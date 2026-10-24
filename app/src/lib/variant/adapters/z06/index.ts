@@ -45,6 +45,8 @@ const MM_V_PX = 25.4 / 96;
 const DEREVO_MAX_PX = 340;
 /** Шире — рисунок под условием, а не справа. */
 const SBOKU_MAX_MM = 80;
+/** Самый мелкий кегль подписей рисунков №6, px (probability.css). */
+const MIN_FONT_PX = 13;
 
 /** Рисунок условия отдельно от текста: диаграмма Эйлера и дерево. */
 function otdelnyy(ris: Ris | undefined): ris is Extract<Ris, { vid: 'eiler' | 'derevo' }> {
@@ -54,7 +56,13 @@ function otdelnyy(ris: Ris | undefined): ris is Extract<Ris, { vid: 'eiler' | 'd
 /** SVG рисунка Ris6 без обёртки <figure>: ширину и место задаёт лист. */
 function figureOf(ris: Extract<Ris, { vid: 'eiler' | 'derevo' }>): Figure {
   const html = renderToStaticMarkup(createElement(Ris6, { ris }));
-  const svg = html.replace(/^<figure[^>]*>/, '').replace(/<\/figure>$/, '');
+  /* Кегли подписей рисунка заданы в CSS (components/probability/
+     probability.css, самый мелкий — 13 px): лист узнаёт его из
+     data-min-font и печатает рисунок не мельче 10 pt (figureRules.js). */
+  const svg = html
+    .replace(/^<figure[^>]*>/, '')
+    .replace(/<\/figure>$/, '')
+    .replace(/^<svg/, `<svg data-min-font="${MIN_FONT_PX}"`);
   const w = Number(/^<svg[^>]*\swidth="([\d.]+)"/.exec(svg)?.[1] ?? 0);
   const px = ris.vid === 'derevo' ? Math.min(w, DEREVO_MAX_PX) : w;
   const mm = Math.round(px * MM_V_PX);

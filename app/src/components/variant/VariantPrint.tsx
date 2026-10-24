@@ -54,6 +54,9 @@ export function VariantPrint() {
   const [warning, setWarning] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [variants, setVariants] = useState(1);
+  /* Крупные рисунки (по умолчанию) плотный режим не трогает: лист
+     длиннее двух страниц на вариант — цена читаемого рисунка. */
+  const [figures, setFigures] = useState<'large' | 'normal'>('large');
 
   useEffect(() => {
     const root = document.documentElement;
@@ -62,6 +65,7 @@ export function VariantPrint() {
     return () => {
       delete root.dataset.sheetTheme;
       delete root.dataset.sheetLayout;
+      delete root.dataset.sheetFigures;
     };
   }, []);
 
@@ -85,6 +89,8 @@ export function VariantPrint() {
         if (alive) {
           setWarning(got.warning);
           setVariants(payload.set.variants.length);
+          setFigures(payload.meta.figures);
+          document.documentElement.dataset.sheetFigures = payload.meta.figures;
           setSpec(specJson(html));
         }
       })
@@ -119,6 +125,7 @@ export function VariantPrint() {
         }
         const tooLong =
           choice === 'uchenik' &&
+          figures === 'normal' &&
           report.error === undefined &&
           (report.pages ?? 0) > 2 * variants &&
           root.dataset.sheetDense === undefined;
@@ -146,7 +153,7 @@ export function VariantPrint() {
       }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [spec, done, warning, choice, variants]);
+  }, [spec, done, warning, choice, variants, figures]);
 
   return (
     <>

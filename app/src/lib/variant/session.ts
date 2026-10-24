@@ -42,6 +42,7 @@ export function defaultMeta(): VariantMeta {
     teacher: '',
     variantLabels: 'numbered',
     numbering: 'ege',
+    figures: 'large',
     instruction: true,
     /* Пусто — стандартная для типа работы (lib/variant/sheets.ts). */
     instructionText: '',
@@ -93,6 +94,7 @@ export function sanitizeMeta(raw: Partial<VariantMeta> | null): VariantMeta {
     teacher: str(raw.teacher, ''),
     variantLabels: raw.variantLabels === 'blank' ? 'blank' : 'numbered',
     numbering: raw.numbering === 'seq' ? 'seq' : 'ege',
+    figures: raw.figures === 'normal' ? 'normal' : 'large',
     instruction: raw.instruction !== false,
     instructionText: ownInstruction(str(raw.instructionText, '')),
   };

@@ -148,6 +148,12 @@ export const VARIANT_SCREEN = {
     { id: 'ege', label: 'Как в ЕГЭ' },
     { id: 'seq', label: 'Сквозная 1…n' },
   ],
+  figures: 'Рисунки',
+  figureSizes: [
+    { id: 'large', label: 'Крупные' },
+    { id: 'normal', label: 'Обычные' },
+  ],
+  figuresNote: 'Крупные — клетка 7 мм, рисунок под условием: всё читается с распечатки.',
   header: 'Шапка работы',
   headerNote: 'Пустое поле «Класс» или «Дата» станет на листе линией для заполнения.',
   kind: 'Тип работы',

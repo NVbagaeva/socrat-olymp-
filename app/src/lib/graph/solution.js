@@ -527,7 +527,7 @@ function stepPairFormula(name, item, win) {
   blocks.push(text('Формула прямой целиком:'));
   blocks.push({ type: 'formula', tex: equationTexExact(kf, bf, name), feature: true });
 
-  return { title: 'Формула прямой ' + name, blocks: blocks };
+  return { title: 'Формула прямой $' + name + '$', blocks: blocks };
 }
 
 /* Шаг 3: в точке пересечения у прямых общие x и y. */

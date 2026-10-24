@@ -16,9 +16,14 @@
 
 import marks from './marks.js';
 import typo from './typography.js';
+import { figureSize, strokeFloor } from './figureRules.js';
 
 var THEMES = ['color', 'print', 'strict'];
 var LAYOUTS = ['single', 'double'];
+/* Рисунки на листе: 'large' — по правилам figureRules.js (клетчатый
+   рисунок крупно под условием, остальные не мельче минимумов),
+   'normal' — прежняя компактная раскладка по клетке раздела. */
+var FIGURES = ['large', 'normal'];
 
 /* ══════════════════════════════════════════════════════════
    Шапка
@@ -151,15 +156,17 @@ function recapBlock(recap) {
  * не помещались бы на лист вместе с задачами. Кусок неделим.
  */
 function exampleItem(example) {
+  var placed = placeFigure(example.figureSvg, { width: example.figureWidth,
+                                               figures: example.figures });
   return '<div class="sheet-item sheet-example' +
-      (example.figureBelow ? ' sheet-example--stack' : '') + '">' +
+      (example.figureBelow || placed.below ? ' sheet-example--stack' : '') + '">' +
     '<span class="sheet-example-label">' + typo.text(example.label) + '</span>' +
     '<div class="sheet-example-text">' +
       (example.title ? '<p class="sheet-example-title">' + typo.markup(example.title) + '</p>' : '') +
       '<p class="sheet-task-question">' + typo.markup(example.conditionHtml) + '</p>' +
       (example.solutionHtml ? '<div class="sheet-task-solution">' + example.solutionHtml + '</div>' : '') +
     '</div>' +
-    figure(example.figureSvg, { width: example.figureWidth }) +
+    placed.html +
     '</div>';
 }
 
@@ -180,20 +187,54 @@ function exampleItem(example) {
    У движка клетка всегда 34 единицы viewBox — отсюда пересчёт. */
 var CELL_UNITS = 34;
 
-function figure(svg, options) {
-  if (!svg) { return ''; }
-  var box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
-  var style = '';
+/* Ширина, которую просит лист: прямо в мм, рамкой или по клетке. */
+function requestedWidth(svg, options) {
   /* Рисунок без клетки (плитки, дерево, ось): ширина задаётся прямо
      в миллиметрах тем, кто собирает лист. */
-  if (options.width) {
-    style = ' style="width:' + (Math.round(options.width * 100) / 100) + 'mm"';
-  } else if (box) {
-    var units = Number(box[1]) / CELL_UNITS;
-    var mm = options.frame ? options.frame : units * options.cell;
-    style = ' style="width:' + (Math.round(mm * 100) / 100) + 'mm"';
+  if (options.width) { return options.width; }
+  var box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
+  if (!box) { return null; }
+  var units = Number(box[1]) / CELL_UNITS;
+  return options.frame ? options.frame : units * (options.cell || 0) || null;
+}
+
+function mmStyle(mm) {
+  return mm ? ' style="width:' + (Math.round(mm * 100) / 100) + 'mm"' : '';
+}
+
+/**
+ * Где и какого размера встанет рисунок. options.figures — 'large'
+ * (по умолчанию) или 'normal'. → { html, grid, below }
+ *
+ * 'large' (lib/sheet/figureRules.js): клетчатый рисунок — по клетке
+ * 7 мм, под условием, по центру; остальной — не уже 40 % строки и не
+ * мельче, чем нужно подписям, основные линии утолщены до минимума;
+ * слишком широкий для места справа — под условием.
+ */
+function placeFigure(svg, options) {
+  if (!svg) { return { html: '', grid: false, below: false, widthMm: 0 }; }
+  var want = requestedWidth(svg, options);
+  /* options.cls — свой класс рисунка (рисунок к разбору у учителя). */
+  var own = options.cls ? ' ' + options.cls : '';
+  if (options.figures === 'normal') {
+    return { html: '<figure class="sheet-figure' + own + '"' + mmStyle(want) + '>' + svg + '</figure>',
+             grid: false, below: false, widthMm: want };
   }
-  return '<figure class="sheet-figure"' + style + '>' + svg + '</figure>';
+  var size = figureSize(svg, want, options.rowMm);
+  var cls = 'sheet-figure sheet-figure--large' + (size.grid ? ' sheet-figure--grid' : '') + own;
+  var drawn = size.grid ? svg : strokeFloor(svg, size.widthMm);
+  return {
+    html: '<figure class="' + cls + '"' + mmStyle(size.widthMm) +
+      (size.grid ? ' data-cell-mm="' + (Math.round(size.cellMm * 100) / 100) + '"' : '') + '>' +
+      drawn + '</figure>',
+    grid: size.grid,
+    below: size.below,
+    widthMm: size.widthMm
+  };
+}
+
+function figure(svg, options) {
+  return placeFigure(svg, options || {}).html;
 }
 
 /** Физический размер клетки при заданной рамке — для отчёта сборки. */
@@ -241,16 +282,20 @@ function taskCard(task, options) {
 
      Широкий рисунок (ось, дерево) справа от текста не встаёт: тогда
      задача помечена figureBelow, и рисунок идёт под условием. */
-  var size = { cell: options.cell, frame: options.frame, width: task.figureWidth };
-  var stacked = options.layout === 'single' && task.figureBelow;
-  var body = options.layout === 'single' && !stacked
-    ? '<div class="sheet-task-text">' + question + solution + answer + '</div>' +
-      figure(task.figureSvg, size)
-    : '<div class="sheet-task-text">' + question + solution + '</div>' +
-      figure(task.figureSvg, size) + answer;
+  var size = { cell: options.cell, frame: options.frame, width: task.figureWidth,
+               figures: options.figures };
+  var placed = placeFigure(task.figureSvg, size);
+  /* Крупный рисунок (клетчатый или широкий) стоит под условием и в
+     раскладке на две колонки: такая карточка занимает строку целиком. */
+  if (placed.below) { layout = 'single'; }
+  var stacked = layout === 'single' && (task.figureBelow || placed.below);
+  var body = layout === 'single' && !stacked
+    ? '<div class="sheet-task-text">' + question + solution + answer + '</div>' + placed.html
+    : '<div class="sheet-task-text">' + question + solution + '</div>' + placed.html + answer;
 
   return '<article class="sheet-task sheet-task--' + layout +
-    (stacked ? ' sheet-task--stack' : '') + '" data-task="' +
+    (stacked ? ' sheet-task--stack' : '') + (placed.grid ? ' sheet-task--grid' : '') +
+    '" data-task="' +
     typo.attr(task.id || '') + '">' +
     '<span class="sheet-task-no">' + task.no + '</span>' +
     '<div class="sheet-task-body">' + body + '</div>' +
@@ -341,24 +386,37 @@ function flowItems(spec) {
     (block.leadItems || []).forEach(function (item) { out.push(item); });
 
     var tasks = block.tasks || [];
+    var opts = { layout: layout, cell: size.cell, frame: size.frame,
+                 withAnswerLine: spec.withAnswerLine, figures: spec.figures };
+    var single = function (task) {
+      return '<div class="sheet-item sheet-tasks sheet-tasks--single">' +
+        taskCard(task, opts) + '</div>';
+    };
     if (layout === 'double') {
       /* В две колонки единица набора — строка из двух карточек:
          карточка не делится, а строка либо встаёт целиком,
-         либо уходит на следующую страницу. */
-      for (var i = 0; i < tasks.length; i += 2) {
-        var pair = tasks.slice(i, i + 2).map(function (task) {
-          return taskCard(task, { layout: layout, cell: size.cell, frame: size.frame,
-                                  withAnswerLine: spec.withAnswerLine });
-        }).join('');
-        out.push('<div class="sheet-item sheet-tasks sheet-tasks--double">' + pair + '</div>');
-      }
-    } else {
+         либо уходит на следующую страницу. Карточка с крупным
+         рисунком (под условием) занимает строку одна. */
+      var pending = [];
+      var flush = function () {
+        if (!pending.length) { return; }
+        out.push('<div class="sheet-item sheet-tasks sheet-tasks--double">' +
+          pending.map(function (task) { return taskCard(task, opts); }).join('') + '</div>');
+        pending = [];
+      };
       tasks.forEach(function (task) {
-        out.push('<div class="sheet-item sheet-tasks sheet-tasks--single">' +
-          taskCard(task, { layout: layout, cell: size.cell, frame: size.frame,
-                           withAnswerLine: spec.withAnswerLine }) +
-          '</div>');
+        if (placeFigure(task.figureSvg, { cell: size.cell, frame: size.frame,
+              width: task.figureWidth, figures: spec.figures }).below) {
+          flush();
+          out.push(single(task));
+          return;
+        }
+        pending.push(task);
+        if (pending.length === 2) { flush(); }
       });
+      flush();
+    } else {
+      tasks.forEach(function (task) { out.push(single(task)); });
     }
   });
 
@@ -371,6 +429,10 @@ function flowItems(spec) {
  * spec:
  *   theme    'color' | 'print' | 'strict' (ч/б с одним акцентом)
  *   layout   'single' | 'double'
+ *   figures  'large' (по умолчанию) | 'normal' — размер рисунков:
+ *            'large' — правила figureRules.js (клетчатый рисунок под
+ *            условием с клеткой 7 мм, подписи не мельче 10 pt), 'normal'
+ *            — прежняя компактная раскладка по cell/frame
  *   cell     размер клетки чертежа в мм (одна клетка на все задачи)
  *   frame    размер рамки чертежа в мм (одна рамка на все задачи);
  *            задаётся вместо cell, не вместе с ним
@@ -419,6 +481,10 @@ function buildDocument(spec, assets) {
   if (LAYOUTS.indexOf(spec.layout) < 0) {
     throw new Error('sheet: неизвестная раскладка «' + spec.layout + '»');
   }
+  var figures = spec.figures || 'large';
+  if (FIGURES.indexOf(figures) < 0) {
+    throw new Error('sheet: неизвестный размер рисунков «' + spec.figures + '»');
+  }
 
   /* Несколько вариантов: у каждого своё начало страницы и свои блоки,
      название в потоке, а не в шапке первой страницы. Один вариант —
@@ -431,12 +497,13 @@ function buildDocument(spec, assets) {
         var fields = variant.fields !== undefined ? variant.fields : spec.fields;
         return out.concat([variantOpening(variant.title, fields)],
           flowItems({ blocks: variant.blocks, cell: spec.cell, frame: spec.frame,
-                      layout: spec.layout, withAnswerLine: spec.withAnswerLine }));
+                      layout: spec.layout, withAnswerLine: spec.withAnswerLine,
+                      figures: figures }));
       }, [])
-    : (spec.leadItems || []).concat(flowItems(spec));
+    : (spec.leadItems || []).concat(flowItems(Object.assign({}, spec, { figures: figures })));
 
   return '<!doctype html>\n<html lang="ru" data-sheet-theme="' + spec.theme +
-    '" data-sheet-layout="' + spec.layout + '">\n<head>\n' +
+    '" data-sheet-layout="' + spec.layout + '" data-sheet-figures="' + figures + '">\n<head>\n' +
     '<meta charset="utf-8">\n' +
     '<title>' + typo.escape(spec.documentTitle || spec.title.text) + '</title>\n' +
     '<style>\n' + (assets.fontCss || '') + '\n' + (assets.css || '') + '\n' +
@@ -461,7 +528,9 @@ function buildDocument(spec, assets) {
 }
 
 const api = { buildDocument: buildDocument, taskCard: taskCard, figure: figure,
-              exampleItem: exampleItem, cellOf: cellOf, THEMES: THEMES, LAYOUTS: LAYOUTS };
+              placeFigure: placeFigure, exampleItem: exampleItem, cellOf: cellOf,
+              THEMES: THEMES, LAYOUTS: LAYOUTS, FIGURES: FIGURES };
 
 export default api;
-export { buildDocument, taskCard, figure, exampleItem, cellOf, THEMES, LAYOUTS };
+export { buildDocument, taskCard, figure, placeFigure, exampleItem, cellOf, THEMES, LAYOUTS,
+         FIGURES };

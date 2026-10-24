@@ -37,8 +37,13 @@ html:root {
 .sheet-task--single .sheet-figure {
   align-self: flex-start;
 }
-.sheet-figure svg {
+/* Потолок высоты — только у «обычных» рисунков: «крупные» печатаются
+   ровно своим размером (lib/sheet/figureRules.js). */
+html[data-sheet-figures='normal'] .sheet-figure svg {
   max-height: 36mm;
+}
+.sheet-task--stack .sheet-figure--large {
+  align-self: center;
 }
 .sheet-task-question {
   line-height: 1.4;
@@ -60,10 +65,12 @@ html:root {
 html[data-sheet-dense] {
   --sheet-fs-body: 9.3pt;
 }
-html[data-sheet-dense] .sheet-task .sheet-figure {
+/* Рисунки плотный режим уменьшает только «обычные»: крупные не
+   мельче печатных минимумов никогда. */
+html[data-sheet-dense][data-sheet-figures='normal'] .sheet-task .sheet-figure {
   max-width: 42mm;
 }
-html[data-sheet-dense] .sheet-figure svg {
+html[data-sheet-dense][data-sheet-figures='normal'] .sheet-figure svg {
   max-height: 30mm;
 }
 html[data-sheet-dense] .var-instruction {

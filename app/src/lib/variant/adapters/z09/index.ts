@@ -34,6 +34,7 @@ import {
   type HintLike,
 } from '../common';
 import { info } from './info';
+import { withPrintFigures, withoutPrintFigures } from '@/lib/sheet/figureRules.js';
 
 interface C9 extends Candidate {
   seed: string;
@@ -88,10 +89,19 @@ function hints(t: Generated): HintLike[] {
   }));
 }
 
+/**
+ * Задача с рисунками в печатном профиле (lib/sheet/figureRules.js):
+ * клетчатый рисунок на листе печатается клеткой 7 мм, и подписи движок
+ * рисует сразу печатным кеглем. Тот же рисунок — в предпросмотре.
+ */
 function build(c: C9, isNew: boolean): VariantTask | null {
+  return withPrintFigures(() => buildTask(c, isNew));
+}
+
+function buildTask(c: C9, isNew: boolean): VariantTask | null {
   let t: Generated;
   try {
-    t = generate(c.prototypeId, c.seed);
+    t = withoutPrintFigures(() => generate(c.prototypeId, c.seed));
   } catch {
     return null;
   }

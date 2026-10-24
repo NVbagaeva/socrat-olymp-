@@ -23,6 +23,7 @@ import type { SheetLayoutId, SheetThemeId } from '@/content/generator';
 import { SHEET_2 } from '@/content/sheet2';
 import { O_ZADANII } from '@/content/vektory';
 import answers from '@/lib/sheet/answers.js';
+import { figure } from '@/lib/sheet/sheet.js';
 import { typeset } from '../tex';
 import { BANK } from './bank';
 import { generate } from './generate';
@@ -159,11 +160,12 @@ function solutionFigureHtml(risunok: Risunok, condition: string): string {
     return '';
   }
   const box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
-  const width =
-    box === null
-      ? ''
-      : ` style="width:${Math.round((Number(box[1]) / CELL_UNITS) * SOLUTION_CELL_MM * 100) / 100}mm"`;
-  return `<figure class="sheet-figure sheet-solution-figure sheet-solution-figure--float"${width}>${svg}</figure>`;
+  /* Размер — по правилам крупных рисунков (sheet/figureRules.js): в
+     печатном профиле клетчатый рисунок — клеткой 7 мм под решением. */
+  return figure(svg, {
+    width: box === null ? null : (Number(box[1]) / CELL_UNITS) * SOLUTION_CELL_MM,
+    cls: 'sheet-solution-figure sheet-solution-figure--float',
+  }) as string;
 }
 
 /**

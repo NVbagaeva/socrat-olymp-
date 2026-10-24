@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { buildWork, workSheetSpec } from '@/lib/ves12/build';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
 import { codeOutdated, parseWorkQuery } from '@/lib/ves12/work';
 import type { Ves12Catalog } from '@/lib/ves12/types';
 import { zachyotText } from '@/content/ves12';
@@ -30,8 +31,11 @@ export function ZachyotSheet({ catalog, withAnswers }: ZachyotSheetProps) {
         if (params === null) {
           return null;
         }
-        const built = buildWork(params, catalog);
-        const spec = workSheetSpec(params, built, withAnswers);
+        /* Рисунки — в печатном профиле (figureRules.js): клетка 7 мм,
+           подписи не мельче 10 pt. Задачи от профиля не зависят. */
+        const spec = withPrintFigures(() =>
+          workSheetSpec(params, buildWork(params, catalog), withAnswers),
+        );
         return {
           html: buildDocument({ ...spec, kit: `Работа ${params.code}` }, {}),
           warning: codeOutdated(params.code) ? zachyotText.outdated : null,

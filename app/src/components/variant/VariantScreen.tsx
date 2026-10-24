@@ -35,11 +35,13 @@ function Segment<I extends string>({
   label,
   options,
   value,
+  note,
   onPick,
 }: {
   label: string;
   options: readonly { id: I; label: string }[];
   value: I;
+  note?: string;
   onPick: (id: I) => void;
 }) {
   return (
@@ -59,6 +61,7 @@ function Segment<I extends string>({
           </button>
         ))}
       </div>
+      {note === undefined ? null : <p className="var-field__note">{note}</p>}
     </div>
   );
 }
@@ -374,6 +377,13 @@ export function VariantScreen() {
             options={T.numberings}
             value={meta.numbering}
             onPick={(id) => setMeta((m) => ({ ...m, numbering: id }))}
+          />
+          <Segment
+            label={T.figures}
+            options={T.figureSizes}
+            value={meta.figures}
+            note={T.figuresNote}
+            onPick={(id) => setMeta((m) => ({ ...m, figures: id }))}
           />
         </div>
 

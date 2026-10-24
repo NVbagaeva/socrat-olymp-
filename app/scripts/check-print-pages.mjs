@@ -27,6 +27,12 @@
    напечатанном PDF и в готовых сборниках out/materials/**.pdf:
    в видимом тексте его быть не должно (scripts/lib/math-markup.mjs).
 
+   Рисунки (правила lib/sheet/figureRules.js) — на каждом листе, у каждого
+   рисунка задачи и разбора (.sheet-figure) по размерам на бумаге:
+   клетка клетчатого рисунка — не меньше 6 мм; подписи — не мельче 10 pt,
+   индексы — не мельче 7 pt; основные линии — не тоньше 1,5 pt; сетка
+   листа не светлее #BBBBBB. Ниже минимума — проверка падает.
+
    Запуск после pnpm build:  node scripts/check-print-pages.mjs
    Нужны apache2, Chromium и WebKit (Playwright). Без WebKit проверка
    падает в CI (переменная CI) и пропускает его на своём компьютере. */
@@ -40,6 +46,7 @@ import { chromium, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
 import { findRawTex } from './lib/math-markup.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { RULES } from '../src/lib/sheet/figureRules.js';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium, webkit);
@@ -57,6 +64,13 @@ const SHEETS = [
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
   ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  /* №1 и №3: чертежи планиметрии и стереометрии — правила крупных рисунков. */
+  [
+    '№1',
+    '/zadaniya/1/pechat/',
+    'm=v&i=m&s=p01:1,p05:1,p13:1,p17:1,p24:1,p35:1,p41:1,p46:1,p49:1,p62:1&seed=print-check',
+  ],
+  ['№3', '/zadaniya/3/pechat/parallelepiped/', 'n=6&seed=print-check'],
   /* №13: «Домашка» компактным листом и зачёт с полями для оформления. */
   [
     '№13',
@@ -175,6 +189,103 @@ async function openSheet(browser, url) {
   return { page, declared };
 }
 
+/**
+ * Размеры рисунков листа на бумаге. Масштаб рисунка — отношение его
+ * ширины на странице к ширине viewBox; кегль текста SVG задан в единицах
+ * viewBox, поэтому на бумаге он равен кеглю × масштаб. Индекс — текст
+ * мельче своей подписи (tspan внутри text).
+ */
+async function figureMetrics(page) {
+  return page.evaluate(() => {
+    const PX_MM = 96 / 25.4;
+    const PT_PX = 0.75;
+    const out = [];
+    for (const svg of document.querySelectorAll('#sheet-pages .sheet-figure svg')) {
+      const vb = svg.viewBox.baseVal;
+      const w = svg.getBoundingClientRect().width;
+      if (!vb || vb.width === 0 || w === 0) continue;
+      const scale = w / vb.width;
+      const cell = Number(svg.getAttribute('data-grid-cell'));
+      const fonts = [];
+      const indexes = [];
+      for (const t of svg.querySelectorAll('text, tspan')) {
+        if (!t.textContent.trim()) continue;
+        const size = parseFloat(getComputedStyle(t).fontSize);
+        const parent = t.parentElement?.closest('text');
+        const parentSize =
+          parent && parent !== t ? parseFloat(getComputedStyle(parent).fontSize) : size;
+        (size < parentSize - 0.01 ? indexes : fonts).push(size * scale * PT_PX);
+      }
+      const strokes = [];
+      for (const el of svg.querySelectorAll(
+        'path, line, polyline, polygon, circle, ellipse, rect',
+      )) {
+        const cs = getComputedStyle(el);
+        if (cs.stroke === 'none' || cs.display === 'none') continue;
+        const sw = parseFloat(cs.strokeWidth);
+        /* non-scaling-stroke: толщина задана в пикселях печати, без масштаба. */
+        const k = cs.vectorEffect === 'non-scaling-stroke' ? 1 : scale;
+        if (sw > 0) strokes.push({ pt: sw * k * PT_PX, dashed: cs.strokeDasharray !== 'none' });
+      }
+      /* Самая толстая сплошная линия: пунктир (вторая прямая, построения)
+         в основные не входит и планку не задаёт. */
+      const thick = Math.max(0, ...strokes.filter((x) => !x.dashed).map((x) => x.pt));
+      const main = strokes.filter((x) => !x.dashed && x.pt >= thick * 0.6).map((x) => x.pt);
+      const task = svg.closest('.sheet-task')?.querySelector('.sheet-task-no')?.textContent ?? '';
+      out.push({
+        task,
+        widthMm: w / PX_MM,
+        cellMm: cell > 0 ? (cell * scale) / PX_MM : null,
+        labelPt: fonts.length ? Math.min(...fonts) : null,
+        indexPt: indexes.length ? Math.min(...indexes) : null,
+        linePt: main.length ? Math.min(...main) : null,
+      });
+    }
+    const grid = getComputedStyle(document.documentElement).getPropertyValue('--graph-grid').trim();
+    return { figures: out, grid };
+  });
+}
+
+/* Яркость цвета #RRGGBB (Rec. 709), 0…255. */
+function luma(hex) {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  if (!m) return null;
+  const [r, g, b] = m.slice(1).map((x) => parseInt(x, 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+const EPS = 0.05;
+function checkFigures(where, metrics) {
+  const { figures, grid } = metrics;
+  const max = luma(RULES.gridColorMax);
+  if (grid !== '' && luma(grid) !== null) {
+    check(luma(grid) <= max + 0.5, `${where}: сетка ${grid} светлее ${RULES.gridColorMax}`);
+  }
+  const low = (v, min) => v !== null && v < min - EPS;
+  for (const f of figures) {
+    const at = `${where}, рисунок${f.task ? ` задачи ${f.task}` : ''}`;
+    check(
+      !(f.cellMm !== null && f.cellMm < RULES.gridCellMinMm - EPS),
+      `${at}: клетка ${f.cellMm?.toFixed(2)} мм < ${RULES.gridCellMinMm} мм`,
+    );
+    check(
+      !low(f.labelPt, RULES.labelPt),
+      `${at}: подпись ${f.labelPt?.toFixed(2)} pt < ${RULES.labelPt} pt`,
+    );
+    check(
+      !low(f.indexPt, RULES.indexPt),
+      `${at}: индекс ${f.indexPt?.toFixed(2)} pt < ${RULES.indexPt} pt`,
+    );
+    check(
+      !low(f.linePt, RULES.linePt),
+      `${at}: основная линия ${f.linePt?.toFixed(2)} pt < ${RULES.linePt} pt`,
+    );
+  }
+  const vals = (k) => figures.map((f) => f[k]).filter((v) => v !== null);
+  const min = (k) => (vals(k).length ? Math.min(...vals(k)).toFixed(1) : '—');
+  return `рисунков ${figures.length}: клетка ≥ ${min('cellMm')} мм, подпись ≥ ${min('labelPt')} pt, индекс ≥ ${min('indexPt')} pt, линия ≥ ${min('linePt')} pt`;
+}
+
 const apache = await startApache(OUT, 4181);
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'print-'));
 
@@ -193,6 +304,7 @@ for (const [name, route, query, vidy] of SHEETS) {
     );
     const syroy = syroyTex(await sheetText(page));
     check(syroy.length === 0, `${name}, ${who}: сырой TeX на листе — ${syroy.join(', ')}`);
+    const figuresRow = checkFigures(`${name}, ${who}`, await figureMetrics(page));
     const cells = [];
     for (const [label, height] of PAPER) {
       if (!label.startsWith('A4')) {
@@ -234,7 +346,7 @@ for (const [name, route, query, vidy] of SHEETS) {
       cells.push(`${pages}${blank ? ` (пустых ${blank})` : ''}`);
     }
     rows.push(
-      `${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  Chromium ${cells.join(' / ')}`,
+      `${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  Chromium ${cells.join(' / ')}; ${figuresRow}`,
     );
     await page.close();
   }

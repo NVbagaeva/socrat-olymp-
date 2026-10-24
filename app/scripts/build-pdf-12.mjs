@@ -29,6 +29,7 @@ import generator from '../src/lib/graph/generate.js';
 import solutionBuilder from '../src/lib/graph/solution.js';
 import { answersItems } from '../src/lib/sheet/answers12.js';
 import { conditionSvg } from '../src/lib/sheet/figures12.js';
+import { withPrintFigures } from '../src/lib/sheet/figureRules.js';
 import content from '../src/content/sheet12.js';
 import { buildSheet } from './lib/sheet-build.mjs';
 
@@ -157,7 +158,9 @@ async function build(name, blocks, options) {
 
 async function sample() {
   /* Образец: первый блок, 8 задач, в утверждённой раскладке. */
-  const blocks = collectBlocks(1, 8);
+  /* Рисунки — в печатном профиле (sheet/figureRules.js): клетка 7 мм,
+     подписи не мельче 10 pt. Задачи от профиля не зависят. */
+  const blocks = withPrintFigures(() => collectBlocks(1, 8));
   const title = blocks[0].title.replace(/<[^>]*>/g, '');
   console.log('Образец: блок «' + title + '», задач ' + blocks[0].tasks.length);
 
@@ -170,11 +173,11 @@ async function sample() {
 }
 
 async function full(draft) {
-  const blocks = collectBlocks();
+  const blocks = withPrintFigures(() => collectBlocks());
   const total = blocks.reduce((sum, block) => sum + block.tasks.length, 0);
   console.log('Сборник: блоков ' + blocks.length + ', задач ' + total);
 
-  const tail = answersItems(blocks, generator, solutionBuilder);
+  const tail = withPrintFigures(() => answersItems(blocks, generator, solutionBuilder));
 
   /* Четыре файла: ученику — со строкой ответа и без ответов вовсе,
      учителю — те же задачи и раздел «Ответы» с новой страницы. */

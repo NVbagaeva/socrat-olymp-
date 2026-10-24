@@ -38,7 +38,12 @@
 import type { SheetLayoutId, SheetThemeId } from '@/content/generator';
 import contentSheet9 from '@/content/sheet9.js';
 import { answerHtml, answersItems } from '@/lib/sheet/answers9.js';
-import { buildDocument, exampleItem, figure as sheetFigure } from '@/lib/sheet/sheet.js';
+import {
+  buildDocument,
+  exampleItem,
+  placeFigure,
+  figure as sheetFigure,
+} from '@/lib/sheet/sheet.js';
 import typo from '@/lib/sheet/typography.js';
 import { generate as generateRaw, opornayaSeed } from './generate';
 import { PROTOTYPES, prototypeById } from './prototypes';
@@ -299,6 +304,21 @@ interface MestoRisunka {
  * 6 мм, не шире колонки.
  */
 function mestoRisunka(drawn: Drawn, kolonka: number): MestoRisunka {
+  /* Печатный профиль (sheet/figureRules.js): клетчатый рисунок —
+     клеткой 7 мм под условием, по правилам шаблона листа. */
+  const placed = placeFigure(drawn.svg, { rowMm: kolonka }) as {
+    html: string;
+    grid: boolean;
+    widthMm: number;
+  };
+  if (placed.grid) {
+    return {
+      html: placed.html,
+      widthMm: placed.widthMm,
+      heightMm: (placed.widthMm * drawn.kletokY) / drawn.kletokX,
+      sboku: false,
+    };
+  }
   const sbokuW = drawn.kletokX * SBOKU_CELL_MM;
   if (sbokuW <= kolonka / 2) {
     return {

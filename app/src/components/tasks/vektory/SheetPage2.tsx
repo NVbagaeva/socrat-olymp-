@@ -8,6 +8,7 @@ import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { keySpec2, parseSheetQuery2, sheetSpec2 } from '@/lib/vektory/sheet2';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
 
 declare global {
   interface Window {
@@ -68,7 +69,12 @@ export function SheetPage2({ vid }: SheetPage2Props) {
     const built = vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers);
     /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
     const kit = checkKitSheet(query, '2', withAnswers ? 'teacher' : 'student', built);
-    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+    /* На лист — сборка в печатном профиле рисунков (figureRules.js):
+       отпечаток комплекта — по обычной, как у напечатанных раньше. */
+    const printed = withPrintFigures(() =>
+      vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers),
+    );
+    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setWarning(kit.warning);

@@ -20,29 +20,37 @@
 import { VARIANT_SCREEN, VARIANT_SHEET as T, standardInstruction } from '@/content/variant';
 import { figure as figureHtml } from '@/lib/sheet/sheet.js';
 import typo from '@/lib/sheet/typography.js';
-import type { Figure, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
+import type { Figure, FigureSize, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
 
 export type SheetKind = 'uchenik' | 'uchitel' | 'razbor';
 export type SheetChoice = SheetKind | 'vse';
 
 export const SHEET_KINDS: readonly SheetKind[] = ['uchenik', 'uchitel', 'razbor'];
 
-/** Клетка чертежа, мм: чуть мельче, чем у листов разделов, — лист компактный. */
+/** Клетка чертежа для «обычных» рисунков, мм: лист компактный. */
 const CELL = 3.0;
 
 /**
- * Рисунки разделов на листе варианта мельче: справа от текста — не шире
- * FIG_SIDE_MAX мм. Под условие рисунок встаёт, только если так просит
- * раздел (дерево, мост): широкий график справа короче, а лист — компактнее.
+ * Рисунки «обычные» (meta.figures = 'normal') на листе варианта мельче:
+ * справа от текста — не шире FIG_SIDE_MAX мм. Под условие рисунок
+ * встаёт, только если так просит раздел (дерево, мост).
+ *
+ * «Крупные» (по умолчанию) раскладывает шаблон листа по правилам
+ * lib/sheet/figureRules.js: клетчатый рисунок — клеткой 7 мм под
+ * условием, остальные — не уже 40 % строки и не мельче, чем нужно
+ * подписям. Ширина раздела для них — только нижняя граница.
  */
 const FIG_SCALE = 0.8;
 const FIG_SIDE_MAX = 50;
 const FIG_BELOW_MAX = 110;
 
 /** Размер рисунка на листе варианта. */
-export function sheetFigure(f: Figure): { width: number | undefined; below: boolean } {
+export function sheetFigure(
+  f: Figure,
+  figures: FigureSize = 'large',
+): { width: number | undefined; below: boolean } {
   const below = f.below === true;
-  if (f.width === undefined) return { width: undefined, below };
+  if (figures === 'large' || f.width === undefined) return { width: f.width, below };
   const w = f.width * FIG_SCALE;
   return { width: Math.round(Math.min(w, below ? FIG_BELOW_MAX : FIG_SIDE_MAX) * 10) / 10, below };
 }
@@ -187,11 +195,16 @@ function solutionItem(cls: string, chunk: string): string {
   return item(cls, chunk, head ? ' data-keep-with-next="1"' : '');
 }
 
-function figureItem(f: Figure | null, cls: string): string {
+function figureItem(f: Figure | null, cls: string, figures: FigureSize): string {
   if (f === null) return '';
   return item(
     cls,
-    figureHtml(f.svg, { cell: CELL, frame: null, width: sheetFigure(f).width ?? null }),
+    figureHtml(f.svg, {
+      cell: CELL,
+      frame: null,
+      width: sheetFigure(f, figures).width ?? null,
+      figures,
+    }),
   );
 }
 
@@ -200,8 +213,8 @@ function figureItem(f: Figure | null, cls: string): string {
  * в КИМ: у листа ученика. Будущее «место для решения» встаёт между
  * условием и этой строкой.
  */
-function card(task: VariantTask, no: number, answerLine = false) {
-  const size = task.figure === null ? null : sheetFigure(task.figure);
+function card(task: VariantTask, no: number, figures: FigureSize, answerLine = false) {
+  const size = task.figure === null ? null : sheetFigure(task.figure, figures);
   return {
     no,
     id: task.taskId,
@@ -276,7 +289,7 @@ function blocksUchenik(tasks: readonly VariantTask[], meta: VariantMeta): unknow
       title: '',
       note: '',
       leadItems: meta.instruction && text !== '' ? [instructionItem(text)] : [],
-      tasks: tasks.map((t, i) => card(t, sheetNo(t, i, meta.numbering), true)),
+      tasks: tasks.map((t, i) => card(t, sheetNo(t, i, meta.numbering), meta.figures, true)),
     },
   ];
 }
@@ -320,14 +333,14 @@ function blocksUchitel(
           ' data-keep-with-next="1"',
         ),
       ],
-      tasks: [card(t, no)],
+      tasks: [card(t, no, meta.figures)],
     });
     out.push({
       head: false,
       title: '',
       note: '',
       leadItems: [
-        figureItem(t.figureTeacher, 'var-sol var-sol__fig'),
+        figureItem(t.figureTeacher, 'var-sol var-sol__fig', meta.figures),
         /* Строку «Ответ: …» ставит адаптер в конце решения (razborAnswer). */
         ...splitSolution(sol).map((chunk) => solutionItem('var-sol', chunk)),
       ].filter((x) => x !== ''),
@@ -349,7 +362,7 @@ function blocksRazbor(tasks: readonly VariantTask[], meta: VariantMeta): unknown
       leadItems: [
         item('var-sol var-sol--first', solutionHead(t, no, false), ' data-keep-with-next="1"'),
       ],
-      tasks: [card(t, no)],
+      tasks: [card(t, no, meta.figures)],
     });
     out.push({
       head: false,
@@ -420,6 +433,7 @@ export function variantSheetSpec(
     theme: 'strict' as const,
     layout: 'single' as const,
     cell: CELL,
+    figures: meta.figures,
     head: T.head,
     runner: opts.workTitle,
     documentTitle,

@@ -840,6 +840,13 @@ body {
 /* В карточке задачи (№2): рисунок к разбору справа, текст обтекает. */
 .sheet-solution-figure--float { float: right; margin: 0 0 calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 3); }
 .sheet-task-solution::after { content: ''; display: block; clear: both; }
+/* Крупный клетчатый рисунок к разбору (figureRules.js) — не сбоку, а
+   отдельной строкой под решением, по центру, своим размером. */
+.sheet-solution:has(> .sheet-figure--grid) { flex-wrap: wrap; }
+.sheet-solution:has(> .sheet-figure--grid)::after { content: ''; order: 8; flex-basis: 100%; }
+.sheet-solution > .sheet-figure--grid { order: 9; margin: calc(var(--sheet-step) * 2) auto 0; }
+.sheet-solution-figure.sheet-figure--large { max-width: none; }
+.sheet-solution-figure.sheet-figure--grid { float: none; display: block; margin: calc(var(--sheet-step) * 2) auto; }
 
 /* ══════════════════════════════════════════════════════════
    Решение по шагам в карточке — файл «Для учителя»
@@ -884,6 +891,16 @@ body {
 .sheet-task--stack .sheet-task-body { flex-direction: column; align-items: stretch; }
 .sheet-task--stack .sheet-figure { align-self: flex-start; max-width: 100%; }
 .sheet-task--stack .sheet-answer-line { padding-top: calc(var(--sheet-step) * 2); }
+
+/* ══════════════════════════════════════════════════════════
+   Крупные рисунки (spec.figures = 'large', figureRules.js)
+   Ширина в мм задана самим рисунком и не сжимается: клетка
+   клетчатого рисунка на печати ровно та, что посчитана.
+   ══════════════════════════════════════════════════════════ */
+.sheet-figure--large { flex: none; max-width: none; }
+.sheet-figure--large svg { max-width: none !important; max-height: none !important; }
+.sheet-task--stack .sheet-figure--large { align-self: center; }
+.sheet-task--grid .sheet-figure { margin-top: calc(var(--sheet-step) * 2); }
 
 /* ══════════════════════════════════════════════════════════
    Разобранный пример — кусок потока в оформлении «Повторяем»

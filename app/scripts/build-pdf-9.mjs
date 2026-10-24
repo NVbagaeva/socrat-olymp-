@@ -30,6 +30,7 @@ import { fileURLToPath } from 'node:url';
 import content from '../src/content/sheet9.js';
 import { requireSrc } from './lib/load-ts.mjs';
 import { buildSheet } from './lib/sheet-build.mjs';
+import { withPrintFigures } from '../src/lib/sheet/figureRules.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = path.join(HERE, '..');
@@ -76,18 +77,20 @@ export function planOf(limitGroups, limitTasks) {
   });
 }
 
+/* Рисунки — в печатном профиле (sheet/figureRules.js): клетка 7 мм,
+   подписи не мельче 10 pt. Задачи от профиля не зависят. */
 function blocksOf(plan, withAnswers) {
-  return S9.fixedBlocks9(plan, { layout: 'single', ramki: 2 }, withAnswers);
+  return withPrintFigures(() => S9.fixedBlocks9(plan, { layout: 'single', ramki: 2 }, withAnswers));
 }
 
 function specOf(blocks, options) {
-  return S9.printSpec9({
+  return withPrintFigures(() => S9.printSpec9({
     ...S9.specOfBlocks9(
       blocks,
       { theme: options.theme, layout: 'single', kind: '', date: '' },
       options.withAnswers,
     ),
-  });
+  }));
 }
 
 async function build(name, plan, options) {

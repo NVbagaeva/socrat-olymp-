@@ -7,6 +7,7 @@ import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery9, printSpec9, sheetSpec9 } from '@/lib/proizvodnaya/sheet9';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
 
 declare global {
   interface Window {
@@ -58,7 +59,10 @@ export function SheetPage9({ withAnswers }: SheetPage9Props) {
     const built = sheetSpec9(params, withAnswers);
     /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
     const kit = checkKitSheet(query, '9', withAnswers ? 'teacher' : 'student', built);
-    const html = buildDocument({ ...printSpec9(built), kit: kitFootLabel(kit.code) }, {});
+    /* На лист — сборка в печатном профиле рисунков (figureRules.js):
+       отпечаток комплекта — по обычной, как у напечатанных раньше. */
+    const printed = withPrintFigures(() => printSpec9(sheetSpec9(params, withAnswers)));
+    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setWarning(kit.warning);

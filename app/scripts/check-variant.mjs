@@ -20,6 +20,11 @@
         пометка, какой фильтр ослаблен.
      6. Код партии: настройки и замены переживают кодирование туда и
         обратно; замена одной задачи не трогает остальные.
+     7. Математика в условиях — только KaTeX (правила test:math-markup,
+        scripts/lib/math-markup.mjs): каждый адаптер выдаёт задачи, пока
+        банк не кончится (до MARKUP_CAP), — это все прототипы и по
+        несколько задач каждого. Формула $…$ без слов внутри: KaTeX в
+        строгом режиме молчит.
 
    --report — таблица возможностей разделов и запасных вариантов.
 
@@ -28,6 +33,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { requireSrc, SRC } from './lib/load-ts.mjs';
+import { findPlainMath, findRawTex, visibleTexts } from './lib/math-markup.mjs';
 
 const args = process.argv.slice(2);
 const SETS = args.includes('--sets') ? Number(args[args.indexOf('--sets') + 1]) : 20;
@@ -226,6 +232,29 @@ for (const [n, adapter] of adapters) {
         fail(where, `инструкция «${kind}»: бланк ${blank ? 'есть' : 'нет'}`);
     }
 
+    /* Рисунки: переключатель «крупные / обычные» доходит до листа, а
+       клетчатый рисунок (№2, №9, №12) нарисован в печатном профиле —
+       с data-grid-cell (lib/sheet/figureRules.js). Задачи не меняются. */
+    for (const figures of ['large', 'normal']) {
+      const spec = variantSheetSpec(set, { ...defaultMeta(), figures }, 'uchenik', {
+        workTitle: 'Проверка',
+        showCode: false,
+      });
+      if (spec.figures !== figures) fail(where, `рисунки «${figures}» не дошли до листа`);
+    }
+    if ([2, 9, 12].includes(n)) {
+      for (const t of set.variants.flatMap((v) => v.tasks)) {
+        /* Рисунок без сетки (№2: векторы по проекциям) клетки не имеет. */
+        const grid =
+          t.figure !== null &&
+          /class="(?:vp|pr)-grid"|<path d="[^"]*" fill="none" stroke="var\(--graph-grid/.test(
+            t.figure.svg,
+          );
+        if (grid && !/^<svg[^>]*data-grid-cell=/.test(t.figure.svg))
+          fail(where, 'клетчатый рисунок не в печатном профиле (нет data-grid-cell)');
+      }
+    }
+
     /* 6. Код и замены. */
     const decoded = decodeCode(
       encodeCode({ seed: 'K7M2', config, zameny: { [`1.${n}`]: 2 }, version: '4F' }, subtypeIds),
@@ -254,6 +283,45 @@ for (const [n, adapter] of adapters) {
   }
 }
 
+/* ── Математика в условиях ─────────────────────────────────────── */
+
+const MARKUP_CAP = 400;
+const markup = new Map();
+for (const [n, adapter] of adapters) {
+  const exclude = new Set();
+  const protos = new Set();
+  const r = rngOf(`markup-${n}`);
+  /* KaTeX в строгом режиме «warn» сообщает о словах внутри формулы. */
+  const warn = console.warn;
+  let warned = 0;
+  console.warn = () => {
+    warned += 1;
+  };
+  try {
+    for (let i = 0; i < MARKUP_CAP; i += 1) {
+      warned = 0;
+      const t = adapter.getRandomTask({ subtypes: null, source: 'mix', stars: null, exclude }, r);
+      if (t === null || exclude.has(t.taskId)) break;
+      exclude.add(t.taskId);
+      protos.add(t.prototypeId);
+      const where = `№${n} ${t.prototypeId}`;
+      if (warned > 0)
+        fail(where, 'в формуле условия или решения — слова (KaTeX: unicodeTextInMathMode)');
+      for (const text of visibleTexts(t.statement)) {
+        for (const f of [...findPlainMath(text), ...findRawTex(text)]) {
+          fail(
+            where,
+            `условие: математика вне KaTeX ${f.rule ?? 'TeX'} «${f.match}» — ${text.slice(0, 90)}`,
+          );
+        }
+      }
+    }
+  } finally {
+    console.warn = warn;
+  }
+  markup.set(n, { tasks: exclude.size, protos: protos.size });
+}
+
 /* ── Отчёт ──────────────────────────────────────────────────────── */
 
 for (const [n, s] of stats) {
@@ -261,7 +329,8 @@ for (const [n, s] of stats) {
   console.log(
     `№${n}: ${s.tasks} задач, ${(s.ms / Math.max(1, SETS)).toFixed(0)} мс на партию; ` +
       `сложность ${caps.difficulty ? 'есть' : 'нет'}, ФИПИ ${caps.fipi ? 'есть' : 'нет'}, ` +
-      `разбор ученика: ${caps.studentSolution}, рисунки: ${caps.figure}`,
+      `разбор ученика: ${caps.studentSolution}, рисунки: ${caps.figure}; ` +
+      `условия: ${markup.get(n)?.tasks ?? 0} задач ${markup.get(n)?.protos ?? 0} прототипов`,
   );
   if (REPORT) {
     for (const [note, count] of [...s.fallbacks].sort((a, b) => b[1] - a[1])) {

@@ -20,7 +20,18 @@
  * отбраковывает задачу.
  */
 
-import { THEME, esc, px, svgText, textWidth } from '@/lib/graph/renderer.js';
+import {
+  THEME,
+  esc,
+  gridCellAttr,
+  indexSize,
+  labelSize,
+  printFitted,
+  px,
+  svgText,
+  textWidth,
+} from '@/lib/graph/renderer.js';
+import { RULES } from '@/lib/sheet/figureRules.js';
 import { type Rect, type Seg, pointSegDist, rectGap, segRectDist } from '../vektory/geometry';
 import { funkciya } from './reshit';
 import { postroit } from './spline';
@@ -96,6 +107,10 @@ const V = {
   mark: { size: 15, sub: 10.5, weight: 600 },
   curveLabel: { size: 20, track: 0.62 },
   helper: { size: 15, weight: 600 },
+  /* Подписи построений у учителя: уровни, точки, знаки производной. */
+  auxLabel: { size: 15, halfH: 9, rise: 5 },
+  sign: { size: 22, rise: 7 },
+  alpha: 19,
   gap: 3,
   field: 3,
 };
@@ -174,7 +189,54 @@ function duga(cx: number, cy: number, r: number, t0: number, t1: number): string
   return `M${px(x0)} ${px(y0)}A${px(r)} ${px(r)} 0 ${large} 0 ${px(x1)} ${px(y1)}`;
 }
 
+/**
+ * Печатный профиль (lib/sheet/figureRules.js): подписи не мельче
+ * печатного минимума при клетке 7 мм, индексы (x₀) — не мельче минимума
+ * индексов. Рамки подписей растут вместе с кеглем, поэтому места
+ * подбираются уже под печатный кегль. Числа под осью x опускаются
+ * настолько, насколько вырос кегль.
+ */
+function withPrintSizes<T>(fn: () => T): T {
+  const saved = JSON.parse(JSON.stringify(V)) as typeof V;
+  const k = (from: number, to: number) => to / from;
+  V.tick.size = labelSize(saved.tick.size);
+  V.tick.gapX = saved.tick.gapX + (V.tick.size - saved.tick.size) * 0.77;
+  V.axisName.size = labelSize(THEME.font.axisName);
+  V.mark.size = labelSize(saved.mark.size);
+  V.mark.sub = indexSize(saved.mark.sub);
+  V.curveLabel.size = labelSize(saved.curveLabel.size);
+  V.helper.size = labelSize(saved.helper.size);
+  V.auxLabel.size = labelSize(saved.auxLabel.size);
+  V.auxLabel.halfH = saved.auxLabel.halfH * k(saved.auxLabel.size, V.auxLabel.size);
+  V.auxLabel.rise = saved.auxLabel.rise * k(saved.auxLabel.size, V.auxLabel.size);
+  V.sign.size = labelSize(saved.sign.size);
+  V.alpha = labelSize(saved.alpha);
+  try {
+    return fn();
+  } finally {
+    Object.assign(V.tick, saved.tick);
+    Object.assign(V.axisName, saved.axisName);
+    Object.assign(V.mark, saved.mark);
+    Object.assign(V.curveLabel, saved.curveLabel);
+    Object.assign(V.helper, saved.helper);
+    Object.assign(V.auxLabel, saved.auxLabel);
+    Object.assign(V.sign, saved.sign);
+    V.alpha = saved.alpha;
+  }
+}
+
 export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
+  const R = report ?? pustoyOtchet();
+  /* Отчёт заполняется заново при каждой отрисовке (drawFigura). */
+  return printFitted(
+    fig.cell ?? THEME.geometry.cell,
+    RULES.gridCellSteps,
+    (r: Otchet) => withPrintSizes(() => drawFigura(fig, opts, r)),
+    () => R,
+  );
+}
+
+function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
   const R = report ?? pustoyOtchet();
   const win = fig.okno;
   const g = THEME.geometry;
@@ -225,6 +287,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
 
   layers.head.push(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px(width)} ${px(height)}" width="${px(width)}" height="${px(height)}" class="pr" role="img"` +
+      gridCellAttr(cell) +
       (fig.alt ? ` aria-label="${esc(fig.alt)}"` : ' aria-hidden="true"') +
       ' style="max-width:100%;height:auto">',
   );
@@ -1276,19 +1339,19 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     }
     if (item.t === 'goriz' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
-      const halfW = textWidth(text, 15) / 2 + 3;
+      const halfW = textWidth(text, V.auxLabel.size) / 2 + 3;
       const b = place(
         `подпись ${text}`,
         'aux',
         halfW,
-        9,
+        V.auxLabel.halfH,
         { x: sx(win.xmax) - halfW - 6, y: sy(item.y) },
         ['above', 'below'],
         [10, 18],
       );
       layers.labels.push(
-        svgText(text, b.x, b.y + 5, 'middle', {
-          size: 15,
+        svgText(text, b.x, b.y + V.auxLabel.rise, 'middle', {
+          size: V.auxLabel.size,
           weight: 600,
           fill: V.aux,
           style: 'italic',
@@ -1298,18 +1361,22 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     }
     if (item.t === 'tochka' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
-      const halfW = textWidth(text, 15) / 2 + 3;
+      const halfW = textWidth(text, V.auxLabel.size) / 2 + 3;
       const b = place(
         `подпись ${text}`,
         'aux',
         halfW,
-        9,
+        V.auxLabel.halfH,
         { x: sx(item.x), y: sy(item.y) },
         ['above-right', 'below-right', 'above-left'],
         fig.teoriya === true ? [10, 18, 26] : [10, 18],
       );
       layers.labels.push(
-        svgText(text, b.x, b.y + 5, 'middle', { size: 15, weight: 600, fill: V.aux }),
+        svgText(text, b.x, b.y + V.auxLabel.rise, 'middle', {
+          size: V.auxLabel.size,
+          weight: 600,
+          fill: V.aux,
+        }),
       );
       addBox(b);
     }
@@ -1328,7 +1395,11 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         [6, 16, 28],
       );
       layers.labels.push(
-        svgText(glyph, b.x, b.y + 7, 'middle', { size: 22, weight: 700, fill: V.aux }),
+        svgText(glyph, b.x, b.y + V.sign.rise, 'middle', {
+          size: V.sign.size,
+          weight: 700,
+          fill: V.aux,
+        }),
       );
       addBox(b);
     }
@@ -1357,7 +1428,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     }
     layers.labels.push(
       svgText(al.text, b.x, b.y + V.helper.size * 0.36, 'middle', {
-        size: al.kind === 'alpha' || al.kind === 'beta' ? 19 : V.helper.size,
+        size: al.kind === 'alpha' || al.kind === 'beta' ? V.alpha : V.helper.size,
         weight: V.helper.weight,
         fill: al.fill,
         style: al.kind === 'alpha' || al.kind === 'beta' ? 'italic' : undefined,
