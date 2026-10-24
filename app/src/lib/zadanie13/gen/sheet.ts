@@ -78,7 +78,9 @@ const STROKI_TIPA =
   `<p class="sheet-answer-line">${SHEET_13.tipPriznak}<span class="sheet-answer-blank"></span></p>`;
 
 function metka(z: ListZadacha13): string {
-  return z.task.source === 'own' ? ` <span class="z13-sheet-metka">${SHEET_13.metkaSvoya}</span>` : '';
+  return z.task.source === 'own'
+    ? ` <span class="z13-sheet-metka">${SHEET_13.metkaSvoya}</span>`
+    : '';
 }
 
 function podpisTipa(z: ListZadacha13, p: GenParams13): string {
@@ -173,7 +175,13 @@ function bloki(
       });
       return;
     }
-    out.push({ title: BLOK_13[vid], note: '', head: false, leadItems: lead, tasks: svoi.map(task) });
+    out.push({
+      title: BLOK_13[vid],
+      note: '',
+      head: false,
+      leadItems: lead,
+      tasks: svoi.map(task),
+    });
   });
   return out;
 }

@@ -16,7 +16,8 @@ export function previewList13(p: GenParams13): GenPreviewTaskV2[][] {
       kindLabel: z.vid === 'T' ? BLOK_13.T : BLOK_13[z.vid],
       html: `<p>${z.questionHtml}</p>${tablitsaUsloviya13(z)}`,
       teacherHtml: `${p.uchitel === 'otvety' ? '' : p.uchitel === 'polno' ? z.polnoHtml : z.kratkoHtml}<p class="gv2-a4__otvet">${GENERATOR_13.otvet}: <b>${z.answer}</b></p>`,
-      badge: z.task.source === 'own' ? SHEET_13.metkaSvoya : z.istochnik === 'bank' ? 'банк' : 'новая',
+      badge:
+        z.task.source === 'own' ? SHEET_13.metkaSvoya : z.istochnik === 'bank' ? 'банк' : 'новая',
     })),
   );
 }

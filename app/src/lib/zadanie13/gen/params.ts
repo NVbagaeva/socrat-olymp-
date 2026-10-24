@@ -96,7 +96,9 @@ export function genQuery13(p: GenParams13): string {
 }
 
 /** Адрес → параметры. Непонятное — по умолчанию; лишнее отбрасывается. */
-export function parseGenQuery13(q: URLSearchParams | { get(name: string): string | null }): GenParams13 {
+export function parseGenQuery13(
+  q: URLSearchParams | { get(name: string): string | null },
+): GenParams13 {
   const sostav: Partial<Record<Vid13, number>> = {};
   for (const part of (q.get('s') ?? '').split(',')) {
     const [id, n] = part.split(':');

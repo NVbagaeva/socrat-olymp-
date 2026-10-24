@@ -11,15 +11,15 @@ name: PDF 13
 
 on:
   push:
-    branches: ['claude/economics-task-13-**', 'claude/pdf-task-13-**']
+    branches: ["claude/economics-task-13-**", "claude/pdf-task-13-**"]
     paths:
-      - 'app/src/lib/sheet/**'
-      - 'app/src/lib/zadanie13/**'
-      - 'app/src/content/generator13.ts'
-      - 'app/src/app/zadaniya/13/pechat/pechat13.css'
-      - 'app/scripts/build-pdf-13.mjs'
-      - 'app/scripts/lib/sheet-render.mjs'
-      - '.github/workflows/pdf-13.yml'
+      - "app/src/lib/sheet/**"
+      - "app/src/lib/zadanie13/**"
+      - "app/src/content/generator13.ts"
+      - "app/src/app/zadaniya/13/pechat/pechat13.css"
+      - "app/scripts/build-pdf-13.mjs"
+      - "app/scripts/lib/sheet-render.mjs"
+      - ".github/workflows/pdf-13.yml"
   workflow_dispatch:
 
 permissions:

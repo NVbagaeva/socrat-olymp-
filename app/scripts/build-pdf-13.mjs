@@ -56,15 +56,23 @@ function paramsOf(presetId) {
 async function build(name, params, withAnswers, requireKatex) {
   const list = L.sobratList13(params);
   const spec = S.sheetSpec13(params, list, withAnswers ? 'uchitel' : 'uchenik');
-  const qr = withAnswers ? null : qrSvg(SITE + P.onlaynHref13(params), 'QR-код: решать набор онлайн');
+  const qr = withAnswers
+    ? null
+    : qrSvg(SITE + P.onlaynHref13(params), 'QR-код: решать набор онлайн');
   const expected = list.poVariantam.reduce((n, v) => n + v.length, 0);
-  return buildSheet(APP, SECTION, name, { ...spec, qr }, {
-    withAnswers,
-    expectTasks: expected,
-    requireKatex,
-    keepHtml: true,
-    extraCss: EXTRA_CSS,
-  });
+  return buildSheet(
+    APP,
+    SECTION,
+    name,
+    { ...spec, qr },
+    {
+      withAnswers,
+      expectTasks: expected,
+      requireKatex,
+      keepHtml: true,
+      extraCss: EXTRA_CSS,
+    },
+  );
 }
 
 async function main() {

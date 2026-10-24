@@ -149,7 +149,12 @@ export function Nabor13() {
       setZadachi(
         planLista13(params).map((v) =>
           v.map((poz) => ({
-            ...sealZadacha13(poz.prototypeId, poz.seed, poz.vid === 'T' ? 'tip' : 'zadachi', poz.no),
+            ...sealZadacha13(
+              poz.prototypeId,
+              poz.seed,
+              poz.vid === 'T' ? 'tip' : 'zadachi',
+              poz.no,
+            ),
             no: poz.no,
             pos: poz.pos,
           })),
@@ -172,7 +177,11 @@ export function Nabor13() {
         <p className="z13-tr__lead">{ONLAYN_13.lead}</p>
       </header>
       {zadachi !== null && zadachi.length > 1 ? (
-        <div className="z13-tr__knopki z13-tr__knopki--chisla" role="group" aria-label={ONLAYN_13.variant}>
+        <div
+          className="z13-tr__knopki z13-tr__knopki--chisla"
+          role="group"
+          aria-label={ONLAYN_13.variant}
+        >
           {zadachi.map((_, i) => (
             <button
               key={i}
