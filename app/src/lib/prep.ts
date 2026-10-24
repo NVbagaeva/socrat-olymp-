@@ -839,6 +839,25 @@ function withTitles(steps: PrepStep[]): PrepStep[] {
   return steps.map((step) => ({ ...step, titleHtml: titleHtml(step.title) }));
 }
 
+/**
+ * Шаги разбора, построенные движком снаружи, → разметка экрана: те же
+ * блоки и заголовки, что у опорных задач. Нужен тем, кто зовёт
+ * сборщик разбора сам (lib/variant/adapters/z12): у прототипов правило
+ * ответа лежит в meta задачи и в наборе прототипа, а не в подготовке.
+ */
+export function viewSteps(
+  steps: readonly { number: number; title: string; arrow?: string | null; blocks: EngineBlock[] }[],
+): PrepStep[] {
+  return withTitles(
+    steps.map((step) => ({
+      number: step.number,
+      title: step.title,
+      arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
+      blocks: viewBlocks(step.blocks),
+    })),
+  );
+}
+
 function buildSteps(task: EngineTask): PrepStep[] | null {
   const steps = buildStepsRaw(task);
   return steps === null ? null : withTitles(steps);

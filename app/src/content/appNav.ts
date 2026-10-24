@@ -10,6 +10,7 @@
 import type { NavItem } from '@/components/ui';
 import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
+import { VARIANT_HREF } from '@/content/variant';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
    «Прогресс» и «Статистика» → «Статистика», «Материалы» →
@@ -20,6 +21,14 @@ export const topNav: NavItem[] = [
   /* В нижней панели пункт называется полным именем страницы —
      «Банк заданий»: он ведёт на список всех заданий, а не в раздел. */
   { id: 'tasks', label: 'Задания', panel: 'Банк заданий', href: tasksPage.href, icon: 'tasks' },
+  /* Генератор варианта из всех заданий первой части (/variant/). */
+  {
+    id: 'variant',
+    label: 'Собрать вариант',
+    short: 'Вариант',
+    href: VARIANT_HREF,
+    icon: 'variant',
+  },
   { id: 'stats', label: 'Статистика', href: '/statistika/', icon: 'stats' },
   /* Короткая подпись — для нижней панели и экрана «Ещё»: полное
      название в ячейку шириной в четверть экрана не помещается. */

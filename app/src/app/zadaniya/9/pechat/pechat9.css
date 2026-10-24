@@ -21,13 +21,13 @@
 /* Рисунки графиков: в ч/б теме кривая — чёрная и толстая, касательная
    и построения — серые и тоньше. Различие — тоном и толщиной, штриха
    на рисунке ученика нет. */
-[data-sheet-theme='print'] svg.pr {
+:is([data-sheet-theme='print'], [data-sheet-theme='strict']) svg.pr {
   --graph-accent: #6b6b6b;
 }
-[data-sheet-theme='print'] svg.pr .pr-tangent {
+:is([data-sheet-theme='print'], [data-sheet-theme='strict']) svg.pr .pr-tangent {
   stroke-width: 2px;
 }
-[data-sheet-theme='print'] svg.pr .pr-fill {
+:is([data-sheet-theme='print'], [data-sheet-theme='strict']) svg.pr .pr-fill {
   fill: #000000;
   fill-opacity: 0.14;
 }

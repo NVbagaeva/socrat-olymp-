@@ -9,8 +9,8 @@
    на 2 мм ниже A4 (lib/sheet/theme.css), фон при печати белый.
 
    Проверяются листы ученика и учителя всех разделов с генератором,
-   с постоянным зерном, и справочник по планиметрии №1 (с примерами
-   и без):
+   с постоянным зерном, три листа «Собрать вариант» по постоянному коду
+   и справочник по планиметрии №1 (с примерами и без):
 
      Chromium — печать в PDF на трёх высотах бумаги: ровно A4 (с
        правилом @page листа) и 841 pt, 840 pt без @page — так печатает
@@ -58,8 +58,22 @@ const SHEETS = [
   ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
   /* №13: «Домашка» компактным листом и зачёт с полями для оформления. */
-  ['№13', '/zadaniya/13/pechat/', 's=A:2,B:1,C:2,D:1&l=base&i=mix&h=ramka&f=compact&v=1&seed=print-check'],
-  ['№13 зачёт', '/zadaniya/13/pechat/', 's=A:5,B:5,C:5,D:5,T:10&l=all&i=mix&h=net&f=full&v=1&zc=1&seed=print-check'],
+  [
+    '№13',
+    '/zadaniya/13/pechat/',
+    's=A:2,B:1,C:2,D:1&l=base&i=mix&h=ramka&f=compact&v=1&seed=print-check',
+  ],
+  [
+    '№13 зачёт',
+    '/zadaniya/13/pechat/',
+    's=A:5,B:5,C:5,D:5,T:10&l=all&i=mix&h=net&f=full&v=1&zc=1&seed=print-check',
+  ],
+  /* «Собрать вариант»: задания 1–13, один вариант (у каждого варианта
+     своя нумерация страниц, а проверка сверяет колонтитул с листом). Без
+     экрана, открывшего вкладку, лист собирается по коду из адреса. */
+  ['Вариант', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00', [['ученик', '']]],
+  ['Вариант', '/variant/pechat/', 'list=uchitel&kod=PR7T-407ZZ-00', [['учитель', '']]],
+  ['Вариант', '/variant/pechat/', 'list=razbor&kod=PR7T-407ZZ-00', [['разбор', '']]],
   /* №13, «Для репетиторов»: лист урока 6 (опорные, банк, новые, «Определи тип») и карточки. */
   ['№13 урок', '/zadaniya/13/pechat/', 's=&l=all&i=mix&h=net&f=compact&v=1&u=5&seed=print-check'],
   ['№13 карточки', '/zadaniya/13/pechat/kartochki/', 'seed=print-check', [['карточки', '']]],

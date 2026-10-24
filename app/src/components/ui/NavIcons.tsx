@@ -26,7 +26,8 @@ export type NavIconName =
   | 'dumbbell'
   | 'book'
   | 'gear'
-  | 'help';
+  | 'help'
+  | 'variant';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
   /* Дом. */
@@ -119,6 +120,14 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
     <>
       <circle cx="12" cy="8" r="3.6" />
       <path d="M5 20.5c0-3.8 3.1-6.2 7-6.2s7 2.4 7 6.2" />
+    </>
+  ),
+  /* Два листа варианта со строками: «Собрать вариант». */
+  variant: (
+    <>
+      <path d="M8.5 3.5h8.2l3.3 3.3v10.7a1 1 0 0 1-1 1h-10.5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z" />
+      <path d="M5.5 7v12.5a1 1 0 0 0 1 1h9" />
+      <path d="M10.5 9.5h6M10.5 12.5h6M10.5 15.5h3.5" />
     </>
   ),
   /* Колокольчик уведомлений. */

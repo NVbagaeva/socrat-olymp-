@@ -249,17 +249,15 @@ export function taskSolutionItem(task, generator, solutionBuilder, quadraticBuil
 }
 
 /**
- * Решение задачи разметкой внутри карточки «Разобранный пример» листа
- * генератора по всем типам: шаги разбора движка и строка ответа. Тот же
- * разбор, что в листе учителя, — ничего не досочиняется. null — разбора
- * у задачи нет: пример с ней не печатается.
+ * Шаги решения задачи разметкой листа — список «sheet-steps» без строки
+ * ответа: тот же разбор, что в листе учителя. null — разбора у задачи
+ * нет. Его же берёт «Собрать вариант» (lib/variant/adapters/z12): там
+ * ответ печатается отдельно.
  */
-export function exampleSolutionHtml(task, generator, solutionBuilder, quadraticBuilder,
-                                    rationalBuilder) {
+export function solutionStepsHtml(task, generator, solutionBuilder, quadraticBuilder,
+                                  rationalBuilder) {
   const math = (tex) => '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
     typo.escape(tex) + '</span>';
-  const answer = '<p class="sheet-task-answer">Ответ: <b>' + typo.markup(answerHtml(task) || task.answer) +
-    '</b></p>';
   if (stepwise(task)) {
     const full = fullSolutionRational(task, rationalBuilder);
     if (!full) { return null; }
@@ -267,15 +265,31 @@ export function exampleSolutionHtml(task, generator, solutionBuilder, quadraticB
       '<li class="sheet-step"><span class="sheet-step-text">' + typo.mathText(step.title) +
         (step.formulas.length ? ':' : '') + '</span> ' +
         step.formulas.map(math).join('<span class="sheet-solution-sep">;</span> ') + '</li>'
-    ).join('') + '</ol>' + answer;
+    ).join('') + '</ol>';
   }
   const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
   if (!formulas) { return null; }
   return '<ol class="sheet-steps">' + formulas.map((tex) =>
-    '<li class="sheet-step">' + math(tex) + '</li>').join('') + '</ol>' + answer;
+    '<li class="sheet-step">' + math(tex) + '</li>').join('') + '</ol>';
+}
+
+/**
+ * Решение задачи разметкой внутри карточки «Разобранный пример» листа
+ * генератора по всем типам: шаги разбора движка и строка ответа. Тот же
+ * разбор, что в листе учителя, — ничего не досочиняется. null — разбора
+ * у задачи нет: пример с ней не печатается.
+ */
+export function exampleSolutionHtml(task, generator, solutionBuilder, quadraticBuilder,
+                                    rationalBuilder) {
+  const steps = solutionStepsHtml(task, generator, solutionBuilder, quadraticBuilder, rationalBuilder);
+  if (steps === null) { return null; }
+  const answer = '<p class="sheet-task-answer">Ответ: <b>' + typo.markup(answerHtml(task) || task.answer) +
+    '</b></p>';
+  return steps + answer;
 }
 
 const api = { answersItems: answersItems, variantAnswersItems: variantAnswersItems,
-              taskSolutionItem: taskSolutionItem, exampleSolutionHtml: exampleSolutionHtml };
+              taskSolutionItem: taskSolutionItem, exampleSolutionHtml: exampleSolutionHtml,
+              solutionStepsHtml: solutionStepsHtml };
 
 export default api;
