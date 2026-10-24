@@ -262,12 +262,24 @@ select set_config('request.jwt.claim.sub', 'b1000000-0000-0000-0000-000000000000
 select public.extend_work(:'work2', now() + interval '2 days', 'c1000000-0000-0000-0000-000000000000');
 select set_config('request.jwt.claim.sub', 'c1000000-0000-0000-0000-000000000000', false);
 select public.save_answer(:'work2', 1::smallint, '', '"2,5"');
+select public.save_answer(:'work2', 14::smallint, 'samo', '{"ball":2,"kriteriy":0,"ili":0}');
+select public.save_answer(:'work2', 19::smallint, 'samo', '{"ball":3,"kriteriy":1,"ili":0}');
+select pg_temp.fails(format($q$select public.save_answer(%L, 15::smallint, 'samo', '"3"')$q$, :'work2'), 'not_self');
+select pg_temp.fails(format($q$select public.save_answer(%L, 15::smallint, 'samo', '{"ball":3}')$q$, :'work_id'), 'not_self');
+select public.save_answer(:'work2', 16::smallint, 'samo', '{"ball":3,"kriteriy":0,"ili":0}');
+select pg_temp.fails(format($q$select public.submit_work(%L)$q$, :'work2'), 'ball_over_max');
+select public.save_answer(:'work2', 16::smallint, 'samo', '{"ball":1,"kriteriy":1,"ili":0}');
 select public.submit_work(:'work2');
 reset role;
 do $$ begin
   perform pg_temp.ok(not exists (select 1 from public.grades g join public.submissions s on s.id = g.submission_id
                                   where s.work_id = (select id from public.variant_works where title = 'Самопроверка')
                                     and g.ne_pristupal), 'в самопроверке «не приступал» не ставится');
+  perform pg_temp.ok((select status from public.submissions s join public.variant_works w on w.id = s.work_id
+                       where w.title = 'Самопроверка') = 'checked', 'самопроверка: работа сразу «проверена»');
+  perform pg_temp.ok((select sum(g.ball) from public.grades g join public.submissions s on s.id = g.submission_id
+                       join public.variant_works w on w.id = s.work_id
+                       where w.title = 'Самопроверка' and g.task_no >= 14) = 6, 'самооценка 2 + 3 + 1 = 6, остальное 0');
   raise notice 'ok 9: срок закрывает загрузку, продление открывает';
 end $$;
 

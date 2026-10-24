@@ -46,6 +46,24 @@ import type {
 
 export const RABOTY_KEY = 'budetege:raboty:v1';
 
+/** Пункт самооценки по критериям (часть 2 в режиме самопроверки). */
+export const SAMO = 'samo';
+
+export interface Samo {
+  ball: number;
+  kriteriy: number | null;
+  ili: number | null;
+}
+
+export function readSamo(v: unknown): Samo | null {
+  if (typeof v !== 'object' || v === null) return null;
+  const o = v as Record<string, unknown>;
+  const int = (x: unknown) =>
+    typeof x === 'number' && Number.isInteger(x) && x >= 0 && x <= 9 ? x : null;
+  const ball = int(o['ball']);
+  return ball === null ? null : { ball, kriteriy: int(o['kriteriy']), ili: int(o['ili']) };
+}
+
 /** Ограничения — как в сервисе загрузки (infra/lite/uploads). */
 export const MAX_PHOTOS = 6;
 export const MAX_PHOTO_BYTES = 3_000_000;
@@ -424,10 +442,22 @@ export function createLocalRaboty(opts: LocalRabotyOptions = {}): RabotyApi {
 
     async saveAnswer(workId, taskNo, punkt, vvod) {
       const value =
-        taskNo <= 13 ? (typeof vvod === 'string' ? vvod.slice(0, 40) : '') : readVvod(vvod);
+        punkt === SAMO
+          ? readSamo(vvod)
+          : taskNo <= 13
+            ? typeof vvod === 'string'
+              ? vvod.slice(0, 40)
+              : ''
+            : readVvod(vvod);
       if (JSON.stringify(value).length > 4000) fail('too_long', 'Слишком длинный ответ');
       change((db) => {
         const s = mySub(db, workId);
+        if (
+          punkt === SAMO &&
+          (value === null || taskNo < 14 || taskNo > 20 || workOf(db, workId)?.part2Mode !== 'self')
+        ) {
+          fail('not_self', 'Самооценка — только в самопроверке');
+        }
         if (!canEdit(db, s, taskNo)) fail('closed', 'Срок прошёл или работа сдана');
         const row = db.answers.find(
           (a) => a.subId === s.id && a.taskNo === taskNo && a.punkt === punkt,
@@ -549,6 +579,21 @@ export function createLocalRaboty(opts: LocalRabotyOptions = {}): RabotyApi {
                 db.photos.some((p) => p.subId === s.id && p.taskNo === no);
               if (!est) putGrade(db, s.id, no, { ball: 0, nePristupal: true }, 'auto', null);
             }
+          } else {
+            /* Самопроверка: баллы — самооценка ученика, работа сразу проверена. */
+            for (const no of PART2_NUMBERS) {
+              const samo = readSamo(answers.find((a) => a.taskNo === no && a.punkt === SAMO)?.vvod);
+              putGrade(
+                db,
+                s.id,
+                no,
+                { ball: samo?.ball ?? 0, kriteriy: samo?.kriteriy ?? null, ili: samo?.ili ?? null },
+                'auto',
+                null,
+              );
+            }
+            s.status = 'checked';
+            s.checkedAt = iso();
           }
         } else {
           fail('already_submitted', 'Работа уже сдана');

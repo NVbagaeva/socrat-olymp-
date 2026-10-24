@@ -402,6 +402,14 @@ language plpgsql security definer set search_path = ''
 as $$
 declare v_sub uuid := public.my_submission(p_work);
 begin
+  -- Самооценка по критериям ({"ball":…,"kriteriy":…,"ili":…}) — только
+  -- в работе с самопроверкой части 2.
+  if p_punkt = 'samo' and (
+       p_task not between 14 and 20
+       or (select part2_mode from public.variant_works where id = p_work) <> 'self'
+       or coalesce(jsonb_typeof(p_vvod -> 'ball'), '') <> 'number') then
+    raise exception 'not_self: самооценка — только в самопроверке' using errcode = 'check_violation';
+  end if;
   if not public.can_edit_task(v_sub, p_task) then
     raise exception 'closed: срок прошёл или работа сдана' using errcode = 'insufficient_privilege';
   end if;
@@ -464,6 +472,16 @@ begin
         from generate_series(14, 20) as t(no)
        where not exists (select 1 from public.submission_answers a where a.submission_id = v_sub and a.task_no = t.no)
          and not exists (select 1 from public.photos p where p.submission_id = v_sub and p.task_no = t.no);
+    else
+      -- Самопроверка: баллы 14–20 — самооценка ученика (не выбрал — 0),
+      -- работа сразу «проверена»; учитель может открыть её и поправить.
+      insert into public.grades (submission_id, task_no, ball, kriteriy, kriteriy_ili)
+      select v_sub, t.no, coalesce((a.vvod ->> 'ball')::smallint, 0),
+             (a.vvod ->> 'kriteriy')::smallint, (a.vvod ->> 'ili')::smallint
+        from generate_series(14, 20) as t(no)
+        left join public.submission_answers a
+          on a.submission_id = v_sub and a.task_no = t.no and a.punkt = 'samo';
+      update public.submissions set status = 'checked', checked_at = now() where id = v_sub;
     end if;
   else
     raise exception 'already_submitted: работа уже сдана' using errcode = 'check_violation';

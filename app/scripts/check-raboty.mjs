@@ -341,6 +341,106 @@ sw = await api.studentWork(W);
 ok(sw.photos.length === 0, 'истёкшие фото удалены');
 ok(sw.score.total > 0, 'баллы после удаления фото остались');
 
+console.log('9. Самопроверка части 2');
+{
+  now = new Date('2027-10-01T10:00:00Z');
+  as('T');
+  const W2 = await api.issueWork({
+    ...base,
+    title: 'Сам',
+    dueAt: null,
+    students: ['B'],
+    part2Mode: 'self',
+  });
+  as('B');
+  await api.saveAnswer(W2, 14, 'samo', { ball: 2, kriteriy: 0, ili: 0 });
+  await api.saveAnswer(W2, 19, 'samo', { ball: 3, kriteriy: 1, ili: 0 });
+  await throws(
+    () => api.saveAnswer(W2, 15, 'samo', '3'),
+    'not_self',
+    'самооценка — объект с баллом',
+  );
+  await throws(
+    () => api.saveAnswer(W, 15, 'samo', { ball: 3 }),
+    'not_self',
+    'в работе учителю самооценки нет',
+  );
+  await api.saveAnswer(W2, 16, 'samo', { ball: 3, kriteriy: 0, ili: 0 });
+  await throws(() => api.submitWork(W2), 'ball_over_max', '№16: самооценка 3 > 2 — отказ');
+  await api.saveAnswer(W2, 16, 'samo', { ball: 1, kriteriy: 1, ili: 0 });
+  await api.submitWork(W2);
+  const s2 = await api.studentWork(W2);
+  ok(s2.submission.status === 'checked', 'самопроверка: работа сразу «проверена»');
+  ok(
+    s2.score.part2 === 6 && s2.score.test !== null,
+    `самооценка 2 + 3 + 1 = ${s2.score.part2}, тестовый есть`,
+  );
+  ok(!s2.grades.some((g) => g.nePristupal), 'в самопроверке «не приступал» не ставится');
+}
+
+console.log('8. Очередь фото: обрыв связи, повтор, перезагрузка');
+{
+  const { createOchered, memoryQStore } = requireSrc('lib/chast2/ochered');
+  const qstore = memoryQStore();
+  let net = true;
+  let onOnline = () => {};
+  const sent = [];
+  let failNext = 0;
+  const send = async (item, progress) => {
+    if (!net) throw new TypeError('Failed to fetch');
+    progress(0.5);
+    if (failNext > 0) {
+      failNext -= 1;
+      throw Object.assign(new Error('Сервер ответил 500'), { code: 'server' });
+    }
+    sent.push(item.taskNo);
+    return { ok: true };
+  };
+  const mk = () =>
+    createOchered({
+      store: qstore,
+      send,
+      online: () => net,
+      onOnline: (fn) => {
+        onOnline = fn;
+        return () => {};
+      },
+      retryDelay: 1,
+    });
+  let q = mk();
+  const item = { workId: 'w', taskNo: 15, blob: jpeg(), width: 10, height: 10 };
+  net = false;
+  await q.add(item);
+  await q.idle();
+  ok(q.items().length === 1 && q.items()[0].offline, 'без связи фото ждёт в очереди');
+  ok((await qstore.all()).length === 1, 'ожидающее фото сохранено (переживёт перезагрузку)');
+  /* «Перезагрузка» страницы: новая очередь из того же хранилища. */
+  q = mk();
+  await q.idle();
+  ok(q.items().length === 1, 'после перезагрузки очередь на месте');
+  net = true;
+  onOnline();
+  await q.idle();
+  ok(q.items().length === 0 && sent.join() === '15', 'связь вернулась — фото ушло');
+  ok((await qstore.all()).length === 0, 'отправленное удалено из хранилища');
+  failNext = 1;
+  await q.add({ ...item, taskNo: 16 });
+  await q.idle();
+  ok(sent.at(-1) === 16, 'сбой сервера — автоповтор успешен');
+  failNext = 5;
+  await q.add({ ...item, taskNo: 17 });
+  await q.idle();
+  const bad = q.items()[0];
+  ok(
+    bad?.status === 'err' && bad.error === 'Сервер ответил 500',
+    'после трёх сбоев — ошибка и кнопка «Повторить»',
+  );
+  failNext = 0;
+  q.retry(bad.id);
+  await q.idle();
+  ok(q.items().length === 0 && sent.at(-1) === 17, '«Повторить» — фото ушло');
+}
+
 if (failures > 0) {
   console.error(`\nРаботы: ошибок ${failures} из ${checks}`);
   process.exit(1);
