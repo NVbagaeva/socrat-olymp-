@@ -220,12 +220,20 @@ export interface Drawn {
   kletokY: number;
 }
 
-export function drawFigure(task: Generated, rezhim: 'student' | 'teacher'): Drawn | null {
+export function drawFigure(
+  task: Generated,
+  rezhim: 'student' | 'teacher',
+  pechat: { minFont?: number } = {},
+): Drawn | null {
   if (task.risunok === null) {
     return null;
   }
   const report = pustoyOtchet();
-  const svg = renderFigura(task.risunok, { rezhim }, report);
+  const svg = renderFigura(
+    task.risunok,
+    pechat.minFont === undefined ? { rezhim } : { rezhim, minFont: pechat.minFont },
+    report,
+  );
   return {
     svg,
     width: (cellMm) => Math.round((report.width / report.cell) * cellMm * 100) / 100,
@@ -632,7 +640,10 @@ function primeryOf(pool: string[], ramki: number): { proto: string; seed: string
   for (let i = 0; i < ramki; i += 1) {
     const second = i === 1;
     const proto = from[i % from.length] as string;
-    out.push({ proto, seed: second && from.length === 1 ? primerSeed(proto) : opornayaSeed(proto) });
+    out.push({
+      proto,
+      seed: second && from.length === 1 ? primerSeed(proto) : opornayaSeed(proto),
+    });
   }
   return out;
 }

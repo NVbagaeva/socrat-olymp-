@@ -24,7 +24,7 @@
  * проверяется автотестом (selftest.ts) без разбора SVG.
  */
 
-import { THEME, esc, fmt, px, svgText, textWidth } from '@/lib/graph/renderer.js';
+import { THEME, esc, fmt, px, sMinKeglem, svgText, textWidth } from '@/lib/graph/renderer.js';
 import { type Rect, type Seg, pointSegDist, rectGap, segRectDist, segSegDist } from './geometry';
 import {
   DEFAULT_WINDOW,
@@ -151,6 +151,19 @@ export function resolveWindow(config: Risunok): Okno {
 }
 
 export function renderVectorPlane(config: Risunok, report?: Report): string {
+  return sMinKeglem(
+    config.minFont,
+    [
+      [V.label, ['size']],
+      [V.tick, ['size']],
+      [V.axisName, ['size']],
+      [V.hint, ['size']],
+    ],
+    () => renderVectorPlaneBez(config, report),
+  );
+}
+
+function renderVectorPlaneBez(config: Risunok, report?: Report): string {
   const R = report ?? emptyReport();
   const win = resolveWindow(config);
   const cell = config.cell ?? THEME.geometry.cell;
@@ -238,7 +251,7 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
   const labelLayer: string[] = [];
 
   head.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px(width)} ${px(height)}" width="${px(width)}" height="${px(height)}" class="vp" role="img"` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="vektory" viewBox="0 0 ${px(width)} ${px(height)}" width="${px(width)}" height="${px(height)}" class="vp" role="img"` +
       (config.alt ? ` aria-label="${esc(config.alt)}"` : ' aria-hidden="true"') +
       ' style="max-width:100%;height:auto">',
   );

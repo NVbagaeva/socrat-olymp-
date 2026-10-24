@@ -88,19 +88,20 @@ export function VariantPrint() {
   const [warning, setWarning] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
 
-  /* Варианты повышенной сложности: лист строгий, чертежи — цветные. */
-  const chertezhiColor = povNomer(code) !== null;
+  /* Лист варианта строгий, а чертежи — в цветах сайта, сплошными
+     линиями: и у «Собрать вариант», и у вариантов повышенной сложности.
+     На ч/б печати графики различает их подпись (y = f(x), y = g(x)). */
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.sheetTheme = 'strict';
     root.dataset.sheetLayout = 'single';
-    if (chertezhiColor) root.dataset.sheetChertezhi = 'color';
+    root.dataset.sheetChertezhi = 'color';
     return () => {
       delete root.dataset.sheetTheme;
       delete root.dataset.sheetLayout;
       delete root.dataset.sheetChertezhi;
     };
-  }, [chertezhiColor]);
+  }, []);
 
   useEffect(() => {
     let alive = true;

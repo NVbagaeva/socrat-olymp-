@@ -40,6 +40,18 @@ export interface KLogTask {
   hints: { question: string; options: string[]; correct: number; comment?: string }[];
 }
 
+/** Печать листа: наименьший кегль подписей в единицах движка (lib/variant/pechat). */
+export interface Pechat {
+  minFont?: number;
+}
+
+/** Рисунок движком №12; лист задаёт наименьший кегль. */
+function risuy(sc: object, pechat: Pechat): string {
+  return renderer.renderGraph(
+    pechat.minFont === undefined ? sc : { ...sc, minFont: pechat.minFont },
+  );
+}
+
 const log = (x: number, r: number) => Math.log(x) / Math.log(r);
 const round9 = (x: number) => Math.round(x * 1e9) / 1e9;
 const dec = (x: number) => String(round9(x)).replace('.', '{,}').replace('-', '-');
@@ -72,14 +84,14 @@ function scene(p: KLog, points: { x: number; y: number }[], uchitel: boolean) {
     axes: { labelX: 'x', labelY: 'y', origin: '0' },
     labelRules: 'strict',
     axisLabels: 'minimal',
-    curves: [{ type: 'loga', a: p.r, k: p.c, c: 0, d: 0, color: 'lineA', label: null }],
+    curves: [{ type: 'loga', a: p.r, k: p.c, c: 0, d: 0, color: 'lineA', label: 'y = f(x)' }],
     points: points.map((t) => ({ x: t.x, y: t.y, style: 'solid', color: 'lineA', label: null })),
     shapes: asymptotes([verticalAsymptote(0, win)]).concat(guides),
     alt: 'График функции f(x) = k·logₐ x с отмеченными точками в узлах сетки',
   };
 }
 
-export function kLog(p: KLog): KLogTask {
+export function kLog(p: KLog, pechat: Pechat = {}): KLogTask {
   const points = p.marks.map((x) => ({ x, y: round9(p.c * log(x, p.r)) }));
   if (!points.every((t) => celoe(t.x) && celoe(t.y))) {
     throw new Error('kLog: точки не в узлах сетки');
@@ -157,8 +169,8 @@ export function kLog(p: KLog): KLogTask {
     uslovie: `На рисунке изображён график функции вида $f(x)=k\\log_a x$. При каком значении $x$ функция $f(x)$ принимает значение $${dec(p.y0)}$?`,
     otvet,
     proverka,
-    svg: renderer.renderGraph(scene(p, points, false)),
-    svgUchitel: renderer.renderGraph(scene(p, points, true)),
+    svg: risuy(scene(p, points, false), pechat),
+    svgUchitel: risuy(scene(p, points, true), pechat),
     points,
     shagi,
     hints,
@@ -201,7 +213,7 @@ function napravlyayushchie(points: readonly T[]) {
  * видно: k читается по A, прямая — по A и P, а B — второй корень
  * квадратного уравнения (по Виету: x_A·x_B = −k/a).
  */
-export function giperbolaPryamaya(p: GiperbolaPryamaya): GrafikTask {
+export function giperbolaPryamaya(p: GiperbolaPryamaya, pechat: Pechat = {}): GrafikTask {
   const [ax, ay] = p.A;
   const [px, py] = p.P;
   const k = ax * ay;
@@ -322,8 +334,8 @@ export function giperbolaPryamaya(p: GiperbolaPryamaya): GrafikTask {
     uslovie: `На рисунке изображены графики функций $f(x)=\\dfrac{k}{x}$ и $g(x)=ax+b$, которые пересекаются в точках $A$ и $B$. Найдите абсциссу точки $B$.`,
     otvet: xB,
     proverka,
-    svg: renderer.renderGraph(scene(false)),
-    svgUchitel: renderer.renderGraph(scene(true)),
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
     points: [p.A, p.P, ...uzly].map(([x, y]) => ({ x, y })),
     shagi,
     hints,
@@ -346,7 +358,7 @@ const nod = (x: number, y: number): number => (y === 0 ? Math.abs(x) : nod(y, x 
  * читаются a (по F) и b (по точкам (b + 1; 1), (b + 4; 2)); абсцисса A —
  * из ax = x − b. Подвох — a дробное, ответ на рисунке не прочесть.
  */
-export function korenKoren(p: KorenKoren): GrafikTask {
+export function korenKoren(p: KorenKoren, pechat: Pechat = {}): GrafikTask {
   const [fx, fy] = p.F;
   const b = p.b;
   const an = fy * fy;
@@ -442,8 +454,8 @@ export function korenKoren(p: KorenKoren): GrafikTask {
     uslovie: `На рисунке изображены графики функций $f(x)=\\sqrt{ax}$ и $g(x)=\\sqrt{x-b}$, которые пересекаются в точке $A$. Найдите абсциссу точки $A$.`,
     otvet,
     proverka,
-    svg: renderer.renderGraph(scene(false)),
-    svgUchitel: renderer.renderGraph(scene(true)),
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
     points: [p.F, G1, G2].map(([x, y]) => ({ x, y })),
     shagi,
     hints,

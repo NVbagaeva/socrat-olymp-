@@ -71,6 +71,7 @@
     "test:zadanie11": "node scripts/check-zadanie11.mjs",
     "test:zadanie13": "node scripts/check-zadanie13.mjs",
     "test:variant": "node scripts/check-variant.mjs",
+    "test:variant-risunki": "node scripts/check-variant-risunki.mjs",
     "test:variant-online": "node scripts/check-variant-online.mjs",
     "test:variant-online-site": "node scripts/check-variant-online-site.mjs",
     "test:povyshennye": "node scripts/check-povyshennye.mjs",

@@ -20,6 +20,7 @@
 import { VARIANT_SHEET as T } from '@/content/variant';
 import { figure as figureHtml } from '@/lib/sheet/sheet.js';
 import typo from '@/lib/sheet/typography.js';
+import { MAX_SHIRINA_MM, shirinaDlyaKegla } from './pechat';
 import type { Figure, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
 
 export type SheetKind = 'uchenik' | 'uchitel' | 'razbor';
@@ -30,19 +31,21 @@ export const SHEET_KINDS: readonly SheetKind[] = ['uchenik', 'uchitel', 'razbor'
 /** Клетка чертежа, мм: чуть мельче, чем у листов разделов, — лист компактный. */
 const CELL = 3.0;
 
-/** Рисунки разделов на листе варианта мельче: справа от текста — не шире этого, мм. */
-const FIG_SCALE = 0.8;
+/** Справа от текста рисунок не шире этого, мм; шире — встаёт под условие. */
 const FIG_SIDE_MAX = 56;
-/** Рисунок шире этого (до сжатия), мм, встаёт под условие. */
-const FIG_WIDE = 72;
-const FIG_BELOW_MAX = 110;
 
-/** Размер рисунка на листе варианта: сжатие и правило «широкий — под текст». */
+/**
+ * Размер рисунка на листе варианта. Рисунки крупные (lib/variant/pechat):
+ * ширина — как задал адаптер (клеточные чертежи — клетка 7 мм), но не
+ * меньше той, при которой подписи печатаются не мельче 10 pt, и не шире
+ * колонки. Широкий рисунок — под условием.
+ */
 export function sheetFigure(f: Figure): { width: number | undefined; below: boolean } {
-  if (f.width === undefined) return { width: undefined, below: f.below === true };
-  const below = f.below === true || f.width > FIG_WIDE;
-  const w = f.width * FIG_SCALE;
-  return { width: Math.round(Math.min(w, below ? FIG_BELOW_MAX : FIG_SIDE_MAX) * 10) / 10, below };
+  const poKeglyu = shirinaDlyaKegla(f.svg);
+  const zadano = f.width ?? poKeglyu ?? undefined;
+  if (zadano === undefined) return { width: undefined, below: f.below === true };
+  const w = Math.min(Math.max(zadano, poKeglyu ?? 0), MAX_SHIRINA_MM);
+  return { width: Math.round(w * 10) / 10, below: f.below === true || w > FIG_SIDE_MAX };
 }
 
 /** Бланк ответов: клеток в строке и колонок строк. */

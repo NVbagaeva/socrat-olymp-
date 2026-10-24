@@ -13,7 +13,8 @@ import { generate } from '@/lib/vektory/generate';
 import { prototypeById } from '@/lib/vektory/prototypes';
 import { renderVectorPlane } from '@/lib/vektory/render';
 import { shagiHtml2 } from '@/lib/vektory/sheet2';
-import type { Generated } from '@/lib/vektory/types';
+import { krupnyyRisunok } from '../../pechat';
+import type { Generated, Risunok } from '@/lib/vektory/types';
 import type { Figure, SectionAdapter, SectionModule, VariantTask } from '../../types';
 import {
   FALLBACK,
@@ -53,21 +54,16 @@ const POOL: C02[] = BANK.flatMap((entry) =>
   }),
 );
 
-/** Клетка рисунка на листе, мм — как у листа №2 в одну колонку; у движка клетка — 34 единицы. */
-const CELL_MM = 3.4;
-const CELL_UNITS = 34;
-
-function figureOf(svg: string): Figure {
-  const box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
-  return box === null
-    ? { svg }
-    : { svg, width: Math.round((Number(box[1]) / CELL_UNITS) * CELL_MM * 100) / 100 };
+/** Рисунок на листе варианта: клетка 7 мм (не меньше 6), под условием (lib/variant/pechat). */
+function risunokLista(risunok: Risunok): Figure {
+  const r = krupnyyRisunok((kegl) => renderVectorPlane({ ...risunok, minFont: kegl }));
+  return { svg: r.svg, width: r.width, below: true };
 }
 
 export function build(c: C02, task: Generated): VariantTask {
   const risunok = task.risunok;
-  const condition = risunok === null ? null : renderVectorPlane(risunok);
-  const withLegs = risunok === null ? null : renderVectorPlane({ ...risunok, hints: true });
+  const condition = risunok === null ? null : risunokLista(risunok);
+  const withLegs = risunok === null ? null : risunokLista({ ...risunok, hints: true });
   const otvet = answerHtml(task.otvet);
   const shagi = task.shagi
     .filter((s) => s.zagolovok !== 'Ответ')
@@ -86,9 +82,9 @@ export function build(c: C02, task: Generated): VariantTask {
     },
     difficulty: null,
     statement: typeset(task.uslovie),
-    figure: condition === null ? null : figureOf(condition),
+    figure: condition,
     /* Рисунок без сетки катетов не имеет — тогда отдельного рисунка учителя нет. */
-    figureTeacher: withLegs === null || withLegs === condition ? null : figureOf(withLegs),
+    figureTeacher: withLegs === null || withLegs.svg === condition?.svg ? null : withLegs,
     answer: answerText(task.otvet),
     answerHtml: otvet,
     solutionTeacher: shagiHtml2(task) + razborAnswer(otvet),

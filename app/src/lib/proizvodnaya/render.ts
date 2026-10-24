@@ -20,7 +20,7 @@
  * отбраковывает задачу.
  */
 
-import { THEME, esc, px, svgText, textWidth } from '@/lib/graph/renderer.js';
+import { THEME, esc, px, sMinKeglem, svgText, textWidth } from '@/lib/graph/renderer.js';
 import { type Rect, type Seg, pointSegDist, rectGap, segRectDist } from '../vektory/geometry';
 import { funkciya } from './reshit';
 import { postroit } from './spline';
@@ -42,6 +42,8 @@ export interface OpciiRisunka {
   rezhim: RezhimRisunka;
   /** Шаг подсказки: показываются построения с shag ≤ этого. По умолчанию все. */
   shag?: number;
+  /** Наименьший кегль подписей в единицах viewBox (печать листа: ≥ 10 pt). */
+  minFont?: number;
 }
 
 export interface Podpis {
@@ -105,6 +107,14 @@ interface Prep {
   r?: number;
   rect?: Rect;
   what: string;
+}
+
+/**
+ * Отступ чисел оси x от оси: прямоугольник числа не задевает засечку и
+ * при крупном печатном кегле (minFont), а при обычном — те же 16.
+ */
+function tickGapX(): number {
+  return Math.max(V.tick.gapX, V.tick.size * 0.77 + THEME.geometry.tick + V.gap);
 }
 
 function boxRect(b: Podpis): Rect {
@@ -174,7 +184,35 @@ function duga(cx: number, cy: number, r: number, t0: number, t1: number): string
   return `M${px(x0)} ${px(y0)}A${px(r)} ${px(r)} 0 ${large} 0 ${px(x1)} ${px(y1)}`;
 }
 
+/** Идёт ли отрисовка для печати листа (задан opts.minFont). */
+const PECHAT = { on: false };
+
 export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
+  const bylo = PECHAT.on;
+  PECHAT.on = opts.minFont !== undefined;
+  try {
+    return renderFiguraPechat(fig, opts, report);
+  } finally {
+    PECHAT.on = bylo;
+  }
+}
+
+function renderFiguraPechat(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
+  return sMinKeglem(
+    opts.minFont,
+    [
+      [THEME.font, ['axisLabel', 'axisName', 'pointLabel', 'curveLabel']],
+      [V.tick, ['size']],
+      [V.mark, ['size', 'sub']],
+      [V.curveLabel, ['size']],
+      [V.helper, ['size']],
+      [V.axisName, ['size']],
+    ],
+    () => renderFiguraBez(fig, opts, report),
+  );
+}
+
+function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
   const R = report ?? pustoyOtchet();
   const win = fig.okno;
   const g = THEME.geometry;
@@ -224,7 +262,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
   };
 
   layers.head.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px(width)} ${px(height)}" width="${px(width)}" height="${px(height)}" class="pr" role="img"` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="proizvodnaya" viewBox="0 0 ${px(width)} ${px(height)}" width="${px(width)}" height="${px(height)}" class="pr" role="img"` +
       (fig.alt ? ` aria-label="${esc(fig.alt)}"` : ' aria-hidden="true"') +
       ' style="max-width:100%;height:auto">',
   );
@@ -1002,16 +1040,16 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     const halfW = zeroW / 2 + 1.5;
     const halfH = V.tick.size * 0.42;
     const spots: [number, number, 'end' | 'start'][] = [
-      [axisY - V.tick.origin, axisX + V.tick.gapX, 'end'],
-      [axisY + V.tick.origin, axisX + V.tick.gapX, 'start'],
+      [axisY - V.tick.origin, axisX + tickGapX(), 'end'],
+      [axisY + V.tick.origin, axisX + tickGapX(), 'start'],
       [axisY - V.tick.origin, axisX - 8, 'end'],
       [axisY + V.tick.origin, axisX - 8, 'start'],
       /* Рисунок теории: запас, когда у начала координат сходятся линии
          (излом, прямые через начало) — ниже оси по центру и дальше влево. */
       ...(fig.teoriya === true
         ? ([
-            [axisY + zeroW / 2, axisX + V.tick.gapX + 8, 'end'],
-            [axisY - V.tick.origin - 12, axisX + V.tick.gapX, 'end'],
+            [axisY + zeroW / 2, axisX + tickGapX() + 8, 'end'],
+            [axisY - V.tick.origin - 12, axisX + tickGapX(), 'end'],
           ] as [number, number, 'end' | 'start'][])
         : []),
     ];
@@ -1124,7 +1162,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       const b = numberBox(
         text,
         sx(x),
-        axisX + side * V.tick.gapX - V.tick.size * 0.35 + (side === -1 ? -V.tick.size * 0.1 : 0),
+        axisX + side * tickGapX() - V.tick.size * 0.35 + (side === -1 ? -V.tick.size * 0.1 : 0),
       );
       const min = zazor(boxRect(b), obstacles).min;
       if (best === null || min > best.min) {
@@ -1150,7 +1188,9 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     const text = (y < 0 ? THEME.minus : '') + String(Math.abs(y));
     const w = textWidth(text, V.tick.size);
     let done = false;
-    for (const side of [-1]) {
+    /* Слева от оси — как в ФИПИ; на печати листа (крупный кегль), если
+       там проходит график, число встаёт справа: единица на оси нужна. */
+    for (const side of PECHAT.on ? [-1, 1] : [-1]) {
       const bx = side === -1 ? axisY - V.tick.gapY - w / 2 : axisY + V.tick.gapY + w / 2;
       const b = numberBox(text, bx, sy(y));
       if (zazor(boxRect(b), obstacles).min >= V.gap - 1) {
@@ -1276,7 +1316,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     }
     if (item.t === 'goriz' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
-      const halfW = textWidth(text, 15) / 2 + 3;
+      const halfW = textWidth(text, V.helper.size) / 2 + 3;
       const b = place(
         `подпись ${text}`,
         'aux',
@@ -1288,7 +1328,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
       );
       layers.labels.push(
         svgText(text, b.x, b.y + 5, 'middle', {
-          size: 15,
+          size: V.helper.size,
           weight: 600,
           fill: V.aux,
           style: 'italic',
@@ -1298,7 +1338,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     }
     if (item.t === 'tochka' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
-      const halfW = textWidth(text, 15) / 2 + 3;
+      const halfW = textWidth(text, V.helper.size) / 2 + 3;
       const b = place(
         `подпись ${text}`,
         'aux',
@@ -1309,7 +1349,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         fig.teoriya === true ? [10, 18, 26] : [10, 18],
       );
       layers.labels.push(
-        svgText(text, b.x, b.y + 5, 'middle', { size: 15, weight: 600, fill: V.aux }),
+        svgText(text, b.x, b.y + 5, 'middle', { size: V.helper.size, weight: 600, fill: V.aux }),
       );
       addBox(b);
     }
@@ -1328,7 +1368,11 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
         [6, 16, 28],
       );
       layers.labels.push(
-        svgText(glyph, b.x, b.y + 7, 'middle', { size: 22, weight: 700, fill: V.aux }),
+        svgText(glyph, b.x, b.y + 7, 'middle', {
+          size: Math.max(22, V.helper.size),
+          weight: 700,
+          fill: V.aux,
+        }),
       );
       addBox(b);
     }
@@ -1421,6 +1465,7 @@ export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): 
     }
     layers.labels.push(
       svgText(text, chosen.x, chosen.y + V.curveLabel.size * 0.34, 'middle', {
+        klass: 'pr-curve-label',
         size: V.curveLabel.size,
         family: THEME.font.curveLabelFamily,
         weight: THEME.font.curveLabelWeight,

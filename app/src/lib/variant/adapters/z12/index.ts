@@ -29,6 +29,7 @@ import { conditionSvg, solutionFigure } from '@/lib/sheet/figures12.js';
 import { solutionStepsHtml } from '@/lib/sheet/answers12.js';
 import { figure as sheetFigure } from '@/lib/sheet/sheet.js';
 import { parseAnswer } from '@/lib/answer';
+import { MAX_SHIRINA_MM, krupnyyRisunok, minFont, shirinaPoKletke } from '../../pechat';
 import { typeset } from '@/lib/tex';
 import {
   exponentialSteps,
@@ -295,8 +296,8 @@ function dollars(html: string): string {
 
 /* ── Разбор для ученика ─────────────────────────────────────────── */
 
+/** Клетка мелких рисунков в разборе ученика (графики-подсказки подготовки), мм. */
 const CELL = 3.4;
-const CELL_UNITS = 34;
 
 function blockHtml(block: PrepBlock): string {
   switch (block.type) {
@@ -409,13 +410,6 @@ function stub(steps: readonly PrepStep[]): boolean {
 
 /* ── Задача ─────────────────────────────────────────────────────── */
 
-function figureOf(svg: string | null, width: number | null = null): Figure | null {
-  if (svg === null) return null;
-  const box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
-  const mm = width ?? (box === null ? null : (Number(box[1]) / CELL_UNITS) * CELL);
-  return mm === null ? { svg } : { svg, width: Math.round(mm * 100) / 100 };
-}
-
 function sourceLabel(tpl: Template, isNew: boolean): string {
   if (tpl.source === 'own') {
     return `Аналог прототипа ${tpl.setId}${isNew ? ', новые числа' : ''}`;
@@ -467,10 +461,24 @@ function build(c: C12): VariantTask | null {
   if (c.tpl.source === 'fipi') fallbacks.push(FALLBACK.noPrototypeNo);
   if (c.tpl.stars === null) fallbacks.push(FALLBACK.noDifficulty);
 
-  const teacherFigure = solutionFigure(item, generator, CELL) as {
-    svg: string;
-    width: number | null;
-  } | null;
+  /* Лист варианта: клетка 7 мм (не меньше 6), подписи не мельче 10 pt (lib/variant/pechat). */
+  const uslovie = krupnyyRisunok(
+    (kegl) => (conditionSvg(task, { minFont: kegl }) as string | null) ?? '',
+  );
+  const figure: Figure | null =
+    uslovie.svg === '' ? null : { svg: uslovie.svg, width: uslovie.width, below: true };
+  /* Рисунок к разбору — в той же клетке, что условие; null — построений нет. */
+  const razborSvg = solutionFigure(item, generator, uslovie.kletka, {
+    minFont: minFont(uslovie.kletka),
+  }) as { svg: string; width: number | null } | null;
+  const teacherFigure: Figure | null =
+    razborSvg === null
+      ? null
+      : {
+          svg: razborSvg.svg,
+          width: shirinaPoKletke(razborSvg.svg, uslovie.kletka) ?? MAX_SHIRINA_MM,
+          below: true,
+        };
   const isNew = c.seed !== null && !c.tpl.fixed;
 
   return {
@@ -481,8 +489,8 @@ function build(c: C12): VariantTask | null {
     source: { kind: c.tpl.source, label: sourceLabel(c.tpl, isNew) },
     difficulty: c.tpl.stars,
     statement: katexPlaceholders(task.questionHtml),
-    figure: figureOf(conditionSvg(task) as string | null),
-    figureTeacher: teacherFigure === null ? null : figureOf(teacherFigure.svg, teacherFigure.width),
+    figure,
+    figureTeacher: teacherFigure,
     answer: answerText(value),
     answerHtml: otvet,
     solutionTeacher,

@@ -1043,7 +1043,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
 
   const alt = optsii.alt;
   const head =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${px(vx)} ${px(vy)} ${px(vw)} ${px(vh)}" width="${px(vw)}" height="${px(vh)}" class="pl" role="img"` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="planimetriya" viewBox="${px(vx)} ${px(vy)} ${px(vw)} ${px(vh)}" width="${px(vw)}" height="${px(vh)}" class="pl" role="img"` +
     (alt ? ` aria-label="${esc(alt)}"` : ' aria-hidden="true"') +
     ' style="max-width:100%;height:auto">' +
     (alt ? `<title>${esc(alt)}</title>` : '');

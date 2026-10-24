@@ -87,6 +87,7 @@ import type { Params as Params10 } from '@/lib/zadanie10/types';
 import type { Params as Params11, Solved as Solved11 } from '@/lib/zadanie11/types';
 import { ocheredno } from '@/lib/zadanie11/prototypes/povyshennye';
 import { razborUchenika } from '@/lib/variant/adapters/z01';
+import { krupnyyRisunok, minFont, shirinaPoKletke } from '@/lib/variant/pechat';
 import { build as build02 } from '@/lib/variant/adapters/z02';
 import { studentHtml, teacherHtml, type Razbor45 } from '@/lib/variant/adapters/z04/veroyatnost';
 import { build as build06 } from '@/lib/variant/adapters/z06';
@@ -424,21 +425,21 @@ function z11(
 
 /* ── №12 ────────────────────────────────────────────────────────── */
 
-/** Ширина рисунка №12 на листе, мм: клетка 3,4 мм, у движка — 34 единицы. */
-function shirina12(svg: string): number | undefined {
-  const box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
-  return box === null ? undefined : Math.round((Number(box[1]) / 34) * 3.4 * 100) / 100;
-}
-
-function z12(t: GrafikTask, klyuch: string): Gotovaya {
+/**
+ * Задача №12 из шаблона раздела: рисунки — движком №12 крупно, клетка
+ * 7 мм (не меньше 6), подписи не мельче 10 pt (lib/variant/pechat).
+ */
+function z12(sobrat: (pechat: { minFont: number }) => GrafikTask, klyuch: string): Gotovaya {
+  const kletka = krupnyyRisunok((kegl) => sobrat({ minFont: kegl }).svg).kletka;
+  const t = sobrat({ minFont: minFont(kletka) });
   const otvet = answerHtml(t.otvet);
   const h = peremeshat(t.hints, klyuch);
   return {
     egeNumber: 12,
     difficulty: null,
     statement: `<p>${typeset(t.uslovie)}</p>`,
-    figure: { svg: t.svg, width: shirina12(t.svg) },
-    figureTeacher: { svg: t.svgUchitel, width: shirina12(t.svgUchitel) },
+    figure: { svg: t.svg, width: shirinaPoKletke(t.svg, kletka), below: true },
+    figureTeacher: { svg: t.svgUchitel, width: shirinaPoKletke(t.svgUchitel, kletka), below: true },
     answer: answerText(t.otvet),
     answerHtml: otvet,
     solutionTeacher:
@@ -832,7 +833,7 @@ export const SHABLONY: Record<string, Shablon> = {
     ege: 12,
     prototip: 'Графики, логарифмическая: f(x) = k·logₐ x, аргумент по значению (как 12L.C)',
     otkuda: 'novyy',
-    zadacha: (p: KLog) => z12(kLog(p), `z12|${p.r}|${p.c}|${p.y0}`),
+    zadacha: (p: KLog) => z12((pe) => kLog(p, pe), `z12|${p.r}|${p.c}|${p.y0}`),
   },
   'z12.giperbola-pryamaya': {
     ege: 12,
@@ -840,14 +841,14 @@ export const SHABLONY: Record<string, Shablon> = {
       'Графики: гипербола k/x и прямая ax + b, вторая точка пересечения вне рисунка (как 12R, по Виету)',
     otkuda: 'novyy',
     zadacha: (p: GiperbolaPryamaya) =>
-      z12(giperbolaPryamaya(p), `z12g|${p.A.join(';')}|${p.P.join(';')}`),
+      z12((pe) => giperbolaPryamaya(p, pe), `z12g|${p.A.join(';')}|${p.P.join(';')}`),
   },
   'z12.koren-koren': {
     ege: 12,
     prototip:
       'Графики: √(ax) и √(x − b), точка пересечения вне рисунка (как 12S, коэффициенты по узлам)',
     otkuda: 'novyy',
-    zadacha: (p: KorenKoren) => z12(korenKoren(p), `z12k|${p.F.join(';')}|${p.b}`),
+    zadacha: (p: KorenKoren) => z12((pe) => korenKoren(p, pe), `z12k|${p.F.join(';')}|${p.b}`),
   },
   'z13.dif-summa': {
     ege: 13,

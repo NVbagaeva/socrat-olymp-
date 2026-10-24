@@ -160,7 +160,7 @@ export function kadrSvg(k: Kadr, o: OpciiSvg): string {
     ? ` role="img" aria-label="${escSvg(o.alt).replace(/"/g, '&quot;')}"`
     : ' aria-hidden="true"';
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" class="${o.klass ?? 'ch3-svg'}" viewBox="0 0 ${f(k.W)} ${f(k.H)}" width="${f(k.W)}" height="${f(k.H)}"${aria}>` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="chertezh3" class="${o.klass ?? 'ch3-svg'}" viewBox="0 0 ${f(k.W)} ${f(k.H)}" width="${f(k.W)}" height="${f(k.H)}"${aria}>` +
     out.join('') +
     '</svg>'
   );

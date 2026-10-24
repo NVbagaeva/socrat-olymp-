@@ -1062,7 +1062,7 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   labels.forEach((label) => parts.push(labelMarkup(label)));
 
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${px(x0)} ${px(y0)} ${px(width)} ${px(height)}" ` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="solid" viewBox="${px(x0)} ${px(y0)} ${px(width)} ${px(height)}" ` +
     `width="${px(width)}" height="${px(height)}" role="img" aria-label="${esc(model.alt)}" class="solid">` +
     `<title>${esc(model.alt)}</title>${parts.join('')}</svg>`
   );

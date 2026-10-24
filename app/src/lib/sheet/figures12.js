@@ -33,6 +33,30 @@ export function namedInCondition(label, question) {
   return new RegExp('(^|[^A-Za-z])' + letter[0] + '([^A-Za-z]|$)').test(String(question || ''));
 }
 
+/* Подписи графиков по порядку кривых — как функции названы в условии:
+   первая f, вторая g, третья h. */
+var IMENA = ['y = f(x)', 'y = g(x)', 'y = h(x)'];
+
+/**
+ * Каждый график на листе подписан: по подписи понятно, где какой, и на
+ * ч/б печати, когда цвета не различить. Своя подпись сцены остаётся;
+ * безымянной кривой даётся имя по её месту.
+ */
+export function podpisiGrafikov(scene) {
+  if (!scene || !scene.curves) { return scene; }
+  var zanyato = scene.curves.map(function (c) { return c.label; }).filter(Boolean);
+  var svobodnye = IMENA.filter(function (n) { return zanyato.indexOf(n) < 0; });
+  return Object.assign({}, scene, {
+    curves: scene.curves.map(function (c) {
+      var out = c.label ? Object.assign({}, c) : Object.assign({}, c, { label: svobodnye.shift() || null });
+      /* labelZone: null у разбора прямой — «подписи не будет»; на листе
+         подпись нужна всегда, место для неё ищет сам движок. */
+      if (out.labelZone === null) { delete out.labelZone; }
+      return out;
+    })
+  });
+}
+
 /**
  * Сцена рисунка условия: режим 'student' (без построений и безымянных
  * узлов) и только те подписанные точки, что названы в условии. Точка A
@@ -41,7 +65,7 @@ export function namedInCondition(label, question) {
  */
 export function conditionScene(task) {
   if (!task || !task.scene) { return null; }
-  var scene = renderer.sceneForMode(task.scene, 'student');
+  var scene = renderer.sceneForMode(podpisiGrafikov(task.scene), 'student');
   return Object.assign({}, scene, {
     points: scene.points.filter(function (point) {
       return namedInCondition(point.label, task.question);
@@ -50,9 +74,16 @@ export function conditionScene(task) {
 }
 
 /** Рисунок условия: чистый, как на листе ученика. Нет сцены — нет рисунка. */
-export function conditionSvg(task) {
+export function conditionSvg(task, pechat) {
   var scene = conditionScene(task);
-  return scene === null ? null : renderer.renderGraph(scene);
+  return scene === null ? null : renderer.renderGraph(sPechatyu(scene, pechat));
+}
+
+/* Печать листа задаёт наименьший кегль подписей (pechat.minFont, в
+   единицах движка): лист варианта печатает чертёж крупно и требует
+   подписи не мельче 10 pt. Без pechat — как было. */
+function sPechatyu(scene, pechat) {
+  return pechat && pechat.minFont ? Object.assign({}, scene, { minFont: pechat.minFont }) : scene;
 }
 
 /* Сцена построения к разбору — или null, если строить нечего. */
@@ -97,12 +128,12 @@ export function solutionScene(task, generator) {
  * Рисунок к разбору на листе учителя. null — если построений нет и
  * он совпал бы с рисунком условия: второй такой же рисунок не нужен.
  */
-export function solutionSvg(task, generator) {
+export function solutionSvg(task, generator, pechat) {
   if (!task || !task.scene) { return null; }
   var scene = solutionScene(task, generator);
   if (!scene) { return null; }
-  var svg = renderer.renderFigure(scene, 'teacherSolution');
-  return svg === conditionSvg(task) ? null : svg;
+  var svg = renderer.renderFigure(sPechatyu(podpisiGrafikov(scene), pechat), 'teacherSolution');
+  return svg === conditionSvg(task, pechat) ? null : svg;
 }
 
 /* Ширина рисунка в миллиметрах при клетке cell: у движка клетка —
@@ -111,8 +142,8 @@ export function solutionSvg(task, generator) {
 var CELL_UNITS = 34;
 
 /** Рисунок к разбору для answers12: { svg, width } или null. */
-export function solutionFigure(task, generator, cell) {
-  var svg = solutionSvg(task, generator);
+export function solutionFigure(task, generator, cell, pechat) {
+  var svg = solutionSvg(task, generator, pechat);
   if (!svg) { return null; }
   var box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
   return { svg: svg, width: box ? Number(box[1]) / CELL_UNITS * cell : null };
