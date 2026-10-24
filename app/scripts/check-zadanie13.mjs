@@ -859,18 +859,28 @@ for (const [n, extra, want] of tables) {
         if (keys.size !== plan.length) problems.push(`${w}: задачи повторяются`);
         for (const z of plan) {
           const p = protos.find((x) => x.id === z.prototypeId);
-          if (!p || p.id.startsWith('P-')) problems.push(`${w}: прототип ${z.prototypeId} не для тренажёра`);
+          if (!p || p.id.startsWith('P-'))
+            problems.push(`${w}: прототип ${z.prototypeId} не для тренажёра`);
           else if (chto.length === 1 && p.type !== chto) problems.push(`${w}: чужая схема ${p.id}`);
-          else if (uroven === 'base' && p.difficulty !== 'base') problems.push(`${w}: повышенная ${p.id}`);
-          if (istochnik === 'bank' && z.istochnik !== 'bank') problems.push(`${w}: новая задача в режиме «банк»`);
+          else if (uroven === 'base' && p.difficulty !== 'base')
+            problems.push(`${w}: повышенная ${p.id}`);
+          if (istochnik === 'bank' && z.istochnik !== 'bank')
+            problems.push(`${w}: новая задача в режиме «банк»`);
           if ((z.vid === 'tip') !== (chto === 'tip')) problems.push(`${w}: не тот вид задачи`);
         }
       }
-  const mistakesPlan = planTrenirovki13({ ...NASTROYKI_13, chto: 'all', oshibki: true }, protos, BANK_13, ['C-02'], 'm');
+  const mistakesPlan = planTrenirovki13(
+    { ...NASTROYKI_13, chto: 'all', oshibki: true },
+    protos,
+    BANK_13,
+    ['C-02'],
+    'm',
+  );
   if (!mistakesPlan.length || mistakesPlan.some((z) => z.prototypeId !== 'C-02'))
     problems.push('тренажёр: «Повтор ошибок» берёт не только прототипы с ошибками');
   /* Оформление: схема — верная, клетки первой строки сходятся с таблицей движка. */
-  const seeds = (Number(process.env.Z13_SEEDS) || 3) > 3 ? ['b1', 'b2', 'b3', 'n-x1', 'n-x2'] : ['b1', 'n-x1'];
+  const seeds =
+    (Number(process.env.Z13_SEEDS) || 3) > 3 ? ['b1', 'b2', 'b3', 'n-x1', 'n-x2'] : ['b1', 'n-x1'];
   for (const p of protos)
     for (const seed of seeds) {
       checks += 1;
@@ -883,8 +893,10 @@ for (const [n, extra, want] of tables) {
         problems.push(`${w}: оформление не открывается`);
         continue;
       }
-      if (of.shema.options[of.shema.correct] !== TYPE_NAMES[p.type]) problems.push(`${w}: в шаге «схема» верный вариант — не схема задачи`);
-      if (!of.shagi.every((s) => s.correct >= 0 && s.correct < s.options.length)) problems.push(`${w}: шаг решения без верного варианта`);
+      if (of.shema.options[of.shema.correct] !== TYPE_NAMES[p.type])
+        problems.push(`${w}: в шаге «схема» верный вариант — не схема задачи`);
+      if (!of.shagi.every((s) => s.correct >= 0 && s.correct < s.options.length))
+        problems.push(`${w}: шаг решения без верного варианта`);
       if (of.stroka) {
         const t = generate(p.id, seed);
         const row = t.tableModel.rows[0];
@@ -892,7 +904,8 @@ for (const [n, extra, want] of tables) {
         of.stroka.kletki.forEach((k, i) => {
           if (k.seal === null) return;
           const v = String(row[fields[i]]).replace('.', ',');
-          if (!secret.answerMatches(v, k.seal)) problems.push(`${w}: клетка «${k.title}» не сходится с таблицей`);
+          if (!secret.answerMatches(v, k.seal))
+            problems.push(`${w}: клетка «${k.title}» не сходится с таблицей`);
         });
         if (Math.abs(row.start - t.answer) < 1e-9 || Math.abs(row.rate - t.answer) < 1e-9)
           problems.push(`${w}: первая строка выдаёт ответ (ищут сумму или ставку)`);
