@@ -114,7 +114,7 @@ async function waitClosed(page) {
 }
 
 async function openByPlate(page) {
-  await page.locator('.razdely-plashka').click();
+  await page.locator('.topic-tabs-row:not([inert]) .razdely-plashka').click();
   await page.waitForSelector(MENU);
   await page.waitForTimeout(400);
 }
@@ -339,7 +339,9 @@ for (const size of SIZES) {
   await page.waitForURL(/\/zadaniya\/12\/irrational\//);
   await page.waitForTimeout(600);
   check(
-    (await page.locator('.razdely-plashka', { hasText: 'Иррациональная' }).count()) === 1,
+    (await page
+      .locator('.topic-tabs-row:not([inert]) .razdely-plashka', { hasText: 'Иррациональная' })
+      .count()) === 1,
     where('«Назад» не вернул в иррациональную'),
   );
   check(
@@ -422,7 +424,9 @@ for (const size of SIZES) {
     check(
       JSON.stringify(drugie.links) ===
         JSON.stringify(
-          RAZDELY.filter((r) => r.open && r.id !== 'irrational').map((r) => `/zadaniya/12/${r.id}/`),
+          RAZDELY.filter((r) => r.open && r.id !== 'irrational').map(
+            (r) => `/zadaniya/12/${r.id}/`,
+          ),
         ),
       where(`в «Других разделах» ${JSON.stringify(drugie.links)}`),
     );
@@ -640,7 +644,7 @@ for (const size of SIZES) {
   if (closed) {
     await page.goto(BASE + '/zadaniya/12/' + closed.id + '/', { waitUntil: 'networkidle' });
     check(
-      (await page.locator('.razdely-plashka').count()) === 1,
+      (await page.locator('.topic-tabs-row:not([inert]) .razdely-plashka').count()) === 1,
       where('на странице закрытого раздела нет плашки'),
     );
   }

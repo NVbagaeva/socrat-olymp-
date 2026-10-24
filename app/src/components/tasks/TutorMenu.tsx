@@ -6,6 +6,7 @@ import { useDismiss } from '@/lib/dismiss';
 import { NavIcon } from '@/components/ui';
 import type { ReactNode, RefObject } from 'react';
 import type { TutorMaterial } from '@/content/sections';
+import { TabsRow } from './TabsRow';
 
 export interface TutorMenuProps {
   /** Материалы темы: сколько записано в конфиге, столько и карточек. */
@@ -176,83 +177,90 @@ export function TutorMenu({
     };
   }, [open, stripRef]);
 
+  /* Строка в двух копиях — плитки и липкая панель (TabsRow). Кнопка
+     и меню материалов, как и ссылка на ленту, — у той копии, что видна:
+     меню всегда одно и раскрывается под видимой кнопкой. */
   return (
-    <div className="topic-tabs-row">
-      {before}
-      <div className="topic-tabs" ref={stripRef}>
-        {children}
-        <button
-          type="button"
-          className="topic-tabs__more"
-          ref={button}
-          aria-expanded={open}
-          aria-controls={`${id}-menu`}
-          onClick={() => onOpenChange(!open)}
-        >
-          <span className="topic-tabs__more-in">
-            <span className="tabs__ico" aria-hidden="true">
-              <NavIcon name="materials" />
-            </span>
-            <span className="tabs__text">{label}</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </span>
-        </button>
-      </div>
+    <TabsRow>
+      {(_copy, live) => (
+        <>
+          {before}
+          <div className="topic-tabs" ref={live ? stripRef : undefined}>
+            {children}
+            <button
+              type="button"
+              className="topic-tabs__more"
+              ref={live ? button : undefined}
+              aria-expanded={open}
+              aria-controls={`${id}-menu`}
+              onClick={() => onOpenChange(!open)}
+            >
+              <span className="topic-tabs__more-in">
+                <span className="tabs__ico" aria-hidden="true">
+                  <NavIcon name="materials" />
+                </span>
+                <span className="tabs__text">{label}</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </span>
+            </button>
+          </div>
 
-      {open ? (
-        <div className="tmenu" id={`${id}-menu`} ref={attach} role="group" aria-label={label}>
-          {/* Материалов у подтемы ещё нет: вместо карточек — честное
-              пустое состояние, а не карточки соседней подтемы. */}
-          {items.length === 0 && empty !== undefined ? (
-            <EmptyState
-              className="tmenu__empty"
-              title={empty.title}
-              description={empty.description}
-            />
+          {open && live ? (
+            <div className="tmenu" id={`${id}-menu`} ref={attach} role="group" aria-label={label}>
+              {/* Материалов у подтемы ещё нет: вместо карточек — честное
+                  пустое состояние, а не карточки соседней подтемы. */}
+              {items.length === 0 && empty !== undefined ? (
+                <EmptyState
+                  className="tmenu__empty"
+                  title={empty.title}
+                  description={empty.description}
+                />
+              ) : null}
+              {items.length === 0 ? null : (
+                <ul className="tmenu__list">
+                  {items.map((item) => {
+                    const inside = (
+                      <>
+                        <span className="tutor-card__icon" aria-hidden="true">
+                          {sheet(item.icon)}
+                        </span>
+                        <span className="tutor-card__text">
+                          <span className="tutor-card__title">{item.title}</span>
+                          <span className="tutor-card__lead">{item.lead}</span>
+                        </span>
+                        <span className="tutor-card__go" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4v10m0 0l-4-4m4 4l4-4" />
+                            <path d="M5 19h14" />
+                          </svg>
+                        </span>
+                      </>
+                    );
+
+                    return (
+                      <li key={item.id}>
+                        {/* Файла ещё нет: карточка приглушена, не ссылка и не
+                          берёт фокус — нажимать в ней нечего. */}
+                        {item.file === undefined ? (
+                          <div className="tutor-card tutor-card--soon" aria-disabled="true">
+                            {inside}
+                          </div>
+                        ) : (
+                          <a className="tutor-card" href={item.file} download>
+                            {inside}
+                          </a>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           ) : null}
-          {items.length === 0 ? null : (
-            <ul className="tmenu__list">
-              {items.map((item) => {
-                const inside = (
-                  <>
-                    <span className="tutor-card__icon" aria-hidden="true">
-                      {sheet(item.icon)}
-                    </span>
-                    <span className="tutor-card__text">
-                      <span className="tutor-card__title">{item.title}</span>
-                      <span className="tutor-card__lead">{item.lead}</span>
-                    </span>
-                    <span className="tutor-card__go" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <path d="M12 4v10m0 0l-4-4m4 4l4-4" />
-                        <path d="M5 19h14" />
-                      </svg>
-                    </span>
-                  </>
-                );
-
-                return (
-                  <li key={item.id}>
-                    {/* Файла ещё нет: карточка приглушена, не ссылка и не
-                      берёт фокус — нажимать в ней нечего. */}
-                    {item.file === undefined ? (
-                      <div className="tutor-card tutor-card--soon" aria-disabled="true">
-                        {inside}
-                      </div>
-                    ) : (
-                      <a className="tutor-card" href={item.file} download>
-                        {inside}
-                      </a>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      ) : null}
-    </div>
+        </>
+      )}
+    </TabsRow>
   );
 }
