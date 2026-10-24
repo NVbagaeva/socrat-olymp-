@@ -70,6 +70,13 @@ ok(
   'шкала: целые 0…100',
 );
 
+/* Миграция базы: те же максимумы и та же шкала, что в конфиге сайта. */
+const MIG = fs.readFileSync(new URL('../../supabase/migrations/20261024120000_raboty_chast2.sql', import.meta.url), 'utf8');
+const maxSql = Object.fromEntries([...MIG.matchAll(/\((\d+), (\d)\)/g)].map((m) => [Number(m[1]), Number(m[2])]));
+for (let n = 1; n <= 20; n += 1) ok(maxSql[n] === MAX_BALL[n], `база: максимум №${n} = ${MAX_BALL[n]}`);
+const shkSql = /unnest\(array\[([\d,\s]+)\]\)/.exec(MIG)?.[1].split(',').map((x) => Number(x.trim()));
+ok(JSON.stringify(shkSql) === JSON.stringify([...TESTOVYJ]), 'база: шкала та же, что shkala.ts');
+
 /* ── 3. Автопроверка ────────────────────────────────────────────── */
 const S = 'sovpadaet';
 const N = 'ne-sovpadaet';

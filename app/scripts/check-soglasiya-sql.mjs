@@ -148,6 +148,18 @@ const SUITES = [
       ['kabinet.test.sql', path.join(SUPA, 'tests', 'kabinet.test.sql')],
     ],
   },
+  {
+    /* Работы-варианты с частью 2: выдача, ответы, фото, проверка учителем
+       (supabase/tests/raboty_chast2.test.sql, docs/chast2-onlayn.md). */
+    name: 'Работы и часть 2',
+    db: 'raboty',
+    files: [
+      stub,
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['raboty_chast2.test.sql', path.join(SUPA, 'tests', 'raboty_chast2.test.sql')],
+    ],
+  },
 ];
 
 let failed = false;
