@@ -14,7 +14,15 @@
 import { shirinaRisunka } from '@/lib/planimetriya/shirina';
 import { BEZ_VARIANTA } from '@/lib/planimetriya/variant';
 import { sostavZadachi } from '@/lib/planimetriya/trenazher/zadacha';
-import { kLog, type KLog } from '@/lib/graph/povyshennye';
+import {
+  giperbolaPryamaya,
+  kLog,
+  korenKoren,
+  type GiperbolaPryamaya,
+  type GrafikTask,
+  type KLog,
+  type KorenKoren,
+} from '@/lib/graph/povyshennye';
 import {
   chisloNaOtrezke,
   maxNaOtrezke,
@@ -414,10 +422,9 @@ function shirina12(svg: string): number | undefined {
   return box === null ? undefined : Math.round((Number(box[1]) / 34) * 3.4 * 100) / 100;
 }
 
-function z12(p: KLog): Gotovaya {
-  const t = kLog(p);
+function z12(t: GrafikTask, klyuch: string): Gotovaya {
   const otvet = answerHtml(t.otvet);
-  const h = peremeshat(t.hints, `z12|${p.r}|${p.c}|${p.y0}`);
+  const h = peremeshat(t.hints, klyuch);
   return {
     egeNumber: 12,
     difficulty: null,
@@ -811,7 +818,22 @@ export const SHABLONY: Record<string, Shablon> = {
     ege: 12,
     prototip: 'Графики, логарифмическая: f(x) = k·logₐ x, аргумент по значению (как 12L.C)',
     otkuda: 'novyy',
-    zadacha: (p: KLog) => z12(p),
+    zadacha: (p: KLog) => z12(kLog(p), `z12|${p.r}|${p.c}|${p.y0}`),
+  },
+  'z12.giperbola-pryamaya': {
+    ege: 12,
+    prototip:
+      'Графики: гипербола k/x и прямая ax + b, вторая точка пересечения вне рисунка (как 12R, по Виету)',
+    otkuda: 'novyy',
+    zadacha: (p: GiperbolaPryamaya) =>
+      z12(giperbolaPryamaya(p), `z12g|${p.A.join(';')}|${p.P.join(';')}`),
+  },
+  'z12.koren-koren': {
+    ege: 12,
+    prototip:
+      'Графики: √(ax) и √(x − b), точка пересечения вне рисунка (как 12S, коэффициенты по узлам)',
+    otkuda: 'novyy',
+    zadacha: (p: KorenKoren) => z12(korenKoren(p), `z12k|${p.F.join(';')}|${p.b}`),
   },
   'z13.dif-summa': {
     ege: 13,
