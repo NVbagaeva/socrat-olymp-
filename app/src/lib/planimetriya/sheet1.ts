@@ -18,11 +18,25 @@
  * Рамка теории: перед задачами каждого блока — «Повторяем» (главные
  * факты раздела теории) и 0–2 разобранных примера с чертежом учителя.
  * Пример — задача того же типа, которой на листе нет.
+ *
+ * Адреса общего генератора (ps=2) привязывают задачу к позиции в
+ * составе (lib/generator/obshchiy/klyuchi.ts) и несут «Дополнительно»:
+ * рамку и примеры порознь, QR-код, вид работы, дату и учителя. Прежние
+ * адреса и уроки серии собираются как раньше.
  */
 
 import { BLOKI_UROKA_1, SHEET_1, UROKI_1, type BlokUroka1 } from '@/content/repetitory1';
 import { SHPARGALKI_1, kartochkaPrototipa } from '@/content/teoriya1';
+import { GEN_UI } from '@/content/generatorUi';
 import { O_ZADANII_1 } from '@/content/zadanie1';
+import {
+  klyuchSlota,
+  planPoKlyucham as planPoKlyuchamObshchiy,
+  razobratSostav,
+  slotySostava,
+  sostavIzSlotov,
+  sostavStroka,
+} from '@/lib/generator/obshchiy/klyuchi';
 import answers from '@/lib/sheet/answers.js';
 import sheet from '@/lib/sheet/sheet.js';
 import { typesetKrupno as typeset } from '../tex';
@@ -49,8 +63,8 @@ export type Rezhim = 'otrabotka' | 'komplekt' | 'urok';
 export interface SheetParams1 {
   rezhim: Rezhim;
   istochnik: Istochnik;
-  /** Состав: прототип («p05») и сколько задач (на лист или на вариант). */
-  sostav: { id: string; n: number }[];
+  /** Состав: прототип («p05») и сколько задач; k — ключ первой (схема ps=2). */
+  sostav: { id: string; n: number; k?: number }[];
   variants: number;
   seed: string;
   /** Замены задач: «вариант.позиция» → сколько раз заменяли. */
@@ -62,6 +76,37 @@ export interface SheetParams1 {
   theme: 'color' | 'print';
   /** Рамка теории: −1 — нет, 0–2 — рамка и столько разобранных примеров. */
   ramka: number;
+  /** Схема ps=2: задача привязана к ключу позиции, а не к номеру. */
+  poKlyucham?: boolean;
+  /** «Дополнительно» общего генератора; задано — вместо ramka. */
+  dop?: Dop1;
+}
+
+export type VidRaboty1 = keyof typeof SHEET_1.vidy;
+
+/** «Дополнительно» (как у №11, lib/zadanie11/sheet11.ts): всё — в адресе. */
+export interface Dop1 {
+  teoriya: boolean;
+  primery: 0 | 1 | 2;
+  qr: boolean;
+  vid: VidRaboty1 | null;
+  data: string;
+  uchitel: string;
+}
+
+export const DOP_1: Dop1 = {
+  teoriya: false,
+  primery: 0,
+  qr: false,
+  vid: null,
+  data: '',
+  uchitel: SHEET_1.head.author,
+};
+
+/** Рамка и примеры листа: из «Дополнительно» или из прежнего f. */
+function ramkaLista(p: SheetParams1): { teoriya: boolean; primery: number } {
+  if (p.dop !== undefined) return { teoriya: p.dop.teoriya, primery: p.dop.primery };
+  return { teoriya: p.ramka >= 0, primery: Math.max(0, p.ramka) };
 }
 
 export const VARIANTS_MAX_1 = 8;
@@ -82,16 +127,49 @@ export function sheetQuery1(p: SheetParams1): string {
     if (p.nastroyki.polnye === true) q.set('pr', '1');
     const n = Object.entries(p.nastroyki.n).filter(([, x]) => x !== undefined);
     if (n.length > 0) q.set('n', n.map(([b, x]) => `${b}:${x}`).join(','));
+  } else if (p.poKlyucham === true) {
+    q.set('ps', '2');
+    q.set('s', sostavStroka(p.sostav));
   } else {
     q.set('s', p.sostav.map((x) => `${x.id}:${x.n}`).join(','));
   }
   if (p.variants > 1) q.set('v', String(p.variants));
-  if (p.ramka >= 0) q.set('f', String(p.ramka));
+  if (p.ramka >= 0 && p.dop === undefined) q.set('f', String(p.ramka));
   q.set('seed', p.seed);
   const z = Object.entries(p.zameny).filter(([, k]) => k > 0);
   if (z.length > 0) q.set('z', z.map(([pos, k]) => `${pos}:${k}`).join(','));
   if (p.theme === 'print') q.set('t', 'print');
+  const dop = p.rezhim === 'urok' ? undefined : p.dop;
+  if (dop !== undefined) {
+    if (dop.teoriya) q.set('tr', '1');
+    if (dop.primery > 0) q.set('pr', String(dop.primery));
+    if (dop.qr) q.set('qr', '1');
+    if (dop.vid !== null) q.set('vr', dop.vid);
+    if (dop.data !== '') q.set('d', dop.data);
+    if (dop.uchitel !== DOP_1.uchitel) q.set('uch', dop.uchitel);
+  }
   return q.toString();
+}
+
+/** «Дополнительно» из адреса; нет ни одного ключа — undefined. Урок не читает. */
+function dopIzZaprosa(q: URLSearchParams): Dop1 | undefined {
+  if (!['tr', 'pr', 'qr', 'vr', 'd', 'uch'].some((k) => q.has(k))) return undefined;
+  const pr = Number(q.get('pr'));
+  const vr = q.get('vr') ?? '';
+  const data = q.get('d') ?? '';
+  return {
+    teoriya: q.get('tr') === '1',
+    primery: pr === 1 || pr === 2 ? pr : 0,
+    qr: q.get('qr') === '1',
+    vid: vr in SHEET_1.vidy ? (vr as VidRaboty1) : null,
+    data: /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : '',
+    uchitel: q.has('uch')
+      ? (q.get('uch') ?? '')
+          .replace(/[\u0000-\u001f<>]/g, '')
+          .trim()
+          .slice(0, 40)
+      : DOP_1.uchitel,
+  };
 }
 
 const IDS = new Set(PROTOTIPY.map((p) => klyuchProto(p.id)));
@@ -102,11 +180,17 @@ export function parseSheetQuery1(q: URLSearchParams): SheetParams1 {
   const istochnik =
     (Object.keys(ISTOCHNIK_KOD) as Istochnik[]).find((k) => ISTOCHNIK_KOD[k] === q.get('i')) ??
     'bank';
-  const sostav = (q.get('s') ?? '')
-    .split(',')
-    .map((x) => x.split(':'))
-    .map(([id = '', n = '1']) => ({ id, n: Math.max(1, Math.min(20, Number(n) || 1)) }))
-    .filter((x) => IDS.has(x.id));
+  const poKlyucham = rezhim !== 'urok' && q.get('ps') === '2';
+  const dop = rezhim === 'urok' || !poKlyucham ? undefined : dopIzZaprosa(q);
+  const razobrannyy = poKlyucham
+    ? razobratSostav(q.get('s') ?? '', true, /p\d{2}/, (id) => IDS.has(id))
+    : (q.get('s') ?? '')
+        .split(',')
+        .map((x) => x.split(':'))
+        .map(([id = '', n = '1']) => ({ id, n: Math.max(1, Math.min(20, Number(n) || 1)) }))
+        .filter((x) => IDS.has(x.id));
+  /* Повтор ключа в адресе — лишняя позиция: убирается. */
+  const sostav = poKlyucham ? sostavIzSlotov(slotySostava(razobrannyy)) : razobrannyy;
   const v = Number(q.get('v'));
   const u = Number(q.get('u'));
   const BLOKI = new Set<string>(BLOKI_UROKA_1.map((b) => b.id));
@@ -120,7 +204,8 @@ export function parseSheetQuery1(q: URLSearchParams): SheetParams1 {
   const zameny: Record<string, number> = {};
   for (const item of (q.get('z') ?? '').split(',')) {
     const [pos = '', k = ''] = item.split(':');
-    if (/^\d+\.\d+$/.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
+    const fmt = poKlyucham ? /^\d+\.p\d{2}_\d{1,2}$/ : /^\d+\.\d+$/;
+    if (fmt.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
   }
   return {
     rezhim,
@@ -131,9 +216,12 @@ export function parseSheetQuery1(q: URLSearchParams): SheetParams1 {
     zameny,
     urok: UROKI_1.some((x) => x.no === u) ? u : 1,
     kod: q.get('k') ?? '',
-    nastroyki: { vykl, n, ...(q.get('pr') === '1' ? { polnye: true } : {}) },
+    /* pr у урока — «полные решения», у листа генератора — число примеров. */
+    nastroyki: { vykl, n, ...(rezhim === 'urok' && q.get('pr') === '1' ? { polnye: true } : {}) },
     theme: q.get('t') === 'print' ? 'print' : 'color',
     ramka: f === '0' || f === '1' || f === '2' ? Number(f) : -1,
+    ...(poKlyucham ? { poKlyucham } : {}),
+    ...(dop === undefined ? {} : { dop }),
   };
 }
 
@@ -148,6 +236,8 @@ interface Shablon {
   istochnik: 'bank' | 'new' | 'mix' | 'mikro';
   /** Блок листа: блок I–X, «опорные», «банк», «новые». */
   blok: string;
+  /** Номер внутри прототипа (схема ps=2). */
+  k: number;
 }
 
 function blokProto(id: string): Blok {
@@ -156,9 +246,22 @@ function blokProto(id: string): Blok {
 
 function shablony(p: SheetParams1): Shablon[] {
   const ist = p.istochnik;
+  if (p.poKlyucham === true) {
+    return slotySostava(p.sostav).map((x) => ({
+      id: x.id,
+      istochnik: ist,
+      blok: blokProto(x.id),
+      k: x.k,
+    }));
+  }
   return p.sostav.flatMap((x) =>
-    Array.from({ length: x.n }, () => ({ id: x.id, istochnik: ist, blok: blokProto(x.id) })),
+    Array.from({ length: x.n }, () => ({ id: x.id, istochnik: ist, blok: blokProto(x.id), k: 0 })),
   );
+}
+
+/** Позиция задачи на листе: «2.3» или, в схеме ps=2, «2.p05_0». */
+function posOf(p: SheetParams1, s: Shablon | undefined, v: number, i: number): string {
+  return p.poKlyucham === true && s !== undefined ? `${v}.${klyuchSlota(s)}` : `${v}.${i}`;
 }
 
 export interface PlanLista {
@@ -192,6 +295,7 @@ function planUrokaLista(p: SheetParams1, bank: readonly UslovieBanka[]): PlanLis
 
 export function planLista(p: SheetParams1, bank: readonly UslovieBanka[]): PlanLista {
   if (p.rezhim === 'urok') return planUrokaLista(p, bank);
+  if (p.poKlyucham === true) return planPoKlyucham(p, bank);
   const sh = shablony(p);
   const zanyato = new Set<string>();
   const ochered = new Map<string, UslovieBanka[]>();
@@ -266,6 +370,45 @@ export function planLista(p: SheetParams1, bank: readonly UslovieBanka[]): PlanL
   return { poVariantam, bloki: sh.map((s) => s.blok), nehvatka };
 }
 
+/** Схема ps=2: задача — функция ключа позиции, варианта и seed листа. */
+function planPoKlyucham(p: SheetParams1, bank: readonly UslovieBanka[]): PlanLista {
+  const sh = shablony(p);
+  const { poVariantam, nehvatka } = planPoKlyuchamObshchiy<Shablon, UslovieBanka, Pozitsiya>({
+    sh,
+    variants: p.variants,
+    seed: p.seed,
+    zameny: p.zameny,
+    mixSol: 'z1-mix',
+    bank: (id) => {
+      const svoi = bank.filter((b) => b.id === id && !b.analog);
+      return rngOf(`z1-list|${p.seed}|${id}`).sample(svoi, svoi.length);
+    },
+    analogi: (id) => {
+      const svoi = bank.filter((b) => b.id === id && b.analog);
+      return rngOf(`z1-analog|${p.seed}|${id}`).sample(svoi, svoi.length);
+    },
+    bankPoz: (b) => ({ vid: 'bank', id: b.id, no: b.no }),
+    analogPoz: (a) => ({ vid: 'analog', id: a.id, no: a.no }),
+    /* Новая задача: seed, на котором числа ещё не встречались на листе. */
+    novaya: (c, seed, zanyato) => {
+      const id = c.s.id;
+      for (let a = 0; a < 12; a += 1) {
+        const sd = a === 0 ? seed : `${seed}~${a}`;
+        const params = novyeParams(protoKlyucha(id), sd);
+        if (params === null) continue;
+        const key = klyuchNabora(id, params);
+        if (!zanyato.has(key)) {
+          zanyato.add(key);
+          return { vid: 'new', id, seed: sd };
+        }
+      }
+      return { vid: 'new', id, seed };
+    },
+    seedNovoy: (x) => (x.vid === 'new' ? x.seed : undefined),
+  });
+  return { poVariantam, bloki: sh.map((s) => s.blok), nehvatka };
+}
+
 /* ── Задачи ─────────────────────────────────────────────────────── */
 
 export interface ListZadacha {
@@ -317,9 +460,10 @@ export interface SobrannyyList {
 
 export function sobratList(p: SheetParams1, bank: readonly UslovieBanka[]): SobrannyyList {
   const plan = planLista(p, bank);
+  const sh = p.rezhim === 'urok' ? [] : shablony(p);
   const poVariantam = plan.poVariantam.map((row, vi) =>
     row.map((poz, i): ListZadacha => {
-      const pos = `${vi + 1}.${i + 1}`;
+      const pos = posOf(p, sh[i], vi + 1, i + 1);
       const blok = plan.bloki[i] ?? '';
       if (poz.vid === 'mikro') {
         const z = generateMikro(poz.id, poz.seed);
@@ -397,7 +541,7 @@ export interface Ramka {
  * k разобранных примеров — задачи тех же прототипов, которых на листе
  * нет (сначала задачи банка, иначе образец).
  */
-export function ramkaDlya(
+export function ramkaPrototipov(
   title: string,
   protos: readonly number[],
   k: number,
@@ -443,7 +587,13 @@ export function ramkaDlya(
 export function ramkiLista(p: SheetParams1, list: SobrannyyList): Map<string, Ramka> {
   const out = new Map<string, Ramka>();
   /* У урока вместо рамки — шпаргалка из карточек справочника. */
-  if (p.ramka < 0 || p.rezhim === 'urok') return out;
+  const { teoriya, primery } = ramkaLista(p);
+  if ((!teoriya && primery === 0) || p.rezhim === 'urok') return out;
+  /* «Дополнительно» может дать примеры без пунктов «Повторяем». */
+  const ramkaDlya = (title: string, protos: readonly number[], k: number, z: Set<string>) => {
+    const r = ramkaPrototipov(title, protos, k, z);
+    return teoriya ? r : { ...r, items: [] };
+  };
   const zanyatye = new Set(
     list.poVariantam.flat().flatMap((z) => (z.poz.vid === 'bank' ? [`b${z.poz.no}`] : [])),
   );
@@ -458,7 +608,7 @@ export function ramkiLista(p: SheetParams1, list: SobrannyyList): Map<string, Ra
   if (p.rezhim === 'otrabotka') {
     for (const blok of new Set(list.bloki)) {
       const tip = O_ZADANII_1.tipy.find((t) => t.blok === blok);
-      out.set(blok, ramkaDlya(tip?.title ?? blok, protosBloka(blok), p.ramka, zanyatye));
+      out.set(blok, ramkaDlya(tip?.title ?? blok, protosBloka(blok), primery, zanyatye));
     }
     return out;
   }
@@ -471,7 +621,7 @@ export function ramkiLista(p: SheetParams1, list: SobrannyyList): Map<string, Ra
         .map((z) => protoKlyucha(z.poz.id)),
     ),
   ];
-  out.set('*', ramkaDlya('', vse, p.ramka, zanyatye));
+  out.set('*', ramkaDlya('', vse, primery, zanyatye));
   return out;
 }
 
@@ -479,12 +629,19 @@ export function ramkiLista(p: SheetParams1, list: SobrannyyList): Map<string, Ra
 
 export type VidLista = 'uchenik' | 'uchitel' | 'vse';
 
-function subtitleOf(p: SheetParams1): string {
+export function subtitleOf(p: SheetParams1): string {
   if (p.rezhim === 'urok') {
     const u = UROKI_1.find((x) => x.no === p.urok);
     return u === undefined ? '' : SHEET_1.subtitle.urok(u.no, u.title);
   }
-  return SHEET_1.subtitle[p.rezhim];
+  const vid = p.dop?.vid ?? null;
+  return vid === null ? SHEET_1.subtitle[p.rezhim] : SHEET_1.vidy[vid];
+}
+
+/** «2026-10-24» → «24.10.2026». */
+function dataNaListe(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m === null ? '' : `${m[3]}.${m[2]}.${m[1]}`;
 }
 
 /** Шпаргалка урока: плитка карточек справочника — тот же HTML, что печатная шпаргалка. */
@@ -543,13 +700,24 @@ function primerKuskami(x: Ramka['primery'][number]): string[] {
   return [golova, ...dalee];
 }
 
-function recapRamki(r: Ramka | undefined) {
+/**
+ * Рамка и примеры перед блоком. dveKolonki — длинную рамку (больше шести
+ * пунктов: вариант ЕГЭ по всем блокам) разложить в две колонки: в три
+ * самая широкая формула выходит за поле листа. Только лист генератора
+ * (ps=2): прежние адреса печатаются как раньше.
+ */
+function recapRamki(r: Ramka | undefined, dveKolonki = false) {
   if (r === undefined) return { recap: null, leadItems: [] as string[] };
+  const rows = dveKolonki && r.items.length > 6 ? { rows: Math.ceil(r.items.length / 2) } : {};
   return {
     recap:
       r.items.length === 0
         ? null
-        : { title: `${SHEET_1.povtoryaem}${r.title === '' ? '' : ` ${r.title}`}`, items: r.items },
+        : {
+            title: `${SHEET_1.povtoryaem}${r.title === '' ? '' : ` ${r.title}`}`,
+            items: r.items,
+            ...rows,
+          },
     leadItems: r.primery.flatMap((x) => primerKuskami(x)),
   };
 }
@@ -568,7 +736,7 @@ function blokiLista(
         head: false,
         title: '',
         note: '',
-        ...recapRamki(ramki.get('*')),
+        ...recapRamki(ramki.get('*'), p.poKlyucham === true),
         tasks: zadachi.map(task),
       },
     ];
@@ -581,19 +749,64 @@ function blokiLista(
       tasks: zadachi.filter((z) => z.blok === b.id).map(task),
     }));
   }
-  const order: string[] = [];
-  for (const z of zadachi) if (!order.includes(z.blok)) order.push(z.blok);
-  return order.map((b) => {
-    const tasks = zadachi.filter((z) => z.blok === b);
+  const bylo = new Set<string>();
+  return gruppyOtrabotki(p, zadachi).map((tasks) => {
+    const b = tasks[0]?.blok ?? '';
     const tip = O_ZADANII_1.tipy.find((t) => t.blok === b);
+    /* Блок встречается второй раз (учитель переставил задачи) — без рамки. */
+    const ramka = bylo.has(b) ? undefined : ramki.get(b);
+    bylo.add(b);
     return {
       id: b,
       title: tip?.title ?? b,
       note: '',
-      ...recapRamki(ramki.get(b)),
+      ...recapRamki(ramka),
       tasks: tasks.map(task),
     };
   });
+}
+
+/**
+ * Блоки отработки. В схеме ps=2 порядок задач задаёт учитель: блок —
+ * подряд идущие задачи одного блока I–X, номера на листе идут по порядку.
+ */
+function gruppyOtrabotki(p: SheetParams1, zadachi: ListZadacha[]): ListZadacha[][] {
+  if (p.poKlyucham === true) {
+    const out: ListZadacha[][] = [];
+    for (const z of zadachi) {
+      const last = out[out.length - 1];
+      if (last !== undefined && last[0]?.blok === z.blok) last.push(z);
+      else out.push([z]);
+    }
+    return out;
+  }
+  const order: string[] = [];
+  for (const z of zadachi) if (!order.includes(z.blok)) order.push(z.blok);
+  return order.map((b) => zadachi.filter((z) => z.blok === b));
+}
+
+/** Рамка перед задачей — для предпросмотра генератора: номер задачи в варианте → рамка. */
+export function peredZadachami1(
+  p: SheetParams1,
+  ramki: Map<string, Ramka>,
+  zadachi: ListZadacha[],
+): Map<number, Ramka> {
+  const out = new Map<number, Ramka>();
+  if (p.rezhim === 'urok') return out;
+  if (p.rezhim === 'komplekt') {
+    const r = ramki.get('*');
+    if (r !== undefined) out.set(0, r);
+    return out;
+  }
+  const bylo = new Set<string>();
+  for (const g of gruppyOtrabotki(p, zadachi)) {
+    const first = g[0];
+    if (first === undefined || bylo.has(first.blok)) continue;
+    bylo.add(first.blok);
+    const r = ramki.get(first.blok);
+    if (r !== undefined) out.set(zadachi.indexOf(first), r);
+  }
+  return out;
 }
 
 const STROKA_OTVETA =
@@ -612,13 +825,21 @@ function bejdzh(z: ListZadacha): string {
  * ответов. «Всё одним файлом» — листы учеников всех вариантов, затем
  * листы учителя. Рамка теории одинакова на обоих листах.
  */
-export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) {
+export function sheetSpec1(
+  p: SheetParams1,
+  list: SobrannyyList,
+  vid: VidLista,
+  /** QR-код на лист ученика, SVG: считает страница печати по своему адресу. */
+  qrSvg?: string,
+) {
   const ramki = ramkiLista(p, list);
+  const dop = p.rezhim === 'urok' ? undefined : p.dop;
   const title = (variant?: string, uchitel = false) => ({
     chip: SHEET_1.title.chip,
     text: SHEET_1.title.text,
     subtitle: subtitleOf(p) + (uchitel ? ` · ${SHEET_1.resheniya}` : ''),
     ...(variant === undefined ? {} : { variant }),
+    ...(dop?.qr === true && qrSvg !== undefined ? { qr: qrSvg } : {}),
   });
   const uchenikTask =
     (sStrokoy: boolean) =>
@@ -638,6 +859,11 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
      одни рисунки, это сверяет test:komplekty), но на листе учителя его
      заменяет чертёж решения (pechat1.css). Чертёж уже половины колонки
      стоит справа от решения, шире — под условием, перед решением. */
+  /* Лист общего генератора (ps=2) — без пометок у задач: источник одной
+     строкой у варианта в разделе ответов (docs/generator/02-design.md).
+     Прежние адреса и уроки оставляют пометки. */
+  const sPometkoy = p.poKlyucham !== true;
+  const pometka = (z: ListZadacha) => (sPometkoy ? `${bejdzh(z)} ` : '');
   const uchitelTask = (z: ListZadacha): SheetTask => {
     const w = z.figureUchitelSvg === null ? 0 : shirinaRisunka(z.figureUchitelSvg, RESHENIE_MAX_MM);
     const sprava = w > 0 && w <= POLKOLONKI_MM;
@@ -648,7 +874,7 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
     return {
       no: z.no,
       id: z.pos,
-      questionHtml: `${bejdzh(z)} ${z.questionHtml}`,
+      questionHtml: `${pometka(z)}${z.questionHtml}`,
       options: null,
       figureSvg: z.figureSvg,
       figureWidth: shirinaRisunka(z.figureSvg),
@@ -665,7 +891,7 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
   const uchitelKratko = (z: ListZadacha): SheetTask => ({
     no: z.no,
     id: z.pos,
-    questionHtml: `${bejdzh(z)} ${z.questionHtml}`,
+    questionHtml: `${pometka(z)}${z.questionHtml}`,
     options: null,
     figureSvg: z.figureSvg,
     figureWidth: shirinaRisunka(z.figureSvg),
@@ -700,6 +926,14 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
             answers.sectionHead(SHEET_1.otvety, SHEET_1.otvetyNote, { section: nV > 1 }),
             ...list.poVariantam.flatMap((zs, i) => [
               ...(nV > 1 ? [answers.subHead(`Вариант ${i + 1}`)] : []),
+              ...(sPometkoy
+                ? []
+                : [
+                    `<div class="sheet-item z1-sheet-istochnik">${GEN_UI.istochnikStroka(
+                      zs.filter((z) => z.poz.vid === 'bank').map((z) => z.no),
+                      zs.length,
+                    )}</div>`,
+                  ]),
               answers.table(
                 SHEET_1.otvety,
                 zs.map((z) => ({ no: z.no, answer: z.answer, html: null })),
@@ -712,12 +946,12 @@ export function sheetSpec1(p: SheetParams1, list: SobrannyyList, vid: VidLista) 
     theme: p.theme,
     layout: 'single' as const,
     documentTitle: `${SHEET_1.title.chip}. ${SHEET_1.title.text} — ${subtitleOf(p)}`,
-    head: SHEET_1.head,
+    head: dop === undefined ? SHEET_1.head : { ...SHEET_1.head, author: dop.uchitel },
     runner: SHEET_1.runner,
     title: one?.title ?? title(),
     recap: null,
     blocks: one?.blocks ?? [],
-    fields: { date: '' },
+    fields: { date: dataNaListe(dop?.data ?? '') },
     ...(one === undefined ? { variants: poVariantam } : {}),
     withAnswerLine: vid === 'uchenik',
     extraItems: otvety,

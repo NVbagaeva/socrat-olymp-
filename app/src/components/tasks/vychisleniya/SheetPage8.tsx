@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
-import { parseSheetQuery8, sheetSpec8 } from '@/lib/vychisleniya/sheet8';
+import { parseSheetQuery8, sheetSpec8, sheetSpecVse8 } from '@/lib/vychisleniya/sheet8';
 
 declare global {
   interface Window {
@@ -17,7 +18,8 @@ declare global {
 }
 
 export interface SheetPage8Props {
-  withAnswers: boolean;
+  /** Что печатать: лист ученика, лист с ответами или всё одним файлом. */
+  vid: 'uchenik' | 'uchitel' | 'vse';
 }
 
 function specJson(html: string): string {
@@ -34,7 +36,8 @@ function specJson(html: string): string {
  * KaTeX в момент генерации, upgrade() здесь подчищает то немногое,
  * что могло остаться неразобранным (декоративные метки шаблона).
  */
-export function SheetPage8({ withAnswers }: SheetPage8Props) {
+export function SheetPage8({ vid }: SheetPage8Props) {
+  const withAnswers = vid !== 'uchenik';
   const query = useSearchParams();
   const params = parseSheetQuery8(query);
   const [spec, setSpec] = useState<string | null>(null);
@@ -58,21 +61,30 @@ export function SheetPage8({ withAnswers }: SheetPage8Props) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const built = sheetSpec8(params, withAnswers);
-    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
-    const kit = checkKitSheet(query, '8', withAnswers ? 'teacher' : 'student', built);
-    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
-    import('@/lib/sheet/paginate.js').then(() => {
-      if (alive) {
-        setWarning(kit.warning);
-        setSpec(specJson(html));
-      }
+    /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+    const qr =
+      params.qr === true
+        ? qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+        : Promise.resolve(undefined);
+    void qr.then((svg) => {
+      if (!alive) return;
+      const built =
+        vid === 'vse' ? sheetSpecVse8(params, svg) : sheetSpec8(params, withAnswers, svg);
+      /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+      const kit = checkKitSheet(query, '8', withAnswers ? 'teacher' : 'student', built);
+      const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+      import('@/lib/sheet/paginate.js').then(() => {
+        if (alive) {
+          setWarning(kit.warning);
+          setSpec(specJson(html));
+        }
+      });
     });
     return () => {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [withAnswers, query.toString()]);
+  }, [vid, query.toString()]);
 
   useEffect(() => {
     if (spec === null || done) {
@@ -96,7 +108,13 @@ export function SheetPage8({ withAnswers }: SheetPage8Props) {
     <>
       <div id="sheet-measure" />
       <div id="sheet-pages" />
-      {spec === null ? null : <script id="sheet-spec" type="application/json" dangerouslySetInnerHTML={{ __html: spec }} />}
+      {spec === null ? null : (
+        <script
+          id="sheet-spec"
+          type="application/json"
+          dangerouslySetInnerHTML={{ __html: spec }}
+        />
+      )}
     </>
   );
 }

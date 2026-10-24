@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export default function Pechat8Page() {
   return (
     <Suspense fallback={null}>
-      <SheetPage8 withAnswers={false} />
+      <SheetPage8 vid="uchenik" />
     </Suspense>
   );
 }

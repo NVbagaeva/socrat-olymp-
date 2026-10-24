@@ -842,7 +842,7 @@ async function runEnabled() {
         const r = el.getBoundingClientRect();
         return { top: r.top, left: r.left, bottom: r.bottom, right: r.right };
       };
-      return { auth: box('.topbar .auth-widget'), bar: box('.cfg-bar'), fab: box('.help-fab') };
+      return { auth: box('.topbar .auth-widget'), bar: box('.gen-actbar'), fab: box('.help-fab') };
     });
     const apart = (a, b) =>
       a === null ||
@@ -858,11 +858,14 @@ async function runEnabled() {
     );
     check(apart(boxes.auth, boxes.fab), 'блок аккаунта не перекрывает кнопку «?»');
 
-    /* Скачивание листа: ссылка открывает новую вкладку — её закрываем. */
-    const kitBtn = page.locator('.kit-bar a.btn--primary');
+    /* Скачивание листа (общий генератор): «Сгенерировать», затем «Скачать
+       PDF» — ссылка открывает новую вкладку, её закрываем. */
+    await page.locator('.gen-actbar .gen-go').click();
+    await page.waitForSelector('.gen-paper.is-live .gen-task');
+    const kitBtn = page.locator('a.gen-pv__pdf[href]');
     if ((await kitBtn.count()) === 1) {
-      await page.waitForSelector('.kit-bar a.btn--primary[href]');
-      const code = (await page.locator('.kit-code').getAttribute('data-kit-code')) ?? '';
+      /* Адрес листа несёт код комплекта (lib/komplekt.ts, withKit). */
+      const code = new URL(await kitBtn.getAttribute('href'), SITE).searchParams.get('kit') ?? '';
       const popup = context
         .waitForEvent('page')
         .then((p) => p.close())
@@ -874,7 +877,7 @@ async function runEnabled() {
         await page.waitForTimeout(100);
       }
       check(
-        mock.kits.length === 1 && mock.kits[0].code === code,
+        mock.kits.length === 1 && code !== '' && mock.kits[0].code === code,
         `комплект ${code} записан в аккаунт`,
       );
       await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
