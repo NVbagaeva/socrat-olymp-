@@ -110,10 +110,10 @@ function peremeshat(h: readonly HintLike[], klyuch: string): HintLike[] {
 
 /* ── №1 ─────────────────────────────────────────────────────────── */
 
-function z01(p: { proto: number; a: number }): Gotovaya {
+function z01(proto: number, params: Record<string, number>): Gotovaya {
   const s = sostavZadachi({
-    proto: p.proto,
-    params: { a: p.a } as never,
+    proto,
+    params: params as never,
     variant: BEZ_VARIANTA,
     fipi: null,
   });
@@ -366,14 +366,34 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip:
       'Планиметрия, блок III: площадь равнобедренного с углом 30° при вершине (прототип 17), боковая сторона — корень',
     otkuda: 'novyy',
-    zadacha: (p: { a: number }) => z01({ proto: 101, a: p.a }),
+    zadacha: (p: { a: number }) => z01(101, p),
   },
   'z01.ravnobedr-150': {
     ege: 1,
     prototip:
       'Планиметрия, блок III: площадь равнобедренного с тупым углом 150° при вершине (как прототип 17), боковая сторона — корень; подвох — sin 150° = sin 30°',
     otkuda: 'novyy',
-    zadacha: (p: { a: number }) => z01({ proto: 102, a: p.a }),
+    zadacha: (p: { a: number }) => z01(102, p),
+  },
+  'z01.trapeciya-menshiy': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок IV: меньший из отрезков, на которые диагональ делит среднюю линию трапеции (как прототип 22, где спрашивают больший)',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; b: number }) => z01(103, p),
+  },
+  'z01.trapeciya-diagonali': {
+    ege: 1,
+    prototip: 'Планиметрия, блок X: отрезок между серединами диагоналей трапеции (прототип 71)',
+    otkuda: 'razdel',
+    zadacha: (p: { a: number; b: number }) => z01(71, p),
+  },
+  'z01.vneshnie-ugly': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок X: два внешних угла при A и C → угол B (как прототип 51, где дан один внешний угол)',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; c: number }) => z01(104, p),
   },
   'z02.skalyar-km': {
     ege: 2,

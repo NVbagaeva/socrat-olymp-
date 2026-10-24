@@ -5,7 +5,7 @@
  */
 
 import type { Params } from '../stseny/dsl';
-import { n, shag, vopros } from './obshchee';
+import { g, n, shag, sverkaUgla, vopros } from './obshchee';
 import type { Reshenie } from './types';
 
 export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
@@ -85,6 +85,82 @@ export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
       ],
       sverka: `Сверяем: высота к продолжению боковой стороны равна $\\sqrt{${p.a}}\\cdot\\sin 30^\\circ = \\frac{\\sqrt{${p.a}}}{2}$, и $S = \\frac12\\cdot\\sqrt{${p.a}}\\cdot\\frac{\\sqrt{${p.a}}}{2} = ${n(s)}$ — сходится.`,
       otvet: s,
+    };
+  },
+  103: (p) => {
+    const bol = Math.max(p.a, p.b);
+    const mal = Math.min(p.a, p.b);
+    const ans = mal / 2;
+    return {
+      shagi: [
+        shag(
+          'Две средние линии',
+          'Диагональ делит трапецию на два треугольника, а среднюю линию трапеции — на две средние линии этих треугольников.',
+          undefined,
+          1,
+        ),
+        shag(
+          'Отрезки',
+          'Средняя линия треугольника равна половине параллельной ей стороны: одна часть — половина меньшего основания, другая — половина большего. Спрашивают меньшую.',
+          [`\\dfrac{${n(mal)}}{2} = ${n(ans)},\\qquad \\dfrac{${n(bol)}}{2} = ${n(bol / 2)}`],
+          2,
+        ),
+      ],
+      voprosy: [
+        vopros(
+          'Чему равна средняя линия треугольника?',
+          ['половине параллельной стороны', 'полусумме сторон', 'стороне'],
+          'Средняя линия параллельна стороне и вдвое короче её.',
+          1,
+        ),
+        vopros(
+          'Меньший отрезок — половина какого основания?',
+          ['меньшего', 'большего', 'их разности'],
+          'Меньший отрезок лежит в треугольнике с меньшим основанием.',
+          2,
+        ),
+      ],
+      sverka: `Сверяем: отрезки $${n(ans)}$ и $${n(bol / 2)}$ вместе дают среднюю линию $\\frac{${n(mal)}+${n(bol)}}{2} = ${n((bol + mal) / 2)}$, меньший — $${n(ans)}$ — сходится.`,
+      otvet: ans,
+    };
+  },
+  104: (p) => {
+    const A = 180 - p.a;
+    const C = 180 - p.c;
+    const ans = p.a + p.c - 180;
+    return {
+      shagi: [
+        shag(
+          'Внутренние углы при $A$ и $C$',
+          'Внешний и внутренний углы при одной вершине — смежные, вместе $180^\\circ$.',
+          [
+            `\\angle A = 180^\\circ - ${g(p.a)} = ${g(A)},\\qquad \\angle C = 180^\\circ - ${g(p.c)} = ${g(C)}`,
+          ],
+          1,
+        ),
+        shag('Угол $B$', 'Сумма углов треугольника — $180^\\circ$.', [
+          `\\angle B = 180^\\circ - ${g(A)} - ${g(C)} = ${g(ans)}`,
+        ]),
+      ],
+      voprosy: [
+        vopros(
+          'Чему равен внутренний угол при $A$?',
+          [`$${g(A)}$`, `$${g(p.a)}$`, `$${g(p.a - 90)}$`],
+          'Внешний и внутренний углы при вершине смежные.',
+          1,
+        ),
+        vopros(
+          'Как найти угол $B$?',
+          [
+            '$180^\\circ - \\angle A - \\angle C$',
+            '$\\angle A + \\angle C$',
+            'сумма внешних углов при $A$ и $C$',
+          ],
+          'Сумма углов треугольника — $180^\\circ$.',
+        ),
+      ],
+      sverka: sverkaUgla('$B$', ans),
+      otvet: ans,
     };
   },
 };
