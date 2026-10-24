@@ -475,10 +475,14 @@ export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista
       figureSvg: null,
       solutionHtml: sStrokoy ? STROKA_OTVETA : null,
     });
+  /* Лист генератора — без служебных пометок у задач: источник одной
+     строкой в конце (docs/generator/02-design.md). Маршрут урока
+     оставляет пометки: там они делят урок на этапы. */
+  const sPometkoy = p.rezhim === 'marshrut';
   const uchitelTask = (z: ListZadacha): SheetTask => ({
     no: z.no,
     id: z.pos,
-    questionHtml: `${bejdzh(z)} ${z.questionHtml}`,
+    questionHtml: sPometkoy ? `${bejdzh(z)} ${z.questionHtml}` : z.questionHtml,
     options: null,
     figureSvg: null,
     solutionHtml: `${z.solutionHtml}<p class="sheet-task-answer">${SHEET_11.otvet}: <b>${z.answerHtml}</b></p>`,
@@ -506,6 +510,16 @@ export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista
               blocks: blokiLista(p, zs, uchitelTask),
             })),
           ];
+  /* Источник задач — одной строкой в разделе ответов, у каждого варианта. */
+  const istochnik = (zs: ListZadacha[]): string[] =>
+    sPometkoy
+      ? []
+      : [
+          `<div class="sheet-item z11-sheet-istochnik">${SHEET_11.istochnik(
+            zs.filter((z) => z.poz.vid === 'bank').map((z) => z.no),
+            zs.length,
+          )}</div>`,
+        ];
   const otvety: string[] =
     vid === 'uchenik'
       ? []
@@ -513,6 +527,7 @@ export function sheetSpec11(p: SheetParams11, list: SobrannyyList, vid: VidLista
           answers.sectionHead(SHEET_11.otvety, SHEET_11.otvetyNote, { section: nV > 1 }),
           ...list.poVariantam.flatMap((zs, i) => [
             ...(nV > 1 ? [answers.subHead(`Вариант ${i + 1}`)] : []),
+            ...istochnik(zs),
             answers.table(
               SHEET_11.otvety,
               zs.map((z) => ({ no: z.no, answer: z.answer, html: null })),
