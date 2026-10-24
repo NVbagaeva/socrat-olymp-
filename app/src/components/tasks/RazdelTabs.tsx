@@ -1,13 +1,13 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Tabs } from '@/components/ui';
 import type { RazdelTab } from '@/content/vkladki';
 import type { TutorMaterial } from '@/content/sections';
 import { TutorMenu } from './TutorMenu';
-import { useStickyTabs } from './useStickyTabs';
+import { TabsRow } from './TabsRow';
 import { useVkladkaPerehod } from './useVkladkaPerehod';
 import { sessionText } from './session/text';
 import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
@@ -52,9 +52,9 @@ export interface RazdelTabsProps {
  */
 export function RazdelTabs({ base, tabs, tutors, tutorsTail, before }: RazdelTabsProps) {
   const pathname = usePathname();
+  /* Узел ленты нужен меню материалов. Активную вкладку в видимую часть
+     ленты подводит общая строка (TabsRow). */
   const strip = useRef<HTMLDivElement>(null);
-  /* Лента прилипает к верху экрана (общий хук всех разделов). */
-  useStickyTabs(strip);
   /* Плавный переход между вкладками (styles/perehody.css). */
   const perehod = useVkladkaPerehod();
   const tail = pathname.replace(base, '').replace(/^\/+/, '');
@@ -65,25 +65,6 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail, before }: RazdelTab
   const active =
     tabs.find((tab) => tab.tail !== '' && tail.startsWith(tab.tail)) ??
     tabs.find((tab) => tab.tail === '');
-
-  /* На узком экране лента шире окна и прокручивается вбок. Активная
-     вкладка может оказаться за правым краем, и страница открывалась бы
-     с непонятного места ленты — подводим её к виду.
-
-     Подводим минимально (inline: 'nearest'), а не в центр: центрирование
-     резало соседние вкладки посередине слова даже тогда, когда активная
-     и так была видна. Если вкладка уже в виду, прокрутки не будет вовсе.
-     Прокручивается сама лента, а не страница — block: 'nearest'. */
-  useEffect(() => {
-    const lenta = strip.current;
-    const knopka = lenta?.querySelector('[aria-selected="true"]');
-    if (lenta === null || knopka === null || knopka === undefined) {
-      return;
-    }
-    if (lenta.scrollWidth > lenta.clientWidth) {
-      knopka.scrollIntoView({ inline: 'nearest', block: 'nearest' });
-    }
-  }, [active?.id]);
 
   /* Метка на «Тренажёре»: в нём осталась незавершённая тренировка. */
   const sessions = useActiveTrainerScopes();
@@ -110,12 +91,14 @@ export function RazdelTabs({ base, tabs, tutors, tutorsTail, before }: RazdelTab
      пришлось бы описывать дважды. */
   if (tutors === undefined) {
     return (
-      <div className="topic-tabs-row">
-        {before}
-        <div className="topic-tabs" ref={strip}>
-          {lenta}
-        </div>
-      </div>
+      <TabsRow>
+        {() => (
+          <>
+            {before}
+            <div className="topic-tabs">{lenta}</div>
+          </>
+        )}
+      </TabsRow>
     );
   }
 

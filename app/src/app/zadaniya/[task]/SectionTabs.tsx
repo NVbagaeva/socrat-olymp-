@@ -1,8 +1,7 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useRef } from 'react';
-import { useStickyTabs } from '@/components/tasks/useStickyTabs';
+import { TabsRow } from '@/components/tasks/TabsRow';
 import { EmptyState, Tabs } from '@/components/ui';
 import { bentoAll, bentoAttrs } from '@/lib/bento';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
@@ -62,13 +61,15 @@ const IDS = new Set(TABS.map((tab) => tab.id));
  * поэтому ссылку на конкретную вкладку можно отправить. Переключение
  * идёт без перезагрузки: адрес меняется через replace.
  */
-export function SectionTabs({ description, subtopics, prototypes, vesRazdel = false }: SectionTabsProps) {
+export function SectionTabs({
+  description,
+  subtopics,
+  prototypes,
+  vesRazdel = false,
+}: SectionTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const strip = useRef<HTMLDivElement>(null);
-  /* Лента прилипает к верху экрана (общий хук всех разделов). */
-  useStickyTabs(strip);
 
   const sizes = bentoAll(subtopics.length);
 
@@ -87,17 +88,19 @@ export function SectionTabs({ description, subtopics, prototypes, vesRazdel = fa
     <>
       {/* Строкой, а не плитками Bento: под крупной картинкой шапки
           первая карточка подтем должна быть на первом экране. */}
-      <div className="topic-tabs-row topic-tabs-row--stroka">
-        <div className="topic-tabs" ref={strip}>
-          <Tabs
-            className="tabs--lenta"
-            items={TABS}
-            value={active}
-            onValueChange={select}
-            label="Разделы задания"
-          />
-        </div>
-      </div>
+      <TabsRow className="topic-tabs-row--stroka">
+        {() => (
+          <div className="topic-tabs">
+            <Tabs
+              className="tabs--lenta"
+              items={TABS}
+              value={active}
+              onValueChange={select}
+              label="Разделы задания"
+            />
+          </div>
+        )}
+      </TabsRow>
 
       <div className="section-panel">
         {active === 'subtopics' && vesRazdel ? (
