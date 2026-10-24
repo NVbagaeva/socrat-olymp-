@@ -85,3 +85,10 @@
   font-weight: 600;
   opacity: 0.75;
 }
+
+/* Лист учителя генератора: источник задач одной строкой перед ответами. */
+.z11-sheet-istochnik {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--sheet-muted, #667389);
+}
