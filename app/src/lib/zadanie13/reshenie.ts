@@ -243,7 +243,7 @@ export function difPereplata(
   const shagi: SolutionStep[] = [
     {
       title: TIP_VYVOD.A.title,
-      text: `Долг уменьшается на одну и ту же величину, значит платёж дифференцированный.`,
+      text: TIP_VYVOD.A.text,
     },
     {
       title: 'Вводим обозначения',

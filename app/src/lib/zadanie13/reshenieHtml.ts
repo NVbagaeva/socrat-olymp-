@@ -119,8 +119,10 @@ export function reshenieChasti(
       const table =
         s.table && tableModel !== null && !kratko ? tablitsaHtml(kletkiModeli(tableModel)) : '';
       const text = kratko && s.vid !== 'vnimanie' ? '' : ` ${typeset(s.text)}`;
+      /* «Определяем тип платежа: долг уменьшается…» — текст со строчной идёт через двоеточие. */
+      const znak = text !== '' && /^\p{Ll}/u.test(s.text) ? ':' : '.';
       const cls = s.vid === undefined ? 'z13-r-shag' : `z13-r-shag z13-r-shag--${s.vid}`;
-      return `<div class="${cls}"><p class="z13-r-shag__head"><b>${typeset(s.title)}.</b>${text}</p>${formula}${table}${bloki}</div>`;
+      return `<div class="${cls}"><p class="z13-r-shag__head"><b>${typeset(s.title)}${znak}</b>${text}</p>${formula}${table}${bloki}</div>`;
     });
 }
 

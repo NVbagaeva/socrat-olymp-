@@ -60,11 +60,7 @@ const stTotal = () =>
 const stAnswer = (text: string) => step('Ответ', text);
 
 /** Шаг 1 любого решения: тип по признаку из условия. */
-const stTip = () =>
-  step(
-    TIP_VYVOD.A.title,
-    'Долг уменьшается на одну и ту же величину, значит платёж дифференцированный.',
-  );
+const stTip = () => step(TIP_VYVOD.A.title, TIP_VYVOD.A.text);
 
 const hintsA = (shift: number, last: ReturnType<typeof choice>[] = []) => [
   hintType('A', shift),

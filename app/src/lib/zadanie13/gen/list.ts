@@ -135,7 +135,7 @@ function uslovieHtml(t: Task13): string {
 /** Первая строка решения учителя: тип называется здесь, а не над условием. */
 function tipHtml(t: Task13): string {
   const v = TIP_VYVOD[t.type];
-  return `<div class="z13-r-shag"><p class="z13-r-shag__head"><b>${v.title}.</b> ${typeset(v.text)}</p></div>`;
+  return `<div class="z13-r-shag"><p class="z13-r-shag__head"><b>${v.title}:</b> ${typeset(v.text)}</p></div>`;
 }
 
 function sobrat(poz: Poziciya13): ListZadacha13 {
