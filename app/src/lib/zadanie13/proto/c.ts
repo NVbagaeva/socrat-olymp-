@@ -2,7 +2,7 @@
  * Прототипы задания №13: аннуитет и «известны платежи» (C-01 … C-17).
  * Список и источники — docs/13-economics/03-prototypes.md.
  *
- * Таблица — формат «Долг на начало · Долг с процентами · Платёж · Долг
+ * Таблица — формат «Долг на начало · Долг после начисления · Платёж · Долг
  * на конец». k = 1 + r/100 — увеличивающий коэффициент. Решение — через
  * цепочку (Sk − X)k − X = 0, раскрытие скобок и геометрическую
  * прогрессию; для четырёх платежей — разложение k³ + k² + k + 1 =
@@ -17,6 +17,8 @@ import { v } from '../plots';
 import { byPayments, equalPayment, totalPaid } from '../solver';
 import { frameEnd, frameJan, money, num, pct, plural, years } from '../text';
 import { choice, hintK, hintType, isNice, step, tex } from './common';
+import { annBukvy } from '../bukvy';
+import { perenos, stChisla, stFormula, stTablitsaBukvy, stUravnenie } from './razbor';
 import type { Prototype } from './types';
 
 /* ── Ставки: k обыкновенной дробью a/b ───────────────────────────── */
@@ -69,22 +71,25 @@ const equalPays = (n: number): string =>
 const kTex = (rate: Rate): string => `${tex(kOf(rate.r))} = \\frac{${rate.a}}{${rate.b}}`;
 
 const CHAIN: Record<number, string> = {
-  2: '(Sk - X)k - X = 0',
-  3: '((Sk - X)k - X)k - X = 0',
-  4: '(((Sk - X)k - X)k - X)k - X = 0',
+  2: '(Sk - x)k - x = 0',
+  3: '((Sk - x)k - x)k - x = 0',
+  4: '(((Sk - x)k - x)k - x)k - x = 0',
 };
 
 const OPEN: Record<number, string> = {
-  2: 'Sk^2 = X(k + 1)',
-  3: 'Sk^3 = X(k^2 + k + 1)',
-  4: 'Sk^4 = X(k^3 + k^2 + k + 1) = X(k^2 + 1)(k + 1)',
+  2: 'Sk^2 = x(k + 1)',
+  3: 'Sk^3 = x(k^2 + k + 1)',
+  4: 'Sk^4 = x(k^3 + k^2 + k + 1) = x(k^2 + 1)(k + 1)',
 };
 
 const FORMULA_X: Record<number, string> = {
-  2: 'X = \\frac{Sk^2}{k + 1}',
-  3: 'X = \\frac{Sk^3}{k^2 + k + 1}',
-  4: 'X = \\frac{Sk^4}{(k^2 + 1)(k + 1)}',
+  2: 'x = \\frac{Sk^2}{k + 1}',
+  3: 'x = \\frac{Sk^3}{k^2 + k + 1}',
+  4: 'x = \\frac{Sk^4}{(k^2 + 1)(k + 1)}',
 };
+
+const TEXT_ANN =
+  'Каждый год долг на начало умножаем на $k = 1 + \\dfrac{r}{100}$ — получаем долг после начисления, вычитаем платёж — получаем долг на конец. После последнего платежа долг равен нулю.';
 
 /* ── Общие шаги ─────────────────────────────────────────────────── */
 
@@ -100,7 +105,7 @@ const stK = (rate: Rate) =>
 const stChain = (n: number) =>
   step(
     'Записываем цепочку',
-    'После каждого начисления процентов долг умножается на $k$, после каждого платежа уменьшается на $X$. После последнего платежа долг равен нулю.',
+    'После каждого начисления процентов долг умножается на $k$, после каждого платежа уменьшается на $x$. После последнего платежа долг равен нулю.',
     CHAIN[n],
   );
 
@@ -125,7 +130,7 @@ const hintChain = (n: number, shift: number) =>
   choice(
     'Какое уравнение описывает погашение кредита?',
     `$${CHAIN[n]}$`,
-    [`$${CHAIN[n]!.replace(/- X/g, '+ X')}$`, `$S - ${n}X = 0$`],
+    [`$${CHAIN[n]!.replace(/- x/g, '+ x')}$`, `$S - ${n}x = 0$`],
     shift,
     'Сначала долг растёт в $k$ раз, потом уменьшается на платёж — и так каждый год.',
   );
@@ -160,6 +165,7 @@ const C01: Prototype = {
     if (S.lt(100000) || S.gt(9000000)) return null;
     const k = kOf(rate.r);
     const answer = annuityX(S, k, n).mul(n);
+    const ops = Array.from({ length: n }, () => '- x');
     const Xs = equalPayment(S, n, rate.r);
     const rows = byPayments(
       S,
@@ -176,22 +182,22 @@ const C01: Prototype = {
       period: 'year',
       labels: yearLabels(plot.year, n),
       solution: [
-        stK(rate),
-        stTable(
-          'Долг на начало года умножаем на $k$ — получаем долг с процентами, вычитаем платёж $X$ — получаем долг на конец.',
-        ),
-        stChain(n),
-        stOpen(n),
+        stTablitsaBukvy(`${TEXT_ANN} Все платежи равны $x$.`),
+        stUravnenie(ops),
         step(
-          'Находим платёж',
-          'Выражаем $X$ и подставляем числа; с $k$ дробью сокращения видны сразу.',
-          `${FORMULA_X[n]} = \\frac{${tex(S)}\\cdot ${tex(k.pow(n))}}{${tex(sumK(k, n))}} = ${tex(X)}`,
+          'Переносим платежи вправо и выносим $x$',
+          'В скобках — сумма геометрической прогрессии.',
+          `${perenos(ops)} = ${OPEN[n]!.split(' = ').slice(1).join(' = ')}`,
         ),
-        step(
-          'Общая сумма выплат',
-          `Платежей ${n}, все равны $X$.`,
-          `${n}X = ${n}\\cdot ${tex(X)} = ${tex(answer)}`,
+        stFormula(
+          `Делим на скобку — получаем платёж; платежей ${n}, все равны $x$.`,
+          `${FORMULA_X[n]!.replace('\\frac', '\\dfrac')}, \\qquad ${n}x = ${n}\\cdot ${FORMULA_X[n]!.slice(4).replace('\\frac', '\\dfrac')}`,
         ),
+        stChisla('Множитель удобно записать обыкновенной дробью: так сокращения видны сразу.', [
+          `k = 1 + \\dfrac{${tex(rate.r)}}{100} = ${kTex(rate)}`,
+          `x = \\dfrac{${tex(S)}\\cdot ${tex(k.pow(n))}}{${tex(sumK(k, n))}} = ${tex(X)}`,
+          `${n}x = ${n}\\cdot ${tex(X)} = ${tex(answer)}`,
+        ]),
         stAnswer(`Банку будет выплачено ${money(answer, 'rub')}.`),
       ],
       hints: hintsC(rng.int(0, 2), [hintChain(n, rng.int(0, 2))]),
@@ -242,21 +248,21 @@ function makeEqualFour(id: 'C-02' | 'C-10'): Prototype {
         solution: [
           stK(rate),
           stTable(
-            'Каждый год: долг на начало $\\cdot\\, k$ — долг с процентами, минус платёж $X$ — долг на конец.',
+            'Каждый год: долг на начало $\\cdot\\, k$ — долг после начисления, минус платёж $x$ — долг на конец.',
           ),
           stChain(4),
           stOpen(4),
           step(
             'Находим платёж',
             'Разложение на множители сокращает счёт: вместо четырёх степеней — два множителя.',
-            `X = \\frac{Sk^4}{(k^2 + 1)(k + 1)} = \\frac{${tex(S)}\\cdot ${tex(k.pow(4))}}{${tex(k2.add(1))}\\cdot ${tex(k.add(1))}} = ${tex(X)}`,
+            `x = \\frac{Sk^4}{(k^2 + 1)(k + 1)} = \\frac{${tex(S)}\\cdot ${tex(k.pow(4))}}{${tex(k2.add(1))}\\cdot ${tex(k.add(1))}} = ${tex(X)}`,
           ),
           ...(askTotal
             ? [
                 step(
                   'Общая сумма выплат',
                   'Четыре равных платежа.',
-                  `4X = 4\\cdot ${tex(X)} = ${tex(answer)}`,
+                  `4x = 4\\cdot ${tex(X)} = ${tex(answer)}`,
                 ),
               ]
             : []),
@@ -331,25 +337,25 @@ const C03: Prototype = {
         step(
           `${n} платежа`,
           `Находим платёж и всё, что отдадим банку.`,
-          `${FORMULA_X[n]} = ${tex(Xn)}, \\quad ${n}X = ${tex(Xn.mul(n))}`,
+          `${FORMULA_X[n]} = ${tex(Xn)}, \\quad ${n}x = ${tex(Xn.mul(n))}`,
         ),
         step(
           '2 платежа',
           'Та же цепочка из двух звеньев.',
-          `Y = \\frac{Sk^2}{k + 1} = ${tex(X2)}, \\quad 2Y = ${tex(X2.mul(2))}`,
+          `y = \\frac{Sk^2}{k + 1} = ${tex(X2)}, \\quad 2y = ${tex(X2.mul(2))}`,
         ),
         step(
           'Разность',
           'Сумма кредита одна, разница — только в переплате.',
-          `${n}X - 2Y = ${tex(Xn.mul(n))} - ${tex(X2.mul(2))} = ${tex(answer)}`,
+          `${n}x - 2y = ${tex(Xn.mul(n))} - ${tex(X2.mul(2))} = ${tex(answer)}`,
         ),
         stAnswer(`На ${money(answer, 'rub')} больше.`),
       ],
       hints: hintsC(rng.int(0, 2), [
         choice(
           'Что нужно сравнить?',
-          `Общие суммы выплат: $${n}X$ и $2Y$`,
-          [`Платежи: $X$ и $Y$`, 'Суммы кредита'],
+          `Общие суммы выплат: $${n}x$ и $2y$`,
+          [`Платежи: $x$ и $y$`, 'Суммы кредита'],
           rng.int(0, 2),
         ),
       ]),
@@ -396,7 +402,7 @@ const C04: Prototype = {
         step(
           'Находим сумму кредита',
           'Теперь неизвестна $S$: делим обе части на $k^3$.',
-          `S = \\frac{X(k^2 + k + 1)}{k^3} = \\frac{${tex(X)}\\cdot ${tex(sumK(k, n))}}{${tex(k.pow(n))}} = ${tex(answer)}`,
+          `S = \\frac{x(k^2 + k + 1)}{k^3} = \\frac{${tex(X)}\\cdot ${tex(sumK(k, n))}}{${tex(k.pow(n))}} = ${tex(answer)}`,
         ),
         stAnswer(`В кредит взято ${money(answer, 'mln')}.`),
       ],
@@ -455,18 +461,18 @@ const C05: Prototype = {
       labels: yearLabels(plot.year, n),
       solution: [
         stK(rate),
-        stTable('Сумму кредита обозначим $S$, платёж — $X$.'),
+        stTable('Сумму кредита обозначим $S$, платёж — $x$.'),
         stChain(n),
         stOpen(n),
         step(
           'Платёж через $S$',
           'Подставляем $k$ дробью — получается доля от суммы кредита.',
-          `X = \\frac{Sk^3}{k^2 + k + 1} = \\frac{${tex(k.pow(3))}}{${tex(sumK(k, 3))}}\\,S`,
+          `x = \\frac{Sk^3}{k^2 + k + 1} = \\frac{${tex(k.pow(3))}}{${tex(sumK(k, 3))}}\\,S`,
         ),
         step(
           'Уравнение по переплате',
           'Переплата — всё, что отдали, минус сумма кредита.',
-          `3X - S = ${tex(P)} \\;\\Rightarrow\\; S\\Big(\\frac{3\\cdot ${tex(k.pow(3))}}{${tex(sumK(k, 3))}} - 1\\Big) = ${tex(P)} \\;\\Rightarrow\\; S = ${tex(Sf)}`,
+          `3x - S = ${tex(P)} \\;\\Rightarrow\\; S\\Big(\\frac{3\\cdot ${tex(k.pow(3))}}{${tex(sumK(k, 3))}} - 1\\Big) = ${tex(P)} \\;\\Rightarrow\\; S = ${tex(Sf)}`,
         ),
         ...(askTotal
           ? [
@@ -486,8 +492,8 @@ const C05: Prototype = {
       hints: hintsC(rng.int(0, 2), [
         choice(
           'Как записать «общая сумма выплат больше суммы кредита на $S_{\\text{перепл}}$»?',
-          '$3X - S = S_{\\text{перепл}}$',
-          ['$3X = S_{\\text{перепл}}$', '$X - S = S_{\\text{перепл}}$'],
+          '$3x - S = S_{\\text{перепл}}$',
+          ['$3x = S_{\\text{перепл}}$', '$x - S = S_{\\text{перепл}}$'],
           rng.int(0, 2),
           'Платежей три, и из их суммы вычитаем то, что взяли.',
         ),
@@ -529,6 +535,8 @@ const C06: Prototype = {
     const verify = r0.div(r0.sub(rest(D(1))));
     const rows = byPayments(S, [X, X.mul(q), X.mul(q * q)], rate.r);
     const qWord = q === 2 ? 'вдвое' : 'втрое';
+    const pl = ['x', `${q}x`, `${q * q}x`];
+    const ops = pl.map((p) => `- ${p}`);
     return {
       condition:
         `${plot.subject} ${v(plot, 'взял', 'взяла')} кредит ${plot.goal} на сумму ${money(S, 'rub')}. ${frameEnd(plot, 'year', D(rate.r))} ` +
@@ -540,35 +548,36 @@ const C06: Prototype = {
       scheme: 'ann',
       period: 'year',
       solution: [
-        stK(rate),
-        stTable(`Первый платёж $X$, второй $${q}X$, третий $${q * q}X$.`),
-        step(
-          'Записываем цепочку',
-          'После третьего платежа долг равен нулю.',
-          `((Sk - X)k - ${q}X)k - ${q * q}X = 0`,
+        stTablitsaBukvy(
+          `${TEXT_ANN} Платежи: первый $x$, второй $${q}x$, третий $${q * q}x$.`,
+          annBukvy({ n: 3, period: 'year', platezh: (i) => pl[i === 'n' ? 2 : i - 1] ?? 'x' }),
         ),
+        stUravnenie(ops),
         step(
-          'Раскрываем скобки',
-          'Все платежи — в правую часть.',
-          `Sk^3 = X(k^2 + ${q}k + ${q * q})`,
+          'Переносим платежи вправо и выносим $x$',
+          'Все платежи — в правую часть, $x$ — общий множитель.',
+          `${perenos(ops)} = x(k^2 + ${q}k + ${q * q})`,
         ),
-        step(
-          'Находим первый платёж',
-          'Подставляем $k$ и сокращаем.',
-          `X = \\frac{Sk^3}{k^2 + ${q}k + ${q * q}} = \\frac{${tex(S)}\\cdot ${tex(k.pow(3))}}{${tex(
+        stFormula(
+          'Делим на скобку — получаем первый платёж.',
+          `x = \\dfrac{Sk^3}{k^2 + ${q}k + ${q * q}}`,
+        ),
+        stChisla('Подставляем сумму кредита и множитель.', [
+          `k = 1 + \\dfrac{${tex(rate.r)}}{100} = ${tex(k)}`,
+          `x = \\dfrac{${tex(S)}\\cdot ${tex(k.pow(3))}}{${tex(
             k
               .pow(2)
               .add(k.mul(q))
               .add(q * q),
           )}} = ${tex(answer)}`,
-        ),
+        ]),
         stAnswer(`Первый платёж — ${money(answer, 'rub')}.`),
       ],
       hints: hintsC(rng.int(0, 2), [
         choice(
           'Какие платежи?',
-          `$X$, $${q}X$, $${q * q}X$`,
-          [`$X$, $${q}X$, $${q + 1}X$`, `$X$, $X$, $X$`],
+          `$x$, $${q}x$, $${q * q}x$`,
+          [`$x$, $${q}x$, $${q + 1}x$`, `$x$, $x$, $x$`],
           rng.int(0, 2),
           `Каждый следующий в ${q === 2 ? 'два' : 'три'} раза больше предыдущего.`,
         ),
@@ -690,7 +699,16 @@ const C08: Prototype = {
     for (let t = 1; t <= 200; t++)
       if (byPayments(S, [x1, x2], D(t, 2))[1]!.end.eq(0)) found = D(t, 2);
     const rows = byPayments(S, [x1, x2], rate.r);
-    const root2 = x1.sub(sqrtD).div(S.mul(2));
+    /* Отбор задач как прежде: второй корень — конечная дробь (банк не меняется). */
+    if (!x1.sub(sqrtD).div(S.mul(2)).isFiniteDecimal()) return null;
+    const ops = ['- x_{1}', '- x_{2}'];
+    const [St, x1t, x2t, sqrtT] = [S, x1, x2, sqrtD].map((z) => z.div(1000)) as [
+      Drob,
+      Drob,
+      Drob,
+      Drob,
+    ];
+    const discT = x1t.mul(x1t).add(St.mul(x2t).mul(4));
     return {
       condition:
         `${plot.subject} ${v(plot, 'взял', 'взяла')} кредит ${plot.goal} на сумму ${money(S, 'rub')} под $r$ % годовых и ${v(plot, 'выплатил', 'выплатила')} его за два года: в первый год ${money(x1, 'rub')}, во второй — ${money(x2, 'rub')}. ` +
@@ -702,26 +720,36 @@ const C08: Prototype = {
       scheme: 'ann',
       period: 'year',
       solution: [
-        step(
-          'Вводим коэффициент',
-          '$k = 1 + \\dfrac{r}{100}$ — увеличивающий коэффициент, его и ищем.',
-          'k = 1 + \\frac{r}{100}',
+        stTablitsaBukvy(
+          `${TEXT_ANN} Платежи известны: $x_{1}$ в первый год и $x_{2}$ во второй; ищем $k$, а с ним и $r$.`,
         ),
-        stTable('Считаем в тысячах рублей: так короче.'),
-        step(
-          'Записываем цепочку',
-          'После второго платежа долг равен нулю.',
-          `(${tex(S.div(1000))}k - ${tex(x1.div(1000))})k - ${tex(x2.div(1000))} = 0`,
+        stUravnenie(ops),
+        {
+          title: 'Решаем квадратное уравнение относительно $k$',
+          text: 'Неизвестное — $k$, остальные буквы — известные числа.',
+          bloki: [
+            {
+              vid: 'text',
+              text: 'Дискриминант равен $x_{1}^2 + 4Sx_{2}$ (букву $D$ не берём: она занята долгом), корни:',
+            },
+            { vid: 'formula', tex: 'k = \\dfrac{x_{1} \\pm \\sqrt{x_{1}^2 + 4Sx_{2}}}{2S}' },
+            {
+              vid: 'text',
+              text: 'Корень больше $x_{1}$, поэтому со знаком «минус» $k$ отрицательный. А $k = 1 + \\dfrac{r}{100} > 1$ — берём «плюс».',
+            },
+          ],
+        },
+        stFormula(
+          'Ставка — из множителя: $r = 100(k - 1)$.',
+          'k = \\dfrac{x_{1} + \\sqrt{x_{1}^2 + 4Sx_{2}}}{2S}, \\qquad r = 100\\,(k - 1)',
         ),
-        step(
-          'Квадратное уравнение',
-          'Раскрываем скобки.',
-          `${tex(S.div(1000))}k^2 - ${tex(x1.div(1000))}k - ${tex(x2.div(1000))} = 0`,
-        ),
-        step(
-          'Выбираем корень',
-          `Дискриминант — полный квадрат. Второй корень отрицательный (${tex(root2).replace('{,}', ',')}), а $k > 1$, поэтому подходит только положительный.`,
-          `k = \\frac{${tex(x1.div(1000))} + ${tex(sqrtD.div(1000))}}{${tex(S.mul(2).div(1000))}} = ${tex(kf)} \\;\\Rightarrow\\; r = ${tex(answer)}`,
+        stChisla(
+          `Считаем в тысячах рублей: $S = ${tex(St)}$, $x_{1} = ${tex(x1t)}$, $x_{2} = ${tex(x2t)}$.`,
+          [
+            `x_{1}^2 + 4Sx_{2} = ${tex(x1t.mul(x1t))} + ${tex(St.mul(x2t).mul(4))} = ${tex(discT)} = ${tex(sqrtT)}^2`,
+            `k = \\dfrac{${tex(x1t)} + ${tex(sqrtT)}}{${tex(St.mul(2))}} = ${tex(kf)}`,
+            `r = 100\\,(${tex(kf)} - 1) = ${tex(answer)}`,
+          ],
         ),
         stAnswer(`$r = ${tex(answer)}$.`),
       ],
@@ -745,7 +773,7 @@ const C11: Prototype = {
   sourceNote: 'по задаче ЕГЭ-2017',
   difficulty: 'hard',
   units: 'percent',
-  title: 'По $X$ за 4 (3) года или по $Y$ за 2 — найти ставку',
+  title: 'По $x$ за 4 (3) года или по $y$ за 2 — найти ставку',
   forbid: [
     { X: 58564, Y: 106964 },
     { X: 38016, Y: 52416 },
@@ -784,66 +812,76 @@ const C11: Prototype = {
       Array.from({ length: n }, () => X),
       rate.r,
     );
-    const solution =
+    const plX = Array.from({ length: n }, () => '- x');
+    const plY = ['- y', '- y'];
+    const pl1 = (i: number | 'n') => yearLabels(plot.year, n)[(i === 'n' ? n : i) - 1] ?? String(i);
+    const pl2 = (i: number | 'n') => yearLabels(plot.year, 2)[(i === 'n' ? 2 : i) - 1] ?? String(i);
+    const t = k.pow(2).add(k); // k² + k при n = 3
+    const solution = [
+      {
+        title: 'Составляем таблицы',
+        text: `${TEXT_ANN} Сумма кредита $S$ одна и та же, схем две: ${n === 4 ? 'четыре' : 'три'} платежа по $x$ и два по $y$.`,
+        bloki: [
+          {
+            vid: 'tablitsa' as const,
+            t: annBukvy({ n, period: 'year', podpis: 'Платежи по $x$', label: pl1 }),
+          },
+          {
+            vid: 'tablitsa' as const,
+            t: annBukvy({
+              n: 2,
+              period: 'year',
+              podpis: 'Платежи по $y$',
+              label: pl2,
+              platezh: () => 'y',
+            }),
+          },
+        ],
+      },
+      { ...stUravnenie(plX), title: 'Составляем уравнение: платежи по $x$' },
+      { ...stUravnenie(plY, { D: "D'" }), title: 'Составляем уравнение: платежи по $y$' },
+      step(
+        'Переносим платежи вправо и выносим $x$ и $y$',
+        n === 4
+          ? 'Сумму из четырёх слагаемых раскладываем группировкой: $k^3 + k^2 + k + 1 = k^2(k + 1) + (k + 1) = (k^2 + 1)(k + 1)$.'
+          : 'В скобках — суммы геометрических прогрессий.',
+        n === 4
+          ? 'Sk^4 = x(k^2 + 1)(k + 1), \\qquad Sk^2 = y(k + 1)'
+          : 'Sk^3 = x(k^2 + k + 1), \\qquad Sk^2 = y(k + 1)',
+      ),
       n === 4
-        ? [
-            step(
-              'Вводим коэффициент',
-              '$k = 1 + \\dfrac{r}{100}$ — увеличивающий коэффициент, сумма кредита $S$ неизвестна.',
-              'k = 1 + \\frac{r}{100}',
-            ),
-            stTable('Две схемы с одной и той же суммой $S$: четыре платежа по $X$ и два по $Y$.'),
-            step(
-              'Два уравнения',
-              'Раскрываем скобки в обеих цепочках.',
-              `Sk^4 = X(k^2 + 1)(k + 1), \\qquad Sk^2 = Y(k + 1)`,
-            ),
-            step(
-              'Делим одно на другое',
-              'Сокращаются $S$ и $(k + 1)$.',
-              `k^2 = \\frac{X}{Y}\\,(k^2 + 1) \\;\\Rightarrow\\; \\frac{k^2 + 1}{k^2} = \\frac{Y}{X} = \\frac{${tex(Y)}}{${tex(X)}}`,
-            ),
-            step(
-              'Замена $q = k^2$',
-              'Получаем линейное уравнение.',
-              `1 + \\frac{1}{q} = \\frac{${tex(Y)}}{${tex(X)}} \\;\\Rightarrow\\; q = \\frac{${tex(X)}}{${tex(Y.sub(X))}} = ${tex(k.pow(2))}`,
-            ),
-            step(
-              'Находим ставку',
-              '$k > 0$, извлекаем корень.',
-              `k = ${tex(k)} \\;\\Rightarrow\\; r = ${tex(answer)}`,
-            ),
-            stAnswer(`$r = ${tex(answer)}$.`),
-          ]
-        : [
-            step(
-              'Вводим коэффициент',
-              '$k = 1 + \\dfrac{r}{100}$ — увеличивающий коэффициент, сумма кредита $S$ неизвестна.',
-              'k = 1 + \\frac{r}{100}',
-            ),
-            stTable('Две схемы с одной и той же суммой $S$: три платежа по $X$ и два по $Y$.'),
-            step(
-              'Два уравнения',
-              'Раскрываем скобки в обеих цепочках.',
-              `Sk^3 = X(k^2 + k + 1), \\qquad Sk^2 = Y(k + 1)`,
-            ),
-            step(
-              'Делим одно на другое',
-              'Сокращается $S$.',
-              `k = \\frac{X(k^2 + k + 1)}{Y(k + 1)} \\;\\Rightarrow\\; \\frac{Y}{X} = \\frac{k^2 + k + 1}{k^2 + k} = 1 + \\frac{1}{k^2 + k}`,
-            ),
-            step(
-              'Находим $k^2 + k$',
-              'Подставляем числа.',
-              `k^2 + k = \\frac{${tex(X)}}{${tex(Y.sub(X))}} = ${tex(k.pow(2).add(k))}`,
-            ),
-            step(
-              'Квадратное уравнение',
-              'Положительный корень — нужный: $k > 1$.',
-              `k^2 + k - ${tex(k.pow(2).add(k))} = 0 \\;\\Rightarrow\\; k = ${tex(k)},\\; r = ${tex(answer)}`,
-            ),
-            stAnswer(`$r = ${tex(answer)}$.`),
-          ];
+        ? step(
+            'Делим первое уравнение на второе',
+            'Сокращаются $S$ и $(k + 1)$ — остаётся уравнение только на $k$.',
+            'k^2 = \\dfrac{x(k^2 + 1)}{y} \\;\\Rightarrow\\; yk^2 = xk^2 + x \\;\\Rightarrow\\; (y - x)\\,k^2 = x',
+          )
+        : step(
+            'Делим первое уравнение на второе',
+            'Сокращается $S$ — остаётся уравнение только на $k$.',
+            'k = \\dfrac{x(k^2 + k + 1)}{y(k + 1)} \\;\\Rightarrow\\; y(k^2 + k) = x(k^2 + k) + x \\;\\Rightarrow\\; (y - x)(k^2 + k) = x',
+          ),
+      stFormula(
+        'Ставка — из множителя: $r = 100(k - 1)$.',
+        n === 4
+          ? 'k^2 = \\dfrac{x}{y - x}, \\qquad r = 100\\,(k - 1)'
+          : 'k^2 + k = \\dfrac{x}{y - x}, \\qquad r = 100\\,(k - 1)',
+      ),
+      stChisla(
+        `$x = ${tex(X)}$, $y = ${tex(Y)}$.`,
+        n === 4
+          ? [
+              `k^2 = \\dfrac{${tex(X)}}{${tex(Y)} - ${tex(X)}} = \\dfrac{${tex(X)}}{${tex(Y.sub(X))}} = ${tex(k.pow(2))}`,
+              `k = \\sqrt{${tex(k.pow(2))}} = ${tex(k)}\\quad (k > 0)`,
+              `r = 100\\,(${tex(k)} - 1) = ${tex(answer)}`,
+            ]
+          : [
+              `k^2 + k = \\dfrac{${tex(X)}}{${tex(Y.sub(X))}} = ${tex(t)}`,
+              `k^2 + k - ${tex(t)} = 0 \\;\\Rightarrow\\; k = \\dfrac{-1 + \\sqrt{1 + 4\\cdot ${tex(t)}}}{2} = \\dfrac{-1 + ${tex(k.mul(2).add(1))}}{2} = ${tex(k)}`,
+              `r = 100\\,(${tex(k)} - 1) = ${tex(answer)}`,
+            ],
+      ),
+      stAnswer(`$r = ${tex(answer)}$.`),
+    ];
     return {
       condition:
         `${frameJan(plot, 'на некоторую сумму', '$r$ %')}\n` +
@@ -896,8 +934,8 @@ const C12: Prototype = {
     return {
       condition:
         `31 декабря ${y} года ${plot.subject} ${v(plot, 'взял', 'взяла')} в банке ${money(S, 'rub')} в кредит под ${pct(D(rate.r))} годовых ${plot.goal}. ` +
-        `Схема выплаты кредита следующая: 31 декабря каждого следующего года банк начисляет проценты на оставшуюся сумму долга (то есть увеличивает долг на ${pct(D(rate.r))}), затем ${plot.firm ? 'компания переводит' : `${plot.subject} переводит`} в банк $X$ рублей. ` +
-        `Какой должна быть сумма $X$, чтобы долг был выплачен двумя равными платежами (то есть за два года)?`,
+        `Схема выплаты кредита следующая: 31 декабря каждого следующего года банк начисляет проценты на оставшуюся сумму долга (то есть увеличивает долг на ${pct(D(rate.r))}), затем ${plot.firm ? 'компания переводит' : `${plot.subject} переводит`} в банк $x$ рублей. ` +
+        `Какой должна быть сумма $x$, чтобы долг был выплачен двумя равными платежами (то есть за два года)?`,
       answer,
       verify: Xs,
       params: { S: S.toNumber(), r: Number(rate.r) },
@@ -907,15 +945,15 @@ const C12: Prototype = {
       labels: yearLabels(y, 2),
       solution: [
         stK(rate),
-        stTable('Два года: долг $\\cdot\\, k$, минус $X$ — и так дважды.'),
+        stTable('Два года: долг $\\cdot\\, k$, минус $x$ — и так дважды.'),
         stChain(2),
         stOpen(2),
         step(
-          'Находим $X$',
+          'Находим $x$',
           'Подставляем $k$ дробью и сокращаем.',
-          `X = \\frac{Sk^2}{k + 1} = \\frac{${tex(S)}\\cdot ${tex(k.pow(2))}}{${tex(k.add(1))}} = ${tex(answer)}`,
+          `x = \\frac{Sk^2}{k + 1} = \\frac{${tex(S)}\\cdot ${tex(k.pow(2))}}{${tex(k.add(1))}} = ${tex(answer)}`,
         ),
-        stAnswer(`$X = ${tex(answer)}$ рублей.`),
+        stAnswer(`$x = ${tex(answer)}$ рублей.`),
       ],
       hints: hintsC(rng.int(0, 2), [hintChain(2, rng.int(0, 2))]),
     };
@@ -965,20 +1003,20 @@ const C13: Prototype = {
         step(
           'Находим платёж',
           'Подставляем $k$ дробью.',
-          `X = \\frac{Sk^3}{k^2 + k + 1} = \\frac{${tex(S)}\\cdot ${tex(k.pow(3))}}{${tex(sumK(k, 3))}} = ${tex(X)}`,
+          `x = \\frac{Sk^3}{k^2 + k + 1} = \\frac{${tex(S)}\\cdot ${tex(k.pow(3))}}{${tex(sumK(k, 3))}} = ${tex(X)}`,
         ),
         step(
           'Переплата',
           'Всё, что отдали, минус то, что взяли.',
-          `3X - S = ${tex(X.mul(3))} - ${tex(S)} = ${tex(answer)}`,
+          `3x - S = ${tex(X.mul(3))} - ${tex(S)} = ${tex(answer)}`,
         ),
         stAnswer(`Сверх суммы кредита — ${money(answer, 'thous')}.`),
       ],
       hints: hintsC(rng.int(0, 2), [
         choice(
           'Как найти переплату?',
-          '$3X - S$',
-          ['$3X$', '$X - S$'],
+          '$3x - S$',
+          ['$3x$', '$x - S$'],
           rng.int(0, 2),
           '«Сверх суммы кредита» — значит, из всех выплат вычитаем кредит.',
         ),
@@ -1102,18 +1140,18 @@ const C16: Prototype = {
         stTable('Таблица — для погашения за 4 года.'),
         step(
           'Срок 3 года',
-          'Цепочка из трёх звеньев даёт сумму кредита через $X$.',
-          `Sk^3 = X(k^2 + k + 1) \\;\\Rightarrow\\; S = \\frac{X(k^2 + k + 1)}{k^3}`,
+          'Цепочка из трёх звеньев даёт сумму кредита через $x$.',
+          `Sk^3 = x(k^2 + k + 1) \\;\\Rightarrow\\; S = \\frac{x(k^2 + k + 1)}{k^3}`,
         ),
         step(
           'Срок 4 года',
-          'Цепочка из четырёх звеньев с новым платежом $Y$.',
-          `Sk^4 = Y(k^2 + 1)(k + 1)`,
+          'Цепочка из четырёх звеньев с новым платежом $y$.',
+          `Sk^4 = y(k^2 + 1)(k + 1)`,
         ),
         step(
           'Подставляем $S$',
           'Сумму кредита не считаем отдельно.',
-          `Y = \\frac{Xk(k^2 + k + 1)}{(k^2 + 1)(k + 1)} = \\frac{${tex(X)}\\cdot ${tex(k)}\\cdot ${tex(sumK(k, 3))}}{${tex(k.pow(2).add(1))}\\cdot ${tex(k.add(1))}} = ${tex(answer)}`,
+          `y = \\frac{Xk(k^2 + k + 1)}{(k^2 + 1)(k + 1)} = \\frac{${tex(X)}\\cdot ${tex(k)}\\cdot ${tex(sumK(k, 3))}}{${tex(k.pow(2).add(1))}\\cdot ${tex(k.add(1))}} = ${tex(answer)}`,
         ),
         stAnswer(`Платежи по ${money(answer, 'thous')}.`),
       ],
@@ -1194,7 +1232,7 @@ const C17: Prototype = {
         ),
         step(
           'Четвёртый платёж',
-          'Последний платёж гасит долг с процентами целиком.',
+          'Последний платёж гасит долг после начисления целиком.',
           `${fr(d3)}\\,S\\cdot ${tex(k2)} = ${fr(p4)}\\,S`,
         ),
         stAnswer(`Четвёртый платёж — ${pct(answer)} от $S$.`),

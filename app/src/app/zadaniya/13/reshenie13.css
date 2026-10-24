@@ -116,12 +116,17 @@
   padding: 0;
   border: 0;
 }
+/* Селекторы стрелки сильнее общего «.solution-details svg» (рисунок
+   во всю ширину, 360px): в раскрывашке теории стрелка не ломается. */
 .z13-r-strelka__box {
   position: relative;
   height: 46px;
   color: var(--z13r-accent);
 }
-.z13-r-strelka__duga {
+.z13-r-strelka svg.z13-r-strelka__duga {
+  display: block;
+  max-width: none;
+  margin: 0;
   position: absolute;
   left: 0;
   top: 16px;
@@ -135,7 +140,10 @@
   stroke-width: 1.6;
   stroke-linecap: round;
 }
-.z13-r-strelka__ostrie {
+.z13-r-strelka svg.z13-r-strelka__ostrie {
+  display: block;
+  max-width: none;
+  margin: 0;
   position: absolute;
   bottom: 0;
   left: calc(100% / 6);

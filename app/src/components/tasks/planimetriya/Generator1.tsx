@@ -19,6 +19,7 @@ import type {
 import { KitBar } from '../generator/KitBar';
 import { Piktogramma, Zvezdy } from '../zadanie11/Piktogrammy';
 import { IkonkaBloka1 } from './IkonkaBloka1';
+import { A4Preview } from '../generator/A4Preview';
 
 const IKONKA_ISTOCHNIKA: Record<Istochnik, string> = { bank: 'doc', mix: 'layers', new: 'sparkle' };
 
@@ -458,7 +459,7 @@ export function Generator1({
           </p>
         ) : null}
 
-        <div className="z11-a4 z1-a4">
+        <A4Preview className="z11-a4 z1-a4">
           {list === null ? (
             <p className="z11-a4__pusto">{GENERATOR_1.pusto}</p>
           ) : (
@@ -530,7 +531,7 @@ export function Generator1({
               <p className="z11-a4__podpis">{SHEET_1.podpis}</p>
             </>
           )}
-        </div>
+        </A4Preview>
       </section>
     </div>
   );
