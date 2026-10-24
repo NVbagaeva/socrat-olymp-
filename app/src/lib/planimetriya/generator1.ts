@@ -187,6 +187,8 @@ export function engine1(
   const query = (state: GenState & { seed: string }) =>
     sheetQuery1(paramsIzSostoyaniya(state, config));
   return {
+    /* Прежний лист этого раздела умеет замены по номеру позиции. */
+    legacyZameny: true,
     async build(state) {
       const { sobratList, ramkiLista, peredZadachami1 } = await import('./sheet1');
       const p = paramsIzSostoyaniya(state, config);

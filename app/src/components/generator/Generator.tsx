@@ -13,6 +13,7 @@ import {
   levelsText,
   matchPreset,
   moveSlot,
+  posKey,
   pruneZameny,
   relayout,
   removeAt,
@@ -264,6 +265,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   /* ── Изменения ─────────────────────────────────────────────────── */
 
   const counts = countsByTopic(config, st.plan);
+  const hasLevels = config.levels.length > 0;
   const presetId = matchPreset(config, st);
 
   /**
@@ -367,7 +369,16 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
       return;
     }
     if (action === 'swap') {
-      setSt({ ...st, zameny: { ...st.zameny, [pos]: (st.zameny[pos] ?? 0) + 1 } });
+      if (st.legacy !== undefined && engine.legacyZameny !== true) {
+        /* Прежний лист этого раздела замен не умеет: набор переходит на
+           ключи позиций, задача заменяется уже в новой схеме. */
+        const slot = st.plan[indexOf(pos)];
+        const v = Number(pos.split('.')[0]);
+        const { legacy: _old, ...rest } = st;
+        commit({ ...rest, zameny: slot === undefined ? {} : { [posKey(v, slot)]: 1 } });
+      } else {
+        setSt({ ...st, zameny: { ...st.zameny, [pos]: (st.zameny[pos] ?? 0) + 1 } });
+      }
       say(GEN_UI.toast.zamenena);
       setOverlay(null);
       return;
@@ -507,38 +518,42 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   const dopControls =
     extras === undefined ? null : (
       <div className="gen-dop__list">
-        <div className="gen-opt">
-          <span>
-            {GEN_UI.dop.teoriya}
-            <small>{GEN_UI.dop.teoriyaNote}</small>
-          </span>
-          <button
-            type="button"
-            role="switch"
-            className="gen-switch"
-            aria-checked={st.extras.theory}
-            aria-label={GEN_UI.dop.teoriya}
-            onClick={() => setExtras({ theory: !st.extras.theory })}
-          />
-        </div>
-        <div className="gen-opt">
-          <span>
-            {GEN_UI.dop.primery}
-            <small>{GEN_UI.dop.primeryNote}</small>
-          </span>
-          <div className="gen-segm" role="group" aria-label={GEN_UI.dop.primery}>
-            {([0, 1, 2] as const).map((k) => (
-              <button
-                key={k}
-                type="button"
-                aria-pressed={st.extras.examples === k}
-                onClick={() => setExtras({ examples: k })}
-              >
-                {k}
-              </button>
-            ))}
+        {extras.theory === false ? null : (
+          <div className="gen-opt">
+            <span>
+              {GEN_UI.dop.teoriya}
+              <small>{GEN_UI.dop.teoriyaNote}</small>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              className="gen-switch"
+              aria-checked={st.extras.theory}
+              aria-label={GEN_UI.dop.teoriya}
+              onClick={() => setExtras({ theory: !st.extras.theory })}
+            />
           </div>
-        </div>
+        )}
+        {extras.examples === false ? null : (
+          <div className="gen-opt">
+            <span>
+              {GEN_UI.dop.primery}
+              <small>{GEN_UI.dop.primeryNote}</small>
+            </span>
+            <div className="gen-segm" role="group" aria-label={GEN_UI.dop.primery}>
+              {([0, 1, 2] as const).map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={st.extras.examples === k}
+                  onClick={() => setExtras({ examples: k })}
+                >
+                  {k}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="gen-opt">
           <span>
             {GEN_UI.dop.qr}
@@ -628,12 +643,14 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               </div>
             </div>
           ) : null}
-          <div className="gen-fld">
-            <span className="gen-label">{GEN_UI.slozhnost}</span>
-            <div className="gen-stars" role="group" aria-label={GEN_UI.slozhnost}>
-              {levelButtons(false)}
+          {hasLevels ? (
+            <div className="gen-fld">
+              <span className="gen-label">{GEN_UI.slozhnost}</span>
+              <div className="gen-stars" role="group" aria-label={GEN_UI.slozhnost}>
+                {levelButtons(false)}
+              </div>
             </div>
-          </div>
+          ) : null}
           <div className="gen-fld">
             <span className="gen-label">{GEN_UI.variantov}</span>
             <Stepper
@@ -662,9 +679,11 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               {source?.title}
             </button>
           ) : null}
-          <button type="button" onClick={() => setOverlay({ kind: 'filters' })}>
-            {levelsText(st.levels)}
-          </button>
+          {hasLevels ? (
+            <button type="button" onClick={() => setOverlay({ kind: 'filters' })}>
+              {levelsText(st.levels)}
+            </button>
+          ) : null}
           <button type="button" onClick={() => setOverlay({ kind: 'filters' })}>
             {variantsText(st.variants)}
           </button>
@@ -716,14 +735,25 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                       pick && n > 0 && 'is-pick',
                     )}
                   >
-                    <span className="gen-trow__icon">{icons?.[t.id]}</span>
+                    <span className="gen-trow__icon">
+                      {/* Без своего значка — буква темы в кружке (группы A–C №2). */}
+                      {icons?.[t.id] ?? (
+                        <span className="gen-trow__letter" aria-hidden="true">
+                          {t.id}
+                        </span>
+                      )}
+                    </span>
                     <button
                       type="button"
                       className="gen-trow__name"
                       aria-expanded={isOpen}
                       onClick={() => setOpen((o) => ({ ...o, [t.id]: !isOpen }))}
                     >
-                      <b>{t.title}</b>
+                      {t.titleHtml === undefined ? (
+                        <b>{t.title}</b>
+                      ) : (
+                        <b dangerouslySetInnerHTML={{ __html: t.titleHtml }} />
+                      )}
                       <small>
                         {meta} · {GEN_UI.podtipy}
                         <GenIcon name="chevron" className={clsx('gen-chev', isOpen && 'is-open')} />
@@ -748,7 +778,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                       />
                     )}
                   </div>
-                  {n > 0 && !topicHasLevels(t, st.levels) ? (
+                  {hasLevels && n > 0 && !topicHasLevels(t, st.levels) ? (
                     <p className="gen-hint gen-trow__warn">{GEN_UI.netUrovnya}</p>
                   ) : null}
                   {isOpen ? (
@@ -758,13 +788,20 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                         return (
                           <div key={s.id} className="gen-sub">
                             <span className="gen-sub__name">
-                              <span className="gen-sub__code">{s.code}</span> {s.title}{' '}
-                              <span
-                                className="gen-sub__lv"
-                                aria-label={`Сложность ${s.level} из 3`}
-                              >
-                                {stars(s.level)}
-                              </span>
+                              <span className="gen-sub__code">{s.code}</span>{' '}
+                              {s.titleHtml === undefined ? (
+                                s.title
+                              ) : (
+                                <span dangerouslySetInnerHTML={{ __html: s.titleHtml }} />
+                              )}{' '}
+                              {hasLevels ? (
+                                <span
+                                  className="gen-sub__lv"
+                                  aria-label={`Сложность ${s.level} из 3`}
+                                >
+                                  {stars(s.level)}
+                                </span>
+                              ) : null}
                             </span>
                             <Stepper
                               value={k}
@@ -906,6 +943,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 teacher={generated && teacher}
                 demo={!generated}
                 live={live}
+                levels={hasLevels}
                 extras={generated ? st.extras : null}
                 qr={generated && st.extras.qr ? qr : null}
                 onAction={onTask}
@@ -922,7 +960,8 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
 
       <div className="gen-actbar">
         <span className="gen-sum">
-          <b>{sum.main}</b> · {sum.rest}
+          <b>{sum.main}</b>
+          {sum.rest === '' ? null : ` · ${sum.rest}`}
         </span>
         {go}
       </div>
@@ -951,13 +990,15 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               </div>
             </section>
           ) : null}
-          <section className="gen-sec">
-            <h3>{GEN_UI.slozhnost}</h3>
-            <div className="gen-lvcards" role="group" aria-label={GEN_UI.slozhnost}>
-              {levelButtons(true)}
-            </div>
-            <p className="gen-hint">{GEN_UI.levelsHint}</p>
-          </section>
+          {hasLevels ? (
+            <section className="gen-sec">
+              <h3>{GEN_UI.slozhnost}</h3>
+              <div className="gen-lvcards" role="group" aria-label={GEN_UI.slozhnost}>
+                {levelButtons(true)}
+              </div>
+              <p className="gen-hint">{GEN_UI.levelsHint}</p>
+            </section>
+          ) : null}
           <section className="gen-sec">
             <h3>{GEN_UI.variantov}</h3>
             <Stepper
@@ -1009,11 +1050,15 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               </button>
             </div>
           ) : null}
-          <div className="gen-menu-item is-static">
-            <GenIcon name="star" />
-            {GEN_UI.drugoyUroven}
-          </div>
-          {levelCards(overlay.pos)}
+          {hasLevels ? (
+            <>
+              <div className="gen-menu-item is-static">
+                <GenIcon name="star" />
+                {GEN_UI.drugoyUroven}
+              </div>
+              {levelCards(overlay.pos)}
+            </>
+          ) : null}
           <button
             type="button"
             className="gen-menu-item is-danger"

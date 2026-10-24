@@ -152,13 +152,6 @@ export const TRENAZHER_2 = {
   sOtkrytymResheniem: 'Решено с подсказками или открытым решением',
 } as const;
 
-/* ── Вкладка «Генератор» ────────────────────────────────────────── */
-
-export const GENERATOR_2 = {
-  gruppa: 'Группа',
-  vse: 'Все',
-} as const;
-
 /* ── Вкладка «Для репетиторов» ──────────────────────────────────── */
 
 export const REPETITORY_2 = {

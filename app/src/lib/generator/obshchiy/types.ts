@@ -23,6 +23,8 @@ export interface GenSubtype {
   /** Код на экране: 'ПР-04'. */
   code: string;
   title: string;
+  /** Название с формулами, набранное KaTeX; нет — title текстом. */
+  titleHtml?: string;
   level: Level;
   /** Задач в открытом банке; 0 — только генерируются. */
   bank: number;
@@ -32,6 +34,8 @@ export interface GenTopic {
   /** 'PR'. */
   id: string;
   title: string;
+  /** Название с формулами, набранное KaTeX; нет — title текстом. */
+  titleHtml?: string;
   /** Подпись вместо «в банке N»: «не входит в ЕГЭ». */
   note?: string;
   /** Источники, в которых тема доступна. Нет поля — во всех. */
@@ -68,13 +72,18 @@ export interface GenConfig {
   section: string;
   sheet: { chip: string; title: string; course: string; teacher: string };
   topics: GenTopic[];
+  /** Уровни сложности; пусто — у раздела их нет: фильтра и «Другого уровня» нет. */
   levels: { level: Level; words: string }[];
   sources: { id: SourceId; title: string; short: string; note: string }[];
   /** Первый — по умолчанию. */
   presets: GenPreset[];
   limits: { maxPerTopic: number; maxTasks: number; variantsMax: number };
-  /** «Дополнительно» к листу; нет поля — раздел его не поддерживает. */
-  extras?: { kinds: { id: string; title: string }[] };
+  /**
+   * «Дополнительно» к листу; нет поля — раздел его не поддерживает.
+   * theory, examples: false — рамки теории или разобранных примеров у
+   * раздела нет, переключателя тоже.
+   */
+  extras?: { kinds: { id: string; title: string }[]; theory?: boolean; examples?: boolean };
 }
 
 /**
@@ -121,9 +130,10 @@ export interface GenState {
   extras: GenExtras;
   /**
    * Набор открыт по адресу прежнего генератора: лист собирается по
-   * старой схеме, как был напечатан, в том же режиме листа — значение
-   * и есть код режима из того адреса («v», «o»). Первая правка состава
-   * переводит набор на ключи позиций.
+   * старой схеме, как был напечатан. Значение понимает адаптер раздела:
+   * у №11 и №1 — код режима листа из того адреса («v», «o»), у №2 —
+   * сам прежний адрес. Первая правка состава переводит набор на ключи
+   * позиций.
    */
   legacy?: string;
 }
@@ -168,4 +178,9 @@ export interface GenEngine {
   parse: (query: URLSearchParams) => (GenState & { seed: string }) | null;
   /** Подзаголовок листа: «Вариант в формате ЕГЭ». */
   subtitle: (state: GenState) => string;
+  /**
+   * Лист с адреса прежнего генератора умеет замены по-старому. Нет —
+   * «Заменить» на таком листе сначала переводит набор на ключи позиций.
+   */
+  legacyZameny?: boolean;
 }

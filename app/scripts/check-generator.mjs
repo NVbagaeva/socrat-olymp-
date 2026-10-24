@@ -34,6 +34,8 @@ const S11 = requireSrc('lib/zadanie11/sheet11.ts');
 const { dannyeTrenazhera1 } = requireSrc('lib/planimetriya/trenazher/dannye.ts');
 const A1 = requireSrc('lib/planimetriya/generator1.ts');
 const S1 = requireSrc('lib/planimetriya/sheet1.ts');
+const A2 = requireSrc('lib/vektory/generator2.ts');
+const S2 = requireSrc('lib/vektory/sheet2.ts');
 const { GEN_UI } = requireSrc('content/generatorUi.ts');
 
 let failed = 0;
@@ -93,6 +95,30 @@ const RAZDELY = [
     oldIds: 'p01,p01,p05',
     urok: 'm=u&i=m&u=2&k=K7Q2AA&seed=K7Q2',
   },
+  (() => {
+    const config2 = A2.config2('/zadaniya/2');
+    /* У №2 нет «сборки» — лист строится по вариантам; задачи только генерируются. */
+    const sobrat = (p) => ({
+      poVariantam: S2.sheetVariants2(p, true).map((blocks) => blocks.flatMap((b) => b.tasks)),
+    });
+    return {
+      name: '№2',
+      config: config2,
+      engine: A2.engine2(config2, '/zadaniya/2'),
+      params: (st) => A2.paramsIzSostoyaniya(st, config2),
+      parse: (q) => S2.parseSheetQuery2(q),
+      query: (p) => S2.sheetQuery2(p),
+      sobrat,
+      spec: (p, list, vid, qr) => S2.sheetSpec2(p, vid !== 'uchenik', qr),
+      primery: () => [],
+      badge: 'z2-sheet-badge',
+      ist: null,
+      ramka: false,
+      old: 's=A1,B3&n=5&v=3&seed=K7Q2&t=color&c=1&k=%D0%94%D0%BE%D0%BC%D0%B0%D1%88%D0%BD%D1%8F%D1%8F+%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0',
+      oldIds: 'A1,A1,A1,B3,B3',
+      urok: 's=A1,B2&bank=1&t=color&c=1',
+    };
+  })(),
 ];
 
 function specOf(R, state, vid) {
@@ -107,7 +133,9 @@ const stripTags = (html) => html.replace(/<[^>]+>/g, '');
 /** Задачи листа: ключ позиции → условие. */
 function byPos(sheet) {
   const out = {};
-  for (const v of sheet.variants) for (const t of v) out[t.pos] = t.questionHtml;
+  /* Задача — условие и рисунок: у задач «по рисунку» текст бывает один. */
+  for (const v of sheet.variants)
+    for (const t of v) out[t.pos] = t.questionHtml + (t.figureSvg ?? '');
   return out;
 }
 /** Позиции, что есть в обоих листах, но с разными задачами. */
@@ -161,7 +189,9 @@ async function proverit(R) {
         const uchHtml = JSON.stringify(specOf(R, state, 'uchenik'));
         ok(
           uch.every((t) => t.solutionHtml === null) &&
-            !new RegExp(`sheet-task-answer|${R.badge}|${R.ist}`).test(uchHtml),
+            !new RegExp(`sheet-task-answer|${R.badge}${R.ist === null ? '' : `|${R.ist}`}`).test(
+              uchHtml,
+            ),
           `${label}/${seed}: на листе ученика нет ответов, решений и пометок`,
         );
         const teaSpec = specOf(R, state, 'uchitel');
@@ -169,16 +199,19 @@ async function proverit(R) {
           !JSON.stringify(teaSpec).includes(R.badge),
           `${label}/${seed}: у задач учителя нет плашек «банк»/«новая»`,
         );
-        ok(
-          teaSpec.extraItems.filter((x) => x.includes(R.ist)).length === state.variants,
-          `${label}/${seed}: строка источника у каждого варианта`,
-        );
+        /* Строка источника — у разделов с открытым банком. */
+        if (R.ist !== null)
+          ok(
+            teaSpec.extraItems.filter((x) => x.includes(R.ist)).length === state.variants,
+            `${label}/${seed}: строка источника у каждого варианта`,
+          );
         const bankNos = sheet.variants[0].filter((t) => t.fromBank).map((t) => t.no);
         const line = teaSpec.extraItems.find((x) => x.includes(R.ist)) ?? '';
-        ok(
-          stripTags(line) === GEN_UI.istochnikStroka(bankNos, state.plan.length),
-          `${label}/${seed}: строка источника совпадает с задачами банка (${stripTags(line)})`,
-        );
+        if (R.ist !== null)
+          ok(
+            stripTags(line) === GEN_UI.istochnikStroka(bankNos, state.plan.length),
+            `${label}/${seed}: строка источника совпадает с задачами банка (${stripTags(line)})`,
+          );
 
         const zameny = {
           [G.posKey(1, state.plan[0])]: 2,
@@ -274,7 +307,9 @@ async function proverit(R) {
         /* Лист печати по ссылке — тот же, что на экране. */
         const link = engine.hrefs(z1).link.split('?')[1];
         const p = R.parse(new URLSearchParams(link));
-        const printed = R.sobrat(p).poVariantam.flatMap((v) => v.map((t) => t.questionHtml));
+        const printed = R.sobrat(p).poVariantam.flatMap((v) =>
+          v.map((t) => t.questionHtml + (t.figureSvg ?? '')),
+        );
         const shown = Object.values(r1);
         ok(
           p.poKlyucham === true && JSON.stringify(printed) === JSON.stringify(shown),
@@ -297,7 +332,10 @@ async function proverit(R) {
         st.seed === 'K7Q2',
       'адрес листа прежнего генератора открывается',
     );
-    ok(st !== null && st.levels.length > 0, 'уровни выводятся из подтипов, если в адресе их нет');
+    ok(
+      st !== null && (config.levels.length === 0 || st.levels.length > 0),
+      'уровни выводятся из подтипов, если в адресе их нет',
+    );
     const was = R.sobrat(R.parse(new URLSearchParams(q))).poVariantam.flatMap((v) =>
       v.map((t) => t.questionHtml),
     );
@@ -335,8 +373,9 @@ async function proverit(R) {
         const label = `${preset.id}/${seed}`;
         const base = { ...G.stateFromPreset(config, preset, 'mix'), seed };
         const extras = {
-          theory: true,
-          examples: 2,
+          /* У №2 рамок и примеров нет: только вид работы, дата, учитель, QR. */
+          theory: R.ramka !== false,
+          examples: R.ramka === false ? 0 : 2,
           qr: true,
           kind: 'kr',
           date: '2026-10-24',
@@ -359,23 +398,25 @@ async function proverit(R) {
         const a = await engine.build(base);
         const b = await engine.build(st);
         ok(diffTasks(a, b).length === 0, `${label}: задачи от «Дополнительно» не меняются`);
-        ok(
-          b.variants.every(
-            (v) => v[0]?.lead?.includes('gen-recap') && v[0].lead.includes('gen-example'),
-          ),
-          `${label}: в предпросмотре рамка и примеры перед задачами`,
-        );
+        if (R.ramka !== false)
+          ok(
+            b.variants.every(
+              (v) => v[0]?.lead?.includes('gen-recap') && v[0].lead.includes('gen-example'),
+            ),
+            `${label}: в предпросмотре рамка и примеры перед задачами`,
+          );
         const p = R.params(st);
         const list = R.sobrat(p);
         for (const vid of ['uchenik', 'uchitel']) {
           const spec = R.spec(p, list, vid, '<svg></svg>');
           const blocks = blocksOf(spec);
           const titles = spec.variants ? spec.variants.map((v) => v.title) : [spec.title];
-          ok(
-            blocks.some((x) => x.recap?.items.length > 0) &&
-              blocks.some((x) => (x.leadItems ?? []).length > 0),
-            `${label}/${vid}: рамка и примеры на листе`,
-          );
+          if (R.ramka !== false)
+            ok(
+              blocks.some((x) => x.recap?.items.length > 0) &&
+                blocks.some((x) => (x.leadItems ?? []).length > 0),
+              `${label}/${vid}: рамка и примеры на листе`,
+            );
           ok(
             titles.every(
               (t) => t.qr === '<svg></svg>' && t.subtitle.startsWith('Контрольная работа'),
@@ -394,10 +435,11 @@ async function proverit(R) {
         }
         const primery = R.primery(p, list);
         const zadachi = new Set(list.poVariantam.flat().map((z) => z.questionHtml));
-        ok(
-          primery.length > 0 && primery.every((x) => !zadachi.has(x)),
-          `${label}: примеры не повторяют задачи листа (${primery.length})`,
-        );
+        if (R.ramka !== false)
+          ok(
+            primery.length > 0 && primery.every((x) => !zadachi.has(x)),
+            `${label}: примеры не повторяют задачи листа (${primery.length})`,
+          );
         const noQr = R.spec(
           R.params({ ...st, extras: { ...extras, qr: false } }),
           list,

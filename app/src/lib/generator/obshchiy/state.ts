@@ -419,7 +419,7 @@ export function problems(config: GenConfig, state: GenState): string[] {
     if (n > config.limits.maxPerTopic) out.push(`${t}: больше ${config.limits.maxPerTopic}`);
   }
   if (state.variants < 1 || state.variants > config.limits.variantsMax) out.push('число вариантов');
-  if (state.levels.length === 0) out.push('нет уровней');
+  if (config.levels.length > 0 && state.levels.length === 0) out.push('нет уровней');
   if (new Set(state.plan.map(slotKey)).size !== state.plan.length) out.push('повтор позиции');
   for (const { id } of state.plan) {
     const t = topicOfSubtype(config, id);

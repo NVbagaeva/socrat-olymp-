@@ -175,6 +175,8 @@ export function engine11(
   const query = (state: GenState & { seed: string }) =>
     sheetQuery11(paramsIzSostoyaniya(state, config));
   return {
+    /* Прежний лист этого раздела умеет замены по номеру позиции. */
+    legacyZameny: true,
     async build(state) {
       const { sobratList, peredZadachami } = await import('./sheet11');
       const p = paramsIzSostoyaniya(state, config);

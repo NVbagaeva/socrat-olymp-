@@ -31,6 +31,7 @@ export function GenSheetView({
   teacher,
   demo,
   live,
+  levels = true,
   extras,
   qr,
   onAction,
@@ -42,6 +43,8 @@ export function GenSheetView({
   teacher: boolean;
   demo: boolean;
   live: boolean;
+  /** У раздела есть уровни — у задачи кнопка «Другой уровень». */
+  levels?: boolean;
   /** «Дополнительно»: учитель и дата в шапке. null — пример листа. */
   extras: GenExtras | null;
   /** QR-код на лист ученика, SVG. */
@@ -224,14 +227,16 @@ export function GenSheetView({
                   >
                     <GenIcon name="swap" />
                   </button>
-                  <button
-                    type="button"
-                    title={GEN_UI.drugoyUroven}
-                    aria-label={`${GEN_UI.drugoyUroven}: ${t.no}`}
-                    onClick={() => onAction(t.pos, 'level')}
-                  >
-                    <GenIcon name="star" />
-                  </button>
+                  {levels ? (
+                    <button
+                      type="button"
+                      title={GEN_UI.drugoyUroven}
+                      aria-label={`${GEN_UI.drugoyUroven}: ${t.no}`}
+                      onClick={() => onAction(t.pos, 'level')}
+                    >
+                      <GenIcon name="star" />
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     title={GEN_UI.ubrat}

@@ -57,6 +57,12 @@ const SHEETS = [
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
   ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  /* №2 на общем генераторе: ключи позиций, QR-код, вид работы и дата. */
+  [
+    '№2 из генератора',
+    '/zadaniya/2/pechat/',
+    'ps=2&s=A1:2,B3:2,B9:1,C1:1&seed=print-check&qr=1&d=2026-10-24',
+  ],
   /* №11 с «Дополнительно» общего генератора: рамка теории, примеры,
      QR-код, вид работы и дата в шапке. */
   [
