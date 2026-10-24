@@ -73,6 +73,7 @@
     "test:variant": "node scripts/check-variant.mjs",
     "test:variant-online": "node scripts/check-variant-online.mjs",
     "test:variant-online-site": "node scripts/check-variant-online-site.mjs",
+    "test:chast2": "node scripts/check-chast2.mjs",
     "test:povyshennye": "node scripts/check-povyshennye.mjs",
     "test:povyshennye-site": "node scripts/check-povyshennye-site.mjs",
     "build:bank-13": "node scripts/build-bank-13.mjs",
