@@ -30,17 +30,19 @@ export const SHEET_KINDS: readonly SheetKind[] = ['uchenik', 'uchitel', 'razbor'
 /** Клетка чертежа, мм: чуть мельче, чем у листов разделов, — лист компактный. */
 const CELL = 3.0;
 
-/** Рисунки разделов на листе варианта мельче: справа от текста — не шире этого, мм. */
+/**
+ * Рисунки разделов на листе варианта мельче: справа от текста — не шире
+ * FIG_SIDE_MAX мм. Под условие рисунок встаёт, только если так просит
+ * раздел (дерево, мост): широкий график справа короче, а лист — компактнее.
+ */
 const FIG_SCALE = 0.8;
-const FIG_SIDE_MAX = 56;
-/** Рисунок шире этого (до сжатия), мм, встаёт под условие. */
-const FIG_WIDE = 72;
+const FIG_SIDE_MAX = 50;
 const FIG_BELOW_MAX = 110;
 
-/** Размер рисунка на листе варианта: сжатие и правило «широкий — под текст». */
+/** Размер рисунка на листе варианта. */
 export function sheetFigure(f: Figure): { width: number | undefined; below: boolean } {
-  if (f.width === undefined) return { width: undefined, below: f.below === true };
-  const below = f.below === true || f.width > FIG_WIDE;
+  const below = f.below === true;
+  if (f.width === undefined) return { width: undefined, below };
   const w = f.width * FIG_SCALE;
   return { width: Math.round(Math.min(w, below ? FIG_BELOW_MAX : FIG_SIDE_MAX) * 10) / 10, below };
 }
@@ -137,12 +139,13 @@ function topLevel(html: string): Piece[] {
 /**
  * Куски решения для потока листа. Список шагов (`<ol>`) режется по
  * пунктам с сохранением нумерации (`start`), обёртка из нескольких
- * детей — по детям; остальное идёт целиком.
+ * детей — по детям; глубже не режется: этап решения раздела (плашка с
+ * заголовком и выкладками) остаётся целым.
  */
 export function splitSolution(html: string, depth = 0): string[] {
   const pieces = topLevel(html);
   return pieces.flatMap((p) => {
-    if (p.open === null || p.name === null || depth > 1) return [p.html];
+    if (p.open === null || p.name === null || depth > 0) return [p.html];
     const kids = topLevel(p.inner).filter((k) => k.html.trim() !== '');
     if (kids.length < 2 || p.html.length < 1500) return [p.html];
     if (p.name === 'ol' || p.name === 'ul') {
@@ -167,6 +170,15 @@ export function splitSolution(html: string, depth = 0): string[] {
 
 function item(cls: string, html: string, attrs = ''): string {
   return `<div class="sheet-item ${cls}"${attrs}>${html}</div>`;
+}
+
+/* Короткий кусок-заголовок («Решаем», «Рассуждаем», подпись шага) не
+   остаётся последним на странице: уезжает вниз вместе со следующим. */
+const HEAD_CHUNK = /^<(p|h\d|b|strong)\b[^>]*>[^<]{0,80}<\/\1>$/;
+
+function solutionItem(cls: string, chunk: string): string {
+  const head = chunk.includes('var-razbor__h') || HEAD_CHUNK.test(chunk.trim());
+  return item(cls, chunk, head ? ' data-keep-with-next="1"' : '');
 }
 
 function figureItem(f: Figure | null, cls: string): string {
@@ -325,7 +337,7 @@ function blocksUchitel(
       leadItems: [
         figureItem(t.figureTeacher, 'var-sol var-sol__fig'),
         /* Строку «Ответ: …» ставит адаптер в конце решения (razborAnswer). */
-        ...splitSolution(sol).map((chunk) => item('var-sol', chunk)),
+        ...splitSolution(sol).map((chunk) => solutionItem('var-sol', chunk)),
       ].filter((x) => x !== ''),
       tasks: [],
     });
@@ -351,7 +363,7 @@ function blocksRazbor(tasks: readonly VariantTask[], meta: VariantMeta): unknown
       head: false,
       title: '',
       note: '',
-      leadItems: splitSolution(sol).map((chunk) => item('var-sol var-razbor-item', chunk)),
+      leadItems: splitSolution(sol).map((chunk) => solutionItem('var-sol var-razbor-item', chunk)),
       tasks: [],
     });
   });

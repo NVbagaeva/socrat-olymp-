@@ -254,9 +254,11 @@ generators.push({
     variants: random() < 0.05 ? 2 : 1,
     vid: random() < 0.3 ? 'full' : 'compact',
     zachet: random() < 0.05,
+    /* Лист урока вкладки «Для репетиторов»: состав задаёт урок. */
+    urok: random() < 0.15 ? 1 + Math.floor(random() * 6) : 0,
   }),
   hrefs: (s, seed) => {
-    const p = { ...P13.GEN_PARAMS_13, sostav: s.sostav, variants: s.variants, vid: s.vid, zachet: s.zachet, seed };
+    const p = { ...P13.GEN_PARAMS_13, sostav: s.sostav, variants: s.variants, vid: s.vid, zachet: s.zachet, urok: s.urok, seed };
     return { student: P13.listHref13(p, 'uchenik'), teacher: P13.listHref13(p, 'uchitel') };
   },
   spec: (href, teacher) => {

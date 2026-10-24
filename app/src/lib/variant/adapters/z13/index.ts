@@ -1,12 +1,12 @@
 /**
  * Адаптер задания №13: банк движка (BANK_13, по 10 seed на прототип)
  * и новые задачи того же прототипа, когда банк в партии кончился.
- * Разметку задачи собирает генератор раздела (`sobrat`, gen/list.ts):
+ * Разметку задачи собирает генератор раздела (`sobratZadachu13`, gen/list.ts):
  * условие с таблицей, полное решение по шагам.
  */
 
 import { BANK_13 } from '@/lib/zadanie13/bank';
-import { sobrat, tablitsaUsloviya13 } from '@/lib/zadanie13/gen/list';
+import { sobratZadachu13, tablitsaUsloviya13 } from '@/lib/zadanie13/gen/list';
 import { otvetText } from '@/lib/zadanie13/html';
 import { PROTOTYPE_BY_ID } from '@/lib/zadanie13/proto';
 import type { TypeCode } from '@/lib/zadanie13/types';
@@ -35,7 +35,8 @@ function stars(d: 'base' | 'hard'): Stars {
 
 function candidate(prototypeId: string, seed: string): C13 | null {
   const p = PROTOTYPE_BY_ID[prototypeId];
-  if (p === undefined || !TYPES.includes(p.type)) return null;
+  /* «Таблица руками» (P-…) — тренировка оформления, в ЕГЭ такой задачи нет. */
+  if (p === undefined || prototypeId.startsWith('P-') || !TYPES.includes(p.type)) return null;
   return {
     taskId: `${prototypeId}:${seed}`,
     prototypeId,
@@ -52,7 +53,7 @@ const POOL: C13[] = BANK_13.flatMap(([id, seed]) => {
 });
 
 function build(c: C13, isNew: boolean): VariantTask {
-  const z = sobrat({
+  const z = sobratZadachu13({
     pos: '1.1',
     no: 1,
     vid: c.subtype as TypeCode,

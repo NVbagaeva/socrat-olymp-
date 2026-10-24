@@ -141,12 +141,14 @@
   color: var(--color-text-inverse);
 }
 .var-chip__label {
+  display: -webkit-box;
   min-width: 0;
+  overflow: hidden;
   font-size: var(--fs-caption);
   line-height: 1.25;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  hyphens: auto;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .var-chip:not(.is-on) .var-chip__label {
   text-decoration: line-through;

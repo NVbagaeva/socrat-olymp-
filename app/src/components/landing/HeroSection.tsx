@@ -17,6 +17,11 @@ export function HeroSection() {
     <section className="hero">
       <HeroLines />
 
+      {/* На телефоне и планшете кадр стоит над текстом и занимает первый
+          экран — плашка «Собрать вариант» встаёт над ним, чтобы её было
+          видно без прокрутки. На широком экране — среди кнопок. */}
+      <VariantEntry className="hero__variant hero__variant--top" />
+
       <div className="hero__media">
         <HeroImage />
       </div>
@@ -35,7 +40,7 @@ export function HeroSection() {
         <div className="hero__actions">
           {/* Главное действие — плашка «Собрать вариант»: на телефоне она
               на первом экране, без прокрутки. */}
-          <VariantEntry className="hero__variant" />
+          <VariantEntry className="hero__variant hero__variant--actions" />
           {/* Рядом с главной кнопкой — вход в инструкцию и тур. */}
           <Link className="hero__howto" href={HOWTO_HREF}>
             <span className="hero__howto-ico" aria-hidden="true">

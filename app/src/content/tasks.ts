@@ -208,7 +208,7 @@ export const tasks = [
     shortTitle: 'Финансовая грамотность',
     slug: '13',
     part: 1,
-    status: 'soon',
+    status: 'ready',
     badges: ['структура 2027'],
   },
 
