@@ -1,12 +1,15 @@
 'use client';
 
 /**
- * Хранилище прогресса задания №13: опорные задачи — общая фабрика
- * lib/progressStore.ts со своим ключом. Исход каждой задачи блока
- * хранится под «блок:номер».
+ * Хранилища прогресса задания №13: тренажёр и опорные задачи — общая
+ * фабрика lib/progressStore.ts со своими ключами. Исход задачи блока
+ * хранится под «блок:номер», задачи тренажёра — под «прототип|seed».
  */
 
 import { createProgressStore, type StoreProgress } from '../progressStore';
+
+/** Тренажёр: счётчики по прототипам и список ошибок («A-01|b3»). */
+export const trenazher13 = createProgressStore('budetege:zadanie-13:v1');
 
 /** Опорные задачи: исход каждой задачи блока. */
 export const opornye13 = createProgressStore('budetege:zadanie-13:opornye:v1');

@@ -638,3 +638,235 @@
   line-height: var(--lh-lg);
   overflow-x: auto;
 }
+
+/* ── Тренажёр: выбор ───────────────────────────────────────────── */
+
+.z13-tr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  max-width: 880px;
+}
+.z13-tr__lead {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.z13-tr__blok {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.z13-tr__h {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+.z13-tr__h4 {
+  margin-top: var(--space-3);
+  font-weight: 600;
+}
+.z13-tr__knopki {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: var(--space-2);
+}
+.z13-tr__knopki--chisla {
+  grid-template-columns: repeat(3, minmax(0, 96px));
+}
+.z13-tr__knopka {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.z13-tr__knopki--chisla .z13-tr__knopka {
+  text-align: center;
+}
+.z13-tr__knopka:hover {
+  border-color: var(--color-accent-soft);
+}
+.z13-tr__knopka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.z13-tr__knopka.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.z13-tr__knopka-label {
+  font-weight: 600;
+}
+.z13-tr__knopka-note {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z13-tr__dop {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z13-tr__dop > summary {
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  cursor: pointer;
+}
+.z13-tr__dop-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-4);
+}
+.z13-tr__oshibki {
+  margin-top: var(--space-3);
+}
+.z13-tr__pusto {
+  color: var(--color-error);
+}
+
+/* ── Тренажёр: задача ──────────────────────────────────────────── */
+
+.z13-resh {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  max-width: 880px;
+}
+.z13-resh__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.z13-resh__bar {
+  flex: 1 0 100%;
+}
+.z13-resh__uslovie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-2);
+}
+.z13-resh__text {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z13-resh__otvet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.z13-resh__input {
+  flex: 1 1 200px;
+  max-width: 320px;
+}
+.z13-resh__dop,
+.z13-resh__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+.z13-resh__links a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Оформление: схема, первая строка таблицы, шаги решения. */
+.z13-of {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.z13-of__shag {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z13-of__no {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z13-of__q {
+  font-family: var(--font-serif);
+  line-height: var(--lh-lg);
+}
+.z13-of__note {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+}
+.z13-of__done {
+  padding: var(--space-2) var(--space-4);
+  border-left: 3px solid var(--color-success);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-lg);
+}
+.z13-of__done b {
+  color: var(--color-text);
+}
+.z13-of__comment {
+  color: var(--color-success);
+}
+.z13-of__stroka {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+  gap: var(--space-3);
+}
+.z13-of__label {
+  grid-column: 1 / -1;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.z13-of__kletka {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.z13-of__title {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z13-of__dano {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.z13-of__dano.is-right {
+  background: var(--color-success-soft);
+}
+.z13-of__vvod {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+}
+.z13-of__pokazat {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
