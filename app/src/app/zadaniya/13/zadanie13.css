@@ -988,3 +988,159 @@
 .z13-rep .z11-urok__polosa .is-t {
   background: var(--color-accent-text);
 }
+
+/* ── О задании ─────────────────────────────────────────────────── */
+/* Колонки и «С чего начать» — общие слои «О задании» №11 (z11-about);
+   здесь карточки типов, таблица признаков и строки-пометки. */
+
+.z13-about__edinicy {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft-surface);
+  border: 1px solid var(--color-border-accent);
+}
+.z13-about-tipy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z13-about-tip {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+/* Раскрытый пример — на всю ширину сетки: таблицы и решение не теснятся. */
+.z13-about-tip:has(.z13-about-tip__primer.open) {
+  grid-column: 1 / -1;
+}
+.z13-about-tip__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z13-about-tip__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 700;
+}
+.z13-about-tip__ikonka {
+  flex: none;
+  width: 2rem;
+  height: 1.5rem;
+  fill: var(--color-text-brand);
+}
+.z13-about-tip__title {
+  margin: 0;
+  font-size: 1.05em;
+}
+.z13-about-tip__priznak {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z13-about-tip__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.z13-about-tip__links a {
+  color: var(--color-text-brand);
+  font-weight: 600;
+}
+.z13-about-tip__primer {
+  min-width: 0;
+}
+.z13-about-priznaki {
+  overflow-x: auto;
+  margin-top: var(--space-3);
+}
+.z13-about-priznaki table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+}
+.z13-about-priznaki th,
+.z13-about-priznaki td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  text-align: left;
+  vertical-align: top;
+}
+.z13-about-priznaki thead th {
+  background: var(--color-surface-soft);
+}
+.z13-about-priznaki tbody th {
+  white-space: nowrap;
+  color: var(--color-text-brand);
+}
+.z13-about__skoro {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* Широкая таблица признаков прокручивается в своей рамке и не
+   распирает колонку на телефоне. */
+.z13-about {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1280px) {
+  .z13-about {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+.z13-about .z11-about__main > section {
+  min-width: 0;
+}
+.z13-about .z11-about__lead a,
+.z13-about .z11-start__step-title {
+  color: var(--color-text-brand);
+}
+.z13-about .z11-start__step-title {
+  text-decoration: none;
+}
+/* Телефон: строка таблицы признаков — карточка: тип, что видим, почему. */
+@media (max-width: 40rem) {
+  .z13-about-priznaki table {
+    min-width: 0;
+  }
+  .z13-about-priznaki thead {
+    display: none;
+  }
+  .z13-about-priznaki tbody {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .z13-about-priznaki tr {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border-info);
+    border-radius: var(--radius-lg);
+  }
+  .z13-about-priznaki th,
+  .z13-about-priznaki td {
+    padding: 0;
+    border: 0;
+  }
+  .z13-about-priznaki tbody th {
+    order: -1;
+    white-space: normal;
+  }
+  .z13-about-priznaki tbody td:last-child {
+    color: var(--color-text-secondary);
+  }
+}
