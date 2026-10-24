@@ -71,7 +71,15 @@ import type { Prototype as Proto7 } from '@/lib/zadanie7/types';
 import { subtype as subtype11 } from '@/lib/zadanie11/prototypes';
 import { generateFixed } from '@/lib/zadanie13/generate';
 import { PEOPLE, type PlotFull } from '@/lib/zadanie13/plots';
-import { obshchayaSummaGod, type ObshchayaSumma } from '@/lib/zadanie13/proto/povyshennye';
+import {
+  obshchayaSummaGod,
+  posledniyPlatezh,
+  stavkaVklada,
+  type ObshchayaSumma,
+  type PosledniyPlatezh,
+  type StavkaVklada,
+} from '@/lib/zadanie13/proto/povyshennye';
+import type { Prototype as Proto13 } from '@/lib/zadanie13/proto/types';
 import type { Params as Params7 } from '@/lib/zadanie7/types';
 import type { Params as Params6 } from '@/lib/zadanie6/types';
 import type { Params as ParamsVer } from '@/lib/veroyatnost/types';
@@ -455,7 +463,7 @@ interface Syuzhet13 {
   year: number;
 }
 
-function z13(p: ObshchayaSumma & Syuzhet13, klyuch: string): Gotovaya {
+function z13(proto: Proto13, p: Syuzhet13, klyuch: string): Gotovaya {
   const person = PEOPLE.find((x) => x.name === p.imya) ?? { name: p.imya, g: 'm' as const };
   const plot: PlotFull = {
     deck: 'варианты',
@@ -467,9 +475,13 @@ function z13(p: ObshchayaSumma & Syuzhet13, klyuch: string): Gotovaya {
     g: person.g,
     firm: false,
   };
-  const task = generateFixed(obshchayaSummaGod(p), plot, klyuch);
+  const task = generateFixed(proto, plot, klyuch);
   return bezPoley(
-    build13({ ...kand, seed: klyuch, prototypeId: task.prototypeId, subtype: 'A' }, false, task),
+    build13(
+      { ...kand, seed: klyuch, prototypeId: task.prototypeId, subtype: proto.type },
+      false,
+      task,
+    ),
   );
 }
 
@@ -840,7 +852,23 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip:
       'Экономика, тип A: годовой дифференцированный, общая сумма выплат в рублях (как A-01, рамка «июль»)',
     otkuda: 'novyy',
-    zadacha: (p: ObshchayaSumma & Syuzhet13, klyuch: string) => z13(p, klyuch),
+    zadacha: (p: ObshchayaSumma & Syuzhet13, klyuch: string) =>
+      z13(obshchayaSummaGod(p), p, klyuch),
+  },
+  'z13.stavka-vklada': {
+    ege: 13,
+    prototip:
+      'Экономика, тип D (вклады): пополнение через год, ставка по итоговой сумме — квадратное уравнение относительно k (как D-12)',
+    otkuda: 'novyy',
+    zadacha: (p: StavkaVklada & Syuzhet13, klyuch: string) => z13(stavkaVklada(p), p, klyuch),
+  },
+  'z13.posledniy-platezh': {
+    ege: 13,
+    prototip:
+      'Экономика, тип B: долг каждый июль меньше на q %, последний платёж в рублях (рамка «июль», как B-кредиты с заданным путём долга)',
+    otkuda: 'novyy',
+    zadacha: (p: PosledniyPlatezh & Syuzhet13, klyuch: string) =>
+      z13(posledniyPlatezh(p), p, klyuch),
   },
 };
 
