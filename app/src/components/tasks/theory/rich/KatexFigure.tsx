@@ -1,19 +1,10 @@
 import { clsx } from 'clsx';
-import { THEME, renderGraph } from '@/lib/graph/renderer.js';
 import { typeset } from '@/lib/tex';
 import { theoryFigure, type TheoryFigureId } from '@/lib/theoryFigures';
+import { LABEL_SIZE, layoutFigure } from '@/lib/theoryLabels';
 
-/** Кегль подписи по умолчанию, пиксели натурального размера чертежа. */
-const LABEL_SIZE = 17;
 /** Мельче этого подпись не становится и на узком экране. */
 const LABEL_MIN = 11;
-
-interface Box {
-  xmin: number;
-  xmax: number;
-  ymin: number;
-  ymax: number;
-}
 
 /**
  * Чертёж теории с подписями KaTeX.
@@ -22,30 +13,48 @@ interface Box {
  * поверх, отдельным слоем, и набраны KaTeX на сборке: внутрь SVG
  * KaTeX не встраивается, а математика на сайте — только KaTeX.
  *
- * Место подписи считается тем же правилом, что у движка: поле pad и
- * клетка cell пикселей. Позиции — в процентах от размера чертежа, кегль
- * — в долях ширины контейнера (cqw): при уменьшении рисунка на телефоне
- * подписи уменьшаются вместе с ним и не уезжают с места.
+ * Место подписи считает lib/theoryLabels.ts: подписи осей и надписи —
+ * там, где их поставил автор; подписи точек (auto) подбирает общий
+ * модуль размещения graph/labels.js, так что рамка не пересекает кривую,
+ * оси, пунктиры и другие подписи. Позиции — в процентах от размера
+ * чертежа, кегль — в долях ширины контейнера (cqw): при уменьшении
+ * рисунка на телефоне подписи уменьшаются вместе с ним и не уезжают.
  */
 export function KatexFigure({ id, className }: { id: TheoryFigureId; className?: string }) {
   const figure = theoryFigure(id);
-  const scene = figure.scene as { window: Box; cell?: number };
-  const geometry = THEME.geometry as { pad: number; cell: number };
-  const cell = scene.cell ?? geometry.cell;
-  const w = scene.window;
-  const width = (w.xmax - w.xmin) * cell + geometry.pad * 2;
-  const height = (w.ymax - w.ymin) * cell + geometry.pad * 2;
-  const svg = renderGraph(figure.scene) as string;
+  const layout = layoutFigure(figure);
+  const { width, height } = layout;
+  const leaders = layout.labels.filter((item) => item.leader !== null);
 
   return (
     <figure className={clsx('kfig', className)} style={{ maxWidth: `${width}px` }}>
-      <span className="kfig__svg" dangerouslySetInnerHTML={{ __html: svg }} />
-      {figure.labels.map((label, index) => {
-        const x = geometry.pad + (label.at[0] - w.xmin) * cell + (label.dx ?? 0);
-        const y = geometry.pad + (w.ymax - label.at[1]) * cell + (label.dy ?? 0);
+      <span className="kfig__svg" dangerouslySetInnerHTML={{ __html: layout.svg }} />
+      {leaders.length === 0 ? null : (
+        <svg
+          className="kfig__leaders"
+          viewBox={`0 0 ${width} ${height}`}
+          aria-hidden="true"
+          focusable="false"
+        >
+          {leaders.map((item, index) => (
+            <line
+              key={index}
+              x1={item.leader!.x1}
+              y1={item.leader!.y1}
+              x2={item.leader!.x2}
+              y2={item.leader!.y2}
+            />
+          ))}
+        </svg>
+      )}
+      {layout.labels.map((item, index) => {
+        const label = item.label;
         const size = label.size ?? LABEL_SIZE;
-        const shift =
-          label.anchor === 'left'
+        /* Подпись точки — по центру подобранной рамки; ручная подпись —
+           от точки привязки по настоящей ширине (anchor). */
+        const shift = item.auto
+          ? '-50%, -50%'
+          : label.anchor === 'left'
             ? '0, -50%'
             : label.anchor === 'right'
               ? '-100%, -50%'
@@ -53,10 +62,14 @@ export function KatexFigure({ id, className }: { id: TheoryFigureId; className?:
         return (
           <span
             key={index}
-            className={clsx('kfig__label', `kfig__label--${label.tone ?? 'ink'}`)}
+            className={clsx(
+              'kfig__label',
+              `kfig__label--${label.tone ?? 'ink'}`,
+              item.auto && 'kfig__label--point',
+            )}
             style={{
-              left: `${((x / width) * 100).toFixed(3)}%`,
-              top: `${((y / height) * 100).toFixed(3)}%`,
+              left: `${((item.anchorX / width) * 100).toFixed(3)}%`,
+              top: `${((item.y / height) * 100).toFixed(3)}%`,
               fontSize: `clamp(${LABEL_MIN}px, ${((size / width) * 100).toFixed(3)}cqw, ${size}px)`,
               transform: `translate(${shift})`,
             }}
