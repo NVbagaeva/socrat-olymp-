@@ -365,6 +365,8 @@ export interface VariantSheetOptions {
    * никогда: по коду на сайте собирается и лист с ответами.
    */
   showCode: boolean;
+  /** Подпись варианта на листе; не задана — «Вариант n» по номеру в партии. */
+  variantLabel?: (index: number) => string;
 }
 
 /** Описание документа для `buildDocument` (lib/sheet/sheet.js). */
@@ -400,7 +402,10 @@ export function variantSheetSpec(
           chip: T.chip[kind],
           text: opts.workTitle,
           subtitle,
-          variant: meta.variantLabels === 'blank' ? T.variantBlank : T.variant(v.index),
+          variant:
+            meta.variantLabels === 'blank'
+              ? T.variantBlank
+              : (opts.variantLabel ?? T.variant)(v.index),
         },
         /* Поля «Фамилия / Класс / Дата» — только у листа ученика. */
         fields:

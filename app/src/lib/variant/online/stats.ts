@@ -40,16 +40,23 @@ export interface Stats {
 export const WEAK_RATE = 0.6;
 
 /** Работы одной серии (партии) или все — по времени завершения. */
-export function computeStats(works: readonly ArchivedWork[], code: string | null = null): Stats {
+export function computeStats(
+  works: readonly ArchivedWork[],
+  code: string | null = null,
+  /** Подпись точки графика; не задана — «В3» в серии, дата вне серии. */
+  label?: (w: ArchivedWork) => string,
+): Stats {
   const list = works
     .filter((w) => code === null || w.code === code)
     .slice()
     .sort((a, b) => a.finishedAt - b.finishedAt);
   const trend: TrendPoint[] = list.map((w) => ({
     label:
-      code === null
-        ? new Date(w.finishedAt).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })
-        : `В${w.variant}`,
+      label !== undefined
+        ? label(w)
+        : code === null
+          ? new Date(w.finishedAt).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })
+          : `В${w.variant}`,
     finishedAt: w.finishedAt,
     value: w.test ?? (w.max === 0 ? 0 : Math.round((w.primary / w.max) * 100)),
     test: w.test !== null,

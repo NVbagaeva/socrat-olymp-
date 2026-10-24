@@ -54,38 +54,55 @@ export function attempt(p: Prototype, seed: string, i: number): Attempt {
   return { draft, plot, problems: draftProblems(p, draft) };
 }
 
+/** Задача из принятого черновика: общая часть generate и generateFixed. */
+function zadacha(p: Prototype, draft: Draft, plot: PlotFull, seed: string): Task13 {
+  return {
+    id: `13.${p.id}:${seed}`,
+    taskNumber: 13,
+    type: p.type,
+    subtype: p.subtype,
+    prototypeId: p.id,
+    source: p.source,
+    ...(p.sourceNote ? { sourceNote: p.sourceNote } : {}),
+    difficulty: p.difficulty,
+    seed,
+    condition: draft.condition,
+    ...(draft.conditionTable ? { conditionTable: draft.conditionTable } : {}),
+    answer: draft.answer.toNumber(),
+    units: draft.units ?? p.units,
+    ...(draft.vopros ? { vopros: draft.vopros } : {}),
+    solution: draft.solution,
+    hints: draft.hints,
+    tableModel: toTableModel(draft.rows, draft.scheme, draft.period, {
+      ...(draft.labels ? { labels: draft.labels } : {}),
+      ...(draft.extra ? { extra: draft.extra } : {}),
+    }),
+    plot: { deck: plot.deck, who: plot.who, goal: plot.goal, year: plot.year },
+    params: draft.params,
+  };
+}
+
 export function generate(prototypeId: string, seed: string): Task13 {
   const p = PROTOTYPE_BY_ID[prototypeId];
   if (!p) throw new Error(`Нет прототипа ${prototypeId}`);
   for (let i = 0; i < MAX_TRIES; i++) {
     const { draft, plot, problems } = attempt(p, seed, i);
     if (!draft || problems.length) continue;
-    return {
-      id: `13.${p.id}:${seed}`,
-      taskNumber: 13,
-      type: p.type,
-      subtype: p.subtype,
-      prototypeId: p.id,
-      source: p.source,
-      ...(p.sourceNote ? { sourceNote: p.sourceNote } : {}),
-      difficulty: p.difficulty,
-      seed,
-      condition: draft.condition,
-      ...(draft.conditionTable ? { conditionTable: draft.conditionTable } : {}),
-      answer: draft.answer.toNumber(),
-      units: draft.units ?? p.units,
-      ...(draft.vopros ? { vopros: draft.vopros } : {}),
-      solution: draft.solution,
-      hints: draft.hints,
-      tableModel: toTableModel(draft.rows, draft.scheme, draft.period, {
-        ...(draft.labels ? { labels: draft.labels } : {}),
-        ...(draft.extra ? { extra: draft.extra } : {}),
-      }),
-      plot: { deck: plot.deck, who: plot.who, goal: plot.goal, year: plot.year },
-      params: draft.params,
-    };
+    return zadacha(p, draft, plot, seed);
   }
   throw new Error(`${prototypeId}: за ${MAX_TRIES} попыток не нашлось задачи для seed «${seed}»`);
+}
+
+/**
+ * Задача на заданных числах и сюжете (варианты повышенной сложности):
+ * без перебора seed, те же проверки, что у generate. Не прошла — ошибка.
+ */
+export function generateFixed(p: Prototype, plot: PlotFull, seed: string): Task13 {
+  const draft = p.make({ rng: rng13(p.id, seed), plot });
+  if (!draft) throw new Error(`${p.id}: параметры не подошли`);
+  const problems = draftProblems(p, draft);
+  if (problems.length) throw new Error(`${p.id}: ${problems.join('; ')}`);
+  return zadacha(p, draft, plot, seed);
 }
 
 export function prototypes(): PrototypeInfo[] {

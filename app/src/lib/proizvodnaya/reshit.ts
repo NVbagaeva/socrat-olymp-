@@ -176,6 +176,10 @@ export function reshit(fig: Figura, zapros: Zapros): number | null {
       const found = nuli(y, p, q).filter((z) => z.tip === 'plus-minus' || z.tip === 'minus-plus');
       return found.length === 1 ? (found[0] as { x: number }).x : null;
     }
+    case 'max-na-otrezke': {
+      const found = nuli(y, p, q).filter((z) => z.tip === 'plus-minus');
+      return found.length === 1 ? (found[0] as { x: number }).x : null;
+    }
     case 'naib-na-otrezke':
     case 'naim-na-otrezke': {
       const candidates = [

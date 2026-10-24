@@ -73,6 +73,8 @@
     "test:variant": "node scripts/check-variant.mjs",
     "test:variant-online": "node scripts/check-variant-online.mjs",
     "test:variant-online-site": "node scripts/check-variant-online-site.mjs",
+    "test:povyshennye": "node scripts/check-povyshennye.mjs",
+    "test:povyshennye-site": "node scripts/check-povyshennye-site.mjs",
     "build:bank-13": "node scripts/build-bank-13.mjs",
     "test:zadanie15": "node scripts/check-zadanie15.mjs",
     "test:chertezh3": "node scripts/check-chertezh3.mjs",

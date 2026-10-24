@@ -5,6 +5,7 @@
  * же прототипа с другими числами).
  */
 
+import { povNomer } from '@/lib/povyshennye/kod';
 import { rngOf } from '@/lib/vychisleniya/rng';
 import { loadAdapters } from '../load';
 import { buildSet, currentVersion, readCode } from '../session';
@@ -20,6 +21,13 @@ export interface LoadedSet {
 
 /** Собрать партию по коду. null — код не читается. */
 export async function loadSet(code: string): Promise<LoadedSet | null> {
+  /* Варианты повышенной сложности: набор версий раздела, не партия. */
+  const pv = povNomer(code);
+  if (pv !== null) {
+    const { povSet } = await import('@/lib/povyshennye/set');
+    const set = await povSet(pv);
+    return set === null ? null : { set, outdated: false, failed: [] };
+  }
   const d = readCode(code);
   if (d === null) return null;
   const built = await buildSet(d.config, d.seed, d.zameny);
@@ -111,6 +119,19 @@ export async function oshibkiTasks(
     const ids = used.get(t.egeNumber) ?? new Set<string>();
     ids.add(t.taskId);
     used.set(t.egeNumber, ids);
+  }
+  /* Варианты повышенной сложности: аналог — то же задание соседней
+     версии (тот же шаблон, другие числа). */
+  if (povNomer(set.code) !== null) {
+    const out: OshibkiItem[] = [];
+    for (const i of wrong) {
+      const task = tasks[i];
+      if (task === undefined) continue;
+      out.push({ task, from: i, analog: false });
+      const sosed = set.variants[variant % set.variants.length]?.tasks[i];
+      if (sosed !== undefined) out.push({ task: sosed, from: i, analog: true });
+    }
+    return out;
   }
   const numbers = [
     ...new Set(wrong.map((i) => tasks[i]?.egeNumber).filter((n) => n !== undefined)),

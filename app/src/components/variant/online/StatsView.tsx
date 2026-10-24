@@ -59,11 +59,14 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
 export function StatsView({
   works,
   code,
+  label,
 }: {
   works: readonly ArchivedWork[];
   code: string | null;
+  /** Подпись точки графика баллов (раздел вариантов: «7.3»). */
+  label?: (w: ArchivedWork) => string;
 }) {
-  const s = computeStats(works, code);
+  const s = computeStats(works, code, label);
   if (s.works === 0) return <p className="vo-note">{T.stats.empty}</p>;
   const anyTest = s.trend.some((p) => p.test);
   const maxAvg = Math.max(1, ...s.numbers.map((n) => n.avgSeconds ?? 0));

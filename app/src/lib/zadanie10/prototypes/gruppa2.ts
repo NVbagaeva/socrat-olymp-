@@ -475,7 +475,12 @@ const P17: Prototype = {
     const h0 = q(num(p, 'h0'));
     const v = num(p, 'v0');
     const H = num(p, 'H');
-    const k = kvadratQ(q(5), q(-v), sub(q(H), h0));
+    /* Коэффициент при t² (половина ускорения): у задач банка 5, у
+       вариантов повышенной сложности бывает другой — параметр g2. */
+    const g = typeof p.g2 === 'number' ? p.g2 : 5;
+    /* Кто летит — для разбора; у задач банка это мяч. */
+    const kto = typeof p.kto === 'string' ? p.kto : 'Мяч';
+    const k = kvadratQ(q(g), q(-v), sub(q(H), h0));
     const [t1, t2] = k.roots;
     const dt = sub(t2, t1);
     const ans = val(dt);
@@ -495,10 +500,10 @@ const P17: Prototype = {
           dano('H', H, 'м', 'отметка высоты'),
         ],
         ishchem: [
-          `Нужно $h(t)\\ge${d(H)}$: $${fq(h0, true)}+${d(v)}t-5t^2\\ge${d(H)}$. Мяч поднимается, пересекает отметку в момент $t_1$, потом падает и пересекает её снова в момент $t_2$. Ищем $t_2-t_1$.`,
+          `Нужно $h(t)\\ge${d(H)}$: $${fq(h0, true)}+${d(v)}t-${d(g)}t^2\\ge${d(H)}$. ${kto} поднимается, пересекает отметку в момент $t_1$, потом падает и пересекает её снова в момент $t_2$. Ищем $t_2-t_1$.`,
         ],
         vid: 'neravenstvo',
-        reshaem: [`$${poly(5, -v, val(sub(q(H), h0)), 't')}\\le0$.`, ...k.lines],
+        reshaem: [`$${poly(g, -v, val(sub(q(H), h0)), 't')}\\le0$.`, ...k.lines],
         koren: [
           `Неравенство выполняется между корнями: $${fq(t1, true)}\\le t\\le${fq(t2, true)}$. Оба корня нужны — это вход и выход из зоны над отметкой.`,
         ],

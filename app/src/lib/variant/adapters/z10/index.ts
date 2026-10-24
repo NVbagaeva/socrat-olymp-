@@ -33,7 +33,7 @@ import { razbor10Html } from './razbor';
 /** Ширина чертежа моста на листе, мм — как на листе №10 (List10, SHIRINA_MM.most). */
 const SHIRINA_MOSTA_MM = 84;
 
-interface C10 extends Candidate {
+export interface C10 extends Candidate {
   z: Zadacha10Variant;
 }
 
@@ -67,7 +67,7 @@ function otvetSEdinicami(answer: number, edinicy: string): string {
   return /^[°%]/.test(edinicy) ? `${x}${typeset(edinicy)}` : `${x}&nbsp;${typeset(edinicy)}`;
 }
 
-function build(c: C10): VariantTask {
+export function build(c: C10): VariantTask {
   const { z } = c;
   const p = prototype(z.prototypeId);
   const s = p.solve(z.params);

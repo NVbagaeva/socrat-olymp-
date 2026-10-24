@@ -36,7 +36,7 @@ import {
 } from '../common';
 import { info } from './info';
 
-interface C9 extends Candidate {
+export interface C9 extends Candidate {
   seed: string;
 }
 
@@ -96,6 +96,11 @@ function build(c: C9, isNew: boolean): VariantTask | null {
   } catch {
     return null;
   }
+  return buildIz(c, t, isNew);
+}
+
+/** Задача из уже собранной задачи раздела (банк или заданные узлы). */
+export function buildIz(c: C9, t: Generated, isNew: boolean): VariantTask {
   const student = drawFigure(t, 'student');
   const teacher = drawFigure(t, 'teacher');
   const otvet = answerHtml(t.otvet);

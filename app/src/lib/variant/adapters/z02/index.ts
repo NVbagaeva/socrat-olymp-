@@ -26,7 +26,7 @@ import {
 } from '../common';
 import { info } from './info';
 
-interface C02 extends Candidate {
+export interface C02 extends Candidate {
   seed: string;
   /** Номер варианта банка; null — новая задача. */
   n: number | null;
@@ -64,7 +64,7 @@ function figureOf(svg: string): Figure {
     : { svg, width: Math.round((Number(box[1]) / CELL_UNITS) * CELL_MM * 100) / 100 };
 }
 
-function build(c: C02, task: Generated): VariantTask {
+export function build(c: C02, task: Generated): VariantTask {
   const risunok = task.risunok;
   const condition = risunok === null ? null : renderVectorPlane(risunok);
   const withLegs = risunok === null ? null : renderVectorPlane({ ...risunok, hints: true });
