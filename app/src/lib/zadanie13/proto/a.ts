@@ -34,6 +34,7 @@ import {
   tex,
   TIP_VYVOD,
 } from './common';
+import { stChisla, stFormula, stTablitsaBukvy } from './razbor';
 import type { Prototype } from './types';
 import { difPereplata, type DifItog } from '../reshenie';
 import type { SolutionStep } from '../types';
@@ -753,20 +754,43 @@ function makeSchedule(id: string, equal: boolean): Prototype {
         period: 'month',
         labels: tbl.dates.slice(1),
         solution: [
-          stTable(
-            'Считаем в процентах от кредита: кредит — 100 %. Сумма изменения долга за месяц — разность соседних чисел графика, переплата — ' +
-              num(r) +
-              ' % от долга на начало месяца.',
+          stTablitsaBukvy(
+            'Долги на 15-е число $D_{1}, \\dots, D_{5}$ заданы графиком; после последней выплаты долг равен $0$. Сумма изменения долга за месяц — разность соседних долгов, переплата — $r\\,\\%$ от долга на начало месяца.',
+            {
+              podpis: '',
+              period: 'month',
+              scheme: 'dif',
+              rows: [1, 2, 3, 4, 5, 6].map((i) => {
+                const pred = i === 1 ? 'S' : `D_{${i - 1}}`;
+                const kon = i === 6 ? '0' : `D_{${i}}`;
+                return {
+                  label: tbl.dates[i] ?? String(i),
+                  cells: [
+                    pred,
+                    `${pred} - ${kon}`.replace(' - 0', ''),
+                    `${pred}\\cdot \\dfrac{r}{100}`,
+                    kon,
+                  ] as [string, string, string, string],
+                };
+              }),
+              itog: ['S', 'P'],
+              strelka: '$r\\,\\%$ начисляется на долг на начало месяца',
+            },
           ),
           step(
-            'Сумма изменений долга',
-            'Долг уменьшился со 100 % до нуля, значит, все изменения вместе дают 100 %, то есть $S$.',
-            'S',
+            'Составляем уравнение',
+            'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Вся сумма выплат $Z$ — кредит плюс переплата $P$, а на сколько процентов $Z$ больше $S$ — это $P$ в процентах от $S$, обозначим $x\\,\\%$.',
+            'Z = S + P, \\qquad P = \\dfrac{r}{100}\\,(S + D_{1} + \\dots + D_{5}), \\qquad x = \\dfrac{P}{S}\\cdot 100',
           ),
-          step(
-            'Складываем переплаты',
-            'Переплата — ставка, умноженная на сумму долгов на начало месяцев.',
-            `\\frac{${tex(r)}}{100}\\,(${starts.map((x) => tex(x)).join(' + ')}) = \\frac{${tex(r)}}{100}\\cdot ${tex(T)} = ${tex(p)}`,
+          stFormula(
+            'Делим переплату на $S$: долги в процентах от кредита — числа графика, $S$ — это $100\\,\\%$.',
+            'x = \\dfrac{r}{100}\\cdot\\Big(100 + \\dfrac{D_{1}}{S}\\cdot 100 + \\dots + \\dfrac{D_{5}}{S}\\cdot 100\\Big)',
+          ),
+          stChisla(
+            `$r = ${tex(r)}$, долги по графику: ${starts.map((x) => `$${tex(x)}\\,\\%$`).join(', ')}.`,
+            [
+              `x = \\dfrac{${tex(r)}}{100}\\cdot (${starts.map((x) => tex(x)).join(' + ')}) = \\dfrac{${tex(r)}}{100}\\cdot ${tex(T)} = ${tex(p)}`,
+            ],
           ),
           stAnswer(`Общая сумма выплат больше кредита на ${pct(p)}.`),
         ],
@@ -1270,7 +1294,7 @@ const A18: Prototype = {
   sourceNote: 'авторская (рабочая тетрадь)',
   difficulty: 'base',
   units: 'rub',
-  title: 'Платёж $k$-го месяца',
+  title: 'Платёж $m$-го месяца',
   forbid: [{ S: 900000, n: 5, r: 2, k: 3 }],
   make({ rng, plot }) {
     const n = rng.int(4, 12);
@@ -1290,32 +1314,64 @@ const A18: Prototype = {
       period: 'month',
       extra: [k],
       solution: [
-        stTable(
-          `Сумма изменения долга каждый месяц: $\\dfrac{${tex(S)}}{${n}} = ${tex(S.div(n))}$.`,
+        stTablitsaBukvy(
+          'Долг каждый месяц уменьшается на одну и ту же сумму $\\dfrac{S}{n}$; долг на начало $i$-го месяца — $n - i + 1$ таких частей. Переплата — $r\\,\\%$ от долга на начало месяца. Номер месяца из вопроса — $m$.',
+          {
+            podpis: '',
+            period: 'month',
+            scheme: 'dif',
+            rows: [
+              {
+                label: '1',
+                cells: ['S', '\\dfrac{S}{n}', 'S\\cdot \\dfrac{r}{100}', '\\dfrac{(n-1)S}{n}'],
+              },
+              {
+                label: '2',
+                cells: [
+                  '\\dfrac{(n-1)S}{n}',
+                  '\\dfrac{S}{n}',
+                  '\\dfrac{(n-1)S}{n}\\cdot \\dfrac{r}{100}',
+                  '\\dfrac{(n-2)S}{n}',
+                ],
+              },
+              null,
+              {
+                label: 'm',
+                cells: [
+                  '\\dfrac{(n-m+1)S}{n}',
+                  '\\dfrac{S}{n}',
+                  '\\dfrac{(n-m+1)S}{n}\\cdot \\dfrac{r}{100}',
+                  '\\dfrac{(n-m)S}{n}',
+                ],
+              },
+              null,
+              {
+                label: 'n',
+                cells: [
+                  '\\dfrac{S}{n}',
+                  '\\dfrac{S}{n}',
+                  '\\dfrac{S}{n}\\cdot \\dfrac{r}{100}',
+                  '0',
+                ],
+              },
+            ],
+            itog: ['S', 'P'],
+            strelka: '$r\\,\\%$ начисляется на долг на начало месяца',
+          },
         ),
         step(
-          `Долг в начале ${k}-го месяца`,
-          `Прошло ${k - 1} ${k - 1 === 1 ? 'месяц' : k - 1 < 5 ? 'месяца' : 'месяцев'}, долг уменьшился на столько же сумм изменения.`,
-          `${tex(S)} - ${k - 1}\\cdot ${tex(S.div(n))} = ${tex(S.sub(S.div(n).mul(k - 1)))}`,
+          'Составляем формулу платежа',
+          'Платёж месяца — сумма изменения долга плюс переплата: берём строку $m$ таблицы.',
+          'x_{m} = \\dfrac{S}{n} + \\dfrac{(n-m+1)S}{n}\\cdot\\dfrac{r}{100}',
         ),
-        step(
-          'Переплата за месяц',
-          `${num(r)} % от долга на начало месяца.`,
-          `${tex(S.sub(S.div(n).mul(k - 1)))}\\cdot\\frac{${tex(r)}}{100} = ${tex(
-            S.sub(S.div(n).mul(k - 1))
-              .mul(r)
-              .div(100),
-          )}`,
+        stFormula(
+          'Выносим $\\dfrac{S}{n}$ за скобку.',
+          'x_{m} = \\dfrac{S}{n}\\Big(1 + \\dfrac{(n-m+1)\\,r}{100}\\Big)',
         ),
-        step(
-          'Платёж',
-          'Сумма изменения долга плюс переплата.',
-          `${tex(S.div(n))} + ${tex(
-            S.sub(S.div(n).mul(k - 1))
-              .mul(r)
-              .div(100),
-          )} = ${tex(z)}`,
-        ),
+        stChisla(`$S = ${tex(S)}$, $n = ${n}$, $m = ${k}$, $r = ${tex(r)}$.`, [
+          `\\dfrac{S}{n} = \\dfrac{${tex(S)}}{${n}} = ${tex(S.div(n))}, \\qquad n - m + 1 = ${n - k + 1}`,
+          `x_{${k}} = ${tex(S.div(n))}\\cdot\\Big(1 + \\dfrac{${n - k + 1}\\cdot ${tex(r)}}{100}\\Big) = ${tex(S.div(n))}\\cdot ${tex(D(1).add(r.mul(n - k + 1).div(100)))} = ${tex(z)}`,
+        ]),
         stAnswer(`Платёж ${k}-го месяца — ${money(z, 'rub')}.`),
       ],
       hints: [

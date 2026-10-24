@@ -13,6 +13,9 @@ import { v } from '../plots';
 import { deposit, type Row } from '../solver';
 import { money, num, pct, plural, years } from '../text';
 import { choice, hintK, hintType, isNice, largestInt, smallestInt, step, tex } from './common';
+import { depBukvy } from '../bukvy';
+import type { TablitsaPeremennye } from '../types';
+import { perenos, raskryto, stChisla, stFormula, stTablitsaBukvy, stUravnenie } from './razbor';
 import type { Prototype } from './types';
 
 /* ── Общие куски ──────────────────────────────────────────────── */
@@ -27,6 +30,15 @@ const ops = (n: number, at: Record<number, Drob>): Drob[] =>
   Array.from({ length: n }, (_, i) => at[i + 1] ?? D(0));
 
 const last = (rows: Row[]): Drob => rows[rows.length - 1]!.end;
+
+/** «= 46,25» или «≈ 46,28»: граница для целого ответа. */
+const granica = (d: Drob): string =>
+  d.isFiniteDecimal() && d.decimals() <= 3
+    ? `= ${tex(d)}`
+    : `\\approx ${tex(D(Math.floor(d.toNumber() * 100)).div(100))}`;
+
+const TEXT_VKLAD =
+  'Каждый год вклад на начало умножаем на $k = 1 + \\dfrac{r}{100}$ — получаем вклад после начисления процентов, затем добавляем пополнение или вычитаем снятие — получаем вклад на конец $V_i$.';
 
 /** Сумма k^a + … + k^b (a ≤ b). */
 const kSum = (k: Drob, from: number, to: number): Drob => {
@@ -115,6 +127,7 @@ function makeTopUp(id: 'D-01' | 'D-02'): Prototype {
       }
       if (answer === null || verify === null || answer !== S0) return null;
       const startWord = from === 2 ? 'второго, третьего и четвёртого' : 'третьего и четвёртого';
+      const deystviya = [1, 2, 3, 4].map((g) => (at[g] ? '+ y' : ''));
       const rows = deposit(S0, 4, r, { after: ops(4, at) });
       const ask = interestMode
         ? `Найдите наименьший размер первоначального вклада, при котором банк за четыре года начислит на вклад больше ${money(N, 'mln')}.`
@@ -130,32 +143,50 @@ function makeTopUp(id: 'D-01' | 'D-02'): Prototype {
         scheme: 'dep',
         period: 'year',
         solution: [
-          stTable(
-            `Считаем в миллионах рублей. $S$ — первоначальный вклад, $k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}$. Пополнение в начале года — это пополнение сразу после начисления процентов за предыдущий год.`,
+          stTablitsaBukvy(
+            `${TEXT_VKLAD} Пополнение $y$ «в начале года» — сразу после начисления процентов за предыдущий год.`,
           ),
+          stUravnenie(deystviya, {
+            D: 'V',
+            nol: false,
+            title: 'Записываем вклад через четыре года',
+          }),
           step(
-            'Записываем цепочку',
-            'Каждый год вклад умножается на $k$, после начисления добавляем пополнение. Раскрываем скобки.',
-            from === 2
-              ? `(((Sk + ${tex(x)})k + ${tex(x)})k + ${tex(x)})k = Sk^4 + ${tex(x)}(k^3 + k^2 + k)`
-              : `((Sk^2 + ${tex(x)})k + ${tex(x)})k = Sk^4 + ${tex(x)}(k^2 + k)`,
+            'Раскрываем скобки',
+            'Изнутри наружу; $y$ выносим за скобку.',
+            `V_{4} = ${raskryto(deystviya)} = Sk^{4} + y(${kSumTex(1, count)})`,
           ),
           interestMode
             ? step(
-                'Сколько начислил банк',
-                'Начисленные проценты — итог минус первоначальный вклад и минус все пополнения.',
-                `Sk^4 + ${tex(x)}(${kSumTex(1, 4 - from + 1)}) - S - ${count}\\cdot ${tex(x)} > ${tex(N)}`,
+                'Составляем неравенство',
+                'Начисленные проценты — вклад через четыре года минус первоначальный вклад и минус все пополнения.',
+                `Sk^{4} + y(${kSumTex(1, count)}) - S - ${count}y > N`,
               )
             : step(
                 'Составляем неравенство',
-                'Итог должен быть меньше заданного.',
-                `${tex(k.pow(4))}\\,S + ${tex(x.mul(tail))} < ${tex(N)}`,
+                'Вклад через четыре года должен быть меньше $N$.',
+                `Sk^{4} + y(${kSumTex(1, count)}) < N`,
               ),
-          step(
-            'Выбираем целое',
+          interestMode
+            ? stFormula(
+                'Собираем $S$ в левой части и делим на $k^4 - 1 > 0$.',
+                `S > \\dfrac{N + ${count}y - y(${kSumTex(1, count)})}{k^{4} - 1}`,
+              )
+            : stFormula(
+                'Переносим пополнения вправо и делим на $k^4$.',
+                `S < \\dfrac{N - y(${kSumTex(1, count)})}{k^{4}}`,
+              ),
+          stChisla(
+            `Считаем в миллионах рублей: $y = ${tex(x)}$, $N = ${tex(N)}$.`,
+            [
+              `k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}, \\qquad k^{4} = ${tex(k.pow(4))}, \\qquad ${kSumTex(1, count)} = ${tex(tail)}`,
+              interestMode
+                ? `S > \\dfrac{${tex(N)} + ${tex(x.mul(count))} - ${tex(x.mul(tail))}}{${tex(k.pow(4).sub(1))}} ${granica(N.add(x.mul(count)).sub(x.mul(tail)).div(k.pow(4).sub(1)))}`
+                : `S < \\dfrac{${tex(N)} - ${tex(x.mul(tail))}}{${tex(k.pow(4))}} ${granica(N.sub(x.mul(tail)).div(k.pow(4)))}`,
+            ],
             interestMode
-              ? `Неравенство выполняется начиная с $S = ${S0}$: при $S = ${S0 - 1}$ банк начислит не больше ${num(N)} млн.`
-              : `Неравенство выполняется при $S \\le ${S0}$: при $S = ${S0 + 1}$ итог уже не меньше ${num(N)} млн.`,
+              ? `Наименьшее целое — $S = ${S0}$: при $S = ${S0 - 1}$ банк начислит не больше ${num(N)} млн.`
+              : `Наибольшее целое — $S = ${S0}$: при $S = ${S0 + 1}$ вклад уже не меньше ${num(N)} млн.`,
           ),
           stAnswer(`${S0} млн рублей.`),
         ],
@@ -240,31 +271,42 @@ const D03: Prototype = {
       scheme: 'dep',
       period: 'year',
       solution: [
-        stTable(
-          `Считаем в миллионах рублей. $S$ — первоначальные вложения, $k = ${tex(k)}$; вложения добавляются после начисления процентов.`,
+        stTablitsaBukvy(
+          `${TEXT_VKLAD} Вложения после начисления: $a$ в первый и второй годы, $b$ — в третий и четвёртый.`,
+          depBukvy({ n: 4, period: 'year', dobavka: (g) => (g === 'n' || g > 2 ? 'b' : 'a') }),
         ),
+        stUravnenie(['+ a', '+ a', '+ b', '+ b'], {
+          D: 'V',
+          nol: false,
+          title: 'Записываем средства через два и через четыре года',
+        }),
+        {
+          title: 'Раскрываем скобки',
+          text: 'Изнутри наружу; через четыре года — от $V_{2}$, чтобы не повторять скобки.',
+          bloki: [
+            { vid: 'formula', tex: 'V_{2} = Sk^{2} + ak + a = Sk^{2} + a(k + 1)' },
+            {
+              vid: 'formula',
+              tex: 'V_{4} = V_{2}\\,k^{2} + bk + b = Sk^{4} + a(k^{3} + k^{2}) + b(k + 1)',
+            },
+          ],
+        },
         step(
-          'Через два года',
-          'Раскрываем скобки.',
-          `(Sk + ${tex(a)})k + ${tex(a)} = ${tex(k.pow(2))}\\,S + ${tex(a.mul(k).add(a))} > ${tex(N1)}`,
+          'Составляем неравенства',
+          'Через два года — больше $N_{1}$, через четыре — больше $N_{2}$; оба условия сразу.',
+          'Sk^{2} + a(k + 1) > N_{1}, \\qquad Sk^{4} + a(k^{3} + k^{2}) + b(k + 1) > N_{2}',
         ),
-        step(
-          'Первое условие',
-          'Выражаем $S$.',
-          `S > \\frac{${tex(N1)} - ${tex(a.mul(k).add(a))}}{${tex(k.pow(2))}} \\approx ${tex(D(Math.floor(s1.toNumber() * 100)).div(100))}`,
+        stFormula(
+          'Выражаем $S$ из каждого неравенства.',
+          'S > \\dfrac{N_{1} - a(k + 1)}{k^{2}}, \\qquad S > \\dfrac{N_{2} - a(k^{3} + k^{2}) - b(k + 1)}{k^{4}}',
         ),
-        step(
-          'Через четыре года',
-          'Ещё два года: умножаем на $k$ и добавляем вложения.',
-          `(${tex(k.pow(2))}\\,S + ${tex(a.mul(k).add(a))})k^2 + ${tex(b)}k + ${tex(b)} = ${tex(k.pow(4))}\\,S + ${tex(a.mul(k).add(a).mul(k.pow(2)).add(b.mul(k)).add(b))} > ${tex(N2)}`,
-        ),
-        step(
-          'Второе условие',
-          'Выражаем $S$.',
-          `S > \\frac{${tex(N2.sub(a.mul(k).add(a).mul(k.pow(2)).add(b.mul(k)).add(b)))}}{${tex(k.pow(4))}} \\approx ${tex(D(Math.floor(s2.toNumber() * 100)).div(100))}`,
-        ),
-        step(
-          'Выбираем целое',
+        stChisla(
+          `Считаем в миллионах рублей: $a = ${tex(a)}$, $b = ${tex(b)}$, $N_{1} = ${tex(N1)}$, $N_{2} = ${tex(N2)}$.`,
+          [
+            `k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}, \\qquad k^{2} = ${tex(k.pow(2))}, \\qquad k^{4} = ${tex(k.pow(4))}`,
+            `S > \\dfrac{${tex(N1)} - ${tex(a.mul(k.add(1)))}}{${tex(k.pow(2))}} ${granica(s1)}`,
+            `S > \\dfrac{${tex(N2)} - ${tex(a.mul(k.pow(3).add(k.pow(2))))} - ${tex(b.mul(k.add(1)))}}{${tex(k.pow(4))}} ${granica(s2)}`,
+          ],
           `Оба условия выполняются начиная с $S = ${answer}$; при $S = ${answer - 1}$ хотя бы одно нарушается.`,
         ),
         stAnswer(`${answer} млн рублей.`),
@@ -488,6 +530,7 @@ const D06: Prototype = {
     const verify = e0.neg().div(e1.sub(e0));
     const w = (i: number) =>
       i === 1 ? 'первого' : i === 2 ? 'второго' : i === 3 ? 'третьего' : 'четвёртого';
+    const deystviya = Array.from({ length: n }, () => '- x');
     return {
       condition: `${plot.subject} ${v(plot, 'открыл', 'открыла')} вклад ${plot.goal} под ${pct(r)} годовых. В конце каждого года банк начисляет проценты, после чего со вклада снимают ${money(x, 'rub')}. После ${w(n)} снятия на счёте не осталось денег. Какая сумма была положена на вклад? Ответ дайте в рублях.`,
       answer: S,
@@ -497,21 +540,26 @@ const D06: Prototype = {
       scheme: 'dep',
       period: 'year',
       solution: [
-        stTable(
-          `$S$ — первоначальный вклад, $k = ${tex(k)}$, $x = ${tex(x)}$ — снятие. Каждый год: умножаем на $k$, затем вычитаем $x$.`,
+        stTablitsaBukvy(`${TEXT_VKLAD} Каждый год снимают одну и ту же сумму $x$.`),
+        stUravnenie(deystviya, { D: 'V' }),
+        step(
+          'Раскрываем скобки',
+          'Изнутри наружу: каждое умножение на $k$ повышает степень на единицу.',
+          `${raskryto(deystviya)} = 0`,
         ),
         step(
-          'Записываем цепочку',
-          `После ${w(n)} снятия на счёте ноль. Это та же схема, что у аннуитета: вклад «гасится» равными снятиями.`,
-          n === 2
-            ? '(Sk - x)k - x = 0 \\;\\Rightarrow\\; Sk^2 = x(k + 1)'
-            : '((Sk - x)k - x)k - x = 0 \\;\\Rightarrow\\; Sk^3 = x(k^2 + k + 1)',
+          'Переносим снятия вправо и выносим $x$',
+          `Это та же схема, что у аннуитета: вклад «гасится» равными снятиями. В скобках — сумма геометрической прогрессии.`,
+          `${perenos(deystviya)} = x(${kSumTex(0, n - 1)})`,
         ),
-        step(
-          'Находим $S$',
-          'Выражаем и подставляем.',
-          `S = \\frac{x(${kSumTex(0, n - 1)})}{k^${n}} = \\frac{${tex(x)}\\cdot ${tex(kSum(k, 0, n - 1))}}{${tex(base)}} = ${tex(S)}`,
+        stFormula(
+          'Делим на $k^' + n + '$ — получаем первоначальный вклад.',
+          `S = \\dfrac{x(${kSumTex(0, n - 1)})}{k^{${n}}}`,
         ),
+        stChisla(`$x = ${tex(x)}$.`, [
+          `k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}, \\qquad k^{${n}} = ${tex(base)}, \\qquad ${kSumTex(0, n - 1)} = ${tex(kSum(k, 0, n - 1))}`,
+          `S = \\dfrac{${tex(x)}\\cdot ${tex(kSum(k, 0, n - 1))}}{${tex(base)}} = ${tex(S)}`,
+        ]),
         stAnswer(`${money(S, 'rub')}.`),
       ],
       hints: [
@@ -932,6 +980,28 @@ const D12: Prototype = {
     const fracAcc =
       fd === 2 ? 'половину' : fd === 3 ? 'треть' : fd === 4 ? 'четверть' : 'пятую часть';
     const rows = deposit(100, 2, [a, a + d], { after: [kOf(a).mul(100).mul(D(1, fd)).neg(), 0] });
+    const c = qv.div(keep);
+    const dd = D(d, 100);
+    const koren = kOf(a).mul(2).add(dd);
+    const tablitsaD12: TablitsaPeremennye = {
+      podpis: '',
+      period: 'year',
+      scheme: 'dep',
+      rows: [
+        {
+          label: '1',
+          cells: [
+            'S',
+            'Sk_{1}',
+            `-\\dfrac{1}{${fd}}\\,Sk_{1}`,
+            `V_{1} = \\dfrac{${fd - 1}}{${fd}}\\,Sk_{1}`,
+          ],
+        },
+        { label: '2', cells: ['V_{1}', 'V_{1}\\,k_{2}', '0', 'V_{2} = V_{1}\\,k_{2}'] },
+      ],
+      itog: null,
+      strelka: null,
+    };
     return {
       condition:
         `${plot.subject} ${v(plot, 'положил', 'положила')} в банк деньги ${plot.goal} под определённый процент. Через год ${frac} накопленной суммы была снята со счёта. Банк увеличил процент годовых на ${d} процентных пунктов (то есть увеличил ставку $a$ % до $(a + ${d})$ %). ` +
@@ -943,21 +1013,49 @@ const D12: Prototype = {
       scheme: 'dep',
       period: 'year',
       solution: [
-        stTable('Вклад примем за 100 %. Таблица — при найденной ставке.'),
+        stTablitsaBukvy(
+          `Первый год ставка $a\\,\\%$, множитель $k_{1} = 1 + \\dfrac{a}{100}$. Ставку увеличили на $d$ процентных пунктов: во второй год ставка $(a + d)\\,\\%$, множитель $k_{2} = 1 + \\dfrac{a + d}{100} = k_{1} + \\dfrac{d}{100}$. Через год снимают ${fracAcc} накопленной суммы.`,
+          tablitsaD12,
+        ),
+        {
+          title: 'Составляем уравнение',
+          text: `Вклад на конец года — вклад на начало следующего. Через два года сумма в $q$ раз больше первоначальной: $V_{2} = qS$.`,
+          bloki: [
+            {
+              vid: 'formula',
+              tex: `V_{1} = Sk_{1} - \\dfrac{1}{${fd}}\\,Sk_{1} = \\dfrac{${fd - 1}}{${fd}}\\,Sk_{1}`,
+            },
+            {
+              vid: 'formula',
+              tex: `V_{2} = V_{1}\\,k_{2} = \\dfrac{${fd - 1}}{${fd}}\\,Sk_{1}k_{2}`,
+            },
+            { vid: 'formula', tex: `\\dfrac{${fd - 1}}{${fd}}\\,Sk_{1}k_{2} = qS` },
+          ],
+        },
         step(
-          'Процентные пункты',
-          `«На ${d} процентных пунктов» — к ставке прибавляют ${d}: было $a$ %, стало $(a + ${d})$ %. Это не то же, что «на ${d} %»: тогда ставку умножили бы на $${tex(kOf(d))}$. Например, ${a} % + ${d} п. п. = ${a + d} %, а ${a} % + ${d} % = ${num(D(a).mul(kOf(d)))} %.`,
+          'Делим на $S$ и подставляем $k_{2}$',
+          'Первоначальный вклад сокращается — остаётся уравнение на $k_{1}$.',
+          `k_{1}\\Big(k_{1} + \\dfrac{d}{100}\\Big) = \\dfrac{${fd}q}{${fd - 1}} \\;\\Rightarrow\\; k_{1}^2 + \\dfrac{d}{100}\\,k_{1} - \\dfrac{${fd}q}{${fd - 1}} = 0`,
         ),
         step(
-          'Составляем уравнение',
-          `Через год вклад умножился на $1 + \\frac{a}{100}$, сняли ${fracAcc} — осталось $\\frac{${fd - 1}}{${fd}}$, затем ещё год под новый процент.`,
-          `\\Big(1 + \\frac{a}{100}\\Big)\\cdot\\frac{${fd - 1}}{${fd}}\\cdot\\Big(1 + \\frac{a + ${d}}{100}\\Big) = ${tex(qv)}`,
+          'Решаем квадратное уравнение относительно $k_{1}$',
+          'Множитель положительный — берём корень со знаком «плюс».',
+          `k_{1} = \\dfrac{1}{2}\\left(-\\dfrac{d}{100} + \\sqrt{\\Big(\\dfrac{d}{100}\\Big)^2 + \\dfrac{4\\cdot ${fd}q}{${fd - 1}}}\\right)`,
         ),
-        step(
-          'Решаем',
-          'Обозначим $t = 1 + \\frac{a}{100}$, получится квадратное уравнение; подходит положительный корень.',
-          `t\\Big(t + \\frac{${d}}{100}\\Big) = ${tex(qv.div(keep))} \\;\\Rightarrow\\; t = ${tex(kOf(a))},\\; a = ${a}`,
+        stFormula(
+          'Новая ставка — старая плюс $d$ пунктов.',
+          'a = 100\\,(k_{1} - 1), \\qquad a + d = 100\\,(k_{1} - 1) + d',
         ),
+        stChisla(`$d = ${d}$, $q = ${tex(qv)}$.`, [
+          `\\dfrac{${fd}q}{${fd - 1}} = ${tex(c)}, \\qquad \\dfrac{d}{100} = ${tex(dd)}`,
+          `k_{1} = \\dfrac{1}{2}\\big(-${tex(dd)} + \\sqrt{${tex(dd.mul(dd))} + ${tex(c.mul(4))}}\\big) = \\dfrac{-${tex(dd)} + ${tex(koren)}}{2} = ${tex(kOf(a))}`,
+          `a = 100\\,(${tex(kOf(a))} - 1) = ${a}, \\qquad a + d = ${a} + ${d} = ${a + d}`,
+        ]),
+        {
+          title: 'Внимание на формулировку',
+          text: `«На ${d} процентных пунктов» — к ставке прибавляют ${d}. Это не то же, что «на ${d} %»: тогда ставку умножили бы на $${tex(kOf(d))}$. Например, ${a} % + ${d} п. п. = ${a + d} %, а ${a} % + ${d} % = ${num(D(a).mul(kOf(d)))} %.`,
+          vid: 'vnimanie',
+        },
         stAnswer(`Новый процент годовых — ${a + d} %.`),
       ],
       hints: [

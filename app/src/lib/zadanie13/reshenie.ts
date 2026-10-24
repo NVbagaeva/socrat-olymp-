@@ -133,7 +133,7 @@ function zakonomernost(k: Kredit13, period: 'month' | 'year'): ShagBlok[] {
   const nS = fr(`${nT}S`, nT);
   const shag = fr('S', nT);
   const kogo = period === 'year' ? 'года' : 'месяца';
-  const obshiy = k.n === null ? fr('(n-k+1)S', 'n') : fr(`(${k.n + 1}-k)S`, k.n);
+  const obshiy = k.n === null ? fr('(n-i+1)S', 'n') : fr(`(${k.n + 1}-i)S`, k.n);
   return [
     {
       vid: 'text',
@@ -143,7 +143,7 @@ function zakonomernost(k: Kredit13, period: 'month' | 'year'): ShagBlok[] {
     { vid: 'formula', tex: `${d(1)} - ${shag} = ${d(2)}` },
     {
       vid: 'text',
-      text: `Каждый ${period === 'year' ? 'год' : 'месяц'} числитель уменьшается на одно $S$: долг на начало $k$-го ${kogo} равен $${obshiy}$, а после последнего платежа долг равен $0$.`,
+      text: `Каждый ${period === 'year' ? 'год' : 'месяц'} числитель уменьшается на одно $S$: долг на начало $i$-го ${kogo} равен $${obshiy}$, а после последнего платежа долг равен $0$.`,
     },
   ];
 }

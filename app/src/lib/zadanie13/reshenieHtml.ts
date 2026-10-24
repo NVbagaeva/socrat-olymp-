@@ -46,7 +46,7 @@ function strelka(podpis: string): string {
 
 /** Таблица в переменных со стрелкой над шапкой. */
 export function tablitsaPeremennyeHtml(t: TablitsaPeremennye): string {
-  const h = TABLE_HEAD.dif;
+  const h = TABLE_HEAD[t.scheme ?? 'dif'];
   const head =
     `<tr><th scope="col">${esc(h.period[t.period])}</th>` +
     h.cols.map((c) => `<th scope="col">${esc(c)}</th>`).join('') +
@@ -60,14 +60,16 @@ export function tablitsaPeremennyeHtml(t: TablitsaPeremennye): string {
     )
     .join('');
   const itog =
-    `<tr class="z13-r-table__itog"><th scope="row">Итого</th><td></td>` +
-    `<td>${stroka(t.itog[0])}</td><td>${stroka(t.itog[1])}</td><td></td></tr>`;
+    t.itog === null
+      ? ''
+      : `<tr class="z13-r-table__itog"><th scope="row">Итого</th><td></td>` +
+        `<td>${stroka(t.itog[0])}</td><td>${stroka(t.itog[1])}</td><td></td></tr>`;
   return (
     `<figure class="z13-r-tab">` +
     (t.podpis ? `<figcaption>${typeset(t.podpis)}</figcaption>` : '') +
     `<div class="z13-r-tab__scroll"><table class="z13-r-table">` +
     `<colgroup><col class="z13-r-table__c0"><col><col><col><col></colgroup>` +
-    `<thead>${strelka(t.strelka)}${head}</thead><tbody>${body}${itog}</tbody></table></div></figure>`
+    `<thead>${t.strelka === null ? '' : strelka(t.strelka)}${head}</thead><tbody>${body}${itog}</tbody></table></div></figure>`
   );
 }
 
