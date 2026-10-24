@@ -30,18 +30,46 @@
 
 /* ── Ч/б: штриховка вместо заливки ─────────────────────────────── */
 
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-tile--favorable rect,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-cell--favorable rect,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-unit--highlighted,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-part {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-tile--favorable
+  rect,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-cell--favorable
+  rect,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-unit--highlighted,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-part {
   fill: url(#sheet-hatch);
   fill-opacity: 1;
   stroke: var(--sheet-ink);
 }
 
 /* Подпись на штриховке: чёрная с белой обводкой, чтобы читалась. */
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-tile--favorable text,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-cell--favorable text {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-tile--favorable
+  text,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-cell--favorable
+  text {
   fill: var(--sheet-ink);
   stroke: var(--sheet-paper);
   stroke-width: 3px;
@@ -50,62 +78,149 @@
 }
 
 /* Плитки и клетки без заливки: только контур. */
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-tile rect,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-cell rect,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-whole {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-tile
+  rect,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-cell
+  rect,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-whole {
   fill: var(--sheet-paper);
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-tile--favorable rect,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-cell--favorable rect {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-tile--favorable
+  rect,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-cell--favorable
+  rect {
   fill: url(#sheet-hatch);
 }
 
 /* Координатная прямая: области условий — редкой штриховкой в разные
    стороны, пересечение выходит клеткой; сам благоприятный отрезок
    на оси — толстая чёрная линия. */
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-band {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-band {
   fill: url(#sheet-hatch-light);
   fill-opacity: 1;
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-band ~ .pr-band {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-band
+  ~ .pr-band {
   fill: url(#sheet-hatch-back);
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-favorable {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-favorable {
   stroke-width: 7;
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-bound {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-bound {
   fill: var(--sheet-paper);
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-bound--inclusive {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-bound--inclusive {
   fill: var(--sheet-ink);
 }
 
 /* Дерево: смысл несёт толщина. Выделенный путь толстый, остальные
    тонкие; полупрозрачного приглушения нет. */
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-branch line {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-branch
+  line {
   stroke: var(--sheet-ink);
   stroke-width: 1.2;
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-branch--highlighted line {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-branch--highlighted
+  line {
   stroke-width: 4.5;
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-branch--dimmed,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-leaf--dimmed,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-unit--dimmed,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-legend--dimmed {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-branch--dimmed,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-leaf--dimmed,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-unit--dimmed,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-legend--dimmed {
   opacity: 1;
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-branch--dimmed .pr-branch-p,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict'])
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-branch--dimmed
+  .pr-branch-p,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
   .pr-branch--dimmed
   .pr-branch-label,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-leaf--dimmed {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-leaf--dimmed {
   fill: var(--sheet-ink-3);
 }
 
 /* Подпись условия над штрихованной областью — с белой обводкой,
    иначе на штрихах она не читается. */
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .pr-band-label {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .pr-band-label {
   stroke: var(--sheet-paper);
   stroke-width: 4px;
   paint-order: stroke;
@@ -128,22 +243,53 @@
    ксероксе от них остаётся грязь. Остаются стены сплошными чернилами
    и подписи. Классов в файле нет, поэтому селекторы по атрибутам:
    тело стен — заливка градиентом, декор — обводки, кружки и вставки. */
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint * {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .sheet-labirint
+  * {
   filter: none;
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict'])
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
   .sheet-labirint
   path[fill='url(#glass)'] {
   fill: var(--sheet-ink);
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint g[clip-path],
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict'])
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .sheet-labirint
+  g[clip-path],
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
   .sheet-labirint
   path[stroke]:not([stroke='none']),
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint circle,
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint use {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .sheet-labirint
+  circle,
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .sheet-labirint
+  use {
   display: none;
 }
-:root:is([data-sheet-theme='print'], [data-sheet-theme='strict']) .sheet-labirint text {
+:root:is(
+    [data-sheet-theme='print'],
+    [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  )
+  .sheet-labirint
+  text {
   fill: var(--sheet-ink);
 }
