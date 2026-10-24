@@ -11,6 +11,7 @@ import { archiveVolatile, saveWork } from '@/lib/variant/online/archive';
 import {
   ONLINE_PATHS,
   oshibkiScope,
+  rabotaScope,
   reshatHref,
   seriyaHref,
   workScope,
@@ -18,6 +19,9 @@ import {
 } from '@/lib/variant/online/link';
 import { normalizeAnswer, sameAnswer } from '@/lib/variant/online/normalize';
 import { Chast2Itog } from '@/components/chast2/Chast2Itog';
+import { RabotaOtpravka } from '@/components/chast2/RabotaOtpravka';
+import type { RabotaCtx } from '@/components/chast2/rabotaCtx';
+import { CHAST2_TEXT as C2 } from '@/content/variantOnline/chast2Text';
 import { ballyChast2, type Chast2Ui } from '@/lib/chast2/sostoyanie';
 import {
   fullPartOne,
@@ -49,6 +53,8 @@ export interface WorkRunProps {
   outdated: boolean;
   /** Ссылка открыта со страницы серии: в итогах — «К серии». */
   series: boolean;
+  /** Работа, выданная в кабинете: ответы — в неё, итог — отправка учителю. */
+  rabota?: RabotaCtx;
 }
 
 /** Название работы по типу из шапки: «Домашняя работа», своё. */
@@ -76,7 +82,7 @@ function firstAttempts(payload: WorkPayload, ui: WorkUi): string[] {
  * Проверка — через `Proverka` (lib/variant/online/proverka.ts): на этапе
  * 1 в браузере, на этапе 2 — на сервере, экран тот же.
  */
-export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
+export function WorkRun({ link, initial, outdated, series, rabota }: WorkRunProps) {
   const [mode, setMode] = useState<'work' | 'oshibki'>('work');
   const snapshot = useRef<WorkUi | null>(null);
   const emptyRef = useRef('');
@@ -91,9 +97,11 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
   /* Версия варианта повышенной сложности называется по разделу: «Вариант 7.3». */
   const pv = povNomer(link.code);
   const title =
-    pv === null
-      ? `${kindTitle(link.kind, link.title)} · ${T.start.variant(link.variant)}`
-      : `${POV_TITLE} · ${POV_VERSION_LABEL(versiyaText(pv, link.variant))}`;
+    rabota !== undefined
+      ? `${rabota.sw.work.title} · ${pv === null ? T.start.variant(link.variant) : POV_VERSION_LABEL(versiyaText(pv, link.variant))}`
+      : pv === null
+        ? `${kindTitle(link.kind, link.title)} · ${T.start.variant(link.variant)}`
+        : `${POV_TITLE} · ${POV_VERSION_LABEL(versiyaText(pv, link.variant))}`;
 
   /* Итоги варианта остаются на месте, пока идёт работа над ошибками:
      «К результатам варианта» возвращает к ним, а не к началу. */
@@ -109,7 +117,11 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
       ) : null}
       <div hidden={mode === 'oshibki'}>
         <TrainerSessionHost<WorkPayload, WorkUi>
-          scope={workScope(link.code, link.variant, link.mode)}
+          scope={
+            rabota === undefined
+              ? workScope(link.code, link.variant, link.mode)
+              : rabotaScope(rabota.id)
+          }
           what="вариант"
           isPayload={isWorkPayload}
           count={(p) => p.tasks.length + part2Of(p).length}
@@ -127,8 +139,8 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
               link.mode === 'kontrol'
                 ? (ui) => Object.values(ui.answers).filter((v) => normalizeAnswer(v).ok).length
                 : undefined,
-            finish: T.run.finish,
-            finishLong: T.run.finish,
+            finish: rabota === undefined ? T.run.finish : C2.rabota.finish,
+            finishLong: rabota === undefined ? T.run.finish : C2.rabota.finish,
             finishTitle: T.run.finishTitle,
             finishText: () =>
               emptyRef.current === '' ? T.run.finishAll : T.run.finishEmpty(emptyRef.current),
@@ -136,10 +148,24 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
             pausable: link.mode === 'trening',
             clock: link.mode === 'trening' && link.timer.kind === 'up',
           }}
-          summaryView={(data) => {
+          summaryView={(data, actions) => {
             const payload = data.payload as WorkPayload;
             const ui = snapshot.current;
             if (ui === null) return null;
+            if (rabota !== undefined) {
+              return (
+                <RabotaOtpravka
+                  payload={payload}
+                  ui={ui}
+                  rabota={rabota}
+                  onBack={() => {
+                    rabota.reload();
+                    actions.onNew();
+                  }}
+                  onSent={rabota.reload}
+                />
+              );
+            }
             return (
               <Finished
                 payload={payload}
@@ -156,15 +182,19 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
               />
             );
           }}
-          configurator={({ start }) => (
-            <StartScreen
-              link={link}
-              title={title}
-              count={initial.tasks.length + part2Of(initial).length}
-              outdated={outdated}
-              onStart={() => start({ ...initial })}
-            />
-          )}
+          configurator={({ start }) =>
+            rabota === undefined ? (
+              <StartScreen
+                link={link}
+                title={title}
+                count={initial.tasks.length + part2Of(initial).length}
+                outdated={outdated}
+                onStart={() => start({ ...initial })}
+              />
+            ) : (
+              <RabotaStart rabota={rabota} title={title} onStart={() => start({ ...initial })} />
+            )
+          }
           screen={(ctx) => (
             <WorkScreen
               payload={ctx.payload}
@@ -176,6 +206,7 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
               proverka={localProverka(ctx.payload.tasks)}
               onSnapshot={onSnapshot}
               onEmpty={onEmpty}
+              {...(rabota === undefined ? {} : { rabota })}
             />
           )}
         />
@@ -222,6 +253,65 @@ function StartScreen({
         <li>{T.start.answerFormat}</li>
       </ul>
       <Button size="lg" onClick={onStart} data-testid="vo-begin">
+        {T.start.begin}
+      </Button>
+    </section>
+  );
+}
+
+/* ── Старт работы из кабинета ───────────────────────────────────── */
+
+function RabotaStart({
+  rabota,
+  title,
+  onStart,
+}: {
+  rabota: RabotaCtx;
+  title: string;
+  onStart: () => void;
+}) {
+  const { sw } = rabota;
+  const returned = sw.submission?.status === 'returned';
+  const late = sw.editable.length === 0;
+  return (
+    <section className="vo-start" data-testid="vo-start">
+      <h2 className="vo-start__title">{title}</h2>
+      <p className="vo-start__meta">
+        {C2.rabota.tutor(sw.tutor.name)} ·{' '}
+        {sw.deadline === null
+          ? C2.rabota.noDeadline
+          : C2.rabota.deadline(
+              new Date(sw.deadline).toLocaleString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+            )}
+      </p>
+      {sw.work.note === null ? null : <p>{sw.work.note}</p>}
+      <ul className="vo-start__rules">
+        <li>{C2.rabota.mode[sw.work.part2Mode]}</li>
+        <li>{C2.rabota.saved}.</li>
+        <li>{T.start.answerFormat}</li>
+      </ul>
+      {returned ? (
+        <div className="vo-warn">
+          <p>{C2.rabota.returned}</p>
+          <ul>
+            {sw.grades
+              .filter((g) => g.naDorabotke)
+              .map((g) => (
+                <li key={g.taskNo}>
+                  {C2.rabota.returnedTask(g.taskNo)}
+                  {g.comment === null ? '' : `: ${g.comment}`}
+                </li>
+              ))}
+          </ul>
+        </div>
+      ) : null}
+      {late ? <p className="vo-warn">{C2.rabota.late}</p> : null}
+      <Button size="lg" onClick={onStart} disabled={late} data-testid="vo-begin">
         {T.start.begin}
       </Button>
     </section>
@@ -412,7 +502,7 @@ function Finished({
 
 /* ── Работа над ошибками ────────────────────────────────────────── */
 
-function OshibkiRun({
+export function OshibkiRun({
   link,
   wrong,
   title,

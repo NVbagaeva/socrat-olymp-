@@ -115,6 +115,24 @@ export function workScope(code: string, variant: number, mode: Mode): string {
   return `variant:${code}:${variant}:${mode === 'kontrol' ? 'k' : 't'}`;
 }
 
+/** Ключ сессии работы, выданной в кабинете: у каждой работы — свой. */
+export function rabotaScope(id: string): string {
+  return `rabota:${id}`;
+}
+
+/** Ссылка ученика на выданную работу: тот же экран решения, контрольная. */
+export function rabotaHref(code: string, versiya: number, id: string): string {
+  const q = new URLSearchParams({
+    kod: code,
+    v: String(versiya),
+    r: 'k',
+    tm: '0',
+    w: 'ege',
+    rabota: id,
+  });
+  return `${ONLINE_PATHS.reshat}?${q.toString()}`;
+}
+
 /** Ключ «Работы над ошибками» по варианту. */
 export function oshibkiScope(code: string, variant: number): string {
   return `variant:${code}:${variant}:oshibki`;

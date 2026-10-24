@@ -21,6 +21,9 @@ import { useSessionUser } from '@/lib/auth/session';
 import { pustoyChast2, punktKey, vvodEst, type Chast2Ui } from '@/lib/chast2/sostoyanie';
 import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import { part2Of } from '@/lib/variant/online/sessionUi';
+import { FotoBlok } from '@/components/chast2/FotoBlok';
+import type { RabotaCtx } from '@/components/chast2/rabotaCtx';
+import { izmeneniya, izRaboty, otpechatok, vRabotu } from '@/lib/raboty/sinhron';
 import { AnswerField } from './AnswerField';
 import { clockText } from './format';
 
@@ -36,6 +39,8 @@ export interface WorkScreenProps {
   onSnapshot: (ui: WorkUi) => void;
   /** Номера заданий без ответа — для вопроса оболочки «Завершить?». */
   onEmpty: (list: string) => void;
+  /** Работа из кабинета: ответы сохраняются в неё, к 14–20 — фото. */
+  rabota?: RabotaCtx;
 }
 
 type Status = 'empty' | 'answered' | 'later' | 'right' | 'wrong' | 'scored';
@@ -76,6 +81,7 @@ export function WorkScreen({
   proverka,
   onSnapshot,
   onEmpty,
+  rabota,
 }: WorkScreenProps) {
   const tasks = payload.tasks;
   const part2 = useMemo(() => part2Of(payload), [payload]);
@@ -83,9 +89,18 @@ export function WorkScreen({
   const total = tasks.length + part2.length;
   const trening = payload.mode === 'trening';
   const [index, setIndex] = useState(Math.min(restored?.index ?? 0, total - 1));
-  const [chast2, setChast2] = useState<Chast2Ui>(restored?.chast2 ?? pustoyChast2());
+  /* Работа из кабинета без сохранённой на этом устройстве сессии —
+     ответы из кабинета (открыли на другом устройстве или вернулись). */
+  const [seed] = useState(() =>
+    rabota === undefined || restored !== null ? null : izRaboty(tasks, rabota.sw.answers),
+  );
+  const [chast2, setChast2] = useState<Chast2Ui>(
+    restored?.chast2 ?? seed?.chast2 ?? pustoyChast2(),
+  );
   const user = useSessionUser();
-  const [answers, setAnswers] = useState<Record<number, string>>(restored?.answers ?? {});
+  const [answers, setAnswers] = useState<Record<number, string>>(
+    restored?.answers ?? seed?.answers ?? {},
+  );
   const [second, setSecond] = useState<Record<number, string>>(restored?.second ?? {});
   const [v1, setV1] = useState<Record<number, Check>>(restored?.v1 ?? {});
   const [v2, setV2] = useState<Record<number, Check>>(restored?.v2 ?? {});
@@ -104,6 +119,43 @@ export function WorkScreen({
 
   const task = tasks[index] ?? tasks[0];
   const z2 = index >= tasks.length ? (part2[index - tasks.length] ?? null) : null;
+
+  /* ── Работа из кабинета: что можно менять и сохранение ответов ── */
+  const editable = useMemo(
+    () => (rabota === undefined ? null : new Set(rabota.sw.editable)),
+    [rabota],
+  );
+  const canEdit = (no: number) => editable === null || editable.has(no);
+  const samoRabota = rabota?.sw.work.part2Mode === 'self';
+  const saved = useRef<Map<string, string> | null>(null);
+  const [saveError, setSaveError] = useState(false);
+  useEffect(() => {
+    if (rabota === undefined) return undefined;
+    if (saved.current === null) {
+      const fromServer = izRaboty(tasks, rabota.sw.answers);
+      saved.current = otpechatok(
+        vRabotu(tasks, part2, fromServer.answers, fromServer.chast2, samoRabota),
+      );
+    }
+    const t = window.setTimeout(() => {
+      const hochu = vRabotu(tasks, part2, answers, chast2, samoRabota);
+      const list = izmeneniya(hochu, saved.current ?? new Map()).filter((z) =>
+        editable?.has(z.taskNo),
+      );
+      void (async () => {
+        try {
+          for (const z of list) {
+            await rabota.api.saveAnswer(rabota.id, z.taskNo, z.punkt, z.vvod);
+            saved.current?.set(`${z.taskNo}|${z.punkt}`, JSON.stringify(z.vvod));
+          }
+          setSaveError(false);
+        } catch {
+          setSaveError(true);
+        }
+      })();
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [rabota, tasks, part2, answers, chast2, samoRabota, editable]);
 
   /* ── Время на задание ─────────────────────────────────────────── */
   /** Активное время с прихода на задание — в его счётчик. */
@@ -349,7 +401,13 @@ export function WorkScreen({
             : T.run.clock(clockText(spent))}
         </div>
       )}
-      {trening ? null : <p className="vo-note vo-note--top">{T.run.kontrolNote}</p>}
+      {rabota !== undefined ? (
+        <p className={clsx('vo-note vo-note--top', saveError && 'is-problem')} aria-live="polite">
+          {saveError ? C2.rabota.saveError : C2.rabota.saved}
+        </p>
+      ) : trening ? null : (
+        <p className="vo-note vo-note--top">{T.run.kontrolNote}</p>
+      )}
 
       <nav className="vo-strip" aria-label={T.run.nav}>
         <ol>
@@ -445,7 +503,7 @@ export function WorkScreen({
               value={value}
               onChange={setValue}
               problem={problem}
-              readOnly={phase === 'done'}
+              readOnly={phase === 'done' || !canEdit(task.egeNumber)}
               state={phase === 'done' ? (checkedRight ? 'success' : 'error') : 'default'}
               action={
                 trening
@@ -466,8 +524,8 @@ export function WorkScreen({
           </>
         ) : (
           <>
-            {trening ? null : <p className="vo-note">{C2.samoKontrol}</p>}
-            {user === null ? (
+            {trening || rabota !== undefined ? null : <p className="vo-note">{C2.samoKontrol}</p>}
+            {user === null && rabota === undefined ? (
               <p className="c2-banner" data-testid="c2-login">
                 {C2.loginBanner}
                 {AUTH_ENABLED ? (
@@ -483,8 +541,21 @@ export function WorkScreen({
               z={z2}
               st={chast2}
               update={(fn) => setChast2(fn)}
-              samo={trening}
+              samo={rabota === undefined ? trening : samoRabota}
+              readOnly={!canEdit(z2.no)}
             />
+            {rabota !== undefined && !samoRabota ? (
+              <FotoBlok
+                key={`foto-${z2.no}`}
+                workId={rabota.id}
+                taskNo={z2.no}
+                photos={rabota.sw.photos.filter((p) => p.taskNo === z2.no)}
+                ochered={rabota.ochered}
+                api={rabota.api}
+                editable={canEdit(z2.no)}
+                onChange={rabota.reload}
+              />
+            ) : null}
           </>
         )}
 
@@ -512,8 +583,12 @@ export function WorkScreen({
           >
             {T.run.next}
           </Button>
-          <Button variant="danger" onClick={() => setConfirm(true)} data-testid="vo-finish">
-            {T.run.finish}
+          <Button
+            variant="danger"
+            onClick={() => (rabota === undefined ? setConfirm(true) : finish())}
+            data-testid="vo-finish"
+          >
+            {rabota === undefined ? T.run.finish : C2.rabota.finish}
           </Button>
         </div>
       </article>

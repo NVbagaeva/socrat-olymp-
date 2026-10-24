@@ -141,7 +141,13 @@ export function FotoRedaktor({ img, initial = BEZ_PRAVKI, onDone, onCancel }: Fo
       data-testid="c2-red"
     >
       <div className="c2-red__head">
+        <Button variant="ghost" size="sm" onClick={onCancel}>
+          {T.editor.cancel}
+        </Button>
         <h2 className="c2-red__title">{T.editor.title}</h2>
+        <Button size="sm" onClick={() => onDone(p)} data-testid="c2-red-save">
+          {T.editor.save}
+        </Button>
       </div>
       <div className="c2-red__stage">
         <div
@@ -198,19 +204,6 @@ export function FotoRedaktor({ img, initial = BEZ_PRAVKI, onDone, onCancel }: Fo
           >
             ⟳ <span className="sr-only">{T.editor.rotR}</span>
           </button>
-          <label className="c2-red__angle">
-            <span>{T.editor.straighten}</span>
-            <input
-              type="range"
-              min={-15}
-              max={15}
-              step={0.5}
-              value={p.angle}
-              onChange={(e) => setP((x) => ({ ...x, angle: Number(e.target.value) }))}
-              data-testid="c2-red-angle"
-            />
-            <output>{T.editor.angle(p.angle)}</output>
-          </label>
           <label className="c2-red__scan">
             <input
               type="checkbox"
@@ -220,18 +213,29 @@ export function FotoRedaktor({ img, initial = BEZ_PRAVKI, onDone, onCancel }: Fo
             />
             {T.editor.scan}
           </label>
-        </div>
-        <div className="c2-red__row c2-red__row--end">
-          <Button variant="ghost" onClick={() => setP(BEZ_PRAVKI)} data-testid="c2-red-reset">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="c2-red__reset"
+            onClick={() => setP(BEZ_PRAVKI)}
+            data-testid="c2-red-reset"
+          >
             {T.editor.reset}
           </Button>
-          <Button variant="secondary" onClick={onCancel}>
-            {T.editor.cancel}
-          </Button>
-          <Button onClick={() => onDone(p)} data-testid="c2-red-save">
-            {T.editor.save}
-          </Button>
         </div>
+        <label className="c2-red__angle">
+          <span>{T.editor.straighten}</span>
+          <input
+            type="range"
+            min={-15}
+            max={15}
+            step={0.5}
+            value={p.angle}
+            onChange={(e) => setP((x) => ({ ...x, angle: Number(e.target.value) }))}
+            data-testid="c2-red-angle"
+          />
+          <output>{T.editor.angle(p.angle)}</output>
+        </label>
       </div>
     </div>,
     document.body,
