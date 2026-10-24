@@ -350,6 +350,8 @@ for (const v of [1, 3]) {
   await begin(page, reshat(v, 'k'));
   for (let i = 0; i < 13; i += 1) {
     if ((i + v) % 3 !== 0) await type(page, i, answerOf(v, i));
+    /* Для снимков статистики — немного времени на задание. */
+    if (SHOTS) await page.waitForTimeout(300 + ((i * 7 + v * 3) % 10) * 150);
   }
   await page.getByTestId('vo-finish').click();
   await page.getByTestId('vo-confirm').click();
@@ -386,6 +388,42 @@ await narrow.getByTestId('vo-series').waitFor({ timeout: 60_000 });
 await shot(narrow, 'seriya-telefon');
 await narrow.locator('.vo-series__stats').scrollIntoViewIfNeeded();
 await shot(narrow, 'statistika-serii-telefon');
+
+/* ── 5. Экран «Собрать вариант»: «Решать онлайн» и «Создать серию» ── */
+
+console.log('5. «Собрать вариант»: ссылка ученику и серия');
+const build = await desk.newPage();
+build.on('pageerror', (e) => errors.push(String(e)));
+await build.goto(`${BASE}/variant/`);
+await build.getByRole('button', { name: 'Сформировать' }).click();
+await build.getByTestId('vo-panel').waitFor({ timeout: 120_000 });
+ok(
+  (await build.getByTestId('vo-kit-online').count()) === 1,
+  '«Решать онлайн» рядом с листами',
+  'нет',
+);
+const studentLink = (await build.getByTestId('vo-link').textContent()) ?? '';
+ok(
+  /\/variant\/reshat\/\?kod=[^&]+&v=1&r=[tk]&tm=/.test(studentLink),
+  'ссылка для ученика',
+  studentLink,
+);
+ok((await build.locator('.vo-panel .qr').count()) >= 1, 'QR-код ссылки', 'нет');
+await build.getByTestId('vo-series').click();
+await build.getByTestId('vo-series-link').waitFor({ timeout: 120_000 });
+const seriesLink = (await build.getByTestId('vo-series-link').textContent()) ?? '';
+ok(
+  /\/variant\/seriya\/\?kod=[0-9A-Z]{4}-[0-9A-Z]{5}-/.test(seriesLink),
+  'ссылка на серию',
+  seriesLink,
+);
+ok(
+  (await build.locator('.var-tabs__btn').count()) === 10,
+  'серия — 10 вариантов',
+  String(await build.locator('.var-tabs__btn').count()),
+);
+await build.getByTestId('vo-panel').scrollIntoViewIfNeeded();
+await shot(build, 'sobrat-variant-onlayn');
 
 ok(errors.length === 0, 'ошибок на страницах нет', errors.join('\n'));
 

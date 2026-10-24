@@ -8,7 +8,7 @@ import { secondsText } from './format';
 
 const W = 620;
 const H = 220;
-const PAD = { l: 36, r: 16, t: 16, b: 32 };
+const PAD = { l: 48, r: 20, t: 24, b: 36 };
 
 /** Линия баллов по вариантам: тестовый балл (или процент) по порядку. */
 function TrendChart({ points }: { points: TrendPoint[] }) {
@@ -83,29 +83,20 @@ export function StatsView({
 
       <section className="vo-stats__block">
         <h3 className="vo-h3">{T.stats.heat}</h3>
-        <div className="vo-heat" role="table" aria-label={T.stats.heat}>
-          <div className="vo-heat__row" role="row">
-            {s.numbers.map((n) => (
-              <span key={n.egeNumber} className="vo-heat__head" role="columnheader">
-                {n.egeNumber}
-              </span>
-            ))}
-          </div>
-          <div className="vo-heat__row" role="row">
-            {s.numbers.map((n) => (
-              <span
-                key={n.egeNumber}
-                role="cell"
-                className="vo-heat__cell heat__cell"
-                data-l={n.rate === null ? undefined : heatLevel(n.rate)}
-                data-empty={n.rate === null ? '' : undefined}
-                title={n.rate === null ? '—' : `${n.right} из ${n.total}`}
-              >
-                {n.rate === null ? '—' : `${Math.round(n.rate * 100)}%`}
-              </span>
-            ))}
-          </div>
-        </div>
+        <ul className="vo-heat" aria-label={T.stats.heat}>
+          {s.numbers.map((n) => (
+            <li
+              key={n.egeNumber}
+              className="vo-heat__cell heat__cell"
+              data-l={n.rate === null ? undefined : heatLevel(n.rate)}
+              data-empty={n.rate === null ? '' : undefined}
+              title={n.rate === null ? '—' : `${n.right} из ${n.total}`}
+            >
+              <span className="vo-heat__no">№{n.egeNumber}</span>
+              <b>{n.rate === null ? '—' : `${Math.round(n.rate * 100)}%`}</b>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="vo-stats__block">
