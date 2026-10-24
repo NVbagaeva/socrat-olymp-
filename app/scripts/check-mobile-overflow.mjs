@@ -85,6 +85,10 @@ function vseStranitsy() {
    верхний — он и есть причина. */
 function zamer() {
   const w = document.documentElement.clientWidth;
+  /* Прокрутки нет — искать виновника незачем: обход всех элементов
+     с их предками на больших страницах теории занимает минуты. */
+  const scroll = document.documentElement.scrollWidth - w;
+  if (scroll <= 0) return { scroll, elementy: [] };
   const opis = (el) => {
     let s = el.tagName.toLowerCase();
     if (el.id) s += `#${el.id}`;
@@ -128,7 +132,7 @@ function zamer() {
   }
   const verhnie = [...vyhodyat].filter((el) => !vyhodyat.has(el.parentElement));
   return {
-    scroll: document.documentElement.scrollWidth - w,
+    scroll,
     elementy: verhnie.slice(0, 6).map((el) => {
       const r = el.getBoundingClientRect();
       return {
@@ -168,11 +172,25 @@ async function main() {
     while (i < zadachi.length) {
       const z = zadachi[i++];
       const page = await browser.newPage({ viewport: { width: z.shirina, height: 800 } });
+      /* Листы печати сами открывают окно печати и спрашивают confirm:
+         в тесте ни то ни другое не нужно, иначе страница ждёт вечно. */
+      await page.addInitScript(() => {
+        window.print = () => {};
+        window.confirm = () => true;
+      });
+      page.on('dialog', (d) => d.dismiss().catch(() => {}));
       try {
         await page.goto(`http://127.0.0.1:${PORT}${z.put}`, { waitUntil: 'load', timeout: 30000 });
-        await page.evaluate(() => document.fonts.ready);
+        /* Старый адрес уводит на новый сам, пока ждём шрифты: без
+           ограничения такая страница держала поток вечно. */
+        const sroch = (p) =>
+          Promise.race([
+            p,
+            new Promise((_, no) => setTimeout(() => no(new Error('navigation timeout')), 15000)),
+          ]);
+        await sroch(page.evaluate(() => document.fonts.ready));
         await page.waitForTimeout(400);
-        const r = await page.evaluate(zamer);
+        const r = await sroch(page.evaluate(zamer));
         if (r.scroll > 0 || r.elementy.length > 0) itog.push({ ...z, ...r });
       } catch (e) {
         /* Старые адреса (…/podgotovka/) уводят на новые сами: страница
@@ -205,3 +223,6 @@ async function main() {
 }
 
 await main();
+/* Сервер и браузер иногда держат открытые соединения после закрытия
+   (страницы-переадресации …/podgotovka/): итог уже напечатан — выходим. */
+process.exit(process.exitCode ?? 0);
