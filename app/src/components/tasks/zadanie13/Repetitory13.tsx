@@ -227,12 +227,14 @@ export function Repetitory13({
                   <span className="z11-urok__polosa" aria-hidden="true">
                     <span style={{ flexGrow: x.opornye.length / n }} className="is-o" />
                     <span style={{ flexGrow: x.bank.length / n }} className="is-b" />
-                    <span style={{ flexGrow: (x.novye.length + x.tip) / n }} className="is-n" />
+                    <span style={{ flexGrow: x.novye.length / n }} className="is-n" />
+                    {x.tip > 0 ? <span style={{ flexGrow: x.tip / n }} className="is-t" /> : null}
                   </span>
                   <span className="z11-urok__legend">
                     <span>{REPETITORY_13.polosa.opornye}</span>
                     <span>{REPETITORY_13.polosa.bank}</span>
                     <span>{REPETITORY_13.polosa.novye}</span>
+                    {x.tip > 0 ? <span>{REPETITORY_13.polosa.tip}</span> : null}
                   </span>
                   <span className="z11-urok__btns">
                     <Button

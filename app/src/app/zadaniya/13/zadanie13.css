@@ -984,3 +984,7 @@
 .z13-rep .z11-urok-plan a {
   color: var(--color-text-brand);
 }
+/* Четвёртая часть урока — «Определи тип». */
+.z13-rep .z11-urok__polosa .is-t {
+  background: var(--color-accent-text);
+}
