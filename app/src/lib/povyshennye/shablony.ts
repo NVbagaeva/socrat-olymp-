@@ -27,7 +27,14 @@ import {
 import type { Generated as Generated9 } from '@/lib/proizvodnaya/types';
 import { renderSolid } from '@/lib/solid';
 import { typeset, typesetKrupno } from '@/lib/tex';
-import { skalyarnoeKombinatsiy, type SkalyarnoeKombinatsiy } from '@/lib/vektory/povyshennye';
+import {
+  dlinaKombinatsiiPoRisunku,
+  perpendikulyarNeizvestnaya,
+  skalyarnoeKombinatsiy,
+  type DlinaKombinatsii,
+  type PerpendikulyarNeizvestnaya,
+  type SkalyarnoeKombinatsiy,
+} from '@/lib/vektory/povyshennye';
 import { PV4_NE_MENEE, PV5_DVE_PARTII } from '@/lib/veroyatnost/povyshennye';
 import { dec, type Prototype as ProtoVer } from '@/lib/veroyatnost/types';
 import {
@@ -402,6 +409,22 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: SkalyarnoeKombinatsiy) =>
       bezPoley(build02({ ...kand, seed: 'pv', n: null }, skalyarnoeKombinatsiy(p))),
+  },
+  'z02.dlina-po-risunku': {
+    ege: 2,
+    prototip:
+      'Векторы, группа A: длина a + k·b по рисунку на клетчатой плоскости (как A6), множитель при b — и дробный',
+    otkuda: 'novyy',
+    zadacha: (p: DlinaKombinatsii) =>
+      bezPoley(build02({ ...kand, seed: 'pv', n: null }, dlinaKombinatsiiPoRisunku(p))),
+  },
+  'z02.perpendikulyar': {
+    ege: 2,
+    prototip:
+      'Векторы, группа B: перпендикулярные векторы, неизвестная координата (как B3, условие a·b = 0)',
+    otkuda: 'novyy',
+    zadacha: (p: PerpendikulyarNeizvestnaya) =>
+      bezPoley(build02({ ...kand, seed: 'pv', n: null }, perpendikulyarNeizvestnaya(p))),
   },
   'z03.shar-v-cilindre': {
     ege: 3,
