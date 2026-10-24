@@ -124,6 +124,12 @@ export const files = {
 
 /* Сборка одним объектом: анонимный export default ESLint не любит,
    и в проекте так же собран data/index.js движка. */
-const content = { head, title, runner, recap, foot, blocks, files };
+/** Лист учителя в «Всё одним файлом» генератора: к подзаголовку. */
+export const resheniya = 'Решения';
+
+/** Заголовок страницы «Всё одним файлом». */
+export const vse = 'Листы ученика и учителя';
+
+const content = { head, title, runner, recap, resheniya, vse, foot, blocks, files };
 
 export default content;

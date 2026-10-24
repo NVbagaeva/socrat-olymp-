@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/layout/AppShell';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
-import { GeneratorAll } from '@/components/tasks/ves12/GeneratorAll';
+import { Generator12 } from '@/components/tasks/generator/Generator12';
+import { razdelyZadaniya } from '@/components/tasks/razdely/razdely12';
+import { findSection } from '@/content/sections';
 import { generatorAllText } from '@/content/ves12';
 import { tasksPage } from '@/content/tasks';
-import { ves12Catalog } from '@/lib/ves12/catalog';
+import { config12 } from '@/lib/ves12/generator12';
 import { href, ZADANIYA } from '@/lib/paths';
 import 'katex/dist/katex.min.css';
 import '../../zadaniya.css';
@@ -19,8 +21,14 @@ export const metadata: Metadata = {
   description: generatorAllText.lead,
 };
 
-/** Генератор по всем типам №12: экран учителя. */
+const BASE = `${ZADANIYA}/12/generator`;
+
+/** Генератор по всем типам №12: общий генератор со всеми типами функций. */
 export default function GeneratorAllPage() {
+  const section = findSection('12');
+  const ikonki = Object.fromEntries(
+    (section === undefined ? [] : razdelyZadaniya(section, '').razdely).map((r) => [r.id, r.icon]),
+  );
   return (
     <AppShell active="tasks">
       <main className="app-main">
@@ -34,7 +42,7 @@ export default function GeneratorAllPage() {
           title={generatorAllText.pageTitle}
           lead={generatorAllText.lead}
         />
-        <GeneratorAll catalog={ves12Catalog()} />
+        <Generator12 config={config12(BASE)} base={BASE} ekran={`${BASE}/?`} ikonki={ikonki} />
       </main>
     </AppShell>
   );

@@ -16,6 +16,7 @@
 import { GENERATOR9_PRESETS, GENERATOR9_SOURCES, GENERATOR9_TEXTS } from '@/content/generator9';
 import { GEN_UI } from '@/content/generatorUi';
 import contentSheet9 from '@/content/sheet9.js';
+import { nabratFormuly } from '@/lib/generator/nabrat';
 import { slotySostava, sostavIzSlotov } from '@/lib/generator/obshchiy/klyuchi';
 import { defaultExtras } from '@/lib/generator/obshchiy/state';
 import type {
@@ -150,20 +151,8 @@ function planPrezhnego(p: SheetParams9): GenSlot[] {
   return slotySostava(ids);
 }
 
-const SPAN_FORMULY = /<span class="math" data-tex="([^"]*)">[^<]*<\/span>/g;
-
 /** Заглушки формул листа (typography.mathText) → KaTeX для предпросмотра. */
-export function nabrat(html: string): string {
-  return html.replace(SPAN_FORMULY, (_, tex: string) =>
-    typeset(
-      `$${tex
-        .replace(/&quot;/g, '"')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')}$`,
-    ),
-  );
-}
+export const nabrat = nabratFormuly;
 
 /** Строка «Ответ: …» в конце разбора листа: у предпросмотра своя. */
 const BEZ_OTVETA = /<p class="sheet-task-answer">.*?<\/p>$/;

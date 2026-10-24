@@ -3,7 +3,7 @@
 
    Запуск: pnpm test:generator
 
-   Проверяет логику и подключение разделов (№11, №1, №2, №8, №9) без браузера:
+   Проверяет логику и подключение разделов (№11, №1, №2, №8, №9, №12) без браузера:
      1. Каждый пресет даёт годное состояние: есть задачи, не больше
         ограничений конфига, темы есть в выбранном источнике.
      2. Один seed — один лист: лист собирается дважды одинаково, листы
@@ -41,6 +41,9 @@ const S8 = requireSrc('lib/vychisleniya/sheet8.ts');
 const A9 = requireSrc('lib/proizvodnaya/generator9.ts');
 const S9 = requireSrc('lib/proizvodnaya/sheet9.ts');
 const typo = requireSrc('lib/sheet/typography.js');
+const C12 = requireSrc('lib/ves12/generator12.ts');
+const E12 = requireSrc('lib/ves12/engine12.ts');
+const G12 = requireSrc('lib/generatorSheet.ts');
 const { GEN_UI } = requireSrc('content/generatorUi.ts');
 
 let failed = 0;
@@ -187,6 +190,60 @@ const RAZDELY = [
       urok: null,
     };
   })(),
+  /* №12: генератор по всем типам и вкладка подтемы — один адаптер, разные конфиги. */
+  ...[
+    {
+      name: '№12 все типы',
+      base: '/zadaniya/12/generator',
+      config: C12.config12('/zadaniya/12/generator'),
+      title: 'Графики функций',
+      old: 's=12.A,12Q.A&n=2&v=3&seed=K7Q2&t=color&c=1&o=types&th=1&pr=1&pp=12.A:1,12Q.A:1',
+      oldIds: '12.A,12Q.A',
+    },
+    {
+      name: '№12 подтема',
+      base: '/zadaniya/12/quadratic',
+      config: C12.config12('/zadaniya/12/quadratic', {
+        tip: 'quadratic',
+        title: 'Квадратичная функция',
+      }),
+      title: 'Квадратичная функция',
+      old: 's=12Q.A,12Q.B&n=4&l=lucky&v=3&seed=K7Q2&t=color&c=1',
+      oldIds: '12Q.A,12Q.A,12Q.B,12Q.B',
+    },
+  ].map(({ name, base, config: c, title, old, oldIds }) => {
+    const spec = (p, withAnswers, qr) => G12.sheetSpec(p, withAnswers, title, qr);
+    const sobrat = (p) => {
+      const sp = spec(p, true);
+      return {
+        poVariantam: (sp.variants ?? [{ blocks: sp.blocks }]).map((v) =>
+          v.blocks.flatMap((b) => b.tasks),
+        ),
+      };
+    };
+    return {
+      name,
+      config: c,
+      engine: E12.engine12(c, base, (q) => `${base}/?${q}`),
+      params: (st) => E12.paramsIzSostoyaniya(st, c),
+      parse: (q) => G12.parseSheetQuery(q),
+      query: (p) => G12.sheetQuery(p),
+      sobrat,
+      spec: (p, list, vid, qr) => spec(p, vid !== 'uchenik', qr),
+      /* Примеры №12 «по рисунку» с одним текстом: сверка условий с задачами
+         листа без рисунка давала бы ложные совпадения — её нет. */
+      primery: () => [],
+      bezSverkiPrimerov: true,
+      seeds: ['7K3F', '0000'],
+      badge: 'z12-sheet-badge',
+      ist: null,
+      urovenNaList: true,
+      vopros: (t) => E12.voprosPredprosmotra(t),
+      old,
+      oldIds,
+      urok: null,
+    };
+  }),
 ];
 
 /** Условие и рисунок задачи листа печати — в записи экрана генератора. */
@@ -219,6 +276,8 @@ function diffTasks(a, b) {
 
 async function proverit(R) {
   const { config, engine } = R;
+  /* №12 — листы с графиками считаются долго: seed меньше, проверки те же. */
+  const seeds = R.seeds ?? SEEDS;
   const ok = (cond, what) => okTop(cond, `${R.name} ${what}`);
   /* ── 1–4. Пресеты ──────────────────────────────────────────────── */
   console.log(`Пресеты ${R.name}`);
@@ -231,7 +290,7 @@ async function proverit(R) {
         `${label}: годное состояние (${G.problems(config, base).join(', ')})`,
       );
       ok(G.matchPreset(config, base) === preset.id, `${label}: пресет узнаётся по состоянию`);
-      for (const seed of SEEDS) {
+      for (const seed of seeds) {
         const state = { ...base, seed };
         const sheet = await engine.build(state);
         const again = await engine.build(state);
@@ -260,7 +319,7 @@ async function proverit(R) {
         );
         const uchHtml = JSON.stringify(specOf(R, state, 'uchenik'));
         ok(
-          uch.every((t) => t.solutionHtml === null) &&
+          uch.every((t) => (t.solutionHtml ?? null) === null) &&
             !new RegExp(`sheet-task-answer|${R.badge}${R.ist === null ? '' : `|${R.ist}`}`).test(
               uchHtml,
             ),
@@ -322,7 +381,7 @@ async function proverit(R) {
   console.log(`Задачи на местах ${R.name}`);
   for (const preset of config.presets) {
     for (const source of config.sources.map((s) => s.id)) {
-      for (const seed of SEEDS.slice(0, 3)) {
+      for (const seed of seeds.slice(0, 3)) {
         const label = `${preset.id}/${source}/${seed}`;
         const base = { ...G.stateFromPreset(config, preset, source), seed };
         if (preset.pickTopic !== undefined) base.variants = 2;
@@ -514,7 +573,7 @@ async function proverit(R) {
           );
           if (vid === 'uchenik')
             ok(
-              blocks.flatMap((x) => x.tasks).every((t) => t.solutionHtml === null),
+              blocks.flatMap((x) => x.tasks).every((t) => (t.solutionHtml ?? null) === null),
               `${label}: у задач ученика по-прежнему нет решений`,
             );
         }
@@ -522,7 +581,7 @@ async function proverit(R) {
         const zadachi = new Set(
           list.poVariantam.flat().map((z) => (R.primerKey ? R.primerKey(z) : z.questionHtml)),
         );
-        if (R.ramka !== false)
+        if (R.ramka !== false && R.bezSverkiPrimerov !== true)
           ok(
             primery.length > 0 && primery.every((x) => !zadachi.has(x)),
             `${label}: примеры не повторяют задачи листа (${primery.length})`,
@@ -542,7 +601,9 @@ async function proverit(R) {
   }
 }
 
-for (const R of RAZDELY) await proverit(R);
+/* GEN_RAZDEL=№12 — только разделы с этим началом имени (отладка; в CI — все). */
+const FILTR = process.env.GEN_RAZDEL ?? '';
+for (const R of RAZDELY.filter((x) => x.name.startsWith(FILTR))) await proverit(R);
 
 /* ── №8: уровень листа и повторы ────────────────────────────────── */
 console.log('№8: уровень и повторы');
