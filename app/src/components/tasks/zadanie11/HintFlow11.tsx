@@ -5,12 +5,13 @@ import { useState } from 'react';
 import { OPORNYE_11 } from '@/content/zadanie11';
 import type { ShagHtml } from '@/lib/zadanie11/prep/seal';
 import { HintIcon } from '../prep/PrepIcons';
+import './HintFlow11.css';
 
 /**
  * Пошаговая подсказка №11: вопрос — кнопки с вариантами. Неверная
  * кнопка гаснет, верная открывает комментарий и следующий шаг.
  * Пройденные шаги остаются на экране — получается ход решения.
- * Общий для «Опорных задач» и тренажёра.
+ * Общий для «Опорных задач» и тренажёра №11 и для «Опорных задач» №13.
  */
 export function HintFlow11({ shagi }: { shagi: ShagHtml[] }) {
   const [step, setStep] = useState(0);

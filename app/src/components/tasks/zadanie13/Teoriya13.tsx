@@ -11,9 +11,9 @@ import {
   type TablitsaRuchnaya,
 } from '@/content/teoriya13';
 import { katex } from '@/lib/graph/katex';
-import { UNIT_LABEL } from '@/lib/zadanie13/edinicy';
 import { generate } from '@/lib/zadanie13/generate';
-import { TABLE_FIELDS, TABLE_HEAD } from '@/lib/zadanie13/tablica';
+import { kletkiModeli, kletkiUsloviya, otvetText } from '@/lib/zadanie13/html';
+import { TABLE_HEAD } from '@/lib/zadanie13/tablica';
 import type { TableModel } from '@/lib/zadanie13/types';
 import { DveShemy, LesenkaAnn, LesenkaDif } from './Risunki13';
 
@@ -27,16 +27,6 @@ function Krupno({ tex, className }: { tex: string; className?: string }) {
 function Yacheyka({ tex }: { tex: string }) {
   const html = katex.renderToString(tex, { throwOnError: true });
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
-}
-
-/** Число из модели таблицы: целое — с пробелами по разрядам, дробь — до четырёх знаков. */
-export function chislo(x: number): string {
-  const r = Math.round(x * 10000) / 10000;
-  const exact = Math.abs(r - x) < 1e-9;
-  const [int, frac] = Math.abs(r).toFixed(4).replace(/0+$/, '').replace(/\.$/, '').split('.');
-  const grouped =
-    (int ?? '0').length > 4 ? (int ?? '0').replace(/\B(?=(\d{3})+(?!\d))/g, '\\,') : (int ?? '0');
-  return `${exact ? '' : '\\approx '}${x < 0 ? '-' : ''}${grouped}${frac ? `{,}${frac}` : ''}`;
 }
 
 function PrimerBlok({ primer }: { primer: Primer }) {
@@ -139,33 +129,7 @@ function TablitsaRuchnayaBlok({ t }: { t: TablitsaRuchnaya }) {
 
 /** Таблица из модели движка: сокращённые строки 1, 2, 3, …, n. */
 function TablitsaModeli({ m }: { m: TableModel }) {
-  const h = TABLE_HEAD[m.scheme];
-  const fields = TABLE_FIELDS[m.scheme];
-  const labels: string[] = [];
-  const rows: string[][] = [];
-  for (const i of m.show) {
-    if (i === 0) {
-      labels.push('\\dots');
-      rows.push(fields.map(() => '\\dots'));
-      continue;
-    }
-    const row = m.rows[i - 1];
-    if (!row) continue;
-    labels.push(m.labels[i - 1] ?? String(i));
-    rows.push(fields.map((f) => chislo(row[f] as number)));
-  }
-  const itog =
-    m.totals && m.scheme === 'dif'
-      ? ['', chislo(m.totals.change), chislo(m.totals.interest), '']
-      : undefined;
-  return (
-    <Tablitsa
-      head={[h.period[m.period], ...h.cols]}
-      labels={labels}
-      rows={rows}
-      {...(itog ? { itog } : {})}
-    />
-  );
+  return <Tablitsa {...kletkiModeli(m)} />;
 }
 
 /** Разобранная задача из движка: условие, таблица, решение по шагам. */
@@ -179,10 +143,6 @@ function Razbor({
   seed: string;
 }) {
   const t = generate(prototypeId, seed);
-  const units = UNIT_LABEL[t.units];
-  const otvet = String(t.answer)
-    .replace('.', ',')
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   return (
     <section className="z13-razbor">
       <h4 className="z13-razbor__title">
@@ -194,34 +154,26 @@ function Razbor({
             <Tex text={line} />
           </p>
         ))}
-        {t.conditionTable ? (
-          <Tablitsa
-            head={t.conditionTable.head.slice(1)}
-            labels={t.conditionTable.rows.map((r) => `\\text{${r[0] ?? ''}}`)}
-            rows={t.conditionTable.rows.map((r) =>
-              r.slice(1).map((c) => `\\text{${c.replace(/%/g, '\\%')}}`),
-            )}
-          />
-        ) : null}
+        {t.conditionTable ? <Tablitsa {...kletkiUsloviya(t.conditionTable)} /> : null}
         {t.source === 'own' ? <p className="z13-razbor__metka">не из открытого банка</p> : null}
       </div>
       <Details title="Решение по шагам" className="z13-primer">
         <ol className="z13-shagi">
-          {t.solution.map((s, i) => (
-            <li key={i}>
-              <b className="z13-shagi__title">
-                <Tex text={`${s.title}.`} />
-              </b>{' '}
-              <Tex text={s.text} />
-              {s.formula ? <Krupno tex={s.formula} /> : null}
-              {s.table ? <TablitsaModeli m={t.tableModel} /> : null}
-            </li>
-          ))}
+          {/* Последний шаг движка — «Ответ»: его показывает строка ответа ниже. */}
+          {t.solution
+            .filter((s) => s.title !== 'Ответ')
+            .map((s, i) => (
+              <li key={i}>
+                <b className="z13-shagi__title">
+                  <Tex text={`${s.title}.`} />
+                </b>{' '}
+                <Tex text={s.text} />
+                {s.formula ? <Krupno tex={s.formula} /> : null}
+                {s.table ? <TablitsaModeli m={t.tableModel} /> : null}
+              </li>
+            ))}
         </ol>
-        <p className="z13-otvet">
-          Ответ: {otvet}
-          {units && units !== '%' ? ` ${units}` : units}
-        </p>
+        <p className="z13-otvet">Ответ: {otvetText(t.answer, t.units)}</p>
       </Details>
     </section>
   );

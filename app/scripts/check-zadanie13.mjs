@@ -663,7 +663,8 @@ for (const [n, extra, want] of tables) {
   const txt = (t, where) => {
     for (const m of t.matchAll(/\$([^$]+)\$/g)) tx(m[1], where);
     const plain = stripDollarMath(t).replace(/\*\*/g, '');
-    for (const f of [...findPlainMath(plain), ...findRawTex(plain)]) problems.push(`теория ${where}: вне KaTeX (${f.rule}): «${f.match}»`);
+    for (const f of [...findPlainMath(plain), ...findRawTex(plain)])
+      problems.push(`теория ${where}: вне KaTeX (${f.rule}): «${f.match}»`);
   };
   const ids = new Set();
   for (const g of GLAVY_13) {
@@ -671,7 +672,8 @@ for (const [n, extra, want] of tables) {
     if (ids.has(g.id)) problems.push(`теория: повтор id ${g.id}`);
     ids.add(g.id);
     txt(g.lead, g.id);
-    if (/\$/.test(g.title)) problems.push(`теория ${g.id}: в названии главы формула — содержание её не наберёт`);
+    if (/\$/.test(g.title))
+      problems.push(`теория ${g.id}: в названии главы формула — содержание её не наберёт`);
     for (const p of g.podrazdely) {
       if (ids.has(p.id)) problems.push(`теория: повтор id ${p.id}`);
       ids.add(p.id);
@@ -684,8 +686,10 @@ for (const [n, extra, want] of tables) {
           if (b.tex) tx(b.tex, w);
           (b.spisok ?? []).forEach((x) => txt(x, w));
           if (b.pochemu) txt(b.pochemu, w);
-          if ((b.rol === 'pravilo' || b.rol === 'vazhno') && !b.primer) problems.push(`теория ${w}: у правила и «Важно» нужен пример`);
-          if (b.rol === 'vazhno' && !b.pochemu) problems.push(`теория ${w}: «Важно» без «Почему это работает»`);
+          if ((b.rol === 'pravilo' || b.rol === 'vazhno') && !b.primer)
+            problems.push(`теория ${w}: у правила и «Важно» нужен пример`);
+          if (b.rol === 'vazhno' && !b.pochemu)
+            problems.push(`теория ${w}: «Важно» без «Почему это работает»`);
           if (b.primer) {
             txt(b.primer.uslovie, w);
             for (const st of b.primer.shagi) {
@@ -748,6 +752,89 @@ for (const [n, extra, want] of tables) {
   }
   for (const id of byProto.keys())
     if (!ids.includes(id)) problems.push(`банк: прототипа ${id} нет в реестре`);
+}
+
+/* ── Опорные задачи: 17 блоков по 10, ответы открываются ──────── */
+{
+  const katex = require('katex');
+  const { findPlainMath, findRawTex, stripDollarMath } = await import('./lib/math-markup.mjs');
+  const { BLOKI_13, zadachiBloka } = requireSrc('lib/zadanie13/opornye/bloki');
+  const { sealZadacha13 } = requireSrc('lib/zadanie13/opornye/seal');
+  const { generate, prototypes } = requireSrc('lib/zadanie13/generate');
+  const secret = requireSrc('lib/zadanie13/secret');
+  const { TYPE_NAMES } = requireSrc('lib/zadanie13/types');
+  const txt = (t, where) => {
+    for (const m of t.matchAll(/\$([^$]+)\$/g)) {
+      try {
+        katex.renderToString(m[1], { throwOnError: true, strict: 'error' });
+      } catch (e) {
+        problems.push(`опорные ${where}: KaTeX «${m[1].slice(0, 50)}»: ${e.message.slice(0, 100)}`);
+      }
+    }
+    const plain = stripDollarMath(t);
+    for (const f of [...findPlainMath(plain), ...findRawTex(plain)])
+      problems.push(`опорные ${where}: вне KaTeX (${f.rule}): «${f.match}»`);
+  };
+  if (BLOKI_13.length !== 17) problems.push(`опорные: блоков ${BLOKI_13.length} вместо 17`);
+  const slugs = new Set();
+  const covered = new Set();
+  BLOKI_13.forEach((b, i) => {
+    checks += 1;
+    const w = `блок ${b.no}`;
+    if (b.no !== String(i + 1).padStart(2, '0')) problems.push(`опорные ${w}: номер не по порядку`);
+    if (slugs.has(b.slug)) problems.push(`опорные ${w}: повтор адреса ${b.slug}`);
+    slugs.add(b.slug);
+    /* Карточка без формул: название и описание — простой текст. */
+    if (/[$\\]/.test(b.nazvanie + b.lead)) problems.push(`опорные ${w}: формула на карточке`);
+    txt(b.nazvanie + ' ' + b.lead, w);
+    b.zapomni.forEach((z) => txt(z, `${w} «Запомни»`));
+    if (/тип\s+[АБВГABCD]\b/.test(JSON.stringify(b))) problems.push(`опорные ${w}: тип буквой`);
+    const list = zadachiBloka(b);
+    if (list.length !== 10) problems.push(`опорные ${w}: ${list.length} задач вместо 10`);
+    const keys = new Set(list.map((z) => `${z.prototypeId}:${z.seed}`));
+    if (keys.size !== list.length) problems.push(`опорные ${w}: задачи повторяются`);
+    if (b.vid === 'zadachi') {
+      for (const id of b.prototipy) covered.add(id);
+      if (!b.prototipy.every((id) => list.some((z) => z.prototypeId === id)))
+        problems.push(`опорные ${w}: не каждый прототип блока попал в задачи`);
+      /* Повышенный уровень — в конце блока. */
+      const hard = list.map((z) => generate(z.prototypeId, z.seed).difficulty === 'hard');
+      if (hard.some((h, k) => !h && hard.slice(0, k).some(Boolean)))
+        problems.push(`опорные ${w}: базовая задача после повышенной`);
+    }
+    for (const z of list) {
+      checks += 1;
+      const zw = `${w} №${z.no} ${z.prototypeId}:${z.seed}`;
+      const t = generate(z.prototypeId, z.seed);
+      const sealed = sealZadacha13(z.prototypeId, z.seed, b.vid, z.no);
+      try {
+        const shagi = JSON.parse(secret.openText(sealed.podskazki, sealed.seal));
+        const razbor = JSON.parse(secret.openText(sealed.razbor, sealed.seal));
+        if (!shagi.length || !razbor.shagi.length || !razbor.otvet)
+          problems.push(`опорные ${zw}: пустые подсказка или решение`);
+      } catch {
+        problems.push(`опорные ${zw}: подсказка или решение не открываются`);
+      }
+      if (sealed.uslovieHtml.includes('$')) problems.push(`опорные ${zw}: формула не набрана`);
+      if (t.source === 'own' && !sealed.metki.includes('не из открытого банка'))
+        problems.push(`опорные ${zw}: нет пометки «не из открытого банка»`);
+      if (b.vid === 'tip') {
+        const right = sealed.vybory.find((v) => secret.choiceMatches(v.number, sealed.seal));
+        if (!right || right.label !== TYPE_NAMES[t.type])
+          problems.push(`опорные ${zw}: верный выбор — не схема задачи`);
+      } else {
+        const answer = String(t.answer).replace('.', ',');
+        if (!secret.answerMatches(answer, sealed.seal))
+          problems.push(`опорные ${zw}: ответ не сходится с отпечатком`);
+        if (sealed.wrongUnits.some((u) => secret.answerMatches(answer, u)))
+          problems.push(`опорные ${zw}: верный ответ попал в «чужие единицы»`);
+      }
+    }
+  });
+  const tipy = new Set(zadachiBloka(BLOKI_13[16]).map((z) => z.prototypeId[0]));
+  if (tipy.size !== 4) problems.push('опорные «Определи тип»: нужны все четыре схемы');
+  for (const p of prototypes())
+    if (!covered.has(p.id)) problems.push(`опорные: прототип ${p.id} не попал ни в один блок`);
 }
 
 /* ── Генерация: все прототипы ──────────────────────────────────── */

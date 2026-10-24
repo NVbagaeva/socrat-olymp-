@@ -73,6 +73,8 @@ const PAGES = [
   '/zadaniya/2/teoriya/',
   '/zadaniya/13/',
   '/zadaniya/13/teoriya/',
+  '/zadaniya/13/opornye-zadachi/',
+  '/zadaniya/13/opornye-zadachi/tablitsa-dif/',
   '/zadaniya/16/',
   '/zadaniya/16/teoriya/',
   '/zadaniya/16/opornye-zadachi/',

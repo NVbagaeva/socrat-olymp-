@@ -20,7 +20,7 @@ export function choice(
   return { question, options, correct: options.indexOf(right), ...(comment ? { comment } : {}) };
 }
 
-const SIGN: Record<TypeCode, string> = {
+export const SIGN: Record<TypeCode, string> = {
   A: 'долг уменьшается на одну и ту же величину весь срок',
   B: 'путь долга задан, но не одной равномерной лесенкой',
   C: 'известны платежи, а долг по месяцам не задан',
