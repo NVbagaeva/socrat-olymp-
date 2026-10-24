@@ -190,8 +190,8 @@ export function checkPrep(seedsPerTask: number, typeset: ((tex: string) => void)
   let generated = 0;
   const ids = new Set<string>();
   for (const block of PREP_BLOCKS) {
-    if (block.zadachi.length !== 8) {
-      problems.push({ where: block.id, what: `в блоке ${block.zadachi.length} задач, а не 8` });
+    if (block.zadachi.length !== 10) {
+      problems.push({ where: block.id, what: `в блоке ${block.zadachi.length} задач, а не 10` });
     }
     block.zadachi.forEach((micro, i) => {
       const expected = `${block.id}-${String(i + 1).padStart(2, '0')}`;

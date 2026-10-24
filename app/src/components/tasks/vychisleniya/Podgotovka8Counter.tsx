@@ -8,7 +8,7 @@ export interface Podgotovka8CounterProps {
   totals: { id: string; total: number }[];
 }
 
-/** Строка «N из 40 заданий» и полоса под ней: счёт из хранилища браузера. */
+/** Строка «N из 50 заданий» и полоса под ней: счёт из хранилища браузера. */
 export function Podgotovka8Counter({ totals }: Podgotovka8CounterProps) {
   const progress = usePrep8Progress();
   const total = totals.reduce((sum, item) => sum + item.total, 0);

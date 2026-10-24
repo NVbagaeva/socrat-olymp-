@@ -100,9 +100,29 @@ interface SheetBlock8 {
   tasks: SheetTask8[];
 }
 
-/** Разбор: список шагов и строка ответа, свёрстано под ту же CSS, что у №12. */
+/**
+ * Заголовок шага разбора. В данных у задания №8 разбор — строки без
+ * заголовков, но роль шага всегда одна: первая строка называет свойство
+ * или формулу, последняя считает ответ, всё между ними — упрощение.
+ */
+function zagolovokShaga(index: number, total: number): string {
+  if (total === 1) {
+    return 'Решение';
+  }
+  if (index === 0) {
+    return 'Применяем свойство';
+  }
+  return index === total - 1 ? 'Вычисляем' : 'Упрощаем';
+}
+
+/** Разбор: шаги с заголовками и строка ответа, свёрстано под ту же CSS, что у №2 и №12. */
 function razborHtml(lines: string[], answerText: string): string {
-  const items = lines.map((line) => `<li class="sheet-step">${typeset(line)}</li>`).join('');
+  const items = lines
+    .map(
+      (line, index) =>
+        `<li class="sheet-step"><b>${zagolovokShaga(index, lines.length)}.</b> ${typeset(line)}</li>`,
+    )
+    .join('');
   return `<ol class="sheet-steps">${items}</ol><p class="sheet-task-answer">Ответ: <b>${answerText}</b></p>`;
 }
 

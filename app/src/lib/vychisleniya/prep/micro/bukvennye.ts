@@ -130,4 +130,39 @@ export const BUKVENNYE: PrepMicro[] = [
       proverka: Math.log(a ** k) / Math.log(a),
     };
   }),
+  micro('P8-5-09', 'Произведение степеней с буквой', 'a^m \\cdot a^n = a^{m+n}', (r) => {
+    const a = r.pick([2, 3, 5, -2, -3, 0.5, 0.2, 1.5, -0.5]);
+    const e = r.pick([1, 2, 3]);
+    const m = r.int(2, 9);
+    const n = r.int(1, 6);
+    const k = m + n - e;
+    if (k < 1) {
+      return null;
+    }
+    const ans = round9(a ** e);
+    if (!Number.isInteger(ans * 1000) || Math.abs(ans) > 1000) {
+      return null;
+    }
+    const tex = `\\dfrac{a^{${m}} \\cdot a^{${n}}}{a^{${k}}}`;
+    return {
+      uslovie: pri(tex, a),
+      otvet: ans,
+      razbor: `$${tex} = a^{${m} + ${n} - ${k}} = a^{${e}} = ${par(a)}${e === 1 ? '' : `^{${e}}`} = ${d(ans)}$`,
+      proverka: (a ** m * a ** n) / a ** k,
+    };
+  }),
+  micro('P8-5-10', 'Сумма квадратов через сумму и произведение', 'a^2 + b^2 = (a + b)^2 - 2ab', (r) => {
+    const s = r.int(0, 1) === 0 ? r.int(2, 12) : tenth(r, 1.5, 9.9);
+    const p = r.int(-20, 20);
+    if (p === 0 || s * s - 4 * p < 0) {
+      return null;
+    }
+    const ans = round9(s * s - 2 * p);
+    return {
+      uslovie: `Найдите значение выражения $a^2 + b^2$, если $a + b = ${d(s)}$ и $ab = ${d(p)}$.`,
+      otvet: ans,
+      razbor: `$a^2 + b^2 = (a + b)^2 - 2ab = ${par(s)}^2 - 2 \\cdot ${par(p)} = ${d(round9(s * s))} ${p > 0 ? '-' : '+'} ${d(Math.abs(2 * p))} = ${d(ans)}$`,
+      proverka: s * s - 2 * p,
+    };
+  }),
 ];

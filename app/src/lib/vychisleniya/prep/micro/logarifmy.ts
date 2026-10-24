@@ -155,4 +155,36 @@ export const LOGARIFMY: PrepMicro[] = [
       proverka: Math.pow(a, (k * Math.log(b)) / Math.log(a)),
     };
   }),
+  micro('P8-2-09', 'Произведение логарифмов', '\\log_a b \\cdot \\log_b c = \\log_a c', (r) => {
+    const a = r.pick([2, 3, 5]);
+    const j = r.int(2, 4);
+    const c = a ** j;
+    const b = r.pick([6, 7, 10, 11, 13]);
+    if (b === a || c > 1000) {
+      return null;
+    }
+    const tex = `${log(String(a), String(b))} \\cdot ${log(String(b), String(c))}`;
+    return {
+      uslovie: naydi(tex),
+      otvet: j,
+      razbor: `$${tex} = ${log(String(a), String(c))} = ${log(String(a), `${a}^{${j}}`)} = ${j}$`,
+      proverka: (Math.log(b) / Math.log(a)) * (Math.log(c) / Math.log(b)),
+    };
+  }),
+  micro('P8-2-10', 'Переход к новому основанию', '\\log_a b = \\dfrac{\\log_c b}{\\log_c a}', (r) => {
+    const a = r.pick([2, 3, 5]);
+    const c = r.pick([2, 3, 5, 7, 10]);
+    const j = r.int(2, 5);
+    if (c === a || a ** j > 1000) {
+      return null;
+    }
+    const b = a ** j;
+    const tex = `\\dfrac{${log(String(c), String(b))}}{${log(String(c), String(a))}}`;
+    return {
+      uslovie: naydi(tex),
+      otvet: j,
+      razbor: `$${tex} = ${log(String(a), String(b))} = ${log(String(a), `${a}^{${j}}`)} = ${j}$`,
+      proverka: Math.log(b) / Math.log(c) / (Math.log(a) / Math.log(c)),
+    };
+  }),
 ];

@@ -148,4 +148,43 @@ export const STEPENI: PrepMicro[] = [
       proverka: Math.pow(a ** (n * k), 1 / n),
     };
   }),
+  micro('P8-1-09', 'Степень дроби', '\\left(\\dfrac{a}{b}\\right)^n = \\dfrac{a^n}{b^n},\\quad \\left(\\dfrac{a}{b}\\right)^{-n} = \\left(\\dfrac{b}{a}\\right)^n', (r) => {
+    const [p, q] = r.pick([
+      [1, 2],
+      [3, 2],
+      [1, 4],
+      [3, 4],
+      [1, 5],
+      [2, 5],
+      [3, 5],
+      [5, 2],
+    ] as const);
+    const n = r.pick([2, 3, -2, -3]);
+    const k = Math.abs(n);
+    const ans = round9((p / q) ** n);
+    if (!nice(ans, 3) || ans > 1000) {
+      return null;
+    }
+    const tex = `\\left(\\dfrac{${p}}{${q}}\\right)^{${n}}`;
+    const razbor =
+      n > 0
+        ? `$${tex} = \\dfrac{${p}^{${k}}}{${q}^{${k}}} = \\dfrac{${p ** k}}{${q ** k}} = ${d(ans)}$`
+        : `$${tex} = \\left(\\dfrac{${q}}{${p}}\\right)^{${k}} = \\dfrac{${q ** k}}{${p ** k}} = ${d(ans)}$`;
+    return { uslovie: naydi(tex), otvet: ans, razbor, proverka: (p / q) ** n };
+  }),
+  micro('P8-1-10', 'Вынесение степени за скобки', 'a^{n+k} + a^n = a^n(a^k + 1)', (r) => {
+    const a = r.pick([2, 3, 5]);
+    const n = r.int(3, 9);
+    const k = r.int(1, 3);
+    const minus = r.int(0, 1) === 0;
+    const sign = minus ? '-' : '+';
+    const ans = minus ? a ** k - 1 : a ** k + 1;
+    const tex = `\\dfrac{${a}^{${n + k}} ${sign} ${a}^{${n}}}{${a}^{${n}}}`;
+    return {
+      uslovie: naydi(tex),
+      otvet: ans,
+      razbor: `$${tex} = \\dfrac{${a}^{${n}}(${a}^{${k}} ${sign} 1)}{${a}^{${n}}} = ${a}^{${k}} ${sign} 1 = ${a ** k} ${sign} 1 = ${ans}$`,
+      proverka: (a ** (n + k) + (minus ? -1 : 1) * a ** n) / a ** n,
+    };
+  }),
 ];
