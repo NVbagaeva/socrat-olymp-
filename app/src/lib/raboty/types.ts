@@ -170,3 +170,16 @@ export interface Notice {
   createdAt: string;
   readAt: string | null;
 }
+
+/** Отчёт по выданной работе: баллы каждого ученика по заданиям. */
+export interface WorkReport {
+  work: VariantWork;
+  rows: {
+    student: Person;
+    status: SubStatus | 'none';
+    submittedAt: string | null;
+    /** Балл по номеру задания; null — нет оценки. */
+    bally: Record<number, number | null>;
+    score: Score | null;
+  }[];
+}

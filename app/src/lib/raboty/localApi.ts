@@ -42,6 +42,7 @@ import type {
   SubStatus,
   Submission,
   VariantWork,
+  WorkReport,
 } from './types';
 
 export const RABOTY_KEY = 'budetege:raboty:v1';
@@ -712,6 +713,36 @@ export function createLocalRaboty(opts: LocalRabotyOptions = {}): RabotyApi {
               };
             }),
         }));
+    },
+
+    async workReport(workId): Promise<WorkReport | null> {
+      const u = me();
+      const db = store.read();
+      const w = workOf(db, workId);
+      if (!w || w.tutorId !== u.id) return null;
+      return {
+        work: w,
+        rows: db.recipients
+          .filter((r) => r.workId === w.id && isMyStudent(u.id, r.userId))
+          .map((r) => {
+            const s = db.subs.find((x) => x.workId === w.id && x.userId === r.userId);
+            const grades = s ? db.grades.filter((g) => g.subId === s.id) : [];
+            const bally: Record<number, number | null> = {};
+            for (let no = 1; no <= 20; no += 1) {
+              const g = grades.find((x) => x.taskNo === no);
+              bally[no] = g === undefined || g.naDorabotke ? null : g.ball;
+            }
+            const row: WorkReport['rows'][number] = {
+              student: personOf(r.userId),
+              status: s?.status ?? 'none',
+              submittedAt: s?.submittedAt ?? null,
+              bally,
+              score: s ? scoreOf(grades, s.status) : null,
+            };
+            return row;
+          })
+          .sort((a, b) => a.student.name.localeCompare(b.student.name, 'ru')),
+      };
     },
 
     async checkList(): Promise<CheckRow[]> {

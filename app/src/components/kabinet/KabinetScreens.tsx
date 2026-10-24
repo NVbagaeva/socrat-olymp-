@@ -12,6 +12,9 @@ import { IssueHomework } from './IssueHomework';
 import { KabinetGate } from './KabinetGate';
 import { StudentHome } from './StudentHome';
 import { TutorHome } from './TutorHome';
+import { ProverkaRaboty } from '@/components/raboty/ProverkaRaboty';
+import { RabotyPage } from '@/components/raboty/RabotyPage';
+import { VydatVariant } from '@/components/raboty/VydatVariant';
 
 export function KabinetHomeScreen() {
   return (
@@ -39,4 +42,16 @@ export function ClassScreen() {
 
 export function HomeworkScreen() {
   return <KabinetGate>{(me) => <HomeworkPage me={me} />}</KabinetGate>;
+}
+
+export function RabotyScreen() {
+  return <KabinetGate roles={['tutor', 'student']}>{(me) => <RabotyPage me={me} />}</KabinetGate>;
+}
+
+export function VydatVariantScreen() {
+  return <KabinetGate roles={['tutor']}>{() => <VydatVariant />}</KabinetGate>;
+}
+
+export function ProverkaRabotyScreen() {
+  return <KabinetGate roles={['tutor']}>{() => <ProverkaRaboty />}</KabinetGate>;
 }

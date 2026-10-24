@@ -40,9 +40,14 @@ export function TutorHome({ me }: { me: Me }) {
     <div className="kab-stack">
       <div className="kab-title-row">
         <h1 className="t-h1">{me.name}</h1>
-        <Link className="btn btn--primary" href="/kabinet/vydat-dz/" data-testid="issue-homework">
-          {t.issue}
-        </Link>
+        <div className="kab-actions">
+          <Link className="btn btn--secondary" href="/kabinet/raboty/" data-testid="raboty-link">
+            Работы-варианты
+          </Link>
+          <Link className="btn btn--primary" href="/kabinet/vydat-dz/" data-testid="issue-homework">
+            {t.issue}
+          </Link>
+        </div>
       </div>
       {problem !== null ? <FieldMessage tone="error">{problem}</FieldMessage> : null}
 

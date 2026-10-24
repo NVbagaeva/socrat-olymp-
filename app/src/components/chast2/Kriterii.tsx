@@ -15,6 +15,8 @@ export interface KriteriiProps {
   readOnly?: boolean;
   /** Префикс data-testid. */
   testId: string;
+  /** Подпись итога: у ученика — «Ваша оценка», у учителя — «Оценка». */
+  itog?: (ball: number, max: number) => string;
 }
 
 /**
@@ -30,6 +32,7 @@ export function Kriterii({
   onPick,
   readOnly = false,
   testId,
+  itog = T.samoBall,
 }: KriteriiProps) {
   return (
     <div className="c2-krit">
@@ -85,7 +88,7 @@ export function Kriterii({
         </tbody>
       </table>
       <p className="c2-krit__itog" aria-live="polite">
-        {ball === undefined ? T.samoNet : T.samoBall(ball, max)}
+        {ball === undefined ? T.samoNet : itog(ball, max)}
       </p>
     </div>
   );

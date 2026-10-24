@@ -14,6 +14,7 @@ import type {
   Notice,
   Photo,
   StudentWork,
+  WorkReport,
 } from './types';
 
 export interface UploadMeta {
@@ -47,6 +48,8 @@ export interface RabotyApi {
   issueWork(input: IssueWorkInput): Promise<string>;
   extendWork(workId: string, until: string, studentId?: string | null): Promise<void>;
   issuedWorks(): Promise<IssuedWork[]>;
+  /** Баллы учеников по заданиям — для статистики и выгрузки в Excel. */
+  workReport(workId: string): Promise<WorkReport | null>;
   checkList(): Promise<CheckRow[]>;
   checkWork(submissionId: string): Promise<CheckWork | null>;
   startCheck(submissionId: string): Promise<void>;

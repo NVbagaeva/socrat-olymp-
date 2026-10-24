@@ -72,7 +72,12 @@ export function StudentHome({ me }: { me: Me }) {
 
   return (
     <div className="kab-stack">
-      <h1 className="t-h1">{me.name}</h1>
+      <div className="kab-title-row">
+        <h1 className="t-h1">{me.name}</h1>
+        <Link className="btn btn--primary" href="/kabinet/raboty/" data-testid="raboty-link">
+          Мои работы
+        </Link>
+      </div>
 
       <div className="kab-grid">
         <Card title={t.tutors} compact>
