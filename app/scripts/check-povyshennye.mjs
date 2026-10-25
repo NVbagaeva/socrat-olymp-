@@ -244,6 +244,66 @@ Object.assign(VTOROY, {
   },
 });
 
+/* Партия 2, группа g1: варианты 7–12, №1–3. */
+const Z3_2 = requireSrc('lib/zadanie3/razdel2/povyshennye');
+const Z3_3 = requireSrc('lib/zadanie3/razdel3/povyshennye');
+const Z3_5 = requireSrc('lib/zadanie3/razdel5/povyshennye');
+const { P03_70 } = requireSrc('lib/zadanie3/razdel5/dvacilindra');
+
+/** Равнобедренный AC = BC = l с углом A при основании: вершины по координатам. */
+function ravnobedr(l, A) {
+  return { A: [0, 0], B: [2 * l * Math.cos(A), 0], C: [l * Math.cos(A), l * Math.sin(A)] };
+}
+
+/** Основание AC, вершина B, биссектриса AF: F — бисекцией по BC, угол меряем. */
+function bissektrisaF(b) {
+  const pri = ((180 - b) / 2) * (Math.PI / 180);
+  const A = [0, 0];
+  const C = [10, 0];
+  const B = [5, 5 * Math.tan(pri)];
+  /* F на BC: углы BAF и FAC равны. */
+  const t = bisekciya(
+    (s) => {
+      const F = [B[0] + (C[0] - B[0]) * s, B[1] + (C[1] - B[1]) * s];
+      return ugol(B, A, F) - ugol(F, A, C);
+    },
+    0,
+    1,
+  );
+  return { A, B, C, F: [B[0] + (C[0] - B[0]) * t, B[1] + (C[1] - B[1]) * t] };
+}
+
+Object.assign(VTOROY, {
+  'z01.trapeciya-radius': (p) => {
+    /* Перебор радиуса с шагом 0,5: сумма оснований равна сумме боковых. */
+    for (let r2 = 1; r2 < 400; r2 += 1) if (close(r2 + p.c, p.per / 2)) return r2 / 2;
+    return NaN;
+  },
+  'z01.ravnobedr-osnovanie-cos': (p) => {
+    const t = ravnobedr(p.l, Math.acos(p.c));
+    return Math.round(Math.hypot(t.B[0] - t.A[0], t.B[1] - t.A[1]) * 1e6) / 1e6;
+  },
+  'z01.ravnobedr-bok-sin': (p) => {
+    const t = ravnobedr(1, Math.asin(p.s));
+    return Math.round(((p.c * Math.hypot(t.C[0], t.C[1])) / t.B[0]) * 1e6) / 1e6;
+  },
+  'z01.bissektrisa-afc': (p) => {
+    const t = bissektrisaF(p.b);
+    return Math.round(ugol(t.A, t.F, t.C) * 1e6) / 1e6;
+  },
+  'z01.bissektrisa-afb': (p) => {
+    const t = bissektrisaF(p.b);
+    return Math.round(ugol(t.A, t.F, t.B) * 1e6) / 1e6;
+  },
+  'z02.skalyar-po-risunku': (p) => VK.skalyarnoePoRisunku(p).proverka,
+  'z02.dlina-km': (p) => VK.dlinaKM(p).proverka,
+  'z03.prizma-gipotenuza': (p) => Z3_2.P03_20S.poModeli(p),
+  'z03.prizma-bez-piramidy': (p) => Z3_2.P03_28S.poModeli(p),
+  'z03.piramida-delit-rebro': (p) => Z3_3.P03_48S.poModeli(p),
+  'z03.dva-cilindra-vyshe': (p) => Z3_5.P03_69S.poModeli(p),
+  'z03.dve-kruzhki': (p) => P03_70.poModeli(p),
+});
+
 /* ── Варианты ───────────────────────────────────────────────────── */
 
 const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');
