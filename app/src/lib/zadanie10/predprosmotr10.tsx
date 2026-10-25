@@ -1,18 +1,17 @@
 /**
  * Предпросмотр листа №10 в общем генераторе: та же модель листа и те же
- * куски, что у страницы печати (List10), — в строку HTML. Модуль
- * грузится при первой сборке листа вместе с банком и решателями.
+ * куски разметки, что у листа печати (sheet10.ts), — условие, разбор,
+ * рамки теории. Модуль грузится при первой сборке листа вместе с банком
+ * и решателями.
  */
 
-import { renderToStaticMarkup } from 'react-dom/server';
-import { RamkiTeorii10, Shagi10, Uslovie10 } from '@/components/tasks/zadanie10/ChastiLista10';
-import { Most10 } from '@/components/tasks/zadanie10/Most10';
 import type { IllInfo } from '@/components/tasks/zadanie10/Zadacha10';
 import { GEN_UI } from '@/content/generatorUi';
 import type { ListHtml, SobratListHtml } from '@/lib/generator/obshchiy/bankEngine';
 import { typeset } from '@/lib/tex';
 import { zagruzitIndeks, zagruzitZadachi, type IndeksZadachi, type ZadachaLite } from './dannye';
 import { parseZapros, parseZaprosKlyuchi, sobratList, sobratListKlyuchi } from './sborka';
+import { otvetText10, ramkiTeorii10, razbor10, uslovie10, type Sborka10 } from './sheet10';
 
 /** Откуда брать банк: в браузере — файлы public/data, в проверке — с диска. */
 export interface Dannye10 {
@@ -22,8 +21,10 @@ export interface Dannye10 {
 
 const BRAUZER: Dannye10 = { indeks: zagruzitIndeks, zadachi: zagruzitZadachi };
 
-function otvetText(x: number | string): string {
-  return String(x).replace('.', ',');
+/** Условие ученика: текст, картинка сюжета и чертёж моста. */
+export function vopros10(o: Sborka10, z: ZadachaLite): string {
+  const u = uslovie10(o, z, 'uchenik');
+  return u.html + (u.figure === null ? '' : `<div class="z10-list__most">${u.figure.svg}</div>`);
 }
 
 /** ill — картинки сюжетов по прототипам (страница генератора, на сервере). */
@@ -41,48 +42,32 @@ export function sobratList10(
     const ids = model.bloki.flatMap((b) => [...b.spiski.flat(), ...(b.primery ?? [])]);
     const protos = [...new Set(indeks.filter((x) => ids.includes(x.id)).map((x) => x.p))];
     const [zadachi, mod] = await Promise.all([dannye.zadachi(protos), import('./prototypes')]);
-    const uslovie = (x: ZadachaLite) =>
-      renderToStaticMarkup(
-        <Uslovie10
-          z={x}
-          vid="uchenik"
-          kartinki={model.kartinki}
-          {...(ill[x.prototypeId] ? { ill: ill[x.prototypeId] } : {})}
-        />,
-      );
-    const razbor = (x: ZadachaLite) =>
-      renderToStaticMarkup(
-        <>
-          {x.prototypeId === 'P01' ? <Most10 params={x.params} rezhim="uchitel" /> : null}
-          <Shagi10 s={mod.prototype(x.prototypeId).solve(x.params)} />
-        </>,
-      );
+    const o: Sborka10 = { model, zadachi, proto: mod.prototype, ill, kartinki: model.kartinki };
+    const otvet = (x: ZadachaLite) =>
+      typeset(otvetText10(mod.prototype(x.prototypeId).solve(x.params).answer));
     const l: ListHtml = {
       bloki: model.bloki,
       zadacha(id) {
         const x = zadachi.get(id);
         if (x === undefined) return null;
         return {
-          question: uslovie(x),
-          answer: typeset(otvetText(mod.prototype(x.prototypeId).solve(x.params).answer)),
-          solution: razbor(x),
+          question: vopros10(o, x),
+          answer: otvet(x),
+          solution: razbor10(o, x).join(''),
           analog: x.source === 'analog',
         };
       },
       pamyatka: (p) =>
-        `<div class="gen-recap"><b>${model.bloki[0]?.title ?? ''}</b>${renderToStaticMarkup(
-          <RamkiTeorii10 prototipy={p} proto={mod.prototype} />,
-        )}</div>`,
+        `<div class="gen-recap"><b>${model.bloki[0]?.title ?? ''}</b>${ramkiTeorii10(o, p).join('')}</div>`,
       primer(id) {
         const x = zadachi.get(id);
         if (x === undefined) return '';
-        const s = mod.prototype(x.prototypeId).solve(x.params);
         return (
           `<div class="gen-example"><span class="gen-example__label">${GEN_UI.primer}</span>` +
           `<p class="gen-example__title">${typeset(mod.prototype(x.prototypeId).title)}</p>` +
-          `<div class="gen-example__q">${uslovie(x)}</div>` +
-          `<div class="gen-example__sol">${razbor(x)}` +
-          `<p>Ответ: <b>${typeset(otvetText(s.answer))}</b></p></div></div>`
+          `<div class="gen-example__q">${vopros10(o, x)}</div>` +
+          `<div class="gen-example__sol">${razbor10(o, x).join('')}` +
+          `<p>Ответ: <b>${otvet(x)}</b></p></div></div>`
         );
       },
     };

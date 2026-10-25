@@ -46,7 +46,7 @@ const E12 = requireSrc('lib/ves12/engine12.ts');
 const G12 = requireSrc('lib/generatorSheet.ts');
 const { GEN_UI } = requireSrc('content/generatorUi.ts');
 const fs = await import('node:fs');
-const { createElement, Fragment } = await import('react');
+const { createElement } = await import('react');
 const { renderToStaticMarkup } = await import('react-dom/server');
 
 let failed = 0;
@@ -203,29 +203,28 @@ const RAZDELY = [
     const S = requireSrc(`lib/zadanie${z}/sborka.ts`);
     const M = requireSrc(`lib/zadanie${z}/prototypes/index.ts`);
     const T = requireSrc(`content/generator${z}.ts`)[`GENERATOR${z}_TEXTS`];
-    const Ch10 = z === '10' ? requireSrc('components/tasks/zadanie10/ChastiLista10.tsx') : null;
-    const Most10 = z === '10' ? requireSrc('components/tasks/zadanie10/Most10.tsx').Most10 : null;
-    /* Разбор №10 — шаги и, у моста, чертёж учителя (как в предпросмотре). */
+    const S10 = z === '10' ? requireSrc('lib/zadanie10/sheet10.ts') : null;
+    const PR10 = z === '10' ? requireSrc('lib/zadanie10/predprosmotr10.tsx') : null;
+    /* Куски листа №10 (sheet10.ts) — без модели: условие и разбор от неё не зависят. */
+    const o10 = (kartinki) => ({ proto: M.prototype, ill, kartinki });
+    /* Разбор №10 — чертёж моста учителя и шаги, как на листе и в предпросмотре. */
     const Razbor =
-      Ch10 === null
+      S10 === null
         ? requireSrc(`components/tasks/zadanie${z}/Razbor${z}.tsx`)[`Razbor${z}`]
-        : ({ s, x }) =>
-            createElement(
-              Fragment,
-              null,
-              x.prototypeId === 'P01'
-                ? createElement(Most10, { params: x.params, rezhim: 'uchitel' })
-                : null,
-              createElement(Ch10.Shagi10, { s }),
-            );
-    const Uslovie = z === '6' ? requireSrc('components/tasks/zadanie6/Uslovie6.tsx').Uslovie6 : null;
+        : ({ x }) =>
+            createElement('div', {
+              dangerouslySetInnerHTML: { __html: S10.razbor10(o10(false), x).join('') },
+            });
+    const Uslovie =
+      z === '6' ? requireSrc('components/tasks/zadanie6/Uslovie6.tsx').Uslovie6 : null;
     const ill = z === '10' ? requireSrc('lib/zadanie10/illyustracii.ts').kartinkiPrototipov() : {};
     const { typeset } = requireSrc('lib/tex.ts');
     const dir = new URL(`../public/data/zadanie${z}/`, import.meta.url);
     const indeks = JSON.parse(fs.readFileSync(new URL('indeks.json', dir), 'utf8'));
     const vse = new Map();
     for (const pr of [...new Set(indeks.map((x) => x.p))])
-      for (const x of JSON.parse(fs.readFileSync(new URL(`${pr}.json`, dir), 'utf8'))) vse.set(x.id, x);
+      for (const x of JSON.parse(fs.readFileSync(new URL(`${pr}.json`, dir), 'utf8')))
+        vse.set(x.id, x);
     const dannye = {
       indeks: async () => indeks,
       zadachi: async (ps) => new Map([...vse].filter(([, x]) => ps.includes(x.prototypeId))),
@@ -236,15 +235,7 @@ const RAZDELY = [
       z === '10' ? E.engine10(config, base, ill, dannye) : E[`engine${z}`](config, base, dannye);
     /* Условие так же, как в предпросмотре и на листе. */
     const vopros = (x, kartinki = false) => {
-      if (Ch10 !== null)
-        return renderToStaticMarkup(
-          createElement(Ch10.Uslovie10, {
-            z: x,
-            vid: 'uchenik',
-            kartinki,
-            ...(ill[x.prototypeId] ? { ill: ill[x.prototypeId] } : {}),
-          }),
-        );
+      if (PR10 !== null) return PR10.vopros10(o10(kartinki), x);
       if (Uslovie === null) return `<p class="z7-list__uslovie">${typeset(x.text)}</p>`;
       const ris = M.prototype(x.prototypeId).ris(x.params);
       const u = { text: x.text, ...(ris ? { ris } : {}), ...(x.posle ? { posle: x.posle } : {}) };
@@ -254,8 +245,7 @@ const RAZDELY = [
       const zk = S.parseZaprosKlyuchi(q);
       return zk !== null ? { ...zk, poKlyucham: true } : { ...S.parseZapros(q), poKlyucham: false };
     };
-    const model = (p) =>
-      p.poKlyucham ? S.sobratListKlyuchi(p, indeks) : S.sobratList(p, indeks);
+    const model = (p) => (p.poKlyucham ? S.sobratListKlyuchi(p, indeks) : S.sobratList(p, indeks));
     const sobrat = (p) => {
       const m = model(p);
       const zadachi = m.bloki.find((b) => b.id === 'zadachi');
@@ -891,9 +881,14 @@ console.log('№10: картинки сюжетов');
     );
     const a = (await R.engine.build(base)).variants.flatMap((v) => v.map((t) => t.solutionHtml));
     const b = (await R.engine.build(on)).variants.flatMap((v) => v.map((t) => t.solutionHtml));
-    okTop(JSON.stringify(a) === JSON.stringify(b), `№10 ${seed}: задачи от переключателя не меняются`);
     okTop(
-      (await R.engine.build(on)).variants.some((v) => v.some((t) => t.questionHtml.includes('<picture'))),
+      JSON.stringify(a) === JSON.stringify(b),
+      `№10 ${seed}: задачи от переключателя не меняются`,
+    );
+    okTop(
+      (await R.engine.build(on)).variants.some((v) =>
+        v.some((t) => t.questionHtml.includes('<picture')),
+      ),
       `№10 ${seed}: в предпросмотре есть картинки сюжетов`,
     );
   }

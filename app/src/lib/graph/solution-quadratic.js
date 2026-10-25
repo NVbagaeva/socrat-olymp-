@@ -370,7 +370,8 @@ function stepSlope(p, win, points, knownA, vertex, interceptFound) {
       math('a \\cdot (\\Delta x)^2', 'a · (Δx)²') + '.'));
     blocks.push(text('От вершины до ' + (fromChart ? 'узла сетки ' : 'отмеченной точки ') +
       math(pointTex(frac(probe.x), frac(probe.y)), pointText(frac(probe.x), frac(probe.y))) +
-      ' по горизонтали ' + key(plain(dx)) + ', по вертикали ' + key(plain(dy)) + '.'));
+      ' по горизонтали ' + keyMath(tex(dx), plain(dx)) + ', по вертикали ' +
+      keyMath(tex(dy), plain(dy)) + '.'));
     blocks.push(formula('a = \\dfrac{' + tex(dy) + '}{' + texBracket(dx) + '^2} = ' + tex(p.a)));
     blocks.push(text('Получили ' + keyMath('a = ' + tex(p.a), 'a = ' + plain(p.a)) + '.'));
     return { title: 'Находим $a$ шагом от вершины', blocks: blocks, found: true };
@@ -724,7 +725,8 @@ function secondParabolaBlocks(q, win, points, blocks) {
     var dy = sub(frac(node.y), q.n);
     blocks.push(text('От вершины до узла сетки ' +
       math(pointTex(frac(node.x), frac(node.y)), pointText(frac(node.x), frac(node.y))) +
-      ' по горизонтали ' + key(plain(dx)) + ', по вертикали ' + key(plain(dy)) +
+      ' по горизонтали ' + keyMath(tex(dx), plain(dx)) + ', по вертикали ' +
+      keyMath(tex(dy), plain(dy)) +
       '. Старший коэффициент второй параболы:'));
     blocks.push(formula('a_2 = \\dfrac{' + tex(dy) + '}{' + texBracket(dx) + '^2} = ' + tex(q.a)));
   }

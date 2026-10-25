@@ -9,6 +9,8 @@ import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { keySpec2, parseSheetQuery2, sheetSpec2, sheetSpecVse2 } from '@/lib/vektory/sheet2';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 
 declare global {
   interface Window {
@@ -73,15 +75,27 @@ export function SheetPage2({ vid }: SheetPage2Props) {
         : Promise.resolve(undefined);
     void qr.then((svg) => {
       if (!alive) return;
-      const built =
+      const sobrat = () =>
         vid === 'klyuch'
           ? keySpec2(params.theme)
           : vid === 'vse'
             ? sheetSpecVse2(params, svg)
             : sheetSpec2(params, withAnswers, svg);
+      const built = sobrat();
       /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
       const kit = checkKitSheet(query, '2', withAnswers ? 'teacher' : 'student', built);
-      const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+      /* На лист — сборка в печатном профиле рисунков (figureRules.js):
+         отпечаток комплекта — по обычной, как у напечатанных раньше.
+         Место для решения (sp=) — только у листа ученика. */
+      const space = spaceOfQuery(query);
+      const risunki = withPrintFigures(sobrat);
+      const printed =
+        vid === 'vse'
+          ? vseWithSpace(risunki, space)
+          : sheetWithSpace(risunki, space, vid !== 'klyuch' && !withAnswers, () =>
+              sheetSpec2(params, true, svg),
+            );
+      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
       import('@/lib/sheet/paginate.js').then(() => {
         if (alive) {
           setWarning(kit.warning);

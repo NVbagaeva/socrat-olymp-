@@ -9,8 +9,8 @@
    на 2 мм ниже A4 (lib/sheet/theme.css), фон при печати белый.
 
    Проверяются листы ученика и учителя всех разделов с генератором,
-   с постоянным зерном, и справочник по планиметрии №1 (с примерами
-   и без):
+   с постоянным зерном, три листа «Собрать вариант» по постоянному коду
+   и справочник по планиметрии №1 (с примерами и без):
 
      Chromium — печать в PDF на трёх высотах бумаги: ровно A4 (с
        правилом @page листа) и 841 pt, 840 pt без @page — так печатает
@@ -27,6 +27,12 @@
    напечатанном PDF и в готовых сборниках out/materials/**.pdf:
    в видимом тексте его быть не должно (scripts/lib/math-markup.mjs).
 
+   Рисунки (правила lib/sheet/figureRules.js) — на каждом листе, у каждого
+   рисунка задачи и разбора (.sheet-figure) по размерам на бумаге:
+   клетка клетчатого рисунка — не меньше 6 мм; подписи — не мельче 10 pt,
+   индексы — не мельче 7 pt; основные линии — не тоньше 1,5 pt; сетка
+   листа не светлее #BBBBBB. Ниже минимума — проверка падает.
+
    Запуск после pnpm build:  node scripts/check-print-pages.mjs
    Нужны apache2, Chromium и WebKit (Playwright). Без WebKit проверка
    падает в CI (переменная CI) и пропускает его на своём компьютере. */
@@ -40,6 +46,7 @@ import { chromium, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
 import { findRawTex } from './lib/math-markup.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { RULES } from '../src/lib/sheet/figureRules.js';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium, webkit);
@@ -57,6 +64,52 @@ const SHEETS = [
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
   ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  /* №1 и №3: чертежи планиметрии и стереометрии — правила крупных рисунков. */
+  [
+    '№1',
+    '/zadaniya/1/pechat/',
+    'm=v&i=m&s=p01:1,p05:1,p13:1,p17:1,p24:1,p35:1,p41:1,p46:1,p49:1,p62:1&seed=print-check',
+  ],
+  ['№3', '/zadaniya/3/pechat/parallelepiped/', 'n=6&seed=print-check'],
+  /* №6, №7, №10 — на общем шаблоне (lib/sheetList.ts). У них t= — типы
+     задач, поэтому свой хвост без темы (пятый элемент). */
+  ['№6', '/zadaniya/6/pechat/', 't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1', null, ''],
+  ['№7', '/zadaniya/7/pechat/', 't=P01:2,P02:2,P03:2&i=m&v=1&e=0&seed=PRINT1', null, ''],
+  [
+    '№10',
+    '/zadaniya/10/pechat/',
+    'm=g&l=uchenik&t=P01:2,P02:2,P03:2&i=m&v=1&e=0&k=0&s=PRINT1',
+    [['ученик', '']],
+    '',
+  ],
+  [
+    '№10',
+    '/zadaniya/10/pechat/',
+    'm=g&l=uchitel&t=P01:2,P02:2,P03:2&i=m&v=1&e=0&k=0&s=PRINT1',
+    [['учитель', '']],
+    '',
+  ],
+  /* Место для решения (lib/sheet/space.js): в клетку «авто» и большое,
+     пустое место — у варианта, листа раздела и листа №6. */
+  ['Место: клетка', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00.PB', [['ученик', '']]],
+  ['Место: пустое', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00.P7', [['ученик', '']]],
+  ['Место: №8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check&sp=A', [['ученик', '']]],
+  /* Общий генератор (ps=2): поле у листа ученика. «Всё одним PDF» — в
+     test:variant (vseWithSpace): у его вариантов своя нумерация страниц. */
+  [
+    'Место: №9 из генератора',
+    '/zadaniya/9/pechat/',
+    'ps=2&s=9.1.1:1,9.2.1:1,9.4.1:2&seed=print-check&sp=B',
+    [['ученик', '']],
+  ],
+
+  [
+    'Место: №6',
+    '/zadaniya/6/pechat/',
+    't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1&sp=B',
+    [['ученик', '']],
+    '',
+  ],
   /* №2 на общем генераторе: ключи позиций, QR-код, вид работы и дата. */
   [
     '№2 из генератора',
@@ -110,6 +163,12 @@ const SHEETS = [
     '/zadaniya/13/pechat/',
     's=A:5,B:5,C:5,D:5,T:10&l=all&i=mix&h=net&f=full&v=1&zc=1&seed=print-check',
   ],
+  /* «Собрать вариант»: задания 1–13, один вариант (у каждого варианта
+     своя нумерация страниц, а проверка сверяет колонтитул с листом). Без
+     экрана, открывшего вкладку, лист собирается по коду из адреса. */
+  ['Вариант', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00', [['ученик', '']]],
+  ['Вариант', '/variant/pechat/', 'list=uchitel&kod=PR7T-407ZZ-00', [['учитель', '']]],
+  ['Вариант', '/variant/pechat/', 'list=razbor&kod=PR7T-407ZZ-00', [['разбор', '']]],
   /* №13, «Для репетиторов»: лист урока 6 (опорные, банк, новые, «Определи тип») и карточки. */
   ['№13 урок', '/zadaniya/13/pechat/', 's=&l=all&i=mix&h=net&f=compact&v=1&u=5&seed=print-check'],
   ['№13 карточки', '/zadaniya/13/pechat/kartochki/', 'seed=print-check', [['карточки', '']]],
@@ -211,6 +270,231 @@ async function openSheet(browser, url) {
   return { page, declared };
 }
 
+/**
+ * Размеры рисунков листа на бумаге. Масштаб рисунка — отношение его
+ * ширины на странице к ширине viewBox; кегль текста SVG задан в единицах
+ * viewBox, поэтому на бумаге он равен кеглю × масштаб. Индекс — текст
+ * мельче своей подписи (tspan внутри text).
+ */
+async function figureMetrics(page) {
+  return page.evaluate(() => {
+    const PX_MM = 96 / 25.4;
+    const PT_PX = 0.75;
+    const out = [];
+    for (const svg of document.querySelectorAll('#sheet-pages .sheet-figure svg')) {
+      const vb = svg.viewBox.baseVal;
+      const w = svg.getBoundingClientRect().width;
+      if (!vb || vb.width === 0 || w === 0) continue;
+      const scale = w / vb.width;
+      const cell = Number(svg.getAttribute('data-grid-cell'));
+      const fonts = [];
+      const indexes = [];
+      for (const t of svg.querySelectorAll('text, tspan')) {
+        if (!t.textContent.trim()) continue;
+        const size = parseFloat(getComputedStyle(t).fontSize);
+        const parent = t.parentElement?.closest('text');
+        const parentSize =
+          parent && parent !== t ? parseFloat(getComputedStyle(parent).fontSize) : size;
+        (size < parentSize - 0.01 ? indexes : fonts).push(size * scale * PT_PX);
+      }
+      const strokes = [];
+      for (const el of svg.querySelectorAll(
+        'path, line, polyline, polygon, circle, ellipse, rect',
+      )) {
+        const cs = getComputedStyle(el);
+        if (cs.stroke === 'none' || cs.display === 'none') continue;
+        const sw = parseFloat(cs.strokeWidth);
+        /* non-scaling-stroke: толщина задана в пикселях печати, без масштаба. */
+        const k = cs.vectorEffect === 'non-scaling-stroke' ? 1 : scale;
+        const dash =
+          cs.strokeDasharray === 'none'
+            ? null
+            : cs.strokeDasharray.split(/[ ,]+/).map((x) => parseFloat(x) * k * PT_PX);
+        if (sw > 0)
+          strokes.push({
+            pt: sw * k * PT_PX,
+            dashed: dash !== null,
+            dash,
+            dot: el.tagName === 'circle',
+          });
+      }
+      /* Стереометрия (data-line-pt): свои толщины — видимые 1,2–1,5 pt,
+         невидимые 0,8–1 pt штрихом 4/3 pt. */
+      const own = svg.hasAttribute('data-line-pt');
+      const lines = strokes.filter((x) => !x.dot);
+      const solid = lines.filter((x) => !x.dashed).map((x) => x.pt);
+      const dashed = lines.filter((x) => x.dashed);
+      /* Самая толстая сплошная линия: пунктир (вторая прямая, построения)
+         в основные не входит и планку не задаёт. */
+      const thick = Math.max(0, ...strokes.filter((x) => !x.dashed).map((x) => x.pt));
+      const main = strokes.filter((x) => !x.dashed && x.pt >= thick * 0.6).map((x) => x.pt);
+      const task = svg.closest('.sheet-task')?.querySelector('.sheet-task-no')?.textContent ?? '';
+      out.push({
+        task,
+        widthMm: w / PX_MM,
+        cellMm: cell > 0 ? (cell * scale) / PX_MM : null,
+        labelPt: fonts.length ? Math.min(...fonts) : null,
+        indexPt: indexes.length ? Math.min(...indexes) : null,
+        linePt: main.length ? Math.min(...main) : null,
+        stereo: own
+          ? {
+              solid: solid.length ? [Math.min(...solid), Math.max(...solid)] : null,
+              dashed: dashed.length
+                ? [Math.min(...dashed.map((x) => x.pt)), Math.max(...dashed.map((x) => x.pt))]
+                : null,
+              dash: dashed.length ? dashed[0].dash : null,
+            }
+          : null,
+      });
+    }
+    const grid = getComputedStyle(document.documentElement).getPropertyValue('--graph-grid').trim();
+    return { figures: out, grid };
+  });
+}
+
+/* Яркость цвета #RRGGBB (Rec. 709), 0…255. */
+function luma(hex) {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  if (!m) return null;
+  const [r, g, b] = m.slice(1).map((x) => parseInt(x, 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * Место для решения на листе (lib/sheet/space.js): клетка 5 мм ± 0,2 по
+ * линиям SVG; ширина поля — целое число клеток; каждый кусок поля целиком
+ * на своей странице и высотой в целое число клеток (переносы — только по
+ * границе строки); линии есть и в режиме печати; строка «Ответ:» стоит в
+ * одном куске с последней строкой поля и после неё.
+ */
+async function spaceMetrics(page) {
+  return page.evaluate(() => {
+    const PX_MM = 96 / 25.4;
+    const out = { fields: 0, pieces: 0, cells: [], bad: [], lines: 0, answers: 0 };
+    for (const el of document.querySelectorAll('#sheet-pages .sheet-space')) {
+      out.pieces += 1;
+      if (el.classList.contains('sheet-space--first')) out.fields += 1;
+      const r = el.getBoundingClientRect();
+      const h = el.clientHeight / PX_MM;
+      const rows = Number(el.dataset.rows);
+      if (Math.abs(h - rows * 5) > 0.2)
+        out.bad.push(`кусок поля ${h.toFixed(2)} мм, а строк ${rows}`);
+      const flow =
+        el.closest('.sheet-page')?.querySelector('.sheet-flow') ?? el.closest('.sheet-page');
+      const fr = flow?.getBoundingClientRect();
+      if (fr && (r.top < fr.top - 1 || r.bottom > fr.bottom + 1))
+        out.bad.push('кусок поля выходит за страницу');
+      if (el.classList.contains('sheet-space--grid')) {
+        const w = el.clientWidth / PX_MM;
+        if (Math.abs(w / 5 - Math.round(w / 5)) > 0.04)
+          out.bad.push(`ширина поля ${w.toFixed(2)} мм — не целое число клеток`);
+        const svg = el.querySelector('svg.sheet-space__grid');
+        if (!svg) {
+          out.bad.push('в поле «в клетку» нет сетки');
+        } else {
+          const vb = svg.viewBox.baseVal;
+          const cell = ((svg.getBoundingClientRect().width / vb.width) * 5) / PX_MM;
+          out.cells.push(cell);
+          if (Math.abs(cell - 5) > 0.2) out.bad.push(`клетка ${cell.toFixed(2)} мм`);
+        }
+      }
+      /* Продолжение поля в начале страницы — с закрытой верхней строкой. */
+      const item = el.closest('.sheet-item');
+      if (
+        el.classList.contains('sheet-space--grid') &&
+        !el.classList.contains('sheet-space--first') &&
+        item?.parentElement?.firstElementChild === item
+      ) {
+        const top = el.querySelector('.sheet-space__top');
+        if (!top || getComputedStyle(top).display === 'none')
+          out.bad.push('продолжение поля на странице без верхней линии');
+      }
+      if (el.classList.contains('sheet-space--last')) {
+        const next = el.nextElementSibling;
+        const answer = el.closest('.sheet-item')?.querySelector('.sheet-answer-line');
+        if (answer) {
+          out.answers += 1;
+          if (next !== answer) out.bad.push('«Ответ:» не сразу после поля');
+        }
+      }
+    }
+    return out;
+  });
+}
+
+async function spacePrintLines(page) {
+  await page.emulateMedia({ media: 'print' });
+  const r = await page.evaluate(() => {
+    let lines = 0;
+    let bad = 0;
+    for (const path of document.querySelectorAll(
+      '#sheet-pages .sheet-space__grid path:not(.sheet-space__top)',
+    )) {
+      const cs = getComputedStyle(path);
+      const svg = path.closest('svg');
+      const visible =
+        cs.display !== 'none' &&
+        cs.visibility !== 'hidden' &&
+        getComputedStyle(svg).display !== 'none';
+      if (visible && cs.stroke !== 'none' && parseFloat(cs.strokeWidth) > 0) lines += 1;
+      else bad += 1;
+    }
+    return { lines, bad };
+  });
+  /* Эмуляцию — по умолчанию: PDF дальше печатается со своими стилями печати. */
+  await page.emulateMedia({ media: null });
+  return r;
+}
+
+const EPS = 0.05;
+function checkFigures(where, metrics) {
+  const { figures, grid } = metrics;
+  const max = luma(RULES.gridColorMax);
+  if (grid !== '' && luma(grid) !== null) {
+    check(luma(grid) <= max + 0.5, `${where}: сетка ${grid} светлее ${RULES.gridColorMax}`);
+  }
+  const low = (v, min) => v !== null && v < min - EPS;
+  for (const f of figures) {
+    const at = `${where}, рисунок${f.task ? ` задачи ${f.task}` : ''}`;
+    check(
+      !(f.cellMm !== null && f.cellMm < RULES.gridCellMinMm - EPS),
+      `${at}: клетка ${f.cellMm?.toFixed(2)} мм < ${RULES.gridCellMinMm} мм`,
+    );
+    check(
+      !low(f.labelPt, RULES.labelPt),
+      `${at}: подпись ${f.labelPt?.toFixed(2)} pt < ${RULES.labelPt} pt`,
+    );
+    check(
+      !low(f.indexPt, RULES.indexPt),
+      `${at}: индекс ${f.indexPt?.toFixed(2)} pt < ${RULES.indexPt} pt`,
+    );
+    if (f.stereo !== null) {
+      const { solid, dashed, dash } = f.stereo;
+      const v = (r) => r.map((x) => x.toFixed(2)).join('–');
+      check(
+        solid === null || (solid[0] >= 1.2 - EPS && solid[1] <= 1.5 + EPS),
+        `${at}: видимые линии ${solid && v(solid)} pt, нужно 1,2–1,5`,
+      );
+      check(
+        dashed === null || (dashed[0] >= 0.8 - EPS && dashed[1] <= 1.0 + EPS),
+        `${at}: невидимые линии ${dashed && v(dashed)} pt, нужно 0,8–1`,
+      );
+      check(
+        dash === null || (Math.abs(dash[0] - 4) < 0.3 && Math.abs(dash[1] - 3) < 0.3),
+        `${at}: штрих ${dash && v(dash)} pt, нужно 4/3`,
+      );
+      continue;
+    }
+    check(
+      !low(f.linePt, RULES.linePt),
+      `${at}: основная линия ${f.linePt?.toFixed(2)} pt < ${RULES.linePt} pt`,
+    );
+  }
+  const vals = (k) => figures.map((f) => f[k]).filter((v) => v !== null);
+  const min = (k) => (vals(k).length ? Math.min(...vals(k)).toFixed(1) : '—');
+  return `рисунков ${figures.length}: клетка ≥ ${min('cellMm')} мм, подпись ≥ ${min('labelPt')} pt, индекс ≥ ${min('indexPt')} pt, линия ≥ ${min('linePt')} pt`;
+}
+
 const apache = await startApache(OUT, 4181);
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'print-'));
 
@@ -219,9 +503,9 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'print-'));
 const chrome = await chromium.launch(
   fs.existsSync('/opt/pw-browsers/chromium') ? { executablePath: '/opt/pw-browsers/chromium' } : {},
 );
-for (const [name, route, query, vidy] of SHEETS) {
+for (const [name, route, query, vidy, tail = TAIL] of SHEETS) {
   for (const [who, sub] of vidy ?? OBA) {
-    const url = `${apache.url}${route}${sub}?${query}${TAIL}`;
+    const url = `${apache.url}${route}${sub}?${query}${tail}`;
     const { page, declared } = await openSheet(chrome, url);
     check(
       declared.footer === declared.pages,
@@ -229,6 +513,24 @@ for (const [name, route, query, vidy] of SHEETS) {
     );
     const syroy = syroyTex(await sheetText(page));
     check(syroy.length === 0, `${name}, ${who}: сырой TeX на листе — ${syroy.join(', ')}`);
+    const figuresRow = checkFigures(`${name}, ${who}`, await figureMetrics(page));
+    const space = await spaceMetrics(page);
+    let spaceRow = '';
+    if (space.pieces > 0) {
+      const lines = await spacePrintLines(page);
+      space.bad
+        .slice(0, 5)
+        .forEach((b) => check(false, `${name}, ${who}: место для решения — ${b}`));
+      if (space.cells.length > 0) {
+        check(
+          lines.lines > 0 && lines.bad === 0,
+          `${name}, ${who}: линий клетки при печати нет (${lines.bad} скрыто)`,
+        );
+      }
+      const min = space.cells.length ? Math.min(...space.cells).toFixed(2) : '—';
+      const max = space.cells.length ? Math.max(...space.cells).toFixed(2) : '—';
+      spaceRow = `; место: полей ${space.fields}, кусков ${space.pieces}, клетка ${min}–${max} мм, «Ответ:» после поля ${space.answers}`;
+    }
     const cells = [];
     for (const [label, height] of PAPER) {
       if (!label.startsWith('A4')) {
@@ -270,11 +572,48 @@ for (const [name, route, query, vidy] of SHEETS) {
       cells.push(`${pages}${blank ? ` (пустых ${blank})` : ''}`);
     }
     rows.push(
-      `${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  Chromium ${cells.join(' / ')}`,
+      `${name.padEnd(14)} ${who.padEnd(8)} лист ${declared.pages}  Chromium ${cells.join(' / ')}; ${figuresRow}${spaceRow}`,
     );
     await page.close();
   }
 }
+/* «Собрать вариант» без места для решения и с обычными рисунками: лист
+   ученика ровно 2 страницы на вариант — на 60 случайных вариантах 1–13
+   (плотный режим VariantPrint). Рисунки «обычные» — из шапки работы на
+   устройстве (localStorage), как у учителя, выбравшего их на экране. */
+{
+  const ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  const ctx = await chrome.newContext();
+  await ctx.addInitScript(() => {
+    window.print = () => {};
+    try {
+      localStorage.setItem('budetege:variant:meta', JSON.stringify({ figures: 'normal' }));
+    } catch {
+      /* хранилища нет — останутся крупные рисунки, проверка это покажет */
+    }
+  });
+  const wrong = [];
+  for (let i = 0; i < 60; i += 1) {
+    let seed = '';
+    for (let k = 0; k < 4; k += 1) seed += ALPHABET[(i * 7 + k * 13 + i * k * 3) % 32];
+    const page = await ctx.newPage();
+    await page.goto(`${apache.url}/variant/pechat/?list=uchenik&kod=${seed}-407ZZ-00`, {
+      waitUntil: 'networkidle',
+    });
+    await page.waitForFunction(() => window.sheetPagination !== undefined, null, {
+      timeout: 60000,
+    });
+    const pages = await page.evaluate(() => window.sheetPagination.pages);
+    if (pages !== 2) wrong.push(`${seed}: ${pages}`);
+    await page.close();
+  }
+  await ctx.close();
+  check(wrong.length === 0, `Вариант без места для решения: не 2 страницы — ${wrong.join(', ')}`);
+  rows.push(
+    `Вариант, место «нет», рисунки обычные: 60 вариантов, не по 2 страницы — ${wrong.length}`,
+  );
+}
+
 /* Ключ ответов банка №2: лист без задач, только таблицы ответов. */
 for (const [name, route] of [['№2 ключ', '/zadaniya/2/pechat/klyuch/?t=print']]) {
   const { page } = await openSheet(chrome, `${apache.url}${route}`);
@@ -314,9 +653,9 @@ try {
 }
 
 if (safari !== null) {
-  for (const [name, route, query, vidy] of SHEETS) {
+  for (const [name, route, query, vidy, tail = TAIL] of SHEETS) {
     for (const [who, sub] of vidy ?? OBA) {
-      const url = `${apache.url}${route}${sub}?${query}${TAIL}`;
+      const url = `${apache.url}${route}${sub}?${query}${tail}`;
       const { page, declared } = await openSheet(safari, url);
       await page.emulateMedia({ media: 'print' });
       const g = await page.evaluate(() => {

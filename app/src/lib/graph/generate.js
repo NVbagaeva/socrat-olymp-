@@ -16,6 +16,7 @@
    в бандл и работает в Node. */
 
 import renderer from './renderer.js';
+import { withoutPrintFigures } from '../sheet/figureRules.js';
 import math from './math.js';
 import Line from './families/line.js';
 import Triangle from './triangle.js';
@@ -907,8 +908,14 @@ function generate(id, seed) {
   return generateSet(set.id, seed).filter(function (task) { return task.id === id; })[0];
 }
 
-/* Весь набор разом — для preview.html, validate.js и сборки ответов. */
+/* Весь набор разом — для preview.html, validate.js и сборки ответов.
+   Печатный профиль рисунков генерация не видит (sheet/figureRules.js):
+   задачи по seed — те же, что на сайте. */
 function generateSet(setId, seed) {
+  return withoutPrintFigures(function () { return generateSetNow(setId, seed); });
+}
+
+function generateSetNow(setId, seed) {
   var set = null;
   allSets().forEach(function (item) { if (item.id === setId) { set = item; } });
   if (!set) { throw new Error('generate: набор «' + setId + '» не найден'); }
@@ -927,7 +934,13 @@ function generateSet(setId, seed) {
    проверяет не то, что видит ученик.
    ══════════════════════════════════════════════════════════ */
 function analysis(id, seed) {
-  var task = generate(id, seed);
+  return analysisOf(generate(id, seed));
+}
+
+/* То же по уже собранной задаче (результат generate/generateSet): без
+   повторной сборки набора. Им пользуется «Собрать вариант»
+   (lib/variant/adapters/z12), у которого задача уже на руках. */
+function analysisOf(task) {
   if (!task.svg || !task.meta.window) { return null; }
   /* Разбор с треугольником наклона — только у прямой. */
   if (task.meta.family === 'quadratic' || task.meta.family === 'rational' ||
@@ -1032,6 +1045,7 @@ const api = {
   setLayoutReport: setLayoutReport,
   typeset: typesetText,
   analysis: analysis,
+  analysisOf: analysisOf,
   slopeTriangles: slopeTriangles,
   taskCandidates: taskCandidates,
   equationText: equationText,
@@ -1043,6 +1057,7 @@ const api = {
 };
 
 export default api;
-export { setSets, setLayoutReport, analysis, slopeTriangles, taskCandidates, equationText, generate, generateSet,
+export { setSets, setLayoutReport, analysis, analysisOf, slopeTriangles, taskCandidates, equationText,
+         generate, generateSet,
          loadSets, buildAnswers, answerText };
 export const typeset = typesetText;

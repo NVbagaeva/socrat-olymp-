@@ -1,13 +1,14 @@
 'use client';
 
-import { clsx } from 'clsx';
 import { useEffect, useState } from 'react';
-import { ShapkaBanka } from '@/components/generator/ShapkaBanka';
-import { RamkaPrimer } from '@/components/teoriya/Ramki';
-import { Tex } from '@/components/ui/Tex';
+import { PrintSheet } from '@/components/tasks/generator/PrintSheet';
 import { GENERATOR10_TEXTS } from '@/content/generator10';
-import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
+import { checkKitSheet, kitFootLabel } from '@/lib/komplekt';
 import { useAdres } from '@/lib/zadanie10/adres';
+import { buildDocument } from '@/lib/sheet/sheet.js';
+import { listSheetVse, sShapkoy } from '@/lib/sheetList';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { zagruzitIndeks, zagruzitZadachi, type ZadachaLite } from '@/lib/zadanie10/dannye';
 import {
   modelUroka,
@@ -18,25 +19,26 @@ import {
   sobratListKlyuchi,
   type ModelLista,
 } from '@/lib/zadanie10/sborka';
+import { sheetSpec10, type Vid10 } from '@/lib/zadanie10/sheet10';
 import type { Prototype } from '@/lib/zadanie10/types';
-import { RamkiTeorii10, Uslovie10, ZadachaUchitelya10, type Vid10 } from './ChastiLista10';
-import { Most10 } from './Most10';
 import type { IllInfo } from './Zadacha10';
-
-const FIO = 'Фамилия, имя ________________________ Дата ________';
 
 interface Gotovo {
   model: ModelLista;
   zadachi: Map<string, ZadachaLite>;
   proto: (id: string) => Prototype;
+  kartinki: boolean;
   kit: { code: string | null; warning: string | null };
 }
 
 /**
- * Печатный лист №10. Адрес общего генератора (ps=2) открывает
+ * Печатный лист №10 — генератора (по запросу в адресе) и урока (m=u) —
+ * на общем шаблоне листов (lib/sheet, sheet10.ts): страницы A4, шапка,
+ * место для решения (sp=). Адрес общего генератора (ps=2) открывают
  * /pechat/, /pechat/otvety/ и /pechat/vse/ — вид листа задаёт страница
- * (vid). Прежний адрес генератора (m=g) и урока (m=u) — один адрес на
- * ученика и учителя, вид — в l=uchenik|uchitel.
+ * (vid); у прежнего адреса генератора (m=g) и урока вид — в l=uchenik|
+ * uchitel. Иллюстрации — у урока, по k=1 прежнего адреса или по
+ * «Картинкам сюжетов» (fl=1).
  */
 export function List10({
   ill,
@@ -50,7 +52,6 @@ export function List10({
     vidStranicy ?? (new URLSearchParams(adres).get('l') === 'uchitel' ? 'uchitel' : 'uchenik');
   const [gotovo, setGotovo] = useState<Gotovo | null>(null);
   const [oshibka, setOshibka] = useState<string | null>(null);
-  const [kartinki, setKartinki] = useState(false);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
@@ -101,8 +102,7 @@ export function List10({
         const kit = checkKitSheet(q, '10', vid === 'uchenik' ? 'student' : 'teacher', {
           blocks: [{ tasks }],
         });
-        setKartinki(kartinki);
-        setGotovo({ model, zadachi, proto: mod.prototype, kit });
+        setGotovo({ model, zadachi, proto: mod.prototype, kartinki, kit });
       } catch (e) {
         setOshibka((e as Error).message);
       }
@@ -115,130 +115,33 @@ export function List10({
   if (gotovo === null) {
     return <p>Собираем лист…</p>;
   }
-  const { model, zadachi, proto, kit } = gotovo;
-  const reshit = (z: ZadachaLite) => proto(z.prototypeId).solve(z.params);
-  const telo = (vid: Vid10, panel = true) => (
-    <div className={clsx('z10-list', `z10-list--${vid}`)}>
-      {panel ? (
-        <div className="z10-list__panel">
-          <button
-            type="button"
-            className="btn btn--primary"
-            onClick={() => printKitSheet(kit.warning)}
-          >
-            Скачать (печать в PDF)
-          </button>
-          <span>{vid === 'uchitel' ? 'Лист учителя: ответы и разборы' : 'Лист ученика'}</span>
-        </div>
-      ) : null}
-      <header className="z10-list__shapka">
-        <p className="z10-list__eyebrow">
-          Будет на ЕГЭ · {vid === 'uchitel' ? 'лист учителя' : 'лист ученика'}
-        </p>
-        <h1>{model.zagolovok}</h1>
-        {model.shapka !== undefined ? (
-          <ShapkaBanka
-            shapka={model.shapka}
-            avtor={GENERATOR10_TEXTS.sheet.teacher}
-            fio={FIO}
-            uchenik={vid === 'uchenik'}
-          />
-        ) : vid === 'uchenik' ? (
-          <p className="z10-list__fio">{FIO}</p>
-        ) : null}
-      </header>
-      {model.bloki.map((b) => (
-        <section key={b.id} className="z10-list__blok">
-          <h2>{b.title}</h2>
-          {b.note && vid === 'uchitel' ? <p className="z10-list__note">{b.note}</p> : null}
-          {b.teoriya ? <RamkiTeorii10 prototipy={b.teoriya} proto={proto} /> : null}
-          {(b.primery ?? []).map((id) => {
-            const z = zadachi.get(id);
-            if (!z) {
-              return null;
-            }
-            const s = reshit(z);
-            return (
-              <RamkaPrimer
-                key={id}
-                title={proto(z.prototypeId).title}
-                uslovie={z.text}
-                shagi={s.etapy.map((e) => ({
-                  label: e.title.replace(/^Шаг \d+\.\s*/, ''),
-                  paras: e.lines,
-                }))}
-              >
-                {z.prototypeId === 'P01' ? <Most10 params={z.params} rezhim="uchitel" /> : null}
-              </RamkaPrimer>
-            );
-          })}
-          {b.spiski.map((variant, vi) => {
-            return (
-              <div key={`v${vi}`} className="z10-list__variant">
-                {b.spiski.length > 1 ? <h3>Вариант {vi + 1}</h3> : null}
-                {vid === 'uchitel' && variant.length > 0 ? (
-                  <p className="z10-list__klyuch">
-                    Ответы:{' '}
-                    {variant
-                      .map((id, k) => {
-                        const z = zadachi.get(id);
-                        return z ? `${k + 1}) ${String(reshit(z).answer).replace('.', ',')}` : '';
-                      })
-                      .join('; ')}
-                  </p>
-                ) : null}
-                {variant.map((id, k) => {
-                  const z = zadachi.get(id);
-                  const nomer = k + 1;
-                  if (!z) {
-                    return null;
-                  }
-                  return vid === 'uchitel' ? (
-                    <ZadachaUchitelya10
-                      key={id}
-                      z={z}
-                      s={reshit(z)}
-                      nomer={nomer}
-                      kartinki={kartinki}
-                      {...(ill[z.prototypeId] ? { ill: ill[z.prototypeId] } : {})}
-                    />
-                  ) : (
-                    <section
-                      key={id}
-                      className={clsx(
-                        'z10-list__zadacha',
-                        b.mesto ? 'z10-list__zadacha--mesto' : '',
-                      )}
-                    >
-                      <Uslovie10
-                        z={z}
-                        vid={vid}
-                        kartinki={kartinki}
-                        nomer={nomer}
-                        {...(ill[z.prototypeId] ? { ill: ill[z.prototypeId] } : {})}
-                      />
-                      <p className="z10-list__otvet">Ответ: ______________</p>
-                    </section>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </section>
-      ))}
-      <footer className="z10-list__podval">
-        <Tex text={kitFootLabel(kit.code) ?? `Код: ${model.kod}`} />
-      </footer>
-    </div>
-  );
-  /* «Всё одним файлом»: лист ученика, затем лист учителя — те же задачи. */
-  return vid === 'vse' ? (
-    <>
-      {telo('uchenik')}
-      <div className="gen-razryv" aria-hidden="true" />
-      {telo('uchitel', false)}
-    </>
-  ) : (
-    telo(vid)
+  const { model, zadachi, proto, kartinki, kit } = gotovo;
+  return (
+    <PrintSheet
+      theme="color"
+      layout="single"
+      buildKey={`${vid}:${adres}`}
+      build={async () => {
+        const sborka = { model, zadachi, proto, ill, kartinki };
+        const shapka = model.shapka;
+        /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+        const qr =
+          shapka?.qr === true
+            ? await qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+            : undefined;
+        const list = (v: Vid10) =>
+          sShapkoy(sheetSpec10(sborka, v), shapka, GENERATOR10_TEXTS.podzagolovok, qr);
+        const kod = kitFootLabel(kit.code) ?? `Код: ${model.kod}`;
+        const space = spaceOfQuery(new URLSearchParams(adres));
+        /* Место для решения (sp=) — только у листа ученика. */
+        const spec =
+          vid === 'vse'
+            ? vseWithSpace(listSheetVse(list('uchenik'), list('uchitel')), space)
+            : sheetWithSpace(list(vid), space, vid === 'uchenik', () =>
+                sheetSpec10(sborka, 'uchitel'),
+              );
+        return { html: buildDocument({ ...spec, kit: kod }, {}), warning: kit.warning };
+      }}
+    />
   );
 }

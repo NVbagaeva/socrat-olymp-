@@ -8,6 +8,7 @@ import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { qrSvg } from '@/lib/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import { sobratList13 } from '@/lib/zadanie13/gen/list';
 import { onlaynHref13, parseGenQuery13, vsegoZadach13 } from '@/lib/zadanie13/gen/params';
 import { sheetSpec13, type VidPechati13 } from '@/lib/zadanie13/gen/sheet';
@@ -55,7 +56,11 @@ export function SheetPage13({ vid }: { vid: VidPechati13 }) {
       vid === 'uchitel'
         ? null
         : qrSvg(`${window.location.origin}${onlaynHref13(params)}`, PECHAT_13.qr);
-    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code), qr }, {});
+    /* Место для решения (sp=) — только у листа ученика. */
+    const printed = sheetWithSpace(built, spaceOfQuery(query), vid === 'uchenik', () =>
+      sheetSpec13(params, sobratList13(params), 'uchitel'),
+    );
+    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code), qr }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setWarning(kit.warning);

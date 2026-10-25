@@ -1,0 +1,289 @@
+/* lib/variant/variant-sheet.css — листы «Собрать вариант».
+
+   Только своё: инструкция, бланк ответов, таблица ответов учителя,
+   решения и разбор. Вёрстка листа (шапка, карточки, подвал) — общая,
+   lib/sheet/sheet.css; цвета — токены темы (lib/sheet/theme.css),
+   своих цветов здесь нет. Решения разделов приходят их разметкой и
+   оформлены их же стилями, страница печати подключает их файлы. */
+
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+/* ── Компактный лист: вариант из 13 заданий — на 1–2 страницы ─── */
+html:root {
+  --sheet-fs-title: 20pt;
+  --sheet-fs-badge: 11pt;
+  --sheet-fs-lead: 10.5pt;
+  --sheet-fs-body: 10pt;
+}
+.sheet-title-block {
+  margin-bottom: calc(var(--sheet-step) * 3);
+}
+.sheet-task {
+  gap: calc(var(--sheet-step) * 2.5);
+  padding: calc(var(--sheet-step) * 1) calc(var(--sheet-step) * 1);
+}
+.sheet-task-no {
+  width: calc(var(--sheet-step) * 6);
+  height: calc(var(--sheet-step) * 6);
+  font-size: var(--sheet-fs-body);
+}
+.sheet-task-body {
+  gap: calc(var(--sheet-step) * 3);
+}
+.sheet-task--single .sheet-figure {
+  align-self: flex-start;
+}
+/* Потолок высоты — только у «обычных» рисунков: «крупные» печатаются
+   ровно своим размером (lib/sheet/figureRules.js). */
+html[data-sheet-figures='normal'] .sheet-figure svg {
+  max-height: 36mm;
+}
+.sheet-task--stack .sheet-figure--large {
+  align-self: center;
+}
+.sheet-task-question {
+  line-height: 1.4;
+}
+/* Место для решения — под текстом задачи: отступ под номер (компактная
+   карточка: поля 1 + номер 6 + зазор 2,5 шага). */
+html:root {
+  --sheet-space-indent: calc(var(--sheet-step) * 9.5);
+  --sheet-space-right: var(--sheet-step);
+}
+/* Строка «Ответ: ____» после задания, как в КИМ: без большого отступа —
+   у тринадцати заданий он стоил бы трети страницы. */
+.sheet-answer-line {
+  padding-top: calc(var(--sheet-step) * 1.5);
+}
+.sheet-answer-blank {
+  width: calc(var(--sheet-step) * 30);
+}
+.sheet-item + .sheet-item {
+  margin-top: calc(var(--sheet-step) * 1.5);
+}
+
+/* Плотный режим: лист ученика не уложился в две страницы на вариант —
+   VariantPrint набирает его ещё раз с этим признаком. */
+html[data-sheet-dense] {
+  --sheet-fs-body: 9.3pt;
+}
+/* Рисунки плотный режим уменьшает только «обычные»: крупные не
+   мельче печатных минимумов никогда. */
+html[data-sheet-dense][data-sheet-figures='normal'] .sheet-task .sheet-figure {
+  max-width: 42mm;
+}
+html[data-sheet-dense][data-sheet-figures='normal'] .sheet-figure svg {
+  max-height: 30mm;
+}
+html[data-sheet-dense] .var-instruction {
+  margin-bottom: calc(var(--sheet-step) * 2);
+  padding-block: var(--sheet-step);
+}
+
+/* ── Поля шапки: вторая строка (время, учитель) ─────────────── */
+.sheet-fields--extra {
+  margin-top: calc(var(--sheet-step) * -3);
+}
+
+/* ── Инструкция ──────────────────────────────────────────────── */
+.var-instruction {
+  margin-bottom: calc(var(--sheet-step) * 4);
+  padding: calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 3);
+  border-left: calc(var(--sheet-step) * 1) solid var(--sheet-recap-bar);
+  font-size: var(--sheet-fs-small);
+  line-height: 1.45;
+  color: var(--sheet-ink);
+}
+.var-instruction__title {
+  margin: 0 0 var(--sheet-step);
+  font-weight: 700;
+  color: var(--sheet-brand);
+}
+.var-instruction__text {
+  margin: 0;
+}
+
+/* ── Таблица ответов учителя ─────────────────────────────────── */
+.var-key__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--sheet-fs-body);
+}
+.var-key__table caption {
+  text-align: left;
+  font-size: var(--sheet-fs-block);
+  font-weight: 700;
+  color: var(--sheet-brand);
+  padding-bottom: calc(var(--sheet-step) * 2);
+}
+.var-key__code {
+  float: right;
+  font-size: var(--sheet-fs-tiny);
+  font-weight: 500;
+  color: var(--sheet-ink-2);
+}
+.var-key__table th,
+.var-key__table td {
+  border: 1px solid var(--sheet-brand);
+  padding: calc(var(--sheet-step) * 1) calc(var(--sheet-step) * 2);
+  text-align: left;
+  vertical-align: top;
+}
+.var-key__table thead th {
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-brand);
+}
+.var-key__table th[scope='row'] {
+  width: 9mm;
+  text-align: center;
+  color: var(--sheet-num-ink);
+  font-variant-numeric: tabular-nums;
+}
+.var-key__answer {
+  width: 22mm;
+  font-weight: 700;
+}
+.var-key__source {
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+
+/* ── Решения и разбор ────────────────────────────────────────── */
+/* Решения разделов приходят их разметкой и со стилями сайта: плашки
+   этапов залиты голубым и тёплым. На строгом листе заливок нет, а
+   акцент один — токены сайта переопределены внутри решения. */
+.var-sol {
+  --color-surface-info: transparent;
+  --color-surface-soft: transparent;
+  --color-success-soft: transparent;
+  --color-accent-soft-surface: transparent;
+  --color-warning: transparent;
+  --z13r-warm: transparent;
+  --z13r-info: transparent;
+  --color-accent: var(--sheet-brand);
+  --color-primary: var(--sheet-brand);
+  font-size: var(--sheet-fs-body);
+  line-height: 1.45;
+  margin-left: 10mm;
+}
+.var-sol--first {
+  margin-left: 0;
+  margin-top: calc(var(--sheet-step) * 4);
+  padding-top: calc(var(--sheet-step) * 2);
+  border-top: 1px solid var(--sheet-brand);
+}
+.var-sol__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--sheet-step) * 3);
+  margin: 0;
+  color: var(--sheet-brand);
+}
+.var-sol__meta {
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+.var-sol__note {
+  margin: var(--sheet-step) 0 0;
+  font-size: var(--sheet-fs-small);
+  font-style: italic;
+  color: var(--sheet-ink-2);
+}
+.var-sol__fig .sheet-figure {
+  margin: calc(var(--sheet-step) * 2) 0;
+}
+.var-sol__answer {
+  margin-top: calc(var(--sheet-step) * 2);
+}
+.var-sol .sheet-steps {
+  margin: calc(var(--sheet-step) * 1) 0;
+  padding-left: 6mm;
+}
+.var-sol .sheet-step + .sheet-step {
+  margin-top: var(--sheet-step);
+}
+
+/* Разбор для ученика: шаг — номер, «что делаем и зачем», формулы. */
+.var-razbor__h {
+  margin: calc(var(--sheet-step) * 2) 0 var(--sheet-step);
+  font-weight: 700;
+  color: var(--sheet-brand);
+}
+.var-razbor {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.var-razbor__step {
+  margin: 0 0 calc(var(--sheet-step) * 2);
+}
+.var-razbor__q {
+  display: flex;
+  gap: calc(var(--sheet-step) * 2);
+  margin: 0;
+  font-weight: 600;
+}
+.var-razbor__n {
+  flex: none;
+  min-width: 5mm;
+  height: 5mm;
+  border: 1px solid var(--sheet-num-line);
+  border-radius: 50%;
+  font-size: var(--sheet-fs-tiny);
+  line-height: 5mm;
+  text-align: center;
+  color: var(--sheet-num-ink);
+}
+.var-razbor__a,
+.var-razbor__why,
+.var-razbor__line {
+  margin: var(--sheet-step) 0 0 7mm;
+}
+.var-razbor__why {
+  color: var(--sheet-ink-2);
+}
+.var-razbor__answer {
+  margin: calc(var(--sheet-step) * 2) 0 0;
+}
+
+/* ── Экран: полоса над листом ────────────────────────────────── */
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+}
+
+/* ── Полоса над листом: кнопка печати. На бумагу не идёт. ─────── */
+@media screen {
+  .var-print-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-sans);
+  }
+  .var-print-bar__lead {
+    max-width: 640px;
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    color: var(--color-text-secondary);
+  }
+}
+@media print {
+  .var-print-bar {
+    display: none;
+  }
+}

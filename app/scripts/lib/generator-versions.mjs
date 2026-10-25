@@ -56,6 +56,30 @@ export const GENERATOR_SOURCES = {
     'content/uroki6.ts',
   ],
   1: ['lib/planimetriya', 'lib/sheet/sheet.js', 'content/repetitory1.ts', 'content/teoriya1.ts'],
+  /* «Собрать вариант»: сборщик и адаптеры плюс движки всех разделов
+     первой части — любая их правка может поменять задачи по коду. */
+  variant: [
+    'lib/variant',
+    'lib/planimetriya',
+    'lib/vektory',
+    'lib/zadanie3',
+    'lib/chertezh3',
+    'lib/solid',
+    'lib/veroyatnost',
+    'lib/zadanie6',
+    'lib/zadanie7',
+    'lib/vychisleniya',
+    'lib/proizvodnaya',
+    'lib/zadanie10',
+    'lib/zadanie11',
+    'lib/graph',
+    'lib/ves12',
+    'lib/zadanie13',
+    'data/zadanie6',
+    'data/zadanie7',
+    'data/zadanie10',
+    'data/zadanie11',
+  ],
 };
 
 /* Crockford base32: без I, L, O, U — код читают с бумаги. */
