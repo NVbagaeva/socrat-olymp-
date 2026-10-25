@@ -8,6 +8,8 @@
  * его единицах (`minFont`): при клетке 7 мм это около 17 единиц.
  */
 
+import { RULES } from '@/lib/sheet/figureRules.js';
+
 /** Клетка чертежа на листе варианта, мм. */
 export const KLETKA_MM = 7;
 /** Клетка движка в единицах viewBox (graph, proizvodnaya, vektory). */
@@ -30,8 +32,11 @@ export function shirinaPoKletke(svg: string, kletkaMm: number = KLETKA_MM): numb
     : Math.round((Number(box[1]) / KLETKA_EDINIC) * kletkaMm * 100) / 100;
 }
 
-/** Наибольшая ширина рисунка под условием: колонка листа с отступом номера, мм. */
-export const MAX_SHIRINA_MM = 168;
+/**
+ * Наибольшая ширина рисунка под условием, мм: тело карточки задачи на
+ * листе A4 (RULES.rowMm шаблона листа, lib/sheet/figureRules.js).
+ */
+export const MAX_SHIRINA_MM: number = RULES.rowMm;
 /** Клетка мельче этой не печатается. */
 export const MIN_KLETKA_MM = 6;
 
