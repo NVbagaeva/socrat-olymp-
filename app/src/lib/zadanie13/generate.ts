@@ -11,6 +11,7 @@ import { pickPlot, type PlotFull } from './plots';
 import { PROTOTYPE_BY_ID, PROTOTYPES } from './proto';
 import type { Draft, Prototype } from './proto/types';
 import { rng13 } from './rng';
+import { bukvyIzModeli } from './bukvy';
 import { toTableModel } from './tablica';
 import type { PrototypeInfo, Task13 } from './types';
 
@@ -56,6 +57,16 @@ export function attempt(p: Prototype, seed: string, i: number): Attempt {
 
 /** Задача из принятого черновика: общая часть generate и generateFixed. */
 function zadacha(p: Prototype, draft: Draft, plot: PlotFull, seed: string): Task13 {
+  const tableModel = toTableModel(draft.rows, draft.scheme, draft.period, {
+    ...(draft.labels ? { labels: draft.labels } : {}),
+    ...(draft.extra ? { extra: draft.extra } : {}),
+  });
+  /* Таблица решения — в буквах (решение автора от 24.10.2026): числа
+     появляются только в конце, при подстановке. */
+  const bukvy = bukvyIzModeli(tableModel);
+  const solution = draft.solution.map(({ table, ...s }) =>
+    table ? { ...s, bloki: [{ vid: 'tablitsa' as const, t: bukvy }, ...(s.bloki ?? [])] } : s,
+  );
   return {
     id: `13.${p.id}:${seed}`,
     taskNumber: 13,
@@ -71,12 +82,9 @@ function zadacha(p: Prototype, draft: Draft, plot: PlotFull, seed: string): Task
     answer: draft.answer.toNumber(),
     units: draft.units ?? p.units,
     ...(draft.vopros ? { vopros: draft.vopros } : {}),
-    solution: draft.solution,
+    solution,
     hints: draft.hints,
-    tableModel: toTableModel(draft.rows, draft.scheme, draft.period, {
-      ...(draft.labels ? { labels: draft.labels } : {}),
-      ...(draft.extra ? { extra: draft.extra } : {}),
-    }),
+    tableModel,
     plot: { deck: plot.deck, who: plot.who, goal: plot.goal, year: plot.year },
     params: draft.params,
   };

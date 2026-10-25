@@ -30,11 +30,12 @@
 .z13-r-formula {
   min-width: 0;
   max-width: 100%;
+  margin: 6px 0;
   overflow-x: auto;
   overflow-y: hidden;
-}
-.z13-r-formula .katex-display {
-  margin: 4px 0;
+  font-size: 1.1em;
+  line-height: 2;
+  text-align: center;
 }
 
 /* Рамка «Вспоминаем …» и рамка «Внимание на формулировку». */
@@ -84,7 +85,6 @@
 .z13-r-table {
   width: 100%;
   min-width: 520px;
-  table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.92em;
 }
@@ -97,7 +97,10 @@
   border: 1px solid var(--z13r-rule);
   text-align: center;
   vertical-align: middle;
-  overflow: hidden;
+}
+/* Выражение в клетке — одной строкой; широкая таблица прокручивается в своей рамке. */
+.z13-r-table td {
+  white-space: nowrap;
 }
 .z13-r-table thead tr:not(.z13-r-strelka) th {
   font-weight: 600;
@@ -116,12 +119,17 @@
   padding: 0;
   border: 0;
 }
+/* Селекторы стрелки сильнее общего «.solution-details svg» (рисунок
+   во всю ширину, 360px): в раскрывашке теории стрелка не ломается. */
 .z13-r-strelka__box {
   position: relative;
   height: 46px;
   color: var(--z13r-accent);
 }
-.z13-r-strelka__duga {
+.z13-r-strelka svg.z13-r-strelka__duga {
+  display: block;
+  max-width: none;
+  margin: 0;
   position: absolute;
   left: 0;
   top: 16px;
@@ -135,7 +143,10 @@
   stroke-width: 1.6;
   stroke-linecap: round;
 }
-.z13-r-strelka__ostrie {
+.z13-r-strelka svg.z13-r-strelka__ostrie {
+  display: block;
+  max-width: none;
+  margin: 0;
   position: absolute;
   bottom: 0;
   left: calc(100% / 6);

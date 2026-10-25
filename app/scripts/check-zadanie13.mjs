@@ -714,6 +714,24 @@ for (const [n, extra, want] of tables) {
           try {
             const t = gen13(b.prototypeId, b.seed);
             if (!t.solution.length) problems.push(`теория ${w}: разбор без решения`);
+            /* Порядок разбора (решение автора от 24.10.2026): таблица в
+               буквах → уравнение → преобразования → итоговая формула →
+               числа и ответ. Шаблон переплаты (A-05, A-15) — свой порядок. */
+            const shagi = t.solution.map((st) => st.title);
+            const tabl = t.solution.findIndex((st) =>
+              (st.bloki ?? []).some((x) => x.vid === 'tablitsa'),
+            );
+            const formula = shagi.indexOf('Итоговая формула');
+            const chisla = shagi.indexOf('Подставляем числа');
+            const otvet = shagi.indexOf('Ответ');
+            if (!['A-05', 'A-15'].includes(b.prototypeId)) {
+              if (tabl < 0 || tabl > 1)
+                problems.push(`теория ${w}: разбор начинается не с таблицы`);
+              if (!(tabl < formula && formula < chisla && chisla < otvet))
+                problems.push(
+                  `теория ${w}: порядок не «таблица → итоговая формула → числа → ответ»`,
+                );
+            }
           } catch (e) {
             problems.push(`теория ${w}: разбор не собрался: ${e.message}`);
           }
@@ -1119,8 +1137,11 @@ for (const [n, extra, want] of tables) {
         problems.push(`приёмка A-02: нет «${what}»: ${frag}`);
     };
     if (!r.answer.eq(2)) problems.push(`приёмка A-02: ответ ${r.answer} вместо 2`);
-    est('S = \\dfrac{11S}{11}', 'первая строка S = 11S/11');
-    est('\\dfrac{10S}{11}\\cdot \\dfrac{7}{100}', 'переплата второй строки');
+    est(
+      'S - \\dfrac{S}{11} = \\dfrac{11S}{11} - \\dfrac{S}{11} = \\dfrac{10S}{11}',
+      'под таблицей: S − S/11 = 11S/11 − S/11 = 10S/11',
+    );
+    est('\\dfrac{7}{100}\\cdot \\dfrac{10S}{11}', 'переплата второй строки');
     est('11 + 10 + \\dots + 1 = \\dfrac{11 + 1}{2}\\cdot 11 = 66', 'сумма прогрессии 66');
     est('= \\dfrac{42S}{100} = 0{,}42S', 'P₁ = 0,42S');
     est('\\dfrac{S}{4}\\cdot \\dfrac{16}{100}\\cdot 10', 'P₂ = S/4 · 16/100 · 10');
@@ -1129,6 +1150,8 @@ for (const [n, extra, want] of tables) {
     est('x_{2} = \\dfrac{0{,}4S\\cdot 100}{S} = 40\\,\\%', 'x₂ = 40 %');
     est('42\\,\\% - 40\\,\\% = 2\\,\\%', '42 % − 40 % = 2 %');
     const t1 = r.shagi.find((st) => st.title === 'Составляем таблицу: первый банк').bloki[0].t;
+    if (t1.rows[0].cells[0] !== 'S')
+      problems.push('приёмка A-02: первая строка таблицы — не просто S');
     if (t1.rows.map((x) => (x ? x.label : '…')).join(',') !== '1,2,3,…,10,11')
       problems.push('приёмка A-02: в таблице первого банка не строки 1–3, «…», 10–11');
     const t2 = r.shagi.find((st) => st.title === 'Составляем таблицу: второй банк').bloki[0].t;
@@ -1288,11 +1311,11 @@ for (const [n, extra, want] of tables) {
             b.rows.flat().forEach((c) => typeset(c, where + ' пропорция'));
             typeset(b.vyvod, where + ' пропорция');
           } else if (b.vid === 'tablitsa') {
-            inline(b.t.podpis + ' ' + b.t.strelka, where + ' таблица');
+            inline(b.t.podpis + ' ' + (b.t.strelka ?? ''), where + ' таблица');
             b.t.rows.forEach(
               (r) => r && [r.label, ...r.cells].forEach((c) => typeset(c, where + ' таблица')),
             );
-            b.t.itog.forEach((c) => typeset(c, where + ' таблица'));
+            (b.t.itog ?? []).forEach((c) => typeset(c, where + ' таблица'));
           } else inline(b.text, where + ' ' + b.vid);
         }
       }

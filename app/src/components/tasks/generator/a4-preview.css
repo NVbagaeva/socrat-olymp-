@@ -1,0 +1,97 @@
+/* Предпросмотр листа A4 (A4Preview.tsx): лист в своей ширине, уменьшенный
+   под место. Значения — токены; ширина листа задаётся в разметке. */
+
+.a4p {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* Место под лист: после масштаба лист занимает ровно его ширину, а
+   прежняя ширина (794px) не распирает страницу. */
+.a4p__mesto {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+.a4p__list {
+  box-sizing: border-box;
+  transform-origin: top left;
+}
+/* Таблицы листа не шире листа: длинную строку периодов ужимаем по
+   кеглю и переносим, но за поля не выходим. */
+.a4p__list table {
+  max-width: 100%;
+}
+.a4p__list th,
+.a4p__list td {
+  overflow-wrap: anywhere;
+}
+.a4p__open {
+  justify-self: end;
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.a4p__open:hover {
+  background: var(--color-surface-info);
+}
+.a4p__open svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Во весь экран: страницы A4 подряд, граница страницы — пунктир. */
+.a4p-ekran {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--color-surface-2);
+}
+.a4p-ekran__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  padding-top: calc(var(--space-2) + env(safe-area-inset-top));
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.a4p-ekran__str {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+.a4p-ekran__close {
+  margin-left: auto;
+}
+.a4p-ekran__scroll {
+  overflow: auto;
+  padding: var(--space-3);
+  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+  overscroll-behavior: contain;
+}
+.a4p__list--stranicy {
+  background-image: linear-gradient(
+    to bottom,
+    transparent calc(100% - 2px),
+    var(--color-border) calc(100% - 2px)
+  );
+  background-repeat: repeat-y;
+}

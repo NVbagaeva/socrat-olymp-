@@ -5,9 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import { REPETITORY_2 } from '@/content/vektory';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
-import { keySpec2, parseSheetQuery2, sheetSpec2 } from '@/lib/vektory/sheet2';
+import { keySpec2, parseSheetQuery2, sheetSpec2, sheetSpecVse2 } from '@/lib/vektory/sheet2';
 
 declare global {
   interface Window {
@@ -19,7 +20,7 @@ declare global {
 
 export interface SheetPage2Props {
   /** Что печатать: лист ученика, лист с решениями или ключ ответов банка. */
-  vid: 'uchenik' | 'uchitel' | 'klyuch';
+  vid: 'uchenik' | 'uchitel' | 'vse' | 'klyuch';
 }
 
 function specJson(html: string): string {
@@ -65,15 +66,28 @@ export function SheetPage2({ vid }: SheetPage2Props) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const built = vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers);
-    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
-    const kit = checkKitSheet(query, '2', withAnswers ? 'teacher' : 'student', built);
-    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
-    import('@/lib/sheet/paginate.js').then(() => {
-      if (alive) {
-        setWarning(kit.warning);
-        setSpec(specJson(html));
-      }
+    /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+    const qr =
+      params.qr === true
+        ? qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+        : Promise.resolve(undefined);
+    void qr.then((svg) => {
+      if (!alive) return;
+      const built =
+        vid === 'klyuch'
+          ? keySpec2(params.theme)
+          : vid === 'vse'
+            ? sheetSpecVse2(params, svg)
+            : sheetSpec2(params, withAnswers, svg);
+      /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+      const kit = checkKitSheet(query, '2', withAnswers ? 'teacher' : 'student', built);
+      const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+      import('@/lib/sheet/paginate.js').then(() => {
+        if (alive) {
+          setWarning(kit.warning);
+          setSpec(specJson(html));
+        }
+      });
     });
     return () => {
       alive = false;

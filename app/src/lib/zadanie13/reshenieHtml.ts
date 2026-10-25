@@ -18,8 +18,54 @@ function esc(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/** Знаки, после которых формулу можно перенести на новую строку. */
+const OTNOSHENIE =
+  /^(\s*\;\\Rightarrow\;\s*|\s*\\Rightarrow\s*|\s*=\s*|\s*\\le\s*|\s*\\ge\s*|\s*<\s*|\s*>\s*)/;
+
+/**
+ * Куски между верхними «=», «⇒», «<» — в фигурные скобки: KaTeX
+ * переносит строку только после знака отношения, а не внутри скобок
+ * вроде x(k^2 + k + 1).
+ */
+function poOtnosheniyam(tex: string): string {
+  const kuski: string[] = [];
+  let tek = '';
+  let glubina = 0;
+  for (let i = 0; i < tex.length;) {
+    const ost = tex.slice(i);
+    if (ost.startsWith('\\left')) glubina++;
+    else if (ost.startsWith('\\right')) glubina--;
+    const c = tex[i]!;
+    if (c === '{') glubina++;
+    else if (c === '}') glubina--;
+    const m = glubina === 0 ? OTNOSHENIE.exec(ost) : null;
+    if (m && tek.trim()) {
+      kuski.push(`{${tek}}`, m[0]);
+      tek = '';
+      i += m[0].length;
+      continue;
+    }
+    tek += c;
+    i++;
+  }
+  kuski.push(`{${tek}}`);
+  return kuski.join('');
+}
+
+/**
+ * Формула решения: строчный режим KaTeX, дроби — \dfrac. Длинная
+ * цепочка переносится после «=» и не уезжает за край телефона; части
+ * через \quad и \qquad — отдельными строками.
+ */
 const krupno = (tex: string) =>
-  `<div class="z13-r-formula">${katex.renderToString(tex, { throwOnError: true, displayMode: true })}</div>`;
+  tex
+    .replace(/\\frac(?=\{)/g, '\\dfrac')
+    .split(/,\s*\\quad\s*|,?\s*\\qquad\s*/)
+    .map(
+      (chast) =>
+        `<div class="z13-r-formula">${katex.renderToString(poOtnosheniyam(chast), { throwOnError: true, displayFrac: true })}</div>`,
+    )
+    .join('');
 
 const stroka = (tex: string) => katex.renderToString(tex, { throwOnError: true });
 
@@ -46,7 +92,7 @@ function strelka(podpis: string): string {
 
 /** Таблица в переменных со стрелкой над шапкой. */
 export function tablitsaPeremennyeHtml(t: TablitsaPeremennye): string {
-  const h = TABLE_HEAD.dif;
+  const h = TABLE_HEAD[t.scheme ?? 'dif'];
   const head =
     `<tr><th scope="col">${esc(h.period[t.period])}</th>` +
     h.cols.map((c) => `<th scope="col">${esc(c)}</th>`).join('') +
@@ -60,14 +106,16 @@ export function tablitsaPeremennyeHtml(t: TablitsaPeremennye): string {
     )
     .join('');
   const itog =
-    `<tr class="z13-r-table__itog"><th scope="row">Итого</th><td></td>` +
-    `<td>${stroka(t.itog[0])}</td><td>${stroka(t.itog[1])}</td><td></td></tr>`;
+    t.itog === null
+      ? ''
+      : `<tr class="z13-r-table__itog"><th scope="row">Итого</th><td></td>` +
+        `<td>${t.itog[0] ? stroka(t.itog[0]) : ''}</td><td>${stroka(t.itog[1])}</td><td></td></tr>`;
   return (
     `<figure class="z13-r-tab">` +
     (t.podpis ? `<figcaption>${typeset(t.podpis)}</figcaption>` : '') +
     `<div class="z13-r-tab__scroll"><table class="z13-r-table">` +
     `<colgroup><col class="z13-r-table__c0"><col><col><col><col></colgroup>` +
-    `<thead>${strelka(t.strelka)}${head}</thead><tbody>${body}${itog}</tbody></table></div></figure>`
+    `<thead>${t.strelka === null ? '' : strelka(t.strelka)}${head}</thead><tbody>${body}${itog}</tbody></table></div></figure>`
   );
 }
 

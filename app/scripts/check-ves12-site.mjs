@@ -383,7 +383,22 @@ for (const [width, height, mobile] of [
   const page = await ctx.newPage();
   await page.goto(BASE + '/zadaniya/12/generator/', { waitUntil: 'networkidle' });
   await shot(page, 'generator-1440', true);
-  const href = await page.locator('.kit-bar a, .kit a').filter({ hasText: /Лист ученика/ }).first().getAttribute('href');
+  /* Общий генератор: «Сгенерировать» по пресету «По задаче на тип», в
+     «Дополнительно» — рамка «Запомни» и один пример, затем «Скачать PDF». */
+  await page.getByRole('button', { name: /Сгенерировать/ }).first().click();
+  await page.waitForSelector('.gen-paper.is-live .gen-task', { timeout: 90000 });
+  await page.locator('.gen-dop__head').first().click();
+  await page.getByRole('switch', { name: 'Рамка с теорией' }).click();
+  await page
+    .getByRole('group', { name: 'Разобранные примеры' })
+    .getByRole('button', { name: '1' })
+    .click();
+  await page.waitForFunction(
+    () => document.querySelectorAll('.gen-paper.is-live .gen-recap').length > 0,
+    null,
+    { timeout: 90000 },
+  );
+  const href = await page.locator('a.gen-pv__pdf[href]').first().getAttribute('href');
   check(href !== null, 'генератор: нет ссылки на лист ученика');
   if (href !== null) {
     const sheet = await ctx.newPage();
@@ -394,7 +409,7 @@ for (const [width, height, mobile] of [
       recaps: document.querySelectorAll('#sheet-pages .sheet-recap').length,
       examples: document.querySelectorAll('#sheet-pages .sheet-example').length,
     }));
-    check(info.tasks === 7, `генератор: задач на листе ${info.tasks}, а по умолчанию «Все типы по 1» — 7`);
+    check(info.tasks === 7, `генератор: задач на листе ${info.tasks}, а «По задаче на тип» — 7`);
     check(info.recaps === 7, `генератор: рамок «Запомни» ${info.recaps}, а типов 7`);
     check(info.examples === 7, `генератор: разобранных примеров ${info.examples}, а типов 7`);
     await shot(sheet, 'generator-list-1440');
