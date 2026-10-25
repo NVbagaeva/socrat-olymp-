@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery8, sheetSpec8 } from '@/lib/vychisleniya/sheet8';
 
@@ -61,7 +62,11 @@ export function SheetPage8({ withAnswers }: SheetPage8Props) {
     const built = sheetSpec8(params, withAnswers);
     /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
     const kit = checkKitSheet(query, '8', withAnswers ? 'teacher' : 'student', built);
-    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+    /* Место для решения (sp=) — только у листа ученика. */
+    const printed = sheetWithSpace(built, spaceOfQuery(query), !withAnswers, () =>
+      sheetSpec8(params, true),
+    );
+    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setWarning(kit.warning);

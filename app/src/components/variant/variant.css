@@ -741,6 +741,11 @@
   border: 1px solid var(--color-border-strong);
   padding: 2px var(--space-2);
 }
+/* Место для решения: на всю ширину текста, под условием и рисунком. */
+.var-task__space {
+  grid-column: 2 / -1;
+  min-width: 0;
+}
 .var-task__answer {
   grid-column: 2 / -1;
   display: flex;

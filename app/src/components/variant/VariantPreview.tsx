@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react';
 import { VARIANT_SCREEN as T, VARIANT_SHEET as S } from '@/content/variant';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
+import { solutionLength, spaceFor, spaceHtml, type SheetSpace } from '@/lib/sheet/space.js';
+import '@/lib/sheet/space.css';
 import { dateRu, instructionFor, sheetNo, starsText } from '@/lib/variant/sheets';
 import type { EgeNo, VariantMeta, VariantSet } from '@/lib/variant/types';
 
@@ -14,6 +16,8 @@ export interface VariantPreviewProps {
   title: string;
   busy: boolean;
   dev: boolean;
+  /** Место для решения: поле — как на листе ученика. */
+  space: SheetSpace;
   onReplace: (variant: number, ege: EgeNo) => void;
 }
 
@@ -24,7 +28,15 @@ export interface VariantPreviewProps {
  * сложность и кнопка «заменить»; в режиме разработчика — поля,
  * взятые из запасного варианта.
  */
-export function VariantPreview({ set, meta, title, busy, dev, onReplace }: VariantPreviewProps) {
+export function VariantPreview({
+  set,
+  meta,
+  title,
+  busy,
+  dev,
+  space,
+  onReplace,
+}: VariantPreviewProps) {
   const [tab, setTab] = useState(0);
   const paper = useRef<HTMLDivElement>(null);
   /* Вариантов стало меньше — показывается последний. */
@@ -151,6 +163,22 @@ export function VariantPreview({ set, meta, title, busy, dev, onReplace }: Varia
                         dangerouslySetInnerHTML={{ __html: t.figure.svg }}
                       />
                     )}
+                    {/* Место для решения — та же разметка, что на листе (space.js). */}
+                    {(() => {
+                      const field = spaceFor(
+                        space,
+                        t.egeNumber,
+                        solutionLength(t.solutionTeacher ?? t.solutionStudent),
+                      );
+                      return field === null ? null : (
+                        <div
+                          className="var-task__space"
+                          dangerouslySetInnerHTML={{
+                            __html: spaceHtml(field, field.rows, true, true),
+                          }}
+                        />
+                      );
+                    })()}
                     <p className="var-task__answer">
                       {S.answer}:<span className="var-task__blank" />
                     </p>

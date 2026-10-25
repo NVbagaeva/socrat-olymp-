@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { parseSheetQuery, sheetSpec } from '@/lib/generatorSheet';
 import { withPrintFigures } from '@/lib/sheet/figureRules.js';
+import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel } from '@/lib/komplekt';
 import { PrintSheet } from '@/components/tasks/generator/PrintSheet';
 
@@ -39,7 +40,13 @@ export function SheetPage({ withAnswers, subtopic }: SheetPageProps) {
         const kit = checkKitSheet(query, '12', withAnswers ? 'teacher' : 'student', built);
         /* На лист — сборка в печатном профиле рисунков (figureRules.js):
            отпечаток комплекта — по обычной, как у напечатанных раньше. */
-        const printed = withPrintFigures(() => sheetSpec(params, withAnswers, subtopic));
+        /* Место для решения (sp=) — только у листа ученика. */
+        const printed = sheetWithSpace(
+          withPrintFigures(() => sheetSpec(params, withAnswers, subtopic)),
+          spaceOfQuery(query),
+          !withAnswers,
+          () => sheetSpec(params, true, subtopic),
+        );
         return {
           html: buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {}),
           warning: kit.warning,

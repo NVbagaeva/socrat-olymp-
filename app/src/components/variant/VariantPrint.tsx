@@ -6,6 +6,8 @@ import { VARIANT_SCREEN, WORK_KINDS } from '@/content/variant';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { decodeSpace, encodeSpace } from '@/lib/sheet/space.js';
+import { spaceOfCode } from '@/lib/variant/code';
 import { loadMeta, payloadFromOpener, type PrintPayload } from '@/lib/variant/handoff';
 import { buildSet, currentVersion, readCode, sanitizeMeta } from '@/lib/variant/session';
 import { variantSheetSpec, workTitle, type SheetChoice } from '@/lib/variant/sheets';
@@ -57,6 +59,10 @@ export function VariantPrint() {
   /* Крупные рисунки (по умолчанию) плотный режим не трогает: лист
      длиннее двух страниц на вариант — цена читаемого рисунка. */
   const [figures, setFigures] = useState<'large' | 'normal'>('large');
+  /* Место для решения — из хвоста кода: лист воспроизводится по адресу.
+     С полем лист длиннее, плотный режим на него тоже не действует. */
+  const spaceToken = spaceOfCode(code);
+  const spaced = decodeSpace(spaceToken).mode !== 'none';
 
   useEffect(() => {
     const root = document.documentElement;
@@ -83,6 +89,8 @@ export function VariantPrint() {
         const built = variantSheetSpec(payload.set, payload.meta, choice, {
           workTitle: payload.workTitle,
           showCode: true,
+          space: decodeSpace(spaceToken),
+          spaceToken: encodeSpace(decodeSpace(spaceToken)),
         });
         const html = buildDocument(built, {});
         await import('@/lib/sheet/paginate.js');
@@ -100,7 +108,7 @@ export function VariantPrint() {
     return () => {
       alive = false;
     };
-  }, [code, choice]);
+  }, [code, choice, spaceToken]);
 
   useEffect(() => {
     if (spec === null || done) return;
@@ -126,6 +134,7 @@ export function VariantPrint() {
         const tooLong =
           choice === 'uchenik' &&
           figures === 'normal' &&
+          !spaced &&
           report.error === undefined &&
           (report.pages ?? 0) > 2 * variants &&
           root.dataset.sheetDense === undefined;
@@ -153,7 +162,7 @@ export function VariantPrint() {
       }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [spec, done, warning, choice, variants, figures]);
+  }, [spec, done, warning, choice, variants, figures, spaced]);
 
   return (
     <>

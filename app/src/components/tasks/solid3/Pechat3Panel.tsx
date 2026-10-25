@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { SpaceOption } from '@/components/tasks/space/SpaceOption';
+import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
 import { SHEET_3 } from '@/content/sheet3';
+import { withSpace } from '@/lib/sheet/space.js';
 import { ZADACH_MAX, ZADACH_MIN, adresLista } from '@/lib/zadanie3/pechat';
 
 /** Новый seed набора: по кнопке, а не при отрисовке (разметка сервера совпадает). */
@@ -24,6 +27,8 @@ export function Pechat3Panel({ razdely }: { razdely: readonly RazdelPechati[] })
   const [n, setN] = useState(6);
   const [seed, setSeed] = useState(1);
   const [vybor, setVybor] = useState(0);
+  /* Место для решения — только на листе ученика (параметр sp=). */
+  const [space, setSpace] = useSheetSpace();
   const q = adresLista({ n, seed, theme: 'color' });
   const g = SHEET_3.generator;
   const base = razdely[vybor]?.base ?? razdely[0]?.base ?? '';
@@ -59,13 +64,19 @@ export function Pechat3Panel({ razdely }: { razdely: readonly RazdelPechati[] })
         <button type="button" className="btn btn--ghost" onClick={() => setSeed(novyySeed())}>
           {g.novyy}
         </button>
-        <a className="btn btn--primary" href={`${base}?${q}`} target="_blank" rel="noopener">
+        <a
+          className="btn btn--primary"
+          href={withSpace(`${base}?${q}`, space)}
+          target="_blank"
+          rel="noopener"
+        >
           {g.uchenik}
         </a>
         <a className="btn btn--ghost" href={`${base}otvety/?${q}`} target="_blank" rel="noopener">
           {g.uchitel}
         </a>
       </div>
+      <SpaceOption className="z3t-print__space" value={space} onChange={setSpace} />
     </section>
   );
 }

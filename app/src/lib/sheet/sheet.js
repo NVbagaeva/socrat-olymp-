@@ -17,6 +17,7 @@
 import marks from './marks.js';
 import typo from './typography.js';
 import { figureSize, strokeFloor } from './figureRules.js';
+import { FIRST_ROWS, spaceHtml } from './space.js';
 
 var THEMES = ['color', 'print', 'strict'];
 var LAYOUTS = ['single', 'double'];
@@ -255,6 +256,8 @@ function optionList(options) {
   }).join('') + '</ol>';
 }
 
+var ANSWER_LINE = '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>';
+
 function taskCard(task, options) {
   var layout = options.layout;
 
@@ -262,11 +265,15 @@ function taskCard(task, options) {
      лист ученика со строками и лист учителя без них; не задана — как
      у листа (withAnswerLine). */
   var withLine = task.answerLine !== undefined ? task.answerLine : options.withAnswerLine;
-  var answer = withLine
-    ? '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>'
-    : '';
+  /* С местом для решения строка ответа стоит после поля (spacedItems). */
+  var answer = withLine && !task.space ? ANSWER_LINE : '';
 
-  var question = '<p class="sheet-task-question">' + typo.markup(task.questionHtml) + '</p>' +
+  /* Условие со своими абзацами или таблицей (<p>, <table>) — в блоке
+     <div>: абзац внутри абзаца браузер разбивает и добавляет пустые
+     отступы. */
+  var markup = typo.markup(task.questionHtml);
+  var tag = /<(?:p|div|table|ol|ul)\b/i.test(markup) ? 'div' : 'p';
+  var question = '<' + tag + ' class="sheet-task-question">' + markup + '</' + tag + '>' +
     optionList(task.options);
 
   /* Решение по шагам — только в файле для учителя: кто собирает лист,
@@ -300,6 +307,35 @@ function taskCard(task, options) {
     '<span class="sheet-task-no">' + task.no + '</span>' +
     '<div class="sheet-task-body">' + body + '</div>' +
     '</article>';
+}
+
+/* ══════════════════════════════════════════════════════════
+   Место для решения (space.js)
+   ══════════════════════════════════════════════════════════ */
+
+/**
+ * Задача с полем для решения — несколько кусков потока: карточка и
+ * первые FIRST_ROWS строк поля неделимы (не встали — задача целиком
+ * уходит на следующую страницу), остальные строки — по одной: поле
+ * продолжается на следующей странице только по границе строки клеток.
+ * Последняя строка и «Ответ: ____» — один кусок.
+ */
+function spacedItems(task, options) {
+  var field = task.space;
+  var rows = field.rows;
+  var first = Math.min(FIRST_ROWS, rows);
+  var withLine = task.answerLine !== undefined ? task.answerLine : options.withAnswerLine;
+  var answer = withLine ? ANSWER_LINE : '';
+  var out = ['<div class="sheet-item sheet-tasks sheet-tasks--single sheet-tasks--space">' +
+    taskCard(task, Object.assign({}, options, { layout: 'single' })) +
+    '<div class="sheet-space-wrap">' + spaceHtml(field, first, true, rows === first) +
+    (rows === first ? answer : '') + '</div></div>'];
+  for (var r = first; r < rows; r += 1) {
+    var last = r === rows - 1;
+    out.push('<div class="sheet-item sheet-space-item"><div class="sheet-space-wrap">' +
+      spaceHtml(field, 1, false, last) + (last ? answer : '') + '</div></div>');
+  }
+  return out;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -389,8 +425,9 @@ function flowItems(spec) {
     var opts = { layout: layout, cell: size.cell, frame: size.frame,
                  withAnswerLine: spec.withAnswerLine, figures: spec.figures };
     var single = function (task) {
-      return '<div class="sheet-item sheet-tasks sheet-tasks--single">' +
-        taskCard(task, opts) + '</div>';
+      if (task.space) { return spacedItems(task, opts); }
+      return ['<div class="sheet-item sheet-tasks sheet-tasks--single">' +
+        taskCard(task, opts) + '</div>'];
     };
     if (layout === 'double') {
       /* В две колонки единица набора — строка из двух карточек:
@@ -405,10 +442,10 @@ function flowItems(spec) {
         pending = [];
       };
       tasks.forEach(function (task) {
-        if (placeFigure(task.figureSvg, { cell: size.cell, frame: size.frame,
+        if (task.space || placeFigure(task.figureSvg, { cell: size.cell, frame: size.frame,
               width: task.figureWidth, figures: spec.figures }).below) {
           flush();
-          out.push(single(task));
+          single(task).forEach(function (item) { out.push(item); });
           return;
         }
         pending.push(task);
@@ -416,7 +453,9 @@ function flowItems(spec) {
       });
       flush();
     } else {
-      tasks.forEach(function (task) { out.push(single(task)); });
+      tasks.forEach(function (task) {
+        single(task).forEach(function (item) { out.push(item); });
+      });
     }
   });
 
@@ -446,7 +485,8 @@ function flowItems(spec) {
  *            и чертежа могут быть figureWidth (мм), figureBelow
  *            (рисунок под условием), solutionHtml (для учителя) и
  *            answerLine — строка «Ответ: ____» у этой задачи (поверх
- *            withAnswerLine листа).
+ *            withAnswerLine листа), space — место для решения { mode:
+ *            'blank' | 'grid', rows } (space.js, applySpace).
  *            У блока могут быть id (плашка перед названием) и
  *            level: 2 — подзаголовок внутри раздела; блок без задач
  *            даёт одну полосу заголовка; head: false — блок без полосы;

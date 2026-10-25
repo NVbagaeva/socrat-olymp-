@@ -6,7 +6,23 @@ import { Button, Input, Select } from '@/components/ui';
 import { VARIANT_SCREEN as T, WORK_KINDS, standardInstruction } from '@/content/variant';
 import { useSessionUser } from '@/lib/auth/session';
 import { newSeed } from '@/lib/variant/code';
-import { loadConfig, loadMeta, openSheet, saveConfig, saveMeta } from '@/lib/variant/handoff';
+import { SpaceOption } from '@/components/tasks/space/SpaceOption';
+import {
+  DEFAULT as SPACE_DEFAULT,
+  decodeSpace,
+  encodeSpace,
+  type SheetSpace,
+} from '@/lib/sheet/space.js';
+import { codeWithSpace } from '@/lib/variant/code';
+import {
+  loadConfig,
+  loadMeta,
+  loadSpace,
+  openSheet,
+  saveConfig,
+  saveMeta,
+  saveSpace,
+} from '@/lib/variant/handoff';
 import { SECTIONS, sectionInfo } from '@/lib/variant/sections';
 import {
   buildSet,
@@ -79,6 +95,8 @@ function sameConfig(a: VariantConfig, b: VariantConfig): boolean {
 export function VariantScreen() {
   const [config, setConfig] = useState<VariantConfig>(defaultConfig);
   const [meta, setMeta] = useState<VariantMeta>(defaultMeta);
+  /* Место для решения: не меняет задачи, хранится хвостом кода. */
+  const [space, setSpace] = useState<SheetSpace>(SPACE_DEFAULT);
   const [open, setOpen] = useState<EgeNo | null>(null);
   const [set, setSet] = useState<VariantSet | null>(null);
   const [busy, setBusy] = useState(false);
@@ -97,6 +115,7 @@ export function VariantScreen() {
     const frame = window.requestAnimationFrame(() => {
       setConfig(sanitizeConfig(loadConfig()));
       setMeta(sanitizeMeta(loadMeta()));
+      setSpace(loadSpace());
       setDev(
         process.env.NODE_ENV === 'development' ||
           new URLSearchParams(window.location.search).get('dev') === '1',
@@ -112,12 +131,17 @@ export function VariantScreen() {
   useEffect(() => {
     if (restored.current) saveMeta(meta);
   }, [meta]);
+  useEffect(() => {
+    if (restored.current) saveSpace(space);
+  }, [space]);
 
   /* Учитель вошёл в кабинет — его имя в шапке, пока поле не заполнено. */
   const tutorName = user?.role === 'tutor' ? user.name.trim() : '';
   const shown: VariantMeta = meta.teacher === '' ? { ...meta, teacher: tutorName } : meta;
 
   const stale = set !== null && !sameConfig(set.config, config);
+  /* Код набора с настройкой места для решения: по нему лист — тот же. */
+  const fullCode = set === null ? '' : codeWithSpace(set.code, encodeSpace(space));
   const title = workTitle(shown, WORK_KINDS);
 
   async function run(next: VariantConfig, seed: string, zameny: Record<string, number>) {
@@ -155,18 +179,20 @@ export function VariantScreen() {
     const now = currentVersion();
     setNotice(d.version === now ? null : T.codeOld(d.version, now));
     setConfig(d.config);
+    /* Код с хвостом места для решения — лист воспроизводится тем же. */
+    if (d.space !== undefined && d.space !== '') setSpace(decodeSpace(d.space));
     void run(d.config, d.seed, d.zameny);
   }
 
   function pechat(choice: SheetChoice) {
     if (set === null) return;
-    const ok = openSheet(choice, { set, meta: shown, workTitle: title });
+    const ok = openSheet(choice, { set, meta: shown, workTitle: title }, fullCode);
     setNotice(ok ? null : T.popupBlocked);
   }
 
   function copyCode() {
     if (set === null) return;
-    void navigator.clipboard?.writeText(set.code).then(() => {
+    void navigator.clipboard?.writeText(fullCode).then(() => {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
     });
@@ -385,6 +411,12 @@ export function VariantScreen() {
             note={T.figuresNote}
             onPick={(id) => setMeta((m) => ({ ...m, figures: id }))}
           />
+          <SpaceOption
+            className="var-field var-space"
+            value={space}
+            onChange={setSpace}
+            numbers={config.tasks}
+          />
         </div>
 
         {/* ── Шапка работы ──────────────────────────────────── */}
@@ -559,7 +591,7 @@ export function VariantScreen() {
           <section className="var-panel var-kit" aria-label={T.downloads}>
             <div className="var-kit__code">
               <span className="var-field__label">{T.code}</span>
-              <code className="var-kit__value">{set.code}</code>
+              <code className="var-kit__value">{fullCode}</code>
               <button type="button" className="var-link" onClick={copyCode}>
                 {copied ? T.codeCopied : T.codeCopy}
               </button>
@@ -593,6 +625,7 @@ export function VariantScreen() {
         title={title}
         busy={busy}
         dev={dev}
+        space={space}
         onReplace={zamenit}
       />
     </div>

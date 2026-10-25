@@ -41,7 +41,9 @@ const REPORT = args.includes('--report');
 const only = args.filter((a, i) => /^\d+$/.test(a) && args[i - 1] !== '--sets').map(Number);
 
 const { buildVariantSet } = requireSrc('lib/variant/build');
-const { encodeCode, decodeCode } = requireSrc('lib/variant/code');
+const { encodeCode, decodeCode, codeWithSpace, spaceOfCode, baseCode } =
+  requireSrc('lib/variant/code');
+const SPACE = requireSrc('lib/sheet/space.js');
 const { rngOf } = requireSrc('lib/vychisleniya/rng');
 const { variantSheetSpec, instructionFor } = requireSrc('lib/variant/sheets');
 const { defaultMeta } = requireSrc('lib/variant/session');
@@ -281,6 +283,34 @@ for (const [n, adapter] of adapters) {
         fail(where, 'замена задачи варианта 1 сдвинула другие варианты');
     }
   }
+}
+
+/* ── Место для решения в коде ───────────────────────────────────
+   Хвост .P… кода: настройка переживает код туда и обратно, задачи по
+   коду с хвостом и без — те же (хвост в состав набора не входит). */
+{
+  const spaces = [
+    { mode: 'none', size: 'auto', per: {} },
+    { mode: 'grid', size: 'auto', per: {} },
+    { mode: 'blank', size: 'S', per: { 4: 'S', 8: 'L', 1: 'none' } },
+    { mode: 'grid', size: 'M', per: { 13: 'auto' } },
+  ];
+  const base = 'PR7T-407ZZ-00';
+  for (const sp of spaces) {
+    const token = SPACE.encodeSpace(sp);
+    const back = SPACE.decodeSpace(token);
+    if (JSON.stringify(back) !== JSON.stringify(SPACE.normalizeSpace(sp)))
+      fail('место для решения', `${JSON.stringify(sp)} → «${token}» → ${JSON.stringify(back)}`);
+    const full = codeWithSpace(base, token);
+    if (baseCode(full) !== base || spaceOfCode(full) !== token)
+      fail('место для решения', `код ${full}: база ${baseCode(full)}, хвост ${spaceOfCode(full)}`);
+    const a = decodeCode(base, subtypeIds);
+    const b = decodeCode(full, subtypeIds);
+    if (b === null || JSON.stringify(a.config) !== JSON.stringify(b.config) || a.seed !== b.seed)
+      fail('место для решения', `код ${full} читается иначе, чем ${base}`);
+  }
+  const rows = [SPACE.rowsFor('auto', 30), SPACE.rowsFor('auto', 600), SPACE.rowsFor('auto', 5000)];
+  if (rows.join() !== '5,11,14') fail('место для решения', `«авто»: строк ${rows.join(', ')}`);
 }
 
 /* ── Математика в условиях ─────────────────────────────────────── */

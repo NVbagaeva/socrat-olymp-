@@ -8,6 +8,7 @@ import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery9, printSpec9, sheetSpec9 } from '@/lib/proizvodnaya/sheet9';
 import { withPrintFigures } from '@/lib/sheet/figureRules.js';
+import { spaceOfQuery } from '@/lib/sheetSpace';
 
 declare global {
   interface Window {
@@ -61,7 +62,10 @@ export function SheetPage9({ withAnswers }: SheetPage9Props) {
     const kit = checkKitSheet(query, '9', withAnswers ? 'teacher' : 'student', built);
     /* На лист — сборка в печатном профиле рисунков (figureRules.js):
        отпечаток комплекта — по обычной, как у напечатанных раньше. */
-    const printed = withPrintFigures(() => printSpec9(sheetSpec9(params, withAnswers)));
+    /* Место для решения (sp=) — у листа ученика (sheetSpec9). */
+    const printed = withPrintFigures(() =>
+      printSpec9(sheetSpec9(params, withAnswers, spaceOfQuery(query))),
+    );
     const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {

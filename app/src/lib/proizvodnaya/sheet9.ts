@@ -53,6 +53,8 @@ import { BANK } from './bank';
 import { rngOf } from './rng';
 import { ru } from './tex';
 import type { Generated, Gruppa } from './types';
+import type { SheetSpace } from '@/lib/sheet/space.js';
+import { sheetWithSpace } from '@/lib/sheetSpace';
 
 /* Задача считается долго (движок подбирает рисунок), а лист ученика,
    лист учителя и проверка комплекта просят одни и те же seed: результат
@@ -794,9 +796,21 @@ function flowOf(spec: Record<string, unknown>, block: SheetBlock9): string[] {
  * blocks нужны проверкам и отпечатку комплекта; печатает лист
  * `printSpec9(spec)` — тот же набор, но с готовым потоком.
  */
-export function sheetSpec9(params: SheetParams9, withAnswers: boolean) {
+export function sheetSpec9(params: SheetParams9, withAnswers: boolean, space?: SheetSpace) {
   const own = { ...params, layout: raskladka(params.layout, withAnswers) };
-  return specOfBlocks9(sheetBlocks9(own, withAnswers), own, withAnswers);
+  const blocks = sheetBlocks9(own, withAnswers);
+  /* Место для решения (sheet/space.js) — у листа ученика. Поток листа
+     собирается здесь же (flowOf), поэтому поля ставятся до него; для
+     «авто» длины решений — по листу учителя тех же задач. */
+  if (withAnswers || space === undefined || space.mode === 'none') {
+    return specOfBlocks9(blocks, own, withAnswers);
+  }
+  const teacher = (): unknown => {
+    const t = { ...params, layout: raskladka(params.layout, true) };
+    return specOfBlocks9(sheetBlocks9(t, true), t, true);
+  };
+  const spaced: SheetBlock9[] = sheetWithSpace({ blocks }, space, true, teacher).blocks;
+  return specOfBlocks9(spaced, own, withAnswers);
 }
 
 /**

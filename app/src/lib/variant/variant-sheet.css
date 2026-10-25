@@ -48,6 +48,12 @@ html[data-sheet-figures='normal'] .sheet-figure svg {
 .sheet-task-question {
   line-height: 1.4;
 }
+/* Место для решения — под текстом задачи: отступ под номер (компактная
+   карточка: поля 1 + номер 6 + зазор 2,5 шага). */
+html:root {
+  --sheet-space-indent: calc(var(--sheet-step) * 9.5);
+  --sheet-space-right: var(--sheet-step);
+}
 /* Строка «Ответ: ____» после задания, как в КИМ: без большого отступа —
    у тринадцати заданий он стоил бы трети страницы. */
 .sheet-answer-line {

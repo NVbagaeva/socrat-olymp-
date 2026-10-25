@@ -6,6 +6,7 @@ import { PECHAT_1 } from '@/content/repetitory1';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery1, sheetSpec1, sobratList, type VidLista } from '@/lib/planimetriya/sheet1';
 import type { UslovieBanka } from '@/lib/planimetriya/trenazher/sessiya';
@@ -59,7 +60,11 @@ export function SheetPage1({ vid, bank }: { vid: VidLista; bank: UslovieBanka[] 
     const built = sheetSpec1(params, sobratList(params, bank), vid);
     /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
     const kit = checkKitSheet(query, '1', vid === 'uchenik' ? 'student' : 'teacher', built);
-    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+    /* Место для решения (sp=) — только у листа ученика. */
+    const printed = sheetWithSpace(built, spaceOfQuery(query), vid === 'uchenik', () =>
+      sheetSpec1(params, sobratList(params, bank), 'uchitel'),
+    );
+    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setWarning(kit.warning);

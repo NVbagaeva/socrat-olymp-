@@ -9,6 +9,7 @@ import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { keySpec2, parseSheetQuery2, sheetSpec2 } from '@/lib/vektory/sheet2';
 import { withPrintFigures } from '@/lib/sheet/figureRules.js';
+import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 
 declare global {
   interface Window {
@@ -71,8 +72,13 @@ export function SheetPage2({ vid }: SheetPage2Props) {
     const kit = checkKitSheet(query, '2', withAnswers ? 'teacher' : 'student', built);
     /* На лист — сборка в печатном профиле рисунков (figureRules.js):
        отпечаток комплекта — по обычной, как у напечатанных раньше. */
-    const printed = withPrintFigures(() =>
-      vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers),
+    const printed = sheetWithSpace(
+      withPrintFigures(() =>
+        vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers),
+      ),
+      spaceOfQuery(query),
+      vid !== 'klyuch' && !withAnswers,
+      () => sheetSpec2(params, true),
     );
     const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {

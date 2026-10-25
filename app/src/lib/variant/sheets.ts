@@ -19,7 +19,9 @@
 
 import { VARIANT_SCREEN, VARIANT_SHEET as T, standardInstruction } from '@/content/variant';
 import { figure as figureHtml } from '@/lib/sheet/sheet.js';
+import { solutionLength, spaceFor, type SheetSpace } from '@/lib/sheet/space.js';
 import typo from '@/lib/sheet/typography.js';
+import { codeWithSpace } from './code';
 import type { Figure, FigureSize, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
 
 export type SheetKind = 'uchenik' | 'uchitel' | 'razbor';
@@ -281,7 +283,15 @@ interface SheetVariant {
   blocks: unknown[];
 }
 
-function blocksUchenik(tasks: readonly VariantTask[], meta: VariantMeta): unknown[] {
+/**
+ * Лист ученика. Место для решения (lib/sheet/space.js): по настройке,
+ * своя для номера задания ЕГЭ, «авто» — по длине решения учителя.
+ */
+function blocksUchenik(
+  tasks: readonly VariantTask[],
+  meta: VariantMeta,
+  space: SheetSpace | undefined,
+): unknown[] {
   const text = instructionFor(meta);
   return [
     {
@@ -289,7 +299,14 @@ function blocksUchenik(tasks: readonly VariantTask[], meta: VariantMeta): unknow
       title: '',
       note: '',
       leadItems: meta.instruction && text !== '' ? [instructionItem(text)] : [],
-      tasks: tasks.map((t, i) => card(t, sheetNo(t, i, meta.numbering), meta.figures, true)),
+      tasks: tasks.map((t, i) => {
+        const field =
+          space === undefined
+            ? null
+            : spaceFor(space, t.egeNumber, solutionLength(t.solutionTeacher ?? t.solutionStudent));
+        const c = card(t, sheetNo(t, i, meta.numbering), meta.figures, true);
+        return field === null ? c : { ...c, space: field };
+      }),
     },
   ];
 }
@@ -382,6 +399,10 @@ export interface VariantSheetOptions {
    * никогда: по коду на сайте собирается и лист с ответами.
    */
   showCode: boolean;
+  /** Место для решения на листе ученика; код в таблице учителя — с ним. */
+  space?: SheetSpace;
+  /** Хвост кода для места для решения (encodeSpace): к коду в таблице. */
+  spaceToken?: string;
 }
 
 /** Описание документа для `buildDocument` (lib/sheet/sheet.js). */
@@ -408,9 +429,13 @@ export function variantSheetSpec(
       const subtitle = [subtitleBase, part].filter((x) => x !== '').join(' · ');
       const blocks =
         kind === 'uchenik'
-          ? blocksUchenik(v.tasks, meta)
+          ? blocksUchenik(v.tasks, meta, opts.space)
           : kind === 'uchitel'
-            ? blocksUchitel(v.tasks, meta, opts.showCode ? set.code : null)
+            ? blocksUchitel(
+                v.tasks,
+                meta,
+                opts.showCode ? codeWithSpace(set.code, opts.spaceToken ?? '') : null,
+              )
             : blocksRazbor(v.tasks, meta);
       return {
         title: {
