@@ -988,7 +988,7 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell, str
      ставить её вне зоны значит вернуть её к треугольнику. */
   if (zone && !best && !fallback) { return ''; }
   if (!zone && !best && (!fallback || !fallback.free)) {
-    best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH, strict);
+    best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH);
   }
 
   var spot = best || fallback ||
@@ -1075,7 +1075,7 @@ function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, repor
 
   var mid = at(total / 2);
   if (!best && (!fallback || !fallback.free)) {
-    best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH, strict);
+    best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH);
   }
   var spot = best || fallback ||
     { x: mid.x + mid.nx * THEME.gap.curveLabel, y: mid.y + mid.ny * THEME.gap.curveLabel };
@@ -1513,7 +1513,7 @@ function ownership(item, all, sx, sy, cx, cy, halfW, halfH) {
    другой кривой). Перебираем всё поле сеткой и берём свободное место
    (зазор не меньше curveLabelClear, не на подписях), которое ближе
    к своей кривой, чем к чужой, — самое близкое к своей. */
-function freeSpotNear(item, all, sx, sy, cloud, labelBoxes, field, halfW, halfH, strict) {
+function freeSpotNear(item, all, sx, sy, cloud, labelBoxes, field, halfW, halfH) {
   var step = 4;
   /* Сначала с обычным зазором, потом с меньшим — но не вплотную. */
   var porogi = [THEME.curveLabelClear, 6, 3];
