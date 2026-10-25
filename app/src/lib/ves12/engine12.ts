@@ -9,11 +9,10 @@
  * был напечатан, — по старой схеме, до первой правки.
  */
 
-import { GEN_UI } from '@/content/generatorUi';
 import content from '@/content/sheet12.js';
 import { nabratFormuly } from '@/lib/generator/nabrat';
 import { slotySostava, sostavIzSlotov } from '@/lib/generator/obshchiy/klyuchi';
-import { defaultExtras } from '@/lib/generator/obshchiy/state';
+import { defaultExtras, vidRabotyIz, vidRabotyText } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
   GenEngine,
@@ -24,8 +23,6 @@ import type {
   Level,
 } from '@/lib/generator/obshchiy/types';
 import { parseSheetQuery, sheetQuery, subtitleOf, type SheetParams } from '@/lib/generatorQuery';
-
-const VIDY = GEN_UI.vidyRaboty as Record<string, string>;
 
 function urovenLista(levels: readonly Level[]): string | null {
   if (levels.length !== 1) return null;
@@ -53,7 +50,7 @@ export function paramsIzSostoyaniya(
     seed: state.seed,
     theme: 'color',
     layout: 'single',
-    kind: e.kind === null ? '' : (VIDY[e.kind] ?? ''),
+    kind: vidRabotyText(config, e),
     date: e.date,
     variants: state.variants,
     theory: e.theory,
@@ -67,12 +64,11 @@ export function paramsIzSostoyaniya(
 }
 
 function extrasIzParams(p: SheetParams, config: GenConfig): GenExtras {
-  const kind = Object.entries(VIDY).find(([, title]) => title === p.kind)?.[0] ?? null;
   return {
     ...defaultExtras(config),
+    ...vidRabotyIz(config, p.kind),
     theory: p.theory === true,
     examples: p.examples === 1 ? 1 : p.examples === 2 ? 2 : 0,
-    kind,
     date: p.date,
     teacher: p.uchitel ?? config.sheet.teacher,
     qr: p.qr === true,

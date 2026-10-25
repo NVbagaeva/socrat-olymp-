@@ -110,7 +110,7 @@ export function parseZaprosBanka(
     zameny,
     pamyatka: q.get('tr') === '1',
     primery: pr === 1 || pr === 2 ? pr : 0,
-    kind: (q.get('k') ?? '').slice(0, 60),
+    kind: (q.get('k') ?? '').slice(0, 80),
     date: /^\d{4}-\d{2}-\d{2}$/.test(q.get('d') ?? '') ? (q.get('d') as string) : '',
     ...(uch === null ? {} : { uchitel: uch.slice(0, 40) }),
     qr: q.get('qr') === '1',

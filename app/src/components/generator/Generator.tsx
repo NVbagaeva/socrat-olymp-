@@ -23,6 +23,8 @@ import {
   stateFromPreset,
   subtypeById,
   summary,
+  SVOY_MAX,
+  SVOY_VID,
   tasksText,
   topicAllowed,
   topicHasLevels,
@@ -255,12 +257,17 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     [hrefs, st.seed, st.plan.length, st.variants, config],
   );
 
-  /* QR-код («Дополнительно») — на лист ученика этого набора. */
+  /* QR-код («Дополнительно») — на онлайн-набор, если он есть, иначе на лист ученика. */
   const studentHref = hrefs?.student ?? null;
+  const onlineHref = hrefs?.online ?? null;
   useEffect(() => {
     if (!st.extras.qr || studentHref === null) return undefined;
     let alive = true;
-    qrSvg(adresListaUchenika(new URL(studentHref, window.location.origin).toString()))
+    const adres =
+      onlineHref === null
+        ? adresListaUchenika(new URL(studentHref, window.location.origin).toString())
+        : new URL(onlineHref, window.location.origin).toString();
+    qrSvg(adres)
       .then((svg) => {
         if (alive) setQr(svg);
       })
@@ -268,7 +275,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     return () => {
       alive = false;
     };
-  }, [st.extras.qr, studentHref]);
+  }, [st.extras.qr, studentHref, onlineHref]);
 
   /* Ссылка на набор — в адресе страницы; текущий комплект — в браузере. */
   useEffect(() => {
@@ -586,7 +593,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
           <div className="gen-opt">
             <span>
               {GEN_UI.dop.teoriya}
-              <small>{GEN_UI.dop.teoriyaNote}</small>
+              <small>{extras.teoriyaNote ?? GEN_UI.dop.teoriyaNote}</small>
               {st.extras.theory && !podskazki ? (
                 <small className="gen-opt__warn" role="note">
                   {GEN_UI.dop.teoriyaPodskazka}
@@ -659,6 +666,22 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
             />
           </div>
         )}
+        {extras.vybor === undefined ? null : (
+          <label className="gen-opt">
+            <span>{extras.vybor.title}</span>
+            <select
+              className="gen-input"
+              value={st.extras.vybor ?? extras.vybor.poUmolchaniyu}
+              onChange={(e) => setExtras({ vybor: e.target.value })}
+            >
+              {extras.vybor.options.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {extras.seriya === undefined ? null : (
           <div className="gen-opt">
             <span>
@@ -677,7 +700,9 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
         <div className="gen-opt">
           <span>
             {GEN_UI.dop.qr}
-            <small>{GEN_UI.dop.qrNote}</small>
+            <small>
+              {hrefs?.online === undefined ? GEN_UI.dop.qrNote : GEN_UI.dop.qrNoteOnlayn}
+            </small>
           </span>
           <button
             type="button"
@@ -701,8 +726,22 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 {k.title}
               </option>
             ))}
+            <option value={SVOY_VID}>{GEN_UI.dop.vidSvoy}</option>
           </select>
         </label>
+        {st.extras.kind === SVOY_VID ? (
+          <label className="gen-opt">
+            <span className="sr-only">{GEN_UI.dop.vidSvoy}</span>
+            <input
+              type="text"
+              className="gen-input"
+              maxLength={SVOY_MAX}
+              placeholder={GEN_UI.dop.vidSvoyPlaceholder}
+              value={st.extras.svoy ?? ''}
+              onChange={(e) => setExtras({ svoy: e.target.value }, true)}
+            />
+          </label>
+        ) : null}
         <label className="gen-opt">
           <span>{GEN_UI.dop.data}</span>
           <input
@@ -1069,6 +1108,17 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                     <GenIcon name="files" />
                     {GEN_UI.vseOdnim}
                   </a>
+                  {hrefs?.online === undefined ? null : (
+                    <a
+                      className="btn btn--ghost btn--sm"
+                      href={hrefs.online}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <GenIcon name="play" />
+                      {GEN_UI.onlayn}
+                    </a>
+                  )}
                   <button
                     type="button"
                     className="btn btn--ghost btn--sm"
@@ -1272,6 +1322,18 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
             <GenIcon name="files" />
             {GEN_UI.vseOdnim}
           </a>
+          {hrefs?.online === undefined ? null : (
+            <a
+              className="gen-menu-item"
+              href={hrefs.online}
+              target="_blank"
+              rel="noopener"
+              onClick={closeOverlay}
+            >
+              <GenIcon name="play" />
+              {GEN_UI.onlayn}
+            </a>
+          )}
           <button type="button" className="gen-menu-item" onClick={copyLink}>
             <GenIcon name="link" />
             {GEN_UI.ssylka}
