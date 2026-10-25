@@ -8,7 +8,7 @@
  * своих у них нет (`varianty` пусто): числа задаёт вариант.
  */
 
-import { shagP } from './bank4/vizual';
+import { plitkiDvuh, shagP } from './bank4/vizual';
 import { shtuk, tex, tochnee, tochno, veroyatnost } from './bank5/obshchee';
 import { skl } from './morfologia';
 import { chislo, vopros, zapisShag } from './podskazka';
@@ -1415,6 +1415,158 @@ export const PV5_OBA_ZAKONCHILIS: Prototype = {
       ),
       zapisShag('десятичная', null),
     ];
+  },
+  varianty: [],
+};
+
+/* ── №4. Доля брака в партии: своя копия прототипа блока II ────────
+   Тот же разбор, что у прототипов p4-19 и p4-20 банка (bank4/
+   statisticheskoe), но без чисел банка: импорт самого банка унёс бы
+   в сборку раздела его варианты. */
+
+/** Округление, заданное параметром варианта: 0 — округления нет. */
+const poParametru4 = (p: Record<string, number | string>): 2 | 3 | null => {
+  const znakov = p['znakov'];
+  return znakov === 2 ? 2 : znakov === 3 ? 3 : null;
+};
+
+export const PV4_NASOSY: Prototype = {
+  id: 'pv4-nasosy',
+  blok: 'povyshennye',
+  nazvanie: 'Садовые насосы: брак в партии',
+  tip: 'Вероятность противоположного события по доле',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: () => null,
+  uslovie: (p) => {
+    const k = num(p, 'k');
+    return `В среднем из ${num(p, 'N')} садовых насосов, поступивших в продажу, ${k} ${skl(k, 'подтекает', 'подтекают', 'подтекают')}. Найдите вероятность того, что один случайно выбранный для контроля насос не подтекает.`;
+  },
+  dopustimo: (p) => {
+    const N = num(p, 'N');
+    const k = num(p, 'k');
+    return k >= 1 && k < N && konechnaya((N - k) / N);
+  },
+  otvet: (p) => (num(p, 'N') - num(p, 'k')) / num(p, 'N'),
+  perebor: (p) => {
+    /* Считаем не «целые минус бракованные», а прямым обходом партии:
+       это второй способ прийти к тому же числу. */
+    const N = num(p, 'N');
+    const k = num(p, 'k');
+    let celyh = 0;
+    for (let i = 1; i <= N; i += 1) {
+      if (i > k) {
+        celyh += 1;
+      }
+    }
+    return celyh / N;
+  },
+  shagi: (p) => {
+    const N = num(p, 'N');
+    const k = num(p, 'k');
+    return [
+      {
+        etap: 'Все исходы',
+        text: 'Насосы партии, на контроль равновероятно попадёт любой:',
+        formula: `n = ${N}`,
+        value: N,
+      },
+      {
+        etap: 'Благоприятные исходы',
+        text: 'Исправные насосы:',
+        formula: `m = ${N} - ${k} = ${N - k}`,
+        value: N - k,
+      },
+      shagP(N - k, N),
+    ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    methodHints: [
+      'один случайно выбранный насос из всех',
+      'даны количества «из $N$ — $k$», не проценты',
+      'благоприятные — исправные: вычитаем',
+    ],
+    fraza: (p) =>
+      `прямой пересчёт — на контроль равновероятно попадает любой из ${num(p, 'N')} насосов.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'исправный', count: num(p, 'N') - num(p, 'k') },
+        { label: 'подтекает', count: num(p, 'k') },
+      ),
+  },
+  varianty: [],
+};
+
+export const PV4_SUMKI: Prototype = {
+  id: 'pv4-sumki',
+  blok: 'povyshennye',
+  nazvanie: 'Фабрика сумок: доля с дефектом',
+  tip: 'Вероятность противоположного события по доле',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: poParametru4,
+  uslovie: (p) => {
+    const k = num(p, 'k');
+    const N = num(p, 'N');
+    const okr = num(p, 'znakov') === 0 ? '' : ' Результат округлите до сотых.';
+    return `Фабрика выпускает сумки. В среднем ${k} ${skl(k, 'сумка', 'сумки', 'сумок')} из ${N} ${skl(k, 'имеет', 'имеют', 'имеют')} скрытые дефекты. Найдите вероятность того, что купленная сумка окажется без дефектов.${okr}`;
+  },
+  dopustimo: (p) => {
+    const N = num(p, 'N');
+    const k = num(p, 'k');
+    const znakov = num(p, 'znakov');
+    if (k < 1 || k >= N || (znakov !== 0 && znakov !== 2)) {
+      return false;
+    }
+    return znakov === 2 || konechnaya((N - k) / N);
+  },
+  otvet: (p) => (num(p, 'N') - num(p, 'k')) / num(p, 'N'),
+  perebor: (p) => {
+    const N = num(p, 'N');
+    const k = num(p, 'k');
+    let celyh = 0;
+    for (let i = 1; i <= N; i += 1) {
+      if (i > k) {
+        celyh += 1;
+      }
+    }
+    return celyh / N;
+  },
+  shagi: (p) => {
+    const N = num(p, 'N');
+    const k = num(p, 'k');
+    const znakov = num(p, 'znakov') === 2 ? 2 : null;
+    return [
+      {
+        etap: 'Все исходы',
+        text: 'Сумки партии, покупателю равновероятно достанется любая:',
+        formula: `n = ${N}`,
+        value: N,
+      },
+      {
+        etap: 'Благоприятные исходы',
+        text: 'Сумки без дефекта:',
+        formula: `m = ${N} - ${k} = ${N - k}`,
+        value: N - k,
+      },
+      shagP(N - k, N, znakov),
+    ];
+  },
+  metodika: {
+    metod: 'direct-count',
+    methodHints: [
+      'одна купленная сумка — один случайный выбор',
+      'даны количества «$k$ из $N$»',
+      'благоприятные — без дефектов: вычитаем',
+    ],
+    fraza: (p) =>
+      `прямой пересчёт — покупателю равновероятно достаётся любая из ${num(p, 'N')} сумок.`,
+    vizual: (p) =>
+      plitkiDvuh(
+        { label: 'без дефекта', count: num(p, 'N') - num(p, 'k') },
+        { label: 'с дефектом', count: num(p, 'k') },
+      ),
   },
   varianty: [],
 };

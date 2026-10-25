@@ -57,14 +57,15 @@ import {
   type SkalyarnoeKombinatsiy,
   type SkalyarnoePoRisunku,
 } from '@/lib/vektory/povyshennye';
-import { STATISTICHESKOE } from '@/lib/veroyatnost/bank4/statisticheskoe';
 import {
   PV4_BOLSHE,
   PV4_CHASTOTA,
   PV4_DELITSYA,
+  PV4_NASOSY,
   PV4_NE_MENEE,
   PV4_PROTIVOPOLOZHNOE,
   PV4_SOOTECHESTVENNIK,
+  PV4_SUMKI,
   PV5_DVE_MISHENI,
   PV5_DVE_PARTII,
   PV5_KOST_USLOVIE,
@@ -429,13 +430,6 @@ function veroyatnost(ege: 4 | 5, proto: ProtoVer, p: ParamsVer): Gotovaya {
     solutionStudent: studentHtml(r) + razborAnswer(otvet),
     fallbacks: [],
   };
-}
-
-/** Прототип блока II банка №4 с подсказками раздела (bank4/statisticheskoe). */
-function bank4(id: string): ProtoVer {
-  const p = STATISTICHESKOE.find((x) => x.id === id);
-  if (p === undefined) throw new Error(`нет прототипа ${id} в банке №4`);
-  return p;
 }
 
 /* ── №6 ─────────────────────────────────────────────────────────── */
@@ -966,15 +960,15 @@ export const SHABLONY: Record<string, Shablon> = {
   },
   'z04.bez-defekta': {
     ege: 4,
-    prototip: 'Вероятность, блок II: сумка без дефекта, «k из N с дефектом» (p4-20)',
+    prototip: 'Вероятность, блок II: сумка без дефекта, «k из N с дефектом» (своя копия p4-20)',
     otkuda: 'razdel',
-    zadacha: (p: ParamsVer) => veroyatnost(4, bank4('p4-20'), p),
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_SUMKI, p),
   },
   'z04.ne-podtekaet': {
     ege: 4,
-    prototip: 'Вероятность, блок II: исправный насос, «из N подтекают k» (p4-19)',
+    prototip: 'Вероятность, блок II: исправный насос, «из N подтекают k» (своя копия p4-19)',
     otkuda: 'razdel',
-    zadacha: (p: ParamsVer) => veroyatnost(4, bank4('p4-19'), p),
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_NASOSY, p),
   },
   'z05.mezhdu': {
     ege: 5,
