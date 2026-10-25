@@ -372,7 +372,7 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
       X(xVanty),
       Y(0),
       C.accent,
-      13,
+      KEGL,
       (cy) => cy > Y(0),
     );
   }

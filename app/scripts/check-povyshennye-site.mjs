@@ -5,7 +5,7 @@
    Запуск: pnpm build && pnpm test:povyshennye-site [--shots]
 
      1. /povyshennye/: 36 карточек, у готового варианта шесть версий
-        кнопками, остальные — «Готовится»; фильтры работают.
+        кнопками, остальные (не из GOTOVY) — «Готовится»; фильтры работают.
      2. Версия 1.1 открывается в общем онлайн-режиме «Собрать вариант»:
         лента 1–13, проверка ответа, итоги с первичным и тестовым баллом.
      3. После завершения у версии на экране раздела — «завершён» и балл;
@@ -48,6 +48,7 @@ function ok(cond, where, message) {
 /* Верные ответы версии 1.1 — тот же набор, что соберёт браузер. */
 const { povSetIz } = requireSrc('lib/povyshennye/set');
 const { VARIANT } = requireSrc('lib/povyshennye/dannye/v01');
+const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');
 const { normalizeAnswer } = requireSrc('lib/variant/online/normalize');
 const SET = povSetIz(1, VARIANT.versii);
 const answerOf = (v, i) =>
@@ -103,9 +104,21 @@ page.on('pageerror', (e) => errors.push(String(e)));
 console.log('1. Экран раздела');
 await page.goto(`${BASE}/povyshennye/`);
 await page.getByTestId('pov-grid').waitFor({ timeout: 60_000 });
-ok((await page.locator('.pov-card').count()) === 36, '36 карточек', String(await page.locator('.pov-card').count()));
-ok((await page.locator('[data-testid="pov-card-1"] .pov-v').count()) === 6, 'у варианта 1 шесть версий', 'нет');
-ok((await page.locator('.pov-card.is-soon').count()) === 35, 'остальные — «Готовится»', 'нет');
+ok(
+  (await page.locator('.pov-card').count()) === 36,
+  '36 карточек',
+  String(await page.locator('.pov-card').count()),
+);
+ok(
+  (await page.locator('[data-testid="pov-card-1"] .pov-v').count()) === 6,
+  'у варианта 1 шесть версий',
+  'нет',
+);
+ok(
+  (await page.locator('.pov-card.is-soon').count()) === 36 - GOTOVY.length,
+  `остальные ${36 - GOTOVY.length} — «Готовится»`,
+  String(await page.locator('.pov-card.is-soon').count()),
+);
 await shot(page, 'razdel-kompyuter');
 
 console.log('2. Версия 1.1 онлайн');
@@ -133,7 +146,11 @@ await shot(page, 'versiya-1-1-podskazka-kompyuter');
 await page.getByTestId('vo-finish').click();
 await page.getByTestId('vo-confirm').click();
 await page.getByTestId('vo-result').waitFor({ timeout: 60_000 });
-ok((await page.getByTestId('vo-primary').textContent())?.includes('12 из 13') === true, 'первичный балл 12 из 13', (await page.getByTestId('vo-primary').textContent()) ?? '');
+ok(
+  (await page.getByTestId('vo-primary').textContent())?.includes('12 из 13') === true,
+  'первичный балл 12 из 13',
+  (await page.getByTestId('vo-primary').textContent()) ?? '',
+);
 ok((await page.getByTestId('vo-test').count()) === 1, 'тестовый балл', 'нет');
 await shot(page, 'versiya-1-1-itogi-kompyuter');
 
@@ -141,12 +158,30 @@ console.log('3. Статус версии на экране раздела');
 await page.goto(`${BASE}/povyshennye/`);
 await page.getByTestId('pov-grid').waitFor({ timeout: 60_000 });
 const v11 = page.getByTestId('pov-v-1.1');
-ok((await v11.getAttribute('class'))?.includes('is-done') === true, 'версия 1.1 — завершена', (await v11.getAttribute('class')) ?? '');
-ok((await v11.textContent())?.includes('12 из 13') === true, 'у версии балл', (await v11.textContent()) ?? '');
+ok(
+  (await v11.getAttribute('class'))?.includes('is-done') === true,
+  'версия 1.1 — завершена',
+  (await v11.getAttribute('class')) ?? '',
+);
+ok(
+  (await v11.textContent())?.includes('12 из 13') === true,
+  'у версии балл',
+  (await v11.textContent()) ?? '',
+);
 await page.getByRole('radio', { name: 'С ошибками' }).click();
-ok((await page.getByTestId('pov-v-1.1').count()) === 1 && (await page.getByTestId('pov-v-1.2').count()) === 0, 'фильтр «С ошибками»', 'не так');
+ok(
+  (await page.getByTestId('pov-v-1.1').count()) === 1 &&
+    (await page.getByTestId('pov-v-1.2').count()) === 0,
+  'фильтр «С ошибками»',
+  'не так',
+);
 await page.getByRole('radio', { name: 'Нерешённые' }).click();
-ok((await page.getByTestId('pov-v-1.1').count()) === 0 && (await page.getByTestId('pov-v-1.2').count()) === 1, 'фильтр «Нерешённые»', 'не так');
+ok(
+  (await page.getByTestId('pov-v-1.1').count()) === 0 &&
+    (await page.getByTestId('pov-v-1.2').count()) === 1,
+  'фильтр «Нерешённые»',
+  'не так',
+);
 await page.getByRole('radio', { name: 'Все' }).click();
 await page.locator('[data-testid="pov-card-1"] .pov-print__toggle').click();
 await shot(page, 'razdel-posle-resheniya-kompyuter');
