@@ -844,7 +844,7 @@ function renderGraphBez(scene, report) {
     var boxes = labelBoxes.slice();
     drawn.curveLabelBoxes = [];
     order.forEach(function (item) {
-      curveLabel(item, scene, win, sx, sy, drawn, boxes, null, cell, strict);
+      curveLabel(item, scene, win, sx, sy, drawn, boxes, false, cell, strict);
     });
     return order.map(function (item) { return item.lastOwnership; });
   });
@@ -860,7 +860,7 @@ function renderGraphBez(scene, report) {
       var boxes = labelBoxes.slice();
       drawn.curveLabelBoxes = [];
       order.forEach(function (item) {
-        curveLabel(item, scene, win, sx, sy, drawn, boxes, null, cell, strict);
+        curveLabel(item, scene, win, sx, sy, drawn, boxes, false, cell, strict);
       });
       return order.map(function (item) { return item.lastOwnership; });
     });
@@ -987,7 +987,7 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell, str
   /* Зона задана, а места в ней не нашлось — подписи не будет:
      ставить её вне зоны значит вернуть её к треугольнику. */
   if (zone && !best && !fallback) { return ''; }
-  if (!zone && !best && (!fallback || !fallback.free)) {
+  if (report !== false && !zone && !best && (!fallback || !fallback.free)) {
     best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH);
   }
 
@@ -1074,7 +1074,9 @@ function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, repor
   }
 
   var mid = at(total / 2);
-  if (!best && (!fallback || !fallback.free)) {
+  /* Перебор поля — только в окончательной отрисовке, не в пробах
+     порядка подписей (там report === false): он дорогой. */
+  if (report !== false && !best && (!fallback || !fallback.free)) {
     best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH);
   }
   var spot = best || fallback ||
@@ -1514,7 +1516,7 @@ function ownership(item, all, sx, sy, cx, cy, halfW, halfH) {
    (зазор не меньше curveLabelClear, не на подписях), которое ближе
    к своей кривой, чем к чужой, — самое близкое к своей. */
 function freeSpotNear(item, all, sx, sy, cloud, labelBoxes, field, halfW, halfH) {
-  var step = 4;
+  var step = 6;
   /* Сначала с обычным зазором, потом с меньшим — но не вплотную. */
   var porogi = [THEME.curveLabelClear, 6, 3];
   for (var k = 0; k < porogi.length; k++) {
