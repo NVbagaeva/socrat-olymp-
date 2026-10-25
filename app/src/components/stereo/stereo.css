@@ -666,7 +666,7 @@ a.o3-kart:hover {
   font-weight: 800;
 }
 .o3-ptask__umenie {
-  margin: 0;
+  margin: 0 0 var(--space-3);
   font-size: var(--fs-label);
   color: var(--color-text-secondary);
 }
@@ -688,6 +688,13 @@ a.o3-kart:hover {
 .o3-card {
   grid-template-columns: minmax(0, 1fr);
 }
+.o3-card .ptask__text {
+  justify-items: stretch;
+  text-align: left;
+}
+.o3-metki {
+  justify-content: flex-start;
+}
 .o3-card__ris {
   min-width: 0;
   max-width: 420px;
@@ -704,7 +711,7 @@ a.o3-kart:hover {
   display: grid;
   gap: var(--space-3);
   width: 100%;
-  max-width: 460px;
+  max-width: 360px;
 }
 .o3-nazhmi__ris {
   padding: var(--space-2);
@@ -848,10 +855,21 @@ a.o3-kart:hover {
 .o3-itog__text {
   margin: 0;
 }
+.o3-itog > * {
+  min-width: 0;
+}
 .o3-itog__links {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+.o3-itog__links .btn {
+  max-width: 100%;
+  height: auto;
+  min-height: 44px;
+  padding-block: var(--space-2);
+  white-space: normal;
+  text-align: left;
 }
 .o3-ptask .katex-display {
   overflow-x: auto;

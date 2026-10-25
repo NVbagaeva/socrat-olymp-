@@ -128,12 +128,7 @@ export function OpornyeStereoScreen({
         <span className="o3-ptask__no" aria-hidden="true">
           {no}
         </span>
-        <div>
-          <h2 className="ptask__title">{title}</h2>
-          <p className="o3-ptask__umenie">
-            {OPORNYE_3.umenie}: {umenie}
-          </p>
-        </div>
+        <h2 className="ptask__title">{title}</h2>
         <p className="ptask__score">
           <span className="ptask__score-item ptask__score-item--right">
             <RightIcon />
@@ -147,6 +142,9 @@ export function OpornyeStereoScreen({
           </span>
         </p>
       </header>
+      <p className="o3-ptask__umenie">
+        {OPORNYE_3.umenie}: {umenie}
+      </p>
 
       {done ? (
         <div className="o3-itog" role="status">
