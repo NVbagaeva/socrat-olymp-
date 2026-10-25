@@ -26,7 +26,7 @@ export interface Kredit13 {
   n: number | null;
   /** Ставка в процентах; null — неизвестна, в решении буква. */
   r: Drob | null;
-  /** Буква ставки: r или t (как в условии). */
+  /** Буква ставки в условии (t, p…); в решении ставка всё равно r. */
   bukva?: string;
   /** «первый банк», «срок 24 месяца» — когда кредитов два. */
   imya?: string;
@@ -41,12 +41,10 @@ export interface DifItog {
   summa: number | null;
   /** Переплата в процентах от кредита; null — в ответе есть буква. */
   procent: Drob | null;
-  /** То же в TeX: «42», «6t», «\dfrac{(n+1)\cdot 3}{2}». */
+  /** То же в TeX: «42», «6r», «\dfrac{(n+1)\cdot 3}{2}». */
   procentTex: string;
   /** Обозначение переплаты: P, P_1, P_2. */
   P: string;
-  /** Обозначение процента: x, x_1, x_2. */
-  x: string;
 }
 
 const fr = (a: string, b: string | number) => `\\dfrac{${a}}{${b}}`;
@@ -62,15 +60,14 @@ function dolya(m: Mnozh, n: number | null): string {
 }
 
 function stavka(k: Kredit13): string {
-  return fr(k.r === null ? (k.bukva ?? 'r') : tex(k.r), 100);
+  return fr(k.r === null ? 'r' : tex(k.r), 100);
 }
 
 /** «Первый банк: $n = 11$, $r = 7$». */
 function podpis(k: Kredit13, period: 'month' | 'year'): string {
-  const b = k.bukva ?? 'r';
   const chasti = [
     k.n === null ? '' : `$n = ${k.n}$ (${period === 'year' ? years(k.n) : months(k.n)})`,
-    k.r === null ? '' : `$${b} = ${tex(k.r)}$`,
+    k.r === null ? '' : `$r = ${tex(k.r)}$`,
   ].filter(Boolean);
   const imya = k.imya ? `${k.imya.charAt(0).toUpperCase()}${k.imya.slice(1)}` : '';
   return [imya, chasti.join(', ')].filter(Boolean).join(': ');
@@ -78,7 +75,6 @@ function podpis(k: Kredit13, period: 'month' | 'year'): string {
 
 /** Таблица в переменных: строки 1–3, «…», n − 1, n (до пяти строк — все). */
 function tablitsa(k: Kredit13, period: 'month' | 'year', P: string): TablitsaPeremennye {
-  const b = k.bukva ?? 'r';
   const rT = stavka(k);
   const cell = (start: Mnozh, end: Mnozh, pervaya: boolean, n: number | null) => {
     /* Первая строка — просто S: как S записывается дробью, видно под
@@ -116,8 +112,8 @@ function tablitsa(k: Kredit13, period: 'month' | 'year', P: string): TablitsaPer
     itog: ['S', P],
     strelka:
       k.r === null
-        ? `$${b}\\,\\%$ начисляется на долг на начало ${kogda}`
-        : `$${b}\\,\\% = ${tex(k.r)}\\,\\%$ начисляется на долг на начало ${kogda}`,
+        ? `$r\\,\\%$ начисляется на долг на начало ${kogda}`
+        : `$r\\,\\% = ${tex(k.r)}\\,\\%$ начисляется на долг на начало ${kogda}`,
   };
 }
 
@@ -172,10 +168,9 @@ function chleny(n: number | null): string {
 function skladyvaem(
   k: Kredit13,
   P: string,
-  x: string,
   period: 'month' | 'year',
 ): { shag: SolutionStep; itog: DifItog } {
-  const b = k.bukva ?? 'r';
+  const b = 'r';
   const rT = stavka(k);
   const nT = k.n === null ? 'n' : String(k.n);
   const obshiy = `${fr('S', nT)}\\cdot ${rT}`;
@@ -205,7 +200,6 @@ function skladyvaem(
       procent: null,
       procentTex: `\\dfrac{(n + 1)\\cdot ${rNum}}{2}`,
       P,
-      x,
     };
   } else {
     const n = k.n;
@@ -220,7 +214,7 @@ function skladyvaem(
     let koef: Drob | null = null;
     let procentTex: string;
     if (k.r === null) {
-      /* Ставка неизвестна: k·S с буквой, например «\dfrac{6t}{100}S». */
+      /* Ставка неизвестна: k·S с буквой, например «\dfrac{6r}{100}S». */
       const chisl = q.isInteger() ? `${tex(q)}${b}` : `${q.n}${b}`;
       const znam = q.isInteger() ? '100' : String(100n * q.d);
       konec = `${fr(chisl, znam)}\\,S`;
@@ -235,7 +229,7 @@ function skladyvaem(
       vid: 'formula',
       tex: `${P} = ${obshiy}\\cdot ${summa} = S\\cdot ${qT}\\cdot ${rT} = ${konec}`,
     });
-    itog = { koef, summa, procent: koef === null ? null : koef.mul(100), procentTex, P, x };
+    itog = { koef, summa, procent: koef === null ? null : koef.mul(100), procentTex, P };
   }
   return {
     shag: {
@@ -258,8 +252,9 @@ export function difPereplata(
 ): { shagi: SolutionStep[]; itogi: DifItog[] } {
   const dva = krediti.length > 1;
   const P = (i: number) => (dva ? `P_{${i + 1}}` : 'P');
-  const x = (i: number) => (dva ? `x_{${i + 1}}` : 'x');
-  const b = krediti[0]?.bukva ?? 'r';
+  const b = 'r';
+  /* Ставка в условии под другой буквой — в решении она всё равно r. */
+  const drugaya = krediti[0]?.bukva && krediti[0].bukva !== 'r' ? krediti[0].bukva : null;
   const ed = period === 'year' ? 'лет' : 'месяцев';
   const vStavka = period === 'year' ? 'годовая' : 'месячная';
   const izmenenie = krediti
@@ -275,7 +270,7 @@ export function difPereplata(
     },
     {
       title: 'Вводим обозначения',
-      text: `$S$ — сумма кредита, $n$ — число ${ed}, $${b}\\,\\%$ — ${vStavka} ставка. Долг каждый ${period === 'year' ? 'год' : 'месяц'} уменьшается на одну и ту же сумму — сумма изменения долга равна $\\dfrac{S}{n}$: ${izmenenie}.`,
+      text: `${drugaya ? `В условии ставка обозначена $${drugaya}$ — обозначим её $r$, как во всех разборах. ` : ''}$S$ — сумма кредита, $n$ — число ${ed}, $${b}\\,\\%$ — ${vStavka} ставка. Долг каждый ${period === 'year' ? 'год' : 'месяц'} уменьшается на одну и ту же сумму — сумма изменения долга равна $\\dfrac{S}{n}$: ${izmenenie}.`,
     },
     {
       title: `Вспоминаем: как найти $${b}\\,\\%$ от числа $S$`,
@@ -310,16 +305,17 @@ export function difPereplata(
   });
   const itogi: DifItog[] = [];
   krediti.forEach((k, i) => {
-    const { shag, itog } = skladyvaem(k, P(i), x(i), period);
+    const { shag, itog } = skladyvaem(k, P(i), period);
     shagi.push(shag);
     itogi.push(itog);
   });
   /* Переплата в процентах нужна не всегда: вопрос в рублях отвечается без неё. */
   if (opts.bezProcentov) return { shagi, itogi };
+  /* Искомый процент — без отдельной буквы: r занята ставкой, x — платежом. */
   shagi.push({
     title: 'Выражаем переплату в процентах от суммы кредита',
     text: dva ? 'Пропорцией для каждого кредита:' : 'Пропорцией:',
-    bloki: itogi.map((it, i): ShagBlok => {
+    bloki: itogi.flatMap((it, i): ShagBlok[] => {
       const k = krediti[i] as Kredit13;
       const PS =
         it.koef !== null
@@ -327,14 +323,23 @@ export function difPereplata(
           : k.n === null
             ? `S\\cdot\\dfrac{n + 1}{2}\\cdot\\dfrac{${k.r === null ? b : tex(k.r)}}{100}`
             : `${fr(it.procentTex, 100)}\\,S`;
-      return {
-        vid: 'proporciya',
-        rows: [
-          ['100\\,\\%', 'S'],
-          [`${it.x}\\,\\%`, PS],
-        ],
-        vyvod: `${it.x} = \\dfrac{${PS}\\cdot 100}{S} = ${it.procentTex}\\,\\%`,
-      };
+      return [
+        ...(dva && k.imya
+          ? [{ vid: 'text' as const, text: `${k.imya.charAt(0).toUpperCase()}${k.imya.slice(1)}:` }]
+          : []),
+        {
+          vid: 'proporciya',
+          rows: [
+            ['100\\,\\%', 'S'],
+            ['?\\,\\%', PS],
+          ],
+          vyvod: `? = \\dfrac{${PS}\\cdot 100}{S} = ${it.procentTex}`,
+        },
+        {
+          vid: 'text',
+          text: `${dva ? `Переплата $${it.P}$` : 'Переплата'} — $${it.procentTex}\\,\\%$ от суммы кредита.`,
+        },
+      ];
     }),
   });
   return { shagi, itogi };
