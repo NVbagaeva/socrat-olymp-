@@ -85,6 +85,7 @@ function zadacha(p: Prototype, draft: Draft, plot: PlotFull, seed: string): Task
     solution,
     hints: draft.hints,
     tableModel,
+    ...(draft.zapros ? { zapros: draft.zapros } : {}),
     plot: { deck: plot.deck, who: plot.who, goal: plot.goal, year: plot.year },
     params: draft.params,
   };

@@ -13,6 +13,7 @@ import type { PlotFull } from '../plots';
 import type { Rng } from '../rng';
 import type { Row } from '../solver';
 import type {
+  Zapros13,
   ConditionTable,
   HintStep,
   PrototypeInfo,
@@ -50,6 +51,8 @@ export interface Draft {
   vopros?: Vopros13;
   /** Найденные нарушения: непустой список — задача отбрасывается. */
   problems?: string[];
+  /** «Таблица руками»: что спрашивают и про какой период (формула ответа в «Заполни таблицу»). */
+  zapros?: Zapros13;
 }
 
 export interface Prototype extends PrototypeInfo {
