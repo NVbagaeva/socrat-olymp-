@@ -1053,6 +1053,9 @@
   fill: var(--color-text-brand);
 }
 .z13-about-tip__title {
+  min-width: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
   margin: 0;
   font-size: 1.05em;
 }

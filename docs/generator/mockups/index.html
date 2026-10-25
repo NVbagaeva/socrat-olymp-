@@ -1,0 +1,89 @@
+<title>Макеты генератора</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+  /* Оглавление макетов: светлая палитра сайта «Будет на ЕГЭ», без тёмной темы —
+     макеты повторяют сайт, у которого одна светлая тема. */
+  :root {
+    --bg: #f5f9ff; --surface: #ffffff; --line: #e4ebf3; --text: #101728; --muted: #667389;
+    --blue: #1f5fd0; --blue-soft: #e8f0fc; --navy: #0e2350; --amber: #d97d0b; --amber-soft: #fef4e3;
+    --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color-scheme: light;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-block: 32px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); font-weight: 700; }
+  h1 { margin: 6px 0 8px; font-size: clamp(26px, 4vw, 36px); letter-spacing: -.02em; line-height: 1.15; text-wrap: balance; }
+  .lead { margin: 0; max-width: 64ch; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 28px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+  .card img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--line); background: var(--bg); }
+  .card__body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .card h2 { margin: 0; font-size: 19px; letter-spacing: -.01em; }
+  .tag { align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 4px 9px; }
+  .tag--rec { color: var(--blue); background: var(--blue-soft); }
+  .tag--alt { color: var(--amber); background: var(--amber-soft); }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .open { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border-radius: 12px; background: var(--blue); color: #fff; text-decoration: none; font-weight: 600; align-self: flex-start; }
+  .open:focus-visible, .states a:focus-visible { outline: 3px solid #9bc0f2; outline-offset: 2px; }
+  .states { display: flex; flex-wrap: wrap; gap: 8px; }
+  .states a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--text); text-decoration: none; font-size: 13px; background: var(--surface); }
+  .states a:hover { border-color: #9bc0f2; }
+  .note { margin-top: 28px; padding: 16px 18px; border-left: 3px solid var(--blue); background: var(--surface); border-radius: 0 12px 12px 0; }
+  .note h3 { margin: 0 0 6px; font-size: 16px; }
+  .note ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+  .note li + li { margin-top: 4px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Будет на ЕГЭ · Генератор · Этап 2</div>
+  <h1>Два макета нового генератора</h1>
+  <p class="lead">Оба макета собраны на №11 «Текстовые задачи» с реальными размерами и текстами сайта. Они кликаются: пресеты, состав, фильтры, «Сгенерировать», варианты, лист ученика и учителя, действия над задачей. На компьютере в каждом макете есть переключатель «Десктоп / Телефон», на телефоне макет сразу открывается в телефонной раскладке.</p>
+
+  <div class="grid">
+    <article class="card">
+      <img src="shots/a-desktop-student.jpg" alt="Макет А на десктопе: полоса фильтров сверху, состав слева, лист справа" width="1440" height="900">
+      <div class="card__body">
+        <span class="tag tag--rec">Выбран</span>
+        <h2>А · Фильтры + состав + предпросмотр</h2>
+        <p>Один экран. Сверху липкая полоса фильтров со сводкой и кнопкой «Сгенерировать». Слева пресеты и состав, справа живой лист. На телефоне фильтры сворачиваются в чипы и нижний лист, кнопка прибита к низу.</p>
+        <a class="open" href="a.html">Открыть макет А</a>
+        <div class="states">
+          <a href="a.html#done">После генерации</a>
+          <a href="a.html#done-teacher">Лист учителя</a>
+          <a href="a.html#done-more">Дополнительно</a>
+          <a href="a.html#phone-filters">Телефон: фильтры</a>
+          <a href="a.html#phone-done-task">Телефон: меню задачи</a>
+        </div>
+      </div>
+    </article>
+    <article class="card">
+      <img src="shots/b-desktop-2-how.jpg" alt="Макет Б на десктопе: шаг 2 из 3, источник, сложность и варианты" width="1440" height="900">
+      <div class="card__body">
+        <span class="tag tag--alt">Не выбран</span>
+        <h2>Б · Три шага</h2>
+        <p>Что → Как → Результат. Каждый шаг — один экран, прогресс сверху, на любой пройденный шаг можно вернуться. Справа на шагах 1–2 маленький лист.</p>
+        <a class="open" href="b.html">Открыть макет Б</a>
+        <div class="states">
+          <a href="b.html#step2">Шаг 2 · Как</a>
+          <a href="b.html#done">Шаг 3 · Результат</a>
+          <a href="b.html#phone">Телефон: шаг 1</a>
+          <a href="b.html#phone-done">Телефон: результат</a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <section class="note">
+    <h3>Что проверить</h3>
+    <ul>
+      <li>Нажмите «Сгенерировать», потом поменяйте сложность или число вариантов: лист обновится, а замены и порядок сохранятся.</li>
+      <li>Наведите на задачу на компьютере или нажмите «⋯» у задачи на телефоне: «Заменить», «Другой уровень», «Выше / Ниже», «Убрать».</li>
+      <li>Пресет «Один тип»: нажмите «+ Добавить» у нужной темы, и в листе останется только она.</li>
+      <li>Задачи в макете берутся из маленького пула, поэтому повторяются. В настоящем генераторе их даёт движок.</li>
+    </ul>
+  </section>
+</div>
