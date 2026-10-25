@@ -1,0 +1,42 @@
+name: 'Сервер: миграции'
+
+# Новые миграции из infra/lite/migrations.txt, список приглашённых
+# (секрет ALLOWED_EMAILS) и пароль роли budetege_admin для туннеля к
+# базе (секрет DB_ADMIN_PASSWORD). Уже применённые миграции
+# пропускаются; поменять список приглашённых — тоже эта кнопка.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Миграции и список приглашённых
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Миграции
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          ALLOWED_EMAILS: ${{ secrets.ALLOWED_EMAILS }}
+          DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
+        run: infra/lite/actions/migrate.sh
+
+      - name: Письмо о сбое
+        if: failure()
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
+        run: infra/lite/actions/notify.sh '«Миграции» не прошли'

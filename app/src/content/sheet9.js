@@ -117,6 +117,12 @@ export const files = {
   uchitelChb: 'zadanie-9-proizvodnaya-uchitel-chb',
 };
 
-const content = { head, title, runner, foot, labels, zapomni, ekran, files };
+/** Лист учителя в «Всё одним файлом» генератора: к подзаголовку. */
+export const resheniya = 'Решения';
+
+/** Заголовок страницы «Всё одним файлом». */
+export const vse = 'Листы ученика и учителя';
+
+const content = { head, title, runner, resheniya, vse, foot, labels, zapomni, ekran, files };
 
 export default content;

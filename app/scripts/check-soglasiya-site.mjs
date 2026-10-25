@@ -70,9 +70,12 @@ function serve() {
   });
 }
 
-/* Баннер cookie в снимках и шагах витрины не нужен: отмечаем прочитанным. */
-const SEEN = () =>
+/* Баннер cookie и окно приветствия в снимках и шагах витрины не нужны:
+   отмечаем прочитанными. */
+const SEEN = () => {
   localStorage.setItem('budetege:cookie-notice:v1', JSON.stringify({ seen: true }));
+  localStorage.setItem('budetege:onboarding:v1', JSON.stringify({ welcomeSeen: true }));
+};
 
 async function sitePart(browser, base) {
   for (const [put, title, toc] of [

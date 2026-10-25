@@ -123,6 +123,11 @@ export function RazdelyNav({ no, chi, razdely, current, vkladka, dop, niz }: Raz
   /* Кнопка «‹ Все разделы» в шапке открывает это же меню. */
   useEffect(() => {
     const onOpen = (event: Event) => {
+      /* Плашка стоит в обеих копиях строки вкладок (плитки и липкая
+         панель, TabsRow); меню открывает та, что сейчас видна. */
+      if (plashka.current?.closest('[inert]') != null) {
+        return;
+      }
       const from = (event as CustomEvent<HTMLElement | null>).detail;
       open(from instanceof HTMLElement ? from : null);
     };

@@ -1,0 +1,1146 @@
+/* Задание №13 «Экономические задачи».
+
+   Оболочка, лента вкладок и оболочка теории — общие слои; здесь только
+   своё: карточки теории по ролям, таблицы по периодам, разборы задач и
+   рисунки. Значения — только токены. План — docs/13-economics/02-design.md. */
+
+.z13-head {
+  margin-bottom: var(--space-6);
+}
+
+/* ── Глава и подраздел ─────────────────────────────────────────── */
+
+.z13-glava {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  min-width: 0;
+}
+.z13-glava__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z13-podrazdel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z13-podrazdel__title {
+  margin: 0;
+  font-size: 1.15em;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+
+/* ── Карточки по ролям ─────────────────────────────────────────── */
+
+.z13-card {
+  --z13-c: var(--color-primary);
+  --z13-c-soft: var(--color-surface-soft);
+  --z13-c-border: var(--color-border-info);
+  border: 1px solid var(--z13-c-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  overflow: hidden;
+  min-width: 0;
+}
+.z13-card--slovami {
+  --z13-c: var(--color-accent-text);
+  --z13-c-soft: var(--color-surface-warm);
+  --z13-c-border: var(--color-border-warm);
+}
+.z13-card--vazhno {
+  --z13-c: var(--color-accent-text);
+  --z13-c-soft: var(--color-accent-soft-surface);
+  --z13-c-border: var(--color-border-accent);
+}
+.z13-card--lovushka {
+  --z13-c: var(--color-error);
+  --z13-c-soft: var(--color-error-soft);
+  --z13-c-border: var(--color-error-soft);
+}
+.z13-card--bystro {
+  --z13-c: var(--color-success);
+  --z13-c-soft: var(--color-success-soft);
+  --z13-c-border: var(--color-success-soft);
+}
+.z13-card--priznak {
+  --z13-c: var(--color-z13-priznak);
+  --z13-c-soft: var(--color-z13-priznak-soft);
+  --z13-c-border: var(--color-z13-priznak-soft);
+}
+.z13-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--z13-c-soft);
+}
+.z13-card__yarlyk {
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--z13-c);
+}
+.z13-card__title {
+  margin: 0;
+  font-size: 1.05em;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.z13-card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.z13-card__body > p {
+  margin: 0;
+}
+.z13-card__spisok {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+.z13-card__pochemu {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+/* Длинная формула переносится по знакам «=», «+», «−» общим
+   FormulyPoShirine; своя прокрутка ему мешала бы заметить переполнение. */
+.z13-formula {
+  padding: var(--space-1) 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* ── Пример и шаги решения ─────────────────────────────────────── */
+
+.z13-primer {
+  margin: 0;
+}
+.z13-primer__uslovie {
+  margin: 0 0 var(--space-2);
+  font-weight: 500;
+}
+.z13-shagi {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.z13-shagi__title {
+  color: var(--color-text-brand);
+}
+.z13-otvet {
+  margin: var(--space-3) 0 0;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+/* ── Таблицы по периодам ───────────────────────────────────────── */
+
+.z13-blok {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z13-blok__title {
+  margin: 0;
+  font-size: 1em;
+  font-weight: 600;
+}
+.z13-tablitsa {
+  margin: 0;
+  min-width: 0;
+}
+.z13-tablitsa__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z13-tablitsa table {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.z13-tablitsa th,
+.z13-tablitsa td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+  white-space: nowrap;
+}
+.z13-tablitsa thead th {
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 0.85em;
+  white-space: normal;
+  min-width: 6em;
+}
+.z13-tablitsa tbody th {
+  position: sticky;
+  left: 0;
+  background: var(--color-surface);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.z13-tablitsa__itog th,
+.z13-tablitsa__itog td {
+  background: var(--color-surface-soft);
+  font-weight: 700;
+  border-bottom: 0;
+}
+.z13-tablitsa figcaption {
+  margin-top: var(--space-2);
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+}
+
+/* ── Пропорция ─────────────────────────────────────────────────── */
+
+.z13-proporciya__zapis {
+  display: inline-grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+  border: 1px solid var(--color-border-warm);
+  justify-self: start;
+}
+.z13-proporciya__stroka {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* ── Разобранная задача ────────────────────────────────────────── */
+
+.z13-primer,
+.z13-primer .solution-details-body,
+.z13-primer .solution-details-body > div {
+  min-width: 0;
+  max-width: 100%;
+}
+.z13-razbor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  min-width: 0;
+}
+.z13-razbor__title {
+  margin: 0;
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.z13-razbor__uslovie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  min-width: 0;
+}
+.z13-razbor__uslovie p {
+  margin: 0;
+}
+.z13-razbor__metka {
+  justify-self: start;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  border-radius: var(--radius-pill);
+  padding: 2px var(--space-3);
+}
+
+/* ── Признаки и «Определи тип» ─────────────────────────────────── */
+
+.z13-priznaki,
+.z13-opredeli {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.z13-opredeli {
+  padding-left: var(--space-5);
+  list-style: decimal;
+}
+.z13-priznaki li {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-z13-priznak-soft);
+  background: var(--color-surface);
+}
+.z13-priznaki p,
+.z13-opredeli p {
+  margin: 0;
+}
+.z13-priznaki__tip {
+  margin-top: var(--space-1) !important;
+  color: var(--color-text-secondary);
+}
+.z13-priznaki__tip b {
+  color: var(--color-z13-priznak);
+}
+.z13-delimost ul {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+}
+
+/* ── Рисунки ───────────────────────────────────────────────────── */
+
+.z13-risunok {
+  margin: 0;
+}
+.z13-risunok figcaption {
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+}
+.z13-ris-para {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+@media (min-width: 768px) {
+  .z13-ris-para {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z13-ris {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z13-ris__title {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--color-text-brand);
+}
+.z13-ris__podpis {
+  font-size: 11px;
+  fill: var(--color-text-secondary);
+}
+.z13-ris__os {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+.z13-ris__dolg {
+  fill: var(--color-primary);
+}
+.z13-ris__pereplata {
+  fill: var(--color-accent);
+}
+.z13-ris__vverh {
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+.z13-ris__vniz {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.z13-ris__tochka {
+  fill: var(--color-text-brand);
+}
+.z13-ris-legenda {
+  grid-column: 1 / -1;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  font-size: 0.9em;
+  color: var(--color-text-secondary);
+}
+.z13-ris-metka {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.z13-ris-metka--dolg {
+  background: var(--color-primary);
+}
+.z13-ris-metka--pereplata {
+  background: var(--color-accent);
+}
+
+/* ── Опорные задачи: список блоков ─────────────────────────────── */
+
+.z13-gruppy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+}
+.z13-gruppa {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.z13-gruppa__title {
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+.z13-karty {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z13-karty > li {
+  display: flex;
+  min-width: 0;
+}
+.z13-kart {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  width: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.z13-kart:hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-sm);
+}
+.z13-kart__no,
+.z13-ptask__no {
+  display: inline-grid;
+  place-items: center;
+  align-self: start;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+  color: var(--color-text-brand);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+/* Текст — вся ширина справа от номера; кольцо и кнопка — нижней
+   строкой, чтобы длинные названия не упирались в кольцо. */
+.z13-kart__text {
+  grid-column: 2 / 4;
+  display: grid;
+  align-content: start;
+  align-self: start;
+  gap: var(--space-1);
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+.z13-kart__title {
+  font-weight: 600;
+  line-height: var(--lh-label);
+}
+.z13-kart__lead {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+}
+.z13-kart__count {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z13-kart__btn {
+  justify-self: end;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: var(--fs-label);
+  font-weight: 600;
+}
+.z13-kart:hover .z13-kart__btn {
+  background: var(--color-surface-soft);
+}
+
+.z13-kolco {
+  grid-column: 1 / 3;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+}
+.z13-kolco svg {
+  width: 56px;
+  height: 56px;
+}
+.z13-kolco__track,
+.z13-kolco__fill {
+  fill: none;
+  stroke-width: 5;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+.z13-kolco__track {
+  stroke: var(--color-track);
+}
+.z13-kolco__fill {
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+}
+.z13-kolco.is-done .z13-kolco__fill {
+  stroke: var(--color-success);
+}
+.z13-kolco__c {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.z13-kolco .z13-kolco__check {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--color-success);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 640px) {
+  .z13-kart {
+    padding: var(--space-4);
+    gap: var(--space-2) var(--space-3);
+  }
+}
+
+/* ── Опорные задачи: экран задачи ──────────────────────────────── */
+
+.z13-prep__back {
+  display: inline-block;
+  margin: var(--space-4) 0 0;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z13-prep__back:hover {
+  text-decoration: underline;
+}
+.z13-ptask .ptask__head {
+  align-items: center;
+}
+.z13-ptask .ptask__question {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* Карточка задачи на узком экране — одна колонка не шире экрана:
+   широкая таблица условия прокручивается внутри себя. */
+@container (max-width: 719.98px) {
+  .z13-ptask .ptask__card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.z13-ptask .ptask__text {
+  min-width: 0;
+}
+.z13-ptask__tab {
+  justify-self: stretch;
+  min-width: 0;
+}
+.z13-metki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.z13-metka {
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+
+.z13-oreshenie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z13-oreshenie__title {
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.z13-oreshenie .z13-shagi > li {
+  min-width: 0;
+}
+
+.z13-memo {
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z13-memo__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.z13-memo__list {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+  line-height: var(--lh-lg);
+  overflow-x: auto;
+}
+
+/* ── Тренажёр: выбор ───────────────────────────────────────────── */
+
+.z13-tr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  max-width: 880px;
+}
+.z13-tr__lead {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.z13-tr__blok {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.z13-tr__h {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+.z13-tr__h4 {
+  margin-top: var(--space-3);
+  font-weight: 600;
+}
+.z13-tr__knopki {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: var(--space-2);
+}
+.z13-tr__knopki--chisla {
+  grid-template-columns: repeat(3, minmax(0, 96px));
+}
+.z13-tr__knopka {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.z13-tr__knopki--chisla .z13-tr__knopka {
+  text-align: center;
+}
+.z13-tr__knopka:hover {
+  border-color: var(--color-accent-soft);
+}
+.z13-tr__knopka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.z13-tr__knopka.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.z13-tr__knopka-label {
+  font-weight: 600;
+}
+.z13-tr__knopka-note {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z13-tr__dop {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z13-tr__dop > summary {
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  cursor: pointer;
+}
+.z13-tr__dop-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-4);
+}
+.z13-tr__oshibki {
+  margin-top: var(--space-3);
+}
+.z13-tr__pusto {
+  color: var(--color-error);
+}
+
+/* ── Тренажёр: задача ──────────────────────────────────────────── */
+
+.z13-resh {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  max-width: 880px;
+}
+.z13-resh__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.z13-resh__bar {
+  flex: 1 0 100%;
+}
+.z13-resh__uslovie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-2);
+}
+.z13-resh__text {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z13-resh__otvet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.z13-resh__input {
+  flex: 1 1 200px;
+  max-width: 320px;
+}
+.z13-resh__dop,
+.z13-resh__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+.z13-resh__links a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Оформление: схема, первая строка таблицы, шаги решения. */
+.z13-of {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.z13-of__shag {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z13-of__no {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z13-of__q {
+  font-family: var(--font-serif);
+  line-height: var(--lh-lg);
+}
+.z13-of__note {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+}
+.z13-of__done {
+  padding: var(--space-2) var(--space-4);
+  border-left: 3px solid var(--color-success);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-lg);
+}
+.z13-of__done b {
+  color: var(--color-text);
+}
+.z13-of__comment {
+  color: var(--color-success);
+}
+.z13-of__stroka {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+  gap: var(--space-3);
+}
+.z13-of__label {
+  grid-column: 1 / -1;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.z13-of__kletka {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.z13-of__title {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z13-of__dano {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.z13-of__dano.is-right {
+  background: var(--color-success-soft);
+}
+.z13-of__vvod {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+}
+.z13-of__pokazat {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+
+/* ── Онлайн-набор по QR ────────────────────────────────────────── */
+
+.z13-nabor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  max-width: 880px;
+}
+.z13-nabor__spisok {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z13-nabor__karta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-2);
+}
+.z13-nabor__no {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-text);
+  font-weight: 700;
+}
+.z13-nabor__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z13-nabor__pusto {
+  color: var(--color-text-secondary);
+}
+@media (max-width: 640px) {
+  .z13-nabor__karta {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-4);
+  }
+}
+
+/* ── Для репетиторов ───────────────────────────────────────────── */
+/* Вёрстка — общие слои вкладки репетиторов №11 (z11-rep); здесь код
+   серии, признак типа и карточки. */
+
+.z13-rep__kod,
+.z13-rep__kartochki {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.z13-rep__kod-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.z13-rep__kod-head .z11-card__title {
+  margin: 0;
+}
+.z13-rep__kod-text {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--color-text-brand);
+}
+.z13-rep__kod-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z13-rep__kod-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.z13-rep__kod-form .input {
+  flex: 1 1 10rem;
+  min-width: 0;
+  max-width: 14rem;
+  text-transform: uppercase;
+}
+.z13-rep__oshibka {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+}
+.z13-rep__priznak {
+  margin: 0;
+}
+.z13-rep__kartochki .z11-card__title {
+  margin: 0;
+}
+.z13-rep__kartochki .btn {
+  justify-self: start;
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.z13-rep .z11-urok-plan a {
+  color: var(--color-text-brand);
+}
+/* Четвёртая часть урока — «Определи тип». */
+.z13-rep .z11-urok__polosa .is-t {
+  background: var(--color-accent-text);
+}
+
+/* ── О задании ─────────────────────────────────────────────────── */
+/* Колонки и «С чего начать» — общие слои «О задании» №11 (z11-about);
+   здесь карточки типов, таблица признаков и строки-пометки. */
+
+.z13-about__edinicy {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft-surface);
+  border: 1px solid var(--color-border-accent);
+}
+.z13-about-tipy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z13-about-tip {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+/* Раскрытый пример — на всю ширину сетки: таблицы и решение не теснятся. */
+.z13-about-tip:has(.z13-about-tip__primer.open) {
+  grid-column: 1 / -1;
+}
+.z13-about-tip__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z13-about-tip__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 700;
+}
+.z13-about-tip__ikonka {
+  flex: none;
+  width: 2rem;
+  height: 1.5rem;
+  fill: var(--color-text-brand);
+}
+.z13-about-tip__title {
+  margin: 0;
+  font-size: 1.05em;
+}
+.z13-about-tip__priznak {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z13-about-tip__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.z13-about-tip__links a {
+  color: var(--color-text-brand);
+  font-weight: 600;
+}
+.z13-about-tip__primer {
+  min-width: 0;
+}
+.z13-about-priznaki {
+  overflow-x: auto;
+  margin-top: var(--space-3);
+}
+.z13-about-priznaki table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+}
+.z13-about-priznaki th,
+.z13-about-priznaki td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-info);
+  text-align: left;
+  vertical-align: top;
+}
+.z13-about-priznaki thead th {
+  background: var(--color-surface-soft);
+}
+.z13-about-priznaki tbody th {
+  white-space: nowrap;
+  color: var(--color-text-brand);
+}
+.z13-about__skoro {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* Широкая таблица признаков прокручивается в своей рамке и не
+   распирает колонку на телефоне. */
+.z13-about {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1280px) {
+  .z13-about {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+.z13-about .z11-about__main > section {
+  min-width: 0;
+}
+.z13-about .z11-about__lead a,
+.z13-about .z11-start__step-title {
+  color: var(--color-text-brand);
+}
+.z13-about .z11-start__step-title {
+  text-decoration: none;
+}
+/* Телефон: строка таблицы признаков — карточка: тип, что видим, почему. */
+@media (max-width: 40rem) {
+  .z13-about-priznaki table {
+    min-width: 0;
+  }
+  .z13-about-priznaki thead {
+    display: none;
+  }
+  .z13-about-priznaki tbody {
+    display: grid;
+    gap: var(--space-3);
+  }
+  .z13-about-priznaki tr {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border-info);
+    border-radius: var(--radius-lg);
+  }
+  .z13-about-priznaki th,
+  .z13-about-priznaki td {
+    padding: 0;
+    border: 0;
+  }
+  .z13-about-priznaki tbody th {
+    order: -1;
+    white-space: normal;
+  }
+  .z13-about-priznaki tbody td:last-child {
+    color: var(--color-text-secondary);
+  }
+}

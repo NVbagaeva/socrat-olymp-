@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Генератор · макет Б</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="mockup.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+</head>
+<body data-mockup="b">
+<div class="mk-bar">
+  <a href="index.html">← <span class="mk-bar__long">Все </span>макеты</a>
+  <b>Макет Б<span class="mk-bar__long"> · Три шага</span></b>
+  <span class="mk-note">Макет без логики: задачи берутся из маленького пула, чтобы лист честно менялся.</span>
+  <span class="mk-bar__sp"></span>
+  <span class="mk-seg mk-bar__view" role="group" aria-label="Устройство"><button data-view-mk="desktop" aria-pressed="true">Десктоп</button><button data-view-mk="phone" aria-pressed="false">Телефон</button></span>
+  <a href="a.html">Макет А →</a>
+</div>
+<div class="stage"><div class="device" id="device"><div class="screen" id="screen">
+<div class="site">
+  <aside class="side" aria-label="Задания ЕГЭ">
+    <div class="side__logo"><i></i>Будет на ЕГЭ</div>
+    <div class="side__h">Задания ЕГЭ</div><div class="side__sub">Профильная математика</div>
+    <div class="side__lbl">Часть 1</div>
+    <a href="#"><span>01</span>Планиметрия</a><a href="#"><span>02</span>Векторы</a><a href="#"><span>03</span>Стереометрия</a>
+    <a href="#"><span>04</span>Вероятность: простая</a><a href="#"><span>05</span>Вероятность: сложная</a><a href="#"><span>06</span>Случайные величины</a>
+    <a href="#"><span>07</span>Уравнения</a><a href="#"><span>08</span>Вычисления</a><a href="#"><span>09</span>Производная</a>
+    <a href="#"><span>10</span>Физический смысл</a><a href="#" class="on"><span>11</span>Текстовые задачи</a><a href="#"><span>12</span>Графики функций</a>
+    <a href="#"><span>13</span>Финансовая грамотность</a>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <span class="top__logo"><i></i>Будет на ЕГЭ</span>
+      <a href="#">Главная</a><a href="#" class="on">Задания</a><a href="#">Статистика</a><a href="#">Мои материалы</a><a href="#">Для учителя</a>
+      <span class="top__sp"></span>
+      <span class="top__search">Поиск по заданиям, темам, формулам…</span>
+      <span class="top__me"><i>НВ</i><span>Наталья Витальевна<small>Преподаватель</small></span></span>
+    </header>
+    <div class="page">
+      <div class="head">
+        <div class="head__crumbs">Главная / Банк заданий / №11</div>
+        <div class="head__row"><h1>Текстовые задачи</h1><span class="chip-lvl">Профильный уровень</span></div>
+      </div>
+      <nav class="tabs" aria-label="Вкладки раздела">
+        <button>О задании</button><button>Теория</button><button>Опорные задачи</button><button>Тренажёр</button><button class="on" aria-current="page">Генератор</button><button>Для репетиторов</button>
+      </nav>
+      <section class="gen" aria-label="Генератор">
+        <nav class="wiz" id="wiz" aria-label="Шаги"></nav>
+        <div class="wstage" id="wstage">
+          <div class="wpane" id="wpane"></div>
+          <aside class="mini" id="mini" aria-label="Предпросмотр"></aside>
+        </div>
+        <div class="wfoot" id="wfoot"></div>
+      </section>
+    </div>
+    <nav class="bnav" aria-label="Разделы"><a href="#"><i></i>Главная</a><a href="#" class="on"><i></i>Банк заданий</a><a href="#"><i></i>Статистика</a><a href="#"><i></i>Ещё</a></nav>
+  </div>
+</div>
+</div><div class="overlay" id="overlay"></div></div></div>
+<script src="data.js"></script>
+<script src="mockup.js"></script>
+</body>
+</html>

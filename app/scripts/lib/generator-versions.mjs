@@ -35,7 +35,9 @@ export const GENERATOR_SOURCES = {
   8: ['lib/vychisleniya', 'content/sheet8.js'],
   9: ['lib/proizvodnaya', 'content/sheet9.js', 'lib/sheet/answers9.js'],
   11: ['lib/zadanie11'],
+  13: ['lib/zadanie13', 'content/generator13.ts'],
   7: ['lib/zadanie7', 'content/teoriya7.ts', 'content/zadanie7.ts'],
+  6: ['lib/zadanie6', 'content/teoriya6.ts', 'content/zadanie6.ts', 'content/uroki6.ts'],
   1: ['lib/planimetriya', 'lib/sheet/sheet.js', 'content/repetitory1.ts', 'content/teoriya1.ts'],
 };
 

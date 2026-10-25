@@ -31,6 +31,11 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 import { APP, requireSrc } from './lib/load-ts.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Баннер cookie и окно «Впервые здесь?» в этой проверке не нужны: окно
+   закрывает страницу целиком. */
+bezBanneraCookieVsyudu(chromium);
 
 /* Баннер cookie перекрывает кнопки внизу экрана — в проверке он не нужен. */
 bezBanneraCookieVsyudu(chromium);
@@ -181,7 +186,9 @@ for (const size of SIZES) {
       const where = (what) => `${size.name}, ${url}: ${what}`;
       await page.goto(BASE + url, { waitUntil: 'networkidle' });
 
-      const tabs = await page.locator('.topic-tabs [role=tab]').allInnerTexts();
+      const tabs = await page
+        .locator('.topic-tabs-row:not([inert]) .topic-tabs [role=tab]')
+        .allInnerTexts();
       check(
         tabs.map((t) => t.trim()).join('|') === VKLADKI.map((v) => v[1]).join('|'),
         where(`вкладки: ${tabs.join(', ')}`),
@@ -198,13 +205,13 @@ for (const size of SIZES) {
         continue;
       }
 
-      /* Лента прилипает. */
+      /* Над страницей появляется липкая панель вкладок (TabsRow). */
       await page.evaluate(() => window.scrollTo(0, 900));
       await page.waitForTimeout(300);
       const stuck = await page.evaluate(() => {
-        const row = document.querySelector('.topic-tabs-row');
+        const row = document.querySelector('.topic-tabs-row--panel');
         return (
-          row !== null && row.classList.contains('is-stuck') && row.getBoundingClientRect().top <= 1
+          row !== null && row.classList.contains('is-shown') && row.getBoundingClientRect().top <= 1
         );
       });
       check(stuck, where('лента вкладок не прилипла'));
@@ -230,7 +237,7 @@ for (const size of SIZES) {
       check(plate.height >= 44, where(`высота плашки ${plate.height} < 44`));
       check(plate.text.includes(`Задание №${no}`), where('на плашке нет номера задания'));
 
-      await page.locator('.razdely-plashka').click();
+      await page.locator('.topic-tabs-row:not([inert]) .razdely-plashka').click();
       await page.waitForSelector('.razdely-menu');
       await page.waitForTimeout(400);
       const menu = await page.evaluate(() => {
@@ -263,7 +270,7 @@ for (const size of SIZES) {
     /* Переход в другое задание сохраняет вкладку. */
     const drugoe = no === '3' ? '15' : '3';
     await page.goto(BASE + `/zadaniya/${no}/teoriya/`, { waitUntil: 'networkidle' });
-    await page.locator('.razdely-plashka').click();
+    await page.locator('.topic-tabs-row:not([inert]) .razdely-plashka').click();
     await page.waitForSelector('.razdely-menu');
     await page.locator('.razdely-menu a.razdel-karta').click();
     await page.waitForURL(`**/zadaniya/${drugoe}/teoriya/`, { timeout: 5000 }).catch(() => {});

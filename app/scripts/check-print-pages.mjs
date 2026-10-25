@@ -57,6 +57,62 @@ const SHEETS = [
   ['№8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check'],
   ['№9', '/zadaniya/9/pechat/', 'g=I,II,III&n=9&seed=print-check&r=2'],
   ['№2', '/zadaniya/2/pechat/', 's=A1,A6,B6,C2&n=10&seed=print-check'],
+  /* №2 на общем генераторе: ключи позиций, QR-код, вид работы и дата. */
+  [
+    '№2 из генератора',
+    '/zadaniya/2/pechat/',
+    'ps=2&s=A1:2,B3:2,B9:1,C1:1&seed=print-check&qr=1&d=2026-10-24',
+  ],
+  /* №12 на общем генераторе: подтема без подписей и все типы с «Запомни» и примером. */
+  [
+    '№12 из генератора',
+    '/zadaniya/12/quadratic/pechat/',
+    'ps=2&s=12Q.A:2,12Q.B:2,12Q.E:2&l=lucky&seed=print-check&qr=1&d=2026-10-24',
+  ],
+  [
+    '№12 все типы',
+    '/zadaniya/12/generator/pechat/',
+    'ps=2&s=12.A:1,12Q.B:1,12R.A:1,12S.A:1,12E.A:1,12L.A:1,12T.A:1&seed=print-check&th=1&pr=1',
+  ],
+  /* №9 на общем генераторе: «Запомни», пример, рисунки учителя, QR-код, урок серии. */
+  [
+    '№9 из генератора',
+    '/zadaniya/9/pechat/',
+    'ps=2&s=9.1.1:1,9.2.1:1,9.4.1:2,9.5.4:1&seed=print-check&tr=1&r=1&u=1&qr=1&d=2026-10-24',
+  ],
+  /* №8 на общем генераторе: ключи позиций, уровень, QR-код и дата. */
+  [
+    '№8 из генератора',
+    '/zadaniya/8/pechat/',
+    'ps=2&s=8.A:2,8.H:2,8.M:2,8.T:1,8.W:1&l=advanced&seed=print-check&qr=1&d=2026-10-24',
+  ],
+  /* №11 с «Дополнительно» общего генератора: рамка теории, примеры,
+     QR-код, вид работы и дата в шапке. */
+  [
+    '№11 с «Дополнительно»',
+    '/zadaniya/11/pechat/',
+    'm=o&i=n&ps=2&s=VD-01:1,VD-02:2,VD-05:1&seed=print-check&tr=1&pr=2&qr=1&vr=dz&d=2026-10-24',
+  ],
+  /* №1 на общем генераторе: чертежи, рамка «Повторяем» с примером, QR. */
+  [
+    '№1 с «Дополнительно»',
+    '/zadaniya/1/pechat/',
+    'm=v&i=m&ps=2&s=p01:1,p13:1,p24:1,p41:1&seed=print-check&tr=1&pr=1&qr=1',
+  ],
+  /* №13: «Домашка» компактным листом и зачёт с полями для оформления. */
+  [
+    '№13',
+    '/zadaniya/13/pechat/',
+    's=A:2,B:1,C:2,D:1&l=base&i=mix&h=ramka&f=compact&v=1&seed=print-check',
+  ],
+  [
+    '№13 зачёт',
+    '/zadaniya/13/pechat/',
+    's=A:5,B:5,C:5,D:5,T:10&l=all&i=mix&h=net&f=full&v=1&zc=1&seed=print-check',
+  ],
+  /* №13, «Для репетиторов»: лист урока 6 (опорные, банк, новые, «Определи тип») и карточки. */
+  ['№13 урок', '/zadaniya/13/pechat/', 's=&l=all&i=mix&h=net&f=compact&v=1&u=5&seed=print-check'],
+  ['№13 карточки', '/zadaniya/13/pechat/kartochki/', 'seed=print-check', [['карточки', '']]],
   /* Справочник №1: один лист, с примерами и без; в две колонки. */
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=1', [['с примерами', '']]],
   ['№1 справочник', '/zadaniya/1/pechat/spravochnik/', 'primery=0', [['без примеров', '']]],

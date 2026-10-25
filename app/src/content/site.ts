@@ -5,6 +5,7 @@
  */
 
 import { legalDocs } from '@/content/legal/documents';
+import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 
 export interface SiteLink {
@@ -12,31 +13,47 @@ export interface SiteLink {
   href: string;
 }
 
+/** Внешняя ссылка: открывается в новой вкладке. */
+export interface ExternalLink extends SiteLink {
+  external: true;
+}
+
 export const site = {
   brand: 'Будет на ЕГЭ',
 
-  /** Первый пункт — отдельная страница; остальные пока якоря лендинга. */
+  /**
+   * Пункты меню. Каждый ведёт на работающую страницу или блок.
+   * «Тарифы» сняты: раздела нет, платного ничего нет. «Учителям» ведёт
+   * на блок «Мы взяли на себя то, что обычно забирает ваш вечер» —
+   * он про самостоятельные, домашние и проверку, то есть для учителя.
+   */
   nav: [
     { label: 'Об авторе', href: '/about/' },
     { label: 'Банк заданий', href: tasksPage.href },
-    { label: 'Учителям', href: '/#teachers' },
-    /* Раздела с тарифами на странице пока нет — ссылка ждёт его. */
-    { label: 'Тарифы', href: '#' },
+    { label: 'Как пользоваться', href: HOWTO_HREF },
+    { label: 'Учителям', href: '/#how' },
   ] satisfies SiteLink[],
 
+  /* «Войти» здесь больше нет: вход живёт в components/auth/AuthWidget и
+     появляется только при включённом флаге (lib/auth/config.ts).
+     «Начать бесплатно» без входа ведёт в банк заданий — платного ничего
+     нет; со входом — на регистрацию. */
   headerActions: {
-    login: { label: 'Войти', href: '#' } satisfies SiteLink,
-    signup: { label: 'Начать бесплатно', href: '#' } satisfies SiteLink,
+    signup: { label: 'Начать бесплатно', href: tasksPage.href } satisfies SiteLink,
   },
 
   footer: {
     copyright: '© 2026 Будет на ЕГЭ',
+    /* Правовые документы — свои страницы сайта; связь — через
+       Telegram-канал платформы, тот же, что на печатных листах, он
+       открывается в новой вкладке. */
     links: [
       { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
       { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
       { label: 'Оферта', href: '#' },
       { label: 'Контакты', href: '#' },
-    ] satisfies SiteLink[],
+      { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
+    ] satisfies (SiteLink | ExternalLink)[],
     /** Строка под копирайтом; ФИО — из src/content/legal/operator.json. */
     operatorLabel: 'Оператор персональных данных:',
   },

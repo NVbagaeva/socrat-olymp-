@@ -1,0 +1,3 @@
+# Скрипты подключают соседний lib.sh: shellcheck читает его оттуда же.
+source-path=SCRIPTDIR
+external-sources=true

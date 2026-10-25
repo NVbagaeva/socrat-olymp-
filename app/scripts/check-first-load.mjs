@@ -18,6 +18,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
@@ -41,10 +42,13 @@ const kb = (n) => Math.round(n / 1024);
 
 /* ── 1. Бюджет ─────────────────────────────────────────────── */
 /* Порог — текущее значение с запасом ≈ 20%: выросло сильнее — разбираться. */
+/* Скрипты — 205 КБ: в первую загрузку любой страницы входит карта ленивых
+   чанков webpack, она растёт с каждым новым разделом сайта (№13: +66 байт
+   при запасе ~270 байт). Код самих страниц №12 при этом не менялся. */
 const BUDGET = [
-  { page: 'zadaniya/12/rational', htmlGz: 200 * 1024, scriptsGz: 200 * 1024 },
-  { page: 'zadaniya/12/quadratic', htmlGz: 260 * 1024, scriptsGz: 200 * 1024 },
-  { page: 'zadaniya/12/linear', htmlGz: 60 * 1024, scriptsGz: 200 * 1024 },
+  { page: 'zadaniya/12/rational', htmlGz: 200 * 1024, scriptsGz: 205 * 1024 },
+  { page: 'zadaniya/12/quadratic', htmlGz: 260 * 1024, scriptsGz: 205 * 1024 },
+  { page: 'zadaniya/12/linear', htmlGz: 60 * 1024, scriptsGz: 205 * 1024 },
 ];
 /* Признаки тяжёлого кода внутри скриптов первой загрузки. */
 const HEAVY = [
@@ -129,6 +133,7 @@ const context = await browser.newContext({
   hasTouch: true,
   isMobile: true,
 });
+await welcomeSeen(context);
 const page = await context.newPage();
 /* Код страницы «едет по сети»: каждый скрипт задержан на 2,5 с. */
 await page.route('**/_next/static/chunks/**', async (route) => {
@@ -173,6 +178,7 @@ const context2 = await browser.newContext({
   hasTouch: true,
   isMobile: true,
 });
+await welcomeSeen(context2);
 const page2 = await context2.newPage();
 await page2.route('**/_next/static/chunks/**', async (route) => {
   await new Promise((resolve) => setTimeout(resolve, 2500));

@@ -1,0 +1,7 @@
+#!/bin/sh
+# docker compose набора с файлами окружения сервера:
+#   bin/dc ps | bin/dc logs auth --tail 50 | bin/dc restart rest
+set -eu
+. "$(dirname "$0")/lib.sh"
+load_env
+dc "$@"

@@ -1,0 +1,94 @@
+name: Auth
+
+# Вход, регистрация и кабинет — в браузере, с моком службы входа.
+#
+# Обычная проверка (check.yml) собирает сайт без входа: флаг
+# NEXT_PUBLIC_AUTH_ENABLED там не передаётся, и в той сборке кнопки
+# «Войти» быть не должно — это проверяет шаг test:auth-disabled в
+# check.yml. Здесь сайт собирается со входом и ненастоящими адресом
+# и ключом проекта (их видит только мок внутри Playwright), а потом
+# Chromium проходит сценарии scripts/check-auth.mjs: регистрация по
+# списку и чужой почтой, письмо и подтверждение, вход, кабинет, смена
+# роли, выход, сброс пароля, удаление аккаунта, телефон 390 px.
+# Секреты не нужны и не используются; сеть наружу — тоже.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auth-${{ github.ref }}
+  cancel-in-progress: true
+
+# Как в check.yml: сборка не публикуется, правовые документы собираются
+# черновиком с незаполненными [ФИО], [ПОЧТА], [ДАТА] (docs/legal/README.md).
+env:
+  LEGAL_DRAFT: '1'
+
+jobs:
+  auth:
+    name: Вход и кабинет в браузере
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v5
+
+      - name: Установить pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: app/package.json
+
+      - name: Установить Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Поставить зависимости
+        working-directory: app
+        run: pnpm install --frozen-lockfile
+
+      # Адрес и ключ — ненастоящие: все запросы к ним перехватывает мок.
+      - name: Собрать сайт со входом
+        working-directory: app
+        env:
+          NEXT_PUBLIC_AUTH_ENABLED: '1'
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key # не секрет: ключ мока
+        run: pnpm build
+
+      - name: Поставить Chromium
+        working-directory: app
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Проверить вход, регистрацию и кабинет
+        working-directory: app
+        run: pnpm test:auth snimki-auth
+
+      # Бюджет первой загрузки — и со включённым входом: SDK грузится
+      # отдельным куском только на страницах входа и кабинета.
+      - name: Проверить первую загрузку со включённым входом
+        working-directory: app
+        run: pnpm test:first-load
+
+      - name: Проверить, что в сборку не попали ключи сервиса
+        working-directory: app
+        run: pnpm test:secrets
+
+      - name: Проверить, что ссылки кончаются на «/»
+        working-directory: app
+        run: pnpm test:trailing-slash
+
+      - name: Сохранить снимки экранов входа
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snimki-auth
+          path: app/snimki-auth
+          if-no-files-found: ignore

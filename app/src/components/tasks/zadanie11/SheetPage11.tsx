@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { PECHAT_11 } from '@/content/repetitory11';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery11, sheetSpec11, sobratList, type VidLista } from '@/lib/zadanie11/sheet11';
@@ -56,15 +57,23 @@ export function SheetPage11({ vid, bank }: { vid: VidLista; bank: UslovieBanka[]
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const built = sheetSpec11(params, sobratList(params, bank), vid);
-    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
-    const kit = checkKitSheet(query, '11', vid === 'uchenik' ? 'student' : 'teacher', built);
-    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
-    import('@/lib/sheet/paginate.js').then(() => {
-      if (alive) {
-        setWarning(kit.warning);
-        setSpec(specJson(html));
-      }
+    /* QR-код («Дополнительно») ведёт на лист ученика того же набора. */
+    const qr =
+      params.dop?.qr === true
+        ? qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+        : Promise.resolve(undefined);
+    void qr.then((svg) => {
+      if (!alive) return;
+      const built = sheetSpec11(params, sobratList(params, bank), vid, svg);
+      /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+      const kit = checkKitSheet(query, '11', vid === 'uchenik' ? 'student' : 'teacher', built);
+      const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+      import('@/lib/sheet/paginate.js').then(() => {
+        if (alive) {
+          setWarning(kit.warning);
+          setSpec(specJson(html));
+        }
+      });
     });
     return () => {
       alive = false;

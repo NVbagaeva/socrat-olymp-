@@ -1,0 +1,373 @@
+/* Заставка первого визита и окно приветствия в её оформлении.
+   Макеты: docs/mockups/intro/ (кадры 1–5). Цвета — семантические
+   токены сайта; новых цветов нет. */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 56;
+  overflow: hidden;
+  outline: none;
+  color: var(--color-text);
+}
+.intro--contained {
+  position: absolute;
+}
+
+/* Фон — сама страница, затемнённая и размытая, как под окнами сайта. */
+.intro__veil {
+  position: absolute;
+  inset: 0;
+  /* Темнее и сильнее размыто, чем у обычных окон: на этом фоне стекло
+     светится, а не теряется (кадры 1–5). */
+  background: color-mix(in srgb, var(--color-surface-brand) 35%, transparent);
+  backdrop-filter: blur(15px) saturate(1.1);
+  -webkit-backdrop-filter: blur(15px) saturate(1.1);
+  animation: intro-fade 400ms var(--ease) both;
+}
+
+.intro__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Рамка слоёв цветка: положение и масштаб задаёт flower.ts. */
+.intro__stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+  /* Сложение света (блик, сердцевина) — только с лепестками внутри рамки:
+     смешивание с самой страницей ломает размытие фона (backdrop-filter). */
+  isolation: isolate;
+  /* Ореол стекла: тёплый вокруг рёбер и голубой пошире (как bloom на кадрах). */
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--color-accent) 55%, transparent))
+    drop-shadow(0 0 48px color-mix(in srgb, var(--color-accent-soft) 60%, transparent));
+}
+.intro__floor {
+  position: absolute;
+  opacity: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--color-surface) 95%, transparent),
+      transparent 18%
+    ),
+    linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--color-surface) 75%, transparent) 50%,
+        transparent
+      )
+      center / 100% 3px no-repeat,
+    radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--color-accent-soft) 70%, transparent),
+      transparent
+    );
+  mix-blend-mode: plus-lighter;
+}
+.intro__layer {
+  position: absolute;
+  max-width: none;
+  user-select: none;
+  will-change: transform, opacity;
+}
+/* Блик: светлая полоса по маске лепестков, проходит слева направо. */
+.intro__glint {
+  position: absolute;
+  opacity: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 42%,
+    color-mix(in srgb, var(--color-surface) 45%, transparent) 50%,
+    transparent 58%
+  );
+  background-size: 300% 100%;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mix-blend-mode: plus-lighter;
+}
+/* Свет сердцевины и вспышка стыка — тёплый акцент, белый центр. */
+.intro__core,
+.intro__flash {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: plus-lighter;
+  background: radial-gradient(
+    circle,
+    var(--color-surface) 0%,
+    color-mix(in srgb, var(--color-accent) 70%, var(--color-surface)) 20%,
+    color-mix(in srgb, var(--color-accent) 35%, transparent) 42%,
+    transparent 70%
+  );
+}
+.intro__flash {
+  left: 0;
+  top: 0;
+  mix-blend-mode: normal;
+}
+/* Мягкое сияние, из которого проявляется октаэдр: белый и голубой. */
+.intro__halo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-surface) 85%, transparent) 0%,
+    color-mix(in srgb, var(--color-accent-soft) 45%, transparent) 30%,
+    transparent 68%
+  );
+}
+
+.intro__skip {
+  position: absolute;
+  top: var(--space-6);
+  right: var(--space-6);
+  z-index: 2;
+  min-height: 48px;
+  padding: 0 var(--space-6);
+  border: 1.5px solid color-mix(in srgb, var(--color-text-inverse) 80%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-text-inverse) 8%, transparent);
+  color: var(--color-text-inverse);
+  font-size: 17px;
+  font-weight: 500;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 200ms var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.intro__skip[data-shown] {
+  visibility: visible;
+  opacity: 1;
+}
+.intro__skip:hover {
+  background: color-mix(in srgb, var(--color-text-inverse) 18%, transparent);
+}
+.intro__skip:focus-visible {
+  outline: 2px solid var(--color-text-inverse);
+  outline-offset: 3px;
+}
+
+/* ── Окно ──────────────────────────────────────────────────────── */
+
+.intro-card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(24px, 8.5vh, 96px);
+  margin-inline: auto;
+  z-index: 1;
+  width: min(880px, calc(100% - 48px));
+  padding: var(--space-10) var(--space-12) var(--space-8);
+  border: 1px solid color-mix(in srgb, var(--color-surface) 75%, transparent);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--color-surface-info) 84%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow:
+    0 30px 80px color-mix(in srgb, var(--color-surface-inverse) 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 80%, transparent);
+  text-align: center;
+  outline: none;
+  transform: translateY(24px);
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 600ms var(--ease),
+    transform 700ms var(--ease),
+    visibility 0s linear 700ms;
+}
+.intro-card[data-shown] {
+  transform: none;
+  visibility: visible;
+  opacity: 1;
+  transition:
+    opacity 600ms var(--ease),
+    transform 700ms var(--ease);
+}
+
+.intro-card__close {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+}
+.intro-card__close:hover {
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  color: var(--color-text);
+}
+.intro-card__close svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.intro-card__title {
+  margin: 0 var(--space-10);
+  color: var(--color-text-brand);
+  font-size: clamp(28px, 2.4vw + 4px, 38px);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.intro-card__lead {
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: 19px;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+.intro-card__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+  margin: var(--space-8) var(--space-4) 0;
+}
+.intro-card__go {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  padding: 0 var(--space-16);
+  border-radius: 20px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary) 82%, var(--color-surface)) 0%,
+    var(--color-primary) 50%,
+    var(--color-primary-hover) 100%
+  );
+  box-shadow:
+    0 12px 26px color-mix(in srgb, var(--color-primary) 34%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 35%, transparent);
+  color: var(--color-text-inverse);
+  font-size: 21px;
+  font-weight: 600;
+  transition:
+    filter var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.intro-card__go:hover {
+  filter: brightness(1.06);
+}
+.intro-card__go:active {
+  transform: translateY(1px);
+}
+.intro-card__go:focus-visible,
+.intro-card__later:focus-visible,
+.intro-card__close:focus-visible {
+  outline: 3px solid var(--color-accent-soft);
+  outline-offset: 3px;
+}
+.intro-card__arrow {
+  position: absolute;
+  right: var(--space-8);
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.intro-card__later {
+  display: inline-block;
+  margin-top: var(--space-6);
+  padding: var(--space-1) var(--space-1);
+  color: var(--color-primary);
+  font-size: 19px;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 6px;
+}
+
+/* Телефон: нижний лист с ручкой, кнопки во всю ширину (кадр 5). */
+.intro-card[data-sheet] {
+  bottom: 0;
+  width: auto;
+  padding: var(--space-4) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom));
+  border-radius: 28px 28px 0 0;
+  border-bottom: 0;
+  transform: translateY(100%);
+}
+.intro-card[data-sheet][data-shown] {
+  transform: none;
+}
+.intro-card__grip {
+  display: block;
+  width: 56px;
+  height: 5px;
+  margin: 0 auto var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--color-border-strong);
+}
+.intro-card[data-sheet] .intro-card__close {
+  top: var(--space-3);
+  right: var(--space-3);
+}
+.intro-card[data-sheet] .intro-card__title {
+  margin: 0 var(--space-4);
+  font-size: 27px;
+}
+.intro-card[data-sheet] .intro-card__lead {
+  margin-top: var(--space-2);
+  font-size: 16px;
+}
+.intro-card[data-sheet] .intro-card__choices {
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 0;
+}
+.intro-card[data-sheet] .intro-card__go {
+  min-height: 56px;
+  border-radius: 16px;
+  font-size: 18px;
+}
+.intro-card[data-sheet] .intro-card__arrow {
+  right: var(--space-6);
+}
+.intro-card[data-sheet] .intro-card__later {
+  margin-top: var(--space-5);
+  font-size: 16px;
+}
+
+@keyframes intro-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-card,
+  .intro-card[data-shown],
+  .intro__veil {
+    transition: none;
+    animation: none;
+  }
+}

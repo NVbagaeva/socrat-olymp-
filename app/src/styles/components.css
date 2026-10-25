@@ -1249,7 +1249,7 @@ a.task-card--soon:hover {
   place-items: center;
   flex: none;
 }
-.bell::after {
+.bell--unread::after {
   content: '';
   position: absolute;
   top: 8px;
@@ -1264,7 +1264,7 @@ a.task-card--soon:hover {
   width: 28px;
   height: 28px;
 }
-.bell--sm::after {
+.bell--sm.bell--unread::after {
   top: 5px;
   right: 5px;
   width: 6px;
@@ -2403,7 +2403,7 @@ html[data-tabs-pending] .topic-panel,
   }
   /* Полоса стоит сразу под прилипшей лентой — без щели; тень снизу
      теперь у неё, а у ленты над ней тень убирается. */
-  .app-main:has(.topic-tabs-row.is-stuck) .topic-open {
+  .app-main:has(.topic-tabs-row--panel.is-shown) .topic-open {
     box-shadow: 0 6px 12px -8px rgb(16 23 40 / 0.22);
   }
   .app-main:has(.topic-open) .topic-tabs-row.is-stuck::before {
@@ -2570,39 +2570,82 @@ html[data-tabs-pending] .topic-panel,
 }
 
 /* ── Липкая лента вкладок ──────────────────────────────────────
-   Лента прилипает к верху экрана во всех разделах: строка
-   .topic-tabs-row стоит прямо в main.app-main, который тянется на всю
-   страницу. Состояние «прилипла» (is-stuck), высоту для полос под
-   лентой (--topic-sticky-top) и выравнивание страницы ставит хук
-   components/tasks/useStickyTabs.ts.
+   Меню раздела — две копии одной строки (components/tasks/TabsRow.tsx).
+
+   Плитки (.topic-tabs-row) стоят в потоке страницы прямо в
+   main.app-main и уезжают вверх вместе с ней: ни вид, ни высота у них
+   не меняются, поэтому страница под ними не сдвигается и пустого места
+   не остаётся.
+
+   Панель (.topic-tabs-row--panel) — компактная строка, закреплённая у
+   верха экрана поверх страницы. Она проявляется (opacity + transform,
+   без анимации высоты), когда нижний край плиток уходит под её нижний
+   край, и гаснет, когда плитки возвращаются. Когда, где по горизонтали
+   и какой высоты — ставит хук components/tasks/useStickyTabs.ts; там
+   же --topic-sticky-top для полос под лентой.
 
    Подложка непрозрачная и растянута на поля страницы псевдоэлементом:
    по ширине самой строки меню «Для репетиторов» считает своё место,
    раздвигать её нельзя. Поля main такие же, поэтому подложка не
    выступает за страницу и горизонтальной прокрутки не даёт. */
 .topic-tabs-row {
-  position: sticky;
-  /* Под чёлкой iPhone лента не прячется: отступ — безопасная зона. */
-  top: env(safe-area-inset-top, 0px);
+  /* Меню материалов висит под кнопкой поверх содержимого. */
+  position: relative;
   z-index: 6;
-  /* Лента не якорь прокрутки. Прилипая, она сворачивается из плиток
-     в строку; если браузер держал за якорь плитку, он сдвигал
-     прокрутку на разницу — лента отлипала, снова разворачивалась, и
-     так по кругу. Якорем браузер берёт текст под лентой. */
+  /* Строка не якорь прокрутки: браузер держит за якорь текст под ней. */
   overflow-anchor: none;
 }
 .topic-tabs-row::before {
   content: '';
   position: absolute;
   /* В стороны — на поле страницы (--tabs-bleed), вверх — на вырез
-     экрана, к которому прилипает лента. */
+     экрана, под которым стоит панель. */
   inset: calc(env(safe-area-inset-top, 0px) * -1) calc(var(--tabs-bleed, var(--space-8)) * -1) 0;
   z-index: -1;
   background: var(--color-bg);
   pointer-events: none;
 }
-/* Прилипшая лента отходит от кромки экрана и отделяется тенью от
-   текста, который уезжает под неё. */
+/* Панель стоит у самого верха, без своих полей. Компонентный слой
+   проигрывает правилам разделов вне слоёв, поэтому поля строки раздел
+   задаёт только плиткам: .topic-tabs-row:not(.topic-tabs-row--panel)
+   (так у №4). */
+.topic-tabs-row.topic-tabs-row--panel {
+  position: fixed;
+  /* Под чёлкой iPhone панель не прячется: отступ — безопасная зона. */
+  top: env(safe-area-inset-top, 0px);
+  left: var(--tabs-panel-left, 0px);
+  width: var(--tabs-panel-width, 100%);
+  margin: 0;
+  z-index: 6;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(var(--space-2) * -1));
+  pointer-events: none;
+  /* Гаснет, потом пропадает совсем — visibility меняется после
+     прозрачности, а не вместе с ней. */
+  transition:
+    opacity var(--dur-switch) var(--ease),
+    transform var(--dur-switch) var(--ease),
+    visibility 0s linear var(--dur-switch);
+}
+.topic-tabs-row.topic-tabs-row--panel.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+  transition:
+    opacity var(--dur-switch) var(--ease),
+    transform var(--dur-switch) var(--ease),
+    visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .topic-tabs-row.topic-tabs-row--panel,
+  .topic-tabs-row.topic-tabs-row--panel.is-shown {
+    transition: none;
+  }
+}
+/* Панель отходит от кромки экрана и отделяется тенью от текста,
+   который уезжает под неё. */
 .topic-tabs-row.is-stuck {
   padding-block: var(--space-2);
 }
@@ -2763,14 +2806,15 @@ html[data-tabs-pending] .topic-panel,
    Пока лента стоит на месте, вкладки раздела — плитки разного
    размера: первая («О задании», «Подтемы») крупнее, остальные
    делят ряды поровну, ряды заполнены без дыр (flex-wrap с ростом).
-   Телефон — по 2 в ряд (первая во всю ширину), планшет — по 3,
-   широкий экран — по 4. Ничего не прокручивается вбок, подписи
-   не обрезаются.
+   Телефон — по 3 в ряд, все плитки одного размера (первая во всю
+   ширину, только если иначе последняя осталась бы в ряду одна),
+   планшет — по 3, широкий экран — по 4. Ничего не прокручивается
+   вбок, подписи не обрезаются.
 
-   Когда лента прилипает к верху экрана (is-stuck), она снова
-   становится компактной строкой — прежняя лента со своими правилами
-   выше и ниже. Разницу высот хук useStickyTabs отдаёт в нижний
-   отступ, страница под лентой не прыгает.
+   Липкая панель (is-stuck, components/tasks/TabsRow.tsx) — та же
+   лента компактной строкой со своими правилами выше и ниже. Плитки
+   при этом остаются на своём месте в потоке: панель лежит поверх
+   страницы, и под плитками ничего не прыгает.
 
    Лента с модификатором --stroka — всегда строкой, без плиток: так
    на странице выбора типа функции №12, где под крупной картинкой
@@ -2833,6 +2877,48 @@ html[data-tabs-pending] .topic-panel,
   min-height: 56px;
   font-size: var(--fs-body);
   line-height: var(--lh-body);
+}
+/* Телефон: по 3 в ряд, значок над подписью, поля меньше. Обычные
+   шесть плиток — два ровных ряда, меню вдвое ниже. Первая плитка —
+   такая же, как остальные; во всю ширину, со значком и подписью в
+   строку, она становится, только когда иначе в последнем ряду
+   осталась бы одна плитка: 4, 7 плиток (вкладки + кнопка материалов).
+   Без :has (старые браузеры) — просто по 3 в ряд. */
+@media (max-width: 767.98px) {
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
+    flex-basis: calc(33.333% - var(--space-2));
+    gap: var(--space-1);
+    min-height: 64px;
+    padding: var(--space-2);
+  }
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child {
+    flex-basis: calc(33.333% - var(--space-2));
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    min-height: 64px;
+    font-size: var(--fs-label);
+    line-height: var(--lh-label);
+  }
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .topic-tabs:not(:has(.topic-tabs__more)):has(.tabs--lenta > :nth-child(3n + 1):last-child)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child,
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    .topic-tabs:has(.topic-tabs__more):has(.tabs--lenta > :nth-child(3n):last-child)
+    .tabs--lenta
+    > :is(button, a[role='tab']):first-child {
+    flex-basis: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 56px;
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+  }
 }
 @media (min-width: 768px) {
   .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)

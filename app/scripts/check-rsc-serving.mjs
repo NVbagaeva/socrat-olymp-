@@ -33,6 +33,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { startApache } from './lib/apache.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium);
@@ -172,6 +173,7 @@ async function asNginx(page) {
 
 async function scenario(server, name, act) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await welcomeSeen(context);
   const page = await context.newPage();
   const documents = [];
   page.on('request', (r) => {

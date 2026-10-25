@@ -29,7 +29,7 @@
 import { storage } from '@/lib/storage';
 
 /** Область комплекта — задание, чей генератор его собрал. */
-export type KitScope = '12' | '1' | '2' | '4' | '5' | '7' | '8' | '9' | '11';
+export type KitScope = '12' | '1' | '2' | '4' | '5' | '6' | '7' | '8' | '9' | '11' | '13';
 
 export type SheetWhich = 'student' | 'teacher';
 
@@ -334,6 +334,19 @@ export function sameKit(a: Kit | null, b: Kit | null): boolean {
   );
 }
 
+/* Кто хочет знать о скачанных комплектах, кроме «Моих комплектов»:
+   аккаунт репетитора (lib/auth/kits.ts) пишет код в базу. Здесь только
+   список слушателей — модуль не знает ни о React, ни о сервисе входа. */
+const rememberListeners = new Set<(kit: Kit) => void>();
+
+/** Подписка на rememberKit. Возвращает отписку. */
+export function onKitRemembered(listener: (kit: Kit) => void): () => void {
+  rememberListeners.add(listener);
+  return () => {
+    rememberListeners.delete(listener);
+  };
+}
+
 /**
  * Комплект в историю: тот же код с теми же настройками — запись
  * обновляется и поднимается. Уроки одной серии (№9) — общий код, разные
@@ -345,6 +358,7 @@ export function rememberKit(kit: Kit): Kit {
     stamped,
     ...loadKits().filter((item) => item.code !== kit.code || item.settings !== kit.settings),
   ]);
+  rememberListeners.forEach((listener) => listener(stamped));
   return stamped;
 }
 
