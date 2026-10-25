@@ -13,12 +13,17 @@
 
 import { BALLY } from '@/content/variantOnline/bally';
 import { TESTOVYJ } from '@/content/variantOnline/shkala';
-import { EGE_NUMBERS, type EgeNo } from '../types';
+import { EGE_NUMBERS, type EgeNo, type HintStep } from '../types';
 import { normalizeAnswer, sameAnswer, type FormatProblem } from './normalize';
 
 /** Что ответить ученику на один ответ. */
 export type Verdict =
-  { kind: 'right' } | { kind: 'wrong' } | { kind: 'format'; problem: FormatProblem };
+  | { kind: 'right' }
+  /* Проверка на сервере присылает с первой ошибкой подсказки-вопросы: у
+     задачи на экране их нет — до завершения ключ и подсказки в браузер
+     не попадают. */
+  | { kind: 'wrong'; hints?: HintStep[] }
+  | { kind: 'format'; problem: FormatProblem };
 
 /** Задание работы с верным ответом — только для локальной проверки. */
 export interface KeyItem {
@@ -34,11 +39,18 @@ export interface WorkCheck {
   answers: string[];
 }
 
+/** Что ещё уходит на сервер при завершении: время и подсказки по заданиям. */
+export interface FinishExtra {
+  seconds: readonly number[];
+  /** Номера заданий (с 0), где открывали подсказку. */
+  hinted: readonly number[];
+}
+
 export interface Proverka {
   /** Тренировка: проверить ответ на задание `index` сразу. */
   checkOne(index: number, input: string): Promise<Verdict>;
   /** Завершение работы: все ответы (первые попытки) → верно/неверно и ключ. */
-  finish(answers: readonly string[]): Promise<WorkCheck>;
+  finish(answers: readonly string[], extra?: FinishExtra): Promise<WorkCheck>;
 }
 
 /** Один ответ против верного: формат, потом число. */
