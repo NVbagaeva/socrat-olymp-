@@ -452,7 +452,7 @@ function Uroven2({ t }: { t: TablitsaZapolni13 }) {
         {j === undefined ? (
           <span className="z13-zap__vybor-pusto">Выбрать</span>
         ) : (
-          <Html html={openText(k.varianty[j]!, t.kluch)} />
+          <Html html={openText(k.nabor[j]!, t.kluch)} />
         )}
       </button>
     );
@@ -498,7 +498,7 @@ function Uroven2({ t }: { t: TablitsaZapolni13 }) {
             {t.period} {t.stroki[ri]?.label} · {t.stolbcy[ci]?.title}
           </p>
           <div className="z13-zap__varianty-list">
-            {k0.varianty.map((html, j) => (
+            {k0.nabor.map((html, j) => (
               <button
                 key={j}
                 type="button"

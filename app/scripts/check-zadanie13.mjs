@@ -1036,9 +1036,9 @@ for (const [n, extra, want] of tables) {
     for (const id2 of z.uroven2) {
       const k = vse.find((x) => x.id === id2);
       const ok = k
-        ? k.varianty.filter((_, j) => secret.choiceMatches(`${z.kluch}:${id2}:${j}`, k.vernyy))
+        ? k.nabor.filter((_, j) => secret.choiceMatches(`${z.kluch}:${id2}:${j}`, k.vernyy))
         : [];
-      if (!k || k.varianty.length < 3 || ok.length !== 1)
+      if (!k || k.nabor.length < 3 || ok.length !== 1)
         problems.push(`${w}: уровень 2 — клетка ${id2} без трёх вариантов с одним верным`);
     }
     if (z.uroven3.length === 0) problems.push(`${w}: уровень 3 — пусто`);

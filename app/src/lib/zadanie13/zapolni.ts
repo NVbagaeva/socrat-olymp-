@@ -49,7 +49,7 @@ export interface KletkaZapolni13 {
   seal: string;
   oshibki: OshibkaZapolni13[];
   /** Уровень 2: варианты выражений (закрыты) и отпечаток номера верного. */
-  varianty: string[];
+  nabor: string[];
   vernyy: string;
   /** В верной записи есть буквы: ответ числом — подсказка писать буквами. */
   bukvy: boolean;
@@ -558,7 +558,7 @@ export function tablitsaZapolni13(
       html: zakryt(kt(kl.v.t)),
       seal,
       oshibki: oshibki.map(({ seal: s, msg }) => ({ seal: s, msg })),
-      varianty: poryadok.map((j) => zakryt(kt(vse[j]!))),
+      nabor: poryadok.map((j) => zakryt(kt(vse[j]!))),
       vernyy: sealChoice(`${kluch}:${id}:${poryadok.indexOf(0)}`),
       bukvy: /[Sxykr]/.test(kl.v.z),
     };
@@ -581,7 +581,7 @@ export function tablitsaZapolni13(
   /* Пустые клетки уровней 2 и 3. */
   const vseKletki = stroki.flatMap((s) => s.kletki);
   const sVariantami = vseKletki
-    .filter((k) => k.dano === null && k.varianty.length >= 3)
+    .filter((k) => k.dano === null && k.nabor.length >= 3)
     .map((k) => k.id);
   const uroven2 = rng.sample(sVariantami, Math.min(4, sVariantami.length));
   const klyuchevye = new Set([0, n > 2 ? Math.floor(n / 2) : -1, n - 1]);
