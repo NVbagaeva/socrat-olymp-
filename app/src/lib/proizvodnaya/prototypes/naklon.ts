@@ -17,7 +17,7 @@ export function nod(a: number, b: number): number {
   return b === 0 ? Math.abs(a) : nod(b, a % b);
 }
 
-/** Сокращение дроби Δy/Δx и перевод в десятичную: отдельные строки, без повторения дроби. */
+/** Сокращение отношения катетов и перевод в десятичную: отдельные строки, без повторения дроби. */
 export function drobSSokrascheniem(dy: number, dx: number, minus = false): string[] {
   const g = nod(dy, dx);
   const n = dy / g;
@@ -55,16 +55,16 @@ export function shagiNaklon(A: Tochka, B: Tochka): Shag[] {
     ),
     shag(
       'Строим прямоугольный треугольник',
-      `Катет по горизонтали: $\\Delta x=${dx}$ клеток. Катет по вертикали: $\\Delta y=${dy}$ клеток.`,
+      `Треугольник строим под прямой, катеты идут по линиям сетки. Подписываем катеты длинами — числом клеток, без знаков: вертикальный катет ${dy}, горизонтальный ${dx}.`,
       vozr
-        ? 'Прямая идёт вверх слева направо: угол $\\alpha$ острый, $\\operatorname{tg}\\alpha>0$.'
-        : 'Прямая идёт вниз слева направо: угол $\\alpha$ тупой. Острый угол треугольника $180^\\circ-\\alpha$ смежный с ним, и $\\operatorname{tg}\\alpha=-\\operatorname{tg}(180^\\circ-\\alpha)$.',
+        ? 'Прямая возрастает — $k > 0$: вертикальный катет делим на горизонтальный.'
+        : 'Прямая убывает — $k < 0$: катеты делим так же, а перед дробью ставим минус. Острый угол треугольника $180^\\circ-\\alpha$ смежный с $\\alpha$, и $\\operatorname{tg}\\alpha=-\\operatorname{tg}(180^\\circ-\\alpha)$.',
     ),
     shag(
       'Считаем тангенс',
       vozr
-        ? `$\\operatorname{tg}\\alpha=\\dfrac{\\Delta y}{\\Delta x}=\\dfrac{${dy}}{${dx}}$`
-        : `$\\operatorname{tg}\\alpha=-\\operatorname{tg}(180^\\circ-\\alpha)=-\\dfrac{\\Delta y}{\\Delta x}=-\\dfrac{${dy}}{${dx}}$`,
+        ? `$\\operatorname{tg}\\alpha=\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}=\\dfrac{${dy}}{${dx}}$`
+        : `$\\operatorname{tg}\\alpha=-\\operatorname{tg}(180^\\circ-\\alpha)=-\\dfrac{${dy}}{${dx}}$`,
       ...drobSSokrascheniem(dy, dx, !vozr),
       `$k=${kText}$`,
     ),
