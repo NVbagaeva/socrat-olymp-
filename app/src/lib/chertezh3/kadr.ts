@@ -294,13 +294,15 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
     return [q[0] * s + ox, q[1] * s + oy];
   };
 
-  const linii: LiniyaKadra[] = linii3.map((l) => ({
-    a: P(l.a),
-    b: P(l.b),
-    vidno: l.vidno,
-    vid: l.vid,
-    ...l.s,
-  }));
+  const linii: LiniyaKadra[] = bezPovtorov(
+    linii3.map((l) => ({
+      a: P(l.a),
+      b: P(l.b),
+      vidno: l.vidno,
+      vid: l.vid,
+      ...l.s,
+    })),
+  );
   const zalivki: ZalivkaKadra[] = zalivki3.map((z) => ({ pts: z.pts.map(P), ...z.s }));
   const puti: PutKadra[] = puti3.map((z) => ({ pts: z.pts.map(P), vidno: z.vidno, ...z.s }));
   const tochki: TochkaKadra[] = tochki3
@@ -412,4 +414,51 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
   }));
 
   return { W, H: Hh, linii, zalivki, puti, tochki, podpisi };
+}
+
+/* ── Один отрезок — одна линия ─────────────────────────────────────
+   Один и тот же отрезок может прийти дважды: диагональ условия и
+   сторона треугольника построения (AC₁ и треугольник ACC₁). Невидимые
+   копии навстречу друг другу дают штрихи со сдвигом фазы, и пунктир на
+   глаз сливается в сплошную. Поэтому каждая линия идёт в одну сторону
+   (слева направо, сверху вниз), а отрезок условия или построения,
+   лежащий на другом таком же с той же видимостью, рисуется один раз —
+   остаётся яркий, затем не тусклый, затем отрезок условия (он толще),
+   при равенстве — позже в списке (лёг бы сверху). */
+
+const RANG = (l: LiniyaKadra) =>
+  (l.yarko ? 4 : 0) + (l.tusklo ? 0 : 2) + (l.vid === 'uslovie' ? 1 : 0);
+
+function vPoryadke(l: LiniyaKadra): LiniyaKadra {
+  const naoborot = l.a[0] > l.b[0] + 1e-9 || (Math.abs(l.a[0] - l.b[0]) <= 1e-9 && l.a[1] > l.b[1]);
+  return naoborot ? { ...l, a: l.b, b: l.a } : l;
+}
+
+/** Отрезок s лежит на t (на чертеже, допуск d единиц). */
+function lezhitNa(s: LiniyaKadra, t: LiniyaKadra, d: number): boolean {
+  const ab = [t.b[0] - t.a[0], t.b[1] - t.a[1]] as const;
+  const l2 = ab[0] * ab[0] + ab[1] * ab[1];
+  if (l2 < 1e-12) return false;
+  const du = d / Math.sqrt(l2);
+  return [s.a, s.b].every((p) => {
+    const u = ((p[0] - t.a[0]) * ab[0] + (p[1] - t.a[1]) * ab[1]) / l2;
+    const qx = t.a[0] + ab[0] * u - p[0];
+    const qy = t.a[1] + ab[1] * u - p[1];
+    return u >= -du && u <= 1 + du && Math.hypot(qx, qy) <= d;
+  });
+}
+
+function bezPovtorov(linii: LiniyaKadra[]): LiniyaKadra[] {
+  const out = linii.map(vPoryadke);
+  const lishniy = new Set<number>();
+  out.forEach((s, i) => {
+    if (s.vid === 'rebro') return;
+    out.forEach((t, j) => {
+      if (i === j || lishniy.has(j) || t.vid === 'rebro' || s.vidno !== t.vidno) return;
+      if (!lezhitNa(s, t, 0.05)) return;
+      const ravny = lezhitNa(t, s, 0.05);
+      if (!ravny || RANG(t) > RANG(s) || (RANG(t) === RANG(s) && j > i)) lishniy.add(i);
+    });
+  });
+  return out.filter((_, i) => !lishniy.has(i));
 }
