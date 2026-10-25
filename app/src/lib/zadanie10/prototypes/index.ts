@@ -43,6 +43,11 @@ export const PROTOTYPES: Prototype[] = [
   .sort((a, b) => a.no - b.no)
   .map((p) => ({ ...p, solve: (params) => bezEdinicVsyudu(p.solve(params)) }));
 
+/** Тот же последний проход для прототипа вне реестра (варианты повышенной сложности). */
+export function sChistymResheniem(p: Prototype): Prototype {
+  return { ...p, solve: (params) => bezEdinicVsyudu(p.solve(params)) };
+}
+
 const PO_ID = new Map(PROTOTYPES.map((p) => [p.id, p]));
 
 export function prototype(id: string): Prototype {

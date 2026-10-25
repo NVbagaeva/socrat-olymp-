@@ -14,6 +14,8 @@ import { figura } from './krivye';
 import { chislaOtvet } from './otvet';
 import { promezhutki, xRavno, znakiPomoshch } from './prototypes/chtenie-pom';
 import { NE_IZ_BANKA, shag, sobrat, vopros } from './prototypes/common';
+import { zadacha921 } from './prototypes/kasatelnaya';
+import { zadachaZnak } from './prototypes/po-grafiku-f';
 import { znakZnacheniya } from './chtenie';
 import { d, otrezok } from './tex';
 import type { Figura, Generated, Pomoshch, Uzel } from './types';
@@ -493,4 +495,88 @@ export function skorostVMoment(par: SkorostVMoment): Generated {
     seed: 'fixed',
     istochnik: NE_IZ_BANKA,
   };
+}
+
+export interface KasatelnayaPoUzlam {
+  /** Узлы кривой f: [x, y], x по возрастанию; узел касания — с абсциссой x0. */
+  uzly: [number, number][];
+  /** Абсцисса точки касания (узел кривой). */
+  x0: number;
+  /** Два узла сетки на касательной, A левее B. */
+  A: [number, number];
+  B: [number, number];
+}
+
+function nod(a: number, b: number): number {
+  return b === 0 ? a : nod(b, a % b);
+}
+
+/**
+ * f′(x₀) по графику f и касательной (как 9.2.1): кривая и узлы
+ * касательной заданы вариантом. Наклон кривой в узле касания ставится
+ * равным наклону прямой AB. Подвох прежний — знак наклона и катеты
+ * «Δy к Δx», а не наоборот; рисунок, проверки и разбор — те же, что в 9.2.1.
+ */
+export function kasatelnayaPoUzlam(par: KasatelnayaPoUzlam): Generated | null {
+  const { x0, A, B } = par;
+  const dx = B[0] - A[0];
+  const dy = B[1] - A[1];
+  if (dx <= 0 || dy === 0) return null;
+  const g = nod(Math.abs(dy), dx);
+  const p = dy / g;
+  const q = dx / g;
+  const uzel = par.uzly.find(([x]) => x === x0);
+  if (uzel === undefined) return null;
+  const y0 = uzel[1];
+  /* Узел касания лежит на прямой AB. */
+  if ((x0 - A[0]) * dy !== (y0 - A[1]) * dx) return null;
+  const uzly: Uzel[] = par.uzly.map(([x, y]) => (x === x0 ? { x, y, m: p / q } : { x, y }));
+  const s = { uzly, a: uzly[0]!.x, b: uzly.at(-1)!.x, x0, y0, p, q };
+  const base = figura('f', 'f(x)', uzly, {});
+  const ok = base.okno;
+  for (const [x, y] of [A, B]) {
+    if (x < ok.xmin + 1 || x > ok.xmax - 1 || y < ok.ymin + 1 || y > ok.ymax - 1) return null;
+  }
+  const kod = `pv9k|${par.uzly.join(';')}|${x0}|${A.join(':')}|${B.join(':')}`;
+  const draft = zadacha921(rngOf(kod), s, base, A, B);
+  return draft === null
+    ? null
+    : {
+        ...draft,
+        signature: kod,
+        prototype: 'PV9-KASAT',
+        seed: 'fixed',
+        istochnik: NE_IZ_BANKA,
+      };
+}
+
+export interface ZnakVTochkah {
+  /** Узлы кривой f: [x, y], x по возрастанию, концы — границы интервала. */
+  uzly: [number, number][];
+  /** Отмеченные точки x₁ … xₙ: целые, по возрастанию. */
+  metki: number[];
+  /** Что считаем: f′ > 0 (1) или f′ < 0 (−1). */
+  znak: 1 | -1;
+}
+
+/**
+ * Сколько отмеченных точек, где f′ > 0 (или f′ < 0), по графику f (как
+ * 9.3.1 / 9.3.2), но точек много — 13, и часть стоит у самых вершин.
+ * Подвох — знак производной читают по направлению графика, а не по его
+ * положению относительно оси Ox; рисунок и разбор — те же, что в 9.3.1.
+ */
+export function znakVTochkah(par: ZnakVTochkah): Generated | null {
+  const uzly: Uzel[] = par.uzly.map(([x, y]) => ({ x, y }));
+  const w = { uzly, a: uzly[0]!.x, b: uzly.at(-1)!.x };
+  const kod = `pv9z|${par.znak}|${par.uzly.join(';')}|${par.metki.join(',')}`;
+  const draft = zadachaZnak(rngOf(kod), par.znak, w, [...par.metki]);
+  return draft === null
+    ? null
+    : {
+        ...draft,
+        signature: kod,
+        prototype: par.znak > 0 ? 'PV9-ZNAK-PLUS' : 'PV9-ZNAK-MINUS',
+        seed: 'fixed',
+        istochnik: NE_IZ_BANKA,
+      };
 }

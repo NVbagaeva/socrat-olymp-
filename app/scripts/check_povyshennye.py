@@ -362,6 +362,109 @@ SCHET.update({
 })
 
 
+# ── Партия 2 (варианты 7–12) ────────────────────────────────────
+
+
+def z09_kasat(p):
+    # Наклон прямой через два узла; узел касания лежит на ней.
+    (ax, ay), (bx, by) = p["A"], p["B"]
+    k = sp.Rational(by - ay, bx - ax)
+    y0 = dict((u[0], u[1]) for u in p["uzly"])[p["x0"]]
+    assert ay + k * (p["x0"] - ax) == y0, "касательная мимо узла"
+    return k
+
+
+def z09_znak(p):
+    # Знак f′ в целой точке: по участку монотонности между узлами-экстремумами.
+    u = p["uzly"]
+    ext = [u[0][0]] + [u[i][0] for i in range(1, len(u) - 1) if (u[i][1] - u[i - 1][1]) * (u[i + 1][1] - u[i][1]) < 0] + [u[-1][0]]
+    val = dict((a, b) for a, b in u)
+    n = 0
+    for m in p["metki"]:
+        assert m not in ext[1:-1], "точка в вершине"
+        lo = max(e for e in ext if e < m)
+        hi = min(e for e in ext if e > m)
+        s = 1 if val[hi] > val[lo] else -1
+        n += s == p["znak"]
+    return sp.Integer(n)
+
+
+def z10_linza(p, naib=False):
+    d1, d2 = sp.symbols("d1 d2", positive=True)
+    f = p["f"]
+    kr = [sp.solve(sp.Eq(1 / d1 + 1 / R(p[k]), sp.Rational(1, f)), d1)[0] for k in ("d2max", "d2min")]
+    lo, hi = max(R(p["d1min"]), min(kr)), min(R(p["d1max"]), max(kr))
+    assert lo <= hi
+    return hi if naib else lo
+
+
+def z10_dolya(p):
+    A = p["ak"] * sp.sqrt(p["am"])
+    tau = R(p["tau"])
+    reg = sp.solveset(A * sp.sin(sp.pi * t / p["T"]) <= p["c"], t, sp.Interval(0, tau))
+    return sp.nsimplify(reg.measure / tau)
+
+
+def z10_raspad(p):
+    return sp.solve(sp.Eq(p["m0"] * 2 ** (-t / sp.Integer(p["T"])), p["m"]), t)[0]
+
+
+def z11_tri(p):
+    X, Y = sp.symbols("X Y", positive=True)
+    a, b, c = p["a"], p["b"], p["c"]
+    e1 = sp.Eq(a * X + b * Y + c * p["m1"], p["p1"] * (X + Y + p["m1"]))
+    e2 = sp.Eq(a * X + b * Y + c * p["m2"], p["p2"] * (X + Y + p["m2"]))
+    s = sp.solve([e1, e2], [X, Y], dict=True)[0]
+    return s[X] if p["ask"] == "a" else s[Y]
+
+
+def z11_suda(p):
+    return sp.solve(sp.Eq(v * sp.Rational(p["t"], 60), sp.Rational(p["a"] + p["L1"] + p["L2"] + p["b"], 1000)), v)[0]
+
+
+def z11_put(p):
+    S = sp.symbols("S", positive=True)
+    s = sp.solve(sp.Eq(S / (p["v"] + p["c"]) + S / (p["v"] - p["c"]), p["T"] - p["st"]), S)[0]
+    return 2 * s
+
+
+def z13_dif_stavka(p):
+    r = sp.symbols("r", positive=True)
+    S, n = p["S"], p["n"]
+    total = sum((S - i * sp.Rational(S, n)) * r / 100 + sp.Rational(S, n) for i in range(n))
+    return sp.solve(sp.Eq(total, p["T"]), r)[0]
+
+
+def z13_popolneniya(p):
+    X = sp.symbols("X", positive=True)
+    k = 1 + R(p["r"]) / 100
+    return sp.solve(sp.Eq(((p["S"] * k + X) * k + X) * k, p["Z"]), X)[0]
+
+
+def z13_summa_ub(p):
+    S = R(p["S"]) * 10**6
+    k = 1 + R(p["r"]) / 100
+    m = 1 - R(p["q"]) / 100
+    dolgi = [S * m**i for i in range(p["n"])] + [0]
+    return sum(dolgi[i] * k - dolgi[i + 1] for i in range(p["n"]))
+
+
+SCHET.update({
+    "z09.kasatelnaya": z09_kasat,
+    "z09.znak-v-tochkah": z09_znak,
+    "z10.linza": z10_linza,
+    "z10.linza-max": lambda p: z10_linza(p, True),
+    "z10.dolya-vremeni": z10_dolya,
+    "z10.raspad": z10_raspad,
+    "z11.tri-rastvora": z11_tri,
+    "z11.suhogruzy": z11_suda,
+    "z11.ves-put": z11_put,
+    "z13.dif-stavka": z13_dif_stavka,
+    "z13.ravnye-popolneniya": z13_popolneniya,
+    "z13.summa-ubyvanie": z13_summa_ub,
+})
+
+
 def konechnaya(q):
     q = F(q)
     d = q.denominator

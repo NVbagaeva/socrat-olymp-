@@ -25,12 +25,16 @@ import {
 } from '@/lib/graph/povyshennye';
 import {
   chisloNaOtrezke,
+  kasatelnayaPoUzlam,
   maxNaOtrezke,
   minNaOtrezke,
   skorostVMoment,
+  znakVTochkah,
   type ChisloNaOtrezke,
+  type KasatelnayaPoUzlam,
   type MaxNaOtrezke,
   type SkorostVMoment,
+  type ZnakVTochkah,
 } from '@/lib/proizvodnaya/povyshennye';
 import type { Generated as Generated9 } from '@/lib/proizvodnaya/types';
 import { renderSolid } from '@/lib/solid';
@@ -78,18 +82,25 @@ import { PEOPLE, type PlotFull } from '@/lib/zadanie13/plots';
 import {
   obshchayaSummaGod,
   posledniyPlatezh,
+  ravnyePopolneniya,
+  stavkaPoSumme,
   stavkaVklada,
+  summaPriUbyvanii,
   type ObshchayaSumma,
   type PosledniyPlatezh,
+  type RavnyePopolneniya,
+  type StavkaPoSumme,
   type StavkaVklada,
 } from '@/lib/zadanie13/proto/povyshennye';
 import type { Prototype as Proto13 } from '@/lib/zadanie13/proto/types';
 import type { Params as Params7 } from '@/lib/zadanie7/types';
 import type { Params as Params6 } from '@/lib/zadanie6/types';
 import type { Params as ParamsVer } from '@/lib/veroyatnost/types';
-import type { Params as Params10 } from '@/lib/zadanie10/types';
+import type { Params as Params10, Prototype as Proto10 } from '@/lib/zadanie10/types';
+import { sChistymResheniem } from '@/lib/zadanie10/prototypes';
+import { PV10_DOLYA, PV10_LINZA_MAX } from '@/lib/zadanie10/prototypes/povyshennye';
 import type { Params as Params11, Solved as Solved11 } from '@/lib/zadanie11/types';
-import { ocheredno } from '@/lib/zadanie11/prototypes/povyshennye';
+import { ocheredno, triRastvora } from '@/lib/zadanie11/prototypes/povyshennye';
 import { razborUchenika } from '@/lib/variant/adapters/z01';
 import { krupnyyRisunok, minFont, shirinaPoKletke } from '@/lib/variant/pechat';
 import { build as build02 } from '@/lib/variant/adapters/z02';
@@ -408,6 +419,21 @@ function z10(proto: string, p: Params10 & { tekst: string }, klyuch: string): Go
       prototypeId: proto,
       z: { id: klyuch, prototypeId: proto, source: 'analog', text: tekst, params },
     }),
+  );
+}
+
+/** То же для прототипа раздела «Варианты повышенной сложности» (не из реестра №10). */
+function z10s(proto: Proto10, p: Params10 & { tekst: string }, klyuch: string): Gotovaya {
+  const { tekst, ...params } = p;
+  return bezPoley(
+    build10(
+      {
+        ...kand,
+        prototypeId: proto.id,
+        z: { id: klyuch, prototypeId: proto.id, source: 'analog', text: tekst, params },
+      },
+      sChistymResheniem(proto),
+    ),
   );
 }
 
@@ -791,6 +817,20 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: SkorostVMoment) => z09(skorostVMoment(p), p),
   },
+  'z09.kasatelnaya': {
+    ege: 9,
+    prototip:
+      'Производная, группа II: f′(x₀) по графику f и касательной через узлы сетки (как 9.2.1), своя кривая',
+    otkuda: 'novyy',
+    zadacha: (p: KasatelnayaPoUzlam) => z09(kasatelnayaPoUzlam(p), p),
+  },
+  'z09.znak-v-tochkah': {
+    ege: 9,
+    prototip:
+      'Производная, группа III: сколько из 13 отмеченных точек, где f′ > 0 или f′ < 0 (как 9.3.1/9.3.2), точки у вершин',
+    otkuda: 'novyy',
+    zadacha: (p: ZnakVTochkah) => z09(znakVTochkah(p), p),
+  },
   'z10.vysota': {
     ege: 10,
     prototip:
@@ -809,6 +849,32 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip: 'Прикладные, группа II: разгон S = v₀t + at²/2, наибольшее время в минутах (P12)',
     otkuda: 'razdel',
     zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P12', p, klyuch),
+  },
+  'z10.linza': {
+    ege: 10,
+    prototip: 'Прикладные, группа I: собирающая линза, наименьшее расстояние до лампочки (P07)',
+    otkuda: 'razdel',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P07', p, klyuch),
+  },
+  'z10.linza-max': {
+    ege: 10,
+    prototip:
+      'Прикладные, группа I: собирающая линза, наибольшее расстояние до лампочки — при наименьшем d₂ (как P07)',
+    otkuda: 'novyy',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10s(PV10_LINZA_MAX, p, klyuch),
+  },
+  'z10.dolya-vremeni': {
+    ege: 10,
+    prototip:
+      'Прикладные, группа V: v = A·sin(πt/T), доля первых τ секунд, когда v ≤ c (как P34, вторая дуга синуса за τ не наступает)',
+    otkuda: 'novyy',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10s(PV10_DOLYA, p, klyuch),
+  },
+  'z10.raspad': {
+    ege: 10,
+    prototip: 'Прикладные, группа IV: радиоактивный распад m = m₀·2^(−t/T), время (P22)',
+    otkuda: 'razdel',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P22', p, klyuch),
   },
   'z11.bystryy': {
     ege: 11,
@@ -833,6 +899,29 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
       z11('PV11-OCHEREDNO', p, klyuch, ocheredno),
+  },
+  'z11.tri-rastvora': {
+    ege: 11,
+    prototip:
+      'Текстовые, смеси: два раствора с неизвестными массами и добавка m₁ или m₂ кг третьего — масса одного из растворов (как СМ-08, у смесей разная масса)',
+    otkuda: 'novyy',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('PV11-TRI-RASTVORA', p, klyuch, triRastvora),
+  },
+  'z11.suhogruzy': {
+    ege: 11,
+    prototip:
+      'Текстовые, протяжённые тела: два судна в одном направлении поменялись местами, разность скоростей (ПТ-04)',
+    otkuda: 'razdel',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('PT-04', p, klyuch, (x) => subtype11('PT-04').solve(x)),
+  },
+  'z11.ves-put': {
+    ege: 11,
+    prototip: 'Текстовые, движение по воде: туда и обратно со стоянкой, весь путь за рейс (ВД-01)',
+    otkuda: 'razdel',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('VD-01', p, klyuch, (x) => subtype11('VD-01').solve(x)),
   },
   'z12.k-log': {
     ege: 12,
@@ -877,6 +966,29 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: PosledniyPlatezh & Syuzhet13, klyuch: string) =>
       z13(posledniyPlatezh(p), p, klyuch),
+  },
+  'z13.dif-stavka': {
+    ege: 13,
+    prototip:
+      'Экономика, тип A: годовой дифференцированный, ставка по общей сумме выплат (рамка «июль», переплата S·(n+1)/2·r/100)',
+    otkuda: 'novyy',
+    zadacha: (p: StavkaPoSumme & Syuzhet13, klyuch: string) => z13(stavkaPoSumme(p), p, klyuch),
+  },
+  'z13.ravnye-popolneniya': {
+    ege: 13,
+    prototip:
+      'Экономика, тип D (вклады): два одинаковых пополнения за три года, найти пополнение по итоговой сумме (x(k² + k))',
+    otkuda: 'novyy',
+    zadacha: (p: RavnyePopolneniya & Syuzhet13, klyuch: string) =>
+      z13(ravnyePopolneniya(p), p, klyuch),
+  },
+  'z13.summa-ubyvanie': {
+    ege: 13,
+    prototip:
+      'Экономика, тип B: долг каждый июль меньше на q % прошлогоднего, общая сумма выплат в рублях (рамка «июль»)',
+    otkuda: 'novyy',
+    zadacha: (p: PosledniyPlatezh & Syuzhet13, klyuch: string) =>
+      z13(summaPriUbyvanii(p), p, klyuch),
   },
 };
 

@@ -14,6 +14,7 @@
 import { typeset } from '@/lib/tex';
 import { chertezhMosta } from '@/lib/zadanie10/chertezh/most';
 import { kodNaSayte, prototype } from '@/lib/zadanie10/prototypes';
+import type { Prototype } from '@/lib/zadanie10/types';
 import type { Fallback, SectionAdapter, SectionModule, VariantTask } from '../../types';
 import type { Zadacha10Variant } from '../../data/z10';
 import { dataUrl } from '@/lib/dataUrl';
@@ -67,9 +68,13 @@ function otvetSEdinicami(answer: number, edinicy: string): string {
   return /^[°%]/.test(edinicy) ? `${x}${typeset(edinicy)}` : `${x}&nbsp;${typeset(edinicy)}`;
 }
 
-export function build(c: C10): VariantTask {
+/**
+ * `svoy` — прототип не из реестра раздела (шаблоны вариантов повышенной
+ * сложности, lib/zadanie10/prototypes/povyshennye.ts).
+ */
+export function build(c: C10, svoy?: Prototype): VariantTask {
   const { z } = c;
-  const p = prototype(z.prototypeId);
+  const p = svoy ?? prototype(z.prototypeId);
   const s = p.solve(z.params);
   const kod = kodNaSayte(z.prototypeId);
   const izKursa = p.fipiNos === '';
