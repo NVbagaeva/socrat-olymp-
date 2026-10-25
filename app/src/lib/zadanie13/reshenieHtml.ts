@@ -18,17 +18,51 @@ function esc(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/** Знаки, после которых формулу можно перенести на новую строку. */
+const OTNOSHENIE = /^(\s*\;\\Rightarrow\;\s*|\s*\\Rightarrow\s*|\s*=\s*|\s*\\le\s*|\s*\\ge\s*|\s*<\s*|\s*>\s*)/;
+
 /**
- * Формула решения: строчный режим KaTeX (дроби \dfrac и так крупные) —
- * длинная цепочка переносится после «=» и «+» и не уезжает за край
- * телефона. Части через \qquad — отдельными строками.
+ * Куски между верхними «=», «⇒», «<» — в фигурные скобки: KaTeX
+ * переносит строку только после знака отношения, а не внутри скобок
+ * вроде x(k^2 + k + 1).
+ */
+function poOtnosheniyam(tex: string): string {
+  const kuski: string[] = [];
+  let tek = '';
+  let glubina = 0;
+  for (let i = 0; i < tex.length; ) {
+    const ost = tex.slice(i);
+    if (ost.startsWith('\\left')) glubina++;
+    else if (ost.startsWith('\\right')) glubina--;
+    const c = tex[i]!;
+    if (c === '{') glubina++;
+    else if (c === '}') glubina--;
+    const m = glubina === 0 ? OTNOSHENIE.exec(ost) : null;
+    if (m && tek.trim()) {
+      kuski.push(`{${tek}}`, m[0]);
+      tek = '';
+      i += m[0].length;
+      continue;
+    }
+    tek += c;
+    i++;
+  }
+  kuski.push(`{${tek}}`);
+  return kuski.join('');
+}
+
+/**
+ * Формула решения: строчный режим KaTeX, дроби — \dfrac. Длинная
+ * цепочка переносится после «=» и не уезжает за край телефона; части
+ * через \quad и \qquad — отдельными строками.
  */
 const krupno = (tex: string) =>
   tex
-    .split(/,?\s*\\qquad\s*/)
+    .replace(/\\frac(?=\{)/g, '\\dfrac')
+    .split(/,\s*\\quad\s*|,?\s*\\qquad\s*/)
     .map(
       (chast) =>
-        `<div class="z13-r-formula">${katex.renderToString(chast, { throwOnError: true })}</div>`,
+        `<div class="z13-r-formula">${katex.renderToString(poOtnosheniyam(chast), { throwOnError: true })}</div>`,
     )
     .join('');
 
