@@ -11,7 +11,7 @@
 
 import { asNumber, asNumberList, asStringRecord, isRecord } from '@/lib/trainerSession/restore';
 import type { BaseUi } from '@/lib/trainerSession/types';
-import type { VariantTask } from '../types';
+import type { HintStep, VariantTask } from '../types';
 import type { Mode, Timer } from './link';
 import { loadSet, oshibkiTasks, tasksSignature } from './work';
 
@@ -29,6 +29,15 @@ export interface WorkPayload {
    */
   oshibki: { wrong: number[]; from: number[]; analog: boolean[] } | null;
   sig: string;
+  /**
+   * Работа, выданная через кабинет: проверка на сервере. Задачи — условия
+   * с сервера, без ответов и подсказок.
+   */
+  kabinet?: { workId: string; attemptId: string; /** Номер варианта в работе. */ variant: number };
+  /** Начало работы по часам сервера (отсчёт контрольной). */
+  startedAt?: number;
+  /** Черновик с сервера — продолжить на другом устройстве. */
+  draft?: { answers?: Record<number, string>; later?: number[]; times?: Record<number, number> };
 }
 
 interface PackedWork {
@@ -135,6 +144,8 @@ export interface WorkUi extends BaseUi {
   hinted: number[];
   /** Сколько шагов разбора открыто подсказкой (разделы без вопросов). */
   steps: Record<number, number>;
+  /** Подсказки, присланные сервером с первой ошибкой. */
+  srvHints: Record<number, HintStep[]>;
   /** Время на задание, мс активного времени. */
   times: Record<number, number>;
   /** Начало работы, мс по часам: для таймера контрольной. */
@@ -167,6 +178,24 @@ function strings(v: unknown): Record<number, string> {
   return out;
 }
 
+function hintsOf(v: unknown): Record<number, HintStep[]> {
+  const out: Record<number, HintStep[]> = {};
+  if (!isRecord(v)) return out;
+  for (const [k, list] of Object.entries(v)) {
+    if (!/^\d+$/.test(k) || !Array.isArray(list)) continue;
+    const ok = list.filter(
+      (h): h is HintStep =>
+        isRecord(h) &&
+        typeof h['question'] === 'string' &&
+        Array.isArray(h['options']) &&
+        h['options'].every((o) => typeof o === 'string') &&
+        typeof h['correct'] === 'number',
+    );
+    if (ok.length > 0) out[Number(k)] = ok.map((h) => ({ ...h, comment: h.comment ?? null }));
+  }
+  return out;
+}
+
 /** Состояние экрана из хранилища: что не прочиталось — по умолчанию. */
 export function readWorkUi(base: BaseUi): WorkUi {
   const raw = base as unknown as Record<string, unknown>;
@@ -182,6 +211,7 @@ export function readWorkUi(base: BaseUi): WorkUi {
     later: asNumberList(raw['later']),
     hinted: asNumberList(raw['hinted']),
     steps: numbers(raw['steps']),
+    srvHints: hintsOf(raw['srvHints']),
     times: numbers(raw['times']),
     startedAt: asNumber(raw['startedAt'], Date.now()),
   };

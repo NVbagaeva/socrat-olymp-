@@ -89,7 +89,7 @@ create function pg_temp.work(mode text, extra jsonb default '{}') returns jsonb 
     'title', 'Пробный ЕГЭ', 'kind', 'probnik', 'set_code', 'K7M2-1Z0GH-4F', 'mode', mode,
     'timer_kind', 'none',
     'variants', jsonb_build_array(
-      jsonb_build_object('variant', 1, 'tasks', jsonb_build_array(
+      jsonb_build_object('variant', 1, 'set_variant', 4, 'tasks', jsonb_build_array(
         jsonb_build_object('position', 1, 'ege_no', 4, 'prototype_id', 'p4-01', 'task_ref', 'p4-01-1',
                            'statement', '<p>Задача 1</p>', 'answer', '0,50',
                            'hints', '[{"question":"Что ищем?","options":["a","b"],"correct":1,"comment":null}]'::jsonb),
@@ -97,7 +97,7 @@ create function pg_temp.work(mode text, extra jsonb default '{}') returns jsonb 
                            'statement', '<p>Задача 2</p>', 'figure', '<svg/>', 'answer', '−3'),
         jsonb_build_object('position', 3, 'ege_no', 12, 'prototype_id', '12.A', 'task_ref', '12.A-1',
                            'statement', '<p>Задача 3</p>', 'answer', '12', 'points', 2))),
-      jsonb_build_object('variant', 2, 'tasks', jsonb_build_array(
+      jsonb_build_object('variant', 2, 'set_variant', 7, 'tasks', jsonb_build_array(
         jsonb_build_object('position', 1, 'ege_no', 4, 'prototype_id', 'p4-01', 'task_ref', 'p4-01-2',
                            'statement', '<p>Задача 1 в2</p>', 'answer', '7'))))
   ) || extra
@@ -121,6 +121,8 @@ select public.issue_variant_work(pg_temp.work('kontrol', jsonb_build_object('cla
   'timer_kind', 'down', 'timer_minutes', 90))) as kw \gset
 select pg_temp.ok((select count(*) = 2 from public.variant_work_recipients where work_id = :'tw'),
   'получатели тренировки: класс + отдельный ученик');
+select pg_temp.ok((select set_variants = '{4,7}' from public.variant_works where id = :'tw'),
+  'номера вариантов в партии сохранены');
 select pg_temp.ok((select answer from public.variant_work_keys
                     where work_id = :'tw' and variant = 1 and position = 2) = '-3',
   'репетитор видит ключ своей работы, ответ в нормальной записи');

@@ -65,6 +65,10 @@ create table public.variant_works (
   set_code text not null check (length(set_code) between 6 and 200),
   -- Вариантов в работе: 1 — один вариант, больше — серия.
   variants smallint not null check (variants between 1 and 10),
+  -- Номер каждого варианта работы в партии: выдан один «Вариант 3» —
+  -- {3}. По нему сайт после завершения собирает разборы тем же кодом.
+  set_variants smallint[] not null
+    check (cardinality(set_variants) = variants and 1 <= all (set_variants) and 10 >= all (set_variants)),
   mode public.variant_mode not null,
   timer_kind text not null default 'none' check (timer_kind in ('none', 'up', 'down')),
   timer_minutes smallint check (timer_minutes between 1 and 300),
@@ -171,7 +175,7 @@ $$;
 /* ── Выдать ────────────────────────────────────────────────────── */
 
 -- p: {title, kind, set_code, mode, timer_kind, timer_minutes, due_at,
---     class_id, student_ids: [uuid], variants: [{variant, tasks: [{position,
+--     class_id, student_ids: [uuid], variants: [{variant, set_variant, tasks: [{position,
 --     ege_no, prototype_id, task_ref, subtype, points, statement, figure,
 --     answer, hints}]}]}
 create or replace function public.issue_variant_work(p jsonb)
@@ -201,10 +205,12 @@ begin
     raise exception 'no_tasks: в работе нет заданий' using errcode = 'check_violation';
   end if;
 
-  insert into public.variant_works (tutor_id, class_id, title, kind, set_code, variants, mode,
-                                    timer_kind, timer_minutes, due_at)
+  insert into public.variant_works (tutor_id, class_id, title, kind, set_code, variants, set_variants,
+                                    mode, timer_kind, timer_minutes, due_at)
   values (auth.uid(), v_class, trim(p ->> 'title'), coalesce(nullif(p ->> 'kind', ''), 'ege'),
           p ->> 'set_code', jsonb_array_length(p -> 'variants'),
+          array(select coalesce((v ->> 'set_variant')::smallint, (v ->> 'variant')::smallint)
+                  from jsonb_array_elements(p -> 'variants') v),
           (p ->> 'mode')::public.variant_mode, coalesce(p ->> 'timer_kind', 'none'),
           nullif(p ->> 'timer_minutes', '')::smallint, v_due)
   returning id into v_id;

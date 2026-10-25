@@ -31,6 +31,15 @@ import {
   type WorkPayload,
   type WorkUi,
 } from '@/lib/variant/online/sessionUi';
+import type { KabinetApi } from '@/lib/kabinet/api';
+import { kabinetProverka } from '@/lib/variant/online/kabinetProverka';
+import {
+  packKabinet,
+  rabotaScope,
+  unpackKabinet,
+  withSolutions,
+} from '@/lib/variant/online/kabinetWork';
+import type { VariantTask } from '@/lib/variant/types';
 import { WorkResult } from './WorkResult';
 import { WorkScreen } from './WorkScreen';
 
@@ -42,6 +51,50 @@ export interface WorkRunProps {
   outdated: boolean;
   /** Ссылка открыта со страницы серии: в итогах — «К серии». */
   series: boolean;
+  /**
+   * Работа, выданная через кабинет (этап 2): проверка на сервере, попытка
+   * начинается на сервере кнопкой «Начать», черновик контрольной уходит
+   * туда же. Нет — вариант по коду, проверка в браузере.
+   */
+  kabinet?: {
+    api: KabinetApi;
+    workId: string;
+    /** Начать попытку на сервере и получить задания с её номером. */
+    start: () => Promise<WorkPayload>;
+    /** Страница работы в кабинете. */
+    backHref: string;
+  };
+}
+
+type KabinetProps = NonNullable<WorkRunProps['kabinet']>;
+
+/** Проверка: работа из кабинета — на сервере, вариант по коду — в браузере. */
+function proverkaOf(payload: WorkPayload, kabinet: KabinetProps | undefined): Proverka {
+  return payload.kabinet !== undefined && kabinet !== undefined
+    ? kabinetProverka(kabinet.api, payload.kabinet.attemptId)
+    : localProverka(payload.tasks);
+}
+
+/** Черновик контрольной — на сервер, не чаще раза в 3 с. */
+function useDraftSync(kabinet: KabinetProps | undefined) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const last = useRef('');
+  return useCallback(
+    (payload: WorkPayload, ui: WorkUi) => {
+      if (kabinet === undefined || payload.kabinet === undefined || payload.mode !== 'kontrol')
+        return;
+      const draft = { answers: ui.answers, later: ui.later, times: ui.times };
+      const json = JSON.stringify(draft);
+      if (json === last.current) return;
+      last.current = json;
+      if (timer.current !== null) clearTimeout(timer.current);
+      const attemptId = payload.kabinet.attemptId;
+      timer.current = setTimeout(() => {
+        void kabinet.api.variantSaveDraft(attemptId, draft).catch(() => undefined);
+      }, 3000);
+    },
+    [kabinet],
+  );
 }
 
 /** Название работы по типу из шапки: «Домашняя работа», своё. */
@@ -69,7 +122,10 @@ function firstAttempts(payload: WorkPayload, ui: WorkUi): string[] {
  * Проверка — через `Proverka` (lib/variant/online/proverka.ts): на этапе
  * 1 в браузере, на этапе 2 — на сервере, экран тот же.
  */
-export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
+export function WorkRun({ link, initial, outdated, series, kabinet }: WorkRunProps) {
+  const syncDraft = useDraftSync(kabinet);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
   const [mode, setMode] = useState<'work' | 'oshibki'>('work');
   const snapshot = useRef<WorkUi | null>(null);
   const emptyRef = useRef('');
@@ -97,7 +153,11 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
       ) : null}
       <div hidden={mode === 'oshibki'}>
         <TrainerSessionHost<WorkPayload, WorkUi>
-          scope={workScope(link.code, link.variant, link.mode)}
+          scope={
+            kabinet === undefined
+              ? workScope(link.code, link.variant, link.mode)
+              : rabotaScope(kabinet.workId, link.variant)
+          }
           what="вариант"
           isPayload={isWorkPayload}
           count={(p) => p.tasks.length}
@@ -105,8 +165,10 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
             kind: `№${p.tasks[i]?.egeNumber ?? ''}`,
             html: p.tasks[i]?.statement ?? '',
           })}
-          pack={packWork}
-          unpack={unpackWork}
+          pack={kabinet === undefined ? packWork : packKabinet}
+          unpack={
+            kabinet === undefined ? unpackWork : (packed) => unpackKabinet(kabinet.api, packed)
+          }
           labels={{
             solved: link.mode === 'kontrol' ? T.run.status.answered : T.run.status.right,
             progress:
@@ -135,6 +197,7 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
                 outdated={outdated}
                 series={series}
                 link={link}
+                kabinet={kabinet}
                 onOshibki={(wrong) => {
                   setWrongForOshibki(wrong);
                   setMode('oshibki');
@@ -148,18 +211,35 @@ export function WorkRun({ link, initial, outdated, series }: WorkRunProps) {
               title={title}
               count={initial.tasks.length}
               outdated={outdated}
-              onStart={() => start({ ...initial })}
+              busy={starting}
+              error={startError}
+              onStart={() => {
+                if (kabinet === undefined) {
+                  start({ ...initial });
+                  return;
+                }
+                setStarting(true);
+                setStartError(null);
+                kabinet
+                  .start()
+                  .then((payload) => start(payload))
+                  .catch((e: unknown) => setStartError(e instanceof Error ? e.message : String(e)))
+                  .finally(() => setStarting(false));
+              }}
             />
           )}
           screen={(ctx) => (
             <WorkScreen
               payload={ctx.payload}
               restored={ctx.restored === null ? null : readWorkUi(ctx.restored)}
-              report={ctx.report}
+              report={(ui) => {
+                ctx.report(ui);
+                syncDraft(ctx.payload, ui);
+              }}
               elapsed={ctx.elapsed}
               finish={ctx.finish}
               setBeforeFinish={ctx.setBeforeFinish}
-              proverka={localProverka(ctx.payload.tasks)}
+              proverka={proverkaOf(ctx.payload, kabinet)}
               onSnapshot={onSnapshot}
               onEmpty={onEmpty}
             />
@@ -177,12 +257,16 @@ function StartScreen({
   title,
   count,
   outdated,
+  busy = false,
+  error = null,
   onStart,
 }: {
   link: WorkLink;
   title: string;
   count: number;
   outdated: boolean;
+  busy?: boolean;
+  error?: string | null;
   onStart: () => void;
 }) {
   const timer =
@@ -207,7 +291,12 @@ function StartScreen({
         ) : null}
         <li>{T.start.answerFormat}</li>
       </ul>
-      <Button size="lg" onClick={onStart} data-testid="vo-begin">
+      {error === null ? null : (
+        <p className="vo-warn" role="alert">
+          {error}
+        </p>
+      )}
+      <Button size="lg" onClick={onStart} loading={busy} data-testid="vo-begin">
         {T.start.begin}
       </Button>
     </section>
@@ -224,6 +313,7 @@ function Finished({
   outdated,
   series,
   link,
+  kabinet,
   onOshibki,
 }: {
   payload: WorkPayload;
@@ -233,11 +323,15 @@ function Finished({
   outdated: boolean;
   series: boolean;
   link: WorkLink;
+  kabinet: KabinetProps | undefined;
   onOshibki: (wrong: number[]) => void;
 }) {
-  const proverka: Proverka = useMemo(() => localProverka(payload.tasks), [payload]);
+  const proverka: Proverka = useMemo(() => proverkaOf(payload, kabinet), [payload, kabinet]);
+  /* Работа из кабинета: разборы — после завершения, по тому же коду партии. */
+  const [shown, setShown] = useState<VariantTask[]>(payload.tasks);
   const [check, setCheck] = useState<WorkCheck | null>(null);
   const [volatile, setVolatile] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
   const answers = useMemo(() => firstAttempts(payload, ui), [payload, ui]);
   const result: ResultData = useMemo(
     () => ({
@@ -258,51 +352,76 @@ function Finished({
   );
   const code = useMemo(() => encodeResult(result), [result]);
   const saved = useRef(false);
+  /* Завершение отправляется один раз, даже если эффект перезапустится:
+     сервер второй раз ответил бы «работа уже завершена». */
+  const finishing = useRef<Promise<WorkCheck> | null>(null);
 
   useEffect(() => {
     let alive = true;
-    void proverka.finish(answers).then((c) => {
-      if (!alive) return;
-      setCheck(c);
-      if (saved.current) return;
-      saved.current = true;
-      const numbers = payload.tasks.map((t) => t.egeNumber);
-      const score = scoreWork(numbers, c.right);
-      const finishedAt = Date.now();
-      void saveWork({
-        id: `${payload.code}|${payload.variant}|${payload.mode}|${finishedAt}`,
-        code: payload.code,
-        variant: payload.variant,
-        mode: payload.mode,
-        title,
-        finishedAt,
-        resultCode: code,
-        primary: score.primary,
-        max: score.max,
-        test: score.test,
-        seconds,
-        tasks: payload.tasks.map((t, i) => ({
-          egeNumber: t.egeNumber,
-          right: c.right[i] === true,
-          empty: (answers[i] ?? '') === '',
-          seconds: result.tasks[i]?.seconds ?? 0,
-        })),
-      }).then(() => {
-        if (alive) setVolatile(archiveVolatile());
-      });
-    });
+    const extra = {
+      seconds: result.tasks.map((t) => t.seconds),
+      hinted: ui.hinted,
+    };
+    finishing.current ??= proverka.finish(answers, extra);
+    void finishing.current.then(
+      (c) => {
+        if (!alive) return;
+        setCheck(c);
+        if (payload.kabinet !== undefined) {
+          void withSolutions(payload.tasks, payload.code, payload.variant).then((t) => {
+            if (alive) setShown(t);
+          });
+        }
+        if (saved.current) return;
+        saved.current = true;
+        const numbers = payload.tasks.map((t) => t.egeNumber);
+        const score = scoreWork(numbers, c.right);
+        const finishedAt = Date.now();
+        void saveWork({
+          id: `${payload.code}|${payload.variant}|${payload.mode}|${finishedAt}`,
+          code: payload.code,
+          variant: payload.variant,
+          mode: payload.mode,
+          title,
+          finishedAt,
+          resultCode: code,
+          primary: score.primary,
+          max: score.max,
+          test: score.test,
+          seconds,
+          tasks: payload.tasks.map((t, i) => ({
+            egeNumber: t.egeNumber,
+            right: c.right[i] === true,
+            empty: (answers[i] ?? '') === '',
+            seconds: result.tasks[i]?.seconds ?? 0,
+          })),
+        }).then(() => {
+          if (alive) setVolatile(archiveVolatile());
+        });
+      },
+      (e: unknown) => {
+        if (alive) setFailed(e instanceof Error ? e.message : String(e));
+      },
+    );
     return () => {
       alive = false;
     };
-  }, [proverka, answers, payload, title, code, seconds, result]);
+  }, [proverka, answers, payload, title, code, seconds, result, ui.hinted]);
 
+  if (failed !== null) {
+    return (
+      <p className="vo-warn" role="alert">
+        {failed}
+      </p>
+    );
+  }
   if (check === null) return <p className="vo-status">{T.start.loading}</p>;
   const wrong = payload.tasks.map((_, i) => i).filter((i) => check.right[i] !== true);
-  const again = reshatHref({ ...link });
+  const again = kabinet?.backHref ?? reshatHref({ ...link });
 
   return (
     <WorkResult
-      tasks={payload.tasks}
+      tasks={shown}
       data={result}
       rights={check.right}
       correct={check.answers}

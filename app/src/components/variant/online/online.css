@@ -783,3 +783,82 @@
 .vo-field .input {
   max-width: 120px;
 }
+
+/* ── Кабинет: результаты класса ─────────────────────────────── */
+.vo-panel__kab {
+  margin: 0;
+}
+.vo-class {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.vo-class th,
+.vo-class td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+  white-space: nowrap;
+}
+.vo-class thead th {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.vo-class th[scope='row'] {
+  text-align: left;
+}
+.vo-class__name {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  text-decoration: none;
+}
+.vo-class__name:disabled {
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+.vo-class th[scope='row'] .vo-mini,
+.vo-class__score .vo-mini {
+  display: block;
+  margin: 0;
+}
+.vo-class__score {
+  font-weight: 700;
+}
+.vo-class__cell {
+  min-width: 32px;
+  font-weight: 700;
+}
+.vo-class__cell.is-right {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.vo-class__cell.is-wrong {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.vo-class__cell.is-none {
+  background: var(--color-surface-2);
+}
+.vo-class tfoot th,
+.vo-class tfoot td {
+  border-top: 2px solid var(--color-border-strong);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.vo-class__avg[data-l='4'],
+.vo-class__avg[data-l='5'] {
+  color: var(--color-text-inverse);
+}
+.vo-class__open td {
+  padding: 0;
+  text-align: left;
+  white-space: normal;
+}
+.vo-class__open .vo-result {
+  margin: var(--space-3) 0;
+  padding-bottom: 0;
+}
+.vo-kab-solve {
+  display: grid;
+  gap: var(--space-2);
+}

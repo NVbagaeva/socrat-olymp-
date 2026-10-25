@@ -6,6 +6,8 @@ import { Avatar, Badge, Button, Card, ErrorState, FieldMessage, Input } from '@/
 import { kabinetApi } from '@/lib/kabinet/client';
 import type { KabinetApi } from '@/lib/kabinet/api';
 import type { Me } from '@/lib/kabinet/types';
+import { ONLINE_TEXT } from '@/content/variantOnline/text';
+import { FinishedBadge } from '@/components/variant/online/kabinet/VariantWorkPage';
 import { KabinetLoading } from './KabinetGate';
 import { DocumentsBlock, initialsOf, InvitationList, InviteLink } from './parts';
 import { kabinetText } from './text';
@@ -30,7 +32,7 @@ export function TutorHome({ me }: { me: Me }) {
       />
     );
   }
-  const { classes, students, homework, invitations } = home.data;
+  const { classes, students, homework, invitations, variantWorks } = home.data;
   const act = (fn: () => Promise<unknown>) => {
     setProblem(null);
     fn().catch((e: unknown) => setProblem(errorText(e)));
@@ -40,9 +42,18 @@ export function TutorHome({ me }: { me: Me }) {
     <div className="kab-stack">
       <div className="kab-title-row">
         <h1 className="t-h1">{me.name}</h1>
-        <Link className="btn btn--primary" href="/kabinet/vydat-dz/" data-testid="issue-homework">
-          {t.issue}
-        </Link>
+        <span className="kab-actions">
+          <Link className="btn btn--primary" href="/kabinet/vydat-dz/" data-testid="issue-homework">
+            {t.issue}
+          </Link>
+          <Link
+            className="btn btn--secondary"
+            href="/kabinet/vydat-variant/"
+            data-testid="issue-variant"
+          >
+            {ONLINE_TEXT.kab.issueButton}
+          </Link>
+        </span>
       </div>
       {problem !== null ? <FieldMessage tone="error">{problem}</FieldMessage> : null}
 
@@ -144,6 +155,32 @@ export function TutorHome({ me }: { me: Me }) {
                 <Badge tone={h.submitted === h.recipients ? 'success' : 'neutral'}>
                   {t.submitted(h.submitted, h.recipients)}
                 </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card title={ONLINE_TEXT.kab.worksTitle}>
+        {variantWorks.length === 0 ? (
+          <p className="t-caption muted">{ONLINE_TEXT.kab.noWorks}</p>
+        ) : (
+          <ul className="kab-list" data-testid="tutor-variants">
+            {variantWorks.map((w) => (
+              <li key={w.id} className="kab-list__row kab-list__row--wrap">
+                <span>
+                  <Link href={`/kabinet/rabota/?id=${w.id}`} className="kab-strong">
+                    {w.title}
+                  </Link>
+                  <span className="t-caption muted kab-block">
+                    {w.className ?? t.pupils(w.recipients)} · {ONLINE_TEXT.kab.variants(w.variants)}{' '}
+                    · {ONLINE_TEXT.kab.mode2[w.mode]} ·{' '}
+                    {w.dueAt === null
+                      ? kabinetText.homework.noDue
+                      : kabinetText.homework.due(formatDate(w.dueAt))}
+                  </span>
+                </span>
+                <FinishedBadge finished={w.finished} recipients={w.recipients} />
               </li>
             ))}
           </ul>

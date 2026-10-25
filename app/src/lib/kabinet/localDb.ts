@@ -6,7 +6,15 @@
  */
 
 import type { ConsentRecord } from '@/lib/account/consents';
-import type { AttemptOutcome, HomeworkItem, KabinetRole } from './types';
+import type {
+  AttemptOutcome,
+  HomeworkItem,
+  KabinetRole,
+  VariantHint,
+  VariantMode,
+  VariantTimer,
+  VariantWorkTask,
+} from './types';
 
 /** Полный ключ в localStorage. */
 export const KABINET_KEY = 'budetege:kabinet:v1';
@@ -94,6 +102,57 @@ export interface Db {
     homeworkId: string | null;
     finishedAt: string;
   }[];
+  /* Онлайн-вариант — таблицы миграции 20261025120000_variant_works.sql.
+     Ключ (variantKeys) читают только «функции базы» в localVariant.ts. */
+  variantWorks: {
+    id: string;
+    tutorId: string;
+    classId: string | null;
+    title: string;
+    kind: string;
+    setCode: string;
+    variants: number;
+    setVariants: number[];
+    mode: VariantMode;
+    timer: VariantTimer;
+    dueAt: string | null;
+    createdAt: string;
+    closedAt: string | null;
+  }[];
+  variantTasks: (VariantWorkTask & { workId: string; variant: number })[];
+  variantKeys: {
+    workId: string;
+    variant: number;
+    position: number;
+    answer: string;
+    hints: VariantHint[];
+  }[];
+  variantRecipients: { workId: string; studentId: string; assignedAt: string }[];
+  variantAttempts: {
+    id: string;
+    workId: string;
+    studentId: string;
+    variant: number;
+    startedAt: string;
+    deadlineAt: string | null;
+    finishedAt: string | null;
+    late: boolean;
+    primary: number | null;
+    max: number | null;
+    seconds: number | null;
+    draft: Record<string, unknown>;
+  }[];
+  variantAnswers: {
+    attemptId: string;
+    studentId: string;
+    position: number;
+    first: string | null;
+    firstRight: boolean | null;
+    second: string | null;
+    secondRight: boolean | null;
+    hinted: boolean;
+    seconds: number;
+  }[];
 }
 
 export function emptyDb(): Db {
@@ -109,6 +168,12 @@ export function emptyDb(): Db {
     recipients: [],
     attempts: [],
     sessions: [],
+    variantWorks: [],
+    variantTasks: [],
+    variantKeys: [],
+    variantRecipients: [],
+    variantAttempts: [],
+    variantAnswers: [],
   };
 }
 

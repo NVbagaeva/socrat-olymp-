@@ -222,6 +222,29 @@ export function OnlinePanel({ set, meta, stale, busy, onSeries }: OnlinePanelPro
         </div>
       )}
       {stale ? <p className="var-status var-status--warn">{T.panel.stale}</p> : null}
+      {/* Пробный кабинет есть только в служебной сборке (KABINET=1). */}
+      {process.env.KABINET_ON === '1' && set !== null ? (
+        <p className="vo-panel__kab">
+          <a
+            className="btn btn--secondary"
+            href={`/kabinet/vydat-variant/?${new URLSearchParams({
+              kod: set.code,
+              r: full.mode === 'kontrol' ? 'k' : 't',
+              tm:
+                full.timer.kind === 'down'
+                  ? String(full.timer.minutes)
+                  : full.timer.kind === 'up'
+                    ? 's'
+                    : '0',
+              w: full.kind,
+              ...(full.kind === 'custom' && full.title !== '' ? { n: full.title } : {}),
+            }).toString()}`}
+            data-testid="vo-to-kabinet"
+          >
+            {T.kab.fromVariant}
+          </a>
+        </p>
+      ) : null}
 
       <div className="vo-panel__series">
         <span className="var-field__label">{T.panel.series}</span>
