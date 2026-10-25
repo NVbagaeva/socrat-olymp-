@@ -72,10 +72,14 @@ const TEXT_ITOGA: Record<Exclude<Itog['t'], 'oshibka' | 'verno' | 'pusto'>, stri
   neverno: 'Неверно.',
 };
 
+/** Текст с формулами в $…$ → HTML. */
+const sFormulami = (text: string): string =>
+  text.replace(/\$([^$]+)\$/g, (_, x: string) => katex.renderToString(x));
+
 function soobshchenie(it: Itog | undefined): string | null {
   if (!it || it.t === 'pusto' || it.t === 'verno') return null;
   if (it.t === 'oshibka') return it.msg;
-  return TEXT_ITOGA[it.t].replace(/\$([^$]+)\$/g, (_, x: string) => katex.renderToString(x));
+  return sFormulami(TEXT_ITOGA[it.t]);
 }
 
 /**
@@ -415,9 +419,15 @@ function Uroven1({ t }: { t: TablitsaZapolni13 }) {
         </Button>
         {itog === null ? null : (
           <span className={clsx('z13-zap__status', itog && 'is-right')} role="status">
-            {itog
-              ? 'Верно: эта таблица заполнена правильно.'
-              : 'В этой таблице ошибка. Проверьте, на что делят кредит, от какого долга считают проценты и умножают ли на k.'}
+            {itog ? (
+              'Верно: эта таблица заполнена правильно.'
+            ) : (
+              <Html
+                html={sFormulami(
+                  'В этой таблице ошибка. Проверьте, на что делят кредит, от какого долга считают проценты и умножают ли на $k$.',
+                )}
+              />
+            )}
           </span>
         )}
       </div>
