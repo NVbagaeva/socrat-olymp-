@@ -326,6 +326,10 @@ if (katexPut === undefined) {
     ['lib/sheet/marks.js', path.join(out, 'sheet', 'marks.js')],
     ['lib/sheet/typography.js', path.join(out, 'sheet', 'typography.js')],
     ['lib/sheet/answers.js', path.join(out, 'sheet', 'answers.js')],
+    /* answers.js ставит рисунок разбора по правилам листа (placeFigure). */
+    ['lib/sheet/sheet.js', path.join(out, 'sheet', 'sheet.js')],
+    ['lib/sheet/figureRules.js', path.join(out, 'sheet', 'figureRules.js')],
+    ['lib/sheet/space.js', path.join(out, 'sheet', 'space.js')],
   ]) {
     perevesti(path.join(root, 'src', file), target);
   }
