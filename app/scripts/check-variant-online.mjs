@@ -58,49 +58,10 @@ const { rngOf } = requireSrc('lib/vychisleniya/rng');
 /* ── 1. Нормализация ─────────────────────────────────────────────── */
 
 console.log('1. Нормализация ответа');
-const CASES = [
-  // ввод, нормальная запись или причина
-  ['5', '5'],
-  ['-3', '-3'],
-  ['−3', '-3'],
-  ['–3', '-3'],
-  ['—3', '-3'],
-  ['0,5', '0.5'],
-  ['0.5', '0.5'],
-  ['1,50', '1.5'],
-  ['1.500', '1.5'],
-  ['2,0', '2'],
-  ['2.', 'other'],
-  ['007', '7'],
-  ['00,25', '0.25'],
-  ['0', '0'],
-  ['-0', '0'],
-  ['−0,00', '0'],
-  ['-0,10', '-0.1'],
-  ['  12  ', '12'],
-  [' 12 ', '12'],
-  ['1000000', '1000000'],
-  ['-2,25', '-2.25'],
-  ['', 'empty'],
-  ['   ', 'empty'],
-  ['1/2', 'fraction'],
-  ['-3/4', 'fraction'],
-  ['1 / 2', 'fraction'],
-  ['abc', 'letters'],
-  ['5 см', 'letters'],
-  ['1e3', 'letters'],
-  ['х=5', 'letters'],
-  ['1 000', 'space'],
-  ['1 000', 'space'],
-  [',5', 'other'],
-  ['.5', 'other'],
-  ['+5', 'other'],
-  ['1,2,3', 'other'],
-  ['--3', 'other'],
-  ['1,5.2', 'other'],
-  ['-', 'other'],
-  [',', 'other'],
-];
+/* Таблица случаев — общая с базой (public.normalize_ege_answer). */
+const CASES = JSON.parse(
+  fs.readFileSync(path.join(SRC, 'lib/variant/online/normalizeCases.json'), 'utf8'),
+).cases;
 for (const [input, want] of CASES) {
   const n = normalizeAnswer(input);
   const got = n.ok ? n.value : n.problem;
