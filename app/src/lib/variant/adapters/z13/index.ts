@@ -6,10 +6,10 @@
  */
 
 import { BANK_13 } from '@/lib/zadanie13/bank';
-import { sobratZadachu13, tablitsaUsloviya13 } from '@/lib/zadanie13/gen/list';
+import { sobratZadachu13 as sobrat, tablitsaUsloviya13 } from '@/lib/zadanie13/gen/list';
 import { otvetText } from '@/lib/zadanie13/html';
 import { PROTOTYPE_BY_ID } from '@/lib/zadanie13/proto';
-import type { TypeCode } from '@/lib/zadanie13/types';
+import type { Task13, TypeCode } from '@/lib/zadanie13/types';
 import type { SectionAdapter, SectionModule, Stars, VariantTask } from '../../types';
 import {
   FALLBACK,
@@ -25,7 +25,7 @@ import { info } from './info';
 
 const TYPES: readonly TypeCode[] = ['A', 'B', 'C', 'D'];
 
-interface C13 extends Candidate {
+export interface C13 extends Candidate {
   seed: string;
 }
 
@@ -53,14 +53,22 @@ const POOL: C13[] = BANK_13.flatMap(([id, seed]) => {
 });
 
 function build(c: C13, isNew: boolean): VariantTask {
-  const z = sobratZadachu13({
-    pos: '1.1',
-    no: 1,
-    vid: c.subtype as TypeCode,
-    prototypeId: c.prototypeId,
-    seed: c.seed,
-    istochnik: isNew ? 'new' : 'bank',
-  });
+  return buildIz(c, isNew);
+}
+
+/** Задача по позиции листа; `gotovaya` — уже собранная на заданных числах. */
+export function buildIz(c: C13, isNew: boolean, gotovaya?: Task13): VariantTask {
+  const z = sobrat(
+    {
+      pos: '1.1',
+      no: 1,
+      vid: c.subtype as TypeCode,
+      prototypeId: c.prototypeId,
+      seed: c.seed,
+      istochnik: isNew ? 'new' : 'bank',
+    },
+    gotovaya,
+  );
   const t = z.task;
   const statement = z.questionHtml + tablitsaUsloviya13(z);
   const solution = z.polnoHtml;

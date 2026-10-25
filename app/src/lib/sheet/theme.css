@@ -329,6 +329,52 @@
   --color-focus-ring: transparent;
 }
 
+/* ══════════════════════════════════════════════════════════
+   СТРОГИЙ ЛИСТ С ЦВЕТНЫМИ ЧЕРТЕЖАМИ — листы вариантов («Собрать
+   вариант» и «Варианты повышенной сложности»): оформление листа
+   строгое, а чертежи — в цветах сайта, сплошными линиями, как на
+   экране; графики различает и подпись y = f(x), y = g(x). Включается
+   атрибутом data-sheet-chertezhi="color" рядом с data-sheet-theme="strict".
+   ══════════════════════════════════════════════════════════ */
+:root[data-sheet-theme='strict'][data-sheet-chertezhi='color'] {
+  /* Чертежи движка graph/ и solid/: те же имена, что ждут движки. */
+  --color-surface: #ffffff;
+  --color-primary: #1f5fd0;
+  --color-text: #101728;
+  --color-text-tertiary: #97a1b0;
+  --graph-axis: #101728;
+  --graph-grid: #a9b9cf;
+  --graph-accent: #e07a2f;
+  --graph-aux-axis: #e07a2f;
+  --graph-asymptote: #8a8f9c;
+  --solid-edge: #1f5fd0;
+  --solid-face: #e8f0fc;
+  --solid-liquid: #9bc0f2;
+
+  /* Толщина линий чертежа: в цвете смысл несёт цвет. */
+  --graph-curve-a-width: 3.2;
+  --graph-curve-b-width: 3.2;
+
+  /* Рисунки вероятности (components/probability): те же токены сайта,
+     что ждёт probability.css. Синий строит рисунок, оранжевый
+     отмечает благоприятное. */
+  --color-accent: #e07a2f;
+  --color-surface-soft: #e8f0fc;
+  --color-border: #e4ebf3;
+  --color-border-strong: #cfdae8;
+  --color-border-info: #d7e5fa;
+  --color-text-secondary: #667389;
+  --color-text-brand: #0b1f45;
+  --color-text-inverse: #ffffff;
+  --color-track: #eff3f8;
+  --color-heat-2: #d5e4fa;
+  --color-heat-3: #a9c8f3;
+  --color-heat-4: #6098e6;
+  --color-success: #16a34a;
+  --color-error: #dc2626;
+  --color-focus-ring: #e8f0fc;
+}
+
 /* Две кривые на чёрно-белом листе: вторая идёт штрихом. Правило
    действует только на чертежи со строгими правилами подписей —
    это подтема «Квадратичная функция». Чертежи линейной подтемы
@@ -337,6 +383,6 @@
    Штрих задаётся только в печатной теме: на экране кривые различает
    цвет, и рвать линию там незачем. */
 [data-sheet-theme='print'] .graph-strict .graph-curve--lineB,
-[data-sheet-theme='strict'] .graph-strict .graph-curve--lineB {
+[data-sheet-theme='strict']:not([data-sheet-chertezhi='color']) .graph-strict .graph-curve--lineB {
   stroke-dasharray: var(--graph-curve-b-dash, 11 7);
 }

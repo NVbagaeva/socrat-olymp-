@@ -8,6 +8,7 @@ import { BLOK_II_IV } from './blok2';
 import { BLOK_V_IX } from './blok3';
 import { BLOK_X } from './blok10';
 import type { PrototipChertezha } from './dsl';
+import { PROTOTIPY_POVYSHENNYE } from './povyshennye';
 
 export type { PrototipChertezha } from './dsl';
 
@@ -19,7 +20,9 @@ export const PROTOTIPY: readonly PrototipChertezha[] = [
 ];
 
 export function prototip(id: number): PrototipChertezha {
-  const p = PROTOTIPY.find((x) => x.id === id);
+  /* Прототипы вариантов повышенной сложности — не в общем реестре:
+     в банк, тренажёр и генератор №1 они не попадают. */
+  const p = PROTOTIPY.find((x) => x.id === id) ?? PROTOTIPY_POVYSHENNYE.find((x) => x.id === id);
   if (p === undefined) throw new Error(`прототип чертежа ${id} не найден`);
   return p;
 }

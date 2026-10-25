@@ -22,6 +22,9 @@ const NOT_TEXT_KEYS = new Set([
   'path', 'file', 'pattern', 'role', 'tag', 'name', 'value', 'variant', 'size', 'width', 'height',
   'alt', 'aria-label', 'ariaLabel', 'title_tex', 'data-tex', 'scene', 'answer', 'seal',
   'levelReason', 'note', 'aria', 'describe', 'setX', 'setY', 'ideya',
+  /* prototip — служебное описание шаблона «Вариантов повышенной сложности»
+     (lib/povyshennye/shablony.ts): для отчётов разработчика, на сайт не выводится. */
+  'prototip',
 ]);
 
 /* Вызовы, аргумент которых — TeX или служебная строка. */

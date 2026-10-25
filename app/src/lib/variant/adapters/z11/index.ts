@@ -51,12 +51,17 @@ const EGE_IDS = new Set(EGE_SUBTYPES.map((s) => s.id));
 type Iz =
   { vid: 'bank' | 'analog'; b: UslovieBanka } | { vid: 'new'; seed: string; params: Params };
 
-interface C11 extends Candidate {
+export interface C11 extends Candidate {
   iz: Iz;
 }
 
-function stars(id: string): Stars {
-  return subtype(id).level;
+function stars(id: string): Stars | null {
+  /* Своих подтипов раздела вариантов в SUBTYPES нет — у них звёзд нет. */
+  try {
+    return subtype(id).level;
+  } catch {
+    return null;
+  }
 }
 
 function fromBank(b: UslovieBanka): C11 | null {
@@ -73,7 +78,7 @@ function fromBank(b: UslovieBanka): C11 | null {
   };
 }
 
-function build(c: C11, solved: Solved): VariantTask {
+export function build(c: C11, solved: Solved): VariantTask {
   const id = c.prototypeId;
   const kod = kodNaSayte(id);
   const s = solved;

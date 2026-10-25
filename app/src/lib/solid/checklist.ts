@@ -16,12 +16,16 @@
  *  8. вспомогательные построения акцентного цвета
  *  9. числа на чертеже — числа варианта
  * 10. буквы на чертеже — те же, что в условии
- * 11. цвета и шрифт из токенов сайта
+ * 11. цвета (палитра сайта значениями) и шрифт рисунков сайта
  * 12. чертёж читается на ширине 360
  */
 
+import { BUKVY, CHISLA } from '../risunki/shrifty.js';
 import type { Model, Polyhedron } from './model';
 import { renderSolid, solidDiagnostics } from './render';
+
+/** Палитра рисунков сайта (styles/tokens.css): текст, синий, терракота, фон. */
+const PALITRA = new Set(['#101728', '#1f5fd0', '#e07a2f', '#ffffff']);
 
 /** Сколько пунктов в чек-листе. */
 export const CHECKLIST_POINTS = 12;
@@ -243,7 +247,7 @@ export function checkDrawing(id: string, model: Model, condition: string | null)
   }
 
   /* 8. Вспомогательные построения терракотовые. */
-  const auxStrokes = (svg.match(/stroke="var\(--graph-accent\)"/g) ?? []).length;
+  const auxStrokes = (svg.match(/stroke="#e07a2f"/gi) ?? []).length;
   ok[7] = aux.length === 0 || auxStrokes > 0;
   if (!ok[7]) {
     notes.push('вспомогательные линии нарисованы не акцентным цветом');
@@ -282,12 +286,26 @@ export function checkDrawing(id: string, model: Model, condition: string | null)
     }
   }
 
-  /* 11. Цвета — сайта, подписи — шрифтом KaTeX, как формулы условия. */
-  const hex = svg.match(/#[0-9a-fA-F]{3,8}\b/g);
-  const font = /font-family="KaTeX_/.test(svg) || !svg.includes('<text');
-  ok[10] = hex === null && font;
+  /* 11. Цвета и шрифт — сайта, значениями прямо в разметке: рисунок не
+     зависит от CSS страницы. Токены var(--…) запрещены (без страницы они
+     не определены, и SVG красит по умолчанию — чёрным), цвета — только
+     из палитры сайта, шрифты — общие для рисунков (lib/risunki/shrifty). */
+  const tokeny = svg.match(/="var\(--[^"]*"/);
+  const chuzhoy = (svg.match(/#[0-9a-fA-F]{6}\b/g) ?? []).find(
+    (c) => !PALITRA.has(c.toLowerCase()),
+  );
+  const font = [...svg.matchAll(/font-family="([^"]*)"/g)].every(
+    (m) => m[1] === CHISLA || m[1] === BUKVY,
+  );
+  ok[10] = tokeny === null && chuzhoy === undefined && font;
   if (!ok[10]) {
-    notes.push(hex ? `в разметке хекс ${hex[0]}` : 'подписи не шрифтом KaTeX');
+    notes.push(
+      tokeny
+        ? `цвет токеном ${tokeny[0]} — без CSS страницы он не определён`
+        : chuzhoy
+          ? `цвет ${chuzhoy} не из палитры сайта`
+          : 'подписи не шрифтом рисунков сайта',
+    );
   }
 
   /* 12. Читается на 360: зазоры после сжатия до ширины телефона. */

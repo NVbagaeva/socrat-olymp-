@@ -2,10 +2,11 @@
  * Кадр → строка SVG: статичный чертёж для листа, предпросмотра и
  * первого кадра интерактивного чертежа (до загрузки скрипта).
  *
- * Цвета — токены палитры сайта (--solid-edge, --graph-accent,
- * --color-text…): на сайте их задаёт tokens.css, на листе — тема
- * листа (sheet/theme.css, цветная и ч/б). Для отдельного файла есть
- * режим `fiks` — те же цвета значениями.
+ * Цвета и толщины — атрибутами прямо в SVG, значениями (токены сайта
+ * из styles/tokens.css): рисунок не зависит от CSS страницы и одинаков
+ * на сайте, на листе, в PDF и на сводном листе. Раньше цвета были
+ * var(--solid-edge) и т. п. без запасного значения: вне страниц, где
+ * токены не заданы, рёбра пропадали, а заливки становились чёрными.
  *
  * Подписи: простые (имя вершины, число, градусы, корень из числа)
  * пишутся текстом SVG — они печатаются где угодно. Сложные (дробь)
@@ -20,6 +21,7 @@
  * data-line-pt).
  */
 
+import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 import { escSvg, imyaSvg } from '@/lib/stereo/proekciya';
 import type { Kadr, LiniyaKadra, PodpisKadra } from './kadr';
 
@@ -40,20 +42,16 @@ export interface OpciiSvg {
   klass?: string;
 }
 
-const TOKENY = {
-  rebro: 'var(--solid-edge)',
-  akcent: 'var(--graph-accent)',
-  podsvetka: 'var(--color-accent)',
-  tekst: 'var(--color-text)',
-  fon: 'var(--color-surface)',
-};
+/* Рёбра — тёмные, построения и подсветка — терракота сайта. Режим
+   tsveta оставлен для совместимости: и 'tokeny', и 'fiks' дают значения. */
 const FIKS = {
-  rebro: '#1f5fd0',
+  rebro: '#101728',
   akcent: '#e07a2f',
   podsvetka: '#e07a2f',
   tekst: '#101728',
   fon: '#ffffff',
 };
+const TOKENY = FIKS;
 
 const f = (x: number) => (Math.round(x * 10) / 10).toString();
 const f2 = (x: number) => (Math.round(x * 100) / 100).toString();
@@ -148,11 +146,10 @@ function plain(s: string): string {
   );
 }
 
-/* Шрифты KaTeX (их приносит katex.min.css листа и страницы); дальше —
-   похожие системные антиквы. Имена — курсив KaTeX_Math, числа — прямой
-   KaTeX_Main. */
-const SHRIFT_IMENI = "KaTeX_Math, 'Times New Roman', Times, serif";
-const SHRIFT_CHISLA = "KaTeX_Main, 'Times New Roman', Times, serif";
+/* Шрифты — общие для рисунков (lib/risunki/shrifty): имена — курсив
+   KaTeX_Math, числа — прямой KaTeX_Main. */
+const SHRIFT_IMENI = BUKVY;
+const SHRIFT_CHISLA = CHISLA;
 
 function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
   const op = p.tusklo ? ' opacity="0.35"' : '';
@@ -213,7 +210,7 @@ export function kadrSvg(k: Kadr, o: OpciiSvg): string {
     ? ` role="img" aria-label="${escSvg(o.alt).replace(/"/g, '&quot;')}"`
     : ' aria-hidden="true"';
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" class="${o.klass ?? 'ch3-svg'}" viewBox="0 0 ${f(k.W)} ${f(k.H)}" width="${f(k.W)}" height="${f(k.H)}"` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="chertezh3" class="${o.klass ?? 'ch3-svg'}" viewBox="0 0 ${f(k.W)} ${f(k.H)}" width="${f(k.W)}" height="${f(k.H)}"` +
     ` data-line-pt="${OFORMLENIE.vidno}" data-line-w="${f2(OFORMLENIE.vidno * edPt)}"${aria}>` +
     out.join('') +
     '</svg>'

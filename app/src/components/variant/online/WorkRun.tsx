@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui';
 import { TrainerSessionHost } from '@/components/tasks/session';
+import { POV_HREF, POV_TITLE, POV_VERSION_LABEL } from '@/content/povyshennye';
 import { WORK_KINDS } from '@/content/variant';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
+import { povNomer, versiyaText } from '@/lib/povyshennye/kod';
 import { archiveVolatile, saveWork } from '@/lib/variant/online/archive';
 import {
   ONLINE_PATHS,
@@ -137,7 +139,12 @@ export function WorkRun({ link, initial, outdated, series, kabinet }: WorkRunPro
   }, []);
   const [wrongForOshibki, setWrongForOshibki] = useState<number[] | null>(null);
 
-  const title = `${kindTitle(link.kind, link.title)} · ${T.start.variant(link.variant)}`;
+  /* Версия варианта повышенной сложности называется по разделу: «Вариант 7.3». */
+  const pv = povNomer(link.code);
+  const title =
+    pv === null
+      ? `${kindTitle(link.kind, link.title)} · ${T.start.variant(link.variant)}`
+      : `${POV_TITLE} · ${POV_VERSION_LABEL(versiyaText(pv, link.variant))}`;
 
   /* Итоги варианта остаются на месте, пока идёт работа над ошибками:
      «К результатам варианта» возвращает к ним, а не к началу. */
@@ -446,6 +453,11 @@ function Finished({
               {T.result.series}
             </Button>
           ) : null}
+          {povNomer(link.code) === null ? null : (
+            <Button variant="secondary" onClick={() => window.location.assign(POV_HREF)}>
+              {T.result.povyshennye}
+            </Button>
+          )}
           <Button variant="ghost" onClick={() => window.location.assign(again)}>
             {T.result.again}
           </Button>

@@ -37,7 +37,7 @@ import {
 import { info } from './info';
 import { withPrintFigures, withoutPrintFigures } from '@/lib/sheet/figureRules.js';
 
-interface C9 extends Candidate {
+export interface C9 extends Candidate {
   seed: string;
 }
 
@@ -106,6 +106,18 @@ function buildTask(c: C9, isNew: boolean): VariantTask | null {
   } catch {
     return null;
   }
+  return buildIz(c, t, isNew);
+}
+
+/**
+ * Задача из уже собранной задачи раздела (банк или заданные узлы).
+ * Рисунки — в печатном профиле листа (lib/sheet/figureRules.js).
+ */
+export function buildIz(c: C9, t: Generated, isNew: boolean): VariantTask {
+  return withPrintFigures(() => buildIzBez(c, t, isNew));
+}
+
+function buildIzBez(c: C9, t: Generated, isNew: boolean): VariantTask {
   const student = drawFigure(t, 'student');
   const teacher = drawFigure(t, 'teacher');
   const otvet = answerHtml(t.otvet);

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { TaskGrid } from '@/components/tasks';
+import { PovEntry } from '@/components/povyshennye/PovEntry';
 import { VariantEntry } from '@/components/variant/VariantEntry';
 import { landing } from '@/content/landing';
 import { tasksOfPart, tasksPage } from '@/content/tasks';
@@ -25,6 +26,7 @@ export function BankSection() {
         {/* На главной — первая часть, как и раньше; вторая часть
             и переключатель живут на странице банка. */}
         <VariantEntry className="bank-variant" />
+        <PovEntry className="bank-variant" />
         <TaskGrid tasks={tasksOfPart(1)} />
 
         <p className="bank-note">{bank.note}</p>

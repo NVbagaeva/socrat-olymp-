@@ -104,7 +104,7 @@ export function teacherHtml(r: Razbor45): string {
 }
 
 /** Разбор для ученика: метод, затем шаги — этап, пояснение, формула. */
-function studentHtml(r: Razbor45): string {
+export function studentHtml(r: Razbor45): string {
   const metod =
     r.metod === ''
       ? ''
