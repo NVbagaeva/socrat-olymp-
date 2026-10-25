@@ -495,7 +495,7 @@ export function summaPriUbyvanii(par: PosledniyPlatezh): Prototype {
     source: 'own',
     difficulty: 'base',
     units: 'rub',
-    title: 'Долг каждый год меньше на q %: общая сумма выплат в рублях',
+    title: 'Долг каждый год меньше на $q\\,\\%$: общая сумма выплат в рублях',
     maxDecimals: 0,
     make({ plot }: { plot: PlotFull }) {
       const dolgi = Array.from({ length: n }, (_, i) => Srub.mul(m.pow(i)));
