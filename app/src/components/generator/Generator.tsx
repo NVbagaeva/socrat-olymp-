@@ -157,6 +157,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [srcPop, setSrcPop] = useState(false);
+  const [filtrPop, setFiltrPop] = useState(false);
   const [pick, setPick] = useState(false);
   const [dopOpen, setDopOpen] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
@@ -342,6 +343,12 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     changePlan(filterBySource(config, st.plan, source), { source });
   }
 
+  function setFiltr(filtr: string) {
+    setFiltrPop(false);
+    commit({ ...st, filtr });
+    if (generated) say(GEN_UI.toast.obnovlen);
+  }
+
   function setVariants(n: number) {
     const variants = Math.max(1, Math.min(config.limits.variantsMax, n));
     commit({ ...st, variants });
@@ -521,6 +528,25 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
       <span>
         <b>{s.title}</b>
         <small>{s.note}</small>
+      </span>
+    </button>
+  ));
+
+  const filtr = config.filtr;
+  const filtrNow = filtr?.options.find((o) => o.id === st.filtr) ?? filtr?.options[0];
+  const filtrRadios = (filtr?.options ?? []).map((o) => (
+    <button
+      key={o.id}
+      type="button"
+      role="radio"
+      className="gen-radio"
+      aria-checked={filtrNow?.id === o.id}
+      onClick={() => setFiltr(o.id)}
+    >
+      <i aria-hidden="true" />
+      <span>
+        <b>{o.title}</b>
+        <small>{o.note}</small>
       </span>
     </button>
   ));
@@ -721,6 +747,40 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               </div>
             </div>
           ) : null}
+          {filtr === undefined ? null : (
+            <div className="gen-fld">
+              <span className="gen-label">{filtr.title}</span>
+              <div className="gen-popwrap">
+                <button
+                  type="button"
+                  className="gen-dd"
+                  aria-haspopup="menu"
+                  aria-expanded={filtrPop}
+                  onClick={() => setFiltrPop((v) => !v)}
+                >
+                  {filtrNow?.title}
+                  <GenIcon name="chevron" />
+                </button>
+                {filtrPop ? (
+                  <GenPopover onClose={() => setFiltrPop(false)}>
+                    {filtr.options.map((o) => (
+                      <button
+                        key={o.id}
+                        type="button"
+                        role="menuitemradio"
+                        aria-checked={filtrNow?.id === o.id}
+                        className="gen-pop__opt"
+                        onClick={() => setFiltr(o.id)}
+                      >
+                        <b>{o.title}</b>
+                        <small>{o.note}</small>
+                      </button>
+                    ))}
+                  </GenPopover>
+                ) : null}
+              </div>
+            </div>
+          )}
           {hasLevels ? (
             <div className="gen-fld">
               <span className="gen-label">{GEN_UI.slozhnost}</span>
@@ -757,6 +817,11 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               {source?.title}
             </button>
           ) : null}
+          {filtr === undefined ? null : (
+            <button type="button" onClick={() => setOverlay({ kind: 'filters' })}>
+              {filtrNow?.title}
+            </button>
+          )}
           {hasLevels ? (
             <button type="button" onClick={() => setOverlay({ kind: 'filters' })}>
               {levelsText(st.levels)}
@@ -1079,6 +1144,14 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               </div>
             </section>
           ) : null}
+          {filtr === undefined ? null : (
+            <section className="gen-sec">
+              <h3>{filtr.title}</h3>
+              <div className="gen-radios" role="radiogroup" aria-label={filtr.title}>
+                {filtrRadios}
+              </div>
+            </section>
+          )}
           {hasLevels ? (
             <section className="gen-sec">
               <h3>{GEN_UI.slozhnost}</h3>
