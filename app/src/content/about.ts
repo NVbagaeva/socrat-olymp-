@@ -1,4 +1,5 @@
 import { assetUrl } from '@/lib/assetUrl';
+import { VARIANT_HREF } from '@/content/variant';
 
 /**
  * Тексты страницы «Об авторе». Отдельно от лендинга: разметка страницы
@@ -189,7 +190,7 @@ export const about = {
   cta: {
     title: 'Пусть время учителя остаётся для главного',
     lead: 'Создайте первый вариант за несколько секунд.',
-    primaryAction: { label: 'Создать вариант →', href: '/zadaniya/11/generator/' },
+    primaryAction: { label: 'Собрать вариант →', href: VARIANT_HREF },
     secondaryAction: { label: 'Перейти в банк заданий', href: '/#bank' },
   },
 } as const;

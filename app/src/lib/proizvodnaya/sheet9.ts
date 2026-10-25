@@ -56,7 +56,12 @@ import {
 } from '@/lib/generator/obshchiy/klyuchi';
 import answers from '@/lib/sheet/answers.js';
 import { answerHtml, answersItems } from '@/lib/sheet/answers9.js';
-import { buildDocument, exampleItem, figure as sheetFigure } from '@/lib/sheet/sheet.js';
+import {
+  buildDocument,
+  exampleItem,
+  placeFigure,
+  figure as sheetFigure,
+} from '@/lib/sheet/sheet.js';
 import typo from '@/lib/sheet/typography.js';
 import { generate as generateRaw, opornayaSeed } from './generate';
 import { PROTOTYPES, prototypeById } from './prototypes';
@@ -66,6 +71,8 @@ import { BANK } from './bank';
 import { rngOf } from './rng';
 import { ru } from './tex';
 import type { Generated, Gruppa } from './types';
+import type { SheetSpace } from '@/lib/sheet/space.js';
+import { sheetWithSpace } from '@/lib/sheetSpace';
 
 /* Задача считается долго (движок подбирает рисунок), а лист ученика,
    лист учителя и проверка комплекта просят одни и те же seed: результат
@@ -276,15 +283,15 @@ function parseKlyuchi9(query: URLSearchParams): SheetParams9 {
 /* ── Лист ─────────────────────────────────────────────────────────── */
 
 /** Клетка рисунка условия на листе, мм: в две колонки чуть мельче. */
-const CELL: Record<SheetLayoutId, number> = { single: 3.4, double: 3.0 };
+export const CELL: Record<SheetLayoutId, number> = { single: 3.4, double: 3.0 };
 /** Клетка рисунка в разобранном примере, мм. */
 const EXAMPLE_CELL_MM = 5.6;
 /* Лист учителя читают с рисунком построений и разбором: рисунок
    стоит под условием на всю ширину колонки, клетка крупнее, чем у
    ученика, но не шире колонки. */
 /* 6 мм на клетку: числа осей печатаются кеглем около 6,5 pt, подпись графика — около 10 pt. */
-const TEACHER_CELL: Record<SheetLayoutId, number> = { single: 6.0, double: 3.6 };
-const TEACHER_MAX_MM: Record<SheetLayoutId, number> = { single: 160, double: 84 };
+export const TEACHER_CELL: Record<SheetLayoutId, number> = { single: 6.0, double: 3.6 };
+export const TEACHER_MAX_MM: Record<SheetLayoutId, number> = { single: 160, double: 84 };
 const EXAMPLE_MAX_MM = 150;
 
 export interface SheetTask9 {
@@ -324,7 +331,7 @@ export interface SheetBlock9 {
   taskItems?: string[];
 }
 
-interface Drawn {
+export interface Drawn {
   svg: string;
   /** Ширина в миллиметрах при заданной клетке. */
   width: (cellMm: number) => number;
@@ -333,7 +340,7 @@ interface Drawn {
   kletokY: number;
 }
 
-function drawFigure(task: Generated, rezhim: 'student' | 'teacher'): Drawn | null {
+export function drawFigure(task: Generated, rezhim: 'student' | 'teacher'): Drawn | null {
   if (task.risunok === null) {
     return null;
   }
@@ -367,6 +374,14 @@ function etapHtml(s: Generated['shagi'][number]): string {
 function etapyHtml(list: Generated['shagi'], start: number): string {
   const from = start > 1 ? ` start="${start}"` : '';
   return `<ol class="sheet-steps z9-razbor"${from}>${list.map(etapHtml).join('')}</ol>`;
+}
+
+/**
+ * Этапы разбора без строки ответа — те же, что на листе учителя. Нужны
+ * генератору вариантов (lib/variant/adapters/z09): там ответ стоит своей строкой.
+ */
+export function razborEtapyHtml(task: Generated): string {
+  return etapyHtml(etapy(task), 1);
 }
 
 /** Разбор ЭТАПАМИ: «Заголовок этапа.» и строки; шаг «Ответ» — строкой под списком. */
@@ -404,6 +419,21 @@ interface MestoRisunka {
  * 6 мм, не шире колонки.
  */
 function mestoRisunka(drawn: Drawn, kolonka: number): MestoRisunka {
+  /* Печатный профиль (sheet/figureRules.js): клетчатый рисунок —
+     клеткой 7 мм под условием, по правилам шаблона листа. */
+  const placed = placeFigure(drawn.svg, { rowMm: kolonka }) as {
+    html: string;
+    grid: boolean;
+    widthMm: number;
+  };
+  if (placed.grid) {
+    return {
+      html: placed.html,
+      widthMm: placed.widthMm,
+      heightMm: (placed.widthMm * drawn.kletokY) / drawn.kletokX,
+      sboku: false,
+    };
+  }
   const sbokuW = drawn.kletokX * SBOKU_CELL_MM;
   if (sbokuW <= kolonka / 2) {
     return {
@@ -1167,10 +1197,25 @@ export function sheetSpec9(
   withAnswers: boolean,
   /** QR-код на лист ученика, SVG: считает страница печати по своему адресу. */
   qrSvg?: string,
+  /** Место для решения (sheet/space.js) — у листа ученика. */
+  space?: SheetSpace,
 ) {
-  if (params.poKlyucham === true) return specPoKlyucham(params, withAnswers, qrSvg);
+  const spaced = !withAnswers && space !== undefined && space.mode !== 'none';
+  if (params.poKlyucham === true) {
+    const spec = specPoKlyucham(params, withAnswers, qrSvg);
+    return spaced ? sheetWithSpace(spec, space, true, () => specPoKlyucham(params, true)) : spec;
+  }
   const own = { ...params, layout: raskladka(params.layout, withAnswers) };
-  return specOfBlocks9(sheetBlocks9(own, withAnswers), own, withAnswers);
+  const blocks = sheetBlocks9(own, withAnswers);
+  /* Место для решения (sheet/space.js) — у листа ученика. Поток листа
+     собирается здесь же (flowOf), поэтому поля ставятся до него; для
+     «авто» длины решений — по листу учителя тех же задач. */
+  if (!spaced) return specOfBlocks9(blocks, own, withAnswers);
+  const teacher = (): unknown => {
+    const t = { ...params, layout: raskladka(params.layout, true) };
+    return specOfBlocks9(sheetBlocks9(t, true), t, true);
+  };
+  return specOfBlocks9(sheetWithSpace({ blocks }, space, true, teacher).blocks, own, withAnswers);
 }
 
 /**

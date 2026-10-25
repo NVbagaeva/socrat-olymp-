@@ -13,6 +13,7 @@ import typo from '@/lib/sheet/typography.js';
 import { SHEET_3 } from '@/content/sheet3';
 import { chertezhSvg } from '../chertezh3';
 import type { Scenariy } from '../chertezh3/scenariy';
+import { KEGL, SHIRINA, SHIRINA_MM } from '../chertezh3/vid';
 import type { ZadachaPechati } from './pechat-dannye';
 import { seeded } from './podhod';
 import { openText } from './secret';
@@ -89,8 +90,9 @@ export function chertezhLista(
   const sc = JSON.parse(openText(z.scena, z.seal)) as Scenariy;
   return chertezhSvg(sc, {
     rezhim: vid,
-    shirina: 280,
-    kegl: 15,
+    shirina: SHIRINA,
+    kegl: KEGL,
+    pechatMm: SHIRINA_MM,
     ...(katex ? { katex } : {}),
     klass: 'sheet-solid ch3-svg',
   });

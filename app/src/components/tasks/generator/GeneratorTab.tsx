@@ -1,6 +1,7 @@
 import type { Subtopic } from '@/content/sections';
 import { VKLADKA_PARAM, type IkonkaRazdela } from '@/components/tasks/razdely/types';
 import { config12 } from '@/lib/ves12/generator12';
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 import { Generator12Lazy } from './Generator12Lazy';
 
 export interface GeneratorTabProps {
@@ -20,11 +21,14 @@ export interface GeneratorTabProps {
 export function GeneratorTab({ subtopic, base, icon }: GeneratorTabProps) {
   const config = config12(base, { tip: subtopic.id, title: subtopic.title });
   return (
-    <Generator12Lazy
-      config={config}
-      base={base}
-      ekran={`${base}/?${VKLADKA_PARAM}=generator&`}
-      ikonki={{ [subtopic.id]: icon }}
-    />
+    <>
+      <VariantFromSection />
+      <Generator12Lazy
+        config={config}
+        base={base}
+        ekran={`${base}/?${VKLADKA_PARAM}=generator&`}
+        ikonki={{ [subtopic.id]: icon }}
+      />
+    </>
   );
 }

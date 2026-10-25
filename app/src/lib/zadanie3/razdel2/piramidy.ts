@@ -13,7 +13,7 @@ import { vertex } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { regularPrismByArea } from './common';
 import { shapeTriSolid, TRI_NAMES } from './drawings';
-import { ru } from '../format';
+import { letters, ru } from '../format';
 import { type Params, type Prototype, type Variant, num } from '../types';
 
 function variant(
@@ -42,7 +42,7 @@ function volumeOf(p: Params, names: readonly string[]): number {
 function findVolumeOf(p: Params, names: readonly string[], wordVertices: string): string {
   const [S, h] = SH(p);
   return (
-    `Найдите объём многогранника, вершинами которого являются $${wordVertices} ${names.join(', ')}$ ` +
+    `Найдите объём многогранника, вершинами которого являются ${wordVertices} $${names.map(letters).join(', ')}$ ` +
     `правильной треугольной призмы $${TRI_NAMES}$, площадь основания которой равна ${ru(S)}, ` +
     `а боковое ребро равно ${ru(h)}.`
   );

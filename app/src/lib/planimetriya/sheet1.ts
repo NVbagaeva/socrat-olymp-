@@ -45,6 +45,7 @@ import { zadachiPrototipa } from './bank/fipi';
 import { BLOKI } from './prep/bloki';
 import { generateMikro, sOtvetom } from './prep/generate';
 import { renderPlan } from './render';
+import { shirinaRisunka } from './shirina';
 import { plitkiHtml } from './spravochnik';
 import { parseKodSerii, planUroka, seriya, type NastroykiUroka } from './uroki';
 import { PROTOTIPY, prototip } from './stseny';
@@ -438,18 +439,11 @@ function chisloOtveta(x: number): string {
   return String(Math.round(x * 1e9) / 1e9).replace('.', ',');
 }
 
-/** Чертёж решения на листе учителя: не шире, мм, и порог «уже половины колонки». */
+/** Чертёж решения на листе учителя: ширина по клетке раздела, не шире, мм
+    (нижнюю границу и место — справа или под условием — даёт шаблон листа). */
 const RESHENIE_MAX_MM = 44;
-const POLKOLONKI_MM = 85;
 
-/** Ширина чертежа на листе, мм: по ширине SVG, не шире колонки и не выше maxVysota. */
-export function shirinaRisunka(svg: string | null, max = 52, maxVysota = 42): number {
-  const w = Number(/width="([0-9.]+)"/.exec(svg ?? '')?.[1] ?? 0);
-  const h = Number(/height="([0-9.]+)"/.exec(svg ?? '')?.[1] ?? 0);
-  /* Высокий узкий чертёж не растягивает задачу: по высоте не больше maxVysota мм. */
-  const poVysote = h > 0 ? (maxVysota * w) / h : Infinity;
-  return Math.max(12, Math.min(poVysote, Math.max(22, Math.min(max, Math.round(w * 0.18)))));
-}
+export { shirinaRisunka };
 
 export interface SobrannyyList {
   poVariantam: ListZadacha[][];
@@ -866,11 +860,21 @@ export function sheetSpec1(
   const pometka = (z: ListZadacha) => (sPometkoy ? `${bejdzh(z)} ` : '');
   const uchitelTask = (z: ListZadacha): SheetTask => {
     const w = z.figureUchitelSvg === null ? 0 : shirinaRisunka(z.figureUchitelSvg, RESHENIE_MAX_MM);
-    const sprava = w > 0 && w <= POLKOLONKI_MM;
+    /* Размер — по правилам крупных рисунков (sheet/figureRules.js): не уже
+       40 % строки и не мельче, чем нужно подписям; такой рисунок справа
+       встаёт, только если остаётся место решению, иначе — под условием. */
+    const placed =
+      z.figureUchitelSvg === null
+        ? null
+        : (sheet.placeFigure(z.figureUchitelSvg, { width: w }) as { below: boolean });
+    const sprava = placed !== null && !placed.below;
     const pic =
       z.figureUchitelSvg === null
         ? ''
-        : `<figure class="sheet-figure z1-sheet-reshenie__pic${sprava ? '' : ' z1-sheet-reshenie__pic--pod'}" style="width:${w}mm">${z.figureUchitelSvg}</figure>`;
+        : (sheet.placeFigure(z.figureUchitelSvg, {
+            width: w,
+            cls: `z1-sheet-reshenie__pic${sprava ? '' : ' z1-sheet-reshenie__pic--pod'}`,
+          }).html as string);
     return {
       no: z.no,
       id: z.pos,

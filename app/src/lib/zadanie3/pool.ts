@@ -17,7 +17,7 @@
 
 import { szhat, tekstyPodpisey } from '../chertezh3';
 import { katex } from '../graph/katex';
-import { renderSolid } from '../solid';
+import { chertezhBanka } from '../solid';
 import { texPlain, typeset } from '../tex';
 import { chertezhVarianta, estScenariy } from './chertezhi';
 import { RAZDELY, type Razdel } from './index';
@@ -119,7 +119,7 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
       seal,
       /* Разбор закрыт тем же отпечатком: без него не раскрыть. */
       steps: sealText(steps, seal),
-      svg: own && !ch ? renderSolid(prototype.chertezh(variant.params)) : null,
+      svg: own && !ch ? chertezhBanka(prototype.chertezh(variant.params)) : null,
       scena: ch ? sealText(JSON.stringify(szhat(ch.scenariy)), seal) : null,
       stepRefs: ch ? sealText(JSON.stringify(ch.shagi), seal) : null,
     };
@@ -132,7 +132,7 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     group: razdel.nomer,
     groupTitle: razdel.nazvanie,
     format: prototype.format,
-    svg: scenarii ? '' : renderSolid(prototype.chertezh(first.params)),
+    svg: scenarii ? '' : chertezhBanka(prototype.chertezh(first.params)),
     podpisiHtml: scenarii
       ? Object.fromEntries(
           [...podpisi].map((t) => [t, katex.renderToString(t, { throwOnError: true })]),

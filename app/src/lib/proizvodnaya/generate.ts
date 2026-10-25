@@ -8,6 +8,7 @@
  * это проверяет сам прототип через sobrat() из prototypes/common.ts.
  */
 
+import { withoutPrintFigures } from '@/lib/sheet/figureRules.js';
 import { paramsKey } from './prototypes/common';
 import { prototypeById } from './prototypes';
 import { rngOf } from './rng';
@@ -16,7 +17,16 @@ import type { Generated } from './types';
 /** Сколько раз прототип может не подобрать рисунок или числа на одном seed. */
 const ATTEMPTS = 600;
 
+/**
+ * Задача по seed. Печатный профиль рисунков (lib/sheet/figureRules.js)
+ * генерация не видит: рисунок отбраковывается по отчёту движка, и с
+ * печатными кеглями тот же seed дал бы другую задачу, чем на сайте.
+ */
 export function generate(prototypeId: string, seed: string): Generated {
+  return withoutPrintFigures(() => generateTask(prototypeId, seed));
+}
+
+function generateTask(prototypeId: string, seed: string): Generated {
   const prototype = prototypeById(prototypeId);
   if (prototype === undefined) {
     throw new Error(`Нет прототипа ${prototypeId}`);

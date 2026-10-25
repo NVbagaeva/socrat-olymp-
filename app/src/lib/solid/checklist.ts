@@ -282,12 +282,12 @@ export function checkDrawing(id: string, model: Model, condition: string | null)
     }
   }
 
-  /* 11. Цвета и шрифт — сайта. */
+  /* 11. Цвета — сайта, подписи — шрифтом KaTeX, как формулы условия. */
   const hex = svg.match(/#[0-9a-fA-F]{3,8}\b/g);
-  const font = svg.includes('font-family="var(--font-sans)"') || !svg.includes('<text');
+  const font = /font-family="KaTeX_/.test(svg) || !svg.includes('<text');
   ok[10] = hex === null && font;
   if (!ok[10]) {
-    notes.push(hex ? `в разметке хекс ${hex[0]}` : 'подписи не шрифтом сайта');
+    notes.push(hex ? `в разметке хекс ${hex[0]}` : 'подписи не шрифтом KaTeX');
   }
 
   /* 12. Читается на 360: зазоры после сжатия до ширины телефона. */

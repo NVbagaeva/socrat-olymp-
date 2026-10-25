@@ -1,146 +1,36 @@
-/* Печатные листы №6: A4, ч/б. Лист учителя: кусок «условие + ответ»
-   не рвётся, разбор переносится только между шагами. */
-.z6-list {
-  max-width: 190mm;
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-4);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: 15px;
-  line-height: 1.55;
-}
-
-.z6-list__panel {
-  display: flex;
-  gap: var(--space-3);
-  align-items: center;
-  margin-bottom: var(--space-4);
-}
-
-.z6-list__eyebrow {
-  margin: 0;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.z6-list h1 {
-  margin: var(--space-1) 0 var(--space-2);
-  font-size: 22px;
-}
-
-.z6-list h2 {
-  margin: var(--space-5) 0 var(--space-2);
-  font-size: 18px;
-  break-after: avoid;
-}
-
-.z6-list h3 {
-  margin: var(--space-3) 0 var(--space-1);
-  font-size: 16px;
-  break-after: avoid;
-}
-
-.z6-list__note,
-.z6-list__klyuch {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-}
-
-.z6-list__zadacha {
-  margin: var(--space-3) 0;
-  break-inside: avoid;
-}
-
-.z6-list__zadacha--mesto {
-  min-height: 70mm;
-}
+/* Печатные листы №6 на общем шаблоне lib/sheet (sheet6.ts): вёрстку
+   страницы, карточек и полей задаёт sheet.css, здесь — только своё:
+   рамки теории, разобранные примеры, ключ и разбор учителя. */
 
 .z6-list__metka {
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  margin: var(--sheet-step) 0 0;
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
 }
 
-.z6-list__otvet {
-  margin: var(--space-2) 0 0;
-}
-
-/* ── Лист учителя ── */
-
-.z6-list__zadacha--uchitel {
-  break-inside: auto;
-  margin: var(--space-4) 0;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
-}
-
-.z6-list__kusok-pervyy {
-  break-inside: avoid;
-}
-
-.z6-list__shag {
-  break-inside: avoid;
-  margin: var(--space-2) 0;
-}
-
-.z6-list__shag-title {
+/* Рамки теории блока: карточки в две колонки, если помещаются. */
+.z6-sheet-teoriya .z6-k {
   margin: 0;
-  font-weight: 600;
+  font-size: var(--sheet-fs-small);
 }
 
-.z6-list__shag-line {
+.z6-sheet-primer .ramka {
   margin: 0;
+  padding: calc(var(--sheet-step) * 3) calc(var(--sheet-step) * 4);
+  font-size: var(--sheet-fs-small);
 }
 
-.z6-list__otvet-uchitel {
-  margin: var(--space-1) 0;
+.z6-sheet-primer-ris {
+  max-width: 90mm;
+  margin: calc(var(--sheet-step) * 2) 0;
 }
 
-.z6-list__podval {
-  margin-top: var(--space-8);
-  font-size: 12px;
-  color: var(--color-text-secondary);
+.z6-sheet-primer-ris svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.z6-list .ramka {
-  margin: var(--space-3) 0;
-  padding: var(--space-3) var(--space-4);
-  font-size: 15px;
-}
-
-@media print {
-  @page {
-    size: A4;
-    margin: 12mm 15mm;
-  }
-
-  .z6-list {
-    max-width: none;
-    padding: 0;
-  }
-
-  .z6-list__panel {
-    display: none;
-  }
-}
-
-.z6-list__teoriya {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 82mm), 1fr));
-  gap: var(--space-3);
-  margin: var(--space-3) 0;
-}
-
-.z6-list__teoriya .z6-k {
-  break-inside: avoid;
+.z6-sheet-razbor .z6-razbor__etap {
   margin: 0;
-}
-
-.z6-list .z6-razbor__etap {
-  break-inside: avoid;
-}
-
-@media print {
-  .z6-list .z6-razbor__calc {
-    display: none;
-  }
 }

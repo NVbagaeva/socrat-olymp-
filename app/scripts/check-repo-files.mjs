@@ -11,6 +11,9 @@
 
      1. PDF лежит вне мест, где PDF — наши:
           app/public/materials/  — листы для учеников, собирает сайт;
+          app/public/blanki/     — официальные бланки ЕГЭ для печати
+                                   (блок «Бланки» на /variant/): форма
+                                   экзамена, не задачи стороннего автора;
           docs/                  — наши документы, кроме docs/sources/;
      2. в пути файла любого типа есть признак известного стороннего
         источника (задачник, тренажёр, курс);
@@ -30,7 +33,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 /* Где PDF — наши. */
-const PDF_HOME = [/^app\/public\/materials\//, /^docs\//];
+const PDF_HOME = [/^app\/public\/materials\//, /^app\/public\/blanki\/\d{4}\//, /^docs\//];
 const PDF_NOT_HOME = [/^docs\/sources\//];
 
 /* Признаки сторонних источников. Сами слова записаны кодами символов:

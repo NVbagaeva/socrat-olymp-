@@ -1,0 +1,82 @@
+/* Плашка-вход «Собрать вариант» (VariantEntry.tsx): главная, банк,
+   вкладки «Генератор». Стекло — как у экрана генератора. */
+.var-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 64px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    150deg,
+    var(--color-surface) 0%,
+    var(--color-glass-mid) 50%,
+    var(--color-glass-end) 100%
+  );
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+.var-entry:hover,
+.var-entry:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+.var-entry__ico {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.var-entry__ico svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.var-entry__text {
+  display: grid;
+  min-width: 0;
+}
+.var-entry__title {
+  font-weight: 700;
+  font-size: var(--fs-body);
+}
+.var-entry__note {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.var-entry__arrow {
+  margin-left: auto;
+  color: var(--color-primary);
+  font-size: 20px;
+}
+
+.var-from-section {
+  margin: 0 0 var(--space-4);
+  font-weight: 600;
+}
+.var-from-section a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.var-from-section a:hover {
+  text-decoration: underline;
+}
+
+/* Плашка над сеткой заданий: главная и банк. */
+.bank-variant {
+  margin-bottom: var(--space-5);
+}

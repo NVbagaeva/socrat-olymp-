@@ -33,9 +33,9 @@ function tex(value: number): string {
   return dec(value).replace(',', '{,}');
 }
 
-/** Отрезок в тексте условия: «[5,9; 6,1]». */
+/** Отрезок в тексте условия: «[5,9; 6,1]» — формулой KaTeX. */
 function otrezok(a: number, b: number): string {
-  return `[${dec(a)}; ${dec(b)}]`;
+  return `$[${tex(a)};\\ ${tex(b)}]$`;
 }
 
 /**

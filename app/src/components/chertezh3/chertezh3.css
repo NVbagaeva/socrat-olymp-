@@ -56,11 +56,10 @@
 .ch3__label--dannoe,
 .ch3__label--oboznachenie {
   color: var(--graph-accent);
-  font-weight: 600;
 }
+/* Числа и имена — не жирно: шрифт KaTeX, как в условии. */
 .ch3__label.is-bright {
   color: var(--color-accent);
-  font-weight: 700;
 }
 .ch3__label.is-dim {
   opacity: 0.35;
