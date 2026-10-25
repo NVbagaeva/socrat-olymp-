@@ -2,16 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { PrintSheet } from '@/components/tasks/generator/PrintSheet';
+import { GENERATOR6_TEXTS } from '@/content/generator6';
 import { GENERATOR_6 } from '@/content/zadanie6';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { checkKitSheet, kitFootLabel } from '@/lib/komplekt';
 import { buildDocument } from '@/lib/sheet/sheet.js';
-import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
+import { listSheetVse, sShapkoy } from '@/lib/sheetList';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { zagruzitIndeks, zagruzitZadachi, type ZadachaLite } from '@/lib/zadanie6/dannye';
 import {
   modelUroka,
   parseUrokQuery,
   parseZapros,
+  parseZaprosKlyuchi,
   sobratList,
+  sobratListKlyuchi,
   type ModelLista,
 } from '@/lib/zadanie6/sborka';
 import { sheetSpec6, type Sborka6, type Vid6 } from '@/lib/zadanie6/sheet6';
@@ -36,7 +41,7 @@ interface Gotovo {
  * Рисунки и решения строит решатель прототипа в браузере: данные без
  * ответов.
  */
-export function List6({ vid }: { vid: Vid6 }) {
+export function List6({ vid }: { vid: Vid6 | 'vse' }) {
   const [gotovo, setGotovo] = useState<Gotovo | null>(null);
   const [oshibka, setOshibka] = useState<string | null>(null);
 
@@ -47,8 +52,12 @@ export function List6({ vid }: { vid: Vid6 }) {
         const indeks = await zagruzitIndeks();
         let model: ModelLista | null = null;
         const u = parseUrokQuery(q);
+        const zk = parseZaprosKlyuchi(q);
         if (u) {
           model = modelUroka(u.kod, u.no, u.n, indeks);
+        } else if (zk) {
+          /* Адрес общего генератора (ps=2): задачи по ключам позиций. */
+          model = sobratListKlyuchi(zk, indeks);
         } else {
           const z = parseZapros(q);
           if (z) {
@@ -75,12 +84,12 @@ export function List6({ vid }: { vid: Vid6 }) {
             ? [
                 {
                   questionHtml: `${z.text} ${JSON.stringify(z.params)} ${z.posle ?? ''}`,
-                  ...(vid === 'uchitel' ? { answer: String(reshit(z).answer) } : {}),
+                  ...(vid === 'uchenik' ? {} : { answer: String(reshit(z).answer) }),
                 },
               ]
             : [];
         });
-        const kit = checkKitSheet(q, '6', vid === 'uchitel' ? 'teacher' : 'student', {
+        const kit = checkKitSheet(q, '6', vid === 'uchenik' ? 'student' : 'teacher', {
           blocks: [{ tasks }],
         });
         setGotovo({ sborka: { model, zadachi, reshit, risunok }, kit, query: q.toString() });
@@ -102,15 +111,31 @@ export function List6({ vid }: { vid: Vid6 }) {
       theme="color"
       layout="single"
       buildKey={`${vid}:${query}`}
-      build={() => {
+      build={async () => {
+        const shapka = sborka.model.shapka;
+        /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+        const qr =
+          shapka?.qr === true
+            ? await qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+            : undefined;
+        const list = (v: Vid6) =>
+          sShapkoy(sheetSpec6(sborka, v), shapka, GENERATOR6_TEXTS.podzagolovok, qr);
+        const kod = kitFootLabel(kit.code) ?? `Код: ${sborka.model.kod}`;
+        if (vid === 'vse') {
+          /* Место для решения (sp=) — у листа ученика в начале файла. */
+          const spec = vseWithSpace(
+            listSheetVse(list('uchenik'), list('uchitel')),
+            spaceOfQuery(new URLSearchParams(query)),
+          );
+          return { html: buildDocument({ ...spec, kit: kod }, {}), warning: kit.warning };
+        }
         /* Место для решения (sp=) — только у листа ученика. */
         const spec = sheetWithSpace(
-          sheetSpec6(sborka, vid),
+          list(vid),
           spaceOfQuery(new URLSearchParams(query)),
           vid === 'uchenik',
           () => sheetSpec6(sborka, 'uchitel'),
         );
-        const kod = kitFootLabel(kit.code) ?? `Код: ${sborka.model.kod}`;
         return { html: buildDocument({ ...spec, kit: kod }, {}), warning: kit.warning };
       }}
     />

@@ -10,6 +10,7 @@ import {
   type KeypadKey,
 } from '@/components/ui';
 import type { FieldState } from '@/components/ui';
+import { Tex } from '@/components/ui/Tex';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
 import { normalizeAnswer, type FormatProblem } from '@/lib/variant/online/normalize';
 
@@ -104,7 +105,7 @@ export function AnswerField({
         className={problem === null ? 'vo-answer__hint' : 'vo-answer__hint is-problem'}
         aria-live="polite"
       >
-        {problem ?? (saved ? T.run.saved : T.start.answerFormat)}
+        <Tex text={problem ?? (saved ? T.run.saved : T.start.answerFormat)} />
       </p>
       {coarse && !readOnly ? (
         <AnswerKeypad label={T.keypad.label} names={T.keypad} onKey={onKey} />

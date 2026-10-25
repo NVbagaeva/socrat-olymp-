@@ -385,12 +385,33 @@ function gridCellAttr(cell) {
  * подписи относительно клетки мельче, места им больше. Вне печати —
  * один раз, как прежде.
  */
+/**
+ * Клетка, с которой рисунок ляжет в строку листа: рисунок шире строки
+ * при клетке cellMm лист сожмёт (lib/sheet/figureRules.js, figureSize),
+ * и подписи надо рисовать уже под сжатую клетку. null — помещается.
+ */
+function rowCellMm(svg, cell, cellMm) {
+  var box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
+  if (!box) { return null; }
+  var cells = Number(box[1]) / cell;
+  if (cells * cellMm <= RULES.rowMm + 0.01) { return null; }
+  return Math.max(RULES.gridCellMinMm, Math.floor(RULES.rowMm / cells * 100) / 100);
+}
+
+/** Печатный рисунок; не лёг в строку — ещё раз под клетку, с которой ляжет. */
+function printThemeInRow(cell, draw, cellMm) {
+  var mm = cellMm || RULES.gridCellMm;
+  var svg = printTheme(cell, draw, mm);
+  var tesnee = rowCellMm(svg, cell, mm);
+  return tesnee === null ? svg : printTheme(cell, draw, tesnee);
+}
+
 function printFitted(cell, steps, draw, fresh) {
   if (!printProfile() || FLOOR) { return draw(fresh()); }
   var svg = null;
   for (var i = 0; i < steps.length; i++) {
     var report = fresh();
-    var next = printTheme(cell, function () { return draw(report); }, steps[i]);
+    var next = printThemeInRow(cell, function () { report = fresh(); return draw(report); }, steps[i]);
     /* Клетка крупнее, чем помещается в строку листа, не берётся: лист
        ужал бы рисунок, и подписи вышли бы мельче 10 pt. */
     var box = /viewBox="0 0 ([0-9.]+) /.exec(next);
@@ -403,7 +424,8 @@ function printFitted(cell, steps, draw, fresh) {
 
 function renderGraph(scene, report) {
   return sMinKeglem(scene.minFont, [[THEME.font, KEGLI_GRAFIKA]], function () {
-    return printTheme(pick(scene.cell, THEME.geometry.cell), function () {
+    if (!printProfile() || FLOOR) { return drawGraph(scene, report); }
+    return printThemeInRow(pick(scene.cell, THEME.geometry.cell), function () {
       return drawGraph(scene, report);
     });
   });

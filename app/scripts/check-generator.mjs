@@ -3,7 +3,7 @@
 
    Запуск: pnpm test:generator
 
-   Проверяет логику и подключение разделов (№11, №1, №2, №8, №9, №12) без браузера:
+   Проверяет логику и подключение разделов (№11, №1, №2, №8, №9, №6, №7, №10, №12) без браузера:
      1. Каждый пресет даёт годное состояние: есть задачи, не больше
         ограничений конфига, темы есть в выбранном источнике.
      2. Один seed — один лист: лист собирается дважды одинаково, листы
@@ -45,6 +45,9 @@ const C12 = requireSrc('lib/ves12/generator12.ts');
 const E12 = requireSrc('lib/ves12/engine12.ts');
 const G12 = requireSrc('lib/generatorSheet.ts');
 const { GEN_UI } = requireSrc('content/generatorUi.ts');
+const fs = await import('node:fs');
+const { createElement } = await import('react');
+const { renderToStaticMarkup } = await import('react-dom/server');
 
 let failed = 0;
 let checks = 0;
@@ -190,6 +193,136 @@ const RAZDELY = [
       urok: null,
     };
   })(),
+  /* №6, №7, №10: банк готовых задач, лист печати — React (List6, List7,
+     List10). Лист для проверки собирается из той же модели (sborka.ts),
+     что рисует страница: задачи, памятка, примеры и шапка. */
+  ...['6', '7', '10'].map((z) => {
+    const C = requireSrc(`lib/zadanie${z}/generator${z}.ts`);
+    const E = requireSrc(`lib/zadanie${z}/engine${z}.ts`);
+    const P = requireSrc(`lib/zadanie${z}/protoInfo.ts`);
+    const S = requireSrc(`lib/zadanie${z}/sborka.ts`);
+    const M = requireSrc(`lib/zadanie${z}/prototypes/index.ts`);
+    const T = requireSrc(`content/generator${z}.ts`)[`GENERATOR${z}_TEXTS`];
+    const S10 = z === '10' ? requireSrc('lib/zadanie10/sheet10.ts') : null;
+    const PR10 = z === '10' ? requireSrc('lib/zadanie10/predprosmotr10.tsx') : null;
+    /* Куски листа №10 (sheet10.ts) — без модели: условие и разбор от неё не зависят. */
+    const o10 = (kartinki) => ({ proto: M.prototype, ill, kartinki });
+    /* Разбор №10 — чертёж моста учителя и шаги, как на листе и в предпросмотре. */
+    const Razbor =
+      S10 === null
+        ? requireSrc(`components/tasks/zadanie${z}/Razbor${z}.tsx`)[`Razbor${z}`]
+        : ({ x }) =>
+            createElement('div', {
+              dangerouslySetInnerHTML: { __html: S10.razbor10(o10(false), x).join('') },
+            });
+    const Uslovie =
+      z === '6' ? requireSrc('components/tasks/zadanie6/Uslovie6.tsx').Uslovie6 : null;
+    const ill = z === '10' ? requireSrc('lib/zadanie10/illyustracii.ts').kartinkiPrototipov() : {};
+    const { typeset } = requireSrc('lib/tex.ts');
+    const dir = new URL(`../public/data/zadanie${z}/`, import.meta.url);
+    const indeks = JSON.parse(fs.readFileSync(new URL('indeks.json', dir), 'utf8'));
+    const vse = new Map();
+    for (const pr of [...new Set(indeks.map((x) => x.p))])
+      for (const x of JSON.parse(fs.readFileSync(new URL(`${pr}.json`, dir), 'utf8')))
+        vse.set(x.id, x);
+    const dannye = {
+      indeks: async () => indeks,
+      zadachi: async (ps) => new Map([...vse].filter(([, x]) => ps.includes(x.prototypeId))),
+    };
+    const base = `/zadaniya/${z}`;
+    const config = C[`config${z}`](base, P[`protoInfo${z}`](), P[`gruppy${z}`](), indeks);
+    const engine =
+      z === '10' ? E.engine10(config, base, ill, dannye) : E[`engine${z}`](config, base, dannye);
+    /* Условие так же, как в предпросмотре и на листе. */
+    const vopros = (x, kartinki = false) => {
+      if (PR10 !== null) return PR10.vopros10(o10(kartinki), x);
+      if (Uslovie === null) return `<p class="z7-list__uslovie">${typeset(x.text)}</p>`;
+      const ris = M.prototype(x.prototypeId).ris(x.params);
+      const u = { text: x.text, ...(ris ? { ris } : {}), ...(x.posle ? { posle: x.posle } : {}) };
+      return renderToStaticMarkup(createElement(Uslovie, { u }));
+    };
+    const parse = (q) => {
+      const zk = S.parseZaprosKlyuchi(q);
+      return zk !== null ? { ...zk, poKlyucham: true } : { ...S.parseZapros(q), poKlyucham: false };
+    };
+    const model = (p) => (p.poKlyucham ? S.sobratListKlyuchi(p, indeks) : S.sobratList(p, indeks));
+    const sobrat = (p) => {
+      const m = model(p);
+      const zadachi = m.bloki.find((b) => b.id === 'zadachi');
+      return {
+        model: m,
+        poVariantam: zadachi.spiski.map((ids) =>
+          ids.map((id) => ({ id, questionHtml: vopros(vse.get(id), m.kartinki === true) })),
+        ),
+      };
+    };
+    const den = (iso) => iso.split('-').reverse().join('.');
+    return {
+      name: `№${z}`,
+      config,
+      engine,
+      params: (st) => parse(new URLSearchParams(engine.hrefs(st).student.split('?')[1])),
+      parse,
+      query: (p) => (p.poKlyucham ? null : S.zaprosQuery(p)),
+      sobrat,
+      spec: (p, list, vid, qr) => {
+        const m = list.model;
+        const teoriya = m.bloki.find((b) => b.id === 'teoriya');
+        /* Шапка — из параметров листа: «без QR» проверяется на тех же задачах. */
+        const sh = p.poKlyucham ? model(p).shapka : undefined;
+        const title = {
+          subtitle: sh?.kind ? sh.kind : T.sheet.title,
+          ...(sh?.qr ? { qr } : {}),
+        };
+        const variants = list.poVariantam.map((v) => ({
+          title,
+          blocks: [
+            {
+              ...(teoriya?.teoriya ? { recap: { items: teoriya.teoriya } } : {}),
+              leadItems: (teoriya?.primery ?? []).map((id) => vopros(vse.get(id), m.kartinki)),
+              tasks: v.map((t, i) => ({
+                id: t.id,
+                no: i + 1,
+                questionHtml: t.questionHtml,
+                solutionHtml:
+                  vid === 'uchenik'
+                    ? null
+                    : renderToStaticMarkup(
+                        createElement(Razbor, {
+                          s: M.prototype(vse.get(t.id).prototypeId).solve(vse.get(t.id).params),
+                          x: vse.get(t.id),
+                        }),
+                      ),
+              })),
+            },
+          ],
+        }));
+        return {
+          variants,
+          extraItems: [],
+          fields: { date: sh?.date ? den(sh.date) : '' },
+          head: { author: sh?.uchitel ?? T.sheet.teacher },
+        };
+      },
+      primery: (p, list) =>
+        (list.model.bloki.find((b) => b.id === 'teoriya')?.primery ?? []).map((id) =>
+          vopros(vse.get(id), list.model.kartinki),
+        ),
+      badge: `z${z}-sheet-badge`,
+      ist: null,
+      ramkaNaListe: (blocks) =>
+        blocks.some((x) => (x.recap?.items ?? []).length > 0) &&
+        blocks.some((x) => (x.leadItems ?? []).length > 0),
+      old: {
+        6: 't=P01:2,P04:1&i=m&v=3&e=1&st=v&seed=K7Q2',
+        7: 't=P01:2,P11:1&i=f&v=3&e=1&seed=K7Q2',
+        /* У №10 seed — в «s», картинки сюжетов — «k». */
+        10: 'm=g&l=uchitel&t=P01:2,P11:1&i=f&v=3&e=1&k=1&s=K7Q2',
+      }[z],
+      oldIds: z === '6' ? 'P01,P01,P04' : 'P01,P01,P11',
+      urok: z === '10' ? 'm=u&kod=K7Q2AB&u=1' : `kod=K${z}Q2AB&u=1`,
+    };
+  }),
   /* №12: генератор по всем типам и вкладка подтемы — один адаптер, разные конфиги. */
   ...[
     {
@@ -724,6 +857,41 @@ console.log('№8: уровень и повторы');
     }
   }
   okTop(dup === 0, `№8: условия одного прототипа в варианте не повторяются (повторов ${dup})`);
+}
+
+/* ── №10: «Картинки сюжетов» ──────────────────────────────────── */
+console.log('№10: картинки сюжетов');
+{
+  const R = RAZDELY.find((x) => x.name === '№10');
+  const preset = R.config.presets[0];
+  for (const seed of SEEDS.slice(0, 3)) {
+    const base = { ...G.stateFromPreset(R.config, preset, 'mix'), seed };
+    const on = { ...base, extras: { ...base.extras, flag: true } };
+    const link = R.engine.hrefs(on).link.split('?')[1];
+    const back = R.engine.parse(new URLSearchParams(link));
+    okTop(
+      new URLSearchParams(link).get('fl') === '1' && back?.extras.flag === true,
+      `№10 ${seed}: переключатель в ссылке на набор`,
+    );
+    okTop(
+      R.parse(new URLSearchParams(link)).flag === true &&
+        R.sobrat(R.parse(new URLSearchParams(link))).model.kartinki === true &&
+        R.sobrat(R.params(base)).model.kartinki === false,
+      `№10 ${seed}: картинки на листе только с переключателем`,
+    );
+    const a = (await R.engine.build(base)).variants.flatMap((v) => v.map((t) => t.solutionHtml));
+    const b = (await R.engine.build(on)).variants.flatMap((v) => v.map((t) => t.solutionHtml));
+    okTop(
+      JSON.stringify(a) === JSON.stringify(b),
+      `№10 ${seed}: задачи от переключателя не меняются`,
+    );
+    okTop(
+      (await R.engine.build(on)).variants.some((v) =>
+        v.some((t) => t.questionHtml.includes('<picture')),
+      ),
+      `№10 ${seed}: в предпросмотре есть картинки сюжетов`,
+    );
+  }
 }
 
 /* ── №9: серия уроков по одному коду ───────────────────────────── */

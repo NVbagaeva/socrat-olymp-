@@ -20,6 +20,13 @@ import { documentsVersion } from '@/lib/legal/operator';
 import { parentConsentNeeded, type ConsentRecord } from '@/lib/account/consents';
 import { KabinetError, type KabinetApi } from './api';
 import { KABINET_KEY, readDb, writeDb, type Db, type DbUser } from './localDb';
+import {
+  localVariantMethods,
+  resultOf,
+  attemptSummary,
+  workSummary,
+  type LocalCtx,
+} from './localVariant';
 import type {
   AttemptOutcome,
   ClassSummary,
@@ -261,6 +268,20 @@ export function createLocalApi(): KabinetApi {
     );
   }
 
+  /* Онлайн-вариант: те же помощники, что у остальных методов. */
+  const variantCtx: LocalCtx = {
+    change,
+    read: readDb,
+    requireRole,
+    current,
+    myStudents,
+    personOf,
+    canSaveProgress,
+    fail,
+    newId,
+    now,
+  };
+
   const api: KabinetApi = {
     async me() {
       const u = user(readDb(), readDb().currentUserId);
@@ -389,6 +410,23 @@ export function createLocalApi(): KabinetApi {
           .filter((s) => s.studentId === me.id)
           .sort((a, b) => b.finishedAt.localeCompare(a.finishedAt))
           .map(({ studentId: _ignored, ...rest }) => rest),
+        variantWorks: db.variantRecipients
+          .filter((r) => r.studentId === me.id)
+          .flatMap((r) => {
+            const w = db.variantWorks.find((x) => x.id === r.workId);
+            if (!w) return [];
+            const mine = db.variantAttempts.filter(
+              (a) => a.workId === w.id && a.studentId === me.id,
+            );
+            return [
+              {
+                ...workSummary(variantCtx, db, w),
+                attempts: mine.filter((a) => a.finishedAt !== null).map((a) => resultOf(db, a)),
+                open: mine.filter((a) => a.finishedAt === null).map(attemptSummary),
+              },
+            ];
+          })
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
       };
     },
 
@@ -429,6 +467,21 @@ export function createLocalApi(): KabinetApi {
         invitations: db.invitations
           .filter((i) => i.createdBy === me.id)
           .map((i) => invitationView(db, i)),
+        variantWorks: db.variantWorks
+          .filter((w) => w.tutorId === me.id)
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+          .map((w) => {
+            const rs = db.variantRecipients.filter((r) => r.workId === w.id);
+            return {
+              ...workSummary(variantCtx, db, w),
+              recipients: rs.length,
+              finished: rs.filter((r) =>
+                db.variantAttempts.some(
+                  (a) => a.workId === w.id && a.studentId === r.studentId && a.finishedAt !== null,
+                ),
+              ).length,
+            };
+          }),
       };
     },
 
@@ -639,6 +692,8 @@ export function createLocalApi(): KabinetApi {
         }
       });
     },
+
+    ...localVariantMethods(variantCtx),
 
     subscribe(listener) {
       listeners.add(listener);

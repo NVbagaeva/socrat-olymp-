@@ -128,6 +128,20 @@ const stub = ['supabase-stub.sql', path.join(SUPA, 'tests', 'supabase-stub.sql')
 /* Каждый набор проверок — в своей базе: тест согласий создаёт
    пользователей без приглашения, и на полной схеме (с регистрацией
    только по приглашению) его не прогнать. */
+/* Таблица случаев нормализации ответа — временной таблицей в сессии теста. */
+function normalizeCasesSql() {
+  const { cases } = JSON.parse(
+    fs.readFileSync(path.join(ROOT, 'app/src/lib/variant/online/normalizeCases.json'), 'utf8'),
+  );
+  const lit = (v) => (v === null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
+  const ok = (want) => /^-?\d+(\.\d+)?$/.test(want);
+  const rows = cases.map(([input, want]) => `(${lit(input)}, ${lit(ok(want) ? want : null)})`);
+  return (
+    'create temp table normalize_cases (input text, expected text);\n' +
+    `insert into normalize_cases values\n${rows.join(',\n')};\n`
+  );
+}
+
 const SUITES = [
   {
     name: 'Согласия',
@@ -148,16 +162,28 @@ const SUITES = [
       ['kabinet.test.sql', path.join(SUPA, 'tests', 'kabinet.test.sql')],
     ],
   },
+  {
+    /* Онлайн-вариант через кабинет: выдача, проверка в базе, ключ закрыт
+       от ученика. В начало теста — таблица случаев нормализации ответа,
+       общая с сайтом (тот же файл проверяет check-variant-online.mjs). */
+    name: 'Онлайн-вариант',
+    db: 'variant',
+    files: [
+      stub,
+      ...migrations.map(migration),
+      ['variant.test.sql', path.join(SUPA, 'tests', 'variant.test.sql'), normalizeCasesSql],
+    ],
+  },
 ];
 
 let failed = false;
 for (const suite of SUITES) {
   console.log(`\n${suite.name}:`);
   must(run('createdb', ['-h', dir, '-p', port, '-U', 'postgres', suite.db]), `база ${suite.db}`);
-  for (const [name, src] of suite.files) {
+  for (const [name, src, prefix] of suite.files) {
     // Файлы читает пользователь postgres — копируем во временную папку.
     const copy = path.join(dir, name);
-    fs.copyFileSync(src, copy);
+    fs.writeFileSync(copy, (prefix?.() ?? '') + fs.readFileSync(src, 'utf8'));
     if (asRoot) execFileSync('chown', ['postgres', copy]);
     const res = psql(copy, suite.db);
     const notices = `${res.stderr}`
@@ -181,4 +207,4 @@ for (const suite of SUITES) {
 
 stop();
 if (failed) process.exit(1);
-console.log('\nСогласия и кабинет в базе: все проверки прошли.');
+console.log('\nСогласия, кабинет и онлайн-вариант в базе: все проверки прошли.');

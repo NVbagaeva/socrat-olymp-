@@ -351,6 +351,12 @@
 .vo-verdict.is-wrong {
   color: var(--color-error);
 }
+/* Лампочка подсказки (HintFlow): размер — как в тренажёрах (prep.css). */
+.vo .ptask__hint-ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
 .vo-steps {
   display: grid;
   gap: var(--space-2);
@@ -495,11 +501,34 @@
 .vo-table__razbor td {
   background: var(--color-surface-soft);
 }
+.vo-table__no {
+  white-space: nowrap;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.vo-table__no::after {
+  content: ' ▾';
+  color: var(--color-text-tertiary);
+  font-size: 0.75em;
+}
+/* На телефоне разбор открывается по номеру: столбца «Разбор» нет. */
 @media (max-width: 599px) {
   .vo-table th,
   .vo-table td {
-    padding: var(--space-2);
+    padding: var(--space-2) var(--space-1);
     font-size: var(--fs-caption);
+  }
+  .vo-table__act {
+    display: none;
+  }
+  .vo-table .vo-mini {
+    font-size: 0.6875rem;
+    line-height: 1.2;
   }
 }
 .vo-links ul {
@@ -648,30 +677,41 @@
   font-size: 13px;
   font-weight: 700;
 }
+/* На телефоне график в полтора раза уже: подписи крупнее в единицах рисунка. */
+@media (max-width: 599px) {
+  .vo-trend__axis {
+    font-size: 22px;
+  }
+  .vo-trend__val {
+    font-size: 24px;
+  }
+}
 .vo-heat {
   display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
   gap: 4px;
-  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.vo-heat__row {
-  display: grid;
-  grid-template-columns: repeat(13, minmax(40px, 1fr));
-  gap: 4px;
-}
-.vo-heat__head {
-  color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  text-align: center;
+@media (max-width: 767px) {
+  .vo-heat {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
 }
 .vo-heat__cell {
   display: grid;
   place-items: center;
-  min-height: 44px;
+  gap: 2px;
+  min-height: 52px;
+  padding: var(--space-1) 0;
   border-radius: var(--radius-sm);
   font-size: var(--fs-caption);
-  font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+.vo-heat__no {
+  font-size: 0.6875rem;
+  opacity: 0.8;
 }
 .vo-heat__cell[data-empty] {
   background: var(--color-surface-2);
@@ -742,4 +782,83 @@
 }
 .vo-field .input {
   max-width: 120px;
+}
+
+/* ── Кабинет: результаты класса ─────────────────────────────── */
+.vo-panel__kab {
+  margin: 0;
+}
+.vo-class {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.vo-class th,
+.vo-class td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+  white-space: nowrap;
+}
+.vo-class thead th {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.vo-class th[scope='row'] {
+  text-align: left;
+}
+.vo-class__name {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  text-decoration: none;
+}
+.vo-class__name:disabled {
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+.vo-class th[scope='row'] .vo-mini,
+.vo-class__score .vo-mini {
+  display: block;
+  margin: 0;
+}
+.vo-class__score {
+  font-weight: 700;
+}
+.vo-class__cell {
+  min-width: 32px;
+  font-weight: 700;
+}
+.vo-class__cell.is-right {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.vo-class__cell.is-wrong {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.vo-class__cell.is-none {
+  background: var(--color-surface-2);
+}
+.vo-class tfoot th,
+.vo-class tfoot td {
+  border-top: 2px solid var(--color-border-strong);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.vo-class__avg[data-l='4'],
+.vo-class__avg[data-l='5'] {
+  color: var(--color-text-inverse);
+}
+.vo-class__open td {
+  padding: 0;
+  text-align: left;
+  white-space: normal;
+}
+.vo-class__open .vo-result {
+  margin: var(--space-3) 0;
+  padding-bottom: 0;
+}
+.vo-kab-solve {
+  display: grid;
+  gap: var(--space-2);
 }

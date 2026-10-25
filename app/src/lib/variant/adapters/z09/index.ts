@@ -10,12 +10,17 @@
 import { generate } from '@/lib/proizvodnaya/generate';
 import { BANK } from '@/lib/proizvodnaya/bank';
 import { prototypeById } from '@/lib/proizvodnaya/prototypes';
-import { drawFigure, razborEtapyHtml } from '@/lib/proizvodnaya/sheet9';
-import { krupnyyRisunok } from '../../pechat';
+import {
+  CELL,
+  TEACHER_CELL,
+  TEACHER_MAX_MM,
+  drawFigure,
+  razborEtapyHtml,
+} from '@/lib/proizvodnaya/sheet9';
 import type { Generated } from '@/lib/proizvodnaya/types';
 import typo from '@/lib/sheet/typography.js';
 import { typeset } from '@/lib/tex';
-import type { Figure, SectionAdapter, SectionModule, VariantTask } from '../../types';
+import type { SectionAdapter, SectionModule, VariantTask } from '../../types';
 import {
   FALLBACK,
   answerHtml,
@@ -104,14 +109,17 @@ function buildTask(c: C9, isNew: boolean): VariantTask | null {
   return buildIz(c, t, isNew);
 }
 
-/** Задача из уже собранной задачи раздела (банк или заданные узлы). */
+/**
+ * Задача из уже собранной задачи раздела (банк или заданные узлы).
+ * Рисунки — в печатном профиле листа (lib/sheet/figureRules.js).
+ */
 export function buildIz(c: C9, t: Generated, isNew: boolean): VariantTask {
-  /* Лист варианта: клетка 7 мм (не меньше 6), подписи не мельче 10 pt (lib/variant/pechat). */
-  const risunok = (rezhim: 'student' | 'teacher'): Figure | null => {
-    if (t.risunok === null) return null;
-    const r = krupnyyRisunok((kegl) => drawFigure(t, rezhim, { minFont: kegl })?.svg ?? '');
-    return { svg: r.svg, width: r.width, below: true };
-  };
+  return withPrintFigures(() => buildIzBez(c, t, isNew));
+}
+
+function buildIzBez(c: C9, t: Generated, isNew: boolean): VariantTask {
+  const student = drawFigure(t, 'student');
+  const teacher = drawFigure(t, 'teacher');
   const otvet = answerHtml(t.otvet);
   const steps = t.shagi
     .filter((s) => s.zagolovok !== 'Ответ')
@@ -130,8 +138,15 @@ export function buildIz(c: C9, t: Generated, isNew: boolean): VariantTask {
           },
     difficulty: null,
     statement: `<p>${katexHtml(typo.mathText(t.uslovie))}</p>`,
-    figure: risunok('student'),
-    figureTeacher: risunok('teacher'),
+    figure: student === null ? null : { svg: student.svg, width: student.width(CELL.single) },
+    figureTeacher:
+      teacher === null
+        ? null
+        : {
+            svg: teacher.svg,
+            width: Math.min(teacher.width(TEACHER_CELL.single), TEACHER_MAX_MM.single),
+            below: true,
+          },
     answer: answerText(t.otvet),
     answerHtml: otvet,
     solutionTeacher: katexHtml(razborEtapyHtml(t)) + razborAnswer(otvet),

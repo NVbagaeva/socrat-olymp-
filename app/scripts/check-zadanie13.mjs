@@ -1283,8 +1283,10 @@ const bezZapolni = (json) =>
     est('= \\dfrac{42S}{100} = 0{,}42S', 'P₁ = 0,42S');
     est('\\dfrac{S}{4}\\cdot \\dfrac{16}{100}\\cdot 10', 'P₂ = S/4 · 16/100 · 10');
     est('0{,}4S', 'P₂ = 0,4S');
-    est('x_{1} = \\dfrac{0{,}42S\\cdot 100}{S} = 42\\,\\%', 'x₁ = 42 %');
-    est('x_{2} = \\dfrac{0{,}4S\\cdot 100}{S} = 40\\,\\%', 'x₂ = 40 %');
+    est('? = \\dfrac{0{,}42S\\cdot 100}{S} = 42', 'первый банк: ? = 42');
+    est('Переплата $P_{1}$ — $42\\,\\%$ от суммы кредита', 'P₁ — 42 % от кредита');
+    est('? = \\dfrac{0{,}4S\\cdot 100}{S} = 40', 'второй банк: ? = 40');
+    est('Переплата $P_{2}$ — $40\\,\\%$ от суммы кредита', 'P₂ — 40 % от кредита');
     est('42\\,\\% - 40\\,\\% = 2\\,\\%', '42 % − 40 % = 2 %');
     const t1 = r.shagi.find((st) => st.title === 'Составляем таблицу: первый банк').bloki[0].t;
     if (t1.rows[0].cells[0] !== 'S')
@@ -1354,7 +1356,7 @@ const bezZapolni = (json) =>
         if (!sol.includes(`= ${tex(koef)}S`)) problems.push(`${w}: P ≠ ${tex(koef)}S (солвер)`);
         if (
           !['A-01', 'A-13', 'A-15'].includes(id) &&
-          !sol.includes(`= ${tex(koef.mul(100))}\\\\,\\\\%`)
+          !sol.includes(`— $${tex(koef.mul(100))}\\\\,\\\\%$ от суммы кредита`)
         )
           problems.push(`${w}: процент от кредита ≠ ${tex(koef.mul(100))} %`);
       }
@@ -1439,6 +1441,18 @@ const bezZapolni = (json) =>
       counts[info.type] = (counts[info.type] ?? 0) + 1;
       seen.add(t.condition);
       inline(t.condition, where + ' условие');
+      /* Обозначения по легенде: ставка — r (r_{1}, r_{2}, … при нескольких),
+         искомый процент — «?», X в подсказках не встречается (платёж — x). */
+      const solJson = JSON.stringify(t.solution);
+      const chuzhaya = solJson.match(/(?<![\\a-zA-Z{])[a-qs-zA-Z](?:_\{\d\})?\\\\,\\\\%/);
+      if (chuzhaya)
+        problems.push(
+          `${where}: процент под буквой ${chuzhaya[0]} — по легенде ставка r, искомый процент «?»`,
+        );
+      if (/[a-z] = 1 \+ \\\\dfrac/.test(solJson.replace(/k(?:_\{\d\})? = 1 \+ \\\\dfrac/g, '')))
+        problems.push(`${where}: множитель не k`);
+      if (JSON.stringify(t.hints).includes('$X$'))
+        problems.push(`${where}: в подсказке $X$ вместо $x$`);
       for (const st of t.solution) {
         inline(st.title + ' ' + st.text, where + ' решение');
         if (st.formula) typeset(st.formula, where + ' формула');

@@ -13,7 +13,7 @@ import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { normalizeAnswer } from '@/lib/variant/online/normalize';
 import type { Proverka } from '@/lib/variant/online/proverka';
 import type { Check, WorkPayload, WorkUi } from '@/lib/variant/online/sessionUi';
-import type { VariantTask } from '@/lib/variant/types';
+import type { HintStep, VariantTask } from '@/lib/variant/types';
 import { AnswerField } from './AnswerField';
 import { clockText } from './format';
 
@@ -68,19 +68,25 @@ export function WorkScreen({
   const tasks = payload.tasks;
   const trening = payload.mode === 'trening';
   const [index, setIndex] = useState(Math.min(restored?.index ?? 0, tasks.length - 1));
-  const [answers, setAnswers] = useState<Record<number, string>>(restored?.answers ?? {});
+  /* Черновик с сервера (работа из кабинета): продолжить на другом устройстве. */
+  const draft = restored === null ? payload.draft : undefined;
+  const [answers, setAnswers] = useState<Record<number, string>>(
+    restored?.answers ?? draft?.answers ?? {},
+  );
   const [second, setSecond] = useState<Record<number, string>>(restored?.second ?? {});
   const [v1, setV1] = useState<Record<number, Check>>(restored?.v1 ?? {});
   const [v2, setV2] = useState<Record<number, Check>>(restored?.v2 ?? {});
-  const [later, setLater] = useState<number[]>(restored?.later ?? []);
+  const [later, setLater] = useState<number[]>(restored?.later ?? draft?.later ?? []);
   const [hinted, setHinted] = useState<number[]>(restored?.hinted ?? []);
   const [steps, setSteps] = useState<Record<number, number>>(restored?.steps ?? {});
-  const [startedAt] = useState(() => restored?.startedAt ?? Date.now());
+  const [startedAt] = useState(() => restored?.startedAt ?? payload.startedAt ?? Date.now());
+  /* Подсказки, присланные сервером с первой ошибкой (работа из кабинета). */
+  const [srvHints, setSrvHints] = useState<Record<number, HintStep[]>>(restored?.srvHints ?? {});
   const [razborOpen, setRazborOpen] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
   const [checking, setChecking] = useState(false);
-  const [times, setTimes] = useState<Record<number, number>>(restored?.times ?? {});
+  const [times, setTimes] = useState<Record<number, number>>(restored?.times ?? draft?.times ?? {});
   const enterRef = useRef({ index, at: elapsed() });
   const card = useRef<HTMLDivElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -137,6 +143,7 @@ export function WorkScreen({
     later,
     hinted,
     steps,
+    srvHints,
     times,
     startedAt,
   };
@@ -211,6 +218,10 @@ export function WorkScreen({
         return;
       }
       const res: Check = verdict.kind === 'right' ? 'right' : 'wrong';
+      if (verdict.kind === 'wrong' && verdict.hints !== undefined && verdict.hints.length > 0) {
+        const got = verdict.hints;
+        setSrvHints((h) => ({ ...h, [index]: got }));
+      }
       if (phase === 'first') setV1((v) => ({ ...v, [index]: res }));
       else setV2((v) => ({ ...v, [index]: res }));
       setLater((l) => l.filter((x) => x !== index));
@@ -228,7 +239,8 @@ export function WorkScreen({
 
   if (task === undefined) return null;
   const status = statusOf(index);
-  const hasHints = (task.hints?.length ?? 0) > 0;
+  const hintList = task.hints ?? srvHints[index] ?? [];
+  const hasHints = hintList.length > 0;
   const shownSteps = steps[index] ?? 0;
   const checkedRight = v1[index] === 'right' || v2[index] === 'right';
 
@@ -247,7 +259,7 @@ export function WorkScreen({
             {phase === 'second' ? (
               hasHints ? (
                 <div onClickCapture={markHinted}>
-                  <HintFlow shagi={task.hints ?? []} />
+                  <HintFlow shagi={hintList} />
                 </div>
               ) : stepList.length > 0 ? (
                 <div className="vo-steps">

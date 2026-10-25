@@ -29,6 +29,12 @@
   overflow-x: auto;
 }
 
+/* Узкий телефон: таблица «Дано» прокручивается в своей рамке, страница — нет. */
+.z10-dano-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .z10-dano {
   width: 100%;
   border-collapse: collapse;

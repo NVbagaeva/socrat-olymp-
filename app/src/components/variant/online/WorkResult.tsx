@@ -136,7 +136,7 @@ export function WorkResult({
               <th scope="col">{T.result.cols.right}</th>
               <th scope="col">{T.result.cols.ok}</th>
               <th scope="col">{T.result.cols.time}</th>
-              <th scope="col">
+              <th scope="col" className="vo-table__act">
                 <span className="sr-only">{T.result.cols.razbor}</span>
               </th>
             </tr>
@@ -150,7 +150,17 @@ export function WorkResult({
               return (
                 <Fragment key={`${t.taskId}-${i}`}>
                   <tr className={ok ? 'is-right' : 'is-wrong'}>
-                    <th scope="row">{t.egeNumber}</th>
+                    <th scope="row">
+                      <button
+                        type="button"
+                        className="vo-table__no"
+                        aria-expanded={open === i}
+                        aria-label={`${T.result.razbor}: №${t.egeNumber}`}
+                        onClick={() => setOpen(open === i ? null : i)}
+                      >
+                        {t.egeNumber}
+                      </button>
+                    </th>
                     <td>
                       {mine}
                       {rec?.hinted ? <span className="vo-mini">{T.result.hinted}</span> : null}
@@ -161,7 +171,7 @@ export function WorkResult({
                       {ok ? '✓' : '✗'}
                     </td>
                     <td>{secondsText(rec?.seconds ?? 0)}</td>
-                    <td>
+                    <td className="vo-table__act">
                       <button
                         type="button"
                         className="vo-link"

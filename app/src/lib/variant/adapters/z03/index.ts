@@ -44,12 +44,9 @@ interface C03 extends Candidate {
   z: Zadacha03;
 }
 
-/**
- * Ширина чертежа на листе, мм. Сценарный (I–III): подписи (кегль 15
- * из 280) не мельче 10 pt, рёбра — 1,5 pt (lib/variant/pechat).
- */
-const SHIRINA_SCENARIYA = 68;
-const SHIRINA_SOLID = 70;
+/** Ширина чертежа на листе, мм: I–III — как на листе печати №3 (figureWidth). */
+const SHIRINA_SCENARIYA = 58;
+const SHIRINA_SOLID = 50;
 
 const OTVET = /^\s*\*{0,2}Ответ:/;
 

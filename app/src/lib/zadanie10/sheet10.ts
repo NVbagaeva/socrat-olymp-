@@ -68,7 +68,8 @@ function kartinka(o: Sborka10, z: ZadachaLite): string {
   );
 }
 
-function ramkiTeorii(o: Sborka10, prototipy: readonly string[]): string[] {
+/** Рамки теории блока: формулы прототипов и «Важно!» разделов теории. */
+export function ramkiTeorii10(o: Sborka10, prototipy: readonly string[]): string[] {
   const razdely = RAZDELY_TEORII_10.filter((r) => r.prototipy.some((p) => prototipy.includes(p)));
   const formuly = prototipy.map((id) =>
     renderToStaticMarkup(
@@ -94,9 +95,67 @@ function ramkiTeorii(o: Sborka10, prototipy: readonly string[]): string[] {
   return [...formuly, ...vazhno];
 }
 
+/** Условие: текст с меткой «аналог», картинка сюжета; у моста на листе ученика — чертёж. */
+export function uslovie10(
+  o: Sborka10,
+  z: ZadachaLite,
+  vid: Vid10,
+): { html: string; figure: { svg: string; width: number } | null } {
+  const metka =
+    z.source === 'analog' ? ' <span class="z10-list__metka">(не из открытого банка)</span>' : '';
+  const most = z.prototypeId === 'P01' && vid === 'uchenik';
+  return {
+    html: `<p class="z10-list__uslovie">${tex(z.text)}${metka}</p>${kartinka(o, z)}`,
+    figure: most ? { svg: mostSvg(z, 'uchenik'), width: SHIRINA_MM.most } : null,
+  };
+}
+
+/** Разбор учителя кусками: чертёж моста с построениями, затем шаги. */
+export function razbor10(o: Sborka10, z: ZadachaLite): string[] {
+  const s = o.proto(z.prototypeId).solve(z.params);
+  const most =
+    z.prototypeId === 'P01'
+      ? [
+          `<div class="z10-list__most" style="width:${SHIRINA_MM.most}mm">${mostSvg(z, 'uchitel')}</div>`,
+        ]
+      : [];
+  return [
+    ...most,
+    ...s.etapy.map(
+      (e) =>
+        `<div class="z10-list__shag"><p class="z10-list__shag-title">${typo.escape(
+          e.title,
+        )}</p>${e.lines.map((l) => `<p class="z10-list__shag-line">${tex(l)}</p>`).join('')}</div>`,
+    ),
+  ];
+}
+
+/** Разобранный пример: рамка с условием, шагами и чертежом моста. */
+export function primer10(o: Sborka10, z: ZadachaLite): string {
+  const s = o.proto(z.prototypeId).solve(z.params);
+  return renderToStaticMarkup(
+    createElement(
+      RamkaPrimer,
+      {
+        title: o.proto(z.prototypeId).title,
+        uslovie: z.text,
+        shagi: s.etapy.map((e) => ({
+          label: e.title.replace(/^Шаг \d+\.\s*/, ''),
+          paras: e.lines,
+        })),
+      },
+      z.prototypeId === 'P01'
+        ? createElement('div', {
+            className: 'z10-list__most',
+            dangerouslySetInnerHTML: { __html: mostSvg(z, 'uchitel') },
+          })
+        : null,
+    ),
+  );
+}
+
 /** Описание листа №10 для buildDocument (lib/sheetList.ts). */
 export function sheetSpec10(o: Sborka10, vid: Vid10) {
-  const reshit = (z: ZadachaLite) => o.proto(z.prototypeId).solve(z.params);
   return listSheetSpec<ZadachaLite>(
     {
       chip: 'Задание 10',
@@ -104,59 +163,11 @@ export function sheetSpec10(o: Sborka10, vid: Vid10) {
       model: o.model,
       zadacha: (id) => o.zadachi.get(id),
       id: (z) => z.id,
-      uslovie: (z) => {
-        const metka =
-          z.source === 'analog'
-            ? ' <span class="z10-list__metka">(не из открытого банка)</span>'
-            : '';
-        const most = z.prototypeId === 'P01' && vid === 'uchenik';
-        return {
-          html: `<p class="z10-list__uslovie">${tex(z.text)}${metka}</p>${kartinka(o, z)}`,
-          figure: most ? { svg: mostSvg(z, 'uchenik'), width: SHIRINA_MM.most } : null,
-        };
-      },
-      otvet: (z) => otvetText10(reshit(z).answer),
-      razbor: (z) => {
-        const s = reshit(z);
-        const most =
-          z.prototypeId === 'P01'
-            ? [
-                `<div class="z10-list__most" style="width:${SHIRINA_MM.most}mm">${mostSvg(z, 'uchitel')}</div>`,
-              ]
-            : [];
-        return [
-          ...most,
-          ...s.etapy.map(
-            (e) =>
-              `<div class="z10-list__shag"><p class="z10-list__shag-title">${typo.escape(
-                e.title,
-              )}</p>${e.lines.map((l) => `<p class="z10-list__shag-line">${tex(l)}</p>`).join('')}</div>`,
-          ),
-        ];
-      },
-      teoriya: (prototipy) => ramkiTeorii(o, prototipy),
-      primer: (z) => {
-        const s = reshit(z);
-        return renderToStaticMarkup(
-          createElement(
-            RamkaPrimer,
-            {
-              title: o.proto(z.prototypeId).title,
-              uslovie: z.text,
-              shagi: s.etapy.map((e) => ({
-                label: e.title.replace(/^Шаг \d+\.\s*/, ''),
-                paras: e.lines,
-              })),
-            },
-            z.prototypeId === 'P01'
-              ? createElement('div', {
-                  className: 'z10-list__most',
-                  dangerouslySetInnerHTML: { __html: mostSvg(z, 'uchitel') },
-                })
-              : null,
-          ),
-        );
-      },
+      uslovie: (z) => uslovie10(o, z, vid),
+      otvet: (z) => otvetText10(o.proto(z.prototypeId).solve(z.params).answer),
+      razbor: (z) => razbor10(o, z),
+      teoriya: (prototipy) => ramkiTeorii10(o, prototipy),
+      primer: (z) => primer10(o, z),
     },
     vid,
   );
