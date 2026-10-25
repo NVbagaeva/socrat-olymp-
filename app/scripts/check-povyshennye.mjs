@@ -316,6 +316,32 @@ Object.assign(VTOROY, {
   'z03.dve-kruzhki': (p) => P03_70.poModeli(p),
 });
 
+/* ── Партия 2: №7, №8, №12 вариантов 7–12 ─────────────────────── */
+
+Object.assign(VTOROY, {
+  'z07.kub-obratnoe': podstanovka7(Z7.PV7_KUB_OBRATNOE),
+  'z07.koren-x2': (p) => {
+    /* Перебор корней x⁴ = ax² − b на целой сетке и подстановка: меньший. */
+    const c = Z7.PV7_KOREN_KVADRAT.chisla(p);
+    for (let x = -100; x <= 100; x += 0.25) {
+      if (c.odz(x) && close(c.lhs(x), c.rhs(x))) return x;
+    }
+    return NaN;
+  },
+  'z07.koren-smeshannoe': (p) => {
+    /* Ненулевой корень бисекцией √(kx) − cx на (ε; 1000), c·x растёт быстрее. */
+    const c = Z7.PV7_KOREN_LINEYNYY.chisla(p);
+    const x = bisekciya((u) => -(c.lhs(u) - c.rhs(u)), 1e-6, 1000);
+    return Math.round(x * 1e6) / 1e6;
+  },
+  'z08.log-chastnoe-stepeney': (p) => VY.logChastnoeStepeney(p).proverka,
+  'z08.trig-privedenie': (p) => VY.trigPrivedenie(p).proverka,
+  'z08.log-am-bn': (p) => VY.logAmBn(p).proverka,
+  'z12.parabola-b': (p) => GR.parabolaB(p).proverka,
+  'z12.pokazatelnaya-otnoshenie': (p) => GR.pokazatelnayaOtnoshenie(p).proverka,
+  'z12.parabola-korni': (p) => GR.parabolaKorni(p).proverka,
+});
+
 /* ── Варианты ───────────────────────────────────────────────────── */
 
 const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');

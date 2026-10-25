@@ -539,6 +539,84 @@ SCHET.update({
 })
 
 
+# ── Партия 2: №7, №8, №12 вариантов 7–12 ─────────────────────────
+
+
+def z07_kub(p):
+    sol = [s_ for s_ in sp.solve(sp.Eq((1 / x + p["c"]) ** 3, p["d"]), x) if s_.is_real]
+    assert len(sol) == 1, sol
+    return sol[0]
+
+
+def z07_x2(p):
+    a, b = R(p["a"]), R(p["b"])
+    sol = [s_ for s_ in sp.solve(sp.Eq(a * x**2 - b, x**4), x) if s_.is_real and a * s_**2 - b >= 0]
+    return min(sol)
+
+
+def z07_smesh(p):
+    c = p["w"] + sp.Rational(p["n"], p["m"])
+    sol = [s_ for s_ in sp.solve(sp.Eq(p["k"] * x, (c * x) ** 2), x) if s_ >= 0]
+    assert 0 in sol, sol
+    return max(sol)
+
+
+def z08_chastnoe(p):
+    A, B = sp.Integer(p["a"]) ** p["i"], sp.Integer(p["b"]) ** p["j"]
+    C, D = sp.Integer(p["a"]) ** p["k"], sp.Integer(p["b"]) ** p["l"]
+    return sp.nsimplify(sp.simplify(sp.log(B, A) / sp.log(D, C)))
+
+
+def z08_trig(p):
+    fns = {"sin": sp.sin, "cos": sp.cos, "tg": sp.tan}
+    val = lambda u: fns[u[0]](sp.Rational(u[1], u[2]) * sp.pi)
+    e = p["k"] * sp.sqrt(p["r"])
+    for u in p["f"]:
+        e *= val(u)
+    return sp.nsimplify(sp.simplify(e / val(p["g"])))
+
+
+def z08_ambn(p):
+    a, b = sp.symbols("a b", positive=True)
+    L = R(p["t"]) if p["dano"] == "ab" else 1 / R(p["t"])
+    arg = a ** p["m"] * b ** p["n"] if p["op"] == "umn" else a ** p["m"] / b ** p["n"]
+    e = sp.expand_log(sp.log(arg) / sp.log(a), force=True)
+    return sp.simplify(e.subs(sp.log(b), L * sp.log(a)))
+
+
+def z12_parabola_b(p):
+    a = sp.symbols("a")
+    b, c = R(p["b"]), R(p["c"])
+    qx, qy = p["Q"]
+    aa = sp.solve(sp.Eq(a * qx**2 + b * qx + c, qy), a)[0]
+    return aa * p["x0"] ** 2 + b * p["x0"] + c
+
+
+def z12_pokaz(p):
+    px, py = p["P"]
+    a = sp.Integer(py) ** sp.Rational(1, px)
+    return sp.simplify(a ** p["m"] / a ** p["n"])
+
+
+def z12_korni(p):
+    a, b, c = sp.symbols("a b c")
+    s = sp.solve([a * p["x1"] ** 2 + b * p["x1"] + c, a * p["x2"] ** 2 + b * p["x2"] + c, c - p["c"]], [a, b, c])
+    return s[a] * p["x0"] ** 2 + s[b] * p["x0"] + s[c]
+
+
+SCHET.update({
+    "z07.kub-obratnoe": z07_kub,
+    "z07.koren-x2": z07_x2,
+    "z07.koren-smeshannoe": z07_smesh,
+    "z08.log-chastnoe-stepeney": z08_chastnoe,
+    "z08.trig-privedenie": z08_trig,
+    "z08.log-am-bn": z08_ambn,
+    "z12.parabola-b": z12_parabola_b,
+    "z12.pokazatelnaya-otnoshenie": z12_pokaz,
+    "z12.parabola-korni": z12_korni,
+})
+
+
 def konechnaya(q):
     q = F(q)
     d = q.denominator
