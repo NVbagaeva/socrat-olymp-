@@ -75,6 +75,7 @@
     "test:variant-online": "node scripts/check-variant-online.mjs",
     "test:variant-online-site": "node scripts/check-variant-online-site.mjs",
     "test:variant-kabinet": "node scripts/check-variant-kabinet.mjs",
+    "test:variant-kabinet-site": "node scripts/check-variant-kabinet-site.mjs",
     "build:blanki": "node scripts/build-blanki.mjs",
     "build:bank-13": "node scripts/build-bank-13.mjs",
     "test:zadanie15": "node scripts/check-zadanie15.mjs",
