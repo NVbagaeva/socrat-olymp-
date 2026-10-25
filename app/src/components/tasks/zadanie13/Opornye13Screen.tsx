@@ -18,7 +18,7 @@ import { itog13, opornye13, zapisat13 } from '@/lib/zadanie13/progress';
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie13/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { HintFlow11 } from '../zadanie11/HintFlow11';
-import { TablitsaZapolni13 } from './TablitsaZapolni13';
+import { TablitsaZapolni13, urovenPoNomeru } from './TablitsaZapolni13';
 
 type Attempt = 'wrong' | 'skipped';
 
@@ -232,7 +232,11 @@ export function Opornye13Screen({
             />
           )}
           {task.zapolni === null ? null : (
-            <TablitsaZapolni13 key={`${task.prototypeId}|${task.seed}`} t={task.zapolni} />
+            <TablitsaZapolni13
+              key={`${task.prototypeId}|${task.seed}`}
+              t={task.zapolni}
+              uroven={urovenPoNomeru(base.no)}
+            />
           )}
         </div>
         {shagi === null ? null : (
