@@ -341,12 +341,21 @@ function kindOf(prototype: Prototype, zadanie: string): PoolKind {
   };
 }
 
+/* Пул банка считается один раз на процесс: сборка зовёт его на каждой
+   странице раздела по нескольку раз (адреса, заголовок, сама страница),
+   а он набирает KaTeX и шифрует разборы всех вариантов — секунды на
+   вызов. Пул не меняется: те же данные, те же отпечатки. */
+let pool4: Pool | null = null;
+let pool5: Pool | null = null;
+
 export function bank4Pool(): Pool {
-  return { bloki: BLOKI_4, kinds: BANK_4.map((p) => kindOf(p, '4')) };
+  pool4 ??= { bloki: BLOKI_4, kinds: BANK_4.map((p) => kindOf(p, '4')) };
+  return pool4;
 }
 
 export function bank5Pool(): Pool {
-  return { bloki: BLOKI_5, kinds: BANK_5.map((p) => kindOf(p, '5')) };
+  pool5 ??= { bloki: BLOKI_5, kinds: BANK_5.map((p) => kindOf(p, '5')) };
+  return pool5;
 }
 
 /* ── Опорные задачи ──────────────────────────────────────────────── */
