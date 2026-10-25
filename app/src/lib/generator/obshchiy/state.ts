@@ -413,7 +413,13 @@ export function defaultState(config: GenConfig): GenState {
 
 /** Сколько пунктов «Дополнительно» включено: для подписи кнопки. */
 export function extrasOn(extras: GenExtras): number {
-  return [extras.theory, extras.examples > 0, extras.qr, extras.urok > 0].filter(Boolean).length;
+  return [
+    extras.theory,
+    extras.examples > 0,
+    extras.qr,
+    extras.urok > 0,
+    extras.flag === true,
+  ].filter(Boolean).length;
 }
 
 /** Какой пресет совпадает с экраном: число вариантов, уровни и темы. */

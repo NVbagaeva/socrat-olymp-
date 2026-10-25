@@ -59,6 +59,8 @@ export interface ZaprosBanka {
   qr: boolean;
   /** Фильтр раздела (у №6 — формулировка: s, f, v); нет — без фильтра. */
   filtr?: string;
+  /** Переключатель раздела (у №10 — картинки сюжетов). */
+  flag?: boolean;
 }
 
 /** Адрес листа: ps=2&s=P01:2,P04.3:1&i=m&v=2&seed=…&z=1.P01_0:1… */
@@ -76,6 +78,7 @@ export function zaprosBankaQuery(z: ZaprosBanka, avtor: string): string {
   if (z.date !== '') q.set('d', z.date);
   if (z.uchitel !== undefined && z.uchitel !== avtor) q.set('uch', z.uchitel);
   if (z.qr) q.set('qr', '1');
+  if (z.flag === true) q.set('fl', '1');
   const zz = Object.entries(z.zameny).filter(([, k]) => k > 0);
   if (zz.length > 0) q.set('z', zz.map(([pos, k]) => `${pos}:${k}`).join(','));
   return q.toString();
@@ -111,6 +114,7 @@ export function parseZaprosBanka(
     date: /^\d{4}-\d{2}-\d{2}$/.test(q.get('d') ?? '') ? (q.get('d') as string) : '',
     ...(uch === null ? {} : { uchitel: uch.slice(0, 40) }),
     qr: q.get('qr') === '1',
+    ...(q.get('fl') === '1' ? { flag: true } : {}),
     ...(opts.filtry !== undefined
       ? { filtr: opts.filtry.includes(st) ? st : (opts.filtry[0] as string) }
       : {}),
@@ -152,12 +156,15 @@ function peremeshat<T>(r: Rng, items: readonly T[]): T[] {
  * раздаётся по вариантам по порядку — ещё один вариант не меняет
  * прежние, а маленький банк исходных задач расходится целиком.
  * podhodit — фильтр раздела (формулировка у №6); примеры — любые.
+ * bezPrimerov — у раздела разобранных примеров нет (№4, №5): задачи
+ * под них не откладываются.
  */
 export function sobratPoKlyucham(
   z: ZaprosBanka,
   indeks: readonly ZadachaBanka[],
   sol: string,
   podhodit: (x: ZadachaBanka) => boolean = () => true,
+  bezPrimerov = false,
 ): ListBanka {
   const sloty = slotySostava(z.sostav);
   const protos = [...new Set(sloty.map((s) => s.id))];
@@ -174,7 +181,7 @@ export function sobratPoKlyucham(
       indeks.filter((x) => x.p === p && x.s === 'a').map((x) => x.id),
     );
     /* Примеры — последние аналоги пула (исходные, если аналогов нет). */
-    const zapas = (a.length > 0 ? a : f).slice(-PRIMEROV_MAX).reverse();
+    const zapas = bezPrimerov ? [] : (a.length > 0 ? a : f).slice(-PRIMEROV_MAX).reverse();
     primery.push({ proto: p, ids: zapas.slice(0, z.primery) });
     const ok = new Set(indeks.filter(podhodit).map((x) => x.id));
     const bez = (ids: string[]) => ids.filter((id) => ok.has(id) && !zapas.includes(id));

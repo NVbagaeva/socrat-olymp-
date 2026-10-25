@@ -138,6 +138,11 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
   /** Дополнения к экрану итогов. */
   summary?: SummaryOptions;
   /**
+   * Свой экран итогов вместо общего (онлайн-вариант: баллы, таблица
+   * ответов, код результата). Не задан — общий экран итогов.
+   */
+  summaryView?: (data: SummaryData, actions: { onNew: () => void }) => ReactNode;
+  /**
    * Вход по ссылке на конкретный набор (ярлык режима, «Потренироваться»
    * с прототипа, ?tip=). Если в тренажёре есть незавершённая тренировка,
    * оболочка не возвращает в неё молча, а спрашивает: продолжить её или
@@ -303,6 +308,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   pack,
   unpack,
   summary,
+  summaryView,
   entryIntent = false,
   onEntryResolved,
   backHref,
@@ -957,6 +963,15 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       }
     />
   );
+
+  if (view.kind === 'summary' && summaryView !== undefined) {
+    return (
+      <Slot
+        render={(data: SummaryData) => summaryView(data, { onNew: toConfig })}
+        arg={view.data}
+      />
+    );
+  }
 
   if (view.kind === 'summary') {
     return (

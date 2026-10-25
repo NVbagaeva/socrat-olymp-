@@ -30,8 +30,8 @@ export const GENERATOR_SOURCES = {
     'content/sheet12.js',
   ],
   2: ['lib/vektory', 'content/sheet2.ts'],
-  4: ['lib/veroyatnost', 'lib/sheetPlan.ts'],
-  5: ['lib/veroyatnost', 'lib/sheetPlan.ts'],
+  4: ['lib/veroyatnost', 'lib/sheetPlan.ts', 'lib/generator/obshchiy/bank.ts'],
+  5: ['lib/veroyatnost', 'lib/sheetPlan.ts', 'lib/generator/obshchiy/bank.ts'],
   8: ['lib/vychisleniya', 'content/sheet8.js'],
   9: ['lib/proizvodnaya', 'content/sheet9.js', 'lib/sheet/answers9.js'],
   11: ['lib/zadanie11'],
@@ -41,6 +41,12 @@ export const GENERATOR_SOURCES = {
     'lib/generator/obshchiy/bank.ts',
     'content/teoriya7.ts',
     'content/zadanie7.ts',
+  ],
+  10: [
+    'lib/zadanie10',
+    'lib/generator/obshchiy/bank.ts',
+    'content/teoriya10.ts',
+    'content/zadanie10.ts',
   ],
   6: [
     'lib/zadanie6',

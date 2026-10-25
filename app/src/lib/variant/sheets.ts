@@ -242,13 +242,19 @@ function instructionItem(text: string): string {
  * Таблица ответов учителя: номер, ответ, источник. Сложность на листах
  * не печатается — её видно только на экране.
  */
-function keyItem(tasks: readonly VariantTask[], numbering: Numbering, code: string | null): string {
+function keyItem(
+  tasks: readonly VariantTask[],
+  numbering: Numbering,
+  code: string | null,
+  istochnik: boolean,
+): string {
   const rows = tasks
     .map(
       (t, i) =>
         `<tr><th scope="row">${sheetNo(t, i, numbering)}</th>` +
         `<td class="var-key__answer" data-answer="${typo.attr(t.answer)}">${t.answerHtml}</td>` +
-        `<td class="var-key__source">${typo.escape(t.source.label)}</td></tr>`,
+        (istochnik ? `<td class="var-key__source">${typo.escape(t.source.label)}</td>` : '') +
+        '</tr>',
     )
     .join('');
   return item(
@@ -256,7 +262,9 @@ function keyItem(tasks: readonly VariantTask[], numbering: Numbering, code: stri
     `<table class="var-key__table"><caption>${typo.escape(T.keyTitle)}` +
       (code === null ? '' : `<span class="var-key__code">${typo.escape(T.code(code))}</span>`) +
       `</caption>` +
-      `<thead><tr><th>${T.keyNo}</th><th>${T.answer}</th><th>${T.keySource}</th></tr></thead>` +
+      `<thead><tr><th>${T.keyNo}</th><th>${T.answer}</th>` +
+      (istochnik ? `<th>${T.keySource}</th>` : '') +
+      `</tr></thead>` +
       `<tbody>${rows}</tbody></table>`,
   );
 }
@@ -315,13 +323,14 @@ function blocksUchitel(
   tasks: readonly VariantTask[],
   meta: VariantMeta,
   code: string | null,
+  istochnik: boolean,
 ): unknown[] {
   const out: unknown[] = [
     {
       head: false,
       title: '',
       note: '',
-      leadItems: [keyItem(tasks, meta.numbering, code)],
+      leadItems: [keyItem(tasks, meta.numbering, code, istochnik)],
       tasks: [],
     },
     {
@@ -346,7 +355,7 @@ function blocksUchitel(
       leadItems: [
         item(
           'var-sol var-sol--first',
-          solutionHead(t, no, true) + teacherNotes(t),
+          solutionHead(t, no, istochnik) + teacherNotes(t),
           ' data-keep-with-next="1"',
         ),
       ],
@@ -399,6 +408,13 @@ export interface VariantSheetOptions {
    * никогда: по коду на сайте собирается и лист с ответами.
    */
   showCode: boolean;
+  /** Подпись варианта на листе; не задана — «Вариант n» по номеру в партии. */
+  variantLabel?: (index: number) => string;
+  /**
+   * Колонка «Источник» у учителя. Нет у вариантов раздела повышенной
+   * сложности: источник у всех задач один — сам вариант.
+   */
+  istochnik?: boolean;
   /** Место для решения на листе ученика; код в таблице учителя — с ним. */
   space?: SheetSpace;
   /** Хвост кода для места для решения (encodeSpace): к коду в таблице. */
@@ -435,6 +451,7 @@ export function variantSheetSpec(
                 v.tasks,
                 meta,
                 opts.showCode ? codeWithSpace(set.code, opts.spaceToken ?? '') : null,
+                opts.istochnik ?? true,
               )
             : blocksRazbor(v.tasks, meta);
       return {
@@ -442,7 +459,10 @@ export function variantSheetSpec(
           chip: T.chip[kind],
           text: opts.workTitle,
           subtitle,
-          variant: meta.variantLabels === 'blank' ? T.variantBlank : T.variant(v.index),
+          variant:
+            meta.variantLabels === 'blank'
+              ? T.variantBlank
+              : (opts.variantLabel ?? T.variant)(v.index),
         },
         /* Поля «Фамилия / Класс / Дата» — только у листа ученика. */
         fields:

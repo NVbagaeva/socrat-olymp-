@@ -479,7 +479,7 @@ export function checkQuadraticTask(set, task) {
 
   /* Чертёж: столько кривых, сколько частей, и без мусора. */
   if (task.svg) {
-    const curves = (task.svg.match(/class="graph-curve/g) || []).length;
+    const curves = (task.svg.match(/class="graph-curve[ "]/g) || []).length;
     if (curves !== meta.curves.length) { fail(`на чертеже ${curves} кривых, в задаче ${meta.curves.length}`); }
     if (/NaN|undefined/.test(task.svg)) { fail('в SVG остались NaN или undefined'); }
   } else if (!source.noChart) {

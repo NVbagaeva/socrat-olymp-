@@ -5,6 +5,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Modal } from './Modal';
+import { PinchZoom } from './PinchZoom';
 
 export interface FigureZoomProps {
   /** Чертёж: элемент движка solid/ или graph/. */
@@ -12,6 +13,11 @@ export interface FigureZoomProps {
   /** Чем подписан чертёж: заголовок окна и подпись кнопки. */
   label: string;
   className?: string;
+  /**
+   * Масштаб двумя пальцами и перетаскивание в окне (PinchZoom). По
+   * умолчанию выключен: чертежам тренажёров хватает окна на весь экран.
+   */
+  pinch?: boolean;
 }
 
 /**
@@ -28,10 +34,10 @@ export interface FigureZoomProps {
  * Окно — общий Modal: от него и перехват фокуса, и закрытие по
  * Escape, по крестику и тапом по фону. Своего окна здесь нет.
  *
- * Масштаб щипком и перетаскивание сюда намеренно не входят: чертёж
- * и так занимает весь экран, а жесты — отдельная работа.
+ * Масштаб щипком и перетаскивание — по флагу `pinch` (онлайн-вариант:
+ * мелкие рисунки на телефоне); без флага окно как было.
  */
-export function FigureZoom({ children, label, className }: FigureZoomProps) {
+export function FigureZoom({ children, label, className, pinch = false }: FigureZoomProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -57,9 +63,17 @@ export function FigureZoom({ children, label, className }: FigureZoomProps) {
         {/* Тот же чертёж, нарисованный крупнее: штриховые линии
             остаются штриховыми, подписи — подписями, потому что это
             вектор, а не увеличенная картинка. */}
-        <span className="figzoom__big">
-          <ErrorBoundary what="рисунок">{children}</ErrorBoundary>
-        </span>
+        {pinch ? (
+          <PinchZoom>
+            <span className="figzoom__big">
+              <ErrorBoundary what="рисунок">{children}</ErrorBoundary>
+            </span>
+          </PinchZoom>
+        ) : (
+          <span className="figzoom__big">
+            <ErrorBoundary what="рисунок">{children}</ErrorBoundary>
+          </span>
+        )}
       </Modal>
     </>
   );

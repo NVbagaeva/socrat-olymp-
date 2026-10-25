@@ -87,7 +87,7 @@ function mathSpan(tex: string): string {
  * печатает пояснение текстом — формулы выносятся метками и после
  * встают заглушками `.math`, как формулы самих шагов.
  */
-function teacherHtml(r: Razbor45): string {
+export function teacherHtml(r: Razbor45): string {
   const formuly: string[] = [];
   const items = r.shagi.map((s) => ({
     etap: s.etap,
@@ -104,7 +104,7 @@ function teacherHtml(r: Razbor45): string {
 }
 
 /** Разбор для ученика: метод, затем шаги — этап, пояснение, формула. */
-function studentHtml(r: Razbor45): string {
+export function studentHtml(r: Razbor45): string {
   const metod =
     r.metod === ''
       ? ''

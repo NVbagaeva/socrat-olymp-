@@ -31,6 +31,7 @@ import {
   answerText,
   pickCandidate,
   razborAnswer,
+  hintSteps,
   studentFromHints,
   type Candidate,
 } from '../common';
@@ -68,7 +69,7 @@ function sourceOf(z: Zadacha6Variant): { kind: 'fipi' | 'own'; label: string } {
 
 /* ── Адаптер ────────────────────────────────────────────────────── */
 
-interface C6 extends Candidate {
+export interface C6 extends Candidate {
   z: Zadacha6Variant;
 }
 
@@ -89,7 +90,7 @@ function candidate(z: Zadacha6Variant): C6 | null {
   };
 }
 
-function build(c: C6): VariantTask {
+export function build(c: C6): VariantTask {
   const { z } = c;
   const p = prototype(z.prototypeId);
   const ris = p.ris(z.params);
@@ -118,6 +119,7 @@ function build(c: C6): VariantTask {
     answer: answerText(s.answer),
     answerHtml: answerHtml(s.answer),
     solutionTeacher: razbor + otvet,
+    hints: hintSteps(s.hints),
     solutionStudent:
       studentFromHints(s.hints, []) + `<p class="var-razbor__h">Решаем</p>${razbor}` + otvet,
     fallbacks,
