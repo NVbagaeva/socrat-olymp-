@@ -164,7 +164,7 @@ export function FiltrPanel({
           onPick={(skolko) => onChange(izmenit(f, { skolko }))}
         />
       </Pole>
-      <Pole label={FILTRY.rezhim} wide>
+      <Pole label={FILTRY.rezhim}>
         <Segm
           label={FILTRY.rezhim}
           value={f.rezhim}
@@ -349,17 +349,9 @@ export function FiltrPanel({
   );
 }
 
-function Pole({
-  label,
-  wide = false,
-  children,
-}: {
-  label: string;
-  wide?: boolean;
-  children: ReactNode;
-}) {
+function Pole({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className={clsx('flt-pole', wide && 'flt-pole--wide')}>
+    <div className="flt-pole">
       <p className="flt-label">{label}</p>
       {children}
     </div>

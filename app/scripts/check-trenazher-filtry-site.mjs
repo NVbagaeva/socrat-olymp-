@@ -229,6 +229,11 @@ console.log('1–3. Фильтры из ссылки, числа на чипах
     `числа на ${shown.length - 1} чипах совпадают с посчитанными`,
   );
   check(p.errors.length === 0, `без ошибок на странице (${p.errors.join('; ')})`);
+  /* Снимок: панель целиком под липкой лентой вкладок. */
+  await p.evaluate(() => {
+    const top = document.querySelector('.trainer__head')?.getBoundingClientRect().top ?? 0;
+    window.scrollTo(0, window.scrollY + top - 240);
+  });
   await snimok(p, 'desktop-1-filtry');
   await ctx.close();
 }

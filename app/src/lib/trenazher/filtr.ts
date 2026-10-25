@@ -393,7 +393,9 @@ export interface SlovaFiltra {
 /** Выбранные типы одним словом: тема целиком — её короткое название. */
 export function nazvanieTipov(f: Filtr, config: TrenazherConfig, slova: SlovaFiltra): string {
   if (f.tipy.length === 0) {
-    return slova.vseTipy;
+    /* Тренажёр подтемы: «все типы» — это сама подтема. */
+    const only = config.temy.length === 1 ? config.temy[0] : undefined;
+    return only === undefined ? slova.vseTipy : only.short;
   }
   const temy = config.temy.filter((t) => vyborTemy(t, f) !== 'net');
   if (temy.length === 1 && temy[0] !== undefined) {

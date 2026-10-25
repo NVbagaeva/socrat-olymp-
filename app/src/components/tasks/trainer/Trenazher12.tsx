@@ -63,7 +63,7 @@ export function Trenazher12({
         ssylki={ssylki}
         perenos={perenos12}
       />
-      {pod}
+      {pod === undefined ? null : <div className="trz-pod">{pod}</div>}
     </>
   );
 }

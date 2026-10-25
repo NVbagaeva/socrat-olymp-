@@ -147,9 +147,6 @@
   justify-items: start;
   min-width: 0;
 }
-.trz-answer > * {
-  max-width: 100%;
-}
 .trz-actions {
   display: flex;
   flex-wrap: wrap;
@@ -276,4 +273,9 @@
   .trz-card {
     padding: var(--space-3) var(--space-4);
   }
+}
+
+/* Сводка раздела под фильтрами: во время тренировки не нужна. */
+.trainer:has(.tsess) .trz-pod {
+  display: none;
 }

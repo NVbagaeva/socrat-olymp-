@@ -57,18 +57,15 @@
   min-width: 0;
 }
 .flt-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--space-3) var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
 }
 .flt-pole {
   display: grid;
   gap: var(--space-1);
   align-content: start;
   min-width: 0;
-}
-.flt-pole--wide {
-  grid-column: span 2;
 }
 
 /* ── Готовые наборы ─────────────────────────────────────────────── */
@@ -343,10 +340,7 @@
   gap: var(--space-4);
 }
 .flt-sheet .flt-grid {
-  grid-template-columns: minmax(0, 1fr);
-}
-.flt-sheet .flt-pole--wide {
-  grid-column: auto;
+  flex-direction: column;
 }
 
 /* ── Телефон ────────────────────────────────────────────────────── */
@@ -355,8 +349,8 @@
   display: none;
 }
 @media (max-width: 759.98px) {
-  .flt {
-    /* Место под липкую панель «Начать тренировку». */
+  /* Место под липкую панель «Начать тренировку» — внизу страницы. */
+  .app-main:has(.flt-go) {
     padding-bottom: 96px;
   }
   .flt-card {
