@@ -61,6 +61,14 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
 }
+.gv2-field__warn {
+  padding: 2px var(--space-2);
+  border-left: 3px solid var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
 
 .gv2-presety {
   display: grid;

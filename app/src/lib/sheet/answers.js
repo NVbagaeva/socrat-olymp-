@@ -142,14 +142,20 @@ function solutionFigure(figure) {
 /**
  * Краткое решение одной задачи.
  *
- * steps — уже отобранные куски: [{ tex }] для формул и строка
+ * steps — уже отобранные куски: формулы (или { text, tex } — слова
+ * перед формулой) и строка
  * ответа. Ничего не досочиняется: что пришло, то и печатается.
  * figure — необязательный рисунок к разбору: { svg, width (мм) }.
  */
 function solution(no, formulas, answer, figure) {
-  var body = formulas.map(function (tex) {
-    return '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
+  /* Кусок — формула или { text, tex }: слова перед формулой
+     («вертикальный катет 4, горизонтальный 4, прямая возрастает»). */
+  var body = formulas.map(function (item) {
+    var tex = typeof item === 'string' ? item : item.tex;
+    var formula = '<span class="math math--display-frac" data-tex="' + typo.attr(tex) + '">' +
       typo.escape(tex) + '</span>';
+    return typeof item === 'string' ? formula
+      : '<span class="sheet-solution-text">' + typo.escape(item.text) + ' → ' + formula + '</span>';
   }).join('<span class="sheet-solution-arrow">' + marks.arrow() + '</span>');
 
   var drawn = solutionFigure(figure);
