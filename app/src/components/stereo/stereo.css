@@ -83,6 +83,7 @@
   color: var(--color-text-secondary);
 }
 .stereo-plan__list {
+  list-style: disc;
   margin: 0;
   padding-left: var(--space-5);
   display: grid;
@@ -274,4 +275,226 @@
 .z3d__podpis {
   margin: 0;
   min-height: 3lh;
+}
+
+/* ── «Что нужно уметь» ── */
+.stereo-umet {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+.stereo-umet__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: center;
+}
+.stereo-umet__grid:has(.stereo-umet__img) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+}
+.stereo-umet__list {
+  list-style: disc;
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+  max-width: 72ch;
+}
+.stereo-umet__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Карточка типа с разбором: метка «Разбор». */
+.stereo-tip__razbor {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ── Разбор типа (razbor/<тип>/) ──
+   Оформление разборов №12 (rich-example, topic.css); здесь — живой
+   чертёж слева и шаги, которые нажимаются. */
+.stereo-razbor__back {
+  margin: 0 0 var(--space-4);
+}
+.stereo-razbor__istochnik {
+  margin: 0;
+  justify-self: start;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.stereo-razbor__chertezh {
+  display: grid;
+  gap: var(--space-3);
+  align-self: start;
+}
+/* На компьютере чертёж едет рядом с текстом решения. */
+@media (min-width: 1024px) {
+  .stereo-razbor__chertezh {
+    position: sticky;
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+  }
+}
+.stereo-razbor__chertezh .z3d {
+  max-width: none;
+}
+.stereo-razbor__nav .btn {
+  min-height: 44px;
+}
+.stereo-razbor__step {
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+.stereo-razbor__step.is-active {
+  border-left-color: var(--graph-accent);
+  background: var(--color-surface-soft);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding-block: var(--space-2);
+}
+.stereo-razbor__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.stereo-razbor__no {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.stereo-razbor__step.is-active .stereo-razbor__no {
+  background: var(--graph-accent);
+  color: var(--color-surface);
+}
+.stereo-razbor__telo {
+  display: grid;
+  gap: var(--space-2);
+}
+.stereo-razbor__telo .rich-example__para {
+  margin: 0;
+}
+/* Длинная формула уезжает вбок внутри себя, страница — нет. Для
+   этого колонка и шаги сетки не растягиваются по содержимому. */
+.stereo-razbor__steps,
+.stereo-razbor__step,
+.stereo-razbor__telo {
+  min-width: 0;
+}
+.stereo-razbor__formula {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.stereo-razbor__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+/* Подпись «Глава теории N. …» длинная: на телефоне она переносится,
+   а не раздвигает страницу. */
+.stereo-razbor__foot .btn {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+@media (max-width: 767.98px) {
+  .stereo-umet__grid:has(.stereo-umet__img) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── №15: пункты, критерии, ошибки ── */
+.stereo-punkty {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--space-3);
+}
+.stereo-punkt {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.stereo-punkt__title {
+  margin: 0;
+  font-weight: 600;
+}
+.stereo-kriterii,
+.stereo-oshibki {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  max-width: 80ch;
+}
+.stereo-kriterii__row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+.stereo-kriterii__ball {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.stereo-oshibka {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-error, var(--graph-accent));
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--color-surface);
+}
+.stereo-oshibka__chto {
+  margin: 0;
+  font-weight: 600;
+}
+.stereo-oshibka__kak {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+/* Заголовок пункта в решении №15. */
+.stereo-razbor__punkt {
+  margin-top: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
 }
