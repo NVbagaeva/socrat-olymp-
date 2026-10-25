@@ -22,6 +22,12 @@ import content from '@/content/sheet12.js';
 import { LIST_4, type ListSlova } from '@/content/veroyatnost';
 import answers from '@/lib/sheet/answers.js';
 import typo from '@/lib/sheet/typography.js';
+import {
+  parseZaprosBanka,
+  sobratPoKlyucham,
+  type ZadachaBanka,
+  type ZaprosBanka,
+} from '../generator/obshchiy/bank';
 import { seeded } from '../zadanie3/podhod';
 import { planCounts, planOrder } from '../sheetPlan';
 import type { Pool, PoolKind } from './pool';
@@ -129,17 +135,28 @@ export interface Sheet4Block {
   tasks: Sheet4Task[];
 }
 
+/**
+ * Прототип банка, как его видит выбор задач: у листа печати — PoolKind
+ * (pool.ts), у предпросмотра генератора — данные маршрута
+ * /variant/dannye/z0N.json. Выбору нужны только номер варианта и
+ * условие (повторы условий не допускаются).
+ */
+export interface Kind45 {
+  id: string;
+  variants: readonly { n: number; uslovie: string }[];
+}
+
 /** Задача листа до раскладки: прототип и его вариант из банка. */
-interface Vybor {
-  kind: PoolKind;
-  variant: PoolKind['variants'][number];
+interface Vybor<K extends Kind45 = PoolKind> {
+  kind: K;
+  variant: K['variants'][number];
 }
 
 /** Прототипы листа в порядке выбора: тех, что есть в банке. */
-function prototipyLista(pool: Pool, params: Sheet4Params): PoolKind[] {
+function prototipyLista<K extends Kind45>(kinds: readonly K[], params: Sheet4Params): K[] {
   return params.skills
-    .map((id) => pool.kinds.find((kind) => kind.id === id))
-    .filter((kind): kind is PoolKind => kind !== undefined);
+    .map((id) => kinds.find((kind) => kind.id === id))
+    .filter((kind): kind is K => kind !== undefined);
 }
 
 /**
@@ -151,16 +168,16 @@ function prototipyLista(pool: Pool, params: Sheet4Params): PoolKind[] {
  * чтобы по соседним задачам нельзя было угадать метод. Зерно — из
  * адреса, поэтому лист ученика и лист с ответами совпадают.
  */
-function vyborPervogo(pool: Pool, params: Sheet4Params): Vybor[] {
-  const kinds = prototipyLista(pool, params);
+function vyborPervogo<K extends Kind45>(kinds: readonly K[], params: Sheet4Params): Vybor<K>[] {
+  const lista = prototipyLista(kinds, params);
   const plan = planCounts(
-    kinds.map((kind) => ({ id: kind.id, capacity: kind.variants.length })),
+    lista.map((kind) => ({ id: kind.id, capacity: kind.variants.length })),
     params.count,
   );
   const ocheredi = new Map(
-    kinds.map((kind) => {
+    lista.map((kind) => {
       const dolya = plan.counts.find((item) => item.id === kind.id)?.count ?? 0;
-      const varianty = shuffle(kind.variants, seeded(zerno(`${params.seed}:${kind.id}`)));
+      const varianty = shuffle([...kind.variants], seeded(zerno(`${params.seed}:${kind.id}`)));
       return [kind.id, varianty.slice(0, dolya).map((variant) => ({ kind, variant }))];
     }),
   );
@@ -183,18 +200,18 @@ function vyborPervogo(pool: Pool, params: Sheet4Params): Vybor[] {
  * ученика и листа с ответами должен быть один и тот же. Условия у
  * разных вариантов банка разные, ответы почти всегда тоже.
  */
-function vyborSleduyushchego(
+function vyborSleduyushchego<K extends Kind45>(
   params: Sheet4Params,
-  obrazec: Vybor[],
+  obrazec: Vybor<K>[],
   k: number,
   bylo: Set<string>,
   naMeste: Map<number, Set<string>>,
-): Vybor[] {
+): Vybor<K>[] {
   const random = seeded(zerno(`${params.seed}:v${k}`));
   const zdes = new Set<string>();
   return obrazec.map((item, i) => {
     const prezhnie = naMeste.get(i) ?? new Set<string>();
-    const kandidaty = shuffle(item.kind.variants, random);
+    const kandidaty = shuffle([...item.kind.variants], random);
     const vzyat =
       kandidaty.find((v) => !bylo.has(v.uslovie) && !zdes.has(v.uslovie)) ??
       kandidaty.find((v) => !prezhnie.has(v.uslovie) && !zdes.has(v.uslovie)) ??
@@ -206,12 +223,12 @@ function vyborSleduyushchego(
 }
 
 /** Все варианты листа: у всех одни и те же прототипы на тех же местах. */
-function vyborVariantov(pool: Pool, params: Sheet4Params): Vybor[][] {
-  const pervyy = vyborPervogo(pool, params);
+function vyborVariantov<K extends Kind45>(kinds: readonly K[], params: Sheet4Params): Vybor<K>[][] {
+  const pervyy = vyborPervogo(kinds, params);
   const out = [pervyy];
   const bylo = new Set<string>();
   const naMeste = new Map<number, Set<string>>();
-  const zapomnit = (variant: Vybor[]) => {
+  const zapomnit = (variant: Vybor<K>[]) => {
     variant.forEach((item, i) => {
       bylo.add(item.variant.uslovie);
       naMeste.set(i, (naMeste.get(i) ?? new Set<string>()).add(item.variant.uslovie));
@@ -224,6 +241,85 @@ function vyborVariantov(pool: Pool, params: Sheet4Params): Vybor[][] {
     out.push(sleduyushchiy);
   }
   return out;
+}
+
+/* ── Адрес общего генератора (ps=2) ─────────────────────────────── */
+
+/** id задачи листа: прототип и номер варианта, «p4-01-3». */
+export function idZadachi45(kind: string, n: number): string {
+  return `${kind}-${n}`;
+}
+
+/** Индекс банка для подбора по ключам: один источник — задачи банка. */
+export function indeks45(kinds: readonly Kind45[]): ZadachaBanka[] {
+  return kinds.flatMap((kind) =>
+    kind.variants.map((v) => ({ id: idZadachi45(kind.id, v.n), p: kind.id, s: 'f' as const })),
+  );
+}
+
+/** Адрес общего генератора; null — адрес прежней схемы или чужой. */
+export function parseZapros45(query: URLSearchParams, zadanie: 4 | 5): ZaprosBanka | null {
+  return parseZaprosBanka(query, {
+    idRe: zadanie === 4 ? /p4-\d\d/ : /p5-\d\d/,
+    est: () => true,
+    variantsMax: MAX_VARIANTS,
+  });
+}
+
+/** Задачи по ключам позиций: варианты, ключи позиций — параллельно. */
+export function poKlyucham45<K extends Kind45>(
+  kinds: readonly K[],
+  z: ZaprosBanka,
+): { vybor: Vybor<K>[][]; pozicii: string[][] } {
+  const l = sobratPoKlyucham(z, indeks45(kinds), 'z45-ps2', () => true, true);
+  const poId = new Map(
+    kinds.flatMap((kind) =>
+      kind.variants.map((variant) => [idZadachi45(kind.id, variant.n), { kind, variant }] as const),
+    ),
+  );
+  const est = l.poVariantam.map((v) => v.filter((p) => p.id !== null && poId.has(p.id)));
+  return {
+    vybor: est.map((v) => v.map((p) => poId.get(p.id as string) as Vybor<K>)),
+    pozicii: est.map((v) => v.map((p) => p.pos)),
+  };
+}
+
+/** Параметры листа для адреса ps=2: оформление — по умолчанию. */
+export function params45(z: ZaprosBanka): Sheet4Params {
+  return {
+    skills: [...new Set(z.sostav.map((s) => s.id))],
+    count: 0,
+    seed: z.seed,
+    theme: 'color',
+    layout: 'single',
+    kind: z.kind,
+    date: z.date,
+    variants: z.variants,
+  };
+}
+
+/**
+ * id задач листа по вариантам — по прежнему адресу или по ключам; null —
+ * адрес не листа этого задания. Предпросмотр генератора берёт отсюда
+ * те же задачи, что лист печати.
+ */
+export function idsLista45(
+  kinds: readonly Kind45[],
+  query: URLSearchParams,
+  zadanie: 4 | 5,
+): { spiski: string[][]; pozicii?: string[][] } | null {
+  const z = parseZapros45(query, zadanie);
+  if (z !== null) {
+    const { vybor, pozicii } = poKlyucham45(kinds, z);
+    return { spiski: vybor.map((v) => v.map((x) => idZadachi45(x.kind.id, x.variant.n))), pozicii };
+  }
+  const params = parseSheet4Query(query);
+  if (params.skills.length === 0) return null;
+  return {
+    spiski: vyborVariantov(kinds, params).map((v) =>
+      v.map((x) => idZadachi45(x.kind.id, x.variant.n)),
+    ),
+  };
 }
 
 /**
@@ -257,7 +353,7 @@ export function sheet4Blocks(
   params: Sheet4Params,
   withAnswers: boolean,
 ): Sheet4Block[] {
-  return blokiIz(vyborPervogo(pool, params), withAnswers);
+  return blokiIz(vyborPervogo(pool.kinds, params), withAnswers);
 }
 
 /** Блоки каждого варианта листа: по образцу первого, числа другие. */
@@ -266,7 +362,7 @@ export function sheet4Variants(
   params: Sheet4Params,
   withAnswers: boolean,
 ): Sheet4Block[][] {
-  return vyborVariantov(pool, params).map((vybor) => blokiIz(vybor, withAnswers));
+  return vyborVariantov(pool.kinds, params).map((vybor) => blokiIz(vybor, withAnswers));
 }
 
 /**
@@ -282,14 +378,54 @@ export function sheet4Spec(
   withAnswers: boolean,
   list: ListSlova = LIST_4,
 ) {
-  const variants = sheet4Variants(pool, params, withAnswers);
+  return specIz(sheet4Variants(pool, params, withAnswers), params, withAnswers, list);
+}
+
+/** Шапка листа общего генератора: учитель и QR-код (ps=2, «Дополнительно»). */
+export interface Shapka45 {
+  uchitel?: string;
+  /** QR-код готовым SVG; нет — без кода. */
+  qr?: string;
+}
+
+/**
+ * Лист по адресу общего генератора (ps=2): задачи по ключам позиций,
+ * вид работы и дата — в подзаголовке и строке полей, как у прежнего
+ * листа; учитель — в шапке страницы, QR-код — у названия.
+ */
+export function sheet4SpecKlyuchi(
+  pool: Pool,
+  z: ZaprosBanka,
+  withAnswers: boolean,
+  list: ListSlova = LIST_4,
+  shapka: Shapka45 = {},
+) {
+  const variants = poKlyucham45(pool.kinds, z).vybor.map((v) => blokiIz(v, withAnswers));
+  return specIz(variants, params45(z), withAnswers, list, shapka);
+}
+
+function specIz(
+  variants: Sheet4Block[][],
+  params: Sheet4Params,
+  withAnswers: boolean,
+  list: ListSlova,
+  shapka: Shapka45 = {},
+) {
   const blocks = variants[0] ?? [];
-  const title = { chip: list.title.chip, text: list.title.text, subtitle: podzagolovok(params) };
+  const title = {
+    chip: list.title.chip,
+    text: list.title.text,
+    subtitle: podzagolovok(params),
+    ...(shapka.qr === undefined ? {} : { qr: shapka.qr }),
+  };
+  const base = sheet4Base(params, list);
+  const head = shapka.uchitel === undefined ? base.head : { ...base.head, author: shapka.uchitel };
   /* Строка «Фамилия, имя / Класс / Дата» — на каждом варианте. */
   const fields = { date: params.date === '' ? '' : dateText(params.date) };
   if (variants.length > 1) {
     return {
-      ...sheet4Base(params, list),
+      ...base,
+      head,
       title,
       fields,
       variants: variants.map((bloki, i) => ({
@@ -304,7 +440,8 @@ export function sheet4Spec(
   const extraItems = withAnswers ? otvetyVariantov(variants, list) : [];
 
   return {
-    ...sheet4Base(params, list),
+    ...base,
+    head,
     title,
     fields,
     blocks,
@@ -380,4 +517,29 @@ function otvetyVariantov(variants: Sheet4Block[][], list: ListSlova): string[] {
     items.push(...resheniya);
   }
   return items;
+}
+
+/**
+ * «Всё одним файлом»: листы ученика всех вариантов, затем листы учителя
+ * тех же задач, в конце — ответы и краткие решения. У задач ученика
+ * строка ответа своя (answerLine), у листа учителя строки полей нет.
+ */
+export function sheet4Vse(
+  uchenik: ReturnType<typeof specIz>,
+  uchitel: ReturnType<typeof specIz>,
+) {
+  const kakVarianty = (s: ReturnType<typeof specIz>) =>
+    'variants' in s ? s.variants : [{ title: s.title, blocks: s.blocks }];
+  const sLiniey = (blocks: Sheet4Block[], liniya: boolean) =>
+    blocks.map((b) => ({ ...b, tasks: b.tasks.map((t) => ({ ...t, answerLine: liniya })) }));
+  return {
+    ...uchenik,
+    variants: [
+      ...kakVarianty(uchenik).map((v) => ({ ...v, blocks: sLiniey(v.blocks, true) })),
+      ...kakVarianty(uchitel).map((v) => ({ ...v, fields: null, blocks: sLiniey(v.blocks, false) })),
+    ],
+    blocks: [],
+    withAnswerLine: false,
+    extraItems: uchitel.extraItems,
+  };
 }
