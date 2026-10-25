@@ -50,6 +50,11 @@ export interface ScreenContext<P, U extends BaseUi> {
    * хуком useBeforeFinish; null — снять.
    */
   setBeforeFinish: (handler: (() => void) | null) => void;
+  /**
+   * Вернуться к выбору тренировки, поставив эту на паузу: тренажёр с
+   * фильтрами сверху показывает над ними «Продолжить тренировку».
+   */
+  toFilters: () => void;
 }
 
 /** Как тренажёр описывает задание на экране итогов. */
@@ -85,6 +90,10 @@ export interface ConfiguratorApi<P> {
    * оболочка сама спросит, что с ней делать.
    */
   start: (payload: P) => void;
+  /** Тренировка поставлена на паузу кнопкой «К фильтрам». null — нет такой. */
+  parked: { solved: number; total: number } | null;
+  /** Вернуться в неё и снять паузу. */
+  resume: () => void;
 }
 
 export interface TrainerSessionHostProps<P, U extends BaseUi> {
@@ -311,6 +320,8 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   const [building, setBuilding] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [confirmFinish, setConfirmFinish] = useState(false);
+  /* Тренировка на паузе, пока ученик меняет фильтры. */
+  const [parked, setParked] = useState<{ solved: number; total: number } | null>(null);
   /* Свой счётчик панели читается при каждом сообщении экрана: подписи
      держатся в ссылке, чтобы report не пересоздавался на каждый рендер. */
   const labelsRef = useRef(labels);
@@ -343,6 +354,8 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clockRef = useRef<{ base: number; since: number | null }>({ base: 0, since: null });
   const epochRef = useRef(0);
+  /* Решено и всего — для плашки «Тренировка на паузе» над фильтрами. */
+  const barRef = useRef({ solved: 0, total: 0 });
 
   /* ── Часы: идут, пока тренировка не на паузе, вкладка видна и
      никто её не обогнал ───────────────────────────────────────── */
@@ -430,6 +443,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       setBlocked(null);
       setConfirmFinish(false);
       setPending(null);
+      setParked(null);
       /* Каждый вход собирает экран заново: ключ с номером входа не
          повторяется, даже если вкладка забирает ту же тренировку. */
       epochRef.current += 1;
@@ -437,11 +451,9 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       viewRef.current = { kind: 'run', run: entered };
       setView({ kind: 'run', run: entered });
       const total = run.restored?.order?.length ?? count(run.payload);
-      setBar({
-        index: run.restored?.index ?? 0,
-        total,
-        solved: run.restored === null ? 0 : Object.keys(run.restored.marks).length,
-      });
+      const solved = run.restored === null ? 0 : Object.keys(run.restored.marks).length;
+      setBar({ index: run.restored?.index ?? 0, total, solved });
+      barRef.current = { solved, total };
       startClock();
     },
     [count, startClock],
@@ -672,6 +684,28 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     flush();
   }, [startClock, flush]);
 
+  /* ── К фильтрам: пауза и выбор тренировки ───────────────────── */
+
+  const toFilters = useCallback(() => {
+    if (viewRef.current.kind !== 'run') {
+      return;
+    }
+    pause();
+    setParked({ solved: barRef.current.solved, total: barRef.current.total });
+    viewRef.current = { kind: 'config' };
+    setView({ kind: 'config' });
+  }, [pause]);
+
+  const resumeParked = useCallback(() => {
+    void resume().then((ok) => {
+      if (ok) {
+        unpause();
+      } else {
+        setParked(null);
+      }
+    });
+  }, [resume, unpause]);
+
   /* ── Экран сообщает о себе ──────────────────────────────────── */
 
   const report = useCallback(
@@ -683,6 +717,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       }
       const total = ui.order?.length ?? count(current.run.payload);
       const solved = labelsRef.current?.progress?.(ui) ?? Object.keys(ui.marks).length;
+      barRef.current = { solved, total };
       setBar((prev) =>
         prev.index === ui.index && prev.total === total && prev.solved === solved
           ? prev
@@ -949,7 +984,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     return (
       <>
         {noticeBlock}
-        <Slot render={configurator} arg={{ start }} />
+        <Slot render={configurator} arg={{ start, parked, resume: resumeParked }} />
         {confirmStart}
       </>
     );
@@ -1023,6 +1058,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
               elapsed,
               finish,
               setBeforeFinish,
+              toFilters,
             }}
           />
         </RunBoundary>

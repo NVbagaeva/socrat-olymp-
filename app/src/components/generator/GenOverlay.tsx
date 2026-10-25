@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { GEN_UI } from '@/content/generatorUi';
 import { GenIcon } from './GenIcons';
+import './okno.css';
 
 /**
  * Окно генератора: на телефоне — нижний лист во всю ширину, на

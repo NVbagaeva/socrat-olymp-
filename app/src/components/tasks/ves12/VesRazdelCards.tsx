@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 import { vesRazdel } from '@/content/ves12';
-import { GENERATOR_ALL_HREF, ZACHYOT_HREF } from './paths';
+import { GENERATOR_ALL_HREF, TRENAZHER_ALL_HREF, ZACHYOT_HREF } from './paths';
 import './ves12.css';
 
 export interface VesRazdelCardsProps {
@@ -28,6 +28,14 @@ function GeneratorIcon() {
       <path d="M14.5 3.5V7h4" />
       <path d="M8.5 11h7M8.5 14h5" />
       <path d="M5.5 20.5h11" />
+    </svg>
+  );
+}
+
+function TrenazherIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 6h16M7 12h10M10 18h4" />
     </svg>
   );
 }
@@ -68,6 +76,18 @@ export function VesRazdelCards({ place, heading = true }: VesRazdelCardsProps) {
             <span className="ves-card__text">
               <span className="ves-card__name">{vesRazdel.zachyot.title}</span>
               <span className="ves-card__lead">{vesRazdel.zachyot.lead}</span>
+            </span>
+            <Arrow />
+          </a>
+        </li>
+        <li>
+          <a className="ves-card" href={TRENAZHER_ALL_HREF}>
+            <span className="ves-card__ico">
+              <TrenazherIcon />
+            </span>
+            <span className="ves-card__text">
+              <span className="ves-card__name">{vesRazdel.trenazher.title}</span>
+              <span className="ves-card__lead">{vesRazdel.trenazher.lead}</span>
             </span>
             <Arrow />
           </a>

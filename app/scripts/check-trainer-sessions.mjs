@@ -45,8 +45,9 @@
    Верный ответ на странице не найти: в бандле его нет (только
    отпечатки). Тест берёт рецепт задания из записи сессии и считает
    ответ здесь, в Node, тем же кодом сайта, которым задание собрано:
-     №12      — generateSet(набор, seed) движка lib/graph/generate.js,
-                задача по id: answer (у задач с вариантами — номер варианта);
+     №12      — zadachaShablona(ключ, seed задания) из lib/trainerSession.ts
+                (тренажёр с фильтрами): answer (у задач с вариантами — номер
+                варианта);
      №8, №2   — generate(прототип, seed[, уровень]).otvet
                 (lib/vychisleniya/generate.ts, lib/vektory/generate.ts);
      №11      — reshitPlan(план, банк dannyeTrenazhera()): answer или
@@ -98,41 +99,16 @@ function check(ok, what) {
 
 /* ── Верные ответы: тем же кодом сайта, по рецепту из записи ──── */
 
-/* Движок №12 — ES-модуль; наборы ему отдаются с диска, как в
-   check-graph-*.mjs (в бандле их отдаёт data/index.js). */
-let graph = null;
-async function graphEngine() {
-  if (graph === null) {
-    const { default: engine } = await import('../src/lib/graph/generate.js');
-    const root = path.join(APP, 'src', 'lib', 'graph', 'data');
-    const readSets = (kind) =>
-      ['12', '12q', '12r', '12s'].flatMap((dir) => {
-        const full = path.join(root, kind, dir);
-        return fs.existsSync(full)
-          ? fs
-              .readdirSync(full)
-              .filter((name) => name.endsWith('.json'))
-              .sort()
-              .map((name) => JSON.parse(fs.readFileSync(path.join(full, name), 'utf8')))
-          : [];
-      });
-    engine.setSets({ prep: readSets('prep'), prototypes: readSets('prototypes') });
-    graph = engine;
+/** №12 (тренажёр с фильтрами): задание {k, seed?} собирается тем же кодом сайта. */
+function answer12(payload, at) {
+  const { zadachaShablona } = requireSrc('lib/trainerSession.ts');
+  const { seedZadaniya } = requireSrc('lib/trenazher/sessiya.ts');
+  const item = payload.items[at];
+  const task = zadachaShablona(item.k, seedZadaniya(payload, at, 0), new Map());
+  if (task === null) {
+    throw new Error(`№12: задача ${item.k} не собралась (seed ${payload.seed})`);
   }
-  return graph;
-}
-
-/** №12: рецепт {set, seed, id, sig} → ответ числом или номер варианта. */
-async function answer12(payload, at) {
-  const recipe = payload.tasks[at];
-  const engine = await graphEngine();
-  const task = engine.generateSet(recipe.set, recipe.seed).find((item) => item.id === recipe.id);
-  if (task === undefined) {
-    throw new Error(`№12: нет задачи ${recipe.id} в наборе ${recipe.set} (seed ${recipe.seed})`);
-  }
-  return Array.isArray(task.options) && task.options.length > 0
-    ? { option: String(task.answer) }
-    : { text: String(task.answer) };
+  return task.options === null ? { text: task.answer } : { option: String(task.answer) };
 }
 
 /** Число ответа так, как его ввёл бы ученик: девять знаков, запятая. */
@@ -255,7 +231,7 @@ async function pressStart(page) {
     .click();
 }
 
-/** Самая большая тренировка №12, №8, №2: режим «Смешанная», количество «Все (N)». */
+/** Самая большая тренировка №8, №2: режим «Смешанная», количество «Все (N)». */
 async function chooseAll(page) {
   await page
     .getByRole('radio', { name: /^Смешанная/ })
@@ -267,15 +243,32 @@ async function chooseAll(page) {
     .click();
 }
 
+/** Самая большая тренировка на панели фильтров: «Сколько задач — Без ограничения». */
+async function chooseAllFiltry(page) {
+  await page
+    .locator('.flt-card')
+    .getByRole('button', { name: 'Без ограничения', exact: true })
+    .click();
+}
+
 const TRAINERS = [
   ...['linear', 'quadratic', 'rational', 'irrational'].map((sub) => ({
     name: `№12 ${sub}`,
     url: `/zadaniya/12/${sub}/trenazher/`,
     scope: `12:${sub}`,
     answer: answer12,
-    all: chooseAll,
+    all: chooseAllFiltry,
     rep: sub === 'linear',
   })),
+  {
+    name: '№12 все типы',
+    url: '/zadaniya/12/trenazher/',
+    scope: '12',
+    answer: answer12,
+    all: chooseAllFiltry,
+    /* Страница без ленты вкладок раздела. */
+    tabs: false,
+  },
   {
     name: '№8',
     url: '/zadaniya/8/trenazher/',

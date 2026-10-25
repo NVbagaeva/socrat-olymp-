@@ -34,11 +34,18 @@ export interface TrainerProgress {
   kinds: Record<string, TrainerKindTally>;
   /** Задания, в которых ошиблись или брали подсказку. */
   mistakes: string[];
+  /**
+   * Задания, решённые верно без подсказки: «только нерешённые» и
+   * прогресс на чипах тренажёра («8/12»). Записей до этого поля нет —
+   * список начинается с первой решённой задачи. У хранилищ других
+   * разделов (progressStore) поля нет: решённое там — в исходах.
+   */
+  solved?: string[];
 }
 
 /* Пустой снимок — одна и та же ссылка: иначе useSyncExternalStore
    зациклится, сверяя снимки. */
-const EMPTY: TrainerProgress = { kinds: {}, mistakes: [] };
+const EMPTY: TrainerProgress = { kinds: {}, mistakes: [], solved: [] };
 
 let cache: TrainerProgress | null = null;
 const listeners = new Set<() => void>();
@@ -57,7 +64,7 @@ function parse(raw: string | null): TrainerProgress {
     if (typeof value !== 'object' || value === null) {
       return EMPTY;
     }
-    const source = value as { kinds?: unknown; mistakes?: unknown };
+    const source = value as { kinds?: unknown; mistakes?: unknown; solved?: unknown };
     const kinds: Record<string, TrainerKindTally> = {};
     if (typeof source.kinds === 'object' && source.kinds !== null) {
       Object.entries(source.kinds as Record<string, unknown>).forEach(([id, tally]) => {
@@ -74,7 +81,10 @@ function parse(raw: string | null): TrainerProgress {
     const mistakes = Array.isArray(source.mistakes)
       ? source.mistakes.filter((item): item is string => typeof item === 'string')
       : [];
-    return { kinds, mistakes };
+    const solved = Array.isArray(source.solved)
+      ? source.solved.filter((item): item is string => typeof item === 'string')
+      : [];
+    return { kinds, mistakes, solved };
   } catch {
     return EMPTY;
   }
@@ -172,7 +182,12 @@ export function recordAttempt(attempt: TrainerAttempt): void {
       ? current.mistakes
       : [...current.mistakes, attempt.taskId];
 
-  save({ kinds, mistakes });
+  const solved =
+    attempt.right && !(current.solved ?? []).includes(attempt.taskId)
+      ? [...(current.solved ?? []), attempt.taskId]
+      : (current.solved ?? []);
+
+  save({ kinds, mistakes, solved });
 }
 
 /** Очистить прогресс тренажёра. Опорные задачи не трогаем. */
@@ -203,6 +218,7 @@ export function progressOf(progress: TrainerProgress, sets: readonly string[]): 
       Object.entries(progress.kinds).filter(([kind]) => sets.includes(kind)),
     ),
     mistakes: progress.mistakes.filter((id) => sets.includes(setOfTask(id))),
+    solved: (progress.solved ?? []).filter((id) => sets.includes(setOfTask(id))),
   };
 }
 
@@ -214,6 +230,7 @@ export function resetSets(sets: readonly string[]): void {
       Object.entries(current.kinds).filter(([kind]) => !sets.includes(kind)),
     ),
     mistakes: current.mistakes.filter((id) => !sets.includes(setOfTask(id))),
+    solved: (current.solved ?? []).filter((id) => !sets.includes(setOfTask(id))),
   });
 }
 

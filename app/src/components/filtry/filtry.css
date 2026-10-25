@@ -1,0 +1,448 @@
+/* Панель фильтров тренажёра (FiltrPanel.tsx): сверху, без колонки
+   слева. Телефон (< 760 px): строка чипов типов и «Фильтры (N)»,
+   остальное — в нижнем листе (okno.css), «Начать тренировку» —
+   липкой панелью над навигацией сайта. Цвета, отступы и радиусы —
+   токены сайта (styles/tokens.css). */
+
+.flt {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.flt .gen-ico {
+  width: 18px;
+  height: 18px;
+}
+.flt-label {
+  margin: 0;
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.flt-wide {
+  width: 100%;
+}
+.flt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-label);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.flt-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Карточка фильтров ──────────────────────────────────────────── */
+
+.flt-card {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.flt-block {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.flt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-3) var(--space-5);
+}
+.flt-pole {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-width: 0;
+}
+.flt-pole--wide {
+  grid-column: span 2;
+}
+
+/* ── Готовые наборы ─────────────────────────────────────────────── */
+
+.flt-nabory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.flt-nabor {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  text-align: left;
+  font: inherit;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.flt-nabor b {
+  font-size: var(--fs-label);
+}
+.flt-nabor small {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.flt-nabor:hover:not(:disabled) {
+  border-color: var(--color-border-hover);
+}
+.flt-nabor[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.flt-nabor:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Чипы типов ─────────────────────────────────────────────────── */
+
+.flt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.flt-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  max-width: 100%;
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font: inherit;
+  font-size: var(--fs-label);
+  line-height: 1.25;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+.flt-chip:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+.flt-chip[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.flt-chip.is-part[aria-pressed='true'] {
+  background: var(--color-surface-info);
+  color: var(--color-text);
+}
+.flt-chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.flt-chip__code {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  opacity: 0.75;
+}
+.flt-chip__t {
+  min-width: 0;
+}
+.flt-chip__n {
+  min-width: 26px;
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.flt-chip[aria-pressed='true'] .flt-chip__n {
+  background: color-mix(in srgb, var(--color-surface) 22%, transparent);
+  color: inherit;
+}
+.flt-chip.is-part[aria-pressed='true'] .flt-chip__n {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+}
+.flt-subs {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-border);
+}
+.flt-subs__title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Переключатели ──────────────────────────────────────────────── */
+
+.flt-segm {
+  display: flex;
+  flex-wrap: wrap;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  gap: 2px;
+}
+.flt-segm button {
+  min-height: 38px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: calc(var(--radius-lg) - 3px);
+  background: none;
+  font: inherit;
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.flt-segm button:hover {
+  color: var(--color-text);
+}
+.flt-segm button[aria-pressed='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.flt-segm .flt-stars {
+  letter-spacing: 1px;
+  color: var(--color-star-off);
+}
+.flt-segm .flt-stars[aria-pressed='true'] {
+  color: var(--color-star);
+}
+
+/* ── Активные фильтры, пусто, счётчик ───────────────────────────── */
+
+.flt-active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.flt-active__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.flt-active__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  padding-left: var(--space-3);
+  border-radius: 999px;
+  background: var(--color-surface-info);
+  font-size: var(--fs-label);
+}
+.flt-active__chip button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.flt-active__chip button:hover {
+  color: var(--color-text);
+}
+.flt-active__chip .gen-ico {
+  width: 16px;
+  height: 16px;
+}
+.flt-empty {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-soft);
+}
+.flt-empty__title {
+  margin: 0;
+  font-weight: 600;
+}
+.flt-empty__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.flt-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.flt-go {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.flt-go__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.flt-count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  margin: 0;
+}
+.flt-count span {
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.flt-pause {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-info);
+}
+.flt-pause__title {
+  margin: 0;
+  font-weight: 600;
+}
+.flt-pause__text {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.flt-sheet {
+  display: grid;
+  gap: var(--space-4);
+}
+.flt-sheet .flt-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.flt-sheet .flt-pole--wide {
+  grid-column: auto;
+}
+
+/* ── Телефон ────────────────────────────────────────────────────── */
+
+.flt-phone {
+  display: none;
+}
+@media (max-width: 759.98px) {
+  .flt {
+    /* Место под липкую панель «Начать тренировку». */
+    padding-bottom: 96px;
+  }
+  .flt-card {
+    display: none;
+  }
+  .flt-phone {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  .flt-phone__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    flex: none;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-primary);
+    border-radius: 999px;
+    background: var(--color-surface);
+    font: inherit;
+    font-size: var(--fs-label);
+    font-weight: 600;
+    color: var(--color-primary);
+    cursor: pointer;
+  }
+  .flt-phone__n {
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    font-size: var(--fs-caption);
+    line-height: 20px;
+    text-align: center;
+  }
+  .flt-phone__chips {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .flt-phone__chips::-webkit-scrollbar {
+    display: none;
+  }
+  .flt-phone__chips .flt-chips {
+    flex-wrap: nowrap;
+    width: max-content;
+    padding-right: var(--space-2);
+  }
+  .flt-phone__chips .flt-chip {
+    white-space: nowrap;
+  }
+  .flt-phone__chips .flt-chip__code {
+    display: none;
+  }
+  .flt-sheet .flt-chips .flt-chip {
+    white-space: normal;
+  }
+  .flt-go {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--h-bnav, 0px) + env(safe-area-inset-bottom));
+    z-index: 30;
+    flex-wrap: nowrap;
+    padding: var(--space-2) var(--space-4);
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-translucent-strong);
+    backdrop-filter: blur(8px);
+  }
+  .flt-go .flt-link {
+    display: none;
+  }
+  .flt-count {
+    display: grid;
+    min-width: 0;
+    font-size: var(--fs-label);
+  }
+  .flt-go__actions {
+    flex: none;
+  }
+  /* Кнопка «?» сайта — над панелью, а не поверх неё. */
+  body:has(.flt-go) .help-fab.help-fab {
+    bottom: calc(var(--h-bnav, 0px) + 80px + env(safe-area-inset-bottom));
+  }
+}

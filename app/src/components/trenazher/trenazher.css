@@ -1,0 +1,279 @@
+/* Экран тренировки на общей панели фильтров (TrenazherEkran.tsx):
+   строка-сводка, лента номеров со статусами, карточка задачи раздела,
+   действия, итоги. Свои стили карточки раздела (условие, подсказка
+   по шагам, разбор) — у раздела. Токены сайта (styles/tokens.css). */
+
+.trz {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.trz-svodka {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface-soft);
+}
+.trz-svodka__text {
+  min-width: 0;
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* ── Лента номеров ──────────────────────────────────────────────── */
+
+.trz-lenta {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 2px 2px var(--space-1);
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.trz-no {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  font: inherit;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.trz-no svg {
+  width: 16px;
+  height: 16px;
+}
+.trz-no--open {
+  border-style: dashed;
+  border-color: var(--color-primary);
+}
+.trz-no--right {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+.trz-no--wrong {
+  border-color: var(--color-error);
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+}
+.trz-no--hinted {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.trz-no--skipped {
+  border-color: var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+}
+.trz-no.is-current {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Карточка ───────────────────────────────────────────────────── */
+
+.trz-card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.trz-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+.trz-card__no {
+  margin: 0;
+  font-weight: 700;
+}
+.trz-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.trz-card__src {
+  color: var(--color-text-tertiary);
+}
+.trz-card__time {
+  margin: 0 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.trz-card__wait {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.trz-label {
+  margin: 0;
+  font-weight: 600;
+}
+.trz-answer {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  min-width: 0;
+}
+.trz-answer > * {
+  max-width: 100%;
+}
+.trz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.trz-offer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-2);
+}
+.trz-offer__warn {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.trz-note {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.trz-hint,
+.trz-razbor {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.trz-verdict {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+}
+.trz-verdict--right {
+  background: var(--color-success-soft);
+}
+.trz-verdict--wrong {
+  background: var(--color-error-soft);
+}
+.trz-verdict__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: 700;
+}
+.trz-verdict--right .trz-verdict__title {
+  color: var(--color-success);
+}
+.trz-verdict--wrong .trz-verdict__title {
+  color: var(--color-error);
+}
+.trz-verdict__ico {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--color-text-inverse);
+}
+.trz-verdict__ico svg {
+  width: 16px;
+  height: 16px;
+}
+.trz-verdict--right .trz-verdict__ico {
+  background: var(--color-success);
+}
+.trz-verdict--wrong .trz-verdict__ico {
+  background: var(--color-error);
+}
+.trz-verdict__text {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* ── Итоги ──────────────────────────────────────────────────────── */
+
+.trz-itog {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.trz-itog__title {
+  margin: 0;
+  font-weight: 600;
+}
+.trz-itog__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trz-itog__list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+.trz-itog__list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-primary);
+}
+.trz-itog__time {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding-left: 1.5em;
+  font-variant-numeric: tabular-nums;
+}
+.trz-itog__time li {
+  min-width: 72px;
+}
+
+@media (max-width: 759.98px) {
+  .trz-card {
+    padding: var(--space-3) var(--space-4);
+  }
+}
