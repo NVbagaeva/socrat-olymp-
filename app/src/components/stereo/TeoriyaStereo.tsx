@@ -4,13 +4,14 @@ import { SheetBlock } from '@/components/tasks/SheetBlock';
 import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { Tex } from '@/components/ui/Tex';
 import { SHPARGALKI } from '@/content/shpargalki';
-import { GLAVA_PLAN, GLAVY_15, GLAVY_3, type GlavaStereo } from '@/content/stereo/glavy';
+import { GLAVA_PLAN, GLAVY_15, GLAVY_3, STARYE_GLAVY_3, type GlavaStereo } from '@/content/stereo/glavy';
 import { DEKOR_STEREO, STEREO, type StereoNo } from '@/content/stereo/zadaniya';
 import { THUMBS } from '@/lib/solid/drawings/thumbs';
 import { prototypeById, RAZDELY } from '@/lib/zadanie3';
 import { assertSheetsOk, renderFormulas } from '@/lib/zadanie3/formulas';
 import { diagonalKuba, sechenieKuba, type PrimerChertezha } from '@/lib/stereo/primery';
 import { Chertezh3d } from './Chertezh3d';
+import { Glava2Treugolnik } from './glavy/Glava2Treugolnik';
 
 const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GLAVY_15 };
 
@@ -18,6 +19,11 @@ const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GL
  * Живые чертежи, которые уже стоят в главах: по одному на задание,
  * пока главы пишутся (этап 3 плана). Ключ — «задание:глава».
  */
+/** Написанные главы: «задание:глава» → текст главы. */
+const NAPISANY: Readonly<Record<string, () => ReactNode>> = {
+  '3:treugolnik': () => <Glava2Treugolnik />,
+};
+
 const ZHIVYE: Readonly<Record<string, () => PrimerChertezha>> = {
   '3:chertezh': diagonalKuba,
   '15:secheniya': sechenieKuba,
@@ -110,7 +116,29 @@ export function TeoriyaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }
   const glavy = GLAVY[no];
   const tela: Record<string, ReactNode> = {};
   glavy.forEach((glava) => {
-    tela[glava.id] = <PlanGlavy glava={glava} no={no} />;
+    const napisana = NAPISANY[`${no}:${glava.id}`];
+    /* Якоря прежних глав №3 ведут в новые: ссылки извне не ломаются. */
+    const starye =
+      no === '3'
+        ? Object.entries(STARYE_GLAVY_3)
+            .filter(([, novaya]) => novaya === glava.id)
+            .map(([staraya]) => (
+              <span key={staraya} id={`teoriya-${staraya}`} className="stereo-yakor" aria-hidden="true" />
+            ))
+        : null;
+    tela[glava.id] = (
+      <>
+        {starye}
+        {napisana === undefined ? (
+          <PlanGlavy glava={glava} no={no} />
+        ) : (
+          <>
+            {napisana()}
+            {glava.prototipy === undefined ? null : <Prototipy nomera={glava.prototipy} />}
+          </>
+        )}
+      </>
+    );
   });
   const model = THUMBS['thumb-III'];
   return (

@@ -24,50 +24,50 @@ export const TIPY_3: readonly TipStereo[] = [
   {
     id: 'diagonali',
     title: 'Диагонали и «Пифагор в пространстве»',
-    glava: 'kub',
+    glava: 'treugolnik',
     prototipy: [1, 2],
   },
   {
     id: 'secheniya',
     title: 'Сечения прямоугольного параллелепипеда',
-    glava: 'kub',
+    glava: 'mnogogranniki',
     prototipy: [3, 4],
   },
   {
     id: 'ugly',
     title: 'Углы между прямыми в кубе и призме',
-    glava: 'pryamye',
+    glava: 'ugly',
     prototipy: [...ot(6, 10), 22, 23, 35],
   },
   {
     id: 'kubiki',
     title: 'Многогранник «из кубиков»: площадь и объём',
-    glava: 'kubiki',
+    glava: 'obem',
     prototipy: [5, 11],
   },
   {
     id: 'chast',
     title: 'Часть параллелепипеда или призмы',
-    glava: 'podobie',
+    glava: 'obem',
     prototipy: [...ot(12, 16), ...ot(24, 27), 31, 32, 36, 37],
   },
   {
     id: 'piramida-vnutri',
     title: 'Пирамида внутри призмы или параллелепипеда',
-    glava: 'podobie',
+    glava: 'obem',
     prototipy: [...ot(17, 19), ...ot(28, 30), 33, 34, ...ot(38, 40)],
   },
-  { id: 'obem-prizmy', title: 'Объём призмы', glava: 'prizma', prototipy: [20, 21] },
+  { id: 'obem-prizmy', title: 'Объём призмы', glava: 'obem', prototipy: [20, 21] },
   {
     id: 'piramida',
     title: 'Пирамида: высота, ребро, апофема',
-    glava: 'piramida',
+    glava: 'treugolnik',
     prototipy: [...ot(41, 44), 49, 51],
   },
   {
     id: 'obem-piramidy',
     title: 'Объём пирамиды и отсечённые пирамиды',
-    glava: 'podobie',
+    glava: 'obem',
     prototipy: [...ot(45, 48), 50],
   },
   {
@@ -91,7 +91,7 @@ export const TIPY_3: readonly TipStereo[] = [
   {
     id: 'zhidkost',
     title: 'Жидкость в сосудах',
-    glava: 'zhidkost',
+    glava: 'podobie',
     prototipy: [61, ...ot(65, 68)],
   },
   {

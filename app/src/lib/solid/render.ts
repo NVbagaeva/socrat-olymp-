@@ -142,6 +142,8 @@ interface Scene {
   dots: Vec2[];
   labels: LabelSpec[];
   angles: Angle[];
+  /** Цели касания («нажми на чертеже»): только если их просили. */
+  celi?: { id: string; points: Vec2[]; on: boolean }[];
 }
 
 /* ── Сбор сцены из модели ──────────────────────────────────────── */
@@ -506,6 +508,14 @@ export interface RenderOptions {
    * модели, поэтому при вращении не прыгает и не «дышит».
    */
   ustoychivo?: boolean;
+  /**
+   * Цели касания для задач «нажми на чертеже»: отрезок (две точки) или
+   * многоугольник. Рисуются поверх чертежа прозрачной широкой полосой
+   * с data-cel; выбранные (vybrano) — подсвечены. Без целей разметка
+   * чертежа не меняется.
+   */
+  celi?: readonly { id: string; points: readonly Vec3[] }[];
+  vybrano?: readonly string[];
 }
 
 function buildScene(model: Model, options: RenderOptions = {}): Scene {
@@ -518,6 +528,13 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
   const hl = (item: { shag?: number }) => shag !== undefined && item.shag === shag;
   const all = occludersOf(view, model.bodies);
   const eps = modelExtent(model) * 1e-6;
+  if (options.celi !== undefined && options.celi.length > 0) {
+    scene.celi = options.celi.map((cel) => ({
+      id: cel.id,
+      points: cel.points.map(view.project),
+      on: options.vybrano?.includes(cel.id) === true,
+    }));
+  }
 
   model.bodies.forEach((body) => {
     switch (body.kind) {
@@ -725,6 +742,9 @@ function toPixels(scene: Scene, sphere?: { center: Vec2; r: number }): Scene {
     fills: scene.fills.map((f) => ({ ...f, points: f.points.map(map) })),
     dots: scene.dots.map(map),
     labels: scene.labels.map((l) => ({ ...l, p: map(l.p) })),
+    ...(scene.celi === undefined
+      ? {}
+      : { celi: scene.celi.map((c) => ({ ...c, points: c.points.map(map) })) }),
     angles: scene.angles.map((a) => {
       const [o, u, v] = a.points.map(map) as [Vec2, Vec2, Vec2];
       const extra = a.hl ? { hl: true } : {};
@@ -1060,6 +1080,23 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   });
 
   labels.forEach((label) => parts.push(labelMarkup(label)));
+
+  /* Цели касания — поверх всего: подсветка выбранной и широкая
+     прозрачная полоса, по которой попадает палец. */
+  (scene.celi ?? []).forEach((cel) => {
+    const closed = cel.points.length > 2;
+    const d = pathOf(cel.points, closed);
+    if (cel.on) {
+      parts.push(
+        `<path d="${d}" fill="${closed ? THEME.colors.aux : 'none'}" fill-opacity="0.22" ` +
+          `stroke="${THEME.colors.aux}" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`,
+      );
+    }
+    parts.push(
+      `<path class="solid-cel" data-cel="${esc(cel.id)}" d="${d}" fill="${closed ? 'transparent' : 'none'}" ` +
+        `stroke="transparent" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" pointer-events="${closed ? 'all' : 'stroke'}"/>`,
+    );
+  });
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${px(x0)} ${px(y0)} ${px(width)} ${px(height)}" ` +
