@@ -92,8 +92,7 @@ import type { Draft } from '@/lib/vychisleniya/types';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
 import { P03_20S, P03_28S } from '@/lib/zadanie3/razdel2/povyshennye';
 import { P03_48S } from '@/lib/zadanie3/razdel3/povyshennye';
-import { P03_70 } from '@/lib/zadanie3/razdel5/dvacilindra';
-import { P03_69S } from '@/lib/zadanie3/razdel5/povyshennye';
+import { P03_69S, PV03_KRUZHKI } from '@/lib/zadanie3/razdel5/povyshennye';
 import { P03_74S } from '@/lib/zadanie3/razdel7/povyshennye';
 import {
   PV03_CILINDR,
@@ -916,7 +915,7 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip: 'Стереометрия, раздел V: две кружки — отношение объёмов (P03-70)',
     otkuda: 'razdel',
     zadacha: (p: { hk: number; wk: number; style: string }) =>
-      z03(P03_70, p, HINTS_KRUZHKI, `z03m|${p.hk}|${p.wk}`),
+      z03(PV03_KRUZHKI, p, HINTS_KRUZHKI, `z03m|${p.hk}|${p.wk}`),
   },
   'z04.ne-menee': {
     ege: 4,
@@ -960,13 +959,13 @@ export const SHABLONY: Record<string, Shablon> = {
   },
   'z04.bez-defekta': {
     ege: 4,
-    prototip: 'Вероятность, блок II: сумка без дефекта, «k из N с дефектом» (своя копия p4-20)',
+    prototip: 'Вероятность, блок II: сумка без дефекта, «k из N с дефектом»',
     otkuda: 'razdel',
     zadacha: (p: ParamsVer) => veroyatnost(4, PV4_SUMKI, p),
   },
   'z04.ne-podtekaet': {
     ege: 4,
-    prototip: 'Вероятность, блок II: исправный насос, «из N подтекают k» (своя копия p4-19)',
+    prototip: 'Вероятность, блок II: исправный насос, «из N подтекают k»',
     otkuda: 'razdel',
     zadacha: (p: ParamsVer) => veroyatnost(4, PV4_NASOSY, p),
   },
