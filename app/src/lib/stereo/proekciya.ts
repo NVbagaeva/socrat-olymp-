@@ -8,6 +8,7 @@
  * ограничена, чтобы вертикаль не переворачивалась.
  */
 
+import { indeksSvg } from '../risunki/shrifty.js';
 import { type P2, type V, cross, dot, norm } from './vec';
 
 /** Базис экрана для параллельной проекции: вправо, вверх, к зрителю. */
@@ -90,7 +91,8 @@ export function imyaSvg(name: string): string {
   return (
     `<tspan font-style="italic">${base}</tspan>` +
     (primes ? `<tspan>${'′'.repeat(primes.length)}</tspan>` : '') +
-    (idx ? `<tspan baseline-shift="sub" font-size="70%">${idx}</tspan>` : '')
+    /* Индекс — общей типографикой рисунков (lib/risunki/shrifty.js). */
+    (idx ? indeksSvg(idx, null) : '')
   );
 }
 

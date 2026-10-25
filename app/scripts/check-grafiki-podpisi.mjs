@@ -11,7 +11,8 @@
      1. Шрифты: каждый font-family в рисунке — из lib/risunki/shrifty
         (KaTeX_Main для чисел, KaTeX_Math для букв); начертание обычное.
      2. Минус типографский: в подписях нет дефиса перед цифрой;
-        греческие буквы — шрифтом KaTeX_Math (в KaTeX_Main их нет).
+        греческие буквы — шрифтом KaTeX_Math (в KaTeX_Main их нет);
+        нижние индексы — настоящие (x₁₃, не «x13»); ось x сплошная.
 
    В браузере (настоящие прямоугольники текста со шрифтами KaTeX):
      3. Подписи не налезают друг на друга.
@@ -27,6 +28,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { requireSrc, SRC, APP } from './lib/load-ts.mjs';
+import { indeksyStrokoy, osShtrihom } from './lib/indeksy-check.mjs';
 
 const { chromium } = createRequire(import.meta.url)('playwright');
 const { buildVariantSet } = requireSrc('lib/variant/build');
@@ -125,6 +127,9 @@ for (const r of risunki) {
       break;
     }
   }
+  const strokoy = indeksyStrokoy(r.svg);
+  if (strokoy.length > 0) fail(r.where, `индекс строкой, без нижнего: «${strokoy[0]}»`);
+  if (osShtrihom(r.svg)) fail(r.where, 'ось x штрихом');
   for (const m of r.svg.matchAll(/<text\b[^>]*>([\s\S]*?)<\/text>/g)) {
     const text = m[1].replace(/<[^>]+>/g, '');
     if (/(^|[^\p{L}\d])-\s?\d/u.test(text)) {

@@ -8,7 +8,7 @@
  * рисуется ничего.
  */
 
-import { BUKVY, CHISLA, VES } from '../risunki/shrifty.js';
+import { BUKVY, CHISLA, VES, indeksSvg, shirinaIndeksa } from '../risunki/shrifty.js';
 import type { Body, Cone, Cylinder, Model, Polyhedron, Sphere } from './model';
 import { faceNormal, polyhedronEdges } from './model';
 import { type View, viewOf } from './project';
@@ -92,8 +92,7 @@ const THEME = {
     family: CHISLA,
     size: 15,
     weight: VES,
-    sub: 10.5,
-    subShift: 3.5,
+    /* Индекс (A₁) — общей типографикой рисунков: lib/risunki/shrifty.js. */
     measure: 14,
     /* Оценка ширины символа в долях кегля: для расстановки подписей. */
     capital: 0.7,
@@ -811,7 +810,7 @@ function labelSize(label: LabelSpec): { w: number; h: number } {
       w += f.lower * size;
     }
   }
-  w += sub.length * f.digit * f.sub;
+  w += shirinaIndeksa(sub, size);
   return { w, h: size };
 }
 
@@ -1027,9 +1026,7 @@ function labelMarkup(label: PlacedLabel): string {
   const style = bukva ? ' font-style="italic"' : '';
   const x = label.x;
   const y = label.y + label.h * 0.78;
-  const inner = sub
-    ? `${esc(base)}<tspan font-size="${f.sub}" dy="${f.subShift}">${esc(sub)}</tspan>`
-    : esc(base);
+  const inner = sub ? `${esc(base)}${indeksSvg(esc(sub), size)}` : esc(base);
   return (
     /* Выделенная шагом подпись — цветом построений; класс solid-hl —
        метка для проверок (жирного начертания у подписей больше нет). */

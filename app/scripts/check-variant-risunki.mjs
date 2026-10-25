@@ -12,7 +12,8 @@
      2. У графиков функций (движки graph и proizvodnaya) нет
         stroke-dasharray: графики — сплошные линии.
      3. У каждого графика функции есть подпись (y = f(x), y = f′(x) …).
-     4. Строчные греческие буквы — шрифтом KaTeX_Math.
+     4. Строчные греческие буквы — шрифтом KaTeX_Math; нижние индексы —
+        настоящие (tspan indeks), ось графиков сплошная.
      5. Клеточные рисунки (graph, proizvodnaya, vektory) печатаются
         крупно: клетка не меньше 6 мм, подписи на бумаге не меньше 10 pt
         (lib/variant/pechat).
@@ -25,6 +26,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { requireSrc, SRC } from './lib/load-ts.mjs';
+import { indeksyStrokoy, osShtrihom } from './lib/indeksy-check.mjs';
 
 const { buildVariantSet } = requireSrc('lib/variant/build');
 const { rngOf } = requireSrc('lib/vychisleniya/rng');
@@ -76,6 +78,10 @@ function proverit(where, fig) {
     const podpisi = (svg.match(new RegExp(`class="${klass}-label"`, 'g')) ?? []).length;
     if (podpisi < krivye.length) fail(where, `графиков ${krivye.length}, подписей ${podpisi}`);
   }
+
+  const strokoy = indeksyStrokoy(svg);
+  if (strokoy.length > 0) fail(where, `индекс строкой, без нижнего: «${strokoy[0]}»`);
+  if (osShtrihom(svg)) fail(where, 'ось графика штрихом');
 
   /* Строчные греческие (α, β, π) есть только в KaTeX_Math: набранные
      другим шрифтом подписей, они уходят в запасной шрифт. */

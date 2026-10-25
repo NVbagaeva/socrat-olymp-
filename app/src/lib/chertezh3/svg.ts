@@ -13,7 +13,7 @@
  * — разметкой KaTeX внутри foreignObject, если её дали.
  */
 
-import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
+import { BUKVY, CHISLA, indeksSvg } from '@/lib/risunki/shrifty.js';
 import { escSvg, imyaSvg } from '@/lib/stereo/proekciya';
 import type { Kadr, LiniyaKadra, PodpisKadra } from './kadr';
 
@@ -99,10 +99,11 @@ function plain(s: string): string {
       .replace(/\\(alpha|beta|gamma|varphi|phi|pi)\b/g, (_, g: string) => GRECH[g] ?? g)
       .replace(/[{}]/g, ''),
   ).replace(
-    /([a-zA-Z])(?:_(\w))?/g,
+    /([a-zA-Z])(?:_(\w+))?/g,
+    /* Индекс — общей типографикой рисунков (lib/risunki): 70 %, опущен,
+       многозначный одним блоком; после него строка возвращается. */
     (_, l: string, sub?: string) =>
-      `<tspan font-style="italic">${l}</tspan>` +
-      (sub ? `<tspan baseline-shift="sub" font-size="70%">${sub}</tspan>` : ''),
+      `<tspan font-style="italic">${l}</tspan>` + (sub ? indeksSvg(sub, null, true) : ''),
   );
 }
 
