@@ -23,7 +23,7 @@ export default function Page() {
     /* useSearchParams требует границы ожидания: без неё статический
        экспорт страницы не собирается. */
     <Suspense fallback={null}>
-      <PechatVeroyatnosti pool={bank4Pool()} zadanie={4} withAnswers={false} />
+      <PechatVeroyatnosti pool={bank4Pool()} zadanie={4} vid="uchenik" />
     </Suspense>
   );
 }
