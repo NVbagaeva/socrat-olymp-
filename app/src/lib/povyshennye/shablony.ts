@@ -36,12 +36,16 @@ import type { Generated as Generated9 } from '@/lib/proizvodnaya/types';
 import { renderSolid } from '@/lib/solid';
 import { typeset, typesetKrupno } from '@/lib/tex';
 import {
+  dlinaKM,
   dlinaKombinatsiiPoRisunku,
   perpendikulyarNeizvestnaya,
   skalyarnoeKombinatsiy,
+  skalyarnoePoRisunku,
+  type DlinaKM,
   type DlinaKombinatsii,
   type PerpendikulyarNeizvestnaya,
   type SkalyarnoeKombinatsiy,
+  type SkalyarnoePoRisunku,
 } from '@/lib/vektory/povyshennye';
 import {
   PV4_BOLSHE,
@@ -61,6 +65,10 @@ import {
 } from '@/lib/vychisleniya/povyshennye';
 import type { Draft } from '@/lib/vychisleniya/types';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
+import { P03_20S, P03_28S } from '@/lib/zadanie3/razdel2/povyshennye';
+import { P03_48S } from '@/lib/zadanie3/razdel3/povyshennye';
+import { P03_70 } from '@/lib/zadanie3/razdel5/dvacilindra';
+import { P03_69S } from '@/lib/zadanie3/razdel5/povyshennye';
 import { P03_74S } from '@/lib/zadanie3/razdel7/povyshennye';
 import {
   PV03_CILINDR,
@@ -232,6 +240,94 @@ const HINTS_PRIZMA_CILINDR: HintLike[] = [
       'Только четыре боковые грани',
       'Одно основание и четыре боковые грани',
     ],
+    correct: 0,
+  },
+];
+
+/** Подсказки к прямой призме, у которой ребро равно гипотенузе (P03-20S). */
+const HINTS_PRIZMA_GIPOTENUZA: HintLike[] = [
+  {
+    question: 'Чему равна гипотенуза основания с катетами $k\\sqrt q$ и $m\\sqrt q$?',
+    options: ['$\\sqrt{k^2+m^2}\\cdot\\sqrt q$', '$(k+m)\\sqrt q$', '$\\sqrt{k^2+m^2}\\cdot q$'],
+    correct: 0,
+    comment:
+      'Теорема Пифагора: $(k\\sqrt q)^2 = k^2q$, общий множитель $q$ выносится из-под корня.',
+  },
+  {
+    question: 'Из чего складывается полная поверхность призмы?',
+    options: [
+      'Два основания и боковая поверхность: периметр основания на боковое ребро',
+      'Одно основание и три боковые грани',
+      'Только боковая поверхность',
+    ],
+    correct: 0,
+  },
+];
+
+/** Подсказки к пирамиде, отсечённой от призмы (P03-28S). */
+const HINTS_PRIZMA_PIRAMIDA: HintLike[] = [
+  {
+    question: 'Какую часть объёма призмы занимает отсечённая пирамида $C_1ABC$?',
+    options: ['Треть', 'Половину', 'Шестую часть'],
+    correct: 0,
+    comment: 'Основание и высота у пирамиды те же, что у призмы, а $V_{\\text{пир}}=\\dfrac13 Sh$.',
+  },
+  {
+    question: 'Что спрашивают?',
+    options: ['Объём оставшейся части', 'Объём пирамиды', 'Объём всей призмы'],
+    correct: 0,
+  },
+];
+
+/** Подсказки к пирамиде, разделённой плоскостью через сторону основания (P03-48S). */
+const HINTS_PIRAMIDA_DELIT: HintLike[] = [
+  {
+    question: 'На какие тела плоскость делит пирамиду $SABC$?',
+    options: [
+      'На две треугольные пирамиды $SABM$ и $MABC$',
+      'На пирамиду и усечённую пирамиду',
+      'На две призмы',
+    ],
+    correct: 0,
+  },
+  {
+    question: 'Во сколько раз высота пирамиды $MABC$ меньше высоты $SABC$?',
+    options: [
+      'Во столько, во сколько $MC$ короче $SC$',
+      'В $2$ раза',
+      'Во столько, во сколько $SM$ короче $SC$',
+    ],
+    correct: 0,
+    comment: 'Основание $ABC$ общее, высоты относятся как $MC : SC$.',
+  },
+];
+
+/** Подсказки к двум цилиндрам: второй выше, радиус меньше (P03-69S). */
+const HINTS_DVA_CILINDRA: HintLike[] = [
+  {
+    question: 'Как меняется объём цилиндра, если радиус уменьшить в $b$ раз?',
+    options: ['Уменьшается в $b^2$ раз', 'Уменьшается в $b$ раз', 'Не меняется'],
+    correct: 0,
+    comment: '$V=\\pi r^2h$: радиус входит в квадрате.',
+  },
+  {
+    question: 'А если высоту увеличить в $a$ раз?',
+    options: ['Увеличивается в $a$ раз', 'Увеличивается в $a^2$ раз', 'Уменьшается в $a$ раз'],
+    correct: 0,
+  },
+];
+
+/** Подсказки к двум кружкам (P03-70). */
+const HINTS_KRUZHKI: HintLike[] = [
+  {
+    question: 'Вторая кружка шире в $w$ раз. Во сколько раз больше площадь её дна?',
+    options: ['В $w^2$ раз', 'В $w$ раз', 'В $2w$ раз'],
+    correct: 0,
+    comment: 'Ширина — диаметр; площадь круга пропорциональна квадрату диаметра.',
+  },
+  {
+    question: 'Как учесть, что вторая кружка ниже?',
+    options: ['Разделить на отношение высот', 'Умножить на отношение высот', 'Никак'],
     correct: 0,
   },
 ];
@@ -530,6 +626,41 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: { a: number; c: number }) => z01(104, p),
   },
+  'z01.trapeciya-radius': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок VII: прямоугольная трапеция, описанная около окружности, — периметр и большая боковая сторона → радиус (прототип 43)',
+    otkuda: 'razdel',
+    zadacha: (p: { per: number; c: number }) => z01(43, p),
+  },
+  'z01.ravnobedr-osnovanie-cos': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок V: AC = BC и cos A → основание AB (как прототип 23, где по основанию ищут косинус); подвох — AH лишь половина основания',
+    otkuda: 'novyy',
+    zadacha: (p: { l: number; c: number }) => z01(105, p),
+  },
+  'z01.ravnobedr-bok-sin': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок V: AC = BC, основание AB и sin A → боковая сторона (как прототип 30); подвох — дан синус, нужен косинус',
+    otkuda: 'novyy',
+    zadacha: (p: { c: number; s: number }) => z01(106, p),
+  },
+  'z01.bissektrisa-afc': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок I: равнобедренный с основанием AC, биссектриса AF, угол B → угол AFC (как прототип 9)',
+    otkuda: 'novyy',
+    zadacha: (p: { b: number }) => z01(107, p),
+  },
+  'z01.bissektrisa-afb': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок I: равнобедренный с основанием AC, биссектриса AF, угол B → угол AFB (как прототип 9); подвох — угол, смежный с углом AFC',
+    otkuda: 'novyy',
+    zadacha: (p: { b: number }) => z01(108, p),
+  },
   'z02.skalyar-km': {
     ege: 2,
     prototip:
@@ -553,6 +684,21 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: PerpendikulyarNeizvestnaya) =>
       bezPoley(build02({ ...kand, seed: 'pv', n: null }, perpendikulyarNeizvestnaya(p))),
+  },
+  'z02.skalyar-po-risunku': {
+    ege: 2,
+    prototip:
+      'Векторы, группа B: скалярное произведение k·a и b по рисунку на клетчатой плоскости (как B9, где множитель 2), множитель — и дробный',
+    otkuda: 'novyy',
+    zadacha: (p: SkalyarnoePoRisunku) =>
+      bezPoley(build02({ ...kand, seed: 'pv', n: null }, skalyarnoePoRisunku(p))),
+  },
+  'z02.dlina-km': {
+    ege: 2,
+    prototip:
+      'Векторы, группа A: длина k·a − m·b по координатам (как A3), разность с целыми множителями',
+    otkuda: 'novyy',
+    zadacha: (p: DlinaKM) => bezPoley(build02({ ...kand, seed: 'pv', n: null }, dlinaKM(p))),
   },
   'z03.shar-v-cilindre': {
     ege: 3,
@@ -585,6 +731,44 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip: 'Стереометрия, раздел VIII: конус в шаре, r конуса = R шара — объём шара (P03-90)',
     otkuda: 'razdel',
     zadacha: (p: { V: number }) => z03(PV03_SHAR_OKOLO_KONUSA, p, HINTS_KONUS_SHAR, `z03s|${p.V}`),
+  },
+  'z03.prizma-gipotenuza': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел II: прямая призма над прямоугольным треугольником, катеты k√q, боковое ребро — гипотенуза; полная поверхность (как P03-20, где спрашивают объём)',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; b: number; q: number }) =>
+      z03(P03_20S, p, HINTS_PRIZMA_GIPOTENUZA, `z03g|${p.a}|${p.b}|${p.q}`),
+  },
+  'z03.prizma-bez-piramidy': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел II: от треугольной (наклонной) призмы плоскостью через сторону основания и вершину другого основания отсечена пирамида — объём остатка (как P03-28)',
+    otkuda: 'novyy',
+    zadacha: (p: { V: number }) => z03(P03_28S, p, HINTS_PRIZMA_PIRAMIDA, `z03o|${p.V}`),
+  },
+  'z03.piramida-delit-rebro': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел III: плоскость через сторону основания делит боковое ребро m : n от вершины — меньшая часть пирамиды (как P03-48)',
+    otkuda: 'novyy',
+    zadacha: (p: { V: number; m: number; n: number }) =>
+      z03(P03_48S, p, HINTS_PIRAMIDA_DELIT, `z03d|${p.V}|${p.m}|${p.n}`),
+  },
+  'z03.dva-cilindra-vyshe': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел V: два цилиндра, у второго высота в a раз больше, радиус в b раз меньше — объём второго (как P03-69, где наоборот)',
+    otkuda: 'novyy',
+    zadacha: (p: { V: number; a: number; b: number }) =>
+      z03(P03_69S, p, HINTS_DVA_CILINDRA, `z03v|${p.V}|${p.a}|${p.b}`),
+  },
+  'z03.dve-kruzhki': {
+    ege: 3,
+    prototip: 'Стереометрия, раздел V: две кружки — отношение объёмов (P03-70)',
+    otkuda: 'razdel',
+    zadacha: (p: { hk: number; wk: number; style: string }) =>
+      z03(P03_70, p, HINTS_KRUZHKI, `z03m|${p.hk}|${p.wk}`),
   },
   'z04.ne-menee': {
     ege: 4,

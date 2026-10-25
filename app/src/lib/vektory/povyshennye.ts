@@ -10,7 +10,7 @@
 import { rngOf } from '../vychisleniya/rng';
 import { risunokChist } from './generate';
 import { OKNO_DVA, OKNO_TRI, razmestit } from './razmeshchenie';
-import { d, kombinatsiya, mnozhitel, slagaemoe, vec } from './tex';
+import { d, kombinatsiya, mnozhitel, skalyarnoe, slagaemoe, vec } from './tex';
 import {
   dany,
   izobrazheny,
@@ -92,6 +92,22 @@ const OKNA: readonly Okno[] = [
 ];
 
 /**
+ * Векторы a и b на клетчатой плоскости: координаты задаёт вариант,
+ * начала подбираются по ключу задачи — первое окно, где рисунок чистый.
+ */
+function risunokDvuh(kod: string, a: Tochka, b: Tochka): Risunok {
+  for (const okno of OKNA) {
+    for (let i = 0; i < 30; i += 1) {
+      const vectors = razmestit(rngOf(`${kod}|${i}`), [a, b], okno);
+      if (vectors === null) continue;
+      const r: Risunok = { vectors, window: okno, alt: 'Векторы a, b на координатной плоскости' };
+      if (risunokChist(r)) return r;
+    }
+  }
+  throw new Error(`№2: рисунок не сложился ${kod}`);
+}
+
+/**
  * Как A6 раздела (длина по рисунку: два вектора), но множитель может
  * быть дробным и у вектора b. Подвох: сначала координаты по клеткам,
  * потом комбинация, длина — по формуле, а не «на глаз».
@@ -104,18 +120,7 @@ export function dlinaKombinatsiiPoRisunku(p: DlinaKombinatsii): Generated {
   const len = Math.sqrt(R[0] * R[0] + R[1] * R[1]);
   if (!Number.isInteger(Math.round(len * 1e9) / 1e9))
     throw new Error(`№2: длина не целая ${JSON.stringify(p)}`);
-  const kod = `pv2d|${p.ax}|${p.ay}|${p.bx}|${p.by}|${p.k}`;
-  let risunok: Risunok | null = null;
-  for (const okno of OKNA) {
-    for (let i = 0; i < 30 && risunok === null; i += 1) {
-      const vectors = razmestit(rngOf(`${kod}|${i}`), [a, b], okno);
-      if (vectors === null) continue;
-      const r: Risunok = { vectors, window: okno, alt: 'Векторы a, b на координатной плоскости' };
-      if (risunokChist(r)) risunok = r;
-    }
-    if (risunok !== null) break;
-  }
-  if (risunok === null) throw new Error(`№2: рисунок не сложился ${JSON.stringify(p)}`);
+  const risunok = risunokDvuh(`pv2d|${p.ax}|${p.ay}|${p.bx}|${p.by}|${p.k}`, a, b);
   const terms = [
     [1, 'a', a],
     [p.k, 'b', b],
@@ -223,6 +228,118 @@ export function perpendikulyarNeizvestnaya(p: PerpendikulyarNeizvestnaya): Gener
     params: { ...p },
     signature: `pv2p|${p.ax}|${p.ay}|${p.bx}|${p.by}|${p.neizv}`,
     prototype: 'P2-PERP',
+    seed: 'fixed',
+  };
+}
+
+/** Скалярное произведение k·a и b по рисунку на клетчатой плоскости. */
+export interface SkalyarnoePoRisunku {
+  ax: number;
+  ay: number;
+  bx: number;
+  by: number;
+  /** Множитель при a: целый или десятичный (0,5; 1,5 …). */
+  k: number;
+}
+
+/**
+ * Как B9 раздела (по рисунку: 2a и b), но множитель при a — любой,
+ * и дробный. Подвох: координаты читаются по клеткам, множитель
+ * умножает обе координаты a, а не всё произведение дважды.
+ */
+export function skalyarnoePoRisunku(p: SkalyarnoePoRisunku): Generated {
+  const a: Tochka = [p.ax, p.ay];
+  const b: Tochka = [p.bx, p.by];
+  const u = umn(p.k, a);
+  const dot = p.ax * p.bx + p.ay * p.by;
+  const otvet = Math.round((u[0] * b[0] + u[1] * b[1]) * 1e9) / 1e9;
+  const risunok = risunokDvuh(`pv2s|${p.ax}|${p.ay}|${p.bx}|${p.by}|${p.k}`, a, b);
+  const ka = kombinatsiya([[p.k, 'a']]);
+  return {
+    uslovie: `${izobrazheny(['a', 'b'])} Найдите скалярное произведение векторов $${ka}$ и $${vec('b')}$.`,
+    risunok,
+    otvet,
+    /* Второй счёт: через длины и угол между векторами, затем множитель k. */
+    proverka:
+      p.k *
+      (Math.hypot(p.ax, p.ay) *
+        Math.hypot(p.bx, p.by) *
+        Math.cos(Math.atan2(p.by, p.bx) - Math.atan2(p.ay, p.ax))),
+    shagi: [
+      shagPoRisunku(risunok.vectors),
+      shagKombinatsiya([[p.k, 'a', a]], u, 'u'),
+      {
+        ...shagSkalyarnoe(['u', u], ['b', b]),
+        zagolovok: `Скалярное произведение $${vec('u')}\\cdot${vec('b')}$ по координатам`,
+      },
+      {
+        zagolovok: 'Проверка свойством $(k\\vec{a})\\cdot\\vec{b} = k(\\vec{a}\\cdot\\vec{b})$',
+        stroki: [
+          `$${skalyarnoe(vec('a'), vec('b'))} = ${d(dot)}$, и $${d(p.k)}\\cdot${mnozhitel(dot)} = ${d(otvet)}$.`,
+        ],
+      },
+      shagOtvet(otvet),
+    ],
+    params: { ...p },
+    signature: `${signatureOf([a, b])}|${d(p.k)}`,
+    prototype: 'P2-SKALYAR-RIS',
+    seed: 'fixed',
+  };
+}
+
+/** Длина k·a + m·b по координатам a и b. */
+export interface DlinaKM {
+  ax: number;
+  ay: number;
+  bx: number;
+  by: number;
+  /** Множители при a и при b (m < 0 — разность). */
+  k: number;
+  m: number;
+  /** 1 — в условии сначала b: |m·b + k·a|. */
+  bPervym?: number;
+}
+
+/**
+ * Как A3 раздела (длина с целыми коэффициентами), но с числами
+ * варианта и разностью. Подвох: множитель и знак у каждой координаты
+ * — минус перед m·b меняет знаки обеих координат.
+ */
+export function dlinaKM(p: DlinaKM): Generated {
+  const a: Tochka = [p.ax, p.ay];
+  const b: Tochka = [p.bx, p.by];
+  const R: Tochka = [p.k * p.ax + p.m * p.bx, p.k * p.ay + p.m * p.by];
+  const len = Math.sqrt(R[0] * R[0] + R[1] * R[1]);
+  if (!Number.isInteger(Math.round(len * 1e9) / 1e9))
+    throw new Error(`№2: длина не целая ${JSON.stringify(p)}`);
+  const otvet = Math.round(len);
+  const terms: (readonly [number, string, Tochka])[] =
+    p.bPervym === 1
+      ? [
+          [p.m, 'b', b],
+          [p.k, 'a', a],
+        ]
+      : [
+          [p.k, 'a', a],
+          [p.m, 'b', b],
+        ];
+  return {
+    uslovie: `${dany([
+      ['a', a],
+      ['b', b],
+    ])} ${naydiDlinu(kombinatsiya(terms.map(([k, n]) => [k, n] as const)))}`,
+    risunok: null,
+    otvet,
+    /* Второй счёт: k²|a|² + 2km·(a·b) + m²|b|² без координат суммы. */
+    proverka: Math.sqrt(
+      p.k ** 2 * (p.ax ** 2 + p.ay ** 2) +
+        2 * p.k * p.m * (p.ax * p.bx + p.ay * p.by) +
+        p.m ** 2 * (p.bx ** 2 + p.by ** 2),
+    ),
+    shagi: [shagKombinatsiya(terms, R, 'c'), shagDlina('c', R, otvet), shagOtvet(otvet)],
+    params: { ...p },
+    signature: `pv2km|${signatureOf([a, b])}|${p.k}|${p.m}|${p.bPervym ?? 0}`,
+    prototype: 'P2-DLINA-KM',
     seed: 'fixed',
   };
 }

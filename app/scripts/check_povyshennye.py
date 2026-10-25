@@ -362,6 +362,129 @@ SCHET.update({
 })
 
 
+# ── Партия 2, группа g1 (варианты 7–12, №1–3) ───────────────────
+
+
+def z01_trapeciya_radius(p):
+    # Описанная: сумма боковых = P/2; меньшая боковая — высота = 2r.
+    r = sp.symbols("r", positive=True)
+    return sp.solve(sp.Eq(2 * r + p["c"], R(p["per"]) / 2), r)[0]
+
+
+def z01_osnovanie_cos(p):
+    # Теорема косинусов в ABC для угла A: BC² = AB² + AC² − 2·AB·AC·cos A, BC = AC.
+    x = sp.symbols("x", positive=True)
+    l = R(p["l"])
+    return sp.solve(sp.Eq(l**2, x**2 + l**2 - 2 * x * l * R(p["c"])), x)[0]
+
+
+def z01_bok_sin(p):
+    # Угол при основании острый: cos A = +√(1 − sin²A); дальше теорема косинусов для AC = BC = y.
+    y = sp.symbols("y", positive=True)
+    c, cosA = R(p["c"]), sp.sqrt(1 - R(p["s"]) ** 2)
+    return sp.solve(sp.Eq(y**2, c**2 + y**2 - 2 * c * y * cosA), y)[0]
+
+
+def ugly_bissektrisa(p):
+    # Координаты (40 знаков): A(0,0), C(1,0), B над серединой AC; F — где биссектриса из A
+    # пересекает BC (делит BC в отношении AB : AC — свойство биссектрисы).
+    import mpmath as mp
+
+    mp.mp.dps = 40
+    pri = (180 - mp.mpf(p["b"])) / 2 * mp.pi / 180
+    A, C = mp.matrix([0, 0]), mp.matrix([1, 0])
+    B = mp.matrix([mp.mpf(1) / 2, mp.tan(pri) / 2])
+    AB = mp.norm(B - A)
+    F = B + (C - B) * (AB / (AB + 1))
+
+    def ugol(P, Q, Rr):
+        u, w = P - Q, Rr - Q
+        val = mp.acos((u[0] * w[0] + u[1] * w[1]) / (mp.norm(u) * mp.norm(w))) * 180 / mp.pi
+        return sp.nsimplify(sp.Float(mp.nstr(val, 35), 35), tolerance=sp.Rational(1, 10**25), rational=True)
+
+    return F, A, B, C, ugol
+
+
+def z01_afc(p):
+    F, A, B, C, ugol = ugly_bissektrisa(p)
+    return ugol(A, F, C)
+
+
+def z01_afb(p):
+    F, A, B, C, ugol = ugly_bissektrisa(p)
+    return ugol(A, F, B)
+
+
+def z02_skalyar_ris(p):
+    return (R(p["k"]) * sp.Matrix([p["ax"], p["ay"]])).dot(sp.Matrix([p["bx"], p["by"]]))
+
+
+def z02_dlina_km(p):
+    r = p["k"] * sp.Matrix([p["ax"], p["ay"]]) + p["m"] * sp.Matrix([p["bx"], p["by"]])
+    return sp.sqrt(r.dot(r))
+
+
+def z03_prizma_gip(p):
+    q = sp.sqrt(p["q"])
+    a, b = p["a"] * q, p["b"] * q
+    c = sp.sqrt(a**2 + b**2)
+    return sp.simplify(a * b + (a + b + c) * c)
+
+
+def z03_bez_piramidy(p):
+    # Наклонная призма по координатам: объём остатка — выпуклая оболочка A, B, A1, B1, C1.
+    V = R(p["V"])
+    h = sp.symbols("h", positive=True)
+    A, B, C = sp.Matrix([0, 0, 0]), sp.Matrix([4, 0, 0]), sp.Matrix([1, 3, 0])
+    s = sp.Matrix([1, 2, h])
+    hh = sp.solve(sp.Eq(sp.Rational(1, 2) * 4 * 3 * h, V), h)[0]
+    tet = lambda P, Q, Rr, S: abs((Q - P).dot((Rr - P).cross(S - P))) / 6
+    A1, B1, C1 = A + s, B + s, C + s
+    ost = tet(A, B, A1, C1) + tet(B, A1, B1, C1)
+    return sp.simplify(ost.subs(h, hh))
+
+
+def z03_delit(p):
+    V, m, n = R(p["V"]), p["m"], p["n"]
+    h = sp.symbols("h", positive=True)
+    A, B, C = sp.Matrix([0, 0, 0]), sp.Matrix([6, 0, 0]), sp.Matrix([2, 5, 0])
+    S = sp.Matrix([1, 1, h])
+    hh = sp.solve(sp.Eq(sp.Rational(1, 3) * 15 * h, V), h)[0]
+    M = S + sp.Rational(m, m + n) * (C - S)
+    tet = lambda P, Q, Rr, T: abs((Q - P).dot((Rr - P).cross(T - P))) / 6
+    return sp.simplify(sp.Min(tet(S, A, B, M), tet(M, A, B, C)).subs(h, hh))
+
+
+def z03_cilindry(p):
+    r, h = sp.symbols("r h", positive=True)
+    V1 = sp.pi * r**2 * h
+    V2 = sp.pi * (r / R(p["b"])) ** 2 * (h * R(p["a"]))
+    return sp.simplify(V2 / V1 * R(p["V"]))
+
+
+def z03_kruzhki(p):
+    d, h = sp.symbols("d h", positive=True)
+    V1 = sp.pi * (d / 2) ** 2 * (h * R(p["hk"]))
+    V2 = sp.pi * (d * R(p["wk"]) / 2) ** 2 * h
+    return sp.simplify(V2 / V1)
+
+
+SCHET.update({
+    "z01.trapeciya-radius": z01_trapeciya_radius,
+    "z01.ravnobedr-osnovanie-cos": z01_osnovanie_cos,
+    "z01.ravnobedr-bok-sin": z01_bok_sin,
+    "z01.bissektrisa-afc": z01_afc,
+    "z01.bissektrisa-afb": z01_afb,
+    "z02.skalyar-po-risunku": z02_skalyar_ris,
+    "z02.dlina-km": z02_dlina_km,
+    "z03.prizma-gipotenuza": z03_prizma_gip,
+    "z03.prizma-bez-piramidy": z03_bez_piramidy,
+    "z03.piramida-delit-rebro": z03_delit,
+    "z03.dva-cilindra-vyshe": z03_cilindry,
+    "z03.dve-kruzhki": z03_kruzhki,
+})
+
+
 def konechnaya(q):
     q = F(q)
     d = q.denominator
