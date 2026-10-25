@@ -33,10 +33,28 @@
  *
  * Ответ и разбор по этапам считаются только для листа учителя и
  * примеров; student-запрос разбор своих задач не строит.
+ *
+ * Адреса общего генератора (ps=2): состав по прототипам с числом задач
+ * и ключами позиций (lib/generator/obshchiy/klyuchi.ts), до четырёх
+ * вариантов, замены, рамка «Запомни» и разобранные примеры отдельно,
+ * учитель в шапке и QR-код. Задача позиции — вариант банка на своём
+ * месте в порядке серии (код комплекта), урок серии сдвигает места;
+ * банк прототипа кончился — новая задача по seed позиции. Прежние
+ * адреса собираются как раньше.
  */
 
 import type { SheetLayoutId, SheetThemeId } from '@/content/generator';
 import contentSheet9 from '@/content/sheet9.js';
+import {
+  klyuchSlota,
+  planPoKlyucham,
+  razobratSostav,
+  slotySostava,
+  sostavIzSlotov,
+  sostavStroka,
+  type SlotShablon,
+} from '@/lib/generator/obshchiy/klyuchi';
+import answers from '@/lib/sheet/answers.js';
 import { answerHtml, answersItems } from '@/lib/sheet/answers9.js';
 import { buildDocument, exampleItem, figure as sheetFigure } from '@/lib/sheet/sheet.js';
 import typo from '@/lib/sheet/typography.js';
@@ -85,7 +103,23 @@ export interface SheetParams9 {
   ramki: 0 | 1 | 2;
   /** Номер урока в серии: 0, 1, … — сдвиг по потоку вариантов банка (серия — seed). */
   urok: number;
+  /** Схема ps=2 (общий генератор): состав с ключами позиций. */
+  poKlyucham?: boolean;
+  /** Состав ps=2: прототип, число задач, ключ первой. */
+  sostav?: { id: string; n: number; k?: number }[];
+  /** Вариантов одной структуры (ps=2): 1–4. */
+  variants?: number;
+  /** Замены ps=2: «вариант.ключ» («2.9.4.1_0») → сколько раз заменяли. */
+  zameny?: Record<string, number>;
+  /** Рамка «Запомни» перед задачами группы (ps=2: отдельно от примеров). */
+  zapomni?: boolean;
+  /** Учитель в шапке листа (ps=2); нет — как в шаблоне. */
+  uchitel?: string;
+  /** QR-код на лист ученика в строке названия (ps=2). */
+  qr?: boolean;
 }
+
+export const VARIANTS_MAX = 4;
 
 /** По умолчанию — полный набор: два разобранных примера на группу. */
 export const RAMKI_DEFAULT = 2;
@@ -108,6 +142,26 @@ export function defaultSheetParams9(): SheetParams9 {
 /** Строка адреса из параметров: g=I,II&p=…&n=&seed=&t=&c=&k=&d=&r=. */
 export function sheetQuery9(params: SheetParams9): string {
   const query = new URLSearchParams();
+  if (params.poKlyucham === true) {
+    query.set('ps', '2');
+    query.set('s', sostavStroka(params.sostav ?? []));
+    if ((params.variants ?? 1) > 1) query.set('v', String(params.variants));
+    query.set('seed', params.seed);
+    query.set('t', params.theme);
+    query.set('c', params.layout === 'double' ? '2' : '1');
+    if (params.kind !== '') query.set('k', params.kind);
+    if (params.date !== '') query.set('d', params.date);
+    if (params.zapomni === true) query.set('tr', '1');
+    if (params.ramki > 0) query.set('r', String(params.ramki));
+    if (params.urok > 0) query.set('u', String(params.urok));
+    if (params.uchitel !== undefined && params.uchitel !== contentSheet9.head.author) {
+      query.set('uch', params.uchitel);
+    }
+    if (params.qr === true) query.set('qr', '1');
+    const z = Object.entries(params.zameny ?? {}).filter(([, k]) => k > 0);
+    if (z.length > 0) query.set('z', z.map(([pos, k]) => `${pos}:${k}`).join(','));
+    return query.toString();
+  }
   query.set('g', params.groups.join(','));
   if (params.prototypes.length > 0) {
     query.set('p', params.prototypes.join(','));
@@ -137,6 +191,7 @@ function groupsOfPrototypes(ids: string[]): Gruppa[] {
 
 /** Параметры из адреса. Чего в адресе нет — берётся по умолчанию. */
 export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
+  if (query.get('ps') === '2') return parseKlyuchi9(query);
   const known = new Set<string>(GRUPPY.map((g) => g.id));
   const list = (name: string) =>
     (query.get(name) ?? '')
@@ -165,6 +220,59 @@ export function parseSheetQuery9(query: URLSearchParams): SheetParams9 {
   };
 }
 
+/** Адрес общего генератора (ps=2). */
+function parseKlyuchi9(query: URLSearchParams): SheetParams9 {
+  const sostav = sostavIzSlotov(
+    slotySostava(
+      razobratSostav(
+        query.get('s') ?? '',
+        true,
+        /9\.\d\.\d{1,2}/,
+        (id) => prototypeById(id) !== undefined,
+      ),
+    ),
+  );
+  const variants = Number(query.get('v'));
+  const ramki = query.get('r');
+  const urok = Number(query.get('u'));
+  const zameny: Record<string, number> = {};
+  for (const item of (query.get('z') ?? '').split(',')) {
+    const [pos = '', k = ''] = item.split(':');
+    if (/^\d+\.9\.\d\.\d{1,2}_\d{1,2}$/.test(pos) && Number(k) > 0) {
+      zameny[pos] = Math.min(50, Number(k));
+    }
+  }
+  const prototypes = [...new Set(sostav.map((x) => x.id))];
+  return {
+    groups: groupsOfPrototypes(prototypes),
+    prototypes,
+    count: sostav.reduce((a, x) => a + x.n, 0),
+    seed: (query.get('seed') ?? 'variant').slice(0, 24),
+    theme: query.get('t') === 'print' ? 'print' : 'color',
+    layout: query.get('c') === '2' ? 'double' : 'single',
+    kind: (query.get('k') ?? '').slice(0, 60),
+    date: /^\d{4}-\d{2}-\d{2}$/.test(query.get('d') ?? '') ? (query.get('d') as string) : '',
+    /* В новой схеме примеров по умолчанию нет: их включают в «Дополнительно». */
+    ramki: ramki === '1' ? 1 : ramki === '2' ? 2 : 0,
+    urok: Number.isFinite(urok) && urok > 0 ? Math.min(50, Math.floor(urok)) : 0,
+    poKlyucham: true,
+    sostav,
+    variants:
+      Number.isFinite(variants) && variants > 1 ? Math.min(VARIANTS_MAX, Math.floor(variants)) : 1,
+    zameny,
+    ...(query.get('tr') === '1' ? { zapomni: true } : {}),
+    ...(query.has('uch')
+      ? {
+          uchitel: (query.get('uch') ?? '')
+            .replace(/[\u0000-\u001f<>]/g, '')
+            .trim()
+            .slice(0, 40),
+        }
+      : {}),
+    ...(query.get('qr') === '1' ? { qr: true } : {}),
+  };
+}
+
 /* ── Лист ─────────────────────────────────────────────────────────── */
 
 /** Клетка рисунка условия на листе, мм: в две колонки чуть мельче. */
@@ -180,6 +288,8 @@ const TEACHER_MAX_MM: Record<SheetLayoutId, number> = { single: 160, double: 84 
 const EXAMPLE_MAX_MM = 150;
 
 export interface SheetTask9 {
+  /** Ключ позиции «вариант.ключ» (ps=2): для замены в генераторе. */
+  pos?: string;
   no: number;
   id: string;
   questionHtml: string;
@@ -209,6 +319,9 @@ export interface SheetBlock9 {
   theory: string[];
   /** Разобранные примеры группы «прототип|seed»: по ним проверка сверяет листы. */
   primery: string[];
+  /** ps=2: рамки перед задачами блока и куски задач учителя — для шаблона. */
+  leadItems?: string[];
+  taskItems?: string[];
 }
 
 interface Drawn {
@@ -624,7 +737,10 @@ function primeryOf(pool: string[], ramki: number): { proto: string; seed: string
   for (let i = 0; i < ramki; i += 1) {
     const second = i === 1;
     const proto = from[i % from.length] as string;
-    out.push({ proto, seed: second && from.length === 1 ? primerSeed(proto) : opornayaSeed(proto) });
+    out.push({
+      proto,
+      seed: second && from.length === 1 ? primerSeed(proto) : opornayaSeed(proto),
+    });
   }
   return out;
 }
@@ -716,6 +832,286 @@ export function fixedBlocks9(
     .filter((block) => block.tasks.length > 0);
 }
 
+/* ── Схема ps=2 ───────────────────────────────────────────────────── */
+
+type Pozitsiya9 = { vid: 'bank' | 'new'; id: string; seed: string };
+
+/**
+ * Задачи позиций по вариантам (ps=2). Банк №9 — проверенные варианты
+ * движка, а не открытый банк: для раскладки они «аналоги» общего
+ * планировщика — своё место по ключу, остаток с конца, затем новая
+ * задача. Урок серии u сдвигает порядок банка на u · (задач прототипа ×
+ * вариантов): уроки одной серии не повторяют задачи, пока банк есть.
+ */
+function pozitsiiPoKlyucham(params: SheetParams9): Pozitsiya9[][] {
+  const sh: SlotShablon[] = slotySostava(params.sostav ?? []).map((s) => ({
+    ...s,
+    istochnik: 'new',
+  }));
+  const variants = params.variants ?? 1;
+  const naListe = new Map<string, number>();
+  for (const s of sh) naListe.set(s.id, (naListe.get(s.id) ?? 0) + 1);
+  const { poVariantam } = planPoKlyucham<SlotShablon, string, Pozitsiya9>({
+    sh,
+    variants,
+    seed: seedUroka(params.seed, params.urok),
+    zameny: params.zameny ?? {},
+    mixSol: 'z9-mix',
+    bank: () => [],
+    analogi: (id) => {
+      const order = bankOrder(id, params.seed);
+      if (order.length === 0) return order;
+      const sdvig = (params.urok * (naListe.get(id) ?? 0) * variants) % order.length;
+      return [...order.slice(sdvig), ...order.slice(0, sdvig)];
+    },
+    bankPoz: (seed) => ({ vid: 'bank', id: '', seed }),
+    analogPoz: (seed) => ({ vid: 'bank', id: '', seed }),
+    /* Новая задача: seed, на котором движок подобрал рисунок и задача ещё не стоит на листе. */
+    novaya: (c, seed, zanyato) => {
+      for (let a = 0; a < ATTEMPTS_PER_TASK; a += 1) {
+        const sd = a === 0 ? seed : `${seed}~${a}`;
+        try {
+          const task = generate(c.s.id, sd);
+          const key = `${c.s.id}|${task.signature}`;
+          if (zanyato.has(key)) continue;
+          zanyato.add(key);
+          return { vid: 'new', id: c.s.id, seed: sd };
+        } catch {
+          /* Параметры не подобрались на этом seed — берём следующий. */
+        }
+      }
+      return { vid: 'new', id: c.s.id, seed };
+    },
+    seedNovoy: (x) => (x.vid === 'new' ? x.seed : undefined),
+  });
+  /* У банка id позиции не хранится — он тот же, что у слота. */
+  return poVariantam.map((row) => row.map((x, i) => ({ ...x, id: sh[i]?.id ?? x.id })));
+}
+
+/** Рамки группы в новой схеме: «Запомни» и примеры — каждое по своей галочке. */
+function theoryPoKlyucham(
+  group: Gruppa,
+  pool: string[],
+  params: SheetParams9,
+  withAnswers: boolean,
+): string[] {
+  const out: string[] = params.zapomni === true ? [zapomniItem(group)] : [];
+  for (const { proto, seed } of primeryOf(pool, params.ramki)) {
+    if (withAnswers) out.push(...exampleKuski(proto, seed));
+    else out.push(exampleOf(proto, seed));
+  }
+  return out.filter((item) => item !== '');
+}
+
+/**
+ * Блоки вариантов (ps=2): подряд идущие задачи одной группы — блок,
+ * сквозная нумерация. Рамки — перед первым блоком группы в варианте,
+ * примеры — по прототипам группы из состава.
+ */
+export function sheetVariants9(params: SheetParams9, withAnswers: boolean): SheetBlock9[][] {
+  /* Прежний адрес: один вариант, блоки по группам — как печатался. */
+  if (params.poKlyucham !== true) {
+    return [
+      sheetBlocks9({ ...params, layout: raskladka(params.layout, withAnswers) }, withAnswers),
+    ];
+  }
+  const sloty = slotySostava(params.sostav ?? []);
+  const layout = raskladka(params.layout, withAnswers);
+  return pozitsiiPoKlyucham(params).map((row, vi) => {
+    const out: SheetBlock9[] = [];
+    const bylo = new Set<Gruppa>();
+    let no = 0;
+    row.forEach((poz, i) => {
+      const slot = sloty[i];
+      const proto = prototypeById(poz.id);
+      if (slot === undefined || proto === undefined) return;
+      let task: Generated;
+      try {
+        task = generate(poz.id, poz.seed);
+      } catch {
+        return;
+      }
+      no += 1;
+      const pos = `${vi + 1}.${klyuchSlota(slot)}`;
+      const t = { ...sheetTask(task, no, layout, withAnswers), pos };
+      const last = out[out.length - 1];
+      if (last !== undefined && last.id === proto.gruppa) {
+        last.tasks.push(t);
+        return;
+      }
+      const pool = params.prototypes.filter((id) => prototypeById(id)?.gruppa === proto.gruppa);
+      const theory = bylo.has(proto.gruppa)
+        ? []
+        : theoryPoKlyucham(proto.gruppa, pool, params, withAnswers);
+      bylo.add(proto.gruppa);
+      out.push({
+        id: proto.gruppa,
+        title: gruppaById(proto.gruppa)?.nazvanie ?? proto.gruppa,
+        note: '',
+        set: proto.gruppa,
+        tasks: [t],
+        theory,
+        primery:
+          theory.length > 0 ? primeryOf(pool, params.ramki).map((x) => `${x.proto}|${x.seed}`) : [],
+        leadItems: theory,
+      });
+    });
+    /* Лист учителя: задачи кусками, разбор переносится между этапами. */
+    if (withAnswers) {
+      for (const b of out) b.taskItems = b.tasks.flatMap((t) => t.kuski ?? []);
+    }
+    return out;
+  });
+}
+
+/** Рамки группы для предпросмотра генератора: строки «Запомни» и разобранные примеры. */
+export interface Ramki9 {
+  zapomni: string[];
+  primery: {
+    title: string;
+    uslovie: string;
+    figureSvg: string | null;
+    etapy: Generated['shagi'];
+    answer: string;
+  }[];
+}
+
+export function ramkiGruppy9(group: Gruppa, params: SheetParams9): Ramki9 {
+  /* Прежний адрес: примеры по всем прототипам группы, «Запомни» — вместе с примерами. */
+  const nova = params.poKlyucham === true;
+  const pool = nova
+    ? params.prototypes.filter((id) => prototypeById(id)?.gruppa === group)
+    : poolOf(group, params);
+  const zapomni = (nova ? params.zapomni === true : params.ramki > 0)
+    ? ((contentSheet9.zapomni as Record<string, string[]>)[group] ?? [])
+    : [];
+  const primery = primeryOf(pool, params.ramki).flatMap(({ proto, seed }) => {
+    try {
+      const task = generate(proto, seed);
+      return [
+        {
+          title: prototypeById(proto)?.nazvanie ?? '',
+          uslovie: task.uslovie,
+          figureSvg: drawFigure(task, 'teacher')?.svg ?? null,
+          etapy: etapy(task),
+          answer: ru(task.otvet),
+        },
+      ];
+    } catch {
+      return [];
+    }
+  });
+  return { zapomni, primery };
+}
+
+/** Таблица «Ответы» листа ps=2: у нескольких вариантов — с подзаголовком варианта. */
+function answersVariantov(variants: SheetBlock9[][]): string[] {
+  const { answers: title, answersNote: note } = contentSheet9.labels;
+  if (variants.length === 1) {
+    return answersItems(variants[0] ?? [], title, note).map((item: string) =>
+      item.replace(' data-page-break="1"', ''),
+    );
+  }
+  const items: string[] = [answers.sectionHead(title, note, { section: true })];
+  variants.forEach((blocks, i) => {
+    items.push(answers.subHead(`Вариант ${i + 1}`));
+    for (const block of blocks) {
+      items.push(
+        answers.table(
+          block.title,
+          block.tasks.map((task) => ({
+            no: task.no,
+            answer: task.answer,
+            html: answerHtml(task.answer),
+          })),
+          5,
+        ),
+      );
+    }
+  });
+  return items;
+}
+
+function titleOf9(params: SheetParams9, variant?: string, qrSvg?: string) {
+  return {
+    chip: contentSheet9.title.chip,
+    text: contentSheet9.title.text,
+    /* Лист генератора без вида работы и даты — подпись по умолчанию. */
+    subtitle: subtitleOf9(params) || contentSheet9.title.subtitle,
+    ...(variant === undefined ? {} : { variant }),
+    ...(params.qr === true && qrSvg !== undefined ? { qr: qrSvg } : {}),
+  };
+}
+
+/** Лист ps=2: варианты, поле даты, учитель в шапке, QR-код. */
+function specPoKlyucham(params: SheetParams9, withAnswers: boolean, qrSvg?: string) {
+  const layout = raskladka(params.layout, withAnswers);
+  const variants = sheetVariants9(params, withAnswers);
+  return {
+    theme: params.theme,
+    layout,
+    cell: CELL[layout],
+    documentTitle:
+      `${contentSheet9.title.chip}. ${contentSheet9.title.text}` +
+      (params.kind ? ` — ${params.kind}` : ''),
+    head:
+      params.uchitel === undefined
+        ? contentSheet9.head
+        : { ...contentSheet9.head, author: params.uchitel },
+    runner: contentSheet9.runner,
+    title: titleOf9(params, undefined, qrSvg),
+    recap: null,
+    blocks: variants[0] ?? [],
+    fields: { date: params.date === '' ? '' : dateText9(params.date) },
+    ...(variants.length > 1
+      ? {
+          variants: variants.map((list, i) => ({
+            title: titleOf9(params, `Вариант ${i + 1}`, qrSvg),
+            blocks: list,
+          })),
+        }
+      : {}),
+    withAnswerLine: !withAnswers,
+    extraItems: withAnswers ? answersVariantov(variants) : [],
+    foot: contentSheet9.foot,
+  };
+}
+
+const STROKA_OTVETA =
+  '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>';
+
+/**
+ * «Всё одним файлом» генератора: листы ученика всех вариантов (со
+ * строкой ответа), затем листы учителя с разбором и таблица ответов.
+ */
+export function sheetSpecVse9(params: SheetParams9, qrSvg?: string) {
+  const p = { ...params, poKlyucham: true };
+  const uchenik = sheetVariants9(p, false);
+  const uchitel = sheetVariants9(p, true);
+  const n = uchenik.length;
+  const nazvanie = (i: number, reshenie: boolean) => {
+    const t = titleOf9(p, n > 1 ? `Вариант ${i + 1}` : undefined, qrSvg);
+    return reshenie
+      ? { ...t, subtitle: [t.subtitle, contentSheet9.resheniya].filter(Boolean).join(' · ') }
+      : t;
+  };
+  return {
+    ...specPoKlyucham(p, true, qrSvg),
+    blocks: [],
+    variants: [
+      ...uchenik.map((blocks, i) => ({
+        title: nazvanie(i, false),
+        blocks: blocks.map((b) => ({
+          ...b,
+          tasks: b.tasks.map((t) => ({ ...t, solutionHtml: STROKA_OTVETA })),
+        })),
+      })),
+      ...uchitel.map((blocks, i) => ({ title: nazvanie(i, true), blocks })),
+    ],
+    withAnswerLine: false,
+  };
+}
+
 /** «18.09.2026» из записи ГГГГ-ММ-ДД. */
 export function dateText9(date: string): string {
   const [year, month, day] = date.split('-');
@@ -766,7 +1162,13 @@ function flowOf(spec: Record<string, unknown>, block: SheetBlock9): string[] {
  * blocks нужны проверкам и отпечатку комплекта; печатает лист
  * `printSpec9(spec)` — тот же набор, но с готовым потоком.
  */
-export function sheetSpec9(params: SheetParams9, withAnswers: boolean) {
+export function sheetSpec9(
+  params: SheetParams9,
+  withAnswers: boolean,
+  /** QR-код на лист ученика, SVG: считает страница печати по своему адресу. */
+  qrSvg?: string,
+) {
+  if (params.poKlyucham === true) return specPoKlyucham(params, withAnswers, qrSvg);
   const own = { ...params, layout: raskladka(params.layout, withAnswers) };
   return specOfBlocks9(sheetBlocks9(own, withAnswers), own, withAnswers);
 }
@@ -828,5 +1230,6 @@ export function specOfBlocks9(
  * блоки с задачами второй раз не раскладываются.
  */
 export function printSpec9<T extends { blocks: unknown[] }>(spec: T): T {
-  return { ...spec, blocks: [] };
+  /* Лист ps=2 собран блоками шаблона: потока в leadItems у него нет. */
+  return 'leadItems' in spec ? { ...spec, blocks: [] } : spec;
 }

@@ -195,6 +195,9 @@
 .prv-zad {
   position: relative;
   display: grid;
+  /* Одна колонка не шире карточки: широкая формула-таблица в условии
+     прокручивается внутри него, а не раздвигает страницу. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   min-width: 0;
   padding: var(--space-5);
@@ -215,6 +218,8 @@
   color: var(--color-spr-svo);
 }
 .prv-zad__uslovie {
+  overflow-x: auto;
+  overflow-y: hidden;
   margin: 0;
   font-size: var(--fs-h4);
   font-weight: 600;
