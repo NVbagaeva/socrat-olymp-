@@ -1116,37 +1116,48 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
   metki.forEach((m, i) => {
     const sub = String(i + 1);
     const halfW = shirinaX(sub) / 2 + 1.5;
-    const halfH = V.mark.size * 0.5;
+    /* На печати индекс того же кегля, что и буква (не мельче 10 pt), и
+       опущен: подпись выше и ниже, чем на экране. Отбор задач банка
+       (рисунок без печати) это не меняет. */
+    const halfH = V.mark.size * (PECHAT.on ? 0.66 : 0.5);
     let best: { b: Podpis; min: number; what: string } | null = null;
-    for (const side of [1, -1]) {
-      for (const off of [18, 28]) {
-        const b: Podpis = {
-          kind: 'mark',
-          id: `x${sub}`,
-          x: sx(m),
-          y: axisX + side * off - V.mark.size * 0.1,
-          halfW,
-          halfH,
-        };
-        const rect = boxRect(b);
-        const inside =
-          rect.left >= field.left &&
-          rect.right <= field.right &&
-          rect.top >= field.top &&
-          rect.bottom <= field.bottom;
-        const c = zazor(
-          rect,
-          obstacles.filter((o) => o.what !== 'отмеченная точка'),
-        );
-        const min = inside ? c.min : -1;
-        if (best === null || min > best.min) {
-          best = { b, min, what: inside ? c.what : 'край рисунка' };
-        }
-        if (min >= V.gap) {
-          break;
-        }
+    /* На печати подписи крупнее, а точки бывают через клетку: подписи
+       уходят и в третий, четвёртый ряд. */
+    const mesta: [number, number][] = PECHAT.on
+      ? [18, 28, 38, 48].flatMap((off): [number, number][] => [
+          [1, off],
+          [-1, off],
+        ])
+      : [
+          [1, 18],
+          [1, 28],
+          [-1, 18],
+          [-1, 28],
+        ];
+    for (const [side, off] of mesta) {
+      const b: Podpis = {
+        kind: 'mark',
+        id: `x${sub}`,
+        x: sx(m),
+        y: axisX + side * off - V.mark.size * 0.1,
+        halfW,
+        halfH,
+      };
+      const rect = boxRect(b);
+      const inside =
+        rect.left >= field.left &&
+        rect.right <= field.right &&
+        rect.top >= field.top &&
+        rect.bottom <= field.bottom;
+      const c = zazor(
+        rect,
+        obstacles.filter((o) => o.what !== 'отмеченная точка'),
+      );
+      const min = inside ? c.min : -1;
+      if (best === null || min > best.min) {
+        best = { b, min, what: inside ? c.what : 'край рисунка' };
       }
-      if (best !== null && best.min >= V.gap) {
+      if (min >= V.gap) {
         break;
       }
     }
@@ -1531,14 +1542,17 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
     if (item.t === 'tochka' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
       const halfW = textWidth(text, V.helper.size) / 2 + 3;
+      /* На печати кегль крупнее: высота подписи — от кегля, мест больше. */
       const b = place(
         `подпись ${text}`,
         'aux',
         halfW,
-        9,
+        PECHAT.on ? Math.max(9, V.helper.size * 0.55) : 9,
         { x: sx(item.x), y: sy(item.y) },
-        ['above-right', 'below-right', 'above-left'],
-        fig.teoriya === true ? [10, 18, 26] : [10, 18],
+        PECHAT.on
+          ? ['above-right', 'below-right', 'above-left', 'below-left']
+          : ['above-right', 'below-right', 'above-left'],
+        fig.teoriya === true || PECHAT.on ? [10, 18, 26] : [10, 18],
       );
       layers.labels.push(
         svgText(text, b.x, b.y + 5, 'middle', { size: V.helper.size, weight: 400, fill: V.aux }),
