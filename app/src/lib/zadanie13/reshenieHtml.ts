@@ -63,7 +63,7 @@ const krupno = (tex: string) =>
     .split(/,\s*\\quad\s*|,?\s*\\qquad\s*/)
     .map(
       (chast) =>
-        `<div class="z13-r-formula">${katex.renderToString(poOtnosheniyam(chast), { throwOnError: true })}</div>`,
+        `<div class="z13-r-formula">${katex.renderToString(poOtnosheniyam(chast), { throwOnError: true, displayFrac: true })}</div>`,
     )
     .join('');
 
