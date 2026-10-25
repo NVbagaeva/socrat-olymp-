@@ -8,6 +8,12 @@
  */
 
 import type { SheetLayoutId, SheetThemeId } from '@/content/generator';
+import {
+  razobratSostav,
+  slotySostava,
+  sostavIzSlotov,
+  sostavStroka,
+} from './generator/obshchiy/klyuchi';
 
 export interface SheetParams {
   /** Наборы движка: 12.A, 12.B … */
@@ -39,7 +45,23 @@ export interface SheetParams {
    * счётчикам типов). Не задано — поровну по плану.
    */
   per?: Record<string, number>;
+  /**
+   * Схема ps=2 (общий генератор, №12): состав «набор × число» с ключами
+   * позиций, замены, учитель в шапке, QR-код. Прежние адреса — без неё.
+   */
+  poKlyucham?: boolean;
+  /** Состав ps=2: набор, число задач, ключ первой. */
+  sostav?: { id: string; n: number; k?: number }[];
+  /** Замены ps=2: «вариант.ключ» («2.12Q.B_0») → сколько раз заменяли. */
+  zameny?: Record<string, number>;
+  /** Учитель в шапке листа (ps=2); нет — как в шаблоне. */
+  uchitel?: string;
+  /** QR-код на лист ученика в строке названия (ps=2). */
+  qr?: boolean;
 }
+
+/** Набор движка №12: 12.A, 12Q.B, 12R.J … */
+const NABOR = /12[QRSELT]?\.[A-Z]/;
 
 /** Сколько вариантов можно заказать в генераторе. */
 export const MAX_VARIANTS = 4;
@@ -53,6 +75,24 @@ export function variantsFrom(raw: string | null): number {
 /** Строка адреса из параметров. */
 export function sheetQuery(params: SheetParams): string {
   const query = new URLSearchParams();
+  if (params.poKlyucham === true) {
+    query.set('ps', '2');
+    query.set('s', sostavStroka(params.sostav ?? []));
+    if (params.level !== null) query.set('l', params.level);
+    query.set('seed', params.seed);
+    query.set('t', params.theme);
+    query.set('c', params.layout === 'double' ? '2' : '1');
+    if (params.kind !== '') query.set('k', params.kind);
+    if (params.date !== '') query.set('d', params.date);
+    if (params.variants > 1) query.set('v', String(params.variants));
+    if (params.theory === true) query.set('th', '1');
+    if ((params.examples ?? 0) > 0) query.set('pr', String(params.examples));
+    if (params.uchitel !== undefined) query.set('uch', params.uchitel);
+    if (params.qr === true) query.set('qr', '1');
+    const z = Object.entries(params.zameny ?? {}).filter(([, k]) => k > 0);
+    if (z.length > 0) query.set('z', z.map(([pos, k]) => `${pos}:${k}`).join(','));
+    return query.toString();
+  }
   query.set('s', params.skills.join(','));
   query.set('n', String(params.count));
   if (params.level !== null) {
@@ -95,6 +135,7 @@ export function sheetQuery(params: SheetParams): string {
 
 /** Параметры из адреса. Чего в адресе нет — берётся по умолчанию. */
 export function parseSheetQuery(query: URLSearchParams): SheetParams {
+  if (query.get('ps') === '2') return parseKlyuchi(query);
   const skills = (query.get('s') ?? '')
     .split(',')
     .map((item) => item.trim())
@@ -115,6 +156,46 @@ export function parseSheetQuery(query: URLSearchParams): SheetParams {
     theory: query.get('th') === '1',
     examples: ['1', '2'].includes(query.get('pr') ?? '') ? Number(query.get('pr')) : 0,
     ...perFrom(query.get('pp')),
+  };
+}
+
+/** Адрес общего генератора (ps=2). Наборы проверяет лист: здесь движка нет. */
+function parseKlyuchi(query: URLSearchParams): SheetParams {
+  const sostav = sostavIzSlotov(
+    slotySostava(razobratSostav(query.get('s') ?? '', true, NABOR, () => true)),
+  );
+  const level = query.get('l');
+  const zameny: Record<string, number> = {};
+  for (const item of (query.get('z') ?? '').split(',')) {
+    const [pos = '', k = ''] = item.split(':');
+    if (new RegExp(`^\\d+\\.${NABOR.source}_\\d{1,2}$`).test(pos) && Number(k) > 0) {
+      zameny[pos] = Math.min(50, Number(k));
+    }
+  }
+  return {
+    skills: [...new Set(sostav.map((x) => x.id))],
+    count: sostav.reduce((a, x) => a + x.n, 0),
+    level: level === 'lucky' || level === 'unlucky' ? level : null,
+    seed: (query.get('seed') ?? 'variant').slice(0, 24),
+    theme: query.get('t') === 'print' ? 'print' : 'color',
+    layout: query.get('c') === '2' ? 'double' : 'single',
+    kind: (query.get('k') ?? '').slice(0, 60),
+    date: /^\d{4}-\d{2}-\d{2}$/.test(query.get('d') ?? '') ? (query.get('d') as string) : '',
+    variants: variantsFrom(query.get('v')),
+    theory: query.get('th') === '1',
+    examples: ['1', '2'].includes(query.get('pr') ?? '') ? Number(query.get('pr')) : 0,
+    poKlyucham: true,
+    sostav,
+    zameny,
+    ...(query.has('uch')
+      ? {
+          uchitel: (query.get('uch') ?? '')
+            .replace(/[\u0000-\u001f<>]/g, '')
+            .trim()
+            .slice(0, 40),
+        }
+      : {}),
+    ...(query.get('qr') === '1' ? { qr: true } : {}),
   };
 }
 

@@ -147,7 +147,7 @@ export function A4Preview({
   label = 'Во весь экран',
 }: {
   children: ReactNode;
-  /** Класс листа: оформление задач внутри (gv2-a4, z11-a4). */
+  /** Класс листа: оформление задач внутри (gv2-a4). */
   className?: string;
   label?: string;
 }) {
