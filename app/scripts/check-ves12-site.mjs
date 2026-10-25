@@ -138,7 +138,7 @@ async function cardLook(page, selector, index) {
   check(rest.arrow === 0, `окно: стрелка видна без наведения (opacity ${rest.arrow})`);
   const allChecks = await page.locator('.subtopic-modal .subtopic-card__check').count();
   check(allChecks === 0, `окно: галочек на карточках ${allChecks}`);
-  check((await page.locator('.subtopic-modal .ves-card').count()) === 2, 'окно: нет двух карточек «Весь раздел»');
+  check((await page.locator('.subtopic-modal .ves-card').count()) === 3, 'окно: нет трёх карточек «Весь раздел»');
   check((await page.locator('.subtopic-modal .ves-or').count()) === 1, 'окно: нет заголовка «Или выберите тип функции»');
   await shot(page, 'okno-pokoy-1440');
   await page.locator('a.subtopic-card').nth(1).hover();
@@ -160,7 +160,7 @@ async function cardLook(page, selector, index) {
 
   /* Страница №12 и меню «Все разделы». */
   await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
-  check((await page.locator('.ves-razdel--page .ves-card').count()) === 2, 'страница №12: нет блока «Весь раздел»');
+  check((await page.locator('.ves-razdel--page .ves-card').count()) === 3, 'страница №12: нет блока «Весь раздел»');
   await page.locator('.ves-razdel--page').scrollIntoViewIfNeeded();
   await shot(page, 'stranica-12-1440');
   await page.goto(BASE + '/zadaniya/12/linear/', { waitUntil: 'networkidle' });
@@ -170,7 +170,7 @@ async function cardLook(page, selector, index) {
     await page.waitForSelector('.razdely-menu');
     const first = await page.$eval('.razdely-menu__list > li', (li) => li.classList.contains('razdely-menu__ves'));
     check(first, 'меню «Все разделы»: «Весь раздел» не первым пунктом');
-    check((await page.locator('.razdely-menu .ves-card').count()) === 2, 'меню: нет двух карточек «Весь раздел»');
+    check((await page.locator('.razdely-menu .ves-card').count()) === 3, 'меню: нет трёх карточек «Весь раздел»');
     await page.waitForTimeout(400);
     await shot(page, 'menu-1440');
   }
