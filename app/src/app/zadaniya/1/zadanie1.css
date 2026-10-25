@@ -590,6 +590,12 @@ a.z1-gde__chip:hover {
   line-height: var(--lh-caption);
   white-space: nowrap;
 }
+@media (max-width: 359.98px) {
+  .z1-urok__ed {
+    min-width: 0;
+    white-space: normal;
+  }
+}
 .z1-urok__polnye {
   display: grid;
   gap: var(--space-1);

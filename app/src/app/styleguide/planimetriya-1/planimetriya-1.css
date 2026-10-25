@@ -101,6 +101,12 @@
   justify-items: start;
   gap: var(--space-3);
 }
+.pl1__stress .btn {
+  max-width: 100%;
+  height: auto;
+  min-height: var(--h-control);
+  white-space: normal;
+}
 
 .pl1__itog {
   max-width: 100%;

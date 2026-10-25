@@ -1837,6 +1837,7 @@ a.tutor-card:hover {
 
 .qth-card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr auto;
   align-content: start;
   gap: var(--space-3);
@@ -1865,6 +1866,7 @@ a.tutor-card:hover {
 }
 .qth-card__text {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   min-width: 0;
 }
