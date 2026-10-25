@@ -40,6 +40,10 @@ export interface GenSegmentV2<S> {
   label: string;
   note?: string;
   options: readonly { id: string; label: string }[];
+  /** Выбор учителя переживает смену пресета: пресет это поле больше не меняет. */
+  rucnoe?: true;
+  /** Предупреждение под полем при таком состоянии; null — нет. */
+  preduprezhdenie?: (s: S) => string | null;
 }
 
 /** Поле «Дополнительно»: текст, число из списка или сегменты. */
