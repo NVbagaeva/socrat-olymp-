@@ -6,10 +6,17 @@ import { listSlova, type Zadanie } from '@/content/veroyatnost';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
-import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import type { Pool } from '@/lib/veroyatnost/pool';
-import { parseSheet4Query, sheet4Spec } from '@/lib/veroyatnost/sheet4';
+import {
+  parseSheet4Query,
+  parseZapros45,
+  sheet4Spec,
+  sheet4SpecKlyuchi,
+  sheet4Vse,
+} from '@/lib/veroyatnost/sheet4';
 
 declare global {
   interface Window {
@@ -24,8 +31,11 @@ export interface PechatVeroyatnostiProps {
   pool: Pool;
   /** Номер задания: по нему берутся слова листа — название, колонтитул, разделы ответов. */
   zadanie: Zadanie;
-  /** Лист с ответами: те же задачи и таблица «Ответы» в конце. */
-  withAnswers: boolean;
+  /**
+   * Лист: ученика, с ответами (те же задачи и таблица «Ответы» в конце)
+   * или «Всё одним файлом» — лист ученика, затем лист с ответами.
+   */
+  vid: 'uchenik' | 'uchitel' | 'vse';
 }
 
 /** Спецификация набора из готового документа шаблона. */
@@ -46,10 +56,13 @@ function specJson(html: string): string {
  * повторно — лист будет тем же. Одна страница на оба задания: разница
  * только в банке и в словах листа.
  */
-export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyatnostiProps) {
+export function PechatVeroyatnosti({ pool, zadanie, vid }: PechatVeroyatnostiProps) {
+  const withAnswers = vid !== 'uchenik';
   const list = listSlova(zadanie);
   const query = useSearchParams();
   const params = parseSheet4Query(query);
+  /* Адрес общего генератора (ps=2): задачи по ключам позиций. */
+  const zapros = parseZapros45(query, zadanie);
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   /* Предупреждение комплекта перед печатью (lib/komplekt.ts). */
@@ -70,31 +83,48 @@ export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyat
      кладётся в документ только после загрузки модуля, иначе он
      запустился бы сам, до готовности. */
   useEffect(() => {
-    if (params.skills.length === 0) {
+    if (zapros === null && params.skills.length === 0) {
       return;
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const built = sheet4Spec(pool, params, withAnswers, list);
-    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
-    const kit = checkKitSheet(query, zadanie === 5 ? '5' : '4', withAnswers ? 'teacher' : 'student', built);
-    /* Место для решения (sp=) — только у листа ученика. */
-    const printed = sheetWithSpace(built, spaceOfQuery(query), !withAnswers, () =>
-      sheet4Spec(pool, params, true, list),
-    );
-    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
-    import('@/lib/sheet/paginate.js').then(() => {
-      if (alive) {
-        setWarning(kit.warning);
-        setSpec(specJson(html));
-      }
+    /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+    const qr =
+      zapros?.qr === true
+        ? qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+        : Promise.resolve(undefined);
+    void qr.then((svg) => {
+      if (!alive) return;
+      const shapka = {
+        ...(zapros?.uchitel === undefined ? {} : { uchitel: zapros.uchitel }),
+        ...(svg === undefined ? {} : { qr: svg }),
+      };
+      const list4 = (answers: boolean) =>
+        zapros === null
+          ? sheet4Spec(pool, params, answers, list)
+          : sheet4SpecKlyuchi(pool, zapros, answers, list, shapka);
+      const built = list4(withAnswers);
+      /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+      const kit = checkKitSheet(query, zadanie === 5 ? '5' : '4', withAnswers ? 'teacher' : 'student', built);
+      /* Место для решения (sp=) — только у листа ученика. */
+      const printed =
+        vid === 'vse'
+          ? vseWithSpace(sheet4Vse(list4(false), built), spaceOfQuery(query))
+          : sheetWithSpace(built, spaceOfQuery(query), !withAnswers, () => list4(true));
+      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
+      import('@/lib/sheet/paginate.js').then(() => {
+        if (alive) {
+          setWarning(kit.warning);
+          setSpec(specJson(html));
+        }
+      });
     });
     return () => {
       alive = false;
     };
     /* Параметры приходят из адреса и за жизнь страницы не меняются. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [withAnswers, query.toString()]);
+  }, [vid, query.toString()]);
 
   /* Спецификация в документе — запускаем набор и ждём отчёт. */
   useEffect(() => {

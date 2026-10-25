@@ -3,7 +3,7 @@
 
    Запуск: pnpm test:generator
 
-   Проверяет логику и подключение разделов (№11, №1, №2, №8, №9, №6, №7, №10, №12) без браузера:
+   Проверяет логику и подключение разделов (№11, №1, №2, №4, №5, №8, №9, №6, №7, №10, №12) без браузера:
      1. Каждый пресет даёт годное состояние: есть задачи, не больше
         ограничений конфига, темы есть в выбранном источнике.
      2. Один seed — один лист: лист собирается дважды одинаково, листы
@@ -321,6 +321,74 @@ const RAZDELY = [
       }[z],
       oldIds: z === '6' ? 'P01,P01,P04' : 'P01,P01,P11',
       urok: z === '10' ? 'm=u&kod=K7Q2AB&u=1' : `kod=K${z}Q2AB&u=1`,
+    };
+  }),
+  /* №4, №5: сюжеты банка по методам, лист — sheet4.ts на общем шаблоне
+     lib/sheet. Предпросмотр — по данным «Собрать вариант» (маршрут
+     /variant/dannye/z0N.json), лист — по банку тренажёра: задачи одни. */
+  ...[4, 5].map((z) => {
+    const P = requireSrc('lib/veroyatnost/pool.ts');
+    const S = requireSrc('lib/veroyatnost/sheet4.ts');
+    const C = requireSrc('lib/veroyatnost/generator45.ts');
+    const E = requireSrc('lib/veroyatnost/engine45.ts');
+    const { navykiZadaniya } = requireSrc('components/tasks/veroyatnost/metody.ts');
+    const { syuzhetyPrototipov } = requireSrc('components/tasks/veroyatnost/navyki.tsx');
+    const { listSlova } = requireSrc('content/veroyatnost.ts');
+    const { dannyeVeroyatnosti } = requireSrc('lib/variant/data/z04.ts');
+    const { nabratFormuly } = requireSrc('lib/generator/nabrat.ts');
+    const pool = z === 4 ? P.bank4Pool() : P.bank5Pool();
+    const list = listSlova(z);
+    const base = `/zadaniya/${z}`;
+    const config = C.config45(z, base, navykiZadaniya(z), syuzhetyPrototipov(pool));
+    const dannye = dannyeVeroyatnosti(z);
+    const engine = E.engine45(config, base, z, async () => dannye);
+    const parse = (q) => {
+      const zk = S.parseZapros45(q, z);
+      return zk !== null
+        ? { ...zk, poKlyucham: true }
+        : { ...S.parseSheet4Query(q), poKlyucham: false };
+    };
+    const spec = (p, vid, qr) =>
+      p.poKlyucham
+        ? S.sheet4SpecKlyuchi(pool, p, vid === 'uchitel', list, {
+            ...(p.uchitel === undefined ? {} : { uchitel: p.uchitel }),
+            ...(p.qr && qr !== undefined ? { qr } : {}),
+          })
+        : S.sheet4Spec(pool, p, vid === 'uchitel', list);
+    return {
+      name: `№${z}`,
+      config,
+      engine,
+      params: (st) => parse(new URLSearchParams(engine.hrefs(st).student.split('?')[1])),
+      parse,
+      query: (p) =>
+        new URLSearchParams({
+          s: p.skills.join(','),
+          n: String(p.count),
+          seed: p.seed,
+          t: p.theme,
+          c: p.layout === 'double' ? '2' : '1',
+          v: String(p.variants),
+        }).toString(),
+      sobrat: (p) => {
+        const sp = spec(p, 'uchenik');
+        return {
+          model: sp,
+          poVariantam: (sp.variants ?? [{ blocks: sp.blocks }]).map((v) =>
+            v.blocks.flatMap((b) => b.tasks).map((t) => ({ id: t.id, questionHtml: t.questionHtml })),
+          ),
+        };
+      },
+      spec: (p, _list, vid, qr) => spec(p, vid, qr),
+      /* Условие листа — формулы заглушками; предпросмотр набирает их сам. */
+      vopros: (t) => nabratFormuly(t.questionHtml),
+      primery: () => [],
+      badge: 'z45-sheet-badge',
+      ist: null,
+      ramka: false,
+      old: `s=${z === 4 ? 'p4-01,p4-07' : 'p5-01,p5-06'}&n=3&seed=K7Q2&t=color&c=1&v=3`,
+      oldIds: z === 4 ? 'p4-01,p4-01,p4-07' : 'p5-01,p5-01,p5-06',
+      urok: null,
     };
   }),
   /* №12: генератор по всем типам и вкладка подтемы — один адаптер, разные конфиги. */
