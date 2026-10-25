@@ -2,6 +2,14 @@
 
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  AktivnyeFiltry,
+  KnopkaFiltrov,
+  Pole,
+  Segm,
+  Zvyozdy,
+  type AktivnyyFiltr,
+} from '@/components/filtry/chasti';
 import { GEN_UI } from '@/content/generatorUi';
 import {
   changeLevelAt,
@@ -54,7 +62,7 @@ import {
 import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { GenIcon } from './GenIcons';
 import { GenKits } from './GenKits';
-import { GenPopover, GenToast, GenSheet as GenWindow } from './GenOverlay';
+import { GenToast, GenSheet as GenWindow } from './GenOverlay';
 import { GenSheetView, type TaskAction } from './GenSheetView';
 import './generator.css';
 
@@ -153,7 +161,6 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   const [toast, setToast] = useState<string | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [overlay, setOverlay] = useState<Overlay>(null);
-  const [srcPop, setSrcPop] = useState(false);
   const [pick, setPick] = useState(false);
   const [dopOpen, setDopOpen] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
@@ -332,8 +339,17 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     changePlan(relayout(config, st.plan, levels), { levels });
   }
 
+  /* Фильтры по умолчанию: источник и уровни первого пресета. */
+  const nachalo = useMemo(() => defaultState(config), [config]);
+  const sameLevels = (a: readonly Level[], b: readonly Level[]) =>
+    a.length === b.length && a.every((l) => b.includes(l));
+
+  /** Снять фильтр сложности: уровни по умолчанию. */
+  function levelsDefault() {
+    changePlan(relayout(config, st.plan, nachalo.levels), { levels: nachalo.levels });
+  }
+
   function setSource(source: SourceId) {
-    setSrcPop(false);
     changePlan(filterBySource(config, st.plan, source), { source });
   }
 
@@ -482,43 +498,42 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     </button>
   );
 
-  const levelButtons = (cards: boolean) =>
-    config.levels.map(({ level, words }) => (
-      <button
-        key={level}
-        type="button"
-        className={cards ? 'gen-lvcard' : undefined}
-        aria-pressed={st.levels.includes(level)}
-        title={words}
-        onClick={() => toggleLevel(level)}
-      >
-        {cards ? (
-          <>
-            <b>{stars(level)}</b>
-            <small>{words}</small>
-          </>
-        ) : (
-          stars(level)
-        )}
-      </button>
-    ));
+  const sourceDefault = nachalo.source;
+  /** Источник в переключателе: коротко, с большой буквы; пояснение — подсказкой. */
+  const sourceOptions = config.sources.map((s) => ({
+    id: s.id,
+    title: s.short.charAt(0).toUpperCase() + s.short.slice(1),
+    hint: s.note,
+  }));
+  const sourceField = (
+    <Segm label={GEN_UI.istochnik} value={st.source} options={sourceOptions} onPick={setSource} />
+  );
+  const levelsField = (
+    <Zvyozdy
+      urovni={config.levels.map(({ level, words }) => ({ uroven: level, words }))}
+      vybrany={st.levels}
+      onToggle={(l) => toggleLevel(l as Level)}
+    />
+  );
 
-  const sourceRadios = config.sources.map((s) => (
-    <button
-      key={s.id}
-      type="button"
-      role="radio"
-      className="gen-radio"
-      aria-checked={st.source === s.id}
-      onClick={() => setSource(s.id)}
-    >
-      <i aria-hidden="true" />
-      <span>
-        <b>{s.title}</b>
-        <small>{s.note}</small>
-      </span>
-    </button>
-  ));
+  /* Активные фильтры: что изменено против начального — чипами с крестиком. */
+  const aktivnye: AktivnyyFiltr[] = [];
+  if (config.sources.length > 1 && st.source !== sourceDefault && source !== undefined)
+    aktivnye.push({
+      id: 'source',
+      label: source.title,
+      onSnyat: () => setSource(sourceDefault),
+    });
+  if (hasLevels && !sameLevels(st.levels, nachalo.levels))
+    aktivnye.push({ id: 'levels', label: levelsText(st.levels), onSnyat: levelsDefault });
+  const sbrosit = () => {
+    const levels = hasLevels ? nachalo.levels : st.levels;
+    changePlan(relayout(config, filterBySource(config, st.plan, sourceDefault), levels), {
+      source: sourceDefault,
+      levels,
+    });
+  };
+  const aktivnyeBlock = <AktivnyeFiltry items={aktivnye} onSbrosit={sbrosit} />;
 
   const overlayTask =
     overlay !== null && (overlay.kind === 'task' || overlay.kind === 'level') ? overlay.pos : null;
@@ -684,43 +699,13 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
           {config.sources.length > 1 ? (
             <div className="gen-fld">
               <span className="gen-label">{GEN_UI.istochnik}</span>
-              <div className="gen-popwrap">
-                <button
-                  type="button"
-                  className="gen-dd"
-                  aria-haspopup="menu"
-                  aria-expanded={srcPop}
-                  onClick={() => setSrcPop((v) => !v)}
-                >
-                  {source?.title}
-                  <GenIcon name="chevron" />
-                </button>
-                {srcPop ? (
-                  <GenPopover onClose={() => setSrcPop(false)}>
-                    {config.sources.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        role="menuitemradio"
-                        aria-checked={st.source === s.id}
-                        className="gen-pop__opt"
-                        onClick={() => setSource(s.id)}
-                      >
-                        <b>{s.title}</b>
-                        <small>{s.note}</small>
-                      </button>
-                    ))}
-                  </GenPopover>
-                ) : null}
-              </div>
+              {sourceField}
             </div>
           ) : null}
           {hasLevels ? (
             <div className="gen-fld">
               <span className="gen-label">{GEN_UI.slozhnost}</span>
-              <div className="gen-stars" role="group" aria-label={GEN_UI.slozhnost}>
-                {levelButtons(false)}
-              </div>
+              {levelsField}
             </div>
           ) : null}
           <div className="gen-fld">
@@ -742,24 +727,12 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
           {go}
         </div>
         <div className="gen-strip__chips">
-          <button type="button" className="is-main" onClick={() => setOverlay({ kind: 'filters' })}>
-            <GenIcon name="filter" />
-            {GEN_UI.filtry}
-          </button>
-          {config.sources.length > 1 ? (
-            <button type="button" onClick={() => setOverlay({ kind: 'filters' })}>
-              {source?.title}
-            </button>
-          ) : null}
-          {hasLevels ? (
-            <button type="button" onClick={() => setOverlay({ kind: 'filters' })}>
-              {levelsText(st.levels)}
-            </button>
-          ) : null}
+          <KnopkaFiltrov n={aktivnye.length} onClick={() => setOverlay({ kind: 'filters' })} />
           <button type="button" onClick={() => setOverlay({ kind: 'filters' })}>
             {variantsText(st.variants)}
           </button>
         </div>
+        {aktivnye.length > 0 ? <div className="gen-strip__active">{aktivnyeBlock}</div> : null}
       </div>
 
       <div className="gen-cols">
@@ -1058,23 +1031,28 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
             </button>
           }
         >
-          {config.sources.length > 1 ? (
-            <section className="gen-sec">
-              <h3>{GEN_UI.istochnik}</h3>
-              <div className="gen-radios" role="radiogroup" aria-label={GEN_UI.istochnik}>
-                {sourceRadios}
-              </div>
-            </section>
-          ) : null}
-          {hasLevels ? (
-            <section className="gen-sec">
-              <h3>{GEN_UI.slozhnost}</h3>
-              <div className="gen-lvcards" role="group" aria-label={GEN_UI.slozhnost}>
-                {levelButtons(true)}
-              </div>
-              <p className="gen-hint">{GEN_UI.levelsHint}</p>
-            </section>
-          ) : null}
+          <div className="gen-flt">
+            {config.sources.length > 1 ? (
+              <Pole label={GEN_UI.istochnik}>
+                {sourceField}
+                <p className="gen-hint">{source?.note}</p>
+              </Pole>
+            ) : null}
+            {hasLevels ? (
+              <Pole label={GEN_UI.slozhnost}>
+                {levelsField}
+                <ul className="gen-flt__lv">
+                  {config.levels.map(({ level, words }) => (
+                    <li key={level}>
+                      <b>{stars(level)}</b> {words}
+                    </li>
+                  ))}
+                </ul>
+                <p className="gen-hint">{GEN_UI.levelsHint}</p>
+              </Pole>
+            ) : null}
+            {aktivnyeBlock}
+          </div>
           <section className="gen-sec">
             <h3>{GEN_UI.variantov}</h3>
             <Stepper

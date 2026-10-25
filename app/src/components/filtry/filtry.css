@@ -220,7 +220,7 @@
 }
 .flt-segm .flt-stars {
   letter-spacing: 1px;
-  color: var(--color-star-off);
+  color: var(--color-text-tertiary);
 }
 .flt-segm .flt-stars[aria-pressed='true'] {
   color: var(--color-star);
@@ -345,6 +345,35 @@
 
 /* ── Телефон ────────────────────────────────────────────────────── */
 
+/* «Фильтры (N)»: видна только в телефонных строках (.flt-phone, у
+   генератора — .gen-strip__chips). */
+.flt-phone__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font: inherit;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.flt-phone__n {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: var(--fs-caption);
+  line-height: 20px;
+  text-align: center;
+}
+
 .flt-phone {
   display: none;
 }
@@ -361,32 +390,6 @@
     align-items: center;
     gap: var(--space-2);
     min-width: 0;
-  }
-  .flt-phone__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    flex: none;
-    min-height: 44px;
-    padding: 0 var(--space-3);
-    border: 1px solid var(--color-primary);
-    border-radius: 999px;
-    background: var(--color-surface);
-    font: inherit;
-    font-size: var(--fs-label);
-    font-weight: 600;
-    color: var(--color-primary);
-    cursor: pointer;
-  }
-  .flt-phone__n {
-    min-width: 20px;
-    padding: 0 6px;
-    border-radius: 999px;
-    background: var(--color-primary);
-    color: var(--color-text-inverse);
-    font-size: var(--fs-caption);
-    line-height: 20px;
-    text-align: center;
   }
   .flt-phone__chips {
     flex: 1 1 auto;

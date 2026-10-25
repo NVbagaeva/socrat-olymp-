@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui';
 import { GenIcon } from '@/components/generator/GenIcons';
@@ -36,8 +36,10 @@ import type {
   FiltrTema,
   Statistika,
   TrenazherConfig,
+  Uroven,
   ZadachaRef,
 } from '@/lib/trenazher/types';
+import { AktivnyeFiltry, KnopkaFiltrov, Pole, Segm, Zvyozdy } from './chasti';
 import './filtry.css';
 
 export interface FiltrPanelProps {
@@ -132,28 +134,12 @@ export function FiltrPanel({
       ) : null}
       {config.urovni.length > 0 ? (
         <Pole label={FILTRY.slozhnost}>
-          <div className="flt-segm" role="group" aria-label={FILTRY.slozhnost}>
-            <button
-              type="button"
-              aria-pressed={f.urovni.length === 0}
-              onClick={() => onChange(izmenit(f, { urovni: [] }))}
-            >
-              {FILTRY.slozhnostVse}
-            </button>
-            {config.urovni.map((u) => (
-              <button
-                key={u.uroven}
-                type="button"
-                className="flt-stars"
-                aria-pressed={f.urovni.includes(u.uroven)}
-                aria-label={`${u.words}: ${'★'.repeat(u.uroven)}`}
-                title={u.words}
-                onClick={() => onChange(pereklyuchitUroven(f, u.uroven))}
-              >
-                {'★'.repeat(u.uroven)}
-              </button>
-            ))}
-          </div>
+          <Zvyozdy
+            urovni={config.urovni}
+            vybrany={f.urovni}
+            onToggle={(u) => onChange(pereklyuchitUroven(f, u as Uroven))}
+            onLyubaya={() => onChange(izmenit(f, { urovni: [] }))}
+          />
         </Pole>
       ) : null}
       <Pole label={FILTRY.skolko}>
@@ -195,30 +181,16 @@ export function FiltrPanel({
     </div>
   );
 
-  const aktivnyeBlock =
-    active.length === 0 ? null : (
-      <div className="flt-active">
-        <ul className="flt-active__list">
-          {active.map((a) => (
-            <li key={a.pole}>
-              <span className="flt-active__chip">
-                {a.label}
-                <button
-                  type="button"
-                  aria-label={FILTRY.snyat(a.label)}
-                  onClick={() => onChange(snyat(f, a.pole))}
-                >
-                  <GenIcon name="x" />
-                </button>
-              </span>
-            </li>
-          ))}
-        </ul>
-        <button type="button" className="flt-link" onClick={() => onChange(sbrositVse(f))}>
-          {FILTRY.sbrosit}
-        </button>
-      </div>
-    );
+  const aktivnyeBlock = (
+    <AktivnyeFiltry
+      items={active.map((a) => ({
+        id: a.pole,
+        label: a.label,
+        onSnyat: () => onChange(snyat(f, a.pole)),
+      }))}
+      onSbrosit={() => onChange(sbrositVse(f))}
+    />
+  );
 
   const pusto =
     found.length > 0 ? null : (
@@ -280,11 +252,7 @@ export function FiltrPanel({
 
       {/* Телефон: чипы типов в одну строку и «Фильтры (N)». */}
       <div className="flt-phone">
-        <button type="button" className="flt-phone__btn" onClick={() => setSheet(true)}>
-          <GenIcon name="filter" />
-          {FILTRY.filtry}
-          {skolkoAktivnyh(f) > 0 ? <span className="flt-phone__n">{skolkoAktivnyh(f)}</span> : null}
-        </button>
+        <KnopkaFiltrov n={skolkoAktivnyh(f)} onClick={() => setSheet(true)} />
         <div className="flt-phone__chips">{chipsTipov}</div>
       </div>
 
@@ -346,43 +314,6 @@ export function FiltrPanel({
         </GenSheet>
       ) : null}
     </section>
-  );
-}
-
-function Pole({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="flt-pole">
-      <p className="flt-label">{label}</p>
-      {children}
-    </div>
-  );
-}
-
-function Segm<T extends string | number>({
-  label,
-  value,
-  options,
-  onPick,
-}: {
-  label: string;
-  value: T;
-  options: { id: T; title: string; hint?: string }[];
-  onPick: (id: T) => void;
-}) {
-  return (
-    <div className="flt-segm" role="group" aria-label={label}>
-      {options.map((o) => (
-        <button
-          key={String(o.id)}
-          type="button"
-          aria-pressed={value === o.id}
-          title={o.hint}
-          onClick={() => onPick(o.id)}
-        >
-          {o.title}
-        </button>
-      ))}
-    </div>
   );
 }
 
