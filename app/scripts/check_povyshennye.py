@@ -222,6 +222,51 @@ def z06_sigma(p):
     return sp.sqrt(z06_disp(p))
 
 
+def z04_chastota(p):
+    return sp.Abs(R(p["p"]) - sp.Rational(p["k"], p["N"]))
+
+
+def z04_sootech(p):
+    # Перебор: участник на следующем месте — любой из оставшихся n − 1.
+    ostalnye = [1] * (p["m"] - 1) + [0] * (p["n"] - p["m"])
+    return sp.Rational(sum(ostalnye), len(ostalnye))
+
+
+def z04_bez_defekta(p):
+    return 1 - sp.Rational(p["k"], p["N"])
+
+
+def z05_misheni(p):
+    a1, a2, b1, b2 = (R(p[k]) for k in ("a1", "a2", "b1", "b2"))
+    dva = lambda x, y: 1 - (1 - x) * (1 - y)  # noqa: E731
+    return sp.Max(dva(a1, a2) * b1, a1 * dva(b1, b2))
+
+
+def z05_tsvet(p):
+    n1 = p["a1"] + p["b1"]
+    n2 = p["a2"] + p["b2"]
+    return sp.Rational(p["a1"] * p["a2"] + p["b1"] * p["b2"], n1 * n2)
+
+
+def z05_oba(p):
+    # P(A) + P(B) − P(A ∪ B), P(A ∪ B) = 1 − P(ни в одном).
+    AB = sp.symbols("AB")
+    return sp.solve(sp.Eq(2 * R(p["p"]) - AB, 1 - R(p["r"])), AB)[0]
+
+
+def z06_strahovka(p):
+    c = sp.symbols("c")
+    pr = sp.Rational(p["pn"], p["pden"])
+    E = c * (1 - pr) + (c - R(p["V"])) * pr
+    return sp.solve(sp.Eq(E, R(p["R"])), c)[0]
+
+
+def z06_promezhutok(p):
+    lo = (lambda x: x > p["a"]) if p["zl"] == "lt" else (lambda x: x >= p["a"])
+    hi = (lambda x: x < p["b"]) if p["zr"] == "lt" else (lambda x: x <= p["b"])
+    return sum(sp.Rational(n, p["den"]) for x_, n in zip(p["xs"], p["ps"]) if lo(x_) and hi(x_))
+
+
 def z07_log_stepeni(p):
     a = sp.Integer(p["a"])
     e = p["k"] * x + p["b"]
@@ -343,6 +388,15 @@ SCHET.update({
     "z05.kost-uslovie": z05_kost,
     "z06.dispersiya": z06_disp,
     "z06.otklonenie": z06_sigma,
+    "z04.chastota": z04_chastota,
+    "z04.sootechestvennik": z04_sootech,
+    "z04.bez-defekta": z04_bez_defekta,
+    "z04.ne-podtekaet": z04_bez_defekta,
+    "z05.dve-misheni": z05_misheni,
+    "z05.odin-tsvet": z05_tsvet,
+    "z05.oba-zakonchilis": z05_oba,
+    "z06.strahovka-tys": z06_strahovka,
+    "z06.promezhutok": z06_promezhutok,
     "z07.log-stepeni": z07_log_stepeni,
     "z07.log-postoronniy": z07_postoronniy,
     "z08.log-pryamoy": z08_pryamoy,

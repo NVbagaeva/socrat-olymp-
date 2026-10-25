@@ -23,7 +23,7 @@ import { Ris6 } from '@/components/tasks/zadanie6/Ris6';
 import { Uslovie6 } from '@/components/tasks/zadanie6/Uslovie6';
 import { dataUrl } from '@/lib/dataUrl';
 import { kodNaSayte, prototype } from '@/lib/zadanie6/prototypes';
-import type { Ris, Solved, Uslovie } from '@/lib/zadanie6/types';
+import type { Prototype, Ris, Solved, Uslovie } from '@/lib/zadanie6/types';
 import type { Zadacha6Variant } from '../../data/z06';
 import type { Fallback, Figure, SectionAdapter, SectionModule, VariantTask } from '../../types';
 import {
@@ -134,9 +134,13 @@ function candidate(z: Zadacha6Variant): C6 | null {
   };
 }
 
-export function build(c: C6): VariantTask {
+/**
+ * `proto` — прототип не из банка раздела (шаблоны «Вариантов повышенной
+ * сложности», lib/zadanie6/prototypes/povyshennye.ts); по умолчанию — по id.
+ */
+export function build(c: C6, proto?: Prototype): VariantTask {
   const { z } = c;
-  const p = prototype(z.prototypeId);
+  const p = proto ?? prototype(z.prototypeId);
   const ris = p.ris(z.params);
   const s = p.solve(z.params);
   const figure = otdelnyy(ris) ? figureOf(ris) : null;
