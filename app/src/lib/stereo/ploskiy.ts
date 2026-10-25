@@ -7,7 +7,13 @@
  * Чистый TypeScript, без DOM: SVG строкой, как у lib/solid. Цвета —
  * те же переменные, что у объёмного чертежа: выделенный треугольник
  * на обеих панелях одного цвета.
+ *
+ * Темы — как у объёмного чертежа (lib/solid/render.ts, Tema): «pechat»
+ * — строгий чертёж, «ekran» — «стекло»: треугольник оранжевый, вершины
+ * пустыми кружками, имена вершин курсивом KaTeX, как на объёмном.
  */
+
+import type { Tema } from '../solid/render';
 
 export interface PloskiyTreugolnik {
   /** Вершины: прямой угол — у первой. «C», «A₂» пишутся «C», «A2». */
@@ -37,10 +43,18 @@ function esc(text: string): string {
 }
 
 /** Имя вершины: буква и индекс — индекс нижним регистром, как на объёмном чертеже. */
-function imya(name: string, x: number, y: number, anchor: string, weight = 700): string {
+function imya(name: string, x: number, y: number, anchor: string, ekran: boolean): string {
   const m = /^([A-Za-zА-Яа-я])(\d*)$/.exec(name);
   const base = m?.[1] ?? name;
   const sub = m?.[2] ?? '';
+  if (ekran) {
+    return (
+      `<text x="${px(x)}" y="${px(y)}" text-anchor="${anchor}" dominant-baseline="middle" ` +
+      `font-family="KaTeX_Math, 'Times New Roman', serif" font-style="italic" font-size="19" fill="var(--color-text)">` +
+      `${esc(base)}${sub === '' ? '' : `<tspan font-family="KaTeX_Main, 'Times New Roman', serif" font-style="normal" font-size="13" dy="4.5">${esc(sub)}</tspan>`}</text>`
+    );
+  }
+  const weight = 700;
   return (
     `<text x="${px(x)}" y="${px(y)}" text-anchor="${anchor}" dominant-baseline="middle" ` +
     `font-family="var(--font-sans)" font-size="${FONT}" font-weight="${weight}" fill="var(--color-text)">` +
@@ -77,7 +91,8 @@ export function vershinyNaEkrane(t: PloskiyTreugolnik): [P, P, P] {
 }
 
 /** SVG рабочего треугольника. */
-export function renderPloskiy(t: PloskiyTreugolnik): string {
+export function renderPloskiy(t: PloskiyTreugolnik, tema: Tema = 'pechat'): string {
+  const ekran = tema === 'ekran';
   const [C, A, B] = vershinyNaEkrane(t);
   const width = Math.max(A[0], C[0]) + PAD;
   const height = C[1] + PAD;
@@ -86,12 +101,16 @@ export function renderPloskiy(t: PloskiyTreugolnik): string {
 
   parts.push(
     `<path d="M${px(C[0])} ${px(C[1])}L${px(A[0])} ${px(A[1])}L${px(B[0])} ${px(B[1])}Z" ` +
-      `fill="var(--graph-accent)" fill-opacity="0.14" stroke="none"/>`,
+      (ekran
+        ? `class="solid-vydel" fill="var(--solid-vydel)" fill-opacity="0.26" stroke="none"/>`
+        : `fill="var(--graph-accent)" fill-opacity="0.14" stroke="none"/>`),
   );
   const side = (p: P, q: P, hl: boolean) =>
     parts.push(
       `<path d="M${px(p[0])} ${px(p[1])}L${px(q[0])} ${px(q[1])}" fill="none" ` +
-        `stroke="${hl ? 'var(--graph-accent)' : 'var(--solid-edge)'}" stroke-width="${hl ? 3.4 : 2}" stroke-linecap="round"/>`,
+        (ekran
+          ? `stroke="var(--solid-vydel)" stroke-width="${hl ? 3.6 : 2.4}" stroke-linecap="round"/>`
+          : `stroke="${hl ? 'var(--graph-accent)' : 'var(--solid-edge)'}" stroke-width="${hl ? 3.4 : 2}" stroke-linecap="round"/>`),
     );
   side(C, A, t.iskomoe === 'a');
   side(C, B, t.iskomoe === 'b');
@@ -101,7 +120,7 @@ export function renderPloskiy(t: PloskiyTreugolnik): string {
   const m = 13;
   parts.push(
     `<path d="M${px(C[0] + m)} ${px(C[1])}L${px(C[0] + m)} ${px(C[1] - m)}L${px(C[0])} ${px(C[1] - m)}" ` +
-      `fill="none" stroke="var(--graph-accent)" stroke-width="1.6"/>`,
+      `fill="none" stroke="${ekran ? 'var(--solid-steklo-rebro)' : 'var(--graph-accent)'}" stroke-width="${ekran ? 2 : 1.6}"/>`,
   );
 
   /* Искомый острый угол — дуга у вершины. */
@@ -145,7 +164,12 @@ export function renderPloskiy(t: PloskiyTreugolnik): string {
   /* Имена вершин: от центра наружу. */
   const name = (p: P, text: string) => {
     const d = norm(sub2(p, center));
-    parts.push(imya(text, p[0] + d[0] * 17, p[1] + d[1] * 17, 'middle'));
+    parts.push(imya(text, p[0] + d[0] * 19, p[1] + d[1] * 19, 'middle', ekran));
+    if (ekran) {
+      parts.push(
+        `<circle class="solid-vershina" cx="${px(p[0])}" cy="${px(p[1])}" r="4.6" fill="var(--color-surface)" stroke="var(--solid-steklo-rebro)" stroke-width="2"/>`,
+      );
+    }
   };
   name(C, t.vershiny[0]);
   name(A, t.vershiny[1]);
@@ -153,7 +177,7 @@ export function renderPloskiy(t: PloskiyTreugolnik): string {
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px(width)} ${px(height)}" ` +
-    `width="${px(width)}" height="${px(height)}" role="img" aria-label="${esc(t.alt)}" class="ploskiy">` +
+    `width="${px(width)}" height="${px(height)}" role="img" aria-label="${esc(t.alt)}" class="${ekran ? 'ploskiy ploskiy--ekran' : 'ploskiy'}">` +
     `<title>${esc(t.alt)}</title>${parts.join('')}</svg>`
   );
 }

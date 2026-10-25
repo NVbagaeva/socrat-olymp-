@@ -44,6 +44,8 @@ const SECRET = requireSrc('lib/stereo/opornye3/secret.ts');
 const R = requireSrc('lib/solid/render.ts');
 const PL = requireSrc('lib/stereo/ploskiy.ts');
 const ST = requireSrc('lib/stereo/stupenka.ts');
+const PK = requireSrc('lib/stereo/opornye3/piktogrammy.ts');
+const BL = requireSrc('lib/stereo/opornye3/bloki.ts');
 
 const near = (a, b) => Math.abs(a - b) < 1e-6;
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
@@ -143,6 +145,42 @@ for (const name of ['LOVUSHKA_ODNA', 'LOVUSHKA_GLAZ']) {
   check(![...l.neverno, ...l.verno].some((t) => /\*\*/.test(t)), `${name}: сырой markdown`);
 }
 
+/* Рисунки ловушек: «В чём ошибка?» и «Как правильно?» — движком, без
+   наложения подписей, в обеих темах. На «Как правильно?» прямые углы
+   отмечены только там, где они действительно прямые. */
+for (const [name, risunki] of [['LOVUSHKA_ODNA', G2.risunkiLovushkiOdna()], ['LOVUSHKA_GLAZ', G2.risunkiLovushkiGlaz()]]) {
+  for (const [kol, m] of Object.entries(risunki)) {
+    for (const tema of ['pechat', 'ekran']) risunokOk(m, `${name}, ${kol}, тема ${tema}`, { tema });
+    (m.angles ?? []).forEach((a) => {
+      const dot = a.u[0] * a.v[0] + a.u[1] * a.v[1] + a.u[2] * a.v[2];
+      check(Math.abs(dot) < 1e-9, `${name}, ${kol}: отмечен прямым непрямой угол`);
+    });
+  }
+}
+
+/* Пиктограммы блоков и декор: модель есть у всех блоков, кроме «Считаю удобно». */
+for (const b of BL.BLOKI_3) {
+  const m = PK.piktogrammaBloka(b.id);
+  check((m === null) === (b.id === 'schet'), `пиктограмма блока ${b.no}: ${m === null ? 'нет' : 'лишняя'}`);
+  if (m !== null) {
+    const svg = R.renderSolid(m, { tema: 'ekran', bezPodpisey: true });
+    check(svg.includes('solid--ekran') && !svg.includes('<text'), `пиктограмма блока ${b.no}: не «стекло» или с подписями`);
+  }
+}
+check(R.renderSolid(PK.dekorBlokov(), { tema: 'ekran', bezPodpisey: true }).startsWith('<svg'), 'декор списка блоков не рисуется');
+
+/* Темы движка: «печать» без градиента и с выделением не плотнее 0,15. */
+for (const p of G2.primeryGlavy2()) {
+  const n = p.shagiChertezha.length;
+  const pechat = R.renderSolid(p.model, { shag: n });
+  const ekran = R.renderSolid(p.model, { shag: n, tema: 'ekran' });
+  check(!pechat.includes('Gradient') && !pechat.includes('solid--ekran'), `тема «печать», ${p.id}: градиент или экранный класс`);
+  [...pechat.matchAll(/fill="var\(--graph-accent\)" fill-opacity="([\d.]+)"/g)].forEach((m) =>
+    check(Number(m[1]) <= 0.15, `тема «печать», ${p.id}: выделение плотнее 0,15 (${m[1]})`),
+  );
+  check(ekran.includes('linearGradient') && ekran.includes('solid-vershina'), `тема «экран», ${p.id}: нет градиента или кружков вершин`);
+}
+
 /* ── 2. Лайфхаки на случайных примерах ─────────────────────────── */
 
 let seed = 12345;
@@ -238,8 +276,22 @@ zadachi.forEach((z, i) => {
     check(!SECRET.choiceMatches(other, sealed.seal), `${where}: отпечаток принимает неверный выбор`);
   }
   check(!json.includes('"otvet"') && !json.includes('pereschet'), `${where}: в закрытой задаче поле ответа`);
+  check(!json.includes('rabochaya') && !json.includes('pryamoy'), `${where}: рабочий треугольник открыто`);
+  check(typeof z.kratko === 'string' && z.kratko.length > 0, `${where}: нет короткого названия`);
+  textOk(z.kratko, where);
+  check(z.rabochaya !== undefined, `${where}: нет рабочего треугольника для подсказки`);
+  if (z.rabochaya !== undefined) {
+    const [a, b, c] = z.rabochaya.points;
+    const o = z.rabochaya.pryamoy;
+    const others = [a, b, c].filter((q) => dist(q, o) > 1e-9);
+    check(others.length === 2 && near(angle(others[0], o, others[1]), Math.PI / 2), `${where}: угол рабочего треугольника не прямой`);
+  }
   const shagi = JSON.parse(SECRET.openText(sealed.podskazki, z.id));
   check(Array.isArray(shagi) && shagi.length === z.podskazka.length, `${where}: подсказки не раскрываются`);
+  shagi.forEach((s, k) => {
+    check(s.n === z.podskazka[k].n && s.correct === z.podskazka[k].verno, `${where}: шаг подсказки ${k + 1} раскрылся не тем`);
+    check((s.rabochaya === null) === (s.n < 2), `${where}: шаг подсказки ${k + 1} — чертёж не по шагу`);
+  });
   const razbor = JSON.parse(SECRET.openText(sealed.razbor, z.id));
   check(typeof razbor.uchenikHtml === 'string' && razbor.uchenikHtml.length > 0, `${where}: разбор не раскрывается`);
 });

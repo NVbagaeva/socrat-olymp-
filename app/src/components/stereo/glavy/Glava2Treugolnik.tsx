@@ -1,6 +1,9 @@
-import katex from 'katex';
-import { Abzacy, RamkaLayfhak, RamkaLovushka, RamkaOpredelenie, RamkaPrimer, RamkaVazhno } from '@/components/teoriya/Ramki';
+import type { ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
+import { renderSolid } from '@/lib/solid/render';
+import { polygonStart, pyramid, regularPolygon } from '@/lib/solid/figures';
+import type { Model } from '@/lib/solid/model';
+import type { Vec3 } from '@/lib/solid/vec';
 import {
   ALGORITM,
   LAYFHAK_45,
@@ -13,6 +16,8 @@ import {
   primerStupenka,
   primerTangens,
   primerUgol45,
+  risunkiLovushkiGlaz,
+  risunkiLovushkiOdna,
   VAZHNO_LYUBAYA,
   VAZHNO_SDVIGI,
   type PrimerG2,
@@ -20,176 +25,320 @@ import {
 } from '@/lib/stereo/glava2';
 import { renderPloskiy } from '@/lib/stereo/ploskiy';
 import { Chertezh3d } from '../Chertezh3d';
+import {
+  Abzacy,
+  Formula,
+  KartaAlgoritm,
+  KartaReshenie,
+  KartaZadacha,
+  RamkaIdeya,
+  RamkaLayfhak,
+  RamkaLovushka,
+  RamkaOtvet,
+  RamkaVazhno,
+  RazdelGlavy,
+} from '../metodika/Bloki';
+import { IkKub, IkStrelka, IkTreugolnik } from '../metodika/Ikonki';
 
-const NOMERA = ['①', '②', '③', '④', '⑤'] as const;
+/**
+ * Разделы главы — подпункты «Содержания» (TeoriyaStereo) и счётчик
+ * «k / n» со стрелками в шапке каждого раздела.
+ */
+export const RAZDELY_GLAVY_2: readonly { id: string; title: string }[] = [
+  { id: 'g2-algoritm', title: 'Главный алгоритм' },
+  { id: 'g2-perpendikulyar', title: 'Прямая, перпендикулярная плоскости' },
+  { id: 'g2-pryamoy-ugol', title: 'Как обосновать прямой угол' },
+  { id: 'g2-rasstoyanie', title: 'Расстояние между вершинами' },
+  { id: 'g2-ugol', title: 'Угол и тангенс' },
+];
 
-function Formula({ tex }: { tex: string }) {
-  return (
-    <span
-      className="ramka__formula"
-      dangerouslySetInnerHTML={{
-        __html: katex.renderToString(tex, { throwOnError: false, displayMode: true }),
-      }}
-    />
-  );
+/** «C2» → «C_2»: имя вершины для KaTeX. */
+function tex(name: string): string {
+  return name.replace(/^([A-Za-z])(\d+)$/, '$1_$2');
+}
+
+/** Рабочий треугольник по вершинам: прямой угол — в середине имени. */
+function imyaTreugolnika(v: readonly [string, string, string]): string {
+  return `${tex(v[1])}${tex(v[0])}${tex(v[2])}`;
 }
 
 /**
- * Двухпанельный пример: слева тело с выделенным рабочим треугольником
- * (живой чертёж — поворачивается, шаги по кнопкам), справа тот же
- * треугольник плоско, с данными. Под ними — решение по шагам главного
- * алгоритма ①–⑤.
+ * Двухпанельный пример: «1. Объёмный чертёж» (живой, «стекло», шаги
+ * по кнопкам) → мостик-стрелка → «2. Плоский треугольник» того же
+ * оранжевого цвета. Ниже — «Задача», «Решение» по шагам алгоритма
+ * ①–⑤ и «Ответ».
  */
 export function DvePaneli({ primer }: { primer: PrimerG2 }) {
   return (
-    <RamkaPrimer
-      title={primer.title}
-      uslovie={primer.uslovie}
-      shagi={primer.shagi.map((shag) => ({
-        label: `${NOMERA[shag.n - 1]} ${ALGORITM[shag.n - 1]?.title ?? ''}`,
-        paras: shag.paras,
-        ...(shag.formuly === undefined ? {} : { formuly: shag.formuly }),
-      }))}
-      otvet={primer.otvet}
-    >
-      <div className="stereo-dve">
-        <div className="stereo-dve__telo">
-          <p className="stereo-dve__podpis">В пространстве</p>
-          <Chertezh3d model={primer.model} uslovie={primer.uslovie} shagi={primer.shagiChertezha} />
-        </div>
-        <figure className="stereo-dve__ploskiy">
-          <p className="stereo-dve__podpis">Рабочий треугольник отдельно</p>
-          <div
-            className="stereo-dve__svg"
-            dangerouslySetInnerHTML={{ __html: renderPloskiy(primer.ploskiy) }}
+    <div className="o3-primer">
+      <h5 className="o3-primer__title">
+        <Tex text={primer.title} zagolovok />
+      </h5>
+      <div className="o3-dve">
+        <section className="o3-panel" aria-label="Объёмный чертёж">
+          <header className="o3-panel__head">
+            <IkKub className="o3-panel__ik" />
+            <div>
+              <p className="o3-panel__t">1. Объёмный чертёж</p>
+              <p className="o3-panel__pod">
+                Цветом выделен рабочий треугольник. Чертёж можно повернуть и пройти по шагам.
+              </p>
+            </div>
+          </header>
+          <Chertezh3d
+            model={primer.model}
+            uslovie={primer.uslovie}
+            shagi={primer.shagiChertezha}
+            tema="ekran"
+            sKontsa
+            className="o3-panel__ris"
           />
-        </figure>
+        </section>
+        <div className="o3-most" aria-hidden="true">
+          <IkStrelka className="o3-most__strelka" />
+          <p className="o3-most__t">
+            <Tex text={`Выносим треугольник $${imyaTreugolnika(primer.ploskiy.vershiny)}$ отдельно`} />
+          </p>
+        </div>
+        <section className="o3-panel" aria-label="Плоский треугольник">
+          <header className="o3-panel__head">
+            <IkTreugolnik className="o3-panel__ik o3-panel__ik--vydel" />
+            <div>
+              <p className="o3-panel__t">2. Плоский треугольник</p>
+              <p className="o3-panel__pod">
+                Тот же треугольник отдельно — в натуральную величину, с данными.
+              </p>
+            </div>
+          </header>
+          <figure
+            className="o3-panel__ploskiy"
+            dangerouslySetInnerHTML={{ __html: renderPloskiy(primer.ploskiy, 'ekran') }}
+          />
+        </section>
       </div>
-    </RamkaPrimer>
+      <KartaZadacha uslovie={primer.uslovie} />
+      <KartaReshenie
+        nomera={primer.shagi.map((s) => s.n)}
+        shagi={primer.shagi.map((shag) => ({
+          title: ALGORITM[shag.n - 1]?.title ?? '',
+          telo: (
+            <div className="o3-stepper__telo">
+              {(shag.formuly ?? []).map((f) => (
+                <Formula tex={f} key={f} />
+              ))}
+              <Abzacy paras={shag.paras} />
+            </div>
+          ),
+        }))}
+      />
+      <RamkaOtvet otvet={primer.otvet} />
+    </div>
   );
 }
 
-/** Задача к рамке «Важно», «Лайфхак»: условие, решение, ответ. */
-function ZadachaRamki({ z }: { z: ZadachaRamki }) {
+/** Задача внутри «Важно» и «Лайфхака»: условие, решение, ответ. */
+function ZadachaVRamke({ z }: { z: ZadachaRamki }) {
   return (
-    <div className="stereo-zr">
-      <p className="ramka__p stereo-zr__uslovie">
+    <div className="o3-zr">
+      <p className="o3-p o3-zr__uslovie">
         <b>Задача.</b> <Tex text={z.uslovie} />
       </p>
       <Abzacy paras={z.reshenie} />
       {(z.formuly ?? []).map((f) => (
         <Formula tex={f} key={f} />
       ))}
-      <p className="ramka__p stereo-zr__otvet">
+      <p className="o3-p o3-zr__otvet">
         <Tex text={z.otvet} />
       </p>
     </div>
   );
 }
 
+/** Чертёж «стекло» без живого поворота: рисунки ловушек и декор. */
+export function RisSteklo({ model, className }: { model: Model; className?: string }) {
+  return (
+    <div
+      className={className === undefined ? 'o3-ris' : `o3-ris ${className}`}
+      dangerouslySetInnerHTML={{ __html: renderSolid(model, { tema: 'ekran' }) }}
+    />
+  );
+}
+
+/** Декор шапки главы: «стеклянная» пирамида с выделенным треугольником, без подписей. */
+function dekorPiramida(): Model {
+  const body = pyramid(regularPolygon(4, 10, 0, polygonStart(4)), [0, 0, 17], ['', '', '', ''], '');
+  const A = body.vertices[0] as Vec3;
+  const C = body.vertices[2] as Vec3;
+  const S = body.vertices[4] as Vec3;
+  const O: Vec3 = [0, 0, 0];
+  return {
+    alt: 'Правильная пирамида',
+    bodies: [body],
+    sections: [{ points: [S, O, A] }],
+    lines: [
+      { a: S, b: O },
+      { a: A, b: C },
+    ],
+  };
+}
+
+/** Раздел главы по номеру: соседи для стрелок. */
+function razdel(k: number) {
+  const r = RAZDELY_GLAVY_2[k - 1];
+  const prev = RAZDELY_GLAVY_2[k - 2];
+  const next = RAZDELY_GLAVY_2[k];
+  if (r === undefined) throw new Error(`Нет раздела ${k}`);
+  return {
+    id: r.id,
+    title: r.title,
+    k,
+    n: RAZDELY_GLAVY_2.length,
+    ...(prev === undefined ? {} : { prev }),
+    ...(next === undefined ? {} : { next }),
+  };
+}
+
+/** «Определение», «Признак»: синяя полоса слева, как у теории сайта. */
+function KartaOpredelenie({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="o3-ramka o3-ramka--opredelenie">
+      <p className="o3-ramka__plashka">{title}</p>
+      {children}
+    </section>
+  );
+}
+
 /**
  * Глава 2 теории №3 «Главный приём: пространство → плоский
- * треугольник». Умения: читать и рисовать. Разделы — подзаголовками,
- * у каждого «Важно», «Лайфхака» и «Ловушки» есть своя задача.
+ * треугольник». Умения: читать и рисовать. Пять разделов со
+ * счётчиком; у каждого «Важно», «Лайфхака» и «Ловушки» своя задача.
  */
 export function Glava2Treugolnik() {
+  const lovOdna = risunkiLovushkiOdna();
+  const lovGlaz = risunkiLovushkiGlaz();
   return (
-    <div className="stereo-glava">
-      <p className="stereo-umenie">
-        Умения: <b>читать</b> чертёж и <b>рисовать</b> — выносить плоскую фигуру отдельно.
-      </p>
-      <Abzacy
-        paras={[
-          'Почти любая задача №3 на длину или угол решается одинаково: в пространстве находим плоский прямоугольный треугольник, где искомое — сторона или угол, и решаем его как в планиметрии. Главное — увидеть этот треугольник и честно объяснить, почему угол в нём прямой.',
-        ]}
-      />
+    <div className="o3-glava">
+      <div className="o3-glava__lead">
+        <p className="o3-glava__lead-t">
+          Умения: <b>читать</b> чертёж и <b>рисовать</b> — выносить плоскую фигуру отдельно.
+        </p>
+        <div className="o3-glava__dekor" aria-hidden="true">
+          <RisSteklo model={dekorPiramida()} />
+        </div>
+      </div>
 
-      <RamkaOpredelenie title="Главный алгоритм">
-        <ol className="ramka__algoritm">
-          {ALGORITM.map((shag) => (
-            <li key={shag.title}>
-              <b>{shag.title}.</b> {shag.text}
-            </li>
-          ))}
-        </ol>
-      </RamkaOpredelenie>
-      <Abzacy
-        paras={[
-          'Посмотрите, как это работает на диагонали параллелепипеда. Слева — тело, на нём цветом выделен рабочий треугольник; чертёж можно повернуть и пройти по шагам. Справа — тот же треугольник отдельно.',
-        ]}
-      />
-      <DvePaneli primer={primerDiagonal()} />
-      <RamkaLayfhak title="Лайфхак: корень на промежуточном шаге не нужен">
-        <ZadachaRamki z={LAYFHAK_KVADRAT} />
-      </RamkaLayfhak>
-
-      <h3 className="stereo-glava__h">Прямая, перпендикулярная плоскости</h3>
-      <RamkaOpredelenie title="Определение">
+      <RazdelGlavy {...razdel(1)}>
+        <RamkaIdeya>
+          <Abzacy
+            paras={[
+              'Почти любая задача №3 на длину или угол решается одинаково: в пространстве находим плоский прямоугольный треугольник, где искомое — сторона или угол, и решаем его как в планиметрии. Главное — увидеть этот треугольник и честно объяснить, почему угол в нём прямой.',
+            ]}
+          />
+        </RamkaIdeya>
+        <KartaAlgoritm
+          title="Главный алгоритм"
+          shagi={ALGORITM.map((shag) => ({
+            title: shag.title,
+            telo: <p className="o3-stepper__text">{shag.text}</p>,
+          }))}
+        />
         <Abzacy
           paras={[
-            'Прямая перпендикулярна плоскости, если она перпендикулярна любой прямой, лежащей в этой плоскости.',
+            'Посмотрите, как это работает на диагонали параллелепипеда. Слева — тело, на нём цветом выделен рабочий треугольник; чертёж можно повернуть и пройти по шагам. Справа — тот же треугольник отдельно.',
           ]}
         />
-      </RamkaOpredelenie>
-      <RamkaOpredelenie title="Признак">
+        <DvePaneli primer={primerDiagonal()} />
+        <RamkaLayfhak title="Лайфхак: корень на промежуточном шаге не нужен">
+          <ZadachaVRamke z={LAYFHAK_KVADRAT} />
+        </RamkaLayfhak>
+      </RazdelGlavy>
+
+      <RazdelGlavy {...razdel(2)}>
+        <KartaOpredelenie title="Определение">
+          <Abzacy
+            paras={[
+              'Прямая перпендикулярна плоскости, если она перпендикулярна любой прямой, лежащей в этой плоскости.',
+            ]}
+          />
+        </KartaOpredelenie>
+        <KartaOpredelenie title="Признак">
+          <Abzacy
+            paras={[
+              'Если прямая перпендикулярна двум пересекающимся прямым плоскости, то она перпендикулярна и самой плоскости.',
+              'Признаком доказывают, что прямая перпендикулярна плоскости. Определением пользуются в обратную сторону: раз прямая перпендикулярна плоскости, то она перпендикулярна любой прямой в ней — так и получается прямой угол рабочего треугольника.',
+            ]}
+          />
+        </KartaOpredelenie>
+        <RamkaLovushka
+          title={LOVUSHKA_ODNA.title}
+          neverno={LOVUSHKA_ODNA.neverno}
+          verno={LOVUSHKA_ODNA.verno}
+          risunokNeverno={<RisSteklo model={lovOdna.neverno} />}
+          risunokVerno={<RisSteklo model={lovOdna.verno} />}
+        />
+        <RamkaVazhno title="Важно: «любой» — значит и не проходящей через основание">
+          <ZadachaVRamke z={VAZHNO_LYUBAYA} />
+        </RamkaVazhno>
+      </RazdelGlavy>
+
+      <RazdelGlavy {...razdel(3)}>
         <Abzacy
           paras={[
-            'Если прямая перпендикулярна двум пересекающимся прямым плоскости, то она перпендикулярна и самой плоскости.',
-            'Признаком доказывают, что прямая перпендикулярна плоскости. Определением пользуются в обратную сторону: раз прямая перпендикулярна плоскости, то она перпендикулярна любой прямой в ней — так и получается прямой угол рабочего треугольника.',
+            'В задачах №3 прямой угол почти всегда приходит из одного из трёх источников. Запись одна и та же: прямая перпендикулярна плоскости, а другая прямая в этой плоскости лежит.',
           ]}
         />
-      </RamkaOpredelenie>
-      <RamkaVazhno title="Важно: «любой» — значит и не проходящей через основание">
-        <ZadachaRamki z={VAZHNO_LYUBAYA} />
-      </RamkaVazhno>
-      <RamkaLovushka title={LOVUSHKA_ODNA.title} neverno={LOVUSHKA_ODNA.neverno} verno={LOVUSHKA_ODNA.verno} />
+        <ul className="o3-istochniki">
+          <li>
+            <b>Ребро перпендикулярно грани.</b>{' '}
+            <Tex text="В параллелепипеде и призме боковое ребро перпендикулярно основанию: $AA_1 \perp (ABC)$." />
+          </li>
+          <li>
+            <b>Высота пирамиды перпендикулярна основанию.</b>{' '}
+            <Tex text="У правильной пирамиды она падает в центр основания $O$: $SO \perp (ABC)$." />
+          </li>
+          <li>
+            <b>Ось цилиндра и конуса перпендикулярна основанию.</b>{' '}
+            <Tex text="Высота, радиус и образующая конуса — прямоугольный треугольник." />
+          </li>
+        </ul>
+        <Formula tex="AA_2 \perp (A_2D_2C_2),\ A_2C_2 \subset (A_2D_2C_2)\ \Rightarrow\ AA_2 \perp A_2C_2" />
+        <DvePaneli primer={primerPiramida()} />
+      </RazdelGlavy>
 
-      <h3 className="stereo-glava__h">Как обосновать прямой угол</h3>
-      <Abzacy
-        paras={[
-          'В задачах №3 прямой угол почти всегда приходит из одного из трёх источников. Запись одна и та же: прямая перпендикулярна плоскости, а другая прямая в этой плоскости лежит.',
-        ]}
-      />
-      <ul className="stereo-istochniki">
-        <li>
-          <b>Ребро перпендикулярно грани.</b> <Tex text="В параллелепипеде и призме боковое ребро перпендикулярно основанию: $AA_1 \perp (ABC)$." />
-        </li>
-        <li>
-          <b>Высота пирамиды перпендикулярна основанию.</b> <Tex text="У правильной пирамиды она падает в центр основания $O$: $SO \perp (ABC)$." />
-        </li>
-        <li>
-          <b>Ось цилиндра и конуса перпендикулярна основанию.</b> <Tex text="Высота, радиус и образующая конуса — прямоугольный треугольник." />
-        </li>
-      </ul>
-      <Formula tex="AA_2 \perp (A_2D_2C_2),\ A_2C_2 \subset (A_2D_2C_2)\ \Rightarrow\ AA_2 \perp A_2C_2" />
-      <DvePaneli primer={primerPiramida()} />
+      <RazdelGlavy {...razdel(4)}>
+        <Abzacy
+          paras={[
+            'В многограннике, у которого все двугранные углы прямые, рёбра идут только в трёх направлениях. Чтобы найти расстояние между двумя вершинами, опускаем перпендикуляр на плоскость грани и получаем рабочий треугольник.',
+          ]}
+        />
+        <DvePaneli primer={primerStupenka()} />
+        <RamkaLovushka
+          title={LOVUSHKA_GLAZ.title}
+          neverno={LOVUSHKA_GLAZ.neverno}
+          verno={LOVUSHKA_GLAZ.verno}
+          risunokNeverno={<RisSteklo model={lovGlaz.neverno} />}
+          risunokVerno={<RisSteklo model={lovGlaz.verno} />}
+        />
+        <RamkaVazhno title="Важно: квадрат расстояния — сумма квадратов трёх сдвигов">
+          <ZadachaVRamke z={VAZHNO_SDVIGI} />
+        </RamkaVazhno>
+        <RamkaLayfhak title="Лайфхак: «тройки» в пространстве">
+          <ZadachaVRamke z={LAYFHAK_TROYKI} />
+        </RamkaLayfhak>
+      </RazdelGlavy>
 
-      <h3 className="stereo-glava__h">Расстояние между вершинами</h3>
-      <Abzacy
-        paras={[
-          'В многограннике, у которого все двугранные углы прямые, рёбра идут только в трёх направлениях. Чтобы найти расстояние между двумя вершинами, опускаем перпендикуляр на плоскость грани и получаем рабочий треугольник.',
-        ]}
-      />
-      <DvePaneli primer={primerStupenka()} />
-      <RamkaVazhno title="Важно: квадрат расстояния — сумма квадратов трёх сдвигов">
-        <ZadachaRamki z={VAZHNO_SDVIGI} />
-      </RamkaVazhno>
-      <RamkaLayfhak title="Лайфхак: «тройки» в пространстве">
-        <ZadachaRamki z={LAYFHAK_TROYKI} />
-      </RamkaLayfhak>
-      <RamkaLovushka title={LOVUSHKA_GLAZ.title} neverno={LOVUSHKA_GLAZ.neverno} verno={LOVUSHKA_GLAZ.verno} />
-
-      <h3 className="stereo-glava__h">Угол и тангенс</h3>
-      <Abzacy
-        paras={[
-          'Угол ищем в том же рабочем треугольнике: сначала прямой угол, потом нужный острый. В ответ идут градусы или тангенс — отношение противолежащего катета к прилежащему.',
-        ]}
-      />
-      <DvePaneli primer={primerUgol45()} />
-      <RamkaLayfhak title="Лайфхак: равные катеты — это 45°">
-        <ZadachaRamki z={LAYFHAK_45} />
-      </RamkaLayfhak>
-      <DvePaneli primer={primerTangens()} />
+      <RazdelGlavy {...razdel(5)}>
+        <Abzacy
+          paras={[
+            'Угол ищем в том же рабочем треугольнике: сначала прямой угол, потом нужный острый. В ответ идут градусы или тангенс — отношение противолежащего катета к прилежащему.',
+          ]}
+        />
+        <DvePaneli primer={primerUgol45()} />
+        <RamkaLayfhak title="Лайфхак: равные катеты — это 45°">
+          <ZadachaVRamke z={LAYFHAK_45} />
+        </RamkaLayfhak>
+        <DvePaneli primer={primerTangens()} />
+      </RazdelGlavy>
     </div>
   );
 }

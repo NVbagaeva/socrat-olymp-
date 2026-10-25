@@ -9,12 +9,25 @@ import katex from 'katex';
 import { typeset } from '../../tex';
 import type { Model } from '../../solid/model';
 import type { Vec3 } from '../../solid/vec';
-import type { ShagHtml } from '../../zadanie11/prep/seal';
 import { renderPloskiy } from '../ploskiy';
 import { sealAnswer, sealChoice, sealText } from './secret';
 import type { Uroven, Vid, ZadachaOp3 } from './tipy';
 
-export type { ShagHtml };
+/**
+ * Шаг подсказки в закрытом виде: шаг главного алгоритма, вопрос с
+ * вариантами и вывод. Рабочий треугольник — для чертежа шага: на
+ * шаге ② он выделен, с ③ отмечен прямой угол (рисует браузер тем же
+ * движком по открытой модели задачи).
+ */
+export interface ShagPodskazkiHtml {
+  n: 1 | 2 | 3 | 4 | 5;
+  title: string;
+  voprosHtml: string;
+  options: string[];
+  correct: number;
+  vyvodHtml: string;
+  rabochaya: { points: [Vec3, Vec3, Vec3]; pryamoy: Vec3 } | null;
+}
 
 export interface ZadachaOp3Sealed {
   id: string;
@@ -24,6 +37,8 @@ export interface ZadachaOp3Sealed {
   vid: Vid;
   uslovieHtml: string;
   model: Model;
+  /** Короткое название — плитка итога блока. */
+  kratkoHtml: string;
   /** nazhmi: цели касания и подписи кнопок. */
   celi: { id: string; points: Vec3[]; labelHtml: string }[] | null;
   /** vybor: варианты, набранные KaTeX. */
@@ -31,7 +46,7 @@ export interface ZadachaOp3Sealed {
   /** ploskiy: плоские чертежи SVG. */
   ploskie: string[] | null;
   seal: string;
-  /** JSON ShagHtml[], закрыт. */
+  /** JSON ShagPodskazkiHtml[], закрыт. */
   podskazki: string;
   /** JSON RazborOp3, закрыт. */
   razbor: string;
@@ -45,7 +60,7 @@ export interface RazborOp3 {
 }
 
 const NOMERA = ['①', '②', '③', '④', '⑤'];
-const SHAGI = ['Узнать тело', 'Найти рабочую фигуру', 'Обосновать прямой угол', 'Нарисовать отдельно', 'Посчитать удобно'];
+export const SHAGI = ['Узнать тело', 'Найти рабочую фигуру', 'Обосновать прямой угол', 'Нарисовать отдельно', 'Посчитать удобно'];
 
 function formula(tex: string): string {
   return katex.renderToString(tex, { throwOnError: false, displayMode: true });
@@ -53,11 +68,17 @@ function formula(tex: string): string {
 
 export function sealZadacha(z: ZadachaOp3, no: number): ZadachaOp3Sealed {
   const seal = z.vid === 'chislo' ? sealAnswer(Number(z.otvet.replace(',', '.'))) : sealChoice(z.otvet);
-  const shagi: ShagHtml[] = z.podskazka.map((s) => ({
-    question: `<span class="o3-shag">${NOMERA[s.n - 1]} ${SHAGI[s.n - 1]}</span> ${typeset(s.vopros)}`,
+  const shagi: ShagPodskazkiHtml[] = z.podskazka.map((s) => ({
+    n: s.n,
+    title: SHAGI[s.n - 1] ?? '',
+    voprosHtml: typeset(s.vopros),
     options: s.varianty.map((v) => typeset(v)),
     correct: s.verno,
-    comment: typeset(s.vyvod),
+    vyvodHtml: typeset(s.vyvod),
+    rabochaya:
+      z.rabochaya === undefined || s.n < 2
+        ? null
+        : { points: [...z.rabochaya.points], pryamoy: z.rabochaya.pryamoy },
   }));
   const otvetText =
     z.vid === 'chislo'
@@ -89,10 +110,11 @@ export function sealZadacha(z: ZadachaOp3, no: number): ZadachaOp3Sealed {
     istochnik: z.istochnik,
     vid: z.vid,
     uslovieHtml: typeset(z.uslovie),
+    kratkoHtml: typeset(z.kratko),
     model: z.model,
     celi: z.celi === undefined ? null : z.celi.map((c) => ({ id: c.id, points: c.points, labelHtml: typeset(c.label) })),
     varianty: z.varianty === undefined ? null : z.varianty.map((v) => typeset(v)),
-    ploskie: z.ploskie === undefined ? null : z.ploskie.map((p) => renderPloskiy(p)),
+    ploskie: z.ploskie === undefined ? null : z.ploskie.map((p) => renderPloskiy(p, 'ekran')),
     seal,
     podskazki: sealText(JSON.stringify(shagi), z.id),
     razbor: sealText(JSON.stringify(razbor), z.id),

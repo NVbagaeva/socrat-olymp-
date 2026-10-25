@@ -295,10 +295,14 @@ for (const size of SIZES) {
     if (size.isMobile) {
       await page.locator('.topic-open__btn').click();
       await page.waitForTimeout(400);
+      /* У №3 «Содержание» раскрывается списком под полосой (макеты
+         этапа 1), у №15 — шторка. */
       const items = await page
-        .locator('.contents-sheet .topic-contents__item, .contents-sheet li')
+        .locator(
+          '.contents-sheet .topic-contents__item, .contents-sheet li, .vteor-raskr:not([hidden]) .contents-list > li',
+        )
         .count();
-      check(items >= glavy.length, `${size.name}: №${no}: в шторке «Содержание» ${items} пунктов`);
+      check(items >= glavy.length, `${size.name}: №${no}: в «Содержании» ${items} пунктов`);
       await page.keyboard.press('Escape');
     } else {
       const side = await page.locator('.topic-side').isVisible();

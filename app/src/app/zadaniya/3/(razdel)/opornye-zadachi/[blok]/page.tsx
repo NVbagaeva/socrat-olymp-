@@ -6,6 +6,7 @@ import { OpornyeStereoShell } from '@/components/stereo/opornye/OpornyeStereoShe
 import { STEREO, stereoTitle } from '@/content/stereo/zadaniya';
 import { BLOKI_3, blokBySlug, zadachiBloka } from '@/lib/stereo/opornye3/bloki';
 import { sealZadacha } from '@/lib/stereo/opornye3/seal';
+import { renderSolid } from '@/lib/solid/render';
 import { ZADANIYA } from '@/lib/paths';
 import '../../../../[task]/[type]/prep.css';
 
@@ -43,9 +44,13 @@ export default async function Page({ params }: { params: Params }) {
         title={found.nazvanie}
         umenie={found.umenie}
         tasks={zadachi.map((z, i) => sealZadacha(z, i + 1))}
-        risunki={zadachi.map((z) => (z.vid === 'nazhmi' ? null : <Chertezh3d key={z.id} model={z.model} />))}
+        risunki={zadachi.map((z) =>
+          z.vid === 'nazhmi' ? null : <Chertezh3d key={z.id} model={z.model} tema="ekran" />,
+        )}
+        miniatyury={zadachi.map((z) => renderSolid(z.model, { tema: 'ekran', bezPodpisey: true }))}
         listHref={`${base}/opornye-zadachi/`}
         teoriyaHref={`${base}/teoriya/#teoriya-treugolnik`}
+        trenazherHref={`${base}/trenazher/`}
       />
     </OpornyeStereoShell>
   );

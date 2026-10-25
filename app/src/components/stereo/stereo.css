@@ -504,261 +504,26 @@
   color: var(--color-text-secondary);
 }
 
-/* ── Написанные главы теории (этап 1 новой методики №3) ─────────── */
-
-.stereo-glava {
-  min-width: 0;
-}
-.stereo-glava__h {
-  margin: var(--space-8) 0 var(--space-2);
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-}
-.stereo-umenie {
-  display: inline-block;
-  margin: 0 0 var(--space-3);
-  padding: var(--space-1) var(--space-3);
-  border-radius: 999px;
-  background: var(--color-surface-info);
-  font-size: var(--fs-label);
-}
+/* Якорь прежней главы №3: ведёт в новую. */
 .stereo-yakor {
   display: block;
   position: relative;
   top: calc(-1 * var(--topic-sticky-top, 0px));
 }
-.stereo-istochniki {
-  display: grid;
-  gap: var(--space-2);
-  margin: var(--space-3) 0;
-  padding-left: 1.25em;
-}
 
-/* Двухпанельный пример: тело слева, плоский треугольник справа. */
-.stereo-dve {
-  display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  gap: var(--space-4);
-  align-items: start;
-  margin: var(--space-4) 0;
-}
-.stereo-dve__telo,
-.stereo-dve__ploskiy {
-  min-width: 0;
-  margin: 0;
-  padding: var(--space-3);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-}
-.stereo-dve__podpis {
-  margin: 0 0 var(--space-2);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.stereo-dve__svg svg {
-  display: block;
-  width: 100%;
-  max-width: 260px;
-  height: auto;
-  margin: 0 auto;
-}
-@media (max-width: 759.98px) {
-  .stereo-dve {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .stereo-dve__svg svg {
-    max-width: 200px;
-  }
-}
+/* ── Опорные задачи №3 (новая методика): оформление — metodika.css ── */
 
-/* Задача внутри рамки «Важно» и «Лайфхак». */
-.stereo-zr {
-  margin-top: var(--space-2);
-}
-.stereo-zr__otvet {
-  font-weight: 700;
-}
-
-/* ── Опорные задачи №3 (новая методика) ─────────────────────────── */
-
-.o3-karty {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: var(--space-3);
-  margin: var(--space-4) 0 0;
-  padding: 0;
-  list-style: none;
-}
-.o3-kart {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  height: 100%;
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  color: var(--color-text);
-  text-decoration: none;
-}
-a.o3-kart:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
-}
-.o3-kart.is-skoro {
-  opacity: 0.6;
-}
-.o3-kart__no {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  font-weight: 800;
-}
-.o3-kart.is-skoro .o3-kart__no {
-  background: var(--color-surface-2);
-  color: var(--color-text-secondary);
-}
-.o3-kart__text {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-.o3-kart__umenie {
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  color: var(--color-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.o3-kart__title {
-  font-weight: 700;
-}
-.o3-kart__lead,
-.o3-kart__count {
-  font-size: var(--fs-label);
-  color: var(--color-text-secondary);
-}
-.o3-kart__go {
-  align-self: center;
-  font-size: 1.5rem;
-  color: var(--color-primary);
-}
 .o3-prep__back {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   color: var(--color-primary);
 }
-.o3-ptask__no {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  font-weight: 800;
-}
-.o3-ptask__umenie {
-  margin: 0 0 var(--space-3);
-  font-size: var(--fs-label);
-  color: var(--color-text-secondary);
-}
-.o3-metki {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  margin: 0 0 var(--space-2);
-  font-size: var(--fs-caption);
-  color: var(--color-text-secondary);
-}
-.o3-metki__lv {
-  color: var(--color-star);
-  letter-spacing: 1px;
-}
-.o3-metki__src {
-  color: var(--color-text-tertiary);
-}
-.o3-card {
-  grid-template-columns: minmax(0, 1fr);
-}
-.o3-card .ptask__text {
-  justify-items: stretch;
-  text-align: left;
-}
-.o3-metki {
-  justify-content: flex-start;
-}
-.o3-card__ris {
-  min-width: 0;
-  max-width: 420px;
-}
 .o3-shag {
   display: inline-block;
   margin-right: var(--space-1);
   font-weight: 700;
   color: var(--color-primary);
-}
-
-/* «Нажми на чертеже». */
-.o3-nazhmi {
-  display: grid;
-  gap: var(--space-3);
-  width: 100%;
-  max-width: 360px;
-}
-.o3-nazhmi__ris {
-  padding: var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.o3-nazhmi__ris svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  touch-action: manipulation;
-}
-.o3-nazhmi__ris .solid-cel {
-  cursor: pointer;
-}
-.o3-nazhmi__knopki {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.o3-cel {
-  min-height: 44px;
-  padding: 0 var(--space-3);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 999px;
-  background: var(--color-surface);
-  font: inherit;
-  color: var(--color-text);
-  cursor: pointer;
-}
-.o3-cel.is-chosen {
-  border-color: var(--color-primary);
-  background: var(--color-surface-info);
-}
-.o3-cel.is-right {
-  border-color: var(--color-success);
-  background: var(--color-success-soft);
-}
-.o3-cel.is-wrong {
-  border-color: var(--color-error);
-  background: var(--color-error-soft);
 }
 
 /* «Выбери плоский чертёж». */
@@ -803,7 +568,7 @@ a.o3-kart:hover {
   border-color: var(--color-error);
 }
 
-/* Решение и итог блока. */
+/* Решение задачи. */
 .o3-reshenie {
   display: grid;
   gap: var(--space-2);
@@ -842,41 +607,4 @@ a.o3-kart:hover {
 .o3-otvet {
   margin: 0;
   font-weight: 700;
-}
-.o3-itog {
-  display: grid;
-  gap: var(--space-2);
-  margin: var(--space-3) 0;
-  padding: var(--space-4) var(--space-5);
-  border: 2px solid var(--color-success);
-  border-radius: var(--radius-xl);
-  background: var(--color-success-soft);
-}
-.o3-itog__title {
-  margin: 0;
-  font-size: var(--fs-h4);
-  font-weight: 800;
-}
-.o3-itog__text {
-  margin: 0;
-}
-.o3-itog > * {
-  min-width: 0;
-}
-.o3-itog__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.o3-itog__links .btn {
-  max-width: 100%;
-  height: auto;
-  min-height: 44px;
-  padding-block: var(--space-2);
-  white-space: normal;
-  text-align: left;
-}
-.o3-ptask .katex-display {
-  overflow-x: auto;
-  overflow-y: hidden;
 }

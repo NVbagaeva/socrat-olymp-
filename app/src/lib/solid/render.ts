@@ -525,6 +525,54 @@ export interface RenderOptions {
    */
   celi?: readonly { id: string; points: readonly Vec3[] }[];
   vybrano?: readonly string[];
+  /**
+   * Ширина полосы касания цели, единицы рисунка (по умолчанию 22).
+   * Экран пересчитывает её под масштаб рисунка: на телефоне полоса
+   * не уже 44 px.
+   */
+  celShirina?: number;
+  /**
+   * Тема оформления. «pechat» (по умолчанию) — строгий чертёж банка,
+   * листов и PDF: плоская заливка, сплошные точки вершин, выделенная
+   * фигура не плотнее 0,15. «ekran» — «стекло» новых экранов №3:
+   * полупрозрачные грани с лёгким градиентом, пустые кружки вершин,
+   * выделенная фигура оранжевой заливкой. Геометрия, видимость и
+   * подписи у тем одни и те же; на печати страницы экранная тема
+   * сама возвращается к строгой (стили .solid--ekran в stereo.css).
+   */
+  tema?: Tema;
+  /**
+   * Без подписей и точек вершин: миниатюры и пиктограммы, где буквы
+   * мельче читаемого. Геометрия та же.
+   */
+  bezPodpisey?: boolean;
+}
+
+export type Tema = 'pechat' | 'ekran';
+
+/* Экранная тема «стекло»: только цвета, прозрачность, толщины и
+   кружки вершин. Цвета — токены (tokens.css, --solid-steklo-*). */
+const STEKLO = {
+  colors: {
+    edge: 'var(--solid-steklo-rebro)',
+    glass1: 'var(--solid-steklo-1)',
+    glass2: 'var(--solid-steklo-2)',
+    vydel: 'var(--solid-vydel)',
+  },
+  width: { edge: 2.3, hidden: 1.6, vertex: 2 },
+  dash: { hidden: '6 5' },
+  opacity: { face: 0.8, sphere: 0.55, hidden: 0.6, section: 0.32, sectionHl: 0.4 },
+  /* Кружок вершины: радиус в единицах рисунка. */
+  vertex: 4.6,
+} as const;
+
+/** Короткий хеш строки: id градиента своего рисунка (на странице их много). */
+function hashId(text: string): string {
+  let h = 5381;
+  for (let i = 0; i < text.length; i += 1) {
+    h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  }
+  return (h >>> 0).toString(36);
 }
 
 function buildScene(model: Model, options: RenderOptions = {}): Scene {
@@ -985,9 +1033,14 @@ function esc(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }
 
-function strokeAttrs(s: Stroke): string {
+function strokeAttrs(s: Stroke, ekran = false): string {
   const c = THEME.colors;
   const w = THEME.width;
+  if (ekran && !s.hl && s.role === 'edge') {
+    return s.visible
+      ? `stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.edge}"`
+      : `stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.hidden}" stroke-opacity="${STEKLO.opacity.hidden}" stroke-dasharray="${STEKLO.dash.hidden}"`;
+  }
   if (s.hl) {
     return s.visible
       ? `stroke="${c.aux}" stroke-width="${w.hl}"`
@@ -1003,9 +1056,22 @@ function strokeAttrs(s: Stroke): string {
     : `stroke="${c.aux}" stroke-width="${w.auxHidden}" stroke-dasharray="${THEME.dash.aux}"`;
 }
 
-function fillAttrs(f: Fill): string {
+function fillAttrs(f: Fill, gradient?: string): string {
   const c = THEME.colors;
   const o = THEME.opacity;
+  if (gradient !== undefined) {
+    const k = STEKLO.opacity;
+    switch (f.role) {
+      case 'face':
+        return `class="solid-gran" fill="url(#${gradient})" fill-opacity="${k.face}"`;
+      case 'sphere':
+        return `class="solid-gran" fill="url(#${gradient})" fill-opacity="${k.sphere}"`;
+      case 'liquid':
+        return `fill="${c.liquid}" fill-opacity="${o.liquid}"`;
+      case 'section':
+        return `class="solid-vydel" fill="${STEKLO.colors.vydel}" fill-opacity="${f.hl ? k.sectionHl : k.section}"`;
+    }
+  }
   switch (f.role) {
     case 'face':
       return `fill="${c.face}" fill-opacity="${o.face}"`;
@@ -1040,6 +1106,10 @@ function labelMarkup(label: PlacedLabel): string {
 /** Модель → SVG. */
 export function renderSolid(model: Model, options: RenderOptions = {}): string {
   const scene = pixelScene(model, options);
+  if (options.bezPodpisey) {
+    scene.labels = [];
+    scene.dots = [];
+  }
   const labels = placeLabels(scene);
 
   const pad = THEME.geometry.pad;
@@ -1063,16 +1133,28 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   const order = (list: Stroke[], role: Role, visible: boolean) =>
     list.filter((s) => s.role === role && s.visible === visible);
 
+  const ekran = options.tema === 'ekran';
+  /* Id градиента — по самому рисунку: одинаковые рисунки делят
+     одинаковое определение, разные не путаются. */
+  const gradient = ekran ? `sg${hashId(pathOf(scene.strokes.flatMap((s) => s.points)) + model.alt)}` : undefined;
   const parts: string[] = [];
+  if (gradient !== undefined) {
+    parts.push(
+      `<defs><linearGradient id="${gradient}" x1="0" y1="0" x2="0.35" y2="1">` +
+        `<stop offset="0" style="stop-color:${STEKLO.colors.glass1}"/>` +
+        `<stop offset="1" style="stop-color:${STEKLO.colors.glass2}"/>` +
+        `</linearGradient></defs>`,
+    );
+  }
   scene.fills
     .filter((f) => f.role === 'face' || f.role === 'sphere')
     .forEach((f) =>
-      parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f)} stroke="none"/>`),
+      parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f, gradient)} stroke="none"/>`),
     );
   scene.fills
     .filter((f) => f.role === 'liquid' || f.role === 'section')
     .forEach((f) =>
-      parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f)} stroke="none"/>`),
+      parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f, gradient)} stroke="none"/>`),
     );
 
   const strokeLayers: [Role, boolean][] = [
@@ -1086,7 +1168,7 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   strokeLayers.forEach(([role, visible]) => {
     order(scene.strokes, role, visible).forEach((s) => {
       parts.push(
-        `<path d="${pathOf(s.points)}" fill="none" ${strokeAttrs(s)} stroke-linecap="round" stroke-linejoin="round"/>`,
+        `<path d="${pathOf(s.points)}" fill="none" ${strokeAttrs(s, ekran)} stroke-linecap="round" stroke-linejoin="round"/>`,
       );
     });
   });
@@ -1101,7 +1183,9 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
 
   scene.dots.forEach((p) => {
     parts.push(
-      `<circle cx="${px(p[0])}" cy="${px(p[1])}" r="${THEME.geometry.dot}" fill="${THEME.colors.edge}" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.dotStroke}"/>`,
+      ekran
+        ? `<circle class="solid-vershina" cx="${px(p[0])}" cy="${px(p[1])}" r="${STEKLO.vertex}" fill="${THEME.colors.surface}" stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.vertex}"/>`
+        : `<circle cx="${px(p[0])}" cy="${px(p[1])}" r="${THEME.geometry.dot}" fill="${THEME.colors.edge}" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.dotStroke}"/>`,
     );
   });
 
@@ -1113,20 +1197,21 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
     const closed = cel.points.length > 2;
     const d = pathOf(cel.points, closed);
     if (cel.on) {
+      const c = ekran ? STEKLO.colors.vydel : THEME.colors.aux;
       parts.push(
-        `<path d="${d}" fill="${closed ? THEME.colors.aux : 'none'}" fill-opacity="0.22" ` +
-          `stroke="${THEME.colors.aux}" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`,
+        `<path class="solid-cel-on" d="${d}" fill="${closed ? c : 'none'}" fill-opacity="${ekran ? 0.32 : 0.22}" ` +
+          `stroke="${c}" stroke-opacity="${ekran ? 0.85 : 0.55}" stroke-width="${ekran ? 5 : 7}" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`,
       );
     }
     parts.push(
       `<path class="solid-cel" data-cel="${esc(cel.id)}" d="${d}" fill="${closed ? 'transparent' : 'none'}" ` +
-        `stroke="transparent" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" pointer-events="${closed ? 'all' : 'stroke'}"/>`,
+        `stroke="transparent" stroke-width="${px(options.celShirina ?? 22)}" stroke-linecap="round" stroke-linejoin="round" pointer-events="${closed ? 'all' : 'stroke'}"/>`,
     );
   });
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${px(x0)} ${px(y0)} ${px(width)} ${px(height)}" ` +
-    `width="${px(width)}" height="${px(height)}" data-line-pt="1.35" data-line-w="${THEME.width.edge}" role="img" aria-label="${esc(model.alt)}" class="solid">` +
+    `width="${px(width)}" height="${px(height)}" data-line-pt="1.35" data-line-w="${THEME.width.edge}" role="img" aria-label="${esc(model.alt)}" class="${ekran ? 'solid solid--ekran' : 'solid'}">` +
     `<title>${esc(model.alt)}</title>${parts.join('')}</svg>`
   );
 }

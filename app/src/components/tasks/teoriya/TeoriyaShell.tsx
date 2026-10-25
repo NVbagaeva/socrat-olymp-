@@ -48,6 +48,11 @@ export interface TeoriyaShellProps {
    * №1. Не задано — ничего.
    */
   vSoderzhanii?: ReactNode;
+  /**
+   * На узком экране «Содержание» раскрывается списком под липкой
+   * полосой, а не шторкой (макеты №3). Не задано — шторка, как везде.
+   */
+  soderzhanieRaskryvashka?: boolean;
 }
 
 /** Якорь раздела на странице. */
@@ -76,6 +81,7 @@ export function TeoriyaShell({
   podZagolovkom,
   nadZagolovkom,
   vSoderzhanii,
+  soderzhanieRaskryvashka = false,
 }: TeoriyaShellProps) {
   const pervyy = razdely[0]?.id ?? '';
   const [aktivnyy, setAktivnyy] = useState(pervyy);
@@ -84,6 +90,45 @@ export function TeoriyaShell({
      экраном — тот же хук, что у теории №12. */
   const ids = useMemo(() => razdely.map((razdel) => razdel.id), [razdely]);
   const zakrepit = useActiveSection(ids, razdelId, true, setAktivnyy);
+  /* Подпункт на экране — для подсветки в содержании (у кого они есть). */
+  const [aktivnyyPodpunkt, setAktivnyyPodpunkt] = useState<string | undefined>(undefined);
+  const podIds = useMemo(
+    () => razdely.flatMap((razdel) => (razdel.podpunkty ?? []).map((sub) => sub.id)),
+    [razdely],
+  );
+  /* Подпункт на экране — последний, чей верх уже поднялся к верхней
+     трети экрана: подпункты длинные и идут подряд, «верхний из
+     видимых» (useActiveSection) застревал бы на предыдущем. */
+  const podKey = podIds.join('|');
+  useEffect(() => {
+    if (podKey === '') {
+      return undefined;
+    }
+    const order = podKey.split('|');
+    let waiting = false;
+    function scan() {
+      waiting = false;
+      const line = window.innerHeight * 0.3;
+      let current: string | undefined;
+      order.forEach((id) => {
+        const node = document.getElementById(id);
+        if (node !== null && node.getBoundingClientRect().top <= line) {
+          current = id;
+        }
+      });
+      setAktivnyyPodpunkt(current);
+    }
+    function onScroll() {
+      if (waiting) {
+        return;
+      }
+      waiting = true;
+      requestAnimationFrame(scan);
+    }
+    scan();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [podKey]);
 
   /* Прочитанные разделы — тем же правилом, что у теории №12: раздел
      засчитан, когда его нижний край поднялся выше середины экрана;
@@ -144,6 +189,7 @@ export function TeoriyaShell({
 
   /* Подпункт открытого раздела (теория №11): элемент на странице по id. */
   function vybratPodpunkt(id: string): void {
+    setAktivnyyPodpunkt(id);
     zakrepit();
     setShtorka(false);
     requestAnimationFrame(() => {
@@ -160,6 +206,7 @@ export function TeoriyaShell({
       active={aktivnyy}
       onSelect={vybrat}
       onSelectPodpunkt={vybratPodpunkt}
+      {...(aktivnyyPodpunkt === undefined ? {} : { activePodpunkt: aktivnyyPodpunkt })}
     />
   );
   const otkryto = razdely.find((razdel) => razdel.id === aktivnyy);
@@ -178,11 +225,20 @@ export function TeoriyaShell({
           липкость не работала бы — ячейка ростом с саму кнопку, и
           ездить внутри неё некуда. Здесь же кнопка липнет вдоль всей
           панели вкладки. */}
-      <div className="topic-open vteor-open">
+      <div
+        className="topic-open vteor-open"
+        onKeyDown={(event) => {
+          /* Раскрытый список закрывается Escape, как шторка. */
+          if (soderzhanieRaskryvashka && event.key === 'Escape') setShtorka(false);
+        }}
+      >
         <button
           type="button"
           className="topic-open__btn btn btn--secondary btn--sm"
-          onClick={() => setShtorka(true)}
+          onClick={() => setShtorka(soderzhanieRaskryvashka ? !shtorka : true)}
+          {...(soderzhanieRaskryvashka
+            ? { 'aria-expanded': shtorka, 'aria-controls': 'vteor-raskr' }
+            : {})}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M4 7h16M4 12h16M4 17h10" />
@@ -191,6 +247,11 @@ export function TeoriyaShell({
         </button>
         {otkryto === undefined ? null : <span className="topic-open__now">{otkryto.title}</span>}
         {vSoderzhanii}
+        {soderzhanieRaskryvashka ? (
+          <div className="vteor-raskr" id="vteor-raskr" hidden={!shtorka}>
+            {spisok}
+          </div>
+        ) : null}
       </div>
 
       <div className="topic-body topic-body--theory vteor">
@@ -256,7 +317,7 @@ export function TeoriyaShell({
 
       {/* Шторка: то же окно, что у содержания задания №12. */}
       <Modal
-        open={shtorka}
+        open={shtorka && !soderzhanieRaskryvashka}
         onClose={() => setShtorka(false)}
         className="contents-sheet"
         closeLabel="Закрыть содержание"

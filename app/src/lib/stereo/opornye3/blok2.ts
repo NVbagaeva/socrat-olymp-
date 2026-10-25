@@ -35,7 +35,7 @@ const PERP_REBRO: ShagPodskazki = {
 
 /* ── Чертежи ────────────────────────────────────────────────────── */
 
-function parallelepiped(a: number, b: number, c: number, alt: string, s1 = false): { model: Model; v: (n: string) => Vec3 } {
+function parallelepiped(a: number, b: number, c: number, { alt }: { alt: string }, s1 = false): { model: Model; v: (n: string) => Vec3 } {
   const body = box(a, b, c);
   const v = (n: string) => vertex(body, n);
   return {
@@ -55,7 +55,7 @@ function parallelepiped(a: number, b: number, c: number, alt: string, s1 = false
 
 function stupenka(
   s: Stupenka,
-  alt: string,
+  { alt }: { alt: string },
   sF: boolean,
 ): { model: Model; A: Vec3; C2: Vec3; F: Vec3; v: Record<string, Vec3> } {
   const v = vershinyStupenki(s);
@@ -89,7 +89,7 @@ function stupenka(
   };
 }
 
-function piramida(R: number, h: number, alt: string, SA: number) {
+function piramida(R: number, h: number, { alt }: { alt: string }, SA: number) {
   const body = pyramid(regularPolygon(4, R, 0, polygonStart(4)), [0, 0, h]);
   const v = (n: string) => vertex(body, n);
   const O: Vec3 = [0, 0, 0];
@@ -113,7 +113,7 @@ export function zadachiBloka2(): ZadachaOp3[] {
 
   /* 1. Нажми: катет, перпендикулярный основанию. */
   {
-    const { model, v } = parallelepiped(3, 4, 12, 'Прямоугольный параллелепипед ABCDA₁B₁C₁D₁ с диагональю AC₁', true);
+    const { model, v } = parallelepiped(3, 4, 12, { alt: 'Прямоугольный параллелепипед ABCDA₁B₁C₁D₁ с диагональю AC₁' }, true);
     const celi = [
       { id: 'AC', points: [v('A'), v('C')], label: '$AC$' },
       { id: 'CC1', points: [v('C'), v('C1')], label: '$CC_1$' },
@@ -121,6 +121,8 @@ export function zadachiBloka2(): ZadachaOp3[] {
     ];
     out.push({
       id: 'o3-2-01',
+      kratko: 'Катет, перпендикулярный основанию',
+      rabochaya: { points: [v('A'), v('C'), v('C1')], pryamoy: v('C') },
       blok: 'treugolnik',
       uroven: 1,
       istochnik: 'new',
@@ -168,7 +170,7 @@ export function zadachiBloka2(): ZadachaOp3[] {
 
   /* 2. Почему угол прямой: высота пирамиды. */
   {
-    const { model, v, O } = piramida(10, 24, 'Правильная четырёхугольная пирамида SABCD с высотой SO', 26);
+    const { model, v, O } = piramida(10, 24, { alt: 'Правильная четырёхугольная пирамида SABCD с высотой SO' }, 26);
     const varianty = [
       '$SO$ — высота, она перпендикулярна плоскости основания, а $OA$ лежит в этой плоскости',
       'Диагонали квадрата перпендикулярны',
@@ -177,6 +179,8 @@ export function zadachiBloka2(): ZadachaOp3[] {
     ];
     out.push({
       id: 'o3-2-02',
+      kratko: 'Почему угол $SOA$ прямой',
+      rabochaya: { points: [v('S'), O, v('A')], pryamoy: O },
       blok: 'treugolnik',
       uroven: 1,
       istochnik: 'new',
@@ -212,7 +216,7 @@ export function zadachiBloka2(): ZadachaOp3[] {
   /* 3. Нажми: рабочий треугольник в ступеньке. */
   {
     const s: Stupenka = { W: 7, w: 3, H: 12, h: 4, D: 4 };
-    const { model, A, C2, F, v } = stupenka(s, 'Многогранник с прямыми двугранными углами, отрезок AC₂ и перпендикуляр C₂F', true);
+    const { model, A, C2, F, v } = stupenka(s, { alt: 'Многогранник с прямыми двугранными углами, отрезок AC₂ и перпендикуляр C₂F' }, true);
     const B = v['B'] as Vec3;
     const K = v['K'] as Vec3;
     const celi = [
@@ -222,6 +226,8 @@ export function zadachiBloka2(): ZadachaOp3[] {
     ];
     out.push({
       id: 'o3-2-03',
+      kratko: 'Рабочий треугольник ступеньки',
+      rabochaya: { points: [A, F, C2], pryamoy: F },
       blok: 'treugolnik',
       uroven: 2,
       istochnik: 'new',
@@ -258,9 +264,11 @@ export function zadachiBloka2(): ZadachaOp3[] {
 
   /* 4. Диагональ параллелепипеда 3 × 4 × 12. */
   {
-    const { model, v } = parallelepiped(3, 4, 12, 'Прямоугольный параллелепипед ABCDA₁B₁C₁D₁ с рёбрами 3, 4 и 12');
+    const { model, v } = parallelepiped(3, 4, 12, { alt: 'Прямоугольный параллелепипед ABCDA₁B₁C₁D₁ с рёбрами 3, 4 и 12' });
     out.push({
       id: 'o3-2-04',
+      kratko: 'Диагональ параллелепипеда',
+      rabochaya: { points: [v('A'), v('C'), v('C1')], pryamoy: v('C') },
       blok: 'treugolnik',
       uroven: 1,
       istochnik: 'new',
@@ -288,7 +296,7 @@ export function zadachiBloka2(): ZadachaOp3[] {
       ],
       uchitel: [
         { etap: 'Основание', formuly: ['AC = \\sqrt{3^2 + 4^2} = 5'] },
-        { etap: 'Рабочий треугольник ACC₁', formuly: ['CC_1 \\perp (ABC) \\Rightarrow \\angle ACC_1 = 90^\\circ', 'AC_1 = \\sqrt{5^2 + 12^2} = 13'] },
+        { etap: 'Рабочий треугольник $ACC_1$', formuly: ['CC_1 \\perp (ABC) \\Rightarrow \\angle ACC_1 = 90^\\circ', 'AC_1 = \\sqrt{5^2 + 12^2} = 13'] },
       ],
       uchenik: [
         { n: 1, chto: 'Отмечаем рёбра $3$, $4$ и $12$.' },
@@ -302,7 +310,7 @@ export function zadachiBloka2(): ZadachaOp3[] {
 
   /* 5. Выбери плоский чертёж: пирамида, SO = 15, SA = 17. */
   {
-    const { model, v } = piramida(8, 15, 'Правильная четырёхугольная пирамида SABCD, SO = 15, SA = 17', 17);
+    const { model, v } = piramida(8, 15, { alt: 'Правильная четырёхугольная пирамида SABCD, SO = 15, SA = 17' }, 17);
     const ploskie = [
       { vershiny: ['O', 'A', 'S'] as const, kateti: [8, 15] as const, podpisi: { a: '?', b: '15', c: '17' }, iskomoe: 'a' as const, alt: 'Прямой угол при O, катет SO = 15, гипотенуза SA = 17, катет OA — искомый' },
       { vershiny: ['A', 'O', 'S'] as const, kateti: [8, 17] as const, podpisi: { a: '?', b: '17', c: '15' }, iskomoe: 'a' as const, alt: 'Прямой угол при A, катет SA = 17, гипотенуза SO = 15' },
@@ -310,6 +318,8 @@ export function zadachiBloka2(): ZadachaOp3[] {
     ];
     out.push({
       id: 'o3-2-05',
+      kratko: 'Плоский чертёж пирамиды',
+      rabochaya: { points: [v('S'), [0, 0, 0], v('A')], pryamoy: [0, 0, 0] },
       blok: 'treugolnik',
       uroven: 2,
       istochnik: 'new',
@@ -350,9 +360,11 @@ export function zadachiBloka2(): ZadachaOp3[] {
 
   /* 6. Пирамида: SO = 15, SA = 17 → BD. */
   {
-    const { model, v } = piramida(8, 15, 'Правильная четырёхугольная пирамида SABCD, SO = 15, SA = 17', 17);
+    const { model, v } = piramida(8, 15, { alt: 'Правильная четырёхугольная пирамида SABCD, SO = 15, SA = 17' }, 17);
     out.push({
       id: 'o3-2-06',
+      kratko: 'Диагональ основания пирамиды',
+      rabochaya: { points: [v('S'), [0, 0, 0], v('A')], pryamoy: [0, 0, 0] },
       blok: 'treugolnik',
       uroven: 2,
       istochnik: 'new',
@@ -401,9 +413,11 @@ export function zadachiBloka2(): ZadachaOp3[] {
   /* 7. Ступенька: 4 × 4, высота 7 → 9. */
   {
     const s: Stupenka = { W: 7, w: 4, H: 7, h: 3, D: 4 };
-    const { model, A, C2 } = stupenka(s, 'Многогранник с прямыми двугранными углами: высокий блок 4 на 4 на 7, отрезок AC₂', false);
+    const { model, A, C2 } = stupenka(s, { alt: 'Многогранник с прямыми двугранными углами: высокий блок 4 на 4 на 7, отрезок AC₂' }, false);
     out.push({
       id: 'o3-2-07',
+      kratko: 'Расстояние между вершинами',
+      rabochaya: { points: [A, [C2[0], C2[1], 0], C2], pryamoy: [C2[0], C2[1], 0] },
       blok: 'treugolnik',
       uroven: 2,
       istochnik: 'new',
@@ -430,7 +444,7 @@ export function zadachiBloka2(): ZadachaOp3[] {
         },
       ],
       uchitel: [
-        { etap: 'Рабочий треугольник AFC₂', formuly: ['C_2F \\perp (ABC) \\Rightarrow \\angle AFC_2 = 90^\\circ'] },
+        { etap: 'Рабочий треугольник $AFC_2$', formuly: ['C_2F \\perp (ABC) \\Rightarrow \\angle AFC_2 = 90^\\circ'] },
         { etap: 'Счёт', formuly: ['AF^2 = 4^2 + 4^2 = 32', 'AC_2^2 = 32 + 7^2 = 81,\\ AC_2 = 9'] },
       ],
       uchenik: [
@@ -445,9 +459,11 @@ export function zadachiBloka2(): ZadachaOp3[] {
   /* 8. Квадрат расстояния: сдвиги 3, 5, 2. */
   {
     const s: Stupenka = { W: 6, w: 3, H: 2, h: 1, D: 5 };
-    const { model, A, C2 } = stupenka(s, 'Многогранник с прямыми двугранными углами: высокий блок 3 на 5 на 2, отрезок AC₂', false);
+    const { model, A, C2 } = stupenka(s, { alt: 'Многогранник с прямыми двугранными углами: высокий блок 3 на 5 на 2, отрезок AC₂' }, false);
     out.push({
       id: 'o3-2-08',
+      kratko: 'Квадрат расстояния',
+      rabochaya: { points: [A, [C2[0], C2[1], 0], C2], pryamoy: [C2[0], C2[1], 0] },
       blok: 'treugolnik',
       uroven: 2,
       istochnik: 'new',
@@ -484,9 +500,11 @@ export function zadachiBloka2(): ZadachaOp3[] {
   /* 9. Тангенс угла: AF = 10, FC₂ = 25. */
   {
     const s: Stupenka = { W: 10, w: 6, H: 25, h: 6, D: 8 };
-    const { model, A, C2, F } = stupenka(s, 'Многогранник с прямыми двугранными углами: высокий блок 6 на 8 на 25, угол C₂AF', true);
+    const { model, A, C2, F } = stupenka(s, { alt: 'Многогранник с прямыми двугранными углами: высокий блок 6 на 8 на 25, угол C₂AF' }, true);
     out.push({
       id: 'o3-2-09',
+      kratko: 'Тангенс угла',
+      rabochaya: { points: [A, F, C2], pryamoy: F },
       blok: 'treugolnik',
       uroven: 3,
       istochnik: 'new',
@@ -531,6 +549,8 @@ export function zadachiBloka2(): ZadachaOp3[] {
     const v = (n: string) => vertex(body, n);
     out.push({
       id: 'o3-2-10',
+      kratko: 'Шестиугольная призма',
+      rabochaya: { points: [v('A'), v('D'), v('D1')], pryamoy: v('D') },
       blok: 'treugolnik',
       uroven: 3,
       istochnik: 'new',
@@ -565,7 +585,7 @@ export function zadachiBloka2(): ZadachaOp3[] {
       ],
       uchitel: [
         { etap: 'Основание', formuly: ['AD = 2\\cdot 5 = 10'] },
-        { etap: 'Рабочий треугольник ADD₁', formuly: ['DD_1 \\perp (ABC) \\Rightarrow \\angle ADD_1 = 90^\\circ', 'AD_1^2 = 10^2 + 5^2 = 125'] },
+        { etap: 'Рабочий треугольник $ADD_1$', formuly: ['DD_1 \\perp (ABC) \\Rightarrow \\angle ADD_1 = 90^\\circ', 'AD_1^2 = 10^2 + 5^2 = 125'] },
       ],
       uchenik: [
         { n: 1, chto: 'Призма правильная: в основании правильный шестиугольник, боковые рёбра перпендикулярны основанию.' },

@@ -11,7 +11,7 @@ import { prototypeById, RAZDELY } from '@/lib/zadanie3';
 import { assertSheetsOk, renderFormulas } from '@/lib/zadanie3/formulas';
 import { diagonalKuba, sechenieKuba, type PrimerChertezha } from '@/lib/stereo/primery';
 import { Chertezh3d } from './Chertezh3d';
-import { Glava2Treugolnik } from './glavy/Glava2Treugolnik';
+import { Glava2Treugolnik, RAZDELY_GLAVY_2 } from './glavy/Glava2Treugolnik';
 
 const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GLAVY_15 };
 
@@ -22,6 +22,11 @@ const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GL
 /** Написанные главы: «задание:глава» → текст главы. */
 const NAPISANY: Readonly<Record<string, () => ReactNode>> = {
   '3:treugolnik': () => <Glava2Treugolnik />,
+};
+
+/** Подпункты написанных глав в «Содержании»: разделы главы. */
+const PODPUNKTY: Readonly<Record<string, readonly { id: string; title: string }[]>> = {
+  '3:treugolnik': RAZDELY_GLAVY_2,
 };
 
 const ZHIVYE: Readonly<Record<string, () => PrimerChertezha>> = {
@@ -141,10 +146,19 @@ export function TeoriyaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }
     );
   });
   const model = THUMBS['thumb-III'];
-  return (
+  const shell = (
     <TeoriyaShell
       vkladka={vkladka}
-      razdely={glavy.map((glava) => ({ id: glava.id, title: glava.title, nomer: glava.nomer }))}
+      razdely={glavy.map((glava) => {
+        const podpunkty = PODPUNKTY[`${no}:${glava.id}`];
+        return {
+          id: glava.id,
+          title: glava.title,
+          nomer: glava.nomer,
+          ...(podpunkty === undefined ? {} : { podpunkty: [...podpunkty] }),
+        };
+      })}
+      soderzhanieRaskryvashka={no === '3'}
       tela={tela}
       trackKey={STEREO[no].teoriyaKey}
       dekor={{
@@ -153,4 +167,6 @@ export function TeoriyaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }
       }}
     />
   );
+  /* Оформление новой методики (metodika.css) — только у №3. */
+  return no === '3' ? <div className="o3-teoriya">{shell}</div> : shell;
 }

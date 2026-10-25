@@ -222,7 +222,7 @@ export function primerPiramida(): PrimerG2 {
 
 function stupenkaModel(
   s: Stupenka,
-  alt: string,
+  { alt }: { alt: string },
   iskomoe: [string, string],
   shagUgla: number,
 ): { model: Model; A: Vec3; X: Vec3; F: Vec3 } {
@@ -261,7 +261,7 @@ export function primerStupenka(): PrimerG2 {
   const s: Stupenka = { W: 7, w: 3, H: 12, h: 4, D: 4 };
   const { model, A, X } = stupenkaModel(
     s,
-    'Многогранник с прямыми двугранными углами: высокий блок 3 на 4 на 12, отрезок AC₂ и треугольник AFC₂',
+    { alt: 'Многогранник с прямыми двугранными углами: высокий блок 3 на 4 на 12, отрезок AC₂ и треугольник AFC₂' },
     ['A', 'C2'],
     3,
   );
@@ -325,7 +325,7 @@ export function primerUgol45(): PrimerG2 {
   const s: Stupenka = { W: 6, w: 3, H: 5, h: 2, D: 4 };
   const { model, A, X, F } = stupenkaModel(
     s,
-    'Многогранник с прямыми двугранными углами: высокий блок 3 на 4 на 5, угол C₂AF',
+    { alt: 'Многогранник с прямыми двугранными углами: высокий блок 3 на 4 на 5, угол C₂AF' },
     ['A', 'C2'],
     1,
   );
@@ -373,7 +373,7 @@ export function primerTangens(): PrimerG2 {
   const s: Stupenka = { W: 10, w: 6, H: 15, h: 5, D: 8 };
   const { model, A, X, F } = stupenkaModel(
     s,
-    'Многогранник с прямыми двугранными углами: высокий блок 6 на 8 на 15, угол C₂AF',
+    { alt: 'Многогранник с прямыми двугранными углами: высокий блок 6 на 8 на 15, угол C₂AF' },
     ['A', 'C2'],
     1,
   );
@@ -537,3 +537,87 @@ export const LOVUSHKA_GLAZ: {
     'На параллельной проекции прямые углы искажаются, а непрямые бывают похожи на прямые. Угол $90^\\circ$ только тот, что обоснован: ребро $\\perp$ грани, высота $\\perp$ основанию. Для $AC_2$ рабочий треугольник — $AFC_2$ с перпендикуляром $C_2F$.',
   ],
 };
+
+/* ── Рисунки к «Ловушкам»: «В чём ошибка?» и «Как правильно?» ────── */
+
+/** Рисунки ловушки: неверный ход и верный — на одном теле. */
+export interface RisunkiLovushki {
+  neverno: Model;
+  verno: Model;
+}
+
+/**
+ * «Одной перпендикулярной прямой мало»: пирамида $SABCD$, ребро $SA$
+ * над вершиной квадрата. Слева известно только $SA \perp AB$, а
+ * треугольник $SAC$ уже объявлен прямоугольным; справа — оба угла
+ * при $A$, и только тогда $\angle SAC = 90^\circ$.
+ */
+export function risunkiLovushkiOdna(): RisunkiLovushki {
+  const A = P(0, 0, 0);
+  const B = P(4, 0, 0);
+  const C = P(4, 4, 0);
+  const D = P(0, 4, 0);
+  const S = P(0, 0, 5);
+  const body = pyramid([A, B, C, D], S);
+  /* Вершина A спереди: прямые углы при ней видны, а не прячутся за ребром. */
+  const obshchee = { bodies: [body], lines: [{ a: A, b: C }], rakurs: { azimuth: 290, elevation: 30 } };
+  return {
+    neverno: {
+      alt: 'Пирамида SABCD: отмечен только прямой угол между SA и AB, треугольник SAC выделен',
+      ...obshchee,
+      sections: [{ points: [S, A, C] }],
+      angles: [{ at: A, u: dir(A, B), v: dir(A, S) }],
+      notes: [{ p: P(1.6, 1.6, 1.1), text: '?' }],
+    },
+    verno: {
+      alt: 'Пирамида SABCD: SA перпендикулярно AB и AD, поэтому угол SAC прямой',
+      ...obshchee,
+      sections: [{ points: [S, A, C] }],
+      angles: [
+        { at: A, u: dir(A, B), v: dir(A, S) },
+        { at: A, u: dir(A, D), v: dir(A, S) },
+        { at: A, u: dir(A, C), v: dir(A, S) },
+      ],
+    },
+  };
+}
+
+/**
+ * «Прямой угол „на глаз“»: ступенька. Слева треугольник $ABC_2$ —
+ * угол при $B$ только кажется прямым; справа рабочий треугольник
+ * $AFC_2$ с обоснованным прямым углом при $F$.
+ */
+export function risunkiLovushkiGlaz(): RisunkiLovushki {
+  const s: Stupenka = { W: 7, w: 3, H: 12, h: 4, D: 4 };
+  const v = vershinyStupenki(s);
+  const A = v['A'] as Vec3;
+  const B = v['B'] as Vec3;
+  const C2 = v['C2'] as Vec3;
+  const F: Vec3 = [C2[0], C2[1], 0];
+  return {
+    neverno: {
+      alt: 'Ступенька: треугольник ABC₂, угол при B только выглядит прямым',
+      view: 'cabinet',
+      bodies: [teloStupenki(s, ['A', 'B', 'C2'])],
+      lines: [
+        { a: A, b: C2 },
+        { a: B, b: C2 },
+      ],
+      sections: [{ points: [A, B, C2] }],
+      notes: [{ p: P(B[0] - 0.9, B[1] + 0.6, B[2] + 1.2), text: '?' }],
+    },
+    verno: {
+      alt: 'Ступенька: рабочий треугольник AFC₂, перпендикуляр C₂F и прямой угол при F',
+      view: 'cabinet',
+      bodies: [teloStupenki(s, ['A', 'C2'])],
+      marks: [{ p: F, label: 'F' }],
+      lines: [
+        { a: A, b: C2 },
+        { a: C2, b: F },
+        { a: A, b: F },
+      ],
+      sections: [{ points: [A, F, C2] }],
+      angles: [{ at: F, u: dir(F, A), v: dir(F, C2) }],
+    },
+  };
+}

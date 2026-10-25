@@ -34,6 +34,10 @@
   --grey-900: #101728;
   --green-600: #16a34a;
   --green-50: #e7f6ec;
+  /* Изумрудный «успех» макетов №3 (пипетка: #029b70 → тон палитры). */
+  --emerald-600: #0a9a6e;
+  --emerald-200: #b9e6d3;
+  --emerald-50: #e5f6ef;
   --amber-600: #d97d0b;
   --amber-50: #fef4e3;
   --red-600: #dc2626;
@@ -272,6 +276,23 @@
   --solid-edge: var(--color-primary);
   --solid-face: var(--blue-100);
   --solid-liquid: var(--blue-300);
+  /* Экранная тема движка «стекло» (новые экраны №3, renderSolid
+     tema: 'ekran'): грани — полупрозрачный голубой градиент сверху
+     вниз, рёбра — светлее основного синего, выделенная фигура —
+     акцентный оранжевый, как плоский треугольник рядом. На печати
+     экранная тема не действует. */
+  --solid-steklo-rebro: var(--blue-500);
+  --solid-steklo-1: var(--blue-50);
+  --solid-steklo-2: var(--blue-200);
+  --solid-vydel: var(--color-accent);
+  --solid-steklo-ten: rgba(31, 95, 208, 0.14);
+
+  /* «Успех» новых экранов №3 (пройденный блок, верная задача, итог):
+     изумрудный с макетов — темнее и холоднее --color-success, на
+     светлой заливке читается как «готово», а не как кнопка. */
+  --color-uspeh: var(--emerald-600);
+  --color-uspeh-soft: var(--emerald-50);
+  --color-uspeh-border: var(--emerald-200);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   /* Текст, в котором встречаются греческие буквы. Греческое

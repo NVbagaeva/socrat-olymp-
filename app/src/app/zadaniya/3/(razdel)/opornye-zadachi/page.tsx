@@ -3,6 +3,8 @@ import { OpornyeStereoList } from '@/components/stereo/opornye/OpornyeStereoList
 import { OpornyeStereoShell } from '@/components/stereo/opornye/OpornyeStereoShell';
 import { STEREO, stereoTitle, vkladkaStereo } from '@/content/stereo/zadaniya';
 import { BLOKI_3, zadachiBloka } from '@/lib/stereo/opornye3/bloki';
+import { dekorBlokov, piktogrammaBloka } from '@/lib/stereo/opornye3/piktogrammy';
+import { renderSolid } from '@/lib/solid/render';
 import { ZADANIYA } from '@/lib/paths';
 import '../../../[task]/[type]/prep.css';
 
@@ -16,7 +18,11 @@ export const metadata: Metadata = {
 export default function Page() {
   const listHref = `${ZADANIYA}/${STEREO['3'].slug}/opornye-zadachi/`;
   return (
-    <OpornyeStereoShell title={VKLADKA} listHref={listHref}>
+    <OpornyeStereoShell
+      title={VKLADKA}
+      listHref={listHref}
+      dekor={renderSolid(dekorBlokov(), { tema: 'ekran', bezPodpisey: true })}
+    >
       <OpornyeStereoList
         listHref={listHref}
         bloki={BLOKI_3.map((b) => ({
@@ -28,6 +34,10 @@ export default function Page() {
           lead: b.lead,
           gotov: b.gotov,
           zadachi: zadachiBloka(b.id).map((z) => z.id),
+          piktogramma: (() => {
+            const m = piktogrammaBloka(b.id);
+            return m === null ? null : renderSolid(m, { tema: 'ekran', bezPodpisey: true });
+          })(),
         }))}
       />
     </OpornyeStereoShell>
