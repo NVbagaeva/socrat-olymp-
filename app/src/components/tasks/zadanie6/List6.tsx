@@ -8,7 +8,7 @@ import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { checkKitSheet, kitFootLabel } from '@/lib/komplekt';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { listSheetVse, sShapkoy } from '@/lib/sheetList';
-import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { zagruzitIndeks, zagruzitZadachi, type ZadachaLite } from '@/lib/zadanie6/dannye';
 import {
   modelUroka,
@@ -122,7 +122,11 @@ export function List6({ vid }: { vid: Vid6 | 'vse' }) {
           sShapkoy(sheetSpec6(sborka, v), shapka, GENERATOR6_TEXTS.podzagolovok, qr);
         const kod = kitFootLabel(kit.code) ?? `Код: ${sborka.model.kod}`;
         if (vid === 'vse') {
-          const spec = listSheetVse(list('uchenik'), list('uchitel'));
+          /* Место для решения (sp=) — у листа ученика в начале файла. */
+          const spec = vseWithSpace(
+            listSheetVse(list('uchenik'), list('uchitel')),
+            spaceOfQuery(new URLSearchParams(query)),
+          );
           return { html: buildDocument({ ...spec, kit: kod }, {}), warning: kit.warning };
         }
         /* Место для решения (sp=) — только у листа ученика. */
