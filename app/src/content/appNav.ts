@@ -10,6 +10,7 @@
 import type { NavItem } from '@/components/ui';
 import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
+import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF } from '@/content/variant';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
@@ -28,6 +29,14 @@ export const topNav: NavItem[] = [
     short: 'Вариант',
     href: VARIANT_HREF,
     icon: 'variant',
+  },
+  /* 36 вариантов × 6 версий: решать онлайн и печатать (/povyshennye/). */
+  {
+    id: 'povyshennye',
+    label: 'Варианты повышенной сложности',
+    short: 'Повышенные',
+    href: POV_HREF,
+    icon: 'povyshennye',
   },
   { id: 'stats', label: 'Статистика', href: '/statistika/', icon: 'stats' },
   /* Короткая подпись — для нижней панели и экрана «Ещё»: полное

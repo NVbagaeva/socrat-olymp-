@@ -24,6 +24,7 @@
  */
 
 import { THEME, esc, px } from '@/lib/graph/renderer.js';
+import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 import { POROG } from './figury';
 import {
   type Krug,
@@ -53,8 +54,8 @@ export const PL = {
   dash: { punktir: '6 4', prodolzhenie: '5 4' },
   /* Подписи точек — курсив KaTeX_Math, как буквы в формулах сайта. */
   font: {
-    bukva: "KaTeX_Math, 'Latin Modern Roman', 'Times New Roman', serif",
-    chislo: "KaTeX_Main, 'Latin Modern Roman', 'Times New Roman', serif",
+    bukva: BUKVY,
+    chislo: CHISLA,
     slovo: THEME.font.family,
     razmer: 19,
     razmerZnach: 15,
@@ -1043,7 +1044,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
 
   const alt = optsii.alt;
   const head =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${px(vx)} ${px(vy)} ${px(vw)} ${px(vh)}" width="${px(vw)}" height="${px(vh)}" class="pl" role="img"` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="planimetriya" viewBox="${px(vx)} ${px(vy)} ${px(vw)} ${px(vh)}" width="${px(vw)}" height="${px(vh)}" class="pl" role="img"` +
     (alt ? ` aria-label="${esc(alt)}"` : ' aria-hidden="true"') +
     ' style="max-width:100%;height:auto">' +
     (alt ? `<title>${esc(alt)}</title>` : '');

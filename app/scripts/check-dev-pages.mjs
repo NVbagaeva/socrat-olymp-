@@ -34,6 +34,8 @@ const DEV_ROUTES = [
   'kabinet/dz',
   'kabinet/priglashenie',
   'kabinet/vydat-dz',
+  'kabinet/vydat-variant',
+  'kabinet/rabota',
 ];
 /* Признаки служебных страниц в собранных файлах: адрес и класс разметки. */
 const MARKERS = [

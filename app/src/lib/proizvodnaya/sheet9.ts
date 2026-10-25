@@ -340,12 +340,37 @@ export interface Drawn {
   kletokY: number;
 }
 
-export function drawFigure(task: Generated, rezhim: 'student' | 'teacher'): Drawn | null {
+const TOCHKA_OTVET: ReadonlySet<string> = new Set([
+  'tochka-max',
+  'tochka-min',
+  'max-na-otrezke',
+  'min-na-otrezke',
+  'extr-na-otrezke',
+]);
+
+export function drawFigure(
+  task: Generated,
+  rezhim: 'student' | 'teacher',
+  pechat: { minFont?: number } = {},
+): Drawn | null {
   if (task.risunok === null) {
     return null;
   }
   const report = pustoyOtchet();
-  const svg = renderFigura(task.risunok, { rezhim }, report);
+  /* Вопрос про точку max/min: на листе учителя точка-ответ крупнее. */
+  const otvetX =
+    rezhim === 'teacher' && task.zapros !== null && TOCHKA_OTVET.has(task.zapros.t)
+      ? [Number(task.otvet)]
+      : [];
+  const svg = renderFigura(
+    task.risunok,
+    {
+      rezhim,
+      ...(pechat.minFont === undefined ? {} : { minFont: pechat.minFont }),
+      ...(otvetX.length > 0 && Number.isFinite(otvetX[0]) ? { otvetX } : {}),
+    },
+    report,
+  );
   return {
     svg,
     width: (cellMm) => Math.round((report.width / report.cell) * cellMm * 100) / 100,

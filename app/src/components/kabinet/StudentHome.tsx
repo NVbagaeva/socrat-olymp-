@@ -5,6 +5,7 @@ import { Avatar, Badge, Button, Card, ErrorState, ProgressBar } from '@/componen
 import { catalogTasks, taskLabel } from '@/lib/kabinet/catalog';
 import type { KabinetApi } from '@/lib/kabinet/api';
 import type { HomeworkProgress, HomeworkSummary, Me, TaskProgressRow } from '@/lib/kabinet/types';
+import { StudentVariantWorks } from '@/components/variant/online/kabinet/StudentVariantWorks';
 import { KabinetLoading } from './KabinetGate';
 import { DocumentsBlock, initialsOf } from './parts';
 import { kabinetText } from './text';
@@ -68,7 +69,7 @@ export function StudentHome({ me }: { me: Me }) {
       />
     );
   }
-  const { tutors, classes, homework, progress, finished } = home.data;
+  const { tutors, classes, homework, progress, finished, variantWorks } = home.data;
 
   return (
     <div className="kab-stack">
@@ -134,6 +135,8 @@ export function StudentHome({ me }: { me: Me }) {
           </ul>
         )}
       </Card>
+
+      <StudentVariantWorks works={variantWorks} />
 
       <ProgressGrid rows={progress} />
       <TrainingSessions finished={finished} />

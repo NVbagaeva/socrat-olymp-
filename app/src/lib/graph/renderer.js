@@ -27,6 +27,7 @@
 'use strict';
 
 import labels from './labels.js';
+import SHRIFTY from '../risunki/shrifty.js';
 import { RULES, printProfile, printFontFloor } from '../sheet/figureRules.js';
 
 /* ══════════════════════════════════════════════════════════
@@ -45,6 +46,8 @@ var THEME = {
     label:       'var(--graph-axis, #101728)',
     lineA:       'var(--color-primary, #1F5FD0)',
     lineB:       'var(--graph-accent, #E07A2F)',
+    /* Третий график: тёмная терракота сайта (--terracotta-700). */
+    lineC:       'var(--graph-line-c, #A8500F)',
     accent:      'var(--graph-accent, #E07A2F)',   /* треугольник наклона   */
     /* Вспомогательная система координат разбора параболы: цветом
        подсказок, а в ч/б печати — серым, чтобы не спутать с осями. */
@@ -98,7 +101,9 @@ var THEME = {
   font: {
     /* Шрифт берётся из styleguide.html через CSS-переменную;
        фолбэк нужен для отдельного .svg-файла вне страницы.               */
-    family:    "var(--font, 'Inter', system-ui, -apple-system, sans-serif)",
+    /* Шрифты подписей — общие для рисунков сайта (lib/risunki/shrifty):
+       числа — KaTeX_Main прямым, буквы — KaTeX_Math курсивом. */
+    family:    SHRIFTY.CHISLA,
     axisLabel:  12,       /* числа на осях — заметно мельче подписей осей  */
     axisName:    17,      /* x, y, 0 — курсив                              */
     pointLabel:  13,
@@ -107,13 +112,15 @@ var THEME = {
     pointLabelStrict: 15,
     helperLabel: 19,      /* числа у катетов треугольника наклона           */
 
-    /* Подпись графика: жирное математическое начертание —
-       антиква с курсивом, как набирают формулы в учебниках.              */
+    /* Подпись графика: математическое начертание — антиква с курсивом,
+       как набирают формулы в учебниках.                                   */
     curveLabel:       21,
     curveLabelTight:  [17, 14], /* подпись графика на тесном чертеже      */
-    curveLabelFamily: "var(--font-math, 'STIX Two Text', 'Cambria Math', Cambria, 'Charter', Georgia, serif)",
-    curveLabelWeight: 700,
-    pointLabelWeight: 600,
+    /* Подпись графика — в типографике формул сайта (KaTeX): курсив
+       букв, прямые скобки и знаки, обычное начертание, не жирное. */
+    curveLabelFamily: SHRIFTY.CHISLA,
+    curveLabelWeight: 400,
+    pointLabelWeight: SHRIFTY.VES,
     curveLabelTrack:  0.62   /* оценка ширины символа в долях кегля       */
   },
 
@@ -279,6 +286,43 @@ function near(a, b) { return Math.abs(a.x - b.x) < 1e-7 && Math.abs(a.y - b.y) <
    реальные прямоугольники подписей и фигур. По нему validate.js
    проверяет наложения на том же, что видит ученик, а не на догадках. */
 /* ══════════════════════════════════════════════════════════
+   Наименьший кегль печати. Лист печатает чертёж в своей клетке
+   (7 мм у вариантов), и кегли движка в единицах viewBox на бумаге
+   выходят мельче 10 pt. scene.minFont — наименьший кегль в тех же
+   единицах: на время отрисовки все кегли подписей поднимаются до него.
+   ══════════════════════════════════════════════════════════ */
+var MIN_FONT = 0;
+
+/** Кегль не меньше печатного минимума текущей отрисовки. */
+function kegl(size) { return Math.max(labelSize(size), MIN_FONT); }
+
+/**
+ * Временно поднять числовые поля объектов до min и выполнить fn.
+ * pary — [объект, [ключи]]: у каждого движка свой набор кеглей.
+ */
+function sMinKeglem(min, pary, fn) {
+  if (!min) { return fn(); }
+  var bylo = MIN_FONT;
+  var sohr = pary.map(function (para) {
+    var obj = para[0];
+    return para[1].map(function (k) {
+      var v = obj[k];
+      obj[k] = Array.isArray(v) ? v.map(function (x) { return Math.max(x, min); }) : Math.max(v, min);
+      return [obj, k, v];
+    });
+  });
+  MIN_FONT = Math.max(bylo, min);
+  try { return fn(); }
+  finally {
+    MIN_FONT = bylo;
+    sohr.forEach(function (list) { list.forEach(function (x) { x[0][x[1]] = x[2]; }); });
+  }
+}
+
+var KEGLI_GRAFIKA = ['axisLabel', 'axisName', 'pointLabel', 'pointLabelStrict', 'helperLabel',
+  'curveLabel', 'curveLabelTight'];
+
+/* ══════════════════════════════════════════════════════════
    Печатный профиль (lib/sheet/figureRules.js): на листе клетка
    печатается 7 мм, и подписи рисуются сразу печатным кеглем — не
    мельче 10 pt при этой клетке. Места подписям подбираются уже этим
@@ -341,12 +385,33 @@ function gridCellAttr(cell) {
  * подписи относительно клетки мельче, места им больше. Вне печати —
  * один раз, как прежде.
  */
+/**
+ * Клетка, с которой рисунок ляжет в строку листа: рисунок шире строки
+ * при клетке cellMm лист сожмёт (lib/sheet/figureRules.js, figureSize),
+ * и подписи надо рисовать уже под сжатую клетку. null — помещается.
+ */
+function rowCellMm(svg, cell, cellMm) {
+  var box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
+  if (!box) { return null; }
+  var cells = Number(box[1]) / cell;
+  if (cells * cellMm <= RULES.rowMm + 0.01) { return null; }
+  return Math.max(RULES.gridCellMinMm, Math.floor(RULES.rowMm / cells * 100) / 100);
+}
+
+/** Печатный рисунок; не лёг в строку — ещё раз под клетку, с которой ляжет. */
+function printThemeInRow(cell, draw, cellMm) {
+  var mm = cellMm || RULES.gridCellMm;
+  var svg = printTheme(cell, draw, mm);
+  var tesnee = rowCellMm(svg, cell, mm);
+  return tesnee === null ? svg : printTheme(cell, draw, tesnee);
+}
+
 function printFitted(cell, steps, draw, fresh) {
   if (!printProfile() || FLOOR) { return draw(fresh()); }
   var svg = null;
   for (var i = 0; i < steps.length; i++) {
     var report = fresh();
-    var next = printTheme(cell, function () { return draw(report); }, steps[i]);
+    var next = printThemeInRow(cell, function () { report = fresh(); return draw(report); }, steps[i]);
     /* Клетка крупнее, чем помещается в строку листа, не берётся: лист
        ужал бы рисунок, и подписи вышли бы мельче 10 pt. */
     var box = /viewBox="0 0 ([0-9.]+) /.exec(next);
@@ -358,8 +423,11 @@ function printFitted(cell, steps, draw, fresh) {
 }
 
 function renderGraph(scene, report) {
-  return printTheme(pick(scene.cell, THEME.geometry.cell), function () {
-    return drawGraph(scene, report);
+  return sMinKeglem(scene.minFont, [[THEME.font, KEGLI_GRAFIKA]], function () {
+    if (!printProfile() || FLOOR) { return drawGraph(scene, report); }
+    return printThemeInRow(pick(scene.cell, THEME.geometry.cell), function () {
+      return drawGraph(scene, report);
+    });
   });
 }
 
@@ -400,7 +468,7 @@ function drawGraph(scene, report) {
   var pointLayer = [];
   var curveLabelLayer = [];
 
-  head.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + px(width) + ' ' + px(height) + '"' +
+  head.push('<svg xmlns="http://www.w3.org/2000/svg" data-engine="graph" viewBox="0 0 ' + px(width) + ' ' + px(height) + '"' +
     /* Признак сцены виден и в разметке: по нему лист для печати
        различает вторую кривую типом линии, а не только толщиной.
        У сцен без строгих правил класса нет, и их чертежи прежние. */
@@ -461,7 +529,9 @@ function drawGraph(scene, report) {
      уменьшении всё равно не прочитать; засечки при этом остаются. */
   function labelled(value, lo, hi) {
     if (mode === 'none' || !ticked(value, lo, hi)) { return false; }
-    return mode === 'full' ? true : Math.abs(Math.abs(value) - 1) < EPS;
+    /* Как в ЕГЭ: по каждой оси подписана только 1 (и 0 в начале
+       координат), остальное считается по клеткам. */
+    return mode === 'full' ? true : Math.abs(value - 1) < EPS;
   }
 
   /* Деления оси. По умолчанию — целые, подписи числом, как было.
@@ -620,18 +690,82 @@ function drawGraph(scene, report) {
     return [];
   }
 
-  axisLabels(ticksX, 'x').forEach(function (item) {
-    var box = tickBox('x', item.at, item.text);
-    labelLayer.push(numberText(item.text, sx(item.at), axisX + THEME.gap.axisLabelX, 'middle'));
-    labelBoxes.push(box);
-    collect(report, 'axisLabel', 'x', box.x, box.y, box.halfW, box.halfH);
+  /* Подписи −1 на двух осях у начала координат стоят по диагонали
+     друг от друга, почти вплотную, и читаются как одна каша. Если
+     зазор между ними меньше AXIS_PAIR_GAP, одна из них переходит на
+     другую сторону своей оси: −1 оси y — правее оси, −1 оси x — над
+     осью. Из двух мест берётся то, что дальше от графиков. */
+  var labelsX = axisLabels(ticksX, 'x').map(function (item) {
+    return { item: item, box: tickBox('x', item.at, item.text), flip: false };
   });
-  axisLabels(ticksY, 'y').forEach(function (item) {
-    var box = tickBox('y', item.at, item.text);
-    labelLayer.push(numberText(item.text, axisY - THEME.gap.axisLabelY,
-      sy(item.at) + THEME.font.axisLabel * 0.375, 'end'));
-    labelBoxes.push(box);
-    collect(report, 'axisLabel', 'y', box.x, box.y, box.halfW, box.halfH);
+  var labelsY = axisLabels(ticksY, 'y').map(function (item) {
+    return { item: item, box: tickBox('y', item.at, item.text), flip: false };
+  });
+  /* Число на обычном месте (под осью x, левее оси y) задевает график —
+     переходит на другую сторону своей оси, если там свободнее. */
+  var tickField = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
+  var tickCloud = obstacleCloud(scene, drawn, sx, sy, { x: axisY, y: axisX }, tickField, [],
+    { axes: false });
+  var TICK_CLEAR = 3;
+  labelsX.concat(labelsY).forEach(function (l) {
+    var here = boxClear(l.box, tickCloud);
+    if (here >= TICK_CLEAR) { return; }
+    var b = l.box;
+    var isX = labelsX.indexOf(l) >= 0;
+    /* Другая сторона оси, затем чуть вбок вдоль оси (график идёт
+       через само деление) — с обеих сторон оси. */
+    var other = isX ? { y: 2 * axisX - b.y } : { x: axisY + THEME.gap.axisLabelY + b.halfW };
+    var shift = isX ? b.halfW + 4 : b.halfH + 3;
+    var cands = [other];
+    [shift, -shift].forEach(function (d) {
+      if (isX) {
+        cands.push({ x: b.x + d }, { x: b.x + d, y: other.y });
+      } else {
+        cands.push({ y: b.y - d }, { y: b.y - d, x: other.x });
+      }
+    });
+    var best = null;
+    cands.forEach(function (c) {
+      var box = Object.assign({}, b, c);
+      var clear = boxClear(box, tickCloud);
+      if (clear > here + 1 && (!best || clear > best.clear + 0.5) && (best === null || best.clear < TICK_CLEAR)) {
+        best = { box: box, clear: clear };
+      }
+    });
+    if (best) {
+      l.box = best.box;
+      l.flip = true;
+    }
+  });
+  var nearX = labelsX.filter(function (l) { return Math.abs(l.item.at + 1) < EPS && !l.flip; })[0];
+  var nearY = labelsY.filter(function (l) { return Math.abs(l.item.at + 1) < EPS && !l.flip; })[0];
+  if (nearX && nearY && boxGap(nearX.box, nearY.box) < AXIS_PAIR_GAP) {
+    var pairField = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
+    var pairCloud = obstacleCloud(scene, drawn, sx, sy, { x: axisY, y: axisX }, pairField, [],
+      { axes: false });
+    var flipY = Object.assign({}, nearY.box, { x: axisY + THEME.gap.axisLabelY + nearY.box.halfW });
+    var flipX = Object.assign({}, nearX.box, { y: 2 * axisX - nearX.box.y });
+    if (boxClear(flipY, pairCloud) + 2 >= boxClear(flipX, pairCloud)) {
+      nearY.box = flipY;
+      nearY.flip = true;
+    } else {
+      nearX.box = flipX;
+      nearX.flip = true;
+    }
+  }
+  labelsX.forEach(function (l) {
+    var y = l.flip ? l.box.y + THEME.font.axisLabel * 0.35 : axisX + THEME.gap.axisLabelX;
+    labelLayer.push(numberText(l.item.text, l.flip ? l.box.x : sx(l.item.at), y, 'middle'));
+    labelBoxes.push(l.box);
+    collect(report, 'axisLabel', 'x', l.box.x, l.box.y, l.box.halfW, l.box.halfH);
+  });
+  labelsY.forEach(function (l) {
+    labelLayer.push(l.flip
+      ? numberText(l.item.text, l.box.x, l.box.y + THEME.font.axisLabel * 0.375, 'middle')
+      : numberText(l.item.text, axisY - THEME.gap.axisLabelY,
+        sy(l.item.at) + THEME.font.axisLabel * 0.375, 'end'));
+    labelBoxes.push(l.box);
+    collect(report, 'axisLabel', 'y', l.box.x, l.box.y, l.box.halfW, l.box.halfH);
   });
   var originTaken = strict && (scene.points || []).some(function (point) {
     return dist(sx(point.x), sy(point.y), axisY, axisX) < g.pointRadius * 2;
@@ -645,9 +779,11 @@ function drawGraph(scene, report) {
     var originHalfH = THEME.font.axisName * 0.62;
     var originField = { left: sx(win.xmin), right: sx(win.xmax),
                         top: sy(win.ymax), bottom: sy(win.ymin) };
+    /* «0» — в левом нижнем углу у начала координат (prefer [-1, 1]);
+       в другой четверти — только если там проходит график. */
     var originSpot = bestLabelSpot(axisY, axisX, originHalfW, originHalfH, THEME.gap.origin,
       obstacleCloud(scene, drawn, sx, sy, { x: axisY, y: axisX }, originField, labelBoxes,
-        { axes: false }), originField);
+        { axes: false }), originField, [-1, 1]);
 
     labelBoxes.push({ x: originSpot.x, y: originSpot.y, halfW: originHalfW, halfH: originHalfH });
     labelLayer.push(mathText(originText, originSpot.x + originHalfW,
@@ -661,7 +797,7 @@ function drawGraph(scene, report) {
      на подсказку от того, кто фигуру построил. ---------------------- */
   var shapeLabelLayer = [];
   shapeLabels.forEach(function (shape) {
-    var size = labelSize(shape.size || THEME.font.helperLabel);
+    var size = kegl(shape.size || THEME.font.helperLabel);
     var halfW = textWidth(shape.text, size, THEME.font.curveLabelTrack) / 2;
     var halfH = size * 0.62;
     var offset = shape.offset || [0, 0];
@@ -814,7 +950,7 @@ function drawGraph(scene, report) {
     var boxes = labelBoxes.slice();
     drawn.curveLabelBoxes = [];
     order.forEach(function (item) {
-      curveLabel(item, scene, win, sx, sy, drawn, boxes, null, cell, strict);
+      curveLabel(item, scene, win, sx, sy, drawn, boxes, false, cell, strict);
     });
     return order.map(function (item) { return item.lastOwnership; });
   });
@@ -830,7 +966,7 @@ function drawGraph(scene, report) {
       var boxes = labelBoxes.slice();
       drawn.curveLabelBoxes = [];
       order.forEach(function (item) {
-        curveLabel(item, scene, win, sx, sy, drawn, boxes, null, cell, strict);
+        curveLabel(item, scene, win, sx, sy, drawn, boxes, false, cell, strict);
       });
       return order.map(function (item) { return item.lastOwnership; });
     });
@@ -957,6 +1093,9 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell, str
   /* Зона задана, а места в ней не нашлось — подписи не будет:
      ставить её вне зоны значит вернуть её к треугольнику. */
   if (zone && !best && !fallback) { return ''; }
+  if (!zone && !best && (!fallback || !fallback.free)) {
+    best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH);
+  }
 
   var spot = best || fallback ||
     { x: (ax + bx) / 2 + nx * offset, y: (ay + by) / 2 + ny * offset };
@@ -965,7 +1104,8 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell, str
   rememberCurveLabel(all, item, spot, halfW, halfH, report, sx, sy);
   collect(report, 'curveLabel', 'curve-label', spot.x, spot.y, halfW, halfH);
 
-  return curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke, size);
+  return vynoskaPodpisi(spot, halfW, halfH, item.stroke) +
+    curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke, size);
 }
 
 /* Подпись кривой вдоль ломаной: точки перебираются по длине дуги,
@@ -1040,6 +1180,9 @@ function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, repor
   }
 
   var mid = at(total / 2);
+  if (!best && (!fallback || !fallback.free)) {
+    best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH);
+  }
   var spot = best || fallback ||
     { x: mid.x + mid.nx * THEME.gap.curveLabel, y: mid.y + mid.ny * THEME.gap.curveLabel };
 
@@ -1047,7 +1190,8 @@ function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, repor
   rememberCurveLabel(all, item, spot, halfW, halfH, report, sx, sy);
   collect(report, 'curveLabel', 'curve-label', spot.x, spot.y, halfW, halfH);
 
-  return curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke, size);
+  return vynoskaPodpisi(spot, halfW, halfH, item.stroke) +
+    curveLabelText(item.curve.label, spot.x, spot.y + halfH * 0.55, item.stroke, size);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1145,7 +1289,7 @@ function renderShape(shape, sx, sy, cell) {
     return '<g' + id + '>' + svgText(shape.text,
       sx(shape.at[0]) + offset[0], sy(shape.at[1]) + offset[1],
       shape.anchor || 'middle', {
-        size:   labelSize(shape.size || THEME.font.pointLabel),
+        size:   kegl(shape.size || THEME.font.pointLabel),
         family: THEME.font.curveLabelFamily,
         weight: THEME.font.pointLabelWeight,
         math:   true,
@@ -1191,8 +1335,10 @@ function slideLabelSpot(shape, sx, sy, halfW, halfH, cloud, field) {
    Перебираются восемь направлений от якоря; берётся то, где до
    облака препятствий дальше всего. Диагональ вверх-вправо идёт
    первой: это привычное место подписи точки. */
+/* Общий порядок мест подписи для всех движков: справа сверху, справа
+   снизу, слева сверху, слева снизу, сверху, снизу; затем сбоку. */
 var LABEL_DIRECTIONS = [
-  [1, -1], [-1, -1], [1, 1], [-1, 1],
+  [1, -1], [1, 1], [-1, -1], [-1, 1],
   [0, -1], [0, 1], [1, 0], [-1, 0]
 ];
 
@@ -1258,6 +1404,26 @@ function pointLabelSpot(ax, ay, halfW, halfH, gap, cloud, texts, field) {
   });
   return best;
 }
+
+/* Наименьший зазор между двумя прямоугольниками подписей, px
+   (0 — касаются или пересекаются). */
+function boxGap(a, b) {
+  var dx = Math.max(Math.abs(a.x - b.x) - a.halfW - b.halfW, 0);
+  var dy = Math.max(Math.abs(a.y - b.y) - a.halfH - b.halfH, 0);
+  return Math.max(dx, dy);
+}
+
+/* Расстояние от прямоугольника подписи до ближайшего препятствия облака. */
+function boxClear(box, cloud) {
+  var clear = Infinity;
+  for (var c = 0; c < cloud.length; c++) {
+    clear = Math.min(clear, rectDist(cloud[c], box.x, box.y, box.halfW, box.halfH));
+  }
+  return clear;
+}
+
+/* Подписи −1 двух осей у начала координат: меньший зазор — уже каша. */
+var AXIS_PAIR_GAP = 10;
 
 function bestLabelSpot(ax, ay, halfW, halfH, gap, cloud, field, prefer) {
   var best = null;
@@ -1449,6 +1615,99 @@ function ownership(item, all, sx, sy, cx, cy, halfW, halfH) {
   };
 }
 
+/* Последнее средство: вдоль линии свободного места нет (кривая зажата
+   другой кривой). Перебираем всё поле сеткой и берём свободное место
+   (зазор не меньше curveLabelClear, не на подписях), которое ближе
+   к своей кривой, чем к чужой, — самое близкое к своей. */
+function freeSpotNear(item, all, sx, sy, cloud, labelBoxes, field, halfW, halfH) {
+  var step = 6;
+  var index = cloudIndex(cloud, 24);
+  /* Сначала с обычным зазором, потом с меньшим — но не вплотную. */
+  var porogi = [THEME.curveLabelClear, 6, 3];
+  for (var k = 0; k < porogi.length; k++) {
+    var porog = porogi[k];
+    var best = null;
+    for (var cy = field.top + halfH + THEME.curveLabelEdge; cy <= field.bottom - halfH - THEME.curveLabelEdge; cy += step) {
+      for (var cx = field.left + halfW + THEME.curveLabelEdge; cx <= field.right - halfW - THEME.curveLabelEdge; cx += step) {
+        if (index.blizhe(cx, cy, halfW, halfH, porog)) { continue; }
+        if (labelBoxes.some(function (b) { return rectDist(b, cx, cy, halfW, halfH) <= 2; })) { continue; }
+        var mine = ownership(item, all, sx, sy, cx, cy, halfW, halfH);
+        if (mine.other <= mine.own + 2 || mine.apart < THEME.curveLabelApart) { continue; }
+        if (!best || mine.own < best.own) { best = { x: cx, y: cy, own: mine.own, score: 0 }; }
+      }
+    }
+    if (best) { return best; }
+  }
+  /* И такого нет — свободное место ближе всего к своей кривой и
+     короткая выноска от подписи к ней. */
+  var own = curveSamples(item, sx, sy);
+  var lead = null;
+  for (var y2 = field.top + halfH + THEME.curveLabelEdge; y2 <= field.bottom - halfH - THEME.curveLabelEdge; y2 += step) {
+    for (var x2 = field.left + halfW + THEME.curveLabelEdge; x2 <= field.right - halfW - THEME.curveLabelEdge; x2 += step) {
+      if (index.blizhe(x2, y2, halfW, halfH, 4)) { continue; }
+      if (labelBoxes.some(function (b) { return rectDist(b, x2, y2, halfW, halfH) <= 2; })) { continue; }
+      /* От подписей других графиков — как у обычного места (curveLabelApart). */
+      if (nearestTo(all.curveLabelBoxes || [], x2, y2, halfW, halfH) < THEME.curveLabelApart) { continue; }
+      var near = nearestTo(own, x2, y2, halfW, halfH);
+      if (!lead || near < lead.own) { lead = { x: x2, y: y2, own: near, score: 0, vynoska: true }; }
+    }
+  }
+  if (lead) {
+    var tip = null;
+    own.forEach(function (p) {
+      var d = rectDist(p, lead.x, lead.y, halfW, halfH);
+      if (!tip || d < tip.d) { tip = { x: p.x, y: p.y, d: d }; }
+    });
+    lead.to = tip;
+  }
+  return lead;
+}
+
+/* Корзины облака препятствий по клеткам size×size: перебор поля
+   спрашивает «есть ли препятствие ближе porog» только у соседних
+   корзин, а не у всего облака. */
+function cloudIndex(cloud, size) {
+  var korziny = {};
+  cloud.forEach(function (o) {
+    var hw = o.halfW || 0;
+    var hh = o.halfH || 0;
+    for (var i = Math.floor((o.x - hw) / size); i <= Math.floor((o.x + hw) / size); i++) {
+      for (var j = Math.floor((o.y - hh) / size); j <= Math.floor((o.y + hh) / size); j++) {
+        var key = i + ':' + j;
+        (korziny[key] || (korziny[key] = [])).push(o);
+      }
+    }
+  });
+  return {
+    blizhe: function (cx, cy, halfW, halfH, porog) {
+      var i0 = Math.floor((cx - halfW - porog) / size);
+      var i1 = Math.floor((cx + halfW + porog) / size);
+      var j0 = Math.floor((cy - halfH - porog) / size);
+      var j1 = Math.floor((cy + halfH + porog) / size);
+      for (var i = i0; i <= i1; i++) {
+        for (var j = j0; j <= j1; j++) {
+          var spisok = korziny[i + ':' + j];
+          if (!spisok) { continue; }
+          for (var c = 0; c < spisok.length; c++) {
+            if (rectDist(spisok[c], cx, cy, halfW, halfH) < porog) { return true; }
+          }
+        }
+      }
+      return false;
+    }
+  };
+}
+
+/* Выноска от края подписи к ближайшей точке её кривой — тонкая,
+   цветом кривой. Только у подписи, которой у кривой места не нашлось. */
+function vynoskaPodpisi(spot, halfW, halfH, stroke) {
+  if (!spot.vynoska || !spot.to) { return ''; }
+  var fx = Math.max(spot.x - halfW, Math.min(spot.x + halfW, spot.to.x));
+  var fy = Math.max(spot.y - halfH, Math.min(spot.y + halfH, spot.to.y));
+  return '<path class="graph-vynoska" d="M' + px(fx) + ' ' + px(fy) + 'L' + px(spot.to.x) + ' ' +
+    px(spot.to.y) + '" fill="none" stroke="' + stroke + '" stroke-width="1.2"/>';
+}
+
 /* Запасное место, когда идеального нет. Порядок: подпись своей кривой
    (ok) с большим зазором; затем — не налезающая ни на что (зазор не
    меньше curveLabelClear) с наибольшим перевесом своей кривой над
@@ -1521,7 +1780,8 @@ function textWidth(value, size, track) {
 /* Переменные в подписи набираются курсивом, числа и скобки — прямым.
    Правило то же, что в graph/math.js; рендерер держит его у себя,
    чтобы остаться без зависимостей. */
-var VARIABLE = /[A-Za-z]/;
+/* Строчные греческие (α, π) — тоже буквы: у KaTeX они в KaTeX_Math. */
+var VARIABLE = /[A-Za-zα-ω]/;
 
 function mathRuns(value) {
   var out = [];
@@ -1539,12 +1799,33 @@ function mathRuns(value) {
   return out;
 }
 
+/* Штрих производной — как у KaTeX (f^{\\prime}): знак ′ мельче и поднят,
+   а не прямой апостроф на строке. Следующий кусок возвращается на строку. */
+var PRIME = /['\u2032]/;
+var PRIME_RISE = 0.42;
+
 function mathSpans(value, baseItalic) {
-  var parts = mathRuns(String(value));
-  if (parts.length === 1 && parts[0].italic === !!baseItalic) { return esc(value); }
+  var text = String(value);
+  var parts = mathRuns(text);
+  if (!PRIME.test(text) && parts.length === 1 && parts[0].italic === !!baseItalic) {
+    return esc(value);
+  }
+  var raised = false;
   return parts.map(function (run) {
-    return '<tspan font-style="' + (run.italic ? 'italic' : 'normal') + '">' +
-      esc(run.text) + '</tspan>';
+    return run.text.split(/(['\u2032])/).filter(Boolean).map(function (chunk) {
+      if (PRIME.test(chunk)) {
+        raised = true;
+        return '<tspan font-style="normal" font-size="72%" dy="-' + PRIME_RISE + 'em">\u2032</tspan>';
+      }
+      /* dy в em тспана: подъём штриха считался от его 72 % кегля. */
+      var back = raised ? ' dy="' + (PRIME_RISE * 0.72).toFixed(3) + 'em"' : '';
+      raised = false;
+      /* Буквы — шрифтом букв (KaTeX_Math) курсивом, остальное — шрифтом
+         чисел прямо: font-family у tspan сильнее унаследованного. */
+      var family = run.italic ? ' style="font-family:' + SHRIFTY.BUKVY + '"' : '';
+      return '<tspan font-style="' + (run.italic ? 'italic' : 'normal') + '"' + family + back + '>' +
+        esc(chunk) + '</tspan>';
+    }).join('');
   }).join('');
 }
 
@@ -1552,7 +1833,8 @@ function svgText(value, x, y, anchor, opts) {
   var style = 'font-family:' + (opts.family || THEME.font.family) + ';paint-order:stroke fill' +
     (opts.style ? ';font-style:' + opts.style : '') +
     (opts.extra ? ';' + opts.extra : '');
-  return '<text x="' + px(x) + '" y="' + px(y) + '" text-anchor="' + anchor +
+  return '<text' + (opts.klass ? ' class="' + opts.klass + '"' : '') +
+    ' x="' + px(x) + '" y="' + px(y) + '" text-anchor="' + anchor +
     '" font-size="' + px(labelSize(opts.size)) + '"' + (opts.weight ? ' font-weight="' + opts.weight + '"' : '') +
     ' fill="' + (opts.fill || THEME.colors.label) + '" stroke="' + THEME.colors.halo +
     '" stroke-width="' + THEME.width.halo + '" stroke-linejoin="round"' +
@@ -1564,18 +1846,22 @@ function svgText(value, x, y, anchor, opts) {
 function numberText(value, x, y, anchor) {
   return svgText(value, x, y, anchor, {
     size: THEME.font.axisLabel,
+    /* π в числе оси — буквой, как в KaTeX: в KaTeX_Main греческих нет. */
+    math: /[α-ω]/.test(String(value)),
     extra: 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\' 1'
   });
 }
 
 /* x, y и 0 — курсив, как принято в математике. */
 function mathText(value, x, y, anchor) {
-  return svgText(value, x, y, anchor, { size: THEME.font.axisName, style: 'italic' });
+  /* Буквы курсивом шрифтом букв, цифры («0») — прямо, как в KaTeX. */
+  return svgText(value, x, y, anchor, { size: THEME.font.axisName, math: true });
 }
 
-/* Подпись графика — жирная антиква, переменные курсивом. */
+/* Подпись графика — антиква, переменные курсивом, штрих — как в KaTeX. */
 function curveLabelText(value, x, y, fill, size) {
   return svgText(value, x, y, 'middle', {
+    klass:  'graph-curve-label',
     size:   size || THEME.font.curveLabel,
     family: THEME.font.curveLabelFamily,
     weight: THEME.font.curveLabelWeight,
@@ -1650,6 +1936,7 @@ function renderFigure(scene, mode, report) {
 
 const api = {
   THEME: THEME,
+  sMinKeglem: sMinKeglem,
   renderGraph: renderGraph,
   renderFigure: renderFigure,
   studentScene: studentScene,
@@ -1668,4 +1955,4 @@ export default api;
    для тех же движков. */
 export { THEME, renderGraph, renderFigure, studentScene, sceneForMode, FIGURE_MODES, registerCurve,
          checkWindow, fmt, esc, px, textWidth, svgText, printTheme, printFitted, labelSize, indexSize,
-         gridCellAttr };
+         gridCellAttr, sMinKeglem };
