@@ -19,7 +19,8 @@ function esc(text: string): string {
 }
 
 /** Знаки, после которых формулу можно перенести на новую строку. */
-const OTNOSHENIE = /^(\s*\;\\Rightarrow\;\s*|\s*\\Rightarrow\s*|\s*=\s*|\s*\\le\s*|\s*\\ge\s*|\s*<\s*|\s*>\s*)/;
+const OTNOSHENIE =
+  /^(\s*\;\\Rightarrow\;\s*|\s*\\Rightarrow\s*|\s*=\s*|\s*\\le\s*|\s*\\ge\s*|\s*<\s*|\s*>\s*)/;
 
 /**
  * Куски между верхними «=», «⇒», «<» — в фигурные скобки: KaTeX
@@ -30,7 +31,7 @@ function poOtnosheniyam(tex: string): string {
   const kuski: string[] = [];
   let tek = '';
   let glubina = 0;
-  for (let i = 0; i < tex.length; ) {
+  for (let i = 0; i < tex.length;) {
     const ost = tex.slice(i);
     if (ost.startsWith('\\left')) glubina++;
     else if (ost.startsWith('\\right')) glubina--;
@@ -62,7 +63,7 @@ const krupno = (tex: string) =>
     .split(/,\s*\\quad\s*|,?\s*\\qquad\s*/)
     .map(
       (chast) =>
-        `<div class="z13-r-formula">${katex.renderToString(poOtnosheniyam(chast), { throwOnError: true })}</div>`,
+        `<div class="z13-r-formula">${katex.renderToString(poOtnosheniyam(chast), { throwOnError: true, displayFrac: true })}</div>`,
     )
     .join('');
 
