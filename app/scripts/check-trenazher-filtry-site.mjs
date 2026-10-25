@@ -110,6 +110,14 @@ async function page(ctx, url) {
   return p;
 }
 
+/** Прокрутить так, чтобы элемент встал под липкой лентой вкладок. */
+async function kElementu(p, selector) {
+  await p.evaluate((sel) => {
+    const top = document.querySelector(sel)?.getBoundingClientRect().top ?? 0;
+    window.scrollTo(0, window.scrollY + top - 250);
+  }, selector);
+}
+
 async function snimok(p, name, full = false) {
   if (SNIMKI === null) return;
   await p.waitForTimeout(300);
@@ -304,6 +312,7 @@ async function dat(p, task) {
   await dat(p, await otvet(p, '12:linear', 0));
   await p.locator('.trz-verdict--right').waitFor({ state: 'visible' });
   await p.getByRole('button', { name: /^Дальше/ }).click();
+  await kElementu(p, '.trz-svodka');
   await snimok(p, 'desktop-4-trenirovka');
   const question = await p.locator('.tsess__body .ptask__question').innerHTML();
   await p.locator('.trz-svodka').getByRole('button', { name: 'К фильтрам' }).click();
@@ -473,8 +482,12 @@ if (SNIMKI !== null) {
   const t = await otvet(p, '12:quadratic', 1);
   if (t.options === null) {
     await p.locator('.tsess__body input.ttask__input').fill('987654');
-    await p.locator('.tsess__body').getByRole('button', { name: 'Проверить', exact: true }).click();
+  } else {
+    const wrong = t.options.find((o) => o.number !== t.answer)?.number ?? '';
+    await p.locator('.tsess__body .popt').filter({ has: p.locator('.popt__no', { hasText: new RegExp(`^${wrong}$`) }) }).click();
   }
+  await p.locator('.tsess__body').getByRole('button', { name: 'Проверить', exact: true }).click();
+  await kElementu(p, '.trz-svodka');
   await snimok(p, 'desktop-4b-oshibka');
   await p
     .locator('.tsess__bar')
