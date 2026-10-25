@@ -184,7 +184,26 @@ for (let i = 0; i < risunki.length; i += PORCIYA) {
             y0: Number(t.getAttribute('y')),
           };
         };
-        const B = texts.map(box);
+        /* Знаки разметки учителя №9 нарисованы линиями (<g class="pr-znak">,
+           у отмеченных точек — pr-znak-tochka):
+           это тоже подписи — рамка группы, текст — сам знак. */
+        const znakBox = (g) => {
+          const b = g.getBBox();
+          const r = 2;
+          return {
+            x: b.x - r,
+            y: b.y - r,
+            w: b.width + 2 * r,
+            h: b.height + 2 * r,
+            t: g.getAttribute('data-znak') ?? '',
+            k: g.getAttribute('class') ?? '',
+            y0: Number(g.getAttribute('data-y')),
+          };
+        };
+        const B = [
+          ...texts.map(box),
+          ...[...svg.querySelectorAll('g.pr-znak, g.pr-znak-tochka')].map(znakBox),
+        ];
         /* 6. Рамка. */
         for (const b of B) {
           if (
@@ -233,7 +252,9 @@ for (let i = 0; i < risunki.length; i += PORCIYA) {
           if (os !== null) {
             const ay = Number(os[1]);
             const nuli = B.filter((b) => /\bpr-nul-label\b/.test(b.k));
-            const znaki = B.filter((b) => /\bpr-znak\b/.test(b.k) && !/pr-znak-nad/.test(b.k));
+            const znaki = B.filter(
+              (b) => /(^|\s)pr-znak(\s|$)/.test(b.k) && !/pr-znak-nad/.test(b.k),
+            );
             const vysoty = (xs) => [...new Set(xs.map((b) => b.y0.toFixed(1)))];
             if (nuli.some((b) => b.y < ay)) out.push(['ryady', 'подпись нуля над осью']);
             if (vysoty(nuli).length > 2)
