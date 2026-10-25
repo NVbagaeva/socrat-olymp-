@@ -389,6 +389,9 @@ export function stateFromPreset(
     seed: null,
     zameny: {},
     extras: { ...extras, kind: preset.kind ?? null },
+    ...(config.filtr === undefined
+      ? {}
+      : { filtr: preset.filtr ?? (config.filtr.options[0]?.id as string) }),
   };
 }
 
@@ -423,7 +426,9 @@ export function matchPreset(config: GenConfig, state: GenState): string | null {
   for (const p of config.presets) {
     const want = countsByTopic(config, planFromPreset(config, p, state.source));
     const lv = [...p.levels].sort().join() === [...state.levels].sort().join();
-    if (p.variants === state.variants && lv && same(counts, want)) return p.id;
+    const f =
+      config.filtr === undefined || (p.filtr ?? config.filtr.options[0]?.id) === state.filtr;
+    if (p.variants === state.variants && lv && f && same(counts, want)) return p.id;
   }
   return null;
 }

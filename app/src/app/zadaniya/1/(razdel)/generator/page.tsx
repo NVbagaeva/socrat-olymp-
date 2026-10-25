@@ -6,6 +6,7 @@ import { dannyeTrenazhera1 } from '@/lib/planimetriya/trenazher/dannye';
 import '../../../11/zadanie11.css';
 import '../../../komplekt.css';
 import '../../trenazher1.css';
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 
 const VKLADKA = ZADANIE1.tabs.find((tab) => tab.id === 'generator')?.label ?? 'Генератор';
 
@@ -21,5 +22,10 @@ export const metadata: Metadata = {
  */
 export default function Generator1Tab() {
   const d = dannyeTrenazhera1();
-  return <Generator1 razdely={d.razdely} bank={d.bank} base={`${ZADANIYA}/${ZADANIE1.slug}`} />;
+  return (
+    <>
+      <VariantFromSection />
+      <Generator1 razdely={d.razdely} bank={d.bank} base={`${ZADANIYA}/${ZADANIE1.slug}`} />
+    </>
+  );
 }

@@ -3,7 +3,7 @@
 import { useId, useState } from 'react';
 import { Button, FieldLabel, FieldMessage, Input, Radio } from '@/components/ui';
 import { registrationText } from '@/content/legal/account';
-import type { AccountApi, AccountSnapshot } from '@/lib/account/api';
+import type { AccountSnapshot } from '@/lib/account/api';
 import {
   checkRegistration,
   type RegistrationForm as Form,
@@ -29,16 +29,23 @@ const EMPTY: Form = {
  * пока форма не заполнена и обе галочки не стоят. Ошибки полей
  * показываются после первого ухода из поля, чтобы не ругать сразу.
  */
-export function RegistrationForm({
+export function RegistrationForm<T = AccountSnapshot>({
   api,
   onRegistered,
+  fixedRole,
+  submitLabel,
 }: {
-  api: AccountApi;
-  onRegistered: (account: AccountSnapshot) => void;
+  api: { register(form: Form, version: string): Promise<T> };
+  onRegistered: (account: T) => void;
+  /** Роль задана заранее (приглашение в кабинет) — выбора «Кто вы» нет. */
+  fixedRole?: Role;
+  submitLabel?: string;
 }) {
   const t = registrationText;
   const id = useId();
-  const [form, setForm] = useState<Form>(EMPTY);
+  const [form, setForm] = useState<Form>(() =>
+    fixedRole === undefined ? EMPTY : { ...EMPTY, role: fixedRole },
+  );
   const [touched, setTouched] = useState<Partial<Record<keyof Form, boolean>>>({});
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -93,19 +100,21 @@ export function RegistrationForm({
 
   return (
     <form className="reg-form" onSubmit={submit} noValidate>
-      <fieldset className="reg-form__roles">
-        <legend className="field__label">{t.role}</legend>
-        {(['student', 'tutor'] as Role[]).map((role) => (
-          <Radio
-            key={role}
-            name="role"
-            checked={form.role === role}
-            onChange={() => set('role', role)}
-          >
-            {t.roles[role]}
-          </Radio>
-        ))}
-      </fieldset>
+      {fixedRole === undefined ? (
+        <fieldset className="reg-form__roles">
+          <legend className="field__label">{t.role}</legend>
+          {(['student', 'tutor'] as Role[]).map((role) => (
+            <Radio
+              key={role}
+              name="role"
+              checked={form.role === role}
+              onChange={() => set('role', role)}
+            >
+              {t.roles[role]}
+            </Radio>
+          ))}
+        </fieldset>
+      ) : null}
 
       {field('name', t.name, { autoComplete: 'given-name' })}
       {field('email', t.email, { type: 'email', autoComplete: 'email' })}
@@ -140,7 +149,7 @@ export function RegistrationForm({
       />
 
       <Button type="submit" size="lg" fullWidth disabled={!check.canSubmit} loading={busy}>
-        {t.submit}
+        {submitLabel ?? t.submit}
       </Button>
       {!form.acceptSoglashenie || !form.acceptSoglasie ? (
         <FieldMessage className="reg-form__hint">{t.submitHint}</FieldMessage>

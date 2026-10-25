@@ -16,7 +16,20 @@
 
 .z15-vit {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
+}
+/* Длинная подпись кнопки на узком телефоне — в две строки: текст и
+   формула идут одной строкой текста, а не отдельными блоками. */
+.z15-vit__btn {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  min-height: var(--h-control-sm);
+  padding-block: var(--space-2);
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
 }
 .z15-vit__bar {
   display: flex;

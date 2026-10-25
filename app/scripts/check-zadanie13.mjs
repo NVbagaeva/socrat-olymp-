@@ -931,6 +931,141 @@ for (const [n, extra, want] of tables) {
     }
 }
 
+/* ── «Заполни таблицу»: строки — периоды, клетки в буквах ────────── */
+/* Проверка по смыслу: верная запись и равносильные ей принимаются,
+   типичные ошибки узнаются, число вместо букв — подсказка. Выражения
+   клеток при числах задачи дают числа таблицы солвера, формула — ответ. */
+{
+  const { tablitsaZapolni13, zapisiZapolni13 } = requireSrc('lib/zadanie13/zapolni');
+  const V = requireSrc('lib/zadanie13/vyrazhenie');
+  const { D } = requireSrc('lib/zadanie13/drob');
+  const { generate } = requireSrc('lib/zadanie13/generate');
+  const secret = requireSrc('lib/zadanie13/secret');
+  const { BANK_13 } = requireSrc('lib/zadanie13/bank');
+  const { TABLE_HEAD } = requireSrc('lib/zadanie13/tablica');
+  const POLYA = {
+    dif: ['start', 'change', 'interest', 'end'],
+    ann: ['start', 'afterInterest', 'payment', 'end'],
+    dep: ['start', 'afterInterest', 'payment', 'end'],
+  };
+  const pary = [...BANK_13];
+  for (let i = 0; i < 30; i++)
+    for (const id of ['P-01', 'P-02', 'P-03']) pary.push([id, `zap${i}`]);
+  let ravnosilnyh = 0;
+  let oshibok = 0;
+  for (const [id, seed] of pary) {
+    const t = generate(id, seed);
+    const z = tablitsaZapolni13(t, (x) => x);
+    checks += 1;
+    const w = `заполни таблицу ${id}|${seed}`;
+    if (!id.startsWith('P-')) {
+      if (z !== null) problems.push(`${w}: таблица у задачи не из «таблицы руками»`);
+      continue;
+    }
+    if (z === null) {
+      problems.push(`${w}: нет таблицы, а условие просит её заполнить`);
+      continue;
+    }
+    const tm = t.tableModel;
+    const zap = zapisiZapolni13(t);
+    const T = z.tochki.map(V.izZapisi);
+    if (z.stroki.length !== tm.rows.length) problems.push(`${w}: строк не по числу периодов`);
+    if (
+      JSON.stringify(z.stolbcy.map((s) => s.title)) !== JSON.stringify(TABLE_HEAD[tm.scheme].cols)
+    )
+      problems.push(`${w}: столбцы не как в теории`);
+    /* Числа задачи: S, r, k, n, платежи. */
+    const r = D(t.params.r);
+    const chisla = { S: D(t.params.S), r, k: D(1).add(r.div(100)), n: D(tm.rows.length) };
+    tm.rows.forEach((row, i) => (chisla[`x${'₀₁₂₃₄'[i + 1]}`] = D(String(row.payment))));
+    const op = tm.rows.find((x) => Math.abs(x.payment) > 1e-9);
+    if (op) chisla[op.payment > 0 ? 'y' : 'x'] = D(String(Math.abs(op.payment)));
+    const prov = (vvod, k) => V.proverit(vvod, k, T).t;
+    z.stroki.forEach((s, i) =>
+      s.kletki.forEach((k, c) => {
+        const zz = zap.stroki[i][c];
+        const where = `${w}: ${s.label} · ${z.stolbcy[c].title}`;
+        if (prov(zz.z, k) !== 'verno') problems.push(`${where}: верная запись не принята`);
+        const u = V.razobrat(zz.z);
+        const val = u ? V.vychislit(u, chisla) : null;
+        const nado = tm.rows[i][POLYA[tm.scheme][c]];
+        if (val === null || Math.abs(val.toNumber() - nado) > 1e-6)
+          problems.push(`${where}: в числах ${val?.toNumber()} ≠ ${nado} у солвера`);
+        if (k.dano !== null) return;
+        /* Равносильные записи. */
+        for (const r2 of [
+          `1·(${zz.z})`,
+          `(${zz.z})+0`,
+          `2(${zz.z})/2`,
+          zz.z.replace(/r\/100/g, String(t.params.r / 100)),
+        ]) {
+          ravnosilnyh += 1;
+          if (prov(r2, k) !== 'verno')
+            problems.push(`${where}: равносильная запись «${r2}» не принята`);
+        }
+        if (/^S\/\d+$/.test(zz.z)) {
+          const d = zz.z.slice(2);
+          for (const r2 of [`(1/${d})S`, `S·1/${d}`, `1/${d}·S`])
+            if (prov(r2, k) !== 'verno') problems.push(`${where}: «${r2}» не принята`);
+        }
+        /* Типичные ошибки узнаются (кроме совпавших с верной). */
+        for (const o of zz.oshibki) {
+          const it = V.proverit(o, k, T);
+          if (it.t === 'verno') continue;
+          oshibok += 1;
+          if (it.t !== 'oshibka') problems.push(`${where}: ошибка «${o}» не узнана (${it.t})`);
+        }
+        /* Число вместо букв. */
+        if (k.bukvy && prov(String(nado).replace('.', ','), k) !== 'chisla')
+          problems.push(`${where}: число вместо букв не замечено`);
+      }),
+    );
+    /* Формула ответа: принимается и при числах задачи даёт ответ. */
+    if (prov(zap.formula, z.formula) !== 'verno') problems.push(`${w}: формула ответа не принята`);
+    const fu = V.razobrat(zap.formula);
+    const fv = fu ? V.vychislit(fu, chisla) : null;
+    if (fv === null || Math.abs(fv.toNumber() - t.answer) > 1e-6)
+      problems.push(`${w}: формула ответа в числах ${fv?.toNumber()} ≠ ответу ${t.answer}`);
+    /* Уровень 1: верна ровно одна таблица; уровень 2: в каждой клетке ровно один вариант. */
+    const u1 = [0, 1, 2].filter((j) => secret.choiceMatches(`${z.kluch}:t:${j}`, z.uroven1.vernyy));
+    if (u1.length !== 1) problems.push(`${w}: уровень 1 — верных таблиц ${u1.length}`);
+    if (new Set(z.uroven1.tablitsy.map((x) => secret.openText(x, z.kluch))).size !== 3)
+      problems.push(`${w}: уровень 1 — таблицы совпадают`);
+    const vse = z.stroki.flatMap((s) => s.kletki);
+    if (z.uroven2.length < 3) problems.push(`${w}: уровень 2 — меньше трёх клеток`);
+    for (const id2 of z.uroven2) {
+      const k = vse.find((x) => x.id === id2);
+      const ok = k
+        ? k.nabor.filter((_, j) => secret.choiceMatches(`${z.kluch}:${id2}:${j}`, k.vernyy))
+        : [];
+      if (!k || k.nabor.length < 3 || ok.length !== 1)
+        problems.push(`${w}: уровень 2 — клетка ${id2} без трёх вариантов с одним верным`);
+    }
+    if (z.uroven3.length === 0) problems.push(`${w}: уровень 3 — пусто`);
+    if (z.itog) {
+      const it = V.razobrat(zap.itog);
+      const iv = it ? V.vychislit(it, chisla) : null;
+      const nado =
+        tm.scheme === 'dif'
+          ? tm.rows.reduce((a, x) => a + x.interest, 0)
+          : tm.rows.reduce((a, x) => a + x.payment, 0);
+      if (iv === null || Math.abs(iv.toNumber() - nado) > 1e-6)
+        problems.push(`${w}: «Итого» ${iv?.toNumber()} ≠ ${nado}`);
+    }
+  }
+  checks += 1;
+  if (ravnosilnyh < 500 || oshibok < 300)
+    problems.push(
+      `заполни таблицу: мало проверок (равносильных ${ravnosilnyh}, ошибок ${oshibok})`,
+    );
+}
+
+/* «Заполни таблицу»: схема названа в условии, столбцы пустой таблицы
+   подписаны как в теории (решение автора) — на проверке утечки типа
+   с листа ученика их вынимаем. */
+const bezZapolni = (json) =>
+  json.replace(/<table class=\\"z13-sheet-pusto z13-sheet-pusto--zapolni\\">.*?<\/table>/g, '');
+
 /* ── Генератор: план, замены, пресеты, адрес ────────────────────── */
 {
   const P13 = requireSrc('lib/zadanie13/gen/params');
@@ -992,6 +1127,7 @@ for (const [n, extra, want] of tables) {
       for (const z of list.poVariantam.flat()) {
         bezUsloviy = bezUsloviy.split(JSON.stringify(z.questionHtml).slice(1, -1)).join('');
       }
+      bezUsloviy = bezZapolni(bezUsloviy);
       const utechka = bezUsloviy.match(
         /дифференцированн|аннуитет|поломанн|не из открытого банка|вклад/i,
       );
@@ -1082,6 +1218,7 @@ for (const [n, extra, want] of tables) {
       let bezUsloviy = JSON.stringify(S13.sheetSpec13(p, list, 'uchenik'));
       for (const z of list.poVariantam.flat())
         bezUsloviy = bezUsloviy.split(JSON.stringify(z.questionHtml).slice(1, -1)).join('');
+      bezUsloviy = bezZapolni(bezUsloviy);
       const utechka = bezUsloviy.match(
         /дифференцированн|аннуитет|поломанн|не из открытого банка|вклад|платёж|переплат/i,
       );
@@ -1146,8 +1283,10 @@ for (const [n, extra, want] of tables) {
     est('= \\dfrac{42S}{100} = 0{,}42S', 'P₁ = 0,42S');
     est('\\dfrac{S}{4}\\cdot \\dfrac{16}{100}\\cdot 10', 'P₂ = S/4 · 16/100 · 10');
     est('0{,}4S', 'P₂ = 0,4S');
-    est('x_{1} = \\dfrac{0{,}42S\\cdot 100}{S} = 42\\,\\%', 'x₁ = 42 %');
-    est('x_{2} = \\dfrac{0{,}4S\\cdot 100}{S} = 40\\,\\%', 'x₂ = 40 %');
+    est('? = \\dfrac{0{,}42S\\cdot 100}{S} = 42', 'первый банк: ? = 42');
+    est('Переплата $P_{1}$ — $42\\,\\%$ от суммы кредита', 'P₁ — 42 % от кредита');
+    est('? = \\dfrac{0{,}4S\\cdot 100}{S} = 40', 'второй банк: ? = 40');
+    est('Переплата $P_{2}$ — $40\\,\\%$ от суммы кредита', 'P₂ — 40 % от кредита');
     est('42\\,\\% - 40\\,\\% = 2\\,\\%', '42 % − 40 % = 2 %');
     const t1 = r.shagi.find((st) => st.title === 'Составляем таблицу: первый банк').bloki[0].t;
     if (t1.rows[0].cells[0] !== 'S')
@@ -1217,7 +1356,7 @@ for (const [n, extra, want] of tables) {
         if (!sol.includes(`= ${tex(koef)}S`)) problems.push(`${w}: P ≠ ${tex(koef)}S (солвер)`);
         if (
           !['A-01', 'A-13', 'A-15'].includes(id) &&
-          !sol.includes(`= ${tex(koef.mul(100))}\\\\,\\\\%`)
+          !sol.includes(`— $${tex(koef.mul(100))}\\\\,\\\\%$ от суммы кредита`)
         )
           problems.push(`${w}: процент от кредита ≠ ${tex(koef.mul(100))} %`);
       }
@@ -1302,6 +1441,18 @@ for (const [n, extra, want] of tables) {
       counts[info.type] = (counts[info.type] ?? 0) + 1;
       seen.add(t.condition);
       inline(t.condition, where + ' условие');
+      /* Обозначения по легенде: ставка — r (r_{1}, r_{2}, … при нескольких),
+         искомый процент — «?», X в подсказках не встречается (платёж — x). */
+      const solJson = JSON.stringify(t.solution);
+      const chuzhaya = solJson.match(/(?<![\\a-zA-Z{])[a-qs-zA-Z](?:_\{\d\})?\\\\,\\\\%/);
+      if (chuzhaya)
+        problems.push(
+          `${where}: процент под буквой ${chuzhaya[0]} — по легенде ставка r, искомый процент «?»`,
+        );
+      if (/[a-z] = 1 \+ \\\\dfrac/.test(solJson.replace(/k(?:_\{\d\})? = 1 \+ \\\\dfrac/g, '')))
+        problems.push(`${where}: множитель не k`);
+      if (JSON.stringify(t.hints).includes('$X$'))
+        problems.push(`${where}: в подсказке $X$ вместо $x$`);
       for (const st of t.solution) {
         inline(st.title + ' ' + st.text, where + ' решение');
         if (st.formula) typeset(st.formula, where + ' формула');

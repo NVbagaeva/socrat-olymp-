@@ -8,6 +8,7 @@
  * катетами: подписи обязаны поместиться в обоих.
  */
 
+import { withoutPrintFigures } from '@/lib/sheet/figureRules.js';
 import { rngOf } from '../vychisleniya/rng';
 import { paramsKey } from './prototypes/common';
 import { prototypeById } from './prototypes';
@@ -29,7 +30,16 @@ export function risunokChist(risunok: Risunok): boolean {
   return true;
 }
 
+/**
+ * Задача по seed. Печатный профиль рисунков (lib/sheet/figureRules.js)
+ * генерация не видит: рисунок отбраковывается по отчёту движка, и с
+ * печатными кеглями тот же seed дал бы другую задачу, чем на сайте.
+ */
 export function generate(prototypeId: string, seed: string): Generated {
+  return withoutPrintFigures(() => generateTask(prototypeId, seed));
+}
+
+function generateTask(prototypeId: string, seed: string): Generated {
   const prototype = prototypeById(prototypeId);
   if (prototype === undefined) {
     throw new Error(`Нет прототипа ${prototypeId}`);

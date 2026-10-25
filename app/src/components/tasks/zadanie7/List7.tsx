@@ -1,67 +1,46 @@
 'use client';
 
-import { clsx } from 'clsx';
 import { useEffect, useState } from 'react';
-import { RamkaPrimer } from '@/components/teoriya/Ramki';
-import { Tex } from '@/components/ui/Tex';
-import { TEORIYA_7_DLYA_PROTOTIPA, vseKartochki7, type Kartochka7 } from '@/content/teoriya7';
+import { PrintSheet } from '@/components/tasks/generator/PrintSheet';
+import { GENERATOR7_TEXTS } from '@/content/generator7';
 import { GENERATOR_7 } from '@/content/zadanie7';
-import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
+import { checkKitSheet, kitFootLabel } from '@/lib/komplekt';
+import { buildDocument } from '@/lib/sheet/sheet.js';
+import { listSheetVse, sShapkoy } from '@/lib/sheetList';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { zagruzitIndeks, zagruzitZadachi, type ZadachaLite } from '@/lib/zadanie7/dannye';
 import {
   modelUroka,
   parseUrokQuery,
   parseZapros,
+  parseZaprosKlyuchi,
   sobratList,
+  sobratListKlyuchi,
   type ModelLista,
 } from '@/lib/zadanie7/sborka';
-import type { Solved } from '@/lib/zadanie7/types';
-import { KartochkaTelo7 } from './KartochkaTelo7';
-import { Razbor7 } from './Razbor7';
+import { sheetSpec7, type Sborka7, type Vid7 } from '@/lib/zadanie7/sheet7';
 
 const T = GENERATOR_7;
 
-export type Vid7 = 'uchenik' | 'uchitel';
+export type { Vid7 };
 
 interface Gotovo {
-  model: ModelLista;
-  zadachi: Map<string, ZadachaLite>;
-  reshit: (z: ZadachaLite) => Solved;
+  sborka: Sborka7;
   kit: { code: string | null; warning: string | null };
-}
-
-/** Ответ на листе: десятичная запятая и настоящий минус. */
-function otvetText(x: number): string {
-  return String(x).replace('.', ',').replace('-', '−');
-}
-
-function Metka({ z }: { z: ZadachaLite }) {
-  return z.source === 'analog' ? <span className="z7-list__metka"> {T.analogMetka}</span> : null;
-}
-
-/** Рамки теории: карточки теории прототипов листа, каждая один раз. */
-function RamkiTeorii({ prototipy }: { prototipy: string[] }) {
-  const vse = vseKartochki7();
-  const ids = [...new Set(prototipy.flatMap((p) => TEORIYA_7_DLYA_PROTOTIPA(p)?.kartochka ?? []))];
-  const kartochki = ids.flatMap((id) => vse.find((k) => k.id === id) ?? []) as Kartochka7[];
-  return (
-    <div className="z7-list__teoriya">
-      {kartochki.map((k) => (
-        <KartochkaTelo7 key={k.id} k={k} />
-      ))}
-    </div>
-  );
+  query: string;
 }
 
 /**
- * Печатный лист №7 — генератора (по запросу в адресе) и, когда
- * появятся уроки, урока (?kod=…&u=…). Лист ученика — только условия
- * и поле для ответа; лист учителя — те же задачи с ответами и
- * разбором по шагам, этапы «ОДЗ» и «Отбор корней» выделены. Оба
- * собираются из одного запроса, поэтому задачи совпадают.
- * Решения строит решатель прототипа в браузере: данные без ответов.
+ * Печатный лист №7 — генератора (по запросу в адресе) и урока
+ * (?kod=…&u=…) — на общем шаблоне листов (lib/sheet, sheet7.ts):
+ * страницы A4, шапка, место для решения (sp=). Лист ученика — условия и
+ * строка ответа; лист учителя — те же задачи с ответами и разбором по
+ * шагам, этапы «ОДЗ» и «Отбор корней» выделены. Оба собираются из
+ * одного запроса, поэтому задачи совпадают. Решения строит решатель
+ * прототипа в браузере: данные без ответов.
  */
-export function List7({ vid }: { vid: Vid7 }) {
+export function List7({ vid }: { vid: Vid7 | 'vse' }) {
   const [gotovo, setGotovo] = useState<Gotovo | null>(null);
   const [oshibka, setOshibka] = useState<string | null>(null);
 
@@ -72,8 +51,12 @@ export function List7({ vid }: { vid: Vid7 }) {
         const indeks = await zagruzitIndeks();
         let model: ModelLista | null = null;
         const u = parseUrokQuery(q);
+        const zk = parseZaprosKlyuchi(q);
         if (u) {
           model = modelUroka(u.kod, u.no, u.n, indeks);
+        } else if (zk) {
+          /* Адрес общего генератора (ps=2): задачи по ключам позиций. */
+          model = sobratListKlyuchi(zk, indeks);
         } else {
           const z = parseZapros(q);
           if (z) {
@@ -98,15 +81,15 @@ export function List7({ vid }: { vid: Vid7 }) {
             ? [
                 {
                   questionHtml: z.text,
-                  ...(vid === 'uchitel' ? { answer: String(reshit(z).answer) } : {}),
+                  ...(vid === 'uchenik' ? {} : { answer: String(reshit(z).answer) }),
                 },
               ]
             : [];
         });
-        const kit = checkKitSheet(q, '7', vid === 'uchitel' ? 'teacher' : 'student', {
+        const kit = checkKitSheet(q, '7', vid === 'uchenik' ? 'student' : 'teacher', {
           blocks: [{ tasks }],
         });
-        setGotovo({ model, zadachi, reshit, kit });
+        setGotovo({ sborka: { model, zadachi, reshit }, kit, query: q.toString() });
       } catch (e) {
         setOshibka((e as Error).message);
       }
@@ -119,107 +102,39 @@ export function List7({ vid }: { vid: Vid7 }) {
   if (gotovo === null) {
     return <p>{T.sobiraem}</p>;
   }
-  const { model, zadachi, reshit, kit } = gotovo;
+  const { sborka, kit, query } = gotovo;
   return (
-    <div className={clsx('z7-list', `z7-list--${vid}`)}>
-      <div className="z7-list__panel">
-        <button
-          type="button"
-          className="btn btn--primary"
-          onClick={() => printKitSheet(kit.warning)}
-        >
-          {T.pechat}
-        </button>
-        <span>{vid === 'uchitel' ? T.uchitel : T.uchenik}</span>
-      </div>
-      <header className="z7-list__shapka">
-        <p className="z7-list__eyebrow">
-          Будет на ЕГЭ · {vid === 'uchitel' ? T.uchitel : T.uchenik}
-        </p>
-        <h1>{model.zagolovok}</h1>
-        {vid === 'uchenik' ? (
-          <p className="z7-list__fio">{T.fio}</p>
-        ) : (
-          <p className="z7-list__note">{T.otbor}</p>
-        )}
-      </header>
-      {model.bloki.map((b) => (
-        <section key={b.id} className="z7-list__blok">
-          <h2>{b.title}</h2>
-          {b.note && vid === 'uchitel' ? <p className="z7-list__note">{b.note}</p> : null}
-          {b.teoriya ? <RamkiTeorii prototipy={b.teoriya} /> : null}
-          {(b.primery ?? []).map((id) => {
-            const z = zadachi.get(id);
-            if (!z) {
-              return null;
-            }
-            const s = reshit(z);
-            return (
-              <RamkaPrimer
-                key={id}
-                title={TEORIYA_7_DLYA_PROTOTIPA(z.prototypeId)?.title ?? ''}
-                uslovie={z.text}
-                shagi={s.etapy.map((e) => ({
-                  label: e.title.replace(/^Шаг \d+\.\s*/, ''),
-                  paras: e.lines,
-                }))}
-              />
-            );
-          })}
-          {b.spiski.map((variant, vi) => (
-            <div key={`v${vi}`} className="z7-list__variant">
-              {b.spiski.length > 1 ? <h3>Вариант {vi + 1}</h3> : null}
-              {vid === 'uchitel' && variant.length > 0 ? (
-                <p className="z7-list__klyuch">
-                  {T.otvety}{' '}
-                  {variant
-                    .map((id, k) => {
-                      const z = zadachi.get(id);
-                      return z ? `${k + 1}) ${otvetText(reshit(z).answer)}` : '';
-                    })
-                    .join('; ')}
-                </p>
-              ) : null}
-              {variant.map((id, k) => {
-                const z = zadachi.get(id);
-                if (!z) {
-                  return null;
-                }
-                if (vid === 'uchenik') {
-                  return (
-                    <section
-                      key={id}
-                      className={clsx('z7-list__zadacha', b.mesto ? 'z7-list__zadacha--mesto' : '')}
-                    >
-                      <p className="z7-list__uslovie">
-                        <b className="z7-list__nomer">{k + 1}.</b> <Tex text={z.text} />
-                        <Metka z={z} />
-                      </p>
-                      <p className="z7-list__otvet">{T.otvetPole}</p>
-                    </section>
-                  );
-                }
-                const s = reshit(z);
-                return (
-                  <section key={id} className="z7-list__zadacha z7-list__zadacha--uchitel">
-                    <div className="z7-list__kusok-pervyy">
-                      <p className="z7-list__uslovie">
-                        <b className="z7-list__nomer">{k + 1}.</b> <Tex text={z.text} />
-                        <Metka z={z} />
-                      </p>
-                      <p className="z7-list__otvet-uchitel">
-                        Ответ: <b>{otvetText(s.answer)}</b>
-                      </p>
-                    </div>
-                    <Razbor7 s={s} />
-                  </section>
-                );
-              })}
-            </div>
-          ))}
-        </section>
-      ))}
-      <footer className="z7-list__podval">{kitFootLabel(kit.code) ?? `Код: ${model.kod}`}</footer>
-    </div>
+    <PrintSheet
+      theme="color"
+      layout="single"
+      buildKey={`${vid}:${query}`}
+      build={async () => {
+        const shapka = sborka.model.shapka;
+        /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+        const qr =
+          shapka?.qr === true
+            ? await qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+            : undefined;
+        const list = (v: Vid7) =>
+          sShapkoy(sheetSpec7(sborka, v), shapka, GENERATOR7_TEXTS.podzagolovok, qr);
+        const kod = kitFootLabel(kit.code) ?? `Код: ${sborka.model.kod}`;
+        if (vid === 'vse') {
+          /* Место для решения (sp=) — у листа ученика в начале файла. */
+          const spec = vseWithSpace(
+            listSheetVse(list('uchenik'), list('uchitel')),
+            spaceOfQuery(new URLSearchParams(query)),
+          );
+          return { html: buildDocument({ ...spec, kit: kod }, {}), warning: kit.warning };
+        }
+        /* Место для решения (sp=) — только у листа ученика. */
+        const spec = sheetWithSpace(
+          list(vid),
+          spaceOfQuery(new URLSearchParams(query)),
+          vid === 'uchenik',
+          () => sheetSpec7(sborka, 'uchitel'),
+        );
+        return { html: buildDocument({ ...spec, kit: kod }, {}), warning: kit.warning };
+      }}
+    />
   );
 }

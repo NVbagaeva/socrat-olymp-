@@ -141,6 +141,15 @@
 .z13-sheet-pusto thead th:first-child {
   width: 14%;
 }
+/* «Заполни таблицу»: клетки под выражение в буквах, подписи столбцов мельче. */
+.z13-sheet-pusto--zapolni td {
+  height: 10mm;
+}
+.z13-sheet-pusto--zapolni thead th {
+  height: auto;
+  font-size: var(--sheet-fs-tiny);
+  line-height: 1.2;
+}
 
 /* Зачёт: первая страница. */
 .z13-sheet-zachet {
