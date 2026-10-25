@@ -1571,6 +1571,7 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
       [krupnyy * 0.85, 6],
       [krupnyy * 0.7, 6],
       [krupnyy * 0.6, 6],
+      [krupnyy * 0.5, 6],
     ] as const) {
       if (plokhih(ryad) === 0) break;
       const drugoy = raskladka(size, otstup);
@@ -1660,21 +1661,19 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
             : ['above-right', 'below-right', 'above-left'],
           fig.teoriya === true || PECHAT.on ? [10, 18, 26] : [10, 18],
         );
-      /* Знак — крупно; тесно — мельче, но не мельче прежней подписи. */
-      const kegli = znak
-        ? [ZNAK.kegl * 0.8, ZNAK.kegl * 0.7, V.auxLabel.size].filter(
-            (k, n, all) => k >= V.auxLabel.size && all.indexOf(k) === n,
-          )
-        : [V.auxLabel.size];
+      /* Рамка знака — как у прежней буквы «+» того же кегля: раскладка
+         знаков у точек та же, что была, а штрих — жирный. Тесно — мельче. */
+      const poBukve = (textWidth('+', V.auxLabel.size) / 2 + 3 - ZNAK.zapas) / (ZNAK.dlina * 0.5);
+      const kegli = znak ? [poBukve, poBukve * 0.85, poBukve * 0.7] : [V.auxLabel.size];
       let kegl = kegli[0] as number;
       let b: Podpis | null = null;
       for (const [n, k] of kegli.entries()) {
         const bylo = problems.length;
         kegl = k;
         b = postavit(
-          znak ? k * ZNAK.dlina * 0.5 + 3 : textWidth(text, V.auxLabel.size) / 2 + 3,
+          znak ? k * ZNAK.dlina * 0.5 + ZNAK.zapas : textWidth(text, V.auxLabel.size) / 2 + 3,
           /* «−» плоский: по высоте ему хватает прежней рамки. */
-          text === '+' ? Math.max(halfH, k * ZNAK.dlina * 0.5 + 3) : halfH,
+          text === '+' ? Math.max(halfH, k * ZNAK.dlina * 0.5 + ZNAK.zapas) : halfH,
         );
         if (problems.length === bylo || n === kegli.length - 1) break;
         problems.length = bylo;
