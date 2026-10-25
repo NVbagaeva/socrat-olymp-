@@ -14,31 +14,33 @@ export function Razbor10({ s, podskazki = false }: { s: Solved; podskazki?: bool
       {pervyy ? (
         <section className="z10-razbor__etap">
           <h4 className="z10-razbor__title">{pervyy.title}</h4>
-          <table className="z10-dano">
-            <thead>
-              <tr>
-                <th scope="col">Величина</th>
-                <th scope="col">Значение</th>
-                <th scope="col">Что это</th>
-              </tr>
-            </thead>
-            <tbody>
-              {s.dano.map((r) => (
-                <tr key={`${r.oboz}-${r.znach}`}>
-                  <td>
-                    <Tex text={`$${r.oboz}$`} />
-                  </td>
-                  <td>
-                    <Tex text={`$${r.znach}$`} />
-                    {r.ed ? <span className="z10-dano__ed"> {r.ed}</span> : null}
-                  </td>
-                  <td>
-                    <Tex text={r.smysl} />
-                  </td>
+          <div className="z10-dano-scroll">
+            <table className="z10-dano">
+              <thead>
+                <tr>
+                  <th scope="col">Величина</th>
+                  <th scope="col">Значение</th>
+                  <th scope="col">Что это</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {s.dano.map((r) => (
+                  <tr key={`${r.oboz}-${r.znach}`}>
+                    <td>
+                      <Tex text={`$${r.oboz}$`} />
+                    </td>
+                    <td>
+                      <Tex text={`$${r.znach}$`} />
+                      {r.ed ? <span className="z10-dano__ed"> {r.ed}</span> : null}
+                    </td>
+                    <td>
+                      <Tex text={r.smysl} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       ) : null}
       {ostalnye.map((e) => (
