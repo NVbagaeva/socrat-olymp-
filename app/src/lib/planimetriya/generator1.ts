@@ -229,6 +229,9 @@ export function engine1(
     subtitle(state) {
       return subtitleOf(paramsIzSostoyaniya({ ...state, seed: '' }, config));
     },
+    formatEge(state) {
+      return paramsIzSostoyaniya({ ...state, seed: '' }, config).rezhim === 'komplekt';
+    },
     parse(q) {
       if (!q.has('s') || q.get('m') === 'u') return null;
       const p = parseSheetQuery1(q);

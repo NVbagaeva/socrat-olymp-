@@ -333,6 +333,47 @@ export function defaultExtras(config: GenConfig): GenExtras {
   };
 }
 
+/**
+ * Виды работ, на которых памятка и разобранный пример по умолчанию
+ * выключены: работа проверяет, а памятка подсказывает ход решения.
+ * На остальных (домашняя, тренировочная) — включены.
+ */
+export const VIDY_BEZ_PODSKAZOK: readonly string[] = ['sr', 'pv', 'kr', 'dg', 'zc', 'pe', 'tv'];
+
+/**
+ * Памятка и пример по умолчанию для вида работы. kind null — «по
+ * составу»: лист в формате варианта ЕГЭ (ege) — без них, иначе с ними.
+ */
+export function sPodskazkami(kind: string | null, ege: boolean): boolean {
+  return kind === null ? !ege : !VIDY_BEZ_PODSKAZOK.includes(kind);
+}
+
+/** Переключатели, которые учитель менял руками: их умолчания не трогают. */
+export interface Rucnye {
+  theory?: boolean;
+  examples?: boolean;
+}
+
+/**
+ * Памятка и примеры по виду работы. Что учитель переключил сам — как
+ * есть. Раздел без рамок или без примеров — поле не меняется.
+ */
+export function umolchaniyaPoTipu(
+  config: GenConfig,
+  extras: GenExtras,
+  ege: boolean,
+  rucnye: Rucnye = {},
+): GenExtras {
+  const dop = config.extras;
+  if (dop === undefined) return extras;
+  const on = sPodskazkami(extras.kind, ege);
+  const out = { ...extras };
+  if (dop.theory !== false && rucnye.theory !== true) out.theory = on;
+  if (dop.examples !== false && rucnye.examples !== true)
+    out.examples = on ? (extras.examples === 0 ? 1 : extras.examples) : 0;
+  return out;
+}
+
 /** Пресет заполняет состав, уровни, варианты и вид работы; остальное «Дополнительно» — как было. */
 export function stateFromPreset(
   config: GenConfig,
