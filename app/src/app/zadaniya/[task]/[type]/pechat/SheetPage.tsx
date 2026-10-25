@@ -4,6 +4,8 @@ import { useSearchParams } from 'next/navigation';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { parseSheetQuery, sheetSpec, sheetSpecVse } from '@/lib/generatorSheet';
 import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel } from '@/lib/komplekt';
 import { PrintSheet } from '@/components/tasks/generator/PrintSheet';
 
@@ -37,12 +39,27 @@ export function SheetPage({ withAnswers, vse = false, subtopic }: SheetPageProps
           return null;
         }
         const sobrat = (svg: string | undefined) => {
-          const built = vse
-            ? sheetSpecVse(params, subtopic, svg)
-            : sheetSpec(params, withAnswers, subtopic, svg);
+          const sborka = () =>
+            vse
+              ? sheetSpecVse(params, subtopic, svg)
+              : sheetSpec(params, withAnswers, subtopic, svg);
+          const built = sborka();
           /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
           const kit = checkKitSheet(query, '12', withAnswers || vse ? 'teacher' : 'student', built);
-          return { html: buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {}), warning: kit.warning };
+          /* На лист — сборка в печатном профиле рисунков (figureRules.js):
+             отпечаток комплекта — по обычной, как у напечатанных раньше.
+             Место для решения (sp=) — только у листа ученика. */
+          const space = spaceOfQuery(query);
+          const risunki = withPrintFigures(sborka);
+          const printed = vse
+            ? vseWithSpace(risunki, space)
+            : sheetWithSpace(risunki, space, !withAnswers, () =>
+                sheetSpec(params, true, subtopic, svg),
+              );
+          return {
+            html: buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {}),
+            warning: kit.warning,
+          };
         };
         /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
         if (params.qr !== true) {

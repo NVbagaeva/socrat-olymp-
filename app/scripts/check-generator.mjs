@@ -45,6 +45,9 @@ const C12 = requireSrc('lib/ves12/generator12.ts');
 const E12 = requireSrc('lib/ves12/engine12.ts');
 const G12 = requireSrc('lib/generatorSheet.ts');
 const { GEN_UI } = requireSrc('content/generatorUi.ts');
+const fs = await import('node:fs');
+const { createElement } = await import('react');
+const { renderToStaticMarkup } = await import('react-dom/server');
 
 let failed = 0;
 let checks = 0;
@@ -190,6 +193,118 @@ const RAZDELY = [
       urok: null,
     };
   })(),
+  /* №6, №7: банк готовых задач, лист печати — React (List6, List7). Лист
+     для проверки собирается из той же модели (sborka.ts), что рисует
+     страница: задачи, памятка, примеры и шапка. */
+  ...['6', '7'].map((z) => {
+    const C = requireSrc(`lib/zadanie${z}/generator${z}.ts`);
+    const E = requireSrc(`lib/zadanie${z}/engine${z}.ts`);
+    const P = requireSrc(`lib/zadanie${z}/protoInfo.ts`);
+    const S = requireSrc(`lib/zadanie${z}/sborka.ts`);
+    const M = requireSrc(`lib/zadanie${z}/prototypes/index.ts`);
+    const T = requireSrc(`content/generator${z}.ts`)[`GENERATOR${z}_TEXTS`];
+    const Razbor = requireSrc(`components/tasks/zadanie${z}/Razbor${z}.tsx`)[`Razbor${z}`];
+    const Uslovie = z === '6' ? requireSrc('components/tasks/zadanie6/Uslovie6.tsx').Uslovie6 : null;
+    const { typeset } = requireSrc('lib/tex.ts');
+    const dir = new URL(`../public/data/zadanie${z}/`, import.meta.url);
+    const indeks = JSON.parse(fs.readFileSync(new URL('indeks.json', dir), 'utf8'));
+    const vse = new Map();
+    for (const pr of [...new Set(indeks.map((x) => x.p))])
+      for (const x of JSON.parse(fs.readFileSync(new URL(`${pr}.json`, dir), 'utf8'))) vse.set(x.id, x);
+    const dannye = {
+      indeks: async () => indeks,
+      zadachi: async (ps) => new Map([...vse].filter(([, x]) => ps.includes(x.prototypeId))),
+    };
+    const base = `/zadaniya/${z}`;
+    const config = C[`config${z}`](base, P[`protoInfo${z}`](), P[`gruppy${z}`](), indeks);
+    const engine = E[`engine${z}`](config, base, dannye);
+    /* Условие так же, как в предпросмотре и на листе. */
+    const vopros = (x) => {
+      if (Uslovie === null) return `<p class="z7-list__uslovie">${typeset(x.text)}</p>`;
+      const ris = M.prototype(x.prototypeId).ris(x.params);
+      const u = { text: x.text, ...(ris ? { ris } : {}), ...(x.posle ? { posle: x.posle } : {}) };
+      return renderToStaticMarkup(createElement(Uslovie, { u }));
+    };
+    const parse = (q) => {
+      const zk = S.parseZaprosKlyuchi(q);
+      return zk !== null ? { ...zk, poKlyucham: true } : { ...S.parseZapros(q), poKlyucham: false };
+    };
+    const model = (p) =>
+      p.poKlyucham ? S.sobratListKlyuchi(p, indeks) : S.sobratList(p, indeks);
+    const sobrat = (p) => {
+      const m = model(p);
+      const zadachi = m.bloki.find((b) => b.id === 'zadachi');
+      return {
+        model: m,
+        poVariantam: zadachi.spiski.map((ids) =>
+          ids.map((id) => ({ id, questionHtml: vopros(vse.get(id)) })),
+        ),
+      };
+    };
+    const den = (iso) => iso.split('-').reverse().join('.');
+    return {
+      name: `№${z}`,
+      config,
+      engine,
+      params: (st) => parse(new URLSearchParams(engine.hrefs(st).student.split('?')[1])),
+      parse,
+      query: (p) => (p.poKlyucham ? null : S.zaprosQuery(p)),
+      sobrat,
+      spec: (p, list, vid, qr) => {
+        const m = list.model;
+        const teoriya = m.bloki.find((b) => b.id === 'teoriya');
+        /* Шапка — из параметров листа: «без QR» проверяется на тех же задачах. */
+        const sh = p.poKlyucham ? model(p).shapka : undefined;
+        const title = {
+          subtitle: sh?.kind ? sh.kind : T.sheet.title,
+          ...(sh?.qr ? { qr } : {}),
+        };
+        const variants = list.poVariantam.map((v) => ({
+          title,
+          blocks: [
+            {
+              ...(teoriya?.teoriya ? { recap: { items: teoriya.teoriya } } : {}),
+              leadItems: (teoriya?.primery ?? []).map((id) => vopros(vse.get(id))),
+              tasks: v.map((t, i) => ({
+                id: t.id,
+                no: i + 1,
+                questionHtml: t.questionHtml,
+                solutionHtml:
+                  vid === 'uchenik'
+                    ? null
+                    : renderToStaticMarkup(
+                        createElement(Razbor, {
+                          s: M.prototype(vse.get(t.id).prototypeId).solve(vse.get(t.id).params),
+                        }),
+                      ),
+              })),
+            },
+          ],
+        }));
+        return {
+          variants,
+          extraItems: [],
+          fields: { date: sh?.date ? den(sh.date) : '' },
+          head: { author: sh?.uchitel ?? T.sheet.teacher },
+        };
+      },
+      primery: (p, list) =>
+        (list.model.bloki.find((b) => b.id === 'teoriya')?.primery ?? []).map((id) =>
+          vopros(vse.get(id)),
+        ),
+      badge: `z${z}-sheet-badge`,
+      ist: null,
+      ramkaNaListe: (blocks) =>
+        blocks.some((x) => (x.recap?.items ?? []).length > 0) &&
+        blocks.some((x) => (x.leadItems ?? []).length > 0),
+      old:
+        z === '6'
+          ? 't=P01:2,P04:1&i=m&v=3&e=1&st=v&seed=K7Q2'
+          : 't=P01:2,P11:1&i=f&v=3&e=1&seed=K7Q2',
+      oldIds: z === '6' ? 'P01,P01,P04' : 'P01,P01,P11',
+      urok: `kod=K${z}Q2AB&u=1`,
+    };
+  }),
   /* №12: генератор по всем типам и вкладка подтемы — один адаптер, разные конфиги. */
   ...[
     {

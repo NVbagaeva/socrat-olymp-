@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/layout/AppShell';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 import { Generator12 } from '@/components/tasks/generator/Generator12';
 import { razdelyZadaniya } from '@/components/tasks/razdely/razdely12';
 import { findSection } from '@/content/sections';
@@ -42,6 +43,7 @@ export default function GeneratorAllPage() {
           title={generatorAllText.pageTitle}
           lead={generatorAllText.lead}
         />
+        <VariantFromSection />
         <Generator12 config={config12(BASE)} base={BASE} ekran={`${BASE}/?`} ikonki={ikonki} />
       </main>
     </AppShell>

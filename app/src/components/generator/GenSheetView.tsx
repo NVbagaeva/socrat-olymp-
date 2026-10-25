@@ -4,6 +4,8 @@ import { clsx } from 'clsx';
 import { useRef, useState } from 'react';
 import { GEN_UI } from '@/content/generatorUi';
 import type { GenConfig, GenExtras, GenTask } from '@/lib/generator/obshchiy/types';
+import { solutionLength, spaceFor, spaceHtml, type SheetSpace } from '@/lib/sheet/space.js';
+import '@/lib/sheet/space.css';
 import { GenIcon } from './GenIcons';
 
 export type TaskAction = 'swap' | 'level' | 'remove' | 'menu' | 'up' | 'down';
@@ -34,6 +36,7 @@ export function GenSheetView({
   levels = true,
   extras,
   qr,
+  space,
   onAction,
   onMove,
 }: {
@@ -49,6 +52,8 @@ export function GenSheetView({
   extras: GenExtras | null;
   /** QR-код на лист ученика, SVG. */
   qr: string | null;
+  /** Место для решения листа ученика: та же разметка, что на листе (space.js). */
+  space?: SheetSpace;
   onAction: (pos: string, action: TaskAction) => void;
   /** Перетаскивание: задача pos встаёт на место to (номер в листе с нуля). */
   onMove: (pos: string, to: number) => void;
@@ -186,9 +191,25 @@ export function GenSheetView({
                   </p>
                 </div>
               ) : (
-                <p className="gen-task__ans">
-                  {GEN_UI.otvet}: <span />
-                </p>
+                <>
+                  {(() => {
+                    const field =
+                      space === undefined || demo
+                        ? null
+                        : spaceFor(space, null, solutionLength(t.solutionHtml));
+                    return field === null ? null : (
+                      <div
+                        className="gen-task__space"
+                        dangerouslySetInnerHTML={{
+                          __html: spaceHtml(field, field.rows, true, true),
+                        }}
+                      />
+                    );
+                  })()}
+                  <p className="gen-task__ans">
+                    {GEN_UI.otvet}: <span />
+                  </p>
+                </>
               )}
             </div>
             {live ? (

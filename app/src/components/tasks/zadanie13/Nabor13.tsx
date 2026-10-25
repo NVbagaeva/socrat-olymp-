@@ -10,6 +10,7 @@ import { parseGenQuery13, vsegoZadach13 } from '@/lib/zadanie13/gen/params';
 import type { Razbor13, Zadacha13Sealed } from '@/lib/zadanie13/opornye/seal';
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie13/secret';
 import { Razbor13Blok } from './Razbor13';
+import { TablitsaZapolni13 } from './TablitsaZapolni13';
 
 type Zadacha = Zadacha13Sealed & { no: number; pos: string };
 
@@ -41,6 +42,7 @@ function Karta({ z }: { z: Zadacha }) {
         {z.tablitsaHtml === null ? null : (
           <div className="z13-ptask__tab" dangerouslySetInnerHTML={{ __html: z.tablitsaHtml }} />
         )}
+        {z.zapolni === null ? null : <TablitsaZapolni13 t={z.zapolni} />}
         {z.vybory === null ? (
           <div className="z13-resh__otvet">
             <Input

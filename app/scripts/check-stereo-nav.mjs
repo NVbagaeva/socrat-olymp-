@@ -52,6 +52,9 @@ const { TIPY_3, TIPY_15 } = requireSrc('content/stereo/tipy.ts');
 const { RAZBORY_3 } = requireSrc('lib/stereo/razbory3.ts');
 const { RAZBORY_15 } = requireSrc('lib/stereo/razbory15.ts');
 const { BANK } = requireSrc('lib/zadanie3/index.ts');
+const { SOLID_THEME } = requireSrc('lib/solid/render.ts');
+const HL = SOLID_THEME.width.hl;
+const HL_HIDDEN = SOLID_THEME.width.hlHidden;
 
 const PLAN = new Set([92]);
 const bank = BANK.map((proto) => Number(proto.id.slice(4)));
@@ -381,9 +384,10 @@ for (const size of SIZES) {
     const shag = await page.locator('.z3d__shag').first().innerText();
     check(shag.trim() === `Шаг ${k} из 3`, where(`после «Далее» ${k} раз: «${shag}»`));
     const svg = await page.locator('.z3d__kholst').first().innerHTML();
-    /* Выделенная линия видна — 3.4, скрыта (внутри куба) — пунктир 2.4. */
+    /* Выделенная линия — толщины выделения из оформления движка: видимая
+       и скрытая (внутри куба, пунктиром). */
     check(
-      svg.includes('stroke-width="3.4"') || svg.includes('stroke-width="2.4"'),
+      svg.includes(`stroke-width="${HL}"`) || svg.includes(`stroke-width="${HL_HIDDEN}"`),
       where(`шаг ${k} не выделен`),
     );
   }
@@ -453,7 +457,11 @@ for (const size of SIZES) {
         ...(m.marks ?? []),
       ].some((x) => x.shag !== undefined);
       check(
-        !sShagami || /stroke-width="(3\.4|2\.4|2\.2)"|font-weight="700"/.test(svg),
+        !sShagami ||
+          [HL, HL_HIDDEN, SOLID_THEME.width.hlMarker].some((x) =>
+            svg.includes(`stroke-width="${x}"`),
+          ) ||
+          svg.includes('data-hl="1"'),
         where('на чертеже шаг 1 не выделен'),
       );
     }

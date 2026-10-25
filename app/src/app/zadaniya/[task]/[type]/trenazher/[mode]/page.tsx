@@ -3,7 +3,7 @@ import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
-import { TrainerShell } from '@/components/tasks/trainer';
+import { TrainerShell } from '@/components/tasks/trainer/TrainerShell';
 import { findSection, findSubtopic, trainerSubtopicParams } from '@/content/sections';
 import { findTrainerShortcut, trainerPage, trainerShortcutIds } from '@/content/trainerModes';
 import 'katex/dist/katex.min.css';

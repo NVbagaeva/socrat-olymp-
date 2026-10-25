@@ -143,7 +143,7 @@ export const P03_66: Prototype = {
         text: `Дно не меняется, значит объём вырос во столько же раз, во сколько уровень: в ${ru(k)} ${razaWord(k)}.`,
       },
       {
-        text: `Деталь заняла разницу: $${ru(V)} \\cdot ${ru(k)} - ${ru(V)} = ${ru(round(V * (k - 1)))} ${unit}$.`,
+        text: `Деталь заняла разницу: $${ru(V)} \\cdot ${ru(k)} - ${ru(V)} = ${ru(round(V * (k - 1)))}$ ${unit}.`,
         value: V * (k - 1),
       },
     ];

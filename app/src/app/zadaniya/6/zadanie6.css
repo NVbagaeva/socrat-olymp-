@@ -439,8 +439,7 @@
 
 .z6-tr__start,
 .z6-tr__nav,
-.z6-zadacha__dop,
-.z6-gen__knopki {
+.z6-zadacha__dop {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
@@ -659,40 +658,9 @@
   padding: 0;
   list-style: none;
 }
-/* ── Генератор и репетиторы ── */
-.z6-gen,
+/* ── Репетиторы ── */
 .z6-rep {
   max-width: 960px;
-}
-
-.z6-gen__blok + .z6-gen__blok {
-  margin-top: var(--space-6);
-}
-
-.z6-gen__tipy {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.z6-gen__tipy label {
-  display: flex;
-  gap: var(--space-3);
-  justify-content: space-between;
-  align-items: center;
-}
-
-.z6-gen__nastroyki {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.z6-gen__itog {
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-info);
 }
 
 .btn.is-disabled {
@@ -767,10 +735,6 @@
   background: var(--color-surface-soft);
   font-size: 12px;
   color: var(--color-text-secondary);
-}
-
-.z6-gen__vsego {
-  margin: 0;
 }
 
 .z6-rep__ssylki {

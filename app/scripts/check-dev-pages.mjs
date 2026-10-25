@@ -27,6 +27,13 @@ const DEV_ROUTES = [
   'styleguide/soglasiya',
   'dev/intro',
   'styleguide/chertezhi-3',
+  /* Пробный кабинет ролей и ДЗ (KABINET=1). Сам /kabinet/ — настоящая
+     страница входа, она есть в обычной сборке. */
+  'kabinet/proba',
+  'kabinet/klass',
+  'kabinet/dz',
+  'kabinet/priglashenie',
+  'kabinet/vydat-dz',
 ];
 /* Признаки служебных страниц в собранных файлах: адрес и класс разметки. */
 const MARKERS = [
@@ -45,6 +52,8 @@ const MARKERS = [
   'dev-intro__panel',
   '/styleguide/chertezhi-3',
   'ch3p__grid',
+  '/kabinet/proba/',
+  'kab-trial',
 ];
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {

@@ -10,6 +10,14 @@
  * Подписи: простые (имя вершины, число, градусы, корень из числа)
  * пишутся текстом SVG — они печатаются где угодно. Сложные (дробь)
  * — разметкой KaTeX внутри foreignObject, если её дали.
+ *
+ * Оформление на бумаге (ОФОРМЛЕНИЕ): видимые линии 1,35 pt, невидимые —
+ * штрих 0,9 pt (штрих 4 pt, пробел 3 pt), заливка выделенной фигуры не
+ * плотнее 0,15, подписи — шрифтом KaTeX: имена курсивом с индексом 70 %
+ * ниже строки, числа прямо и не жирно, кегль не меньше 10 pt. Толщины
+ * задаются в pt через edPt — единиц рисунка в одном pt на бумаге; лист
+ * пересчитывает их под итоговую ширину (sheet/figureRules.js,
+ * data-line-pt).
  */
 
 import { escSvg, imyaSvg } from '@/lib/stereo/proekciya';
@@ -18,6 +26,11 @@ import type { Kadr, LiniyaKadra, PodpisKadra } from './kadr';
 export interface OpciiSvg {
   /** Подписи: текстом SVG или не рисовать (интерактив кладёт свои, KaTeX). */
   podpisi?: 'svg' | 'net';
+  /**
+   * Единиц рисунка в одном pt на бумаге. По умолчанию 4/3: единица —
+   * CSS-пиксель экрана (1 px = 0,75 pt).
+   */
+  edPt?: number;
   /** Цвета токенами (на странице и листе) или значениями (файл). */
   tsveta?: 'tokeny' | 'fiks';
   /** Разметка KaTeX для сложных подписей (дроби). */
@@ -43,16 +56,45 @@ const FIKS = {
 };
 
 const f = (x: number) => (Math.round(x * 10) / 10).toString();
+const f2 = (x: number) => (Math.round(x * 100) / 100).toString();
 
-/** Стиль линии: цвет, толщина, штрих, прозрачность. */
-export function stilLinii(l: Pick<LiniyaKadra, 'vid' | 'vidno' | 'yarko' | 'tusklo'>) {
+/** Оформление чертежа на бумаге, pt. */
+export const OFORMLENIE = {
+  /** Видимая линия (ребро, отрезок условия, построение): 1,2–1,5 pt. */
+  vidno: 1.35,
+  /** Подсвеченный шаг решения — толще, но в той же границе. */
+  yarko: 1.5,
+  /** Невидимая линия: штрих 0,8–1 pt. */
+  nevidno: 0.9,
+  shtrih: [4, 3] as const,
+  /** Заливка выделенной фигуры и подсвеченной — не плотнее 0,15. */
+  zalivka: 0.12,
+  zalivkaYarko: 0.15,
+  /** Кегль подписи, не меньше 10 pt. */
+  kegl: 10.3,
+  /** Индекс — 70 % кегля. */
+  indeks: 0.7,
+} as const;
+
+/** Единиц рисунка в pt по умолчанию: CSS-пиксель экрана. */
+export const ED_PT_EKRAN = 4 / 3;
+
+/** Стиль линии: цвет, толщина и штрих в единицах рисунка, прозрачность. */
+export function stilLinii(
+  l: Pick<LiniyaKadra, 'vid' | 'vidno' | 'yarko' | 'tusklo'>,
+  edPt: number = ED_PT_EKRAN,
+) {
+  const o = OFORMLENIE;
   const cvet = l.yarko ? 'podsvetka' : l.vid === 'rebro' ? 'rebro' : 'akcent';
-  let w = l.vid === 'rebro' ? 1.6 : l.vid === 'uslovie' ? 2 : 1.4;
-  if (l.yarko) w += 1.1;
-  if (!l.vidno) w = Math.max(1.1, w - 0.4);
-  let op = l.vidno ? 1 : 0.8;
+  const pt = !l.vidno ? o.nevidno : l.yarko ? o.yarko : o.vidno;
+  let op = l.vidno ? 1 : 0.85;
   if (l.tusklo) op *= 0.28;
-  return { cvet, w, dash: l.vidno ? '' : '5 4', op } as const;
+  return {
+    cvet,
+    w: pt * edPt,
+    dash: l.vidno ? '' : o.shtrih.map((x) => f2(x * edPt)).join(' '),
+    op,
+  } as const;
 }
 
 const GRECH: Record<string, string> = {
@@ -106,10 +148,15 @@ function plain(s: string): string {
   );
 }
 
+/* Шрифты KaTeX (их приносит katex.min.css листа и страницы); дальше —
+   похожие системные антиквы. Имена — курсив KaTeX_Math, числа — прямой
+   KaTeX_Main. */
+const SHRIFT_IMENI = "KaTeX_Math, 'Times New Roman', Times, serif";
+const SHRIFT_CHISLA = "KaTeX_Main, 'Times New Roman', Times, serif";
+
 function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
   const op = p.tusklo ? ' opacity="0.35"' : '';
   const fill = p.yarko ? c.podsvetka : p.vid === 'imya' ? c.tekst : c.akcent;
-  const weight = p.yarko || p.vid === 'dannoe' ? ' font-weight="600"' : '';
   const txt = texSvg(p.tex);
   if (txt === null && o.katex) {
     return (
@@ -117,19 +164,25 @@ function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
       `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:${o.kegl}px;line-height:1;color:${fill}">${o.katex(p.tex)}</div></foreignObject>`
     );
   }
-  const shrift =
-    p.vid === 'imya' ? "'PT Serif', Georgia, serif" : 'var(--font-sans, Inter, sans-serif)';
+  const shrift = p.vid === 'imya' ? SHRIFT_IMENI : SHRIFT_CHISLA;
+  /* Индекс — цифры прямым KaTeX_Main, как в формуле: у KaTeX_Math они
+     старинного начертания. */
+  const tekst = (txt ?? escSvg(p.tex)).replace(
+    /<tspan baseline-shift="sub"/g,
+    `<tspan baseline-shift="sub" font-family="${SHRIFT_CHISLA}" font-style="normal"`,
+  );
   return (
-    `<text x="${f(p.x + 1)}" y="${f(p.y + p.h * 0.78)}" font-family="${shrift}" font-size="${o.kegl}" fill="${fill}"${weight}${op}>` +
-    `${txt ?? escSvg(p.tex)}</text>`
+    `<text x="${f(p.x + 1)}" y="${f(p.y + p.h * 0.78)}" font-family="${shrift}" font-size="${f2(o.kegl)}" fill="${fill}"${op}>` +
+    `${tekst}</text>`
   );
 }
 
 export function kadrSvg(k: Kadr, o: OpciiSvg): string {
   const c = o.tsveta === 'fiks' ? FIKS : TOKENY;
+  const edPt = o.edPt ?? ED_PT_EKRAN;
   const out: string[] = [];
   for (const z of k.zalivki) {
-    const op = (z.yarko ? 0.26 : 0.13) * (z.tusklo ? 0.35 : 1);
+    const op = (z.yarko ? OFORMLENIE.zalivkaYarko : OFORMLENIE.zalivka) * (z.tusklo ? 0.35 : 1);
     out.push(
       `<polygon points="${z.pts.map((p) => `${f(p[0])},${f(p[1])}`).join(' ')}" fill="${z.yarko ? c.podsvetka : c.akcent}" fill-opacity="${op.toFixed(3)}" stroke="none"/>`,
     );
@@ -137,15 +190,15 @@ export function kadrSvg(k: Kadr, o: OpciiSvg): string {
   // Невидимые под видимыми, тусклые под яркими.
   const rang = (l: LiniyaKadra) => (l.vidno ? 2 : 0) + (l.yarko ? 4 : 0) + (l.tusklo ? 0 : 1);
   for (const l of [...k.linii].sort((x, y) => rang(x) - rang(y))) {
-    const s = stilLinii(l);
+    const s = stilLinii(l, edPt);
     out.push(
-      `<line x1="${f(l.a[0])}" y1="${f(l.a[1])}" x2="${f(l.b[0])}" y2="${f(l.b[1])}" stroke="${c[s.cvet]}" stroke-width="${s.w}" stroke-linecap="round"${s.dash ? ` stroke-dasharray="${s.dash}"` : ''}${s.op < 1 ? ` stroke-opacity="${s.op.toFixed(2)}"` : ''}/>`,
+      `<line x1="${f(l.a[0])}" y1="${f(l.a[1])}" x2="${f(l.b[0])}" y2="${f(l.b[1])}" stroke="${c[s.cvet]}" stroke-width="${f2(s.w)}" stroke-linecap="${s.dash ? 'butt' : 'round'}"${s.dash ? ` stroke-dasharray="${s.dash}"` : ''}${s.op < 1 ? ` stroke-opacity="${s.op.toFixed(2)}"` : ''}/>`,
     );
   }
   for (const p of k.puti) {
-    const s = stilLinii({ vid: 'vspom', vidno: p.vidno, yarko: p.yarko, tusklo: p.tusklo });
+    const s = stilLinii({ vid: 'vspom', vidno: p.vidno, yarko: p.yarko, tusklo: p.tusklo }, edPt);
     out.push(
-      `<polyline points="${p.pts.map((q) => `${f(q[0])},${f(q[1])}`).join(' ')}" fill="none" stroke="${c[s.cvet]}" stroke-width="${s.w}"${s.dash ? ` stroke-dasharray="3 3"` : ''}${s.op < 1 ? ` stroke-opacity="${s.op.toFixed(2)}"` : ''}/>`,
+      `<polyline points="${p.pts.map((q) => `${f(q[0])},${f(q[1])}`).join(' ')}" fill="none" stroke="${c[s.cvet]}" stroke-width="${f2(s.w)}"${s.dash ? ` stroke-dasharray="${s.dash}"` : ''}${s.op < 1 ? ` stroke-opacity="${s.op.toFixed(2)}"` : ''}/>`,
     );
   }
   for (const t of k.tochki) {
@@ -160,7 +213,8 @@ export function kadrSvg(k: Kadr, o: OpciiSvg): string {
     ? ` role="img" aria-label="${escSvg(o.alt).replace(/"/g, '&quot;')}"`
     : ' aria-hidden="true"';
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" class="${o.klass ?? 'ch3-svg'}" viewBox="0 0 ${f(k.W)} ${f(k.H)}" width="${f(k.W)}" height="${f(k.H)}"${aria}>` +
+    `<svg xmlns="http://www.w3.org/2000/svg" class="${o.klass ?? 'ch3-svg'}" viewBox="0 0 ${f(k.W)} ${f(k.H)}" width="${f(k.W)}" height="${f(k.H)}"` +
+    ` data-line-pt="${OFORMLENIE.vidno}" data-line-w="${f2(OFORMLENIE.vidno * edPt)}"${aria}>` +
     out.join('') +
     '</svg>'
   );

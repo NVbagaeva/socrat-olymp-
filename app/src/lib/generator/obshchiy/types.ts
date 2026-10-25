@@ -64,6 +64,8 @@ export interface GenPreset {
   pickTopic?: number;
   /** Вид работы в шапке листа (GenConfig.extras.kinds); нет — по составу. */
   kind?: string;
+  /** Значение фильтра раздела (GenConfig.filtr); нет — первое. */
+  filtr?: string;
 }
 
 export interface GenConfig {
@@ -85,6 +87,12 @@ export interface GenConfig {
    */
   taskLevel?: false;
   sources: { id: SourceId; title: string; short: string; note: string }[];
+  /**
+   * Фильтр задач раздела рядом с источником: у №6 — «Формулировка»
+   * (сюжетные, стандартные, все). Нет поля — фильтра нет. Первое
+   * значение — по умолчанию.
+   */
+  filtr?: { title: string; options: { id: string; title: string; note: string }[] };
   /** Первый — по умолчанию. */
   presets: GenPreset[];
   limits: { maxPerTopic: number; maxTasks: number; variantsMax: number };
@@ -149,6 +157,8 @@ export interface GenState {
   /** Замены: «вариант.ключ позиции» («2.PR-04_0») → сколько раз заменяли. */
   zameny: Record<string, number>;
   extras: GenExtras;
+  /** Значение фильтра раздела (GenConfig.filtr). */
+  filtr?: string;
   /**
    * Набор открыт по адресу прежнего генератора: лист собирается по
    * старой схеме, как был напечатан. Значение понимает адаптер раздела:

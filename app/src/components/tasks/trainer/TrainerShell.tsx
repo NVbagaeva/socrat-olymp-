@@ -9,7 +9,7 @@ import type { Filtr, TrenazherConfig } from '@/lib/trenazher/types';
 import { podtemaNabora, trenazherConfig12, zadachi12 } from '@/lib/ves12/trenazher12';
 import { TabScrollOnMount } from '../TabScroll';
 import { TrainerStats } from './TrainerStats';
-import { Trenazher12 } from './Trenazher12';
+import { Trenazher12Lazy } from './Trenazher12Lazy';
 
 /** Ярлык прежнего адреса /trenazher/<режим>/: наборы, режим, правила ответа. */
 export interface TrainerPreset {
@@ -79,7 +79,7 @@ export function TrainerShell({ subtopic, base, icon, preset = null, children }: 
       </header>
       <TabScrollOnMount />
       {children ?? (
-        <Trenazher12
+        <Trenazher12Lazy
           config={config}
           refs={refs}
           start={preset === null ? null : filtrYarlyka(preset, config)}

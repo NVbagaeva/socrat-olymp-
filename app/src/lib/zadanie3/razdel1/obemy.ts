@@ -184,7 +184,7 @@ export const P03_14: Prototype = {
   uslovie: (p) =>
     `Найдите объём многогранника, вершинами которого являются точки $${listed(PART_14)}$ ` +
     `прямоугольного параллелепипеда $${NAMES}$, у которого $AB=${ru(num(p, 'a'))}$, ` +
-    `AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}.`,
+    `$AD=${ru(num(p, 'b'))}$, $AA_1=${ru(num(p, 'c'))}$.`,
 
   dopustimo: positive,
   otvet: (p) => {
@@ -382,7 +382,7 @@ export const P03_17: Prototype = {
   uslovie: (p) =>
     `Найдите объём многогранника, вершинами которого являются вершины $${listed(PART_17)}$ ` +
     `прямоугольного параллелепипеда $${NAMES}$, у которого $AB=${ru(num(p, 'a'))}$, ` +
-    `BC=${ru(num(p, 'b'))}, BB₁=${ru(num(p, 'c'))}.`,
+    `$BC=${ru(num(p, 'b'))}$, $BB_1=${ru(num(p, 'c'))}$.`,
 
   dopustimo: positive,
   otvet: (p) => {

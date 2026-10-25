@@ -434,6 +434,18 @@
 .ed-pristavki:not(:has(.ed-pristavki__kartinki)) {
   grid-template-columns: minmax(0, 1fr);
 }
+/* Узкий телефон: ячейки теснее, а если таблица приставок всё равно
+   шире экрана — прокручивается в своём блоке. */
+@media (max-width: 359.98px) {
+  .ed-pristavki > .ed-tablica {
+    display: block;
+    overflow-x: auto;
+  }
+  .ed-tablica th,
+  .ed-tablica td {
+    padding: var(--space-2);
+  }
+}
 .ed-pristavki__kartinki {
   display: grid;
   gap: var(--space-3);
