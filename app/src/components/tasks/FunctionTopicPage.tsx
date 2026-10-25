@@ -14,7 +14,7 @@ import { prototypeSkills } from './configurator/skillItems';
 import { GeneratorTab } from './generator';
 import { MethodsTab, metodyFor } from './MethodsTab';
 import { PrepSkills } from './prep';
-import { TrainerShell } from './trainer';
+import { TrainerShell } from './trainer/TrainerShell';
 import { TopicAbout } from './TopicAbout';
 import type { TheoryFigureId } from '@/lib/theoryFigures';
 import { TopicProgress } from './TopicProgress';
