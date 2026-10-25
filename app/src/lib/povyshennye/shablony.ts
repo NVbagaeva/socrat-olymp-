@@ -18,10 +18,16 @@ import {
   giperbolaPryamaya,
   kLog,
   korenKoren,
+  parabolaB,
+  parabolaKorni,
+  pokazatelnayaOtnoshenie,
   type GiperbolaPryamaya,
   type GrafikTask,
   type KLog,
   type KorenKoren,
+  type ParabolaB,
+  type ParabolaKorni,
+  type PokazatelnayaOtnoshenie,
 } from '@/lib/graph/povyshennye';
 import {
   chisloNaOtrezke,
@@ -54,11 +60,19 @@ import {
 } from '@/lib/veroyatnost/povyshennye';
 import { dec, type Prototype as ProtoVer } from '@/lib/veroyatnost/types';
 import {
+  logAmBn,
+  logChastnoeStepeney,
   logObratnyy,
   logPryamoy,
   sinDvoynogoPrivedenie,
   stepeniChastnoe,
+  trigCepochka,
+  trigPrivedenie,
+  type LogAmBn,
+  type TrigPrivedenie,
+  type TrigUgol,
 } from '@/lib/vychisleniya/povyshennye';
+import { fn as fnTex, rad as radTex } from '@/lib/vychisleniya/tex';
 import type { Draft } from '@/lib/vychisleniya/types';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
 import { P03_74S } from '@/lib/zadanie3/razdel7/povyshennye';
@@ -70,7 +84,14 @@ import {
 } from '@/lib/zadanie3/razdel8/povyshennye';
 import type { Params as Params3, Prototype as Proto3 } from '@/lib/zadanie3/types';
 import { prototype as prototype6 } from '@/lib/zadanie6/prototypes';
-import { PV7_KOREN, PV7_LOG_KVADRAT, PV7_LOG_STEPENI } from '@/lib/zadanie7/prototypes/povyshennye';
+import {
+  PV7_KOREN,
+  PV7_KOREN_KVADRAT,
+  PV7_KOREN_LINEYNYY,
+  PV7_KUB_OBRATNOE,
+  PV7_LOG_KVADRAT,
+  PV7_LOG_STEPENI,
+} from '@/lib/zadanie7/prototypes/povyshennye';
 import type { Prototype as Proto7 } from '@/lib/zadanie7/types';
 import { subtype as subtype11 } from '@/lib/zadanie11/prototypes';
 import { generateFixed } from '@/lib/zadanie13/generate';
@@ -366,6 +387,92 @@ function hints08Obratnyy(p: { m: number; t: number }): HintLike[] {
       ],
       correct: 0,
     },
+  ];
+}
+
+/** Подсказки к частному логарифмов со степенями в основаниях и числах. */
+function hints08Chastnoe(p: {
+  a: number;
+  i: number;
+  b: number;
+  j: number;
+  k: number;
+  l: number;
+}): HintLike[] {
+  const L = `\\log_{${p.a}} ${p.b}`;
+  return [
+    {
+      question: `Степенями каких чисел являются $${p.a ** p.i}$, $${p.b ** p.j}$, $${p.a ** p.k}$, $${p.b ** p.l}$?`,
+      options: [`$${p.a}$ и $${p.b}$`, `$${p.a ** p.i}$ и $${p.b ** p.j}$`, '$10$'],
+      correct: 0,
+    },
+    {
+      question: `Чему равен $\\log_{${p.a ** p.i}} ${p.b ** p.j}$?`,
+      options: [
+        `$\\dfrac{${p.j}}{${p.i}}${L}$`,
+        `$\\dfrac{${p.i}}{${p.j}}${L}$`,
+        `$${p.i * p.j}${L}$`,
+      ],
+      correct: 0,
+      comment: '$\\log_{a^i} b^j=\\dfrac{j}{i}\\log_a b$.',
+    },
+    {
+      question: 'Что происходит с $' + L + '$ при делении?',
+      options: ['Сокращается', 'Остаётся множителем', 'Возводится в квадрат'],
+      correct: 0,
+    },
+  ];
+}
+
+/** Подсказки к выражению с формулами приведения: по значению каждого множителя. */
+function hints08Trig(p: TrigPrivedenie): HintLike[] {
+  const vse: TrigUgol[] = [...p.f, p.g];
+  return vse.map((u) => {
+    const tex = trigCepochka(u).tex.split('=');
+    const verno = tex[tex.length - 1] as string;
+    const protiv = verno.startsWith('-') ? verno.slice(1) : `-${verno}`;
+    /* Чужое табличное значение: синус вместо косинуса и наоборот. */
+    const drugoe = trigCepochka([
+      u[0] === 'tg' ? 'sin' : u[0] === 'sin' ? 'cos' : 'sin',
+      u[1],
+      u[2],
+    ])
+      .tex.split('=')
+      .pop() as string;
+    const options = [...new Set([`$${verno}$`, `$${protiv}$`, `$${drugoe}$`])];
+    return {
+      question: `Чему равен $${fnTex(u[0])}${u[1] < 0 ? `\\left(${radTex(u[1], u[2])}\\right)` : radTex(u[1], u[2])}$?`,
+      options,
+      correct: 0,
+      comment: `$${trigCepochka(u).tex}$.`,
+    };
+  });
+}
+
+/** Подсказки к log_a(aᵐbⁿ) и log_a(aᵐ/bⁿ). */
+function hints08AmBn(p: LogAmBn): HintLike[] {
+  const z = p.op === 'umn' ? '+' : '-';
+  const nz = p.op === 'umn' ? '-' : '+';
+  return [
+    {
+      question: `Как разложить логарифм ${p.op === 'umn' ? 'произведения' : 'частного'}?`,
+      options: [
+        `$${p.m}${z}${p.n}\\log_a b$`,
+        `$${p.m}${nz}${p.n}\\log_a b$`,
+        `$${p.m}\\cdot${p.n}\\log_a b$`,
+      ],
+      correct: 0,
+    },
+    ...(p.dano === 'ba'
+      ? [
+          {
+            question: `Как найти $\\log_a b$, если $\\log_b a=${p.t}$?`,
+            options: [`$\\dfrac{1}{${p.t}}$`, `$${-p.t}$`, `$${p.t}$`],
+            correct: 0,
+            comment: '$\\log_a b\\cdot\\log_b a=1$.',
+          },
+        ]
+      : []),
   ];
 }
 
@@ -670,6 +777,27 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: Params7) => z07(p, PV7_LOG_KVADRAT),
   },
+  'z07.kub-obratnoe': {
+    ege: 7,
+    prototip:
+      'Простейшие уравнения, группа I: куб выражения 1/x + c равен кубу числа (как П-02, нечётная степень), затем обратное число',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_KUB_OBRATNOE),
+  },
+  'z07.koren-x2': {
+    ege: 7,
+    prototip:
+      'Простейшие уравнения, группа II: √(ax² − b) = x², меньший корень — отрицательный, не посторонний (как П-13)',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_KOREN_KVADRAT),
+  },
+  'z07.koren-smeshannoe': {
+    ege: 7,
+    prototip:
+      'Простейшие уравнения, группа II: √(kx) = cx, c — смешанное число, корень x = 0 и больший корень (как П-13 и П-03)',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_KOREN_LINEYNYY),
+  },
   'z08.log-obratnyy': {
     ege: 8,
     prototip: 'Вычисления, логарифмы с буквами (как 8.Z «given»): дан log_b a, найти log_a(bᵐ√a)',
@@ -763,6 +891,34 @@ export const SHABLONY: Record<string, Shablon> = {
         `z08c|${p.b}|${p.x}|${p.y}`,
       ),
   },
+  'z08.log-chastnoe-stepeney': {
+    ege: 8,
+    prototip:
+      'Вычисления, логарифмы (как 8.J «same-arg»): частное логарифмов, основания — степени a, числа — степени b',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; i: number; b: number; j: number; k: number; l: number }) =>
+      z08(
+        logChastnoeStepeney(p),
+        hints08Chastnoe(p),
+        `z08l|${p.a}|${p.i}|${p.b}|${p.j}|${p.k}|${p.l}`,
+      ),
+  },
+  'z08.trig-privedenie': {
+    ege: 8,
+    prototip:
+      'Вычисления, тригонометрия: произведение и частное значений в углах больше периода и отрицательных — формулы приведения и знаки',
+    otkuda: 'novyy',
+    zadacha: (p: TrigPrivedenie) =>
+      z08(trigPrivedenie(p), hints08Trig(p), `z08t|${JSON.stringify(p)}`),
+  },
+  'z08.log-am-bn': {
+    ege: 8,
+    prototip:
+      'Вычисления, логарифмы с буквами (как 8.Z «given»): log_a(aᵐbⁿ) или log_a(aᵐ/bⁿ) при данном log_a b или log_b a',
+    otkuda: 'novyy',
+    zadacha: (p: LogAmBn) =>
+      z08(logAmBn(p), hints08AmBn(p), `z08a|${p.m}|${p.n}|${p.op}|${p.dano}|${p.t}`),
+  },
   'z09.max-na-otrezke': {
     ege: 9,
     prototip:
@@ -854,6 +1010,30 @@ export const SHABLONY: Record<string, Shablon> = {
       'Графики: √(ax) и √(x − b), точка пересечения вне рисунка (как 12S, коэффициенты по узлам)',
     otkuda: 'novyy',
     zadacha: (p: KorenKoren) => z12((pe) => korenKoren(p, pe), `z12k|${p.F.join(';')}|${p.b}`),
+  },
+  'z12.parabola-b': {
+    ege: 12,
+    prototip:
+      'Графики, парабола: f(x) = ax² + bx + c, b дано, c и a по узлам сетки, значение f(x₀) за рамкой (как 12Q)',
+    otkuda: 'novyy',
+    zadacha: (p: ParabolaB) =>
+      z12((pe) => parabolaB(p, pe), `z12b|${p.b}|${p.c}|${p.Q.join(';')}|${p.x0}`),
+  },
+  'z12.pokazatelnaya-otnoshenie': {
+    ege: 12,
+    prototip:
+      'Графики, показательная: f(x) = aˣ через два узла, a иррациональное, отношение f(m)/f(n) (как 12E)',
+    otkuda: 'novyy',
+    zadacha: (p: PokazatelnayaOtnoshenie) =>
+      z12((pe) => pokazatelnayaOtnoshenie(p, pe), `z12e|${p.P.join(';')}|${p.m}|${p.n}`),
+  },
+  'z12.parabola-korni': {
+    ege: 12,
+    prototip:
+      'Графики, парабола: f(x) = ax² + bx + c через нули и точку на оси Oy, f(x₀) за рамкой (как 12Q, форма через нули)',
+    otkuda: 'novyy',
+    zadacha: (p: ParabolaKorni) =>
+      z12((pe) => parabolaKorni(p, pe), `z12q|${p.x1}|${p.x2}|${p.c}|${p.x0}`),
   },
   'z13.dif-summa': {
     ege: 13,
