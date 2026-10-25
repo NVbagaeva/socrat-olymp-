@@ -247,3 +247,10 @@
     border-color: var(--color-text);
   }
 }
+
+/* Источник задач листа общего генератора — одной строкой у варианта. */
+.z1-sheet-istochnik {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--sheet-muted, #667389);
+}

@@ -44,6 +44,7 @@ const { buildVariantSet } = requireSrc('lib/variant/build');
 const { encodeCode, decodeCode, codeWithSpace, spaceOfCode, baseCode } =
   requireSrc('lib/variant/code');
 const SPACE = requireSrc('lib/sheet/space.js');
+const SHEET_SPACE = requireSrc('lib/sheetSpace.ts');
 const { rngOf } = requireSrc('lib/vychisleniya/rng');
 const { variantSheetSpec, instructionFor } = requireSrc('lib/variant/sheets');
 const { defaultMeta } = requireSrc('lib/variant/session');
@@ -311,6 +312,30 @@ for (const [n, adapter] of adapters) {
   }
   const rows = [SPACE.rowsFor('auto', 30), SPACE.rowsFor('auto', 600), SPACE.rowsFor('auto', 5000)];
   if (rows.join() !== '5,11,14') fail('место для решения', `«авто»: строк ${rows.join(', ')}`);
+
+  /* «Всё одним PDF» раздела: поле — только у листов ученика (первая
+     половина вариантов), строка ответа уходит под поле. */
+  const line = '<p class="sheet-answer-line">Ответ:</p>';
+  const task = (no, sol) => ({ no, id: `t${no}`, questionHtml: 'x', solutionHtml: sol });
+  const vse = {
+    variants: [
+      { blocks: [{ tasks: [task(1, line), task(2, line)] }] },
+      { blocks: [{ tasks: [task(1, 'решение '.repeat(80)), task(2, 'коротко')] }] },
+    ],
+  };
+  const spaced = SHEET_SPACE.vseWithSpace(vse, { mode: 'grid', size: 'auto', per: {} });
+  const [u, t] = spaced.variants;
+  const ok =
+    u.blocks[0].tasks.every((x) => x.space && x.solutionHtml === null && x.answerLine === true) &&
+    t.blocks[0].tasks.every((x) => x.space === undefined && x.solutionHtml !== null) &&
+    u.blocks[0].tasks[0].space.rows > u.blocks[0].tasks[1].space.rows;
+  if (!ok)
+    fail(
+      'место для решения',
+      '«Всё одним PDF»: поле не только у листов ученика или «авто» не по решению',
+    );
+  if (SHEET_SPACE.vseWithSpace(vse, { mode: 'none', size: 'auto', per: {} }) !== vse)
+    fail('место для решения', '«Всё одним PDF»: «нет» меняет лист');
 }
 
 /* ── Математика в условиях ─────────────────────────────────────── */

@@ -291,6 +291,19 @@ body {
   white-space: nowrap;
 }
 
+/* QR-код на лист ученика — справа в строке названия, квадрат 20 мм:
+   адрес набора длинный, мельче камера телефона читает хуже. */
+.sheet-qr {
+  flex: none;
+  width: 20mm;
+  height: 20mm;
+}
+.sheet-qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* Строка полей ученика: фамилия, класс, дата. Линии — как у строки
    «Ответ: ____», чтобы на листе был один вид поля для письма. */
 .sheet-fields {
@@ -347,6 +360,14 @@ body {
   grid-template-rows: repeat(3, auto);
   grid-auto-columns: 1fr;
   gap: calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 5);
+}
+
+/* Длинные пункты с формулами (рамка генератора №11) — в столбик:
+   в три колонки они не помещаются по ширине листа. */
+.sheet-recap-list--stack {
+  grid-auto-flow: row;
+  grid-template-rows: none;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .sheet-recap-item {

@@ -94,12 +94,63 @@ const SHEETS = [
   ['Место: клетка', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00.PB', [['ученик', '']]],
   ['Место: пустое', '/variant/pechat/', 'list=uchenik&kod=PR7T-407ZZ-00.P7', [['ученик', '']]],
   ['Место: №8', '/zadaniya/8/pechat/', 's=S1&n=10&l=base&seed=print-check&sp=A', [['ученик', '']]],
+  /* Общий генератор (ps=2): поле у листа ученика. «Всё одним PDF» — в
+     test:variant (vseWithSpace): у его вариантов своя нумерация страниц. */
+  [
+    'Место: №9 из генератора',
+    '/zadaniya/9/pechat/',
+    'ps=2&s=9.1.1:1,9.2.1:1,9.4.1:2&seed=print-check&sp=B',
+    [['ученик', '']],
+  ],
+
   [
     'Место: №6',
     '/zadaniya/6/pechat/',
     't=P01:2,P02:2,P03:2&i=m&v=1&e=0&st=v&seed=PRINT1&sp=B',
     [['ученик', '']],
     '',
+  ],
+  /* №2 на общем генераторе: ключи позиций, QR-код, вид работы и дата. */
+  [
+    '№2 из генератора',
+    '/zadaniya/2/pechat/',
+    'ps=2&s=A1:2,B3:2,B9:1,C1:1&seed=print-check&qr=1&d=2026-10-24',
+  ],
+  /* №12 на общем генераторе: подтема без подписей и все типы с «Запомни» и примером. */
+  [
+    '№12 из генератора',
+    '/zadaniya/12/quadratic/pechat/',
+    'ps=2&s=12Q.A:2,12Q.B:2,12Q.E:2&l=lucky&seed=print-check&qr=1&d=2026-10-24',
+  ],
+  [
+    '№12 все типы',
+    '/zadaniya/12/generator/pechat/',
+    'ps=2&s=12.A:1,12Q.B:1,12R.A:1,12S.A:1,12E.A:1,12L.A:1,12T.A:1&seed=print-check&th=1&pr=1',
+  ],
+  /* №9 на общем генераторе: «Запомни», пример, рисунки учителя, QR-код, урок серии. */
+  [
+    '№9 из генератора',
+    '/zadaniya/9/pechat/',
+    'ps=2&s=9.1.1:1,9.2.1:1,9.4.1:2,9.5.4:1&seed=print-check&tr=1&r=1&u=1&qr=1&d=2026-10-24',
+  ],
+  /* №8 на общем генераторе: ключи позиций, уровень, QR-код и дата. */
+  [
+    '№8 из генератора',
+    '/zadaniya/8/pechat/',
+    'ps=2&s=8.A:2,8.H:2,8.M:2,8.T:1,8.W:1&l=advanced&seed=print-check&qr=1&d=2026-10-24',
+  ],
+  /* №11 с «Дополнительно» общего генератора: рамка теории, примеры,
+     QR-код, вид работы и дата в шапке. */
+  [
+    '№11 с «Дополнительно»',
+    '/zadaniya/11/pechat/',
+    'm=o&i=n&ps=2&s=VD-01:1,VD-02:2,VD-05:1&seed=print-check&tr=1&pr=2&qr=1&vr=dz&d=2026-10-24',
+  ],
+  /* №1 на общем генераторе: чертежи, рамка «Повторяем» с примером, QR. */
+  [
+    '№1 с «Дополнительно»',
+    '/zadaniya/1/pechat/',
+    'm=v&i=m&ps=2&s=p01:1,p13:1,p24:1,p41:1&seed=print-check&tr=1&pr=1&qr=1',
   ],
   /* №13: «Домашка» компактным листом и зачёт с полями для оформления. */
   [
@@ -255,8 +306,24 @@ async function figureMetrics(page) {
         const sw = parseFloat(cs.strokeWidth);
         /* non-scaling-stroke: толщина задана в пикселях печати, без масштаба. */
         const k = cs.vectorEffect === 'non-scaling-stroke' ? 1 : scale;
-        if (sw > 0) strokes.push({ pt: sw * k * PT_PX, dashed: cs.strokeDasharray !== 'none' });
+        const dash =
+          cs.strokeDasharray === 'none'
+            ? null
+            : cs.strokeDasharray.split(/[ ,]+/).map((x) => parseFloat(x) * k * PT_PX);
+        if (sw > 0)
+          strokes.push({
+            pt: sw * k * PT_PX,
+            dashed: dash !== null,
+            dash,
+            dot: el.tagName === 'circle',
+          });
       }
+      /* Стереометрия (data-line-pt): свои толщины — видимые 1,2–1,5 pt,
+         невидимые 0,8–1 pt штрихом 4/3 pt. */
+      const own = svg.hasAttribute('data-line-pt');
+      const lines = strokes.filter((x) => !x.dot);
+      const solid = lines.filter((x) => !x.dashed).map((x) => x.pt);
+      const dashed = lines.filter((x) => x.dashed);
       /* Самая толстая сплошная линия: пунктир (вторая прямая, построения)
          в основные не входит и планку не задаёт. */
       const thick = Math.max(0, ...strokes.filter((x) => !x.dashed).map((x) => x.pt));
@@ -269,6 +336,15 @@ async function figureMetrics(page) {
         labelPt: fonts.length ? Math.min(...fonts) : null,
         indexPt: indexes.length ? Math.min(...indexes) : null,
         linePt: main.length ? Math.min(...main) : null,
+        stereo: own
+          ? {
+              solid: solid.length ? [Math.min(...solid), Math.max(...solid)] : null,
+              dashed: dashed.length
+                ? [Math.min(...dashed.map((x) => x.pt)), Math.max(...dashed.map((x) => x.pt))]
+                : null,
+              dash: dashed.length ? dashed[0].dash : null,
+            }
+          : null,
       });
     }
     const grid = getComputedStyle(document.documentElement).getPropertyValue('--graph-grid').trim();
@@ -392,6 +468,23 @@ function checkFigures(where, metrics) {
       !low(f.indexPt, RULES.indexPt),
       `${at}: индекс ${f.indexPt?.toFixed(2)} pt < ${RULES.indexPt} pt`,
     );
+    if (f.stereo !== null) {
+      const { solid, dashed, dash } = f.stereo;
+      const v = (r) => r.map((x) => x.toFixed(2)).join('–');
+      check(
+        solid === null || (solid[0] >= 1.2 - EPS && solid[1] <= 1.5 + EPS),
+        `${at}: видимые линии ${solid && v(solid)} pt, нужно 1,2–1,5`,
+      );
+      check(
+        dashed === null || (dashed[0] >= 0.8 - EPS && dashed[1] <= 1.0 + EPS),
+        `${at}: невидимые линии ${dashed && v(dashed)} pt, нужно 0,8–1`,
+      );
+      check(
+        dash === null || (Math.abs(dash[0] - 4) < 0.3 && Math.abs(dash[1] - 3) < 0.3),
+        `${at}: штрих ${dash && v(dash)} pt, нужно 4/3`,
+      );
+      continue;
+    }
     check(
       !low(f.linePt, RULES.linePt),
       `${at}: основная линия ${f.linePt?.toFixed(2)} pt < ${RULES.linePt} pt`,

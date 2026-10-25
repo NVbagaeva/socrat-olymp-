@@ -78,6 +78,8 @@ function titleBlock(title) {
         (title.subtitle ? '<p class="sheet-subtitle">' + typo.text(title.subtitle) + '</p>' : '') +
       '</div>' +
       (title.variant ? '<span class="sheet-variant">' + typo.text(title.variant) + '</span>' : '') +
+      /* QR-код на лист ученика (генератор, «Дополнительно»): SVG готов. */
+      (title.qr ? '<span class="sheet-qr">' + title.qr + '</span>' : '') +
     '</div>' +
     '</div>';
 }
@@ -141,7 +143,9 @@ function recapBlock(recap) {
   return '<section class="sheet-recap">' +
     '<div class="sheet-recap-main">' +
       '<h2 class="sheet-recap-title">' + typo.text(recap.title) + '</h2>' +
-      '<ul class="sheet-recap-list">' + items + '</ul>' +
+      '<ul class="sheet-recap-list' + (recap.stack ? ' sheet-recap-list--stack' : '') + '"' +
+        (recap.rows ? ' style="grid-template-rows: repeat(' + Number(recap.rows) + ', auto)"' : '') +
+        '>' + items + '</ul>' +
     '</div>' + aside +
     '</section>';
 }
@@ -421,6 +425,13 @@ function flowItems(spec) {
     }
     (block.leadItems || []).forEach(function (item) { out.push(item); });
 
+    /* Готовые куски задач вместо карточек: лист учителя №9 разбивает
+       задачу на куски сам, чтобы разбор переносился между этапами. */
+    if (block.taskItems) {
+      block.taskItems.forEach(function (item) { out.push(item); });
+      return;
+    }
+
     var tasks = block.tasks || [];
     var opts = { layout: layout, cell: size.cell, frame: size.frame,
                  withAnswerLine: spec.withAnswerLine, figures: spec.figures };
@@ -477,8 +488,11 @@ function flowItems(spec) {
  *            задаётся вместо cell, не вместе с ним
  *   head     { course, author, motto }
  *   runner   строка компактной шапки следующих страниц
- *   title    { chip, text, subtitle }
- *   recap    { title, items[], phrase } либо null
+ *   title    { chip, text, subtitle, variant?, qr? } — qr: SVG QR-кода
+ *            справа в строке названия
+ *   recap    { title, items[], phrase, stack?, rows? } либо null;
+ *            stack — пункты в один столбик (длинные пункты с формулами),
+ *            rows — сколько пунктов в колонке (по умолчанию три)
  *   leadItems  куски потока перед блоками задач: например,
  *            разобранные примеры (exampleItem)
  *   blocks   [ { title, note, tasks[] } ]; у задачи сверх условия
@@ -491,7 +505,9 @@ function flowItems(spec) {
  *            level: 2 — подзаголовок внутри раздела; блок без задач
  *            даёт одну полосу заголовка; head: false — блок без полосы;
  *            recap — рамка «Повторяем» блока, leadItems — куски потока
- *            перед его задачами (разобранные примеры, exampleItem)
+ *            перед его задачами (разобранные примеры, exampleItem); taskItems —
+ *            готовые куски потока вместо карточек задач (tasks при этом
+ *            остаются данными листа: по ним сверяется комплект)
  *   defs     разметка, которая кладётся в документ один раз перед
  *            страницами: например, SVG-паттерны штриховки для ч/б
  *   fields   { date, group, extra } — строка «Фамилия, имя / Класс /

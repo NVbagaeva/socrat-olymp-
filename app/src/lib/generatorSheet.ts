@@ -8,6 +8,12 @@
  * с ответами по одному seed содержат одни и те же задачи. Задачи
  * считает движок graph/ в браузере, лист раскладывает шаблон
  * lib/sheet/ — тот же, что печатает сборник в CI.
+ *
+ * Адреса общего генератора (ps=2): состав «набор × число» с ключами
+ * позиций (lib/generator/obshchiy/klyuchi.ts). Шаблон задачи позиции —
+ * по коду листа и ключу, один во всех вариантах: вариант 2 на том же
+ * месте — та же задача с другими числами. Условия одного набора в
+ * варианте не повторяются; замены — по цепочке, каждая новая.
  */
 
 import GraphGenerate from '@/lib/graph/generate.js';
@@ -30,6 +36,8 @@ import { planCounts, planOrder, type PlanMethod } from '@/lib/sheetPlan';
 import type { EngineTask } from '@/lib/trainer';
 import { functionTypes } from '@/data/functionTypes';
 import { exampleItems, recapOf } from '@/lib/ves12/build';
+import { klyuchSlota, slotySostava, type Slot } from '@/lib/generator/obshchiy/klyuchi';
+import { rngOf } from '@/lib/vychisleniya/rng';
 
 /* Адрес листа (параметры ↔ строка запроса) лежит в лёгком модуле: экран
    генератора берёт его, не загружая движок. Здесь он для прежних импортов. */
@@ -51,6 +59,8 @@ export type { SheetParams };
 const CELL: Record<SheetLayoutId, number> = { single: 3.4, double: 3.0 };
 
 interface SheetTask {
+  /** Ключ позиции «вариант.ключ» (ps=2): для замены в генераторе. */
+  pos?: string;
   no: number;
   id: string;
   questionHtml: string;
@@ -389,6 +399,153 @@ function nextVariant(
   });
 }
 
+/* ── Схема ps=2 ───────────────────────────────────────────────────── */
+
+type ShablonNabora = { id: string; level?: string | null };
+
+/** Шаблоны набора, годные уровню листа; у набора нет такого уровня — все. */
+function shablonyNabora(setId: string, level: string | null): string[] {
+  const sets = GraphGenerate.loadSets() as { prototypes: { id: string; tasks?: ShablonNabora[] }[] };
+  const tasks = sets.prototypes.find((set) => set.id === setId)?.tasks ?? [];
+  const fit = level === null ? tasks : tasks.filter((t) => t.level === level);
+  return (fit.length > 0 ? fit : tasks).map((t) => t.id);
+}
+
+/**
+ * Задачи позиций по вариантам (ps=2). Позиции одного набора считаются
+ * по возрастанию ключа и обходят условия младших: перестановка задач их
+ * не меняет. Шаблон позиции — k-й в перестановке шаблонов набора по коду
+ * листа, один во всех вариантах.
+ */
+function zadachiPoKlyucham(params: SheetParams, rules: Record<string, string>) {
+  const sloty = slotySostava(params.sostav ?? []);
+  const poryadok = sloty.slice().sort((a, b) => a.id.localeCompare(b.id) || a.k - b.k);
+  const level = (id: string) => (levelsOf(id).includes(params.level ?? '') ? params.level : null);
+  const batches = new Map<string, EngineTask[]>();
+  const batch = (setId: string, seed: string): EngineTask[] => {
+    const key = `${setId}|${seed}`;
+    let list = batches.get(key);
+    if (list === undefined) {
+      try {
+        list = GraphGenerate.generateSet(setId, seed) as EngineTask[];
+      } catch {
+        list = [];
+      }
+      batches.set(key, list);
+    }
+    return list;
+  };
+  const shablon = (slot: Slot) => {
+    const all = shablonyNabora(slot.id, level(slot.id));
+    const perm = rngOf(`${params.seed}|${slot.id}|shablony`).sample(all, all.length);
+    return perm.length === 0 ? null : (perm[slot.k % perm.length] as string);
+  };
+  /* Что видит ученик: условие, варианты и нарисованный рисунок. Сцена
+     движка для этого не годится — она различается и в невидимых полях. */
+  const vid = (t: EngineTask): string => {
+    const e = t as EngineExtra & { scene?: unknown };
+    return `${t.questionHtml}\u0000${JSON.stringify(e.options ?? null)}\u0000${t.svg === null ? '' : String(conditionSvg(e) ?? '')}`;
+  };
+  /* Задача позиции на seed: сначала её шаблон, затем другие шаблоны того же уровня. */
+  const vzyat = (slot: Slot, seed: string, zanyato: ReadonlySet<string>): EngineTask | null => {
+    const id = shablon(slot);
+    const lv = level(slot.id);
+    /* Набор на seed может не собраться целиком (движок бросает, если хоть
+       одна задача не подобралась) — тогда попытка пустая. Другой шаблон того
+       же уровня запоминается из любой попытки: у шаблона бывает мало чисел. */
+    let zapas: EngineTask | null = null;
+    let drugoy: EngineTask | null = null;
+    for (let a = 0; a < VARIANT_TRIES; a += 1) {
+      const list = batch(slot.id, a === 0 ? seed : `${seed}~${a}`).filter((t) =>
+        usable(t as EngineExtra),
+      );
+      const svoy = list.find((t) => t.id === id);
+      if (svoy !== undefined && !zanyato.has(vid(svoy))) return svoy;
+      zapas ??= svoy ?? null;
+      drugoy ??=
+        list.find((t) => (lv === null || t.meta.level === lv) && !zanyato.has(vid(t))) ?? null;
+    }
+    return drugoy ?? zapas;
+  };
+  return Array.from({ length: params.variants }, (_, vi) => {
+    const v = vi + 1;
+    const out = new Map<string, SheetTask>();
+    const vzyato = new Map<string, Set<string>>();
+    for (const slot of poryadok) {
+      const key = klyuchSlota(slot);
+      const base = `${params.seed}|${v}|${key}`;
+      const zanyato = vzyato.get(slot.id) ?? new Set<string>();
+      let task = vzyat(slot, base, zanyato);
+      const bylo = new Set([...zanyato, ...(task === null ? [] : [vid(task)])]);
+      const z = params.zameny?.[`${v}.${key}`] ?? 0;
+      for (let j = 1; j <= z && task !== null; j += 1) {
+        task = vzyat(slot, `${base}|z${j}`, bylo) ?? task;
+        bylo.add(vid(task));
+      }
+      if (task === null) continue;
+      zanyato.add(vid(task));
+      vzyato.set(slot.id, zanyato);
+      out.set(key, { ...sheetTaskFrom(task, 0, rules), pos: `${v}.${key}` });
+    }
+    return sloty.flatMap((slot) => {
+      const t = out.get(klyuchSlota(slot));
+      return t === undefined ? [] : [t];
+    });
+  });
+}
+
+/**
+ * Варианты листа ps=2. Одна подтема без рамок — один блок без полосы:
+ * навык на листе ученика не подписан. Несколько типов или рамки —
+ * подряд идущие задачи одного типа блоком, «Запомни» и примеры — перед
+ * первым блоком типа.
+ */
+export function sheetVariantsPoKlyucham(params: SheetParams): SheetBlock[][] {
+  const rules = answerRules();
+  const theory = params.theory === true;
+  const examples = params.examples ?? 0;
+  const tipy = new Set(params.skills.map((id) => typeOfSet(id)?.id));
+  const poTipam = theory || examples > 0 || tipy.size > 1;
+  const exampleSets = (typeId: string) => {
+    const chosen = params.skills.filter((setId) => typeOfSet(setId)?.id === typeId);
+    const others = (manifest.families.find((family) => family.id === typeId)?.skills ?? [])
+      .filter((skill) => skill.kind === 'prototype' && !chosen.includes(skill.id))
+      .map((skill) => skill.id);
+    return [...chosen, ...others];
+  };
+  return zadachiPoKlyucham(params, rules).map((tasks) => {
+    const numbered = tasks.map((t, i) => ({ ...t, no: i + 1 }));
+    if (!poTipam) {
+      return numbered.length === 0 ? [] : [{ title: '', note: '', set: '', head: false, tasks: numbered }];
+    }
+    const out: SheetBlock[] = [];
+    const bylo = new Set<string>();
+    for (const task of numbered) {
+      const type = typeOfSet(task.meta.set);
+      if (type === undefined) continue;
+      const last = out[out.length - 1];
+      if (last !== undefined && last.set === type.id) {
+        last.tasks.push(task);
+        continue;
+      }
+      const pervyy = !bylo.has(type.id);
+      bylo.add(type.id);
+      out.push({
+        title: type.title,
+        note: type.graphName,
+        set: type.id,
+        tasks: [task],
+        recap: pervyy && theory ? recapOf(type) : null,
+        leadItems:
+          pervyy && examples > 0
+            ? exampleItems(type, exampleSets(type.id), examples, params.seed)
+            : [],
+      });
+    }
+    return out;
+  });
+}
+
 /**
  * Все варианты листа. Первый — ровно тот, что собирался до появления
  * вариантов (тот же seed), остальные — по его образцу.
@@ -450,28 +607,39 @@ const rationalBuilder = {
  * одного ответа; учителю — те же задачи и раздел «Ответы» с новой
  * страницы. Рамки «Повторяем» на варианте нет.
  */
-export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: string) {
-  const variants = withAnswers
-    ? withSolutionFigures(sheetVariants(params), CELL[params.layout])
-    : sheetVariants(params);
+export function sheetSpec(
+  params: SheetParams,
+  withAnswers: boolean,
+  subtopic?: string,
+  /** QR-код на лист ученика, SVG (ps=2): считает страница печати по своему адресу. */
+  qrSvg?: string,
+) {
+  const vse = params.poKlyucham === true ? sheetVariantsPoKlyucham(params) : sheetVariants(params);
+  const variants = withAnswers ? withSolutionFigures(vse, CELL[params.layout]) : vse;
   const blocks = variants[0] ?? [];
   /* Название подтемы приходит со страницы: лист собирается один на
      все подтемы задания, а в шапке должно стоять то, что печатают.
      Не передали — остаётся название из конфига листа. */
   const name = subtopic ?? content.title.text;
+  /* Лист генератора (ps=2) без вида работы и даты — подпись по умолчанию;
+     QR-код — справа в строке названия. Прежние листы — как были. */
+  const nova = params.poKlyucham === true;
+  const subtitle = subtitleOf(params) || (nova ? content.title.subtitle : '');
+  const qr = nova && params.qr === true && qrSvg !== undefined ? { qr: qrSvg } : {};
   return {
     theme: params.theme,
     layout: params.layout,
     cell: CELL[params.layout],
     documentTitle: `${content.title.chip}. ${name}` + (params.kind ? ` — ${params.kind}` : ''),
-    head: content.head,
+    head:
+      nova && params.uchitel !== undefined ? { ...content.head, author: params.uchitel } : content.head,
     /* Бегунок собран в конфиге листа целиком: у другой подтемы в нём
        меняется только название, остальное остаётся как было. */
     runner:
       subtopic === undefined
         ? content.runner
         : content.runner.replace(content.title.text, subtopic),
-    title: { chip: content.title.chip, text: name, subtitle: subtitleOf(params) },
+    title: { chip: content.title.chip, text: name, subtitle, ...qr },
     recap: null,
     blocks,
     /* Строка «Фамилия, имя / Класс / Дата» — на каждом варианте. */
@@ -484,8 +652,9 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: 
             title: {
               chip: content.title.chip,
               text: name,
-              subtitle: subtitleOf(params),
+              subtitle,
               variant: `Вариант ${i + 1}`,
+              ...qr,
             },
             blocks: list,
           })),
@@ -505,5 +674,37 @@ export function sheetSpec(params: SheetParams, withAnswers: boolean, subtopic?: 
           rationalBuilder,
         ),
     foot: content.foot,
+  };
+}
+
+const STROKA_OTVETA =
+  '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>';
+
+/**
+ * «Всё одним файлом» генератора (ps=2): листы ученика всех вариантов
+ * (со строкой ответа), затем листы учителя с построениями и ответы.
+ */
+export function sheetSpecVse(params: SheetParams, subtopic?: string, qrSvg?: string) {
+  const uchenik = sheetSpec(params, false, subtopic, qrSvg);
+  const uchitel = sheetSpec(params, true, subtopic, qrSvg);
+  const spisok = (spec: typeof uchenik) =>
+    spec.variants ?? [{ title: spec.title, blocks: spec.blocks }];
+  return {
+    ...uchitel,
+    blocks: [],
+    variants: [
+      ...spisok(uchenik).map((v) => ({
+        ...v,
+        blocks: v.blocks.map((b) => ({
+          ...b,
+          tasks: b.tasks.map((t) => ({ ...t, solutionHtml: STROKA_OTVETA })),
+        })),
+      })),
+      ...spisok(uchitel).map((v) => ({
+        ...v,
+        title: { ...v.title, subtitle: [v.title.subtitle, content.resheniya].filter(Boolean).join(' · ') },
+      })),
+    ],
+    withAnswerLine: false,
   };
 }

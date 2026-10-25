@@ -32,3 +32,40 @@ export function sheetWithSpace<T>(
     lengths: needsLengths(space) ? solutionLengths(teacher()) : null,
   });
 }
+
+interface VseTask {
+  space?: unknown;
+  solutionHtml?: string | null;
+}
+interface VseVariant {
+  blocks: { tasks?: VseTask[] }[];
+}
+
+/**
+ * «Всё одним файлом»: первая половина вариантов — листы ученика, вторая
+ * — листы учителя тех же задач. Поле ставится только листам ученика;
+ * строка ответа у них лежит в solutionHtml — с полем она уходит под
+ * поле (answerLine), как на отдельном листе ученика.
+ */
+export function vseWithSpace<T extends object>(spec: T, space: SheetSpace): T {
+  const all = (spec as { variants?: VseVariant[] }).variants ?? [];
+  if (space.mode === 'none' || all.length === 0 || all.length % 2 !== 0) return spec;
+  const uchenik = all.slice(0, all.length / 2);
+  const uchitel = all.slice(all.length / 2);
+  const marked = applySpace({ variants: uchenik }, space, {
+    lengths: needsLengths(space) ? solutionLengths({ variants: uchitel }) : null,
+  }).variants.map((v) => ({
+    ...v,
+    blocks: v.blocks.map((b) =>
+      b.tasks === undefined
+        ? b
+        : {
+            ...b,
+            tasks: b.tasks.map((t) =>
+              t.space === undefined ? t : { ...t, solutionHtml: null, answerLine: true },
+            ),
+          },
+    ),
+  }));
+  return { ...spec, variants: [...marked, ...uchitel] };
+}

@@ -1,43 +1,33 @@
 import type { Subtopic } from '@/content/sections';
-import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
-import { findManifestFamily } from '@/lib/generator/manifest';
-import { generatorPage } from '@/content/generator';
-import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
-import { typeset } from '@/lib/tex';
-import { skillItems } from '../configurator/skillItems';
+import { VKLADKA_PARAM, type IkonkaRazdela } from '@/components/tasks/razdely/types';
+import { config12 } from '@/lib/ves12/generator12';
 import { VariantFromSection } from '@/components/variant/VariantEntry';
-import { GeneratorScreen } from './GeneratorScreen';
+import { Generator12Lazy } from './Generator12Lazy';
 
 export interface GeneratorTabProps {
   subtopic: Subtopic;
   /** Адрес подтемы: от него считаются адреса страниц печати. */
   base: string;
-  /** Иконка раздела для сводки. */
+  /** Иконка раздела для строки темы. */
   icon?: IkonkaRazdela | undefined;
 }
 
 /**
- * Вкладка «Генератор», собранная на сервере: вариант для печати.
- *
- * Отсюда на клиентский экран уходят только названия, числа и готовые
- * миниатюры: движок graph/ рисует их на сборке, как на карточках
- * навыков подготовки, и в браузер не попадает.
+ * Вкладка «Генератор» подтемы №12, собранная на сервере: конфиг общего
+ * генератора с одним типом функций. В браузер уходят только названия и
+ * числа; сам генератор грузится, когда вкладка открыта, а движок graph/ —
+ * при сборке листа.
  */
 export function GeneratorTab({ subtopic, base, icon }: GeneratorTabProps) {
-  const family = findManifestFamily(subtopic.id);
-  /* Подписи уровней — подтемы: у квадратичной уровень не про
-     коэффициент b. Плашка «откуда задания» у всех подтем одна: наборы —
-     прототипы открытого банка ФИПИ. */
+  const config = config12(base, { tip: subtopic.id, title: subtopic.title });
   return (
     <>
       <VariantFromSection />
-      <GeneratorScreen
+      <Generator12Lazy
+        config={config}
         base={base}
-        family={subtopic.title}
-        familyIcon={icon}
-        skills={skillItems(family)}
-        levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
-        note={generatorPage.summary.note}
+        ekran={`${base}/?${VKLADKA_PARAM}=generator&`}
+        ikonki={{ [subtopic.id]: icon }}
       />
     </>
   );

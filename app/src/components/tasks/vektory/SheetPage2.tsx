@@ -5,11 +5,12 @@ import { useSearchParams } from 'next/navigation';
 import { REPETITORY_2 } from '@/content/vektory';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
-import { keySpec2, parseSheetQuery2, sheetSpec2 } from '@/lib/vektory/sheet2';
+import { keySpec2, parseSheetQuery2, sheetSpec2, sheetSpecVse2 } from '@/lib/vektory/sheet2';
 import { withPrintFigures } from '@/lib/sheet/figureRules.js';
-import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 
 declare global {
   interface Window {
@@ -21,7 +22,7 @@ declare global {
 
 export interface SheetPage2Props {
   /** Что печатать: лист ученика, лист с решениями или ключ ответов банка. */
-  vid: 'uchenik' | 'uchitel' | 'klyuch';
+  vid: 'uchenik' | 'uchitel' | 'vse' | 'klyuch';
 }
 
 function specJson(html: string): string {
@@ -67,25 +68,40 @@ export function SheetPage2({ vid }: SheetPage2Props) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const built = vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers);
-    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
-    const kit = checkKitSheet(query, '2', withAnswers ? 'teacher' : 'student', built);
-    /* На лист — сборка в печатном профиле рисунков (figureRules.js):
-       отпечаток комплекта — по обычной, как у напечатанных раньше. */
-    const printed = sheetWithSpace(
-      withPrintFigures(() =>
-        vid === 'klyuch' ? keySpec2(params.theme) : sheetSpec2(params, withAnswers),
-      ),
-      spaceOfQuery(query),
-      vid !== 'klyuch' && !withAnswers,
-      () => sheetSpec2(params, true),
-    );
-    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
-    import('@/lib/sheet/paginate.js').then(() => {
-      if (alive) {
-        setWarning(kit.warning);
-        setSpec(specJson(html));
-      }
+    /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+    const qr =
+      params.qr === true
+        ? qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+        : Promise.resolve(undefined);
+    void qr.then((svg) => {
+      if (!alive) return;
+      const sobrat = () =>
+        vid === 'klyuch'
+          ? keySpec2(params.theme)
+          : vid === 'vse'
+            ? sheetSpecVse2(params, svg)
+            : sheetSpec2(params, withAnswers, svg);
+      const built = sobrat();
+      /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+      const kit = checkKitSheet(query, '2', withAnswers ? 'teacher' : 'student', built);
+      /* На лист — сборка в печатном профиле рисунков (figureRules.js):
+         отпечаток комплекта — по обычной, как у напечатанных раньше.
+         Место для решения (sp=) — только у листа ученика. */
+      const space = spaceOfQuery(query);
+      const risunki = withPrintFigures(sobrat);
+      const printed =
+        vid === 'vse'
+          ? vseWithSpace(risunki, space)
+          : sheetWithSpace(risunki, space, vid !== 'klyuch' && !withAnswers, () =>
+              sheetSpec2(params, true, svg),
+            );
+      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
+      import('@/lib/sheet/paginate.js').then(() => {
+        if (alive) {
+          setWarning(kit.warning);
+          setSpec(specJson(html));
+        }
+      });
     });
     return () => {
       alive = false;
