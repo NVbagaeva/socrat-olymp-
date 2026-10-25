@@ -163,6 +163,13 @@ function answer1(payload, at) {
   return { text: numberText(sostavZadachi(razreshit(plan, bank1)).otvet) };
 }
 
+/** №13 (тренажёр с фильтрами): задание «A-01|b3» → generate(прототип, seed).answer. */
+function answer13(payload, at) {
+  const { generate } = requireSrc('lib/zadanie13/generate');
+  const [prototype, seed] = payload.items[at].k.split('|');
+  return { text: numberText(generate(prototype, payload.items[at].seed ?? seed).answer) };
+}
+
 /** №4, №5: [прототип, номер варианта, подпись] → ответ ученика или метод. */
 const uznay = new Map();
 function answer45(payload, at) {
@@ -297,6 +304,13 @@ const TRAINERS = [
     url: '/zadaniya/1/trenazher/',
     scope: '1',
     answer: answer1,
+    all: chooseAllFiltry,
+  },
+  {
+    name: '№13',
+    url: '/zadaniya/13/trenazher/',
+    scope: '13',
+    answer: answer13,
     all: chooseAllFiltry,
   },
   {

@@ -132,7 +132,8 @@ export function TrenazherEkran<T>({
     if (zadacha === null || zadacha === undefined) return;
     const right = K.proverit(zadacha, sost.v);
     if (right) {
-      zakryt('right', { proverka: 'right' });
+      /* Ответ после подсказки по шагам — верно, но с подсказкой. */
+      zakryt(sost.podskazka ? 'hinted' : 'right', { proverka: 'right' });
       return;
     }
     const oshibok = sost.oshibok + 1;
@@ -203,7 +204,50 @@ export function TrenazherEkran<T>({
     K.poyasnenie !== undefined &&
     zadacha !== null &&
     zadacha !== undefined;
-  const mozhnoOtvechat = !zakryta && !sost.podskazka;
+  /* Поле ответа: над подсказкой; у раздела, где после шагов ответ
+     вводит сам ученик (posleShagov), — и под подсказкой. */
+  const posleShagov = K.otvetPosleShagov === true;
+  const mozhnoOtvechat = !zakryta && (!sost.podskazka || posleShagov);
+  const otvetBlock =
+    zadacha === undefined || zadacha === null || (sost.podskazka && !posleShagov) ? null : (
+      <div className="trz-answer">
+        <p className="trz-label" id={labelId}>
+          {EKRAN.otvet}
+        </p>
+        <K.Otvet
+          task={zadacha}
+          value={sost.v}
+          labelId={labelId}
+          proverka={sost.proverka}
+          disabled={!mozhnoOtvechat}
+          onChange={(v) => patch({ v, ...(sost.proverka === 'wrong' ? { proverka: null } : {}) })}
+        />
+        {sost.proverka === null ? null : (
+          <div className={clsx('trz-verdict', `trz-verdict--${sost.proverka}`)} role="status">
+            <p className="trz-verdict__title">
+              <span className="trz-verdict__ico">
+                {sost.proverka === 'right' ? <RightIcon /> : <WrongIcon />}
+              </span>
+              {sost.proverka === 'right' ? EKRAN.verno : EKRAN.oshibka}
+            </p>
+            {pokazPoyasneniya && (podskazki || zakryta) ? (
+              <p
+                className="trz-verdict__text"
+                dangerouslySetInnerHTML={{
+                  __html: K.poyasnenie?.(zadacha, sost.v, sost.proverka === 'right') ?? '',
+                }}
+              />
+            ) : null}
+            {sost.proverka === 'wrong' && !zakryta ? (
+              <p className="trz-verdict__text">{EKRAN.eshchyoRaz}</p>
+            ) : null}
+            {sost.itog === 'wrong' && sost.razbor ? (
+              <p className="trz-verdict__text">{EKRAN.razborPosle}</p>
+            ) : null}
+          </div>
+        )}
+      </div>
+    );
 
   return (
     <section className="trz" aria-label={stroka}>
@@ -266,45 +310,7 @@ export function TrenazherEkran<T>({
         )}
       </article>
 
-      {zadacha === undefined || zadacha === null || sost.podskazka ? null : (
-        <div className="trz-answer">
-          <p className="trz-label" id={labelId}>
-            {EKRAN.otvet}
-          </p>
-          <K.Otvet
-            task={zadacha}
-            value={sost.v}
-            labelId={labelId}
-            proverka={sost.proverka}
-            disabled={!mozhnoOtvechat}
-            onChange={(v) => patch({ v, ...(sost.proverka === 'wrong' ? { proverka: null } : {}) })}
-          />
-          {sost.proverka === null ? null : (
-            <div className={clsx('trz-verdict', `trz-verdict--${sost.proverka}`)} role="status">
-              <p className="trz-verdict__title">
-                <span className="trz-verdict__ico">
-                  {sost.proverka === 'right' ? <RightIcon /> : <WrongIcon />}
-                </span>
-                {sost.proverka === 'right' ? EKRAN.verno : EKRAN.oshibka}
-              </p>
-              {pokazPoyasneniya && (podskazki || zakryta) ? (
-                <p
-                  className="trz-verdict__text"
-                  dangerouslySetInnerHTML={{
-                    __html: K.poyasnenie?.(zadacha, sost.v, sost.proverka === 'right') ?? '',
-                  }}
-                />
-              ) : null}
-              {sost.proverka === 'wrong' && !zakryta ? (
-                <p className="trz-verdict__text">{EKRAN.eshchyoRaz}</p>
-              ) : null}
-              {sost.itog === 'wrong' && sost.razbor ? (
-                <p className="trz-verdict__text">{EKRAN.razborPosle}</p>
-              ) : null}
-            </div>
-          )}
-        </div>
-      )}
+      {sost.podskazka && posleShagov ? null : otvetBlock}
 
       {zadacha !== undefined && zadacha !== null && sost.podskazka ? (
         <div className="trz-hint">
@@ -313,7 +319,9 @@ export function TrenazherEkran<T>({
             shagi={sost.shagi}
             setShagi={(shagi: Shagi) => patch({ shagi })}
             onMiss={() => patch({ oshibok: sost.oshibok + 1 })}
-            onDone={() => zakryt('hinted')}
+            onDone={() => {
+              if (!posleShagov) zakryt('hinted');
+            }}
           />
           {sost.itog === 'hinted' ? (
             <p className="trz-note" role="status">
@@ -322,6 +330,8 @@ export function TrenazherEkran<T>({
           ) : null}
         </div>
       ) : null}
+
+      {sost.podskazka && posleShagov ? otvetBlock : null}
 
       <div className="trz-actions">
         {zakryta ? (
@@ -338,10 +348,14 @@ export function TrenazherEkran<T>({
           </>
         ) : (
           <>
-            {sost.podskazka ? null : (
+            {sost.podskazka && !posleShagov ? null : (
               <Button
                 onClick={proverit}
-                disabled={zadacha === null || zadacha === undefined || sost.v.trim() === ''}
+                disabled={
+                  zadacha === null ||
+                  zadacha === undefined ||
+                  (K.gotov === undefined ? sost.v.trim() === '' : !K.gotov(zadacha, sost.v))
+                }
               >
                 {EKRAN.proverit}
               </Button>

@@ -1,9 +1,8 @@
 'use client';
 
-import { clsx } from 'clsx';
 import Link from 'next/link';
 import { FigureZoom, Input } from '@/components/ui';
-import { Tex } from '@/components/ui/Tex';
+import { ShagiVoprosy, shagiSost } from '@/components/trenazher/ShagiVoprosy';
 import type { KartochkaRazdela, Shagi } from '@/components/trenazher/types';
 import { TRENAZHER_1 } from '@/content/zadanie1';
 import { progress1 } from '@/lib/planimetriya/progress';
@@ -32,20 +31,7 @@ function podskazki(z: Zadacha1): Podskazki1 | null {
 }
 
 /** Состояние подсказки: пройдено вопросов и неверные кнопки текущего. */
-interface Hint {
-  shag: number;
-  mimo: number[];
-}
-
-function hintOf(shagi: Shagi | null): Hint {
-  const raw = shagi ?? {};
-  const shag = raw['shag'];
-  const mimo = raw['mimo'];
-  return {
-    shag: typeof shag === 'number' && Number.isInteger(shag) && shag >= 0 ? shag : 0,
-    mimo: Array.isArray(mimo) ? mimo.filter((x): x is number => typeof x === 'number') : [],
-  };
-}
+const hintOf = shagiSost;
 
 export interface Kartochka1Dannye {
   bank: readonly UslovieBanka[];
@@ -78,9 +64,6 @@ export function kartochka1({
           <IkonkaBloka1 blok={blok?.id ?? ''} />
           <span className="z11-resh__razdel-text">
             <span className="z11-resh__razdel-name">{blok?.nazvanie}</span>
-            <span className="z11-resh__podtip">
-              <Tex text={z.title} />
-            </span>
           </span>
         </div>
         <div className="z1-resh__grid">
@@ -167,58 +150,25 @@ export function kartochka1({
   }) {
     const voprosy = podskazki(z)?.voprosy ?? [];
     const h = hintOf(shagi);
-    const tek = voprosy[h.shag];
-    const pred = h.shag > 0 ? voprosy[h.shag - 1] : undefined;
-
-    function vybrat(k: number) {
-      if (tek === undefined) return;
-      if (k !== tek.verno) {
-        setShagi({ ...h, mimo: [...h.mimo, k] });
-        onMiss();
-        return;
-      }
-      setShagi({ shag: h.shag + 1, mimo: [] });
-      if (h.shag + 1 >= voprosy.length) onDone();
-    }
-
     return (
       <div className="z1t-hint">
-        {tek === undefined ? null : (
-          <div className="z11-resh__shag">
-            <p className="tstep__no">{TRENAZHER_1.shag(h.shag + 1, voprosy.length)}</p>
-            <p className="z11-resh__q" dangerouslySetInnerHTML={{ __html: tek.vopros }} />
-            <div className="z11-resh__opts">
-              {tek.knopki.map((o, k) => (
-                <button
-                  key={k}
-                  type="button"
-                  className={clsx('z11-resh__opt', h.mimo.includes(k) && 'is-wrong')}
-                  disabled={h.mimo.includes(k)}
-                  onClick={() => vybrat(k)}
-                  dangerouslySetInnerHTML={{ __html: o }}
-                />
-              ))}
-            </div>
-            {h.mimo.length > 0 ? <p className="z11-resh__oops">{TRENAZHER_1.nevernoHint}</p> : null}
-          </div>
-        )}
-        {pred === undefined ? null : (
-          <div className="z11-resh__pred">
-            <p className="z11-resh__pred-otvet">
-              <span dangerouslySetInnerHTML={{ __html: pred.vopros }} />{' '}
-              <b dangerouslySetInnerHTML={{ __html: pred.knopki[pred.verno] ?? '' }} />
-            </p>
-            {pred.poyasnenie === '' ? null : (
-              <p
-                className="z11-resh__pred-comment"
-                dangerouslySetInnerHTML={{ __html: pred.poyasnenie }}
-              />
-            )}
-            {h.shag >= voprosy.length ? (
-              <p className="z11-resh__pred-done">{TRENAZHER_1.vseShagi}</p>
-            ) : null}
-          </div>
-        )}
+        <ShagiVoprosy
+          shagi={voprosy.map((v) => ({
+            question: v.vopros,
+            options: v.knopki,
+            correct: v.verno,
+            comment: v.poyasnenie,
+          }))}
+          sost={h}
+          onChange={(next) => setShagi({ ...next })}
+          onMiss={onMiss}
+          onDone={onDone}
+          slova={{
+            shag: TRENAZHER_1.shag,
+            neverno: TRENAZHER_1.nevernoHint,
+            vse: TRENAZHER_1.vseShagi,
+          }}
+        />
       </div>
     );
   }
@@ -263,6 +213,7 @@ export function kartochka1({
     Otvet,
     proverit: (z, value) => answerMatches(value, z.seal),
     estPodskazka: (z) => (podskazki(z)?.voprosy.length ?? 0) > 0,
+    otvetPosleShagov: true,
     Podskazka,
     estRazbor: () => true,
     Razbor,

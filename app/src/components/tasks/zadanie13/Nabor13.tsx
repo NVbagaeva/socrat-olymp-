@@ -9,7 +9,7 @@ import { checkSealed, type Verdict } from '@/lib/zadanie13/edinicy';
 import { parseGenQuery13, vsegoZadach13 } from '@/lib/zadanie13/gen/params';
 import type { Razbor13, Zadacha13Sealed } from '@/lib/zadanie13/opornye/seal';
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie13/secret';
-import { Razbor13Blok } from './Trenazher13Reshenie';
+import { Razbor13Blok } from './Razbor13';
 
 type Zadacha = Zadacha13Sealed & { no: number; pos: string };
 

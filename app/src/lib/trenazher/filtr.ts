@@ -7,8 +7,10 @@
 
 import { levelsText, tasksText } from '@/lib/generator/obshchiy/state';
 import type {
+  DopPole,
   Filtr,
   FiltrPole,
+  NaborRazdela,
   FiltrTema,
   IstochnikFiltra,
   Moi,
@@ -38,6 +40,7 @@ export const NACHALNYY: Filtr = {
   moi: 'vse',
   pravila: [],
   poryadokSuzheniya: [],
+  dop: {},
 };
 
 const PUSTAYA: Statistika = { resheno: new Set(), oshibki: new Set() };
@@ -251,7 +254,11 @@ export function pereklyuchitUroven(f: Filtr, u: Uroven): Filtr {
 export function kRazdelu(f: Filtr, config: TrenazherConfig): Filtr {
   const ids = new Set(config.temy.flatMap((t) => t.podtipy.map((p) => p.id)));
   const urovni = new Set(config.urovni.map((u) => u.uroven));
-  let tipy = f.tipy.filter((id, at) => ids.has(id) && f.tipy.indexOf(id) === at);
+  /* Тема в ссылке («?t=A» — схема №13 целиком) — это все её подтипы. */
+  const vybrany = f.tipy.flatMap(
+    (id) => config.temy.find((t) => t.id === id && !ids.has(id))?.podtipy.map((p) => p.id) ?? [id],
+  );
+  let tipy = vybrany.filter((id, at) => ids.has(id) && vybrany.indexOf(id) === at);
   if (tipy.length === ids.size) {
     tipy = [];
   }
@@ -264,6 +271,7 @@ export function kRazdelu(f: Filtr, config: TrenazherConfig): Filtr {
     tipy,
     urovni: ur,
     istochnik: config.istochnik ? f.istochnik : 'vse',
+    dop: dopRazdela(f.dop, config),
   };
   return {
     ...next,
@@ -271,6 +279,23 @@ export function kRazdelu(f: Filtr, config: TrenazherConfig): Filtr {
       (pole, at) => f.poryadokSuzheniya.indexOf(pole) === at && !poUmolchaniyu(next, pole),
     ),
   };
+}
+
+/** Дополнительные поля: только известные разделу и отличные от первого варианта. */
+function dopRazdela(dop: Record<string, string>, config: TrenazherConfig): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const pole of config.dop ?? []) {
+    const v = dop[pole.id];
+    if (v !== undefined && v !== pole.varianty[0]?.id && pole.varianty.some((x) => x.id === v)) {
+      out[pole.id] = v;
+    }
+  }
+  return out;
+}
+
+/** Значение дополнительного поля: выбранное или первый вариант. */
+export function dopZnachenie(f: Filtr, pole: DopPole): string {
+  return f.dop[pole.id] ?? pole.varianty[0]?.id ?? '';
 }
 
 const REZHIM_V_SSYLKE: Record<Rezhim, string> = { podskazki: '', bez: 'bez', vremya: 'vremya' };
@@ -309,13 +334,15 @@ export function vSsylku(f: Filtr): string {
   if (f.poryadokSuzheniya.length > 1) {
     q.set('s', f.poryadokSuzheniya.map((pole) => SUZH_V_SSYLKE[pole]).join(','));
   }
+  const dop = Object.entries(f.dop).sort(([a], [b]) => (a < b ? -1 : 1));
+  if (dop.length > 0) q.set('d', dop.map(([k, v]) => `${k}.${v}`).join(','));
   return q.toString();
 }
 
 /** Есть ли в адресе фильтр тренажёра. */
 export function estVSsylke(q: URLSearchParams): boolean {
   /* tip, tipy — прежние ссылки «Решать» из теории и маршрутов урока. */
-  return ['t', 'ist', 'ur', 'n', 'rezh', 'por', 'moi', 'pr', 'tip', 'tipy'].some((key) =>
+  return ['t', 'ist', 'ur', 'n', 'rezh', 'por', 'moi', 'pr', 'd', 'tip', 'tipy'].some((key) =>
     q.has(key),
   );
 }
@@ -341,6 +368,12 @@ export function izSsylki(q: URLSearchParams, config: TrenazherConfig): Filtr {
     moi: moi === 'nereshennye' || moi === 'oshibki' ? moi : 'vse',
     pravila: list('pr'),
     poryadokSuzheniya: [],
+    dop: Object.fromEntries(
+      list('d').flatMap((x) => {
+        const [k = '', v = ''] = x.split('.');
+        return k === '' || v === '' ? [] : [[k, v]];
+      }),
+    ),
   };
   const title = q.get('prn');
   if (f.pravila.length > 0 && title !== null && title !== '') {
@@ -418,6 +451,22 @@ export function nazvanieTipov(f: Filtr, config: TrenazherConfig, slova: SlovaFil
   return slova.tipov(f.tipy.length);
 }
 
+/** Дополнительные поля, отличные от первого варианта: чипы с крестиком. */
+export function dopAktivnye(f: Filtr, config: TrenazherConfig): { id: string; label: string }[] {
+  return (config.dop ?? []).flatMap((pole) => {
+    const v = f.dop[pole.id];
+    const variant = pole.varianty.find((x) => x.id === v);
+    return v === undefined || variant === undefined ? [] : [{ id: pole.id, label: variant.title }];
+  });
+}
+
+/** Вернуть дополнительное поле к первому варианту. */
+export function snyatDop(f: Filtr, id: string): Filtr {
+  const dop = { ...f.dop };
+  delete dop[id];
+  return { ...f, dop };
+}
+
 /** Строка-сводка во время тренировки: «№12 · параболы · ★★ · 10 задач». */
 export function svodka(config: TrenazherConfig, f: Filtr, n: number, slova: SlovaFiltra): string {
   const parts = [`№${config.razdel}`, nazvanieTipov(f, config, slova)];
@@ -425,6 +474,7 @@ export function svodka(config: TrenazherConfig, f: Filtr, n: number, slova: Slov
   if (f.urovni.length > 0) parts.push(levelsText(f.urovni));
   if (f.pravila.length > 0) parts.push(f.pravilaTitle ?? slova.pravila);
   if (f.moi !== 'vse') parts.push(slova.moi[f.moi]);
+  for (const d of dopAktivnye(f, config)) parts.push(d.label.toLowerCase());
   parts.push(tasksText(n));
   return parts.join(' · ');
 }
@@ -435,7 +485,8 @@ export function skolkoAktivnyh(f: Filtr): number {
     f.poryadokSuzheniya.length +
     (f.skolko !== NACHALNYY.skolko ? 1 : 0) +
     (f.rezhim !== NACHALNYY.rezhim ? 1 : 0) +
-    (f.poryadok !== NACHALNYY.poryadok ? 1 : 0)
+    (f.poryadok !== NACHALNYY.poryadok ? 1 : 0) +
+    Object.keys(f.dop).length
   );
 }
 
@@ -457,6 +508,11 @@ export function nabor(id: NaborId, f: Filtr, config: TrenazherConfig): Filtr | n
         : izmenit({ ...NACHALNYY, rezhim: f.rezhim, poryadok: 'sluchayno' }, { urovni: [max] });
     }
   }
+}
+
+/** Готовый набор раздела: начальный фильтр со своими дополнительными полями. */
+export function naborRazdela(n: NaborRazdela, f: Filtr, config: TrenazherConfig): Filtr {
+  return kRazdelu({ ...NACHALNYY, rezhim: f.rezhim, dop: n.dop }, config);
 }
 
 /** Набор уже выбран: фильтр совпадает с ним. */

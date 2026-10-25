@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { Input } from '@/components/ui';
+import { ShagiVoprosy, shagiSost } from '@/components/trenazher/ShagiVoprosy';
 import type { KartochkaRazdela, Shagi } from '@/components/trenazher/types';
 import { TRENAZHER_11 } from '@/content/zadanie11';
 import { trenazher11 } from '@/lib/zadanie11/progress';
@@ -39,13 +40,12 @@ interface Hint {
 }
 
 function hintOf(shagi: Shagi | null): Hint {
-  const raw = shagi ?? {};
-  const shag = raw['shag'];
-  const list = (v: unknown) => (Array.isArray(v) ? v : []);
+  const otkrytye = shagi?.['otkrytye'];
   return {
-    shag: typeof shag === 'number' && Number.isInteger(shag) && shag >= 0 ? shag : 0,
-    mimo: list(raw['mimo']).filter((x): x is number => typeof x === 'number'),
-    otkrytye: list(raw['otkrytye']).filter((x): x is string => typeof x === 'string'),
+    ...shagiSost(shagi),
+    otkrytye: Array.isArray(otkrytye)
+      ? otkrytye.filter((x): x is string => typeof x === 'string')
+      : [],
   };
 }
 
@@ -89,7 +89,6 @@ export function kartochka11({
           <IkonkaRazdela section={z.section} />
           <span className="z11-resh__razdel-text">
             <span className="z11-resh__razdel-name">{nazvaniya[z.section]}</span>
-            <span className="z11-resh__podtip">{z.title}</span>
           </span>
         </div>
         <div className="ptask__question" dangerouslySetInnerHTML={{ __html: z.uslovieHtml }} />
@@ -190,64 +189,25 @@ export function kartochka11({
     const h = hintOf(shagi);
     const steps = p?.shagi ?? [];
     const tables = p?.tables ?? [];
-    const tek = steps[h.shag];
-    const pred = h.shag > 0 ? steps[h.shag - 1] : undefined;
     const pustye = pustyeKletki(tables);
     /* Пройдено k шагов из n — открыта такая же доля пустых клеток. */
     const poShagam = steps.length === 0 ? 0 : Math.round((pustye.length * h.shag) / steps.length);
     const zakryto = new Set(pustye.filter((k, i) => i >= poShagam && !h.otkrytye.includes(k)));
 
-    function vybrat(k: number) {
-      if (tek === undefined) return;
-      if (k !== tek.correct) {
-        setShagi({ ...h, mimo: [...h.mimo, k] });
-        onMiss();
-        return;
-      }
-      setShagi({ ...h, shag: h.shag + 1, mimo: [] });
-      if (h.shag + 1 >= steps.length) onDone();
-    }
-
     return (
       <div className={clsx('z11t-hint', tsvetRazdela(z.section))}>
-        {tek === undefined ? null : (
-          <div className="z11-resh__shag">
-            <p className="tstep__no">{TRENAZHER_11.shag(h.shag + 1, steps.length)}</p>
-            <p className="z11-resh__q" dangerouslySetInnerHTML={{ __html: tek.question }} />
-            <div className="z11-resh__opts">
-              {tek.options.map((o, k) => (
-                <button
-                  key={k}
-                  type="button"
-                  className={clsx('z11-resh__opt', h.mimo.includes(k) && 'is-wrong')}
-                  disabled={h.mimo.includes(k)}
-                  onClick={() => vybrat(k)}
-                  dangerouslySetInnerHTML={{ __html: o }}
-                />
-              ))}
-            </div>
-            {h.mimo.length > 0 ? (
-              <p className="z11-resh__oops">{TRENAZHER_11.nevernoHint}</p>
-            ) : null}
-          </div>
-        )}
-        {pred === undefined ? null : (
-          <div className="z11-resh__pred">
-            <p className="z11-resh__pred-otvet">
-              <span dangerouslySetInnerHTML={{ __html: pred.question }} />{' '}
-              <b dangerouslySetInnerHTML={{ __html: pred.options[pred.correct] ?? '' }} />
-            </p>
-            {pred.comment === null ? null : (
-              <p
-                className="z11-resh__pred-comment"
-                dangerouslySetInnerHTML={{ __html: pred.comment }}
-              />
-            )}
-            {h.shag >= steps.length ? (
-              <p className="z11-resh__pred-done">{TRENAZHER_11.vseShagi}</p>
-            ) : null}
-          </div>
-        )}
+        <ShagiVoprosy
+          shagi={steps}
+          sost={h}
+          onChange={(next) => setShagi({ ...h, ...next })}
+          onMiss={onMiss}
+          onDone={onDone}
+          slova={{
+            shag: TRENAZHER_11.shag,
+            neverno: TRENAZHER_11.nevernoHint,
+            vse: TRENAZHER_11.vseShagi,
+          }}
+        />
         {tables.length === 0 ? null : (
           <section className="z11-resh__tablitsa">
             <h3 className="z11-resh__h">
@@ -322,6 +282,7 @@ export function kartochka11({
     proverit: (z, value) =>
       z.answerType === 'choice' ? choiceMatches(value, z.seal) : answerMatches(value, z.seal),
     estPodskazka: (z) => (podskazki(z)?.shagi.length ?? 0) > 0,
+    otvetPosleShagov: true,
     Podskazka,
     estRazbor: () => true,
     Razbor,

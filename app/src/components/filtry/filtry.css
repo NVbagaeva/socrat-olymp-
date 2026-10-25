@@ -380,7 +380,7 @@
 @media (max-width: 759.98px) {
   /* Место под липкую панель «Начать тренировку» — внизу страницы. */
   .app-main:has(.flt-go) {
-    padding-bottom: 96px;
+    padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + 96px);
   }
   .flt-card {
     display: none;
