@@ -9,8 +9,10 @@
 import { D, type Drob, kOf, sum } from '../drob';
 import { v } from '../plots';
 import { byPayments, deposit, differentiated, type Row } from '../solver';
-import { money, months, num, pct, years } from '../text';
+import { money, months, pct, years } from '../text';
+import { annBukvy } from '../bukvy';
 import { choice, hintType, step, tex } from './common';
+import { raskryto, stChisla, stFormula, stTablitsaBukvy, stUravnenie } from './razbor';
 import type { Prototype } from './types';
 
 const stAnswer = (text: string) => step('Ответ', text);
@@ -81,6 +83,46 @@ const P01: Prototype = {
       overpay: 'переплату за весь срок',
       total: 'сколько всего рублей нужно вернуть банку',
     };
+    const pereplataLine = `P = \\dfrac{${tex(S)}\\cdot ${n + 1}}{2}\\cdot\\dfrac{${tex(r)}}{100} = ${tex(S.mul(n + 1).div(2))}\\cdot ${tex(r.div(100))} = ${tex(formula.overpay)}`;
+    const startLine = `\\dfrac{(n-m+1)S}{n} = \\dfrac{${n - m + 1}\\cdot ${tex(S)}}{${n}} = ${tex(startM)}`;
+    const itog: Record<DifAsk, { text: string; f: string; chisla: string[] }> = {
+      change: {
+        text: 'Сумма изменения долга — кредит, делённый на число месяцев.',
+        f: '\\dfrac{S}{n}',
+        chisla: [`\\dfrac{S}{n} = \\dfrac{${tex(S)}}{${n}} = ${tex(change)}`],
+      },
+      interest: {
+        text: 'Переплата за $m$-й месяц — $r\\,\\%$ от долга на начало этого месяца.',
+        f: 'P_{m} = \\dfrac{(n-m+1)S}{n}\\cdot\\dfrac{r}{100}',
+        chisla: [
+          startLine,
+          `P_{${m}} = ${tex(startM)}\\cdot\\dfrac{${tex(r)}}{100} = ${tex(formula.interest)}`,
+        ],
+      },
+      end: {
+        text: 'Долг на конец $m$-го месяца — осталось $n - m$ частей по $\\dfrac{S}{n}$.',
+        f: 'D_{m} = \\dfrac{(n-m)S}{n}',
+        chisla: [`D_{${m}} = \\dfrac{${n - m}\\cdot ${tex(S)}}{${n}} = ${tex(formula.end)}`],
+      },
+      payment: {
+        text: 'Платёж $m$-го месяца — сумма изменения долга плюс переплата за этот месяц.',
+        f: 'x_{m} = \\dfrac{S}{n} + \\dfrac{(n-m+1)S}{n}\\cdot\\dfrac{r}{100}',
+        chisla: [
+          `\\dfrac{S}{n} = \\dfrac{${tex(S)}}{${n}} = ${tex(change)}, \\qquad ${startLine}`,
+          `x_{${m}} = ${tex(change)} + ${tex(startM)}\\cdot\\dfrac{${tex(r)}}{100} = ${tex(change)} + ${tex(formula.interest)} = ${tex(formula.payment)}`,
+        ],
+      },
+      overpay: {
+        text: 'Переплата за весь срок — сумма столбца «Переплата».',
+        f: 'P = \\dfrac{S(n+1)}{2}\\cdot\\dfrac{r}{100}',
+        chisla: [pereplataLine],
+      },
+      total: {
+        text: 'Всего вернуть банку — весь кредит плюс переплата за весь срок.',
+        f: 'Z = S + \\dfrac{S(n+1)}{2}\\cdot\\dfrac{r}{100}',
+        chisla: [pereplataLine, `Z = ${tex(S)} + ${tex(formula.overpay)} = ${tex(formula.total)}`],
+      },
+    };
     return {
       condition:
         `${plot.subject} ${v(plot, 'взял', 'взяла')} в кредит ${money(S, 'rub')} на ${months(n)}. Каждый месяц долг уменьшается на одну и ту же сумму, а банк начисляет ${pct(r)} на долг, который был в начале месяца. ` +
@@ -92,31 +134,38 @@ const P01: Prototype = {
       scheme: 'dif',
       period: 'month',
       solution: [
-        step(
-          'Сумма изменения долга',
-          `Это на сколько уменьшается долг за месяц. Долг уменьшается одинаково и за ${months(n)} доходит до нуля, поэтому делим кредит на число месяцев. Этот столбец одинаковый сверху донизу.`,
-          `${tex(S)} : ${n} = ${tex(change)}`,
+        stTablitsaBukvy(
+          'Сумма изменения долга — на сколько долг уменьшается за месяц. Долг уменьшается одинаково и за $n$ месяцев доходит до нуля, поэтому кредит $S$ делим на число месяцев: этот столбец одинаковый сверху донизу. Переплата — деньги, которые отдаём банку сверх того, что взяли: $r\\,\\%$ от долга на начало месяца. Долг на конец = долг на начало − сумма изменения долга; он же — долг на начало следующего месяца.',
         ),
-        step(
-          'Переплата',
-          `Переплата — деньги, которые отдаём банку сверх того, что взяли. За месяц это ${num(r)} % от долга на начало месяца: пропорция «${num(startM)} — 100 %, ? — ${num(r)} %».`,
-          `${tex(startM)}\\cdot\\frac{${tex(r)}}{100} = ${tex(startM.mul(r).div(100))}\\quad\\text{(в ${m}-м месяце)}`,
-        ),
-        step(
-          'Долг на конец',
-          'Долг на конец = долг на начало − сумма изменения долга. Он же — долг на начало следующего месяца.',
-          `${tex(startM)} - ${tex(change)} = ${tex(startM.sub(change))}`,
-        ),
-        step(
-          'Заполняем таблицу',
-          'Так строка за строкой до нуля. Платёж месяца — сумма изменения долга плюс переплата.',
-          undefined,
-          true,
-        ),
-        step(
-          'Итоги',
-          'Сумма столбца «Сумма изменения долга» — это весь кредит. Сумма столбца «Переплата» — переплата за весь срок. Вместе — всё, что вернули банку.',
-          `S = ${tex(S)},\\quad S_{\\text{перепл}} = ${rows.map((x) => tex(x.interest)).join(' + ')} = ${tex(totalOver)},\\quad S_{\\text{общ}} = ${tex(S.add(totalOver))}`,
+        {
+          title: 'Записываем формулы строки',
+          text: 'Возьмём месяц с номером $m$. До него долг уменьшился $m - 1$ раз: на начало месяца осталось $n - m + 1$ частей по $\\dfrac{S}{n}$, на конец — $n - m$ частей. Платёж месяца — сумма изменения долга плюс переплата.',
+          bloki: [
+            {
+              vid: 'formula',
+              tex: 'D_{m-1} = \\dfrac{(n-m+1)S}{n}, \\qquad D_{m} = \\dfrac{(n-m)S}{n}',
+            },
+            {
+              vid: 'formula',
+              tex: 'P_{m} = \\dfrac{(n-m+1)S}{n}\\cdot\\dfrac{r}{100}, \\qquad x_{m} = \\dfrac{S}{n} + P_{m}',
+            },
+            {
+              vid: 'text',
+              text: 'Итоги: столбец «Сумма изменения долга» в сумме даёт весь кредит $S$, столбец «Переплата» — переплату за весь срок $P$, вместе — всё, что вернули банку, $Z$. Долги на начало месяцев — $S, \\dfrac{(n-1)S}{n}, \\dots, \\dfrac{S}{n}$, их сумма $\\dfrac{S}{n}\\big(n + (n-1) + \\dots + 1\\big) = \\dfrac{S(n+1)}{2}$.',
+            },
+            {
+              vid: 'formula',
+              tex: 'P = \\dfrac{r}{100}\\Big(S + \\dfrac{(n-1)S}{n} + \\dots + \\dfrac{S}{n}\\Big) = \\dfrac{S(n+1)}{2}\\cdot\\dfrac{r}{100}, \\qquad Z = S + P',
+            },
+          ],
+        },
+        stFormula(itog[ask].text, itog[ask].f),
+        stChisla(
+          `$S = ${tex(S)}$, $n = ${n}$, $r = ${tex(r)}$${['interest', 'end', 'payment'].includes(ask) ? `, $m = ${m}$` : ''}.`,
+          itog[ask].chisla,
+          ask === 'overpay' || ask === 'total'
+            ? `Проверка по столбцу «Переплата»: $${rows.map((x) => tex(x.interest)).join(' + ')} = ${tex(totalOver)}$.`
+            : undefined,
         ),
         stAnswer(`${money(formula[ask], 'rub')}.`),
       ],
@@ -199,6 +248,37 @@ const P02: Prototype = {
       end: `долг на конец ${ORD_GEN[y - 1]} года`,
       last: 'последний платёж',
     };
+    /* Разбор в буквах: степень k и сколько платежей входит в ответ. */
+    const opsX = pays.map((_, i) => `- x_{${i + 1}}`);
+    const uravnenie = stUravnenie(opsX, { nol: false, title: 'Записываем долг по годам' });
+    const e = ask === 'last' ? n : y;
+    const J = ask === 'after' ? y - 1 : ask === 'end' ? y : n - 1;
+    const opsJ = [...opsX.slice(0, J), ...(J < e ? [''] : [])];
+    const chleny = Array.from({ length: J }, (_, i) => i + 1);
+    const imya =
+      ask === 'end'
+        ? `D_{${y}}`
+        : ask === 'last'
+          ? `x_{${n}} = D_{${n - 1}}\\,k`
+          : y === 1
+            ? ''
+            : `D_{${y - 1}}\\,k`;
+    const imyaChisla =
+      ask === 'end' ? `D_{${y}}` : ask === 'last' ? `x_{${n}}` : `D_{${y - 1}}\\,k`;
+    const itogText =
+      ask === 'end'
+        ? y === 1
+          ? 'Долг на конец первого года — первая строка таблицы.'
+          : `Долг на конец ${ORD_GEN[y - 1]} года — раскрываем скобки в формуле для $D_{${y}}$.`
+        : ask === 'last'
+          ? 'Последний платёж — весь долг после начисления в последний год; раскрываем скобки.'
+          : y === 1
+            ? 'Долг после начисления в первый год — сумма кредита, умноженная на $k$.'
+            : `Долг после начисления ${inYear(y - 1)} год — долг на начало этого года, умноженный на $k$; раскрываем скобки.`;
+    const znach = chleny.reduce(
+      (acc, j) => acc.sub(pays[j - 1]!.mul(k.pow(e - j))),
+      S.mul(k.pow(e)),
+    );
     return {
       condition:
         `${plot.subject} ${v(plot, 'взял', 'взяла')} в кредит ${money(S, 'rub')} на ${years(n)} под ${pct(r)} годовых. В конце каждого года банк начисляет проценты на оставшийся долг, затем вносится платёж: ${payText}, а последним платежом долг гасится полностью. ` +
@@ -210,26 +290,30 @@ const P02: Prototype = {
       scheme: 'ann',
       period: 'year',
       solution: [
-        step(
-          'Коэффициент $k$',
-          `Начислить ${num(r)} % — значит умножить долг на $k$: было 100 %, стало ${num(D(100).add(r))} %.`,
-          `k = 1 + \\frac{${tex(r)}}{100} = ${tex(k)}`,
+        stTablitsaBukvy(
+          'Начислить $r\\,\\%$ — значит умножить долг на $k = 1 + \\dfrac{r}{100}$: было 100 %, стало $(100 + r)\\,\\%$. Долг после начисления = долг на начало · $k$. Долг на конец $D_{i}$ = долг после начисления − платёж $x_{i}$; он же — долг на начало следующего года. В последний год платёж равен всему долгу после начисления — после него долг ноль.',
+          annBukvy({ n, period: 'year', platezh: (i) => `x_{${i}}` }),
         ),
-        step(
-          'Долг после начисления',
-          'Долг после начисления = долг на начало · $k$.',
-          `${tex(S)}\\cdot ${tex(k)} = ${tex(S.mul(k))}\\quad\\text{(в первый год)}`,
-        ),
-        step(
-          'Долг на конец',
-          'Долг на конец = долг после начисления − платёж. Он же — долг на начало следующего года.',
-          `${tex(S.mul(k))} - ${tex(pays[0]!)} = ${tex(S.mul(k).sub(pays[0]!))}`,
-        ),
-        step(
-          'Заполняем таблицу',
-          'Так год за годом. В последний год платёж равен всему долгу с процентами — после него долг ноль.',
-          undefined,
-          true,
+        {
+          ...uravnenie,
+          bloki: [
+            ...(uravnenie.bloki ?? []),
+            { vid: 'text', text: 'Последний платёж гасит весь долг после начисления:' },
+            {
+              vid: 'formula',
+              tex: `D_{${n}} = D_{${n - 1}}\\,k - x_{${n}} = 0 \\;\\Rightarrow\\; x_{${n}} = D_{${n - 1}}\\,k`,
+            },
+          ],
+        },
+        stFormula(itogText, imya ? `${imya} = ${raskryto(opsJ)}` : raskryto(opsJ)),
+        stChisla(
+          `$S = ${tex(S)}$, ${pays.map((p, i) => `$x_{${i + 1}} = ${tex(p)}$`).join(', ')}, $r = ${tex(r)}$.`,
+          [
+            `k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}${Array.from({ length: e - 1 }, (_, i) => `, \\qquad k^{${i + 2}} = ${tex(k.pow(i + 2))}`).join('')}`,
+            J === 0
+              ? `Sk = ${tex(S)}\\cdot ${tex(k)} = ${tex(znach)}`
+              : `${imyaChisla} = ${tex(S)}\\cdot ${tex(k.pow(e))}${chleny.map((j) => ` - ${tex(pays[j - 1]!)}${e - j > 0 ? `\\cdot ${tex(k.pow(e - j))}` : ''}`).join('')} = ${tex(S.mul(k.pow(e)))}${chleny.map((j) => ` - ${tex(pays[j - 1]!.mul(k.pow(e - j)))}`).join('')} = ${tex(znach)}`,
+          ],
         ),
         stAnswer(`${money(formula[ask], 'rub')}.`),
       ],
@@ -243,7 +327,7 @@ const P02: Prototype = {
         ),
         choice(
           'Каким должен быть последний платёж?',
-          'Равным всему долгу с процентами в последний год',
+          'Равным всему долгу после начисления в последний год',
           ['Равным предыдущему платежу', 'Равным сумме кредита'],
           rng.int(0, 2),
         ),
@@ -316,6 +400,40 @@ const P03: Prototype = {
       end: `сумму на счёте в конце ${ORD_GEN[y - 1]} года`,
       final: `сколько будет на счёте через ${years(n)}`,
     };
+    /* Разбор в буквах: степень k и сколько лет операций входит в ответ. */
+    const znak = sign > 0 ? '+' : '-';
+    const opsL = Array.from({ length: n }, (_, i) =>
+      i + 1 === opYear ? (sign > 0 ? '+ y' : '- x') : '',
+    );
+    const e = ask === 'final' ? n : y;
+    const J = ask === 'after' ? y - 1 : e;
+    const opsJ = [...opsL.slice(0, J), ...(J < e ? [''] : [])];
+    const sOp = opYear <= J;
+    const uravnenieV0 = stUravnenie(opsL, {
+      D: 'V',
+      nol: false,
+      title: 'Записываем вклад по годам',
+    });
+    // vlozheno() пишет «((Sk + y)k)k», когда два года подряд операций нет: сворачиваем в k².
+    const uravnenieV = {
+      ...uravnenieV0,
+      bloki: (uravnenieV0.bloki ?? []).map((b) =>
+        b.vid === 'formula'
+          ? { ...b, tex: b.tex.replace(/\(\((Sk [+-] [xy])\)k\)k$/, '($1)k^{2}') }
+          : b,
+      ),
+    };
+    const imya = ask === 'after' ? (y === 1 ? '' : `V_{${y - 1}}\\,k`) : `V_{${e}}`;
+    const imyaChisla = ask === 'after' ? (y === 1 ? 'Sk' : `V_{${y - 1}}\\,k`) : `V_{${e}}`;
+    const itogText =
+      ask === 'after'
+        ? y === 1
+          ? 'Вклад после начисления в первый год — первоначальный вклад, умноженный на $k$.'
+          : `Вклад после начисления ${inYear(y - 1)} год — вклад на начало этого года, умноженный на $k$; раскрываем скобки.`
+        : e === 1
+          ? 'Вклад на конец первого года — первая строка таблицы.'
+          : `Вклад на конец ${ORD_GEN[e - 1]} года — раскрываем скобки в формуле для $V_{${e}}$.`;
+    const znach = S.mul(k.pow(e)).add(sOp ? op.mul(k.pow(e - opYear)) : D(0));
     return {
       condition:
         `${plot.subject} ${v(plot, 'положил', 'положила')} ${money(S, 'rub')} ${plot.goal} в банк на ${years(n)} под ${pct(r)} годовых. В конце каждого года банк начисляет проценты на сумму, которая была на счёте в начале года. В конце ${ORD_GEN[opYear - 1]} года, после начисления процентов, ${opText}. ` +
@@ -327,22 +445,19 @@ const P03: Prototype = {
       scheme: 'dep',
       period: 'year',
       solution: [
-        step(
-          'Коэффициент $k$',
-          `Начислить ${num(r)} % — умножить вклад на $k$.`,
-          `k = 1 + \\frac{${tex(r)}}{100} = ${tex(k)}`,
+        stTablitsaBukvy(
+          'Начислить $r\\,\\%$ — умножить вклад на $k = 1 + \\dfrac{r}{100}$. Вклад после начисления = вклад на начало · $k$. Вклад на конец $V_{i}$ = после начисления плюс пополнение $y$ (или минус снятие $x$); он же — вклад на начало следующего года.',
         ),
-        step(
-          'После начисления',
-          'Вклад после начисления = вклад на начало · $k$.',
-          `${tex(S)}\\cdot ${tex(k)} = ${tex(S.mul(k))}\\quad\\text{(в первый год)}`,
-        ),
-        step(
-          'Пополнение или снятие',
-          'Вклад на конец = после начисления плюс пополнение (или минус снятие). Он же — вклад на начало следующего года.',
-          `${tex(byRule[opYear - 1]!.after)} ${sign > 0 ? '+' : '-'} ${tex(amount)} = ${tex(byRule[opYear - 1]!.end)}\\quad\\text{(в ${opYear}-й год)}`,
-        ),
-        step('Заполняем таблицу', 'Так год за годом.', undefined, true),
+        uravnenieV,
+        stFormula(itogText, imya ? `${imya} = ${raskryto(opsJ)}` : raskryto(opsJ)),
+        stChisla(`$S = ${tex(S)}$, $${sign > 0 ? 'y' : 'x'} = ${tex(amount)}$, $r = ${tex(r)}$.`, [
+          `k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}${Array.from({ length: e - 1 }, (_, i) => `, \\qquad k^{${i + 2}} = ${tex(k.pow(i + 2))}`).join('')}`,
+          e === 1 && !sOp
+            ? `Sk = ${tex(S)}\\cdot ${tex(k)} = ${tex(znach)}`
+            : sOp
+              ? `${imyaChisla} = ${tex(S)}\\cdot ${tex(k.pow(e))} ${znak} ${tex(amount)}${e - opYear > 0 ? `\\cdot ${tex(k.pow(e - opYear))}` : ''} = ${tex(S.mul(k.pow(e)))} ${znak} ${tex(amount.mul(k.pow(e - opYear)))} = ${tex(znach)}`
+              : `${imyaChisla} = ${tex(S)}\\cdot ${tex(k.pow(e))} = ${tex(znach)}`,
+        ]),
         stAnswer(`${money(formula[ask], 'rub')}.`),
       ],
       hints: [
