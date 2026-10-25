@@ -298,8 +298,12 @@ const marks = [...BANK_3, ...BANK_4, ...BANK_5, ...KONSPEKT_4]
   })
   .filter((m) => m.text.length >= 20);
 
-/* Имена полей прототипа: если они есть в куске, уехал весь банк. */
+/* Имена полей прототипа вместе с непустым списком вариантов — значит,
+   уехал весь банк. Шаблоны «Вариантов повышенной сложности» устроены
+   как прототипы, но своих чисел у них нет (varianty: []): числа задаёт
+   вариант, и без вариантов банка поля сами по себе ничего не выдают. */
 const FIELDS = ['poModeli:', 'perebor:', 'dopustimo:', 'varianty:'];
+const VARIANTY_BANKA = /varianty:\[(?!\])/;
 
 /* Банк №11 хранит параметры и ответ задачи (data/zadanie11/bank.json);
    с ответами в браузер он уезжать не должен. Тренажёру условия банка
@@ -511,7 +515,7 @@ for (const file of files) {
   }
 
   /* След целого банка. */
-  const fields = FIELDS.filter((f) => text.includes(f));
+  const fields = VARIANTY_BANKA.test(text) ? FIELDS.filter((f) => text.includes(f)) : [];
   if (fields.length > 0) {
     problemy.push(`поля прототипа: ${fields.join(' ')}`);
   }

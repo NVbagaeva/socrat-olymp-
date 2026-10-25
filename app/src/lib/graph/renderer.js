@@ -987,7 +987,7 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell, str
   /* Зона задана, а места в ней не нашлось — подписи не будет:
      ставить её вне зоны значит вернуть её к треугольнику. */
   if (zone && !best && !fallback) { return ''; }
-  if (report !== false && !zone && !best && (!fallback || !fallback.free)) {
+  if (!zone && !best && (!fallback || !fallback.free)) {
     best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH);
   }
 
@@ -1074,9 +1074,7 @@ function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, repor
   }
 
   var mid = at(total / 2);
-  /* Перебор поля — только в окончательной отрисовке, не в пробах
-     порядка подписей (там report === false): он дорогой. */
-  if (report !== false && !best && (!fallback || !fallback.free)) {
+  if (!best && (!fallback || !fallback.free)) {
     best = freeSpotNear(item, all, sx, sy, cloud, labelBoxes, labelField, halfW, halfH);
   }
   var spot = best || fallback ||
@@ -1517,6 +1515,7 @@ function ownership(item, all, sx, sy, cx, cy, halfW, halfH) {
    к своей кривой, чем к чужой, — самое близкое к своей. */
 function freeSpotNear(item, all, sx, sy, cloud, labelBoxes, field, halfW, halfH) {
   var step = 6;
+  var index = cloudIndex(cloud, 24);
   /* Сначала с обычным зазором, потом с меньшим — но не вплотную. */
   var porogi = [THEME.curveLabelClear, 6, 3];
   for (var k = 0; k < porogi.length; k++) {
@@ -1524,16 +1523,10 @@ function freeSpotNear(item, all, sx, sy, cloud, labelBoxes, field, halfW, halfH)
     var best = null;
     for (var cy = field.top + halfH + THEME.curveLabelEdge; cy <= field.bottom - halfH - THEME.curveLabelEdge; cy += step) {
       for (var cx = field.left + halfW + THEME.curveLabelEdge; cx <= field.right - halfW - THEME.curveLabelEdge; cx += step) {
-        var clear = Infinity;
-        for (var c = 0; c < cloud.length; c++) {
-          var d = rectDist(cloud[c], cx, cy, halfW, halfH);
-          if (d < clear) { clear = d; }
-          if (clear < porog) { break; }
-        }
-        if (clear < porog) { continue; }
+        if (index.blizhe(cx, cy, halfW, halfH, porog)) { continue; }
         if (labelBoxes.some(function (b) { return rectDist(b, cx, cy, halfW, halfH) <= 2; })) { continue; }
         var mine = ownership(item, all, sx, sy, cx, cy, halfW, halfH);
-        if (mine.other <= mine.own + 2) { continue; }
+        if (mine.other <= mine.own + 2 || mine.apart < THEME.curveLabelApart) { continue; }
         if (!best || mine.own < best.own) { best = { x: cx, y: cy, own: mine.own, score: 0 }; }
       }
     }
@@ -1545,13 +1538,10 @@ function freeSpotNear(item, all, sx, sy, cloud, labelBoxes, field, halfW, halfH)
   var lead = null;
   for (var y2 = field.top + halfH + THEME.curveLabelEdge; y2 <= field.bottom - halfH - THEME.curveLabelEdge; y2 += step) {
     for (var x2 = field.left + halfW + THEME.curveLabelEdge; x2 <= field.right - halfW - THEME.curveLabelEdge; x2 += step) {
-      var free = Infinity;
-      for (var c2 = 0; c2 < cloud.length; c2++) {
-        free = Math.min(free, rectDist(cloud[c2], x2, y2, halfW, halfH));
-        if (free < 4) { break; }
-      }
-      if (free < 4) { continue; }
+      if (index.blizhe(x2, y2, halfW, halfH, 4)) { continue; }
       if (labelBoxes.some(function (b) { return rectDist(b, x2, y2, halfW, halfH) <= 2; })) { continue; }
+      /* От подписей других графиков — как у обычного места (curveLabelApart). */
+      if (nearestTo(all.curveLabelBoxes || [], x2, y2, halfW, halfH) < THEME.curveLabelApart) { continue; }
       var near = nearestTo(own, x2, y2, halfW, halfH);
       if (!lead || near < lead.own) { lead = { x: x2, y: y2, own: near, score: 0, vynoska: true }; }
     }
@@ -1565,6 +1555,41 @@ function freeSpotNear(item, all, sx, sy, cloud, labelBoxes, field, halfW, halfH)
     lead.to = tip;
   }
   return lead;
+}
+
+/* Корзины облака препятствий по клеткам size×size: перебор поля
+   спрашивает «есть ли препятствие ближе porog» только у соседних
+   корзин, а не у всего облака. */
+function cloudIndex(cloud, size) {
+  var korziny = {};
+  cloud.forEach(function (o) {
+    var hw = o.halfW || 0;
+    var hh = o.halfH || 0;
+    for (var i = Math.floor((o.x - hw) / size); i <= Math.floor((o.x + hw) / size); i++) {
+      for (var j = Math.floor((o.y - hh) / size); j <= Math.floor((o.y + hh) / size); j++) {
+        var key = i + ':' + j;
+        (korziny[key] || (korziny[key] = [])).push(o);
+      }
+    }
+  });
+  return {
+    blizhe: function (cx, cy, halfW, halfH, porog) {
+      var i0 = Math.floor((cx - halfW - porog) / size);
+      var i1 = Math.floor((cx + halfW + porog) / size);
+      var j0 = Math.floor((cy - halfH - porog) / size);
+      var j1 = Math.floor((cy + halfH + porog) / size);
+      for (var i = i0; i <= i1; i++) {
+        for (var j = j0; j <= j1; j++) {
+          var spisok = korziny[i + ':' + j];
+          if (!spisok) { continue; }
+          for (var c = 0; c < spisok.length; c++) {
+            if (rectDist(spisok[c], cx, cy, halfW, halfH) < porog) { return true; }
+          }
+        }
+      }
+      return false;
+    }
+  };
 }
 
 /* Выноска от края подписи к ближайшей точке её кривой — тонкая,
