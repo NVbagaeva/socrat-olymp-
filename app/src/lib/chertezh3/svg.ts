@@ -2,16 +2,18 @@
  * Кадр → строка SVG: статичный чертёж для листа, предпросмотра и
  * первого кадра интерактивного чертежа (до загрузки скрипта).
  *
- * Цвета — токены палитры сайта (--solid-edge, --graph-accent,
- * --color-text…): на сайте их задаёт tokens.css, на листе — тема
- * листа (sheet/theme.css, цветная и ч/б). Для отдельного файла есть
- * режим `fiks` — те же цвета значениями.
+ * Цвета и толщины — атрибутами прямо в SVG, значениями (токены сайта
+ * из styles/tokens.css): рисунок не зависит от CSS страницы и одинаков
+ * на сайте, на листе, в PDF и на сводном листе. Раньше цвета были
+ * var(--solid-edge) и т. п. без запасного значения: вне страниц, где
+ * токены не заданы, рёбра пропадали, а заливки становились чёрными.
  *
  * Подписи: простые (имя вершины, число, градусы, корень из числа)
  * пишутся текстом SVG — они печатаются где угодно. Сложные (дробь)
  * — разметкой KaTeX внутри foreignObject, если её дали.
  */
 
+import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 import { escSvg, imyaSvg } from '@/lib/stereo/proekciya';
 import type { Kadr, LiniyaKadra, PodpisKadra } from './kadr';
 
@@ -27,29 +29,27 @@ export interface OpciiSvg {
   klass?: string;
 }
 
-const TOKENY = {
-  rebro: 'var(--solid-edge)',
-  akcent: 'var(--graph-accent)',
-  podsvetka: 'var(--color-accent)',
-  tekst: 'var(--color-text)',
-  fon: 'var(--color-surface)',
-};
+/* Рёбра — тёмные, построения и подсветка — терракота сайта. Режим
+   tsveta оставлен для совместимости: и 'tokeny', и 'fiks' дают значения. */
 const FIKS = {
-  rebro: '#1f5fd0',
+  rebro: '#101728',
   akcent: '#e07a2f',
   podsvetka: '#e07a2f',
   tekst: '#101728',
   fon: '#ffffff',
 };
+const TOKENY = FIKS;
 
 const f = (x: number) => (Math.round(x * 10) / 10).toString();
 
 /** Стиль линии: цвет, толщина, штрих, прозрачность. */
 export function stilLinii(l: Pick<LiniyaKadra, 'vid' | 'vidno' | 'yarko' | 'tusklo'>) {
   const cvet = l.yarko ? 'podsvetka' : l.vid === 'rebro' ? 'rebro' : 'akcent';
-  let w = l.vid === 'rebro' ? 1.6 : l.vid === 'uslovie' ? 2 : 1.4;
+  /* Видимое ребро на листе — 1,5 pt: кадр шириной 280 печатается
+     шириной ~66 мм, 0,24 мм на единицу. */
+  let w = l.vid === 'rebro' ? 2.3 : l.vid === 'uslovie' ? 2.4 : 1.8;
   if (l.yarko) w += 1.1;
-  if (!l.vidno) w = Math.max(1.1, w - 0.4);
+  if (!l.vidno) w = Math.max(1.4, w - 0.5);
   let op = l.vidno ? 1 : 0.8;
   if (l.tusklo) op *= 0.28;
   return { cvet, w, dash: l.vidno ? '' : '5 4', op } as const;
@@ -109,7 +109,8 @@ function plain(s: string): string {
 function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
   const op = p.tusklo ? ' opacity="0.35"' : '';
   const fill = p.yarko ? c.podsvetka : p.vid === 'imya' ? c.tekst : c.akcent;
-  const weight = p.yarko || p.vid === 'dannoe' ? ' font-weight="600"' : '';
+  /* Подписи — обычного начертания, как формулы KaTeX. */
+  const weight = '';
   const txt = texSvg(p.tex);
   if (txt === null && o.katex) {
     return (
@@ -117,8 +118,7 @@ function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
       `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:${o.kegl}px;line-height:1;color:${fill}">${o.katex(p.tex)}</div></foreignObject>`
     );
   }
-  const shrift =
-    p.vid === 'imya' ? "'PT Serif', Georgia, serif" : 'var(--font-sans, Inter, sans-serif)';
+  const shrift = p.vid === 'imya' ? BUKVY : CHISLA;
   return (
     `<text x="${f(p.x + 1)}" y="${f(p.y + p.h * 0.78)}" font-family="${shrift}" font-size="${o.kegl}" fill="${fill}"${weight}${op}>` +
     `${txt ?? escSvg(p.tex)}</text>`
@@ -129,7 +129,8 @@ export function kadrSvg(k: Kadr, o: OpciiSvg): string {
   const c = o.tsveta === 'fiks' ? FIKS : TOKENY;
   const out: string[] = [];
   for (const z of k.zalivki) {
-    const op = (z.yarko ? 0.26 : 0.13) * (z.tusklo ? 0.35 : 1);
+    /* Заливка — лёгкий оттенок, не больше 0,1: непрозрачных пятен нет. */
+    const op = (z.yarko ? 0.1 : 0.07) * (z.tusklo ? 0.35 : 1);
     out.push(
       `<polygon points="${z.pts.map((p) => `${f(p[0])},${f(p[1])}`).join(' ')}" fill="${z.yarko ? c.podsvetka : c.akcent}" fill-opacity="${op.toFixed(3)}" stroke="none"/>`,
     );

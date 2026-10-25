@@ -241,7 +241,8 @@ function z03(proto: Proto3, p: Params3, hints: HintLike[], klyuch: string): Goto
     egeNumber: 3,
     difficulty: null,
     statement: typeset(proto.uslovie(p)),
-    figure: { svg: renderSolid(proto.chertezh(p)), width: 50 },
+    /* Ширина 70 мм: видимые рёбра движка — 1,5 pt (lib/solid/render.ts). */
+    figure: { svg: renderSolid(proto.chertezh(p)), width: 70 },
     figureTeacher: null,
     answer: answerText(otvetChislo),
     answerHtml: otvet,

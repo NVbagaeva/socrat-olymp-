@@ -46,7 +46,7 @@ for (const [id, model] of MODELS) {
       `${id}: orthoAt(28, 25) рисует не так, как вид по умолчанию`,
     );
   }
-  check(!plain.includes('stroke-width="3.4"'), `${id}: выделение без шага`);
+  check(!plain.includes('stroke-width="3.6"'), `${id}: выделение без шага`);
 }
 
 /* 2. Шаги. */
@@ -64,7 +64,7 @@ for (const primer of [diagonalKuba(), sechenieKuba()]) {
   for (let k = 1; k <= maxShag; k += 1) {
     const svg = R.renderSolid(model, { shag: k });
     check(
-      svg.includes('stroke-width="3.4"') || svg.includes('stroke-width="2.4"'),
+      svg.includes('stroke-width="3.6"') || svg.includes('stroke-width="2.6"'),
       `${model.alt}: шаг ${k} не выделен`,
     );
     const prev = R.solidDiagnostics(model, { shag: k - 1 }).strokes.length;
