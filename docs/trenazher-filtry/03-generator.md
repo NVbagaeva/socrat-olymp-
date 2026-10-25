@@ -19,11 +19,11 @@
 
 | Проверка | Результат |
 |---|---|
-| `pnpm lint`, `pnpm typecheck` | см. описание PR |
-| `test:generator`, `test:komplekty` | см. описание PR |
-| `test:trenazher-filtry`, `test:trenazher-filtry-site` | см. описание PR |
+| `pnpm lint`, `pnpm typecheck` | чисто |
+| `test:generator`, `test:komplekty` | 4356 из 4356; 3000 комплектов, 15 807 задач на листах — расхождений 0 |
+| `test:trenazher-filtry`, `test:trenazher-filtry-site` | 68 988 и 62 проверки — чисто |
 | Браузер, №11 и №8, 1440 и 390 px: в начале активных фильтров нет; после выбора источника и звезды — чипы; «Сбросить» — чипов нет; прокрутки вбок нет | чисто |
-| `check-mobile-overflow` генераторов №1, №2, №8, №9, №11, №12 и тренажёра №12 | см. описание PR |
+| `check-mobile-overflow` генераторов №1, №2, №8, №9, №11, №12 и тренажёра №12 | 10 страниц × 4 ширины (60 проверок), прокрутки вбок 0 |
 
 ## Снимки
 
