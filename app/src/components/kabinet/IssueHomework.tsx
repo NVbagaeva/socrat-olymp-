@@ -23,7 +23,8 @@ import { kabinetText } from './text';
 import { errorText, useKabinet, useQueryParam } from './useKabinet';
 
 const loadTutor = (api: KabinetApi) => api.tutorHome();
-const readyTasks = catalogTasks.filter((t) => t.ready);
+/* Разделы второй части без банка прототипов (№15, №16) в ДЗ не выдаются. */
+const readyTasks = catalogTasks.filter((t) => t.ready && t.prototypes.length > 0);
 const firstTask = readyTasks[0]?.no ?? 1;
 
 /** Одна строка «номер → прототип → сколько». */
@@ -136,7 +137,7 @@ export function IssueHomework() {
             <Link className="btn btn--primary" href={`/kabinet/dz/?id=${issuedId}`}>
               Открыть задание
             </Link>
-            <Link className="btn btn--ghost" href="/kabinet/">
+            <Link className="btn btn--ghost" href="/kabinet/proba/">
               {kabinetText.toHome}
             </Link>
           </span>
@@ -150,7 +151,7 @@ export function IssueHomework() {
         title={t.title}
         description={t.noStudents}
         action={
-          <Link className="btn btn--primary" href="/kabinet/">
+          <Link className="btn btn--primary" href="/kabinet/proba/">
             {kabinetText.toHome}
           </Link>
         }

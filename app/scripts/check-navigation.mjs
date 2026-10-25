@@ -34,6 +34,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
@@ -171,6 +172,9 @@ for (const [name, browser] of browsers) {
         isMobile: name !== 'Firefox',
         hasTouch: true,
       });
+      /* Иначе окно «Впервые здесь?» (при переводе часов — сразу)
+         ложится поверх нижней панели. */
+      await welcomeSeen(context);
       const page = await context.newPage();
       const requested = [];
       page.on('request', (r) => requested.push(new URL(r.url()).pathname));

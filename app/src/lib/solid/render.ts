@@ -54,6 +54,10 @@ const THEME = {
     marker: 1.4,
     dotStroke: 1.6,
     halo: 3.2,
+    /* Элемент текущего шага решения: толще остальных. */
+    hl: 3.4,
+    hlHidden: 2.4,
+    hlMarker: 2.2,
   },
   dash: {
     hidden: '6 4',
@@ -66,6 +70,7 @@ const THEME = {
     liquid: 0.85,
     section: 0.16,
     sphere: 0.5,
+    sectionHl: 0.3,
   },
   font: {
     family: 'var(--font-sans)',
@@ -87,6 +92,8 @@ const THEME = {
     labelGap: 10,
     angle: 8,
     ellipsePoints: 96,
+    /* Поле вокруг живого чертежа: при вращении подписи не обрезаются. */
+    liveMargin: 26,
   },
 } as const;
 
@@ -98,6 +105,8 @@ interface Stroke {
   points: Vec2[];
   role: Role;
   visible: boolean;
+  /** Элемент текущего шага решения. */
+  hl?: boolean;
 }
 
 type FillRole = 'face' | 'liquid' | 'section' | 'sphere';
@@ -105,12 +114,14 @@ type FillRole = 'face' | 'liquid' | 'section' | 'sphere';
 interface Fill {
   points: Vec2[];
   role: FillRole;
+  hl?: boolean;
 }
 
 interface LabelSpec {
   p: Vec2;
   text: string;
   kind: 'vertex' | 'aux' | 'measure';
+  hl?: boolean;
 }
 
 interface PlacedLabel extends LabelSpec {
@@ -122,6 +133,7 @@ interface PlacedLabel extends LabelSpec {
 
 interface Angle {
   points: [Vec2, Vec2, Vec2];
+  hl?: boolean;
 }
 
 interface Scene {
@@ -476,9 +488,34 @@ function addSphere(view: View, scene: Scene, body: Sphere, all: readonly Occlude
   });
 }
 
-function buildScene(model: Model): Scene {
+/**
+ * Как рисовать модель. Без опций — статичный чертёж в виде модели,
+ * все элементы, масштаб по рамке рисунка: так рисуются банк, теория
+ * и печать.
+ */
+export interface RenderOptions {
+  /** Свой вид вместо вида модели: живой чертёж под углом ученика. */
+  view?: View;
+  /**
+   * Шаг решения: элементы с бóльшим шагом не рисуются, элементы
+   * этого шага выделены. Не задан — видно всё, без выделения.
+   */
+  shag?: number;
+  /**
+   * Постоянный масштаб и рамка: чертёж вписан по описанной сфере
+   * модели, поэтому при вращении не прыгает и не «дышит».
+   */
+  ustoychivo?: boolean;
+}
+
+function buildScene(model: Model, options: RenderOptions = {}): Scene {
   const scene: Scene = { strokes: [], fills: [], dots: [], labels: [], angles: [] };
-  const view = viewOf(model.view);
+  const view = options.view ?? viewOf(model.view);
+  const shag = options.shag;
+  /* Виден ли элемент на этом шаге и выделен ли он. */
+  const vidno = (item: { shag?: number }) =>
+    shag === undefined || item.shag === undefined || item.shag <= shag;
+  const hl = (item: { shag?: number }) => shag !== undefined && item.shag === shag;
   const all = occludersOf(view, model.bodies);
   const eps = modelExtent(model) * 1e-6;
 
@@ -499,46 +536,63 @@ function buildScene(model: Model): Scene {
     }
   });
 
-  (model.sections ?? []).forEach((section) => {
-    scene.fills.push({ points: section.points.map(view.project), role: 'section' });
+  /* Флаг выделения ставится только там, где он есть: у статичного
+     чертежа разметка остаётся прежней до байта. */
+  const sHl = <T extends object>(item: T, on: boolean): T => (on ? { ...item, hl: true } : item);
+
+  (model.sections ?? []).filter(vidno).forEach((section) => {
+    const on = hl(section);
+    scene.fills.push(sHl({ points: section.points.map(view.project), role: 'section' }, on));
     section.points.forEach((a, i) => {
       const b = at(section.points, (i + 1) % section.points.length);
-      scene.strokes.push(...segmentStrokes(view, a, b, all, eps, 'section'));
+      scene.strokes.push(
+        ...segmentStrokes(view, a, b, all, eps, 'section').map((st) => sHl(st, on)),
+      );
     });
   });
 
-  (model.lines ?? []).forEach((line) => {
-    scene.strokes.push(...segmentStrokes(view, line.a, line.b, all, eps, 'aux'));
+  (model.lines ?? []).filter(vidno).forEach((line) => {
+    const on = hl(line);
+    scene.strokes.push(
+      ...segmentStrokes(view, line.a, line.b, all, eps, 'aux').map((st) => sHl(st, on)),
+    );
     if (line.label) {
-      scene.labels.push({ p: view.project(mid(line.a, line.b)), text: line.label, kind: 'aux' });
+      scene.labels.push(
+        sHl({ p: view.project(mid(line.a, line.b)), text: line.label, kind: 'aux' }, on),
+      );
     }
   });
 
-  (model.marks ?? []).forEach((mark) => {
+  (model.marks ?? []).filter(vidno).forEach((mark) => {
     const p = view.project(mark.p);
     scene.dots.push(p);
     if (mark.label) {
-      scene.labels.push({ p, text: mark.label, kind: 'vertex' });
+      scene.labels.push(sHl({ p, text: mark.label, kind: 'vertex' }, hl(mark)));
     }
   });
 
-  (model.measures ?? []).forEach((measure) => {
-    scene.labels.push({
-      p: view.project(mid(measure.a, measure.b)),
-      text: measure.text,
-      kind: 'measure',
-    });
+  (model.measures ?? []).filter(vidno).forEach((measure) => {
+    scene.labels.push(
+      sHl(
+        {
+          p: view.project(mid(measure.a, measure.b)),
+          text: measure.text,
+          kind: 'measure',
+        },
+        hl(measure),
+      ),
+    );
   });
 
-  (model.notes ?? []).forEach((note) => {
-    scene.labels.push({ p: view.project(note.p), text: note.text, kind: 'aux' });
+  (model.notes ?? []).filter(vidno).forEach((note) => {
+    scene.labels.push(sHl({ p: view.project(note.p), text: note.text, kind: 'aux' }, hl(note)));
   });
 
-  (model.angles ?? []).forEach((angle) => {
+  (model.angles ?? []).filter(vidno).forEach((angle) => {
     const o = view.project(angle.at);
     const u = view.project(add(angle.at, normalize(angle.u)));
     const v = view.project(add(angle.at, normalize(angle.v)));
-    scene.angles.push({ points: [o, u, v] });
+    scene.angles.push(sHl({ points: [o, u, v] }, hl(angle)));
   });
 
   return scene;
@@ -586,15 +640,82 @@ function boxOf(points: Vec2[]): Box {
   return box;
 }
 
-/** Всё, что нарисовано, в пикселях: сцена вписана в квадрат fit. */
-function toPixels(scene: Scene): Scene {
+/**
+ * Описанная сфера модели: центр и радиус. От ракурса не зависит —
+ * по ней живой чертёж держит масштаб и рамку при вращении.
+ */
+export function boundingSphere(model: Model): { center: Vec3; r: number } {
+  const pts: Vec3[] = [];
+  const round: { c: Vec3; r: number }[] = [];
+  model.bodies.forEach((body) => {
+    switch (body.kind) {
+      case 'polyhedron':
+        pts.push(...body.vertices);
+        break;
+      case 'cylinder':
+      case 'cone': {
+        const down = body.kind === 'cone' && body.inverted === true;
+        const top: Vec3 = add(body.base, [0, 0, down ? -body.h : body.h]);
+        round.push({ c: body.base, r: body.r });
+        round.push({ c: top, r: body.kind === 'cone' ? (body.top ?? 0) : body.r });
+        pts.push(body.base, top);
+        break;
+      }
+      case 'sphere':
+        round.push({ c: body.center, r: body.r });
+        pts.push(body.center);
+        break;
+    }
+  });
+  (model.lines ?? []).forEach((l) => pts.push(l.a, l.b));
+  (model.marks ?? []).forEach((m) => pts.push(m.p));
+  round.forEach(({ c, r }) => {
+    pts.push(add(c, [r, 0, 0]), add(c, [-r, 0, 0]), add(c, [0, r, 0]), add(c, [0, -r, 0]));
+  });
+  const lo = [Infinity, Infinity, Infinity];
+  const hi = [-Infinity, -Infinity, -Infinity];
+  pts.forEach((p) => {
+    for (let i = 0; i < 3; i += 1) {
+      lo[i] = Math.min(at(lo, i), at(p, i));
+      hi[i] = Math.max(at(hi, i), at(p, i));
+    }
+  });
+  const center: Vec3 = [
+    (at(lo, 0) + at(hi, 0)) / 2,
+    (at(lo, 1) + at(hi, 1)) / 2,
+    (at(lo, 2) + at(hi, 2)) / 2,
+  ];
+  let r = 0;
+  pts.forEach((p) => {
+    r = Math.max(r, Math.sqrt(dot(sub(p, center), sub(p, center))));
+  });
+  round.forEach((b) => {
+    r = Math.max(r, Math.sqrt(dot(sub(b.c, center), sub(b.c, center))) + b.r);
+  });
+  return { center, r: r || 1 };
+}
+
+/**
+ * Всё, что нарисовано, в пикселях: сцена вписана в квадрат fit — по
+ * рамке рисунка, а у живого чертежа по описанной сфере (рамка одна при
+ * любом ракурсе).
+ */
+function toPixels(scene: Scene, sphere?: { center: Vec2; r: number }): Scene {
   const points = [
     ...scene.strokes.flatMap((s) => s.points),
     ...scene.fills.flatMap((f) => f.points),
     ...scene.dots,
     ...scene.labels.map((l) => l.p),
   ];
-  const box = boxOf(points);
+  const box =
+    sphere === undefined
+      ? boxOf(points)
+      : {
+          minX: sphere.center[0] - sphere.r,
+          minY: sphere.center[1] - sphere.r,
+          maxX: sphere.center[0] + sphere.r,
+          maxY: sphere.center[1] + sphere.r,
+        };
   const w = box.maxX - box.minX || 1;
   const h = box.maxY - box.minY || 1;
   const k = THEME.geometry.fit / Math.max(w, h);
@@ -606,6 +727,7 @@ function toPixels(scene: Scene): Scene {
     labels: scene.labels.map((l) => ({ ...l, p: map(l.p) })),
     angles: scene.angles.map((a) => {
       const [o, u, v] = a.points.map(map) as [Vec2, Vec2, Vec2];
+      const extra = a.hl ? { hl: true } : {};
       /* Знак угла: стороны фиксированной длины в пикселях. */
       const side = THEME.geometry.angle;
       const du = normalize2(sub2(u, o));
@@ -616,6 +738,7 @@ function toPixels(scene: Scene): Scene {
           [o[0] + du[0] * side, o[1] + du[1] * side],
           [o[0] + dv[0] * side, o[1] + dv[1] * side],
         ],
+        ...extra,
       };
     }),
   };
@@ -713,6 +836,11 @@ function placeLabels(scene: Scene): PlacedLabel[] {
     }
     return list;
   });
+  /* Рамки линий: место подписи, далёкое от рамки, линию заведомо не
+     задевает, и точная проверка по отрезкам ему не нужна. Запас больше
+     порога касания, поэтому выбор места от этого не меняется. */
+  const PRUNE = 0.01;
+  const strokeBoxes = scene.strokes.map((s) => boxOf(s.points));
   const anchors = scene.labels.map((l) => l.p);
   const center: Vec2 = anchors.length
     ? [
@@ -744,9 +872,21 @@ function placeLabels(scene: Scene): PlacedLabel[] {
         let score = ring * 5;
         score += 3 * (1 - (dir[0] * outward[0] + dir[1] * outward[1]));
 
-        strokes.forEach((segments) => {
+        const rx0 = x - clear - PRUNE;
+        const ry0 = y - clear - PRUNE;
+        const rx1 = x + w + clear + PRUNE;
+        const ry1 = y + h + clear + PRUNE;
+        strokes.forEach((segments, si) => {
+          const sb = at(strokeBoxes, si);
+          if (sb.maxX < rx0 || sb.minX > rx1 || sb.maxY < ry0 || sb.minY > ry1) {
+            return;
+          }
           const crosses = segments.some(
             ([a, b]) =>
+              Math.max(a[0], b[0]) >= rx0 &&
+              Math.min(a[0], b[0]) <= rx1 &&
+              Math.max(a[1], b[1]) >= ry0 &&
+              Math.min(a[1], b[1]) <= ry1 &&
               rectSegmentDistance(x - clear, y - clear, w + 2 * clear, h + 2 * clear, a, b) < 0.001,
           );
           if (crosses) {
@@ -755,8 +895,8 @@ function placeLabels(scene: Scene): PlacedLabel[] {
         });
         scene.dots.forEach((dot2) => {
           if (
-            dist2(dot2, label.p) > 0.001 &&
-            pointRectDistance(dot2, x, y, w, h) < THEME.geometry.dot + 1
+            pointRectDistance(dot2, x, y, w, h) < THEME.geometry.dot + 1 &&
+            dist2(dot2, label.p) > 0.001
           ) {
             score += 30;
           }
@@ -803,6 +943,11 @@ function esc(text: string): string {
 function strokeAttrs(s: Stroke): string {
   const c = THEME.colors;
   const w = THEME.width;
+  if (s.hl) {
+    return s.visible
+      ? `stroke="${c.aux}" stroke-width="${w.hl}"`
+      : `stroke="${c.aux}" stroke-width="${w.hlHidden}" stroke-dasharray="${THEME.dash.aux}"`;
+  }
   if (s.role === 'edge') {
     return s.visible
       ? `stroke="${c.edge}" stroke-width="${w.edge}"`
@@ -824,7 +969,7 @@ function fillAttrs(f: Fill): string {
     case 'liquid':
       return `fill="${c.liquid}" fill-opacity="${o.liquid}"`;
     case 'section':
-      return `fill="${c.aux}" fill-opacity="${o.section}"`;
+      return `fill="${c.aux}" fill-opacity="${f.hl ? o.sectionHl : o.section}"`;
   }
 }
 
@@ -832,7 +977,8 @@ function labelMarkup(label: PlacedLabel): string {
   const f = THEME.font;
   const { base, sub } = splitName(label.text);
   const size = label.kind === 'measure' ? f.measure : f.size;
-  const fill = label.kind === 'aux' ? THEME.colors.aux : THEME.colors.label;
+  const fill = label.kind === 'aux' || label.hl ? THEME.colors.aux : THEME.colors.label;
+  const weight = label.hl ? 700 : f.weight;
   const style = label.kind === 'aux' ? ' font-style="italic"' : '';
   const x = label.x;
   const y = label.y + label.h * 0.78;
@@ -840,14 +986,14 @@ function labelMarkup(label: PlacedLabel): string {
     ? `${esc(base)}<tspan font-size="${f.sub}" dy="${f.subShift}">${esc(sub)}</tspan>`
     : esc(base);
   return (
-    `<text x="${px(x)}" y="${px(y)}" font-family="${f.family}" font-size="${size}" font-weight="${f.weight}"${style} ` +
+    `<text x="${px(x)}" y="${px(y)}" font-family="${f.family}" font-size="${size}" font-weight="${weight}"${style} ` +
     `fill="${fill}" paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
 
 /** Модель → SVG. */
-export function renderSolid(model: Model): string {
-  const scene = toPixels(buildScene(model));
+export function renderSolid(model: Model, options: RenderOptions = {}): string {
+  const scene = pixelScene(model, options);
   const labels = placeLabels(scene);
 
   const pad = THEME.geometry.pad;
@@ -860,10 +1006,13 @@ export function renderSolid(model: Model): string {
     ...labels.map((l): Vec2 => [l.x - 2, l.y - 2]),
     ...labels.map((l): Vec2 => [l.x + l.w + 2, l.y + l.h + 2]),
   ]);
-  const x0 = box.minX - pad;
-  const y0 = box.minY - pad;
-  const width = box.maxX - box.minX + 2 * pad;
-  const height = box.maxY - box.minY + 2 * pad;
+  /* Живой чертёж — постоянная рамка: квадрат fit с полем под подписи. */
+  const m = THEME.geometry.liveMargin;
+  const fit = THEME.geometry.fit;
+  const x0 = options.ustoychivo ? -m : box.minX - pad;
+  const y0 = options.ustoychivo ? -m : box.minY - pad;
+  const width = options.ustoychivo ? fit + 2 * m : box.maxX - box.minX + 2 * pad;
+  const height = options.ustoychivo ? fit + 2 * m : box.maxY - box.minY + 2 * pad;
 
   const order = (list: Stroke[], role: Role, visible: boolean) =>
     list.filter((s) => s.role === role && s.visible === visible);
@@ -900,7 +1049,7 @@ export function renderSolid(model: Model): string {
     const [o, u, v] = a.points;
     const corner: Vec2 = [u[0] + v[0] - o[0], u[1] + v[1] - o[1]];
     parts.push(
-      `<path d="${pathOf([u, corner, v])}" fill="none" stroke="${THEME.colors.aux}" stroke-width="${THEME.width.marker}" stroke-linejoin="round"/>`,
+      `<path d="${pathOf([u, corner, v])}" fill="none" stroke="${THEME.colors.aux}" stroke-width="${a.hl ? THEME.width.hlMarker : THEME.width.marker}" stroke-linejoin="round"/>`,
     );
   });
 
@@ -934,8 +1083,19 @@ export interface SolidDiagnostics {
   height: number;
 }
 
-export function solidDiagnostics(model: Model): SolidDiagnostics {
-  const scene = toPixels(buildScene(model));
+/** Сцена в пикселях: рамка рисунка или, у живого чертежа, описанная сфера. */
+function pixelScene(model: Model, options: RenderOptions): Scene {
+  const scene = buildScene(model, options);
+  if (!options.ustoychivo) {
+    return toPixels(scene);
+  }
+  const view = options.view ?? viewOf(model.view);
+  const sphere = boundingSphere(model);
+  return toPixels(scene, { center: view.project(sphere.center), r: sphere.r });
+}
+
+export function solidDiagnostics(model: Model, options: RenderOptions = {}): SolidDiagnostics {
+  const scene = pixelScene(model, options);
   const labels = placeLabels(scene);
   const box = boxOf([...scene.strokes.flatMap((s) => s.points), ...scene.dots]);
   return {

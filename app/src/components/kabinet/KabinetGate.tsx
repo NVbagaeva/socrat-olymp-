@@ -137,7 +137,7 @@ export function KabinetGate({
           title={kabinetText.wrongRole.title}
           description={kabinetText.wrongRole.body(roles.map((r) => roleName[r]).join(', '))}
           action={
-            <Link className="btn btn--primary" href="/kabinet/">
+            <Link className="btn btn--primary" href="/kabinet/proba/">
               {kabinetText.toHome}
             </Link>
           }

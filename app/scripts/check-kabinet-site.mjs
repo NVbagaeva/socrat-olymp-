@@ -29,6 +29,12 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP, requireSrc } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
+import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+
+/* Заставка первого визита и баннер cookie закрывают страницу целиком —
+   в этой проверке они не нужны (как в check-trainer-sessions.mjs). */
+bezBanneraCookieVsyudu(chromium);
 
 const args = process.argv.slice(2);
 const argOf = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
@@ -37,8 +43,8 @@ const OUT = path.join(APP, 'out');
 
 let server = null;
 if (BASE === null) {
-  if (!fs.existsSync(path.join(OUT, 'kabinet', 'index.html'))) {
-    console.error('Нет out/kabinet/ — соберите с KABINET=1 (или укажите --base).');
+  if (!fs.existsSync(path.join(OUT, 'kabinet', 'proba', 'index.html'))) {
+    console.error('Нет out/kabinet/proba/ — соберите с KABINET=1 (или укажите --base).');
     process.exit(1);
   }
   server = http.createServer((req, res) => {
@@ -58,6 +64,9 @@ if (BASE === null) {
         '.js': 'text/javascript',
         '.css': 'text/css',
         '.json': 'application/json',
+        /* index.txt — данные страницы для переходов внутри сайта (RSC):
+           с другим типом роутер уходит на полную загрузку без «/» в конце. */
+        '.txt': 'text/plain; charset=utf-8',
         '.svg': 'image/svg+xml',
         '.woff2': 'font/woff2',
       }[ext] ?? 'application/octet-stream';
@@ -95,6 +104,7 @@ const browser = await chromium.launch(
   process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {},
 );
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+await welcomeSeen(context);
 const page = await context.newPage();
 page.on('pageerror', (e) => problems.push(`ошибка на странице: ${e.message}`));
 page.on('console', (m) => {
@@ -125,7 +135,7 @@ async function inviteUrl() {
 }
 
 async function signInAs(name) {
-  await go('/kabinet/');
+  await go('/kabinet/proba/');
   /* Кабинет сначала грузится: ждём либо вошедшего, либо экран входа. */
   await page.locator('.kab-trial, .kab-list__row').first().waitFor();
   const switchBtn = page.getByRole('button', { name: 'Сменить аккаунт' });
@@ -139,7 +149,7 @@ async function signInAs(name) {
 
 try {
   console.log('1. Первый запуск');
-  await go('/kabinet/');
+  await go('/kabinet/proba/');
   await page.getByText('Первый запуск').waitFor();
   await fillRegistration({ name: 'Наталья', email: 'admin@example.ru' });
   await page.getByRole('button', { name: 'Создать аккаунт администратора' }).click();
@@ -167,7 +177,7 @@ try {
   await page.getByText('Аккаунт создан').waitFor();
 
   console.log('3. Класс и приглашение ученика');
-  await go('/kabinet/');
+  await go('/kabinet/proba/');
   await page.getByTestId('issue-homework').waitFor();
   await page.getByLabel('Название класса или группы').fill('11 «А»');
   await page.getByRole('button', { name: 'Создать', exact: true }).click();
@@ -233,7 +243,7 @@ try {
         .click();
     }
   }
-  await go('/kabinet/');
+  await go('/kabinet/proba/');
   const openRow = page.getByTestId('open-sessions').locator('li').first();
   await openRow.waitFor();
   ok(
@@ -252,7 +262,7 @@ try {
   await go('/zadaniya/8/trenazher/');
   await page.locator('.tsess__cover-title').first().waitFor();
   ok(true, 'тренажёр открылся на паузе — тренировка не сбросилась');
-  await go('/kabinet/');
+  await go('/kabinet/proba/');
   await page
     .getByTestId('open-sessions')
     .getByRole('button', { name: 'Завершить тренировку' })
@@ -304,7 +314,7 @@ try {
       .click();
   }
   await page.waitForFunction((k) => localStorage.getItem(k) === null, KEY8);
-  await go('/kabinet/');
+  await go('/kabinet/proba/');
   await page.getByTestId('finished-sessions').locator('li').nth(1).waitFor();
   await page
     .getByTestId('progress-grid')

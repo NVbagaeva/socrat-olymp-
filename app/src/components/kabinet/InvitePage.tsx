@@ -33,7 +33,7 @@ export function InvitePage() {
         title="Готово"
         description="Аккаунт создан."
         action={
-          <Link className="btn btn--primary" href="/kabinet/">
+          <Link className="btn btn--primary" href="/kabinet/proba/">
             {kabinetText.toHome}
           </Link>
         }

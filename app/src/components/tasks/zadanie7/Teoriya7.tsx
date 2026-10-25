@@ -8,7 +8,7 @@ import {
   RamkaVyvod,
   type ShagPrimera,
 } from '@/components/teoriya/Ramki';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { Tex } from '@/components/ui/Tex';
 import {
   RAZDELY_TEORII_7,

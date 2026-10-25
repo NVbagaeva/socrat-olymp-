@@ -10,6 +10,8 @@ import './razdely.css';
 export interface DrugieRazdelyProps extends RazdelyData {
   /** Вкладка, открытая сейчас: в другом разделе откроется она же. */
   vkladka: string;
+  /** Заголовок блока. Не задан — «Другие разделы №<no>». */
+  zagolovok?: string;
 }
 
 /**
@@ -17,7 +19,14 @@ export interface DrugieRazdelyProps extends RazdelyData {
  * разделов, кроме текущего. Разделов «Скоро» здесь нет — звать в них
  * незачем, они видны в меню разделов.
  */
-export function DrugieRazdely({ no, razdely, current, podzagolovok, vkladka }: DrugieRazdelyProps) {
+export function DrugieRazdely({
+  no,
+  razdely,
+  current,
+  podzagolovok,
+  vkladka,
+  zagolovok,
+}: DrugieRazdelyProps) {
   const titleId = useId();
   const items = razdely.filter((razdel) => razdel.id !== current && !razdel.soon);
   if (items.length === 0) {
@@ -26,7 +35,7 @@ export function DrugieRazdely({ no, razdely, current, podzagolovok, vkladka }: D
   return (
     <section className="drugie-razdely" aria-labelledby={titleId}>
       <h2 className="drugie-razdely__title" id={titleId}>
-        Другие разделы №{no}
+        {zagolovok ?? `Другие разделы №${no}`}
       </h2>
       <p className="drugie-razdely__lead">{podzagolovok}</p>
       <ul className="drugie-razdely__list">

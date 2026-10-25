@@ -15,6 +15,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
@@ -29,7 +30,14 @@ const SHIRINY = [360, 768, 1440];
 
 /* Страницы по умолчанию: главная, банк заданий и открытые разделы.
    Правится здесь — на каждый адрес выйдет по три снимка. */
-const STRANITSY = ['/', '/zadaniya/', '/zadaniya/3/', '/zadaniya/4/', '/zadaniya/5/'];
+const STRANITSY = [
+  '/',
+  '/zadaniya/',
+  '/zadaniya/3/',
+  '/zadaniya/4/',
+  '/zadaniya/5/',
+  '/zadaniya/15/',
+];
 
 /* Адреса из описания pull request. Берём только то, что похоже
    на путь этого сайта: описание правит человек, но подставлять
@@ -116,6 +124,7 @@ async function main() {
           viewport: { width: shirina, height: 900 },
           deviceScaleFactor: 1,
         });
+        await welcomeSeen(page);
         const otvet = await page.goto(`http://127.0.0.1:${PORT}${put}`, {
           waitUntil: 'networkidle',
         });

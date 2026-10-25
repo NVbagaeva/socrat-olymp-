@@ -57,6 +57,37 @@
   height: auto;
 }
 
+/* Инструмент «Сечение по трём точкам». */
+.z15-vit__tool {
+  margin-left: auto;
+}
+.z15-sech {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+}
+.z15-sech__hint,
+.z15-sech__msg {
+  margin: 0;
+}
+.z15-sech__hint {
+  font-weight: 600;
+}
+.z15-sech__msg {
+  color: var(--color-text-secondary);
+}
+.z15-sech__msg--oshibka {
+  color: var(--color-error);
+}
+@media (max-width: 640px) {
+  .z15-vit__tool {
+    margin-left: 0;
+  }
+}
+
 /* Окно чертежа. */
 .z15-ch {
   --z15-liniya: var(--grey-900);
@@ -103,6 +134,10 @@
   color: var(--z15-liniya);
   white-space: nowrap;
   will-change: transform;
+}
+.z15-ch__label--vybrana {
+  font-weight: 600;
+  color: var(--color-accent);
 }
 .z15-ch__msg {
   position: absolute;

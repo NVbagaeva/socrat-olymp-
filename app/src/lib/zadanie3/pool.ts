@@ -15,8 +15,11 @@
  * бандл они не попадают.
  */
 
+import { szhat, tekstyPodpisey } from '../chertezh3';
+import { katex } from '../graph/katex';
 import { renderSolid } from '../solid';
 import { texPlain, typeset } from '../tex';
+import { chertezhVarianta, estScenariy } from './chertezhi';
 import { RAZDELY, type Razdel } from './index';
 import { klyuchZadachi, sealAnswer, sealText } from './secret';
 import { type Prototype } from './types';
@@ -31,6 +34,14 @@ export interface PoolVariant {
   steps: string;
   /** Чертёж варианта. null — берётся общий чертёж прототипа. */
   svg: string | null;
+  /**
+   * Сценарий интерактивного чертежа (многогранники), закрытый тем же
+   * отпечатком: по размерам тела иногда видно ответ. null — чертёж
+   * прежний, статичный (тела вращения).
+   */
+  scena: string | null;
+  /** Ссылки шагов разбора на элементы чертежа, закрытые: JSON string[][]. */
+  stepRefs: string | null;
 }
 
 export interface PoolKind {
@@ -48,8 +59,10 @@ export interface PoolKind {
   groupTitle: string;
   /** Формат ответа: подсказывает, чего ждать от поля ввода. */
   format: Prototype['format'];
-  /** Общий чертёж прототипа. */
+  /** Общий чертёж прототипа (пусто, если чертежи — сценарии). */
   svg: string;
+  /** Подписи сценариев прототипа, свёрстанные KaTeX: TeX → HTML. */
+  podpisiHtml: Record<string, string> | null;
   variants: PoolVariant[];
 }
 
@@ -80,6 +93,37 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     throw new Error(`У прототипа ${prototype.id} нет вариантов`);
   }
   const own = perVariant(prototype);
+  const scenarii = estScenariy(prototype);
+  const podpisi = new Set<string>();
+  const variants = prototype.varianty.map((variant) => {
+    /* Отпечаток — с ключом задачи: у одного ответа в двух вариантах
+       отпечатки разные. */
+    const seal = sealAnswer(
+      prototype.otvet(variant.params),
+      klyuchZadachi(prototype.id, variant.n),
+    );
+    /* Шаги набираются KaTeX здесь, на сборке: в закрытый разбор
+       уходит готовая вёрстка, по строке на шаг. */
+    const steps = prototype
+      .shagi(variant.params)
+      .map((step) => typeset(step.text).replace(/\n/g, ' '))
+      .join('\n');
+    const ch = scenarii ? chertezhVarianta(prototype, variant) : null;
+    if (ch && ch.oshibki.length > 0) {
+      throw new Error(`Чертёж ${prototype.id}#${variant.n}: ${ch.oshibki.join('; ')}`);
+    }
+    if (ch) tekstyPodpisey(ch.scenariy).forEach((t) => podpisi.add(t));
+    return {
+      n: variant.n,
+      uslovieHtml: typeset(prototype.uslovie(variant.params)),
+      seal,
+      /* Разбор закрыт тем же отпечатком: без него не раскрыть. */
+      steps: sealText(steps, seal),
+      svg: own && !ch ? renderSolid(prototype.chertezh(variant.params)) : null,
+      scena: ch ? sealText(JSON.stringify(szhat(ch.scenariy)), seal) : null,
+      stepRefs: ch ? sealText(JSON.stringify(ch.shagi), seal) : null,
+    };
+  });
   return {
     id: prototype.id,
     title: prototype.nazvanie,
@@ -88,29 +132,13 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     group: razdel.nomer,
     groupTitle: razdel.nazvanie,
     format: prototype.format,
-    svg: renderSolid(prototype.chertezh(first.params)),
-    variants: prototype.varianty.map((variant) => {
-      /* Отпечаток — с ключом задачи: у одного ответа в двух вариантах
-         отпечатки разные. */
-      const seal = sealAnswer(
-        prototype.otvet(variant.params),
-        klyuchZadachi(prototype.id, variant.n),
-      );
-      /* Шаги набираются KaTeX здесь, на сборке: в закрытый разбор
-         уходит готовая вёрстка, по строке на шаг. */
-      const steps = prototype
-        .shagi(variant.params)
-        .map((step) => typeset(step.text).replace(/\n/g, ' '))
-        .join('\n');
-      return {
-        n: variant.n,
-        uslovieHtml: typeset(prototype.uslovie(variant.params)),
-        seal,
-        /* Разбор закрыт тем же отпечатком: без него не раскрыть. */
-        steps: sealText(steps, seal),
-        svg: own ? renderSolid(prototype.chertezh(variant.params)) : null,
-      };
-    }),
+    svg: scenarii ? '' : renderSolid(prototype.chertezh(first.params)),
+    podpisiHtml: scenarii
+      ? Object.fromEntries(
+          [...podpisi].map((t) => [t, katex.renderToString(t, { throwOnError: true })]),
+        )
+      : null,
+    variants,
   };
 }
 

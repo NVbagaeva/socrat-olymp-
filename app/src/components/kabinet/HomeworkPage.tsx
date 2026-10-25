@@ -38,7 +38,7 @@ export function HomeworkPage({ me }: { me: Me }) {
         title={t.notFound}
         description=""
         action={
-          <Link className="btn btn--primary" href="/kabinet/">
+          <Link className="btn btn--primary" href="/kabinet/proba/">
             {kabinetText.toHome}
           </Link>
         }

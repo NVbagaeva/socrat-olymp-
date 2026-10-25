@@ -358,6 +358,8 @@
   min-width: 0;
 }
 .razdel-karta__title {
+  overflow-wrap: break-word;
+  hyphens: auto;
   color: var(--color-text-brand);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -526,6 +528,9 @@ a.razdel-karta:focus-visible .razdel-karta__go {
 }
 .drugie-razdely__list {
   display: grid;
+  /* Одна колонка не шире блока: иначе карточка раздвигала её
+     по своему содержимому, и на 360px страница ехала вбок. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
   margin: 0;
   padding: 0;
@@ -548,6 +553,12 @@ a.razdel-karta:focus-visible .razdel-karta__go {
 @media (min-width: 768px) {
   .razdel-karta--krupno .razdel-karta__ico {
     width: 112px;
+  }
+}
+/* На самых узких телефонах (320) крупная картинка сжимала подпись. */
+@media (max-width: 359.98px) {
+  .razdel-karta--krupno .razdel-karta__ico {
+    width: 80px;
   }
 }
 

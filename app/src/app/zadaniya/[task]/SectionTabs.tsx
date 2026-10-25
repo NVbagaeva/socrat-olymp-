@@ -1,9 +1,9 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useRef } from 'react';
-import { useStickyTabs } from '@/components/tasks/useStickyTabs';
+import { TabsRow } from '@/components/tasks/TabsRow';
 import { EmptyState, Tabs } from '@/components/ui';
+import { bentoAll, bentoAttrs } from '@/lib/bento';
 import { SubtopicCard } from '@/components/tasks/SubtopicCard';
 import { VesRazdelCards } from '@/components/tasks/ves12/VesRazdelCards';
 import { vesRazdel as vesRazdelText } from '@/content/ves12';
@@ -61,13 +61,17 @@ const IDS = new Set(TABS.map((tab) => tab.id));
  * поэтому ссылку на конкретную вкладку можно отправить. Переключение
  * идёт без перезагрузки: адрес меняется через replace.
  */
-export function SectionTabs({ description, subtopics, prototypes, vesRazdel = false }: SectionTabsProps) {
+export function SectionTabs({
+  description,
+  subtopics,
+  prototypes,
+  vesRazdel = false,
+}: SectionTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const strip = useRef<HTMLDivElement>(null);
-  /* Лента прилипает к верху экрана (общий хук всех разделов). */
-  useStickyTabs(strip);
+
+  const sizes = bentoAll(subtopics.length);
 
   const requested = params.get('tab');
   const active = requested !== null && IDS.has(requested) ? requested : 'subtopics';
@@ -82,17 +86,21 @@ export function SectionTabs({ description, subtopics, prototypes, vesRazdel = fa
 
   return (
     <>
-      <div className="topic-tabs-row">
-        <div className="topic-tabs" ref={strip}>
-          <Tabs
-            className="tabs--lenta"
-            items={TABS}
-            value={active}
-            onValueChange={select}
-            label="Разделы задания"
-          />
-        </div>
-      </div>
+      {/* Строкой, а не плитками Bento: под крупной картинкой шапки
+          первая карточка подтем должна быть на первом экране. */}
+      <TabsRow className="topic-tabs-row--stroka">
+        {() => (
+          <div className="topic-tabs">
+            <Tabs
+              className="tabs--lenta"
+              items={TABS}
+              value={active}
+              onValueChange={select}
+              label="Разделы задания"
+            />
+          </div>
+        )}
+      </TabsRow>
 
       <div className="section-panel">
         {active === 'subtopics' && vesRazdel ? (
@@ -102,9 +110,10 @@ export function SectionTabs({ description, subtopics, prototypes, vesRazdel = fa
           </>
         ) : null}
         {active === 'subtopics' ? (
-          <ul className="subtopics-grid">
-            {subtopics.map((item) => (
-              <li key={item.slug}>
+          /* Bento: карточки разного размера, ряды без дыр (lib/bento.ts). */
+          <ul className="subtopics-grid subtopics-grid--bento">
+            {subtopics.map((item, i) => (
+              <li key={item.slug} {...bentoAttrs(sizes, i)}>
                 <SubtopicCard
                   name={item.name}
                   {...(item.caption === undefined ? {} : { caption: item.caption })}
@@ -148,10 +157,7 @@ export function SectionTabs({ description, subtopics, prototypes, vesRazdel = fa
         ) : null}
 
         {active === 'stats' ? (
-          <EmptyState
-            title="Статистика появится вместе с личным кабинетом"
-            description="Хранилища результатов в проекте пока нет, поэтому показывать нечего."
-          />
+          <EmptyState title="Раздел в разработке" description="Статистики по заданию пока нет." />
         ) : null}
 
         {active === 'materials' ? (

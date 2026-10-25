@@ -1,0 +1,44 @@
+{
+  "errors": [],
+  "video_desktop": {
+    "file": "screenshots/intro/intro-1440x900.mp4",
+    "kb": 820
+  },
+  "video_phone": {
+    "file": "screenshots/intro/intro-390x844.mp4",
+    "kb": 735
+  },
+  "fps": {
+    "desktop": 4,
+    "phoneThrottle4x": 6
+  },
+  "memory": {
+    "heapKbBefore": 4702,
+    "heapKbOpen": 6408,
+    "heapKbAfter": 6378,
+    "canvasesAfter": 0,
+    "introNodesAfter": 0
+  },
+  "weight": {
+    "code": [
+      {
+        "file": "_next/static/chunks/7301.07cc0f333947bcde.js",
+        "gzKb": 10
+      },
+      {
+        "file": "_next/static/css/26d77010473547d0.css",
+        "gzKb": 2
+      }
+    ],
+    "layers": {
+      "768": {
+        "animatedKb": 338,
+        "staticKb": 134
+      },
+      "1536": {
+        "animatedKb": 929,
+        "staticKb": 378
+      }
+    }
+  }
+}

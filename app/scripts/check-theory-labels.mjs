@@ -28,6 +28,7 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium);
@@ -197,6 +198,7 @@ const failures = [];
 let figures = 0;
 for (const width of SIZES) {
   const page = await browser.newPage({ viewport: { width, height: 900 } });
+  await welcomeSeen(page);
   for (const { url, theory, scope } of TARGETS) {
     await page.goto(BASE + url, { waitUntil: 'networkidle' });
     if (theory) {

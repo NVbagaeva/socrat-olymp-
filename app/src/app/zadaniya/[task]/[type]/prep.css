@@ -6,6 +6,9 @@
 
 .prep {
   display: grid;
+  /* Колонка не шире блока: длинная формула в карточке или памятке
+     раздвигала её, и вместе с ней всю страницу. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
   container-type: inline-size;
 }
@@ -318,6 +321,7 @@
 
 .ptask {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
   container-type: inline-size;
 }
@@ -330,6 +334,9 @@
   flex-wrap: wrap;
 }
 .ptask__title {
+  min-width: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
   margin: 0;
   font-size: var(--fs-h3);
   line-height: var(--lh-h3);
@@ -387,8 +394,9 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  /* Номер задачи нажимается пальцем: 44px — минимум для касания. */
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 2px solid var(--color-border);
   background: var(--color-surface);
@@ -542,6 +550,8 @@
   }
 }
 .popt {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: var(--space-3);

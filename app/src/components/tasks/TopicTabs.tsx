@@ -24,8 +24,9 @@ import { TopicContents } from './TopicContents';
 import { scrollToSection, useActiveSection } from './useActiveSection';
 import { TutorMenu } from './TutorMenu';
 import { DrugieRazdely, RazdelyNav, type RazdelyData } from './razdely';
+import { VesRazdelCards } from './ves12/VesRazdelCards';
+import { vesRazdel } from '@/content/ves12';
 import { sbrositVkladku, vkladkaIzAdresa } from './razdely/vkladka';
-import { useStickyTabs } from './useStickyTabs';
 import { TAB_TAP_SCRIPT, takePendingTabTap } from '@/lib/tabTap';
 import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
 import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
@@ -230,10 +231,8 @@ export function TopicTabs({
   const [block, setBlock] = useState(theory[0]?.id ?? '');
   const [sheet, setSheet] = useState(false);
   /* Лента вкладок прокручивается вбок: нужен сам узел, чтобы подводить
-     к активной вкладке. */
+     к активной вкладке. Липкая панель — в общей строке (TabsRow). */
   const strip = useRef<HTMLDivElement>(null);
-  /* Лента прилипает к верху экрана (общий хук всех разделов). */
-  useStickyTabs(strip);
 
   /* Подпункты «Содержания» — подразделы с якорями внутри раздела
      (.rich-sub: «8.1 Найти f(3)»). Берутся из самой разметки раздела
@@ -423,7 +422,25 @@ export function TopicTabs({
         open={menu}
         onOpenChange={setMenu}
         stripRef={strip}
-        before={razdely === undefined ? undefined : <RazdelyNav {...razdely} vkladka={tab} />}
+        before={
+          razdely === undefined ? undefined : (
+            <RazdelyNav
+              {...razdely}
+              vkladka={tab}
+              /* Первый пункт меню №12 — весь раздел: зачётная работа и
+                 генератор по всем типам. В прокрутке вместе со списком:
+                 на телефоне панель невысокая. */
+              dop={
+                String(razdely.no) === '12' ? (
+                  <>
+                    <VesRazdelCards place="menu" />
+                    <h3 className="razdely-menu__sub">{vesRazdel.orType}</h3>
+                  </>
+                ) : undefined
+              }
+            />
+          )
+        }
       >
         <Tabs
           className="tabs--lenta"

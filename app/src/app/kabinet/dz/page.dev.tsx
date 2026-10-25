@@ -20,7 +20,7 @@ export default function Page() {
         <Breadcrumbs
           items={[
             { label: 'Главная', href: '/' },
-            { label: 'Кабинет', href: '/kabinet/' },
+            { label: 'Кабинет', href: '/kabinet/proba/' },
             { label: 'Домашнее задание' },
           ]}
         />

@@ -54,6 +54,18 @@
   background: var(--color-surface-info);
 }
 
+/* Первый столбец закреплён: таблица на телефоне прокручивается вбок
+   внутри себя, подписи строк остаются на месте. */
+.z10-tablica tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  box-shadow: inset -1px 0 0 var(--color-border-strong);
+}
+.z10-tablica td:first-child {
+  background: var(--color-surface);
+}
+
 .z10-tablica__podpis {
   margin: var(--space-2) 0 0;
   color: var(--color-text-secondary);
@@ -428,6 +440,8 @@
 }
 
 .z10-tr__pereklyuchatel {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   padding: var(--space-2) var(--space-4);
   border: 0;
   border-radius: 999px;
@@ -514,6 +528,13 @@
   font-size: 13px;
   cursor: pointer;
 }
+/* На сенсорном экране номер задачи — палец, а не курсор: 44px. */
+@media (pointer: coarse) {
+  .z10-tr__tochka {
+    width: 44px;
+    height: 44px;
+  }
+}
 
 .z10-tr__tochka[aria-current='true'] {
   border-color: var(--color-primary);
@@ -594,8 +615,21 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+/* Узкий экран: варианты ответа в столбик во всю ширину — кнопки
+   не мельчат и не налезают друг на друга. */
+@media (max-width: 479.98px) {
+  .z10-podskazki__knopki {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .z10-podskazki__knopka {
+    text-align: left;
+  }
+}
 
 .z10-podskazki__knopka {
+  /* Кнопка нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);

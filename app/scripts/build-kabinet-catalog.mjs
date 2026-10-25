@@ -37,11 +37,14 @@ const SOURCES = {
   3: ['lib/zadanie3/index', 'BANK'],
   4: ['lib/veroyatnost/index', 'BANK_4'],
   5: ['lib/veroyatnost/index', 'BANK_5'],
+  6: ['lib/zadanie6/prototypes/index', 'PROTOTYPES'],
   7: ['lib/zadanie7/prototypes/index', 'PROTOTYPES'],
   8: ['lib/vychisleniya/prototypes/index', 'PROTOTYPES'],
   9: ['lib/proizvodnaya/prototypes/index', 'PROTOTYPES'],
   10: ['lib/zadanie10/prototypes/index', 'PROTOTYPES'],
   11: ['lib/zadanie11/prototypes/index', 'SUBTYPES'],
+  /* №13: реестр прототипов — функция генератора. */
+  13: ['lib/zadanie13/generate', 'prototypes'],
 };
 
 function listOf(no) {
@@ -63,7 +66,8 @@ function listOf(no) {
     return [];
   }
   const [mod, name] = source;
-  const list = requireSrc(mod)[name];
+  const found = requireSrc(mod)[name];
+  const list = typeof found === 'function' ? found() : found;
   if (!Array.isArray(list)) {
     throw new Error(`${mod}: нет списка ${name}`);
   }
@@ -83,7 +87,9 @@ for (const task of tasks) {
     if (!p.title) throw new Error(`${p.code}: пустое название`);
     seen.add(p.code);
   }
-  if (ready && prototypes.length === 0) {
+  /* Вторая часть (№15, №16) — теория и чертежи, банка прототипов у
+     разделов нет: ДЗ из банка по ним не выдаётся. */
+  if (ready && prototypes.length === 0 && Number(task.part) === 1) {
     throw new Error(`№${no} открыт, а прототипов не нашлось: допишите его в SOURCES`);
   }
   catalog.tasks.push({ no, name: task.name, ready, prototypes });

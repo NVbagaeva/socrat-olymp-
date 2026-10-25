@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { TeoriyaShell } from '@/components/tasks/veroyatnost/teoriya/TeoriyaShell';
+import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { RAZDELY_TEORII } from '@/content/theoryVektory';
 import { PROGRESS_2, TEORIYA_DEKOR_2 } from '@/content/vektory';
 import { stsena, type StsenaId } from '@/lib/vektory/stseny';

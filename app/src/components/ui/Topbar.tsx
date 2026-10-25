@@ -22,6 +22,11 @@ export interface TopbarProps {
   /** Адрес страницы уведомлений. Не задан — колокольчик кнопкой. */
   notificationsHref?: string;
   user?: { initials: string; name: string; role?: string };
+  /**
+   * Блок аккаунта справа: кнопка входа или кружок с меню. Задан —
+   * показывается вместо user; это живой компонент, а не данные.
+   */
+  userSlot?: ReactNode;
   actions?: ReactNode;
   className?: string;
 }
@@ -32,9 +37,11 @@ export function Topbar({
   search = true,
   searchPlaceholder = 'Поиск по заданиям, темам и номерам',
   searchLabel = 'Поиск',
-  unread = true,
+  /* Уведомлений пока нет — точку «есть новые» по умолчанию не рисуем. */
+  unread = false,
   notificationsHref,
   user,
+  userSlot,
   actions,
   className,
 }: TopbarProps) {
@@ -74,15 +81,24 @@ export function Topbar({
       {/* Колокольчик: ссылка, когда страница уведомлений есть, и кнопка,
           когда её нет, — чтобы не обещать переход в никуда. */}
       {notificationsHref !== undefined ? (
-        <a className="bell" href={notificationsHref} aria-label={bellLabel}>
+        <a
+          className={clsx('bell', unread && 'bell--unread')}
+          href={notificationsHref}
+          aria-label={bellLabel}
+        >
           <NavIcon name="notifications" />
         </a>
       ) : (
-        <button type="button" className="bell" aria-label={bellLabel}>
+        <button
+          type="button"
+          className={clsx('bell', unread && 'bell--unread')}
+          aria-label={bellLabel}
+        >
           <span className="bell__ico" aria-hidden="true" />
         </button>
       )}
 
+      {userSlot}
       {user !== undefined ? (
         <span className="topbar__user">
           <span className="avatar avatar--sm" aria-hidden="true">
@@ -92,9 +108,7 @@ export function Topbar({
               подписью к аватару. */}
           <span className="topbar__who">
             <span className="topbar__name">{user.name}</span>
-            {user.role !== undefined ? (
-              <span className="topbar__role">{user.role}</span>
-            ) : null}
+            {user.role !== undefined ? <span className="topbar__role">{user.role}</span> : null}
           </span>
         </span>
       ) : null}
