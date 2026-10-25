@@ -59,10 +59,10 @@ function figureOf(ris: Extract<Ris, { vid: 'eiler' | 'derevo' }>): Figure {
   const svg = html.replace(/^<figure[^>]*>/, '').replace(/<\/figure>$/, '');
   const w = Number(/^<svg[^>]*\swidth="([\d.]+)"/.exec(svg)?.[1] ?? 0);
   const px = ris.vid === 'derevo' ? Math.min(w, DEREVO_MAX_PX) : w;
-  /* Кегли подписей заданы в CSS (probability.css): у дерева 15 px, у
-     диаграммы Эйлера мельче всех вероятности — 11,5 px. На бумаге они
+  /* Кегли подписей заданы в CSS (probability.css): у дерева мельче всех
+     13 px, у диаграммы Эйлера — вероятности, 11,5 px. На бумаге они
      не меньше 10 pt: ширина рисунка — не меньше той, что это даёт. */
-  const keglPx = ris.vid === 'derevo' ? 15 : 11.5;
+  const keglPx = ris.vid === 'derevo' ? 13 : 11.5;
   const dlyaKegla = Math.ceil((w * MIN_PT * (25.4 / 72)) / keglPx);
   const mm = Math.min(MAX_SHIRINA_MM, Math.max(Math.round(px * MM_V_PX), dlyaKegla));
   return { svg, width: mm, ...(mm > SBOKU_MAX_MM ? { below: true } : {}) };

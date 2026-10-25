@@ -29,7 +29,13 @@ import { conditionSvg, solutionFigure } from '@/lib/sheet/figures12.js';
 import { solutionStepsHtml } from '@/lib/sheet/answers12.js';
 import { figure as sheetFigure } from '@/lib/sheet/sheet.js';
 import { parseAnswer } from '@/lib/answer';
-import { MAX_SHIRINA_MM, krupnyyRisunok, minFont, shirinaPoKletke } from '../../pechat';
+import {
+  MAX_SHIRINA_MM,
+  krupnyyRisunok,
+  minFont,
+  shirinaDlyaKegla,
+  shirinaPoKletke,
+} from '../../pechat';
 import { typeset } from '@/lib/tex';
 import {
   exponentialSteps,
@@ -308,8 +314,18 @@ function blockHtml(block: PrepBlock): string {
     case 'answer':
       /* Ответ стоит в конце разбора отдельной строкой. */
       return '';
-    case 'chart':
-      return sheetFigure(block.svg, { cell: CELL, frame: null }) as string;
+    case 'chart': {
+      /* Чертёж шага разбора — крупно, как рисунки условия: клетка 7 мм,
+         а если подписи при ней мельче 10 pt — шире (не больше 168 мм). */
+      const width = Math.min(
+        MAX_SHIRINA_MM,
+        Math.max(shirinaPoKletke(block.svg) ?? 0, shirinaDlyaKegla(block.svg) ?? 0),
+      );
+      return sheetFigure(
+        block.svg,
+        width > 0 ? { width, frame: null } : { cell: CELL, frame: null },
+      ) as string;
+    }
     case 'callout':
     case 'details':
       return (
