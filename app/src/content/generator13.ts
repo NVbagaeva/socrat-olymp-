@@ -132,6 +132,7 @@ export const PRESETY_13: readonly Preset13[] = [
 
 export const GENERATOR_13 = {
   bystryy: 'Быстрый старт',
+  teoriyaNote: 'одна рамка в начале листа: правила всех схем',
   bystryyNote: 'Одно касание заполняет все шаги. Дальше можно ничего не трогать.',
   chto: 'Что',
   chtoNote: 'Какие типы и сколько задач каждого.',

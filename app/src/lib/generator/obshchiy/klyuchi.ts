@@ -147,6 +147,12 @@ export interface PlanPoKlyuchamOpts<S extends SlotShablon, B, P> {
   novaya: (c: Yacheyka<S>, seed: string, zanyato: Set<string>) => P;
   /** Seed новой задачи — чтобы замена не совпала с прежней. */
   seedNovoy: (p: P) => string | undefined;
+  /**
+   * Мест пула на вариант: позиция k варианта v берёт место v × M + k —
+   * ещё один вариант не сдвигает задачи прежних (№13: у «Определи тип»
+   * один подтип на десяток задач). Нет — места плотные, k × вариантов + v.
+   */
+  mestNaVariant?: number;
 }
 
 /** Задачи листа по позициям: банк → аналоги → новые, затем замены. */
@@ -173,7 +179,7 @@ export function planPoKlyucham<S extends SlotShablon, B, P>(
         s,
         i,
         v: vi + 1,
-        mesto: s.k * o.variants + vi,
+        mesto: o.mestNaVariant === undefined ? s.k * o.variants + vi : vi * o.mestNaVariant + s.k,
         seed: `${o.seed}|${vi + 1}|${klyuchSlota(s)}`,
       })),
     )

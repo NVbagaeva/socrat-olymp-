@@ -87,6 +87,8 @@ export interface Dop11 {
   qr: boolean;
   /** Вид работы в шапке; null — подпись по составу. */
   vid: VidRaboty11 | null;
+  /** Свой заголовок вместо вида работы из списка (vid — null). */
+  svoy?: string;
   /** Дата на листе: «2026-10-24»; пусто — пустая линия. */
   data: string;
   uchitel: string;
@@ -131,15 +133,24 @@ export function sheetQuery11(p: SheetParams11): string {
     if (dop.primery > 0) q.set('pr', String(dop.primery));
     if (dop.qr) q.set('qr', '1');
     if (dop.vid !== null) q.set('vr', dop.vid);
+    else if (dop.svoy !== undefined && dop.svoy !== '') q.set('vt', dop.svoy);
     if (dop.data !== '') q.set('d', dop.data);
     if (dop.uchitel !== DOP_11.uchitel) q.set('uch', dop.uchitel);
   }
   return q.toString();
 }
 
+/** Текст из адреса для шапки листа: без управляющих символов и угловых скобок. */
+function chistyy(text: string, max: number): string {
+  return text
+    .replace(/[\u0000-\u001f<>]/g, '')
+    .trim()
+    .slice(0, max);
+}
+
 /** «Дополнительно» из адреса; нет ни одного ключа — undefined. */
 function dopIzZaprosa(q: URLSearchParams): Dop11 | undefined {
-  if (!['tr', 'pr', 'qr', 'vr', 'd', 'uch'].some((k) => q.has(k))) return undefined;
+  if (!['tr', 'pr', 'qr', 'vr', 'vt', 'd', 'uch'].some((k) => q.has(k))) return undefined;
   const pr = Number(q.get('pr'));
   const vr = q.get('vr') ?? '';
   const data = q.get('d') ?? '';
@@ -148,6 +159,7 @@ function dopIzZaprosa(q: URLSearchParams): Dop11 | undefined {
     primery: pr === 1 || pr === 2 ? pr : 0,
     qr: q.get('qr') === '1',
     vid: vr in SHEET_11.vidy ? (vr as VidRaboty11) : null,
+    ...(vr in SHEET_11.vidy || !q.has('vt') ? {} : { svoy: chistyy(q.get('vt') ?? '', 80) }),
     data: /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : '',
     uchitel: q.has('uch')
       ? (q.get('uch') ?? '')
@@ -624,7 +636,8 @@ export function subtitleOf(p: SheetParams11): string {
     return m === undefined ? '' : SHEET_11.subtitle.marshrut(m.no, m.title);
   }
   const vid = p.dop?.vid ?? null;
-  return vid === null ? SHEET_11.subtitle[p.rezhim] : SHEET_11.vidy[vid];
+  if (vid !== null) return SHEET_11.vidy[vid];
+  return p.dop?.svoy !== undefined && p.dop.svoy !== '' ? p.dop.svoy : SHEET_11.subtitle[p.rezhim];
 }
 
 /** «2026-10-24» → «24.10.2026». */
