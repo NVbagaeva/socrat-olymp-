@@ -15,6 +15,7 @@
  * после перезагрузки не попадёт. Экран говорит об этом плашкой.
  */
 
+import type { Chast2Ui } from '@/lib/chast2/sostoyanie';
 import type { EgeNo } from '../types';
 import type { Mode } from './link';
 
@@ -41,6 +42,12 @@ export interface ArchivedWork {
   test: number | null;
   seconds: number;
   tasks: ArchivedTask[];
+  /**
+   * Часть 2 (варианты повышенной сложности): баллы самопроверки и
+   * сколько заданий оценено; ui — ответы и оценки, чтобы досчитать
+   * часть 2 после завершения.
+   */
+  chast2?: { summa: number; oceneno: number; vsego: number; max: number; ui: Chast2Ui };
 }
 
 /** Хранилище архива: в браузере — IndexedDB, в проверках — память. */

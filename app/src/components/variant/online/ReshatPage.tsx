@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
+import { povNomer } from '@/lib/povyshennye/kod';
 import { parseReshat } from '@/lib/variant/online/link';
 import { tasksSignature, loadSet } from '@/lib/variant/online/work';
 import type { WorkPayload } from '@/lib/variant/online/sessionUi';
@@ -26,8 +27,14 @@ export function ReshatPage() {
   useEffect(() => {
     if (link === null) return undefined;
     let alive = true;
-    void loadSet(link.code)
-      .then((loaded) => {
+    /* Вариант повышенной сложности: к заданиям 1–13 — часть 2 версии. */
+    const pv = povNomer(link.code);
+    const chast2 =
+      pv === null
+        ? Promise.resolve(null)
+        : import('@/lib/povyshennye/chast2').then((m) => m.chast2Versii(pv, link.variant));
+    void Promise.all([loadSet(link.code), chast2])
+      .then(([loaded, c2]) => {
         if (!alive) return;
         const tasks = loaded?.set.variants[link.variant - 1]?.tasks;
         if (loaded === null || tasks === undefined) {
@@ -48,6 +55,7 @@ export function ReshatPage() {
               tasks,
               oshibki: null,
               sig: tasksSignature(tasks),
+              ...(c2 === null ? {} : { chast2: c2 }),
             },
           });
         }

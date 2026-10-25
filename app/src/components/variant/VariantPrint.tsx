@@ -18,7 +18,13 @@ import {
   readCode,
   sanitizeMeta,
 } from '@/lib/variant/session';
-import { variantSheetSpec, workTitle, type SheetChoice } from '@/lib/variant/sheets';
+import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
+import {
+  variantSheetSpec,
+  workTitle,
+  type Mesto2,
+  type SheetChoice,
+} from '@/lib/variant/sheets';
 
 const CHOICES: readonly SheetChoice[] = ['uchenik', 'uchitel', 'razbor', 'vse'];
 
@@ -37,6 +43,8 @@ async function obtain(
   payload: PrintPayload;
   warning: string | null;
   variantLabel?: (index: number) => string;
+  /** Часть 2 по номеру версии (варианты повышенной сложности). */
+  chast2?: (index: number) => readonly Chast2Zadacha[] | null;
 } | null> {
   const fromScreen = payloadFromOpener(code);
   if (fromScreen !== null) return { payload: fromScreen, warning: null };
@@ -53,10 +61,14 @@ async function obtain(
         : { ...full, variants: full.variants.filter((v) => v.index === versiya) };
     if (set.variants.length === 0) return null;
     const meta = { ...defaultMeta(), kind: 'custom', customTitle: POV_TITLE, duration: '' };
+    const { chast2Versii } = await import('@/lib/povyshennye/chast2');
+    const c2 = new Map<number, Chast2Zadacha[] | null>();
+    for (const v of set.variants) c2.set(v.index, await chast2Versii(pv, v.index));
     return {
       payload: { set, meta, workTitle: POV_TITLE },
       warning: null,
       variantLabel: (i: number) => POV_VERSION_LABEL(versiyaText(pv, i)),
+      chast2: (i: number) => c2.get(i) ?? null,
     };
   }
   const d = readCode(code);
@@ -84,6 +96,9 @@ export function VariantPrint() {
     : 'uchenik';
   const code = query.get('kod') ?? '';
   const vRaw = Number(query.get('v'));
+  /* Часть 2 на листе ученика: по странице на задание (по умолчанию),
+     m2=0 — без места для решения. */
+  const mesto2: Mesto2 = query.get('m2') === '0' ? 'net' : 'stranica';
   const versiya = Number.isInteger(vRaw) && vRaw >= 1 ? vRaw : null;
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -131,6 +146,7 @@ export function VariantPrint() {
           ...(got.variantLabel === undefined
             ? {}
             : { variantLabel: got.variantLabel, istochnik: false }),
+          ...(got.chast2 === undefined ? {} : { chast2: got.chast2, mesto2 }),
           space: decodeSpace(spaceToken),
           spaceToken: encodeSpace(decodeSpace(spaceToken)),
         });
@@ -150,7 +166,7 @@ export function VariantPrint() {
     return () => {
       alive = false;
     };
-  }, [code, choice, versiya, spaceToken]);
+  }, [code, choice, versiya, spaceToken, mesto2]);
 
   useEffect(() => {
     if (spec === null || done) return;
@@ -173,12 +189,17 @@ export function VariantPrint() {
           shown = undefined;
           return;
         }
+        /* Правило «до двух страниц на вариант» — про первую часть:
+           часть 2 (по странице на задание) в счёт не идёт. */
+        const chast2Pages = document.querySelectorAll(
+          '#sheet-pages .sheet-page:has(.var-part2-head) ~ .sheet-page, #sheet-pages .sheet-page:has(.var-part2-head)',
+        ).length;
         const tooLong =
           choice === 'uchenik' &&
           figures === 'normal' &&
           !spaced &&
           report.error === undefined &&
-          (report.pages ?? 0) > 2 * variants &&
+          (report.pages ?? 0) - chast2Pages > 2 * variants &&
           root.dataset.sheetDense === undefined;
         if (tooLong) {
           root.dataset.sheetDense = '1';

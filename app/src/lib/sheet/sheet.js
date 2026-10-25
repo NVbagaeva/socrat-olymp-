@@ -277,7 +277,11 @@ function taskCard(task, options) {
      отступы. */
   var markup = typo.markup(task.questionHtml);
   var tag = /<(?:p|div|table|ol|ul)\b/i.test(markup) ? 'div' : 'p';
-  var question = '<' + tag + ' class="sheet-task-question">' + markup + '</' + tag + '>' +
+  /* Плашка «2 балла» сразу после номера (варианты из двух частей). */
+  var badge = task.badge
+    ? '<p class="sheet-task-badge"><span class="ball-plashka">' + typo.escape(task.badge) + '</span></p>'
+    : '';
+  var question = badge + '<' + tag + ' class="sheet-task-question">' + markup + '</' + tag + '>' +
     optionList(task.options);
 
   /* Решение по шагам — только в файле для учителя: кто собирает лист,
@@ -316,6 +320,25 @@ function taskCard(task, options) {
 /* ══════════════════════════════════════════════════════════
    Место для решения (space.js)
    ══════════════════════════════════════════════════════════ */
+
+/**
+ * Задача «на страницу» (вторая часть варианта, task.page): карточка с
+ * новой страницы (task.pageBreak !== false) и поле в клетку до нижнего
+ * поля страницы. Высоту и ширину поля — целое число клеток 5 мм —
+ * ставит набор (paginate.js, data-fill-page): заранее остаток страницы
+ * не знает никто. Строки «Ответ:» нет — ответ пишется в решении.
+ */
+function pageItems(task, options) {
+  var brk = task.pageBreak === false ? '' : ' data-page-break="1"';
+  return [
+    '<div class="sheet-item sheet-tasks sheet-tasks--single sheet-tasks--page"' + brk + '>' +
+      taskCard(Object.assign({}, task, { answerLine: false }),
+        Object.assign({}, options, { layout: 'single' })) + '</div>',
+    '<div class="sheet-item sheet-fill-item" data-fill-page="1">' +
+      '<div class="sheet-space-wrap"><div class="sheet-space sheet-space--grid sheet-fill' +
+      ' sheet-space--first sheet-space--last" data-rows="0"></div></div></div>'
+  ];
+}
 
 /**
  * Задача с полем для решения — несколько кусков потока: карточка и
@@ -436,6 +459,7 @@ function flowItems(spec) {
     var opts = { layout: layout, cell: size.cell, frame: size.frame,
                  withAnswerLine: spec.withAnswerLine, figures: spec.figures };
     var single = function (task) {
+      if (task.page) { return pageItems(task, opts); }
       if (task.space) { return spacedItems(task, opts); }
       return ['<div class="sheet-item sheet-tasks sheet-tasks--single">' +
         taskCard(task, opts) + '</div>'];

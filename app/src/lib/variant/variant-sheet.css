@@ -287,3 +287,107 @@ html[data-sheet-dense] .var-instruction {
     display: none;
   }
 }
+
+/* ── Варианты из двух частей: плашки баллов, часть 2, критерии ───── */
+.ball-plashka {
+  display: inline-block;
+  padding: 0.05em 0.5em;
+  border: 0.75pt solid #e8894a;
+  border-radius: 0.6em;
+  background: #fff3ea;
+  color: #a5481a;
+  font-size: 0.8em;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: nowrap;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.sheet-task-badge {
+  margin: 0 0 1mm;
+}
+.var-part2-head__t {
+  margin: 0 0 1.5mm;
+  font-size: 1.25em;
+  font-weight: 700;
+  text-align: center;
+}
+.var-part2-head__instr {
+  margin: 0 0 1.5mm;
+  padding: 2mm 3mm;
+  border: 0.75pt solid currentColor;
+  font-style: italic;
+}
+.var-part2-head__max {
+  margin: 0 0 3mm;
+}
+.c2-etapy {
+  margin: 0;
+  padding-left: 5mm;
+}
+.c2-etap {
+  margin: 0 0 2mm;
+}
+.c2-etap__t {
+  margin: 0 0 0.5mm;
+  font-weight: 700;
+}
+.c2-etap__l {
+  margin: 0;
+  padding-left: 4mm;
+}
+.c2-etap__ris {
+  margin: 1.5mm 0;
+}
+.c2-etap__ris svg {
+  width: 62mm;
+  max-width: 100%;
+  height: auto;
+}
+.teor-ssylka {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+.c2-krit-print {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  margin: 1mm 0 2mm;
+}
+.c2-krit-print th,
+.c2-krit-print td {
+  border: 0.5pt solid #555;
+  padding: 0.8mm 1.5mm;
+  vertical-align: top;
+  text-align: left;
+}
+.c2-krit-print__b {
+  width: 12mm;
+  text-align: center !important;
+}
+.c2-krit-print__or {
+  display: block;
+  font-weight: 700;
+  font-size: 0.85em;
+}
+.c2-krit-print__max td {
+  font-style: italic;
+}
+.var-teor .teor {
+  break-inside: avoid;
+}
+.var-teor .teor__t {
+  margin: 0 0 1mm;
+  font-size: 1em;
+}
+.var-teor .teor__ris svg {
+  width: 50mm;
+  height: auto;
+}
+.var-teor .teor__dok {
+  margin: 0;
+  padding-left: 5mm;
+}
+.c2-razbor__f {
+  display: block;
+}
