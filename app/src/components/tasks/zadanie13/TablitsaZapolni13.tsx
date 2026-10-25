@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui';
 import { katex } from '@/lib/graph/katex';
 import { choiceMatches, openText } from '@/lib/zadanie13/secret';
@@ -186,7 +187,18 @@ export function TablitsaZapolni13({
           spellCheck={false}
           aria-label={imyaPolya(id)}
           aria-invalid={it !== undefined && it.t !== 'verno' && it.t !== 'pusto'}
-          onFocus={() => setAktiv(id)}
+          onFocus={(e) => {
+            setAktiv(id);
+            /* Поле над клавиатурой: на телефоне она закрывает нижнюю половину экрана. */
+            if (uzkiy) {
+              const el = e.currentTarget;
+              /* Только по вертикали: scrollIntoView сдвинул бы и страницу вбок. */
+              window.setTimeout(() => {
+                const r = el.getBoundingClientRect();
+                window.scrollBy({ top: r.top - window.innerHeight * 0.25, behavior: 'smooth' });
+              }, 50);
+            }
+          }}
           onBlur={() =>
             window.setTimeout(() => {
               const f = document.activeElement;
@@ -301,9 +313,16 @@ export function TablitsaZapolni13({
         ) : null}
       </div>
 
-      {aktiv !== null ? (
+      {aktiv === null ? null : uzkiy ? (
+        /* На телефоне — панель у нижнего края поверх меню: из карточки
+           задачи она бы ушла под нижнее меню (своё наложение слоёв). */
+        createPortal(
+          <Klaviatura13 bukvy={t.klavishi} onKey={naKlavishu} zagolovok={imyaPolya(aktiv)} />,
+          document.body,
+        )
+      ) : (
         <Klaviatura13 bukvy={t.klavishi} onKey={naKlavishu} zagolovok={imyaPolya(aktiv)} />
-      ) : null}
+      )}
     </div>
   );
 }

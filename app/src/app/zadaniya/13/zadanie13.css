@@ -1654,12 +1654,21 @@
   .z13-zap.is-kl {
     padding-bottom: 360px;
   }
+  .z13-zap__urovni {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .z13-zap__uroven {
+    min-height: 40px;
+    white-space: normal;
+  }
   .z13-kl {
     position: fixed;
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 80;
+    z-index: 1000;
     padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom));
     border-width: 1px 0 0;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
