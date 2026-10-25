@@ -26,7 +26,8 @@ const devPages =
   process.env.GALEREYA_9 === '1' ||
   process.env.GALEREYA_10 === '1' ||
   process.env.SOGLASIYA === '1' ||
-  process.env.INTRO_DEV_PAGES === '1';
+  process.env.INTRO_DEV_PAGES === '1' ||
+  process.env.KABINET === '1';
 
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
