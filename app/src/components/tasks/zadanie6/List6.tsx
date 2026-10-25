@@ -2,9 +2,11 @@
 
 import { clsx } from 'clsx';
 import { useEffect, useState } from 'react';
+import { ShapkaBanka } from '@/components/generator/ShapkaBanka';
 import { RamkaPrimer } from '@/components/teoriya/Ramki';
 import { Tex } from '@/components/ui/Tex';
-import { TEORIYA_6_DLYA_PROTOTIPA, vseKartochki6, type Kartochka6 } from '@/content/teoriya6';
+import { TEORIYA_6_DLYA_PROTOTIPA } from '@/content/teoriya6';
+import { GENERATOR6_TEXTS } from '@/content/generator6';
 import { GENERATOR_6 } from '@/content/zadanie6';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { zagruzitIndeks, zagruzitZadachi, type ZadachaLite } from '@/lib/zadanie6/dannye';
@@ -12,17 +14,19 @@ import {
   modelUroka,
   parseUrokQuery,
   parseZapros,
+  parseZaprosKlyuchi,
   sobratList,
+  sobratListKlyuchi,
   type ModelLista,
 } from '@/lib/zadanie6/sborka';
 import type { Ris, Solved } from '@/lib/zadanie6/types';
-import { KartochkaTelo6 } from './KartochkaTelo6';
+import { RamkiTeorii6 } from './RamkiTeorii6';
 import { Razbor6 } from './Razbor6';
 import { Uslovie6 } from './Uslovie6';
 
 const T = GENERATOR_6;
 
-export type Vid6 = 'uchenik' | 'uchitel';
+export type Vid6 = 'uchenik' | 'uchitel' | 'vse';
 
 interface Gotovo {
   model: ModelLista;
@@ -35,20 +39,6 @@ interface Gotovo {
 /** Ответ на листе: десятичная запятая и настоящий минус. */
 function otvetText(x: number): string {
   return String(x).replace('.', ',').replace('-', '−');
-}
-
-/** Рамки теории: карточки теории прототипов листа, каждая один раз — те же, что во вкладке «Теория». */
-function RamkiTeorii({ prototipy }: { prototipy: string[] }) {
-  const vse = vseKartochki6();
-  const ids = [...new Set(prototipy.flatMap((p) => TEORIYA_6_DLYA_PROTOTIPA(p)?.kartochka ?? []))];
-  const kartochki = ids.flatMap((id) => vse.find((k) => k.id === id) ?? []) as Kartochka6[];
-  return (
-    <div className="z6-list__teoriya">
-      {kartochki.map((k) => (
-        <KartochkaTelo6 key={k.id} k={k} />
-      ))}
-    </div>
-  );
 }
 
 /**
@@ -70,8 +60,11 @@ export function List6({ vid }: { vid: Vid6 }) {
         const indeks = await zagruzitIndeks();
         let model: ModelLista | null = null;
         const u = parseUrokQuery(q);
+        const zk = parseZaprosKlyuchi(q);
         if (u) {
           model = modelUroka(u.kod, u.no, u.n, indeks);
+        } else if (zk) {
+          model = sobratListKlyuchi(zk, indeks);
         } else {
           const z = parseZapros(q);
           if (z) {
@@ -97,12 +90,12 @@ export function List6({ vid }: { vid: Vid6 }) {
             ? [
                 {
                   questionHtml: `${z.text} ${JSON.stringify(z.params)} ${z.posle ?? ''}`,
-                  ...(vid === 'uchitel' ? { answer: String(reshit(z).answer) } : {}),
+                  ...(vid === 'uchenik' ? {} : { answer: String(reshit(z).answer) }),
                 },
               ]
             : [];
         });
-        const kit = checkKitSheet(q, '6', vid === 'uchitel' ? 'teacher' : 'student', {
+        const kit = checkKitSheet(q, '6', vid === 'uchenik' ? 'student' : 'teacher', {
           blocks: [{ tasks }],
         });
         setGotovo({ model, zadachi, reshit, risunok, kit });
@@ -123,34 +116,42 @@ export function List6({ vid }: { vid: Vid6 }) {
     const ris = risunok(z);
     return { text: z.text, ...(ris ? { ris } : {}), ...(z.posle ? { posle: z.posle } : {}) };
   };
-  return (
+  const telo = (vid: 'uchenik' | 'uchitel', panel = true) => (
     <div className={clsx('z6-list', `z6-list--${vid}`)}>
-      <div className="z6-list__panel">
-        <button
-          type="button"
-          className="btn btn--primary"
-          onClick={() => printKitSheet(kit.warning)}
-        >
-          {T.pechat}
-        </button>
-        <span>{vid === 'uchitel' ? T.uchitel : T.uchenik}</span>
-      </div>
+      {panel ? (
+        <div className="z6-list__panel">
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => printKitSheet(kit.warning)}
+          >
+            {T.pechat}
+          </button>
+          <span>{vid === 'uchitel' ? T.uchitel : T.uchenik}</span>
+        </div>
+      ) : null}
       <header className="z6-list__shapka">
         <p className="z6-list__eyebrow">
           Будет на ЕГЭ · {vid === 'uchitel' ? T.uchitel : T.uchenik}
         </p>
         <h1>{model.zagolovok}</h1>
-        {vid === 'uchenik' ? (
+        {model.shapka !== undefined ? (
+          <ShapkaBanka
+            shapka={model.shapka}
+            avtor={GENERATOR6_TEXTS.sheet.teacher}
+            fio={T.fio}
+            uchenik={vid === 'uchenik'}
+          />
+        ) : vid === 'uchenik' ? (
           <p className="z6-list__fio">{T.fio}</p>
-        ) : (
-          <p className="z6-list__note">{T.uchitelNote}</p>
-        )}
+        ) : null}
+        {vid === 'uchitel' ? <p className="z6-list__note">{T.uchitelNote}</p> : null}
       </header>
       {model.bloki.map((b) => (
         <section key={b.id} className="z6-list__blok">
           <h2>{b.title}</h2>
           {b.note && vid === 'uchitel' ? <p className="z6-list__note">{b.note}</p> : null}
-          {b.teoriya ? <RamkiTeorii prototipy={b.teoriya} /> : null}
+          {b.teoriya ? <RamkiTeorii6 prototipy={b.teoriya} /> : null}
           {(b.primery ?? []).map((id) => {
             const z = zadachi.get(id);
             if (!z) {
@@ -222,5 +223,15 @@ export function List6({ vid }: { vid: Vid6 }) {
         <Tex text={kitFootLabel(kit.code) ?? `Код: ${model.kod}`} />
       </footer>
     </div>
+  );
+  /* «Всё одним файлом»: лист ученика, затем лист учителя — те же задачи. */
+  return vid === 'vse' ? (
+    <>
+      {telo('uchenik')}
+      <div className="gen-razryv" aria-hidden="true" />
+      {telo('uchitel', false)}
+    </>
+  ) : (
+    telo(vid)
   );
 }

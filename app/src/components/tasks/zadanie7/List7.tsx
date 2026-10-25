@@ -2,9 +2,11 @@
 
 import { clsx } from 'clsx';
 import { useEffect, useState } from 'react';
+import { ShapkaBanka } from '@/components/generator/ShapkaBanka';
 import { RamkaPrimer } from '@/components/teoriya/Ramki';
 import { Tex } from '@/components/ui/Tex';
-import { TEORIYA_7_DLYA_PROTOTIPA, vseKartochki7, type Kartochka7 } from '@/content/teoriya7';
+import { TEORIYA_7_DLYA_PROTOTIPA } from '@/content/teoriya7';
+import { GENERATOR7_TEXTS } from '@/content/generator7';
 import { GENERATOR_7 } from '@/content/zadanie7';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { zagruzitIndeks, zagruzitZadachi, type ZadachaLite } from '@/lib/zadanie7/dannye';
@@ -12,16 +14,18 @@ import {
   modelUroka,
   parseUrokQuery,
   parseZapros,
+  parseZaprosKlyuchi,
   sobratList,
+  sobratListKlyuchi,
   type ModelLista,
 } from '@/lib/zadanie7/sborka';
 import type { Solved } from '@/lib/zadanie7/types';
-import { KartochkaTelo7 } from './KartochkaTelo7';
+import { RamkiTeorii7 } from './RamkiTeorii7';
 import { Razbor7 } from './Razbor7';
 
 const T = GENERATOR_7;
 
-export type Vid7 = 'uchenik' | 'uchitel';
+export type Vid7 = 'uchenik' | 'uchitel' | 'vse';
 
 interface Gotovo {
   model: ModelLista;
@@ -37,20 +41,6 @@ function otvetText(x: number): string {
 
 function Metka({ z }: { z: ZadachaLite }) {
   return z.source === 'analog' ? <span className="z7-list__metka"> {T.analogMetka}</span> : null;
-}
-
-/** Рамки теории: карточки теории прототипов листа, каждая один раз. */
-function RamkiTeorii({ prototipy }: { prototipy: string[] }) {
-  const vse = vseKartochki7();
-  const ids = [...new Set(prototipy.flatMap((p) => TEORIYA_7_DLYA_PROTOTIPA(p)?.kartochka ?? []))];
-  const kartochki = ids.flatMap((id) => vse.find((k) => k.id === id) ?? []) as Kartochka7[];
-  return (
-    <div className="z7-list__teoriya">
-      {kartochki.map((k) => (
-        <KartochkaTelo7 key={k.id} k={k} />
-      ))}
-    </div>
-  );
 }
 
 /**
@@ -72,8 +62,11 @@ export function List7({ vid }: { vid: Vid7 }) {
         const indeks = await zagruzitIndeks();
         let model: ModelLista | null = null;
         const u = parseUrokQuery(q);
+        const zk = parseZaprosKlyuchi(q);
         if (u) {
           model = modelUroka(u.kod, u.no, u.n, indeks);
+        } else if (zk) {
+          model = sobratListKlyuchi(zk, indeks);
         } else {
           const z = parseZapros(q);
           if (z) {
@@ -98,12 +91,12 @@ export function List7({ vid }: { vid: Vid7 }) {
             ? [
                 {
                   questionHtml: z.text,
-                  ...(vid === 'uchitel' ? { answer: String(reshit(z).answer) } : {}),
+                  ...(vid === 'uchenik' ? {} : { answer: String(reshit(z).answer) }),
                 },
               ]
             : [];
         });
-        const kit = checkKitSheet(q, '7', vid === 'uchitel' ? 'teacher' : 'student', {
+        const kit = checkKitSheet(q, '7', vid === 'uchenik' ? 'student' : 'teacher', {
           blocks: [{ tasks }],
         });
         setGotovo({ model, zadachi, reshit, kit });
@@ -120,34 +113,42 @@ export function List7({ vid }: { vid: Vid7 }) {
     return <p>{T.sobiraem}</p>;
   }
   const { model, zadachi, reshit, kit } = gotovo;
-  return (
+  const telo = (vid: 'uchenik' | 'uchitel', panel = true) => (
     <div className={clsx('z7-list', `z7-list--${vid}`)}>
-      <div className="z7-list__panel">
-        <button
-          type="button"
-          className="btn btn--primary"
-          onClick={() => printKitSheet(kit.warning)}
-        >
-          {T.pechat}
-        </button>
-        <span>{vid === 'uchitel' ? T.uchitel : T.uchenik}</span>
-      </div>
+      {panel ? (
+        <div className="z7-list__panel">
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => printKitSheet(kit.warning)}
+          >
+            {T.pechat}
+          </button>
+          <span>{vid === 'uchitel' ? T.uchitel : T.uchenik}</span>
+        </div>
+      ) : null}
       <header className="z7-list__shapka">
         <p className="z7-list__eyebrow">
           Будет на ЕГЭ · {vid === 'uchitel' ? T.uchitel : T.uchenik}
         </p>
         <h1>{model.zagolovok}</h1>
-        {vid === 'uchenik' ? (
+        {model.shapka !== undefined ? (
+          <ShapkaBanka
+            shapka={model.shapka}
+            avtor={GENERATOR7_TEXTS.sheet.teacher}
+            fio={T.fio}
+            uchenik={vid === 'uchenik'}
+          />
+        ) : vid === 'uchenik' ? (
           <p className="z7-list__fio">{T.fio}</p>
-        ) : (
-          <p className="z7-list__note">{T.otbor}</p>
-        )}
+        ) : null}
+        {vid === 'uchitel' ? <p className="z7-list__note">{T.otbor}</p> : null}
       </header>
       {model.bloki.map((b) => (
         <section key={b.id} className="z7-list__blok">
           <h2>{b.title}</h2>
           {b.note && vid === 'uchitel' ? <p className="z7-list__note">{b.note}</p> : null}
-          {b.teoriya ? <RamkiTeorii prototipy={b.teoriya} /> : null}
+          {b.teoriya ? <RamkiTeorii7 prototipy={b.teoriya} /> : null}
           {(b.primery ?? []).map((id) => {
             const z = zadachi.get(id);
             if (!z) {
@@ -221,5 +222,15 @@ export function List7({ vid }: { vid: Vid7 }) {
       ))}
       <footer className="z7-list__podval">{kitFootLabel(kit.code) ?? `Код: ${model.kod}`}</footer>
     </div>
+  );
+  /* «Всё одним файлом»: лист ученика, затем лист учителя — те же задачи. */
+  return vid === 'vse' ? (
+    <>
+      {telo('uchenik')}
+      <div className="gen-razryv" aria-hidden="true" />
+      {telo('uchitel', false)}
+    </>
+  ) : (
+    telo(vid)
   );
 }

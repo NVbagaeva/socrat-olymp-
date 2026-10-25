@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { List7 } from '@/components/tasks/zadanie7/List7';
 import { zadanie7Title } from '@/content/zadanie7';
 import 'katex/dist/katex.min.css';
+import '@/components/generator/shapka-banka.css';
 import '@/components/tasks/zadanie7/razbor7.css';
 import '../zadanie7.css';
 import './pechat7.css';

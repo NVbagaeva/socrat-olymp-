@@ -1,0 +1,50 @@
+/* Шапка листа из банка задач (№6, №7, №10) по «Дополнительно» общего
+   генератора: вид работы, поле «Фамилия, имя» с датой, учитель, QR. */
+.gen-shapka {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.gen-shapka__text {
+  min-width: 0;
+}
+
+.gen-shapka p {
+  margin: var(--space-1) 0;
+}
+
+.gen-shapka__vid {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.gen-shapka__uchitel {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.gen-shapka__qr {
+  flex: none;
+  width: 20mm;
+  height: 20mm;
+}
+
+.gen-shapka__qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* «Всё одним файлом»: лист учителя — с новой страницы. */
+.gen-razryv {
+  break-before: page;
+  height: var(--space-8);
+}
+
+@media print {
+  .gen-razryv {
+    height: 0;
+  }
+}
