@@ -78,7 +78,7 @@ export const PRESETY_13: readonly Preset13[] = [
     note: '6 задач · все типы',
     sostav: { A: 2, B: 1, C: 2, D: 1 },
     uroven: 'base',
-    pomoshch: 'net',
+    pomoshch: 'ramka',
     vid: 'compact',
     variants: 1,
     title: 'Домашняя работа',
@@ -287,7 +287,7 @@ export const RAMKA_13: Record<Vid13, { pravilo: string; primer: string; reshenie
     pravilo:
       'Долг растёт в $k = 1 + \\dfrac{r}{100}$ раз, затем вычитаем платёж. После последнего платежа долг равен нулю.',
     primer: 'Кредит 2100 рублей под 10 % погашен двумя равными платежами. Найдите платёж.',
-    reshenie: '$(2100 \\cdot 1{,}1 - X) \\cdot 1{,}1 - X = 0$, откуда $X = 1210$ рублей.',
+    reshenie: '$(2100 \\cdot 1{,}1 - x) \\cdot 1{,}1 - x = 0$, откуда $x = 1210$ рублей.',
   },
   D: {
     pravilo:

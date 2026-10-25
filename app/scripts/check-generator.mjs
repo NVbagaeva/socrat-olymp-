@@ -599,6 +599,83 @@ async function proverit(R) {
       }
     }
   }
+
+  /* ── 9. Памятка и пример по виду работы ─────────────────────────── */
+  console.log(`Памятка по виду работы ${R.name}`);
+  {
+    const dop = config.extras;
+    const ramka = dop !== undefined && dop.theory !== false;
+    const primery = dop !== undefined && dop.examples !== false;
+    const BEZ = ['sr', 'pv', 'kr', 'dg', 'zc', 'pe', 'tv'];
+    const base = G.stateFromPreset(config, config.presets[0], 'mix');
+    for (const kind of Object.keys(GEN_UI.vidyRaboty)) {
+      const on = !BEZ.includes(kind);
+      const e = G.umolchaniyaPoTipu(config, { ...G.defaultExtras(config), kind }, false);
+      ok(
+        e.theory === (ramka && on) && e.examples === (primery && on ? 1 : 0),
+        `${kind}: памятка и пример по умолчанию ${on ? 'включены' : 'выключены'}`,
+      );
+      /* Выбор учителя переживает смену вида работы — в обе стороны. */
+      const sam = { ...G.defaultExtras(config), kind, theory: !on, examples: on ? 0 : 2 };
+      const keep = G.umolchaniyaPoTipu(config, sam, false, { theory: true, examples: true });
+      ok(
+        keep.theory === !on && keep.examples === (on ? 0 : 2),
+        `${kind}: переключённое руками вид работы не меняет`,
+      );
+      const half = G.umolchaniyaPoTipu(config, sam, false, { theory: true });
+      ok(
+        half.theory === !on && half.examples === (primery ? (on ? 1 : 0) : sam.examples),
+        `${kind}: руками — только памятка, пример по виду работы`,
+      );
+    }
+    /* «По составу»: вариант ЕГЭ — без памятки, «Задания для отработки» — с ней. */
+    const ege = G.umolchaniyaPoTipu(config, G.defaultExtras(config), true);
+    const otr = G.umolchaniyaPoTipu(config, G.defaultExtras(config), false);
+    ok(!ege.theory && ege.examples === 0, 'по составу, вариант ЕГЭ: без памятки и примера');
+    ok(otr.theory === ramka, 'по составу, отработка: памятка по умолчанию');
+    if (engine.formatEge !== undefined) {
+      const odin = config.presets.find((x) => x.pickTopic !== undefined);
+      ok(engine.formatEge(base), `${config.presets[0].id}: лист в формате варианта ЕГЭ`);
+      if (odin !== undefined)
+        ok(
+          !engine.formatEge(G.stateFromPreset(config, odin, 'mix')),
+          `${odin.id}: одна тема — не вариант ЕГЭ`,
+        );
+    }
+    /* Один код набора: «Контрольная» без памятки, «Домашняя» с ней, задачи те же. */
+    const seed = SEEDS[0];
+    const kr = {
+      ...base,
+      seed,
+      extras: G.umolchaniyaPoTipu(config, { ...base.extras, kind: 'kr' }, false),
+    };
+    const dz = {
+      ...base,
+      seed,
+      extras: G.umolchaniyaPoTipu(config, { ...base.extras, kind: 'dz' }, false),
+    };
+    const a = await engine.build(kr);
+    const b = await engine.build(dz);
+    ok(diffTasks(a, b).length === 0, 'КР и ДЗ с одним кодом: задачи те же');
+    if (ramka) {
+      ok(
+        a.variants.every((v) => v.every((t) => !t.lead?.includes('gen-recap'))),
+        'КР: памятки на листе нет',
+      );
+      ok(
+        b.variants.every((v) => v[0]?.lead?.includes('gen-recap')),
+        'ДЗ: памятка на листе есть',
+      );
+    }
+    /* Настройки — вместе с кодом: ссылка на набор возвращает их. */
+    const back = engine.parse(new URLSearchParams(engine.hrefs(dz).link.split('?')[1]));
+    ok(
+      back !== null &&
+        back.extras.theory === dz.extras.theory &&
+        back.extras.examples === dz.extras.examples,
+      'ДЗ: памятка и пример в ссылке на набор',
+    );
+  }
 }
 
 /* GEN_RAZDEL=№12 — только разделы с этим началом имени (отладка; в CI — все). */
