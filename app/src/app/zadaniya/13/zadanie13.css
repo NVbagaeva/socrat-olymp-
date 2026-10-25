@@ -92,6 +92,14 @@
   font-weight: 700;
   color: var(--color-text);
 }
+/* Узкий экран: метка («ЛОВУШКА») строкой выше, заголовок под ней во всю
+   ширину — а не узкой колонкой рядом с меткой. */
+@media (max-width: 40rem) {
+  .z13-card__head {
+    display: grid;
+    gap: var(--space-1);
+  }
+}
 .z13-card__body {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1045,6 +1053,9 @@
   fill: var(--color-text-brand);
 }
 .z13-about-tip__title {
+  min-width: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
   margin: 0;
   font-size: 1.05em;
 }

@@ -106,6 +106,7 @@
     "test:stereo-nav": "node scripts/check-stereo-nav.mjs",
     "test:stereo-engine": "node scripts/check-stereo-engine.mjs",
     "test:stereo-kachestvo": "node scripts/check-stereo-kachestvo.mjs",
+    "test:stereo-razbory": "node scripts/check-stereo-razbory.mjs",
     "test:ves12-site": "node scripts/check-ves12-site.mjs",
     "test:zachyot-12": "node scripts/check-zachyot-12.mjs",
     "test:razdely-names": "node scripts/check-razdely-names.mjs",

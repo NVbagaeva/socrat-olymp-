@@ -13,7 +13,8 @@
         ракурсе — он не прыгает при вращении.
      4. Подписи при вращении (12 азимутов × 4 подъёма): друг на друга не
         налезают никогда, сквозь линию проходят не чаще 0,1 %.
-     5. Скорость: средний кадр ≤ 3 мс, худший ≤ 25 мс (на машине сборки;
+     5. Скорость (лучшее из трёх замеров кадра): средний ≤ 3 мс, худший
+        ≤ 25 мс (на машине сборки;
         слабый телефон медленнее в разы — компонент пропускает кадры).
      6. Точное ядро №15: призма, пирамида и тетраэдр собираются с
         гранями наружу (V − E + F = 2), сечения считаются. */
@@ -110,9 +111,15 @@ for (const [id, model] of MODELS) {
   for (const az of AZ) {
     for (const el of EL) {
       const opts = { view: P.orthoAt(az, el), ustoychivo: true };
-      const t0 = performance.now();
-      const svg = R.renderSolid(model, opts);
-      const dt = performance.now() - t0;
+      /* Время кадра — лучшее из трёх: одиночный замер ловит паузы
+         машины (сборщик мусора, соседние процессы), а не сам рендер. */
+      let svg = '';
+      let dt = Infinity;
+      for (let i = 0; i < 3; i += 1) {
+        const t0 = performance.now();
+        svg = R.renderSolid(model, opts);
+        dt = Math.min(dt, performance.now() - t0);
+      }
       frames += 1;
       total += dt;
       if (dt > worst) {

@@ -66,6 +66,25 @@ export function typeset(text: string, strogo = false): string {
 }
 
 /**
+ * Заголовок рамки (Ловушка, Важно, Вывод…) с формулой: дроби строчные
+ * (\tfrac — строка не раздувается), а «$X$, а не $Y$» собирается в одно
+ * выражение KaTeX, которое не рвётся переносом:
+ * $X,\ \text{а не}\ Y$.
+ */
+export function zagolovokTex(text: string): string {
+  return text
+    .replace(/\\dfrac/g, '\\tfrac')
+    .replace(
+      /\$([^$]+)\$,\s*а не\s*\$([^$]+)\$/g,
+      (_, a: string, b: string) => `$${a},\\ \\text{а не}\\ ${b}$`,
+    );
+}
+
+export function typesetZagolovok(text: string): string {
+  return typeset(zagolovokTex(text));
+}
+
+/**
  * То же, что typeset, но \dfrac в строке остаётся крупной дробью
  * (опция displayFrac, как в ключе учителя): «Опорные задачи» №11 —
  * дроби 100/(x + 6) в вариантах ответа и подсказках должны читаться.

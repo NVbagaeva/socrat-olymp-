@@ -1013,7 +1013,7 @@ function labelMarkup(label: PlacedLabel): string {
     : esc(base);
   return (
     `<text x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
-    `fill="${fill}" paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
+    `fill="${fill}"${label.hl ? ' data-hl="1"' : ''} paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
 

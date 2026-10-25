@@ -94,7 +94,7 @@ export function RamkaZadacha({
           {no}
         </span>
         <span className="sr-only">Задача {no}. </span>
-        <Tex text={title} />
+        <Tex text={title} zagolovok />
       </h4>
       {children}
     </section>
@@ -127,7 +127,7 @@ export function RamkaPrimer({
     <section className="ramka ramka--primer">
       <span className="ramka__plashka ramka__plashka--primer">Пример</span>
       <h4 className="ramka__zagolovok">
-        <Tex text={title} />
+        <Tex text={title} zagolovok />
       </h4>
       {uslovie === undefined ? null : (
         <p className="ramka__p ramka__uslovie">
