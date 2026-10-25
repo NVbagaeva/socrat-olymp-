@@ -178,7 +178,7 @@ function BlokView({ b }: { b: Blok }) {
           <header className="z13-card__head">
             <span className="z13-card__yarlyk">{ROL_YARLYK[b.rol]}</span>
             <h4 className="z13-card__title">
-              <Tex text={b.title} />
+              <Tex text={b.title} zagolovok />
             </h4>
           </header>
           <div className="z13-card__body">

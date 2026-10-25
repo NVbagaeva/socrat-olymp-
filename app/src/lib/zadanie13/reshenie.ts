@@ -81,14 +81,15 @@ function tablitsa(k: Kredit13, period: 'month' | 'year', P: string): TablitsaPer
   const b = k.bukva ?? 'r';
   const rT = stavka(k);
   const cell = (start: Mnozh, end: Mnozh, pervaya: boolean, n: number | null) => {
-    const nT = n === null ? 'n' : String(n);
-    const nachalo = pervaya ? fr(`${nT}S`, nT) : dolya(start, n);
-    return [
-      pervaya ? `S = ${nachalo}` : nachalo,
-      dolya(1, n),
-      `${nachalo}\\cdot ${rT}`,
-      dolya(end, n),
-    ] as [string, string, string, string];
+    /* Первая строка — просто S: как S записывается дробью, видно под
+       таблицей (переход к долгу на конец) и в сумме переплат. */
+    const nachalo = pervaya ? 'S' : dolya(start, n);
+    return [nachalo, dolya(1, n), `${nachalo}\\cdot ${rT}`, dolya(end, n)] as [
+      string,
+      string,
+      string,
+      string,
+    ];
   };
   let rows: TablitsaPeremennye['rows'];
   if (k.n === null) {
@@ -118,6 +119,33 @@ function tablitsa(k: Kredit13, period: 'month' | 'year', P: string): TablitsaPer
         ? `$${b}\\,\\%$ начисляется на долг на начало ${kogda}`
         : `$${b}\\,\\% = ${tex(k.r)}\\,\\%$ начисляется на долг на начало ${kogda}`,
   };
+}
+
+/**
+ * Под таблицей: откуда берутся долги. Долг на конец = долг на начало −
+ * сумма изменения долга; первые два перехода расписаны (S записываем
+ * дробью со знаменателем n), затем — закономерность для любой строки.
+ */
+function zakonomernost(k: Kredit13, period: 'month' | 'year'): ShagBlok[] {
+  const nT = k.n === null ? 'n' : String(k.n);
+  const d = (m: number) =>
+    k.n === null ? fr(m === 0 ? 'nS' : `(n-${m})S`, 'n') : dolya(k.n - m, k.n);
+  const nS = fr(`${nT}S`, nT);
+  const shag = fr('S', nT);
+  const kogo = period === 'year' ? 'года' : 'месяца';
+  const obshiy = k.n === null ? fr('(n-k+1)S', 'n') : fr(`(${k.n + 1}-k)S`, k.n);
+  return [
+    {
+      vid: 'text',
+      text: `Долг на конец = долг на начало − сумма изменения долга. Чтобы вычитать, записываем $S$ дробью со знаменателем $${nT}$: $S = ${nS}$.`,
+    },
+    { vid: 'formula', tex: `S - ${shag} = ${nS} - ${shag} = ${d(1)}` },
+    { vid: 'formula', tex: `${d(1)} - ${shag} = ${d(2)}` },
+    {
+      vid: 'text',
+      text: `Каждый ${period === 'year' ? 'год' : 'месяц'} числитель уменьшается на одно $S$: долг на начало $k$-го ${kogo} равен $${obshiy}$, а после последнего платежа долг равен $0$.`,
+    },
+  ];
 }
 
 /** Слагаемые переплаты: все при n ≤ 4, иначе два первых, «…» и последнее. */
@@ -277,7 +305,7 @@ export function difPereplata(
     shagi.push({
       title: dva && k.imya ? `Составляем таблицу: ${k.imya}` : 'Составляем таблицу',
       text: `Долг на начало каждой строки — долг на конец предыдущей. Переплата — $${b}\\,\\%$ от долга на начало: умножаем его на $${stavka(k)}$.`,
-      bloki: [{ vid: 'tablitsa', t: tablitsa(k, period, P(i)) }],
+      bloki: [{ vid: 'tablitsa', t: tablitsa(k, period, P(i)) }, ...zakonomernost(k, period)],
     });
   });
   const itogi: DifItog[] = [];

@@ -538,7 +538,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
-            title: '$\\dfrac{n+1}{2}$, а не $\\dfrac{n}{2}$',
+            title: '$\\tfrac{n+1}{2},\\ \\text{а не}\\ \\tfrac{n}{2}$',
             text: 'В сумме долгов на начало есть и самый первый долг $S$, и последний $\\dfrac{S}{n}$. Поэтому в формуле $n + 1$.',
           },
         ],
