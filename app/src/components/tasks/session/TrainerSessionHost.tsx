@@ -4,6 +4,7 @@ import { Component, useCallback, useEffect, useLayoutEffect, useRef, useState } 
 import type { ErrorInfo, ReactNode } from 'react';
 import { Button, Modal } from '@/components/ui';
 import { ErrorFallback } from '@/components/ErrorFallback';
+import { reportTrainerFinished } from '@/lib/kabinet/trainerSync';
 import { isBaseUi, normalizeBase } from '@/lib/trainerSession/restore';
 import {
   TAB_ID,
@@ -335,9 +336,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     payload: P | null;
     solved: number;
     total: number;
-  } | null>(
-    null,
-  );
+  } | null>(null);
   /* Прогресс для панели: перерисовывается только панель, не экран. */
   const [bar, setBar] = useState({ index: 0, total: 0, solved: 0 });
 
@@ -653,6 +652,9 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     beforeFinishRef.current = null;
     stopClock();
     const data = summarize(current.run);
+    /* Ученик вошёл в кабинет — тренировка записывается ему (прогресс,
+       ДЗ). Гостю — ничего: код кабинета даже не грузится. */
+    reportTrainerFinished(scope, current.run.id, data.items, data.seconds);
     if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -1068,7 +1070,11 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         open={confirmFinish}
         onClose={() => setConfirmFinish(false)}
         title={labels?.finishTitle ?? sessionText.finishTitle}
-        description={confirmFinish && labels?.finishText !== undefined ? labels.finishText() : sessionText.finishText}
+        description={
+          confirmFinish && labels?.finishText !== undefined
+            ? labels.finishText()
+            : sessionText.finishText
+        }
         footer={
           <>
             <Button variant="secondary" onClick={() => setConfirmFinish(false)}>

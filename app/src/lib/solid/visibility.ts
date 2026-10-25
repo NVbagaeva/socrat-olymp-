@@ -5,11 +5,15 @@
  * и скрытые куски по модели. Линия скрыта там, где между ней
  * и зрителем лежит грань непрозрачного тела или поверхность шара.
  *
- * Как считается: отрезок опрашивается в десятках точек, каждая
- * проверяется на попадание в проекцию грани и на глубину, границы
- * между соседними точками с разным ответом уточняются делением
- * пополам. Тела вращения для этого разбиты на грани; их собственные
- * контуры при этом считаются точно, а не по граням.
+ * Как считается: видимость отрезка может смениться только там, где
+ * его проекция пересекает контур заслонки (сторону грани, контур
+ * шара) или где отрезок протыкает её (плоскость грани, поверхность
+ * шара). Эти точки находятся аналитически, отрезок режется по ним, и
+ * каждый кусок проверяется одной точкой — серединой: закрыта ли она
+ * лучом к зрителю. Тела вращения для этого разбиты на грани; их
+ * собственные контуры при этом считаются точно, а не по граням.
+ * Кривая (эллипс основания, контур шара) — ломаная: так же режется
+ * каждая её хорда.
  */
 
 import type { Body, Cone, Cylinder, Polyhedron, Sphere } from './model';
@@ -291,8 +295,79 @@ export interface Run {
   visible: boolean;
 }
 
-const SAMPLES = 40;
-const REFINE = 10;
+/** Параметр t ∈ (0, 1) пересечения отрезков ab и cd на чертеже. */
+function crossT(a: Vec2, b: Vec2, c: Vec2, d: Vec2): number | null {
+  const rx = b[0] - a[0];
+  const ry = b[1] - a[1];
+  const sx = d[0] - c[0];
+  const sy = d[1] - c[1];
+  const den = rx * sy - ry * sx;
+  if (Math.abs(den) < 1e-12) return null;
+  const qx = c[0] - a[0];
+  const qy = c[1] - a[1];
+  const t = (qx * sy - qy * sx) / den;
+  const u = (qx * ry - qy * rx) / den;
+  return t > 0 && t < 1 && u >= -1e-9 && u <= 1 + 1e-9 ? t : null;
+}
+
+/** Корни квадратного уравнения A t² + B t + C = 0 внутри (0, 1). */
+function rootsIn01(A: number, B: number, C: number): number[] {
+  if (Math.abs(A) < 1e-14) {
+    if (Math.abs(B) < 1e-14) return [];
+    const t = -C / B;
+    return t > 0 && t < 1 ? [t] : [];
+  }
+  const D = B * B - 4 * A * C;
+  if (D < 0) return [];
+  const q = Math.sqrt(D);
+  return [(-B - q) / (2 * A), (-B + q) / (2 * A)].filter((t) => t > 0 && t < 1);
+}
+
+/**
+ * Точки отрезка, где может смениться видимость: пересечения проекции
+ * с контурами заслонок и проколы заслонок.
+ */
+function cutPoints(view: View, a: Vec3, b: Vec3, list: readonly Occluder[]): number[] {
+  const pa = view.project(a);
+  const pb = view.project(b);
+  const da = view.depth(a);
+  const db = view.depth(b);
+  const ts: number[] = [];
+  const minX = Math.min(pa[0], pb[0]);
+  const maxX = Math.max(pa[0], pb[0]);
+  const minY = Math.min(pa[1], pb[1]);
+  const maxY = Math.max(pa[1], pb[1]);
+  for (const occ of list) {
+    if (occ.kind === 'sphere') {
+      /* Контур шара на чертеже — круг радиуса r вокруг проекции центра. */
+      const c = view.project(occ.center);
+      const dx = pb[0] - pa[0];
+      const dy = pb[1] - pa[1];
+      const fx = pa[0] - c[0];
+      const fy = pa[1] - c[1];
+      ts.push(
+        ...rootsIn01(dx * dx + dy * dy, 2 * (fx * dx + fy * dy), fx * fx + fy * fy - occ.r * occ.r),
+      );
+      /* Прокол поверхности шара. */
+      const ab = sub(b, a);
+      const ac = sub(a, occ.center);
+      ts.push(...rootsIn01(dot(ab, ab), 2 * dot(ac, ab), dot(ac, ac) - occ.r * occ.r));
+      continue;
+    }
+    if (maxX < occ.minX || minX > occ.maxX || maxY < occ.minY || minY > occ.maxY) continue;
+    const n = occ.poly.length;
+    for (let i = 0; i < n; i += 1) {
+      const t = crossT(pa, pb, at(occ.poly, i), at(occ.poly, (i + 1) % n));
+      if (t !== null) ts.push(t);
+    }
+    /* Прокол плоскости грани: глубина отрезка и глубина грани под ним —
+       линейные функции t. */
+    const fa = occ.a * pa[0] + occ.b * pa[1] + occ.c - da;
+    const fb = occ.a * pb[0] + occ.b * pb[1] + occ.c - db;
+    if (fa !== fb && fa * fb < 0) ts.push(fa / (fa - fb));
+  }
+  return ts;
+}
 
 /**
  * Разбить отрезок на видимые и скрытые куски.
@@ -311,48 +386,78 @@ export function segmentRuns(
   if (list.length === 0) {
     return [{ t0: 0, t1: 1, visible: true }];
   }
-  const test = (t: number) => !hidden(view, lerp(a, b, t), list, eps);
-  const ts = Array.from({ length: SAMPLES }, (_, k) => (k + 0.5) / SAMPLES);
-  const states = ts.map(test);
-
+  const ts = [0, 1, ...cutPoints(view, a, b, list)].sort((x, y) => x - y);
   const runs: Run[] = [];
-  let start = 0;
-  let state = at(states, 0);
-  for (let k = 1; k < SAMPLES; k += 1) {
-    if (at(states, k) === state) {
+  for (let i = 0; i + 1 < ts.length; i += 1) {
+    const t0 = at(ts, i);
+    const t1 = at(ts, i + 1);
+    if (t1 - t0 < 1e-9) continue;
+    const visible = !hidden(view, lerp(a, b, (t0 + t1) / 2), list, eps);
+    const last = runs.at(-1);
+    if (last && last.visible === visible) last.t1 = t1;
+    else runs.push({ t0: last ? last.t1 : 0, t1, visible });
+  }
+  return mergeTiny(runs);
+}
+
+/* Крошечный кусок (касание, вершина на контуре) — не рисуется отдельно:
+   доля отрезка меньше 1/1000 сливается с соседом. */
+function mergeTiny(runs: Run[]): Run[] {
+  const MIN = 1e-3;
+  const out: Run[] = [];
+  for (const r of runs) {
+    const last = out.at(-1);
+    if (last && (r.t1 - r.t0 < MIN || last.visible === r.visible)) {
+      last.t1 = r.t1;
       continue;
     }
-    /* Граница между соседними точками: уточняем делением пополам. */
-    let lo = at(ts, k - 1);
-    let hi = at(ts, k);
-    for (let r = 0; r < REFINE; r += 1) {
-      const m = (lo + hi) / 2;
-      if (test(m) === state) {
-        lo = m;
-      } else {
-        hi = m;
-      }
-    }
-    const cut = (lo + hi) / 2;
-    runs.push({ t0: start, t1: cut, visible: state });
-    start = cut;
-    state = at(states, k);
+    if (!last && r.t1 - r.t0 < MIN && runs.length > 1) continue;
+    out.push({ ...r, t0: last ? last.t1 : 0 });
   }
-  runs.push({ t0: start, t1: 1, visible: state });
-  return runs;
+  return out;
 }
 
 /**
- * Видимость ломаной по точкам: у каждой точки уже есть своя
- * видимость по самому телу (контуры тел вращения считаются точно),
- * сюда добавляется заслонение чужими телами.
+ * Видимость ломаной (кривой тела вращения): своя видимость точек уже
+ * посчитана по самому телу — контуры тел вращения точные; чужие тела
+ * режут каждую хорду, как отрезок (segmentRuns). Хорда, на концах
+ * которой своя видимость разная, делится пополам: там контур.
+ * Возвращаются куски по порядку: точки и видимость.
  */
-export function polylineVisibility(
+export function polylineRuns(
   view: View,
   points: readonly Vec3[],
   selfVisible: readonly boolean[],
   occluders: readonly Occluder[],
   eps: number,
-): boolean[] {
-  return points.map((p, i) => at(selfVisible, i) && !hidden(view, p, occluders, eps));
+): { points: Vec3[]; visible: boolean }[] {
+  const out: { points: Vec3[]; visible: boolean }[] = [];
+  const push = (p: Vec3, q: Vec3, visible: boolean) => {
+    const last = out.at(-1);
+    if (last && last.visible === visible) {
+      last.points.push(q);
+    } else {
+      out.push({ points: [p, q], visible });
+    }
+  };
+  for (let i = 0; i + 1 < points.length; i += 1) {
+    const a = at(points, i);
+    const b = at(points, i + 1);
+    const sa = at(selfVisible, i);
+    const sb = at(selfVisible, i + 1);
+    const cuts = sa === sb ? [] : [0.5];
+    const runs = segmentRuns(view, a, b, occluders, eps);
+    const ts = [...new Set([0, 1, ...cuts, ...runs.flatMap((r) => [r.t0, r.t1])])].sort(
+      (x, y) => x - y,
+    );
+    for (let k = 0; k + 1 < ts.length; k += 1) {
+      const t0 = at(ts, k);
+      const t1 = at(ts, k + 1);
+      const m = (t0 + t1) / 2;
+      const self = sa === sb ? sa : m < 0.5 ? sa : sb;
+      const run = runs.find((r) => r.t0 <= m && m <= r.t1);
+      push(lerp(a, b, t0), lerp(a, b, t1), self && (run?.visible ?? true));
+    }
+  }
+  return out;
 }

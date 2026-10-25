@@ -14,6 +14,8 @@ import {
   type Kit,
   type KitScope,
 } from '@/lib/komplekt';
+import { withSpace } from '@/lib/sheet/space.js';
+import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
 
 const T = GEN_UI.komplekty;
 
@@ -43,6 +45,7 @@ export function GenKits({
   onSeed: (id: string) => void;
 }) {
   const history = useSyncExternalStore(subscribeKits, loadKits, () => NO_KITS);
+  const [space] = useSheetSpace();
   const [code, setCode] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const codeId = useId();
@@ -128,7 +131,7 @@ export function GenKits({
                 ) : null}
                 <a
                   className="btn btn--ghost btn--sm"
-                  href={kit.studentHref}
+                  href={withSpace(kit.studentHref, space)}
                   target="_blank"
                   rel="noopener"
                 >
@@ -144,7 +147,7 @@ export function GenKits({
                 </a>
                 <a
                   className="btn btn--ghost btn--sm"
-                  href={bothHref(kit)}
+                  href={withSpace(bothHref(kit), space)}
                   target="_blank"
                   rel="noopener"
                 >

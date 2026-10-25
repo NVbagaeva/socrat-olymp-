@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/layout/AppShell';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
-import { TrainerStats, Trenazher12 } from '@/components/tasks/trainer';
+import { TrainerStats } from '@/components/tasks/trainer/TrainerStats';
+import { Trenazher12 } from '@/components/tasks/trainer/Trenazher12';
 import { ssylki12 } from '@/components/tasks/trainer/TrainerShell';
 import { trenazherAllText } from '@/content/ves12';
 import { tasksPage } from '@/content/tasks';

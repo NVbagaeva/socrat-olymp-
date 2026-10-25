@@ -59,11 +59,17 @@ function textTex(c: string): string {
 }
 
 /** Таблица условия (график долга): клетки — текст. */
+/**
+ * Таблица условия на экран и в лист — строки по периодам, как все
+ * таблицы раздела: «Дата | Долг» сверху, ниже строка на каждую дату.
+ * В данных она записана как в задании («Дата | 15.01 | 15.02 …»).
+ */
 export function kletkiUsloviya(t: ConditionTable): Kletki {
+  const periody = t.head.slice(1);
   return {
-    head: t.head,
-    labels: t.rows.map((r) => textTex(r[0] ?? '')),
-    rows: t.rows.map((r) => r.slice(1).map(textTex)),
+    head: [t.head[0] ?? '', ...t.rows.map((r) => r[0] ?? '')],
+    labels: periody.map(textTex),
+    rows: periody.map((_, j) => t.rows.map((r) => textTex(r[j + 1] ?? ''))),
   };
 }
 

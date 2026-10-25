@@ -1361,3 +1361,13 @@
 .gen-options li {
   margin-top: 2px;
 }
+
+/* Место для решения в предпросмотре листа ученика (lib/sheet/space.js). */
+.gen-task__space {
+  clear: right;
+  margin-top: var(--space-2);
+}
+.gen-dop__list .gen-space {
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}

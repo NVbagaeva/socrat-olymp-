@@ -16,6 +16,7 @@ import { BLOK_13, RAMKA_13, SHEET_13, ZACHET_13, type Vid13 } from '@/content/ge
 import { LIST_UROKA_13 } from '@/content/repetitory13';
 import { typeset } from '../../tex';
 import { TABLE_HEAD } from '../tablica';
+import { tablitsaZapolniBukvyHtml } from '../zapolni';
 import type { List13, ListZadacha13 } from './list';
 import { tablitsaUsloviya13 } from './list';
 import { urokPo13, type GenParams13 } from './params';
@@ -52,20 +53,28 @@ function escape(text: string): string {
  * Пустая таблица по периодам: сокращённые строки 1, 2, 3, …, n.
  * Подписи столбцов пустые — по ним угадывалась бы схема («Вклад на
  * начало», «Долг после начисления»): столбцы ученик подписывает сам.
+ * У «Заполни таблицу» схема названа в условии — там столбцы подписаны,
+ * как в теории, и внизу строка «Итого».
  */
 function pustayaTablitsa(z: ListZadacha13): string {
   const m = z.task.tableModel;
   const h = TABLE_HEAD[m.scheme];
+  const zapolni = z.prototypeId.startsWith('P-');
   const head =
     `<th scope="col">${escape(h.period[m.period])}</th>` +
-    h.cols.map(() => '<th scope="col"></th>').join('');
-  const rows = m.show
+    h.cols.map((c) => `<th scope="col">${zapolni ? escape(c) : ''}</th>`).join('');
+  const nomera = zapolni ? m.rows.map((_, i) => i + 1) : m.show;
+  const rows = nomera
     .map((i) => {
       const label = i === 0 ? '…' : escape(m.labels[i - 1] ?? String(i));
       return `<tr><th scope="row">${label}</th>${h.cols.map(() => '<td></td>').join('')}</tr>`;
     })
     .join('');
-  return `<table class="z13-sheet-pusto"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+  const itog =
+    zapolni && m.scheme !== 'dep'
+      ? `<tr><th scope="row">Итого</th>${h.cols.map(() => '<td></td>').join('')}</tr>`
+      : '';
+  return `<table class="z13-sheet-pusto${zapolni ? ' z13-sheet-pusto--zapolni' : ''}"><thead><tr>${head}</tr></thead><tbody>${rows}${itog}</tbody></table>`;
 }
 
 function polyaOformleniya(z: ListZadacha13): string {
@@ -95,7 +104,10 @@ function uchenikTask(p: GenParams13) {
         ? STROKI_TIPA
         : p.vid === 'full' || p.zachet
           ? polyaOformleniya(z) + STROKA_OTVETA
-          : STROKA_OTVETA;
+          : /* «Заполни таблицу» без таблицы не решить: пустая таблица и на компактном листе. */
+            z.prototypeId.startsWith('P-')
+            ? pustayaTablitsa(z) + STROKA_OTVETA
+            : STROKA_OTVETA;
     return {
       no: z.no,
       id: z.pos,
@@ -124,7 +136,11 @@ function uchitelTask(p: GenParams13) {
     questionHtml: z.questionHtml,
     options: null,
     figureSvg: null,
-    solutionHtml: tablitsaUsloviya13(z) + (p.uchitel === 'otvety' ? stroOtveta(z) : ''),
+    solutionHtml:
+      tablitsaUsloviya13(z) +
+      /* «Заполни таблицу» — таблица в буквах, как её заполняет ученик. */
+      (tablitsaZapolniBukvyHtml(z.task, 'z13-sheet-pusto z13-sheet-pusto--zapolni') ?? '') +
+      (p.uchitel === 'otvety' ? stroOtveta(z) : ''),
   });
 }
 
