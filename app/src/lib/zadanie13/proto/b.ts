@@ -151,12 +151,12 @@ const TABLITSA_DOLEY: TablitsaPeremennye = {
 function sharesSolution() {
   return [
     stTablitsaBukvy(
-      'Долг на июль задан таблицей условия: $S$, $aS$, $bS$ и $0$, где $a$ и $b$ — доли кредита. Каждый январь долг умножается на $k = 1 + \\dfrac{r}{100}$; платёж года — долг с процентами минус долг на июль.',
+      'Долг на июль задан таблицей условия: $S$, $aS$, $bS$ и $0$, где $a$ и $b$ — доли кредита. Каждый январь долг умножается на $k = 1 + \\dfrac{r}{100}$; платёж года — долг после начисления минус долг на июль.',
       TABLITSA_DOLEY,
     ),
     {
       title: 'Выражаем платежи через $S$',
-      text: 'Из каждой строки таблицы: платёж = долг с процентами − долг на конец.',
+      text: 'Из каждой строки таблицы: платёж = долг после начисления − долг на конец.',
       bloki: [
         { vid: 'formula' as const, tex: 'x_{1} = Sk - aS = (k - a)\\,S' },
         { vid: 'formula' as const, tex: 'x_{2} = aSk - bS = (ak - b)\\,S' },
@@ -427,7 +427,7 @@ const TABLITSA_FIXED: TablitsaPeremennye = (() => {
   const dolg = (m: string) => `S - ${m}`;
   const stroka = (label: string, m: string, m1: string) => ({
     label,
-    cells: [dolg(m), 'X', `(${dolg(m)})\\cdot ${rT}`, dolg(m1)] as [string, string, string, string],
+    cells: [dolg(m), 'X', `${rT}\\cdot (${dolg(m)})`, dolg(m1)] as [string, string, string, string],
   });
   return {
     podpis: '',
@@ -436,7 +436,7 @@ const TABLITSA_FIXED: TablitsaPeremennye = (() => {
     rows: [
       {
         label: '1',
-        cells: ['S', 'X', `S\\cdot ${rT}`, 'S - X'] as [string, string, string, string],
+        cells: ['S', 'X', `${rT}\\cdot S`, 'S - X'] as [string, string, string, string],
       },
       stroka('2', 'X', '2X'),
       stroka('3', '2X', '3X'),
@@ -444,7 +444,7 @@ const TABLITSA_FIXED: TablitsaPeremennye = (() => {
       stroka('n-1', '(n-2)X', '(n-1)X'),
       {
         label: 'n',
-        cells: ['S - (n-1)X', 'S - (n-1)X', `(S - (n-1)X)\\cdot ${rT}`, '0'] as [
+        cells: ['S - (n-1)X', 'S - (n-1)X', `${rT}\\cdot (S - (n-1)X)`, '0'] as [
           string,
           string,
           string,
@@ -889,7 +889,7 @@ const TABLITSA_DVE_STAVKI: TablitsaPeremennye = (() => {
   const d = (c: string) => (c === 'n' ? 'S' : c === '0' ? '0' : `\\dfrac{${c}S}{n}`);
   const stroka = (label: string, c: string, c1: string, r: string) => ({
     label,
-    cells: [d(c), '\\dfrac{S}{n}', `${d(c)}\\cdot \\dfrac{${r}}{100}`, d(c1)] as [
+    cells: [d(c), '\\dfrac{S}{n}', `\\dfrac{${r}}{100}\\cdot ${d(c)}`, d(c1)] as [
       string,
       string,
       string,
@@ -908,7 +908,7 @@ const TABLITSA_DVE_STAVKI: TablitsaPeremennye = (() => {
       null,
       {
         label: 'n',
-        cells: ['\\dfrac{S}{n}', '\\dfrac{S}{n}', '\\dfrac{S}{n}\\cdot \\dfrac{r_{2}}{100}', '0'],
+        cells: ['\\dfrac{S}{n}', '\\dfrac{S}{n}', '\\dfrac{r_{2}}{100}\\cdot \\dfrac{S}{n}', '0'],
       },
     ],
     itog: ['S', 'P'],
@@ -1342,10 +1342,10 @@ function lgotSteps(m: number) {
     scheme: 'ann',
     rows: [
       ...Array.from({ length: m }, (_, i) => proc(i + 1)),
-      { label: String(m + 1), cells: ['S', 'Sk', 'x', `D_{${m + 1}} = Sk - x`] },
-      { label: String(m + 2), cells: [`D_{${m + 1}}`, `D_{${m + 1}}\\,k`, 'x', '0'] },
+      { label: String(m + 1), cells: ['S', 'Sk', 'x', 'Sk - x'] },
+      { label: String(m + 2), cells: ['Sk - x', 'Sk^{2} - xk', 'x', '0'] },
     ],
-    itog: null,
+    itog: ['', `${m}S(k - 1) + 2x`],
     strelka: null,
   };
   return [
@@ -1353,18 +1353,15 @@ function lgotSteps(m: number) {
       `Каждый январь долг умножается на $k = 1 + \\dfrac{r}{100}$. Первые ${m} года долг не меняется: платим только проценты $S(k - 1)$. Потом долг $S$ гасится двумя равными платежами $x$.`,
       t,
     ),
-    {
-      title: 'Составляем уравнение',
-      text: 'Две последние строки таблицы — одна в другую; после второго платежа долг равен нулю.',
-      bloki: [
-        { vid: 'formula' as const, tex: `D_{${m + 1}} = Sk - x` },
-        { vid: 'formula' as const, tex: `D_{${m + 2}} = D_{${m + 1}}\\,k - x = (Sk - x)k - x = 0` },
-      ],
-    },
+    step(
+      'Составляем уравнение',
+      'Долг на конец последнего года — последняя строка таблицы; после второго платежа он равен нулю.',
+      'Sk^{2} - xk - x = 0',
+    ),
     step(
       'Выражаем платёж',
-      'Раскрываем скобки, переносим платежи вправо и выносим $x$.',
-      'Sk^{2} - xk - x = 0 \\;\\Rightarrow\\; Sk^{2} = x(k + 1) \\;\\Rightarrow\\; x = \\dfrac{Sk^{2}}{k + 1}',
+      'Переносим платежи вправо и выносим $x$.',
+      'Sk^{2} = x(k + 1) \\;\\Rightarrow\\; x = \\dfrac{Sk^{2}}{k + 1}',
     ),
   ];
 }
@@ -1634,7 +1631,7 @@ const B16: Prototype = {
       period: 'year',
       solution: [
         stTablitsaBukvy(
-          'Считаем в тысячах рублей. Каждый год долг умножается на $k = 1 + \\dfrac{r}{100}$, платёж — долг с процентами минус долг на конец. Первые два года долг уменьшается на одну и ту же долю кредита: на конец первого года он равен $aS$, второго — $bS$ ($a$ и $b$ — доли кредита, найдём их при подстановке чисел). Остаток $bS$ гасится двумя равными платежами $x$.',
+          'Считаем в тысячах рублей. Каждый год долг умножается на $k = 1 + \\dfrac{r}{100}$, платёж — долг после начисления минус долг на конец. Первые два года долг уменьшается на одну и ту же долю кредита: на конец первого года он равен $aS$, второго — $bS$ ($a$ и $b$ — доли кредита, найдём их при подстановке чисел). Остаток $bS$ гасится двумя равными платежами $x$.',
           {
             podpis: 'Долг на конец первых двух лет — $aS$ и $bS$, затем два равных платежа',
             period: 'year',
@@ -1642,8 +1639,8 @@ const B16: Prototype = {
             rows: [
               { label: '1', cells: ['S', 'Sk', 'x_{1}', 'aS'] },
               { label: '2', cells: ['aS', 'aS\\,k', 'x_{2}', 'bS'] },
-              { label: '3', cells: ['bS', 'bS\\,k', 'x', 'D_{3} = bSk - x'] },
-              { label: '4', cells: ['D_{3}', 'D_{3}\\,k', 'x', '0'] },
+              { label: '3', cells: ['bS', 'bSk', 'x', 'bSk - x'] },
+              { label: '4', cells: ['bSk - x', 'bSk^{2} - xk', 'x', '0'] },
             ],
             itog: null,
             strelka: null,
@@ -1657,13 +1654,13 @@ const B16: Prototype = {
               vid: 'formula',
               tex: 'x_{1} = Sk - aS = (k - a)\\,S, \\qquad x_{2} = aSk - bS = (ak - b)\\,S',
             },
-            { vid: 'formula', tex: 'D_{4} = D_{3}\\,k - x = (bSk - x)k - x = 0' },
+            { vid: 'formula', tex: 'bSk^{2} - xk - x = 0' },
           ],
         },
         step(
           'Выражаем равный платёж',
-          'Раскрываем скобки, переносим платежи вправо и выносим $x$.',
-          'bSk^{2} - xk - x = 0 \\;\\Rightarrow\\; bSk^{2} = x(k + 1) \\;\\Rightarrow\\; x = \\dfrac{bk^{2}}{k + 1}\\,S',
+          'Переносим платежи вправо и выносим $x$.',
+          'bSk^{2} = x(k + 1) \\;\\Rightarrow\\; x = \\dfrac{bk^{2}}{k + 1}\\,S',
         ),
         step(
           'Складываем выплаты',
@@ -1709,7 +1706,7 @@ const B16: Prototype = {
 function dvaRavnyhSteps(y: number): SolutionStep[] {
   return [
     stTablitsaBukvy(
-      'Решаем таблицей дифференцированного платежа, считаем в тысячах рублей. Платежи первых двух лет равны $x$, третьим платежом гасится остаток. Долг на конец года — долг с процентами минус платёж: $D_{1} = Sk - x$, $D_{2} = D_{1}k - x$, где $k = 1 + \\dfrac{r}{100}$.',
+      'Решаем таблицей дифференцированного платежа, считаем в тысячах рублей. Платежи первых двух лет равны $x$, третьим платежом гасится остаток. Долг на конец года — долг после начисления минус платёж: $D_{1} = Sk - x$, $D_{2} = D_{1}k - x$, где $k = 1 + \\dfrac{r}{100}$.',
       {
         podpis: '',
         period: 'year',

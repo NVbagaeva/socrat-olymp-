@@ -18,8 +18,19 @@ function esc(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/**
+ * Формула решения: строчный режим KaTeX (дроби \dfrac и так крупные) —
+ * длинная цепочка переносится после «=» и «+» и не уезжает за край
+ * телефона. Части через \qquad — отдельными строками.
+ */
 const krupno = (tex: string) =>
-  `<div class="z13-r-formula">${katex.renderToString(tex, { throwOnError: true, displayMode: true })}</div>`;
+  tex
+    .split(/,?\s*\\qquad\s*/)
+    .map(
+      (chast) =>
+        `<div class="z13-r-formula">${katex.renderToString(chast, { throwOnError: true })}</div>`,
+    )
+    .join('');
 
 const stroka = (tex: string) => katex.renderToString(tex, { throwOnError: true });
 
@@ -63,7 +74,7 @@ export function tablitsaPeremennyeHtml(t: TablitsaPeremennye): string {
     t.itog === null
       ? ''
       : `<tr class="z13-r-table__itog"><th scope="row">Итого</th><td></td>` +
-        `<td>${stroka(t.itog[0])}</td><td>${stroka(t.itog[1])}</td><td></td></tr>`;
+        `<td>${t.itog[0] ? stroka(t.itog[0]) : ''}</td><td>${stroka(t.itog[1])}</td><td></td></tr>`;
   return (
     `<figure class="z13-r-tab">` +
     (t.podpis ? `<figcaption>${typeset(t.podpis)}</figcaption>` : '') +

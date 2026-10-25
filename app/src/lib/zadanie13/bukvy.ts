@@ -5,9 +5,9 @@
  *
  * Обозначения едины по всей теории (легенда в начале раздела):
  * S — сумма кредита (вклада), r % — ставка, k = 1 + r/100 — множитель,
- * x — платёж, n — срок. Долг (вклад) на конец периода i — D_i: так
- * строка следующего периода начинается с того, чем кончилась прошлая,
- * и запись не разрастается скобками.
+ * x — платёж, n — срок. Аннуитет и вклад — в развёрнутом виде (Sk − x,
+ * Sk² − xk − x), как ученик записывает в тетради; у «поломанных» схем
+ * с неравными уменьшениями долг на конец периода i — D_i.
  */
 
 import type { PeriodRow, TableModel, TablitsaPeremennye } from './types';
@@ -24,10 +24,69 @@ function nomera(n: number | null): (number | 'n' | null)[] {
   return [1, 2, 3, null, n];
 }
 
+const kSt = (e: number | string): string => (e === 0 ? '' : e === 1 ? 'k' : `k^{${e}}`);
+
+/** Член многочлена по k: знак, множитель («S», «x», «3x», «y») и степень k. */
+interface Chlen {
+  znak: '+' | '-';
+  c: string;
+  st: number;
+}
+
+/** «Sk^{2} - xk - x»; больше четырёх членов — два первых, «…» и последний. */
+function mnogochlen(ch: readonly Chlen[]): string {
+  const sh: (Chlen | null)[] = ch.length > 4 ? [ch[0]!, ch[1]!, null, ch[ch.length - 1]!] : [...ch];
+  const posl = ch[ch.length - 1]!;
+  return sh
+    .map((t, j) => {
+      if (t === null) return ` ${posl.znak} \\dots`;
+      const telo = `${t.c}${kSt(t.st)}`;
+      if (j === 0) return t.znak === '-' ? `-${telo}` : telo;
+      return ` ${t.znak} ${telo}`;
+    })
+    .join('');
+}
+
+/** «- x» → член; пустая строка или «0» — операции нет. */
+function chlenOp(op: string, st: number): Chlen | null {
+  const t = op.trim();
+  if (t === '' || t === '0') return null;
+  if (t.startsWith('-')) return { znak: '-', c: t.slice(1).trim(), st };
+  return { znak: '+', c: t.replace(/^\+/, '').trim(), st };
+}
+
 /**
- * Аннуитет и «известны платежи»: Долг на начало · Долг с процентами ·
- * Платёж · Долг на конец. Платёж строки i — platezh(i) (по умолчанию x),
- * после последнего платежа долг равен нулю.
+ * Строка i (с 1) в развёрнутом виде: сумма на начало, после начисления и
+ * на конец периода. ops — операции по периодам со знаком («- x», «+ y»).
+ */
+function razvernuto(S: string, ops: readonly string[], i: number) {
+  const nachalo: Chlen[] = [{ znak: '+', c: S, st: i - 1 }];
+  for (let j = 1; j < i; j++) {
+    const ch = chlenOp(ops[j - 1] ?? '', i - 1 - j);
+    if (ch) nachalo.push(ch);
+  }
+  const posle = nachalo.map((t) => ({ ...t, st: t.st + 1 }));
+  const op = chlenOp(ops[i - 1] ?? '', 0);
+  const konec = op ? [...posle, op] : posle;
+  return { nachalo: mnogochlen(nachalo), posle: mnogochlen(posle), konec: mnogochlen(konec) };
+}
+
+/** Общая строка n при равных операциях: «Sk^{n-1} - xk^{n-2} - … - x». */
+function obshayaN(S: string, op: string) {
+  const ch = chlenOp(op, 0);
+  if (!ch) return { nachalo: `${S}k^{n-1}`, posle: `${S}k^{n}` };
+  const z = ch.znak;
+  return {
+    nachalo: `${S}k^{n-1} ${z} ${ch.c}k^{n-2} ${z} \\dots ${z} ${ch.c}`,
+    posle: `${S}k^{n} ${z} ${ch.c}k^{n-1} ${z} \\dots ${z} ${ch.c}k`,
+  };
+}
+
+/**
+ * Аннуитет и «известны платежи»: Долг на начало · Долг после начисления ·
+ * Платёж · Долг на конец — в развёрнутом виде, как в тетради:
+ * S | Sk | x | Sk − x, затем Sk − x | Sk² − xk | x | Sk² − xk − x.
+ * После последнего платежа долг равен нулю; «Итого» — сумма платежей.
  */
 export function annBukvy(opts: {
   n: number | null;
@@ -38,35 +97,44 @@ export function annBukvy(opts: {
   label?: (i: number | 'n') => string;
   /** Что на начало первого периода: S. */
   nachalo?: string;
-  /** Буква долга на конец: D; у второй схемы той же задачи — D'. */
-  bukva?: string;
 }): TablitsaPeremennye {
   const pl = opts.platezh ?? (() => 'x');
-  const D = (i: number | string) => `${opts.bukva ?? 'D'}_{${i}}`;
   const lbl = opts.label ?? ((i) => String(i));
   const S = opts.nachalo ?? 'S';
-  const last = opts.n ?? 'n';
-  const rows: Stroka[] = nomera(opts.n).map((i) => {
+  const n = opts.n;
+  const ops = n === null ? [] : Array.from({ length: n }, (_, j) => `- ${pl(j + 1)}`);
+  const rows: Stroka[] = nomera(n).map((i) => {
     if (i === null) return null;
-    const prev = i === 1 ? S : i === 'n' ? D('n-1') : D(i - 1);
-    const sK = i === 1 ? `${S}k` : `${prev}\\,k`;
-    const konec = i === last ? '0' : `${D(i)} = ${sK} - ${pl(i)}`;
-    return { label: lbl(i), cells: [prev, sK, pl(i), konec] };
+    if (i === 'n') {
+      const o = obshayaN(S, `- ${pl('n')}`);
+      return { label: lbl('n'), cells: [o.nachalo, o.posle, pl('n'), '0'] };
+    }
+    const r = razvernuto(S, ops, i);
+    return { label: lbl(i), cells: [r.nachalo, r.posle, pl(i), i === n ? '0' : r.konec] };
   });
+  const vse = n === null ? [] : Array.from({ length: n }, (_, j) => pl(j + 1));
+  const itogo =
+    n === null
+      ? `n${pl('n')}`
+      : vse.every((p) => p === vse[0])
+        ? `${n}${vse[0]}`
+        : n <= 4
+          ? vse.join(' + ')
+          : `${vse[0]} + ${vse[1]} + \\dots + ${vse[n - 1]}`;
   return {
     podpis: opts.podpis ?? '',
     period: opts.period,
     scheme: 'ann',
     rows,
-    itog: null,
+    itog: ['', itogo],
     strelka: null,
   };
 }
 
 /**
  * Вклад: Вклад на начало · После начисления % · Пополнение / снятие ·
- * Вклад на конец. Пополнение строки i — dobavka(i) со знаком («+ y»,
- * «- x», «0»).
+ * Вклад на конец — в развёрнутом виде. Пополнение строки i — dobavka(i):
+ * «y», «-x» или «0».
  */
 export function depBukvy(opts: {
   n: number | null;
@@ -75,21 +143,24 @@ export function depBukvy(opts: {
   dobavka: (i: number | 'n') => string;
   label?: (i: number | 'n') => string;
   nachalo?: string;
-  /** Вклад на конец последнего периода: «0» у снятий до нуля; по умолчанию V_n. */
+  /** Вклад на конец последнего периода: «0» у снятий до нуля. */
   konec?: string;
 }): TablitsaPeremennye {
   const lbl = opts.label ?? ((i) => String(i));
   const S = opts.nachalo ?? 'S';
-  const last = opts.n ?? 'n';
-  const V = (i: number | string) => `V_{${i}}`;
-  const rows: Stroka[] = nomera(opts.n).map((i) => {
+  const n = opts.n;
+  const zn = (d: string) => (d === '0' ? '' : d.startsWith('-') ? `- ${d.slice(1)}` : `+ ${d}`);
+  const ops = n === null ? [] : Array.from({ length: n }, (_, j) => zn(opts.dobavka(j + 1)));
+  const rows: Stroka[] = nomera(n).map((i) => {
     if (i === null) return null;
-    const prev = i === 1 ? S : i === 'n' ? V('n-1') : V(i - 1);
-    const sK = i === 1 ? `${S}k` : `${prev}\\,k`;
     const d = opts.dobavka(i);
-    const sum = d === '0' ? sK : d.startsWith('-') ? `${sK} - ${d.slice(1)}` : `${sK} + ${d}`;
-    const konec = i === last && opts.konec !== undefined ? opts.konec : `${V(i)} = ${sum}`;
-    return { label: lbl(i), cells: [prev, sK, d === '0' ? '0' : d, konec] };
+    if (i === 'n') {
+      const o = obshayaN(S, zn(d));
+      return { label: lbl('n'), cells: [o.nachalo, o.posle, d, opts.konec ?? '\\dots'] };
+    }
+    const r = razvernuto(S, ops, i);
+    const konec = i === n && opts.konec !== undefined ? opts.konec : r.konec;
+    return { label: lbl(i), cells: [r.nachalo, r.posle, d, konec] };
   });
   return {
     podpis: opts.podpis ?? '',
@@ -171,13 +242,13 @@ export function bukvyIzModeli(m: TableModel): TablitsaPeremennye {
         const start = dolya(n - i + 1, n);
         return {
           label: lbl(i),
-          cells: [start, fr('S', n), `${start}\\cdot ${rT}`, dolya(n - i, n)],
+          cells: [start, fr('S', n), `${rT}\\cdot ${start}`, dolya(n - i, n)],
         };
       }
       const D = (k: number) => (k === 0 ? 'S' : `D_{${k}}`);
       const d = nachaloX && i < n ? 'X' : i === n && nachaloX ? D(n - 1) : `\\Delta_{${i}}`;
       const konec = i === n && pogashen ? '0' : `${D(i)} = ${D(i - 1)} - ${d}`;
-      return { label: lbl(i), cells: [D(i - 1), d, `${D(i - 1)}\\cdot ${rT}`, konec] };
+      return { label: lbl(i), cells: [D(i - 1), d, `${rT}\\cdot ${D(i - 1)}`, konec] };
     },
   );
   const kogda = m.period === 'year' ? 'года' : 'месяца';

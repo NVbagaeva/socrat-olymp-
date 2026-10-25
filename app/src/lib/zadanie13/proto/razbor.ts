@@ -46,44 +46,48 @@ export function perenos(ops: readonly string[]): string {
 }
 
 /**
- * Шаг «Составляем уравнение»: каждая строка таблицы — в следующую.
- * D — буква суммы на конец года (D у долга, D' у второй схемы, V у
- * вклада); nol — после последней операции на счёте ноль, тогда в конце
- * уравнение «… = 0».
+ * Шаг «Составляем уравнение» по таблице в развёрнутом виде: последняя
+ * строка таблицы и есть уравнение. nol — после последнего платежа
+ * (снятия) на счёте ноль: «Sk^{3} - xk^{2} - xk - x = 0»; иначе —
+ * сумма на конец нужных лет: «V_{4} = Sk^{4} + yk^{2} + yk».
  */
 export function stUravnenie(
   ops: readonly string[],
-  opts: { D?: string; kto?: string; nol?: boolean; title?: string; text?: string } = {},
+  opts: {
+    D?: string;
+    kto?: string;
+    nol?: boolean;
+    title?: string;
+    text?: string;
+    /** Какие годы выписать при nol = false; по умолчанию последний. */
+    stroki?: number[];
+  } = {},
 ): SolutionStep {
   const D = opts.D ?? 'D';
   const n = ops.length;
-  const op = (j: number) => (ops[j] ? ` ${ops[j]}` : '');
-  const bloki: ShagBlok[] = [];
-  for (let i = 1; i <= n; i++) {
-    const prev = i === 1 ? 'Sk' : `${D}_{${i - 1}}\\,k`;
-    const vyr = vlozheno(ops, i);
-    const pervoe = `${prev}${op(i - 1)}`;
-    bloki.push({
-      vid: 'formula',
-      tex: `${D}_{${i}} = ${pervoe}${pervoe === vyr ? '' : ` = ${vyr}`}`,
-    });
-  }
+  const kto = opts.kto ?? 'года';
+  const vklad = D === 'V';
   if (opts.nol !== false) {
-    bloki.push({
-      vid: 'text',
+    return {
+      title: opts.title ?? 'Составляем уравнение',
       text:
-        D === 'V'
-          ? 'После последнего снятия на счёте ноль — это и есть уравнение:'
-          : 'После последнего платежа долг равен нулю — это и есть уравнение:',
-    });
-    bloki.push({ vid: 'formula', tex: `${vlozheno(ops, n)} = 0` });
+        opts.text ??
+        (vklad
+          ? `Вклад на конец последнего ${kto} — последняя строка таблицы. После последнего снятия на счёте ноль — это и есть уравнение:`
+          : `Долг на конец последнего ${kto} — последняя строка таблицы. После последнего платежа долг равен нулю — это и есть уравнение:`),
+      bloki: [{ vid: 'formula', tex: `${raskryto(ops)} = 0` }],
+    };
   }
+  const stroki = opts.stroki ?? [n];
   return {
     title: opts.title ?? 'Составляем уравнение',
     text:
       opts.text ??
-      `${D === 'V' ? 'Вклад' : 'Долг'} на конец ${opts.kto ?? 'года'} — ${D === 'V' ? 'вклад' : 'долг'} на начало следующего: подставляем каждую строку таблицы в следующую.`,
-    bloki,
+      `${vklad ? 'Вклад' : 'Долг'} на конец ${kto} — столбец «на конец» таблицы, скобки уже раскрыты.`,
+    bloki: stroki.map((i): ShagBlok => ({
+      vid: 'formula',
+      tex: `${D}_{${i}} = ${raskryto(ops.slice(0, i))}`,
+    })),
   };
 }
 
