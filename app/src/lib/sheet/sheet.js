@@ -374,7 +374,7 @@ function socialList(social, size) {
 /* kit — «Комплект 7K3F-2B» (lib/komplekt.ts): мелко у номера
    страницы, на обоих листах комплекта. По нему учитель находит
    комплект в «Моих комплектах» и печатает его снова. */
-function footer(foot, kit, qr) {
+function footer(foot, kit) {
   return '<footer class="sheet-foot">' +
     '<span class="sheet-foot-brand">' +
       '<span class="sheet-logo">' + marks.logoMark(7) +
@@ -386,7 +386,6 @@ function footer(foot, kit, qr) {
       '<p class="sheet-rights">' + typo.text(foot.rights) + '</p>' +
     '</span>' +
     (kit ? '<span class="sheet-kit-code" data-kit-code>' + typo.escape(kit) + '</span>' : '') +
-    (qr ? '<span class="sheet-foot-qr">' + qr + '</span>' : '') +
     '<span class="sheet-page-no" data-page-number>—</span>' +
     '</footer>';
 }
@@ -525,8 +524,6 @@ function flowItems(spec) {
  *               раздел начинался с новой страницы
  *   foot     { course, social[], rights }
  *   kit      «Комплект 7K3F-2B» — код комплекта в колонтитуле; нет — нет
- *   qr       готовая разметка SVG с QR-кодом в подвале (лист генератора №13:
- *            онлайн-версия набора); нет — нет
  *
  * assets: { css, fontCss, extraCss, script }
  */
@@ -576,7 +573,7 @@ function buildDocument(spec, assets) {
         compactHead: compactHead(spec.head, spec.runner || spec.title.text),
         opening: variants ? '' : titleBlock(spec.title) + recapBlock(spec.recap) + fieldsLine(spec.fields),
         items: items.concat(spec.extraItems || []),
-        footer: footer(spec.foot, spec.kit, spec.qr)
+        footer: footer(spec.foot, spec.kit)
       }).replace(/<\//g, '<\\/') +
     '</script>\n' +
     '<script>\n' + (assets.script || '') + '\n</script>\n' +

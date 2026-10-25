@@ -451,7 +451,7 @@ const RAZDELY = [
       urok: null,
     };
   }),
-  /* №13: лист в шаблоне lib/sheet; QR — в подвале листа ученика, ведёт в
+  /* №13: лист в шаблоне lib/sheet; QR — у названия листа ученика, ведёт в
      онлайн-набор; заголовок листа — вид работы, дата — только у ученика.
      У ученика под условием поля для ответа (строка, таблица) — не решения. */
   (() => {
@@ -468,11 +468,8 @@ const RAZDELY = [
       parse,
       query: (p) => P13.genQuery13(p),
       sobrat: (p) => L13.sobratList13(p),
-      spec: (p, list, vid, qr) => ({
-        ...S13.sheetSpec13(p, list, vid),
-        /* Как страница печати (SheetPage13): QR — подвалу листа ученика. */
-        qr: vid !== 'uchitel' && (p.klyuchi === undefined || p.qr === true) ? qr : undefined,
-      }),
+      /* Как страница печати (SheetPage13): QR — по sQr13. */
+      spec: (p, list, vid, qr) => S13.sheetSpec13(p, list, vid, P13.sQr13(p, vid) ? qr : undefined),
       vopros: (t) => `<p>${t.questionHtml}</p>${L13.tablitsaUsloviya13(t)}`,
       primery: () => [],
       bezSverkiPrimerov: true,
@@ -483,7 +480,7 @@ const RAZDELY = [
       ramkaNaListe: (blocks, vid) =>
         vid === 'uchitel' ||
         blocks.some((x) => (x.leadItems ?? []).some((i) => i.includes('z13-sheet-povtor'))),
-      qrVPodvale: true,
+      qrTolkoUchenika: true,
       vidVZagolovke: true,
       dataTolkoUchenika: true,
       polyaUchenika: true,
@@ -816,9 +813,8 @@ async function proverit(R) {
           ok(
             titles.every(
               (t) =>
-                (R.qrVPodvale
-                  ? spec.qr === (vid === 'uchenik' ? '<svg></svg>' : undefined)
-                  : t.qr === '<svg></svg>') &&
+                /* У №13 QR — только на листе ученика. */
+                t.qr === (R.qrTolkoUchenika && vid === 'uchitel' ? undefined : '<svg></svg>') &&
                 (R.vidVZagolovke ? t.text : t.subtitle).startsWith('Контрольная работа'),
             ),
             `${label}/${vid}: QR-код и вид работы в шапке`,
@@ -870,9 +866,7 @@ async function proverit(R) {
           '<svg></svg>',
         );
         ok(
-          R.qrVPodvale
-            ? noQr.qr === undefined
-            : (noQr.variants ?? [noQr]).every((v) => (v.title ?? noQr.title).qr === undefined),
+          (noQr.variants ?? [noQr]).every((v) => (v.title ?? noQr.title).qr === undefined),
           `${label}: без галочки QR-кода нет`,
         );
       }

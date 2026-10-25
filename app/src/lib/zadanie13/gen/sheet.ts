@@ -356,7 +356,11 @@ function dataNaListe13(iso: string): string {
   return m === null ? '' : `${m[3]}.${m[2]}.${m[1]}`;
 }
 
-export function sheetSpec13(p: GenParams13, list: List13, vid: VidPechati13) {
+/**
+ * qr — SVG QR-кода онлайн-набора (lib/generator/qr.ts): у названия листа
+ * ученика, как у листов остальных разделов. Лист учителя — без него.
+ */
+export function sheetSpec13(p: GenParams13, list: List13, vid: VidPechati13, qr?: string) {
   const nV = list.poVariantam.length;
   const urok = p.urok > 0 ? urokPo13(p.urok) : undefined;
   const zagolovokDlya = (uchitel: boolean) =>
@@ -371,6 +375,7 @@ export function sheetSpec13(p: GenParams13, list: List13, vid: VidPechati13) {
     text: uchitel ? `${zagolovokDlya(true)} · ${SHEET_13.resheniya}` : zagolovokDlya(false),
     subtitle: SHEET_13.text,
     ...(variant === null || nV === 1 ? {} : { variant: `Вариант ${variant + 1}` }),
+    ...(qr === undefined || uchitel ? {} : { qr }),
   });
   const svodka = (zs: ListZadacha13[], i: number) =>
     answers.table(
