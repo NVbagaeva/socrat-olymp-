@@ -27,6 +27,11 @@
 .ves-razdel--page {
   margin-bottom: var(--space-8);
 }
+/* На странице №12 карточек три (зачёт, тренажёр, генератор) — в ряд:
+   карточки разделов остаются на первом экране (test:zadanie-hero). */
+.ves-razdel--page .ves-razdel__list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .ves-razdel--menu .ves-razdel__list {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
@@ -480,7 +485,7 @@
 
 /* Страница №12 на телефоне: первая карточка раздела должна быть видна на
    первом экране (test:zadanie-hero), поэтому «Весь раздел» здесь — строка
-   из двух компактных кнопок, без заголовков и подписей. */
+   из трёх компактных кнопок, без значков, заголовков и подписей. */
 @media (max-width: 767.98px) {
   .ves-razdel--page {
     margin-bottom: var(--space-3);
@@ -490,11 +495,11 @@
     display: none;
   }
   .ves-razdel--page .ves-razdel__list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-2);
   }
   .ves-razdel--page .ves-card {
-    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-2);
     min-height: 52px;
     padding: var(--space-2);
@@ -511,6 +516,7 @@
     font-size: 14px;
     line-height: 18px;
   }
+  .ves-razdel--page .ves-card__ico,
   .ves-razdel--page .ves-card__lead,
   .ves-razdel--page .ves-card__go {
     display: none;
