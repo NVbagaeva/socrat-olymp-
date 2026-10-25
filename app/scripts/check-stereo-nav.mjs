@@ -381,9 +381,9 @@ for (const size of SIZES) {
     const shag = await page.locator('.z3d__shag').first().innerText();
     check(shag.trim() === `Шаг ${k} из 3`, where(`после «Далее» ${k} раз: «${shag}»`));
     const svg = await page.locator('.z3d__kholst').first().innerHTML();
-    /* Выделенная линия видна — 3.4, скрыта (внутри куба) — пунктир 2.4. */
+    /* Выделенная линия видна — 3.6, скрыта (внутри куба) — пунктир 2.6. */
     check(
-      svg.includes('stroke-width="3.4"') || svg.includes('stroke-width="2.4"'),
+      svg.includes('stroke-width="3.6"') || svg.includes('stroke-width="2.6"'),
       where(`шаг ${k} не выделен`),
     );
   }

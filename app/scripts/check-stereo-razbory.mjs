@@ -122,9 +122,9 @@ for (const r of RAZBORY_3) {
   for (let k = 1; k <= shagov; k += 1) {
     const svg = R.renderSolid(model, { shag: k, ustoychivo: true });
     check(
-      svg.includes('stroke-width="3.4"') ||
-        svg.includes('stroke-width="2.4"') ||
-        svg.includes('font-weight="700"') ||
+      svg.includes('stroke-width="3.6"') ||
+        svg.includes('stroke-width="2.6"') ||
+        svg.includes('class="solid-hl"') ||
         svg.includes('stroke-width="2.2"'),
       `${where}: на шаге ${k} на чертеже ничего не выделено`,
     );

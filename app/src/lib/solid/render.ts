@@ -1031,7 +1031,9 @@ function labelMarkup(label: PlacedLabel): string {
     ? `${esc(base)}<tspan font-size="${f.sub}" dy="${f.subShift}">${esc(sub)}</tspan>`
     : esc(base);
   return (
-    `<text x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
+    /* Выделенная шагом подпись — цветом построений; класс solid-hl —
+       метка для проверок (жирного начертания у подписей больше нет). */
+    `<text${label.hl ? ' class="solid-hl"' : ''} x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
     `fill="${fill}" paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
