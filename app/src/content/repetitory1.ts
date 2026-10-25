@@ -7,6 +7,7 @@
  * свои слова.
  */
 
+import { GEN_UI } from '@/content/generatorUi';
 import { plural } from '@/lib/plural';
 import type { Blok } from '@/lib/planimetriya/stseny/dsl';
 
@@ -36,6 +37,8 @@ export const SHEET_1 = {
   },
   povtoryaem: 'Повторяем:',
   primer: 'Пример',
+  /* «Дополнительно» общего генератора: вид работы в шапке. */
+  vidy: GEN_UI.vidyRaboty,
   otvety: 'Ответы',
   otvetyTab: { no: '№', otvet: 'Ответ', shag: 'Ключевой шаг' },
   otvet: 'Ответ',
@@ -71,49 +74,6 @@ export const PECHAT_1 = {
   uchenik: 'Лист ученика',
   uchitel: 'Лист учителя',
   vse: 'Листы ученика и учителя',
-} as const;
-
-/* ── Вкладка «Генератор» ────────────────────────────────────────── */
-
-export const GENERATOR_1 = {
-  otkuda: 'Откуда брать задачи',
-  rezhim: 'Режим',
-  rezhimy: [
-    {
-      id: 'otrabotka',
-      title: 'Задания для отработки',
-      lead: 'Лист по выбранным типам: несколько задач каждого типа',
-    },
-    {
-      id: 'komplekt',
-      title: 'Варианты',
-      lead: 'На каждом месте во всех вариантах — задачи одного типа',
-    },
-  ] as const,
-  variantov: 'Количество вариантов',
-  sostav: 'Состав',
-  sostavVarianta: 'Состав варианта',
-  zadach: ['задача', 'задачи', 'задач'] as const,
-  itogo: (n: number, poVariantam: boolean) =>
-    `${poVariantam ? 'В варианте' : 'На листе'} ${n} ${plural(n, 'задача', 'задачи', 'задач')}`,
-  slozhnost: 'Сложность',
-  vse: 'Все',
-  ramka: 'Рамка теории',
-  ramkaLead:
-    'Перед задачами каждого типа — «Повторяем»: главные факты блока и разобранные примеры с чертежом.',
-  ramkaVkl: 'Рамка «Повторяем» перед типом',
-  primerov: 'Разобранных примеров',
-  sgenerirovat: 'Сгенерировать',
-  gotovim: 'Собираем лист…',
-  pusto: 'Выберите типы задач и нажмите «Сгенерировать» — здесь появится лист.',
-  listUchenika: 'Лист ученика',
-  listUchitelya: 'Лист учителя (ответы и решения)',
-  variant: 'Вариант:',
-  vseOdnim: 'Скачать всё одним файлом',
-  zamenit: 'Заменить задачу',
-  nehvatka: (n: number) => `В банке не хватило задач: ${n} заменены новыми того же типа.`,
-  familiya: 'Фамилия, имя',
-  otvet: 'Ответ',
 } as const;
 
 /* ── Вкладка «Для репетиторов» ──────────────────────────────────── */

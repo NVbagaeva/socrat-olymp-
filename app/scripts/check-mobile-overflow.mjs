@@ -5,6 +5,7 @@
    390, 430 и 768 и ищет то, что выходит за экран: страница целиком не должна
    ехать вбок. Широкое содержимое (формулы, таблицы) прокручивается
    внутри своего блока — такой блок обрезает потомков и сюда не попадает.
+   В CI — ширина 375 (SHIRINY=375).
 
    Запуск: node scripts/check-mobile-overflow.mjs [--json файл] [префикс…]
    Ширины можно сузить: SHIRINY=375 node scripts/check-mobile-overflow.mjs.
@@ -164,49 +165,78 @@ async function main() {
   await new Promise((done) => srv.listen(PORT, done));
   const svoy = process.env.CHROMIUM_PATH;
   const browser = await chromium.launch(svoy === undefined ? {} : { executablePath: svoy });
+  /* Служебная проверка аналогов №11 весит 70 МБ: раскладка такой
+     страницы занимает больше минуты — ей и сроки дольше. */
+  const ves = (put) => fs.statSync(path.join(OUT, put, 'index.html')).size;
   const zadachi = [];
-  for (const put of puti) for (const shirina of SHIRINY) zadachi.push({ put, shirina });
+  for (const put of puti) {
+    const dolgo = ves(put) > 30 * 1024 * 1024 ? 8 : 1;
+    for (const shirina of SHIRINY) zadachi.push({ put, shirina, dolgo });
+  }
   const itog = [];
   let i = 0;
+  /* Ожидание с потолком: что бы ни повисло (переход, шрифты, закрытие
+     вкладки), поток не стоит вечно. */
+  const sroch = (p, ms, chto) =>
+    Promise.race([
+      p,
+      new Promise((_, no) => setTimeout(() => no(new Error(`${chto}: нет ответа ${ms} мс`)), ms)),
+    ]);
+  const proverit = async (z) => {
+    const page = await sroch(
+      browser.newPage({ viewport: { width: z.shirina, height: 800 } }),
+      15000,
+      'вкладка',
+    );
+    /* Листы печати сами открывают окно печати и спрашивают confirm:
+       в тесте ни то ни другое не нужно, иначе страница ждёт вечно. */
+    await page.addInitScript(() => {
+      window.print = () => {};
+      window.confirm = () => true;
+    });
+    page.on('dialog', (d) => d.dismiss().catch(() => {}));
+    try {
+      await page.goto(`http://127.0.0.1:${PORT}${z.put}`, {
+        waitUntil: 'load',
+        timeout: 30000 * z.dolgo,
+      });
+      /* Старый адрес уводит на новый сам, пока ждём шрифты. */
+      await sroch(
+        page.evaluate(() => document.fonts.ready),
+        15000,
+        'шрифты',
+      );
+      await page.waitForTimeout(400);
+      const r = await sroch(page.evaluate(zamer), 15000 * z.dolgo, 'замер');
+      if (r.scroll > 0 || r.elementy.length > 0)
+        itog.push({ put: z.put, shirina: z.shirina, ...r });
+    } catch (e) {
+      /* Старые адреса (…/podgotovka/) уводят на новые сами: страница
+         ушла из-под замера — проверять на ней нечего. */
+      if (!/context was destroyed|navigation/i.test(String(e))) {
+        itog.push({ put: z.put, shirina: z.shirina, oshibka: String(e).slice(0, 200) });
+      }
+    } finally {
+      await sroch(page.close(), 10000, 'закрытие').catch(() => {});
+    }
+  };
+  let gotovo = 0;
   const rabotnik = async () => {
     while (i < zadachi.length) {
       const z = zadachi[i++];
-      const page = await browser.newPage({ viewport: { width: z.shirina, height: 800 } });
-      /* Листы печати сами открывают окно печати и спрашивают confirm:
-         в тесте ни то ни другое не нужно, иначе страница ждёт вечно. */
-      await page.addInitScript(() => {
-        window.print = () => {};
-        window.confirm = () => true;
-      });
-      page.on('dialog', (d) => d.dismiss().catch(() => {}));
       try {
-        await page.goto(`http://127.0.0.1:${PORT}${z.put}`, { waitUntil: 'load', timeout: 30000 });
-        /* Старый адрес уводит на новый сам, пока ждём шрифты: без
-           ограничения такая страница держала поток вечно. */
-        const sroch = (p) =>
-          Promise.race([
-            p,
-            new Promise((_, no) => setTimeout(() => no(new Error('navigation timeout')), 15000)),
-          ]);
-        await sroch(page.evaluate(() => document.fonts.ready));
-        await page.waitForTimeout(400);
-        const r = await sroch(page.evaluate(zamer));
-        if (r.scroll > 0 || r.elementy.length > 0) itog.push({ ...z, ...r });
+        await sroch(proverit(z), 60000 * z.dolgo, 'страница');
       } catch (e) {
-        /* Старые адреса (…/podgotovka/) уводят на новые сами: страница
-           ушла из-под замера — проверять на ней нечего. */
-        if (!/context was destroyed|navigation/i.test(String(e))) {
-          itog.push({ ...z, oshibka: String(e).slice(0, 200) });
-        }
-      } finally {
-        await page.close();
+        itog.push({ put: z.put, shirina: z.shirina, oshibka: String(e).slice(0, 200) });
       }
+      gotovo += 1;
+      if (gotovo % 100 === 0) process.stderr.write(`… ${gotovo} из ${zadachi.length}\n`);
     }
   };
   try {
     await Promise.all(Array.from({ length: POTOKI }, rabotnik));
   } finally {
-    await browser.close();
+    await sroch(browser.close(), 15000, 'браузер').catch(() => {});
     srv.close();
   }
   itog.sort((a, b) => (a.put === b.put ? a.shirina - b.shirina : a.put < b.put ? -1 : 1));

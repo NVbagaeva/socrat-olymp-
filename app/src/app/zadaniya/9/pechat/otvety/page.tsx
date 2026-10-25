@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default function Pechat9OtvetyPage() {
   return (
     <Suspense fallback={null}>
-      <SheetPage9 withAnswers />
+      <SheetPage9 vid="uchitel" />
     </Suspense>
   );
 }

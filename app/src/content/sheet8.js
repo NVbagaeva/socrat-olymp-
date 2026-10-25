@@ -23,6 +23,12 @@ export const title = {
 /** Строка компактной шапки следующих страниц. */
 export const runner = 'Задание 8 · Вычисления и преобразования';
 
+/** Лист учителя в «Всё одним файлом» генератора: к подзаголовку. */
+export const resheniya = 'Решения';
+
+/** Заголовок страницы «Всё одним файлом». */
+export const vse = 'Листы ученика и учителя';
+
 /** Подвал — тот же, что у сборников №4 и №12. */
 export const foot = {
   course: 'Профильная математика',
@@ -66,6 +72,6 @@ export const files = {
   uchitelChb: 'zadanie-8-vychisleniya-uchitel-chb',
 };
 
-const content = { head, title, runner, foot, blocks, files };
+const content = { head, title, runner, resheniya, vse, foot, blocks, files };
 
 export default content;
