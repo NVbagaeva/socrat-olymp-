@@ -388,11 +388,13 @@ for (const [width, height, mobile] of [
   await page.getByRole('button', { name: /Сгенерировать/ }).first().click();
   await page.waitForSelector('.gen-paper.is-live .gen-task', { timeout: 90000 });
   await page.locator('.gen-dop__head').first().click();
-  await page.getByRole('switch', { name: 'Рамка с теорией' }).click();
-  await page
-    .getByRole('group', { name: 'Разобранные примеры' })
-    .getByRole('button', { name: '1' })
-    .click();
+  /* Памятка и пример по умолчанию зависят от вида работы: включаем
+     явно, если выключены, и ставим один пример на тип. */
+  for (const name of ['Памятка на листе', 'Разобранный пример на листе']) {
+    const sw = page.getByRole('switch', { name });
+    if ((await sw.getAttribute('aria-checked')) !== 'true') await sw.click();
+  }
+  await page.getByRole('group', { name: 'Примеров на тип' }).getByRole('button', { name: '1' }).click();
   await page.waitForFunction(
     () => document.querySelectorAll('.gen-paper.is-live .gen-recap').length > 0,
     null,

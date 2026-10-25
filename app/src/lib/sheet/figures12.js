@@ -84,9 +84,13 @@ export function solutionScene(task, generator) {
     }
     return task.scene;
   }
-  /* Прямая: сцена разбора движка с треугольником наклона. Две прямые
-     (12.C, 12.D) треугольника не строят — тогда сцена задачи с
-     отмеченными узлами. */
+  /* Две прямые (12.C, 12.D): обе прямые и треугольник у каждой. Сцена
+     analysis() строится по одной прямой — для пары она не годится. */
+  if (meta.lines && meta.lines.length > 1) {
+    var pair = generator && generator.slopeTriangles ? generator.slopeTriangles(task) : null;
+    return pair ? pair.scene : task.scene;
+  }
+  /* Одна прямая: сцена разбора движка с треугольником наклона. */
   var analysis = null;
   try { analysis = generator ? generator.analysis(task.id, meta.seed) : null; }
   catch { analysis = null; }

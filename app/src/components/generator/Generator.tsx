@@ -19,14 +19,17 @@ import {
   removeAt,
   setSubtypeCount,
   setTopicCount,
+  sPodskazkami,
   stateFromPreset,
   subtypeById,
   summary,
   tasksText,
   topicAllowed,
   topicHasLevels,
+  umolchaniyaPoTipu,
   urovniPodtipa,
   variantsText,
+  type Rucnye,
 } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
@@ -133,7 +136,14 @@ function stars(l: number): string {
  * возвращения на вкладку открывается тот же лист.
  */
 export function Generator({ config, engine, icons }: GeneratorProps) {
-  const [st, setSt] = useState<GenState>(() => defaultState(config));
+  /* Памятка и пример — по виду работы, пока учитель их не переключил сам. */
+  const ege = (s: GenState) => engine.formatEge?.(s) ?? false;
+  const poTipu = (s: GenState, r: Rucnye): GenState => ({
+    ...s,
+    extras: umolchaniyaPoTipu(config, s.extras, ege(s), r),
+  });
+  const [st, setSt] = useState<GenState>(() => poTipu(defaultState(config), {}));
+  const [rucnye, setRucnye] = useState<Rucnye>({});
   const [generated, setGenerated] = useState(false);
   const [sheet, setSheet] = useState<GenSheet | null>(null);
   const [demo, setDemo] = useState<GenSheet | null>(null);
@@ -180,7 +190,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
       }
     });
     engine
-      .build({ ...defaultState(config), seed: DEMO_SEED })
+      .build({ ...poTipu(defaultState(config), {}), seed: DEMO_SEED })
       .then((d) => {
         if (alive) setDemo(d);
       })
@@ -286,14 +296,16 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   }
 
   function changePlan(plan: GenSlot[], patch: Partial<GenState> = {}) {
-    commit({ ...st, ...patch, plan });
+    const next = { ...st, ...patch, plan };
+    /* Вид «по составу»: лист стал вариантом ЕГЭ или перестал — другой вид. */
+    commit(st.extras.kind === null && ege(next) !== ege(st) ? poTipu(next, rucnye) : next);
     if (generated) say(GEN_UI.toast.obnovlen);
   }
 
   function applyPreset(id: string) {
     const p = config.presets.find((x) => x.id === id);
     if (p === undefined) return;
-    setSt({ ...stateFromPreset(config, p, st.source, st.extras), seed: st.seed });
+    setSt(poTipu({ ...stateFromPreset(config, p, st.source, st.extras), seed: st.seed }, rucnye));
     setPick(p.pickTopic !== undefined);
     setVariant(0);
     say(GEN_UI.toast.preset);
@@ -334,6 +346,21 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   function setExtras(patch: Partial<GenExtras>, quiet = false) {
     commit({ ...st, extras: { ...st.extras, ...patch } });
     if (generated && !quiet) say(GEN_UI.toast.obnovlen);
+  }
+
+  /** Памятку или пример учитель переключил сам: вид работы их больше не меняет. */
+  function setRucnoe(patch: Pick<Partial<GenExtras>, 'theory' | 'examples'>) {
+    setRucnye({
+      ...rucnye,
+      ...('theory' in patch ? { theory: true } : {}),
+      ...('examples' in patch ? { examples: true } : {}),
+    });
+    setExtras(patch);
+  }
+
+  function setKind(kind: string | null) {
+    commit(poTipu({ ...st, extras: { ...st.extras, kind } }, rucnye));
+    if (generated) say(GEN_UI.toast.obnovlen);
   }
 
   function generate() {
@@ -518,6 +545,8 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
 
   const extras = config.extras;
   const dopCount = extrasOn(st.extras);
+  /* Памятка или пример включены там, где вид работы их не предполагает. */
+  const podskazki = sPodskazkami(st.extras.kind, ege(st));
   const dopControls =
     extras === undefined ? null : (
       <div className="gen-dop__list">
@@ -526,6 +555,11 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
             <span>
               {GEN_UI.dop.teoriya}
               <small>{GEN_UI.dop.teoriyaNote}</small>
+              {st.extras.theory && !podskazki ? (
+                <small className="gen-opt__warn" role="note">
+                  {GEN_UI.dop.teoriyaPodskazka}
+                </small>
+              ) : null}
             </span>
             <button
               type="button"
@@ -533,29 +567,49 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               className="gen-switch"
               aria-checked={st.extras.theory}
               aria-label={GEN_UI.dop.teoriya}
-              onClick={() => setExtras({ theory: !st.extras.theory })}
+              onClick={() => setRucnoe({ theory: !st.extras.theory })}
             />
           </div>
         )}
         {extras.examples === false ? null : (
-          <div className="gen-opt">
-            <span>
-              {GEN_UI.dop.primery}
-              <small>{GEN_UI.dop.primeryNote}</small>
-            </span>
-            <div className="gen-segm" role="group" aria-label={GEN_UI.dop.primery}>
-              {([0, 1, 2] as const).map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  aria-pressed={st.extras.examples === k}
-                  onClick={() => setExtras({ examples: k })}
-                >
-                  {k}
-                </button>
-              ))}
+          <>
+            <div className="gen-opt">
+              <span>
+                {GEN_UI.dop.primery}
+                <small>{GEN_UI.dop.primeryNote}</small>
+                {st.extras.examples > 0 && !podskazki ? (
+                  <small className="gen-opt__warn" role="note">
+                    {GEN_UI.dop.primeryPodskazka}
+                  </small>
+                ) : null}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                className="gen-switch"
+                aria-checked={st.extras.examples > 0}
+                aria-label={GEN_UI.dop.primery}
+                onClick={() => setRucnoe({ examples: st.extras.examples > 0 ? 0 : 1 })}
+              />
             </div>
-          </div>
+            {st.extras.examples === 0 ? null : (
+              <div className="gen-opt">
+                <span>{GEN_UI.dop.primeryChislo}</span>
+                <div className="gen-segm" role="group" aria-label={GEN_UI.dop.primeryChislo}>
+                  {([1, 2] as const).map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      aria-pressed={st.extras.examples === k}
+                      onClick={() => setRucnoe({ examples: k })}
+                    >
+                      {k}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
         {extras.seriya === undefined ? null : (
           <div className="gen-opt">
@@ -591,7 +645,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
           <select
             className="gen-input"
             value={st.extras.kind ?? ''}
-            onChange={(e) => setExtras({ kind: e.target.value === '' ? null : e.target.value })}
+            onChange={(e) => setKind(e.target.value === '' ? null : e.target.value)}
           >
             <option value="">{GEN_UI.dop.vidAuto}</option>
             {extras.kinds.map((k) => (

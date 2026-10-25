@@ -22,6 +22,7 @@ import { logarithmicGuideSvg } from '@/lib/logarithmicGuides';
 import TrigonometricHints from '@/lib/graph/hints-trigonometric.js';
 import { trigonometricGuideSvg } from '@/lib/trigonometricGuides';
 import { sqrtTriangleSvg } from '@/lib/sqrtTriangle';
+import { renderGraph } from '@/lib/graph/renderer.js';
 import QuadraticHints from '@/lib/graph/hints-quadratic.js';
 import QuadraticAux from '@/lib/graph/quadratic-aux.js';
 import { katex } from '@/lib/graph/katex';
@@ -436,7 +437,9 @@ function rightHintFor(task: EngineTask): string {
    формулами — как и везде в условиях. */
 const SLOPE_ONE = 'Проверьте, как сняты $k$ и $b$ по чертежу: ';
 const SLOPE_TWO = 'Проверьте уравнения обеих прямых: ';
-const SLOPE_RULE = '$k$ — это $\\Delta y : \\Delta x$ по двум отмеченным точкам, ';
+const SLOPE_RULE =
+  '$k$ — по треугольнику под прямой: вертикальный катет делим на горизонтальный, ' +
+  'у убывающей прямой ставим минус; ';
 
 /* Две концовки: там, где пересечение с осью Oy видно в узле сетки,
    b читается прямо с чертежа; где не видно — только подстановкой. */
@@ -463,9 +466,7 @@ function wrongHintFor(task: EngineTask): string | null {
   const readable = pair
     ? lines.every((line) => interceptVisible(line.b, win))
     : interceptVisible(b, win);
-  return (
-    (pair ? SLOPE_TWO : SLOPE_ONE) + SLOPE_RULE + (readable ? B_FROM_CHART : B_BY_POINT)
-  );
+  return (pair ? SLOPE_TWO : SLOPE_ONE) + SLOPE_RULE + (readable ? B_FROM_CHART : B_BY_POINT);
 }
 
 /* Формулы в пояснении размечены долларами, как в условиях задач:
@@ -473,7 +474,6 @@ function wrongHintFor(task: EngineTask): string | null {
 function hintHtml(text: string): string {
   return typeset(GraphGenerate.typeset(text) as string);
 }
-
 
 /* ── Цепочка подсказки ───────────────────────────────────────────
 
@@ -487,19 +487,154 @@ function plain(value: number): string {
   return String(Math.round(value * 1000) / 1000).replace('.', ',');
 }
 
-function stepK(k: number): TrainerStep {
-  return {
-    titleHtml: hintHtml('Давай проверим, правильно ли ты нашёл $k$.'),
-    textHtml: hintHtml(
-      'Возьми две отмеченные точки. Посчитай, на сколько клеток прямая сдвинулась ' +
-        'вправо и на сколько вверх. Тогда $k = \\Delta y : \\Delta x$.',
-    ),
-    shape: 'plain',
-    fields: [{ labelHtml: math('k ='), answer: plain(k) }],
-    wrongHint: hintHtml(
-      'Проверь, на сколько клеток прямая сдвинулась вправо и на сколько вверх.',
-    ),
+/** Треугольник наклона из graph/triangle.js: то, что нужно подсказке. */
+interface SlopeTriangle {
+  A: { x: number; y: number };
+  B: { x: number; y: number };
+  dx: number;
+  dy: number;
+  rising: boolean;
+}
+
+/** Треугольники наклона прямых задачи и чертёж с ними; null — не построить. */
+function slopeHint(task: EngineTask): { svg: string; triangles: (SlopeTriangle | null)[] } | null {
+  const found = GraphGenerate.slopeTriangles(task) as {
+    scene: unknown;
+    triangles: (SlopeTriangle | null)[];
+  } | null;
+  return found === null
+    ? null
+    : { svg: renderGraph(found.scene) as string, triangles: found.triangles };
+}
+
+function pointTex(p: { x: number; y: number }): string {
+  return '(' + tex(p.x) + ';\\, ' + tex(p.y) + ')';
+}
+
+/* Шаг про k — четырьмя вопросами, как k находится на бумаге (теория
+   №12, «Как считать»): две точки в узлах сетки, катеты в клетках,
+   направление прямой — и только потом деление. Треугольник появляется
+   на чертеже подсказки, когда точки выбраны; на листе ученика его нет. */
+function stepK(
+  k: number,
+  t: SlopeTriangle | null,
+  svg: string | null,
+  name: string | null = null,
+): TrainerStep {
+  const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
+  const of = name === null ? '' : ' для прямой $' + curve(name) + '$';
+  const field = { labelHtml: math('k ='), answer: plain(k) };
+  if (t === null || t.dy === 0) {
+    return {
+      titleHtml: hintHtml('Проверим $k$' + of + '.'),
+      textHtml: hintHtml(
+        t === null
+          ? 'Выберите две точки в узлах сетки и постройте под прямой прямоугольный треугольник. ' +
+              'Прямая возрастает — $k > 0$: вертикальный катет делим на горизонтальный. ' +
+              'Прямая убывает — $k < 0$: катеты делим так же, а перед дробью ставим минус.'
+          : 'Прямая идёт по горизонтали: вертикального катета нет, $k = 0$.',
+      ),
+      shape: 'plain',
+      fields: [field],
+      wrongHint: hintHtml(SLOPE_RULE),
+    };
+  }
+  /* Неверный вариант — узел сетки рядом со второй точкой, но не на прямой. */
+  const off = { x: t.B.x, y: t.B.y + 1 };
+  const right = {
+    html: big('$' + pointTex(t.A) + '$ и $' + pointTex(t.B) + '$'),
+    right: true,
+    whyHtml: '',
   };
+  const wrong = {
+    html: big('$' + pointTex(t.A) + '$ и $' + pointTex(off) + '$'),
+    right: false,
+    whyHtml: big('Точка $' + pointTex(off) + '$ в узле сетки, но не на прямой.'),
+  };
+  const word = t.rising ? 'возрастает' : 'убывает';
+  const ratio = (t.rising ? '' : '-') + t.dy + ' : ' + t.dx;
+  const step: TrainerStep = {
+    titleHtml: hintHtml('Проверим $k$' + of + ' по треугольнику.'),
+    textHtml: '',
+    shape: 'plain',
+    fields: [],
+    wrongHint: '',
+    parts: [
+      {
+        kind: 'choice',
+        promptHtml: big('Выберите две точки в узлах сетки.'),
+        options: (t.A.x + t.A.y) % 2 === 0 ? [right, wrong] : [wrong, right],
+        rightHtml: big(
+          'Строим прямоугольный треугольник строго под прямой: катеты идут по линиям сетки.',
+        ),
+      },
+      {
+        kind: 'fields',
+        textHtml: big('Сколько клеток по вертикали?'),
+        fields: [{ labelHtml: big('вертикальный катет'), answer: String(t.dy) }],
+        sign: {
+          field: 0,
+          whyHtml: big('Катет — длина, без знака. Знак $k$ — по направлению прямой.'),
+        },
+        wrongHint: big('Посчитайте клетки вдоль вертикального катета.'),
+      },
+      {
+        kind: 'fields',
+        textHtml: big('Сколько по горизонтали?'),
+        fields: [{ labelHtml: big('горизонтальный катет'), answer: String(t.dx) }],
+        sign: { field: 0, whyHtml: big('Катет — длина, без знака.') },
+        wrongHint: big('Посчитайте клетки вдоль горизонтального катета.'),
+      },
+      {
+        kind: 'choice',
+        promptHtml: big('Прямая возрастает или убывает?'),
+        options: [
+          {
+            html: big('Возрастает: $k > 0$'),
+            right: t.rising,
+            whyHtml: t.rising ? '' : big('Слева направо прямая идёт вниз.'),
+          },
+          {
+            html: big('Убывает: $k < 0$'),
+            right: !t.rising,
+            whyHtml: t.rising ? big('Слева направо прямая идёт вверх.') : '',
+          },
+        ],
+        rightHtml: big(
+          t.rising
+            ? 'Прямая возрастает — $k > 0$: вертикальный катет делим на горизонтальный.'
+            : 'Прямая убывает — $k < 0$: катеты делим так же, а перед дробью ставим минус.',
+        ),
+      },
+      {
+        kind: 'fields',
+        textHtml: big('Чему равен $k$?'),
+        fields: [field],
+        sign: { field: 0, whyHtml: big('Проверьте знак: прямая ' + word + '.') },
+        wrongHint: big(
+          'Вертикальный катет делим на горизонтальный' + (t.rising ? '.' : ' и ставим минус.'),
+        ),
+        afterHtml: big(
+          'Вертикальный катет ' +
+            t.dy +
+            ', горизонтальный ' +
+            t.dx +
+            ', прямая ' +
+            word +
+            ' → $k = ' +
+            ratio +
+            ' = ' +
+            tex(k) +
+            '$',
+        ),
+      },
+    ],
+  };
+  if (svg !== null) {
+    step.chartSvg = svg;
+    step.chartFrom = 1;
+  }
+  return step;
 }
 
 /* ── Подсказка про b, когда его не снять с чертежа ───────────────
@@ -604,7 +739,7 @@ function bySubstitution(
   /* Тонкий пробел после «;» ставит сам движок (graph/math.js),
      руками его дублировать не нужно. */
   const dot = '$(' + texNum(point.x) + '; ' + texNum(point.y) + ')$';
-  const product = Math.round((k * point.x) * 1e9) / 1e9;
+  const product = Math.round(k * point.x * 1e9) / 1e9;
   const line = curve === '' ? 'на прямой' : 'на $' + curve + '$';
 
   return {
@@ -634,9 +769,7 @@ function bySubstitution(
         'Отсюда найди $b$.',
     ),
     wrongHint: hintHtml(
-      'Подставь координаты точки ' +
-        dot +
-        ' в $y = kx + b$ и реши уравнение относительно $b$.',
+      'Подставь координаты точки ' + dot + ' в $y = kx + b$ и реши уравнение относительно $b$.',
     ),
   };
 }
@@ -687,9 +820,7 @@ function stepAnswer(task: EngineTask): TrainerStep | null {
       titleHtml: hintHtml('Найди ответ.'),
       textHtml: hintHtml('Подставь $x = ' + tex(query.x0) + '$ в полученное уравнение.'),
       shape: 'plain',
-      fields: [
-        { labelHtml: math('f(' + tex(query.x0) + ') ='), answer: plain(k * query.x0 + b) },
-      ],
+      fields: [{ labelHtml: math('f(' + tex(query.x0) + ') ='), answer: plain(k * query.x0 + b) }],
       wrongHint: hintHtml('Проверь, как подставил $x$ в уравнение.'),
     };
   }
@@ -716,26 +847,6 @@ function stepAnswer(task: EngineTask): TrainerStep | null {
 /** Имя прямой в заголовке и в тексте: f или g. */
 function curve(name: string): string {
   return 'y = ' + name + '(x)';
-}
-
-function stepPairK(name: string, k: number, firstOne: boolean): TrainerStep {
-  return {
-    titleHtml: hintHtml('Проверим $k$ для прямой $' + curve(name) + '$.'),
-    textHtml: hintHtml(
-      firstOne
-        ? 'Возьми две отмеченные точки на прямой $' +
-            curve(name) +
-            '$. Посчитай, на сколько клеток она сдвинулась вправо и на сколько вверх. ' +
-            'Тогда $k = \\Delta y : \\Delta x$.'
-        : 'То же самое для второй прямой: две отмеченные точки, сдвиг вправо и вверх, ' +
-            '$k = \\Delta y : \\Delta x$.',
-    ),
-    shape: 'plain',
-    fields: [{ labelHtml: math('k ='), answer: plain(k) }],
-    wrongHint: hintHtml(
-      'Проверь, на сколько клеток прямая сдвинулась вправо и на сколько вверх.',
-    ),
-  };
 }
 
 function stepPairB(task: EngineTask, name: string, line: EngineLine): TrainerStep {
@@ -810,10 +921,12 @@ function stepsForPair(task: EngineTask): TrainerStep[] {
   if (intersection === null || first === undefined || second === undefined) {
     return [];
   }
+  const hint = slopeHint(task);
+  const svg = hint?.svg ?? null;
   const steps = [
-    stepPairK('f', first.k, true),
+    stepK(first.k, hint?.triangles[0] ?? null, svg, 'f'),
     stepPairB(task, 'f', first),
-    stepPairK('g', second.k, false),
+    stepK(second.k, hint?.triangles[1] ?? null, svg, 'g'),
     stepPairB(task, 'g', second),
     stepPairEquation(first, second),
     stepCrossX(intersection.x),
@@ -833,7 +946,16 @@ function stepsFor(task: EngineTask): TrainerStep[] {
     return stepsForPair(task);
   }
   const last = stepAnswer(task);
-  return last === null ? [] : [stepK(k), stepB(task, b), stepEquation(k, b), last];
+  if (last === null) {
+    return [];
+  }
+  const hint = slopeHint(task);
+  return [
+    stepK(k, hint?.triangles[0] ?? null, hint?.svg ?? null),
+    stepB(task, b),
+    stepEquation(k, b),
+    last,
+  ];
 }
 
 /* ── Цепочка для гиперболы ───────────────────────────────────────
@@ -870,9 +992,15 @@ const val = (e: Exact): number => e.p / e.q;
 /** Число в подсказке: десятичная, а трети — дробью, как в условии. */
 function rtex(e: Exact): string {
   let q = e.q;
-  while (q % 2 === 0) { q /= 2; }
-  while (q % 5 === 0) { q /= 5; }
-  if (q === 1) { return tex(val(e)); }
+  while (q % 2 === 0) {
+    q /= 2;
+  }
+  while (q % 5 === 0) {
+    q /= 5;
+  }
+  if (q === 1) {
+    return tex(val(e));
+  }
   return (e.p < 0 ? '-' : '') + '\\dfrac{' + Math.abs(e.p) + '}{' + e.q + '}';
 }
 
@@ -900,8 +1028,12 @@ interface RationalHint {
    решения, по одной в строку, с крупными дробями. */
 function afterHtml(lines: string[]): string {
   return lines
-    .map((line) => '<span class="tstep__line">' +
-      katex.renderToString(line, { ...KATEX, displayFrac: true } as typeof KATEX) + '</span>')
+    .map(
+      (line) =>
+        '<span class="tstep__line">' +
+        katex.renderToString(line, { ...KATEX, displayFrac: true } as typeof KATEX) +
+        '</span>',
+    )
     .join('');
 }
 
@@ -915,7 +1047,10 @@ function rationalSteps(task: EngineTask): TrainerStep[] {
       titleHtml: hintHtml(hint.title),
       textHtml: hint.text === undefined ? '' : big(hint.text),
       shape: 'plain',
-      fields: (hint.fields ?? []).map((field) => ({ labelHtml: math(field.label), answer: field.answer })),
+      fields: (hint.fields ?? []).map((field) => ({
+        labelHtml: math(field.label),
+        answer: field.answer,
+      })),
       wrongHint: hint.wrong === undefined ? '' : big(hint.wrong),
       focus: hint.focus ?? null,
     };
@@ -983,10 +1118,13 @@ interface QuadraticFacts {
 function quadraticSteps(task: EngineTask): TrainerStep[] {
   const hints = QuadraticHints.fromTask(task) as unknown as QuadraticHint[];
   const big = (text: string): string => typeset(GraphGenerate.typeset(text) as string, true);
-  const solution = (GraphSolutionQuadratic as unknown as {
-    fromTask: (source: unknown) => { id: string; facts: QuadraticFacts }[];
-  }).fromTask(task);
-  const facts = (id: string): QuadraticFacts => solution.find((step) => step.id === id)?.facts ?? {};
+  const solution = (
+    GraphSolutionQuadratic as unknown as {
+      fromTask: (source: unknown) => { id: string; facts: QuadraticFacts }[];
+    }
+  ).fromTask(task);
+  const facts = (id: string): QuadraticFacts =>
+    solution.find((step) => step.id === id)?.facts ?? {};
   const meta = task.meta as unknown;
 
   return hints.map((hint) => {
@@ -1012,13 +1150,24 @@ function quadraticSteps(task: EngineTask): TrainerStep[] {
         const out: TrainerFieldsPart = {
           kind: 'fields',
           textHtml: big(part.text ?? ''),
-          fields: (part.fields ?? []).map((field) => ({ labelHtml: math(field.label), answer: field.answer })),
+          fields: (part.fields ?? []).map((field) => ({
+            labelHtml: math(field.label),
+            answer: field.answer,
+          })),
           wrongHint: big(part.wrong ?? ''),
         };
-        if (part.variants) { out.variants = part.variants; }
-        if (part.traps) { out.traps = part.traps.map((trap) => ({ values: trap.values, whyHtml: big(trap.why) })); }
-        if (part.sign) { out.sign = { field: part.sign.field, whyHtml: big(part.sign.why) }; }
-        if (part.after && part.after.length > 0) { out.afterHtml = afterHtml(part.after); }
+        if (part.variants) {
+          out.variants = part.variants;
+        }
+        if (part.traps) {
+          out.traps = part.traps.map((trap) => ({ values: trap.values, whyHtml: big(trap.why) }));
+        }
+        if (part.sign) {
+          out.sign = { field: part.sign.field, whyHtml: big(part.sign.why) };
+        }
+        if (part.after && part.after.length > 0) {
+          out.afterHtml = afterHtml(part.after);
+        }
         return out;
       }),
     };
@@ -1027,12 +1176,18 @@ function quadraticSteps(task: EngineTask): TrainerStep[] {
     }
     if (hint.chart === 'aux') {
       const svg = QuadraticAux.auxSvg(meta, facts('slope').point ?? null) as string | null;
-      if (svg !== null) { step.chartSvg = svg; step.chartFrom = hint.chartFrom; }
+      if (svg !== null) {
+        step.chartSvg = svg;
+        step.chartFrom = hint.chartFrom;
+      }
     } else if (hint.chart === 'symmetry') {
       const f = facts('slope');
       const x0 = f.x0 ? f.x0.p / f.x0.q : 0;
       const svg = QuadraticAux.symmetrySvg(meta, f.pair ?? [], x0) as string | null;
-      if (svg !== null) { step.chartSvg = svg; step.chartFrom = hint.chartFrom; }
+      if (svg !== null) {
+        step.chartSvg = svg;
+        step.chartFrom = hint.chartFrom;
+      }
     }
     return step;
   });
@@ -1047,7 +1202,8 @@ function markAsymptotes(svg: string): string {
     /<path d="M([\d.]+) ([\d.]+)L([\d.]+) ([\d.]+)"([^>]*stroke="var\(--graph-asymptote)/g,
     (whole, x1: string, y1: string, x2: string, y2: string, rest: string) => {
       const dir = x1 === x2 ? 'v' : y1 === y2 ? 'h' : null;
-      return dir === null ? whole
+      return dir === null
+        ? whole
         : `<path class="chart-asym chart-asym--${dir}" d="M${x1} ${y1}L${x2} ${y2}"${rest}`;
     },
   );
@@ -1059,7 +1215,7 @@ function rationalWrongHint(task: EngineTask): string {
   if (meta.form === 'line') {
     return hintHtml(
       'Проверь по шагам: $k$ гиперболы $f(x)$ по точке $A$, коэффициенты $a$ и $b$ прямой ' +
-        '$g(x)$ по двум точкам, уравнение $ax^2 + bx - k = 0$ и выбор корня — абсцисса $A$ ' +
+        '$g(x)$ по треугольнику и точке, уравнение $ax^2 + bx - k = 0$ и выбор корня — абсцисса $A$ ' +
         'в ответ не идёт.',
     );
   }
@@ -1077,10 +1233,17 @@ function rationalWrongHint(task: EngineTask): string {
 
 /** Откуда взялся ответ — формула функции, восстановленная по чертежу. */
 function rationalRightHint(task: EngineTask): string {
-  const meta = task.meta as unknown as RationalMeta & { equation?: string; line: { text?: string } | null };
+  const meta = task.meta as unknown as RationalMeta & {
+    equation?: string;
+    line: { text?: string } | null;
+  };
   if (meta.form === 'line' && meta.line !== null) {
     return hintHtml(
-      'По чертежу $f(x) = ' + rtex(meta.m) + '/x$ и $' + (meta.line.text ?? '') + '$. ' +
+      'По чертежу $f(x) = ' +
+        rtex(meta.m) +
+        '/x$ и $' +
+        (meta.line.text ?? '') +
+        '$. ' +
         'Второй корень уравнения $ax^2 + bx - k = 0$ — абсцисса точки $B$.',
     );
   }
@@ -1315,10 +1478,15 @@ export function trainerTaskFrom(task: EngineTask): TrainerTask {
     wrongHint: quadratic ? '' : hintHtml(wrongHintFor(task) ?? ''),
     rightHint: quadratic ? '' : rightHintFor(task),
     steps: quadratic ? quadraticSteps(task) : stepsFor(task),
-    options: task.options == null ? null
-      : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
-    oshibki: Object.fromEntries((task.options ?? []).flatMap((option) =>
-      option.error === null ? [] : [[option.number, hintHtml(option.error)]])),
+    options:
+      task.options == null
+        ? null
+        : task.options.map((option) => ({ number: option.number, html: typeset(option.html) })),
+    oshibki: Object.fromEntries(
+      (task.options ?? []).flatMap((option) =>
+        option.error === null ? [] : [[option.number, hintHtml(option.error)]],
+      ),
+    ),
     solution: quadratic ? quadraticSolution(task) : null,
     method: quadratic ? methodFor(task.meta.set) : null,
   };

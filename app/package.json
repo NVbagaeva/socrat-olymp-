@@ -45,6 +45,7 @@
     "test:about-examples": "node scripts/check-about-examples.mjs",
     "test:curve-labels": "node scripts/check-curve-labels.mjs",
     "test:solution-tex": "node scripts/check-solution-tex.mjs",
+    "test:k-treugolnik": "node scripts/check-k-treugolnik.mjs",
     "test:rational-hints": "node scripts/check-rational-hints.mjs",
     "test:quadratic-hints": "node scripts/check-quadratic-hints.mjs",
     "preview:shots": "node scripts/preview-shots.mjs",
