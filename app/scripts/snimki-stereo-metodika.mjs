@@ -48,7 +48,7 @@ async function k(p, selector, nth = 0) {
     ([sel, n]) => {
       const el = document.querySelectorAll(sel)[n];
       const top = el?.getBoundingClientRect().top ?? 0;
-      window.scrollTo(0, window.scrollY + top - (window.innerWidth < 760 ? 120 : 170));
+      window.scrollTo(0, window.scrollY + top - (window.innerWidth < 760 ? 170 : 200));
     },
     [selector, nth],
   );

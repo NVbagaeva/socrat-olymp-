@@ -86,10 +86,46 @@ PR: #236. Ветка: `claude/stereometry-redesign-v2su1a`.
 | `test:stereo-engine` | 49 458 |
 | `test:stereo-razbory` | 460 |
 | `test:stereo-kachestvo` | в порядке |
-| `lint`, `typecheck` | чисто |
+| `test:stereo-nav` | 720 (на телефоне «Содержание» №3 — раскрывашка) |
+| `test:zadanie3`, `test:chertezh3`, `test:zadanie15` | нарушений нет |
+| `test:math-markup --src` / `--site` | математики вне KaTeX нет (1755 файлов / 641 страница) |
+| `test:secrets` | ответов, разборов и параметров рисунков в бандле нет |
+| `test:first-load` | 17 страниц, все в бюджете |
+| `test:mobile-overflow` | 649 страниц; №3 без прокрутки вбок; одна чужая страница — см. ниже |
+| Телефон 320 / 375 / 390, экраны №3 | прокрутки вбок нет; полоса касания цели на чертеже — 44 px; касание рядом с отрезком выбирает его; подсказка стоит под чертежом, не поверх |
+| Компьютер 1440 | подсказка справа от чертежа, не поверх |
+| `lint`, `typecheck`, сборка с `LEGAL_DRAFT=1` | чисто |
 
-Результаты сборки и браузерных проверок — в описании PR.
+`test:mobile-overflow` у меня находит +4 px на «О задании» №13 при 320 px. Это не №3: так же в `main`, а в CI та же проверка на ветках со свежим `main` зелёная — вероятно, дело в шрифтах окружения.
 
 ## Снимки «макет / сделано»
 
 `docs/stereometry-snimki/metodika-1-dizayn/`. Команда: `node scripts/snimki-stereo-metodika.mjs`. Файлы `sravnenie-*.jpg` — макет слева, снимки компьютера (1440) и телефона (390) справа.
+
+### 1. Начало главы
+
+![Начало главы: макет и сделано](../stereometry-snimki/metodika-1-dizayn/sravnenie-1-1-nachalo-glavy.jpg)
+
+### 2. Две панели
+
+![Две панели: макет и сделано](../stereometry-snimki/metodika-1-dizayn/sravnenie-2-2-dve-paneli.jpg)
+
+### 3. Ловушка
+
+![Ловушка: макет и сделано](../stereometry-snimki/metodika-1-dizayn/sravnenie-3-3-lovushka.jpg)
+
+### 4. «Нажми на чертеже»
+
+![«Нажми на чертеже»: макет и сделано](../stereometry-snimki/metodika-1-dizayn/sravnenie-4-4-nazhmi.jpg)
+
+### 5. Подсказка
+
+![Подсказка: макет и сделано](../stereometry-snimki/metodika-1-dizayn/sravnenie-5-5-podskazka.jpg)
+
+### 6. Итог блока
+
+![Итог блока: макет и сделано](../stereometry-snimki/metodika-1-dizayn/sravnenie-6-6-itog.jpg)
+
+### 7. Карточки блоков
+
+![Карточки блоков: макет и сделано](../stereometry-snimki/metodika-1-dizayn/sravnenie-7-7-bloki.jpg)

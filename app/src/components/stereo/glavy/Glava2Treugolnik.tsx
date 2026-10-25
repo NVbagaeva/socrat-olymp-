@@ -57,8 +57,19 @@ function tex(name: string): string {
   return name.replace(/^([A-Za-z])(\d+)$/, '$1_$2');
 }
 
-/** Рабочий треугольник по вершинам: прямой угол — в середине имени. */
-function imyaTreugolnika(v: readonly [string, string, string]): string {
+const PODSTROCHNYE: Record<string, string> = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4' };
+
+/**
+ * Имя рабочего треугольника — как в тексте главы: из описания чертежа
+ * («Прямоугольный треугольник SOA: …»). Нет в описании — по вершинам,
+ * прямой угол в середине имени.
+ */
+function imyaTreugolnika(t: PrimerG2['ploskiy']): string {
+  const m = /треугольник ([A-Z][A-Z₀-₄]*)/.exec(t.alt);
+  if (m?.[1] !== undefined) {
+    return m[1].replace(/([A-Z])([₀-₄]+)/g, (_, b: string, d: string) => `${b}_${[...d].map((c) => PODSTROCHNYE[c] ?? c).join('')}`);
+  }
+  const v = t.vershiny;
   return `${tex(v[1])}${tex(v[0])}${tex(v[2])}`;
 }
 
@@ -97,7 +108,7 @@ export function DvePaneli({ primer }: { primer: PrimerG2 }) {
         <div className="o3-most" aria-hidden="true">
           <IkStrelka className="o3-most__strelka" />
           <p className="o3-most__t">
-            <Tex text={`Выносим треугольник $${imyaTreugolnika(primer.ploskiy.vershiny)}$ отдельно`} />
+            <Tex text={`Выносим треугольник $${imyaTreugolnika(primer.ploskiy)}$ отдельно`} />
           </p>
         </div>
         <section className="o3-panel" aria-label="Плоский треугольник">
