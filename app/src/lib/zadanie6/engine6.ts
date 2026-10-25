@@ -16,7 +16,7 @@ export function engine6(config: GenConfig, base: string, dannye?: Dannye6): GenE
     base,
     ekran: (q) => `${base}/generator/?${q}`,
     avtor: GENERATOR6_TEXTS.sheet.teacher,
-    podzagolovok: GENERATOR6_TEXTS.sheet.title,
+    podzagolovok: GENERATOR6_TEXTS.podzagolovok,
     parseKlyuchi: parseZaprosKlyuchi,
     parseStaryy(q) {
       const z = parseZapros(q);
