@@ -19,14 +19,7 @@ import { byPayments, equalPayment, totalPaid } from '../solver';
 import { frameEnd, frameJan, money, pct, plural, years } from '../text';
 import { choice, hintK, hintType, isNice, step, tex } from './common';
 import { annBukvy } from '../bukvy';
-import {
-  kSt,
-  perenos,
-  stChisla,
-  stFormula,
-  stTablitsaBukvy,
-  stUravnenie,
-} from './razbor';
+import { kSt, perenos, stChisla, stFormula, stTablitsaBukvy, stUravnenie } from './razbor';
 import type { TablitsaPeremennye } from '../types';
 import type { Prototype } from './types';
 
