@@ -1071,7 +1071,7 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
     const otvet = d.y === 0 && otvetX.has(d.x);
     layers.dots.push(
       otvet
-        ? `<circle class="pr-otvet" cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR + 1.6}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="2"/>` +
+        ? `<circle class="pr-otvet" cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR + 1.6}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="1.6"/>` +
             `<circle cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR + 4.4}" fill="none" stroke="${d.fill}" stroke-width="1.8"/>`
         : `<circle cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR - 0.8}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="1.6"/>`,
     );
