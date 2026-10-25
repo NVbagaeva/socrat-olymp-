@@ -59,6 +59,8 @@ export interface ZaprosBanka {
   qr: boolean;
   /** Фильтр раздела (у №6 — формулировка: s, f, v); нет — без фильтра. */
   filtr?: string;
+  /** Переключатель раздела (у №10 — картинки сюжетов). */
+  flag?: boolean;
 }
 
 /** Адрес листа: ps=2&s=P01:2,P04.3:1&i=m&v=2&seed=…&z=1.P01_0:1… */
@@ -76,6 +78,7 @@ export function zaprosBankaQuery(z: ZaprosBanka, avtor: string): string {
   if (z.date !== '') q.set('d', z.date);
   if (z.uchitel !== undefined && z.uchitel !== avtor) q.set('uch', z.uchitel);
   if (z.qr) q.set('qr', '1');
+  if (z.flag === true) q.set('fl', '1');
   const zz = Object.entries(z.zameny).filter(([, k]) => k > 0);
   if (zz.length > 0) q.set('z', zz.map(([pos, k]) => `${pos}:${k}`).join(','));
   return q.toString();
@@ -111,6 +114,7 @@ export function parseZaprosBanka(
     date: /^\d{4}-\d{2}-\d{2}$/.test(q.get('d') ?? '') ? (q.get('d') as string) : '',
     ...(uch === null ? {} : { uchitel: uch.slice(0, 40) }),
     qr: q.get('qr') === '1',
+    ...(q.get('fl') === '1' ? { flag: true } : {}),
     ...(opts.filtry !== undefined
       ? { filtr: opts.filtry.includes(st) ? st : (opts.filtry[0] as string) }
       : {}),

@@ -637,6 +637,22 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
             )}
           </>
         )}
+        {extras.flag === undefined ? null : (
+          <div className="gen-opt">
+            <span>
+              {extras.flag.title}
+              <small>{extras.flag.note}</small>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              className="gen-switch"
+              aria-checked={st.extras.flag === true}
+              aria-label={extras.flag.title}
+              onClick={() => setExtras({ flag: st.extras.flag !== true })}
+            />
+          </div>
+        )}
         {extras.seriya === undefined ? null : (
           <div className="gen-opt">
             <span>

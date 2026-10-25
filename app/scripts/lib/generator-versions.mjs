@@ -42,6 +42,12 @@ export const GENERATOR_SOURCES = {
     'content/teoriya7.ts',
     'content/zadanie7.ts',
   ],
+  10: [
+    'lib/zadanie10',
+    'lib/generator/obshchiy/bank.ts',
+    'content/teoriya10.ts',
+    'content/zadanie10.ts',
+  ],
   6: [
     'lib/zadanie6',
     'lib/generator/obshchiy/bank.ts',

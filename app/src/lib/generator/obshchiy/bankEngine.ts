@@ -1,9 +1,9 @@
 /**
  * Адаптер общего генератора для разделов с банком готовых задач (№6,
- * №7; №10 — по тому же образцу): состояние генератора ↔ адрес листа
+ * №7, №10): состояние генератора ↔ адрес листа
  * (lib/generator/obshchiy/bank.ts) и предпросмотр из модели листа.
  *
- * Лист печати раздела — React-компоненты (List6, List7); предпросмотр
+ * Лист печати раздела — React-компоненты (List6, List7, List10); предпросмотр
  * собирает модуль раздела (predprosmotr6.tsx …) теми же компонентами,
  * в строку HTML. Он грузится при первой сборке листа вместе с банком.
  *
@@ -64,6 +64,7 @@ export interface StaryyZapros {
   primery: 0 | 1 | 2;
   seed: string;
   filtr?: string;
+  flag?: boolean;
 }
 
 export interface BankSection {
@@ -75,6 +76,10 @@ export interface BankSection {
   avtor: string;
   parseKlyuchi: (q: URLSearchParams) => ZaprosBanka | null;
   parseStaryy: (q: URLSearchParams) => StaryyZapros | null;
+  /** Ключ seed в прежнем адресе: «seed», у №10 — «s». */
+  staryySeed?: string;
+  /** Ключи прежнего адреса, которых не должно быть в ссылках листов (вид листа у №10 — «l»). */
+  staryyBez?: string[];
   sobrat: () => Promise<SobratListHtml>;
   /** Подзаголовок листа без вида работы. */
   podzagolovok: string;
@@ -101,6 +106,7 @@ export function zaprosIzSostoyaniya(
     date: e.date,
     ...(e.teacher === config.sheet.teacher ? {} : { uchitel: e.teacher }),
     qr: e.qr,
+    ...(e.flag === true ? { flag: true } : {}),
     ...(config.filtr === undefined
       ? {}
       : { filtr: state.filtr ?? (config.filtr.options[0]?.id as string) }),
@@ -116,6 +122,7 @@ function extrasIzZaprosa(z: ZaprosBanka, config: GenConfig): GenExtras {
     date: z.date,
     teacher: z.uchitel ?? config.sheet.teacher,
     qr: z.qr,
+    ...(z.flag === true ? { flag: true } : {}),
   };
 }
 
@@ -150,11 +157,17 @@ function zadachiIzBlokov(l: ListHtml, legacy: boolean): GenTask[][] {
   return variants;
 }
 
+function bezKlyuchey(q: URLSearchParams, klyuchi: readonly string[]): string {
+  const out = new URLSearchParams(q);
+  for (const k of klyuchi) out.delete(k);
+  return out.toString();
+}
+
 export function bankEngine(config: GenConfig, s: BankSection): GenEngine {
   const query = (state: GenState & { seed: string }) => {
     if (state.legacy !== undefined) {
       const q = new URLSearchParams(state.legacy);
-      q.set('seed', state.seed);
+      q.set(s.staryySeed ?? 'seed', state.seed);
       return q.toString();
     }
     return zaprosBankaQuery(zaprosIzSostoyaniya(state, config), s.avtor);
@@ -215,9 +228,14 @@ export function bankEngine(config: GenConfig, s: BankSection): GenEngine {
         seed: old.seed,
         zameny: {},
         /* У прежнего листа рамка теории шла вместе с примерами (e). */
-        extras: { ...defaultExtras(config), theory: old.primery > 0, examples: old.primery },
+        extras: {
+          ...defaultExtras(config),
+          theory: old.primery > 0,
+          examples: old.primery,
+          ...(old.flag === true ? { flag: true } : {}),
+        },
         ...(old.filtr === undefined ? {} : { filtr: old.filtr }),
-        legacy: q.toString(),
+        legacy: bezKlyuchey(q, s.staryyBez ?? []),
       };
     },
   };
