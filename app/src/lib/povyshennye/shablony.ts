@@ -62,8 +62,12 @@ import {
 import type { Draft } from '@/lib/vychisleniya/types';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
 import { P03_74S } from '@/lib/zadanie3/razdel7/povyshennye';
-import { P03_85, P03_86 } from '@/lib/zadanie3/razdel8/cilindr';
-import { P03_90, P03_91 } from '@/lib/zadanie3/razdel8/sfera-konus';
+import {
+  PV03_CILINDR,
+  PV03_KONUS,
+  PV03_SHAR,
+  PV03_SHAR_OKOLO_KONUSA,
+} from '@/lib/zadanie3/razdel8/povyshennye';
 import type { Params as Params3, Prototype as Proto3 } from '@/lib/zadanie3/types';
 import { prototype as prototype6 } from '@/lib/zadanie6/prototypes';
 import { PV7_KOREN, PV7_LOG_KVADRAT, PV7_LOG_STEPENI } from '@/lib/zadanie7/prototypes/povyshennye';
@@ -554,13 +558,13 @@ export const SHABLONY: Record<string, Shablon> = {
     ege: 3,
     prototip: 'Стереометрия, раздел VIII: объём шара, вписанного в цилиндр (P03-86)',
     otkuda: 'razdel',
-    zadacha: (p: { V: number }) => z03(P03_86, p, HINTS_SHAR_CILINDR, `z03|${p.V}`),
+    zadacha: (p: { V: number }) => z03(PV03_SHAR, p, HINTS_SHAR_CILINDR, `z03|${p.V}`),
   },
   'z03.cilindr-okolo-shara': {
     ege: 3,
     prototip: 'Стереометрия, раздел VIII: объём цилиндра, описанного около шара (P03-85)',
     otkuda: 'razdel',
-    zadacha: (p: { V: number }) => z03(P03_85, p, HINTS_SHAR_CILINDR, `z03c|${p.V}`),
+    zadacha: (p: { V: number }) => z03(PV03_CILINDR, p, HINTS_SHAR_CILINDR, `z03c|${p.V}`),
   },
   'z03.prizma-okolo-cilindra': {
     ege: 3,
@@ -574,13 +578,13 @@ export const SHABLONY: Record<string, Shablon> = {
     ege: 3,
     prototip: 'Стереометрия, раздел VIII: конус в шаре, r конуса = R шара — объём конуса (P03-91)',
     otkuda: 'razdel',
-    zadacha: (p: { V: number }) => z03(P03_91, p, HINTS_KONUS_SHAR, `z03k|${p.V}`),
+    zadacha: (p: { V: number }) => z03(PV03_KONUS, p, HINTS_KONUS_SHAR, `z03k|${p.V}`),
   },
   'z03.shar-okolo-konusa': {
     ege: 3,
     prototip: 'Стереометрия, раздел VIII: конус в шаре, r конуса = R шара — объём шара (P03-90)',
     otkuda: 'razdel',
-    zadacha: (p: { V: number }) => z03(P03_90, p, HINTS_KONUS_SHAR, `z03s|${p.V}`),
+    zadacha: (p: { V: number }) => z03(PV03_SHAR_OKOLO_KONUSA, p, HINTS_KONUS_SHAR, `z03s|${p.V}`),
   },
   'z04.ne-menee': {
     ege: 4,
