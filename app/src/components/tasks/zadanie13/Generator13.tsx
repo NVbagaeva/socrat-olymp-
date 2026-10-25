@@ -1,6 +1,8 @@
 'use client';
 
 import { GENERATOR_13, PRESETY_13, SHEET_13, VIDY_13 } from '@/content/generator13';
+import { GEN_UI } from '@/content/generatorUi';
+import { VIDY_BEZ_PODSKAZOK } from '@/lib/generator/obshchiy/state';
 import { qrSvg } from '@/lib/qr';
 import {
   BASE_13,
@@ -11,6 +13,11 @@ import {
 } from '@/lib/zadanie13/gen/params';
 import { GeneratorV2 } from '../generator-v2/GeneratorV2';
 import type { GeneratorConfigV2 } from '../generator-v2/types';
+
+/** Заголовки листа, на которых рамка подсказывает ход решения: «Зачёт», «Самостоятельная работа»… */
+const BEZ_PODSKAZOK = new Set(
+  VIDY_BEZ_PODSKAZOK.map((id) => (GEN_UI.vidyRaboty as Record<string, string>)[id]),
+);
 
 /**
  * Конфиг генератора №13 для общего экрана generator-v2: строки
@@ -51,6 +58,9 @@ const CONFIG_13: GeneratorConfigV2<GenParams13> = {
       label: GENERATOR_13.pomoshch,
       note: GENERATOR_13.pomoshchNote,
       options: GENERATOR_13.pomoshchi,
+      rucnoe: true,
+      preduprezhdenie: (s) =>
+        s.pomoshch === 'ramka' && BEZ_PODSKAZOK.has(s.title) ? GEN_UI.dop.teoriyaPodskazka : null,
     },
     { key: 'vid', label: GENERATOR_13.vid, note: GENERATOR_13.vidNote, options: GENERATOR_13.vidy },
   ],

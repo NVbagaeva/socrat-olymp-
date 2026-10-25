@@ -191,6 +191,7 @@ function stepSlope(t, kf) {
       'Прилежащий катет — горизонтальный, ' + key(t.dx) + ' кл.'));
     /* Хвост «= 0,333» у неконечной дроби был бы округлением,
        поэтому сама дробь и есть итог шага. */
+    blocks.push(summaryText(t, kf));
     blocks.push(formula('k = \\operatorname{tg} \\alpha = ' + ratioTex(t, kf)));
   } else {
     blocks.push(text('Угол ' + math('\\alpha', 'α') + ' здесь тупой: прямая наклонена влево. ' +
@@ -210,6 +211,7 @@ function stepSlope(t, kf) {
     /* Итог шага повторяет вывод целиком: краткое решение на листе
        учителя берёт из шага последнюю формулу, и «k = −2» без дроби
        не показало бы, откуда число. */
+    blocks.push(summaryText(t, kf));
     blocks.push(formula('k = -\\operatorname{tg}(180^\\circ - \\alpha) = ' + ratioTex(t, absK, '-')));
     blocks.push({ type: 'details', id: 'why-minus', title: 'Откуда берётся минус',
                   blocks: whyMinus() });
@@ -226,6 +228,11 @@ function stepSlope(t, kf) {
   return { title: 'Находим $k$', blocks: blocks };
 }
 
+function summaryText(t, kf) {
+  var s = slopeSummary(t.dy, t.dx, kf);
+  return text(s.text + ' → ' + math(s.tex, s.tex) + '.');
+}
+
 /* Отношение катетов и его значение: \\dfrac{4}{4} = 1, со знаком
    у убывающей: −\\dfrac{6}{3} = −2. Неконечная
    дробь остаётся дробью — округлять её нельзя; несократимая не
@@ -234,6 +241,23 @@ function ratioTex(t, f, sign) {
   var raw = (sign || '') + fracTex(t.dy, t.dx);
   var done = (sign || '') + texExact(f);
   return raw === done ? raw : raw + ' = ' + done;
+}
+
+/* Итог про k словами теории №12: «вертикальный катет 4, горизонтальный 4,
+   прямая возрастает» и запись k = 4 : 4 = 1. Катеты — длины в клетках,
+   знак — по направлению прямой; «: 1» не пишется. kf — точное k. */
+function slopeSummary(dy, dx, kf) {
+  var sign = Line.num(kf) < 0 ? '-' : '';
+  if (dy === 0) {
+    return { text: 'Прямая горизонтальна, вертикального катета нет', tex: 'k = 0' };
+  }
+  var done = sign + texExact(Line.frac(Math.abs(kf.p), kf.q));
+  var ratio = dx === 1 ? sign + dy : sign + dy + ' : ' + dx;
+  return {
+    text: 'Вертикальный катет ' + dy + ', горизонтальный ' + dx + ', прямая ' +
+      (sign === '' ? 'возрастает' : 'убывает'),
+    tex: 'k = ' + ratio + (ratio === done ? '' : ' = ' + done)
+  };
 }
 
 /* Тригонометрическая окружность: почему у смежных углов
@@ -489,18 +513,17 @@ function stepPairFormula(name, item, win) {
   var blocks = [];
 
   if (p1 && p2) {
-    var dy = p2.y - p1.y;
-    var dx = p2.x - p1.x;
+    /* Только треугольник: катеты по линиям сетки, длины в клетках,
+       знак — по направлению прямой (теория №12, «Как считать»). */
+    var dy = Math.abs(p2.y - p1.y);
+    var dx = Math.abs(p2.x - p1.x);
     blocks.push(text('Прямая ' + math('y = ' + name + '(x)', 'y = ' + name + '(x)') +
-      ' проходит через отмеченные точки <b class="key">' + math(pointTex(p1), pointPlain(p1)) +
+      ' проходит через целые точки <b class="key">' + math(pointTex(p1), pointPlain(p1)) +
       '</b> и <b class="key">' + math(pointTex(p2), pointPlain(p2)) + '</b>. ' +
-      'Угловой коэффициент — это отношение изменения ' + math('y', 'y') +
-      ' к изменению ' + math('x', 'x') + ' между ними:'));
-    var raw = fracTex(dy, dx);
-    var done = texExact(kf);
-    blocks.push(formula('k = \\dfrac{' + texNegative(p2.y) + ' - ' + texNegative(p1.y) + '}{' +
-      texNegative(p2.x) + ' - ' + texNegative(p1.x) + '} = ' + raw +
-      (raw === done ? '' : ' = ' + done)));
+      'Строим прямоугольный треугольник под прямой и подписываем катеты длинами — числом клеток.'));
+    var summary = slopeSummary(dy, dx, kf);
+    blocks.push(text(summary.text + ':'));
+    blocks.push(formula(summary.tex));
   } else {
     blocks.push(text('Угловой коэффициент прямой ' + math('y = ' + name + '(x)', 'y = ' + name + '(x)') + ':'));
     blocks.push(formula('k = ' + texExact(kf)));
@@ -626,9 +649,10 @@ const api = {
   build: build,
   equationTex: equationTex,
   interceptVisible: interceptVisible,
+  slopeSummary: slopeSummary,
   num: num,
   tex: tex
 };
 
 export default api;
-export { build, equationTex, interceptVisible, num, tex };
+export { build, equationTex, interceptVisible, num, slopeSummary, tex };

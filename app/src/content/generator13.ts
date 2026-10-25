@@ -78,7 +78,7 @@ export const PRESETY_13: readonly Preset13[] = [
     note: '6 задач · все типы',
     sostav: { A: 2, B: 1, C: 2, D: 1 },
     uroven: 'base',
-    pomoshch: 'net',
+    pomoshch: 'ramka',
     vid: 'compact',
     variants: 1,
     title: 'Домашняя работа',

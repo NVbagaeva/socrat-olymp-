@@ -19,10 +19,12 @@ const nichego = () => () => {};
 function Segmenty<S>({
   seg,
   value,
+  warn = null,
   onPick,
 }: {
   seg: GenSegmentV2<S>;
   value: string;
+  warn?: string | null;
   onPick: (id: string) => void;
 }) {
   return (
@@ -43,6 +45,11 @@ function Segmenty<S>({
         ))}
       </div>
       {seg.note === undefined ? null : <p className="gv2-field__note">{seg.note}</p>}
+      {warn === null ? null : (
+        <p className="gv2-field__warn" role="note">
+          {warn}
+        </p>
+      )}
     </div>
   );
 }
@@ -61,6 +68,8 @@ export function GeneratorV2<S extends GenStateV2>({ config }: { config: Generato
   const T = config.texts;
   const [s, setS] = useState<S>(config.initial);
   const [preset, setPreset] = useState<string | null>(null);
+  /* Поля rucnoe, которые учитель выбрал сам: пресет их не трогает. */
+  const [rucnye, setRucnye] = useState<readonly (keyof S)[]>([]);
   const [generated, setGenerated] = useState(false);
   const [preview, setPreview] = useState<GenPreviewTaskV2[][] | null>(null);
   const [zagruzka, setZagruzka] = useState(false);
@@ -201,7 +210,11 @@ export function GeneratorV2<S extends GenStateV2>({ config }: { config: Generato
                 className={clsx('gv2-preset', preset === p.id && 'is-active')}
                 aria-pressed={preset === p.id}
                 onClick={() => {
-                  setS((prev) => ({ ...p.apply(prev), zameny: {} }));
+                  setS((prev) => {
+                    const next = { ...p.apply(prev), zameny: {} };
+                    for (const k of rucnye) next[k] = prev[k];
+                    return next;
+                  });
                   setPreset(p.id);
                   setGenerated(false);
                 }}
@@ -283,7 +296,12 @@ export function GeneratorV2<S extends GenStateV2>({ config }: { config: Generato
               key={seg.key}
               seg={seg}
               value={String(s[seg.key])}
-              onPick={(id) => izmenit({ [seg.key]: id } as Partial<S>)}
+              warn={seg.preduprezhdenie?.(s) ?? null}
+              onPick={(id) => {
+                if (seg.rucnoe === true && !rucnye.includes(seg.key))
+                  setRucnye([...rucnye, seg.key]);
+                izmenit({ [seg.key]: id } as Partial<S>);
+              }}
             />
           ))}
           <details className="gv2-dop">

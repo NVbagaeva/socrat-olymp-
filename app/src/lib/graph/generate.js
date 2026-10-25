@@ -956,6 +956,48 @@ function analysis(id, seed) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   Треугольники наклона всех прямых задачи — для разборов,
+   подсказок и листа учителя. У пары (12.C, 12.D) — у каждой
+   прямой свой: первая — по отмеченным точкам, вторая — по своим
+   опорным узлам. k находится только так: катеты по сетке, длины
+   в клетках, знак — по направлению прямой. null — не прямая
+   или треугольника нет (горизонталь, задача без чертежа).
+   ══════════════════════════════════════════════════════════ */
+function slopeTriangles(task) {
+  var meta = task.meta;
+  if (!task.scene || !meta.window || (meta.family && meta.family !== 'line')) { return null; }
+  var items = meta.lines && meta.lines.length > 1 ? meta.lines
+    : [{ k: meta.k, b: meta.b, kFraction: meta.kFraction, bFraction: meta.bFraction,
+         points: meta.points }];
+  var triangles = [];
+  var shapes = [];
+  var points = [];
+  items.forEach(function (item, i) {
+    var triangle = null;
+    if (item.k !== 0) {
+      var line = Line.create(item.kFraction || item.k, item.bFraction || item.b);
+      triangle = Triangle.build(line, meta.window, i === 0 ? meta.points : item.points);
+    }
+    triangles.push(triangle);
+    if (!triangle) { return; }
+    /* Идентификаторы второй фигуры — с номером: в одном SVG они не повторяются. */
+    Triangle.shapes(triangle).forEach(function (shape) {
+      shapes.push(i === 0 ? shape : Object.assign({}, shape, { id: shape.id + '-' + (i + 1) }));
+    });
+    var color = (task.scene.curves[i] && task.scene.curves[i].color) || 'lineA';
+    points.push({ x: triangle.A.x, y: triangle.A.y, style: 'solid', color: color },
+                { x: triangle.B.x, y: triangle.B.y, style: 'solid', color: color });
+  });
+  if (shapes.length === 0) { return null; }
+  var scene = Object.assign({}, task.scene, {
+    points: (task.scene.points || []).concat(points),
+    shapes: (task.scene.shapes || []).concat(shapes),
+    alt: 'Разбор: треугольник наклона'
+  });
+  return { triangles: triangles, scene: scene };
+}
+
+/* ══════════════════════════════════════════════════════════
    Ответы: отдельный файл, не вперемешку с условиями.
    Подготовка и прототипы — разными разделами.
    ══════════════════════════════════════════════════════════ */
@@ -990,6 +1032,7 @@ const api = {
   setLayoutReport: setLayoutReport,
   typeset: typesetText,
   analysis: analysis,
+  slopeTriangles: slopeTriangles,
   taskCandidates: taskCandidates,
   equationText: equationText,
   generate: generate,
@@ -1000,6 +1043,6 @@ const api = {
 };
 
 export default api;
-export { setSets, setLayoutReport, analysis, taskCandidates, equationText, generate, generateSet,
+export { setSets, setLayoutReport, analysis, slopeTriangles, taskCandidates, equationText, generate, generateSet,
          loadSets, buildAnswers, answerText };
 export const typeset = typesetText;
