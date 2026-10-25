@@ -1,0 +1,785 @@
+/* Онлайн-вариант: экран решения, результаты, серия, проверка и
+   статистика. Только семантические токены; сетки — minmax(0, 1fr).
+   Префикс vo- («вариант онлайн»). */
+
+.vo,
+.vo-start,
+.vo-result,
+.vo-series,
+.vo-proverka,
+.vo-statistika {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
+  margin-top: var(--space-4);
+  padding-bottom: var(--space-8);
+}
+
+.vo-status,
+.vo-note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vo-note--top {
+  margin-top: calc(-1 * var(--space-2));
+}
+.vo-warn {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.vo-h2 {
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+.vo-h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.vo-mini {
+  margin-left: var(--space-2);
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+}
+.vo-tag {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-text-brand);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  vertical-align: middle;
+}
+.vo-tag--approx {
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+}
+.vo-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent-text);
+  font: inherit;
+  font-size: var(--fs-caption);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ── Панель с карточкой ─────────────────────────────────────── */
+.vo-start,
+.vo-card,
+.vo-result,
+.vo-series__head,
+.vo-proverka__form,
+.vo-stats__block {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    160deg,
+    var(--color-surface) 0%,
+    var(--color-glass-mid) 55%,
+    var(--color-glass-end) 100%
+  );
+  box-shadow: var(--shadow-sm);
+}
+@media (max-width: 767px) {
+  .vo-start,
+  .vo-card,
+  .vo-result,
+  .vo-series__head,
+  .vo-proverka__form,
+  .vo-stats__block {
+    padding: var(--space-4);
+  }
+}
+
+/* ── Старт ──────────────────────────────────────────────────── */
+.vo-start {
+  justify-items: start;
+}
+.vo-start__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 700;
+}
+.vo-start__meta {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.vo-start__rules {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+/* ── Таймер ─────────────────────────────────────────────────── */
+.vo-timer {
+  justify-self: end;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.vo-timer.is-low {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+
+/* ── Лента номеров ──────────────────────────────────────────── */
+.vo-strip ol {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 599px) {
+  .vo-strip ol {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+.vo-strip__no {
+  position: relative;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.vo-strip__no.is-answered {
+  border-color: var(--color-border-accent);
+  background: var(--color-surface-info);
+}
+.vo-strip__no.is-later {
+  border-color: var(--color-warning);
+  background: var(--color-warning-soft);
+}
+.vo-strip__no.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.vo-strip__no.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.vo-strip__no.is-current {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vo-strip__flag {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-warning);
+}
+
+/* ── Карточка задания ───────────────────────────────────────── */
+.vo-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
+  touch-action: pan-y;
+}
+.vo-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.vo-card__title {
+  margin: 0;
+  font-size: var(--fs-h4);
+  font-weight: 700;
+}
+.vo-status {
+  font-size: var(--fs-caption);
+}
+.vo-card__head .vo-status {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+}
+.vo-card__head .vo-status.is-right {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.vo-card__head .vo-status.is-wrong {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.vo-card__statement {
+  min-width: 0;
+  overflow-x: auto;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.vo-card__statement p {
+  margin: 0 0 var(--space-2);
+}
+.vo-card__figure {
+  justify-self: center;
+  width: 100%;
+  max-width: 560px;
+}
+.vo-card__figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+}
+
+/* ── Ответ ──────────────────────────────────────────────────── */
+.vo-answer {
+  display: grid;
+  gap: var(--space-2);
+}
+.vo-answer__label {
+  font-weight: 600;
+}
+.vo-answer__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.vo-answer__input {
+  flex: 1 1 200px;
+  max-width: 320px;
+  font-size: var(--fs-lg);
+  font-variant-numeric: tabular-nums;
+}
+.vo-answer__hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.vo-answer__hint.is-problem {
+  color: var(--color-error);
+}
+
+/* Экранная клавиатура (ui/AnswerKeypad) */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  max-width: 360px;
+}
+.keypad__key {
+  min-height: 52px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 1.375rem;
+  font-weight: 600;
+  touch-action: manipulation;
+  cursor: pointer;
+  user-select: none;
+}
+.keypad__key:active {
+  background: var(--color-surface-info);
+}
+.keypad__key--sign {
+  background: var(--color-surface-2);
+}
+.keypad__key--zero {
+  grid-column: 1 / span 3;
+}
+
+.vo-later {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: start;
+  min-height: 44px;
+  cursor: pointer;
+}
+.vo-later input {
+  width: 20px;
+  height: 20px;
+}
+.vo-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.vo-moves > :last-child {
+  margin-left: auto;
+}
+
+/* ── Проверка в тренировке ──────────────────────────────────── */
+.vo-feedback {
+  display: grid;
+  gap: var(--space-3);
+}
+.vo-verdict {
+  margin: 0;
+  font-weight: 600;
+}
+.vo-verdict.is-right {
+  color: var(--color-success);
+}
+.vo-verdict.is-wrong {
+  color: var(--color-error);
+}
+/* Лампочка подсказки (HintFlow): размер — как в тренажёрах (prep.css). */
+.vo .ptask__hint-ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.vo-steps {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+.vo-razbor {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+.vo-razbor__body,
+.vo-razbor__task {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.vo-razbor__task {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+/* ── Масштаб рисунка (ui/PinchZoom) ─────────────────────────── */
+.pinch {
+  display: grid;
+  gap: var(--space-2);
+}
+.pinch__area {
+  overflow: hidden;
+  height: min(70vh, 640px);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  touch-action: none;
+  cursor: grab;
+}
+.pinch__content {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  will-change: transform;
+}
+.pinch__content svg {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+}
+.pinch__tools {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.pinch__btn {
+  min-width: 48px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Результаты ─────────────────────────────────────────────── */
+.vo-result__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 700;
+}
+.vo-result__meta {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+}
+.vo-score {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4) var(--space-6);
+}
+.vo-score__main,
+.vo-score__item {
+  display: grid;
+  gap: 2px;
+}
+.vo-score__label {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.vo-score__value {
+  font-size: var(--fs-data-xl);
+  line-height: 1;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.vo-score__main .vo-tag {
+  justify-self: start;
+  margin: var(--space-1) 0 0;
+}
+.vo-score__num {
+  font-size: var(--fs-data-sm);
+  font-weight: 700;
+}
+.vo-score__note {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+.vo-table-wrap {
+  overflow-x: auto;
+}
+.vo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.vo-table th,
+.vo-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.vo-table thead th {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.vo-table .vo-mini {
+  display: block;
+  margin: 0;
+}
+.vo-table__ok {
+  font-weight: 700;
+}
+.vo-table tr.is-right .vo-table__ok {
+  color: var(--color-success);
+}
+.vo-table tr.is-wrong .vo-table__ok {
+  color: var(--color-error);
+}
+.vo-table__razbor td {
+  background: var(--color-surface-soft);
+}
+.vo-table__no {
+  white-space: nowrap;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.vo-table__no::after {
+  content: ' ▾';
+  color: var(--color-text-tertiary);
+  font-size: 0.75em;
+}
+/* На телефоне разбор открывается по номеру: столбца «Разбор» нет. */
+@media (max-width: 599px) {
+  .vo-table th,
+  .vo-table td {
+    padding: var(--space-2) var(--space-1);
+    font-size: var(--fs-caption);
+  }
+  .vo-table__act {
+    display: none;
+  }
+  .vo-table .vo-mini {
+    font-size: 0.6875rem;
+    line-height: 1.2;
+  }
+}
+.vo-links ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vo-links li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+.vo-links__no {
+  min-width: 3ch;
+  font-weight: 700;
+}
+.vo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.vo-code {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.vo-code__text {
+  display: grid;
+  flex: 1 1 260px;
+  gap: var(--space-2);
+  justify-items: start;
+  min-width: 0;
+}
+.vo-code__value {
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-size: var(--fs-caption);
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.vo-qr {
+  width: 168px;
+  color: var(--color-text);
+}
+.vo-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Серия ──────────────────────────────────────────────────── */
+.vo-series__head {
+  display: grid;
+  gap: var(--space-2);
+}
+.vo-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vo-vcard {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.vo-vcard.is-run {
+  border-color: var(--color-warning);
+}
+.vo-vcard.is-done {
+  border-color: var(--color-success);
+}
+.vo-vcard__title {
+  margin: 0;
+  font-weight: 700;
+}
+.vo-vcard__status {
+  display: grid;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.vo-vcard__score {
+  color: var(--color-text);
+  font-size: var(--fs-body);
+}
+.vo-vcard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.vo-series__print {
+  margin: 0;
+}
+.vo-series__stats {
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* ── Статистика ─────────────────────────────────────────────── */
+.vo-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+.vo-trend {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.vo-trend__grid {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+.vo-trend__axis {
+  fill: var(--color-text-tertiary);
+  font-size: 12px;
+}
+.vo-trend__line {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+.vo-trend__dot {
+  fill: var(--color-surface);
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+.vo-trend__val {
+  fill: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+/* На телефоне график в полтора раза уже: подписи крупнее в единицах рисунка. */
+@media (max-width: 599px) {
+  .vo-trend__axis {
+    font-size: 22px;
+  }
+  .vo-trend__val {
+    font-size: 24px;
+  }
+}
+.vo-heat {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 767px) {
+  .vo-heat {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+.vo-heat__cell {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  min-height: 52px;
+  padding: var(--space-1) 0;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+}
+.vo-heat__no {
+  font-size: 0.6875rem;
+  opacity: 0.8;
+}
+.vo-heat__cell[data-empty] {
+  background: var(--color-surface-2);
+  color: var(--color-text-tertiary);
+}
+.vo-heat__cell[data-l='4'],
+.vo-heat__cell[data-l='5'] {
+  color: var(--color-text-inverse);
+}
+.vo-times,
+.vo-weak {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.vo-weak {
+  color: var(--color-error);
+  font-size: var(--fs-body);
+  font-weight: 600;
+}
+
+/* ── Панель на экране «Собрать вариант» ─────────────────────── */
+.vo-panel {
+  display: grid;
+  gap: var(--space-4);
+}
+.vo-panel__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+.vo-panel__share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+.vo-panel__link {
+  display: grid;
+  flex: 1 1 280px;
+  gap: var(--space-2);
+  justify-items: start;
+  min-width: 0;
+}
+.vo-panel__url {
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-size: var(--fs-caption);
+  overflow-wrap: anywhere;
+}
+.vo-panel__series {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.vo-field {
+  display: grid;
+  gap: var(--space-1);
+}
+.vo-field .input {
+  max-width: 120px;
+}

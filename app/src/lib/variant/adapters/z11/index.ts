@@ -37,6 +37,7 @@ import {
   razborAnswer,
   sourceOk,
   starsOk,
+  hintSteps,
   studentFromHints,
   subtypeOk,
   type Candidate,
@@ -111,6 +112,7 @@ function build(c: C11, solved: Solved): VariantTask {
     answer: otvetVybor === null ? answerText(s.answer) : otvetVybor.replace(/\$/g, ''),
     answerHtml: otvet,
     solutionTeacher: reshenie + razborAnswer(otvet),
+    hints: hintSteps(s.hints),
     solutionStudent:
       studentFromHints(s.hints, []) +
       `<p class="var-razbor__h">Решаем</p>${reshenie}` +
