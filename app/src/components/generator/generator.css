@@ -1517,3 +1517,21 @@
     padding-right: var(--space-4);
   }
 }
+
+/* Иконка подтемы в строке темы (№12): картинка раздела в 36 px. */
+.gen-z12-ikonka,
+.gen-z12-ikonka img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+/* Варианты ответа у задачи с выбором (№12): списком под условием. */
+.gen-options {
+  margin: var(--space-1) 0 0;
+  padding-left: 1.5em;
+}
+.gen-options li {
+  margin-top: 2px;
+}

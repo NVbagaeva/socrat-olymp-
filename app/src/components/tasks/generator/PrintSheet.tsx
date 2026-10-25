@@ -21,8 +21,11 @@ export interface BuiltSheet {
 }
 
 export interface PrintSheetProps {
-  /** Собрать лист. null — собирать нечего (адрес без параметров). */
-  build: () => BuiltSheet | null;
+  /**
+   * Собрать лист. null — собирать нечего (адрес без параметров).
+   * Promise — когда листу нужно дождаться чего-то (QR-код генератора).
+   */
+  build: () => BuiltSheet | null | Promise<BuiltSheet | null>;
   /** Ключ сборки: сменился — лист собирается заново. */
   buildKey: string;
   theme: 'color' | 'print';
@@ -67,16 +70,17 @@ export function PrintSheet({ build, buildKey, theme, layout }: PrintSheetProps) 
      до готовности. */
   useEffect(() => {
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const built = build();
-    if (built === null) {
-      return;
-    }
     let alive = true;
-    import('@/lib/sheet/paginate.js').then(() => {
-      if (alive) {
-        setWarning(built.warning);
-        setSpec(specJson(built.html));
+    void Promise.resolve(build()).then((built) => {
+      if (built === null || !alive) {
+        return;
       }
+      import('@/lib/sheet/paginate.js').then(() => {
+        if (alive) {
+          setWarning(built.warning);
+          setSpec(specJson(built.html));
+        }
+      });
     });
     return () => {
       alive = false;
