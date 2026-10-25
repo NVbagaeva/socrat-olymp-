@@ -276,8 +276,10 @@ for (const { where, text } of prep.texts) {
 const trenazher = { zadach: 0 };
 {
   const { dannyeTrenazhera } = requireSrc('lib/zadanie11/trenazher/dannye');
-  const { planSessii, bankDlya, klyuchZadachi, podtipKlyucha, primernoeVremya, vTrenirovke } =
-    requireSrc('lib/zadanie11/trenazher/sessiya');
+  const { klyuchZadachi, podtipKlyucha } = requireSrc('lib/zadanie11/trenazher/sessiya');
+  const { trenazherConfig11, zadachi11, planPoKlyuchu, klyuchNovoy } = requireSrc(
+    'lib/zadanie11/trenazher/filtry11',
+  );
   const { sobratZadachu } = requireSrc('lib/zadanie11/trenazher/zadacha');
   const { answerMatches, choiceMatches, openText } = requireSrc('lib/zadanie11/secret');
   const { kodNaSayte } = requireSrc('lib/zadanie11/kod');
@@ -303,77 +305,40 @@ const trenazher = { zadach: 0 };
   const vse = d.razdely.flatMap((r) => r.podtipy);
   const ids = vse.map((x) => x.id);
 
-  /* План: «только банк» — без разминки и повторов, не больше банка. */
-  const bankPlan = planSessii({ podtipy: ids, istochnik: 'bank', count: 500 }, d.bank, 's1');
-  if (bankPlan.some((x) => x.vid !== 'bank' || x.id.startsWith('RZ-')))
-    add('в режиме «банк» есть не банк');
-  if (bankPlan.length !== BANK.length)
-    add(`«банк»: ${bankPlan.length} задач вместо ${BANK.length}`);
-  if (new Set(bankPlan.map(klyuchZadachi)).size !== bankPlan.length)
-    add('«банк»: задачи повторяются');
-  for (let i = 1; i < bankPlan.length; i += 1) {
-    if (
-      bankPlan[i].id === bankPlan[i - 1].id &&
-      new Set(bankPlan.map((x) => x.id)).size > 1 &&
-      i < 30
-    ) {
-      add('«банк»: подряд две задачи одного подтипа');
-      break;
-    }
+  /* Список задач общего тренажёра: все задачи банка, разминки и пула,
+     ключи однозначные и читаются обратно, у каждого подтипа не меньше
+     десяти задач, источник и уровень — по задаче и подтипу. */
+  const refs = zadachi11(d);
+  if (refs.length !== d.bank.length) add(`в списке ${refs.length} задач из ${d.bank.length}`);
+  if (new Set(refs.map((r) => r.key)).size !== refs.length) add('ключи задач повторяются');
+  for (const r of refs) {
+    const plan = planPoKlyuchu(r.key, 'x');
+    if (plan === null || klyuchZadachi(plan) !== r.key) add(`${r.key}: ключ не читается обратно`);
   }
-  const malo = planSessii({ podtipy: ['DP-07'], istochnik: 'bank', count: 50 }, d.bank, 's2');
-  if (malo.length !== bankDlya(['DP-07'], d.bank, 'bank').length) add('«банк»: план длиннее банка');
-  const mix = planSessii(
-    { podtipy: ['DP-07', 'RZ-01'], istochnik: 'mix', count: 20 },
-    d.bank,
-    's3',
-  );
-  /* «Новые» в смеси — аналоги из пула и генератор. */
-  const novaya = (x) => x.vid === 'new' || x.vid === 'analog';
-  if (mix.length !== 20 || !mix.some(novaya) || !mix.some((x) => !novaya(x))) {
-    add('«банк + новые»: нет смеси или не та длина');
+  if (refs.filter((r) => r.istochnik === 'fipi').length !== BANK.length)
+    add('«открытый банк ФИПИ» — не все задачи банка');
+  if (refs.some((r) => r.podtip.startsWith('RZ-') && r.istochnik === 'fipi'))
+    add('разминка помечена как банк');
+  const urovenPodtipa = new Map(vse.map((x) => [x.id, x.level]));
+  for (const id of ids) {
+    const n = refs.filter((r) => r.podtip === id).length;
+    if (n < 10) add(`${id}: задач в списке ${n}, меньше десяти`);
   }
-  if (!mix.some((x) => x.vid === 'razminka')) add('«банк + новые»: нет задач разминки для РЗ');
-  const novye = planSessii(
-    { podtipy: ['VD-01', 'RB-03'], istochnik: 'new', count: 12 },
-    d.bank,
-    's4',
-  );
-  if (novye.length !== 12 || novye.some((x) => x.vid !== 'new' && x.vid !== 'analog')) {
-    add('«только новые»: не то');
-  }
-  /* Новые задачи берутся сначала из пула аналогов, без повторов. */
-  const izPula = planSessii({ podtipy: ['DP-07'], istochnik: 'new', count: 14 }, d.bank, 's6');
-  const analogov = izPula.filter((x) => x.vid === 'analog');
-  if (analogov.length !== 10 || new Set(analogov.map((x) => x.no)).size !== 10) {
-    add(`«только новые» ДП-07: аналогов ${analogov.length} из 10 или повторы`);
-  }
+  if (refs.some((r) => r.uroven !== urovenPodtipa.get(r.podtip)))
+    add('уровень задачи не её подтипа');
+  const cfg = trenazherConfig11(d);
   if (
-    izPula.slice(10).some((x) => x.vid !== 'new') &&
-    izPula.filter((x) => x.vid === 'new').length !== 4
-  ) {
-    add('«только новые»: после пула не включился генератор');
-  }
-  if (planSessii({ podtipy: ['RZ-01'], istochnik: 'bank', count: 5 }, d.bank, 's5').length !== 0) {
-    add('«банк»: разминка не скрыта');
-  }
+    cfg.temy.flatMap((t) => t.podtipy.map((p) => p.id)).join() !== ids.join() ||
+    cfg.urovni.length !== 3 ||
+    !cfg.istochnik
+  )
+    add('конфиг фильтров №11');
+  const nov = planPoKlyuchu(klyuchNovoy('DP-07'), 'seed1');
+  if (nov === null || nov.vid !== 'new' || nov.seed !== 'seed1') add('ключ новой задачи');
+  if (planPoKlyuchu('DP-07', 'x') !== null || planPoKlyuchu('DP-07|q1', 'x') !== null)
+    add('чужой ключ читается');
   if (podtipKlyucha(klyuchZadachi({ vid: 'new', id: 'DP-07', seed: 'x' })) !== 'DP-07')
     add('ключ задачи');
-  const n0 = {
-    istochnik: 'bank',
-    podtipy: ['RZ-01', 'DP-07', 'DP-10'],
-    count: 5,
-    uroven: 3,
-    podskazki: true,
-  };
-  if (
-    vTrenirovke(n0, vse)
-      .map((x) => x.id)
-      .join() !== 'DP-10'
-  )
-    add('фильтр уровня и разминки');
-  const [lo, hi] = primernoeVremya([1, 2, 3], 15);
-  if (!(lo > 0 && hi > lo)) add('примерное время');
 
   /* Каждая задача банка и разминки, по 3 новых на подтип: закрытый
      ответ узнаётся, подсказки и разбор открываются. */

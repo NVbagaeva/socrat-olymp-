@@ -314,7 +314,10 @@ export function vSsylku(f: Filtr): string {
 
 /** Есть ли в адресе фильтр тренажёра. */
 export function estVSsylke(q: URLSearchParams): boolean {
-  return ['t', 'ist', 'ur', 'n', 'rezh', 'por', 'moi', 'pr'].some((key) => q.has(key));
+  /* tip, tipy — прежние ссылки «Решать» из теории и маршрутов урока. */
+  return ['t', 'ist', 'ur', 'n', 'rezh', 'por', 'moi', 'pr', 'tip', 'tipy'].some((key) =>
+    q.has(key),
+  );
 }
 
 /** Фильтр из адреса. Неизвестное — по умолчанию, чужие подтипы — прочь. */
@@ -329,7 +332,7 @@ export function izSsylki(q: URLSearchParams, config: TrenazherConfig): Filtr {
     .map(Number)
     .filter((u): u is Uroven => u === 1 || u === 2 || u === 3);
   const f: Filtr = {
-    tipy: list('t'),
+    tipy: [...new Set([...list('t'), ...list('tipy'), ...list('tip')])],
     istochnik: ist === 'fipi' || ist === 'new' ? ist : 'vse',
     urovni,
     skolko: n === 'vse' ? 0 : n === '5' ? 5 : n === '20' ? 20 : 10,
