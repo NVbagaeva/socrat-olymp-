@@ -1575,7 +1575,8 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
     ] as const) {
       if (plokhih(ryad) === 0) break;
       const drugoy = raskladka(size, otstup);
-      if (plokhih(drugoy) < plokhih(ryad)) ryad = drugoy;
+      /* При равном числе невставших — мельче: налезает меньше. */
+      if (plokhih(drugoy) <= plokhih(ryad)) ryad = drugoy;
     }
     const size = ryad.length === 0 ? krupnyy : (ryad[0] as Mesto).size;
     /* Не вставший знак — над своим горбом, по центру промежутка. */
@@ -1594,8 +1595,10 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
       }
     }
     ryad.forEach((o, i) => {
+      /* Крайний короткий кусок: знак для ответа не нужен — рисуем его,
+         только если он стоит свободно, с запасом от кривой. */
+      if (kraynii(i) && o.min < V.gap * 2) return;
       if (o.min < V.gap) {
-        if (kraynii(i)) return;
         problems.push(`знак ${o.glyph} не помещается: мешает ${o.what}`);
       }
       layers.labels.push(
