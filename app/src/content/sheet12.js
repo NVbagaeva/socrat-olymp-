@@ -74,7 +74,7 @@ export const blocks = [
   {
     set: 'P12-1',
     title: 'Угловой коэффициент <span class="math" data-tex="k"><i>k</i></span> по графику',
-    note: 'найти наклон по двум точкам',
+    note: 'найти наклон по треугольнику',
   },
   {
     set: 'P12-2',

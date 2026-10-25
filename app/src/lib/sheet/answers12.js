@@ -136,13 +136,44 @@ function shortSolution(task, generator, solutionBuilder, quadraticBuilder) {
      сама формула и подстановка. Правило одно на все шаги, поэтому
      выбор не зависит от содержания формулы. */
   const formulas = [];
-  steps.forEach((step) => {
+  /* k — словами теории №12: «вертикальный катет 4, горизонтальный 4,
+     прямая возрастает → k = 4 : 4 = 1». У одной прямой это итог шага
+     про k, у пары — строка перед формулой каждой прямой. */
+  const summaries = slopeSummaries(task, lines, steps, generator, solutionBuilder);
+  steps.forEach((step, i) => {
     const own = (step.blocks || []).filter((piece) => piece.type === 'formula' && piece.tex);
-    if (own.length) { formulas.push(own[own.length - 1].tex); }
+    const summary = summaries[i] || null;
+    if (summary) { formulas.push(summary); }
+    if (own.length && !(summary && step.title === 'Находим $k$')) {
+      formulas.push(own[own.length - 1].tex);
+    }
   });
 
   if (formulas.length < 2) { return null; }
   return formulas;
+}
+
+/* Итог про k по шагам разбора: { text, tex } у шага, где находится k. */
+function slopeSummaries(task, lines, steps, generator, solutionBuilder) {
+  const out = {};
+  if (!solutionBuilder.slopeSummary) { return out; }
+  if (lines && lines.length === 2) {
+    lines.forEach((line, i) => {
+      const pts = (line.points || []).slice().sort((a, b) => a.x - b.x);
+      if (pts.length < 2 || !line.kFraction) { return; }
+      out[i] = solutionBuilder.slopeSummary(Math.abs(pts[1].y - pts[0].y),
+        Math.abs(pts[1].x - pts[0].x), line.kFraction);
+    });
+    return out;
+  }
+  const at = steps.findIndex((step) => step.title === 'Находим $k$');
+  let analysis = null;
+  try { analysis = generator.analysis(task.id, task.seed); }
+  catch { analysis = null; }
+  if (at >= 0 && analysis) {
+    out[at] = solutionBuilder.slopeSummary(analysis.triangle.dy, analysis.triangle.dx, analysis.line.k);
+  }
+  return out;
 }
 
 /**
@@ -269,8 +300,10 @@ export function solutionStepsHtml(task, generator, solutionBuilder, quadraticBui
   }
   const formulas = shortSolution(task, generator, solutionBuilder, quadraticBuilder);
   if (!formulas) { return null; }
-  return '<ol class="sheet-steps">' + formulas.map((tex) =>
-    '<li class="sheet-step">' + math(tex) + '</li>').join('') + '</ol>';
+  return '<ol class="sheet-steps">' + formulas.map((item) =>
+    '<li class="sheet-step">' + (typeof item === 'string' ? math(item)
+      : '<span class="sheet-step-text">' + typo.escape(item.text) + ' →</span> ' + math(item.tex)) +
+    '</li>').join('') + '</ol>';
 }
 
 /**

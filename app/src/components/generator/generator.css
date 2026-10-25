@@ -989,6 +989,14 @@
   color: var(--color-text-tertiary);
   font-size: 12px;
 }
+/* Янтарный текст мелким кеглем не читается: янтарь — полоса и фон. */
+.gen-opt small.gen-opt__warn {
+  margin-top: var(--space-1);
+  padding: 2px var(--space-2);
+  border-left: 3px solid var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+}
 /* Переключатель: дорожка 40×24, место нажатия — 44 px за счёт рамки. */
 .gen-switch {
   position: relative;

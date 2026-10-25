@@ -19,8 +19,6 @@
 
 import Line from './families/line.js';
 
-var MINUS = '−';
-
 /* Идентификаторы фигур: по ним анимация находит элементы в готовом SVG. */
 var IDS = {
   fill:       'slope-fill',
@@ -145,11 +143,9 @@ function build(line, win, preferred) {
     thirdForHorizontal: thirdForHorizontal,
     thirdForVertical: thirdForVertical,
 
-    /* На чертеже у катетов стоит только число клеток, без знаков:
-       катет — длина. Знак приращения разбирается в блоке решения,
-       для него хранятся values. */
+    /* У катетов только число клеток, без знаков: катет — длина.
+       Знак k — по направлению прямой. */
     labels: { dx: String(dx), dy: String(dy) },
-    values: { dx: '+' + dx, dy: (rising ? '+' : MINUS) + dy },
 
     angleDeg: Math.atan2(B.y - A.y, B.x - A.x) * 180 / Math.PI,
     order: rising ? ['horizontal', 'vertical'] : ['vertical', 'horizontal'],
@@ -258,51 +254,9 @@ function labelZone(triangle, line, win) {
   return best.length >= RULES.labelZoneCells ? [best.from, best.to] : null;
 }
 
-/* ══════════════════════════════════════════════════════════
-   Текст разбора. Числа — настоящие, из варианта.
-   У убывающей прямой между «вправо» и «вниз» встаёт отдельная
-   строка про знак: катеты положительны, а приращение — нет.
-   ══════════════════════════════════════════════════════════ */
-function solution(triangle, answer) {
-  var t = triangle;
-  var dyValue = (t.rising ? '' : MINUS) + t.dy;
-  var lines = [];
-
-  lines.push({ id: 'points', text: 'Берём две точки: $' +
-    point(t.A) + '$ и $' + point(t.B) + '$' });
-
-  lines.push({ id: 'dx', text: 'Вправо на ' + t.dx + ' ' + cells(t.dx) });
-
-  if (!t.rising) {
-    lines.push({ id: 'sign',
-      text: 'При движении вправо значение убывает, поэтому приращение отрицательное' });
-  }
-
-  lines.push({ id: 'dy',
-    text: (t.rising ? 'Вверх на ' : 'Вниз на ') + t.dy + ' ' + cells(t.dy) });
-
-  lines.push({ id: 'k', formula: true, tex: 'k = \\dfrac{\\Delta y}{\\Delta x} = \\dfrac{' + dyValue.replace(MINUS, '-') +
-    '}{' + t.dx + '} = ' + String(answer === undefined ? t.k : answer).replace('.', '{,}').replace(MINUS, '-'),
-    text: 'k = ' + dyValue + ' / ' + t.dx + ' = ' +
-      String(answer === undefined ? t.k : answer).replace('.', ',') });
-
-  return lines;
-}
-
-function point(p) { return '(' + p.x + '; ' + p.y + ')'; }
-
-function cells(n) {
-  var last = n % 10;
-  var teen = n % 100 >= 11 && n % 100 <= 14;
-  if (!teen && last === 1) { return 'клетку'; }
-  if (!teen && last >= 2 && last <= 4) { return 'клетки'; }
-  return 'клеток';
-}
-
 const api = {
   RULES: RULES,
   build: build,
-  solution: solution,
   choosePair: choosePair,
   vertexFor: vertexFor,
   arcRadius: arcRadius,
@@ -312,4 +266,4 @@ const api = {
 };
 
 export default api;
-export { RULES, build, solution, choosePair, vertexFor, arcRadius, shapes, labelZone, IDS };
+export { RULES, build, choosePair, vertexFor, arcRadius, shapes, labelZone, IDS };

@@ -457,7 +457,11 @@ for (const size of SIZES) {
         ...(m.marks ?? []),
       ].some((x) => x.shag !== undefined);
       check(
-        !sShagami || /stroke-width="(3\.4|2\.4|2\.2)"|font-weight="700"/.test(svg),
+        !sShagami ||
+          [HL, HL_HIDDEN, SOLID_THEME.width.hlMarker].some((x) =>
+            svg.includes(`stroke-width="${x}"`),
+          ) ||
+          svg.includes('data-hl="1"'),
         where('на чертеже шаг 1 не выделен'),
       );
     }

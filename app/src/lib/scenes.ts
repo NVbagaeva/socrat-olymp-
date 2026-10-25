@@ -507,7 +507,7 @@ export function prepSkillScene(id: PrepSkillSceneId) {
        занимает меньшую долю поля — длинная формула перестаёт
        упираться в край холста. */
     window: squareWindow(2),
-    /* Сетка нужна: по клеткам читаются Δx и Δy у треугольника. */
+    /* Сетка нужна: по клеткам считаются катеты треугольника. */
     grid: { step: 1, show: true },
     axes: { labelX: '', labelY: '', origin: '' },
     /* До появления режима 'none' в рендерере это слово падало в
@@ -520,22 +520,25 @@ export function prepSkillScene(id: PrepSkillSceneId) {
   };
 
   if (id === 'k') {
-    /* Треугольник наклона: катеты пунктиром, как в разборе решения. */
+    /* Треугольник наклона: две целые точки, катеты по сетке пунктиром,
+       длины в клетках и прямой угол — как в разборе решения. */
     return {
       ...base,
       curves: [{ type: 'line', k: 1, b: 0, color: 'lineA', label: null }],
       points: [
-        { x: -0.8, y: -0.8, color: 'lineA', label: null },
-        { x: 0.8, y: 0.8, color: 'lineA', label: null },
+        { x: -1, y: -1, color: 'lineA', label: null },
+        { x: 1, y: 1, color: 'lineA', label: null },
       ],
       shapes: [
-        { type: 'segment', from: [-0.8, -0.8], to: [0.8, -0.8], color: 'accent', style: 'dashed' },
-        { type: 'segment', from: [0.8, -0.8], to: [0.8, 0.8], color: 'accent', style: 'dashed' },
+        { type: 'polygon', points: [[-1, -1], [1, -1], [1, 1]] },
+        { type: 'segment', from: [-1, -1], to: [1, -1], color: 'accent', style: 'dashed' },
+        { type: 'segment', from: [1, -1], to: [1, 1], color: 'accent', style: 'dashed' },
+        { type: 'rightAngle', at: [1, -1], alongX: -1, alongY: 1 },
         /* Опорные точки подписей отведены от самих катетов: движок
            ставит подпись рядом с точкой, и стоя на катете она на него
            же и наезжала. */
-        prepLabel('\u0394x', 0, -1.25, 0, 14, 'accent'),
-        prepLabel('\u0394y', 1.3, 0, 14, 0, 'accent'),
+        prepLabel('2', 0, -1.45, 0, 14, 'accent'),
+        prepLabel('2', 1.45, 0, 14, 0, 'accent'),
       ],
     };
   }

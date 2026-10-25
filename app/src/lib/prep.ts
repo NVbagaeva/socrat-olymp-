@@ -369,12 +369,11 @@ function flatSteps(task: EngineTask): PrepStep[] {
       blocks: [
         {
           type: 'text',
-          html:
-            'Значит, ' + katexHtml('\\Delta y = 0') + ' при любом ' + katexHtml('\\Delta x') + '.',
+          html: 'Значит, вертикального катета у треугольника нет: угловой коэффициент равен нулю.',
         },
         {
           type: 'formula',
-          html: katexHtml('k = \\Delta y : \\Delta x = 0 : \\Delta x = ' + value, true),
+          html: katexHtml('k = ' + value, true),
           feature: false,
         },
         {
@@ -912,11 +911,17 @@ function buildStepsRaw(task: EngineTask): PrepStep[] | null {
     },
   }) as { number: number; title: string; arrow?: string; blocks: EngineBlock[] }[];
 
+  /* Шаг про k показывает треугольник наклона на чертеже задачи: «треугольник,
+     который мы построили» — вот он. */
+  const triangle = renderGraph(found.scene) as string;
   return steps.map((step) => ({
     number: step.number,
     title: step.title,
     arrow: step.arrow === 'up' || step.arrow === 'down' ? step.arrow : null,
-    blocks: viewBlocks(step.blocks),
+    blocks:
+      step.title === 'Находим $k$'
+        ? [{ type: 'chart', svg: triangle } as PrepBlock, ...viewBlocks(step.blocks)]
+        : viewBlocks(step.blocks),
   }));
 }
 

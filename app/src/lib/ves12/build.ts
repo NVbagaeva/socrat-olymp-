@@ -501,19 +501,25 @@ export function exampleItems(type: TypeRef, sets: string[], count: number, seed:
     if (task === undefined) {
       continue;
     }
-    const item = sheetTask({ no: 0, type, setId, task }, rules, false);
+    /* Пример — решённая задача: чертёж с построениями решения (у прямой —
+       треугольник наклона), как в листе учителя. Задачи листа ученика
+       остаются без построений. */
+    const item = sheetTask({ no: 0, type, setId, task }, rules, true) as ReturnType<
+      typeof sheetTask
+    > & { solutionFigure?: { svg: string; width: number | null } | null };
     const html = exampleSolutionHtml(item, GraphGenerate, solutionBuilder, quadraticBuilder, stepwiseBuilder);
     if (html === null) {
       continue;
     }
+    const svg = item.solutionFigure?.svg ?? item.figureSvg;
     out.push(
       exampleItem({
         label: generatorAllText.exampleLabel,
         title: type.title,
         conditionHtml: task.questionHtml,
         solutionHtml: html,
-        figureSvg: item.figureSvg,
-        figureWidth: figureWidth(item.figureSvg),
+        figureSvg: svg,
+        figureWidth: item.solutionFigure?.width ?? figureWidth(svg),
       }),
     );
   }

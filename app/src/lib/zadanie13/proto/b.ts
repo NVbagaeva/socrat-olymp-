@@ -23,18 +23,11 @@ import {
   step,
   tex,
 } from './common';
+import type { SolutionStep, TablitsaPeremennye } from '../types';
+import { stChisla, stFormula, stTablitsaBukvy } from './razbor';
 import type { Prototype } from './types';
 
 /* ── Общие куски ──────────────────────────────────────────────── */
-
-const stTable = (text: string) => step('Составляем таблицу', text, undefined, true);
-
-const stChangeSum = () =>
-  step(
-    'Главное правило',
-    'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Значит, вся сумма выплат — это кредит плюс переплата, а переплата — ставка, умноженная на сумму долгов на начало периодов.',
-    'S_{\\text{общ}} = S + S_{\\text{перепл}}',
-  );
 
 const stAnswer = (text: string) => step('Ответ', text);
 
@@ -140,20 +133,68 @@ function sharesStem(
   );
 }
 
-function sharesSolution(a: Drob, b: Drob, r: Drob) {
-  const k = kOf(r);
-  const [z1, z2, z3] = sharePays(a, b, k) as [Drob, Drob, Drob];
+/** Таблица долей в буквах: долг на июль S, aS, bS, 0; платежи x_1, x_2, x_3. */
+const TABLITSA_DOLEY: TablitsaPeremennye = {
+  podpis: 'Доли из таблицы условия: долг на июль — $S$, $aS$, $bS$, $0$',
+  period: 'year',
+  scheme: 'ann',
+  rows: [
+    { label: '1', cells: ['S', 'Sk', 'x_{1}', 'aS'] },
+    { label: '2', cells: ['aS', 'aS\\,k', 'x_{2}', 'bS'] },
+    { label: '3', cells: ['bS', 'bS\\,k', 'x_{3}', '0'] },
+  ],
+  itog: null,
+  strelka: null,
+};
+
+/** Таблица и платежи через S — в буквах (числа — в sharesChisla). */
+function sharesSolution() {
   return [
-    stTable(
-      `Ставка ${num(r)} %, значит, после начисления процентов долг умножается на $k = ${tex(k)}$. Выплата года — долг после начисления минус долг на июль.`,
+    stTablitsaBukvy(
+      'Долг на июль задан таблицей условия: $S$, $aS$, $bS$ и $0$, где $a$ и $b$ — доли кредита. Каждый январь долг умножается на $k = 1 + \\dfrac{r}{100}$; платёж года — долг после начисления минус долг на июль.',
+      TABLITSA_DOLEY,
     ),
-    step(
-      'Выплаты через $S$',
-      'Записываем каждую выплату как часть $S$.',
-      `z_1 = ${tex(k)}S - ${tex(a)}S = ${tex(z1)}S,\\quad z_2 = ${tex(k)}\\cdot ${tex(a)}S - ${tex(b)}S = ${tex(z2)}S,\\quad z_3 = ${tex(k)}\\cdot ${tex(b)}S = ${tex(z3)}S`,
-    ),
+    {
+      title: 'Выражаем платежи через $S$',
+      text: 'Из каждой строки таблицы: платёж = долг после начисления − долг на конец.',
+      bloki: [
+        { vid: 'formula' as const, tex: 'x_{1} = Sk - aS = (k - a)\\,S' },
+        { vid: 'formula' as const, tex: 'x_{2} = aSk - bS = (ak - b)\\,S' },
+        { vid: 'formula' as const, tex: 'x_{3} = bSk = bk\\,S' },
+      ],
+    },
   ];
 }
+
+/**
+ * Коэффициенты платежей числами: k, k − a, ak − b, bk. dop — ещё числа
+ * условия (в конец первой строки) и формулы после коэффициентов.
+ */
+function sharesChisla(
+  a: Drob,
+  b: Drob,
+  r: Drob,
+  posle?: string,
+  dop?: { text: string; formuly: string[] },
+) {
+  const k = kOf(r);
+  const [z1, z2, z3] = sharePays(a, b, k) as [Drob, Drob, Drob];
+  return stChisla(
+    `$r = ${tex(r)}$, $a = ${tex(a)}$, $b = ${tex(b)}$${dop ? dop.text : ''}.`,
+    [
+      `k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}`,
+      `x_{1} = (${tex(k)} - ${tex(a)})\\,S = ${tex(z1)}S,\\quad x_{2} = (${tex(a)}\\cdot ${tex(k)} - ${tex(b)})\\,S = ${tex(z2)}S,\\quad x_{3} = ${tex(b)}\\cdot ${tex(k)}\\,S = ${tex(z3)}S`,
+      ...(dop ? dop.formuly : []),
+    ],
+    posle,
+  );
+}
+
+/** Частное в неравенстве: конечная дробь до трёх знаков — точно, иначе три знака и «…». */
+const texDo3 = (x: Drob): string =>
+  x.isFiniteDecimal() && x.decimals() <= 3
+    ? tex(x)
+    : `${tex(D(x.mul(1000).floor()).div(1000))}\\ldots`;
 
 /* ── Б3: таблица долей и целое S ─────────────────────────────── */
 
@@ -193,16 +234,20 @@ const B01: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        ...sharesSolution(a, b, r),
+        ...sharesSolution(),
         step(
-          'Когда выплаты целые',
-          'Каждая дробь, умноженная на $S$, должна дать целое число: $S$ делится на знаменатель каждой несократимой дроби.',
-          `${tex(z1)} = \\frac{${z1.n}}{${z1.d}},\\quad ${tex(z2)} = \\frac{${z2.n}}{${z2.d}},\\quad ${tex(z3)} = \\frac{${z3.n}}{${z3.d}}`,
+          'Когда платежи целые',
+          'Каждый коэффициент запишем несократимой дробью $\\dfrac{p}{q}$. Платёж $\\dfrac{p}{q}\\,S$ целый, только если $S$ делится на $q$: $p$ и $q$ взаимно просты.',
         ),
+        stFormula(
+          'Наименьшее $S$, которое делится на все три знаменателя, — их наименьшее общее кратное; $q_{1}$, $q_{2}$, $q_{3}$ — знаменатели несократимых дробей $k - a$, $ak - b$ и $bk$.',
+          'S = \\text{НОК}(q_{1}, q_{2}, q_{3})',
+        ),
+        sharesChisla(a, b, r),
         step(
-          'Наименьшее общее кратное',
-          'Наименьшее $S$ — наименьшее общее кратное знаменателей.',
-          `S = \\text{НОК}(${z1.d}, ${z2.d}, ${z3.d}) = ${L}`,
+          'Знаменатели и НОК',
+          'Записываем коэффициенты несократимыми дробями.',
+          `${tex(z1)} = \\frac{${z1.n}}{${z1.d}},\\quad ${tex(z2)} = \\frac{${z2.n}}{${z2.d}},\\quad ${tex(z3)} = \\frac{${z3.n}}{${z3.d}} \\;\\Rightarrow\\; S = \\text{НОК}(${z1.d}, ${z2.d}, ${z3.d}) = ${L}`,
         ),
         stAnswer(`Наименьшее $S = ${L}$ (тыс. рублей).`),
       ],
@@ -289,24 +334,63 @@ function makeShareBound(id: 'B-02' | 'B-03'): Prototype {
         scheme: 'dif',
         period: 'year',
         solution: [
-          ...sharesSolution(a, b, r),
+          ...sharesSolution(),
           isMin
             ? step(
                 'Составляем неравенство',
-                'Если наименьшая выплата больше $N$, то и все остальные больше.',
-                `${tex(lo)}S > ${tex(N)} \\;\\Rightarrow\\; S > \\frac{${tex(N)}}{${tex(lo)}}`,
+                'Каждая выплата — коэффициент, умноженный на $S$. Обозначим $c_{\\min}$ наименьший из трёх коэффициентов: если наименьшая выплата больше $N$, то и все остальные больше.',
+                'c_{\\min}\\,S > N, \\qquad c_{\\min} = \\min(k - a,\\; ak - b,\\; bk)',
               )
             : step(
                 'Составляем неравенство',
-                'Разница наибольшей и наименьшей выплат — тоже часть $S$.',
-                `(${tex(hi)} - ${tex(lo)})S < ${tex(N)} \\;\\Rightarrow\\; ${tex(spread)}S < ${tex(N)}`,
+                'Каждая выплата — коэффициент, умноженный на $S$. Обозначим $c_{\\max}$ и $c_{\\min}$ наибольший и наименьший из трёх коэффициентов: разница выплат — тоже коэффициент, умноженный на $S$.',
+                'c_{\\max}\\,S - c_{\\min}\\,S < N \\;\\Rightarrow\\; (c_{\\max} - c_{\\min})\\,S < N',
               ),
-          step(
-            'Выбираем целое',
-            isMin
-              ? `Правая часть больше ${S0 - 1}, но меньше ${S0}. Наименьшее целое — ${S0}; при $S = ${S0 - 1}$ наименьшая выплата не больше ${num(N)} млн.`
-              : `Правая часть больше ${S0}, но не больше ${S0 + 1}. Наибольшее целое — ${S0}; при $S = ${S0 + 1}$ разница уже не меньше ${num(N)} млн.`,
-          ),
+          isMin
+            ? step(
+                'Выражаем $S$',
+                'Делим обе части на положительное число $c_{\\min}$: знак неравенства не меняется.',
+                'S > \\dfrac{N}{c_{\\min}}',
+              )
+            : step(
+                'Выражаем $S$',
+                'Делим обе части на положительное число $c_{\\max} - c_{\\min}$: знак неравенства не меняется.',
+                'S < \\dfrac{N}{c_{\\max} - c_{\\min}}',
+              ),
+          isMin
+            ? stFormula(
+                'Ответ — наименьшее целое $S$, большее этой дроби.',
+                'S > \\dfrac{N}{c_{\\min}}, \\qquad c_{\\min} = \\min(k - a,\\; ak - b,\\; bk)',
+              )
+            : stFormula(
+                'Ответ — наибольшее целое $S$, меньшее этой дроби.',
+                'S < \\dfrac{N}{c_{\\max} - c_{\\min}}, \\qquad c_{\\max},\\ c_{\\min}\\ \\text{— наибольший и наименьший из}\\ k - a,\\; ak - b,\\; bk',
+              ),
+          isMin
+            ? sharesChisla(
+                a,
+                b,
+                r,
+                `Наименьшее целое $S$, большее этого числа, — ${S0}: при $S = ${S0 - 1}$ наименьшая выплата не больше ${num(N)} млн.`,
+                {
+                  text: `, $N = ${tex(N)}$`,
+                  formuly: [
+                    `c_{\\min} = ${tex(lo)}, \\qquad S > \\dfrac{${tex(N)}}{${tex(lo)}} = ${texDo3(N.div(lo))}`,
+                  ],
+                },
+              )
+            : sharesChisla(
+                a,
+                b,
+                r,
+                `Наибольшее целое $S$, меньшее этого числа, — ${S0}: при $S = ${S0 + 1}$ разница уже не меньше ${num(N)} млн.`,
+                {
+                  text: `, $N = ${tex(N)}$`,
+                  formuly: [
+                    `c_{\\max} - c_{\\min} = ${tex(hi)} - ${tex(lo)} = ${tex(spread)}, \\qquad S < \\dfrac{${tex(N)}}{${tex(spread)}} = ${texDo3(N.div(spread))}`,
+                  ],
+                },
+              ),
           stAnswer(`$S = ${S0}$ (млн рублей).`),
         ],
         hints: [
@@ -336,6 +420,42 @@ function makeShareBound(id: 'B-02' | 'B-03'): Prototype {
 function fixedRows(S: Drob, X: Drob, n: number, r: Drob) {
   return byDebts(S, fixedEnds(S, X, n - 1), r);
 }
+
+/** «Уменьшение на X и остаток» в буквах: строки 1, 2, 3, …, n − 1, n. */
+const TABLITSA_FIXED: TablitsaPeremennye = (() => {
+  const rT = '\\dfrac{r}{100}';
+  const dolg = (m: string) => `S - ${m}`;
+  const stroka = (label: string, m: string, m1: string) => ({
+    label,
+    cells: [dolg(m), 'X', `${rT}\\cdot (${dolg(m)})`, dolg(m1)] as [string, string, string, string],
+  });
+  return {
+    podpis: '',
+    period: 'month' as const,
+    scheme: 'dif' as const,
+    rows: [
+      {
+        label: '1',
+        cells: ['S', 'X', `${rT}\\cdot S`, 'S - X'] as [string, string, string, string],
+      },
+      stroka('2', 'X', '2X'),
+      stroka('3', '2X', '3X'),
+      null,
+      stroka('n-1', '(n-2)X', '(n-1)X'),
+      {
+        label: 'n',
+        cells: ['S - (n-1)X', 'S - (n-1)X', `${rT}\\cdot (S - (n-1)X)`, '0'] as [
+          string,
+          string,
+          string,
+          string,
+        ],
+      },
+    ],
+    itog: ['S', 'P'],
+    strelka: '$r\\,\\%$ начисляется на долг на начало месяца',
+  };
+})();
 
 function makeFixed(id: 'B-04' | 'B-05'): Prototype {
   const askDebt = id === 'B-04';
@@ -384,31 +504,40 @@ function makeFixed(id: 'B-04' | 'B-05'): Prototype {
         period: 'month',
         extra: [n - 1],
         solution: [
-          stTable(
-            `Считаем в тысячах рублей. Пусть $S$ — сумма кредита. Первые ${n - 1} месяцев сумма изменения долга равна ${num(X)}, долги на начало месяцев: $S, S - ${tex(X)}, \\dots, S - ${n - 1}\\cdot ${tex(X)}$. В последний месяц гасится весь остаток.`,
-          ),
-          stChangeSum(),
-          step(
-            'Сумма долгов на начало',
-            `Это ${n} слагаемых; вычитаемые образуют арифметическую прогрессию $1 + 2 + \\dots + ${n - 1} = ${tri}$.`,
-            `${n}S - ${tex(X)}\\cdot ${tri} = ${n}S - ${tex(X.mul(tri))}`,
+          stTablitsaBukvy(
+            'Считаем в тысячах рублей. Первые $n - 1$ месяцев долг уменьшается на одну и ту же сумму $X$, в последний месяц гасится весь остаток. Переплата — $r\\,\\%$ от долга на начало месяца.',
+            TABLITSA_FIXED,
           ),
           step(
             'Составляем уравнение',
-            'Общая сумма выплат — кредит плюс переплата.',
-            `S + \\frac{${tex(r)}}{100}\\,(${n}S - ${tex(X.mul(tri))}) = ${tex(Z)} \\;\\Rightarrow\\; S = ${tex(S)}`,
+            'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Вся сумма выплат $Z$ — кредит плюс переплата $P$, а переплата — $\\dfrac{r}{100}$ от суммы долгов на начало месяцев.',
+            'Z = S + P, \\qquad P = \\dfrac{r}{100}\\big(S + (S - X) + \\dots + (S - (n-1)X)\\big)',
           ),
-          askDebt
-            ? step(
-                `Долг ${n - 1}-го месяца`,
-                `За ${n - 1} ${plural(n - 1, 'месяц', 'месяца', 'месяцев')} долг ${n - 1} раз уменьшился на ${num(X)}.`,
-                `${tex(S)} - ${n - 1}\\cdot ${tex(X)} = ${tex(d)}`,
-              )
-            : step(
-                'Переводим в рубли',
-                'Считали в тысячах.',
-                `${tex(S)}\\ \\text{тыс.} = ${tex(S.mul(1000))}\\ \\text{руб.}`,
-              ),
+          step(
+            'Складываем долги на начало',
+            '$n$ слагаемых по $S$; вычитаемые — $X$, умноженное на арифметическую прогрессию $1 + 2 + \\dots + (n - 1)$.',
+            'S + (S - X) + \\dots + (S - (n-1)X) = nS - X\\,(1 + 2 + \\dots + (n-1)) = nS - \\dfrac{n(n-1)}{2}\\,X',
+          ),
+          step(
+            'Подставляем в уравнение и собираем $S$',
+            'Слагаемые с $S$ — в левую часть.',
+            'Z = S + \\dfrac{r}{100}\\Big(nS - \\dfrac{n(n-1)}{2}\\,X\\Big) \\;\\Rightarrow\\; S\\Big(1 + \\dfrac{rn}{100}\\Big) = Z + \\dfrac{r}{100}\\cdot\\dfrac{n(n-1)}{2}\\,X',
+          ),
+          stFormula(
+            askDebt
+              ? 'Делим на скобку; долг на 15-е число $(n - 1)$-го месяца — кредит минус $n - 1$ уменьшений.'
+              : 'Делим на скобку.',
+            askDebt
+              ? 'S = \\dfrac{Z + \\dfrac{r}{100}\\cdot\\dfrac{n(n-1)}{2}\\,X}{1 + \\dfrac{rn}{100}}, \\qquad D_{n-1} = S - (n-1)X'
+              : 'S = \\dfrac{Z + \\dfrac{r}{100}\\cdot\\dfrac{n(n-1)}{2}\\,X}{1 + \\dfrac{rn}{100}}',
+          ),
+          stChisla(`$n = ${n}$, $r = ${tex(r)}$, $X = ${tex(X)}$, $Z = ${tex(Z)}$.`, [
+            `\\dfrac{n(n-1)}{2} = \\dfrac{${n}\\cdot ${n - 1}}{2} = ${tri}`,
+            `S = \\dfrac{${tex(Z)} + \\dfrac{${tex(r)}}{100}\\cdot ${tri}\\cdot ${tex(X)}}{1 + \\dfrac{${tex(r)}\\cdot ${n}}{100}} = \\dfrac{${tex(Z.add(r.div(100).mul(X).mul(tri)))}}{${tex(r.mul(n).div(100).add(1))}} = ${tex(S)}`,
+            askDebt
+              ? `D_{${n - 1}} = ${tex(S)} - ${n - 1}\\cdot ${tex(X)} = ${tex(d)}`
+              : `${tex(S)}\\ \\text{тыс.} = ${tex(S.mul(1000))}\\ \\text{руб.}`,
+          ]),
           stAnswer(
             askDebt
               ? `Долг составит ${money(d, 'thous')}.`
@@ -467,19 +596,30 @@ const B06: Prototype = {
       period: 'month',
       extra: [n - 1],
       solution: [
-        stTable(
-          `Долги на начало месяцев: $${tex(S)}$, затем на одну и ту же сумму меньше, …, в последний месяц — $${tex(d)}$. Это ${n} членов арифметической прогрессии.`,
-        ),
-        stChangeSum(),
-        step(
-          'Сумма долгов на начало',
-          'Сумма прогрессии — полусумма первого и последнего, умноженная на число членов.',
-          `\\frac{${tex(S)} + ${tex(d)}}{2}\\cdot ${n} = ${tex(S.add(d).mul(n).div(2))}`,
+        stTablitsaBukvy(
+          'Считаем в тысячах рублей. Первые $n - 1$ месяцев долг уменьшается на одну и ту же сумму $X$; долг на конец $(n - 1)$-го месяца $D_{n-1} = S - (n-1)X$ дан в условии, в последний месяц он гасится целиком. Переплата — $r\\,\\%$ от долга на начало месяца.',
+          TABLITSA_FIXED,
         ),
         step(
-          'Переплата и сумма выплат',
-          `Переплата — ${num(r)} % от суммы долгов.`,
-          `${tex(S)} + \\frac{${tex(r)}}{100}\\cdot ${tex(S.add(d).mul(n).div(2))} = ${tex(Z)}`,
+          'Составляем уравнение',
+          'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Вся сумма выплат $Z$ — кредит плюс переплата $P$, а переплата — $\\dfrac{r}{100}$ от суммы долгов на начало месяцев.',
+          'Z = S + P, \\qquad P = \\dfrac{r}{100}\\big(S + (S - X) + \\dots + D_{n-1}\\big)',
+        ),
+        step(
+          'Складываем долги на начало',
+          'Долги на начало убывают на одно и то же $X$ — это $n$ членов арифметической прогрессии от $S$ до $D_{n-1}$. Сумма — полусумма первого и последнего, умноженная на число членов; $X$ знать не нужно.',
+          'S + (S - X) + \\dots + D_{n-1} = \\dfrac{S + D_{n-1}}{2}\\cdot n',
+        ),
+        stFormula(
+          'Подставляем сумму долгов в уравнение.',
+          'Z = S + \\dfrac{r}{100}\\cdot\\dfrac{S + D_{n-1}}{2}\\cdot n',
+        ),
+        stChisla(
+          `$S = ${tex(S)}$, $n = ${n}$, $r = ${tex(r)}$, $D_{n-1} = D_{${n - 1}} = ${tex(d)}$.`,
+          [
+            `\\dfrac{S + D_{n-1}}{2}\\cdot n = \\dfrac{${tex(S)} + ${tex(d)}}{2}\\cdot ${n} = ${tex(S.add(d).mul(n).div(2))}`,
+            `Z = ${tex(S)} + \\dfrac{${tex(r)}}{100}\\cdot ${tex(S.add(d).mul(n).div(2))} = ${tex(S)} + ${tex(Z.sub(S))} = ${tex(Z)}`,
+          ],
         ),
         stAnswer(`Общая сумма выплат — ${money(Z, 'thous')}.`),
       ],
@@ -520,6 +660,49 @@ function frameNplus1(
   );
 }
 
+/**
+ * «n месяцев уменьшение на X, в (n + 1)-й — остаток» в буквах: строки
+ * 1, 2, …, n, n + 1; долг после n-го месяца — D_n (дан в условии).
+ */
+const TABLITSA_N1: TablitsaPeremennye = (() => {
+  const rT = '\\dfrac{r}{100}';
+  type Kletki = [string, string, string, string];
+  const stroka = (label: string, nach: string, kon: string) => ({
+    label,
+    cells: [nach, 'X', `(${nach})\\cdot ${rT}`, kon] as Kletki,
+  });
+  return {
+    podpis: '',
+    period: 'month' as const,
+    scheme: 'dif' as const,
+    rows: [
+      { label: '1', cells: ['S', 'X', `S\\cdot ${rT}`, 'S - X'] as Kletki },
+      stroka('2', 'S - X', 'S - 2X'),
+      null,
+      stroka('n', 'S - (n-1)X', 'D_{n} = S - nX'),
+      { label: 'n+1', cells: ['D_{n}', 'D_{n}', `D_{n}\\cdot ${rT}`, '0'] as Kletki },
+    ],
+    itog: ['S', 'P'],
+    strelka: '$r\\,\\%$ начисляется на долг на начало месяца',
+  };
+})();
+
+/** Уравнение «главное правило» для TABLITSA_N1 и сумма n + 1 долгов на начало. */
+function n1Steps() {
+  return [
+    step(
+      'Составляем уравнение',
+      'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Вся сумма выплат $Z$ — кредит плюс переплата $P$, а переплата — $\\dfrac{r}{100}$ от суммы долгов на начало месяцев.',
+      'Z = S + P, \\qquad P = \\dfrac{r}{100}\\big(S + (S - X) + \\dots + (S - (n-1)X) + D_{n}\\big)',
+    ),
+    step(
+      'Складываем долги на начало',
+      'Долги на начало убывают на одно и то же $X$: $S$, $S - X$, …, $S - nX = D_{n}$ — это $n + 1$ членов арифметической прогрессии. Сумма — полусумма первого и последнего, умноженная на число членов.',
+      'S + (S - X) + \\dots + D_{n} = \\dfrac{S + D_{n}}{2}\\,(n + 1)',
+    ),
+  ];
+}
+
 const B07: Prototype = {
   id: 'B-07',
   type: 'B',
@@ -558,25 +741,29 @@ const B07: Prototype = {
       period: 'month',
       extra: [n],
       solution: [
+        stTablitsaBukvy(
+          'Считаем в тысячах рублей. Первые $n$ месяцев долг уменьшается на одну и ту же сумму $X$, долг после $n$-го месяца $D_{n}$ дан в условии, в $(n + 1)$-й месяц он гасится целиком. Переплата — $r\\,\\%$ от долга на начало месяца.',
+          TABLITSA_N1,
+        ),
+        ...n1Steps(),
         step(
           'Находим $n$',
-          `Долг уменьшился с ${num(S)} до ${num(d)} тыс. ступеньками по ${num(X)} тыс.`,
-          `n = \\frac{${tex(S)} - ${tex(d)}}{${tex(X)}} = ${n}`,
-        ),
-        stTable(
-          `Долги на начало месяцев: $${tex(S)}, ${tex(S.sub(X))}, \\dots, ${tex(d)}$ — это ${n + 1} членов арифметической прогрессии.`,
-        ),
-        stChangeSum(),
-        step(
-          'Сумма долгов на начало',
-          'Полусумма первого и последнего, умноженная на число членов.',
-          `\\frac{${tex(S)} + ${tex(d)}}{2}\\cdot ${n + 1} = ${tex(starts)}`,
+          'Из строки $n$ таблицы: за $n$ месяцев долг уменьшился с $S$ до $D_{n}$ ступеньками по $X$.',
+          'D_{n} = S - nX \\;\\Rightarrow\\; n = \\dfrac{S - D_{n}}{X}',
         ),
         step(
-          'Находим $r$',
-          'Переплата — разность суммы выплат и кредита.',
-          `\\frac{r}{100}\\cdot ${tex(starts)} = ${tex(Z)} - ${tex(S)} \\;\\Rightarrow\\; r = ${tex(r)}`,
+          'Выражаем $r$',
+          'Переплата — разность суммы выплат и кредита: $P = Z - S$.',
+          '\\dfrac{r}{100}\\cdot\\dfrac{S + D_{n}}{2}\\,(n + 1) = Z - S',
         ),
+        stFormula(
+          'Сначала находим $n$, затем $r$.',
+          'n = \\dfrac{S - D_{n}}{X}, \\qquad r = \\dfrac{200\\,(Z - S)}{(S + D_{n})(n + 1)}',
+        ),
+        stChisla(`$S = ${tex(S)}$, $X = ${tex(X)}$, $D_{n} = ${tex(d)}$, $Z = ${tex(Z)}$.`, [
+          `n = \\dfrac{${tex(S)} - ${tex(d)}}{${tex(X)}} = ${n}`,
+          `r = \\dfrac{200\\cdot (${tex(Z)} - ${tex(S)})}{(${tex(S)} + ${tex(d)})\\cdot ${n + 1}} = \\dfrac{${tex(Z.sub(S).mul(200))}}{${tex(S.add(d).mul(n + 1))}} = ${tex(r)}`,
+        ]),
         stAnswer(`$r = ${tex(r)}$.`),
       ],
       hints: [
@@ -632,20 +819,28 @@ const B08: Prototype = {
       period: 'month',
       extra: [n],
       solution: [
-        stTable(
-          `Долги на начало месяцев: от $${tex(S)}$ до $${tex(d)}$ с одинаковым шагом — это $n + 1$ членов арифметической прогрессии.`,
+        stTablitsaBukvy(
+          'Считаем в тысячах рублей. Первые $n$ месяцев долг уменьшается на одну и ту же сумму $X$ (её не знаем), долг после $n$-го месяца $D_{n}$ дан в условии, в $(n + 1)$-й месяц он гасится целиком. Переплата — $r\\,\\%$ от долга на начало месяца.',
+          TABLITSA_N1,
         ),
-        stChangeSum(),
+        ...n1Steps(),
         step(
-          'Сумма долгов на начало',
-          'Полусумма первого и последнего, умноженная на число членов.',
-          `\\frac{${tex(S)} + ${tex(d)}}{2}\\,(n + 1) = ${tex(S.add(d).div(2))}\\,(n+1)`,
+          'Подставляем сумму в уравнение',
+          'Сумма долгов зависит только от первого и последнего долга и от числа месяцев — $X$ знать не нужно.',
+          'Z = S + \\dfrac{r}{100}\\cdot\\dfrac{S + D_{n}}{2}\\,(n + 1)',
         ),
         step(
-          'Составляем уравнение',
-          'Кредит плюс переплата равны сумме выплат.',
-          `${tex(S)} + \\frac{${tex(r)}}{100}\\cdot ${tex(S.add(d).div(2))}\\,(n+1) = ${tex(Z)} \\;\\Rightarrow\\; n + 1 = ${n + 1}`,
+          'Выражаем $n + 1$',
+          'Переносим $S$ влево и делим на множитель при $n + 1$.',
+          'n + 1 = \\dfrac{200\\,(Z - S)}{r\\,(S + D_{n})}',
         ),
+        stFormula(
+          'Срок — на один месяц меньше.',
+          'n = \\dfrac{200\\,(Z - S)}{r\\,(S + D_{n})} - 1',
+        ),
+        stChisla(`$S = ${tex(S)}$, $r = ${tex(r)}$, $D_{n} = ${tex(d)}$, $Z = ${tex(Z)}$.`, [
+          `n = \\dfrac{200\\cdot (${tex(Z)} - ${tex(S)})}{${tex(r)}\\cdot (${tex(S)} + ${tex(d)})} - 1 = \\dfrac{${tex(Z.sub(S).mul(200))}}{${tex(r.mul(S.add(d)))}} - 1 = ${n + 1} - 1 = ${n}`,
+        ]),
         stAnswer(`$n = ${n}$.`),
       ],
       hints: [
@@ -689,20 +884,66 @@ function twoRateSums(S: Drob, m: number) {
   return { first: S.div(n).mul(firstK), second: S.div(n).mul(secondK), firstK, secondK, n };
 }
 
-function twoRateSteps(S: Drob, m: number, r1: Drob) {
-  const { firstK, secondK, n } = twoRateSums(S, m);
+/** Две ставки в буквах: строки 1, …, m, m + 1, …, n (n = 2m). */
+const TABLITSA_DVE_STAVKI: TablitsaPeremennye = (() => {
+  const d = (c: string) => (c === 'n' ? 'S' : c === '0' ? '0' : `\\dfrac{${c}S}{n}`);
+  const stroka = (label: string, c: string, c1: string, r: string) => ({
+    label,
+    cells: [d(c), '\\dfrac{S}{n}', `\\dfrac{${r}}{100}\\cdot ${d(c)}`, d(c1)] as [
+      string,
+      string,
+      string,
+      string,
+    ],
+  });
+  return {
+    podpis: 'Первые $m$ лет ставка $r_{1}\\,\\%$, последние $m$ лет — $r_{2}\\,\\%$; $n = 2m$',
+    period: 'year' as const,
+    scheme: 'dif' as const,
+    rows: [
+      stroka('1', 'n', '(n-1)', 'r_{1}'),
+      null,
+      stroka('m', '(n-m+1)', '(n-m)', 'r_{1}'),
+      stroka('m+1', '(n-m)', '(n-m-1)', 'r_{2}'),
+      null,
+      {
+        label: 'n',
+        cells: ['\\dfrac{S}{n}', '\\dfrac{S}{n}', '\\dfrac{r_{2}}{100}\\cdot \\dfrac{S}{n}', '0'],
+      },
+    ],
+    itog: ['S', 'P'],
+    strelka: 'проценты начисляются на долг на начало года',
+  };
+})();
+
+/** Таблица, уравнение и суммы прогрессий — в буквах (числа — у прототипа). */
+function twoRateSteps() {
   return [
-    stTable(
-      `Срок ${n} лет, долг каждый год уменьшается на $\\dfrac{S}{${n}} = ${tex(S.div(n))}$. Долги на начало лет: $${n}, ${n - 1}, \\dots, 1$ таких частей.`,
+    stTablitsaBukvy(
+      'Долг каждый год уменьшается на одну и ту же сумму $\\dfrac{S}{n}$. Долг на начало года — $n$, $n - 1$, …, $1$ таких частей. Переплата года — ставка этого года от долга на начало.',
+      TABLITSA_DVE_STAVKI,
     ),
-    stChangeSum(),
     step(
-      'Переплата по кускам',
-      `Первые ${m} лет ставка ${num(r1)} %, долги на начало — от ${n} до ${m + 1} частей; последние ${m} лет — от ${m} до 1 части.`,
-      `S_{\\text{перепл}} = \\frac{${tex(r1)}}{100}\\cdot ${tex(S.div(n))}\\cdot ${firstK} + \\frac{r}{100}\\cdot ${tex(S.div(n))}\\cdot ${secondK}`,
+      'Составляем уравнение',
+      'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Вся сумма выплат $Z$ — кредит плюс переплата $P$; переплату считаем по двум кускам срока.',
+      'Z = S + \\dfrac{r_{1}}{100}\\cdot\\dfrac{S}{n}\\big(n + (n-1) + \\dots + (m+1)\\big) + \\dfrac{r_{2}}{100}\\cdot\\dfrac{S}{n}\\big(m + \\dots + 1\\big)',
+    ),
+    step(
+      'Складываем прогрессии',
+      'В каждой скобке — $m$ членов арифметической прогрессии: полусумма первого и последнего, умноженная на число членов.',
+      'n + \\dots + (m+1) = \\dfrac{(n+m+1)\\,m}{2}, \\qquad m + \\dots + 1 = \\dfrac{(m+1)\\,m}{2}',
     ),
   ];
 }
+
+/** Подстановка чисел для двух ставок: n, суммы прогрессий, S/n. */
+const dveStavkiChisla = (S: Drob, m: number, r1: string, r2: string) => {
+  const { firstK, secondK, n } = twoRateSums(S, m);
+  return [
+    `n = 2\\cdot ${m} = ${n}, \\qquad \\dfrac{(n+m+1)\\,m}{2} = ${firstK}, \\qquad \\dfrac{(m+1)\\,m}{2} = ${secondK}, \\qquad \\dfrac{S}{n} = ${tex(S.div(n))}`,
+    `$S = ${tex(S)}$, $m = ${m}$, $r_{1} = ${r1}$${r2 ? `, $r_{2} = ${r2}$` : ''}.`,
+  ] as const;
+};
 
 const B09: Prototype = {
   id: 'B-09',
@@ -724,9 +965,10 @@ const B09: Prototype = {
     const r1 = D(rng.pick(['8', '10', '12', '15', '20']));
     const r = D(rng.pick(['6', '8', '10', '12', '14', '15', '16', '18', '20']));
     if (r.eq(r1)) return null;
-    const { first, second, n } = twoRateSums(S, m);
+    const { first, second, n, firstK, secondK } = twoRateSums(S, m);
     const Z = S.add(r1.div(100).mul(first)).add(r.div(100).mul(second));
     if (!isNice(Z, 1) || !isNice(S.div(n), 2)) return null;
+    const chisla9 = dveStavkiChisla(S, m, tex(r1), '');
     let found: Drob = D(0);
     for (let x = 1; x <= 60; x++) {
       const rates = [...Array(m).fill(r1), ...Array(m).fill(D(x))] as Drob[];
@@ -742,12 +984,19 @@ const B09: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        ...twoRateSteps(S, m, r1),
-        step(
-          'Составляем уравнение',
-          'Кредит плюс переплата — общая сумма выплат.',
-          `${tex(S)} + ${tex(r1.div(100).mul(first))} + \\frac{r}{100}\\cdot ${tex(second)} = ${tex(Z)} \\;\\Rightarrow\\; r = ${tex(r)}`,
+        ...twoRateSteps(),
+        stFormula(
+          'Выражаем $r_{2}$ — это и есть $r$: умножаем уравнение на $\\dfrac{100n}{S}$ и переносим известное вправо.',
+          'r = r_{2} = \\dfrac{\\dfrac{200n\\,(Z - S)}{S} - r_{1}(n+m+1)\\,m}{m(m+1)}',
         ),
+        stChisla(`${chisla9[1]} $Z = ${tex(Z)}$.`, [
+          chisla9[0],
+          `r = \\dfrac{\\dfrac{200\\cdot ${n}\\cdot (${tex(Z)} - ${tex(S)})}{${tex(S)}} - ${tex(r1)}\\cdot ${2 * firstK}}{${2 * secondK}} = \\dfrac{${tex(
+            D(200 * n)
+              .mul(Z.sub(S))
+              .div(S),
+          )} - ${tex(r1.mul(2 * firstK))}}{${2 * secondK}} = ${tex(r)}`,
+        ]),
         stAnswer(`$r = ${tex(r)}$.`),
       ],
       hints: [
@@ -782,7 +1031,7 @@ const B10: Prototype = {
     const r1 = D(rng.pick(['8', '10', '12', '14', '15', '20']));
     const r2 = D(rng.pick(['6', '9', '10', '11', '12', '15', '16', '18']));
     if (r2.eq(r1)) return null;
-    const { first, second, n } = twoRateSums(S, m);
+    const { first, second, n, firstK, secondK } = twoRateSums(S, m);
     const Z = S.add(r1.div(100).mul(first)).add(r2.div(100).mul(second));
     if (!isNice(Z, 1) || !isNice(S.div(n), 2)) return null;
     const rates = [...Array(m).fill(r1), ...Array(m).fill(r2)] as Drob[];
@@ -796,19 +1045,15 @@ const B10: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        ...twoRateSteps(S, m, r1).map((s, i) =>
-          i === 2
-            ? {
-                ...s,
-                formula: (s.formula ?? '').replace('\\frac{r}{100}', `\\frac{${tex(r2)}}{100}`),
-              }
-            : s,
+        ...twoRateSteps(),
+        stFormula(
+          'Подставляем суммы прогрессий в уравнение.',
+          'Z = S + \\dfrac{S}{n}\\Big(\\dfrac{r_{1}}{100}\\cdot\\dfrac{(n+m+1)\\,m}{2} + \\dfrac{r_{2}}{100}\\cdot\\dfrac{(m+1)\\,m}{2}\\Big)',
         ),
-        step(
-          'Считаем',
-          'Складываем кредит и обе части переплаты.',
-          `${tex(S)} + ${tex(r1.div(100).mul(first))} + ${tex(r2.div(100).mul(second))} = ${tex(Z)}`,
-        ),
+        stChisla(dveStavkiChisla(S, m, tex(r1), tex(r2))[1], [
+          dveStavkiChisla(S, m, tex(r1), tex(r2))[0],
+          `Z = ${tex(S)} + ${tex(S.div(n))}\\cdot\\Big(\\dfrac{${tex(r1)}}{100}\\cdot ${firstK} + \\dfrac{${tex(r2)}}{100}\\cdot ${secondK}\\Big) = ${tex(S)} + ${tex(r1.div(100).mul(first))} + ${tex(r2.div(100).mul(second))} = ${tex(Z)}`,
+        ]),
         stAnswer(`Общая сумма выплат — ${money(Z, 'thous')}.`),
       ],
       hints: [
@@ -826,6 +1071,39 @@ const B10: Prototype = {
 };
 
 /* ── Б4: две величины уменьшения, остаток ─────────────────────── */
+
+/**
+ * Две величины уменьшения в буквах: первые m лет долг уменьшается на
+ * X_1, следующие m лет — на X_2; долг после m-го года — D_m. m — буква
+ * (B-11) или число (B-19: по пять лет).
+ */
+function tablitsaDvaUmensheniya(m: 'm' | number): TablitsaPeremennye {
+  const rT = '\\dfrac{r}{100}';
+  type Kletki = [string, string, string, string];
+  const num1 = (sdvig: number) =>
+    m === 'm' ? (sdvig === 0 ? 'm' : `m${sdvig > 0 ? '+' : ''}${sdvig}`) : String(m + sdvig);
+  const Dm = `D_{${m}}`;
+  const stroka = (label: string, nach: string, X: string, kon: string) => ({
+    label,
+    cells: [nach, X, `${nach.includes(' ') ? `(${nach})` : nach}\\cdot ${rT}`, kon] as Kletki,
+  });
+  return {
+    podpis: '',
+    period: 'year',
+    scheme: 'dif',
+    rows: [
+      stroka('1', 'S', 'X_{1}', 'S - X_{1}'),
+      stroka('2', 'S - X_{1}', 'X_{1}', 'S - 2X_{1}'),
+      null,
+      stroka(num1(0), `S - ${m === 'm' ? '(m-1)' : m - 1}X_{1}`, 'X_{1}', `${Dm} = S - ${m}X_{1}`),
+      stroka(num1(1), Dm, 'X_{2}', `${Dm} - X_{2}`),
+      null,
+      stroka(m === 'm' ? '2m' : String(2 * m), 'X_{2}', 'X_{2}', '0'),
+    ],
+    itog: ['S', 'P'],
+    strelka: '$r\\,\\%$ начисляется на долг на начало года',
+  };
+}
 
 const B11: Prototype = {
   id: 'B-11',
@@ -884,30 +1162,48 @@ const B11: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        stTable(
-          `Пусть $x$ — долг в июле ${y + m} года (тыс. рублей). Первые ${m} лет долг убывает на $\\dfrac{${tex(S)} - x}{${m}}$, следующие ${m} лет — на $\\dfrac{x}{${m}}$.`,
+        stTablitsaBukvy(
+          'Считаем в тысячах рублей. Срок — $2m$ лет: первые $m$ лет долг уменьшается на одну и ту же сумму $X_{1}$, следующие $m$ лет — на другую, $X_{2}$. Искомый долг после $m$-го года — $D_{m}$. Переплата — $r\\,\\%$ от долга на начало года.',
+          tablitsaDvaUmensheniya('m'),
         ),
-        stChangeSum(),
+        step(
+          'Составляем уравнение',
+          'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Вся сумма выплат $Z$ — кредит плюс переплата, а переплата — $\\dfrac{r}{100}$ от суммы долгов на начало лет.',
+          'Z = S + \\dfrac{r}{100}\\Big(S + (S - X_{1}) + \\dots + (S - (m-1)X_{1}) + D_{m} + (D_{m} - X_{2}) + \\dots + X_{2}\\Big)',
+        ),
+        step(
+          'Выражаем $X_{1}$ и $X_{2}$ через $D_{m}$',
+          'За первые $m$ лет долг уменьшился с $S$ до $D_{m}$, за следующие $m$ лет — с $D_{m}$ до нуля.',
+          'X_{1} = \\dfrac{S - D_{m}}{m}, \\qquad X_{2} = \\dfrac{D_{m}}{m}',
+        ),
         step(
           'Долги на начало: первый кусок',
-          `${m} слагаемых от $${tex(S)}$ вниз с шагом $\\dfrac{${tex(S)} - x}{${m}}$.`,
-          `${m}\\cdot ${tex(S)} - \\frac{${tex(S)} - x}{${m}}\\cdot ${((m - 1) * m) / 2}`,
+          '$m$ слагаемых по $S$, вычитаемые — $X_{1}$, умноженное на $1 + 2 + \\dots + (m - 1) = \\dfrac{m(m-1)}{2}$.',
+          'S + \\dots + (S - (m-1)X_{1}) = mS - \\dfrac{m(m-1)}{2}\\cdot\\dfrac{S - D_{m}}{m} = mS - \\dfrac{(m-1)(S - D_{m})}{2}',
         ),
         step(
           'Долги на начало: второй кусок',
-          `От $x$ до $\\dfrac{x}{${m}}$ — полусумма, умноженная на ${m}.`,
-          `\\frac{x + \\frac{x}{${m}}}{2}\\cdot ${m} = \\frac{${m + 1}x}{2}`,
+          '$m$ членов арифметической прогрессии от $D_{m}$ до $X_{2} = \\dfrac{D_{m}}{m}$: полусумма первого и последнего, умноженная на число членов.',
+          'D_{m} + \\dots + X_{2} = \\dfrac{D_{m} + \\dfrac{D_{m}}{m}}{2}\\cdot m = \\dfrac{(m+1)\\,D_{m}}{2}',
         ),
         step(
-          'Составляем уравнение и решаем',
-          'Кредит плюс переплата — сумма платежей.',
-          `${tex(S)} + \\frac{${tex(r)}}{100}\\Big(${m}\\cdot ${tex(S)} - \\frac{${tex(S)} - x}{${m}}\\cdot ${((m - 1) * m) / 2} + \\frac{${m + 1}x}{2}\\Big) = ${tex(Z)} \\;\\Rightarrow\\; x = ${tex(d)}`,
+          'Складываем куски',
+          'Собираем слагаемые с $S$ и с $D_{m}$.',
+          'mS - \\dfrac{(m-1)(S - D_{m})}{2} + \\dfrac{(m+1)\\,D_{m}}{2} = \\dfrac{(m+1)\\,S}{2} + m\\,D_{m}',
         ),
         step(
-          'Переводим в рубли',
-          'Считали в тысячах.',
-          `${tex(d)}\\ \\text{тыс.} = ${tex(d.mul(1000))}\\ \\text{руб.}`,
+          'Выражаем $D_{m}$',
+          'Подставляем сумму в уравнение: $Z = S + \\dfrac{r}{100}\\Big(\\dfrac{(m+1)\\,S}{2} + m\\,D_{m}\\Big)$. Переносим $S$, умножаем на $\\dfrac{100}{r}$.',
+          'm\\,D_{m} = \\dfrac{100\\,(Z - S)}{r} - \\dfrac{(m+1)\\,S}{2}',
         ),
+        stFormula(
+          'Делим на $m$.',
+          'D_{m} = \\dfrac{1}{m}\\Big(\\dfrac{100\\,(Z - S)}{r} - \\dfrac{(m+1)\\,S}{2}\\Big)',
+        ),
+        stChisla(`$S = ${tex(S)}$, $m = ${m}$, $r = ${tex(r)}$, $Z = ${tex(Z)}$.`, [
+          `\\dfrac{100\\cdot (${tex(Z)} - ${tex(S)})}{${tex(r)}} = ${tex(Z.sub(S).mul(100).div(r))}, \\qquad \\dfrac{(m+1)\\,S}{2} = \\dfrac{${m + 1}\\cdot ${tex(S)}}{2} = ${tex(S.mul(m + 1).div(2))}`,
+          `D_{${m}} = \\dfrac{${tex(Z.sub(S).mul(100).div(r))} - ${tex(S.mul(m + 1).div(2))}}{${m}} = ${tex(d)}\\ \\text{тыс.} = ${tex(d.mul(1000))}\\ \\text{руб.}`,
+        ]),
         stAnswer(`Долг в июле ${y + m} года — ${money(d.mul(1000), 'rub')}.`),
       ],
       hints: [
@@ -966,28 +1262,27 @@ const B12: Prototype = {
       period: 'month',
       extra: [n, n + 1],
       solution: [
-        stTable(
-          `Кредит длится ${n + 1} ${plural(n + 1, 'месяц', 'месяца', 'месяцев')}. Долги на начало месяцев убывают равномерно от $${tex(S)}$ до $${tex(d)}$ — это ${n + 1} членов арифметической прогрессии.`,
+        stTablitsaBukvy(
+          'Считаем в тысячах рублей. Первые $n$ месяцев долг уменьшается на одну и ту же сумму $X$, долг после $n$-го месяца $D_{n}$ дан в условии, в следующий, $(n + 1)$-й месяц он гасится одним платежом — кредит длится $n + 1$ месяц. Переплата — $r\\,\\%$ от долга на начало месяца.',
+          TABLITSA_N1,
         ),
-        stChangeSum(),
-        step(
-          'Сумма долгов на начало',
-          'Полусумма первого и последнего, умноженная на число членов.',
-          `\\frac{${tex(S)} + ${tex(d)}}{2}\\cdot ${n + 1} = ${tex(
+        ...n1Steps(),
+        stFormula(
+          'Подставляем сумму долгов в уравнение; $X$ знать не нужно.',
+          'Z = S + \\dfrac{r}{100}\\cdot\\dfrac{S + D_{n}}{2}\\,(n + 1)',
+        ),
+        stChisla(`$S = ${tex(S)}$, $n = ${n}$, $r = ${tex(r)}$, $D_{n} = ${tex(d)}$.`, [
+          `\\dfrac{S + D_{n}}{2}\\,(n + 1) = \\dfrac{${tex(S)} + ${tex(d)}}{2}\\cdot ${n + 1} = ${tex(
             S.add(d)
               .mul(n + 1)
               .div(2),
           )}`,
-        ),
-        step(
-          'Сумма выплат',
-          `Переплата — ${num(r)} % от суммы долгов на начало.`,
-          `${tex(S)} + \\frac{${tex(r)}}{100}\\cdot ${tex(
+          `Z = ${tex(S)} + \\dfrac{${tex(r)}}{100}\\cdot ${tex(
             S.add(d)
               .mul(n + 1)
               .div(2),
-          )} = ${tex(Z)}`,
-        ),
+          )} = ${tex(S)} + ${tex(Z.sub(S))} = ${tex(Z)}`,
+        ]),
         stAnswer(`Общая сумма выплат — ${money(Z, 'thous')}.`),
       ],
       hints: [
@@ -1031,16 +1326,45 @@ function lgotFrame(
   );
 }
 
-const lgotSteps = (Stxt: string, r: string) => [
-  stTable(
-    `Первые три года долг не меняется: платим только проценты, ${r} от $${Stxt}$. Потом долг $${Stxt}$ гасится двумя равными платежами $x$.`,
-  ),
-  step(
-    'Два равных платежа',
-    'После начисления процентов долг умножается на $k$, затем вычитается платёж; после второго платежа долг равен нулю.',
-    `(${Stxt}\\,k - x)\\,k - x = 0 \\;\\Rightarrow\\; x = \\frac{${Stxt}\\,k^2}{k + 1}`,
-  ),
-];
+/**
+ * Льготный кредит в буквах: m лет платим только проценты S(k − 1), долг
+ * остаётся S; затем два равных платежа x гасят долг. Таблица, уравнение
+ * и формула платежа — общие для B-13, B-14, B-15.
+ */
+function lgotSteps(m: number) {
+  const proc = (i: number) => ({
+    label: String(i),
+    cells: ['S', 'Sk', 'S(k - 1)', 'S'] as [string, string, string, string],
+  });
+  const t: TablitsaPeremennye = {
+    podpis: `Первые ${m} года — только проценты, затем два равных платежа`,
+    period: 'year',
+    scheme: 'ann',
+    rows: [
+      ...Array.from({ length: m }, (_, i) => proc(i + 1)),
+      { label: String(m + 1), cells: ['S', 'Sk', 'x', 'Sk - x'] },
+      { label: String(m + 2), cells: ['Sk - x', 'Sk^{2} - xk', 'x', '0'] },
+    ],
+    itog: ['', `${m}S(k - 1) + 2x`],
+    strelka: null,
+  };
+  return [
+    stTablitsaBukvy(
+      `Каждый январь долг умножается на $k = 1 + \\dfrac{r}{100}$. Первые ${m} года долг не меняется: платим только проценты $S(k - 1)$. Потом долг $S$ гасится двумя равными платежами $x$.`,
+      t,
+    ),
+    step(
+      'Составляем уравнение',
+      'Долг на конец последнего года — последняя строка таблицы; после второго платежа он равен нулю.',
+      'Sk^{2} - xk - x = 0',
+    ),
+    step(
+      'Выражаем платёж',
+      'Переносим платежи вправо и выносим $x$.',
+      'Sk^{2} = x(k + 1) \\;\\Rightarrow\\; x = \\dfrac{Sk^{2}}{k + 1}',
+    ),
+  ];
+}
 
 const B13: Prototype = {
   id: 'B-13',
@@ -1064,6 +1388,7 @@ const B13: Prototype = {
     const x = S.mul(k.pow(2)).div(k.add(1));
     const Z = S.mul(k.sub(1)).mul(3).add(x.mul(2));
     if (!isNice(x, 2) || !isNice(Z, 2) || !x.isInteger()) return null;
+    const koren = S.mul(10).mul(k).sub(Z); // √(Z² + 20S(3S + Z)) = 10Sk − Z
     let found: Drob = D(0);
     for (let q = 1; q <= 60; q++) {
       const rows = lgotRows(S, 3, D(q));
@@ -1078,22 +1403,26 @@ const B13: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        ...lgotSteps(tex(S), '$r$ %'),
+        ...lgotSteps(3),
         step(
-          'Составляем уравнение',
-          'Три раза проценты плюс два равных платежа — вся сумма выплат.',
-          `3\\cdot ${tex(S)}\\,(k-1) + \\frac{2\\cdot ${tex(S)}\\,k^2}{k+1} = ${tex(Z)}`,
+          'Составляем уравнение на сумму выплат',
+          'Три раза проценты и два равных платежа — вся сумма выплат $Z$.',
+          'Z = 3S(k - 1) + 2x = 3S(k - 1) + \\dfrac{2Sk^{2}}{k + 1}',
         ),
         step(
-          'Решаем квадратное уравнение',
+          'Приводим к квадратному уравнению',
           'Умножаем обе части на $k + 1$ и собираем всё в одной части.',
-          `${tex(S.mul(5))}\\,k^2 - ${tex(Z)}\\,k - ${tex(S.mul(3).add(Z))} = 0`,
+          'Z(k + 1) = 3S(k^{2} - 1) + 2Sk^{2} \\;\\Rightarrow\\; 5S\\,k^{2} - Z\\,k - (3S + Z) = 0',
         ),
-        step(
-          'Выбираем корень',
-          'Коэффициент $k$ больше единицы, второй корень отрицательный и не подходит.',
-          `k = ${tex(k)} \\;\\Rightarrow\\; r = ${tex(r)}`,
+        stFormula(
+          '$k > 1$ — берём положительный корень; второй отрицательный.',
+          'k = \\dfrac{Z + \\sqrt{Z^{2} + 20S(3S + Z)}}{10S}, \\qquad r = 100\\,(k - 1)',
         ),
+        stChisla(`Считаем в тысячах рублей: $S = ${tex(S)}$, $Z = ${tex(Z)}$.`, [
+          `${tex(S.mul(5))}\\,k^{2} - ${tex(Z)}\\,k - ${tex(S.mul(3).add(Z))} = 0`,
+          `k = \\dfrac{${tex(Z)} + \\sqrt{${tex(Z.mul(Z))} + ${tex(S.mul(20).mul(S.mul(3).add(Z)))}}}{${tex(S.mul(10))}} = \\dfrac{${tex(Z)} + ${tex(koren)}}{${tex(S.mul(10))}} = ${tex(k)}`,
+          `r = 100\\,(${tex(k)} - 1) = ${tex(r)}`,
+        ]),
         stAnswer(`$r = ${tex(r)}$.`),
       ],
       hints: [
@@ -1162,12 +1491,14 @@ const B14: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        ...lgotSteps('S', `${num(r)} %`),
-        step(
-          'Сумма выплат через $S$',
-          `${m} раза проценты и два равных платежа, $k = ${tex(k)}$.`,
-          `${m}\\cdot ${tex(k.sub(1))}\\,S + \\frac{2\\cdot ${tex(k.pow(2))}}{${tex(k.add(1))}}\\,S = ${texQ(c)}\\,S`,
+        ...lgotSteps(m),
+        stFormula(
+          `${m} раза проценты и два равных платежа: сумма выплат — множитель, умноженный на $S$.`,
+          `Z = ${m}S(k - 1) + \\dfrac{2Sk^{2}}{k + 1} = \\Big(${m}(k - 1) + \\dfrac{2k^{2}}{k + 1}\\Big)S`,
         ),
+        stChisla(`$r = ${tex(r)}$.`, [
+          `k = ${tex(k)}, \\qquad Z = \\Big(${m}\\cdot ${tex(k.sub(1))} + \\dfrac{2\\cdot ${tex(k.pow(2))}}{${tex(k.add(1))}}\\Big)S = ${texQ(c)}\\,S`,
+        ]),
         step(
           'Неравенство и целое число',
           wantMax
@@ -1226,17 +1557,15 @@ const B15: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        ...lgotSteps('S', pct(r)),
-        step(
-          'Находим $S$',
-          `Платёж известен: $x = ${tex(X)}$, $k = ${tex(k)}$.`,
-          `S = \\frac{x\\,(k+1)}{k^2} = \\frac{${tex(X)}\\cdot ${tex(k.add(1))}}{${tex(k.pow(2))}} = ${tex(S)}`,
+        ...lgotSteps(3),
+        stFormula(
+          'Платёж известен — выражаем $S$; сумма выплат — три раза проценты и два платежа.',
+          'S = \\dfrac{x(k + 1)}{k^{2}}, \\qquad Z = 3S(k - 1) + 2x',
         ),
-        step(
-          'Общая сумма выплат',
-          'Три раза проценты и два платежа.',
-          `3\\cdot ${tex(S)}\\cdot ${tex(k.sub(1))} + 2\\cdot ${tex(X)} = ${tex(total)}\\ \\text{тыс.} = ${tex(total.mul(1000))}\\ \\text{руб.}`,
-        ),
+        stChisla(`Считаем в тысячах рублей: $x = ${tex(X)}$, $k = ${tex(k)}$.`, [
+          `S = \\dfrac{${tex(X)}\\cdot ${tex(k.add(1))}}{${tex(k.pow(2))}} = ${tex(S)}`,
+          `Z = 3\\cdot ${tex(S)}\\cdot ${tex(k.sub(1))} + 2\\cdot ${tex(X)} = ${tex(total)}\\ \\text{тыс.} = ${tex(total.mul(1000))}\\ \\text{руб.}`,
+        ]),
         stAnswer(`${money(total.mul(1000), 'rub')}.`),
       ],
       hints: [
@@ -1301,23 +1630,56 @@ const B16: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        stTable(
-          `Первые два года — дифференцированная часть: долг на конец $${tex(a)}S$, затем $${tex(b)}S$. Последние два года — аннуитетная часть: остаток $${tex(b)}S$ гасится двумя равными платежами $x$ (в теории для этой части таблица «Долг на начало · Долг с процентами · Платёж · Долг на конец»).`,
+        stTablitsaBukvy(
+          'Считаем в тысячах рублей. Каждый год долг умножается на $k = 1 + \\dfrac{r}{100}$, платёж — долг после начисления минус долг на конец. Первые два года долг уменьшается на одну и ту же долю кредита: на конец первого года он равен $aS$, второго — $bS$ ($a$ и $b$ — доли кредита, найдём их при подстановке чисел). Остаток $bS$ гасится двумя равными платежами $x$.',
+          {
+            podpis: 'Долг на конец первых двух лет — $aS$ и $bS$, затем два равных платежа',
+            period: 'year',
+            scheme: 'ann',
+            rows: [
+              { label: '1', cells: ['S', 'Sk', 'x_{1}', 'aS'] },
+              { label: '2', cells: ['aS', 'aS\\,k', 'x_{2}', 'bS'] },
+              { label: '3', cells: ['bS', 'bSk', 'x', 'bSk - x'] },
+              { label: '4', cells: ['bSk - x', 'bSk^{2} - xk', 'x', '0'] },
+            ],
+            itog: null,
+            strelka: null,
+          },
+        ),
+        {
+          title: 'Составляем уравнения',
+          text: 'Из первых двух строк — платежи; две последние строки — одна в другую, после второго равного платежа долг равен нулю.',
+          bloki: [
+            {
+              vid: 'formula',
+              tex: 'x_{1} = Sk - aS = (k - a)\\,S, \\qquad x_{2} = aSk - bS = (ak - b)\\,S',
+            },
+            { vid: 'formula', tex: 'bSk^{2} - xk - x = 0' },
+          ],
+        },
+        step(
+          'Выражаем равный платёж',
+          'Переносим платежи вправо и выносим $x$.',
+          'bSk^{2} = x(k + 1) \\;\\Rightarrow\\; x = \\dfrac{bk^{2}}{k + 1}\\,S',
         ),
         step(
-          'Первые две выплаты',
-          `Долг после начисления минус долг на конец, $k = ${tex(k)}$.`,
-          `z_1 = ${tex(k)}S - ${tex(a)}S = ${tex(k.sub(a))}S,\\quad z_2 = ${tex(k)}\\cdot ${tex(a)}S - ${tex(b)}S = ${tex(a.mul(k).sub(b))}S`,
+          'Складываем выплаты',
+          'Вся сумма выплат $Z$ — два первых платежа и два равных; каждый — множитель, умноженный на $S$.',
+          'Z = x_{1} + x_{2} + 2x = \\Big(k - a + ak - b + \\dfrac{2bk^{2}}{k + 1}\\Big)S',
         ),
-        step(
-          'Два равных платежа',
-          'Остаток растёт на проценты, после второго платежа долг равен нулю.',
-          `(${tex(b)}S\\,k - x)\\,k - x = 0 \\;\\Rightarrow\\; x = \\frac{${tex(b)}S\\,k^2}{k+1} = ${texQ(b.mul(k.pow(2)).div(k.add(1)))}S`,
+        stFormula(
+          'Делим сумму выплат на множитель.',
+          'S = \\dfrac{Z}{k - a + ak - b + \\dfrac{2bk^{2}}{k + 1}}',
         ),
-        step(
-          'Составляем уравнение',
-          'Все выплаты вместе.',
-          `${texQ(unit)}\\,S = ${tex(Z)} \\;\\Rightarrow\\; S = ${tex(S)}`,
+        stChisla(
+          `Долг каждый год уменьшается на $${fracTex}$ кредита, $r = ${tex(r)}$, $Z = ${tex(Z)}$.`,
+          [
+            `a = 1 - ${fracTex} = ${tex(a)}, \\qquad b = 1 - 2\\cdot ${fracTex} = ${tex(b)}, \\qquad k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}`,
+            `k - a + ak - b + \\dfrac{2bk^{2}}{k + 1} = ${tex(k.sub(a))} + ${tex(a.mul(k).sub(b))} + \\dfrac{2\\cdot ${tex(b)}\\cdot ${tex(k.pow(2))}}{${tex(k.add(1))}} = ${texQ(unit)}`,
+            unit.isFiniteDecimal()
+              ? `S = \\dfrac{${tex(Z)}}{${tex(unit)}} = ${tex(S)}`
+              : `S = ${tex(Z)} : \\frac{${unit.n}}{${unit.d}} = \\dfrac{${tex(Z)}\\cdot ${unit.d}}{${unit.n}} = ${tex(S)}`,
+          ],
         ),
         stAnswer(`$S = ${tex(S)}$ тыс. рублей.`),
       ],
@@ -1335,6 +1697,61 @@ const B16: Prototype = {
 };
 
 /* ── Б7: известны некоторые платежи — таблица диф. платежа ───── */
+
+/**
+ * Платежи первых двух лет равны x, третьим гасится остаток: таблица
+ * дифференцированного платежа в буквах, уравнение «главное правило» и
+ * выражение суммы долгов через x (B-17, B-18).
+ */
+function dvaRavnyhSteps(y: number): SolutionStep[] {
+  return [
+    stTablitsaBukvy(
+      'Решаем таблицей дифференцированного платежа, считаем в тысячах рублей. Платежи первых двух лет равны $x$, третьим платежом гасится остаток. Долг на конец года — долг после начисления минус платёж: $D_{1} = Sk - x$, $D_{2} = D_{1}k - x$, где $k = 1 + \\dfrac{r}{100}$.',
+      {
+        podpis: '',
+        period: 'year',
+        scheme: 'dif',
+        rows: [
+          {
+            label: String(y + 1),
+            cells: ['S', 'S - D_{1}', 'S\\cdot \\dfrac{r}{100}', 'D_{1}'],
+          },
+          {
+            label: String(y + 2),
+            cells: ['D_{1}', 'D_{1} - D_{2}', 'D_{1}\\cdot \\dfrac{r}{100}', 'D_{2}'],
+          },
+          {
+            label: String(y + 3),
+            cells: ['D_{2}', 'D_{2}', 'D_{2}\\cdot \\dfrac{r}{100}', '0'],
+          },
+        ],
+        itog: ['S', 'P'],
+        strelka: '$r\\,\\%$ начисляется на долг на начало года',
+      },
+    ),
+    step(
+      'Составляем уравнение',
+      'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Вся сумма выплат $Z$ — кредит плюс переплата.',
+      'Z = S + \\dfrac{r}{100}\\,(S + D_{1} + D_{2})',
+    ),
+    {
+      title: 'Выражаем долги через $x$',
+      text: 'Подставляем строки таблицы одну в другую.',
+      bloki: [
+        {
+          vid: 'formula',
+          tex: 'D_{1} = Sk - x, \\qquad D_{2} = (Sk - x)k - x = Sk^{2} - xk - x',
+        },
+        { vid: 'formula', tex: 'S + D_{1} + D_{2} = S(1 + k + k^{2}) - x(k + 2)' },
+      ],
+    },
+    step(
+      'Собираем $x$',
+      'Ставка через множитель: $\\dfrac{r}{100} = k - 1$, и $(k - 1)(1 + k + k^{2}) = k^{3} - 1$.',
+      'Z = S + (k - 1)\\big(S(1 + k + k^{2}) - x(k + 2)\\big) = Sk^{3} - (k - 1)(k + 2)\\,x',
+    ),
+  ];
+}
 
 const B17: Prototype = {
   id: 'B-17',
@@ -1377,25 +1794,12 @@ const B17: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        stTable(
-          `Решаем таблицей дифференцированного платежа (считаем в тысячах). Пусть $x$ — платёж ${y + 1} и ${y + 2} годов. Долг на конец первого года $${tex(S)}\\cdot ${tex(k)} - x$, второго — $(${tex(S.mul(k))} - x)\\cdot ${tex(k)} - x$.`,
-        ),
-        stChangeSum(),
-        step(
-          'Переплата',
-          `${num(r)} % от суммы долгов на начало трёх лет.`,
-          `S_{\\text{перепл}} = \\frac{${tex(r)}}{100}\\Big(${tex(S)} + (${tex(S.mul(k))} - x) + (${tex(S.mul(k.pow(2)))} - ${tex(k.add(1))}x)\\Big)`,
-        ),
-        step(
-          'Составляем уравнение',
-          'Сумма выплат — кредит плюс переплата; уравнение линейное.',
-          `${tex(S)} + S_{\\text{перепл}} = ${tex(Z)} \\;\\Rightarrow\\; x = ${tex(x)}`,
-        ),
-        step(
-          'Переводим в рубли',
-          'Считали в тысячах.',
-          `${tex(x)}\\ \\text{тыс.} = ${tex(x.mul(1000))}\\ \\text{руб.}`,
-        ),
+        ...dvaRavnyhSteps(y),
+        stFormula('Выражаем платёж.', 'x = \\dfrac{Sk^{3} - Z}{(k - 1)(k + 2)}'),
+        stChisla(`Считаем в тысячах рублей: $S = ${tex(S)}$, $Z = ${tex(Z)}$.`, [
+          `k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}, \\qquad k^{3} = ${tex(k.pow(3))}`,
+          `x = \\dfrac{${tex(S)}\\cdot ${tex(k.pow(3))} - ${tex(Z)}}{${tex(k.sub(1))}\\cdot ${tex(k.add(2))}} = \\dfrac{${tex(S.mul(k.pow(3)).sub(Z))}}{${tex(k.sub(1).mul(k.add(2)))}} = ${tex(x)}\\ \\text{тыс.} = ${tex(x.mul(1000))}\\ \\text{руб.}`,
+        ]),
         stAnswer(`Платёж ${y + 1} года — ${money(x.mul(1000), 'rub')}.`),
       ],
       hints: [
@@ -1449,29 +1853,15 @@ const B18: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        stTable(
-          'Платежи двух первых лет известны, третий гасит остаток. Долг на конец года — долг на начало, увеличенный на проценты, минус платёж.',
+        ...dvaRavnyhSteps(y),
+        stFormula(
+          'Платёж $x$ известен — сумма платежей выражена через $S$, $k$ и $x$.',
+          'Z = Sk^{3} - (k - 1)(k + 2)\\,x',
         ),
-        step(
-          'Первый год',
-          `Долг растёт в $${tex(k)}$ раза, затем вычитаем платёж.`,
-          `${tex(S)}\\cdot ${tex(k)} - ${tex(X)} = ${tex(d1)}`,
-        ),
-        step(
-          'Второй год',
-          'Так же со вторым платежом.',
-          `${tex(d1)}\\cdot ${tex(k)} - ${tex(X)} = ${tex(d2)}`,
-        ),
-        step(
-          'Третий платёж',
-          'Гасит весь долг с процентами.',
-          `${tex(d2)}\\cdot ${tex(k)} = ${tex(last)}`,
-        ),
-        step(
-          'Сумма платежей',
-          'Складываем три платежа.',
-          `${tex(X)} + ${tex(X)} + ${tex(last)} = ${tex(Z)}`,
-        ),
+        stChisla(`Считаем в тысячах рублей: $S = ${tex(S)}$, $r = ${tex(r)}$, $x = ${tex(X)}$.`, [
+          `k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}, \\qquad k^{3} = ${tex(k.pow(3))}`,
+          `Z = ${tex(S)}\\cdot ${tex(k.pow(3))} - ${tex(k.sub(1))}\\cdot ${tex(k.add(2))}\\cdot ${tex(X)} = ${tex(S.mul(k.pow(3)))} - ${tex(k.sub(1).mul(k.add(2)).mul(X))} = ${tex(Z)}`,
+        ]),
         stAnswer(`Сумма всех платежей — ${money(Z, 'thous')}.`),
       ],
       hints: [
@@ -1533,28 +1923,42 @@ const B19: Prototype = {
       scheme: 'dif',
       period: 'year',
       solution: [
-        stTable(
-          `Первые пять лет долг убывает на $\\dfrac{${tex(S)} - ${tex(d)}}{5} = ${tex(X1)}$, следующие пять — на $\\dfrac{${tex(d)}}{5} = ${tex(X2)}$.`,
-        ),
-        stChangeSum(),
-        step(
-          'Сумма долгов на начало',
-          'По кускам: первые пять лет — от ' +
-            num(S) +
-            ' с шагом ' +
-            num(X1) +
-            ', затем от ' +
-            num(d) +
-            ' с шагом ' +
-            num(X2) +
-            '.',
-          `\\frac{${tex(S)} + ${tex(S.sub(X1.mul(4)))}}{2}\\cdot 5 + \\frac{${tex(d)} + ${tex(X2)}}{2}\\cdot 5 = ${tex(starts)}`,
+        stTablitsaBukvy(
+          'Считаем в тысячах рублей. Первые пять лет долг уменьшается на одну и ту же сумму $X_{1}$, следующие пять — на другую, $X_{2}$. Долг после пятого года $D_{5}$ дан в условии. Переплата — $r\\,\\%$ от долга на начало года.',
+          tablitsaDvaUmensheniya(5),
         ),
         step(
-          'Находим $r$',
-          'Переплата — разность суммы платежей и кредита.',
-          `\\frac{r}{100}\\cdot ${tex(starts)} = ${tex(Z)} - ${tex(S)} \\;\\Rightarrow\\; r = ${tex(r)}`,
+          'Составляем уравнение',
+          'Долг уменьшился с $S$ до нуля, поэтому столбец «Сумма изменения долга» в сумме даёт $S$. Вся сумма выплат $Z$ — кредит плюс переплата, а переплата — $\\dfrac{r}{100}$ от суммы долгов на начало лет.',
+          'Z = S + \\dfrac{r}{100}\\Big(S + (S - X_{1}) + \\dots + (S - 4X_{1}) + D_{5} + (D_{5} - X_{2}) + \\dots + X_{2}\\Big)',
         ),
+        step(
+          'Выражаем $X_{1}$ и $X_{2}$ через $D_{5}$',
+          'За первые пять лет долг уменьшился с $S$ до $D_{5}$, за следующие пять — с $D_{5}$ до нуля.',
+          'X_{1} = \\dfrac{S - D_{5}}{5}, \\qquad X_{2} = \\dfrac{D_{5}}{5}',
+        ),
+        step(
+          'Долги на начало: первый кусок',
+          'Пять слагаемых по $S$, вычитаемые — $X_{1}$, умноженное на $1 + 2 + 3 + 4 = 10$.',
+          'S + \\dots + (S - 4X_{1}) = 5S - 10X_{1} = 5S - 2(S - D_{5}) = 3S + 2D_{5}',
+        ),
+        step(
+          'Долги на начало: второй кусок',
+          'Долг на начало: $D_{5} = 5X_{2}$, затем $4X_{2}$, …, $X_{2}$.',
+          'D_{5} + \\dots + X_{2} = (5 + 4 + 3 + 2 + 1)\\,X_{2} = 15\\cdot\\dfrac{D_{5}}{5} = 3D_{5}',
+        ),
+        step(
+          'Выражаем $r$',
+          'Сумма долгов на начало — $3S + 2D_{5} + 3D_{5} = 3S + 5D_{5}$. Переплата — разность суммы платежей и кредита.',
+          '\\dfrac{r}{100}\\,(3S + 5D_{5}) = Z - S',
+        ),
+        stFormula(
+          'Умножаем на 100 и делим на сумму долгов.',
+          'r = \\dfrac{100\\,(Z - S)}{3S + 5D_{5}}',
+        ),
+        stChisla(`$S = ${tex(S)}$, $D_{5} = ${tex(d)}$, $Z = ${tex(Z)}$.`, [
+          `r = \\dfrac{100\\cdot (${tex(Z)} - ${tex(S)})}{3\\cdot ${tex(S)} + 5\\cdot ${tex(d)}} = \\dfrac{${tex(Z.sub(S).mul(100))}}{${tex(starts)}} = ${tex(r)}`,
+        ]),
         stAnswer(`$r = ${tex(r)}$.`),
       ],
       hints: [
