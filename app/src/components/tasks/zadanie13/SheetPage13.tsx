@@ -6,11 +6,11 @@ import { PECHAT_13 } from '@/content/generator13';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
-import { qrSvg } from '@/lib/qr';
+import { qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import { sobratList13 } from '@/lib/zadanie13/gen/list';
-import { onlaynHref13, parseGenQuery13, vsegoZadach13 } from '@/lib/zadanie13/gen/params';
+import { onlaynHref13, parseGenQuery13, sQr13, vsegoZadach13 } from '@/lib/zadanie13/gen/params';
 import { sheetSpec13, type VidPechati13 } from '@/lib/zadanie13/gen/sheet';
 
 function specJson(html: string): string {
@@ -24,7 +24,7 @@ function specJson(html: string): string {
  * Лист для печати задания №13, собранный в браузере — как у №11:
  * задачи считает движок №13 по адресу, формулы свёрстаны KaTeX, лист
  * раскладывает lib/sheet, затем открывается окно печати. На листе
- * ученика в подвале QR-код онлайн-версии того же набора: ученик
+ * ученика у названия QR-код онлайн-версии того же набора: ученик
  * решает и проверяет ответы, ответов в адресе нет.
  */
 export function SheetPage13({ vid }: { vid: VidPechati13 }) {
@@ -50,23 +50,27 @@ export function SheetPage13({ vid }: { vid: VidPechati13 }) {
     }
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const built = sheetSpec13(params, sobratList13(params), vid);
-    const kit = checkKitSheet(query, '13', vid === 'uchenik' ? 'student' : 'teacher', built);
-    const qr =
-      /* В прежних адресах QR есть всегда; в адресе общего генератора — если включён. */
-      vid === 'uchitel' || (params.klyuchi !== undefined && params.qr !== true)
-        ? null
-        : qrSvg(`${window.location.origin}${onlaynHref13(params)}`, PECHAT_13.qr);
-    /* Место для решения (sp=) — только у листа ученика. */
-    const printed = sheetWithSpace(built, spaceOfQuery(query), vid === 'uchenik', () =>
-      sheetSpec13(params, sobratList13(params), 'uchitel'),
-    );
-    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code), qr }, {});
-    import('@/lib/sheet/paginate.js').then(() => {
-      if (alive) {
-        setWarning(kit.warning);
-        setSpec(specJson(html));
-      }
+    /* QR — у названия листа ученика, ведёт в онлайн-набор. */
+    const qr = !sQr13(params, vid)
+      ? Promise.resolve(undefined)
+      : qrSvg(new URL(onlaynHref13(params), window.location.origin).toString()).catch(
+          () => undefined,
+        );
+    void qr.then((svg) => {
+      if (!alive) return;
+      const built = sheetSpec13(params, sobratList13(params), vid, svg);
+      const kit = checkKitSheet(query, '13', vid === 'uchenik' ? 'student' : 'teacher', built);
+      /* Место для решения (sp=) — только у листа ученика. */
+      const printed = sheetWithSpace(built, spaceOfQuery(query), vid === 'uchenik', () =>
+        sheetSpec13(params, sobratList13(params), 'uchitel'),
+      );
+      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
+      import('@/lib/sheet/paginate.js').then(() => {
+        if (alive) {
+          setWarning(kit.warning);
+          setSpec(specJson(html));
+        }
+      });
     });
     return () => {
       alive = false;

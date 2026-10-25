@@ -268,6 +268,14 @@ export function listHref13(p: GenParams13, vid: 'uchenik' | 'uchitel' | 'vse'): 
   return `${BASE_13}/pechat/${hvost}?${genQuery13(p)}`;
 }
 
+/**
+ * Есть ли QR-код онлайн-набора на листе: только у листа ученика; в
+ * прежних адресах — всегда, в адресе общего генератора — если включён.
+ */
+export function sQr13(p: GenParams13, vid: 'uchenik' | 'uchitel' | 'vse'): boolean {
+  return vid !== 'uchitel' && (p.klyuchi === undefined || p.qr === true);
+}
+
 export function onlaynHref13(p: GenParams13): string {
   return `${BASE_13}/nabor/?${genQuery13(p)}`;
 }
