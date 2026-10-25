@@ -142,6 +142,12 @@ export interface Plot {
 export type Vopros13 =
   'ot-summy' | 'ot-pereplaty' | 'vo-skolko' | 'procent' | 'rubli' | 'summa' | 'stavka' | 'srok';
 
+/** «Таблица руками» (P-01…P-03): что спрашивают и номер периода (с 1). */
+export interface Zapros13 {
+  chto: string;
+  nomer: number;
+}
+
 export interface Task13 {
   /** «13.C-08:9f2k» — прототип и seed. */
   id: string;
@@ -167,6 +173,8 @@ export interface Task13 {
   solution: SolutionStep[];
   hints: HintStep[];
   tableModel: TableModel;
+  /** «Таблица руками»: что спрашивают. */
+  zapros?: Zapros13;
   plot: Plot;
   params: Record<string, number>;
 }

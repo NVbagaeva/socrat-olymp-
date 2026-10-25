@@ -1155,3 +1155,533 @@
     color: var(--color-text-secondary);
   }
 }
+
+/* ── «Заполни таблицу» (TablitsaZapolni13.tsx, Klaviatura13.tsx) ── */
+/* Строки — периоды, столбцы — величины. Четыре уровня; на телефоне в
+   уровнях 3–4 — карточки по периодам, таблица — по кнопке. Широкая
+   таблица прокручивается в своей рамке, первый столбец закреплён. */
+
+.z13-zap {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin-top: var(--space-4);
+}
+.z13-zap__title,
+.z13-zap__formula-title {
+  margin: 0;
+  font-weight: 700;
+}
+.z13-zap__rabota {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  font-size: var(--fs-caption);
+}
+.z13-zap__lead,
+.z13-zap__formula-lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z13-zap__urovni {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.z13-zap__uroven {
+  flex: none;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+.z13-zap__uroven b {
+  color: var(--color-primary);
+}
+.z13-zap__uroven.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z13-zap__uroven.is-active b {
+  color: inherit;
+}
+.z13-zap__u1,
+.z13-zap__u2 {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* Таблицы: с полями, выбор, только для чтения, варианты уровня 1. */
+.z13-zap__scroll {
+  overflow-x: auto;
+  min-width: 0;
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z13-zap__table,
+.z13-zap__mini {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+}
+.z13-zap__table th,
+.z13-zap__table td,
+.z13-zap__mini th,
+.z13-zap__mini td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border-info);
+  text-align: center;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.z13-zap__table thead th,
+.z13-zap__mini thead th {
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  white-space: normal;
+  vertical-align: middle;
+}
+.z13-zap__table tbody tr:last-child > *,
+.z13-zap__mini tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.z13-zap__table .z13-zap__sticky,
+.z13-zap__mini tbody th,
+.z13-zap__mini thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  border-right: 1px solid var(--color-border-info);
+  background: var(--color-surface);
+  text-align: left;
+}
+.z13-zap__table thead .z13-zap__sticky,
+.z13-zap__mini thead th:first-child {
+  background: var(--color-surface-soft);
+}
+.z13-zap__itog-row > *,
+.z13-zap__mini .z13-zap__itog > * {
+  background: var(--color-surface-soft);
+  font-weight: 600;
+}
+.z13-zap__name {
+  margin-right: var(--space-1);
+}
+.z13-zap__q {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 2px;
+  border: 1px solid var(--color-border-info);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.z13-zap__q.is-open {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z13-zap__hint {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.z13-zap__hint--mini {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-caption);
+}
+.z13-zap__dano {
+  display: inline-block;
+  padding-top: 6px;
+}
+
+/* Уровень 1: три таблицы на выбор. */
+.z13-zap__variant {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.z13-zap__variant.is-chosen {
+  border-color: var(--color-primary);
+}
+.z13-zap__variant.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.z13-zap__variant.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+}
+.z13-zap__variant-head {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 32px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Уровень 2: клетка-кнопка и варианты под таблицей. */
+.z13-zap__vybor {
+  min-width: 5.5rem;
+  min-height: 40px;
+  padding: var(--space-1) var(--space-2);
+  border: 1.5px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.z13-zap__vybor.is-open {
+  border-style: solid;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+.z13-zap__vybor.is-right {
+  border: 1.5px solid var(--color-success);
+  background: var(--color-success-soft);
+}
+.z13-zap__vybor.is-wrong {
+  border: 1.5px solid var(--color-error);
+  background: var(--color-error-soft);
+}
+.z13-zap__vybor-pusto {
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z13-zap__varianty {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+}
+.z13-zap__varianty-title {
+  margin: 0;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z13-zap__varianty-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: var(--space-2);
+}
+.z13-zap__var {
+  min-height: 48px;
+  padding: var(--space-2);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: inherit;
+  cursor: pointer;
+}
+.z13-zap__var.is-chosen {
+  border-color: var(--color-primary);
+}
+
+/* Поле ввода: запись, под ней — как поняли (KaTeX) и сообщение. */
+.z13-zap__pole {
+  display: inline-grid;
+  gap: 4px;
+  justify-items: center;
+  min-width: 0;
+}
+.z13-zap__pole--shirokoe {
+  display: grid;
+  justify-items: start;
+}
+.z13-zap__input {
+  width: 8.5rem;
+  min-height: 40px;
+  padding: var(--space-1) var(--space-2);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: center;
+}
+.z13-zap__pole--shirokoe .z13-zap__input {
+  width: min(100%, 22rem);
+  text-align: left;
+}
+.z13-zap__input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+.z13-zap__input.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+}
+.z13-zap__input.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+}
+.z13-zap__pr {
+  max-width: 100%;
+  overflow-x: auto;
+  color: var(--color-text-secondary);
+  font-size: 0.9em;
+}
+.z13-zap__msg {
+  max-width: 14rem;
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+  line-height: 1.35;
+  white-space: normal;
+  text-align: left;
+}
+.z13-zap__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.z13-zap__status {
+  margin: 0;
+  color: var(--color-error);
+  font-weight: 600;
+}
+.z13-zap__status.is-right {
+  color: var(--color-success);
+}
+.z13-zap__oshibki {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-error);
+  font-size: var(--fs-caption);
+}
+.z13-zap__formula {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-info);
+}
+
+/* Телефон, уровни 3–4: карточки по периодам. */
+.z13-zap__karty {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z13-zap__progress {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z13-zap__progress li {
+  flex: 1;
+}
+.z13-zap__seg {
+  width: 100%;
+  min-height: 32px;
+  border: 0;
+  border-bottom: 4px solid var(--color-border);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.z13-zap__seg.is-filled {
+  border-bottom-color: var(--color-primary);
+}
+.z13-zap__seg.is-right {
+  border-bottom-color: var(--color-success);
+}
+.z13-zap__seg.is-wrong {
+  border-bottom-color: var(--color-error);
+}
+.z13-zap__seg.is-current {
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.z13-zap__karta {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  touch-action: pan-y;
+}
+.z13-zap__karta-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.z13-zap__strelka {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.z13-zap__strelka:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.z13-zap__karta-pole {
+  display: grid;
+  gap: var(--space-1);
+}
+.z13-zap__karta-pole .z13-zap__pole {
+  justify-items: stretch;
+}
+.z13-zap__karta-pole .z13-zap__input {
+  width: 100%;
+  text-align: left;
+}
+.z13-zap__karta-pole .z13-zap__msg {
+  max-width: none;
+}
+.z13-zap__karta-label {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z13-zap__kak-tablitsa {
+  justify-self: start;
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.z13-zap__chten.is-right {
+  color: var(--color-success);
+}
+.z13-zap__chten.is-wrong {
+  color: var(--color-error);
+}
+
+/* Экранная клавиатура: на компьютере — под таблицей, на телефоне —
+   панель внизу экрана поверх нижнего меню. */
+.z13-kl {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+}
+.z13-kl__kuda {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z13-kl__ryad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.z13-kl__setka {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+.z13-kl__k {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 1.05rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.z13-kl__k:active {
+  background: var(--color-surface-info);
+}
+.z13-kl__k--bukva {
+  color: var(--color-primary);
+  font-family: 'KaTeX_Math', 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+}
+.z13-kl__k--gotovo {
+  grid-column: span 2;
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 600;
+}
+@media (max-width: 40rem) {
+  .z13-zap.is-kl {
+    padding-bottom: 360px;
+  }
+  .z13-zap__urovni {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .z13-zap__uroven {
+    min-height: 40px;
+    white-space: normal;
+  }
+  .z13-kl {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -6px 24px rgb(15 23 42 / 0.12);
+  }
+  .z13-kl__k {
+    min-height: 42px;
+  }
+}

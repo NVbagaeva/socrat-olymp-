@@ -2,16 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { PrintSheet } from '@/components/tasks/generator/PrintSheet';
+import { GENERATOR7_TEXTS } from '@/content/generator7';
 import { GENERATOR_7 } from '@/content/zadanie7';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { checkKitSheet, kitFootLabel } from '@/lib/komplekt';
 import { buildDocument } from '@/lib/sheet/sheet.js';
-import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
+import { listSheetVse, sShapkoy } from '@/lib/sheetList';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { zagruzitIndeks, zagruzitZadachi, type ZadachaLite } from '@/lib/zadanie7/dannye';
 import {
   modelUroka,
   parseUrokQuery,
   parseZapros,
+  parseZaprosKlyuchi,
   sobratList,
+  sobratListKlyuchi,
   type ModelLista,
 } from '@/lib/zadanie7/sborka';
 import { sheetSpec7, type Sborka7, type Vid7 } from '@/lib/zadanie7/sheet7';
@@ -35,7 +40,7 @@ interface Gotovo {
  * одного запроса, поэтому задачи совпадают. Решения строит решатель
  * прототипа в браузере: данные без ответов.
  */
-export function List7({ vid }: { vid: Vid7 }) {
+export function List7({ vid }: { vid: Vid7 | 'vse' }) {
   const [gotovo, setGotovo] = useState<Gotovo | null>(null);
   const [oshibka, setOshibka] = useState<string | null>(null);
 
@@ -46,8 +51,12 @@ export function List7({ vid }: { vid: Vid7 }) {
         const indeks = await zagruzitIndeks();
         let model: ModelLista | null = null;
         const u = parseUrokQuery(q);
+        const zk = parseZaprosKlyuchi(q);
         if (u) {
           model = modelUroka(u.kod, u.no, u.n, indeks);
+        } else if (zk) {
+          /* Адрес общего генератора (ps=2): задачи по ключам позиций. */
+          model = sobratListKlyuchi(zk, indeks);
         } else {
           const z = parseZapros(q);
           if (z) {
@@ -72,12 +81,12 @@ export function List7({ vid }: { vid: Vid7 }) {
             ? [
                 {
                   questionHtml: z.text,
-                  ...(vid === 'uchitel' ? { answer: String(reshit(z).answer) } : {}),
+                  ...(vid === 'uchenik' ? {} : { answer: String(reshit(z).answer) }),
                 },
               ]
             : [];
         });
-        const kit = checkKitSheet(q, '7', vid === 'uchitel' ? 'teacher' : 'student', {
+        const kit = checkKitSheet(q, '7', vid === 'uchenik' ? 'student' : 'teacher', {
           blocks: [{ tasks }],
         });
         setGotovo({ sborka: { model, zadachi, reshit }, kit, query: q.toString() });
@@ -99,15 +108,31 @@ export function List7({ vid }: { vid: Vid7 }) {
       theme="color"
       layout="single"
       buildKey={`${vid}:${query}`}
-      build={() => {
+      build={async () => {
+        const shapka = sborka.model.shapka;
+        /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+        const qr =
+          shapka?.qr === true
+            ? await qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+            : undefined;
+        const list = (v: Vid7) =>
+          sShapkoy(sheetSpec7(sborka, v), shapka, GENERATOR7_TEXTS.podzagolovok, qr);
+        const kod = kitFootLabel(kit.code) ?? `Код: ${sborka.model.kod}`;
+        if (vid === 'vse') {
+          /* Место для решения (sp=) — у листа ученика в начале файла. */
+          const spec = vseWithSpace(
+            listSheetVse(list('uchenik'), list('uchitel')),
+            spaceOfQuery(new URLSearchParams(query)),
+          );
+          return { html: buildDocument({ ...spec, kit: kod }, {}), warning: kit.warning };
+        }
         /* Место для решения (sp=) — только у листа ученика. */
         const spec = sheetWithSpace(
-          sheetSpec7(sborka, vid),
+          list(vid),
           spaceOfQuery(new URLSearchParams(query)),
           vid === 'uchenik',
           () => sheetSpec7(sborka, 'uchitel'),
         );
-        const kod = kitFootLabel(kit.code) ?? `Код: ${sborka.model.kod}`;
         return { html: buildDocument({ ...spec, kit: kod }, {}), warning: kit.warning };
       }}
     />

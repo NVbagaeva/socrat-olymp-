@@ -20,6 +20,14 @@
 
 import { UROKI_7 } from '../../content/uroki7';
 import { rngOf, type Rng } from '../vychisleniya/rng';
+import {
+  blokiBanka,
+  parseZaprosBanka,
+  shapkaBanka,
+  sobratPoKlyucham,
+  type ShapkaBanka,
+  type ZaprosBanka,
+} from '../generator/obshchiy/bank';
 import type { IndeksZadachi } from './dannye';
 
 /* ── Общее ──────────────────────────────────────────────────────── */
@@ -119,6 +127,8 @@ export interface ModelLista {
   kod: string;
   /** Блоки листа по порядку. */
   bloki: BlokLista[];
+  /** Шапка листа общего генератора (ps=2): вид работы, дата, учитель, QR. */
+  shapka?: ShapkaBanka;
 }
 
 export interface BlokLista {
@@ -134,6 +144,8 @@ export interface BlokLista {
   spiski: string[][];
   /** На листе ученика — место для решения (разбор в классе). */
   mesto?: boolean;
+  /** Ключи позиций задач (ps=2) — параллельно spiski. */
+  pozicii?: string[][];
 }
 
 /** Адресная строка запроса генератора: t=P01:2,P11:1&i=m&v=2&e=1&seed=AB12CD. */
@@ -201,6 +213,29 @@ export function sobratList(z: ZaprosLista, indeks: readonly IndeksZadachi[]): Mo
     zagolovok: 'Задание №7. Простейшие уравнения',
     kod: z.seed,
     bloki,
+  };
+}
+
+/* ── Общий генератор (ps=2) ─────────────────────────────────────── */
+
+/** Адрес листа общего генератора; null — адрес прежней схемы или чужой. */
+export function parseZaprosKlyuchi(q: URLSearchParams): ZaprosBanka | null {
+  return parseZaprosBanka(q, {
+    idRe: /P\d\d/,
+    est: (id) => Object.values(GRUPPY_PROTOTIPOV).some((g) => g.includes(id)),
+    variantsMax: VARIANTOV_MAX,
+  });
+}
+
+/** Лист общего генератора: задачи по ключам позиций, памятка и примеры отдельно. */
+export function sobratListKlyuchi(z: ZaprosBanka, indeks: readonly IndeksZadachi[]): ModelLista {
+  const l = sobratPoKlyucham(z, indeks, 'z7-ps2');
+  return {
+    vid: 'generator',
+    zagolovok: 'Задание №7. Простейшие уравнения',
+    kod: z.seed,
+    bloki: blokiBanka(z, l),
+    shapka: shapkaBanka(z),
   };
 }
 
