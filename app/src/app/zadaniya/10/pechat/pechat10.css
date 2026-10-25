@@ -1,112 +1,32 @@
-/* Печатные листы №10: A4, ч/б. Лист учителя: кусок «условие + рисунок»
-   не рвётся; разбор переносится только между шагами; рисунок не шире
-   половины колонки — справа от разбора, шире — под условием. */
+/* Печатные листы №10 на общем шаблоне lib/sheet (sheet10.ts): вёрстку
+   страницы, карточек, ключа и разбора задаёт sheet.css, здесь — только
+   своё: условие, иллюстрация, чертёж моста, шаги разбора, рамки. */
 
-.z10-list {
-  max-width: 190mm;
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-4);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: 15px;
-  line-height: 1.55;
-}
-
-.z10-list__panel {
-  display: flex;
-  gap: var(--space-3);
-  align-items: center;
-  margin-bottom: var(--space-4);
-}
-
-.z10-list__eyebrow {
+.z10-list__uslovie {
   margin: 0;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.z10-list h1 {
-  margin: var(--space-1) 0 var(--space-2);
-  font-size: 22px;
-}
-
-.z10-list h2 {
-  margin: var(--space-5) 0 var(--space-2);
-  font-size: 18px;
-  break-after: avoid;
-}
-
-.z10-list h3 {
-  margin: var(--space-3) 0 var(--space-1);
-  font-size: 16px;
-  break-after: avoid;
-}
-
-.z10-list__note,
-.z10-list__klyuch {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-}
-
-.z10-list__zadacha {
-  margin: var(--space-3) 0;
-  break-inside: avoid;
-}
-
-.z10-list__zadacha--mesto {
-  min-height: 70mm;
 }
 
 .z10-list__metka {
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
 }
 
-.z10-list__otvet {
-  margin: var(--space-2) 0 0;
+.z10-list__kartinka {
+  display: block;
+  max-width: 100%;
+  margin: calc(var(--sheet-step) * 2) 0 0;
 }
 
-.z10-list__most svg,
-.z10-list__kartinka img {
+.z10-list__kartinka img,
+.z10-list__most svg {
   display: block;
   width: 100%;
   height: auto;
 }
 
-.z10-list__kartinka {
-  display: block;
-  margin: var(--space-2) 0;
-}
-
-/* ── Лист учителя ── */
-
-.z10-list__zadacha--uchitel {
-  break-inside: auto;
-  margin: var(--space-4) 0;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
-}
-
-.z10-list__kusok-pervyy {
-  break-inside: avoid;
-}
-
-.z10-list__ryad {
-  display: flow-root;
-}
-
-.z10-list__most--sboku {
-  float: right;
-  margin: 0 0 var(--space-2) var(--space-3);
-}
-
-.z10-list__pod-usloviem {
-  margin: var(--space-2) 0;
-}
-
-.z10-list__shag {
-  break-inside: avoid;
-  margin: var(--space-2) 0;
+.z10-list__most {
+  max-width: 100%;
+  margin: 0 0 calc(var(--sheet-step) * 2);
 }
 
 .z10-list__shag-title {
@@ -118,40 +38,9 @@
   margin: 0;
 }
 
-.z10-list__otvet-uchitel {
-  margin: var(--space-1) 0;
-}
-
-.z10-list__podval {
-  margin-top: var(--space-8);
-  font-size: 12px;
-  color: var(--color-text-secondary);
-}
-
-.z10-list .ramka {
-  margin: var(--space-3) 0;
-  padding: var(--space-3) var(--space-4);
-  font-size: 15px;
-}
-
-@media print {
-  @page {
-    size: A4;
-    margin: 12mm 15mm;
-  }
-
-  .z10-list {
-    max-width: none;
-    padding: 0;
-  }
-
-  .z10-list__panel {
-    display: none;
-  }
-
-  .z10-list .z10-most-wrap {
-    border: none;
-    background: none;
-    padding: 0;
-  }
+.z10-sheet-teoriya .ramka,
+.z10-sheet-primer .ramka {
+  margin: 0;
+  padding: calc(var(--sheet-step) * 3) calc(var(--sheet-step) * 4);
+  font-size: var(--sheet-fs-small);
 }

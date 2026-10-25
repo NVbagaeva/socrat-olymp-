@@ -6,6 +6,7 @@ import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery8, sheetSpec8, sheetSpecVse8 } from '@/lib/vychisleniya/sheet8';
 
@@ -72,7 +73,13 @@ export function SheetPage8({ vid }: SheetPage8Props) {
         vid === 'vse' ? sheetSpecVse8(params, svg) : sheetSpec8(params, withAnswers, svg);
       /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
       const kit = checkKitSheet(query, '8', withAnswers ? 'teacher' : 'student', built);
-      const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+      /* Место для решения (sp=) — только у листа ученика. */
+      const space = spaceOfQuery(query);
+      const printed =
+        vid === 'vse'
+          ? vseWithSpace(built, space)
+          : sheetWithSpace(built, space, !withAnswers, () => sheetSpec8(params, true, svg));
+      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
       import('@/lib/sheet/paginate.js').then(() => {
         if (alive) {
           setWarning(kit.warning);

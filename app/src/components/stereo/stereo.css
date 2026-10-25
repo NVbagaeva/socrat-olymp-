@@ -397,6 +397,11 @@
 .stereo-razbor__telo .rich-example__para {
   margin: 0;
 }
+/* Длинная формула в строке переносится между частями — после «=»,
+   «+» и т. п. (KaTeX ставит их отдельными блоками), а не уезжает вбок. */
+.stereo-razbor__telo .rich-example__para .katex .katex-html {
+  white-space: normal;
+}
 /* Длинная формула уезжает вбок внутри себя, страница — нет. Для
    этого колонка и шаги сетки не растягиваются по содержимому. */
 .stereo-razbor__steps,

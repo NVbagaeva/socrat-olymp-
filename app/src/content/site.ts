@@ -7,6 +7,7 @@
 import { legalDocs } from '@/content/legal/documents';
 import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
+import { VARIANT_HREF } from '@/content/variant';
 
 export interface SiteLink {
   label: string;
@@ -30,6 +31,7 @@ export const site = {
   nav: [
     { label: 'Об авторе', href: '/about/' },
     { label: 'Банк заданий', href: tasksPage.href },
+    { label: 'Собрать вариант', href: VARIANT_HREF },
     { label: 'Как пользоваться', href: HOWTO_HREF },
     { label: 'Учителям', href: '/#how' },
   ] satisfies SiteLink[],

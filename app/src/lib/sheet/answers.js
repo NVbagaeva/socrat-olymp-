@@ -12,6 +12,7 @@
 
 import marks from './marks.js';
 import typo from './typography.js';
+import { placeFigure } from './sheet.js';
 
 /* Название метода в ключе: с формулами $…$ — заглушки KaTeX,
    иначе готовая разметка (у №4, №5 и №8 метод приходит HTML). */
@@ -132,8 +133,10 @@ function keyTable(title, rows) {
    на рисунке условия. Ширина — как у рисунка задачи на листе. */
 function solutionFigure(figure) {
   if (!figure || !figure.svg) { return ''; }
-  var width = figure.width ? ' style="width:' + (Math.round(figure.width * 100) / 100) + 'mm"' : '';
-  return '<figure class="sheet-figure sheet-solution-figure"' + width + '>' + figure.svg + '</figure>';
+  /* Размер — по правилам крупных рисунков (sheet/figureRules.js), как
+     у рисунка условия: клетчатый рисунок — клеткой 7 мм. */
+  return placeFigure(figure.svg, { width: figure.width, figures: figure.figures,
+                                   cls: 'sheet-solution-figure' }).html;
 }
 
 /**

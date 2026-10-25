@@ -89,6 +89,7 @@ export function generate(prototypeId: string, seed: string): Task13 {
       solution,
       hints: draft.hints,
       tableModel,
+      ...(draft.zapros ? { zapros: draft.zapros } : {}),
       plot: { deck: plot.deck, who: plot.who, goal: plot.goal, year: plot.year },
       params: draft.params,
     };

@@ -29,7 +29,21 @@
 import { storage } from '@/lib/storage';
 
 /** Область комплекта — задание, чей генератор его собрал. */
-export type KitScope = '12' | '1' | '2' | '4' | '5' | '6' | '7' | '8' | '9' | '11' | '13';
+export type KitScope =
+  | '12'
+  | '1'
+  | '2'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | '10'
+  | '11'
+  | '13'
+  /** «Собрать вариант» (lib/variant): все задания первой части. */
+  | 'variant';
 
 export type SheetWhich = 'student' | 'teacher';
 
@@ -135,6 +149,7 @@ export function settingsOf(href: string): string {
   params.delete('seed');
   params.delete('kit');
   params.delete('oba');
+  params.delete('sp');
   return `${path}?${params.toString()}`;
 }
 
@@ -144,6 +159,8 @@ export function nastroykiZaprosa(query: URLSearchParams): string {
   params.delete('seed');
   params.delete('kit');
   params.delete('oba');
+  /* Место для решения (sp=) задач не меняет: комплект тот же. */
+  params.delete('sp');
   return params.toString();
 }
 
@@ -478,6 +495,8 @@ export function nextSheetAfterPrint(location: { pathname: string; search: string
     return null;
   }
   params.delete('oba');
+  /* У листа учителя места для решения нет. */
+  params.delete('sp');
   return `${teacherPathOf(location.pathname)}?${params.toString()}`;
 }
 

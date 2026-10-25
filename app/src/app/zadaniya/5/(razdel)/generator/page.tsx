@@ -5,6 +5,7 @@ import { syuzhetyPrototipov } from '@/components/tasks/veroyatnost/navyki';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { bank5Pool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('5', vkladka('5', 'generator')),
@@ -24,6 +25,7 @@ export default function Generator5Tab() {
     <>
       {/* Название вкладки — H2 панели; у экрана генератора свой заголовок ниже. */}
       <h2 className="t-h2 vtab__title">{vkladka('5', 'generator')}</h2>
+      <VariantFromSection />
       <GeneratorSyuzhety
         zadanie={5}
         base={`${ZADANIYA}/5`}

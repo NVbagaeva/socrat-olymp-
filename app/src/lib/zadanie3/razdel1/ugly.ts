@@ -215,7 +215,7 @@ export const P03_09: Prototype = {
 
   uslovie: (p) =>
     `В правильной четырёхугольной призме $${NAMES}$ известно, что ` +
-    `${segment(pair(p, 'd'))}=${ru(num(p, 'k'))}${segment(pair(p, 'e'))}. ` +
+    `$${segment(pair(p, 'd'))}=${ru(num(p, 'k'))}${segment(pair(p, 'e'))}$. ` +
     `Найдите угол между диагоналями $${segment(pair(p, 'l1'))}$ и $${segment(pair(p, 'l2'))}$. ` +
     'Ответ дайте в градусах.',
 
@@ -364,7 +364,7 @@ export const P03_10: Prototype = {
 
   uslovie: (p) =>
     `В прямоугольном параллелепипеде $${NAMES}$ известны длины рёбер: ` +
-    `AB=${ru(num(p, 'a'))}, AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. ` +
+    `$AB=${ru(num(p, 'a'))}$, $AD=${ru(num(p, 'b'))}$, $AA_1=${ru(num(p, 'c'))}$. ` +
     `Найдите синус угла между прямыми $${segment(pair(p, 'l1'))}$ и $${segment(pair(p, 'l2'))}$.`,
 
   dopustimo: (p) => num(p, 'a') > 0 && num(p, 'b') > 0 && num(p, 'c') > 0 && differentLines(p),
