@@ -65,7 +65,7 @@ function kod(id: string): string {
 }
 
 /** Разбор для ученика из разбора тренажёра: разметка уже набрана KaTeX. */
-function razborUchenika(r: Razbor1): string {
+export function razborUchenika(r: Razbor1): string {
   const shagi = r.shagi
     .map((s, i) => {
       const tekst = s.tekst.map((t) => `<p class="var-razbor__line">${t}</p>`).join('');

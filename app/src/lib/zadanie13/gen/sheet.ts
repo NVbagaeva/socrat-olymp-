@@ -209,6 +209,21 @@ function zagolovokBloka(title: string): string {
 }
 
 /**
+ * Блоки зачёта — подряд идущие задачи одного типа. В прежнем адресе
+ * задачи зачёта идут по типам, блок — тип; в общем генераторе порядок
+ * задаёт учитель, и задача, переставленная к другим, — свой блок.
+ */
+function gruppyZacheta(zs: ListZadacha13[]): ListZadacha13[][] {
+  const out: ListZadacha13[][] = [];
+  for (const z of zs) {
+    const last = out[out.length - 1];
+    if (last !== undefined && last[0]?.vid === z.vid) last.push(z);
+    else out.push([z]);
+  }
+  return out;
+}
+
+/**
  * Блоки листа одного варианта. Обычный лист — один блок без заголовка:
  * задачи в порядке плана (он уже перемешан). Зачёт — блоки по схемам,
  * у ученика без названий схем, в блоках 1–4 — по задаче на страницу.
@@ -240,10 +255,9 @@ function bloki(
       ...hvost(z),
     ]);
   }
-  const vidy = [...new Set(zs.map((z) => z.vid))];
   const out: SheetBlock[] = [];
-  vidy.forEach((vid, bi) => {
-    const svoi = zs.filter((z) => z.vid === vid);
+  gruppyZacheta(zs).forEach((svoi, bi) => {
+    const vid = svoi[0]?.vid ?? 'A';
     const ot = svoi[0]?.no ?? 1;
     const poOdnoy = uchenik && vid !== 'T';
     svoi.forEach((z, i) => {
@@ -301,12 +315,12 @@ function blokiUroka(
 
 /** Первая страница зачёта: как выполнять, таблица баллов, шкала. */
 function stranicaZacheta(zs: ListZadacha13[]): string {
-  const vidy = [...new Set(zs.map((z) => z.vid))];
   let ot = 1;
   let vsego = 0;
-  const stroki = vidy
-    .map((vid, i) => {
-      const n = zs.filter((z) => z.vid === vid).length;
+  const stroki = gruppyZacheta(zs)
+    .map((svoi, i) => {
+      const vid = svoi[0]?.vid ?? 'A';
+      const n = svoi.length;
       const ball = vid === 'T' ? ZACHET_13.bally.tip : ZACHET_13.bally.zadacha;
       vsego += n * ball;
       /* Схему блока на листе ученика не называем: только «Определи тип». */
@@ -334,6 +348,12 @@ function stranicaZacheta(zs: ListZadacha13[]): string {
     `<p class="z13-sheet-note"><b>${escape(ZACHET_13.zachet)}</b></p>` +
     `</div>`
   );
+}
+
+/** «2026-10-24» → «24.10.2026»: дата из общего генератора (ps=2). */
+function dataNaListe13(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m === null ? '' : `${m[3]}.${m[2]}.${m[1]}`;
 }
 
 export function sheetSpec13(p: GenParams13, list: List13, vid: VidPechati13) {
@@ -389,7 +409,9 @@ export function sheetSpec13(p: GenParams13, list: List13, vid: VidPechati13) {
     recap: null,
     blocks: one?.blocks ?? [],
     /* Строка «Фамилия, имя / Класс / Дата» — только на листе ученика. */
-    ...(vid === 'uchitel' ? {} : { fields: { date: p.date } }),
+    ...(vid === 'uchitel'
+      ? {}
+      : { fields: { date: p.klyuchi === undefined ? p.date : dataNaListe13(p.date) } }),
     ...(one === undefined ? { variants } : {}),
     withAnswerLine: false,
     extraItems: [] as string[],

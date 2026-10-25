@@ -8,6 +8,7 @@
  * рисуется ничего.
  */
 
+import { BUKVY, CHISLA, VES } from '../risunki/shrifty.js';
 import type { Body, Cone, Cylinder, Model, Polyhedron, Sphere } from './model';
 import { faceNormal, polyhedronEdges } from './model';
 import { type View, orthoAt, viewOf } from './project';
@@ -28,16 +29,28 @@ import { type Occluder, occludersOf, polylineRuns, segmentRuns, selfOccluders } 
 
 /* ══════════════════════════════════════════════════════════
    THEME — единственное место, где живёт оформление.
-   Цвета только через токены дизайн-системы (tokens.css).
+
+   Все стили — атрибутами прямо в SVG и значениями, а не токенами
+   var(--…): рисунок не зависит от CSS страницы и одинаков на сайте,
+   на листе, в PDF, в предпросмотре и на сводном листе. (Раньше цвета
+   были var(--solid-edge) и т. п. без запасного значения: вне страниц,
+   где токены не заданы, заливка становилась чёрной по умолчанию SVG,
+   а рёбра пропадали — тело печаталось чёрной кляксой.)
+
+   Значения — токены сайта из styles/tokens.css: тёмный текст
+   (--color-text), синий (--color-primary), терракота (--graph-accent).
+   Внешнее (стеклянное) тело и одиночное тело — тёмные, вписанное —
+   синее. Заливки — только лёгкие, полупрозрачность не больше 0,1.
    ══════════════════════════════════════════════════════════ */
 const THEME = {
   colors: {
-    edge: 'var(--solid-edge)',
-    face: 'var(--solid-face)',
-    liquid: 'var(--solid-liquid)',
-    aux: 'var(--graph-accent)',
-    label: 'var(--color-text)',
-    surface: 'var(--color-surface)',
+    edge: '#101728',
+    inner: '#1f5fd0',
+    face: '#1f5fd0',
+    liquid: '#1f5fd0',
+    aux: '#e07a2f',
+    label: '#101728',
+    surface: '#ffffff',
   },
   /* Толщины — в единицах рисунка: чертёж шириной около 330 единиц
      печатается шириной около 64 мм, это PT единиц в pt. На бумаге
@@ -63,24 +76,25 @@ const THEME = {
   },
   opacity: {
     /* Невидимое ребро — тот же цвет, светлее. */
-    hidden: 0.75,
-    face: 0.75,
-    liquid: 0.85,
-    /* Выделенная фигура (сечение) — не плотнее 0,15. */
-    section: 0.12,
-    sphere: 0.5,
-    sectionHl: 0.15,
+    hidden: 0.7,
+    /* Заливки: только лёгкий оттенок, не больше 0,1. */
+    face: 0.06,
+    liquid: 0.1,
+    section: 0.08,
+    sphere: 0.08,
+    sectionHl: 0.1,
   },
   /* Подписи — шрифтом KaTeX, как в условии: имена курсивом KaTeX_Math,
      числа прямым KaTeX_Main, не жирно; индекс — 70 % ниже строки;
      кегль на бумаге не меньше 10 pt. */
   font: {
-    family: "KaTeX_Main, 'Times New Roman', Times, serif",
-    familyName: "KaTeX_Math, 'Times New Roman', Times, serif",
+    /* Шрифты — общие для рисунков сайта (lib/risunki/shrifty). */
+    family: CHISLA,
+    familyName: BUKVY,
     size: 19,
     /* Живой чертёж — только экран: кегль 15 px, как прежде. */
     liveSize: 15,
-    weight: 400,
+    weight: VES,
     /* Индекс — 70 % кегля и ниже строки на четверть кегля. */
     subShare: 0.7,
     subDy: 0.24,
@@ -107,10 +121,14 @@ const THEME = {
 
 type Role = 'edge' | 'aux' | 'section';
 
+/** Чьё это: вписанное тело — синее, внешнее и одиночное — тёмное. */
+type Ton = 'inner' | 'outer';
+
 interface Stroke {
   points: Vec2[];
   role: Role;
   visible: boolean;
+  ton?: Ton;
   /** Элемент текущего шага решения. */
   hl?: boolean;
   /** Прямой отрезок в пространстве, кусок которого это: для метрик вида (vid.ts). */
@@ -128,6 +146,9 @@ interface Fill {
   points: Vec2[];
   role: FillRole;
   hl?: boolean;
+  ton?: Ton;
+  /** Стеклянное внешнее тело: без заливки. */
+  steklo?: boolean;
 }
 
 interface LabelSpec {
@@ -553,11 +574,14 @@ export type Tema = 'pechat' | 'ekran';
 /* Экранная тема «стекло»: только цвета, прозрачность, толщины и
    кружки вершин. Цвета — токены (tokens.css, --solid-steklo-*). */
 const STEKLO = {
+  /* Экранная тема живёт только на страницах сайта, где токены заданы;
+     запасные значения — те же токены хексом, на случай рисунка вне
+     страницы (тогда он не станет чёрным). */
   colors: {
-    edge: 'var(--solid-steklo-rebro)',
-    glass1: 'var(--solid-steklo-1)',
-    glass2: 'var(--solid-steklo-2)',
-    vydel: 'var(--solid-vydel)',
+    edge: 'var(--solid-steklo-rebro, #3d79e0)',
+    glass1: 'var(--solid-steklo-1, #f2f7fe)',
+    glass2: 'var(--solid-steklo-2, #d7e5fa)',
+    vydel: 'var(--solid-vydel, #e07a2f)',
   },
   width: { edge: 2.3, hidden: 1.6, vertex: 2 },
   dash: { hidden: '6 5' },
@@ -593,8 +617,11 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
     }));
   }
 
+  /* Есть стеклянное (внешнее) тело — остальные вписаны в него. */
+  const estSteklo = model.bodies.some((b) => b.glass === true);
   model.bodies.forEach((body, owner) => {
-    const from = scene.strokes.length;
+    const s0 = scene.strokes.length;
+    const f0 = scene.fills.length;
     switch (body.kind) {
       case 'polyhedron':
         addPolyhedron(view, scene, body, all, eps);
@@ -609,8 +636,16 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
         addSphere(view, scene, body, all, eps);
         break;
     }
-    for (let i = from; i < scene.strokes.length; i += 1) {
-      (scene.strokes[i] as Stroke).owner = owner;
+    const ton: Ton = estSteklo && body.glass !== true ? 'inner' : 'outer';
+    for (let i = s0; i < scene.strokes.length; i += 1) {
+      scene.strokes[i] = { ...(scene.strokes[i] as Stroke), ton, owner };
+    }
+    for (let i = f0; i < scene.fills.length; i += 1) {
+      scene.fills[i] = {
+        ...(scene.fills[i] as Fill),
+        ton,
+        ...(body.glass === true ? { steklo: true } : {}),
+      };
     }
   });
 
@@ -1038,8 +1073,8 @@ function strokeAttrs(s: Stroke, ekran = false): string {
   const w = THEME.width;
   if (ekran && !s.hl && s.role === 'edge') {
     return s.visible
-      ? `stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.edge}"`
-      : `stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.hidden}" stroke-opacity="${STEKLO.opacity.hidden}" stroke-dasharray="${STEKLO.dash.hidden}"`;
+      ? `class="solid-rebro" stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.edge}"`
+      : `class="solid-rebro" stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.hidden}" stroke-opacity="${STEKLO.opacity.hidden}" stroke-dasharray="${STEKLO.dash.hidden}"`;
   }
   if (s.hl) {
     return s.visible
@@ -1047,9 +1082,10 @@ function strokeAttrs(s: Stroke, ekran = false): string {
       : `stroke="${c.aux}" stroke-width="${w.hlHidden}" stroke-dasharray="${THEME.dash.aux}"`;
   }
   if (s.role === 'edge') {
+    const cvet = s.ton === 'inner' ? c.inner : c.edge;
     return s.visible
-      ? `stroke="${c.edge}" stroke-width="${w.edge}"`
-      : `stroke="${c.edge}" stroke-width="${w.hidden}" stroke-opacity="${THEME.opacity.hidden}" stroke-dasharray="${THEME.dash.hidden}"`;
+      ? `stroke="${cvet}" stroke-width="${w.edge}"`
+      : `stroke="${cvet}" stroke-width="${w.hidden}" stroke-opacity="${THEME.opacity.hidden}" stroke-dasharray="${THEME.dash.hidden}"`;
   }
   return s.visible
     ? `stroke="${c.aux}" stroke-width="${w.aux}"`
@@ -1059,6 +1095,8 @@ function strokeAttrs(s: Stroke, ekran = false): string {
 function fillAttrs(f: Fill, gradient?: string): string {
   const c = THEME.colors;
   const o = THEME.opacity;
+  /* Стеклянное внешнее тело не заливается: сквозь него видно вписанное. */
+  if (f.steklo && (f.role === 'face' || f.role === 'sphere')) return 'fill="none"';
   if (gradient !== undefined) {
     const k = STEKLO.opacity;
     switch (f.role) {
@@ -1089,16 +1127,21 @@ function labelMarkup(label: PlacedLabel): string {
   const { base, sub } = splitName(label.text);
   const size = label.size ?? (label.kind === 'measure' ? f.measure : f.size);
   const fill = label.kind === 'aux' || label.hl ? THEME.colors.aux : THEME.colors.label;
-  const weight = f.weight;
-  const family = label.kind === 'measure' ? f.family : f.familyName;
-  const style = label.kind === 'measure' ? '' : ' font-style="italic"';
+  /* Шрифты подписей — общие для рисунков сайта (lib/risunki/shrifty):
+     буквы-вершины — KaTeX_Math курсивом, числа — KaTeX_Main прямым. */
+  const bukva = label.kind === 'vertex' || label.kind === 'aux';
+  const family = bukva ? BUKVY : CHISLA;
+  const weight = VES;
+  const style = bukva ? ' font-style="italic"' : '';
   const x = label.x;
   const y = label.y + label.h * 0.78;
   const inner = sub
     ? `${esc(base)}<tspan font-size="${px(size * f.subShare)}" dy="${px(size * f.subDy)}" font-family="${f.family}" font-style="normal">${esc(sub)}</tspan>`
     : esc(base);
   return (
-    `<text x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
+    /* Выделенная шагом подпись — цветом построений; class="solid-hl" и
+       data-hl — метки для проверок (жирного начертания нет). */
+    `<text${label.hl ? ' class="solid-hl"' : ''} x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
     `fill="${fill}"${label.hl ? ' data-hl="1"' : ''} paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
@@ -1210,7 +1253,7 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   });
 
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${px(x0)} ${px(y0)} ${px(width)} ${px(height)}" ` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="solid" viewBox="${px(x0)} ${px(y0)} ${px(width)} ${px(height)}" ` +
     `width="${px(width)}" height="${px(height)}" data-line-pt="1.35" data-line-w="${THEME.width.edge}" role="img" aria-label="${esc(model.alt)}" class="${ekran ? 'solid solid--ekran' : 'solid'}">` +
     `<title>${esc(model.alt)}</title>${parts.join('')}</svg>`
   );

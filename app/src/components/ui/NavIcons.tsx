@@ -27,7 +27,8 @@ export type NavIconName =
   | 'book'
   | 'gear'
   | 'help'
-  | 'variant';
+  | 'variant'
+  | 'povyshennye';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
   /* Дом. */
@@ -128,6 +129,14 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <path d="M8.5 3.5h8.2l3.3 3.3v10.7a1 1 0 0 1-1 1h-10.5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z" />
       <path d="M5.5 7v12.5a1 1 0 0 0 1 1h9" />
       <path d="M10.5 9.5h6M10.5 12.5h6M10.5 15.5h3.5" />
+    </>
+  ),
+  /* Стопка листов со звездой: варианты повышенной сложности. */
+  povyshennye: (
+    <>
+      <path d="M8.5 3.5h8.2l3.3 3.3v10.7a1 1 0 0 1-1 1h-10.5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z" />
+      <path d="M5.5 7v12.5a1 1 0 0 0 1 1h9" />
+      <path d="m13.3 8.2 1 2 2.2.3-1.6 1.6.4 2.2-2-1-2 1 .4-2.2-1.6-1.6 2.2-.3z" />
     </>
   ),
   /* Колокольчик уведомлений. */

@@ -16,6 +16,7 @@ import {
   answerText,
   pickCandidate,
   razborAnswer,
+  hintSteps,
   studentFromHints,
   type Candidate,
 } from '../common';
@@ -73,6 +74,7 @@ function build(c: C7): VariantTask {
     answer: answerText(s.answer),
     answerHtml: otvet,
     solutionTeacher: razbor + razborAnswer(otvet),
+    hints: hintSteps(s.hints),
     solutionStudent:
       studentFromHints(s.hints, []) +
       `<p class="var-razbor__h">Решаем</p>${razbor}` +

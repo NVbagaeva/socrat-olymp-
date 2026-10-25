@@ -52,12 +52,22 @@ function walk(dir) {
 const out = fs.mkdtempSync(path.join(os.tmpdir(), 'zadanie3-'));
 const src = path.join(root, 'src', 'lib');
 
-for (const file of [...walk(path.join(src, 'solid')), ...walk(path.join(src, 'zadanie3'))]) {
+/* Шрифты подписей рисунков (lib/risunki/shrifty.js) — общие для движков,
+   solid/ импортирует их; модуль на JS, транспилируется так же. */
+const obshchie = fs
+  .readdirSync(path.join(src, 'risunki'))
+  .filter((f) => f.endsWith('.js'))
+  .map((f) => path.join(src, 'risunki', f));
+for (const file of [
+  ...walk(path.join(src, 'solid')),
+  ...walk(path.join(src, 'zadanie3')),
+  ...obshchie,
+]) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     fileName: file,
   }).outputText;
-  const target = path.join(out, path.relative(src, file).replace(/\.ts$/, '.js'));
+  const target = path.join(out, path.relative(src, file).replace(/\.[tj]s$/, '.js'));
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, js);
 }

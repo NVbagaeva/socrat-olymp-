@@ -106,6 +106,11 @@ export interface StudentHome {
   homework: (HomeworkSummary & { progress: HomeworkProgress })[];
   progress: TaskProgressRow[];
   finished: FinishedSession[];
+  /** Выданные варианты и серии: свои попытки с итогами (для статистики). */
+  variantWorks: (VariantWorkSummary & {
+    attempts: VariantResult[];
+    open: VariantAttemptSummary[];
+  })[];
 }
 
 export interface TutorStudent extends Person {
@@ -120,6 +125,8 @@ export interface TutorHome {
   students: TutorStudent[];
   homework: (HomeworkSummary & { submitted: number; recipients: number })[];
   invitations: Invitation[];
+  /** Выданные варианты: сколько получателей и сколько завершили. */
+  variantWorks: (VariantWorkSummary & { recipients: number; finished: number })[];
 }
 
 export interface AdminHome {
@@ -185,4 +192,124 @@ export interface SessionResultInput {
   activeMs: number;
   homeworkId: string | null;
   attempts: AttemptInput[];
+}
+
+/* ── Онлайн-вариант (supabase/migrations/20261025120000_variant_works.sql) ── */
+
+export type VariantMode = 'trening' | 'kontrol';
+
+export type VariantTimer = { kind: 'none' } | { kind: 'up' } | { kind: 'down'; minutes: number };
+
+/** Подсказка-вопрос (HTML). */
+export interface VariantHint {
+  question: string;
+  options: string[];
+  correct: number;
+  comment: string | null;
+}
+
+/** Задание работы, как его видит получатель: без ответа и подсказок. */
+export interface VariantWorkTask {
+  /** С 1, как в базе. */
+  position: number;
+  egeNo: number;
+  prototypeId: string;
+  taskRef: string;
+  subtype: string;
+  points: number;
+  statement: string;
+  figure: string | null;
+}
+
+/** Задание при выдаче: с ключом. Ключ уходит в variant_work_keys. */
+export interface VariantWorkTaskInput extends VariantWorkTask {
+  answer: string;
+  hints: VariantHint[];
+}
+
+export interface IssueVariantInput {
+  title: string;
+  /** Тип работы из шапки листа (ege, dz, probnik…). */
+  kind: string;
+  setCode: string;
+  mode: VariantMode;
+  timer: VariantTimer;
+  dueAt: string | null;
+  classId: string | null;
+  studentIds: string[];
+  /** variant — номер в работе (с 1), setVariant — номер в партии. */
+  variants: { variant: number; setVariant: number; tasks: VariantWorkTaskInput[] }[];
+}
+
+export interface VariantWorkSummary {
+  id: string;
+  title: string;
+  kind: string;
+  setCode: string;
+  /** Вариантов: 1 — вариант, больше — серия. */
+  variants: number;
+  /** Номер каждого варианта работы в партии (setVariants[v - 1]). */
+  setVariants: number[];
+  mode: VariantMode;
+  timer: VariantTimer;
+  tutor: Person;
+  className: string | null;
+  dueAt: string | null;
+  createdAt: string;
+  closedAt: string | null;
+}
+
+/** Итог задания в попытке. */
+export interface VariantResultTask {
+  position: number;
+  egeNo: number;
+  /** Первая попытка, нормальная запись; null — нет ответа. */
+  answer: string | null;
+  right: boolean;
+  second: string | null;
+  secondRight: boolean | null;
+  hinted: boolean;
+  seconds: number;
+  /** Верный ответ — только у завершённой попытки. */
+  key: string;
+}
+
+export interface VariantAttemptSummary {
+  id: string;
+  variant: number;
+  startedAt: string;
+  deadlineAt: string | null;
+  finishedAt: string | null;
+  late: boolean;
+  primary: number | null;
+  max: number | null;
+  seconds: number | null;
+}
+
+export interface VariantResult extends VariantAttemptSummary {
+  tasks: VariantResultTask[];
+}
+
+/** Работа на экране: ученику — его попытки, репетитору — все. */
+export interface VariantWorkView {
+  work: VariantWorkSummary;
+  /** Условия по вариантам: tasks[variant - 1]. */
+  tasks: VariantWorkTask[][];
+  /** Ученику — свои попытки. */
+  mine: VariantAttemptSummary[];
+  /** Репетитору — получатели и их завершённые попытки с итогами. */
+  results: { student: Person; attempts: VariantResult[] }[] | null;
+}
+
+export interface VariantStart {
+  attemptId: string;
+  deadlineAt: string | null;
+  /** Черновик контрольной — продолжить на другом устройстве. */
+  draft: Record<string, unknown>;
+}
+
+export interface VariantCheck {
+  verdict: 'right' | 'wrong' | 'format';
+  /** Первая ошибка в тренировке — подсказки-вопросы. */
+  hints?: VariantHint[];
 }

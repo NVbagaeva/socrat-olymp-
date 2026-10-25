@@ -15,23 +15,26 @@
   filter: drop-shadow(0 10px 16px var(--solid-steklo-ten));
 }
 
-/* На печати экранная тема возвращается к строгой: плоская заливка,
-   сплошные точки, выделение не плотнее 0,15. */
+/* На печати экранная тема возвращается к строгой (как тема «pechat»
+   движка): тёмные рёбра, сплошные точки, заливки не плотнее 0,1. */
 @media print {
   .solid--ekran {
     filter: none;
   }
+  .solid--ekran .solid-rebro {
+    stroke: var(--color-text);
+  }
   .solid--ekran .solid-gran {
-    fill: var(--solid-face);
-    fill-opacity: 0.75;
+    fill: var(--color-primary);
+    fill-opacity: 0.06;
   }
   .solid--ekran .solid-vydel,
   .ploskiy--ekran .solid-vydel {
-    fill-opacity: 0.15;
+    fill-opacity: 0.1;
   }
   .solid--ekran .solid-vershina,
   .ploskiy--ekran .solid-vershina {
-    fill: var(--solid-edge);
+    fill: var(--color-text);
     stroke: var(--color-surface);
     r: 3.2px;
   }

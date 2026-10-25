@@ -32,9 +32,11 @@ import {
   labelSize,
   printFitted,
   px,
+  sMinKeglem,
   svgText,
   textWidth,
 } from '@/lib/graph/renderer.js';
+import { BUKVY } from '@/lib/risunki/shrifty.js';
 import { RULES } from '@/lib/sheet/figureRules.js';
 import { type Rect, type Seg, pointSegDist, rectGap, segRectDist, segSegDist } from './geometry';
 import {
@@ -78,10 +80,10 @@ const V = {
   },
   /* Числа у осей: 0, 1 и координаты проекций. В ФИПИ они заметно
      жирнее подписей графиков, и читаются с телефона. */
-  tick: { size: 14, weight: 600, gapX: 17, gapY: 7, originGap: 5 },
+  tick: { size: 14, weight: 400, gapX: 17, gapY: 7, originGap: 5 },
   axisName: { size: THEME.font.axisName, belowX: 19, leftY: 8, downY: 15 },
   proj: { dash: '5 4', width: 1.4, tick: 3.5 },
-  hint: { dash: '6 4', width: THEME.width.helper, size: 15, weight: 600, gap: 11 },
+  hint: { dash: '6 4', width: THEME.width.helper, size: 15, weight: 400, gap: 11 },
   /* Минимальная дистанция между векторами и минимальная длина, в клетках. */
   minDist: 1,
   minLen: 2,
@@ -194,7 +196,19 @@ export function renderVectorPlane(config: Risunok, report?: Report): string {
   const svg = printFitted(
     config.cell ?? THEME.geometry.cell,
     RULES.gridCellSteps,
-    (r: Report) => withPrintSizes(() => drawVectorPlane(config, r)),
+    (r: Report) =>
+      withPrintSizes(() =>
+        sMinKeglem(
+          config.minFont,
+          [
+            [V.label, ['size']],
+            [V.tick, ['size']],
+            [V.axisName, ['size']],
+            [V.hint, ['size']],
+          ],
+          () => drawVectorPlane(config, r),
+        ),
+      ),
     () => (last = emptyReport()),
   );
   if (report !== undefined && last !== null) Object.assign(report, last);
@@ -289,7 +303,7 @@ function drawVectorPlane(config: Risunok, report?: Report): string {
   const labelLayer: string[] = [];
 
   head.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${px(width)} ${px(height)}" width="${px(width)}" height="${px(height)}" class="vp" role="img"` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="vektory" viewBox="0 0 ${px(width)} ${px(height)}" width="${px(width)}" height="${px(height)}" class="vp" role="img"` +
       (showGrid ? gridCellAttr(cell) : '') +
       (config.alt ? ` aria-label="${esc(config.alt)}"` : ' aria-hidden="true"') +
       ' style="max-width:100%;height:auto">',
@@ -379,12 +393,14 @@ function drawVectorPlane(config: Risunok, report?: Report): string {
     svgText('x', tipX - 3, axisX + V.axisName.belowX, 'end', {
       size: V.axisName.size,
       style: 'italic',
+      family: BUKVY,
     }),
   );
   labelLayer.push(
     svgText('y', axisY - V.axisName.leftY, tipY + V.axisName.downY, 'end', {
       size: V.axisName.size,
       style: 'italic',
+      family: BUKVY,
     }),
   );
   addBox(xName);

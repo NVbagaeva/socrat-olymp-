@@ -14,11 +14,16 @@ import type {
   InvitePreview,
   InviteRegistration,
   IssueHomeworkInput,
+  IssueVariantInput,
   Me,
   Person,
   SessionResultInput,
   StudentHome,
   TutorHome,
+  VariantCheck,
+  VariantResult,
+  VariantStart,
+  VariantWorkView,
 } from './types';
 
 /** Ошибка с кодом — тем же, что поднимает функция базы. */
@@ -63,6 +68,28 @@ export interface KabinetApi {
   homework(id: string): Promise<HomeworkView | null>;
   startHomework(id: string): Promise<void>;
   submitHomework(id: string): Promise<void>;
+
+  /* ── Онлайн-вариант (миграция 20261025120000_variant_works.sql) ── */
+
+  /** Выдать вариант или серию (issue_variant_work). Возвращает id работы. */
+  issueVariantWork(input: IssueVariantInput): Promise<string>;
+  /** Работа: условия без ключа; ученику — его попытки, репетитору — итоги. */
+  variantWork(id: string): Promise<VariantWorkView | null>;
+  /** Начать или продолжить вариант (variant_start). */
+  variantStart(workId: string, variant: number): Promise<VariantStart>;
+  /** Тренировка: проверить ответ сразу (variant_check); position — с 1. */
+  variantCheck(attemptId: string, position: number, answer: string): Promise<VariantCheck>;
+  /** Контрольная: черновик без проверки (variant_save_draft). */
+  variantSaveDraft(attemptId: string, draft: Record<string, unknown>): Promise<void>;
+  /** «Завершить работу» (variant_submit): баллы и ключ — только теперь. */
+  variantSubmit(
+    attemptId: string,
+    answers: (string | null)[],
+    seconds: number[],
+    hinted: number[],
+  ): Promise<VariantResult>;
+  /** Итог завершённой попытки (variant_result). */
+  variantResult(attemptId: string): Promise<VariantResult>;
 
   /** Завершённая тренировка: строка trainer_sessions и попытки (record_attempt). */
   saveSessionResult(result: SessionResultInput): Promise<void>;

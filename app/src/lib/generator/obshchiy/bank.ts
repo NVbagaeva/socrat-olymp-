@@ -110,7 +110,7 @@ export function parseZaprosBanka(
     zameny,
     pamyatka: q.get('tr') === '1',
     primery: pr === 1 || pr === 2 ? pr : 0,
-    kind: (q.get('k') ?? '').slice(0, 60),
+    kind: (q.get('k') ?? '').slice(0, 80),
     date: /^\d{4}-\d{2}-\d{2}$/.test(q.get('d') ?? '') ? (q.get('d') as string) : '',
     ...(uch === null ? {} : { uchitel: uch.slice(0, 40) }),
     qr: q.get('qr') === '1',
@@ -156,12 +156,15 @@ function peremeshat<T>(r: Rng, items: readonly T[]): T[] {
  * раздаётся по вариантам по порядку — ещё один вариант не меняет
  * прежние, а маленький банк исходных задач расходится целиком.
  * podhodit — фильтр раздела (формулировка у №6); примеры — любые.
+ * bezPrimerov — у раздела разобранных примеров нет (№4, №5): задачи
+ * под них не откладываются.
  */
 export function sobratPoKlyucham(
   z: ZaprosBanka,
   indeks: readonly ZadachaBanka[],
   sol: string,
   podhodit: (x: ZadachaBanka) => boolean = () => true,
+  bezPrimerov = false,
 ): ListBanka {
   const sloty = slotySostava(z.sostav);
   const protos = [...new Set(sloty.map((s) => s.id))];
@@ -178,7 +181,7 @@ export function sobratPoKlyucham(
       indeks.filter((x) => x.p === p && x.s === 'a').map((x) => x.id),
     );
     /* Примеры — последние аналоги пула (исходные, если аналогов нет). */
-    const zapas = (a.length > 0 ? a : f).slice(-PRIMEROV_MAX).reverse();
+    const zapas = bezPrimerov ? [] : (a.length > 0 ? a : f).slice(-PRIMEROV_MAX).reverse();
     primery.push({ proto: p, ids: zapas.slice(0, z.primery) });
     const ok = new Set(indeks.filter(podhodit).map((x) => x.id));
     const bez = (ids: string[]) => ids.filter((id) => ok.has(id) && !zapas.includes(id));

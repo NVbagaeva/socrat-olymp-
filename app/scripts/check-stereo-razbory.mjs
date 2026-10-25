@@ -126,7 +126,8 @@ for (const r of RAZBORY_3) {
     const w = R.SOLID_THEME.width;
     check(
       [w.hl, w.hlHidden, w.hlMarker].some((x) => svg.includes(`stroke-width="${x}"`)) ||
-        svg.includes('data-hl="1"'),
+        svg.includes('data-hl="1"') ||
+        svg.includes('class="solid-hl"'),
       `${where}: на шаге ${k} на чертеже ничего не выделено`,
     );
   }

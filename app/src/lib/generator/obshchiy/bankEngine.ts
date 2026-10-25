@@ -12,7 +12,7 @@
  */
 
 import { slotySostava, sostavIzSlotov } from './klyuchi';
-import { defaultExtras } from './state';
+import { defaultExtras, vidRabotyIz, vidRabotyText } from './state';
 import type { BlokBanka, IstochnikBanka, ZaprosBanka } from './bank';
 import { zaprosBankaQuery } from './bank';
 import type {
@@ -85,10 +85,6 @@ export interface BankSection {
   podzagolovok: string;
 }
 
-function vidy(config: GenConfig): Record<string, string> {
-  return Object.fromEntries((config.extras?.kinds ?? []).map((k) => [k.id, k.title]));
-}
-
 export function zaprosIzSostoyaniya(
   state: GenState & { seed: string },
   config: GenConfig,
@@ -102,7 +98,7 @@ export function zaprosIzSostoyaniya(
     zameny: state.zameny,
     pamyatka: e.theory,
     primery: e.examples,
-    kind: e.kind === null ? '' : (vidy(config)[e.kind] ?? ''),
+    kind: vidRabotyText(config, e),
     date: e.date,
     ...(e.teacher === config.sheet.teacher ? {} : { uchitel: e.teacher }),
     qr: e.qr,
@@ -118,7 +114,7 @@ function extrasIzZaprosa(z: ZaprosBanka, config: GenConfig): GenExtras {
     ...defaultExtras(config),
     theory: z.pamyatka,
     examples: z.primery,
-    kind: Object.entries(vidy(config)).find(([, t]) => t === z.kind)?.[0] ?? null,
+    ...vidRabotyIz(config, z.kind),
     date: z.date,
     teacher: z.uchitel ?? config.sheet.teacher,
     qr: z.qr,
@@ -197,7 +193,7 @@ export function bankEngine(config: GenConfig, s: BankSection): GenEngine {
       };
     },
     subtitle(state) {
-      const kind = state.extras.kind === null ? '' : (vidy(config)[state.extras.kind] ?? '');
+      const kind = vidRabotyText(config, state.extras);
       return kind !== '' ? kind : s.podzagolovok;
     },
     parse(q) {

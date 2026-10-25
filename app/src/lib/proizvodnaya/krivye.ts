@@ -269,7 +269,7 @@ export function figura(
     uzly,
     levyy: 'open',
     pravyy: 'open',
-    chisla: 'vse',
+    chisla: 'minimum',
     chislaY: 'minimum',
     cell: razmerKletki(w),
     ...extra,

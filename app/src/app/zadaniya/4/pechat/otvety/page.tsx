@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <Suspense fallback={null}>
-      <PechatVeroyatnosti pool={bank4Pool()} zadanie={4} withAnswers />
+      <PechatVeroyatnosti pool={bank4Pool()} zadanie={4} vid="uchitel" />
     </Suspense>
   );
 }

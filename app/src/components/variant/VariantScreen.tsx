@@ -46,6 +46,9 @@ import {
 } from '@/lib/variant/types';
 import { BlankiEge } from '@/components/blanki/BlankiEge';
 import { VariantPreview } from './VariantPreview';
+import { OnlinePanel, readSettings } from './online/OnlinePanel';
+import { ONLINE_TEXT } from '@/content/variantOnline/text';
+import { reshatHref } from '@/lib/variant/online/link';
 
 function Segment<I extends string>({
   label,
@@ -188,6 +191,29 @@ export function VariantScreen() {
     if (set === null) return;
     const ok = openSheet(choice, { set, meta: shown, workTitle: title }, fullCode);
     setNotice(ok ? null : T.popupBlocked);
+  }
+
+  /* Серия: N разных вариантов без повторов задач, фильтры — те же. */
+  function seriya(n: number) {
+    setNotice(null);
+    const next = { ...config, count: Math.min(MAX_VARIANTS, Math.max(2, n)), parallel: false };
+    setConfig(next);
+    void run(next, newSeed(), {});
+  }
+
+  /* «Решать онлайн» рядом с листами: вариант 1 с режимом и таймером из
+     панели ниже. */
+  function onlayn() {
+    if (set === null) return;
+    const s = readSettings();
+    const href = reshatHref({
+      code: set.code,
+      variant: 1,
+      ...s,
+      kind: shown.kind,
+      title: shown.kind === 'custom' ? shown.customTitle : '',
+    });
+    window.open(href, '_blank', 'noopener');
   }
 
   function copyCode() {
@@ -611,12 +637,19 @@ export function VariantScreen() {
               <Button variant="ghost" onClick={() => pechat('uchenik')}>
                 {T.print}
               </Button>
+              <Button variant="secondary" onClick={onlayn} data-testid="vo-kit-online">
+                {ONLINE_TEXT.panel.open}
+              </Button>
             </div>
             <p className="var-field__note">{T.downloadsNote}</p>
           </section>
         )}
         <BlankiEge defaultCopies={set?.variants.length ?? config.count} />
       </div>
+
+      {set === null ? null : (
+        <OnlinePanel set={set} meta={shown} stale={stale} busy={busy} onSeries={seriya} />
+      )}
 
       {/* ── Предпросмотр ──────────────────────────────────── */}
       <VariantPreview

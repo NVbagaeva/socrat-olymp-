@@ -53,7 +53,8 @@ export function SheetPage13({ vid }: { vid: VidPechati13 }) {
     const built = sheetSpec13(params, sobratList13(params), vid);
     const kit = checkKitSheet(query, '13', vid === 'uchenik' ? 'student' : 'teacher', built);
     const qr =
-      vid === 'uchitel'
+      /* В прежних адресах QR есть всегда; в адресе общего генератора — если включён. */
+      vid === 'uchitel' || (params.klyuchi !== undefined && params.qr !== true)
         ? null
         : qrSvg(`${window.location.origin}${onlaynHref13(params)}`, PECHAT_13.qr);
     /* Место для решения (sp=) — только у листа ученика. */

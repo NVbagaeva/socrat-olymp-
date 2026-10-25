@@ -10,6 +10,7 @@
 
 import type { Vid13 } from '@/content/generator13';
 import type { Urok13 } from '@/content/repetitory13';
+import { planPoKlyucham, slotySostava, type SlotShablon } from '@/lib/generator/obshchiy/klyuchi';
 import { typeset } from '../../tex';
 import { rngOf } from '../../vychisleniya/rng';
 import { BANK_13 } from '../bank';
@@ -81,6 +82,7 @@ interface Slot {
  * трогает: место в очереди банка задача занимает и после замены.
  */
 export function planLista13(p: GenParams13): Poziciya13[][] {
+  if (p.klyuchi !== undefined) return planPoKlyucham13(p, p.klyuchi);
   const u = p.urok > 0 ? urokPo13(p.urok) : undefined;
   if (u !== undefined) return planUroka13(p, u);
   const bankSeeds = new Map<string, string[]>();
@@ -130,6 +132,73 @@ export function planLista13(p: GenParams13): Poziciya13[][] {
     );
   }
   return out;
+}
+
+/** Задача банка: прототип и seed. */
+interface Bank13 {
+  prototypeId: string;
+  seed: string;
+}
+
+/**
+ * Схема ps=2 (общий генератор): задача — функция ключа позиции
+ * («A-01_0»), варианта и seed листа (lib/generator/obshchiy/klyuchi.ts).
+ * Банк прототипа перемешан seed листа; «Определи тип» (подтип «T») берёт
+ * условия банка всех схем уровня листа. «Таблица руками» — всегда
+ * новые задачи, как и раньше. Порядок задач задаёт учитель: план не
+ * перемешивается; блок зачёта — подряд идущие задачи одного типа.
+ */
+function planPoKlyucham13(
+  p: GenParams13,
+  klyuchi: NonNullable<GenParams13['klyuchi']>,
+): Poziciya13[][] {
+  const sh = slotySostava(klyuchi).map((s): SlotShablon => ({
+    ...s,
+    istochnik: s.id.startsWith('P-') ? 'new' : p.istochnik,
+  }));
+  const tipKand = kandidaty('T', p.uroven);
+  const bank = (id: string): Bank13[] => {
+    const svoi = BANK_13.filter(([pid]) => (id === 'T' ? tipKand.includes(pid) : pid === id)).map(
+      ([prototypeId, seed]) => ({ prototypeId, seed }),
+    );
+    return rngOf(`z13-ps2|${p.seed}|${id}`).sample(svoi, svoi.length);
+  };
+  type Zadacha = Bank13 & { istochnik: 'bank' | 'new' };
+  const { poVariantam } = planPoKlyucham<SlotShablon, Bank13, Zadacha>({
+    sh,
+    variants: p.variants,
+    seed: p.seed,
+    zameny: p.zameny,
+    mixSol: 'z13-mix',
+    /* Задач подтипа на варианте — не больше 10 (GenConfig.limits). */
+    mestNaVariant: 12,
+    bank,
+    analogi: () => [],
+    bankPoz: (b) => ({ ...b, istochnik: 'bank' }),
+    analogPoz: (b) => ({ ...b, istochnik: 'bank' }),
+    novaya: (c, seed) => ({
+      prototypeId:
+        c.s.id === 'T'
+          ? (tipKand[rngOf(`z13-tip|${seed}`).int(0, tipKand.length - 1)] ?? 'A-01')
+          : c.s.id,
+      seed: `g${seed}`,
+      istochnik: 'new',
+    }),
+    seedNovoy: (x) => (x.istochnik === 'new' ? x.seed.slice(1) : undefined),
+  });
+  return poVariantam.map((row, v) => {
+    const zadachi = row.map((z, i) => {
+      const s = sh[i] as SlotShablon;
+      return {
+        pos: `${v + 1}.${s.id}_${s.k}`,
+        vid: vidPrototipa(z.prototypeId, s.id === 'T'),
+        prototypeId: z.prototypeId,
+        seed: z.seed,
+        istochnik: z.istochnik,
+      };
+    });
+    return zadachi.map((z, i): Poziciya13 => ({ ...z, no: i + 1 }));
+  });
 }
 
 /** Вид задачи урока: «таблица руками» — свой вид, «Определи тип» — свой, остальное — тип прототипа. */
@@ -234,9 +303,12 @@ function tipHtml(t: Task13): string {
   return `<div class="z13-r-shag"><p class="z13-r-shag__head"><b>${v.title}:</b> ${typeset(v.text)}</p></div>`;
 }
 
-/** Задача листа по позиции плана: условие, ответ, решения. */
-export function sobratZadachu13(poz: Poziciya13): ListZadacha13 {
-  const t = generate(poz.prototypeId, poz.seed);
+/**
+ * Задача листа по позиции плана: условие, ответ, решения. `gotovaya` —
+ * задача, уже собранная на заданных числах (generateFixed).
+ */
+export function sobratZadachu13(poz: Poziciya13, gotovaya?: Task13): ListZadacha13 {
+  const t = gotovaya ?? generate(poz.prototypeId, poz.seed);
   if (poz.vid === 'T') {
     const reshenie = `<p>${typeset(`Признак: ${SIGN[t.type]}.`)}</p>`;
     return {
@@ -268,7 +340,9 @@ export function sobratZadachu13(poz: Poziciya13): ListZadacha13 {
 }
 
 export function sobratList13(p: GenParams13): List13 {
-  return { poVariantam: planLista13(p).map((variant) => variant.map(sobratZadachu13)) };
+  return {
+    poVariantam: planLista13(p).map((variant) => variant.map((poz) => sobratZadachu13(poz))),
+  };
 }
 
 /** Таблица условия — отдельно: на листе она стоит под условием, не внутри абзаца. */

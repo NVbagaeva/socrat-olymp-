@@ -27,7 +27,7 @@ import {
 import { info } from './info';
 import { withPrintFigures } from '@/lib/sheet/figureRules.js';
 
-interface C02 extends Candidate {
+export interface C02 extends Candidate {
   seed: string;
   /** Номер варианта банка; null — новая задача. */
   n: number | null;
@@ -70,7 +70,7 @@ function figureOf(svg: string): Figure {
  * клетчатый рисунок на листе печатается клеткой 7 мм, и подписи движок
  * рисует сразу печатным кеглем. Тот же рисунок — в предпросмотре.
  */
-function build(c: C02, task: Generated): VariantTask {
+export function build(c: C02, task: Generated): VariantTask {
   return withPrintFigures(() => buildTask(c, task));
 }
 

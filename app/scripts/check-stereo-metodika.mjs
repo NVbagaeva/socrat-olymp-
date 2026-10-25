@@ -175,9 +175,10 @@ for (const p of G2.primeryGlavy2()) {
   const pechat = R.renderSolid(p.model, { shag: n });
   const ekran = R.renderSolid(p.model, { shag: n, tema: 'ekran' });
   check(!pechat.includes('Gradient') && !pechat.includes('solid--ekran'), `тема «печать», ${p.id}: градиент или экранный класс`);
-  [...pechat.matchAll(/fill="var\(--graph-accent\)" fill-opacity="([\d.]+)"/g)].forEach((m) =>
-    check(Number(m[1]) <= 0.15, `тема «печать», ${p.id}: выделение плотнее 0,15 (${m[1]})`),
-  );
+  const zalivki = [...pechat.matchAll(/fill="(?!none|transparent)[^"]+" fill-opacity="([\d.]+)"/g)];
+  check(zalivki.length > 0, `тема «печать», ${p.id}: нет заливок`);
+  zalivki.forEach((m) => check(Number(m[1]) <= 0.15, `тема «печать», ${p.id}: заливка плотнее 0,15 (${m[1]})`));
+  check(!/="var\(--/.test(pechat), `тема «печать», ${p.id}: цвет токеном var(--…)`);
   check(ekran.includes('linearGradient') && ekran.includes('solid-vershina'), `тема «экран», ${p.id}: нет градиента или кружков вершин`);
 }
 

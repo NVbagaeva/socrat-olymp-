@@ -10,7 +10,7 @@
  */
 
 import { typeset } from '@/lib/tex';
-import type { Fallback, Rng, SourceFilter, Stars, TaskFilters } from '../types';
+import type { Fallback, HintStep, Rng, SourceFilter, Stars, TaskFilters } from '../types';
 
 /* ── Фильтры ────────────────────────────────────────────────────── */
 
@@ -114,6 +114,22 @@ export interface HintLike {
   options: readonly string[];
   correct: number;
   comment?: string;
+}
+
+/**
+ * Подсказки-вопросы для онлайн-тренировки: тот же вопрос, варианты и
+ * пояснение, что у тренажёра раздела, набранные KaTeX. Ученик
+ * выбирает вариант — неверный гаснет, верный открывает следующий шаг.
+ */
+export function hintSteps(hints: readonly HintLike[]): HintStep[] {
+  return hints
+    .filter((h) => h.correct >= 0 && h.correct < h.options.length)
+    .map((h) => ({
+      question: typeset(h.question),
+      options: h.options.map((o) => typeset(o)),
+      correct: h.correct,
+      comment: h.comment === undefined || h.comment === '' ? null : typeset(h.comment),
+    }));
 }
 
 /**
