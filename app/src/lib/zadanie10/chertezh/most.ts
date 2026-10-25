@@ -60,7 +60,9 @@ const POLE = { left: 14, right: 40, top: 34, bottom: 22 };
 /** Растяжки пилонов опускаются на берег на такой доле длины моста. */
 const OTKOS = 0.2;
 const SHAG_VANT = 10;
-const KEGL = 14;
+/* Кегль подписей: чертёж 640 единиц печатается не шире строки листа
+   (158 мм), и подпись выходит не мельче 10 pt (lib/sheet/figureRules.js). */
+const KEGL = 15;
 const ZAZOR = 4;
 
 interface Otrezok {

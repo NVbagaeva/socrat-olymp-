@@ -2,7 +2,10 @@
 
 import { useEffect, useId, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { clsx } from 'clsx';
+import { SpaceOption } from '@/components/tasks/space/SpaceOption';
+import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
 import { kitTexts as T } from '@/content/generator';
+import { withSpace } from '@/lib/sheet/space.js';
 import { counted } from '@/lib/plural';
 import {
   bezUroka,
@@ -103,6 +106,10 @@ export function KitBar({
     () => null,
   );
   const [code, setCode] = useState('');
+  /* Место для решения — настройка листа ученика (sp= в адресе). Задач
+     она не меняет, поэтому в настройки комплекта не входит: комплект
+     не «уходит» от смены поля, а лист ученика печатается с ним. */
+  const [space, setSpace] = useSheetSpace();
   const [message, setMessage] = useState<{ text: string; kit?: Kit } | null>(null);
   const codeId = useId();
   /* Адрес по пробному seed — ключ настроек: по нему черновик следует
@@ -217,6 +224,7 @@ export function KitBar({
 
   return (
     <div className="kit">
+      <SpaceOption className="kit-space" value={space} onChange={setSpace} />
       <div className="cfg-bar kit-bar">
         <p className="kit-bar__code" aria-live="polite">
           {T.label}{' '}
@@ -237,7 +245,7 @@ export function KitBar({
               адрес можно скопировать — лист будет тем же. */}
           <a
             className={clsx('btn btn--primary kit-bar__btn', active || 'is-disabled')}
-            href={active ? kit.studentHref : undefined}
+            href={active ? withSpace(kit.studentHref, space) : undefined}
             aria-disabled={!active || undefined}
             target="_blank"
             rel="noopener"
@@ -257,7 +265,7 @@ export function KitBar({
           </a>
           <a
             className={clsx('btn btn--secondary kit-bar__btn', active || 'is-disabled')}
-            href={active ? bothHref(kit) : undefined}
+            href={active ? withSpace(bothHref(kit), space) : undefined}
             aria-disabled={!active || undefined}
             target="_blank"
             rel="noopener"

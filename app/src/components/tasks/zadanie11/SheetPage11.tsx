@@ -7,6 +7,7 @@ import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery11, sheetSpec11, sobratList, type VidLista } from '@/lib/zadanie11/sheet11';
 import type { UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
@@ -67,7 +68,15 @@ export function SheetPage11({ vid, bank }: { vid: VidLista; bank: UslovieBanka[]
       const built = sheetSpec11(params, sobratList(params, bank), vid, svg);
       /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
       const kit = checkKitSheet(query, '11', vid === 'uchenik' ? 'student' : 'teacher', built);
-      const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+      /* Место для решения (sp=) — только у листа ученика. */
+      const space = spaceOfQuery(query);
+      const printed =
+        vid === 'vse'
+          ? vseWithSpace(built, space)
+          : sheetWithSpace(built, space, vid === 'uchenik', () =>
+              sheetSpec11(params, sobratList(params, bank), 'uchitel', svg),
+            );
+      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
       import('@/lib/sheet/paginate.js').then(() => {
         if (alive) {
           setWarning(kit.warning);

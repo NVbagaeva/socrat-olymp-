@@ -31,6 +31,9 @@ function check(ok, what) {
 }
 
 const R = requireSrc('lib/solid/render.ts');
+/* Толщины выделенного шага — из оформления движка. */
+const HL = R.SOLID_THEME.width.hl;
+const HL_HIDDEN = R.SOLID_THEME.width.hlHidden;
 const P = requireSrc('lib/solid/project.ts');
 const D = requireSrc('lib/solid/drawings/index.ts');
 const { diagonalKuba, sechenieKuba } = requireSrc('lib/stereo/primery.ts');
@@ -47,7 +50,7 @@ for (const [id, model] of MODELS) {
       `${id}: orthoAt(28, 25) рисует не так, как вид по умолчанию`,
     );
   }
-  check(!plain.includes('stroke-width="3.6"'), `${id}: выделение без шага`);
+  check(!plain.includes(`stroke-width="${HL}"`), `${id}: выделение без шага`);
 }
 
 /* 2. Шаги. */
@@ -65,7 +68,7 @@ for (const primer of [diagonalKuba(), sechenieKuba()]) {
   for (let k = 1; k <= maxShag; k += 1) {
     const svg = R.renderSolid(model, { shag: k });
     check(
-      svg.includes('stroke-width="3.6"') || svg.includes('stroke-width="2.6"'),
+      svg.includes(`stroke-width="${HL}"`) || svg.includes(`stroke-width="${HL_HIDDEN}"`),
       `${model.alt}: шаг ${k} не выделен`,
     );
     const prev = R.solidDiagnostics(model, { shag: k - 1 }).strokes.length;

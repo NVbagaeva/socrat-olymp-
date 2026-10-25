@@ -293,3 +293,35 @@
   text {
   fill: var(--sheet-ink);
 }
+
+/* ── Крупные рисунки (sheet/figureRules.js) ──────────────────────
+   Основные линии на бумаге не тоньше 1,5 pt (2 px), какого бы размера
+   ни был рисунок: толщина задаётся в пикселях печати, а не в единицах
+   рисунка (vector-effect: non-scaling-stroke). Выделенный путь дерева
+   и благоприятный отрезок — толще, смысл держится на толщине. */
+html
+  .sheet-figure--large
+  :is(
+    .pr-tile rect,
+    .pr-cell rect,
+    .pr-axis-line,
+    .pr-tick line,
+    .pr-whole,
+    .pr-part,
+    .pr-branch line,
+    .pr-event ellipse,
+    .pr-unit,
+    .pr-eiler__opyt,
+    .pr-bound,
+    .pr-tochka circle
+  ) {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 2px;
+}
+html .sheet-figure--large .pr-branch--highlighted line {
+  stroke-width: 4px;
+}
+html .sheet-figure--large .pr-favorable {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 5px;
+}

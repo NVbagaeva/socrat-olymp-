@@ -55,7 +55,7 @@ export const P03_41: Prototype = {
 
   uslovie: (p) =>
     `В правильной четырёхугольной пирамиде $SABCD$ с вершиной $S$ точка $O$ — центр основания, ` +
-    `${text(p, 'edge')}=${ru(num(p, 'sd'))}, $BD=${ru(num(p, 'bd'))}$. Найдите длину отрезка $SO$.`,
+    `$${text(p, 'edge')}=${ru(num(p, 'sd'))}$, $BD=${ru(num(p, 'bd'))}$. Найдите длину отрезка $SO$.`,
 
   dopustimo: (p) => num(p, 'sd') > num(p, 'bd') / 2 && num(p, 'bd') > 0,
 
@@ -171,7 +171,7 @@ export const P03_43: Prototype = {
 
   uslovie: (p) =>
     `В правильной четырёхугольной пирамиде $SABCD$ с вершиной $S$ точка $O$ — центр основания, ` +
-    `$SO=${ru(num(p, 'so'))}$, ${text(p, 'edge')}=${ru(num(p, 'edge_v'))}. Найдите длину отрезка ${text(p, 'diag')}.`,
+    `$SO=${ru(num(p, 'so'))}$, $${text(p, 'edge')}=${ru(num(p, 'edge_v'))}$. Найдите длину отрезка $${text(p, 'diag')}$.`,
 
   dopustimo: (p) => num(p, 'edge_v') > num(p, 'so') && num(p, 'so') > 0,
 

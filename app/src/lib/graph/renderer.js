@@ -28,6 +28,7 @@
 
 import labels from './labels.js';
 import SHRIFTY from '../risunki/shrifty.js';
+import { RULES, printProfile, printFontFloor } from '../sheet/figureRules.js';
 
 /* ══════════════════════════════════════════════════════════
    THEME — единственное место, где живёт оформление
@@ -293,7 +294,7 @@ function near(a, b) { return Math.abs(a.x - b.x) < 1e-7 && Math.abs(a.y - b.y) <
 var MIN_FONT = 0;
 
 /** Кегль не меньше печатного минимума текущей отрисовки. */
-function kegl(size) { return Math.max(size, MIN_FONT); }
+function kegl(size) { return Math.max(labelSize(size), MIN_FONT); }
 
 /**
  * Временно поднять числовые поля объектов до min и выполнить fn.
@@ -321,13 +322,94 @@ function sMinKeglem(min, pary, fn) {
 var KEGLI_GRAFIKA = ['axisLabel', 'axisName', 'pointLabel', 'pointLabelStrict', 'helperLabel',
   'curveLabel', 'curveLabelTight'];
 
+/* ══════════════════════════════════════════════════════════
+   Печатный профиль (lib/sheet/figureRules.js): на листе клетка
+   печатается 7 мм, и подписи рисуются сразу печатным кеглем — не
+   мельче 10 pt при этой клетке. Места подписям подбираются уже этим
+   кеглем, поэтому они не налезают на линии. Профиль включает сборка
+   листа (withPrintFigures); на сайте рисунки прежние.
+
+   printTheme(cell, fn) нужен и движкам векторов (№2) и производной
+   (№9): они рисуют тем же пером и берут кегли из THEME.
+   ══════════════════════════════════════════════════════════ */
+var FLOOR = null;
+
+/** Кегль подписи не меньше печатного минимума (вне печати — как есть). */
+function labelSize(size) {
+  return FLOOR ? Math.max(size, FLOOR.label) : size;
+}
+
+/** Кегль индекса не меньше печатного минимума индексов. */
+function indexSize(size) {
+  return FLOOR ? Math.max(size, FLOOR.index) : size;
+}
+
+function printTheme(cell, fn, cellMm) {
+  if (!printProfile() || FLOOR) { return fn(); }
+  var floor = printFontFloor(cell, cellMm);
+  var font = THEME.font;
+  var gap = THEME.gap;
+  var saved = { font: Object.assign({}, font), gap: Object.assign({}, gap),
+                axis: THEME.width.axis };
+  FLOOR = floor;
+  /* Оси — не тоньше основных линий на печати (1,5 pt). */
+  THEME.width.axis = Math.max(saved.axis, floor.line);
+  ['axisLabel', 'axisName', 'pointLabel', 'pointLabelStrict', 'helperLabel', 'curveLabel']
+    .forEach(function (key) { font[key] = Math.max(font[key], floor.label); });
+  /* Тесный чертёж: кегль подписи графика уменьшается ступенями, но
+     не ниже печатного минимума — ступени между прежним кеглем и ним. */
+  font.curveLabelTight = [(font.curveLabel + floor.label) / 2, floor.label]
+    .filter(function (size) { return size < font.curveLabel; })
+    .map(function (size) { return Math.round(size * 10) / 10; });
+  /* Число под осью x: верх его рамки — на прежнем зазоре от оси. */
+  gap.axisLabelX = saved.gap.axisLabelX + (font.axisLabel - saved.font.axisLabel) * 0.97;
+  try {
+    return fn();
+  } finally {
+    FLOOR = null;
+    THEME.width.axis = saved.axis;
+    Object.assign(font, saved.font);
+    Object.assign(gap, saved.gap);
+  }
+}
+
+/** Атрибут клетчатого рисунка для листа: сколько единиц viewBox в клетке. */
+function gridCellAttr(cell) {
+  return FLOOR ? ' data-grid-cell="' + px(cell) + '" data-cell-mm="' + FLOOR.cellMm + '"' : '';
+}
+
+/**
+ * Печатный рисунок с запасом места: draw(report) рисует с текущими
+ * печатными кеглями; если движок сообщил о тесноте (report.problems),
+ * рисунок рисуется ещё раз под клетку крупнее (RULES.gridCellSteps) —
+ * подписи относительно клетки мельче, места им больше. Вне печати —
+ * один раз, как прежде.
+ */
+function printFitted(cell, steps, draw, fresh) {
+  if (!printProfile() || FLOOR) { return draw(fresh()); }
+  var svg = null;
+  for (var i = 0; i < steps.length; i++) {
+    var report = fresh();
+    var next = printTheme(cell, function () { return draw(report); }, steps[i]);
+    /* Клетка крупнее, чем помещается в строку листа, не берётся: лист
+       ужал бы рисунок, и подписи вышли бы мельче 10 pt. */
+    var box = /viewBox="0 0 ([0-9.]+) /.exec(next);
+    if (svg !== null && box && Number(box[1]) / cell * steps[i] > RULES.rowMm) { return svg; }
+    svg = next;
+    if (!report.problems || report.problems.length === 0) { return svg; }
+  }
+  return svg;
+}
+
 function renderGraph(scene, report) {
   return sMinKeglem(scene.minFont, [[THEME.font, KEGLI_GRAFIKA]], function () {
-    return renderGraphBez(scene, report);
+    return printTheme(pick(scene.cell, THEME.geometry.cell), function () {
+      return drawGraph(scene, report);
+    });
   });
 }
 
-function renderGraphBez(scene, report) {
+function drawGraph(scene, report) {
   var win = scene.window;
   var problems = checkWindow(win);
   if (problems.length) { throw new Error('renderer: ' + problems.join('; ')); }
@@ -369,6 +451,7 @@ function renderGraphBez(scene, report) {
        различает вторую кривую типом линии, а не только толщиной.
        У сцен без строгих правил класса нет, и их чертежи прежние. */
     (strict ? ' class="graph-strict"' : '') +
+    (pick(grid.show, true) ? gridCellAttr(cell) : '') +
     ' width="' + px(width) + '" height="' + px(height) + '" role="img"' +
     (scene.alt ? ' aria-label="' + esc(scene.alt) + '"' : ' aria-hidden="true"') +
     ' style="max-width:100%;height:auto">');
@@ -656,8 +739,9 @@ function renderGraphBez(scene, report) {
   });
   labelsY.forEach(function (l) {
     labelLayer.push(l.flip
-      ? numberText(l.item.text, l.box.x, l.box.y + 4.5, 'middle')
-      : numberText(l.item.text, axisY - THEME.gap.axisLabelY, sy(l.item.at) + 4.5, 'end'));
+      ? numberText(l.item.text, l.box.x, l.box.y + THEME.font.axisLabel * 0.375, 'middle')
+      : numberText(l.item.text, axisY - THEME.gap.axisLabelY,
+        sy(l.item.at) + THEME.font.axisLabel * 0.375, 'end'));
     labelBoxes.push(l.box);
     collect(report, 'axisLabel', 'y', l.box.x, l.box.y, l.box.halfW, l.box.halfH);
   });
@@ -921,7 +1005,7 @@ function curveLabel(item, scene, win, sx, sy, all, labelBoxes, report, cell, str
   var nx = -(by - ay) / len;          /* единичная нормаль к линии */
   var ny = (bx - ax) / len;
 
-  var size = item.labelSize || THEME.font.curveLabel;
+  var size = labelSize(item.labelSize || THEME.font.curveLabel);
   var halfW = textWidth(item.curve.label, size, THEME.font.curveLabelTrack) / 2;
   var halfH = size * 0.62;
 
@@ -1026,7 +1110,7 @@ function curveLabelAlong(item, piece, scene, win, sx, sy, all, labelBoxes, repor
              nx: -(p1.y - p0.y) / len, ny: (p1.x - p0.x) / len };
   }
 
-  var size = item.labelSize || THEME.font.curveLabel;
+  var size = labelSize(item.labelSize || THEME.font.curveLabel);
   var halfW = textWidth(item.curve.label, size, THEME.font.curveLabelTrack) / 2;
   var halfH = size * 0.62;
   var labelField = { left: sx(win.xmin), right: sx(win.xmax), top: sy(win.ymax), bottom: sy(win.ymin) };
@@ -1729,7 +1813,7 @@ function svgText(value, x, y, anchor, opts) {
     (opts.extra ? ';' + opts.extra : '');
   return '<text' + (opts.klass ? ' class="' + opts.klass + '"' : '') +
     ' x="' + px(x) + '" y="' + px(y) + '" text-anchor="' + anchor +
-    '" font-size="' + opts.size + '"' + (opts.weight ? ' font-weight="' + opts.weight + '"' : '') +
+    '" font-size="' + px(labelSize(opts.size)) + '"' + (opts.weight ? ' font-weight="' + opts.weight + '"' : '') +
     ' fill="' + (opts.fill || THEME.colors.label) + '" stroke="' + THEME.colors.halo +
     '" stroke-width="' + THEME.width.halo + '" stroke-linejoin="round"' +
     ' style="' + style + '">' +
@@ -1845,5 +1929,8 @@ export default api;
 /* esc, px, textWidth и svgText нужны движку векторов (lib/vektory):
    он рисует тем же пером — та же тема, то же гало под подписями, —
    и второй копии этих четырёх функций в проекте нет. */
+/* printTheme, labelSize, indexSize и gridCellAttr — печатный профиль
+   для тех же движков. */
 export { THEME, renderGraph, renderFigure, studentScene, sceneForMode, FIGURE_MODES, registerCurve,
-         checkWindow, fmt, esc, px, textWidth, svgText, sMinKeglem };
+         checkWindow, fmt, esc, px, textWidth, svgText, printTheme, printFitted, labelSize, indexSize,
+         gridCellAttr, sMinKeglem };

@@ -6,6 +6,7 @@ import { SHEET_3 } from '@/content/sheet3';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import type { ZadachaPechati } from '@/lib/zadanie3/pechat-dannye';
 import { type Vid, parametryIz, specLista } from '@/lib/zadanie3/pechat';
 
@@ -56,7 +57,14 @@ export function SheetPage3({ vid, razdel, zadachi }: SheetPage3Props) {
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
     const tex = (t: string) => katex.renderToString(t, { throwOnError: false });
-    const html = buildDocument(specLista(zadachi, razdel, params, vid, tex), {});
+    /* Место для решения (sp=) — только у листа ученика. */
+    const built = sheetWithSpace(
+      specLista(zadachi, razdel, params, vid, tex),
+      spaceOfQuery(query),
+      vid === 'uchenik',
+      () => specLista(zadachi, razdel, params, 'uchitel', tex),
+    );
+    const html = buildDocument(built, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) setSpec(specJson(html));
     });

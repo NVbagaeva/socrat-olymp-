@@ -439,9 +439,9 @@ function chisloOtveta(x: number): string {
   return String(Math.round(x * 1e9) / 1e9).replace('.', ',');
 }
 
-/** Чертёж решения на листе учителя: не шире, мм, и порог «уже половины колонки». */
+/** Чертёж решения на листе учителя: ширина по клетке раздела, не шире, мм
+    (нижнюю границу и место — справа или под условием — даёт шаблон листа). */
 const RESHENIE_MAX_MM = 44;
-const POLKOLONKI_MM = 85;
 
 export { shirinaRisunka };
 
@@ -860,11 +860,21 @@ export function sheetSpec1(
   const pometka = (z: ListZadacha) => (sPometkoy ? `${bejdzh(z)} ` : '');
   const uchitelTask = (z: ListZadacha): SheetTask => {
     const w = z.figureUchitelSvg === null ? 0 : shirinaRisunka(z.figureUchitelSvg, RESHENIE_MAX_MM);
-    const sprava = w > 0 && w <= POLKOLONKI_MM;
+    /* Размер — по правилам крупных рисунков (sheet/figureRules.js): не уже
+       40 % строки и не мельче, чем нужно подписям; такой рисунок справа
+       встаёт, только если остаётся место решению, иначе — под условием. */
+    const placed =
+      z.figureUchitelSvg === null
+        ? null
+        : (sheet.placeFigure(z.figureUchitelSvg, { width: w }) as { below: boolean });
+    const sprava = placed !== null && !placed.below;
     const pic =
       z.figureUchitelSvg === null
         ? ''
-        : `<figure class="sheet-figure z1-sheet-reshenie__pic${sprava ? '' : ' z1-sheet-reshenie__pic--pod'}" style="width:${w}mm">${z.figureUchitelSvg}</figure>`;
+        : (sheet.placeFigure(z.figureUchitelSvg, {
+            width: w,
+            cls: `z1-sheet-reshenie__pic${sprava ? '' : ' z1-sheet-reshenie__pic--pod'}`,
+          }).html as string);
     return {
       no: z.no,
       id: z.pos,

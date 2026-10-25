@@ -3,10 +3,26 @@
 import { clsx } from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Select } from '@/components/ui';
-import { EGE_INSTRUCTION, VARIANT_SCREEN as T, WORK_KINDS } from '@/content/variant';
+import { VARIANT_SCREEN as T, WORK_KINDS, standardInstruction } from '@/content/variant';
 import { useSessionUser } from '@/lib/auth/session';
 import { newSeed } from '@/lib/variant/code';
-import { loadConfig, loadMeta, openSheet, saveConfig, saveMeta } from '@/lib/variant/handoff';
+import { SpaceOption } from '@/components/tasks/space/SpaceOption';
+import {
+  DEFAULT as SPACE_DEFAULT,
+  decodeSpace,
+  encodeSpace,
+  type SheetSpace,
+} from '@/lib/sheet/space.js';
+import { codeWithSpace } from '@/lib/variant/code';
+import {
+  loadConfig,
+  loadMeta,
+  loadSpace,
+  openSheet,
+  saveConfig,
+  saveMeta,
+  saveSpace,
+} from '@/lib/variant/handoff';
 import { SECTIONS, sectionInfo } from '@/lib/variant/sections';
 import {
   buildSet,
@@ -17,7 +33,7 @@ import {
   sanitizeConfig,
   sanitizeMeta,
 } from '@/lib/variant/session';
-import { workTitle, type SheetChoice } from '@/lib/variant/sheets';
+import { instructionFor, workTitle, type SheetChoice } from '@/lib/variant/sheets';
 import { zamenaKey } from '@/lib/variant/build';
 import {
   EGE_NUMBERS,
@@ -28,6 +44,7 @@ import {
   type VariantMeta,
   type VariantSet,
 } from '@/lib/variant/types';
+import { BlankiEge } from '@/components/blanki/BlankiEge';
 import { VariantPreview } from './VariantPreview';
 import { OnlinePanel, readSettings } from './online/OnlinePanel';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
@@ -37,11 +54,13 @@ function Segment<I extends string>({
   label,
   options,
   value,
+  note,
   onPick,
 }: {
   label: string;
   options: readonly { id: I; label: string }[];
   value: I;
+  note?: string;
   onPick: (id: I) => void;
 }) {
   return (
@@ -61,6 +80,7 @@ function Segment<I extends string>({
           </button>
         ))}
       </div>
+      {note === undefined ? null : <p className="var-field__note">{note}</p>}
     </div>
   );
 }
@@ -78,6 +98,8 @@ function sameConfig(a: VariantConfig, b: VariantConfig): boolean {
 export function VariantScreen() {
   const [config, setConfig] = useState<VariantConfig>(defaultConfig);
   const [meta, setMeta] = useState<VariantMeta>(defaultMeta);
+  /* Место для решения: не меняет задачи, хранится хвостом кода. */
+  const [space, setSpace] = useState<SheetSpace>(SPACE_DEFAULT);
   const [open, setOpen] = useState<EgeNo | null>(null);
   const [set, setSet] = useState<VariantSet | null>(null);
   const [busy, setBusy] = useState(false);
@@ -96,6 +118,7 @@ export function VariantScreen() {
     const frame = window.requestAnimationFrame(() => {
       setConfig(sanitizeConfig(loadConfig()));
       setMeta(sanitizeMeta(loadMeta()));
+      setSpace(loadSpace());
       setDev(
         process.env.NODE_ENV === 'development' ||
           new URLSearchParams(window.location.search).get('dev') === '1',
@@ -111,12 +134,17 @@ export function VariantScreen() {
   useEffect(() => {
     if (restored.current) saveMeta(meta);
   }, [meta]);
+  useEffect(() => {
+    if (restored.current) saveSpace(space);
+  }, [space]);
 
   /* Учитель вошёл в кабинет — его имя в шапке, пока поле не заполнено. */
   const tutorName = user?.role === 'tutor' ? user.name.trim() : '';
   const shown: VariantMeta = meta.teacher === '' ? { ...meta, teacher: tutorName } : meta;
 
   const stale = set !== null && !sameConfig(set.config, config);
+  /* Код набора с настройкой места для решения: по нему лист — тот же. */
+  const fullCode = set === null ? '' : codeWithSpace(set.code, encodeSpace(space));
   const title = workTitle(shown, WORK_KINDS);
 
   async function run(next: VariantConfig, seed: string, zameny: Record<string, number>) {
@@ -154,12 +182,14 @@ export function VariantScreen() {
     const now = currentVersion();
     setNotice(d.version === now ? null : T.codeOld(d.version, now));
     setConfig(d.config);
+    /* Код с хвостом места для решения — лист воспроизводится тем же. */
+    if (d.space !== undefined && d.space !== '') setSpace(decodeSpace(d.space));
     void run(d.config, d.seed, d.zameny);
   }
 
   function pechat(choice: SheetChoice) {
     if (set === null) return;
-    const ok = openSheet(choice, { set, meta: shown, workTitle: title });
+    const ok = openSheet(choice, { set, meta: shown, workTitle: title }, fullCode);
     setNotice(ok ? null : T.popupBlocked);
   }
 
@@ -188,7 +218,7 @@ export function VariantScreen() {
 
   function copyCode() {
     if (set === null) return;
-    void navigator.clipboard?.writeText(set.code).then(() => {
+    void navigator.clipboard?.writeText(fullCode).then(() => {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
     });
@@ -400,6 +430,19 @@ export function VariantScreen() {
             value={meta.numbering}
             onPick={(id) => setMeta((m) => ({ ...m, numbering: id }))}
           />
+          <Segment
+            label={T.figures}
+            options={T.figureSizes}
+            value={meta.figures}
+            note={T.figuresNote}
+            onPick={(id) => setMeta((m) => ({ ...m, figures: id }))}
+          />
+          <SpaceOption
+            className="var-field var-space"
+            value={space}
+            onChange={setSpace}
+            numbers={config.tasks}
+          />
         </div>
 
         {/* ── Шапка работы ──────────────────────────────────── */}
@@ -491,21 +534,30 @@ export function VariantScreen() {
               <span className="var-switch__track" aria-hidden="true" />
               <span className="var-switch__label">{T.instruction}</span>
             </label>
+            <p className="var-field__note">{T.instructionNote}</p>
             {meta.instruction ? (
               <>
                 <textarea
                   className="var-textarea"
                   rows={3}
-                  value={meta.instructionText}
+                  value={instructionFor(meta)}
                   maxLength={600}
                   aria-label={T.instruction}
-                  onChange={(e) => setMeta((m) => ({ ...m, instructionText: e.target.value }))}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    /* Совпала со стандартной — хранится пустой: тогда она
+                       следует за типом работы (с бланком № 1 или без). */
+                    setMeta((m) => ({
+                      ...m,
+                      instructionText: v.trim() === standardInstruction(m.kind) ? '' : v,
+                    }));
+                  }}
                 />
-                {meta.instructionText !== EGE_INSTRUCTION ? (
+                {meta.instructionText !== '' ? (
                   <button
                     type="button"
                     className="var-link"
-                    onClick={() => setMeta((m) => ({ ...m, instructionText: EGE_INSTRUCTION }))}
+                    onClick={() => setMeta((m) => ({ ...m, instructionText: '' }))}
                   >
                     {T.instructionReset}
                   </button>
@@ -558,38 +610,42 @@ export function VariantScreen() {
         {stale ? <p className="var-status var-status--warn">{T.stale}</p> : null}
       </section>
 
-      {/* ── Набор: код и листы ─────────────────────────────── */}
-      {set === null ? null : (
-        <section className="var-panel var-kit" aria-label={T.downloads}>
-          <div className="var-kit__code">
-            <span className="var-field__label">{T.code}</span>
-            <code className="var-kit__value">{set.code}</code>
-            <button type="button" className="var-link" onClick={copyCode}>
-              {copied ? T.codeCopied : T.codeCopy}
-            </button>
-            <span className="var-field__note">{T.codeNote}</span>
-          </div>
-          <div className="var-kit__buttons">
-            <Button onClick={() => pechat('uchenik')}>{T.pdf.uchenik}</Button>
-            <Button variant="secondary" onClick={() => pechat('uchitel')}>
-              {T.pdf.uchitel}
-            </Button>
-            <Button variant="secondary" onClick={() => pechat('razbor')}>
-              {T.pdf.razbor}
-            </Button>
-            <Button variant="secondary" onClick={() => pechat('vse')}>
-              {T.pdf.vse}
-            </Button>
-            <Button variant="ghost" onClick={() => pechat('uchenik')}>
-              {T.print}
-            </Button>
-            <Button variant="secondary" onClick={onlayn} data-testid="vo-kit-online">
-              {ONLINE_TEXT.panel.open}
-            </Button>
-          </div>
-          <p className="var-field__note">{T.downloadsNote}</p>
-        </section>
-      )}
+      {/* ── Набор: код и листы; рядом — бланки ЕГЭ (на телефоне — под
+          кнопками вариантов). Бланки в листы не входят никогда. */}
+      <div className={clsx('var-out', set !== null && 'var-out--two')}>
+        {set === null ? null : (
+          <section className="var-panel var-kit" aria-label={T.downloads}>
+            <div className="var-kit__code">
+              <span className="var-field__label">{T.code}</span>
+              <code className="var-kit__value">{fullCode}</code>
+              <button type="button" className="var-link" onClick={copyCode}>
+                {copied ? T.codeCopied : T.codeCopy}
+              </button>
+              <span className="var-field__note">{T.codeNote}</span>
+            </div>
+            <div className="var-kit__buttons">
+              <Button onClick={() => pechat('uchenik')}>{T.pdf.uchenik}</Button>
+              <Button variant="secondary" onClick={() => pechat('uchitel')}>
+                {T.pdf.uchitel}
+              </Button>
+              <Button variant="secondary" onClick={() => pechat('razbor')}>
+                {T.pdf.razbor}
+              </Button>
+              <Button variant="secondary" onClick={() => pechat('vse')}>
+                {T.pdf.vse}
+              </Button>
+              <Button variant="ghost" onClick={() => pechat('uchenik')}>
+                {T.print}
+              </Button>
+              <Button variant="secondary" onClick={onlayn} data-testid="vo-kit-online">
+                {ONLINE_TEXT.panel.open}
+              </Button>
+            </div>
+            <p className="var-field__note">{T.downloadsNote}</p>
+          </section>
+        )}
+        <BlankiEge defaultCopies={set?.variants.length ?? config.count} />
+      </div>
 
       {set === null ? null : (
         <OnlinePanel set={set} meta={shown} stale={stale} busy={busy} onSeries={seriya} />
@@ -602,6 +658,7 @@ export function VariantScreen() {
         title={title}
         busy={busy}
         dev={dev}
+        space={space}
         onReplace={zamenit}
       />
     </div>

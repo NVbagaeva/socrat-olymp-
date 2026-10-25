@@ -86,6 +86,8 @@ export interface Kadr {
 
 export interface OpciiKadra {
   rakurs?: Rakurs;
+  /** Вертикальный масштаб тела (сценарий, szhatie): по умолчанию — из сценария. */
+  szhatie?: number;
   /** Показывать вспомогательные построения (лист учителя, переключатель). */
   vspom: boolean;
   /** Подсветка шага решения: ссылки на элементы. Пусто — без подсветки. */
@@ -132,12 +134,47 @@ function klyuchRebra(ref: string): string | null {
     : null;
 }
 
+/**
+ * Вид чертежа: ракурс и вертикальный масштаб sz. Чертёж сцены со
+ * сжатой высотой — это проекция образа S·p, S = diag(1, 1, sz). Луч к
+ * зрителю k в сжатой сцене — это луч S⁻¹k в исходной, а лицевая грань
+ * остаётся лицевой (n·S⁻¹k = S⁻ᵀn·k). Поэтому видимость считается
+ * по самой сцене с камерой S⁻¹k, а на экран идёт S·p.
+ */
+export function vidKadra(rakurs: Rakurs, sz: number): { kam: Kamera; raw: (p: V) => P2 } {
+  const k = napravlenie(rakurs);
+  const b = bazis(k);
+  const kam: Kamera = { vid: 'orto', k: norm([b.k[0], b.k[1], b.k[2] / sz]) };
+  return { kam, raw: (p: V) => proj(b, [p[0], p[1], p[2] * sz]) };
+}
+
+/** Масштаб и сдвиг кадра по ширине: те же формулы, что у листа. */
+export function vpisat(
+  pts2: readonly P2[],
+  W: number,
+  kegl: number,
+): { s: number; ox: number; oy: number; H: number } {
+  const pole = kegl * 2.2;
+  const xs = pts2.map((p) => p[0]);
+  const ys = pts2.map((p) => p[1]);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const maxH = W * 1.15;
+  const s = Math.min(
+    (W - 2 * pole) / Math.max(x1 - x0, 1e-9),
+    (maxH - 2 * pole) / Math.max(y1 - y0, 1e-9),
+  );
+  return {
+    s,
+    ox: (W - (x1 - x0) * s) / 2 - x0 * s,
+    oy: pole - y0 * s,
+    H: Math.round((y1 - y0) * s + 2 * pole),
+  };
+}
+
 export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
   const sc = scena.sc;
   const rakurs = o.rakurs ?? sc.rakurs ?? SHKOLNYY;
-  const k = napravlenie(rakurs);
-  const b = bazis(k);
-  const kam: Kamera = { vid: 'orto', k: b.k };
+  const { kam, raw } = vidKadra(rakurs, o.szhatie ?? sc.szhatie ?? 1);
   const eps = scena.geom.razmer * 1e-7;
   const chasti = scena.telo.chasti;
 
@@ -223,13 +260,11 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
   );
 
   /* ── Экран ────────────────────────────────────────────────── */
-  const raw = (p: V) => proj(b, p);
   let s = 1;
   let ox = 0;
   let oy = 0;
   const W = o.shirina;
   let Hh: number;
-  const pole = o.kegl * 2.2;
   if (o.vysota !== undefined) {
     Hh = o.vysota;
     // Центр — середина габарита: шар вокруг него наименьший, и фигура
@@ -241,24 +276,18 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
       return (Math.min(...xs) + Math.max(...xs)) / 2;
     };
     const c: V = vse.length > 0 ? [os(0), os(1), os(2)] : scena.geom.centr;
-    const R = Math.max(...vse.map((p) => dist(p, c)), 1e-9);
+    const sz = o.szhatie ?? sc.szhatie ?? 1;
+    const R = Math.max(
+      ...vse.map((p) => dist([p[0], p[1], p[2] * sz], [c[0], c[1], c[2] * sz])),
+      1e-9,
+    );
     s = (Math.min(W, Hh) / 2 - o.kegl * 1.5) / R;
     const c2 = raw(c);
     ox = W / 2 - c2[0] * s;
     oy = Hh / 2 - c2[1] * s;
   } else {
     const pts2 = linii3.flatMap((l) => [raw(l.a), raw(l.b)]).concat(tochki3.map((t) => raw(t.p)));
-    const xs = pts2.map((p) => p[0]);
-    const ys = pts2.map((p) => p[1]);
-    const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
-    const maxH = W * 1.15;
-    s = Math.min(
-      (W - 2 * pole) / Math.max(x1 - x0, 1e-9),
-      (maxH - 2 * pole) / Math.max(y1 - y0, 1e-9),
-    );
-    Hh = Math.round((y1 - y0) * s + 2 * pole);
-    ox = (W - (x1 - x0) * s) / 2 - x0 * s;
-    oy = pole - y0 * s;
+    ({ s, ox, oy, H: Hh } = vpisat(pts2, W, o.kegl));
   }
   const P = (p: V): P2 => {
     const q = raw(p);

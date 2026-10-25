@@ -8,6 +8,8 @@ import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { POV_TITLE, POV_VERSION_LABEL } from '@/content/povyshennye';
 import { povNomer, versiyaText } from '@/lib/povyshennye/kod';
+import { decodeSpace, encodeSpace } from '@/lib/sheet/space.js';
+import { spaceOfCode } from '@/lib/variant/code';
 import { loadMeta, payloadFromOpener, type PrintPayload } from '@/lib/variant/handoff';
 import {
   buildSet,
@@ -87,6 +89,14 @@ export function VariantPrint() {
   const [done, setDone] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [variants, setVariants] = useState(1);
+  /* Крупные рисунки (по умолчанию) плотный режим не трогает: лист
+     длиннее двух страниц на вариант — цена читаемого рисунка. */
+  const [figures, setFigures] = useState<'large' | 'normal'>('large');
+  /* Место для решения — из хвоста кода: лист воспроизводится по адресу.
+     С полем лист длиннее, плотный режим на него тоже не действует. */
+  const spaceToken = spaceOfCode(code);
+  const spaced = decodeSpace(spaceToken).mode !== 'none';
 
   /* Лист варианта строгий, а чертежи — в цветах сайта, сплошными
      линиями: и у «Собрать вариант», и у вариантов повышенной сложности.
@@ -100,6 +110,7 @@ export function VariantPrint() {
       delete root.dataset.sheetTheme;
       delete root.dataset.sheetLayout;
       delete root.dataset.sheetChertezhi;
+      delete root.dataset.sheetFigures;
     };
   }, []);
 
@@ -120,11 +131,16 @@ export function VariantPrint() {
           ...(got.variantLabel === undefined
             ? {}
             : { variantLabel: got.variantLabel, istochnik: false }),
+          space: decodeSpace(spaceToken),
+          spaceToken: encodeSpace(decodeSpace(spaceToken)),
         });
         const html = buildDocument(built, {});
         await import('@/lib/sheet/paginate.js');
         if (alive) {
           setWarning(got.warning);
+          setVariants(payload.set.variants.length);
+          setFigures(payload.meta.figures);
+          document.documentElement.dataset.sheetFigures = payload.meta.figures;
           setSpec(specJson(html));
         }
       })
@@ -134,10 +150,48 @@ export function VariantPrint() {
     return () => {
       alive = false;
     };
-  }, [code, choice, versiya]);
+  }, [code, choice, versiya, spaceToken]);
 
   useEffect(() => {
     if (spec === null || done) return;
+    /* Лист ученика — 1–2 страницы на вариант. Не уложился — набор ещё раз
+       в плотном режиме (кегль и рисунки чуть мельче, variant-sheet.css).
+       Наружу (печать, проверки) отчёт пагинатора выходит только
+       окончательный: промежуточный набор не виден. */
+    const root = document.documentElement;
+    delete root.dataset.sheetDense;
+    let shown: typeof window.sheetPagination;
+    /* Промежуточный отчёт виден только пагинатору: он дописывает в него
+       поля сразу после присваивания, синхронно; микрозадача убирает отчёт
+       раньше любого таймера и кадра, и опрос печати и проверок его не застаёт. */
+    let pending: typeof window.sheetPagination;
+    Object.defineProperty(window, 'sheetPagination', {
+      configurable: true,
+      get: () => pending ?? shown,
+      set: (report: typeof window.sheetPagination) => {
+        if (report === undefined) {
+          shown = undefined;
+          return;
+        }
+        const tooLong =
+          choice === 'uchenik' &&
+          figures === 'normal' &&
+          !spaced &&
+          report.error === undefined &&
+          (report.pages ?? 0) > 2 * variants &&
+          root.dataset.sheetDense === undefined;
+        if (tooLong) {
+          root.dataset.sheetDense = '1';
+          pending = report;
+          queueMicrotask(() => {
+            pending = undefined;
+          });
+          window.setTimeout(() => window.sheetPaginate?.(), 0);
+          return;
+        }
+        shown = report;
+      },
+    });
     window.sheetPagination = undefined;
     window.sheetPaginate?.();
     const timer = window.setInterval(() => {
@@ -150,7 +204,7 @@ export function VariantPrint() {
       }
     }, 100);
     return () => window.clearInterval(timer);
-  }, [spec, done, warning]);
+  }, [spec, done, warning, choice, variants, figures, spaced]);
 
   return (
     <>

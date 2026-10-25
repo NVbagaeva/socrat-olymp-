@@ -1,6 +1,9 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { SpaceOption } from '@/components/tasks/space/SpaceOption';
+import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
+import { withSpace } from '@/lib/sheet/space.js';
 import { useState, useSyncExternalStore } from 'react';
 import { TRENAZHER_10 } from '@/content/zadanie10';
 import {
@@ -47,7 +50,12 @@ export function Generator10({
     .filter((p) => (chislo[p.id] ?? 0) > 0)
     .map((p) => ({ id: p.id, n: chislo[p.id] ?? 0 }));
   const zapros: ZaprosLista = { tipy, istochnik, variantov, primery, kartinki, seed };
-  const ssylka = (l: 'uchenik' | 'uchitel') => `${base}/pechat/?m=g&l=${l}&${zaprosQuery(zapros)}`;
+  /* Место для решения — только у листа ученика (sp=). */
+  const [space, setSpace] = useSheetSpace();
+  const ssylka = (l: 'uchenik' | 'uchitel') => {
+    const href = `${base}/pechat/?m=g&l=${l}&${zaprosQuery(zapros)}`;
+    return l === 'uchenik' ? withSpace(href, space) : href;
+  };
   const vsego = tipy.reduce((s, t) => s + t.n, 0);
 
   return (
@@ -145,6 +153,7 @@ export function Generator10({
             Другой набор
           </button>
         </p>
+        <SpaceOption className="z10-gen__space" value={space} onChange={setSpace} />
         <div className="z10-gen__knopki">
           <a
             className={clsx('btn btn--primary', vsego === 0 ? 'is-disabled' : '')}

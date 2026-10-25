@@ -20,6 +20,11 @@
         пометка, какой фильтр ослаблен.
      6. Код партии: настройки и замены переживают кодирование туда и
         обратно; замена одной задачи не трогает остальные.
+     7. Математика в условиях — только KaTeX (правила test:math-markup,
+        scripts/lib/math-markup.mjs): каждый адаптер выдаёт задачи, пока
+        банк не кончится (до MARKUP_CAP), — это все прототипы и по
+        несколько задач каждого. Формула $…$ без слов внутри: KaTeX в
+        строгом режиме молчит.
 
    --report — таблица возможностей разделов и запасных вариантов.
 
@@ -28,6 +33,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { requireSrc, SRC } from './lib/load-ts.mjs';
+import { findPlainMath, findRawTex, visibleTexts } from './lib/math-markup.mjs';
 
 const args = process.argv.slice(2);
 const SETS = args.includes('--sets') ? Number(args[args.indexOf('--sets') + 1]) : 20;
@@ -35,8 +41,13 @@ const REPORT = args.includes('--report');
 const only = args.filter((a, i) => /^\d+$/.test(a) && args[i - 1] !== '--sets').map(Number);
 
 const { buildVariantSet } = requireSrc('lib/variant/build');
-const { encodeCode, decodeCode } = requireSrc('lib/variant/code');
+const { encodeCode, decodeCode, codeWithSpace, spaceOfCode, baseCode } =
+  requireSrc('lib/variant/code');
+const SPACE = requireSrc('lib/sheet/space.js');
+const SHEET_SPACE = requireSrc('lib/sheetSpace.ts');
 const { rngOf } = requireSrc('lib/vychisleniya/rng');
+const { variantSheetSpec, instructionFor } = requireSrc('lib/variant/sheets');
+const { defaultMeta } = requireSrc('lib/variant/session');
 
 let failures = 0;
 function fail(where, message) {
@@ -74,6 +85,10 @@ for (let n = 1; n <= 13; n += 1) {
 
 /* ── Проверки задачи ────────────────────────────────────────────── */
 
+/* Пометки уровня сложности: на листах их быть не должно. */
+const LEVEL =
+  /[★☆]|\b(?:un)?lucky\b|сложност[ьи]|(?:базов|повышенн|сложн)\S* уров|уровень сложности|\bбаза\b|\(база\)/i;
+
 /* Сырой TeX вне формул: формулы набраны KaTeX (class="katex") или
    стоят заглушкой (class="math" data-tex="…"); в остальном тексте
    долларов и команд быть не должно. */
@@ -103,6 +118,18 @@ function checkTask(where, t, n) {
     if (raw !== null) fail(where, `сырой TeX в ${field}: «${raw}»`);
   }
   if (/Ответ:/.test(t.statement)) fail(where, 'в условии строка «Ответ:»');
+  /* Сложность на листы не печатается: ни звёзд, ни «база/сложная»,
+     ни lucky/unlucky — ни в условии, ни в решениях, ни в источнике. */
+  for (const [field, html] of [
+    ['statement', t.statement],
+    ['solutionTeacher', t.solutionTeacher ?? ''],
+    ['solutionStudent', t.solutionStudent ?? ''],
+    ['source', t.source.label],
+  ]) {
+    const text = html.replace(/<[^>]+>/g, ' ');
+    const m = LEVEL.exec(text);
+    if (m !== null) fail(where, `пометка сложности в ${field}: «${m[0]}»`);
+  }
   if (t.figure !== null && !/^<svg[\s>]/.test(t.figure.svg.trim()) && !/<img /.test(t.figure.svg))
     fail(where, 'рисунок не SVG');
   for (const f of t.fallbacks) {
@@ -186,6 +213,51 @@ for (const [n, adapter] of adapters) {
         fail(w, `звёзды ${t.difficulty} не из ${config.stars}`);
     });
 
+    /* Листы: «всё одним файлом» — три части. Бланков ЕГЭ в листах нет
+       (только блок «Бланки» на экране), пометок сложности тоже; у листа
+       ученика строка ответа после каждого задания. */
+    for (const kind of ['ege', 'dz']) {
+      const meta = { ...defaultMeta(), kind };
+      const spec = variantSheetSpec(set, meta, 'vse', { workTitle: 'Проверка', showCode: true });
+      const json = JSON.stringify(spec);
+      if (/[★☆]/.test(json)) fail(where, 'звёзды сложности на листе');
+      if (/var-blank|blanki\//.test(json)) fail(where, 'бланк ЕГЭ в листе');
+      const uchenik = spec.variants.slice(0, set.variants.length);
+      const lines = uchenik.flatMap((v) => v.blocks.flatMap((b) => b.tasks ?? []));
+      if (lines.some((t) => t.answerLine !== true))
+        fail(where, 'у задачи листа ученика нет строки ответа');
+      const teacher = spec.variants
+        .slice(set.variants.length)
+        .flatMap((v) => v.blocks.flatMap((b) => b.tasks ?? []));
+      if (teacher.some((t) => t.answerLine === true)) fail(where, 'строка ответа на листе учителя');
+      const blank = /бланк/i.test(instructionFor(meta));
+      if (blank !== (kind === 'ege'))
+        fail(where, `инструкция «${kind}»: бланк ${blank ? 'есть' : 'нет'}`);
+    }
+
+    /* Рисунки: переключатель «крупные / обычные» доходит до листа, а
+       клетчатый рисунок (№2, №9, №12) нарисован в печатном профиле —
+       с data-grid-cell (lib/sheet/figureRules.js). Задачи не меняются. */
+    for (const figures of ['large', 'normal']) {
+      const spec = variantSheetSpec(set, { ...defaultMeta(), figures }, 'uchenik', {
+        workTitle: 'Проверка',
+        showCode: false,
+      });
+      if (spec.figures !== figures) fail(where, `рисунки «${figures}» не дошли до листа`);
+    }
+    if ([2, 9, 12].includes(n)) {
+      for (const t of set.variants.flatMap((v) => v.tasks)) {
+        /* Рисунок без сетки (№2: векторы по проекциям) клетки не имеет. */
+        const grid =
+          t.figure !== null &&
+          /class="(?:vp|pr)-grid"|<path d="[^"]*" fill="none" stroke="var\(--graph-grid/.test(
+            t.figure.svg,
+          );
+        if (grid && !/^<svg[^>]*data-grid-cell=/.test(t.figure.svg))
+          fail(where, 'клетчатый рисунок не в печатном профиле (нет data-grid-cell)');
+      }
+    }
+
     /* 6. Код и замены. */
     const decoded = decodeCode(
       encodeCode({ seed: 'K7M2', config, zameny: { [`1.${n}`]: 2 }, version: '4F' }, subtypeIds),
@@ -214,6 +286,97 @@ for (const [n, adapter] of adapters) {
   }
 }
 
+/* ── Место для решения в коде ───────────────────────────────────
+   Хвост .P… кода: настройка переживает код туда и обратно, задачи по
+   коду с хвостом и без — те же (хвост в состав набора не входит). */
+{
+  const spaces = [
+    { mode: 'none', size: 'auto', per: {} },
+    { mode: 'grid', size: 'auto', per: {} },
+    { mode: 'blank', size: 'S', per: { 4: 'S', 8: 'L', 1: 'none' } },
+    { mode: 'grid', size: 'M', per: { 13: 'auto' } },
+  ];
+  const base = 'PR7T-407ZZ-00';
+  for (const sp of spaces) {
+    const token = SPACE.encodeSpace(sp);
+    const back = SPACE.decodeSpace(token);
+    if (JSON.stringify(back) !== JSON.stringify(SPACE.normalizeSpace(sp)))
+      fail('место для решения', `${JSON.stringify(sp)} → «${token}» → ${JSON.stringify(back)}`);
+    const full = codeWithSpace(base, token);
+    if (baseCode(full) !== base || spaceOfCode(full) !== token)
+      fail('место для решения', `код ${full}: база ${baseCode(full)}, хвост ${spaceOfCode(full)}`);
+    const a = decodeCode(base, subtypeIds);
+    const b = decodeCode(full, subtypeIds);
+    if (b === null || JSON.stringify(a.config) !== JSON.stringify(b.config) || a.seed !== b.seed)
+      fail('место для решения', `код ${full} читается иначе, чем ${base}`);
+  }
+  const rows = [SPACE.rowsFor('auto', 30), SPACE.rowsFor('auto', 600), SPACE.rowsFor('auto', 5000)];
+  if (rows.join() !== '5,11,14') fail('место для решения', `«авто»: строк ${rows.join(', ')}`);
+
+  /* «Всё одним PDF» раздела: поле — только у листов ученика (первая
+     половина вариантов), строка ответа уходит под поле. */
+  const line = '<p class="sheet-answer-line">Ответ:</p>';
+  const task = (no, sol) => ({ no, id: `t${no}`, questionHtml: 'x', solutionHtml: sol });
+  const vse = {
+    variants: [
+      { blocks: [{ tasks: [task(1, line), task(2, line)] }] },
+      { blocks: [{ tasks: [task(1, 'решение '.repeat(80)), task(2, 'коротко')] }] },
+    ],
+  };
+  const spaced = SHEET_SPACE.vseWithSpace(vse, { mode: 'grid', size: 'auto', per: {} });
+  const [u, t] = spaced.variants;
+  const ok =
+    u.blocks[0].tasks.every((x) => x.space && x.solutionHtml === null && x.answerLine === true) &&
+    t.blocks[0].tasks.every((x) => x.space === undefined && x.solutionHtml !== null) &&
+    u.blocks[0].tasks[0].space.rows > u.blocks[0].tasks[1].space.rows;
+  if (!ok)
+    fail(
+      'место для решения',
+      '«Всё одним PDF»: поле не только у листов ученика или «авто» не по решению',
+    );
+  if (SHEET_SPACE.vseWithSpace(vse, { mode: 'none', size: 'auto', per: {} }) !== vse)
+    fail('место для решения', '«Всё одним PDF»: «нет» меняет лист');
+}
+
+/* ── Математика в условиях ─────────────────────────────────────── */
+
+const MARKUP_CAP = 400;
+const markup = new Map();
+for (const [n, adapter] of adapters) {
+  const exclude = new Set();
+  const protos = new Set();
+  const r = rngOf(`markup-${n}`);
+  /* KaTeX в строгом режиме «warn» сообщает о словах внутри формулы. */
+  const warn = console.warn;
+  let warned = 0;
+  console.warn = () => {
+    warned += 1;
+  };
+  try {
+    for (let i = 0; i < MARKUP_CAP; i += 1) {
+      warned = 0;
+      const t = adapter.getRandomTask({ subtypes: null, source: 'mix', stars: null, exclude }, r);
+      if (t === null || exclude.has(t.taskId)) break;
+      exclude.add(t.taskId);
+      protos.add(t.prototypeId);
+      const where = `№${n} ${t.prototypeId}`;
+      if (warned > 0)
+        fail(where, 'в формуле условия или решения — слова (KaTeX: unicodeTextInMathMode)');
+      for (const text of visibleTexts(t.statement)) {
+        for (const f of [...findPlainMath(text), ...findRawTex(text)]) {
+          fail(
+            where,
+            `условие: математика вне KaTeX ${f.rule ?? 'TeX'} «${f.match}» — ${text.slice(0, 90)}`,
+          );
+        }
+      }
+    }
+  } finally {
+    console.warn = warn;
+  }
+  markup.set(n, { tasks: exclude.size, protos: protos.size });
+}
+
 /* ── Отчёт ──────────────────────────────────────────────────────── */
 
 for (const [n, s] of stats) {
@@ -221,7 +384,8 @@ for (const [n, s] of stats) {
   console.log(
     `№${n}: ${s.tasks} задач, ${(s.ms / Math.max(1, SETS)).toFixed(0)} мс на партию; ` +
       `сложность ${caps.difficulty ? 'есть' : 'нет'}, ФИПИ ${caps.fipi ? 'есть' : 'нет'}, ` +
-      `разбор ученика: ${caps.studentSolution}, рисунки: ${caps.figure}`,
+      `разбор ученика: ${caps.studentSolution}, рисунки: ${caps.figure}; ` +
+      `условия: ${markup.get(n)?.tasks ?? 0} задач ${markup.get(n)?.protos ?? 0} прототипов`,
   );
   if (REPORT) {
     for (const [note, count] of [...s.fallbacks].sort((a, b) => b[1] - a[1])) {

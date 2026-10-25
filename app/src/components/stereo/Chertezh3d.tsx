@@ -15,7 +15,7 @@ export interface Chertezh3dProps {
   shagi?: readonly string[];
   /** Подпись к шагу 0. */
   uslovie?: string;
-  /** Начальный ракурс, градусы. */
+  /** Начальный ракурс, градусы: по умолчанию — выбранный видом модели (model.rakurs). */
   azimuth?: number;
   elevation?: number;
   className?: string;
@@ -35,8 +35,8 @@ export function Chertezh3d({
   model,
   shagi,
   uslovie = 'Рисунок условия',
-  azimuth = ORTHO_AZIMUTH,
-  elevation = ORTHO_ELEVATION,
+  azimuth = model.rakurs?.azimuth ?? ORTHO_AZIMUTH,
+  elevation = model.rakurs?.elevation ?? ORTHO_ELEVATION,
   className,
 }: Chertezh3dProps) {
   const estShagi = shagi !== undefined && shagi.length > 0;
