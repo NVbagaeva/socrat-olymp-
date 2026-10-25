@@ -374,7 +374,7 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
       X(xVanty),
       Y(0),
       C.accent,
-      13,
+      KEGL,
       (cy) => cy > Y(0),
     );
   }
@@ -402,7 +402,7 @@ export function chertezhMosta(p: ParamsMosta, rezhim: RezhimMosta, title?: strin
     title ??
     'Схема висячего моста: пилоны с растяжками, провисающая цепь, вертикальные ванты, полотно моста над рекой';
   const svg =
-    `<svg class="z10-most z10-most--${rezhim}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}">` +
+    `<svg class="z10-most z10-most--${rezhim}" data-engine="zadanie10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}">` +
     `<title>${esc(label)}</title>` +
     parts.join('') +
     podpisi.join('') +

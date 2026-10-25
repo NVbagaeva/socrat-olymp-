@@ -50,6 +50,10 @@ const nextConfig: NextConfig = {
     // `process.env.AUTH_ON === '1'` вычисляется на сборке, и без флага
     // webpack не кладёт в сборку ни ветку входа, ни кусок SDK
     // (lib/auth/config.ts, lib/auth/client.ts).
+    // Пробный кабинет (служебные страницы /kabinet/…): «1» в next dev и в
+    // сборке с KABINET=1. По нему экран «Собрать вариант» показывает
+    // ссылку «Выдать через кабинет»; в обычной сборке ссылки нет.
+    KABINET_ON: process.env.NODE_ENV === 'development' || process.env.KABINET === '1' ? '1' : '0',
     AUTH_ON:
       process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
       (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '') !== '' &&

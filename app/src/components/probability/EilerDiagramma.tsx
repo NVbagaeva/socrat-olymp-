@@ -49,6 +49,7 @@ export function EilerDiagramma({
   const est = highlighted !== undefined;
   return (
     <svg
+      data-engine="veroyatnost"
       className={clsx('pr-eiler', `pr-is-${state}`, className)}
       viewBox={`0 0 ${r.w} ${r.h}`}
       width={r.w}

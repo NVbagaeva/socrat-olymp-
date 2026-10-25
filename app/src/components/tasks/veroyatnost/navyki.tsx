@@ -42,8 +42,8 @@ export function navykiMetodov(pool: Pool, zadanie: Zadanie): MetodKarta[] {
 
 /**
  * Сюжет генератора — прототип банка: название, код, метод и число
- * вариантов. Картинку сюжета подбирает экран по коду
- * (content/veroyatnost-syuzhety.ts); нет картинки — стоит значок метода.
+ * вариантов. В общем генераторе (lib/veroyatnost/generator45.ts) сюжеты —
+ * подтипы, методы — темы.
  */
 export interface Syuzhet {
   id: string;

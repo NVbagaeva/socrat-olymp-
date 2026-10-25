@@ -122,6 +122,7 @@ export function ProbabilityTree({
 
   return (
     <svg
+      data-engine="veroyatnost"
       className={clsx('pr-tree', `pr-is-${state}`, className)}
       viewBox={`0 0 ${width} ${height}`}
       width={width}

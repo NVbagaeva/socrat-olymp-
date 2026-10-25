@@ -399,6 +399,19 @@ export interface DrobnoeEtapy {
   hintKoren: HintStep;
 }
 
+/**
+ * Корень в TeX: конечная дробь — десятичной записью, иначе обыкновенной
+ * («$-\dfrac{1}{3}$», а не «$-0{,}333333333$»).
+ */
+function korenTex(r: number): string {
+  if (Math.abs(r * 1e4 - Math.round(r * 1e4)) < 1e-6) return d(r);
+  for (let q = 2; q <= 1000; q += 1) {
+    const p = Math.round(r * q);
+    if (Math.abs(r * q - p) < 1e-6) return `${p < 0 ? '-' : ''}\\dfrac{${Math.abs(p)}}{${q}}`;
+  }
+  return d(r);
+}
+
 /** «$x\ne0$, $x\ne-3$» */
 function zaprety(nuli: number[], x: string): string {
   return [...new Set(nuli)]
@@ -431,7 +444,7 @@ export function drobnoe(o: Drobnoe): DrobnoeEtapy {
   const otbor: string[] = ['Проверяем каждый корень по ОДЗ и по смыслу задачи.'];
   const podhodyat: number[] = [];
   for (const r of [...new Set(o.roots.map((v) => Math.round(v * 1e9) / 1e9))]) {
-    const pref = `$${x}=${d(r)}$`;
+    const pref = `$${x}=${korenTex(r)}$`;
     if (o.nuli.some((v) => Math.abs(v - r) < 1e-9)) {
       otbor.push(`${pref} — не входит в ОДЗ: знаменатель обращается в ноль. Отбрасываем.`);
     } else if (!(r > o.lo) || (o.hi !== undefined && !(r < o.hi))) {
@@ -465,7 +478,9 @@ export function drobnoe(o: Drobnoe): DrobnoeEtapy {
     ],
     'ОДЗ: знаменатели дробей не равны нулю.',
   );
-  const drugie = o.roots.filter((r) => Math.abs(r - root) > 1e-9).map((r) => `$${x}=${d(r)}$`);
+  const drugie = o.roots
+    .filter((r) => Math.abs(r - root) > 1e-9)
+    .map((r) => `$${x}=${korenTex(r)}$`);
   const hintKoren = vopros(
     'Какой корень подходит?',
     `$${x}=${d(root)}$`,

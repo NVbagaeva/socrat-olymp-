@@ -66,8 +66,12 @@ const src = path.join(root, 'src', 'lib');
    разбором строки lib/razmetka.ts) и
    склонение из lib/plural.ts (его просят слова вкладки подготовки) и
    план листа генератора из lib/sheetPlan.ts (его просит sheet4.ts),
-   адреса страниц из lib/paths.ts (их просит content/tasks.ts) —
-   переводим их вместе с папкой раздела. */
+   адреса страниц из lib/paths.ts (их просит content/tasks.ts),
+   подбор задач по ключам позиций общего генератора
+   (lib/generator/obshchiy/bank.ts, klyuchi.ts и источник случайных
+   чисел lib/vychisleniya/rng.ts — их просит sheet4.ts) —
+   переводим их вместе с папкой раздела. Импорты «@/lib/…» ведут в
+   ту же временную папку. */
 for (const file of [
   ...walk(path.join(src, 'veroyatnost')),
   path.join(src, 'answer.ts'),
@@ -80,11 +84,14 @@ for (const file of [
   path.join(src, 'zadanie3', 'podhod.ts'),
   path.join(src, 'sheetPlan.ts'),
   path.join(src, 'paths.ts'),
+  path.join(src, 'generator', 'obshchiy', 'bank.ts'),
+  path.join(src, 'generator', 'obshchiy', 'klyuchi.ts'),
+  path.join(src, 'vychisleniya', 'rng.ts'),
 ]) {
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     fileName: file,
-  }).outputText;
+  }).outputText.replace(/require\("@\/lib\//g, `require("${out.replace(/\\/g, '/')}/`);
   const target = path.join(out, path.relative(src, file).replace(/\.ts$/, '.js'));
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, js);

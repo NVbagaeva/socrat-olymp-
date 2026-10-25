@@ -45,6 +45,14 @@ export { Heatmap, type HeatLevel, type HeatmapProps, type HeatmapRow } from './H
 export { EmptyState, type StateProps } from './EmptyState';
 export { Details, type DetailsProps } from './Details';
 export { FigureZoom, type FigureZoomProps } from './FigureZoom';
+export { PinchZoom, type PinchZoomProps } from './PinchZoom';
+export {
+  AnswerKeypad,
+  applyKey,
+  useCoarsePointer,
+  type AnswerKeypadProps,
+  type KeypadKey,
+} from './AnswerKeypad';
 export { ErrorState } from './ErrorState';
 export { SuccessState } from './SuccessState';
 export { Toast, type ToastProps } from './Toast';

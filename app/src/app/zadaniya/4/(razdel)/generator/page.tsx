@@ -1,25 +1,23 @@
 import type { Metadata } from 'next';
-import { GeneratorSyuzhety } from '@/components/tasks/veroyatnost/GeneratorSyuzhety';
+import { Generator45 } from '@/components/tasks/veroyatnost/Generator45';
 import { navykiZadaniya } from '@/components/tasks/veroyatnost/metody';
 import { syuzhetyPrototipov } from '@/components/tasks/veroyatnost/navyki';
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
-import { KARTINKI_SYUZHETOV } from '@/content/veroyatnost-syuzhety';
+import { config45 } from '@/lib/veroyatnost/generator45';
 import { bank4Pool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
-import { VariantFromSection } from '@/components/variant/VariantEntry';
+
+const BASE = `${ZADANIYA}/4`;
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('4', vkladka('4', 'generator')),
 };
 
 /**
- * Вкладка «Генератор» задания №4: вариант для печати по макету.
- *
- * Сюжеты — прототипы банка, сгруппированные по методам автора.
- * Картинки сюжетов — из content/veroyatnost-syuzhety; у сюжета без
- * картинки на карточке стоит значок метода.
- * Кнопки ведут на страницы печати раздела: там лист собирается из тех
- * же прототипов по параметрам адреса.
+ * Вкладка «Генератор» задания №4 на общем компоненте: темы — методы
+ * автора, подтипы — сюжеты банка. Листы ученика и учителя — из одного
+ * набора, код комплекта в адресе.
  */
 export default function Generator4Tab() {
   return (
@@ -27,12 +25,10 @@ export default function Generator4Tab() {
       {/* Название вкладки — H2 панели; у экрана генератора свой заголовок ниже. */}
       <h2 className="t-h2 vtab__title">{vkladka('4', 'generator')}</h2>
       <VariantFromSection />
-      <GeneratorSyuzhety
+      <Generator45
+        config={config45(4, BASE, navykiZadaniya(4), syuzhetyPrototipov(bank4Pool()))}
+        base={BASE}
         zadanie={4}
-        base={`${ZADANIYA}/4`}
-        metody={navykiZadaniya(4)}
-        syuzhety={syuzhetyPrototipov(bank4Pool())}
-        kartinki={KARTINKI_SYUZHETOV}
       />
     </>
   );

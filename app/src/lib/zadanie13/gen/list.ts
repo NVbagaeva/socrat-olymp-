@@ -234,9 +234,12 @@ function tipHtml(t: Task13): string {
   return `<div class="z13-r-shag"><p class="z13-r-shag__head"><b>${v.title}:</b> ${typeset(v.text)}</p></div>`;
 }
 
-/** Задача листа по позиции плана: условие, ответ, решения. */
-export function sobratZadachu13(poz: Poziciya13): ListZadacha13 {
-  const t = generate(poz.prototypeId, poz.seed);
+/**
+ * Задача листа по позиции плана: условие, ответ, решения. `gotovaya` —
+ * задача, уже собранная на заданных числах (generateFixed).
+ */
+export function sobratZadachu13(poz: Poziciya13, gotovaya?: Task13): ListZadacha13 {
+  const t = gotovaya ?? generate(poz.prototypeId, poz.seed);
   if (poz.vid === 'T') {
     const reshenie = `<p>${typeset(`Признак: ${SIGN[t.type]}.`)}</p>`;
     return {
@@ -268,7 +271,9 @@ export function sobratZadachu13(poz: Poziciya13): ListZadacha13 {
 }
 
 export function sobratList13(p: GenParams13): List13 {
-  return { poVariantam: planLista13(p).map((variant) => variant.map(sobratZadachu13)) };
+  return {
+    poVariantam: planLista13(p).map((variant) => variant.map((poz) => sobratZadachu13(poz))),
+  };
 }
 
 /** Таблица условия — отдельно: на листе она стоит под условием, не внутри абзаца. */
