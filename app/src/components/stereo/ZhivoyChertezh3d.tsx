@@ -42,6 +42,14 @@ export interface ZhivoyChertezh3dProps {
   elevation: number;
   /** Подписи шагов, уже набранные KaTeX: [условие, шаг 1, …]. Пусто — без шагов. */
   podpisi: readonly string[];
+  /**
+   * Шаг снаружи: разбор держит шаг сам, чтобы текст решения и чертёж
+   * шли вместе. Не задан — шаг живёт внутри чертежа.
+   */
+  shag?: number;
+  onShag?: (shag: number) => void;
+  /** Без своих кнопок шагов: их рисует разбор рядом с текстом решения. */
+  bezNavigatsii?: boolean;
   className?: string;
 }
 
@@ -56,10 +64,14 @@ export function ZhivoyChertezh3d({
   azimuth,
   elevation,
   podpisi,
+  shag: shagSnaruzhi,
+  onShag,
+  bezNavigatsii = false,
   className,
 }: ZhivoyChertezh3dProps) {
   const kholst = useRef<HTMLDivElement>(null);
-  const [shag, setShag] = useState(0);
+  const [shagVnutri, setShag] = useState(0);
+  const shag = shagSnaruzhi ?? shagVnutri;
   const [tronut, setTronut] = useState(false);
   /* Взгляд почти сверху: кнопка тогда возвращает вид сбоку. */
   const [sverkhu, setSverkhu] = useState(false);
@@ -181,10 +193,23 @@ export function ZhivoyChertezh3d({
 
   function pereyti(k: number) {
     const next = clamp(k, 0, nShagov);
+    if (onShag !== undefined) {
+      onShag(next);
+      return;
+    }
     shagRef.current = next;
     setShag(next);
     narisovat();
   }
+
+  /* Шаг сменили снаружи (кнопка у шага в тексте разбора) — перерисовать. */
+  useEffect(() => {
+    if (shagSnaruzhi === undefined || shagSnaruzhi === shagRef.current) {
+      return;
+    }
+    shagRef.current = shagSnaruzhi;
+    narisovat();
+  }, [shagSnaruzhi, narisovat]);
 
   return (
     <figure className={clsx('z3d', className)}>
@@ -223,7 +248,7 @@ export function ZhivoyChertezh3d({
         )}
       </div>
 
-      {estShagi ? (
+      {estShagi && !bezNavigatsii ? (
         <figcaption className="z3d__shagi">
           <div className="z3d__shagi-nav">
             <Button
