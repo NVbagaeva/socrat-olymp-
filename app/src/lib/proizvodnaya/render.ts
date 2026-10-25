@@ -1584,7 +1584,7 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
         weight: V.helper.weight,
         fill: al.fill,
         style: al.kind === 'alpha' || al.kind === 'beta' ? 'italic' : undefined,
-        family: al.kind === 'alpha' || al.kind === 'beta' ? THEME.font.curveLabelFamily : undefined,
+        family: al.kind === 'alpha' || al.kind === 'beta' ? BUKVY : undefined,
       }),
     );
     addBox(b);

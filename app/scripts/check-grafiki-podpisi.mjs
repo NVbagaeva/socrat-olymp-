@@ -10,7 +10,8 @@
    Без браузера:
      1. Шрифты: каждый font-family в рисунке — из lib/risunki/shrifty
         (KaTeX_Main для чисел, KaTeX_Math для букв); начертание обычное.
-     2. Минус типографский: в подписях нет дефиса перед цифрой.
+     2. Минус типографский: в подписях нет дефиса перед цифрой;
+        греческие буквы — шрифтом KaTeX_Math (в KaTeX_Main их нет).
 
    В браузере (настоящие прямоугольники текста со шрифтами KaTeX):
      3. Подписи не налезают друг на друга.
@@ -116,6 +117,14 @@ for (const r of risunki) {
   if (semeystva.length === 0 && /<text\b/.test(r.svg)) fail(r.where, 'у подписей не задан шрифт');
   const zhirnye = r.svg.match(/font-weight="(bold|[6-9]00)"|font-weight:\s*(bold|[6-9]00)/g);
   if (zhirnye !== null) fail(r.where, `жирные подписи (${zhirnye[0]})`);
+  /* Строчные греческие (α, β…) есть только в KaTeX_Math: набранные
+     KaTeX_Main, они уходят в запасной шрифт. */
+  for (const m of r.svg.matchAll(/<(text|tspan)\b([^>]*)>([^<]*[α-ω][^<]*)</g)) {
+    if (!/KaTeX_Math/.test(m[2])) {
+      fail(r.where, `«${m[3]}» не шрифтом KaTeX_Math — греческой буквы нет в KaTeX_Main`);
+      break;
+    }
+  }
   for (const m of r.svg.matchAll(/<text\b[^>]*>([\s\S]*?)<\/text>/g)) {
     const text = m[1].replace(/<[^>]+>/g, '');
     if (/(^|[^\p{L}\d])-\s?\d/u.test(text)) {

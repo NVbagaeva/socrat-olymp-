@@ -12,7 +12,8 @@
      2. У графиков функций (движки graph и proizvodnaya) нет
         stroke-dasharray: графики — сплошные линии.
      3. У каждого графика функции есть подпись (y = f(x), y = f′(x) …).
-     4. Клеточные рисунки (graph, proizvodnaya, vektory) печатаются
+     4. Строчные греческие буквы — шрифтом KaTeX_Math.
+     5. Клеточные рисунки (graph, proizvodnaya, vektory) печатаются
         крупно: клетка не меньше 6 мм, подписи на бумаге не меньше 10 pt
         (lib/variant/pechat).
 
@@ -74,6 +75,15 @@ function proverit(where, fig) {
     if (krivye.some((p) => /stroke-dasharray/.test(p))) fail(where, 'график функции штрихом');
     const podpisi = (svg.match(new RegExp(`class="${klass}-label"`, 'g')) ?? []).length;
     if (podpisi < krivye.length) fail(where, `графиков ${krivye.length}, подписей ${podpisi}`);
+  }
+
+  /* Строчные греческие (α, β, π) есть только в KaTeX_Math: набранные
+     другим шрифтом подписей, они уходят в запасной шрифт. */
+  for (const m of svg.matchAll(/<(text|tspan)\b([^>]*)>([^<]*[α-ω][^<]*)</g)) {
+    if (/font-family/.test(m[2]) && !/KaTeX_Math/.test(m[2])) {
+      fail(where, `«${m[3]}» не шрифтом KaTeX_Math — греческой буквы нет в KaTeX_Main`);
+      break;
+    }
   }
 
   if (OTCHET) {

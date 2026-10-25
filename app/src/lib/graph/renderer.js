@@ -1647,7 +1647,8 @@ function textWidth(value, size, track) {
 /* Переменные в подписи набираются курсивом, числа и скобки — прямым.
    Правило то же, что в graph/math.js; рендерер держит его у себя,
    чтобы остаться без зависимостей. */
-var VARIABLE = /[A-Za-z]/;
+/* Строчные греческие (α, π) — тоже буквы: у KaTeX они в KaTeX_Math. */
+var VARIABLE = /[A-Za-zα-ω]/;
 
 function mathRuns(value) {
   var out = [];
@@ -1712,6 +1713,8 @@ function svgText(value, x, y, anchor, opts) {
 function numberText(value, x, y, anchor) {
   return svgText(value, x, y, anchor, {
     size: THEME.font.axisLabel,
+    /* π в числе оси — буквой, как в KaTeX: в KaTeX_Main греческих нет. */
+    math: /[α-ω]/.test(String(value)),
     extra: 'font-variant-numeric:tabular-nums;font-feature-settings:\'tnum\' 1'
   });
 }
