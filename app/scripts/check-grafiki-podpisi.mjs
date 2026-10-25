@@ -189,7 +189,13 @@ for (let i = 0; i < risunki.length; i += PORCIYA) {
            это тоже подписи — рамка группы, текст — сам знак. */
         const znakBox = (g) => {
           const b = g.getBBox();
-          const r = 2;
+          /* getBBox — по средней линии штриха: добавляем половину самой
+             толстой линии (белая подложка) — это и есть видимый знак. */
+          const r =
+            Math.max(
+              0,
+              ...[...g.querySelectorAll('path')].map((p) => Number(p.getAttribute('stroke-width'))),
+            ) / 2;
           return {
             x: b.x - r,
             y: b.y - r,
