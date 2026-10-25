@@ -163,7 +163,8 @@ export function buildHtml(spec, extraCss) {
 
   const html = sheet.buildDocument(spec, {
     fontCss: fontCss(),
-    css: readSheetAsset('theme.css') + '\n' + graphCss + '\n' + readSheetAsset('sheet.css') +
+    css: readSheetAsset('theme.css') + '\n' + graphCss + '\n' + readSheetAsset('space.css') + '\n' +
+      readSheetAsset('sheet.css').replace(/^@import [^;]+;$/m, '') +
       (katex ? '\n' + katex.css : '') + '\n' + mathFontCss(Boolean(katex)),
     extraCss: extraCss || '',
     script: (katex ? katex.js + '\n' + upgradeScript() + '\n' : '') + readSheetAsset('paginate.js'),

@@ -49,7 +49,12 @@ function check(ok, what) {
 
 const { GLAVY_3, GLAVY_15, FIGURA_GLAVA } = requireSrc('content/stereo/glavy.ts');
 const { TIPY_3, TIPY_15 } = requireSrc('content/stereo/tipy.ts');
+const { RAZBORY_3 } = requireSrc('lib/stereo/razbory3.ts');
+const { RAZBORY_15 } = requireSrc('lib/stereo/razbory15.ts');
 const { BANK } = requireSrc('lib/zadanie3/index.ts');
+const { SOLID_THEME } = requireSrc('lib/solid/render.ts');
+const HL = SOLID_THEME.width.hl;
+const HL_HIDDEN = SOLID_THEME.width.hlHidden;
 
 const PLAN = new Set([92]);
 const bank = BANK.map((proto) => Number(proto.id.slice(4)));
@@ -379,9 +384,10 @@ for (const size of SIZES) {
     const shag = await page.locator('.z3d__shag').first().innerText();
     check(shag.trim() === `Шаг ${k} из 3`, where(`после «Далее» ${k} раз: «${shag}»`));
     const svg = await page.locator('.z3d__kholst').first().innerHTML();
-    /* Выделенная линия видна — 3.4, скрыта (внутри куба) — пунктир 2.4. */
+    /* Выделенная линия — толщины выделения из оформления движка: видимая
+       и скрытая (внутри куба, пунктиром). */
     check(
-      svg.includes('stroke-width="3.4"') || svg.includes('stroke-width="2.4"'),
+      svg.includes(`stroke-width="${HL}"`) || svg.includes(`stroke-width="${HL_HIDDEN}"`),
       where(`шаг ${k} не выделен`),
     );
   }
@@ -393,6 +399,70 @@ for (const size of SIZES) {
     where(`кнопки ниже 44px: ${knopki.join(', ')}`),
   );
   check(errors.length === 0, where(`ошибки: ${errors.join('; ')}`));
+  await context.close();
+}
+
+/* Разборы типов («О задании» → карточка): лента на «О задании»,
+   чертёж на месте, «Начать решение» выделяет первый шаг в тексте и на
+   чертеже, страница не уезжает вбок; карточки «О задании» ведут сюда. */
+for (const size of SIZES) {
+  const context = await browser.newContext({
+    viewport: { width: size.width, height: size.height },
+    isMobile: size.isMobile,
+    hasTouch: size.isMobile,
+  });
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  for (const [no, razbory] of [
+    ['3', RAZBORY_3],
+    ['15', RAZBORY_15],
+  ]) {
+    await page.goto(BASE + `/zadaniya/${no}/`, { waitUntil: 'networkidle' });
+    const ssylki = await page
+      .locator('.stereo-tip--razbor')
+      .evaluateAll((list) => list.map((a) => a.getAttribute('href')));
+    check(
+      ssylki.length === razbory.length,
+      `${size.name}, №${no}: карточек с разбором ${ssylki.length}, разборов ${razbory.length}`,
+    );
+    for (const r of razbory) {
+      const url = `/zadaniya/${no}/razbor/${r.tip}/`;
+      const where = (what) => `${size.name}, ${url}: ${what}`;
+      check(ssylki.includes(url), where('нет карточки на «О задании»'));
+      await page.goto(BASE + url, { waitUntil: 'networkidle' });
+      const active = await page.locator('[role=tab][aria-selected=true]').first().innerText();
+      check(active.trim() === 'О задании', where(`подсвечена вкладка «${active.trim()}»`));
+      check(
+        (await page.locator('.stereo-razbor .z3d__kholst svg').count()) === 1,
+        where('нет чертежа'),
+      );
+      const wide = await page.evaluate(
+        () => document.documentElement.scrollWidth - window.innerWidth,
+      );
+      check(wide <= 1, where(`страница шире окна на ${wide}px`));
+      await page.locator('.stereo-razbor__nav .btn--primary').click();
+      await page.waitForTimeout(400);
+      check(
+        (await page.locator('.stereo-razbor__step.is-active').count()) === 1,
+        where('после «Начать решение» шаг не выделен'),
+      );
+      const svg = await page.locator('.stereo-razbor .z3d__kholst').innerHTML();
+      /* Чертёж без шагов (ступенчатое тело) только вращается. */
+      const m = r.model();
+      const sShagami = [
+        ...(m.lines ?? []),
+        ...(m.sections ?? []),
+        ...(m.angles ?? []),
+        ...(m.marks ?? []),
+      ].some((x) => x.shag !== undefined);
+      check(
+        !sShagami || /stroke-width="(3\.4|2\.4|2\.2)"|font-weight="700"/.test(svg),
+        where('на чертеже шаг 1 не выделен'),
+      );
+    }
+  }
+  check(errors.length === 0, `${size.name}, разборы: ошибки ${errors.join('; ')}`);
   await context.close();
 }
 

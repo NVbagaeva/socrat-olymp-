@@ -15,12 +15,13 @@
 import { type Kadr, kadr } from './kadr';
 import { postroit } from './postroit';
 import { type Scenariy, imyaTex as imyaTexLocal } from './scenariy';
-import { kadrSvg } from './svg';
+import { ED_PT_EKRAN, OFORMLENIE, kadrSvg } from './svg';
 
 export * from './scenariy';
 export { postroit, type Scena3 } from './postroit';
 export { kadr, ocenkaRazmera, type Kadr, type OpciiKadra, type PodpisKadra } from './kadr';
-export { kadrSvg, stilLinii, texSvg } from './svg';
+export { ED_PT_EKRAN, OFORMLENIE, kadrSvg, stilLinii, texSvg } from './svg';
+export { KAMERY, PRAVILA, metrikiVida, sVidom, vybratVid, type Metriki } from './vid';
 
 export type Rezhim = 'uchenik' | 'uchitel';
 
@@ -33,18 +34,38 @@ export interface OpciiChertezha {
   tsveta?: 'tokeny' | 'fiks';
   katex?: (tex: string) => string;
   klass?: string;
+  /**
+   * Ширина рисунка на бумаге, мм: толщины и кегль считаются в pt под
+   * неё (svg.ts, OFORMLENIE). Нет — рисунок для экрана, единица — пиксель.
+   */
+  pechatMm?: number;
+}
+
+/** Единиц рисунка шириной shirina в одном pt при ширине на бумаге mm. */
+export function edPtPechati(shirina: number, mm: number): number {
+  return (shirina / mm) * (25.4 / 72);
 }
 
 /** Статичный SVG по сценарию: лист ученика или учителя, предпросмотр. */
 export function chertezhSvg(sc: Scenariy, o: OpciiChertezha): string {
-  const kegl = o.kegl ?? 15;
+  const shirina = o.shirina ?? 320;
+  const edPt = o.pechatMm === undefined ? ED_PT_EKRAN : edPtPechati(shirina, o.pechatMm);
+  /* Кегль — не меньше 10 pt на бумаге. */
+  const kegl = Math.max(o.kegl ?? 15, Math.ceil(OFORMLENIE.kegl * edPt * 10) / 10);
   const k: Kadr = kadr(postroit(sc), {
     vspom: o.rezhim === 'uchitel',
-    shirina: o.shirina ?? 320,
+    shirina,
     kegl,
     podsvetka: o.podsvetka ?? null,
   });
-  return kadrSvg(k, { kegl, tsveta: o.tsveta, katex: o.katex, alt: sc.alt, klass: o.klass });
+  return kadrSvg(k, {
+    kegl,
+    edPt,
+    tsveta: o.tsveta,
+    katex: o.katex,
+    alt: sc.alt,
+    klass: o.klass,
+  });
 }
 export { validirovat, chisloPodpisi, chislaUsloviya, type KontekstProverki } from './validator';
 

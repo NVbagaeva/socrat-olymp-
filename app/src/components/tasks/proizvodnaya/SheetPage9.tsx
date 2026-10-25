@@ -4,9 +4,12 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
+import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
-import { parseSheetQuery9, printSpec9, sheetSpec9 } from '@/lib/proizvodnaya/sheet9';
+import { parseSheetQuery9, printSpec9, sheetSpec9, sheetSpecVse9 } from '@/lib/proizvodnaya/sheet9';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
+import { spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 
 declare global {
   interface Window {
@@ -18,7 +21,8 @@ declare global {
 
 export interface SheetPage9Props {
   /** true — лист учителя: разбор по этапам, рисунок построений, таблица ответов. */
-  withAnswers: boolean;
+  /** Что печатать: лист ученика, лист учителя или всё одним файлом. */
+  vid: 'uchenik' | 'uchitel' | 'vse';
 }
 
 function specJson(html: string): string {
@@ -34,7 +38,8 @@ function specJson(html: string): string {
  * формулы — заглушки `math`, которые KaTeX набирает перед раскладкой
  * по страницам (window.sheetTypeset), лист раскладывает lib/sheet.
  */
-export function SheetPage9({ withAnswers }: SheetPage9Props) {
+export function SheetPage9({ vid }: SheetPage9Props) {
+  const withAnswers = vid !== 'uchenik';
   const query = useSearchParams();
   const params = parseSheetQuery9(query);
   const [spec, setSpec] = useState<string | null>(null);
@@ -55,21 +60,39 @@ export function SheetPage9({ withAnswers }: SheetPage9Props) {
   useEffect(() => {
     let alive = true;
     window.sheetTypeset = (root) => upgrade(root, katex);
-    const built = sheetSpec9(params, withAnswers);
-    /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
-    const kit = checkKitSheet(query, '9', withAnswers ? 'teacher' : 'student', built);
-    const html = buildDocument({ ...printSpec9(built), kit: kitFootLabel(kit.code) }, {});
-    import('@/lib/sheet/paginate.js').then(() => {
-      if (alive) {
-        setWarning(kit.warning);
-        setSpec(specJson(html));
-      }
+    /* QR-код («Дополнительно» генератора) ведёт на лист ученика того же набора. */
+    const qr =
+      params.qr === true
+        ? qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
+        : Promise.resolve(undefined);
+    void qr.then((svg) => {
+      if (!alive) return;
+      const built =
+        vid === 'vse' ? sheetSpecVse9(params, svg) : sheetSpec9(params, withAnswers, svg);
+      /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+      const kit = checkKitSheet(query, '9', withAnswers ? 'teacher' : 'student', built);
+      /* На лист — сборка в печатном профиле рисунков (figureRules.js):
+         отпечаток комплекта — по обычной, как у напечатанных раньше.
+         Место для решения (sp=) — у листа ученика (sheetSpec9). */
+      const space = spaceOfQuery(query);
+      const printed = withPrintFigures(() =>
+        vid === 'vse'
+          ? vseWithSpace(sheetSpecVse9(params, svg), space)
+          : printSpec9(sheetSpec9(params, withAnswers, svg, space)),
+      );
+      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
+      import('@/lib/sheet/paginate.js').then(() => {
+        if (alive) {
+          setWarning(kit.warning);
+          setSpec(specJson(html));
+        }
+      });
     });
     return () => {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [withAnswers, query.toString()]);
+  }, [vid, query.toString()]);
 
   useEffect(() => {
     if (spec === null || done) {

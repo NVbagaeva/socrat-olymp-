@@ -25,6 +25,7 @@ import {
   type Candidate,
 } from '../common';
 import { info } from './info';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
 
 interface C02 extends Candidate {
   seed: string;
@@ -64,7 +65,16 @@ function figureOf(svg: string): Figure {
     : { svg, width: Math.round((Number(box[1]) / CELL_UNITS) * CELL_MM * 100) / 100 };
 }
 
+/**
+ * Задача с рисунками в печатном профиле (lib/sheet/figureRules.js):
+ * клетчатый рисунок на листе печатается клеткой 7 мм, и подписи движок
+ * рисует сразу печатным кеглем. Тот же рисунок — в предпросмотре.
+ */
 function build(c: C02, task: Generated): VariantTask {
+  return withPrintFigures(() => buildTask(c, task));
+}
+
+function buildTask(c: C02, task: Generated): VariantTask {
   const risunok = task.risunok;
   const condition = risunok === null ? null : renderVectorPlane(risunok);
   const withLegs = risunok === null ? null : renderVectorPlane({ ...risunok, hints: true });

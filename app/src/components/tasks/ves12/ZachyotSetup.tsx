@@ -3,6 +3,9 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Badge, Button, Input } from '@/components/ui';
+import { SpaceOption } from '@/components/tasks/space/SpaceOption';
+import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
+import { withSpace } from '@/lib/sheet/space.js';
 import { persistent } from '@/lib/storage';
 import { sostavText, zachyotText } from '@/content/ves12';
 import {
@@ -87,6 +90,7 @@ function defaults(catalog: Ves12Catalog): Settings {
  * экран можно поделиться.
  */
 export function ZachyotSetup({ catalog }: ZachyotSetupProps) {
+  const [space, setSpace] = useSheetSpace();
   const query = useSearchParams();
   const ids = { title: useId(), teacher: useId(), minutes: useId() };
   /* minutes: 0 — время считается само (3 минуты на задачу). */
@@ -199,7 +203,8 @@ export function ZachyotSetup({ catalog }: ZachyotSetupProps) {
 
   const params: WorkParams | null = built === null ? null : { ...current, code: built.code };
   const workQ = params === null ? '' : workQuery(params);
-  const studentHref = `${ZACHYOT_PRINT_HREF}?${workQ}`;
+  /* Место для решения — только у листа ученика (sp=), работу не меняет. */
+  const studentHref = withSpace(`${ZACHYOT_PRINT_HREF}?${workQ}`, space);
   const runHref = `${ZACHYOT_RUN_HREF}?${workQ}`;
 
   const setGrade = (key: keyof Grades, raw: string) => {
@@ -455,6 +460,7 @@ export function ZachyotSetup({ catalog }: ZachyotSetupProps) {
                           {zachyotText.printTeacher}
                         </a>
                       </div>
+                      <SpaceOption className="zs-space" value={space} onChange={setSpace} />
                       <h4 className="zs-out__title">{zachyotText.link}</h4>
                       <p className="zs-hint">{zachyotText.linkLead}</p>
                       <div className="ves-links">

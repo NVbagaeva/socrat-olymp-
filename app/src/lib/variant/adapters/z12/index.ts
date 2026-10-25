@@ -62,6 +62,7 @@ import {
   type Candidate,
 } from '../common';
 import { info } from './info';
+import { withPrintFigures, withoutPrintFigures } from '@/lib/sheet/figureRules.js';
 
 /* Наборы движку передаются один раз на модуль, как в lib/trainer.ts. */
 GraphGenerate.setSets({ prep, prototypes });
@@ -192,7 +193,9 @@ function generated(setId: string, seed: string | null): EngineTask[] | null {
   if (store.has(key)) return store.get(key) ?? null;
   let tasks: EngineTask[] | null;
   try {
-    tasks = GraphGenerate.generateSet(setId, seed ?? undefined) as EngineTask[];
+    tasks = withoutPrintFigures(
+      () => GraphGenerate.generateSet(setId, seed ?? undefined) as EngineTask[],
+    );
   } catch {
     tasks = null;
   }
@@ -425,7 +428,16 @@ function sourceLabel(tpl: Template, isNew: boolean): string {
     : `Открытый банк ФИПИ: прототип ${tpl.setId}, числа новые`;
 }
 
+/**
+ * Задача с рисунками в печатном профиле (lib/sheet/figureRules.js):
+ * клетчатый рисунок на листе печатается клеткой 7 мм, и подписи движок
+ * рисует сразу печатным кеглем. Тот же рисунок — в предпросмотре.
+ */
 function build(c: C12): VariantTask | null {
+  return withPrintFigures(() => buildTask(c));
+}
+
+function buildTask(c: C12): VariantTask | null {
   const task = generated(c.tpl.setId, c.seed)?.find((t) => t.id === c.tpl.id);
   if (task === undefined) return null;
   const value = parseAnswer(task.answer);

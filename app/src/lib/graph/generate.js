@@ -16,6 +16,7 @@
    в бандл и работает в Node. */
 
 import renderer from './renderer.js';
+import { withoutPrintFigures } from '../sheet/figureRules.js';
 import math from './math.js';
 import Line from './families/line.js';
 import Triangle from './triangle.js';
@@ -907,8 +908,14 @@ function generate(id, seed) {
   return generateSet(set.id, seed).filter(function (task) { return task.id === id; })[0];
 }
 
-/* Весь набор разом — для preview.html, validate.js и сборки ответов. */
+/* Весь набор разом — для preview.html, validate.js и сборки ответов.
+   Печатный профиль рисунков генерация не видит (sheet/figureRules.js):
+   задачи по seed — те же, что на сайте. */
 function generateSet(setId, seed) {
+  return withoutPrintFigures(function () { return generateSetNow(setId, seed); });
+}
+
+function generateSetNow(setId, seed) {
   var set = null;
   allSets().forEach(function (item) { if (item.id === setId) { set = item; } });
   if (!set) { throw new Error('generate: набор «' + setId + '» не найден'); }

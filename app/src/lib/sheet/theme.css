@@ -113,7 +113,9 @@
   --color-text: #101728;
   --color-text-tertiary: #97a1b0;
   --graph-axis: #101728;
-  --graph-grid: #cfdae8;
+  /* Сетка видна и на ч/б принтере: не светлее #BBBBBB по яркости
+     (lib/sheet/figureRules.js, проверяет test:print-pages). */
+  --graph-grid: #a9b9cf;
   --graph-accent: #e07a2f;
   --graph-aux-axis: #e07a2f;
   --graph-asymptote: #8a8f9c;
@@ -215,8 +217,10 @@
   /* Цвета в ч/б нет, поэтому две прямые различаются толщиной:
      f(x) — тонкая, g(x) — толстая. Штриховые линии остаются
      штриховыми, их рисует сам движок. */
-  --graph-curve-a-width: 2;
-  --graph-curve-b-width: 3.6;
+  /* Клетка 7 мм: 2,8 единицы — 1,6 pt, основная линия не тоньше
+     1,5 pt (sheet/figureRules.js); g(x) заметно толще. */
+  --graph-curve-a-width: 2.8;
+  --graph-curve-b-width: 4.2;
   /* Длина штриха второй кривой на чертежах подтемы «Квадратичная
      функция»: две параболы одной толщины в месте пересечения на
      чёрно-белом листе не различить, и толщины там мало. */
@@ -302,8 +306,10 @@
   --solid-edge: #000000;
   --solid-face: transparent;
   --solid-liquid: transparent;
-  --graph-curve-a-width: 2;
-  --graph-curve-b-width: 3.6;
+  /* Клетка 7 мм: 2,8 единицы — 1,6 pt, основная линия не тоньше
+     1,5 pt (sheet/figureRules.js); g(x) заметно толще. */
+  --graph-curve-a-width: 2.8;
+  --graph-curve-b-width: 4.2;
   --graph-curve-b-dash: 11 7;
 
   --color-accent: #000000;

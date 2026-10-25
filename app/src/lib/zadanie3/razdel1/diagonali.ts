@@ -262,14 +262,14 @@ export const P03_03: Prototype = {
   id: 'P03-03',
   razdel: 'I',
   nazvanie: 'Сечение через $A$, $B$, $C_1$',
-  tip: 'площадь сечения — прямоугольника ABC₁D₁',
+  tip: 'площадь сечения — прямоугольника $ABC_1D_1$',
   zadachnik: [13, 14],
   status: 'есть',
   format: 'целое',
 
   uslovie: (p) =>
     `В прямоугольном параллелепипеде $${NAMES}$ известны длины рёбер: ` +
-    `AB=${ru(num(p, 'a'))}, AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. ` +
+    `$AB=${ru(num(p, 'a'))}$, $AD=${ru(num(p, 'b'))}$, $AA_1=${ru(num(p, 'c'))}$. ` +
     'Найдите площадь сечения параллелепипеда плоскостью, проходящей через точки $A$, $B$ и $C_1$.',
 
   dopustimo: (p) => num(p, 'a') > 0 && num(p, 'b') > 0 && num(p, 'c') > 0,
@@ -344,7 +344,7 @@ export const P03_04: Prototype = {
     const names = [text(p, 'p1'), text(p, 'p2'), text(p, 'p3')].map(letters);
     return (
       `В прямоугольном параллелепипеде $${NAMES}$ известны длины рёбер: ` +
-      `AB=${ru(num(p, 'a'))}, AD=${ru(num(p, 'b'))}, AA₁=${ru(num(p, 'c'))}. ` +
+      `$AB=${ru(num(p, 'a'))}$, $AD=${ru(num(p, 'b'))}$, $AA_1=${ru(num(p, 'c'))}$. ` +
       `Найдите площадь сечения, проходящего через вершины $${names[0]}$, $${names[1]}$ и $${names[2]}$.`
     );
   },

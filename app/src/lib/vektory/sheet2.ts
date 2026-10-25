@@ -17,12 +17,25 @@
  *
  * Рисунок задачи на листе ученика — без катетов; на листе с
  * решениями — с катетами: это лист учителя, разбор рядом.
+ *
+ * Адреса общего генератора (ps=2): состав по прототипам с числом задач
+ * и ключами позиций (lib/generator/obshchiy/klyuchi.ts), замены,
+ * учитель в шапке и QR-код. Задача позиции — по seed листа, варианту и
+ * ключу; прежние адреса и банк собираются как раньше.
  */
 
 import type { SheetLayoutId, SheetThemeId } from '@/content/generator';
 import { SHEET_2 } from '@/content/sheet2';
 import { O_ZADANII } from '@/content/vektory';
+import {
+  klyuchSlota,
+  razobratSostav,
+  slotySostava,
+  sostavIzSlotov,
+  sostavStroka,
+} from '@/lib/generator/obshchiy/klyuchi';
 import answers from '@/lib/sheet/answers.js';
+import { figure } from '@/lib/sheet/sheet.js';
 import { typeset } from '../tex';
 import { BANK } from './bank';
 import { generate } from './generate';
@@ -46,6 +59,16 @@ export interface SheetParams2 {
   date: string;
   /** Банк для репетиторов: зафиксированные варианты вместо seed. */
   bank: boolean;
+  /** Схема ps=2 (общий генератор): состав с ключами позиций. */
+  poKlyucham?: boolean;
+  /** Состав ps=2: прототип, число задач, ключ первой. */
+  sostav?: { id: string; n: number; k?: number }[];
+  /** Замены ps=2: «вариант.ключ» («2.A1_0») → сколько раз заменяли. */
+  zameny?: Record<string, number>;
+  /** Учитель в шапке листа (ps=2); нет — как в шаблоне. */
+  uchitel?: string;
+  /** QR-код на лист ученика в строке названия (ps=2). */
+  qr?: boolean;
 }
 
 /** Клетка рисунка на листе, мм: в две колонки чуть мельче. */
@@ -56,6 +79,23 @@ export const VARIANTS_MAX = 4;
 /** Строка адреса из параметров — тот же формат, что у листов №8 и №12. */
 export function sheetQuery2(params: SheetParams2): string {
   const query = new URLSearchParams();
+  if (params.poKlyucham === true && !params.bank) {
+    query.set('ps', '2');
+    query.set('s', sostavStroka(params.sostav ?? []));
+    if (params.variants > 1) query.set('v', String(params.variants));
+    query.set('seed', params.seed);
+    query.set('t', params.theme);
+    query.set('c', params.layout === 'double' ? '2' : '1');
+    if (params.kind !== '') query.set('k', params.kind);
+    if (params.date !== '') query.set('d', params.date);
+    if (params.uchitel !== undefined && params.uchitel !== SHEET_2.head.author) {
+      query.set('uch', params.uchitel);
+    }
+    if (params.qr === true) query.set('qr', '1');
+    const z = Object.entries(params.zameny ?? {}).filter(([, k]) => k > 0);
+    if (z.length > 0) query.set('z', z.map(([pos, k]) => `${pos}:${k}`).join(','));
+    return query.toString();
+  }
   query.set('s', params.prototypes.join(','));
   if (params.bank) {
     query.set('bank', '1');
@@ -79,6 +119,7 @@ export function sheetQuery2(params: SheetParams2): string {
 
 /** Параметры из адреса. Чего в адресе нет — берётся по умолчанию. */
 export function parseSheetQuery2(query: URLSearchParams): SheetParams2 {
+  if (query.get('ps') === '2' && query.get('bank') !== '1') return parseKlyuchi2(query);
   const raw = (query.get('s') ?? '')
     .split(',')
     .map((item) => item.trim())
@@ -102,7 +143,53 @@ export function parseSheetQuery2(query: URLSearchParams): SheetParams2 {
   };
 }
 
+/** Адрес общего генератора (ps=2). */
+function parseKlyuchi2(query: URLSearchParams): SheetParams2 {
+  const sostav = sostavIzSlotov(
+    slotySostava(
+      razobratSostav(
+        query.get('s') ?? '',
+        true,
+        /[ABC]\d/,
+        (id) => prototypeById(id) !== undefined,
+      ),
+    ),
+  );
+  const variants = Number(query.get('v'));
+  const zameny: Record<string, number> = {};
+  for (const item of (query.get('z') ?? '').split(',')) {
+    const [pos = '', k = ''] = item.split(':');
+    if (/^\d+\.[ABC]\d_\d{1,2}$/.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
+  }
+  return {
+    prototypes: [...new Set(sostav.map((x) => x.id))],
+    count: sostav.reduce((a, x) => a + x.n, 0),
+    variants:
+      Number.isFinite(variants) && variants > 1 ? Math.min(VARIANTS_MAX, Math.floor(variants)) : 1,
+    seed: (query.get('seed') ?? 'variant').slice(0, 24),
+    theme: query.get('t') === 'print' ? 'print' : 'color',
+    layout: query.get('c') === '2' ? 'double' : 'single',
+    kind: (query.get('k') ?? '').slice(0, 60),
+    date: /^\d{4}-\d{2}-\d{2}$/.test(query.get('d') ?? '') ? (query.get('d') as string) : '',
+    bank: false,
+    poKlyucham: true,
+    sostav,
+    zameny,
+    ...(query.has('uch')
+      ? {
+          uchitel: (query.get('uch') ?? '')
+            .replace(/[\u0000-\u001f<>]/g, '')
+            .trim()
+            .slice(0, 40),
+        }
+      : {}),
+    ...(query.get('qr') === '1' ? { qr: true } : {}),
+  };
+}
+
 export interface SheetTask2 {
+  /** Ключ позиции «вариант.ключ» (ps=2): для замены в генераторе. */
+  pos?: string;
   no: number;
   id: string;
   questionHtml: string;
@@ -159,11 +246,12 @@ function solutionFigureHtml(risunok: Risunok, condition: string): string {
     return '';
   }
   const box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
-  const width =
-    box === null
-      ? ''
-      : ` style="width:${Math.round((Number(box[1]) / CELL_UNITS) * SOLUTION_CELL_MM * 100) / 100}mm"`;
-  return `<figure class="sheet-figure sheet-solution-figure sheet-solution-figure--float"${width}>${svg}</figure>`;
+  /* Размер — по правилам крупных рисунков (sheet/figureRules.js): в
+     печатном профиле клетчатый рисунок — клеткой 7 мм под решением. */
+  return figure(svg, {
+    width: box === null ? null : (Number(box[1]) / CELL_UNITS) * SOLUTION_CELL_MM,
+    cls: 'sheet-solution-figure sheet-solution-figure--float',
+  }) as string;
 }
 
 /**
@@ -227,12 +315,65 @@ function blockOf(prototype: string, tasks: SheetTask2[]): SheetBlock2 {
   };
 }
 
+/** Задача «по рисунку» отличается рисунком при том же тексте — сравниваем оба. */
+function otpechatok(task: Generated): string {
+  return `${task.uslovie}|${JSON.stringify(task.risunok)}`;
+}
+
+/** Задача позиции (ps=2): по seed листа, варианту, ключу и числу замен. */
+function zadachaPozicii(
+  id: string,
+  seed: string,
+  nePovtor: ReadonlySet<string> = new Set(),
+): Generated | null {
+  for (let a = 0; a < ATTEMPTS_PER_TASK; a += 1) {
+    try {
+      const task = generate(id, a === 0 ? seed : `${seed}~${a}`);
+      if (!nePovtor.has(otpechatok(task))) return task;
+    } catch {
+      /* Параметры не подобрались на этом seed — берём следующий. */
+    }
+  }
+  return null;
+}
+
+/**
+ * Блоки варианта в схеме ps=2: позиции по порядку состава, блок —
+ * подряд идущие задачи одного прототипа, сквозная нумерация.
+ */
+function blokiPoKlyucham(params: SheetParams2, withAnswers: boolean, variant: number) {
+  const out: SheetBlock2[] = [];
+  let no = 0;
+  for (const slot of slotySostava(params.sostav ?? [])) {
+    const key = `${variant}.${klyuchSlota(slot)}`;
+    const base = `${params.seed}|${variant}|${klyuchSlota(slot)}`;
+    const z = params.zameny?.[key] ?? 0;
+    /* Каждая замена отличается от задачи позиции и от прежних замен. */
+    let task = zadachaPozicii(slot.id, base);
+    const bylo = new Set(task === null ? [] : [otpechatok(task)]);
+    for (let j = 1; j <= z && task !== null; j += 1) {
+      task = zadachaPozicii(slot.id, `${base}|z${j}`, bylo) ?? task;
+      bylo.add(otpechatok(task));
+    }
+    if (task === null) continue;
+    no += 1;
+    const t = { ...sheetTask(task, no, withAnswers), pos: key };
+    const last = out[out.length - 1];
+    if (last !== undefined && last.id === slot.id) last.tasks.push(t);
+    else out.push(blockOf(slot.id, [t]));
+  }
+  return out;
+}
+
 /** Блоки одного варианта: по блоку на прототип, сквозная нумерация. */
 export function sheetBlocks2(
   params: SheetParams2,
   withAnswers: boolean,
   variant = 1,
 ): SheetBlock2[] {
+  if (params.poKlyucham === true && !params.bank) {
+    return blokiPoKlyucham(params, withAnswers, variant);
+  }
   const numberRef = { n: 0 };
   if (params.bank) {
     return params.prototypes
@@ -309,12 +450,14 @@ function answersItems2(variants: SheetBlock2[][]): string[] {
   return items;
 }
 
-function titleOf(params: SheetParams2, variant?: string) {
+function titleOf(params: SheetParams2, variant?: string, qrSvg?: string) {
   return {
     chip: SHEET_2.title.chip,
     text: SHEET_2.title.text,
-    subtitle: subtitleOf2(params),
+    /* Лист генератора без вида работы и даты — подпись по умолчанию. */
+    subtitle: subtitleOf2(params) || (params.poKlyucham === true ? SHEET_2.title.subtitle : ''),
     ...(variant === undefined ? {} : { variant }),
+    ...(params.qr === true && qrSvg !== undefined ? { qr: qrSvg } : {}),
   };
 }
 
@@ -324,7 +467,12 @@ function titleOf(params: SheetParams2, variant?: string) {
  * по шагам внутри карточки, рисунком с катетами и сводной таблицей
  * «Ответы» в конце.
  */
-export function sheetSpec2(params: SheetParams2, withAnswers: boolean) {
+export function sheetSpec2(
+  params: SheetParams2,
+  withAnswers: boolean,
+  /** QR-код на лист ученика, SVG: считает страница печати по своему адресу. */
+  qrSvg?: string,
+) {
   const variants = sheetVariants2(params, withAnswers);
   const blocks = variants[0] ?? [];
   return {
@@ -333,16 +481,16 @@ export function sheetSpec2(params: SheetParams2, withAnswers: boolean) {
     cell: CELL[params.layout],
     documentTitle:
       `${SHEET_2.title.chip}. ${SHEET_2.title.text}` + (params.kind ? ` — ${params.kind}` : ''),
-    head: SHEET_2.head,
+    head: params.uchitel === undefined ? SHEET_2.head : { ...SHEET_2.head, author: params.uchitel },
     runner: SHEET_2.runner,
-    title: titleOf(params),
+    title: titleOf(params, undefined, qrSvg),
     recap: null,
     blocks,
     fields: { date: params.date === '' ? '' : dateText2(params.date) },
     ...(variants.length > 1
       ? {
           variants: variants.map((list, i) => ({
-            title: titleOf(params, `Вариант ${i + 1}`),
+            title: titleOf(params, `Вариант ${i + 1}`, qrSvg),
             blocks: list,
           })),
         }
@@ -350,6 +498,41 @@ export function sheetSpec2(params: SheetParams2, withAnswers: boolean) {
     withAnswerLine: !withAnswers,
     extraItems: withAnswers ? answersItems2(variants) : [],
     foot: SHEET_2.foot,
+  };
+}
+
+const STROKA_OTVETA =
+  '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>';
+
+/**
+ * «Всё одним файлом» генератора: листы ученика всех вариантов (со
+ * строкой ответа), затем листы учителя и таблица ответов.
+ */
+export function sheetSpecVse2(params: SheetParams2, qrSvg?: string) {
+  const uchenik = sheetVariants2(params, false);
+  const uchitel = sheetVariants2(params, true);
+  const n = uchenik.length;
+  const nazvanie = (i: number, reshenie: boolean) => {
+    const t = titleOf(params, n > 1 ? `Вариант ${i + 1}` : undefined, qrSvg);
+    return reshenie
+      ? { ...t, subtitle: [t.subtitle, SHEET_2.resheniya].filter(Boolean).join(' · ') }
+      : t;
+  };
+  const spec = sheetSpec2(params, true, qrSvg);
+  return {
+    ...spec,
+    blocks: [],
+    variants: [
+      ...uchenik.map((blocks, i) => ({
+        title: nazvanie(i, false),
+        blocks: blocks.map((b) => ({
+          ...b,
+          tasks: b.tasks.map((t) => ({ ...t, solutionHtml: STROKA_OTVETA })),
+        })),
+      })),
+      ...uchitel.map((blocks, i) => ({ title: nazvanie(i, true), blocks })),
+    ],
+    withAnswerLine: false,
   };
 }
 

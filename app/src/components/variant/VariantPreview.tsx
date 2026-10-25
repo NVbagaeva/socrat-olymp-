@@ -5,7 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import { VARIANT_SCREEN as T, VARIANT_SHEET as S } from '@/content/variant';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
-import { dateRu, sheetNo, starsText } from '@/lib/variant/sheets';
+import { solutionLength, spaceFor, spaceHtml, type SheetSpace } from '@/lib/sheet/space.js';
+import '@/lib/sheet/space.css';
+import { dateRu, instructionFor, sheetNo, starsText } from '@/lib/variant/sheets';
 import type { EgeNo, VariantMeta, VariantSet } from '@/lib/variant/types';
 
 export interface VariantPreviewProps {
@@ -14,6 +16,8 @@ export interface VariantPreviewProps {
   title: string;
   busy: boolean;
   dev: boolean;
+  /** Место для решения: поле — как на листе ученика. */
+  space: SheetSpace;
   onReplace: (variant: number, ege: EgeNo) => void;
 }
 
@@ -24,7 +28,15 @@ export interface VariantPreviewProps {
  * сложность и кнопка «заменить»; в режиме разработчика — поля,
  * взятые из запасного варианта.
  */
-export function VariantPreview({ set, meta, title, busy, dev, onReplace }: VariantPreviewProps) {
+export function VariantPreview({
+  set,
+  meta,
+  title,
+  busy,
+  dev,
+  space,
+  onReplace,
+}: VariantPreviewProps) {
   const [tab, setTab] = useState(0);
   const paper = useRef<HTMLDivElement>(null);
   /* Вариантов стало меньше — показывается последний. */
@@ -89,8 +101,8 @@ export function VariantPreview({ set, meta, title, busy, dev, onReplace }: Varia
               </span>
             )}
           </p>
-          {meta.instruction && meta.instructionText.trim() !== '' ? (
-            <p className="var-paper__instruction">{meta.instructionText}</p>
+          {meta.instruction && instructionFor(meta) !== '' ? (
+            <p className="var-paper__instruction">{instructionFor(meta)}</p>
           ) : null}
 
           <ol className="var-paper__tasks">
@@ -100,7 +112,16 @@ export function VariantPreview({ set, meta, title, busy, dev, onReplace }: Varia
                 <li key={`${t.egeNumber}:${t.taskId}`} className="var-task">
                   <div className="var-task__bar">
                     <span className="var-task__meta">
-                      №{t.egeNumber} · {t.source.label} · {starsText(t.difficulty)}
+                      №{t.egeNumber} · {t.source.label}
+                    </span>
+                    {/* Сложность — только здесь, на экране: на листы она не печатается. */}
+                    <span
+                      className={clsx(
+                        'var-task__level',
+                        t.difficulty === null && 'var-task__level--none',
+                      )}
+                    >
+                      {starsText(t.difficulty)}
                     </span>
                     <button
                       type="button"
@@ -142,23 +163,30 @@ export function VariantPreview({ set, meta, title, busy, dev, onReplace }: Varia
                         dangerouslySetInnerHTML={{ __html: t.figure.svg }}
                       />
                     )}
+                    {/* Место для решения — та же разметка, что на листе (space.js). */}
+                    {(() => {
+                      const field = spaceFor(
+                        space,
+                        t.egeNumber,
+                        solutionLength(t.solutionTeacher ?? t.solutionStudent),
+                      );
+                      return field === null ? null : (
+                        <div
+                          className="var-task__space"
+                          dangerouslySetInnerHTML={{
+                            __html: spaceHtml(field, field.rows, true, true),
+                          }}
+                        />
+                      );
+                    })()}
+                    <p className="var-task__answer">
+                      {S.answer}:<span className="var-task__blank" />
+                    </p>
                   </div>
                 </li>
               );
             })}
           </ol>
-
-          <div className="var-paper__blank">
-            <p className="var-paper__blank-title">{S.blankTitle}</p>
-            <div className="var-paper__blank-grid">
-              {variant.tasks.map((t, i) => (
-                <span key={i} className="var-paper__blank-row">
-                  <b>{sheetNo(t, i, meta.numbering)}</b>
-                  <span className="var-paper__cells" aria-hidden="true" />
-                </span>
-              ))}
-            </div>
-          </div>
         </div>
       )}
     </section>

@@ -18,12 +18,11 @@
 
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Razbor6 } from '@/components/tasks/zadanie6/Razbor6';
-import { Ris6 } from '@/components/tasks/zadanie6/Ris6';
 import { Uslovie6 } from '@/components/tasks/zadanie6/Uslovie6';
 import { dataUrl } from '@/lib/dataUrl';
 import { kodNaSayte, prototype } from '@/lib/zadanie6/prototypes';
-import type { Ris, Solved, Uslovie } from '@/lib/zadanie6/types';
+import { figure6, otdelnyy, razbor6Html } from '@/lib/zadanie6/sheet6';
+import type { Ris, Uslovie } from '@/lib/zadanie6/types';
 import type { Zadacha6Variant } from '../../data/z06';
 import type { Fallback, Figure, SectionAdapter, SectionModule, VariantTask } from '../../types';
 import {
@@ -38,50 +37,13 @@ import {
 } from '../common';
 import { info } from './info';
 
-/* ── Рисунок ────────────────────────────────────────────────────── */
+/* ── Рисунок и разбор — как на листе №6 (lib/zadanie6/sheet6.ts) ── */
 
-/** Миллиметров в CSS-пикселе: рисунки №6 заданы в пикселях. */
-const MM_V_PX = 25.4 / 96;
-/** Дерево на листе №6 не шире 340 px (zadanie6.css, @media print). */
-const DEREVO_MAX_PX = 340;
-/** Шире — рисунок под условием, а не справа. */
-const SBOKU_MAX_MM = 80;
-
-/** Рисунок условия отдельно от текста: диаграмма Эйлера и дерево. */
-function otdelnyy(ris: Ris | undefined): ris is Extract<Ris, { vid: 'eiler' | 'derevo' }> {
-  return ris !== undefined && (ris.vid === 'eiler' || ris.vid === 'derevo');
-}
-
-/** SVG рисунка Ris6 без обёртки <figure>: ширину и место задаёт лист. */
 function figureOf(ris: Extract<Ris, { vid: 'eiler' | 'derevo' }>): Figure {
-  const html = renderToStaticMarkup(createElement(Ris6, { ris }));
-  const svg = html.replace(/^<figure[^>]*>/, '').replace(/<\/figure>$/, '');
-  const w = Number(/^<svg[^>]*\swidth="([\d.]+)"/.exec(svg)?.[1] ?? 0);
-  const px = ris.vid === 'derevo' ? Math.min(w, DEREVO_MAX_PX) : w;
-  const mm = Math.round(px * MM_V_PX);
-  return { svg, width: mm, ...(mm > SBOKU_MAX_MM ? { below: true } : {}) };
+  return figure6(ris);
 }
 
-/* ── Разбор ─────────────────────────────────────────────────────── */
-
-/** Строка «**Ответ:** …» в шаге: ответ на листе стоит отдельно. */
-const OTVET = /^\s*\*{0,2}Ответ:/;
-
-/**
- * Разбор листа учителя №6 (Razbor6). Панель «Считаем с умом» на
- * экране свёрнута (<details>), на бумаге свёрнутая не печатается —
- * здесь она раскрыта.
- */
-function razborHtml(s: Solved): string {
-  const bezOtveta: Solved = {
-    ...s,
-    etapy: s.etapy.map((e) => ({ ...e, lines: e.lines.filter((l) => !OTVET.test(l)) })),
-  };
-  return renderToStaticMarkup(createElement(Razbor6, { s: bezOtveta })).replace(
-    /<details class="z6-razbor__calc">/g,
-    '<details class="z6-razbor__calc" open="">',
-  );
-}
+const razborHtml = razbor6Html;
 
 /* ── Источник ───────────────────────────────────────────────────── */
 

@@ -10,7 +10,7 @@
 
 import type { Body, Cone, Cylinder, Model, Polyhedron, Sphere } from './model';
 import { faceNormal, polyhedronEdges } from './model';
-import { type View, viewOf } from './project';
+import { type View, orthoAt, viewOf } from './project';
 import {
   type Vec2,
   type Vec3,
@@ -24,13 +24,7 @@ import {
   segmentDistance2,
   sub,
 } from './vec';
-import {
-  type Occluder,
-  occludersOf,
-  polylineVisibility,
-  segmentRuns,
-  selfOccluders,
-} from './visibility';
+import { type Occluder, occludersOf, polylineRuns, segmentRuns, selfOccluders } from './visibility';
 
 /* ══════════════════════════════════════════════════════════
    THEME — единственное место, где живёт оформление.
@@ -45,40 +39,52 @@ const THEME = {
     label: 'var(--color-text)',
     surface: 'var(--color-surface)',
   },
+  /* Толщины — в единицах рисунка: чертёж шириной около 330 единиц
+     печатается шириной около 64 мм, это PT единиц в pt. На бумаге
+     видимые линии 1,2–1,5 pt, невидимые 0,8–1 pt штрихом 4/3 pt; лист
+     пересчитывает их под итоговую ширину (data-line-pt, figureRules.js). */
   width: {
-    edge: 2,
-    hidden: 1.6,
-    aux: 1.7,
-    auxHidden: 1.5,
+    edge: 2.45,
+    hidden: 1.64,
+    aux: 2.3,
+    auxHidden: 1.64,
     thin: 1.3,
-    marker: 1.4,
+    marker: 2.2,
     dotStroke: 1.6,
     halo: 3.2,
-    /* Элемент текущего шага решения: толще остальных. */
-    hl: 3.4,
-    hlHidden: 2.4,
-    hlMarker: 2.2,
+    /* Элемент текущего шага решения: толще остальных (1,5 pt). */
+    hl: 2.73,
+    hlHidden: 1.8,
+    hlMarker: 2.73,
   },
   dash: {
-    hidden: '6 4',
-    aux: '5 4',
+    hidden: '7.28 5.46',
+    aux: '7.28 5.46',
   },
   opacity: {
     /* Невидимое ребро — тот же цвет, светлее. */
-    hidden: 0.62,
+    hidden: 0.75,
     face: 0.75,
     liquid: 0.85,
-    section: 0.16,
+    /* Выделенная фигура (сечение) — не плотнее 0,15. */
+    section: 0.12,
     sphere: 0.5,
-    sectionHl: 0.3,
+    sectionHl: 0.15,
   },
+  /* Подписи — шрифтом KaTeX, как в условии: имена курсивом KaTeX_Math,
+     числа прямым KaTeX_Main, не жирно; индекс — 70 % ниже строки;
+     кегль на бумаге не меньше 10 pt. */
   font: {
-    family: 'var(--font-sans)',
-    size: 15,
-    weight: 600,
-    sub: 10.5,
-    subShift: 3.5,
-    measure: 14,
+    family: "KaTeX_Main, 'Times New Roman', Times, serif",
+    familyName: "KaTeX_Math, 'Times New Roman', Times, serif",
+    size: 19,
+    /* Живой чертёж — только экран: кегль 15 px, как прежде. */
+    liveSize: 15,
+    weight: 400,
+    /* Индекс — 70 % кегля и ниже строки на четверть кегля. */
+    subShare: 0.7,
+    subDy: 0.24,
+    measure: 19,
     /* Оценка ширины символа в долях кегля: для расстановки подписей. */
     capital: 0.7,
     lower: 0.56,
@@ -107,6 +113,13 @@ interface Stroke {
   visible: boolean;
   /** Элемент текущего шага решения. */
   hl?: boolean;
+  /** Прямой отрезок в пространстве, кусок которого это: для метрик вида (vid.ts). */
+  seg?: { a: Vec3; b: Vec3 };
+  /** Тот же кусок в пространстве и тело, чья это линия: для проверки видимости. */
+  p3?: Vec3[];
+  owner?: number;
+  /** Уровень жидкости в сосуде: стенки сосуда его не прячут (сосуд прозрачен). */
+  liquid?: boolean;
 }
 
 type FillRole = 'face' | 'liquid' | 'section' | 'sphere';
@@ -122,6 +135,10 @@ interface LabelSpec {
   text: string;
   kind: 'vertex' | 'aux' | 'measure';
   hl?: boolean;
+  /** Точка в пространстве (вершина, пометка): для метрик вида. */
+  p3?: Vec3;
+  /** Кегль, единицы рисунка: у живого чертежа мельче (только экран). */
+  size?: number;
 }
 
 interface PlacedLabel extends LabelSpec {
@@ -142,9 +159,18 @@ interface Scene {
   dots: Vec2[];
   labels: LabelSpec[];
   angles: Angle[];
+  /** Контур основания первого тела: для метрик вида. */
+  base?: Vec2[];
 }
 
 /* ── Сбор сцены из модели ──────────────────────────────────────── */
+
+/** Вид модели: выбранный ракурс (model.rakurs, lib/solid/vid.ts) или вид по умолчанию. */
+export function modelView(model: Pick<Model, 'view' | 'rakurs'>): View {
+  return model.rakurs !== undefined && model.view !== 'cabinet'
+    ? orthoAt(model.rakurs.azimuth, model.rakurs.elevation)
+    : viewOf(model.view);
+}
 
 const TWO_PI = Math.PI * 2;
 
@@ -156,36 +182,46 @@ function ellipse(view: View, center: Vec3, r: number, from = 0, to = TWO_PI): Ve
   );
 }
 
-/** Ломаная по точкам с готовыми флагами видимости → куски. */
-function polylineStrokes(
+/**
+ * Своя видимость точек края поверхности вращения — правилом граней,
+ * как у ребра многогранника: точка края видна, если к зрителю повёрнута
+ * хотя бы одна из двух поверхностей, которые в ней сходятся, — плоское
+ * основание (нормаль capZ по вертикали, 0 — основания нет) или боковая
+ * поверхность (наружная нормаль: от оси по горизонтали и slope по
+ * вертикали). Так считается при любом ракурсе, и снизу тоже.
+ */
+function rimVisible(
+  view: View,
+  points: readonly Vec3[],
+  center: Vec3,
+  capZ: -1 | 0 | 1,
+  slope: number,
+): boolean[] {
+  const t = view.toward;
+  return points.map((p) => {
+    const dx = p[0] - center[0];
+    const dy = p[1] - center[1];
+    const rho = Math.hypot(dx, dy);
+    const side = dx * t[0] + dy * t[1] + slope * rho * t[2];
+    return (capZ !== 0 && capZ * t[2] > 1e-9) || side >= -1e-9 * Math.max(rho, 1);
+  });
+}
+
+/** Кривая с флагами своей видимости точек → куски с заслонением чужими телами. */
+function curveStrokes(
   view: View,
   points: Vec3[],
-  visible: boolean[],
+  selfVisible: boolean[],
+  occluders: readonly Occluder[],
+  eps: number,
   role: Role,
-  closed: boolean,
 ): Stroke[] {
-  const out: Stroke[] = [];
-  const n = points.length;
-  const last = closed ? n : n - 1;
-  let current: Vec2[] = [];
-  let state: boolean | null = null;
-  for (let i = 0; i < last; i += 1) {
-    const a = at(points, i);
-    const b = at(points, (i + 1) % n);
-    const vis = at(visible, i) && at(visible, (i + 1) % n);
-    if (state !== vis) {
-      if (current.length > 1 && state !== null) {
-        out.push({ points: current, role, visible: state });
-      }
-      current = [view.project(a)];
-      state = vis;
-    }
-    current.push(view.project(b));
-  }
-  if (current.length > 1 && state !== null) {
-    out.push({ points: current, role, visible: state });
-  }
-  return out;
+  return polylineRuns(view, points, selfVisible, occluders, eps).map((run) => ({
+    points: run.points.map(view.project),
+    role,
+    visible: run.visible,
+    p3: run.points,
+  }));
 }
 
 function segmentStrokes(
@@ -197,11 +233,21 @@ function segmentStrokes(
   role: Role,
   skip?: (occ: Occluder) => boolean,
 ): Stroke[] {
+  const seg = { a, b };
   return segmentRuns(view, a, b, occluders, eps, skip).map((run) => ({
     points: [view.project(lerp(a, b, run.t0)), view.project(lerp(a, b, run.t1))],
     role,
     visible: run.visible,
+    seg,
+    p3: [lerp(a, b, run.t0), lerp(a, b, run.t1)],
   }));
+}
+
+/** Уровень жидкости: виден сквозь стенку сосуда целиком — так рисуют сосуд. */
+function liquidCurve(scene: Scene, draw: () => void) {
+  const from = scene.strokes.length;
+  draw();
+  for (let i = from; i < scene.strokes.length; i += 1) (scene.strokes[i] as Stroke).liquid = true;
 }
 
 function others(all: readonly Occluder[], body: Body): Occluder[] {
@@ -229,6 +275,10 @@ function addPolyhedron(
     scene.strokes.push(...strokes);
   });
 
+  if (scene.base === undefined && body.vertices.length > 0) {
+    const zmin = Math.min(...body.vertices.map((v) => v[2]));
+    scene.base = body.vertices.filter((v) => Math.abs(v[2] - zmin) < 1e-9).map(view.project);
+  }
   if (!body.noFill) {
     body.faces.forEach((face) => {
       if (dot(faceNormal(body.vertices, face), view.toward) > 0) {
@@ -245,7 +295,7 @@ function addPolyhedron(
     if (name) {
       const p = view.project(v);
       scene.dots.push(p);
-      scene.labels.push({ p, text: name, kind: 'vertex' });
+      scene.labels.push({ p, text: name, kind: 'vertex', p3: v });
     }
   });
 }
@@ -259,31 +309,19 @@ function addCylinder(
 ) {
   const occluders = others(all, body);
   const top: Vec3 = add(body.base, [0, 0, body.h]);
+  scene.base ??= ellipse(view, body.base, body.r).map(view.project);
   const curve = (points: Vec3[], selfVisible: boolean[]) => {
-    scene.strokes.push(
-      ...polylineStrokes(
-        view,
-        points,
-        polylineVisibility(view, points, selfVisible, occluders, eps),
-        'edge',
-        false,
-      ),
-    );
+    scene.strokes.push(...curveStrokes(view, points, selfVisible, occluders, eps, 'edge'));
   };
 
-  /* Нижнее основание: ближняя половина видна, дальняя за стенкой. */
+  /* Основания: край виден, где к зрителю повёрнуто основание или
+     боковая стенка (rimVisible). */
   if (!body.hideBase) {
     const bottom = ellipse(view, body.base, body.r);
-    curve(
-      bottom,
-      bottom.map((_, k) => view.nearSide((TWO_PI * k) / (bottom.length - 1))),
-    );
+    curve(bottom, rimVisible(view, bottom, body.base, -1, 0));
   }
   const upper = ellipse(view, top, body.r);
-  curve(
-    upper,
-    upper.map(() => true),
-  );
+  curve(upper, rimVisible(view, upper, top, 1, 0));
 
   /* Контурные образующие: там, где луч зрения касается боковой поверхности. */
   [view.silhouette, view.silhouette + Math.PI].forEach((u) => {
@@ -311,9 +349,11 @@ function addCylinder(
   if (body.liquid !== undefined && body.liquid > 0) {
     const level: Vec3 = add(body.base, [0, 0, body.liquid]);
     const surface = ellipse(view, level, body.r);
-    curve(
-      surface,
-      surface.map(() => true),
+    liquidCurve(scene, () =>
+      curve(
+        surface,
+        surface.map(() => true),
+      ),
     );
     scene.fills.push({
       points: [
@@ -325,24 +365,11 @@ function addCylinder(
   }
 }
 
-/** Лежит ли угол на дуге от from до to (по возрастанию, с точностью до 2π). */
-function inArc(u: number, from: number, to: number): boolean {
-  const norm = (value: number) => ((value % TWO_PI) + TWO_PI) % TWO_PI;
-  return norm(u - from) < norm(to - from);
-}
-
 function addCone(view: View, scene: Scene, body: Cone, all: readonly Occluder[], eps: number) {
   const occluders = others(all, body);
+  scene.base ??= ellipse(view, body.base, body.r).map(view.project);
   const curve = (points: Vec3[], selfVisible: boolean[], role: Role = 'edge') => {
-    scene.strokes.push(
-      ...polylineStrokes(
-        view,
-        points,
-        polylineVisibility(view, points, selfVisible, occluders, eps),
-        role,
-        false,
-      ),
-    );
+    scene.strokes.push(...curveStrokes(view, points, selfVisible, occluders, eps, role));
   };
   const segment = (a: Vec3, b: Vec3) => {
     scene.strokes.push(...segmentStrokes(view, a, b, occluders, eps, 'edge'));
@@ -357,10 +384,8 @@ function addCone(view: View, scene: Scene, body: Cone, all: readonly Occluder[],
     const right = view.silhouette - psi;
     const base = ellipse(view, body.base, body.r);
     if (!body.hideBase) {
-      curve(
-        base,
-        base.map(() => true),
-      );
+      /* Открытый край сосуда: основание смотрит вверх, стенка — наружу и вниз. */
+      curve(base, rimVisible(view, base, body.base, 1, -body.r / body.h));
     }
     segment(apex, view.circlePoint(body.base, body.r, right));
     segment(apex, view.circlePoint(body.base, body.r, left));
@@ -375,9 +400,11 @@ function addCone(view: View, scene: Scene, body: Cone, all: readonly Occluder[],
       const level: Vec3 = add(apex, [0, 0, body.liquid]);
       const rl = (body.r * body.liquid) / body.h;
       const surface = ellipse(view, level, rl);
-      curve(
-        surface,
-        surface.map(() => true),
+      liquidCurve(scene, () =>
+        curve(
+          surface,
+          surface.map(() => true),
+        ),
       );
       scene.fills.push({
         points: [view.project(apex), ...ellipse(view, level, rl, right, left).map(view.project)],
@@ -395,11 +422,9 @@ function addCone(view: View, scene: Scene, body: Cone, all: readonly Occluder[],
 
   const base = ellipse(view, body.base, body.r);
   if (!body.hideBase) {
-    const n = base.length - 1;
-    curve(
-      base,
-      base.map((_, k) => !inArc((TWO_PI * k) / n, right, left)),
-    );
+    /* Видна дуга между контурными образующими (right, left) — та, где
+       боковая поверхность повёрнута к зрителю. */
+    curve(base, rimVisible(view, base, body.base, -1, body.r / apexHeight));
   }
 
   if (body.top === undefined) {
@@ -416,10 +441,7 @@ function addCone(view: View, scene: Scene, body: Cone, all: readonly Occluder[],
   } else {
     const topCenter: Vec3 = add(body.base, [0, 0, body.h]);
     const upper = ellipse(view, topCenter, body.top);
-    curve(
-      upper,
-      upper.map(() => true),
-    );
+    curve(upper, rimVisible(view, upper, topCenter, 1, body.r / apexHeight));
     segment(
       view.circlePoint(body.base, body.r, right),
       view.circlePoint(topCenter, body.top, right),
@@ -447,18 +469,13 @@ function addSphere(view: View, scene: Scene, body: Sphere, all: readonly Occlude
   );
   scene.fills.push({ points: ring.map(view.project), role: 'sphere' });
   scene.strokes.push(
-    ...polylineStrokes(
+    ...curveStrokes(
       view,
       ring,
-      polylineVisibility(
-        view,
-        ring,
-        ring.map(() => true),
-        occluders,
-        eps,
-      ),
+      ring.map(() => true),
+      occluders,
+      eps,
       'edge',
-      false,
     ),
   );
 
@@ -466,15 +483,7 @@ function addSphere(view: View, scene: Scene, body: Sphere, all: readonly Occlude
     const center: Vec3 = add(body.center, [0, 0, z]);
     const pts = ellipse(view, center, r);
     const selfVisible = pts.map((p) => dot(sub(p, body.center), view.toward) > 1e-9);
-    scene.strokes.push(
-      ...polylineStrokes(
-        view,
-        pts,
-        polylineVisibility(view, pts, selfVisible, occluders, eps),
-        role,
-        false,
-      ),
-    );
+    scene.strokes.push(...curveStrokes(view, pts, selfVisible, occluders, eps, role));
     return pts;
   };
 
@@ -510,7 +519,7 @@ export interface RenderOptions {
 
 function buildScene(model: Model, options: RenderOptions = {}): Scene {
   const scene: Scene = { strokes: [], fills: [], dots: [], labels: [], angles: [] };
-  const view = options.view ?? viewOf(model.view);
+  const view = options.view ?? modelView(model);
   const shag = options.shag;
   /* Виден ли элемент на этом шаге и выделен ли он. */
   const vidno = (item: { shag?: number }) =>
@@ -519,7 +528,8 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
   const all = occludersOf(view, model.bodies);
   const eps = modelExtent(model) * 1e-6;
 
-  model.bodies.forEach((body) => {
+  model.bodies.forEach((body, owner) => {
+    const from = scene.strokes.length;
     switch (body.kind) {
       case 'polyhedron':
         addPolyhedron(view, scene, body, all, eps);
@@ -534,6 +544,9 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
         addSphere(view, scene, body, all, eps);
         break;
     }
+    for (let i = from; i < scene.strokes.length; i += 1) {
+      (scene.strokes[i] as Stroke).owner = owner;
+    }
   });
 
   /* Флаг выделения ставится только там, где он есть: у статичного
@@ -543,10 +556,18 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
   (model.sections ?? []).filter(vidno).forEach((section) => {
     const on = hl(section);
     scene.fills.push(sHl({ points: section.points.map(view.project), role: 'section' }, on));
+    /* Сечение тела вращения — многоугольник из десятков хорд: это кривая,
+       а не отрезки, и в метрики отрезков вида она не идёт. */
+    const krivaya = section.points.length > 12;
     section.points.forEach((a, i) => {
       const b = at(section.points, (i + 1) % section.points.length);
       scene.strokes.push(
-        ...segmentStrokes(view, a, b, all, eps, 'section').map((st) => sHl(st, on)),
+        ...segmentStrokes(view, a, b, all, eps, 'section').map((st) => {
+          const own = sHl(st, on);
+          if (!krivaya) return own;
+          const { seg: _, ...rest } = own;
+          return rest;
+        }),
       );
     });
   });
@@ -567,7 +588,7 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
     const p = view.project(mark.p);
     scene.dots.push(p);
     if (mark.label) {
-      scene.labels.push(sHl({ p, text: mark.label, kind: 'vertex' }, hl(mark)));
+      scene.labels.push(sHl({ p, text: mark.label, kind: 'vertex', p3: mark.p }, hl(mark)));
     }
   });
 
@@ -595,6 +616,9 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
     scene.angles.push(sHl({ points: [o, u, v] }, hl(angle)));
   });
 
+  if (options.ustoychivo) {
+    scene.labels = scene.labels.map((l) => ({ ...l, size: THEME.font.liveSize }));
+  }
   return scene;
 }
 
@@ -725,6 +749,7 @@ function toPixels(scene: Scene, sphere?: { center: Vec2; r: number }): Scene {
     fills: scene.fills.map((f) => ({ ...f, points: f.points.map(map) })),
     dots: scene.dots.map(map),
     labels: scene.labels.map((l) => ({ ...l, p: map(l.p) })),
+    ...(scene.base === undefined ? {} : { base: scene.base.map(map) }),
     angles: scene.angles.map((a) => {
       const [o, u, v] = a.points.map(map) as [Vec2, Vec2, Vec2];
       const extra = a.hl ? { hl: true } : {};
@@ -761,7 +786,7 @@ function splitName(text: string): { base: string; sub: string } {
 
 function labelSize(label: LabelSpec): { w: number; h: number } {
   const f = THEME.font;
-  const size = label.kind === 'measure' ? f.measure : f.size;
+  const size = label.size ?? (label.kind === 'measure' ? f.measure : f.size);
   const { base, sub } = splitName(label.text);
   let w = 0;
   for (const ch of base) {
@@ -773,7 +798,7 @@ function labelSize(label: LabelSpec): { w: number; h: number } {
       w += f.lower * size;
     }
   }
-  w += sub.length * f.digit * f.sub;
+  w += sub.length * f.digit * size * f.subShare;
   return { w, h: size };
 }
 
@@ -976,18 +1001,19 @@ function fillAttrs(f: Fill): string {
 function labelMarkup(label: PlacedLabel): string {
   const f = THEME.font;
   const { base, sub } = splitName(label.text);
-  const size = label.kind === 'measure' ? f.measure : f.size;
+  const size = label.size ?? (label.kind === 'measure' ? f.measure : f.size);
   const fill = label.kind === 'aux' || label.hl ? THEME.colors.aux : THEME.colors.label;
-  const weight = label.hl ? 700 : f.weight;
-  const style = label.kind === 'aux' ? ' font-style="italic"' : '';
+  const weight = f.weight;
+  const family = label.kind === 'measure' ? f.family : f.familyName;
+  const style = label.kind === 'measure' ? '' : ' font-style="italic"';
   const x = label.x;
   const y = label.y + label.h * 0.78;
   const inner = sub
-    ? `${esc(base)}<tspan font-size="${f.sub}" dy="${f.subShift}">${esc(sub)}</tspan>`
+    ? `${esc(base)}<tspan font-size="${px(size * f.subShare)}" dy="${px(size * f.subDy)}" font-family="${f.family}" font-style="normal">${esc(sub)}</tspan>`
     : esc(base);
   return (
-    `<text x="${px(x)}" y="${px(y)}" font-family="${f.family}" font-size="${size}" font-weight="${weight}"${style} ` +
-    `fill="${fill}" paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
+    `<text x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
+    `fill="${fill}"${label.hl ? ' data-hl="1"' : ''} paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
 
@@ -1063,7 +1089,7 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${px(x0)} ${px(y0)} ${px(width)} ${px(height)}" ` +
-    `width="${px(width)}" height="${px(height)}" role="img" aria-label="${esc(model.alt)}" class="solid">` +
+    `width="${px(width)}" height="${px(height)}" data-line-pt="1.35" data-line-w="${THEME.width.edge}" role="img" aria-label="${esc(model.alt)}" class="solid">` +
     `<title>${esc(model.alt)}</title>${parts.join('')}</svg>`
   );
 }
@@ -1089,9 +1115,74 @@ function pixelScene(model: Model, options: RenderOptions): Scene {
   if (!options.ustoychivo) {
     return toPixels(scene);
   }
-  const view = options.view ?? viewOf(model.view);
+  const view = options.view ?? modelView(model);
   const sphere = boundingSphere(model);
   return toPixels(scene, { center: view.project(sphere.center), r: sphere.r });
+}
+
+/**
+ * Каркас чертежа для метрик вида: прямые отрезки (куски одного отрезка
+ * собраны обратно), точки с именами, основание и рамка — в пикселях
+ * статичного чертежа, плюс те же отрезки и точки в пространстве.
+ */
+export interface SolidKarkas {
+  otrezki: { a: Vec2; b: Vec2; a3: Vec3; b3: Vec3 }[];
+  tochki: { imya: string; p: Vec2; p3: Vec3 }[];
+  osnovanie: Vec2[] | null;
+  /** Рамка всех линий чертежа, пиксели. */
+  ramka: { w: number; h: number };
+}
+
+export function solidKarkas(model: Model, options: RenderOptions = {}): SolidKarkas {
+  const scene = pixelScene(model, options);
+  const bySeg = new Map<object, { pts: Vec2[]; a3: Vec3; b3: Vec3 }>();
+  for (const s of scene.strokes) {
+    if (s.seg === undefined) continue;
+    const e = bySeg.get(s.seg) ?? { pts: [], a3: s.seg.a, b3: s.seg.b };
+    e.pts.push(...s.points);
+    bySeg.set(s.seg, e);
+  }
+  const otrezki = [...bySeg.values()].map((e) => {
+    /* Концы — крайние точки кусков вдоль отрезка. */
+    const o = at(e.pts, 0);
+    const far = e.pts.reduce((m, p) => (dist2(p, o) > dist2(m, o) ? p : m), o);
+    const near = e.pts.reduce((m, p) => (dist2(p, far) > dist2(m, far) ? p : m), far);
+    return { a: near, b: far, a3: e.a3, b3: e.b3 };
+  });
+  const tochki = scene.labels
+    .filter((l) => l.kind === 'vertex' && l.p3 !== undefined)
+    .map((l) => ({ imya: l.text, p: l.p, p3: l.p3 as Vec3 }));
+  const box = boxOf(scene.strokes.flatMap((st) => st.points));
+  return {
+    otrezki,
+    tochki,
+    osnovanie: scene.base ?? null,
+    ramka: { w: box.maxX - box.minX, h: box.maxY - box.minY },
+  };
+}
+
+/**
+ * Линии чертежа в пространстве с видимостью, как их нарисовал движок:
+ * для независимой проверки видимости (scripts/check-stereo-kachestvo.mjs).
+ * owner — номер тела в model.bodies; нет — пометка (отрезок, сечение).
+ */
+export function solidLinii(
+  model: Model,
+  options: RenderOptions = {},
+): { p3: Vec3[]; visible: boolean; role: Role; owner?: number; liquid?: boolean }[] {
+  return buildScene(model, options).strokes.flatMap((s) =>
+    s.p3 === undefined
+      ? []
+      : [
+          {
+            p3: s.p3,
+            visible: s.visible,
+            role: s.role,
+            ...(s.owner === undefined ? {} : { owner: s.owner }),
+            ...(s.liquid ? { liquid: true } : {}),
+          },
+        ],
+  );
 }
 
 export function solidDiagnostics(model: Model, options: RenderOptions = {}): SolidDiagnostics {

@@ -6,6 +6,7 @@ import { listSlova, type Zadanie } from '@/content/veroyatnost';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
+import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import type { Pool } from '@/lib/veroyatnost/pool';
 import { parseSheet4Query, sheet4Spec } from '@/lib/veroyatnost/sheet4';
@@ -77,7 +78,11 @@ export function PechatVeroyatnosti({ pool, zadanie, withAnswers }: PechatVeroyat
     const built = sheet4Spec(pool, params, withAnswers, list);
     /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
     const kit = checkKitSheet(query, zadanie === 5 ? '5' : '4', withAnswers ? 'teacher' : 'student', built);
-    const html = buildDocument({ ...built, kit: kitFootLabel(kit.code) }, {});
+    /* Место для решения (sp=) — только у листа ученика. */
+    const printed = sheetWithSpace(built, spaceOfQuery(query), !withAnswers, () =>
+      sheet4Spec(pool, params, true, list),
+    );
+    const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
     import('@/lib/sheet/paginate.js').then(() => {
       if (alive) {
         setWarning(kit.warning);

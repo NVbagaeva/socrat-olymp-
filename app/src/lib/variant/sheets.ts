@@ -17,39 +17,45 @@
  * следующую страницу, а не теряет решение, которое выше страницы.
  */
 
-import { VARIANT_SHEET as T } from '@/content/variant';
+import { VARIANT_SCREEN, VARIANT_SHEET as T, standardInstruction } from '@/content/variant';
 import { figure as figureHtml } from '@/lib/sheet/sheet.js';
+import { solutionLength, spaceFor, type SheetSpace } from '@/lib/sheet/space.js';
 import typo from '@/lib/sheet/typography.js';
-import type { Figure, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
+import { codeWithSpace } from './code';
+import type { Figure, FigureSize, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
 
 export type SheetKind = 'uchenik' | 'uchitel' | 'razbor';
 export type SheetChoice = SheetKind | 'vse';
 
 export const SHEET_KINDS: readonly SheetKind[] = ['uchenik', 'uchitel', 'razbor'];
 
-/** Клетка чертежа, мм: чуть мельче, чем у листов разделов, — лист компактный. */
+/** Клетка чертежа для «обычных» рисунков, мм: лист компактный. */
 const CELL = 3.0;
 
 /**
- * Рисунки разделов на листе варианта мельче: справа от текста — не шире
- * FIG_SIDE_MAX мм. Под условие рисунок встаёт, только если так просит
- * раздел (дерево, мост): широкий график справа короче, а лист — компактнее.
+ * Рисунки «обычные» (meta.figures = 'normal') на листе варианта мельче:
+ * справа от текста — не шире FIG_SIDE_MAX мм. Под условие рисунок
+ * встаёт, только если так просит раздел (дерево, мост).
+ *
+ * «Крупные» (по умолчанию) раскладывает шаблон листа по правилам
+ * lib/sheet/figureRules.js: клетчатый рисунок — клеткой 7 мм под
+ * условием, остальные — не уже 40 % строки и не мельче, чем нужно
+ * подписям. Ширина раздела для них — только нижняя граница.
  */
 const FIG_SCALE = 0.8;
 const FIG_SIDE_MAX = 50;
 const FIG_BELOW_MAX = 110;
 
 /** Размер рисунка на листе варианта. */
-export function sheetFigure(f: Figure): { width: number | undefined; below: boolean } {
+export function sheetFigure(
+  f: Figure,
+  figures: FigureSize = 'large',
+): { width: number | undefined; below: boolean } {
   const below = f.below === true;
-  if (f.width === undefined) return { width: undefined, below };
+  if (figures === 'large' || f.width === undefined) return { width: f.width, below };
   const w = f.width * FIG_SCALE;
   return { width: Math.round(Math.min(w, below ? FIG_BELOW_MAX : FIG_SIDE_MAX) * 10) / 10, below };
 }
-
-/** Бланк ответов: клеток в строке и колонок строк. */
-const BLANK_CELLS = 10;
-const BLANK_COLUMNS = 3;
 
 /* ── Номера и подписи ───────────────────────────────────────────── */
 
@@ -58,8 +64,18 @@ export function sheetNo(task: VariantTask, index: number, numbering: Numbering):
   return numbering === 'ege' ? task.egeNumber : index + 1;
 }
 
+/**
+ * Звёзды для экрана (фильтры, предпросмотр вне листа). На листы
+ * сложность не печатается никогда.
+ */
 export function starsText(stars: number | null): string {
-  return stars === null ? T.noLevel : '★'.repeat(stars) + '☆'.repeat(3 - stars);
+  return stars === null ? VARIANT_SCREEN.noLevel : '★'.repeat(stars) + '☆'.repeat(3 - stars);
+}
+
+/** Инструкция листа: своя или стандартная для типа работы. */
+export function instructionFor(meta: VariantMeta): string {
+  const own = meta.instructionText.trim();
+  return own !== '' ? own : standardInstruction(meta.kind);
 }
 
 /** Название работы из шапки. */
@@ -181,25 +197,36 @@ function solutionItem(cls: string, chunk: string): string {
   return item(cls, chunk, head ? ' data-keep-with-next="1"' : '');
 }
 
-function figureItem(f: Figure | null, cls: string): string {
+function figureItem(f: Figure | null, cls: string, figures: FigureSize): string {
   if (f === null) return '';
   return item(
     cls,
-    figureHtml(f.svg, { cell: CELL, frame: null, width: sheetFigure(f).width ?? null }),
+    figureHtml(f.svg, {
+      cell: CELL,
+      frame: null,
+      width: sheetFigure(f, figures).width ?? null,
+      figures,
+    }),
   );
 }
 
-function card(task: VariantTask, no: number, prefix = '') {
-  const size = task.figure === null ? null : sheetFigure(task.figure);
+/**
+ * Карточка задачи. answerLine — строка «Ответ: ____» после задания, как
+ * в КИМ: у листа ученика. Будущее «место для решения» встаёт между
+ * условием и этой строкой.
+ */
+function card(task: VariantTask, no: number, figures: FigureSize, answerLine = false) {
+  const size = task.figure === null ? null : sheetFigure(task.figure, figures);
   return {
     no,
     id: task.taskId,
-    questionHtml: prefix + task.statement,
+    questionHtml: task.statement,
     options: null,
     figureSvg: task.figure?.svg ?? null,
     figureWidth: size?.width,
     figureBelow: size?.below === true,
     solutionHtml: null,
+    answerLine,
   };
 }
 
@@ -211,33 +238,17 @@ function instructionItem(text: string): string {
   );
 }
 
-/** Бланк ответов в стиле ЕГЭ: номер задания и клеточки. */
-function blankItem(numbers: number[]): string {
-  const cells = Array.from({ length: BLANK_CELLS }, () => '<i></i>').join('');
-  const rows = numbers
-    .map(
-      (n) =>
-        `<div class="var-blank__row"><span class="var-blank__no">${n}</span>` +
-        `<span class="var-blank__cells">${cells}</span></div>`,
-    )
-    .join('');
-  return item(
-    'var-blank',
-    `<p class="var-blank__title">${typo.escape(T.blankTitle)}</p>` +
-      `<div class="var-blank__grid" style="grid-template-rows:repeat(${Math.ceil(numbers.length / BLANK_COLUMNS)},auto)">${rows}</div>`,
-    ' data-keep-together="1"',
-  );
-}
-
-/** Таблица ответов учителя: номер, ответ, источник, сложность. */
+/**
+ * Таблица ответов учителя: номер, ответ, источник. Сложность на листах
+ * не печатается — её видно только на экране.
+ */
 function keyItem(tasks: readonly VariantTask[], numbering: Numbering, code: string | null): string {
   const rows = tasks
     .map(
       (t, i) =>
         `<tr><th scope="row">${sheetNo(t, i, numbering)}</th>` +
         `<td class="var-key__answer" data-answer="${typo.attr(t.answer)}">${t.answerHtml}</td>` +
-        `<td class="var-key__source">${typo.escape(t.source.label)}</td>` +
-        `<td class="var-key__level">${typo.escape(starsText(t.difficulty))}</td></tr>`,
+        `<td class="var-key__source">${typo.escape(t.source.label)}</td></tr>`,
     )
     .join('');
   return item(
@@ -245,14 +256,14 @@ function keyItem(tasks: readonly VariantTask[], numbering: Numbering, code: stri
     `<table class="var-key__table"><caption>${typo.escape(T.keyTitle)}` +
       (code === null ? '' : `<span class="var-key__code">${typo.escape(T.code(code))}</span>`) +
       `</caption>` +
-      `<thead><tr><th>${T.blankNo}</th><th>${T.answer}</th><th>${T.keySource}</th><th>${T.keyLevel}</th></tr></thead>` +
+      `<thead><tr><th>${T.keyNo}</th><th>${T.answer}</th><th>${T.keySource}</th></tr></thead>` +
       `<tbody>${rows}</tbody></table>`,
   );
 }
 
 function solutionHead(task: VariantTask, no: number, withMeta: boolean): string {
   const meta = withMeta
-    ? `<span class="var-sol__meta">${typo.escape(task.source.label)} · ${typo.escape(starsText(task.difficulty))}</span>`
+    ? `<span class="var-sol__meta">${typo.escape(task.source.label)}</span>`
     : '';
   return `<p class="var-sol__head"><b>${typo.escape(T.task(no))}</b>${meta}</p>`;
 }
@@ -272,20 +283,31 @@ interface SheetVariant {
   blocks: unknown[];
 }
 
-function blocksUchenik(tasks: readonly VariantTask[], meta: VariantMeta): unknown[] {
-  const numbers = tasks.map((t, i) => sheetNo(t, i, meta.numbering));
+/**
+ * Лист ученика. Место для решения (lib/sheet/space.js): по настройке,
+ * своя для номера задания ЕГЭ, «авто» — по длине решения учителя.
+ */
+function blocksUchenik(
+  tasks: readonly VariantTask[],
+  meta: VariantMeta,
+  space: SheetSpace | undefined,
+): unknown[] {
+  const text = instructionFor(meta);
   return [
     {
       head: false,
       title: '',
       note: '',
-      leadItems:
-        meta.instruction && meta.instructionText.trim() !== ''
-          ? [instructionItem(meta.instructionText)]
-          : [],
-      tasks: tasks.map((t, i) => card(t, numbers[i] ?? i + 1)),
+      leadItems: meta.instruction && text !== '' ? [instructionItem(text)] : [],
+      tasks: tasks.map((t, i) => {
+        const field =
+          space === undefined
+            ? null
+            : spaceFor(space, t.egeNumber, solutionLength(t.solutionTeacher ?? t.solutionStudent));
+        const c = card(t, sheetNo(t, i, meta.numbering), meta.figures, true);
+        return field === null ? c : { ...c, space: field };
+      }),
     },
-    { head: false, title: '', note: '', leadItems: [blankItem(numbers)], tasks: [] },
   ];
 }
 
@@ -328,14 +350,14 @@ function blocksUchitel(
           ' data-keep-with-next="1"',
         ),
       ],
-      tasks: [card(t, no)],
+      tasks: [card(t, no, meta.figures)],
     });
     out.push({
       head: false,
       title: '',
       note: '',
       leadItems: [
-        figureItem(t.figureTeacher, 'var-sol var-sol__fig'),
+        figureItem(t.figureTeacher, 'var-sol var-sol__fig', meta.figures),
         /* Строку «Ответ: …» ставит адаптер в конце решения (razborAnswer). */
         ...splitSolution(sol).map((chunk) => solutionItem('var-sol', chunk)),
       ].filter((x) => x !== ''),
@@ -357,7 +379,7 @@ function blocksRazbor(tasks: readonly VariantTask[], meta: VariantMeta): unknown
       leadItems: [
         item('var-sol var-sol--first', solutionHead(t, no, false), ' data-keep-with-next="1"'),
       ],
-      tasks: [card(t, no)],
+      tasks: [card(t, no, meta.figures)],
     });
     out.push({
       head: false,
@@ -377,6 +399,10 @@ export interface VariantSheetOptions {
    * никогда: по коду на сайте собирается и лист с ответами.
    */
   showCode: boolean;
+  /** Место для решения на листе ученика; код в таблице учителя — с ним. */
+  space?: SheetSpace;
+  /** Хвост кода для места для решения (encodeSpace): к коду в таблице. */
+  spaceToken?: string;
 }
 
 /** Описание документа для `buildDocument` (lib/sheet/sheet.js). */
@@ -403,9 +429,13 @@ export function variantSheetSpec(
       const subtitle = [subtitleBase, part].filter((x) => x !== '').join(' · ');
       const blocks =
         kind === 'uchenik'
-          ? blocksUchenik(v.tasks, meta)
+          ? blocksUchenik(v.tasks, meta, opts.space)
           : kind === 'uchitel'
-            ? blocksUchitel(v.tasks, meta, opts.showCode ? set.code : null)
+            ? blocksUchitel(
+                v.tasks,
+                meta,
+                opts.showCode ? codeWithSpace(set.code, opts.spaceToken ?? '') : null,
+              )
             : blocksRazbor(v.tasks, meta);
       return {
         title: {
@@ -428,6 +458,7 @@ export function variantSheetSpec(
     theme: 'strict' as const,
     layout: 'single' as const,
     cell: CELL,
+    figures: meta.figures,
     head: T.head,
     runner: opts.workTitle,
     documentTitle,

@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { Button, Input } from '@/components/ui';
 import { newKitId } from '@/lib/komplekt';
+import { A4Preview } from '../generator/A4Preview';
 import { KitBar } from '../generator/KitBar';
 import type {
   GenDopV2,
@@ -377,7 +378,7 @@ export function GeneratorV2<S extends GenStateV2>({ config }: { config: Generato
           ) : null}
         </div>
         <p className="gv2-card__note">{T.predprosmotrNote}</p>
-        <div className={clsx('gv2-a4', zagruzka && 'is-loading')}>
+        <A4Preview className={clsx('gv2-a4', zagruzka && 'is-loading')}>
           {pokaz === null ? (
             <p className="gv2-a4__pusto">{T.pusto}</p>
           ) : (
@@ -418,7 +419,7 @@ export function GeneratorV2<S extends GenStateV2>({ config }: { config: Generato
               ))}
             </ol>
           )}
-        </div>
+        </A4Preview>
       </section>
 
       <div className="gv2-bar" aria-hidden={vsego === 0}>

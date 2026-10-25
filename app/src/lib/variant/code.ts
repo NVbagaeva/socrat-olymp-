@@ -14,6 +14,9 @@
  * задания и маска подтипов фиксированной длины (по числу подтипов
  * раздела в lib/variant/sections.ts).
  * Замены: тройки знаков «вариант − 1, задание, сколько раз».
+ * Место для решения (P…): настройка листа ученика (lib/sheet/space.js,
+ * encodeSpace) — на задачи не влияет, но хранится с кодом, чтобы лист
+ * воспроизводился тем же.
  */
 
 import { EGE_NUMBERS, MAX_VARIANTS, type EgeNo, type Stars, type VariantConfig } from './types';
@@ -49,6 +52,31 @@ export interface Decoded {
   config: VariantConfig;
   zameny: Record<string, number>;
   version: string;
+  /** Место для решения: знаки encodeSpace; '' — без места. */
+  space?: string;
+}
+
+/** Код с настройкой места для решения: хвост .P… (пусто — без хвоста). */
+export function codeWithSpace(code: string, token: string): string {
+  const base = baseCode(code);
+  return token === '' ? base : `${base}.P${token}`;
+}
+
+/** Код без хвоста места для решения: так его знает набор (set.code). */
+export function baseCode(code: string): string {
+  return code
+    .split('.')
+    .filter((part, i) => i === 0 || !part.startsWith('P'))
+    .join('.');
+}
+
+/** Хвост места для решения из кода: знаки encodeSpace или ''. */
+export function spaceOfCode(code: string): string {
+  const tail = normalizeCode(code)
+    .split('.')
+    .slice(1)
+    .find((part) => part.startsWith('P'));
+  return tail === undefined ? '' : tail.slice(1);
 }
 
 export function encodeCode(
@@ -122,8 +150,11 @@ export function decodeCode(
   const stars = ([1, 2, 3] as Stars[]).filter((s) => (starsMask & (1 << (s - 1))) !== 0);
   const subtypes: VariantConfig['subtypes'] = {};
   const zameny: Record<string, number> = {};
+  let space = '';
   for (const tail of tails) {
-    if (tail.startsWith('S')) {
+    if (tail.startsWith('P')) {
+      space = tail.slice(1);
+    } else if (tail.startsWith('S')) {
       let rest = tail.slice(1);
       while (rest.length > 0) {
         const n = dec(rest.slice(0, 1));
@@ -154,5 +185,6 @@ export function decodeCode(
     version,
     zameny,
     config: { tasks, subtypes, source: SOURCES[src] ?? 'mix', stars, count, parallel },
+    space,
   };
 }
