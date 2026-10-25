@@ -189,9 +189,30 @@ function figureSize(svg, widthMm, rowMm) {
 var MAIN_SHARE = 0.6;
 var STROKE = /(<(?:path|line|polyline|polygon|circle|ellipse|rect)\b[^>]*?\sstroke-width=")([0-9.]+)"/g;
 
+/* Рисунок со своими толщинами на печати (стереометрия: видимые линии
+   1,2–1,5 pt, невидимые 0,8–1 pt, штрих 4/3 pt) объявляет на <svg>:
+   data-line-pt — толщина видимой линии на бумаге, data-line-w — та же
+   линия в единицах рисунка. Лист пересчитывает все толщины и штрихи под
+   итоговую ширину рисунка в одно и то же число раз: на бумаге ровно
+   объявленные pt, при любой ширине колонки. */
+var OWN_LINE = /^<svg[^>]*\sdata-line-pt="([0-9.]+)"[^>]*\sdata-line-w="([0-9.]+)"/;
+var DASH = /(\sstroke-dasharray=")([0-9. ]+)"/g;
+
+function ownStrokes(svg, box, widthMm, m) {
+  var ratio = Number(m[1]) / PT_PER_MM * (box.width / widthMm) / Number(m[2]);
+  var round = function (v) { return Math.round(v * ratio * 100) / 100; };
+  return svg
+    .replace(STROKE, function (all, head, w) { return head + round(Number(w)) + '"'; })
+    .replace(DASH, function (all, head, list) {
+      return head + list.trim().split(/\s+/).map(function (v) { return round(Number(v)); }).join(' ') + '"';
+    });
+}
+
 function strokeFloor(svg, widthMm) {
   var box = viewBoxOf(svg);
   if (!box || !widthMm) { return svg; }
+  var own = OWN_LINE.exec(svg);
+  if (own) { return ownStrokes(svg, box, widthMm, own); }
   var floor = RULES.linePt / PT_PER_MM * (box.width / widthMm);
   var widths = [];
   svg.replace(STROKE, function (all, head, w) { widths.push(Number(w)); return all; });

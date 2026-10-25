@@ -303,6 +303,20 @@ export function neVMasshtabe(t: TeloScenariya): { telo: TeloScenariya; bylo: num
     const [s2 = shir, h = t.h] = sjat([shir, t.h]);
     return { telo: { ...t, a: (t.a * s2) / shir, h }, bylo };
   }
+  if (t.vid === 'pryamaya-prizma') {
+    /* Поперечник основания — наибольшее расстояние между его вершинами. */
+    const shir = Math.max(
+      ...t.osnovanie.flatMap((p) => t.osnovanie.map((q) => Math.hypot(p[0] - q[0], p[1] - q[1]))),
+    );
+    const bylo = Math.max(shir / t.h, t.h / shir);
+    if (bylo <= PREDEL_PROPORCII) return null;
+    const [s2 = shir, h = t.h] = sjat([shir, t.h]);
+    const k = s2 / shir;
+    return {
+      telo: { ...t, osnovanie: t.osnovanie.map(([x, y]) => [x * k, y * k] as const), h },
+      bylo,
+    };
+  }
   return null;
 }
 
