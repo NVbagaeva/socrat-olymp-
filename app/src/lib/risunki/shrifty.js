@@ -24,4 +24,5 @@ export var VES = 400;
 /** Типографский минус. */
 export var MINUS = '−';
 
-export default { CHISLA: CHISLA, BUKVY: BUKVY, RAZRESHENNYE: RAZRESHENNYE, VES: VES, MINUS: MINUS };
+var shrifty = { CHISLA: CHISLA, BUKVY: BUKVY, RAZRESHENNYE: RAZRESHENNYE, VES: VES, MINUS: MINUS };
+export default shrifty;

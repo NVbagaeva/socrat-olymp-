@@ -220,6 +220,14 @@ export interface Drawn {
   kletokY: number;
 }
 
+const TOCHKA_OTVET: ReadonlySet<string> = new Set([
+  'tochka-max',
+  'tochka-min',
+  'max-na-otrezke',
+  'min-na-otrezke',
+  'extr-na-otrezke',
+]);
+
 export function drawFigure(
   task: Generated,
   rezhim: 'student' | 'teacher',
@@ -229,9 +237,18 @@ export function drawFigure(
     return null;
   }
   const report = pustoyOtchet();
+  /* Вопрос про точку max/min: на листе учителя точка-ответ крупнее. */
+  const otvetX =
+    rezhim === 'teacher' && task.zapros !== null && TOCHKA_OTVET.has(task.zapros.t)
+      ? [Number(task.otvet)]
+      : [];
   const svg = renderFigura(
     task.risunok,
-    pechat.minFont === undefined ? { rezhim } : { rezhim, minFont: pechat.minFont },
+    {
+      rezhim,
+      ...(pechat.minFont === undefined ? {} : { minFont: pechat.minFont }),
+      ...(otvetX.length > 0 && Number.isFinite(otvetX[0]) ? { otvetX } : {}),
+    },
     report,
   );
   return {

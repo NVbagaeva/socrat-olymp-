@@ -103,7 +103,7 @@ function bazovaya(
     uzly,
     levyy: 'none',
     pravyy: 'none',
-    chisla: 'vse',
+    chisla: 'minimum',
     chislaY: 'vse',
     cell: razmerKletki(okno),
     ...extra,

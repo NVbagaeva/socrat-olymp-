@@ -27,6 +27,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
+import { vstroitShrifty } from './lib/vstroit-shrifty.mjs';
 
 const warn = console.warn;
 console.warn = (...a) => (String(a[0]).includes('LaTeX-incompatible') ? undefined : warn(...a));
@@ -262,7 +263,7 @@ if (PDF !== null) {
   </style></head><body><h1>Стереометрия (№3): чертежи по типам тел</h1><div class="grid">${kartochki
     .map(
       ({ tip, r }) =>
-        `<div class="k"><b>${tip}</b><small>${r.where} · ${r.nazvanie.replace(/\$/g, '')}</small>${r.svg}</div>`,
+        `<div class="k"><b>${tip}</b><small>${r.where} · ${r.nazvanie.replace(/\$/g, '')}</small>${vstroitShrifty(r.svg)}</div>`,
     )
     .join('')}</div></body></html>`;
   const p2 = await browser.newPage();

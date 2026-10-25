@@ -24,6 +24,7 @@
  */
 
 import { THEME, esc, px } from '@/lib/graph/renderer.js';
+import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 import { POROG } from './figury';
 import {
   type Krug,
@@ -53,8 +54,8 @@ export const PL = {
   dash: { punktir: '6 4', prodolzhenie: '5 4' },
   /* Подписи точек — курсив KaTeX_Math, как буквы в формулах сайта. */
   font: {
-    bukva: "KaTeX_Math, 'Latin Modern Roman', 'Times New Roman', serif",
-    chislo: "KaTeX_Main, 'Latin Modern Roman', 'Times New Roman', serif",
+    bukva: BUKVY,
+    chislo: CHISLA,
     slovo: THEME.font.family,
     razmer: 19,
     razmerZnach: 15,

@@ -21,8 +21,10 @@
  */
 
 import { THEME, esc, px, sMinKeglem, svgText, textWidth } from '@/lib/graph/renderer.js';
+import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 import { type Rect, type Seg, pointSegDist, rectGap, segRectDist } from '../vektory/geometry';
 import { funkciya } from './reshit';
+import { d } from './tex';
 import { postroit } from './spline';
 import type { Figura, Konets, Pomoshch, Tochka } from './types';
 
@@ -44,6 +46,8 @@ export interface OpciiRisunka {
   shag?: number;
   /** Наименьший кегль подписей в единицах viewBox (печать листа: ≥ 10 pt). */
   minFont?: number;
+  /** Абсциссы точек-ответов (вопрос про точки max/min): крупнее, с обводкой. */
+  otvetX?: readonly number[];
 }
 
 export interface Podpis {
@@ -93,11 +97,11 @@ const V = {
   dashWidth: 1.8,
   dotR: 4.8,
   endR: 5.2,
-  tick: { size: 12.5, weight: 600, gapY: 7, gapX: 16, origin: 5 },
+  tick: { size: 12.5, weight: 400, gapY: 7, gapX: 16, origin: 5 },
   axisName: { size: THEME.font.axisName, belowX: 19, leftY: 8, downY: 15 },
-  mark: { size: 15, sub: 10.5, weight: 600 },
+  mark: { size: 15, sub: 10.5, weight: 400 },
   curveLabel: { size: 20, track: 0.62 },
-  helper: { size: 15, weight: 600 },
+  helper: { size: 15, weight: 400 },
   gap: 3,
   field: 3,
 };
@@ -156,8 +160,8 @@ function podpisX(sub: string, x: number, y: number, fill: string): string {
   return (
     `<text x="${px(x)}" y="${px(y)}" text-anchor="middle" font-size="${V.mark.size}" font-weight="${V.mark.weight}" fill="${fill}" ` +
     `stroke="${THEME.colors.halo}" stroke-width="${THEME.width.halo}" stroke-linejoin="round" ` +
-    `style="font-family:${THEME.font.curveLabelFamily};font-style:italic;paint-order:stroke fill">x` +
-    `<tspan font-size="${V.mark.sub}" dy="3" font-style="normal">${esc(sub)}</tspan></text>`
+    `style="font-family:${BUKVY};font-style:italic;paint-order:stroke fill">x` +
+    `<tspan font-size="${V.mark.sub}" dy="3" font-style="normal" style="font-family:${CHISLA}">${esc(sub)}</tspan></text>`
   );
 }
 
@@ -322,10 +326,12 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
     svgText('x', tipX - 3, axisX + V.axisName.belowX, 'end', {
       size: V.axisName.size,
       style: 'italic',
+      family: BUKVY,
     }),
     svgText('y', axisY - V.axisName.leftY, tipY + V.axisName.downY, 'end', {
       size: V.axisName.size,
       style: 'italic',
+      family: BUKVY,
     }),
   );
   addBox({
@@ -797,8 +803,20 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
         break;
       }
       case 'otrezok': {
+        /* Полупрозрачная полоса вдоль оси и квадратные скобки на концах. */
         layers.aux.push(
-          `<path class="pr-aux-seg" d="M${px(sx(item.p))} ${px(axisX)}H${px(sx(item.q))}" fill="none" stroke="${V.aux}" stroke-opacity="0.55" stroke-width="9" stroke-linecap="butt"/>`,
+          `<path class="pr-aux-seg" d="M${px(sx(item.p))} ${px(axisX)}H${px(sx(item.q))}" fill="none" stroke="${V.aux}" stroke-opacity="0.35" stroke-width="9" stroke-linecap="butt"/>`,
+        );
+        const h = 10;
+        const u = 4.5;
+        const P = sx(item.p);
+        const Q = sx(item.q);
+        layers.aux.push(
+          `<path class="pr-skobka" d="M${px(P + u)} ${px(axisX - h)}H${px(P)}V${px(axisX + h)}H${px(P + u)}M${px(Q - u)} ${px(axisX - h)}H${px(Q)}V${px(axisX + h)}H${px(Q - u)}" fill="none" stroke="${V.aux}" stroke-width="2.2" stroke-linejoin="miter"/>`,
+        );
+        obstacles.push(
+          { seg: { x1: P, y1: axisX - h, x2: P, y2: axisX + h }, r: 1.5, what: 'скобка' },
+          { seg: { x1: Q, y1: axisX - h, x2: Q, y2: axisX + h }, r: 1.5, what: 'скобка' },
         );
         break;
       }
@@ -983,9 +1001,15 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
   }
 
   /* Точки (после линий, чтобы лежали сверху). */
+  const otvetX = new Set(opts.otvetX ?? []);
   for (const d of auxDots) {
+    /* Точка-ответ (вопрос про точки max/min) — крупнее и с обводкой. */
+    const otvet = d.y === 0 && otvetX.has(d.x);
     layers.dots.push(
-      `<circle cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR - 0.8}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="1.6"/>`,
+      otvet
+        ? `<circle class="pr-otvet" cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR + 1.6}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="2"/>` +
+            `<circle cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR + 4.4}" fill="none" stroke="${d.fill}" stroke-width="1.8"/>`
+        : `<circle cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${V.dotR - 0.8}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="1.6"/>`,
     );
     obstacles.push({
       seg: { x1: sx(d.x), y1: sy(d.y), x2: sx(d.x), y2: sy(d.y) },
@@ -1293,23 +1317,191 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
     layers.labels.push(podpisX('0', b.x, b.y + V.mark.size * 0.35, THEME.colors.axis));
     addBox(b);
   }
+  /* ── Разметка учителя на оси: ряды подписей и знаков ────────────
+     Подписи нулей f′ и концов отрезка — все под осью, в один ряд на
+     одной высоте; подпись сдвинута в ту сторону от точки, где нет
+     кривой (смена знака «+ на −»: кривая слева сверху, справа снизу —
+     подпись снизу слева; «− на +» — снизу справа). Не помещается — во
+     второй ряд с короткой выноской. Знаки f′ — в один ряд над осью,
+     одного кегля, по центру промежутка; задевают кривую — сдвигаются
+     вдоль промежутка на той же высоте. */
+  const podOsyu: { x: number; text: string; storona: -1 | 0 | 1 }[] = [];
+  const znaki: Extract<Pomoshch, { t: 'znak' }>[] = [];
+  const storonaNulya = (x: number): -1 | 0 | 1 => {
+    const yl = f.y(x - 0.15);
+    const yr = f.y(x + 0.15);
+    if (yl > 0 && yr < 0) return -1;
+    if (yl < 0 && yr > 0) return 1;
+    return 0;
+  };
+  const svobodno = (b: Podpis): { ok: boolean; min: number; what: string } => {
+    const rect = boxRect(b);
+    const inside =
+      rect.left >= field.left &&
+      rect.right <= field.right &&
+      rect.top >= field.top &&
+      rect.bottom <= field.bottom;
+    const c = zazor(rect, obstacles);
+    return { ok: inside && c.min >= V.gap, min: inside ? c.min : -1, what: c.what };
+  };
+  const ryadPodOsyu = () => {
+    const vse = [...new Map(podOsyu.map((p) => [p.x, p])).values()].sort((a, b) => a.x - b.x);
+    const size = V.tick.size;
+    const halfH = size * 0.42;
+    const y1 = axisX + tickGapX() - size * 0.35;
+    const ryady = [y1, y1 + size * 1.3];
+    for (const p of vse) {
+      const halfW = textWidth(p.text, size) / 2 + 1.5;
+      const cx = sx(p.x);
+      /* Сдвиг вбок — мимо точки на оси и скобки отрезка. */
+      const sdvig = halfW + V.dotR + V.gap;
+      /* Сначала в сторону без кривой, потом по центру, потом в другую
+         сторону; не встаёт — чуть дальше вбок (на ту же высоту ряда). */
+      const pref = p.storona === 0 ? -1 : p.storona;
+      const xs = [cx + pref * sdvig, cx, cx - pref * sdvig];
+      for (let k = 4; k <= 16; k += 4) xs.push(cx + pref * (sdvig + k), cx - pref * (sdvig + k));
+      if (p.storona === 0) xs.splice(0, 2, cx, cx - sdvig);
+      let best: { b: Podpis; min: number; ryad: number; what: string } | null = null;
+      for (let r = 0; r < ryady.length && (best === null || best.min < V.gap); r += 1) {
+        for (const x of xs) {
+          const b: Podpis = {
+            kind: 'aux',
+            id: `подпись ${p.text}`,
+            x,
+            y: ryady[r] as number,
+            halfW,
+            halfH,
+          };
+          const c = svobodno(b);
+          if (best === null || c.min > best.min + 0.5)
+            best = { b, min: c.min, ryad: r, what: c.what };
+          if (c.ok) break;
+        }
+      }
+      const ch = best as { b: Podpis; min: number; ryad: number; what: string };
+      if (ch.min < V.gap) problems.push(`подпись ${p.text} не помещается: мешает ${ch.what}`);
+      if (ch.ryad > 0) {
+        /* Второй ряд — короткая выноска от точки на оси к подписи. */
+        layers.labels.push(
+          `<path class="pr-vynoska" d="M${px(cx)} ${px(axisX + 4)}L${px(ch.b.x)} ${px(ch.b.y - halfH - 1)}" fill="none" stroke="${V.aux}" stroke-width="1.2"/>`,
+        );
+      }
+      layers.labels.push(
+        svgText(p.text, ch.b.x, ch.b.y + size * 0.35, 'middle', {
+          ...tickOpts,
+          fill: V.aux,
+          klass: 'pr-nul-label',
+        }),
+      );
+      addBox(ch.b);
+    }
+  };
+  const ryadZnakov = () => {
+    /* Один кегль и одна высота на весь ряд. Если какой-то знак не
+       встаёт (горб кривой над осью), весь ряд пробуем ближе к оси,
+       затем мельче — но всегда одинаково для всех знаков. Что и тогда
+       не встало, идёт во второй ряд — над горбами, тоже на одной высоте. */
+    type Mesto = { b: Podpis; glyph: string; min: number; what: string };
+    const postavit = (
+      z: (typeof znaki)[number],
+      size: number,
+      y: number,
+      uzhe: readonly Mesto[],
+    ): Mesto => {
+      const halfH = size * 0.42;
+      const glyph = z.znak > 0 ? '+' : THEME.minus;
+      const halfW = textWidth(glyph, size) / 2 + 2;
+      const lo = sx(Math.min(z.x0, z.x1)) + halfW + 3;
+      const hi = sx(Math.max(z.x0, z.x1)) - halfW - 3;
+      const mid = sx((z.x0 + z.x1) / 2);
+      const xs = [mid];
+      for (let k = 3; mid - k >= lo || mid + k <= hi; k += 3) {
+        if (mid + k <= hi) xs.push(mid + k);
+        if (mid - k >= lo) xs.push(mid - k);
+      }
+      let best: Mesto | null = null;
+      for (const x of xs) {
+        const b: Podpis = { kind: 'aux', id: `знак ${glyph}`, x, y, halfW, halfH };
+        const c = svobodno(b);
+        const r = boxRect(b);
+        const mezhdu = uzhe.some((o) => {
+          const q = boxRect(o.b);
+          return (
+            r.left < q.right + V.gap &&
+            r.right > q.left - V.gap &&
+            r.top < q.bottom + V.gap &&
+            r.bottom > q.top - V.gap
+          );
+        });
+        const min = mezhdu ? Math.min(c.min, -1) : c.min;
+        if (best === null || min > best.min + 0.5)
+          best = { b, glyph, min, what: mezhdu ? 'знак' : c.what };
+        if (c.ok && !mezhdu) break;
+      }
+      return best as Mesto;
+    };
+    const raskladka = (size: number, otstup: number): Mesto[] => {
+      const y = axisX - otstup - size * 0.42;
+      const out: Mesto[] = [];
+      for (const z of znaki) out.push(postavit(z, size, y, out));
+      return out;
+    };
+    /* Короткий крайний кусок графика (кривая сразу уходит от оси к концу
+       области): знаку там места нет, а для ответа он не нужен. */
+    const kraynii = (i: number): boolean => {
+      const z = znaki[i] as (typeof znaki)[number];
+      const kray = Math.min(z.x0, z.x1) <= lo + 1e-9 || Math.max(z.x0, z.x1) >= hi - 1e-9;
+      return kray && Math.abs(z.x1 - z.x0) <= 1.5;
+    };
+    const plokhih = (r: readonly Mesto[]) =>
+      r.filter((o, i) => o.min < V.gap && !kraynii(i)).length;
+    const krupnyy = Math.max(20, V.helper.size);
+    let ryad = raskladka(krupnyy, 9);
+    for (const [size, otstup] of [
+      [krupnyy, 6],
+      [krupnyy * 0.85, 6],
+    ] as const) {
+      if (plokhih(ryad) === 0) break;
+      const drugoy = raskladka(size, otstup);
+      if (plokhih(drugoy) < plokhih(ryad)) ryad = drugoy;
+    }
+    const size = ryad.length === 0 ? krupnyy : (ryad[0] as Mesto).b.halfH / 0.42;
+    /* Не вставший знак — над своим горбом, по центру промежутка. */
+    const ne = ryad.map((o, i) => (o.min < V.gap && !kraynii(i) ? i : -1)).filter((i) => i >= 0);
+    const ostalnye = ryad.filter((_, i) => !ne.includes(i));
+    for (const i of ne) {
+      const z = znaki[i] as (typeof znaki)[number];
+      const [a, c] = [Math.min(z.x0, z.x1), Math.max(z.x0, z.x1)];
+      let verh = axisX;
+      for (let k = 0; k <= 40; k += 1) verh = Math.min(verh, sy(f.y(a + ((c - a) * k) / 40)));
+      const m = postavit(z, size, verh - V.gap - 4 - size * 0.42, ostalnye);
+      if (m.min >= V.gap) {
+        m.b.id = 'знак над горбом';
+        ryad[i] = m;
+        ostalnye.push(m);
+      }
+    }
+    ryad.forEach((o, i) => {
+      if (o.min < V.gap) {
+        if (kraynii(i)) return;
+        problems.push(`знак ${o.glyph} не помещается: мешает ${o.what}`);
+      }
+      layers.labels.push(
+        svgText(o.glyph, o.b.x, o.b.y + size * 0.35, 'middle', {
+          size: Math.round(size * 10) / 10,
+          weight: 400,
+          fill: V.aux,
+          klass: o.b.id === 'знак над горбом' ? 'pr-znak pr-znak-nad' : 'pr-znak',
+        }),
+      );
+      addBox(o.b);
+    });
+  };
+
   for (const item of aux) {
     if (item.t === 'vert' && item.podpis !== undefined && item.podpis !== '') {
-      const text = minusify(item.podpis);
-      const halfW = textWidth(text, V.tick.size) / 2 + 2;
-      const b = place(
-        `подпись ${text}`,
-        'aux',
-        halfW,
-        V.tick.size * 0.5,
-        { x: sx(item.x), y: axisX },
-        ['below', 'above'],
-        [14, 22],
-      );
-      layers.labels.push(
-        svgText(text, b.x, b.y + V.tick.size * 0.35, 'middle', { ...tickOpts, fill: V.aux }),
-      );
-      addBox(b);
+      /* Подписи на оси — потом, все разом в ряд под осью (ryadPodOsyu). */
+      podOsyu.push({ x: item.x, text: minusify(item.podpis), storona: storonaNulya(item.x) });
     }
     if (item.t === 'zasechka' && item.podpis !== undefined) {
       /* Число уже поставлено как обычная подпись оси. */
@@ -1329,7 +1521,7 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
       layers.labels.push(
         svgText(text, b.x, b.y + 5, 'middle', {
           size: V.helper.size,
-          weight: 600,
+          weight: 400,
           fill: V.aux,
           style: 'italic',
         }),
@@ -1349,34 +1541,21 @@ function renderFiguraBez(fig: Figura, opts: OpciiRisunka, report?: Otchet): stri
         fig.teoriya === true ? [10, 18, 26] : [10, 18],
       );
       layers.labels.push(
-        svgText(text, b.x, b.y + 5, 'middle', { size: V.helper.size, weight: 600, fill: V.aux }),
+        svgText(text, b.x, b.y + 5, 'middle', { size: V.helper.size, weight: 400, fill: V.aux }),
       );
       addBox(b);
     }
     if (item.t === 'znak') {
-      const midX = (item.x0 + item.x1) / 2;
-      const glyph = item.znak > 0 ? '+' : THEME.minus;
-      const halfW = 9;
-      const halfH = 10;
-      const b = place(
-        `знак ${glyph}`,
-        'aux',
-        halfW,
-        halfH,
-        { x: sx(midX), y: axisX },
-        item.znak > 0 ? ['above', 'below'] : ['below', 'above'],
-        [6, 16, 28],
-      );
-      layers.labels.push(
-        svgText(glyph, b.x, b.y + 7, 'middle', {
-          size: Math.max(22, V.helper.size),
-          weight: 700,
-          fill: V.aux,
-        }),
-      );
-      addBox(b);
+      znaki.push(item);
+    }
+    if (item.t === 'otrezok') {
+      /* Концы отрезка подписаны в ряду нулей: левый — левее скобки, правый — правее. */
+      podOsyu.push({ x: item.p, text: minusify(d(item.p)), storona: -1 });
+      podOsyu.push({ x: item.q, text: minusify(d(item.q)), storona: 1 });
     }
   }
+  ryadPodOsyu();
+  ryadZnakov();
   for (const al of auxLabels) {
     const halfW = textWidth(al.text, V.helper.size) / 2 + 3;
     const halfH = V.helper.size * 0.55;
