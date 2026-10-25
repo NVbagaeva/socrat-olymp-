@@ -11,7 +11,9 @@
  * вернулся на страницу, всё на месте.
  */
 
+import { normalizeSpace, type SheetSpace } from '@/lib/sheet/space.js';
 import { storage } from '@/lib/storage';
+import { baseCode } from './code';
 import type { SheetChoice } from './sheets';
 import type { VariantConfig, VariantMeta, VariantSet } from './types';
 
@@ -35,11 +37,14 @@ export function printHref(choice: SheetChoice, code: string): string {
   return `${PRINT_PATH}?${q.toString()}`;
 }
 
-/** Открыть лист в новой вкладке. false — браузер не дал открыть окно. */
-export function openSheet(choice: SheetChoice, payload: PrintPayload): boolean {
+/**
+ * Открыть лист в новой вкладке. code — код набора с хвостом места для
+ * решения (codeWithSpace). false — браузер не дал открыть окно.
+ */
+export function openSheet(choice: SheetChoice, payload: PrintPayload, code: string): boolean {
   window.__variantPrint = payload;
   saveMeta(payload.meta);
-  const w = window.open(printHref(choice, payload.set.code), '_blank');
+  const w = window.open(printHref(choice, code), '_blank');
   return w !== null;
 }
 
@@ -47,7 +52,7 @@ export function openSheet(choice: SheetChoice, payload: PrintPayload): boolean {
 export function payloadFromOpener(code: string): PrintPayload | null {
   try {
     const p = (window.opener as Window | null)?.__variantPrint;
-    return p !== undefined && p.set.code === code ? p : null;
+    return p !== undefined && p.set.code === baseCode(code) ? p : null;
   } catch {
     return null;
   }
@@ -57,6 +62,16 @@ export function payloadFromOpener(code: string): PrintPayload | null {
 
 const META_KEY = 'variant:meta';
 const CONFIG_KEY = 'variant:config';
+/* Место для решения — выбор учителя на этом устройстве. */
+const SPACE_KEY = 'variant:space';
+
+export function saveSpace(space: SheetSpace): void {
+  storage.set(SPACE_KEY, space);
+}
+
+export function loadSpace(): SheetSpace {
+  return normalizeSpace(storage.get<unknown>(SPACE_KEY, null));
+}
 
 export function saveMeta(meta: VariantMeta): void {
   storage.set(META_KEY, meta);

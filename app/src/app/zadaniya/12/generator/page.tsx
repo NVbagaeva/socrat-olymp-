@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/layout/AppShell';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
+import { VariantFromSection } from '@/components/variant/VariantEntry';
 import { Generator12 } from '@/components/tasks/generator/Generator12';
 import { razdelyZadaniya } from '@/components/tasks/razdely/razdely12';
 import { findSection } from '@/content/sections';
@@ -14,7 +15,6 @@ import '../../[task]/section.css';
 import '../../[task]/[type]/configurator.css';
 import '../../komplekt.css';
 import '@/components/tasks/ves12/ves12.css';
-import { VariantFromSection } from '@/components/variant/VariantEntry';
 import '@/components/tasks/ves12/zachyot-setup.css';
 
 export const metadata: Metadata = {

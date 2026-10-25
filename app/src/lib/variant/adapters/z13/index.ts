@@ -1,7 +1,7 @@
 /**
  * Адаптер задания №13: банк движка (BANK_13, по 10 seed на прототип)
  * и новые задачи того же прототипа, когда банк в партии кончился.
- * Разметку задачи собирает генератор раздела (`sobrat`, gen/list.ts):
+ * Разметку задачи собирает генератор раздела (`sobratZadachu13`, gen/list.ts):
  * условие с таблицей, полное решение по шагам.
  */
 
@@ -35,7 +35,8 @@ function stars(d: 'base' | 'hard'): Stars {
 
 function candidate(prototypeId: string, seed: string): C13 | null {
   const p = PROTOTYPE_BY_ID[prototypeId];
-  if (p === undefined || !TYPES.includes(p.type)) return null;
+  /* «Таблица руками» (P-…) — тренировка оформления, в ЕГЭ такой задачи нет. */
+  if (p === undefined || prototypeId.startsWith('P-') || !TYPES.includes(p.type)) return null;
   return {
     taskId: `${prototypeId}:${seed}`,
     prototypeId,

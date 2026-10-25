@@ -217,7 +217,7 @@ export function posledniyPlatezh(par: PosledniyPlatezh): Prototype {
     source: 'own',
     difficulty: 'base',
     units: 'rub',
-    title: 'Долг каждый год меньше на q %: последний платёж в рублях',
+    title: 'Долг каждый год меньше на $q\\,\\%$: последний платёж в рублях',
     maxDecimals: 0,
     make({ plot }: { plot: PlotFull }) {
       const ost = Srub.mul(m.pow(n - 1));

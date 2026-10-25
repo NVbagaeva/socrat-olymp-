@@ -4,6 +4,7 @@ import { Component, useCallback, useEffect, useLayoutEffect, useRef, useState } 
 import type { ErrorInfo, ReactNode } from 'react';
 import { Button, Modal } from '@/components/ui';
 import { ErrorFallback } from '@/components/ErrorFallback';
+import { reportTrainerFinished } from '@/lib/kabinet/trainerSync';
 import { isBaseUi, normalizeBase } from '@/lib/trainerSession/restore';
 import {
   TAB_ID,
@@ -645,6 +646,9 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     beforeFinishRef.current = null;
     stopClock();
     const data = summarize(current.run);
+    /* Ученик вошёл в кабинет — тренировка записывается ему (прогресс,
+       ДЗ). Гостю — ничего: код кабинета даже не грузится. */
+    reportTrainerFinished(scope, current.run.id, data.items, data.seconds);
     if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
       timerRef.current = null;

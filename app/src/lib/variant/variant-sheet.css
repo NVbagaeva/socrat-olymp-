@@ -37,11 +37,51 @@ html:root {
 .sheet-task--single .sheet-figure {
   align-self: flex-start;
 }
-.sheet-figure svg {
-  max-height: 46mm;
+/* Потолок высоты — только у «обычных» рисунков: «крупные» печатаются
+   ровно своим размером (lib/sheet/figureRules.js). */
+html[data-sheet-figures='normal'] .sheet-figure svg {
+  max-height: 36mm;
+}
+.sheet-task--stack .sheet-figure--large {
+  align-self: center;
+}
+.sheet-task-question {
+  line-height: 1.4;
+}
+/* Место для решения — под текстом задачи: отступ под номер (компактная
+   карточка: поля 1 + номер 6 + зазор 2,5 шага). */
+html:root {
+  --sheet-space-indent: calc(var(--sheet-step) * 9.5);
+  --sheet-space-right: var(--sheet-step);
+}
+/* Строка «Ответ: ____» после задания, как в КИМ: без большого отступа —
+   у тринадцати заданий он стоил бы трети страницы. */
+.sheet-answer-line {
+  padding-top: calc(var(--sheet-step) * 1.5);
+}
+.sheet-answer-blank {
+  width: calc(var(--sheet-step) * 30);
 }
 .sheet-item + .sheet-item {
-  margin-top: calc(var(--sheet-step) * 2);
+  margin-top: calc(var(--sheet-step) * 1.5);
+}
+
+/* Плотный режим: лист ученика не уложился в две страницы на вариант —
+   VariantPrint набирает его ещё раз с этим признаком. */
+html[data-sheet-dense] {
+  --sheet-fs-body: 9.3pt;
+}
+/* Рисунки плотный режим уменьшает только «обычные»: крупные не
+   мельче печатных минимумов никогда. */
+html[data-sheet-dense][data-sheet-figures='normal'] .sheet-task .sheet-figure {
+  max-width: 42mm;
+}
+html[data-sheet-dense][data-sheet-figures='normal'] .sheet-figure svg {
+  max-height: 30mm;
+}
+html[data-sheet-dense] .var-instruction {
+  margin-bottom: calc(var(--sheet-step) * 2);
+  padding-block: var(--sheet-step);
 }
 
 /* ── Поля шапки: вторая строка (время, учитель) ─────────────── */
@@ -65,47 +105,6 @@ html:root {
 }
 .var-instruction__text {
   margin: 0;
-}
-
-/* ── Бланк ответов ученика ───────────────────────────────────── */
-.var-blank {
-  margin-top: calc(var(--sheet-step) * 3);
-  padding-top: calc(var(--sheet-step) * 2);
-  border-top: var(--sheet-rule-width) solid var(--sheet-rule);
-  break-inside: avoid;
-}
-.var-blank__title {
-  margin: 0 0 calc(var(--sheet-step) * 2);
-  font-size: var(--sheet-fs-block);
-  font-weight: 700;
-  color: var(--sheet-brand);
-}
-.var-blank__grid {
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 4);
-}
-.var-blank__row {
-  display: flex;
-  align-items: center;
-  gap: calc(var(--sheet-step) * 2);
-}
-.var-blank__no {
-  width: 6mm;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  color: var(--sheet-num-ink);
-}
-.var-blank__cells {
-  display: flex;
-}
-.var-blank__cells i {
-  width: 4.6mm;
-  height: 6mm;
-  border: 1px solid var(--sheet-ink-2);
-  margin-left: -1px;
 }
 
 /* ── Таблица ответов учителя ─────────────────────────────────── */
@@ -151,12 +150,6 @@ html:root {
 .var-key__source {
   font-size: var(--sheet-fs-small);
   color: var(--sheet-ink-2);
-}
-.var-key__level {
-  width: 24mm;
-  font-size: var(--sheet-fs-small);
-  color: var(--sheet-ink-2);
-  white-space: nowrap;
 }
 
 /* ── Решения и разбор ────────────────────────────────────────── */

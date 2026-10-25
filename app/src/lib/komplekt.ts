@@ -148,6 +148,7 @@ export function settingsOf(href: string): string {
   params.delete('seed');
   params.delete('kit');
   params.delete('oba');
+  params.delete('sp');
   return `${path}?${params.toString()}`;
 }
 
@@ -157,6 +158,8 @@ export function nastroykiZaprosa(query: URLSearchParams): string {
   params.delete('seed');
   params.delete('kit');
   params.delete('oba');
+  /* Место для решения (sp=) задач не меняет: комплект тот же. */
+  params.delete('sp');
   return params.toString();
 }
 
@@ -491,6 +494,8 @@ export function nextSheetAfterPrint(location: { pathname: string; search: string
     return null;
   }
   params.delete('oba');
+  /* У листа учителя места для решения нет. */
+  params.delete('sp');
   return `${teacherPathOf(location.pathname)}?${params.toString()}`;
 }
 

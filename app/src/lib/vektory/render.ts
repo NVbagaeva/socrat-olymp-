@@ -24,8 +24,20 @@
  * проверяется автотестом (selftest.ts) без разбора SVG.
  */
 
-import { THEME, esc, fmt, px, sMinKeglem, svgText, textWidth } from '@/lib/graph/renderer.js';
+import {
+  THEME,
+  esc,
+  fmt,
+  gridCellAttr,
+  labelSize,
+  printFitted,
+  px,
+  sMinKeglem,
+  svgText,
+  textWidth,
+} from '@/lib/graph/renderer.js';
 import { BUKVY } from '@/lib/risunki/shrifty.js';
+import { RULES } from '@/lib/sheet/figureRules.js';
 import { type Rect, type Seg, pointSegDist, rectGap, segRectDist, segSegDist } from './geometry';
 import {
   DEFAULT_WINDOW,
@@ -151,20 +163,59 @@ export function resolveWindow(config: Risunok): Okno {
   };
 }
 
-export function renderVectorPlane(config: Risunok, report?: Report): string {
-  return sMinKeglem(
-    config.minFont,
-    [
-      [V.label, ['size']],
-      [V.tick, ['size']],
-      [V.axisName, ['size']],
-      [V.hint, ['size']],
-    ],
-    () => renderVectorPlaneBez(config, report),
-  );
+/**
+ * Печатный профиль (lib/sheet/figureRules.js): кегли подписей не мельче
+ * печатного минимума при клетке 7 мм, место подписям подбирается уже
+ * этим кеглем. Числа под осью x опускаются ровно настолько, насколько
+ * вырос кегль: верх их рамки остаётся на прежнем зазоре от оси.
+ */
+function withPrintSizes<T>(fn: () => T): T {
+  const saved = {
+    label: V.label.size,
+    tick: { ...V.tick },
+    axisName: V.axisName.size,
+    hint: V.hint.size,
+  };
+  V.label.size = labelSize(V.label.size);
+  V.tick.size = labelSize(V.tick.size);
+  V.tick.gapX = saved.tick.gapX + (V.tick.size - saved.tick.size) * 0.77;
+  V.axisName.size = labelSize(THEME.font.axisName);
+  V.hint.size = labelSize(V.hint.size);
+  try {
+    return fn();
+  } finally {
+    V.label.size = saved.label;
+    Object.assign(V.tick, saved.tick);
+    V.axisName.size = saved.axisName;
+    V.hint.size = saved.hint;
+  }
 }
 
-function renderVectorPlaneBez(config: Risunok, report?: Report): string {
+export function renderVectorPlane(config: Risunok, report?: Report): string {
+  let last: Report | null = null;
+  const svg = printFitted(
+    config.cell ?? THEME.geometry.cell,
+    RULES.gridCellSteps,
+    (r: Report) =>
+      withPrintSizes(() =>
+        sMinKeglem(
+          config.minFont,
+          [
+            [V.label, ['size']],
+            [V.tick, ['size']],
+            [V.axisName, ['size']],
+            [V.hint, ['size']],
+          ],
+          () => drawVectorPlane(config, r),
+        ),
+      ),
+    () => (last = emptyReport()),
+  );
+  if (report !== undefined && last !== null) Object.assign(report, last);
+  return svg;
+}
+
+function drawVectorPlane(config: Risunok, report?: Report): string {
   const R = report ?? emptyReport();
   const win = resolveWindow(config);
   const cell = config.cell ?? THEME.geometry.cell;
@@ -253,6 +304,7 @@ function renderVectorPlaneBez(config: Risunok, report?: Report): string {
 
   head.push(
     `<svg xmlns="http://www.w3.org/2000/svg" data-engine="vektory" viewBox="0 0 ${px(width)} ${px(height)}" width="${px(width)}" height="${px(height)}" class="vp" role="img"` +
+      (showGrid ? gridCellAttr(cell) : '') +
       (config.alt ? ` aria-label="${esc(config.alt)}"` : ' aria-hidden="true"') +
       ' style="max-width:100%;height:auto">',
   );

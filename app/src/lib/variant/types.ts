@@ -215,9 +215,17 @@ export interface VariantMeta {
   /** «Вариант 1», «Вариант 2» … или пустое «Вариант №___». */
   variantLabels: 'numbered' | 'blank';
   numbering: Numbering;
+  /**
+   * Рисунки на листах: 'large' — по правилам lib/sheet/figureRules.js
+   * (клетка 7 мм, подписи не мельче 10 pt), 'normal' — прежние
+   * компактные. На выбор задач не влияет.
+   */
+  figures: FigureSize;
   instruction: boolean;
   instructionText: string;
 }
+
+export type FigureSize = 'large' | 'normal';
 
 export interface Variant {
   /** Номер варианта в партии: 1…count. */

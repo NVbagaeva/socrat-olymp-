@@ -52,6 +52,9 @@ import {
   type SheetWhich,
 } from '@/lib/komplekt';
 import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
+import { withSpace } from '@/lib/sheet/space.js';
+import { SpaceOption } from '@/components/tasks/space/SpaceOption';
+import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
 import { GenIcon } from './GenIcons';
 import { GenKits } from './GenKits';
 import { GenPopover, GenToast, GenSheet as GenWindow } from './GenOverlay';
@@ -157,6 +160,8 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   const [pick, setPick] = useState(false);
   const [dopOpen, setDopOpen] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
+  /* Место для решения: выбор на устройстве, лист ученика получает его адресом (sp=). */
+  const [space, setSpace] = useSheetSpace();
   const pvRef = useRef<HTMLDivElement>(null);
   const buildNo = useRef(0);
   const scrollAfterBuild = useRef(false);
@@ -544,12 +549,13 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
   );
 
   const extras = config.extras;
-  const dopCount = extrasOn(st.extras);
+  const dopCount = extrasOn(st.extras) + (space.mode === 'none' ? 0 : 1);
   /* Памятка или пример включены там, где вид работы их не предполагает. */
   const podskazki = sPodskazkami(st.extras.kind, ege(st));
   const dopControls =
     extras === undefined ? null : (
       <div className="gen-dop__list">
+        <SpaceOption className="gen-space" value={space} onChange={setSpace} />
         {extras.theory === false ? null : (
           <div className="gen-opt">
             <span>
@@ -956,7 +962,13 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                     'btn btn--secondary btn--sm gen-pv__pdf',
                     kit === null && 'is-disabled',
                   )}
-                  href={kit === null ? undefined : teacher ? kit.teacherHref : kit.studentHref}
+                  href={
+                    kit === null
+                      ? undefined
+                      : teacher
+                        ? kit.teacherHref
+                        : withSpace(kit.studentHref, space)
+                  }
                   target="_blank"
                   rel="noopener"
                   aria-disabled={kit === null || undefined}
@@ -968,7 +980,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 <span className="gen-pv__desk">
                   <a
                     className={clsx('btn btn--secondary btn--sm', hrefs === null && 'is-disabled')}
-                    href={hrefs?.all}
+                    href={hrefs === null ? undefined : withSpace(hrefs.all, space)}
                     target="_blank"
                     rel="noopener"
                     onClick={() => mark(['student', 'teacher'])}
@@ -1022,6 +1034,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 levels={taskLevel}
                 extras={generated ? st.extras : null}
                 qr={generated && st.extras.qr ? qr : null}
+                space={space}
                 onAction={onTask}
                 onMove={move}
               />
@@ -1159,7 +1172,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
         <GenWindow title={GEN_UI.esche} onClose={closeOverlay}>
           <a
             className="gen-menu-item"
-            href={hrefs?.all}
+            href={hrefs === null ? undefined : withSpace(hrefs.all, space)}
             target="_blank"
             rel="noopener"
             onClick={() => {

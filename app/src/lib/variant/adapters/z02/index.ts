@@ -26,6 +26,7 @@ import {
   type Candidate,
 } from '../common';
 import { info } from './info';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
 
 export interface C02 extends Candidate {
   seed: string;
@@ -60,7 +61,16 @@ function risunokLista(risunok: Risunok): Figure {
   return { svg: r.svg, width: r.width, below: true };
 }
 
+/**
+ * Задача с рисунками в печатном профиле (lib/sheet/figureRules.js):
+ * клетчатый рисунок на листе печатается клеткой 7 мм, и подписи движок
+ * рисует сразу печатным кеглем. Тот же рисунок — в предпросмотре.
+ */
 export function build(c: C02, task: Generated): VariantTask {
+  return withPrintFigures(() => buildTask(c, task));
+}
+
+function buildTask(c: C02, task: Generated): VariantTask {
   const risunok = task.risunok;
   const condition = risunok === null ? null : risunokLista(risunok);
   const withLegs = risunok === null ? null : risunokLista({ ...risunok, hints: true });

@@ -12,11 +12,13 @@
 
    Проверки (рисунок отдельным SVG, без CSS страницы):
      1. Нет непрозрачной заливки: у замкнутой фигуры fill="none" или
-        fill-opacity/opacity ≤ 0,1; без атрибута fill (по умолчанию —
-        чёрный) — нарушение. Исключение — точки (круг r ≤ 4,5).
+        fill-opacity/opacity ≤ 0,15 (правило листов: выделенная фигура
+        не плотнее 0,15); без атрибута fill (по умолчанию — чёрный) —
+        нарушение. Исключение — точки (круг r ≤ 4,5).
      2. Все цвета — значения: нет var(--…) в атрибутах.
      3. Есть пунктир невидимых линий (stroke-dasharray).
-     4. Видимое ребро на листе не тоньше 1,5 pt при ширине печати.
+     4. Видимое ребро на листе не тоньше 1,2 pt при ширине печати
+        (правило листов: видимые линии стереометрии 1,2–1,5 pt).
      5. По пикселям (Chromium, рисунок как картинка на белом): доля
         тёмных пикселей меньше 15 % — ловит «кляксы» любой природы.
 
@@ -38,6 +40,7 @@ const PDF = process.argv.includes('--pdf') ? process.argv[process.argv.indexOf('
 const { RAZDELY } = requireSrc('lib/zadanie3/index');
 const { renderSolid } = requireSrc('lib/solid');
 const { dannyePechati } = requireSrc('lib/zadanie3/pechat-dannye');
+const { figureSize, strokeFloor } = requireSrc('lib/sheet/figureRules.js');
 const { chertezhLista } = requireSrc('lib/zadanie3/pechat');
 const { P03_74S } = requireSrc('lib/zadanie3/razdel7/povyshennye');
 const { povSetIz } = requireSrc('lib/povyshennye/set');
@@ -52,7 +55,7 @@ function fail(where, message) {
 
 /** Ширина печати, мм: solid — 70 (лист варианта, тренажёр), сценарий — 68. */
 const SHIRINA = { solid: 70, chertezh3: 68 };
-const MIN_REBRO_MM = 1.5 * (25.4 / 72);
+const MIN_REBRO_MM = 1.2 * (25.4 / 72);
 
 /* ── Сбор чертежей ──────────────────────────────────────────────── */
 
@@ -124,7 +127,7 @@ for (const r of ris) {
     if (fill === 'none' || fill === 'transparent') continue;
     const op = Math.min(num(attr(tag, 'fill-opacity')) ?? 1, num(attr(tag, 'opacity')) ?? 1);
     if (m[1] === 'circle' && (num(attr(tag, 'r')) ?? 99) <= 4.5) continue;
-    if (op > 0.1 + 1e-9) {
+    if (op > 0.15 + 1e-9) {
       fail(
         where,
         `непрозрачная заливка: <${m[1]} fill="${fill ?? '(чёрная по умолчанию)'}" opacity ${op}>`,
@@ -134,9 +137,12 @@ for (const r of ris) {
   }
   if (!/stroke-dasharray/.test(svg) && !BEZ_NEVIDIMYKH.has(r.proto))
     fail(where, 'нет пунктира невидимых линий');
+  /* Ширина и толщины — как на листе (lib/sheet/figureRules.js). */
+  const razmer = figureSize(svg, r.shirina ?? SHIRINA[r.engine]);
+  const naListe = strokeFloor(svg, razmer.widthMm);
   const vb = /viewBox="[-0-9.]+ [-0-9.]+ ([0-9.]+) /.exec(svg);
-  const mmNaEd = (r.shirina ?? SHIRINA[r.engine]) / Number(vb?.[1] ?? 1);
-  const vidimye = [...svg.matchAll(/<(path|line|polyline)\b[^>]*>/g)]
+  const mmNaEd = razmer.widthMm / Number(vb?.[1] ?? 1);
+  const vidimye = [...naListe.matchAll(/<(path|line|polyline)\b[^>]*>/g)]
     .map((m) => m[0])
     .filter((t) => !/stroke-dasharray/.test(t) && /stroke="#(101728|1f5fd0)"/.test(t))
     .map((t) => num(attr(t, 'stroke-width')) ?? 1);
@@ -144,7 +150,7 @@ for (const r of ris) {
   else if (Math.max(...vidimye) * mmNaEd < MIN_REBRO_MM * 0.97)
     fail(
       where,
-      `видимое ребро ${((Math.max(...vidimye) * mmNaEd) / (25.4 / 72)).toFixed(2)} pt < 1,5`,
+      `видимое ребро ${((Math.max(...vidimye) * mmNaEd) / (25.4 / 72)).toFixed(2)} pt < 1,2`,
     );
 }
 
@@ -280,6 +286,6 @@ if (failures > 0) {
   console.error(`\nРисунки стереометрии: ошибок ${failures}`);
   process.exit(1);
 }
-console.log('\nРисунки стереометрии: заливки лёгкие, пунктир есть, рёбра 1,5 pt, клякс нет.');
+console.log('\nРисунки стереометрии: заливки лёгкие, пунктир есть, рёбра не тоньше 1,2 pt, клякс нет.');
 void APP;
 void fs;

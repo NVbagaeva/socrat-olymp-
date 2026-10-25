@@ -13,7 +13,7 @@
  * тренажёре (pool.ts): числа стоят в условии, не на чертеже.
  */
 
-import { renderSolid } from '@/lib/solid';
+import { chertezhBanka } from '@/lib/solid';
 import { RAZDELY } from '@/lib/zadanie3';
 import { estScenariy } from '@/lib/zadanie3/chertezhi';
 import { ru } from '@/lib/zadanie3/format';
@@ -72,9 +72,9 @@ export function dannye(): Dannye03 {
         /* Числа на самом чертеже — чертёж свой у варианта (как perVariant в pool.ts). */
         const first = p.varianty[0];
         if (first !== undefined && (p.chertezh(first.params).measures ?? []).length > 0) {
-          for (const v of p.varianty) svg[`${p.id}#${v.n}`] = renderSolid(p.chertezh(v.params));
+          for (const v of p.varianty) svg[`${p.id}#${v.n}`] = chertezhBanka(p.chertezh(v.params));
         } else if (first !== undefined) {
-          svg[p.id] = renderSolid(p.chertezh(first.params));
+          svg[p.id] = chertezhBanka(p.chertezh(first.params));
         }
         zadachi.push(...bezScenariya(p));
       }

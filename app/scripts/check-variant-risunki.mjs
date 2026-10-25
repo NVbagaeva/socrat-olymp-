@@ -34,6 +34,7 @@ const { povSetIz } = requireSrc('lib/povyshennye/set');
 const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');
 const { KLETKA_EDINIC, MIN_KLETKA_MM, MIN_PT } = requireSrc('lib/variant/pechat');
 const { sheetFigure } = requireSrc('lib/variant/sheets');
+const { figureSize, strokeFloor } = requireSrc('lib/sheet/figureRules.js');
 
 const PARTIY = Number(process.argv.find((a) => /^--partiy=/.test(a))?.slice(9) ?? 4);
 
@@ -53,8 +54,14 @@ const MM_V_PT = 25.4 / 72;
 function proverit(where, fig) {
   if (fig === null || fig === undefined) return;
   figures += 1;
-  /* Ширина — та, с которой рисунок печатается на листе (sheetFigure). */
-  const f = { svg: fig.svg, width: sheetFigure(fig).width };
+  /* Ширина и толщины — те, с которыми рисунок печатается на листе
+     «крупными» рисунками: заказ раздела (sheetFigure) раскладывает
+     шаблон листа (lib/sheet/figureRules.js: figureSize, strokeFloor). */
+  const razmer = figureSize(fig.svg, sheetFigure(fig).width);
+  const f = {
+    svg: razmer.grid ? fig.svg : strokeFloor(fig.svg, razmer.widthMm),
+    width: razmer.widthMm,
+  };
   const svg = f.svg;
   const root = /^\s*<svg\b[^>]*>/.exec(svg);
   if (root === null) {

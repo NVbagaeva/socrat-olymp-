@@ -121,11 +121,13 @@ for (const r of RAZBORY_3) {
   );
   for (let k = 1; k <= shagov; k += 1) {
     const svg = R.renderSolid(model, { shag: k, ustoychivo: true });
+    /* Выделение шага — толщины выделения из оформления движка или
+       подпись шага (data-hl): подписи не жирные. */
+    const w = R.SOLID_THEME.width;
     check(
-      svg.includes('stroke-width="3.6"') ||
-        svg.includes('stroke-width="2.6"') ||
-        svg.includes('class="solid-hl"') ||
-        svg.includes('stroke-width="2.2"'),
+      [w.hl, w.hlHidden, w.hlMarker].some((x) => svg.includes(`stroke-width="${x}"`)) ||
+        svg.includes('data-hl="1"') ||
+        svg.includes('class="solid-hl"'),
       `${where}: на шаге ${k} на чертеже ничего не выделено`,
     );
   }

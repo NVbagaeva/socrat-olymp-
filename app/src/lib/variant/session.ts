@@ -4,7 +4,7 @@
  * Общая для экрана /variant/ и страницы печати.
  */
 
-import { EGE_INSTRUCTION } from '@/content/variant';
+import { INSTRUCTION_BLANK, INSTRUCTION_LEGACY, INSTRUCTION_PLAIN } from '@/content/variant';
 import { generatorVersion } from '@/lib/komplekt';
 import { buildVariantSet } from './build';
 import { decodeCode, encodeCode } from './code';
@@ -42,8 +42,10 @@ export function defaultMeta(): VariantMeta {
     teacher: '',
     variantLabels: 'numbered',
     numbering: 'ege',
+    figures: 'large',
     instruction: true,
-    instructionText: EGE_INSTRUCTION,
+    /* Пусто — стандартная для типа работы (lib/variant/sheets.ts). */
+    instructionText: '',
   };
 }
 
@@ -92,9 +94,16 @@ export function sanitizeMeta(raw: Partial<VariantMeta> | null): VariantMeta {
     teacher: str(raw.teacher, ''),
     variantLabels: raw.variantLabels === 'blank' ? 'blank' : 'numbered',
     numbering: raw.numbering === 'seq' ? 'seq' : 'ege',
+    figures: raw.figures === 'normal' ? 'normal' : 'large',
     instruction: raw.instruction !== false,
-    instructionText: str(raw.instructionText, d.instructionText) || d.instructionText,
+    instructionText: ownInstruction(str(raw.instructionText, '')),
   };
+}
+
+/** Своя инструкция; стандартная (любого года) хранится пустой строкой. */
+function ownInstruction(text: string): string {
+  const t = text.trim();
+  return [INSTRUCTION_BLANK, INSTRUCTION_PLAIN, INSTRUCTION_LEGACY].includes(t) ? '' : t;
 }
 
 export function currentVersion(): string {
