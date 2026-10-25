@@ -41,6 +41,8 @@ const { P03_85, P03_86 } = requireSrc('lib/zadanie3/razdel8/cilindr');
 const { P03_90, P03_91 } = requireSrc('lib/zadanie3/razdel8/sfera-konus');
 const { P03_74S } = requireSrc('lib/zadanie3/razdel7/povyshennye');
 const { prototype: prototype6 } = requireSrc('lib/zadanie6/prototypes');
+const PV6 = requireSrc('lib/zadanie6/prototypes/povyshennye');
+const { STATISTICHESKOE: STAT4 } = requireSrc('lib/veroyatnost/bank4/statisticheskoe');
 const Z7 = requireSrc('lib/zadanie7/prototypes/povyshennye');
 const { PV7_KOREN } = Z7;
 const VY = requireSrc('lib/vychisleniya/povyshennye');
@@ -191,6 +193,16 @@ Object.assign(VTOROY, {
   'z05.kost-uslovie': (p) => VER.PV5_KOST_USLOVIE.perebor(p),
   'z06.dispersiya': (p) => prototype6('P14').pereschet(p),
   'z06.otklonenie': (p) => prototype6('P15').pereschet(p),
+  'z04.chastota': (p) => VER.PV4_CHASTOTA.perebor(p),
+  'z04.sootechestvennik': (p) => VER.PV4_SOOTECHESTVENNIK.perebor(p),
+  /* Прототипы банка №4 (p4-20, p4-19): прямой обход партии. */
+  'z04.bez-defekta': (p) => STAT4.find((x) => x.id === 'p4-20').perebor(p),
+  'z04.ne-podtekaet': (p) => STAT4.find((x) => x.id === 'p4-19').perebor(p),
+  'z05.dve-misheni': (p) => VER.PV5_DVE_MISHENI.perebor(p),
+  'z05.odin-tsvet': (p) => VER.PV5_ODIN_TSVET.perebor(p),
+  'z05.oba-zakonchilis': (p) => VER.PV5_OBA_ZAKONCHILIS.perebor(p),
+  'z06.strahovka-tys': (p) => PV6.PV6_STRAHOVKA_TYS.pereschet(p),
+  'z06.promezhutok': (p) => prototype6('P11').pereschet(p),
   'z07.log-stepeni': podstanovka7(Z7.PV7_LOG_STEPENI),
   'z07.log-postoronniy': podstanovka7(Z7.PV7_LOG_KVADRAT),
   'z08.log-pryamoy': (p) => VY.logPryamoy(p).proverka,

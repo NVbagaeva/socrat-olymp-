@@ -47,14 +47,20 @@ import {
   type SkalyarnoeKombinatsiy,
   type SkalyarnoePoRisunku,
 } from '@/lib/vektory/povyshennye';
+import { STATISTICHESKOE } from '@/lib/veroyatnost/bank4/statisticheskoe';
 import {
   PV4_BOLSHE,
+  PV4_CHASTOTA,
   PV4_DELITSYA,
   PV4_NE_MENEE,
   PV4_PROTIVOPOLOZHNOE,
+  PV4_SOOTECHESTVENNIK,
+  PV5_DVE_MISHENI,
   PV5_DVE_PARTII,
   PV5_KOST_USLOVIE,
   PV5_MEZHDU,
+  PV5_OBA_ZAKONCHILIS,
+  PV5_ODIN_TSVET,
 } from '@/lib/veroyatnost/povyshennye';
 import { dec, type Prototype as ProtoVer } from '@/lib/veroyatnost/types';
 import {
@@ -93,7 +99,8 @@ import {
 } from '@/lib/zadanie13/proto/povyshennye';
 import type { Prototype as Proto13 } from '@/lib/zadanie13/proto/types';
 import type { Params as Params7 } from '@/lib/zadanie7/types';
-import type { Params as Params6 } from '@/lib/zadanie6/types';
+import type { Params as Params6, Prototype as Proto6 } from '@/lib/zadanie6/types';
+import { PV6_STRAHOVKA_TYS } from '@/lib/zadanie6/prototypes/povyshennye';
 import type { Params as ParamsVer } from '@/lib/veroyatnost/types';
 import type { Params as Params10 } from '@/lib/zadanie10/types';
 import type { Params as Params11, Solved as Solved11 } from '@/lib/zadanie11/types';
@@ -392,24 +399,38 @@ function veroyatnost(ege: 4 | 5, proto: ProtoVer, p: ParamsVer): Gotovaya {
   };
 }
 
+/** Прототип блока II банка №4 с подсказками раздела (bank4/statisticheskoe). */
+function bank4(id: string): ProtoVer {
+  const p = STATISTICHESKOE.find((x) => x.id === id);
+  if (p === undefined) throw new Error(`нет прототипа ${id} в банке №4`);
+  return p;
+}
+
 /* ── №6 ─────────────────────────────────────────────────────────── */
 
-/** Задача №6 прототипа раздела: условие и разбор — генератора раздела. */
-function z06(proto: string, p: Params6, klyuch: string): Gotovaya {
-  const u = prototype6(proto).uslovie(p);
+/**
+ * Задача №6: условие и разбор — генератора раздела. `proto` — id
+ * прототипа банка или свой шаблон (zadanie6/prototypes/povyshennye).
+ */
+function z06(proto: string | Proto6, p: Params6, klyuch: string): Gotovaya {
+  const pr = typeof proto === 'string' ? prototype6(proto) : proto;
+  const u = pr.uslovie(p);
   return bezPoley(
-    build06({
-      ...kand,
-      prototypeId: proto,
-      z: {
-        id: klyuch,
-        prototypeId: proto,
-        source: 'analog',
-        text: u.text,
-        ...(u.posle === undefined ? {} : { posle: u.posle }),
-        params: p,
+    build06(
+      {
+        ...kand,
+        prototypeId: pr.id,
+        z: {
+          id: klyuch,
+          prototypeId: pr.id,
+          source: 'analog',
+          text: u.text,
+          ...(u.posle === undefined ? {} : { posle: u.posle }),
+          params: p,
+        },
       },
-    }),
+      pr,
+    ),
   );
 }
 
@@ -796,6 +817,32 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: ParamsVer) => veroyatnost(4, PV4_PROTIVOPOLOZHNOE, p),
   },
+  'z04.chastota': {
+    ege: 4,
+    prototip:
+      'Вероятность, статистическое определение: на сколько частота «из N проданных в ремонт попали k» меньше (больше) данной вероятности',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_CHASTOTA, p),
+  },
+  'z04.sootechestvennik': {
+    ege: 4,
+    prototip:
+      'Вероятность, классическое определение: жребий порядка старта, следующим — спортсмен той же страны, (m − 1)/(n − 1)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_SOOTECHESTVENNIK, p),
+  },
+  'z04.bez-defekta': {
+    ege: 4,
+    prototip: 'Вероятность, блок II: сумка без дефекта, «k из N с дефектом» (p4-20)',
+    otkuda: 'razdel',
+    zadacha: (p: ParamsVer) => veroyatnost(4, bank4('p4-20'), p),
+  },
+  'z04.ne-podtekaet': {
+    ege: 4,
+    prototip: 'Вероятность, блок II: исправный насос, «из N подтекают k» (p4-19)',
+    otkuda: 'razdel',
+    zadacha: (p: ParamsVer) => veroyatnost(4, bank4('p4-19'), p),
+  },
   'z05.mezhdu': {
     ege: 5,
     prototip:
@@ -816,6 +863,27 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: ParamsVer) => veroyatnost(5, PV5_DVE_PARTII, p),
   },
+  'z05.dve-misheni': {
+    ege: 5,
+    prototip:
+      'Вероятность: две мишени, три выстрела — «2 + 1» или «1 + 2», выбрать способ с большей вероятностью поразить обе (как p5-07)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_DVE_MISHENI, p),
+  },
+  'z05.odin-tsvet': {
+    ege: 5,
+    prototip:
+      'Вероятность: по одному предмету из двух ящиков — одного цвета, два пути по дереву (как p5-09)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_ODIN_TSVET, p),
+  },
+  'z05.oba-zakonchilis': {
+    ege: 5,
+    prototip:
+      'Вероятность: два автомата, дано «останется в обоих» — найти «закончится в обоих» (обратная к p5-04)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_OBA_ZAKONCHILIS, p),
+  },
   'z06.chastoty': {
     ege: 6,
     prototip: 'Случайные величины, группа III: частоты «из 100 покупателей» → ожидание (P08)',
@@ -833,6 +901,19 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip: 'Случайные величины, группа V: стандартное отклонение (P15)',
     otkuda: 'razdel',
     zadacha: (p: Params6, klyuch: string) => z06('P15', p, klyuch),
+  },
+  'z06.strahovka-tys': {
+    ege: 6,
+    prototip:
+      'Случайные величины, группа III: цена полиса по ожидаемому доходу (как P09), суммы в тысячах рублей — ответ дробный',
+    otkuda: 'novyy',
+    zadacha: (p: Params6, klyuch: string) => z06(PV6_STRAHOVKA_TYS, p, klyuch),
+  },
+  'z06.promezhutok': {
+    ege: 6,
+    prototip: 'Случайные величины, группа IV: вероятность попадания в промежуток (P11)',
+    otkuda: 'razdel',
+    zadacha: (p: Params6, klyuch: string) => z06('P11', p, klyuch),
   },
   'z07.koren': {
     ege: 7,
