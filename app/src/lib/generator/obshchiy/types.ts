@@ -110,6 +110,11 @@ export interface GenConfig {
      * берёт следующие задачи банка. Нет поля — серии у раздела нет.
      */
     seriya?: number;
+    /**
+     * Переключатель раздела в «Дополнительно» (у №10 — «Картинки
+     * сюжетов»): по умолчанию выключен. Нет поля — переключателя нет.
+     */
+    flag?: { title: string; note: string };
   };
 }
 
@@ -131,6 +136,8 @@ export interface GenExtras {
   teacher: string;
   /** Урок серии с нуля (GenConfig.extras.seriya); 0 — первый урок. */
   urok: number;
+  /** Переключатель раздела (GenConfig.extras.flag); нет — выключен. */
+  flag?: boolean;
 }
 
 /**
