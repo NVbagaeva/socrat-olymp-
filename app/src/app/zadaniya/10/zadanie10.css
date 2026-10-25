@@ -800,40 +800,13 @@
   margin-inline: auto;
 }
 
-/* ── Генератор и репетиторы ── */
-.z10-gen,
+/* ── Репетиторы ── */
 .z10-rep {
   max-width: 960px;
 }
 
 .z10-gen__blok + .z10-gen__blok {
   margin-top: var(--space-6);
-}
-
-.z10-gen__tipy {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.z10-gen__tipy label {
-  display: flex;
-  gap: var(--space-3);
-  justify-content: space-between;
-  align-items: center;
-}
-
-.z10-gen__nastroyki {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.z10-gen__itog {
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-info);
 }
 
 .btn.is-disabled {
@@ -916,9 +889,5 @@
 @media (max-width: 640px) {
   .z10-zadacha {
     padding: var(--space-4) var(--space-3);
-  }
-
-  .z10-gen__tipy label {
-    align-items: flex-start;
   }
 }
