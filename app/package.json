@@ -120,6 +120,7 @@
     "test:uravneniya": "node scripts/check-uravneniya.mjs",
     "test:sluchainye-velichiny": "node scripts/check-sluchainye-velichiny.mjs",
     "test:prikladnye": "node scripts/check-prikladnye.mjs",
+    "test:upominaniya": "node scripts/check-upominaniya.mjs",
     "test:edinicy": "node scripts/check-edinicy.mjs",
     "test:proverka-edinic": "node scripts/check-proverka-edinic.mjs",
     "test:proverka-edinic-site": "node scripts/check-proverka-edinic-site.mjs",
