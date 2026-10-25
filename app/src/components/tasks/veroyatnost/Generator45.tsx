@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { Generator } from '@/components/generator/Generator';
 import type { GenConfig } from '@/lib/generator/obshchiy/types';
 import { engine45 } from '@/lib/veroyatnost/engine45';
+import { MetodIkonka } from './MetodIkonka';
 
 /**
  * Генератор листов №4 и №5 на общем компоненте (components/generator/).
@@ -20,5 +21,16 @@ export function Generator45({
   zadanie: 4 | 5;
 }) {
   const engine = useMemo(() => engine45(config, base, zadanie), [config, base, zadanie]);
-  return <Generator config={config} engine={engine} />;
+  /* Значки тем — значки методов, те же, что в тренажёре и «Ключевых методах». */
+  const icons = useMemo(
+    () =>
+      Object.fromEntries(
+        config.topics.map((t) => [
+          t.id,
+          <MetodIkonka key={t.id} zadanie={zadanie} metod={t.id} size="sm" />,
+        ]),
+      ),
+    [config, zadanie],
+  );
+  return <Generator config={config} engine={engine} icons={icons} />;
 }
