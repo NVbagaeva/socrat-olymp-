@@ -47,6 +47,7 @@ const SKIP_FILES = [
   { re: /^lib\/graph\/(?:renderer|math|katex|katex-upgrade|animate|preview-ui|triangle)\.js$/,
     why: 'внутренности движка: разбор и вёрстка формул, подписи SVG' },
   { re: /answers\.json$/, why: 'ключи ответов, не текст' },
+  { re: /^lib\/variant\/online\/normalizeCases\.json$/, why: 'таблица случаев ввода ответа для тестов: сырой ввод ученика, на сайт не выводится' },
   { re: /^lib\/solid\/catalog\.ts$/, why: 'подписи каталога тел — только для /styleguide/' },
   { re: /^lib\/scenes\.ts$/, why: 'подписи внутри SVG-чертежей: KaTeX в <text> не встраивается' },
   { re: /^lib\/vektory\/(?:render|obraztsy)\.ts$/, why: 'движок рисунков №2: подписи внутри SVG и образцы витрины' },
