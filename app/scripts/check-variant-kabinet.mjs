@@ -68,7 +68,7 @@ const { encodeCode } = requireSrc('lib/variant/code');
 const { normalizeAnswer } = requireSrc('lib/variant/online/normalize');
 const { issueInput } = requireSrc('lib/variant/online/issue');
 const { kabinetProverka } = requireSrc('lib/variant/online/kabinetProverka');
-const { classTable, excelRows } = requireSrc('lib/variant/online/classResults');
+const { classTable, excelRows, excelName } = requireSrc('lib/variant/online/classResults');
 const { xlsx, crc32 } = requireSrc('lib/xlsx');
 
 /* ── Партия «Собрать вариант» ─────────────────────────────────────── */
@@ -243,6 +243,11 @@ const rows = excelRows(tt);
 ok(
   rows.length === 4 && rows[0][0] === 'Ученик' && rows[3][0] === 'Среднее по классу',
   'строки Excel: заголовок, ученики, среднее',
+);
+ok(
+  excelName({ work: { title: 'Пробный: ЕГЭ', className: '11 «А»' } }) ===
+    'Пробный  ЕГЭ — 11 «А».xlsx',
+  'имя файла Excel: название и класс, без запрещённых знаков',
 );
 const bytes = xlsx('Пробный ЕГЭ', rows, [24]);
 ok(crc32(new TextEncoder().encode('123456789')) === 0xcbf43926, 'crc32');

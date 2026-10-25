@@ -252,9 +252,10 @@ try {
     page.getByTestId('vo-excel').click(),
   ]);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'xlsx-'));
-  const file = path.join(dir, download.suggestedFilename());
+  // Имя файла (по-русски, excelName) проверяет check-variant-kabinet:
+  // headless-Chromium отдаёт для не-ASCII имени «download».
+  const file = path.join(dir, 'rezultaty.xlsx');
   await download.saveAs(file);
-  ok(file.endsWith('.xlsx'), `файл Excel: ${path.basename(file)}`);
   const py = spawnSync(
     'python3',
     [
