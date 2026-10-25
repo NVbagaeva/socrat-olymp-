@@ -8,6 +8,9 @@
    через calc(var(--sheet-step) * n): множитель виден в самом правиле.
 */
 
+/* Место для решения — свой файл: его подключает и предпросмотр. */
+@import './space.css';
+
 /* ══════════════════════════════════════════════════════════
    Страница
    ══════════════════════════════════════════════════════════ */
@@ -554,6 +557,8 @@ body {
 }
 
 .sheet-task-question { margin: 0; }
+div.sheet-task-question > p { margin: 0; }
+div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
 
 /* Варианты ответа: у задач с выбором. */
 .sheet-options {
@@ -861,6 +866,13 @@ body {
 /* В карточке задачи (№2): рисунок к разбору справа, текст обтекает. */
 .sheet-solution-figure--float { float: right; margin: 0 0 calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 3); }
 .sheet-task-solution::after { content: ''; display: block; clear: both; }
+/* Крупный клетчатый рисунок к разбору (figureRules.js) — не сбоку, а
+   отдельной строкой под решением, по центру, своим размером. */
+.sheet-solution:has(> .sheet-figure--grid) { flex-wrap: wrap; }
+.sheet-solution:has(> .sheet-figure--grid)::after { content: ''; order: 8; flex-basis: 100%; }
+.sheet-solution > .sheet-figure--grid { order: 9; margin: calc(var(--sheet-step) * 2) auto 0; }
+.sheet-solution-figure.sheet-figure--large { max-width: none; }
+.sheet-solution-figure.sheet-figure--grid { float: none; display: block; margin: calc(var(--sheet-step) * 2) auto; }
 
 /* ══════════════════════════════════════════════════════════
    Решение по шагам в карточке — файл «Для учителя»
@@ -905,6 +917,16 @@ body {
 .sheet-task--stack .sheet-task-body { flex-direction: column; align-items: stretch; }
 .sheet-task--stack .sheet-figure { align-self: flex-start; max-width: 100%; }
 .sheet-task--stack .sheet-answer-line { padding-top: calc(var(--sheet-step) * 2); }
+
+/* ══════════════════════════════════════════════════════════
+   Крупные рисунки (spec.figures = 'large', figureRules.js)
+   Ширина в мм задана самим рисунком и не сжимается: клетка
+   клетчатого рисунка на печати ровно та, что посчитана.
+   ══════════════════════════════════════════════════════════ */
+.sheet-figure--large { flex: none; max-width: none; }
+.sheet-figure--large svg { max-width: none !important; max-height: none !important; }
+.sheet-task--stack .sheet-figure--large { align-self: center; }
+.sheet-task--grid .sheet-figure { margin-top: calc(var(--sheet-step) * 2); }
 
 /* ══════════════════════════════════════════════════════════
    Разобранный пример — кусок потока в оформлении «Повторяем»
@@ -952,3 +974,22 @@ body {
 
 /* Формула не рвётся переносом посередине — как на сайте (styles/base.css). */
 .katex .katex-html { white-space: nowrap; }
+
+/* ══════════════════════════════════════════════════════════
+   Листы по модели «блоки → варианты → задачи» (lib/sheetList.ts:
+   №6, №7, №10): ключ ответов варианта, ответ и разбор учителя
+   ══════════════════════════════════════════════════════════ */
+.sheet-list-klyuch p {
+  margin: 0;
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+.sheet-list-otvet { margin: calc(var(--sheet-step) * 1.5) 0 0; }
+/* Шаги разбора — кусками под карточкой задачи, на ширину её текста. */
+.sheet-list-razbor {
+  padding: 0 calc(var(--sheet-step) * 3.5) 0 calc(var(--sheet-step) * 13.5);
+  font-size: var(--sheet-fs-small);
+}
+.sheet-item.sheet-list-razbor + .sheet-item.sheet-list-razbor {
+  margin-top: calc(var(--sheet-step) * 1.5);
+}

@@ -17,6 +17,7 @@ import { reshenieHtml } from '../reshenieHtml';
 import { choice, SIGN } from '../proto/common';
 import { sealAnswer, sealChoice, sealText } from '../secret';
 import { TYPE_NAMES, type HintStep, type Task13, type TypeCode } from '../types';
+import { tablitsaZapolni13, type TablitsaZapolni13 } from '../zapolni';
 
 export type { ShagHtml };
 
@@ -31,6 +32,8 @@ export interface Zadacha13Sealed {
   uslovieHtml: string;
   /** Таблица условия (график долга), если она есть. */
   tablitsaHtml: string | null;
+  /** «Заполни таблицу» (таблица руками): клетки закрыты отпечатками. */
+  zapolni: TablitsaZapolni13 | null;
   /** «не из открытого банка», «повышенный уровень». */
   metki: string[];
   /** Выбор схемы в «Определи тип»; null — ответ числом. */
@@ -95,6 +98,7 @@ function zadachaChislom(t: Task13): Zadacha13Sealed {
     seed: t.seed,
     uslovieHtml: uslovieHtml(t),
     tablitsaHtml: t.conditionTable ? tablitsaHtml(kletkiUsloviya(t.conditionTable)) : null,
+    zapolni: tablitsaZapolni13(t, typeset),
     metki: metki(t),
     vybory: null,
     seal,
@@ -130,6 +134,7 @@ function zadachaTip(t: Task13, no: number): Zadacha13Sealed {
     seed: t.seed,
     uslovieHtml: uslovieHtml(t),
     tablitsaHtml: t.conditionTable ? tablitsaHtml(kletkiUsloviya(t.conditionTable)) : null,
+    zapolni: null,
     metki: metki(t),
     vybory: TIPY.map((x, i) => ({ number: String(i + 1), label: TYPE_NAMES[x] })),
     seal,

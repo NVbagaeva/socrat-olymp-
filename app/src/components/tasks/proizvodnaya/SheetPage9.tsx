@@ -8,6 +8,8 @@ import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery9, printSpec9, sheetSpec9, sheetSpecVse9 } from '@/lib/proizvodnaya/sheet9';
+import { withPrintFigures } from '@/lib/sheet/figureRules.js';
+import { spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 
 declare global {
   interface Window {
@@ -69,7 +71,16 @@ export function SheetPage9({ vid }: SheetPage9Props) {
         vid === 'vse' ? sheetSpecVse9(params, svg) : sheetSpec9(params, withAnswers, svg);
       /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
       const kit = checkKitSheet(query, '9', withAnswers ? 'teacher' : 'student', built);
-      const html = buildDocument({ ...printSpec9(built), kit: kitFootLabel(kit.code) }, {});
+      /* На лист — сборка в печатном профиле рисунков (figureRules.js):
+         отпечаток комплекта — по обычной, как у напечатанных раньше.
+         Место для решения (sp=) — у листа ученика (sheetSpec9). */
+      const space = spaceOfQuery(query);
+      const printed = withPrintFigures(() =>
+        vid === 'vse'
+          ? vseWithSpace(sheetSpecVse9(params, svg), space)
+          : printSpec9(sheetSpec9(params, withAnswers, svg, space)),
+      );
+      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
       import('@/lib/sheet/paginate.js').then(() => {
         if (alive) {
           setWarning(kit.warning);

@@ -35,6 +35,7 @@ import {
   sostavStroka,
 } from '@/lib/generator/obshchiy/klyuchi';
 import answers from '@/lib/sheet/answers.js';
+import { figure } from '@/lib/sheet/sheet.js';
 import { typeset } from '../tex';
 import { BANK } from './bank';
 import { generate } from './generate';
@@ -208,8 +209,11 @@ export interface SheetBlock2 {
   tasks: SheetTask2[];
 }
 
-/** Разбор по шагам с заголовками и строка ответа — под ту же CSS, что у №8 и №12. */
-function razborHtml(task: Generated, answerText: string): string {
+/**
+ * Шаги разбора листа учителя без строки ответа: их же берёт
+ * «Собрать вариант» (lib/variant/adapters/z02).
+ */
+export function shagiHtml2(task: Pick<Generated, 'shagi'>): string {
   /* Шаг «Ответ» на листе не нужен: ответ стоит строкой под разбором. */
   const items = task.shagi
     .filter((s) => s.zagolovok !== 'Ответ')
@@ -218,7 +222,12 @@ function razborHtml(task: Generated, answerText: string): string {
         `<li class="sheet-step"><b>${typeset(s.zagolovok)}.</b> ${s.stroki.map((line) => typeset(line)).join(' ')}</li>`,
     )
     .join('');
-  return `<ol class="sheet-steps">${items}</ol><p class="sheet-task-answer">Ответ: <b>${answerText}</b></p>`;
+  return `<ol class="sheet-steps">${items}</ol>`;
+}
+
+/** Разбор по шагам с заголовками и строка ответа — под ту же CSS, что у №8 и №12. */
+function razborHtml(task: Generated, answerText: string): string {
+  return `${shagiHtml2(task)}<p class="sheet-task-answer">Ответ: <b>${answerText}</b></p>`;
 }
 
 /* Клетка рисунка к разбору, мм: он стоит в колонке разбора и мельче
@@ -237,11 +246,12 @@ function solutionFigureHtml(risunok: Risunok, condition: string): string {
     return '';
   }
   const box = /viewBox="0 0 ([0-9.]+) /.exec(svg);
-  const width =
-    box === null
-      ? ''
-      : ` style="width:${Math.round((Number(box[1]) / CELL_UNITS) * SOLUTION_CELL_MM * 100) / 100}mm"`;
-  return `<figure class="sheet-figure sheet-solution-figure sheet-solution-figure--float"${width}>${svg}</figure>`;
+  /* Размер — по правилам крупных рисунков (sheet/figureRules.js): в
+     печатном профиле клетчатый рисунок — клеткой 7 мм под решением. */
+  return figure(svg, {
+    width: box === null ? null : (Number(box[1]) / CELL_UNITS) * SOLUTION_CELL_MM,
+    cls: 'sheet-solution-figure sheet-solution-figure--float',
+  }) as string;
 }
 
 /**

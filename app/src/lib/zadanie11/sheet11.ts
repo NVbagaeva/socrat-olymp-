@@ -437,7 +437,8 @@ function chislo(x: number): string {
   return String(Math.round(x * 1e9) / 1e9).replace('.', ',');
 }
 
-function reshenieHtml(
+/** Решение по этапам с таблицами модели — лист учителя (и «Собрать вариант»). */
+export function reshenieHtml(
   etapy: { title: string; lines: string[] }[],
   tables: Tablitsa[],
   k: Kontekst,

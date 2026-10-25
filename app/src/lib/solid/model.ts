@@ -159,6 +159,11 @@ export interface Model {
    * Не указан — ortho.
    */
   view?: ViewId;
+  /**
+   * Ракурс вида ortho, выбранный по метрикам читаемости
+   * (lib/solid/vid.ts), градусы. Не указан — вид по умолчанию.
+   */
+  rakurs?: { azimuth: number; elevation: number };
   bodies: Body[];
   marks?: Mark[];
   lines?: Line[];

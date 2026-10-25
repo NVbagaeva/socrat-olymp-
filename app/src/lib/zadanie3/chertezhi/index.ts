@@ -12,6 +12,8 @@
 
 import type { Dannoe, TochkaScenariya } from '@/lib/chertezh3/scenariy';
 import { validirovat } from '@/lib/chertezh3/validator';
+import { postroit } from '@/lib/chertezh3/postroit';
+import { type VybranVid, sVidom, vybratVid } from '@/lib/chertezh3/vid';
 import { RAZDELY } from '../index';
 import { type Params, type Prototype, type Variant, num } from '../types';
 import { ANNOTACII } from './annotacii';
@@ -79,6 +81,8 @@ function stupenka(p: Params) {
 export interface ChertezhVarianta extends Sborka {
   /** Ошибки валидатора: пусто — сценарий годен. */
   oshibki: string[];
+  /** Выбранный вид: ракурс, сжатие высоты и метрики (lib/chertezh3/vid.ts). */
+  vid: VybranVid;
 }
 
 /** Сценарий чертежа варианта. null — прототип не про многогранник. */
@@ -116,7 +120,9 @@ export function chertezhVarianta(prototype: Prototype, variant: Variant): Cherte
   }
   if (!ann) sb.somneniya.push('нет записи прототипа: без вспомогательных построений');
   const oshibki = validirovat(sb.scenariy, { uslovie: tekstDlyaProverki, shagi: sb.shagi });
-  return { ...sb, oshibki };
+  /* Вид — расчётом по метрикам читаемости, а не ракурсом по умолчанию. */
+  const vid = vybratVid(postroit(sb.scenariy));
+  return { ...sb, scenariy: sVidom(sb.scenariy, vid), oshibki, vid };
 }
 
 /** Строка списка «на проверку». */
