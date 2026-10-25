@@ -180,3 +180,61 @@ export function listSheetSpec<Z>(src: ListSource<Z>, vid: ListVid) {
     foot: LIST_FOOT,
   };
 }
+
+/** Шапка листа общего генератора (ps=2, «Дополнительно»): вид работы, дата, учитель, QR. */
+export interface ListShapka {
+  kind: string;
+  /** ГГГГ-ММ-ДД или пусто. */
+  date: string;
+  uchitel?: string;
+  qr: boolean;
+}
+
+type ListSpec = ReturnType<typeof listSheetSpec>;
+
+/** «27.10.2026» из записи ГГГГ-ММ-ДД. */
+function dataText(iso: string): string {
+  return iso === '' ? '' : iso.split('-').reverse().join('.');
+}
+
+/**
+ * Лист с шапкой общего генератора: вид работы (или podzagolovok) — в
+ * подзаголовке, дата — в строке полей, учитель — в шапке страницы,
+ * QR-код (готовый SVG) — у названия. Без шапки (прежний адрес, урок)
+ * лист не меняется.
+ */
+export function sShapkoy<S extends ListSpec>(
+  spec: S,
+  shapka: ListShapka | undefined,
+  podzagolovok: string,
+  qr?: string,
+): S {
+  if (shapka === undefined) return spec;
+  return {
+    ...spec,
+    head: { ...spec.head, author: shapka.uchitel ?? spec.head.author },
+    title: {
+      ...spec.title,
+      subtitle: [shapka.kind || podzagolovok, spec.title.subtitle].filter(Boolean).join(' · '),
+      ...(shapka.qr && qr !== undefined ? { qr } : {}),
+    },
+    fields: spec.fields === null ? null : { ...spec.fields, date: dataText(shapka.date) },
+  };
+}
+
+/**
+ * «Всё одним файлом»: лист ученика, затем лист учителя тех же задач —
+ * два «варианта» шаблона, у каждого своё начало страницы; у листа
+ * учителя строки полей нет.
+ */
+export function listSheetVse(uchenik: ListSpec, uchitel: ListSpec) {
+  return {
+    ...uchenik,
+    documentTitle: `${uchenik.runner} — ${LIST_TEXT.uchenik}, ${LIST_TEXT.uchitel.toLowerCase()}`,
+    blocks: [],
+    variants: [
+      { title: uchenik.title, blocks: uchenik.blocks },
+      { title: uchitel.title, fields: null, blocks: uchitel.blocks },
+    ],
+  };
+}

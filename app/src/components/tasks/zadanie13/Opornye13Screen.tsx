@@ -14,7 +14,7 @@ import {
   type ShagHtml,
   type Zadacha13Sealed,
 } from '@/lib/zadanie13/opornye/seal';
-import { itog13, opornye13, zapisat13 } from '@/lib/zadanie13/progress';
+import { itog13, opornye13, zadachaId13, zapisat13 } from '@/lib/zadanie13/progress';
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie13/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { HintFlow11 } from '../zadanie11/HintFlow11';
@@ -236,6 +236,7 @@ export function Opornye13Screen({
               key={`${task.prototypeId}|${task.seed}`}
               t={task.zapolni}
               uroven={urovenPoNomeru(base.no)}
+              oshibkaId={zadachaId13(blockId, base.no)}
             />
           )}
         </div>

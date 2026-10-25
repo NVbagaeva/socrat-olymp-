@@ -20,6 +20,14 @@
 
 import { UROKI_6 } from '../../content/uroki6';
 import { rngOf, type Rng } from '../vychisleniya/rng';
+import {
+  blokiBanka,
+  parseZaprosBanka,
+  shapkaBanka,
+  sobratPoKlyucham,
+  type ShapkaBanka,
+  type ZaprosBanka,
+} from '../generator/obshchiy/bank';
 import type { IndeksZadachi } from './dannye';
 import { podStil, type Stil } from './shablony';
 
@@ -123,6 +131,8 @@ export interface ModelLista {
   kod: string;
   /** Блоки листа по порядку. */
   bloki: BlokLista[];
+  /** Шапка листа общего генератора (ps=2): вид работы, дата, учитель, QR. */
+  shapka?: ShapkaBanka;
 }
 
 export interface BlokLista {
@@ -138,6 +148,8 @@ export interface BlokLista {
   spiski: string[][];
   /** На листе ученика — место для решения (разбор в классе). */
   mesto?: boolean;
+  /** Ключи позиций задач (ps=2) — параллельно spiski. */
+  pozicii?: string[][];
 }
 
 /** Адресная строка запроса генератора: t=P01:2,P11:1&i=m&v=2&e=1&seed=AB12CD. */
@@ -211,6 +223,39 @@ export function sobratList(z: ZaprosLista, indeks: readonly IndeksZadachi[]): Mo
     zagolovok: 'Задание №6. Случайные величины и распределения',
     kod: z.seed,
     bloki,
+  };
+}
+
+/* ── Общий генератор (ps=2) ─────────────────────────────────────── */
+
+/** Формулировка в адресе ps=2: s — сюжетные, f — стандартные, v — все. */
+export const FILTRY_6 = ['v', 's', 'f'];
+
+function stilIzFiltra(f: string | undefined): Stil {
+  return f === 's' ? 'syuzhet' : f === 'f' ? 'standart' : 'vse';
+}
+
+/** Адрес листа общего генератора; null — адрес прежней схемы или чужой. */
+export function parseZaprosKlyuchi(q: URLSearchParams): ZaprosBanka | null {
+  return parseZaprosBanka(q, {
+    idRe: /P(?:0[1-9]|1[0-5])/,
+    est: (id) => Object.values(GRUPPY_PROTOTIPOV).some((g) => g.includes(id)),
+    variantsMax: VARIANTOV_MAX,
+    filtry: FILTRY_6,
+  });
+}
+
+/** Лист общего генератора: задачи по ключам позиций, памятка и примеры отдельно. */
+export function sobratListKlyuchi(z: ZaprosBanka, indeks: readonly IndeksZadachi[]): ModelLista {
+  const l = sobratPoKlyucham(z, indeks, 'z6-ps2', (x) =>
+    podStil(x.st ?? 'f', stilIzFiltra(z.filtr)),
+  );
+  return {
+    vid: 'generator',
+    zagolovok: 'Задание №6. Случайные величины и распределения',
+    kod: z.seed,
+    bloki: blokiBanka(z, l),
+    shapka: shapkaBanka(z),
   };
 }
 

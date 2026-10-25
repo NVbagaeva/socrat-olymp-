@@ -13,11 +13,23 @@ import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui';
 import { katex } from '@/lib/graph/katex';
 import { choiceMatches, openText } from '@/lib/zadanie13/secret';
+import {
+  snyatOshibku,
+  urovenOshibki,
+  zapomnitOshibku,
+  type Uroven13,
+} from '@/lib/zadanie13/urovniZapolni';
 import { izZapisi, proverit, texVvoda, type Itog } from '@/lib/zadanie13/vyrazhenie';
 import type { KletkaZapolni13, TablitsaZapolni13 } from '@/lib/zadanie13/zapolni';
 import { Klaviatura13, type Klavisha } from './Klaviatura13';
 
-export type Uroven13 = 1 | 2 | 3 | 4;
+export type { Uroven13 };
+
+/* Пометка уровня читается при отрисовке, подписка на хранилище не нужна. */
+const bezPodpiski = () => () => {};
+
+/** Отметить проверку уровня: ошибка запоминается, верное решение снимает пометку. */
+type Otmetit = (u: Uroven13, verno: boolean) => void;
 
 const UROVNI: { u: Uroven13; label: string }[] = [
   { u: 1, label: 'Выбери таблицу' },
@@ -94,11 +106,35 @@ function soobshchenie(it: Itog | undefined): string | null {
 export function TablitsaZapolni13({
   t,
   uroven: nachalo = 4,
+  oshibkaId,
 }: {
   t: TablitsaZapolni13;
   uroven?: Uroven13;
+  /** Номер задачи блока для работы над ошибками; без него уровень ошибки не запоминается. */
+  oshibkaId?: string;
 }) {
   const [uroven, setUroven] = useState<Uroven13>(nachalo);
+  /* Работа над ошибками: задача открывается на уровне последней ошибки.
+     Пометку берём один раз — при первой отрисовке в браузере (на сервере
+     хранилища нет, там undefined); ошибки этой попытки уровень не меняют. */
+  const pometka = useSyncExternalStore(
+    bezPodpiski,
+    () => (oshibkaId ? urovenOshibki(oshibkaId) : null),
+    () => undefined,
+  );
+  const [urovenRaboty, setUrovenRaboty] = useState<Uroven13 | null | undefined>(undefined);
+  if (urovenRaboty === undefined && pometka !== undefined) {
+    setUrovenRaboty(pometka);
+    if (pometka !== null) setUroven(pometka);
+  }
+  const otmetit = useCallback<Otmetit>(
+    (u, verno) => {
+      if (!oshibkaId) return;
+      if (verno) snyatOshibku(oshibkaId, u);
+      else zapomnitOshibku(oshibkaId, u);
+    },
+    [oshibkaId],
+  );
   const tochki = useMemo(() => t.tochki.map(izZapisi), [t]);
   const uzkiy = useMedia('(max-width: 40rem)');
   const sensor = useMedia('(pointer: coarse)');
@@ -234,6 +270,9 @@ export function TablitsaZapolni13({
     if ((znach.formula ?? '').trim())
       out.formula = proverit(znach.formula ?? '', t.formula, tochki);
     setItogi(out);
+    const oshibka = Object.values(out).some((it) => it.t !== 'verno' && it.t !== 'pusto');
+    if (oshibka) otmetit(uroven, false);
+    else if ([...pustye].every((id) => out[id]?.t === 'verno')) otmetit(uroven, true);
   }
 
   const proverennye = [...pustye].filter((id) => itogi[id] && itogi[id]!.t !== 'pusto');
@@ -242,6 +281,12 @@ export function TablitsaZapolni13({
   return (
     <div className={clsx('z13-zap', aktiv !== null && uzkiy && 'is-kl')}>
       <p className="z13-zap__title">Заполните таблицу</p>
+      {urovenRaboty == null ? null : (
+        <p className="z13-zap__rabota" role="note">
+          Работа над ошибками: в прошлый раз ошибка была на уровне «
+          {UROVNI[urovenRaboty - 1]?.label}» — начинаем с него.
+        </p>
+      )}
       <div className="z13-zap__urovni" role="tablist" aria-label="Уровень">
         {UROVNI.map(({ u, label }) => (
           <button
@@ -261,8 +306,8 @@ export function TablitsaZapolni13({
         ))}
       </div>
 
-      {uroven === 1 ? <Uroven1 t={t} key={`u1-${t.kluch}`} /> : null}
-      {uroven === 2 ? <Uroven2 t={t} key={`u2-${t.kluch}`} /> : null}
+      {uroven === 1 ? <Uroven1 t={t} otmetit={otmetit} key={`u1-${t.kluch}`} /> : null}
+      {uroven === 2 ? <Uroven2 t={t} otmetit={otmetit} key={`u2-${t.kluch}`} /> : null}
       {uroven >= 3 ? (
         <>
           {uzkiy ? (
@@ -299,12 +344,11 @@ export function TablitsaZapolni13({
             <Button
               variant="secondary"
               size="sm"
-              onClick={() =>
-                setItogi((p) => ({
-                  ...p,
-                  formula: proverit(znach.formula ?? '', t.formula, tochki),
-                }))
-              }
+              onClick={() => {
+                const it = proverit(znach.formula ?? '', t.formula, tochki);
+                setItogi((p) => ({ ...p, formula: it }));
+                if (it.t !== 'verno' && it.t !== 'pusto') otmetit(uroven, false);
+              }}
             >
               Проверить формулу
             </Button>
@@ -372,7 +416,7 @@ function Gotovaya({ k, kluch }: { k: KletkaZapolni13; kluch: string }) {
 
 /* ── Уровень 1: выбрать верную таблицу ───────────────────────────── */
 
-function Uroven1({ t }: { t: TablitsaZapolni13 }) {
+function Uroven1({ t, otmetit }: { t: TablitsaZapolni13; otmetit: Otmetit }) {
   const [vybor, setVybor] = useState<number | null>(null);
   const [itog, setItog] = useState<boolean | null>(null);
   return (
@@ -413,7 +457,11 @@ function Uroven1({ t }: { t: TablitsaZapolni13 }) {
           variant="secondary"
           size="sm"
           disabled={vybor === null}
-          onClick={() => setItog(choiceMatches(`${t.kluch}:t:${vybor}`, t.uroven1.vernyy))}
+          onClick={() => {
+            const verno = choiceMatches(`${t.kluch}:t:${vybor}`, t.uroven1.vernyy);
+            setItog(verno);
+            otmetit(1, verno);
+          }}
         >
           Проверить
         </Button>
@@ -437,7 +485,7 @@ function Uroven1({ t }: { t: TablitsaZapolni13 }) {
 
 /* ── Уровень 2: выбрать выражение в пустых клетках ───────────────── */
 
-function Uroven2({ t }: { t: TablitsaZapolni13 }) {
+function Uroven2({ t, otmetit }: { t: TablitsaZapolni13; otmetit: Otmetit }) {
   const { shapka, tekst } = useShapka(t);
   const [vybor, setVybor] = useState<Record<string, number>>({});
   const [itogi, setItogi] = useState<Record<string, boolean>>({});
@@ -542,6 +590,9 @@ function Uroven2({ t }: { t: TablitsaZapolni13 }) {
               if (j !== undefined && k) out[id] = choiceMatches(`${t.kluch}:${id}:${j}`, k.vernyy);
             }
             setItogi(out);
+            const otvety = Object.values(out);
+            if (otvety.some((v) => !v)) otmetit(2, false);
+            else if (otvety.length === t.uroven2.length) otmetit(2, true);
           }}
         >
           Проверить
