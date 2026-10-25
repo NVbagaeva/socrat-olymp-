@@ -1558,10 +1558,13 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
     const kraynii = (i: number): boolean => {
       const z = znaki[i] as (typeof znaki)[number];
       const kray = Math.min(z.x0, z.x1) <= lo + 1e-9 || Math.max(z.x0, z.x1) >= hi - 1e-9;
-      return kray && Math.abs(z.x1 - z.x0) <= 1.5;
+      return kray && Math.abs(z.x1 - z.x0) <= 2;
     };
     const plokhih = (r: readonly Mesto[]) =>
       r.filter((o, i) => o.min < V.gap && !kraynii(i)).length;
+    /* Насколько не вставшие знаки налезают на соседей (сумма нехватки). */
+    const nahlyost = (r: readonly Mesto[]) =>
+      r.reduce((s, o, i) => s + (kraynii(i) ? 0 : Math.max(0, V.gap - o.min)), 0);
     const krupnyy = Math.max(ZNAK.kegl, V.helper.size);
     let ryad = raskladka(krupnyy, 9);
     /* Тесно — ряд ближе к оси, затем мельче: штрих и тогда толще буквы
@@ -1575,8 +1578,10 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
     ] as const) {
       if (plokhih(ryad) === 0) break;
       const drugoy = raskladka(size, otstup);
-      /* При равном числе невставших — мельче: налезает меньше. */
-      if (plokhih(drugoy) <= plokhih(ryad)) ryad = drugoy;
+      /* Лучше — меньше невставших; при равном числе — меньше нахлёст;
+         при полном равенстве остаётся крупнее. */
+      const [pd, pr] = [plokhih(drugoy), plokhih(ryad)];
+      if (pd < pr || (pd === pr && nahlyost(drugoy) < nahlyost(ryad) - 1e-6)) ryad = drugoy;
     }
     const size = ryad.length === 0 ? krupnyy : (ryad[0] as Mesto).size;
     /* Не вставший знак — над своим горбом, по центру промежутка. */
