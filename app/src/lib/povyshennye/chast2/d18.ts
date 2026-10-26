@@ -117,7 +117,7 @@ function sobrat(p: PD18): Chast2Zadacha {
         ],
       },
       {
-        title: 'а) Точка L на средней линии',
+        title: 'а) Точка $L$ на средней линии',
         lines: [
           `В равнобедренном треугольнике $AML$: $\\angle MLA=\\angle MAL=\\angle LAB$. Это накрест лежащие углы при прямых $ML$, $AB$ и секущей $AL$, поэтому {{t:priznak-par-pryamyh|$ML\\parallel AB$}}.`,
           `$MO$ — {{t:srednyaya-liniya-treugolnika|средняя линия треугольника}} $ABD$: $MO\\parallel AB$, $MO=\\dfrac{AB}{2}$. Через $M$ проходит одна прямая, параллельная $AB$, значит, $L$ лежит на прямой $MO$, причём по ту же сторону от $M$, что и $O$.`,
@@ -125,7 +125,7 @@ function sobrat(p: PD18): Chast2Zadacha {
         ],
       },
       {
-        title: 'б) Угол A',
+        title: 'б) Угол $A$',
         risunok: chertezh(p, 'b'),
         lines: [
           `В прямоугольном треугольнике $ALD$: $\\cos\\dfrac{\\angle A}{2}=\\dfrac{AL}{AD}=${ratTex(c.c)}$, по {{t:pifagor|теореме Пифагора}} $\\sin\\dfrac{\\angle A}{2}=${ratTex(c.s)}$.`,

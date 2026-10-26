@@ -25,6 +25,9 @@
 import fs from 'node:fs';
 import { requireSrc } from './lib/load-ts.mjs';
 import { provB } from './lib/prov-chast2-b.mjs';
+import { provD } from './lib/prov-chast2-d.mjs';
+import { provE } from './lib/prov-chast2-e.mjs';
+import { provF } from './lib/prov-chast2-f.mjs';
 
 const { MAX_BALL, MAX_PART1, MAX_PART2, MAX_TOTAL, ballText } = requireSrc(
   'content/variantOnline/bally',
@@ -827,6 +830,9 @@ function provC20(p, z) {
 
 const PROV = {
   ...provB({ ok, close, requireSrc }),
+  ...provD({ ok, close, requireSrc }),
+  ...provE({ ok, close, requireSrc }),
+  ...provF({ ok, close, requireSrc }),
   'z14.logTrig': prov14,
   'z15.rombPiramida': prov15,
   'z16.pokazKoren': prov16,
@@ -872,7 +878,8 @@ for (const k of S_CHAST2) {
       zadachi.push(z);
       ok(z.no === 14 + j, `${kv}: №${14 + j} на своём месте`);
       ok(SHABLONY_2[zp.s].no === z.no, `${kv}: шаблон ${zp.s} — для №${z.no}`);
-      PROV[zp.s](zp.p, z);
+      ok(PROV[zp.s] !== undefined, `${kv}: проверка вторым способом для ${zp.s}`);
+      PROV[zp.s]?.(zp.p, z);
       /* Решение по этапам, разбор по шагам, формулы набираются. */
       ok(z.reshenie.length >= 3, `${kv} №${z.no}: решение по этапам`);
       ok(z.razbor.length >= 3, `${kv} №${z.no}: разбор по шагам`);
