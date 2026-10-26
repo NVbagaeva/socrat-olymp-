@@ -81,7 +81,7 @@ const bad = badVariants(report);
 console.log(`1. прототипов ${report.prototypes}, вариантов ${report.variants}`);
 console.log(
   `2. из задачника ${report.bySource.задачник}, из домашки ${report.bySource.домашка}, ` +
-    `создано заново ${report.bySource.новый}`,
+    `создано заново ${report.bySource.новый}, из открытого банка ФИПИ ${report.bySource.фипи}`,
 );
 console.log(`3. ответ по формуле разошёлся с ответом по модели: ${report.mismatchModel}`);
 console.log(`4. последний шаг разбора не равен ответу: ${report.mismatchSteps}`);
@@ -97,14 +97,40 @@ console.log(
 );
 report.drawingViolations.forEach((item) => console.log(`   ${item.id}: пункты ${item.points}`));
 
+/* Формулы подсказок набираются KaTeX без ошибок (на сайте ошибка
+   оставила бы сырой TeX на кнопке). */
+const katex = require0('katex');
+const oshibkiKatex = [];
+for (const prototype of BANK) {
+  for (const variant of prototype.varianty) {
+    for (const shag of prototype.podskazka?.(variant.params) ?? []) {
+      for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
+        stroka.split('$').forEach((kusok, i) => {
+          if (i % 2 === 0) return;
+          try {
+            katex.renderToString(kusok, { throwOnError: true, strict: 'ignore' });
+          } catch (e) {
+            oshibkiKatex.push(`${prototype.id} вариант ${variant.n}: «${kusok}» — ${e.message.split('\n')[0]}`);
+          }
+        });
+      }
+    }
+  }
+}
+console.log(`9. формул подсказок, которые не набирает KaTeX: ${oshibkiKatex.length}`);
+oshibkiKatex.slice(0, 20).forEach((item) => console.log(`   ${item}`));
+
 fs.rmSync(out, { recursive: true, force: true });
 
-if (bad.length > 0 || report.notTen.length > 0) {
+if (bad.length > 0 || report.notTen.length > 0 || report.bezPodskazki.length > 0 || oshibkiKatex.length > 0) {
   console.error(`\nБанк не сходится: ${bad.length} вариантов с проблемами.`);
   bad
     .slice(0, 30)
     .forEach((row) => console.error(`  ${row.id} вариант ${row.n}: ${row.problems.join('; ')}`));
   report.notTen.forEach((item) => console.error(`  не по десять вариантов: ${item}`));
+  if (report.bezPodskazki.length > 0) {
+    console.error(`  без подсказки-вопросов: ${report.bezPodskazki.join(', ')}`);
+  }
   process.exit(1);
 }
 

@@ -33,7 +33,7 @@ export interface VariantReport {
 export interface BankReport {
   prototypes: number;
   variants: number;
-  bySource: { задачник: number; домашка: number; новый: number };
+  bySource: { задачник: number; домашка: number; новый: number; фипи: number };
   mismatchModel: number;
   mismatchSteps: number;
   badFormat: number;
@@ -130,7 +130,7 @@ export function problemyPodskazki(
 
 export function checkBank(bank: readonly Prototype[]): BankReport {
   const rows: VariantReport[] = [];
-  const bySource = { задачник: 0, домашка: 0, новый: 0 };
+  const bySource = { задачник: 0, домашка: 0, новый: 0, фипи: 0 };
   const sourceProblems: { ref: string; why: string }[] = [];
   const duplicates: { a: string; b: string }[] = [];
   const notTen: string[] = [];
