@@ -9,7 +9,13 @@
  * не входят. Проверка по модели — у прототипов банка той же формы.
  */
 
-import { ballInCylinder, sphereAroundCone } from './drawings';
+import { box } from '../../solid/figures';
+import { surfaceArea } from '../../solid/measure';
+import { unlabelled } from '../../solid/drawings/common';
+import { type Model } from '../../solid/model';
+import type { Vec3 } from '../../solid/vec';
+import { cube, cubeVolume, inradiusOfCube } from './common';
+import { ballInCube, ballInCylinder, sphereAroundCone } from './drawings';
 import { ru } from '../format';
 import { type Prototype, num } from '../types';
 
@@ -124,6 +130,99 @@ export const PV03_SHAR_OKOLO_KONUSA: Prototype = {
     return [
       { text: PROVERKA_KONUSA },
       { text: `$V_{\\text{шара}} = 4\\cdot ${ru(V)} = ${ru(V * 4)}$.`, value: V * 4 },
+    ];
+  },
+};
+
+/* ── Куб, вписанный в шар: объём куба ──────────────────────────── */
+
+/** Куб, вписанный в шар: вершины куба лежат на сфере. */
+function cubeInBall(alt: string): Model {
+  const a = 3.2;
+  const cube = unlabelled(box(a, a, a));
+  const center: Vec3 = [a / 2, a / 2, a / 2];
+  return {
+    alt,
+    bodies: [cube, { kind: 'sphere', center, r: (a * Math.sqrt(3)) / 2, glass: true }],
+  };
+}
+
+/** Радиус шара R = k√3 в TeX: «4{,}5\sqrt3». */
+const rKoren3 = (k: number) => `${k === 1 ? '' : ru(k)}\\sqrt{3}`;
+
+export const PV03_KUB_V_SHARE: Prototype = {
+  ...SVOI,
+  dopustimo: (p) => num(p, 'k') > 0,
+  id: 'PV03-kub-v-share',
+  /* Номера задачника — у прототипов раздела VIII о кубе и сфере. */
+  zadachnik: [286, 289],
+  nazvanie: 'Куб, вписанный в шар радиуса $k\\sqrt3$: объём куба',
+  tip: 'объём куба по радиусу описанного шара',
+  format: 'десятичная',
+  uslovie: (p) => `Куб вписан в шар радиуса $${rKoren3(num(p, 'k'))}$. Найдите объём куба.`,
+  otvet: (p) => (2 * num(p, 'k')) ** 3,
+  /* Куб с ребром 2k — вершина на расстоянии R от центра, объём измеряется. */
+  poModeli: (p) => {
+    const a = 2 * num(p, 'k');
+    const R = num(p, 'k') * Math.sqrt(3);
+    const body = cube(a);
+    const c: Vec3 = [a / 2, a / 2, a / 2];
+    const v = body.vertices[0]!;
+    if (Math.abs(Math.hypot(v[0] - c[0], v[1] - c[1], v[2] - c[2]) - R) > 1e-9)
+      throw new Error('Вершина куба не на сфере');
+    return Math.round(cubeVolume(a) * 1e6) / 1e6;
+  },
+  chertezh: () => cubeInBall('Куб, вписанный в шар'),
+  shagi: (p) => {
+    const k = num(p, 'k');
+    const a = 2 * k;
+    return [
+      {
+        text: `Вершины куба лежат на сфере, поэтому диагональ куба — диаметр шара: $d = 2R = ${rKoren3(2 * k)}$.`,
+      },
+      {
+        text: `Диагональ куба с ребром $a$ равна $a\\sqrt3$, значит, $a = ${ru(a)}$.`,
+        value: a,
+      },
+      { text: `Объём: $${ru(a)}^3 = ${ru(a ** 3)}$.`, value: a ** 3 },
+    ];
+  },
+};
+
+/* ── Параллелепипед, описанный около сферы: площадь поверхности ── */
+
+export const PV03_PARALLELEPIPED_OKOLO_SFERY: Prototype = {
+  ...SVOI,
+  dopustimo: (p) => num(p, 'r') > 0,
+  id: 'PV03-parallelepiped-okolo-sfery',
+  /* Номера задачника — у прототипа банка той же формы (P03-83, там объём). */
+  zadachnik: [290, 293],
+  nazvanie: 'Параллелепипед около сферы: площадь поверхности',
+  tip: 'площадь поверхности прямоугольного параллелепипеда, описанного около сферы',
+  format: 'целое',
+  uslovie: (p) =>
+    `Прямоугольный параллелепипед описан около сферы радиуса ${ru(num(p, 'r'))}. Найдите площадь его поверхности.`,
+  otvet: (p) => 24 * num(p, 'r') ** 2,
+  poModeli: (p) => {
+    const a = 2 * num(p, 'r');
+    if (Math.abs(inradiusOfCube(a) - num(p, 'r')) > 1e-9)
+      throw new Error('Сфера не касается всех граней');
+    return Math.round(surfaceArea(cube(a)) * 1e6) / 1e6;
+  },
+  chertezh: () =>
+    ballInCube('Прямоугольный параллелепипед, описанный около сферы: он оказывается кубом'),
+  shagi: (p) => {
+    const r = num(p, 'r');
+    const a = 2 * r;
+    return [
+      {
+        text: `Сфера касается всех шести граней, а это возможно только у куба: каждое ребро равно диаметру, $${ru(a)}$.`,
+        value: a,
+      },
+      {
+        text: `Поверхность куба — шесть квадратов: $6\\cdot ${ru(a)}^2 = ${ru(6 * a * a)}$.`,
+        value: 6 * a * a,
+      },
     ];
   },
 };

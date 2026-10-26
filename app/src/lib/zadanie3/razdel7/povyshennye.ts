@@ -63,3 +63,104 @@ export const P03_74S: Prototype = {
 
   varianty: [],
 };
+
+/* ── Конус: радиус и образующая меняются — во сколько раз боковая ── */
+
+/** Множитель «в k раз»: v = 1 — увеличится, 0 — уменьшится. */
+const mnozh = (k: number, v: number) => (v === 1 ? k : 1 / k);
+const izmenitsya = (v: number) => (v === 1 ? 'увеличится' : 'уменьшится');
+
+/** «в 5 раз», «в 2 раза», «в 12 раз», «в 2,5 раза». */
+function vRaz(k: number): string {
+  const d = k % 10;
+  const a = !Number.isInteger(k) || (d >= 2 && d <= 4 && Math.floor(k / 10) % 10 !== 1);
+  return `в ${ru(k)} раз${a ? 'а' : ''}`;
+}
+
+/** Во сколько раз меняется боковая поверхность; больше 1 — растёт. */
+function otnoshenieBokovoy(p: Parameters<Prototype['otvet']>[0]): number {
+  return mnozh(num(p, 'r'), num(p, 'rv')) * mnozh(num(p, 'l'), num(p, 'lv'));
+}
+
+/** Боковая поверхность конуса по сетке: сумма площадей узких треугольников-граней. */
+function bokovayaPoSetke(r: number, l: number): number {
+  const h = Math.sqrt(l * l - r * r);
+  const n = 20000;
+  let s = 0;
+  for (let i = 0; i < n; i += 1) {
+    const a = (2 * Math.PI * i) / n;
+    const b = (2 * Math.PI * (i + 1)) / n;
+    const P = [r * Math.cos(a), r * Math.sin(a), 0];
+    const Q = [r * Math.cos(b), r * Math.sin(b), 0];
+    /* Площадь треугольника с вершиной (0, 0, h): половина модуля векторного произведения. */
+    const u = [P[0]!, P[1]!, -h];
+    const w = [Q[0]!, Q[1]!, -h];
+    const c = [u[1]! * w[2]! - u[2]! * w[1]!, u[2]! * w[0]! - u[0]! * w[2]!, u[0]! * w[1]! - u[1]! * w[0]!];
+    s += Math.hypot(c[0]!, c[1]!, c[2]!) / 2;
+  }
+  return s;
+}
+
+export const PV03_KONUS_BOKOVAYA: Prototype = {
+  id: 'PV03-konus-bokovaya',
+  razdel: 'VII',
+  nazvanie: 'Конус: радиус и образующая меняются — во сколько раз меняется боковая поверхность',
+  tip: 'отношение площадей боковых поверхностей конусов',
+  zadachnik: [234, 237],
+  status: 'добавить',
+  format: 'десятичная',
+  uslovie: (p) => {
+    const q = otnoshenieBokovoy(p);
+    return (
+      `Во сколько раз ${izmenitsya(q > 1 ? 1 : 0)} площадь боковой поверхности конуса, ` +
+      `если радиус его основания ${izmenitsya(num(p, 'rv'))} ${vRaz(num(p, 'r'))}, ` +
+      `а образующая ${izmenitsya(num(p, 'lv'))} ${vRaz(num(p, 'l'))}?`
+    );
+  },
+  dopustimo: (p) =>
+    num(p, 'r') > 1 &&
+    num(p, 'l') > 1 &&
+    Number.isInteger(num(p, 'r')) &&
+    Number.isInteger(num(p, 'l')) &&
+    Math.abs(otnoshenieBokovoy(p) - 1) > 1e-9,
+  otvet: (p) => {
+    const q = otnoshenieBokovoy(p);
+    return Math.round((q > 1 ? q : 1 / q) * 1e9) / 1e9;
+  },
+  /* Два настоящих конуса: площади по сетке граней, затем отношение. Образующая
+     первого много длиннее радиуса — высота второго существует при любых множителях. */
+  poModeli: (p) => {
+    const r1 = 1;
+    const l1 = 1000;
+    const q =
+      bokovayaPoSetke(r1 * mnozh(num(p, 'r'), num(p, 'rv')), l1 * mnozh(num(p, 'l'), num(p, 'lv'))) /
+      bokovayaPoSetke(r1, l1);
+    return Math.round((q > 1 ? q : 1 / q) * 1e6) / 1e6;
+  },
+  chertezh: () => ({
+    alt: 'Конус',
+    bodies: [{ kind: 'cone', base: [0, 0, 0], r: 2.2, h: 4.2 }],
+  }),
+  shagi: (p) => {
+    const r = num(p, 'r');
+    const l = num(p, 'l');
+    const rk = mnozh(r, num(p, 'rv'));
+    const lk = mnozh(l, num(p, 'lv'));
+    const q = rk * lk;
+    const tex = (k: number, v: number) => (v === 1 ? ru(k) : `\\dfrac1{${ru(k)}}`);
+    return [
+      {
+        text: 'Площадь боковой поверхности конуса $S = \\pi r l$: она пропорциональна и радиусу основания $r$, и образующей $l$.',
+      },
+      {
+        text: `Новые радиус и образующая: $${tex(r, num(p, 'rv'))}\\,r$ и $${tex(l, num(p, 'lv'))}\\,l$, поэтому $S' = \\pi\\cdot ${tex(r, num(p, 'rv'))}\\,r\\cdot ${tex(l, num(p, 'lv'))}\\,l = ${q > 1 ? ru(q) : `\\dfrac{S}{${ru(1 / q)}}`}${q > 1 ? '\\,S' : ''}$.`,
+        value: q,
+      },
+      {
+        text: `Площадь ${izmenitsya(q > 1 ? 1 : 0)} ${vRaz(q > 1 ? q : 1 / q)}.`,
+        value: q > 1 ? q : 1 / q,
+      },
+    ];
+  },
+  varianty: [],
+};

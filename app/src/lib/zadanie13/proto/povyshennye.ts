@@ -8,8 +8,8 @@
 import { D, type DrobInput } from '../drob';
 import { v, type PlotFull } from '../plots';
 import { difPereplata, type DifItog } from '../reshenie';
-import { byDebts, deposit, differentiated, totalPaid } from '../solver';
-import { frameJuly, money, pct, years } from '../text';
+import { byDebts, byPayments, deposit, differentiated, equalPayment, totalPaid } from '../solver';
+import { frameJan, frameJuly, money, pct, years } from '../text';
 import { choice, hintChangeSum, hintK, hintOverpayFormula, hintType, step, tex } from './common';
 import type { Prototype } from './types';
 
@@ -573,6 +573,257 @@ export function summaPriUbyvanii(par: PosledniyPlatezh): Prototype {
             'Сумму всех платежей',
             ['Последний платёж', 'Переплату — только проценты'],
             2,
+          ),
+        ],
+      };
+    },
+  };
+}
+
+/* ── Партия 3: два равных платежа и вклад с пополнениями ───────── */
+
+export interface DvaRavnyhSumma {
+  /** Кредит, тыс. рублей. */
+  S: number;
+  r: DrobInput;
+}
+
+/**
+ * Рамка «январь»: кредит на 2 года, погашен двумя равными платежами;
+ * найти общую сумму платежей в рублях. Подвох — не «кредит плюс
+ * проценты за два года», а 2x, где x = Sk²/(k + 1).
+ */
+export function dvaRavnyhSumma(par: DvaRavnyhSumma): Prototype {
+  const S = D(par.S).mul(1000);
+  const r = D(par.r);
+  return {
+    id: 'PV-C-DVA-SUMMA',
+    type: 'C',
+    subtype: 'В2',
+    source: 'own',
+    difficulty: 'base',
+    units: 'rub',
+    title: 'Два равных платежа: общая сумма в рублях',
+    maxDecimals: 0,
+    make({ plot }: { plot: PlotFull }) {
+      const k = D(1).add(r.div(100));
+      const x = S.mul(k.pow(2)).div(k.add(1));
+      const answer = x.mul(2);
+      if (!answer.isInteger()) return null;
+      const X = equalPayment(S, 2, r);
+      const rows = byPayments(S, [X, X], r);
+      return {
+        condition: `${frameJan(plot, `в банке на 2 года в размере ${money(D(par.S), 'thous')}`, r)}\nСколько рублей составит общая сумма платежей после полного погашения кредита, если известно, что кредит будет полностью погашен двумя равными платежами?`,
+        answer,
+        verify: totalPaid(rows),
+        params: { S: S.toNumber(), r: r.toNumber() },
+        rows,
+        scheme: 'ann',
+        period: 'year',
+        solution: [
+          step(
+            'Составляем таблицу',
+            'Суммы — в рублях. Таблица — при найденном платеже.',
+            undefined,
+            true,
+          ),
+          step(
+            'Составляем уравнение',
+            `Обозначим $k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}$ и платёж $x$. Долг вырос в $k$ раз, уменьшился на $x$, снова вырос в $k$ раз и погашен вторым платежом.`,
+            `(Sk - x)k - x = 0 \\quad\\Rightarrow\\quad Sk^2 = x(k + 1) \\quad\\Rightarrow\\quad x = \\dfrac{Sk^2}{k + 1}`,
+          ),
+          step(
+            'Считаем',
+            'Общая сумма — два одинаковых платежа.',
+            `x = \\dfrac{${tex(S)}\\cdot ${tex(k.pow(2))}}{${tex(k.add(1))}} = ${tex(x)},\\qquad 2x = ${tex(answer)}`,
+          ),
+          step('Ответ', `Общая сумма платежей — ${money(answer, 'rub')}.`),
+        ],
+        vopros: 'rubli',
+        hints: [
+          hintType('C', 0),
+          hintK(1),
+          choice(
+            'Какое уравнение описывает погашение кредита?',
+            '$(Sk - x)k - x = 0$',
+            ['$Sk^2 - 2x = 0$', '$S - 2x = 0$'],
+            2,
+            'Сначала долг растёт в $k$ раз, потом уменьшается на платёж — и так два года.',
+          ),
+        ],
+      };
+    },
+  };
+}
+
+export interface DvaRavnyhStavka {
+  /** Кредит и каждый из двух равных платежей, тыс. рублей. */
+  S: DrobInput;
+  x: DrobInput;
+}
+
+/**
+ * Рамка «январь» с неизвестной ставкой r: кредит на 2 года погашен
+ * двумя равными платежами x; найти r. Подвох — уравнение Sk² − xk − x = 0
+ * квадратное относительно k, и берётся корень k > 1.
+ */
+export function dvaRavnyhStavka(par: DvaRavnyhStavka): Prototype {
+  const S = D(par.S);
+  const x = D(par.x);
+  return {
+    id: 'PV-C-DVA-STAVKA',
+    type: 'C',
+    subtype: 'В5',
+    source: 'own',
+    difficulty: 'base',
+    units: 'percent',
+    title: 'Два равных платежа: найти ставку',
+    make({ plot }: { plot: PlotFull }) {
+      /* Sk² − xk − x = 0: D = x² + 4Sx — полный квадрат. */
+      const Dsk = x.mul(x).add(S.mul(x).mul(4));
+      const kor = Math.round(Math.sqrt(Dsk.toNumber()) * 1e6) / 1e6;
+      const koren = D(String(kor));
+      if (!koren.mul(koren).eq(Dsk)) return null;
+      const k = x.add(koren).div(S.mul(2));
+      const r = k.sub(1).mul(100);
+      if (!r.isInteger() || r.lt(1)) return null;
+      /* Второй счёт: перебор целых ставок прямым пересчётом долга. */
+      let found = D(0);
+      for (let t = 1; t <= 100; t += 1) if (byPayments(S, [x, x], t)[1]!.end.eq(0)) found = D(t);
+      const rows = byPayments(S, [x, x], r);
+      const y = plot.year;
+      return {
+        condition: `${frameJan(plot, `в банке на 2 года в размере ${money(S, 'thous')}`, '$r$ %', [
+          `к июлю ${y + 2} года кредит должен быть полностью погашен`,
+        ]).replace(
+          'необходимо выплатить одним платежом часть долга',
+          'необходимо выплатить часть долга',
+        )}\nНайдите $r$, если кредит будет полностью погашен двумя равными платежами по ${money(x, 'thous')}.`,
+        answer: r,
+        verify: found,
+        params: { S: S.toNumber(), x: x.toNumber() },
+        rows,
+        scheme: 'ann',
+        period: 'year',
+        solution: [
+          step(
+            'Составляем таблицу',
+            'Суммы — в тыс. рублей. Таблица — при найденной ставке.',
+            undefined,
+            true,
+          ),
+          step(
+            'Составляем уравнение',
+            'Обозначим $k = 1 + \\dfrac{r}{100}$. Долг вырос в $k$ раз, уменьшился на платёж, снова вырос и погашен вторым платежом.',
+            `(${tex(S)}k - ${tex(x)})k - ${tex(x)} = 0 \\quad\\Rightarrow\\quad ${tex(S)}k^2 - ${tex(x)}k - ${tex(x)} = 0`,
+          ),
+          step(
+            'Решаем',
+            'Подходит только корень $k > 1$.',
+            `\\mathcal D = ${tex(x)}^2 + 4\\cdot ${tex(S)}\\cdot ${tex(x)} = ${tex(Dsk)} = ${tex(koren)}^2,\\quad k = \\dfrac{${tex(x)} + ${tex(koren)}}{2\\cdot ${tex(S)}} = ${tex(k)}`,
+          ),
+          step('Ответ', `$k = ${tex(k)}$, значит, $r = ${tex(r)}$.`),
+        ],
+        vopros: 'stavka',
+        hints: [
+          hintType('C', 0),
+          hintK(1),
+          choice(
+            'Какое уравнение получится?',
+            `$(${tex(S)}k - ${tex(x)})k - ${tex(x)} = 0$`,
+            [`$${tex(S)}k^2 - 2\\cdot ${tex(x)} = 0$`, `$${tex(S)}k - 2\\cdot ${tex(x)} = 0$`],
+            2,
+            'Второй платёж вносят после второго начисления.',
+          ),
+        ],
+      };
+    },
+  };
+}
+
+export interface VkladNachalnyy {
+  /** Ежегодное пополнение, тыс. рублей. */
+  x: number;
+  r: DrobInput;
+  /** Сумма на вкладе через три года, тыс. рублей. */
+  Z: DrobInput;
+}
+
+/**
+ * Январь: вклад на целое число S сотен тысяч рублей на 3 года; в
+ * январе второго и третьего года — пополнения по x тыс. рублей; в
+ * декабре — r %. Найти S по сумме Z через три года. Подвох — S в сотнях
+ * тысяч, а уравнение — в тысячах: 100S·k³ + x(k² + k) = Z.
+ */
+export function vkladNachalnyy(par: VkladNachalnyy): Prototype {
+  const x = D(par.x);
+  const r = D(par.r);
+  const Z = D(par.Z);
+  return {
+    id: 'PV-D-NACHALNYY',
+    type: 'D',
+    subtype: 'Г',
+    source: 'own',
+    difficulty: 'base',
+    units: 'none',
+    title: 'Вклад с двумя равными пополнениями: найти первоначальный вклад',
+    plot: { kind: 'deposit' },
+    make({ plot }: { plot: PlotFull }) {
+      const k = D(1).add(r.div(100));
+      const k3 = k.pow(3);
+      const k2k = k.pow(2).add(k);
+      const ost = Z.sub(x.mul(k2k));
+      const S100 = ost.div(k3);
+      const S = S100.div(100);
+      if (!S.isInteger() || !S.isPositive()) return null;
+      const rows = deposit(S100, 3, r, { after: [x, x, 0] });
+      /* Второй счёт: перебор S прямым пересчётом вклада по годам. */
+      let found = D(0);
+      for (let t = 1; t <= 200; t += 1)
+        if (deposit(t * 100, 3, r, { after: [x, x, 0] })[2]!.end.eq(Z)) found = D(t);
+      const y = plot.year;
+      return {
+        condition:
+          `В январе ${y} года ${plot.subject} ${v(plot, 'планирует', 'планирует')} открыть вклад${plot.goal.startsWith('чтобы') ? `, ${plot.goal},` : ` ${plot.goal}`} на 3 года на целое число $S$ сотен тысяч рублей, а в январе ${y + 1} и ${y + 2} годов дополнительно вносить на этот вклад ещё по ${money(x, 'thous')}. ` +
+          `Банк в декабре каждого года действия вклада начисляет ${pct(r)} на сумму, находящуюся на вкладе. Начисленные проценты при этом остаются на вкладе, увеличивая сумму вклада.\nНайдите $S$, если в январе ${y + 3} года на вкладе должно быть ${money(Z, 'thous')}.`,
+        answer: S,
+        verify: found,
+        params: { x: x.toNumber(), r: r.toNumber(), Z: Z.toNumber() },
+        rows,
+        scheme: 'dep',
+        period: 'year',
+        solution: [
+          step(
+            'Составляем таблицу',
+            'Суммы — в тыс. рублей: вклад $S$ сотен тысяч — это $100S$ тыс. рублей. Таблица — при найденном $S$.',
+            undefined,
+            true,
+          ),
+          step(
+            'Составляем уравнение',
+            `Обозначим $k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}$. Первоначальный вклад вырос три раза, первое пополнение — два раза, второе — один раз.`,
+            `100S\\cdot k^3 + ${tex(x)}k^2 + ${tex(x)}k = ${tex(Z)}`,
+          ),
+          step(
+            'Считаем',
+            `$k^3 = ${tex(k3)}$, $k^2 + k = ${tex(k2k)}$.`,
+            `${tex(k3.mul(100))}S + ${tex(x.mul(k2k))} = ${tex(Z)} \\quad\\Rightarrow\\quad S = \\dfrac{${tex(ost)}}{${tex(k3.mul(100))}} = ${tex(S)}`,
+          ),
+          step('Ответ', `$S = ${tex(S)}$: первоначальный вклад — ${money(S100, 'thous')}.`),
+        ],
+        vopros: 'summa',
+        hints: [
+          hintType('D', 0),
+          hintK(1),
+          choice(
+            'Какое уравнение получится (суммы в тыс. рублей)?',
+            `$100S\\cdot k^3 + ${tex(x)}k^2 + ${tex(x)}k = ${tex(Z)}$`,
+            [
+              `$S\\cdot k^3 + ${tex(x)}k^2 + ${tex(x)}k = ${tex(Z)}$`,
+              `$100S\\cdot k^3 + 2\\cdot ${tex(x)}k = ${tex(Z)}$`,
+            ],
+            2,
+            'Вклад дан в сотнях тысяч, пополнения — в тысячах; первое пополнение лежит на счёте два начисления.',
           ),
         ],
       };

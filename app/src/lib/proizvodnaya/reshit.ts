@@ -229,6 +229,9 @@ export function reshit(fig: Figura, zapros: Zapros): number | null {
       }
       return (t.b[1] - t.a[1]) / (t.b[0] - t.a[0]);
     }
+    case 'kasat-nachalo':
+      /* Наклон графика в точке p численно — не через f(p)/p. */
+      return Math.round(dy(p) * 1e6) / 1e6;
     case 'prirashchenie':
       return integral(y, p, q);
     case 'ploshchad':

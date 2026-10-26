@@ -658,3 +658,243 @@ export const PV7_KOREN_LINEYNYY: Prototype = {
     };
   },
 };
+
+/* ── (aˢ)^(kx + b) = (aʳ)^(mx + c): степени одного основания ─────── */
+
+/** Основание aˢ и показатель kx + b одной части уравнения. */
+function chast(p: Params, s: 's' | 'r', k: 'k' | 'm', b: 'b' | 'c', por: 'por1' | 'por2') {
+  const a = num(p, 'a');
+  return {
+    st: num(p, s),
+    osn: a ** num(p, s),
+    k: num(p, k),
+    b: num(p, b),
+    E: lin(num(p, k), num(p, b), 'x', (p[por] ?? 'xb') as Poryadok),
+  };
+}
+
+function uravneniePokaz(p: Params): string {
+  const L = chast(p, 's', 'k', 'b', 'por1');
+  const R = chast(p, 'r', 'm', 'c', 'por2');
+  return `${pw(d(L.osn), L.E)}=${pw(d(R.osn), R.E)}`;
+}
+
+/**
+ * (aˢ)^(kx + b) = (aʳ)^(mx + c): основания — разные степени одного
+ * числа a (16 и 2, 2 и 64). Подвох — привести обе части к a и
+ * умножить каждый показатель на свою степень, а не приравнять
+ * показатели сразу.
+ */
+export const PV7_POKAZATELNOE: Prototype = {
+  id: 'PV7-POKAZATELNOE',
+  no: 107,
+  group: 'III',
+  title: 'Показательное: основания — разные степени одного числа',
+  formula: '\\left(a^s\\right)^{kx+b}=\\left(a^r\\right)^{mx+c}',
+  skills: ['stepeni', 'perenos'],
+  fipiNos: '',
+  uravnenie: uravneniePokaz,
+  uslovie(p) {
+    return uslovieTekst(uravneniePokaz(p), 'koren');
+  },
+  vopros: () => 'koren',
+  chisla(p) {
+    const L = chast(p, 's', 'k', 'b', 'por1');
+    const R = chast(p, 'r', 'm', 'c', 'por2');
+    /* Сравниваем логарифмы частей: сами степени бывают огромными. */
+    return {
+      lhs: (x) => (L.k * x + L.b) * Math.log(L.osn),
+      rhs: (x) => (R.k * x + R.b) * Math.log(R.osn),
+      odz: () => true,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const L = chast(p, 's', 'k', 'b', 'por1');
+    const R = chast(p, 'r', 'm', 'c', 'por2');
+    /* s(kx + b) = r(mx + c)  ⇒  (sk − rm)x = rc − sb. */
+    const K = L.st * L.k - R.st * R.k;
+    const B = R.st * R.b - L.st * L.b;
+    if (K === 0) throw new Error('PV7-POKAZATELNOE: коэффициент при x равен нулю');
+    const x = q(B, K);
+    if (!konechnaya(x)) throw new Error(`PV7-POKAZATELNOE: ${B}/${K} — бесконечная дробь`);
+    const ans = val(x);
+    const A = d(a);
+    /* s·(kx + b): одночлен — без скобок («6x», «4·2x»). */
+    const vid = (st: number, E: string) =>
+      st === 1
+        ? E
+        : E === 'x'
+          ? `${d(st)}x`
+          : /^-?\d*x$/.test(E)
+            ? `${d(st)}\\cdot ${E}`
+            : `${d(st)}(${E})`;
+    const levyy = vid(L.st, L.E);
+    const pravyy = vid(R.st, R.E);
+    const raskr = (st: number, k: number, b: number) => lin(st * k, st * b);
+    const osnTex = (st: number, osn: number) =>
+      st === 1 ? `$${A}$ — уже нужное основание` : `$${d(osn)}=${pw(A, String(st))}$`;
+    return {
+      answer: ans,
+      uravnenie: uravneniePokaz(p),
+      korni: [ans],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          `Показательное уравнение. Основания $${d(L.osn)}$ и $${d(R.osn)}$ — степени числа $${A}$. План: записать обе части степенями $${A}$ и приравнять показатели.`,
+        ],
+        preobr: [
+          `Слева: ${osnTex(L.st, L.osn)}, поэтому левая часть равна $${pw(A, levyy)}$.`,
+          `Справа: ${osnTex(R.st, R.osn)}, поэтому правая часть равна $${pw(A, pravyy)}$.`,
+          `Основания равны — приравниваем показатели: $${levyy}=${pravyy}$, то есть $${raskr(L.st, L.k, L.b)}=${raskr(R.st, R.k, R.b)}$.`,
+          `Переносим: $${lin(K, 0)}=${d(B)}$, $x=${t(x)}$.`,
+        ],
+        korni: [`$x=${t(x)}$ — единственный корень (показательная функция монотонна).`],
+        proverka: [
+          `При $x=${t(x)}$ показатели степеней $${A}$ слева и справа равны $${t(mul(q(L.st), sub(mul(q(L.k), x), q(-L.b))))}$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(
+          'К какому основанию привести обе части?',
+          `$${A}$`,
+          [`$${d(Math.max(L.osn, R.osn))}$`, '$10$'],
+          `$${d(L.osn)}$ и $${d(R.osn)}$ — степени числа $${A}$.`,
+        ),
+        hint('Какое уравнение для показателей получится?', `$${levyy}=${pravyy}$`, [
+          `$${L.E}=${R.E}$`,
+          `$${vid(R.st, L.E)}=${vid(L.st, R.E)}$`,
+        ]),
+        hint('Чему равен $x$?', `$${t(x)}$`, ryadom(x)),
+      ],
+    };
+  },
+};
+
+/* ── 1 + log_a(px + q) = 2·log_a(x + e): квадратное и ОДЗ ───────── */
+
+function uravnenieLogKv(p: Params): string {
+  const a = num(p, 'a');
+  const L = logTex(a);
+  const odin = `1+${L}(${lin(num(p, 'p'), num(p, 'q'))})`;
+  const dva = `2${L}(${lin(1, num(p, 'e'))})`;
+  return num(p, 'sleva') === 1 ? `${odin}=${dva}` : `${dva}=${odin}`;
+}
+
+/** Корни (x + e)² = a(px + q) по возрастанию. */
+function korniLogKv(p: Params): number[] {
+  const a = num(p, 'a');
+  const e = num(p, 'e');
+  /* x² + (2e − ap)x + e² − aq = 0. */
+  const B = 2 * e - a * num(p, 'p');
+  const C = e * e - a * num(p, 'q');
+  const D = B * B - 4 * C;
+  const s = Math.round(Math.sqrt(D));
+  if (D < 0 || s * s !== D) throw new Error(`PV7-LOG-KVADRATNOE: D = ${D} — не квадрат`);
+  return [(-B - s) / 2, (-B + s) / 2];
+}
+
+/**
+ * 1 + log_a(px + q) = 2·log_a(x + e): единица — это log_a a, двойка —
+ * показатель квадрата. Подвох — квадратное уравнение даёт два корня, а
+ * ОДЗ x + e > 0 оставляет один; «меньший из корней» — оставшийся.
+ */
+export const PV7_LOG_KVADRATNOE: Prototype = {
+  id: 'PV7-LOG-KVADRATNOE',
+  no: 108,
+  group: 'IV',
+  title: 'Единица и удвоенный логарифм: квадратное уравнение и ОДЗ',
+  formula: '1+\\log_a(px+q)=2\\log_a(x+e)',
+  skills: ['log-svoystva', 'log-opredelenie', 'diskriminant'],
+  fipiNos: '',
+  uravnenie: uravnenieLogKv,
+  uslovie(p) {
+    return uslovieTekst(uravnenieLogKv(p), 'menshiy');
+  },
+  vopros: () => 'menshiy',
+  chisla(p) {
+    const a = num(p, 'a');
+    const pp = num(p, 'p');
+    const qq = num(p, 'q');
+    const e = num(p, 'e');
+    const ln = (x: number) => Math.log(x) / Math.log(a);
+    return {
+      lhs: (x) => 1 + ln(pp * x + qq),
+      rhs: (x) => 2 * ln(x + e),
+      odz: (x) => pp * x + qq > 0 && x + e > 0,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const pp = num(p, 'p');
+    const qq = num(p, 'q');
+    const e = num(p, 'e');
+    const L = logTex(a);
+    const [x1, x2] = korniLogKv(p) as [number, number];
+    const ok = (x: number) => pp * x + qq > 0 && x + e > 0;
+    const goden = [x1, x2].filter(ok);
+    const plohie = [x1, x2].filter((x) => !ok(x));
+    if (goden.length === 0) throw new Error('PV7-LOG-KVADRATNOE: корней нет');
+    const ans = Math.min(...goden);
+    const PX = lin(pp, qq);
+    const XE = lin(1, e);
+    const B = 2 * e - a * pp;
+    const C = e * e - a * qq;
+    const podst = (x: number) => d(x + e);
+    return {
+      answer: ans,
+      uravnenie: uravnenieLogKv(p),
+      korni: [x1, x2],
+      postoronnie: plohie,
+      etapy: razbor({
+        plan: [
+          `Запишем обе части логарифмами по основанию $${d(a)}$: $1=${L}${d(a)}$, а $2${L}(${XE})=${L}(${XE})^2$ при $${XE}>0$. Затем приравняем выражения под логарифмами и отберём корни по ОДЗ.`,
+        ],
+        odz: [`$${PX}>0$ и $${XE}>0$.`],
+        preobr: [
+          `$1+${L}(${PX})=${L}\\big(${d(a)}(${PX})\\big)$, поэтому $${d(a)}(${PX})=(${XE})^2$.`,
+          `$${lin(a * pp, a * qq)}=x^2${e < 0 ? '-' : '+'}${d(Math.abs(2 * e))}x+${d(e * e)}$, то есть $x^2${B < 0 ? '-' : '+'}${d(Math.abs(B))}x${C < 0 ? '-' : '+'}${d(Math.abs(C))}=0$.`,
+          `$D=${d(B * B - 4 * C)}$, корни $x=${d(x1)}$ и $x=${d(x2)}$.`,
+        ],
+        korni: [`$x=${d(x1)}$ или $x=${d(x2)}$.`],
+        otbor: [
+          ...[x1, x2].map((x) =>
+            ok(x)
+              ? `$x=${d(x)}$: $${XE}=${podst(x)}>0$ и $${PX}=${d(pp * x + qq)}>0$ — подходит.`
+              : `$x=${d(x)}$: $${XE}=${podst(x)}${x + e === 0 ? '' : '<0'}$ — не входит в ОДЗ, корень посторонний.`,
+          ),
+          goden.length === 1
+            ? 'Корень один — он и есть ответ.'
+            : 'Оба корня подходят, записываем меньший.',
+        ],
+        proverka: [
+          `$1+${L}${d(pp * ans + qq)}=${L}${d(a * (pp * ans + qq))}$ и $2${L}${podst(ans)}=${L}${d((ans + e) ** 2)}$ — равны.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(
+          `Каким логарифмом записать $1$?`,
+          `$${L}${d(a)}$`,
+          [`$${L}1$`, `$${L}10$`],
+          `$${L}${d(a)}=1$, а сумма логарифмов — логарифм произведения.`,
+        ),
+        hint('Какое уравнение получится без логарифмов?', `$${d(a)}(${PX})=(${XE})^2$`, [
+          `$${PX}=2(${XE})$`,
+          `$1+${PX}=(${XE})^2$`,
+        ]),
+        hintOtbor(
+          'menshiy',
+          `$${d(ans)}$`,
+          [x1, x2].filter((x) => x !== ans).map((x) => `$${d(x)}$`),
+          plohie.length > 0
+            ? `При $x=${d(plohie[0] as number)}$ выражение $${XE}$ не положительно — корень посторонний.`
+            : undefined,
+        ),
+      ],
+    };
+  },
+};

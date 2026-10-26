@@ -597,6 +597,21 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
     }
   }
 
+  /* ── Точка графика из условия с пунктиром до оси ─────────────── */
+  if (fig.tochkaNaGrafike !== undefined) {
+    const xt = fig.tochkaNaGrafike;
+    const yt = f.y(xt);
+    layers.aux.push(
+      `<path class="pr-aux" d="M${px(sx(xt))} ${px(axisX)}V${px(sy(yt))}" fill="none" stroke="${THEME.colors.axis}" stroke-width="${V.dashWidth}" stroke-dasharray="${V.dash}"/>`,
+    );
+    obstacles.push({
+      seg: { x1: sx(xt), y1: axisX, x2: sx(xt), y2: sy(yt) },
+      r: 1,
+      what: 'пунктир к точке графика',
+    });
+    dotsPoints.push({ x: xt, y: yt, fill: THEME.colors.axis, r: V.dotR, what: 'точка графика' });
+  }
+
   /* ── Отмеченные точки на оси ─────────────────────────────────── */
   const metki = fig.metki ?? [];
   metki.forEach((m) => {
