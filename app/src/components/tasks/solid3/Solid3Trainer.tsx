@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
@@ -35,6 +35,9 @@ const MIX = 'mix';
 
 /** Приставка режима «только этот раздел» в общем тренажёре. */
 const GROUP = 'razdel:';
+
+/** Режим «типы из ссылки»: ?tipy=P03-01,P03-02 со страницы разбора типа. */
+const TIPY = 'tipy';
 
 /** Зерно подхода: берётся по нажатию «Начать», а не при отрисовке. */
 function freshSeed(): number {
@@ -121,6 +124,27 @@ function Solid3Review({ variant }: { variant: PoolVariant }) {
   );
 }
 
+/* Адрес страницы для useSyncExternalStore: query не меняется, пока
+   страница открыта, поэтому подписываться не на что. */
+function neSlushat(): () => void {
+  return () => undefined;
+}
+function adresBrauzera(): string {
+  return window.location.search;
+}
+function adresServera(): string {
+  return '';
+}
+
+/** «2 прототипа», «5 прототипов». */
+function prototipov(n: number): string {
+  const d = n % 10;
+  const dd = n % 100;
+  if (d === 1 && dd !== 11) return 'прототип';
+  if (d >= 2 && d <= 4 && (dd < 12 || dd > 14)) return 'прототипа';
+  return 'прототипов';
+}
+
 interface Solid3SetupProps {
   pool: Pool;
   byId: ReadonlyMap<string, PoolKind>;
@@ -130,10 +154,25 @@ interface Solid3SetupProps {
 /** Выбор тренировки: режим и «Начать тренировку», ниже — статистика. */
 function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
   const progress = useZ3Progress();
-  const [mode, setMode] = useState<string>(MIX);
+  /* Выбранный режим. null — ученик ещё не выбирал: тогда типы из
+     ссылки, если они есть, иначе смешанный режим. */
+  const [vybor, setMode] = useState<string | null>(null);
   /* Повторение ошибок — отдельный режим: подход собирается только из
      заданий, в которых ошиблись. */
   const [repeat, setRepeat] = useState(false);
+  /* Прототипы из ссылки (?tipy=…): разбор типа ведёт в тренажёр
+     сразу по своему типу. Страница собрана заранее, поэтому на сервере
+     и при первой отрисовке адрес пустой, а после неё — настоящий. */
+  const search = useSyncExternalStore(neSlushat, adresBrauzera, adresServera);
+  const tipyKey = useMemo(() => {
+    const t = new URLSearchParams(search).get('tipy');
+    return (t ?? '')
+      .split(',')
+      .filter((id) => byId.has(id))
+      .join(',');
+  }, [search, byId]);
+  const tipy = useMemo(() => (tipyKey === '' ? [] : tipyKey.split(',')), [tipyKey]);
+  const mode = vybor ?? (tipy.length > 0 ? TIPY : MIX);
 
   /* Из чего собирать подход: один тип, все типы или список ошибок.
      Список ошибок берётся строкой, чтобы зависимость не менялась от
@@ -157,6 +196,14 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
         variants: list.map((n) => ({ n })),
       }));
     }
+    if (mode === TIPY) {
+      return tipy.flatMap((id) => {
+        const kind = byId.get(id);
+        return kind === undefined
+          ? []
+          : [{ id: kind.id, variants: kind.variants.map((item) => ({ n: item.n })) }];
+      });
+    }
     if (mode === MIX) {
       return pool.kinds.map((kind) => ({
         id: kind.id,
@@ -175,7 +222,7 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
     return only === undefined
       ? []
       : [{ id: only.id, variants: only.variants.map((item) => ({ n: item.n })) }];
-  }, [repeat, mode, pool, byId, mistakesKey]);
+  }, [repeat, mode, tipy, pool, byId, mistakesKey]);
 
   /* Чем фильтровать: разделами в общем тренажёре, типами заданий
      в тренажёре раздела. */
@@ -224,6 +271,23 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
     <section className="z3t">
       {/* Фильтр по типам заданий раздела и смешанный режим. */}
       <nav className="z3t__filter" aria-label="Типы заданий">
+        {tipy.length === 0 ? null : (
+          <button
+            type="button"
+            className={clsx('chip', !repeat && mode === TIPY && 'is-active')}
+            onClick={() => choose(TIPY)}
+            title={tipy.map((id) => byId.get(id)?.titlePlain ?? id).join('; ')}
+          >
+            {tipy.length === 1 ? (
+              <TitleText
+                title={byId.get(tipy[0] ?? '')?.title ?? ''}
+                html={byId.get(tipy[0] ?? '')?.titleHtml}
+              />
+            ) : (
+              `Тип из разбора: ${tipy.length} ${prototipov(tipy.length)}`
+            )}
+          </button>
+        )}
         <button
           type="button"
           className={clsx('chip', !repeat && mode === MIX && 'is-active')}
@@ -251,6 +315,22 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
           </button>
         )}
       </nav>
+
+      {!repeat && mode === TIPY && tipy.length > 1 ? (
+        <p className="z3t__hint">
+          В подходе:{' '}
+          {tipy.map((id, i) => {
+            const kind = byId.get(id);
+            return kind === undefined ? null : (
+              <span key={id}>
+                {i > 0 ? '; ' : ''}
+                <TitleText title={kind.title} html={kind.titleHtml} />
+              </span>
+            );
+          })}
+          .
+        </p>
+      ) : null}
 
       <div className="z3t__actions">
         <Button onClick={start} disabled={source.length === 0}>
