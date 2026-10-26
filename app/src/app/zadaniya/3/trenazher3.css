@@ -103,6 +103,12 @@
   width: 100%;
   max-width: 220px;
 }
+/* Лампочка подсказки (HintFlow): размер — как в тренажёрах (prep.css). */
+.z3t .ptask__hint-ico {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
 .z3t__hint {
   font-size: var(--fs-caption);
   color: var(--color-text-secondary);

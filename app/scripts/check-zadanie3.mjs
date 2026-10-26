@@ -91,6 +91,10 @@ report.sourceProblems.forEach((item) => console.log(`   ${item.ref}: ${item.why}
 console.log(`7. совпадающих вариантов: ${report.duplicates.length}`);
 report.duplicates.forEach((item) => console.log(`   ${item.a} = ${item.b}`));
 console.log(`чертежей с нарушениями чек-листа: ${report.drawingViolations.length}`);
+console.log(
+  `8. прототипов без подсказки-вопросов: ${report.bezPodskazki.length}` +
+    (report.bezPodskazki.length > 0 ? ` (${report.bezPodskazki.join(', ')})` : ''),
+);
 report.drawingViolations.forEach((item) => console.log(`   ${item.id}: пункты ${item.points}`));
 
 fs.rmSync(out, { recursive: true, force: true });
