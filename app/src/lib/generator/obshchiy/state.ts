@@ -333,6 +333,29 @@ export function defaultExtras(config: GenConfig): GenExtras {
   };
 }
 
+/** Вид работы «Свой заголовок»: текст — в GenExtras.svoy. */
+export const SVOY_VID = 'svoy';
+/** Длина своего заголовка. */
+export const SVOY_MAX = 80;
+
+/** Заголовок листа по «Дополнительно»: вид работы из списка или свой; пусто — по составу. */
+export function vidRabotyText(config: GenConfig, e: Pick<GenExtras, 'kind' | 'svoy'>): string {
+  if (e.kind === null) return '';
+  if (e.kind === SVOY_VID) return (e.svoy ?? '').trim().slice(0, SVOY_MAX);
+  return config.extras?.kinds.find((k) => k.id === e.kind)?.title ?? '';
+}
+
+/** Вид работы по заголовку из адреса: из списка — id, другой текст — свой заголовок. */
+export function vidRabotyIz(
+  config: GenConfig,
+  text: string,
+): Pick<GenExtras, 'kind'> & { svoy?: string } {
+  const t = text.trim().slice(0, SVOY_MAX);
+  if (t === '') return { kind: null };
+  const id = config.extras?.kinds.find((k) => k.title === t)?.id;
+  return id === undefined ? { kind: SVOY_VID, svoy: t } : { kind: id };
+}
+
 /**
  * Виды работ, на которых памятка и разобранный пример по умолчанию
  * выключены: работа проверяет, а памятка подсказывает ход решения.
@@ -374,6 +397,18 @@ export function umolchaniyaPoTipu(
   return out;
 }
 
+/** Вид работы пресета (из списка или свой) и его переключатель раздела; остальное — как было. */
+function extrasPreseta(extras: GenExtras, preset: GenPreset): GenExtras {
+  const { svoy: _svoy, flag: _flag, ...rest } = extras;
+  const flag = preset.flag ?? extras.flag;
+  return {
+    ...rest,
+    kind: preset.kind ?? (preset.svoy !== undefined ? SVOY_VID : null),
+    ...(preset.kind === undefined && preset.svoy !== undefined ? { svoy: preset.svoy } : {}),
+    ...(flag === true ? { flag: true } : {}),
+  };
+}
+
 /** Пресет заполняет состав, уровни, варианты и вид работы; остальное «Дополнительно» — как было. */
 export function stateFromPreset(
   config: GenConfig,
@@ -388,7 +423,7 @@ export function stateFromPreset(
     plan: planFromPreset(config, preset, source),
     seed: null,
     zameny: {},
-    extras: { ...extras, kind: preset.kind ?? null },
+    extras: extrasPreseta(extras, preset),
     ...(config.filtr === undefined
       ? {}
       : { filtr: preset.filtr ?? (config.filtr.options[0]?.id as string) }),

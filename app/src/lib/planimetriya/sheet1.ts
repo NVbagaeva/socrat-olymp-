@@ -91,6 +91,8 @@ export interface Dop1 {
   primery: 0 | 1 | 2;
   qr: boolean;
   vid: VidRaboty1 | null;
+  /** Свой заголовок вместо вида работы из списка (vid — null). */
+  svoy?: string;
   data: string;
   uchitel: string;
 }
@@ -146,15 +148,24 @@ export function sheetQuery1(p: SheetParams1): string {
     if (dop.primery > 0) q.set('pr', String(dop.primery));
     if (dop.qr) q.set('qr', '1');
     if (dop.vid !== null) q.set('vr', dop.vid);
+    else if (dop.svoy !== undefined && dop.svoy !== '') q.set('vt', dop.svoy);
     if (dop.data !== '') q.set('d', dop.data);
     if (dop.uchitel !== DOP_1.uchitel) q.set('uch', dop.uchitel);
   }
   return q.toString();
 }
 
+/** Текст из адреса для шапки листа: без управляющих символов и угловых скобок. */
+function chistyy(text: string, max: number): string {
+  return text
+    .replace(/[\u0000-\u001f<>]/g, '')
+    .trim()
+    .slice(0, max);
+}
+
 /** «Дополнительно» из адреса; нет ни одного ключа — undefined. Урок не читает. */
 function dopIzZaprosa(q: URLSearchParams): Dop1 | undefined {
-  if (!['tr', 'pr', 'qr', 'vr', 'd', 'uch'].some((k) => q.has(k))) return undefined;
+  if (!['tr', 'pr', 'qr', 'vr', 'vt', 'd', 'uch'].some((k) => q.has(k))) return undefined;
   const pr = Number(q.get('pr'));
   const vr = q.get('vr') ?? '';
   const data = q.get('d') ?? '';
@@ -163,6 +174,7 @@ function dopIzZaprosa(q: URLSearchParams): Dop1 | undefined {
     primery: pr === 1 || pr === 2 ? pr : 0,
     qr: q.get('qr') === '1',
     vid: vr in SHEET_1.vidy ? (vr as VidRaboty1) : null,
+    ...(vr in SHEET_1.vidy || !q.has('vt') ? {} : { svoy: chistyy(q.get('vt') ?? '', 80) }),
     data: /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : '',
     uchitel: q.has('uch')
       ? (q.get('uch') ?? '')
@@ -629,7 +641,8 @@ export function subtitleOf(p: SheetParams1): string {
     return u === undefined ? '' : SHEET_1.subtitle.urok(u.no, u.title);
   }
   const vid = p.dop?.vid ?? null;
-  return vid === null ? SHEET_1.subtitle[p.rezhim] : SHEET_1.vidy[vid];
+  if (vid !== null) return SHEET_1.vidy[vid];
+  return p.dop?.svoy !== undefined && p.dop.svoy !== '' ? p.dop.svoy : SHEET_1.subtitle[p.rezhim];
 }
 
 /** «2026-10-24» → «24.10.2026». */
