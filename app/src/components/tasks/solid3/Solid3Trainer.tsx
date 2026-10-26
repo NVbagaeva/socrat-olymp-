@@ -20,6 +20,8 @@ import { Solid3Stats } from './Solid3Stats';
 import { readSolid3Ui, type Solid3Ui } from './solid3Ui';
 import { TitleText } from '@/components/tasks/TitleText';
 import { Chertezh3 } from '@/components/chertezh3/Chertezh3';
+import { HintFlow } from '@/components/tasks/card/HintFlow';
+import { otkrytPodskazku } from '@/lib/veroyatnost/razbor';
 import type { Scenariy } from '@/lib/chertezh3/scenariy';
 
 export interface Solid3TrainerProps {
@@ -400,6 +402,10 @@ function Solid3Screen({
   const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
   /* Неверные проверки за всю тренировку: строка «Неверных попыток» в итогах. */
   const [misses, setMisses] = useState(restored?.misses ?? 0);
+  /* Подсказка открывается после первой ошибки; после второй ошибки
+     в задании сайт предлагает решение. */
+  const [hint, setHint] = useState(restored?.hint ?? false);
+  const [oshibok, setOshibok] = useState(restored?.oshibok ?? 0);
 
   useSessionReport<Solid3Ui>(report, {
     index,
@@ -412,6 +418,8 @@ function Solid3Screen({
     missed,
     taskFrom,
     misses,
+    hint,
+    oshibok,
   });
 
   const total = order.length;
@@ -443,6 +451,19 @@ function Solid3Screen({
   }, [variant, solution]);
   const [step, setStep] = useState<number | null>(null);
 
+  /* Подсказка раскрывается, только когда её открыли: вопросы банка,
+     а если их у прототипа нет — первый шаг разбора. */
+  const podskazka = useMemo(() => {
+    if (variant === undefined || !hint) {
+      return null;
+    }
+    if (variant.podskazka !== null) {
+      return { voprosy: otkrytPodskazku(variant.podskazka, variant.seal), shag: null };
+    }
+    const first = openText(variant.steps, variant.seal).split('\n')[0] ?? '';
+    return { voprosy: null, shag: first };
+  }, [variant, hint]);
+
   if (item === undefined || kind === undefined || variant === undefined) {
     return <p className="z3t__wait">Собираем подход…</p>;
   }
@@ -453,6 +474,8 @@ function Solid3Screen({
     setChecked(null);
     setSolution(false);
     setMissed(false);
+    setHint(false);
+    setOshibok(0);
     setTaskFrom(elapsed());
   }
 
@@ -473,11 +496,12 @@ function Solid3Screen({
       /* Без ошибки и разбора — «решено», иначе «с подсказкой». Уже
          поставленная отметка не понижается повторной проверкой. */
       if (marks[index] === undefined) {
-        setMarks({ ...marks, [index]: missed || solution ? 'hinted' : 'right' });
+        setMarks({ ...marks, [index]: missed || solution || hint ? 'hinted' : 'right' });
       }
     } else {
       setMissed(true);
       setMisses(misses + 1);
+      setOshibok(oshibok + 1);
       setTried({ ...tried, [index]: true });
     }
   }
@@ -499,6 +523,8 @@ function Solid3Screen({
   }
 
   const last = index >= total - 1;
+  /* После второй ошибки в задании главная кнопка — решение. */
+  const kResheniyu = checked === 'wrong' && oshibok >= 2 && !solution;
 
   return (
     <section className="z3t">
@@ -573,19 +599,32 @@ function Solid3Screen({
             <p className="z3t__verdict-lead">
               {checked === 'right'
                 ? 'Разбор ниже — посмотрите, если решали иначе.'
-                : 'Попробуйте ещё раз или посмотрите разбор решения.'}
+                : kResheniyu
+                  ? 'Не получилось и во второй раз — посмотрите решение по шагам.'
+                  : hint
+                    ? 'Попробуйте ещё раз — подсказка ниже.'
+                    : 'Попробуйте ещё раз или откройте подсказку.'}
             </p>
           </div>
         )}
 
         <div className="z3t__actions">
           {checked === 'right' ? null : (
-            <Button onClick={check} disabled={value.trim() === ''}>
+            <Button
+              variant={kResheniyu ? 'secondary' : 'primary'}
+              onClick={check}
+              disabled={value.trim() === ''}
+            >
               Проверить
             </Button>
           )}
+          {checked === 'wrong' && !hint && !solution ? (
+            <Button variant="secondary" onClick={() => setHint(true)}>
+              Подсказка
+            </Button>
+          ) : null}
           <Button
-            variant="ghost"
+            variant={kResheniyu ? 'primary' : 'ghost'}
             onClick={() => {
               setSolution(true);
               setStep(0);
@@ -598,6 +637,15 @@ function Solid3Screen({
             Ещё один вариант
           </Button>
         </div>
+
+        {podskazka === null || solution ? null : podskazka.voprosy !== null ? (
+          <HintFlow key={`${index}-${item.kind}-${item.n}`} shagi={podskazka.voprosy} />
+        ) : (
+          <aside className="pc-hint" aria-live="polite">
+            <p className="pc-hint__head">Подсказка: с чего начать</p>
+            <p className="pc-hint__q" dangerouslySetInnerHTML={{ __html: podskazka.shag ?? '' }} />
+          </aside>
+        )}
 
         {solution ? (
           <SolutionSteps

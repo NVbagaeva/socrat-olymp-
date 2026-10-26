@@ -26,12 +26,17 @@ export interface Solid3Ui extends BaseUi {
   taskFrom: number | null;
   /** Неверных проверок за тренировку: строка «Неверных попыток» в итогах. */
   misses: number;
+  /** Открыта ли подсказка к текущему заданию. */
+  hint: boolean;
+  /** Неверных проверок в текущем задании: после второй предлагается решение. */
+  oshibok: number;
 }
 
 /** Достать из сохранённого состояния поля экрана; что не прочиталось — по умолчанию. */
 export function readSolid3Ui(base: BaseUi): Solid3Ui {
   const raw: Record<string, unknown> = isRecord(base) ? base : {};
   const misses = asNumberOrNull(raw['misses']);
+  const oshibok = asNumberOrNull(raw['oshibok']);
   return {
     ...base,
     value: asString(raw['value']),
@@ -40,5 +45,7 @@ export function readSolid3Ui(base: BaseUi): Solid3Ui {
     missed: asBool(raw['missed']),
     taskFrom: asNumberOrNull(raw['taskFrom']),
     misses: misses !== null && Number.isInteger(misses) && misses >= 0 ? misses : 0,
+    hint: asBool(raw['hint']),
+    oshibok: oshibok !== null && Number.isInteger(oshibok) && oshibok >= 0 ? oshibok : 0,
   };
 }

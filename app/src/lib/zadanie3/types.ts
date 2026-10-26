@@ -38,6 +38,18 @@ export interface Variant {
   params: Params;
 }
 
+/**
+ * Шаг подсказки-вопроса: вопрос и кнопки, одна верная (correct — её
+ * номер). Комментарий открывается после верного нажатия. Формулы —
+ * $…$, набираются KaTeX на сборке.
+ */
+export interface HintStep {
+  question: string;
+  options: string[];
+  correct: number;
+  comment?: string;
+}
+
 /** Шаг разбора: текст с числами варианта и значение, если шаг считает. */
 export interface Step {
   text: string;
@@ -66,6 +78,11 @@ export interface Prototype {
   chertezh(p: Params): Model;
   /** Шаги разбора; значение последнего шага равно ответу. */
   shagi(p: Params): Step[];
+  /**
+   * Подсказка-вопросы: ход решения кнопками, без самого ответа. Нет —
+   * тренажёр подсказывает первым шагом разбора.
+   */
+  podskazka?(p: Params): HintStep[];
   varianty: readonly Variant[];
 }
 
