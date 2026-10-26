@@ -374,44 +374,75 @@ export const P03_16: Prototype = {
 
 /* ── P03-17. Пирамида A, B, C, D, B₁ ────────────────────────────── */
 
-const PART_17 = ['A', 'B', 'C', 'D', 'B1'];
+/**
+ * Вершина пирамиды P03-17 — над одной из вершин основания (параметр v,
+ * по умолчанию B): у задач открытого банка она бывает и над A, и над C.
+ * Рёбра в условии называются от этой вершины: два ребра основания и
+ * боковое. a — длина AB (и CD), b — длина BC (и AD), c — высота.
+ */
+function vershina17(p: Params): 'A' | 'B' | 'C' | 'D' {
+  const v = p['v'];
+  return v === 'A' || v === 'C' || v === 'D' ? v : 'B';
+}
+
+function part17(p: Params): string[] {
+  return ['A', 'B', 'C', 'D', `${vershina17(p)}1`];
+}
+
+/** Рёбра условия P03-17 от вершины: имя и длина. */
+function rebra17(p: Params): [string, number][] {
+  const [a, b, c] = abc(p);
+  const v = vershina17(p);
+  const osnovanie: Record<typeof v, [string, number][]> = {
+    A: [['AB', a], ['AD', b]],
+    B: [['AB', a], ['BC', b]],
+    C: [['BC', b], ['CD', a]],
+    D: [['AD', b], ['CD', a]],
+  };
+  return [...osnovanie[v], [`${v}${v}_1`, c]];
+}
 
 export const P03_17: Prototype = {
   id: 'P03-17',
   razdel: 'I',
-  nazvanie: 'Пирамида $A$, $B$, $C$, $D$, $B_1$ в параллелепипеде',
+  nazvanie: 'Пирамида с основанием $ABCD$ в параллелепипеде',
   tip: 'объём пирамиды внутри параллелепипеда',
   zadachnik: [54, 57],
   status: 'есть',
   format: 'десятичная',
 
   uslovie: (p) =>
-    `Найдите объём многогранника, вершинами которого являются вершины $${listed(PART_17)}$ ` +
-    `прямоугольного параллелепипеда $${NAMES}$, у которого $AB=${ru(num(p, 'a'))}$, ` +
-    `$BC=${ru(num(p, 'b'))}$, $BB_1=${ru(num(p, 'c'))}$.`,
+    `Найдите объём многогранника, вершинами которого являются вершины $${listed(part17(p))}$ ` +
+    `прямоугольного параллелепипеда $${NAMES}$, у которого ` +
+    `${rebra17(p)
+      .map(([name, x]) => `$${name}=${ru(x)}$`)
+      .join(', ')}.`,
 
-  dopustimo: positive,
+  dopustimo: (p) => positive(p) && (p['v'] === undefined || ['A', 'B', 'C', 'D'].includes(String(p['v']))),
   otvet: (p) => {
     const [a, b, c] = abc(p);
     return (a * b * c) / 3;
   },
-  poModeli: (p) => partVolume(p, PART_17),
+  poModeli: (p) => partVolume(p, part17(p)),
 
-  chertezh: () =>
-    shapeLines(
+  chertezh: (p) => {
+    const v = vershina17(p);
+    return shapeLines(
       'box',
-      `Прямоугольный параллелепипед ${NAMES}, выделена пирамида с основанием ABCD и вершиной B₁`,
-      [
-        ['A', 'B1'],
-        ['C', 'B1'],
-        ['D', 'B1'],
-      ],
-    ),
+      `Прямоугольный параллелепипед ${NAMES}, выделена пирамида с основанием ABCD и вершиной ${letters(`${v}1`)}`,
+      ['A', 'B', 'C', 'D']
+        .filter((x) => x !== v)
+        .map((x): [string, string] => [x, `${v}1`]),
+    );
+  },
 
   shagi: (p) => {
     const [a, b, c] = abc(p);
+    const v = vershina17(p);
     return [
-      { text: 'Это пирамида с основанием $ABCD$ и вершиной $B_1$; её высота — боковое ребро $BB_1$.' },
+      {
+        text: `Это пирамида с основанием $ABCD$ и вершиной $${v}_1$; её высота — боковое ребро $${v}${v}_1$.`,
+      },
       {
         text: `Площадь основания: $${ru(a)} \\cdot ${ru(b)} = ${ru(a * b)}$.`,
         value: a * b,
@@ -655,19 +686,20 @@ function podskazka16(p: Params): HintStep[] {
 }
 
 function podskazka17(p: Params): HintStep[] {
-  const v = abc(p).reduce((x, y) => x * y, 1);
+  const obem = abc(p).reduce((x, y) => x * y, 1);
+  const v = vershina17(p);
   return [
     vopros(
       'Что это за многогранник?',
-      'Пирамида с основанием $ABCD$ и высотой $BB_1$',
+      `Пирамида с основанием $ABCD$ и высотой $${v}${v}_1$`,
       [
         'Призма с основанием $ABCD$',
         'Пирамида с основанием $ABB_1A_1$ и вершиной $D$',
-        'Тетраэдр $ABCB_1$',
+        `Тетраэдр $ABC${v}_1$`,
       ],
     ),
     dolya('параллелепипеда', 'Треть', 'У пирамиды и параллелепипеда общие основание и высота.'),
-    obemParallelepipeda(p, v / 3),
+    obemParallelepipeda(p, obem / 3),
   ];
 }
 
