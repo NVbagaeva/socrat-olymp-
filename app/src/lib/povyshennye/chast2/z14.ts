@@ -62,8 +62,12 @@ const LOG = {
 
 export interface P14 {
   a: keyof typeof A_TERM;
-  /** Знак перед вторым слагаемым. */
+  /** Знак перед слагаемым со сдвигом π/4. */
   z: 1 | -1;
+  /** Знак перед слагаемым с множителем √2 (по умолчанию +). */
+  za?: 1 | -1;
+  /** Слагаемое со сдвигом π/4 стоит первым (как в варианте 2). */
+  bFirst?: boolean;
   b: keyof typeof B_TERM;
   log: keyof typeof LOG;
   /** Отрезок [lo·π/2; hi·π/2]. */
@@ -72,11 +76,12 @@ export interface P14 {
 }
 
 /** Коэффициенты α, β в α sin x + β cos x = 1; null — сочетание не годится. */
-export function koeff14(p: Pick<P14, 'a' | 'z' | 'b'>): { al: number; be: number } | null {
+export function koeff14(p: Pick<P14, 'a' | 'z' | 'b' | 'za'>): { al: number; be: number } | null {
   const A = A_TERM[p.a];
   const B = B_TERM[p.b];
-  const al = 2 * A.s + p.z * B.s;
-  const be = 2 * A.c + p.z * B.c;
+  const za = p.za ?? 1;
+  const al = 2 * za * A.s + p.z * B.s;
+  const be = 2 * za * A.c + p.z * B.c;
   return Math.abs(al) === 1 && Math.abs(be) === 1 ? { al, be } : null;
 }
 
@@ -118,7 +123,10 @@ function sobrat(p: P14): Chast2Zadacha {
   if (vse.length !== 2 || p.hi - p.lo !== 3)
     throw new Error(`z14: на отрезке ${vse.length} корней`);
 
-  const arg = `${A.tex}${p.z < 0 ? '-' : '+'}${B.tex}`;
+  const za = p.za ?? 1;
+  const arg = p.bFirst
+    ? `${p.z < 0 ? '-' : ''}${B.tex}${za < 0 ? '-' : '+'}${A.tex}`
+    : `${za < 0 ? '-' : ''}${A.tex}${p.z < 0 ? '-' : '+'}${B.tex}`;
   const otrTex = `\\left[${piTex(polPi(p.lo))};\\ ${piTex(polPi(p.hi))}\\right]`;
   const uslovie =
     `а) Решите уравнение $\\log_{${L.osn}}\\left(${arg}\\right)=${L.prav}.$\n` +
@@ -128,6 +136,12 @@ function sobrat(p: P14): Chast2Zadacha {
   const aVal = A.s !== 0 ? koefTex(A.s, '\\sqrt2\\sin x') : koefTex(A.c, '\\sqrt2\\cos x');
   const bVal = `\\dfrac{${koefTex(B.s, '\\sin x')}${sgn(B.c)}\\cos x}{\\sqrt2}`;
   const bRaskryt = `${B.f}=${bVal}`;
+  /* Слагаемые со своими знаками и в порядке условия. */
+  const aSum =
+    A.s !== 0 ? koefTex(za * A.s, '\\sqrt2\\sin x') : koefTex(za * A.c, '\\sqrt2\\cos x');
+  const bSum = `${p.z < 0 ? '-' : ''}${bVal}`;
+  const plus = (t: string) => (t.startsWith('-') ? t : `+${t}`);
+  const summa = p.bFirst ? `${bSum}${plus(aSum)}` : `${aSum}${plus(bSum)}`;
   const sum = `${al < 0 ? '-' : ''}\\sin x${be < 0 ? '-' : '+'}\\cos x`;
 
   /* Вспомогательный угол. */
@@ -182,7 +196,7 @@ function sobrat(p: P14): Chast2Zadacha {
         lines: [
           `По формулам приведения $${A.tex}=${aVal}$.`,
           `По формуле ${B.tex.startsWith('\\cos') ? 'косинуса' : 'синуса'} ${B.f.includes('-') ? 'разности' : 'суммы'} $${B.tex}=${bRaskryt}$.`,
-          `Аргумент логарифма: $${aVal}${p.z < 0 ? '-' : '+'}${bVal}=\\dfrac{${sum}}{\\sqrt2}$.`,
+          `Аргумент логарифма: $${summa}=\\dfrac{${sum}}{\\sqrt2}$.`,
         ],
       },
       {

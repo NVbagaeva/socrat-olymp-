@@ -16,6 +16,10 @@
         по критериям → итог из 33 и тестовый балл; на 320 и 375 px нет
         прокрутки вбок; на листах часть 2 — с новой страницы, плашки,
         место для решения, критерии и теоремы у учителя.
+     6. Часть 2 остальных вариантов (S_CHAST2): решения 14–20 открываются,
+        формулы набраны, у 15 и 18 ссылки на теоремы; на 320 px у 15, 18, 19
+        нет прокрутки вбок; лист ученика — задания 14–20 по странице с
+        клеткой, у учителя — критерии.
 
    --shots — снимки в docs/povyshennye-snimki/ (компьютер и телефон). */
 
@@ -53,7 +57,7 @@ function ok(cond, where, message) {
 /* Верные ответы версии 1.1 — тот же набор, что соберёт браузер. */
 const { povSetIz } = requireSrc('lib/povyshennye/set');
 const { VARIANT } = requireSrc('lib/povyshennye/dannye/v01');
-const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');
+const { GOTOVY, S_CHAST2 } = requireSrc('lib/povyshennye/dannye/index');
 const { normalizeAnswer } = requireSrc('lib/variant/online/normalize');
 const SET = povSetIz(1, VARIANT.versii);
 const answerOf = (v, i) =>
@@ -396,9 +400,12 @@ for (const list of ['uchenik', 'uchitel']) {
         const cols = Number(fill.dataset.cols);
         return {
           no: Number(card.querySelector('.sheet-task-no').textContent),
-          pervaya: kids.indexOf(card) === 0 || (kids.indexOf(card) === 1 && kids[0].classList.contains('var-part2-head')),
+          pervaya:
+            kids.indexOf(card) === 0 ||
+            (kids.indexOf(card) === 1 && kids[0].classList.contains('var-part2-head')),
           zazor: (flow.getBoundingClientRect().bottom - fb.bottom) / cell,
-          celye: Math.abs(fb.height - 2 - rows * cell) < 1 && Math.abs(fb.width - 2 - cols * cell) < 1,
+          celye:
+            Math.abs(fb.height - 2 - rows * cell) < 1 && Math.abs(fb.width - 2 - cols * cell) < 1,
           rows,
           stroka: page.querySelector('.sheet-answer-line') === null,
         };
@@ -426,17 +433,109 @@ for (const list of ['uchenik', 'uchitel']) {
     ok(r.stranicy.length === 7, 'часть 2: семь заданий по странице', String(r.stranicy.length));
     for (const z of r.stranicy) {
       ok(z.pervaya, `№${z.no} — с новой страницы`, '');
-      ok(z.zazor >= 0 && z.zazor < 1, `№${z.no}: клетка до нижнего поля (зазор ${z.zazor.toFixed(2)} клетки)`, '');
+      ok(
+        z.zazor >= 0 && z.zazor < 1,
+        `№${z.no}: клетка до нижнего поля (зазор ${z.zazor.toFixed(2)} клетки)`,
+        '',
+      );
       ok(z.celye && z.rows > 0, `№${z.no}: целое число клеток (${z.rows} строк)`, '');
       ok(z.stroka, `№${z.no}: без строки «Ответ:»`, '');
     }
-    ok(r.stranic1 >= 1 && r.stranic1 <= 4, `часть 1 — ${r.stranic1} стр., как раньше`, String(r.stranic1));
+    ok(
+      r.stranic1 >= 1 && r.stranic1 <= 4,
+      `часть 1 — ${r.stranic1} стр., как раньше`,
+      String(r.stranic1),
+    );
   }
   if (list === 'uchitel') {
     ok(r.krit === 7, 'критерии 14–20 у учителя', String(r.krit));
     ok(r.teor >= 10, `теоремы в конце листа учителя (${r.teor})`, 'мало');
   }
   await p.close();
+}
+
+console.log('6. Часть 2 остальных вариантов');
+for (const k of S_CHAST2.filter((x) => x !== 1)) {
+  const kod = `PV-${String(k).padStart(2, '0')}`;
+  const v = ((k - 1) % 6) + 1;
+  const p = await desk.newPage();
+  p.on('pageerror', (e) => errors.push(`${kod}: ${String(e)}`));
+  await p.goto(`${BASE}/variant/reshat/?kod=${kod}&v=${v}&r=t&tm=0&w=ege`);
+  await p.getByTestId('vo-begin').click({ timeout: 60_000 });
+  await p.getByTestId('vo-card').waitFor();
+  for (const no of [14, 15, 16, 17, 18, 19, 20]) {
+    await p
+      .locator('[data-testid=vo-strip-part2] .vo-strip__no', { hasText: new RegExp(`^${no}$`) })
+      .click();
+    await p.getByTestId(`c2-${no}-reshenie`).click();
+    await p.getByTestId(`c2-${no}-reshenie-ok`).click();
+    const telo = p.getByTestId(`c2-${no}-reshenie-telo`);
+    await telo.waitFor();
+    const html = (await telo.innerHTML()) ?? '';
+    ok(!html.includes('katex-error'), `${kod}.${v} №${no}: решение набрано`, 'katex-error');
+    if (no === 15 || no === 18) {
+      const n = await telo.locator('.teor-ssylka').count();
+      ok(n >= 3, `${kod}.${v} №${no}: ссылки на теоремы (${n})`, 'мало');
+      await telo.locator('.teor-ssylka').first().click();
+      await p.getByTestId('teorema-okno').waitFor({ timeout: 30_000 });
+      await p.keyboard.press('Escape');
+    }
+  }
+  await shot(p, `chast2-${kod}-reshenie`);
+  await p.close();
+
+  const ctx = await browser.newContext({
+    ...devices['iPhone 12'],
+    viewport: { width: 320, height: 800 },
+  });
+  await welcomeSeen(ctx);
+  const m = await ctx.newPage();
+  m.on('pageerror', (e) => errors.push(`${kod} 320: ${String(e)}`));
+  await m.goto(`${BASE}/variant/reshat/?kod=${kod}&v=${v}&r=t&tm=0&w=ege`);
+  await m.getByTestId('vo-begin').click({ timeout: 60_000 });
+  for (const no of [15, 18, 19]) {
+    await m
+      .locator('[data-testid=vo-strip-part2] .vo-strip__no', { hasText: new RegExp(`^${no}$`) })
+      .click();
+    await m.getByTestId(`c2-${no}-reshenie`).click();
+    await m.getByTestId(`c2-${no}-reshenie-ok`).click();
+    await m.getByTestId(`c2-${no}-reshenie-telo`).waitFor();
+    const sx = await m.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    ok(sx <= 0, `${kod}.${v}, 320 px, №${no}: нет прокрутки вбок`, String(sx));
+  }
+  await ctx.close();
+
+  for (const list of ['uchenik', 'uchitel']) {
+    const q = await desk.newPage();
+    q.on('pageerror', (e) => errors.push(`${kod} ${list}: ${String(e)}`));
+    await q.addInitScript(() => {
+      window.print = () => {};
+    });
+    await q.setViewportSize({ width: 900, height: 1200 });
+    await q.goto(`${BASE}/variant/pechat/?kod=${kod}&v=${v}&list=${list}`);
+    await q.waitForFunction(() => window.sheetPagination !== undefined, null, { timeout: 120_000 });
+    const r = await q.evaluate(() => ({
+      stranicy: [...document.querySelectorAll('#sheet-pages .sheet-tasks--page')].map((card) => {
+        const page = card.closest('.sheet-page');
+        const fill = page.querySelector('.sheet-fill');
+        return {
+          no: Number(card.querySelector('.sheet-task-no').textContent),
+          rows: Number(fill?.dataset.rows ?? 0),
+        };
+      }),
+      krit: document.querySelectorAll('#sheet-pages .c2-krit-print').length,
+      oshibki: document.querySelectorAll('#sheet-pages .katex-error').length,
+    }));
+    ok(r.oshibki === 0, `${kod}.${v} лист «${list}»: формулы набраны`, String(r.oshibki));
+    if (list === 'uchenik') {
+      ok(
+        r.stranicy.length === 7 && r.stranicy.every((z) => z.rows > 0),
+        `${kod}.${v}: задания 14–20 по странице с клеткой`,
+        JSON.stringify(r.stranicy),
+      );
+    } else ok(r.krit === 7, `${kod}.${v}: критерии 14–20 у учителя`, String(r.krit));
+    await q.close();
+  }
 }
 
 ok(errors.length === 0, 'ошибок на страницах нет', errors.join('\n'));

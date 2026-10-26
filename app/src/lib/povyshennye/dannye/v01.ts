@@ -845,7 +845,7 @@ export const VARIANT: VariantPV = {
       { s: 'z15.rombPiramida', p: { osn: 'ugol', a2: 16, phi: 45 } },
       { s: 'z16.pokazKoren', p: { q: 2, e: 3, y1: 1, y2: 3 } },
       { s: 'z17.kachka', p: { T: 12, sudno: 0 } },
-      { s: 'z18.pyatiugolnik', p: { e: 5, b: 14, l: 15 } },
+      { s: 'z18.pyatiugolnik', p: { e: 21, b: 30, l: 41 } },
       { s: 'z19.logKoren', p: { m: 4, b: 2, c: 4 } },
       { s: 'z20.zabor', p: { S: 120, p: 30, A: 550, B: 500 } },
     ],

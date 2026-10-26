@@ -11,7 +11,9 @@
  */
 
 import { renderPlan } from '@/lib/planimetriya/render';
-import type { Element, Scena, T2 } from '@/lib/planimetriya/types';
+import type { Scena } from '@/lib/planimetriya/types';
+import { ALFA, BEZ, PLOSKOST, im, mn, otr, pr, pun, sh, tch, ug } from './elementy';
+import { SPISOK_B } from './semyaB';
 
 export type RazdelTeoremy = 'planimetriya' | 'stereometriya';
 
@@ -27,30 +29,6 @@ export interface Teorema {
   dokazatelstvo: string[];
   scena: () => Scena;
 }
-
-const otr = (a: string, b: string, o: Partial<Element> = {}): Element =>
-  ({ tip: 'otrezok', a, b, ...o }) as Element;
-const pun = (a: string, b: string): Element => otr(a, b, { stil: 'punktir' });
-const mn = (...tochki: string[]): Element => ({ tip: 'mnogougolnik', tochki });
-const tch = (t: string): Element => ({ tip: 'tochka', t });
-const pr = (a: string, v: string, b: string): Element => ({ tip: 'ugol', a, v, b, pryamoy: true });
-const ug = (a: string, v: string, b: string, dugi: 1 | 2 = 1): Element => ({
-  tip: 'ugol',
-  a,
-  v,
-  b,
-  dugi,
-});
-const sh = (a: string, b: string, n: 1 | 2): Element =>
-  ({ tip: 'otrezok', a, b, shtrihi: n, tolkoShtrihi: true }) as Element;
-
-/** Плоскость параллелограммом: углы P1…P4, без подписей. */
-const PLOSKOST: Record<string, T2> = { P1: [0, 0], P2: [7, 0], P3: [9, 3], P4: [2, 3] };
-const BEZ = ['P1', 'P2', 'P3', 'P4'];
-/** Подпись прямой или плоскости буквой у отрезка (линия уже нарисована). */
-const im = (a: string, b: string, znachenie: string): Element =>
-  ({ tip: 'otrezok', a, b, tolkoShtrihi: true, vydelit: 'dano', znachenie }) as Element;
-const ALFA = im('P1', 'P2', 'α');
 
 const SPISOK: Teorema[] = [
   /* ── Планиметрия ──────────────────────────────────────────── */
@@ -310,6 +288,120 @@ const SPISOK: Teorema[] = [
     }),
   },
 
+  {
+    id: 'bissektrisa-gmt',
+    razdel: 'planimetriya',
+    nazvanie: 'Точки, равноудалённые от сторон угла',
+    formulirovka:
+      'Точка, лежащая внутри угла и равноудалённая от его сторон, лежит на биссектрисе этого угла (и наоборот: каждая точка биссектрисы равноудалена от сторон угла).',
+    dokazatelstvo: [
+      'Пусть точка $H$ внутри угла $B$, $HP$ и $HQ$ — перпендикуляры к сторонам, $HP=HQ$.',
+      'Прямоугольные треугольники $BPH$ и $BQH$ равны по гипотенузе $BH$ и катету $HP=HQ$.',
+      'Значит, $\\angle PBH=\\angle QBH$, то есть $BH$ — биссектриса угла $B$. Обратно: если $BH$ — биссектриса, треугольники равны по гипотенузе и острому углу, и $HP=HQ$.',
+    ],
+    scena: () => {
+      const a = 28 * (Math.PI / 180);
+      const d = 4;
+      return {
+        tochki: {
+          B: [0, 0],
+          H: [d, 0],
+          P: [d * Math.cos(a) ** 2, d * Math.cos(a) * Math.sin(a)],
+          Q: [d * Math.cos(a) ** 2, -d * Math.cos(a) * Math.sin(a)],
+          X: [6 * Math.cos(a), 6 * Math.sin(a)],
+          Y: [6 * Math.cos(a), -6 * Math.sin(a)],
+        },
+        elementy: [
+          otr('B', 'X'),
+          otr('B', 'Y'),
+          pun('B', 'H'),
+          otr('H', 'P'),
+          otr('H', 'Q'),
+          pr('H', 'P', 'B'),
+          pr('H', 'Q', 'B'),
+          sh('H', 'P', 1),
+          sh('H', 'Q', 1),
+          ug('P', 'B', 'H'),
+          ug('H', 'B', 'Q'),
+          tch('H'),
+        ],
+        bezPodpisi: ['X', 'Y'],
+      };
+    },
+  },
+  {
+    id: 'vpisannaya-trapeciya',
+    razdel: 'planimetriya',
+    nazvanie: 'Трапеция, вписанная в окружность',
+    formulirovka:
+      'Трапеция, вписанная в окружность, равнобедренная. Обратно: около любой равнобедренной трапеции можно описать окружность, и её центр лежит на оси симметрии трапеции.',
+    dokazatelstvo: [
+      'Пусть трапеция $ABCD$ ($AD\\parallel BC$) вписана в окружность. Углы $CAD$ и $ACB$ равны как накрест лежащие при параллельных $AD$ и $BC$.',
+      'Это вписанные углы, опирающиеся на хорды $CD$ и $AB$; равные вписанные углы опираются на равные хорды, поэтому $AB=CD$ — трапеция равнобедренная.',
+      'Обратно: у равнобедренной трапеции ось симметрии — серединный перпендикуляр к основаниям. Серединный перпендикуляр к $AB$ пересекает ось в точке $O$; по симметрии $O$ лежит и на серединном перпендикуляре к $CD$. Тогда $OA=OB$, $OA=OD$, $OC=OD$ — все четыре вершины на окружности с центром $O$.',
+    ],
+    scena: () => {
+      const r = 3;
+      const ug1 = (200 * Math.PI) / 180;
+      const ug2 = (130 * Math.PI) / 180;
+      return {
+        tochki: {
+          O: [0, 0],
+          A: [r * Math.cos(ug1), r * Math.sin(ug1)],
+          D: [-r * Math.cos(ug1), r * Math.sin(ug1)],
+          B: [r * Math.cos(ug2), r * Math.sin(ug2)],
+          C: [-r * Math.cos(ug2), r * Math.sin(ug2)],
+        },
+        okruzhnosti: { w: { centr: 'O', radius: r } },
+        elementy: [
+          { tip: 'okruzhnost', okr: 'w' },
+          mn('A', 'B', 'C', 'D'),
+          pun('A', 'C'),
+          ug('C', 'A', 'D'),
+          ug('A', 'C', 'B'),
+          sh('A', 'B', 1),
+          sh('C', 'D', 1),
+          tch('O'),
+        ],
+      };
+    },
+  },
+  {
+    id: 'srednyaya-liniya-trapecii',
+    razdel: 'planimetriya',
+    nazvanie: 'Средняя линия трапеции',
+    formulirovka:
+      'Средняя линия трапеции (отрезок, соединяющий середины боковых сторон) параллельна основаниям и равна их полусумме. Она делит высоту трапеции пополам.',
+    dokazatelstvo: [
+      'Пусть $K$ и $M$ — середины боковых сторон $AB$ и $CD$ трапеции $ABCD$. Проведём прямую $BM$ до пересечения с прямой $AD$ в точке $E$.',
+      'Треугольники $BCM$ и $EDM$ равны: $CM=MD$, вертикальные углы при $M$ равны, $\\angle BCM=\\angle EDM$ как накрест лежащие. Поэтому $BM=ME$ и $DE=BC$.',
+      'В треугольнике $ABE$ отрезок $KM$ — средняя линия: $KM\\parallel AE$ и $KM=\\dfrac{AE}{2}=\\dfrac{AD+BC}{2}$.',
+      'Прямая $KM$ параллельна основаниям и проходит через середину боковой стороны, поэтому делит пополам и высоту (по теореме Фалеса).',
+    ],
+    scena: () => ({
+      tochki: {
+        A: [0, 0],
+        D: [7, 0],
+        B: [1.5, 3],
+        C: [4, 3],
+        K: [0.75, 1.5],
+        M: [5.5, 1.5],
+        E: [9.5, 0],
+      },
+      elementy: [
+        mn('A', 'B', 'C', 'D'),
+        otr('K', 'M'),
+        pun('M', 'E'),
+        pun('D', 'E'),
+        pun('B', 'M'),
+        sh('A', 'K', 1),
+        sh('K', 'B', 1),
+        sh('C', 'M', 2),
+        sh('M', 'D', 2),
+      ],
+    }),
+  },
+
   /* ── Стереометрия ─────────────────────────────────────────── */
   {
     id: 'perp-parallel',
@@ -507,10 +599,115 @@ const SPISOK: Teorema[] = [
       bezPodpisi: [...BEZ, 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
     }),
   },
+  {
+    id: 'tri-perpendikulyara',
+    razdel: 'stereometriya',
+    nazvanie: 'Теорема о трёх перпендикулярах',
+    formulirovka:
+      'Прямая, проведённая в плоскости через основание наклонной перпендикулярно её проекции, перпендикулярна и самой наклонной. Верно и обратное: если прямая плоскости перпендикулярна наклонной, то она перпендикулярна и её проекции.',
+    dokazatelstvo: [
+      'Пусть $SH$ — перпендикуляр к плоскости $\\alpha$, $SP$ — наклонная, $HP$ — её проекция, прямая $a$ лежит в $\\alpha$ и проходит через $P$.',
+      'Прямая $a$ перпендикулярна $SH$, так как $SH\\perp\\alpha$.',
+      'Если $a\\perp HP$, то $a$ перпендикулярна двум пересекающимся прямым $SH$ и $HP$ плоскости $SHP$, значит, $a\\perp(SHP)$ и $a\\perp SP$.',
+      'Обратно: если $a\\perp SP$, то $a$ перпендикулярна $SP$ и $SH$, то есть плоскости $SHP$, и потому $a\\perp HP$.',
+    ],
+    scena: () => ({
+      tochki: { ...PLOSKOST, H: [3, 1.2], S: [3, 4.8], P: [6, 1.8], X: [5.1, 0.4], Y: [6.9, 3.2] },
+      elementy: [
+        mn('P1', 'P2', 'P3', 'P4'),
+        ALFA,
+        otr('S', 'H'),
+        otr('S', 'P'),
+        otr('H', 'P'),
+        otr('X', 'Y'),
+        im('X', 'P', 'a'),
+        pr('S', 'H', 'P'),
+        pr('H', 'P', 'Y'),
+        pr('S', 'P', 'Y'),
+        tch('H'),
+        tch('P'),
+      ],
+      podpisi: ['S', 'H', 'P'],
+      bezPodpisi: [...BEZ, 'X', 'Y'],
+    }),
+  },
+  {
+    id: 'naklonnye-proekcii',
+    razdel: 'stereometriya',
+    nazvanie: 'Наклонные и их проекции',
+    formulirovka:
+      'Если из одной точки к плоскости проведены перпендикуляр и наклонные, то равные наклонные имеют равные проекции, и наоборот: наклонные с равными проекциями равны.',
+    dokazatelstvo: [
+      'Пусть $SH$ — перпендикуляр к плоскости, $SA$ и $SB$ — наклонные, $HA$ и $HB$ — их проекции.',
+      'Треугольники $SHA$ и $SHB$ прямоугольные с общим катетом $SH$.',
+      'По теореме Пифагора $SA^2=SH^2+HA^2$ и $SB^2=SH^2+HB^2$. Поэтому $SA=SB$ тогда и только тогда, когда $HA=HB$.',
+    ],
+    scena: () => ({
+      tochki: { ...PLOSKOST, H: [4.5, 1.5], S: [4.5, 5], A: [2, 0.8], B: [7, 2.2] },
+      elementy: [
+        mn('P1', 'P2', 'P3', 'P4'),
+        ALFA,
+        otr('S', 'H'),
+        otr('S', 'A'),
+        otr('S', 'B'),
+        pun('H', 'A'),
+        pun('H', 'B'),
+        pr('S', 'H', 'B'),
+        sh('H', 'A', 1),
+        sh('H', 'B', 1),
+        sh('S', 'A', 2),
+        sh('S', 'B', 2),
+        tch('H'),
+      ],
+      podpisi: ['S', 'H', 'A', 'B'],
+      bezPodpisi: BEZ,
+    }),
+  },
+  {
+    id: 'ugol-mezhdu-ploskostyami',
+    razdel: 'stereometriya',
+    nazvanie: 'Линейный угол двугранного угла',
+    formulirovka:
+      'Угол между пересекающимися плоскостями равен линейному углу двугранного угла: углу между перпендикулярами к линии пересечения плоскостей, проведёнными в этих плоскостях из одной её точки (берётся угол не больше $90^\\circ$).',
+    zagolovokDok: 'Почему угол не зависит от выбора точки',
+    dokazatelstvo: [
+      'Пусть плоскости $\\alpha$ и $\\beta$ пересекаются по прямой $l$; в точках $P$ и $P_1$ прямой $l$ проведены перпендикуляры к $l$: $PA$, $P_1A_1$ в $\\alpha$ и $PB$, $P_1B_1$ в $\\beta$.',
+      'Перпендикуляры к одной прямой в одной плоскости параллельны: $PA\\parallel P_1A_1$, $PB\\parallel P_1B_1$.',
+      'Углы с соответственно параллельными и одинаково направленными сторонами равны, поэтому $\\angle APB=\\angle A_1P_1B_1$ — линейный угол один и тот же в любой точке $l$.',
+    ],
+    scena: () => ({
+      tochki: {
+        ...PLOSKOST,
+        L1: [1, 1.5],
+        L2: [8, 1.5],
+        P: [4.5, 1.5],
+        A: [5.5, 3],
+        B: [4.5, 5],
+        Q1: [1, 5],
+        Q2: [8, 5],
+      },
+      elementy: [
+        mn('P1', 'P2', 'P3', 'P4'),
+        ALFA,
+        otr('L1', 'L2'),
+        otr('L1', 'Q1'),
+        otr('L2', 'Q2'),
+        otr('Q1', 'Q2'),
+        im('Q1', 'Q2', 'β'),
+        im('L1', 'P', 'l'),
+        otr('P', 'A'),
+        otr('P', 'B'),
+        ug('A', 'P', 'B'),
+        tch('P'),
+      ],
+      podpisi: ['P', 'A', 'B'],
+      bezPodpisi: [...BEZ, 'L1', 'L2', 'Q1', 'Q2'],
+    }),
+  },
 ];
 
 export const TEOREMY: Readonly<Record<string, Teorema>> = Object.fromEntries(
-  SPISOK.map((t) => [t.id, t]),
+  [...SPISOK, ...SPISOK_B].map((t) => [t.id, t]),
 );
 
 export function teorema(id: string): Teorema {

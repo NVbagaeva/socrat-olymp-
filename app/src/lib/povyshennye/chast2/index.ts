@@ -8,7 +8,21 @@
 
 import { zagruzitVariant } from '../dannye';
 import type { Zapis } from '../types';
+import { B14_POKAZ_STEPEN } from './b14';
+import { B15_PRIZMA_PLOSKOST } from './b15';
+import { B16_LOG_BIKVADRAT } from './b16';
+import { B17_DZHOUL } from './b17';
+import { B18_PRYAMOUGOLNIK } from './b18';
+import { B19_KOREN4 } from './b19';
+import { B20_POKUPKA } from './b20';
 import type { Chast2Zadacha, Shablon2 } from './types';
+import { C14_TG_PODSTANOVKA } from './c14';
+import { C15_SFERA_PIRAMIDA } from './c15';
+import { C16_POKAZ_LOG } from './c16';
+import { C17_MAKSVELL } from './c17';
+import { C18_TRAPECIYA_SREDNYAYA } from './c18';
+import { C19_MODUL } from './c19';
+import { C20_SREDNIE } from './c20';
 import { Z14_LOG_TRIG } from './z14';
 import { Z15_ROMB_PIRAMIDA } from './z15';
 import { Z16_POKAZ_KOREN } from './z16';
@@ -26,6 +40,21 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'z18.pyatiugolnik': Z18_PYATIUGOLNIK,
   'z19.logKoren': Z19_LOG_KOREN,
   'z20.zabor': Z20_ZABOR,
+  'b14.pokazStepen': B14_POKAZ_STEPEN,
+  'b15.prizmaPloskost': B15_PRIZMA_PLOSKOST,
+  'b16.logBikvadrat': B16_LOG_BIKVADRAT,
+  'b17.dzhoul': B17_DZHOUL,
+  'b18.pryamougolnik': B18_PRYAMOUGOLNIK,
+  'b19.koren4': B19_KOREN4,
+  'b20.pokupka': B20_POKUPKA,
+  /* Семья C: варианты 5 и 6. */
+  'c14.tgPodstanovka': C14_TG_PODSTANOVKA,
+  'c15.sferaPiramida': C15_SFERA_PIRAMIDA,
+  'c16.pokazLog': C16_POKAZ_LOG,
+  'c17.maksvell': C17_MAKSVELL,
+  'c18.trapeciyaSrednyaya': C18_TRAPECIYA_SREDNYAYA,
+  'c19.modul': C19_MODUL,
+  'c20.srednie': C20_SREDNIE,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
