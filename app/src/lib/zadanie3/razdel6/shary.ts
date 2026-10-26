@@ -13,7 +13,8 @@
 import { areaUnits, approxArea, solveBySearch, volumeUnits } from './common';
 import { twoBalls } from './drawings';
 import { razaWord, ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -71,6 +72,7 @@ export const P03_71: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka71(p),
   varianty: [
     variant(1, 'задачник', 'задачник 242', { a: 9, b: 12 }),
     variant(2, 'задачник', 'задачник 243', { a: 16, b: 30 }),
@@ -121,6 +123,7 @@ export const P03_72: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka72(p),
   varianty: [
     variant(1, 'задачник', 'задачник 246', { k: 2 }),
     variant(2, 'задачник', 'задачник 247', { k: 3 }),
@@ -170,6 +173,7 @@ export const P03_73: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka73(p),
   varianty: [
     variant(1, 'задачник', 'задачник 250', { k: 9 }),
     variant(2, 'задачник', 'задачник 251', { k: 6 }),
@@ -183,3 +187,82 @@ export const P03_73: Prototype = {
     variant(10, 'новый', 'новый', { k: 12 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Формула площади поверхности шара: общий первый шаг. */
+function formulaPloshchadi(): HintStep {
+  return vopros('По какой формуле считается площадь поверхности шара?', '$4\\pi r^2$', [
+    '$\\frac{4}{3}\\pi r^3$',
+    '$\\pi r^2$',
+    '$2\\pi r^2$',
+  ]);
+}
+
+function podskazka71(p: Params): HintStep[] {
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  const sum = a * a + b * b;
+  const otvet = Math.sqrt(sum);
+  return [
+    formulaPloshchadi(),
+    vopros(
+      'Какое равенство получится для радиуса $R$ после сокращения на $4\\pi$?',
+      `$R^2 = ${tex(a)}^2 + ${tex(b)}^2$`,
+      [
+        `$R = ${tex(a)} + ${tex(b)}$`,
+        `$R^3 = ${tex(a)}^3 + ${tex(b)}^3$`,
+        `$R^2 = (${tex(a)} + ${tex(b)})^2$`,
+      ],
+    ),
+    vopros(
+      'Чему равен квадрат искомого радиуса?',
+      chislo(sum),
+      chisla([(a + b) ** 2, a + b, 2 * sum, a * a * b * b], sum, otvet),
+    ),
+    vopros('Как найти радиус?', `$\\sqrt{${tex(sum)}}$`, [
+      `$${tex(sum)} : 2$`,
+      `$\\frac{${tex(sum)}}{4\\pi}$`,
+    ]),
+  ];
+}
+
+function podskazka72(p: Params): HintStep[] {
+  const k = tex(num(p, 'k'));
+  return [
+    formulaPloshchadi(),
+    vopros(
+      'Как площадь поверхности шара зависит от радиуса?',
+      'Пропорциональна квадрату радиуса',
+      ['Пропорциональна радиусу', 'Пропорциональна кубу радиуса'],
+      'Множитель $4\\pi$ у обоих шаров одинаковый и в отношении сокращается.',
+    ),
+    vopros('Как найти, во сколько раз поверхность первого шара больше?', `$${k}^2$`, [
+      `$${k}^3$`,
+      `$\\sqrt{${k}}$`,
+      `$4 \\cdot ${k}^2$`,
+    ]),
+  ];
+}
+
+function podskazka73(p: Params): HintStep[] {
+  const k = tex(num(p, 'k'));
+  return [
+    vopros('По какой формуле считается объём шара?', '$\\frac{4}{3}\\pi r^3$', [
+      '$4\\pi r^2$',
+      '$\\frac{1}{3}\\pi r^3$',
+      '$\\frac{4}{3}\\pi r^2$',
+    ]),
+    vopros(
+      'Как объём шара зависит от радиуса?',
+      'Пропорционален кубу радиуса',
+      ['Пропорционален квадрату радиуса', 'Пропорционален радиусу'],
+      'Множитель $\\frac{4}{3}\\pi$ у обоих шаров одинаковый и в отношении сокращается.',
+    ),
+    vopros('Как найти, во сколько раз объём первого шара больше?', `$${k}^3$`, [
+      `$${k}^2$`,
+      `$3 \\cdot ${k}$`,
+      `$\\frac{4}{3} \\cdot ${k}^3$`,
+    ]),
+  ];
+}
