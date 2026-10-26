@@ -297,11 +297,10 @@ function podskazka88(p: Params): HintStep[] {
   return [
     razmeryKonusa(),
     obrazuyuschaya(),
-    vopros(
-      'Как найти образующую?',
-      `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`,
-      [`$${tex(k)}\\sqrt{2} : \\sqrt{2}$`, `$2 \\cdot ${tex(k)}\\sqrt{2}$`],
-    ),
+    vopros('Как найти образующую?', `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`, [
+      `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`,
+      `$2 \\cdot ${tex(k)}\\sqrt{2}$`,
+    ]),
   ];
 }
 
@@ -310,11 +309,10 @@ function podskazka89(p: Params): HintStep[] {
   return [
     razmeryKonusa(),
     obrazuyuschaya(),
-    vopros(
-      'Как найти радиус сферы?',
-      `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`,
-      [`$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`, `$2 \\cdot ${tex(k)}\\sqrt{2}$`],
-    ),
+    vopros('Как найти радиус сферы?', `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`, [
+      `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`,
+      `$2 \\cdot ${tex(k)}\\sqrt{2}$`,
+    ]),
   ];
 }
 
@@ -323,11 +321,11 @@ function podskazka90(p: Params): HintStep[] {
   return [
     vysotaKonusa(),
     otnosheniePoObemu(),
-    vopros(
-      'Как найти объём шара?',
-      `$${tex(V)} \\cdot 4$`,
-      [`$${tex(V)} : 4$`, `$${tex(V)} \\cdot 3$`, `$${tex(V)} \\cdot \\frac{4}{3}$`],
-    ),
+    vopros('Как найти объём шара?', `$${tex(V)} \\cdot 4$`, [
+      `$${tex(V)} : 4$`,
+      `$${tex(V)} \\cdot 3$`,
+      `$${tex(V)} \\cdot \\frac{4}{3}$`,
+    ]),
   ];
 }
 
@@ -336,10 +334,10 @@ function podskazka91(p: Params): HintStep[] {
   return [
     vysotaKonusa(),
     otnosheniePoObemu(),
-    vopros(
-      'Как найти объём конуса?',
-      `$${tex(V)} : 4$`,
-      [`$${tex(V)} \\cdot 4$`, `$${tex(V)} : 3$`, `$${tex(V)} : 2$`],
-    ),
+    vopros('Как найти объём конуса?', `$${tex(V)} : 4$`, [
+      `$${tex(V)} \\cdot 4$`,
+      `$${tex(V)} : 3$`,
+      `$${tex(V)} : 2$`,
+    ]),
   ];
 }

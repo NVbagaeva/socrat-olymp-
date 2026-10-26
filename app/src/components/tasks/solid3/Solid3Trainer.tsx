@@ -86,7 +86,8 @@ export function Solid3Trainer({ pool, scope, backHref }: Solid3TrainerProps) {
         return {
           kind: kind.titlePlain,
           html: variant.uslovieHtml,
-          badge: variant.fipi.length > 0 ? `ФИПИ № ${variant.fipi.join(', ')}` : 'Не из открытого банка',
+          badge:
+            variant.fipi.length > 0 ? `ФИПИ № ${variant.fipi.join(', ')}` : 'Не из открытого банка',
           /* Разбор раскрывается только на итогах: до этого он закрыт. */
           review: () => <Solid3Review variant={variant} />,
         };
@@ -265,9 +266,7 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
   }, [source, otkrytyy, byId]);
   const vsego = istochnik.reduce((sum, kind) => sum + kind.variants.length, 0);
 
-  const size = repeat || otkrytyy
-    ? Math.min(vsego, ROUND_SIZE)
-    : ROUND_SIZE;
+  const size = repeat || otkrytyy ? Math.min(vsego, ROUND_SIZE) : ROUND_SIZE;
 
   function choose(next: string) {
     setMode(next);

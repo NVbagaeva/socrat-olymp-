@@ -110,7 +110,9 @@ for (const prototype of BANK) {
           try {
             katex.renderToString(kusok, { throwOnError: true, strict: 'ignore' });
           } catch (e) {
-            oshibkiKatex.push(`${prototype.id} вариант ${variant.n}: «${kusok}» — ${e.message.split('\n')[0]}`);
+            oshibkiKatex.push(
+              `${prototype.id} вариант ${variant.n}: «${kusok}» — ${e.message.split('\n')[0]}`,
+            );
           }
         });
       }
@@ -127,17 +129,22 @@ oshibkiKatex.slice(0, 20).forEach((item) => console.log(`   ${item}`));
    (A1, A₁, A_1) — не числа. */
 const { FIPI_3 } = require0(path.join(out, 'zadanie3', 'fipi.js'));
 const snimok = JSON.parse(
-  fs.readFileSync(path.join(root, '..', 'content-source', 'stereometria', 'fipi-otkrytyy-bank.json'), 'utf8'),
+  fs.readFileSync(
+    path.join(root, '..', 'content-source', 'stereometria', 'fipi-otkrytyy-bank.json'),
+    'utf8',
+  ),
 );
 const chislaUsloviya = (t) =>
-  (t
-    .replace(/√\(\s*(\d+)\s*\)/g, ' $1 ')
-    .replace(/\\sqrt\{(\d+)\}/g, ' $1 ')
-    .replace(/\b([A-Z])\s?1\b/g, '$1')
-    .replace(/([A-Z])[₀-₉]+/g, '$1')
-    .replace(/_\{?\d\}?/g, '')
-    .replace(/(\d),(\d)/g, '$1.$2')
-    .match(/\d+(?:\.\d+)?/g) ?? [])
+  (
+    t
+      .replace(/√\(\s*(\d+)\s*\)/g, ' $1 ')
+      .replace(/\\sqrt\{(\d+)\}/g, ' $1 ')
+      .replace(/\b([A-Z])\s?1\b/g, '$1')
+      .replace(/([A-Z])[₀-₉]+/g, '$1')
+      .replace(/_\{?\d\}?/g, '')
+      .replace(/(\d),(\d)/g, '$1.$2')
+      .match(/\d+(?:\.\d+)?/g) ?? []
+  )
     .map(Number)
     .sort((x, y) => x - y)
     .join(' ');
@@ -156,7 +163,9 @@ for (const [klyuch, nomera] of Object.entries(FIPI_3)) {
     const zadacha = snimok.zadachi.find((z) => z.nomer === nomer);
     if (zadacha === undefined) {
       oshibkiFipi.push(`${klyuch}: задачи ${nomer} нет в снимке банка`);
-    } else if (chislaUsloviya(zadacha.uslovie) !== chislaUsloviya(prototype.uslovie(variant.params))) {
+    } else if (
+      chislaUsloviya(zadacha.uslovie) !== chislaUsloviya(prototype.uslovie(variant.params))
+    ) {
       oshibkiFipi.push(`${klyuch}: числа условия не те, что у задачи ФИПИ ${nomer}`);
     }
   }

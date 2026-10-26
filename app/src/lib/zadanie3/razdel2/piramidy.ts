@@ -427,11 +427,7 @@ function chtoZaTelo(osnovanie: string, apex: string, drugoe: string): HintStep {
   return vopros(
     'Что это за многогранник?',
     `Пирамида с основанием $${osnovanie}$ и вершиной $${tx(apex)}$`,
-    [
-      `Призма с основанием $${osnovanie}$`,
-      `Пирамида с основанием $${drugoe}$`,
-      'Половина призмы',
-    ],
+    [`Призма с основанием $${osnovanie}$`, `Пирамида с основанием $${drugoe}$`, 'Половина призмы'],
   );
 }
 
@@ -448,11 +444,11 @@ function vysota(apex: string): HintStep {
 /** Объём пирамиды: треть произведения площади основания на высоту. */
 function obemPiramidy(p: Params): HintStep {
   const [S, h] = SH(p).map(tex);
-  return vopros(
-    'Как найти объём пирамиды?',
-    `$\\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
-    [`$${S} \\cdot ${h}$`, `$\\frac{1}{2} \\cdot ${S} \\cdot ${h}$`, `$\\frac{1}{6} \\cdot ${S} \\cdot ${h}$`],
-  );
+  return vopros('Как найти объём пирамиды?', `$\\frac{1}{3} \\cdot ${S} \\cdot ${h}$`, [
+    `$${S} \\cdot ${h}$`,
+    `$\\frac{1}{2} \\cdot ${S} \\cdot ${h}$`,
+    `$\\frac{1}{6} \\cdot ${S} \\cdot ${h}$`,
+  ]);
 }
 
 /** Какую часть призмы составляет пирамида с тем же основанием и высотой. */

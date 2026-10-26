@@ -97,7 +97,11 @@ export function problemyPodskazki(
     if (shag.options.length < 2 || shag.options.length > 4) {
       problems.push(`${gde}: кнопок ${shag.options.length}, нужно 2–4`);
     }
-    if (!Number.isInteger(shag.correct) || shag.correct < 0 || shag.correct >= shag.options.length) {
+    if (
+      !Number.isInteger(shag.correct) ||
+      shag.correct < 0 ||
+      shag.correct >= shag.options.length
+    ) {
       problems.push(`${gde}: верная кнопка ${shag.correct} вне списка`);
     }
     const vidno = shag.options.map(bezRazmetki);

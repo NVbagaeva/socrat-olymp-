@@ -17,7 +17,11 @@ const DANNYE = {
  * Тренажёр по типу: у №3 — прототипы типа в адресе (?tipy=P03-01,…),
  * тренажёр сразу выбирает их. У №15 банка пока нет — весь тренажёр.
  */
-function trenazherTipa(base: string, no: StereoNo, prototipy: readonly number[] | undefined): string {
+function trenazherTipa(
+  base: string,
+  no: StereoNo,
+  prototipy: readonly number[] | undefined,
+): string {
   if (no !== '3' || prototipy === undefined || prototipy.length === 0) {
     return `${base}/trenazher/`;
   }

@@ -107,4 +107,3 @@ export function chisla(spisok: readonly number[], ...zapret: number[]): string[]
     .filter((x) => x > 0)
     .map(chislo);
 }
-

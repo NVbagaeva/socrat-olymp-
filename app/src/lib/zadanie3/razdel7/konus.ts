@@ -270,11 +270,11 @@ function podskazka77(p: Params): HintStep[] {
   return [
     formulaKonusa(),
     otnoshenieObemov(),
-    vopros(
-      'Как найти объём конуса?',
-      `$${tex(V)} : 3$`,
-      [`$${tex(V)} \\cdot 3$`, `$${tex(V)} : 2$`, `$${tex(V)} : 9$`],
-    ),
+    vopros('Как найти объём конуса?', `$${tex(V)} : 3$`, [
+      `$${tex(V)} \\cdot 3$`,
+      `$${tex(V)} : 2$`,
+      `$${tex(V)} : 9$`,
+    ]),
   ];
 }
 
@@ -283,11 +283,11 @@ function podskazka78(p: Params): HintStep[] {
   return [
     formulaKonusa(),
     otnoshenieObemov(),
-    vopros(
-      'Как найти объём цилиндра?',
-      `$${tex(V)} \\cdot 3$`,
-      [`$${tex(V)} : 3$`, `$${tex(V)} \\cdot 2$`, `$${tex(V)} \\cdot 9$`],
-    ),
+    vopros('Как найти объём цилиндра?', `$${tex(V)} \\cdot 3$`, [
+      `$${tex(V)} : 3$`,
+      `$${tex(V)} \\cdot 2$`,
+      `$${tex(V)} \\cdot 9$`,
+    ]),
   ];
 }
 
@@ -316,11 +316,11 @@ function podskazka79(p: Params): HintStep[] {
   return [
     obrazuyushchaya(),
     otnosheniePoverhnostey(),
-    vopros(
-      'Как найти боковую поверхность цилиндра?',
-      `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`,
-      [`$${tex(k)}\\sqrt{2} : \\sqrt{2}$`, `$2 \\cdot ${tex(k)}\\sqrt{2}$`, `$${tex(k)}\\sqrt{2} : 2$`],
-    ),
+    vopros('Как найти боковую поверхность цилиндра?', `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`, [
+      `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`,
+      `$2 \\cdot ${tex(k)}\\sqrt{2}$`,
+      `$${tex(k)}\\sqrt{2} : 2$`,
+    ]),
   ];
 }
 
@@ -329,10 +329,10 @@ function podskazka80(p: Params): HintStep[] {
   return [
     obrazuyushchaya(),
     otnosheniePoverhnostey(),
-    vopros(
-      'Как найти боковую поверхность конуса?',
-      `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`,
-      [`$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`, `$${tex(k)}\\sqrt{2} : 2$`, `$2 \\cdot ${tex(k)}\\sqrt{2}$`],
-    ),
+    vopros('Как найти боковую поверхность конуса?', `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`, [
+      `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`,
+      `$${tex(k)}\\sqrt{2} : 2$`,
+      `$2 \\cdot ${tex(k)}\\sqrt{2}$`,
+    ]),
   ];
 }

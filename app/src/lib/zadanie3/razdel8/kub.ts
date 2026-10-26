@@ -212,11 +212,11 @@ function rebroPoRadiusu(r: number, otvet: number): HintStep {
 /** Объём куба по ребру. */
 function obemKuba(r: number): HintStep {
   const a = 2 * r;
-  return vopros(
-    'Как найти объём куба?',
-    `$${tex(a)}^3$`,
-    [`$${tex(a)}^2$`, `$${tex(r)}^3$`, `$6 \\cdot ${tex(a)}^2$`],
-  );
+  return vopros('Как найти объём куба?', `$${tex(a)}^3$`, [
+    `$${tex(a)}^2$`,
+    `$${tex(r)}^3$`,
+    `$6 \\cdot ${tex(a)}^2$`,
+  ]);
 }
 
 function podskazka81(p: Params): HintStep[] {
@@ -229,16 +229,16 @@ function podskazka81(p: Params): HintStep[] {
       chisla([a, a / 4, 2 * a], r, a ** 3 / 6),
       'Шар касается противоположных граней куба, поэтому его диаметр равен ребру.',
     ),
-    vopros(
-      'По какой формуле считается объём шара?',
-      '$\\frac{4}{3}\\pi r^3$',
-      ['$4\\pi r^2$', '$\\frac{1}{3}\\pi r^3$', '$\\frac{4}{3}\\pi r^2$'],
-    ),
-    vopros(
-      'Как найти объём шара, делённый на $\\pi$?',
-      `$\\frac{4}{3} \\cdot ${tex(r)}^3$`,
-      [`$\\frac{4}{3} \\cdot ${tex(a)}^3$`, `$\\frac{4}{3} \\cdot ${tex(r)}^2$`, `$\\frac{1}{3} \\cdot ${tex(r)}^3$`],
-    ),
+    vopros('По какой формуле считается объём шара?', '$\\frac{4}{3}\\pi r^3$', [
+      '$4\\pi r^2$',
+      '$\\frac{1}{3}\\pi r^3$',
+      '$\\frac{4}{3}\\pi r^2$',
+    ]),
+    vopros('Как найти объём шара, делённый на $\\pi$?', `$\\frac{4}{3} \\cdot ${tex(r)}^3$`, [
+      `$\\frac{4}{3} \\cdot ${tex(a)}^3$`,
+      `$\\frac{4}{3} \\cdot ${tex(r)}^2$`,
+      `$\\frac{1}{3} \\cdot ${tex(r)}^3$`,
+    ]),
   ];
 }
 
