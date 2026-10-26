@@ -11,7 +11,8 @@
 import { solveBySearch, volumeUnits } from './common';
 import { twoVessels, vesselWithRise } from './drawings';
 import { razaWord, round, ru } from '../format';
-import { type Params, type Prototype, type Variant, num, text } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num, text } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -74,6 +75,7 @@ export const P03_65: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka65(p),
   varianty: [
     variant(1, 'задачник', 'задачник 216', { V: 2800, H: 16, dh: 13 }),
     variant(2, 'задачник', 'задачник 217', { V: 1200, H: 12, dh: 10 }),
@@ -149,6 +151,7 @@ export const P03_66: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka66(p),
   varianty: [
     variant(1, 'задачник', 'задачник 220', { V: 500, k: 1.2, unit: 'см' }),
     variant(2, 'задачник', 'задачник 221', { V: 700, k: 1.4, unit: 'см' }),
@@ -229,6 +232,8 @@ function pourProto(
       ];
     },
 
+    podskazka: (p) => (wider ? podskazka67(p) : podskazka68(p)),
+
     varianty,
   };
 }
@@ -258,3 +263,100 @@ export const P03_68 = pourProto('P03-68', 'Перелили в сосуд уже
   variant(9, 'новый', 'новый', { h: 5, n: 4 }),
   variant(10, 'новый', 'новый', { h: 1, n: 10 }),
 ]);
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+function podskazka65(p: Params): HintStep[] {
+  const V = num(p, 'V');
+  const H = num(p, 'H');
+  const dh = num(p, 'dh');
+  const S = tex(V / H);
+  return [
+    vopros(
+      'Как найти площадь дна сосуда?',
+      `$${tex(V)} : ${tex(H)}$`,
+      [`$${tex(V)} \\cdot ${tex(H)}$`, `$${tex(V)} : ${tex(dh)}$`, `$${tex(V)} : ${tex(H + dh)}$`],
+      'Вода — цилиндр высотой в уровень жидкости, его объём — площадь дна на высоту.',
+    ),
+    vopros(
+      'Какому столбику воды равен объём детали?',
+      `С тем же дном и высотой $${tex(dh)}$ см`,
+      [`С тем же дном и высотой $${tex(H + dh)}$ см`, `С тем же дном и высотой $${tex(H)}$ см`],
+      'Деталь вытесняет ровно столько воды, сколько занимает сама.',
+    ),
+    vopros('Как найти объём детали?', `$${S} \\cdot ${tex(dh)}$`, [
+      `$${S} \\cdot ${tex(H + dh)}$`,
+      `$${S} : ${tex(dh)}$`,
+      `$${tex(V)} \\cdot ${tex(dh)}$`,
+    ]),
+  ];
+}
+
+function podskazka66(p: Params): HintStep[] {
+  const V = tex(num(p, 'V'));
+  const k = num(p, 'k');
+  const kt = tex(k);
+  return [
+    vopros(
+      'Во сколько раз объём воды вместе с деталью больше объёма воды?',
+      `в $${kt}$ ${razaWord(k)}`,
+      [`в $${kt}^2$ ${razaWord(k * k)}`, 'Объём не изменился'],
+      'Дно у сосуда то же, поэтому объём растёт во столько же раз, что и уровень.',
+    ),
+    vopros(
+      'Как найти объём детали?',
+      `$${V} \\cdot ${kt} - ${V}$`,
+      [`$${V} \\cdot ${kt}$`, `$${V} : ${kt}$`, `$${V} - ${V} : ${kt}$`],
+      'Деталь занимает разницу между объёмом воды с деталью и объёмом воды.',
+    ),
+  ];
+}
+
+/** Общее начало у «перелили»: что сохраняется и как изменилось дно. */
+function pereliliNachalo(n: number, wider: boolean): HintStep[] {
+  const nt = tex(n);
+  const kak = wider ? 'Увеличилась' : 'Уменьшилась';
+  const naoborot = wider ? 'Уменьшилась' : 'Увеличилась';
+  return [
+    vopros('Что не меняется, когда жидкость переливают в другой сосуд?', 'Объём жидкости', [
+      'Уровень жидкости',
+      'Площадь дна',
+    ]),
+    vopros(
+      'Как изменилась площадь дна второго сосуда?',
+      `${kak} в $${nt}^2$ ${razaWord(n * n)}`,
+      [`${kak} в $${nt}$ ${razaWord(n)}`, `${naoborot} в $${nt}^2$ ${razaWord(n * n)}`],
+      'Площадь круга растёт как квадрат диаметра.',
+    ),
+  ];
+}
+
+function podskazka67(p: Params): HintStep[] {
+  const h = tex(num(p, 'h'));
+  const n = num(p, 'n');
+  const nt = tex(n);
+  return [
+    ...pereliliNachalo(n, true),
+    vopros(
+      'Как найти новый уровень жидкости?',
+      `$${h} : ${nt}^2$`,
+      [`$${h} \\cdot ${nt}^2$`, `$${h} : ${nt}$`],
+      'При том же объёме уровень меняется обратно площади дна.',
+    ),
+  ];
+}
+
+function podskazka68(p: Params): HintStep[] {
+  const h = tex(num(p, 'h'));
+  const n = num(p, 'n');
+  const nt = tex(n);
+  return [
+    ...pereliliNachalo(n, false),
+    vopros(
+      'Как найти новый уровень жидкости?',
+      `$${h} \\cdot ${nt}^2$`,
+      [`$${h} : ${nt}^2$`, `$${h} \\cdot ${nt}$`],
+      'При том же объёме уровень меняется обратно площади дна.',
+    ),
+  ];
+}

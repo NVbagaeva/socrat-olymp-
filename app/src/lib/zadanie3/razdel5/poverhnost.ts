@@ -12,7 +12,8 @@
 import { lateralUnits, solveBySearch } from './common';
 import { cylinderWithHeight } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -65,6 +66,7 @@ export const P03_63: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka63(p),
   varianty: [
     variant(1, 'задачник', 'задачник 208', { k: 20, h: 4 }),
     variant(2, 'задачник', 'задачник 209', { k: 40, h: 10 }),
@@ -117,6 +119,7 @@ export const P03_64: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka64(p),
   varianty: [
     variant(1, 'задачник', 'задачник 212', { k: 12, d: 6 }),
     variant(2, 'задачник', 'задачник 213', { k: 24, d: 8 }),
@@ -130,3 +133,62 @@ export const P03_64: Prototype = {
     variant(10, 'новый', 'новый', { k: 40, d: 8 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Формула боковой поверхности цилиндра: общий первый шаг. */
+function formulaBokovoy(): HintStep {
+  return vopros(
+    'По какой формуле считается площадь боковой поверхности цилиндра?',
+    '$2\\pi r h$',
+    ['$\\pi r h$', '$\\pi r^2 h$', '$2\\pi r^2 + 2\\pi r h$'],
+    'Это то же, что $\\pi d h$: удвоенный радиус — диаметр.',
+  );
+}
+
+function podskazka63(p: Params): HintStep[] {
+  const k = tex(num(p, 'k'));
+  const h = tex(num(p, 'h'));
+  return [
+    formulaBokovoy(),
+    vopros(
+      'Какое уравнение получается для диаметра $d$?',
+      `$\\pi \\cdot d \\cdot ${h} = ${k}\\pi$`,
+      [
+        `$2\\pi \\cdot d \\cdot ${h} = ${k}\\pi$`,
+        `$\\pi \\cdot d^2 \\cdot ${h} = ${k}\\pi$`,
+        `$\\pi \\cdot \\frac{d}{2} \\cdot ${h} = ${k}\\pi$`,
+      ],
+    ),
+    vopros(
+      'Как найти диаметр?',
+      `$${k} : ${h}$`,
+      [`$${k} : (2 \\cdot ${h})$`, `$${k} \\cdot ${h}$`, `$\\frac{${k}}{${h}\\pi}$`],
+      'Число $\\pi$ сокращается с обеих сторон.',
+    ),
+  ];
+}
+
+function podskazka64(p: Params): HintStep[] {
+  const k = tex(num(p, 'k'));
+  const d = tex(num(p, 'd'));
+  return [
+    formulaBokovoy(),
+    vopros(
+      'Какое уравнение получается для высоты $h$?',
+      `$\\pi \\cdot ${d} \\cdot h = ${k}\\pi$`,
+      [
+        `$2\\pi \\cdot ${d} \\cdot h = ${k}\\pi$`,
+        `$\\pi \\cdot ${d}^2 \\cdot h = ${k}\\pi$`,
+        `$\\pi \\cdot \\frac{${d}}{2} \\cdot h = ${k}\\pi$`,
+      ],
+      'Диаметр уже равен $2r$, второй раз удваивать не нужно.',
+    ),
+    vopros(
+      'Как найти высоту?',
+      `$${k} : ${d}$`,
+      [`$${k} : (2 \\cdot ${d})$`, `$${k} \\cdot ${d}$`, `$\\frac{${k}}{${d}\\pi}$`],
+      'Число $\\pi$ сокращается с обеих сторон.',
+    ),
+  ];
+}
