@@ -16,7 +16,8 @@
 import { coneLateral, coneVolume, cylinderLateral, cylinderVolume } from './common';
 import { R, cylinderAndCone } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -68,6 +69,7 @@ export const P03_77: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka77(p),
   varianty: [
     variant(1, 'задачник', 'задачник 266', { V: 162 }),
     variant(2, 'задачник', 'задачник 267', { V: 252 }),
@@ -113,6 +115,7 @@ export const P03_78: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka78(p),
   varianty: [
     variant(1, 'задачник', 'задачник 270', { V: 45 }),
     variant(2, 'задачник', 'задачник 271', { V: 36 }),
@@ -170,6 +173,7 @@ export const P03_79: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka79(p),
   varianty: [
     variant(1, 'задачник', 'задачник 274', { k: 3 }),
     variant(2, 'задачник', 'задачник 275', { k: 7 }),
@@ -227,6 +231,7 @@ export const P03_80: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka80(p),
   varianty: [
     variant(1, 'задачник', 'задачник 278', { k: 5 }),
     variant(2, 'задачник', 'задачник 279', { k: 11 }),
@@ -240,3 +245,94 @@ export const P03_80: Prototype = {
     variant(10, 'новый', 'новый', { k: 10 }),
   ],
 };
+
+/* ── Подсказки-вопросы ───────────────────────────────────────────── */
+
+function formulaKonusa(): HintStep {
+  return vopros(
+    'Как записать объём конуса через радиус основания $r$ и высоту $h$?',
+    '$\\frac{1}{3}\\pi r^2 h$',
+    ['$\\pi r^2 h$', '$\\frac{1}{2}\\pi r^2 h$', '$\\frac{1}{3}\\pi r h$'],
+    'У цилиндра с теми же $r$ и $h$ объём $\\pi r^2 h$.',
+  );
+}
+
+function otnoshenieObemov(): HintStep {
+  return vopros(
+    'Во сколько раз объём цилиндра больше объёма конуса с теми же основанием и высотой?',
+    'В $3$ раза',
+    ['В $2$ раза', 'В $\\pi$ раз', 'В $9$ раз'],
+  );
+}
+
+function podskazka77(p: Params): HintStep[] {
+  const V = num(p, 'V');
+  return [
+    formulaKonusa(),
+    otnoshenieObemov(),
+    vopros(
+      'Как найти объём конуса?',
+      `$${tex(V)} : 3$`,
+      [`$${tex(V)} \\cdot 3$`, `$${tex(V)} : 2$`, `$${tex(V)} : 9$`],
+    ),
+  ];
+}
+
+function podskazka78(p: Params): HintStep[] {
+  const V = num(p, 'V');
+  return [
+    formulaKonusa(),
+    otnoshenieObemov(),
+    vopros(
+      'Как найти объём цилиндра?',
+      `$${tex(V)} \\cdot 3$`,
+      [`$${tex(V)} : 3$`, `$${tex(V)} \\cdot 2$`, `$${tex(V)} \\cdot 9$`],
+    ),
+  ];
+}
+
+/** Образующая конуса при высоте, равной радиусу. */
+function obrazuyushchaya(): HintStep {
+  return vopros(
+    'Чему равна образующая конуса $l$, если его высота равна радиусу $r$?',
+    '$r\\sqrt{2}$',
+    ['$2r$', '$r$', '$r\\sqrt{3}$'],
+    'Образующая — гипотенуза прямоугольного треугольника с катетами $r$ и $r$.',
+  );
+}
+
+/** Отношение боковых поверхностей цилиндра и конуса. */
+function otnosheniePoverhnostey(): HintStep {
+  return vopros(
+    'Во сколько раз боковая поверхность цилиндра больше боковой поверхности конуса?',
+    'В $\\sqrt{2}$ раз',
+    ['В $2$ раза', 'Они равны', 'В $2\\sqrt{2}$ раз'],
+    'У цилиндра $2\\pi r h$, где $h = r$, у конуса $\\pi r l$, где $l = r\\sqrt{2}$.',
+  );
+}
+
+function podskazka79(p: Params): HintStep[] {
+  const k = num(p, 'k');
+  return [
+    obrazuyushchaya(),
+    otnosheniePoverhnostey(),
+    vopros(
+      'Как найти боковую поверхность цилиндра?',
+      `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`,
+      [`$${tex(k)}\\sqrt{2} : \\sqrt{2}$`, `$2 \\cdot ${tex(k)}\\sqrt{2}$`, `$${tex(k)}\\sqrt{2} : 2$`],
+    ),
+  ];
+}
+
+function podskazka80(p: Params): HintStep[] {
+  const k = num(p, 'k');
+  return [
+    obrazuyushchaya(),
+    otnosheniePoverhnostey(),
+    vopros(
+      'Как найти боковую поверхность конуса?',
+      `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`,
+      [`$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`, `$${tex(k)}\\sqrt{2} : 2$`, `$2 \\cdot ${tex(k)}\\sqrt{2}$`],
+    ),
+  ];
+}
