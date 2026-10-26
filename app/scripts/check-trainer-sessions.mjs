@@ -204,14 +204,14 @@ function answer45(payload, at) {
   return { text: numberText(otvetUchenika(prototype, variant.params)) };
 }
 
-/** №3: пул {kind, n} → prototype.otvet(параметры варианта). */
+/** №3 (тренажёр с фильтрами): задание «P03-01#3» → prototype.otvet(параметры варианта). */
 function answer3(payload, at) {
   const { prototypeById } = requireSrc('lib/zadanie3/index');
-  const item = payload.pool[at];
-  const prototype = prototypeById(item.kind);
-  const variant = prototype?.varianty.find((entry) => entry.n === item.n);
+  const [id, n] = payload.items[at].k.split('#');
+  const prototype = prototypeById(id);
+  const variant = prototype?.varianty.find((entry) => entry.n === Number(n));
   if (variant === undefined) {
-    throw new Error(`№3: нет варианта ${item.kind}#${item.n}`);
+    throw new Error(`№3: нет варианта ${payload.items[at].k}`);
   }
   return { text: numberText(prototype.otvet(variant.params)) };
 }
@@ -364,7 +364,14 @@ const TRAINERS = [
     answer: answer45,
   },
   /* №3: один тренажёр на всё задание — вкладка раздела стереометрии. */
-  { name: '№3', url: '/zadaniya/3/trenazher/', scope: '3', answer: answer3, rep: true },
+  {
+    name: '№3',
+    url: '/zadaniya/3/trenazher/',
+    scope: '3',
+    answer: answer3,
+    all: chooseAllFiltry,
+    rep: true,
+  },
 ];
 
 /* ── Статический сервер над out/ ────────────────────────────── */
