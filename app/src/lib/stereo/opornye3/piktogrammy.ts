@@ -4,9 +4,8 @@
  * подписей (renderSolid: tema 'ekran', bezPodpisey): характерное
  * тело или элемент блока, оранжевым — то, что блок учит видеть.
  *
- * Блок «Считаю удобно» — про счёт, а не про тело: для него вида
- * движком нет, пиктограммы нет (список недостающих картинок —
- * docs/methodology/n3-etap-1-dizayn.md).
+ * Блок «Считаю удобно» — про счёт, а не про тело: вида движком у него
+ * нет, пиктограмма — готовая картинка в том же стиле (kartinkaBloka).
  */
 
 import { box, dir, polygonStart, pyramid, regularPolygon, regularPrism, tetrahedron, vertex } from '../../solid/figures';
@@ -121,6 +120,19 @@ const PIKTOGRAMMY: Readonly<Record<string, () => Model>> = {
     };
   },
 };
+
+/**
+ * Пиктограммы-картинки для блоков, у которых вида движком нет: путь в
+ * public/ (на странице — через assetUrl, с версией). 192 × 168 px,
+ * прозрачный фон — вдвое больше места на карточке.
+ */
+const KARTINKI: Readonly<Record<string, string>> = {
+  schet: '/images/stereo/o3-blok-12-schitayu-udobno.png',
+};
+
+export function kartinkaBloka(id: string): string | null {
+  return KARTINKI[id] ?? null;
+}
 
 /** Пиктограмма блока; null — для блока вида движком нет. */
 export function piktogrammaBloka(id: string): Model | null {

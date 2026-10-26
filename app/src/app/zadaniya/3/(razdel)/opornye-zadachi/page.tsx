@@ -3,7 +3,8 @@ import { OpornyeStereoList } from '@/components/stereo/opornye/OpornyeStereoList
 import { OpornyeStereoShell } from '@/components/stereo/opornye/OpornyeStereoShell';
 import { STEREO, stereoTitle, vkladkaStereo } from '@/content/stereo/zadaniya';
 import { BLOKI_3, zadachiBloka } from '@/lib/stereo/opornye3/bloki';
-import { dekorBlokov, piktogrammaBloka } from '@/lib/stereo/opornye3/piktogrammy';
+import { dekorBlokov, kartinkaBloka, piktogrammaBloka } from '@/lib/stereo/opornye3/piktogrammy';
+import { assetUrl } from '@/lib/assetUrl';
 import { renderSolid } from '@/lib/solid/render';
 import { ZADANIYA } from '@/lib/paths';
 import '../../../[task]/[type]/prep.css';
@@ -37,6 +38,10 @@ export default function Page() {
           piktogramma: (() => {
             const m = piktogrammaBloka(b.id);
             return m === null ? null : renderSolid(m, { tema: 'ekran', bezPodpisey: true });
+          })(),
+          kartinka: (() => {
+            const src = kartinkaBloka(b.id);
+            return src === null ? null : assetUrl(src);
           })(),
         }))}
       />

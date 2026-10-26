@@ -26,8 +26,10 @@
         треугольник: прямой угол по теореме Пифагора на экране.
      6. Формулы: все строки $…$ и выкладки набираются KaTeX без ошибок. */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import katex from 'katex';
-import { requireSrc } from './lib/load-ts.mjs';
+import { APP, requireSrc } from './lib/load-ts.mjs';
 
 const failures = [];
 let checks = 0;
@@ -161,7 +163,11 @@ for (const [name, risunki] of [['LOVUSHKA_ODNA', G2.risunkiLovushkiOdna()], ['LO
 /* Пиктограммы блоков и декор: модель есть у всех блоков, кроме «Считаю удобно». */
 for (const b of BL.BLOKI_3) {
   const m = PK.piktogrammaBloka(b.id);
-  check((m === null) === (b.id === 'schet'), `пиктограмма блока ${b.no}: ${m === null ? 'нет' : 'лишняя'}`);
+  const kartinka = PK.kartinkaBloka(b.id);
+  check((m === null) !== (kartinka === null), `пиктограмма блока ${b.no}: нужна ровно одна — чертёж движка или картинка`);
+  if (kartinka !== null) {
+    check(fs.existsSync(path.join(APP, 'public', kartinka)), `пиктограмма блока ${b.no}: нет файла ${kartinka}`);
+  }
   if (m !== null) {
     const svg = R.renderSolid(m, { tema: 'ekran', bezPodpisey: true });
     check(svg.includes('solid--ekran') && !svg.includes('<text'), `пиктограмма блока ${b.no}: не «стекло» или с подписями`);

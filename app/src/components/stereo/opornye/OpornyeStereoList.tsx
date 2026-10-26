@@ -18,6 +18,8 @@ export interface BlokKartochka3 {
   gotov: boolean;
   /** Пиктограмма блока — SVG движка («стекло», без подписей); нет — пусто. */
   piktogramma: string | null;
+  /** Пиктограмма-картинка, когда вида движком нет: адрес с версией. */
+  kartinka: string | null;
 }
 
 type Status = 'proyden' | 'vProcesse' | 'neNachat' | 'skoro';
@@ -72,13 +74,18 @@ export function OpornyeStereoList({ bloki, listHref }: { bloki: BlokKartochka3[]
                 {OPORNYE_3.umenie}: {b.umenie}
               </span>
             </span>
-            {b.piktogramma === null ? null : (
+            {b.piktogramma !== null ? (
               <span
                 className="o3-kart__pikt"
                 aria-hidden="true"
                 dangerouslySetInnerHTML={{ __html: b.piktogramma }}
               />
-            )}
+            ) : b.kartinka !== null ? (
+              <span className="o3-kart__pikt" aria-hidden="true">
+                {/* Картинка из public/ без оптимизации: статический экспорт. */}
+                <img src={b.kartinka} alt="" width={96} height={84} loading="lazy" />
+              </span>
+            ) : null}
             {b.gotov ? (
               <span className="o3-kart__progress">
                 <span
