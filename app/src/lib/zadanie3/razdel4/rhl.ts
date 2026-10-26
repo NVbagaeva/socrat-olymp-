@@ -14,7 +14,8 @@ import { apex, basePoint, solveBySearch } from './common';
 import { distance } from '../../solid/measure';
 import { coneWithHeight } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -72,6 +73,7 @@ export const P03_52: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka52(p),
   varianty: [
     variant(1, 'задачник', 'задачник 164', { h: 12, d: 70 }),
     variant(2, 'задачник', 'задачник 165', { h: 16, d: 60 }),
@@ -133,6 +135,7 @@ export const P03_53: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka53(p),
   varianty: [
     variant(1, 'задачник', 'задачник 168', { h: 9, l: 41 }),
     variant(2, 'задачник', 'задачник 169', { h: 21, l: 29 }),
@@ -193,6 +196,7 @@ export const P03_54: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka54(p),
   varianty: [
     variant(1, 'задачник', 'задачник 172', { d: 10, l: 13 }),
     variant(2, 'задачник', 'задачник 173', { d: 14, l: 25 }),
@@ -206,3 +210,89 @@ export const P03_54: Prototype = {
     variant(10, 'новый', 'новый', { d: 80, l: 41 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Прямоугольный треугольник «высота — радиус — образующая»: что в нём гипотенуза. */
+function gipotenuza(): HintStep {
+  return vopros(
+    'Какой отрезок — гипотенуза в прямоугольном треугольнике «высота — радиус — образующая»?',
+    'Образующая',
+    ['Высота', 'Радиус основания', 'Диаметр основания'],
+    'Высота перпендикулярна основанию, поэтому прямой угол — между высотой и радиусом.',
+  );
+}
+
+function podskazka52(p: Params): HintStep[] {
+  const h = num(p, 'h');
+  const d = num(p, 'd');
+  const r = d / 2;
+  const l = Math.hypot(h, r);
+  const [bolshe, menshe] = h > r ? [h, r] : [r, h];
+  return [
+    gipotenuza(),
+    vopros(
+      'Чему равен радиус основания?',
+      chislo(r),
+      chisla([d, d / 4, 2 * d], r, l),
+      'Радиус — половина диаметра.',
+    ),
+    vopros(
+      'Как найти образующую?',
+      `$\\sqrt{${tex(h)}^2 + ${tex(r)}^2}$`,
+      [
+        `$\\sqrt{${tex(bolshe)}^2 - ${tex(menshe)}^2}$`,
+        `$\\sqrt{${tex(h)}^2 + ${tex(d)}^2}$`,
+        `$${tex(h)} + ${tex(r)}$`,
+      ],
+      'Квадрат гипотенузы равен сумме квадратов катетов.',
+    ),
+  ];
+}
+
+function podskazka53(p: Params): HintStep[] {
+  const h = num(p, 'h');
+  const l = num(p, 'l');
+  const r = Math.sqrt(l * l - h * h);
+  return [
+    gipotenuza(),
+    vopros(
+      'Чему равен радиус основания?',
+      chislo(r),
+      chisla([l - h, Math.round(Math.hypot(l, h)), r / 2], r, 2 * r),
+      `Радиус — катет: $\\sqrt{${tex(l)}^2 - ${tex(h)}^2} = ${tex(r)}$.`,
+    ),
+    vopros(
+      'Как найти диаметр основания?',
+      `$${tex(r)} \\cdot 2$`,
+      [`$${tex(r)} : 2$`, `$${tex(r)}^2$`],
+      'Диаметр вдвое длиннее радиуса.',
+    ),
+  ];
+}
+
+function podskazka54(p: Params): HintStep[] {
+  const d = num(p, 'd');
+  const l = num(p, 'l');
+  const r = d / 2;
+  const h = Math.sqrt(l * l - r * r);
+  return [
+    gipotenuza(),
+    vopros(
+      'Чему равен радиус основания?',
+      chislo(r),
+      chisla([d, d / 4, 2 * d], r, h),
+      'Радиус — половина диаметра.',
+    ),
+    vopros(
+      'Как найти высоту конуса?',
+      `$\\sqrt{${tex(l)}^2 - ${tex(r)}^2}$`,
+      [
+        `$\\sqrt{${tex(l)}^2 + ${tex(r)}^2}$`,
+        ...(d < l ? [`$\\sqrt{${tex(l)}^2 - ${tex(d)}^2}$`] : []),
+        `$${tex(l)} - ${tex(r)}$`,
+      ],
+      'Высота — катет: из квадрата гипотенузы вычесть квадрат другого катета.',
+    ),
+  ];
+}

@@ -13,7 +13,8 @@ import { apex, basePoint } from './common';
 import { polygonArea } from '../../solid/measure';
 import { coneWithAxial } from './drawings';
 import { round, ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -77,6 +78,7 @@ export const P03_55: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka55(p),
   varianty: [
     variant(1, 'задачник', 'задачник 176', { d: 140, l: 74 }),
     variant(2, 'задачник', 'задачник 177', { d: 90, l: 51 }),
@@ -137,6 +139,7 @@ export const P03_56: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka56(p),
   varianty: [
     variant(1, 'задачник', 'задачник 180', { h: 40, l: 58 }),
     variant(2, 'задачник', 'задачник 181', { h: 20, l: 29 }),
@@ -190,6 +193,7 @@ export const P03_57: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka57(p),
   varianty: [
     variant(1, 'задачник', 'задачник 184', { k: 4, h: 3 }),
     variant(2, 'задачник', 'задачник 185', { k: 36, h: 10 }),
@@ -203,3 +207,87 @@ export const P03_57: Prototype = {
     variant(10, 'новый', 'новый', { k: 1, h: 9 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Что такое осевое сечение конуса: общий первый шаг. */
+function chtoTakoeSechenie(): HintStep {
+  return vopros(
+    'Какая фигура — осевое сечение конуса?',
+    'Равнобедренный треугольник: основание — диаметр, высота — высота конуса',
+    [
+      'Прямоугольный треугольник с катетами — высотой и радиусом',
+      'Прямоугольник со сторонами — диаметром и высотой',
+      'Круг основания',
+    ],
+    'Плоскость через ось режет конус по двум образующим и диаметру.',
+  );
+}
+
+/** Площадь осевого треугольника: половина основания-диаметра на высоту. */
+function ploshchadSecheniya(d: number, h: number, l?: number): HintStep {
+  return vopros(
+    'Как найти площадь осевого сечения?',
+    `$\\frac{1}{2} \\cdot ${tex(d)} \\cdot ${tex(h)}$`,
+    [
+      `$${tex(d)} \\cdot ${tex(h)}$`,
+      `$\\frac{1}{2} \\cdot ${tex(d / 2)} \\cdot ${tex(h)}$`,
+      ...(l === undefined ? [] : [`$\\frac{1}{2} \\cdot ${tex(d)} \\cdot ${tex(l)}$`]),
+    ],
+    'Площадь треугольника — половина произведения основания на высоту.',
+  );
+}
+
+function podskazka55(p: Params): HintStep[] {
+  const d = num(p, 'd');
+  const l = num(p, 'l');
+  const r = d / 2;
+  const h = Math.sqrt(l * l - r * r);
+  return [
+    chtoTakoeSechenie(),
+    vopros(
+      'Чему равна высота конуса?',
+      chislo(h),
+      chisla([l - r, 2 * h, h / 2], h, r * h),
+      `Высота — катет треугольника с гипотенузой-образующей и катетом-радиусом $${tex(r)}$: $\\sqrt{${tex(l)}^2 - ${tex(r)}^2} = ${tex(h)}$.`,
+    ),
+    ploshchadSecheniya(d, h, l),
+  ];
+}
+
+function podskazka56(p: Params): HintStep[] {
+  const h = num(p, 'h');
+  const l = num(p, 'l');
+  const r = Math.sqrt(l * l - h * h);
+  return [
+    chtoTakoeSechenie(),
+    vopros(
+      'Чему равен радиус основания?',
+      chislo(r),
+      chisla([l - h, 2 * r, r / 2], r, r * h),
+      `Радиус — катет: $\\sqrt{${tex(l)}^2 - ${tex(h)}^2} = ${tex(r)}$.`,
+    ),
+    ploshchadSecheniya(2 * r, h, l),
+  ];
+}
+
+function podskazka57(p: Params): HintStep[] {
+  const k = num(p, 'k');
+  const h = num(p, 'h');
+  const r = Math.sqrt(k);
+  return [
+    vopros(
+      'Какое уравнение даёт радиус основания?',
+      `$\\pi r^2 = ${tex(k)}\\pi$`,
+      [`$2\\pi r = ${tex(k)}\\pi$`, `$\\pi d^2 = ${tex(k)}\\pi$`, `$\\pi r = ${tex(k)}\\pi$`],
+      'Основание — круг, его площадь $\\pi r^2$.',
+    ),
+    vopros(
+      'Чему равен радиус основания?',
+      chislo(r),
+      chisla([k, k / 2, 2 * r], r, r * h),
+    ),
+    chtoTakoeSechenie(),
+    ploshchadSecheniya(2 * r, h),
+  ];
+}
