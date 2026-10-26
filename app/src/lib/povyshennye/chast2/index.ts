@@ -15,6 +15,13 @@ import { B17_DZHOUL } from './b17';
 import { B18_PRYAMOUGOLNIK } from './b18';
 import { B19_KOREN4 } from './b19';
 import { B20_POKUPKA } from './b20';
+import { D14_POKAZ_TRIG } from './d14';
+import { D15_PRIZMA_PYATIUGOLNIK } from './d15';
+import { D16_LOG_LOG } from './d16';
+import { D17_KATUSHKA } from './d17';
+import { D18_PARALLELOGRAMM } from './d18';
+import { D19_PARA_PRYAMYH } from './d19';
+import { D20_RYAD_KVADRAT } from './d20';
 import type { Chast2Zadacha, Shablon2 } from './types';
 import { C14_TG_PODSTANOVKA } from './c14';
 import { C15_SFERA_PIRAMIDA } from './c15';
@@ -55,6 +62,14 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'c18.trapeciyaSrednyaya': C18_TRAPECIYA_SREDNYAYA,
   'c19.modul': C19_MODUL,
   'c20.srednie': C20_SREDNIE,
+  /* Семья D: варианты 7 и 8. */
+  'd14.pokazTrig': D14_POKAZ_TRIG,
+  'd15.prizmaPyatiugolnik': D15_PRIZMA_PYATIUGOLNIK,
+  'd16.logLog': D16_LOG_LOG,
+  'd17.katushka': D17_KATUSHKA,
+  'd18.parallelogrammBiss': D18_PARALLELOGRAMM,
+  'd19.paraPryamyh': D19_PARA_PRYAMYH,
+  'd20.ryadKvadrat': D20_RYAD_KVADRAT,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

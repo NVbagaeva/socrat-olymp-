@@ -221,6 +221,54 @@ const TABLICA = [
       [['\\operatorname{arctg}3+2\\pi', '\\operatorname{arctg}0{,}2-2\\pi'], N],
     ],
   ],
+  /* логарифм с основанием, arccos, вложенный корень (варианты 9–12) */
+  [
+    { vid: 'korni', verno: ['\\log_{5}^{2}10', '\\log_{5}^{2}34'] },
+    [
+      [['\\log_5^2 10', '(\\log_{5}34)^2'], S],
+      [['log_5(10)^2', 'log_5(34)'], N],
+    ],
+  ],
+  [
+    {
+      vid: 'promezhutki',
+      verno: {
+        kuski: [
+          { t: 'interval', lo: '\\log_{5}2', loZakr: false, hi: '\\log_{5}8', hiZakr: false },
+          { t: 'interval', lo: '\\log_{5}8', loZakr: false, hi: '\\log_{3}8', hiZakr: true },
+        ],
+      },
+    },
+    [
+      [
+        {
+          kuski: [
+            { t: 'interval', lo: 'log_5(2)', loZakr: false, hi: '3log_5(2)', hiZakr: false },
+            { t: 'interval', lo: '3log_5 2', loZakr: false, hi: 'log_3 8', hiZakr: true },
+          ],
+        },
+        S,
+      ],
+      [{ kuski: [{ t: 'interval', lo: 'log_5(2)', loZakr: false, hi: 'log_3(8)', hiZakr: true }] }, N],
+    ],
+  ],
+  [
+    { vid: 'chislo', verno: '\\arccos\\dfrac{\\sqrt{10}}{5}' },
+    [
+      ['arccos(√10/5)', S],
+      ['\\arccos\\frac{2}{\\sqrt{10}}', S],
+      ['\\arcsin\\frac{\\sqrt{15}}{5}', S],
+      ['arccos(√10/4)', N],
+    ],
+  ],
+  [
+    { vid: 'chislo', verno: '3\\sqrt{4-2\\sqrt{2}}' },
+    [
+      ['3√(4−2√2)', S],
+      ['\\frac{6}{2}\\sqrt{4-2\\sqrt2}', S],
+      ['3\\sqrt{4+2\\sqrt{2}}', N],
+    ],
+  ],
   /* да / нет */
   [
     { vid: 'danet', verno: true },

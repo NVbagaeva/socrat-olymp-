@@ -14,6 +14,7 @@ import { renderPlan } from '@/lib/planimetriya/render';
 import type { Scena } from '@/lib/planimetriya/types';
 import { ALFA, BEZ, PLOSKOST, im, mn, otr, pr, pun, sh, tch, ug } from './elementy';
 import { SPISOK_B } from './semyaB';
+import { SPISOK_D } from './semyaD';
 
 export type RazdelTeoremy = 'planimetriya' | 'stereometriya';
 
@@ -707,7 +708,7 @@ const SPISOK: Teorema[] = [
 ];
 
 export const TEOREMY: Readonly<Record<string, Teorema>> = Object.fromEntries(
-  [...SPISOK, ...SPISOK_B].map((t) => [t.id, t]),
+  [...SPISOK, ...SPISOK_B, ...SPISOK_D].map((t) => [t.id, t]),
 );
 
 export function teorema(id: string): Teorema {
