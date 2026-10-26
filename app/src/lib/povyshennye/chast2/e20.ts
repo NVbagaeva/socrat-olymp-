@@ -342,7 +342,7 @@ function sobrat(p: PE20): Chast2Zadacha {
       {
         title: 'в) Пример',
         lines: [
-          `${pr(opt.nab)} Отношение $${max ? `\\dfrac{${opt.nab.S2}}{${opt.nab.S1}}` : `\\dfrac{${opt.nab.S1}}{${opt.nab.S2}}`}=${otvV}$.`,
+          `${pr(opt.nab)} Отношение $${max ? '\\dfrac{S_2}{S_1}' : '\\dfrac{S_1}{S_2}'}=${otvV}$.`,
           `Ответ: $${otvV}$.`,
         ],
       },
