@@ -20,11 +20,20 @@
 import { ru } from './format';
 import { type HintStep } from './types';
 
-/** Видимый текст кнопки: без разметки формул и пробелов. */
+/**
+ * Видимый текст кнопки: разметка формул заменена знаками, которые
+ * видит ученик (√, ·, π, °, дробь), пробелы убраны. Две кнопки с одним
+ * видом — дубль; «k√2·√2» и «k√2·2» — разные кнопки.
+ */
 export function bezRazmetki(stroka: string): string {
   return stroka
     .replace(/\{,\}/g, ',')
-    .replace(/\\(?:dfrac|tfrac|frac|sqrt|cdot|pi|circ|text|quad|,|;|!)/g, ' ')
+    .replace(/\\sqrt/g, '√')
+    .replace(/\\cdot/g, '·')
+    .replace(/\\pi/g, 'π')
+    .replace(/\\circ/g, '°')
+    .replace(/\\[dt]?frac/g, '⁄')
+    .replace(/\\(?:text|quad|,|;|!)/g, ' ')
     .replace(/[${}\\\s]/g, '');
 }
 
