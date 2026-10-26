@@ -303,6 +303,142 @@ zadachi.forEach((z, i) => {
   check(typeof razbor.uchenikHtml === 'string' && razbor.uchenikHtml.length > 0, `${where}: разбор не раскрывается`);
 });
 
+/* ── 6. Главы 0, 1, 3–10: данные глав ──────────────────────────────
+   Каждый ответ — пересчётом по координатам или формулой независимо от
+   текста решения; «Ответ: $…$.» совпадает с числом; все строки и
+   выкладки набираются KaTeX; чертежи — в обеих темах и на каждом шаге,
+   прямые углы отмечены только там, где они прямые. */
+
+const GL = requireSrc('lib/stereo/glavy/index.ts');
+const chisloTex = (x) => String(x).replace('.', '{,}');
+const vseId = new Set();
+
+function modelOk(m, where, shagov = 0) {
+  check(typeof m.alt === 'string' && m.alt.length > 0, `${where}: нет alt`);
+  for (const tema of ['pechat', 'ekran']) {
+    for (let k = 0; k <= shagov; k += 1) {
+      risunokOk(m, `${where}, тема ${tema}${shagov > 0 ? `, шаг ${k}` : ''}`, shagov > 0 ? { tema, shag: k } : { tema });
+    }
+  }
+  (m.angles ?? []).forEach((a) => {
+    const dot = a.u[0] * a.v[0] + a.u[1] * a.v[1] + a.u[2] * a.v[2];
+    check(Math.abs(dot) < 1e-9 * Math.hypot(...a.u) * Math.hypot(...a.v), `${where}: отмечен прямым непрямой угол`);
+  });
+  const maxShag = Math.max(
+    0,
+    ...[...(m.lines ?? []), ...(m.sections ?? []), ...(m.angles ?? []), ...(m.marks ?? []), ...(m.measures ?? [])].map((x) => x.shag ?? 0),
+  );
+  check(maxShag <= shagov, `${where}: шагов чертежа ${maxShag}, подписей ${shagov}`);
+}
+
+function otvetOk(o, where) {
+  const x = o.pereschet();
+  check(Number.isFinite(x) && near(x, o.chislo), `${where}: ответ ${o.chislo}, пересчёт ${x}`);
+  check(o.otvet === `Ответ: $${chisloTex(o.chislo)}$.`, `${where}: «${o.otvet}» не совпадает с числом ${o.chislo}`);
+  textOk(o.otvet, where);
+  (o.formuly ?? []).forEach((f) => texOk(f, where));
+}
+
+function zadachaOk(z, where) {
+  check(z.uslovie.length > 0 && z.reshenie.length > 0, `${where}: нет условия или объяснения`);
+  [z.uslovie, ...z.reshenie].forEach((t) => textOk(t, where));
+  otvetOk(z, where);
+}
+
+let primerov = 0;
+let zadach = 0;
+for (const [id, dannye] of Object.entries(GL.GLAVY_DANNYE_3)) {
+  const g = dannye();
+  check(g.id === id, `глава ${id}: id данных ${g.id}`);
+  textOk(g.lead, `глава ${id}, лид`);
+  if (g.dekor !== undefined) modelOk(g.dekor, `глава ${id}, декор`);
+  check(g.razdely.length > 0, `глава ${id}: нет разделов`);
+  for (const r of g.razdely) {
+    const where = `глава ${id}, раздел «${r.title}»`;
+    check(!vseId.has(r.id), `${where}: id ${r.id} повторяется`);
+    vseId.add(r.id);
+    check(!/[$\\]/.test(r.title), `${where}: в заголовке раздела формула — в «Содержании» она не наберётся`);
+    if (r.lead !== undefined) textOk(r.lead, where);
+    check(r.bloki.length > 0, `${where}: пустой раздел`);
+    r.bloki.forEach((b, i) => {
+      const w = `${where}, блок ${i + 1} (${b.vid})`;
+      switch (b.vid) {
+        case 'abzacy':
+        case 'ideya':
+          b.paras.forEach((t) => textOk(t, w));
+          break;
+        case 'opredelenie':
+          b.paras.forEach((t) => textOk(t, w));
+          (b.formuly ?? []).forEach((f) => texOk(f, w));
+          break;
+        case 'algoritm':
+          b.shagi.forEach((s) => textOk(s.text, w));
+          break;
+        case 'formuly':
+          b.stroki.forEach((s) => {
+            texOk(s.tex, w);
+            textOk(s.podpis, w);
+          });
+          break;
+        case 'spisok':
+          b.items.forEach((t) => textOk(t, w));
+          break;
+        case 'formula':
+          texOk(b.tex, w);
+          break;
+        case 'primer': {
+          const p = b.primer;
+          const wp = `${w} «${p.id}»`;
+          primerov += 1;
+          check(!vseId.has(p.id), `${wp}: id повторяется`);
+          vseId.add(p.id);
+          [p.title, p.uslovie, ...(p.shagiChertezha ?? []), ...p.shagi.flatMap((s) => [s.title, ...s.paras])].forEach((t) =>
+            textOk(t, wp),
+          );
+          p.shagi.flatMap((s) => s.formuly ?? []).forEach((f) => texOk(f, wp));
+          otvetOk(p, wp);
+          if (p.model !== undefined) modelOk(p.model, wp, (p.shagiChertezha ?? []).length);
+          else check(p.ploskiy === undefined, `${wp}: плоская панель без объёмного чертежа`);
+          if (p.ploskiy !== undefined) ploskiyOk(p.ploskiy, wp);
+          if (p.most !== undefined) textOk(p.most, wp);
+          break;
+        }
+        case 'vazhno':
+        case 'layfhak':
+          textOk(b.title, w);
+          (b.paras ?? []).forEach((t) => textOk(t, w));
+          zadachaOk(b.zadacha, w);
+          zadach += 1;
+          break;
+        case 'lovushka':
+          textOk(b.title, w);
+          check(b.neverno.length > 0 && b.verno.length > 0, `${w}: нет «В чём ошибка?» или «Как правильно?»`);
+          [...b.neverno, ...b.verno].forEach((t) => textOk(t, w));
+          if (b.risunki !== undefined) {
+            modelOk(b.risunki.neverno, `${w}, рисунок «ошибка»`);
+            modelOk(b.risunki.verno, `${w}, рисунок «правильно»`);
+          }
+          zadachaOk(b.zadacha, w);
+          zadach += 1;
+          break;
+        case 'risunki':
+          b.items.forEach((it, k) => {
+            textOk(it.podpis, `${w}, рисунок ${k + 1}`);
+            modelOk(it.model, `${w}, рисунок ${k + 1}`);
+          });
+          break;
+        case 'tipy':
+        case 'shpargalki':
+          break;
+        default:
+          check(false, `${w}: неизвестный вид блока`);
+      }
+    });
+  }
+}
+check(Object.keys(GL.GLAVY_DANNYE_3).length === 10, `глав-данных ${Object.keys(GL.GLAVY_DANNYE_3).length}, нужно 10 (все, кроме главы 2)`);
+console.log(`check-stereo-metodika: главы-данные — ${primerov} примеров, ${zadach} задач в рамках`);
+
 if (failures.length > 0) {
   console.error(`check-stereo-metodika: ${failures.length} из ${checks} проверок не прошли`);
   failures.slice(0, 50).forEach((item) => console.error(` - ${item}`));

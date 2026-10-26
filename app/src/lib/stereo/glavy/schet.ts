@@ -92,3 +92,31 @@ export function obemTetraedra(a: Vec3, b: Vec3, c: Vec3, d: Vec3): number {
 export function okr(x: number): number {
   return Math.round(x * 1e9) / 1e9;
 }
+
+/**
+ * Пересчёт с проверкой чертежа: если данные условия на модели не
+ * выполнены (рёбра не те), ответ — NaN, и тест падает.
+ */
+export function pri(usloviya: readonly (readonly [number, number])[], x: number): number {
+  return usloviya.every(([est, nado]) => Math.abs(est - nado) < 1e-9) ? x : Number.NaN;
+}
+
+/** Площадь поверхности тела из единичных кубиков: грани, не общие с соседом. */
+export function ploshchadKubikov(kubiki: readonly (readonly [number, number, number])[]): number {
+  const est = new Set(kubiki.map((k) => k.join(',')));
+  const sosedi = [
+    [1, 0, 0],
+    [-1, 0, 0],
+    [0, 1, 0],
+    [0, -1, 0],
+    [0, 0, 1],
+    [0, 0, -1],
+  ] as const;
+  let s = 0;
+  kubiki.forEach(([x, y, z]) => {
+    sosedi.forEach(([dx, dy, dz]) => {
+      if (!est.has(`${x + dx},${y + dy},${z + dz}`)) s += 1;
+    });
+  });
+  return s;
+}
