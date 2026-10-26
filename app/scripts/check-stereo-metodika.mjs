@@ -375,6 +375,7 @@ for (const [id, dannye] of Object.entries(GL.GLAVY_DANNYE_3)) {
           b.shagi.forEach((s) => textOk(s.text, w));
           break;
         case 'formuly':
+          check(!/[$\\]/.test(b.title), `${w}: в заголовке карточки формула — он не набирается KaTeX`);
           b.stroki.forEach((s) => {
             texOk(s.tex, w);
             textOk(s.podpis, w);
