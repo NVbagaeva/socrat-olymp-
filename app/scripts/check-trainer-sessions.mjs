@@ -245,11 +245,11 @@ function answer6(payload, at) {
      tabs    — false, если у страницы нет ленты вкладок (метку не искать). */
 
 /** Нажать «Начать тренировку» на выборе тренировки. */
-async function pressStart(page) {
+async function pressStart(page, timeout) {
   await page
     .getByRole('button', { name: /^Начать тренировку/ })
     .first()
-    .click();
+    .click(timeout === undefined ? {} : { timeout });
 }
 
 /** Самая большая тренировка №8, №2: режим «Смешанная», количество «Все (N)». */
@@ -601,10 +601,16 @@ async function questionOf(page) {
 }
 
 /** Начать тренировку и дождаться панели и первой записи экрана. */
-async function startRun(page, trainer) {
-  await (trainer.start ?? pressStart)(page);
-  await waitBar(page);
-  return waitRecord(page, trainer.scope, (record) => record.ui !== null);
+/**
+ * timeout — для самых больших тренировок (сценарий 9): прежний тренажёр
+ * №12 собирает все 140 заданий «Все» разом — около 30 с даже на быстрой
+ * машине, и на медленной машине CI кнопка не успевает нажаться за
+ * обычные 20 с. Тренажёр с фильтрами собирает задачи по одной.
+ */
+async function startRun(page, trainer, timeout) {
+  await (trainer.start ?? pressStart)(page, timeout);
+  await waitBar(page, timeout);
+  return waitRecord(page, trainer.scope, (record) => record.ui !== null, timeout);
 }
 
 /** Метка на вкладке «Тренажёр». */
@@ -1114,7 +1120,7 @@ async function restoreTiming(trainer) {
     const page = await newPage(context);
     await open(page, trainer.url);
     await trainer.all(page);
-    const record = await startRun(page, trainer);
+    const record = await startRun(page, trainer, 120_000);
     if (!check(record !== null, `${trainer.name}, «Все»: тренировка начата`)) {
       return;
     }
