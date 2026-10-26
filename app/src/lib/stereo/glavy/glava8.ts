@@ -68,7 +68,7 @@ export function glava8(): GlavaDannye {
                 },
                 {
                   title: 'Узнаём треугольник',
-                  paras: ['$AB_1$, $AD_1$, $B_1D_1$ — диагонали равных квадратов: треугольник правильный.'],
+                  paras: ['Треугольник правильный: $AB_1$, $AD_1$ и $B_1D_1$ — диагонали равных квадратов.'],
                   formuly: ['\\angle B_1AD_1 = 60^\\circ'],
                 },
               ],
@@ -155,7 +155,7 @@ export function glava8(): GlavaDannye {
                 },
                 {
                   title: 'Считаем в треугольнике',
-                  paras: ['В треугольнике $ADE$ угол при $E$ прямой, катет $DE = a$ — половина гипотенузы $AD = 2a$.'],
+                  paras: ['Синус равен $\\frac{1}{2}$, потому что катет $DE = a$ — половина гипотенузы $AD = 2a$.'],
                   formuly: ['\\sin\\angle DAE = \\frac{DE}{AD} = \\frac{1}{2},\\quad \\angle DAE = 30^\\circ'],
                 },
               ],

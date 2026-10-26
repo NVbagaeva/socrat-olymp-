@@ -33,9 +33,9 @@ export function glava7(): GlavaDannye {
 
   /* Призма и цилиндр: радиус 5. */
   const R = 5;
-  const prizmaVCilindre = regularPrism(4, R, 4);
+  const prizmaVCilindre = regularPrism(4, R, 7);
   prizmaVCilindre.noFill = true;
-  const cilindrVPrizme = regularPrism(4, R * Math.SQRT2, 4);
+  const cilindrVPrizme = regularPrism(4, R * Math.SQRT2, 7);
   cilindrVPrizme.glass = true;
   const pv = (n: string) => vertex(prizmaVCilindre, n);
 
@@ -261,11 +261,11 @@ export function glava7(): GlavaDannye {
             risunki: {
               neverno: {
                 alt: 'Цилиндр, вписанный в призму: диаметр равен стороне квадрата',
-                bodies: [cilindrVPrizme, { kind: 'cylinder', base: P(0, 0, 0), r: R, h: 4 }],
+                bodies: [cilindrVPrizme, { kind: 'cylinder', base: P(0, 0, 0), r: R, h: 7 }],
               },
               verno: {
                 alt: 'Призма, вписанная в цилиндр: диагональ основания равна диаметру',
-                bodies: [{ kind: 'cylinder', base: P(0, 0, 0), r: R, h: 4, glass: true }, prizmaVCilindre],
+                bodies: [{ kind: 'cylinder', base: P(0, 0, 0), r: R, h: 7, glass: true }, prizmaVCilindre],
                 lines: [{ a: pv('A'), b: pv('C') }],
               },
             },
