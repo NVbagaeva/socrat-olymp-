@@ -198,6 +198,29 @@ const TABLICA = [
       [['\\frac{\\pi}{6}+\\pi n'], N],
     ],
   ],
+  /* серии и корни с арктангенсом (№14 вариантов 5, 6) */
+  [
+    {
+      vid: 'serii',
+      verno: ['\\operatorname{arctg}2+\\pi n', '-\\operatorname{arctg}\\dfrac{1}{3}+\\pi n'],
+    },
+    [
+      [['\\operatorname{arctg}2+\\pi k', '\\pi-\\operatorname{arctg}\\frac{1}{3}+\\pi n'], S],
+      [['arctg 2 + πn', '-arctg(1/3) + πn'], S],
+      [['\\arctan2+\\pi n', '\\arctan\\frac{1}{3}+\\pi n'], N],
+      [['\\operatorname{arctg}2+2\\pi n', '-\\operatorname{arctg}\\frac{1}{3}+\\pi n'], N],
+    ],
+  ],
+  [
+    {
+      vid: 'korni',
+      verno: ['\\operatorname{arctg}\\dfrac{1}{5}-2\\pi', '\\operatorname{arctg}3-2\\pi'],
+    },
+    [
+      [['arctg3−2π', 'arctg(0,2)−2π'], S],
+      [['\\operatorname{arctg}3+2\\pi', '\\operatorname{arctg}0{,}2-2\\pi'], N],
+    ],
+  ],
   /* да / нет */
   [
     { vid: 'danet', verno: true },

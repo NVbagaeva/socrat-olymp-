@@ -17,7 +17,19 @@ export type Uzel =
   | { t: 'bin'; op: '+' | '-' | '*' | '/' | '^'; a: Uzel; b: Uzel }
   | { t: 'fn'; name: string; args: Uzel[] };
 
-const FUNKCII = new Set(['sqrt', 'root', 'sin', 'cos', 'tan', 'cot', 'ln', 'log', 'abs', 'lg']);
+const FUNKCII = new Set([
+  'sqrt',
+  'root',
+  'arctan',
+  'sin',
+  'cos',
+  'tan',
+  'cot',
+  'ln',
+  'log',
+  'abs',
+  'lg',
+]);
 
 /** LaTeX и «бытовые» знаки → плоская запись для разбора. */
 export function normalizovat(src: string): string {
@@ -31,6 +43,8 @@ export function normalizovat(src: string): string {
   s = s.replace(/\\pi|π/g, 'pi');
   s = s.replace(/\\infty|∞/g, 'inf');
   s = s.replace(/−|–|—/g, '-');
+  /* Арктангенс — до тангенса: в «\\arctg» есть «tg». */
+  s = s.replace(/\\?arctg|\\?arctan/g, 'arctan');
   s = s.replace(/\\tg|\\tan/g, 'tan').replace(/\\ctg|\\cot/g, 'cot');
   s = s
     .replace(/\\sin/g, 'sin')
@@ -84,6 +98,7 @@ function lexer(s: string): Tok[] | null {
       const parts: string[] = [];
       while (w.length > 0) {
         const f = [
+          'arctan',
           'sqrt',
           'root',
           'logb',
@@ -271,6 +286,8 @@ export function vychislit(u: Uzel, vars: Readonly<Record<string, number>> = {}):
           return Math.cos(a0);
         case 'tan':
           return Math.tan(a0);
+        case 'arctan':
+          return Math.atan(a0);
         case 'cot':
           return 1 / Math.tan(a0);
         case 'ln':
