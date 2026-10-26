@@ -21,7 +21,7 @@
  * data-line-pt).
  */
 
-import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
+import { BUKVY, CHISLA, indeksSvg } from '@/lib/risunki/shrifty.js';
 import { escSvg, imyaSvg } from '@/lib/stereo/proekciya';
 import type { Kadr, LiniyaKadra, PodpisKadra } from './kadr';
 
@@ -139,10 +139,11 @@ function plain(s: string): string {
       .replace(/\\(alpha|beta|gamma|varphi|phi|pi)\b/g, (_, g: string) => GRECH[g] ?? g)
       .replace(/[{}]/g, ''),
   ).replace(
-    /([a-zA-Z])(?:_(\w))?/g,
+    /([a-zA-Z])(?:_(\w+))?/g,
+    /* Индекс — общей типографикой рисунков (lib/risunki): 70 %, опущен,
+       многозначный одним блоком; после него строка возвращается. */
     (_, l: string, sub?: string) =>
-      `<tspan font-style="italic">${l}</tspan>` +
-      (sub ? `<tspan baseline-shift="sub" font-size="70%">${sub}</tspan>` : ''),
+      `<tspan font-style="italic">${l}</tspan>` + (sub ? indeksSvg(sub, null, true) : ''),
   );
 }
 
@@ -162,12 +163,8 @@ function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
     );
   }
   const shrift = p.vid === 'imya' ? SHRIFT_IMENI : SHRIFT_CHISLA;
-  /* Индекс — цифры прямым KaTeX_Main, как в формуле: у KaTeX_Math они
-     старинного начертания. */
-  const tekst = (txt ?? escSvg(p.tex)).replace(
-    /<tspan baseline-shift="sub"/g,
-    `<tspan baseline-shift="sub" font-family="${SHRIFT_CHISLA}" font-style="normal"`,
-  );
+  /* Индекс (indeksSvg) — цифры прямым KaTeX_Main, как в формуле. */
+  const tekst = txt ?? escSvg(p.tex);
   return (
     `<text x="${f(p.x + 1)}" y="${f(p.y + p.h * 0.78)}" font-family="${shrift}" font-size="${f2(o.kegl)}" fill="${fill}"${op}>` +
     `${tekst}</text>`

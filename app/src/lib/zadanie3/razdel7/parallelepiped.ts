@@ -13,7 +13,8 @@
 import { boxVolume, solveBySearch } from './common';
 import { H, boxAroundCylinder } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -70,6 +71,7 @@ export const P03_74: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka74(p),
   varianty: [
     variant(1, 'задачник', 'задачник 254', { r: 2 }),
     variant(2, 'задачник', 'задачник 255', { r: 4 }),
@@ -129,6 +131,7 @@ export const P03_75: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka75(p),
   varianty: [
     variant(1, 'задачник', 'задачник 258', { r: 3, V: 36 }),
     variant(2, 'задачник', 'задачник 259', { r: 4, V: 96 }),
@@ -142,3 +145,67 @@ export const P03_75: Prototype = {
     variant(10, 'новый', 'новый', { r: 7, V: 98 }),
   ],
 };
+
+/* ── Подсказки-вопросы ───────────────────────────────────────────── */
+
+/** Основание описанного параллелепипеда: квадрат со стороной-диаметром. */
+function osnovanie(): HintStep {
+  return vopros(
+    'Какое основание у параллелепипеда, описанного около цилиндра?',
+    'Квадрат со стороной, равной диаметру основания цилиндра',
+    [
+      'Квадрат со стороной, равной радиусу основания цилиндра',
+      'Квадрат, вписанный в основание цилиндра',
+      'Прямоугольник со сторонами $r$ и $2r$',
+    ],
+    'Окружность основания вписана в квадрат, а диаметр вписанной окружности равен стороне.',
+  );
+}
+
+function podskazka74(p: Params): HintStep[] {
+  const r = num(p, 'r');
+  const a = 2 * r;
+  const otvet = a * a * r;
+  return [
+    osnovanie(),
+    vopros(
+      'Чему равна сторона основания?',
+      chislo(a),
+      chisla([r, 4 * r, r * r], a, otvet),
+      'Диаметр — два радиуса.',
+    ),
+    vopros(
+      'Как найти объём параллелепипеда?',
+      `$${tex(a)} \\cdot ${tex(a)} \\cdot ${tex(r)}$`,
+      [
+        `$${tex(a)} \\cdot ${tex(a)} \\cdot ${tex(a)}$`,
+        `$\\pi \\cdot ${tex(r)}^2 \\cdot ${tex(r)}$`,
+        `$${tex(r)} \\cdot ${tex(r)} \\cdot ${tex(r)}$`,
+      ],
+      'Площадь квадрата-основания умножить на высоту цилиндра.',
+    ),
+  ];
+}
+
+function podskazka75(p: Params): HintStep[] {
+  const r = num(p, 'r');
+  const V = num(p, 'V');
+  const a = 2 * r;
+  const S = a * a;
+  const otvet = V / S;
+  return [
+    osnovanie(),
+    vopros(
+      'Чему равна площадь основания параллелепипеда?',
+      chislo(S),
+      chisla([r * r, 2 * r * r, 4 * r], S, otvet),
+      `Сторона квадрата — диаметр ${chislo(a)}.`,
+    ),
+    vopros(
+      'Как найти высоту цилиндра?',
+      `$${tex(V)} : ${tex(S)}$`,
+      [`$${tex(V)} \\cdot ${tex(S)}$`, `$${tex(S)} : ${tex(V)}$`, `$${tex(V)} : ${tex(a)}$`],
+      'Высота параллелепипеда та же, что у цилиндра: объём делим на площадь основания.',
+    ),
+  ];
+}

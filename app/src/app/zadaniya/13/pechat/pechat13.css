@@ -1,6 +1,6 @@
 /* Страницы печати задания №13: только лист, без оболочки сайта. Та же
    основа, что у pechat11.css; плюс поля для оформления, таблица
-   условия, рамка зачёта и QR в подвале. */
+   условия и рамка зачёта. */
 :root {
   --sheet-font-sans: var(--font-sans);
   --sheet-font-hand: var(--font-hand);
@@ -198,17 +198,6 @@
 }
 .z13-sheet-note {
   font-size: var(--sheet-fs-small);
-}
-
-/* QR в подвале: онлайн-версия набора. */
-.sheet-foot-qr {
-  display: inline-flex;
-  width: 14mm;
-  height: 14mm;
-}
-.sheet-foot-qr .qr {
-  width: 100%;
-  height: 100%;
 }
 
 /* Карточки «Определи тип»: вырезать по сплошной, согнуть по пунктиру.

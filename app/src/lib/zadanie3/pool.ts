@@ -19,14 +19,18 @@ import { szhat, tekstyPodpisey } from '../chertezh3';
 import { katex } from '../graph/katex';
 import { chertezhBanka } from '../solid';
 import { texPlain, typeset } from '../tex';
+import type { PodskazkaShag } from '../veroyatnost/razbor';
 import { chertezhVarianta, estScenariy } from './chertezhi';
+import { fipiVarianta } from './fipi';
 import { RAZDELY, type Razdel } from './index';
 import { klyuchZadachi, sealAnswer, sealText } from './secret';
-import { type Prototype } from './types';
+import { type HintStep, type Prototype } from './types';
 
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
   n: number;
+  /** Номера задачи в открытом банке ФИПИ; пусто — не из открытого банка. */
+  fipi: readonly string[];
   uslovieHtml: string;
   /** Отпечаток верного ответа. Самого ответа здесь нет. */
   seal: string;
@@ -42,6 +46,12 @@ export interface PoolVariant {
   scena: string | null;
   /** Ссылки шагов разбора на элементы чертежа, закрытые: JSON string[][]. */
   stepRefs: string | null;
+  /**
+   * Подсказка-вопросы, набранная KaTeX и закрытая тем же отпечатком:
+   * JSON PodskazkaShag[]. null — у прототипа её нет, подсказкой
+   * служит первый шаг разбора.
+   */
+  podskazka: string | null;
 }
 
 export interface PoolKind {
@@ -115,6 +125,7 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     if (ch) tekstyPodpisey(ch.scenariy).forEach((t) => podpisi.add(t));
     return {
       n: variant.n,
+      fipi: fipiVarianta(prototype.id, variant.n),
       uslovieHtml: typeset(prototype.uslovie(variant.params)),
       seal,
       /* Разбор закрыт тем же отпечатком: без него не раскрыть. */
@@ -122,6 +133,10 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
       svg: own && !ch ? chertezhBanka(prototype.chertezh(variant.params)) : null,
       scena: ch ? sealText(JSON.stringify(szhat(ch.scenariy)), seal) : null,
       stepRefs: ch ? sealText(JSON.stringify(ch.shagi), seal) : null,
+      podskazka:
+        prototype.podskazka === undefined
+          ? null
+          : sealText(JSON.stringify(nabrat(prototype.podskazka(variant.params))), seal),
     };
   });
   return {
@@ -140,6 +155,16 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
       : null,
     variants,
   };
+}
+
+/** Подсказка в разметку: вопросы, кнопки и комментарии набраны KaTeX. */
+function nabrat(shagi: readonly HintStep[]): PodskazkaShag[] {
+  return shagi.map((h) => ({
+    question: typeset(h.question),
+    options: h.options.map((o) => typeset(o)),
+    correct: h.correct,
+    comment: h.comment === undefined ? null : typeset(h.comment),
+  }));
 }
 
 /** Банк одного раздела. */

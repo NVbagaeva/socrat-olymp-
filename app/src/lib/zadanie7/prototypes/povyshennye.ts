@@ -7,8 +7,11 @@
 
 import {
   d,
+  div,
   hint,
   hintOtbor,
+  konechnaya,
+  korenN,
   lin,
   linKoren,
   linReshenie,
@@ -17,10 +20,13 @@ import {
   pw,
   q,
   razbor,
+  sk,
+  stepenTex,
   sub,
   t,
   uslovieTekst,
   val,
+  vychDelenie,
   type Poryadok,
 } from '../kit';
 import type { Params, Prototype } from '../types';
@@ -347,6 +353,307 @@ export const PV7_LOG_KVADRAT: Prototype = {
           [`$${d(x1)}$`, `$${d(c)}$`],
           `При $x=${d(x1)}$ под первым логарифмом $${d(c - x1)}<0$ — корень посторонний.`,
         ),
+      ],
+    };
+  },
+};
+
+/* ── (1/x + c)³ = d: нечётная степень, затем обратное число ─────── */
+
+function uravnenieKub(p: Params): string {
+  return `\\left(\\dfrac{1}{x}+${d(num(p, 'c'))}\\right)^3=${d(num(p, 'd'))}`;
+}
+
+/**
+ * (1/x + c)³ = d, d — куб целого r: кубический корень один, 1/x = r − c.
+ * Подвох — 1/x выходит отрицательным, и x — маленькая десятичная дробь
+ * со знаком минус (а не r − c и не c − r).
+ */
+export const PV7_KUB_OBRATNOE: Prototype = {
+  id: 'PV7-KUB-OBRATNOE',
+  no: 104,
+  group: 'I',
+  title: 'Куб суммы с дробью $\\dfrac1x$: кубический корень и обратное число',
+  formula: '\\left(\\dfrac{1}{x}+c\\right)^3=d',
+  skills: ['stepeni', 'perenos'],
+  fipiNos: '',
+  uravnenie: uravnenieKub,
+  uslovie(p) {
+    return uslovieTekst(uravnenieKub(p), 'koren');
+  },
+  vopros: () => 'koren',
+  chisla(p) {
+    const c = num(p, 'c');
+    const dd = num(p, 'd');
+    return { lhs: (x) => (1 / x + c) ** 3, rhs: () => dd, odz: (x) => x !== 0 };
+  },
+  solve(p) {
+    const c = num(p, 'c');
+    const dd = num(p, 'd');
+    const r = korenN(dd, 3);
+    if (r === null) throw new Error(`${dd} — не куб целого`);
+    const y = r - c;
+    if (y === 0) throw new Error('PV7-KUB-OBRATNOE: 1/x = 0, корней нет');
+    const x = q(1, y);
+    if (!konechnaya(x)) throw new Error(`PV7-KUB-OBRATNOE: 1/${y} — бесконечная дробь`);
+    const ans = val(x);
+    const Y = '\\dfrac{1}{x}';
+    return {
+      answer: ans,
+      uravnenie: uravnenieKub(p),
+      korni: [ans],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          `Куб выражения $${Y}+${d(c)}$ равен числу. Степень $3$ нечётная — у уравнения $t^3=${d(dd)}$ ровно один корень $t=\\sqrt[3]{${d(dd)}}$. План: извлечь кубический корень, найти $${Y}$ и перевернуть дробь.`,
+        ],
+        odz: ['$x\\ne0$ — на ноль делить нельзя.'],
+        preobr: [
+          `$${d(dd)}=${stepenTex(r, 3)}$, поэтому $${Y}+${d(c)}=${d(r)}$.`,
+          `Переносим $${d(c)}$ в правую часть с противоположным знаком: $${Y}=${d(r)}-${d(c)}=${d(y)}$.`,
+          `Число, обратное к $${d(y)}$: $x=\\dfrac{1}{${d(y)}}=${t(x)}$.`,
+        ],
+        korni: [`$x=${t(x)}$ — единственный корень, $x\\ne0$.`],
+        proverka: [
+          `$\\dfrac{1}{${t(x)}}=${d(y)}$, $${d(y)}+${d(c)}=${d(r)}$, $${sk(r)}^3=${d(dd)}$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: vychDelenie(q(1), q(y)),
+      hints: [
+        hint(
+          'С чего начать?',
+          `извлечь кубический корень: $${Y}+${d(c)}=${d(r)}$`,
+          ['раскрыть куб суммы по формуле', `$${Y}+${d(c)}=\\pm${d(Math.abs(r))}$`],
+          'Степень нечётная: каждое число — куб ровно одного числа.',
+        ),
+        hint(`Чему равно $${Y}$?`, `$${d(y)}$`, [`$${d(r + c)}$`, `$${d(-y)}$`]),
+        hint('Чему равен $x$?', `$${t(x)}$`, [`$${d(y)}$`, `$${t(q(-1, y))}$`, `$${d(-y)}$`]),
+      ],
+    };
+  },
+};
+
+/* ── √(a·x² − b) = x²: отрицательные корни не посторонние ───────── */
+
+function uravnenieKvKoren(p: Params): string {
+  return `\\sqrt{${d(num(p, 'a'))}x^2-${d(num(p, 'b'))}}=x^2`;
+}
+
+/** Точный квадратный корень из неотрицательного целого или null. */
+function kvKoren(n: number): number | null {
+  const r = korenN(n, 2);
+  return r === null || r < 0 ? null : r;
+}
+
+/**
+ * √(a·x² − b) = x², меньший корень. После возведения в квадрат —
+ * биквадратное x⁴ − a·x² + b = 0 (у книжного типа — полный квадрат
+ * (x² − s)²). Подвох: правая часть x² неотрицательна при любом x, и
+ * отрицательный корень — не посторонний; меньший корень — отрицательный.
+ */
+export const PV7_KOREN_KVADRAT: Prototype = {
+  id: 'PV7-KOREN-KVADRAT',
+  no: 105,
+  group: 'II',
+  title: 'Корень равен $x^2$: отрицательные корни подходят',
+  formula: '\\sqrt{ax^2-b}=x^2',
+  skills: ['korni', 'diskriminant'],
+  fipiNos: '',
+  uravnenie: uravnenieKvKoren,
+  uslovie(p) {
+    return uslovieTekst(uravnenieKvKoren(p), 'menshiy');
+  },
+  vopros: () => 'menshiy',
+  chisla(p) {
+    const a = num(p, 'a');
+    const b = num(p, 'b');
+    return {
+      lhs: (x) => Math.sqrt(a * x * x - b),
+      rhs: (x) => x * x,
+      odz: (x) => a * x * x - b >= 0,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const b = num(p, 'b');
+    const D = a * a - 4 * b;
+    const sD = kvKoren(D);
+    if (sD === null || (a + sD) % 2 !== 0) throw new Error(`PV7-KOREN-KVADRAT: D = ${D}`);
+    /* t = x²: t² − a·t + b = 0, оба корня — положительные точные квадраты. */
+    const ts = [...new Set([(a - sD) / 2, (a + sD) / 2])];
+    const ks = ts.map((u) => {
+      const s = kvKoren(u);
+      if (u <= 0 || s === null) throw new Error(`PV7-KOREN-KVADRAT: x² = ${u}`);
+      return s;
+    });
+    const vse = ks.flatMap((s) => [-s, s]).sort((x, y) => x - y);
+    const ans = vse[0] as number;
+    const smax = -ans;
+    const tmax = smax * smax;
+    const kvadrat = ts.length === 1;
+    const t0 = ts[0] as number;
+    const t1 = ts[ts.length - 1] as number;
+    const kvUr = `x^4-${d(a)}x^2+${d(b)}=0`;
+    return {
+      answer: ans,
+      uravnenie: uravnenieKvKoren(p),
+      korni: vse,
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          'Корень равен $x^2$. Справа число неотрицательное при любом $x$, поэтому $\\sqrt A=x^2\\iff A=x^4$ — возводим в квадрат без потери корней и без лишних. Получится биквадратное уравнение: решаем его заменой $t=x^2$.',
+        ],
+        odz: [
+          'Подкоренное выражение после возведения в квадрат равно $x^4\\ge0$, а условие $x^2\\ge0$ верно всегда — отдельных ограничений на знак $x$ нет.',
+        ],
+        preobr: [
+          `Возводим в квадрат: $${d(a)}x^2-${d(b)}=x^4$, то есть $${kvUr}$.`,
+          kvadrat
+            ? `Слева полный квадрат: $${d(a)}=2\\cdot${d(t0)}$, $${d(b)}=${d(t0)}^2$, поэтому $\\left(x^2-${d(t0)}\\right)^2=0$ и $x^2=${d(t0)}$.`
+            : `Замена $t=x^2$: $t^2-${d(a)}t+${d(b)}=0$, $D=${d(a)}^2-4\\cdot${d(b)}=${d(D)}$, $t=\\dfrac{${d(a)}\\pm${d(sD)}}{2}$: $t=${d(t0)}$ или $t=${d(t1)}$ — оба положительны.`,
+        ],
+        korni: ts.map(
+          (u, i) => `$x^2=${d(u)}$: $x=${d(ks[i] as number)}$ или $x=${d(-(ks[i] as number))}$.`,
+        ),
+        otbor: [
+          'Все корни подходят: правая часть $x^2$ при отрицательном $x$ тоже положительна, а подкоренное выражение равно $x^4$. Отбрасывать отрицательные корни нельзя — в этом ловушка.',
+          `Меньший корень — $${d(ans)}$.`,
+        ],
+        proverka: [
+          `$x=${d(ans)}$: $\\sqrt{${d(a)}\\cdot${d(tmax)}-${d(b)}}=\\sqrt{${d(a * tmax - b)}}=${d(tmax)}$, а $x^2=(${d(ans)})^2=${d(tmax)}$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [
+        {
+          tekst: 'Корни для $t=x^2$ проверяем по теореме Виета: сумма и произведение.',
+          tex: kvadrat
+            ? `${d(t0)}+${d(t0)}=${d(a)},\\quad ${d(t0)}\\cdot${d(t0)}=${d(b)}`
+            : `${d(t0)}+${d(t1)}=${d(a)},\\quad ${d(t0)}\\cdot${d(t1)}=${d(b)}`,
+        },
+      ],
+      hints: [
+        hint('Какое уравнение получится после возведения в квадрат?', `$${kvUr}$`, [
+          `$x^4-${d(a)}x^2-${d(b)}=0$`,
+          `$x^2-${d(a)}x+${d(b)}=0$`,
+        ]),
+        hint('Чему может равняться $x^2$?', kvadrat ? `$${d(t0)}$` : `$${d(t0)}$ или $${d(t1)}$`, [
+          `$${d(b)}$`,
+          `$${d(a)}$`,
+          `$${d(-t1)}$`,
+        ]),
+        hint(
+          `Подходит ли корень $x=${d(ans)}$?`,
+          'да: справа $x^2$, оно положительно и при отрицательном $x$',
+          [
+            'нет: корень не может равняться отрицательному числу',
+            'нет: подкоренное выражение отрицательно',
+          ],
+        ),
+        hintOtbor('menshiy', `$${d(ans)}$`, [
+          `$${d(smax)}$`,
+          kvadrat ? `$${d(tmax)}$` : `$${d(-(ks[0] as number))}$`,
+        ]),
+      ],
+    };
+  },
+};
+
+/* ── √(k·x) = c·x, c — смешанное число: корень x = 0 ───────────── */
+
+/** Смешанное число w n/m: целая часть, числитель, знаменатель и N = wm + n. */
+function smeshannoe(p: Params): { w: number; n: number; m: number; N: number } {
+  const w = num(p, 'w');
+  const n = num(p, 'n');
+  const m = num(p, 'm');
+  if (!(w >= 1 && n > 0 && n < m)) throw new Error(`смешанное число ${w} ${n}/${m}`);
+  return { w, n, m, N: w * m + n };
+}
+
+function uravnenieLinKoren(p: Params): string {
+  const { w, n, m } = smeshannoe(p);
+  return `\\sqrt{${d(num(p, 'k'))}x}=${d(w)}\\dfrac{${d(n)}}{${d(m)}}x`;
+}
+
+/**
+ * √(kx) = (w n/m)·x, больший корень. После возведения в квадрат
+ * x·(c²x − k) = 0: корни 0 и k/c². Подвох — x = 0 тоже корень (его
+ * теряют делением на x), а спрашивают больший — ненулевой.
+ */
+export const PV7_KOREN_LINEYNYY: Prototype = {
+  id: 'PV7-KOREN-LINEYNYY',
+  no: 106,
+  group: 'II',
+  title: 'Корень из $kx$ равен $cx$ со смешанным числом: корень $x=0$',
+  formula: '\\sqrt{kx}=w\\dfrac{n}{m}\\,x',
+  skills: ['korni', 'proporciya'],
+  fipiNos: '',
+  uravnenie: uravnenieLinKoren,
+  uslovie(p) {
+    return uslovieTekst(uravnenieLinKoren(p), 'bolshiy');
+  },
+  vopros: () => 'bolshiy',
+  chisla(p) {
+    const k = num(p, 'k');
+    const { m, N } = smeshannoe(p);
+    return {
+      lhs: (x) => Math.sqrt(k * x),
+      rhs: (x) => (N / m) * x,
+      odz: (x) => k * x >= 0 && x >= 0,
+    };
+  },
+  solve(p) {
+    const k = num(p, 'k');
+    const { w, n, m, N } = smeshannoe(p);
+    const c = q(N, m);
+    const x = div(q(k), mul(c, c));
+    if (!konechnaya(x)) throw new Error(`PV7-KOREN-LINEYNYY: x = ${t(x)} — бесконечная дробь`);
+    const ans = val(x);
+    /* √(k·x) = k·m/N — значение обеих частей в корне. */
+    const znach = q(k * m, N);
+    const ct = `\\dfrac{${d(N)}}{${d(m)}}`;
+    const c2t = `\\dfrac{${d(N * N)}}{${d(m * m)}}`;
+    return {
+      answer: ans,
+      uravnenie: uravnenieLinKoren(p),
+      korni: [0, ans],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          'Корень равен выражению с $x$. Корень неотрицателен, значит, и правая часть должна быть неотрицательной: $x\\ge0$. План: смешанное число — в неправильную дробь, возвести обе части в квадрат, вынести $x$ за скобки.',
+        ],
+        odz: [`$${d(k)}x\\ge0$ и $${ct}x\\ge0$ — оба условия дают $x\\ge0$.`],
+        preobr: [
+          `$${d(w)}\\dfrac{${d(n)}}{${d(m)}}=\\dfrac{${d(w)}\\cdot${d(m)}+${d(n)}}{${d(m)}}=${ct}$.`,
+          `Возводим в квадрат: $${d(k)}x=${c2t}x^2$.`,
+          `Переносим всё в одну часть и выносим $x$: $x\\left(${c2t}x-${d(k)}\\right)=0$. Делить на $x$ нельзя — потеряется корень $x=0$.`,
+        ],
+        korni: [
+          `$x=0$ или $${c2t}x=${d(k)}$, откуда $x=\\dfrac{${d(k)}\\cdot${d(m * m)}}{${d(N * N)}}=${t(x)}$.`,
+        ],
+        otbor: [
+          'Оба корня неотрицательны — оба подходят: при $x=0$ обе части равны нулю.',
+          `Больший — $${t(x)}$.`,
+        ],
+        proverka: [
+          `$\\sqrt{${d(k)}\\cdot${t(x)}}=\\sqrt{${t(mul(q(k), x))}}=${t(znach)}$, а $${ct}\\cdot${t(x)}=${t(znach)}$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: vychDelenie(q(k * m * m), q(N * N)),
+      hints: [
+        hint(`Как записать $${d(w)}\\dfrac{${d(n)}}{${d(m)}}$ дробью?`, `$${ct}$`, [
+          `$\\dfrac{${d(w + n)}}{${d(m)}}$`,
+          `$\\dfrac{${d(n)}}{${d(w * m)}}$`,
+        ]),
+        hint(
+          'Сколько корней у уравнения после возведения в квадрат?',
+          'два: $x=0$ и ещё один',
+          ['один', 'ни одного'],
+          `$${d(k)}x=${c2t}x^2\\iff x\\left(${c2t}x-${d(k)}\\right)=0$.`,
+        ),
+        hintOtbor('bolshiy', `$${t(x)}$`, ['$0$', `$${t(znach)}$`]),
       ],
     };
   },

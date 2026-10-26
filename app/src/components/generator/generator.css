@@ -514,18 +514,6 @@
   line-height: 1.5;
   color: var(--color-text);
 }
-.gen-paper.is-demo::after {
-  content: 'ПРИМЕР';
-  position: absolute;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-24deg);
-  font-size: 96px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  color: color-mix(in srgb, var(--color-primary) 6%, transparent);
-  pointer-events: none;
-}
 .gen-paper__head {
   display: flex;
   align-items: center;
@@ -1303,9 +1291,6 @@
     border-radius: 0;
     box-shadow: none;
     font-size: 15px;
-  }
-  .gen-paper.is-demo::after {
-    font-size: 64px;
   }
   .gen-paper__motto {
     display: none;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
 import type { Pool, PoolKind, PoolVariant } from '@/lib/zadanie3/pool';
@@ -20,6 +20,8 @@ import { Solid3Stats } from './Solid3Stats';
 import { readSolid3Ui, type Solid3Ui } from './solid3Ui';
 import { TitleText } from '@/components/tasks/TitleText';
 import { Chertezh3 } from '@/components/chertezh3/Chertezh3';
+import { HintFlow } from '@/components/tasks/card/HintFlow';
+import { otkrytPodskazku } from '@/lib/veroyatnost/razbor';
 import type { Scenariy } from '@/lib/chertezh3/scenariy';
 
 export interface Solid3TrainerProps {
@@ -35,6 +37,9 @@ const MIX = 'mix';
 
 /** Приставка режима «только этот раздел» в общем тренажёре. */
 const GROUP = 'razdel:';
+
+/** Режим «типы из ссылки»: ?tipy=P03-01,P03-02 со страницы разбора типа. */
+const TIPY = 'tipy';
 
 /** Зерно подхода: берётся по нажатию «Начать», а не при отрисовке. */
 function freshSeed(): number {
@@ -81,6 +86,8 @@ export function Solid3Trainer({ pool, scope, backHref }: Solid3TrainerProps) {
         return {
           kind: kind.titlePlain,
           html: variant.uslovieHtml,
+          badge:
+            variant.fipi.length > 0 ? `ФИПИ № ${variant.fipi.join(', ')}` : 'Не из открытого банка',
           /* Разбор раскрывается только на итогах: до этого он закрыт. */
           review: () => <Solid3Review variant={variant} />,
         };
@@ -121,6 +128,27 @@ function Solid3Review({ variant }: { variant: PoolVariant }) {
   );
 }
 
+/* Адрес страницы для useSyncExternalStore: query не меняется, пока
+   страница открыта, поэтому подписываться не на что. */
+function neSlushat(): () => void {
+  return () => undefined;
+}
+function adresBrauzera(): string {
+  return window.location.search;
+}
+function adresServera(): string {
+  return '';
+}
+
+/** «2 прототипа», «5 прототипов». */
+function prototipov(n: number): string {
+  const d = n % 10;
+  const dd = n % 100;
+  if (d === 1 && dd !== 11) return 'прототип';
+  if (d >= 2 && d <= 4 && (dd < 12 || dd > 14)) return 'прототипа';
+  return 'прототипов';
+}
+
 interface Solid3SetupProps {
   pool: Pool;
   byId: ReadonlyMap<string, PoolKind>;
@@ -130,10 +158,27 @@ interface Solid3SetupProps {
 /** Выбор тренировки: режим и «Начать тренировку», ниже — статистика. */
 function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
   const progress = useZ3Progress();
-  const [mode, setMode] = useState<string>(MIX);
+  /* Выбранный режим. null — ученик ещё не выбирал: тогда типы из
+     ссылки, если они есть, иначе смешанный режим. */
+  const [vybor, setMode] = useState<string | null>(null);
   /* Повторение ошибок — отдельный режим: подход собирается только из
      заданий, в которых ошиблись. */
   const [repeat, setRepeat] = useState(false);
+  /* Только задачи открытого банка ФИПИ — поверх режима. */
+  const [otkrytyy, setOtkrytyy] = useState(false);
+  /* Прототипы из ссылки (?tipy=…): разбор типа ведёт в тренажёр
+     сразу по своему типу. Страница собрана заранее, поэтому на сервере
+     и при первой отрисовке адрес пустой, а после неё — настоящий. */
+  const search = useSyncExternalStore(neSlushat, adresBrauzera, adresServera);
+  const tipyKey = useMemo(() => {
+    const t = new URLSearchParams(search).get('tipy');
+    return (t ?? '')
+      .split(',')
+      .filter((id) => byId.has(id))
+      .join(',');
+  }, [search, byId]);
+  const tipy = useMemo(() => (tipyKey === '' ? [] : tipyKey.split(',')), [tipyKey]);
+  const mode = vybor ?? (tipy.length > 0 ? TIPY : MIX);
 
   /* Из чего собирать подход: один тип, все типы или список ошибок.
      Список ошибок берётся строкой, чтобы зависимость не менялась от
@@ -157,13 +202,21 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
         variants: list.map((n) => ({ n })),
       }));
     }
+    if (mode === TIPY) {
+      return tipy.flatMap((id) => {
+        const kind = byId.get(id);
+        return kind === undefined
+          ? []
+          : [{ id: kind.id, variants: kind.variants.map((item) => ({ n: item.n })) }];
+      });
+    }
     if (mode === MIX) {
       return pool.kinds.map((kind) => ({
         id: kind.id,
         variants: kind.variants.map((item) => ({ n: item.n })),
       }));
     }
-    /* Общий тренажёр фильтрует по разделам: кнопок на 91 прототип
+    /* Общий тренажёр фильтрует по разделам: кнопок на 92 прототипа
        было бы полтора экрана, и выбирать в них нечего. */
     if (mode.startsWith(GROUP)) {
       const nomer = mode.slice(GROUP.length);
@@ -175,7 +228,7 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
     return only === undefined
       ? []
       : [{ id: only.id, variants: only.variants.map((item) => ({ n: item.n })) }];
-  }, [repeat, mode, pool, byId, mistakesKey]);
+  }, [repeat, mode, tipy, pool, byId, mistakesKey]);
 
   /* Чем фильтровать: разделами в общем тренажёре, типами заданий
      в тренажёре раздела. */
@@ -196,12 +249,24 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
     }));
   }, [pool]);
 
-  const size = repeat
-    ? Math.min(
-        source.reduce((sum, kind) => sum + kind.variants.length, 0),
-        ROUND_SIZE,
-      )
-    : ROUND_SIZE;
+  /* «Только открытый банк»: из выбранного остаются задачи ФИПИ. */
+  const istochnik = useMemo(() => {
+    if (!otkrytyy) {
+      return source;
+    }
+    return source
+      .map((item) => {
+        const kind = byId.get(item.id);
+        const variants = item.variants.filter(
+          (v) => (kind?.variants.find((x) => x.n === v.n)?.fipi.length ?? 0) > 0,
+        );
+        return { id: item.id, variants };
+      })
+      .filter((item) => item.variants.length > 0);
+  }, [source, otkrytyy, byId]);
+  const vsego = istochnik.reduce((sum, kind) => sum + kind.variants.length, 0);
+
+  const size = repeat || otkrytyy ? Math.min(vsego, ROUND_SIZE) : ROUND_SIZE;
 
   function choose(next: string) {
     setMode(next);
@@ -209,7 +274,7 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
   }
 
   function start() {
-    const items = buildRound(source, seeded(freshSeed()), size);
+    const items = buildRound(istochnik, seeded(freshSeed()), size);
     if (items.length === 0) {
       return;
     }
@@ -224,6 +289,23 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
     <section className="z3t">
       {/* Фильтр по типам заданий раздела и смешанный режим. */}
       <nav className="z3t__filter" aria-label="Типы заданий">
+        {tipy.length === 0 ? null : (
+          <button
+            type="button"
+            className={clsx('chip', !repeat && mode === TIPY && 'is-active')}
+            onClick={() => choose(TIPY)}
+            title={tipy.map((id) => byId.get(id)?.titlePlain ?? id).join('; ')}
+          >
+            {tipy.length === 1 ? (
+              <TitleText
+                title={byId.get(tipy[0] ?? '')?.title ?? ''}
+                html={byId.get(tipy[0] ?? '')?.titleHtml}
+              />
+            ) : (
+              `Тип из разбора: ${tipy.length} ${prototipov(tipy.length)}`
+            )}
+          </button>
+        )}
         <button
           type="button"
           className={clsx('chip', !repeat && mode === MIX && 'is-active')}
@@ -252,8 +334,37 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
         )}
       </nav>
 
+      {!repeat && mode === TIPY && tipy.length > 1 ? (
+        <p className="z3t__hint">
+          В подходе:{' '}
+          {tipy.map((id, i) => {
+            const kind = byId.get(id);
+            return kind === undefined ? null : (
+              <span key={id}>
+                {i > 0 ? '; ' : ''}
+                <TitleText title={kind.title} html={kind.titleHtml} />
+              </span>
+            );
+          })}
+          .
+        </p>
+      ) : null}
+
+      <label className="z3t__toggle">
+        <input
+          type="checkbox"
+          checked={otkrytyy}
+          onChange={(event) => setOtkrytyy(event.target.checked)}
+        />
+        Только задачи открытого банка ФИПИ
+        {otkrytyy ? <span className="z3t__toggle-count"> — задач в выбранном: {vsego}</span> : null}
+      </label>
+      {otkrytyy && vsego === 0 ? (
+        <p className="z3t__hint">В этом режиме задач открытого банка нет — выберите другой.</p>
+      ) : null}
+
       <div className="z3t__actions">
-        <Button onClick={start} disabled={source.length === 0}>
+        <Button onClick={start} disabled={istochnik.length === 0}>
           Начать тренировку
         </Button>
       </div>
@@ -320,6 +431,10 @@ function Solid3Screen({
   const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
   /* Неверные проверки за всю тренировку: строка «Неверных попыток» в итогах. */
   const [misses, setMisses] = useState(restored?.misses ?? 0);
+  /* Подсказка открывается после первой ошибки; после второй ошибки
+     в задании сайт предлагает решение. */
+  const [hint, setHint] = useState(restored?.hint ?? false);
+  const [oshibok, setOshibok] = useState(restored?.oshibok ?? 0);
 
   useSessionReport<Solid3Ui>(report, {
     index,
@@ -332,6 +447,8 @@ function Solid3Screen({
     missed,
     taskFrom,
     misses,
+    hint,
+    oshibok,
   });
 
   const total = order.length;
@@ -363,6 +480,19 @@ function Solid3Screen({
   }, [variant, solution]);
   const [step, setStep] = useState<number | null>(null);
 
+  /* Подсказка раскрывается, только когда её открыли: вопросы банка,
+     а если их у прототипа нет — первый шаг разбора. */
+  const podskazka = useMemo(() => {
+    if (variant === undefined || !hint) {
+      return null;
+    }
+    if (variant.podskazka !== null) {
+      return { voprosy: otkrytPodskazku(variant.podskazka, variant.seal), shag: null };
+    }
+    const first = openText(variant.steps, variant.seal).split('\n')[0] ?? '';
+    return { voprosy: null, shag: first };
+  }, [variant, hint]);
+
   if (item === undefined || kind === undefined || variant === undefined) {
     return <p className="z3t__wait">Собираем подход…</p>;
   }
@@ -373,6 +503,8 @@ function Solid3Screen({
     setChecked(null);
     setSolution(false);
     setMissed(false);
+    setHint(false);
+    setOshibok(0);
     setTaskFrom(elapsed());
   }
 
@@ -393,11 +525,12 @@ function Solid3Screen({
       /* Без ошибки и разбора — «решено», иначе «с подсказкой». Уже
          поставленная отметка не понижается повторной проверкой. */
       if (marks[index] === undefined) {
-        setMarks({ ...marks, [index]: missed || solution ? 'hinted' : 'right' });
+        setMarks({ ...marks, [index]: missed || solution || hint ? 'hinted' : 'right' });
       }
     } else {
       setMissed(true);
       setMisses(misses + 1);
+      setOshibok(oshibok + 1);
       setTried({ ...tried, [index]: true });
     }
   }
@@ -419,12 +552,19 @@ function Solid3Screen({
   }
 
   const last = index >= total - 1;
+  /* После второй ошибки в задании главная кнопка — решение. */
+  const kResheniyu = checked === 'wrong' && oshibok >= 2 && !solution;
 
   return (
     <section className="z3t">
       <p className="z3t__count">
         <span className="z3t__kind">
           <TitleText title={kind.title} html={kind.titleHtml} />
+        </span>
+        <span className={clsx('z3t__metka', variant.fipi.length > 0 && 'is-fipi')}>
+          {variant.fipi.length > 0
+            ? `Задача ФИПИ № ${variant.fipi.join(', ')}`
+            : 'Не из открытого банка'}
         </span>
       </p>
 
@@ -493,19 +633,32 @@ function Solid3Screen({
             <p className="z3t__verdict-lead">
               {checked === 'right'
                 ? 'Разбор ниже — посмотрите, если решали иначе.'
-                : 'Попробуйте ещё раз или посмотрите разбор решения.'}
+                : kResheniyu
+                  ? 'Не получилось и во второй раз — посмотрите решение по шагам.'
+                  : hint
+                    ? 'Попробуйте ещё раз — подсказка ниже.'
+                    : 'Попробуйте ещё раз или откройте подсказку.'}
             </p>
           </div>
         )}
 
         <div className="z3t__actions">
           {checked === 'right' ? null : (
-            <Button onClick={check} disabled={value.trim() === ''}>
+            <Button
+              variant={kResheniyu ? 'secondary' : 'primary'}
+              onClick={check}
+              disabled={value.trim() === ''}
+            >
               Проверить
             </Button>
           )}
+          {checked === 'wrong' && !hint && !solution ? (
+            <Button variant="secondary" onClick={() => setHint(true)}>
+              Подсказка
+            </Button>
+          ) : null}
           <Button
-            variant="ghost"
+            variant={kResheniyu ? 'primary' : 'ghost'}
             onClick={() => {
               setSolution(true);
               setStep(0);
@@ -518,6 +671,15 @@ function Solid3Screen({
             Ещё один вариант
           </Button>
         </div>
+
+        {podskazka === null || solution ? null : podskazka.voprosy !== null ? (
+          <HintFlow key={`${index}-${item.kind}-${item.n}`} shagi={podskazka.voprosy} />
+        ) : (
+          <aside className="pc-hint" aria-live="polite">
+            <p className="pc-hint__head">Подсказка: с чего начать</p>
+            <p className="pc-hint__q" dangerouslySetInnerHTML={{ __html: podskazka.shag ?? '' }} />
+          </aside>
+        )}
 
         {solution ? (
           <SolutionSteps
