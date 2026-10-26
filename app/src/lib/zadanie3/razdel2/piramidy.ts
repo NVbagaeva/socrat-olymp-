@@ -14,7 +14,8 @@ import { hullVolume } from '../../solid/measure';
 import { regularPrismByArea } from './common';
 import { shapeTriSolid, TRI_NAMES } from './drawings';
 import { letters, ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -82,6 +83,7 @@ export const P03_28: Prototype = {
       { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
     ];
   },
+  podskazka: (p) => podskazka28(p),
   varianty: [
     variant(1, 'задачник', 'задачник 94', { S: 6, h: 9 }),
     variant(2, 'задачник', 'задачник 95', { S: 7, h: 9 }),
@@ -134,6 +136,7 @@ export const P03_29: Prototype = {
       { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
     ];
   },
+  podskazka: (p) => podskazka29(p),
   varianty: [
     variant(1, 'задачник', 'задачник 96', { S: 5, h: 6, apex: 1 }),
     variant(2, 'задачник', 'задачник 97', { S: 7, h: 3, apex: 2 }),
@@ -194,6 +197,7 @@ export const P03_30: Prototype = {
       { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
     ];
   },
+  podskazka: (p) => podskazka30(p),
   varianty: [
     variant(1, 'задачник', 'задачник 98', { S: 2, h: 6, apex: 0 }),
     variant(2, 'задачник', 'задачник 99', { S: 3, h: 2, apex: 0 }),
@@ -216,6 +220,7 @@ function fiveVertexProto(
   zad: [number, number],
   status: 'есть' | 'добавить',
   missing: 'B' | 'A',
+  podskazka: (p: Params) => HintStep[],
   varianty: readonly Variant[],
 ): Prototype {
   const names = missing === 'B' ? ['A', 'C', 'A1', 'B1', 'C1'] : ['B', 'C', 'A1', 'B1', 'C1'];
@@ -259,6 +264,7 @@ function fiveVertexProto(
         },
       ];
     },
+    podskazka,
     varianty,
   };
 }
@@ -269,6 +275,7 @@ export const P03_31 = fiveVertexProto(
   [102, 103],
   'есть',
   'B',
+  (p) => podskazka31(p),
   [
     variant(1, 'задачник', 'задачник 102', { S: 8, h: 6 }),
     variant(2, 'задачник', 'задачник 103', { S: 7, h: 9 }),
@@ -289,6 +296,7 @@ export const P03_32 = fiveVertexProto(
   [104, 105],
   'добавить',
   'A',
+  (p) => podskazka32(p),
   [
     variant(1, 'задачник', 'задачник 104', { S: 4, h: 6 }),
     variant(2, 'задачник', 'задачник 105', { S: 9, h: 5 }),
@@ -311,6 +319,7 @@ function tetraProto(
   zad: [number, number],
   names: readonly [string, string, string, string],
   edges: readonly (readonly [string, string])[],
+  podskazka: (p: Params) => HintStep[],
   varianty: readonly Variant[],
 ): Prototype {
   return {
@@ -345,6 +354,7 @@ function tetraProto(
         { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
       ];
     },
+    podskazka,
     varianty,
   };
 }
@@ -361,6 +371,7 @@ export const P03_33 = tetraProto(
     ['C', 'B1'],
     ['A1', 'B1'],
   ],
+  (p) => podskazka33(p),
   [
     variant(1, 'задачник', 'задачник 106', { S: 9, h: 4 }),
     variant(2, 'задачник', 'задачник 107', { S: 8, h: 6 }),
@@ -387,6 +398,7 @@ export const P03_34 = tetraProto(
     ['C', 'B1'],
     ['B1', 'C1'],
   ],
+  (p) => podskazka34(p),
   [
     variant(1, 'задачник', 'задачник 108', { S: 3, h: 5 }),
     variant(2, 'задачник', 'задачник 109', { S: 7, h: 9 }),
@@ -400,3 +412,142 @@ export const P03_34 = tetraProto(
     variant(10, 'новый', 'новый', { S: 15, h: 2 }),
   ],
 );
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Имя вершины для формулы: A1 → A_1. */
+function tx(name: string): string {
+  return name.replace(/1/g, '_1');
+}
+
+/** Пирамида на основании призмы: что за тело. */
+function chtoZaTelo(osnovanie: string, apex: string, drugoe: string): HintStep {
+  return vopros(
+    'Что это за многогранник?',
+    `Пирамида с основанием $${osnovanie}$ и вершиной $${tx(apex)}$`,
+    [
+      `Призма с основанием $${osnovanie}$`,
+      `Пирамида с основанием $${drugoe}$`,
+      'Половина призмы',
+    ],
+  );
+}
+
+/** Высота пирамиды, вершина которой лежит над (под) вершиной основания. */
+function vysota(apex: string): HintStep {
+  return vopros(
+    'Чему равна высота пирамиды?',
+    'Боковому ребру призмы',
+    ['Половине бокового ребра', 'Диагонали боковой грани', 'Стороне основания'],
+    `Вершина $${tx(apex)}$ лежит на боковом ребре, перпендикулярном основаниям.`,
+  );
+}
+
+/** Объём пирамиды: треть произведения площади основания на высоту. */
+function obemPiramidy(p: Params): HintStep {
+  const [S, h] = SH(p).map(tex);
+  return vopros(
+    'Как найти объём пирамиды?',
+    `$\\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
+    [`$${S} \\cdot ${h}$`, `$\\frac{1}{2} \\cdot ${S} \\cdot ${h}$`, `$\\frac{1}{6} \\cdot ${S} \\cdot ${h}$`],
+  );
+}
+
+/** Какую часть призмы составляет пирамида с тем же основанием и высотой. */
+function tret(): HintStep {
+  return vopros(
+    'Какую часть объёма призмы составляет пирамида с тем же основанием и той же высотой?',
+    'Треть',
+    ['Половину', 'Шестую', 'Четверть'],
+  );
+}
+
+function podskazka28(p: Params): HintStep[] {
+  return [chtoZaTelo('ABC', 'C1', 'AA_1C_1C'), vysota('C1'), obemPiramidy(p)];
+}
+
+function podskazka29(p: Params): HintStep[] {
+  const apex = num(p, 'apex') === 1 ? 'A1' : 'B1';
+  const grani = apex === 'A1' ? 'AA_1B_1B' : 'BB_1C_1C';
+  return [chtoZaTelo('ABC', apex, grani), vysota(apex), obemPiramidy(p)];
+}
+
+function podskazka30(p: Params): HintStep[] {
+  const apex = BOTTOM_APEX[num(p, 'apex') % 3] as string;
+  return [chtoZaTelo('A_1B_1C_1', apex, 'ABC'), vysota(apex), obemPiramidy(p)];
+}
+
+/** P03-31/32: призма без пирамиды с основанием ABC и вершиной над пропущенной. */
+function podskazkaPyati(p: Params, missing: 'A' | 'B'): HintStep[] {
+  const [S, h] = SH(p).map(tex);
+  return [
+    vopros(
+      `Чего не хватает многограннику до всей призмы? Вершины $${missing}$ у него нет.`,
+      `Пирамиды с основанием $ABC$ и вершиной $${missing}_1$`,
+      [
+        `Пирамиды с основанием $A_1B_1C_1$ и вершиной $${missing}$`,
+        'Половины призмы',
+        `Призмы с основанием $ABC$`,
+      ],
+      'Отрезанная часть — тетраэдр, у которого основание $ABC$ — нижнее основание призмы.',
+    ),
+    tret(),
+    vopros(
+      'Как найти объём многогранника?',
+      `$${S} \\cdot ${h} - \\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
+      [
+        `$\\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
+        `$${S} \\cdot ${h} - \\frac{1}{2} \\cdot ${S} \\cdot ${h}$`,
+        `$${S} \\cdot ${h} - \\frac{1}{6} \\cdot ${S} \\cdot ${h}$`,
+      ],
+    ),
+  ];
+}
+
+/** P03-33/34: тетраэдр — призма без двух пирамид на основаниях призмы. */
+function podskazkaTetra(p: Params, nizhnyaya: string, verhnyaya: string): HintStep[] {
+  const [S, h] = SH(p).map(tex);
+  return [
+    vopros(
+      'Как удобнее найти объём этого тетраэдра?',
+      `Вычесть из призмы две пирамиды: $${nizhnyaya}$ и $${verhnyaya}$`,
+      [
+        `Вычесть из призмы одну пирамиду $${nizhnyaya}$`,
+        'Взять половину объёма призмы',
+        'Взять за основание нижнее основание призмы',
+      ],
+      'Призма разрезается диагональными сечениями на три тетраэдра.',
+    ),
+    vopros(
+      'Какую часть призмы составляет каждая отрезанная пирамида?',
+      'Треть',
+      ['Половину', 'Шестую', 'Четверть'],
+      'Её основание — основание призмы, высота — боковое ребро.',
+    ),
+    vopros(
+      'Как найти объём тетраэдра?',
+      `$${S} \\cdot ${h} - 2 \\cdot \\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
+      [
+        `$${S} \\cdot ${h} - \\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
+        `$${S} \\cdot ${h} - 2 \\cdot \\frac{1}{6} \\cdot ${S} \\cdot ${h}$`,
+        `$\\frac{1}{6} \\cdot ${S} \\cdot ${h}$`,
+      ],
+    ),
+  ];
+}
+
+function podskazka31(p: Params): HintStep[] {
+  return podskazkaPyati(p, 'B');
+}
+
+function podskazka32(p: Params): HintStep[] {
+  return podskazkaPyati(p, 'A');
+}
+
+function podskazka33(p: Params): HintStep[] {
+  return podskazkaTetra(p, 'ABCB_1', 'A_1B_1C_1C');
+}
+
+function podskazka34(p: Params): HintStep[] {
+  return podskazkaTetra(p, 'ABCB_1', 'A_1B_1C_1A');
+}

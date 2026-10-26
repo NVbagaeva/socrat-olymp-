@@ -18,7 +18,8 @@ import { hullVolume, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { midlineCutModel } from './drawings';
 import { solveBySearch } from '../search';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -125,6 +126,7 @@ export const P03_24: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka24(p),
   varianty: [
     variant(1, 'задачник', 'задачник 78', { S: 75 }),
     variant(2, 'задачник', 'задачник 79', { S: 47 }),
@@ -176,6 +178,7 @@ export const P03_25: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka25(p),
   varianty: [
     variant(1, 'задачник', 'задачник 82', { s: 37 }),
     variant(2, 'задачник', 'задачник 83', { s: 43 }),
@@ -221,6 +224,7 @@ export const P03_26: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka26(p),
   varianty: [
     variant(1, 'задачник', 'задачник 86', { V: 48 }),
     variant(2, 'задачник', 'задачник 87', { V: 52 }),
@@ -270,6 +274,7 @@ export const P03_27: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka27(p),
   varianty: [
     variant(1, 'задачник', 'задачник 90', { v: 7 }),
     variant(2, 'задачник', 'задачник 91', { v: 5 }),
@@ -283,3 +288,89 @@ export const P03_27: Prototype = {
     variant(10, 'новый', 'новый', { v: 11 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Стороны основания отсечённой призмы — половины исходных. */
+function storony(): HintStep {
+  return vopros(
+    'Как стороны основания отсечённой призмы относятся к сторонам исходного основания?',
+    'Каждая вдвое меньше соответствующей',
+    ['Они равны', 'Каждая втрое меньше', 'Каждая вчетверо меньше'],
+    'Средняя линия — половина третьей стороны, две другие стороны отсечённого треугольника — половины сторон.',
+  );
+}
+
+/** Боковое ребро (высота) отсечённой призмы — то же, что у исходной. */
+function rebro(): HintStep {
+  return vopros(
+    'Какое боковое ребро у отсечённой призмы?',
+    'Такое же, как у исходной',
+    ['Вдвое меньше', 'Вдвое больше'],
+    'Секущая плоскость параллельна боковому ребру и проходит через всю высоту призмы.',
+  );
+}
+
+/** Площадь основания отсечённой призмы — четверть исходной. */
+function osnovanie(): HintStep {
+  return vopros(
+    'Во сколько раз площадь основания отсечённой призмы меньше исходной?',
+    'В $4$ раза',
+    ['В $2$ раза', 'В $8$ раз', 'В $3$ раза'],
+    'Треугольники подобны с коэффициентом $\\frac{1}{2}$, а площади относятся как $k^2$.',
+  );
+}
+
+function podskazka24(p: Params): HintStep[] {
+  const S = tex(num(p, 'S'));
+  return [
+    storony(),
+    rebro(),
+    vopros(
+      'Как найти боковую поверхность отсечённой призмы?',
+      `$\\frac{1}{2} \\cdot ${S}$`,
+      [`$\\frac{1}{4} \\cdot ${S}$`, `$\\frac{1}{3} \\cdot ${S}$`, `$\\frac{3}{4} \\cdot ${S}$`],
+      'Периметр основания вдвое меньше, а боковое ребро то же.',
+    ),
+  ];
+}
+
+function podskazka25(p: Params): HintStep[] {
+  const s = tex(num(p, 's'));
+  return [
+    storony(),
+    rebro(),
+    vopros(
+      'Как найти боковую поверхность исходной призмы?',
+      `$2 \\cdot ${s}$`,
+      [`$4 \\cdot ${s}$`, `$${s} : 2$`, `$3 \\cdot ${s}$`],
+      'Периметр основания исходной призмы вдвое больше, а боковое ребро то же.',
+    ),
+  ];
+}
+
+function podskazka26(p: Params): HintStep[] {
+  const V = tex(num(p, 'V'));
+  return [
+    osnovanie(),
+    rebro(),
+    vopros(
+      'Как найти объём отсечённой призмы?',
+      `$${V} : 4$`,
+      [`$${V} : 2$`, `$${V} : 8$`, `$${V} : 3$`],
+    ),
+  ];
+}
+
+function podskazka27(p: Params): HintStep[] {
+  const v = tex(num(p, 'v'));
+  return [
+    osnovanie(),
+    rebro(),
+    vopros(
+      'Как найти объём исходной призмы?',
+      `$4 \\cdot ${v}$`,
+      [`$2 \\cdot ${v}$`, `$8 \\cdot ${v}$`, `$${v} : 4$`],
+    ),
+  ];
+}
