@@ -270,7 +270,8 @@ export function RamkaOtvet({ otvet }: { otvet: string }) {
 function razrezat(title: string, yarlyk: string): { yarlyk: string; pod: string | null } {
   const m = /^([^:]+):\s*(.+)$/.exec(title);
   if (m === null) return { yarlyk: title || yarlyk, pod: null };
-  return { yarlyk: m[1] ?? yarlyk, pod: m[2] ?? null };
+  const pod = m[2] ?? '';
+  return { yarlyk: m[1] ?? yarlyk, pod: pod === '' ? null : pod.charAt(0).toUpperCase() + pod.slice(1) };
 }
 
 function RamkaSoZnachkom({
@@ -337,12 +338,15 @@ export function RamkaLovushka({
   verno,
   risunokNeverno,
   risunokVerno,
+  zadacha,
 }: {
   title: string;
   neverno: readonly string[];
   verno: readonly string[];
   risunokNeverno?: ReactNode;
   risunokVerno?: ReactNode;
+  /** Задача ловушки с верным решением — под колонками. */
+  zadacha?: ReactNode;
 }) {
   return (
     <aside className="o3-ramka o3-ramka--lovushka">
@@ -375,6 +379,7 @@ export function RamkaLovushka({
           {risunokVerno === undefined ? null : <div className="o3-lov__ris">{risunokVerno}</div>}
         </div>
       </div>
+      {zadacha === undefined ? null : <div className="o3-lov__zadacha">{zadacha}</div>}
     </aside>
   );
 }

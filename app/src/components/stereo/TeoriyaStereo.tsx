@@ -11,6 +11,8 @@ import { prototypeById, RAZDELY } from '@/lib/zadanie3';
 import { assertSheetsOk, renderFormulas } from '@/lib/zadanie3/formulas';
 import { diagonalKuba, sechenieKuba, type PrimerChertezha } from '@/lib/stereo/primery';
 import { Chertezh3d } from './Chertezh3d';
+import { GLAVY_DANNYE_3 } from '@/lib/stereo/glavy';
+import { GlavaMetodiki } from './glavy/GlavaMetodiki';
 import { Glava2Treugolnik, RAZDELY_GLAVY_2 } from './glavy/Glava2Treugolnik';
 
 const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GLAVY_15 };
@@ -22,11 +24,23 @@ const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GL
 /** Написанные главы: «задание:глава» → текст главы. */
 const NAPISANY: Readonly<Record<string, () => ReactNode>> = {
   '3:treugolnik': () => <Glava2Treugolnik />,
+  ...Object.fromEntries(
+    Object.entries(GLAVY_DANNYE_3).map(([id, dannye]) => [
+      `3:${id}`,
+      () => <GlavaMetodiki glava={dannye()} shpargalki={<Shpargalki />} />,
+    ]),
+  ),
 };
 
 /** Подпункты написанных глав в «Содержании»: разделы главы. */
 const PODPUNKTY: Readonly<Record<string, readonly { id: string; title: string }[]>> = {
   '3:treugolnik': RAZDELY_GLAVY_2,
+  ...Object.fromEntries(
+    Object.entries(GLAVY_DANNYE_3).map(([id, dannye]) => [
+      `3:${id}`,
+      dannye().razdely.map(({ id: rid, title }) => ({ id: rid, title })),
+    ]),
+  ),
 };
 
 const ZHIVYE: Readonly<Record<string, () => PrimerChertezha>> = {
