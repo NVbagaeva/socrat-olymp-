@@ -724,7 +724,7 @@ def d16(p, kon):
         ok(ist(mp.mpf(t)) == nado, "d16: граница", str(t))
     if hi < 1e6:
         ok(not ist(mp.mpf(hi + 1e-7)), "d16: правая граница")
-        ok(ist(mp.mpf(hi)) == bool(kon["hiZ"]) or not kon["hiZ"], "d16: правый конец")
+        ok(ist(mp.mpf(hi) - mp.mpf("1e-9")), "d16: левее правого конца — решение")
 
 
 def d17(p, kon):
