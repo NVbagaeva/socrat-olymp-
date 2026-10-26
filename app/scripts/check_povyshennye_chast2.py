@@ -67,7 +67,7 @@ LOG14 = {
 
 def z14(p, kon):
     osn, prav = LOG14[p["log"]]
-    arg = A14[p["a"]] + p["z"] * B14[p["b"]]
+    arg = p.get("za", 1) * A14[p["a"]] + p["z"] * B14[p["b"]]
     # Аргумент равен osn^prav; область — аргумент > 0 выполнена сама.
     znach = sp.nsimplify(osn**prav)
     ok(sp.simplify(znach - 1 / sp.sqrt(2)) == 0, "14: osn^prav = 1/√2")
@@ -88,7 +88,7 @@ def z15(p, kon):
     C = sp.Matrix([s * sp.cos(2 * sp.pi / 3), s * sp.sin(2 * sp.pi / 3), 0])
     D = A + C - B
     O = (A + C) / 2
-    h = sp.sqrt(sp.nsimplify(kon["h"] ** 2))
+    h = sp.sqrt(sp.Rational(*p["h2"])) if "h2" in p else sp.sqrt(sp.nsimplify(kon["h"] ** 2))
     S = O + sp.Matrix([0, 0, h])
     K = C + k * (S - C)
     v = K - D
@@ -107,30 +107,42 @@ def z15(p, kon):
 
 def z16(p, kon):
     q, e, y1, y2 = p["q"], p["e"], p["y1"], p["y2"]
-    s, t = y1 + y2, q ** (e + 1) - y1 * y2
-    expr = (q ** (2 * x + 1) + x - s * sp.sqrt(x) - t) / (q ** (2 * x) - q**e) - q
-    # sympy: преобразованное неравенство по знакам множителей — проверяем
-    # концы и знаки в точках между ними точно.
-    a, x0, b = sp.Integer(kon["a"]), sp.Rational(e, 2), sp.Integer(kon["b"])
+    al, ga = p.get("alpha", 1), p.get("gamma", 0)
+    ge = p.get("znak", "ge") == "ge"
+    kk = sp.Integer(q) ** (al - ga)
+    s, t = y1 + y2, kk * q**e - y1 * y2
+    expr = (q ** (2 * x + al) + x - s * sp.sqrt(x) - t) / (q ** (2 * x + ga) - q**e) - kk
+    a, x0, b = sp.Integer(kon["a"]), sp.Rational(e - ga, 2), sp.Integer(kon["b"])
     ok(sp.simplify(expr.subs(x, a)) == 0 and sp.simplify(expr.subs(x, b)) == 0, "16: концы — нули")
-    for tt, verno in [(a / 2, False), ((a + x0) / 2, True), ((x0 + b) / 2, False), (b + 1, True), (b * 3, True)]:
-        ok((sp.N(expr.subs(x, tt), 80) >= 0) == verno, f"16: знак в {tt}")
+    ks = kon["kuski"]
+    kuski = [(ks[i], ks[i + 1], ks[i + 2] == 1, ks[i + 3] == 1) for i in range(0, len(ks), 4)]
+
+    def vnutri(X):
+        return any((lo < X < hi) or (lz and X == lo) or (hz and X == hi) for lo, hi, lz, hz in kuski)
+
+    def verno(v):
+        return v >= 0 if ge else v <= 0
+
+    # Точные знаки в серединах промежутков между особыми точками.
+    tochki = sorted({sp.Integer(0), a, b, x0})
+    for i, tt in enumerate(tochki):
+        nx = tochki[i + 1] if i + 1 < len(tochki) else tt + 2
+        mid = (tt + nx) / 2
+        ok(verno(sp.N(expr.subs(x, mid), 80)) == vnutri(float(mid)), f"16: знак в {mid}")
+    ok(not vnutri(float(x0)), "16: x0 не в ответе")
     # Сетка mpmath, 60 знаков.
     mp.mp.dps = 60
-    f = lambda X: (mp.mpf(q) ** (2 * X + 1) + X - s * mp.sqrt(X) - t) / (mp.mpf(q) ** (2 * X) - mp.mpf(q) ** e) - q
+    Q = mp.mpf(q)
+    f = lambda X: (Q ** (2 * X + al) + X - s * mp.sqrt(X) - t) / (Q ** (2 * X + ga) - Q**e) - Q ** (al - ga)
     plokho = 0
     i = 0
     xa, xb, xx0 = float(a), float(b), float(x0)
     while i * 0.01 <= xb + 5:
         X = mp.mpf(i) / 100
         i += 1
-        if abs(X - xx0) < 1e-9:
+        if abs(X - xx0) < 1e-9 or abs(X - xa) < 1e-12 or abs(X - xb) < 1e-12:
             continue
-        v = f(X)
-        vnutri = (xa <= X < xx0) or X >= xb
-        if abs(X - xa) < 1e-12 or abs(X - xb) < 1e-12:
-            continue
-        if (v >= 0) != vnutri:
+        if verno(f(X)) != vnutri(float(X)):
             plokho += 1
     ok(plokho == 0, "16: сетка mpmath", str(plokho))
 
@@ -166,7 +178,38 @@ def z18(p, kon):
     ok(near(S, kon["S"]), "18: площадь", f"{sp.nsimplify(S)} {kon['S']}")
 
 
+def z19z(p, kon):
+    m, b = p["m"], p["b"]
+    N = b**m
+
+    def korni(av):
+        # (m − log_b(x²−a²))(a − x)(√(a−x) − m) = 0 при x ≤ a, |x| > |a|.
+        out = set()
+        for xs in (sp.sqrt(av**2 + N), -sp.sqrt(av**2 + N), av - m * m):
+            if xs <= av and xs**2 - av**2 > 0:
+                out.add(sp.nsimplify(xs))
+        return len(out)
+
+    gr = sp.Rational(m * m, 2)
+    toch = sp.nsimplify(kon["tochka"], rational=True)
+    ok(sp.Rational(m**4 - N, 2 * m * m) == toch, "19: точка совпадения")
+    # Разложение: левая минус правая часть равна произведению множителей.
+    av, L, u = sp.symbols("av L u", real=True)
+    xx = av - u**2
+    lhs = u**3 + m * xx - (xx + u**3 / m) * L - m * av + av * L
+    ok(sp.expand(lhs - (m - L) * u**2 * (u - m) / m) == 0, "19: разложение на множители")
+    plokho = []
+    for i in range(-1400, 1401):
+        a_ = sp.Rational(i, 100)
+        if (korni(a_) == 1) != (a_ >= gr or a_ == toch):
+            plokho.append(str(a_))
+    ok(korni(gr) == 1 and korni(toch) == 1, "19: границы")
+    ok(not plokho, "19: множество ровно одного корня", ",".join(plokho[:5]))
+
+
 def z19(p, kon):
+    if p.get("zerk"):
+        return z19z(p, kon)
     m, b, cc = p["m"], p["b"], p["c"]
     N = b**cc
 
@@ -198,7 +241,7 @@ def z19(p, kon):
 
 def z20(p, kon):
     S, pp = p["S"], p["p"]
-    q = pp + 20
+    q = p.get("q", pp + 20)
     can = set()
     for kk in range(1, 80):
         for aa in range(kk):

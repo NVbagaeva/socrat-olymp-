@@ -105,7 +105,7 @@ const LOG14 = {
 
 function prov14(p, z) {
   const [osn, prav] = LOG14[p.log];
-  const arg = (x) => A14[p.a](x) + p.z * B14[p.b](x);
+  const arg = (x) => (p.za ?? 1) * A14[p.a](x) + p.z * B14[p.b](x);
   const f = (x) => Math.log(arg(x)) / Math.log(osn) - prav;
   for (const x0 of z.kontrol.serii)
     for (const n of [-3, 0, 2]) {
@@ -171,6 +171,8 @@ function prov15(p, z) {
   const Dp = [A[0] + C[0] - B[0], A[1] + C[1] - B[1], 0];
   const O = [(A[0] + C[0]) / 2, (A[1] + C[1]) / 2, 0];
   const h = z.kontrol.h;
+  if (p.h2 !== undefined)
+    ok(close(h * h, p.h2[0] / p.h2[1], 1e-12), '№15: высота из условия', `${h * h} vs ${p.h2}`);
   const S = [O[0], O[1], h];
   /* Точку K находим по углу (бисекция), а не по ответу шаблона. */
   const ugol = (t) => {
@@ -214,39 +216,50 @@ function prov15(p, z) {
 }
 
 function prov16(p, z) {
+  const alpha = p.alpha ?? 1;
+  const gamma = p.gamma ?? 0;
+  const k = p.q ** (alpha - gamma);
+  const t = k * p.q ** p.e - p.y1 * p.y2;
+  const ge = (p.znak ?? 'ge') === 'ge';
   const f = (x) =>
-    (p.q ** (2 * x + 1) + x - (p.y1 + p.y2) * Math.sqrt(x) - (p.q ** (p.e + 1) - p.y1 * p.y2)) /
-      (p.q ** (2 * x) - p.q ** p.e) -
-    p.q;
+    (p.q ** (2 * x + alpha) + x - (p.y1 + p.y2) * Math.sqrt(x) - t) /
+      (p.q ** (2 * x + gamma) - p.q ** p.e) -
+    k;
+  /* Условие задачи в тексте — то же неравенство. */
+  ok(z.uslovie.includes(ge ? '\\ge' : '\\le'), '№16: знак неравенства в условии');
+  ok(z.uslovie.includes(`\\sqrt x-${t}`), '№16: свободный член в условии', `${t}`);
   const { a, x0, b } = z.kontrol;
-  const vnutri = (x) => (x >= a - 1e-12 && x < x0) || x >= b - 1e-12;
-  /* Сетка на [0; max(12, y₂² + 3)]. Дробь при больших x отличается от q
+  const ks = [];
+  for (let i = 0; i < z.kontrol.kuski.length; i += 4) {
+    const [lo, hi, loZ, hiZ] = z.kontrol.kuski.slice(i, i + 4);
+    ks.push({ lo, hi, loZ: loZ === 1, hiZ: hiZ === 1 });
+  }
+  const vnutri = (x) =>
+    ks.some((q) => (x > q.lo && x < q.hi) || (q.loZ && x === q.lo) || (q.hiZ && x === q.hi));
+  /* Сетка на [0; max(12, y₂² + 3)]. Дробь при больших x отличается от k
      на 1e-9…1e-12 — это настоящая величина, погрешность счёта на порядки
      меньше; точки, где |f| < 1e-13, не сравниваются — там знак сверяет
      сетка mpmath с 60 знаками (check_povyshennye_chast2.py). */
   let plokho = 0;
-  let mimo = 0;
   const kray = Math.max(12, b + 3);
   for (let i = 0; i * 0.0005 <= kray; i += 1) {
     const x = i * 0.0005;
     const v = f(x);
-    if (!Number.isFinite(v)) continue;
+    if (!Number.isFinite(v) || Math.abs(x - x0) < 1e-9) continue;
     if (Math.abs(x - a) < 1e-9 || Math.abs(x - b) < 1e-9) {
       if (Math.abs(v) > 1e-6) plokho += 1;
+      if (!vnutri(x)) plokho += 1;
       continue;
     }
-    if (Math.abs(v) < 1e-13) {
-      mimo += 1;
-      continue;
-    }
-    if (v > 0 !== vnutri(x)) {
+    if (Math.abs(v) < 1e-13) continue;
+    if ((ge ? v > 0 : v < 0) !== vnutri(x)) {
       plokho += 1;
       if (plokho < 4) console.error(`    №16: x = ${x}, f = ${v}`);
     }
   }
-  void mimo;
   ok(plokho === 0, '№16: ответ совпал с сеткой', `${plokho} точек`);
-  ok(a < x0 && x0 < b, '№16: та же структура [y₁²; x₀) ∪ [y₂²; +∞)');
+  ok(!vnutri(x0), '№16: точка разрыва не в ответе');
+  ok(ks.length >= 2, '№16: в ответе не меньше двух кусков');
 }
 
 function prov17(p, z) {
@@ -341,7 +354,63 @@ function prov18(p, z) {
   }
 }
 
+function prov19z(p, z) {
+  /* Зеркальный вид: корни исходного уравнения при x ≤ a, |x| > |a|,
+     сменой знака левой минус правой части; ответ — «ровно один корень». */
+  const { m, b } = p;
+  const F = (a, x) => {
+    const u = a - x;
+    const L = Math.log(x * x - a * a) / Math.log(b);
+    return u ** 1.5 + m * x - (x + u ** 1.5 / m) * L - m * a + a * L;
+  };
+  const korni = (a) => {
+    const lo = -Math.sqrt(a * a + 4 * b ** m) - 20;
+    const hi = a;
+    const K = 60000;
+    const out = [];
+    let prev = null;
+    for (let i = 1; i < K; i += 1) {
+      const x = lo + ((hi - lo) * i) / K;
+      if (Math.abs(x) <= Math.abs(a)) {
+        prev = null;
+        continue;
+      }
+      const v = F(a, x);
+      if (!Number.isFinite(v)) continue;
+      if (Math.abs(v) < 1e-12) out.push(x);
+      else if (prev !== null && prev.v * v < 0) out.push(x);
+      prev = { x, v };
+    }
+    const N = b ** m;
+    for (const x of [a - m * m, -Math.sqrt(a * a + N)])
+      if (
+        x <= a &&
+        Math.abs(x) > Math.abs(a) + 1e-9 &&
+        Math.abs(F(a, x)) < 1e-8 &&
+        !out.some((y) => Math.abs(y - x) < 1e-3)
+      )
+        out.push(x);
+    const s = out.sort((x, y) => x - y);
+    return s.filter((x, i) => i === 0 || x - s[i - 1] > 1e-3).length;
+  };
+  const { granica, tochka } = z.kontrol;
+  const vOtvete = (a) => a >= granica - 1e-12 || Math.abs(a - tochka) < 1e-12;
+  const plokho = [];
+  for (let a = -14; a <= 14; a += 0.0173) {
+    if (Math.abs(a - granica) < 0.01 || Math.abs(a - tochka) < 0.01) continue;
+    if ((korni(a) === 1) !== vOtvete(a)) plokho.push(a.toFixed(3));
+  }
+  for (const a of [granica, tochka]) if (korni(a) !== 1) plokho.push(`граница ${a}`);
+  if (korni(granica - 1e-4) === 1) plokho.push('левее границы — один корень');
+  ok(
+    plokho.length === 0,
+    '№19: множество «ровно один корень» совпало',
+    plokho.slice(0, 5).join(', '),
+  );
+}
+
 function prov19(p, z) {
+  if (p.zerk === true) return prov19z(p, z);
   const { m, b, c } = p;
   const N = b ** c;
   const F = (a, x) => {
@@ -393,7 +462,7 @@ function prov19(p, z) {
 }
 
 function prov20(p, z) {
-  const q = p.p + 20;
+  const q = p.q ?? p.p + 20;
   const maxLen = 3000;
   const can = new Set();
   /* Полный перебор: число секций и нахлёстов каждого вида. */

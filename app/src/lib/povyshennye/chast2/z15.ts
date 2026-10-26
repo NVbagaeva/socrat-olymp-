@@ -13,7 +13,17 @@
  */
 
 import { chertezhSvg, sVidom, vybratVid, postroit, type Scenariy } from '@/lib/chertezh3';
-import { add, div, mul, rat, sub, toNumber, type Rat } from '@/lib/zadanie15/core/rational';
+import {
+  add,
+  div,
+  isZero,
+  mul,
+  neg,
+  rat,
+  sub,
+  toNumber,
+  type Rat,
+} from '@/lib/zadanie15/core/rational';
 import { sqrtRat, surdTex } from '@/lib/zadanie15/core/surd';
 import { ratTex } from './tex';
 import type { Chast2Zadacha, Shablon2 } from './types';
@@ -22,8 +32,12 @@ import type { Chast2Zadacha, Shablon2 } from './types';
 const TG2: Record<number, Rat> = { 30: rat(1, 3), 45: rat(1), 60: rat(3) };
 
 export type P15 =
-  /** Ромб с углом ABC = 120° и стороной √a2. */
-  | { osn: 'ugol'; a2: number; phi: 30 | 45 | 60 }
+  /**
+   * Ромб с углом ABC = 120° и стороной √a2. h2 — квадрат высоты SO
+   * дробью [числитель, знаменатель]; без него SO = OC·tg φ, и уравнение
+   * на k линейное (вариант 1). С ним — квадратное (вариант 2).
+   */
+  | { osn: 'ugol'; a2: number; phi: 30 | 45 | 60; h2?: readonly [number, number] }
   /** Ромб с диагоналями AC = 2c, BD = 2d (c > d). */
   | { osn: 'diag'; ac: number; bd: number; phi: 30 | 45 | 60 };
 
@@ -34,8 +48,24 @@ export function chisla15(p: P15) {
   const d2 = p.osn === 'ugol' ? mul(rat(1, 4), rat(p.a2)) : rat(p.bd * p.bd, 4);
   const a2 = add(c2, d2);
   const t = TG2[p.phi]!;
-  const h2 = mul(t, c2);
-  const k = div(a2, mul(rat(2), c2));
+  const zadana = p.osn === 'ugol' && p.h2 !== undefined;
+  const h2 = zadana ? rat(p.h2![0], p.h2![1]) : mul(t, c2);
+  /* k²h² = t(d² + c²(1 − k)²): (h² − tc²)k² + 2tc²·k − t(c² + d²) = 0. */
+  const kvA = sub(h2, mul(t, c2));
+  const kvB = mul(rat(2), mul(t, c2));
+  const kvC = neg(mul(t, a2));
+  let korni: Rat[];
+  if (isZero(kvA)) {
+    korni = [div(neg(kvC), kvB)];
+  } else {
+    const disk = sub(mul(kvB, kvB), mul(rat(4), mul(kvA, kvC)));
+    const kd = sqrtRat(disk);
+    if (kd.m !== 1n) throw new Error('z15: k иррационально');
+    korni = [-1, 1].map((z) => div(add(neg(kvB), mul(rat(z), kd.k)), mul(rat(2), kvA)));
+  }
+  const vRebre = korni.filter((r) => toNumber(r) > 0 && toNumber(r) < 1);
+  if (vRebre.length !== 1) throw new Error('z15: точка K на ребре не одна');
+  const k = vRebre[0]!;
   const on2 = div(mul(c2, d2), a2);
   const fn2 = mul(rat(4), on2);
   const et2 = mul(mul(k, k), h2);
@@ -43,7 +73,20 @@ export function chisla15(p: P15) {
   const nt2 = mul(mul(dk, dk), on2);
   const en2 = add(et2, nt2);
   const fh2 = div(mul(et2, fn2), en2);
-  return { c2, d2, a2, t, h2, k, on2, fn2, et2, nt2, en2, fh2 };
+  return { c2, d2, a2, t, h2, k, on2, fn2, et2, nt2, en2, fh2, kvA, kvB, kvC, korni };
+}
+
+/** Ak² + Bk + C в TeX без «+ −» и единичных множителей. */
+function kvadrat(A: Rat, B: Rat, C: Rat): string {
+  const chlen = (q: Rat, x: string, first: boolean) => {
+    if (isZero(q)) return '';
+    const neg = q.n < 0n;
+    const mod = neg ? rat(-q.n, q.d) : q;
+    const one = mod.n === 1n && mod.d === 1n && x !== '';
+    const body = `${one ? '' : ratTex(mod)}${x}`;
+    return `${neg ? '-' : first ? '' : '+'}${body}`;
+  };
+  return chlen(A, 'k^2', true) + chlen(B, 'k', false) + chlen(C, '', false);
 }
 
 /** Отношение (1 − k) : k несократимыми целыми. */
@@ -231,7 +274,11 @@ function sobrat(p: P15): Chast2Zadacha {
         title: 'а) Находим $k$',
         lines: [
           `Из $KP^2=PD^2\\operatorname{tg}^2${phi}$: $${lev}k^2=${odin ? '' : `${ratTex(t)}\\left(`}${ratTex(n.d2)}+${ratTex(n.c2)}(1-k)^2${odin ? '' : '\\right)'}$.`,
-          `Раскрываем скобки: $${lev}k^2=${ratTex(svobod)}-${ratTex(mul(rat(2), h2))}k+${lev}k^2$, откуда $k=${kT}$.`,
+          isZero(n.kvA)
+            ? `Раскрываем скобки: $${lev}k^2=${ratTex(svobod)}-${ratTex(mul(rat(2), h2))}k+${lev}k^2$, откуда $k=${kT}$.`
+            : `Раскрываем скобки и приводим подобные: $${kvadrat(n.kvA, n.kvB, n.kvC)}=0$. Корни: ${n.korni
+                .map((r) => `$k=${ratTex(r)}$`)
+                .join(' и ')}. Точка $K$ лежит на ребре, поэтому $0<k<1$, и $k=${kT}$.`,
           `Значит, $CK=${kT}\\,CS$ и $SK:KC=${o1}:${o2}$, что и требовалось доказать.`,
         ],
       },

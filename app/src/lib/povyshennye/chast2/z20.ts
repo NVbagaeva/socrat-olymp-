@@ -1,13 +1,14 @@
 /**
  * №20: забор из секций одной ширины, соседние секции скрепляются
- * внахлёст на p или q = p + 20 см. а) можно ли собрать длину A (да);
+ * внахлёст на p или q см. а) можно ли собрать длину A (да);
  * б) длину B (нет); в) наименьшая L, при которой собираются L и все
  * L + 10n.
  *
  * Длина из 1 + k₁ + k₂ секций: S + (S − q)k₁ + (S − p)k₂. Шаги S − q
- * и S − p дают 10 и 10·(нечётное), поэтому все кратные 10 длины
- * начиная с некоторой собираются; наибольшая несобираемая M — число
- * Фробениуса, ответ в) — M + 10. Как в образце: да / нет / число.
+ * и S − p в десятках сантиметров взаимно просты, поэтому все кратные 10
+ * длины начиная с некоторой собираются; наибольшая несобираемая M —
+ * число Фробениуса, ответ в) — M + 10. Как в образцах (нахлёст 10/30 и
+ * 10/40): да / нет / число.
  */
 
 import { decText } from './tex';
@@ -16,8 +17,10 @@ import type { Chast2Zadacha, Shablon2 } from './types';
 export interface P20 {
   /** Ширина секции, см. */
   S: number;
-  /** Меньший нахлёст, см (больший — p + 20). */
+  /** Меньший нахлёст, см. */
   p: number;
+  /** Больший нахлёст, см (по умолчанию p + 20). */
+  q?: number;
   /** Длина пункта а (собирается), см. */
   A: number;
   /** Длина пункта б (не собирается), см. */
@@ -26,7 +29,7 @@ export interface P20 {
 
 /** Разложение длины: k₁ соединений по q, k₂ — по p; null — не собирается. */
 export function razlozhit(p: P20, L: number): { k1: number; k2: number } | null {
-  const q = p.p + 20;
+  const q = p.q ?? p.p + 20;
   const a = p.S - q;
   const b = p.S - p.p;
   const r = L - p.S;
@@ -40,7 +43,7 @@ export function razlozhit(p: P20, L: number): { k1: number; k2: number } | null 
 
 /** Наибольшая несобираемая длина, кратная 10 и не меньше S − 10. */
 export function naibolshayaNe(p: P20): number {
-  const a = (p.S - p.p - 20) / 10;
+  const a = (p.S - (p.q ?? p.p + 20)) / 10;
   const b = (p.S - p.p) / 10;
   return p.S + 10 * (a * b - a - b);
 }
@@ -48,10 +51,14 @@ export function naibolshayaNe(p: P20): number {
 const m = (cm: number) => `${decText(cm / 100)} м`;
 
 function sobrat(p: P20): Chast2Zadacha {
-  const q = p.p + 20;
+  const q = p.q ?? p.p + 20;
   const a = p.S - q;
   const b = p.S - p.p;
-  if (a <= 0 || (p.S - p.p) % 20 !== 10) throw new Error('z20: не та структура');
+  /* Шаги длины a и b (в десятках см) взаимно просты: собираются все
+     кратные 10 длины начиная с некоторой. */
+  const nod = (x: number, y: number): number => (y === 0 ? x : nod(y, x % y));
+  if (a <= 0 || q <= p.p || a % 10 !== 0 || b % 10 !== 0 || nod(a / 10, b / 10) !== 1)
+    throw new Error('z20: не та структура');
   const ra = razlozhit(p, p.A);
   if (ra === null || razlozhit(p, p.B) !== null) throw new Error('z20: пункты а/б не те');
   const M = naibolshayaNe(p);

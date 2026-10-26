@@ -21,6 +21,11 @@ export interface P18 {
   e: number;
   b: number;
   l: number;
+  /**
+   * Что дано в пункте б: BD (вариант 1) или радиус окружности ω
+   * (вариант 2: AE, AB и r — BD и высоту ученик находит сам).
+   */
+  dano?: 'BD' | 'r';
 }
 
 export function chisla18(p: P18) {
@@ -41,6 +46,36 @@ export function chisla18(p: P18) {
 }
 
 const n = (x: Rat) => toNumber(x);
+
+/**
+ * Этапы «высота и радиус», когда дан радиус (вариант 2): из
+ * tg∠OAP = r/AP находим угол трапеции, затем высоту и BD.
+ */
+function etapyPoR(p: P18, c: ReturnType<typeof chisla18>, risunok: string) {
+  const r = ratTex(c.r);
+  const e2 = rat(p.e * p.e);
+  const r2 = mul(c.r, c.r);
+  const cos = div(sub(r2, e2), add(r2, e2));
+  const sin = div(mul(rat(2 * p.e), c.r), add(r2, e2));
+  return [
+    {
+      title: 'б) Угол трапеции из радиуса',
+      risunok,
+      lines: [
+        `$OP\\perp AE$ — {{t:kasatelnaya-radius|радиус в точку касания перпендикулярен касательной}}, $AP=\\dfrac{AE}{2}=${p.e}$, поэтому $\\operatorname{tg}\\angle OAP=\\dfrac{OP}{AP}=\\dfrac{${r}}{${p.e}}$.`,
+        `$AO$ — {{t:centr-v-ugle|биссектриса угла}} $BAE$, $\\angle BAE=180^\\circ-\\angle ABD$, поэтому $\\angle OAP=90^\\circ-\\dfrac{\\angle ABD}{2}$ и $\\operatorname{tg}\\dfrac{\\angle ABD}{2}=\\dfrac{${p.e}}{${r}}$.`,
+        `Отсюда $\\cos\\angle ABD=\\dfrac{1-\\operatorname{tg}^2\\frac{\\angle ABD}{2}}{1+\\operatorname{tg}^2\\frac{\\angle ABD}{2}}=${ratTex(cos)}$, $\\sin\\angle ABD=${ratTex(sin)}$.`,
+      ],
+    },
+    {
+      title: 'б) Высота и большее основание',
+      lines: [
+        `Высота трапеции $h=AB\\cdot\\sin\\angle ABD=${p.l}\\cdot${ratTex(sin)}=${c.h}$, проекция боковой стороны на $BD$ равна $AB\\cdot\\cos\\angle ABD=${c.d}$, поэтому $BD=AE+2\\cdot${c.d}=${2 * p.b}$.`,
+        `$r<h$, поэтому $O$ лежит внутри трапеции; пусть $M$ — середина $BD$, тогда $OM=h-r=${ratTex(c.om)}$.`,
+      ],
+    },
+  ];
+}
 
 /** Чертёж к решению: пункт а — касательные отрезки и ось; б — углы при B. */
 function chertezh(p: P18, punkt: 'a' | 'b'): string {
@@ -127,7 +162,9 @@ function sobrat(p: P18): Chast2Zadacha {
   const uslovie =
     `В пятиугольник $ABCDE$ вписана окружность $\\omega$ с центром $O$. Четырёхугольник $ABDE$ — равнобедренная трапеция с большим основанием $BD$; $P$ — точка касания окружности $\\omega$ со стороной $AE$.\n` +
     `а) Докажите, что точки $C$, $O$ и $P$ лежат на одной прямой.\n` +
-    `б) Найдите площадь пятиугольника $ABCDE$, если $AE=${AE}$, $BD=${BD}$, $AB=${p.l}$.`;
+    (p.dano === 'r'
+      ? `б) Найдите площадь пятиугольника $ABCDE$, если $AE=${AE}$, $AB=${p.l}$, а радиус окружности $\\omega$ равен $${ratTex(c.r)}$.`
+      : `б) Найдите площадь пятиугольника $ABCDE$, если $AE=${AE}$, $BD=${BD}$, $AB=${p.l}$.`);
   const S = ratTex(c.s);
   const r = ratTex(c.r);
   const tgA = ratTex(rat(p.l + c.d, c.h));
@@ -164,21 +201,25 @@ function sobrat(p: P18): Chast2Zadacha {
           `Точка $C$ равноудалена от $B$ и $D$, значит, {{t:seredinnyy-perp|лежит на серединном перпендикуляре}} к $BD$ — это та же ось. Итак, $C$, $O$ и $P$ лежат на оси трапеции, то есть на одной прямой.`,
         ],
       },
-      {
-        title: 'б) Высота трапеции',
-        lines: [
-          `Проекция боковой стороны на большее основание равна $\\dfrac{BD-AE}{2}=${c.d}$. По {{t:pifagor|теореме Пифагора}} высота трапеции $h=\\sqrt{${p.l}^2-${c.d}^2}=${c.h}$, $\\cos\\angle ABD=\\dfrac{${c.d}}{${p.l}}$.`,
-        ],
-      },
-      {
-        title: 'б) Радиус окружности',
-        risunok: chertezh(p, 'b'),
-        lines: [
-          `$AO$ — {{t:centr-v-ugle|биссектриса угла}} $BAE$, а $\\angle BAE=180^\\circ-\\angle ABD$ (углы при боковой стороне трапеции). Поэтому $\\operatorname{tg}\\angle OAP=\\operatorname{tg}\\left(90^\\circ-\\dfrac{\\angle ABD}{2}\\right)=\\sqrt{\\dfrac{1+\\cos\\angle ABD}{1-\\cos\\angle ABD}}=\\sqrt{\\dfrac{${p.l + c.d}}{${p.l - c.d}}}=${tgA}$.`,
-          `В прямоугольном треугольнике $AOP$: $r=OP=AP\\cdot\\operatorname{tg}\\angle OAP=${p.e}\\cdot${tgA}=${r}$.`,
-          `$r<h=${c.h}$, поэтому $O$ лежит внутри трапеции; пусть $M$ — середина $BD$, тогда $OM=h-r=${ratTex(c.om)}$.`,
-        ],
-      },
+      ...(p.dano === 'r'
+        ? etapyPoR(p, c, chertezh(p, 'b'))
+        : [
+            {
+              title: 'б) Высота трапеции',
+              lines: [
+                `Проекция боковой стороны на большее основание равна $\\dfrac{BD-AE}{2}=${c.d}$. По {{t:pifagor|теореме Пифагора}} высота трапеции $h=\\sqrt{${p.l}^2-${c.d}^2}=${c.h}$, $\\cos\\angle ABD=\\dfrac{${c.d}}{${p.l}}$.`,
+              ],
+            },
+            {
+              title: 'б) Радиус окружности',
+              risunok: chertezh(p, 'b'),
+              lines: [
+                `$AO$ — {{t:centr-v-ugle|биссектриса угла}} $BAE$, а $\\angle BAE=180^\\circ-\\angle ABD$ (углы при боковой стороне трапеции). Поэтому $\\operatorname{tg}\\angle OAP=\\operatorname{tg}\\left(90^\\circ-\\dfrac{\\angle ABD}{2}\\right)=\\sqrt{\\dfrac{1+\\cos\\angle ABD}{1-\\cos\\angle ABD}}=\\sqrt{\\dfrac{${p.l + c.d}}{${p.l - c.d}}}=${tgA}$.`,
+                `В прямоугольном треугольнике $AOP$: $r=OP=AP\\cdot\\operatorname{tg}\\angle OAP=${p.e}\\cdot${tgA}=${r}$.`,
+                `$r<h=${c.h}$, поэтому $O$ лежит внутри трапеции; пусть $M$ — середина $BD$, тогда $OM=h-r=${ratTex(c.om)}$.`,
+              ],
+            },
+          ]),
       {
         title: 'б) Угол CBD',
         lines: [
@@ -202,8 +243,18 @@ function sobrat(p: P18): Chast2Zadacha {
         formula: 'O\\in\\text{оси}',
       },
       { slovo: 'Отрезки касательных равны, поэтому $BC=DC$ и $C$ — на оси', formula: 'BC=DC' },
-      { slovo: 'Высота трапеции по теореме Пифагора', formula: `h=${c.h}` },
-      { slovo: 'Радиус — через половину угла при основании', formula: `r=${r}` },
+      ...(p.dano === 'r'
+        ? [
+            {
+              slovo: 'Угол трапеции — через радиус: $\\operatorname{tg}$ половины угла',
+              formula: `\\operatorname{tg}\\dfrac{\\angle ABD}{2}=\\dfrac{${p.e}}{${r}}`,
+            },
+            { slovo: 'Высота и большее основание', formula: `h=${c.h},\\ BD=${2 * p.b}` },
+          ]
+        : [
+            { slovo: 'Высота трапеции по теореме Пифагора', formula: `h=${c.h}` },
+            { slovo: 'Радиус — через половину угла при основании', formula: `r=${r}` },
+          ]),
       {
         slovo: 'Тангенс угла CBD — как тангенс разности',
         formula: `\\operatorname{tg}\\angle CBD=${ratTex(c.tg)}`,
