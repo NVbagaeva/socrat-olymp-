@@ -72,7 +72,7 @@ export const P03_55: Prototype = {
     return [
       { text: `Высота: $\\sqrt{${ru(l)}^2 - ${ru(r)}^2} = ${ru(h)}$.`, value: h },
       {
-        text: `Осевое сечение — треугольник с основанием ${ru(num(p, 'd'))} и высотой ${ru(h)}: площадь = $${ru(num(p, 'd'))} \\cdot ${ru(h)} : 2 = ${ru(round(r * h))}$.`,
+        text: `Осевое сечение — треугольник с основанием ${ru(num(p, 'd'))} и высотой ${ru(h)}, его площадь: $${ru(num(p, 'd'))} \\cdot ${ru(h)} : 2 = ${ru(round(r * h))}$.`,
         value: r * h,
       },
     ];
@@ -133,7 +133,7 @@ export const P03_56: Prototype = {
     return [
       { text: `Радиус: $\\sqrt{${ru(l)}^2 - ${ru(h)}^2} = ${ru(r)}$.`, value: r },
       {
-        text: `Осевое сечение — треугольник с основанием ${ru(2 * r)} и высотой ${ru(h)}: площадь = $${ru(r)} \\cdot ${ru(h)} = ${ru(r * h)}$.`,
+        text: `Осевое сечение — треугольник с основанием ${ru(2 * r)} и высотой ${ru(h)}, его площадь: $${ru(r)} \\cdot ${ru(h)} = ${ru(r * h)}$.`,
         value: r * h,
       },
     ];

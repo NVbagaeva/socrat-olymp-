@@ -15,7 +15,7 @@ import { vertex } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { regularPrismByArea } from './common';
 import { shapeHexSolid, HEX_NAMES } from './drawings';
-import { ru } from '../format';
+import { letters, ru } from '../format';
 import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
 import { tex, vopros } from '../podskazka';
 
@@ -44,7 +44,7 @@ function volumeOf(p: Params, names: readonly string[]): number {
 function condition(p: Params, names: readonly string[]): string {
   const [S, h] = SH(p);
   return (
-    `Найдите объём многогранника, вершинами которого являются точки $${names.join(', ')}$ ` +
+    `Найдите объём многогранника, вершинами которого являются точки $${names.map(letters).join(', ')}$ ` +
     `правильной шестиугольной призмы $${HEX_NAMES}$, площадь основания которой равна ${ru(S)}, ` +
     `а боковое ребро равно ${ru(h)}.`
   );
@@ -133,7 +133,7 @@ export const P03_37: Prototype = {
     const [S, h] = SH(p);
     return [
       {
-        text: 'Четыре вершины через одну отсекают от шестиугольника два одинаковых треугольника по $\\frac{S}{6}$ каждый: остаётся ⅔$S$.',
+        text: 'Четыре вершины через одну отсекают от шестиугольника два одинаковых треугольника по $\\frac{S}{6}$ каждый: остаётся $\\frac{2}{3}S$.',
       },
       { text: `Объём: $${ru(S)} \\cdot \\tfrac{2}{3} \\cdot ${ru(h)} = ${ru((2 * S * h) / 3)}$.`, value: (2 * S * h) / 3 },
     ];
@@ -294,7 +294,7 @@ export const P03_40: Prototype = {
   uslovie: (p) => {
     const names = tetra40Names(p);
     return (
-      `Найдите объём многогранника, вершинами которого являются вершины $${names.join(', ')}$ ` +
+      `Найдите объём многогранника, вершинами которого являются вершины $${names.map(letters).join(', ')}$ ` +
       `правильной шестиугольной призмы $${HEX_NAMES}$, площадь основания которой равна ${ru(num(p, 'S'))}, ` +
       `а боковое ребро равно ${ru(num(p, 'h'))}.`
     );
@@ -327,7 +327,7 @@ export const P03_40: Prototype = {
         text: 'Три соседние вершины одного уровня отсекают от основания шестую часть, площадью $\\frac{S}{6}$; четвёртая вершина лежит на высоте $h$ от их плоскости.',
       },
       {
-        text: `Объём тетраэдра: ⅓ · $(${ru(S)} : 6) \\cdot ${ru(h)} = ${ru((S * h) / 18)}$.`,
+        text: `Объём тетраэдра: $\\frac{1}{3} \\cdot (${ru(S)} : 6) \\cdot ${ru(h)} = ${ru((S * h) / 18)}$.`,
         value: (S * h) / 18,
       },
     ];

@@ -390,7 +390,7 @@ export const P03_04: Prototype = {
     const quad = sectionQuad([text(p, 'p1'), text(p, 'p2'), text(p, 'p3')]);
     return [
       {
-        text: `Сечение ${quad.map(letters).join('')} — прямоугольник: одна сторона — диагональ основания, другая — боковое ребро.`,
+        text: `Сечение $${quad.map(letters).join('')}$ — прямоугольник: одна сторона — диагональ основания, другая — боковое ребро.`,
       },
       {
         text: `Диагональ основания: $\\sqrt{${ru(a)}^2 + ${ru(b)}^2} = ${ru(diag)}$.`,

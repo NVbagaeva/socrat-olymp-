@@ -65,7 +65,7 @@ export const P03_71: Prototype = {
       {
         text:
           'Поверхность шара растёт как квадрат радиуса, поэтому складываются квадраты: ' +
-          `${ru(a)}² + ${ru(b)}² = ${ru(sum)}.`,
+          `$${ru(a)}^2 + ${ru(b)}^2 = ${ru(sum)}$.`,
         value: sum,
       },
       { text: `Радиус: $\\sqrt{${ru(sum)}} = ${ru(Math.sqrt(sum))}$.`, value: Math.sqrt(sum) },

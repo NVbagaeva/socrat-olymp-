@@ -116,7 +116,7 @@ export const P03_42: Prototype = {
 
   uslovie: (p) =>
     `В правильной четырёхугольной пирамиде $SABCD$ с вершиной $S$ точка $O$ — центр основания, ` +
-    `$SO=${ru(num(p, 'so'))}$, $BD=${ru(num(p, 'bd'))}$. Найдите длину отрезка ${text(p, 'edge')}.`,
+    `$SO=${ru(num(p, 'so'))}$, $BD=${ru(num(p, 'bd'))}$. Найдите длину отрезка $${text(p, 'edge')}$.`,
 
   dopustimo: (p) => num(p, 'so') > 0 && num(p, 'bd') > 0,
 
@@ -140,7 +140,7 @@ export const P03_42: Prototype = {
     return [
       { text: `Половина диагонали: $BD : 2 = ${ru(bd)} : 2 = ${ru(half)}$.`, value: half },
       {
-        text: `Боковое ребро — гипотенуза прямоугольного треугольника с катетами $SO$ и половиной диагонали: ${text(p, 'edge')} = $\\sqrt{${ru(so)}^2 + ${ru(half)}^2} = ${ru(sc)}$.`,
+        text: `Боковое ребро — гипотенуза прямоугольного треугольника с катетами $SO$ и половиной диагонали: $${text(p, 'edge')} = \\sqrt{${ru(so)}^2 + ${ru(half)}^2} = ${ru(sc)}$.`,
         value: sc,
       },
     ];
@@ -200,10 +200,10 @@ export const P03_43: Prototype = {
     const half = Math.sqrt(ev * ev - so * so);
     return [
       {
-        text: `Половина диагонали — катет прямоугольного треугольника с гипотенузой ${text(p, 'edge')} и катетом $SO$: $\\sqrt{${ru(ev)}^2 - ${ru(so)}^2} = ${ru(half)}$.`,
+        text: `Половина диагонали — катет прямоугольного треугольника с гипотенузой $${text(p, 'edge')}$ и катетом $SO$: $\\sqrt{${ru(ev)}^2 - ${ru(so)}^2} = ${ru(half)}$.`,
         value: half,
       },
-      { text: `Диагональ ${text(p, 'diag')}: $${ru(half)} \\cdot 2 = ${ru(2 * half)}$.`, value: 2 * half },
+      { text: `Диагональ $${text(p, 'diag')}$: $${ru(half)} \\cdot 2 = ${ru(2 * half)}$.`, value: 2 * half },
     ];
   },
 

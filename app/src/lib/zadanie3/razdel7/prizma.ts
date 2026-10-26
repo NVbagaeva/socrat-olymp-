@@ -74,7 +74,7 @@ export const P03_76: Prototype = {
       {
         text:
           `Объём цилиндра равен $\\pi \\cdot R^2 \\cdot h$. Высота $${ru(k)} : \\pi$, поэтому $\\pi$ сокращается: ` +
-          `${ru(d2 / 4)} · ${ru(k)} = ${ru((k * d2) / 4)}.`,
+          `$${ru(d2 / 4)} \\cdot ${ru(k)} = ${ru((k * d2) / 4)}$.`,
         value: (k * d2) / 4,
       },
     ];
