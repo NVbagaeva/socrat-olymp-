@@ -27,6 +27,9 @@ function bokovaya(body: Polyhedron, osnovaniya: readonly (readonly string[])[]):
   );
 }
 
+/** Ракурс пониже для пирамид, у которых высота меньше основания. */
+const NIZKO = { azimuth: 28, elevation: 14 };
+
 export function glava3(): GlavaDannye {
   /* Куб с диагональю 5√3. */
   const k5 = box(5, 5, 5);
@@ -50,6 +53,7 @@ export function glava3(): GlavaDannye {
       ? 'Правильная пирамида SABCD: высота SO падает в центр основания, треугольник SOA прямоугольный'
       : 'Правильная пирамида SABCD: апофема SM, принятая за высоту, и треугольник SMA',
     bodies: [p3.body],
+    rakurs: NIZKO,
     marks: verno ? [{ p: p3.O, label: 'O' }] : [{ p: M3, label: 'M' }],
     lines: verno ? [{ a: p3.v('S'), b: p3.O }, { a: p3.O, b: p3.v('A') }] : [{ a: p3.v('S'), b: M3 }],
     sections: [{ points: verno ? [p3.v('S'), p3.O, p3.v('A')] : [p3.v('S'), M3, p3.v('A')] }],
@@ -276,6 +280,7 @@ export function glava3(): GlavaDannye {
               model: {
                 alt: 'Правильная пирамида SABCD: высота SO, отрезок OM до середины стороны AB, апофема SM',
                 bodies: [p6.body],
+                rakurs: NIZKO,
                 marks: [
                   { p: p6.O, label: 'O' },
                   { p: M, label: 'M', shag: 1 },
@@ -287,9 +292,7 @@ export function glava3(): GlavaDannye {
                 ],
                 sections: [{ points: [S, p6.O, M], shag: 2 }],
                 angles: [{ at: p6.O, u: dir(p6.O, M), v: dir(p6.O, S), shag: 2 }],
-                measures: [
-                  { a: p6.v('A'), b: p6.v('B'), text: '6' },
-                ],
+                measures: [{ a: p6.v('B'), b: p6.v('C'), text: '6' }],
               },
               shagiChertezha: [
                 '$M$ — середина $AB$; $OM$ — половина стороны, $3$.',
