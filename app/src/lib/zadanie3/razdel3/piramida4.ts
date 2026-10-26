@@ -12,7 +12,8 @@ import { solveBySearch } from '../search';
 import { distance } from '../../solid/measure';
 import { shapeHeightDiagonals, NAMES4 } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num, text } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num, text } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -87,6 +88,7 @@ export const P03_41: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka41(p),
   varianty: [
     variant(1, 'задачник', 'задачник 126', { edge: 'SD', sd: 41, bd: 18 }),
     variant(2, 'задачник', 'задачник 127', { edge: 'SA', sd: 34, bd: 32 }),
@@ -144,6 +146,7 @@ export const P03_42: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka42(p),
   varianty: [
     variant(1, 'задачник', 'задачник 130', { edge: 'SC', so: 28, bd: 42 }),
     variant(2, 'задачник', 'задачник 131', { edge: 'SA', so: 15, bd: 40 }),
@@ -204,6 +207,7 @@ export const P03_43: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka43(p),
   varianty: [
     variant(1, 'задачник', 'задачник 132', { edge: 'SC', edge_v: 73, so: 48, diag: 'AC' }),
     variant(2, 'задачник', 'задачник 133', { edge: 'SA', edge_v: 34, so: 30, diag: 'AC' }),
@@ -229,3 +233,101 @@ export const P03_43: Prototype = {
     variant(10, 'новый', 'новый', { edge: 'SA', edge_v: 29, so: 21, diag: 'BD' }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Вершина основания на данном боковом ребре: у ребра SD — D. */
+function vershina(p: Params): string {
+  return text(p, 'edge').charAt(1);
+}
+
+/** Первый шаг у всех трёх: прямоугольный треугольник SO и вершина ребра. */
+function treugolnik(p: Params): HintStep {
+  const x = vershina(p);
+  const edge = text(p, 'edge');
+  return vopros(
+    'Какой треугольник рассмотреть?',
+    `Прямоугольный треугольник $SO${x}$`,
+    ['Треугольник $SBD$ целиком', 'Боковую грань $SAB$', 'Треугольник $SAC$ целиком'],
+    `$SO$ — высота, поэтому угол $SO${x}$ прямой, а $${edge}$ — гипотенуза.`,
+  );
+}
+
+function podskazka41(p: Params): HintStep[] {
+  const sd = num(p, 'sd');
+  const bd = num(p, 'bd');
+  const half = bd / 2;
+  const otvet = Math.sqrt(sd * sd - half * half);
+  const x = vershina(p);
+  const edge = text(p, 'edge');
+  return [
+    treugolnik(p),
+    vopros(
+      `Чему равен катет $O${x}$?`,
+      chislo(half),
+      chisla([bd, half / 2, bd * 2], half, otvet),
+      `$O$ — середина диагонали, а диагонали квадрата равны: $O${x} = BD : 2$.`,
+    ),
+    vopros(
+      'Как найти $SO$?',
+      `$\\sqrt{${tex(sd)}^2 - ${tex(half)}^2}$`,
+      [
+        `$\\sqrt{${tex(sd)}^2 + ${tex(half)}^2}$`,
+        `$\\sqrt{${tex(sd)}^2 - ${tex(bd)}^2}$`,
+        `$${tex(sd)} - ${tex(half)}$`,
+      ],
+      `По теореме Пифагора: гипотенуза $${edge}$, второй катет $O${x}$.`,
+    ),
+  ];
+}
+
+function podskazka42(p: Params): HintStep[] {
+  const so = num(p, 'so');
+  const bd = num(p, 'bd');
+  const half = bd / 2;
+  const otvet = Math.sqrt(so * so + half * half);
+  const x = vershina(p);
+  return [
+    treugolnik(p),
+    vopros(
+      `Чему равен катет $O${x}$?`,
+      chislo(half),
+      chisla([bd, half / 2, bd * 2], half, otvet),
+      `$O$ — середина диагонали, а диагонали квадрата равны: $O${x} = BD : 2$.`,
+    ),
+    vopros(
+      `Как найти $${text(p, 'edge')}$?`,
+      `$\\sqrt{${tex(so)}^2 + ${tex(half)}^2}$`,
+      [
+        `$\\sqrt{${tex(so)}^2 - ${tex(half)}^2}$`,
+        `$\\sqrt{${tex(so)}^2 + ${tex(bd)}^2}$`,
+        `$${tex(so)} + ${tex(half)}$`,
+      ],
+      'Боковое ребро — гипотенуза: квадраты катетов складываются.',
+    ),
+  ];
+}
+
+function podskazka43(p: Params): HintStep[] {
+  const so = num(p, 'so');
+  const ev = num(p, 'edge_v');
+  const half = Math.sqrt(ev * ev - so * so);
+  const otvet = 2 * half;
+  const x = vershina(p);
+  const diag = text(p, 'diag');
+  return [
+    treugolnik(p),
+    vopros(
+      `Чему равен катет $O${x}$?`,
+      chislo(half),
+      chisla([ev - so, ev + so, half / 2], half, otvet),
+      `По теореме Пифагора: $O${x} = \\sqrt{${tex(ev)}^2 - ${tex(so)}^2}$.`,
+    ),
+    vopros(
+      `Как найти $${diag}$?`,
+      `$${diag} = 2 \\cdot O${x}$`,
+      [`$${diag} = O${x} : 2$`, `$${diag} = O${x} \\cdot \\sqrt{2}$`],
+      'Диагонали квадрата равны и точкой $O$ делятся пополам.',
+    ),
+  ];
+}
