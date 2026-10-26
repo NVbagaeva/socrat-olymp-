@@ -77,6 +77,11 @@ function textOk(text, where) {
 
 /* ── Рисунок движка ────────────────────────────────────────────── */
 
+/* Условие без разметки: цифры путей SVG (знак корня KaTeX) и атрибутов — не текст. */
+function tekstUsloviya(html) {
+  return html.replace(/<svg[\s\S]*?<\/svg>/g, ' ').replace(/<annotation[\s\S]*?<\/annotation>/g, ' ').replace(/<[^>]*>/g, ' ');
+}
+
 function risunokOk(model, where, opts = {}) {
   const svg = R.renderSolid(model, opts);
   check(!/fill="(#000|#000000|black)"/i.test(svg), `${where}: чёрная заливка`);
@@ -262,7 +267,10 @@ for (const b of BL.BLOKI_3) {
     }
     if (z.vid === 'nazhmi') {
       check((z.celi ?? []).some((c) => c.id === z.otvet), `${where}: ответ не среди целей`);
-      const svg = risunokOk(z.model, where, { celi: z.celi.map((c) => ({ id: c.id, points: c.points })) });
+      const celi = z.celi.map((c) => ({ id: c.id, points: c.points }));
+      /* На странице блока чертёж — в теме «экран»: подписи проверяются в обеих. */
+      risunokOk(z.model, `${where}, тема ekran`, { celi, tema: 'ekran' });
+      const svg = risunokOk(z.model, where, { celi });
       for (const c of z.celi) {
         check(svg.includes(`data-cel="${c.id}"`), `${where}: на чертеже нет цели ${c.id}`);
       }
@@ -270,6 +278,7 @@ for (const b of BL.BLOKI_3) {
       z.celi.forEach((c) => textOk(c.label, where));
     } else {
       risunokOk(z.model, where);
+      risunokOk(z.model, `${where}, тема ekran`, { tema: 'ekran' });
     }
     if (z.vid === 'vybor') {
       check(Number(z.otvet) >= 0 && Number(z.otvet) < (z.varianty ?? []).length, `${where}: ответ вне вариантов`);
@@ -297,7 +306,7 @@ for (const b of BL.BLOKI_3) {
     const sealed = SEAL.sealZadacha(z, i + 1);
     const json = JSON.stringify({ ...sealed, model: null });
     if (z.vid === 'chislo') {
-      check(!new RegExp(`(^|[^0-9.,])${z.otvet.replace(',', '[.,]')}([^0-9.,]|$)`).test(sealed.uslovieHtml) || z.uslovie.includes(z.otvet), `${where}: ответ в условии открыто`);
+      check(!new RegExp(`(^|[^0-9.,])${z.otvet.replace(',', '[.,]')}([^0-9.,]|$)`).test(tekstUsloviya(sealed.uslovieHtml)) || z.uslovie.includes(z.otvet), `${where}: ответ в условии открыто`);
       check(SECRET.answerMatches(z.otvet, sealed.seal), `${where}: отпечаток не принимает верный ответ`);
       check(!SECRET.answerMatches(String(Number(z.otvet.replace(',', '.')) + 1), sealed.seal), `${where}: отпечаток принимает неверный ответ`);
     } else {
