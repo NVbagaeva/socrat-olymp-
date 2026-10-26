@@ -21,6 +21,7 @@ import { chertezhBanka } from '../solid';
 import { texPlain, typeset } from '../tex';
 import type { PodskazkaShag } from '../veroyatnost/razbor';
 import { chertezhVarianta, estScenariy } from './chertezhi';
+import { fipiVarianta } from './fipi';
 import { RAZDELY, type Razdel } from './index';
 import { klyuchZadachi, sealAnswer, sealText } from './secret';
 import { type HintStep, type Prototype } from './types';
@@ -28,6 +29,8 @@ import { type HintStep, type Prototype } from './types';
 export interface PoolVariant {
   /** Номер варианта в прототипе, 1…10. */
   n: number;
+  /** Номера задачи в открытом банке ФИПИ; пусто — не из открытого банка. */
+  fipi: readonly string[];
   uslovieHtml: string;
   /** Отпечаток верного ответа. Самого ответа здесь нет. */
   seal: string;
@@ -122,6 +125,7 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     if (ch) tekstyPodpisey(ch.scenariy).forEach((t) => podpisi.add(t));
     return {
       n: variant.n,
+      fipi: fipiVarianta(prototype.id, variant.n),
       uslovieHtml: typeset(prototype.uslovie(variant.params)),
       seal,
       /* Разбор закрыт тем же отпечатком: без него не раскрыть. */

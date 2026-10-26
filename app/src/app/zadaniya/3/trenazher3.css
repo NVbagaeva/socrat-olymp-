@@ -26,6 +26,34 @@
   flex-wrap: wrap;
   color: var(--color-text-secondary);
 }
+/* Откуда задача: открытый банк ФИПИ или нет (как метки №10). */
+.z3t__metka {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+.z3t__metka.is-fipi {
+  color: var(--color-primary);
+}
+/* «Только задачи открытого банка ФИПИ» в настройке тренировки. */
+.z3t__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  cursor: pointer;
+}
+.z3t__toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary);
+}
+.z3t__toggle-count {
+  color: var(--color-text-secondary);
+}
 .z3t__kind {
   font-size: var(--fs-caption);
   color: var(--color-text-tertiary);

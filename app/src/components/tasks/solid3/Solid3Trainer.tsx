@@ -86,6 +86,7 @@ export function Solid3Trainer({ pool, scope, backHref }: Solid3TrainerProps) {
         return {
           kind: kind.titlePlain,
           html: variant.uslovieHtml,
+          badge: variant.fipi.length > 0 ? `ФИПИ № ${variant.fipi.join(', ')}` : 'Не из открытого банка',
           /* Разбор раскрывается только на итогах: до этого он закрыт. */
           review: () => <Solid3Review variant={variant} />,
         };
@@ -162,6 +163,8 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
   /* Повторение ошибок — отдельный режим: подход собирается только из
      заданий, в которых ошиблись. */
   const [repeat, setRepeat] = useState(false);
+  /* Только задачи открытого банка ФИПИ — поверх режима. */
+  const [otkrytyy, setOtkrytyy] = useState(false);
   /* Прототипы из ссылки (?tipy=…): разбор типа ведёт в тренажёр
      сразу по своему типу. Страница собрана заранее, поэтому на сервере
      и при первой отрисовке адрес пустой, а после неё — настоящий. */
@@ -212,7 +215,7 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
         variants: kind.variants.map((item) => ({ n: item.n })),
       }));
     }
-    /* Общий тренажёр фильтрует по разделам: кнопок на 91 прототип
+    /* Общий тренажёр фильтрует по разделам: кнопок на 92 прототипа
        было бы полтора экрана, и выбирать в них нечего. */
     if (mode.startsWith(GROUP)) {
       const nomer = mode.slice(GROUP.length);
@@ -245,11 +248,25 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
     }));
   }, [pool]);
 
-  const size = repeat
-    ? Math.min(
-        source.reduce((sum, kind) => sum + kind.variants.length, 0),
-        ROUND_SIZE,
-      )
+  /* «Только открытый банк»: из выбранного остаются задачи ФИПИ. */
+  const istochnik = useMemo(() => {
+    if (!otkrytyy) {
+      return source;
+    }
+    return source
+      .map((item) => {
+        const kind = byId.get(item.id);
+        const variants = item.variants.filter(
+          (v) => (kind?.variants.find((x) => x.n === v.n)?.fipi.length ?? 0) > 0,
+        );
+        return { id: item.id, variants };
+      })
+      .filter((item) => item.variants.length > 0);
+  }, [source, otkrytyy, byId]);
+  const vsego = istochnik.reduce((sum, kind) => sum + kind.variants.length, 0);
+
+  const size = repeat || otkrytyy
+    ? Math.min(vsego, ROUND_SIZE)
     : ROUND_SIZE;
 
   function choose(next: string) {
@@ -258,7 +275,7 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
   }
 
   function start() {
-    const items = buildRound(source, seeded(freshSeed()), size);
+    const items = buildRound(istochnik, seeded(freshSeed()), size);
     if (items.length === 0) {
       return;
     }
@@ -334,8 +351,21 @@ function Solid3Setup({ pool, byId, api }: Solid3SetupProps) {
         </p>
       ) : null}
 
+      <label className="z3t__toggle">
+        <input
+          type="checkbox"
+          checked={otkrytyy}
+          onChange={(event) => setOtkrytyy(event.target.checked)}
+        />
+        Только задачи открытого банка ФИПИ
+        {otkrytyy ? <span className="z3t__toggle-count"> — задач в выбранном: {vsego}</span> : null}
+      </label>
+      {otkrytyy && vsego === 0 ? (
+        <p className="z3t__hint">В этом режиме задач открытого банка нет — выберите другой.</p>
+      ) : null}
+
       <div className="z3t__actions">
-        <Button onClick={start} disabled={source.length === 0}>
+        <Button onClick={start} disabled={istochnik.length === 0}>
           Начать тренировку
         </Button>
       </div>
@@ -531,6 +561,11 @@ function Solid3Screen({
       <p className="z3t__count">
         <span className="z3t__kind">
           <TitleText title={kind.title} html={kind.titleHtml} />
+        </span>
+        <span className={clsx('z3t__metka', variant.fipi.length > 0 && 'is-fipi')}>
+          {variant.fipi.length > 0
+            ? `Задача ФИПИ № ${variant.fipi.join(', ')}`
+            : 'Не из открытого банка'}
         </span>
       </p>
 
