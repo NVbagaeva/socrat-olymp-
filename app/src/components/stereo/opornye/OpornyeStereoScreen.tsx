@@ -27,6 +27,8 @@ export interface OpornyeStereoScreenProps {
   miniatyury: string[];
   listHref: string;
   teoriyaHref: string;
+  /** Название главы теории блока: в итоге. */
+  glava: string;
   trenazherHref: string;
 }
 
@@ -61,6 +63,7 @@ export function OpornyeStereoScreen({
   miniatyury,
   listHref,
   teoriyaHref,
+  glava,
   trenazherHref,
 }: OpornyeStereoScreenProps) {
   const progress = opornye3.useProgress();
@@ -159,6 +162,7 @@ export function OpornyeStereoScreen({
             verno: status[i] === 'right',
           }))}
           teoriyaHref={teoriyaHref}
+          glava={glava}
           listHref={listHref}
           trenazherHref={trenazherHref}
           onOtkryt={open}

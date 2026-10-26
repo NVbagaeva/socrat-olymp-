@@ -40,7 +40,6 @@ function check(ok, what) {
 }
 
 const G2 = requireSrc('lib/stereo/glava2.ts');
-const B2 = requireSrc('lib/stereo/opornye3/blok2.ts');
 const SEAL = requireSrc('lib/stereo/opornye3/seal.ts');
 const SECRET = requireSrc('lib/stereo/opornye3/secret.ts');
 const R = requireSrc('lib/solid/render.ts');
@@ -221,87 +220,112 @@ for (const [a, b, c, d] of [[1, 2, 2, 3], [2, 3, 6, 7], [1, 4, 8, 9], [2, 6, 9, 
   check(a * a + b * b + c * c === d * d, `тройка в пространстве ${a}, ${b}, ${c} → ${d} — неверна`);
 }
 
-/* ── 3–5. Задачи блока 2 ───────────────────────────────────────── */
+/* ── 3–5. Задачи опорных блоков ─────────────────────────────────
+   Все написанные блоки: по десять задач, уровни не убывают, ответ
+   пересчитывается по чертежу, задача уходит на страницу закрытой.
+   Глава теории блока есть в оглавлении. Задача с меткой «банк» —
+   задача №3 из снимка открытого банка ФИПИ. */
 
-const zadachi = B2.zadachiBloka2();
-check(zadachi.length === 10, `в блоке 2 задач ${zadachi.length}, а не 10`);
-check(new Set(zadachi.map((z) => z.id)).size === zadachi.length, 'ключи задач блока повторяются');
-check(zadachi.every((z, i) => i === 0 || z.uroven >= zadachi[i - 1].uroven), 'уровни задач блока убывают');
-check(['chislo', 'vybor', 'nazhmi', 'ploskiy'].every((vid) => zadachi.some((z) => z.vid === vid)), 'в блоке не все форматы');
+const GLAVY = requireSrc('content/stereo/glavy.ts');
+const BANK_FIPI = new Set(
+  JSON.parse(fs.readFileSync(path.join(APP, '..', 'content-source/stereometria/fipi-otkrytyy-bank.json'), 'utf8'))
+    .zadachi.filter((t) => t.zadanie === '3')
+    .map((t) => t.nomer),
+);
 
-zadachi.forEach((z, i) => {
-  const where = `блок 2, ${z.id}`;
-  const p = z.pereschet();
-  if (z.vid === 'chislo') {
-    check(near(Number(z.otvet.replace(',', '.')), Number(p)), `${where}: ответ ${z.otvet}, пересчёт ${p}`);
-  } else {
-    check(String(p) === z.otvet, `${where}: ответ ${z.otvet}, пересчёт ${p}`);
-  }
-  if (z.vid === 'nazhmi') {
-    check((z.celi ?? []).some((c) => c.id === z.otvet), `${where}: ответ не среди целей`);
-    const svg = risunokOk(z.model, where, { celi: z.celi.map((c) => ({ id: c.id, points: c.points })) });
-    for (const c of z.celi) {
-      check(svg.includes(`data-cel="${c.id}"`), `${where}: на чертеже нет цели ${c.id}`);
+for (const b of BL.BLOKI_3) {
+  check(GLAVY.GLAVY_3.some((g) => g.id === b.glava), `блок ${b.no}: нет главы теории «${b.glava}»`);
+  const zadachi = BL.zadachiBloka(b.id);
+  check(b.gotov === zadachi.length > 0, `блок ${b.no}: «готов» не совпадает с наличием задач`);
+  if (!b.gotov) continue;
+  const N = b.no;
+  check(zadachi.length === 10, `в блоке ${N} задач ${zadachi.length}, а не 10`);
+  check(new Set(zadachi.map((z) => z.id)).size === zadachi.length, `блок ${N}: ключи задач повторяются`);
+  check(zadachi.every((z) => z.id.startsWith(`o3-${N}-`) && z.blok === b.id), `блок ${N}: ключ или блок задачи не того блока`);
+  check(zadachi.every((z, i) => i === 0 || z.uroven >= zadachi[i - 1].uroven), `блок ${N}: уровни задач убывают`);
+  const vidy = new Set(zadachi.map((z) => z.vid));
+  check(b.id === 'treugolnik' ? vidy.size === 4 : vidy.size >= 3, `блок ${N}: форматов ответа ${vidy.size}`);
+  zadachi.forEach((z) => {
+    if (z.istochnik === 'fipi') {
+      check(z.fipi !== undefined && BANK_FIPI.has(z.fipi), `блок ${N}, ${z.id}: метка «банк», а задачи ${z.fipi ?? '—'} в открытом банке №3 нет`);
+    } else {
+      check(z.fipi === undefined, `блок ${N}, ${z.id}: номер ФИПИ у задачи не из банка`);
     }
-    check(R.renderSolid(z.model) === R.renderSolid(z.model, {}), `${where}: без целей чертёж меняется`);
-    z.celi.forEach((c) => textOk(c.label, where));
-  } else {
-    risunokOk(z.model, where);
-  }
-  if (z.vid === 'vybor') {
-    check(Number(z.otvet) >= 0 && Number(z.otvet) < (z.varianty ?? []).length, `${where}: ответ вне вариантов`);
-    (z.varianty ?? []).forEach((v) => textOk(v, where));
-  }
-  if (z.vid === 'ploskiy') {
-    check(Number(z.otvet) >= 0 && Number(z.otvet) < (z.ploskie ?? []).length, `${where}: ответ вне чертежей`);
-    (z.ploskie ?? []).forEach((t, k) => ploskiyOk(t, `${where}, чертёж ${k + 1}`));
-  }
-  check(z.podskazka.length >= 1, `${where}: нет подсказки`);
-  z.podskazka.forEach((s, k) => {
-    check(s.n >= 1 && s.n <= 5, `${where}: шаг подсказки ${k + 1} — не шаг алгоритма`);
-    check(s.verno >= 0 && s.verno < s.varianty.length, `${where}: шаг подсказки ${k + 1} — верный вариант вне списка`);
-    [s.vopros, s.vyvod, ...s.varianty].forEach((t) => textOk(t, where));
   });
-  check(z.uchitel.length > 0 && z.uchenik.length > 0, `${where}: нет решения учителя или разбора ученика`);
-  z.uchitel.flatMap((e) => e.formuly).forEach((f) => texOk(f, `${where}, учитель`));
-  z.uchenik.forEach((s) => {
-    textOk(s.chto, `${where}, ученик`);
-    if (s.formula !== undefined) texOk(s.formula, `${where}, ученик`);
-  });
-  textOk(z.uslovie, where);
+  zadachi.forEach((z, i) => {
+    const where = `блок ${N}, ${z.id}`;
+    const p = z.pereschet();
+    if (z.vid === 'chislo') {
+      check(near(Number(z.otvet.replace(',', '.')), Number(p)), `${where}: ответ ${z.otvet}, пересчёт ${p}`);
+    } else {
+      check(String(p) === z.otvet, `${where}: ответ ${z.otvet}, пересчёт ${p}`);
+    }
+    if (z.vid === 'nazhmi') {
+      check((z.celi ?? []).some((c) => c.id === z.otvet), `${where}: ответ не среди целей`);
+      const svg = risunokOk(z.model, where, { celi: z.celi.map((c) => ({ id: c.id, points: c.points })) });
+      for (const c of z.celi) {
+        check(svg.includes(`data-cel="${c.id}"`), `${where}: на чертеже нет цели ${c.id}`);
+      }
+      check(R.renderSolid(z.model) === R.renderSolid(z.model, {}), `${where}: без целей чертёж меняется`);
+      z.celi.forEach((c) => textOk(c.label, where));
+    } else {
+      risunokOk(z.model, where);
+    }
+    if (z.vid === 'vybor') {
+      check(Number(z.otvet) >= 0 && Number(z.otvet) < (z.varianty ?? []).length, `${where}: ответ вне вариантов`);
+      (z.varianty ?? []).forEach((v) => textOk(v, where));
+    }
+    if (z.vid === 'ploskiy') {
+      check(Number(z.otvet) >= 0 && Number(z.otvet) < (z.ploskie ?? []).length, `${where}: ответ вне чертежей`);
+      (z.ploskie ?? []).forEach((t, k) => ploskiyOk(t, `${where}, чертёж ${k + 1}`));
+    }
+    check(z.podskazka.length >= 1, `${where}: нет подсказки`);
+    z.podskazka.forEach((s, k) => {
+      check(s.n >= 1 && s.n <= 5, `${where}: шаг подсказки ${k + 1} — не шаг алгоритма`);
+      check(s.verno >= 0 && s.verno < s.varianty.length, `${where}: шаг подсказки ${k + 1} — верный вариант вне списка`);
+      [s.vopros, s.vyvod, ...s.varianty].forEach((t) => textOk(t, where));
+    });
+    check(z.uchitel.length > 0 && z.uchenik.length > 0, `${where}: нет решения учителя или разбора ученика`);
+    z.uchitel.flatMap((e) => e.formuly).forEach((f) => texOk(f, `${where}, учитель`));
+    z.uchenik.forEach((s) => {
+      textOk(s.chto, `${where}, ученик`);
+      if (s.formula !== undefined) texOk(s.formula, `${where}, ученик`);
+    });
+    textOk(z.uslovie, where);
 
-  /* 4. Запечатанная задача. */
-  const sealed = SEAL.sealZadacha(z, i + 1);
-  const json = JSON.stringify({ ...sealed, model: null });
-  if (z.vid === 'chislo') {
-    check(!new RegExp(`(^|[^0-9.,])${z.otvet.replace(',', '[.,]')}([^0-9.,]|$)`).test(sealed.uslovieHtml) || z.uslovie.includes(z.otvet), `${where}: ответ в условии открыто`);
-    check(SECRET.answerMatches(z.otvet, sealed.seal), `${where}: отпечаток не принимает верный ответ`);
-    check(!SECRET.answerMatches(String(Number(z.otvet.replace(',', '.')) + 1), sealed.seal), `${where}: отпечаток принимает неверный ответ`);
-  } else {
-    check(SECRET.choiceMatches(z.otvet, sealed.seal), `${where}: отпечаток не принимает верный выбор`);
-    const other = z.vid === 'nazhmi' ? z.celi.find((c) => c.id !== z.otvet).id : String((Number(z.otvet) + 1) % 3);
-    check(!SECRET.choiceMatches(other, sealed.seal), `${where}: отпечаток принимает неверный выбор`);
-  }
-  check(!json.includes('"otvet"') && !json.includes('pereschet'), `${where}: в закрытой задаче поле ответа`);
-  check(!json.includes('rabochaya') && !json.includes('pryamoy'), `${where}: рабочий треугольник открыто`);
-  check(typeof z.kratko === 'string' && z.kratko.length > 0, `${where}: нет короткого названия`);
-  textOk(z.kratko, where);
-  check(z.rabochaya !== undefined, `${where}: нет рабочего треугольника для подсказки`);
-  if (z.rabochaya !== undefined) {
-    const [a, b, c] = z.rabochaya.points;
-    const o = z.rabochaya.pryamoy;
-    const others = [a, b, c].filter((q) => dist(q, o) > 1e-9);
-    check(others.length === 2 && near(angle(others[0], o, others[1]), Math.PI / 2), `${where}: угол рабочего треугольника не прямой`);
-  }
-  const shagi = JSON.parse(SECRET.openText(sealed.podskazki, z.id));
-  check(Array.isArray(shagi) && shagi.length === z.podskazka.length, `${where}: подсказки не раскрываются`);
-  shagi.forEach((s, k) => {
-    check(s.n === z.podskazka[k].n && s.correct === z.podskazka[k].verno, `${where}: шаг подсказки ${k + 1} раскрылся не тем`);
-    check((s.rabochaya === null) === (s.n < 2), `${where}: шаг подсказки ${k + 1} — чертёж не по шагу`);
+    /* 4. Запечатанная задача. */
+    const sealed = SEAL.sealZadacha(z, i + 1);
+    const json = JSON.stringify({ ...sealed, model: null });
+    if (z.vid === 'chislo') {
+      check(!new RegExp(`(^|[^0-9.,])${z.otvet.replace(',', '[.,]')}([^0-9.,]|$)`).test(sealed.uslovieHtml) || z.uslovie.includes(z.otvet), `${where}: ответ в условии открыто`);
+      check(SECRET.answerMatches(z.otvet, sealed.seal), `${where}: отпечаток не принимает верный ответ`);
+      check(!SECRET.answerMatches(String(Number(z.otvet.replace(',', '.')) + 1), sealed.seal), `${where}: отпечаток принимает неверный ответ`);
+    } else {
+      check(SECRET.choiceMatches(z.otvet, sealed.seal), `${where}: отпечаток не принимает верный выбор`);
+      const other = z.vid === 'nazhmi' ? z.celi.find((c) => c.id !== z.otvet).id : String((Number(z.otvet) + 1) % 3);
+      check(!SECRET.choiceMatches(other, sealed.seal), `${where}: отпечаток принимает неверный выбор`);
+    }
+    check(!json.includes('"otvet"') && !json.includes('pereschet'), `${where}: в закрытой задаче поле ответа`);
+    check(!json.includes('rabochaya') && !json.includes('pryamoy'), `${where}: рабочий треугольник открыто`);
+    check(typeof z.kratko === 'string' && z.kratko.length > 0, `${where}: нет короткого названия`);
+    textOk(z.kratko, where);
+    check(b.id !== 'treugolnik' || z.rabochaya !== undefined, `${where}: нет рабочего треугольника для подсказки`);
+    if (z.rabochaya !== undefined) {
+      const [a, b, c] = z.rabochaya.points;
+      const o = z.rabochaya.pryamoy;
+      const others = [a, b, c].filter((q) => dist(q, o) > 1e-9);
+      check(others.length === 2 && near(angle(others[0], o, others[1]), Math.PI / 2), `${where}: угол рабочего треугольника не прямой`);
+    }
+    const shagi = JSON.parse(SECRET.openText(sealed.podskazki, z.id));
+    check(Array.isArray(shagi) && shagi.length === z.podskazka.length, `${where}: подсказки не раскрываются`);
+    shagi.forEach((s, k) => {
+      check(s.n === z.podskazka[k].n && s.correct === z.podskazka[k].verno, `${where}: шаг подсказки ${k + 1} раскрылся не тем`);
+      check((s.rabochaya === null) === (z.rabochaya === undefined || s.n < 2), `${where}: шаг подсказки ${k + 1} — чертёж не по шагу`);
+    });
+    const razbor = JSON.parse(SECRET.openText(sealed.razbor, z.id));
+    check(typeof razbor.uchenikHtml === 'string' && razbor.uchenikHtml.length > 0, `${where}: разбор не раскрывается`);
   });
-  const razbor = JSON.parse(SECRET.openText(sealed.razbor, z.id));
-  check(typeof razbor.uchenikHtml === 'string' && razbor.uchenikHtml.length > 0, `${where}: разбор не раскрывается`);
-});
+}
 
 /* ── 6. Главы 0, 1, 3–10: данные глав ──────────────────────────────
    Каждый ответ — пересчётом по координатам или формулой независимо от
