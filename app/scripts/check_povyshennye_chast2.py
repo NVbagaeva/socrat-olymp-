@@ -951,27 +951,36 @@ def f14(p, kon):
     f_ = sp.lambdify(x, lev - prav, "mpmath")
     g_ = sp.lambdify(x, prav, "mpmath")
     mp.mp.dps = 30
+    v_ = lambda t: abs(f_(t)) + max(0, -g_(t))
     korni = []
-    t = mp.mpf(float(a_lo)) - mp.mpf("0.001")
     shag = mp.mpf("0.0005")
-    prev = None
-    while t <= float(a_hi) + 0.001:
-        v = abs(f_(t)) + max(0, -g_(t))
-        if prev is not None and prev[1] < v and prev[1] <= prev[2] and prev[1] < 1e-3:
-            try:
-                r = mp.findroot(lambda s: f_(s), prev[0])
-                if a_lo - 1e-12 <= r <= a_hi + 1e-12 and g_(r) >= -1e-20 and all(abs(r - q) > 1e-8 for q in korni):
-                    korni.append(r)
-            except Exception:
-                pass
-        prev = (t, v, prev[1] if prev else mp.inf)
+    t = mp.mpf(float(a_lo)) - mp.mpf("0.05")
+    tochki = []
+    while t <= float(a_hi) + 0.05:
+        tochki.append((t, v_(t)))
         t += shag
+    for i in range(1, len(tochki) - 1):
+        if tochki[i][1] <= tochki[i - 1][1] and tochki[i][1] <= tochki[i + 1][1] and tochki[i][1] < 1e-2:
+            # Золотое сечение для минимума невязки.
+            l, r = tochki[i - 1][0], tochki[i + 1][0]
+            for _ in range(120):
+                m1, m2 = l + (r - l) * mp.mpf("0.382"), l + (r - l) * mp.mpf("0.618")
+                if v_(m1) < v_(m2):
+                    r = m2
+                else:
+                    l = m1
+            xm = (l + r) / 2
+            if v_(xm) < 1e-12 and a_lo - 1e-9 <= xm <= a_hi + 1e-9 and all(abs(xm - q) > 1e-6 for q in korni):
+                korni.append(xm)
     korni = sorted(float(r / mp.pi) for r in korni)
     ok(len(korni) == len(kon["otbor"]) and all(near(u, v, 1e-7) for u, v in zip(korni, kon["otbor"])), "f14: корни на отрезке", f"{korni} {kon['otbor']}")
     s = kon["serii"]
     for i in range(0, len(s), 2):
         for nn in range(-2, 3):
-            xv = mp.pi * (s[i] + s[i + 1] * nn)
+            from fractions import Fraction as Fr
+
+            q0, q1 = (Fr(v).limit_denominator(100) for v in (s[i], s[i + 1]))
+            xv = mp.pi * (mp.mpf(q0.numerator) / q0.denominator + mp.mpf(q1.numerator) / q1.denominator * nn)
             ok(abs(f_(xv)) < 1e-20 and g_(xv) >= -1e-20, "f14: серия — корень")
     mp.mp.dps = 15
 
@@ -1006,11 +1015,11 @@ def f16(p, kon):
 
 
 def f17(p, kon):
-    eps = sp.symbols("eps", positive=True)
-    kT = sp.Rational(138, 100) * sp.Rational(1, 10**23) * p["T"]
+    eps, kT = sp.symbols("eps kT", positive=True)
     f_ = 2 * sp.sqrt(eps / sp.pi) * (1 / kT) ** sp.Rational(3, 2) * sp.exp(-eps / kT)
     kr = sp.solve(sp.diff(f_, eps), eps)
-    ok(len(kr) == 1 and near(kr[0], kon["eps"]), "f17: ε максимума", str(kr))
+    znach = sp.Rational(138, 100) * p["T"] / sp.Integer(10) ** 23
+    ok(len(kr) == 1 and near(kr[0].subs(kT, znach), kon["eps"]), "f17: ε максимума", str(kr))
 
 
 def f18(p, kon):
