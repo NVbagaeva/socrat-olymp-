@@ -149,3 +149,20 @@ export function mnogochlen(chleny: readonly (readonly [Rat, number])[]): string 
   }
   return s === '' ? '0' : s;
 }
+
+/** Конечная десятичная дробь — точно («15{,}12», «1{,}7578125»), иначе обыкновенная. */
+export function tochnoTex(x: Rat): string {
+  let d = x.d;
+  let a = 0;
+  let b = 0;
+  while (d % 2n === 0n) {
+    d /= 2n;
+    a += 1;
+  }
+  while (d % 5n === 0n) {
+    d /= 5n;
+    b += 1;
+  }
+  const z = Math.max(a, b);
+  return d === 1n && z <= 8 ? dec(toNumber(x), z) : ratTex(x);
+}

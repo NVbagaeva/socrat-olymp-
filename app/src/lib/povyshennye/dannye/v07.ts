@@ -842,4 +842,118 @@ export const VARIANT: VariantPV = {
       },
     ],
   ],
+  /** Часть 2: задания 14–20 по версиям; проверка — pnpm test:povyshennye-chast2. */
+  chast2: [
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 2, B: 3, p: 2, q: 1, sA: -1, sB: -1, f: 'sin', k: 2, lo: [2, 1], hi: [3, 1] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'tri', pr: ['A', 'C1'], pl: ['B', 'C', 'D1'], fn: 'sin', dano: 'AB', a2: 4 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 2, k: 1 }, b2: { m: 2, k: -1 }, p: 3, q: -1, znak: 'ge' } },
+      { s: 'd17.katushka', p: { L: 0.015, Cm: 5, R: 20, U: 220, syuzhet: 0 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 30, AD: 20, AL: 12, tr: 'DOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: 2, k: -5, m: -5, D: [1, 1], x0: -3, y0: 1, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 1300, s: 6, M: 1000, A: 410, B: 520, Dv: 20, kto: 0 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 3, B: 5, p: 3, q: 2, sA: -1, sB: 1, f: 'sin', k: 4, lo: [-1, 1], hi: [0, 1] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'tri', pr: ['A', 'D1'], pl: ['C', 'D', 'E1'], fn: 'sin', dano: 'AB', a2: 2 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 0, k: 3 }, b2: { m: 5, k: -2 }, p: 2, q: 1, znak: 'ge' } },
+      { s: 'd17.katushka', p: { L: 0.072, Cm: 6.25, R: 16, U: 120, syuzhet: 1 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 26, AD: 13, AL: 12, tr: 'DOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: 2, k: -4, m: 5, D: [1, 1], x0: -3, y0: 3, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 700, s: 6, M: 1000, A: 230, B: 400, Dv: 14, kto: 2 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 2, B: 4, p: 2, q: 1, sA: 1, sB: 1, f: 'sin', k: 3, lo: [-2, 1], hi: [-1, 1] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'tri', pr: ['A', 'B1'], pl: ['B', 'C1', 'E1'], fn: 'sin', dano: 'AB', a2: 9 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 7, k: 2 }, b2: { m: 7, k: -2 }, p: 4, q: -5, znak: 'ge' } },
+      { s: 'd17.katushka', p: { L: 0.165, Cm: 20, R: 40, U: 60, syuzhet: 2 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 40, AD: 25, AL: 20, tr: 'AOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: -3, k: 2, m: -5, D: [2, 1], x0: -2, y0: -1, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 1600, s: 9, M: 1000, A: 350, B: 610, Dv: 20, kto: 4 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 4, B: 5, p: 1, q: 1, sA: 1, sB: -1, f: 'sin', k: 5, lo: [1, 1], hi: [2, 1] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'tri', pr: ['A', 'C1'], pl: ['B', 'D1', 'E1'], fn: 'sin', dano: 'AA1', a2: 1 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 6, k: 2 }, b2: { m: 6, k: -2 }, p: -3, q: 4, znak: 'ge' } },
+      { s: 'd17.katushka', p: { L: 0.15, Cm: 8, R: 50, U: 100, syuzhet: 3 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 35, AD: 25, AL: 7, tr: 'DOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: -3, k: 4, m: -5, D: [1, 1], x0: -3, y0: -2, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 1900, s: 6, M: 1000, A: 470, B: 280, Dv: 22, kto: 6 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 3, B: 6, p: 2, q: 1, sA: 1, sB: -1, f: 'sin', k: 1, lo: [-3, 1], hi: [-1, 1] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'tri', pr: ['A', 'D1'], pl: ['B', 'C1', 'D'], fn: 'sin', dano: 'AA1', a2: 4 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 2, k: -1 }, b2: { m: 3, k: -1 }, p: 2, q: -1, znak: 'le' } },
+      { s: 'd17.katushka', p: { L: 0.132, Cm: 16, R: 20, U: 36, syuzhet: 4 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 22, AD: 10, AL: 6, tr: 'AOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 3, q: -1, k: -5, m: -3, D: [2, 1], x0: -1, y0: -1, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 1300, s: 9, M: 1000, A: 410, B: 400, Dv: 20, kto: 8 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 2, B: 8, p: 3, q: 1, sA: 1, sB: 1, f: 'sin', k: 6, lo: [1, 2], hi: [1, 1] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'tri', pr: ['C', 'D1'], pl: ['A', 'B1', 'E1'], fn: 'sin', dano: 'AB', a2: 8 },
+      },
+      {
+        s: 'd16.logLog',
+        p: { b1: { m: 10, k: 3 }, b2: { m: 10, k: -3 }, p: 5, q: -2, znak: 'ge' },
+      },
+      { s: 'd17.katushka', p: { L: 0.009, Cm: 4, R: 20, U: 50, syuzhet: 5 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 42, AD: 30, AL: 24, tr: 'DOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: -1, k: 3, m: -1, D: [2, 1], x0: -2, y0: -1, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 1600, s: 12, M: 1000, A: 350, B: 520, Dv: 16, kto: 10 } },
+    ],
+  ],
 };
