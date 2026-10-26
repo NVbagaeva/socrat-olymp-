@@ -382,6 +382,12 @@ for (const size of SIZES) {
   const svg1 = await page.locator('.z3d__kholst').first().innerHTML();
   check(svg1 !== svg0, where('не повернулся'));
 
+  /* Примеры глав открыты на последнем шаге: отматываем к началу. */
+  const nazad = page.locator('.z3d').first().getByRole('button', { name: 'Назад' });
+  for (let i = 0; i < 5 && (await nazad.isEnabled()); i += 1) {
+    await nazad.click();
+    await page.waitForTimeout(150);
+  }
   for (let k = 1; k <= 3; k += 1) {
     await page.locator('.z3d').first().getByRole('button', { name: 'Далее' }).click();
     await page.waitForTimeout(250);

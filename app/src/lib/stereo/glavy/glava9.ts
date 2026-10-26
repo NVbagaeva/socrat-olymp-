@@ -157,7 +157,7 @@ export function glava9(): GlavaDannye {
               shagi: [
                 {
                   title: 'Формула диагонали куба',
-                  paras: ['Диагональ куба с ребром $a$ равна $a\\sqrt{3}$.'],
+                  paras: ['У куба с ребром $a$ диагональ — $a\\sqrt{3}$.'],
                   formuly: ['d = a\\sqrt{3} = 2\\sqrt{3}\\cdot\\sqrt{3} = 2\\cdot 3 = 6'],
                 },
               ],
