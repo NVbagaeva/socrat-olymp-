@@ -11,7 +11,9 @@
  */
 
 import { renderPlan } from '@/lib/planimetriya/render';
-import type { Element, Scena, T2 } from '@/lib/planimetriya/types';
+import type { Scena } from '@/lib/planimetriya/types';
+import { ALFA, BEZ, PLOSKOST, im, mn, otr, pr, pun, sh, tch, ug } from './elementy';
+import { SPISOK_B } from './semyaB';
 
 export type RazdelTeoremy = 'planimetriya' | 'stereometriya';
 
@@ -27,30 +29,6 @@ export interface Teorema {
   dokazatelstvo: string[];
   scena: () => Scena;
 }
-
-const otr = (a: string, b: string, o: Partial<Element> = {}): Element =>
-  ({ tip: 'otrezok', a, b, ...o }) as Element;
-const pun = (a: string, b: string): Element => otr(a, b, { stil: 'punktir' });
-const mn = (...tochki: string[]): Element => ({ tip: 'mnogougolnik', tochki });
-const tch = (t: string): Element => ({ tip: 'tochka', t });
-const pr = (a: string, v: string, b: string): Element => ({ tip: 'ugol', a, v, b, pryamoy: true });
-const ug = (a: string, v: string, b: string, dugi: 1 | 2 = 1): Element => ({
-  tip: 'ugol',
-  a,
-  v,
-  b,
-  dugi,
-});
-const sh = (a: string, b: string, n: 1 | 2): Element =>
-  ({ tip: 'otrezok', a, b, shtrihi: n, tolkoShtrihi: true }) as Element;
-
-/** Плоскость параллелограммом: углы P1…P4, без подписей. */
-const PLOSKOST: Record<string, T2> = { P1: [0, 0], P2: [7, 0], P3: [9, 3], P4: [2, 3] };
-const BEZ = ['P1', 'P2', 'P3', 'P4'];
-/** Подпись прямой или плоскости буквой у отрезка (линия уже нарисована). */
-const im = (a: string, b: string, znachenie: string): Element =>
-  ({ tip: 'otrezok', a, b, tolkoShtrihi: true, vydelit: 'dano', znachenie }) as Element;
-const ALFA = im('P1', 'P2', 'α');
 
 const SPISOK: Teorema[] = [
   /* ── Планиметрия ──────────────────────────────────────────── */
@@ -510,7 +488,7 @@ const SPISOK: Teorema[] = [
 ];
 
 export const TEOREMY: Readonly<Record<string, Teorema>> = Object.fromEntries(
-  SPISOK.map((t) => [t.id, t]),
+  [...SPISOK, ...SPISOK_B].map((t) => [t.id, t]),
 );
 
 export function teorema(id: string): Teorema {

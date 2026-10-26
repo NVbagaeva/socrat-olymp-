@@ -24,6 +24,7 @@
 
 import fs from 'node:fs';
 import { requireSrc } from './lib/load-ts.mjs';
+import { provB } from './lib/prov-chast2-b.mjs';
 
 const { MAX_BALL, MAX_PART1, MAX_PART2, MAX_TOTAL, ballText } = requireSrc(
   'content/variantOnline/bally',
@@ -483,6 +484,7 @@ function prov20(p, z) {
 }
 
 const PROV = {
+  ...provB({ ok, close, requireSrc }),
   'z14.logTrig': prov14,
   'z15.rombPiramida': prov15,
   'z16.pokazKoren': prov16,
