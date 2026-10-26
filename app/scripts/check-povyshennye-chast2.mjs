@@ -37,6 +37,8 @@ const { reshenieHtml, uslovieHtml, razborHtml, teoremaHtml, teoremyZadach } = re
 const { TEOREMY, ssylkiV, chertezhTeoremy } = requireSrc('lib/teoremy');
 const { scenariy15 } = requireSrc('lib/povyshennye/chast2/z15');
 const { chertezh18 } = requireSrc('lib/povyshennye/chast2/z18');
+const { scenariyC15 } = requireSrc('lib/povyshennye/chast2/c15');
+const { chertezhC18 } = requireSrc('lib/povyshennye/chast2/c18');
 const { validirovat } = requireSrc('lib/chertezh3');
 const { proverit } = requireSrc('lib/chast2/sravnenie');
 const { kriteriiZadaniya } = requireSrc('content/variantOnline/kriterii');
@@ -483,6 +485,346 @@ function prov20(p, z) {
   ok(L === z.kontrol.L, '№20 в): наименьшая L', `${L} vs ${z.kontrol.L}`);
 }
 
+/* ── Семья C (варианты 5, 6) ───────────────────────────────────── */
+
+/** Нули функции на [lo; hi]: смена знака + бисекция. */
+function nuli(f, lo, hi, N = 60000) {
+  const out = [];
+  let px = lo;
+  let pv = f(lo);
+  for (let i = 1; i <= N; i += 1) {
+    const x = lo + ((hi - lo) * i) / N;
+    const v = f(x);
+    if (Math.abs(v) < 1e-13) out.push(x);
+    else if (pv * v < 0) {
+      let a = px;
+      let b = x;
+      for (let k = 0; k < 70; k += 1) {
+        const m = (a + b) / 2;
+        if (f(a) * f(m) <= 0) b = m;
+        else a = m;
+      }
+      out.push((a + b) / 2);
+    }
+    px = x;
+    pv = v;
+  }
+  const s = out.sort((a, b) => a - b);
+  return s.filter((x, i) => i === 0 || x - s[i - 1] > 1e-6);
+}
+
+function provC14(p, z) {
+  const f = (x) => p.a * Math.sin(2 * x) + p.b * Math.cos(2 * x) - p.c;
+  /* Серии: arctg t + πn — корни при разных n. */
+  for (const t of z.kontrol.t)
+    for (const n of [-4, 0, 3]) {
+      const x = Math.atan(t) + Math.PI * n;
+      ok(Math.abs(f(x)) < 1e-9, `№14: x = ${x.toFixed(4)} — корень`);
+    }
+  /* Других корней нет: на периоде π ровно два нуля. */
+  ok(nuli(f, 0.001, Math.PI + 0.001).length === 2, '№14: на периоде два корня');
+  const kor = nuli(f, z.kontrol.lo, z.kontrol.hi);
+  ok(
+    kor.length === 2 && kor.every((x, i) => close(x, z.kontrol.korni[i], 1e-7)),
+    '№14: корни на отрезке совпали',
+    `${kor} vs ${z.kontrol.korni}`,
+  );
+}
+
+function provC15(p, z) {
+  const m = Math.sqrt(p.ac2) / 2;
+  const bm = Math.sqrt(p.l2 - m * m);
+  const A = [-m, 0, 0];
+  const B = [0, -bm, 0];
+  const C = [m, 0, 0];
+  const h = Math.sqrt(p.h2[0] / p.h2[1]);
+  /* tg из условия — разбором текста не берём: считаем по данным шаблона
+     и проверяем, что H по нему восстанавливается однозначно. */
+  const tgM = z.uslovie.match(/равен \$([^$]+)\$/);
+  ok(tgM !== null, '№15: тангенс в условии');
+  const d = z.kontrol.d;
+  /* H внутри угла ABC на расстоянии d от прямых AB и BC: пересечение
+     прямых, параллельных AB и BC и сдвинутых внутрь угла. */
+  const sdvig = (P, Q, X) => {
+    /* Единичная нормаль к PQ в сторону точки X. */
+    const v = [Q[0] - P[0], Q[1] - P[1]];
+    let nn = [-v[1], v[0]];
+    const L = Math.hypot(...nn);
+    nn = [nn[0] / L, nn[1] / L];
+    if ((X[0] - P[0]) * nn[0] + (X[1] - P[1]) * nn[1] < 0) nn = [-nn[0], -nn[1]];
+    return { P: [P[0] + d * nn[0], P[1] + d * nn[1]], v };
+  };
+  const l1 = sdvig(B, A, C);
+  const l2 = sdvig(B, C, A);
+  const det = l1.v[0] * -l2.v[1] - l1.v[1] * -l2.v[0];
+  const rx = l2.P[0] - l1.P[0];
+  const ry = l2.P[1] - l1.P[1];
+  const s = (rx * -l2.v[1] - ry * -l2.v[0]) / det;
+  const H = [l1.P[0] + s * l1.v[0], l1.P[1] + s * l1.v[1], 0];
+  const S = [H[0], H[1], h];
+  /* Тангенс двугранного угла при AB — по нормалям плоскостей. */
+  const tgDv = (P, Q, R) => {
+    const nn = crs(sub(Q, P), sub(R, P));
+    const cos = Math.abs(nn[2]) / nrm(nn);
+    return Math.sqrt(1 - cos * cos) / cos;
+  };
+  ok(close(tgDv(S, A, B), tgDv(S, B, C), 1e-9), '№15: углы при AB и BC равны');
+  ok(close(tgDv(S, A, B), h / d, 1e-9), '№15: тангенс из условия');
+  /* Центр сферы: точка, равноудалённая от S, A, B, C (линейная система). */
+  const rows = [B, C, S].map((X) => [
+    2 * (X[0] - A[0]),
+    2 * (X[1] - A[1]),
+    2 * (X[2] - A[2]),
+    dot(X, X) - dot(A, A),
+  ]);
+  const det3 = (M) =>
+    M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) -
+    M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) +
+    M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]);
+  const M0 = rows.map((r) => r.slice(0, 3));
+  const D0 = det3(M0);
+  const O = [0, 1, 2].map(
+    (j) => det3(M0.map((r, i) => r.map((x, c) => (c === j ? rows[i][3] : x)))) / D0,
+  );
+  ok(Math.hypot(O[0] - H[0], O[1] - H[1]) < 1e-9, '№15 а): центр сферы на прямой SH');
+  ok(O[2] < h, '№15 а): центр сферы на луче SH');
+  ok(
+    close(tgDv(S, A, C), z.kontrol.otvet, 1e-9),
+    '№15 б): тангенс',
+    `${tgDv(S, A, C)} vs ${z.kontrol.otvet}`,
+  );
+  for (const punkt of ['a', 'b']) {
+    const pr = validirovat(scenariyC15(p, punkt));
+    const oshibki = Array.isArray(pr) ? pr : (pr?.oshibki ?? pr?.problems ?? []);
+    ok(
+      oshibki.length === 0,
+      `№15: чертёж пункта ${punkt} без замечаний`,
+      JSON.stringify(oshibki).slice(0, 200),
+    );
+  }
+}
+
+const OSN16 = { '0,5': 0.5, '0,25': 0.25, '0,2': 0.2, '0,1': 0.1, '0,04': 0.04 };
+const chislo16 = (s) => OSN16[s] ?? Number(s);
+
+function provC16(p, z) {
+  const P = chislo16(p.p);
+  const R = chislo16(p.r);
+  const b = chislo16(p.b);
+  const c = p.c[0] / p.c[1];
+  const f = (x) => {
+    const W = p.k * x - p.s;
+    if (W <= 0) return NaN;
+    const L = p.zE * W;
+    const E = P ** L - R ** L;
+    const lg = Math.log(W) / Math.log(b);
+    const G = (p.forma === 'minus' ? 1 : -1) * (lg * lg - c * c);
+    return p.logNum ? G / E : E / G;
+  };
+  ok(z.uslovie.includes(p.znak === 'ge' ? '\\ge' : '\\le'), '№16: знак неравенства в условии');
+  const ks = [];
+  for (let i = 0; i < z.kontrol.kuski.length; i += 4) {
+    const [lo, hi, loZ, hiZ] = z.kontrol.kuski.slice(i, i + 4);
+    ks.push({ lo, hi, loZ: loZ === 1, hiZ: hiZ === 1 });
+  }
+  const vnutri = (x) =>
+    ks.some(
+      (q) =>
+        (x > q.lo + 1e-12 && x < q.hi - 1e-12) ||
+        (q.loZ && Math.abs(x - q.lo) < 1e-12) ||
+        (q.hiZ && Math.abs(x - q.hi) < 1e-12),
+    );
+  /* Сетка вокруг области: шаг 0,0002 рядом с концами, 0,01 дальше. */
+  const x0 = z.kontrol.x0;
+  const kray = ks.flatMap((q) => [q.lo, q.hi]).filter((x) => Math.abs(x) < 1e8);
+  const lo = Math.min(...kray, x0) - 5;
+  const hi = Math.max(...kray, x0) + 5;
+  let plokho = 0;
+  const tochki = [];
+  for (let x = lo; x <= hi; x += 0.01) tochki.push(x);
+  for (const e of kray) for (let i = -200; i <= 200; i += 1) tochki.push(e + i * 0.0002);
+  for (const x of tochki) {
+    if (kray.some((e) => Math.abs(x - e) < 1e-9)) continue;
+    const v = f(x);
+    const verno = Number.isFinite(v) && (p.znak === 'ge' ? v >= 0 : v <= 0);
+    if (verno !== vnutri(x)) {
+      plokho += 1;
+      if (plokho < 4) console.error(`    №16C: x = ${x}, f = ${v}`);
+    }
+  }
+  ok(plokho === 0, '№16: ответ совпал с сеткой', `${plokho} точек`);
+  /* Концы: закрытые — нули числителя, открытые — вне области или нули знаменателя. */
+  for (const q of ks)
+    for (const [x, zakr] of [
+      [q.lo, q.loZ],
+      [q.hi, q.hiZ],
+    ]) {
+      if (Math.abs(x) > 1e8) continue;
+      const v = f(x);
+      ok(
+        zakr ? Math.abs(v) < 1e-9 : !Number.isFinite(v) || Math.abs(v) > 1e6,
+        `№16: конец ${x} ${zakr ? 'входит' : 'не входит'}`,
+        String(v),
+      );
+    }
+  ok(ks.length === 2, '№16: два промежутка');
+}
+
+const GAZ17 = [28, 4, 40, 20, 16, 44, 2];
+
+function provC17(p, z) {
+  const M = GAZ17[p.gaz] / 1000;
+  for (const R of [8.31, 8.314, 8.5]) {
+    const T = p.T;
+    const f = (v) =>
+      4 *
+      Math.PI *
+      v *
+      v *
+      (M / (2 * Math.PI * R * T)) ** 1.5 *
+      Math.exp((-M * v * v) / (2 * R * T));
+    /* Перебор с уточнением. */
+    let best = 0;
+    for (let v = 1; v < 10000; v += 1) if (f(v) > f(best)) best = v;
+    let a = best - 1;
+    let b = best + 1;
+    for (let k = 0; k < 200; k += 1) {
+      const m1 = a + (b - a) / 3;
+      const m2 = b - (b - a) / 3;
+      if (f(m1) < f(m2)) a = m1;
+      else b = m2;
+    }
+    ok(Math.abs((a + b) / 2 - Math.sqrt(z.kontrol.K * R)) < 1e-4, `№17: максимум при R = ${R}`);
+  }
+  const pole = z.punkty[0].pole;
+  ok(
+    proverit(pole, `\\sqrt{\\frac{2\\cdot${p.T}R}{${M}}}`) === 'sovpadaet',
+    '№17: ответ = √(2RT/M)',
+  );
+}
+
+function provC18(p, z) {
+  const a = p.AD / 2;
+  const b = p.BC / 2;
+  const h = Math.sqrt(p.AB * p.AB - (a - b) ** 2);
+  const A = [-a, 0];
+  const D = [a, 0];
+  const B = [-b, h];
+  const C = [b, h];
+  const K = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2];
+  const M = [(C[0] + D[0]) / 2, (C[1] + D[1]) / 2];
+  const okr = (P, Q, X) => {
+    const d = 2 * (P[0] * (Q[1] - X[1]) + Q[0] * (X[1] - P[1]) + X[0] * (P[1] - Q[1]));
+    const sq = (T) => T[0] * T[0] + T[1] * T[1];
+    const ux = (sq(P) * (Q[1] - X[1]) + sq(Q) * (X[1] - P[1]) + sq(X) * (P[1] - Q[1])) / d;
+    const uy = (sq(P) * (X[0] - Q[0]) + sq(Q) * (P[0] - X[0]) + sq(X) * (Q[0] - P[0])) / d;
+    return { c: [ux, uy], r: Math.hypot(P[0] - ux, P[1] - uy) };
+  };
+  const [P1, P2, P3, P4] = p.vid === 'AKMD' ? [A, K, M, D] : [K, B, C, M];
+  const o = okr(P1, P2, P3);
+  ok(
+    Math.abs(Math.hypot(P4[0] - o.c[0], P4[1] - o.c[1]) - o.r) < 1e-9,
+    '№18: четвёртая вершина на окружности',
+  );
+  ok(close(o.r, z.kontrol.R, 1e-9), '№18 б): радиус', `${o.r} vs ${z.kontrol.R}`);
+  for (const punkt of ['a', 'b']) {
+    const svg = chertezhC18(p, punkt);
+    ok(svg.startsWith('<svg') && !svg.includes('NaN'), `№18: чертёж пункта ${punkt}`);
+  }
+}
+
+/* а) №18 для всех трапеций: перебор форм с центром вне трапеции. */
+function proverkaUtverzhdeniyaC18() {
+  let plokho = 0;
+  let vsego = 0;
+  for (let a = 1; a <= 12; a += 0.5)
+    for (let b = 0.25; b < a; b += 0.25)
+      for (let h = 0.1; h < 12; h += 0.1) {
+        const vne = (u, w, t) => (w * w + t * t - u * u) / (2 * t) < 0;
+        if (!vne(a, b, h)) continue;
+        vsego += 1;
+        if (!vne(a, (a + b) / 2, h / 2)) plokho += 1;
+        if (!vne((a + b) / 2, b, h / 2)) plokho += 1;
+      }
+  ok(
+    vsego > 1000 && plokho === 0,
+    '№18 а): утверждение верно на переборе трапеций',
+    `${plokho} из ${vsego}`,
+  );
+}
+
+function provC19(p, z) {
+  const { k } = p;
+  const pp = p.p;
+  /* Левая минус правая часть исходного уравнения. */
+  const g =
+    p.vid === 'shest'
+      ? (x, a) => Math.abs(x) * (k * x * x + (k + pp) * a) - x * x * (a + k * pp) - a * a
+      : (x, a) => x * x * (a + k * pp) - Math.abs(x) * (k * x * x - (k - pp) * a) - a * a;
+  const chislo = (a) => {
+    const X = 4 * (Math.abs(a) + pp + k + 2);
+    const pos = nuli((x) => g(x, a), 1e-9, X, 40000).length;
+    const nol = Math.abs(g(0, a)) < 1e-12 ? 1 : 0;
+    return 2 * pos + nol;
+  };
+  const ks = [];
+  for (let i = 0; i < z.kontrol.kuski.length; i += 4) {
+    const [lo, hi, loZ, hiZ] = z.kontrol.kuski.slice(i, i + 4);
+    ks.push({ lo, hi, loZ: loZ === 1, hiZ: hiZ === 1 });
+  }
+  const vOtvete = (a) =>
+    ks.some((q) => (a > q.lo && a < q.hi) || (q.loZ && a === q.lo) || (q.hiZ && a === q.hi));
+  const krit = [0, z.kontrol.aStar, z.kontrol.gran];
+  const plokho = [];
+  for (let a = -6.03; a <= Math.max(25, z.kontrol.aStar + 5); a += 0.0731) {
+    if (krit.some((c) => Math.abs(a - c) < 0.02)) continue;
+    if ((chislo(a) === z.kontrol.N) !== vOtvete(a)) plokho.push(a.toFixed(3));
+  }
+  ok(
+    plokho.length === 0,
+    `№19: множество «ровно ${z.kontrol.N} корней» совпало`,
+    plokho.slice(0, 5).join(', '),
+  );
+  ok(
+    !vOtvete(z.kontrol.aStar) && !vOtvete(0) && !vOtvete(z.kontrol.gran),
+    '№19: критические точки не в ответе',
+  );
+}
+
+function provC20(p, z) {
+  const Lo = 10 ** (p.razr - 1);
+  const U = 10 ** p.razr - 1;
+  const { r } = p;
+  /* а) и б): перебор начал n, m (удвоенные средние — целые). */
+  const ravny = (k) => {
+    for (let m = Lo; m + r * k - 1 <= U; m += 1) {
+      /* 2Q₁ = 2n + k − 1 = 2m + rk − 1. */
+      const n2 = 2 * m + r * k - k;
+      if (n2 % 2 === 0 && n2 / 2 >= Lo && n2 / 2 + k - 1 <= U) return true;
+    }
+    return false;
+  };
+  ok(ravny(p.ka), `№20 а): при k = ${p.ka} средние равны`);
+  ok(!ravny(p.kb), `№20 б): при k = ${p.kb} — нет`);
+  /* в): для каждого k и n — крайние допустимые m (модуль разности линеен по m). */
+  const kMax = p.razr === 5 ? p.k0 + 200 : Math.floor((U - Lo + 1) / (r + 1));
+  let best = p.rezhim === 'min' ? Infinity : -Infinity;
+  for (let k = p.k0; k <= kMax; k += 1)
+    for (let n = Lo; n + k - 1 <= U; n += 1) {
+      const kand = [Lo, n - r * k, n + k, U - r * k + 1].filter(
+        (m) => m >= Lo && m + r * k - 1 <= U && (m + r * k - 1 < n || m > n + k - 1),
+      );
+      for (const m of kand) {
+        const q1 = n + (k - 1) / 2;
+        const q2 = m + (r * k - 1) / 2;
+        const vse = (k * q1 + r * k * q2) / ((r + 1) * k);
+        const v = Math.abs((q1 + q2) / 2 - vse);
+        best = p.rezhim === 'min' ? Math.min(best, v) : Math.max(best, v);
+      }
+    }
+  ok(close(best, z.kontrol.otv, 1e-9), `№20 в): ${p.rezhim}`, `${best} vs ${z.kontrol.otv}`);
+}
+
 const PROV = {
   ...provB({ ok, close, requireSrc }),
   'z14.logTrig': prov14,
@@ -492,7 +834,15 @@ const PROV = {
   'z18.pyatiugolnik': prov18,
   'z19.logKoren': prov19,
   'z20.zabor': prov20,
+  'c14.tgPodstanovka': provC14,
+  'c15.sferaPiramida': provC15,
+  'c16.pokazLog': provC16,
+  'c17.maksvell': provC17,
+  'c18.trapeciyaSrednyaya': provC18,
+  'c19.modul': provC19,
+  'c20.srednie': provC20,
 };
+proverkaUtverzhdeniyaC18();
 
 /* ── Варианты ─────────────────────────────────────────────────── */
 const json = [];

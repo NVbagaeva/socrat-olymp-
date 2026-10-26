@@ -28,7 +28,7 @@ export const GOTOVY: readonly number[] = Object.keys(ZAGRUZKA).map(Number);
  * Варианты, у которых готова часть 2 (задания 14–20). Экран раздела
  * читает список без загрузки данных; автотест сверяет его с данными.
  */
-export const S_CHAST2: readonly number[] = [1, 2, 3, 4];
+export const S_CHAST2: readonly number[] = [1, 2, 3, 4, 5, 6];
 
 export async function zagruzitVariant(k: number): Promise<VariantPV | null> {
   const f = ZAGRUZKA[k];
