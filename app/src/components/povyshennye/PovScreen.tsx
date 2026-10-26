@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { StatsView } from '@/components/variant/online/StatsView';
 import { useArchive } from '@/components/variant/online/useArchive';
 import { POV_SCREEN as T } from '@/content/povyshennye';
-import { GOTOVY } from '@/lib/povyshennye/dannye';
+import { GOTOVY, S_CHAST2 } from '@/lib/povyshennye/dannye';
 import { povKod, povNomer, versiyaText } from '@/lib/povyshennye/kod';
 import { VARIANTOV, VERSIY } from '@/lib/povyshennye/types';
 import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
@@ -23,13 +23,27 @@ interface Sostoyanie {
   last: ArchivedWork | null;
 }
 
-const LISTY = ['uchenik', 'uchitel', 'razbor'] as const;
+/* «Весь комплект» первым: ученик, учитель и разбор одним файлом. */
+const LISTY = ['vse', 'uchenik', 'uchitel', 'razbor'] as const;
 
-/** Таймер режима «Как на ЕГЭ» для части 1, минуты. */
+/** Таймер режима «Как на ЕГЭ», минуты: часть 1 — 1 ч 30 мин, весь вариант — 3 ч 55 мин. */
 const MINUT_KONTROL = 90;
+const MINUT_KONTROL_VSE = 235;
 
-function printHref(k: number, v: number, list: (typeof LISTY)[number]): string {
+/** Балл версии в карточке: у варианта с частью 2 — по частям. */
+function ballText(k: number, w: ArchivedWork): string {
+  if (!S_CHAST2.includes(k)) return T.score(w.primary, w.max, w.test);
+  const c = w.chast2;
+  return T.scoreDvuh(
+    w.primary,
+    w.max,
+    c === undefined ? null : { summa: c.summa, max: c.max, gotovo: c.oceneno === c.vsego },
+  );
+}
+
+function printHref(k: number, v: number, list: (typeof LISTY)[number], mesto2 = true): string {
   const q = new URLSearchParams({ kod: povKod(k), v: String(v), list });
+  if (!mesto2) q.set('m2', '0');
   return `${PRINT_PATH}?${q.toString()}`;
 }
 
@@ -48,6 +62,7 @@ export function PovScreen() {
   const [filtr, setFiltr] = useState<Filtr>('all');
   const [mode, setMode] = useState<Mode>('trening');
   const [pechat, setPechat] = useState<number | null>(null);
+  const [mesto2, setMesto2] = useState(true);
 
   const nashi = useMemo(() => (works ?? []).filter((w) => povNomer(w.code) !== null), [works]);
 
@@ -83,7 +98,7 @@ export function PovScreen() {
 
   return (
     <div className="pov">
-      <p className="pov-part">{T.part1}</p>
+      <p className="pov-part">{T.parts(S_CHAST2)}</p>
 
       <div className="pov-controls">
         <div className="pov-seg" role="radiogroup" aria-label={T.filter.label}>
@@ -151,7 +166,12 @@ export function PovScreen() {
                             mode,
                             timer:
                               mode === 'kontrol'
-                                ? { kind: 'down', minutes: MINUT_KONTROL }
+                                ? {
+                                    kind: 'down',
+                                    minutes: S_CHAST2.includes(c.k)
+                                      ? MINUT_KONTROL_VSE
+                                      : MINUT_KONTROL,
+                                  }
                                 : { kind: 'none' },
                             kind: 'ege',
                             title: '',
@@ -162,14 +182,12 @@ export function PovScreen() {
                                 className={clsx('pov-v', `is-${s.status}`)}
                                 href={href}
                                 data-testid={`pov-v-${kv}`}
-                                aria-label={`${kv}: ${T.status[s.status]}${s.last === null ? '' : `, ${T.score(s.last.primary, s.last.max, s.last.test)}`}`}
+                                aria-label={`${kv}: ${T.status[s.status]}${s.last === null ? '' : `, ${ballText(c.k, s.last)}`}`}
                               >
                                 <span className="pov-v__no">{kv}</span>
                                 <span className="pov-v__status">{T.status[s.status]}</span>
                                 <span className="pov-v__score" title={T.scoreTitle}>
-                                  {s.last === null
-                                    ? '—'
-                                    : T.score(s.last.primary, s.last.max, s.last.test)}
+                                  {s.last === null ? '—' : ballText(c.k, s.last)}
                                 </span>
                               </a>
                             </li>
@@ -185,6 +203,28 @@ export function PovScreen() {
                       >
                         {T.card.print}
                       </button>
+                      {pechat === c.k && S_CHAST2.includes(c.k) ? (
+                        <div
+                          className="pov-seg pov-print__mesto"
+                          role="radiogroup"
+                          aria-label={T.card.mesto2.label}
+                        >
+                          <span className="pov-seg__label">{T.card.mesto2.label}</span>
+                          {([true, false] as const).map((m) => (
+                            <button
+                              key={String(m)}
+                              type="button"
+                              role="radio"
+                              aria-checked={mesto2 === m}
+                              className={clsx('pov-seg__btn', mesto2 === m && 'is-on')}
+                              data-testid={`pov-mesto2-${m ? 'stranica' : 'net'}`}
+                              onClick={() => setMesto2(m)}
+                            >
+                              {m ? T.card.mesto2.stranica : T.card.mesto2.net}
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
                       {pechat === c.k ? (
                         <table className="pov-print__table">
                           <tbody>
@@ -194,7 +234,7 @@ export function PovScreen() {
                                 {LISTY.map((l) => (
                                   <td key={l}>
                                     <a
-                                      href={printHref(c.k, v, l)}
+                                      href={printHref(c.k, v, l, mesto2)}
                                       target="_blank"
                                       rel="noopener"
                                       aria-label={`${T.card.printFor(versiyaText(c.k, v))}: ${T.card.sheets[l]}`}

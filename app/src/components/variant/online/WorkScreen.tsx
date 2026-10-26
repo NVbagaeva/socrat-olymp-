@@ -4,10 +4,15 @@ import { clsx } from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button, FigureZoom, Modal } from '@/components/ui';
+import { BallPlashka } from '@/components/chast2/BallPlashka';
+import { Chast2Card } from '@/components/chast2/Chast2Card';
 import { HintFlow } from '@/components/tasks/card/HintFlow';
 import { useBeforeFinish } from '@/components/tasks/session/useBeforeFinish';
 import { useSessionReport } from '@/components/tasks/session/useSessionReport';
+import { BALLY, MAX_BALL, MAX_PART2, ballText } from '@/content/variantOnline/bally';
+import { CHAST2_TEXT as T2 } from '@/content/variantOnline/chast2Text';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
+import { punktKey, pustoyChast2, vvodEst, type Chast2Ui } from '@/lib/chast2/sostoyanie';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { normalizeAnswer } from '@/lib/variant/online/normalize';
@@ -67,7 +72,13 @@ export function WorkScreen({
 }: WorkScreenProps) {
   const tasks = payload.tasks;
   const trening = payload.mode === 'trening';
-  const [index, setIndex] = useState(Math.min(restored?.index ?? 0, tasks.length - 1));
+  /* Часть 2 (варианты повышенной сложности): номера 14–20 идут на ленте
+     после 13-го, индексы n1…vsego−1. */
+  const c2 = payload.chast2 ?? null;
+  const n1 = tasks.length;
+  const vsego = n1 + (c2?.length ?? 0);
+  const [index, setIndex] = useState(Math.min(restored?.index ?? 0, vsego - 1));
+  const [c2st, setC2st] = useState<Chast2Ui>(() => restored?.c2 ?? pustoyChast2());
   /* Черновик с сервера (работа из кабинета): продолжить на другом устройстве. */
   const draft = restored === null ? payload.draft : undefined;
   const [answers, setAnswers] = useState<Record<number, string>>(
@@ -146,6 +157,7 @@ export function WorkScreen({
     srvHints,
     times,
     startedAt,
+    ...(c2 === null ? {} : { c2: c2st }),
   };
   useSessionReport(report, ui);
   useBeforeFinish(setBeforeFinish, () => {
@@ -185,7 +197,7 @@ export function WorkScreen({
 
   /* ── Действия ─────────────────────────────────────────────────── */
   function go(to: number) {
-    if (to < 0 || to >= tasks.length || to === index) return;
+    if (to < 0 || to >= vsego || to === index) return;
     commitTime();
     enterRef.current = { index: to, at: elapsed() };
     setIndex(to);
@@ -238,6 +250,7 @@ export function WorkScreen({
   const stepList = useMemo(() => razborSteps(task?.solutionStudent ?? null), [task]);
 
   if (task === undefined) return null;
+  const z2 = c2 !== null && index >= n1 ? (c2[index - n1] ?? null) : null;
   const status = statusOf(index);
   const hintList = task.hints ?? srvHints[index] ?? [];
   const hasHints = hintList.length > 0;
@@ -319,6 +332,36 @@ export function WorkScreen({
     );
   }
 
+  /** Статус задания части 2 на ленте: есть ли ответ хоть в одном пункте. */
+  function status2(no: number, punktov: number): Status {
+    for (let i = 0; i < punktov; i += 1)
+      if (vvodEst(c2st.vvod[punktKey(no as 14, i)] ?? null)) return 'answered';
+    return c2st.ball[no as 14] !== undefined ? 'answered' : 'empty';
+  }
+
+  const lentaChasti1 = (
+    <ol>
+      {tasks.map((t, i) => {
+        const st = statusOf(i);
+        return (
+          <li key={`${t.taskId}-${i}`}>
+            <button
+              type="button"
+              className={clsx('vo-strip__no', `is-${st}`, i === index && 'is-current')}
+              aria-current={i === index ? 'step' : undefined}
+              aria-label={`${T.run.task(noOf(t))}: ${T.run.status[st]}`}
+              data-status={st}
+              onClick={() => go(i)}
+            >
+              {noOf(t)}
+              {st === 'later' ? <span className="vo-strip__flag" aria-hidden="true" /> : null}
+            </button>
+          </li>
+        );
+      })}
+    </ol>
+  );
+
   return (
     <div className="vo" ref={card}>
       {payload.timer.kind === 'none' || (trening && payload.timer.kind === 'up') ? null : (
@@ -336,118 +379,187 @@ export function WorkScreen({
       )}
       {trening ? null : <p className="vo-note vo-note--top">{T.run.kontrolNote}</p>}
 
-      <nav className="vo-strip" aria-label={T.run.nav}>
-        <ol>
-          {tasks.map((t, i) => {
-            const st = statusOf(i);
-            return (
-              <li key={`${t.taskId}-${i}`}>
-                <button
-                  type="button"
-                  className={clsx('vo-strip__no', `is-${st}`, i === index && 'is-current')}
-                  aria-current={i === index ? 'step' : undefined}
-                  aria-label={`${T.run.task(noOf(t))}: ${T.run.status[st]}`}
-                  data-status={st}
-                  onClick={() => go(i)}
-                >
-                  {noOf(t)}
-                  {st === 'later' ? <span className="vo-strip__flag" aria-hidden="true" /> : null}
-                </button>
-              </li>
-            );
-          })}
-        </ol>
+      <nav className={clsx('vo-strip', c2 !== null && 'vo-strip--parts')} aria-label={T.run.nav}>
+        {c2 === null ? (
+          lentaChasti1
+        ) : (
+          <>
+            <div className="vo-strip__part">
+              <span className="vo-strip__label">{T2.part1Label}</span>
+              {lentaChasti1}
+            </div>
+            <span className="vo-strip__sep" aria-hidden="true" />
+            <div className="vo-strip__part" data-testid="vo-strip-part2">
+              <span className="vo-strip__label">{T2.part2Label}</span>
+              <ol>
+                {c2.map((z, j) => {
+                  const i = n1 + j;
+                  const st = status2(z.no, z.punkty.length);
+                  return (
+                    <li key={z.no}>
+                      <button
+                        type="button"
+                        className={clsx('vo-strip__no', `is-${st}`, i === index && 'is-current')}
+                        aria-current={i === index ? 'step' : undefined}
+                        aria-label={`${T.run.task(z.no)}: ${T.run.status[st]}`}
+                        data-status={st}
+                        onClick={() => go(i)}
+                      >
+                        {z.no}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          </>
+        )}
       </nav>
 
-      <article
-        className="vo-card"
-        data-testid="vo-card"
-        onTouchStart={(e) => {
-          const p = e.touches[0];
-          touch.current =
-            e.touches.length === 1 && p !== undefined ? { x: p.clientX, y: p.clientY } : null;
-        }}
-        onTouchEnd={(e) => {
-          const s = touch.current;
-          const p = e.changedTouches[0];
-          touch.current = null;
-          if (s === null || p === undefined) return;
-          const dx = p.clientX - s.x;
-          const dy = p.clientY - s.y;
-          if (Math.abs(dx) > 70 && Math.abs(dy) < 50) go(index + (dx < 0 ? 1 : -1));
-        }}
-      >
-        <header className="vo-card__head">
-          <h2 className="vo-card__title">
-            {T.run.task(noOf(task))}
-            {payload.oshibki !== null ? (
-              <span className="vo-tag">
-                {payload.oshibki.analog[index] === true ? 'Аналог' : 'Из варианта'}
-              </span>
-            ) : null}
-          </h2>
-          <span className={clsx('vo-status', `is-${status}`)}>{T.run.status[status]}</span>
-        </header>
-        <div className="vo-card__statement" dangerouslySetInnerHTML={{ __html: task.statement }} />
-        {task.figure === null ? null : (
-          <FigureZoom label={T.run.figure(noOf(task))} className="vo-card__figure" pinch>
-            <span dangerouslySetInnerHTML={{ __html: task.figure.svg }} />
-          </FigureZoom>
-        )}
-
-        <AnswerField
-          key={`${index}-${phase}`}
-          value={value}
-          onChange={setValue}
-          problem={problem}
-          readOnly={phase === 'done'}
-          state={phase === 'done' ? (checkedRight ? 'success' : 'error') : 'default'}
-          action={
-            trening
-              ? phase === 'done'
-                ? null
-                : {
-                    label: phase === 'second' ? T.run.checkAgain : T.run.check,
-                    onClick: () => void check(),
-                    busy: checking,
-                  }
-              : null
-          }
-          onFormat={(p) => setProblem(p === null ? null : T.format[p])}
-          saved={!trening && filled(index)}
-        />
-
-        {feedback}
-
-        <label className="vo-later">
-          <input
-            type="checkbox"
-            checked={later.includes(index)}
-            disabled={trening && phase === 'done'}
-            onChange={(e) =>
-              setLater((l) => (e.target.checked ? [...l, index] : l.filter((x) => x !== index)))
-            }
+      {z2 !== null ? (
+        <article className="vo-card" data-testid="vo-card">
+          {index === n1 ? (
+            <header className="vo-part-head" data-testid="vo-part2-head">
+              <h2>{T2.partTitle}</h2>
+              <p>{T2.part2Instr}</p>
+              <p>
+                <b>{T2.part2Max(ballText(MAX_PART2))}</b>
+              </p>
+            </header>
+          ) : null}
+          <header className="vo-card__head">
+            <h2 className="vo-card__title">
+              {T.run.task(z2.no)}
+              <BallPlashka n={MAX_BALL[z2.no]} />
+            </h2>
+          </header>
+          <Chast2Card key={z2.no} z={z2} st={c2st} update={(fn) => setC2st(fn)} samo={trening} />
+          {trening ? null : <p className="vo-note">{T2.samoKontrol}</p>}
+          <div className="vo-moves">
+            <Button variant="ghost" onClick={() => go(index - 1)}>
+              {T.run.prev}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={index === vsego - 1}
+              onClick={() => go(index + 1)}
+              data-testid="vo-next"
+            >
+              {T.run.next}
+            </Button>
+            <Button variant="danger" onClick={() => setConfirm(true)} data-testid="vo-finish">
+              {T.run.finish}
+            </Button>
+          </div>
+          <Button variant="ghost" onClick={() => go(0)} data-testid="vo-to-part1">
+            {T2.toPart1}
+          </Button>
+        </article>
+      ) : (
+        <article
+          className="vo-card"
+          data-testid="vo-card"
+          onTouchStart={(e) => {
+            const p = e.touches[0];
+            touch.current =
+              e.touches.length === 1 && p !== undefined ? { x: p.clientX, y: p.clientY } : null;
+          }}
+          onTouchEnd={(e) => {
+            const s = touch.current;
+            const p = e.changedTouches[0];
+            touch.current = null;
+            if (s === null || p === undefined) return;
+            const dx = p.clientX - s.x;
+            const dy = p.clientY - s.y;
+            if (Math.abs(dx) > 70 && Math.abs(dy) < 50) go(index + (dx < 0 ? 1 : -1));
+          }}
+        >
+          <header className="vo-card__head">
+            <h2 className="vo-card__title">
+              {T.run.task(noOf(task))}
+              {c2 === null ? null : <BallPlashka n={BALLY[task.egeNumber]} />}
+              {payload.oshibki !== null ? (
+                <span className="vo-tag">
+                  {payload.oshibki.analog[index] === true ? 'Аналог' : 'Из варианта'}
+                </span>
+              ) : null}
+            </h2>
+            <span className={clsx('vo-status', `is-${status}`)}>{T.run.status[status]}</span>
+          </header>
+          <div
+            className="vo-card__statement"
+            dangerouslySetInnerHTML={{ __html: task.statement }}
           />
-          {T.run.later}
-        </label>
+          {task.figure === null ? null : (
+            <FigureZoom label={T.run.figure(noOf(task))} className="vo-card__figure" pinch>
+              <span dangerouslySetInnerHTML={{ __html: task.figure.svg }} />
+            </FigureZoom>
+          )}
 
-        <div className="vo-moves">
-          <Button variant="ghost" disabled={index === 0} onClick={() => go(index - 1)}>
-            {T.run.prev}
-          </Button>
-          <Button
-            variant="secondary"
-            disabled={index === tasks.length - 1}
-            onClick={() => go(index + 1)}
-            data-testid="vo-next"
-          >
-            {T.run.next}
-          </Button>
-          <Button variant="danger" onClick={() => setConfirm(true)} data-testid="vo-finish">
-            {T.run.finish}
-          </Button>
-        </div>
-      </article>
+          <AnswerField
+            key={`${index}-${phase}`}
+            value={value}
+            onChange={setValue}
+            problem={problem}
+            readOnly={phase === 'done'}
+            state={phase === 'done' ? (checkedRight ? 'success' : 'error') : 'default'}
+            action={
+              trening
+                ? phase === 'done'
+                  ? null
+                  : {
+                      label: phase === 'second' ? T.run.checkAgain : T.run.check,
+                      onClick: () => void check(),
+                      busy: checking,
+                    }
+                : null
+            }
+            onFormat={(p) => setProblem(p === null ? null : T.format[p])}
+            saved={!trening && filled(index)}
+          />
+
+          {feedback}
+
+          <label className="vo-later">
+            <input
+              type="checkbox"
+              checked={later.includes(index)}
+              disabled={trening && phase === 'done'}
+              onChange={(e) =>
+                setLater((l) => (e.target.checked ? [...l, index] : l.filter((x) => x !== index)))
+              }
+            />
+            {T.run.later}
+          </label>
+
+          <div className="vo-moves">
+            <Button variant="ghost" disabled={index === 0} onClick={() => go(index - 1)}>
+              {T.run.prev}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={index === vsego - 1}
+              onClick={() => go(index + 1)}
+              data-testid="vo-next"
+            >
+              {T.run.next}
+            </Button>
+            <Button variant="danger" onClick={() => setConfirm(true)} data-testid="vo-finish">
+              {T.run.finish}
+            </Button>
+          </div>
+          {c2 !== null && index === n1 - 1 ? (
+            <Button
+              size="lg"
+              className="vo-part-btn"
+              onClick={() => go(n1)}
+              data-testid="vo-to-part2"
+            >
+              {T2.toPart2}
+            </Button>
+          ) : null}
+        </article>
+      )}
 
       <Modal
         open={confirm}

@@ -11,6 +11,9 @@
 
 import { asNumber, asNumberList, asStringRecord, isRecord } from '@/lib/trainerSession/restore';
 import type { BaseUi } from '@/lib/trainerSession/types';
+import { readChast2, type Chast2Ui } from '@/lib/chast2/sostoyanie';
+import { povNomer } from '@/lib/povyshennye/kod';
+import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import type { HintStep, VariantTask } from '../types';
 import type { Mode, Timer } from './link';
 import { loadSet, oshibkiTasks, tasksSignature } from './work';
@@ -36,6 +39,11 @@ export interface WorkPayload {
   kabinet?: { workId: string; attemptId: string; /** Номер варианта в работе. */ variant: number };
   /** Начало работы по часам сервера (отсчёт контрольной). */
   startedAt?: number;
+  /**
+   * Часть 2 (задания 14–20) — у вариантов повышенной сложности. Как и
+   * часть 1, собирается заново по коду и номеру версии.
+   */
+  chast2?: Chast2Zadacha[];
   /** Черновик с сервера — продолжить на другом устройстве. */
   draft?: { answers?: Record<number, string>; later?: number[]; times?: Record<number, number> };
 }
@@ -95,7 +103,18 @@ export async function buildWork(
   const tasks = loaded.set.variants[base.variant - 1]?.tasks;
   if (tasks === undefined || tasks.length === 0) return null;
   if (wrong === null) {
-    return { ...base, tasks, oshibki: null, sig: tasksSignature(tasks) };
+    const pv = povNomer(base.code);
+    const chast2 =
+      pv === null
+        ? null
+        : await import('@/lib/povyshennye/chast2').then((m) => m.chast2Versii(pv, base.variant));
+    return {
+      ...base,
+      tasks,
+      oshibki: null,
+      sig: tasksSignature(tasks),
+      ...(chast2 === null ? {} : { chast2 }),
+    };
   }
   const items = await oshibkiTasks(loaded.set, base.variant, wrong);
   if (items.length === 0) return null;
@@ -150,6 +169,8 @@ export interface WorkUi extends BaseUi {
   times: Record<number, number>;
   /** Начало работы, мс по часам: для таймера контрольной. */
   startedAt: number;
+  /** Часть 2: ответы по пунктам, сверка, открытые решения, самооценка. */
+  c2?: Chast2Ui;
 }
 
 function checks(v: unknown): Record<number, Check> {
@@ -214,5 +235,6 @@ export function readWorkUi(base: BaseUi): WorkUi {
     srvHints: hintsOf(raw['srvHints']),
     times: numbers(raw['times']),
     startedAt: asNumber(raw['startedAt'], Date.now()),
+    ...(raw['c2'] === undefined ? {} : { c2: readChast2(raw['c2']) }),
   };
 }

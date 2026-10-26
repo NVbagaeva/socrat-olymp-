@@ -24,6 +24,12 @@ const ZAGRUZKA: Record<number, () => Promise<{ VARIANT: VariantPV }>> = {
 /** Номера вариантов, у которых есть версии (остальные — «скоро»). */
 export const GOTOVY: readonly number[] = Object.keys(ZAGRUZKA).map(Number);
 
+/**
+ * Варианты, у которых готова часть 2 (задания 14–20). Экран раздела
+ * читает список без загрузки данных; автотест сверяет его с данными.
+ */
+export const S_CHAST2: readonly number[] = [1];
+
 export async function zagruzitVariant(k: number): Promise<VariantPV | null> {
   const f = ZAGRUZKA[k];
   return f === undefined ? null : (await f()).VARIANT;
