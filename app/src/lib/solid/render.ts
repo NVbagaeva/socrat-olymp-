@@ -144,6 +144,11 @@ type FillRole = 'face' | 'liquid' | 'section' | 'sphere';
 
 interface Fill {
   points: Vec2[];
+  /**
+   * Ещё контуры той же заливки: смежные грани одной плоскости или одной
+   * кривой поверхности рисуются одним путём — без швов между ними.
+   */
+  dop?: Vec2[][];
   role: FillRole;
   hl?: boolean;
   ton?: Ton;
@@ -277,6 +282,47 @@ function others(all: readonly Occluder[], body: Body): Occluder[] {
   return all.filter((occ) => occ.owner !== body);
 }
 
+/** Ребро «i-j» (i < j) → грани, в которые оно входит. */
+function rebraKGranyam(faces: readonly (readonly number[])[]): Map<string, number[]> {
+  const map = new Map<string, number[]>();
+  faces.forEach((face, f) => {
+    face.forEach((a, k) => {
+      const b = at(face, (k + 1) % face.length);
+      const key = a < b ? `${a}-${b}` : `${b}-${a}`;
+      const list = map.get(key);
+      if (list === undefined) map.set(key, [f]);
+      else list.push(f);
+    });
+  });
+  return map;
+}
+
+/**
+ * Рисовать ли ребро между гранями: стык двух граней одной плоскости —
+ * не ребро; стык двух полосок кривой поверхности — только контур.
+ */
+function rebroTela(
+  grani: readonly number[],
+  normals: readonly Vec3[],
+  gladkie: ReadonlySet<number>,
+  view: View,
+): boolean {
+  if (grani.length !== 2) return true;
+  const [f, g] = grani as [number, number];
+  const [nf, ng] = [at(normals, f), at(normals, g)];
+  if (dot(nf, ng) > 1 - 1e-9) return false;
+  if (gladkie.has(f) && gladkie.has(g)) {
+    return dot(nf, view.toward) > 0 !== dot(ng, view.toward) > 0;
+  }
+  return true;
+}
+
+/** Ключ плоскости грани: единичная нормаль и расстояние до начала. */
+function ploskost(n: Vec3, p: Vec3): string {
+  const r = (x: number) => (Math.round(x * 1e6) / 1e6 + 0).toFixed(6);
+  return [n[0], n[1], n[2], dot(n, p)].map(r).join(',');
+}
+
 function addPolyhedron(
   view: View,
   scene: Scene,
@@ -285,7 +331,11 @@ function addPolyhedron(
   eps: number,
 ) {
   const occluders = body.glass ? [...all, ...selfOccluders(view, body)] : all;
+  const normals = body.faces.map((face) => normalize(faceNormal(body.vertices, face)));
+  const gladkie = new Set(body.gladkie ?? []);
+  const kGrani = rebraKGranyam(body.faces);
   polyhedronEdges(body.faces).forEach(([i, j]) => {
+    if (!rebroTela(kGrani.get(`${i}-${j}`) ?? [], normals, gladkie, view)) return;
     const strokes = segmentStrokes(
       view,
       at(body.vertices, i),
@@ -303,13 +353,23 @@ function addPolyhedron(
     scene.base = body.vertices.filter((v) => Math.abs(v[2] - zmin) < 1e-9).map(view.project);
   }
   if (!body.noFill) {
-    body.faces.forEach((face) => {
-      if (dot(faceNormal(body.vertices, face), view.toward) > 0) {
-        scene.fills.push({
-          points: face.map((i) => view.project(at(body.vertices, i))),
-          role: 'face',
-        });
-      }
+    /* Видимые грани одной плоскости или одной кривой поверхности —
+       одной заливкой (контуры одного пути): иначе на стыках швы. */
+    const gruppy = new Map<string, Vec2[][]>();
+    body.faces.forEach((face, f) => {
+      if (dot(faceNormal(body.vertices, face), view.toward) <= 0) return;
+      const kontur = face.map((i) => view.project(at(body.vertices, i)));
+      const klyuch = gladkie.has(f) ? 'gladko' : ploskost(at(normals, f), at(body.vertices, at(face, 0)));
+      const gruppa = gruppy.get(klyuch);
+      if (gruppa === undefined) gruppy.set(klyuch, [kontur]);
+      else gruppa.push(kontur);
+    });
+    gruppy.forEach(([pervyy, ...dop]) => {
+      scene.fills.push({
+        points: pervyy as Vec2[],
+        ...(dop.length > 0 ? { dop } : {}),
+        role: 'face',
+      });
     });
   }
 
@@ -827,7 +887,7 @@ export function boundingSphere(model: Model): { center: Vec3; r: number } {
 function toPixels(scene: Scene, sphere?: { center: Vec2; r: number }): Scene {
   const points = [
     ...scene.strokes.flatMap((s) => s.points),
-    ...scene.fills.flatMap((f) => f.points),
+    ...scene.fills.flatMap((f) => [...f.points, ...(f.dop ?? []).flat()]),
     ...scene.dots,
     ...scene.labels.map((l) => l.p),
   ];
@@ -846,7 +906,11 @@ function toPixels(scene: Scene, sphere?: { center: Vec2; r: number }): Scene {
   const map = (p: Vec2): Vec2 => [(p[0] - box.minX) * k, (p[1] - box.minY) * k];
   return {
     strokes: scene.strokes.map((s) => ({ ...s, points: s.points.map(map) })),
-    fills: scene.fills.map((f) => ({ ...f, points: f.points.map(map) })),
+    fills: scene.fills.map((f) => ({
+      ...f,
+      points: f.points.map(map),
+      ...(f.dop === undefined ? {} : { dop: f.dop.map((k) => k.map(map)) }),
+    })),
     dots: scene.dots.map(map),
     labels: scene.labels.map((l) => ({ ...l, p: map(l.p) })),
     ...(scene.celi === undefined
@@ -1158,7 +1222,7 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   const pad = THEME.geometry.pad;
   const box = boxOf([
     ...scene.strokes.flatMap((s) => s.points),
-    ...scene.fills.flatMap((f) => f.points),
+    ...scene.fills.flatMap((f) => [...f.points, ...(f.dop ?? []).flat()]),
     ...scene.angles.flatMap((a) => a.points),
     ...scene.dots.map((p): Vec2 => [p[0] - THEME.geometry.dot, p[1] - THEME.geometry.dot]),
     ...scene.dots.map((p): Vec2 => [p[0] + THEME.geometry.dot, p[1] + THEME.geometry.dot]),
@@ -1191,9 +1255,10 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   }
   scene.fills
     .filter((f) => f.role === 'face' || f.role === 'sphere')
-    .forEach((f) =>
-      parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f, gradient)} stroke="none"/>`),
-    );
+    .forEach((f) => {
+      const d = [f.points, ...(f.dop ?? [])].map((k) => pathOf(k, true)).join('');
+      parts.push(`<path d="${d}" ${fillAttrs(f, gradient)} stroke="none"/>`);
+    });
   scene.fills
     .filter((f) => f.role === 'liquid' || f.role === 'section')
     .forEach((f) =>
