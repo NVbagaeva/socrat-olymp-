@@ -15,7 +15,8 @@
 import { ballOverPi, cubeVolume, inradiusOfCube } from './common';
 import { ballInCube } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -68,6 +69,7 @@ export const P03_81: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka81(p),
   varianty: [
     variant(1, 'задачник', 'задачник 282', { a: 3 }),
     variant(2, 'задачник', 'задачник 283', { a: 9 }),
@@ -120,6 +122,7 @@ export const P03_82: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka82(p),
   varianty: [
     variant(1, 'задачник', 'задачник 286', { r: 3 }),
     variant(2, 'задачник', 'задачник 287', { r: 4 }),
@@ -178,6 +181,7 @@ export const P03_83: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka83(p),
   varianty: [
     variant(1, 'задачник', 'задачник 290', { r: 7.5 }),
     variant(2, 'задачник', 'задачник 291', { r: 8.5 }),
@@ -191,3 +195,72 @@ export const P03_83: Prototype = {
     variant(10, 'новый', 'новый', { r: 11 }),
   ],
 };
+
+/* ── Подсказки-вопросы ───────────────────────────────────────────── */
+
+/** Ребро куба, описанного около сферы радиуса r: диаметр. */
+function rebroPoRadiusu(r: number, otvet: number): HintStep {
+  const a = 2 * r;
+  return vopros(
+    'Чему равно ребро куба?',
+    chislo(a),
+    chisla([r, r / 2, 4 * r], a, otvet),
+    'Сфера касается противоположных граней, поэтому ребро равно диаметру.',
+  );
+}
+
+/** Объём куба по ребру. */
+function obemKuba(r: number): HintStep {
+  const a = 2 * r;
+  return vopros(
+    'Как найти объём куба?',
+    `$${tex(a)}^3$`,
+    [`$${tex(a)}^2$`, `$${tex(r)}^3$`, `$6 \\cdot ${tex(a)}^2$`],
+  );
+}
+
+function podskazka81(p: Params): HintStep[] {
+  const a = num(p, 'a');
+  const r = a / 2;
+  return [
+    vopros(
+      'Чему равен радиус шара?',
+      chislo(r),
+      chisla([a, a / 4, 2 * a], r, a ** 3 / 6),
+      'Шар касается противоположных граней куба, поэтому его диаметр равен ребру.',
+    ),
+    vopros(
+      'По какой формуле считается объём шара?',
+      '$\\frac{4}{3}\\pi r^3$',
+      ['$4\\pi r^2$', '$\\frac{1}{3}\\pi r^3$', '$\\frac{4}{3}\\pi r^2$'],
+    ),
+    vopros(
+      'Как найти объём шара, делённый на $\\pi$?',
+      `$\\frac{4}{3} \\cdot ${tex(r)}^3$`,
+      [`$\\frac{4}{3} \\cdot ${tex(a)}^3$`, `$\\frac{4}{3} \\cdot ${tex(r)}^2$`, `$\\frac{1}{3} \\cdot ${tex(r)}^3$`],
+    ),
+  ];
+}
+
+function podskazka82(p: Params): HintStep[] {
+  const r = num(p, 'r');
+  return [rebroPoRadiusu(r, 8 * r ** 3), obemKuba(r)];
+}
+
+function podskazka83(p: Params): HintStep[] {
+  const r = num(p, 'r');
+  return [
+    vopros(
+      'Каким получается параллелепипед, описанный около сферы?',
+      'Кубом с ребром, равным диаметру',
+      [
+        'Любым с высотой, равной диаметру',
+        'Кубом с ребром, равным радиусу',
+        'Параллелепипедом с квадратным основанием и высотой, равной радиусу',
+      ],
+      'Сфера касается всех шести граней, поэтому расстояние между любыми противоположными гранями — диаметр.',
+    ),
+    rebroPoRadiusu(r, 8 * r ** 3),
+    obemKuba(r),
+  ];
+}

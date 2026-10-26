@@ -16,7 +16,8 @@
 import { cylinderOverBallArea, cylinderOverBallVolume } from './common';
 import { ballInCylinder } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -70,6 +71,7 @@ export const P03_84: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka84(p),
   varianty: [
     variant(1, 'задачник', 'задачник 294', { S: 29 }),
     variant(2, 'задачник', 'задачник 295', { S: 21 }),
@@ -114,6 +116,7 @@ export const P03_85: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka85(p),
   varianty: [
     variant(1, 'задачник', 'задачник 298', { V: 18 }),
     variant(2, 'задачник', 'задачник 299', { V: 62 }),
@@ -158,6 +161,7 @@ export const P03_86: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka86(p),
   varianty: [
     variant(1, 'задачник', 'задачник 302', { V: 42 }),
     variant(2, 'задачник', 'задачник 303', { V: 18 }),
@@ -207,6 +211,7 @@ export const P03_87: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka87(p),
   varianty: [
     variant(1, 'задачник', 'задачник 306', { S: 30 }),
     variant(2, 'задачник', 'задачник 307', { S: 42 }),
@@ -220,3 +225,106 @@ export const P03_87: Prototype = {
     variant(10, 'новый', 'новый', { S: 72 }),
   ],
 };
+
+/* ── Подсказки-вопросы ───────────────────────────────────────────── */
+
+/** Размеры цилиндра, описанного около шара. */
+function razmeryCilindra(): HintStep {
+  return vopros(
+    'Каковы радиус и высота цилиндра, описанного около шара радиуса $r$?',
+    'Радиус $r$, высота $2r$',
+    ['Радиус $r$, высота $r$', 'Радиус $2r$, высота $2r$', 'Радиус $r$, высота $4r$'],
+    'Шар касается обоих оснований и боковой поверхности.',
+  );
+}
+
+/** Поверхность шара и боковая поверхность цилиндра (Архимед). */
+function bokovaya(): HintStep {
+  return vopros(
+    'Чему равна боковая поверхность описанного цилиндра?',
+    'Поверхности шара',
+    ['Половине поверхности шара', 'Удвоенной поверхности шара', 'Полной поверхности цилиндра без шара'],
+    'Боковая поверхность $2\\pi r \\cdot 2r = 4\\pi r^2$ — как у шара.',
+  );
+}
+
+function podskazka84(p: Params): HintStep[] {
+  const S = num(p, 'S');
+  return [
+    bokovaya(),
+    vopros(
+      'Какую часть поверхности шара составляют два основания цилиндра?',
+      'Половину',
+      ['Четверть', 'Столько же', 'Треть'],
+      'Два основания — это $2\\pi r^2$, а поверхность шара $4\\pi r^2$.',
+    ),
+    vopros(
+      'Как найти полную поверхность цилиндра?',
+      `$${tex(S)} \\cdot 1{,}5$`,
+      [`$${tex(S)} \\cdot 2$`, `$${tex(S)} \\cdot \\frac{2}{3}$`, `$${tex(S)} \\cdot 3$`],
+    ),
+  ];
+}
+
+function podskazka85(p: Params): HintStep[] {
+  const V = num(p, 'V');
+  return [
+    razmeryCilindra(),
+    vopros(
+      'Во сколько раз объём цилиндра больше объёма шара?',
+      '$\\frac{3}{2}$',
+      ['$\\frac{4}{3}$', '$2$', '$3$'],
+      'Объём цилиндра $\\pi r^2 \\cdot 2r = 2\\pi r^3$, объём шара $\\frac{4}{3}\\pi r^3$.',
+    ),
+    vopros(
+      'Как найти объём цилиндра?',
+      `$${tex(V)} \\cdot \\frac{3}{2}$`,
+      [`$${tex(V)} \\cdot \\frac{2}{3}$`, `$${tex(V)} \\cdot 2$`, `$${tex(V)} \\cdot \\frac{4}{3}$`],
+    ),
+  ];
+}
+
+function podskazka86(p: Params): HintStep[] {
+  const V = num(p, 'V');
+  return [
+    razmeryCilindra(),
+    vopros(
+      'Какую часть объёма цилиндра составляет объём шара?',
+      'Две трети',
+      ['Половину', 'Три четверти', 'Треть'],
+      'Объём цилиндра $\\pi r^2 \\cdot 2r = 2\\pi r^3$, объём шара $\\frac{4}{3}\\pi r^3$.',
+    ),
+    vopros(
+      'Как найти объём шара?',
+      `$${tex(V)} \\cdot \\frac{2}{3}$`,
+      [`$${tex(V)} \\cdot \\frac{3}{2}$`, `$${tex(V)} : 2$`, `$${tex(V)} \\cdot \\frac{3}{4}$`],
+    ),
+  ];
+}
+
+function podskazka87(p: Params): HintStep[] {
+  const S = num(p, 'S');
+  return [
+    vopros(
+      'Чему равна поверхность вписанного шара?',
+      'Боковой поверхности цилиндра',
+      [
+        'Полной поверхности цилиндра',
+        'Площади двух оснований цилиндра',
+        'Половине боковой поверхности цилиндра',
+      ],
+      'Боковая поверхность $2\\pi r \\cdot 2r = 4\\pi r^2$ — как у шара.',
+    ),
+    vopros(
+      'Какую часть полной поверхности цилиндра составляет боковая?',
+      'Две трети',
+      ['Половину', 'Три четверти', 'Треть'],
+      'Полная поверхность $4\\pi r^2 + 2\\pi r^2 = 6\\pi r^2$.',
+    ),
+    vopros(
+      'Как найти поверхность шара?',
+      `$${tex(S)} \\cdot \\frac{2}{3}$`,
+      [`$${tex(S)} \\cdot \\frac{3}{2}$`, `$${tex(S)} : 2$`, `$${tex(S)} : 3$`],
+    ),
+  ];
+}
