@@ -18,7 +18,8 @@
 import { approxBaseArea, approxTotalArea, approxVolume } from './common';
 import { coneVessel, coneWithHeight, coneWithParallelCut } from './drawings';
 import { round, ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -94,6 +95,7 @@ export const P03_58: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka58(p),
   varianty: [
     variant(1, 'задачник', 'задачник 188', { S: 48, a: 4, b: 12 }),
     variant(2, 'задачник', 'задачник 189', { S: 72, a: 6, b: 12 }),
@@ -143,6 +145,7 @@ export const P03_59: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka59(p),
   varianty: [
     variant(1, 'задачник', 'задачник 192', { k: 8 }),
     variant(2, 'задачник', 'задачник 193', { k: 5 }),
@@ -190,6 +193,7 @@ export const P03_60: Prototype = {
     ];
   },
 
+  podskazka: () => podskazka60(),
   varianty: [
     variant(1, 'задачник', 'задачник 196', { k: 4 }),
     variant(2, 'задачник', 'задачник 197', { k: 9 }),
@@ -255,8 +259,8 @@ export const P03_61: Prototype = {
       },
       {
         text:
-          `Полный объём сосуда: $${ru(V)} \\cdot ${ru(den)}^3$` +
-          `${numerator === 1 ? '' : ` : ${ru(numerator)}³`} = ${ru(round(full))}.`,
+          `Полный объём сосуда: $${ru(V)} \\cdot ${ru(den)}^3` +
+          `${numerator === 1 ? '' : ` : ${ru(numerator)}^3`} = ${ru(round(full))}$.`,
         value: full,
       },
       {
@@ -266,6 +270,7 @@ export const P03_61: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka61(p),
   varianty: [
     variant(1, 'задачник', 'задачник 200', { num: 1, den: 4, V: 1 }),
     variant(2, 'задачник', 'задачник 201', { num: 1, den: 2, V: 25 }),
@@ -293,7 +298,7 @@ export const P03_62: Prototype = {
 
   uslovie: (p) =>
     `Площадь полной поверхности конуса равна ${ru(num(p, 'S'))}. Параллельно основанию конуса ` +
-    `проведено сечение, делящее высоту в отношении ${num(p, 'a')}:${num(p, 'b')}, считая от вершины ` +
+    `проведено сечение, делящее высоту в отношении $${num(p, 'a')}:${num(p, 'b')}$, считая от вершины ` +
     'конуса. Найдите площадь полной поверхности отсечённого конуса.',
 
   dopustimo: (p) => num(p, 'S') > 0 && num(p, 'a') > 0 && num(p, 'b') > 0,
@@ -337,12 +342,13 @@ export const P03_62: Prototype = {
       {
         text:
           'Его полная поверхность масштабируется как квадрат коэффициента: ' +
-          `${ru(S)} · ${ru(a)}² : ${ru(a + b)}² = ${ru(round(S * t * t))}.`,
+          `$${ru(S)} \\cdot ${ru(a)}^2 : ${ru(a + b)}^2 = ${ru(round(S * t * t))}$.`,
         value: S * t * t,
       },
     ];
   },
 
+  podskazka: (p) => podskazka62(p),
   varianty: [
     variant(1, 'задачник', 'задачник 204', { S: 35, a: 3, b: 2 }),
     variant(2, 'задачник', 'задачник 205', { S: 32.5, a: 4, b: 1 }),
@@ -356,3 +362,141 @@ export const P03_62: Prototype = {
     variant(10, 'новый', 'новый', { S: 50, a: 2, b: 3 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Дробь «a из целого» в формуле: «\frac{4}{16}». */
+function drob(a: number, b: number): string {
+  return `\\frac{${tex(a)}}{${tex(b)}}`;
+}
+
+/** Коэффициент подобия верхнего конуса: доля высоты от вершины. */
+function koefficient(a: number, b: number, comment: string): HintStep {
+  return vopros(
+    'Чему равен коэффициент подобия отсечённого (верхнего) конуса и всего конуса?',
+    `$${drob(a, a + b)}$`,
+    [`$${drob(a, b)}$`, `$${drob(b, a + b)}$`],
+    comment,
+  );
+}
+
+/** Площади подобных фигур: квадрат коэффициента. */
+function ploshchadiPodobnyh(): HintStep {
+  return vopros('Как относятся площади подобных фигур?', 'Как квадрат коэффициента подобия', [
+    'Как коэффициент подобия',
+    'Как куб коэффициента подобия',
+  ]);
+}
+
+/** Площадь по коэффициенту: верная формула и промахи со степенью. */
+function ploshchadPoKoefficientu(vopr: string, S: number, a: number, b: number): HintStep {
+  return vopros(vopr, `$${tex(S)} \\cdot \\frac{${tex(a)}^2}{${tex(a + b)}^2}$`, [
+    `$${tex(S)} \\cdot ${drob(a, a + b)}$`,
+    `$${tex(S)} \\cdot \\frac{${tex(a)}^3}{${tex(a + b)}^3}$`,
+    `$${tex(S)} \\cdot \\frac{${tex(a)}^2}{${tex(b)}^2}$`,
+  ]);
+}
+
+function podskazka58(p: Params): HintStep[] {
+  const S = num(p, 'S');
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  return [
+    koefficient(a, b, 'Сечение — основание верхнего конуса, его высота — отрезок от вершины.'),
+    ploshchadiPodobnyh(),
+    ploshchadPoKoefficientu('Как найти площадь сечения?', S, a, b),
+  ];
+}
+
+/** Формула объёма конуса: общий первый шаг. */
+function formulaObema(): HintStep {
+  return vopros('По какой формуле считают объём конуса?', '$V = \\frac{1}{3}\\pi r^2 h$', [
+    '$V = \\pi r^2 h$',
+    '$V = \\frac{1}{3}\\pi r h$',
+    '$V = \\frac{1}{2}\\pi r^2 h$',
+  ]);
+}
+
+function podskazka59(p: Params): HintStep[] {
+  const k = num(p, 'k');
+  return [
+    formulaObema(),
+    vopros(
+      'Как объём зависит от радиуса, если высота та же?',
+      'Пропорционален квадрату радиуса',
+      ['Пропорционален радиусу', 'Пропорционален кубу радиуса'],
+      'В формулу радиус входит в квадрате.',
+    ),
+    vopros('Как найти, во сколько раз увеличится объём?', `$${tex(k)}^2$`, [
+      `$${tex(k)}^3$`,
+      `$${tex(k)} \\cdot 2$`,
+      `$\\frac{${tex(k)}^2}{3}$`,
+    ]),
+  ];
+}
+
+function podskazka60(): HintStep[] {
+  return [
+    formulaObema(),
+    vopros(
+      'Как объём зависит от высоты, если радиус тот же?',
+      'Прямо пропорционален высоте',
+      ['Пропорционален квадрату высоты', 'Обратно пропорционален высоте', 'Не зависит от высоты'],
+      'В формулу высота входит в первой степени.',
+    ),
+    vopros('Во сколько раз уменьшится объём?', 'Во столько же раз, во сколько уменьшилась высота', [
+      'В квадрат этого числа раз',
+      'В куб этого числа раз',
+      'Втрое больше, из-за множителя $\\frac{1}{3}$',
+    ]),
+  ];
+}
+
+function podskazka61(p: Params): HintStep[] {
+  const numer = num(p, 'num');
+  const den = num(p, 'den');
+  const V = num(p, 'V');
+  const f = numer / den;
+  const full = V / (f * f * f);
+  const otvet = full - V;
+  const d = drob(numer, den);
+  return [
+    vopros(
+      'Какую часть объёма сосуда занимает жидкость?',
+      `$\\left(${d}\\right)^3$`,
+      [`$${d}$`, `$\\left(${d}\\right)^2$`],
+      `Жидкость — конус, подобный сосуду с коэффициентом $${d}$, а объёмы подобных тел относятся как куб коэффициента.`,
+    ),
+    vopros(
+      'Чему равен объём всего сосуда?',
+      chislo(full),
+      chisla(
+        [(V * den) / numer, (V * den * den) / (numer * numer), V * den * den * den],
+        full,
+        otvet,
+      ),
+      numer === 1
+        ? `$${tex(V)} \\cdot ${tex(den)}^3$`
+        : `$${tex(V)} \\cdot \\frac{${tex(den)}^3}{${tex(numer)}^3}$`,
+    ),
+    vopros(
+      'Как найти, сколько жидкости долить?',
+      'Из объёма сосуда вычесть объём налитой жидкости',
+      ['Это объём всего сосуда', 'К объёму сосуда прибавить объём жидкости'],
+    ),
+  ];
+}
+
+function podskazka62(p: Params): HintStep[] {
+  const S = num(p, 'S');
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  return [
+    koefficient(a, b, 'Отсечённый конус — верхний, его высота — часть от вершины.'),
+    vopros('Как относятся площади поверхностей подобных тел?', 'Как квадрат коэффициента подобия', [
+      'Как коэффициент подобия',
+      'Как куб коэффициента подобия',
+    ]),
+    ploshchadPoKoefficientu('Как найти полную поверхность отсечённого конуса?', S, a, b),
+  ];
+}

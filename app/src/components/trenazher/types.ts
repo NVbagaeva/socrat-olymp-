@@ -36,9 +36,17 @@ export interface KartochkaRazdela<T> {
     labelId: string;
   }>;
   proverit: (task: T, value: string) => boolean;
+  /** Можно ли проверять: составной ответ (таблица) заполнен. Нет — непустая строка. */
+  gotov?: (task: T, value: string) => boolean;
   /** Пояснение к ответу, HTML: что проверить при ошибке, откуда ответ при верном. */
   poyasnenie?: (task: T, value: string, right: boolean) => string;
   estPodskazka: (task: T) => boolean;
+  /**
+   * Подсказка ведёт к уравнению, а ответ ученик вводит сам: поле ответа
+   * остаётся под подсказкой, задача закрывается ответом (с подсказкой).
+   * Нет — подсказка доводит до ответа и сама закрывает задачу.
+   */
+  otvetPosleShagov?: boolean;
   /**
    * Подсказка по шагам. onMiss — неверный ответ на шаге, onDone —
    * цепочка пройдена (задача решена с подсказкой).

@@ -66,6 +66,10 @@ export interface GenPreset {
   kind?: string;
   /** Значение фильтра раздела (GenConfig.filtr); нет — первое. */
   filtr?: string;
+  /** Свой заголовок листа вместо вида работы из списка (№13: «Разминка»). */
+  svoy?: string;
+  /** Переключатель раздела (GenConfig.extras.flag); нет — как был. */
+  flag?: boolean;
 }
 
 export interface GenConfig {
@@ -104,6 +108,8 @@ export interface GenConfig {
   extras?: {
     kinds: { id: string; title: string }[];
     theory?: boolean;
+    /** Подпись памятки, если она стоит не перед каждым типом (№13 — одна рамка в начале). */
+    teoriyaNote?: string;
     examples?: boolean;
     /**
      * Уроков в серии (№9): один код комплекта — серия листов, урок 2, 3, …
@@ -115,6 +121,11 @@ export interface GenConfig {
      * сюжетов»): по умолчанию выключен. Нет поля — переключателя нет.
      */
     flag?: { title: string; note: string };
+    /**
+     * Выбор раздела в «Дополнительно» (у №13 — «Лист учителя»: только
+     * ответы, краткие решения, полные). Нет поля — выбора нет.
+     */
+    vybor?: { title: string; options: { id: string; title: string }[]; poUmolchaniyu: string };
   };
 }
 
@@ -129,8 +140,10 @@ export interface GenExtras {
   examples: 0 | 1 | 2;
   /** QR-код на лист ученика. */
   qr: boolean;
-  /** Вид работы в шапке; null — по составу. */
+  /** Вид работы в шапке: id из GenConfig.extras.kinds, SVOY_VID — свой заголовок; null — по составу. */
   kind: string | null;
+  /** Свой заголовок (kind === SVOY_VID). */
+  svoy?: string;
   /** Дата на листе, «2026-10-24»; пусто — пустая линия. */
   date: string;
   teacher: string;
@@ -138,6 +151,8 @@ export interface GenExtras {
   urok: number;
   /** Переключатель раздела (GenConfig.extras.flag); нет — выключен. */
   flag?: boolean;
+  /** Выбор раздела (GenConfig.extras.vybor); нет — по умолчанию. */
+  vybor?: string;
 }
 
 /**
@@ -206,6 +221,8 @@ export interface GenHrefs {
   all: string;
   /** Ссылка на набор: открывает генератор с тем же листом. */
   link: string;
+  /** Онлайн-набор (№13): ученик решает и проверяет ответы; QR-код ведёт сюда. */
+  online?: string;
 }
 
 /** Движок раздела через адаптер. Движок сам не меняется. */

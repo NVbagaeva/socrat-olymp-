@@ -134,19 +134,40 @@ function answer2(payload, at) {
   return { text: numberText(generate(prototype, seed).otvet) };
 }
 
-/** №11: [вид, подтип, номер в банке или seed, подпись] → reshitPlan. */
+/** №11 (тренажёр с фильтрами): задание {k, seed?} → план по ключу → reshitPlan. */
 let bank11 = null;
 function answer11(payload, at) {
   const { reshitPlan } = requireSrc('lib/zadanie11/trenazher/zadacha');
+  const { planPoKlyuchu } = requireSrc('lib/zadanie11/trenazher/filtry11');
+  const { osnovaSeed } = requireSrc('lib/trenazher/sessiya.ts');
   if (bank11 === null) {
     bank11 = requireSrc('lib/zadanie11/trenazher/dannye').dannyeTrenazhera().bank;
   }
-  const [vid, id, otkuda] = payload.zadachi[at];
-  const plan = vid === 'new' ? { vid, id, seed: String(otkuda) } : { vid, id, no: Number(otkuda) };
+  const plan = planPoKlyuchu(payload.items[at].k, osnovaSeed(payload, at, 0));
   const solved = reshitPlan(plan, bank11);
   return solved.vybor === undefined
     ? { text: numberText(solved.answer) }
     : { option: String(solved.vybor.correct + 1) };
+}
+
+/** №1 (тренажёр с фильтрами): задание {k, seed?} → план по ключу → ответ движка. */
+let bank1 = null;
+function answer1(payload, at) {
+  const { razreshit, sostavZadachi } = requireSrc('lib/planimetriya/trenazher/zadacha');
+  const { planPoKlyuchu1 } = requireSrc('lib/planimetriya/trenazher/filtry1');
+  const { osnovaSeed } = requireSrc('lib/trenazher/sessiya.ts');
+  if (bank1 === null) {
+    bank1 = requireSrc('lib/planimetriya/trenazher/dannye').dannyeTrenazhera1().bank;
+  }
+  const plan = planPoKlyuchu1(payload.items[at].k, osnovaSeed(payload, at, 0));
+  return { text: numberText(sostavZadachi(razreshit(plan, bank1)).otvet) };
+}
+
+/** №13 (тренажёр с фильтрами): задание «A-01|b3» → generate(прототип, seed).answer. */
+function answer13(payload, at) {
+  const { generate } = requireSrc('lib/zadanie13/generate');
+  const [prototype, seed] = payload.items[at].k.split('|');
+  return { text: numberText(generate(prototype, payload.items[at].seed ?? seed).answer) };
 }
 
 /** №4, №5: [прототип, номер варианта, подпись] → ответ ученика или метод. */
@@ -183,14 +204,14 @@ function answer45(payload, at) {
   return { text: numberText(otvetUchenika(prototype, variant.params)) };
 }
 
-/** №3: пул {kind, n} → prototype.otvet(параметры варианта). */
+/** №3 (тренажёр с фильтрами): задание «P03-01#3» → prototype.otvet(параметры варианта). */
 function answer3(payload, at) {
   const { prototypeById } = requireSrc('lib/zadanie3/index');
-  const item = payload.pool[at];
-  const prototype = prototypeById(item.kind);
-  const variant = prototype?.varianty.find((entry) => entry.n === item.n);
+  const [id, n] = payload.items[at].k.split('#');
+  const prototype = prototypeById(id);
+  const variant = prototype?.varianty.find((entry) => entry.n === Number(n));
   if (variant === undefined) {
-    throw new Error(`№3: нет варианта ${item.kind}#${item.n}`);
+    throw new Error(`№3: нет варианта ${payload.items[at].k}`);
   }
   return { text: numberText(prototype.otvet(variant.params)) };
 }
@@ -224,11 +245,11 @@ function answer6(payload, at) {
      tabs    — false, если у страницы нет ленты вкладок (метку не искать). */
 
 /** Нажать «Начать тренировку» на выборе тренировки. */
-async function pressStart(page) {
+async function pressStart(page, timeout) {
   await page
     .getByRole('button', { name: /^Начать тренировку/ })
     .first()
-    .click();
+    .click(timeout === undefined ? {} : { timeout });
 }
 
 /** Самая большая тренировка №8, №2: режим «Смешанная», количество «Все (N)». */
@@ -279,15 +300,25 @@ const TRAINERS = [
   },
   { name: '№2', url: '/zadaniya/2/trenazher/', scope: '2', answer: answer2, all: chooseAll },
   {
+    name: '№1',
+    url: '/zadaniya/1/trenazher/',
+    scope: '1',
+    answer: answer1,
+    all: chooseAllFiltry,
+  },
+  {
+    name: '№13',
+    url: '/zadaniya/13/trenazher/',
+    scope: '13',
+    answer: answer13,
+    all: chooseAllFiltry,
+  },
+  {
     name: '№11',
     url: '/zadaniya/11/trenazher/',
     scope: '11',
     answer: answer11,
-    /* Типы задач по умолчанию не отмечены: быстрая настройка на всё задание. */
-    start: async (page) => {
-      await page.getByRole('button', { name: 'Всё задание 11' }).click();
-      await pressStart(page);
-    },
+    all: chooseAllFiltry,
     rep: true,
   },
   {
@@ -333,7 +364,14 @@ const TRAINERS = [
     answer: answer45,
   },
   /* №3: один тренажёр на всё задание — вкладка раздела стереометрии. */
-  { name: '№3', url: '/zadaniya/3/trenazher/', scope: '3', answer: answer3, rep: true },
+  {
+    name: '№3',
+    url: '/zadaniya/3/trenazher/',
+    scope: '3',
+    answer: answer3,
+    all: chooseAllFiltry,
+    rep: true,
+  },
 ];
 
 /* ── Статический сервер над out/ ────────────────────────────── */
@@ -563,10 +601,16 @@ async function questionOf(page) {
 }
 
 /** Начать тренировку и дождаться панели и первой записи экрана. */
-async function startRun(page, trainer) {
-  await (trainer.start ?? pressStart)(page);
-  await waitBar(page);
-  return waitRecord(page, trainer.scope, (record) => record.ui !== null);
+/**
+ * timeout — для самых больших тренировок (сценарий 9): прежний тренажёр
+ * №12 собирает все 140 заданий «Все» разом — около 30 с даже на быстрой
+ * машине, и на медленной машине CI кнопка не успевает нажаться за
+ * обычные 20 с. Тренажёр с фильтрами собирает задачи по одной.
+ */
+async function startRun(page, trainer, timeout) {
+  await (trainer.start ?? pressStart)(page, timeout);
+  await waitBar(page, timeout);
+  return waitRecord(page, trainer.scope, (record) => record.ui !== null, timeout);
 }
 
 /** Метка на вкладке «Тренажёр». */
@@ -823,7 +867,11 @@ async function choiceScenario() {
       .first()
       .click();
     check(
-      (await waitRecord(page, trainer.scope, (item) => item.ui?.value === wrong.option)) !== null,
+      (await waitRecord(
+        page,
+        trainer.scope,
+        (item) => item.ui?.z?.[item.ui.index ?? 0]?.v === wrong.option,
+      )) !== null,
       `${tag}: выбор варианта ${wrong.option} записан`,
     );
     await page.reload({ waitUntil: 'load' });
@@ -831,6 +879,57 @@ async function choiceScenario() {
     await page.locator(`${BODY} .popt`).first().waitFor({ state: 'visible' });
     const shown = await shownAnswer(page, wrong);
     check(same(shown, wrong), `${tag}: после перезагрузки выбран тот же вариант (${shown.option})`);
+  });
+}
+
+/* ── 11. №1: пауза прежнего тренажёра переносится в сессию ──── */
+
+async function pauza1Scenario() {
+  const trainer = TRAINERS.find((item) => item.scope === '1');
+  await inContext('№1, прежняя пауза', async (context) => {
+    const tag = '№1, пауза прежнего тренажёра';
+    const page = await newPage(context);
+    await open(page, '/zadaniya/1/');
+    await page.evaluate(() => {
+      localStorage.setItem(
+        'budetege:planimetriya-1:trenazher-pauza:v1',
+        JSON.stringify({
+          plan: [
+            { vid: 'bank', no: 1, id: 'p01' },
+            { vid: 'analog', no: 1100, id: 'p01' },
+            { vid: 'new', id: 'p05', seed: 'старый' },
+          ],
+          podskazki: true,
+          index: 1,
+          otmetki: ['right', null, null],
+          nachato: Date.now() - 60_000,
+        }),
+      );
+    });
+    await open(page, trainer.url);
+    const record = await waitRecord(page, trainer.scope, () => true);
+    if (!check(record !== null, `${tag}: перенесена в запись сессии`)) return;
+    check(record.payload.items.length === 3, `${tag}: три задания`);
+    check(record.payload.items[2]?.seed === 'старый', `${tag}: у новой задачи прежний seed`);
+    check(
+      record.ui?.index === 1 && record.ui?.z?.[0]?.itog === 'right',
+      `${tag}: та же задача и отметка`,
+    );
+    check(
+      (await page.evaluate(() =>
+        localStorage.getItem('budetege:planimetriya-1:trenazher-pauza:v1'),
+      )) === null,
+      `${tag}: прежний ключ убран`,
+    );
+    const resume = page.getByRole('button', { name: /Продолжить/ }).first();
+    await resume.waitFor({ state: 'visible' });
+    await resume.click();
+    await waitBar(page);
+    const right = await trainer.answer(record.payload, 1);
+    check(
+      (await page.locator(QUESTION).first().textContent())?.length > 0,
+      `${tag}: «Продолжить» — открыта задача 2 (ответ ${right.text})`,
+    );
   });
 }
 
@@ -1021,7 +1120,7 @@ async function restoreTiming(trainer) {
     const page = await newPage(context);
     await open(page, trainer.url);
     await trainer.all(page);
-    const record = await startRun(page, trainer);
+    const record = await startRun(page, trainer, 120_000);
     if (!check(record !== null, `${trainer.name}, «Все»: тренировка начата`)) {
       return;
     }
@@ -1061,6 +1160,10 @@ for (const trainer of reps) {
 if (chosen.some((item) => item.scope === '11')) {
   console.log('\n6. №11: вариант ответа после перезагрузки');
   await choiceScenario();
+}
+if (chosen.some((item) => item.scope === '1')) {
+  console.log('\n11. №1: пауза прежнего тренажёра');
+  await pauza1Scenario();
 }
 console.log('\n10. Вход по ссылке на набор');
 for (const [name, link, tag] of [

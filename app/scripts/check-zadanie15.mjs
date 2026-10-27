@@ -497,11 +497,17 @@ for (const p of R.PRIMERY) {
   }
   const svg = R.chertezhSvg(R.scena(cube(6)), K0, [0, 0, 1]);
   eqStr((svg.match(/stroke-dasharray/g) ?? []).length, 3, 'SVG куба — штрихом три ребра');
-  eqStr(
-    R.imyaSvg('A_1'),
-    '<tspan font-style="italic">A</tspan><tspan baseline-shift="sub" font-size="70%">1</tspan>',
-    'имя A_1 в SVG',
+  /* Индекс — общей типографикой рисунков (lib/risunki/shrifty.js): буква
+     курсивом, индекс tspan class="indeks" — 70 %, опущен, прямой. */
+  const a1 = R.imyaSvg('A_1');
+  ok(
+    a1.startsWith('<tspan font-style="italic">A</tspan>') &&
+      /<tspan class="indeks" font-size="70%" font-style="normal" dy="[0-9.]+em"[^>]*>1<\/tspan>$/.test(
+        a1,
+      ),
+    `имя A_1 в SVG — буква курсивом и нижний индекс: ${a1}`,
   );
+  ok(/>13<\/tspan>$/.test(R.imyaSvg('A_{13}')), 'имя A_{13} — двузначный индекс одним блоком');
   ok(R.imyaSvg("K'").includes('′'), "имя K' в SVG — со штрихом");
 }
 

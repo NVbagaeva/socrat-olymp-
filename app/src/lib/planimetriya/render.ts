@@ -24,7 +24,7 @@
  */
 
 import { THEME, esc, px } from '@/lib/graph/renderer.js';
-import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
+import { BUKVY, CHISLA, indeksSvg } from '@/lib/risunki/shrifty.js';
 import { POROG } from './figury';
 import {
   type Krug,
@@ -872,7 +872,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const base = vybran.y + size * 0.72;
     const tx = vybran.x + 1;
     sloyPodpisi.push(
-      `<text class="pl-bukva" x="${px(tx)}" y="${px(base)}" font-family="${PL.font.bukva}" font-style="italic" font-size="${size}" fill="${PL.ink}" stroke="${PL.bg}" stroke-width="3" paint-order="stroke" stroke-linejoin="round">${esc(osn)}${ind ? `<tspan font-size="${px(size * 0.7)}" font-style="normal" font-family="${PL.font.chislo}" dy="${px(size * 0.22)}">${esc(ind)}</tspan>` : ''}</text>`,
+      `<text class="pl-bukva" x="${px(tx)}" y="${px(base)}" font-family="${PL.font.bukva}" font-style="italic" font-size="${size}" fill="${PL.ink}" stroke="${PL.bg}" stroke-width="3" paint-order="stroke" stroke-linejoin="round">${esc(osn)}${ind ? indeksSvg(esc(ind), size) : ''}</text>`,
     );
     R.teksty.push(tekst);
   }

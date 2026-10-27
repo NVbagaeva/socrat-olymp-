@@ -857,45 +857,53 @@ for (const [n, extra, want] of tables) {
 
 /* ── Тренажёр: план и оформление ───────────────────────────────── */
 {
-  const { planTrenirovki13, NASTROYKI_13 } = requireSrc('lib/zadanie13/trenazher/plan');
+  const { trenazherConfig13, zadachi13, poKlyuchu13 } = requireSrc(
+    'lib/zadanie13/trenazher/filtry13',
+  );
   const { sobratZadachu13 } = requireSrc('lib/zadanie13/trenazher/zadacha');
   const { generate, prototypes } = requireSrc('lib/zadanie13/generate');
   const { BANK_13 } = requireSrc('lib/zadanie13/bank');
   const { TABLE_FIELDS } = requireSrc('lib/zadanie13/tablica');
   const secret = requireSrc('lib/zadanie13/secret');
   const { TYPE_NAMES } = requireSrc('lib/zadanie13/types');
-  const protos = prototypes().map((p) => ({ id: p.id, type: p.type, difficulty: p.difficulty }));
-  for (const chto of ['A', 'B', 'C', 'D', 'all', 'tip'])
-    for (const istochnik of ['bank', 'mix', 'new'])
-      for (const uroven of ['base', 'all']) {
-        checks += 1;
-        const n = { ...NASTROYKI_13, chto, istochnik, uroven, count: 20 };
-        const plan = planTrenirovki13(n, protos, BANK_13, [], `t-${chto}-${istochnik}`);
-        const w = `тренажёр ${chto}/${istochnik}/${uroven}`;
-        if (plan.length !== 20) problems.push(`${w}: в плане ${plan.length} задач вместо 20`);
-        const keys = new Set(plan.map((z) => `${z.prototypeId}|${z.seed}`));
-        if (keys.size !== plan.length) problems.push(`${w}: задачи повторяются`);
-        for (const z of plan) {
-          const p = protos.find((x) => x.id === z.prototypeId);
-          if (!p || p.id.startsWith('P-'))
-            problems.push(`${w}: прототип ${z.prototypeId} не для тренажёра`);
-          else if (chto.length === 1 && p.type !== chto) problems.push(`${w}: чужая схема ${p.id}`);
-          else if (uroven === 'base' && p.difficulty !== 'base')
-            problems.push(`${w}: повышенная ${p.id}`);
-          if (istochnik === 'bank' && z.istochnik !== 'bank')
-            problems.push(`${w}: новая задача в режиме «банк»`);
-          if ((z.vid === 'tip') !== (chto === 'tip')) problems.push(`${w}: не тот вид задачи`);
-        }
-      }
-  const mistakesPlan = planTrenirovki13(
-    { ...NASTROYKI_13, chto: 'all', oshibki: true },
-    protos,
-    BANK_13,
-    ['C-02'],
-    'm',
-  );
-  if (!mistakesPlan.length || mistakesPlan.some((z) => z.prototypeId !== 'C-02'))
-    problems.push('тренажёр: «Повтор ошибок» берёт не только прототипы с ошибками');
+  const protos = prototypes().map((p) => ({
+    id: p.id,
+    type: p.type,
+    difficulty: p.difficulty,
+    source: p.source,
+    title: p.title,
+  }));
+  /* Список задач общего тренажёра: весь банк раздела без таблиц руками,
+     ключи однозначные и читаются обратно, источник и уровень — у прототипа. */
+  {
+    checks += 1;
+    const refs = zadachi13(protos, BANK_13);
+    const vBanke = BANK_13.filter(([id]) => !id.startsWith('P-')).length;
+    if (refs.length !== vBanke)
+      problems.push(`тренажёр: в списке ${refs.length} задач из ${vBanke}`);
+    if (new Set(refs.map((r) => r.key)).size !== refs.length)
+      problems.push('тренажёр: ключи задач повторяются');
+    for (const r of refs) {
+      const p = protos.find((x) => x.id === r.podtip);
+      const k = poKlyuchu13(r.key);
+      if (k === null || `${k.prototypeId}|${k.seed}` !== r.key)
+        problems.push(`тренажёр: ключ ${r.key} не читается`);
+      if (p === undefined || r.uroven !== (p.difficulty === 'base' ? 1 : 2))
+        problems.push(`тренажёр: ${r.key} — не тот уровень`);
+      if (p === undefined || r.istochnik !== (p.source === 'fipi' ? 'fipi' : 'new'))
+        problems.push(`тренажёр: ${r.key} — не тот источник`);
+    }
+    const cfg = trenazherConfig13(protos, (t) => t);
+    const ids = cfg.temy.flatMap((t) => t.podtipy.map((p) => p.id));
+    if (ids.length !== protos.filter((p) => !p.id.startsWith('P-')).length)
+      problems.push('тренажёр: в фильтре не все прототипы');
+    for (const t of cfg.temy)
+      if (t.podtipy.some((p) => protos.find((x) => x.id === p.id)?.type !== t.id))
+        problems.push(`тренажёр: в схеме ${t.id} чужой прототип`);
+    if (cfg.dop?.map((d) => d.id).join() !== 'zadanie,oformlenie')
+      problems.push('тренажёр: поля раздела «Задание» и «Ответ»');
+    if (cfg.nabory?.[0]?.dop?.zadanie !== 'tip') problems.push('тренажёр: набор «Определи тип»');
+  }
   /* Оформление: схема — верная, клетки первой строки сходятся с таблицей движка. */
   const seeds =
     (Number(process.env.Z13_SEEDS) || 3) > 3 ? ['b1', 'b2', 'b3', 'n-x1', 'n-x2'] : ['b1', 'n-x1'];

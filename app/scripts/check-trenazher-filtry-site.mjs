@@ -466,6 +466,83 @@ for (const width of [320, 375, 390]) {
   await ctx.close();
 }
 
+/* ── 8. Партия 1: №11, №1, №13 ─────────────────────────────── */
+
+console.log('8. Партия 1: №11, №1, №13 — фильтры, тренировка, подсказка');
+const PARTIYA_1 = [
+  { no: '11', url: '/zadaniya/11/trenazher/' },
+  { no: '1', url: '/zadaniya/1/trenazher/' },
+  { no: '13', url: '/zadaniya/13/trenazher/' },
+  { no: '13-oformlenie', url: '/zadaniya/13/trenazher/?d=oformlenie.oformlenie' },
+  { no: '13-tip', url: '/zadaniya/13/trenazher/?d=zadanie.tip' },
+];
+for (const [tag, viewport] of [
+  ['desktop', DESKTOP],
+  ['phone', { width: 390, height: 844 }],
+  ['375', { width: 375, height: 800 }],
+  ['320', { width: 320, height: 800 }],
+]) {
+  const ctx = await context(viewport);
+  for (const { no, url } of PARTIYA_1) {
+    const p = await page(ctx, url);
+    const t = `${tag} №${no}`;
+    /* Ссылка с фильтром при незавершённой тренировке раздела — вопрос. */
+    const dialog = p.getByRole('dialog');
+    if (await dialog.isVisible()) {
+      await dialog.getByRole('button', { name: 'Начать новую' }).click();
+    }
+    check((await naydenoNaStranice(p)) > 0, `${t}: найдено 0 задач`);
+    check(await bezProkrutki(p), `${t}: фильтры`);
+    const snim = SNIMKI !== null && (tag === 'desktop' || tag === 'phone');
+    if (snim && !no.includes('-')) await snimok(p, `p1-${tag}-${no}-filtry`);
+    if (tag !== 'desktop') {
+      /* Кнопка может оказаться под липкой «Начать» внизу экрана — к середине. */
+      await p.locator('.flt-phone__btn').evaluate((el) => el.scrollIntoView({ block: 'center' }));
+      await p.locator('.flt-phone__btn').click();
+      await p.locator('.gen-sheet').waitFor({ state: 'visible' });
+      check(await bezProkrutki(p), `${t}: нижний лист`);
+      if (snim && no === '13') await snimok(p, `p1-${tag}-13-shtorka`);
+      await p.locator('.gen-sheet__foot').getByRole('button').click();
+    }
+    await p
+      .getByRole('button', { name: /^Начать тренировку/ })
+      .first()
+      .click();
+    await p.locator('.tsess__body .ptask__question').waitFor({ state: 'visible' });
+    check(await bezProkrutki(p), `${t}: тренировка`);
+    if (no === '13-oformlenie') {
+      check(
+        (await p.locator('.tsess__body .z13t-of').count()) === 1,
+        `${t}: нет полей оформления (схема, строка таблицы, число)`,
+      );
+    }
+    if (no === '13-tip') {
+      check(
+        (await p.locator('.tsess__body .popt').count()) >= 2,
+        `${t}: «Определить схему» — нет вариантов схемы`,
+      );
+    }
+    if (snim) await kElementu(p, '.tsess__body .ptask__question');
+    if (snim) await snimok(p, `p1-${tag}-${no}-zadacha`);
+    const hint = p.locator('.tsess__body').getByRole('button', { name: 'Подсказка по шагам' });
+    if (!no.includes('tip') && (await hint.count()) > 0) {
+      await hint.click();
+      await p.locator('.tsess__body .trz-q').first().waitFor({ state: 'visible' });
+      check(await bezProkrutki(p), `${t}: подсказка`);
+      check(
+        (await p.locator('.tsess__body .trz-answer').count()) === 1,
+        `${t}: под подсказкой нет поля ответа`,
+      );
+      if (snim && !no.includes('-')) {
+        await kElementu(p, '.tsess__body .trz-hint');
+        await snimok(p, `p1-${tag}-${no}-podskazka`);
+      }
+    }
+    await p.close();
+  }
+  await ctx.close();
+}
+
 /* ── Снимки итогов на компьютере ─────────────────────────────── */
 
 if (SNIMKI !== null) {
@@ -484,7 +561,10 @@ if (SNIMKI !== null) {
     await p.locator('.tsess__body input.ttask__input').fill('987654');
   } else {
     const wrong = t.options.find((o) => o.number !== t.answer)?.number ?? '';
-    await p.locator('.tsess__body .popt').filter({ has: p.locator('.popt__no', { hasText: new RegExp(`^${wrong}$`) }) }).click();
+    await p
+      .locator('.tsess__body .popt')
+      .filter({ has: p.locator('.popt__no', { hasText: new RegExp(`^${wrong}$`) }) })
+      .click();
   }
   await p.locator('.tsess__body').getByRole('button', { name: 'Проверить', exact: true }).click();
   await kElementu(p, '.trz-svodka');

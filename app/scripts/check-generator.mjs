@@ -3,7 +3,7 @@
 
    Запуск: pnpm test:generator
 
-   Проверяет логику и подключение разделов (№11, №1, №2, №4, №5, №8, №9, №6, №7, №10, №12) без браузера:
+   Проверяет логику и подключение разделов (№11, №1, №2, №4, №5, №8, №9, №6, №7, №10, №12, №13) без браузера:
      1. Каждый пресет даёт годное состояние: есть задачи, не больше
         ограничений конфига, темы есть в выбранном источнике.
      2. Один seed — один лист: лист собирается дважды одинаково, листы
@@ -45,6 +45,10 @@ const C12 = requireSrc('lib/ves12/generator12.ts');
 const E12 = requireSrc('lib/ves12/engine12.ts');
 const G12 = requireSrc('lib/generatorSheet.ts');
 const { GEN_UI } = requireSrc('content/generatorUi.ts');
+const C13 = requireSrc('lib/zadanie13/gen/generator13.ts');
+const P13 = requireSrc('lib/zadanie13/gen/params.ts');
+const L13 = requireSrc('lib/zadanie13/gen/list.ts');
+const S13 = requireSrc('lib/zadanie13/gen/sheet.ts');
 const fs = await import('node:fs');
 const { createElement } = await import('react');
 const { renderToStaticMarkup } = await import('react-dom/server');
@@ -375,7 +379,9 @@ const RAZDELY = [
         return {
           model: sp,
           poVariantam: (sp.variants ?? [{ blocks: sp.blocks }]).map((v) =>
-            v.blocks.flatMap((b) => b.tasks).map((t) => ({ id: t.id, questionHtml: t.questionHtml })),
+            v.blocks
+              .flatMap((b) => b.tasks)
+              .map((t) => ({ id: t.id, questionHtml: t.questionHtml })),
           ),
         };
       },
@@ -445,6 +451,45 @@ const RAZDELY = [
       urok: null,
     };
   }),
+  /* №13: лист в шаблоне lib/sheet; QR — у названия листа ученика, ведёт в
+     онлайн-набор; заголовок листа — вид работы, дата — только у ученика.
+     У ученика под условием поля для ответа (строка, таблица) — не решения. */
+  (() => {
+    const config13 = C13.config13();
+    const parse = (q) => {
+      const p = P13.parseGenQuery13(q);
+      return { ...p, poKlyucham: p.klyuchi !== undefined };
+    };
+    return {
+      name: '№13',
+      config: config13,
+      engine: C13.engine13(config13),
+      params: (st) => C13.paramsIzSostoyaniya13(st, config13),
+      parse,
+      query: (p) => P13.genQuery13(p),
+      sobrat: (p) => L13.sobratList13(p),
+      /* Как страница печати (SheetPage13): QR — по sQr13. */
+      spec: (p, list, vid, qr) => S13.sheetSpec13(p, list, vid, P13.sQr13(p, vid) ? qr : undefined),
+      vopros: (t) => `<p>${t.questionHtml}</p>${L13.tablitsaUsloviya13(t)}`,
+      primery: () => [],
+      bezSverkiPrimerov: true,
+      badge: 'z13-sheet-badge',
+      ist: null,
+      ramka: 'teoriya',
+      /* Рамка «Повторяем» — ученику; лист учителя — ответы и решения. */
+      ramkaNaListe: (blocks, vid) =>
+        vid === 'uchitel' ||
+        blocks.some((x) => (x.leadItems ?? []).some((i) => i.includes('z13-sheet-povtor'))),
+      qrTolkoUchenika: true,
+      vidVZagolovke: true,
+      dataTolkoUchenika: true,
+      polyaUchenika: true,
+      seeds: ['7K3F', 'Q2M8', '0000'],
+      old: 's=A:2,T:1&l=all&i=mix&h=net&f=compact&v=3&a=kratko&t=color&seed=K7Q2&z=2.1:1',
+      oldIds: 'A-09,A-03,T',
+      urok: 'l=all&i=mix&h=net&f=compact&v=1&a=kratko&t=color&seed=K7Q2&u=1',
+    };
+  })(),
 ];
 
 /** Условие и рисунок задачи листа печати — в записи экрана генератора. */
@@ -520,7 +565,7 @@ async function proverit(R) {
         );
         const uchHtml = JSON.stringify(specOf(R, state, 'uchenik'));
         ok(
-          uch.every((t) => (t.solutionHtml ?? null) === null) &&
+          (R.polyaUchenika === true || uch.every((t) => (t.solutionHtml ?? null) === null)) &&
             !new RegExp(`sheet-task-answer|${R.badge}${R.ist === null ? '' : `|${R.ist}`}`).test(
               uchHtml,
             ),
@@ -717,7 +762,8 @@ async function proverit(R) {
         const extras = {
           /* У №2 рамок и примеров нет: только вид работы, дата, учитель, QR. */
           theory: R.ramka !== false,
-          examples: R.ramka === false ? 0 : 2,
+          /* У №13 — только памятка «Повторяем», разобранных примеров нет. */
+          examples: R.ramka === false || R.ramka === 'teoriya' ? 0 : 2,
           qr: true,
           kind: 'kr',
           date: '2026-10-24',
@@ -744,7 +790,9 @@ async function proverit(R) {
         if (R.ramka !== false)
           ok(
             b.variants.every(
-              (v) => v[0]?.lead?.includes('gen-recap') && v[0].lead.includes('gen-example'),
+              (v) =>
+                v[0]?.lead?.includes('gen-recap') &&
+                (R.ramka === 'teoriya' || v[0].lead.includes('gen-example')),
             ),
             `${label}: в предпросмотре рамка и примеры перед задачами`,
           );
@@ -757,22 +805,27 @@ async function proverit(R) {
           if (R.ramka !== false)
             ok(
               R.ramkaNaListe
-                ? R.ramkaNaListe(blocks)
+                ? R.ramkaNaListe(blocks, vid)
                 : blocks.some((x) => x.recap?.items.length > 0) &&
                     blocks.some((x) => (x.leadItems ?? []).length > 0),
               `${label}/${vid}: рамка и примеры на листе`,
             );
           ok(
             titles.every(
-              (t) => t.qr === '<svg></svg>' && t.subtitle.startsWith('Контрольная работа'),
+              (t) =>
+                /* У №13 QR — только на листе ученика. */
+                t.qr === (R.qrTolkoUchenika && vid === 'uchitel' ? undefined : '<svg></svg>') &&
+                (R.vidVZagolovke ? t.text : t.subtitle).startsWith('Контрольная работа'),
             ),
             `${label}/${vid}: QR-код и вид работы в шапке`,
           );
           ok(
-            spec.fields.date === '24.10.2026' && spec.head.author === 'Иванова А.А.',
+            (R.dataTolkoUchenika && vid === 'uchitel'
+              ? spec.fields === undefined
+              : spec.fields.date === '24.10.2026') && spec.head.author === 'Иванова А.А.',
             `${label}/${vid}: дата и учитель`,
           );
-          if (vid === 'uchenik')
+          if (vid === 'uchenik' && R.polyaUchenika !== true)
             ok(
               blocks.flatMap((x) => x.tasks).every((t) => (t.solutionHtml ?? null) === null),
               `${label}: у задач ученика по-прежнему нет решений`,
@@ -787,6 +840,25 @@ async function proverit(R) {
             primery.length > 0 && primery.every((x) => !zadachi.has(x)),
             `${label}: примеры не повторяют задачи листа (${primery.length})`,
           );
+        /* Свой заголовок вместо вида работы из списка — в ссылке и в шапке листа. */
+        const svoy = { ...extras, kind: 'svoy', svoy: 'Зачёт по кредитам' };
+        const sv = { ...base, extras: svoy };
+        const backS = engine.parse(new URLSearchParams(engine.hrefs(sv).link.split('?')[1]));
+        ok(
+          backS !== null && JSON.stringify(backS.extras) === JSON.stringify(svoy),
+          `${label}: свой заголовок в ссылке на набор`,
+        );
+        {
+          const pS = R.params(sv);
+          const specS = R.spec(pS, R.sobrat(pS), 'uchenik', '<svg></svg>');
+          const titlesS = specS.variants ? specS.variants.map((v) => v.title) : [specS.title];
+          ok(
+            titlesS.every((t) =>
+              (R.vidVZagolovke ? t.text : t.subtitle).startsWith('Зачёт по кредитам'),
+            ),
+            `${label}: свой заголовок в шапке листа`,
+          );
+        }
         const noQr = R.spec(
           R.params({ ...st, extras: { ...extras, qr: false } }),
           list,

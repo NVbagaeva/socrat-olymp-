@@ -1,14 +1,113 @@
 /**
- * Подтип раздела «Варианты повышенной сложности» для задания №11.
- * Устроен как подтипы РБ (таблица A | p | t, этапы, подсказки), но в
- * SUBTYPES не входит: в тренажёр, банк и «Собрать вариант» не попадает,
- * числа задаёт вариант.
+ * Подтипы раздела «Варианты повышенной сложности» для задания №11.
+ * Устроены как подтипы РБ и СМ (таблица A | p | t или таблица
+ * концентраций, этапы, подсказки), но в SUBTYPES не входят: в тренажёр,
+ * банк и «Собрать вариант» не попадают, числа задаёт вариант.
  */
 
-import { chtoSprashivayut, etapy, num, rabota, vopros } from '../kit';
-import { d, txt } from '../num';
+import { chtoSprashivayut, etapy, koncentraciya, num, rabota, str, vopros } from '../kit';
+import { add, d, div, fq, mul, q, sub, txt, val } from '../num';
 import type { Solved } from '../types';
-import { otvet } from './common';
+import { otvet, pct } from './common';
+
+/**
+ * Смешали a%-й и b%-й растворы (массы x и y неизвестны) и добавили
+ * m₁ кг c%-го — получили p₁%. Если бы добавили m₂ кг c%-го — получили бы
+ * p₂%. Найти x (или y). Подвох — в двух смесях разные массы (x + y + m₁
+ * и x + y + m₂), разность уравнений даёт x + y, а не ответ.
+ */
+export function triRastvora(p: Record<string, number | string>): Solved {
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  const c = num(p, 'c');
+  const m1 = num(p, 'm1');
+  const m2 = num(p, 'm2');
+  const p1 = num(p, 'p1');
+  const p2 = num(p, 'p2');
+  const ask = str(p, 'ask', ['a', 'b'] as const);
+  /* Вещество в родительном падеже: «кислоты», «соли». */
+  const vv = typeof p.vv === 'string' && p.vv !== '' ? p.vv : 'кислоты';
+  /* (p₂ − p₁)·s = c(m₂ − m₁) − p₂m₂ + p₁m₁, s = x + y. */
+  const sQ = q(c * (m2 - m1) - p2 * m2 + p1 * m1, p2 - p1);
+  const s = val(sQ);
+  /* a·x + b·(s − x) = p₁(s + m₁) − c·m₁. */
+  const pravQ = add(q(p1 * m1 - c * m1), mul(q(p1 - b), sQ));
+  const prav = val(pravQ);
+  const x = val(div(pravQ, q(a - b)));
+  const y = val(sub(sQ, div(pravQ, q(a - b))));
+  if (!(x > 0 && y > 0)) throw new Error(`№11: массы не положительны ${JSON.stringify(p)}`);
+  const ans = ask === 'a' ? x : y;
+  const sd = d(Math.round(s * 1e9) / 1e9);
+  const s1 = `${fq(sQ, true)}+${d(m1)}`;
+  return {
+    uslovie: `Смешав ${txt(a)}-процентный и ${txt(b)}-процентный растворы ${vv} и добавив ${txt(m1)} кг ${txt(c)}-процентного раствора, получили ${txt(p1)}-процентный раствор. Если бы вместо ${txt(m1)} кг добавили ${txt(m2)} кг ${txt(c)}-процентного раствора, получили бы ${txt(p2)}-процентный раствор. Сколько килограммов ${txt(ask === 'a' ? a : b)}-процентного раствора использовали?`,
+    answer: ans,
+    etapy: etapy(
+      ['Обозначаем', [`Масса $${pct(a)}$-го раствора — $x$ кг, $${pct(b)}$-го — $y$ кг.`]],
+      [
+        'Две смеси',
+        [
+          `Первая: масса $x+y+${d(m1)}$, ${vv} в ней $${d(a / 100)}x+${d(b / 100)}y+${d((c * m1) / 100)}$.`,
+          `Вторая: масса $x+y+${d(m2)}$ — другая, ${vv} в ней $${d(a / 100)}x+${d(b / 100)}y+${d((c * m2) / 100)}$.`,
+        ],
+      ],
+      [
+        'Система',
+        [
+          `Умножим на $100$: $\\begin{cases}${d(a)}x+${d(b)}y+${d(c * m1)}=${d(p1)}(x+y+${d(m1)}),\\\\ ${d(a)}x+${d(b)}y+${d(c * m2)}=${d(p2)}(x+y+${d(m2)}).\\end{cases}$`,
+        ],
+      ],
+      [
+        'Решение',
+        [
+          `Вычтем из второго первое: $${d(c * (m2 - m1))}=${d(p2 - p1)}(x+y)+${d(p2 * m2 - p1 * m1)}$, $x+y=${sd}$.`,
+          `Подставим $y=${sd}-x$ в первое: $${d(a)}x+${d(b)}(${sd}-x)+${d(c * m1)}=${d(p1)}\\cdot(${s1})$, $${d(a - b)}x=${d(Math.round(prav * 1e9) / 1e9)}$, $x=${d(x)}$, $y=${d(y)}$.`,
+        ],
+      ],
+      [
+        'Ответ на вопрос задачи',
+        [`Спрашивают массу $${pct(ask === 'a' ? a : b)}$-го раствора.`, otvet(ans)],
+      ],
+    ),
+    tables: [
+      koncentraciya(
+        [
+          { label: 'I', mvv: `${d(a / 100)}x`, mr: 'x', p: d(a) },
+          { label: 'II', mvv: `${d(b / 100)}y`, mr: 'y', p: d(b) },
+          { label: 'III', mvv: d((c * m1) / 100), mr: d(m1), p: d(c) },
+          { label: 'смесь', mvv: `${d(p1 / 100)}(x+y+${d(m1)})`, mr: `x+y+${d(m1)}`, p: d(p1) },
+        ],
+        `Добавили $${d(m1)}$ кг`,
+      ),
+      koncentraciya(
+        [
+          { label: 'I', mvv: `${d(a / 100)}x`, mr: 'x', p: d(a) },
+          { label: 'II', mvv: `${d(b / 100)}y`, mr: 'y', p: d(b) },
+          { label: 'III', mvv: d((c * m2) / 100), mr: d(m2), p: d(c) },
+          { label: 'смесь', mvv: `${d(p2 / 100)}(x+y+${d(m2)})`, mr: `x+y+${d(m2)}`, p: d(p2) },
+        ],
+        `Добавили $${d(m2)}$ кг`,
+      ),
+    ],
+    hints: [
+      vopros(
+        `Сколько ${vv} в $${d(m1)}$ кг $${pct(c)}$-го раствора?`,
+        `$${d((c * m1) / 100)}$ кг`,
+        [`$${d(c * m1)}$ кг`, `$${d(m1)}$ кг`],
+      ),
+      vopros('Какова масса второй смеси?', `$x+y+${d(m2)}$`, [
+        `$x+y+${d(m1)}$ — как у первой`,
+        '$x+y$',
+      ]),
+      vopros('Что даёт разность уравнений?', `$x+y=${sd}$`, [`$x=${sd}$`, `$y=${sd}$`]),
+      chtoSprashivayut(`массу $${pct(ask === 'a' ? a : b)}$-го раствора`, [
+        `массу $${pct(ask === 'a' ? b : a)}$-го раствора`,
+        'массу всей смеси',
+      ]),
+    ],
+    lifehacks: ['substitution'],
+  };
+}
 
 /**
  * Три одинаковых рабочих, каждый выполняет работу за t ч. Второй

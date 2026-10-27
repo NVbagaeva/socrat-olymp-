@@ -14,7 +14,7 @@ import { GEN_UI } from '@/content/generatorUi';
 import { SHEET_2 } from '@/content/sheet2';
 import { O_ZADANII } from '@/content/vektory';
 import { slotySostava, sostavIzSlotov } from '@/lib/generator/obshchiy/klyuchi';
-import { defaultExtras } from '@/lib/generator/obshchiy/state';
+import { defaultExtras, vidRabotyIz, vidRabotyText } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
   GenEngine,
@@ -78,7 +78,7 @@ export function paramsIzSostoyaniya(
     seed: state.seed,
     theme: 'color',
     layout: 'single',
-    kind: e.kind === null ? '' : (VIDY[e.kind] ?? ''),
+    kind: vidRabotyText(config, e),
     date: e.date,
     bank: false,
     poKlyucham: true,
@@ -91,10 +91,9 @@ export function paramsIzSostoyaniya(
 
 /** «Дополнительно» из листа: вид работы — по названию из списка. */
 function extrasIzParams(p: SheetParams2, config: GenConfig): GenExtras {
-  const kind = Object.entries(VIDY).find(([, title]) => title === p.kind)?.[0] ?? null;
   return {
     ...defaultExtras(config),
-    kind,
+    ...vidRabotyIz(config, p.kind),
     date: p.date,
     teacher: p.uchitel ?? config.sheet.teacher,
     qr: p.qr === true,

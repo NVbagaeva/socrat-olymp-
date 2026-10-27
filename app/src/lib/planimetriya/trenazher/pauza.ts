@@ -1,120 +1,109 @@
 'use client';
 
 /**
- * Тренировка на паузе: начатая тренировка №1 переживает уход со
- * страницы и перезагрузку (localStorage).
+ * Тренировка на паузе прежнего тренажёра №1 (до общей оболочки
+ * сессий): переносится в запись общей оболочки один раз.
  *
- * Хранится только план — ссылки на задачи (номер банка, аналога или
- * seed новой задачи), — номер текущей задачи и отметки решённых.
- * Ответов здесь нет: задачи по плану собираются заново тем же
- * детерминированным движком (trenazher/zadacha.ts), ответ снова
- * закрывается отпечатком. «Поставить на паузу» сохраняет и уводит к
- * выбору, «Продолжить» возвращает к той же задаче, «Завершить
- * тренировку» подводит итог и стирает запись.
+ * Прежняя запись хранила план (номер банка, аналога или seed новой
+ * задачи), текущую задачу и отметки. Задания общего тренажёра — те же
+ * ключи (filtry1.ts), поэтому тренировка открывается как была: та же
+ * задача, те же отметки, на паузе — с плашкой «Продолжить».
  */
 
-import { useSyncExternalStore } from 'react';
-import type { ZadachaPlan } from './sessiya';
+import {
+  encodeSession,
+  newSessionId,
+  readSession,
+  TAB_ID,
+  writeRaw,
+} from '../../trainerSession/store';
+import type { TrenPayload, TrenUi, ZadachaSost } from '../../trenazher/sessiya';
+import { NOVAYA } from '../../trenazher/sessiya';
+import { klyuchNovoy1 } from './filtry1';
 
 const KEY = 'budetege:planimetriya-1:trenazher-pauza:v1';
 
-export type Otmetka = 'right' | 'hinted' | 'wrong';
-
-export interface Pauza {
-  plan: ZadachaPlan[];
-  podskazki: boolean;
-  /** Текущая задача. */
-  index: number;
-  /** Отметки по задачам; null — ещё не закрыта. */
-  otmetki: (Otmetka | null)[];
-  /** Когда начата тренировка, мс. */
-  nachato: number;
+interface StarayaPauza {
+  plan: { vid: string; id: string; no?: number; seed?: string }[];
+  podskazki?: boolean;
+  index?: number;
+  otmetki?: unknown[];
+  nachato?: number;
 }
 
-const listeners = new Set<() => void>();
-let current: Pauza | null | undefined;
-
-function planOk(x: unknown): x is ZadachaPlan {
-  if (typeof x !== 'object' || x === null) return false;
-  const p = x as Record<string, unknown>;
-  if (typeof p.id !== 'string' || !/^p\d{2}$/.test(p.id)) return false;
-  if (p.vid === 'new') return typeof p.seed === 'string';
-  return (p.vid === 'bank' || p.vid === 'analog') && typeof p.no === 'number';
+function zadanie(p: StarayaPauza['plan'][number]): TrenPayload['items'][number] | null {
+  if (typeof p.id !== 'string' || !/^p\d{2}$/.test(p.id)) return null;
+  if (p.vid === 'new')
+    return typeof p.seed === 'string' ? { k: klyuchNovoy1(p.id), seed: p.seed } : null;
+  if ((p.vid === 'bank' || p.vid === 'analog') && typeof p.no === 'number') {
+    return { k: `${p.id}|${p.vid === 'bank' ? 'b' : 'a'}${p.no}` };
+  }
+  return null;
 }
 
-function razobrat(raw: string | null): Pauza | null {
-  if (raw === null) return null;
+/**
+ * Перенести прежнюю паузу в запись сессии раздела «1», если своей
+ * записи там ещё нет. Прежний ключ убирается в любом случае.
+ */
+export function perenestiPauzu1(): void {
+  let raw: string | null;
   try {
-    const v = JSON.parse(raw) as Partial<Pauza>;
-    if (!Array.isArray(v.plan) || v.plan.length === 0 || !v.plan.every(planOk)) return null;
-    const n = v.plan.length;
-    const otmetki = Array.from({ length: n }, (_, i) => {
-      const o = Array.isArray(v.otmetki) ? v.otmetki[i] : null;
-      return o === 'right' || o === 'hinted' || o === 'wrong' ? o : null;
-    });
-    const index =
-      typeof v.index === 'number' && v.index >= 0 && v.index < n ? Math.floor(v.index) : 0;
-    return {
-      plan: v.plan,
-      podskazki: v.podskazki !== false,
-      index,
-      otmetki,
-      nachato: typeof v.nachato === 'number' ? v.nachato : Date.now(),
-    };
+    raw = window.localStorage.getItem(KEY);
   } catch {
-    return null;
+    return;
   }
-}
-
-function snapshot(): Pauza | null {
-  if (current === undefined) {
-    try {
-      current = razobrat(window.localStorage.getItem(KEY));
-    } catch {
-      current = null;
-    }
-  }
-  return current;
-}
-
-function subscribe(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
-function uvedomit(): void {
-  listeners.forEach((listener) => listener());
-}
-
-/** Запомнить состояние тренировки (каждый переход к задаче и отметка). */
-export function zapomnitPauzu(p: Pauza): void {
-  current = p;
-  try {
-    window.localStorage.setItem(KEY, JSON.stringify(p));
-  } catch {
-    /* Приватный режим: пауза живёт до перезагрузки. */
-  }
-  uvedomit();
-}
-
-/** Тренировка завершена или брошена: записи больше нет. */
-export function steretPauzu(): void {
-  current = null;
+  if (raw === null) return;
   try {
     window.localStorage.removeItem(KEY);
   } catch {
-    /* Нечего стирать. */
+    /* Запись запрещена — перенос всё равно попробуем. */
   }
-  uvedomit();
-}
-
-export function usePauza(): Pauza | null {
-  return useSyncExternalStore(subscribe, snapshot, () => null);
-}
-
-/** Сколько задач закрыто. */
-export function zakryto(p: Pauza): number {
-  return p.otmetki.filter((o) => o !== null).length;
+  if (readSession('1').status !== 'none') return;
+  let v: StarayaPauza;
+  try {
+    v = JSON.parse(raw) as StarayaPauza;
+  } catch {
+    return;
+  }
+  if (!Array.isArray(v.plan)) return;
+  const items = v.plan.map(zadanie);
+  if (items.length === 0 || items.some((x) => x === null)) return;
+  const payload: TrenPayload = {
+    v: 1,
+    filtr: '',
+    rezhim: v.podskazki === false ? 'bez' : 'podskazki',
+    seed: 'perenos',
+    items: items as TrenPayload['items'],
+  };
+  const z: Record<number, ZadachaSost> = {};
+  const marks: TrenUi['marks'] = {};
+  const tried: TrenUi['tried'] = {};
+  (Array.isArray(v.otmetki) ? v.otmetki : []).forEach((o, i) => {
+    if (o === 'right' || o === 'hinted' || o === 'wrong') z[i] = { ...NOVAYA, itog: o };
+    if (o === 'right' || o === 'hinted') marks[i] = o;
+    if (o === 'wrong') tried[i] = true;
+  });
+  const index =
+    typeof v.index === 'number' && v.index >= 0 && v.index < items.length ? Math.floor(v.index) : 0;
+  const ui: TrenUi = { index, marks, tried, order: null, z, s: null };
+  const now = Date.now();
+  const nachato = typeof v.nachato === 'number' ? v.nachato : now;
+  writeRaw(
+    '1',
+    encodeSession(
+      {
+        scope: '1',
+        id: newSessionId(),
+        createdAt: nachato,
+        updatedAt: now,
+        rev: 1,
+        writer: TAB_ID,
+        paused: true,
+        activeMs: 0,
+        total: items.length,
+      },
+      JSON.stringify(ui),
+      JSON.stringify(payload),
+    ),
+  );
 }

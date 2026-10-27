@@ -1,0 +1,93 @@
+/* Подсказка вопросами по шагам (ShagiVoprosy.tsx) и выбор схемы в
+   ответе с оформлением №13: вид — как вопросы подсказки №12
+   (trainer.css, .tquest), но свои классы — стили приходят вместе с
+   компонентом на страницу любого раздела. */
+
+.trz-q {
+  display: grid;
+  gap: var(--space-2);
+}
+.trz-q__no {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.trz-q__prompt {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+}
+.trz-q__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-2);
+}
+.trz-q__option {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-body);
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+}
+.trz-q__option:hover:not(:disabled) {
+  border-color: var(--color-text-brand);
+}
+.trz-q__option:focus-visible {
+  outline: 2px solid var(--color-text-brand);
+  outline-offset: 2px;
+}
+.trz-q__option.is-chosen {
+  border-color: var(--color-text-brand);
+  background: var(--color-surface-info);
+  font-weight: 600;
+}
+.trz-q__option.is-wrong {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+}
+.trz-q__option.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  font-weight: 600;
+}
+.trz-q__option:disabled {
+  cursor: default;
+}
+.trz-q__option:disabled:not(.is-right):not(.is-chosen) {
+  opacity: 0.55;
+}
+.trz-q__oops {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-error);
+}
+.trz-q__pred {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-success-soft);
+}
+.trz-q__pred p {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.trz-q__pred b {
+  color: var(--color-success);
+}
+.trz-q__comment {
+  color: var(--color-text-secondary);
+}
+.trz-q__done {
+  font-weight: 600;
+}

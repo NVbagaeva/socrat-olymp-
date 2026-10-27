@@ -1,14 +1,12 @@
 /**
- * Тренировка тренажёра задания №3 в том виде, в каком она лежит в
- * сохранённой сессии.
+ * Тренировка прежнего тренажёра задания №3 в том виде, в каком она
+ * лежит в сохранённой сессии. Новый тренажёр на общей панели фильтров
+ * (components/tasks/solid3/Trenazher3.tsx) переводит её в свою запись.
  *
- * Задания и чертежи в запись не попадают: они живут в статическом
- * банке (pool.ts), а в сессии — только ссылки на него, «прототип и
- * номер варианта». Первые `size` ссылок — подход в порядке показа
- * на момент старта. За ними идут запасные: все варианты тех же
- * прототипов, из них берётся замена для «Ещё один вариант». Так
- * замена — это новый индекс пула в раскладке экрана, и после
- * возвращения в тренировку на месте оказывается то же задание.
+ * В записи — только ссылки на банк, «прототип и номер варианта»:
+ * первые `size` — подход в порядке показа, за ними запасные варианты
+ * тех же прототипов (на них ссылается раскладка экрана после замены
+ * варианта).
  */
 
 import { isRecord } from '../trainerSession/restore';
@@ -20,24 +18,6 @@ export interface Solid3Payload {
   pool: RoundItem[];
   /** Сколько первых ссылок пула — задания подхода. */
   size: number;
-}
-
-/** Пул тренировки из готового подхода: сам подход и запасные. */
-export function makeSolid3Payload(
-  items: RoundItem[],
-  byId: ReadonlyMap<string, PoolKind>,
-): Solid3Payload {
-  const spare: RoundItem[] = [];
-  const seen = new Set<string>();
-  for (const item of items) {
-    const kind = byId.get(item.kind);
-    if (kind === undefined || seen.has(item.kind)) {
-      continue;
-    }
-    seen.add(item.kind);
-    kind.variants.forEach((variant) => spare.push({ kind: kind.id, n: variant.n }));
-  }
-  return { pool: [...items, ...spare], size: items.length };
 }
 
 function isItem(value: unknown): value is RoundItem {
@@ -73,70 +53,8 @@ export function isSolid3Payload(
     size <= pool.length &&
     pool.every(
       (item) =>
-        isItem(item) && byId.get(item.kind)?.variants.some((variant) => variant.n === item.n) === true,
+        isItem(item) &&
+        byId.get(item.kind)?.variants.some((variant) => variant.n === item.n) === true,
     )
   );
-}
-
-/**
- * Куда заменить задание: индекс запасного варианта того же прототипа,
- * который ещё не стоит в подходе и не равен нынешнему. null — менять
- * не на что.
- */
-export function spareFor(
-  payload: Solid3Payload,
-  order: readonly number[],
-  at: number,
-  random: () => number,
-): number | null {
-  const current = payload.pool[order[at] ?? -1];
-  if (current === undefined) {
-    return null;
-  }
-  const used = new Set(order);
-  const free: number[] = [];
-  for (let i = payload.size; i < payload.pool.length; i += 1) {
-    const item = payload.pool[i] as RoundItem;
-    if (item.kind === current.kind && item.n !== current.n && !used.has(i)) {
-      free.push(i);
-    }
-  }
-  return free.length === 0 ? null : (free[Math.floor(random() * free.length)] ?? null);
-}
-
-/**
- * «Похожие задачи»: на каждое задание с ошибкой — другой вариант того
- * же прототипа, которого в тренировке не было (ни в подходе, ни среди
- * заданий с ошибкой). У прототипа варианты кончились — задание
- * пропускается; не осталось ни одного — null.
- */
-export function similarSolid3(
-  payload: Solid3Payload,
-  indexes: readonly number[],
-  byId: ReadonlyMap<string, PoolKind>,
-  random: () => number,
-): Solid3Payload | null {
-  const key = (item: RoundItem) => `${item.kind}:${item.n}`;
-  const used = new Set(
-    [...payload.pool.slice(0, payload.size), ...indexes.flatMap((at) => payload.pool[at] ?? [])].map(
-      key,
-    ),
-  );
-  const items: RoundItem[] = [];
-  for (const at of indexes) {
-    const current = payload.pool[at];
-    const kind = current === undefined ? undefined : byId.get(current.kind);
-    if (kind === undefined) {
-      continue;
-    }
-    const free = kind.variants
-      .map((variant): RoundItem => ({ kind: kind.id, n: variant.n }))
-      .filter((item) => !used.has(key(item)));
-    const pick = free[Math.floor(random() * free.length)];
-    if (pick !== undefined) {
-      used.add(key(pick));
-      items.push(pick);
-    }
-  }
-  return items.length === 0 ? null : makeSolid3Payload(items, byId);
 }

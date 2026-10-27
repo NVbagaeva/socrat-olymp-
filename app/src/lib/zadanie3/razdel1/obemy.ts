@@ -13,8 +13,9 @@ import { hullVolume, polyhedronVolume } from '../../solid/measure';
 import { NAMES, cubeCutPrism, shapeLines, shapeSection } from '../../solid/drawings/section1';
 import { type Vec3 } from '../../solid/vec';
 import { letters, ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
 import { boxOf } from './common';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -94,6 +95,7 @@ export const P03_12: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka12(p),
   varianty: [
     variant(1, 'задачник', 'задачник 42', { a: 8, b: 5, c: 4 }),
     variant(2, 'задачник', 'задачник 43', { a: 7, b: 6, c: 5 }),
@@ -101,7 +103,7 @@ export const P03_12: Prototype = {
     variant(4, 'домашка', 'домашка 9, вариант 2', { a: 3, b: 5, c: 4 }, 30),
     variant(5, 'домашка', 'домашка 9, вариант 3', { a: 10, b: 6, c: 4 }, 120),
     variant(6, 'домашка', 'домашка 9, вариант 4', { a: 5, b: 6, c: 5 }, 75),
-    variant(7, 'новый', 'новый', { a: 4, b: 3, c: 2 }),
+    variant(7, 'фипи', 'ФИПИ ADF4FE', { a: 8, b: 7, c: 6 }),
     variant(8, 'новый', 'новый', { a: 9, b: 4, c: 6 }),
     variant(9, 'новый', 'новый', { a: 6, b: 7, c: 4 }),
     variant(10, 'новый', 'новый', { a: 8, b: 3, c: 5 }),
@@ -154,6 +156,7 @@ export const P03_13: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka13(p),
   varianty: [
     variant(1, 'задачник', 'задачник 44', { a: 6, b: 5, c: 4 }),
     variant(2, 'задачник', 'задачник 45', { a: 5, b: 4, c: 3 }),
@@ -214,6 +217,7 @@ export const P03_14: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka14(p),
   varianty: [
     variant(1, 'задачник', 'задачник 46', { a: 3, b: 4, c: 5 }),
     variant(2, 'задачник', 'задачник 47', { a: 4, b: 3, c: 8 }),
@@ -301,12 +305,13 @@ export const P03_15: Prototype = {
         text: 'Отсечённая призма — прямая, её основание — прямоугольный треугольник с катетами по половине ребра куба.',
       },
       {
-        text: 'Значит объём призмы: ½ · $(\\frac{a}{2}) \\cdot (\\frac{a}{2}) \\cdot a = a^\\frac{3}{8}$, то есть восьмая часть объёма куба.',
+        text: 'Значит объём призмы: $\\frac{1}{2} \\cdot \\frac{a}{2} \\cdot \\frac{a}{2} \\cdot a = \\frac{a^3}{8}$, то есть восьмая часть объёма куба.',
       },
       { text: `Объём куба: $8 \\cdot ${ru(v)} = ${ru(8 * v)}$.`, value: 8 * v },
     ];
   },
 
+  podskazka: (p) => podskazka15(p),
   varianty: [
     variant(1, 'задачник', 'задачник 48', { v: 1.5 }),
     variant(2, 'задачник', 'задачник 49', { v: 3.5 }),
@@ -347,17 +352,18 @@ export const P03_16: Prototype = {
       {
         text: 'Отсечённая призма — прямая, её основание — прямоугольный треугольник с катетами по половине ребра куба.',
       },
-      { text: 'Объём призмы: ½ · $(\\frac{a}{2}) \\cdot (\\frac{a}{2}) \\cdot a = a^\\frac{3}{8}$ — восьмая часть объёма куба.' },
+      { text: 'Объём призмы: $\\frac{1}{2} \\cdot \\frac{a}{2} \\cdot \\frac{a}{2} \\cdot a = \\frac{a^3}{8}$ — восьмая часть объёма куба.' },
       { text: `Объём призмы: $${ru(v)} : 8 = ${ru(v / 8)}$.`, value: v / 8 },
     ];
   },
 
+  podskazka: (p) => podskazka16(p),
   varianty: [
     variant(1, 'задачник', 'задачник 51', { V: 20 }),
     variant(2, 'задачник', 'задачник 52', { V: 4 }),
     variant(3, 'задачник', 'задачник 53', { V: 12 }),
-    variant(4, 'новый', 'новый', { V: 8 }),
-    variant(5, 'новый', 'новый', { V: 16 }),
+    variant(4, 'фипи', 'ФИПИ F3Fc26', { V: 144 }),
+    variant(5, 'фипи', 'ФИПИ F51D9A', { V: 80 }),
     variant(6, 'новый', 'новый', { V: 24 }),
     variant(7, 'новый', 'новый', { V: 28 }),
     variant(8, 'новый', 'новый', { V: 32 }),
@@ -368,44 +374,75 @@ export const P03_16: Prototype = {
 
 /* ── P03-17. Пирамида A, B, C, D, B₁ ────────────────────────────── */
 
-const PART_17 = ['A', 'B', 'C', 'D', 'B1'];
+/**
+ * Вершина пирамиды P03-17 — над одной из вершин основания (параметр v,
+ * по умолчанию B): у задач открытого банка она бывает и над A, и над C.
+ * Рёбра в условии называются от этой вершины: два ребра основания и
+ * боковое. a — длина AB (и CD), b — длина BC (и AD), c — высота.
+ */
+function vershina17(p: Params): 'A' | 'B' | 'C' | 'D' {
+  const v = p['v'];
+  return v === 'A' || v === 'C' || v === 'D' ? v : 'B';
+}
+
+function part17(p: Params): string[] {
+  return ['A', 'B', 'C', 'D', `${vershina17(p)}1`];
+}
+
+/** Рёбра условия P03-17 от вершины: имя и длина. */
+function rebra17(p: Params): [string, number][] {
+  const [a, b, c] = abc(p);
+  const v = vershina17(p);
+  const osnovanie: Record<typeof v, [string, number][]> = {
+    A: [['AB', a], ['AD', b]],
+    B: [['AB', a], ['BC', b]],
+    C: [['BC', b], ['CD', a]],
+    D: [['AD', b], ['CD', a]],
+  };
+  return [...osnovanie[v], [`${v}${v}_1`, c]];
+}
 
 export const P03_17: Prototype = {
   id: 'P03-17',
   razdel: 'I',
-  nazvanie: 'Пирамида $A$, $B$, $C$, $D$, $B_1$ в параллелепипеде',
+  nazvanie: 'Пирамида с основанием $ABCD$ в параллелепипеде',
   tip: 'объём пирамиды внутри параллелепипеда',
   zadachnik: [54, 57],
   status: 'есть',
   format: 'десятичная',
 
   uslovie: (p) =>
-    `Найдите объём многогранника, вершинами которого являются вершины $${listed(PART_17)}$ ` +
-    `прямоугольного параллелепипеда $${NAMES}$, у которого $AB=${ru(num(p, 'a'))}$, ` +
-    `$BC=${ru(num(p, 'b'))}$, $BB_1=${ru(num(p, 'c'))}$.`,
+    `Найдите объём многогранника, вершинами которого являются вершины $${listed(part17(p))}$ ` +
+    `прямоугольного параллелепипеда $${NAMES}$, у которого ` +
+    `${rebra17(p)
+      .map(([name, x]) => `$${name}=${ru(x)}$`)
+      .join(', ')}.`,
 
-  dopustimo: positive,
+  dopustimo: (p) => positive(p) && (p['v'] === undefined || ['A', 'B', 'C', 'D'].includes(String(p['v']))),
   otvet: (p) => {
     const [a, b, c] = abc(p);
     return (a * b * c) / 3;
   },
-  poModeli: (p) => partVolume(p, PART_17),
+  poModeli: (p) => partVolume(p, part17(p)),
 
-  chertezh: () =>
-    shapeLines(
+  chertezh: (p) => {
+    const v = vershina17(p);
+    return shapeLines(
       'box',
-      `Прямоугольный параллелепипед ${NAMES}, выделена пирамида с основанием ABCD и вершиной B₁`,
-      [
-        ['A', 'B1'],
-        ['C', 'B1'],
-        ['D', 'B1'],
-      ],
-    ),
+      `Прямоугольный параллелепипед ${NAMES}, выделена пирамида с основанием ABCD и вершиной ${letters(`${v}1`)}`,
+      ['A', 'B', 'C', 'D']
+        .filter((x) => x !== v)
+        .map((x): [string, string] => [x, `${v}1`]),
+    );
+  },
 
   shagi: (p) => {
     const [a, b, c] = abc(p);
+    const v = vershina17(p);
     return [
-      { text: 'Это пирамида с основанием $ABCD$ и вершиной $B_1$; её высота — боковое ребро $BB_1$.' },
+      {
+        text: `Это пирамида с основанием $ABCD$ и вершиной $${v}_1$; её высота — боковое ребро $${v}${v}_1$.`,
+      },
       {
         text: `Площадь основания: $${ru(a)} \\cdot ${ru(b)} = ${ru(a * b)}$.`,
         value: a * b,
@@ -417,6 +454,7 @@ export const P03_17: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka17(p),
   varianty: [
     variant(1, 'задачник', 'задачник 54', { a: 4, b: 7, c: 3 }),
     variant(2, 'задачник', 'задачник 55', { a: 9, b: 3, c: 8 }),
@@ -426,8 +464,9 @@ export const P03_17: Prototype = {
     variant(6, 'домашка', 'домашка 12, вариант 2', { a: 9, b: 7, c: 6 }, 126),
     variant(7, 'домашка', 'домашка 12, вариант 3', { a: 8, b: 4, c: 3 }, 32),
     variant(8, 'домашка', 'домашка 12, вариант 4', { a: 5, b: 9, c: 5 }, 75),
-    variant(9, 'новый', 'новый', { a: 6, b: 5, c: 4 }),
-    variant(10, 'новый', 'новый', { a: 9, b: 4, c: 5 }),
+    /* Задачи открытого банка ФИПИ: вершина над C и над A. */
+    variant(9, 'фипи', 'ФИПИ 2D6929', { a: 3, b: 9, c: 7, v: 'C' }),
+    variant(10, 'фипи', 'ФИПИ 68281C', { a: 3, b: 9, c: 4, v: 'A' }),
   ],
 };
 
@@ -489,6 +528,7 @@ export const P03_18: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka18(p),
   varianty: [
     variant(1, 'задачник', 'задачник 58', { S: 6, h: 7 }),
     variant(2, 'задачник', 'задачник 59', { S: 6, h: 6 }),
@@ -552,6 +592,7 @@ export const P03_19: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka19(p),
   varianty: [
     variant(1, 'задачник', 'задачник 62', { a: 9, b: 7, c: 6 }),
     variant(2, 'задачник', 'задачник 63', { a: 7, b: 6, c: 5 }),
@@ -565,3 +606,136 @@ export const P03_19: Prototype = {
     variant(10, 'новый', 'новый', { a: 5, b: 4, c: 6 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Объём параллелепипеда — второй шаг у частей: без ответа на кнопках. */
+function obemParallelepipeda(p: Params, otvet: number): HintStep {
+  const [a, b, c] = abc(p);
+  const v = a * b * c;
+  return vopros(
+    'Чему равен объём всего параллелепипеда?',
+    chislo(v),
+    chisla([a * b, a + b + c, 2 * (a * b + b * c + a * c), v * 2], v, otvet),
+  );
+}
+
+/** Какую часть целого составляет тело: верная доля и типичные промахи. */
+function dolya(chto: string, verno: string, comment: string): HintStep {
+  return vopros(
+    `Какую часть ${chto} составляет многогранник?`,
+    verno,
+    ['Половину', 'Треть', 'Четверть', 'Шестую', 'Восьмую'].filter((x) => x !== verno),
+    comment,
+  );
+}
+
+function podskazka12(p: Params): HintStep[] {
+  const v = abc(p).reduce((x, y) => x * y, 1);
+  return [
+    dolya('параллелепипеда', 'Половину', 'Плоскость $ACC_1A_1$ режет параллелепипед на две равные призмы.'),
+    obemParallelepipeda(p, v / 2),
+  ];
+}
+
+function podskazka13(p: Params): HintStep[] {
+  const v = abc(p).reduce((x, y) => x * y, 1);
+  return [
+    dolya('параллелепипеда', 'Половину', 'Плоскость $A_1B_1CD$ режет параллелепипед на две равные части.'),
+    obemParallelepipeda(p, v / 2),
+  ];
+}
+
+function podskazka14(p: Params): HintStep[] {
+  const v = abc(p).reduce((x, y) => x * y, 1);
+  return [
+    dolya('параллелепипеда', 'Половину', 'Плоскость $ABC_1D_1$ режет параллелепипед на две равные призмы.'),
+    obemParallelepipeda(p, v / 2),
+  ];
+}
+
+function podskazka15(p: Params): HintStep[] {
+  const v = num(p, 'v');
+  return [
+    dolya(
+      'куба',
+      'Восьмую',
+      'Основание призмы — треугольник с катетами $\\frac{a}{2}$: это восьмая часть грани, а высота — всё ребро.',
+    ),
+    vopros(
+      'Как найти объём куба?',
+      `$8 \\cdot ${tex(v)}$`,
+      [`$${tex(v)} : 8$`, `$4 \\cdot ${tex(v)}$`, `$2 \\cdot ${tex(v)}$`],
+    ),
+  ];
+}
+
+function podskazka16(p: Params): HintStep[] {
+  const v = num(p, 'V');
+  return [
+    dolya(
+      'куба',
+      'Восьмую',
+      'Основание призмы — треугольник с катетами $\\frac{a}{2}$: это восьмая часть грани, а высота — всё ребро.',
+    ),
+    vopros(
+      'Как найти объём призмы?',
+      `$${tex(v)} : 8$`,
+      [`$${tex(v)} : 4$`, `$${tex(v)} : 2$`, `$8 \\cdot ${tex(v)}$`],
+    ),
+  ];
+}
+
+function podskazka17(p: Params): HintStep[] {
+  const obem = abc(p).reduce((x, y) => x * y, 1);
+  const v = vershina17(p);
+  return [
+    vopros(
+      'Что это за многогранник?',
+      `Пирамида с основанием $ABCD$ и высотой $${v}${v}_1$`,
+      [
+        'Призма с основанием $ABCD$',
+        'Пирамида с основанием $ABB_1A_1$ и вершиной $D$',
+        `Тетраэдр $ABC${v}_1$`,
+      ],
+    ),
+    dolya('параллелепипеда', 'Треть', 'У пирамиды и параллелепипеда общие основание и высота.'),
+    obemParallelepipeda(p, obem / 3),
+  ];
+}
+
+function podskazka18(p: Params): HintStep[] {
+  const S = num(p, 'S');
+  const h = num(p, 'h');
+  const otvet = (S * h) / 3;
+  return [
+    dolya(
+      'призмы',
+      'Треть',
+      'Тело — две пирамиды с вершиной $C$, их основания — половины грани $ABB_1A_1$.',
+    ),
+    vopros(
+      'Чему равен объём всей призмы?',
+      chislo(S * h),
+      chisla([S + h, (S * h) / 2, 2 * S * h], S * h, otvet),
+      'Площадь основания умножить на боковое ребро.',
+    ),
+  ];
+}
+
+function podskazka19(p: Params): HintStep[] {
+  const v = abc(p).reduce((x, y) => x * y, 1);
+  return [
+    vopros(
+      'Что в основании пирамиды $ABCB_1$ и какая у неё высота?',
+      'Треугольник $ABC$ — половина основания, высота $BB_1$',
+      [
+        'Прямоугольник $ABCD$, высота $BB_1$',
+        'Треугольник $ABB_1$, высота $BC$',
+        'Треугольник $ABC$, высота — диагональ $AC$',
+      ],
+    ),
+    dolya('параллелепипеда', 'Шестую', '$\\frac{1}{2}$ основания и $\\frac{1}{3}$ от пирамиды: вместе $\\frac{1}{6}$.'),
+    obemParallelepipeda(p, v / 6),
+  ];
+}

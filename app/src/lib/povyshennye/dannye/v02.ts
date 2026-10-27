@@ -851,4 +851,97 @@ export const VARIANT: VariantPV = {
       },
     ],
   ],
+  /** Часть 2: задания 14–20 по версиям; проверка — pnpm test:povyshennye-chast2. */
+  chast2: [
+    [
+      {
+        s: 'z14.logTrig',
+        p: { b: 's+4', z: 1, a: 'c-', za: -1, bFirst: true, log: '4', lo: -4, hi: -1 },
+      },
+      { s: 'z15.rombPiramida', p: { osn: 'ugol', a2: 4, phi: 45, h2: [13, 1] } },
+      {
+        s: 'z16.pokazKoren',
+        p: { q: 2, alpha: 2, gamma: 1, e: 4, y1: 2, y2: 5, znak: 'le', vidN: 'B', vidD: 'q' },
+      },
+      { s: 'z17.kachka', p: { T: 11.4, sudno: 3 } },
+      { s: 'z18.pyatiugolnik', p: { e: 18, b: 42, l: 51, dano: 'r' } },
+      { s: 'z19.logKoren', p: { m: 3, b: 2, c: 3, zerk: true } },
+      { s: 'z20.zabor', p: { S: 120, p: 10, q: 40, A: 600, B: 400 } },
+    ],
+    [
+      {
+        s: 'z14.logTrig',
+        p: { b: 'c+4', z: 1, a: 's+', za: -1, bFirst: true, log: 'r2', lo: 6, hi: 9 },
+      },
+      { s: 'z15.rombPiramida', p: { osn: 'ugol', a2: 12, phi: 30, h2: [13, 1] } },
+      {
+        s: 'z16.pokazKoren',
+        p: { q: 3, alpha: 2, gamma: 1, e: 4, y1: 2, y2: 3, znak: 'le', vidN: 'B', vidD: 'q' },
+      },
+      { s: 'z17.kachka', p: { T: 13.8, sudno: 5 } },
+      { s: 'z18.pyatiugolnik', p: { e: 15, b: 45, l: 50, dano: 'r' } },
+      { s: 'z19.logKoren', p: { m: 3, b: 3, c: 3, zerk: true } },
+      { s: 'z20.zabor', p: { S: 130, p: 20, q: 50, A: 750, B: 550 } },
+    ],
+    [
+      {
+        s: 'z14.logTrig',
+        p: { b: 's-4', z: -1, a: 'c+', za: -1, bFirst: true, log: '0,25', lo: -7, hi: -4 },
+      },
+      { s: 'z15.rombPiramida', p: { osn: 'ugol', a2: 36, phi: 60, h2: [39, 1] } },
+      {
+        s: 'z16.pokazKoren',
+        p: { q: 2, alpha: 3, gamma: 1, e: 6, y1: 2, y2: 7, znak: 'le', vidN: 'q', vidD: 'q' },
+      },
+      { s: 'z17.kachka', p: { T: 10.2, sudno: 1 } },
+      { s: 'z18.pyatiugolnik', p: { e: 12, b: 54, l: 58, dano: 'r' } },
+      { s: 'z19.logKoren', p: { m: 4, b: 2, c: 4, zerk: true } },
+      { s: 'z20.zabor', p: { S: 140, p: 10, q: 40, A: 1100, B: 850 } },
+    ],
+    [
+      {
+        s: 'z14.logTrig',
+        p: { b: 'c-4', z: 1, a: 's+', za: -1, bFirst: true, log: '2', lo: 3, hi: 6 },
+      },
+      { s: 'z15.rombPiramida', p: { osn: 'ugol', a2: 16, phi: 60, h2: [21, 1] } },
+      {
+        s: 'z16.pokazKoren',
+        p: { q: 2, alpha: 2, gamma: 0, e: 5, y1: 3, y2: 5, znak: 'le', vidN: 'B', vidD: 'B' },
+      },
+      { s: 'z17.kachka', p: { T: 15, sudno: 0 } },
+      { s: 'z18.pyatiugolnik', p: { e: 20, b: 48, l: 53, dano: 'r' } },
+      { s: 'z19.logKoren', p: { m: 4, b: 3, c: 4, zerk: true } },
+      { s: 'z20.zabor', p: { S: 150, p: 20, q: 50, A: 1100, B: 600 } },
+    ],
+    [
+      {
+        s: 'z14.logTrig',
+        p: { b: 'c-4', z: -1, a: 'cpi', za: -1, bFirst: true, log: '0,5', lo: 8, hi: 11 },
+      },
+      { s: 'z15.rombPiramida', p: { osn: 'ugol', a2: 48, phi: 30, h2: [124, 1] } },
+      {
+        s: 'z16.pokazKoren',
+        p: { q: 3, alpha: 1, gamma: 0, e: 3, y1: 2, y2: 4, znak: 'le', vidN: 'q', vidD: 'B' },
+      },
+      { s: 'z17.kachka', p: { T: 12.6, sudno: 4 } },
+      { s: 'z18.pyatiugolnik', p: { e: 18, b: 60, l: 70, dano: 'r' } },
+      { s: 'z19.logKoren', p: { m: 2, b: 3, c: 2, zerk: true } },
+      { s: 'z20.zabor', p: { S: 140, p: 30, q: 60, A: 700, B: 450 } },
+    ],
+    [
+      {
+        s: 'z14.logTrig',
+        p: { b: 's-4', z: 1, a: 's32', za: -1, bFirst: true, log: '4', lo: -13, hi: -10 },
+      },
+      { s: 'z15.rombPiramida', p: { osn: 'ugol', a2: 12, phi: 60, h2: [49, 1] } },
+      {
+        s: 'z16.pokazKoren',
+        p: { q: 2, alpha: 3, gamma: 2, e: 7, y1: 3, y2: 6, znak: 'le', vidN: 'q', vidD: 'B' },
+      },
+      { s: 'z17.kachka', p: { T: 16.8, sudno: 2 } },
+      { s: 'z18.pyatiugolnik', p: { e: 35, b: 46, l: 61, dano: 'r' } },
+      { s: 'z19.logKoren', p: { m: 2, b: 5, c: 2, zerk: true } },
+      { s: 'z20.zabor', p: { S: 160, p: 20, q: 50, A: 1300, B: 900 } },
+    ],
+  ],
 };

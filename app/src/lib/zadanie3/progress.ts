@@ -37,9 +37,11 @@ export interface Z3Progress {
   kinds: Record<string, KindTally>;
   /** Задания с ошибкой: «P03-01:3». */
   mistakes: string[];
+  /** Задания, решённые верно (с первой попытки или нет): «P03-01:3». Фильтр «нерешённые». */
+  solved: string[];
 }
 
-const EMPTY: Z3Progress = { kinds: {}, mistakes: [] };
+const EMPTY: Z3Progress = { kinds: {}, mistakes: [], solved: [] };
 
 let cache: Z3Progress | null = null;
 const listeners = new Set<() => void>();
@@ -57,7 +59,7 @@ function parse(raw: string | null): Z3Progress {
     if (typeof value !== 'object' || value === null) {
       return EMPTY;
     }
-    const source = value as { kinds?: unknown; mistakes?: unknown };
+    const source = value as { kinds?: unknown; mistakes?: unknown; solved?: unknown };
     const kinds: Record<string, KindTally> = {};
     if (typeof source.kinds === 'object' && source.kinds !== null) {
       Object.entries(source.kinds as Record<string, unknown>).forEach(([id, tally]) => {
@@ -74,7 +76,10 @@ function parse(raw: string | null): Z3Progress {
     const mistakes = Array.isArray(source.mistakes)
       ? source.mistakes.filter((item): item is string => typeof item === 'string')
       : [];
-    return { kinds, mistakes };
+    const solved = Array.isArray(source.solved)
+      ? source.solved.filter((item): item is string => typeof item === 'string')
+      : [];
+    return { kinds, mistakes, solved };
   } catch {
     return EMPTY;
   }
@@ -140,9 +145,16 @@ export function taskKey(kind: string, n: number): string {
  *
  * right — решено ли верно с первой попытки: именно это считается
  * точностью. Ошибся и потом решил — задание закрыто, но в точность
- * не идёт и попадает в список ошибок.
+ * не идёт и попадает в список ошибок. solved — задание решено верно
+ * (хоть и не с первой попытки): оно уходит из «нерешённых».
  */
-export function recordTask(kind: string, n: number, right: boolean, seconds: number): void {
+export function recordTask(
+  kind: string,
+  n: number,
+  right: boolean,
+  seconds: number,
+  solved = true,
+): void {
   const current = snapshot();
   const tally = current.kinds[kind] ?? { done: 0, right: 0, seconds: 0 };
   const key = taskKey(kind, n);
@@ -151,6 +163,8 @@ export function recordTask(kind: string, n: number, right: boolean, seconds: num
     : current.mistakes.includes(key)
       ? current.mistakes
       : [...current.mistakes, key];
+  const resheno =
+    solved && !current.solved.includes(key) ? [...current.solved, key] : current.solved;
 
   write({
     kinds: {
@@ -162,65 +176,6 @@ export function recordTask(kind: string, n: number, right: boolean, seconds: num
       },
     },
     mistakes,
+    solved: resheno,
   });
-}
-
-/** Стереть счёт задания №3. Задания №12 это не касается. */
-export function resetZ3(): void {
-  cache = EMPTY;
-  try {
-    window.localStorage.removeItem(Z3_TRAINER_KEY);
-  } catch {
-    /* Нечего стирать — и ладно. */
-  }
-  listeners.forEach((fn) => fn());
-}
-
-export interface Z3Summary {
-  done: number;
-  right: number;
-  wrong: number;
-  /** Доля верных с первой попытки, 0…100. Заданий нет — null. */
-  accuracy: number | null;
-  /** Среднее время на задание в секундах. Заданий нет — null. */
-  average: number | null;
-}
-
-/** Итог по всем типам. */
-export function summarize(progress: Z3Progress): Z3Summary {
-  const list = Object.values(progress.kinds);
-  const done = list.reduce((sum, item) => sum + item.done, 0);
-  const right = list.reduce((sum, item) => sum + item.right, 0);
-  const seconds = list.reduce((sum, item) => sum + item.seconds, 0);
-  return {
-    done,
-    right,
-    wrong: done - right,
-    accuracy: done === 0 ? null : Math.round((right / done) * 100),
-    average: done === 0 ? null : Math.round(seconds / done),
-  };
-}
-
-/**
- * Тип с наименьшей точностью: его и стоит повторить. Считаются
- * только типы, где хотя бы одно задание закрыто, — по нерешённому
- * судить не о чем. Всё верно везде — null, советовать нечего.
- */
-export function weakestKind(progress: Z3Progress): string | null {
-  const rows = Object.entries(progress.kinds).filter(([, tally]) => tally.done > 0);
-  if (rows.length === 0) {
-    return null;
-  }
-  const sorted = [...rows].sort((a, b) => {
-    const left = a[1].right / a[1].done;
-    const right = b[1].right / b[1].done;
-    if (left !== right) {
-      return left - right;
-    }
-    /* При равной точности вперёд идёт тот, где заданий закрыто
-       больше: там оценка надёжнее. */
-    return b[1].done - a[1].done;
-  });
-  const worst = sorted[0] as [string, KindTally];
-  return worst[1].right === worst[1].done ? null : worst[0];
 }

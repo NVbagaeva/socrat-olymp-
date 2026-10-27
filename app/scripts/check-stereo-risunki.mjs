@@ -30,6 +30,7 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
 import { vstroitShrifty } from './lib/vstroit-shrifty.mjs';
+import { indeksyStrokoy } from './lib/indeksy-check.mjs';
 
 const warn = console.warn;
 console.warn = (...a) => (String(a[0]).includes('LaTeX-incompatible') ? undefined : warn(...a));
@@ -118,6 +119,8 @@ const attr = (tag, name) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
 for (const r of ris) {
   const { svg, where } = r;
   if (/="var\(--/.test(svg)) fail(where, 'цвет токеном var(--…): рисунок зависит от CSS страницы');
+  const strokoy = indeksyStrokoy(svg);
+  if (strokoy.length > 0) fail(where, `индекс строкой, без нижнего: «${strokoy[0]}»`);
   for (const m of svg.matchAll(/<(path|polygon|rect|ellipse|circle|polyline)\b[^>]*>/g)) {
     const tag = m[0];
     const fill = attr(tag, 'fill');

@@ -83,28 +83,3 @@ export function GenToast({ text }: { text: string }) {
     document.body,
   );
 }
-
-/** Выпадающий список у кнопки (десктоп): закрывается кликом мимо и Esc. */
-export function GenPopover({ onClose, children }: { onClose: () => void; children: ReactNode }) {
-  const box = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const onDown = (e: PointerEvent) => {
-      const el = box.current;
-      if (el !== null && !el.parentElement?.contains(e.target as Node)) onClose();
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('pointerdown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('pointerdown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [onClose]);
-  return (
-    <div className="gen-pop" ref={box} role="menu">
-      {children}
-    </div>
-  );
-}
