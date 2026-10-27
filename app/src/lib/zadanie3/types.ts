@@ -17,8 +17,12 @@ import { type Model } from '../solid/model';
 /** Формат ответа, как его ждёт ЕГЭ. */
 export type AnswerFormat = 'целое' | 'десятичная' | 'на-пи';
 
-/** Откуда взят вариант. */
-export type Source = 'задачник' | 'домашка' | 'новый';
+/**
+ * Откуда взят вариант. «фипи» — задача открытого банка ФИПИ, которой
+ * не было ни в задачнике, ни в домашке: добавлена по сверке с банком
+ * (номера задач ФИПИ у всех вариантов — в fipi.ts).
+ */
+export type Source = 'задачник' | 'домашка' | 'новый' | 'фипи';
 
 /** Значения параметров варианта: числа условия и буквы прямых. */
 export type Params = Record<string, number | string | readonly string[]>;
@@ -36,6 +40,18 @@ export interface Variant {
    */
   sourceAnswer?: number;
   params: Params;
+}
+
+/**
+ * Шаг подсказки-вопроса: вопрос и кнопки, одна верная (correct — её
+ * номер). Комментарий открывается после верного нажатия. Формулы —
+ * $…$, набираются KaTeX на сборке.
+ */
+export interface HintStep {
+  question: string;
+  options: string[];
+  correct: number;
+  comment?: string;
 }
 
 /** Шаг разбора: текст с числами варианта и значение, если шаг считает. */
@@ -66,6 +82,11 @@ export interface Prototype {
   chertezh(p: Params): Model;
   /** Шаги разбора; значение последнего шага равно ответу. */
   shagi(p: Params): Step[];
+  /**
+   * Подсказка-вопросы: ход решения кнопками, без самого ответа. Нет —
+   * тренажёр подсказывает первым шагом разбора.
+   */
+  podskazka?(p: Params): HintStep[];
   varianty: readonly Variant[];
 }
 

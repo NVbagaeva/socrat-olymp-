@@ -12,7 +12,8 @@
 import { circumradiusOfLegs, volumeUnits } from './common';
 import { cylinderAroundPrism } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -73,12 +74,13 @@ export const P03_76: Prototype = {
       {
         text:
           `Объём цилиндра равен $\\pi \\cdot R^2 \\cdot h$. Высота $${ru(k)} : \\pi$, поэтому $\\pi$ сокращается: ` +
-          `${ru(d2 / 4)} · ${ru(k)} = ${ru((k * d2) / 4)}.`,
+          `$${ru(d2 / 4)} \\cdot ${ru(k)} = ${ru((k * d2) / 4)}$.`,
         value: (k * d2) / 4,
       },
     ];
   },
 
+  podskazka: (p) => podskazka76(p),
   varianty: [
     variant(1, 'задачник', 'задачник 262', { a: 10, b: 9, k: 2 }),
     variant(2, 'задачник', 'задачник 263', { a: 1, b: 8, k: 6 }),
@@ -92,3 +94,48 @@ export const P03_76: Prototype = {
     variant(10, 'новый', 'новый', { a: 8, b: 15, k: 4 }),
   ],
 };
+
+/* ── Подсказки-вопросы ───────────────────────────────────────────── */
+
+function podskazka76(p: Params): HintStep[] {
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  const k = num(p, 'k');
+  const d2 = a * a + b * b;
+  const R2 = d2 / 4;
+  const otvet = k * R2;
+  return [
+    vopros(
+      'Где центр окружности, описанной около основания призмы?',
+      'В середине гипотенузы',
+      [
+        'В точке пересечения медиан',
+        'В середине большего катета',
+        'В точке пересечения биссектрис',
+      ],
+      'Прямой угол опирается на диаметр, поэтому гипотенуза — диаметр, а радиус цилиндра — её половина.',
+    ),
+    vopros(
+      'Чему равен квадрат радиуса цилиндра $R^2$?',
+      chislo(R2),
+      chisla([d2, d2 / 2, ((a + b) * (a + b)) / 4], R2, otvet),
+      `$R^2 = \\frac{${tex(a)}^2 + ${tex(b)}^2}{4}$ — четверть квадрата гипотенузы.`,
+    ),
+    vopros(
+      'По какой формуле считать объём цилиндра?',
+      '$\\pi R^2 h$',
+      ['$\\frac{1}{3}\\pi R^2 h$', '$2\\pi R h$', '$\\pi R h$'],
+      `Высота цилиндра — боковое ребро призмы $\\frac{${tex(k)}}{\\pi}$.`,
+    ),
+    vopros(
+      `Что остаётся от $\\pi R^2 h$ при $h = \\frac{${tex(k)}}{\\pi}$?`,
+      `$${tex(R2)} \\cdot ${tex(k)}$`,
+      [
+        `$${tex(R2)} : ${tex(k)}$`,
+        `$\\pi^2 \\cdot ${tex(R2)} \\cdot ${tex(k)}$`,
+        `$${tex(R2)} \\cdot ${tex(k)} : 3$`,
+      ],
+      'Число $\\pi$ сокращается.',
+    ),
+  ];
+}

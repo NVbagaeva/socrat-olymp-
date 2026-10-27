@@ -14,7 +14,8 @@
 import { surfaceArea, polyhedronVolume } from '../../solid/measure';
 import { type Step, stepAlt, stepBody, stepModel } from '../../solid/drawings/steps';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function stepOf(p: Params): Step {
   return {
@@ -144,6 +145,7 @@ export const P03_05: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka05(p),
   varianty: variants(SURFACE, SURFACE_NEW),
 };
 
@@ -194,5 +196,73 @@ export const P03_11: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka11(p),
   varianty: variants(VOLUME, VOLUME_NEW),
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+function podskazka05(p: Params): HintStep[] {
+  const s = stepOf(p);
+  const area = profileArea(s);
+  const per = profilePerimeter(s);
+  const otvet = 2 * area + per * s.depth;
+  return [
+    vopros(
+      'Из чего складывается поверхность такого тела?',
+      'Два ступенчатых профиля и боковые грани по периметру профиля',
+      [
+        'Шесть прямоугольников, как у параллелепипеда',
+        'Только грани, видные на рисунке',
+        'Один профиль и боковые грани',
+      ],
+      'Тело — призма: профиль спереди и сзади, а боковые грани обходят его по контуру.',
+    ),
+    vopros(
+      'Чему равна площадь профиля?',
+      chislo(area),
+      chisla([s.W * s.H, s.W * s.h, area + s.w], area, otvet),
+      'Профиль — два прямоугольника: нижний во всю ширину и верхний над ним.',
+    ),
+    vopros(
+      'Чему равен периметр профиля?',
+      chislo(per),
+      chisla([s.W + s.H, per + 2 * (s.H - s.h), per - 2], per, otvet),
+      `Уступ не меняет периметр: он такой же, как у прямоугольника $${tex(s.W)} \\times ${tex(s.H)}$.`,
+    ),
+    vopros(
+      'Как найти площадь поверхности?',
+      '$2S_{\\text{профиля}} + P_{\\text{профиля}} \\cdot d$',
+      [
+        '$S_{\\text{профиля}} \\cdot d$',
+        '$S_{\\text{профиля}} + P_{\\text{профиля}} \\cdot d$',
+        '$2S_{\\text{профиля}} + P_{\\text{профиля}}$',
+      ],
+      'Здесь $d$ — глубина тела.',
+    ),
+  ];
+}
+
+function podskazka11(p: Params): HintStep[] {
+  const s = stepOf(p);
+  const area = profileArea(s);
+  const otvet = area * s.depth;
+  return [
+    vopros(
+      'Как найти объём такого тела?',
+      'Площадь ступенчатого профиля умножить на глубину',
+      [
+        'Ширину умножить на высоту и на глубину',
+        'Сложить площади всех граней',
+        'Половину произведения ширины, высоты и глубины',
+      ],
+      'Тело — призма над ступенчатым профилем.',
+    ),
+    vopros(
+      'Чему равна площадь профиля?',
+      chislo(area),
+      chisla([s.W * s.H, s.W * s.h, area + s.w], area, otvet),
+      'Профиль — два прямоугольника: нижний во всю ширину и верхний над ним.',
+    ),
+  ];
+}

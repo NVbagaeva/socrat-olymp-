@@ -17,7 +17,8 @@
 import { ballOverConeVolume, slantBySphere, solveBySearch } from './common';
 import { sphereAroundCone } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -78,13 +79,14 @@ export const P03_88: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka88(p),
   varianty: [
     variant(1, 'задачник', 'задачник 310', { k: 23 }),
     variant(2, 'задачник', 'задачник 311', { k: 10 }),
     variant(3, 'задачник', 'задачник 312', { k: 26 }),
     variant(4, 'задачник', 'задачник 313', { k: 31 }),
     variant(5, 'домашка', 'домашка 55, вариант 3', { k: 47 }, 94),
-    variant(6, 'новый', 'новый', { k: 7 }),
+    variant(6, 'фипи', 'ФИПИ Dc980A', { k: 84 }),
     variant(7, 'новый', 'новый', { k: 15 }),
     variant(8, 'новый', 'новый', { k: 19 }),
     variant(9, 'новый', 'новый', { k: 40 }),
@@ -129,13 +131,14 @@ export const P03_89: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka89(p),
   varianty: [
     variant(1, 'задачник', 'задачник 314', { k: 29 }),
     variant(2, 'задачник', 'задачник 315', { k: 36 }),
     variant(3, 'задачник', 'задачник 316', { k: 85 }),
     variant(4, 'задачник', 'задачник 317', { k: 94 }),
     variant(5, 'домашка', 'домашка 55, вариант 1', { k: 23 }, 23),
-    variant(6, 'новый', 'новый', { k: 12 }),
+    variant(6, 'фипи', 'ФИПИ DB4Ae5', { k: 9 }),
     variant(7, 'новый', 'новый', { k: 18 }),
     variant(8, 'новый', 'новый', { k: 41 }),
     variant(9, 'новый', 'новый', { k: 57 }),
@@ -179,6 +182,7 @@ export const P03_90: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka90(p),
   varianty: [
     variant(1, 'задачник', 'задачник 318', { V: 12 }),
     variant(2, 'задачник', 'задачник 319', { V: 20 }),
@@ -227,6 +231,7 @@ export const P03_91: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka91(p),
   varianty: [
     variant(1, 'задачник', 'задачник 322', { V: 24 }),
     variant(2, 'задачник', 'задачник 323', { V: 36 }),
@@ -240,3 +245,99 @@ export const P03_91: Prototype = {
     variant(10, 'новый', 'новый', { V: 100 }),
   ],
 };
+
+/* ── Подсказки-вопросы ───────────────────────────────────────────── */
+
+/** Радиус основания и высота конуса со сферой с центром в основании. */
+function razmeryKonusa(): HintStep {
+  return vopros(
+    'Чему равны радиус основания и высота конуса?',
+    'Оба равны радиусу сферы',
+    [
+      'Радиус основания — радиусу сферы, высота — диаметру',
+      'Высота — радиусу сферы, радиус основания — его половине',
+      'Оба равны диаметру сферы',
+    ],
+    'Центр сферы — центр основания, а окружность основания и вершина лежат на сфере.',
+  );
+}
+
+/** Связь образующей l и радиуса сферы R. */
+function obrazuyuschaya(): HintStep {
+  return vopros(
+    'Как образующая $l$ выражается через радиус сферы $R$?',
+    '$l = R\\sqrt{2}$',
+    ['$l = 2R$', '$l = \\frac{R}{\\sqrt{2}}$', '$l = R\\sqrt{3}$'],
+    'Образующая — гипотенуза прямоугольного треугольника с катетами $R$ и $R$.',
+  );
+}
+
+/** Высота конуса, вписанного в шар, с радиусом основания, равным радиусу шара. */
+function vysotaKonusa(): HintStep {
+  return vopros(
+    'Чему равна высота конуса?',
+    'Радиусу шара',
+    ['Диаметру шара', 'Половине радиуса шара', 'Радиусу шара, умноженному на $\\sqrt{2}$'],
+    'Основание — большой круг шара, его центр — центр шара, а вершина лежит на шаре.',
+  );
+}
+
+/** Во сколько раз шар больше конуса. */
+function otnosheniePoObemu(): HintStep {
+  return vopros(
+    'Во сколько раз объём шара больше объёма конуса?',
+    '$4$',
+    ['$\\frac{4}{3}$', '$3$', '$2$'],
+    'Объём шара $\\frac{4}{3}\\pi R^3$, объём конуса $\\frac{1}{3}\\pi R^2 \\cdot R$.',
+  );
+}
+
+function podskazka88(p: Params): HintStep[] {
+  const k = num(p, 'k');
+  return [
+    razmeryKonusa(),
+    obrazuyuschaya(),
+    vopros('Как найти образующую?', `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`, [
+      `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`,
+      `$2 \\cdot ${tex(k)}\\sqrt{2}$`,
+    ]),
+  ];
+}
+
+function podskazka89(p: Params): HintStep[] {
+  const k = num(p, 'k');
+  return [
+    razmeryKonusa(),
+    obrazuyuschaya(),
+    vopros('Как найти радиус сферы?', `$${tex(k)}\\sqrt{2} : \\sqrt{2}$`, [
+      `$${tex(k)}\\sqrt{2} \\cdot \\sqrt{2}$`,
+      `$2 \\cdot ${tex(k)}\\sqrt{2}$`,
+    ]),
+  ];
+}
+
+function podskazka90(p: Params): HintStep[] {
+  const V = num(p, 'V');
+  return [
+    vysotaKonusa(),
+    otnosheniePoObemu(),
+    vopros('Как найти объём шара?', `$${tex(V)} \\cdot 4$`, [
+      `$${tex(V)} : 4$`,
+      `$${tex(V)} \\cdot 3$`,
+      `$${tex(V)} \\cdot \\frac{4}{3}$`,
+    ]),
+  ];
+}
+
+function podskazka91(p: Params): HintStep[] {
+  const V = num(p, 'V');
+  return [
+    vysotaKonusa(),
+    otnosheniePoObemu(),
+    vopros('Как найти объём конуса?', `$${tex(V)} : 4$`, [
+      `$${tex(V)} \\cdot 4$`,
+      `$${tex(V)} : 3$`,
+      `$${tex(V)} : 2$`,
+    ]),
+  ];
+}

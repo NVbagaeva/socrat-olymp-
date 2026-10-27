@@ -15,8 +15,9 @@ import { vertex } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { regularPrismByArea } from './common';
 import { shapeHexSolid, HEX_NAMES } from './drawings';
-import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { letters, ru } from '../format';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -43,7 +44,7 @@ function volumeOf(p: Params, names: readonly string[]): number {
 function condition(p: Params, names: readonly string[]): string {
   const [S, h] = SH(p);
   return (
-    `Найдите объём многогранника, вершинами которого являются точки $${names.join(', ')}$ ` +
+    `Найдите объём многогранника, вершинами которого являются точки $${names.map(letters).join(', ')}$ ` +
     `правильной шестиугольной призмы $${HEX_NAMES}$, площадь основания которой равна ${ru(S)}, ` +
     `а боковое ребро равно ${ru(h)}.`
   );
@@ -86,6 +87,7 @@ export const P03_36: Prototype = {
       },
     ];
   },
+  podskazka: (p) => podskazka36(p),
   varianty: [
     variant(1, 'задачник', 'задачник 114', { S: 8, h: 15 }),
     variant(2, 'задачник', 'задачник 115', { S: 12, h: 13 }),
@@ -131,11 +133,12 @@ export const P03_37: Prototype = {
     const [S, h] = SH(p);
     return [
       {
-        text: 'Четыре вершины через одну отсекают от шестиугольника два одинаковых треугольника по $\\frac{S}{6}$ каждый: остаётся ⅔$S$.',
+        text: 'Четыре вершины через одну отсекают от шестиугольника два одинаковых треугольника по $\\frac{S}{6}$ каждый: остаётся $\\frac{2}{3}S$.',
       },
       { text: `Объём: $${ru(S)} \\cdot \\tfrac{2}{3} \\cdot ${ru(h)} = ${ru((2 * S * h) / 3)}$.`, value: (2 * S * h) / 3 },
     ];
   },
+  podskazka: (p) => podskazka37(p),
   varianty: [
     variant(1, 'задачник', 'задачник 118', { S: 9, h: 11 }),
     variant(2, 'задачник', 'задачник 119', { S: 7, h: 15 }),
@@ -194,6 +197,7 @@ export const P03_38: Prototype = {
       { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
     ];
   },
+  podskazka: (p) => podskazka38(p),
   varianty: [
     variant(1, 'задачник', 'задачник 120', { S: 4, h: 3, apex: 0 }),
     variant(2, 'задачник', 'задачник 121', { S: 12, h: 2, apex: 2 }),
@@ -252,6 +256,7 @@ export const P03_39: Prototype = {
       { text: `Объём: $${ru(S)} \\cdot ${ru(h)} : 3 = ${ru((S * h) / 3)}$.`, value: (S * h) / 3 },
     ];
   },
+  podskazka: (p) => podskazka39(p),
   varianty: [
     variant(1, 'задачник', 'задачник 122', { S: 5, h: 9, apex: 0 }),
     variant(2, 'задачник', 'задачник 123', { S: 10, h: 6, apex: 2 }),
@@ -289,7 +294,7 @@ export const P03_40: Prototype = {
   uslovie: (p) => {
     const names = tetra40Names(p);
     return (
-      `Найдите объём многогранника, вершинами которого являются вершины $${names.join(', ')}$ ` +
+      `Найдите объём многогранника, вершинами которого являются вершины $${names.map(letters).join(', ')}$ ` +
       `правильной шестиугольной призмы $${HEX_NAMES}$, площадь основания которой равна ${ru(num(p, 'S'))}, ` +
       `а боковое ребро равно ${ru(num(p, 'h'))}.`
     );
@@ -322,11 +327,12 @@ export const P03_40: Prototype = {
         text: 'Три соседние вершины одного уровня отсекают от основания шестую часть, площадью $\\frac{S}{6}$; четвёртая вершина лежит на высоте $h$ от их плоскости.',
       },
       {
-        text: `Объём тетраэдра: ⅓ · $(${ru(S)} : 6) \\cdot ${ru(h)} = ${ru((S * h) / 18)}$.`,
+        text: `Объём тетраэдра: $\\frac{1}{3} \\cdot (${ru(S)} : 6) \\cdot ${ru(h)} = ${ru((S * h) / 18)}$.`,
         value: (S * h) / 18,
       },
     ];
   },
+  podskazka: (p) => podskazka40(p),
   varianty: [
     variant(1, 'задачник', 'задачник 124', { S: 12, h: 15, mirror: 0 }),
     variant(2, 'задачник', 'задачник 125', { S: 9, h: 6, mirror: 1 }),
@@ -340,3 +346,129 @@ export const P03_40: Prototype = {
     variant(10, 'новый', 'новый', { S: 6, h: 21, mirror: 1 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Имя вершины для формулы: A1 → A_1. */
+function tx(name: string): string {
+  return name.replace(/1/g, '_1');
+}
+
+/** Треугольник из трёх соседних вершин шестиугольника — шестая часть. */
+function shestaya(tri: string): HintStep {
+  return vopros(
+    `Какую часть площади шестиугольника занимает треугольник $${tri}$?`,
+    'Шестую',
+    ['Треть', 'Четверть', 'Двенадцатую'],
+    'Он равновелик одному из шести правильных треугольников, на которые шестиугольник делят большие диагонали.',
+  );
+}
+
+/** Пирамида на всём шестиугольном основании. */
+function piramida6(p: Params, osnovanie: string, apex: string, drugoe: string): HintStep[] {
+  const [S, h] = SH(p).map(tex);
+  return [
+    vopros(
+      'Что это за многогранник?',
+      `Пирамида с основанием $${osnovanie}$ и вершиной $${tx(apex)}$`,
+      [`Призма с основанием $${osnovanie}$`, `Пирамида с основанием $${drugoe}$`, 'Половина призмы'],
+    ),
+    vopros(
+      'Чему равна высота пирамиды?',
+      'Боковому ребру призмы',
+      ['Половине бокового ребра', 'Диагонали боковой грани', 'Большой диагонали основания'],
+      `Вершина $${tx(apex)}$ лежит на боковом ребре, перпендикулярном основаниям.`,
+    ),
+    vopros(
+      'Как найти объём пирамиды?',
+      `$\\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
+      [`$${S} \\cdot ${h}$`, `$\\frac{1}{2} \\cdot ${S} \\cdot ${h}$`, `$\\frac{1}{6} \\cdot ${S} \\cdot ${h}$`],
+    ),
+  ];
+}
+
+function podskazka36(p: Params): HintStep[] {
+  const [S, h] = SH(p).map(tex);
+  return [
+    vopros(
+      'Что это за многогранник?',
+      'Прямая призма с основанием $ABF$',
+      ['Пирамида с основанием $ABF$', 'Призма с основанием $ABCDEF$', 'Пирамида с основанием $AA_1B_1B$'],
+    ),
+    shestaya('ABF'),
+    vopros(
+      'Как найти объём этой призмы?',
+      `$\\frac{${S}}{6} \\cdot ${h}$`,
+      [
+        `$\\frac{1}{3} \\cdot \\frac{${S}}{6} \\cdot ${h}$`,
+        `$\\frac{${S}}{3} \\cdot ${h}$`,
+        `$\\frac{${S}}{4} \\cdot ${h}$`,
+      ],
+    ),
+  ];
+}
+
+function podskazka37(p: Params): HintStep[] {
+  const [S, h] = SH(p).map(tex);
+  return [
+    vopros(
+      'Какие треугольники отрезаны от шестиугольника, чтобы получился четырёхугольник $ACDF$?',
+      '$ABC$ и $DEF$',
+      ['$ABF$ и $CDE$', '$ACE$ и $BDF$'],
+    ),
+    vopros(
+      'Какую часть площади шестиугольника занимает $ACDF$?',
+      'Две трети',
+      ['Половину', 'Три четверти', 'Пять шестых'],
+      'Каждый отрезанный треугольник из трёх соседних вершин — шестая часть шестиугольника.',
+    ),
+    vopros(
+      'Как найти объём призмы с основанием $ACDF$?',
+      `$\\frac{2}{3} \\cdot ${S} \\cdot ${h}$`,
+      [
+        `$\\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
+        `$\\frac{5}{6} \\cdot ${S} \\cdot ${h}$`,
+        `$\\frac{1}{3} \\cdot \\frac{2}{3} \\cdot ${S} \\cdot ${h}$`,
+      ],
+    ),
+  ];
+}
+
+function podskazka38(p: Params): HintStep[] {
+  const apex = TOP_APEX[num(p, 'apex') % 3] as string;
+  return piramida6(p, 'A_1B_1C_1D_1E_1F_1', apex, 'ABCDEF');
+}
+
+function podskazka39(p: Params): HintStep[] {
+  const apex = BOTTOM_APEX_HEX[num(p, 'apex') % 4] as string;
+  return piramida6(p, 'ABCDEF', apex, 'A_1B_1C_1D_1E_1F_1');
+}
+
+function podskazka40(p: Params): HintStep[] {
+  const [S, h] = SH(p).map(tex);
+  const [a, b, c, d] = tetra40Names(p).map(tx);
+  const tri = `${a}${b}${c}`;
+  const verh = num(p, 'mirror') === 1 ? 'ABCDEF' : 'A_1B_1C_1D_1E_1F_1';
+  return [
+    vopros(
+      'Что это за многогранник?',
+      `Пирамида с основанием $${tri}$ и вершиной $${d}$`,
+      [
+        `Призма с основанием $${tri}$`,
+        `Пирамида с основанием $${verh}$ и вершиной $${d}$`,
+        'Шестая часть призмы',
+      ],
+      `Вершина $${d}$ — конец бокового ребра, поэтому высота пирамиды равна боковому ребру.`,
+    ),
+    shestaya(tri),
+    vopros(
+      'Как найти объём пирамиды?',
+      `$\\frac{1}{3} \\cdot \\frac{${S}}{6} \\cdot ${h}$`,
+      [
+        `$\\frac{${S}}{6} \\cdot ${h}$`,
+        `$\\frac{1}{3} \\cdot \\frac{${S}}{3} \\cdot ${h}$`,
+        `$\\frac{1}{3} \\cdot ${S} \\cdot ${h}$`,
+      ],
+    ),
+  ];
+}

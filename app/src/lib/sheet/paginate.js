@@ -554,10 +554,24 @@
         opening.innerHTML = spec.opening;
         window.sheetTypeset(opening);
         spec.opening = opening.innerHTML;
-        document.body.removeChild(box);
+        /* Шрифты KaTeX браузер просит только теперь, когда формулы
+           набраны и легли в документ: первое ожидание их не видело.
+           Обмер запасным шрифтом даёт строки на доли миллиметра ниже,
+           и поле решения потом вылезало за край страницы. Раскладка
+           коробки запрашивает шрифты — ждём их ещё раз. */
+        box.appendChild(opening);
+        void box.offsetHeight;
+        return (document.fonts && document.fonts.ready
+          ? document.fonts.ready
+          : Promise.resolve()
+        ).then(function () {
+          document.body.removeChild(box);
+          return spec;
+        });
       }
-
-      window.sheetPagination = run(spec);
+      return spec;
+    }).then(function (nabrannyy) {
+      window.sheetPagination = run(nabrannyy);
 
       /* Уже расставленные по страницам формулы — на случай, если
          какая-то разметка пришла помимо кусков потока. */
