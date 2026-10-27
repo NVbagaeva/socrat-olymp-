@@ -82,14 +82,16 @@ export function Trenazher11({ dannye, base }: { dannye: DannyeTrenazhera; base: 
     [progress],
   );
   return (
-    <Trenazher
-      config={config}
-      refs={refs}
-      kartochka={kartochka}
-      stat={stat}
-      backHref={base}
-      ssylki={ssylki}
-      perenos={perenos11}
-    />
+    <div className="z11-trenazher">
+      <Trenazher
+        config={config}
+        refs={refs}
+        kartochka={kartochka}
+        stat={stat}
+        backHref={base}
+        ssylki={ssylki}
+        perenos={perenos11}
+      />
+    </div>
   );
 }
