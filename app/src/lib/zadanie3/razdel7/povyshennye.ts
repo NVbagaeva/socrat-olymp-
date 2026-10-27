@@ -78,6 +78,13 @@ function vRaz(k: number): string {
 }
 
 /** Во сколько раз меняется боковая поверхность; больше 1 — растёт. */
+/** Во сколько раз изменилась площадь — из целых: больший множитель на меньший. */
+function vRazBokovoy(p: Parameters<Prototype['otvet']>[0]): number {
+  const verh = (num(p, 'rv') === 1 ? num(p, 'r') : 1) * (num(p, 'lv') === 1 ? num(p, 'l') : 1);
+  const niz = (num(p, 'rv') === 1 ? 1 : num(p, 'r')) * (num(p, 'lv') === 1 ? 1 : num(p, 'l'));
+  return Math.round((Math.max(verh, niz) / Math.min(verh, niz)) * 1e9) / 1e9;
+}
+
 function otnoshenieBokovoy(p: Parameters<Prototype['otvet']>[0]): number {
   return mnozh(num(p, 'r'), num(p, 'rv')) * mnozh(num(p, 'l'), num(p, 'lv'));
 }
@@ -95,7 +102,11 @@ function bokovayaPoSetke(r: number, l: number): number {
     /* Площадь треугольника с вершиной (0, 0, h): половина модуля векторного произведения. */
     const u = [P[0]!, P[1]!, -h];
     const w = [Q[0]!, Q[1]!, -h];
-    const c = [u[1]! * w[2]! - u[2]! * w[1]!, u[2]! * w[0]! - u[0]! * w[2]!, u[0]! * w[1]! - u[1]! * w[0]!];
+    const c = [
+      u[1]! * w[2]! - u[2]! * w[1]!,
+      u[2]! * w[0]! - u[0]! * w[2]!,
+      u[0]! * w[1]! - u[1]! * w[0]!,
+    ];
     s += Math.hypot(c[0]!, c[1]!, c[2]!) / 2;
   }
   return s;
@@ -124,8 +135,7 @@ export const PV03_KONUS_BOKOVAYA: Prototype = {
     Number.isInteger(num(p, 'l')) &&
     Math.abs(otnoshenieBokovoy(p) - 1) > 1e-9,
   otvet: (p) => {
-    const q = otnoshenieBokovoy(p);
-    return Math.round((q > 1 ? q : 1 / q) * 1e9) / 1e9;
+    return vRazBokovoy(p);
   },
   /* Два настоящих конуса: площади по сетке граней, затем отношение. Образующая
      первого много длиннее радиуса — высота второго существует при любых множителях. */
@@ -133,8 +143,10 @@ export const PV03_KONUS_BOKOVAYA: Prototype = {
     const r1 = 1;
     const l1 = 1000;
     const q =
-      bokovayaPoSetke(r1 * mnozh(num(p, 'r'), num(p, 'rv')), l1 * mnozh(num(p, 'l'), num(p, 'lv'))) /
-      bokovayaPoSetke(r1, l1);
+      bokovayaPoSetke(
+        r1 * mnozh(num(p, 'r'), num(p, 'rv')),
+        l1 * mnozh(num(p, 'l'), num(p, 'lv')),
+      ) / bokovayaPoSetke(r1, l1);
     return Math.round((q > 1 ? q : 1 / q) * 1e6) / 1e6;
   },
   chertezh: () => ({
@@ -147,18 +159,19 @@ export const PV03_KONUS_BOKOVAYA: Prototype = {
     const rk = mnozh(r, num(p, 'rv'));
     const lk = mnozh(l, num(p, 'lv'));
     const q = rk * lk;
+    const vo = vRazBokovoy(p);
     const tex = (k: number, v: number) => (v === 1 ? ru(k) : `\\dfrac1{${ru(k)}}`);
     return [
       {
         text: 'Площадь боковой поверхности конуса $S = \\pi r l$: она пропорциональна и радиусу основания $r$, и образующей $l$.',
       },
       {
-        text: `Новые радиус и образующая: $${tex(r, num(p, 'rv'))}\\,r$ и $${tex(l, num(p, 'lv'))}\\,l$, поэтому $S' = \\pi\\cdot ${tex(r, num(p, 'rv'))}\\,r\\cdot ${tex(l, num(p, 'lv'))}\\,l = ${q > 1 ? ru(q) : `\\dfrac{S}{${ru(1 / q)}}`}${q > 1 ? '\\,S' : ''}$.`,
+        text: `Новые радиус и образующая: $${tex(r, num(p, 'rv'))}\\,r$ и $${tex(l, num(p, 'lv'))}\\,l$, поэтому $S' = \\pi\\cdot ${tex(r, num(p, 'rv'))}\\,r\\cdot ${tex(l, num(p, 'lv'))}\\,l = ${q > 1 ? `${ru(vo)}\\,S` : `\\dfrac{S}{${ru(vo)}}`}$.`,
         value: q,
       },
       {
-        text: `Площадь ${izmenitsya(q > 1 ? 1 : 0)} ${vRaz(q > 1 ? q : 1 / q)}.`,
-        value: q > 1 ? q : 1 / q,
+        text: `Площадь ${izmenitsya(q > 1 ? 1 : 0)} ${vRaz(vo)}.`,
+        value: vo,
       },
     ];
   },

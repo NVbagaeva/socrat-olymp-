@@ -434,6 +434,160 @@ Object.assign(VTOROY, {
   },
 });
 
+/* ── Партия 3: варианты 13–18 ──────────────────────────────────── */
+
+const Z3_1 = requireSrc('lib/zadanie3/razdel1/povyshennye');
+const Z3_7 = requireSrc('lib/zadanie3/razdel7/povyshennye');
+const Z3_8 = requireSrc('lib/zadanie3/razdel8/povyshennye');
+const { prototype: prototype7 } = requireSrc('lib/zadanie7/prototypes');
+const r6 = (x) => Math.round(x * 1e6) / 1e6;
+
+/** Параллелограмм с углом 60° при A: AB = c, AD = d, B — сверху. */
+function parallelogrammXY(c, d) {
+  const B = [c / 2, (c * Math.sqrt(3)) / 2];
+  return { A: [0, 0], B, C: [B[0] + d, B[1]], D: [d, 0] };
+}
+
+/** Пересечение биссектрисы угла при вершине V (лучи к P и Q) с прямой y = y0. */
+function bissektrisaDo(V, P, Q, y0) {
+  const e = (T) => {
+    const L = Math.hypot(T[0] - V[0], T[1] - V[1]);
+    return [(T[0] - V[0]) / L, (T[1] - V[1]) / L];
+  };
+  const [u1, u2] = [e(P), e(Q)];
+  const w = [u1[0] + u2[0], u1[1] + u2[1]];
+  const s = (y0 - V[1]) / w[1];
+  return [V[0] + s * w[0], y0];
+}
+
+Object.assign(VTOROY, {
+  'z01.parallelogramm-bissektrisa': (p) => {
+    /* Бисекция по AB: биссектриса угла B делит AD в отношении m : n. */
+    const c = bisekciya(
+      (ab) => {
+        const t = parallelogrammXY(ab, p.per / 2 - ab);
+        const K = bissektrisaDo(t.B, t.A, t.C, 0);
+        return K[0] / (t.D[0] - K[0]) - p.m / p.n;
+      },
+      1e-6,
+      p.per / 4,
+    );
+    return r6(p.per / 2 - c);
+  },
+  'z01.parallelogramm-dve-bissektrisy': (p) => {
+    /* Бисекция по AB: биссектрисы углов A и D встречаются на прямой BC. */
+    const c = bisekciya(
+      (ab) => {
+        const t = parallelogrammXY(ab, p.per / 2 - ab);
+        const K1 = bissektrisaDo(t.A, t.B, t.D, t.B[1]);
+        const K2 = bissektrisaDo(t.D, t.A, t.C, t.B[1]);
+        return K1[0] - K2[0];
+      },
+      1e-6,
+      p.per / 4 + 1e-3,
+    );
+    return r6(p.k ? p.per / 2 - c : c);
+  },
+  'z01.ravnobedr-vysota-sin': (p) => {
+    /* Угол при основании — бисекцией: расстояние от A до прямой BC равно h. */
+    const al = bisekciya((u) => p.a * Math.sin(u) - p.h, 0, Math.PI / 2);
+    return r6(Math.sin(al));
+  },
+  'z01.ravnobedr-vysota-cos': (p) => {
+    const al = bisekciya((u) => p.a * Math.sin(u) - p.h * Math.sqrt(p.m), 0, Math.PI / 2);
+    return r6(Math.cos(al));
+  },
+  'z01.vpisannyy-dva-ugla': (p) => {
+    /* Углы по дугам: вписанный угол — половина дуги, на которую опирается. */
+    const ugly = [p.a, p.b].map((u) => (360 - 2 * u) / 2);
+    return p.k ? Math.max(...ugly) : Math.min(...ugly);
+  },
+  'z02.kosinus-km': (p) => VK.kosinusPoKoordinatam(p).proverka,
+  'z02.kosinus-po-risunku': (p) => VK.kosinusPoRisunku(p).proverka,
+  'z03.konus-bokovaya': (p) => Z3_7.PV03_KONUS_BOKOVAYA.poModeli(p),
+  'z03.kub-v-share': (p) => Z3_8.PV03_KUB_V_SHARE.poModeli(p),
+  'z03.okolo-sfery-poverhnost': (p) => Z3_8.PV03_PARALLELEPIPED_OKOLO_SFERY.poModeli(p),
+  'z03.piramida-v-parallelepipede': (p) => Z3_1.PV03_PIRAMIDA_ABCA1B1.poModeli(p),
+  'z03.tetraedr-v-parallelepipede': (p) => Z3_1.PV03_TETRAEDR_ABCB1.poModeli(p),
+  'z04.pary': (p) => VER.PV4_PARY.perebor(p),
+  'z04.tri-tsveta': (p) => VER.PV4_TRI_TSVETA.perebor(p),
+  'z04.taksi': (p) => VER.PV4_TAKSI.perebor(p),
+  'z05.odna-gruppa': (p) => VER.PV5_ODNA_GRUPPA.perebor(p),
+  'z05.hotya-by-dve': (p) => VER.PV5_HOTYA_BY_DVE.perebor(p),
+  'z05.summa-ochkov': (p) => VER.PV5_SUMMA_OCHKOV.perebor(p),
+  'z05.bernulli': (p) => VER.PV5_BERNULLI.perebor(p),
+  'z06.lotereya': (p) => prototype6('P04').pereschet(p),
+  'z06.ozhidanie': (p) => prototype6('P07').pereschet(p),
+  'z07.nechetnaya-stepen': podstanovka7(prototype7('P02')),
+  'z07.pokazatelnoe-osnovaniya': podstanovka7(Z7.PV7_POKAZATELNOE),
+  'z07.log-kvadratnoe': podstanovka7(Z7.PV7_LOG_KVADRATNOE),
+  'z08.cos-dvoynoy': (p) => VY.cosDvoynogo(p).proverka,
+  'z08.stepen-s-log': (p) => VY.stepenSLog(p).proverka,
+  'z08.tg-po-znacheniyu': (p) => VY.tgPoZnacheniyu(p).proverka,
+  'z09.kasatelnaya-nachalo': (p) => PR9.kasatelnayaCherezNachalo(p)?.proverka ?? NaN,
+  'z09.naib-naim-metka': (p) => PR9.naibNaimMetka(p)?.proverka ?? NaN,
+  'z09.skorost-mnogochlen': (p) => PR9.skorostMnogochlen(p).proverka,
+  'z10.gorizont': (p) => {
+    /* Высоты бисекцией по l = √(2Rh), разность в метрах. */
+    const h = (l) => bisekciya((u) => Math.sqrt(2 * p.R * u) - l, 0, 100);
+    return r6((h(p.l2) - h(p.l1)) * 1000);
+  },
+  'z10.pruzhina': (p) => {
+    const vv = p.v0 * Math.sin((2 * Math.PI * p.t) / p.T);
+    return r6((p.m * vv * vv) / 2);
+  },
+  'z10.kpd': (p) => r6(bisekciya((T1) => ((T1 - p.T2) / T1) * 100 - p.eta, p.T2, 1e5)),
+  'z11.dve-truby': (p) => {
+    /* Доля наполнения к моменту T растёт — бисекция. */
+    const dolya = (T) => Math.min(T, p.d) / p.t + (2 * Math.max(0, T - p.d)) / p.t - 1;
+    return r6(bisekciya(dolya, 0, 1000));
+  },
+  'z11.rastvor-i-voda': (p) => {
+    /* Перебор массы первого раствора с шагом 0,1 кг: обе концентрации сходятся. */
+    for (let i = 1; i <= 100000; i += 1) {
+      const xx = i / 10;
+      const M = (p.p2 * p.m) / (p.p1 - p.p2);
+      const y = M - xx;
+      if (y > 0 && Math.abs(p.a * xx + p.b * y - p.p1 * M) < 1e-6)
+        return p.ask === 'a' ? xx : r6(y);
+    }
+    return NaN;
+  },
+  'z11.avtobus-avtomobil': (p) => {
+    /* Бисекция по AK: при найденной скорости автобуса автомобиль возвращается вовремя. */
+    const f = (d) => {
+      const u = d / (p.t0 + d / p.v);
+      return p.S / u - (p.t0 + (2 * d) / p.v);
+    };
+    return r6(bisekciya((d) => -f(d), 1e-6, p.S - 1e-6));
+  },
+  'z12.giperbola-kb': (p) => GR.giperbolaKB(p).proverka,
+  'z12.koren-pryamaya': (p) => GR.korenPryamaya(p).proverka,
+  'z12.parabola-pryamaya': (p) => GR.parabolaPryamaya(p).proverka,
+  'z13.dva-ravnyh-summa': (p) => {
+    /* Платёж бисекцией: при нём долг через два года равен нулю. */
+    const S = p.S * 1000;
+    const k = 1 + p.r / 100;
+    const X = bisekciya((x) => -((S * k - x) * k - x), 0, S * 2);
+    return Math.round(2 * X * 100) / 100;
+  },
+  'z13.dva-ravnyh-stavka': (p) => {
+    for (let r = 1; r <= 100; r += 1) {
+      const k = 1 + r / 100;
+      if (Math.abs((p.S * k - p.x) * k - p.x) < 1e-6) return r;
+    }
+    return NaN;
+  },
+  'z13.vklad-nachalnyy': (p) => {
+    for (let S = 1; S <= 200; S += 1) {
+      let v = S * 100;
+      for (let i = 0; i < 3; i += 1) v = v * (1 + p.r / 100) + (i < 2 ? p.x : 0);
+      if (Math.abs(v - p.Z) < 1e-6) return S;
+    }
+    return NaN;
+  },
+});
+
 /* ── Варианты ───────────────────────────────────────────────────── */
 
 const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');
@@ -521,7 +675,7 @@ for (const k of nomera) {
           }
         }
       }
-      if ([1, 3, 9, 12].includes(ege) && t.figure === null && z.s !== 'z09.skorost')
+      if ([1, 3, 9, 12].includes(ege) && t.figure === null && !z.s.startsWith('z09.skorost'))
         fail(kv, 'нет рисунка');
       const vtoroy = VTOROY[z.s]?.(z.p);
       if (vtoroy === undefined || !close(vtoroy, x)) {
