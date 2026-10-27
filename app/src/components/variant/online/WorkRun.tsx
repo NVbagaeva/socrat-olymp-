@@ -1,13 +1,15 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Chast2Itog } from '@/components/chast2/Chast2Itog';
 import { Button } from '@/components/ui';
+import { ballyChast2, pustoyChast2, type Chast2Ui } from '@/lib/chast2/sostoyanie';
 import { TrainerSessionHost } from '@/components/tasks/session';
 import { POV_HREF, POV_TITLE, POV_VERSION_LABEL } from '@/content/povyshennye';
 import { WORK_KINDS } from '@/content/variant';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
 import { povNomer, versiyaText } from '@/lib/povyshennye/kod';
-import { archiveVolatile, saveWork } from '@/lib/variant/online/archive';
+import { archiveVolatile, saveWork, type ArchivedWork } from '@/lib/variant/online/archive';
 import {
   ONLINE_PATHS,
   oshibkiScope,
@@ -167,11 +169,13 @@ export function WorkRun({ link, initial, outdated, series, kabinet }: WorkRunPro
           }
           what="вариант"
           isPayload={isWorkPayload}
-          count={(p) => p.tasks.length}
-          describe={(p, i) => ({
-            kind: `№${p.tasks[i]?.egeNumber ?? ''}`,
-            html: p.tasks[i]?.statement ?? '',
-          })}
+          count={(p) => p.tasks.length + (p.chast2?.length ?? 0)}
+          describe={(p, i) => {
+            const z = i >= p.tasks.length ? p.chast2?.[i - p.tasks.length] : undefined;
+            return z === undefined
+              ? { kind: `№${p.tasks[i]?.egeNumber ?? ''}`, html: p.tasks[i]?.statement ?? '' }
+              : { kind: `№${z.no}`, html: '' };
+          }}
           pack={kabinet === undefined ? packWork : packKabinet}
           unpack={
             kabinet === undefined ? unpackWork : (packed) => unpackKabinet(kabinet.api, packed)
@@ -339,6 +343,14 @@ function Finished({
   const [check, setCheck] = useState<WorkCheck | null>(null);
   const [volatile, setVolatile] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
+  /* Часть 2: самопроверка продолжается на экране итогов. */
+  const [c2st, setC2st] = useState<Chast2Ui>(() => ui.c2 ?? pustoyChast2());
+  const c2nos = useMemo(() => (payload.chast2 ?? []).map((z) => z.no), [payload]);
+  const c2bally = useMemo(
+    () => (payload.chast2 === undefined ? null : ballyChast2(c2nos, c2st.ball)),
+    [payload, c2nos, c2st],
+  );
+  const zapis = useRef<ArchivedWork | null>(null);
   const answers = useMemo(() => firstAttempts(payload, ui), [payload, ui]);
   const result: ResultData = useMemo(
     () => ({
@@ -384,7 +396,7 @@ function Finished({
         const numbers = payload.tasks.map((t) => t.egeNumber);
         const score = scoreWork(numbers, c.right);
         const finishedAt = Date.now();
-        void saveWork({
+        const rec: ArchivedWork = {
           id: `${payload.code}|${payload.variant}|${payload.mode}|${finishedAt}`,
           code: payload.code,
           variant: payload.variant,
@@ -402,7 +414,9 @@ function Finished({
             empty: (answers[i] ?? '') === '',
             seconds: result.tasks[i]?.seconds ?? 0,
           })),
-        }).then(() => {
+        };
+        zapis.current = rec;
+        void saveWork(rec).then(() => {
           if (alive) setVolatile(archiveVolatile());
         });
       },
@@ -414,6 +428,16 @@ function Finished({
       alive = false;
     };
   }, [proverka, answers, payload, title, code, seconds, result, ui.hinted]);
+
+  /* Оценки части 2 — в ту же запись архива: карточка версии покажет
+     «Часть 2: 14/20» или «на проверке». */
+  useEffect(() => {
+    const rec = zapis.current;
+    if (rec === null || c2bally === null) return;
+    const next: ArchivedWork = { ...rec, chast2: { ...c2bally, ui: c2st } };
+    zapis.current = next;
+    void saveWork(next);
+  }, [c2bally, c2st, check]);
 
   if (failed !== null) {
     return (
@@ -436,6 +460,12 @@ function Finished({
       resultCode={code}
       outdated={outdated}
       notice={volatile ? T.result.volatile : null}
+      {...(c2bally === null || payload.chast2 === undefined
+        ? {}
+        : {
+            chast2: c2bally,
+            posleTablicy: <Chast2Itog zadachi={payload.chast2} st={c2st} update={setC2st} />,
+          })}
       actions={
         <>
           {wrong.length > 0 ? (

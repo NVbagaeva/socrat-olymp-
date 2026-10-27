@@ -17,7 +17,7 @@ import {
 } from '@/content/generator1';
 import { SHEET_1 } from '@/content/repetitory1';
 import { sostavIzSlotov, slotySostava } from '@/lib/generator/obshchiy/klyuchi';
-import { defaultExtras } from '@/lib/generator/obshchiy/state';
+import { defaultExtras, SVOY_VID } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
   GenEngine,
@@ -95,6 +95,7 @@ function dopIzExtras(e: GenExtras, config: GenConfig): Dop1 | undefined {
     primery: e.examples,
     qr: e.qr,
     vid: e.kind !== null && e.kind in SHEET_1.vidy ? (e.kind as VidRaboty1) : null,
+    ...(e.kind === SVOY_VID && e.svoy !== undefined ? { svoy: e.svoy } : {}),
     data: e.date,
     uchitel: e.teacher,
   };
@@ -108,10 +109,14 @@ function extrasIzParams(p: SheetParams1, config: GenConfig): GenExtras {
       theory: p.dop.teoriya,
       examples: p.dop.primery,
       qr: p.dop.qr,
-      kind: p.dop.vid,
+      kind:
+        p.dop.vid === null && p.dop.svoy !== undefined && p.dop.svoy !== '' ? SVOY_VID : p.dop.vid,
       date: p.dop.data,
       teacher: p.dop.uchitel,
       urok: 0,
+      ...(p.dop.vid === null && p.dop.svoy !== undefined && p.dop.svoy !== ''
+        ? { svoy: p.dop.svoy }
+        : {}),
     };
   }
   if (p.ramka < 0) return d;

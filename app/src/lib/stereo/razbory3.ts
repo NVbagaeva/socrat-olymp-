@@ -569,6 +569,7 @@ export const RAZBORY_3: readonly RazborStereo[] = [
     tip: 'cilindr-shar',
     prototip: 'P03-92',
     fipi: 'FcFB97',
+    params: { S: 12 },
     uslovie:
       'Площадь сечения шара плоскостью, проходящей через центр шара, равна 12. Найдите площадь поверхности шара.',
     model: () => ({

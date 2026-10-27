@@ -41,6 +41,8 @@ const { P03_85, P03_86 } = requireSrc('lib/zadanie3/razdel8/cilindr');
 const { P03_90, P03_91 } = requireSrc('lib/zadanie3/razdel8/sfera-konus');
 const { P03_74S } = requireSrc('lib/zadanie3/razdel7/povyshennye');
 const { prototype: prototype6 } = requireSrc('lib/zadanie6/prototypes');
+const PV6 = requireSrc('lib/zadanie6/prototypes/povyshennye');
+const { STATISTICHESKOE: STAT4 } = requireSrc('lib/veroyatnost/bank4/statisticheskoe');
 const Z7 = requireSrc('lib/zadanie7/prototypes/povyshennye');
 const { PV7_KOREN } = Z7;
 const VY = requireSrc('lib/vychisleniya/povyshennye');
@@ -191,6 +193,16 @@ Object.assign(VTOROY, {
   'z05.kost-uslovie': (p) => VER.PV5_KOST_USLOVIE.perebor(p),
   'z06.dispersiya': (p) => prototype6('P14').pereschet(p),
   'z06.otklonenie': (p) => prototype6('P15').pereschet(p),
+  'z04.chastota': (p) => VER.PV4_CHASTOTA.perebor(p),
+  'z04.sootechestvennik': (p) => VER.PV4_SOOTECHESTVENNIK.perebor(p),
+  /* Прототипы банка №4 (p4-20, p4-19): прямой обход партии. */
+  'z04.bez-defekta': (p) => STAT4.find((x) => x.id === 'p4-20').perebor(p),
+  'z04.ne-podtekaet': (p) => STAT4.find((x) => x.id === 'p4-19').perebor(p),
+  'z05.dve-misheni': (p) => VER.PV5_DVE_MISHENI.perebor(p),
+  'z05.odin-tsvet': (p) => VER.PV5_ODIN_TSVET.perebor(p),
+  'z05.oba-zakonchilis': (p) => VER.PV5_OBA_ZAKONCHILIS.perebor(p),
+  'z06.strahovka-tys': (p) => PV6.PV6_STRAHOVKA_TYS.pereschet(p),
+  'z06.promezhutok': (p) => prototype6('P11').pereschet(p),
   'z07.log-stepeni': podstanovka7(Z7.PV7_LOG_STEPENI),
   'z07.log-postoronniy': podstanovka7(Z7.PV7_LOG_KVADRAT),
   'z08.log-pryamoy': (p) => VY.logPryamoy(p).proverka,
@@ -241,6 +253,184 @@ Object.assign(VTOROY, {
       dolg = novyy;
     }
     return Math.round(plat * 100) / 100;
+  },
+});
+
+/* Партия 2, группа g1: варианты 7–12, №1–3. */
+const Z3_2 = requireSrc('lib/zadanie3/razdel2/povyshennye');
+const Z3_3 = requireSrc('lib/zadanie3/razdel3/povyshennye');
+const Z3_5 = requireSrc('lib/zadanie3/razdel5/povyshennye');
+const { P03_70 } = requireSrc('lib/zadanie3/razdel5/dvacilindra');
+
+/** Равнобедренный AC = BC = l с углом A при основании: вершины по координатам. */
+function ravnobedr(l, A) {
+  return { A: [0, 0], B: [2 * l * Math.cos(A), 0], C: [l * Math.cos(A), l * Math.sin(A)] };
+}
+
+/** Основание AC, вершина B, биссектриса AF: F — бисекцией по BC, угол меряем. */
+function bissektrisaF(b) {
+  const pri = ((180 - b) / 2) * (Math.PI / 180);
+  const A = [0, 0];
+  const C = [10, 0];
+  const B = [5, 5 * Math.tan(pri)];
+  /* F на BC: углы BAF и FAC равны. */
+  const t = bisekciya(
+    (s) => {
+      const F = [B[0] + (C[0] - B[0]) * s, B[1] + (C[1] - B[1]) * s];
+      return ugol(B, A, F) - ugol(F, A, C);
+    },
+    0,
+    1,
+  );
+  return { A, B, C, F: [B[0] + (C[0] - B[0]) * t, B[1] + (C[1] - B[1]) * t] };
+}
+
+Object.assign(VTOROY, {
+  'z01.trapeciya-radius': (p) => {
+    /* Перебор радиуса с шагом 0,5: сумма оснований равна сумме боковых. */
+    for (let r2 = 1; r2 < 400; r2 += 1) if (close(r2 + p.c, p.per / 2)) return r2 / 2;
+    return NaN;
+  },
+  'z01.ravnobedr-osnovanie-cos': (p) => {
+    const t = ravnobedr(p.l, Math.acos(p.c));
+    return Math.round(Math.hypot(t.B[0] - t.A[0], t.B[1] - t.A[1]) * 1e6) / 1e6;
+  },
+  'z01.ravnobedr-bok-sin': (p) => {
+    const t = ravnobedr(1, Math.asin(p.s));
+    return Math.round(((p.c * Math.hypot(t.C[0], t.C[1])) / t.B[0]) * 1e6) / 1e6;
+  },
+  'z01.bissektrisa-afc': (p) => {
+    const t = bissektrisaF(p.b);
+    return Math.round(ugol(t.A, t.F, t.C) * 1e6) / 1e6;
+  },
+  'z01.bissektrisa-afb': (p) => {
+    const t = bissektrisaF(p.b);
+    return Math.round(ugol(t.A, t.F, t.B) * 1e6) / 1e6;
+  },
+  'z02.skalyar-po-risunku': (p) => VK.skalyarnoePoRisunku(p).proverka,
+  'z02.dlina-km': (p) => VK.dlinaKM(p).proverka,
+  'z03.prizma-gipotenuza': (p) => Z3_2.P03_20S.poModeli(p),
+  'z03.prizma-bez-piramidy': (p) => Z3_2.P03_28S.poModeli(p),
+  'z03.piramida-delit-rebro': (p) => Z3_3.P03_48S.poModeli(p),
+  'z03.dva-cilindra-vyshe': (p) => Z3_5.P03_69S.poModeli(p),
+  'z03.dve-kruzhki': (p) => P03_70.poModeli(p),
+});
+
+/* ── Партия 2: №7, №8, №12 вариантов 7–12 ─────────────────────── */
+
+Object.assign(VTOROY, {
+  'z07.kub-obratnoe': podstanovka7(Z7.PV7_KUB_OBRATNOE),
+  'z07.koren-x2': (p) => {
+    /* Перебор корней x⁴ = ax² − b на целой сетке и подстановка: меньший. */
+    const c = Z7.PV7_KOREN_KVADRAT.chisla(p);
+    for (let x = -100; x <= 100; x += 0.25) {
+      if (c.odz(x) && close(c.lhs(x), c.rhs(x))) return x;
+    }
+    return NaN;
+  },
+  'z07.koren-smeshannoe': (p) => {
+    /* Ненулевой корень бисекцией √(kx) − cx на (ε; 1000), c·x растёт быстрее. */
+    const c = Z7.PV7_KOREN_LINEYNYY.chisla(p);
+    const x = bisekciya((u) => -(c.lhs(u) - c.rhs(u)), 1e-6, 1000);
+    return Math.round(x * 1e6) / 1e6;
+  },
+  'z08.log-chastnoe-stepeney': (p) => VY.logChastnoeStepeney(p).proverka,
+  'z08.trig-privedenie': (p) => VY.trigPrivedenie(p).proverka,
+  'z08.log-am-bn': (p) => VY.logAmBn(p).proverka,
+  'z12.parabola-b': (p) => GR.parabolaB(p).proverka,
+  'z12.pokazatelnaya-otnoshenie': (p) => GR.pokazatelnayaOtnoshenie(p).proverka,
+  'z12.parabola-korni': (p) => GR.parabolaKorni(p).proverka,
+});
+
+/* ── Партия 2 ───────────────────────────────────────────────────── */
+
+Object.assign(VTOROY, {
+  'z09.kasatelnaya': (p) => PR9.kasatelnayaPoUzlam(p)?.proverka ?? NaN,
+  'z09.znak-v-tochkah': (p) => PR9.znakVTochkah(p)?.proverka ?? NaN,
+  'z10.linza': (p) => {
+    /* Наименьшее d₁ — перебор d₁ с шагом 0,01 см: есть ли d₂ в пределах. */
+    for (let i = Math.round(p.d1min * 100); i <= p.d1max * 100; i += 1) {
+      const d2 = 1 / (1 / p.f - 1 / (i / 100));
+      if (d2 > 0 && d2 >= p.d2min - 1e-9 && d2 <= p.d2max + 1e-9) return i / 100;
+    }
+    return NaN;
+  },
+  'z10.linza-max': (p) => {
+    for (let i = Math.round(p.d1max * 100); i >= p.d1min * 100; i -= 1) {
+      const d2 = 1 / (1 / p.f - 1 / (i / 100));
+      if (d2 > 0 && d2 >= p.d2min - 1e-9 && d2 <= p.d2max + 1e-9) return i / 100;
+    }
+    return NaN;
+  },
+  'z10.dolya-vremeni': (p) => {
+    /* Мера {t ∈ [0; τ]: v(t) ≤ c} численно: 10⁶ отрезков, по середине. */
+    const A = p.ak * Math.sqrt(p.am);
+    const N = 1_000_000;
+    let m = 0;
+    for (let i = 0; i < N; i += 1) {
+      const t = ((i + 0.5) * p.tau) / N;
+      if (A * Math.sin((Math.PI * t) / p.T) <= p.c + 1e-12) m += 1;
+    }
+    return Math.round((m / N) * 1e4) / 1e4;
+  },
+  'z10.raspad': (p) => {
+    /* Масса убывает: бисекция m(t) = m. */
+    const t = bisekciya((u) => p.m - p.m0 * 2 ** (-u / p.T), 0, 1000);
+    return Math.round(t * 1e6) / 1e6;
+  },
+  'z11.tri-rastvora': (p) => {
+    /* Система 2×2 по Крамеру: (a − p₁)x + (b − p₁)y = (p₁ − c)m₁ и то же для второй смеси. */
+    const [a1, b1, c1] = [p.a - p.p1, p.b - p.p1, (p.p1 - p.c) * p.m1];
+    const [a2, b2, c2] = [p.a - p.p2, p.b - p.p2, (p.p2 - p.c) * p.m2];
+    const det = a1 * b2 - a2 * b1;
+    const x = (c1 * b2 - c2 * b1) / det;
+    const y = (a1 * c2 - a2 * c1) / det;
+    return Math.round((p.ask === 'a' ? x : y) * 1e6) / 1e6;
+  },
+  'z11.suhogruzy': (p) => {
+    /* Перебор разности скоростей с шагом 0,01 км/ч: путь относительно первого. */
+    for (let i = 1; i <= 100000; i += 1) {
+      if (Math.abs(((i / 100) * p.t) / 60 - (p.a + p.L1 + p.L2 + p.b) / 1000) < 1e-9)
+        return i / 100;
+    }
+    return NaN;
+  },
+  'z11.ves-put': (p) => {
+    /* Время в пути растёт по x: бисекция, затем путь туда и обратно. */
+    const x = bisekciya((u) => u / (p.v + p.c) + u / (p.v - p.c) - (p.T - p.st), 0, 10000);
+    return Math.round(2 * x * 1e6) / 1e6;
+  },
+  'z13.dif-stavka': (p) => {
+    /* Перебор целых ставок прямым пересчётом таблицы по годам. */
+    for (let r = 1; r <= 100; r += 1) {
+      let dolg = p.S;
+      let vsego = 0;
+      for (let i = 0; i < p.n; i += 1) {
+        vsego += dolg * (r / 100) + p.S / p.n;
+        dolg -= p.S / p.n;
+      }
+      if (Math.abs(vsego - p.T) < 1e-6) return r;
+    }
+    return NaN;
+  },
+  'z13.ravnye-popolneniya': (p) => {
+    /* Итог вклада растёт по пополнению: бисекция, вклад — по годам. */
+    const itog = (x) => {
+      let s = p.S;
+      for (let i = 0; i < 3; i += 1) s = s * (1 + p.r / 100) + (i < 2 ? x : 0);
+      return s - p.Z;
+    };
+    return Math.round(bisekciya(itog, 0, 1e6) * 1e6) / 1e6;
+  },
+  'z13.summa-ubyvanie': (p) => {
+    let dolg = p.S * 1e6;
+    let vsego = 0;
+    for (let i = 1; i <= p.n; i += 1) {
+      const novyy = i === p.n ? 0 : dolg * (1 - p.q / 100);
+      vsego += dolg * (1 + p.r / 100) - novyy;
+      dolg = novyy;
+    }
+    return Math.round(vsego * 100) / 100;
   },
 });
 

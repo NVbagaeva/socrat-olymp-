@@ -24,7 +24,6 @@ import {
   THEME,
   esc,
   gridCellAttr,
-  indexSize,
   labelSize,
   printFitted,
   px,
@@ -32,7 +31,7 @@ import {
   svgText,
   textWidth,
 } from '@/lib/graph/renderer.js';
-import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
+import { BUKVY, indeksSvg, shirinaIndeksa } from '@/lib/risunki/shrifty.js';
 import { RULES } from '@/lib/sheet/figureRules.js';
 import { type Rect, type Seg, pointSegDist, rectGap, segRectDist } from '../vektory/geometry';
 import { funkciya } from './reshit';
@@ -111,7 +110,7 @@ const V = {
   endR: 5.2,
   tick: { size: 12.5, weight: 400, gapY: 7, gapX: 16, origin: 5 },
   axisName: { size: THEME.font.axisName, belowX: 19, leftY: 8, downY: 15 },
-  mark: { size: 15, sub: 10.5, weight: 400 },
+  mark: { size: 15, weight: 400 },
   curveLabel: { size: 20, track: 0.62 },
   helper: { size: 15, weight: 400 },
   /* Подписи построений у учителя: уровни, точки, знаки производной. */
@@ -174,15 +173,15 @@ function zazor(rect: Rect, obstacles: readonly Prep[]): { min: number; what: str
 /** Подпись переменной с индексом: x₁, x₀. */
 function podpisX(sub: string, x: number, y: number, fill: string): string {
   return (
-    `<text x="${px(x)}" y="${px(y)}" text-anchor="middle" font-size="${V.mark.size}" font-weight="${V.mark.weight}" fill="${fill}" ` +
+    `<text class="pr-x-label" x="${px(x)}" y="${px(y)}" text-anchor="middle" font-size="${V.mark.size}" font-weight="${V.mark.weight}" fill="${fill}" ` +
     `stroke="${THEME.colors.halo}" stroke-width="${THEME.width.halo}" stroke-linejoin="round" ` +
     `style="font-family:${BUKVY};font-style:italic;paint-order:stroke fill">x` +
-    `<tspan font-size="${V.mark.sub}" dy="3" font-style="normal" style="font-family:${CHISLA}">${esc(sub)}</tspan></text>`
+    `${indeksSvg(esc(sub), V.mark.size)}</text>`
   );
 }
 
 function shirinaX(sub: string): number {
-  return V.mark.size * 0.55 + sub.length * V.mark.sub * 0.58;
+  return V.mark.size * 0.55 + shirinaIndeksa(sub, V.mark.size);
 }
 
 /** Дуга угла между направлениями t0 → t1 (против часовой, в градусах математических). */
@@ -220,7 +219,6 @@ function withPrintSizes<T>(fn: () => T): T {
   V.tick.gapX = saved.tick.gapX + (V.tick.size - saved.tick.size) * 0.77;
   V.axisName.size = labelSize(THEME.font.axisName);
   V.mark.size = labelSize(saved.mark.size);
-  V.mark.sub = indexSize(saved.mark.sub);
   V.curveLabel.size = labelSize(saved.curveLabel.size);
   V.helper.size = labelSize(saved.helper.size);
   V.auxLabel.size = labelSize(saved.auxLabel.size);
@@ -242,6 +240,34 @@ function withPrintSizes<T>(fn: () => T): T {
   }
 }
 
+/* ── Знак производной в разметке учителя ───────────────────────────
+   Рисуется линиями, а не буквой шрифта: у «−» шрифта KaTeX штрих
+   тонкий и короткий, на листе он похож на чёрточку. «+» и «−» — одной
+   длины и толщины, цвета разметки, на белой подложке, как подписи. */
+const ZNAK = {
+  /** Кегль ряда знаков (единицы рисунка): от него длина и толщина. */
+  kegl: 24,
+  /** Длина штриха — доля кегля. */
+  dlina: 0.62,
+  /** Толщина штриха — доля кегля, не тоньше 2,6. */
+  tolshchina: 0.12,
+  /** Запас рамки за концом штриха: скругление и белая подложка. */
+  zapas: 3,
+};
+
+function znakSvg(plus: boolean, x: number, y: number, size: number, klass: string): string {
+  const h = (size * ZNAK.dlina) / 2;
+  const w = Math.max(2.6, size * ZNAK.tolshchina);
+  const d =
+    `M${px(x - h)} ${px(y)}H${px(x + h)}` + (plus ? `M${px(x)} ${px(y - h)}V${px(y + h)}` : '');
+  return (
+    `<g class="${klass}" data-znak="${plus ? '+' : THEME.minus}" data-y="${px(y)}">` +
+    `<path d="${d}" fill="none" stroke="${THEME.colors.halo}" stroke-width="${px(w + 3)}" stroke-linecap="round"/>` +
+    `<path d="${d}" fill="none" stroke="${V.aux}" stroke-width="${px(w)}" stroke-linecap="round"/>` +
+    '</g>'
+  );
+}
+
 export function renderFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
   const bylo = PECHAT.on;
   PECHAT.on = opts.minFont !== undefined;
@@ -258,7 +284,7 @@ function renderFiguraPechat(fig: Figura, opts: OpciiRisunka, report?: Otchet): s
     [
       [THEME.font, ['axisLabel', 'axisName', 'pointLabel', 'curveLabel']],
       [V.tick, ['size']],
-      [V.mark, ['size', 'sub']],
+      [V.mark, ['size']],
       [V.curveLabel, ['size']],
       [V.helper, ['size']],
       [V.auxLabel, ['size']],
@@ -1083,7 +1109,10 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
   }
   for (const d of dotsPoints) {
     layers.dots.push(
-      `<circle class="pr-dot" cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${d.r}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="1.8"/>`,
+      /* Точка на оси — без белого ободка: он резал бы ось на штрихи. */
+      d.what === 'отмеченная точка'
+        ? `<circle class="pr-dot" cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${d.r}" fill="${d.fill}"/>`
+        : `<circle class="pr-dot" cx="${px(sx(d.x))}" cy="${px(sy(d.y))}" r="${d.r}" fill="${d.fill}" stroke="${THEME.colors.halo}" stroke-width="1.8"/>`,
     );
     obstacles.push({
       seg: { x1: sx(d.x), y1: sy(d.y), x2: sx(d.x), y2: sy(d.y) },
@@ -1176,51 +1205,61 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
     layers.labels.push(svgText('0', chosen.x, chosen.y, chosen.anchor, tickOpts));
     addBox(chosen.b);
   }
-  /* Подписи отмеченных точек раньше чисел: у них приоритет. */
-  metki.forEach((m, i) => {
-    const sub = String(i + 1);
-    const halfW = shirinaX(sub) / 2 + 1.5;
-    const halfH = V.mark.size * 0.5;
-    let best: { b: Podpis; min: number; what: string } | null = null;
-    for (const side of [1, -1]) {
-      for (const off of [18, 28]) {
-        const b: Podpis = {
-          kind: 'mark',
-          id: `x${sub}`,
-          x: sx(m),
-          y: axisX + side * off - V.mark.size * 0.1,
-          halfW,
-          halfH,
-        };
+  /* Подписи отмеченных точек раньше чисел: у них приоритет.
+     Ряды на одной высоте: все под осью, если подписи там помещаются
+     бок о бок; иначе строго через одну — x₁, x₃, … под осью, x₂, x₄, …
+     над осью. Подпись, которую задевает кривая, сдвигается вдоль оси
+     в своём ряду. */
+  {
+    const size = V.mark.size;
+    /* Рамка подписи с опущенным индексом: от верха буквы до низа индекса. */
+    const halfH = size * 0.52;
+    const vniz = axisX + 7 + halfH;
+    const vverh = axisX - 7 - halfH;
+    const podpisi = metki.map((m, i) => {
+      const sub = String(i + 1);
+      return { m, sub, x: sx(m), halfW: shirinaX(sub) / 2 + 1.5 };
+    });
+    const tesno = podpisi.some((p, i) => {
+      const q = podpisi[i + 1];
+      return q !== undefined && q.x - q.halfW - (p.x + p.halfW) < V.gap + 2;
+    });
+    const ryadOf = (i: number) => (tesno && i % 2 === 1 ? vverh : vniz);
+    podpisi.forEach((p, i) => {
+      const y = ryadOf(i);
+      /* Сдвиг вдоль ряда — до полутора клеток: подписи соседей по ряду
+         уже стоят препятствиями (addBox), на них подпись не ляжет. */
+      const predel = cell * 1.5;
+      const xs = [p.x];
+      for (let k = 2; k <= predel; k += 2) xs.push(p.x + k, p.x - k);
+      let best: { b: Podpis; min: number; what: string } | null = null;
+      for (const x of xs) {
+        const b: Podpis = { kind: 'mark', id: `x${p.sub}`, x, y, halfW: p.halfW, halfH };
         const rect = boxRect(b);
         const inside =
           rect.left >= field.left &&
           rect.right <= field.right &&
           rect.top >= field.top &&
           rect.bottom <= field.bottom;
+        /* Пунктиры учителя от точек к кривой при точках через клетку
+           стоят частоколом: подпись ложится поверх, белая обводка их
+           прерывает. Кривая, числа и другие подписи — препятствия. */
         const c = zazor(
           rect,
-          obstacles.filter((o) => o.what !== 'отмеченная точка'),
+          obstacles.filter((o) => o.what !== 'отмеченная точка' && o.what !== 'пунктир'),
         );
         const min = inside ? c.min : -1;
-        if (best === null || min > best.min) {
+        if (best === null || min > best.min + 0.5) {
           best = { b, min, what: inside ? c.what : 'край рисунка' };
         }
-        if (min >= V.gap) {
-          break;
-        }
+        if (min >= V.gap) break;
       }
-      if (best !== null && best.min >= V.gap) {
-        break;
-      }
-    }
-    const chosen = (best as { b: Podpis }).b;
-    if ((best as { min: number }).min < V.gap) {
-      problems.push(`подпись x${sub} не помещается: мешает ${(best as { what: string }).what}`);
-    }
-    layers.labels.push(podpisX(sub, chosen.x, chosen.y + V.mark.size * 0.35, THEME.colors.axis));
-    addBox(chosen);
-  });
+      const ch = best as { b: Podpis; min: number; what: string };
+      if (ch.min < V.gap) problems.push(`подпись x${p.sub} не помещается: мешает ${ch.what}`);
+      layers.labels.push(podpisX(p.sub, ch.b.x, ch.b.y + size * 0.21, THEME.colors.axis));
+      addBox(ch.b);
+    });
+  }
   /* Числа по оси x и y. */
   const numberBox = (text: string, x: number, y: number): Podpis => ({
     kind: 'tick',
@@ -1465,16 +1504,20 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
        встаёт (горб кривой над осью), весь ряд пробуем ближе к оси,
        затем мельче — но всегда одинаково для всех знаков. Что и тогда
        не встало, идёт во второй ряд — над горбами, тоже на одной высоте. */
-    type Mesto = { b: Podpis; glyph: string; min: number; what: string };
+    type Mesto = { b: Podpis; glyph: string; min: number; what: string; size: number };
+    /* Полувысота рамки знака: штрих «+» с подложкой и запасом. */
+    const vysotaZnaka = (size: number) =>
+      Math.max(size * 0.42, size * ZNAK.dlina * 0.5 + ZNAK.zapas);
     const postavit = (
       z: (typeof znaki)[number],
       size: number,
       y: number,
       uzhe: readonly Mesto[],
     ): Mesto => {
-      const halfH = size * 0.42;
       const glyph = z.znak > 0 ? '+' : THEME.minus;
-      const halfW = textWidth(glyph, size) / 2 + 2;
+      /* «−» плоский: по высоте ему хватает прежней рамки. */
+      const halfH = z.znak > 0 ? vysotaZnaka(size) : size * 0.42;
+      const halfW = size * ZNAK.dlina * 0.5 + ZNAK.zapas;
       const lo = sx(Math.min(z.x0, z.x1)) + halfW + 3;
       const hi = sx(Math.max(z.x0, z.x1)) - halfW - 3;
       const mid = sx((z.x0 + z.x1) / 2);
@@ -1499,13 +1542,13 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
         });
         const min = mezhdu ? Math.min(c.min, -1) : c.min;
         if (best === null || min > best.min + 0.5)
-          best = { b, glyph, min, what: mezhdu ? 'знак' : c.what };
+          best = { b, glyph, min, what: mezhdu ? 'знак' : c.what, size };
         if (c.ok && !mezhdu) break;
       }
       return best as Mesto;
     };
     const raskladka = (size: number, otstup: number): Mesto[] => {
-      const y = axisX - otstup - size * 0.42;
+      const y = axisX - otstup - vysotaZnaka(size);
       const out: Mesto[] = [];
       for (const z of znaki) out.push(postavit(z, size, y, out));
       return out;
@@ -1515,21 +1558,32 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
     const kraynii = (i: number): boolean => {
       const z = znaki[i] as (typeof znaki)[number];
       const kray = Math.min(z.x0, z.x1) <= lo + 1e-9 || Math.max(z.x0, z.x1) >= hi - 1e-9;
-      return kray && Math.abs(z.x1 - z.x0) <= 1.5;
+      return kray && Math.abs(z.x1 - z.x0) <= 2;
     };
     const plokhih = (r: readonly Mesto[]) =>
       r.filter((o, i) => o.min < V.gap && !kraynii(i)).length;
-    const krupnyy = Math.max(20, V.helper.size);
+    /* Насколько не вставшие знаки налезают на соседей (сумма нехватки). */
+    const nahlyost = (r: readonly Mesto[]) =>
+      r.reduce((s, o, i) => s + (kraynii(i) ? 0 : Math.max(0, V.gap - o.min)), 0);
+    const krupnyy = Math.max(ZNAK.kegl, V.helper.size);
     let ryad = raskladka(krupnyy, 9);
+    /* Тесно — ряд ближе к оси, затем мельче: штрих и тогда толще буквы
+       шрифта. */
     for (const [size, otstup] of [
       [krupnyy, 6],
       [krupnyy * 0.85, 6],
+      [krupnyy * 0.7, 6],
+      [krupnyy * 0.6, 6],
+      [krupnyy * 0.5, 6],
     ] as const) {
       if (plokhih(ryad) === 0) break;
       const drugoy = raskladka(size, otstup);
-      if (plokhih(drugoy) < plokhih(ryad)) ryad = drugoy;
+      /* Лучше — меньше невставших; при равном числе — меньше нахлёст;
+         при полном равенстве остаётся крупнее. */
+      const [pd, pr] = [plokhih(drugoy), plokhih(ryad)];
+      if (pd < pr || (pd === pr && nahlyost(drugoy) < nahlyost(ryad) - 1e-6)) ryad = drugoy;
     }
-    const size = ryad.length === 0 ? krupnyy : (ryad[0] as Mesto).b.halfH / 0.42;
+    const size = ryad.length === 0 ? krupnyy : (ryad[0] as Mesto).size;
     /* Не вставший знак — над своим горбом, по центру промежутка. */
     const ne = ryad.map((o, i) => (o.min < V.gap && !kraynii(i) ? i : -1)).filter((i) => i >= 0);
     const ostalnye = ryad.filter((_, i) => !ne.includes(i));
@@ -1538,7 +1592,7 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
       const [a, c] = [Math.min(z.x0, z.x1), Math.max(z.x0, z.x1)];
       let verh = axisX;
       for (let k = 0; k <= 40; k += 1) verh = Math.min(verh, sy(f.y(a + ((c - a) * k) / 40)));
-      const m = postavit(z, size, verh - V.gap - 4 - size * 0.42, ostalnye);
+      const m = postavit(z, size, verh - V.gap - 4 - vysotaZnaka(size), ostalnye);
       if (m.min >= V.gap) {
         m.b.id = 'знак над горбом';
         ryad[i] = m;
@@ -1546,17 +1600,20 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
       }
     }
     ryad.forEach((o, i) => {
+      /* Крайний короткий кусок: знак для ответа не нужен — рисуем его,
+         только если он стоит свободно, с запасом от кривой. */
+      if (kraynii(i) && o.min < V.gap * 2) return;
       if (o.min < V.gap) {
-        if (kraynii(i)) return;
         problems.push(`знак ${o.glyph} не помещается: мешает ${o.what}`);
       }
       layers.labels.push(
-        svgText(o.glyph, o.b.x, o.b.y + size * 0.35, 'middle', {
-          size: Math.round(size * 10) / 10,
-          weight: 400,
-          fill: V.aux,
-          klass: o.b.id === 'знак над горбом' ? 'pr-znak pr-znak-nad' : 'pr-znak',
-        }),
+        znakSvg(
+          o.glyph === '+',
+          o.b.x,
+          o.b.y,
+          size,
+          o.b.id === 'знак над горбом' ? 'pr-znak pr-znak-nad' : 'pr-znak',
+        ),
       );
       addBox(o.b);
     });
@@ -1594,24 +1651,51 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
     }
     if (item.t === 'tochka' && item.podpis !== undefined && item.podpis !== '') {
       const text = minusify(item.podpis);
-      const halfW = textWidth(text, V.auxLabel.size) / 2 + 3;
-      const b = place(
-        `подпись ${text}`,
-        'aux',
-        halfW,
-        V.auxLabel.halfH,
-        { x: sx(item.x), y: sy(item.y) },
-        ['above-right', 'below-right', 'above-left'],
-        fig.teoriya === true ? [10, 18, 26] : [10, 18],
-      );
+      /* Подпись-знак (f′ в точке: «+» или «−») — линиями, как знаки ряда. */
+      const znak = text === '+' || text === THEME.minus;
+      /* На печати кегль крупнее: высота подписи — от кегля, мест больше. */
+      const halfH = PECHAT.on
+        ? Math.max(V.auxLabel.halfH, V.auxLabel.size * 0.55)
+        : V.auxLabel.halfH;
+      const postavit = (halfW: number, vys: number) =>
+        place(
+          `подпись ${text}`,
+          'aux',
+          halfW,
+          vys,
+          { x: sx(item.x), y: sy(item.y) },
+          PECHAT.on
+            ? ['above-right', 'below-right', 'above-left', 'below-left']
+            : ['above-right', 'below-right', 'above-left'],
+          fig.teoriya === true || PECHAT.on ? [10, 18, 26] : [10, 18],
+        );
+      /* Рамка знака — как у прежней буквы «+» того же кегля: раскладка
+         знаков у точек та же, что была, а штрих — жирный. Тесно — мельче. */
+      const poBukve = (textWidth('+', V.auxLabel.size) / 2 + 3 - ZNAK.zapas) / (ZNAK.dlina * 0.5);
+      const kegli = znak ? [poBukve, poBukve * 0.85, poBukve * 0.7] : [V.auxLabel.size];
+      let kegl = kegli[0] as number;
+      let b: Podpis | null = null;
+      for (const [n, k] of kegli.entries()) {
+        const bylo = problems.length;
+        kegl = k;
+        b = postavit(
+          znak ? k * ZNAK.dlina * 0.5 + ZNAK.zapas : textWidth(text, V.auxLabel.size) / 2 + 3,
+          /* «−» плоский: по высоте ему хватает прежней рамки. */
+          text === '+' ? Math.max(halfH, k * ZNAK.dlina * 0.5 + ZNAK.zapas) : halfH,
+        );
+        if (problems.length === bylo || n === kegli.length - 1) break;
+        problems.length = bylo;
+      }
       layers.labels.push(
-        svgText(text, b.x, b.y + V.auxLabel.rise, 'middle', {
-          size: V.auxLabel.size,
-          weight: 400,
-          fill: V.aux,
-        }),
+        znak
+          ? znakSvg(text === '+', (b as Podpis).x, (b as Podpis).y, kegl, 'pr-znak-tochka')
+          : svgText(text, (b as Podpis).x, (b as Podpis).y + V.auxLabel.rise, 'middle', {
+              size: V.auxLabel.size,
+              weight: 400,
+              fill: V.aux,
+            }),
       );
-      addBox(b);
+      addBox(b as Podpis);
     }
     if (item.t === 'znak') {
       znaki.push(item);

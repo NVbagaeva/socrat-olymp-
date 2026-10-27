@@ -11,9 +11,10 @@ import { vertex } from '../../solid/figures';
 import { distance, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { NAMES, shapeLines, shapeSection } from '../../solid/drawings/section1';
 import { letters, ru, segment } from '../format';
-import { type Params, type Prototype, type Variant, num, pair, text } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num, pair, text } from '../types';
 import { baseNames, boxOf, coversAllDims, sides } from './common';
 import { solveBySearch } from '../search';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 /** Три ребра условия строкой: «DD₁=2, C₁D₁=6, B₁C₁=3». */
 function edgesText(p: Params): string {
@@ -104,6 +105,7 @@ export const P03_01: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka01(p),
   varianty: [
     variant(1, 'задачник', 'задачник 1', {
       n1: 'DD1',
@@ -242,6 +244,7 @@ export const P03_02: Prototype = {
     ];
   },
 
+  podskazka: () => podskazka02(),
   varianty: [
     variant(1, 'задачник', 'задачник 9', { k: 2 }),
     variant(2, 'домашка', 'домашка 2, вариант 2', { k: 1 }, 1),
@@ -306,6 +309,7 @@ export const P03_03: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka03(p),
   varianty: [
     variant(1, 'задачник', 'задачник 13', { a: 7, b: 3, c: 4 }),
     variant(2, 'задачник', 'задачник 14', { a: 11, b: 6, c: 8 }),
@@ -386,7 +390,7 @@ export const P03_04: Prototype = {
     const quad = sectionQuad([text(p, 'p1'), text(p, 'p2'), text(p, 'p3')]);
     return [
       {
-        text: `Сечение ${quad.map(letters).join('')} — прямоугольник: одна сторона — диагональ основания, другая — боковое ребро.`,
+        text: `Сечение $${quad.map(letters).join('')}$ — прямоугольник: одна сторона — диагональ основания, другая — боковое ребро.`,
       },
       {
         text: `Диагональ основания: $\\sqrt{${ru(a)}^2 + ${ru(b)}^2} = ${ru(diag)}$.`,
@@ -399,6 +403,7 @@ export const P03_04: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka04(p),
   varianty: [
     variant(1, 'задачник', 'задачник 15', { a: 21, b: 20, c: 23, p1: 'A', p2: 'A1', p3: 'C' }),
     variant(2, 'задачник', 'задачник 16', { a: 3, b: 4, c: 32, p1: 'C', p2: 'C1', p3: 'A' }),
@@ -412,3 +417,119 @@ export const P03_04: Prototype = {
     variant(10, 'новый', 'новый', { a: 20, b: 21, c: 6, p1: 'C', p2: 'C1', p3: 'A' }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+function podskazka01(p: Params): HintStep[] {
+  const [a, b, c] = boxSides(p);
+  const diag = segment(pair(p, 'diag'));
+  const base = a * a + b * b;
+  const otvet = Math.sqrt(base + c * c);
+  return [
+    vopros(
+      `В каком прямоугольном треугольнике $${diag}$ — гипотенуза?`,
+      'Катеты — диагональ основания и вертикальное ребро',
+      [
+        'Катеты — два ребра основания',
+        'Катеты — вертикальное ребро и ребро основания',
+        'Катеты — две диагонали боковых граней',
+      ],
+    ),
+    vopros(
+      'Чему равен квадрат диагонали основания?',
+      chislo(base),
+      chisla([(a + b) ** 2, a + b, a * a + c * c], base, otvet),
+      `$${tex(a)}^2 + ${tex(b)}^2 = ${tex(base)}$`,
+    ),
+    vopros(
+      `Как найти $${diag}$?`,
+      `$\\sqrt{${tex(base)} + ${tex(c)}^2}$`,
+      [
+        `$${tex(base)} + ${tex(c)}^2$`,
+        `$\\sqrt{${tex(base)}} + ${tex(c)}$`,
+        `$\\sqrt{${tex(base)} - ${tex(c)}^2}$`,
+      ],
+    ),
+  ];
+}
+
+function podskazka02(): HintStep[] {
+  return [
+    vopros(
+      'Как диагональ куба выражается через его ребро $a$?',
+      '$a\\sqrt{3}$',
+      ['$a\\sqrt{2}$', '$3a$', '$a^2\\sqrt{3}$'],
+      'Диагональ основания — $a\\sqrt{2}$, вместе с ребром: $\\sqrt{2a^2 + a^2} = a\\sqrt{3}$.',
+    ),
+    vopros(
+      'Как найти ребро куба по диагонали?',
+      'Разделить диагональ на $\\sqrt{3}$',
+      [
+        'Разделить диагональ на $\\sqrt{2}$',
+        'Умножить диагональ на $\\sqrt{3}$',
+        'Разделить диагональ на $3$',
+      ],
+      'Под корнем стоит $3a^2$: квадрат ребра втрое меньше числа под корнем.',
+    ),
+    vopros('Как найти объём куба?', '$a^3$', ['$3a$', '$a^2$', '$6a^2$']),
+  ];
+}
+
+function podskazka03(p: Params): HintStep[] {
+  const b = num(p, 'b');
+  const c = num(p, 'c');
+  const bc1 = Math.sqrt(b * b + c * c);
+  const otvet = num(p, 'a') * bc1;
+  return [
+    vopros(
+      'Какая фигура получается в сечении?',
+      'Прямоугольник $ABC_1D_1$',
+      ['Треугольник $ABC_1$', 'Квадрат $ABB_1A_1$', 'Трапеция $ABC_1C$'],
+      'Сторона $D_1C_1$ параллельна $AB$, поэтому плоскость проходит и через неё.',
+    ),
+    vopros(
+      'Чему равна сторона $BC_1$ — диагональ боковой грани?',
+      chislo(bc1),
+      chisla([b + c, b * c, Math.abs(c - b)], bc1, otvet),
+      `$BC_1 = \\sqrt{${tex(b)}^2 + ${tex(c)}^2}$`,
+    ),
+    vopros(
+      'Как найти площадь сечения?',
+      '$AB \\cdot BC_1$',
+      ['$AB \\cdot BC$', '$\\frac{1}{2}\\, AB \\cdot BC_1$', '$AB \\cdot AA_1$'],
+    ),
+  ];
+}
+
+function podskazka04(p: Params): HintStep[] {
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  const d = Math.sqrt(a * a + b * b);
+  const otvet = d * num(p, 'c');
+  return [
+    vopros(
+      'Какая фигура получается в сечении?',
+      'Прямоугольник: диагональ основания и боковое ребро',
+      [
+        'Треугольник с вершинами из условия',
+        'Квадрат со стороной, равной боковому ребру',
+        'Параллелограмм с острым углом',
+      ],
+    ),
+    vopros(
+      'Чему равна диагональ основания?',
+      chislo(d),
+      chisla([a + b, a * b, d * d], d, otvet),
+      `$\\sqrt{${tex(a)}^2 + ${tex(b)}^2}$`,
+    ),
+    vopros(
+      'Как найти площадь сечения?',
+      'Диагональ основания умножить на боковое ребро',
+      [
+        'Половина произведения диагонали основания и ребра',
+        'Произведение двух рёбер основания',
+        'Квадрат диагонали основания',
+      ],
+    ),
+  ];
+}

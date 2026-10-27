@@ -22,3 +22,23 @@ export const TESTOVYJ: readonly number[] = [
   0, 6, 11, 17, 22, 27, 34, 40, 46, 52, 58, 64, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94,
   95, 96, 97, 98, 99, 100, 100, 100,
 ];
+
+/**
+ * Вариант из двух частей (13 + 7 заданий, максимум 33 первичных балла):
+ * официальной шкалы 2027 года ещё нет, поэтому шкала выше (32 балла)
+ * равномерно растягивается на 0…33 — тестовый балл за k первичных равен
+ * её значению в точке k·32/33 (линейно между соседними, с округлением).
+ * На сайте рядом — пометка «ориентировочно».
+ */
+export function rastyanut(shkala: readonly number[], max: number): number[] {
+  const n = shkala.length - 1;
+  return Array.from({ length: max + 1 }, (_, k) => {
+    const t = (k * n) / max;
+    const i = Math.floor(t);
+    const a = shkala[i] ?? 100;
+    const b = shkala[Math.min(i + 1, n)] ?? 100;
+    return Math.round(a + (b - a) * (t - i));
+  });
+}
+
+export const TESTOVYJ_33: readonly number[] = rastyanut(TESTOVYJ, 33);

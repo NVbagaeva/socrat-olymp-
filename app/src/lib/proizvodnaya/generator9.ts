@@ -18,7 +18,7 @@ import { GEN_UI } from '@/content/generatorUi';
 import contentSheet9 from '@/content/sheet9.js';
 import { nabratFormuly } from '@/lib/generator/nabrat';
 import { slotySostava, sostavIzSlotov } from '@/lib/generator/obshchiy/klyuchi';
-import { defaultExtras } from '@/lib/generator/obshchiy/state';
+import { defaultExtras, vidRabotyIz, vidRabotyText } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
   GenEngine,
@@ -100,7 +100,7 @@ export function paramsIzSostoyaniya(
     seed: state.seed,
     theme: 'color',
     layout: 'single',
-    kind: e.kind === null ? '' : (VIDY[e.kind] ?? ''),
+    kind: vidRabotyText(config, e),
     date: e.date,
     ramki: e.examples,
     urok: e.urok,
@@ -116,12 +116,11 @@ export function paramsIzSostoyaniya(
 
 /** «Дополнительно» из листа. У прежнего адреса «Запомни» шла вместе с примерами (r). */
 function extrasIzParams(p: SheetParams9, config: GenConfig): GenExtras {
-  const kind = Object.entries(VIDY).find(([, title]) => title === p.kind)?.[0] ?? null;
   return {
     ...defaultExtras(config),
+    ...vidRabotyIz(config, p.kind),
     theory: p.poKlyucham === true ? p.zapomni === true : p.ramki > 0,
     examples: p.ramki,
-    kind,
     date: p.date,
     teacher: p.uchitel ?? config.sheet.teacher,
     qr: p.qr === true,

@@ -3,6 +3,9 @@
 import { clsx } from 'clsx';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { MAX_TOTAL } from '@/content/variantOnline/bally';
+import { CHAST2_TEXT } from '@/content/variantOnline/chast2Text';
+import { TESTOVYJ_33 } from '@/content/variantOnline/shkala';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
@@ -34,6 +37,14 @@ export interface WorkResultProps {
   actions?: ReactNode;
   /** Предупреждение над результатом. */
   notice?: string | null;
+  /**
+   * Вариант из двух частей: баллы части 2 (самопроверка). Итог — часть 1
+   * из 13, часть 2 из 20, всего из 33; тестовый балл — только когда
+   * оценена вся часть 2.
+   */
+  chast2?: { summa: number; oceneno: number; vsego: number; max: number };
+  /** Блок под таблицей части 1 — задания части 2. */
+  posleTablicy?: ReactNode;
 }
 
 /**
@@ -55,6 +66,8 @@ export function WorkResult({
   outdated = false,
   actions,
   notice,
+  chast2,
+  posleTablicy,
 }: WorkResultProps) {
   const [open, setOpen] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
@@ -98,7 +111,11 @@ export function WorkResult({
       {outdated ? <p className="vo-warn">{T.result.outdated}</p> : null}
       {notice === undefined || notice === null ? null : <p className="vo-warn">{notice}</p>}
 
-      {noScore ? null : (
+      {noScore || chast2 === undefined ? null : (
+        <Itog2 p1={score.primary} max1={score.max} c2={chast2} seconds={data.seconds} />
+      )}
+
+      {noScore || chast2 !== undefined ? null : (
         <div className="vo-score">
           {score.test !== null ? (
             <div className="vo-score__main" data-testid="vo-test">
@@ -207,6 +224,8 @@ export function WorkResult({
         </table>
       </div>
 
+      {posleTablicy}
+
       {links.length > 0 ? (
         <section className="vo-links" aria-label={T.result.links}>
           <h3 className="vo-h3">{T.result.links}</h3>
@@ -248,6 +267,56 @@ export function WorkResult({
           {qr === null ? null : <div className="vo-qr" dangerouslySetInnerHTML={{ __html: qr }} />}
         </section>
       )}
+    </div>
+  );
+}
+
+/** Итог варианта из двух частей. */
+function Itog2({
+  p1,
+  max1,
+  c2,
+  seconds,
+}: {
+  p1: number;
+  max1: number;
+  c2: NonNullable<WorkResultProps['chast2']>;
+  seconds: number;
+}) {
+  const T2 = CHAST2_TEXT.itog2;
+  const gotovo = c2.oceneno === c2.vsego;
+  const vsego = p1 + c2.summa;
+  const max = max1 + c2.max;
+  return (
+    <div className="vo-score" data-testid="vo-itog2">
+      {gotovo && max === MAX_TOTAL ? (
+        <div className="vo-score__main" data-testid="vo-test">
+          <span className="vo-score__label">{T.result.test}</span>
+          <span className="vo-score__value">{TESTOVYJ_33[vsego] ?? 100}</span>
+          <span className="vo-tag vo-tag--approx" title={T2.approx33}>
+            {T.result.approx}
+          </span>
+        </div>
+      ) : null}
+      <div className="vo-score__item" data-testid="vo-part1">
+        <span className="vo-score__label">{T2.part1}</span>
+        <span className="vo-score__num">{T2.iz(p1, max1)}</span>
+      </div>
+      <div className="vo-score__item" data-testid="vo-part2">
+        <span className="vo-score__label">{T2.part2}</span>
+        <span className="vo-score__num">{gotovo ? T2.iz(c2.summa, c2.max) : T2.naProverke}</span>
+      </div>
+      <div className="vo-score__item" data-testid="vo-total">
+        <span className="vo-score__label">{T2.total}</span>
+        <span className="vo-score__num">{gotovo ? T2.iz(vsego, max) : '—'}</span>
+      </div>
+      <div className="vo-score__item">
+        <span className="vo-score__label">{T.result.time}</span>
+        <span className="vo-score__num">{secondsText(seconds)}</span>
+      </div>
+      <p className="vo-score__note">
+        {gotovo ? T2.approx33 : T2.naProverkeNote(c2.oceneno, c2.vsego)}
+      </p>
     </div>
   );
 }

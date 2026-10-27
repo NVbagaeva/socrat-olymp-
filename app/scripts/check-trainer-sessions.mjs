@@ -204,14 +204,14 @@ function answer45(payload, at) {
   return { text: numberText(otvetUchenika(prototype, variant.params)) };
 }
 
-/** №3: пул {kind, n} → prototype.otvet(параметры варианта). */
+/** №3 (тренажёр с фильтрами): задание «P03-01#3» → prototype.otvet(параметры варианта). */
 function answer3(payload, at) {
   const { prototypeById } = requireSrc('lib/zadanie3/index');
-  const item = payload.pool[at];
-  const prototype = prototypeById(item.kind);
-  const variant = prototype?.varianty.find((entry) => entry.n === item.n);
+  const [id, n] = payload.items[at].k.split('#');
+  const prototype = prototypeById(id);
+  const variant = prototype?.varianty.find((entry) => entry.n === Number(n));
   if (variant === undefined) {
-    throw new Error(`№3: нет варианта ${item.kind}#${item.n}`);
+    throw new Error(`№3: нет варианта ${payload.items[at].k}`);
   }
   return { text: numberText(prototype.otvet(variant.params)) };
 }
@@ -245,11 +245,11 @@ function answer6(payload, at) {
      tabs    — false, если у страницы нет ленты вкладок (метку не искать). */
 
 /** Нажать «Начать тренировку» на выборе тренировки. */
-async function pressStart(page) {
+async function pressStart(page, timeout) {
   await page
     .getByRole('button', { name: /^Начать тренировку/ })
     .first()
-    .click();
+    .click(timeout === undefined ? {} : { timeout });
 }
 
 /** Самая большая тренировка №8, №2: режим «Смешанная», количество «Все (N)». */
@@ -364,7 +364,14 @@ const TRAINERS = [
     answer: answer45,
   },
   /* №3: один тренажёр на всё задание — вкладка раздела стереометрии. */
-  { name: '№3', url: '/zadaniya/3/trenazher/', scope: '3', answer: answer3, rep: true },
+  {
+    name: '№3',
+    url: '/zadaniya/3/trenazher/',
+    scope: '3',
+    answer: answer3,
+    all: chooseAllFiltry,
+    rep: true,
+  },
 ];
 
 /* ── Статический сервер над out/ ────────────────────────────── */
@@ -594,10 +601,16 @@ async function questionOf(page) {
 }
 
 /** Начать тренировку и дождаться панели и первой записи экрана. */
-async function startRun(page, trainer) {
-  await (trainer.start ?? pressStart)(page);
-  await waitBar(page);
-  return waitRecord(page, trainer.scope, (record) => record.ui !== null);
+/**
+ * timeout — для самых больших тренировок (сценарий 9): прежний тренажёр
+ * №12 собирает все 140 заданий «Все» разом — около 30 с даже на быстрой
+ * машине, и на медленной машине CI кнопка не успевает нажаться за
+ * обычные 20 с. Тренажёр с фильтрами собирает задачи по одной.
+ */
+async function startRun(page, trainer, timeout) {
+  await (trainer.start ?? pressStart)(page, timeout);
+  await waitBar(page, timeout);
+  return waitRecord(page, trainer.scope, (record) => record.ui !== null, timeout);
 }
 
 /** Метка на вкладке «Тренажёр». */
@@ -1107,7 +1120,7 @@ async function restoreTiming(trainer) {
     const page = await newPage(context);
     await open(page, trainer.url);
     await trainer.all(page);
-    const record = await startRun(page, trainer);
+    const record = await startRun(page, trainer, 120_000);
     if (!check(record !== null, `${trainer.name}, «Все»: тренировка начата`)) {
       return;
     }

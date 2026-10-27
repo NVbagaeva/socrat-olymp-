@@ -16,7 +16,7 @@ import {
   GENERATOR11_SOURCES,
   GENERATOR11_TEXTS,
 } from '@/content/generator11';
-import { defaultExtras } from '@/lib/generator/obshchiy/state';
+import { defaultExtras, SVOY_VID } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
   GenEngine,
@@ -82,6 +82,7 @@ function dopIzExtras(e: GenExtras, config: GenConfig): Dop11 | undefined {
     primery: e.examples,
     qr: e.qr,
     vid: e.kind !== null && e.kind in SHEET_11.vidy ? (e.kind as VidRaboty11) : null,
+    ...(e.kind === SVOY_VID && e.svoy !== undefined ? { svoy: e.svoy } : {}),
     data: e.date,
     uchitel: e.teacher,
   };
@@ -93,10 +94,11 @@ function extrasIzDop(dop: Dop11 | undefined, config: GenConfig): GenExtras {
     theory: dop.teoriya,
     examples: dop.primery,
     qr: dop.qr,
-    kind: dop.vid,
+    kind: dop.vid === null && dop.svoy !== undefined && dop.svoy !== '' ? SVOY_VID : dop.vid,
     date: dop.data,
     teacher: dop.uchitel,
     urok: 0,
+    ...(dop.vid === null && dop.svoy !== undefined && dop.svoy !== '' ? { svoy: dop.svoy } : {}),
   };
 }
 

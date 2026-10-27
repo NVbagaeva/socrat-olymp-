@@ -29,6 +29,12 @@
 
    Оглавление: элемент с data-toc-ref="X" получает номер страницы,
    на которой стоит элемент с data-toc-id="X".
+
+   Поле «на страницу» (data-fill-page, вторая часть варианта): поле в
+   клетку 5 мм после карточки задачи растягивается до нижнего поля
+   страницы — высота и ширина целым числом клеток, без обрезанной
+   клетки. Если карточка заняла больше половины страницы, поле
+   продолжается на следующей странице, тоже до конца листа.
 */
 
 (function () {
@@ -220,6 +226,68 @@
     }
   }
 
+  /* ── Поле в клетку до конца страницы ───────────────────────────── */
+
+  var KLETKA_MM = 5;
+  var LINIYA_MM = 0.2;
+
+  function setkaSvg(cols, rows) {
+    var w = cols * KLETKA_MM;
+    var h = rows * KLETKA_MM;
+    var d = '';
+    for (var x = 1; x < cols; x += 1) { d += 'M' + x * KLETKA_MM + ' 0V' + h; }
+    for (var y = 1; y < rows; y += 1) { d += 'M0 ' + y * KLETKA_MM + 'H' + w; }
+    return '<svg class="sheet-space__grid" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"' +
+      ' viewBox="0 0 ' + w + ' ' + h + '" width="' + w + 'mm" height="' + h + 'mm">' +
+      '<path d="' + d + '" fill="none" stroke="var(--sheet-space-line, #b3b3b3)"' +
+      ' stroke-width="' + LINIYA_MM + '"/></svg>';
+  }
+
+  /* Сколько пикселей в клетке на этой странице (обмер, а не расчёт:
+     масштаб экрана и печати разный). */
+  function kletkaPx(flow) {
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:absolute;visibility:hidden;width:' + 10 * KLETKA_MM +
+      'mm;height:' + 10 * KLETKA_MM + 'mm';
+    flow.appendChild(probe);
+    var px = probe.getBoundingClientRect().height / 10;
+    flow.removeChild(probe);
+    return px;
+  }
+
+  /* Растянуть поле node (уже в потоке, последним) до конца страницы.
+     Возвращает число строк клеток; 0 — места нет совсем. */
+  function zapolnit(node, flow) {
+    var box = node.querySelector('.sheet-fill');
+    box.style.height = '0px';
+    box.innerHTML = '';
+    var cell = kletkaPx(flow);
+    /* Остаток страницы — от низа пустого поля (рамка уже в обмере) до
+       низа потока, за вычетом отступа куска снизу. scrollHeight потока
+       для этого не годится: он не меньше высоты потока. */
+    var flowBox = flow.getBoundingClientRect();
+    var niz = box.getBoundingClientRect().bottom;
+    var otstup = node.getBoundingClientRect().bottom - niz +
+      (parseFloat(getComputedStyle(node).marginBottom) || 0);
+    var free = flowBox.bottom - niz - otstup - 1;
+    var wrap = box.parentNode;
+    var rows = Math.max(0, Math.floor(free / cell));
+    var cols = Math.max(1, Math.floor((wrap.clientWidth - 2) / cell));
+    box.style.height = rows * KLETKA_MM + 'mm';
+    box.style.width = cols * KLETKA_MM + 'mm';
+    box.setAttribute('data-rows', String(rows));
+    box.setAttribute('data-cols', String(cols));
+    box.innerHTML = rows > 0 ? setkaSvg(cols, rows) : '';
+    /* Защита от округления: не влезло — на клетку меньше. */
+    while (rows > 0 && flow.scrollHeight > flow.clientHeight + 0.5) {
+      rows -= 1;
+      box.style.height = rows * KLETKA_MM + 'mm';
+      box.setAttribute('data-rows', String(rows));
+      box.innerHTML = rows > 0 ? setkaSvg(cols, rows) : '';
+    }
+    return rows;
+  }
+
   function run(spec) {
     var host = document.getElementById('sheet-pages');
     host.style.removeProperty('--sheet-preview-zoom');
@@ -278,6 +346,28 @@
     while (i < items.length) {
       var node = el(items[i]);
       var breakBefore = node.getAttribute('data-page-break') === '1';
+
+      /* Поле «на страницу»: до конца этой страницы, а если карточка
+         заняла больше половины — ещё и вся следующая страница. */
+      if (node.getAttribute('data-fill-page') === '1') {
+        /* Сколько заняли куски над полем (карточка задачи, заголовок). */
+        var posl = flow.lastElementChild;
+        var zanyato = posl
+          ? posl.getBoundingClientRect().bottom - flow.getBoundingClientRect().top
+          : 0;
+        var bolshe = zanyato > flow.clientHeight / 2;
+        flow.appendChild(node);
+        if (zapolnit(node, flow) === 0) { flow.removeChild(node); }
+        if (bolshe) {
+          flow = addPage();
+          var dalshe = el(items[i]);
+          dalshe.setAttribute('data-fill-cont', '1');
+          flow.appendChild(dalshe);
+          zapolnit(dalshe, flow);
+        }
+        i += 1;
+        continue;
+      }
 
       if (breakBefore && flow.childElementCount > 0) {
         flow = addPage(node.getAttribute('data-full-head') === '1');
@@ -464,10 +554,24 @@
         opening.innerHTML = spec.opening;
         window.sheetTypeset(opening);
         spec.opening = opening.innerHTML;
-        document.body.removeChild(box);
+        /* Шрифты KaTeX браузер просит только теперь, когда формулы
+           набраны и легли в документ: первое ожидание их не видело.
+           Обмер запасным шрифтом даёт строки на доли миллиметра ниже,
+           и поле решения потом вылезало за край страницы. Раскладка
+           коробки запрашивает шрифты — ждём их ещё раз. */
+        box.appendChild(opening);
+        void box.offsetHeight;
+        return (document.fonts && document.fonts.ready
+          ? document.fonts.ready
+          : Promise.resolve()
+        ).then(function () {
+          document.body.removeChild(box);
+          return spec;
+        });
       }
-
-      window.sheetPagination = run(spec);
+      return spec;
+    }).then(function (nabrannyy) {
+      window.sheetPagination = run(nabrannyy);
 
       /* Уже расставленные по страницам формулы — на случай, если
          какая-то разметка пришла помимо кусков потока. */

@@ -81,7 +81,7 @@ const bad = badVariants(report);
 console.log(`1. прототипов ${report.prototypes}, вариантов ${report.variants}`);
 console.log(
   `2. из задачника ${report.bySource.задачник}, из домашки ${report.bySource.домашка}, ` +
-    `создано заново ${report.bySource.новый}`,
+    `создано заново ${report.bySource.новый}, из открытого банка ФИПИ ${report.bySource.фипи}`,
 );
 console.log(`3. ответ по формуле разошёлся с ответом по модели: ${report.mismatchModel}`);
 console.log(`4. последний шаг разбора не равен ответу: ${report.mismatchSteps}`);
@@ -91,16 +91,118 @@ report.sourceProblems.forEach((item) => console.log(`   ${item.ref}: ${item.why}
 console.log(`7. совпадающих вариантов: ${report.duplicates.length}`);
 report.duplicates.forEach((item) => console.log(`   ${item.a} = ${item.b}`));
 console.log(`чертежей с нарушениями чек-листа: ${report.drawingViolations.length}`);
+console.log(
+  `8. прототипов без подсказки-вопросов: ${report.bezPodskazki.length}` +
+    (report.bezPodskazki.length > 0 ? ` (${report.bezPodskazki.join(', ')})` : ''),
+);
 report.drawingViolations.forEach((item) => console.log(`   ${item.id}: пункты ${item.points}`));
+
+/* Формулы подсказок набираются KaTeX без ошибок (на сайте ошибка
+   оставила бы сырой TeX на кнопке). */
+const katex = require0('katex');
+const oshibkiKatex = [];
+for (const prototype of BANK) {
+  for (const variant of prototype.varianty) {
+    for (const shag of prototype.podskazka?.(variant.params) ?? []) {
+      for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
+        stroka.split('$').forEach((kusok, i) => {
+          if (i % 2 === 0) return;
+          try {
+            katex.renderToString(kusok, { throwOnError: true, strict: 'ignore' });
+          } catch (e) {
+            oshibkiKatex.push(
+              `${prototype.id} вариант ${variant.n}: «${kusok}» — ${e.message.split('\n')[0]}`,
+            );
+          }
+        });
+      }
+    }
+  }
+}
+console.log(`9. формул подсказок, которые не набирает KaTeX: ${oshibkiKatex.length}`);
+oshibkiKatex.slice(0, 20).forEach((item) => console.log(`   ${item}`));
+
+/* Открытый банк ФИПИ: каждая задача №3 из снимка банка стоит в fipi.ts
+   ровно один раз, у варианта те же числа условия, а вариант с
+   источником «фипи» есть в таблице. Числа сравниваются без разметки:
+   корень «√( 2 )» и «\sqrt{2}» — число под корнем, индексы вершин
+   (A1, A₁, A_1) — не числа. */
+const { FIPI_3 } = require0(path.join(out, 'zadanie3', 'fipi.js'));
+const snimok = JSON.parse(
+  fs.readFileSync(
+    path.join(root, '..', 'content-source', 'stereometria', 'fipi-otkrytyy-bank.json'),
+    'utf8',
+  ),
+);
+const chislaUsloviya = (t) =>
+  (
+    t
+      .replace(/√\(\s*(\d+)\s*\)/g, ' $1 ')
+      .replace(/\\sqrt\{(\d+)\}/g, ' $1 ')
+      .replace(/\b([A-Z])\s?1\b/g, '$1')
+      .replace(/([A-Z])[₀-₉]+/g, '$1')
+      .replace(/_\{?\d\}?/g, '')
+      .replace(/(\d),(\d)/g, '$1.$2')
+      .match(/\d+(?:\.\d+)?/g) ?? []
+  )
+    .map(Number)
+    .sort((x, y) => x - y)
+    .join(' ');
+const oshibkiFipi = [];
+const vTablice = new Map();
+for (const [klyuch, nomera] of Object.entries(FIPI_3)) {
+  const [id, n] = klyuch.split('#');
+  const prototype = BANK.find((p) => p.id === id);
+  const variant = prototype?.varianty.find((v) => v.n === Number(n));
+  if (variant === undefined) {
+    oshibkiFipi.push(`${klyuch}: нет такого варианта`);
+    continue;
+  }
+  for (const nomer of nomera) {
+    vTablice.set(nomer, (vTablice.get(nomer) ?? 0) + 1);
+    const zadacha = snimok.zadachi.find((z) => z.nomer === nomer);
+    if (zadacha === undefined) {
+      oshibkiFipi.push(`${klyuch}: задачи ${nomer} нет в снимке банка`);
+    } else if (
+      chislaUsloviya(zadacha.uslovie) !== chislaUsloviya(prototype.uslovie(variant.params))
+    ) {
+      oshibkiFipi.push(`${klyuch}: числа условия не те, что у задачи ФИПИ ${nomer}`);
+    }
+  }
+}
+for (const zadacha of snimok.zadachi.filter((z) => z.zadanie === '3')) {
+  const k = vTablice.get(zadacha.nomer) ?? 0;
+  if (k !== 1) oshibkiFipi.push(`задача ФИПИ ${zadacha.nomer} стоит в таблице ${k} раз`);
+}
+for (const prototype of BANK) {
+  for (const variant of prototype.varianty) {
+    if (variant.source === 'фипи' && FIPI_3[`${prototype.id}#${variant.n}`] === undefined) {
+      oshibkiFipi.push(`${prototype.id} вариант ${variant.n}: источник «фипи», а номера ФИПИ нет`);
+    }
+  }
+}
+console.log(
+  `10. открытый банк ФИПИ: задач в таблице ${vTablice.size} из ${snimok.zadachi.filter((z) => z.zadanie === '3').length}, расхождений ${oshibkiFipi.length}`,
+);
+oshibkiFipi.slice(0, 20).forEach((item) => console.log(`   ${item}`));
 
 fs.rmSync(out, { recursive: true, force: true });
 
-if (bad.length > 0 || report.notTen.length > 0) {
+if (
+  bad.length > 0 ||
+  report.notTen.length > 0 ||
+  report.bezPodskazki.length > 0 ||
+  oshibkiKatex.length > 0 ||
+  oshibkiFipi.length > 0
+) {
   console.error(`\nБанк не сходится: ${bad.length} вариантов с проблемами.`);
   bad
     .slice(0, 30)
     .forEach((row) => console.error(`  ${row.id} вариант ${row.n}: ${row.problems.join('; ')}`));
   report.notTen.forEach((item) => console.error(`  не по десять вариантов: ${item}`));
+  if (report.bezPodskazki.length > 0) {
+    console.error(`  без подсказки-вопросов: ${report.bezPodskazki.join(', ')}`);
+  }
   process.exit(1);
 }
 

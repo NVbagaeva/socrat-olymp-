@@ -222,6 +222,51 @@ def z06_sigma(p):
     return sp.sqrt(z06_disp(p))
 
 
+def z04_chastota(p):
+    return sp.Abs(R(p["p"]) - sp.Rational(p["k"], p["N"]))
+
+
+def z04_sootech(p):
+    # Перебор: участник на следующем месте — любой из оставшихся n − 1.
+    ostalnye = [1] * (p["m"] - 1) + [0] * (p["n"] - p["m"])
+    return sp.Rational(sum(ostalnye), len(ostalnye))
+
+
+def z04_bez_defekta(p):
+    return 1 - sp.Rational(p["k"], p["N"])
+
+
+def z05_misheni(p):
+    a1, a2, b1, b2 = (R(p[k]) for k in ("a1", "a2", "b1", "b2"))
+    dva = lambda x, y: 1 - (1 - x) * (1 - y)  # noqa: E731
+    return sp.Max(dva(a1, a2) * b1, a1 * dva(b1, b2))
+
+
+def z05_tsvet(p):
+    n1 = p["a1"] + p["b1"]
+    n2 = p["a2"] + p["b2"]
+    return sp.Rational(p["a1"] * p["a2"] + p["b1"] * p["b2"], n1 * n2)
+
+
+def z05_oba(p):
+    # P(A) + P(B) − P(A ∪ B), P(A ∪ B) = 1 − P(ни в одном).
+    AB = sp.symbols("AB")
+    return sp.solve(sp.Eq(2 * R(p["p"]) - AB, 1 - R(p["r"])), AB)[0]
+
+
+def z06_strahovka(p):
+    c = sp.symbols("c")
+    pr = sp.Rational(p["pn"], p["pden"])
+    E = c * (1 - pr) + (c - R(p["V"])) * pr
+    return sp.solve(sp.Eq(E, R(p["R"])), c)[0]
+
+
+def z06_promezhutok(p):
+    lo = (lambda x: x > p["a"]) if p["zl"] == "lt" else (lambda x: x >= p["a"])
+    hi = (lambda x: x < p["b"]) if p["zr"] == "lt" else (lambda x: x <= p["b"])
+    return sum(sp.Rational(n, p["den"]) for x_, n in zip(p["xs"], p["ps"]) if lo(x_) and hi(x_))
+
+
 def z07_log_stepeni(p):
     a = sp.Integer(p["a"])
     e = p["k"] * x + p["b"]
@@ -343,6 +388,15 @@ SCHET.update({
     "z05.kost-uslovie": z05_kost,
     "z06.dispersiya": z06_disp,
     "z06.otklonenie": z06_sigma,
+    "z04.chastota": z04_chastota,
+    "z04.sootechestvennik": z04_sootech,
+    "z04.bez-defekta": z04_bez_defekta,
+    "z04.ne-podtekaet": z04_bez_defekta,
+    "z05.dve-misheni": z05_misheni,
+    "z05.odin-tsvet": z05_tsvet,
+    "z05.oba-zakonchilis": z05_oba,
+    "z06.strahovka-tys": z06_strahovka,
+    "z06.promezhutok": z06_promezhutok,
     "z07.log-stepeni": z07_log_stepeni,
     "z07.log-postoronniy": z07_postoronniy,
     "z08.log-pryamoy": z08_pryamoy,
@@ -359,6 +413,310 @@ SCHET.update({
     "z12.koren-koren": z12_koren,
     "z13.stavka-vklada": z13_stavka,
     "z13.posledniy-platezh": z13_posledniy,
+})
+
+
+# ── Партия 2, группа g1 (варианты 7–12, №1–3) ───────────────────
+
+
+def z01_trapeciya_radius(p):
+    # Описанная: сумма боковых = P/2; меньшая боковая — высота = 2r.
+    r = sp.symbols("r", positive=True)
+    return sp.solve(sp.Eq(2 * r + p["c"], R(p["per"]) / 2), r)[0]
+
+
+def z01_osnovanie_cos(p):
+    # Теорема косинусов в ABC для угла A: BC² = AB² + AC² − 2·AB·AC·cos A, BC = AC.
+    x = sp.symbols("x", positive=True)
+    l = R(p["l"])
+    return sp.solve(sp.Eq(l**2, x**2 + l**2 - 2 * x * l * R(p["c"])), x)[0]
+
+
+def z01_bok_sin(p):
+    # Угол при основании острый: cos A = +√(1 − sin²A); дальше теорема косинусов для AC = BC = y.
+    y = sp.symbols("y", positive=True)
+    c, cosA = R(p["c"]), sp.sqrt(1 - R(p["s"]) ** 2)
+    return sp.solve(sp.Eq(y**2, c**2 + y**2 - 2 * c * y * cosA), y)[0]
+
+
+def ugly_bissektrisa(p):
+    # Координаты (40 знаков): A(0,0), C(1,0), B над серединой AC; F — где биссектриса из A
+    # пересекает BC (делит BC в отношении AB : AC — свойство биссектрисы).
+    import mpmath as mp
+
+    mp.mp.dps = 40
+    pri = (180 - mp.mpf(p["b"])) / 2 * mp.pi / 180
+    A, C = mp.matrix([0, 0]), mp.matrix([1, 0])
+    B = mp.matrix([mp.mpf(1) / 2, mp.tan(pri) / 2])
+    AB = mp.norm(B - A)
+    F = B + (C - B) * (AB / (AB + 1))
+
+    def ugol(P, Q, Rr):
+        u, w = P - Q, Rr - Q
+        val = mp.acos((u[0] * w[0] + u[1] * w[1]) / (mp.norm(u) * mp.norm(w))) * 180 / mp.pi
+        return sp.nsimplify(sp.Float(mp.nstr(val, 35), 35), tolerance=sp.Rational(1, 10**25), rational=True)
+
+    return F, A, B, C, ugol
+
+
+def z01_afc(p):
+    F, A, B, C, ugol = ugly_bissektrisa(p)
+    return ugol(A, F, C)
+
+
+def z01_afb(p):
+    F, A, B, C, ugol = ugly_bissektrisa(p)
+    return ugol(A, F, B)
+
+
+def z02_skalyar_ris(p):
+    return (R(p["k"]) * sp.Matrix([p["ax"], p["ay"]])).dot(sp.Matrix([p["bx"], p["by"]]))
+
+
+def z02_dlina_km(p):
+    r = p["k"] * sp.Matrix([p["ax"], p["ay"]]) + p["m"] * sp.Matrix([p["bx"], p["by"]])
+    return sp.sqrt(r.dot(r))
+
+
+def z03_prizma_gip(p):
+    q = sp.sqrt(p["q"])
+    a, b = p["a"] * q, p["b"] * q
+    c = sp.sqrt(a**2 + b**2)
+    return sp.simplify(a * b + (a + b + c) * c)
+
+
+def z03_bez_piramidy(p):
+    # Наклонная призма по координатам: объём остатка — выпуклая оболочка A, B, A1, B1, C1.
+    V = R(p["V"])
+    h = sp.symbols("h", positive=True)
+    A, B, C = sp.Matrix([0, 0, 0]), sp.Matrix([4, 0, 0]), sp.Matrix([1, 3, 0])
+    s = sp.Matrix([1, 2, h])
+    hh = sp.solve(sp.Eq(sp.Rational(1, 2) * 4 * 3 * h, V), h)[0]
+    tet = lambda P, Q, Rr, S: abs((Q - P).dot((Rr - P).cross(S - P))) / 6
+    A1, B1, C1 = A + s, B + s, C + s
+    ost = tet(A, B, A1, C1) + tet(B, A1, B1, C1)
+    return sp.simplify(ost.subs(h, hh))
+
+
+def z03_delit(p):
+    V, m, n = R(p["V"]), p["m"], p["n"]
+    h = sp.symbols("h", positive=True)
+    A, B, C = sp.Matrix([0, 0, 0]), sp.Matrix([6, 0, 0]), sp.Matrix([2, 5, 0])
+    S = sp.Matrix([1, 1, h])
+    hh = sp.solve(sp.Eq(sp.Rational(1, 3) * 15 * h, V), h)[0]
+    M = S + sp.Rational(m, m + n) * (C - S)
+    tet = lambda P, Q, Rr, T: abs((Q - P).dot((Rr - P).cross(T - P))) / 6
+    return sp.simplify(sp.Min(tet(S, A, B, M), tet(M, A, B, C)).subs(h, hh))
+
+
+def z03_cilindry(p):
+    r, h = sp.symbols("r h", positive=True)
+    V1 = sp.pi * r**2 * h
+    V2 = sp.pi * (r / R(p["b"])) ** 2 * (h * R(p["a"]))
+    return sp.simplify(V2 / V1 * R(p["V"]))
+
+
+def z03_kruzhki(p):
+    d, h = sp.symbols("d h", positive=True)
+    V1 = sp.pi * (d / 2) ** 2 * (h * R(p["hk"]))
+    V2 = sp.pi * (d * R(p["wk"]) / 2) ** 2 * h
+    return sp.simplify(V2 / V1)
+
+
+SCHET.update({
+    "z01.trapeciya-radius": z01_trapeciya_radius,
+    "z01.ravnobedr-osnovanie-cos": z01_osnovanie_cos,
+    "z01.ravnobedr-bok-sin": z01_bok_sin,
+    "z01.bissektrisa-afc": z01_afc,
+    "z01.bissektrisa-afb": z01_afb,
+    "z02.skalyar-po-risunku": z02_skalyar_ris,
+    "z02.dlina-km": z02_dlina_km,
+    "z03.prizma-gipotenuza": z03_prizma_gip,
+    "z03.prizma-bez-piramidy": z03_bez_piramidy,
+    "z03.piramida-delit-rebro": z03_delit,
+    "z03.dva-cilindra-vyshe": z03_cilindry,
+    "z03.dve-kruzhki": z03_kruzhki,
+})
+
+
+# ── Партия 2: №7, №8, №12 вариантов 7–12 ─────────────────────────
+
+
+def z07_kub(p):
+    sol = [s_ for s_ in sp.solve(sp.Eq((1 / x + p["c"]) ** 3, p["d"]), x) if s_.is_real]
+    assert len(sol) == 1, sol
+    return sol[0]
+
+
+def z07_x2(p):
+    a, b = R(p["a"]), R(p["b"])
+    sol = [s_ for s_ in sp.solve(sp.Eq(a * x**2 - b, x**4), x) if s_.is_real and a * s_**2 - b >= 0]
+    return min(sol)
+
+
+def z07_smesh(p):
+    c = p["w"] + sp.Rational(p["n"], p["m"])
+    sol = [s_ for s_ in sp.solve(sp.Eq(p["k"] * x, (c * x) ** 2), x) if s_ >= 0]
+    assert 0 in sol, sol
+    return max(sol)
+
+
+def z08_chastnoe(p):
+    A, B = sp.Integer(p["a"]) ** p["i"], sp.Integer(p["b"]) ** p["j"]
+    C, D = sp.Integer(p["a"]) ** p["k"], sp.Integer(p["b"]) ** p["l"]
+    return sp.nsimplify(sp.simplify(sp.log(B, A) / sp.log(D, C)))
+
+
+def z08_trig(p):
+    fns = {"sin": sp.sin, "cos": sp.cos, "tg": sp.tan}
+    val = lambda u: fns[u[0]](sp.Rational(u[1], u[2]) * sp.pi)
+    e = p["k"] * sp.sqrt(p["r"])
+    for u in p["f"]:
+        e *= val(u)
+    return sp.nsimplify(sp.simplify(e / val(p["g"])))
+
+
+def z08_ambn(p):
+    a, b = sp.symbols("a b", positive=True)
+    L = R(p["t"]) if p["dano"] == "ab" else 1 / R(p["t"])
+    arg = a ** p["m"] * b ** p["n"] if p["op"] == "umn" else a ** p["m"] / b ** p["n"]
+    e = sp.expand_log(sp.log(arg) / sp.log(a), force=True)
+    return sp.simplify(e.subs(sp.log(b), L * sp.log(a)))
+
+
+def z12_parabola_b(p):
+    a = sp.symbols("a")
+    b, c = R(p["b"]), R(p["c"])
+    qx, qy = p["Q"]
+    aa = sp.solve(sp.Eq(a * qx**2 + b * qx + c, qy), a)[0]
+    return aa * p["x0"] ** 2 + b * p["x0"] + c
+
+
+def z12_pokaz(p):
+    px, py = p["P"]
+    a = sp.Integer(py) ** sp.Rational(1, px)
+    return sp.simplify(a ** p["m"] / a ** p["n"])
+
+
+def z12_korni(p):
+    a, b, c = sp.symbols("a b c")
+    s = sp.solve([a * p["x1"] ** 2 + b * p["x1"] + c, a * p["x2"] ** 2 + b * p["x2"] + c, c - p["c"]], [a, b, c])
+    return s[a] * p["x0"] ** 2 + s[b] * p["x0"] + s[c]
+
+
+SCHET.update({
+    "z07.kub-obratnoe": z07_kub,
+    "z07.koren-x2": z07_x2,
+    "z07.koren-smeshannoe": z07_smesh,
+    "z08.log-chastnoe-stepeney": z08_chastnoe,
+    "z08.trig-privedenie": z08_trig,
+    "z08.log-am-bn": z08_ambn,
+    "z12.parabola-b": z12_parabola_b,
+    "z12.pokazatelnaya-otnoshenie": z12_pokaz,
+    "z12.parabola-korni": z12_korni,
+})
+
+
+# ── Партия 2 (варианты 7–12) ────────────────────────────────────
+
+
+def z09_kasat(p):
+    # Наклон прямой через два узла; узел касания лежит на ней.
+    (ax, ay), (bx, by) = p["A"], p["B"]
+    k = sp.Rational(by - ay, bx - ax)
+    y0 = dict((u[0], u[1]) for u in p["uzly"])[p["x0"]]
+    assert ay + k * (p["x0"] - ax) == y0, "касательная мимо узла"
+    return k
+
+
+def z09_znak(p):
+    # Знак f′ в целой точке: по участку монотонности между узлами-экстремумами.
+    u = p["uzly"]
+    ext = [u[0][0]] + [u[i][0] for i in range(1, len(u) - 1) if (u[i][1] - u[i - 1][1]) * (u[i + 1][1] - u[i][1]) < 0] + [u[-1][0]]
+    val = dict((a, b) for a, b in u)
+    n = 0
+    for m in p["metki"]:
+        assert m not in ext[1:-1], "точка в вершине"
+        lo = max(e for e in ext if e < m)
+        hi = min(e for e in ext if e > m)
+        s = 1 if val[hi] > val[lo] else -1
+        n += s == p["znak"]
+    return sp.Integer(n)
+
+
+def z10_linza(p, naib=False):
+    d1, d2 = sp.symbols("d1 d2", positive=True)
+    f = p["f"]
+    kr = [sp.solve(sp.Eq(1 / d1 + 1 / R(p[k]), sp.Rational(1, f)), d1)[0] for k in ("d2max", "d2min")]
+    lo, hi = max(R(p["d1min"]), min(kr)), min(R(p["d1max"]), max(kr))
+    assert lo <= hi
+    return hi if naib else lo
+
+
+def z10_dolya(p):
+    A = p["ak"] * sp.sqrt(p["am"])
+    tau = R(p["tau"])
+    reg = sp.solveset(A * sp.sin(sp.pi * t / p["T"]) <= p["c"], t, sp.Interval(0, tau))
+    return sp.nsimplify(reg.measure / tau)
+
+
+def z10_raspad(p):
+    return sp.solve(sp.Eq(p["m0"] * 2 ** (-t / sp.Integer(p["T"])), p["m"]), t)[0]
+
+
+def z11_tri(p):
+    X, Y = sp.symbols("X Y", positive=True)
+    a, b, c = p["a"], p["b"], p["c"]
+    e1 = sp.Eq(a * X + b * Y + c * p["m1"], p["p1"] * (X + Y + p["m1"]))
+    e2 = sp.Eq(a * X + b * Y + c * p["m2"], p["p2"] * (X + Y + p["m2"]))
+    s = sp.solve([e1, e2], [X, Y], dict=True)[0]
+    return s[X] if p["ask"] == "a" else s[Y]
+
+
+def z11_suda(p):
+    return sp.solve(sp.Eq(v * sp.Rational(p["t"], 60), sp.Rational(p["a"] + p["L1"] + p["L2"] + p["b"], 1000)), v)[0]
+
+
+def z11_put(p):
+    S = sp.symbols("S", positive=True)
+    s = sp.solve(sp.Eq(S / (p["v"] + p["c"]) + S / (p["v"] - p["c"]), p["T"] - p["st"]), S)[0]
+    return 2 * s
+
+
+def z13_dif_stavka(p):
+    r = sp.symbols("r", positive=True)
+    S, n = p["S"], p["n"]
+    total = sum((S - i * sp.Rational(S, n)) * r / 100 + sp.Rational(S, n) for i in range(n))
+    return sp.solve(sp.Eq(total, p["T"]), r)[0]
+
+
+def z13_popolneniya(p):
+    X = sp.symbols("X", positive=True)
+    k = 1 + R(p["r"]) / 100
+    return sp.solve(sp.Eq(((p["S"] * k + X) * k + X) * k, p["Z"]), X)[0]
+
+
+def z13_summa_ub(p):
+    S = R(p["S"]) * 10**6
+    k = 1 + R(p["r"]) / 100
+    m = 1 - R(p["q"]) / 100
+    dolgi = [S * m**i for i in range(p["n"])] + [0]
+    return sum(dolgi[i] * k - dolgi[i + 1] for i in range(p["n"]))
+
+
+SCHET.update({
+    "z09.kasatelnaya": z09_kasat,
+    "z09.znak-v-tochkah": z09_znak,
+    "z10.linza": z10_linza,
+    "z10.linza-max": lambda p: z10_linza(p, True),
+    "z10.dolya-vremeni": z10_dolya,
+    "z10.raspad": z10_raspad,
+    "z11.tri-rastvora": z11_tri,
+    "z11.suhogruzy": z11_suda,
+    "z11.ves-put": z11_put,
+    "z13.dif-stavka": z13_dif_stavka,
+    "z13.ravnye-popolneniya": z13_popolneniya,
+    "z13.summa-ubyvanie": z13_summa_ub,
 })
 
 

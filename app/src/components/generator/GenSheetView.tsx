@@ -31,7 +31,6 @@ export function GenSheetView({
   tasks,
   subtitle,
   teacher,
-  demo,
   live,
   levels = true,
   extras,
@@ -44,7 +43,6 @@ export function GenSheetView({
   tasks: GenTask[];
   subtitle: string;
   teacher: boolean;
-  demo: boolean;
   live: boolean;
   /** У раздела есть уровни — у задачи кнопка «Другой уровень». */
   levels?: boolean;
@@ -73,10 +71,7 @@ export function GenSheetView({
     }
   };
   return (
-    <article
-      className={clsx('gen-paper', demo && 'is-demo', live && 'is-live')}
-      aria-label={demo ? GEN_UI.primerLista : undefined}
-    >
+    <article className={clsx('gen-paper', live && 'is-live')}>
       <header className="gen-paper__head">
         <span className="gen-paper__logo" aria-hidden="true">
           <GenIcon name="pen" />
@@ -109,8 +104,8 @@ export function GenSheetView({
         )}
       </div>
       <p className="gen-paper__sub">
-        {demo ? GEN_UI.primerLista : subtitle}
-        {teacher && !demo ? ` · ${GEN_UI.resheniya}` : ''}
+        {subtitle}
+        {teacher ? ` · ${GEN_UI.resheniya}` : ''}
       </p>
       <div className="gen-paper__fields">
         <b>{GEN_UI.familiya}</b>
@@ -194,7 +189,7 @@ export function GenSheetView({
                 <>
                   {(() => {
                     const field =
-                      space === undefined || demo
+                      space === undefined
                         ? null
                         : spaceFor(space, null, solutionLength(t.solutionHtml));
                     return field === null ? null : (
@@ -280,7 +275,7 @@ export function GenSheetView({
           </li>,
         ])}
       </ol>
-      {teacher && !demo ? (
+      {teacher ? (
         <p className="gen-paper__src">{GEN_UI.istochnikStroka(bankNos, tasks.length)}</p>
       ) : null}
     </article>
