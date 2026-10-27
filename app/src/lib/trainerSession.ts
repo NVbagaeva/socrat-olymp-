@@ -286,6 +286,37 @@ export function buildSession(request: SessionRequest): Session {
 }
 
 /**
+ * Одна задача по шаблону («12Q.B-07») для тренажёра с фильтрами.
+ * Движок собирает набор целиком, поэтому собранные наборы кладутся в
+ * cache: задачи одного набора в тренировке берутся из одной сборки.
+ * seedFor(attempt) — seed попытки; набор не собрался или задача на
+ * нём без проверяемого ответа — следующая попытка. Детерминированно:
+ * те же seed дают ту же задачу, и сессия собирается заново по ключу.
+ */
+export function zadachaShablona(
+  key: string,
+  seedFor: (attempt: number) => string,
+  cache: Map<string, EngineTask[] | null>,
+  tries = SEED_TRIES,
+): TrainerTask | null {
+  const setId = key.split('-')[0] ?? key;
+  for (let attempt = 0; attempt < tries; attempt += 1) {
+    const seed = seedFor(attempt);
+    const at = `${setId}\u0000${seed}`;
+    let tasks = cache.get(at);
+    if (tasks === undefined) {
+      tasks = trySet(setId, seed, { rejected: 0 });
+      cache.set(at, tasks);
+    }
+    const found = tasks?.find((task) => task.id === key);
+    if (found !== undefined && answerable(found, true)) {
+      return sessionTask(found);
+    }
+  }
+  return null;
+}
+
+/**
  * Рецепт задания в сохранённой сессии: набор, seed, задача набора и
  * подпись. Движок детерминирован по (набор, seed), так что больше
  * ничего не нужно: режим, уровень, фильтр по правилам и история

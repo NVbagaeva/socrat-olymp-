@@ -1,15 +1,24 @@
 import type { ReactNode } from 'react';
-import { trainerPage, trainerWordsFor } from '@/content/trainerModes';
-import { levelsWithHtml, skillLevelsFor } from '@/content/skills12';
-import { typeset } from '@/lib/tex';
-import { scopeOfPath } from '@/lib/trainerSession/scope';
+import { trainerPage } from '@/content/trainerModes';
+import type { TrainerModeId } from '@/content/trainerModes';
 import type { Subtopic } from '@/content/sections';
 import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
-import { findManifestFamily } from '@/lib/generator/manifest';
-import { prototypes } from '@/lib/graph/data/index.js';
-import { skillItems } from '../configurator/skillItems';
+import { ZADANIYA } from '@/lib/paths';
+import { izmenit, kRazdelu, NACHALNYY } from '@/lib/trenazher/filtr';
+import type { Filtr, TrenazherConfig } from '@/lib/trenazher/types';
+import { podtemaNabora, trenazherConfig12, zadachi12 } from '@/lib/ves12/trenazher12';
 import { TabScrollOnMount } from '../TabScroll';
-import { TrainerBuilder, type TrainerPreset } from './TrainerBuilder';
+import { Trenazher12Lazy } from './Trenazher12Lazy';
+import { szhatRefs } from './refsSzhato';
+
+/** Ярлык прежнего адреса /trenazher/<режим>/: наборы, режим, правила ответа. */
+export interface TrainerPreset {
+  skill: string | null;
+  skills?: string[];
+  mode: TrainerModeId;
+  rules?: string[];
+  filter?: string;
+}
 
 export interface TrainerShellProps {
   subtopic: Subtopic;
@@ -19,85 +28,66 @@ export interface TrainerShellProps {
   preset?: TrainerPreset | null;
   /** Иконка раздела для сводки. */
   icon?: IkonkaRazdela | undefined;
-  /** Экран сессии: подставляется вместо конфигуратора. */
+  /** Экран сессии: подставляется вместо тренажёра. */
   children?: ReactNode;
 }
 
 /**
- * Вкладка «Тренажёр»: заголовок и конфигуратор тренировки; сводка
- * сделанного живёт под конфигуратором и уходит вместе с ним, когда
- * начинается сессия. Шапку темы и ленту вкладок рисует страница
- * темы: вкладка живёт внутри них, а не вместо них.
- *
- * Карточки навыков собираются здесь, на сервере: движок рисует
- * миниатюры на сборке, в браузер уходит готовая разметка.
+ * Ярлык прежнего адреса — в фильтр: «Отработка» — выбранные наборы от
+ * простых к сложным, «Смешанная» — вперемешку, «Повтор ошибок» —
+ * только с ошибками, «Контроль» — без подсказок.
+ */
+export function filtrYarlyka(preset: TrainerPreset, config: TrenazherConfig): Filtr {
+  const skills = preset.skills ?? (preset.skill === null ? [] : [preset.skill]);
+  let f: Filtr = { ...NACHALNYY };
+  if (skills.length > 0) f = izmenit(f, { tipy: skills });
+  if (preset.rules !== undefined && preset.rules.length > 0) {
+    f = izmenit(f, {
+      pravila: preset.rules,
+      ...(preset.filter === undefined ? {} : { pravilaTitle: preset.filter }),
+    });
+  }
+  if (preset.mode === 'practice') f = izmenit(f, { poryadok: 'prostye' });
+  if (preset.mode === 'mistakes') f = izmenit(f, { moi: 'oshibki' });
+  if (preset.mode === 'control') f = izmenit(f, { rezhim: 'bez' });
+  return kRazdelu(f, config);
+}
+
+/** Теория и опорные задачи подтемы — ссылки в итогах по типам с ошибками. */
+export function ssylki12(): Record<string, { teoriya: string; opornye: string }> {
+  return Object.fromEntries(
+    Object.entries(podtemaNabora()).map(([set, tip]) => [
+      set,
+      { teoriya: `${ZADANIYA}/12/${tip}/`, opornye: `${ZADANIYA}/12/${tip}/opornye-zadachi/` },
+    ]),
+  );
+}
+
+/**
+ * Вкладка «Тренажёр» подтемы №12: панель фильтров сверху и сессия.
+ * Конфиг и список шаблонов задач собираются здесь, на сервере: данные
+ * прототипов в браузер не идут, движок грузится по «Начать».
  */
 export function TrainerShell({ subtopic, base, icon, preset = null, children }: TrainerShellProps) {
-  const family = findManifestFamily(subtopic.id);
-  /* Ярлык может вести не в один набор, а в связку: тогда
-     конфигуратор показывает только её наборы, и «Смешанная» идёт
-     по ним же — иначе выбранное на экране расходилось бы с тем,
-     что попадёт в тренировку. */
-  const group = preset?.skills ?? [];
-  const rules = preset?.rules ?? [];
-  const all = skillItems(family);
-  /* Фильтр по правилу ответа: в конфигураторе только наборы ярлыка,
-     и у каждого — столько задач, сколько оставил фильтр. */
-  const skills = rules.length > 0
-    ? all
-      .filter((item) => group.includes(item.id))
-      .map((item) => ({ ...item, count: ruleCount(item.id, rules) }))
-    : group.length > 1 ? all.filter((item) => group.includes(item.id)) : all;
-  const total = group.length > 1 || rules.length > 0
-    ? skills.reduce((sum, item) => sum + item.count, 0)
-    : (family?.prototypes.tasks ?? 0);
-
+  const config = trenazherConfig12(subtopic.id);
+  const refs = zadachi12(subtopic.id);
+  const sets = config.temy.flatMap((t) => t.podtipy.map((p) => p.id));
   return (
     <section className="trainer">
       <header className="trainer__head">
         <h2 className="t-h2 trainer__title">{trainerPage.title}</h2>
       </header>
-
-      {/* На телефоне вкладка оказывается ниже кромки экрана:
-          подводим её к глазам, как во вкладке подготовки. */}
       <TabScrollOnMount />
-
-      {children === undefined && preset?.filter !== undefined ? (
-        <p className="trainer__filter">
-          <span className="trainer__filter-text">{preset.filter}</span>
-          <a className="trainer__filter-reset" href={base}>
-            Показать все задачи
-          </a>
-        </p>
-      ) : null}
-
       {children ?? (
-        <TrainerBuilder
-          base={base}
-          scope={scopeOfPath(base) ?? subtopic.id}
-          family={subtopic.title}
-          familyIcon={icon}
-          familySets={all.map((item) => item.id)}
-          familyTotal={total}
-          skills={skills}
-          levels={levelsWithHtml(skillLevelsFor(subtopic.id), typeset)}
-          words={trainerWordsFor(subtopic.id)}
-          /* Ответ выбором варианта — признак подтемы: у линейной его
-             нет, и её тренажёр берёт только числовые ответы. */
-          choice={subtopic.choiceAnswers === true}
-          preset={preset}
+        <Trenazher12Lazy
+          config={config}
+          refs={szhatRefs(refs)}
+          start={preset === null ? null : filtrYarlyka(preset, config)}
+          backHref={base}
+          ssylki={ssylki12()}
+          svodka={{ total: refs.length, sets, razdel: { title: subtopic.title, icon } }}
         />
       )}
     </section>
   );
-}
-
-/** Сколько задач набора отвечают по одному из правил. */
-function ruleCount(setId: string, rules: string[]): number {
-  const set = (prototypes as unknown as { id: string; tasks: { answerRule?: string }[] }[]).find(
-    (item) => item.id === setId,
-  );
-  return set === undefined
-    ? 0
-    : set.tasks.filter((task) => rules.includes(task.answerRule ?? '')).length;
 }

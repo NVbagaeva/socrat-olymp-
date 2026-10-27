@@ -36,11 +36,6 @@
 .app-main:has(.gen) .section-panel {
   margin-top: 0;
 }
-.gen-ico {
-  width: 18px;
-  height: 18px;
-  flex: none;
-}
 .gen-label {
   font-size: var(--fs-label);
   line-height: var(--lh-label);
@@ -55,25 +50,6 @@
 }
 .gen-wide {
   width: 100%;
-}
-.gen-iconbtn {
-  display: grid;
-  place-items: center;
-  width: var(--h-control);
-  height: var(--h-control);
-  border: 0;
-  border-radius: var(--radius-md);
-  background: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-.gen-iconbtn:hover {
-  background: var(--color-surface-2);
-  color: var(--color-text);
-}
-.gen-iconbtn .gen-ico {
-  width: 20px;
-  height: 20px;
 }
 .gen .btn.is-disabled {
   opacity: 0.45;
@@ -111,22 +87,6 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.gen-stars {
-  display: inline-flex;
-  gap: var(--space-1);
-}
-.gen-stars button {
-  min-width: var(--h-control);
-  height: var(--h-control);
-  padding: 0 var(--space-2);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text-tertiary);
-  letter-spacing: -0.05em;
-  cursor: pointer;
-}
-.gen-stars button[aria-pressed='true'],
 .gen-lvcard[aria-pressed='true'] {
   border-color: color-mix(in srgb, var(--color-warning) 45%, transparent);
   background: var(--color-warning-soft);
@@ -173,8 +133,9 @@
   top: var(--topic-sticky-top, 0px);
   z-index: 15;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
-  gap: var(--space-4) var(--space-5);
+  gap: var(--space-3) var(--space-5);
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
@@ -184,9 +145,13 @@
 }
 .gen-strip__filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
-  gap: var(--space-4);
-  flex: none;
+  gap: var(--space-3) var(--space-4);
+  /* Полей бывает четыре (№6, №7 — с «Формулировкой»): на узком
+     компьютере они переносятся, а не выталкивают полосу за экран. */
+  flex: 0 1 auto;
+  min-width: 0;
 }
 .gen-fld {
   display: grid;
@@ -231,63 +196,10 @@
 .gen-strip__chips {
   display: none;
 }
-.gen-popwrap {
-  position: relative;
-}
-.gen-dd {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  height: var(--h-control);
-  padding: 0 var(--space-3);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  font-size: var(--fs-caption);
-  white-space: nowrap;
-  cursor: pointer;
-}
-.gen-pop {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 30;
-  width: 320px;
-  padding: 6px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-lg);
-}
-.gen-pop__opt {
-  display: block;
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 0;
-  border-radius: var(--radius-md);
-  background: none;
-  text-align: left;
-  cursor: pointer;
-}
-.gen-pop__opt:hover {
-  background: var(--color-surface-info);
-}
-.gen-pop__opt b {
-  display: block;
-  font-size: var(--fs-caption);
-}
-.gen-pop__opt[aria-checked='true'] b::before {
-  content: '✓ ';
-  color: var(--color-primary);
-}
-.gen-pop__opt small {
-  font-size: var(--fs-label);
-  color: var(--color-text-secondary);
-}
-@media (max-width: 1179.98px) {
-  .gen-strip {
-    flex-wrap: wrap;
-  }
+/* Активные фильтры — строкой под полосой. */
+.gen-strip__active {
+  flex: 1 0 100%;
+  min-width: 0;
 }
 
 /* ── Колонки ────────────────────────────────────────────────────── */
@@ -1099,57 +1011,9 @@
 }
 
 /* ── Окна, меню, сообщения ──────────────────────────────────────── */
+/* Само окно (нижний лист на телефоне) — okno.css: оно общее с
+   тренажёром. */
 
-.gen-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  padding: var(--space-4);
-}
-.gen-overlay__scrim {
-  position: absolute;
-  inset: 0;
-  background: color-mix(in srgb, var(--color-surface-inverse) 36%, transparent);
-}
-.gen-sheet {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: min(520px, 100%);
-  max-height: min(86dvh, 720px);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-lg);
-}
-.gen-sheet:focus {
-  outline: none;
-}
-.gen-sheet__grip {
-  display: none;
-}
-.gen-sheet__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-3) var(--space-2) var(--space-5);
-}
-.gen-sheet__title {
-  margin: 0;
-  font-size: var(--fs-lg);
-}
-.gen-sheet__body {
-  display: grid;
-  gap: var(--space-2);
-  padding: 0 var(--space-5) var(--space-4);
-  overflow: auto;
-}
-.gen-sheet__foot {
-  padding: var(--space-3) var(--space-5) var(--space-4);
-  border-top: 1px solid var(--color-border);
-}
 .gen-sec {
   display: grid;
   gap: var(--space-2);
@@ -1164,45 +1028,30 @@
   font-size: var(--fs-body);
   font-weight: 600;
 }
-.gen-radios {
+/* Окно «Фильтры»: источник и звёзды — общие переключатели панели
+   фильтров (components/filtry), под звёздами — что значит каждая. */
+.gen-flt {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-4);
 }
-.gen-radio {
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-  width: 100%;
-  min-height: 56px;
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  text-align: left;
-  cursor: pointer;
+.gen-flt .gen-hint {
+  margin: var(--space-1) 0 0;
 }
-.gen-radio i {
-  width: 20px;
-  height: 20px;
-  flex: none;
-  margin-top: 1px;
-  border: 2px solid var(--color-border-strong);
-  border-radius: 50%;
-}
-.gen-radio[aria-checked='true'] {
-  border-color: var(--color-primary);
-  background: var(--color-surface-info);
-}
-.gen-radio[aria-checked='true'] i {
-  border: 6px solid var(--color-primary);
-}
-.gen-radio b {
-  display: block;
-  font-size: var(--fs-caption);
-}
-.gen-radio small {
+.gen-flt__lv {
+  display: grid;
+  gap: 2px;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
   font-size: var(--fs-label);
   color: var(--color-text-secondary);
+}
+.gen-flt__lv b {
+  display: inline-block;
+  min-width: 3.4em;
+  color: var(--color-star);
+  font-weight: 400;
+  letter-spacing: 1px;
 }
 .gen-lvcards {
   display: grid;
@@ -1374,7 +1223,7 @@
     overflow-x: auto;
     scrollbar-width: none;
   }
-  .gen-strip__chips button {
+  .gen-strip__chips button:not(.flt-phone__btn) {
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -1387,11 +1236,8 @@
     font-size: var(--fs-caption);
     cursor: pointer;
   }
-  .gen-strip__chips button.is-main {
-    border-color: var(--color-text);
-    background: var(--color-text);
-    color: var(--color-text-inverse);
-    font-weight: 600;
+  .gen-strip__active {
+    margin-top: var(--space-2);
   }
   .gen-presets {
     display: flex;
@@ -1484,30 +1330,6 @@
   /* Кнопка «?» сайта — над панелью «Сгенерировать», а не поверх неё. */
   body:has(.gen-actbar) .help-fab.help-fab {
     bottom: calc(var(--h-bnav) + 120px + env(safe-area-inset-bottom));
-  }
-  .gen-overlay {
-    place-items: end stretch;
-    padding: 0;
-  }
-  .gen-sheet {
-    width: 100%;
-    max-height: 88dvh;
-    border-radius: 20px 20px 0 0;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .gen-sheet__grip {
-    display: block;
-    width: 40px;
-    height: 4px;
-    margin: var(--space-2) auto 0;
-    border-radius: 2px;
-    background: var(--color-border-strong);
-  }
-  .gen-sheet__head,
-  .gen-sheet__body,
-  .gen-sheet__foot {
-    padding-left: var(--space-4);
-    padding-right: var(--space-4);
   }
 }
 
