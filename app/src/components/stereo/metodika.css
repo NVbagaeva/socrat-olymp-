@@ -1458,6 +1458,13 @@ button.o3-schet__btn:disabled {
     padding: var(--space-2) var(--space-3);
   }
 }
+/* Узкий телефон: длинные подписи («горизонтальный разрез») не влезают
+   в две колонки — варианты в одну. */
+@media (max-width: 400px) {
+  .o3-var {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 
 /* Кнопки «Проверить» и «Подсказка». */
 .o3-zad__knopki {

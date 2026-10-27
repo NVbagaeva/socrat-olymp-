@@ -23,6 +23,7 @@ export function ItogBloka({
   nazvanie,
   plitki,
   teoriyaHref,
+  glava,
   listHref,
   trenazherHref,
   onOtkryt,
@@ -30,6 +31,8 @@ export function ItogBloka({
   nazvanie: string;
   plitki: readonly PlitkaItoga[];
   teoriyaHref: string;
+  /** Название главы теории блока. */
+  glava: string;
   listHref: string;
   trenazherHref: string;
   /** Открыть задачу по месту в блоке (с нуля). */
@@ -127,7 +130,7 @@ export function ItogBloka({
         </span>
         <div className="o3-itog2__tekst">
           <p className="o3-itog2__st">{t.teoriyaTitle}</p>
-          <p className="o3-itog2__lead">{t.teoriyaLead}</p>
+          <p className="o3-itog2__lead">{t.teoriyaLead(glava)}</p>
         </div>
         <Link className="btn btn--secondary o3-btn-strelka" href={teoriyaHref}>
           {t.kTeorii}

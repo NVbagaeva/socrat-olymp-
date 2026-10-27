@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Chertezh3d } from '@/components/stereo/Chertezh3d';
 import { OpornyeStereoScreen } from '@/components/stereo/opornye/OpornyeStereoScreen';
 import { OpornyeStereoShell } from '@/components/stereo/opornye/OpornyeStereoShell';
+import { GLAVY_3 } from '@/content/stereo/glavy';
 import { STEREO, stereoTitle } from '@/content/stereo/zadaniya';
 import { BLOKI_3, blokBySlug, zadachiBloka } from '@/lib/stereo/opornye3/bloki';
 import { sealZadacha } from '@/lib/stereo/opornye3/seal';
@@ -49,7 +50,8 @@ export default async function Page({ params }: { params: Params }) {
         )}
         miniatyury={zadachi.map((z) => renderSolid(z.model, { tema: 'ekran', bezPodpisey: true }))}
         listHref={`${base}/opornye-zadachi/`}
-        teoriyaHref={`${base}/teoriya/#teoriya-treugolnik`}
+        teoriyaHref={`${base}/teoriya/#teoriya-${found.glava}`}
+        glava={GLAVY_3.find((g) => g.id === found.glava)?.title ?? ''}
         trenazherHref={`${base}/trenazher/`}
       />
     </OpornyeStereoShell>

@@ -67,6 +67,8 @@ export interface ZadachaOp3 {
   blok: string;
   uroven: Uroven;
   istochnik: 'fipi' | 'new';
+  /** Номер задачи в открытом банке ФИПИ — у задач с меткой «банк». */
+  fipi?: string;
   vid: Vid;
   uslovie: string;
   model: Model;
@@ -94,6 +96,8 @@ export interface BlokOp3 {
   /** Умение блока. */
   umenie: 'читать' | 'рисовать' | 'считать' | 'читать и рисовать' | 'читать и считать';
   lead: string;
+  /** Глава теории блока (id из content/stereo/glavy.ts): ссылка в итоге. */
+  glava: string;
   /** Блок написан: задачи есть, страница открывается. */
   gotov: boolean;
 }
