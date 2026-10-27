@@ -8,7 +8,6 @@ import { Tex } from '@/components/ui/Tex';
 import { REPETITORY_13, UROKI_13, ZAMETKI_13, type Urok13 } from '@/content/repetitory13';
 import { generatorVersion, kitCode, newKitId, parseKitCode, withKit } from '@/lib/komplekt';
 import { GEN_PARAMS_13, listHref13, minut13, vsegoZadach13 } from '@/lib/zadanie13/gen/params';
-import { KLYUCH_VYBORA_13 } from '@/lib/zadanie13/trenazher/plan';
 import type { TypeCode } from '@/lib/zadanie13/types';
 import { Piktogramma } from '../zadanie11/Piktogrammy';
 
@@ -54,20 +53,6 @@ function novyyKod(): string {
 function chistyyKod(text: string): string | null {
   const p = parseKitCode(text);
   return p === null ? null : kitCode(p.id, p.version);
-}
-
-/** «Решать в тренажёре»: выбор тренажёра — тип урока, остальное как было. */
-function vybratVTrenazhere(chto: TypeCode): void {
-  try {
-    const raw = window.sessionStorage.getItem(KLYUCH_VYBORA_13);
-    const prezhniy = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
-    window.sessionStorage.setItem(
-      KLYUCH_VYBORA_13,
-      JSON.stringify({ ...prezhniy, chto, oshibki: false }),
-    );
-  } catch {
-    /* Хранилище недоступно — тренажёр откроется с выбором по умолчанию. */
-  }
 }
 
 const TIPY: readonly TypeCode[] = ['A', 'B', 'C', 'D'];
@@ -303,8 +288,7 @@ export function Repetitory13({
               <div className="z11-urok-plan__btns">
                 <Link
                   className="btn btn--secondary btn--sm"
-                  href={`${base}/trenazher/`}
-                  onClick={() => vybratVTrenazhere(m.chto)}
+                  href={`${base}/trenazher/?t=${m.chto}`}
                 >
                   {REPETITORY_13.vTrenazhere}
                 </Link>

@@ -28,6 +28,8 @@ export interface TrenPayload {
   /** Seed тренировки: новый на каждый запуск. */
   seed: string;
   items: ZadachaItem[];
+  /** Дополнительные поля раздела (Filtr.dop): как решаются задачи. */
+  dop?: Record<string, string>;
 }
 
 function isItem(value: unknown): value is ZadachaItem {
@@ -49,7 +51,9 @@ export function isTrenPayload(value: unknown): value is TrenPayload {
     typeof value['seed'] === 'string' &&
     Array.isArray(value['items']) &&
     value['items'].length > 0 &&
-    value['items'].every(isItem)
+    value['items'].every(isItem) &&
+    (value['dop'] === undefined ||
+      (isRecord(value['dop']) && Object.values(value['dop']).every((x) => typeof x === 'string')))
   );
 }
 

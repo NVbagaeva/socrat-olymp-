@@ -2371,3 +2371,22 @@
 .z11-zametka--poryadok .z11-pic {
   color: var(--color-star);
 }
+
+/* Карточка задачи №11 и №1 в общем тренажёре (Zadacha11.tsx,
+   Zadacha1.tsx): всё по левому краю, ссылки к задаче — строкой. */
+.ptask__text.z11t,
+.ptask__text.z1t {
+  justify-items: stretch;
+  text-align: left;
+}
+.z11t .z11-resh__links,
+.z1t .z11-resh__links {
+  display: flex;
+  flex-wrap: wrap;
+}
+.z11t .z11-resh__link,
+.z1t .z11-resh__link {
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-label);
+}

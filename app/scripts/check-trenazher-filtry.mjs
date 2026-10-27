@@ -38,6 +38,17 @@ const F = requireSrc('lib/trenazher/filtr.ts');
 const S = requireSrc('lib/trenazher/sessiya.ts');
 const T12 = requireSrc('lib/ves12/trenazher12.ts');
 const { functionTypes } = requireSrc('data/functionTypes.ts');
+const T11 = requireSrc('lib/zadanie11/trenazher/filtry11.ts');
+const D11 = requireSrc('lib/zadanie11/trenazher/dannye.ts').dannyeTrenazhera();
+const T1 = requireSrc('lib/planimetriya/trenazher/filtry1.ts');
+const D1 = requireSrc('lib/planimetriya/trenazher/dannye.ts').dannyeTrenazhera1();
+const T13 = requireSrc('lib/zadanie13/trenazher/filtry13.ts');
+const P13 = requireSrc('lib/zadanie13/generate.ts').prototypes();
+const { BANK_13 } = requireSrc('lib/zadanie13/bank.ts');
+const T3 = requireSrc('lib/zadanie3/trenazher/filtry3.ts');
+const { RAZDELY: RAZDELY_3 } = requireSrc('lib/zadanie3/index.ts');
+const { fipiVarianta } = requireSrc('lib/zadanie3/fipi.ts');
+const bezTex = (t) => t;
 
 /* Воспроизводимый генератор случайных чисел. */
 function rng(seed) {
@@ -62,6 +73,14 @@ const RAZDELY = [
       config: T12.trenazherConfig12(t.id),
       refs: T12.zadachi12(t.id),
     })),
+  { name: '№11', config: T11.trenazherConfig11(D11), refs: T11.zadachi11(D11) },
+  { name: '№1', config: T1.trenazherConfig1(D1, bezTex), refs: T1.zadachi1(D1) },
+  { name: '№13', config: T13.trenazherConfig13(P13, bezTex), refs: T13.zadachi13(P13, BANK_13) },
+  {
+    name: '№3',
+    config: T3.trenazherConfig3(RAZDELY_3, bezTex),
+    refs: T3.zadachi3(RAZDELY_3, fipiVarianta),
+  },
 ];
 
 function randomStat(r, refs) {
@@ -86,6 +105,7 @@ function randomFiltr(r, config) {
       'poryadok',
       'moi',
       'tema',
+      'dop',
     ]);
     if (what === 'tipy') f = F.pereklyuchitTip(f, pick(r, ids));
     if (what === 'tema') f = F.pereklyuchitTemu(f, pick(r, config.temy));
@@ -97,6 +117,10 @@ function randomFiltr(r, config) {
     if (what === 'rezhim') f = F.izmenit(f, { rezhim: pick(r, F.REZHIMY) });
     if (what === 'poryadok') f = F.izmenit(f, { poryadok: pick(r, F.PORYADKI) });
     if (what === 'moi') f = F.izmenit(f, { moi: pick(r, F.MOI) });
+    if (what === 'dop' && (config.dop ?? []).length > 0) {
+      const pole = pick(r, config.dop);
+      f = F.kRazdelu({ ...f, dop: { ...f.dop, [pole.id]: pick(r, pole.varianty).id } }, config);
+    }
   }
   return F.kRazdelu(f, config);
 }
@@ -262,6 +286,40 @@ for (const { name, config, refs } of RAZDELY) {
   );
 }
 
+/* Ссылки: тема целиком в «t», прежние «tip» и «tipy», поля раздела. */
+{
+  const c13 = T13.trenazherConfig13(P13, bezTex);
+  const a = F.izSsylki(new URLSearchParams('t=A'), c13);
+  const temaA = c13.temy.find((t) => t.id === 'A').podtipy.map((p) => p.id);
+  check(JSON.stringify(a.tipy) === JSON.stringify(temaA), '№13: «?t=A» — не все прототипы схемы A');
+  const c11 = T11.trenazherConfig11(D11);
+  check(
+    F.estVSsylke(new URLSearchParams('tip=DP-07')) &&
+      F.izSsylki(new URLSearchParams('tip=DP-07'), c11).tipy.join() === 'DP-07',
+    '№11: ссылка «?tip=DP-07» не открыла подтип',
+  );
+  check(
+    F.izSsylki(new URLSearchParams('tipy=PR-01,PR-04,XX'), c11).tipy.join() === 'PR-01,PR-04',
+    '№11: ссылка «?tipy=…» — не те подтипы',
+  );
+  const d = F.izSsylki(new URLSearchParams('d=zadanie.tip,oformlenie.nonsense,chuzhoe.x'), c13);
+  check(
+    JSON.stringify(d.dop) === JSON.stringify({ zadanie: 'tip' }),
+    '№13: поля раздела из ссылки — чужие и неверные не отброшены',
+  );
+  check(F.vSsylku(d) === 'd=zadanie.tip', '№13: поле раздела в ссылке');
+  const tip = F.naborRazdela(c13.nabory[0], F.NACHALNYY, c13);
+  check(tip.dop.zadanie === 'tip', '№13: набор «Определи тип» не задаёт поле');
+  check(
+    F.dopAktivnye(tip, c13).length === 1 && F.snyatDop(tip, 'zadanie').dop.zadanie === undefined,
+    '№13: чип поля раздела и его крестик',
+  );
+  check(
+    F.izSsylki(new URLSearchParams('d=zadanie.tip'), c11).dop.zadanie === undefined,
+    '№11: чужое поле раздела не отброшено',
+  );
+}
+
 /* 6. Сессия. */
 {
   const TS = requireSrc('lib/trainerSession.ts');
@@ -367,6 +425,36 @@ for (const { name, config, refs } of RAZDELY) {
       back.tried[3] === true,
     'перенос: отметки после чтения не те же',
   );
+}
+
+/* №3: ключи читаются обратно, источник — по таблице открытого банка,
+   ссылка разбора типа «?tipy=P03-…» открывает эти прототипы. */
+{
+  const c3 = T3.trenazherConfig3(RAZDELY_3, bezTex);
+  const refs3 = T3.zadachi3(RAZDELY_3, fipiVarianta);
+  const { FIPI_3 } = requireSrc('lib/zadanie3/fipi.ts');
+  check(new Set(refs3.map((r) => r.key)).size === refs3.length, '№3: ключи задач повторяются');
+  for (const r of refs3) {
+    const k = T3.poKlyuchu3(r.key);
+    check(
+      k !== null && k.id === r.podtip && T3.klyuch3(k.id, k.n) === r.key,
+      `№3: ключ ${r.key} не читается обратно`,
+    );
+    check(
+      (r.istochnik === 'fipi') === (FIPI_3[r.key] !== undefined),
+      `№3: источник ${r.key} не совпадает с таблицей ФИПИ`,
+    );
+  }
+  check(
+    refs3.filter((r) => r.istochnik === 'fipi').length === Object.keys(FIPI_3).length,
+    '№3: задач открытого банка не столько, сколько в таблице',
+  );
+  check(
+    F.izSsylki(new URLSearchParams('tipy=P03-01,P03-02,P03-99'), c3).tipy.join() ===
+      'P03-01,P03-02',
+    '№3: ссылка «?tipy=…» с разбора типа — не те прототипы',
+  );
+  check(T3.poKlyuchu3('P03-01|b1') === null, '№3: чужой ключ прочитан');
 }
 
 if (failures.length > 0) {

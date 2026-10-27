@@ -21,7 +21,8 @@ import { parseSheetQuery1, sheetSpec1, sobratList } from '../sheet1';
 import { PROTOTIPY } from '../stseny';
 import { chislo, type Params } from '../stseny/dsl';
 import { dannyeTrenazhera1 } from './dannye';
-import { nomerAnaloga, planSessii, type ZadachaPlan } from './sessiya';
+import { klyuchNovoy1, planPoKlyuchu1, trenazherConfig1, zadachi1 } from './filtry1';
+import { klyuchZadachi, nomerAnaloga, type ZadachaPlan } from './sessiya';
 import { razreshit, sobratZadachu, sostavZadachi, type Podskazki1, type Razbor1 } from './zadacha';
 
 export interface ItogTrenazhera {
@@ -119,16 +120,32 @@ export function checkTrenazher(seedov = 3): ItogTrenazhera {
     }
   }
 
-  /* Сессии из всех источников. */
-  for (const istochnik of ['bank', 'mix', 'new'] as const) {
-    const podtipy = vse.filter((p) => istochnik !== 'bank' || p.vBanke > 0).map((p) => p.id);
-    const plan = planSessii({ podtipy, istochnik, count: 30 }, d.bank, `s-${istochnik}`);
-    if (plan.length !== 30) problems.push(`сессия «${istochnik}»: ${plan.length} задач из 30`);
-    if (istochnik === 'bank' && plan.some((x) => x.vid !== 'bank'))
-      problems.push('сессия «только банк»: попала не задача банка');
-    if (istochnik === 'new' && plan.some((x) => x.vid === 'bank'))
-      problems.push('сессия «только новые»: попала задача банка');
+  /* Список задач общего тренажёра: все задачи банка и аналоги, ключи
+     однозначные и читаются обратно, источник и уровень — по задаче. */
+  const refs = zadachi1(d);
+  if (refs.length !== d.bank.length)
+    problems.push(`в списке ${refs.length} задач из ${d.bank.length}`);
+  if (new Set(refs.map((r) => r.key)).size !== refs.length)
+    problems.push('ключи задач повторяются');
+  for (const r of refs) {
+    const plan = planPoKlyuchu1(r.key, 'x');
+    if (plan === null || klyuchZadachi(plan) !== r.key)
+      problems.push(`${r.key}: ключ не читается обратно`);
   }
+  if (refs.filter((r) => r.istochnik === 'fipi').length !== d.bank.filter((b) => !b.analog).length)
+    problems.push('«открытый банк ФИПИ» — не все задачи банка');
+  const level = new Map(vse.map((p) => [p.id, p.level]));
+  if (refs.some((r) => r.uroven !== level.get(r.podtip)))
+    problems.push('уровень задачи не её прототипа');
+  const cfg = trenazherConfig1(d, (t) => t);
+  if (cfg.temy.flatMap((t) => t.podtipy.map((p) => p.id)).join() !== vse.map((p) => p.id).join())
+    problems.push('конфиг фильтров: не те прототипы');
+  if (cfg.temy.some((t) => t.podtipy.some((p) => p.title.includes('$'))))
+    problems.push('конфиг фильтров: в названии без формул остался $');
+  const nov = planPoKlyuchu1(klyuchNovoy1('p05'), 'seed1');
+  if (nov === null || nov.vid !== 'new' || nov.seed !== 'seed1') problems.push('ключ новой задачи');
+  if (planPoKlyuchu1('p05', 'x') !== null || planPoKlyuchu1('x05|b1', 'x') !== null)
+    problems.push('чужой ключ читается');
 
   /* Листы. */
   const adresa = [

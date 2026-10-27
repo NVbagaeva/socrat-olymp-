@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Вкладка «Генератор» задания №13: общий экран generator-v2 с
+ * Вкладка «Генератор» задания №13: общий генератор (components/generator) с
  * конфигом раздела. Задачи и ответы считает движок в браузере.
  */
 export default function Generator13Tab() {

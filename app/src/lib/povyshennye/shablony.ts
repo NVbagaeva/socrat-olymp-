@@ -18,49 +18,81 @@ import {
   giperbolaPryamaya,
   kLog,
   korenKoren,
+  parabolaB,
+  parabolaKorni,
+  pokazatelnayaOtnoshenie,
   type GiperbolaPryamaya,
   type GrafikTask,
   type KLog,
   type KorenKoren,
+  type ParabolaB,
+  type ParabolaKorni,
+  type PokazatelnayaOtnoshenie,
 } from '@/lib/graph/povyshennye';
 import {
   chisloNaOtrezke,
+  kasatelnayaPoUzlam,
   maxNaOtrezke,
   minNaOtrezke,
   skorostVMoment,
+  znakVTochkah,
   type ChisloNaOtrezke,
+  type KasatelnayaPoUzlam,
   type MaxNaOtrezke,
   type SkorostVMoment,
+  type ZnakVTochkah,
 } from '@/lib/proizvodnaya/povyshennye';
 import type { Generated as Generated9 } from '@/lib/proizvodnaya/types';
 import { renderSolid } from '@/lib/solid';
 import { typeset, typesetKrupno } from '@/lib/tex';
 import {
+  dlinaKM,
   dlinaKombinatsiiPoRisunku,
   perpendikulyarNeizvestnaya,
   skalyarnoeKombinatsiy,
+  skalyarnoePoRisunku,
+  type DlinaKM,
   type DlinaKombinatsii,
   type PerpendikulyarNeizvestnaya,
   type SkalyarnoeKombinatsiy,
+  type SkalyarnoePoRisunku,
 } from '@/lib/vektory/povyshennye';
 import {
   PV4_BOLSHE,
+  PV4_CHASTOTA,
   PV4_DELITSYA,
+  PV4_NASOSY,
   PV4_NE_MENEE,
   PV4_PROTIVOPOLOZHNOE,
+  PV4_SOOTECHESTVENNIK,
+  PV4_SUMKI,
+  PV5_DVE_MISHENI,
   PV5_DVE_PARTII,
   PV5_KOST_USLOVIE,
   PV5_MEZHDU,
+  PV5_OBA_ZAKONCHILIS,
+  PV5_ODIN_TSVET,
 } from '@/lib/veroyatnost/povyshennye';
 import { dec, type Prototype as ProtoVer } from '@/lib/veroyatnost/types';
 import {
+  logAmBn,
+  logChastnoeStepeney,
   logObratnyy,
   logPryamoy,
   sinDvoynogoPrivedenie,
   stepeniChastnoe,
+  trigCepochka,
+  trigPrivedenie,
+  type LogAmBn,
+  type TrigPrivedenie,
+  type TrigUgol,
 } from '@/lib/vychisleniya/povyshennye';
+import { fn as fnTex, rad as radTex } from '@/lib/vychisleniya/tex';
 import type { Draft } from '@/lib/vychisleniya/types';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
+import { P03_20S, P03_28S } from '@/lib/zadanie3/razdel2/povyshennye';
+import { P03_48S } from '@/lib/zadanie3/razdel3/povyshennye';
+import { P03_69S, PV03_KRUZHKI } from '@/lib/zadanie3/razdel5/povyshennye';
 import { P03_74S } from '@/lib/zadanie3/razdel7/povyshennye';
 import {
   PV03_CILINDR,
@@ -70,7 +102,14 @@ import {
 } from '@/lib/zadanie3/razdel8/povyshennye';
 import type { Params as Params3, Prototype as Proto3 } from '@/lib/zadanie3/types';
 import { prototype as prototype6 } from '@/lib/zadanie6/prototypes';
-import { PV7_KOREN, PV7_LOG_KVADRAT, PV7_LOG_STEPENI } from '@/lib/zadanie7/prototypes/povyshennye';
+import {
+  PV7_KOREN,
+  PV7_KOREN_KVADRAT,
+  PV7_KOREN_LINEYNYY,
+  PV7_KUB_OBRATNOE,
+  PV7_LOG_KVADRAT,
+  PV7_LOG_STEPENI,
+} from '@/lib/zadanie7/prototypes/povyshennye';
 import type { Prototype as Proto7 } from '@/lib/zadanie7/types';
 import { subtype as subtype11 } from '@/lib/zadanie11/prototypes';
 import { generateFixed } from '@/lib/zadanie13/generate';
@@ -78,18 +117,26 @@ import { PEOPLE, type PlotFull } from '@/lib/zadanie13/plots';
 import {
   obshchayaSummaGod,
   posledniyPlatezh,
+  ravnyePopolneniya,
+  stavkaPoSumme,
   stavkaVklada,
+  summaPriUbyvanii,
   type ObshchayaSumma,
   type PosledniyPlatezh,
+  type RavnyePopolneniya,
+  type StavkaPoSumme,
   type StavkaVklada,
 } from '@/lib/zadanie13/proto/povyshennye';
 import type { Prototype as Proto13 } from '@/lib/zadanie13/proto/types';
 import type { Params as Params7 } from '@/lib/zadanie7/types';
-import type { Params as Params6 } from '@/lib/zadanie6/types';
+import type { Params as Params6, Prototype as Proto6 } from '@/lib/zadanie6/types';
+import { PV6_STRAHOVKA_TYS } from '@/lib/zadanie6/prototypes/povyshennye';
 import type { Params as ParamsVer } from '@/lib/veroyatnost/types';
-import type { Params as Params10 } from '@/lib/zadanie10/types';
+import type { Params as Params10, Prototype as Proto10 } from '@/lib/zadanie10/types';
+import { sChistymResheniem } from '@/lib/zadanie10/prototypes';
+import { PV10_DOLYA, PV10_LINZA_MAX } from '@/lib/zadanie10/prototypes/povyshennye';
 import type { Params as Params11, Solved as Solved11 } from '@/lib/zadanie11/types';
-import { ocheredno } from '@/lib/zadanie11/prototypes/povyshennye';
+import { ocheredno, triRastvora } from '@/lib/zadanie11/prototypes/povyshennye';
 import { razborUchenika } from '@/lib/variant/adapters/z01';
 import { krupnyyRisunok, minFont, shirinaPoKletke } from '@/lib/variant/pechat';
 import { build as build02 } from '@/lib/variant/adapters/z02';
@@ -236,6 +283,94 @@ const HINTS_PRIZMA_CILINDR: HintLike[] = [
   },
 ];
 
+/** Подсказки к прямой призме, у которой ребро равно гипотенузе (P03-20S). */
+const HINTS_PRIZMA_GIPOTENUZA: HintLike[] = [
+  {
+    question: 'Чему равна гипотенуза основания с катетами $k\\sqrt q$ и $m\\sqrt q$?',
+    options: ['$\\sqrt{k^2+m^2}\\cdot\\sqrt q$', '$(k+m)\\sqrt q$', '$\\sqrt{k^2+m^2}\\cdot q$'],
+    correct: 0,
+    comment:
+      'Теорема Пифагора: $(k\\sqrt q)^2 = k^2q$, общий множитель $q$ выносится из-под корня.',
+  },
+  {
+    question: 'Из чего складывается полная поверхность призмы?',
+    options: [
+      'Два основания и боковая поверхность: периметр основания на боковое ребро',
+      'Одно основание и три боковые грани',
+      'Только боковая поверхность',
+    ],
+    correct: 0,
+  },
+];
+
+/** Подсказки к пирамиде, отсечённой от призмы (P03-28S). */
+const HINTS_PRIZMA_PIRAMIDA: HintLike[] = [
+  {
+    question: 'Какую часть объёма призмы занимает отсечённая пирамида $C_1ABC$?',
+    options: ['Треть', 'Половину', 'Шестую часть'],
+    correct: 0,
+    comment: 'Основание и высота у пирамиды те же, что у призмы, а $V_{\\text{пир}}=\\dfrac13 Sh$.',
+  },
+  {
+    question: 'Что спрашивают?',
+    options: ['Объём оставшейся части', 'Объём пирамиды', 'Объём всей призмы'],
+    correct: 0,
+  },
+];
+
+/** Подсказки к пирамиде, разделённой плоскостью через сторону основания (P03-48S). */
+const HINTS_PIRAMIDA_DELIT: HintLike[] = [
+  {
+    question: 'На какие тела плоскость делит пирамиду $SABC$?',
+    options: [
+      'На две треугольные пирамиды $SABM$ и $MABC$',
+      'На пирамиду и усечённую пирамиду',
+      'На две призмы',
+    ],
+    correct: 0,
+  },
+  {
+    question: 'Во сколько раз высота пирамиды $MABC$ меньше высоты $SABC$?',
+    options: [
+      'Во столько, во сколько $MC$ короче $SC$',
+      'В $2$ раза',
+      'Во столько, во сколько $SM$ короче $SC$',
+    ],
+    correct: 0,
+    comment: 'Основание $ABC$ общее, высоты относятся как $MC : SC$.',
+  },
+];
+
+/** Подсказки к двум цилиндрам: второй выше, радиус меньше (P03-69S). */
+const HINTS_DVA_CILINDRA: HintLike[] = [
+  {
+    question: 'Как меняется объём цилиндра, если радиус уменьшить в $b$ раз?',
+    options: ['Уменьшается в $b^2$ раз', 'Уменьшается в $b$ раз', 'Не меняется'],
+    correct: 0,
+    comment: '$V=\\pi r^2h$: радиус входит в квадрате.',
+  },
+  {
+    question: 'А если высоту увеличить в $a$ раз?',
+    options: ['Увеличивается в $a$ раз', 'Увеличивается в $a^2$ раз', 'Уменьшается в $a$ раз'],
+    correct: 0,
+  },
+];
+
+/** Подсказки к двум кружкам (P03-70). */
+const HINTS_KRUZHKI: HintLike[] = [
+  {
+    question: 'Вторая кружка шире в $w$ раз. Во сколько раз больше площадь её дна?',
+    options: ['В $w^2$ раз', 'В $w$ раз', 'В $2w$ раз'],
+    correct: 0,
+    comment: 'Ширина — диаметр; площадь круга пропорциональна квадрату диаметра.',
+  },
+  {
+    question: 'Как учесть, что вторая кружка ниже?',
+    options: ['Разделить на отношение высот', 'Умножить на отношение высот', 'Никак'],
+    correct: 0,
+  },
+];
+
 function z03(proto: Proto3, p: Params3, hints: HintLike[], klyuch: string): Gotovaya {
   const otvetChislo = proto.otvet(p);
   const otvet = answerHtml(otvetChislo);
@@ -298,22 +433,29 @@ function veroyatnost(ege: 4 | 5, proto: ProtoVer, p: ParamsVer): Gotovaya {
 
 /* ── №6 ─────────────────────────────────────────────────────────── */
 
-/** Задача №6 прототипа раздела: условие и разбор — генератора раздела. */
-function z06(proto: string, p: Params6, klyuch: string): Gotovaya {
-  const u = prototype6(proto).uslovie(p);
+/**
+ * Задача №6: условие и разбор — генератора раздела. `proto` — id
+ * прототипа банка или свой шаблон (zadanie6/prototypes/povyshennye).
+ */
+function z06(proto: string | Proto6, p: Params6, klyuch: string): Gotovaya {
+  const pr = typeof proto === 'string' ? prototype6(proto) : proto;
+  const u = pr.uslovie(p);
   return bezPoley(
-    build06({
-      ...kand,
-      prototypeId: proto,
-      z: {
-        id: klyuch,
-        prototypeId: proto,
-        source: 'analog',
-        text: u.text,
-        ...(u.posle === undefined ? {} : { posle: u.posle }),
-        params: p,
+    build06(
+      {
+        ...kand,
+        prototypeId: pr.id,
+        z: {
+          id: klyuch,
+          prototypeId: pr.id,
+          source: 'analog',
+          text: u.text,
+          ...(u.posle === undefined ? {} : { posle: u.posle }),
+          params: p,
+        },
       },
-    }),
+      pr,
+    ),
   );
 }
 
@@ -369,6 +511,92 @@ function hints08Obratnyy(p: { m: number; t: number }): HintLike[] {
   ];
 }
 
+/** Подсказки к частному логарифмов со степенями в основаниях и числах. */
+function hints08Chastnoe(p: {
+  a: number;
+  i: number;
+  b: number;
+  j: number;
+  k: number;
+  l: number;
+}): HintLike[] {
+  const L = `\\log_{${p.a}} ${p.b}`;
+  return [
+    {
+      question: `Степенями каких чисел являются $${p.a ** p.i}$, $${p.b ** p.j}$, $${p.a ** p.k}$, $${p.b ** p.l}$?`,
+      options: [`$${p.a}$ и $${p.b}$`, `$${p.a ** p.i}$ и $${p.b ** p.j}$`, '$10$'],
+      correct: 0,
+    },
+    {
+      question: `Чему равен $\\log_{${p.a ** p.i}} ${p.b ** p.j}$?`,
+      options: [
+        `$\\dfrac{${p.j}}{${p.i}}${L}$`,
+        `$\\dfrac{${p.i}}{${p.j}}${L}$`,
+        `$${p.i * p.j}${L}$`,
+      ],
+      correct: 0,
+      comment: '$\\log_{a^i} b^j=\\dfrac{j}{i}\\log_a b$.',
+    },
+    {
+      question: 'Что происходит с $' + L + '$ при делении?',
+      options: ['Сокращается', 'Остаётся множителем', 'Возводится в квадрат'],
+      correct: 0,
+    },
+  ];
+}
+
+/** Подсказки к выражению с формулами приведения: по значению каждого множителя. */
+function hints08Trig(p: TrigPrivedenie): HintLike[] {
+  const vse: TrigUgol[] = [...p.f, p.g];
+  return vse.map((u) => {
+    const tex = trigCepochka(u).tex.split('=');
+    const verno = tex[tex.length - 1] as string;
+    const protiv = verno.startsWith('-') ? verno.slice(1) : `-${verno}`;
+    /* Чужое табличное значение: синус вместо косинуса и наоборот. */
+    const drugoe = trigCepochka([
+      u[0] === 'tg' ? 'sin' : u[0] === 'sin' ? 'cos' : 'sin',
+      u[1],
+      u[2],
+    ])
+      .tex.split('=')
+      .pop() as string;
+    const options = [...new Set([`$${verno}$`, `$${protiv}$`, `$${drugoe}$`])];
+    return {
+      question: `Чему равен $${fnTex(u[0])}${u[1] < 0 ? `\\left(${radTex(u[1], u[2])}\\right)` : radTex(u[1], u[2])}$?`,
+      options,
+      correct: 0,
+      comment: `$${trigCepochka(u).tex}$.`,
+    };
+  });
+}
+
+/** Подсказки к log_a(aᵐbⁿ) и log_a(aᵐ/bⁿ). */
+function hints08AmBn(p: LogAmBn): HintLike[] {
+  const z = p.op === 'umn' ? '+' : '-';
+  const nz = p.op === 'umn' ? '-' : '+';
+  return [
+    {
+      question: `Как разложить логарифм ${p.op === 'umn' ? 'произведения' : 'частного'}?`,
+      options: [
+        `$${p.m}${z}${p.n}\\log_a b$`,
+        `$${p.m}${nz}${p.n}\\log_a b$`,
+        `$${p.m}\\cdot${p.n}\\log_a b$`,
+      ],
+      correct: 0,
+    },
+    ...(p.dano === 'ba'
+      ? [
+          {
+            question: `Как найти $\\log_a b$, если $\\log_b a=${p.t}$?`,
+            options: [`$\\dfrac{1}{${p.t}}$`, `$${-p.t}$`, `$${p.t}$`],
+            correct: 0,
+            comment: '$\\log_a b\\cdot\\log_b a=1$.',
+          },
+        ]
+      : []),
+  ];
+}
+
 /** Задача №8 из черновика раздела и своих подсказок. */
 function z08(t: Draft, hints: HintLike[], klyuch: string): Gotovaya {
   const otvet = answerHtml(t.otvet);
@@ -408,6 +636,21 @@ function z10(proto: string, p: Params10 & { tekst: string }, klyuch: string): Go
       prototypeId: proto,
       z: { id: klyuch, prototypeId: proto, source: 'analog', text: tekst, params },
     }),
+  );
+}
+
+/** То же для прототипа раздела «Варианты повышенной сложности» (не из реестра №10). */
+function z10s(proto: Proto10, p: Params10 & { tekst: string }, klyuch: string): Gotovaya {
+  const { tekst, ...params } = p;
+  return bezPoley(
+    build10(
+      {
+        ...kand,
+        prototypeId: proto.id,
+        z: { id: klyuch, prototypeId: proto.id, source: 'analog', text: tekst, params },
+      },
+      sChistymResheniem(proto),
+    ),
   );
 }
 
@@ -530,6 +773,41 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: { a: number; c: number }) => z01(104, p),
   },
+  'z01.trapeciya-radius': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок VII: прямоугольная трапеция, описанная около окружности, — периметр и большая боковая сторона → радиус (прототип 43)',
+    otkuda: 'razdel',
+    zadacha: (p: { per: number; c: number }) => z01(43, p),
+  },
+  'z01.ravnobedr-osnovanie-cos': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок V: AC = BC и cos A → основание AB (как прототип 23, где по основанию ищут косинус); подвох — AH лишь половина основания',
+    otkuda: 'novyy',
+    zadacha: (p: { l: number; c: number }) => z01(105, p),
+  },
+  'z01.ravnobedr-bok-sin': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок V: AC = BC, основание AB и sin A → боковая сторона (как прототип 30); подвох — дан синус, нужен косинус',
+    otkuda: 'novyy',
+    zadacha: (p: { c: number; s: number }) => z01(106, p),
+  },
+  'z01.bissektrisa-afc': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок I: равнобедренный с основанием AC, биссектриса AF, угол B → угол AFC (как прототип 9)',
+    otkuda: 'novyy',
+    zadacha: (p: { b: number }) => z01(107, p),
+  },
+  'z01.bissektrisa-afb': {
+    ege: 1,
+    prototip:
+      'Планиметрия, блок I: равнобедренный с основанием AC, биссектриса AF, угол B → угол AFB (как прототип 9); подвох — угол, смежный с углом AFC',
+    otkuda: 'novyy',
+    zadacha: (p: { b: number }) => z01(108, p),
+  },
   'z02.skalyar-km': {
     ege: 2,
     prototip:
@@ -553,6 +831,21 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: PerpendikulyarNeizvestnaya) =>
       bezPoley(build02({ ...kand, seed: 'pv', n: null }, perpendikulyarNeizvestnaya(p))),
+  },
+  'z02.skalyar-po-risunku': {
+    ege: 2,
+    prototip:
+      'Векторы, группа B: скалярное произведение k·a и b по рисунку на клетчатой плоскости (как B9, где множитель 2), множитель — и дробный',
+    otkuda: 'novyy',
+    zadacha: (p: SkalyarnoePoRisunku) =>
+      bezPoley(build02({ ...kand, seed: 'pv', n: null }, skalyarnoePoRisunku(p))),
+  },
+  'z02.dlina-km': {
+    ege: 2,
+    prototip:
+      'Векторы, группа A: длина k·a − m·b по координатам (как A3), разность с целыми множителями',
+    otkuda: 'novyy',
+    zadacha: (p: DlinaKM) => bezPoley(build02({ ...kand, seed: 'pv', n: null }, dlinaKM(p))),
   },
   'z03.shar-v-cilindre': {
     ege: 3,
@@ -586,6 +879,44 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'razdel',
     zadacha: (p: { V: number }) => z03(PV03_SHAR_OKOLO_KONUSA, p, HINTS_KONUS_SHAR, `z03s|${p.V}`),
   },
+  'z03.prizma-gipotenuza': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел II: прямая призма над прямоугольным треугольником, катеты k√q, боковое ребро — гипотенуза; полная поверхность (как P03-20, где спрашивают объём)',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; b: number; q: number }) =>
+      z03(P03_20S, p, HINTS_PRIZMA_GIPOTENUZA, `z03g|${p.a}|${p.b}|${p.q}`),
+  },
+  'z03.prizma-bez-piramidy': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел II: от треугольной (наклонной) призмы плоскостью через сторону основания и вершину другого основания отсечена пирамида — объём остатка (как P03-28)',
+    otkuda: 'novyy',
+    zadacha: (p: { V: number }) => z03(P03_28S, p, HINTS_PRIZMA_PIRAMIDA, `z03o|${p.V}`),
+  },
+  'z03.piramida-delit-rebro': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел III: плоскость через сторону основания делит боковое ребро m : n от вершины — меньшая часть пирамиды (как P03-48)',
+    otkuda: 'novyy',
+    zadacha: (p: { V: number; m: number; n: number }) =>
+      z03(P03_48S, p, HINTS_PIRAMIDA_DELIT, `z03d|${p.V}|${p.m}|${p.n}`),
+  },
+  'z03.dva-cilindra-vyshe': {
+    ege: 3,
+    prototip:
+      'Стереометрия, раздел V: два цилиндра, у второго высота в a раз больше, радиус в b раз меньше — объём второго (как P03-69, где наоборот)',
+    otkuda: 'novyy',
+    zadacha: (p: { V: number; a: number; b: number }) =>
+      z03(P03_69S, p, HINTS_DVA_CILINDRA, `z03v|${p.V}|${p.a}|${p.b}`),
+  },
+  'z03.dve-kruzhki': {
+    ege: 3,
+    prototip: 'Стереометрия, раздел V: две кружки — отношение объёмов (P03-70)',
+    otkuda: 'razdel',
+    zadacha: (p: { hk: number; wk: number; style: string }) =>
+      z03(PV03_KRUZHKI, p, HINTS_KRUZHKI, `z03m|${p.hk}|${p.wk}`),
+  },
   'z04.ne-menee': {
     ege: 4,
     prototip: 'Вероятность: вложенные события «не менее a / не менее b» (как p5-03, сюжет лучника)',
@@ -612,6 +943,32 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: ParamsVer) => veroyatnost(4, PV4_PROTIVOPOLOZHNOE, p),
   },
+  'z04.chastota': {
+    ege: 4,
+    prototip:
+      'Вероятность, статистическое определение: на сколько частота «из N проданных в ремонт попали k» меньше (больше) данной вероятности',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_CHASTOTA, p),
+  },
+  'z04.sootechestvennik': {
+    ege: 4,
+    prototip:
+      'Вероятность, классическое определение: жребий порядка старта, следующим — спортсмен той же страны, (m − 1)/(n − 1)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_SOOTECHESTVENNIK, p),
+  },
+  'z04.bez-defekta': {
+    ege: 4,
+    prototip: 'Вероятность, блок II: сумка без дефекта, «k из N с дефектом»',
+    otkuda: 'razdel',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_SUMKI, p),
+  },
+  'z04.ne-podtekaet': {
+    ege: 4,
+    prototip: 'Вероятность, блок II: исправный насос, «из N подтекают k»',
+    otkuda: 'razdel',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_NASOSY, p),
+  },
   'z05.mezhdu': {
     ege: 5,
     prototip:
@@ -632,6 +989,27 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: ParamsVer) => veroyatnost(5, PV5_DVE_PARTII, p),
   },
+  'z05.dve-misheni': {
+    ege: 5,
+    prototip:
+      'Вероятность: две мишени, три выстрела — «2 + 1» или «1 + 2», выбрать способ с большей вероятностью поразить обе (как p5-07)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_DVE_MISHENI, p),
+  },
+  'z05.odin-tsvet': {
+    ege: 5,
+    prototip:
+      'Вероятность: по одному предмету из двух ящиков — одного цвета, два пути по дереву (как p5-09)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_ODIN_TSVET, p),
+  },
+  'z05.oba-zakonchilis': {
+    ege: 5,
+    prototip:
+      'Вероятность: два автомата, дано «останется в обоих» — найти «закончится в обоих» (обратная к p5-04)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_OBA_ZAKONCHILIS, p),
+  },
   'z06.chastoty': {
     ege: 6,
     prototip: 'Случайные величины, группа III: частоты «из 100 покупателей» → ожидание (P08)',
@@ -649,6 +1027,19 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip: 'Случайные величины, группа V: стандартное отклонение (P15)',
     otkuda: 'razdel',
     zadacha: (p: Params6, klyuch: string) => z06('P15', p, klyuch),
+  },
+  'z06.strahovka-tys': {
+    ege: 6,
+    prototip:
+      'Случайные величины, группа III: цена полиса по ожидаемому доходу (как P09), суммы в тысячах рублей — ответ дробный',
+    otkuda: 'novyy',
+    zadacha: (p: Params6, klyuch: string) => z06(PV6_STRAHOVKA_TYS, p, klyuch),
+  },
+  'z06.promezhutok': {
+    ege: 6,
+    prototip: 'Случайные величины, группа IV: вероятность попадания в промежуток (P11)',
+    otkuda: 'razdel',
+    zadacha: (p: Params6, klyuch: string) => z06('P11', p, klyuch),
   },
   'z07.koren': {
     ege: 7,
@@ -669,6 +1060,27 @@ export const SHABLONY: Record<string, Shablon> = {
       'Простейшие уравнения, группа IV: равные логарифмы → x² = c, посторонний корень, «больший корень» (как П-30)',
     otkuda: 'novyy',
     zadacha: (p: Params7) => z07(p, PV7_LOG_KVADRAT),
+  },
+  'z07.kub-obratnoe': {
+    ege: 7,
+    prototip:
+      'Простейшие уравнения, группа I: куб выражения 1/x + c равен кубу числа (как П-02, нечётная степень), затем обратное число',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_KUB_OBRATNOE),
+  },
+  'z07.koren-x2': {
+    ege: 7,
+    prototip:
+      'Простейшие уравнения, группа II: √(ax² − b) = x², меньший корень — отрицательный, не посторонний (как П-13)',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_KOREN_KVADRAT),
+  },
+  'z07.koren-smeshannoe': {
+    ege: 7,
+    prototip:
+      'Простейшие уравнения, группа II: √(kx) = cx, c — смешанное число, корень x = 0 и больший корень (как П-13 и П-03)',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_KOREN_LINEYNYY),
   },
   'z08.log-obratnyy': {
     ege: 8,
@@ -763,6 +1175,34 @@ export const SHABLONY: Record<string, Shablon> = {
         `z08c|${p.b}|${p.x}|${p.y}`,
       ),
   },
+  'z08.log-chastnoe-stepeney': {
+    ege: 8,
+    prototip:
+      'Вычисления, логарифмы (как 8.J «same-arg»): частное логарифмов, основания — степени a, числа — степени b',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; i: number; b: number; j: number; k: number; l: number }) =>
+      z08(
+        logChastnoeStepeney(p),
+        hints08Chastnoe(p),
+        `z08l|${p.a}|${p.i}|${p.b}|${p.j}|${p.k}|${p.l}`,
+      ),
+  },
+  'z08.trig-privedenie': {
+    ege: 8,
+    prototip:
+      'Вычисления, тригонометрия: произведение и частное значений в углах больше периода и отрицательных — формулы приведения и знаки',
+    otkuda: 'novyy',
+    zadacha: (p: TrigPrivedenie) =>
+      z08(trigPrivedenie(p), hints08Trig(p), `z08t|${JSON.stringify(p)}`),
+  },
+  'z08.log-am-bn': {
+    ege: 8,
+    prototip:
+      'Вычисления, логарифмы с буквами (как 8.Z «given»): log_a(aᵐbⁿ) или log_a(aᵐ/bⁿ) при данном log_a b или log_b a',
+    otkuda: 'novyy',
+    zadacha: (p: LogAmBn) =>
+      z08(logAmBn(p), hints08AmBn(p), `z08a|${p.m}|${p.n}|${p.op}|${p.dano}|${p.t}`),
+  },
   'z09.max-na-otrezke': {
     ege: 9,
     prototip:
@@ -791,6 +1231,20 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: SkorostVMoment) => z09(skorostVMoment(p), p),
   },
+  'z09.kasatelnaya': {
+    ege: 9,
+    prototip:
+      'Производная, группа II: f′(x₀) по графику f и касательной через узлы сетки (как 9.2.1), своя кривая',
+    otkuda: 'novyy',
+    zadacha: (p: KasatelnayaPoUzlam) => z09(kasatelnayaPoUzlam(p), p),
+  },
+  'z09.znak-v-tochkah': {
+    ege: 9,
+    prototip:
+      'Производная, группа III: сколько из 13 отмеченных точек, где f′ > 0 или f′ < 0 (как 9.3.1/9.3.2), точки у вершин',
+    otkuda: 'novyy',
+    zadacha: (p: ZnakVTochkah) => z09(znakVTochkah(p), p),
+  },
   'z10.vysota': {
     ege: 10,
     prototip:
@@ -809,6 +1263,32 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip: 'Прикладные, группа II: разгон S = v₀t + at²/2, наибольшее время в минутах (P12)',
     otkuda: 'razdel',
     zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P12', p, klyuch),
+  },
+  'z10.linza': {
+    ege: 10,
+    prototip: 'Прикладные, группа I: собирающая линза, наименьшее расстояние до лампочки (P07)',
+    otkuda: 'razdel',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P07', p, klyuch),
+  },
+  'z10.linza-max': {
+    ege: 10,
+    prototip:
+      'Прикладные, группа I: собирающая линза, наибольшее расстояние до лампочки — при наименьшем d₂ (как P07)',
+    otkuda: 'novyy',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10s(PV10_LINZA_MAX, p, klyuch),
+  },
+  'z10.dolya-vremeni': {
+    ege: 10,
+    prototip:
+      'Прикладные, группа V: v = A·sin(πt/T), доля первых τ секунд, когда v ≤ c (как P34, вторая дуга синуса за τ не наступает)',
+    otkuda: 'novyy',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10s(PV10_DOLYA, p, klyuch),
+  },
+  'z10.raspad': {
+    ege: 10,
+    prototip: 'Прикладные, группа IV: радиоактивный распад m = m₀·2^(−t/T), время (P22)',
+    otkuda: 'razdel',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10('P22', p, klyuch),
   },
   'z11.bystryy': {
     ege: 11,
@@ -834,6 +1314,29 @@ export const SHABLONY: Record<string, Shablon> = {
     zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
       z11('PV11-OCHEREDNO', p, klyuch, ocheredno),
   },
+  'z11.tri-rastvora': {
+    ege: 11,
+    prototip:
+      'Текстовые, смеси: два раствора с неизвестными массами и добавка m₁ или m₂ кг третьего — масса одного из растворов (как СМ-08, у смесей разная масса)',
+    otkuda: 'novyy',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('PV11-TRI-RASTVORA', p, klyuch, triRastvora),
+  },
+  'z11.suhogruzy': {
+    ege: 11,
+    prototip:
+      'Текстовые, протяжённые тела: два судна в одном направлении поменялись местами, разность скоростей (ПТ-04)',
+    otkuda: 'razdel',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('PT-04', p, klyuch, (x) => subtype11('PT-04').solve(x)),
+  },
+  'z11.ves-put': {
+    ege: 11,
+    prototip: 'Текстовые, движение по воде: туда и обратно со стоянкой, весь путь за рейс (ВД-01)',
+    otkuda: 'razdel',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('VD-01', p, klyuch, (x) => subtype11('VD-01').solve(x)),
+  },
   'z12.k-log': {
     ege: 12,
     prototip: 'Графики, логарифмическая: f(x) = k·logₐ x, аргумент по значению (как 12L.C)',
@@ -854,6 +1357,30 @@ export const SHABLONY: Record<string, Shablon> = {
       'Графики: √(ax) и √(x − b), точка пересечения вне рисунка (как 12S, коэффициенты по узлам)',
     otkuda: 'novyy',
     zadacha: (p: KorenKoren) => z12((pe) => korenKoren(p, pe), `z12k|${p.F.join(';')}|${p.b}`),
+  },
+  'z12.parabola-b': {
+    ege: 12,
+    prototip:
+      'Графики, парабола: f(x) = ax² + bx + c, b дано, c и a по узлам сетки, значение f(x₀) за рамкой (как 12Q)',
+    otkuda: 'novyy',
+    zadacha: (p: ParabolaB) =>
+      z12((pe) => parabolaB(p, pe), `z12b|${p.b}|${p.c}|${p.Q.join(';')}|${p.x0}`),
+  },
+  'z12.pokazatelnaya-otnoshenie': {
+    ege: 12,
+    prototip:
+      'Графики, показательная: f(x) = aˣ через два узла, a иррациональное, отношение f(m)/f(n) (как 12E)',
+    otkuda: 'novyy',
+    zadacha: (p: PokazatelnayaOtnoshenie) =>
+      z12((pe) => pokazatelnayaOtnoshenie(p, pe), `z12e|${p.P.join(';')}|${p.m}|${p.n}`),
+  },
+  'z12.parabola-korni': {
+    ege: 12,
+    prototip:
+      'Графики, парабола: f(x) = ax² + bx + c через нули и точку на оси Oy, f(x₀) за рамкой (как 12Q, форма через нули)',
+    otkuda: 'novyy',
+    zadacha: (p: ParabolaKorni) =>
+      z12((pe) => parabolaKorni(p, pe), `z12q|${p.x1}|${p.x2}|${p.c}|${p.x0}`),
   },
   'z13.dif-summa': {
     ege: 13,
@@ -877,6 +1404,29 @@ export const SHABLONY: Record<string, Shablon> = {
     otkuda: 'novyy',
     zadacha: (p: PosledniyPlatezh & Syuzhet13, klyuch: string) =>
       z13(posledniyPlatezh(p), p, klyuch),
+  },
+  'z13.dif-stavka': {
+    ege: 13,
+    prototip:
+      'Экономика, тип A: годовой дифференцированный, ставка по общей сумме выплат (рамка «июль», переплата S·(n+1)/2·r/100)',
+    otkuda: 'novyy',
+    zadacha: (p: StavkaPoSumme & Syuzhet13, klyuch: string) => z13(stavkaPoSumme(p), p, klyuch),
+  },
+  'z13.ravnye-popolneniya': {
+    ege: 13,
+    prototip:
+      'Экономика, тип D (вклады): два одинаковых пополнения за три года, найти пополнение по итоговой сумме (x(k² + k))',
+    otkuda: 'novyy',
+    zadacha: (p: RavnyePopolneniya & Syuzhet13, klyuch: string) =>
+      z13(ravnyePopolneniya(p), p, klyuch),
+  },
+  'z13.summa-ubyvanie': {
+    ege: 13,
+    prototip:
+      'Экономика, тип B: долг каждый июль меньше на q % прошлогоднего, общая сумма выплат в рублях (рамка «июль»)',
+    otkuda: 'novyy',
+    zadacha: (p: PosledniyPlatezh & Syuzhet13, klyuch: string) =>
+      z13(summaPriUbyvanii(p), p, klyuch),
   },
 };
 

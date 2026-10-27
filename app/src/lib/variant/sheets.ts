@@ -18,6 +18,18 @@
  */
 
 import { VARIANT_SCREEN, VARIANT_SHEET as T, standardInstruction } from '@/content/variant';
+import { BALLY, MAX_BALL, MAX_PART2, ballText } from '@/content/variantOnline/bally';
+import { CHAST2_TEXT } from '@/content/variantOnline/chast2Text';
+import {
+  kriteriiHtml,
+  razborHtml,
+  reshenieHtml,
+  strokaHtml,
+  teoremaHtml,
+  teoremyZadach,
+  uslovieHtml,
+} from '@/lib/povyshennye/chast2/html';
+import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import { figure as figureHtml } from '@/lib/sheet/sheet.js';
 import { solutionLength, spaceFor, type SheetSpace } from '@/lib/sheet/space.js';
 import typo from '@/lib/sheet/typography.js';
@@ -215,9 +227,16 @@ function figureItem(f: Figure | null, cls: string, figures: FigureSize): string 
  * в КИМ: у листа ученика. Будущее «место для решения» встаёт между
  * условием и этой строкой.
  */
-function card(task: VariantTask, no: number, figures: FigureSize, answerLine = false) {
+function card(
+  task: VariantTask,
+  no: number,
+  figures: FigureSize,
+  answerLine = false,
+  plashka = false,
+) {
   const size = task.figure === null ? null : sheetFigure(task.figure, figures);
   return {
+    ...(plashka ? { badge: ballText(BALLY[task.egeNumber]) } : {}),
     no,
     id: task.taskId,
     questionHtml: task.statement,
@@ -299,6 +318,7 @@ function blocksUchenik(
   tasks: readonly VariantTask[],
   meta: VariantMeta,
   space: SheetSpace | undefined,
+  plashka = false,
 ): unknown[] {
   const text = instructionFor(meta);
   return [
@@ -312,7 +332,7 @@ function blocksUchenik(
           space === undefined
             ? null
             : spaceFor(space, t.egeNumber, solutionLength(t.solutionTeacher ?? t.solutionStudent));
-        const c = card(t, sheetNo(t, i, meta.numbering), meta.figures, true);
+        const c = card(t, sheetNo(t, i, meta.numbering), meta.figures, true, plashka);
         return field === null ? c : { ...c, space: field };
       }),
     },
@@ -324,13 +344,17 @@ function blocksUchitel(
   meta: VariantMeta,
   code: string | null,
   istochnik: boolean,
+  c2: readonly Chast2Zadacha[] | null = null,
 ): unknown[] {
   const out: unknown[] = [
     {
       head: false,
       title: '',
       note: '',
-      leadItems: [keyItem(tasks, meta.numbering, code, istochnik)],
+      leadItems: [
+        keyItem(tasks, meta.numbering, code, istochnik),
+        ...(c2 === null ? [] : [key2Item(c2)]),
+      ],
       tasks: [],
     },
     {
@@ -359,7 +383,7 @@ function blocksUchitel(
           ' data-keep-with-next="1"',
         ),
       ],
-      tasks: [card(t, no, meta.figures)],
+      tasks: [card(t, no, meta.figures, false, c2 !== null)],
     });
     out.push({
       head: false,
@@ -376,7 +400,11 @@ function blocksUchitel(
   return out;
 }
 
-function blocksRazbor(tasks: readonly VariantTask[], meta: VariantMeta): unknown[] {
+function blocksRazbor(
+  tasks: readonly VariantTask[],
+  meta: VariantMeta,
+  plashka = false,
+): unknown[] {
   const out: unknown[] = [];
   tasks.forEach((t, i) => {
     const no = sheetNo(t, i, meta.numbering);
@@ -388,13 +416,170 @@ function blocksRazbor(tasks: readonly VariantTask[], meta: VariantMeta): unknown
       leadItems: [
         item('var-sol var-sol--first', solutionHead(t, no, false), ' data-keep-with-next="1"'),
       ],
-      tasks: [card(t, no, meta.figures)],
+      tasks: [card(t, no, meta.figures, false, plashka)],
     });
     out.push({
       head: false,
       title: '',
       note: '',
       leadItems: splitSolution(sol).map((chunk) => solutionItem('var-sol var-razbor-item', chunk)),
+      tasks: [],
+    });
+  });
+  return out;
+}
+
+/* ── Часть 2 (задания 14–20) ───────────────────────────────────── */
+
+/** Часть 2 на листе ученика: по странице на задание или без места для решения. */
+export type Mesto2 = 'stranica' | 'net';
+
+function card2(z: Chast2Zadacha) {
+  return {
+    no: z.no,
+    id: `c2-${z.no}`,
+    badge: ballText(MAX_BALL[z.no]),
+    questionHtml: uslovieHtml(z.uslovie),
+    options: null,
+    figureSvg: z.risunok,
+    figureWidth: z.risunok === null ? undefined : 60,
+    figureBelow: false,
+    solutionHtml: null,
+    answerLine: false,
+  };
+}
+
+/** Заголовок части 2: с новой страницы, инструкция и максимум. */
+function part2Head(): string {
+  const C = CHAST2_TEXT;
+  return item(
+    'var-part2-head',
+    `<p class="var-part2-head__t">${typo.escape(C.partTitle)}</p>` +
+      `<p class="var-part2-head__instr">${typo.escape(C.part2InstrList)}</p>` +
+      `<p class="var-part2-head__max"><b>${typo.escape(C.part2Max(ballText(MAX_PART2)))}</b></p>`,
+    ' data-page-break="1" data-keep-with-next="1"',
+  );
+}
+
+/**
+ * Лист ученика, часть 2. «По странице на задание» (по умолчанию): каждое
+ * задание — с новой страницы, под условием поле в клетку до конца листа
+ * (lib/sheet/sheet.js, pageItems; высоту ставит набор). Первое задание
+ * стоит на одной странице с заголовком части. «Без места» — задания
+ * подряд.
+ */
+function blocksUchenik2(zadachi: readonly Chast2Zadacha[], mesto: Mesto2): unknown[] {
+  return [
+    {
+      head: false,
+      title: '',
+      note: '',
+      leadItems: [part2Head()],
+      tasks: zadachi.map((z, i) =>
+        mesto === 'stranica' ? { ...card2(z), page: true, pageBreak: i > 0 } : card2(z),
+      ),
+    },
+  ];
+}
+
+function key2Item(zadachi: readonly Chast2Zadacha[]): string {
+  const rows = zadachi
+    .map(
+      (z) =>
+        `<tr><th scope="row">${z.no}</th><td class="var-key__answer">${strokaHtml(z.otvet, 'list')}</td>` +
+        `<td>${MAX_BALL[z.no]}</td></tr>`,
+    )
+    .join('');
+  return item(
+    'var-key var-key--2',
+    `<table class="var-key__table"><caption>${typo.escape(CHAST2_TEXT.partTitle)}: ответы</caption>` +
+      `<thead><tr><th>${T.keyNo}</th><th>${T.answer}</th><th>Баллы</th></tr></thead><tbody>${rows}</tbody></table>`,
+  );
+}
+
+function blocksUchitel2(zadachi: readonly Chast2Zadacha[]): unknown[] {
+  const out: unknown[] = [];
+  zadachi.forEach((z, i) => {
+    out.push({
+      head: false,
+      title: '',
+      note: '',
+      leadItems: [
+        ...(i === 0 ? [part2Head()] : []),
+        item(
+          'var-sol var-sol--first',
+          `<p class="var-sol__head"><b>${typo.escape(T.task(z.no))}</b></p>`,
+          ' data-keep-with-next="1"',
+        ),
+      ],
+      tasks: [card2(z)],
+    });
+    out.push({
+      head: false,
+      title: '',
+      note: '',
+      leadItems: [
+        ...splitSolution(reshenieHtml(z, 'list')).map((chunk) =>
+          solutionItem('var-sol c2-sol', chunk),
+        ),
+        item(
+          'var-sol',
+          `<p class="var-razbor__answer"><b>${T.answer}:</b> ${strokaHtml(z.otvet, 'list')}</p>`,
+        ),
+        item('var-sol c2-krit-item', kriteriiHtml(z)),
+      ],
+      tasks: [],
+    });
+  });
+  /* Теоремы, на которые ссылаются решения: формулировка, чертёж, доказательство. */
+  const ids = teoremyZadach(zadachi);
+  if (ids.length > 0) {
+    out.push({
+      head: false,
+      title: '',
+      note: '',
+      leadItems: [
+        item(
+          'var-part2-head',
+          `<p class="var-part2-head__t">Теоремы, на которые ссылаются решения</p>`,
+          ' data-page-break="1" data-keep-with-next="1"',
+        ),
+        ...ids.map((id) => item('var-teor', teoremaHtml(id, 200))),
+      ],
+      tasks: [],
+    });
+  }
+  return out;
+}
+
+function blocksRazbor2(zadachi: readonly Chast2Zadacha[]): unknown[] {
+  const out: unknown[] = [];
+  zadachi.forEach((z, i) => {
+    out.push({
+      head: false,
+      title: '',
+      note: '',
+      leadItems: [
+        ...(i === 0 ? [part2Head()] : []),
+        item(
+          'var-sol var-sol--first',
+          `<p class="var-sol__head"><b>${typo.escape(T.task(z.no))}</b></p>`,
+          ' data-keep-with-next="1"',
+        ),
+      ],
+      tasks: [card2(z)],
+    });
+    out.push({
+      head: false,
+      title: '',
+      note: '',
+      leadItems: [
+        solutionItem('var-sol var-razbor-item', razborHtml(z)),
+        item(
+          'var-sol',
+          `<p class="var-razbor__answer"><b>${T.answer}:</b> ${strokaHtml(z.otvet, 'list')}</p>`,
+        ),
+      ],
       tasks: [],
     });
   });
@@ -419,6 +604,13 @@ export interface VariantSheetOptions {
   space?: SheetSpace;
   /** Хвост кода для места для решения (encodeSpace): к коду в таблице. */
   spaceToken?: string;
+  /**
+   * Часть 2 варианта (по номеру варианта в наборе); null — у варианта
+   * её нет. Есть — у заданий плашки баллов, часть 2 с новой страницы.
+   */
+  chast2?: (index: number) => readonly Chast2Zadacha[] | null;
+  /** Часть 2 на листе ученика: по странице на задание (по умолчанию) или без места. */
+  mesto2?: Mesto2;
 }
 
 /** Описание документа для `buildDocument` (lib/sheet/sheet.js). */
@@ -443,20 +635,29 @@ export function variantSheetSpec(
             ? ''
             : T.part[kind];
       const subtitle = [subtitleBase, part].filter((x) => x !== '').join(' · ');
+      const c2 = opts.chast2?.(v.index) ?? null;
+      const pl = c2 !== null;
       const blocks =
         kind === 'uchenik'
-          ? blocksUchenik(v.tasks, meta, opts.space)
+          ? [
+              ...blocksUchenik(v.tasks, meta, opts.space, pl),
+              ...(c2 === null ? [] : blocksUchenik2(c2, opts.mesto2 ?? 'stranica')),
+            ]
           : kind === 'uchitel'
-            ? blocksUchitel(
-                v.tasks,
-                meta,
-                opts.showCode ? codeWithSpace(set.code, opts.spaceToken ?? '') : null,
-                opts.istochnik ?? true,
-              )
-            : blocksRazbor(v.tasks, meta);
+            ? [
+                ...blocksUchitel(
+                  v.tasks,
+                  meta,
+                  opts.showCode ? codeWithSpace(set.code, opts.spaceToken ?? '') : null,
+                  opts.istochnik ?? true,
+                  c2,
+                ),
+                ...(c2 === null ? [] : blocksUchitel2(c2)),
+              ]
+            : [...blocksRazbor(v.tasks, meta, pl), ...(c2 === null ? [] : blocksRazbor2(c2))];
       return {
         title: {
-          chip: T.chip[kind],
+          chip: kind === 'uchenik' && c2 !== null ? T.chipDvuh : T.chip[kind],
           text: opts.workTitle,
           subtitle,
           variant:

@@ -14,9 +14,13 @@ import {
   SKOLKO,
   aktivnye,
   chislaChipov,
+  dopAktivnye,
+  dopZnachenie,
   etoNabor,
   izmenit,
+  kRazdelu,
   nabor,
+  naborRazdela,
   naydeno,
   pereklyuchitTemu,
   pereklyuchitTip,
@@ -26,6 +30,8 @@ import {
   skolkoAktivnyh,
   skolkoVozmyot,
   snyat,
+  snyatDop,
+  vSsylku,
   vyborTemy,
   type ChisloChipa,
   type NaborId,
@@ -117,6 +123,21 @@ export function FiltrPanel({
           </button>
         );
       })}
+      {(config.nabory ?? []).map((n) => {
+        const next = naborRazdela(n, f, config);
+        return (
+          <button
+            key={n.id}
+            type="button"
+            className="flt-nabor"
+            aria-pressed={vSsylku(next) === vSsylku(f)}
+            onClick={() => onChange(next)}
+          >
+            <b>{n.title}</b>
+            <small>{n.sub}</small>
+          </button>
+        );
+      })}
     </div>
   );
 
@@ -162,6 +183,16 @@ export function FiltrPanel({
           onPick={(rezhim) => onChange(izmenit(f, { rezhim }))}
         />
       </Pole>
+      {(config.dop ?? []).map((pole) => (
+        <Pole key={pole.id} label={pole.title}>
+          <Segm
+            label={pole.title}
+            value={dopZnachenie(f, pole)}
+            options={pole.varianty}
+            onPick={(v) => onChange(kRazdelu({ ...f, dop: { ...f.dop, [pole.id]: v } }, config))}
+          />
+        </Pole>
+      ))}
       <Pole label={FILTRY.poryadok}>
         <Segm
           label={FILTRY.poryadok}
@@ -183,11 +214,18 @@ export function FiltrPanel({
 
   const aktivnyeBlock = (
     <AktivnyeFiltry
-      items={active.map((a) => ({
-        id: a.pole,
-        label: a.label,
-        onSnyat: () => onChange(snyat(f, a.pole)),
-      }))}
+      items={[
+        ...active.map((a) => ({
+          id: a.pole,
+          label: a.label,
+          onSnyat: () => onChange(snyat(f, a.pole)),
+        })),
+        ...dopAktivnye(f, config).map((d) => ({
+          id: `dop:${d.id}`,
+          label: d.label,
+          onSnyat: () => onChange(snyatDop(f, d.id)),
+        })),
+      ]}
       onSbrosit={() => onChange(sbrositVse(f))}
     />
   );

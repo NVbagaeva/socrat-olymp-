@@ -13,6 +13,22 @@ const DANNYE = {
   '15': { tipy: TIPY_15, glavy: GLAVY_15, razbor: razbor15, vse: RAZBORY_15 },
 } as const;
 
+/**
+ * Тренажёр по типу: у №3 — прототипы типа в адресе (?tipy=P03-01,…),
+ * тренажёр сразу выбирает их. У №15 банка пока нет — весь тренажёр.
+ */
+function trenazherTipa(
+  base: string,
+  no: StereoNo,
+  prototipy: readonly number[] | undefined,
+): string {
+  if (no !== '3' || prototipy === undefined || prototipy.length === 0) {
+    return `${base}/trenazher/`;
+  }
+  const ids = prototipy.map((n) => `P03-${String(n).padStart(2, '0')}`);
+  return `${base}/trenazher/?tipy=${ids.join(',')}`;
+}
+
 /** Типы задания, у которых есть разбор: параметры статических страниц. */
 export function tipySRazborom(no: StereoNo): { tip: string }[] {
   return DANNYE[no].vse.map((r: Razbor) => ({ tip: r.tip }));
@@ -54,7 +70,7 @@ export function RazborStranitsa({ no, tip }: { no: StereoNo; tip: string }) {
             {RAZBOR_STEREO.glava} {glava.nomer}. {glava.title}
           </Link>
         )}
-        <Link className="btn btn--primary" href={`${base}/trenazher/`}>
+        <Link className="btn btn--primary" href={trenazherTipa(base, no, t.prototipy)}>
           {RAZBOR_STEREO.trenazher}
         </Link>
       </div>

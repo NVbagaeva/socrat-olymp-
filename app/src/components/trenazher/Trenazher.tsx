@@ -84,7 +84,14 @@ export function Trenazher<T>({
       const found = naydeno(refs, f, stat);
       const items = sostav(found, f, Math.random).map((r) => ({ k: r.key }));
       if (items.length === 0) return;
-      api.start({ v: 1, filtr: vSsylku(f), rezhim: f.rezhim, seed: randomSeed(), items });
+      api.start({
+        v: 1,
+        filtr: vSsylku(f),
+        rezhim: f.rezhim,
+        seed: randomSeed(),
+        items,
+        ...(Object.keys(f.dop).length === 0 ? {} : { dop: f.dop }),
+      });
     } finally {
       setStarting(false);
     }

@@ -21,6 +21,8 @@ export interface Zapis {
 export interface VariantPV {
   k: number;
   versii: Zapis[][];
+  /** Часть 2: шесть версий по 7 задач (14–20); шаблоны — chast2/. */
+  chast2?: Zapis[][];
 }
 
 /** Шаблон: какой раздел, какой прототип и откуда взят. */

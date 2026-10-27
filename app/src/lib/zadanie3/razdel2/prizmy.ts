@@ -6,9 +6,10 @@
 import { polyhedronVolume } from '../../solid/measure';
 import { shapeLeg } from './drawings';
 import { ru } from '../format';
-import { type Params, type Prototype, type Variant, num } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num } from '../types';
 import { legPrismBody } from './common';
 import { solveBySearch } from '../search';
+import { chisla, chislo, tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -81,6 +82,7 @@ export const P03_20: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka20(p),
   varianty: [
     variant(1, 'задачник', 'задачник 66', { a: 2, b: 7, h: 6 }),
     variant(2, 'задачник', 'задачник 67', { a: 3, b: 4, h: 4 }),
@@ -149,6 +151,7 @@ export const P03_21: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka21(p),
   varianty: [
     variant(1, 'задачник', 'задачник 70', { a: 4, b: 7, V: 56 }),
     variant(2, 'задачник', 'задачник 71', { a: 5, b: 6, V: 75 }),
@@ -162,3 +165,55 @@ export const P03_21: Prototype = {
     variant(10, 'новый', 'новый', { a: 7, b: 3, V: 42 }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** Площадь основания — прямоугольного треугольника: без ответа на кнопках. */
+function ploshchadOsnovaniya(p: Params, otvet: number): HintStep {
+  const [a, b] = legs(p);
+  const s = (a * b) / 2;
+  return vopros(
+    'Чему равна площадь основания — прямоугольного треугольника?',
+    chislo(s),
+    chisla([a * b, a + b, (a * b) / 4], s, otvet),
+    'Половина произведения катетов.',
+  );
+}
+
+function podskazka20(p: Params): HintStep[] {
+  const [a, b] = legs(p);
+  const h = num(p, 'h');
+  const s = (a * b) / 2;
+  return [
+    ploshchadOsnovaniya(p, s * h),
+    vopros(
+      'Как найти объём прямой призмы?',
+      `$${tex(s)} \\cdot ${tex(h)}$`,
+      [
+        `$${tex(s)} \\cdot ${tex(h)} : 3$`,
+        `$${tex(a * b)} \\cdot ${tex(h)}$`,
+        `$(${tex(a)} + ${tex(b)}) \\cdot ${tex(h)}$`,
+      ],
+      'Площадь основания умножить на высоту — у прямой призмы это боковое ребро.',
+    ),
+  ];
+}
+
+function podskazka21(p: Params): HintStep[] {
+  const [a, b] = legs(p);
+  const V = num(p, 'V');
+  const s = (a * b) / 2;
+  return [
+    ploshchadOsnovaniya(p, V / s),
+    vopros(
+      'Как найти боковое ребро по объёму?',
+      `$${tex(V)} : ${tex(s)}$`,
+      [
+        `$${tex(V)} : ${tex(a * b)}$`,
+        `$${tex(V)} \\cdot ${tex(s)}$`,
+        `$3 \\cdot ${tex(V)} : ${tex(s)}$`,
+      ],
+      'Объём призмы — площадь основания на боковое ребро, значит ребро — объём, делённый на площадь.',
+    ),
+  ];
+}

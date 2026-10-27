@@ -13,8 +13,9 @@
  */
 
 import { type CheckRow, checkDrawing } from '../solid/checklist';
-import { fitsFormat, round } from './format';
-import { type Prototype } from './types';
+import { fitsFormat, ru, round } from './format';
+import { bezRazmetki } from './podskazka';
+import { type HintStep, type Prototype } from './types';
 
 export interface VariantReport {
   id: string;
@@ -32,7 +33,7 @@ export interface VariantReport {
 export interface BankReport {
   prototypes: number;
   variants: number;
-  bySource: { задачник: number; домашка: number; новый: number };
+  bySource: { задачник: number; домашка: number; новый: number; фипи: number };
   mismatchModel: number;
   mismatchSteps: number;
   badFormat: number;
@@ -40,6 +41,8 @@ export interface BankReport {
   duplicates: { a: string; b: string }[];
   notTen: string[];
   drawingViolations: { id: string; points: string }[];
+  /** Прототипы без подсказки-вопросов. */
+  bezPodskazki: string[];
   rows: VariantReport[];
 }
 
@@ -59,13 +62,84 @@ function longTails(text: string): string[] {
   return (text.match(/\d+[,.]\d+/g) ?? []).filter((piece) => LONG_TAIL.test(piece));
 }
 
+/** Числа, которые видит ученик: «2,5», «36» — без разметки формул. */
+function chislaVTekste(stroka: string): string[] {
+  return bezRazmetki(stroka).match(/\d+(?:,\d+)?/g) ?? [];
+}
+
+/** Числа, которые стоят результатом: сразу после «=». */
+function rezultaty(stroka: string): string[] {
+  return [...bezRazmetki(stroka).matchAll(/=(\d+(?:,\d+)?)(?![\d,])/g)].map((m) => m[1] ?? '');
+}
+
+/**
+ * Что не так с подсказкой варианта: 2–5 шагов, у каждого вопрос и 2–4
+ * разные кнопки, верная в списке, формулы парные. Главное — число
+ * ответа не стоит ни в одном шаге, если его нет в самом условии: иначе
+ * подсказка решает задачу за ученика.
+ */
+export function problemyPodskazki(
+  shagi: readonly HintStep[],
+  otvet: number,
+  uslovie: string,
+): string[] {
+  const problems: string[] = [];
+  if (shagi.length < 2 || shagi.length > 5) {
+    problems.push(`в подсказке ${shagi.length} шагов, нужно от 2 до 5`);
+  }
+  const vBlank = ru(round(otvet));
+  const vUslovii = chislaVTekste(uslovie).includes(vBlank);
+  shagi.forEach((shag, i) => {
+    const gde = `подсказка, шаг ${i + 1}`;
+    if (shag.question.trim() === '') {
+      problems.push(`${gde}: пустой вопрос`);
+    }
+    if (shag.options.length < 2 || shag.options.length > 4) {
+      problems.push(`${gde}: кнопок ${shag.options.length}, нужно 2–4`);
+    }
+    if (
+      !Number.isInteger(shag.correct) ||
+      shag.correct < 0 ||
+      shag.correct >= shag.options.length
+    ) {
+      problems.push(`${gde}: верная кнопка ${shag.correct} вне списка`);
+    }
+    const vidno = shag.options.map(bezRazmetki);
+    if (new Set(vidno).size !== vidno.length) {
+      problems.push(`${gde}: кнопки повторяются (${vidno.join(' | ')})`);
+    }
+    if (vidno.some((o) => o === '')) {
+      problems.push(`${gde}: пустая кнопка`);
+    }
+    /* Ответ выдан, если он целиком стоит на кнопке или результатом
+       вычисления («… = 8») в вопросе, на кнопке или в комментарии.
+       Служебные числа формул («a/2», «1 : 8») ответом не считаются. */
+    if (!vUslovii && vidno.includes(vBlank)) {
+      problems.push(`${gde}: кнопка называет ответ ${vBlank}`);
+    }
+    for (const stroka of [shag.question, ...shag.options, shag.comment ?? '']) {
+      if (!vUslovii && rezultaty(stroka).includes(vBlank)) {
+        problems.push(`${gde}: подсказка называет ответ ${vBlank} в «${stroka}»`);
+      }
+      if ((stroka.match(/\$/g) ?? []).length % 2 !== 0) {
+        problems.push(`${gde}: непарный знак $ в «${stroka}»`);
+      }
+      if (/undefined|NaN|\[object/.test(stroka)) {
+        problems.push(`${gde}: подстановка без значения в «${stroka}»`);
+      }
+    }
+  });
+  return problems;
+}
+
 export function checkBank(bank: readonly Prototype[]): BankReport {
   const rows: VariantReport[] = [];
-  const bySource = { задачник: 0, домашка: 0, новый: 0 };
+  const bySource = { задачник: 0, домашка: 0, новый: 0, фипи: 0 };
   const sourceProblems: { ref: string; why: string }[] = [];
   const duplicates: { a: string; b: string }[] = [];
   const notTen: string[] = [];
   const drawingViolations: { id: string; points: string }[] = [];
+  const bezPodskazki: string[] = [];
   const seen = new Map<string, string>();
   let mismatchModel = 0;
   let mismatchSteps = 0;
@@ -74,6 +148,9 @@ export function checkBank(bank: readonly Prototype[]): BankReport {
   bank.forEach((prototype) => {
     if (prototype.varianty.length !== 10) {
       notTen.push(`${prototype.id}: ${prototype.varianty.length}`);
+    }
+    if (prototype.podskazka === undefined) {
+      bezPodskazki.push(prototype.id);
     }
 
     prototype.varianty.forEach((variant) => {
@@ -111,6 +188,10 @@ export function checkBank(bank: readonly Prototype[]): BankReport {
       if (shag === null || Math.abs(shag - otvet) > TOL) {
         mismatchSteps += 1;
         problems.push(`последний шаг разбора даёт ${shag ?? 'ничего'}, а ответ ${otvet}`);
+      }
+
+      if (prototype.podskazka !== undefined) {
+        problems.push(...problemyPodskazki(prototype.podskazka(variant.params), otvet, uslovie));
       }
 
       if (!fitsFormat(otvet, prototype.format)) {
@@ -180,6 +261,7 @@ export function checkBank(bank: readonly Prototype[]): BankReport {
     duplicates,
     notTen,
     drawingViolations,
+    bezPodskazki,
     rows,
   };
 }

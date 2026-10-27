@@ -32,6 +32,26 @@ export interface FiltrTema {
   podtipy: FiltrPodtip[];
 }
 
+/**
+ * Дополнительное поле раздела: не сужает список задач, а меняет, как
+ * задача решается (№13: «Определить тип», «С оформлением»; №6:
+ * формулировка). Первый вариант — по умолчанию.
+ */
+export interface DopPole {
+  id: string;
+  title: string;
+  varianty: { id: string; title: string; hint?: string }[];
+}
+
+/** Готовый набор раздела рядом с «Быстрым стартом»: «Определи тип» №13. */
+export interface NaborRazdela {
+  id: string;
+  title: string;
+  sub: string;
+  /** Значения дополнительных полей набора. */
+  dop: Record<string, string>;
+}
+
 /** Конфиг раздела: только то, чем разделы отличаются. */
 export interface TrenazherConfig {
   /** Номер раздела для сводки: '12'. */
@@ -43,6 +63,8 @@ export interface TrenazherConfig {
   urovni: { uroven: Uroven; words: string }[];
   /** Есть задачи и из банка, и не из банка: показывать выбор источника. */
   istochnik: boolean;
+  dop?: DopPole[];
+  nabory?: NaborRazdela[];
 }
 
 /**
@@ -85,6 +107,8 @@ export interface Filtr {
   pravilaTitle?: string;
   /** В каком порядке ученик сужал выбор: последний снимается первым. */
   poryadokSuzheniya: FiltrPole[];
+  /** Дополнительные поля раздела: только отличные от первого варианта. */
+  dop: Record<string, string>;
 }
 
 /** Что известно об ученике: из статистики раздела. */
