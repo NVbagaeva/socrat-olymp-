@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+/* Подсказка-вопросы тренажёра — та же карточка, что у задач банка. */
+import '@/components/tasks/card/problem-card.css';
 import { Pechat3Panel } from '@/components/tasks/solid3/Pechat3Panel';
 import { Solid3Trainer } from '@/components/tasks/solid3/Solid3Trainer';
 import { RAZDELY } from '@/lib/zadanie3';

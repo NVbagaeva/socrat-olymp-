@@ -69,7 +69,7 @@ for (const r of RAZBORY_3) {
   const where = `${r.tip} (${r.prototip})`;
   const proto = r.prototip === undefined ? undefined : prototypeById(r.prototip);
   if (proto === undefined) {
-    check(r.prototip === 'P03-92', `${where}: прототипа нет в банке`);
+    check(false, `${where}: прототипа нет в банке`);
   } else {
     check(r.params !== undefined, `${where}: нет чисел банка`);
     const otvet = proto.otvet(r.params);
@@ -84,8 +84,10 @@ for (const r of RAZBORY_3) {
   if (r.fipi !== undefined) {
     const z = FIPI.find((item) => item.nomer === r.fipi);
     check(z !== undefined, `${where}: задачи ФИПИ ${r.fipi} нет в снимке банка`);
-    if (z !== undefined && r.prototip !== 'P03-92') {
-      check(z.prototip === r.prototip, `${where}: ФИПИ ${r.fipi} — прототип ${z.prototip}`);
+    /* В снимке банка у P03-92 пометка «НОВЫЙ»: прототип добавлен по сверке. */
+    const vSnimke = z?.prototip === 'НОВЫЙ' ? 'P03-92' : z?.prototip;
+    if (z !== undefined) {
+      check(vSnimke === r.prototip, `${where}: ФИПИ ${r.fipi} — прототип ${z.prototip}`);
     }
   }
 

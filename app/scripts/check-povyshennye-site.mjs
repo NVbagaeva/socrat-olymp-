@@ -11,6 +11,15 @@
      3. После завершения у версии на экране раздела — «завершён» и балл;
         фильтр «С ошибками» показывает её, «Нерешённые» — прячет.
      4. Листы версии (ученик, учитель, разбор) раскладываются на страницы.
+     5. Часть 2 (вариант 1): лента 1–20 из двух частей, кнопки перехода,
+        плашки баллов, решение со ссылкой на теорему (окно), самооценка
+        по критериям → итог из 33 и тестовый балл; на 320 и 375 px нет
+        прокрутки вбок; на листах часть 2 — с новой страницы, плашки,
+        место для решения, критерии и теоремы у учителя.
+     6. Часть 2 остальных вариантов (S_CHAST2): решения 14–20 открываются,
+        формулы набраны, у 15 и 18 ссылки на теоремы; на 320 px у 15, 18, 19
+        нет прокрутки вбок; лист ученика — задания 14–20 по странице с
+        клеткой, у учителя — критерии.
 
    --shots — снимки в docs/povyshennye-snimki/ (компьютер и телефон). */
 
@@ -48,7 +57,7 @@ function ok(cond, where, message) {
 /* Верные ответы версии 1.1 — тот же набор, что соберёт браузер. */
 const { povSetIz } = requireSrc('lib/povyshennye/set');
 const { VARIANT } = requireSrc('lib/povyshennye/dannye/v01');
-const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');
+const { GOTOVY, S_CHAST2 } = requireSrc('lib/povyshennye/dannye/index');
 const { normalizeAnswer } = requireSrc('lib/variant/online/normalize');
 const SET = povSetIz(1, VARIANT.versii);
 const answerOf = (v, i) =>
@@ -110,8 +119,20 @@ ok(
   String(await page.locator('.pov-card').count()),
 );
 ok(
-  (await page.locator('[data-testid="pov-card-1"] .pov-v').count()) === 6,
-  'у варианта 1 шесть версий',
+  (await page.locator('.pov-head__sub').textContent()) === '36 вариантов · 6 версий · ЕГЭ-2027',
+  'шапка: строка «36 вариантов · 6 версий · ЕГЭ-2027»',
+  (await page.locator('.pov-head__sub').textContent()) ?? '',
+);
+ok((await page.locator('.help-fab').count()) === 0, 'кнопки «?» на экране нет', 'есть');
+ok(
+  (await page.getByTestId('pov-resheno').textContent())?.includes('0 из 216') === true &&
+    (await page.getByTestId('pov-srednij').textContent())?.includes('—') === true,
+  'сводка: «0 из 216», средний балл «—»',
+  `${await page.getByTestId('pov-resheno').textContent()} / ${await page.getByTestId('pov-srednij').textContent()}`,
+);
+ok(
+  (await page.locator('[data-testid="pov-card-1"] .pov-tochka').count()) === 6,
+  'у варианта 1 шесть точек-статусов',
   'нет',
 );
 ok(
@@ -119,13 +140,43 @@ ok(
   `остальные ${36 - GOTOVY.length} — «Готовится»`,
   String(await page.locator('.pov-card.is-soon').count()),
 );
+/* Шире телефона версии раскрываются на месте, аккордеоном. */
+await page.getByTestId('pov-open-1').click();
+ok(
+  (await page.locator('[data-testid="pov-akkordeon-1"] .pov-v').count()) === 6,
+  'компьютер: вариант 1 раскрылся аккордеоном, шесть версий',
+  'нет',
+);
+ok((await page.getByTestId('pov-shtorka').count()) === 0, 'компьютер: без шторки', 'шторка');
+await page.getByTestId('pov-info').click();
+ok(
+  (await page.getByTestId('pov-info-telo').textContent())?.includes('Цвета статусов') === true,
+  'кнопка «i»: пояснения раздела в шторке',
+  'нет',
+);
+await page.keyboard.press('Escape');
+ok(
+  (await page.getByTestId('pov-info-shtorka').count()) === 0,
+  'шторка «i» закрывается Escape',
+  'нет',
+);
 await shot(page, 'razdel-kompyuter');
 
 console.log('2. Версия 1.1 онлайн');
 await page.getByTestId('pov-v-1.1').click();
 await page.getByTestId('vo-begin').click({ timeout: 60_000 });
 await page.getByTestId('vo-card').waitFor();
-ok((await page.locator('.vo-strip__no').count()) === 13, 'лента 1–13', 'нет');
+ok((await page.locator('.vo-strip__no').count()) === 20, 'лента 1–20 (две части)', 'нет');
+ok(
+  (await page.locator('.vo-strip__label').allTextContents()).join('|') === 'Часть 1|Часть 2',
+  'подписи «Часть 1» / «Часть 2»',
+  'нет',
+);
+ok(
+  (await page.locator('.vo-card .ball-plashka').textContent()) === '1 балл',
+  'плашка «1 балл» у задания части 1',
+  (await page.locator('.vo-card .ball-plashka').textContent()) ?? '',
+);
 ok((await page.locator('.vo-start__title, h2').first().textContent()) !== null, 'заголовок', '');
 /* Верно — задания 1–12, №13 — неверно: получится «с ошибками». */
 for (let i = 0; i < 12; i += 1) {
@@ -147,43 +198,88 @@ await page.getByTestId('vo-finish').click();
 await page.getByTestId('vo-confirm').click();
 await page.getByTestId('vo-result').waitFor({ timeout: 60_000 });
 ok(
-  (await page.getByTestId('vo-primary').textContent())?.includes('12 из 13') === true,
-  'первичный балл 12 из 13',
-  (await page.getByTestId('vo-primary').textContent()) ?? '',
+  (await page.getByTestId('vo-part1').textContent())?.includes('12 из 13') === true,
+  'часть 1: 12 из 13',
+  (await page.getByTestId('vo-part1').textContent()) ?? '',
 );
-ok((await page.getByTestId('vo-test').count()) === 1, 'тестовый балл', 'нет');
+ok(
+  (await page.getByTestId('vo-part2').textContent())?.includes('на проверке') === true,
+  'часть 2: на проверке',
+  (await page.getByTestId('vo-part2').textContent()) ?? '',
+);
+ok(
+  (await page.getByTestId('vo-test').count()) === 0,
+  'тестовый балл скрыт до проверки части 2',
+  'есть',
+);
 await shot(page, 'versiya-1-1-itogi-kompyuter');
 
 console.log('3. Статус версии на экране раздела');
 await page.goto(`${BASE}/povyshennye/`);
 await page.getByTestId('pov-grid').waitFor({ timeout: 60_000 });
-const v11 = page.getByTestId('pov-v-1.1');
 ok(
-  (await v11.getAttribute('class'))?.includes('is-done') === true,
-  'версия 1.1 — завершена',
+  (await page.getByTestId('pov-resheno').textContent())?.includes('1 из 216') === true,
+  'сводка: решено 1 из 216',
+  (await page.getByTestId('pov-resheno').textContent()) ?? '',
+);
+const tochki1 = page.locator('[data-testid="pov-card-1"] .pov-tochki .pov-tochka');
+ok(
+  (await tochki1.nth(0).getAttribute('class'))?.includes('is-oshibki') === true &&
+    (await tochki1.nth(1).getAttribute('class'))?.includes('is-new') === true,
+  'точки в порядке версий: 1.1 — «есть ошибки», 1.2 — «не начата»',
+  (await tochki1.nth(0).getAttribute('class')) ?? '',
+);
+ok(
+  (await page.locator('[data-testid="pov-card-1"] .pov-card__count').textContent()) ===
+    '1 из 6 версий',
+  'в карточке «1 из 6 версий»',
+  (await page.locator('[data-testid="pov-card-1"] .pov-card__count').textContent()) ?? '',
+);
+await page.getByTestId('pov-open-1').click();
+const v11 = page.locator('[data-testid="pov-akkordeon-1"] .pov-v').first();
+ok(
+  (await v11.getAttribute('class'))?.includes('is-oshibki') === true,
+  'версия 1.1 — «есть ошибки»',
   (await v11.getAttribute('class')) ?? '',
 );
 ok(
-  (await v11.textContent())?.includes('12 из 13') === true,
-  'у версии балл',
+  (await v11.textContent())?.includes('Первичный 12 · часть 2 на проверке') === true,
+  'у версии первичный балл, часть 2 на проверке',
   (await v11.textContent()) ?? '',
+);
+ok(
+  (await page.locator('[data-testid="pov-akkordeon-1"] .pov-v').nth(1).textContent())?.includes(
+    'Первичный',
+  ) === false,
+  'у не начатой версии баллов нет',
+  'есть',
 );
 await page.getByRole('radio', { name: 'С ошибками' }).click();
 ok(
   (await page.getByTestId('pov-v-1.1').count()) === 1 &&
-    (await page.getByTestId('pov-v-1.2').count()) === 0,
-  'фильтр «С ошибками»',
+    (await page.getByTestId('pov-v-1.2').count()) === 0 &&
+    (await tochki1.nth(1).getAttribute('class'))?.includes('is-dim') === true &&
+    (await tochki1.nth(0).getAttribute('class'))?.includes('is-dim') === false,
+  'фильтр «С ошибками»: список и точки',
   'не так',
 );
 await page.getByRole('radio', { name: 'Нерешённые' }).click();
 ok(
   (await page.getByTestId('pov-v-1.1').count()) === 0 &&
-    (await page.getByTestId('pov-v-1.2').count()) === 1,
-  'фильтр «Нерешённые»',
+    (await page.getByTestId('pov-v-1.2').count()) === 1 &&
+    (await tochki1.nth(0).getAttribute('class'))?.includes('is-dim') === true,
+  'фильтр «Нерешённые»: список и точки',
   'не так',
 );
+await page.getByRole('radio', { name: 'Как на ЕГЭ' }).click();
+ok(
+  (await page.getByTestId('pov-v-1.2').getAttribute('href'))?.includes('r=k') === true,
+  'режим «Как на ЕГЭ» — в ссылке версии',
+  (await page.getByTestId('pov-v-1.2').getAttribute('href')) ?? '',
+);
+await page.getByRole('radio', { name: 'Тренировка' }).click();
 await page.getByRole('radio', { name: 'Все' }).click();
-await page.locator('[data-testid="pov-card-1"] .pov-print__toggle').click();
+await page.getByTestId('pov-print-1').click();
 await shot(page, 'razdel-posle-resheniya-kompyuter');
 await page.locator('.pov-stats').scrollIntoViewIfNeeded();
 await shot(page, 'statistika-razdela-kompyuter');
@@ -197,6 +293,68 @@ await mob.getByTestId('pov-grid').waitFor({ timeout: 60_000 });
 const overflow = await mob.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 ok(overflow <= 0, 'на телефоне нет прокрутки вбок', String(overflow));
 await shot(mob, 'razdel-telefon');
+/* Телефон: вариант — в нижней шторке; закрытие крестиком, фоном, свайпом. */
+const shtorka = mob.getByTestId('pov-shtorka');
+await mob.getByTestId('pov-open-1').click();
+await shtorka.waitFor();
+ok(
+  (await shtorka.locator('.pov-v').count()) === 6 &&
+    (await shtorka.locator('.pov-v__btn').first().textContent()) === 'Решать' &&
+    (await shtorka.textContent())?.includes('Часть 2 доступна') === true,
+  'телефон: шторка варианта 1 — шесть версий, «Решать», «Часть 2 доступна»',
+  'не так',
+);
+await shot(mob, 'razdel-telefon-shtorka');
+await mob.getByTestId('pov-shtorka-close').click();
+ok((await shtorka.count()) === 0, 'шторка закрывается крестиком', 'открыта');
+await mob.getByTestId('pov-open-1').click();
+await shtorka.waitFor();
+await mob.getByTestId('pov-shtorka-fon').click({ position: { x: 20, y: 20 } });
+ok((await shtorka.count()) === 0, 'шторка закрывается тапом по фону', 'открыта');
+await mob.getByTestId('pov-open-1').click();
+await shtorka.waitFor();
+const ruchka = await mob.locator('.pov-shtorka__ruchka').boundingBox();
+await mob.mouse.move(ruchka.x + ruchka.width / 2, ruchka.y + 8);
+await mob.mouse.down();
+for (let i = 1; i <= 10; i += 1)
+  await mob.mouse.move(ruchka.x + ruchka.width / 2, ruchka.y + 8 + i * 25);
+await mob.mouse.up();
+await mob.waitForTimeout(300);
+ok((await shtorka.count()) === 0, 'шторка закрывается свайпом вниз', 'открыта');
+/* Последняя карточка не уходит под нижнюю панель. */
+await mob.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+await mob.waitForTimeout(300);
+const pod = await mob.evaluate(() => {
+  const nav = document.querySelector('.bnav');
+  const last = document.querySelector('.pov-stats');
+  return nav === null || last === null
+    ? 0
+    : last.getBoundingClientRect().bottom - nav.getBoundingClientRect().top;
+});
+ok(pod <= 0, 'низ страницы не уходит под нижнюю панель', String(pod));
+/* 360 px: без прокрутки вбок, заголовок не длиннее двух строк. */
+const uzk = await browser.newContext({
+  ...devices['iPhone 13'],
+  viewport: { width: 360, height: 780 },
+});
+await welcomeSeen(uzk);
+const u = await uzk.newPage();
+await u.goto(`${BASE}/povyshennye/`);
+await u.getByTestId('pov-grid').waitFor({ timeout: 60_000 });
+const r360 = await u.evaluate(() => {
+  const h = document.querySelector('.pov-head__title');
+  const lh = parseFloat(getComputedStyle(h).lineHeight);
+  return {
+    sx: document.documentElement.scrollWidth - window.innerWidth,
+    stroki: Math.round(h.getBoundingClientRect().height / lh),
+  };
+});
+ok(
+  r360.sx <= 0 && r360.stroki <= 2,
+  '360 px: нет прокрутки вбок, заголовок в 2 строки',
+  JSON.stringify(r360),
+);
+await uzk.close();
 await mob.goto(`${BASE}/variant/reshat/?kod=PV-01&v=2&r=t&tm=0&w=ege`);
 await mob.getByTestId('vo-begin').click({ timeout: 60_000 });
 await mob.locator('.vo-strip__no').nth(8).click();
@@ -218,6 +376,296 @@ for (const list of ['uchenik', 'uchitel', 'razbor']) {
   ok(txt.includes('Вариант 1.1'), `лист «${list}»: подпись «Вариант 1.1»`, 'нет');
   await shot(p, `list-${list}`, true);
   await p.close();
+}
+
+console.log('5. Часть 2');
+const OZHIDAEM = {
+  14: '2 балла',
+  15: '3 балла',
+  16: '2 балла',
+  17: '2 балла',
+  18: '3 балла',
+  19: '4 балла',
+  20: '4 балла',
+};
+await page.goto(`${BASE}/variant/reshat/?kod=PV-01&v=3&r=t&tm=0&w=ege`);
+await page.getByTestId('vo-begin').click({ timeout: 60_000 });
+await page.getByTestId('vo-card').waitFor();
+await page.locator('.vo-strip__no').nth(12).click();
+ok(
+  (await page.getByTestId('vo-to-part2').count()) === 1,
+  'после №13 — «Перейти ко второй части»',
+  'нет',
+);
+await page.getByTestId('vo-to-part2').click();
+ok(
+  (await page.getByTestId('vo-part2-head').count()) === 1,
+  'заголовок и инструкция части 2',
+  'нет',
+);
+ok(
+  (await page.getByTestId('vo-part2-head').textContent())?.includes(
+    'Максимум за часть 2 — 20 баллов',
+  ) === true,
+  '«Максимум за часть 2 — 20 баллов»',
+  'нет',
+);
+let summa2 = 0;
+for (const no of [14, 15, 16, 17, 18, 19, 20]) {
+  await page
+    .locator('[data-testid=vo-strip-part2] .vo-strip__no', { hasText: new RegExp(`^${no}$`) })
+    .click();
+  const pl = (await page.locator('.vo-card__title .ball-plashka').textContent()) ?? '';
+  ok(pl === OZHIDAEM[no], `плашка №${no}: ${OZHIDAEM[no]}`, pl);
+  await page.getByTestId(`c2-${no}-reshenie`).click();
+  await page.getByTestId(`c2-${no}-reshenie-ok`).click();
+  await page.getByTestId(`c2-${no}-reshenie-telo`).waitFor();
+  if (no === 15 || no === 18) {
+    const n = await page.locator('.teor-ssylka').count();
+    ok(n >= 3, `№${no}: ссылки на теоремы (${n})`, 'мало');
+    await page.locator('.teor-ssylka').first().click();
+    await page.getByTestId('teorema-okno').waitFor({ timeout: 30_000 });
+    const t = (await page.getByTestId('teorema-okno').textContent()) ?? '';
+    ok(
+      t.includes('Доказательство') || t.includes('Почему'),
+      `№${no}: окно теоремы с доказательством`,
+      t.slice(0, 80),
+    );
+    ok(
+      (await page.locator('[data-testid=teorema-okno] svg').count()) === 1,
+      `№${no}: в окне чертёж`,
+      'нет',
+    );
+    await page.keyboard.press('Escape');
+  }
+  /* Самооценка: максимум у 14, у остальных 1 балл. */
+  const b = no === 14 ? 2 : 1;
+  summa2 += b;
+  await page.getByTestId(`c2-${no}-ball-${b}`).click();
+}
+await page.getByTestId('vo-to-part1').click();
+ok(
+  (await page.locator('.vo-strip__no.is-current').textContent()) === '1',
+  '«Вернуться к первой части»',
+  'нет',
+);
+await page.getByTestId('vo-finish').click();
+await page.getByTestId('vo-confirm').click();
+await page.getByTestId('vo-itog2').waitFor({ timeout: 60_000 });
+ok(
+  (await page.getByTestId('vo-part2').textContent())?.includes(`${summa2} из 20`) === true,
+  `часть 2: ${summa2} из 20`,
+  (await page.getByTestId('vo-part2').textContent()) ?? '',
+);
+ok(
+  (await page.getByTestId('vo-total').textContent())?.includes(`${summa2} из 33`) === true,
+  `всего: ${summa2} из 33`,
+  (await page.getByTestId('vo-total').textContent()) ?? '',
+);
+ok(
+  (await page.getByTestId('vo-test').count()) === 1,
+  'тестовый балл после проверки части 2',
+  'нет',
+);
+await shot(page, 'chast2-itogi-kompyuter');
+
+for (const w of [320, 375]) {
+  const ctx = await browser.newContext({
+    viewport: { width: w, height: 800 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  await welcomeSeen(ctx);
+  const m = await ctx.newPage();
+  m.on('pageerror', (e) => errors.push(String(e)));
+  await m.goto(`${BASE}/variant/reshat/?kod=PV-01&v=4&r=t&tm=0&w=ege`);
+  await m.getByTestId('vo-begin').click({ timeout: 60_000 });
+  for (const no of [15, 18, 19]) {
+    await m
+      .locator('[data-testid=vo-strip-part2] .vo-strip__no', { hasText: new RegExp(`^${no}$`) })
+      .click();
+    await m.getByTestId(`c2-${no}-reshenie`).click();
+    await m.getByTestId(`c2-${no}-reshenie-ok`).click();
+    await m.getByTestId(`c2-${no}-reshenie-telo`).waitFor();
+    const sx = await m.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    ok(sx <= 0, `${w} px, №${no} с решением: нет прокрутки вбок`, String(sx));
+  }
+  await ctx.close();
+}
+
+for (const list of ['uchenik', 'uchitel']) {
+  const p = await desk.newPage();
+  p.on('pageerror', (e) => errors.push(String(e)));
+  await p.addInitScript(() => {
+    window.print = () => {};
+  });
+  await p.setViewportSize({ width: 900, height: 1200 });
+  await p.goto(`${BASE}/variant/pechat/?kod=PV-01&v=1&list=${list}`);
+  await p.waitForFunction(() => window.sheetPagination !== undefined, null, { timeout: 120_000 });
+  const r = await p.evaluate(() => {
+    const head = document.querySelector('#sheet-pages .var-part2-head');
+    const page = head?.closest('.sheet-page');
+    const first = page?.querySelector('.sheet-flow')?.firstElementChild;
+    return {
+      head: head !== null,
+      pervyy: first !== null && first !== undefined && first.contains(head),
+      plashki: [...document.querySelectorAll('#sheet-pages .ball-plashka')].map(
+        (e) => e.textContent,
+      ),
+      /* Часть 2 «по странице на задание»: карточка задачи — первый кусок
+         страницы (у №14 — сразу под заголовком части), поле в клетку
+         до нижнего поля с допуском меньше клетки, клеток целое число. */
+      stranicy: [...document.querySelectorAll('#sheet-pages .sheet-tasks--page')].map((card) => {
+        const page = card.closest('.sheet-page');
+        const flow = page.querySelector('.sheet-flow');
+        const kids = [...flow.children];
+        const fill = page.querySelector('.sheet-fill');
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:absolute;height:50mm';
+        flow.appendChild(probe);
+        const cell = probe.getBoundingClientRect().height / 10;
+        probe.remove();
+        const fb = fill.getBoundingClientRect();
+        const rows = Number(fill.dataset.rows);
+        const cols = Number(fill.dataset.cols);
+        return {
+          no: Number(card.querySelector('.sheet-task-no').textContent),
+          pervaya:
+            kids.indexOf(card) === 0 ||
+            (kids.indexOf(card) === 1 && kids[0].classList.contains('var-part2-head')),
+          zazor: (flow.getBoundingClientRect().bottom - fb.bottom) / cell,
+          celye:
+            Math.abs(fb.height - 2 - rows * cell) < 1 && Math.abs(fb.width - 2 - cols * cell) < 1,
+          rows,
+          stroka: page.querySelector('.sheet-answer-line') === null,
+        };
+      }),
+      stranic1: (() => {
+        const pages = [...document.querySelectorAll('#sheet-pages .sheet-page')];
+        return pages.findIndex((pg) => pg.querySelector('.var-part2-head') !== null);
+      })(),
+      krit: document.querySelectorAll('#sheet-pages .c2-krit-print').length,
+      teor: document.querySelectorAll('#sheet-pages .var-teor .teor').length,
+    };
+  });
+  ok(
+    r.head && r.pervyy,
+    `лист «${list}»: часть 2 с новой страницы`,
+    JSON.stringify(r).slice(0, 120),
+  );
+  ok(r.plashki.length === 20, `лист «${list}»: 20 плашек баллов`, String(r.plashki.length));
+  ok(
+    r.plashki.slice(13).join(',') === Object.values(OZHIDAEM).join(','),
+    `лист «${list}»: плашки 14–20`,
+    r.plashki.slice(13).join(','),
+  );
+  if (list === 'uchenik') {
+    ok(r.stranicy.length === 7, 'часть 2: семь заданий по странице', String(r.stranicy.length));
+    for (const z of r.stranicy) {
+      ok(z.pervaya, `№${z.no} — с новой страницы`, '');
+      ok(
+        z.zazor >= 0 && z.zazor < 1,
+        `№${z.no}: клетка до нижнего поля (зазор ${z.zazor.toFixed(2)} клетки)`,
+        '',
+      );
+      ok(z.celye && z.rows > 0, `№${z.no}: целое число клеток (${z.rows} строк)`, '');
+      ok(z.stroka, `№${z.no}: без строки «Ответ:»`, '');
+    }
+    ok(
+      r.stranic1 >= 1 && r.stranic1 <= 4,
+      `часть 1 — ${r.stranic1} стр., как раньше`,
+      String(r.stranic1),
+    );
+  }
+  if (list === 'uchitel') {
+    ok(r.krit === 7, 'критерии 14–20 у учителя', String(r.krit));
+    ok(r.teor >= 10, `теоремы в конце листа учителя (${r.teor})`, 'мало');
+  }
+  await p.close();
+}
+
+console.log('6. Часть 2 остальных вариантов');
+for (const k of S_CHAST2.filter((x) => x !== 1)) {
+  const kod = `PV-${String(k).padStart(2, '0')}`;
+  const v = ((k - 1) % 6) + 1;
+  const p = await desk.newPage();
+  p.on('pageerror', (e) => errors.push(`${kod}: ${String(e)}`));
+  await p.goto(`${BASE}/variant/reshat/?kod=${kod}&v=${v}&r=t&tm=0&w=ege`);
+  await p.getByTestId('vo-begin').click({ timeout: 60_000 });
+  await p.getByTestId('vo-card').waitFor();
+  for (const no of [14, 15, 16, 17, 18, 19, 20]) {
+    await p
+      .locator('[data-testid=vo-strip-part2] .vo-strip__no', { hasText: new RegExp(`^${no}$`) })
+      .click();
+    await p.getByTestId(`c2-${no}-reshenie`).click();
+    await p.getByTestId(`c2-${no}-reshenie-ok`).click();
+    const telo = p.getByTestId(`c2-${no}-reshenie-telo`);
+    await telo.waitFor();
+    const html = (await telo.innerHTML()) ?? '';
+    ok(!html.includes('katex-error'), `${kod}.${v} №${no}: решение набрано`, 'katex-error');
+    if (no === 15 || no === 18) {
+      const n = await telo.locator('.teor-ssylka').count();
+      ok(n >= 3, `${kod}.${v} №${no}: ссылки на теоремы (${n})`, 'мало');
+      await telo.locator('.teor-ssylka').first().click();
+      await p.getByTestId('teorema-okno').waitFor({ timeout: 30_000 });
+      await p.keyboard.press('Escape');
+    }
+  }
+  await shot(p, `chast2-${kod}-reshenie`);
+  await p.close();
+
+  const ctx = await browser.newContext({
+    ...devices['iPhone 12'],
+    viewport: { width: 320, height: 800 },
+  });
+  await welcomeSeen(ctx);
+  const m = await ctx.newPage();
+  m.on('pageerror', (e) => errors.push(`${kod} 320: ${String(e)}`));
+  await m.goto(`${BASE}/variant/reshat/?kod=${kod}&v=${v}&r=t&tm=0&w=ege`);
+  await m.getByTestId('vo-begin').click({ timeout: 60_000 });
+  for (const no of [15, 18, 19]) {
+    await m
+      .locator('[data-testid=vo-strip-part2] .vo-strip__no', { hasText: new RegExp(`^${no}$`) })
+      .click();
+    await m.getByTestId(`c2-${no}-reshenie`).click();
+    await m.getByTestId(`c2-${no}-reshenie-ok`).click();
+    await m.getByTestId(`c2-${no}-reshenie-telo`).waitFor();
+    const sx = await m.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    ok(sx <= 0, `${kod}.${v}, 320 px, №${no}: нет прокрутки вбок`, String(sx));
+  }
+  await ctx.close();
+
+  for (const list of ['uchenik', 'uchitel']) {
+    const q = await desk.newPage();
+    q.on('pageerror', (e) => errors.push(`${kod} ${list}: ${String(e)}`));
+    await q.addInitScript(() => {
+      window.print = () => {};
+    });
+    await q.setViewportSize({ width: 900, height: 1200 });
+    await q.goto(`${BASE}/variant/pechat/?kod=${kod}&v=${v}&list=${list}`);
+    await q.waitForFunction(() => window.sheetPagination !== undefined, null, { timeout: 120_000 });
+    const r = await q.evaluate(() => ({
+      stranicy: [...document.querySelectorAll('#sheet-pages .sheet-tasks--page')].map((card) => {
+        const page = card.closest('.sheet-page');
+        const fill = page.querySelector('.sheet-fill');
+        return {
+          no: Number(card.querySelector('.sheet-task-no').textContent),
+          rows: Number(fill?.dataset.rows ?? 0),
+        };
+      }),
+      krit: document.querySelectorAll('#sheet-pages .c2-krit-print').length,
+      oshibki: document.querySelectorAll('#sheet-pages .katex-error').length,
+    }));
+    ok(r.oshibki === 0, `${kod}.${v} лист «${list}»: формулы набраны`, String(r.oshibki));
+    if (list === 'uchenik') {
+      ok(
+        r.stranicy.length === 7 && r.stranicy.every((z) => z.rows > 0),
+        `${kod}.${v}: задания 14–20 по странице с клеткой`,
+        JSON.stringify(r.stranicy),
+      );
+    } else ok(r.krit === 7, `${kod}.${v}: критерии 14–20 у учителя`, String(r.krit));
+    await q.close();
+  }
 }
 
 ok(errors.length === 0, 'ошибок на страницах нет', errors.join('\n'));

@@ -11,10 +11,12 @@
  */
 
 import renderer from './renderer.js';
+import Exp from './families/exponential.js';
 import './families/loga.js';
+import './families/quadratic.js';
 import './families/rational.js';
 import './families/sqrt.js';
-import { asymptotes, verticalAsymptote } from './families/shared.js';
+import { asymptotes, horizontalAsymptote, verticalAsymptote } from './families/shared.js';
 
 export interface KLog {
   /** Основание, в котором точки читаются: f(x) = c·log_r x. */
@@ -457,6 +459,726 @@ export function korenKoren(p: KorenKoren, pechat: Pechat = {}): GrafikTask {
     svg: risuy(scene(false), pechat),
     svgUchitel: risuy(scene(true), pechat),
     points: [p.F, G1, G2].map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+/* ── Партия 2: парабола и показательная по узлам сетки ────────────── */
+
+/** Многочлен ax² + bx + c в TeX: «0{,}4x^2-0{,}8x-2», «-x^2+3x+4». */
+function mnogochlen(a: number, b: number, c: number): string {
+  const chlen = (k: number, v: string, pervyy: boolean) => {
+    if (k === 0) return '';
+    const znak = k < 0 ? '-' : pervyy ? '' : '+';
+    const m = Math.abs(k);
+    return `${znak}${m === 1 && v !== '' ? '' : dec(m)}${v}`;
+  };
+  return chlen(a, 'x^2', true) + chlen(b, 'x', false) + chlen(c, '', false) || '0';
+}
+
+/** Множитель (x − r) в TeX: «(x+4)», «(x-1)», «x». */
+const skobka = (r: number) => (r === 0 ? 'x' : `(x${r < 0 ? '+' : '-'}${dec(Math.abs(r))})`);
+
+/** Окно по точкам с полями: не уже восьми клеток по каждой оси. */
+function oknoPo(pts: readonly T[], vverh: boolean) {
+  const xs = pts.map((t) => t[0]);
+  const ys = pts.map((t) => t[1]);
+  let xmin = Math.floor(Math.min(...xs, 0)) - 2;
+  let xmax = Math.ceil(Math.max(...xs, 0)) + 2;
+  let ymin = Math.floor(Math.min(...ys, 0)) - 2;
+  let ymax = Math.ceil(Math.max(...ys, 0)) + 2;
+  while (xmax - xmin < 8) {
+    xmin -= 1;
+    if (xmax - xmin < 8) xmax += 1;
+  }
+  /* Не хватает высоты — растим в сторону ветвей. */
+  while (ymax - ymin < 8) {
+    if (vverh) ymax += 1;
+    else ymin -= 1;
+  }
+  return { xmin, xmax, ymin, ymax };
+}
+
+/** Точка за окном — по рисунку её не прочесть. */
+function zaOknom(
+  x: number,
+  y: number,
+  w: { xmin: number; xmax: number; ymin: number; ymax: number },
+) {
+  return x < w.xmin || x > w.xmax || y < w.ymin || y > w.ymax;
+}
+
+/** Сцена параболы с отмеченными узлами. */
+function stsenaParaboly(
+  a: number,
+  b: number,
+  c: number,
+  uzly: readonly T[],
+  win: { xmin: number; xmax: number; ymin: number; ymax: number },
+  uchitel: boolean,
+) {
+  return {
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [{ type: 'quadratic', a, b, c, color: 'lineA', label: 'y = f(x)' }],
+    points: uzly.map(([x, y]) => ({ x, y, style: 'solid', color: 'lineA', label: null })),
+    shapes: uchitel ? napravlyayushchie(uzly) : [],
+    alt: 'График параболы f(x) = ax² + bx + c с отмеченными точками в узлах сетки',
+  };
+}
+
+/** Варианты кнопки без повторов: верный первым. */
+function bezPovtorov(options: string[]): string[] {
+  return [...new Set(options)];
+}
+
+export interface ParabolaB {
+  /** Данный в условии коэффициент при x. */
+  b: number;
+  /** Пересечение с осью Oy: (0; c) — узел. */
+  c: number;
+  /** Ещё один узел графика. */
+  Q: [number, number];
+  /** Где спрашивают значение функции. */
+  x0: number;
+}
+
+/**
+ * f(x) = ax² + bx + c, b дано в условии; на рисунке отмечены узлы (0; c)
+ * и Q. c читается по оси Oy, a — из f(x_Q) = y_Q. Подвох — вершина не в
+ * узле, а f(x₀) — за рамкой: ответ только счётом.
+ */
+export function parabolaB(p: ParabolaB, pechat: Pechat = {}): GrafikTask {
+  const { b, c, x0 } = p;
+  const [qx, qy] = p.Q;
+  if (qx === 0) throw new Error('parabolaB: Q на оси Oy');
+  const a = round9((qy - c - b * qx) / (qx * qx));
+  if (a === 0 || !celoe(a * 1e4)) throw new Error(`parabolaB: a = ${a}`);
+  const f = (x: number) => round9(a * x * x + b * x + c);
+  const otvet = f(x0);
+  const xv = -b / (2 * a);
+  const V: T = [xv, a * xv * xv + b * xv + c];
+  const uzly: T[] = [[0, c], p.Q];
+  const win = oknoPo([...uzly, V], a > 0);
+  if (!zaOknom(x0, otvet, win)) throw new Error('parabolaB: f(x₀) читается по рисунку');
+  /* Второй счёт: a — из разделённой разности, значение — схемой Горнера. */
+  const aa = ((qy - c) / qx - b) / qx;
+  const proverka = (aa * x0 + b) * x0 + c;
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const bx = round9(b * qx);
+  const prava = round9(qy - c - bx);
+  const fTex = mnogochlen(a, b, c);
+  const podst = `${dec(a)}\\cdot${mn(x0)}^2${b < 0 ? '-' : '+'}${dec(Math.abs(b))}\\cdot${mn(x0)}${c < 0 ? '-' : '+'}${dec(Math.abs(c))}`;
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [`График проходит через узлы сетки $${kv(uzly[0] as T)}$ и $${kv(p.Q)}$.`],
+    },
+    {
+      title: 'Коэффициенты',
+      lines: [
+        `$f(0)=c$, а график пересекает ось $Oy$ в точке $${kv(uzly[0] as T)}$: $c=${dec(c)}$.`,
+        `$f(${dec(qx)})=${dec(qy)}$: $a\\cdot${mn(qx)}^2${b < 0 ? '-' : '+'}${dec(Math.abs(b))}\\cdot${mn(qx)}${c < 0 ? '-' : '+'}${dec(Math.abs(c))}=${dec(qy)}$, то есть $${dec(qx * qx)}a${bx < 0 ? '' : '+'}${dec(bx)}${c < 0 ? '' : '+'}${dec(c)}=${dec(qy)}$, $${dec(qx * qx)}a=${dec(prava)}$, $a=${dec(a)}$.`,
+      ],
+    },
+    {
+      title: 'Значение функции',
+      lines: [`$f(x)=${fTex}$, $f(${dec(x0)})=${podst}=${dec(otvet)}$.`],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Как найти $c$?',
+      options: [
+        `$c=f(0)=${dec(c)}$ — по точке на оси $Oy$`,
+        'По ординате вершины',
+        'По абсциссе вершины',
+      ],
+      correct: 0,
+    },
+    {
+      question: 'Какое уравнение даёт $a$?',
+      options: bezPovtorov([
+        `$${dec(qx * qx)}a${bx < 0 ? '' : '+'}${dec(bx)}${c < 0 ? '' : '+'}${dec(c)}=${dec(qy)}$`,
+        `$${dec(qx)}a${bx < 0 ? '' : '+'}${dec(bx)}${c < 0 ? '' : '+'}${dec(c)}=${dec(qy)}$`,
+        `$${dec(qx * qx)}a${bx < 0 ? '+' : '-'}${dec(Math.abs(bx))}${c < 0 ? '' : '+'}${dec(c)}=${dec(qy)}$`,
+      ]),
+      correct: 0,
+      comment: `Точка $${kv(p.Q)}$ лежит на графике: подставляем $x=${dec(qx)}$, $f(x)=${dec(qy)}$.`,
+    },
+    {
+      question: `Можно ли прочитать $f(${dec(x0)})$ по рисунку?`,
+      options: [
+        'Нет: точка за рамкой — считаем по формуле',
+        'Да: по ближайшему узлу сетки',
+        'Да: оно равно ординате вершины',
+      ],
+      correct: 0,
+      comment: `$f(${dec(x0)})=${podst}$.`,
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображён график функции $f(x)=ax^2${b < 0 ? '-' : '+'}${dec(Math.abs(b))}x+c$. Найдите $f(${dec(x0)})$.`,
+    otvet,
+    proverka,
+    svg: risuy(stsenaParaboly(a, b, c, uzly, win, false), pechat),
+    svgUchitel: risuy(stsenaParaboly(a, b, c, uzly, win, true), pechat),
+    points: uzly.map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+export interface ParabolaKorni {
+  /** Нули функции — узлы на оси Ox. */
+  x1: number;
+  x2: number;
+  /** Пересечение с осью Oy: (0; c). */
+  c: number;
+  x0: number;
+}
+
+/**
+ * f(x) = ax² + bx + c через нули x₁, x₂ и точку (0; c): f = a(x − x₁)(x − x₂),
+ * a = c/(x₁x₂). Подвох — вершина не в узле, f(x₀) за рамкой.
+ */
+export function parabolaKorni(p: ParabolaKorni, pechat: Pechat = {}): GrafikTask {
+  const { x1, x2, c, x0 } = p;
+  if (x1 === x2 || x1 === 0 || x2 === 0 || c === 0) throw new Error('parabolaKorni: вырожденно');
+  const pr = x1 * x2;
+  const a = round9(c / pr);
+  if (!celoe(a * 1e4)) throw new Error(`parabolaKorni: a = ${a}`);
+  const b = round9(-a * (x1 + x2));
+  const otvet = round9(a * (x0 - x1) * (x0 - x2));
+  const xv = (x1 + x2) / 2;
+  const V: T = [xv, a * (xv - x1) * (xv - x2)];
+  const uzly: T[] = [
+    [Math.min(x1, x2), 0],
+    [Math.max(x1, x2), 0],
+    [0, c],
+  ];
+  const win = oknoPo([...uzly, V], a > 0);
+  if (!zaOknom(x0, otvet, win)) throw new Error('parabolaKorni: f(x₀) читается по рисунку');
+  /* Второй счёт: коэффициенты общей формы из системы по трём точкам. */
+  const proverka = (() => {
+    const bb = -a * (x1 + x2);
+    return a * x0 * x0 + bb * x0 + c;
+  })();
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const [u1, u2] = [Math.min(x1, x2), Math.max(x1, x2)];
+  const razl = `${skobka(u1)}${skobka(u2)}`;
+  const podst = `${mn(a)}\\cdot${mn(round9(x0 - u1))}\\cdot${mn(round9(x0 - u2))}`;
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [
+        `График пересекает ось $Ox$ в узлах $${kv(uzly[0] as T)}$ и $${kv(uzly[1] as T)}$, ось $Oy$ — в узле $${kv(uzly[2] as T)}$.`,
+      ],
+    },
+    {
+      title: 'Формула через нули',
+      lines: [
+        `Нули функции $${dec(u1)}$ и $${dec(u2)}$, поэтому $f(x)=a${razl}$.`,
+        `$f(0)=a\\cdot${mn(-u1)}\\cdot${mn(-u2)}=${dec(pr)}a=${dec(c)}$, откуда $a=${dec(a)}$.`,
+      ],
+    },
+    {
+      title: 'Значение функции',
+      lines: [
+        `$f(${dec(x0)})=${podst}=${dec(otvet)}$.`,
+        `В общей форме $f(x)=${mnogochlen(a, b, c)}$ — то же значение.`,
+      ],
+    },
+  ];
+  const obr = `${skobka(-u1)}${skobka(-u2)}`;
+  const hints = [
+    {
+      question: 'Как записать $f(x)$ через нули?',
+      options: bezPovtorov([`$a${razl}$`, `$a${obr}$`, `$a${razl}+${dec(c)}$`]),
+      correct: 0,
+      comment: 'Множитель $(x-x_0)$ обращается в ноль при $x=x_0$.',
+    },
+    {
+      question: 'Как найти $a$?',
+      options: bezPovtorov([
+        `$f(0)=${dec(pr)}a=${dec(c)}$`,
+        `$a=${dec(c)}$ — по точке на оси $Oy$`,
+        `$f(0)=${dec(-pr)}a=${dec(c)}$`,
+      ]),
+      correct: 0,
+    },
+    {
+      question: `Чему равно $f(${dec(x0)})$?`,
+      options: bezPovtorov([
+        `$${dec(otvet)}$`,
+        `$${dec(round9(a * (x0 + u1) * (x0 + u2)))}$`,
+        `$${dec(-otvet)}$`,
+      ]),
+      correct: 0,
+      comment: `$f(${dec(x0)})=${podst}$.`,
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображён график функции $f(x)=ax^2+bx+c$. Найдите $f(${dec(x0)})$.`,
+    otvet,
+    proverka,
+    svg: risuy(stsenaParaboly(a, b, c, uzly, win, false), pechat),
+    svgUchitel: risuy(stsenaParaboly(a, b, c, uzly, win, true), pechat),
+    points: uzly.map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+export interface PokazatelnayaOtnoshenie {
+  /** Узел графика кроме (0; 1): a^{P₀} = P₁. */
+  P: [number, number];
+  /** Спрашивают f(m) / f(n). */
+  m: number;
+  n: number;
+}
+
+/**
+ * f(x) = aˣ через (0; 1) и узел P: a^{p} = y. Основание иррациональное
+ * (y — не точная степень), но f(m)/f(n) = a^{m−n} = y^{(m−n)/p} — целое.
+ * Подвох — не искать a приближённо, а свести к известной степени.
+ */
+export function pokazatelnayaOtnoshenie(
+  p: PokazatelnayaOtnoshenie,
+  pechat: Pechat = {},
+): GrafikTask {
+  const [px, py] = p.P;
+  const { m, n } = p;
+  const e = (m - n) / px;
+  if (px === 0 || py <= 0 || py === 1 || !Number.isInteger(e) || e === 0)
+    throw new Error('pokazatelnayaOtnoshenie: показатель не целый');
+  const otvet = round9(py ** e);
+  if (!celoe(otvet * 1e4)) throw new Error(`pokazatelnayaOtnoshenie: ${py}^${e}`);
+  const a = py ** (1 / px);
+  const proverka = a ** m / a ** n;
+  const uzly: T[] = [
+    [0, 1],
+    [px, py],
+  ];
+  const rastet = a > 1;
+  /* Хвост у асимптоты y = 0 обрезаем там, где кривая ещё отстоит от оси
+     на CLEARANCE (то же правило, что у семейства exponential). */
+  const hvost = Math.max(2, Math.floor(Exp.tailReach(a) + 1e-9));
+  const shir = Math.max(Math.abs(px) + 2, 8 - hvost);
+  const win = {
+    xmin: rastet ? -hvost : -shir,
+    xmax: rastet ? shir : hvost,
+    ymin: -2,
+    ymax: Math.max(py, 6) + 2,
+  };
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [{ type: 'exponential', a, d: 0, color: 'lineA', label: 'y = f(x)' }],
+    points: uzly.map(([x, y]) => ({ x, y, style: 'solid', color: 'lineA', label: null })),
+    shapes: uchitel ? napravlyayushchie(uzly) : [],
+    alt: 'График показательной функции f(x) = aˣ с отмеченными точками в узлах сетки',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const ap = `a^{${dec(px)}}`;
+  const raz = round9(m - n);
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [`График проходит через узлы $${kv(uzly[0] as T)}$ и $${kv(p.P)}$.`],
+    },
+    {
+      title: 'Что дают точки',
+      lines: [
+        `$f(0)=a^0=1$ — эта точка есть у любой показательной функции. Из второй точки: $${ap}=${dec(py)}$.`,
+        `Само $a$ находить не нужно: оно иррациональное, $a=${px > 0 ? '' : '\\dfrac{1}{'}${Math.abs(px) === 2 ? `\\sqrt{${py}}` : `\\sqrt[${Math.abs(px)}]{${py}}`}${px > 0 ? '' : '}'}$.`,
+      ],
+    },
+    {
+      title: 'Отношение',
+      lines: [
+        `$\\dfrac{f(${dec(m)})}{f(${dec(n)})}=\\dfrac{a^{${dec(m)}}}{a^{${dec(n)}}}=a^{${dec(m)}-${mn(n)}}=a^{${dec(raz)}}$.`,
+        `$a^{${dec(raz)}}=\\left(${ap}\\right)^{${dec(e)}}=${dec(py)}^{${dec(e)}}=${dec(otvet)}$.`,
+      ],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Что дают отмеченные точки?',
+      options: [`$${ap}=${dec(py)}$`, `$a=${dec(py)}$`, `$${dec(px)}a=${dec(py)}$`],
+      correct: 0,
+      comment: `Точка $${kv(p.P)}$ лежит на графике: $f(${dec(px)})=${dec(py)}$.`,
+    },
+    {
+      question: `Чему равно $\\dfrac{a^{${dec(m)}}}{a^{${dec(n)}}}$?`,
+      options: bezPovtorov([
+        `$a^{${dec(raz)}}$`,
+        `$a^{${dec(round9(m + n))}}$`,
+        `$a^{${dec(round9(n - m))}}$`,
+      ]),
+      correct: 0,
+      comment: 'При делении степеней с одним основанием показатели вычитаются.',
+    },
+    {
+      question: `Как выразить $a^{${dec(raz)}}$ через $${ap}$?`,
+      options: [
+        `$\\left(${ap}\\right)^{${dec(e)}}=${dec(py)}^{${dec(e)}}$`,
+        `$${ap}\\cdot${dec(e)}=${dec(round9(py * e))}$`,
+        `$${dec(py)}^{${dec(raz)}}$`,
+      ],
+      correct: 0,
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображён график функции $f(x)=a^x$. Найдите $\\dfrac{f(${dec(m)})}{f(${dec(n)})}$.`,
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: uzly.map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+/* ── Партия 3 ───────────────────────────────────────────────────── */
+
+export interface GiperbolaKB {
+  /** Два узла графика f(x) = k/x + b по разные стороны асимптоты. */
+  A: [number, number];
+  B: [number, number];
+  /** Где спрашивают значение функции (за рамкой). */
+  x0: number;
+}
+
+/**
+ * f(x) = k/x + b через два узла сетки; найти f(x₀) далеко за рамкой.
+ * Подвох — асимптота y = b не проходит по оси, и k с b находятся только
+ * вместе: система по двум точкам.
+ */
+export function giperbolaKB(p: GiperbolaKB, pechat: Pechat = {}): GrafikTask {
+  const [ax, ay] = p.A;
+  const [bx, by] = p.B;
+  if (ax === 0 || bx === 0 || ax === bx) throw new Error('giperbolaKB: точки на асимптоте');
+  /* k(1/x_A − 1/x_B) = y_A − y_B. */
+  const k = round9(((ay - by) * ax * bx) / (bx - ax));
+  const b = round9(ay - k / ax);
+  if (k === 0 || !celoe(k) || !celoe(b)) throw new Error(`giperbolaKB: k = ${k}, b = ${b}`);
+  const otvet = round9(k / p.x0 + b);
+  if (!celoe(otvet * 1e4)) throw new Error(`giperbolaKB: f(x₀) = ${otvet}`);
+  /* Второй счёт: система по Крамеру в неизвестных k и b. */
+  const det = 1 / ax - 1 / bx;
+  const kk = (ay - by) / det;
+  const bb = (by / ax - ay / bx) / det;
+  const proverka = kk / p.x0 + bb;
+  const win = {
+    xmin: Math.min(ax, bx, -4) - 1,
+    xmax: Math.max(ax, bx, 4) + 1,
+    ymin: Math.min(ay, by, b - 3, -2) - 1,
+    ymax: Math.max(ay, by, b + 3, 2) + 1,
+  };
+  if (!zaOknom(p.x0, otvet, win))
+    throw new Error('giperbolaKB: f(x₀) читается по рисунку');
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [{ type: 'rational', k, b, a: 0, color: 'lineA', label: 'y = f(x)' }],
+    points: [p.A, p.B].map(([x, y]) => ({ x, y, style: 'solid', color: 'lineA', label: null })),
+    shapes: asymptotes([verticalAsymptote(0, win), horizontalAsymptote(b, win)]).concat(
+      uchitel ? napravlyayushchie([p.A, p.B]) : [],
+    ),
+    alt: 'График функции f(x) = k/x + b с отмеченными точками в узлах сетки',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const fTex = `\\dfrac{${dec(k)}}{x}${b < 0 ? '' : '+'}${dec(b)}`;
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [`График проходит через узлы сетки $${kv(p.A)}$ и $${kv(p.B)}$.`],
+    },
+    {
+      title: 'Система',
+      lines: [
+        `$\\dfrac{k}{${mn(ax)}}+b=${dec(ay)}$ и $\\dfrac{k}{${mn(bx)}}+b=${dec(by)}$.`,
+        `Вычтем: $k\\left(\\dfrac{1}{${mn(ax)}}-\\dfrac{1}{${mn(bx)}}\\right)=${dec(round9(ay - by))}$, откуда $k=${dec(k)}$; тогда $b=${dec(ay)}-\\dfrac{${dec(k)}}{${mn(ax)}}=${dec(b)}$.`,
+        `$f(x)=${fTex}$; горизонтальная асимптота $y=${dec(b)}$ — сходится с рисунком.`,
+      ],
+    },
+    {
+      title: 'Значение функции',
+      lines: [`$f(${dec(p.x0)})=\\dfrac{${dec(k)}}{${mn(p.x0)}}${b < 0 ? '' : '+'}${dec(b)}=${dec(otvet)}$.`],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Что показывает горизонтальная асимптота?',
+      options: [`$b=${dec(b)}$`, `$k=${dec(b)}$`, 'Ничего: асимптота — ось $Ox$'],
+      correct: 0,
+      comment: 'При больших $|x|$ дробь $\\dfrac{k}{x}$ близка к нулю, и $f(x)$ близка к $b$.',
+    },
+    {
+      question: 'Как найти $k$?',
+      options: [
+        `Подставить точку: $\\dfrac{k}{${mn(ax)}}${b < 0 ? '' : '+'}${dec(b)}=${dec(ay)}$`,
+        `$k=${dec(ax)}\\cdot${mn(ay)}$`,
+        `$k=${dec(ay)}:${mn(ax)}$`,
+      ],
+      correct: 0,
+      comment: '$k=xy$ было бы верно только при $b=0$.',
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображён график функции $f(x)=\\dfrac{k}{x}+b$. Найдите $f(${dec(p.x0)})$.`,
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: [p.A, p.B].map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+export interface KorenPryamaya {
+  /** Узел графика g(x) = p√x (x — точный квадрат). */
+  G: [number, number];
+  /** Узел прямой f(x) = kx + b, проходящей через начало координат. */
+  L: [number, number];
+}
+
+/**
+ * f(x) = kx + b и g(x) = p√x пересекаются в начале координат и в B вне
+ * рисунка. p — по узлу G, k — по узлу L (b = 0: прямая проходит через
+ * O); абсцисса B: p√x = kx, √x = p/k. Подвох — корень x = 0 — это O.
+ */
+export function korenPryamaya(par: KorenPryamaya, pechat: Pechat = {}): GrafikTask {
+  const [gx, gy] = par.G;
+  const [lx, ly] = par.L;
+  const s = Math.sqrt(gx);
+  if (!celoe(s) || gx <= 0 || lx === 0) throw new Error('korenPryamaya: узлы не годятся');
+  const pp = round9(gy / s);
+  const k = ly / lx;
+  if (pp <= 0 || k <= 0) throw new Error('korenPryamaya: графики не пересекаются правее O');
+  /* √x_B = p/k = y_G·x_L/(√x_G·y_L) — из целых, без деления по дороге. */
+  const pkQ = (gy * lx) / (s * ly);
+  const otvet = round9(pkQ ** 2);
+  const g0 = nod(ly, lx);
+  const kTex = celoe(k * 1e4) ? dec(round9(k)) : `\\dfrac{${ly / g0}}{${lx / g0}}`;
+  if (!celoe(otvet * 1e4)) throw new Error(`korenPryamaya: x_B = ${otvet}`);
+  /* Второй счёт: бисекция p√x − kx на (x_B/4; 1000) — левее неё только O. */
+  const h = (x: number) => pp * Math.sqrt(x) - k * x;
+  let lo = 1e-9 + ((pp / k) ** 2) / 4;
+  let hi = 10000;
+  for (let i = 0; i < 300; i += 1) {
+    const c = (lo + hi) / 2;
+    if (h(c) > 0) lo = c;
+    else hi = c;
+  }
+  const proverka = (lo + hi) / 2;
+  const win = oknoPo([par.G, par.L, [0, 0]], true);
+  win.xmin = Math.min(win.xmin, -3);
+  win.ymin = Math.min(win.ymin, -3);
+  if (!zaOknom(otvet, k * otvet, win)) throw new Error('korenPryamaya: B читается по рисунку');
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'line', k: round9(k), b: 0, color: 'lineB', label: 'y = f(x)' },
+      { type: 'sqrt', a: pp, c: 0, d: 0, color: 'lineA', label: 'y = g(x)' },
+    ],
+    points: [
+      { x: 0, y: 0, style: 'solid', color: 'lineA', label: null },
+      { x: gx, y: gy, style: 'solid', color: 'lineA', label: null },
+      { x: lx, y: ly, style: 'solid', color: 'lineB', label: null },
+    ],
+    shapes: uchitel ? napravlyayushchie([par.G, par.L]) : [],
+    alt: 'Графики прямой f(x) = kx + b и функции g(x) = p√x, пересекающихся в начале координат',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const pk = round9(pkQ);
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [
+        `Оба графика проходят через $O(0;\\ 0)$; график $g$ — через $${kv(par.G)}$, прямая — через $${kv(par.L)}$.`,
+      ],
+    },
+    {
+      title: 'Коэффициенты',
+      lines: [
+        `$g(${dec(gx)})=p\\sqrt{${dec(gx)}}=${dec(s)}p=${dec(gy)}$, $p=${dec(pp)}$.`,
+        `Прямая проходит через начало координат, поэтому $b=0$; $k=\\dfrac{${dec(ly)}}{${dec(lx)}}${celoe(k * 1e4) ? `=${kTex}` : ''}$.`,
+      ],
+    },
+    {
+      title: 'Точка пересечения',
+      lines: [
+        `$${dec(pp)}\\sqrt{x}=${kTex}x$. Корень $x=0$ — это точка $O$; при $x>0$ делим на $\\sqrt{x}$: $\\sqrt{x}=${dec(pp)}:${kTex}=${dec(pk)}$.`,
+        `$x=${dec(pk)}^2=${dec(otvet)}$.`,
+      ],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Чему равен $b$?',
+      options: ['$0$: прямая проходит через начало координат', `$${kTex}$`, '$1$'],
+      correct: 0,
+    },
+    {
+      question: 'Как найти $p$?',
+      options: [
+        `По точке $${kv(par.G)}$: $p\\sqrt{${dec(gx)}}=${dec(gy)}$`,
+        `$p=${dec(gy)}:${dec(gx)}$`,
+        `$p=${dec(gy)}$`,
+      ],
+      correct: 0,
+    },
+    {
+      question: 'Какое уравнение даёт абсциссу $B$?',
+      options: [
+        `$\\sqrt{x}=${dec(pp)}:${kTex}$`,
+        `$x=${dec(pp)}:${kTex}$`,
+        `$\\sqrt{x}=${kTex}:${dec(pp)}$`,
+      ],
+      correct: 0,
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображены графики функций $f(x)=kx+b$ и $g(x)=p\\sqrt{x}$, которые пересекаются в начале координат и в точке $B$. Найдите абсциссу точки $B$.`,
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: [[0, 0] as T, par.G, par.L].map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+export interface ParabolaPryamaya {
+  /** Второй нуль параболы g(x) = ax(x − r) (первый — начало координат). */
+  r: number;
+  /** Ещё один узел параболы (обычно вершина). */
+  Q: [number, number];
+  /** Узел прямой f(x) = kx + b через начало координат. */
+  L: [number, number];
+}
+
+/**
+ * f(x) = kx + b и g(x) = ax² + bx + c пересекаются в начале координат и
+ * в A вне рисунка. Парабола — по нулям 0 и r и узлу Q, прямая — по O и
+ * L; x_A — второй корень ax(x − r) = kx. Подвох — c = 0 и b прямой = 0
+ * читаются по общей точке O, а A на рисунке нет.
+ */
+export function parabolaPryamaya(par: ParabolaPryamaya, pechat: Pechat = {}): GrafikTask {
+  const { r } = par;
+  const [qx, qy] = par.Q;
+  const [lx, ly] = par.L;
+  if (r === 0 || qx === 0 || qx === r || lx === 0) throw new Error('parabolaPryamaya: узлы');
+  const a = round9(qy / (qx * (qx - r)));
+  const k = round9(ly / lx);
+  if (a === 0 || !celoe(a * 1e4) || !celoe(k * 1e4)) throw new Error(`parabolaPryamaya: a = ${a}`);
+  const bb = round9(-a * r);
+  const otvet = round9(r + k / a);
+  if (otvet === 0 || !celoe(otvet * 1e4)) throw new Error(`parabolaPryamaya: x_A = ${otvet}`);
+  /* Второй счёт: корни ax² + (b − k)x = 0 по формуле с дискриминантом. */
+  const B2 = bb - k;
+  const D = B2 * B2;
+  const korni = [(-B2 - Math.sqrt(D)) / (2 * a), (-B2 + Math.sqrt(D)) / (2 * a)];
+  const proverka = korni.reduce((x, y) => (Math.abs(x) > Math.abs(y) ? x : y));
+  const uzly: T[] = [[0, 0], [r, 0], par.Q];
+  const win = oknoPo([...uzly, par.L], a > 0);
+  if (!zaOknom(otvet, k * otvet, win)) throw new Error('parabolaPryamaya: A читается по рисунку');
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'quadratic', a, b: bb, c: 0, color: 'lineA', label: 'y = g(x)' },
+      { type: 'line', k, b: 0, color: 'lineB', label: 'y = f(x)' },
+    ],
+    points: [
+      ...uzly.map(([x, y]) => ({ x, y, style: 'solid', color: 'lineA', label: null })),
+      { x: lx, y: ly, style: 'solid', color: 'lineB', label: null },
+    ],
+    shapes: uchitel ? napravlyayushchie([...uzly, par.L]) : [],
+    alt: 'Графики прямой f(x) = kx + b и параболы g(x) = ax² + bx + c, пересекающихся в начале координат',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const gTex = mnogochlen(a, bb, 0);
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [
+        `Оба графика проходят через $O(0;\\ 0)$. Парабола — ещё через $${kv([r, 0])}$ и $${kv(par.Q)}$, прямая — через $${kv(par.L)}$.`,
+      ],
+    },
+    {
+      title: 'Прямая',
+      lines: [`Прямая проходит через $O$: $b=0$, $k=\\dfrac{${dec(ly)}}{${dec(lx)}}=${dec(k)}$, $f(x)=${dec(k)}x$.`],
+    },
+    {
+      title: 'Парабола',
+      lines: [
+        `Нули параболы $0$ и $${dec(r)}$: $g(x)=a\\,x${skobka(r)}$. По точке $${kv(par.Q)}$: $a\\cdot${mn(qx)}\\cdot${mn(round9(qx - r))}=${dec(qy)}$, $a=${dec(a)}$.`,
+        `$g(x)=${gTex}$.`,
+      ],
+    },
+    {
+      title: 'Точка пересечения',
+      lines: [
+        `$${gTex}=${dec(k)}x$. Корень $x=0$ — это точка $O$; при $x\\ne0$ делим на $x$: $${dec(a)}x${bb < 0 ? '' : '+'}${dec(bb)}=${dec(k)}$, $x=${dec(otvet)}$.`,
+      ],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Что даёт общая точка графиков в начале координат?',
+      options: [
+        'У прямой $b=0$, у параболы $c=0$',
+        'Абсциссу точки $A$',
+        'Вершину параболы',
+      ],
+      correct: 0,
+    },
+    {
+      question: 'Как удобнее записать параболу?',
+      options: [`$g(x)=a\\,x${skobka(r)}$ — через нули`, '$g(x)=ax^2$', `$g(x)=a(x-${mn(qx)})^2$`],
+      correct: 0,
+      comment: `Парабола пересекает ось $Ox$ в точках $0$ и $${dec(r)}$.`,
+    },
+    {
+      question: 'Какое уравнение даёт абсциссу $A$?',
+      options: [
+        `$${dec(a)}x${bb < 0 ? '' : '+'}${dec(bb)}=${dec(k)}$`,
+        `$${gTex}=0$`,
+        `$${dec(k)}x=0$`,
+      ],
+      correct: 0,
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображены графики функций $f(x)=kx+b$ и $g(x)=ax^2+bx+c$, которые пересекаются в начале координат и в точке $A$. Найдите абсциссу точки $A$.`,
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: [...uzly, par.L].map(([x, y]) => ({ x, y })),
     shagi,
     hints,
   };

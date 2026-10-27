@@ -11,7 +11,8 @@
      1. Шрифты: каждый font-family в рисунке — из lib/risunki/shrifty
         (KaTeX_Main для чисел, KaTeX_Math для букв); начертание обычное.
      2. Минус типографский: в подписях нет дефиса перед цифрой;
-        греческие буквы — шрифтом KaTeX_Math (в KaTeX_Main их нет).
+        греческие буквы — шрифтом KaTeX_Math (в KaTeX_Main их нет);
+        нижние индексы — настоящие (x₁₃, не «x13»); ось x сплошная.
 
    В браузере (настоящие прямоугольники текста со шрифтами KaTeX):
      3. Подписи не налезают друг на друга.
@@ -27,6 +28,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { requireSrc, SRC, APP } from './lib/load-ts.mjs';
+import { indeksyStrokoy, osShtrihom } from './lib/indeksy-check.mjs';
 
 const { chromium } = createRequire(import.meta.url)('playwright');
 const { buildVariantSet } = requireSrc('lib/variant/build');
@@ -125,6 +127,9 @@ for (const r of risunki) {
       break;
     }
   }
+  const strokoy = indeksyStrokoy(r.svg);
+  if (strokoy.length > 0) fail(r.where, `индекс строкой, без нижнего: «${strokoy[0]}»`);
+  if (osShtrihom(r.svg)) fail(r.where, 'ось x штрихом');
   for (const m of r.svg.matchAll(/<text\b[^>]*>([\s\S]*?)<\/text>/g)) {
     const text = m[1].replace(/<[^>]+>/g, '');
     if (/(^|[^\p{L}\d])-\s?\d/u.test(text)) {
@@ -179,7 +184,32 @@ for (let i = 0; i < risunki.length; i += PORCIYA) {
             y0: Number(t.getAttribute('y')),
           };
         };
-        const B = texts.map(box);
+        /* Знаки разметки учителя №9 нарисованы линиями (<g class="pr-znak">,
+           у отмеченных точек — pr-znak-tochka):
+           это тоже подписи — рамка группы, текст — сам знак. */
+        const znakBox = (g) => {
+          const b = g.getBBox();
+          /* getBBox — по средней линии штриха: добавляем половину самой
+             толстой линии (белая подложка) — это и есть видимый знак. */
+          const r =
+            Math.max(
+              0,
+              ...[...g.querySelectorAll('path')].map((p) => Number(p.getAttribute('stroke-width'))),
+            ) / 2;
+          return {
+            x: b.x - r,
+            y: b.y - r,
+            w: b.width + 2 * r,
+            h: b.height + 2 * r,
+            t: g.getAttribute('data-znak') ?? '',
+            k: g.getAttribute('class') ?? '',
+            y0: Number(g.getAttribute('data-y')),
+          };
+        };
+        const B = [
+          ...texts.map(box),
+          ...[...svg.querySelectorAll('g.pr-znak, g.pr-znak-tochka')].map(znakBox),
+        ];
         /* 6. Рамка. */
         for (const b of B) {
           if (
@@ -228,7 +258,9 @@ for (let i = 0; i < risunki.length; i += PORCIYA) {
           if (os !== null) {
             const ay = Number(os[1]);
             const nuli = B.filter((b) => /\bpr-nul-label\b/.test(b.k));
-            const znaki = B.filter((b) => /\bpr-znak\b/.test(b.k) && !/pr-znak-nad/.test(b.k));
+            const znaki = B.filter(
+              (b) => /(^|\s)pr-znak(\s|$)/.test(b.k) && !/pr-znak-nad/.test(b.k),
+            );
             const vysoty = (xs) => [...new Set(xs.map((b) => b.y0.toFixed(1)))];
             if (nuli.some((b) => b.y < ay)) out.push(['ryady', 'подпись нуля над осью']);
             if (vysoty(nuli).length > 2)

@@ -30,7 +30,7 @@ const P = requireSrc('lib/zadanie13/gen/params.ts');
 const L = requireSrc('lib/zadanie13/gen/list.ts');
 const S = requireSrc('lib/zadanie13/gen/sheet.ts');
 const { PRESETY_13 } = requireSrc('content/generator13.ts');
-const { qrSvg } = requireSrc('lib/qr.ts');
+const { qrSvg } = requireSrc('lib/generator/qr.ts');
 
 /** Печатная CSS листа без блока :root: шрифты сборке задаёт sheet-render. */
 const EXTRA_CSS =
@@ -60,24 +60,17 @@ function paramsOf(presetId) {
 
 async function build(name, params, withAnswers, requireKatex) {
   const list = L.sobratList13(params);
-  const spec = S.sheetSpec13(params, list, withAnswers ? 'uchitel' : 'uchenik');
-  const qr = withAnswers
-    ? null
-    : qrSvg(SITE + P.onlaynHref13(params), 'QR-код: решать набор онлайн');
+  /* QR у названия листа ученика — на онлайн-набор (lib/generator/qr.ts). */
+  const qr = withAnswers ? undefined : await qrSvg(SITE + P.onlaynHref13(params));
+  const spec = S.sheetSpec13(params, list, withAnswers ? 'uchitel' : 'uchenik', qr);
   const expected = list.poVariantam.reduce((n, v) => n + v.length, 0);
-  return buildSheet(
-    APP,
-    SECTION,
-    name,
-    { ...spec, qr },
-    {
-      withAnswers,
-      expectTasks: expected,
-      requireKatex,
-      keepHtml: true,
-      extraCss: EXTRA_CSS,
-    },
-  );
+  return buildSheet(APP, SECTION, name, spec, {
+    withAnswers,
+    expectTasks: expected,
+    requireKatex,
+    keepHtml: true,
+    extraCss: EXTRA_CSS,
+  });
 }
 
 async function main() {

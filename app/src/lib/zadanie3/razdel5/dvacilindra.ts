@@ -10,7 +10,8 @@
 import { volumeUnits } from './common';
 import { twoCylinders, twoMugs } from './drawings';
 import { razaWord, ru } from '../format';
-import { type Params, type Prototype, type Variant, num, text } from '../types';
+import { type HintStep, type Params, type Prototype, type Variant, num, text } from '../types';
+import { tex, vopros } from '../podskazka';
 
 function variant(
   n: number,
@@ -69,6 +70,7 @@ export const P03_69: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka69(p),
   varianty: [
     variant(1, 'задачник', 'задачник 234', { V: 15, a: 3, b: 2 }),
     variant(2, 'задачник', 'задачник 235', { V: 20, a: 4, b: 3 }),
@@ -78,7 +80,7 @@ export const P03_69: Prototype = {
     variant(6, 'домашка', 'домашка 43, вариант 2', { V: 40, a: 4, b: 3 }, 90),
     variant(7, 'домашка', 'домашка 43, вариант 3', { V: 12, a: 6, b: 5 }, 50),
     variant(8, 'домашка', 'домашка 43, вариант 4', { V: 10, a: 2, b: 3 }, 45),
-    variant(9, 'новый', 'новый', { V: 24, a: 3, b: 2 }),
+    variant(9, 'фипи', 'ФИПИ 61D99A', { V: 18, a: 3, b: 2 }),
     variant(10, 'новый', 'новый', { V: 18, a: 6, b: 4 }),
   ],
 };
@@ -95,6 +97,7 @@ export const P03_69: Prototype = {
 const HEIGHT_WORDS: Record<string, string> = {
   '1.5': 'в полтора раза',
   '2': 'вдвое',
+  '2.5': 'в два с половиной раза',
   '3': 'втрое',
   '4': 'в четыре раза',
   '4.5': 'в четыре с половиной раза',
@@ -103,6 +106,7 @@ const HEIGHT_WORDS: Record<string, string> = {
 const WIDTH_WORDS: Record<string, string> = {
   '1.5': 'в полтора раза',
   '2': 'в два раза',
+  '2.5': 'в два с половиной раза',
   '3': 'в три раза',
   '4': 'в четыре раза',
   '5': 'в пять раз',
@@ -171,6 +175,7 @@ export const P03_70: Prototype = {
     ];
   },
 
+  podskazka: (p) => podskazka70(p),
   varianty: [
     variant(1, 'задачник', 'задачник 238', { hk: 2, wk: 3, style: 'зато' }),
     variant(2, 'задачник', 'задачник 239', { hk: 2, wk: 4, style: 'а' }),
@@ -184,3 +189,72 @@ export const P03_70: Prototype = {
     variant(10, 'новый', 'новый', { hk: 4.5, wk: 3, style: 'а' }),
   ],
 };
+
+/* ── Подсказки-вопросы ──────────────────────────────────────────── */
+
+/** «в $x$ раз(а)» для кнопки. */
+function vRaz(x: number): string {
+  return `в $${tex(x)}$ ${razaWord(x)}`;
+}
+
+/** «в $x^2$ раз(а)»: квадрат показан степенью, а не числом. */
+function vRazKvadrat(x: number): string {
+  return `в $${tex(x)}^2$ ${razaWord(x * x)}`;
+}
+
+function podskazka69(p: Params): HintStep[] {
+  const V = tex(num(p, 'V'));
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  return [
+    vopros(
+      'Как изменится площадь основания второго цилиндра?',
+      `Увеличится ${vRazKvadrat(b)}`,
+      [
+        `Увеличится ${vRaz(b)}`,
+        `Уменьшится ${vRazKvadrat(b)}`,
+        `Увеличится в $2 \\cdot ${tex(b)}$ ${razaWord(2 * b)}`,
+      ],
+      'Площадь круга $\\pi r^2$ растёт как квадрат радиуса.',
+    ),
+    vopros(
+      'Как на объёме скажется изменение высоты?',
+      `Объём уменьшится ${vRaz(a)}`,
+      [`Объём уменьшится ${vRazKvadrat(a)}`, `Объём увеличится ${vRaz(a)}`, 'Объём не изменится'],
+      'Объём цилиндра $\\pi r^2 h$ пропорционален высоте.',
+    ),
+    vopros('Как найти объём второго цилиндра?', `$${V} \\cdot ${tex(b)}^2 : ${tex(a)}$`, [
+      `$${V} \\cdot ${tex(b)} : ${tex(a)}$`,
+      `$${V} \\cdot ${tex(a)} : ${tex(b)}^2$`,
+      `$${V} \\cdot ${tex(b)}^2 \\cdot ${tex(a)}$`,
+    ]),
+  ];
+}
+
+function podskazka70(p: Params): HintStep[] {
+  const hk = num(p, 'hk');
+  const wk = num(p, 'wk');
+  return [
+    vopros(
+      'Во сколько раз площадь дна второй кружки больше, чем у первой?',
+      vRazKvadrat(wk),
+      [vRaz(wk), `в $2 \\cdot ${tex(wk)}$ ${razaWord(2 * wk)}`],
+      'Шире — значит больше радиус, а площадь круга растёт как квадрат радиуса.',
+    ),
+    vopros(
+      'Как на объёме второй кружки скажется её высота?',
+      `Объём меньше ${vRaz(hk)}`,
+      [`Объём больше ${vRaz(hk)}`, `Объём меньше ${vRazKvadrat(hk)}`, 'Высота на объём не влияет'],
+      'Вторая кружка ниже первой, а объём пропорционален высоте.',
+    ),
+    vopros(
+      'Как найти отношение объёма второй кружки к объёму первой?',
+      `$${tex(wk)}^2 : ${tex(hk)}$`,
+      [
+        `$${tex(hk)} : ${tex(wk)}^2$`,
+        `$${tex(wk)} : ${tex(hk)}$`,
+        `$${tex(wk)}^2 \\cdot ${tex(hk)}$`,
+      ],
+    ),
+  ];
+}

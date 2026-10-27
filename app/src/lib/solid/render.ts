@@ -8,7 +8,7 @@
  * рисуется ничего.
  */
 
-import { BUKVY, CHISLA, VES } from '../risunki/shrifty.js';
+import { BUKVY, CHISLA, VES, indeksSvg, shirinaIndeksa } from '../risunki/shrifty.js';
 import type { Body, Cone, Cylinder, Model, Polyhedron, Sphere } from './model';
 import { faceNormal, polyhedronEdges } from './model';
 import { type View, orthoAt, viewOf } from './project';
@@ -25,7 +25,14 @@ import {
   segmentDistance2,
   sub,
 } from './vec';
-import { type Occluder, occludersOf, polylineRuns, segmentRuns, selfOccluders } from './visibility';
+import {
+  type Occluder,
+  hidden,
+  occludersOf,
+  polylineRuns,
+  segmentRuns,
+  selfOccluders,
+} from './visibility';
 
 /* ══════════════════════════════════════════════════════════
    THEME — единственное место, где живёт оформление.
@@ -95,9 +102,6 @@ const THEME = {
     /* Живой чертёж — только экран: кегль 15 px, как прежде. */
     liveSize: 15,
     weight: VES,
-    /* Индекс — 70 % кегля и ниже строки на четверть кегля. */
-    subShare: 0.7,
-    subDy: 0.24,
     measure: 19,
     /* Оценка ширины символа в долях кегля: для расстановки подписей. */
     capital: 0.7,
@@ -719,6 +723,18 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
     /* Сечение тела вращения — многоугольник из десятков хорд: это кривая,
        а не отрезки, и в метрики отрезков вида она не идёт. */
     const krivaya = section.points.length > 12;
+    if (krivaya) {
+      /* Вершины кривой лежат на поверхности тела, а середины хорд —
+         чуть внутри: проверка в середине хорды прятала бы и переднюю
+         половину (большой круг шара — весь пунктиром). Поэтому видимость
+         кривой — по её вершинам, смена — на середине хорды. */
+      const pts = [...section.points, at(section.points, 0)];
+      const vis = pts.map((p) => !hidden(view, p, all, eps));
+      scene.strokes.push(
+        ...curveStrokes(view, pts, vis, [], eps, 'section').map((st) => sHl(st, on)),
+      );
+      return;
+    }
     section.points.forEach((a, i) => {
       const b = at(section.points, (i + 1) % section.points.length);
       scene.strokes.push(
@@ -780,6 +796,67 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
     scene.labels = scene.labels.map((l) => ({ ...l, size: THEME.font.liveSize }));
   }
   return scene;
+}
+
+/* ── Один отрезок — одна линия ─────────────────────────────────────
+   Шаблон может задать одну и ту же линию дважды: сторону сечения и
+   отрезок построения (треугольник ABC₁ и отрезок AC₁). Невидимые копии,
+   нарисованные навстречу друг другу, дают штрихи со сдвигом фазы, и
+   пунктир на глаз сливается в сплошную. Поэтому:
+   — каждый прямой кусок идёт в одну сторону (слева направо, сверху
+     вниз), и штрихи совпадающих кусков совпадают;
+   — кусок построения или сечения, лежащий на другом таком же куске с той
+     же видимостью, не рисуется второй раз (остаётся выделенный шагом,
+     затем сторона сечения). */
+
+/** Порядок концов прямого куска: слева направо, при равных x — сверху вниз. */
+function vPoryadke(st: Stroke): Stroke {
+  const [p, q] = st.points as [Vec2, Vec2];
+  const naoborot = p[0] > q[0] + 1e-9 || (Math.abs(p[0] - q[0]) <= 1e-9 && p[1] > q[1]);
+  if (!naoborot) return st;
+  return {
+    ...st,
+    points: [q, p],
+    ...(st.p3 === undefined ? {} : { p3: [...st.p3].reverse() }),
+  };
+}
+
+/** Кусок s лежит на куске t (в пространстве, с допуском tol). */
+function lezhitNa(s: Stroke, t: Stroke, tol: number): boolean {
+  if (s.p3?.length !== 2 || t.p3?.length !== 2) return false;
+  const [a, b] = t.p3 as [Vec3, Vec3];
+  const ab = sub(b, a);
+  const l2 = dot(ab, ab);
+  if (l2 === 0) return false;
+  return (s.p3 as Vec3[]).every((p) => {
+    const u = dot(sub(p, a), ab) / l2;
+    const blizh = add(a, [ab[0] * u, ab[1] * u, ab[2] * u]);
+    const tolU = tol / Math.sqrt(l2);
+    const d = sub(p, blizh);
+    return u >= -tolU && u <= 1 + tolU && dot(d, d) <= tol * tol;
+  });
+}
+
+const VES_KUSKA = (s: Stroke) => (s.hl ? 2 : 0) + (s.role === 'section' ? 1 : 0);
+
+function bezPovtorov(strokes: Stroke[], tol: number): Stroke[] {
+  const out = strokes.map((st) => (st.points.length === 2 ? vPoryadke(st) : st));
+  const vydelenie = (st: Stroke) =>
+    (st.role === 'aux' || st.role === 'section') && st.points.length === 2;
+  const lishniy = new Set<number>();
+  out.forEach((s, i) => {
+    if (!vydelenie(s)) return;
+    out.forEach((t, j) => {
+      if (i === j || lishniy.has(j) || !vydelenie(t) || s.visible !== t.visible) return;
+      if (!lezhitNa(s, t, tol)) return;
+      /* s целиком на t: s лишний, если t не слабее или t длиннее s. */
+      const ravny = lezhitNa(t, s, tol);
+      if (!ravny || VES_KUSKA(t) > VES_KUSKA(s) || (VES_KUSKA(t) === VES_KUSKA(s) && j < i)) {
+        lishniy.add(i);
+      }
+    });
+  });
+  return out.filter((_, i) => !lishniy.has(i));
 }
 
 /** Размер модели: для допусков и масштаба. */
@@ -965,7 +1042,7 @@ function labelSize(label: LabelSpec): { w: number; h: number } {
       w += f.lower * size;
     }
   }
-  w += sub.length * f.digit * size * f.subShare;
+  w += shirinaIndeksa(sub, size);
   return { w, h: size };
 }
 
@@ -1199,9 +1276,7 @@ function labelMarkup(label: PlacedLabel): string {
   const style = bukva ? ' font-style="italic"' : '';
   const x = label.x;
   const y = label.y + label.h * 0.78;
-  const inner = sub
-    ? `${esc(base)}<tspan font-size="${px(size * f.subShare)}" dy="${px(size * f.subDy)}" font-family="${f.family}" font-style="normal">${esc(sub)}</tspan>`
-    : esc(base);
+  const inner = sub ? `${esc(base)}${indeksSvg(esc(sub), size)}` : esc(base);
   return (
     /* Выделенная шагом подпись — цветом построений; class="solid-hl" и
        data-hl — метки для проверок (жирного начертания нет). */
@@ -1340,8 +1415,17 @@ export interface SolidDiagnostics {
 }
 
 /** Сцена в пикселях: рамка рисунка или, у живого чертежа, описанная сфера. */
-function pixelScene(model: Model, options: RenderOptions): Scene {
-  const scene = buildScene(model, options);
+/**
+ * Сцена для рисования — без повторов линий (bezPovtorov). Метрики вида
+ * (solidKarkas) берут сцену как есть: выбор ракурса от этого не зависит.
+ */
+function odnaLiniya(model: Model, scene: Scene): Scene {
+  return { ...scene, strokes: bezPovtorov(scene.strokes, modelExtent(model) * 1e-4) };
+}
+
+function pixelScene(model: Model, options: RenderOptions, risovat = true): Scene {
+  const sobrana = buildScene(model, options);
+  const scene = risovat ? odnaLiniya(model, sobrana) : sobrana;
   if (!options.ustoychivo) {
     return toPixels(scene);
   }
@@ -1364,7 +1448,7 @@ export interface SolidKarkas {
 }
 
 export function solidKarkas(model: Model, options: RenderOptions = {}): SolidKarkas {
-  const scene = pixelScene(model, options);
+  const scene = pixelScene(model, options, false);
   const bySeg = new Map<object, { pts: Vec2[]; a3: Vec3; b3: Vec3 }>();
   for (const s of scene.strokes) {
     if (s.seg === undefined) continue;
@@ -1400,7 +1484,7 @@ export function solidLinii(
   model: Model,
   options: RenderOptions = {},
 ): { p3: Vec3[]; visible: boolean; role: Role; owner?: number; liquid?: boolean }[] {
-  return buildScene(model, options).strokes.flatMap((s) =>
+  return odnaLiniya(model, buildScene(model, options)).strokes.flatMap((s) =>
     s.p3 === undefined
       ? []
       : [

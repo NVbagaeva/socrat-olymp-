@@ -29,7 +29,9 @@ export const GEN_UI = {
   pustoy: 'Добавьте хотя бы одну тему',
 
   primer: 'Пример',
-  primerText: 'Так выглядит лист. Нажмите «Сгенерировать», и здесь будет ваш набор.',
+  predpros: 'Предпросмотр',
+  predprosText:
+    'Лист ученика по этим настройкам. «Сгенерировать» — и задачи можно менять и скачать.',
   variant: 'Вариант',
   uchenik: 'Ученик',
   uchitel: 'Учитель',
@@ -46,7 +48,6 @@ export const GEN_UI = {
   familiya: 'Фамилия, имя',
   data: 'Дата',
   otvet: 'Ответ',
-  primerLista: 'Пример листа',
   resheniya: 'ответы и решения',
   motto: 'БОЛЬШЕ, ЧЕМ ПОДГОТОВКА',
   uchitelPodpis: (name: string) => `Учитель: ${name}`,
