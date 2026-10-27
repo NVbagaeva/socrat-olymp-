@@ -19,6 +19,12 @@ const ZAGRUZKA: Record<number, () => Promise<{ VARIANT: VariantPV }>> = {
   10: () => import('./v10'),
   11: () => import('./v11'),
   12: () => import('./v12'),
+  13: () => import('./v13'),
+  14: () => import('./v14'),
+  15: () => import('./v15'),
+  16: () => import('./v16'),
+  17: () => import('./v17'),
+  18: () => import('./v18'),
 };
 
 /** Номера вариантов, у которых есть версии (остальные — «скоро»). */

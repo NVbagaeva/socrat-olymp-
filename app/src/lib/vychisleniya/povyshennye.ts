@@ -7,7 +7,7 @@
  * В банк, тренажёр и генератор №8 не входит.
  */
 
-import { coefRoot, d, fn, frac, log, rad } from './tex';
+import { coefRoot, d, fn, frac, log, quarterInterval, rad } from './tex';
 import type { Draft } from './types';
 
 const round9 = (x: number) => Math.round(x * 1e9) / 1e9;
@@ -384,5 +384,154 @@ export function logAmBn(p: LogAmBn): Draft {
       return Math.log(x) / Math.log(a);
     })(),
     signature: `lamb:${m}:${n}:${op}:${dano}:${t}`,
+  };
+}
+
+/* ── Партия 3 ───────────────────────────────────────────────────── */
+
+export interface CosDvoynogo {
+  /** Подкоренное число множителя √A. */
+  A: number;
+  /** Угол α = n·π/den. */
+  n: number;
+  den: number;
+  /** raznost: √A·cos²α − √A·sin²α; odin: √(4A)·cos²α − √A. */
+  vid: 'raznost' | 'odin';
+}
+
+/** Квадрат функции угла в TeX: \cos^2\frac{19\pi}{12}. */
+const kvadratTex = (f: 'sin' | 'cos', n: number, den: number) => `${fn(f)}^2${rad(n, den)}`;
+
+/**
+ * √A·cos²α − √A·sin²α или √(4A)·cos²α − √A: в обоих случаях это
+ * √A·cos 2α, где 2α — угол с табличным косинусом, а √A сокращает
+ * корень значения. Подвох — увидеть косинус двойного угла (во втором
+ * виде — после 2cos²α − 1) и не ошибиться со знаком при приведении.
+ */
+export function cosDvoynogo(p: CosDvoynogo): Draft {
+  const { A, n, den, vid } = p;
+  const c2 = kvadratTex('cos', n, den);
+  const s2 = kvadratTex('sin', n, den);
+  const vyr =
+    vid === 'raznost'
+      ? `\\sqrt{${A}}${c2}-\\sqrt{${A}}${s2}`
+      : `\\sqrt{${4 * A}}${c2}-\\sqrt{${A}}`;
+  const cep = trigCepochka(['cos', 2 * n, den]);
+  const { zn, s, D } = cep.z;
+  const koren = Math.round(Math.sqrt(A * s));
+  if (koren * koren !== A * s) throw new Error(`cosDvoynogo: √(${A}·${s}) не целый`);
+  const otvet = round9((zn * koren) / D);
+  if (!konechnaya(otvet)) throw new Error(`cosDvoynogo: ${zn * koren}/${D} — бесконечная дробь`);
+  const dvaAlfa = rad(2 * n, den);
+  return {
+    uslovie: `Найдите значение выражения $${vyr}$.`,
+    otvet,
+    razbor: [
+      vid === 'raznost'
+        ? `Выносим общий множитель: $${vyr} = \\sqrt{${A}}\\left(${c2}-${s2}\\right)$.`
+        : `$\\sqrt{${4 * A}} = \\sqrt{4\\cdot${A}} = 2\\sqrt{${A}}$, поэтому $${vyr} = \\sqrt{${A}}\\left(2${c2}-1\\right)$.`,
+      vid === 'raznost'
+        ? `Косинус двойного угла: $\\cos^2\\alpha-\\sin^2\\alpha = \\cos2\\alpha$, здесь $2\\alpha = ${dvaAlfa}$.`
+        : `Косинус двойного угла: $2\\cos^2\\alpha-1 = \\cos2\\alpha$, здесь $2\\alpha = ${dvaAlfa}$.`,
+      `Формулы приведения: $${cep.tex}$.`,
+      `Умножаем: $\\sqrt{${A}}\\cdot\\left(${cep.tex.split('=').pop()}\\right) = ${zn < 0 ? '-' : ''}\\dfrac{\\sqrt{${A * s}}}{${D}} = ${d(otvet)}$.`,
+    ],
+    params: { A, n, den, vid },
+    proverka: (() => {
+      const a = (n * Math.PI) / den;
+      return vid === 'raznost'
+        ? Math.sqrt(A) * Math.cos(a) ** 2 - Math.sqrt(A) * Math.sin(a) ** 2
+        : Math.sqrt(4 * A) * Math.cos(a) ** 2 - Math.sqrt(A);
+    })(),
+    signature: `cos2:${vid}:${A}:${n}:${den}`,
+  };
+}
+
+/**
+ * a^(n + log_a b): степень суммы — произведение степеней, а
+ * a^(log_a b) = b по определению логарифма. Ответ aⁿ·b.
+ */
+export function stepenSLog(p: { a: number; n: number; b: number }): Draft {
+  const { a, n, b } = p;
+  const an = a ** n;
+  const otvet = round9(an * b);
+  return {
+    uslovie: `Найдите значение выражения $${a}^{${n}+${log(String(a), String(b))}}$.`,
+    otvet,
+    razbor: [
+      `При умножении степеней показатели складываются, поэтому $${a}^{${n}+${log(String(a), String(b))}} = ${a}^{${n}}\\cdot ${a}^{${log(String(a), String(b))}}$.`,
+      `Основное логарифмическое тождество: $${a}^{${log(String(a), String(b))}} = ${b}$.`,
+      `$${a}^{${n}}\\cdot ${b} = ${an}\\cdot ${b} = ${d(otvet)}$.`,
+    ],
+    params: { a, n, b },
+    proverka: a ** (n + Math.log(b) / Math.log(a)),
+    signature: `stlog:${a}:${n}:${b}`,
+  };
+}
+
+export interface TgPoZnacheniyu {
+  /** Что дано: косинус или синус. */
+  f: 'sin' | 'cos';
+  /** Значение (a√r)/(b√s), знак — sign. */
+  a: number;
+  r: number;
+  b: number;
+  s: number;
+  sign: 1 | -1;
+  /** Четверть угла. */
+  q: 1 | 2 | 3 | 4;
+}
+
+/** a√r/(b√s) в TeX: \dfrac{2}{\sqrt{29}}, \dfrac{2\sqrt{5}}{5}. */
+function drobKorenTex(p: TgPoZnacheniyu): string {
+  return `${p.sign < 0 ? '-' : ''}\\dfrac{${coefRoot(p.a, p.r)}}{${coefRoot(p.b, p.s)}}`;
+}
+
+/**
+ * Дано cos α (или sin α) с корнем и четверть угла; найти tg α. Через
+ * основное тождество: квадрат второй функции, затем tg²α и знак по
+ * четверти. Подвох — знак: в четверти он у синуса и косинуса свой.
+ */
+export function tgPoZnacheniyu(p: TgPoZnacheniyu): Draft {
+  const { f, a, r, b, s, sign, q } = p;
+  /* v² = P/Q. */
+  const P = a * a * r;
+  const Q = b * b * s;
+  if (P >= Q) throw new Error('tgPoZnacheniyu: |значение| ≥ 1');
+  const g = f === 'cos' ? fn('cos') : fn('sin');
+  const drug = f === 'cos' ? fn('sin') : fn('cos');
+  /* tg² = (Q − P)/P при данном косинусе и P/(Q − P) при данном синусе. */
+  const [tn0, td0] = f === 'cos' ? [Q - P, P] : [P, Q - P];
+  const [tn, td] = [tn0 / nod(tn0, td0), td0 / nod(tn0, td0)];
+  const kn = Math.round(Math.sqrt(tn));
+  const kd = Math.round(Math.sqrt(td));
+  if (kn * kn !== tn || kd * kd !== td) throw new Error('tgPoZnacheniyu: tg не рационален');
+  const plusTg = q === 1 || q === 3;
+  const sinPol = q === 1 || q === 2;
+  const cosPol = q === 1 || q === 4;
+  const znakDannoy = f === 'cos' ? cosPol : sinPol;
+  if ((sign > 0) !== znakDannoy) throw new Error('tgPoZnacheniyu: знак не по четверти');
+  const otvet = round9(((plusTg ? 1 : -1) * kn) / kd);
+  if (!konechnaya(otvet)) throw new Error('tgPoZnacheniyu: tg — бесконечная дробь');
+  const sinZnak = sinPol ? 'положителен' : 'отрицателен';
+  const cosZnak = cosPol ? 'положителен' : 'отрицателен';
+  return {
+    uslovie: `Найдите $${fn('tg')}\\alpha$, если $${g}\\alpha = ${drobKorenTex(p)}$ и $\\alpha\\in${quarterInterval(q)}$.`,
+    otvet,
+    razbor: [
+      `Основное тождество: $${drug}^2\\alpha = 1-${g}^2\\alpha = 1-${frac(P, Q)} = ${frac(Q - P, Q)}$.`,
+      `$${fn('tg')}^2\\alpha = \\dfrac{\\sin^2\\alpha}{\\cos^2\\alpha} = ${f === 'cos' ? `${frac(Q - P, Q)} : ${frac(P, Q)}` : `${frac(P, Q)} : ${frac(Q - P, Q)}`} = ${frac(tn, td)}$, $|${fn('tg')}\\alpha| = ${frac(kn, kd)}$.`,
+      `При $\\alpha\\in${quarterInterval(q)}$ синус ${sinZnak}, косинус ${cosZnak}, поэтому тангенс ${plusTg ? 'положителен' : 'отрицателен'}: $${fn('tg')}\\alpha = ${d(otvet)}$.`,
+    ],
+    params: { f, a, r, b, s, sign, q },
+    proverka: (() => {
+      const v = (sign * a * Math.sqrt(r)) / (b * Math.sqrt(s));
+      /* Угол в нужной четверти по значению: арккосинус или арксинус, затем отражения. */
+      let al: number;
+      if (f === 'cos') al = q === 1 || q === 2 ? Math.acos(v) : 2 * Math.PI - Math.acos(v);
+      else al = q === 1 || q === 4 ? Math.asin(v) : Math.PI - Math.asin(v);
+      return Math.tan(al);
+    })(),
+    signature: `tg:${f}:${a}:${r}:${b}:${s}:${sign}:${q}`,
   };
 }

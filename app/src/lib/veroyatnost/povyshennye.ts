@@ -12,7 +12,7 @@ import { plitkiDvuh, shagP } from './bank4/vizual';
 import { shtuk, tex, tochnee, tochno, veroyatnost } from './bank5/obshchee';
 import { skl } from './morfologia';
 import { chislo, vopros, zapisShag } from './podskazka';
-import { dec, konechnaya, num, text, type Params, type Prototype } from './types';
+import { dec, konechnaya, num, round, text, type Params, type Prototype } from './types';
 
 /** x·base — целое (с допуском: 0,58·100 в плавающей запятой не ровно 58). */
 const celoeProtsentov = (x: number, base: number) =>
@@ -1567,6 +1567,746 @@ export const PV4_SUMKI: Prototype = {
         { label: 'без дефекта', count: num(p, 'N') - num(p, 'k') },
         { label: 'с дефектом', count: num(p, 'k') },
       ),
+  },
+  varianty: [],
+};
+
+/* ── Партия 3 (варианты 13–18) ──────────────────────────────────── */
+
+/* ── №4. Пары первого тура: соперник — соотечественник ──────────── */
+
+/** Слова сюжета: вид спорта и как называют игрока. */
+function turnir(p: Params): { gde: string; kto: [string, string, string]; kem: string } {
+  switch (text(p, 'syuzhet')) {
+    case 'shahmaty':
+      return {
+        gde: 'В чемпионате по шахматам',
+        kto: ['шахматист', 'шахматиста', 'шахматистов'],
+        kem: 'шахматистом',
+      };
+    case 'badminton':
+      return {
+        gde: 'В турнире по бадминтону',
+        kto: ['бадминтонист', 'бадминтониста', 'бадминтонистов'],
+        kem: 'бадминтонистом',
+      };
+    case 'tennis':
+      return {
+        gde: 'В турнире по настольному теннису',
+        kto: ['теннисист', 'теннисиста', 'теннисистов'],
+        kem: 'теннисистом',
+      };
+    default:
+      return {
+        gde: 'В чемпионате по шашкам',
+        kto: ['шашист', 'шашиста', 'шашистов'],
+        kem: 'шашистом',
+      };
+  }
+}
+
+const otvetPary = (p: Params) => tochnee((num(p, 'm') - 1) / (num(p, 'n') - 1));
+
+/** (2k − 1)!! — число разбиений 2k участников на пары. */
+function razbieniyNaPary(n: number): number {
+  let f = 1;
+  for (let i = n - 1; i >= 1; i -= 2) f *= i;
+  return f;
+}
+
+/**
+ * n участников (чётное), m из них — из одной страны, среди них
+ * названный игрок. Первый тур — случайное разбиение на пары.
+ * Вероятность, что соперник названного — из его страны. Подвох —
+ * соперника выбирают из n − 1 остальных, своих среди них m − 1.
+ */
+export const PV4_PARY: Prototype = {
+  id: 'pv4-pary',
+  blok: 'povyshennye',
+  nazvanie: 'Пары первого тура: соперник из той же страны',
+  tip: 'Классическое определение',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: tochno,
+  uslovie: (p) => {
+    const n = num(p, 'n');
+    const m = num(p, 'm');
+    const t = turnir(p);
+    const kto = text(p, 'kto');
+    return `${t.gde} участвуют ${n} ${skl(n, 'спортсмен', 'спортсмена', 'спортсменов')}, среди которых ${m} ${skl(m, ...t.kto)} из ${text(p, 'strana')}, в том числе ${kto}. Для игр первого тура участников разбивают на игровые пары случайным образом. Найдите вероятность того, что в первом туре ${kto} будет играть с каким-либо ${t.kem} из ${text(p, 'strana')}.`;
+  },
+  dopustimo: (p) => {
+    const n = num(p, 'n');
+    const m = num(p, 'm');
+    const o = otvetPary(p);
+    return n % 2 === 0 && m >= 2 && m < n && n <= 100 && o > 0 && o < 1 && konechnaya(o);
+  },
+  otvet: otvetPary,
+  /* Второй путь — через разбиения на пары: пара «он + свой» и любое
+     разбиение остальных n − 2, из всех разбиений n участников. */
+  perebor: (p) => {
+    const n = num(p, 'n');
+    const m = num(p, 'm');
+    return tochnee(((m - 1) * razbieniyNaPary(n - 2)) / razbieniyNaPary(n));
+  },
+  shagi: (p) => {
+    const n = num(p, 'n');
+    const m = num(p, 'm');
+    const kto = text(p, 'kto');
+    return [
+      {
+        etap: 'Все исходы',
+        text: `Соперником может оказаться любой из остальных участников — с равными шансами:`,
+        formula: `n = ${n} - 1 = ${n - 1}`,
+        value: n - 1,
+      },
+      {
+        etap: 'Благоприятные исходы',
+        text: `Соотечественники среди них — все, кроме самого игрока (${kto} входит в число ${m}):`,
+        formula: `m = ${m} - 1 = ${m - 1}`,
+        value: m - 1,
+      },
+      shagP(m - 1, n - 1),
+    ];
+  },
+  podskazka: (p) => {
+    const n = num(p, 'n');
+    const m = num(p, 'm');
+    return [
+      vopros(
+        'Из скольких участников равновозможно выбирается соперник?',
+        `$${n - 1}$`,
+        [`$${n}$`, `$${n / 2}$`],
+        'Из всех, кроме самого игрока.',
+      ),
+      vopros(
+        'Сколько среди них его соотечественников?',
+        `$${m - 1}$`,
+        [`$${m}$`, `$${m - 2}$`].filter((x) => x !== '$0$'),
+        'Сам игрок в этот счёт не входит.',
+      ),
+      vopros('Какое выражение даёт ответ?', `$\\dfrac{${m - 1}}{${n - 1}}$`, [
+        `$\\dfrac{${m}}{${n}}$`,
+        `$\\dfrac{${m - 1}}{${n}}$`,
+        `$\\dfrac{${m}}{${n - 1}}$`,
+      ]),
+      zapisShag('десятичная', null),
+    ];
+  },
+  varianty: [],
+};
+
+/* ── №5. Трое друзей и случайное деление на группы ──────────────── */
+
+/** C(n, k) в плавающей запятой: n ≤ 60, точность с запасом. */
+function soch(n: number, k: number): number {
+  if (k < 0 || k > n) return 0;
+  let c = 1;
+  for (let i = 1; i <= k; i += 1) c = (c * (n - k + i)) / i;
+  return c;
+}
+
+/** Три имени друзей через запятую и «и». */
+function troe(p: Params): string {
+  return `${text(p, 'i1')}, ${text(p, 'i2')} и ${text(p, 'i3')}`;
+}
+
+/** Вероятность, что трое из n окажутся в одной из двух равных групп. */
+const vOdnoy = (n: number) => ((n / 2 - 1) * (n / 2 - 2)) / ((n - 1) * (n - 2));
+
+/** Округление по условию: okr = 2 — до сотых, иначе ответ точный. */
+const okrDvuh = (p: Params): 2 | null => (num(p, 'okr') === 2 ? 2 : null);
+
+/**
+ * n человек (чётное) делят на две равные группы. Вероятность, что три
+ * друга окажутся в одной группе. Подвох — первый друг уже где-то, для
+ * второго свободных мест в его группе n/2 − 1 из n − 1, для третьего —
+ * n/2 − 2 из n − 2.
+ */
+export const PV5_ODNA_GRUPPA: Prototype = {
+  id: 'pv5-odna-gruppa',
+  blok: 'povyshennye',
+  nazvanie: 'Две равные группы: трое друзей в одной',
+  tip: 'Умножение вероятностей',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: okrDvuh,
+  uslovie: (p) => {
+    const n = num(p, 'n');
+    return `${text(p, 'gde')} ${n} ${skl(n, 'человек', 'человека', 'человек')}, в том числе три друга — ${troe(p)}. ${text(p, 'kogo')} случайным образом разбивают на две равные группы. Найдите вероятность того, что все три друга окажутся в одной группе.${okrDvuh(p) === 2 ? ' Ответ округлите до сотых.' : ''}`;
+  },
+  dopustimo: (p) => {
+    const n = num(p, 'n');
+    const o = vOdnoy(n);
+    return (
+      n % 2 === 0 && n >= 8 && n <= 60 && (okrDvuh(p) === 2 || konechnaya(tochnee(o)))
+    );
+  },
+  otvet: (p) => {
+    const o = vOdnoy(num(p, 'n'));
+    return okrDvuh(p) === 2 ? round(o, 2) : tochnee(o);
+  },
+  /* Второй путь — через сочетания: группа с друзьями дополняется n/2 − 3
+     из остальных n − 3; таких групп две (чья — первая или вторая). */
+  perebor: (p) => {
+    const n = num(p, 'n');
+    const o = (2 * soch(n - 3, n / 2 - 3)) / soch(n, n / 2);
+    return okrDvuh(p) === 2 ? round(o, 2) : tochnee(o);
+  },
+  shagi: (p) => {
+    const n = num(p, 'n');
+    const g = n / 2;
+    const o = vOdnoy(n);
+    const otv = okrDvuh(p) === 2 ? round(o, 2) : tochnee(o);
+    return [
+      {
+        etap: 'Связь событий',
+        text: `Первый друг попал в какую-то группу. Нужно, чтобы двое других попали к нему: в каждой группе ${g} ${skl(g, 'место', 'места', 'мест')}.`,
+      },
+      {
+        etap: 'Количества',
+        text: `Для второго друга свободных мест в группе первого — ${g - 1} из ${n - 1} оставшихся, для третьего — ${g - 2} из ${n - 2}:`,
+        formula: `\\dfrac{${g - 1}}{${n - 1}},\\qquad \\dfrac{${g - 2}}{${n - 2}}`,
+      },
+      {
+        etap: 'Ответ',
+        text: 'Оба события должны произойти — вероятности перемножаются:',
+        formula: `P = \\dfrac{${g - 1}}{${n - 1}}\\cdot\\dfrac{${g - 2}}{${n - 2}} = \\dfrac{${(g - 1) * (g - 2)}}{${(n - 1) * (n - 2)}} ${okrDvuh(p) === 2 ? '\\approx' : '='} ${tex(otv)}`,
+        value: otv,
+      },
+    ];
+  },
+  podskazka: (p) => {
+    const n = num(p, 'n');
+    const g = n / 2;
+    return [
+      vopros(
+        'Сколько мест осталось для второго друга в группе первого?',
+        `$${g - 1}$ из $${n - 1}$`,
+        [`$${g}$ из $${n}$`, `$${g - 1}$ из $${n}$`],
+        'Одно место в группе уже занял первый друг, и он же выбыл из числа распределяемых.',
+      ),
+      vopros(
+        'А для третьего?',
+        `$${g - 2}$ из $${n - 2}$`,
+        [`$${g - 1}$ из $${n - 1}$`, `$${g - 2}$ из $${n - 1}$`],
+      ),
+      zapisShag('десятичная', okrDvuh(p)),
+    ];
+  },
+  varianty: [],
+};
+
+/** Вероятность, что из троих хотя бы двое в одной из трёх равных групп. */
+const hotyaByDve = (n: number) => 1 - ((2 * n) / 3 / (n - 1)) * (n / 3 / (n - 2));
+
+/**
+ * n человек (кратно трём) делят на три равные группы. Вероятность,
+ * что хотя бы двое из трёх подруг окажутся в одной группе, до сотых.
+ * Подвох — считать через противоположное «все в разных группах».
+ */
+export const PV5_HOTYA_BY_DVE: Prototype = {
+  id: 'pv5-hotya-by-dve',
+  blok: 'povyshennye',
+  nazvanie: 'Три равные группы: хотя бы двое из трёх в одной',
+  tip: 'Противоположное событие',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: () => 2,
+  uslovie: (p) => {
+    const n = num(p, 'n');
+    return `${text(p, 'gde')} ${n} ${skl(n, 'человек', 'человека', 'человек')}, в том числе три ${text(p, 'kto')} — ${troe(p)}. ${text(p, 'kogo')} случайным образом разбивают на три равные группы. Найдите вероятность того, что хотя бы двое из трёх ${text(p, 'kogo2')} окажутся в одной группе. Ответ округлите до сотых.`;
+  },
+  dopustimo: (p) => {
+    const n = num(p, 'n');
+    return n % 3 === 0 && n >= 9 && n <= 60;
+  },
+  otvet: (p) => round(hotyaByDve(num(p, 'n')), 2),
+  /* Второй путь — через сочетания: «все в разных» — по одному в каждой
+     группе, остальные n − 3 раскладываются по n/3 − 1 в каждую. */
+  perebor: (p) => {
+    const n = num(p, 'n');
+    const g = n / 3;
+    const vse = soch(n, g) * soch(n - g, g);
+    const raznye = 6 * soch(n - 3, g - 1) * soch(n - 3 - (g - 1), g - 1);
+    return round(1 - raznye / vse, 2);
+  },
+  shagi: (p) => {
+    const n = num(p, 'n');
+    const g = n / 3;
+    const raznye = ((2 * g) / (n - 1)) * (g / (n - 2));
+    const otv = round(1 - raznye, 2);
+    return [
+      {
+        etap: 'Противоположное событие',
+        text: 'Противоположное событие — все трое в разных группах. Его вероятность найти проще.',
+      },
+      {
+        etap: 'Количества',
+        text: `Первая попала в какую-то группу. Вторая должна попасть в другую — там ${2 * g} ${skl(2 * g, 'место', 'места', 'мест')} из ${n - 1}; третья — в оставшуюся, ${g} из ${n - 2}:`,
+        formula: `P(\\bar A) = \\dfrac{${2 * g}}{${n - 1}}\\cdot\\dfrac{${g}}{${n - 2}} = \\dfrac{${2 * g * g}}{${(n - 1) * (n - 2)}}`,
+      },
+      {
+        etap: 'Ответ',
+        text: 'Искомая вероятность:',
+        formula: `P = 1 - \\dfrac{${2 * g * g}}{${(n - 1) * (n - 2)}} = \\dfrac{${(n - 1) * (n - 2) - 2 * g * g}}{${(n - 1) * (n - 2)}} \\approx ${tex(otv)}`,
+        value: otv,
+      },
+    ];
+  },
+  podskazka: (p) => {
+    const n = num(p, 'n');
+    const g = n / 3;
+    return [
+      vopros(
+        'Какое событие удобнее посчитать?',
+        'Все трое в разных группах',
+        ['Ровно двое в одной группе', 'Все трое в одной группе'],
+        'Оно противоположно искомому и считается одним произведением.',
+      ),
+      vopros(
+        'Сколько мест в «чужих» группах для второй?',
+        `$${2 * g}$ из $${n - 1}$`,
+        [`$${g}$ из $${n - 1}$`, `$${2 * g}$ из $${n}$`],
+      ),
+      zapisShag('десятичная', 2),
+    ];
+  },
+  varianty: [],
+};
+
+/* ── №4. Три цвета: P(X или Y) и P(Z или Y) → P(Y) ─────────────── */
+
+/** Цвета: родительный для чернил/шаров и творительный для «окажется …». */
+const TSVETA: Record<string, { mn: string; zh: string; m: string; rod: string }> = {
+  chern: { mn: 'чёрными', zh: 'чёрной', m: 'чёрным', rod: 'чёрного' },
+  sin: { mn: 'синими', zh: 'синей', m: 'синим', rod: 'синего' },
+  krasn: { mn: 'красными', zh: 'красной', m: 'красным', rod: 'красного' },
+  zel: { mn: 'зелёными', zh: 'зелёной', m: 'зелёным', rod: 'зелёного' },
+  fiol: { mn: 'фиолетовыми', zh: 'фиолетовой', m: 'фиолетовым', rod: 'фиолетового' },
+};
+
+function tsvetIz(p: Params, key: string) {
+  const c = TSVETA[text(p, key)];
+  if (c === undefined) throw new Error(`pv4-tri-tsveta: нет цвета ${text(p, key)}`);
+  return c;
+}
+
+/** Сюжет: ручки (ж. р., чернила) или фломастеры (м. р.). */
+function predmet(p: Params) {
+  const ruchki = text(p, 'syuzhet') === 'ruchki';
+  return {
+    lezhat: ruchki
+      ? (spisok: string) => `ручки с ${spisok} чернилами`
+      : (spisok: string) => `фломастеры с ${spisok} стержнями`,
+    odin: ruchki ? 'одну ручку' : 'один фломастер',
+    ona: ruchki ? 'она' : 'он',
+    kakoy: (k: string) => (ruchki ? tsvetIz(p, k).zh : tsvetIz(p, k).m),
+    iskomyy: ruchki ? 'ручка' : 'фломастер',
+  };
+}
+
+const otvetTriTsveta = (p: Params) => tochnee(veroyatnost(p, 'p1') + veroyatnost(p, 'p2') - 1);
+
+/**
+ * Три вида предметов X, Y, Z. Дано P(X или Y) = p1 и P(Z или Y) = p2;
+ * найти P(Y). Подвох — сумма p1 + p2 больше 1: Y посчитан дважды,
+ * а X + Y + Z = 1, поэтому P(Y) = p1 + p2 − 1.
+ */
+export const PV4_TRI_TSVETA: Prototype = {
+  id: 'pv4-tri-tsveta',
+  blok: 'povyshennye',
+  nazvanie: 'Три цвета: $P(X+Y)$ и $P(Z+Y)$ → $P(Y)$',
+  tip: 'Сложение вероятностей',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: tochno,
+  uslovie: (p) => {
+    const t = predmet(p);
+    const spisok = `${tsvetIz(p, 'y').mn}, ${tsvetIz(p, 'x').mn} и ${tsvetIz(p, 'z').mn}`;
+    return `${text(p, 'gde')} в одной коробке лежат вперемешку ${t.lezhat(spisok)}, одинаковые на вид. Покупатель случайным образом выбирает ${t.odin}. Вероятность того, что ${t.ona} окажется ${t.kakoy('x')} или ${t.kakoy('y')}, равна ${dec(veroyatnost(p, 'p1'))}, а того, что ${t.ona} окажется ${t.kakoy('z')} или ${t.kakoy('y')}, равна ${dec(veroyatnost(p, 'p2'))}. Найдите вероятность того, что ${t.iskomyy} окажется ${t.kakoy('y')}.`;
+  },
+  dopustimo: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    const o = otvetTriTsveta(p);
+    const raznye = new Set([text(p, 'x'), text(p, 'y'), text(p, 'z')]).size === 3;
+    return raznye && p1 < 1 && p2 < 1 && o > 0 && o < Math.min(p1, p2) && konechnaya(o);
+  },
+  otvet: otvetTriTsveta,
+  /* Второй путь — сто предметов: X = 100 − (Z + Y), Z = 100 − (X + Y), Y = 100 − X − Z. */
+  perebor: (p) => {
+    const xy = shtuk(veroyatnost(p, 'p1'), 100);
+    const zy = shtuk(veroyatnost(p, 'p2'), 100);
+    const x = 100 - zy;
+    const z = 100 - xy;
+    return (100 - x - z) / 100;
+  },
+  shagi: (p) => {
+    const t = predmet(p);
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    const px = tochnee(1 - p2);
+    const pz = tochnee(1 - p1);
+    return [
+      {
+        etap: 'Связь событий',
+        text: `Цветов три, и вместе их вероятности дают 1. Поэтому «${t.kakoy('z')} или ${t.kakoy('y')}» противоположно «${t.kakoy('x')}», а «${t.kakoy('x')} или ${t.kakoy('y')}» — «${t.kakoy('z')}».`,
+      },
+      {
+        etap: 'Противоположное событие',
+        text: `Вероятности ${tsvetIz(p, 'x').rod} и ${tsvetIz(p, 'z').rod} цвета:`,
+        formula: `P_1 = 1 - ${tex(p2)} = ${tex(px)},\\qquad P_2 = 1 - ${tex(p1)} = ${tex(pz)}`,
+      },
+      {
+        etap: 'Ответ',
+        text: 'Искомая вероятность — всё, кроме двух других цветов:',
+        formula: `P = 1 - ${tex(px)} - ${tex(pz)} = ${tex(otvetTriTsveta(p))}`,
+        value: otvetTriTsveta(p),
+      },
+    ];
+  },
+  podskazka: (p) => {
+    const p1 = veroyatnost(p, 'p1');
+    const p2 = veroyatnost(p, 'p2');
+    return [
+      vopros(
+        'Почему сумма данных вероятностей больше 1?',
+        'Искомый цвет входит в оба события',
+        ['События несовместны', 'Так не бывает — в условии ошибка'],
+      ),
+      vopros(
+        'Какое выражение даёт ответ?',
+        `$${tex(p1)} + ${tex(p2)} - 1$`,
+        [`$${tex(p1)} \\cdot ${tex(p2)}$`, `$${tex(p1)} - ${tex(p2)}$`, `$1 - ${tex(p1)}$`],
+        'Каждый из двух других цветов — дополнение одного из данных событий.',
+      ),
+      zapisShag('десятичная', null),
+    ];
+  },
+  varianty: [],
+};
+
+/* ── №5. Сумма очков достигла s: сколько было бросков ──────────── */
+
+/** Все упорядоченные разбиения s на слагаемые 1…6 (s ≤ 6 — любые). */
+function razbieniya(s: number): number[][] {
+  if (s === 0) return [[]];
+  const out: number[][] = [];
+  for (let a = 1; a <= Math.min(6, s); a += 1)
+    for (const r of razbieniya(s - a)) out.push([a, ...r]);
+  return out;
+}
+
+/** P(сумма в какой-то момент равна s и бросков ровно k) — по числу бросков. */
+function poBroskam(s: number): number[] {
+  const w: number[] = [];
+  for (let k = 1; k <= s; k += 1) w.push(soch(s - 1, k - 1) / 6 ** k);
+  return w;
+}
+
+const broskov = (k: number) => `${k} ${skl(k, 'бросок', 'броска', 'бросков')}`;
+
+/**
+ * Кубик бросают N раз; известно, что в какой-то момент сумма очков
+ * стала равна s (s ≤ 6). Вероятность, что к этому моменту было
+ * сделано ровно k бросков, до сотых. Подвох — исходы «сумма s за j
+ * бросков» не равновозможны: у каждого свой вес (1/6)ʲ.
+ */
+export const PV5_SUMMA_OCHKOV: Prototype = {
+  id: 'pv5-summa-ochkov',
+  blok: 'povyshennye',
+  nazvanie: 'Сумма очков достигла $s$: ровно $k$ бросков',
+  tip: 'Вероятность при условии',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: () => 2,
+  uslovie: (p) => {
+    const s = num(p, 's');
+    const k = num(p, 'k');
+    return `Правильный игральный кубик бросили ${num(p, 'N')} раз. Известно, что в какой-то момент сумма выпавших при бросаниях очков оказалась равна ${s}. Какова вероятность того, что к этому моменту было сделано ровно ${k === 1 ? 'один бросок' : broskov(k)}? Ответ округлите до сотых.`;
+  },
+  dopustimo: (p) => {
+    const s = num(p, 's');
+    const k = num(p, 'k');
+    return s >= 2 && s <= 6 && k >= 1 && k <= s && num(p, 'N') >= s;
+  },
+  otvet: (p) => {
+    const w = poBroskam(num(p, 's'));
+    return round(w[num(p, 'k') - 1]! / w.reduce((a, b) => a + b, 0), 2);
+  },
+  /* Второй путь — перебор всех последовательностей бросков с суммой s и их весов. */
+  perebor: (p) => {
+    const k = num(p, 'k');
+    let vse = 0;
+    let blago = 0;
+    for (const r of razbieniya(num(p, 's'))) {
+      const ves = 1 / 6 ** r.length;
+      vse += ves;
+      if (r.length === k) blago += ves;
+    }
+    return round(blago / vse, 2);
+  },
+  shagi: (p) => {
+    const s = num(p, 's');
+    const k = num(p, 'k');
+    const w = poBroskam(s);
+    const kol = w.map((_, j) => soch(s - 1, j));
+    /* Общий знаменатель 6^s: вес j бросков — C(s−1, j−1)·6^(s−j). */
+    const chisla = kol.map((c, j) => c * 6 ** (s - (j + 1)));
+    const vse = chisla.reduce((a, b) => a + b, 0);
+    const otv = round(chisla[k - 1]! / vse, 2);
+    return [
+      {
+        etap: 'Все исходы',
+        text: `Сумма ${s} могла набраться за 1, 2, …, ${s} бросков. Число последовательностей из $j$ бросков с суммой ${s} — столько, сколькими способами ${s} раскладывается на $j$ слагаемых по порядку; вероятность каждой — $(1/6)^j$:`,
+        formula: kol
+          .map((c, j) => `j=${j + 1}:\\ ${c}\\cdot\\left(\\tfrac16\\right)^{${j + 1}}`)
+          .join(',\\quad '),
+      },
+      {
+        etap: 'Количества',
+        text: `Домножим всё на $6^{${s}}$ — отношения не изменятся:`,
+        formula: chisla.join(' + ') + ` = ${vse}`,
+        value: vse,
+      },
+      {
+        etap: 'Ответ',
+        text: `Доля случаев, где бросков ровно ${k}:`,
+        formula: `P = \\dfrac{${chisla[k - 1]}}{${vse}} \\approx ${tex(otv)}`,
+        value: otv,
+      },
+    ];
+  },
+  podskazka: (p) => {
+    const s = num(p, 's');
+    return [
+      vopros(
+        'Равновозможны ли случаи «сумма за 1 бросок», «за 2 броска» и т. д.?',
+        'Нет: у каждой последовательности из $j$ бросков вероятность $(1/6)^j$',
+        ['Да, все равновозможны', `Да, их ${s}`],
+      ),
+      vopros(
+        `Сколькими способами получить сумму ${s} за два броска?`,
+        `$${s - 1}$`,
+        [`$${s}$`, '$6$'].filter((x) => x !== `$${s - 1}$`),
+        `Первый бросок — от 1 до ${s - 1}, второй определяется.`,
+      ),
+      zapisShag('десятичная', 2),
+    ];
+  },
+  varianty: [],
+};
+
+/* ── №4. Такси: машина «другой» раскраски ──────────────────────── */
+
+const RASKRASKI: Record<string, [string, string]> = {
+  /* [цвет кузова, цвет надписей] у первой группы; у второй — наоборот. */
+  'chern-zhelt': ['чёрного', 'жёлт'],
+  'bel-sin': ['белого', 'син'],
+  'ser-krasn': ['серого', 'красн'],
+  'zel-bel': ['зелёного', 'бел'],
+};
+
+/** «жёлт» → «жёлтого» / «жёлтыми», «син» → «синего» / «синими». */
+const myagkiy = (o: string) => o === 'син';
+const rod = (o: string) => `${o}${myagkiy(o) ? 'его' : 'ого'}`;
+const tvor = (o: string) => `${o}${myagkiy(o) ? 'ими' : 'ыми'}`;
+/** Основа из родительного «чёрного» → «чёрн». */
+const osnova = (r: string) => r.replace(/(ого|его)$/, '');
+
+function raskraska(p: Params) {
+  const r = RASKRASKI[text(p, 'raskraska')];
+  if (r === undefined) throw new Error(`pv4-taksi: нет раскраски ${text(p, 'raskraska')}`);
+  const [kuzov1, nadp1] = r;
+  const o1 = osnova(kuzov1);
+  return {
+    pervye: `${kuzov1} цвета с ${tvor(nadp1)} надписями на бортах`,
+    vtorye: `${rod(nadp1)} цвета с ${tvor(o1)} надписями`,
+  };
+}
+
+const otvetTaksi = (p: Params) =>
+  tochnee((num(p, 'vtoroy') === 1 ? num(p, 'n') - num(p, 'k') : num(p, 'k')) / num(p, 'n'));
+
+/**
+ * n машин, k одной раскраски, остальные — другой; найти вероятность
+ * приезда машины второй (или первой) раскраски. Подвох — в условии дано
+ * число машин первой раскраски, а спрашивают про вторую: n − k.
+ */
+export const PV4_TAKSI: Prototype = {
+  id: 'pv4-taksi',
+  blok: 'povyshennye',
+  nazvanie: 'Такси двух раскрасок: приедет машина второй раскраски',
+  tip: 'Классическое определение',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: tochno,
+  uslovie: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    const r = raskraska(p);
+    const isk = num(p, 'vtoroy') === 1 ? r.vtorye : r.pervye.replace(' на бортах', '');
+    return `В фирме такси в наличии ${n} ${skl(n, 'легковой автомобиль', 'легковых автомобиля', 'легковых автомобилей')}: ${k} ${r.pervye}, остальные — ${r.vtorye}. Найдите вероятность того, что на случайный вызов приедет машина ${isk}.`;
+  },
+  dopustimo: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    const o = otvetTaksi(p);
+    return k >= 1 && k < n && n <= 200 && o > 0 && o < 1 && konechnaya(o);
+  },
+  otvet: otvetTaksi,
+  /* Второй путь — обход парка: каждая машина приезжает с вероятностью 1/n. */
+  perebor: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    let m = 0;
+    for (let i = 0; i < n; i += 1) if ((i >= k) === (num(p, 'vtoroy') === 1)) m += 1;
+    return tochnee(m / n);
+  },
+  shagi: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    const m = num(p, 'vtoroy') === 1 ? n - k : k;
+    return [
+      {
+        etap: 'Все исходы',
+        text: 'Приехать может любая машина фирмы — с равными шансами:',
+        formula: `n = ${n}`,
+        value: n,
+      },
+      num(p, 'vtoroy') === 1
+        ? {
+            etap: 'Благоприятные исходы',
+            text: 'Машин нужной раскраски — все, кроме названных первыми:',
+            formula: `m = ${n} - ${k} = ${m}`,
+            value: m,
+          }
+        : {
+            etap: 'Благоприятные исходы',
+            text: 'Машин нужной раскраски столько, сколько названо первыми:',
+            formula: `m = ${m}`,
+            value: m,
+          },
+      shagP(m, n),
+    ];
+  },
+  podskazka: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    const m = num(p, 'vtoroy') === 1 ? n - k : k;
+    return [
+      vopros(
+        'Сколько машин нужной раскраски?',
+        `$${m}$`,
+        [`$${n - m}$`, `$${n}$`],
+        'Перечитайте, про какие машины спрашивают.',
+      ),
+      vopros('Какое выражение даёт ответ?', `$\\dfrac{${m}}{${n}}$`, [
+        `$\\dfrac{${n - m}}{${n}}$`,
+        `$\\dfrac{${m}}{${n - m}}$`,
+      ]),
+      zapisShag('десятичная', null),
+    ];
+  },
+  varianty: [],
+};
+
+/* ── №5. Схема Бернулли: k попаданий из n ──────────────────────── */
+
+function strelba(p: Params): { kto: string; chto: string } {
+  return text(p, 'syuzhet') === 'tir'
+    ? { kto: 'Посетитель тира', chto: 'посетитель тира' }
+    : { kto: 'Биатлонист', chto: 'биатлонист' };
+}
+
+const bernulli = (n: number, k: number, q: number) => soch(n, k) * q ** k * (1 - q) ** (n - k);
+
+/**
+ * n выстрелов по n мишеням, вероятность попадания p; найти вероятность
+ * ровно k попаданий, до сотых. Подвох — промахи считаются вероятностью
+ * 1 − p, а попадания могут прийтись на любые k мишеней из n: C(n, k).
+ */
+export const PV5_BERNULLI: Prototype = {
+  id: 'pv5-bernulli',
+  blok: 'povyshennye',
+  nazvanie: 'Схема Бернулли: ровно $k$ попаданий из $n$',
+  tip: 'Независимые события',
+  sourceRange: [0, 0],
+  format: 'десятичная',
+  okruglenie: () => 2,
+  uslovie: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    const s = strelba(p);
+    const raz = (x: number) => `${x} ${skl(x, 'раз', 'раза', 'раз')}`;
+    return `${s.kto} по одному разу стреляет по ${n} ${skl(n, 'мишени', 'мишеням', 'мишеням')}. Вероятность попадания в мишень при одном выстреле равна ${dec(veroyatnost(p, 'p'))}. Найдите вероятность того, что ${s.chto} ${raz(k)} попадёт в мишени и ${n - k === 1 ? 'один раз' : raz(n - k)} промахнётся. Результат округлите до сотых.`;
+  },
+  dopustimo: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    const q = veroyatnost(p, 'p');
+    return n >= 2 && n <= 8 && k >= 1 && k < n && q > 0 && q < 1;
+  },
+  otvet: (p) => round(bernulli(num(p, 'n'), num(p, 'k'), veroyatnost(p, 'p')), 2),
+  /* Второй путь — перебор всех 2ⁿ исходов серии выстрелов. */
+  perebor: (p) => {
+    const n = num(p, 'n');
+    const q = veroyatnost(p, 'p');
+    let s = 0;
+    for (let mask = 0; mask < 2 ** n; mask += 1) {
+      let hits = 0;
+      let w = 1;
+      for (let i = 0; i < n; i += 1) {
+        if ((mask >> i) & 1) {
+          hits += 1;
+          w *= q;
+        } else w *= 1 - q;
+      }
+      if (hits === num(p, 'k')) s += w;
+    }
+    return round(s, 2);
+  },
+  shagi: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    const q = veroyatnost(p, 'p');
+    const odna = tochnee(q ** k * (1 - q) ** (n - k));
+    const c = soch(n, k);
+    const otv = round(c * odna, 2);
+    return [
+      {
+        etap: 'Путь по дереву',
+        text: `Выстрелы независимы. Одна конкретная серия — например, первые ${k} попадания, остальные промахи — имеет вероятность`,
+        formula: `${tex(q)}^{${k}}\\cdot ${tex(tochnee(1 - q))}^{${n - k}} = ${tex(odna)}`,
+        value: odna,
+      },
+      {
+        etap: 'Количества',
+        text: `Промахи могут прийтись на любые ${n - k} из ${n} мишеней — таких серий`,
+        formula: `C_{${n}}^{${n - k}} = ${c}`,
+        value: c,
+      },
+      {
+        etap: 'Ответ',
+        text: 'Серии несовместны — вероятности складываются:',
+        formula: `P = ${c}\\cdot ${tex(odna)} = ${tex(tochnee(c * odna))} \\approx ${tex(otv)}`,
+        value: otv,
+      },
+    ];
+  },
+  podskazka: (p) => {
+    const n = num(p, 'n');
+    const k = num(p, 'k');
+    return [
+      vopros(
+        'Сколько разных серий дают ровно нужное число попаданий?',
+        `$${soch(n, k)}$`,
+        ['$1$', `$${n * k}$`].filter((x) => x !== `$${soch(n, k)}$`),
+        `Выбираем, на какие ${n - k} мишени из ${n} пришлись промахи.`,
+      ),
+      zapisShag('десятичная', 2),
+    ];
   },
   varianty: [],
 };

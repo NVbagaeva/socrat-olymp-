@@ -219,3 +219,129 @@ export const PV10_DOLYA: Prototype = {
     };
   },
 };
+
+/* ── Горизонт: на сколько метров подняться ─────────────────────── */
+
+/**
+ * l = √(2Rh): человек у подножия видит горизонт на l₁ км; на сколько
+ * метров подняться, чтобы видеть на l₂ км. Подвох — найти две высоты и
+ * их разность, а ответ перевести из километров в метры.
+ */
+export const PV10_GORIZONT: Prototype = {
+  id: 'PV10-GORIZONT',
+  no: 135,
+  group: 'III',
+  title: 'Дальность горизонта: на сколько подняться',
+  formula: 'l=\\sqrt{2Rh}',
+  ask: 'на сколько метров нужно подняться',
+  skills: ['stepen', 'edinicy'],
+  fipiNos: '',
+  alt: 'Наблюдатель поднимается на смотровую площадку и видит горизонт дальше',
+  solve(p) {
+    const R = num(p, 'R');
+    const l1 = num(p, 'l1');
+    const l2 = num(p, 'l2');
+    const h1 = q(l1 * l1, 2 * R);
+    const h2 = q(l2 * l2, 2 * R);
+    const dh = sub(h2, h1);
+    const ans = val(mul(dh, q(1000)));
+    if (!Number.isFinite(ans) || ans <= 0) throw new Error('PV10-GORIZONT: l₂ ≤ l₁');
+    const dn = [
+      dano('R', R, 'км', 'радиус Земли'),
+      dano('l_1', l1, 'км', 'горизонт у подножия'),
+      dano('l_2', l2, 'км', 'горизонт с площадки'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: 'h_2-h_1',
+      edinicy: 'м',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          `Из $l=\\sqrt{2Rh}$ высота $h=\\dfrac{l^2}{2R}$ (в км). Найдём высоты для $l_1$ и $l_2$ и их разность.`,
+        ],
+        vid: 'vychislyaem',
+        reshaem: [
+          `$h_1=\\dfrac{${d(l1)}^2}{2\\cdot${d(R)}}=${fq(h1, true)}$ км, $h_2=\\dfrac{${d(l2)}^2}{2\\cdot${d(R)}}=${fq(h2, true)}$ км.`,
+          `$h_2-h_1=\\dfrac{${d(l2 * l2)}-${d(l1 * l1)}}{${d(2 * R)}}=${fq(dh, true)}$ км $=${d(ans)}$ м.`,
+        ],
+        proverka: [
+          `Подъём на $${d(ans)}$ м — смотровая площадка или вышка; горизонт при этом отодвигается с $${d(l1)}$ до $${d(l2)}$ км — правдоподобно.`,
+        ],
+        answer: ans,
+        ed: 'м',
+      }),
+      vychisleniya: sokrashchenie([l2 * l2 - l1 * l1, 1000], 2 * R, 'h_2-h_1'),
+      hints: [
+        chtoNayti('разность высот $h_2-h_1$', ['высоту $h_2$', 'расстояние $l_2$']),
+        vopros('Как выразить $h$ из $l=\\sqrt{2Rh}$?', '$h=\\dfrac{l^2}{2R}$', [
+          '$h=\\dfrac{l}{2R}$',
+          '$h=2Rl^2$',
+        ]),
+        vKakihEdinicah('в метрах', ['в километрах', 'в сантиметрах'], 'Высоты получились в километрах — переводим.'),
+      ],
+    };
+  },
+};
+
+/* ── КПД двигателя: температура нагревателя ────────────────────── */
+
+/**
+ * η = (T₁ − T₂)/T₁ · 100 %: по η и T₂ найти T₁. Подвох — T₁ стоит и в
+ * числителе, и в знаменателе: η/100 = 1 − T₂/T₁, откуда T₁ = T₂/(1 − η/100).
+ */
+export const PV10_KPD: Prototype = {
+  id: 'PV10-KPD',
+  no: 136,
+  group: 'I',
+  title: 'КПД двигателя: температура нагревателя',
+  formula: '\\eta=\\dfrac{T_1-T_2}{T_1}\\cdot100\\%',
+  ask: 'температуру нагревателя',
+  skills: ['podstanovka'],
+  fipiNos: '',
+  alt: 'Тепловой двигатель: нагреватель и холодильник',
+  solve(p) {
+    const T2 = num(p, 'T2');
+    const eta = num(p, 'eta');
+    const dolya = q(100 - eta, 100);
+    const T1q = div(q(T2), dolya);
+    const ans = val(T1q);
+    const dn = [
+      dano('\\eta', `${d(eta)}\\%`, '', 'КПД'),
+      dano('T_2', T2, 'К', 'температура холодильника'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: 'T_1',
+      edinicy: 'К',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          `Ищем $T_1$. Подставляем: $${d(eta)}=\\dfrac{T_1-${d(T2)}}{T_1}\\cdot100$.`,
+        ],
+        vid: 'uravnenie',
+        reshaem: [
+          `Делим на $100$: $\\dfrac{T_1-${d(T2)}}{T_1}=${fq(q(eta, 100))}$, то есть $1-\\dfrac{${d(T2)}}{T_1}=${fq(q(eta, 100))}$.`,
+          `$\\dfrac{${d(T2)}}{T_1}=${fq(dolya)}$, $T_1=${d(T2)}:${fq(dolya)}=${d(ans)}$ К.`,
+        ],
+        proverka: [
+          `$\\dfrac{${d(ans)}-${d(T2)}}{${d(ans)}}\\cdot100=${d(eta)}$ — верно; нагреватель горячее холодильника.`,
+        ],
+        answer: ans,
+        ed: 'К',
+      }),
+      vychisleniya: sokrashchenie([T2, 100], 100 - eta, 'T_1'),
+      hints: [
+        chtoNayti('температуру нагревателя $T_1$', ['КПД', 'температуру холодильника']),
+        vopros(
+          'Какое уравнение получится после деления на $100$?',
+          `$1-\\dfrac{${d(T2)}}{T_1}=${fq(q(eta, 100))}$`,
+          [`$T_1-${d(T2)}=${fq(q(eta, 100))}$`, `$\\dfrac{T_1}{${d(T2)}}=${fq(q(eta, 100))}$`],
+        ),
+        vKakihEdinicah('в кельвинах', ['в градусах Цельсия', 'в процентах']),
+      ],
+    };
+  },
+};

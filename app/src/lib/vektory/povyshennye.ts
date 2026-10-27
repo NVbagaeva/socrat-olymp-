@@ -22,6 +22,7 @@ import {
   shagSkalyarnoe,
   signatureOf,
 } from './prototypes/common';
+import { paraIz, shagiKosinusa } from './prototypes/kosinus-shagi';
 import type { Generated, Okno, Risunok, Tochka } from './types';
 
 /** k·a и m·b заданы координатами a и b: скалярное произведение k·a на m·b. */
@@ -232,31 +233,50 @@ export function perpendikulyarNeizvestnaya(p: PerpendikulyarNeizvestnaya): Gener
   };
 }
 
-/** Скалярное произведение k·a и b по рисунку на клетчатой плоскости. */
+/** Скалярное произведение k·a и b (или a и k·b) по рисунку на клетчатой плоскости. */
 export interface SkalyarnoePoRisunku {
   ax: number;
   ay: number;
   bx: number;
   by: number;
-  /** Множитель при a: целый или десятичный (0,5; 1,5 …). */
+  /** Множитель при a (или при b, если naB = 1): целый или десятичный (0,5; 1,5 …). */
   k: number;
+  /** 1 — множитель стоит у вектора b: a и k·b. */
+  naB?: number;
 }
 
 /**
- * Как B9 раздела (по рисунку: 2a и b), но множитель при a — любой,
- * и дробный. Подвох: координаты читаются по клеткам, множитель
- * умножает обе координаты a, а не всё произведение дважды.
+ * Как B9 раздела (по рисунку: 2a и b), но множитель — любой, и дробный,
+ * у a или у b. Подвох: координаты читаются по клеткам, множитель
+ * умножает обе координаты своего вектора, а не всё произведение дважды.
  */
 export function skalyarnoePoRisunku(p: SkalyarnoePoRisunku): Generated {
   const a: Tochka = [p.ax, p.ay];
   const b: Tochka = [p.bx, p.by];
-  const u = umn(p.k, a);
+  const naB = p.naB === 1;
   const dot = p.ax * p.bx + p.ay * p.by;
-  const otvet = Math.round((u[0] * b[0] + u[1] * b[1]) * 1e9) / 1e9;
-  const risunok = risunokDvuh(`pv2s|${p.ax}|${p.ay}|${p.bx}|${p.by}|${p.k}`, a, b);
-  const ka = kombinatsiya([[p.k, 'a']]);
+  const otvet = Math.round(p.k * dot * 1e9) / 1e9;
+  const risunok = risunokDvuh(
+    `pv2s|${p.ax}|${p.ay}|${p.bx}|${p.by}|${p.k}${naB ? '|b' : ''}`,
+    a,
+    b,
+  );
+  const [imya, vektor] = naB ? (['b', b] as const) : (['a', a] as const);
+  const u = umn(p.k, vektor);
+  const ku = kombinatsiya([[p.k, imya]]);
+  const para: readonly [readonly [string, Tochka], readonly [string, Tochka]] = naB
+    ? [
+        ['a', a],
+        ['u', u],
+      ]
+    : [
+        ['u', u],
+        ['b', b],
+      ];
   return {
-    uslovie: `${izobrazheny(['a', 'b'])} Найдите скалярное произведение векторов $${ka}$ и $${vec('b')}$.`,
+    uslovie: `${izobrazheny(['a', 'b'])} Найдите скалярное произведение векторов ${
+      naB ? `$${vec('a')}$ и $${ku}$` : `$${ku}$ и $${vec('b')}$`
+    }.`,
     risunok,
     otvet,
     /* Второй счёт: через длины и угол между векторами, затем множитель k. */
@@ -267,13 +287,15 @@ export function skalyarnoePoRisunku(p: SkalyarnoePoRisunku): Generated {
         Math.cos(Math.atan2(p.by, p.bx) - Math.atan2(p.ay, p.ax))),
     shagi: [
       shagPoRisunku(risunok.vectors),
-      shagKombinatsiya([[p.k, 'a', a]], u, 'u'),
+      shagKombinatsiya([[p.k, imya, vektor]], u, 'u'),
       {
-        ...shagSkalyarnoe(['u', u], ['b', b]),
-        zagolovok: `Скалярное произведение $${vec('u')}\\cdot${vec('b')}$ по координатам`,
+        ...shagSkalyarnoe(para[0], para[1]),
+        zagolovok: `Скалярное произведение $${vec(para[0][0])}\\cdot${vec(para[1][0])}$ по координатам`,
       },
       {
-        zagolovok: 'Проверка свойством $(k\\vec{a})\\cdot\\vec{b} = k(\\vec{a}\\cdot\\vec{b})$',
+        zagolovok: naB
+          ? 'Проверка свойством $\\vec{a}\\cdot(k\\vec{b}) = k(\\vec{a}\\cdot\\vec{b})$'
+          : 'Проверка свойством $(k\\vec{a})\\cdot\\vec{b} = k(\\vec{a}\\cdot\\vec{b})$',
         stroki: [
           `$${skalyarnoe(vec('a'), vec('b'))} = ${d(dot)}$, и $${d(p.k)}\\cdot${mnozhitel(dot)} = ${d(otvet)}$.`,
         ],
@@ -281,8 +303,67 @@ export function skalyarnoePoRisunku(p: SkalyarnoePoRisunku): Generated {
       shagOtvet(otvet),
     ],
     params: { ...p },
-    signature: `${signatureOf([a, b])}|${d(p.k)}`,
+    signature: `${signatureOf([a, b])}|${d(p.k)}${naB ? '|b' : ''}`,
     prototype: 'P2-SKALYAR-RIS',
+    seed: 'fixed',
+  };
+}
+
+/** Косинус угла между векторами a и b: координаты задаёт вариант. */
+export interface KosinusVektorov {
+  ax: number;
+  ay: number;
+  bx: number;
+  by: number;
+}
+
+function paraVektorov(p: KosinusVektorov) {
+  const para = paraIz([p.ax, p.ay], [p.bx, p.by]);
+  if (para === null) throw new Error(`№2: произведение длин не целое ${JSON.stringify(p)}`);
+  return para;
+}
+
+/** Второй счёт косинуса: через углы наклона векторов, без скалярного произведения. */
+const kosinusUglami = (p: KosinusVektorov) =>
+  Math.cos(Math.atan2(p.by, p.bx) - Math.atan2(p.ay, p.ax));
+
+/**
+ * Как C1 раздела (косинус по координатам), числа — варианта: косинус —
+ * конечная дробь до трёх знаков, длины — целые или корни, которые
+ * сокращаются. Подвох: знак скалярного произведения и деление на
+ * произведение длин, а не на сумму.
+ */
+export function kosinusPoKoordinatam(p: KosinusVektorov): Generated {
+  const para = paraVektorov(p);
+  return {
+    uslovie: `${dany([
+      ['a', para.a],
+      ['b', para.b],
+    ])} Найдите косинус угла между векторами $${vec('a')}$ и $${vec('b')}$.`,
+    risunok: null,
+    otvet: Math.round(para.cos * 1e9) / 1e9,
+    proverka: kosinusUglami(p),
+    shagi: shagiKosinusa(para, null),
+    params: { ...p },
+    signature: `pv2c|${signatureOf([para.a, para.b])}`,
+    prototype: 'P2-COS',
+    seed: 'fixed',
+  };
+}
+
+/** Как C2 раздела (косинус по рисунку): векторы на клетчатой плоскости. */
+export function kosinusPoRisunku(p: KosinusVektorov): Generated {
+  const para = paraVektorov(p);
+  const risunok = risunokDvuh(`pv2cr|${p.ax}|${p.ay}|${p.bx}|${p.by}`, para.a, para.b);
+  return {
+    uslovie: `${izobrazheny(['a', 'b'])} Найдите $\\cos\\angle\\left(${vec('a')};\\,${vec('b')}\\right)$.`,
+    risunok,
+    otvet: Math.round(para.cos * 1e9) / 1e9,
+    proverka: kosinusUglami(p),
+    shagi: shagiKosinusa(para, shagPoRisunku(risunok.vectors)),
+    params: { ...p },
+    signature: `pv2cr|${signatureOf([para.a, para.b])}`,
+    prototype: 'P2-COS-RIS',
     seed: 'fixed',
   };
 }
