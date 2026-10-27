@@ -121,6 +121,7 @@
     "test:stereo-kachestvo": "node scripts/check-stereo-kachestvo.mjs",
     "test:stereo-vydelenie": "node scripts/check-stereo-vydelenie.mjs",
     "test:stereo-razbory": "node scripts/check-stereo-razbory.mjs",
+    "test:stereo-metodika": "node scripts/check-stereo-metodika.mjs",
     "test:ves12-site": "node scripts/check-ves12-site.mjs",
     "test:zachyot-12": "node scripts/check-zachyot-12.mjs",
     "test:razdely-names": "node scripts/check-razdely-names.mjs",

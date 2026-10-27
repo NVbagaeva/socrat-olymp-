@@ -201,3 +201,71 @@ export function RamkaVyvod({
     </aside>
   );
 }
+
+/**
+ * «Лайфхак» — приём счёта или чертежа. Как «Важно!», значок слева;
+ * у приёма всегда есть задача, на которой видно, почему он работает
+ * (children).
+ */
+export function RamkaLayfhak({
+  title = 'Лайфхак',
+  children,
+}: {
+  title?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <aside className="ramka ramka--layfhak">
+      <span className="ramka__znak ramka__znak--layfhak" aria-hidden="true">
+        ✦
+      </span>
+      <div className="ramka__telo">
+        <p className="ramka__titul">{title}</p>
+        {children}
+      </div>
+    </aside>
+  );
+}
+
+/**
+ * «Ловушка» — отдельной рамкой: неверный ход, почему он неверен и как
+ * правильно. Две колонки «Неверно / Верно» на компьютере, одна под
+ * другой на телефоне.
+ */
+export function RamkaLovushka({
+  title,
+  neverno,
+  verno,
+  children,
+}: {
+  title: string;
+  /** Неверный ход: абзацы со строками «текст $формула$». */
+  neverno: readonly string[];
+  /** Как правильно. */
+  verno: readonly string[];
+  children?: ReactNode;
+}) {
+  return (
+    <aside className="ramka ramka--lovushka">
+      <p className="ramka__titul ramka__titul--lovushka">
+        <span className="ramka__znak ramka__znak--lovushka" aria-hidden="true">
+          ⚠
+        </span>
+        <span>
+          Ловушка: <Tex text={title} />
+        </span>
+      </p>
+      {children}
+      <div className="ramka__dve">
+        <div className="ramka__neverno">
+          <p className="ramka__metka">Неверно</p>
+          <Abzacy paras={neverno} />
+        </div>
+        <div className="ramka__verno">
+          <p className="ramka__metka">Верно</p>
+          <Abzacy paras={verno} />
+        </div>
+      </div>
+    </aside>
+  );
+}

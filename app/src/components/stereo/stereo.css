@@ -503,3 +503,108 @@
   text-transform: uppercase;
   color: var(--color-text-secondary);
 }
+
+/* Якорь прежней главы №3: ведёт в новую. */
+.stereo-yakor {
+  display: block;
+  position: relative;
+  top: calc(-1 * var(--topic-sticky-top, 0px));
+}
+
+/* ── Опорные задачи №3 (новая методика): оформление — metodika.css ── */
+
+.o3-prep__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-primary);
+}
+.o3-shag {
+  display: inline-block;
+  margin-right: var(--space-1);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* «Выбери плоский чертёж». */
+.o3-ploskie {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.o3-plosk {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-2);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  font: inherit;
+  cursor: pointer;
+}
+.o3-plosk__no {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+.o3-plosk__svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.o3-plosk.is-chosen {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.o3-plosk.is-right {
+  border-color: var(--color-success);
+}
+.o3-plosk.is-wrong {
+  border-color: var(--color-error);
+}
+
+/* Решение задачи. */
+.o3-reshenie {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-4);
+  border: 2px dashed var(--color-border-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+}
+.o3-reshenie__title {
+  margin: 0;
+  font-weight: 800;
+}
+.o3-razbor {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.o3-razbor__shag p {
+  margin: var(--space-1) 0 0;
+}
+.o3-uchitel summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+.o3-etap__t {
+  margin: var(--space-2) 0 0;
+  font-weight: 700;
+}
+.o3-otvet {
+  margin: 0;
+  font-weight: 700;
+}

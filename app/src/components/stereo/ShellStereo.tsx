@@ -16,6 +16,7 @@ import { THUMBS } from '@/lib/solid/drawings/thumbs';
 import { ZADANIYA } from '@/lib/paths';
 import { StereoDrugie, StereoNav } from './StereoNav';
 import './stereo.css';
+import './metodika.css';
 
 /**
  * Миниатюра в шапке — чертёж движка lib/solid, пока нет иллюстрации
