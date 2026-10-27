@@ -4,7 +4,7 @@
  * проекции и где она не работает, части параллелепипеда и призмы.
  */
 
-import { box, pyramid, regularPolygon, polygonStart, rightPrism, vertex } from '../../solid/figures';
+import { box, kubiki, pyramid, regularPolygon, polygonStart, rightPrism, vertex } from '../../solid/figures';
 import type { Polyhedron } from '../../solid/model';
 import { teloStupenki, vershinyStupenki, type Stupenka } from '../stupenka';
 import { obemMnogogrannika, obemTetraedra, P, ploshchadKubikov, ploshchadPoverhnosti, pri } from './schet';
@@ -47,6 +47,15 @@ export function glava4(): GlavaDannye {
 
   /* Куб 4 с вырезом 2 × 2 × 4 — та же ступенька. */
   const vyrez: Stupenka = { W: 4, w: 2, H: 4, h: 2, D: 4 };
+
+  /* Куб 3 с ямкой 1 × 1 × 1 в середине верхней грани. */
+  const yamka = kubiki(kubBez(3, [[1, 1, 2]]));
+  /* Стенки ямки, видные сверху внутрь (дальняя и левая): новые грани,
+     которых нет в проекциях. Ближние стенки закрыты краем ямки. */
+  const stenkiYamki = [
+    { points: [P(2, 2, 2), P(1, 2, 2), P(1, 2, 3), P(2, 2, 3)] },
+    { points: [P(1, 2, 2), P(1, 1, 2), P(1, 1, 3), P(1, 2, 3)] },
+  ];
 
   /* Части параллелепипеда объёма 18 и 30. */
   const b18 = box(3, 2, 3);
@@ -194,6 +203,14 @@ export function glava4(): GlavaDannye {
             verno: [
               'Метод проекций работает, только если каждая прямая, параллельная оси, пересекает поверхность дважды. В ямке появились четыре стенки, которых проекции не видят: $S = 54 + 4 = 58$.',
             ],
+            risunki: {
+              neverno: { alt: 'Целый куб с ребром 3: такие же три проекции, как у куба с ямкой', bodies: [kubiki(kubBez(3, []), 1)] },
+              verno: {
+                alt: 'Куб с ребром 3 и ямкой 1 на 1 на 1 в середине верхней грани: видные стенки ямки выделены',
+                bodies: [yamka],
+                sections: stenkiYamki,
+              },
+            },
             zadacha: {
               uslovie:
                 'Из середины грани куба с ребром $3$ вынули кубик с ребром $1$, получилась ямка. Найдите площадь поверхности оставшегося тела.',
@@ -201,7 +218,7 @@ export function glava4(): GlavaDannye {
               formuly: ['S = 6\\cdot 3^2 + 4\\cdot 1^2 = 58'],
               otvet: 'Ответ: $58$.',
               chislo: 58,
-              pereschet: () => ploshchadKubikov(kubBez(3, [[1, 1, 2]])),
+              pereschet: () => pri([[ploshchadPoverhnosti(yamka), 58]], ploshchadKubikov(kubBez(3, [[1, 1, 2]]))),
             },
           },
         ],

@@ -4,7 +4,7 @@
  * в единицах π.
  */
 
-import { dir } from '../../solid/figures';
+import { dir, sektorCilindra, sektorKonusa } from '../../solid/figures';
 import type { Model } from '../../solid/model';
 import { ortho } from '../../solid/project';
 import { dlina, P, pri } from './schet';
@@ -221,6 +221,32 @@ export function glava5(): GlavaDannye {
             ],
           },
           { vid: 'formula', tex: 'V_{\\text{части}} = V\\cdot\\frac{\\alpha}{360^\\circ}' },
+          {
+            vid: 'risunki',
+            items: [
+              {
+                model: {
+                  alt: 'Часть цилиндра с центральным углом AOB = 120°: треть цилиндра',
+                  bodies: [sektorCilindra(3, 4, 120, 260)],
+                },
+                podpis: 'Угол $120^\\circ$ — треть полного оборота: треть цилиндра.',
+              },
+              {
+                model: {
+                  alt: 'Часть конуса с центральным углом AOB = 60°: шестая часть конуса',
+                  bodies: [sektorKonusa(3, 5, 60, 210)],
+                },
+                podpis: 'Угол $60^\\circ$ — шестая часть оборота: шестая часть конуса.',
+              },
+              {
+                model: {
+                  alt: 'Цилиндр, из которого вырезана четверть: осталась часть с углом 270°',
+                  bodies: [sektorCilindra(3, 4, 270, 0)],
+                },
+                podpis: 'Вырезали четверть — осталось $\\frac{270^\\circ}{360^\\circ} = \\frac{3}{4}$ цилиндра.',
+              },
+            ],
+          },
           {
             vid: 'layfhak',
             title: 'Лайфхак: сначала сократите долю',
