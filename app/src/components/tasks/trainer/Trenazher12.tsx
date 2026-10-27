@@ -7,6 +7,7 @@ import type { TrenPayload } from '@/lib/trenazher/sessiya';
 import type { Filtr, TrenazherConfig, ZadachaRef } from '@/lib/trenazher/types';
 import { useTrainerProgress } from '@/lib/trainerProgress';
 import { readTrainerRecipe } from './trainerPayload';
+import { TrainerStats, type TrainerStatsProps } from './TrainerStats';
 import { KARTOCHKA_12 } from './Zadacha12';
 
 export interface Trenazher12Props {
@@ -17,6 +18,11 @@ export interface Trenazher12Props {
   ssylki: Record<string, SsylkiTipa>;
   /** Под панелью фильтров: сводка сделанного по разделу. */
   pod?: ReactNode;
+  /**
+   * Сводка по разделу под панелью, если pod не задан. Рисуется здесь, в
+   * отложенном коде: в разметке страницы темы от неё только данные.
+   */
+  svodka?: TrainerStatsProps;
 }
 
 /**
@@ -45,6 +51,7 @@ export function Trenazher12({
   backHref,
   ssylki,
   pod,
+  svodka,
 }: Trenazher12Props) {
   const progress = useTrainerProgress();
   const stat = useMemo(
@@ -63,7 +70,13 @@ export function Trenazher12({
         ssylki={ssylki}
         perenos={perenos12}
       />
-      {pod === undefined ? null : <div className="trz-pod">{pod}</div>}
+      {pod !== undefined ? (
+        <div className="trz-pod">{pod}</div>
+      ) : svodka !== undefined ? (
+        <div className="trz-pod">
+          <TrainerStats {...svodka} />
+        </div>
+      ) : null}
     </>
   );
 }

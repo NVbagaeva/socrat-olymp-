@@ -8,8 +8,8 @@ import { izmenit, kRazdelu, NACHALNYY } from '@/lib/trenazher/filtr';
 import type { Filtr, TrenazherConfig } from '@/lib/trenazher/types';
 import { podtemaNabora, trenazherConfig12, zadachi12 } from '@/lib/ves12/trenazher12';
 import { TabScrollOnMount } from '../TabScroll';
-import { TrainerStats } from './TrainerStats';
 import { Trenazher12Lazy } from './Trenazher12Lazy';
+import { szhatRefs } from './refsSzhato';
 
 /** Ярлык прежнего адреса /trenazher/<режим>/: наборы, режим, правила ответа. */
 export interface TrainerPreset {
@@ -81,17 +81,11 @@ export function TrainerShell({ subtopic, base, icon, preset = null, children }: 
       {children ?? (
         <Trenazher12Lazy
           config={config}
-          refs={refs}
+          refs={szhatRefs(refs)}
           start={preset === null ? null : filtrYarlyka(preset, config)}
           backHref={base}
           ssylki={ssylki12()}
-          pod={
-            <TrainerStats
-              total={refs.length}
-              sets={sets}
-              razdel={{ title: subtopic.title, icon }}
-            />
-          }
+          svodka={{ total: refs.length, sets, razdel: { title: subtopic.title, icon } }}
         />
       )}
     </section>
