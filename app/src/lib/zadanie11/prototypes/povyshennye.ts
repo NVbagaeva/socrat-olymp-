@@ -371,7 +371,7 @@ export function avtobusIAvtomobil(p: Record<string, number | string>): Solved {
     ),
     hints: [
       vopros(
-        'Сколько времени автобус был в пути до 0',
+        'Сколько времени автобус был в пути до города К?',
         `$${d(t0)}+\\dfrac{x}{${d(v)}}$ ч`,
         [`$\\dfrac{x}{${d(v)}}$ ч`, `$\\dfrac{x}{${d(v)}}-${d(t0)}$ ч`],
         'Автобус выехал раньше на всё время задержки.',
@@ -380,7 +380,7 @@ export function avtobusIAvtomobil(p: Record<string, number | string>): Solved {
         `$\\dfrac{x}{${d(v)}}$ ч`,
         `$\\dfrac{${d(S)}}{${d(v)}}$ ч`,
       ]),
-      chtoSprashivayut('расстояние $', ['скорость автобуса', 'расстояние $']),
+      chtoSprashivayut('расстояние $AK$', ['скорость автобуса', 'расстояние $AB$']),
     ],
     lifehacks: ['divide-equation'],
   };
