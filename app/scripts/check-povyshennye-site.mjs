@@ -119,14 +119,46 @@ ok(
   String(await page.locator('.pov-card').count()),
 );
 ok(
-  (await page.locator('[data-testid="pov-card-1"] .pov-v').count()) === 6,
-  'у варианта 1 шесть версий',
+  (await page.locator('.pov-head__sub').textContent()) === '36 вариантов · 6 версий · ЕГЭ-2027',
+  'шапка: строка «36 вариантов · 6 версий · ЕГЭ-2027»',
+  (await page.locator('.pov-head__sub').textContent()) ?? '',
+);
+ok((await page.locator('.help-fab').count()) === 0, 'кнопки «?» на экране нет', 'есть');
+ok(
+  (await page.getByTestId('pov-resheno').textContent())?.includes('0 из 216') === true &&
+    (await page.getByTestId('pov-srednij').textContent())?.includes('—') === true,
+  'сводка: «0 из 216», средний балл «—»',
+  `${await page.getByTestId('pov-resheno').textContent()} / ${await page.getByTestId('pov-srednij').textContent()}`,
+);
+ok(
+  (await page.locator('[data-testid="pov-card-1"] .pov-tochka').count()) === 6,
+  'у варианта 1 шесть точек-статусов',
   'нет',
 );
 ok(
   (await page.locator('.pov-card.is-soon').count()) === 36 - GOTOVY.length,
   `остальные ${36 - GOTOVY.length} — «Готовится»`,
   String(await page.locator('.pov-card.is-soon').count()),
+);
+/* Шире телефона версии раскрываются на месте, аккордеоном. */
+await page.getByTestId('pov-open-1').click();
+ok(
+  (await page.locator('[data-testid="pov-akkordeon-1"] .pov-v').count()) === 6,
+  'компьютер: вариант 1 раскрылся аккордеоном, шесть версий',
+  'нет',
+);
+ok((await page.getByTestId('pov-shtorka').count()) === 0, 'компьютер: без шторки', 'шторка');
+await page.getByTestId('pov-info').click();
+ok(
+  (await page.getByTestId('pov-info-telo').textContent())?.includes('Цвета статусов') === true,
+  'кнопка «i»: пояснения раздела в шторке',
+  'нет',
+);
+await page.keyboard.press('Escape');
+ok(
+  (await page.getByTestId('pov-info-shtorka').count()) === 0,
+  'шторка «i» закрывается Escape',
+  'нет',
 );
 await shot(page, 'razdel-kompyuter');
 
@@ -185,33 +217,69 @@ await shot(page, 'versiya-1-1-itogi-kompyuter');
 console.log('3. Статус версии на экране раздела');
 await page.goto(`${BASE}/povyshennye/`);
 await page.getByTestId('pov-grid').waitFor({ timeout: 60_000 });
-const v11 = page.getByTestId('pov-v-1.1');
 ok(
-  (await v11.getAttribute('class'))?.includes('is-done') === true,
-  'версия 1.1 — завершена',
+  (await page.getByTestId('pov-resheno').textContent())?.includes('1 из 216') === true,
+  'сводка: решено 1 из 216',
+  (await page.getByTestId('pov-resheno').textContent()) ?? '',
+);
+const tochki1 = page.locator('[data-testid="pov-card-1"] .pov-tochki .pov-tochka');
+ok(
+  (await tochki1.nth(0).getAttribute('class'))?.includes('is-oshibki') === true &&
+    (await tochki1.nth(1).getAttribute('class'))?.includes('is-new') === true,
+  'точки в порядке версий: 1.1 — «есть ошибки», 1.2 — «не начата»',
+  (await tochki1.nth(0).getAttribute('class')) ?? '',
+);
+ok(
+  (await page.locator('[data-testid="pov-card-1"] .pov-card__count').textContent()) ===
+    '1 из 6 версий',
+  'в карточке «1 из 6 версий»',
+  (await page.locator('[data-testid="pov-card-1"] .pov-card__count').textContent()) ?? '',
+);
+await page.getByTestId('pov-open-1').click();
+const v11 = page.locator('[data-testid="pov-akkordeon-1"] .pov-v').first();
+ok(
+  (await v11.getAttribute('class'))?.includes('is-oshibki') === true,
+  'версия 1.1 — «есть ошибки»',
   (await v11.getAttribute('class')) ?? '',
 );
 ok(
-  (await v11.textContent())?.includes('Часть 1: 12/13 · Часть 2: на проверке') === true,
-  'у версии баллы по частям',
+  (await v11.textContent())?.includes('Первичный 12 · часть 2 на проверке') === true,
+  'у версии первичный балл, часть 2 на проверке',
   (await v11.textContent()) ?? '',
+);
+ok(
+  (await page.locator('[data-testid="pov-akkordeon-1"] .pov-v').nth(1).textContent())?.includes(
+    'Первичный',
+  ) === false,
+  'у не начатой версии баллов нет',
+  'есть',
 );
 await page.getByRole('radio', { name: 'С ошибками' }).click();
 ok(
   (await page.getByTestId('pov-v-1.1').count()) === 1 &&
-    (await page.getByTestId('pov-v-1.2').count()) === 0,
-  'фильтр «С ошибками»',
+    (await page.getByTestId('pov-v-1.2').count()) === 0 &&
+    (await tochki1.nth(1).getAttribute('class'))?.includes('is-dim') === true &&
+    (await tochki1.nth(0).getAttribute('class'))?.includes('is-dim') === false,
+  'фильтр «С ошибками»: список и точки',
   'не так',
 );
 await page.getByRole('radio', { name: 'Нерешённые' }).click();
 ok(
   (await page.getByTestId('pov-v-1.1').count()) === 0 &&
-    (await page.getByTestId('pov-v-1.2').count()) === 1,
-  'фильтр «Нерешённые»',
+    (await page.getByTestId('pov-v-1.2').count()) === 1 &&
+    (await tochki1.nth(0).getAttribute('class'))?.includes('is-dim') === true,
+  'фильтр «Нерешённые»: список и точки',
   'не так',
 );
+await page.getByRole('radio', { name: 'Как на ЕГЭ' }).click();
+ok(
+  (await page.getByTestId('pov-v-1.2').getAttribute('href'))?.includes('r=k') === true,
+  'режим «Как на ЕГЭ» — в ссылке версии',
+  (await page.getByTestId('pov-v-1.2').getAttribute('href')) ?? '',
+);
+await page.getByRole('radio', { name: 'Тренировка' }).click();
 await page.getByRole('radio', { name: 'Все' }).click();
-await page.locator('[data-testid="pov-card-1"] .pov-print__toggle').click();
+await page.getByTestId('pov-print-1').click();
 await shot(page, 'razdel-posle-resheniya-kompyuter');
 await page.locator('.pov-stats').scrollIntoViewIfNeeded();
 await shot(page, 'statistika-razdela-kompyuter');
@@ -225,6 +293,68 @@ await mob.getByTestId('pov-grid').waitFor({ timeout: 60_000 });
 const overflow = await mob.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 ok(overflow <= 0, 'на телефоне нет прокрутки вбок', String(overflow));
 await shot(mob, 'razdel-telefon');
+/* Телефон: вариант — в нижней шторке; закрытие крестиком, фоном, свайпом. */
+const shtorka = mob.getByTestId('pov-shtorka');
+await mob.getByTestId('pov-open-1').click();
+await shtorka.waitFor();
+ok(
+  (await shtorka.locator('.pov-v').count()) === 6 &&
+    (await shtorka.locator('.pov-v__btn').first().textContent()) === 'Решать' &&
+    (await shtorka.textContent())?.includes('Часть 2 доступна') === true,
+  'телефон: шторка варианта 1 — шесть версий, «Решать», «Часть 2 доступна»',
+  'не так',
+);
+await shot(mob, 'razdel-telefon-shtorka');
+await mob.getByTestId('pov-shtorka-close').click();
+ok((await shtorka.count()) === 0, 'шторка закрывается крестиком', 'открыта');
+await mob.getByTestId('pov-open-1').click();
+await shtorka.waitFor();
+await mob.getByTestId('pov-shtorka-fon').click({ position: { x: 20, y: 20 } });
+ok((await shtorka.count()) === 0, 'шторка закрывается тапом по фону', 'открыта');
+await mob.getByTestId('pov-open-1').click();
+await shtorka.waitFor();
+const ruchka = await mob.locator('.pov-shtorka__ruchka').boundingBox();
+await mob.mouse.move(ruchka.x + ruchka.width / 2, ruchka.y + 8);
+await mob.mouse.down();
+for (let i = 1; i <= 10; i += 1)
+  await mob.mouse.move(ruchka.x + ruchka.width / 2, ruchka.y + 8 + i * 25);
+await mob.mouse.up();
+await mob.waitForTimeout(300);
+ok((await shtorka.count()) === 0, 'шторка закрывается свайпом вниз', 'открыта');
+/* Последняя карточка не уходит под нижнюю панель. */
+await mob.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+await mob.waitForTimeout(300);
+const pod = await mob.evaluate(() => {
+  const nav = document.querySelector('.bnav');
+  const last = document.querySelector('.pov-stats');
+  return nav === null || last === null
+    ? 0
+    : last.getBoundingClientRect().bottom - nav.getBoundingClientRect().top;
+});
+ok(pod <= 0, 'низ страницы не уходит под нижнюю панель', String(pod));
+/* 360 px: без прокрутки вбок, заголовок не длиннее двух строк. */
+const uzk = await browser.newContext({
+  ...devices['iPhone 13'],
+  viewport: { width: 360, height: 780 },
+});
+await welcomeSeen(uzk);
+const u = await uzk.newPage();
+await u.goto(`${BASE}/povyshennye/`);
+await u.getByTestId('pov-grid').waitFor({ timeout: 60_000 });
+const r360 = await u.evaluate(() => {
+  const h = document.querySelector('.pov-head__title');
+  const lh = parseFloat(getComputedStyle(h).lineHeight);
+  return {
+    sx: document.documentElement.scrollWidth - window.innerWidth,
+    stroki: Math.round(h.getBoundingClientRect().height / lh),
+  };
+});
+ok(
+  r360.sx <= 0 && r360.stroki <= 2,
+  '360 px: нет прокрутки вбок, заголовок в 2 строки',
+  JSON.stringify(r360),
+);
+await uzk.close();
 await mob.goto(`${BASE}/variant/reshat/?kod=PV-01&v=2&r=t&tm=0&w=ege`);
 await mob.getByTestId('vo-begin').click({ timeout: 60_000 });
 await mob.locator('.vo-strip__no').nth(8).click();

@@ -842,4 +842,118 @@ export const VARIANT: VariantPV = {
       },
     ],
   ],
+  /** Часть 2: задания 14–20 по версиям; проверка — pnpm test:povyshennye-chast2. */
+  chast2: [
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 9, B: 4, p: 1, q: 2, sA: 1, sB: -1, f: 'cos', k: 1, lo: [1, 1], hi: [5, 2] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'ravn', pr: ['A', 'C1'], pl: ['B', 'D1', 'E'], fn: 'cos', dano: 'AA1', a2: 12 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 3, k: 1 }, b2: { m: 2, k: -1 }, p: -4, q: 3, znak: 'le' } },
+      { s: 'd17.katushka', p: { L: 0.027, Cm: 12.5, R: 20, U: 127, syuzhet: 5 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 15, AD: 25, AL: 20, tr: 'DOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: -2, k: -5, m: -7, D: [1, 1], x0: -2, y0: -1, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 700, s: 12, M: 1000, A: 230, B: 280, Dv: 25, kto: 1 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 3, B: 12, p: 3, q: 1, sA: -1, sB: 1, f: 'cos', k: 3, lo: [-1, 2], hi: [0, 1] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'ravn', pr: ['A', 'B1'], pl: ['B', 'C', 'E1'], fn: 'cos', dano: 'AA1', a2: 27 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 6, k: 2 }, b2: { m: 7, k: -2 }, p: 2, q: -3, znak: 'le' } },
+      { s: 'd17.katushka', p: { L: 0.012, Cm: 12.5, R: 8, U: 36, syuzhet: 4 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 12, AD: 20, AL: 12, tr: 'DOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 2, q: -1, k: -2, m: -1, D: [5, 2], x0: -2, y0: -2, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 1900, s: 9, M: 1000, A: 470, B: 1000, Dv: 14, kto: 3 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 12, B: 3, p: 1, q: 3, sA: 1, sB: -1, f: 'cos', k: 4, lo: [0, 1], hi: [1, 2] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'ravn', pr: ['A', 'D1'], pl: ['C', 'E', 'E1'], fn: 'cos', dano: 'AB', a2: 2 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 0, k: 5 }, b2: { m: 3, k: -1 }, p: -2, q: 5, znak: 'le' } },
+      { s: 'd17.katushka', p: { L: 0.057, Cm: 25, R: 16, U: 220, syuzhet: 3 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 20, AD: 30, AL: 18, tr: 'AOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: 1, k: -2, m: -7, D: [5, 2], x0: -3, y0: -2, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 1300, s: 12, M: 500, A: 410, B: 400, Dv: 15, kto: 5 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 4, B: 3, p: 1, q: 1, sA: -1, sB: 1, f: 'cos', k: 2, lo: [-2, 1], hi: [-1, 2] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'ravn', pr: ['A', 'C1'], pl: ['A1', 'B', 'D'], fn: 'cos', dano: 'AA1', a2: 48 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 2, k: 1 }, b2: { m: 6, k: -2 }, p: 3, q: 1, znak: 'le' } },
+      { s: 'd17.katushka', p: { L: 0.054, Cm: 4, R: 50, U: 110, syuzhet: 2 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 7, AD: 10, AL: 8, tr: 'DOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: -1, k: -5, m: -5, D: [5, 1], x0: -1, y0: 2, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 1600, s: 6, M: 1000, A: 350, B: 610, Dv: 22, kto: 7 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 6, B: 5, p: 1, q: 1, sA: -1, sB: 1, f: 'cos', k: 3, lo: [1, 1], hi: [2, 1] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'ravn', pr: ['C', 'D1'], pl: ['A', 'B1', 'E1'], fn: 'cos', dano: 'AB', a2: 1 },
+      },
+      {
+        s: 'd16.logLog',
+        p: { b1: { m: 5, k: -2 }, b2: { m: 10, k: -3 }, p: -6, q: 1, znak: 'ge' },
+      },
+      { s: 'd17.katushka', p: { L: 0.075, Cm: 6.25, R: 40, U: 48, syuzhet: 1 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 21, AD: 35, AL: 21, tr: 'DOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 3, q: -1, k: 2, m: -5, D: [1, 1], x0: -1, y0: -1, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 700, s: 9, M: 1000, A: 230, B: 520, Dv: 25, kto: 9 } },
+    ],
+    [
+      {
+        s: 'd14.pokazTrig',
+        p: { A: 2, B: 6, p: 3, q: 1, sA: -1, sB: 1, f: 'cos', k: 2, lo: [-3, 2], hi: [-1, 2] },
+      },
+      {
+        s: 'd15.prizmaPyatiugolnik',
+        p: { vid: 'ravn', pr: ['A', 'B1'], pl: ['A1', 'B', 'D'], fn: 'cos', dano: 'AA1', a2: 75 },
+      },
+      { s: 'd16.logLog', p: { b1: { m: 7, k: 2 }, b2: { m: 5, k: -2 }, p: 4, q: -1, znak: 'le' } },
+      { s: 'd17.katushka', p: { L: 0.033, Cm: 16, R: 10, U: 24, syuzhet: 0 } },
+      { s: 'd18.parallelogrammBiss', p: { AB: 16, AD: 25, AL: 24, tr: 'AOL' } },
+      {
+        s: 'd19.paraPryamyh',
+        p: { p: 1, q: 1, k: 3, m: 1, D: [1, 1], x0: -2, y0: -2, nado: [2, 3] },
+      },
+      { s: 'd20.ryadKvadrat', p: { N0: 2200, s: 6, M: 1000, A: 500, B: 610, Dv: 30, kto: 11 } },
+    ],
+  ],
 };

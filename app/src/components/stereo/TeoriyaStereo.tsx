@@ -4,13 +4,16 @@ import { SheetBlock } from '@/components/tasks/SheetBlock';
 import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { Tex } from '@/components/ui/Tex';
 import { SHPARGALKI } from '@/content/shpargalki';
-import { GLAVA_PLAN, GLAVY_15, GLAVY_3, type GlavaStereo } from '@/content/stereo/glavy';
+import { GLAVA_PLAN, GLAVY_15, GLAVY_3, STARYE_GLAVY_3, type GlavaStereo } from '@/content/stereo/glavy';
 import { DEKOR_STEREO, STEREO, type StereoNo } from '@/content/stereo/zadaniya';
 import { THUMBS } from '@/lib/solid/drawings/thumbs';
 import { prototypeById, RAZDELY } from '@/lib/zadanie3';
 import { assertSheetsOk, renderFormulas } from '@/lib/zadanie3/formulas';
-import { diagonalKuba, sechenieKuba, type PrimerChertezha } from '@/lib/stereo/primery';
+import { sechenieKuba, type PrimerChertezha } from '@/lib/stereo/primery';
 import { Chertezh3d } from './Chertezh3d';
+import { GLAVY_DANNYE_3 } from '@/lib/stereo/glavy';
+import { GlavaMetodiki } from './glavy/GlavaMetodiki';
+import { Glava2Treugolnik, RAZDELY_GLAVY_2 } from './glavy/Glava2Treugolnik';
 
 const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GLAVY_15 };
 
@@ -18,8 +21,29 @@ const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GL
  * Живые чертежи, которые уже стоят в главах: по одному на задание,
  * пока главы пишутся (этап 3 плана). Ключ — «задание:глава».
  */
+/** Написанные главы: «задание:глава» → текст главы. */
+const NAPISANY: Readonly<Record<string, () => ReactNode>> = {
+  '3:treugolnik': () => <Glava2Treugolnik />,
+  ...Object.fromEntries(
+    Object.entries(GLAVY_DANNYE_3).map(([id, dannye]) => [
+      `3:${id}`,
+      () => <GlavaMetodiki glava={dannye()} shpargalki={<Shpargalki />} />,
+    ]),
+  ),
+};
+
+/** Подпункты написанных глав в «Содержании»: разделы главы. */
+const PODPUNKTY: Readonly<Record<string, readonly { id: string; title: string }[]>> = {
+  '3:treugolnik': RAZDELY_GLAVY_2,
+  ...Object.fromEntries(
+    Object.entries(GLAVY_DANNYE_3).map(([id, dannye]) => [
+      `3:${id}`,
+      dannye().razdely.map(({ id: rid, title }) => ({ id: rid, title })),
+    ]),
+  ),
+};
+
 const ZHIVYE: Readonly<Record<string, () => PrimerChertezha>> = {
-  '3:chertezh': diagonalKuba,
   '15:secheniya': sechenieKuba,
 };
 
@@ -50,15 +74,14 @@ function Prototipy({ nomera }: { nomera: readonly number[] }) {
 }
 
 /**
- * Справочник формул, пока глава 10 пишется: шпаргалки восьми групп
- * банка, по одной сворачиваемой карточке. Формулы набраны на сборке;
+ * Шпаргалки восьми групп банка для главы 10, по одной сворачиваемой
+ * карточке. Формулы набраны на сборке;
  * кривая запись роняет сборку (assertSheetsOk), а не страницу.
  */
 function Shpargalki() {
   assertSheetsOk();
   return (
     <div className="stereo-shpargalki">
-      <p className="stereo-plan__note">{GLAVA_PLAN.spravochnik}</p>
       {RAZDELY.map((razdel) => {
         const sheet = SHPARGALKI[razdel.nomer] ?? [];
         if (sheet.length === 0) {
@@ -91,11 +114,7 @@ function PlanGlavy({ glava, no }: { glava: GlavaStereo; no: StereoNo }) {
           </li>
         ))}
       </ul>
-      {no === '3' && glava.id === 'formuly' ? (
-        <Shpargalki />
-      ) : (
-        <p className="stereo-plan__note">{GLAVA_PLAN.gotovitsya}</p>
-      )}
+      <p className="stereo-plan__note">{GLAVA_PLAN.gotovitsya}</p>
       {glava.prototipy === undefined ? null : <Prototipy nomera={glava.prototipy} />}
     </div>
   );
@@ -110,13 +129,44 @@ export function TeoriyaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }
   const glavy = GLAVY[no];
   const tela: Record<string, ReactNode> = {};
   glavy.forEach((glava) => {
-    tela[glava.id] = <PlanGlavy glava={glava} no={no} />;
+    const napisana = NAPISANY[`${no}:${glava.id}`];
+    /* Якоря прежних глав №3 ведут в новые: ссылки извне не ломаются. */
+    const starye =
+      no === '3'
+        ? Object.entries(STARYE_GLAVY_3)
+            .filter(([, novaya]) => novaya === glava.id)
+            .map(([staraya]) => (
+              <span key={staraya} id={`teoriya-${staraya}`} className="stereo-yakor" aria-hidden="true" />
+            ))
+        : null;
+    tela[glava.id] = (
+      <>
+        {starye}
+        {napisana === undefined ? (
+          <PlanGlavy glava={glava} no={no} />
+        ) : (
+          <>
+            {napisana()}
+            {glava.prototipy === undefined ? null : <Prototipy nomera={glava.prototipy} />}
+          </>
+        )}
+      </>
+    );
   });
   const model = THUMBS['thumb-III'];
-  return (
+  const shell = (
     <TeoriyaShell
       vkladka={vkladka}
-      razdely={glavy.map((glava) => ({ id: glava.id, title: glava.title, nomer: glava.nomer }))}
+      razdely={glavy.map((glava) => {
+        const podpunkty = PODPUNKTY[`${no}:${glava.id}`];
+        return {
+          id: glava.id,
+          title: glava.title,
+          nomer: glava.nomer,
+          ...(podpunkty === undefined ? {} : { podpunkty: [...podpunkty] }),
+        };
+      })}
+      soderzhanieRaskryvashka={no === '3'}
       tela={tela}
       trackKey={STEREO[no].teoriyaKey}
       dekor={{
@@ -125,4 +175,6 @@ export function TeoriyaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }
       }}
     />
   );
+  /* Оформление новой методики (metodika.css) — только у №3. */
+  return no === '3' ? <div className="o3-teoriya">{shell}</div> : shell;
 }

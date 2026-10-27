@@ -877,4 +877,163 @@ export const VARIANT: VariantPV = {
       },
     ],
   ],
+  /** Часть 2: задания 14–20 по версиям; проверка — pnpm test:povyshennye-chast2. */
+  chast2: [
+    [
+      {
+        s: 'f14.koren3',
+        p: {
+          F: 'cos',
+          korni: [
+            [1, 1],
+            [-1, 1],
+            [1, 2],
+          ],
+          sg: -1,
+          pr: 1,
+          lo: [2, 1],
+          hi: [7, 2],
+        },
+      },
+      { s: 'f15.piramidaMediany', p: { a2: 4, h2: 16, delit: 'AC', pr: 'SA' } },
+      { s: 'f16.drobLog', p: { p: 2, r1: 1, r2: 7, q: 3, c: 5, d: 2, sg: 1, znak: 'le' } },
+      { s: 'f17.raspredelenie', p: { T: 300, gaz: 0, vopros: 'eps' } },
+      { s: 'f18.trapeciyaOkr', p: { R: 4, dok: 'BN', nado: 'r', dano: 'R' } },
+      { s: 'f19.moduliKoren', p: { vid: 'minus', R: 7, t: 4, s: 1, r: 5, k: 2 } },
+      {
+        s: 'f20.albomy',
+        p: { e: 4, d: 2, B0: 140, B1: 150, s0: 90, s1: 110, k0: 5, predmet: 0, kto: 0 },
+      },
+    ],
+    [
+      {
+        s: 'f14.koren3',
+        p: {
+          F: 'cos',
+          korni: [
+            [1, 1],
+            [-1, 1],
+            [-1, 2],
+          ],
+          sg: 1,
+          pr: 0,
+          lo: [-3, 2],
+          hi: [0, 1],
+        },
+      },
+      { s: 'f15.piramidaMediany', p: { a2: 1, h2: 45, delit: 'AC', pr: 'AC' } },
+      { s: 'f16.drobLog', p: { p: 3, r1: 1, r2: 10, q: 4, c: 6, d: 3, sg: 1, znak: 'le' } },
+      { s: 'f17.raspredelenie', p: { T: 250, gaz: 1, vopros: 'eps' } },
+      { s: 'f18.trapeciyaOkr', p: { R: 8, dok: 'BN', nado: 'S', dano: 'AD' } },
+      { s: 'f19.moduliKoren', p: { vid: 'minus', R: 4, t: 3, s: 2, r: 1, k: 2 } },
+      {
+        s: 'f20.albomy',
+        p: { e: 3, d: 2, B0: 130, B1: 140, s0: 80, s1: 100, k0: 2, predmet: 1, kto: 1 },
+      },
+    ],
+    [
+      {
+        s: 'f14.koren3',
+        p: {
+          F: 'cos',
+          korni: [
+            [-1, 1],
+            [1, 2],
+            [-1, 2],
+          ],
+          sg: 1,
+          pr: 1,
+          lo: [1, 1],
+          hi: [5, 2],
+        },
+      },
+      { s: 'f15.piramidaMediany', p: { a2: 8, h2: 5, delit: 'AC', pr: 'SA' } },
+      { s: 'f16.drobLog', p: { p: 2, r1: 2, r2: 12, q: 5, c: 7, d: 4, sg: 1, znak: 'le' } },
+      { s: 'f17.raspredelenie', p: { T: 600, gaz: 2, vopros: 'T' } },
+      { s: 'f18.trapeciyaOkr', p: { R: 10, dok: 'BN', nado: 'Ro', dano: 'R' } },
+      { s: 'f19.moduliKoren', p: { vid: 'minus', R: 5, t: 4, s: -1, r: 3, k: 4 } },
+      {
+        s: 'f20.albomy',
+        p: { e: 6, d: 2, B0: 170, B1: 180, s0: 110, s1: 130, k0: 5, predmet: 2, kto: 2 },
+      },
+    ],
+    [
+      {
+        s: 'f14.koren3',
+        p: {
+          F: 'cos',
+          korni: [
+            [1, 1],
+            [0, 1],
+            [-1, 2],
+          ],
+          sg: -1,
+          pr: 0,
+          lo: [-2, 1],
+          hi: [-1, 2],
+        },
+      },
+      { s: 'f15.piramidaMediany', p: { a2: 4, h2: 5, delit: 'AC', pr: 'BC' } },
+      { s: 'f16.drobLog', p: { p: 3, r1: 1, r2: 12, q: 7, c: 4, d: 3, sg: 1, znak: 'le' } },
+      { s: 'f17.raspredelenie', p: { T: 150, gaz: 3, vopros: 'eps' } },
+      { s: 'f18.trapeciyaOkr', p: { R: 2, dok: 'BN', nado: 'r', dano: 'AD' } },
+      { s: 'f19.moduliKoren', p: { vid: 'minus', R: 6, t: 5, s: 3, r: 4, k: 3 } },
+      {
+        s: 'f20.albomy',
+        p: { e: 2, d: 2, B0: 180, B1: 190, s0: 120, s1: 140, k0: 7, predmet: 3, kto: 3 },
+      },
+    ],
+    [
+      {
+        s: 'f14.koren3',
+        p: {
+          F: 'cos',
+          korni: [
+            [-1, 1],
+            [0, 1],
+            [1, 2],
+          ],
+          sg: 1,
+          pr: 0,
+          lo: [3, 1],
+          hi: [9, 2],
+        },
+      },
+      { s: 'f15.piramidaMediany', p: { a2: 9, h2: 9, delit: 'AC', pr: 'SC' } },
+      { s: 'f16.drobLog', p: { p: 5, r1: 1, r2: 30, q: 3, c: 7, d: 5, sg: 1, znak: 'le' } },
+      { s: 'f17.raspredelenie', p: { T: 360, gaz: 4, vopros: 'eps' } },
+      { s: 'f18.trapeciyaOkr', p: { R: 12, dok: 'BN', nado: 'P', dano: 'R' } },
+      { s: 'f19.moduliKoren', p: { vid: 'minus', R: 3, t: 2, s: -2, r: 2, k: 2 } },
+      {
+        s: 'f20.albomy',
+        p: { e: 5, d: 2, B0: 150, B1: 160, s0: 110, s1: 130, k0: 8, predmet: 4, kto: 4 },
+      },
+    ],
+    [
+      {
+        s: 'f14.koren3',
+        p: {
+          F: 'cos',
+          korni: [
+            [1, 1],
+            [1, 2],
+            [-1, 2],
+          ],
+          sg: -1,
+          pr: 1,
+          lo: [-7, 2],
+          hi: [-2, 1],
+        },
+      },
+      { s: 'f15.piramidaMediany', p: { a2: 48, h2: 2, delit: 'AC', pr: 'SC' } },
+      { s: 'f16.drobLog', p: { p: 2, r1: 1, r2: 3, q: 6, c: 2, d: 2, sg: 1, znak: 'ge' } },
+      { s: 'f17.raspredelenie', p: { T: 500, gaz: 5, vopros: 'T' } },
+      { s: 'f18.trapeciyaOkr', p: { R: 14, dok: 'BN', nado: 'r', dano: 'R' } },
+      { s: 'f19.moduliKoren', p: { vid: 'minus', R: 5, t: 3, s: 1, r: 2, k: 4 } },
+      {
+        s: 'f20.albomy',
+        p: { e: 3, d: 2, B0: 140, B1: 150, s0: 100, s1: 120, k0: 10, predmet: 0, kto: 5 },
+      },
+    ],
+  ],
 };

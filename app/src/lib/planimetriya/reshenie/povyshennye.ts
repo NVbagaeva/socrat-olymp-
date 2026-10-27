@@ -5,8 +5,8 @@
  */
 
 import type { Params } from '../stseny/dsl';
-import { ugly107 } from '../stseny/povyshennye';
-import { g, n, shag, sverkaDliny, sverkaUgla, variantyGradusov, vopros } from './obshchee';
+import { storony109, ugly107 } from '../stseny/povyshennye';
+import { g, n, sokr, shag, sverkaDliny, sverkaUgla, variantyGradusov, vopros } from './obshchee';
 import type { Reshenie } from './types';
 
 export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
@@ -358,6 +358,135 @@ export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
       ],
       sverka: `Сверяем: $\\angle AFC = 180^\\circ - ${g(u.afb)} = ${g(u.afc)}$, и в треугольнике $AFC$ $${g(u.fac)} + ${g(u.pri)} + ${g(u.afc)} = 180^\\circ$ — сходится.`,
       otvet: u.afb,
+    };
+  },
+  109: (p) => {
+    const s = storony109(p);
+    const x = s.ab / p.m;
+    return {
+      shagi: [
+        shag(
+          'Накрест лежащие углы',
+          'Пусть $ABCD$ — параллелограмм с острым углом $A$, $BK$ — биссектриса тупого угла $B$, точка $K$ на стороне $AD$. $AD \\parallel BC$, поэтому $\\angle AKB = \\angle KBC$ как накрест лежащие, а $\\angle KBC = \\angle ABK$ по свойству биссектрисы.',
+          undefined,
+          1,
+        ),
+        shag(
+          'Равнобедренный треугольник',
+          `В треугольнике $ABK$ углы при $B$ и $K$ равны, значит, $AB = AK$. Отрезок $AK$ прилежит к острому углу: $AK = ${p.m}x$, $KD = ${p.n}x$.`,
+          [`AB = AK = ${p.m}x,\\qquad AD = ${p.m}x + ${p.n}x = ${p.m + p.n}x`],
+          2,
+        ),
+        shag('Периметр', 'Периметр — удвоенная сумма соседних сторон.', [
+          `2\\cdot(${p.m}x + ${p.m + p.n}x) = ${n(p.per)}\\quad\\Rightarrow\\quad ${2 * (2 * p.m + p.n)}x = ${n(p.per)},\\quad x = ${n(x)}`,
+          `AD = ${p.m + p.n}\\cdot ${n(x)} = ${n(s.ad)}`,
+        ]),
+      ],
+      voprosy: [
+        vopros(
+          'Какой треугольник отсекает биссектриса $BK$?',
+          ['равнобедренный, $AB = AK$', 'равнобедренный, $AB = BK$', 'прямоугольный'],
+          'Углы $ABK$ и $AKB$ равны — равны и противолежащие им стороны $AK$ и $AB$.',
+          2,
+        ),
+        vopros(
+          'Какая сторона больше?',
+          ['$AD$', '$AB$', 'они равны'],
+          `$AB = ${p.m}x$, а $AD = ${p.m + p.n}x$.`,
+        ),
+      ],
+      sverka: `Сверяем: $AB = ${n(s.ab)}$, $AD = ${n(s.ad)}$, периметр $2\\cdot(${n(s.ab)} + ${n(s.ad)}) = ${n(p.per)}$ — сходится.`,
+      otvet: s.ad,
+    };
+  },
+  110: (p) => {
+    const ab = p.per / 6;
+    const ans = p.k ? 2 * ab : ab;
+    return {
+      shagi: [
+        shag(
+          'Два равнобедренных треугольника',
+          'Пусть биссектрисы углов $A$ и $D$ параллелограмма $ABCD$ пересекаются в точке $K$ на стороне $BC$. $\\angle BKA = \\angle KAD$ как накрест лежащие при $AD \\parallel BC$, а $\\angle KAD = \\angle BAK$: треугольник $ABK$ равнобедренный, $BK = AB$. Так же $CK = CD$.',
+          undefined,
+          1,
+        ),
+        shag(
+          'Большая сторона вдвое больше меньшей',
+          '$CD = AB$ как противоположные стороны, поэтому $BC = BK + KC = 2AB$.',
+          [`P = 2\\cdot(AB + 2AB) = 6AB = ${n(p.per)}`],
+          2,
+        ),
+        shag(
+          'Ответ',
+          p.k ? 'Спрашивают большую сторону $BC = 2AB$.' : 'Спрашивают меньшую сторону $AB$.',
+          [
+            p.k
+              ? `AB = ${n(p.per)} : 6 = ${n(ab)},\\qquad BC = 2\\cdot ${n(ab)} = ${n(ans)}`
+              : `AB = ${n(p.per)} : 6 = ${n(ab)}`,
+          ],
+        ),
+      ],
+      voprosy: [
+        vopros(
+          'Чему равен отрезок $BK$?',
+          ['$AB$', '$\\frac12 AB$', '$AD$'],
+          'Биссектриса угла параллелограмма отсекает равнобедренный треугольник.',
+          1,
+        ),
+        vopros(
+          'Во сколько раз $BC$ больше $AB$?',
+          ['в $2$ раза', 'в $3$ раза', 'они равны'],
+          '$BC = BK + KC = AB + CD = 2AB$.',
+          2,
+        ),
+      ],
+      sverka: `Сверяем: стороны $${n(ab)}$ и $${n(2 * ab)}$, периметр $2\\cdot(${n(ab)} + ${n(2 * ab)}) = ${n(p.per)}$ — сходится.`,
+      otvet: ans,
+    };
+  },
+  111: (p) => {
+    const ah2 = p.h * p.h * p.m;
+    const ch = Math.sqrt(p.a * p.a - ah2);
+    const s = sokr([ch], p.a, '\\cos');
+    const ahTex = p.m === 1 ? n(p.h) : `${p.h === 1 ? '' : n(p.h)}\\sqrt{${p.m}}`;
+    return {
+      shagi: [
+        shag(
+          'Углы при основании',
+          'Треугольник равнобедренный с основанием $AC$, углы при основании равны: $\\angle CAB = \\angle ACB$, и косинусы у них одинаковые.',
+          undefined,
+          1,
+        ),
+        shag(
+          'Катет $CH$',
+          'Высота $AH$ отсекает прямоугольный треугольник $AHC$ с гипотенузой $AC$. По теореме Пифагора:',
+          [`CH = \\sqrt{AC^2 - AH^2} = \\sqrt{${n(p.a * p.a)} - ${n(ah2)}} = \\sqrt{${n(ch * ch)}} = ${n(ch)}`],
+          2,
+        ),
+        shag(
+          'Косинус',
+          'В треугольнике $AHC$ катет $CH$ прилежит к углу $C$:',
+          [`\\cos\\angle CAB = \\cos\\angle ACB = \\dfrac{CH}{AC} = \\dfrac{${n(ch)}}{${n(p.a)}} = ${n(s.itog)}`],
+          undefined,
+          s.shagi,
+        ),
+      ],
+      voprosy: [
+        vopros(
+          'Косинус какого угла равен искомому?',
+          ['угла $ACB$', 'угла $ABC$', 'угла $AHC$'],
+          'Углы при основании равнобедренного треугольника равны.',
+          1,
+        ),
+        vopros(
+          'Чему равно $CH$?',
+          [`$${n(ch)}$`, `$${n(p.a * p.a - ah2)}$`, `$\\sqrt{${n(p.a * p.a + ah2)}}$`],
+          `$CH^2 = ${n(p.a * p.a)} - ${n(ah2)}$.`,
+          2,
+        ),
+      ],
+      sverka: `Сверяем: косинус острого угла — между $0$ и $1$, и катет короче гипотенузы: $${n(ch)} < ${n(p.a)}$; высота $${ahTex}$ и $CH$ дают $${n(ah2)} + ${n(ch * ch)} = ${n(p.a * p.a)}$ — сходится.`,
+      otvet: s.itog,
     };
   },
 };

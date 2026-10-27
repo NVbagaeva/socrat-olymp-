@@ -6,7 +6,7 @@ import type { PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardE
 import { Button } from '@/components/ui/Button';
 import type { Model } from '@/lib/solid/model';
 import type { View } from '@/lib/solid/project';
-import type { RenderOptions } from '@/lib/solid/render';
+import type { RenderOptions, Tema } from '@/lib/solid/render';
 
 /** Движок рисунка — приезжает только по первому касанию. */
 interface Dvizhok {
@@ -50,6 +50,10 @@ export interface ZhivoyChertezh3dProps {
   onShag?: (shag: number) => void;
   /** Без своих кнопок шагов: их рисует разбор рядом с текстом решения. */
   bezNavigatsii?: boolean;
+  /** Тема движка: «стекло» новых экранов №3 или строгий чертёж (по умолчанию). */
+  tema?: Tema;
+  /** С какого шага открыть чертёж (внутренний шаг): по умолчанию с условия. */
+  shagSnachala?: number;
   className?: string;
 }
 
@@ -67,10 +71,12 @@ export function ZhivoyChertezh3d({
   shag: shagSnaruzhi,
   onShag,
   bezNavigatsii = false,
+  tema = 'pechat',
+  shagSnachala = 0,
   className,
 }: ZhivoyChertezh3dProps) {
   const kholst = useRef<HTMLDivElement>(null);
-  const [shagVnutri, setShag] = useState(0);
+  const [shagVnutri, setShag] = useState(shagSnachala);
   const shag = shagSnaruzhi ?? shagVnutri;
   const [tronut, setTronut] = useState(false);
   /* Взгляд почти сверху: кнопка тогда возвращает вид сбоку. */
@@ -81,7 +87,7 @@ export function ZhivoyChertezh3d({
   const tyanem = useRef<{ x: number; y: number; az: number; el: number; touch: boolean } | null>(
     null,
   );
-  const shagRef = useRef(0);
+  const shagRef = useRef(shagSnachala);
   const estShagi = podpisi.length > 1;
   const nShagov = podpisi.length - 1;
 
@@ -108,13 +114,14 @@ export function ZhivoyChertezh3d({
         node.innerHTML = renderSolid(model, {
           view: orthoAt(vid.current.az, vid.current.el),
           ustoychivo: true,
+          tema,
           ...(estShagi ? { shag: shagRef.current } : {}),
         });
         propusk.current = performance.now() - t0 > DOLGIY_KADR_MS;
       });
     };
     kadr.current = requestAnimationFrame(step);
-  }, [model, estShagi]);
+  }, [model, estShagi, tema]);
 
   useEffect(
     () => () => {

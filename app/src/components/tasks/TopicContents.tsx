@@ -25,6 +25,8 @@ export interface TopicContentsProps {
   onSelectPodpunkt?: (id: string) => void;
   /** Подпункты видны всегда, а не только у открытого раздела. */
   podpunktyVsegda?: boolean;
+  /** Подпункт, который сейчас на экране: подсвечивается (теория №3). */
+  activePodpunkt?: string;
   className?: string;
 }
 
@@ -50,6 +52,7 @@ export function TopicContents({
   onSelect,
   onSelectPodpunkt,
   podpunktyVsegda = false,
+  activePodpunkt,
   className,
 }: TopicContentsProps) {
   return (
@@ -84,7 +87,8 @@ export function TopicContents({
                 <li key={sub.id}>
                   <button
                     type="button"
-                    className="contents-sub__item"
+                    className={clsx('contents-sub__item', sub.id === activePodpunkt && 'is-active')}
+                    aria-current={sub.id === activePodpunkt ? 'true' : undefined}
                     onClick={() => onSelectPodpunkt(sub.id)}
                   >
                     <TitleText title={sub.title} html={sub.titleHtml} />

@@ -244,6 +244,71 @@
   font-weight: 800;
 }
 
+/* «Лайфхак»: как «Важно!», цвет — примера. */
+.ramka--layfhak {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  background: var(--color-surface-info);
+  border: 2px solid var(--color-primary);
+}
+.ramka__znak--layfhak {
+  background: var(--color-primary);
+  font-size: 1.15rem;
+}
+
+/* «Ловушка»: красная рамка, «Неверно / Верно» в две колонки. */
+.ramka--lovushka {
+  background: var(--color-surface);
+  border: 2px solid var(--color-error);
+}
+.ramka__titul--lovushka {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+.ramka__znak--lovushka {
+  width: 2rem;
+  height: 2rem;
+  background: var(--color-error);
+  font-size: 1.05rem;
+}
+.ramka__dve {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+}
+.ramka__neverno,
+.ramka__verno {
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+}
+.ramka__neverno {
+  background: var(--color-error-soft);
+}
+.ramka__verno {
+  background: var(--color-success-soft);
+}
+.ramka__metka {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-caption);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ramka__neverno .ramka__metka {
+  color: var(--color-error);
+}
+.ramka__verno .ramka__metka {
+  color: var(--color-success);
+}
+.ramka__neverno .ramka__p:last-child,
+.ramka__verno .ramka__p:last-child {
+  margin-bottom: 0;
+}
+
 /* Рисунок в рамке и рядом: на телефоне рисунок над текстом. */
 .ramka__risunok {
   display: block;
@@ -292,7 +357,9 @@
     color: #000;
     border: 1.5px solid #000;
   }
-  .ramka--formula {
+  .ramka--formula,
+  .ramka--lovushka,
+  .ramka--layfhak {
     border-color: #000;
   }
   .ramka--zadacha {

@@ -843,4 +843,73 @@ export const VARIANT: VariantPV = {
       },
     ],
   ],
+  /** Часть 2: задания 14–20 по версиям; проверка — pnpm test:povyshennye-chast2. */
+  chast2: [
+    [
+      { s: 'e14.logKoren', p: { c: 2, s: -2, q: 3, e: [-2, 1], t1: 2, t2: 3, k1: 3, k2: 5 } },
+      { s: 'e15.prizmaTrapeciya', p: { b: 4, d: 12, usl: 'BD=DA1', t: 'A', pl: ['B', 'D', 'A1'] } },
+      { s: 'e16.pokazRazlozh', p: { p: 2, q: 3, m: 9, n: 4, znak: 'gt' } },
+      { s: 'e17.snos', p: { h: 30, u: 2, v: 1.6, syuzhet: 0 } },
+      { s: 'e18.vysotyRavnobedr', p: { a: 3, m: 4, tr: 'CNH', nado: 'R' } },
+      { s: 'e19.okrPrjamye', p: { cx: -4, cy: 5, r: 3, al: 2, be: -1, k: 4 } },
+      { s: 'e20.perestanovkaCifr', p: { N: 90, cel: 'min', D: 0, k: 8 } },
+    ],
+    [
+      { s: 'e14.logKoren', p: { c: 5, s: -4, q: 3, e: [2, 1], t1: 1, t2: 4, k1: 1, k2: 2 } },
+      {
+        s: 'e15.prizmaTrapeciya',
+        p: { b: 12, d: 24, usl: 'BD=DA1', t: 'A', pl: ['B', 'D', 'A1'] },
+      },
+      { s: 'e16.pokazRazlozh', p: { p: 3, q: 5, m: 5, n: 1, znak: 'ge' } },
+      { s: 'e17.snos', p: { h: 24, u: 2.5, v: 2, syuzhet: 1 } },
+      { s: 'e18.vysotyRavnobedr', p: { a: 9, m: 12, tr: 'CNH', nado: 'KN' } },
+      { s: 'e19.okrPrjamye', p: { cx: 2, cy: -4, r: 6, al: 2, be: -1, k: 4 } },
+      { s: 'e20.perestanovkaCifr', p: { N: 120, cel: 'min', D: -27, k: 6 } },
+    ],
+    [
+      { s: 'e14.logKoren', p: { c: 3, s: -3, q: 2, e: [-2, 1], t1: 1, t2: 5, k1: 1, k2: 3 } },
+      { s: 'e15.prizmaTrapeciya', p: { b: 6, d: 30, usl: 'BD=DA1', t: 'A', pl: ['B', 'D', 'A1'] } },
+      { s: 'e16.pokazRazlozh', p: { p: 2, q: 7, m: 6, n: 1, znak: 'gt' } },
+      { s: 'e17.snos', p: { h: 48, u: 2.6, v: 2.4, syuzhet: 2 } },
+      { s: 'e18.vysotyRavnobedr', p: { a: 9, m: 40, tr: 'CNH', nado: 'R' } },
+      { s: 'e19.okrPrjamye', p: { cx: -5, cy: 1, r: 3, al: -2, be: 1, k: 4 } },
+      { s: 'e20.perestanovkaCifr', p: { N: 100, cel: 'min', D: 20, k: 9 } },
+    ],
+    [
+      { s: 'e14.logKoren', p: { c: 2, s: -6, q: 2, e: [-2, 1], t1: 1, t2: 4, k1: 3, k2: 4 } },
+      {
+        s: 'e15.prizmaTrapeciya',
+        p: { b: 10, d: 15, usl: 'BD=DA1', t: 'A1', pl: ['B1', 'D1', 'A'] },
+      },
+      { s: 'e16.pokazRazlozh', p: { p: 3, q: 4, m: 4, n: 0, znak: 'gt' } },
+      { s: 'e17.snos', p: { h: 45, u: 3.4, v: 3, syuzhet: 3 } },
+      { s: 'e18.vysotyRavnobedr', p: { a: 6, m: 8, tr: 'CNH', nado: 'KN' } },
+      { s: 'e19.okrPrjamye', p: { cx: 1, cy: 2, r: 3, al: 2, be: 1, k: 3 } },
+      { s: 'e20.perestanovkaCifr', p: { N: 75, cel: 'min', D: -45, k: 7 } },
+    ],
+    [
+      { s: 'e14.logKoren', p: { c: 10, s: -1, q: 3, e: [-1, 1], t1: 2, t2: 4, k1: 1, k2: 2 } },
+      {
+        s: 'e15.prizmaTrapeciya',
+        p: { b: 24, d: 40, usl: 'BD=DA1', t: 'A', pl: ['B', 'D', 'A1'] },
+      },
+      { s: 'e16.pokazRazlozh', p: { p: 2, q: 3, m: 8, n: 2, znak: 'ge' } },
+      { s: 'e17.snos', p: { h: 42, u: 1.7, v: 1.5, syuzhet: 4 } },
+      { s: 'e18.vysotyRavnobedr', p: { a: 24, m: 32, tr: 'CNH', nado: 'R' } },
+      { s: 'e19.okrPrjamye', p: { cx: -5, cy: 3, r: 4, al: 3, be: -1, k: 4 } },
+      { s: 'e20.perestanovkaCifr', p: { N: 140, cel: 'min', D: 0, k: 4 } },
+    ],
+    [
+      { s: 'e14.logKoren', p: { c: 4, s: -1, q: 7, e: [-2, 1], t1: 1, t2: 2, k1: 1, k2: 2 } },
+      {
+        s: 'e15.prizmaTrapeciya',
+        p: { b: 14, d: 35, usl: 'BD=DA1', t: 'A', pl: ['B', 'D', 'A1'] },
+      },
+      { s: 'e16.pokazRazlozh', p: { p: 3, q: 7, m: 3, n: 1, znak: 'gt' } },
+      { s: 'e17.snos', p: { h: 72, u: 2.5, v: 2.4, syuzhet: 5 } },
+      { s: 'e18.vysotyRavnobedr', p: { a: 21, m: 28, tr: 'CNH', nado: 'R' } },
+      { s: 'e19.okrPrjamye', p: { cx: 5, cy: 1, r: 8, al: 3, be: -1, k: 4 } },
+      { s: 'e20.perestanovkaCifr', p: { N: 60, cel: 'min', D: 36, k: 8 } },
+    ],
+  ],
 };

@@ -217,6 +217,90 @@ for (const poly of [pir, pr, tet]) {
   check(sides.size === 1 && sides.has(-1), `${poly.kind}: грани смотрят не наружу`);
 }
 
+/* ── Части тел вращения и тела из кубиков ──────────────────────────
+   Поверхность замкнута (каждое ребро — ровно в двух гранях), грани
+   смотрят наружу (объём по граням положителен и верен). Стыки граней
+   одной плоскости и полосок кривой поверхности не рисуются: у тела
+   из кубиков каждая нарисованная линия лежит на настоящем ребре —
+   вокруг неё заняты 1 или 3 из четырёх соседних клеток (или 2 по
+   диагонали); у части цилиндра и конуса полоски рисуются только
+   контуром. */
+{
+  const F = requireSrc('lib/solid/figures.ts');
+  const { obemMnogogrannika, ploshchadKubikov, ploshchadPoverhnosti } = requireSrc('lib/stereo/glavy/schet.ts');
+  const zamknuto = (body, name) => {
+    const count = new Map();
+    body.faces.forEach((face) =>
+      face.forEach((a, k) => {
+        const b = face[(k + 1) % face.length];
+        const key = `${a}>${b}`;
+        count.set(key, (count.get(key) ?? 0) + 1);
+      }),
+    );
+    let ok = true;
+    count.forEach((n, key) => {
+      const [a, b] = key.split('>');
+      if (n !== 1 || count.get(`${b}>${a}`) !== 1) ok = false;
+    });
+    check(ok, `${name}: поверхность не замкнута или грани обходятся вразнобой`);
+  };
+
+  for (const [alfa, a0] of [[60, 267], [120, 237], [270, 342], [300, 0]]) {
+    for (const [vid, body, tochno] of [
+      ['цилиндр', F.sektorCilindra(3, 4, alfa, a0), Math.PI * 9 * 4 * (alfa / 360)],
+      ['конус', F.sektorKonusa(3, 5, alfa, a0), (Math.PI * 9 * 5 * (alfa / 360)) / 3],
+    ]) {
+      const name = `часть: ${vid}, ${alfa}°`;
+      zamknuto(body, name);
+      const v = obemMnogogrannika(body);
+      check(Math.abs(v - tochno) / tochno < 0.01, `${name}: объём ${v}, а должен ${tochno}`);
+      const linii = R.solidLinii({ alt: name, bodies: [body] }).filter((l) => l.role === 'edge');
+      const bez = R.solidLinii({ alt: name, bodies: [{ ...body, gladkie: [] }] }).filter((l) => l.role === 'edge');
+      check(linii.length < bez.length, `${name}: полоски боковой поверхности рисуются рёбрами`);
+      check(linii.some((l) => l.visible), `${name}: нет видимых линий`);
+      for (const tema of ['pechat', 'ekran']) {
+        const svg = R.renderSolid({ alt: name, bodies: [body] }, { tema });
+        check(svg.startsWith('<svg'), `${name}: не рисуется (${tema})`);
+      }
+    }
+  }
+
+  const kub3 = [];
+  for (let x = 0; x < 3; x += 1) for (let y = 0; y < 3; y += 1) for (let z = 0; z < 3; z += 1) kub3.push([x, y, z]);
+  const tela = {
+    'куб 3': kub3,
+    'куб с ямкой': kub3.filter(([x, y, z]) => !(x === 1 && y === 1 && z === 2)),
+    'куб без угла': kub3.filter(([x, y, z]) => !(x === 2 && y === 0 && z === 2)),
+    'ступенька': kub3.filter(([x, , z]) => !(x === 2 && z > 0)),
+  };
+  for (const [name, spisok] of Object.entries(tela)) {
+    const body = F.kubiki(spisok);
+    zamknuto(body, name);
+    check(Math.abs(obemMnogogrannika(body) - spisok.length) < 1e-9, `${name}: объём не равен числу кубиков`);
+    check(Math.abs(ploshchadPoverhnosti(body) - ploshchadKubikov(spisok)) < 1e-9, `${name}: площадь поверхности не та`);
+    const est = new Set(spisok.map((k) => k.join(',')));
+    for (const view of ['ortho', 'cabinet']) {
+      const linii = R.solidLinii({ alt: name, view, bodies: [body] }).filter((l) => l.role === 'edge');
+      linii.forEach((l) => {
+        const m = l.p3[0].map((c, i) => (c + l.p3[l.p3.length - 1][i]) / 2);
+        /* Ось ребра — та, по которой середина не целая. */
+        const os = m.findIndex((c) => Math.abs(c - Math.round(c)) > 1e-6);
+        const [u, w] = [0, 1, 2].filter((i) => i !== os);
+        const kletki = [[-1, -1], [0, -1], [-1, 0], [0, 0]].map(([du, dw]) => {
+          const k = [0, 0, 0];
+          k[os] = Math.floor(m[os]);
+          k[u] = Math.round(m[u]) + du;
+          k[w] = Math.round(m[w]) + dw;
+          return est.has(k.join(','));
+        });
+        const n = kletki.filter(Boolean).length;
+        const diag = n === 2 && kletki[0] === kletki[3];
+        check(os >= 0 && (n === 1 || n === 3 || diag), `${name} (${view}): линия ${JSON.stringify(m)} — не ребро тела`);
+      });
+    }
+  }
+}
+
 console.log(
   `Кадров ${frames}: средний ${avg.toFixed(2)} мс, худший ${worst.toFixed(1)} мс (${worstId}); ` +
     `подписей сквозь линию ${crossing} из ${labels}.`,

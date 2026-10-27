@@ -135,6 +135,12 @@ export interface Figura {
   /** Отмеченные точки x₁ … xₙ на оси абсцисс, слева направо. */
   metki?: number[];
   kasatelnaya?: Kasatelnaya;
+  /**
+   * Точка графика с абсциссой x, отмеченная в условии, и пунктир от
+   * неё до оси x — касательная сама не нарисована (касательная через
+   * начало координат).
+   */
+  tochkaNaGrafike?: number;
   /** Закраска между графиком и осью Ox на [a; b]. */
   zalivka?: { a: number; b: number };
   /** Какие числа подписаны на оси x: все целые, только 0 и 1 или только 0 (теория — рисунок без масштаба). */
@@ -186,6 +192,8 @@ export type ZaprosT =
   | 'naib-metka'
   | 'naim-metka'
   | 'kasat-znachenie'
+  /* f′(x₀) = f(x₀)/x₀: касательная через начало координат (варианты повышенной сложности) */
+  | 'kasat-nachalo'
   | 'chislo-nuley-f'
   | 'prirashchenie'
   | 'ploshchad';

@@ -14,7 +14,7 @@ import { figura } from './krivye';
 import { chislaOtvet } from './otvet';
 import { promezhutki, xRavno, znakiPomoshch } from './prototypes/chtenie-pom';
 import { NE_IZ_BANKA, shag, sobrat, vopros } from './prototypes/common';
-import { zadacha921 } from './prototypes/kasatelnaya';
+import { zadacha921, zadachaNaibNaim } from './prototypes/kasatelnaya';
 import { zadachaZnak } from './prototypes/po-grafiku-f';
 import { znakZnacheniya } from './chtenie';
 import { d, otrezok } from './tex';
@@ -579,4 +579,247 @@ export function znakVTochkah(par: ZnakVTochkah): Generated | null {
         seed: 'fixed',
         istochnik: NE_IZ_BANKA,
       };
+}
+
+/* ── Партия 3 ───────────────────────────────────────────────────── */
+
+export interface KasatelnayaNachalo {
+  /** Узлы кривой f: [x, y], x по возрастанию; узел касания — с абсциссой x0. */
+  uzly: [number, number][];
+  /** Абсцисса точки касания (узел кривой, x0 ≠ 0). */
+  x0: number;
+}
+
+/**
+ * Касательная к графику f в точке с абсциссой x₀ проходит через начало
+ * координат; найти f′(x₀). Касательной на рисунке нет — только точка
+ * графика. Подвох — прямая через O и (x₀; f(x₀)) имеет наклон f(x₀)/x₀:
+ * его надо увидеть, а не искать касательную на глаз.
+ */
+export function kasatelnayaCherezNachalo(par: KasatelnayaNachalo): Generated | null {
+  const { x0 } = par;
+  const uzel = par.uzly.find(([x]) => x === x0);
+  if (uzel === undefined || x0 === 0) return null;
+  const y0 = uzel[1];
+  const k = Math.round((y0 / x0) * 1e9) / 1e9;
+  if (Math.abs(k * 1e4 - Math.round(k * 1e4)) > 1e-6) return null;
+  const uzly: Uzel[] = par.uzly.map(([x, y]) => (x === x0 ? { x, y, m: y0 / x0 } : { x, y }));
+  const a = uzly[0]!.x;
+  const b = uzly.at(-1)!.x;
+  const fig = figura('f', 'f(x)', uzly, {
+    tochkaNaGrafike: x0,
+    obyazatelnye: [x0],
+    pomoshch: [
+      { t: 'tochka', x: 0, y: 0, shag: 1 },
+      { t: 'liniya', a: [0, 0], b: [x0, y0], shag: 1 },
+    ],
+  });
+  const kod = `pv9kn|${par.uzly.join(';')}|${x0}`;
+  const r = rngOf(kod);
+  const vozr = k > 0;
+  const draft = sobrat(fig, { t: 'kasat-nachalo', p: x0 }, k, {
+    uslovie: `На рисунке изображён график функции $y=f(x)$. Прямая, проходящая через начало координат, касается графика этой функции в точке с абсциссой $${d(x0)}$. Найдите значение производной функции $f(x)$ в точке $x_0=${d(x0)}$.`,
+    shagi: [
+      shag(
+        'Что нужно найти',
+        "Значение производной в точке касания равно угловому коэффициенту касательной: $f'(x_0)=k$.",
+      ),
+      shag(
+        'Две точки касательной',
+        `Касательная проходит через начало координат $O(0;\\ 0)$ и через точку касания. По рисунку $f(${d(x0)})=${d(y0)}$, точка касания — $(${d(x0)};\\ ${d(y0)})$.`,
+      ),
+      shag(
+        'Угловой коэффициент',
+        `Прямая через начало координат — это $y=kx$, и $k=\\dfrac{y}{x}$ для любой её точки: $k=\\dfrac{${d(y0)}}{${d(x0)}}=${d(k)}$.`,
+        vozr
+          ? `Касательная идёт вверх слева направо, ответ положителен — сходится.`
+          : `Касательная идёт вниз слева направо, ответ отрицателен — сходится.`,
+      ),
+      shag('Ответ', `**Ответ: ${chislaOtvet(k)}**`),
+    ],
+    podskazka: [
+      vopros(
+        r,
+        'Через какие две точки проходит касательная?',
+        `$O(0;\\ 0)$ и $(${d(x0)};\\ ${d(y0)})$`,
+        [
+          {
+            tekst: `$O(0;\\ 0)$ и $(${d(y0)};\\ ${d(x0)})$`,
+            pochemu: 'Координаты переставлены: сначала абсцисса, потом ордината.',
+          },
+          {
+            tekst: `$(${d(x0)};\\ 0)$ и $(${d(x0)};\\ ${d(y0)})$`,
+            pochemu: 'Это вертикальный пунктир, а не касательная.',
+          },
+        ],
+        'Начало координат дано в условии, точка касания — на графике.',
+        1,
+      ),
+      vopros(
+        r,
+        "Чему равен $f'(x_0)$?",
+        `$${d(k)}$`,
+        [
+          { tekst: `$${d(Math.round((x0 / y0) * 1e4) / 1e4)}$`, pochemu: 'Делить надо $y$ на $x$, а не наоборот.' },
+          { tekst: `$${d(-k)}$`, pochemu: 'Знак перепутан: посмотрите, куда идёт прямая.' },
+          { tekst: `$${d(y0)}$`, pochemu: "Это значение функции $f(x_0)$, а не производной." },
+        ].filter((o) => o.tekst !== `$${d(k)}$`),
+        `$k=\\dfrac{${d(y0)}}{${d(x0)}}$.`,
+        1,
+      ),
+    ],
+    params: { a, b, x0, y0, ans: k, uzly: par.uzly.map((u) => u.join(':')).join(',') },
+    signature: kod,
+  });
+  return draft === null
+    ? null
+    : { ...draft, prototype: 'PV9-KASAT-NACHALO', seed: 'fixed', istochnik: NE_IZ_BANKA };
+}
+
+export interface NaibNaimMetka {
+  /** Узлы кривой f: [x, y], x по возрастанию, концы — границы интервала. */
+  uzly: [number, number][];
+  /** Отмеченные точки x₁ … xₙ: целые, по возрастанию. */
+  metki: number[];
+  /** 1 — где производная наибольшая, 0 — наименьшая. */
+  naib: number;
+}
+
+/**
+ * В какой отмеченной точке производная наибольшая (наименьшая) — по
+ * графику f (как 9.2.5 / 9.2.6), кривая и точки заданы вариантом.
+ * Подвох — у вершин производная нулевая, а сравнивают не высоту точек,
+ * а крутизну подъёма или спуска.
+ */
+export function naibNaimMetka(par: NaibNaimMetka): Generated | null {
+  const uzly: Uzel[] = par.uzly.map(([x, y]) => ({ x, y }));
+  const w = { uzly, a: uzly[0]!.x, b: uzly.at(-1)!.x };
+  const kod = `pv9nm|${par.naib}|${par.uzly.join(';')}|${par.metki.join(',')}`;
+  const draft = zadachaNaibNaim(rngOf(kod), w, [...par.metki], par.naib === 1);
+  return draft === null
+    ? null
+    : {
+        ...draft,
+        signature: kod,
+        prototype: par.naib === 1 ? 'PV9-NAIB-METKA' : 'PV9-NAIM-METKA',
+        seed: 'fixed',
+        istochnik: NE_IZ_BANKA,
+      };
+}
+
+export interface SkorostMnogochlen {
+  /** Члены закона x(t): [числитель, знаменатель, степень], степени по убыванию. */
+  chleny: [number, number, number][];
+  t0: number;
+  /** Что движется: «Материальная точка движется прямолинейно». */
+  kto: string;
+}
+
+/** Член (n/d)·t^k в TeX со знаком: «-\dfrac14t^{3}», «+7t^{2}», «-8t». */
+function chlenDrob(n: number, den: number, k: number, first: boolean): string {
+  if (n === 0) return '';
+  const sign = n < 0 ? '-' : first ? '' : '+';
+  const abs = Math.abs(n);
+  const t = k === 0 ? '' : k === 1 ? 't' : `t^{${k}}`;
+  const coef = den === 1 ? (abs === 1 && k !== 0 ? '' : String(abs)) : `\\dfrac{${abs}}{${den}}`;
+  return `${sign}${coef}${t}`;
+}
+
+/**
+ * Скорость в момент t₀ по закону движения — многочлену третьей или
+ * четвёртой степени с дробными коэффициентами (как 9.1.1). Подвох —
+ * показатель умножается на дробный коэффициент, а подставлять t₀ надо в
+ * производную, не в закон.
+ */
+export function skorostMnogochlen(par: SkorostMnogochlen): Generated {
+  const { chleny, t0 } = par;
+  const proizv = chleny
+    .filter(([, , k]) => k > 0)
+    .map(([n, den, k]) => [n * k, den, k - 1] as [number, number, number]);
+  const znach = (cs: [number, number, number][], t: number) =>
+    cs.reduce((s, [n, den, k]) => s + (n / den) * t ** k, 0);
+  const v = okr(znach(proizv, t0));
+  const xFun = (t: number) => znach(chleny, t);
+  const h = 1e-4;
+  const proverka = Math.round(((xFun(t0 + h) - xFun(t0 - h)) / (2 * h)) * 1e4) / 1e4;
+  const tex = (cs: [number, number, number][]) => {
+    let out = '';
+    for (const [n, den, k] of cs) {
+      /* Сокращаем коэффициент: 4/2 → 2. */
+      const g = nod(Math.abs(n), den);
+      out += chlenDrob(n / g, den / g, k, out === '');
+    }
+    return out === '' ? '0' : out;
+  };
+  const xt = tex(chleny);
+  const vt = tex(proizv);
+  const podst = proizv
+    .map(([n, den, k], i) => {
+      const g = nod(Math.abs(n), den);
+      const [cn, cd] = [Math.abs(n) / g, den / g];
+      const sign = n < 0 ? '-' : i === 0 ? '' : '+';
+      const c = cd === 1 ? String(cn) : `\\dfrac{${cn}}{${cd}}`;
+      const t = k === 0 ? '' : k === 1 ? `\\cdot ${t0}` : `\\cdot ${t0}^{${k}}`;
+      return `${sign}${c}${t}`;
+    })
+    .join('');
+  const r = rngOf(`pv9vm|${JSON.stringify(chleny)}|${t0}`);
+  const xT0 = okr(znach(chleny, t0));
+  return {
+    uslovie: `${par.kto} по закону $x(t)=${xt}$, где $x$ — расстояние от точки отсчёта в метрах, $t$ — время в секундах, прошедшее с начала движения. Найдите её скорость (в метрах в секунду) в момент времени $t=${t0}$ с.`,
+    risunok: null,
+    zapros: null,
+    otvet: v,
+    proverka,
+    shagi: [
+      shag(
+        "Находим скорость $v(t)=x'(t)$",
+        "Скорость — производная закона движения: $v(t)=x'(t)$. Производная степени: $(c\\,t^n)'=c\\cdot n\\,t^{n-1}$, постоянное слагаемое даёт $0$.",
+        `$v(t)=${vt}$`,
+      ),
+      shag(`Подставляем $t=${t0}$`, `$v(${t0})=${podst}=${d(v)}$`),
+      shag(
+        'Ответ',
+        `Скорость в момент $t=${t0}$ с равна $${d(v)}$ м/с.`,
+        `**Ответ: ${chislaOtvet(v)}**`,
+      ),
+    ],
+    podskazka: [
+      vopros(
+        r,
+        'Как связаны скорость и закон движения $x(t)$?',
+        "$v(t)=x'(t)$",
+        [
+          { tekst: '$v(t)=x(t)$', pochemu: 'Это само расстояние, а не скорость.' },
+          {
+            tekst: '$v(t)=\\dfrac{x(t)}{t}$',
+            pochemu: 'Так считают среднюю скорость, а нужна скорость в момент.',
+          },
+        ],
+        'Скорость в момент времени — это производная закона движения.',
+      ),
+      vopros(r, "Чему равна производная $x'(t)$?", `$${vt}$`, [
+        {
+          tekst: `$${tex(chleny.filter(([, , k]) => k > 0).map(([n, den, k]) => [n, den, k - 1]))}$`,
+          pochemu: 'Степень понижена, но показатель не умножен на коэффициент.',
+        },
+      ]),
+      vopros(
+        r,
+        `Чему равна скорость при $t=${t0}$?`,
+        `$${d(v)}$`,
+        [
+          {
+            tekst: `$${d(xT0)}$`,
+            pochemu: 'Это координата $x(t_0)$: подставили $t_0$ в закон движения, а не в производную.',
+          },
+        ].filter((o) => o.tekst !== `$${d(v)}$`),
+      ),
+    ],
+    params: { t0, ans: v, chleny: chleny.map((c) => c.join(':')).join(',') },
+    signature: `pv9vm|${JSON.stringify(chleny)}|${t0}`,
+    prototype: 'PV9-SKOROST-MNOGOCHLEN',
+    seed: 'fixed',
+    istochnik: NE_IZ_BANKA,
+  };
 }

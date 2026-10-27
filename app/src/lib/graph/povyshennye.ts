@@ -16,7 +16,7 @@ import './families/loga.js';
 import './families/quadratic.js';
 import './families/rational.js';
 import './families/sqrt.js';
-import { asymptotes, verticalAsymptote } from './families/shared.js';
+import { asymptotes, horizontalAsymptote, verticalAsymptote } from './families/shared.js';
 
 export interface KLog {
   /** Основание, в котором точки читаются: f(x) = c·log_r x. */
@@ -843,6 +843,342 @@ export function pokazatelnayaOtnoshenie(
     svg: risuy(scene(false), pechat),
     svgUchitel: risuy(scene(true), pechat),
     points: uzly.map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+/* ── Партия 3 ───────────────────────────────────────────────────── */
+
+export interface GiperbolaKB {
+  /** Два узла графика f(x) = k/x + b по разные стороны асимптоты. */
+  A: [number, number];
+  B: [number, number];
+  /** Где спрашивают значение функции (за рамкой). */
+  x0: number;
+}
+
+/**
+ * f(x) = k/x + b через два узла сетки; найти f(x₀) далеко за рамкой.
+ * Подвох — асимптота y = b не проходит по оси, и k с b находятся только
+ * вместе: система по двум точкам.
+ */
+export function giperbolaKB(p: GiperbolaKB, pechat: Pechat = {}): GrafikTask {
+  const [ax, ay] = p.A;
+  const [bx, by] = p.B;
+  if (ax === 0 || bx === 0 || ax === bx) throw new Error('giperbolaKB: точки на асимптоте');
+  /* k(1/x_A − 1/x_B) = y_A − y_B. */
+  const k = round9(((ay - by) * ax * bx) / (bx - ax));
+  const b = round9(ay - k / ax);
+  if (k === 0 || !celoe(k) || !celoe(b)) throw new Error(`giperbolaKB: k = ${k}, b = ${b}`);
+  const otvet = round9(k / p.x0 + b);
+  if (!celoe(otvet * 1e4)) throw new Error(`giperbolaKB: f(x₀) = ${otvet}`);
+  /* Второй счёт: система по Крамеру в неизвестных k и b. */
+  const det = 1 / ax - 1 / bx;
+  const kk = (ay - by) / det;
+  const bb = (by / ax - ay / bx) / det;
+  const proverka = kk / p.x0 + bb;
+  const win = {
+    xmin: Math.min(ax, bx, -4) - 1,
+    xmax: Math.max(ax, bx, 4) + 1,
+    ymin: Math.min(ay, by, b - 3, -2) - 1,
+    ymax: Math.max(ay, by, b + 3, 2) + 1,
+  };
+  if (!zaOknom(p.x0, otvet, win))
+    throw new Error('giperbolaKB: f(x₀) читается по рисунку');
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [{ type: 'rational', k, b, a: 0, color: 'lineA', label: 'y = f(x)' }],
+    points: [p.A, p.B].map(([x, y]) => ({ x, y, style: 'solid', color: 'lineA', label: null })),
+    shapes: asymptotes([verticalAsymptote(0, win), horizontalAsymptote(b, win)]).concat(
+      uchitel ? napravlyayushchie([p.A, p.B]) : [],
+    ),
+    alt: 'График функции f(x) = k/x + b с отмеченными точками в узлах сетки',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const fTex = `\\dfrac{${dec(k)}}{x}${b < 0 ? '' : '+'}${dec(b)}`;
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [`График проходит через узлы сетки $${kv(p.A)}$ и $${kv(p.B)}$.`],
+    },
+    {
+      title: 'Система',
+      lines: [
+        `$\\dfrac{k}{${mn(ax)}}+b=${dec(ay)}$ и $\\dfrac{k}{${mn(bx)}}+b=${dec(by)}$.`,
+        `Вычтем: $k\\left(\\dfrac{1}{${mn(ax)}}-\\dfrac{1}{${mn(bx)}}\\right)=${dec(round9(ay - by))}$, откуда $k=${dec(k)}$; тогда $b=${dec(ay)}-\\dfrac{${dec(k)}}{${mn(ax)}}=${dec(b)}$.`,
+        `$f(x)=${fTex}$; горизонтальная асимптота $y=${dec(b)}$ — сходится с рисунком.`,
+      ],
+    },
+    {
+      title: 'Значение функции',
+      lines: [`$f(${dec(p.x0)})=\\dfrac{${dec(k)}}{${mn(p.x0)}}${b < 0 ? '' : '+'}${dec(b)}=${dec(otvet)}$.`],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Что показывает горизонтальная асимптота?',
+      options: [`$b=${dec(b)}$`, `$k=${dec(b)}$`, 'Ничего: асимптота — ось $Ox$'],
+      correct: 0,
+      comment: 'При больших $|x|$ дробь $\\dfrac{k}{x}$ близка к нулю, и $f(x)$ близка к $b$.',
+    },
+    {
+      question: 'Как найти $k$?',
+      options: [
+        `Подставить точку: $\\dfrac{k}{${mn(ax)}}${b < 0 ? '' : '+'}${dec(b)}=${dec(ay)}$`,
+        `$k=${dec(ax)}\\cdot${mn(ay)}$`,
+        `$k=${dec(ay)}:${mn(ax)}$`,
+      ],
+      correct: 0,
+      comment: '$k=xy$ было бы верно только при $b=0$.',
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображён график функции $f(x)=\\dfrac{k}{x}+b$. Найдите $f(${dec(p.x0)})$.`,
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: [p.A, p.B].map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+export interface KorenPryamaya {
+  /** Узел графика g(x) = p√x (x — точный квадрат). */
+  G: [number, number];
+  /** Узел прямой f(x) = kx + b, проходящей через начало координат. */
+  L: [number, number];
+}
+
+/**
+ * f(x) = kx + b и g(x) = p√x пересекаются в начале координат и в B вне
+ * рисунка. p — по узлу G, k — по узлу L (b = 0: прямая проходит через
+ * O); абсцисса B: p√x = kx, √x = p/k. Подвох — корень x = 0 — это O.
+ */
+export function korenPryamaya(par: KorenPryamaya, pechat: Pechat = {}): GrafikTask {
+  const [gx, gy] = par.G;
+  const [lx, ly] = par.L;
+  const s = Math.sqrt(gx);
+  if (!celoe(s) || gx <= 0 || lx === 0) throw new Error('korenPryamaya: узлы не годятся');
+  const pp = round9(gy / s);
+  const k = ly / lx;
+  if (pp <= 0 || k <= 0) throw new Error('korenPryamaya: графики не пересекаются правее O');
+  /* √x_B = p/k = y_G·x_L/(√x_G·y_L) — из целых, без деления по дороге. */
+  const pkQ = (gy * lx) / (s * ly);
+  const otvet = round9(pkQ ** 2);
+  const g0 = nod(ly, lx);
+  const kTex = celoe(k * 1e4) ? dec(round9(k)) : `\\dfrac{${ly / g0}}{${lx / g0}}`;
+  if (!celoe(otvet * 1e4)) throw new Error(`korenPryamaya: x_B = ${otvet}`);
+  /* Второй счёт: бисекция p√x − kx на (x_B/4; 1000) — левее неё только O. */
+  const h = (x: number) => pp * Math.sqrt(x) - k * x;
+  let lo = 1e-9 + ((pp / k) ** 2) / 4;
+  let hi = 10000;
+  for (let i = 0; i < 300; i += 1) {
+    const c = (lo + hi) / 2;
+    if (h(c) > 0) lo = c;
+    else hi = c;
+  }
+  const proverka = (lo + hi) / 2;
+  const win = oknoPo([par.G, par.L, [0, 0]], true);
+  win.xmin = Math.min(win.xmin, -3);
+  win.ymin = Math.min(win.ymin, -3);
+  if (!zaOknom(otvet, k * otvet, win)) throw new Error('korenPryamaya: B читается по рисунку');
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'line', k: round9(k), b: 0, color: 'lineB', label: 'y = f(x)' },
+      { type: 'sqrt', a: pp, c: 0, d: 0, color: 'lineA', label: 'y = g(x)' },
+    ],
+    points: [
+      { x: 0, y: 0, style: 'solid', color: 'lineA', label: null },
+      { x: gx, y: gy, style: 'solid', color: 'lineA', label: null },
+      { x: lx, y: ly, style: 'solid', color: 'lineB', label: null },
+    ],
+    shapes: uchitel ? napravlyayushchie([par.G, par.L]) : [],
+    alt: 'Графики прямой f(x) = kx + b и функции g(x) = p√x, пересекающихся в начале координат',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const pk = round9(pkQ);
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [
+        `Оба графика проходят через $O(0;\\ 0)$; график $g$ — через $${kv(par.G)}$, прямая — через $${kv(par.L)}$.`,
+      ],
+    },
+    {
+      title: 'Коэффициенты',
+      lines: [
+        `$g(${dec(gx)})=p\\sqrt{${dec(gx)}}=${dec(s)}p=${dec(gy)}$, $p=${dec(pp)}$.`,
+        `Прямая проходит через начало координат, поэтому $b=0$; $k=\\dfrac{${dec(ly)}}{${dec(lx)}}${celoe(k * 1e4) ? `=${kTex}` : ''}$.`,
+      ],
+    },
+    {
+      title: 'Точка пересечения',
+      lines: [
+        `$${dec(pp)}\\sqrt{x}=${kTex}x$. Корень $x=0$ — это точка $O$; при $x>0$ делим на $\\sqrt{x}$: $\\sqrt{x}=${dec(pp)}:${kTex}=${dec(pk)}$.`,
+        `$x=${dec(pk)}^2=${dec(otvet)}$.`,
+      ],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Чему равен $b$?',
+      options: ['$0$: прямая проходит через начало координат', `$${kTex}$`, '$1$'],
+      correct: 0,
+    },
+    {
+      question: 'Как найти $p$?',
+      options: [
+        `По точке $${kv(par.G)}$: $p\\sqrt{${dec(gx)}}=${dec(gy)}$`,
+        `$p=${dec(gy)}:${dec(gx)}$`,
+        `$p=${dec(gy)}$`,
+      ],
+      correct: 0,
+    },
+    {
+      question: 'Какое уравнение даёт абсциссу $B$?',
+      options: [
+        `$\\sqrt{x}=${dec(pp)}:${kTex}$`,
+        `$x=${dec(pp)}:${kTex}$`,
+        `$\\sqrt{x}=${kTex}:${dec(pp)}$`,
+      ],
+      correct: 0,
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображены графики функций $f(x)=kx+b$ и $g(x)=p\\sqrt{x}$, которые пересекаются в начале координат и в точке $B$. Найдите абсциссу точки $B$.`,
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: [[0, 0] as T, par.G, par.L].map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+export interface ParabolaPryamaya {
+  /** Второй нуль параболы g(x) = ax(x − r) (первый — начало координат). */
+  r: number;
+  /** Ещё один узел параболы (обычно вершина). */
+  Q: [number, number];
+  /** Узел прямой f(x) = kx + b через начало координат. */
+  L: [number, number];
+}
+
+/**
+ * f(x) = kx + b и g(x) = ax² + bx + c пересекаются в начале координат и
+ * в A вне рисунка. Парабола — по нулям 0 и r и узлу Q, прямая — по O и
+ * L; x_A — второй корень ax(x − r) = kx. Подвох — c = 0 и b прямой = 0
+ * читаются по общей точке O, а A на рисунке нет.
+ */
+export function parabolaPryamaya(par: ParabolaPryamaya, pechat: Pechat = {}): GrafikTask {
+  const { r } = par;
+  const [qx, qy] = par.Q;
+  const [lx, ly] = par.L;
+  if (r === 0 || qx === 0 || qx === r || lx === 0) throw new Error('parabolaPryamaya: узлы');
+  const a = round9(qy / (qx * (qx - r)));
+  const k = round9(ly / lx);
+  if (a === 0 || !celoe(a * 1e4) || !celoe(k * 1e4)) throw new Error(`parabolaPryamaya: a = ${a}`);
+  const bb = round9(-a * r);
+  const otvet = round9(r + k / a);
+  if (otvet === 0 || !celoe(otvet * 1e4)) throw new Error(`parabolaPryamaya: x_A = ${otvet}`);
+  /* Второй счёт: корни ax² + (b − k)x = 0 по формуле с дискриминантом. */
+  const B2 = bb - k;
+  const D = B2 * B2;
+  const korni = [(-B2 - Math.sqrt(D)) / (2 * a), (-B2 + Math.sqrt(D)) / (2 * a)];
+  const proverka = korni.reduce((x, y) => (Math.abs(x) > Math.abs(y) ? x : y));
+  const uzly: T[] = [[0, 0], [r, 0], par.Q];
+  const win = oknoPo([...uzly, par.L], a > 0);
+  if (!zaOknom(otvet, k * otvet, win)) throw new Error('parabolaPryamaya: A читается по рисунку');
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'quadratic', a, b: bb, c: 0, color: 'lineA', label: 'y = g(x)' },
+      { type: 'line', k, b: 0, color: 'lineB', label: 'y = f(x)' },
+    ],
+    points: [
+      ...uzly.map(([x, y]) => ({ x, y, style: 'solid', color: 'lineA', label: null })),
+      { x: lx, y: ly, style: 'solid', color: 'lineB', label: null },
+    ],
+    shapes: uchitel ? napravlyayushchie([...uzly, par.L]) : [],
+    alt: 'Графики прямой f(x) = kx + b и параболы g(x) = ax² + bx + c, пересекающихся в начале координат',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const gTex = mnogochlen(a, bb, 0);
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [
+        `Оба графика проходят через $O(0;\\ 0)$. Парабола — ещё через $${kv([r, 0])}$ и $${kv(par.Q)}$, прямая — через $${kv(par.L)}$.`,
+      ],
+    },
+    {
+      title: 'Прямая',
+      lines: [`Прямая проходит через $O$: $b=0$, $k=\\dfrac{${dec(ly)}}{${dec(lx)}}=${dec(k)}$, $f(x)=${dec(k)}x$.`],
+    },
+    {
+      title: 'Парабола',
+      lines: [
+        `Нули параболы $0$ и $${dec(r)}$: $g(x)=a\\,x${skobka(r)}$. По точке $${kv(par.Q)}$: $a\\cdot${mn(qx)}\\cdot${mn(round9(qx - r))}=${dec(qy)}$, $a=${dec(a)}$.`,
+        `$g(x)=${gTex}$.`,
+      ],
+    },
+    {
+      title: 'Точка пересечения',
+      lines: [
+        `$${gTex}=${dec(k)}x$. Корень $x=0$ — это точка $O$; при $x\\ne0$ делим на $x$: $${dec(a)}x${bb < 0 ? '' : '+'}${dec(bb)}=${dec(k)}$, $x=${dec(otvet)}$.`,
+      ],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Что даёт общая точка графиков в начале координат?',
+      options: [
+        'У прямой $b=0$, у параболы $c=0$',
+        'Абсциссу точки $A$',
+        'Вершину параболы',
+      ],
+      correct: 0,
+    },
+    {
+      question: 'Как удобнее записать параболу?',
+      options: [`$g(x)=a\\,x${skobka(r)}$ — через нули`, '$g(x)=ax^2$', `$g(x)=a(x-${mn(qx)})^2$`],
+      correct: 0,
+      comment: `Парабола пересекает ось $Ox$ в точках $0$ и $${dec(r)}$.`,
+    },
+    {
+      question: 'Какое уравнение даёт абсциссу $A$?',
+      options: [
+        `$${dec(a)}x${bb < 0 ? '' : '+'}${dec(bb)}=${dec(k)}$`,
+        `$${gTex}=0$`,
+        `$${dec(k)}x=0$`,
+      ],
+      correct: 0,
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображены графики функций $f(x)=kx+b$ и $g(x)=ax^2+bx+c$, которые пересекаются в начале координат и в точке $A$. Найдите абсциссу точки $A$.`,
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: [...uzly, par.L].map(([x, y]) => ({ x, y })),
     shagi,
     hints,
   };

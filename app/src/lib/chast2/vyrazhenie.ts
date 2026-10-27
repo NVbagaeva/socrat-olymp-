@@ -21,6 +21,8 @@ const FUNKCII = new Set([
   'sqrt',
   'root',
   'arctan',
+  'arccos',
+  'arcsin',
   'sin',
   'cos',
   'tan',
@@ -38,6 +40,8 @@ export function normalizovat(src: string): string {
   s = s.replace(/\\left|\\right|\\displaystyle|\\,|\;|\\!|\\ |~/g, '');
   s = s.replace(/\\operatorname\{([a-z]+)\}/g, '\\$1');
   s = s.replace(/\\dfrac|\\tfrac/g, '\\frac');
+  /* «\\log_5^2 10»: показатель из одной цифры перед пробелом. */
+  s = s.replace(/\^(\d)(?=\s)/g, '^{$1}');
   s = s.replace(/\\cdot|\\times|·|×|⋅/g, '*');
   s = s.replace(/\\div|:/g, '/');
   s = s.replace(/\\pi|π/g, 'pi');
@@ -45,6 +49,7 @@ export function normalizovat(src: string): string {
   s = s.replace(/−|–|—/g, '-');
   /* Арктангенс — до тангенса: в «\\arctg» есть «tg». */
   s = s.replace(/\\?arctg|\\?arctan/g, 'arctan');
+  s = s.replace(/\\?arccos/g, 'arccos').replace(/\\?arcsin/g, 'arcsin');
   s = s.replace(/\\tg|\\tan/g, 'tan').replace(/\\ctg|\\cot/g, 'cot');
   s = s
     .replace(/\\sin/g, 'sin')
@@ -52,8 +57,8 @@ export function normalizovat(src: string): string {
     .replace(/\\ln/g, 'ln')
     .replace(/\\lg/g, 'lg');
   s = s
-    .replace(/\\log_\{([^{}]*)\}/g, 'logb($1)')
-    .replace(/\\log_(\w)/g, 'logb($1)')
+    .replace(/\\?log_\{([^{}]*)\}/g, 'logb($1)')
+    .replace(/\\?log_(\d+(?:[.,]\d+)?|\w)/g, 'logb($1)')
     .replace(/\\log/g, 'log');
   /* Десятичная запятая: {,} у KaTeX и «1,5» — только между цифрами. */
   s = s.replace(/\{,\}/g, '.').replace(/(\d),(?=\d)/g, '$1.');
@@ -99,6 +104,8 @@ function lexer(s: string): Tok[] | null {
       while (w.length > 0) {
         const f = [
           'arctan',
+          'arccos',
+          'arcsin',
           'sqrt',
           'root',
           'logb',
@@ -175,6 +182,13 @@ export function razobrat(src: string): Uzel | null {
           const b = expr();
           if (!isOp(')')) throw new Error(')');
           p += 1;
+          /* \log_b^2 x — квадрат логарифма: степень стоит до аргумента. */
+          if (isOp('^')) {
+            p += 1;
+            const st = primary();
+            const a = power();
+            return { t: 'bin', op: '^', a: { t: 'fn', name: 'logb', args: [b, a] }, b: st };
+          }
           const a = power();
           return { t: 'fn', name: 'logb', args: [b, a] };
         }
@@ -288,6 +302,10 @@ export function vychislit(u: Uzel, vars: Readonly<Record<string, number>> = {}):
           return Math.tan(a0);
         case 'arctan':
           return Math.atan(a0);
+        case 'arccos':
+          return Math.acos(a0);
+        case 'arcsin':
+          return Math.asin(a0);
         case 'cot':
           return 1 / Math.tan(a0);
         case 'ln':

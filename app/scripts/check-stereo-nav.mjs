@@ -295,10 +295,14 @@ for (const size of SIZES) {
     if (size.isMobile) {
       await page.locator('.topic-open__btn').click();
       await page.waitForTimeout(400);
+      /* У №3 «Содержание» раскрывается списком под полосой (макеты
+         этапа 1), у №15 — шторка. */
       const items = await page
-        .locator('.contents-sheet .topic-contents__item, .contents-sheet li')
+        .locator(
+          '.contents-sheet .topic-contents__item, .contents-sheet li, .vteor-raskr:not([hidden]) .contents-list > li',
+        )
         .count();
-      check(items >= glavy.length, `${size.name}: №${no}: в шторке «Содержание» ${items} пунктов`);
+      check(items >= glavy.length, `${size.name}: №${no}: в «Содержании» ${items} пунктов`);
       await page.keyboard.press('Escape');
     } else {
       const side = await page.locator('.topic-side').isVisible();
@@ -378,6 +382,12 @@ for (const size of SIZES) {
   const svg1 = await page.locator('.z3d__kholst').first().innerHTML();
   check(svg1 !== svg0, where('не повернулся'));
 
+  /* Примеры глав открыты на последнем шаге: отматываем к началу. */
+  const nazad = page.locator('.z3d').first().getByRole('button', { name: 'Назад' });
+  for (let i = 0; i < 5 && (await nazad.isEnabled()); i += 1) {
+    await nazad.click();
+    await page.waitForTimeout(150);
+  }
   for (let k = 1; k <= 3; k += 1) {
     await page.locator('.z3d').first().getByRole('button', { name: 'Далее' }).click();
     await page.waitForTimeout(250);

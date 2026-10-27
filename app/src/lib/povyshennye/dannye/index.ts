@@ -19,6 +19,12 @@ const ZAGRUZKA: Record<number, () => Promise<{ VARIANT: VariantPV }>> = {
   10: () => import('./v10'),
   11: () => import('./v11'),
   12: () => import('./v12'),
+  13: () => import('./v13'),
+  14: () => import('./v14'),
+  15: () => import('./v15'),
+  16: () => import('./v16'),
+  17: () => import('./v17'),
+  18: () => import('./v18'),
 };
 
 /** Номера вариантов, у которых есть версии (остальные — «скоро»). */
@@ -28,7 +34,7 @@ export const GOTOVY: readonly number[] = Object.keys(ZAGRUZKA).map(Number);
  * Варианты, у которых готова часть 2 (задания 14–20). Экран раздела
  * читает список без загрузки данных; автотест сверяет его с данными.
  */
-export const S_CHAST2: readonly number[] = [1, 2, 3, 4, 5, 6];
+export const S_CHAST2: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export async function zagruzitVariant(k: number): Promise<VariantPV | null> {
   const f = ZAGRUZKA[k];

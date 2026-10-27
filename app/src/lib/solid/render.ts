@@ -148,6 +148,11 @@ type FillRole = 'face' | 'liquid' | 'section' | 'sphere';
 
 interface Fill {
   points: Vec2[];
+  /**
+   * Ещё контуры той же заливки: смежные грани одной плоскости или одной
+   * кривой поверхности рисуются одним путём — без швов между ними.
+   */
+  dop?: Vec2[][];
   role: FillRole;
   hl?: boolean;
   ton?: Ton;
@@ -184,6 +189,8 @@ interface Scene {
   dots: Vec2[];
   labels: LabelSpec[];
   angles: Angle[];
+  /** Цели касания («нажми на чертеже»): только если их просили. */
+  celi?: { id: string; points: Vec2[]; on: boolean }[];
   /** Контур основания первого тела: для метрик вида. */
   base?: Vec2[];
 }
@@ -279,6 +286,47 @@ function others(all: readonly Occluder[], body: Body): Occluder[] {
   return all.filter((occ) => occ.owner !== body);
 }
 
+/** Ребро «i-j» (i < j) → грани, в которые оно входит. */
+function rebraKGranyam(faces: readonly (readonly number[])[]): Map<string, number[]> {
+  const map = new Map<string, number[]>();
+  faces.forEach((face, f) => {
+    face.forEach((a, k) => {
+      const b = at(face, (k + 1) % face.length);
+      const key = a < b ? `${a}-${b}` : `${b}-${a}`;
+      const list = map.get(key);
+      if (list === undefined) map.set(key, [f]);
+      else list.push(f);
+    });
+  });
+  return map;
+}
+
+/**
+ * Рисовать ли ребро между гранями: стык двух граней одной плоскости —
+ * не ребро; стык двух полосок кривой поверхности — только контур.
+ */
+function rebroTela(
+  grani: readonly number[],
+  normals: readonly Vec3[],
+  gladkie: ReadonlySet<number>,
+  view: View,
+): boolean {
+  if (grani.length !== 2) return true;
+  const [f, g] = grani as [number, number];
+  const [nf, ng] = [at(normals, f), at(normals, g)];
+  if (dot(nf, ng) > 1 - 1e-9) return false;
+  if (gladkie.has(f) && gladkie.has(g)) {
+    return dot(nf, view.toward) > 0 !== dot(ng, view.toward) > 0;
+  }
+  return true;
+}
+
+/** Ключ плоскости грани: единичная нормаль и расстояние до начала. */
+function ploskost(n: Vec3, p: Vec3): string {
+  const r = (x: number) => (Math.round(x * 1e6) / 1e6 + 0).toFixed(6);
+  return [n[0], n[1], n[2], dot(n, p)].map(r).join(',');
+}
+
 function addPolyhedron(
   view: View,
   scene: Scene,
@@ -287,7 +335,11 @@ function addPolyhedron(
   eps: number,
 ) {
   const occluders = body.glass ? [...all, ...selfOccluders(view, body)] : all;
+  const normals = body.faces.map((face) => normalize(faceNormal(body.vertices, face)));
+  const gladkie = new Set(body.gladkie ?? []);
+  const kGrani = rebraKGranyam(body.faces);
   polyhedronEdges(body.faces).forEach(([i, j]) => {
+    if (!rebroTela(kGrani.get(`${i}-${j}`) ?? [], normals, gladkie, view)) return;
     const strokes = segmentStrokes(
       view,
       at(body.vertices, i),
@@ -305,13 +357,23 @@ function addPolyhedron(
     scene.base = body.vertices.filter((v) => Math.abs(v[2] - zmin) < 1e-9).map(view.project);
   }
   if (!body.noFill) {
-    body.faces.forEach((face) => {
-      if (dot(faceNormal(body.vertices, face), view.toward) > 0) {
-        scene.fills.push({
-          points: face.map((i) => view.project(at(body.vertices, i))),
-          role: 'face',
-        });
-      }
+    /* Видимые грани одной плоскости или одной кривой поверхности —
+       одной заливкой (контуры одного пути): иначе на стыках швы. */
+    const gruppy = new Map<string, Vec2[][]>();
+    body.faces.forEach((face, f) => {
+      if (dot(faceNormal(body.vertices, face), view.toward) <= 0) return;
+      const kontur = face.map((i) => view.project(at(body.vertices, i)));
+      const klyuch = gladkie.has(f) ? 'gladko' : ploskost(at(normals, f), at(body.vertices, at(face, 0)));
+      const gruppa = gruppy.get(klyuch);
+      if (gruppa === undefined) gruppy.set(klyuch, [kontur]);
+      else gruppa.push(kontur);
+    });
+    gruppy.forEach(([pervyy, ...dop]) => {
+      scene.fills.push({
+        points: pervyy as Vec2[],
+        ...(dop.length > 0 ? { dop } : {}),
+        role: 'face',
+      });
     });
   }
 
@@ -540,6 +602,65 @@ export interface RenderOptions {
    * модели, поэтому при вращении не прыгает и не «дышит».
    */
   ustoychivo?: boolean;
+  /**
+   * Цели касания для задач «нажми на чертеже»: отрезок (две точки) или
+   * многоугольник. Рисуются поверх чертежа прозрачной широкой полосой
+   * с data-cel; выбранные (vybrano) — подсвечены. Без целей разметка
+   * чертежа не меняется.
+   */
+  celi?: readonly { id: string; points: readonly Vec3[] }[];
+  vybrano?: readonly string[];
+  /**
+   * Ширина полосы касания цели, единицы рисунка (по умолчанию 22).
+   * Экран пересчитывает её под масштаб рисунка: на телефоне полоса
+   * не уже 44 px.
+   */
+  celShirina?: number;
+  /**
+   * Тема оформления. «pechat» (по умолчанию) — строгий чертёж банка,
+   * листов и PDF: плоская заливка, сплошные точки вершин, выделенная
+   * фигура не плотнее 0,15. «ekran» — «стекло» новых экранов №3:
+   * полупрозрачные грани с лёгким градиентом, пустые кружки вершин,
+   * выделенная фигура оранжевой заливкой. Геометрия, видимость и
+   * подписи у тем одни и те же; на печати страницы экранная тема
+   * сама возвращается к строгой (стили .solid--ekran в stereo.css).
+   */
+  tema?: Tema;
+  /**
+   * Без подписей и точек вершин: миниатюры и пиктограммы, где буквы
+   * мельче читаемого. Геометрия та же.
+   */
+  bezPodpisey?: boolean;
+}
+
+export type Tema = 'pechat' | 'ekran';
+
+/* Экранная тема «стекло»: только цвета, прозрачность, толщины и
+   кружки вершин. Цвета — токены (tokens.css, --solid-steklo-*). */
+const STEKLO = {
+  /* Экранная тема живёт только на страницах сайта, где токены заданы;
+     запасные значения — те же токены хексом, на случай рисунка вне
+     страницы (тогда он не станет чёрным). */
+  colors: {
+    edge: 'var(--solid-steklo-rebro, #3d79e0)',
+    glass1: 'var(--solid-steklo-1, #f2f7fe)',
+    glass2: 'var(--solid-steklo-2, #d7e5fa)',
+    vydel: 'var(--solid-vydel, #e07a2f)',
+  },
+  width: { edge: 2.3, hidden: 1.6, vertex: 2 },
+  dash: { hidden: '6 5' },
+  opacity: { face: 0.8, sphere: 0.55, hidden: 0.6, section: 0.32, sectionHl: 0.4 },
+  /* Кружок вершины: радиус в единицах рисунка. */
+  vertex: 4.6,
+} as const;
+
+/** Короткий хеш строки: id градиента своего рисунка (на странице их много). */
+function hashId(text: string): string {
+  let h = 5381;
+  for (let i = 0; i < text.length; i += 1) {
+    h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  }
+  return (h >>> 0).toString(36);
 }
 
 function buildScene(model: Model, options: RenderOptions = {}): Scene {
@@ -552,6 +673,13 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
   const hl = (item: { shag?: number }) => shag !== undefined && item.shag === shag;
   const all = occludersOf(view, model.bodies);
   const eps = modelExtent(model) * 1e-6;
+  if (options.celi !== undefined && options.celi.length > 0) {
+    scene.celi = options.celi.map((cel) => ({
+      id: cel.id,
+      points: cel.points.map(view.project),
+      on: options.vybrano?.includes(cel.id) === true,
+    }));
+  }
 
   /* Есть стеклянное (внешнее) тело — остальные вписаны в него. */
   const estSteklo = model.bodies.some((b) => b.glass === true);
@@ -836,7 +964,7 @@ export function boundingSphere(model: Model): { center: Vec3; r: number } {
 function toPixels(scene: Scene, sphere?: { center: Vec2; r: number }): Scene {
   const points = [
     ...scene.strokes.flatMap((s) => s.points),
-    ...scene.fills.flatMap((f) => f.points),
+    ...scene.fills.flatMap((f) => [...f.points, ...(f.dop ?? []).flat()]),
     ...scene.dots,
     ...scene.labels.map((l) => l.p),
   ];
@@ -855,9 +983,16 @@ function toPixels(scene: Scene, sphere?: { center: Vec2; r: number }): Scene {
   const map = (p: Vec2): Vec2 => [(p[0] - box.minX) * k, (p[1] - box.minY) * k];
   return {
     strokes: scene.strokes.map((s) => ({ ...s, points: s.points.map(map) })),
-    fills: scene.fills.map((f) => ({ ...f, points: f.points.map(map) })),
+    fills: scene.fills.map((f) => ({
+      ...f,
+      points: f.points.map(map),
+      ...(f.dop === undefined ? {} : { dop: f.dop.map((k) => k.map(map)) }),
+    })),
     dots: scene.dots.map(map),
     labels: scene.labels.map((l) => ({ ...l, p: map(l.p) })),
+    ...(scene.celi === undefined
+      ? {}
+      : { celi: scene.celi.map((c) => ({ ...c, points: c.points.map(map) })) }),
     ...(scene.base === undefined ? {} : { base: scene.base.map(map) }),
     angles: scene.angles.map((a) => {
       const [o, u, v] = a.points.map(map) as [Vec2, Vec2, Vec2];
@@ -1074,9 +1209,14 @@ function esc(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 }
 
-function strokeAttrs(s: Stroke): string {
+function strokeAttrs(s: Stroke, ekran = false): string {
   const c = THEME.colors;
   const w = THEME.width;
+  if (ekran && !s.hl && s.role === 'edge') {
+    return s.visible
+      ? `class="solid-rebro" stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.edge}"`
+      : `class="solid-rebro" stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.hidden}" stroke-opacity="${STEKLO.opacity.hidden}" stroke-dasharray="${STEKLO.dash.hidden}"`;
+  }
   if (s.hl) {
     return s.visible
       ? `stroke="${c.aux}" stroke-width="${w.hl}"`
@@ -1093,11 +1233,24 @@ function strokeAttrs(s: Stroke): string {
     : `stroke="${c.aux}" stroke-width="${w.auxHidden}" stroke-dasharray="${THEME.dash.aux}"`;
 }
 
-function fillAttrs(f: Fill): string {
+function fillAttrs(f: Fill, gradient?: string): string {
   const c = THEME.colors;
   const o = THEME.opacity;
   /* Стеклянное внешнее тело не заливается: сквозь него видно вписанное. */
   if (f.steklo && (f.role === 'face' || f.role === 'sphere')) return 'fill="none"';
+  if (gradient !== undefined) {
+    const k = STEKLO.opacity;
+    switch (f.role) {
+      case 'face':
+        return `class="solid-gran" fill="url(#${gradient})" fill-opacity="${k.face}"`;
+      case 'sphere':
+        return `class="solid-gran" fill="url(#${gradient})" fill-opacity="${k.sphere}"`;
+      case 'liquid':
+        return `fill="${c.liquid}" fill-opacity="${o.liquid}"`;
+      case 'section':
+        return `class="solid-vydel" fill="${STEKLO.colors.vydel}" fill-opacity="${f.hl ? k.sectionHl : k.section}"`;
+    }
+  }
   switch (f.role) {
     case 'face':
       return `fill="${c.face}" fill-opacity="${o.face}"`;
@@ -1135,12 +1288,16 @@ function labelMarkup(label: PlacedLabel): string {
 /** Модель → SVG. */
 export function renderSolid(model: Model, options: RenderOptions = {}): string {
   const scene = pixelScene(model, options);
+  if (options.bezPodpisey) {
+    scene.labels = [];
+    scene.dots = [];
+  }
   const labels = placeLabels(scene);
 
   const pad = THEME.geometry.pad;
   const box = boxOf([
     ...scene.strokes.flatMap((s) => s.points),
-    ...scene.fills.flatMap((f) => f.points),
+    ...scene.fills.flatMap((f) => [...f.points, ...(f.dop ?? []).flat()]),
     ...scene.angles.flatMap((a) => a.points),
     ...scene.dots.map((p): Vec2 => [p[0] - THEME.geometry.dot, p[1] - THEME.geometry.dot]),
     ...scene.dots.map((p): Vec2 => [p[0] + THEME.geometry.dot, p[1] + THEME.geometry.dot]),
@@ -1158,16 +1315,29 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   const order = (list: Stroke[], role: Role, visible: boolean) =>
     list.filter((s) => s.role === role && s.visible === visible);
 
+  const ekran = options.tema === 'ekran';
+  /* Id градиента — по самому рисунку: одинаковые рисунки делят
+     одинаковое определение, разные не путаются. */
+  const gradient = ekran ? `sg${hashId(pathOf(scene.strokes.flatMap((s) => s.points)) + model.alt)}` : undefined;
   const parts: string[] = [];
+  if (gradient !== undefined) {
+    parts.push(
+      `<defs><linearGradient id="${gradient}" x1="0" y1="0" x2="0.35" y2="1">` +
+        `<stop offset="0" style="stop-color:${STEKLO.colors.glass1}"/>` +
+        `<stop offset="1" style="stop-color:${STEKLO.colors.glass2}"/>` +
+        `</linearGradient></defs>`,
+    );
+  }
   scene.fills
     .filter((f) => f.role === 'face' || f.role === 'sphere')
-    .forEach((f) =>
-      parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f)} stroke="none"/>`),
-    );
+    .forEach((f) => {
+      const d = [f.points, ...(f.dop ?? [])].map((k) => pathOf(k, true)).join('');
+      parts.push(`<path d="${d}" ${fillAttrs(f, gradient)} stroke="none"/>`);
+    });
   scene.fills
     .filter((f) => f.role === 'liquid' || f.role === 'section')
     .forEach((f) =>
-      parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f)} stroke="none"/>`),
+      parts.push(`<path d="${pathOf(f.points, true)}" ${fillAttrs(f, gradient)} stroke="none"/>`),
     );
 
   const strokeLayers: [Role, boolean][] = [
@@ -1181,7 +1351,7 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   strokeLayers.forEach(([role, visible]) => {
     order(scene.strokes, role, visible).forEach((s) => {
       parts.push(
-        `<path d="${pathOf(s.points)}" fill="none" ${strokeAttrs(s)} stroke-linecap="round" stroke-linejoin="round"/>`,
+        `<path d="${pathOf(s.points)}" fill="none" ${strokeAttrs(s, ekran)} stroke-linecap="round" stroke-linejoin="round"/>`,
       );
     });
   });
@@ -1196,15 +1366,35 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
 
   scene.dots.forEach((p) => {
     parts.push(
-      `<circle cx="${px(p[0])}" cy="${px(p[1])}" r="${THEME.geometry.dot}" fill="${THEME.colors.edge}" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.dotStroke}"/>`,
+      ekran
+        ? `<circle class="solid-vershina" cx="${px(p[0])}" cy="${px(p[1])}" r="${STEKLO.vertex}" fill="${THEME.colors.surface}" stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.vertex}"/>`
+        : `<circle cx="${px(p[0])}" cy="${px(p[1])}" r="${THEME.geometry.dot}" fill="${THEME.colors.edge}" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.dotStroke}"/>`,
     );
   });
 
   labels.forEach((label) => parts.push(labelMarkup(label)));
 
+  /* Цели касания — поверх всего: подсветка выбранной и широкая
+     прозрачная полоса, по которой попадает палец. */
+  (scene.celi ?? []).forEach((cel) => {
+    const closed = cel.points.length > 2;
+    const d = pathOf(cel.points, closed);
+    if (cel.on) {
+      const c = ekran ? STEKLO.colors.vydel : THEME.colors.aux;
+      parts.push(
+        `<path class="solid-cel-on" d="${d}" fill="${closed ? c : 'none'}" fill-opacity="${ekran ? 0.32 : 0.22}" ` +
+          `stroke="${c}" stroke-opacity="${ekran ? 0.85 : 0.55}" stroke-width="${ekran ? 5 : 7}" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`,
+      );
+    }
+    parts.push(
+      `<path class="solid-cel" data-cel="${esc(cel.id)}" d="${d}" fill="${closed ? 'transparent' : 'none'}" ` +
+        `stroke="transparent" stroke-width="${px(options.celShirina ?? 22)}" stroke-linecap="round" stroke-linejoin="round" pointer-events="${closed ? 'all' : 'stroke'}"/>`,
+    );
+  });
+
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" data-engine="solid" viewBox="${px(x0)} ${px(y0)} ${px(width)} ${px(height)}" ` +
-    `width="${px(width)}" height="${px(height)}" data-line-pt="1.35" data-line-w="${THEME.width.edge}" role="img" aria-label="${esc(model.alt)}" class="solid">` +
+    `width="${px(width)}" height="${px(height)}" data-line-pt="1.35" data-line-w="${THEME.width.edge}" role="img" aria-label="${esc(model.alt)}" class="${ekran ? 'solid solid--ekran' : 'solid'}">` +
     `<title>${esc(model.alt)}</title>${parts.join('')}</svg>`
   );
 }

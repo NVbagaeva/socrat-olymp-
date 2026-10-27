@@ -9,7 +9,7 @@
  */
 
 import { RAD } from '../geom';
-import { poUglam, ravnobedrennyy, trapeciya, uglyTreugolnika } from '../figury';
+import { parallelogramm, poUglam, ravnobedrennyy, trapeciya, uglyTreugolnika } from '../figury';
 import type { Element } from '../types';
 import {
   type PrototipChertezha,
@@ -17,6 +17,8 @@ import {
   clamp,
   gr,
   grTex,
+  koren,
+  korenTex,
   mn,
   oblast,
   otr,
@@ -116,7 +118,7 @@ function bissektrisaStsena(p: Params, porog: number, iskomyy: 'C' | 'B') {
 /** Случайный угол при вершине, кратный 4: все углы задачи целые. */
 const ugolVershiny = (r: { int(a: number, b: number): number }) => 4 * r.int(5, 38);
 
-export const PROTOTIPY_POVYSHENNYE: readonly PrototipChertezha[] = [
+const PROTOTIPY_PARTIYA_1_2: readonly PrototipChertezha[] = [
   {
     id: 101,
     blok: 'III',
@@ -380,4 +382,170 @@ export const PROTOTIPY_POVYSHENNYE: readonly PrototipChertezha[] = [
     sluchaynye: (r) => ({ b: ugolVershiny(r) }),
     stsena: (p, porog) => bissektrisaStsena(p, porog, 'B'),
   },
+];
+
+/** Параллелограмм с острым углом u при A, AB : AD = ab : ad; на рисунке отношение — в пределах 0,3…0,8. */
+function parallelogrammPo(u: number | undefined, ab: number, ad: number) {
+  const ratio = clamp(ab / ad, 0.3, 0.8);
+  return { t: parallelogramm(u ?? 60, 10, 10 * ratio), ratio, sk: Math.abs(ratio - ab / ad) > 1e-9 };
+}
+
+/** Прототип 109: AB = AK = m частей, AD = m + n частей, периметр → AD. */
+export function storony109(p: Params) {
+  const x = p.per / (2 * (2 * p.m + p.n));
+  return { ab: p.m * x, ad: (p.m + p.n) * x };
+}
+
+/** Партия 3 (варианты 13–18). */
+const PROTOTIPY_PARTIYA_3: readonly PrototipChertezha[] = [
+  {
+    id: 109,
+    blok: 'X',
+    nazvanie:
+      'Биссектриса тупого угла параллелограмма делит сторону в отношении $m:n$ от острого угла, периметр → большая сторона',
+    fipi: [],
+    uslovie: (p) =>
+      `Биссектриса тупого угла параллелограмма делит противоположную сторону в отношении $${p.m}:${p.n}$, считая от вершины острого угла. Найдите большую сторону параллелограмма, если его периметр равен $${tex(p.per)}$.`,
+    otvet: (p) => storony109(p).ad,
+    primer: { m: 2, n: 5, per: 36 },
+    sluchaynye: (r) => ({ m: r.int(1, 6), n: r.int(1, 6), per: 2 * r.int(5, 60) }),
+    stsena: (p) => {
+      const s = storony109(p);
+      const { t, ratio, sk } = parallelogrammPo(p.u, p.m, p.m + p.n);
+      return scena(
+        {
+          tochki: { ...t, K: { naPryamoy: ['A', 'D', ratio] } },
+          elementy: [
+            mn(['A', 'B', 'C', 'D']),
+            otr('B', 'K'),
+            ug('A', 'B', 'K'),
+            ug('K', 'B', 'C'),
+            otr('A', 'D', {
+              tolkoShtrihi: true,
+              vydelit: 'iskomoe',
+              znachenie: chislo(s.ad),
+              otvet: true,
+            }),
+            ug('B', 'K', 'A', { sloy: 1 }),
+            shtrih('A', 'B', 1, { sloy: 2 }),
+            shtrih('A', 'K', 1, { sloy: 2 }),
+          ],
+          proverki: [
+            {
+              parallelny: [
+                ['A', 'D'],
+                ['B', 'C'],
+              ],
+            },
+          ],
+          otvet: chislo(s.ad),
+        },
+        sk,
+      );
+    },
+  },
+  {
+    id: 110,
+    blok: 'X',
+    nazvanie:
+      'Биссектрисы двух углов параллелограмма при одной стороне пересекаются на противоположной стороне, периметр → сторона',
+    fipi: [],
+    uslovie: (p) =>
+      `Точка пересечения биссектрис двух углов параллелограмма, прилежащих к одной стороне, принадлежит противоположной стороне. Найдите ${p.k ? 'большую' : 'меньшую'} сторону параллелограмма, если его периметр равен $${tex(p.per)}$.`,
+    otvet: (p) => (p.k ? p.per / 3 : p.per / 6),
+    primer: { per: 24, k: 0 },
+    sluchaynye: (r) => ({ per: 6 * r.int(1, 30), k: r.int(0, 1) }),
+    stsena: (p) => {
+      const t = parallelogramm(p.u ?? 60, 10, 5);
+      const ans = p.k ? p.per / 3 : p.per / 6;
+      const isk = p.k ? (['A', 'D'] as const) : (['A', 'B'] as const);
+      return {
+        tochki: { ...t, K: { seredina: ['B', 'C'] } },
+        elementy: [
+          mn(['A', 'B', 'C', 'D']),
+          otr('A', 'K'),
+          otr('D', 'K'),
+          ug('B', 'A', 'K'),
+          ug('K', 'A', 'D'),
+          ug('A', 'D', 'K', { dugi: 2 }),
+          ug('K', 'D', 'C', { dugi: 2 }),
+          otr(isk[0], isk[1], {
+            tolkoShtrihi: true,
+            vydelit: 'iskomoe',
+            znachenie: chislo(ans),
+            otvet: true,
+          }),
+          shtrih('A', 'B', 1, { sloy: 1 }),
+          shtrih('B', 'K', 1, { sloy: 1 }),
+          shtrih('K', 'C', 1, { sloy: 2 }),
+          shtrih('C', 'D', 1, { sloy: 2 }),
+        ],
+        proverki: [
+          {
+            parallelny: [
+              ['A', 'D'],
+              ['B', 'C'],
+            ],
+          },
+        ],
+        otvet: chislo(ans),
+      };
+    },
+  },
+  {
+    id: 111,
+    blok: 'V',
+    nazvanie: '$AB=BC$, $AC$ и высота $AH=k\\sqrt m$ → $\\cos\\angle CAB$',
+    fipi: [],
+    uslovie: (p) =>
+      `В треугольнике $ABC$ высота $AH$ равна $${korenTex(p.h, p.m)}$, $AB=BC$, $AC=${tex(p.a)}$. Найдите косинус угла $CAB$.`,
+    otvet: (p) => Math.sqrt(p.a * p.a - p.h * p.h * p.m) / p.a,
+    primer: { a: 25, h: 7, m: 1 },
+    sluchaynye: (r) =>
+      r.pick([
+        { a: 25, h: 7, m: 1 },
+        { a: 10, h: 2, m: 9 },
+        { a: 20, h: 4, m: 6 },
+      ]),
+    stsena: (p, porog) => {
+      const cosA = Math.sqrt(p.a * p.a - p.h * p.h * p.m) / p.a;
+      const a0 = Math.acos(cosA) / RAD;
+      let aV = clamp(a0, porog, 78);
+      if (Math.abs(aV - 45) < 7) aV = aV < 45 ? 38 : 52;
+      const t = ravnobedrennyy(180 - 2 * aV);
+      const vne = 180 - 2 * aV > 90 ? 'b' : null;
+      return scena(
+        {
+          tochki: { A: t.A, C: t.B, B: t.C, H: { osnovanie: ['A', 'C', 'B'] } },
+          elementy: [
+            tri('A', 'B', 'C'),
+            shtrih('A', 'B', 1),
+            shtrih('B', 'C', 1),
+            ...vysota('A', 'C', 'B', 'H', vne, {
+              vydelit: 'dano',
+              znachenie: koren(p.h, p.m),
+            }),
+            storona('A', 'C', chislo(p.a)),
+            ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
+            ug('A', 'C', 'B', { sloy: 1 }),
+            otr('C', 'H', { sloy: 2, tolkoShtrihi: true, znachenie: chislo(cosA * p.a) }),
+          ],
+          proverki: [
+            {
+              ravny: [
+                ['A', 'B'],
+                ['B', 'C'],
+              ],
+            },
+          ],
+        },
+        Math.abs(aV - a0) > 1e-9,
+      );
+    },
+  },
+];
+
+export const PROTOTIPY_POVYSHENNYE: readonly PrototipChertezha[] = [
+  ...PROTOTIPY_PARTIYA_1_2,
+  ...PROTOTIPY_PARTIYA_3,
 ];
