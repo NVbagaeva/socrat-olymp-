@@ -209,6 +209,9 @@
 .z3d {
   display: grid;
   gap: var(--space-3);
+  /* Ширина — от места, а не от содержимого: окно вращения своей
+     ширины не имеет (container-type), в узкой обёртке схлопнулось бы. */
+  width: 100%;
   max-width: 480px;
   margin: 0;
   padding: var(--space-4);

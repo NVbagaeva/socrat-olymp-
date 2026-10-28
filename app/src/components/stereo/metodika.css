@@ -2166,6 +2166,11 @@ button.o3-schet__btn:disabled {
 }
 
 /* Галерея чертежей: «Неудачно / Удачно». */
+/* Живой чертёж ловушки или галереи — во всю ширину ячейки: ячейка
+   ставит содержимое по центру, а у окна вращения своей ширины нет. */
+.o3-ris:has(> .z3d) {
+  width: 100%;
+}
 .o3-galereya {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
