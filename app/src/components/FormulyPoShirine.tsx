@@ -159,7 +159,16 @@ export function FormulyPoShirine() {
       }
     }
     const onToggle = () => zaplanirovat(false);
-    const nablyudatel = new MutationObserver(() => zaplanirovat(false));
+    /* Кадры живого чертежа стереометрии (.vr__kholst) — не повод
+       обходить страницу заново: на вращении это каждый кадр. */
+    const nablyudatel = new MutationObserver((zapisi) => {
+      if (
+        zapisi.every((z) => z.target instanceof Element && z.target.closest('.vr__kholst') !== null)
+      ) {
+        return;
+      }
+      zaplanirovat(false);
+    });
 
     shirina = document.documentElement.clientWidth;
     /* Шрифты KaTeX грузятся после разметки и меняют ширину формул. */
@@ -168,11 +177,14 @@ export function FormulyPoShirine() {
     window.addEventListener('resize', onResize);
     document.addEventListener('toggle', onToggle, true);
     document.addEventListener('click', onToggle, true);
+    /* Глава с content-visibility: auto появилась на экране — досчитать её. */
+    document.addEventListener('contentvisibilityautostatechange', onToggle, true);
     nablyudatel.observe(document.body, { childList: true, subtree: true });
     return () => {
       window.removeEventListener('resize', onResize);
       document.removeEventListener('toggle', onToggle, true);
       document.removeEventListener('click', onToggle, true);
+      document.removeEventListener('contentvisibilityautostatechange', onToggle, true);
       nablyudatel.disconnect();
       if (kadr !== 0) {
         window.cancelAnimationFrame(kadr);

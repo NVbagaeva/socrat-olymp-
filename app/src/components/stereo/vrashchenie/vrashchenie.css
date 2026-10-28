@@ -19,6 +19,8 @@
   padding-right: 52px;
   border-radius: var(--radius-md);
   touch-action: none;
+  /* Кадр поворота не пересчитывает раскладку остальной страницы. */
+  contain: layout paint style;
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;

@@ -110,9 +110,11 @@ export function ZhivoyChertezh3d({
     (v: Vid) => {
       if (v.az === vid.current.az && v.el === vid.current.el) return;
       vid.current = { az: v.az, el: v.el };
+      /* Вернулись к исходному виду («Сбросить вид») — подписи как в первом кадре. */
+      if (v.az === azimuth && v.el === elevation) pamyat.current.clear();
       narisovat();
     },
-    [narisovat],
+    [narisovat, azimuth, elevation],
   );
 
   function pereyti(k: number) {

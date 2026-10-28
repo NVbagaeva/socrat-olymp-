@@ -119,6 +119,7 @@
     "test:stereo-nav": "node scripts/check-stereo-nav.mjs",
     "test:stereo-engine": "node scripts/check-stereo-engine.mjs",
     "test:stereo-vrashchenie": "node scripts/check-stereo-vrashchenie.mjs",
+    "test:stereo-vrashchenie-site": "node scripts/check-stereo-vrashchenie-site.mjs",
     "test:stereo-kachestvo": "node scripts/check-stereo-kachestvo.mjs",
     "test:stereo-vydelenie": "node scripts/check-stereo-vydelenie.mjs",
     "test:stereo-razbory": "node scripts/check-stereo-razbory.mjs",

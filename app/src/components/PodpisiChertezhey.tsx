@@ -119,6 +119,22 @@ export function PodpisiChertezhey() {
     const onToggle = () => zaplanirovat(false);
     /* Чертёж перерисовался на месте (тренажёр, ползунок): пересчитать. */
     const nablyudatel = new MutationObserver((zapisi) => {
+      /* Кадр живого чертежа стереометрии (.vr__kholst): подогнать только
+         его новый рисунок, не обходя страницу — на вращении это каждый кадр. */
+      if (
+        zapisi.every((z) => z.target instanceof Element && z.target.closest('.vr__kholst') !== null)
+      ) {
+        for (const z of zapisi) {
+          const kholst = (z.target as Element).closest('.vr__kholst');
+          kholst?.querySelectorAll<SVGSVGElement>('svg[viewBox]').forEach((svg) => {
+            if (svg.closest('.katex') === null && svg.getBoundingClientRect().width > 0) {
+              gotovye.add(svg);
+              podognat(svg);
+            }
+          });
+        }
+        return;
+      }
       for (const z of zapisi) {
         const svg = z.target instanceof Element ? z.target.closest('svg') : null;
         if (svg instanceof SVGSVGElement) {
@@ -134,11 +150,14 @@ export function PodpisiChertezhey() {
     window.addEventListener('resize', onResize);
     document.addEventListener('toggle', onToggle, true);
     document.addEventListener('click', onToggle, true);
+    /* Глава с content-visibility: auto появилась на экране — досчитать её. */
+    document.addEventListener('contentvisibilityautostatechange', onToggle, true);
     nablyudatel.observe(document.body, { childList: true, subtree: true });
     return () => {
       window.removeEventListener('resize', onResize);
       document.removeEventListener('toggle', onToggle, true);
       document.removeEventListener('click', onToggle, true);
+      document.removeEventListener('contentvisibilityautostatechange', onToggle, true);
       nablyudatel.disconnect();
       if (kadr !== 0) {
         window.cancelAnimationFrame(kadr);

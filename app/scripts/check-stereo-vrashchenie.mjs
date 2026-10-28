@@ -76,8 +76,7 @@ function tochkiUsloviya(text) {
   return out;
 }
 
-const peresek = (a, b) =>
-  a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+const peresek = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 
 function otrezokVPryamougolnike(p, q, r) {
   /* Отрезок задевает прямоугольник подписи (с полем 0,5 px внутрь). */

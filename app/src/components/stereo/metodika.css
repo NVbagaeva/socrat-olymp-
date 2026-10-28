@@ -222,6 +222,11 @@
   gap: var(--space-8);
   font-size: var(--fs-lg);
   line-height: 1.6;
+  /* Главы вне экрана браузер не рисует: на странице теории десятки
+     живых чертежей, и кадр поворота одного не тянет за собой всю
+     страницу. Высота нерисованной главы запоминается (auto). */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 2400px;
 }
 .o3-glava__lead {
   display: flex;
