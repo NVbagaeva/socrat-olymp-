@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useRef, useSyncExternalStore, type ReactNode } from 'react';
+import { useCallback, useRef, useSyncExternalStore, type ReactNode } from 'react';
 import { IkMinus, IkPlyus, IkPovorot, IkSverkhu } from '../metodika/Ikonki';
 import { useVrashchenie, ZUM_MAX, ZUM_MIN, type Vid } from './useVrashchenie';
 import './vrashchenie.css';
@@ -33,6 +33,8 @@ export interface VrashchaemyyChertezhProps {
   className?: string;
   /** Под областью чертежа: кнопки шагов, переключатели. */
   pod?: ReactNode;
+  /** Ученик или учитель повернул чертёж (каждый кадр): ракурс для листа печати. */
+  onPovorot?: (vid: Vid) => void;
 }
 
 function podpiskaNaUkazatel(izmenilos: () => void): () => void {
@@ -56,9 +58,17 @@ export function VrashchaemyyChertezh({
   children,
   className,
   pod,
+  onPovorot,
 }: VrashchaemyyChertezhProps) {
   const oblast = useRef<HTMLDivElement>(null);
-  const v = useVrashchenie({ oblast, az, el, onVid });
+  const kadr = useCallback(
+    (vid: Vid) => {
+      onVid(vid);
+      onPovorot?.(vid);
+    },
+    [onVid, onPovorot],
+  );
+  const v = useVrashchenie({ oblast, az, el, onVid: kadr });
   const palec = useSyncExternalStore(
     podpiskaNaUkazatel,
     () => window.matchMedia('(pointer: coarse)').matches,

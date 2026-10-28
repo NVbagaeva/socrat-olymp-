@@ -37,6 +37,10 @@ import { rngOf } from '@/lib/vychisleniya/rng';
 import { chertezhLista } from '../pechat';
 import type { ZadachaPechati } from '../pechat-dannye';
 import { openText } from '../secret';
+import type { Scenariy } from '@/lib/chertezh3/scenariy';
+import { orthoAt } from '@/lib/solid/project';
+import { renderSolid } from '@/lib/solid/render';
+import { dannye3dJson } from '@/lib/stereo/zhivoy';
 import type { Razdel3 } from './info';
 
 export type VidLista = 'uchenik' | 'uchitel' | 'vse';
@@ -53,6 +57,8 @@ export interface Dop3 {
   /** Дата на листе: «2026-10-24»; пусто — пустая линия. */
   data: string;
   uchitel: string;
+  /** Чертежи — в ракурсе, как их повернули в предпросмотре (иначе — ракурс задачи). */
+  kakVPrevyu?: boolean;
 }
 
 export const DOP_3: Dop3 = {
@@ -74,6 +80,8 @@ export interface SheetParams3 {
   poKlyucham: true;
   theme: 'color' | 'print';
   dop: Dop3;
+  /** Ракурсы чертежей из предпросмотра: «вариант.ключ» → [азимут, подъём]. */
+  rakursy?: Record<string, [number, number]>;
 }
 
 export const VARIANTS_MAX_3 = 8;
@@ -98,6 +106,11 @@ export function sheetQuery3(p: SheetParams3): string {
   else if (d.svoy !== undefined && d.svoy !== '') q.set('vt', d.svoy);
   if (d.data !== '') q.set('d', d.data);
   if (d.uchitel !== DOP_3.uchitel) q.set('uch', d.uchitel);
+  if (d.kakVPrevyu === true) {
+    q.set('kp', '1');
+    const rk = Object.entries(p.rakursy ?? {});
+    if (rk.length > 0) q.set('rk', rk.map(([pos, [a, e]]) => `${pos}:${a}:${e}`).join(','));
+  }
   return q.toString();
 }
 
@@ -123,6 +136,12 @@ export function parseSheetQuery3(
   const vid = vr in SHEET_GEN_3.vidy ? (vr as VidRaboty3) : null;
   const vt = chistyy(q.get('vt') ?? '', SVOY_MAX);
   const d = q.get('d') ?? '';
+  const kp = q.get('kp') === '1';
+  const rakursy: Record<string, [number, number]> = {};
+  for (const x of (q.get('rk') ?? '').split(',')) {
+    const m = /^(\d+\.P03-\d{2}_\d+):(-?\d{1,3}):(-?\d{1,2})$/.exec(x);
+    if (m !== null) rakursy[m[1] as string] = [Number(m[2]), Number(m[3])];
+  }
   return {
     istochnik,
     sostav: razobratSostav(q.get('s') ?? '', true, PROTOTIP_RE, est),
@@ -137,7 +156,9 @@ export function parseSheetQuery3(
       ...(vid === null && vt !== '' ? { svoy: vt } : {}),
       data: /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : '',
       uchitel: chistyy(q.get('uch') ?? '', 60) || DOP_3.uchitel,
+      ...(kp ? { kakVPrevyu: true } : {}),
     },
+    ...(kp && Object.keys(rakursy).length > 0 ? { rakursy } : {}),
   };
 }
 
@@ -162,6 +183,9 @@ export interface ListZadacha3 {
   figureSvg: string | null;
   figureUchitelSvg: string | null;
   figureWidth: number;
+  /** Данные живого чертежа для предпросмотра (lib/stereo/zhivoy.ts). */
+  zhivoy?: string;
+  zhivoyUchitel?: string;
   solutionHtml: string;
   /** Ответ: «1,5». */
   answer: string;
@@ -173,8 +197,8 @@ export interface SobrannyyList3 {
 }
 
 /** Ширина чертежа на листе, мм: сценарий — как на листе печати №3, SVG solid/ — уже. */
-const SHIRINA_SCENARIYA = 58;
-const SHIRINA_SOLID = 50;
+const SHIRINA_SCENARIYA = 64;
+const SHIRINA_SOLID = 60;
 
 const OTVET = /^\s*\*{0,2}Ответ:/;
 
@@ -247,6 +271,8 @@ function zadachaLista(
   pos: string,
   no: number,
   bank: boolean,
+  /** Ракурс из предпросмотра: [азимут, подъём]; нет — ракурс задачи. */
+  rk?: [number, number],
 ): ListZadacha3 {
   const otvet = openText(z.otvet, z.seal);
   const shagi = openText(z.shagi, z.seal)
@@ -255,16 +281,27 @@ function zadachaLista(
   let figure: string | null;
   let figureUchitel: string | null;
   let width: number;
+  let zhivoy: string | undefined;
+  let zhivoyUchitel: string | undefined;
   if (z.scena !== '') {
     /* Листу печати от записи нужны только сценарий и отпечаток. */
     const zp: ZadachaPechati = { ...z, nazvanie: '' };
-    figure = chertezhLista(zp, 'uchenik', tex);
-    figureUchitel = chertezhLista(zp, 'uchitel', tex);
+    const rakurs = rk === undefined ? undefined : { azimut: rk[0], vysota: rk[1] };
+    figure = chertezhLista(zp, 'uchenik', tex, rakurs);
+    figureUchitel = chertezhLista(zp, 'uchitel', tex, rakurs);
     width = SHIRINA_SCENARIYA;
+    const sc = JSON.parse(openText(z.scena, z.seal)) as Scenariy;
+    zhivoy = dannye3dJson({ sc });
+    zhivoyUchitel = dannye3dJson({ sc, vspom: true });
   } else {
-    figure = d.svg[z.klyuch] ?? d.svg[z.prototip] ?? null;
+    const m = d.model?.[z.klyuch] ?? d.model?.[z.prototip];
+    figure =
+      rk !== undefined && m !== undefined
+        ? renderSolid(m, { view: orthoAt(rk[0], rk[1]) })
+        : (d.svg[z.klyuch] ?? d.svg[z.prototip] ?? null);
     figureUchitel = figure;
     width = SHIRINA_SOLID;
+    if (m !== undefined) zhivoy = dannye3dJson({ m });
   }
   return {
     pos,
@@ -276,6 +313,8 @@ function zadachaLista(
     figureSvg: figure,
     figureUchitelSvg: figureUchitel,
     figureWidth: width,
+    ...(zhivoy === undefined ? {} : { zhivoy }),
+    ...(zhivoyUchitel === undefined ? {} : { zhivoyUchitel }),
     solutionHtml: `<ol class="sheet-steps">${shagi
       .map((t) => `<li class="sheet-step">${typesetKrupno(t)}</li>`)
       .join('')}</ol>`,
@@ -294,7 +333,9 @@ export function sobratList3(
     poVariantam: plan.poVariantam.map((zs) =>
       zs.flatMap((x, i) => {
         const z = poKlyuchu.get(x.klyuch);
-        return z === undefined ? [] : [zadachaLista(z, d, x.pos, i + 1, x.vid === 'bank')];
+        return z === undefined
+          ? []
+          : [zadachaLista(z, d, x.pos, i + 1, x.vid === 'bank', p.rakursy?.[x.pos])];
       }),
     ),
     nehvatka: plan.nehvatka,

@@ -36,6 +36,8 @@ export interface Chertezh3Props {
   /** Вспомогательные построения включены с самого начала. */
   vspomSrazu?: boolean;
   className?: string;
+  /** Чертёж повернули: ракурс для листа печати (генератор). */
+  onPovorot?: (vid: Vid) => void;
 }
 
 const KEGL = 15;
@@ -70,6 +72,7 @@ export function Chertezh3({
   pereklyuchatel = true,
   vspomSrazu = false,
   className,
+  onPovorot,
 }: Chertezh3Props) {
   const scena = useMemo(() => postroit(scenariy), [scenariy]);
   const ishodnyy: Rakurs = scenariy.rakurs ?? SHKOLNYY;
@@ -144,6 +147,7 @@ export function Chertezh3({
         el={ishodnyy.vysota}
         onVid={onVid}
         alt={scenariy.alt}
+        {...(onPovorot === undefined ? {} : { onPovorot })}
         pod={
           pereklyuchatel ? (
             <figcaption className="ch3__bar">
@@ -171,6 +175,7 @@ export function Chertezh3({
                     `ch3__label--${p.vid}`,
                     p.yarko && 'is-bright',
                     p.tusklo && 'is-dim',
+                    p.skryta === true && 'is-skryt',
                   )}
                   style={{ transform: `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)` }}
                   dangerouslySetInnerHTML={{ __html: podpisiHtml[p.tex] ?? p.tex }}

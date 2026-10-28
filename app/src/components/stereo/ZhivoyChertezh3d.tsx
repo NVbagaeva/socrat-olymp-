@@ -49,6 +49,8 @@ export interface ZhivoyChertezh3dProps {
   /** С какого шага открыть чертёж (внутренний шаг): по умолчанию с условия. */
   shagSnachala?: number;
   className?: string;
+  /** Чертёж повернули: ракурс для листа печати (генератор). */
+  onPovorot?: (vid: Vid) => void;
 }
 
 /**
@@ -67,12 +69,15 @@ export function ZhivoyChertezh3d({
   tema = 'pechat',
   shagSnachala = 0,
   className,
+  onPovorot,
 }: ZhivoyChertezh3dProps) {
   const kholst = useRef<HTMLDivElement>(null);
   const [shagVnutri, setShag] = useState(shagSnachala);
   const shag = shagSnaruzhi ?? shagVnutri;
   const vid = useRef({ az: azimuth, el: elevation });
   const propusk = useRef(false);
+  /* Стороны подписей прошлого кадра: при вращении подписи не прыгают. */
+  const pamyat = useRef(new Map<string, number>());
   const shagRef = useRef(shagSnachala);
   const estShagi = podpisi.length > 1;
   const nShagov = podpisi.length - 1;
@@ -94,6 +99,7 @@ export function ZhivoyChertezh3d({
         view: orthoAt(vid.current.az, vid.current.el),
         ustoychivo: true,
         tema,
+        pamyatPodpisey: pamyat.current,
         ...(estShagi ? { shag: shagRef.current } : {}),
       });
       propusk.current = performance.now() - t0 > DOLGIY_KADR_MS;
@@ -139,6 +145,7 @@ export function ZhivoyChertezh3d({
         onVid={onVid}
         alt={model.alt}
         className="z3d__vid"
+        {...(onPovorot === undefined ? {} : { onPovorot })}
       >
         <div
           ref={kholst}

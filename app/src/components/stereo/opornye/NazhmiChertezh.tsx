@@ -42,18 +42,22 @@ export function NazhmiRisunok({
   /* Единиц рисунка на пиксель экрана: от неё — ширина полосы касания. */
   const [naPiksel, setNaPiksel] = useState(1);
   const kholst = useRef<HTMLDivElement>(null);
+  /* Стороны подписей прошлого кадра: при вращении подписи не прыгают. */
+  const [pamyat] = useState(() => new Map<string, number>());
   const povernut = vid.az !== az0 || vid.el !== el0;
 
   const svg = useMemo(
     () =>
       renderSolid(task.model, {
         tema: 'ekran',
-        ...(povernut ? { view: orthoAt(vid.az, vid.el), ustoychivo: true } : {}),
+        ...(povernut
+          ? { view: orthoAt(vid.az, vid.el), ustoychivo: true, pamyatPodpisey: pamyat }
+          : {}),
         celi: order.map((c) => ({ id: c.id, points: c.points })),
         vybrano: value === '' ? [] : [value],
         celShirina: Math.max(22, (CEL_PX * naPiksel) / vid.zum),
       }),
-    [task.model, order, value, povernut, vid.az, vid.el, vid.zum, naPiksel],
+    [task.model, order, value, povernut, vid.az, vid.el, vid.zum, naPiksel, pamyat],
   );
 
   useEffect(() => {

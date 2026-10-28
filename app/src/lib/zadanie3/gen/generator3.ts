@@ -73,6 +73,7 @@ export function config3(razdely: readonly Razdel3[], slot: string): GenConfig {
       kinds: Object.entries(SHEET_GEN_3.vidy).map(([id, title]) => ({ id, title })),
       theory: false,
       examples: false,
+      flag: { title: GENERATOR3_TEXTS.rakurs.title, note: GENERATOR3_TEXTS.rakurs.note },
     },
   };
 }
@@ -85,6 +86,7 @@ function dopIzExtras(e: GenExtras): Dop3 {
     ...(e.kind === SVOY_VID && e.svoy !== undefined ? { svoy: e.svoy } : {}),
     data: e.date,
     uchitel: e.teacher,
+    ...(e.flag === true ? { kakVPrevyu: true } : {}),
   };
 }
 
@@ -97,6 +99,7 @@ function extrasIzDop(dop: Dop3, config: GenConfig): GenExtras {
     date: dop.data,
     teacher: dop.uchitel || DOP_3.uchitel,
     ...(svoy ? { svoy: dop.svoy } : {}),
+    ...(dop.kakVPrevyu === true ? { flag: true } : {}),
   };
 }
 
@@ -110,6 +113,9 @@ export function paramsIzSostoyaniya3(state: GenState & { seed: string }): SheetP
     poKlyucham: true,
     theme: 'color',
     dop: dopIzExtras(state.extras),
+    ...(state.extras.flag === true && state.rakursy !== undefined
+      ? { rakursy: state.rakursy }
+      : {}),
   };
 }
 
@@ -140,6 +146,8 @@ export function engine3(
             fromBank: z.fromBank,
             figureSvg: z.figureSvg,
             figureTeacherSvg: z.figureUchitelSvg,
+            ...(z.zhivoy === undefined ? {} : { figureZhivoy: z.zhivoy }),
+            ...(z.zhivoyUchitel === undefined ? {} : { figureTeacherZhivoy: z.zhivoyUchitel }),
           })),
         ),
         note: list.nehvatka > 0 ? GENERATOR3_TEXTS.nehvatka(list.nehvatka) : null,
@@ -171,6 +179,7 @@ export function engine3(
         seed: p.seed,
         zameny: p.zameny,
         extras: extrasIzDop(p.dop, config),
+        ...(p.rakursy === undefined ? {} : { rakursy: p.rakursy }),
       };
     },
   };

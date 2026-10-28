@@ -8,13 +8,26 @@ import { ORTHO_AZIMUTH, ORTHO_ELEVATION, orthoAt } from '@/lib/solid/project';
 import { renderSolid } from '@/lib/solid/render';
 import type { Dannye3d } from '@/lib/stereo/zhivoy';
 import { ZhivoyChertezh3d } from './ZhivoyChertezh3d';
+import type { Vid } from './vrashchenie/useVrashchenie';
 
 /**
  * Живой чертёж по данным фигуры (lib/stereo/zhivoy.ts): модель lib/solid
  * — ZhivoyChertezh3d, первый кадр по её ракурсу; сценарий lib/chertezh3
  * — Chertezh3, подписи набираются KaTeX здесь же.
  */
-export function Zhivoy3d({ d, className }: { d: Dannye3d; className?: string }) {
+export function Zhivoy3d({
+  d,
+  className,
+  onPovorot,
+}: {
+  d: Dannye3d;
+  className?: string;
+  onPovorot?: (vid: Vid) => void;
+}) {
+  const dop = {
+    ...(className === undefined ? {} : { className }),
+    ...(onPovorot === undefined ? {} : { onPovorot }),
+  };
   const podpisiHtml = useMemo(
     () =>
       'sc' in d
@@ -46,7 +59,7 @@ export function Zhivoy3d({ d, className }: { d: Dannye3d; className?: string }) 
         podpisiHtml={podpisiHtml}
         pereklyuchatel={false}
         vspomSrazu={d.vspom === true}
-        {...(className === undefined ? {} : { className })}
+        {...dop}
       />
     );
   }
@@ -57,7 +70,7 @@ export function Zhivoy3d({ d, className }: { d: Dannye3d; className?: string }) 
       azimuth={d.m.rakurs?.azimuth ?? ORTHO_AZIMUTH}
       elevation={d.m.rakurs?.elevation ?? ORTHO_ELEVATION}
       podpisi={[]}
-      {...(className === undefined ? {} : { className })}
+      {...dop}
     />
   );
 }

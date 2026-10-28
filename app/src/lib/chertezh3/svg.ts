@@ -153,7 +153,7 @@ const SHRIFT_IMENI = BUKVY;
 const SHRIFT_CHISLA = CHISLA;
 
 function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
-  const op = p.tusklo ? ' opacity="0.35"' : '';
+  const op = p.tusklo ? ' opacity="0.35"' : p.skryta === true ? ' opacity="0.55" data-skryt="1"' : '';
   const fill = p.yarko ? c.podsvetka : p.vid === 'imya' ? c.tekst : c.akcent;
   const txt = texSvg(p.tex);
   if (txt === null && o.katex) {

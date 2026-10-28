@@ -72,6 +72,8 @@ export interface PodpisKadra extends Svet {
   w: number;
   h: number;
   dir: number;
+  /** Точка закрыта телом от зрителя: подпись видна, но бледнее. */
+  skryta?: boolean;
 }
 
 export interface Kadr {
@@ -320,6 +322,7 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
     pref?: P2;
     zapas?: P2[];
     s: Svet;
+    skryta?: boolean;
   }
   const zad: Zad[] = [];
   for (const t of tochki3) {
@@ -329,6 +332,7 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
       vid: 'imya',
       p: P(t.p),
       s: svet(t.imya, yarkieTochki.has(t.imya)),
+      ...(zakrytaKemTo(t.p, chasti, kam, eps) ? { skryta: true } : {}),
     });
   }
   /** Подпись у отрезка: в середине, по нормали наружу от центра фигуры. */
@@ -411,6 +415,7 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
     h: razmery[i]?.h ?? 10,
     dir: pol[i]?.dir ?? 0,
     ...z.s,
+    ...(z.skryta === true ? { skryta: true } : {}),
   }));
 
   return { W, H: Hh, linii, zalivki, puti, tochki, podpisi };
