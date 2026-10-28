@@ -6,6 +6,9 @@
 
 import type { Params } from '../stseny/dsl';
 import {
+  cos117,
+  horda116,
+  katet117,
   osnovaniya112,
   storony109,
   storony113,
@@ -466,13 +469,17 @@ export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
         shag(
           'Катет $CH$',
           'Высота $AH$ отсекает прямоугольный треугольник $AHC$ с гипотенузой $AC$. По теореме Пифагора:',
-          [`CH = \\sqrt{AC^2 - AH^2} = \\sqrt{${n(p.a * p.a)} - ${n(ah2)}} = \\sqrt{${n(ch * ch)}} = ${n(ch)}`],
+          [
+            `CH = \\sqrt{AC^2 - AH^2} = \\sqrt{${n(p.a * p.a)} - ${n(ah2)}} = \\sqrt{${n(ch * ch)}} = ${n(ch)}`,
+          ],
           2,
         ),
         shag(
           'Косинус',
           'В треугольнике $AHC$ катет $CH$ прилежит к углу $C$:',
-          [`\\cos\\angle CAB = \\cos\\angle ACB = \\dfrac{CH}{AC} = \\dfrac{${n(ch)}}{${n(p.a)}} = ${n(s.itog)}`],
+          [
+            `\\cos\\angle CAB = \\cos\\angle ACB = \\dfrac{CH}{AC} = \\dfrac{${n(ch)}}{${n(p.a)}} = ${n(s.itog)}`,
+          ],
           undefined,
           s.shagi,
         ),
@@ -504,7 +511,9 @@ export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
         shag(
           'Части средней линии',
           `Средняя линия $${n(p.m)}$ разделена в отношении $${p.p}:${p.q}$: одна часть — $${p.p}$ доли, другая — $${p.q}$ доли из $${p.p + p.q}$.`,
-          [`${n(p.m)}\\cdot\\dfrac{${p.p}}{${p.p + p.q}} = ${n(o.chast1)},\\qquad ${n(p.m)}\\cdot\\dfrac{${p.q}}{${p.p + p.q}} = ${n(o.chast2)}`],
+          [
+            `${n(p.m)}\\cdot\\dfrac{${p.p}}{${p.p + p.q}} = ${n(o.chast1)},\\qquad ${n(p.m)}\\cdot\\dfrac{${p.q}}{${p.p + p.q}} = ${n(o.chast2)}`,
+          ],
           1,
         ),
         shag(
@@ -544,9 +553,11 @@ export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
           [`AB + CD = ${n(s.per)} : 2 = ${n(pol)}`],
           1,
         ),
-        shag('Искомая сторона', `Стороны $AB$ и $CD$ противолежащие: из половины периметра вычитаем $${dannaya}$.`, [
-          `${iskomaya} = ${n(pol)} - ${n(s.dano)} = ${n(s.ans)}`,
-        ]),
+        shag(
+          'Искомая сторона',
+          `Стороны $AB$ и $CD$ противолежащие: из половины периметра вычитаем $${dannaya}$.`,
+          [`${iskomaya} = ${n(pol)} - ${n(s.dano)} = ${n(s.ans)}`],
+        ),
       ],
       voprosy: [
         vopros(
@@ -594,6 +605,195 @@ export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
         drugaya,
         'высота — перпендикуляр, он короче наклонной',
       ),
+      otvet: ans,
+    };
+  },
+  115: (p) => {
+    const ans = (p.t - p.s) / 2;
+    return {
+      shagi: [
+        shag(
+          'Вписанные углы и дуги',
+          'Вписанный угол равен половине дуги, на которую он опирается.',
+          [
+            `\\angle ADB = ${g(p.t)} : 2 = ${g(p.t / 2)},\\qquad \\angle DAE = ${g(p.s)} : 2 = ${g(p.s / 2)}`,
+          ],
+          1,
+        ),
+        shag(
+          'Внешний угол треугольника',
+          'Угол $ADB$ — внешний угол треугольника $ADC$ при вершине $D$: он равен сумме двух углов треугольника, не смежных с ним, — $\\angle DAC$ и $\\angle ACD$.',
+          [`\\angle ACB = \\angle ADB - \\angle DAE = ${g(p.t / 2)} - ${g(p.s / 2)} = ${g(ans)}`],
+        ),
+      ],
+      voprosy: [
+        vopros(
+          `Чему равен угол $ADB$?`,
+          [`$${g(p.t / 2)}$`, `$${g(p.t)}$`, `$${g(180 - p.t / 2)}$`],
+          'Вписанный угол — половина дуги.',
+          1,
+        ),
+        vopros(
+          'Как связаны углы $ADB$, $DAE$ и $ACB$?',
+          [
+            '$\\angle ACB = \\angle ADB - \\angle DAE$',
+            '$\\angle ACB = \\angle ADB + \\angle DAE$',
+            '$\\angle ACB = \\angle ADB$',
+          ],
+          'Внешний угол треугольника $ADC$ равен сумме двух несмежных с ним.',
+        ),
+      ],
+      sverka: `Сверяем: угол между секущими — полуразность дуг, $\\frac{${n(p.t)}-${n(p.s)}}{2} = ${n(ans)}$, — сходится.`,
+      otvet: ans,
+    };
+  },
+  116: (p) => {
+    const h = horda116(p);
+    const sinTex =
+      p.g === 120 ? '\\frac{\\sqrt3}{2}' : p.g === 135 ? '\\frac{\\sqrt2}{2}' : '\\frac12';
+    const R = p.m === 1 ? n(p.a) : `${p.a === 1 ? '' : n(p.a)}\\sqrt{${p.m}}`;
+    const AB = h.m === 1 ? n(h.k) : `${h.k === 1 ? '' : n(h.k)}\\sqrt{${h.m}}`;
+    const ostr = 180 - p.g;
+    return p.k
+      ? {
+          shagi: [
+            shag(
+              'Теорема синусов',
+              'Хорда $AB$ и вписанный угол $C$, который на неё опирается, — сторона и противолежащий угол треугольника $ABC$, вписанного в эту окружность.',
+              [`AB = 2R\\sin C`],
+              1,
+            ),
+            shag('Синус тупого угла', `$\\sin ${g(p.g)} = \\sin ${g(ostr)} = ${sinTex}$.`, [
+              `AB = 2\\cdot ${R}\\cdot ${sinTex} = ${AB}`,
+            ]),
+          ],
+          voprosy: [
+            vopros(
+              'Какая формула связывает хорду, радиус и вписанный угол?',
+              ['$AB = 2R\\sin C$', '$AB = R\\sin C$', '$AB = 2R\\cos C$'],
+              'Это теорема синусов для треугольника, вписанного в окружность.',
+              1,
+            ),
+            vopros(
+              `Чему равен $\\sin ${g(p.g)}$?`,
+              [`$${sinTex}$`, `$-${sinTex}$`, '$1$'],
+              'Синусы смежных углов равны.',
+            ),
+          ],
+          sverka: sverkaDliny(
+            'хорда',
+            h.val,
+            'диаметр',
+            2 * p.a * Math.sqrt(p.m),
+            'хорда не длиннее диаметра',
+          ),
+          otvet: h.val,
+        }
+      : {
+          shagi: [
+            shag(
+              'Теорема синусов',
+              'Хорда $AB$ и вписанный угол $C$, который на неё опирается, — сторона и противолежащий угол треугольника, вписанного в окружность.',
+              [`\\sin C = \\dfrac{AB}{2R} = \\dfrac{${AB}}{2\\cdot ${R}} = ${sinTex}`],
+              1,
+            ),
+            shag(
+              'Тупой угол',
+              `Синус равен $${sinTex}$ у углов $${g(ostr)}$ и $${g(p.g)}$. Угол тупой — значит, $${g(p.g)}$.`,
+              [`\\angle C = ${g(p.g)}`],
+            ),
+          ],
+          voprosy: [
+            vopros(
+              'Какая формула связывает хорду, радиус и вписанный угол?',
+              ['$AB = 2R\\sin C$', '$AB = R\\sin C$', '$AB = 2R\\cos C$'],
+              'Это теорема синусов для треугольника, вписанного в окружность.',
+              1,
+            ),
+            vopros(
+              `Синус какого тупого угла равен $${sinTex}$?`,
+              [`$${g(p.g)}$`, `$${g(ostr)}$`, '$90^\\circ$'],
+              'Тупой угол — больше $90^\\circ$.',
+            ),
+          ],
+          sverka: sverkaUgla('вписанный угол', p.g),
+          otvet: p.g,
+        };
+  },
+  117: (p) => {
+    const ans = katet117(p);
+    if (p.k) {
+      const c = cos117(p);
+      const cosTex =
+        c.d === 1
+          ? `${c.n === 1 ? '' : n(c.n)}\\sqrt{${c.m}}`
+          : `\\frac{${c.n === 1 ? '' : n(c.n)}${c.m === 1 ? '' : `\\sqrt{${c.m}}`}}{${c.d}}`;
+      const sinKv = 1 - (p.v * p.v) / (p.u * p.u + p.v * p.v);
+      return {
+        shagi: [
+          shag(
+            'Синус по косинусу',
+            `$\\sin^2 A = 1 - \\cos^2 A = 1 - \\left(${cosTex}\\right)^2 = ${n(sinKv)}$.`,
+            [`\\operatorname{tg} A = \\dfrac{\\sin A}{\\cos A} = \\dfrac{${n(p.u)}}{${n(p.v)}}`],
+            1,
+          ),
+          shag(
+            'Катет $AC$',
+            '$\\operatorname{tg} A$ — отношение противолежащего катета $BC$ к прилежащему $AC$.',
+            [
+              `AC = \\dfrac{BC}{\\operatorname{tg} A} = ${n(p.bc)} : \\dfrac{${n(p.u)}}{${n(p.v)}} = ${n(ans)}`,
+            ],
+          ),
+        ],
+        voprosy: [
+          vopros(
+            'Как найти $\\sin A$ по $\\cos A$?',
+            ['$\\sin^2 A = 1 - \\cos^2 A$', '$\\sin A = 1 - \\cos A$', '$\\sin A = \\cos A$'],
+            'Основное тригонометрическое тождество.',
+            1,
+          ),
+          vopros(
+            'Какое отношение связывает $BC$ и $AC$?',
+            [
+              '$\\operatorname{tg} A = \\frac{BC}{AC}$',
+              '$\\cos A = \\frac{BC}{AC}$',
+              '$\\sin A = \\frac{BC}{AC}$',
+            ],
+            'Противолежащий катет к прилежащему — тангенс.',
+          ),
+        ],
+        sverka: `Сверяем: $AB = \\sqrt{${n(ans)}^2 + ${n(p.bc)}^2}$ и $\\frac{AC}{AB} = \\cos A$ — сходится.`,
+        otvet: ans,
+      };
+    }
+    const sin = p.p / p.r;
+    const cos = p.q / p.r;
+    return {
+      shagi: [
+        shag(
+          'Косинус по синусу',
+          `$AC$ — прилежащий к углу $A$ катет, $AC = AB\\cos A$. Косинус найдём из основного тождества.`,
+          [`\\cos A = \\sqrt{1 - ${n(sin)}^2} = \\sqrt{${n(1 - sin * sin)}} = ${n(cos)}`],
+          1,
+        ),
+        shag('Катет $AC$', 'Угол $A$ острый, косинус положителен.', [
+          `AC = ${n(p.ab)}\\cdot ${n(cos)} = ${n(ans)}`,
+        ]),
+      ],
+      voprosy: [
+        vopros(
+          'Через какую функцию угла $A$ выражается $AC$?',
+          ['$\\cos A$', '$\\sin A$', '$\\operatorname{tg} A$'],
+          '$AC$ прилежит к углу $A$.',
+          1,
+        ),
+        vopros(
+          'Чему равен $\\cos A$?',
+          [`$${n(cos)}$`, `$${n(1 - sin)}$`, `$${n(1 - sin * sin)}$`],
+          'Из $\\sin^2 A + \\cos^2 A = 1$ — с корнем.',
+        ),
+      ],
+      sverka: sverkaDliny('катет', ans, 'гипотенуза', p.ab, 'катет короче гипотенузы'),
       otvet: ans,
     };
   },

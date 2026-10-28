@@ -830,3 +830,74 @@ export function vkladNachalnyy(par: VkladNachalnyy): Prototype {
     },
   };
 }
+
+/* ── Партия 6: три равных платежа — общая сумма ───────────────────── */
+
+/**
+ * Рамка «январь»: кредит на 3 года погашен тремя равными платежами;
+ * найти общую сумму платежей в рублях. Подвох — x = Sk³/(k² + k + 1),
+ * ответ 3x, а не «кредит плюс проценты за три года».
+ */
+export function triRavnyhSumma(par: DvaRavnyhSumma): Prototype {
+  const S = D(par.S).mul(1000);
+  const r = D(par.r);
+  return {
+    id: 'PV-C-TRI-SUMMA',
+    type: 'C',
+    subtype: 'В2',
+    source: 'own',
+    difficulty: 'base',
+    units: 'rub',
+    title: 'Три равных платежа: общая сумма в рублях',
+    maxDecimals: 0,
+    make({ plot }: { plot: PlotFull }) {
+      const k = D(1).add(r.div(100));
+      const zn = k.pow(2).add(k).add(1);
+      const x = S.mul(k.pow(3)).div(zn);
+      const answer = x.mul(3);
+      if (!answer.isInteger()) return null;
+      const X = equalPayment(S, 3, r);
+      const rows = byPayments(S, [X, X, X], r);
+      return {
+        condition: `${frameJan(plot, `в банке на 3 года в размере ${money(D(par.S), 'thous')}`, r)}\nСколько рублей составит общая сумма платежей после полного погашения кредита, если известно, что кредит будет полностью погашен тремя равными платежами?`,
+        answer,
+        verify: totalPaid(rows),
+        params: { S: S.toNumber(), r: r.toNumber() },
+        rows,
+        scheme: 'ann',
+        period: 'year',
+        solution: [
+          step(
+            'Составляем таблицу',
+            'Суммы — в рублях. Таблица — при найденном платеже.',
+            undefined,
+            true,
+          ),
+          step(
+            'Составляем уравнение',
+            `Обозначим $k = 1 + \\dfrac{${tex(r)}}{100} = ${tex(k)}$ и платёж $x$. Три раза долг растёт в $k$ раз и уменьшается на $x$; после третьего платежа он равен нулю.`,
+            `((Sk - x)k - x)k - x = 0 \\quad\\Rightarrow\\quad Sk^3 = x(k^2 + k + 1) \\quad\\Rightarrow\\quad x = \\dfrac{Sk^3}{k^2 + k + 1}`,
+          ),
+          step(
+            'Считаем',
+            'Общая сумма — три одинаковых платежа.',
+            `x = \\dfrac{${tex(S)}\\cdot ${tex(k.pow(3))}}{${tex(zn)}} = ${tex(x)},\\qquad 3x = ${tex(answer)}`,
+          ),
+          step('Ответ', `Общая сумма платежей — ${money(answer, 'rub')}.`),
+        ],
+        vopros: 'rubli',
+        hints: [
+          hintType('C', 0),
+          hintK(1),
+          choice(
+            'Какое уравнение описывает погашение кредита?',
+            '$((Sk - x)k - x)k - x = 0$',
+            ['$Sk^3 - 3x = 0$', '$S - 3x = 0$'],
+            2,
+            'Каждый год долг сначала растёт в $k$ раз, потом уменьшается на платёж.',
+          ),
+        ],
+      };
+    },
+  };
+}

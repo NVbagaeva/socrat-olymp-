@@ -518,7 +518,7 @@ export function tgPoZnacheniyu(p: TgPoZnacheniyu): Draft {
   const sinPol = q === 1 || q === 2;
   const cosPol = q === 1 || q === 4;
   const znakDannoy = f === 'cos' ? cosPol : sinPol;
-  if ((sign > 0) !== znakDannoy) throw new Error('tgPoZnacheniyu: знак не по четверти');
+  if (sign > 0 !== znakDannoy) throw new Error('tgPoZnacheniyu: знак не по четверти');
   const otvet = round9(((plusTg ? 1 : -1) * kn) / kd);
   if (!konechnaya(otvet)) throw new Error('tgPoZnacheniyu: tg — бесконечная дробь');
   const sinZnak = sinPol ? 'положителен' : 'отрицателен';
@@ -690,7 +690,13 @@ export function logSkobki(p: { a: number; b: number; m: number; n: number }): Dr
  * vid 'obratno' (дробь перевёрнута) — 1/m. Подвох — записать k как
  * log_a aᵏ и собрать знаменатель в один логарифм.
  */
-export function logDrobSumma(p: { a: number; k: number; c: number; m: number; vid: 'pryamo' | 'obratno' }): Draft {
+export function logDrobSumma(p: {
+  a: number;
+  k: number;
+  c: number;
+  m: number;
+  vid: 'pryamo' | 'obratno';
+}): Draft {
   const { a, k, c, m, vid } = p;
   const M = a ** k * c;
   const N = M ** m;
@@ -727,7 +733,13 @@ export function logDrobSumma(p: { a: number; k: number; c: number; m: number; vi
  * (b^s1)^x · (b^s2)^y: оба основания — степени b, показатели дробные,
  * сумма s1·x + s2·y целая. Ответ b^(s1·x + s2·y).
  */
-export function stepeniProizvedenie(p: { b: number; s1: number; s2: number; x: number; y: number }): Draft {
+export function stepeniProizvedenie(p: {
+  b: number;
+  s1: number;
+  s2: number;
+  x: number;
+  y: number;
+}): Draft {
   const { b, s1, s2, x, y } = p;
   const B1 = b ** s1;
   const B2 = b ** s2;
@@ -735,7 +747,8 @@ export function stepeniProizvedenie(p: { b: number; s1: number; s2: number; x: n
   const e2 = round9(s2 * y);
   const e = round9(e1 + e2);
   const otvet = round9(b ** e);
-  if (!konechnaya(otvet)) throw new Error(`stepeniProizvedenie: ответ ${otvet} — не конечная дробь`);
+  if (!konechnaya(otvet))
+    throw new Error(`stepeniProizvedenie: ответ ${otvet} — не конечная дробь`);
   return {
     uslovie: `Найдите значение выражения $${B1}^{${d(x)}}\\cdot ${B2}^{${d(y)}}$.`,
     otvet,
@@ -761,7 +774,8 @@ export function sinCosProizvedenie(p: { A: number; n: number; den: number }): Dr
   const { zn, s, D } = cep.z;
   if (s !== 1) throw new Error(`sinCosProizvedenie: sin 2α = ±√${s}/${D} — с корнем`);
   const otvet = round9((zn * A) / (2 * D));
-  if (!konechnaya(otvet)) throw new Error(`sinCosProizvedenie: ${zn * A}/${2 * D} — бесконечная дробь`);
+  if (!konechnaya(otvet))
+    throw new Error(`sinCosProizvedenie: ${zn * A}/${2 * D} — бесконечная дробь`);
   const ugol = rad(n, den);
   return {
     uslovie: `Найдите значение выражения $${A}${fn('sin')}${ugol}\\cdot${fn('cos')}${ugol}$.`,
@@ -774,5 +788,123 @@ export function sinCosProizvedenie(p: { A: number; n: number; den: number }): Dr
     params: { A, n, den },
     proverka: A * Math.sin((n * Math.PI) / den) * Math.cos((n * Math.PI) / den),
     signature: `sincos:${A}:${n}:${den}`,
+  };
+}
+
+/* ── Партия 6 (варианты 31–36) ──────────────────────────────────── */
+
+/**
+ * (B₁^x₁)^x₂ : (B₂^y₁)^y₂, где B₁ = b^s1, B₂ = b^s2. Подвох — степень
+ * в степени: показатели перемножаются (а не складываются), а оба
+ * основания надо свести к одному числу b.
+ */
+export function stepeniVlozhennye(p: {
+  b: number;
+  s1: number;
+  s2: number;
+  x1: number;
+  x2: number;
+  y1: number;
+  y2: number;
+}): Draft {
+  const { b, s1, s2, x1, x2, y1, y2 } = p;
+  const B1 = b ** s1;
+  const B2 = b ** s2;
+  const e1 = s1 * x1 * x2;
+  const e2 = s2 * y1 * y2;
+  const e = e1 - e2;
+  const otvet = round9(b ** e);
+  if (!konechnaya(otvet)) throw new Error(`№8: ${b}^${e} — не конечная дробь`);
+  const st = (x: number) => (x < 0 ? `{${d(x)}}` : `${d(x)}`);
+  return {
+    uslovie: `Найдите значение выражения $\\left(${B1}^{${x1}}\\right)^{${x2}}:\\left(${B2}^{${y1}}\\right)^{${y2}}$.`,
+    otvet,
+    razbor: [
+      `Степень в степени — показатели перемножаются: $\\left(${B1}^{${x1}}\\right)^{${x2}}=${B1}^{${x1 * x2}}$, $\\left(${B2}^{${y1}}\\right)^{${y2}}=${B2}^{${y1 * y2}}$.`,
+      `Оба основания — степени числа $${b}$: $${B1}=${b}^{${s1}}$, $${B2}=${b}^{${s2}}$. Тогда $${B1}^{${x1 * x2}}=${b}^{${e1}}$, $${B2}^{${y1 * y2}}=${b}^{${e2}}$.`,
+      `При делении показатели вычитаются: $${b}^{${e1}-${e2}}=${b}^${st(e)}=${d(otvet)}$.`,
+    ],
+    params: { b, s1, s2, x1, x2, y1, y2 },
+    proverka: Math.exp(x1 * x2 * Math.log(B1) - y1 * y2 * Math.log(B2)),
+    signature: `stvl:${b}:${s1}:${s2}:${x1}:${x2}:${y1}:${y2}`,
+  };
+}
+
+/**
+ * k·cos 2α по sin α или cos α (знак не важен). Подвох — выбрать формулу
+ * двойного угла под данную функцию: 1 − 2sin²α или 2cos²α − 1.
+ */
+export function cosDvoynogoPo(p: { given: 'sin' | 'cos'; s: number; k: number }): Draft {
+  const { given, s, k } = p;
+  const s2 = round9(s * s);
+  const c2 = round9(given === 'sin' ? 1 - 2 * s2 : 2 * s2 - 1);
+  const otvet = round9(k * c2);
+  const formula = given === 'sin' ? '1-2\\sin^2\\alpha' : '2\\cos^2\\alpha-1';
+  const mn = (x: number) => (x < 0 ? `(${d(x)})` : d(x));
+  return {
+    uslovie: `Найдите $${k === 1 ? '' : k}\\cos 2\\alpha$, если $\\${given}\\alpha=${d(s)}$.`,
+    otvet,
+    razbor: [
+      `Дан $\\${given}\\alpha$, поэтому берём формулу $\\cos2\\alpha=${formula}$ — через ту же функцию. Знак $\\${given}\\alpha$ не важен: он возводится в квадрат.`,
+      `$\\cos2\\alpha=${given === 'sin' ? `1-2\\cdot${mn(s)}^2=1-2\\cdot${d(s2)}` : `2\\cdot${mn(s)}^2-1=2\\cdot${d(s2)}-1`}=${d(c2)}$.`,
+      ...(k === 1 ? [] : [`$${k}\\cdot${mn(c2)}=${d(otvet)}$.`]),
+    ],
+    params: { given, s, k },
+    proverka: k * Math.cos(2 * (given === 'sin' ? Math.asin(s) : Math.acos(s))),
+    signature: `cos2po:${given}:${s}:${k}`,
+  };
+}
+
+/**
+ * Дробь из корней разных степеней одной переменной (и самой переменной)
+ * при заданном значении: показатель — сумма 1/n по числителю минус
+ * сумма по знаменателю. Подвох — не подставлять число сразу (корни
+ * не извлекаются), а сначала свести всё к одной степени.
+ */
+export function korniDrob(p: { v: string; A: number; chisl: number[]; znam: number[] }): Draft {
+  const { v, A, chisl, znam } = p;
+  /* Показатель — несократимая дробь P/Q: сумма 1/n с плюсом и минусом. */
+  let P = 0;
+  let Q = 1;
+  const dob = (n: number, z: number) => {
+    P = P * n + z * Q;
+    Q *= n;
+    const g = nod(Math.abs(P), Q) || 1;
+    P /= g;
+    Q /= g;
+  };
+  chisl.forEach((n) => dob(n, 1));
+  znam.forEach((n) => dob(n, -1));
+  const otvet = round9(A ** (P / Q));
+  if (!konechnaya(otvet) || otvet === 0)
+    throw new Error(`№8: ${A}^(${P}/${Q}) — не конечная дробь`);
+  const vA = d(A);
+  const koren = (n: number) => (n === 1 ? v : n === 2 ? `\\sqrt{${v}}` : `\\sqrt[${n}]{${v}}`);
+  const proizv = (xs: number[]) => xs.map(koren).join('\\cdot ');
+  const st = (n: number) => (n === 1 ? v : `${v}^{\\frac{1}{${n}}}`);
+  const drob = (P2: number, Q2: number) =>
+    Q2 === 1 ? `${P2}` : `${P2 < 0 ? '-' : ''}\\frac{${Math.abs(P2)}}{${Q2}}`;
+  const pokazateli = [
+    ...chisl.map((n) => `\\frac{1}{${n}}`),
+    ...znam.map((n) => `-\\frac{1}{${n}}`),
+  ]
+    .join('')
+    .replace(/^\+/, '')
+    .replace(/\\frac\{1\}\{1\}/g, '1');
+  return {
+    uslovie: `Найдите значение выражения $\\dfrac{${proizv(chisl)}}{${proizv(znam)}}$ при $${v}=${vA}$.`,
+    otvet,
+    razbor: [
+      `Запишем корни степенями с дробными показателями: ${[...new Set([...chisl, ...znam])]
+        .filter((n) => n > 1)
+        .map((n) => `$${koren(n)}=${st(n)}$`)
+        .join(', ')}.`,
+      `При умножении показатели складываются, при делении вычитаются: $${pokazateli}=${drob(P, Q)}$, то есть выражение равно $${v}^{${drob(P, Q)}}$.`,
+      `При $${v}=${vA}$: $${vA}^{${drob(P, Q)}}=${d(otvet)}$.`,
+    ],
+    params: { v, A, chisl: chisl.join(','), znam: znam.join(',') },
+    proverka:
+      chisl.reduce((s, n) => s * A ** (1 / n), 1) / znam.reduce((s, n) => s * A ** (1 / n), 1),
+    signature: `kdr:${v}:${A}:${chisl.join(',')}:${znam.join(',')}`,
   };
 }

@@ -101,3 +101,9 @@ export function shapeVertexMidline(alt: string): Model {
   const sections = [{ points: cut }];
   return pyramidModel(alt, unlabelled(body), { sections });
 }
+
+/** Правильная шестиугольная пирамида SABCDEF, выделена пирамида SABC (диагональ AC). */
+export function shapeHexPartABC(alt: string): Model {
+  const body = p6();
+  return pyramidModel(alt, body, { lines: [edge(body, 'A', 'C')] });
+}

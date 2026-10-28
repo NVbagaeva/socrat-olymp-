@@ -973,7 +973,9 @@ export const PV7_KOREN_POSTORONNIY: Prototype = {
         plan: [
           'Слева арифметический корень — он неотрицателен. Возводим в квадрат, решаем квадратное уравнение, а потом проверяем корни: правая часть тоже должна быть неотрицательной.',
         ],
-        odz: [`Нужно $${b === 0 ? '-x' : `${d(b)}-x`}\\ge0$ и $x${c < 0 ? '-' : '+'}${d(Math.abs(c))}\\ge0$, то есть $${d(-c)}\\le x\\le ${d(b)}$.`],
+        odz: [
+          `Нужно $${b === 0 ? '-x' : `${d(b)}-x`}\\ge0$ и $x${c < 0 ? '-' : '+'}${d(Math.abs(c))}\\ge0$, то есть $${d(-c)}\\le x\\le ${d(b)}$.`,
+        ],
         preobr: [
           `Возводим в квадрат: $${b === 0 ? '-x' : `${d(b)}-x`}=\\left(x${c < 0 ? '-' : '+'}${d(Math.abs(c))}\\right)^2$.`,
           `Раскрываем скобки и переносим: $${kv}$.`,
@@ -983,9 +985,7 @@ export const PV7_KOREN_POSTORONNIY: Prototype = {
           `При $x=${d(lishniy)}$ правая часть $${prav(lishniy)}=${d(lishniy + c)}<0$ — корень посторонний.`,
           `При $x=${d(ans)}$ правая часть $${prav(ans)}=${d(ans + c)}\\ge0$ — подходит. Корень один, он и в ответе.`,
         ],
-        proverka: [
-          `$\\sqrt{${d(b - ans)}}=${d(ans + c)}$ — верно.`,
-        ],
+        proverka: [`$\\sqrt{${d(b - ans)}}=${d(ans + c)}$ — верно.`],
         answer: ans,
       }),
       vychisleniya: [
@@ -999,11 +999,10 @@ export const PV7_KOREN_POSTORONNIY: Prototype = {
           `$x^2${B < 0 ? '+' : '-'}${Math.abs(B) === 1 ? '' : d(Math.abs(B))}x${C < 0 ? '-' : '+'}${d(Math.abs(C))}=0$`,
           `$x^2+${d(c * c + b)}=0$`,
         ]),
-        hint(
-          `Подходит ли корень $x=${d(lishniy)}$?`,
-          'нет: правая часть при нём отрицательна',
-          ['да: он меньше, его и записываем', 'да: после возведения в квадрат равенство верно'],
-        ),
+        hint(`Подходит ли корень $x=${d(lishniy)}$?`, 'нет: правая часть при нём отрицательна', [
+          'да: он меньше, его и записываем',
+          'да: после возведения в квадрат равенство верно',
+        ]),
         hintOtbor('menshiy', `$${d(ans)}$`, [`$${d(lishniy)}$`]),
       ],
     };
@@ -1110,8 +1109,12 @@ export const PV7_STEPEN_KVADRATA: Prototype = {
         hint(
           `Чему может равняться $${d(c)}-x^2$?`,
           n % 2 === 1 ? `$${d(ts[0] as number)}$` : `$${d(r)}$ или $${d(-r)}$`,
-          n % 2 === 1 ? [`$${d(-(ts[0] as number))}$`, `$\\pm${d(r)}$`] : [`только $${d(r)}$`, `$${d(D)}$`],
-          n % 2 === 1 ? 'Нечётная степень сохраняет знак.' : 'У чётной степени два корня с разными знаками.',
+          n % 2 === 1
+            ? [`$${d(-(ts[0] as number))}$`, `$\\pm${d(r)}$`]
+            : [`только $${d(r)}$`, `$${d(D)}$`],
+          n % 2 === 1
+            ? 'Нечётная степень сохраняет знак.'
+            : 'У чётной степени два корня с разными знаками.',
         ),
         hintOtbor('menshiy', `$${d(ans)}$`, [`$${d(-ans)}$`, `$${d(c - ans * ans)}$`]),
       ],
@@ -1164,7 +1167,8 @@ export const PV7_KOREN_DROB: Prototype = {
     const c2 = mul(q(c), q(c));
     const zn = div(q(A), c2);
     const x = div(sub(zn, q(b)), q(k));
-    if (!konechnaya(x)) throw new Error(`PV7-KOREN-DROB: корень — бесконечная дробь ${JSON.stringify(p)}`);
+    if (!konechnaya(x))
+      throw new Error(`PV7-KOREN-DROB: корень — бесконечная дробь ${JSON.stringify(p)}`);
     const ans = val(x);
     const E = lin(k, b, 'x', (p.por ?? 'xb') as Poryadok);
     return {
@@ -1194,7 +1198,10 @@ export const PV7_KOREN_DROB: Prototype = {
           'Извлечь корень из числителя',
         ]),
         hint(`Чему равно $${d(c)}^2$?`, `$${t(c2)}$`, [`$${t(mul(q(c), q(2)))}$`, `$${t(q(c))}$`]),
-        hint('Чему равен знаменатель дроби?', `$${t(zn)}$`, [`$${t(c2)}$`, `$${t(mul(q(A), c2))}$`]),
+        hint('Чему равен знаменатель дроби?', `$${t(zn)}$`, [
+          `$${t(c2)}$`,
+          `$${t(mul(q(A), c2))}$`,
+        ]),
         hintOtbor(voprosIz(p, ['koren', 'menshiy', 'bolshiy']), `$${t(x)}$`, ryadom(x)),
       ],
     };
@@ -1218,7 +1225,7 @@ export const PV7_LOG_MNOZHITEL: Prototype = {
   id: 'PV7-LOG-MNOZHITEL',
   no: 112,
   group: 'IV',
-  title: 'Логарифм с множителем справа: logₐ(kx + b) = n·logₐ c',
+  title: 'Логарифм с множителем справа: $\\log_a(kx+b)=n\\log_a c$',
   formula: '\\log_a(kx+b)=n\\log_a c',
   skills: ['log-svoystva', 'perenos'],
   fipiNos: '',
@@ -1244,7 +1251,8 @@ export const PV7_LOG_MNOZHITEL: Prototype = {
     const c = num(p, 'c');
     const C = c ** n;
     const x = div(q(C - b), q(k));
-    if (!konechnaya(x)) throw new Error(`PV7-LOG-MNOZHITEL: корень — бесконечная дробь ${JSON.stringify(p)}`);
+    if (!konechnaya(x))
+      throw new Error(`PV7-LOG-MNOZHITEL: корень — бесконечная дробь ${JSON.stringify(p)}`);
     const ans = val(x);
     const E = lin(k, b, 'x', (p.por ?? 'bx') as Poryadok);
     const L = logTex(a);
@@ -1280,6 +1288,256 @@ export const PV7_LOG_MNOZHITEL: Prototype = {
           `$${E}=${d(c)}$`,
         ]),
         hint('Чему равен $x$?', `$${t(x)}$`, ryadom(x)),
+      ],
+    };
+  },
+};
+
+/* ── Партия 6 (варианты 31–36) ──────────────────────────────────── */
+
+/** Основание a^m в TeX: 0,2 вместо 1/5, если дробь конечная; иначе \frac{1}{a^|m|}. */
+function osnovanieStepeni(a: number, m: number): string {
+  if (m > 0) return d(a ** m);
+  const v = div(q(1), q(a ** -m));
+  return konechnaya(v) ? t(v) : `\\frac{1}{${d(a ** -m)}}`;
+}
+
+function logPo(osn: string): string {
+  return osn.length === 1 ? `\\log_${osn}` : `\\log_{${osn}}`;
+}
+
+function uravnenieTozhdestvo(p: Params): string {
+  const a = num(p, 'a');
+  const k = num(p, 'k');
+  const E = lin(num(p, 'kx'), num(p, 'b'), 'x', (p.por ?? 'xb') as Poryadok);
+  return `${d(a)}^{${logPo(d(a ** k))}(${E})}=${d(num(p, 'D'))}`;
+}
+
+/**
+ * a^(log_{a^k}(kx·x + b)) = D: основание логарифма — степень основания
+ * степени. Подвох — тождество a^{logₐ E} = E здесь напрямую не
+ * работает: log_{a^k} E = (1/k)·logₐ E, и слева стоит E^{1/k}, а не E;
+ * отсюда kx·x + b = D^k, а не D.
+ */
+export const PV7_TOZHDESTVO_STEPEN: Prototype = {
+  id: 'PV7-TOZHDESTVO-STEPEN',
+  no: 113,
+  group: 'IV',
+  title: 'Основное тождество, основание логарифма — степень: $a^{\\log_{a^k} E}=D$',
+  formula: 'a^{\\log_{a^k}(bx+c)}=D',
+  skills: ['log-svoystva', 'log-opredelenie'],
+  fipiNos: '',
+  uravnenie: uravnenieTozhdestvo,
+  uslovie(p) {
+    return uslovieTekst(uravnenieTozhdestvo(p), 'koren');
+  },
+  vopros: () => 'koren',
+  chisla(p) {
+    const a = num(p, 'a');
+    const k = num(p, 'k');
+    const kx = num(p, 'kx');
+    const b = num(p, 'b');
+    return {
+      lhs: (x) => a ** (Math.log(kx * x + b) / Math.log(a ** k)),
+      rhs: () => num(p, 'D'),
+      odz: (x) => kx * x + b > 0,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const k = num(p, 'k');
+    const kx = num(p, 'kx');
+    const b = num(p, 'b');
+    const D = num(p, 'D');
+    const Dk = D ** k;
+    const x = div(q(Dk - b), q(kx));
+    if (!konechnaya(x))
+      throw new Error(`PV7-TOZHDESTVO-STEPEN: корень — бесконечная дробь ${JSON.stringify(p)}`);
+    const ans = val(x);
+    const por = (p.por ?? 'xb') as Poryadok;
+    const E = lin(kx, b, 'x', por);
+    const ak = d(a ** k);
+    const koren = k === 2 ? '\\sqrt' : `\\sqrt[${k}]`;
+    return {
+      answer: ans,
+      uravnenie: uravnenieTozhdestvo(p),
+      korni: [ans],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          `Основание логарифма $${ak}=${d(a)}^{${k}}$ — степень числа $${d(a)}$. Перейдём к логарифму по основанию $${d(a)}$ и применим основное логарифмическое тождество.`,
+        ],
+        odz: [`Аргумент логарифма положителен: $${E}>0$.`],
+        preobr: [
+          `$${logPo(ak)}(${E})=\\dfrac{1}{${k}}\\log_{${d(a)}}(${E})$, поэтому левая часть равна $${d(a)}^{\\frac{1}{${k}}\\log_{${d(a)}}(${E})}=(${E})^{\\frac{1}{${k}}}=${koren}{${E}}$.`,
+          `$${koren}{${E}}=${d(D)}$, значит $${E}=${d(D)}^{${k}}=${d(Dk)}$.`,
+          ...linReshenie(kx, b, q(Dk), por),
+        ],
+        korni: [`$x=${t(x)}$.`],
+        proverka: [
+          `При $x=${t(x)}$: $${E}=${d(Dk)}>0$, $${logPo(ak)}${d(Dk)}=\\dfrac{1}{${k}}\\log_{${d(a)}}${d(Dk)}$ и $${d(a)}^{\\frac{1}{${k}}\\log_{${d(a)}}${d(Dk)}}=${koren}{${d(Dk)}}=${d(D)}$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(
+          `Чему равно $${logPo(ak)}(${E})$ через логарифм по основанию $${d(a)}$?`,
+          `$\\dfrac{1}{${k}}\\log_{${d(a)}}(${E})$`,
+          [`$${k}\\log_{${d(a)}}(${E})$`, `$\\log_{${d(a)}}(${E})$`],
+        ),
+        hint('Какое уравнение получится для выражения под логарифмом?', `$${E}=${d(Dk)}$`, [
+          `$${E}=${d(D)}$`,
+          `$${E}=${d(D * k)}$`,
+        ]),
+        hint('Чему равен $x$?', `$${t(x)}$`, ryadom(x)),
+      ],
+    };
+  },
+};
+
+function uravnenieLogOsn(p: Params): string {
+  const a = num(p, 'a');
+  const m = num(p, 'm');
+  const F = lin(num(p, 'k1'), num(p, 'b1'));
+  const G = lin(num(p, 'k2'), num(p, 'b2'));
+  return `${logTex(a)}(${F})=${logPo(osnovanieStepeni(a, m))}(${G})`;
+}
+
+/** Корни A x² + B x + C = 0, где F^m = G (m = −1 или 2), по возрастанию, или null. */
+function korniLogOsn(p: Params): { A: number; B: number; C: number; korni: number[] } | null {
+  const m = num(p, 'm');
+  const k1 = num(p, 'k1');
+  const b1 = num(p, 'b1');
+  const k2 = num(p, 'k2');
+  const b2 = num(p, 'b2');
+  const [A, B, C] =
+    m === -1
+      ? [k1 * k2, k1 * b2 + k2 * b1, b1 * b2 - 1]
+      : [k1 * k1, 2 * k1 * b1 - k2, b1 * b1 - b2];
+  const Dis = B * B - 4 * A * C;
+  if (Dis <= 0) return null;
+  const s = Math.sqrt(Dis);
+  if (!Number.isInteger(s)) return null;
+  const x1 = val(div(q(-B - s), q(2 * A)));
+  const x2 = val(div(q(-B + s), q(2 * A)));
+  return { A, B, C, korni: [Math.min(x1, x2), Math.max(x1, x2)] };
+}
+
+/**
+ * logₐ F = log_{a^m} G при m = −1 (основание 1/a) или m = 2 (a²):
+ * переходим к основанию a — m·logₐ F = logₐ G, то есть F^m = G.
+ * Подвох — квадратное уравнение даёт два корня, ОДЗ (F > 0 и G > 0)
+ * оставляет один; «меньший из корней» — оставшийся, а не меньший корень
+ * квадратного уравнения.
+ */
+export const PV7_LOG_OSNOVANIYA: Prototype = {
+  id: 'PV7-LOG-OSNOVANIYA',
+  no: 114,
+  group: 'IV',
+  title: 'Логарифмы по основаниям $a$ и $\\frac1a$ (или $a^2$): квадратное уравнение и ОДЗ',
+  formula: '\\log_a F=\\log_{a^m} G',
+  skills: ['log-svoystva', 'log-opredelenie', 'diskriminant'],
+  fipiNos: '',
+  uravnenie: uravnenieLogOsn,
+  uslovie(p) {
+    return uslovieTekst(uravnenieLogOsn(p), 'menshiy');
+  },
+  vopros: () => 'menshiy',
+  chisla(p) {
+    const a = num(p, 'a');
+    const m = num(p, 'm');
+    const f = (x: number) => num(p, 'k1') * x + num(p, 'b1');
+    const g = (x: number) => num(p, 'k2') * x + num(p, 'b2');
+    return {
+      lhs: (x) => Math.log(f(x)) / Math.log(a),
+      rhs: (x) => Math.log(g(x)) / Math.log(a ** m),
+      odz: (x) => f(x) > 0 && g(x) > 0,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const m = num(p, 'm');
+    const k1 = num(p, 'k1');
+    const b1 = num(p, 'b1');
+    const k2 = num(p, 'k2');
+    const b2 = num(p, 'b2');
+    const r = korniLogOsn(p);
+    if (r === null)
+      throw new Error(`PV7-LOG-OSNOVANIYA: нет двух рациональных корней ${JSON.stringify(p)}`);
+    const { A, B, C, korni } = r;
+    const [x1, x2] = korni as [number, number];
+    const F = lin(k1, b1);
+    const G = lin(k2, b2);
+    const ok = (x: number) => k1 * x + b1 > 0 && k2 * x + b2 > 0;
+    const goden = korni.filter(ok);
+    const plohie = korni.filter((x) => !ok(x));
+    if (goden.length !== 1)
+      throw new Error('PV7-LOG-OSNOVANIYA: в ОДЗ должен остаться один корень');
+    const ans = goden[0] as number;
+    if (!konechnaya(q(Math.round(ans * 1e6), 1e6)))
+      throw new Error('PV7-LOG-OSNOVANIYA: корень не конечная дробь');
+    const osn = osnovanieStepeni(a, m);
+    const L = logTex(a);
+    const per =
+      m === -1
+        ? `$${logPo(osn)}(${G})=-${L}(${G})$, так как $${osn}=${d(a)}^{-1}$. Уравнение: $${L}(${F})=-${L}(${G})$, то есть $${L}(${F})+${L}(${G})=0$ и $(${F})(${G})=1$.`
+        : `$${logPo(osn)}(${G})=\\dfrac12${L}(${G})$, так как $${osn}=${d(a)}^{2}$. Уравнение: $2${L}(${F})=${L}(${G})$, то есть $(${F})^2=${G}$.`;
+    const kvTex = `${A === 1 ? '' : d(A)}x^2${B === 0 ? '' : B < 0 ? `-${Math.abs(B) === 1 ? '' : d(-B)}x` : `+${B === 1 ? '' : d(B)}x`}${C === 0 ? '' : C < 0 ? d(C) : `+${d(C)}`}=0`;
+    const podst = (x: number) => `$${F}=${d(k1 * x + b1)}$, $${G}=${d(k2 * x + b2)}$`;
+    return {
+      answer: ans,
+      uravnenie: uravnenieLogOsn(p),
+      korni,
+      postoronnie: plohie,
+      etapy: razbor({
+        plan: [
+          `Основание $${osn}$ — степень числа $${d(a)}$. Перейдём к одному основанию $${d(a)}$, уберём логарифмы и отберём корни по ОДЗ.`,
+        ],
+        odz: [`$${F}>0$ и $${G}>0$.`],
+        preobr: [
+          per,
+          `Раскрываем скобки: $${kvTex}$.`,
+          `$D=${d(B * B - 4 * A * C)}$, корни $x=${d(x1)}$ и $x=${d(x2)}$.`,
+        ],
+        korni: [`$x=${d(x1)}$ или $x=${d(x2)}$.`],
+        otbor: [
+          ...korni.map((x) =>
+            ok(x)
+              ? `$x=${d(x)}$: ${podst(x)} — оба положительны, подходит.`
+              : `$x=${d(x)}$: ${podst(x)} — не входит в ОДЗ, корень посторонний.`,
+          ),
+          'Подходит один корень — он и есть ответ.',
+        ],
+        proverka: [
+          m === -1
+            ? `При $x=${d(ans)}$: $${L}${d(k1 * ans + b1)}$ и $${logPo(osn)}${d(k2 * ans + b2)}=-${L}${d(k2 * ans + b2)}$ — равны, потому что $${d(k1 * ans + b1)}\\cdot${d(k2 * ans + b2)}=1$.`
+            : `При $x=${d(ans)}$: $(${d(k1 * ans + b1)})^2=${d((k1 * ans + b1) ** 2)}=${d(k2 * ans + b2)}$ — равенство верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(
+          `Чему равен $${logPo(osn)}(${G})$ через логарифм по основанию $${d(a)}$?`,
+          m === -1 ? `$-${L}(${G})$` : `$\\dfrac12${L}(${G})$`,
+          m === -1
+            ? [`$${L}(${G})$`, `$\\dfrac{1}{${L}(${G})}$`]
+            : [`$2${L}(${G})$`, `$${L}(${G})$`],
+        ),
+        hint(
+          'Какое уравнение получится без логарифмов?',
+          m === -1 ? `$(${F})(${G})=1$` : `$(${F})^2=${G}$`,
+          [`$${F}=${G}$`, m === -1 ? `$(${F})(${G})=-1$` : `$${F}=(${G})^2$`],
+        ),
+        hintOtbor(
+          'menshiy',
+          `$${d(ans)}$`,
+          korni.filter((x) => x !== ans).map((x) => `$${d(x)}$`),
+          plohie.length > 0
+            ? `При $x=${d(plohie[0] as number)}$ выражение под логарифмом не положительно — корень посторонний.`
+            : undefined,
+        ),
       ],
     };
   },

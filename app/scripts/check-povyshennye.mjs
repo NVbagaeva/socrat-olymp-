@@ -640,8 +640,7 @@ Object.assign(VTOROY, {
     /* Длина трубы растёт при остывании — бисекция по T от T_в вниз до T_п. */
     r6(
       bisekciya(
-        (T) =>
-          -(((p.alpha * p.c * p.m) / p.gamma) * Math.log2((p.Tv - p.Tp) / (T - p.Tp)) - p.x),
+        (T) => -(((p.alpha * p.c * p.m) / p.gamma) * Math.log2((p.Tv - p.Tp) / (T - p.Tp)) - p.x),
         p.Tp + 1e-9,
         p.Tv,
       ),
@@ -657,7 +656,8 @@ Object.assign(VTOROY, {
   'z11.mastera': (p) => {
     /* Перебор производительности второго мастера: разница во времени в минутах. */
     for (let y = p.r + 1; y <= 1000; y += 1) {
-      if (Math.abs((p.N1 / (y - p.r) - p.N2 / y) * 60 - p.tm) < 1e-9) return p.ask === 'vtoroy' ? y : y - p.r;
+      if (Math.abs((p.N1 / (y - p.r) - p.N2 / y) * 60 - p.tm) < 1e-9)
+        return p.ask === 'vtoroy' ? y : y - p.r;
     }
     return NaN;
   },
@@ -721,7 +721,8 @@ Object.assign(VTOROY, {
     const C = naKruge(2 * p.abd + 2 * p.cad);
     const B = naKruge((2 * p.abd + 2 * p.cad + 360) / 2);
     /* Построение сверяем с условием: углы ABD и CAD — те, что даны. */
-    if (Math.abs(ugol(A, B, D) - p.abd) > 1e-6 || Math.abs(ugol(C, A, D) - p.cad) > 1e-6) return NaN;
+    if (Math.abs(ugol(A, B, D) - p.abd) > 1e-6 || Math.abs(ugol(C, A, D) - p.cad) > 1e-6)
+      return NaN;
     return r6(ugol(A, B, C));
   },
   'z01.vpisannyy-cad': (p) => {
@@ -729,7 +730,8 @@ Object.assign(VTOROY, {
     const D = naKruge(2 * p.abd);
     const C = naKruge(2 * p.abc);
     const B = naKruge((2 * p.abc + 360) / 2);
-    if (Math.abs(ugol(A, B, C) - p.abc) > 1e-6 || Math.abs(ugol(A, B, D) - p.abd) > 1e-6) return NaN;
+    if (Math.abs(ugol(A, B, C) - p.abc) > 1e-6 || Math.abs(ugol(A, B, D) - p.abd) > 1e-6)
+      return NaN;
     return r6(ugol(C, A, D));
   },
   'z02.skalyar-treh': (p) => VK.skalyarnoeTrehPoRisunku(p).proverka,
@@ -756,8 +758,20 @@ Object.assign(VTOROY, {
     r6(2 * bisekciya((a) => p.m * p.v ** 2 * Math.sin((a * Math.PI) / 180) ** 2 - p.Q, 0, 90)),
   'z10.platforma': (p) =>
     p.vid === 'v'
-      ? r6(bisekciya((v) => (p.m / (p.m + p.M)) * v * Math.cos((p.alpha * Math.PI) / 180) - p.u, 0, 1e4))
-      : r6(bisekciya((a) => -((p.m / (p.m + p.M)) * p.v * Math.cos((a * Math.PI) / 180) - p.u), 0, 90)),
+      ? r6(
+          bisekciya(
+            (v) => (p.m / (p.m + p.M)) * v * Math.cos((p.alpha * Math.PI) / 180) - p.u,
+            0,
+            1e4,
+          ),
+        )
+      : r6(
+          bisekciya(
+            (a) => -((p.m / (p.m + p.M)) * p.v * Math.cos((a * Math.PI) / 180) - p.u),
+            0,
+            90,
+          ),
+        ),
   'z10.kolodec': (p) => r6(5 * p.t1 ** 2 - 5 * (p.t1 - p.dt) ** 2),
   'z10.arhimed': (p) =>
     r6(bisekciya((x) => (p.vid === 'shar' ? p.alpha : 1) * p.rho * p.g * x ** 3 - p.F, 0, 100)),
@@ -782,7 +796,11 @@ Object.assign(VTOROY, {
   },
   'z11.splavy': (p) => {
     /* Бисекция по массе первого сплава: масса металла в смеси. */
-    const m1 = bisekciya((x) => -((x * p.p1 + (p.M - x) * p.p2) / 100 - (p.M * p.p3) / 100), 0, p.M);
+    const m1 = bisekciya(
+      (x) => -((x * p.p1 + (p.M - x) * p.p2) / 100 - (p.M * p.p3) / 100),
+      0,
+      p.M,
+    );
     const m2 = p.M - m1;
     return r6(p.ask === 'pervyy' ? m1 : p.ask === 'vtoroy' ? m2 : Math.abs(m2 - m1));
   },
@@ -798,6 +816,140 @@ Object.assign(VTOROY, {
     return r6(p.ask === 'pervyy' ? t : (t * p.b) / p.a);
   },
   'z12.dve-pryamye': (p) => r6(GR.dvePryamye(p).proverka),
+});
+
+/* ── Партия 6 (варианты 31–36) ──────────────────────────────────── */
+
+/** Точка пересечения прямых PQ и RS. */
+function peresechenie(P, Q, R, S) {
+  const d1 = [Q[0] - P[0], Q[1] - P[1]];
+  const d2 = [S[0] - R[0], S[1] - R[1]];
+  const den = d1[0] * d2[1] - d1[1] * d2[0];
+  const t = ((R[0] - P[0]) * d2[1] - (R[1] - P[1]) * d2[0]) / den;
+  return [P[0] + t * d1[0], P[1] + t * d1[1]];
+}
+
+/** Секущие из C: дуга AB (без D, E) = t, дуга DE = δ; точки на единичной окружности. */
+function sekushchie(t, delta) {
+  const x = (360 - t - delta) / 2;
+  const D = naKruge(delta / 2);
+  const E = naKruge(-delta / 2);
+  const B = naKruge(delta / 2 + x);
+  const A = naKruge(-delta / 2 - x);
+  return { A, B, D, E, C: peresechenie(B, D, A, E) };
+}
+
+Object.assign(VTOROY, {
+  'z01.sekushchie-dae': (p) => {
+    const g = sekushchie(p.t, p.t - 2 * p.f);
+    if (Math.abs(ugol(g.A, g.C, g.B) - p.f) > 1e-6) return NaN;
+    return r6(ugol(g.D, g.A, g.E));
+  },
+  'z01.sekushchie-acb': (p) => {
+    const g = sekushchie(p.t, p.s);
+    if (
+      Math.abs(ugol(g.A, g.D, g.B) - p.t / 2) > 1e-6 ||
+      Math.abs(ugol(g.D, g.A, g.E) - p.s / 2) > 1e-6
+    )
+      return NaN;
+    return r6(ugol(g.A, g.C, g.B));
+  },
+  'z01.horda-ugol': (p) => {
+    const R = p.a * Math.sqrt(p.m);
+    if (p.k) {
+      /* Тупой вписанный угол g опирается на меньшую дугу 360 − 2g; хорда — расстояние между её концами. */
+      const A = naKruge(0).map((c) => c * R);
+      const B = naKruge(360 - 2 * p.g).map((c) => c * R);
+      return r6(Math.hypot(A[0] - B[0], A[1] - B[1]));
+    }
+    /* Хорда c: центральный угол 2·arcsin(c/2R); C — середина меньшей дуги. */
+    const sinKv = p.g === 120 ? 3 : p.g === 135 ? 2 : 1;
+    const c = p.a * Math.sqrt(p.m * sinKv);
+    const u = (2 * Math.asin(c / (2 * R)) * 180) / Math.PI;
+    return r6(ugol(naKruge(0), naKruge(u / 2), naKruge(u)));
+  },
+  'z01.pryamoy-katet': (p) => {
+    if (p.k) {
+      /* cos A = v/√(u² + v²): угол A, AC = BC·ctg A. */
+      const A = Math.acos(p.v / Math.hypot(p.u, p.v));
+      return r6(p.bc / Math.tan(A));
+    }
+    /* BC = AB·sin A, AC — по теореме Пифагора. */
+    const bc = (p.ab * p.p) / p.r;
+    return r6(Math.sqrt(p.ab ** 2 - bc ** 2));
+  },
+  'z02.dlina-treh': (p) => VK.dlinaTrehPoRisunku(p).proverka,
+  'z02.dlina-otnoshenie': (p) => r6(VK.dlinaOtnoshenie(p).proverka),
+  'z03.detal': (p) => Z3_5.PV03_DETAL.poModeli(p),
+  'z03.srednyaya-liniya': (p) => Z3_3.PV03_SREDNYAYA.poModeli(p),
+  'z03.shest-chast': (p) => Z3_3.PV03_SHEST_CHAST.poModeli(p),
+  'z03.cilindr-s-po-sharu': (p) => Z3_8.PV03_CILINDR_S_PO_SHARU.poModeli(p),
+  'z04.vertolet': (p) => VER.PV4_VERTOLET.perebor(p),
+  'z04.sumki-na': (p) => VER.PV4_SUMKI_NA.perebor(p),
+  'z05.chaynye-pary': (p) => VER.PV5_CHAYNYE_PARY.perebor(p),
+  'z05.pervyy-raz': (p) => VER.PV5_PERVYY_RAZ.perebor(p),
+  'z05.dva-tsveta': (p) => VER.PV5_DVA_TSVETA.perebor(p),
+  'z07.tozhdestvo-stepen': podstanovka7(Z7.PV7_TOZHDESTVO_STEPEN),
+  'z07.log-osnovaniya': podstanovka7(Z7.PV7_LOG_OSNOVANIYA),
+  'z08.stepeni-vlozhennye': (p) => r6(VY.stepeniVlozhennye(p).proverka),
+  'z08.cos-dvoynogo-po': (p) => r6(VY.cosDvoynogoPo(p).proverka),
+  'z08.korni-drob': (p) => r6(VY.korniDrob(p).proverka),
+  'z09.summa-celyh': (p) => PR9.summaCelyhFprime(p)?.proverka ?? NaN,
+  'z09.metki-fprime': (p) => PR9.metkiFprime(p)?.proverka ?? NaN,
+  'z09.parallel-fprime': (p) => PR9.kasatParallelFprime(p)?.proverka ?? NaN,
+  'z10.bak-koren': (p) => {
+    /* Бисекция по t: H(t) убывает до опустошения, ищем H = H₀/n². */
+    const k = 1 / p.kDen;
+    const H = (t) => p.H0 - Math.sqrt(20 * p.H0) * k * t + 5 * k * k * t * t;
+    const tPust = Math.sqrt(p.H0 / 5) / k;
+    return r6(bisekciya((t) => -(H(t) - p.H0 / p.n ** 2), 0, tPust));
+  },
+  'z10.kondensator': (p) =>
+    r6(bisekciya((U) => -(p.alpha * p.Cm * p.Rm * Math.log2(p.U0 / U) - p.t), 1e-9, p.U0)),
+  'z10.nagrev': (p) => {
+    const a = p.aNum / p.aDen;
+    /* Температура растёт до вершины: первое время, когда T = Tmax. */
+    const T = (t) => p.T0 + p.b * t + a * t * t;
+    return r6(bisekciya((t) => T(t) - p.Tmax, 0, -p.b / (2 * a)));
+  },
+  'z10.bak-kvadrat': (p) => {
+    const a = 1 / p.aDen;
+    const b = -p.bNum / p.bDen;
+    /* H убывает до вершины, где H = 0 (касание): минимум по перебору. */
+    let best = 0;
+    let hmin = Infinity;
+    for (let i = 0; i <= 200000; i += 1) {
+      const t = i / 1000;
+      const h = a * t * t + b * t + p.H0;
+      if (h < hmin) {
+        hmin = h;
+        best = t;
+      }
+    }
+    return Math.abs(hmin) < 1e-6 ? r6(best) : NaN;
+  },
+  'z11.truby': (p) => {
+    /* Перебор пропускной способности первой трубы с шагом 0,01. */
+    for (let i = 1; i <= 100000; i += 1) {
+      const x = i / 100;
+      if (Math.abs(p.V1 / x - p.V2 / (x + p.d) - p.t) < 1e-9)
+        return p.ask === 'pervaya' ? x : r6(x + p.d);
+    }
+    return NaN;
+  },
+  'z11.teplohody': (p) => {
+    for (let x = 1; x <= 1000; x += 1) {
+      if (Math.abs(p.S / x - p.S / (x + p.dv) - p.t) < 1e-9)
+        return p.ask === 'pervyy' ? x : x + p.dv;
+    }
+    return NaN;
+  },
+  'z13.tri-ravnyh-summa': (p) => {
+    const S = p.S * 1000;
+    const k = 1 + p.r / 100;
+    const X = bisekciya((x) => -(((S * k - x) * k - x) * k - x), 0, S * 2);
+    return Math.round(3 * X * 100) / 100;
+  },
 });
 
 /* ── Варианты ───────────────────────────────────────────────────── */
@@ -891,8 +1043,7 @@ for (const k of nomera) {
       }
       /* №9 без рисунка — задачи по формуле: скорость по закону движения, касательная по уравнению. */
       const bezRisunka = z.s.startsWith('z09.skorost') || z.s === 'z09.kasatelnaya-formula';
-      if ([1, 3, 9, 12].includes(ege) && t.figure === null && !bezRisunka)
-        fail(kv, 'нет рисунка');
+      if ([1, 3, 9, 12].includes(ege) && t.figure === null && !bezRisunka) fail(kv, 'нет рисунка');
       const vtoroy = VTOROY[z.s]?.(z.p);
       if (vtoroy === undefined || !close(vtoroy, x)) {
         fail(kv, `второй счёт ${vtoroy} ≠ ответу ${x}`);

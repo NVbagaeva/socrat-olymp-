@@ -251,8 +251,9 @@ export const PV03_SHAR_CILINDR_S: Prototype = {
   /* По модели: боковая и полная поверхности измеренного цилиндра (r, 2r);
      поверхность шара — боковая (Архимед), отношение — как у P03-87. */
   poModeli: (p) =>
-    Math.round((num(p, 'vid') === 1 ? num(p, 'S') : num(p, 'S') / cylinderOverBallArea(2.5)) * 1e6) /
-    1e6,
+    Math.round(
+      (num(p, 'vid') === 1 ? num(p, 'S') : num(p, 'S') / cylinderOverBallArea(2.5)) * 1e6,
+    ) / 1e6,
   chertezh: () => ballInCylinder('Шар, вписанный в цилиндр'),
   shagi: (p) => {
     const S = num(p, 'S');
@@ -275,6 +276,52 @@ export const PV03_SHAR_CILINDR_S: Prototype = {
           : `Площадь поверхности шара: $${ru(S)}\\cdot\\dfrac23=${ru(ans)}$.`,
         value: ans,
       },
+    ];
+  },
+  varianty: [],
+};
+
+/* ── Партия 6: поверхность цилиндра по поверхности вписанного шара ── */
+
+/**
+ * Шар вписан в цилиндр; дана площадь поверхности шара — найти полную
+ * (vid 0) или боковую (vid 1) поверхность цилиндра. Обратная к
+ * PV03_SHAR_CILINDR_S. Подвох — боковая поверхность цилиндра равна
+ * поверхности шара, а полная — в полтора раза больше.
+ */
+export const PV03_CILINDR_S_PO_SHARU: Prototype = {
+  id: 'PV03-cilindr-S-po-sharu',
+  razdel: 'VIII',
+  status: 'добавить',
+  zadachnik: [290, 293],
+  nazvanie: 'Шар в цилиндре: поверхность цилиндра по поверхности шара',
+  tip: 'полная или боковая поверхность цилиндра по поверхности вписанного шара',
+  format: 'десятичная',
+  uslovie: (p) =>
+    `В цилиндр вписан шар, площадь его поверхности равна ${ru(num(p, 'S'))}. Найдите площадь ${num(p, 'vid') === 1 ? 'боковой' : 'полной'} поверхности цилиндра.`,
+  dopustimo: (p) => num(p, 'S') > 0,
+  otvet: (p) => (num(p, 'vid') === 1 ? num(p, 'S') : Math.round(num(p, 'S') * 1.5 * 1e9) / 1e9),
+  poModeli: (p) =>
+    Math.round(
+      (num(p, 'vid') === 1 ? num(p, 'S') : num(p, 'S') * cylinderOverBallArea(2.5)) * 1e6,
+    ) / 1e6,
+  chertezh: () => ballInCylinder('Шар, вписанный в цилиндр'),
+  shagi: (p) => {
+    const S = num(p, 'S');
+    const bok = num(p, 'vid') === 1;
+    return [
+      {
+        text: 'Радиус основания цилиндра равен радиусу шара $R$, высота — диаметру $2R$. Поверхность шара $4\\pi R^2$.',
+      },
+      bok
+        ? {
+            text: `Боковая поверхность цилиндра $2\\pi R\\cdot 2R = 4\\pi R^2$ — столько же, сколько у шара: ${ru(S)}.`,
+            value: S,
+          }
+        : {
+            text: `Полная поверхность цилиндра $4\\pi R^2 + 2\\pi R^2 = 6\\pi R^2$ — в полтора раза больше поверхности шара: $${ru(S)}\\cdot 1{,}5 = ${ru(S * 1.5)}$.`,
+            value: S * 1.5,
+          },
     ];
   },
   varianty: [],

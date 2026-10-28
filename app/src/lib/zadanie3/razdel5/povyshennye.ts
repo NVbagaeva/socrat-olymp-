@@ -13,7 +13,7 @@ import { polygonStart, regularPolygon, rightPrism } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { type Model } from '../../solid/model';
 import { volumeUnits } from './common';
-import { twoMugs } from './drawings';
+import { twoMugs, vesselWithRise } from './drawings';
 import { razaWord, ru } from '../format';
 import { type Prototype, num, text } from '../types';
 
@@ -296,6 +296,76 @@ export const PV03_SOSUD_PRIZMA: Prototype = {
       {
         text: `Объём воды тот же: $V=S\\cdot h$, и уровень уменьшается во столько же раз, во сколько выросла площадь: $${ru(h)} : ${ru(n * n)} = ${ru(ans)}$ см.`,
         value: ans,
+      },
+    ];
+  },
+  varianty: [],
+};
+
+/* ── Партия 6 (варианты 31–36): деталь в цилиндрическом сосуде ───── */
+
+/**
+ * Деталь погрузили в цилиндрический сосуд с водой: vid 'na' — дан объём
+ * воды V, уровень H и подъём dh (как P03-65); vid 'raz' — объём воды V и
+ * во сколько раз k вырос уровень (как P03-66). Подвох — объём детали
+ * равен объёму «добавленного» столбика, а не всему новому объёму.
+ */
+export const PV03_DETAL: Prototype = {
+  id: 'PV03-detal',
+  razdel: 'V',
+  nazvanie: 'Деталь в цилиндрическом сосуде: объём по подъёму уровня',
+  tip: 'объём детали по подъёму уровня воды',
+  zadachnik: [216, 225],
+  status: 'добавить',
+  format: 'десятичная',
+  uslovie: (p) =>
+    text(p, 'vid') === 'na'
+      ? `В цилиндрическом сосуде ${ru(num(p, 'V'))} см³ воды, её уровень — ${ru(num(p, 'H'))} см. Когда в воду целиком опустили деталь, уровень поднялся на ${ru(num(p, 'dh'))} см. Чему равен объём детали? Ответ дайте в кубических сантиметрах.`
+      : `В цилиндрический сосуд налито ${ru(num(p, 'V'))} см³ воды. После того как в неё целиком опустили деталь, уровень воды стал в ${ru(num(p, 'k'))} ${razaWord(num(p, 'k'))} выше. Чему равен объём детали? Ответ дайте в кубических сантиметрах.`,
+  dopustimo: (p) =>
+    num(p, 'V') > 0 &&
+    (text(p, 'vid') === 'na' ? num(p, 'H') > 0 && num(p, 'dh') > 0 : num(p, 'k') > 1),
+  otvet: (p) =>
+    Math.round(
+      (text(p, 'vid') === 'na'
+        ? (num(p, 'V') * num(p, 'dh')) / num(p, 'H')
+        : num(p, 'V') * (num(p, 'k') - 1)) * 1e9,
+    ) / 1e9,
+  /* По модели: столбики воды единичного сечения, масштаб — по объёму воды. */
+  poModeli: (p) => {
+    const H = text(p, 'vid') === 'na' ? num(p, 'H') : 1;
+    const dh = text(p, 'vid') === 'na' ? num(p, 'dh') : num(p, 'k') - 1;
+    const scale = num(p, 'V') / volumeUnits(1, H);
+    return Math.round(scale * volumeUnits(1, dh) * 1e6) / 1e6;
+  },
+  chertezh: () =>
+    vesselWithRise('Цилиндрический сосуд с водой: уровень до и после погружения детали', 2.4, 3.5),
+  shagi: (p) => {
+    const V = num(p, 'V');
+    if (text(p, 'vid') === 'na') {
+      const H = num(p, 'H');
+      const dh = num(p, 'dh');
+      const S = V / H;
+      return [
+        {
+          text: `Объём воды — площадь дна на высоту уровня, поэтому площадь дна $S = ${ru(V)} : ${ru(H)} = ${ru(S)}$ см².`,
+          value: S,
+        },
+        {
+          text: `Деталь вытеснила воду, и уровень поднялся на ${ru(dh)} см: её объём — столбик над прежним уровнем, $${ru(S)}\\cdot ${ru(dh)} = ${ru(S * dh)}$ см³.`,
+          value: S * dh,
+        },
+      ];
+    }
+    const k = num(p, 'k');
+    return [
+      {
+        text: `Сечение сосуда одно и то же, объёмы пропорциональны уровням: вода вместе с деталью занимает в ${ru(k)} ${razaWord(k)} больше, $${ru(V)}\\cdot ${ru(k)} = ${ru(V * k)}$ см³.`,
+        value: V * k,
+      },
+      {
+        text: `Объём детали — разность: $${ru(V * k)} - ${ru(V)} = ${ru(V * (k - 1))}$ см³.`,
+        value: V * (k - 1),
       },
     ];
   },
