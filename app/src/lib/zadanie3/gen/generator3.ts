@@ -34,7 +34,7 @@ import {
   type Dop3,
   type SheetParams3,
   type VidRaboty3,
-} from './list3';
+} from './params3';
 
 export function config3(razdely: readonly Razdel3[], slot: string): GenConfig {
   return {

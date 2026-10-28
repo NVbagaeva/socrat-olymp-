@@ -636,6 +636,10 @@
   width: 100%;
   height: auto;
 }
+/* Живой чертёж стереометрии: шире — кнопки вида встают под ним. */
+.gen-task__fig--3d {
+  width: min(48%, 300px);
+}
 .gen-task__ans {
   clear: right;
   display: flex;

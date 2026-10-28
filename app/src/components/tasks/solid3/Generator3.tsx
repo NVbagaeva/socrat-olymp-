@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { Generator } from '@/components/generator/Generator';
 import { config3, engine3 } from '@/lib/zadanie3/gen/generator3';
 import type { Razdel3 } from '@/lib/zadanie3/gen/info';
-import { zagruzitDannye3 } from '@/lib/zadanie3/gen/list3';
+import { zagruzitDannye3 } from '@/lib/zadanie3/gen/params3';
 
 /**
  * Вкладка «Генератор» задания №3: общий генератор (components/generator/)
