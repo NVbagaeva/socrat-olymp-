@@ -1185,6 +1185,25 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
           ] as [number, number, 'end' | 'start'][])
         : []),
     ];
+    /* Точки, подписанные числами: подпись «−1» или «1» под осью рядом с
+       нулём читается как «−10» / «01». Их места под осью — препятствия
+       для нуля, с запасом в ширину цифры. */
+    const sosedi: Podpis[] =
+      fig.metkiChislami === true
+        ? (fig.metki ?? [])
+            .filter((m) => Math.abs(m) <= 1)
+            .map((m) => {
+              const t = minusify(String(m));
+              return {
+                kind: 'tick',
+                id: t,
+                x: sx(m),
+                y: axisX + 7 + V.tick.size * 0.42,
+                halfW: textWidth(t, V.tick.size) / 2 + zeroW,
+                halfH: V.tick.size * 0.42,
+              };
+            })
+        : [];
     let best: { b: Podpis; x: number; y: number; anchor: 'end' | 'start'; min: number } | null =
       null;
     for (const [x, y, anchor] of spots) {
@@ -1196,10 +1215,14 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
         halfW,
         halfH,
       };
-      const min = zazor(
-        boxRect(b),
-        obstacles.filter((o) => o.what !== 'ось x' && o.what !== 'ось y'),
-      ).min;
+      const rect = boxRect(b);
+      const min = Math.min(
+        zazor(
+          rect,
+          obstacles.filter((o) => o.what !== 'ось x' && o.what !== 'ось y'),
+        ).min,
+        ...sosedi.map((q) => rectGap(boxRect(q), rect)),
+      );
       if (best === null || min > best.min) {
         best = { b, x, y, anchor, min };
       }
@@ -1226,14 +1249,17 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
      над осью. Подпись, которую задевает кривая, сдвигается вдоль оси
      в своём ряду. */
   {
-    const size = V.mark.size;
-    /* Рамка подписи с опущенным индексом: от верха буквы до низа индекса. */
-    const halfH = size * 0.52;
+    const chislami = fig.metkiChislami === true;
+    const size = chislami ? V.tick.size : V.mark.size;
+    /* Рамка подписи с опущенным индексом: от верха буквы до низа индекса;
+       у подписи-числа — как у чисел на оси. */
+    const halfH = chislami ? size * 0.42 : size * 0.52;
     const vniz = axisX + 7 + halfH;
     const vverh = axisX - 7 - halfH;
     const podpisi = metki.map((m, i) => {
-      const sub = String(i + 1);
-      return { m, sub, x: sx(m), halfW: shirinaX(sub) / 2 + 1.5 };
+      const sub = chislami ? minusify(String(m)) : String(i + 1);
+      const halfW = chislami ? textWidth(sub, size) / 2 + 1.5 : shirinaX(sub) / 2 + 1.5;
+      return { m, sub, x: sx(m), halfW };
     });
     const tesno = podpisi.some((p, i) => {
       const q = podpisi[i + 1];
@@ -1271,7 +1297,11 @@ function drawFigura(fig: Figura, opts: OpciiRisunka, report?: Otchet): string {
       }
       const ch = best as { b: Podpis; min: number; what: string };
       if (ch.min < V.gap) problems.push(`подпись x${p.sub} не помещается: мешает ${ch.what}`);
-      layers.labels.push(podpisX(p.sub, ch.b.x, ch.b.y + size * 0.21, THEME.colors.axis));
+      layers.labels.push(
+        chislami
+          ? svgText(p.sub, ch.b.x, ch.b.y + size * 0.35, 'middle', tickOpts)
+          : podpisX(p.sub, ch.b.x, ch.b.y + size * 0.21, THEME.colors.axis),
+      );
       addBox(ch.b);
     });
   }

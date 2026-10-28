@@ -95,7 +95,7 @@ export const VARIANT: VariantPV = {
         },
       },
       { s: 'z05.summa-ochkov', p: { N: 9, s: 2, k: 2 } },
-      { s: 'z06.otklonenie', p: { v: 'Z', xs: [2, 4, 8], ps: [50, 40, 10], den: 100 } },
+      { s: 'z06.otklonenie', p: { v: 'Z', xs: [0, 4, 10], ps: [40, 50, 10], den: 100 } },
       {
         s: 'z07.pokazatelnoe-osnovaniya',
         p: { a: 2, s: 1, k: -2, b: 9, r: 3, m: 1, c: 0, por1: 'bx' },
@@ -299,7 +299,7 @@ export const VARIANT: VariantPV = {
         },
       },
       { s: 'z05.summa-ochkov', p: { N: 7, s: 3, k: 3 } },
-      { s: 'z06.otklonenie', p: { v: 'Z', xs: [4, 5, 6], ps: [30, 60, 10], den: 100 } },
+      { s: 'z06.otklonenie', p: { v: 'Z', xs: [1, 5, 6], ps: [30, 50, 20], den: 100 } },
       {
         s: 'z07.pokazatelnoe-osnovaniya',
         p: { a: 3, s: 1, k: -2, b: -7, r: 3, m: 1, c: 0, por1: 'bx' },

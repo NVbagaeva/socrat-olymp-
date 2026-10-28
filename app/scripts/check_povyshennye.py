@@ -1017,7 +1017,8 @@ def p3_metka(p):
         i = max(j for j in range(len(u) - 1) if u[j][0] <= m)
         nakl.append(sp.Rational(u[i + 1][1] - u[i][1], u[i + 1][0] - u[i][0]))
     cel = max(nakl) if p["naib"] == 1 else min(nakl)
-    return sp.Integer(nakl.index(cel) + 1)
+    # Ответ — абсцисса точки (точки подписаны числами), а не её номер.
+    return sp.Integer(p["metki"][nakl.index(cel)])
 
 
 SCHET.update({

@@ -16,7 +16,7 @@ export const VARIANT: VariantPV = {
       { s: 'z03.piramida-v-parallelepipede', p: { a: 6, b: 8, c: 5 } },
       { s: 'z04.taksi', p: { raskraska: 'chern-zhelt', n: 40, k: 14, vtoroy: 1 } },
       { s: 'z05.bernulli', p: { syuzhet: 'biatlon', n: 5, k: 4, p: 0.7 } },
-      { s: 'z06.ozhidanie', p: { v: 'X', xs: [1, 3, 5, 7], ps: [20, 30, 40, 10], den: 100 } },
+      { s: 'z06.ozhidanie', p: { v: 'X', xs: [1, 3, 5, 7], ps: [20, 30, 30, 20], den: 100 } },
       { s: 'z07.log-kvadratnoe', p: { a: 2, p: 2, q: 18, e: 1, sleva: 1 } },
       { s: 'z08.tg-po-znacheniyu', p: { f: 'cos', a: 1, r: 1, b: 1, s: 5, sign: 1, q: 4 } },
       {
