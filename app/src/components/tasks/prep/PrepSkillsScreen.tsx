@@ -65,7 +65,6 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
           </li>
         ))}
       </ul>
-
     </>
   );
 }

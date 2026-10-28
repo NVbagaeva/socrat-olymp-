@@ -84,7 +84,12 @@ export function sozdatKristall(host: HTMLElement, az: number, el: number): Krist
   const ryobra = new THREE.EdgesGeometry(forma, 10);
   const linii = new THREE.LineSegments(
     ryobra,
-    new THREE.LineBasicMaterial({ color: 0x9bc0f2, transparent: true, opacity: 0.45, depthTest: false }),
+    new THREE.LineBasicMaterial({
+      color: 0x9bc0f2,
+      transparent: true,
+      opacity: 0.45,
+      depthTest: false,
+    }),
   );
   linii.renderOrder = 4;
   gruppa.add(linii);
@@ -160,7 +165,10 @@ export function sozdatKristall(host: HTMLElement, az: number, el: number): Krist
     otrezok(
       [
         apofema.clone().setLength(s).setY(niz),
-        apofema.clone().setLength(s).setY(niz + s),
+        apofema
+          .clone()
+          .setLength(s)
+          .setY(niz + s),
         new THREE.Vector3(0, niz + s, 0),
       ],
       ugolMat,
@@ -187,7 +195,11 @@ export function sozdatKristall(host: HTMLElement, az: number, el: number): Krist
     const d = 5.2;
     const a = (A * Math.PI) / 180;
     const e = (E * Math.PI) / 180;
-    kamera.position.set(d * Math.sin(a) * Math.cos(e), d * Math.sin(e), d * Math.cos(a) * Math.cos(e));
+    kamera.position.set(
+      d * Math.sin(a) * Math.cos(e),
+      d * Math.sin(e),
+      d * Math.cos(a) * Math.cos(e),
+    );
     kamera.lookAt(0, -0.16, 0);
     renderer.render(scene, kamera);
   };

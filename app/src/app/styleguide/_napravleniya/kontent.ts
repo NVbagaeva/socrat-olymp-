@@ -9,18 +9,19 @@
 
 export type Napravlenie = 'steklo' | 'chertyozh';
 
-export const NAPRAVLENIYA: Record<Napravlenie, { href: string; nazvanie: string; podpis: string }> = {
-  steklo: {
-    href: '/styleguide/steklo/',
-    nazvanie: 'Стеклянная сцена',
-    podpis: 'DESIGN_AUDIT.md, раздел 5: A с элементами B',
-  },
-  chertyozh: {
-    href: '/styleguide/chertyozh/',
-    nazvanie: 'Чертёж',
-    podpis: 'DESIGN_CRIT.md, раздел 5: «Что выбрал бы я»',
-  },
-};
+export const NAPRAVLENIYA: Record<Napravlenie, { href: string; nazvanie: string; podpis: string }> =
+  {
+    steklo: {
+      href: '/styleguide/steklo/',
+      nazvanie: 'Стеклянная сцена',
+      podpis: 'DESIGN_AUDIT.md, раздел 5: A с элементами B',
+    },
+    chertyozh: {
+      href: '/styleguide/chertyozh/',
+      nazvanie: 'Чертёж',
+      podpis: 'DESIGN_CRIT.md, раздел 5: «Что выбрал бы я»',
+    },
+  };
 
 export const SHAPKA = {
   menu: [
@@ -63,8 +64,18 @@ export const RAZDELY = {
   kartochki: [
     { no: '01', nazvanie: 'Планиметрия', format: 'svg', sostav: 'Теория · Опорные · Тренажёр' },
     { no: '03', nazvanie: 'Стереометрия', format: 'webp', sostav: 'Теория · Опорные · Тренажёр' },
-    { no: '04', nazvanie: 'Вероятность: простая', format: 'webp', sostav: 'Теория · Опорные · Тренажёр' },
-    { no: '12', nazvanie: 'Графики функций', format: 'webp', sostav: 'Теория · Опорные · Тренажёр' },
+    {
+      no: '04',
+      nazvanie: 'Вероятность: простая',
+      format: 'webp',
+      sostav: 'Теория · Опорные · Тренажёр',
+    },
+    {
+      no: '12',
+      nazvanie: 'Графики функций',
+      format: 'webp',
+      sostav: 'Теория · Опорные · Тренажёр',
+    },
   ],
 } as const;
 
@@ -109,7 +120,10 @@ export const TIPY = {
   gruppa: 'Касательная',
   stroki: [
     { no: '9.2.1', text: 'Значение производной по графику функции и касательной' },
-    { no: '9.2.2', text: 'Касательная параллельна оси абсцисс: точка отрезка по графику производной' },
+    {
+      no: '9.2.2',
+      text: 'Касательная параллельна оси абсцисс: точка отрезка по графику производной',
+    },
     { no: '9.2.5', text: 'В какой отмеченной точке производная наибольшая' },
   ],
   primer: 'Пример',
@@ -119,12 +133,12 @@ export const OSHIBKI = {
   zagolovok: 'Типичные ошибки',
   punkty: [
     {
-      zagolovok: 'Путают график $f$ и график $f\'$',
+      zagolovok: "Путают график $f$ и график $f'$",
       text: 'Читают экстремумы по графику производной как по графику функции.',
     },
     {
       zagolovok: '«Выше оси» принимают за «растёт»',
-      text: 'На графике $f\'$ выше оси означает $f\'>0$: растёт сама функция $f$, а не график производной.',
+      text: "На графике $f'$ выше оси означает $f'>0$: растёт сама функция $f$, а не график производной.",
     },
   ],
   /** Рукописная ремарка учителя — одна на страницу (направление «Чертёж»). */
@@ -145,13 +159,17 @@ export const SHRIFTY = {
     { id: 'h2', imya: 'H2', obrazec: 'Типичные ошибки' },
     { id: 'h3', imya: 'H3', obrazec: 'Касательная к графику функции' },
     { id: 'lead', imya: 'Лид', obrazec: 'Числа и графики в каждой задаче свои.' },
-    { id: 'body', imya: 'Текст', obrazec: 'Съешь же ещё этих мягких французских булок, да выпей чаю.' },
+    {
+      id: 'body',
+      imya: 'Текст',
+      obrazec: 'Съешь же ещё этих мягких французских булок, да выпей чаю.',
+    },
     { id: 'small', imya: 'Мелкий', obrazec: 'Группа II · 7 типов · обновлено в октябре' },
     { id: 'caption', imya: 'Подпись', obrazec: 'НАДЗАГОЛОВОК · ЕГЭ 2027' },
   ],
   cifry: '№ 01  №09  9.2.1  3 800+  0,25  −1,5',
   abzac:
-    'Если $f\'(x_0) > 0$, функция в точке $x_0$ возрастает: касательная к графику идёт вверх, и её угловой коэффициент $k = \\operatorname{tg}\\alpha$ положителен. Поэтому значение производной ищут по двум точкам касательной: $k = \\frac{\\Delta y}{\\Delta x}$.',
+    "Если $f'(x_0) > 0$, функция в точке $x_0$ возрастает: касательная к графику идёт вверх, и её угловой коэффициент $k = \\operatorname{tg}\\alpha$ положителен. Поэтому значение производной ищут по двум точкам касательной: $k = \\frac{\\Delta y}{\\Delta x}$.",
 };
 
 export const TABBAR = ['Главная', 'Задания', 'Статистика', 'Ещё'];

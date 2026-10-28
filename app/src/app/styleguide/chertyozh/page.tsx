@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DemoStranica } from '../_napravleniya/DemoStranica';
+import { monoCifry, onestKirillica, onestLatinica } from './shrifty';
 import './tokens-chertyozh.css';
 import './chertyozh.css';
 
@@ -11,5 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DemoStranica vid="chertyozh" />;
+  return (
+    <DemoStranica
+      vid="chertyozh"
+      shrifty={`${onestKirillica.variable} ${onestLatinica.variable} ${monoCifry.variable}`}
+    />
+  );
 }

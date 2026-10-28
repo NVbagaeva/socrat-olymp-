@@ -101,7 +101,6 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
           <h1 className="t-h1 bank-head__title">{tasksPage.title}</h1>
           <p className="bank-head__lead">{tasksPage.lead}</p>
         </div>
-
       </header>
 
       {/* Строка фильтров. Рядом с поиском встанет выбор темы, когда

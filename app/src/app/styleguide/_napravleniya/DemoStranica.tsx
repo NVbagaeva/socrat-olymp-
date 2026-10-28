@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import 'katex/dist/katex.min.css';
 import './karkas.css';
 import { TaskImage } from '@/components/tasks/TaskImage';
@@ -55,18 +54,26 @@ const IKONKI_TABBARA = [
   'M6 12h.01M12 12h.01M18 12h.01',
 ];
 
-export function DemoStranica({ vid }: { vid: Napravlenie }) {
+export interface DemoStranicaProps {
+  vid: Napravlenie;
+  /** Классы переменных шрифтов направления (next/font, shrifty.ts страницы). */
+  shrifty: string;
+}
+
+export function DemoStranica({ vid, shrifty }: DemoStranicaProps) {
   const drugoe: Napravlenie = vid === 'steklo' ? 'chertyozh' : 'steklo';
   const steklo = vid === 'steklo';
   return (
-    <div className={`dm-root dm-${vid}`}>
+    <div className={`dm-root dm-${vid} ${shrifty}`}>
       {/* Полоса демо: какое направление открыто и переход ко второму. */}
       <div className="dm-demo">
         <span>
           Демо направления · <b>{NAPRAVLENIYA[vid].nazvanie}</b>
           <span className="dm-demo__istochnik"> · {NAPRAVLENIYA[vid].podpis}</span>
         </span>
-        <Link href={NAPRAVLENIYA[drugoe].href}>Сравнить: {NAPRAVLENIYA[drugoe].nazvanie} →</Link>
+        {/* Обычная ссылка, не next/link: та заранее подгрузила бы вторую
+            страницу вместе с её шрифтами, и замеры смешались бы. */}
+        <a href={NAPRAVLENIYA[drugoe].href}>Сравнить: {NAPRAVLENIYA[drugoe].nazvanie} →</a>
       </div>
 
       <header className="dm-shapka">
@@ -106,10 +113,7 @@ export function DemoStranica({ vid }: { vid: Napravlenie }) {
               <h1 className="dm-display">{GEROY.zagolovok}</h1>
               <p className="dm-lid">{GEROY.lid}</p>
             </div>
-            <Kristall
-              className="dm-geroy__kristall"
-              podpisi={steklo ? [] : GEROY.podpisi}
-            />
+            <Kristall className="dm-geroy__kristall" podpisi={steklo ? [] : GEROY.podpisi} />
             <div className="dm-dveri">
               {GEROY.dveri.map((d) => (
                 <a key={d.id} className={`dm-dver dm-dver--${d.id}`} href="#razdely">

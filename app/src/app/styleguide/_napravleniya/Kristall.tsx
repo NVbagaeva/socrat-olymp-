@@ -88,7 +88,7 @@ export function Kristall({ className, podpisi = [] }: KristallProps) {
   const povernut = useCallback(
     (dAz: number, dEl: number) => {
       const v = vid.current;
-      v.az = (((v.az + dAz + 180) % 360) + 360) % 360 - 180;
+      v.az = ((((v.az + dAz + 180) % 360) + 360) % 360) - 180;
       v.el = Math.min(EL_MAX, Math.max(EL_MIN, v.el + dEl));
       setPovernul(true);
       narisovat();

@@ -5,39 +5,12 @@
 
    Шрифты: Onest Variable (ось wght) — весь текст; JetBrains Mono —
    только номера и цифры, файл урезан до цифр и знаков (9 КБ). Caveat
-   для одной рукописной ремарки уже загружен сайтом (--font-caveat). */
-
-@font-face {
-  font-family: 'Onest Chertyozh';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 900;
-  src: url('../../../fonts/demo/onest-cyrillic-wght-normal.woff2') format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-@font-face {
-  font-family: 'Onest Chertyozh';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 900;
-  src: url('../../../fonts/demo/onest-latin-wght-normal.woff2') format('woff2');
-  unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
-    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* Только цифры и знаки номеров: остальные буквы берёт Onest. */
-@font-face {
-  font-family: 'JetBrains Mono Cifry';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 800;
-  src: url('../../../fonts/demo/jetbrains-mono-cifry-wght.woff2') format('woff2');
-  unicode-range: U+0020-0029, U+002B-003B, U+005B, U+005D, U+00B7, U+00D7, U+2013-2014, U+0023, U+0025;
-}
+   для одной рукописной ремарки уже загружен сайтом (--font-caveat).
+   Файлы объявлены в shrifty.ts (next/font/local). */
 
 .dm-chertyozh {
-  --dm-font: 'Onest Chertyozh', system-ui, -apple-system, sans-serif;
-  --dm-font-cifry: 'JetBrains Mono Cifry', var(--dm-font);
+  --dm-font: var(--font-chertyozh-kir), var(--font-chertyozh-lat);
+  --dm-font-cifry: var(--font-chertyozh-cifry), var(--dm-font);
   --dm-font-ruka: var(--font-caveat), cursive;
 
   /* Палитра — фирменная. Синий только у интерактива, терракота —
@@ -56,7 +29,7 @@
   --dm-surface: #ffffff;
   --dm-text: #101728;
   --dm-text-2: #4a5568;
-  --dm-text-3: #667389;
+  --dm-text-3: #5d6a80;
   --dm-line: #e4ebf3;
   --dm-line-strong: #cfdae8;
   --dm-grid-minor: rgb(31 95 208 / 0.05);
