@@ -17,6 +17,9 @@ import { typeset } from '@/lib/tex';
 import type { ZadachaPechati } from '@/lib/zadanie3/pechat-dannye';
 import { chertezhLista } from '@/lib/zadanie3/pechat';
 import { openText } from '@/lib/zadanie3/secret';
+import type { Scenariy } from '@/lib/chertezh3/scenariy';
+import type { Model } from '@/lib/solid/model';
+import { dannye3dJson } from '@/lib/stereo/zhivoy';
 import type { Figure, SectionAdapter, SectionModule, VariantTask } from '../../types';
 import {
   FALLBACK,
@@ -37,6 +40,7 @@ interface Zadacha03 extends Omit<ZadachaPechati, 'nazvanie'> {
 interface Dannye03 {
   razdel: Record<string, string>;
   svg: Record<string, string>;
+  model: Record<string, Model>;
   zadachi: Zadacha03[];
 }
 
@@ -83,17 +87,28 @@ function init(data: unknown): SectionAdapter {
     if (z.scena !== '') {
       /* Листу печати от записи нужны только сценарий и отпечаток. */
       const zp: ZadachaPechati = { ...z, nazvanie: '' };
+      const sc = JSON.parse(openText(z.scena, z.seal)) as Scenariy;
       figure = {
         svg: chertezhLista(zp, 'uchenik', tex),
         width: SHIRINA_SCENARIYA,
+        zhivoy: dannye3dJson({ sc }),
       };
       figureTeacher = {
         svg: chertezhLista(zp, 'uchitel', tex),
         width: SHIRINA_SCENARIYA,
+        zhivoy: dannye3dJson({ sc, vspom: true }),
       };
     } else {
       const svg = d.svg[z.klyuch] ?? d.svg[z.prototip];
-      figure = svg === undefined ? null : { svg, width: SHIRINA_SOLID };
+      const m = d.model[z.klyuch] ?? d.model[z.prototip];
+      figure =
+        svg === undefined
+          ? null
+          : {
+              svg,
+              width: SHIRINA_SOLID,
+              ...(m === undefined ? {} : { zhivoy: dannye3dJson({ m }) }),
+            };
       figureTeacher = null;
     }
     return {

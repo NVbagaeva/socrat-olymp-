@@ -18,6 +18,7 @@ import {
   type Scenariy,
   type TochkaScenariya,
 } from '@/lib/chertezh3';
+import { obernut3d } from '@/lib/stereo/zhivoy';
 import { add, div, mul, rat, sub, toNumber, type Rat } from '@/lib/zadanie15/core/rational';
 import { sqrtRat, surdScale, surdTex, surdToNumber } from '@/lib/zadanie15/core/surd';
 import { ratTex, sklon } from './tex';
@@ -154,7 +155,11 @@ function scenariy(p: PB15, punkt: 'a' | 'b'): Scenariy {
 }
 
 export function chertezhB15(p: PB15, punkt: 'a' | 'b'): string {
-  return chertezhSvg(scenariy(p, punkt), { rezhim: 'uchitel', shirina: 300, klass: 'ch3-svg' });
+  /* На экране чертёж решения вращается руками (lib/stereo/zhivoy.ts). */
+  return obernut3d(
+    chertezhSvg(scenariy(p, punkt), { rezhim: 'uchitel', shirina: 300, klass: 'ch3-svg' }),
+    { sc: scenariy(p, punkt), vspom: true },
+  );
 }
 
 export function scenariyB15(p: PB15, punkt: 'a' | 'b'): Scenariy {

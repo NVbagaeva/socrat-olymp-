@@ -5,6 +5,7 @@
  * останется на сервере.
  */
 
+import { svgSDannymi } from '@/lib/stereo/zhivoy';
 import { BALLY } from '@/content/variantOnline/bally';
 import type { IssueVariantInput, VariantWorkTaskInput } from '@/lib/kabinet/types';
 import type { VariantSet } from '../types';
@@ -46,7 +47,8 @@ export function issueInput(set: VariantSet, s: IssueSettings): IssueVariantInput
         subtype: t.subtype.slice(0, 32),
         points: BALLY[t.egeNumber],
         statement: t.statement,
-        figure: t.figure?.svg ?? null,
+        /* Данные живого чертежа стереометрии — в той же строке (svgSDannymi). */
+        figure: t.figure === null ? null : svgSDannymi(t.figure.svg, t.figure.zhivoy),
         answer: t.answer,
         hints: (t.hints ?? []).map((h) => ({ ...h, options: [...h.options] })),
       })),

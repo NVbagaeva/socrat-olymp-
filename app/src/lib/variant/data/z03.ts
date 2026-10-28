@@ -20,6 +20,15 @@ import { ru } from '@/lib/zadanie3/format';
 import { dannyePechati, type ZadachaPechati } from '@/lib/zadanie3/pechat-dannye';
 import { klyuchZadachi, sealAnswer, sealText } from '@/lib/zadanie3/secret';
 import type { Prototype } from '@/lib/zadanie3/types';
+import type { Model } from '@/lib/solid/model';
+import { modelDlyaVrashcheniya } from '@/lib/stereo/zhivoy-model';
+
+/** Числа модели — до четырёх знаков: файл данных не разрастается. */
+function szhat(m: Model): Model {
+  return JSON.parse(
+    JSON.stringify(m, (_k, v: unknown) => (typeof v === 'number' ? Math.round(v * 1e4) / 1e4 : v)),
+  ) as Model;
+}
 
 /** Задача: запись листа печати без названия прототипа, плюс источник варианта. */
 export interface Zadacha03 extends Omit<ZadachaPechati, 'nazvanie'> {
@@ -32,6 +41,11 @@ export interface Dannye03 {
   razdel: Record<string, string>;
   /** Чертёж разделов IV–VIII (SVG solid/): по прототипу или по ключу задачи «P03-52#3». */
   svg: Record<string, string>;
+  /**
+   * Модели тех же чертежей IV–VIII для вращения на экране
+   * (lib/stereo/zhivoy.ts, modelDlyaVrashcheniya): ключи — как у svg.
+   */
+  model: Record<string, Model>;
   zadachi: Zadacha03[];
 }
 
@@ -62,6 +76,7 @@ function bezScenariya(p: Prototype): ZadachaPechati[] {
 export function dannye(): Dannye03 {
   const razdel: Record<string, string> = {};
   const svg: Record<string, string> = {};
+  const model: Record<string, Model> = {};
   const ref = new Map<string, string>();
   const zadachi: ZadachaPechati[] = [];
   for (const r of RAZDELY) {
@@ -72,9 +87,13 @@ export function dannye(): Dannye03 {
         /* Числа на самом чертеже — чертёж свой у варианта (как perVariant в pool.ts). */
         const first = p.varianty[0];
         if (first !== undefined && (p.chertezh(first.params).measures ?? []).length > 0) {
-          for (const v of p.varianty) svg[`${p.id}#${v.n}`] = chertezhBanka(p.chertezh(v.params));
+          for (const v of p.varianty) {
+            svg[`${p.id}#${v.n}`] = chertezhBanka(p.chertezh(v.params));
+            model[`${p.id}#${v.n}`] = szhat(modelDlyaVrashcheniya(p.chertezh(v.params)));
+          }
         } else if (first !== undefined) {
           svg[p.id] = chertezhBanka(p.chertezh(first.params));
+          model[p.id] = szhat(modelDlyaVrashcheniya(p.chertezh(first.params)));
         }
         zadachi.push(...bezScenariya(p));
       }
@@ -84,6 +103,7 @@ export function dannye(): Dannye03 {
   return {
     razdel,
     svg,
+    model,
     zadachi: zadachi.map(({ nazvanie: _, ...z }) => ({ ...z, ref: ref.get(z.klyuch) ?? '' })),
   };
 }

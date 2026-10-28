@@ -11,6 +11,7 @@
  */
 
 import { chertezhSvg, postroit, sVidom, vybratVid, type Scenariy } from '@/lib/chertezh3';
+import { obernut3d } from '@/lib/stereo/zhivoy';
 import { div, mul, rat, toNumber, type Rat } from '@/lib/zadanie15/core/rational';
 import { sqrtRat, surdTex, surdToNumber } from '@/lib/zadanie15/core/surd';
 import type { Chast2Zadacha, Shablon2 } from './types';
@@ -113,7 +114,11 @@ export function scenariyF15(p: PF15, punkt: 'a' | 'b'): Scenariy {
 }
 
 function chertezh(p: PF15, punkt: 'a' | 'b'): string {
-  return chertezhSvg(scenariy(p, punkt), { rezhim: 'uchitel', shirina: 300, klass: 'ch3-svg' });
+  /* На экране чертёж решения вращается руками (lib/stereo/zhivoy.ts). */
+  return obernut3d(
+    chertezhSvg(scenariy(p, punkt), { rezhim: 'uchitel', shirina: 300, klass: 'ch3-svg' }),
+    { sc: scenariy(p, punkt), vspom: true },
+  );
 }
 
 function sobrat(p: PF15): Chast2Zadacha {

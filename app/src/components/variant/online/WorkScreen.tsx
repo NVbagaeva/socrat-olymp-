@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { FiguraZhivaya } from '@/components/stereo/FiguraZhivaya';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button, FigureZoom, Modal } from '@/components/ui';
@@ -490,7 +491,12 @@ export function WorkScreen({
             className="vo-card__statement"
             dangerouslySetInnerHTML={{ __html: task.statement }}
           />
-          {task.figure === null ? null : (
+          {task.figure === null ? null : task.figure.zhivoy !== undefined ? (
+            /* Стереометрия: чертёж вращается руками, масштаб — его же кнопками. */
+            <div className="vo-card__figure is-3d">
+              <FiguraZhivaya svg={task.figure.svg} zhivoy={task.figure.zhivoy} />
+            </div>
+          ) : (
             <FigureZoom label={T.run.figure(noOf(task))} className="vo-card__figure" pinch>
               <span dangerouslySetInnerHTML={{ __html: task.figure.svg }} />
             </FigureZoom>

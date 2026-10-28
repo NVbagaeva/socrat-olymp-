@@ -37,8 +37,10 @@ export function classTable(view: VariantWorkView): ClassTable {
   const numbers = (view.tasks[0] ?? []).map((t) => t.egeNo);
   const rows: ResultRow[] = (view.results ?? []).map((r) => {
     const attempt =
-      [...r.attempts].sort((a, b) => (b.finishedAt ?? '').localeCompare(a.finishedAt ?? ''))[0] ?? null;
-    const nums = attempt === null ? [] : (view.tasks[attempt.variant - 1] ?? []).map((t) => t.egeNo as EgeNo);
+      [...r.attempts].sort((a, b) => (b.finishedAt ?? '').localeCompare(a.finishedAt ?? ''))[0] ??
+      null;
+    const nums =
+      attempt === null ? [] : (view.tasks[attempt.variant - 1] ?? []).map((t) => t.egeNo as EgeNo);
     return {
       student: r.student,
       attempt,
@@ -56,7 +58,9 @@ export function classTable(view: VariantWorkView): ClassTable {
     rows,
     average,
     averagePrimary:
-      done.length === 0 ? null : done.reduce((s, r) => s + (r.attempt?.primary ?? 0), 0) / done.length,
+      done.length === 0
+        ? null
+        : done.reduce((s, r) => s + (r.attempt?.primary ?? 0), 0) / done.length,
     finished: done.length,
     total: rows.length,
   };
@@ -85,7 +89,9 @@ export function excelRows(table: ClassTable): Cell[][] {
       r.test,
       a.seconds === null ? null : Math.round((a.seconds / 60) * 10) / 10,
       `${a.finishedAt?.slice(0, 16).replace('T', ' ') ?? ''}${a.late ? ' (поздно)' : ''}`,
-      ...a.tasks.map((t) => `${t.answer === null ? '—' : displayAnswer(t.answer)} ${t.right ? '✓' : '✗'}`),
+      ...a.tasks.map(
+        (t) => `${t.answer === null ? '—' : displayAnswer(t.answer)} ${t.right ? '✓' : '✗'}`,
+      ),
     ];
   });
   const avg: Cell[] = [

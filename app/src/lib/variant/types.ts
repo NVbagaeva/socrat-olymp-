@@ -101,6 +101,11 @@ export interface Figure {
   width?: number;
   /** Рисунок под условием, а не справа. */
   below?: boolean;
+  /**
+   * Данные живого чертежа стереометрии (lib/stereo/zhivoy.ts, JSON): на
+   * экране рисунок вращается руками, на листе печати — этот же svg.
+   */
+  zhivoy?: string;
 }
 
 export interface TaskSource {
