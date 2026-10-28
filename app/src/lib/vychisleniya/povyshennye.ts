@@ -535,3 +535,115 @@ export function tgPoZnacheniyu(p: TgPoZnacheniyu): Draft {
     signature: `tg:${f}:${a}:${r}:${b}:${s}:${sign}:${q}`,
   };
 }
+
+/* ── Партия 4 (варианты 19–24) ──────────────────────────────────── */
+
+/** Степень с показателем в скобках при отрицательном: 6^{-3{,}7}. */
+const st = (osn: number, e: number) => `${osn}^{${d(e)}}`;
+
+/**
+ * Произведение и частное степеней с основаниями a, b и a·b, показатели
+ * — десятичные дроби:
+ *  vid 'ab'  — aˣ·bʸ / (ab)ᶻ;
+ *  vid 'abb' — (ab)ˣ·bʸ / aᶻ.
+ * Подвох — разложить ab на множители и собрать показатели при a и при b
+ * отдельно: дробные части сокращаются, остаются целые степени.
+ */
+export function stepeniTriOsnovaniya(p: {
+  vid: string;
+  a: number;
+  b: number;
+  x: number;
+  y: number;
+  z: number;
+}): Draft {
+  const { vid, a, b, x, y, z } = p;
+  const ab = a * b;
+  const ea = round9(vid === 'ab' ? x - z : x - z);
+  const eb = round9(vid === 'ab' ? y - z : x + y);
+  if (!Number.isInteger(ea) || !Number.isInteger(eb))
+    throw new Error(`№8: показатели не целые ${JSON.stringify(p)}`);
+  const otvet = round9(a ** ea * b ** eb);
+  if (!konechnaya(otvet)) throw new Error(`№8: ответ ${otvet} — не конечная дробь`);
+  const vyr =
+    vid === 'ab'
+      ? `\\dfrac{${st(a, x)}\\cdot ${st(b, y)}}{${st(ab, z)}}`
+      : `\\dfrac{${st(ab, x)}\\cdot ${st(b, y)}}{${st(a, z)}}`;
+  const razlozh =
+    vid === 'ab'
+      ? `$${st(ab, z)} = ${st(a, z)}\\cdot ${st(b, z)}$, поэтому выражение равно $\\dfrac{${st(a, x)}}{${st(a, z)}}\\cdot\\dfrac{${st(b, y)}}{${st(b, z)}}$.`
+      : `$${st(ab, x)} = ${st(a, x)}\\cdot ${st(b, x)}$, поэтому выражение равно $\\dfrac{${st(a, x)}}{${st(a, z)}}\\cdot ${st(b, x)}\\cdot ${st(b, y)}$.`;
+  const sobrat =
+    vid === 'ab'
+      ? `$${a}^{${d(x)}-${d(z)}}\\cdot ${b}^{${d(y)}-${d(z)}} = ${a}^{${ea}}\\cdot ${b}^{${eb}}$`
+      : `$${a}^{${d(x)}-${z < 0 ? `(${d(z)})` : d(z)}}\\cdot ${b}^{${d(x)}+${y < 0 ? `(${d(y)})` : d(y)}} = ${a}^{${ea}}\\cdot ${b}^{${eb}}$`;
+  return {
+    uslovie: `Найдите значение выражения $${vyr}$.`,
+    otvet,
+    razbor: [
+      `Раскладываем основание $${ab}$ на множители: $${ab} = ${a}\\cdot ${b}$, а степень произведения — произведение степеней: ${razlozh}`,
+      `Собираем показатели при одинаковых основаниях (при делении вычитаются, при умножении складываются): ${sobrat}.`,
+      `$${a}^{${ea}}\\cdot ${b}^{${eb}} = ${d(otvet)}$.`,
+    ],
+    params: { vid, a, b, x, y, z },
+    proverka:
+      vid === 'ab'
+        ? Math.exp(x * Math.log(a) + y * Math.log(b) - z * Math.log(ab))
+        : Math.exp(x * Math.log(ab) + y * Math.log(b) - z * Math.log(a)),
+    signature: `st3:${vid}:${a}:${b}:${x}:${y}:${z}`,
+  };
+}
+
+/**
+ * log_c x − log_c y (znak −1) или log_c x + log_c y (znak 1), основание
+ * c — десятичная дробь (2,5; 0,2). Подвох — свернуть в log_c(x/y) или
+ * log_c(xy) и увидеть степень основания, в том числе отрицательную.
+ */
+export function logRaznost(p: { c: number; x: number; y: number; znak: number }): Draft {
+  const { c, x, y, znak } = p;
+  const arg = round9(znak > 0 ? x * y : x / y);
+  const k = Math.round(Math.log(arg) / Math.log(c));
+  if (Math.abs(c ** k - arg) > 1e-9) throw new Error(`№8: ${arg} — не степень ${c}`);
+  const zn = znak > 0 ? '+' : '-';
+  const svernuto = znak > 0 ? `${d(x)}\\cdot ${d(y)}` : `\\dfrac{${d(x)}}{${d(y)}}`;
+  return {
+    uslovie: `Найдите значение выражения $${log(d(c), d(x))} ${zn} ${log(d(c), d(y))}$.`,
+    otvet: k,
+    razbor: [
+      `Логарифмы с одним основанием: ${znak > 0 ? 'сумма логарифмов — логарифм произведения' : 'разность логарифмов — логарифм частного'}: $${log(d(c), d(x))} ${zn} ${log(d(c), d(y))} = ${log(d(c), `\\left(${svernuto}\\right)`)} = ${log(d(c), d(arg))}$.`,
+      `$${d(arg)} = ${d(c)}^{${k}}$${k < 0 ? ` (отрицательная степень: $${d(c)}^{${k}} = \\dfrac{1}{${d(round9(c ** -k))}}$)` : ''}, поэтому логарифм равен $${k}$.`,
+    ],
+    params: { c, x, y, znak },
+    proverka: (Math.log(x) + znak * Math.log(y)) / Math.log(c),
+    signature: `logr:${c}:${x}:${y}:${znak}`,
+  };
+}
+
+/**
+ * k·ⁿ√A·ᵐ√A: корни разных степеней из одного числа A. Подвох — перейти
+ * к степеням с дробными показателями и сложить их: A^(1/n + 1/m).
+ */
+export function korniProizvedenie(p: { k: number; A: number; n: number; m: number }): Draft {
+  const { k, A, n, m } = p;
+  const num = m + n;
+  const den = n * m;
+  const g = nod(num, den);
+  const pe = num / g;
+  const qe = den / g;
+  const zn = Math.round(A ** (pe / qe));
+  if (Math.abs(zn - A ** (pe / qe)) > 1e-6) throw new Error(`№8: ${A}^(${pe}/${qe}) не целое`);
+  const otvet = k * zn;
+  const koren = (s: number) => (s === 2 ? `\\sqrt{${A}}` : `\\sqrt[${s}]{${A}}`);
+  return {
+    uslovie: `Найдите значение выражения $${k === 1 ? '' : `${k}\\cdot `}${koren(n)}\\cdot ${koren(m)}$.`,
+    otvet,
+    razbor: [
+      `Запишем корни степенями: $${koren(n)} = ${A}^{\\frac{1}{${n}}}$, $${koren(m)} = ${A}^{\\frac{1}{${m}}}$.`,
+      `При умножении показатели складываются: $\\dfrac{1}{${n}}+\\dfrac{1}{${m}} = \\dfrac{${num}}{${den}}${g === 1 ? '' : ` = \\dfrac{${pe}}{${qe}}`}$, то есть $${A}^{\\frac{${pe}}{${qe}}}${qe === 1 ? '' : pe === 1 ? ` = ${koren(qe)}` : ` = \\left(${koren(qe)}\\right)^{${pe}}`} = ${zn}$.`,
+      `$${k === 1 ? '' : `${k}\\cdot `}${zn} = ${otvet}$.`,
+    ],
+    params: { k, A, n, m },
+    proverka: k * A ** (1 / n) * A ** (1 / m),
+    signature: `kpr:${k}:${A}:${n}:${m}`,
+  };
+}

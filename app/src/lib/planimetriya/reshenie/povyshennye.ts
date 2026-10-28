@@ -5,7 +5,7 @@
  */
 
 import type { Params } from '../stseny/dsl';
-import { storony109, ugly107 } from '../stseny/povyshennye';
+import { osnovaniya112, storony109, ugly107 } from '../stseny/povyshennye';
 import { g, n, sokr, shag, sverkaDliny, sverkaUgla, variantyGradusov, vopros } from './obshchee';
 import type { Reshenie } from './types';
 
@@ -487,6 +487,43 @@ export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
       ],
       sverka: `Сверяем: косинус острого угла — между $0$ и $1$, и катет короче гипотенузы: $${n(ch)} < ${n(p.a)}$; высота $${ahTex}$ и $CH$ дают $${n(ah2)} + ${n(ch * ch)} = ${n(p.a * p.a)}$ — сходится.`,
       otvet: s.itog,
+    };
+  },
+  112: (p) => {
+    const o = osnovaniya112(p);
+    const ans = p.k ? o.bol : o.mal;
+    const drugoe = p.k ? o.mal : o.bol;
+    return {
+      shagi: [
+        shag(
+          'Части средней линии',
+          `Средняя линия $${n(p.m)}$ разделена в отношении $${p.p}:${p.q}$: одна часть — $${p.p}$ доли, другая — $${p.q}$ доли из $${p.p + p.q}$.`,
+          [`${n(p.m)}\\cdot\\dfrac{${p.p}}{${p.p + p.q}} = ${n(o.chast1)},\\qquad ${n(p.m)}\\cdot\\dfrac{${p.q}}{${p.p + p.q}} = ${n(o.chast2)}`],
+          1,
+        ),
+        shag(
+          'Каждая часть — средняя линия треугольника',
+          'Диагональ делит трапецию на два треугольника. Отрезки средней линии — средние линии этих треугольников, каждый вдвое короче своего основания трапеции.',
+          [`2\\cdot ${n(ans / 2)} = ${n(ans)}`],
+          2,
+        ),
+      ],
+      voprosy: [
+        vopros(
+          'Чему равна каждая часть средней линии?',
+          ['половине одного из оснований', 'полусумме оснований', 'боковой стороне'],
+          'Часть средней линии — средняя линия треугольника, отрезанного диагональю.',
+          1,
+        ),
+        vopros(
+          `${p.k ? 'Большее' : 'Меньшее'} основание — это удвоенная какая часть?`,
+          [p.k ? 'большая' : 'меньшая', p.k ? 'меньшая' : 'большая', 'вся средняя линия'],
+          `${p.k ? 'Большая' : 'Меньшая'} часть лежит в треугольнике с ${p.k ? 'большим' : 'меньшим'} основанием.`,
+          2,
+        ),
+      ],
+      sverka: `Сверяем: основания $${n(ans)}$ и $${n(drugoe)}$, их полусумма $\\frac{${n(o.mal)}+${n(o.bol)}}{2} = ${n(p.m)}$ — это средняя линия, сходится.`,
+      otvet: ans,
     };
   },
 };

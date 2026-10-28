@@ -345,3 +345,216 @@ export const PV10_KPD: Prototype = {
     };
   },
 };
+
+/* ── Партия 4 (варианты 19–24) ──────────────────────────────────── */
+
+/**
+ * Радиатор: x = α·(cm/γ)·log₂((T_{\\text{в}} − T_{\\text{п}})/(T − T_{\\text{п}})); по длине трубы x
+ * найти температуру T на выходе. Подвох — сначала посчитать множитель
+ * перед логарифмом, затем раскрыть логарифм: отношение разностей равно
+ * степени двойки, и T — не сама дробь, а T_{\\text{п}} плюс разность.
+ */
+export const PV10_RADIATOR: Prototype = {
+  id: 'PV10-RADIATOR',
+  no: 137,
+  group: 'IV',
+  title: 'Радиатор: температура воды на выходе',
+  formula: 'x=\\alpha\\dfrac{cm}{\\gamma}\\log_2\\dfrac{T_{\\text{в}}-T_{\\text{п}}}{T-T_{\\text{п}}}',
+  ask: 'до какой температуры охладится вода',
+  skills: ['logarifm', 'podstanovka'],
+  fipiNos: '',
+  alt: 'Горячая вода остывает, проходя по трубе радиатора',
+  solve(p) {
+    const al = num(p, 'alpha');
+    const c = num(p, 'c');
+    const m = num(p, 'm');
+    const ga = num(p, 'gamma');
+    const Tv = num(p, 'Tv');
+    const Tp = num(p, 'Tp');
+    const x = num(p, 'x');
+    const K = q(al * c * m, ga);
+    const L = div(q(x), K);
+    const Lv = val(L);
+    if (!Number.isInteger(Lv) || Lv < 1) throw new Error('PV10-RADIATOR: логарифм не целый');
+    const raz = q(Tv - Tp, 2 ** Lv);
+    const ans = val(raz) + Tp;
+    const dn = [
+      dano('\\alpha', al, '', 'постоянная'),
+      dano('c', c, '', 'теплоёмкость воды'),
+      dano('m', m, 'кг/с', 'расход воды'),
+      dano('\\gamma', ga, '', 'коэффициент теплообмена'),
+      dano('T_{\\text{в}}', Tv, '°C', 'температура на входе'),
+      dano('T_{\\text{п}}', Tp, '°C', 'температура помещения'),
+      dano('x', x, 'м', 'длина трубы'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: 'T',
+      edinicy: '°C',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [`Ищем $T$. Сначала множитель перед логарифмом, потом сам логарифм.`],
+        vid: 'uravnenie',
+        reshaem: [
+          `$\\alpha\\dfrac{cm}{\\gamma}=\\dfrac{${d(al)}\\cdot${d(c)}\\cdot${d(m)}}{${d(ga)}}=${fq(K)}$.`,
+          `$${d(x)}=${fq(K)}\\cdot\\log_2\\dfrac{${d(Tv - Tp)}}{T-${d(Tp)}}$, откуда $\\log_2\\dfrac{${d(Tv - Tp)}}{T-${d(Tp)}}=${d(Lv)}$.`,
+          `$\\dfrac{${d(Tv - Tp)}}{T-${d(Tp)}}=2^{${d(Lv)}}=${d(2 ** Lv)}$, значит $T-${d(Tp)}=${fq(raz)}$ и $T=${d(ans)}$ °C.`,
+        ],
+        proverka: [
+          `Вода остыла с $${d(Tv)}$ до $${d(ans)}$ °C — выше температуры помещения $${d(Tp)}$ °C, правдоподобно.`,
+        ],
+        answer: ans,
+        ed: '°C',
+      }),
+      vychisleniya: sokrashchenie([al, c, m], ga, '\\alpha\\dfrac{cm}{\\gamma}'),
+      hints: [
+        chtoNayti('температуру $T$ на выходе', ['длину трубы', 'температуру помещения']),
+        vopros(
+          'Чему равен логарифм в формуле?',
+          `$${d(Lv)}$`,
+          [`$${d(x)}$`, `$${fq(K)}$`].filter((o) => o !== `$${d(Lv)}$`),
+          'Делим длину трубы на множитель перед логарифмом.',
+        ),
+        vopros(
+          'Что получается из $\\log_2 A=n$?',
+          '$A=2^n$',
+          ['$A=n^2$', '$A=2n$'],
+        ),
+      ],
+    };
+  },
+};
+
+/**
+ * Разгон с постоянным ускорением: v = √(2la). vid 'a' — найти
+ * ускорение по пути и скорости, vid 'l' — путь по ускорению и скорости.
+ * Подвох — возвести формулу в квадрат и выразить нужную величину, не
+ * перепутав, что делить и на что.
+ */
+export const PV10_RAZGON: Prototype = {
+  id: 'PV10-RAZGON',
+  no: 138,
+  group: 'II',
+  title: 'Разгон: ускорение или путь по формуле $v=\\sqrt{2la}$',
+  formula: 'v=\\sqrt{2la}',
+  ask: 'ускорение или путь',
+  skills: ['koren', 'podstanovka'],
+  fipiNos: '',
+  alt: 'Автомобиль разгоняется на прямом участке дороги',
+  solve(p) {
+    const v = num(p, 'v');
+    const naiti = p['vid'] === 'l' ? 'l' : 'a';
+    const dano2 = num(p, naiti === 'a' ? 'l' : 'a');
+    const otv = q(v * v, 2 * dano2);
+    const ans = val(otv);
+    const dn =
+      naiti === 'a'
+        ? [dano('l', dano2, 'км', 'путь'), dano('v', v, 'км/ч', 'скорость в конце')]
+        : [dano('a', dano2, 'км/ч²', 'ускорение'), dano('v', v, 'км/ч', 'скорость в конце')];
+    return {
+      answer: ans,
+      iskomoe: naiti,
+      edinicy: naiti === 'a' ? 'км/ч²' : 'км',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [`Ищем $${naiti}$. Возводим формулу в квадрат: $v^2=2la$.`],
+        vid: 'vychislyaem',
+        reshaem: [
+          naiti === 'a'
+            ? `$a=\\dfrac{v^2}{2l}=\\dfrac{${d(v)}^2}{2\\cdot${d(dano2)}}=${d(ans)}$ км/ч².`
+            : `$l=\\dfrac{v^2}{2a}=\\dfrac{${d(v)}^2}{2\\cdot${d(dano2)}}=${d(ans)}$ км.`,
+        ],
+        proverka: [
+          `$\\sqrt{2\\cdot${d(naiti === 'a' ? dano2 : ans)}\\cdot${d(naiti === 'a' ? ans : dano2)}}=${d(v)}$ — верно.`,
+        ],
+        answer: ans,
+        ed: naiti === 'a' ? 'км/ч²' : 'км',
+      }),
+      vychisleniya: sokrashchenie([v, v], 2 * dano2, naiti),
+      hints: [
+        chtoNayti(naiti === 'a' ? 'ускорение $a$' : 'путь $l$', ['скорость $v$', 'время разгона']),
+        vopros(
+          `Как выразить $${naiti}$ из $v=\\sqrt{2la}$?`,
+          naiti === 'a' ? '$a=\\dfrac{v^2}{2l}$' : '$l=\\dfrac{v^2}{2a}$',
+          naiti === 'a' ? ['$a=\\dfrac{v}{2l}$', '$a=\\dfrac{2l}{v^2}$'] : ['$l=\\dfrac{v}{2a}$', '$l=\\dfrac{2a}{v^2}$'],
+        ),
+        vKakihEdinicah(naiti === 'a' ? 'в км/ч²' : 'в километрах', naiti === 'a' ? ['в м/с²', 'в км/ч'] : ['в метрах', 'в км/ч']),
+      ],
+    };
+  },
+};
+
+/**
+ * Изотермическое сжатие воздуха в колоколе: A = α·ν·T·log₂ r, где r =
+ * V₁/V₂ (vid 'V' — найти V₂) или r = p₂/p₁ (vid 'p' — найти p₂).
+ * Подвох — log₂ r = A/(ανT), отсюда r — степень двойки, и для объёма
+ * V₂ = V₁/r (объём уменьшается), а для давления p₂ = p₁·r (растёт).
+ */
+export const PV10_KOLOKOL: Prototype = {
+  id: 'PV10-KOLOKOL',
+  no: 139,
+  group: 'IV',
+  title: 'Водолазный колокол: изотермическое сжатие, объём или давление',
+  formula: 'A=\\alpha\\nu T\\log_2\\dfrac{V_1}{V_2}',
+  ask: 'конечный объём или давление',
+  skills: ['logarifm', 'podstanovka'],
+  fipiNos: '',
+  alt: 'Водолазный колокол опускают на дно',
+  solve(p) {
+    const al = num(p, 'alpha');
+    const nu = num(p, 'nu');
+    const T = num(p, 'T');
+    const A = num(p, 'A');
+    const poV = p['vid'] !== 'p';
+    const nach = num(p, poV ? 'V1' : 'p1');
+    const K = al * nu * T;
+    const L = val(div(q(A), q(K)));
+    if (!Number.isInteger(L) || L < 1) throw new Error('PV10-KOLOKOL: логарифм не целый');
+    const r = 2 ** L;
+    const ans = val(poV ? q(nach, r) : mul(q(nach), q(r)));
+    const dn = [
+      dano('\\nu', nu, 'моль', 'количество воздуха'),
+      dano(poV ? 'V_1' : 'p_1', nach, poV ? 'л' : 'атм', poV ? 'начальный объём' : 'начальное давление'),
+      dano('\\alpha', al, '', 'постоянная'),
+      dano('T', T, 'К', 'температура'),
+      dano('A', A, 'Дж', 'работа'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: poV ? 'V_2' : 'p_2',
+      edinicy: poV ? 'л' : 'атм',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [`Ищем $${poV ? 'V_2' : 'p_2'}$. Сначала множитель $\\alpha\\nu T$, потом логарифм.`],
+        vid: 'uravnenie',
+        reshaem: [
+          `$\\alpha\\nu T=${d(al)}\\cdot${d(nu)}\\cdot${d(T)}=${d(K)}$.`,
+          `$${d(A)}=${d(K)}\\cdot\\log_2${poV ? `\\dfrac{${d(nach)}}{V_2}` : `\\dfrac{p_2}{${d(nach)}}`}$, откуда логарифм равен $${d(A)}:${d(K)}=${d(L)}$.`,
+          poV
+            ? `$\\dfrac{${d(nach)}}{V_2}=2^{${d(L)}}=${d(r)}$, $V_2=${d(nach)}:${d(r)}=${d(ans)}$ л.`
+            : `$\\dfrac{p_2}{${d(nach)}}=2^{${d(L)}}=${d(r)}$, $p_2=${d(nach)}\\cdot${d(r)}=${d(ans)}$ атм.`,
+        ],
+        proverka: [
+          poV
+            ? `Воздух сжали: объём уменьшился с $${d(nach)}$ до $${d(ans)}$ л — так и должно быть.`
+            : `Воздух сжали: давление выросло с $${d(nach)}$ до $${d(ans)}$ атм — так и должно быть.`,
+        ],
+        answer: ans,
+        ed: poV ? 'л' : 'атм',
+      }),
+      vychisleniya: [],
+      hints: [
+        chtoNayti(poV ? 'объём $V_2$' : 'давление $p_2$', ['работу $A$', 'температуру $T$']),
+        vopros('Чему равен логарифм в формуле?', `$${d(L)}$`, [`$${d(r)}$`, `$${d(K)}$`]),
+        vopros(
+          poV ? 'Как найти $V_2$?' : 'Как найти $p_2$?',
+          poV ? `$V_2=\\dfrac{${d(nach)}}{${d(r)}}$` : `$p_2=${d(nach)}\\cdot${d(r)}$`,
+          poV ? [`$V_2=${d(nach)}\\cdot${d(r)}$`, `$V_2=${d(nach)}-${d(r)}$`] : [`$p_2=\\dfrac{${d(nach)}}{${d(r)}}$`, `$p_2=${d(nach)}+${d(r)}$`],
+        ),
+      ],
+    };
+  },
+};

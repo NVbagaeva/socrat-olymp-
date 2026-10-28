@@ -218,8 +218,8 @@ function ekstremumNaOtrezke(par: MaxNaOtrezke, tip: Tip): Generated | null {
 }
 
 export interface ChisloNaOtrezke extends MaxNaOtrezke {
-  /** Что считаем: точки максимума или все точки экстремума. */
-  tip: 'max' | 'extr';
+  /** Что считаем: точки максимума, минимума или все точки экстремума. */
+  tip: 'max' | 'min' | 'extr';
 }
 
 /**
@@ -236,11 +236,11 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
   const zs = nuli.map((z) => z.x);
   const vnutri = nuli.filter((z) => z.x >= p && z.x <= q);
   const vne = nuli.filter((z) => z.x < p || z.x > q);
-  const nuzhnye = vnutri.filter((z) => tip === 'extr' || z.tip === 'max');
-  const lishnie = vnutri.filter((z) => tip === 'max' && z.tip === 'min');
+  const nuzhnye = vnutri.filter((z) => tip === 'extr' || z.tip === tip);
+  const lishnie = vnutri.filter((z) => tip !== 'extr' && z.tip !== tip);
   const ans = nuzhnye.length;
-  /* Подвох должен быть: нули вне отрезка, а для «максимума» — и минимумы на нём. */
-  if (ans < 2 || vne.length === 0 || (tip === 'max' && lishnie.length === 0)) return null;
+  /* Подвох должен быть: нули вне отрезка, а для «максимума» («минимума») — и точки другого вида на нём. */
+  if (ans < 2 || vne.length === 0 || (tip !== 'extr' && lishnie.length === 0)) return null;
   const ps = promezhutki([a, ...zs, b], (m) => znakZnacheniya(uzly, m));
   const fig: Figura = figura('fprime', "f'(x)", uzly, {
     pomoshch: [
@@ -251,16 +251,24 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
   });
   const kod = `pv9n${tip}|${par.uzly.join(';')}|${p}|${q}`;
   const r = rngOf(kod);
-  const chto = tip === 'max' ? 'точек максимума' : 'точек экстремума';
+  const chto =
+    tip === 'max' ? 'точек максимума' : tip === 'min' ? 'точек минимума' : 'точек экстремума';
+  const drugoy = tip === 'max' ? 'минимума' : 'максимума';
   const nX = nuzhnye.map((z) => z.x);
-  const draft = sobrat(fig, { t: tip === 'max' ? 'chislo-max' : 'chislo-extr', p, q }, ans, {
+  const draft = sobrat(fig, { t: `chislo-${tip}` as const, p, q }, ans, {
     uslovie: `${grafikP(a, b)} Найдите количество ${chto} функции $f(x)$, принадлежащих отрезку $${otrezok(p, q)}$.`,
     shagi: [
       shag(
-        tip === 'max' ? 'Что такое точка максимума' : 'Что такое точка экстремума',
+        tip === 'max'
+          ? 'Что такое точка максимума'
+          : tip === 'min'
+            ? 'Что такое точка минимума'
+            : 'Что такое точка экстремума',
         tip === 'max'
           ? "В точке максимума производная $f'$ равна нулю и меняет знак с «$+$» на «$-$»: на графике $f'$ — пересечение оси $Ox$ сверху вниз."
-          : "В точке экстремума производная $f'$ равна нулю и меняет знак: на графике $f'$ — пересечение оси $Ox$. Сверху вниз — максимум, снизу вверх — минимум.",
+          : tip === 'min'
+            ? "В точке минимума производная $f'$ равна нулю и меняет знак с «$-$» на «$+$»: на графике $f'$ — пересечение оси $Ox$ снизу вверх."
+            : "В точке экстремума производная $f'$ равна нулю и меняет знак: на графике $f'$ — пересечение оси $Ox$. Сверху вниз — максимум, снизу вверх — минимум.",
       ),
       shag(
         'Находим нули производной',
@@ -276,7 +284,7 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
         ...(lishnie.length === 0
           ? []
           : [
-              `${xRavno(lishnie.map((z) => z.x))} — точк${lishnie.length === 1 ? 'а' : 'и'} минимума, не считаем.`,
+              `${xRavno(lishnie.map((z) => z.x))} — точк${lishnie.length === 1 ? 'а' : 'и'} ${drugoy}, не считаем.`,
             ]),
         `Остаются ${xRavno(nX)}: ${ans} ${tochekSlovo(ans)}.`,
       ),
@@ -287,10 +295,14 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
         r,
         tip === 'max'
           ? "Как на графике $f'$ узнать точку максимума функции $f$?"
-          : "Как на графике $f'$ узнать точку экстремума функции $f$?",
+          : tip === 'min'
+            ? "Как на графике $f'$ узнать точку минимума функции $f$?"
+            : "Как на графике $f'$ узнать точку экстремума функции $f$?",
         tip === 'max'
           ? `$f'$ пересекает ось $Ox$, меняя знак ${PLUS_MINUS_K}`
-          : "$f'$ пересекает ось $Ox$ (меняет знак)",
+          : tip === 'min'
+            ? `$f'$ пересекает ось $Ox$, меняя знак ${MINUS_PLUS_K}`
+            : "$f'$ пересекает ось $Ox$ (меняет знак)",
         [
           {
             tekst: "Это вершина графика $f'$",
@@ -301,6 +313,11 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
                 tekst: `$f'$ пересекает ось $Ox$, меняя знак ${MINUS_PLUS_K}`,
                 pochemu: 'Так выглядит точка минимума.',
               }
+            : tip === 'min'
+              ? {
+                  tekst: `$f'$ пересекает ось $Ox$, меняя знак ${PLUS_MINUS_K}`,
+                  pochemu: 'Так выглядит точка максимума.',
+                }
             : {
                 tekst: "$f'$ положительна",
                 pochemu: 'Там функция возрастает, но экстремума нет.',
@@ -318,7 +335,7 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
             : [
                 {
                   tekst: xRavno(nX),
-                  pochemu: 'Здесь только точки максимума, а спрашиваем все нули на отрезке.',
+                  pochemu: `Здесь только точки ${tip === 'min' ? 'минимума' : 'максимума'}, а спрашиваем все нули на отрезке.`,
                 },
               ]),
         ],
@@ -333,7 +350,7 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
           { tekst: `$${zs.length}$`, pochemu: 'Посчитаны и нули вне отрезка.' },
           ...(lishnie.length === 0
             ? [{ tekst: `$${ans - 1}$`, pochemu: 'Пропущена одна из точек на отрезке.' }]
-            : [{ tekst: `$${vnutri.length}$`, pochemu: 'Посчитаны и точки минимума.' }]),
+            : [{ tekst: `$${vnutri.length}$`, pochemu: `Посчитаны и точки ${drugoy}.` }]),
         ],
         `${xRavno(nX)}.`,
         3,
@@ -346,7 +363,7 @@ export function chisloNaOtrezke(par: ChisloNaOtrezke): Generated | null {
     ? null
     : {
         ...draft,
-        prototype: tip === 'max' ? 'PV9-CHISLO-MAX' : 'PV9-CHISLO-EXTR',
+        prototype: tip === 'max' ? 'PV9-CHISLO-MAX' : tip === 'min' ? 'PV9-CHISLO-MIN' : 'PV9-CHISLO-EXTR',
         seed: 'fixed',
         istochnik: NE_IZ_BANKA,
       };
@@ -820,6 +837,193 @@ export function skorostMnogochlen(par: SkorostMnogochlen): Generated {
     params: { t0, ans: v, chleny: chleny.map((c) => c.join(':')).join(',') },
     signature: `pv9vm|${JSON.stringify(chleny)}|${t0}`,
     prototype: 'PV9-SKOROST-MNOGOCHLEN',
+    seed: 'fixed',
+    istochnik: NE_IZ_BANKA,
+  };
+}
+
+/* ── Партия 4: касательная задана формулой, рисунка нет ─────────── */
+
+export interface KasatelnayaFormula {
+  /**
+   * abscissa — прямая y = kx + m касается y = f(x) (f — многочлен), найти
+   *            абсциссу точки касания;
+   * koefA    — y = kx + m касается y = ax² + bx + c, найти a;
+   * parallel — y = kx + m параллельна касательной к y = f(x), найти абсциссу;
+   * koefC    — y = kx + m касается y = ax² + bx + c, найти c.
+   */
+  vid: 'abscissa' | 'koefA' | 'parallel' | 'koefC';
+  k: number;
+  m: number;
+  /** Коэффициенты f по убыванию степени (abscissa, parallel); для koefA — [b, c], для koefC — [a, b]. */
+  f: number[];
+}
+
+/** Многочлен по коэффициентам при xⁿ, …, x⁰ в TeX: «x^3+5x^2-3x+6». */
+function mnogochlenTex(cs: readonly number[]): string {
+  const n = cs.length - 1;
+  let out = '';
+  cs.forEach((c, i) => {
+    if (c === 0) return;
+    const st = n - i;
+    const abs = Math.abs(c);
+    const koef = st === 0 ? d(abs) : abs === 1 ? '' : d(abs);
+    const x = st === 0 ? '' : st === 1 ? 'x' : `x^${st}`;
+    const sign = c < 0 ? '-' : out === '' ? '' : '+';
+    out += `${sign}${koef}${x}`;
+  });
+  return out === '' ? '0' : out;
+}
+
+const znachMn = (cs: readonly number[], x: number) => cs.reduce((s, c) => s * x + c, 0);
+const proizvMn = (cs: readonly number[]) => {
+  const n = cs.length - 1;
+  return cs.slice(0, -1).map((c, i) => c * (n - i));
+};
+const pryamaya = (k: number, m: number) =>
+  `${k === 1 ? '' : k === -1 ? '-' : d(k)}x${m === 0 ? '' : m < 0 ? `-${d(-m)}` : `+${d(m)}`}`;
+
+/** Корни многочлена степени ≤ 2 (действительные, по возрастанию). */
+function korniKv(cs: readonly number[]): number[] {
+  if (cs.length === 2) return [-(cs[1] as number) / (cs[0] as number)];
+  const [a, b, c] = cs as [number, number, number];
+  const D = b * b - 4 * a * c;
+  if (D < 0) return [];
+  const s = Math.sqrt(D);
+  return [(-b - s) / (2 * a), (-b + s) / (2 * a)].sort((u, v) => u - v);
+}
+
+export function kasatelnayaFormula(par: KasatelnayaFormula): Generated {
+  const { vid, k, m, f } = par;
+  const line = pryamaya(k, m);
+  const r = rngOf(`pv9kf|${vid}|${k}|${m}|${f.join(',')}`);
+  let otvet: number;
+  let uslovie: string;
+  let shagi: ReturnType<typeof shag>[];
+  let proverka: number;
+  let lovushka: number;
+  if (vid === 'abscissa' || vid === 'parallel') {
+    const fp = proizvMn(f);
+    const fpk = [...fp.slice(0, -1), (fp.at(-1) as number) - k];
+    const kandidaty = korniKv(fpk).map(okr);
+    const godnye =
+      vid === 'parallel'
+        ? kandidaty
+        : kandidaty.filter((x) => Math.abs(znachMn(f, x) - (k * x + m)) < 1e-9);
+    if (godnye.length !== 1) throw new Error(`№9: точек касания ${godnye.length} ${JSON.stringify(par)}`);
+    otvet = godnye[0] as number;
+    lovushka = kandidaty.find((x) => x !== otvet) ?? otvet + 1;
+    const ft = mnogochlenTex(f);
+    uslovie =
+      vid === 'abscissa'
+        ? `Прямая $y=${line}$ является касательной к графику функции $y=${ft}$. Найдите абсциссу точки касания.`
+        : `Прямая $y=${line}$ параллельна касательной к графику функции $y=${ft}$. Найдите абсциссу точки касания.`;
+    /* Второй счёт: перебор абсцисс с шагом 0,5 — где наклон графика равен k (и, для касания, точка на прямой). */
+    proverka = NaN;
+    for (let x = -20; x <= 20; x += 0.5) {
+      const h = 1e-5;
+      const naklon = (znachMn(f, x + h) - znachMn(f, x - h)) / (2 * h);
+      const naPryamoy = vid === 'parallel' || Math.abs(znachMn(f, x) - (k * x + m)) < 1e-6;
+      if (Math.abs(naklon - k) < 1e-4 && naPryamoy) proverka = x;
+    }
+    const fpt = mnogochlenTex(fp);
+    shagi = [
+      shag(
+        'Наклон касательной',
+        `Угловой коэффициент касательной в точке $x_0$ равен $f'(x_0)$. ${vid === 'abscissa' ? 'У касательной' : 'У параллельной прямой'} $y=${line}$ он равен $${d(k)}$: $f'(x)=${fpt}$, решаем $${fpt}=${d(k)}$.`,
+        kandidaty.length === 1
+          ? `$x_0=${d(kandidaty[0] as number)}$.`
+          : `$x=${d(kandidaty[0] as number)}$ или $x=${d(kandidaty[1] as number)}$.`,
+      ),
+      ...(vid === 'abscissa' && kandidaty.length > 1
+        ? [
+            shag(
+              'Точка касания лежит и на прямой',
+              `Проверяем, где значения функции и прямой совпадают: при $x=${d(otvet)}$ $f(${d(otvet)})=${d(okr(znachMn(f, otvet)))}$ и $${d(k)}\\cdot(${d(otvet)})${m < 0 ? '-' : '+'}${d(Math.abs(m))}=${d(okr(k * otvet + m))}$ — совпали; при $x=${d(lovushka)}$ — нет: $f(${d(lovushka)})=${d(okr(znachMn(f, lovushka)))}\\ne ${d(okr(k * lovushka + m))}$.`,
+            ),
+          ]
+        : []),
+      shag('Ответ', `Абсцисса точки касания — $${d(otvet)}$.`, `**Ответ: ${chislaOtvet(otvet)}**`),
+    ];
+  } else if (vid === 'koefA') {
+    const [b, c] = f as [number, number];
+    /* 2ax₀ + b = k и ax₀² + bx₀ + c = kx₀ + m ⇒ x₀ = 2(c − m)/(k − b), a = (k − b)/(2x₀). */
+    const x0 = okr((2 * (c - m)) / (k - b));
+    otvet = okr((k - b) / (2 * x0));
+    lovushka = x0;
+    uslovie = `Прямая $y=${line}$ является касательной к графику функции $y=ax^2${b < 0 ? '-' : '+'}${d(Math.abs(b))}x${c < 0 ? '-' : '+'}${d(Math.abs(c))}$. Найдите $a$.`;
+    proverka = NaN;
+    for (let a = -50; a <= 50; a += 0.25) {
+      if (a === 0) continue;
+      /* Касание ⇔ ax² + (b − k)x + (c − m) = 0 имеет один корень. */
+      if (Math.abs((b - k) ** 2 - 4 * a * (c - m)) < 1e-9) proverka = a;
+    }
+    shagi = [
+      shag(
+        'Два условия касания в точке $x_0$',
+        `Наклоны равны: $2ax_0${b < 0 ? '-' : '+'}${d(Math.abs(b))}=${d(k)}$. Значения равны: $ax_0^2${b < 0 ? '-' : '+'}${d(Math.abs(b))}x_0${c < 0 ? '-' : '+'}${d(Math.abs(c))}=${pryamaya(k, m).replace(/x/g, 'x_0')}$.`,
+      ),
+      shag(
+        'Исключаем $a$',
+        `Из первого $ax_0=${d(okr((k - b) / 2))}$. Подставляем $ax_0^2=${d(okr((k - b) / 2))}x_0$ во второе: $${d(okr((k - b) / 2))}x_0${b < 0 ? '-' : '+'}${d(Math.abs(b))}x_0${c < 0 ? '-' : '+'}${d(Math.abs(c))}=${pryamaya(k, m).replace(/x/g, 'x_0')}$, откуда $x_0=${d(x0)}$.`,
+        `$a=\\dfrac{${d(okr((k - b) / 2))}}{${d(x0)}}=${d(otvet)}$.`,
+      ),
+      shag('Ответ', `$a=${d(otvet)}$.`, `**Ответ: ${chislaOtvet(otvet)}**`),
+    ];
+  } else {
+    const [a, b] = f as [number, number];
+    const x0 = okr((k - b) / (2 * a));
+    const y0 = okr(k * x0 + m);
+    otvet = okr(y0 - a * x0 * x0 - b * x0);
+    lovushka = y0;
+    uslovie = `Прямая $y=${line}$ является касательной к графику функции $y=${mnogochlenTex([a, b, 0]).replace(/^0$/, '')}+c$. Найдите $c$.`;
+    proverka = NaN;
+    for (let c = -100; c <= 100; c += 0.25) {
+      if (Math.abs((b - k) ** 2 - 4 * a * (c - m)) < 1e-9) proverka = c;
+    }
+    shagi = [
+      shag(
+        'Абсцисса точки касания',
+        `Наклон касательной $f'(x_0)=${d(k)}$: $${mnogochlenTex(proizvMn([a, b, 0]))}=${d(k)}$, $x_0=${d(x0)}$.`,
+      ),
+      shag(
+        'Точка касания лежит на прямой',
+        `$y_0=${d(k)}\\cdot${x0 < 0 ? `(${d(x0)})` : d(x0)}${m < 0 ? '-' : '+'}${d(Math.abs(m))}=${d(y0)}$. Значение функции в $x_0$ такое же: $${d(okr(a * x0 * x0 + b * x0))}+c=${d(y0)}$.`,
+        `$c=${d(otvet)}$.`,
+      ),
+      shag('Ответ', `$c=${d(otvet)}$.`, `**Ответ: ${chislaOtvet(otvet)}**`),
+    ];
+  }
+  return {
+    uslovie,
+    risunok: null,
+    zapros: null,
+    otvet,
+    proverka,
+    shagi,
+    podskazka: [
+      vopros(
+        r,
+        'Чему равен угловой коэффициент касательной в точке $x_0$?',
+        "$f'(x_0)$",
+        [
+          { tekst: '$f(x_0)$', pochemu: 'Это значение функции, а не наклон.' },
+          { tekst: '$x_0$', pochemu: 'Абсцисса точки — не наклон.' },
+        ],
+        'Геометрический смысл производной: наклон касательной.',
+      ),
+      vopros(
+        r,
+        vid === 'koefA' ? 'Чему равен $a$?' : vid === 'koefC' ? 'Чему равно $c$?' : 'Какая абсцисса подходит?',
+        `$${d(otvet)}$`,
+        [{ tekst: `$${d(lovushka)}$`, pochemu: 'Проверьте оба условия касания: и наклон, и общую точку.' }].filter(
+          (o) => o.tekst !== `$${d(otvet)}$`,
+        ),
+      ),
+    ],
+    params: { vid, k, m, f: f.join(','), ans: otvet },
+    signature: `pv9kf|${vid}|${k}|${m}|${f.join(',')}`,
+    prototype: 'PV9-KASAT-FORMULA',
     seed: 'fixed',
     istochnik: NE_IZ_BANKA,
   };

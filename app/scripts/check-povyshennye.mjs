@@ -588,6 +588,94 @@ Object.assign(VTOROY, {
   },
 });
 
+/* №4–5, где ответ — не вероятность: отношение вероятностей, число билетов. */
+const NE_VEROYATNOST = new Set(['z05.bernulli-otnoshenie', 'z05.bilety']);
+
+/* Партия 4 (варианты 19–24). */
+const ugolMezhdu = (u, v) =>
+  (Math.acos((u[0] * v[0] + u[1] * v[1]) / (Math.hypot(...u) * Math.hypot(...v))) * 180) / Math.PI;
+Object.assign(VTOROY, {
+  'z01.bissektrisy-aob': (p) => r6(180 - p.a / 2 - (180 - p.c - p.a) / 2),
+  'z01.vysota-bissektrisa': (p) => {
+    /* C в начале, катеты по осям: CA = 1 вдоль Ox, CB = tg A; меньший угол — A. */
+    const f = (a) => {
+      const A = [1, 0];
+      const B = [0, Math.tan((a * Math.PI) / 180)];
+      const n = [B[1] - A[1], A[0] - B[0]];
+      const h = n[0] * A[0] + n[1] * A[1] < 0 ? [-n[0], -n[1]] : n;
+      return ugolMezhdu(h, [1, 1]) - p.f;
+    };
+    return r6(bisekciya((a) => -f(a), 1e-6, 45 - 1e-6));
+  },
+  'z01.bissektrisa-mediana': (p) => {
+    const B = [1, 0];
+    const A = [0, Math.tan((p.b * Math.PI) / 180)];
+    return r6(ugolMezhdu([(A[0] + B[0]) / 2, (A[1] + B[1]) / 2], [1, 1]));
+  },
+  'z01.trapeciya-osnovanie': (p) => {
+    /* Основания x и y: x + y = 2m, а части средней линии x/2 : y/2 = p : q. */
+    const x = (2 * p.m * p.p) / (p.p + p.q);
+    const y = 2 * p.m - x;
+    return r6(p.k ? Math.max(x, y) : Math.min(x, y));
+  },
+  'z03.piramida-poverhnost': (p) =>
+    requireSrc('lib/zadanie3/razdel3/povyshennye').PV03_PIRAMIDA_POVERHNOST.poModeli(p),
+  'z03.cilindr-konus': (p) =>
+    requireSrc('lib/zadanie3/razdel5/povyshennye').PV03_CILINDR_KONUS.poModeli(p),
+  'z03.shar-poverhnost': (p) =>
+    requireSrc('lib/zadanie3/razdel6/povyshennye').PV03_SHAR_POVERHNOST.poModeli(p),
+  'z04.poryadok': (p) => VER.PV4_PORYADOK.perebor(p),
+  'z04.tri-ishoda': (p) => VER.PV4_TRI_ISHODA.perebor(p),
+  'z04.dva-druga': (p) => VER.PV4_DVA_DRUGA.perebor(p),
+  'z05.bernulli-otnoshenie': (p) => VER.PV5_BERNULLI_OTNOSHENIE.perebor(p),
+  'z05.misheni-dva-vystrela': (p) => VER.PV5_MISHENI_DVA_VYSTRELA.perebor(p),
+  'z05.bilety': (p) => VER.PV5_BILETY.perebor(p),
+  'z07.koren-postoronniy': podstanovka7(Z7.PV7_KOREN_POSTORONNIY),
+  'z07.stepen-kvadrata': podstanovka7(Z7.PV7_STEPEN_KVADRATA),
+  'z08.stepeni-tri-osnovaniya': (p) => r6(VY.stepeniTriOsnovaniya(p).proverka),
+  'z08.log-raznost': (p) => r6(VY.logRaznost(p).proverka),
+  'z08.korni-proizvedenie': (p) => r6(VY.korniProizvedenie(p).proverka),
+  'z09.kasatelnaya-formula': (p) => PR9.kasatelnayaFormula(p).proverka,
+  'z10.radiator': (p) =>
+    /* Длина трубы растёт при остывании — бисекция по T от T_в вниз до T_п. */
+    r6(
+      bisekciya(
+        (T) =>
+          -(((p.alpha * p.c * p.m) / p.gamma) * Math.log2((p.Tv - p.Tp) / (T - p.Tp)) - p.x),
+        p.Tp + 1e-9,
+        p.Tv,
+      ),
+    ),
+  'z10.razgon': (p) =>
+    p.vid === 'l'
+      ? r6(bisekciya((l) => Math.sqrt(2 * l * p.a) - p.v, 0, 1e6))
+      : r6(bisekciya((a) => Math.sqrt(2 * p.l * a) - p.v, 0, 1e9)),
+  'z10.kolokol': (p) =>
+    p.vid === 'p'
+      ? r6(bisekciya((p2) => p.alpha * p.nu * p.T * Math.log2(p2 / p.p1) - p.A, p.p1, 1e6))
+      : r6(bisekciya((V2) => -(p.alpha * p.nu * p.T * Math.log2(p.V1 / V2) - p.A), 1e-9, p.V1)),
+  'z11.mastera': (p) => {
+    /* Перебор производительности второго мастера: разница во времени в минутах. */
+    for (let y = p.r + 1; y <= 1000; y += 1) {
+      if (Math.abs((p.N1 / (y - p.r) - p.N2 / y) * 60 - p.tm) < 1e-9) return p.ask === 'vtoroy' ? y : y - p.r;
+    }
+    return NaN;
+  },
+  'z11.plot-yahta': (p) => {
+    const T = p.R / p.vt - p.z;
+    return r6(bisekciya((v) => -(p.S / (v + p.vt) + p.S / (v - p.vt) - T), p.vt + 1e-9, 1e4));
+  },
+  'z11.brigady': (p) => {
+    /* По дням: работа обеих бригад, пока объёмы не сравняются после перехода. */
+    for (let T = p.d + 1; T <= 1000; T += 1) {
+      if (p.n1 * p.d + (p.n1 + p.k) * (T - p.d) === p.n2 * p.d + (p.n2 - p.k) * (T - p.d)) return T;
+    }
+    return NaN;
+  },
+  'z12.dva-uzla': (p) => r6(GR.dvaUzla(p).proverka),
+  /* P4-END */
+});
+
 /* ── Варианты ───────────────────────────────────────────────────── */
 
 const { GOTOVY } = requireSrc('lib/povyshennye/dannye/index');
@@ -643,8 +731,10 @@ for (const k of nomera) {
         ok = false;
       }
       const x = num(t.answer);
-      if ([4, 5].includes(ege) && Number.isInteger(x)) fail(kv, `у №${ege} ответ целый: ${x}`);
-      if ([4, 5].includes(ege) && !(x > 0 && x < 1)) fail(kv, `вероятность ${x} вне (0; 1)`);
+      /* Ответ — вероятность, кроме шаблонов, где спрашивают отношение или число билетов. */
+      const veroyatnostOtvet = [4, 5].includes(ege) && !NE_VEROYATNOST.has(z.s);
+      if (veroyatnostOtvet && Number.isInteger(x)) fail(kv, `у №${ege} ответ целый: ${x}`);
+      if (veroyatnostOtvet && !(x > 0 && x < 1)) fail(kv, `вероятность ${x} вне (0; 1)`);
       if (ege === 13 && !Number.isInteger(x)) fail(kv, `сумма не целая: ${x}`);
       if (x === 0) fail(kv, 'ответ 0');
       /* Хвосты двоичной арифметики: в ответе ЕГЭ не больше 4 знаков после запятой. */
@@ -675,7 +765,9 @@ for (const k of nomera) {
           }
         }
       }
-      if ([1, 3, 9, 12].includes(ege) && t.figure === null && !z.s.startsWith('z09.skorost'))
+      /* №9 без рисунка — задачи по формуле: скорость по закону движения, касательная по уравнению. */
+      const bezRisunka = z.s.startsWith('z09.skorost') || z.s === 'z09.kasatelnaya-formula';
+      if ([1, 3, 9, 12].includes(ege) && t.figure === null && !bezRisunka)
         fail(kv, 'нет рисунка');
       const vtoroy = VTOROY[z.s]?.(z.p);
       if (vtoroy === undefined || !close(vtoroy, x)) {

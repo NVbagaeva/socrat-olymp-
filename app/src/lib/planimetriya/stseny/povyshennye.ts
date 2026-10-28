@@ -545,7 +545,77 @@ const PROTOTIPY_PARTIYA_3: readonly PrototipChertezha[] = [
   },
 ];
 
+/** Основания трапеции по средней линии m, разделённой диагональю в отношении p : q (прототип 112). */
+export function osnovaniya112(p: Params) {
+  const chast1 = (p.m * p.p) / (p.p + p.q);
+  const chast2 = (p.m * p.q) / (p.p + p.q);
+  return { mal: 2 * Math.min(chast1, chast2), bol: 2 * Math.max(chast1, chast2), chast1, chast2 };
+}
+
+/** Партия 4 (варианты 19–24). */
+const PROTOTIPY_PARTIYA_4: readonly PrototipChertezha[] = [
+  {
+    id: 112,
+    blok: 'IV',
+    nazvanie:
+      'Трапеция: средняя линия и отношение, в котором её делит диагональ → большее или меньшее основание',
+    fipi: [],
+    uslovie: (p) =>
+      `Средняя линия трапеции равна $${tex(p.m)}$, а одна из её диагоналей делит среднюю линию в отношении $${p.p}:${p.q}$. Найдите ${p.k ? 'большее' : 'меньшее'} основание трапеции.`,
+    otvet: (p) => (p.k ? osnovaniya112(p).bol : osnovaniya112(p).mal),
+    primer: { m: 20, p: 3, q: 7, k: 1 },
+    sluchaynye: (r) => ({ m: 5 * r.int(2, 12), p: r.int(1, 4), q: r.int(5, 9), k: r.int(0, 1) }),
+    stsena: (p) => {
+      const o = osnovaniya112(p);
+      const ans = p.k ? o.bol : o.mal;
+      const verh = clamp(o.mal / o.bol, 0.3, 0.8) * 10;
+      return scena(
+        {
+          tochki: {
+            ...trapeciya(10, verh, 5, (10 - verh) * 0.35),
+            M: { seredina: ['A', 'B'] },
+            N: { seredina: ['D', 'C'] },
+            K: {
+              peresechenie: [
+                ['M', 'N'],
+                ['A', 'C'],
+              ],
+            },
+          },
+          elementy: [
+            mn(['A', 'B', 'C', 'D']),
+            otr('M', 'K', { vydelit: 'dano', znachenie: chislo(o.mal / 2) }),
+            otr('K', 'N', { vydelit: 'dano', znachenie: chislo(o.bol / 2) }),
+            otr('A', 'C'),
+            storona(p.k ? 'A' : 'B', p.k ? 'D' : 'C', chislo(ans), {
+              vydelit: 'iskomoe',
+              otvet: true,
+            }),
+            shtrih('A', 'M', 1, { sloy: 1 }),
+            shtrih('M', 'B', 1, { sloy: 1 }),
+            shtrih('D', 'N', 2, { sloy: 1 }),
+            shtrih('N', 'C', 2, { sloy: 1 }),
+            oblast(['A', 'B', 'C'], { sloy: 2 }),
+          ],
+          podpisi: false,
+          proverki: [
+            {
+              parallelny: [
+                ['A', 'D'],
+                ['B', 'C'],
+              ],
+            },
+          ],
+          otvet: chislo(ans),
+        },
+        Math.abs(verh - (o.mal / o.bol) * 10) > 1e-9,
+      );
+    },
+  },
+];
+
 export const PROTOTIPY_POVYSHENNYE: readonly PrototipChertezha[] = [
   ...PROTOTIPY_PARTIYA_1_2,
   ...PROTOTIPY_PARTIYA_3,
+  ...PROTOTIPY_PARTIYA_4,
 ];

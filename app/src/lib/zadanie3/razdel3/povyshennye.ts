@@ -12,7 +12,8 @@
  */
 
 import { regularPyramid, vertex } from '../../solid/figures';
-import { hullVolume } from '../../solid/measure';
+import { hullVolume, surfaceArea } from '../../solid/measure';
+import { unlabelled } from '../../solid/drawings/common';
 import { type Model } from '../../solid/model';
 import type { Vec3 } from '../../solid/vec';
 import { ru } from '../format';
@@ -107,5 +108,84 @@ export const P03_48S: Prototype = {
     ];
   },
 
+  varianty: [],
+};
+
+/* ── Партия 4. Правильная четырёхугольная пирамида: полная поверхность ─ */
+
+/** Апофема: по боковому ребру (vid 0) или по высоте (vid 1). */
+function apofema(p: Params): number {
+  const a = num(p, 'a');
+  return num(p, 'vid') === 0
+    ? Math.sqrt(num(p, 'b') ** 2 - (a / 2) ** 2)
+    : Math.sqrt(num(p, 'h') ** 2 + (a / 2) ** 2);
+}
+
+/**
+ * Полная поверхность правильной четырёхугольной пирамиды по стороне
+ * основания и боковому ребру или высоте. Подвох — площадь боковой грани
+ * считают через апофему, а не через ребро или высоту пирамиды; и не
+ * забывают основание.
+ */
+export const PV03_PIRAMIDA_POVERHNOST: Prototype = {
+  id: 'PV03-piramida-poverhnost',
+  razdel: 'III',
+  nazvanie: 'Правильная четырёхугольная пирамида: полная поверхность по ребру или высоте',
+  tip: 'площадь полной поверхности правильной четырёхугольной пирамиды',
+  zadachnik: [140, 141],
+  status: 'добавить',
+  format: 'десятичная',
+  uslovie: (p) =>
+    num(p, 'vid') === 0
+      ? `У правильной четырёхугольной пирамиды сторона основания равна ${ru(num(p, 'a'))}, а каждое боковое ребро равно ${ru(num(p, 'b'))}. Найдите площадь полной поверхности пирамиды.`
+      : `Высота правильной четырёхугольной пирамиды равна ${ru(num(p, 'h'))}, а сторона её основания равна ${ru(num(p, 'a'))}. Найдите площадь полной поверхности пирамиды.`,
+  dopustimo: (p) => {
+    const f = apofema(p);
+    /* Пирамида существует: боковое ребро длиннее половины диагонали основания. */
+    const est = num(p, 'vid') !== 0 || num(p, 'b') ** 2 > num(p, 'a') ** 2 / 2;
+    return (
+      est &&
+      num(p, 'a') > 0 &&
+      Number.isFinite(f) &&
+      f > 0 &&
+      Math.abs(f * 100 - Math.round(f * 100)) < 1e-9
+    );
+  },
+  otvet: (p) => {
+    const a = num(p, 'a');
+    return Math.round((a * a + 2 * a * apofema(p)) * 1e9) / 1e9;
+  },
+  /* Настоящая пирамида: высота из ребра или дана, площадь — по граням. */
+  poModeli: (p) => {
+    const a = num(p, 'a');
+    const h =
+      num(p, 'vid') === 0 ? Math.sqrt(num(p, 'b') ** 2 - (a * a) / 2) : num(p, 'h');
+    return Math.round(surfaceArea(regularPyramid(4, a / Math.SQRT2, h)) * 1e6) / 1e6;
+  },
+  chertezh: () => {
+    const model: Model = {
+      alt: 'Правильная четырёхугольная пирамида',
+      bodies: [unlabelled(regularPyramid(4, 2.9, 4.2))],
+    };
+    return model;
+  },
+  shagi: (p) => {
+    const a = num(p, 'a');
+    const f = apofema(p);
+    const osn = a * a;
+    const bok = 2 * a * f;
+    const pervyy =
+      num(p, 'vid') === 0
+        ? `Боковая грань — равнобедренный треугольник с основанием ${ru(a)} и боковыми сторонами ${ru(num(p, 'b'))}. Его высота (апофема) по теореме Пифагора: $\\sqrt{${ru(num(p, 'b'))}^2-${ru(a / 2)}^2}=${ru(f)}$.`
+        : `Апофему находим из прямоугольного треугольника: высота пирамиды ${ru(num(p, 'h'))} и половина стороны основания ${ru(a / 2)} — катеты, апофема — гипотенуза: $\\sqrt{${ru(num(p, 'h'))}^2+${ru(a / 2)}^2}=${ru(f)}$.`;
+    return [
+      { text: pervyy, value: f },
+      {
+        text: `Четыре боковые грани: $4\\cdot\\dfrac12\\cdot ${ru(a)}\\cdot ${ru(f)} = ${ru(bok)}$. Основание — квадрат: $${ru(a)}^2 = ${ru(osn)}$.`,
+        value: bok,
+      },
+      { text: `Полная поверхность: $${ru(osn)} + ${ru(bok)} = ${ru(osn + bok)}$.`, value: osn + bok },
+    ];
+  },
   varianty: [],
 };
