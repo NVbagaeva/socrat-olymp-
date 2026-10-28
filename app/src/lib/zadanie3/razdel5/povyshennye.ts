@@ -9,6 +9,7 @@
  * погрешность приближения сокращается в отношении.
  */
 
+import { hullVolume } from '../../solid/measure';
 import { type Model } from '../../solid/model';
 import { volumeUnits } from './common';
 import { twoMugs } from './drawings';
@@ -163,5 +164,69 @@ export const PV03_KRUZHKI: Prototype = {
     ];
   },
 
+  varianty: [],
+};
+
+/* ── Партия 4. Цилиндр и конус с общим основанием и высотой ─────── */
+
+/** Многоугольник основания: 96 вершин на окружности радиуса r в плоскости z. */
+function krug96(r: number, z: number): [number, number, number][] {
+  return Array.from({ length: 96 }, (_, i) => {
+    const u = (2 * Math.PI * i) / 96;
+    return [r * Math.cos(u), r * Math.sin(u), z] as [number, number, number];
+  });
+}
+
+/**
+ * Цилиндр и конус с общим основанием и общей высотой: по объёму одного
+ * найти объём другого. Подвох — в какую сторону множитель 3: объём
+ * конуса — треть объёма цилиндра, а не втрое больше.
+ * vid 0 — дан цилиндр, найти конус; vid 1 — дан конус, найти цилиндр.
+ */
+export const PV03_CILINDR_KONUS: Prototype = {
+  id: 'PV03-cilindr-konus',
+  razdel: 'V',
+  nazvanie: 'Цилиндр и конус с общим основанием и высотой: объём одного по объёму другого',
+  tip: 'объём цилиндра или конуса с общим основанием и общей высотой',
+  zadachnik: [196, 197],
+  status: 'добавить',
+  format: 'десятичная',
+  uslovie: (p) =>
+    num(p, 'vid') === 0
+      ? `Конус вписан в цилиндр: основание конуса совпадает с нижним основанием цилиндра, а вершина лежит в центре верхнего. Объём цилиндра равен ${ru(num(p, 'V'))}. Найдите объём конуса.`
+      : `Конус вписан в цилиндр: основание конуса совпадает с нижним основанием цилиндра, а вершина лежит в центре верхнего. Объём конуса равен ${ru(num(p, 'V'))}. Найдите объём цилиндра.`,
+  dopustimo: (p) => num(p, 'V') > 0,
+  otvet: (p) => Math.round((num(p, 'vid') === 0 ? num(p, 'V') / 3 : num(p, 'V') * 3) * 1e9) / 1e9,
+  /* Призма и пирамида над одним 96-угольником: отношение объёмов по координатам. */
+  poModeli: (p) => {
+    const niz = krug96(1, 0);
+    const prizma = hullVolume([...niz, ...krug96(1, 2)]);
+    const piramida = hullVolume([...niz, [0, 0, 2]]);
+    const k = prizma / piramida;
+    return Math.round((num(p, 'vid') === 0 ? num(p, 'V') / k : num(p, 'V') * k) * 1e6) / 1e6;
+  },
+  chertezh: () => ({
+    alt: 'Конус, вписанный в цилиндр: общее основание и общая высота',
+    bodies: [
+      { kind: 'cylinder', base: [0, 0, 0], r: R, h: H, glass: true },
+      { kind: 'cone', base: [0, 0, 0], r: R, h: H },
+    ],
+  }),
+  shagi: (p) => {
+    const V = num(p, 'V');
+    const ans = num(p, 'vid') === 0 ? V / 3 : V * 3;
+    return [
+      {
+        text: 'Объём цилиндра $V=S\\cdot h$, объём конуса $V=\\dfrac13 S\\cdot h$, где $S$ — площадь основания, $h$ — высота. Основание и высота у них общие.',
+      },
+      {
+        text:
+          num(p, 'vid') === 0
+            ? `Значит, конус втрое меньше цилиндра: $\\dfrac{${ru(V)}}{3}=${ru(ans)}$.`
+            : `Значит, цилиндр втрое больше конуса: $3\\cdot ${ru(V)}=${ru(ans)}$.`,
+        value: ans,
+      },
+    ];
+  },
   varianty: [],
 };

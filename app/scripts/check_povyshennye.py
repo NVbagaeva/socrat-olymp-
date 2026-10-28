@@ -159,7 +159,7 @@ def z01_vneshnie(p):
 
 
 def z02_dlina(p):
-    r = sp.Matrix([p["ax"], p["ay"]]) + R(p["k"]) * sp.Matrix([p["bx"], p["by"]])
+    r = R(p.get("m", 1)) * sp.Matrix([p["ax"], p["ay"]]) + R(p["k"]) * sp.Matrix([p["bx"], p["by"]])
     return sp.sqrt(r.dot(r))
 
 
@@ -310,7 +310,7 @@ def z09_min(p):
 
 
 def z09_chislo(p):
-    return sp.Integer(sum(1 for x_, tip in nuli9(p) if p["p"] <= x_ <= p["q"] and (p["tip"] == "extr" or tip == "max")))
+    return sp.Integer(sum(1 for x_, tip in nuli9(p) if p["p"] <= x_ <= p["q"] and (p["tip"] == "extr" or tip == p["tip"])))
 
 
 def z09_skorost(p):
@@ -1024,6 +1024,238 @@ def p3_metka(p):
 SCHET.update({
     "z09.kasatelnaya-nachalo": p3_kas_nach,
     "z09.naib-naim-metka": p3_metka,
+})
+
+
+# ── Партия 4 (варианты 19–24) ──
+
+
+def p4_aob(p):
+    # Сумма углов треугольника AOB: 180 − A/2 − B/2.
+    return 180 - sp.Rational(p["a"], 2) - sp.Rational(180 - p["c"] - p["a"], 2)
+
+
+def p4_vys_bis(p):
+    # Угол между высотой и биссектрисой из прямого угла: |B − 45°| = 45° − A, A < 45°.
+    a = sp.symbols("a", positive=True)
+    return sp.solve(sp.Eq(45 - a, R(p["f"])), a)[0]
+
+
+def p4_bis_med(p):
+    # Медиана к гипотенузе: угол MCB = B; биссектриса — 45° от катета.
+    return abs(45 - sp.Integer(p["b"]))
+
+
+def p4_trap(p):
+    x, y = sp.symbols("x y", positive=True)
+    sol = sp.solve([sp.Eq(x + y, 2 * R(p["m"])), sp.Eq(x * p["q"], y * p["p"])], [x, y], dict=True)[0]
+    return max(sol[x], sol[y]) if p["k"] else min(sol[x], sol[y])
+
+
+def p4_piramida(p):
+    a = R(p["a"])
+    f = sp.sqrt(R(p["b"]) ** 2 - (a / 2) ** 2) if p["vid"] == 0 else sp.sqrt(R(p["h"]) ** 2 + (a / 2) ** 2)
+    return a**2 + 4 * a * f / 2
+
+
+def p4_cil_kon(p):
+    S, h = sp.symbols("S h", positive=True)
+    kon, cil = S * h / 3, S * h
+    return sp.simplify(R(p["V"]) * (kon / cil if p["vid"] == 0 else cil / kon))
+
+
+def p4_shar(p):
+    r = sp.symbols("r", positive=True)
+    if p["vid"] == 0:
+        return R(p["S"]) * (4 * sp.pi * r**2) / (sp.pi * r**2)
+    return (4 * sp.pi * (R(p["k"]) * r) ** 2) / (4 * sp.pi * r**2)
+
+
+def okr2(x):
+    # До сотых, если дробь длиннее двух знаков.
+    x = sp.Rational(x)
+    return x if (x * 100).is_integer else sp.floor(x * 100 + sp.Rational(1, 2)) / 100
+
+
+def p4_poryadok(p):
+    m = len([k for k in p if k.startswith("i") and k[1:].isdigit()])
+    vid = p["vid"]
+    x = {"posle": sp.Rational(1, m), "cepochka": sp.Rational(1, sp.factorial(m)), "mezhdu": sp.Rational(1, 3)}.get(
+        vid, sp.Rational(1, 2 ** (m // 2))
+    )
+    return okr2(x)
+
+
+def p4_tri(p):
+    return 1 - R(p["p1"]) - R(p["p2"])
+
+
+def p4_druga(p):
+    n, g = p["n"], p["g"]
+    k = n // g
+    v = sp.Rational(g * sp.binomial(n - 2, k - 2), sp.binomial(n, k))
+    return okr2(v if p["vmeste"] == 1 else 1 - v)
+
+
+def p4_bern_otn(p):
+    n, k, q = p["n"], p["k"], R(p["p"])
+    a = sp.binomial(n, k) * q**k * (1 - q) ** (n - k)
+    b = sp.binomial(n, k - 1) * q ** (k - 1) * (1 - q) ** (n - k + 1)
+    return okr2(a / b)
+
+
+def p4_misheni(p):
+    q = R(p["p1"]) + (1 - R(p["p1"])) * R(p["p2"])
+    return sp.binomial(p["N"], p["k"]) * q ** p["k"] * (1 - q) ** (p["N"] - p["k"])
+
+
+def p4_bilety(p):
+    d = sp.Rational(1, p["m"]) if p["vid"] == "kazhdyy" else (1 - sp.Rational(p["q"], 100)) / (2 - sp.Rational(p["q"], 100))
+    n = 1
+    while not (1 - (1 - d) ** n > R(p["P"])):
+        n += 1
+    return sp.Integer(n)
+
+
+def p4_kor_post(p):
+    eq = sp.Eq(p["b"] - x, (x + p["c"]) ** 2)
+    good = [r for r in sp.solve(eq, x) if r + p["c"] >= 0 and p["b"] - r >= 0]
+    return min(good)
+
+
+def p4_step_kv(p):
+    good = [r for r in sp.solve(sp.Eq((p["c"] - x**2) ** p["n"], p["D"]), x) if r.is_real]
+    return min(good)
+
+
+def p4_st3(p):
+    a, b = sp.Integer(p["a"]), sp.Integer(p["b"])
+    X, Y, Z = R(p["x"]), R(p["y"]), R(p["z"])
+    if p["vid"] == "ab":
+        return sp.simplify(a**X * b**Y / (a * b) ** Z)
+    return sp.simplify((a * b) ** X * b**Y / a**Z)
+
+
+def p4_logr(p):
+    c = R(p["c"])
+    v = sp.log(R(p["x"]), c) + (1 if p["znak"] > 0 else -1) * sp.log(R(p["y"]), c)
+    return sp.nsimplify(sp.simplify(v))
+
+
+def p4_korni(p):
+    A = sp.Integer(p["A"])
+    return sp.simplify(p["k"] * sp.root(A, p["n"]) * sp.root(A, p["m"]))
+
+
+def p4_kas(p):
+    k, m, f = R(p["k"]), R(p["m"]), [R(c) for c in p["f"]]
+    if p["vid"] in ("abscissa", "parallel"):
+        F = sum(c * x ** (len(f) - 1 - i) for i, c in enumerate(f))
+        xs = sp.solve(sp.Eq(sp.diff(F, x), k), x)
+        if p["vid"] == "abscissa":
+            xs = [r for r in xs if sp.simplify(F.subs(x, r) - (k * r + m)) == 0]
+        assert len(xs) == 1, xs
+        return xs[0]
+    a_, c_ = sp.symbols("a_ c_")
+    if p["vid"] == "koefA":
+        b, c = f
+        # Касание: ax² + (b − k)x + (c − m) = 0 с нулевым дискриминантом.
+        return sp.solve(sp.Eq((b - k) ** 2 - 4 * a_ * (c - m), 0), a_)[0]
+    a, b = f
+    return sp.solve(sp.Eq((b - k) ** 2 - 4 * a * (c_ - m), 0), c_)[0]
+
+
+def p4_radiator(p):
+    T = sp.symbols("T", positive=True)
+    K = R(p["alpha"]) * R(p["c"]) * R(p["m"]) / R(p["gamma"])
+    return sp.solve(sp.Eq(K * sp.log((R(p["Tv"]) - R(p["Tp"])) / (T - R(p["Tp"])), 2), R(p["x"])), T)[0]
+
+
+def p4_razgon(p):
+    u = sp.symbols("u", positive=True)
+    if p["vid"] == "l":
+        return sp.solve(sp.Eq(sp.sqrt(2 * u * R(p["a"])), R(p["v"])), u)[0]
+    return sp.solve(sp.Eq(sp.sqrt(2 * R(p["l"]) * u), R(p["v"])), u)[0]
+
+
+def p4_kolokol(p):
+    u = sp.symbols("u", positive=True)
+    K = R(p["alpha"]) * R(p["nu"]) * R(p["T"])
+    if p["vid"] == "p":
+        return sp.solve(sp.Eq(K * sp.log(u / R(p["p1"]), 2), R(p["A"])), u)[0]
+    return sp.solve(sp.Eq(K * sp.log(R(p["V1"]) / u, 2), R(p["A"])), u)[0]
+
+
+def p4_mastera(p):
+    y = sp.symbols("y", positive=True)
+    sol = [r for r in sp.solve(sp.Eq(p["N1"] / (y - p["r"]) - p["N2"] / y, sp.Rational(p["tm"], 60)), y) if r > p["r"]]
+    return sol[0] if p["ask"] == "vtoroy" else sol[0] - p["r"]
+
+
+def p4_plot(p):
+    v = sp.symbols("v", positive=True)
+    T = R(p["R"]) / R(p["vt"]) - R(p["z"])
+    sol = [r for r in sp.solve(sp.Eq(p["S"] / (v + p["vt"]) + p["S"] / (v - p["vt"]), T), v) if r > p["vt"]]
+    return sol[0]
+
+
+def p4_brigady(p):
+    T = sp.symbols("T", positive=True)
+    return sp.solve(sp.Eq(p["n1"] * p["d"] + (p["n1"] + p["k"]) * (T - p["d"]), p["n2"] * p["d"] + (p["n2"] - p["k"]) * (T - p["d"])), T)[0]
+
+
+def p4_dva_uzla(p):
+    a, b, k = sp.symbols("a b k")
+    (ax, ay), (bx, by) = [[R(u) for u in t] for t in (p["A"], p["B"])]
+    vid = p["vid"]
+    if vid == "pokazSdvig":
+        f = a ** (x + b)
+        sol = sp.solve([sp.Eq(f.subs(x, ax), ay), sp.Eq(f.subs(x, bx), by)], [a, b], dict=True)
+    elif vid == "logSdvig":
+        f = sp.log(x + b) / sp.log(a)
+        sol = [{b: 1 - ax, a: (bx + 1 - ax) ** (1 / by)}]
+    elif vid == "giperbolaA":
+        f = k / (x + a)
+        sol = sp.solve([sp.Eq(f.subs(x, ax), ay), sp.Eq(f.subs(x, bx), by)], [a, k], dict=True)
+    else:
+        f = a**x + b
+        sol = [{b: ay - 1, a: (by - ay + 1) ** (1 / bx)}]
+    sol = [s for s in sol if all(v.is_real for v in s.values()) and (vid == "giperbolaA" or s[a] > 0)]
+    F = f.subs(sol[0])
+    if "x0" in p:
+        return sp.nsimplify(sp.simplify(F.subs(x, R(p["x0"]))))
+    r = [t for t in sp.solve(sp.Eq(F, R(p["y0"])), x) if t.is_real]
+    return sp.nsimplify(sp.simplify(r[0]))
+
+
+SCHET.update({
+    "z01.bissektrisy-aob": p4_aob,
+    "z01.vysota-bissektrisa": p4_vys_bis,
+    "z01.bissektrisa-mediana": p4_bis_med,
+    "z01.trapeciya-osnovanie": p4_trap,
+    "z03.piramida-poverhnost": p4_piramida,
+    "z03.cilindr-konus": p4_cil_kon,
+    "z03.shar-poverhnost": p4_shar,
+    "z04.poryadok": p4_poryadok,
+    "z04.tri-ishoda": p4_tri,
+    "z04.dva-druga": p4_druga,
+    "z05.bernulli-otnoshenie": p4_bern_otn,
+    "z05.misheni-dva-vystrela": p4_misheni,
+    "z05.bilety": p4_bilety,
+    "z07.koren-postoronniy": p4_kor_post,
+    "z07.stepen-kvadrata": p4_step_kv,
+    "z08.stepeni-tri-osnovaniya": p4_st3,
+    "z08.log-raznost": p4_logr,
+    "z08.korni-proizvedenie": p4_korni,
+    "z09.kasatelnaya-formula": p4_kas,
+    "z10.radiator": p4_radiator,
+    "z10.razgon": p4_razgon,
+    "z10.kolokol": p4_kolokol,
+    "z11.mastera": p4_mastera,
+    "z11.plot-yahta": p4_plot,
+    "z11.brigady": p4_brigady,
+    "z12.dva-uzla": p4_dva_uzla,
+    # P4-END
 })
 
 

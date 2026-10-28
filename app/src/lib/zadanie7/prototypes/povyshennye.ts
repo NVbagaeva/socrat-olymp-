@@ -898,3 +898,222 @@ export const PV7_LOG_KVADRATNOE: Prototype = {
     };
   },
 };
+
+/* ── √(b − x) = x + c: посторонний корень после возведения в квадрат ── */
+
+function uravnenieKorenMinus(p: Params): string {
+  const b = num(p, 'b');
+  const c = num(p, 'c');
+  const pod = b === 0 ? '-x' : `${d(b)}-x`;
+  return `\\sqrt{${pod}}=x${c < 0 ? '-' : '+'}${d(Math.abs(c))}`;
+}
+
+/** Корни x² + (2c + 1)x + (c² − b) = 0 по возрастанию (целые) или null. */
+function korniMinus(p: Params): [number, number] | null {
+  const b = num(p, 'b');
+  const c = num(p, 'c');
+  const B = 2 * c + 1;
+  const C = c * c - b;
+  const D = B * B - 4 * C;
+  const s = korenN(D, 2);
+  if (D <= 0 || s === null) return null;
+  return [(-B - s) / 2, (-B + s) / 2];
+}
+
+/**
+ * √(b − x) = x + c, «если корней больше одного — меньший». После
+ * возведения в квадрат — квадратное уравнение с двумя корнями, но один
+ * из них посторонний: при нём правая часть x + c отрицательна. Подвох —
+ * записать в ответ меньший корень квадратного уравнения, не проверив.
+ */
+export const PV7_KOREN_POSTORONNIY: Prototype = {
+  id: 'PV7-KOREN-POSTORONNIY',
+  no: 109,
+  group: 'II',
+  title: 'Корень из $b-x$ равен $x+c$: посторонний корень',
+  formula: '\\sqrt{b-x}=x+c',
+  skills: ['korni', 'diskriminant'],
+  fipiNos: '',
+  uravnenie: uravnenieKorenMinus,
+  uslovie(p) {
+    return uslovieTekst(uravnenieKorenMinus(p), 'menshiy');
+  },
+  vopros: () => 'menshiy',
+  chisla(p) {
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    return {
+      lhs: (x) => Math.sqrt(b - x),
+      rhs: (x) => x + c,
+      odz: (x) => b - x >= 0,
+    };
+  },
+  solve(p) {
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    const kr = korniMinus(p);
+    if (kr === null) throw new Error(`PV7-KOREN-POSTORONNIY: корни не целые ${JSON.stringify(p)}`);
+    const [x1, x2] = kr;
+    const goden = (x: number) => x + c >= 0 && b - x >= 0;
+    const vse = [x1, x2].filter(goden);
+    if (vse.length !== 1) throw new Error(`PV7-KOREN-POSTORONNIY: подходящих корней ${vse.length}`);
+    const ans = vse[0] as number;
+    const lishniy = ans === x1 ? x2 : x1;
+    const B = 2 * c + 1;
+    const C = c * c - b;
+    const kv = `x^2${B < 0 ? '-' : '+'}${Math.abs(B) === 1 ? '' : d(Math.abs(B))}x${C < 0 ? '-' : '+'}${d(Math.abs(C))}=0`;
+    const prav = (x: number) => `${d(x)}${c < 0 ? '-' : '+'}${d(Math.abs(c))}`;
+    return {
+      answer: ans,
+      uravnenie: uravnenieKorenMinus(p),
+      korni: [ans],
+      postoronnie: [lishniy],
+      etapy: razbor({
+        plan: [
+          'Слева арифметический корень — он неотрицателен. Возводим в квадрат, решаем квадратное уравнение, а потом проверяем корни: правая часть тоже должна быть неотрицательной.',
+        ],
+        odz: [`Нужно $${b === 0 ? '-x' : `${d(b)}-x`}\\ge0$ и $x${c < 0 ? '-' : '+'}${d(Math.abs(c))}\\ge0$, то есть $${d(-c)}\\le x\\le ${d(b)}$.`],
+        preobr: [
+          `Возводим в квадрат: $${b === 0 ? '-x' : `${d(b)}-x`}=\\left(x${c < 0 ? '-' : '+'}${d(Math.abs(c))}\\right)^2$.`,
+          `Раскрываем скобки и переносим: $${kv}$.`,
+        ],
+        korni: [`Корни квадратного уравнения: $x=${d(x1)}$ и $x=${d(x2)}$.`],
+        otbor: [
+          `При $x=${d(lishniy)}$ правая часть $${prav(lishniy)}=${d(lishniy + c)}<0$ — корень посторонний.`,
+          `При $x=${d(ans)}$ правая часть $${prav(ans)}=${d(ans + c)}\\ge0$ — подходит. Корень один, он и в ответе.`,
+        ],
+        proverka: [
+          `$\\sqrt{${d(b - ans)}}=${d(ans + c)}$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [
+        {
+          tekst: 'Корни проверяем по теореме Виета.',
+          tex: `${d(x1)}+${d(x2)}=${d(-B)},\\quad ${d(x1)}\\cdot${d(x2)}=${d(C)}`,
+        },
+      ],
+      hints: [
+        hint('Какое уравнение получится после возведения в квадрат?', `$${kv}$`, [
+          `$x^2${B < 0 ? '+' : '-'}${Math.abs(B) === 1 ? '' : d(Math.abs(B))}x${C < 0 ? '-' : '+'}${d(Math.abs(C))}=0$`,
+          `$x^2+${d(c * c + b)}=0$`,
+        ]),
+        hint(
+          `Подходит ли корень $x=${d(lishniy)}$?`,
+          'нет: правая часть при нём отрицательна',
+          ['да: он меньше, его и записываем', 'да: после возведения в квадрат равенство верно'],
+        ),
+        hintOtbor('menshiy', `$${d(ans)}$`, [`$${d(lishniy)}$`]),
+      ],
+    };
+  },
+};
+
+/* ── (c − x²)ⁿ = d: корень n-й степени и знак ──────────────────── */
+
+function uravnenieStepenKv(p: Params): string {
+  const D = num(p, 'D');
+  return `\\left(${d(num(p, 'c'))}-x^2\\right)^{${num(p, 'n')}}=${d(D)}`;
+}
+
+/** Значения t = c − x²: при нечётном n одно, при чётном ±корень. */
+function znacheniyaT(p: Params): number[] {
+  const n = num(p, 'n');
+  const D = num(p, 'D');
+  const r = korenN(Math.abs(D), n);
+  if (r === null) throw new Error(`PV7-STEPEN-KVADRATA: ${D} — не степень ${n}`);
+  if (n % 2 === 1) return [D < 0 ? -r : r];
+  if (D <= 0) throw new Error('PV7-STEPEN-KVADRATA: чётная степень и D ≤ 0');
+  return [r, -r];
+}
+
+/**
+ * (c − x²)ⁿ = D, меньший корень. Подвох — при чётном n у числа два
+ * корня n-й степени (±r), и одно из уравнений c − x² = ±r может не
+ * иметь решений; при нечётном — знак D переходит в t. Меньший корень —
+ * отрицательный.
+ */
+export const PV7_STEPEN_KVADRATA: Prototype = {
+  id: 'PV7-STEPEN-KVADRATA',
+  no: 110,
+  group: 'I',
+  title: 'Степень выражения с $x^2$: корень $n$-й степени и два знака',
+  formula: '(c-x^2)^n=D',
+  skills: ['stepeni', 'korni'],
+  fipiNos: '',
+  uravnenie: uravnenieStepenKv,
+  uslovie(p) {
+    return uslovieTekst(uravnenieStepenKv(p), 'menshiy');
+  },
+  vopros: () => 'menshiy',
+  chisla(p) {
+    const c = num(p, 'c');
+    const n = num(p, 'n');
+    return {
+      lhs: (x) => (c - x * x) ** n,
+      rhs: () => num(p, 'D'),
+      odz: () => true,
+    };
+  },
+  solve(p) {
+    const c = num(p, 'c');
+    const n = num(p, 'n');
+    const D = num(p, 'D');
+    const ts = znacheniyaT(p);
+    const korni: number[] = [];
+    const stroki: string[] = [];
+    for (const tz of ts) {
+      const x2 = c - tz;
+      if (x2 < 0) {
+        stroki.push(`$${d(c)}-x^2=${d(tz)}$: $x^2=${d(x2)}<0$ — решений нет.`);
+        continue;
+      }
+      const s = korenN(x2, 2);
+      if (s === null) throw new Error(`PV7-STEPEN-KVADRATA: x² = ${x2} — не квадрат`);
+      if (s === 0) {
+        korni.push(0);
+        stroki.push(`$${d(c)}-x^2=${d(tz)}$: $x^2=0$, $x=0$.`);
+      } else {
+        korni.push(-s, s);
+        stroki.push(`$${d(c)}-x^2=${d(tz)}$: $x^2=${d(x2)}$, $x=\\pm${d(s)}$.`);
+      }
+    }
+    if (korni.length < 2) throw new Error('PV7-STEPEN-KVADRATA: меньше двух корней');
+    const ans = Math.min(...korni);
+    const r = Math.abs(ts[0] as number);
+    return {
+      answer: ans,
+      uravnenie: uravnenieStepenKv(p),
+      korni: [...korni].sort((a, b) => a - b),
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          n % 2 === 1
+            ? `Степень нечётная: у числа $${d(D)}$ ровно один корень ${n}-й степени, знак сохраняется. Находим $${d(c)}-x^2$, потом $x$.`
+            : `Степень чётная: $t^{${n}}=${d(D)}$ даёт два значения $t=\\pm${d(r)}$. Каждое даёт своё уравнение для $x^2$.`,
+        ],
+        preobr: [
+          n % 2 === 1
+            ? `$${d(c)}-x^2=${d(ts[0] as number)}$, так как $(${d(ts[0] as number)})^{${n}}=${d(D)}$.`
+            : `$${d(c)}-x^2=${d(r)}$ или $${d(c)}-x^2=${d(-r)}$, так как $(\\pm${d(r)})^{${n}}=${d(D)}$.`,
+        ],
+        korni: stroki,
+        otbor: [`Меньший из корней — $${d(ans)}$.`],
+        proverka: [
+          `$\\left(${d(c)}-(${d(ans)})^2\\right)^{${n}}=(${d(c - ans * ans)})^{${n}}=${d(D)}$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(
+          `Чему может равняться $${d(c)}-x^2$?`,
+          n % 2 === 1 ? `$${d(ts[0] as number)}$` : `$${d(r)}$ или $${d(-r)}$`,
+          n % 2 === 1 ? [`$${d(-(ts[0] as number))}$`, `$\\pm${d(r)}$`] : [`только $${d(r)}$`, `$${d(D)}$`],
+          n % 2 === 1 ? 'Нечётная степень сохраняет знак.' : 'У чётной степени два корня с разными знаками.',
+        ),
+        hintOtbor('menshiy', `$${d(ans)}$`, [`$${d(-ans)}$`, `$${d(c - ans * ans)}$`]),
+      ],
+    };
+  },
+};

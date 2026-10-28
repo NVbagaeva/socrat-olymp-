@@ -12,6 +12,7 @@
 
 import renderer from './renderer.js';
 import Exp from './families/exponential.js';
+import './families/expo.js';
 import './families/loga.js';
 import './families/quadratic.js';
 import './families/rational.js';
@@ -1179,6 +1180,241 @@ export function parabolaPryamaya(par: ParabolaPryamaya, pechat: Pechat = {}): Gr
     svg: risuy(scene(false), pechat),
     svgUchitel: risuy(scene(true), pechat),
     points: [...uzly, par.L].map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+/* ── Партия 4 (варианты 19–24) ──────────────────────────────────── */
+
+export interface DvaUzla {
+  /**
+   * pokazSdvig — f(x) = a^(x+b); logSdvig — f(x) = logₐ(x+b);
+   * giperbolaA — f(x) = k/(x+a); pokazPlus — f(x) = aˣ + b.
+   */
+  vid: 'pokazSdvig' | 'logSdvig' | 'giperbolaA' | 'pokazPlus';
+  A: [number, number];
+  B: [number, number];
+  /** Спрашивают f(x0) … */
+  x0?: number;
+  /** … или x, при котором f(x) = y0. */
+  y0?: number;
+}
+
+interface Koef {
+  a: number;
+  b: number;
+  k: number;
+}
+
+/** Коэффициенты по двум узлам; у logSdvig и pokazPlus один узел особый (y = 0 или x = 0). */
+function koefDvaUzla(p: DvaUzla): Koef {
+  const [ax, ay] = p.A;
+  const [bx, by] = p.B;
+  if (p.vid === 'pokazSdvig') {
+    const a = (by / ay) ** (1 / (bx - ax));
+    const b = Math.round((Math.log(ay) / Math.log(a) - ax) * 1e6) / 1e6;
+    return { a, b, k: 1 };
+  }
+  if (p.vid === 'logSdvig') {
+    /* Узел A на оси: logₐ(x_A + b) = 0 ⇒ b = 1 − x_A; a^(y_B) = x_B + b. */
+    if (ay !== 0) throw new Error('dvaUzla: у логарифма узел A — на оси Ox');
+    const b = 1 - ax;
+    const a = (bx + b) ** (1 / by);
+    return { a, b, k: 1 };
+  }
+  if (p.vid === 'giperbolaA') {
+    const a = round9((by * bx - ay * ax) / (ay - by));
+    return { a, b: 0, k: round9(ay * (ax + a)) };
+  }
+  /* pokazPlus: узел A на оси Oy: a⁰ + b = y_A ⇒ b = y_A − 1; a^(x_B) = y_B − b. */
+  if (ax !== 0) throw new Error('dvaUzla: у aˣ + b узел A — на оси Oy');
+  const b = ay - 1;
+  const a = (by - b) ** (1 / bx);
+  return { a, b, k: 1 };
+}
+
+function znachenie(vid: DvaUzla['vid'], c: Koef, x: number): number {
+  if (vid === 'pokazSdvig') return c.a ** (x + c.b);
+  if (vid === 'logSdvig') return Math.log(x + c.b) / Math.log(c.a);
+  if (vid === 'giperbolaA') return c.k / (x + c.a);
+  return c.a ** x + c.b;
+}
+
+function argument(vid: DvaUzla['vid'], c: Koef, y: number): number {
+  if (vid === 'pokazSdvig') return Math.log(y) / Math.log(c.a) - c.b;
+  if (vid === 'logSdvig') return c.a ** y - c.b;
+  if (vid === 'giperbolaA') return c.k / y - c.a;
+  return Math.log(y - c.b) / Math.log(c.a);
+}
+
+/** Основание в TeX: 2, 0,5, √2, 1/3. */
+function osnTex(a: number): string {
+  if (celoe(a)) return dec(a);
+  if (celoe(a * a)) return `\\sqrt{${dec(round9(a * a))}}`;
+  if (celoe(1 / a)) return `\\dfrac{1}{${dec(round9(1 / a))}}`;
+  return dec(a);
+}
+
+/**
+ * Функция заданного вида через два узла сетки: найти коэффициенты и
+ * значение f(x₀) за рамкой или x, при котором f(x) = y₀. Подвох у
+ * каждого вида свой: у показательной со сдвигом — делить значения, у
+ * логарифма — узел на оси даёт сдвиг, у гиперболы — сдвиг в знаменателе,
+ * у aˣ + b — узел на оси Oy даёт b.
+ */
+export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
+  const c = koefDvaUzla(p);
+  const osnovanie = p.vid !== 'giperbolaA';
+  if (
+    (osnovanie && (!(c.a > 0) || c.a === 1)) ||
+    !Number.isFinite(c.a) ||
+    !celoe(c.b) ||
+    !celoe(c.k) ||
+    (!osnovanie && (c.a === 0 || c.k === 0))
+  )
+    throw new Error(`dvaUzla: коэффициенты ${JSON.stringify(c)}`);
+  for (const [x, y] of [p.A, p.B]) {
+    if (Math.abs(znachenie(p.vid, c, x) - y) > 1e-7) throw new Error('dvaUzla: узел не на графике');
+  }
+  const poZnach = p.x0 !== undefined;
+  const otvet = round9(
+    Math.round(
+      (poZnach ? znachenie(p.vid, c, p.x0 as number) : argument(p.vid, c, p.y0 as number)) * 1e6,
+    ) / 1e6,
+  );
+  if (!Number.isFinite(otvet) || !celoe(otvet * 1e4)) throw new Error(`dvaUzla: ответ ${otvet}`);
+  /* Второй счёт: бисекция по самой кривой между узлами и далеко за ними. */
+  const f = (x: number) => znachenie(p.vid, c, x);
+  let proverka: number;
+  if (poZnach) {
+    proverka = f(p.x0 as number);
+  } else {
+    const y0 = p.y0 as number;
+    const lo0 = p.vid === 'logSdvig' ? -c.b + 1e-12 : p.vid === 'giperbolaA' ? (y0 * c.k > 0 ? -c.a + 1e-12 : -1e4) : -60;
+    const hi0 = p.vid === 'giperbolaA' ? (y0 * c.k > 0 ? 1e4 : -c.a - 1e-12) : p.vid === 'logSdvig' ? 1e7 : 60;
+    let lo = lo0;
+    let hi = hi0;
+    const g = (x: number) => f(x) - y0;
+    const rastet = g(hi) > g(lo);
+    for (let i = 0; i < 300; i += 1) {
+      const m = (lo + hi) / 2;
+      if (g(m) < 0 === rastet) lo = m;
+      else hi = m;
+    }
+    proverka = (lo + hi) / 2;
+  }
+  const xs = [p.A[0], p.B[0], 0];
+  const ys = [p.A[1], p.B[1], 0];
+  const win = {
+    xmin: Math.min(...xs) - 3,
+    xmax: Math.max(...xs) + 3,
+    ymin: Math.min(...ys) - 2,
+    ymax: Math.max(...ys) + 2,
+  };
+  if (p.vid === 'giperbolaA') {
+    win.xmin = Math.min(win.xmin, -c.a - 3);
+    win.xmax = Math.max(win.xmax, -c.a + 3);
+    win.ymin = Math.min(win.ymin, -4);
+    win.ymax = Math.max(win.ymax, 4);
+  }
+  if (p.vid === 'pokazPlus') {
+    win.ymin = Math.min(win.ymin, c.b - 1);
+    win.ymax = Math.max(win.ymax, c.b + 1);
+  }
+  if (poZnach ? !zaOknom(p.x0 as number, otvet, win) : !zaOknom(otvet, p.y0 as number, win))
+    throw new Error('dvaUzla: ответ читается по рисунку');
+  const kriv =
+    p.vid === 'pokazSdvig'
+      ? { type: 'expo', a: c.a, c: c.b, d: 0, k: 1 }
+      : p.vid === 'logSdvig'
+        ? { type: 'loga', a: c.a, c: c.b, d: 0, k: 1 }
+        : p.vid === 'giperbolaA'
+          ? { type: 'rational', k: c.k, a: c.a, b: 0 }
+          : { type: 'expo', a: c.a, c: 0, d: c.b, k: 1 };
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [{ ...kriv, color: 'lineA', label: 'y = f(x)' }],
+    points: [p.A, p.B].map(([x, y]) => ({ x, y, style: 'solid', color: 'lineA', label: null })),
+    shapes: uchitel ? napravlyayushchie([p.A, p.B]) : [],
+    alt: 'График функции с двумя отмеченными точками в узлах сетки',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const [ax, ay] = p.A;
+  const [bx, by] = p.B;
+  const vidTex =
+    p.vid === 'pokazSdvig'
+      ? 'a^{x+b}'
+      : p.vid === 'logSdvig'
+        ? '\\log_a(x+b)'
+        : p.vid === 'giperbolaA'
+          ? '\\dfrac{k}{x+a}'
+          : 'a^x+b';
+  const sdvig = (b: number) => (b === 0 ? '' : b < 0 ? `-${dec(-b)}` : `+${dec(b)}`);
+  const fTex =
+    p.vid === 'pokazSdvig'
+      ? `${osnTex(c.a).includes('frac') || osnTex(c.a).includes('sqrt') ? `\\left(${osnTex(c.a)}\\right)` : osnTex(c.a)}^{x${sdvig(c.b)}}`
+      : p.vid === 'logSdvig'
+        ? `\\log_{${osnTex(c.a)}}(x${sdvig(c.b)})`
+        : p.vid === 'giperbolaA'
+          ? `\\dfrac{${dec(c.k)}}{x${sdvig(c.a)}}`
+          : `${osnTex(c.a).includes('frac') || osnTex(c.a).includes('sqrt') ? `\\left(${osnTex(c.a)}\\right)` : osnTex(c.a)}^x${sdvig(c.b)}`;
+  const sistema =
+    p.vid === 'pokazSdvig'
+      ? [
+          `$a^{${dec(ax)}+b}=${dec(ay)}$ и $a^{${dec(bx)}+b}=${dec(by)}$. Делим второе на первое: $a^{${dec(round9(bx - ax))}}=${dec(round9(by / ay))}$, $a=${osnTex(c.a)}$.`,
+          `Из первого: $${osnTex(c.a)}^{${dec(ax)}+b}=${dec(ay)}$, откуда $b=${dec(c.b)}$.`,
+        ]
+      : p.vid === 'logSdvig'
+        ? [
+            `Точка $${kv(p.A)}$ на оси: $\\log_a(${dec(ax)}+b)=0$, значит $${dec(ax)}+b=1$ и $b=${dec(c.b)}$.`,
+            `Вторая точка: $\\log_a(${dec(bx)}${sdvig(c.b)})=${dec(by)}$, то есть $a^{${dec(by)}}=${dec(bx + c.b)}$ и $a=${osnTex(c.a)}$.`,
+          ]
+        : p.vid === 'giperbolaA'
+          ? [
+              `$\\dfrac{k}{${dec(ax)}+a}=${dec(ay)}$ и $\\dfrac{k}{${dec(bx)}+a}=${dec(by)}$, то есть $k=${mn(ay)}(${dec(ax)}+a)=${mn(by)}(${dec(bx)}+a)$.`,
+              `Отсюда $a=${dec(c.a)}$, $k=${dec(c.k)}$.`,
+            ]
+          : [
+              `Точка $${kv(p.A)}$ на оси $Oy$: $a^0+b=${dec(ay)}$, значит $b=${dec(c.b)}$.`,
+              `Вторая точка: $a^{${dec(bx)}}${sdvig(c.b)}=${dec(by)}$, то есть $a^{${dec(bx)}}=${dec(round9(by - c.b))}$ и $a=${osnTex(c.a)}$.`,
+            ];
+  const otvetStr = poZnach
+    ? `$f(${dec(p.x0 as number)})=${dec(otvet)}$.`
+    : `$${fTex}=${dec(p.y0 as number)}$ при $x=${dec(otvet)}$.`;
+  const shagi = [
+    { title: 'Читаем точки', lines: [`График проходит через узлы сетки $${kv(p.A)}$ и $${kv(p.B)}$.`] },
+    { title: 'Коэффициенты', lines: [...sistema, `$f(x)=${fTex}$.`] },
+    { title: poZnach ? 'Значение функции' : 'Решаем уравнение', lines: [otvetStr] },
+  ];
+  const hints = [
+    {
+      question: 'Что дают отмеченные точки?',
+      options: [
+        'Два уравнения на коэффициенты',
+        'Сразу значение в нужной точке',
+        'Только знак коэффициента',
+      ],
+      correct: 0,
+      comment: 'Координаты узла подставляем в формулу функции.',
+    },
+    {
+      question: 'Какая формула у функции?',
+      options: bezPovtorov([`$f(x)=${fTex}$`, `$f(x)=${dec(c.a)}x${sdvig(c.b)}$`, `$f(x)=${vidTex}$ при $a=1$`]),
+      correct: 0,
+    },
+  ];
+  return {
+    uslovie: `На рисунке изображён график функции $f(x)=${vidTex}$. ${poZnach ? `Найдите $f(${dec(p.x0 as number)})$.` : `Найдите значение $x$, при котором $f(x)=${dec(p.y0 as number)}$.`}`,
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: [p.A, p.B].map(([x, y]) => ({ x, y })),
     shagi,
     hints,
   };

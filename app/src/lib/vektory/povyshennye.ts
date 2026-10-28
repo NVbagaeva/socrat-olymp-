@@ -82,6 +82,10 @@ export interface DlinaKombinatsii {
   by: number;
   /** Множитель при b: целый или 0,5. */
   k: number;
+  /** Множитель при a (по умолчанию 1): m·a + k·b. */
+  m?: number;
+  /** 'ba' — в условии сначала слагаемое с b: «k·b − a». */
+  poryadok?: 'ab' | 'ba';
 }
 
 /** Окна по возрастанию: первое, куда векторы ложатся с чистым рисунком. */
@@ -116,31 +120,28 @@ function risunokDvuh(kod: string, a: Tochka, b: Tochka): Risunok {
 export function dlinaKombinatsiiPoRisunku(p: DlinaKombinatsii): Generated {
   const a: Tochka = [p.ax, p.ay];
   const b: Tochka = [p.bx, p.by];
+  const m = p.m ?? 1;
   const kb = umn(p.k, b);
-  const R: Tochka = [a[0] + kb[0], a[1] + kb[1]];
+  const ma = umn(m, a);
+  const R: Tochka = [ma[0] + kb[0], ma[1] + kb[1]];
   const len = Math.sqrt(R[0] * R[0] + R[1] * R[1]);
   if (!Number.isInteger(Math.round(len * 1e9) / 1e9))
     throw new Error(`№2: длина не целая ${JSON.stringify(p)}`);
   const risunok = risunokDvuh(`pv2d|${p.ax}|${p.ay}|${p.bx}|${p.by}|${p.k}`, a, b);
-  const terms = [
-    [1, 'a', a],
-    [p.k, 'b', b],
-  ] as const;
+  const ta = [m, 'a', a] as const;
+  const tb = [p.k, 'b', b] as const;
+  const terms = p.poryadok === 'ba' ? [tb, ta] : [ta, tb];
   const otvet = Math.round(len);
   return {
     uslovie: `${izobrazheny(['a', 'b'])} ${naydiDlinu(
-      kombinatsiya([
-        [1, 'a'],
-        [p.k, 'b'],
-      ]),
+      kombinatsiya(terms.map(([k, name]) => [k, name] as const)),
     )}`,
     risunok,
     otvet,
     /* Второй счёт: |a|² + 2k·(a·b) + k²|b|² без координат суммы. */
     proverka: Math.sqrt(
-      p.ax ** 2 +
-        p.ay ** 2 +
-        2 * p.k * (p.ax * p.bx + p.ay * p.by) +
+      m ** 2 * (p.ax ** 2 + p.ay ** 2) +
+        2 * m * p.k * (p.ax * p.bx + p.ay * p.by) +
         p.k ** 2 * (p.bx ** 2 + p.by ** 2),
     ),
     shagi: [
@@ -150,7 +151,7 @@ export function dlinaKombinatsiiPoRisunku(p: DlinaKombinatsii): Generated {
       shagOtvet(otvet),
     ],
     params: { ...p },
-    signature: `${signatureOf([a, b])}|${d(p.k)}`,
+    signature: `${signatureOf([a, b])}|${d(p.k)}${m === 1 ? '' : `|m${d(m)}`}`,
     prototype: 'P2-DLINA-KB',
     seed: 'fixed',
   };
