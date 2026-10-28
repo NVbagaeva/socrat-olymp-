@@ -10,11 +10,10 @@
    «Ответ: ____» — после него. Клетка 5 мм, как в тетради. Сетка — SVG
    (линии, а не фон: фон браузер не печатает), рамка — граница блока.
 
-   Лист раскладывает поле кусками (sheet.js, flowItems): условие, рисунок
-   и первые FIRST_ROWS строк — один неделимый кусок; остальные строки —
-   по одной, так что перенос на следующую страницу идёт только по
-   границе строки клеток; последняя строка и «Ответ:» — один кусок, и
-   строка ответа от поля не отрывается.
+   Задача с полем и строкой «Ответ:» — один неделимый кусок листа
+   (sheet.js, spacedItems): по страницам они не разъезжаются. Не встаёт
+   на страницу — набор (paginate.js) делает поле ниже на целые строки
+   клеток, но не меньше MIN_ROWS, или переносит задачу целиком.
 
    Лист учителя и разбор — без поля всегда: настройку применяет только
    сборка листа ученика (applySpace). На задачи настройка не влияет. */
@@ -24,8 +23,8 @@ var SIZES = ['S', 'M', 'L', 'auto'];
 var ROWS = { S: 5, M: 9, L: 14 };
 var AUTO = { min: 5, max: 14, from: 150, perRow: 75 };
 var CELL_MM = 5;
-/* Сколько строк поля обязаны встать на страницу вместе с условием. */
-var FIRST_ROWS = 3;
+/* Ниже этого поле не ужимается, даже чтобы задача встала на страницу. */
+var MIN_ROWS = 4;
 
 var DEFAULT = { mode: 'none', size: 'auto', per: {} };
 
@@ -193,47 +192,39 @@ function applySpace(spec, space, opts) {
 
 /* ── Разметка поля ──────────────────────────────────────────────── */
 
-/* Сетка — линии в миллиметрах на SVG шире любой колонки; блок поля
-   шириной в целое число клеток (CSS round()) обрезает лишнее.
-   Нижняя линия каждой строки стоит внутри строки: на стыке двух кусков
-   одна линия, а не две. У последнего куска её заменяет рамка. Верхняя
-   линия куска (sheet-space__top) видна, только когда кусок первый на
-   странице (space.css): продолжение поля на новой странице начинается
-   с закрытой строки клеток. */
+/* Сетка — внутренние линии в миллиметрах на SVG шире любой колонки;
+   блок поля шириной в целое число клеток (CSS round()) обрезает лишнее,
+   рамку даёт граница блока. Ту же сетку рисует набор (paginate.js,
+   setkaSvg), когда меняет высоту поля. */
 var GRID_COLS = 44;
 var LINE = 0.2;
 
-function gridSvg(rows, last) {
+function gridSvg(rows) {
   var w = GRID_COLS * CELL_MM;
   var h = rows * CELL_MM;
   var d = '';
   for (var x = CELL_MM; x < w; x += CELL_MM) { d += 'M' + x + ' 0V' + h; }
-  for (var i = 1; i <= rows; i += 1) {
-    if (last && i === rows) { continue; }
-    d += 'M0 ' + (i * CELL_MM - LINE / 2) + 'H' + w;
-  }
-  var stroke = 'stroke="var(--sheet-space-line, #b3b3b3)" stroke-width="' + LINE + '"';
+  for (var y = CELL_MM; y < h; y += CELL_MM) { d += 'M0 ' + y + 'H' + w; }
   return '<svg class="sheet-space__grid" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" ' +
     'viewBox="0 0 ' + w + ' ' + h + '" width="' + w + 'mm" height="' + h + 'mm">' +
-    '<path d="' + d + '" fill="none" ' + stroke + '/>' +
-    '<path class="sheet-space__top" d="M0 ' + LINE / 2 + 'H' + w + '" fill="none" ' + stroke + '/>' +
-    '</svg>';
+    '<path d="' + d + '" fill="none" stroke="var(--sheet-space-line, #cfdcf0)" stroke-width="' +
+    LINE + '"/></svg>';
 }
 
 /**
- * Кусок поля из rows строк. first / last — верхний и нижний кусок поля:
- * у них рамка сверху и снизу.
+ * Поле из rows строк. first / last — рамка сверху и снизу (поле
+ * всегда целиком, оба флага у него стоят).
  */
 function spaceHtml(field, rows, first, last) {
   var grid = field.mode === 'grid';
   return '<div class="sheet-space sheet-space--' + field.mode +
     (first ? ' sheet-space--first' : '') + (last ? ' sheet-space--last' : '') +
     '" data-rows="' + rows + '" style="height:' + rows * CELL_MM + 'mm">' +
-    (grid ? gridSvg(rows, last) : '') + '</div>';
+    (grid ? gridSvg(rows) : '') + '</div>';
 }
 
 const api = {
-  MODES: MODES, SIZES: SIZES, ROWS: ROWS, AUTO: AUTO, CELL_MM: CELL_MM, FIRST_ROWS: FIRST_ROWS,
+  MODES: MODES, SIZES: SIZES, ROWS: ROWS, AUTO: AUTO, CELL_MM: CELL_MM, MIN_ROWS: MIN_ROWS,
   DEFAULT: DEFAULT, encodeSpace: encodeSpace, decodeSpace: decodeSpace,
   normalizeSpace: normalizeSpace, withSpace: withSpace, solutionLength: solutionLength,
   rowsFor: rowsFor, spaceFor: spaceFor, solutionLengths: solutionLengths,
@@ -241,6 +232,6 @@ const api = {
 };
 
 export default api;
-export { MODES, SIZES, ROWS, AUTO, CELL_MM, FIRST_ROWS, DEFAULT, encodeSpace, decodeSpace,
+export { MODES, SIZES, ROWS, AUTO, CELL_MM, MIN_ROWS, DEFAULT, encodeSpace, decodeSpace,
          normalizeSpace, withSpace, solutionLength, rowsFor, spaceFor, solutionLengths,
          applySpace, spaceHtml };

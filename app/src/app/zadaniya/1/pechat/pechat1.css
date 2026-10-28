@@ -146,7 +146,6 @@
   margin-bottom: 1.5mm;
   font-size: 10.5pt;
   font-weight: 700;
-  break-after: avoid;
 }
 .spr-r__grid {
   display: grid;
@@ -159,7 +158,6 @@
   padding: 1.2mm 1.5mm;
   border: 0.6pt solid var(--color-border);
   border-radius: 1.5mm;
-  break-inside: avoid;
 }
 .spr-k__pic {
   float: right;

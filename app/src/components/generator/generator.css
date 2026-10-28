@@ -986,6 +986,12 @@
   margin: var(--space-1) 0 0;
   padding-left: var(--space-5);
 }
+/* Пояснение к формуле пункта — строкой ниже, как на листе (sheet.css). */
+.gen-recap .sheet-recap-note {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
 .gen-example {
   padding: var(--space-2) var(--space-3);
   border: 1px dashed var(--color-border-strong);

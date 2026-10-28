@@ -46,6 +46,126 @@
     return box.firstElementChild;
   }
 
+  /* ── Шрифты ─────────────────────────────────────────────────────
+     document.fonts.ready в Safari бывает «готов» раньше, чем браузер
+     вообще попросит начертания KaTeX: они нужны только набранным
+     формулам. Обмер и печать запасным шрифтом дают другие высоты —
+     дробь «числитель поверх знаменателя», строка, уехавшая вниз. Поэтому
+     начертания KaTeX, объявленные в CSS, грузятся явно, и только потом
+     ждём ready. Тот же вызов делает печать перед window.print()
+     (window.sheetShrifty, lib/komplekt.ts). */
+  function zagruzitShrifty() {
+    var fonts = document.fonts;
+    if (!fonts || !fonts.ready) { return Promise.resolve(); }
+    var loads = [];
+    if (typeof fonts.forEach === 'function') {
+      fonts.forEach(function (face) {
+        if (/katex/i.test(face.family) && face.status === 'unloaded') {
+          loads.push(face.load().catch(function () { return null; }));
+        }
+      });
+    }
+    return Promise.all(loads).then(function () { return fonts.ready; });
+  }
+  window.sheetShrifty = zagruzitShrifty;
+
+  /* ── Поле для решения: высота по месту ──────────────────────────
+     Задача с полем — один неделимый кусок: карточка, поле и строка
+     «Ответ:» (sheet.js, spacedItems). Не встаёт — поле ниже на целые
+     строки клеток (5 мм), но не меньше data-space-min строк. */
+  function poleStrok(node) {
+    var box = node.querySelector('.sheet-space[data-rows]');
+    return box ? Number(box.getAttribute('data-rows')) : 0;
+  }
+
+  function postavitStroki(node, rows) {
+    var box = node.querySelector('.sheet-space[data-rows]');
+    box.setAttribute('data-rows', String(rows));
+    box.style.height = rows * KLETKA_MM + 'mm';
+    /* Сетка — по новой высоте: внутренние линии, рамка — граница поля. */
+    var svg = box.querySelector('svg.sheet-space__grid');
+    if (svg) { svg.outerHTML = setkaSvg(SETKA_STOLBTSOV, rows); }
+  }
+
+  /* Ужать поле node до самого большого числа строк, при котором поток
+     влезает, но не ниже min. Влезло — true; нет — поле как было. */
+  function uzhat(node, flow, fits, min) {
+    var full = poleStrok(node);
+    for (var r = full - 1; r >= min; r -= 1) {
+      postavitStroki(node, r);
+      if (fits(flow)) { return true; }
+    }
+    postavitStroki(node, full);
+    return false;
+  }
+
+  /* ── Кусок выше целой страницы ──────────────────────────────────
+     Разобранный пример или рамка «Повторяем» выше страницы: целиком не
+     встанут нигде. Режем только по границе шага разбора или пункта
+     рамки: конец уходит продолжением на следующую страницу. Задача
+     с полем так не режется — у неё ужимается поле. Возвращает кусок-
+     продолжение или null, если резать негде. */
+  var CHASTI = '.sheet-step, .sheet-recap-item';
+
+  /* Встанет ли в поток кусок, урезанный до первой части (шага или
+     пункта рамки), — без изменений в самом куске. */
+  function pervayaChastVlezet(node, flow) {
+    var parts = node.querySelectorAll(CHASTI);
+    if (parts.length < 2) { return false; }
+    var spisok = parts[0].parentNode;
+    var skryty = [];
+    for (var k = 1; k < parts.length; k += 1) { skryty.push(parts[k]); }
+    for (var h = spisok.nextElementSibling; h; h = h.nextElementSibling) { skryty.push(h); }
+    skryty.forEach(function (x) { x.setAttribute('data-proba', x.style.display); x.style.display = 'none'; });
+    flow.appendChild(node);
+    var ok = flow.scrollHeight <= flow.clientHeight + 0.5;
+    flow.removeChild(node);
+    skryty.forEach(function (x) {
+      x.style.display = x.getAttribute('data-proba');
+      x.removeAttribute('data-proba');
+    });
+    return ok;
+  }
+
+  function razrezat(node, flow, fits) {
+    var parts = node.querySelectorAll(CHASTI);
+    if (parts.length < 2) { return null; }
+    var spisok = parts[0].parentNode;
+    /* Что идёт после списка частей (строка ответа примера), уходит
+       в продолжение вместе с последней частью. */
+    var hvost = [];
+    for (var h = spisok.nextElementSibling; h; h = h.nextElementSibling) { hvost.push(h); }
+    hvost.forEach(function (x) { x.parentNode.removeChild(x); });
+    var ushli = 0;
+    while (!fits(flow) && parts.length - ushli > 1) {
+      ushli += 1;
+      parts[parts.length - ushli].style.display = 'none';
+    }
+    if (ushli === 0) {
+      hvost.forEach(function (x) { spisok.parentNode.appendChild(x); });
+      return null;
+    }
+    var ostalos = parts.length - ushli;
+    var cont = node.cloneNode(true);
+    cont.setAttribute('data-cont', '1');
+    var contParts = cont.querySelectorAll(CHASTI);
+    for (var k = 0; k < contParts.length; k += 1) {
+      if (k < ostalos) { contParts[k].parentNode.removeChild(contParts[k]); }
+      else { contParts[k].style.removeProperty('display'); }
+    }
+    var contSpisok = cont.querySelectorAll(CHASTI)[0].parentNode;
+    if (contSpisok.tagName === 'OL') { contSpisok.setAttribute('start', String(ostalos + 1)); }
+    hvost.forEach(function (x) { contSpisok.parentNode.appendChild(x.cloneNode(true)); });
+    /* Условие примера и заголовок рамки повторять не нужно. */
+    Array.prototype.forEach.call(
+      cont.querySelectorAll('.sheet-example-title, .sheet-task-question, .sheet-recap-title, .sheet-figure'),
+      function (x) { x.parentNode.removeChild(x); });
+    for (var j = parts.length - ushli; j < parts.length; j += 1) {
+      parts[j].parentNode.removeChild(parts[j]);
+    }
+    return cont;
+  }
+
   /* Набор в две колонки (spec.columns === 2). Поток страницы — полосы:
      полоса двух колонок или кусок на всю ширину. Открытая (последняя)
      полоса колонок занимает всю оставшуюся высоту, и влезло ли —
@@ -230,6 +350,9 @@
 
   var KLETKA_MM = 5;
   var LINIYA_MM = 0.2;
+  /* Ширина сетки поля в клетках — как в space.js (GRID_COLS): шире
+     любой колонки, лишнее обрезает блок поля. */
+  var SETKA_STOLBTSOV = 44;
 
   function setkaSvg(cols, rows) {
     var w = cols * KLETKA_MM;
@@ -239,7 +362,7 @@
     for (var y = 1; y < rows; y += 1) { d += 'M0 ' + y * KLETKA_MM + 'H' + w; }
     return '<svg class="sheet-space__grid" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"' +
       ' viewBox="0 0 ' + w + ' ' + h + '" width="' + w + 'mm" height="' + h + 'mm">' +
-      '<path d="' + d + '" fill="none" stroke="var(--sheet-space-line, #b3b3b3)"' +
+      '<path d="' + d + '" fill="none" stroke="var(--sheet-space-line, #cfdcf0)"' +
       ' stroke-width="' + LINIYA_MM + '"/></svg>';
   }
 
@@ -376,21 +499,60 @@
       flow.appendChild(node);
 
       if (!fits(flow)) {
-        if (flow.childElementCount === 1) {
-          /* Кусок выше целой страницы. Разрывать его нельзя, поэтому
-             оставляем как есть и сообщаем наверх: это не «почти
-             влезло», это ошибка вёрстки, и знать о ней надо. */
-          overflowing.push(node.getAttribute('data-task') ||
-            node.getAttribute('data-block') || String(i));
-          i += 1;
-          continue;
+        var stroki = poleStrok(node);
+        var minStrok = Number(node.getAttribute('data-space-min')) || stroki;
+        /* Поле влезет, если стать ниже не больше чем вдвое: так оно
+           остаётся на этой странице. Иначе задача уходит на следующую
+           с полем в полный рост. */
+        if (!(stroki > 0 && uzhat(node, flow, fits, Math.max(minStrok, Math.ceil(stroki / 2))))) {
+          if (flow.childElementCount > 1) {
+            var prezhniy = flow;
+            flow.removeChild(node);
+            flow = addPage();
+            flow.appendChild(node);
+            /* Целиком не встал и на пустую страницу — значит, его всё
+               равно резать. Тогда начинаем на прежней странице, в её
+               свободном месте, а не оставляем там пустоту. */
+            if (!fits(flow)) {
+              flow.removeChild(node);
+              if (pervayaChastVlezet(node, prezhniy)) {
+                prezhniy.appendChild(node);
+                var cont = razrezat(node, prezhniy, fits);
+                flow.appendChild(cont);
+                node = cont;
+              } else {
+                flow.appendChild(node);
+              }
+            }
+          }
+          flow = ulozhitNaPustuyu(node, flow, i);
         }
-        flow.removeChild(node);
-        flow = addPage();
-        flow.appendChild(node);
       }
 
       i += 1;
+    }
+
+    /* Кусок один на странице и не влез. Поле задачи ужимается до
+       data-space-min строк; пример и рамка режутся по шагам — конец
+       уходит на новую страницу (и так, пока не встанет). Если не
+       помогло ничего — ошибка вёрстки: сообщаем наверх, чтобы
+       проверки (test:print-pages, test:pdf-listy) упали. */
+    function ulozhitNaPustuyu(node, flow, index) {
+      if (fits(flow)) { return flow; }
+      var stroki = poleStrok(node);
+      if (stroki > 0 &&
+          uzhat(node, flow, fits, Number(node.getAttribute('data-space-min')) || stroki)) {
+        return flow;
+      }
+      var cont = razrezat(node, flow, fits);
+      if (cont === null) {
+        overflowing.push(node.getAttribute('data-task') ||
+          node.getAttribute('data-block') || String(index));
+        return flow;
+      }
+      var next = addPage();
+      next.appendChild(cont);
+      return ulozhitNaPustuyu(cont, next, index);
     }
 
     /* Правило 2: заголовок блока не остаётся один внизу страницы.
@@ -428,6 +590,18 @@
           target = pages[q + 1];
         }
         target.flow.insertBefore(moved, target.flow.firstChild);
+      }
+    }
+
+    /* Страница так и не встала (один кусок выше страницы, который
+       нельзя ни ужать, ни разрезать) — в отчёт: молча обрезанный
+       низ страницы не должен уйти в печать незамеченным. */
+    for (var z = 0; spec.columns !== 2 && z < pages.length; z += 1) {
+      if (!fits(pages[z].flow)) {
+        var lishniy = pages[z].flow.lastElementChild;
+        var imyaKuska = lishniy && (lishniy.getAttribute('data-task') ||
+          lishniy.getAttribute('data-block')) || 'страница ' + (z + 1);
+        if (overflowing.indexOf(imyaKuska) < 0) { overflowing.push(imyaKuska); }
       }
     }
 
@@ -528,9 +702,7 @@
     var spec = JSON.parse(source.textContent);
 
     /* Обмер до загрузки шрифтов даёт чужие высоты, поэтому ждём. */
-    var ready = document.fonts && document.fonts.ready
-      ? document.fonts.ready
-      : Promise.resolve();
+    var ready = zagruzitShrifty();
 
     ready.then(function () {
       /* Формулы набираются ДО обмера: вёрстка KaTeX выше исходной
@@ -561,10 +733,7 @@
            коробки запрашивает шрифты — ждём их ещё раз. */
         box.appendChild(opening);
         void box.offsetHeight;
-        return (document.fonts && document.fonts.ready
-          ? document.fonts.ready
-          : Promise.resolve()
-        ).then(function () {
+        return zagruzitShrifty().then(function () {
           document.body.removeChild(box);
           return spec;
         });

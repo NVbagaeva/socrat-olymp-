@@ -164,7 +164,7 @@ body {
   background: var(--sheet-rule-strong);
 }
 
-.sheet-head-course { flex: 1 1 auto; }
+.sheet-head-course { flex: 1 1 auto; min-width: 0; }
 
 .sheet-course-name {
   font-size: var(--sheet-fs-lead);
@@ -177,15 +177,19 @@ body {
   color: var(--sheet-ink-2);
 }
 
-/* Правый угол: капслок, тонкая линия и точка. */
+/* Правый угол: капслок, тонкая линия и точка. Сжимается и переносится,
+   но не выходит за поле листа: шрифт, загруженный позже, или печатная
+   область уже A4 не должны его обрезать. */
 .sheet-motto {
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: calc(var(--sheet-step) * 2);
 }
 
 .sheet-motto-text {
+  text-align: right;
   font-size: var(--sheet-fs-tiny);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -226,6 +230,7 @@ body {
 
 .sheet-head--compact .sheet-runner {
   flex: 1 1 auto;
+  min-width: 0;
   font-size: var(--sheet-fs-small);
   color: var(--sheet-ink-2);
 }
@@ -265,6 +270,7 @@ body {
 
 .sheet-title {
   margin: 0;
+  overflow-wrap: anywhere;
   font-size: var(--sheet-fs-title);
   font-weight: 700;
   line-height: 1.05;
@@ -337,7 +343,6 @@ body {
   border: var(--sheet-rule-width) solid var(--sheet-recap-line);
   border-left: calc(var(--sheet-step) * 1.5) solid var(--sheet-recap-bar);
   border-radius: var(--sheet-radius-lg);
-  break-inside: avoid;
 }
 
 .sheet-recap-main { flex: 1 1 auto; }
@@ -371,10 +376,19 @@ body {
 }
 
 .sheet-recap-item {
-  display: flex;
-  align-items: baseline;
-  gap: calc(var(--sheet-step) * 2);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: calc(var(--sheet-step) * 2);
   font-size: var(--sheet-fs-body);
+}
+
+/* Пояснение к формуле пункта — словами, строкой ниже. */
+.sheet-recap-note {
+  display: block;
+  margin-top: calc(var(--sheet-step) * 0.5);
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
 }
 
 /* Номер пункта — в квадратике. */
@@ -391,7 +405,9 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: center;
+  /* На уровне первой строки пункта, а не по середине высокой формулы. */
+  align-self: start;
+  margin-top: 0.05em;
 }
 
 /* Фраза справа, за вертикальной линией. */
@@ -431,11 +447,8 @@ body {
   border: var(--sheet-rule-width) solid var(--sheet-block-line);
   border-left: calc(var(--sheet-step) * 1.5) solid var(--sheet-block-bar);
   border-radius: var(--sheet-radius-md);
-  break-inside: avoid;
   /* Заголовок не остаётся один внизу страницы. Страницы всё равно
      набирает paginate.js, но правило нужно и обычной печати из браузера. */
-  break-after: avoid;
-  page-break-after: avoid;
 }
 
 .sheet-block-title {
@@ -513,8 +526,6 @@ body {
   border: var(--sheet-card-width) solid var(--sheet-card-line);
   border-radius: var(--sheet-radius-lg);
   /* Задача никогда не разрывается между страницами. */
-  break-inside: avoid;
-  page-break-inside: avoid;
 }
 
 /* Номер задачи — в синем квадратике, сама цифра без «№». */
@@ -642,6 +653,7 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
 
 .sheet-foot-middle {
   flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: calc(var(--sheet-step) * 1.5);
@@ -649,8 +661,9 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
 
 .sheet-social {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: calc(var(--sheet-step) * 3);
+  gap: calc(var(--sheet-step) * 1) calc(var(--sheet-step) * 3);
 }
 
 .sheet-social-item {
@@ -664,6 +677,7 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
 .sheet-social-item a {
   color: var(--sheet-brand);
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 
 .sheet-social-sep {
@@ -674,6 +688,7 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
 
 .sheet-rights {
   margin: 0;
+  overflow-wrap: anywhere;
   color: var(--sheet-ink-3);
   line-height: 1.35;
 }
@@ -726,7 +741,6 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
   color: var(--sheet-ink-2);
 }
 
-.sheet-solution { break-inside: avoid; }
 
 /* Ключ генератора: номер, ответ, метод — две задачи в строке. */
 .sheet-key-table {
@@ -778,7 +792,6 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
 /* ══════════════════════════════════════════════════════════
    Раздел «Ответы»: таблица и краткие решения
    ══════════════════════════════════════════════════════════ */
-.sheet-answers { break-inside: avoid; }
 
 .sheet-answers-table th[scope='row'] {
   width: calc(var(--sheet-step) * 7);
@@ -802,7 +815,6 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
   border: var(--sheet-card-width) solid var(--sheet-card-line);
   border-radius: var(--sheet-radius-md);
   background: var(--sheet-card-bg);
-  break-inside: avoid;
 }
 
 .sheet-solution-no {
@@ -942,7 +954,6 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
   border-left: calc(var(--sheet-step) * 1.5) solid var(--sheet-recap-bar);
   border-radius: var(--sheet-radius-lg);
   font-size: var(--sheet-fs-small);
-  break-inside: avoid;
 }
 
 /* Подпись «пример» — плашка, как номер пункта. */
@@ -992,4 +1003,10 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
 }
 .sheet-item.sheet-list-razbor + .sheet-item.sheet-list-razbor {
   margin-top: calc(var(--sheet-step) * 1.5);
+}
+
+/* Продолжение разобранного примера на следующей странице (paginate.js
+   режет пример выше страницы по шагам разбора). */
+.sheet-example[data-cont='1'] .sheet-example-label::after {
+  content: ' (продолжение)';
 }
