@@ -1,0 +1,78 @@
+/*
+ * Значки разделов №3 (IkonkaTela.tsx): тело в светло-голубом стеклянном
+ * круге. Размер круга — --ikonka-tela (48 px на телефоне, 56 px шире);
+ * рисунок занимает 80 % круга. Цвета — из токенов: рёбра синие, грани —
+ * голубое стекло, акцент — оранжевый.
+ */
+
+.ikonka-tela {
+  --ikonka-tela: 48px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--ikonka-tela);
+  height: var(--ikonka-tela);
+  border: 1px solid var(--color-border-info);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%, rgb(255 255 255 / 0.9), transparent 58%),
+    linear-gradient(160deg, var(--color-surface-info), var(--color-surface-soft));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    0 2px 6px -3px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+@media (min-width: 760px) {
+  .ikonka-tela {
+    --ikonka-tela: 56px;
+  }
+}
+.ikonka-tela svg {
+  width: 80%;
+  height: 80%;
+  overflow: visible;
+}
+.ikonka-tela .it-g0 {
+  stop-color: var(--color-primary);
+  stop-opacity: 0.26;
+}
+.ikonka-tela .it-g1 {
+  stop-color: var(--color-primary);
+  stop-opacity: 0.07;
+}
+.ikonka-tela .it-v,
+.ikonka-tela .it-h,
+.ikonka-tela .it-a {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ikonka-tela .it-v {
+  stroke: var(--color-primary);
+  stroke-width: 1.6;
+}
+.ikonka-tela .it-h {
+  stroke: var(--color-primary);
+  stroke-width: 1;
+  stroke-dasharray: 2 1.8;
+  opacity: 0.75;
+}
+.ikonka-tela .it-a {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+.ikonka-tela .it-a--h {
+  stroke-width: 1;
+  stroke-dasharray: 2 1.8;
+}
+.ikonka-tela .it-t {
+  fill: var(--color-accent);
+  stroke: var(--color-surface);
+  stroke-width: 0.8;
+}
+/* Запасной значок — римская цифра раздела. */
+.ikonka-tela--nomer {
+  color: var(--color-primary);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
