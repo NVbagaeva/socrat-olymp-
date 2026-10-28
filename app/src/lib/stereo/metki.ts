@@ -133,7 +133,9 @@ export function razlozhit(
           };
           let cost = 0;
           for (const b of placed) {
-            cost += overlap(box, b) * 40;
+            const o = overlap(box, b);
+            /* Наложение подписей — почти запрещено: даже край к краю. */
+            if (o > 0) cost += 500 + o * 40;
           }
           for (const [a, b] of linii) {
             cost += segInBox(a, b, box) * shtrafLinii;
