@@ -1001,12 +1001,47 @@
 /* Колонки и «С чего начать» — общие слои «О задании» №11 (z11-about);
    здесь карточки типов, таблица признаков и строки-пометки. */
 
-.z13-about__edinicy {
+/* Шапка: заголовок и чипы «часть 1 · краткий ответ · 1 балл» под ним.
+   Отступы между абзацами, «Важно» и сноской — ритм .flow (callout.css). */
+.z13-about__head {
+  display: grid;
+  gap: var(--space-3);
+}
+.z13-about__title {
   margin: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-accent-soft-surface);
-  border: 1px solid var(--color-border-accent);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+@media (min-width: 1024px) {
+  .z13-about__title {
+    font-size: var(--fs-h2);
+    line-height: var(--lh-h2);
+    letter-spacing: -0.02em;
+  }
+}
+.z13-about__chipy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z13-about__lead > p {
+  max-width: 64ch;
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+}
+.z13-about__lead > .z13-about__lead-text {
+  color: var(--color-text-lead);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z13-about__lead > .snoska {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
 }
 .z13-about-tipy {
   display: grid;

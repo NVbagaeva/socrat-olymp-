@@ -1,0 +1,134 @@
+/* Плашки Callout и сноски (components/ui/Callout.tsx), ритм текста .flow.
+   Образец — «Типичные ошибки» №9 (DESIGN_CRIT.md, «Что сохранить»):
+   тёплая карточка, тонкая рамка, акцент цветом. Все цвета — токены
+   --color-callout-*; направление из /styleguide меняет их в tokens.css. */
+
+/* ── Вертикальный ритм ───────────────────────────────────────────
+   Абзац → абзац: --flow-p (16). Абзац → рамка или карточка и обратно:
+   --flow-block (24, от 1024 — 32). Рамка → следующий заголовок:
+   --flow-section (40, от 1024 — 56). Контейнер .flow сам расставляет
+   отступы между детьми; дети своих margin сверху и снизу не задают. */
+.flow > * {
+  margin-block: 0;
+}
+.flow > * + * {
+  margin-top: var(--flow-p);
+}
+.flow > * + :is(.callout, .flow-block),
+.flow > :is(.callout, .flow-block) + * {
+  margin-top: var(--flow-block);
+}
+.flow > :is(.callout, .flow-block) + :is(h2, h3, h4, section) {
+  margin-top: var(--flow-section);
+}
+
+/* ── Callout ─────────────────────────────────────────────────────── */
+.callout {
+  --callout-accent: var(--color-callout-vazhno);
+  --callout-border: var(--color-callout-vazhno-border);
+  --callout-text: var(--color-callout-vazhno-text);
+  min-width: 0;
+  max-width: 72ch;
+  padding: var(--space-5);
+  border: 1px solid var(--callout-border);
+  border-left: 3px solid var(--callout-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-callout-surface);
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-lg);
+  break-inside: avoid;
+}
+@media (min-width: 1024px) {
+  .callout {
+    padding: var(--space-6);
+  }
+}
+.callout--zapomni {
+  --callout-accent: var(--color-callout-zapomni);
+  --callout-border: var(--color-callout-zapomni-border);
+  --callout-text: var(--color-callout-zapomni-text);
+}
+.callout--layfhak {
+  --callout-accent: var(--color-callout-layfhak);
+  --callout-border: var(--color-callout-layfhak-border);
+  --callout-text: var(--color-callout-layfhak-text);
+}
+.callout__metka {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  color: var(--callout-text);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.callout__znak,
+.snoska__znak {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.callout__telo > * {
+  margin: 0;
+}
+.callout__telo > * + * {
+  margin-top: var(--space-2);
+}
+.callout__telo strong {
+  font-weight: 700;
+}
+.callout__primer {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--callout-border);
+}
+.callout__primer > * {
+  margin: 0;
+}
+.callout__primer > * + * {
+  margin-top: var(--space-2);
+}
+.callout__primer-metka {
+  color: var(--callout-text);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+/* Формула примера не распирает плашку на телефоне. */
+.callout .katex-display,
+.callout__formula {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* ── Сноска ──────────────────────────────────────────────────────── */
+.snoska {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  max-width: 64ch;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.snoska__znak {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+@media print {
+  .callout {
+    background: none;
+  }
+}
