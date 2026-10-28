@@ -72,6 +72,8 @@ export interface PodpisKadra extends Svet {
   w: number;
   h: number;
   dir: number;
+  /** Точка закрыта телом от зрителя: подпись видна, но бледнее. */
+  skryta?: boolean;
 }
 
 export interface Kadr {
@@ -320,7 +322,19 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
     pref?: P2;
     zapas?: P2[];
     s: Svet;
+    skryta?: boolean;
   }
+  /* Точка закрыта от зрителя, если все куски линий, сходящихся в ней,
+     невидимы (вершина тела: её рёбра — пунктир). Точка без линий —
+     по лучу к зрителю. */
+  const skrytaTochka = (p2: P2, p3: V): boolean => {
+    const u = linii.filter(
+      (l) =>
+        Math.hypot(l.a[0] - p2[0], l.a[1] - p2[1]) < 0.75 ||
+        Math.hypot(l.b[0] - p2[0], l.b[1] - p2[1]) < 0.75,
+    );
+    return u.length > 0 ? u.every((l) => !l.vidno) : zakrytaKemTo(p3, chasti, kam, eps);
+  };
   const zad: Zad[] = [];
   for (const t of tochki3) {
     zad.push({
@@ -329,6 +343,7 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
       vid: 'imya',
       p: P(t.p),
       s: svet(t.imya, yarkieTochki.has(t.imya)),
+      ...(skrytaTochka(P(t.p), t.p) ? { skryta: true } : {}),
     });
   }
   /** Подпись у отрезка: в середине, по нормали наружу от центра фигуры. */
@@ -399,7 +414,7 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
     centr2,
     zad.map((z) => o.prezhnie?.get(z.klyuch)),
     Math.max(3, o.kegl * 0.28),
-    { koltsa: [1, 1.8, 2.8, 4], shtrafLinii: 60 },
+    { koltsa: [1, 1.8, 2.8, 4, 5.5, 7], shtrafLinii: 60 },
   );
   const podpisi: PodpisKadra[] = zad.map((z, i) => ({
     klyuch: z.klyuch,
@@ -411,6 +426,7 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
     h: razmery[i]?.h ?? 10,
     dir: pol[i]?.dir ?? 0,
     ...z.s,
+    ...(z.skryta === true ? { skryta: true } : {}),
   }));
 
   return { W, H: Hh, linii, zalivki, puti, tochki, podpisi };

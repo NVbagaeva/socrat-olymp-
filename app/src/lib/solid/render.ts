@@ -169,6 +169,8 @@ interface LabelSpec {
   p3?: Vec3;
   /** Кегль, единицы рисунка: у живого чертежа мельче (только экран). */
   size?: number;
+  /** Точка закрыта телом от зрителя: подпись видна, но бледнее. */
+  skryt?: boolean;
 }
 
 interface PlacedLabel extends LabelSpec {
@@ -382,7 +384,13 @@ function addPolyhedron(
     if (name) {
       const p = view.project(v);
       scene.dots.push(p);
-      scene.labels.push({ p, text: name, kind: 'vertex', p3: v });
+      scene.labels.push({
+        p,
+        text: name,
+        kind: 'vertex',
+        p3: v,
+        ...(hidden(view, v, occluders, eps) ? { skryt: true } : {}),
+      });
     }
   });
 }
@@ -627,6 +635,11 @@ export interface RenderOptions {
    */
   tema?: Tema;
   /**
+   * Память сторон подписей живого чертежа (текст → направление): при
+   * вращении подпись держится прежней стороны, пока ей там свободно.
+   */
+  pamyatPodpisey?: Map<string, number>;
+  /**
    * Без подписей и точек вершин: миниатюры и пиктограммы, где буквы
    * мельче читаемого. Геометрия та же.
    */
@@ -764,7 +777,18 @@ function buildScene(model: Model, options: RenderOptions = {}): Scene {
     const p = view.project(mark.p);
     scene.dots.push(p);
     if (mark.label) {
-      scene.labels.push(sHl({ p, text: mark.label, kind: 'vertex', p3: mark.p }, hl(mark)));
+      scene.labels.push(
+        sHl(
+          {
+            p,
+            text: mark.label,
+            kind: 'vertex',
+            p3: mark.p,
+            ...(hidden(view, mark.p, all, eps) ? { skryt: true } : {}),
+          },
+          hl(mark),
+        ),
+      );
     }
   });
 
@@ -1094,7 +1118,7 @@ const DIRECTIONS: Vec2[] = Array.from({ length: 16 }, (_, k) => {
  * наложение на другую подпись и на точку, и за уход внутрь фигуры
  * (снаружи подпись читается лучше).
  */
-function placeLabels(scene: Scene): PlacedLabel[] {
+function placeLabels(scene: Scene, pamyat?: Map<string, number>): PlacedLabel[] {
   /* Линии по штрихам: одна линия, сколько бы кусков в ней ни было,
      штрафует один раз — иначе эллипс из сотни отрезков перевешивал бы
      любое ребро. */
@@ -1131,15 +1155,20 @@ function placeLabels(scene: Scene): PlacedLabel[] {
     let best: PlacedLabel | null = null;
     let bestScore = Infinity;
 
-    [gap, gap + 8, gap + 16].forEach((reachBase, ring) => {
-      DIRECTIONS.forEach((dir) => {
+    const bylo = pamyat?.get(label.text);
+    let bestDir = 0;
+    [gap, gap + 6, gap + 12, gap + 20, gap + 30].forEach((reachBase, ring) => {
+      DIRECTIONS.forEach((dir, di) => {
         const reach = reachBase + Math.abs(dir[0]) * (w / 2) + Math.abs(dir[1]) * (h / 2);
         const cx = label.p[0] + dir[0] * reach;
         const cy = label.p[1] + dir[1] * reach;
         const x = cx - w / 2;
         const y = cy - h / 2;
         let score = ring * 5;
-        score += 3 * (1 - (dir[0] * outward[0] + dir[1] * outward[1]));
+        /* Снаружи фигуры подпись читается лучше. */
+        score += 6 * (1 - (dir[0] * outward[0] + dir[1] * outward[1]));
+        /* Живой чертёж: подпись держится прежней стороны и не прыгает. */
+        if (bylo !== undefined && bylo !== di) score += 4;
 
         const rx0 = x - clear - PRUNE;
         const ry0 = y - clear - PRUNE;
@@ -1158,8 +1187,9 @@ function placeLabels(scene: Scene): PlacedLabel[] {
               Math.min(a[1], b[1]) <= ry1 &&
               rectSegmentDistance(x - clear, y - clear, w + 2 * clear, h + 2 * clear, a, b) < 0.001,
           );
+          /* Подпись на линии — почти запрещено: ищем дальше по кольцам. */
           if (crosses) {
-            score += 40;
+            score += 120;
           }
         });
         scene.dots.forEach((dot2) => {
@@ -1167,7 +1197,7 @@ function placeLabels(scene: Scene): PlacedLabel[] {
             pointRectDistance(dot2, x, y, w, h) < THEME.geometry.dot + 1 &&
             dist2(dot2, label.p) > 0.001
           ) {
-            score += 30;
+            score += 80;
           }
         });
         placed.forEach((other) => {
@@ -1177,18 +1207,20 @@ function placeLabels(scene: Scene): PlacedLabel[] {
             y < other.y + other.h + 2 &&
             y + h + 2 > other.y
           ) {
-            score += 60;
+            score += 500;
           }
         });
 
         if (score < bestScore) {
           bestScore = score;
+          bestDir = di;
           best = { ...label, x, y, w, h };
         }
       });
     });
     if (best) {
       placed.push(best);
+      pamyat?.set(label.text, bestDir);
     }
   });
   return placed;
@@ -1277,11 +1309,13 @@ function labelMarkup(label: PlacedLabel): string {
   const x = label.x;
   const y = label.y + label.h * 0.78;
   const inner = sub ? `${esc(base)}${indeksSvg(esc(sub), size)}` : esc(base);
+  /* Подпись закрытой вершины — бледнее, но читается. */
+  const blednee = label.skryt === true ? ' opacity="0.55" data-skryt="1"' : '';
   return (
     /* Выделенная шагом подпись — цветом построений; class="solid-hl" и
        data-hl — метки для проверок (жирного начертания нет). */
     `<text${label.hl ? ' class="solid-hl"' : ''} x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
-    `fill="${fill}"${label.hl ? ' data-hl="1"' : ''} paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
+    `fill="${fill}"${label.hl ? ' data-hl="1"' : ''}${blednee} paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
 
@@ -1292,7 +1326,7 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
     scene.labels = [];
     scene.dots = [];
   }
-  const labels = placeLabels(scene);
+  const labels = placeLabels(scene, options.pamyatPodpisey);
 
   const pad = THEME.geometry.pad;
   const box = boxOf([

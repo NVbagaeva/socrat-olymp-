@@ -55,6 +55,8 @@ import {
   type ZnakVTochkah,
 } from '@/lib/proizvodnaya/povyshennye';
 import type { Generated as Generated9 } from '@/lib/proizvodnaya/types';
+import { dannye3dJson } from '@/lib/stereo/zhivoy';
+import { modelDlyaVrashcheniya } from '@/lib/stereo/zhivoy-model';
 import { renderSolid } from '@/lib/solid';
 import { typeset, typesetKrupno } from '@/lib/tex';
 import {
@@ -490,7 +492,12 @@ function z03(proto: Proto3, p: Params3, hints: HintLike[], klyuch: string): Goto
     difficulty: null,
     statement: typeset(proto.uslovie(p)),
     /* Ширина 70 мм: видимые рёбра движка — 1,5 pt (lib/solid/render.ts). */
-    figure: { svg: renderSolid(proto.chertezh(p)), width: 70 },
+    figure: {
+      svg: renderSolid(proto.chertezh(p)),
+      width: 70,
+      /* На экране чертёж вращается руками (lib/stereo/zhivoy.ts). */
+      zhivoy: dannye3dJson({ m: modelDlyaVrashcheniya(proto.chertezh(p)) }),
+    },
     figureTeacher: null,
     answer: answerText(otvetChislo),
     answerHtml: otvet,
@@ -757,11 +764,7 @@ function hints08Tg(p: TgPoZnacheniyu): HintLike[] {
   return [
     {
       question: `Как найти $${drug}^2\\alpha$?`,
-      options: [
-        `$1-\\${p.f}^2\\alpha$`,
-        `$\\${p.f}^2\\alpha-1$`,
-        `$1+\\${p.f}^2\\alpha$`,
-      ],
+      options: [`$1-\\${p.f}^2\\alpha$`, `$\\${p.f}^2\\alpha-1$`, `$1+\\${p.f}^2\\alpha$`],
       correct: 0,
       comment: 'Основное тождество: $\\sin^2\\alpha+\\cos^2\\alpha=1$.',
     },
@@ -1323,7 +1326,8 @@ export const SHABLONY: Record<string, Shablon> = {
   },
   'z05.bernulli': {
     ege: 5,
-    prototip: 'Независимые испытания: ровно k попаданий из n выстрелов, C(n, k)·pᵏ·(1 − p)ⁿ⁻ᵏ, до сотых',
+    prototip:
+      'Независимые испытания: ровно k попаданий из n выстрелов, C(n, k)·pᵏ·(1 − p)ⁿ⁻ᵏ, до сотых',
     otkuda: 'novyy',
     zadacha: (p: ParamsVer) => veroyatnost(5, PV5_BERNULLI, p),
   },
@@ -1903,8 +1907,7 @@ export const SHABLONY: Record<string, Shablon> = {
     prototip:
       'Экономика, тип C: кредит на 2 года двумя равными платежами, ставка — квадратное уравнение относительно k (как C-08)',
     otkuda: 'novyy',
-    zadacha: (p: DvaRavnyhStavka & Syuzhet13, klyuch: string) =>
-      z13(dvaRavnyhStavka(p), p, klyuch),
+    zadacha: (p: DvaRavnyhStavka & Syuzhet13, klyuch: string) => z13(dvaRavnyhStavka(p), p, klyuch),
   },
   'z13.vklad-nachalnyy': {
     ege: 13,

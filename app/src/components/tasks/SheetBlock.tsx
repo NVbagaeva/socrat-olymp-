@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { Solid } from '@/components/solid/Solid';
-import { FigureZoom } from '@/components/ui';
+import { Chertezh3d } from '@/components/stereo/Chertezh3d';
 import type { SheetItem } from '@/content/shpargalki';
 import { formulaKey } from '@/lib/zadanie3/formulas';
 /* Напрямую из sheets, а не из сборного drawings: тот собирает
@@ -44,11 +43,8 @@ export function SheetBlock({ items, formulas }: SheetBlockProps): ReactNode {
         }
         return (
           <li className="sheet__item" key={index}>
-            {model !== undefined ? (
-              <FigureZoom className="sheet__fig" label={model.alt}>
-                <Solid model={model} />
-              </FigureZoom>
-            ) : null}
+            {/* Чертёж вращается руками, как все чертежи раздела. */}
+            {model !== undefined ? <Chertezh3d model={model} className="sheet__fig" /> : null}
             <span className="sheet__text">
               {item.pieces.map((piece, k) =>
                 piece.kind === 'текст' ? (

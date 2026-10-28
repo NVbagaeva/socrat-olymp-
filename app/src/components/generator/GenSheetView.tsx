@@ -6,6 +6,7 @@ import { GEN_UI } from '@/content/generatorUi';
 import type { GenConfig, GenExtras, GenTask } from '@/lib/generator/obshchiy/types';
 import { solutionLength, spaceFor, spaceHtml, type SheetSpace } from '@/lib/sheet/space.js';
 import '@/lib/sheet/space.css';
+import { FiguraZhivaya } from '@/components/stereo/FiguraZhivaya';
 import { GenIcon } from './GenIcons';
 
 export type TaskAction = 'swap' | 'level' | 'remove' | 'menu' | 'up' | 'down';
@@ -38,6 +39,7 @@ export function GenSheetView({
   space,
   onAction,
   onMove,
+  onRakurs,
 }: {
   config: GenConfig;
   tasks: GenTask[];
@@ -55,6 +57,8 @@ export function GenSheetView({
   onAction: (pos: string, action: TaskAction) => void;
   /** Перетаскивание: задача pos встаёт на место to (номер в листе с нуля). */
   onMove: (pos: string, to: number) => void;
+  /** Чертёж задачи pos повернули в предпросмотре (стереометрия). */
+  onRakurs?: (pos: string, az: number, el: number) => void;
 }) {
   const timer = useRef<number | null>(null);
   const [drag, setDrag] = useState<string | null>(null);
@@ -170,12 +174,26 @@ export function GenSheetView({
             <span className="gen-task__no">{t.no}</span>
             <div className="gen-task__body">
               {(teacher ? (t.figureTeacherSvg ?? t.figureSvg) : t.figureSvg) ? (
-                <figure
-                  className="gen-task__fig"
-                  dangerouslySetInnerHTML={{
-                    __html: (teacher ? (t.figureTeacherSvg ?? t.figureSvg) : t.figureSvg) ?? '',
-                  }}
-                />
+                (teacher ? (t.figureTeacherZhivoy ?? t.figureZhivoy) : t.figureZhivoy) ? (
+                  /* Стереометрия: чертёж вращается руками; повёрнутый ракурс
+                     может уйти на лист печати (onRakurs). */
+                  <figure className="gen-task__fig gen-task__fig--3d">
+                    <FiguraZhivaya
+                      svg={(teacher ? (t.figureTeacherSvg ?? t.figureSvg) : t.figureSvg) ?? ''}
+                      zhivoy={teacher ? (t.figureTeacherZhivoy ?? t.figureZhivoy) : t.figureZhivoy}
+                      {...(onRakurs === undefined
+                        ? {}
+                        : { onRakurs: (az: number, el: number) => onRakurs(t.pos, az, el) })}
+                    />
+                  </figure>
+                ) : (
+                  <figure
+                    className="gen-task__fig"
+                    dangerouslySetInnerHTML={{
+                      __html: (teacher ? (t.figureTeacherSvg ?? t.figureSvg) : t.figureSvg) ?? '',
+                    }}
+                  />
+                )
               ) : null}
               <div className="gen-task__q" dangerouslySetInnerHTML={{ __html: t.questionHtml }} />
               {teacher ? (

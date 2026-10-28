@@ -1,0 +1,122 @@
+/* Окно вращаемого чертежа (VrashchaemyyChertezh): область жестов,
+   столбик кнопок вида справа, подсказка под чертежом.
+   Жест по области вращает фигуру и страницу не листает
+   (touch-action: none); область не выше 70 % экрана — за что ухватиться
+   для прокрутки остаётся. */
+.vr {
+  display: grid;
+  gap: var(--space-2);
+  /* Контейнер по ширине своей ширины от содержимого не берёт: во
+     флексе и сетке без явной ширины окно схлопнулось бы. */
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+}
+.vr__okno {
+  position: relative;
+  min-width: 0;
+}
+.vr__oblast {
+  position: relative;
+  overflow: hidden;
+  max-height: 70vh;
+  padding-right: 52px;
+  border-radius: var(--radius-md);
+  touch-action: none;
+  /* Кадр поворота не пересчитывает раскладку остальной страницы. */
+  contain: layout paint style;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.vr__oblast:active {
+  cursor: grabbing;
+}
+.vr__oblast:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vr__kholst {
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+.vr__kholst svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+.vr__knopki {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.vr__btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+}
+.vr__btn:hover:not(:disabled),
+.vr__btn.is-on {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.vr__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.vr__btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.vr__btn .o3i {
+  width: 20px;
+  height: 20px;
+}
+.vr__podskazka {
+  margin: 0;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  transition: opacity 0.3s ease;
+}
+.vr__podskazka.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  height: 0;
+}
+/* Узкое окно (предпросмотр листа, карточка): тот же набор кнопок —
+   рядом под чертежом, чертёж во всю ширину. */
+@container (max-width: 340px) {
+  .vr__oblast {
+    padding-right: 0;
+  }
+  .vr__knopki {
+    position: static;
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vr__podskazka {
+    transition: none;
+  }
+}
+@media print {
+  .vr__knopki,
+  .vr__podskazka {
+    display: none;
+  }
+}

@@ -26,7 +26,11 @@ export function OpornyeStereoShell({
           {vBloke ? null : <p className="prep__lead">{OPORNYE_3.lead}</p>}
         </div>
         {dekor === undefined ? null : (
-          <span className="o3-prep__dekor" aria-hidden="true" dangerouslySetInnerHTML={{ __html: dekor }} />
+          <span
+            className="o3-prep__dekor"
+            aria-hidden="true"
+            dangerouslySetInnerHTML={{ __html: dekor }}
+          />
         )}
       </header>
       {vBloke ? (

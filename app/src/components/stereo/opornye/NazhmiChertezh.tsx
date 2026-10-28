@@ -1,22 +1,23 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { ORTHO_AZIMUTH, ORTHO_ELEVATION, orthoAt } from '@/lib/solid/project';
 import { renderSolid } from '@/lib/solid/render';
 import type { ZadachaOp3Sealed } from '@/lib/stereo/opornye3/seal';
-import { OPORNYE_3 } from '@/content/stereo/opornye3';
-import { IkMinus, IkPlyus, IkPovorot } from '../metodika/Ikonki';
+import { VrashchaemyyChertezh } from '../vrashchenie/VrashchaemyyChertezh';
+import type { Vid } from '../vrashchenie/useVrashchenie';
 
 /** Цель касания на экране не уже этого, px. */
 const CEL_PX = 44;
-const MASHTABY = [1, 1.25, 1.5] as const;
 
 /**
- * Чертёж задачи «нажми на чертеже»: крупно, «стеклом», с кнопками
- * «крупнее / мельче / повернуть». Над каждой целью — прозрачная
- * полоса касания (renderSolid, celi), её ширина пересчитывается под
- * масштаб рисунка, чтобы на телефоне она была не меньше 44 px.
+ * Чертёж задачи «нажми на чертеже»: крупно, «стеклом», вращается руками
+ * (VrashchaemyyChertezh: палец, мышь, щипок, кнопки вида). Короткое
+ * касание без сдвига выбирает цель, перетаскивание — вращает. Над
+ * каждой целью — прозрачная полоса касания (renderSolid, celi), её
+ * ширина пересчитывается под масштаб рисунка, чтобы на телефоне она
+ * была не меньше 44 px.
  */
 export function NazhmiRisunok({
   task,
@@ -35,23 +36,29 @@ export function NazhmiRisunok({
   /* Многоугольники — под отрезками: отрезок внутри треугольника тоже
      можно выбрать. */
   const order = useMemo(() => [...celi].sort((a, b) => b.points.length - a.points.length), [celi]);
-  const [mashtab, setMashtab] = useState(0);
-  const [povorot, setPovorot] = useState(0);
+  const az0 = task.model.rakurs?.azimuth ?? ORTHO_AZIMUTH;
+  const el0 = task.model.rakurs?.elevation ?? ORTHO_ELEVATION;
+  const [vid, setVid] = useState<Vid>({ az: az0, el: el0, zum: 1 });
   /* Единиц рисунка на пиксель экрана: от неё — ширина полосы касания. */
   const [naPiksel, setNaPiksel] = useState(1);
   const kholst = useRef<HTMLDivElement>(null);
+  /* Стороны подписей прошлого кадра: при вращении подписи не прыгают. */
+  const [pamyat] = useState(() => new Map<string, number>());
+  const povernut = vid.az !== az0 || vid.el !== el0;
 
-  const svg = useMemo(() => {
-    const az = (task.model.rakurs?.azimuth ?? ORTHO_AZIMUTH) + povorot;
-    const el = task.model.rakurs?.elevation ?? ORTHO_ELEVATION;
-    return renderSolid(task.model, {
-      tema: 'ekran',
-      ...(povorot === 0 ? {} : { view: orthoAt(az, el) }),
-      celi: order.map((c) => ({ id: c.id, points: c.points })),
-      vybrano: value === '' ? [] : [value],
-      celShirina: Math.max(22, CEL_PX * naPiksel),
-    });
-  }, [task.model, order, value, povorot, naPiksel]);
+  const svg = useMemo(
+    () =>
+      renderSolid(task.model, {
+        tema: 'ekran',
+        ...(povernut
+          ? { view: orthoAt(vid.az, vid.el), ustoychivo: true, pamyatPodpisey: pamyat }
+          : {}),
+        celi: order.map((c) => ({ id: c.id, points: c.points })),
+        vybrano: value === '' ? [] : [value],
+        celShirina: Math.max(22, (CEL_PX * naPiksel) / vid.zum),
+      }),
+    [task.model, order, value, povernut, vid.az, vid.el, vid.zum, naPiksel, pamyat],
+  );
 
   useEffect(() => {
     const node = kholst.current;
@@ -61,7 +68,8 @@ export function NazhmiRisunok({
       const w = el?.viewBox.baseVal.width ?? 0;
       const px = el?.getBoundingClientRect().width ?? 0;
       if (w > 0 && px > 0) {
-        const next = Math.round((w / px) * 100) / 100;
+        /* Прямоугольник уже увеличен масштабом окна — делим обратно. */
+        const next = Math.round((w / px) * vid.zum * 100) / 100;
         setNaPiksel((prev) => (Math.abs(prev - next) > 0.02 ? next : prev));
       }
     };
@@ -69,20 +77,14 @@ export function NazhmiRisunok({
     const ro = new ResizeObserver(izmerit);
     ro.observe(node);
     return () => ro.disconnect();
-  }, [mashtab]);
+  }, [vid.zum]);
 
   return (
     <div className={clsx('o3-nazhmi', proverka !== null && `is-${proverka}`)}>
-      <div className="o3-nazhmi__okno">
+      <VrashchaemyyChertezh az={az0} el={el0} onVid={setVid} alt={task.model.alt}>
         <div
           ref={kholst}
           className="o3-nazhmi__ris"
-          style={
-            {
-              width: `${(MASHTABY[mashtab] ?? 1) * 100}%`,
-              '--o3-zum': MASHTABY[mashtab] ?? 1,
-            } as CSSProperties
-          }
           onClick={(event) => {
             if (disabled) return;
             const target = (event.target as Element).closest('[data-cel]');
@@ -91,35 +93,7 @@ export function NazhmiRisunok({
           }}
           dangerouslySetInnerHTML={{ __html: svg }}
         />
-      </div>
-      <div className="o3-zum" role="group" aria-label="Чертёж">
-        <button
-          type="button"
-          className="o3-zum__btn"
-          aria-label={OPORNYE_3.chertezh.krupnee}
-          disabled={mashtab === MASHTABY.length - 1}
-          onClick={() => setMashtab(mashtab + 1)}
-        >
-          <IkPlyus />
-        </button>
-        <button
-          type="button"
-          className="o3-zum__btn"
-          aria-label={OPORNYE_3.chertezh.melche}
-          disabled={mashtab === 0}
-          onClick={() => setMashtab(mashtab - 1)}
-        >
-          <IkMinus />
-        </button>
-        <button
-          type="button"
-          className="o3-zum__btn"
-          aria-label={OPORNYE_3.chertezh.povernut}
-          onClick={() => setPovorot((povorot + 30) % 360)}
-        >
-          <IkPovorot />
-        </button>
-      </div>
+      </VrashchaemyyChertezh>
     </div>
   );
 }

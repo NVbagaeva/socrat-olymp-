@@ -108,7 +108,8 @@ export function ItogBloka({
           </span>
           <div className="o3-itog2__tekst">
             <p className="o3-itog2__st">
-              {t.oshibki} <span className="o3-itog2__nomera">{oshibki.map((p) => p.no).join(', ')}</span>
+              {t.oshibki}{' '}
+              <span className="o3-itog2__nomera">{oshibki.map((p) => p.no).join(', ')}</span>
             </p>
             <p className="o3-itog2__lead">{t.oshibkiLead}</p>
           </div>

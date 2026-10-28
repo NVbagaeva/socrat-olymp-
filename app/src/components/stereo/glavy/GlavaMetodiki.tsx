@@ -23,7 +23,7 @@ import {
   RazdelGlavy,
 } from '../metodika/Bloki';
 import { IkKub, IkStrelka, IkTreugolnik } from '../metodika/Ikonki';
-import { RisSteklo } from './Glava2Treugolnik';
+import { RisDekor, RisSteklo } from './Glava2Treugolnik';
 
 /** «C2» → «C_2». */
 function tex(name: string): string {
@@ -34,7 +34,11 @@ function tex(name: string): string {
 function imyaTreugolnika(t: NonNullable<PrimerGlavy['ploskiy']>): string {
   const m = /треугольник ([A-Z][A-Z₀-₉]*)/.exec(t.alt);
   if (m?.[1] !== undefined) {
-    return m[1].replace(/([A-Z])([₀-₉]+)/g, (_, b: string, d: string) => `${b}_${[...d].map((c) => String(c.charCodeAt(0) - 0x2080)).join('')}`);
+    return m[1].replace(
+      /([A-Z])([₀-₉]+)/g,
+      (_, b: string, d: string) =>
+        `${b}_${[...d].map((c) => String(c.charCodeAt(0) - 0x2080)).join('')}`,
+    );
   }
   const v = t.vershiny;
   return `${tex(v[1])}${tex(v[0])}${tex(v[2])}`;
@@ -66,7 +70,10 @@ function ZadachaVRamke({ z }: { z: ZadachaBloka }) {
 function Primer({ primer }: { primer: PrimerGlavy }) {
   const shagiChertezha = primer.shagiChertezha ?? [];
   const most =
-    primer.most ?? (primer.ploskiy === undefined ? '' : `Выносим треугольник $${imyaTreugolnika(primer.ploskiy)}$ отдельно`);
+    primer.most ??
+    (primer.ploskiy === undefined
+      ? ''
+      : `Выносим треугольник $${imyaTreugolnika(primer.ploskiy)}$ отдельно`);
   return (
     <div className="o3-primer">
       <h5 className="o3-primer__title">
@@ -78,7 +85,9 @@ function Primer({ primer }: { primer: PrimerGlavy }) {
             <header className="o3-panel__head">
               <IkKub className="o3-panel__ik" />
               <div>
-                <p className="o3-panel__t">{primer.ploskiy === undefined ? 'Чертёж' : '1. Объёмный чертёж'}</p>
+                <p className="o3-panel__t">
+                  {primer.ploskiy === undefined ? 'Чертёж' : '1. Объёмный чертёж'}
+                </p>
                 <p className="o3-panel__pod">
                   {shagiChertezha.length > 0
                     ? 'Чертёж можно повернуть и пройти по шагам решения.'
@@ -108,7 +117,9 @@ function Primer({ primer }: { primer: PrimerGlavy }) {
                   <IkTreugolnik className="o3-panel__ik o3-panel__ik--vydel" />
                   <div>
                     <p className="o3-panel__t">2. Плоский треугольник</p>
-                    <p className="o3-panel__pod">Тот же треугольник отдельно — в натуральную величину, с данными.</p>
+                    <p className="o3-panel__pod">
+                      Тот же треугольник отдельно — в натуральную величину, с данными.
+                    </p>
                   </div>
                 </header>
                 <figure
@@ -161,9 +172,7 @@ function Tipy() {
                   <Link href={`${base}/razbor/${tip.id}/`}>Разобранный пример</Link>
                 ) : null}
                 {glava === undefined ? null : (
-                  <a href={`#teoriya-${glava.id}`}>
-                    Глава {glava.nomer}
-                  </a>
+                  <a href={`#teoriya-${glava.id}`}>Глава {glava.nomer}</a>
                 )}
               </span>
             </span>
@@ -188,7 +197,14 @@ function Blok({ blok, shpargalki }: { blok: BlokGlavy; shpargalki?: ReactNode })
       return (
         <KartaAlgoritm
           title={blok.title}
-          shagi={blok.shagi.map((s) => ({ title: s.title, telo: <p className="o3-stepper__text"><Tex text={s.text} /></p> }))}
+          shagi={blok.shagi.map((s) => ({
+            title: s.title,
+            telo: (
+              <p className="o3-stepper__text">
+                <Tex text={s.text} />
+              </p>
+            ),
+          }))}
         />
       );
     case 'opredelenie':
@@ -266,9 +282,18 @@ function Blok({ blok, shpargalki }: { blok: BlokGlavy; shpargalki?: ReactNode })
       return (
         <ul className="o3-galereya">
           {blok.items.map((item) => (
-            <li key={item.podpis} className={item.ocenka === undefined ? 'o3-galereya__item' : `o3-galereya__item is-${item.ocenka}`}>
+            <li
+              key={item.podpis}
+              className={
+                item.ocenka === undefined
+                  ? 'o3-galereya__item'
+                  : `o3-galereya__item is-${item.ocenka}`
+              }
+            >
               {item.ocenka === undefined ? null : (
-                <span className="o3-galereya__ocenka">{item.ocenka === 'udachno' ? 'Удачно' : 'Неудачно'}</span>
+                <span className="o3-galereya__ocenka">
+                  {item.ocenka === 'udachno' ? 'Удачно' : 'Неудачно'}
+                </span>
               )}
               <RisSteklo model={item.model} />
               <p className="o3-galereya__podpis">
@@ -289,7 +314,13 @@ function Blok({ blok, shpargalki }: { blok: BlokGlavy; shpargalki?: ReactNode })
  * Глава теории №3 из данных (lib/stereo/glavy): лид с декором, разделы
  * со счётчиком «k / n» и стрелками, в разделах — блоки методики.
  */
-export function GlavaMetodiki({ glava, shpargalki }: { glava: GlavaDannye; shpargalki?: ReactNode }) {
+export function GlavaMetodiki({
+  glava,
+  shpargalki,
+}: {
+  glava: GlavaDannye;
+  shpargalki?: ReactNode;
+}) {
   const n = glava.razdely.length;
   return (
     <div className="o3-glava">
@@ -299,7 +330,7 @@ export function GlavaMetodiki({ glava, shpargalki }: { glava: GlavaDannye; shpar
         </p>
         {glava.dekor === undefined ? null : (
           <div className="o3-glava__dekor" aria-hidden="true">
-            <RisSteklo model={glava.dekor} />
+            <RisDekor model={glava.dekor} />
           </div>
         )}
       </div>
@@ -318,7 +349,11 @@ export function GlavaMetodiki({ glava, shpargalki }: { glava: GlavaDannye; shpar
             {...(next === undefined ? {} : { next: { id: next.id, title: next.title } })}
           >
             {razdel.bloki.map((blok, j) => (
-              <Blok key={`${razdel.id}-${j}`} blok={blok} {...(shpargalki === undefined ? {} : { shpargalki })} />
+              <Blok
+                key={`${razdel.id}-${j}`}
+                blok={blok}
+                {...(shpargalki === undefined ? {} : { shpargalki })}
+              />
             ))}
           </RazdelGlavy>
         );

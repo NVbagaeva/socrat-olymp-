@@ -189,6 +189,12 @@ export interface GenState {
    * позиций.
    */
   legacy?: string;
+  /**
+   * Ракурсы чертежей, повёрнутых в предпросмотре: «вариант.ключ позиции»
+   * → [азимут, подъём]. Лист от них не пересобирается — они нужны только
+   * адресам печати (№3, переключатель «как в предпросмотре»).
+   */
+  rakursy?: Record<string, [number, number]>;
 }
 
 /** Задача листа для предпросмотра. */
@@ -206,6 +212,12 @@ export interface GenTask {
   /** Чертёж условия, SVG; у учителя — чертёж со всеми построениями. */
   figureSvg?: string | null;
   figureTeacherSvg?: string | null;
+  /**
+   * Данные живого чертежа стереометрии (lib/stereo/zhivoy.ts, JSON): в
+   * предпросмотре чертёж вращается руками; учительский — с построениями.
+   */
+  figureZhivoy?: string;
+  figureTeacherZhivoy?: string;
 }
 
 export interface GenSheet {

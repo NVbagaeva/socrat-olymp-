@@ -222,6 +222,11 @@
   gap: var(--space-8);
   font-size: var(--fs-lg);
   line-height: 1.6;
+  /* Главы вне экрана браузер не рисует: на странице теории десятки
+     живых чертежей, и кадр поворота одного не тянет за собой всю
+     страницу. Высота нерисованной главы запоминается (auto). */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 2400px;
 }
 .o3-glava__lead {
   display: flex;
@@ -993,7 +998,9 @@ a.o3-kart:focus-visible {
 }
 .o3-kart.is-tekushchiy {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary), var(--shadow-sm);
+  box-shadow:
+    0 0 0 1px var(--color-primary),
+    var(--shadow-sm);
 }
 .o3-kart.is-skoro {
   box-shadow: none;
@@ -2159,6 +2166,11 @@ button.o3-schet__btn:disabled {
 }
 
 /* Галерея чертежей: «Неудачно / Удачно». */
+/* Живой чертёж ловушки или галереи — во всю ширину ячейки: ячейка
+   ставит содержимое по центру, а у окна вращения своей ширины нет. */
+.o3-ris:has(> .z3d) {
+  width: 100%;
+}
 .o3-galereya {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));

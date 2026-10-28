@@ -2,11 +2,12 @@
 
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { Model } from '@/lib/solid/model';
 import type { View } from '@/lib/solid/project';
 import type { RenderOptions, Tema } from '@/lib/solid/render';
+import { VrashchaemyyChertezh } from './vrashchenie/VrashchaemyyChertezh';
+import type { Vid } from './vrashchenie/useVrashchenie';
 
 /** Движок рисунка — приезжает только по первому касанию. */
 interface Dvizhok {
@@ -22,13 +23,6 @@ function zagruzit(): Promise<Dvizhok> {
   return dvizhok;
 }
 
-/** Подъём взгляда: от почти горизонтального до почти сверху. */
-const PODYOM_MIN = 5;
-const PODYOM_MAX = 80;
-/** Градусов поворота на пиксель перетаскивания. */
-const NA_PIKSEL = 0.5;
-/** Шаг поворота стрелками клавиатуры. */
-const NA_KLAVISHU = 10;
 /** Кадр дольше этого — следующий пропускается (слабый телефон). */
 const DOLGIY_KADR_MS = 24;
 
@@ -55,12 +49,13 @@ export interface ZhivoyChertezh3dProps {
   /** С какого шага открыть чертёж (внутренний шаг): по умолчанию с условия. */
   shagSnachala?: number;
   className?: string;
+  /** Чертёж повернули: ракурс для листа печати (генератор). */
+  onPovorot?: (vid: Vid) => void;
 }
 
 /**
- * Живой чертёж: поворот перетаскиванием (на телефоне — пальцем вбок,
- * страница при этом листается вверх-вниз как обычно), стрелками
- * клавиатуры и кнопками, шаги решения с выделением элементов шага.
+ * Живой чертёж: вращение руками (VrashchaemyyChertezh — палец, мышь,
+ * щипок, колесо, кнопки вида), шаги решения с выделением элементов шага.
  */
 export function ZhivoyChertezh3d({
   model,
@@ -74,129 +69,53 @@ export function ZhivoyChertezh3d({
   tema = 'pechat',
   shagSnachala = 0,
   className,
+  onPovorot,
 }: ZhivoyChertezh3dProps) {
   const kholst = useRef<HTMLDivElement>(null);
   const [shagVnutri, setShag] = useState(shagSnachala);
   const shag = shagSnaruzhi ?? shagVnutri;
-  const [tronut, setTronut] = useState(false);
-  /* Взгляд почти сверху: кнопка тогда возвращает вид сбоку. */
-  const [sverkhu, setSverkhu] = useState(false);
   const vid = useRef({ az: azimuth, el: elevation });
-  const kadr = useRef<number | null>(null);
   const propusk = useRef(false);
-  const tyanem = useRef<{ x: number; y: number; az: number; el: number; touch: boolean } | null>(
-    null,
-  );
+  /* Стороны подписей прошлого кадра: при вращении подписи не прыгают. */
+  const pamyat = useRef(new Map<string, number>());
   const shagRef = useRef(shagSnachala);
   const estShagi = podpisi.length > 1;
   const nShagov = podpisi.length - 1;
 
-  /* Перерисовать в ближайшем кадре: несколько движений за кадр — один
-     рисунок. Если прошлый кадр рисовался долго (слабый телефон),
-     следующий кадр пропускается. */
+  /* Перерисовать кадр. Если прошлый кадр рисовался долго (слабый
+     телефон), следующий пропускается. */
   const narisovat = useCallback(() => {
-    if (kadr.current !== null) {
+    if (propusk.current) {
+      propusk.current = false;
       return;
     }
-    const step = () => {
-      if (propusk.current) {
-        propusk.current = false;
-        kadr.current = requestAnimationFrame(step);
+    void zagruzit().then(({ renderSolid, orthoAt }) => {
+      const node = kholst.current;
+      if (node === null) {
         return;
       }
-      kadr.current = null;
-      void zagruzit().then(({ renderSolid, orthoAt }) => {
-        const node = kholst.current;
-        if (node === null) {
-          return;
-        }
-        const t0 = performance.now();
-        node.innerHTML = renderSolid(model, {
-          view: orthoAt(vid.current.az, vid.current.el),
-          ustoychivo: true,
-          tema,
-          ...(estShagi ? { shag: shagRef.current } : {}),
-        });
-        propusk.current = performance.now() - t0 > DOLGIY_KADR_MS;
+      const t0 = performance.now();
+      node.innerHTML = renderSolid(model, {
+        view: orthoAt(vid.current.az, vid.current.el),
+        ustoychivo: true,
+        tema,
+        pamyatPodpisey: pamyat.current,
+        ...(estShagi ? { shag: shagRef.current } : {}),
       });
-    };
-    kadr.current = requestAnimationFrame(step);
+      propusk.current = performance.now() - t0 > DOLGIY_KADR_MS;
+    });
   }, [model, estShagi, tema]);
 
-  useEffect(
-    () => () => {
-      if (kadr.current !== null) {
-        cancelAnimationFrame(kadr.current);
-      }
-    },
-    [],
-  );
-
-  const povernut = useCallback(
-    (az: number, el: number) => {
-      vid.current = { az, el: clamp(el, PODYOM_MIN, PODYOM_MAX) };
-      setTronut(true);
-      setSverkhu(vid.current.el > 60);
+  const onVid = useCallback(
+    (v: Vid) => {
+      if (v.az === vid.current.az && v.el === vid.current.el) return;
+      vid.current = { az: v.az, el: v.el };
+      /* Вернулись к исходному виду («Сбросить вид») — подписи как в первом кадре. */
+      if (v.az === azimuth && v.el === elevation) pamyat.current.clear();
       narisovat();
     },
-    [narisovat],
+    [narisovat, azimuth, elevation],
   );
-
-  function onPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (event.button !== 0) {
-      return;
-    }
-    /* Движок — заранее, пока палец ещё не сдвинулся. */
-    void zagruzit();
-    tyanem.current = {
-      x: event.clientX,
-      y: event.clientY,
-      az: vid.current.az,
-      el: vid.current.el,
-      touch: event.pointerType === 'touch',
-    };
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function onPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
-    const t = tyanem.current;
-    if (t === null) {
-      return;
-    }
-    const dx = event.clientX - t.x;
-    const dy = event.clientY - t.y;
-    /* Пальцем — только вбок: вертикальный жест остаётся прокрутке страницы. */
-    povernut(t.az - dx * NA_PIKSEL, t.touch ? t.el : t.el + dy * NA_PIKSEL);
-  }
-
-  function onPointerUp() {
-    tyanem.current = null;
-  }
-
-  function onKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
-    const { az, el } = vid.current;
-    const shift: Record<string, [number, number]> = {
-      ArrowLeft: [NA_KLAVISHU, 0],
-      ArrowRight: [-NA_KLAVISHU, 0],
-      ArrowUp: [0, NA_KLAVISHU],
-      ArrowDown: [0, -NA_KLAVISHU],
-    };
-    const d = shift[event.key];
-    if (d === undefined) {
-      return;
-    }
-    event.preventDefault();
-    povernut(az + d[0], el + d[1]);
-  }
-
-  function sbrosit() {
-    povernut(azimuth, elevation);
-    setTronut(false);
-  }
-
-  function sverhu() {
-    povernut(vid.current.az, vid.current.el > 60 ? elevation : PODYOM_MAX);
-  }
 
   function pereyti(k: number) {
     const next = clamp(k, 0, nShagov);
@@ -206,6 +125,7 @@ export function ZhivoyChertezh3d({
     }
     shagRef.current = next;
     setShag(next);
+    propusk.current = false;
     narisovat();
   }
 
@@ -215,45 +135,26 @@ export function ZhivoyChertezh3d({
       return;
     }
     shagRef.current = shagSnaruzhi;
+    propusk.current = false;
     narisovat();
   }, [shagSnaruzhi, narisovat]);
 
   return (
     <figure className={clsx('z3d', className)}>
-      <div
+      <VrashchaemyyChertezh
+        az={azimuth}
+        el={elevation}
+        onVid={onVid}
+        alt={model.alt}
         className="z3d__vid"
-        role="group"
-        tabIndex={0}
-        aria-label={`${model.alt}. Чертёж можно поворачивать: перетащите его или нажимайте стрелки.`}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-        onKeyDown={onKeyDown}
+        {...(onPovorot === undefined ? {} : { onPovorot })}
       >
         <div
           ref={kholst}
           className="z3d__kholst solid-wrap"
           dangerouslySetInnerHTML={{ __html: svg }}
         />
-      </div>
-
-      <div className="z3d__knopki">
-        <Button variant="secondary" size="sm" onClick={sbrosit}>
-          Сбросить вид
-        </Button>
-        <Button variant="secondary" size="sm" onClick={sverhu}>
-          {sverkhu ? 'Сбоку' : 'Сверху'}
-        </Button>
-        {tronut ? null : (
-          <span className="z3d__namek" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-              <path d="M4 12h16M4 12l3-3M4 12l3 3M20 12l-3-3M20 12l-3 3" />
-            </svg>
-            Потяните, чтобы повернуть
-          </span>
-        )}
-      </div>
+      </VrashchaemyyChertezh>
 
       {estShagi && !bezNavigatsii ? (
         <figcaption className="z3d__shagi">

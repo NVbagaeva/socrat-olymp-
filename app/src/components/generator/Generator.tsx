@@ -258,10 +258,16 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
     pvRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [sheet]);
 
+  /* Ракурсы чертежей, повёрнутых в предпросмотре (стереометрия): лист от
+     них не пересобирается, они идут только в адреса печати. */
+  const [rakursy, setRakursy] = useState<Record<string, [number, number]>>({});
+  const onRakurs = useCallback((pos: string, az: number, el: number) => {
+    setRakursy((r) => ({ ...r, [pos]: [Math.round(az), Math.round(el)] }));
+  }, []);
   const ready = generated && st.seed !== null && st.plan.length > 0;
   const hrefs = useMemo(
-    () => (ready && st.seed !== null ? engine.hrefs({ ...st, seed: st.seed }) : null),
-    [ready, st, engine],
+    () => (ready && st.seed !== null ? engine.hrefs({ ...st, seed: st.seed, rakursy }) : null),
+    [ready, st, engine, rakursy],
   );
   const kit: Kit | null = useMemo(
     () =>
@@ -1136,6 +1142,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 space={space}
                 onAction={onTask}
                 onMove={move}
+                onRakurs={onRakurs}
               />
             ) : (
               <p className="gen-pv__empty">{empty ? GEN_UI.pustoy : GEN_UI.sobiraem}</p>

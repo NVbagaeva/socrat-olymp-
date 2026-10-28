@@ -11,6 +11,7 @@
 
 import type { KabinetApi } from '@/lib/kabinet/api';
 import type { VariantStart, VariantWorkTask, VariantWorkView } from '@/lib/kabinet/types';
+import { razdelitSvg } from '@/lib/stereo/zhivoy';
 import { isRecord } from '@/lib/trainerSession/restore';
 import type { EgeNo, VariantTask } from '../types';
 import type { WorkLink } from './link';
@@ -37,7 +38,7 @@ export function taskOf(t: VariantWorkTask): VariantTask {
     source: { kind: 'own', label: '' },
     difficulty: null,
     statement: t.statement,
-    figure: t.figure === null ? null : { svg: t.figure },
+    figure: t.figure === null ? null : razdelitSvg(t.figure),
     figureTeacher: null,
     answer: '',
     answerHtml: '',

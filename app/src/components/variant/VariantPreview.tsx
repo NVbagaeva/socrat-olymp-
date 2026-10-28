@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import { FiguraZhivaya } from '@/components/stereo/FiguraZhivaya';
 import { useEffect, useRef, useState } from 'react';
 import { VARIANT_SCREEN as T, VARIANT_SHEET as S } from '@/content/variant';
 import { katex } from '@/lib/graph/katex';
@@ -152,7 +153,12 @@ export function VariantPreview({
                       className="var-task__text"
                       dangerouslySetInnerHTML={{ __html: t.statement }}
                     />
-                    {t.figure === null ? null : (
+                    {t.figure === null ? null : t.figure.zhivoy !== undefined ? (
+                      /* Стереометрия: чертёж вращается руками (на печати — тот же svg). */
+                      <div className="var-task__fig is-below is-3d">
+                        <FiguraZhivaya svg={t.figure.svg} zhivoy={t.figure.zhivoy} />
+                      </div>
+                    ) : (
                       <div
                         className={clsx('var-task__fig', t.figure.below === true && 'is-below')}
                         style={

@@ -109,7 +109,8 @@ export function OpornyeStereoScreen({
 
   function check() {
     if (!ready || task === undefined) return;
-    const ok = task.vid === 'chislo' ? answerMatches(value, task.seal) : choiceMatches(value, task.seal);
+    const ok =
+      task.vid === 'chislo' ? answerMatches(value, task.seal) : choiceMatches(value, task.seal);
     setPicked(index);
     setVZadache(true);
     setChecked(ok ? 'right' : 'wrong');
@@ -143,7 +144,12 @@ export function OpornyeStereoScreen({
 
   const podskazka =
     shagi === null ? null : (
-      <PodskazkaShagi key={task.id} shagi={shagi} model={task.model} onClose={() => setShagi(null)} />
+      <PodskazkaShagi
+        key={task.id}
+        shagi={shagi}
+        model={task.model}
+        onClose={() => setShagi(null)}
+      />
     );
 
   return (
@@ -200,10 +206,19 @@ export function OpornyeStereoScreen({
                 </button>
               </span>
             </div>
-            <div className="o3-zad__uslovie" dangerouslySetInnerHTML={{ __html: task.uslovieHtml }} />
+            <div
+              className="o3-zad__uslovie"
+              dangerouslySetInnerHTML={{ __html: task.uslovieHtml }}
+            />
             <div className="o3-zad__ris">
               {task.vid === 'nazhmi' ? (
-                <NazhmiRisunok task={task} value={value} onPick={pick} disabled={solved} proverka={checked} />
+                <NazhmiRisunok
+                  task={task}
+                  value={value}
+                  onPick={pick}
+                  disabled={solved}
+                  proverka={checked}
+                />
               ) : (
                 risunki[index]
               )}
@@ -308,7 +323,10 @@ export function OpornyeStereoScreen({
             {razbor === null ? null : (
               <div className="o3-reshenie" role="region" aria-label={OPORNYE_3.uchenik}>
                 <p className="o3-reshenie__title">{OPORNYE_3.uchenik}</p>
-                <ol className="o3-razbor" dangerouslySetInnerHTML={{ __html: razbor.uchenikHtml }} />
+                <ol
+                  className="o3-razbor"
+                  dangerouslySetInnerHTML={{ __html: razbor.uchenikHtml }}
+                />
                 <details className="o3-uchitel">
                   <summary>{OPORNYE_3.uchitel}</summary>
                   <div dangerouslySetInnerHTML={{ __html: razbor.uchitelHtml }} />
@@ -385,7 +403,11 @@ export function OpornyeStereoScreen({
                     <li key={t.id}>
                       <button
                         type="button"
-                        className={clsx('o3-tochka', s !== null && `is-${s}`, i === index && 'is-current')}
+                        className={clsx(
+                          'o3-tochka',
+                          s !== null && `is-${s}`,
+                          i === index && 'is-current',
+                        )}
                         aria-current={i === index ? 'step' : undefined}
                         onClick={() => open(i)}
                       >

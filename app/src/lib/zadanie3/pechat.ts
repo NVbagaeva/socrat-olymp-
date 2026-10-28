@@ -86,8 +86,11 @@ export function chertezhLista(
   z: ZadachaPechati,
   vid: Vid,
   katex?: (tex: string) => string,
+  /** Свой ракурс вместо ракурса задачи: учитель повернул чертёж в предпросмотре. */
+  rakurs?: { azimut: number; vysota: number },
 ): string {
-  const sc = JSON.parse(openText(z.scena, z.seal)) as Scenariy;
+  const ishodnyy = JSON.parse(openText(z.scena, z.seal)) as Scenariy;
+  const sc = rakurs === undefined ? ishodnyy : { ...ishodnyy, rakurs };
   return chertezhSvg(sc, {
     rezhim: vid,
     shirina: SHIRINA,

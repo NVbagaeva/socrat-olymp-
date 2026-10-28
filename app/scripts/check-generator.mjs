@@ -49,6 +49,10 @@ const C13 = requireSrc('lib/zadanie13/gen/generator13.ts');
 const P13 = requireSrc('lib/zadanie13/gen/params.ts');
 const L13 = requireSrc('lib/zadanie13/gen/list.ts');
 const S13 = requireSrc('lib/zadanie13/gen/sheet.ts');
+const A3 = requireSrc('lib/zadanie3/gen/generator3.ts');
+const L3 = requireSrc('lib/zadanie3/gen/list3.ts');
+const { info3 } = requireSrc('lib/zadanie3/gen/info.ts');
+const D03 = requireSrc('lib/variant/data/z03.ts');
 const fs = await import('node:fs');
 const { createElement } = await import('react');
 const { renderToStaticMarkup } = await import('react-dom/server');
@@ -110,6 +114,30 @@ const RAZDELY = [
     oldIds: 'p01,p01,p05',
     urok: 'm=u&i=m&u=2&k=K7Q2AA&seed=K7Q2',
   },
+  (() => {
+    /* №3: задачи — файл «Собрать вариант» (lib/variant/data/z03.ts), здесь собран на месте. */
+    const razdely3 = info3();
+    const dannye3 = D03.dannye();
+    const config3 = A3.config3(razdely3, '/zadaniya/3/generator/');
+    return {
+      name: '№3',
+      config: config3,
+      engine: A3.engine3(config3, razdely3, '/zadaniya/3', async () => dannye3),
+      params: (st) => A3.paramsIzSostoyaniya3(st),
+      parse: (q) => L3.parseSheetQuery3(q),
+      query: (p) => L3.sheetQuery3(p),
+      sobrat: (p) => L3.sobratList3(p, razdely3, dannye3),
+      spec: (p, list, vid, qr) => L3.sheetSpec3(p, list, vid, qr),
+      primery: () => [],
+      badge: 'z3-sheet-badge',
+      ist: 'z3-sheet-istochnik',
+      ramka: false,
+      old: null,
+      urok: null,
+      /* Чертежи №3 рисуются долго: seed меньше, проверки те же. */
+      seeds: ['7K3F', 'Q2M8', 'A1B2'],
+    };
+  })(),
   (() => {
     const config2 = A2.config2('/zadaniya/2');
     /* У №2 нет «сборки» — лист строится по вариантам; задачи только генерируются. */
@@ -703,8 +731,9 @@ async function proverit(R) {
   }
 
   /* ── 7. Старые адреса ───────────────────────────────────────────── */
-  console.log(`Прежние адреса листов ${R.name}`);
-  {
+  /* У №3 прежнего генератора не было: старых адресов нет. */
+  if (R.old !== null) {
+    console.log(`Прежние адреса листов ${R.name}`);
     const q = R.query(R.parse(new URLSearchParams(R.old)));
     const st = engine.parse(new URLSearchParams(q));
     ok(
