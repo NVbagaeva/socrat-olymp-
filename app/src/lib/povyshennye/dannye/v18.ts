@@ -18,7 +18,7 @@ export const VARIANT: VariantPV = {
       { s: 'z05.bernulli', p: { syuzhet: 'biatlon', n: 5, k: 4, p: 0.9 } },
       {
         s: 'z06.ozhidanie',
-        p: { v: 'Y', xs: [3, 5, 7, 9, 11], ps: [10, 20, 30, 30, 10], den: 100 },
+        p: { v: 'Y', xs: [3, 5, 7, 9, 11], ps: [10, 20, 40, 20, 10], den: 100 },
       },
       { s: 'z07.log-kvadratnoe', p: { a: 3, p: 2, q: 26, e: 1, sleva: 0 } },
       { s: 'z08.tg-po-znacheniyu', p: { f: 'sin', a: 3, r: 1, b: 1, s: 13, sign: 1, q: 2 } },
@@ -118,7 +118,7 @@ export const VARIANT: VariantPV = {
       { s: 'z03.tetraedr-v-parallelepipede', p: { a: 12, b: 3, c: 7 } },
       { s: 'z04.taksi', p: { raskraska: 'chern-zhelt', n: 50, k: 19, vtoroy: 1 } },
       { s: 'z05.bernulli', p: { syuzhet: 'biatlon', n: 4, k: 3, p: 0.9 } },
-      { s: 'z06.ozhidanie', p: { v: 'X', xs: [2, 6, 10, 14], ps: [35, 15, 30, 20], den: 100 } },
+      { s: 'z06.ozhidanie', p: { v: 'X', xs: [2, 6, 10, 14], ps: [25, 20, 35, 20], den: 100 } },
       { s: 'z07.log-kvadratnoe', p: { a: 2, p: 5, q: 23, e: -1, sleva: 0 } },
       { s: 'z08.tg-po-znacheniyu', p: { f: 'sin', a: 3, r: 1, b: 5, s: 1, sign: -1, q: 3 } },
       {

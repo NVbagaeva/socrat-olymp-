@@ -234,7 +234,7 @@ export const VARIANT: VariantPV = {
       },
       {
         s: 'z06.lotereya',
-        p: { N: 64000, w: [100, 1000, 5000, 30000], c: [2000, 300, 40, 6], forma: 'org', tab: 'A' },
+        p: { N: 80000, w: [100, 1000, 5000, 30000], c: [2000, 300, 40, 6], forma: 'org', tab: 'A' },
       },
       { s: 'z07.nechetnaya-stepen', p: { a: 6, n: 3, b: -64 } },
       { s: 'z08.cos-dvoynoy', p: { A: 50, n: 9, den: 8, vid: 'raznost' } },

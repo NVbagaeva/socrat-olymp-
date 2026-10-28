@@ -155,7 +155,7 @@ export const VARIANT: VariantPV = {
         },
       },
       { s: 'z05.summa-ochkov', p: { N: 10, s: 6, k: 3 } },
-      { s: 'z06.otklonenie', p: { v: 'Z', xs: [3, 5, 7], ps: [10, 60, 30], den: 100 } },
+      { s: 'z06.otklonenie', p: { v: 'Z', xs: [3, 4, 8], ps: [20, 50, 30], den: 100 } },
       { s: 'z07.pokazatelnoe-osnovaniya', p: { a: 5, s: 2, k: 2, b: -1, r: 1, m: 3, c: 0 } },
       { s: 'z08.stepen-s-log', p: { a: 3, n: 2, b: 7 } },
       {

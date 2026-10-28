@@ -220,7 +220,11 @@ export function reshit(fig: Figura, zapros: Zapros): number | null {
       const idx = slopes
         .map((s, i) => (Math.abs(s - target) < 1e-6 ? i : -1))
         .filter((i) => i >= 0);
-      return idx.length === 1 ? (idx[0] as number) + 1 : null;
+      if (idx.length !== 1) {
+        return null;
+      }
+      const i = idx[0] as number;
+      return zapros.chislom === true ? (metki[i] as number) : i + 1;
     }
     case 'kasat-znachenie': {
       const t = fig.kasatelnaya;

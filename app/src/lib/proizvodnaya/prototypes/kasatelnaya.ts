@@ -939,31 +939,39 @@ const P924 = kasatParallel(
  * Задача 9.2.5 / 9.2.6 по готовой кривой и отмеченным точкам: рисунок,
  * разбор и подсказка. Её же собирает шаблон вариантов повышенной
  * сложности (proizvodnaya/povyshennye.ts) — со своими узлами и точками.
+ * chislami: точки подписаны абсциссами («отмечены точки −2, 1, 3»), в
+ * ответе — сама точка; иначе x₁ … xₙ и номер точки, как в банке.
  */
 export function zadachaNaibNaim(
   r: Rng,
   w: { uzly: Uzel[]; a: number; b: number },
   metki: number[],
   naib: boolean,
+  chislami = false,
 ): Draft | null {
   const n = metki.length;
+  const imya = (i: number) => (chislami ? `$${d(metki[i] as number)}$` : `$x_{${i + 1}}$`);
   const spl = postroit(w.uzly);
   const slopes = metki.map((x) => spl.dy(x));
   const target = naib ? Math.max(...slopes) : Math.min(...slopes);
   const idx = slopes.findIndex((s) => Math.abs(s - target) < 1e-9);
   const fig = figura('f', 'f(x)', w.uzly, {
     metki,
+    ...(chislami ? { metkiChislami: true, chisla: 'net' as const } : {}),
     pomoshch: metki.map((x, i): Pomoshch => ({ t: 'vert', x, shag: 1 + (i % 1) })),
   });
-  const uslovie = `${grafikF(w.a, w.b)} ${metkiTekst(n)} В какой из этих точек значение производной ${naib ? 'наибольшее' : 'наименьшее'}? В ответе укажите номер этой точки.`;
+  const uslovie = chislami
+    ? `${grafikF(w.a, w.b)} На оси абсцисс отмечены точки ${metki.map((_, i) => imya(i)).join(', ')}. В какой из этих точек значение производной функции $f(x)$ ${naib ? 'наибольшее' : 'наименьшее'}? В ответе укажите эту точку.`
+    : `${grafikF(w.a, w.b)} ${metkiTekst(n)} В какой из этих точек значение производной ${naib ? 'наибольшее' : 'наименьшее'}? В ответе укажите номер этой точки.`;
+  const otvet = chislami ? (metki[idx] as number) : idx + 1;
   const rounded = slopes.map((s) => Math.round(s * 2) / 2);
   const spisok = (pred: (s: number) => boolean) =>
     metki
       .map((_, i) => i)
       .filter((i) => pred(slopes[i] as number))
-      .map((i) => `$x_{${i + 1}}$`)
+      .map(imya)
       .join(', ');
-  return sobrat(fig, { t: naib ? 'naib-metka' : 'naim-metka' }, idx + 1, {
+  return sobrat(fig, { t: naib ? 'naib-metka' : 'naim-metka', ...(chislami ? { chislom: true } : {}) }, otvet, {
     uslovie,
     shagi: [
       shag(
@@ -979,12 +987,14 @@ export function zadachaNaibNaim(
         naib
           ? 'Наибольшая производная — у самого крутого подъёма: ищем точку, где график идёт вверх круче всего.'
           : 'Наименьшая производная — у самого крутого спуска: ищем точку, где график идёт вниз круче всего.',
-        `На глаз по клеткам: наклон в точках $x_1,\\ldots,x_${n}$ примерно ${rounded.map((s) => `$${d(s)}$`).join('; ')}.`,
+        chislami
+          ? `На глаз по клеткам: наклон в точках ${metki.map((_, i) => imya(i)).join('; ')} примерно ${rounded.map((s) => `$${d(s)}$`).join('; ')}.`
+          : `На глаз по клеткам: наклон в точках $x_1,\\ldots,x_${n}$ примерно ${rounded.map((s) => `$${d(s)}$`).join('; ')}.`,
       ),
       shag(
         'Ответ',
-        `${naib ? 'Наибольшая' : 'Наименьшая'} производная в точке $x_{${idx + 1}}$.`,
-        `**Ответ: ${idx + 1}**`,
+        `${naib ? 'Наибольшая' : 'Наименьшая'} производная в точке ${imya(idx)}.`,
+        `**Ответ: ${chislami ? chislaOtvet(otvet) : otvet}**`,
       ),
     ],
     podskazka: [
@@ -1014,7 +1024,7 @@ export function zadachaNaibNaim(
             pochemu: 'Здесь график убывает: производная отрицательна.',
           },
           {
-            tekst: metki.map((_, i) => `$x_{${i + 1}}$`).join(', '),
+            tekst: metki.map((_, i) => imya(i)).join(', '),
             pochemu: 'В части точек график убывает: там производная отрицательна.',
           },
         ],
@@ -1024,13 +1034,13 @@ export function zadachaNaibNaim(
       vopros(
         r,
         naib ? 'Где график поднимается круче всего?' : 'Где график опускается круче всего?',
-        `$x_{${idx + 1}}$`,
+        imya(idx),
         metki
           .map((_, i) => i)
           .filter((i) => i !== idx)
           .slice(0, 3)
           .map((i) => ({
-            tekst: `$x_{${i + 1}}$`,
+            tekst: imya(i),
             pochemu: naib
               ? (slopes[i] as number) <= 0
                 ? 'Здесь график не растёт: производная не положительна.'
@@ -1039,7 +1049,7 @@ export function zadachaNaibNaim(
                 ? 'Здесь график не убывает: производная не отрицательна.'
                 : 'Здесь график опускается, но положе, чем в лучшей точке.',
           })),
-        `Самый крутой участок — у точки $x_{${idx + 1}}$.`,
+        `Самый крутой участок — у точки ${imya(idx)}.`,
         1,
       ),
     ],

@@ -643,7 +643,7 @@ for (const k of nomera) {
         ok = false;
       }
       const x = num(t.answer);
-      if ([4, 5, 6].includes(ege) && Number.isInteger(x)) fail(kv, `у №${ege} ответ целый: ${x}`);
+      if ([4, 5].includes(ege) && Number.isInteger(x)) fail(kv, `у №${ege} ответ целый: ${x}`);
       if ([4, 5].includes(ege) && !(x > 0 && x < 1)) fail(kv, `вероятность ${x} вне (0; 1)`);
       if (ege === 13 && !Number.isInteger(x)) fail(kv, `сумма не целая: ${x}`);
       if (x === 0) fail(kv, 'ответ 0');

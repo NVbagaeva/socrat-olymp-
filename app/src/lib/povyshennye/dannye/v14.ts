@@ -31,7 +31,7 @@ export const VARIANT: VariantPV = {
       {
         s: 'z06.lotereya',
         p: {
-          N: 60000,
+          N: 45000,
           w: [100, 500, 1000, 20000],
           c: [1200, 300, 60, 6],
           forma: 'vsego',
@@ -166,7 +166,7 @@ export const VARIANT: VariantPV = {
       },
       {
         s: 'z06.lotereya',
-        p: { N: 12500, w: [50, 200, 1000, 5000], c: [400, 100, 20, 4], forma: 'vsego', tab: 'A' },
+        p: { N: 10000, w: [50, 200, 1000, 5000], c: [400, 100, 20, 4], forma: 'vsego', tab: 'A' },
       },
       { s: 'z07.nechetnaya-stepen', p: { a: 5, n: 3, b: -729 } },
       { s: 'z08.cos-dvoynoy', p: { A: 32, n: 13, den: 8, vid: 'odin' } },

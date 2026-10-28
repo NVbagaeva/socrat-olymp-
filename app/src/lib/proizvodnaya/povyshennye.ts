@@ -679,7 +679,7 @@ export function kasatelnayaCherezNachalo(par: KasatelnayaNachalo): Generated | n
 export interface NaibNaimMetka {
   /** Узлы кривой f: [x, y], x по возрастанию, концы — границы интервала. */
   uzly: [number, number][];
-  /** Отмеченные точки x₁ … xₙ: целые, по возрастанию. */
+  /** Отмеченные точки: целые, разные, по возрастанию; подписаны абсциссами. */
   metki: number[];
   /** 1 — где производная наибольшая, 0 — наименьшая. */
   naib: number;
@@ -687,7 +687,8 @@ export interface NaibNaimMetka {
 
 /**
  * В какой отмеченной точке производная наибольшая (наименьшая) — по
- * графику f (как 9.2.5 / 9.2.6), кривая и точки заданы вариантом.
+ * графику f (как 9.2.5 / 9.2.6), кривая и точки заданы вариантом. Точки
+ * на оси подписаны своими абсциссами, в ответе — сама точка, как в ЕГЭ.
  * Подвох — у вершин производная нулевая, а сравнивают не высоту точек,
  * а крутизну подъёма или спуска.
  */
@@ -695,7 +696,7 @@ export function naibNaimMetka(par: NaibNaimMetka): Generated | null {
   const uzly: Uzel[] = par.uzly.map(([x, y]) => ({ x, y }));
   const w = { uzly, a: uzly[0]!.x, b: uzly.at(-1)!.x };
   const kod = `pv9nm|${par.naib}|${par.uzly.join(';')}|${par.metki.join(',')}`;
-  const draft = zadachaNaibNaim(rngOf(kod), w, [...par.metki], par.naib === 1);
+  const draft = zadachaNaibNaim(rngOf(kod), w, [...par.metki], par.naib === 1, true);
   return draft === null
     ? null
     : {
