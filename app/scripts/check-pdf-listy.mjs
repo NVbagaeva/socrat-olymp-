@@ -21,8 +21,12 @@
    QR-кодом, в клетку и без; лист учителя №11; генераторы №12, №1, №9,
    №6 и «Собрать вариант» с местом для решения.
 
+   WebKit (движок Safari, профили компьютера и iPhone): PDF в нём
+   Playwright не печатает — проверяется вёрстка в режиме печати на
+   ширине A4 по тем же правилам 2–4, лист не выше A4, листов столько же.
+
    Запуск после pnpm build:  node scripts/check-pdf-listy.mjs
-   Нужны apache2, Chromium (Playwright), pdfinfo и pdftotext (poppler).
+   Нужны apache2, Chromium и WebKit (Playwright), pdfinfo и pdftotext.
    PDF_LISTY_BASE=http://localhost:3000 — проверить запущенный сайт
    (pnpm dev) вместо собранного out/; PDF_LISTY_ONLY=№11 — только листы
    с этой строкой в названии. */
@@ -32,11 +36,11 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright';
+import { chromium, devices, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
-bezBanneraCookieVsyudu(chromium);
+bezBanneraCookieVsyudu(chromium, webkit);
 
 const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(app, 'out');
@@ -100,7 +104,15 @@ async function raskladka(page) {
   await page.emulateMedia({ media: 'print' });
   const r = await page.evaluate(
     ({ POLE_MM, PX_MM }) => {
-      const out = { listov: 0, naPodval: [], zaKray: [], drobi: 0, slomany: [], potok: [] };
+      const out = {
+        listov: 0,
+        vysota: 0,
+        naPodval: [],
+        zaKray: [],
+        drobi: 0,
+        slomany: [],
+        potok: [],
+      };
       const pole = POLE_MM * PX_MM;
       const imya = (el) =>
         (
@@ -112,6 +124,7 @@ async function raskladka(page) {
           .slice(0, 50);
       const pages = [...document.querySelectorAll('#sheet-pages .sheet-page')];
       out.listov = pages.length;
+      out.vysota = Math.max(0, ...pages.map((p) => p.getBoundingClientRect().height / PX_MM));
       pages.forEach((p, n) => {
         const box = p.getBoundingClientRect();
         const foot = p.querySelector('.sheet-foot');
@@ -202,6 +215,36 @@ async function raskladka(page) {
   return r;
 }
 
+/** Открыть лист и дождаться набора; печать браузера — заглушка. */
+async function otkryt(context, url) {
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    window.print = () => {};
+  });
+  await page.goto(url, { waitUntil: 'networkidle', timeout: 180000 });
+  await page.waitForFunction(() => window.sheetPagination !== undefined, null, {
+    timeout: 180000,
+  });
+  return page;
+}
+
+/** Набор и раскладка листа в режиме печати: общая часть обоих движков. */
+async function proveritList(page, name) {
+  const nabor = await page.evaluate(() => window.sheetPagination);
+  check(nabor.error === undefined, `${name}: набор не удался — ${nabor.error}`);
+  check(
+    (nabor.overflowing ?? []).length === 0,
+    `${name}: куски выше страницы — ${(nabor.overflowing ?? []).join(', ')}`,
+  );
+  const r = await raskladka(page);
+  check(r.vysota <= 297.05, `${name}: лист выше A4 — ${r.vysota.toFixed(2)} мм`);
+  r.potok.slice(0, 3).forEach((x) => check(false, `${name}: ${x}`));
+  r.naPodval.slice(0, 3).forEach((x) => check(false, `${name}: ${x}`));
+  r.zaKray.slice(0, 3).forEach((x) => check(false, `${name}: за полем ${POLE_MM} мм — ${x}`));
+  r.slomany.slice(0, 3).forEach((x) => check(false, `${name}: дробь KaTeX — ${x}`));
+  return r;
+}
+
 const base = process.env.PDF_LISTY_BASE;
 const apache = base ? null : await startApache(OUT, 4185);
 const root = base ?? apache.url;
@@ -210,29 +253,12 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'pdf-listy-'));
 const chrome = await chromium.launch(
   fs.existsSync('/opt/pw-browsers/chromium') ? { executablePath: '/opt/pw-browsers/chromium' } : {},
 );
+/* PDF_LISTY_ONLY=№11 — только листы, в названии которых есть строка. */
+const only = process.env.PDF_LISTY_ONLY;
 try {
-  /* PDF_LISTY_ONLY=№11 — только листы, в названии которых есть строка. */
-  const only = process.env.PDF_LISTY_ONLY;
   for (const [name, route, query] of LISTY.filter(([n]) => !only || n.includes(only))) {
-    const page = await chrome.newPage();
-    await page.addInitScript(() => {
-      window.print = () => {};
-    });
-    await page.goto(`${root}${route}?${query}`, { waitUntil: 'networkidle', timeout: 180000 });
-    await page.waitForFunction(() => window.sheetPagination !== undefined, null, {
-      timeout: 180000,
-    });
-    const nabor = await page.evaluate(() => window.sheetPagination);
-    check(nabor.error === undefined, `${name}: набор не удался — ${nabor.error}`);
-    check(
-      (nabor.overflowing ?? []).length === 0,
-      `${name}: куски выше страницы — ${(nabor.overflowing ?? []).join(', ')}`,
-    );
-    const r = await raskladka(page);
-    r.potok.slice(0, 3).forEach((x) => check(false, `${name}: ${x}`));
-    r.naPodval.slice(0, 3).forEach((x) => check(false, `${name}: ${x}`));
-    r.zaKray.slice(0, 3).forEach((x) => check(false, `${name}: за полем ${POLE_MM} мм — ${x}`));
-    r.slomany.slice(0, 3).forEach((x) => check(false, `${name}: дробь KaTeX — ${x}`));
+    const page = await otkryt(chrome, `${root}${route}?${query}`);
+    const r = await proveritList(page, name);
 
     const cells = [];
     for (const [label, height] of [
@@ -271,6 +297,56 @@ try {
     }
     rows.push(`${name.padEnd(22)} листов ${r.listov}; PDF: ${cells.join(', ')}; дробей ${r.drobi}`);
     await page.close();
+  }
+
+  /* WebKit (движок Safari): PDF Playwright в нём не печатает, поэтому
+     проверяется вёрстка в режиме печати на бумаге A4 (окно 210 мм) —
+     как Safari на компьютере и на iPhone: лист не выше A4, ничего на
+     подвале и за полем, дроби целые, листов столько же, сколько в
+     Chromium. PDF_LISTY_PNG=папка — снимки каждого листа. */
+  const safari = await webkit.launch();
+  try {
+    const png = process.env.PDF_LISTY_PNG;
+    const A4 = { width: 794, height: 1123 };
+    const profili = [
+      ['Safari', { ...devices['Desktop Safari'], viewport: A4 }],
+      ['iPhone', { ...devices['iPhone 14'], viewport: A4, screen: A4 }],
+    ];
+    for (const [kto, opts] of profili) {
+      const context = await safari.newContext(opts);
+      for (const [name, route, query] of LISTY.filter(([n]) => !only || n.includes(only))) {
+        const page = await otkryt(context, `${root}${route}?${query}`);
+        const r = await proveritList(page, `${name}, ${kto}`);
+        const chromiumListov = rows
+          .find((x) => x.startsWith(name.padEnd(22)))
+          ?.match(/листов (\d+)/)?.[1];
+        check(
+          chromiumListov === undefined || Number(chromiumListov) === r.listov,
+          `${name}, ${kto}: листов ${r.listov}, в Chromium ${chromiumListov}`,
+        );
+        if (png) {
+          fs.mkdirSync(png, { recursive: true });
+          await page.emulateMedia({ media: 'print' });
+          const listy = await page.$$('#sheet-pages .sheet-page');
+          for (let i = 0; i < listy.length; i += 1) {
+            await listy[i].screenshot({
+              path: path.join(
+                png,
+                `${kto}-${route.replace(/\W/g, '')}-${query.length}-${i + 1}.png`,
+              ),
+            });
+          }
+          await page.emulateMedia({ media: null });
+        }
+        rows.push(
+          `${`${name}, ${kto}`.padEnd(30)} WebKit: листов ${r.listov}, высота ${r.vysota.toFixed(1)} мм, дробей ${r.drobi}`,
+        );
+        await page.close();
+      }
+      await context.close();
+    }
+  } finally {
+    await safari.close();
   }
 } finally {
   await chrome.close();
