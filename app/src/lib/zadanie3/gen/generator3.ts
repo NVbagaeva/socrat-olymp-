@@ -48,6 +48,7 @@ export function config3(razdely: readonly Razdel3[], slot: string): GenConfig {
       return {
         id: r.id,
         title: `${r.nomer}. ${r.nazvanie}`,
+        mark: r.nomer,
         /* Раздел без задач банка — только в «банк + наши» и «не из банка». */
         ...(bezBanka
           ? {

@@ -909,10 +909,12 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                     )}
                   >
                     <span className="gen-trow__icon">
-                      {/* Без своего значка — буква темы в кружке (группы A–C №2). */}
+                      {/* Без своего значка — метка темы в кружке (группы A–C №2,
+                          римская цифра раздела №3). Длинный id в кружок не
+                          пишется: он не для глаз, вместо него — точка. */}
                       {icons?.[t.id] ?? (
                         <span className="gen-trow__letter no-math-check" aria-hidden="true">
-                          {t.id}
+                          {t.mark ?? (t.id.length <= 2 ? t.id : '•')}
                         </span>
                       )}
                     </span>
@@ -927,9 +929,17 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                       ) : (
                         <b dangerouslySetInnerHTML={{ __html: t.titleHtml }} />
                       )}
+                      {/* «подтипы» и стрелка не разрываются: подпись
+                          переносится перед ними, а не между ними. */}
                       <small>
-                        {meta} · {GEN_UI.podtipy}
-                        <GenIcon name="chevron" className={clsx('gen-chev', isOpen && 'is-open')} />
+                        {meta} ·{' '}
+                        <span className="gen-trow__podtipy">
+                          {GEN_UI.podtipy}
+                          <GenIcon
+                            name="chevron"
+                            className={clsx('gen-chev', isOpen && 'is-open')}
+                          />
+                        </span>
                       </small>
                     </button>
                     {n === 0 ? (

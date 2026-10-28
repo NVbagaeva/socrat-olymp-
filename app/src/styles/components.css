@@ -2750,6 +2750,42 @@ html[data-tabs-pending] .topic-panel,
 .tabs--lenta [aria-selected='true'] .tabs__dot {
   box-shadow: 0 0 0 2px var(--color-tab-bottom);
 }
+/* В прилипшей ленте поля вкладки узкие (4 px × 8 px на телефоне):
+   точка уходит в самый угол, на скругление, и не задевает подпись. */
+.topic-tabs-row.is-stuck .tabs__dot {
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+}
+/* Лента прокручивается вбок: с той стороны, где есть скрытые вкладки,
+   край мягко гаснет — видно, что меню продолжается. Стороны отмечает
+   TabsRow (data-ten-l / data-ten-r), пока лента не у своего края. */
+.topic-tabs[data-ten-l],
+.topic-tabs[data-ten-r] {
+  --ten-l: 0px;
+  --ten-r: 0px;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.15),
+    #000 var(--ten-l),
+    #000 calc(100% - var(--ten-r)),
+    rgb(0 0 0 / 0.15)
+  );
+  mask-image: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.15),
+    #000 var(--ten-l),
+    #000 calc(100% - var(--ten-r)),
+    rgb(0 0 0 / 0.15)
+  );
+}
+.topic-tabs[data-ten-l] {
+  --ten-l: 28px;
+}
+.topic-tabs[data-ten-r] {
+  --ten-r: 28px;
+}
 /* Подпись тёмная, пока вкладка не активна и на неё не наводят;
    в обоих этих случаях она принимает цвет вкладки — белый
    на заливке, синий под курсором. */
