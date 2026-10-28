@@ -7,6 +7,7 @@ import type { PdfSpravochnika } from '@/content/spravochnik1/pdf';
 import { naIos, useIos } from './ios';
 import { Nazad1 } from './Nazad1';
 import { SkachatPdf1 } from './SkachatPdf1';
+import { pechatat } from '@/lib/sheet/pechat';
 
 const PDF = SPRAVOCHNIK_1.pdf;
 
@@ -92,7 +93,7 @@ export function SpravochnikPdf1({
             setDone(true);
             /* На iPhone/iPad окно печати само не открываем: там печатается
                готовый PDF (ios.ts). */
-            if (window.sheetPagination.error === undefined && !naIos()) window.print();
+            if (window.sheetPagination.error === undefined && !naIos()) void pechatat();
           }
         }, 100);
       })
@@ -137,7 +138,7 @@ export function SpravochnikPdf1({
             <button
               type="button"
               className="btn btn--secondary"
-              onClick={() => window.print()}
+              onClick={() => void pechatat()}
               disabled={!done}
             >
               {done ? PDF.knopka : PDF.gotovim}

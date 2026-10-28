@@ -25,6 +25,7 @@ import {
   type Mesto2,
   type SheetChoice,
 } from '@/lib/variant/sheets';
+import { pechatat } from '@/lib/sheet/pechat';
 
 const CHOICES: readonly SheetChoice[] = ['uchenik', 'uchitel', 'razbor', 'vse'];
 
@@ -220,7 +221,7 @@ export function VariantPrint() {
         window.clearInterval(timer);
         setDone(true);
         if (window.sheetPagination.error === undefined && warning === null) {
-          window.print();
+          void pechatat();
         }
       }
     }, 100);
@@ -233,7 +234,7 @@ export function VariantPrint() {
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => window.print()}
+          onClick={() => void pechatat()}
           disabled={!done}
         >
           {VARIANT_SCREEN.print}

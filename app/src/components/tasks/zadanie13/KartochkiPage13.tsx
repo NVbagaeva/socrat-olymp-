@@ -8,6 +8,7 @@ import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { kitCode, kitFootLabel, parseKitCode } from '@/lib/komplekt';
 import { buildDocument } from '@/lib/sheet/sheet.js';
 import { kartochkiSpec13 } from '@/lib/zadanie13/gen/kartochki';
+import { pechatat } from '@/lib/sheet/pechat';
 
 function specJson(html: string): string {
   const open = html.indexOf('<script type="application/json" id="sheet-spec">');
@@ -65,7 +66,7 @@ export function KartochkiPage13() {
         window.clearInterval(timer);
         setDone(true);
         if (window.sheetPagination.error === undefined) {
-          window.print();
+          void pechatat();
         }
       }
     }, 100);
@@ -78,7 +79,7 @@ export function KartochkiPage13() {
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => window.print()}
+          onClick={() => void pechatat()}
           disabled={!done}
         >
           {PECHAT_13.knopka}

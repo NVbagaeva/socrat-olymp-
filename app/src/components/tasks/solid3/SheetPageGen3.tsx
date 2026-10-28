@@ -17,6 +17,7 @@ import {
   zagruzitDannye3,
   type VidLista,
 } from '@/lib/zadanie3/gen/list3';
+import { pechatat } from '@/lib/sheet/pechat';
 
 declare global {
   interface Window {
@@ -119,7 +120,7 @@ export function SheetPageGen3({ vid, razdely }: { vid: VidLista; razdely: Razdel
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => window.print()}
+          onClick={() => void pechatat()}
           disabled={!done}
         >
           {PECHAT_GEN_3.knopka}
