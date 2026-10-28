@@ -420,4 +420,169 @@ export const VARIANT: VariantPV = {
       },
     ],
   ],
+  /** Часть 2: задания 14–20 по версиям; проверка — pnpm test:povyshennye-chast2. */
+  chast2: [
+    [
+      {
+        s: 'h14.logKub',
+        p: {
+          q: 2,
+          c: -2,
+          chleny: [
+            { A: [1, 1], k: 3, e: [1, 1], w: 2 },
+            { A: [40, 1], k: 1, e: [1, 1], w: -1 },
+            { A: [1, 1], k: 2, e: [1, 1], w: -4, prav: true },
+          ],
+          Cprav: [0, 1],
+          Clev: [48, 1],
+          lo: { b: [1, 2], y: [1, 5] },
+          hi: { b: [1, 5], y: [1, 1000] },
+        },
+      },
+      { s: 'h15.pravPiramida', p: { a2: 8, h2: 16, delit: 'SA', nado: 'rasst' } },
+      { s: 'h16.korenPokaz', p: { B: 2, e1: 6, e2: 5, x0: -4, luch: 'ge', znak: 'ge' } },
+      { s: 'c17.maksvell', p: { gaz: 1, T: 400 } },
+      { s: 'h18.trapeciyaDveOkr', p: { m: 4, n: 25, L: 29, nado: 'S' } },
+      {
+        s: 'h19.pryamyeOkr',
+        p: { alfa: [1, 1], beta: [0, 1], gamma: [3, 2], kappa: [1, 2], dom: 'pol' },
+      },
+      { s: 'h20.chisloProizv', p: { cifry: 'le', d: 5, k1: 14, k2: 2, nado: 'min' } },
+    ],
+    [
+      {
+        s: 'h14.logKub',
+        p: {
+          q: 3,
+          c: -1,
+          chleny: [
+            { A: [1, 1], k: 3, e: [1, 1], w: 2 },
+            { A: [24, 1], k: 1, e: [1, 1], w: -1 },
+            { A: [1, 1], k: 2, e: [1, 1], w: -4, prav: true },
+          ],
+          Cprav: [0, 1],
+          Clev: [0, 1],
+          lo: { b: [1, 5], y: [1, 2] },
+          hi: { b: [9, 10], y: [4, 5] },
+        },
+      },
+      { s: 'h15.pravPiramida', p: { a2: 20, h2: 36, delit: 'AC', nado: 'rasst' } },
+      { s: 'h16.korenPokaz', p: { B: 3, e1: 4, e2: 3, x0: -3, luch: 'ge', znak: 'ge' } },
+      { s: 'c17.maksvell', p: { gaz: 0, T: 315 } },
+      { s: 'h18.trapeciyaDveOkr', p: { m: 1, n: 4, L: 40, nado: 'S' } },
+      {
+        s: 'h19.pryamyeOkr',
+        p: { alfa: [1, 2], beta: [0, 1], gamma: [1, 1], kappa: [1, 2], dom: 'pol' },
+      },
+      { s: 'h20.chisloProizv', p: { cifry: 'le', d: 4, k1: 52, k2: 6, nado: 'min' } },
+    ],
+    [
+      {
+        s: 'h14.logKub',
+        p: {
+          q: 2,
+          c: -3,
+          chleny: [
+            { A: [1, 1], k: 3, e: [1, 1], w: 2 },
+            { A: [88, 1], k: 1, e: [1, 1], w: -1 },
+            { A: [1, 1], k: 2, e: [1, 1], w: -4, prav: true },
+          ],
+          Cprav: [0, 1],
+          Clev: [96, 1],
+          lo: { b: [1, 10], y: [1, 1000] },
+          hi: { b: [1, 2], y: [1, 20] },
+        },
+      },
+      { s: 'h15.pravPiramida', p: { a2: 4, h2: 1, delit: 'SA', nado: 'rasst' } },
+      { s: 'h16.korenPokaz', p: { B: 2, e1: 7, e2: 4.5, x0: 0, luch: 'ge', znak: 'ge' } },
+      { s: 'c17.maksvell', p: { gaz: 2, T: 360 } },
+      { s: 'h18.trapeciyaDveOkr', p: { m: 4, n: 9, L: 13, nado: 'S' } },
+      {
+        s: 'h19.pryamyeOkr',
+        p: { alfa: [2, 1], beta: [0, 1], gamma: [1, 2], kappa: [2, 1], dom: 'pol' },
+      },
+      { s: 'h20.chisloProizv', p: { cifry: 'le', d: 6, k1: 21, k2: 3, nado: 'min' } },
+    ],
+    [
+      {
+        s: 'h14.logKub',
+        p: {
+          q: 3,
+          c: -2,
+          chleny: [
+            { A: [1, 1], k: 3, e: [1, 1], w: 2 },
+            { A: [72, 1], k: 1, e: [1, 1], w: -1 },
+            { A: [1, 1], k: 2, e: [1, 1], w: -4, prav: true },
+          ],
+          Cprav: [0, 1],
+          Clev: [144, 1],
+          lo: { b: [1, 5], y: [1, 25] },
+          hi: { b: [1, 2], y: [1, 10000] },
+        },
+      },
+      { s: 'h15.pravPiramida', p: { a2: 12, h2: 9, delit: 'AC', nado: 'ugol' } },
+      { s: 'h16.korenPokaz', p: { B: 2, e1: 7, e2: 6.5, x0: -2, luch: 'ge', znak: 'le' } },
+      { s: 'c17.maksvell', p: { gaz: 3, T: 280 } },
+      { s: 'h18.trapeciyaDveOkr', p: { m: 1, n: 25, L: 52, nado: 'AC' } },
+      {
+        s: 'h19.pryamyeOkr',
+        p: { alfa: [3, 2], beta: [0, 1], gamma: [1, 1], kappa: [2, 1], dom: 'pol' },
+      },
+      { s: 'h20.chisloProizv', p: { cifry: 'le', d: 7, k1: 8, k2: 2, nado: 'min' } },
+    ],
+    [
+      {
+        s: 'h14.logKub',
+        p: {
+          q: 2,
+          c: 0,
+          chleny: [
+            { A: [1, 1], k: 3, e: [1, 1], w: 2 },
+            { A: [104, 1], k: 1, e: [1, 1], w: -1 },
+            { A: [1, 1], k: 2, e: [1, 1], w: -4, prav: true },
+          ],
+          Cprav: [0, 1],
+          Clev: [-80, 1],
+          lo: { b: [1, 2], y: [4, 1] },
+          hi: { b: [9, 10], y: [1, 2] },
+        },
+      },
+      { s: 'h15.pravPiramida', p: { a2: 4, h2: 12, delit: 'SA', nado: 'rasst' } },
+      { s: 'h16.korenPokaz', p: { B: 3, e1: 2, e2: 1.5, x0: -6, luch: 'ge', znak: 'ge' } },
+      { s: 'c17.maksvell', p: { gaz: 4, T: 400 } },
+      { s: 'h18.trapeciyaDveOkr', p: { m: 9, n: 16, L: 50, nado: 'S' } },
+      {
+        s: 'h19.pryamyeOkr',
+        p: { alfa: [1, 1], beta: [1, 1], gamma: [1, 2], kappa: [2, 1], dom: 'pol' },
+      },
+      { s: 'h20.chisloProizv', p: { cifry: 'le', d: 8, k1: 17, k2: 120, nado: 'min' } },
+    ],
+    [
+      {
+        s: 'h14.logKub',
+        p: {
+          q: 3,
+          c: -5,
+          chleny: [
+            { A: [1, 1], k: 3, e: [1, 1], w: 1 },
+            { A: [-1, 1], k: 1, e: [1, 1], w: -1 },
+            { A: [1, 1], k: 2, e: [1, 1], w: -2, prav: true },
+          ],
+          Cprav: [0, 1],
+          Clev: [6, 1],
+          lo: { b: [1, 2], y: [1, 10] },
+          hi: { b: [1, 5], y: [1, 10000] },
+        },
+      },
+      { s: 'h15.pravPiramida', p: { a2: 2, h2: 9, delit: 'AC', nado: 'rasst' } },
+      { s: 'h16.korenPokaz', p: { B: 2, e1: 9, e2: 7, x0: -5, luch: 'ge', znak: 'ge' } },
+      { s: 'c17.maksvell', p: { gaz: 6, T: 270 } },
+      { s: 'h18.trapeciyaDveOkr', p: { m: 1, n: 16, L: 34, nado: 'S' } },
+      {
+        s: 'h19.pryamyeOkr',
+        p: { alfa: [2, 1], beta: [1, 1], gamma: [1, 2], kappa: [2, 1], dom: 'pol' },
+      },
+      { s: 'h20.chisloProizv', p: { cifry: 'chet', k1: 13, k2: 14, nado: 'min' } },
+    ],
+  ],
 };
