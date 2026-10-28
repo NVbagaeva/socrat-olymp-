@@ -4,36 +4,37 @@ import { useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { dir } from '@/lib/solid/figures';
 import type { Model } from '@/lib/solid/model';
+import { ORTHO_AZIMUTH, ORTHO_ELEVATION, orthoAt } from '@/lib/solid/project';
 import { renderSolid } from '@/lib/solid/render';
+import { ZhivoyChertezh3d } from '../ZhivoyChertezh3d';
 import type { ShagPodskazkiHtml } from '@/lib/stereo/opornye3/seal';
 import { OPORNYE_3 } from '@/content/stereo/opornye3';
 import { IkGalochka, IkLampa, IkNazad, IkVpered, IkZakryt } from '../metodika/Ikonki';
 
 /**
- * Чертёж шага подсказки: та же модель задачи; со шага ② выделен
+ * Модель шага подсказки: та же модель задачи; со шага ② выделен
  * рабочий треугольник, с ③ отмечен прямой угол.
  */
-function chertezhShaga(model: Model, shag: ShagPodskazkiHtml): string {
+function modelShaga(model: Model, shag: ShagPodskazkiHtml): Model {
   const r = shag.rabochaya;
   if (r === null) {
-    return renderSolid(model, { tema: 'ekran' });
+    return model;
   }
   const [a, b, c] = r.points;
   const p = r.pryamoy;
-  const drugie = [a, b, c].filter((q) => q !== p && (q[0] !== p[0] || q[1] !== p[1] || q[2] !== p[2]));
+  const drugie = [a, b, c].filter(
+    (q) => q !== p && (q[0] !== p[0] || q[1] !== p[1] || q[2] !== p[2]),
+  );
   const u = drugie[0];
   const v = drugie[1];
-  return renderSolid(
-    {
-      ...model,
-      sections: [...(model.sections ?? []), { points: [a, b, c] }],
-      angles:
-        shag.n >= 3 && u !== undefined && v !== undefined
-          ? [...(model.angles ?? []), { at: p, u: dir(p, u), v: dir(p, v) }]
-          : (model.angles ?? []),
-    },
-    { tema: 'ekran' },
-  );
+  return {
+    ...model,
+    sections: [...(model.sections ?? []), { points: [a, b, c] }],
+    angles:
+      shag.n >= 3 && u !== undefined && v !== undefined
+        ? [...(model.angles ?? []), { at: p, u: dir(p, u), v: dir(p, v) }]
+        : (model.angles ?? []),
+  };
 }
 
 /**
@@ -58,7 +59,13 @@ export function PodskazkaShagi({
   /* Выбранный вариант по шагам; верный ответ закрывает шаг. */
   const [vybor, setVybor] = useState<Record<number, number>>({});
   const shag = shagi[tek];
-  const svg = useMemo(() => (shag === undefined ? '' : chertezhShaga(model, shag)), [model, shag]);
+  const m = useMemo(() => (shag === undefined ? model : modelShaga(model, shag)), [model, shag]);
+  const az = model.rakurs?.azimuth ?? ORTHO_AZIMUTH;
+  const el = model.rakurs?.elevation ?? ORTHO_ELEVATION;
+  const svg = useMemo(
+    () => renderSolid(m, { tema: 'ekran', view: orthoAt(az, el), ustoychivo: true }),
+    [m, az, el],
+  );
   if (shag === undefined) return null;
   const otvecheno = (i: number) => vybor[i] !== undefined && vybor[i] === shagi[i]?.correct;
   const v = vybor[tek];
@@ -69,7 +76,12 @@ export function PodskazkaShagi({
       <header className="o3-pod__head">
         <IkLampa className="o3-pod__ik" />
         <p className="o3-pod__title">{OPORNYE_3.pod.title}</p>
-        <button type="button" className="o3-pod__x" onClick={onClose} aria-label={OPORNYE_3.pod.zakryt}>
+        <button
+          type="button"
+          className="o3-pod__x"
+          onClick={onClose}
+          aria-label={OPORNYE_3.pod.zakryt}
+        >
           <IkZakryt />
         </button>
       </header>
@@ -127,12 +139,23 @@ export function PodskazkaShagi({
         </ul>
         {v === undefined ? null : verno ? (
           <p className="o3-pod__vyvod">
-            <b>{OPORNYE_3.pod.verno}</b> <span dangerouslySetInnerHTML={{ __html: shag.vyvodHtml }} />
+            <b>{OPORNYE_3.pod.verno}</b>{' '}
+            <span dangerouslySetInnerHTML={{ __html: shag.vyvodHtml }} />
           </p>
         ) : (
           <p className="o3-pod__neverno">{OPORNYE_3.pod.neverno}</p>
         )}
-        <div className="o3-pod__ris" dangerouslySetInnerHTML={{ __html: svg }} />
+        {/* Чертёж шага вращается так же, как чертёж задачи. */}
+        <ZhivoyChertezh3d
+          key={tek}
+          model={m}
+          svg={svg}
+          azimuth={az}
+          elevation={el}
+          podpisi={[]}
+          tema="ekran"
+          className="o3-pod__ris"
+        />
       </section>
 
       <footer className="o3-pod__nav">
@@ -146,12 +169,22 @@ export function PodskazkaShagi({
           <IkNazad />
         </button>
         {tek < shagi.length - 1 ? (
-          <button type="button" className="btn btn--primary o3-pod__dalee" onClick={() => setTek(tek + 1)} disabled={!verno}>
+          <button
+            type="button"
+            className="btn btn--primary o3-pod__dalee"
+            onClick={() => setTek(tek + 1)}
+            disabled={!verno}
+          >
             {OPORNYE_3.pod.dalee}
             <IkVpered />
           </button>
         ) : (
-          <button type="button" className="btn btn--primary o3-pod__dalee" onClick={onClose} disabled={!verno}>
+          <button
+            type="button"
+            className="btn btn--primary o3-pod__dalee"
+            onClick={onClose}
+            disabled={!verno}
+          >
             {OPORNYE_3.pod.gotovo}
           </button>
         )}

@@ -4,7 +4,13 @@ import { SheetBlock } from '@/components/tasks/SheetBlock';
 import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { Tex } from '@/components/ui/Tex';
 import { SHPARGALKI } from '@/content/shpargalki';
-import { GLAVA_PLAN, GLAVY_15, GLAVY_3, STARYE_GLAVY_3, type GlavaStereo } from '@/content/stereo/glavy';
+import {
+  GLAVA_PLAN,
+  GLAVY_15,
+  GLAVY_3,
+  STARYE_GLAVY_3,
+  type GlavaStereo,
+} from '@/content/stereo/glavy';
 import { DEKOR_STEREO, STEREO, type StereoNo } from '@/content/stereo/zadaniya';
 import { THUMBS } from '@/lib/solid/drawings/thumbs';
 import { prototypeById, RAZDELY } from '@/lib/zadanie3';
@@ -136,7 +142,12 @@ export function TeoriyaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }
         ? Object.entries(STARYE_GLAVY_3)
             .filter(([, novaya]) => novaya === glava.id)
             .map(([staraya]) => (
-              <span key={staraya} id={`teoriya-${staraya}`} className="stereo-yakor" aria-hidden="true" />
+              <span
+                key={staraya}
+                id={`teoriya-${staraya}`}
+                className="stereo-yakor"
+                aria-hidden="true"
+              />
             ))
         : null;
     tela[glava.id] = (

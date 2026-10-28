@@ -3,6 +3,9 @@
 import { useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Chertezh3 } from '@/components/chertezh3/Chertezh3';
+import { ZhivoyChertezh3d } from '@/components/stereo/ZhivoyChertezh3d';
+import type { Model } from '@/lib/solid/model';
+import { ORTHO_AZIMUTH, ORTHO_ELEVATION } from '@/lib/solid/project';
 import { ShagiVoprosy, shagiSost } from '@/components/trenazher/ShagiVoprosy';
 import type { KartochkaRazdela, Shagi } from '@/components/trenazher/types';
 import { FigureZoom, Input } from '@/components/ui';
@@ -71,11 +74,39 @@ function Chertezh({ z, podsvetka }: { z: Zadacha3; podsvetka: string[] | null })
       />
     );
   }
+  const m = model(z);
+  const svg = z.variant.svg ?? z.kind.svg;
+  if (m === null) {
+    return (
+      <FigureZoom className="z3t__fig" label={`${SLOVA.risunok}: ${z.kind.titlePlain}`}>
+        <span dangerouslySetInnerHTML={{ __html: svg }} />
+      </FigureZoom>
+    );
+  }
+  /* Тела вращения: живой чертёж движка lib/solid — первый кадр готов,
+     движок приезжает по первому касанию. */
   return (
-    <FigureZoom className="z3t__fig" label={`${SLOVA.risunok}: ${z.kind.titlePlain}`}>
-      <span dangerouslySetInnerHTML={{ __html: z.variant.svg ?? z.kind.svg }} />
-    </FigureZoom>
+    <ZhivoyChertezh3d
+      className="z3t__fig z3t__fig--3d"
+      model={m}
+      svg={svg}
+      azimuth={m.rakurs?.azimuth ?? ORTHO_AZIMUTH}
+      elevation={m.rakurs?.elevation ?? ORTHO_ELEVATION}
+      podpisi={[]}
+    />
   );
+}
+
+/* Модель чертежа тела вращения: разбирается один раз на вариант. */
+const MODELI = new WeakMap<object, Model | null>();
+function model(z: Zadacha3): Model | null {
+  let m = MODELI.get(z.variant);
+  if (m === undefined) {
+    const json = z.variant.model ?? z.kind.model;
+    m = json === '' ? null : (JSON.parse(json) as Model);
+    MODELI.set(z.variant, m);
+  }
+  return m;
 }
 
 function Uslovie({ task: z }: { task: Zadacha3; nomer: number; shagi: Shagi | null }) {

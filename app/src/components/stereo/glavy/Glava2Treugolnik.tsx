@@ -67,7 +67,10 @@ const PODSTROCHNYE: Record<string, string> = { '₀': '0', '₁': '1', '₂': '2
 function imyaTreugolnika(t: PrimerG2['ploskiy']): string {
   const m = /треугольник ([A-Z][A-Z₀-₄]*)/.exec(t.alt);
   if (m?.[1] !== undefined) {
-    return m[1].replace(/([A-Z])([₀-₄]+)/g, (_, b: string, d: string) => `${b}_${[...d].map((c) => PODSTROCHNYE[c] ?? c).join('')}`);
+    return m[1].replace(
+      /([A-Z])([₀-₄]+)/g,
+      (_, b: string, d: string) => `${b}_${[...d].map((c) => PODSTROCHNYE[c] ?? c).join('')}`,
+    );
   }
   const v = t.vershiny;
   return `${tex(v[1])}${tex(v[0])}${tex(v[2])}`;
@@ -165,11 +168,24 @@ function ZadachaVRamke({ z }: { z: ZadachaRamki }) {
   );
 }
 
-/** Чертёж «стекло» без живого поворота: рисунки ловушек и декор. */
+/**
+ * Чертёж «стекло» ловушек и галерей: вращается руками, как все чертежи
+ * раздела (Chertezh3d без шагов).
+ */
 export function RisSteklo({ model, className }: { model: Model; className?: string }) {
   return (
+    <div className={className === undefined ? 'o3-ris' : `o3-ris ${className}`}>
+      <Chertezh3d model={model} tema="ekran" />
+    </div>
+  );
+}
+
+/** Декор шапки главы: картинка без подписей, не чертёж задачи — не вращается. */
+export function RisDekor({ model }: { model: Model }) {
+  return (
     <div
-      className={className === undefined ? 'o3-ris' : `o3-ris ${className}`}
+      className="o3-ris"
+      aria-hidden="true"
       dangerouslySetInnerHTML={{ __html: renderSolid(model, { tema: 'ekran' }) }}
     />
   );
@@ -234,7 +250,7 @@ export function Glava2Treugolnik() {
           Умения: <b>читать</b> чертёж и <b>рисовать</b> — выносить плоскую фигуру отдельно.
         </p>
         <div className="o3-glava__dekor" aria-hidden="true">
-          <RisSteklo model={dekorPiramida()} />
+          <RisDekor model={dekorPiramida()} />
         </div>
       </div>
 

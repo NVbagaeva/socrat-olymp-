@@ -993,7 +993,9 @@ a.o3-kart:focus-visible {
 }
 .o3-kart.is-tekushchiy {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary), var(--shadow-sm);
+  box-shadow:
+    0 0 0 1px var(--color-primary),
+    var(--shadow-sm);
 }
 .o3-kart.is-skoro {
   box-shadow: none;

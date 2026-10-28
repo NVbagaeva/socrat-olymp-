@@ -37,7 +37,13 @@ function ZnakStatusa({ status }: { status: Status }) {
  * заливкой, текущий — синей обводкой. Блоки, которые ещё пишутся, —
  * «Скоро», без полосы и без ссылки.
  */
-export function OpornyeStereoList({ bloki, listHref }: { bloki: BlokKartochka3[]; listHref: string }) {
+export function OpornyeStereoList({
+  bloki,
+  listHref,
+}: {
+  bloki: BlokKartochka3[];
+  listHref: string;
+}) {
   const progress = opornye3.useProgress();
   const statusy: Status[] = bloki.map((b) => {
     if (!b.gotov) return 'skoro';

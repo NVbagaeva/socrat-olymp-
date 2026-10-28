@@ -121,7 +121,13 @@ export function RazdelGlavy({
 }
 
 /** «Идея метода»: оранжевая рамка с мишенью. */
-export function RamkaIdeya({ title = 'Идея метода', children }: { title?: string; children: ReactNode }) {
+export function RamkaIdeya({
+  title = 'Идея метода',
+  children,
+}: {
+  title?: string;
+  children: ReactNode;
+}) {
   return (
     <aside className="o3-ramka o3-ramka--ideya">
       <IkIdeya className="o3-ramka__ik" />
@@ -236,9 +242,15 @@ export function KartaReshenie({
   return (
     <section className="o3-karta o3-karta--reshenie">
       <Svernuto
-        zagolovok={<ZagolovokKarty ikonka={<IkAlgoritm className="o3-karta__ik" />}>Решение</ZagolovokKarty>}
+        zagolovok={
+          <ZagolovokKarty ikonka={<IkAlgoritm className="o3-karta__ik" />}>Решение</ZagolovokKarty>
+        }
       >
-        <Stepper shagi={shagi} {...(nomera === undefined ? {} : { nomera })} className="o3-stepper--reshenie" />
+        <Stepper
+          shagi={shagi}
+          {...(nomera === undefined ? {} : { nomera })}
+          className="o3-stepper--reshenie"
+        />
       </Svernuto>
     </section>
   );
@@ -271,7 +283,10 @@ function razrezat(title: string, yarlyk: string): { yarlyk: string; pod: string 
   const m = /^([^:]+):\s*(.+)$/.exec(title);
   if (m === null) return { yarlyk: title || yarlyk, pod: null };
   const pod = m[2] ?? '';
-  return { yarlyk: m[1] ?? yarlyk, pod: pod === '' ? null : pod.charAt(0).toUpperCase() + pod.slice(1) };
+  return {
+    yarlyk: m[1] ?? yarlyk,
+    pod: pod === '' ? null : pod.charAt(0).toUpperCase() + pod.slice(1),
+  };
 }
 
 function RamkaSoZnachkom({
@@ -366,7 +381,9 @@ export function RamkaLovushka({
             В чём ошибка?
           </p>
           <Abzacy paras={neverno} />
-          {risunokNeverno === undefined ? null : <div className="o3-lov__ris">{risunokNeverno}</div>}
+          {risunokNeverno === undefined ? null : (
+            <div className="o3-lov__ris">{risunokNeverno}</div>
+          )}
         </div>
         <div className="o3-lov__kol o3-lov__kol--verno">
           <p className="o3-lov__metka">

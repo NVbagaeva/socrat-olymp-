@@ -152,6 +152,14 @@ export const IkPovorot = ({ className }: P) => (
   </Ikonka>
 );
 
+/** Вид сверху: квадрат основания и стрелка взгляда к нему. */
+export const IkSverkhu = ({ className }: P) => (
+  <Ikonka className={className}>
+    <path d="M12 3v7M9 7l3 3 3-3M5 14l7-3 7 3-7 3z" />
+    <path d="M5 14v3l7 3 7-3v-3" />
+  </Ikonka>
+);
+
 /** Перерешать: круговая стрелка. */
 export const IkPovtor = ({ className }: P) => (
   <Ikonka className={className}>

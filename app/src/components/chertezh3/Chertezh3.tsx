@@ -10,16 +10,18 @@
  * Кадр пересчитывается только при повороте, смене размера окна,
  * переключателе построений или подсветке шага решения.
  *
- * Вращение — мышью или пальцем по чертежу (жест захвачен только на
- * самом чертеже, страница прокручивается как обычно вне его).
+ * Вращение, масштаб и кнопки вида — общее ядро раздела
+ * (components/stereo/vrashchenie): палец, мышь, щипок, колесо.
  * До замера подписей показывается тот же кадр статичным SVG с
  * подписями текстом — он же виден без скриптов.
  */
 
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { type Kadr, type Scenariy, kadr as schitatKadr, kadrSvg, postroit } from '@/lib/chertezh3';
-import { type Rakurs, SHKOLNYY, povernut } from '@/lib/stereo/proekciya';
+import { VrashchaemyyChertezh } from '@/components/stereo/vrashchenie/VrashchaemyyChertezh';
+import type { Vid } from '@/components/stereo/vrashchenie/useVrashchenie';
+import { type Rakurs, SHKOLNYY } from '@/lib/stereo/proekciya';
 import 'katex/dist/katex.min.css';
 import './chertezh3.css';
 
@@ -83,9 +85,6 @@ export function Chertezh3({
   }
   const stage = useRef<HTMLDivElement>(null);
   const zamer = useRef<HTMLDivElement>(null);
-  const tyanem = useRef<{ x: number; y: number; id: number } | null>(null);
-  const kadrRaf = useRef(0);
-  const sdvig = useRef({ dx: 0, dy: 0 });
 
   // Ширина окна чертежа.
   useLayoutEffect(() => {
@@ -133,109 +132,64 @@ export function Chertezh3({
     [k, razmery],
   );
 
-  /* ── Вращение ─────────────────────────────────────────────── */
-  const primenit = useCallback(() => {
-    kadrRaf.current = 0;
-    const { dx, dy } = sdvig.current;
-    sdvig.current = { dx: 0, dy: 0 };
-    if (dx !== 0 || dy !== 0) setRakurs((r) => povernut(r, dx, dy));
+  /* ── Вращение: общее ядро (VrashchaemyyChertezh) ───────────── */
+  const onVid = useCallback((v: Vid) => {
+    setRakurs((r) => (r.azimut === v.az && r.vysota === v.el ? r : { azimut: v.az, vysota: v.el }));
   }, []);
-  useEffect(() => () => cancelAnimationFrame(kadrRaf.current), []);
-
-  const onDown = (e: React.PointerEvent) => {
-    if (e.button !== 0) return;
-    tyanem.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
-  const onMove = (e: React.PointerEvent) => {
-    const t = tyanem.current;
-    if (!t || t.id !== e.pointerId) return;
-    sdvig.current.dx += e.clientX - t.x;
-    sdvig.current.dy += e.clientY - t.y;
-    t.x = e.clientX;
-    t.y = e.clientY;
-    if (kadrRaf.current === 0) kadrRaf.current = requestAnimationFrame(primenit);
-  };
-  const onUp = (e: React.PointerEvent) => {
-    if (tyanem.current?.id === e.pointerId) tyanem.current = null;
-  };
-  const onKey = (e: React.KeyboardEvent) => {
-    const shag = 6;
-    const d: Record<string, [number, number]> = {
-      ArrowLeft: [-shag, 0],
-      ArrowRight: [shag, 0],
-      ArrowUp: [0, -shag],
-      ArrowDown: [0, shag],
-    };
-    const v = d[e.key];
-    if (v) {
-      e.preventDefault();
-      setRakurs((r) => povernut(r, v[0] / 0.5, v[1] / 0.5));
-    }
-  };
-
-  const izmenyon = rakurs.azimut !== ishodnyy.azimut || rakurs.vysota !== ishodnyy.vysota;
 
   return (
     <figure className={clsx('ch3', className)}>
-      <div
-        ref={stage}
-        className="ch3__stage"
-        style={{ height: H }}
-        role="img"
-        aria-label={`${scenariy.alt}. Чертёж можно поворачивать мышью, пальцем или стрелками.`}
-        tabIndex={0}
-        onPointerDown={onDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        onPointerCancel={onUp}
-        onKeyDown={onKey}
+      <VrashchaemyyChertezh
+        az={ishodnyy.azimut}
+        el={ishodnyy.vysota}
+        onVid={onVid}
+        alt={scenariy.alt}
+        pod={
+          pereklyuchatel ? (
+            <figcaption className="ch3__bar">
+              <label className="ch3__toggle">
+                <input
+                  type="checkbox"
+                  checked={vspom}
+                  onChange={(e) => setVspom(e.target.checked)}
+                />
+                <span>Вспомогательные построения</span>
+              </label>
+            </figcaption>
+          ) : undefined
+        }
       >
-        <div className="ch3__lines" dangerouslySetInnerHTML={{ __html: svg }} />
-        {razmery ? (
-          <div className="ch3__labels" aria-hidden="true">
-            {k.podpisi.map((p) => (
+        <div ref={stage} className="ch3__stage" style={{ height: H }}>
+          <div className="ch3__lines" dangerouslySetInnerHTML={{ __html: svg }} />
+          {razmery ? (
+            <div className="ch3__labels" aria-hidden="true">
+              {k.podpisi.map((p) => (
+                <span
+                  key={p.klyuch}
+                  className={clsx(
+                    'ch3__label',
+                    `ch3__label--${p.vid}`,
+                    p.yarko && 'is-bright',
+                    p.tusklo && 'is-dim',
+                  )}
+                  style={{ transform: `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)` }}
+                  dangerouslySetInnerHTML={{ __html: podpisiHtml[p.tex] ?? p.tex }}
+                />
+              ))}
+            </div>
+          ) : null}
+          <div ref={zamer} className="ch3__measure" aria-hidden="true">
+            {teksty.map((t) => (
               <span
-                key={p.klyuch}
-                className={clsx(
-                  'ch3__label',
-                  `ch3__label--${p.vid}`,
-                  p.yarko && 'is-bright',
-                  p.tusklo && 'is-dim',
-                )}
-                style={{ transform: `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)` }}
-                dangerouslySetInnerHTML={{ __html: podpisiHtml[p.tex] ?? p.tex }}
+                key={t}
+                data-tex={t}
+                className="ch3__label"
+                dangerouslySetInnerHTML={{ __html: podpisiHtml[t] ?? t }}
               />
             ))}
           </div>
-        ) : null}
-        <div ref={zamer} className="ch3__measure" aria-hidden="true">
-          {teksty.map((t) => (
-            <span
-              key={t}
-              data-tex={t}
-              className="ch3__label"
-              dangerouslySetInnerHTML={{ __html: podpisiHtml[t] ?? t }}
-            />
-          ))}
         </div>
-      </div>
-      <figcaption className="ch3__bar">
-        <button
-          type="button"
-          className="ch3__btn"
-          onClick={() => setRakurs(ishodnyy)}
-          disabled={!izmenyon}
-        >
-          Исходный вид
-        </button>
-        {pereklyuchatel ? (
-          <label className="ch3__toggle">
-            <input type="checkbox" checked={vspom} onChange={(e) => setVspom(e.target.checked)} />
-            <span>Вспомогательные построения</span>
-          </label>
-        ) : null}
-      </figcaption>
+      </VrashchaemyyChertezh>
     </figure>
   );
 }

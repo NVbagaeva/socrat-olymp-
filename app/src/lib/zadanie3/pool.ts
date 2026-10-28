@@ -17,7 +17,8 @@
 
 import { szhat, tekstyPodpisey } from '../chertezh3';
 import { katex } from '../graph/katex';
-import { chertezhBanka } from '../solid';
+import { chertezhBanka, type Model } from '../solid';
+import { vybratVidSolid } from '../solid/vid';
 import { texPlain, typeset } from '../tex';
 import type { PodskazkaShag } from '../veroyatnost/razbor';
 import { chertezhVarianta, estScenariy } from './chertezhi';
@@ -38,6 +39,12 @@ export interface PoolVariant {
   steps: string;
   /** Чертёж варианта. null — берётся общий чертёж прототипа. */
   svg: string | null;
+  /**
+   * Модель чертежа варианта (JSON модели lib/solid с выбранным видом):
+   * по ней чертёж вращается руками. null — общая модель прототипа или
+   * чертёж-сценарий.
+   */
+  model: string | null;
   /**
    * Сценарий интерактивного чертежа (многогранники), закрытый тем же
    * отпечатком: по размерам тела иногда видно ответ. null — чертёж
@@ -71,6 +78,8 @@ export interface PoolKind {
   format: Prototype['format'];
   /** Общий чертёж прототипа (пусто, если чертежи — сценарии). */
   svg: string;
+  /** Общая модель прототипа для вращения (пусто, если чертежи — сценарии). */
+  model: string;
   /** Подписи сценариев прототипа, свёрстанные KaTeX: TeX → HTML. */
   podpisiHtml: Record<string, string> | null;
   variants: PoolVariant[];
@@ -131,6 +140,7 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
       /* Разбор закрыт тем же отпечатком: без него не раскрыть. */
       steps: sealText(steps, seal),
       svg: own && !ch ? chertezhBanka(prototype.chertezh(variant.params)) : null,
+      model: own && !ch ? modelJson(prototype.chertezh(variant.params)) : null,
       scena: ch ? sealText(JSON.stringify(szhat(ch.scenariy)), seal) : null,
       stepRefs: ch ? sealText(JSON.stringify(ch.shagi), seal) : null,
       podskazka:
@@ -148,6 +158,7 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
     groupTitle: razdel.nazvanie,
     format: prototype.format,
     svg: scenarii ? '' : chertezhBanka(prototype.chertezh(first.params)),
+    model: scenarii ? '' : modelJson(prototype.chertezh(first.params)),
     podpisiHtml: scenarii
       ? Object.fromEntries(
           [...podpisi].map((t) => [t, katex.renderToString(t, { throwOnError: true })]),
@@ -155,6 +166,17 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
       : null,
     variants,
   };
+}
+
+/**
+ * Модель чертежа с выбранным видом — тем же, что у chertezhBanka: живой
+ * чертёж открывается тем же кадром и дальше вращается. Числа округлены,
+ * чтобы банк не разрастался.
+ */
+function modelJson(model: Model): string {
+  return JSON.stringify(vybratVidSolid(model).model, (_k, v: unknown) =>
+    typeof v === 'number' ? Math.round(v * 1e4) / 1e4 : v,
+  );
 }
 
 /** Подсказка в разметку: вопросы, кнопки и комментарии набраны KaTeX. */
