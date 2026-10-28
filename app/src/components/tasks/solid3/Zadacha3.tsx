@@ -42,10 +42,25 @@ const SLOVA = {
   pokazat: 'показать на чертеже',
 };
 
+/* Набор формул KaTeX: приезжает вместе с банком по «Начать» (zagruzit).
+   Подсказки и разборы банк хранит текстом с формулами $…$. */
+let nabor: ((text: string) => string) | null = null;
+const tex = (text: string) => (nabor === null ? text : nabor(text));
+
 const PODSKAZKI = new WeakMap<PoolVariant, ReturnType<typeof otkrytPodskazku> | null>();
 function podskazka(v: PoolVariant) {
   if (!PODSKAZKI.has(v)) {
-    PODSKAZKI.set(v, v.podskazka === null ? null : otkrytPodskazku(v.podskazka, v.seal));
+    PODSKAZKI.set(
+      v,
+      v.podskazka === null
+        ? null
+        : otkrytPodskazku(v.podskazka, v.seal).map((h) => ({
+            question: tex(h.question),
+            options: h.options.map(tex),
+            correct: h.correct,
+            comment: h.comment === null ? null : tex(h.comment),
+          })),
+    );
   }
   return PODSKAZKI.get(v) ?? null;
 }
@@ -135,7 +150,7 @@ function Uslovie({ task: z }: { task: Zadacha3; nomer: number; shagi: Shagi | nu
  * подсвечивает на чертеже свои элементы, остальное приглушается.
  */
 function Razbor({ task: z }: { task: Zadacha3 }) {
-  const steps = useMemo(() => openText(z.variant.steps, z.variant.seal).split('\n'), [z]);
+  const steps = useMemo(() => openText(z.variant.steps, z.variant.seal).split('\n').map(tex), [z]);
   const refs = useMemo(
     () =>
       z.variant.stepRefs === null
@@ -148,7 +163,7 @@ function Razbor({ task: z }: { task: Zadacha3 }) {
     return (
       <ol className="z3t__steps">
         {steps.map((text, i) => (
-          /* Шаг набран KaTeX на сборке (lib/zadanie3/pool.ts). */
+          /* Шаг набран KaTeX в браузере (tex): в банке — текст с формулами. */
           <li key={i} dangerouslySetInnerHTML={{ __html: text }} />
         ))}
       </ol>
@@ -208,9 +223,14 @@ function Podskazka({
   );
 }
 
-/** Карточка №3 над банком тренажёра. */
-export function kartochka3(pool: Pool): KartochkaRazdela<Zadacha3> {
-  const byId = new Map(pool.kinds.map((k) => [k.id, k]));
+/**
+ * Карточка №3 над банком тренажёра. Банк (условия, чертежи, закрытые
+ * ответы и разборы) на странице не лежит: он приезжает одним файлом по
+ * «Начать тренировку» вместе с KaTeX — zagruzitBank.
+ */
+export function kartochka3(zagruzitBank: () => Promise<Pool>): KartochkaRazdela<Zadacha3> {
+  let pool: Pool | null = null;
+  let byId = new Map<string, PoolKind>();
 
   function Otvet({
     task: z,
@@ -240,7 +260,7 @@ export function kartochka3(pool: Pool): KartochkaRazdela<Zadacha3> {
           onChange={(event) => onChange(event.target.value)}
         />
         {z.kind.format === 'на-пи' ? (
-          <p className="z3t__hint" dangerouslySetInnerHTML={{ __html: pool.piHintHtml }} />
+          <p className="z3t__hint" dangerouslySetInnerHTML={{ __html: pool?.piHintHtml ?? '' }} />
         ) : null}
       </>
     );
@@ -262,8 +282,15 @@ export function kartochka3(pool: Pool): KartochkaRazdela<Zadacha3> {
 
   return {
     zagruzit: async () => {
-      /* Банк уже на странице: собирать нечего, кроме seed похожей. */
-      const { osnovaSeed } = await import('@/lib/trenazher/sessiya');
+      /* Банк, KaTeX и seed похожей — по «Начать»: на странице их нет. */
+      const [{ osnovaSeed }, { typeset }, bank] = await Promise.all([
+        import('@/lib/trenazher/sessiya'),
+        import('@/lib/tex'),
+        zagruzitBank(),
+      ]);
+      nabor = typeset;
+      pool = bank;
+      byId = new Map(bank.kinds.map((k) => [k.id, k]));
       return {
         postroit: (payload, at, pohozhaya) => {
           const item = payload.items[at];

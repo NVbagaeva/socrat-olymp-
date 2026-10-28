@@ -10,7 +10,6 @@
  */
 
 import { isRecord } from '../trainerSession/restore';
-import type { PoolKind } from './pool';
 import type { RoundItem } from './podhod';
 
 export interface Solid3Payload {
@@ -36,7 +35,8 @@ function isItem(value: unknown): value is RoundItem {
  */
 export function isSolid3Payload(
   value: unknown,
-  byId: ReadonlyMap<string, PoolKind>,
+  /** Есть ли в банке вариант n прототипа id. */
+  est: (id: string, n: number) => boolean,
 ): value is Solid3Payload {
   if (
     !isRecord(value) ||
@@ -49,12 +49,6 @@ export function isSolid3Payload(
   const size = value['size'];
   const pool: unknown[] = value['pool'];
   return (
-    size > 0 &&
-    size <= pool.length &&
-    pool.every(
-      (item) =>
-        isItem(item) &&
-        byId.get(item.kind)?.variants.some((variant) => variant.n === item.n) === true,
-    )
+    size > 0 && size <= pool.length && pool.every((item) => isItem(item) && est(item.kind, item.n))
   );
 }

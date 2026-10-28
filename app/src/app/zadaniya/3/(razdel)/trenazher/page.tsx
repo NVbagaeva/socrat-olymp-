@@ -10,7 +10,6 @@ import { estScenariy } from '@/lib/zadanie3/chertezhi';
 import { fipiVarianta } from '@/lib/zadanie3/fipi';
 import { trenazherConfig3, zadachi3 } from '@/lib/zadanie3/trenazher/filtry3';
 import { stereoTitle, vkladkaStereo } from '@/content/stereo/zadaniya';
-import { wholePool } from '@/lib/zadanie3/pool';
 import { href, ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
 
@@ -41,7 +40,6 @@ export default function Page() {
     <>
       <h2 className="t-h2 vtab__title">{VKLADKA}</h2>
       <Trenazher3
-        pool={wholePool()}
         config={trenazherConfig3(RAZDELY, typeset)}
         refs={zadachi3(RAZDELY, fipiVarianta)}
         backHref={`${base}/`}

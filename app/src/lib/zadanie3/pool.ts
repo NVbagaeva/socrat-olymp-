@@ -35,7 +35,7 @@ export interface PoolVariant {
   uslovieHtml: string;
   /** Отпечаток верного ответа. Самого ответа здесь нет. */
   seal: string;
-  /** Закрытый разбор: шаги через перевод строки. */
+  /** Закрытый разбор: шаги текстом с формулами $…$ через перевод строки. */
   steps: string;
   /** Чертёж варианта. null — берётся общий чертёж прототипа. */
   svg: string | null;
@@ -54,8 +54,8 @@ export interface PoolVariant {
   /** Ссылки шагов разбора на элементы чертежа, закрытые: JSON string[][]. */
   stepRefs: string | null;
   /**
-   * Подсказка-вопросы, набранная KaTeX и закрытая тем же отпечатком:
-   * JSON PodskazkaShag[]. null — у прототипа её нет, подсказкой
+   * Подсказка-вопросы текстом с формулами $…$, закрытая тем же
+   * отпечатком: JSON PodskazkaShag[]; KaTeX набирает её в браузере. null — у прототипа её нет, подсказкой
    * служит первый шаг разбора.
    */
   podskazka: string | null;
@@ -121,11 +121,12 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
       prototype.otvet(variant.params),
       klyuchZadachi(prototype.id, variant.n),
     );
-    /* Шаги набираются KaTeX здесь, на сборке: в закрытый разбор
-       уходит готовая вёрстка, по строке на шаг. */
+    /* Шаги — текстом с формулами $…$, по строке на шаг: KaTeX набирает
+       их в браузере, когда ученик открыл разбор. Готовая вёрстка KaTeX
+       в закрытом виде весила вдесятеро больше и не сжималась. */
     const steps = prototype
       .shagi(variant.params)
-      .map((step) => typeset(step.text).replace(/\n/g, ' '))
+      .map((step) => step.text.replace(/\n/g, ' '))
       .join('\n');
     const ch = scenarii ? chertezhVarianta(prototype, variant) : null;
     if (ch && ch.oshibki.length > 0) {
@@ -146,7 +147,7 @@ function kindOf(razdel: Razdel, prototype: Prototype): PoolKind {
       podskazka:
         prototype.podskazka === undefined
           ? null
-          : sealText(JSON.stringify(nabrat(prototype.podskazka(variant.params))), seal),
+          : sealText(JSON.stringify(tekstom(prototype.podskazka(variant.params))), seal),
     };
   });
   return {
@@ -179,13 +180,13 @@ function modelJson(model: Model): string {
   );
 }
 
-/** Подсказка в разметку: вопросы, кнопки и комментарии набраны KaTeX. */
-function nabrat(shagi: readonly HintStep[]): PodskazkaShag[] {
+/** Подсказка текстом с формулами $…$: KaTeX набирает её в браузере (nabratPodskazku). */
+function tekstom(shagi: readonly HintStep[]): PodskazkaShag[] {
   return shagi.map((h) => ({
-    question: typeset(h.question),
-    options: h.options.map((o) => typeset(o)),
+    question: h.question,
+    options: [...h.options],
     correct: h.correct,
-    comment: h.comment === undefined ? null : typeset(h.comment),
+    comment: h.comment ?? null,
   }));
 }
 
