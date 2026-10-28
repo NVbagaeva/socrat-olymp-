@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useId, useMemo, useState, useSyncExternalStore } from 'react';
 import { TaskGrid } from '@/components/tasks';
 import { VariantEntry } from '@/components/variant/VariantEntry';
-import { HandNote } from '@/components/ui';
 import type { ExamTask, TaskPart } from '@/content/tasks';
 import { partRange, taskParts, tasks, tasksPage } from '@/content/tasks';
 
@@ -103,21 +102,6 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
           <p className="bank-head__lead">{tasksPage.lead}</p>
         </div>
 
-        {/* Баннер: портрет и цитата. Декор, поэтому alt пустой —
-            содержания, которого нет в тексте рядом, он не несёт. */}
-        <figure className="bank-quote">
-          <figcaption className="bank-quote__text">
-            <HandNote>«{tasksPage.quote.text}»</HandNote>
-            <span className="bank-quote__author">— {tasksPage.quote.author}</span>
-          </figcaption>
-          <Image
-            className="bank-quote__art"
-            src={assetUrl('/images/bust-galileo.webp')}
-            alt=""
-            width={814}
-            height={700}
-          />
-        </figure>
       </header>
 
       {/* Строка фильтров. Рядом с поиском встанет выбор темы, когда
@@ -225,7 +209,6 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
             width={1400}
             height={504}
           />
-          <HandNote className="bank-start__note">{tasksPage.start.note}</HandNote>
         </div>
       </section>
     </main>

@@ -40,50 +40,6 @@
   color: var(--color-text-secondary);
 }
 
-/* ── Баннер с цитатой ───────────────────────────────────────── */
-
-/* Цитата — строка под подзаголовком, не колонка рядом с ним: деля
-   ширину, они ломали друг друга. Блок жмётся по длине самой цитаты,
-   поэтому подпись под ней встаёт по её правому краю. */
-.topic-quote {
-  display: grid;
-  justify-items: end;
-  gap: var(--space-1);
-  width: max-content;
-  max-width: 100%;
-  margin: var(--space-4) 0 0;
-}
-.topic-quote__text {
-  margin: 0;
-  /* Рукописный шрифт узкий, и рост строчных у него мелкий: при равном
-     кегле Caveat читается заметно мельче Inter. Поэтому ступень шкалы
-     выше, чем взял бы обычный текст той же роли. На телефоне цитата
-     скрыта, так что ступень касается только десктопа. */
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-}
-/* Не осветлённый примерный синий, как у прочих рукописных пометок,
-   а тот же, которым набран текст страницы: цитата здесь не пометка
-   на полях, её читают. */
-.topic-quote__text .hand-note {
-  color: var(--color-text-brand);
-  opacity: 1;
-}
-.topic-quote__author {
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  color: var(--color-text-tertiary);
-}
-/* Портрет целиком в кадре: высота задана, ширина считается по файлу. */
-/* Портрет стоит отдельным элементом шапки, справа от текста. */
-.topic-head__art {
-  display: block;
-  width: auto;
-  height: 132px;
-  object-fit: contain;
-  flex: none;
-}
-
 /* ── Прогресс по разделам ───────────────────────────────────── */
 
 .topic-progress {
@@ -1291,10 +1247,6 @@ a.tutor-card:hover {
 }
 
 @media (max-width: 1279.98px) {
-  /* Портрет уменьшается вместе с остальной шапкой. */
-  .topic-head__art {
-    height: 104px;
-  }
   .about-lead,
   .about-skills,
   .about-skills--figure {
@@ -1311,8 +1263,8 @@ a.tutor-card:hover {
     padding: var(--space-4);
   }
 
-  /* На телефоне шапка идёт столбиком: заголовок, подзаголовок,
-     цитата и прогресс — по строке на каждое. */
+  /* На телефоне шапка идёт столбиком: заголовок, подзаголовок
+     и прогресс — по строке на каждое. */
   .topic-head {
     align-items: flex-start;
     margin-bottom: var(--space-6);
@@ -1322,11 +1274,8 @@ a.tutor-card:hover {
   .topic-head .section-head__media {
     justify-content: flex-start;
   }
-  /* Цитата и пирамида — декор: на телефоне его нет, как и на
-     остальных страницах кабинета. Цитата весила 100px из 392
-     у шапки, а первый экран нужен вкладкам. */
-  .topic-quote,
-  .topic-head__art,
+  /* Пирамида — декор: на телефоне его нет, как и на остальных
+     страницах кабинета. */
   .topic-side__decor {
     display: none;
   }
