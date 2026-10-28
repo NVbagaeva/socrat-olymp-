@@ -11,6 +11,7 @@ import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { keySpec2, parseSheetQuery2, sheetSpec2, sheetSpecVse2 } from '@/lib/vektory/sheet2';
 import { withPrintFigures } from '@/lib/sheet/figureRules.js';
 import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
+import { pechatat } from '@/lib/sheet/pechat';
 
 declare global {
   interface Window {
@@ -133,7 +134,7 @@ export function SheetPage2({ vid }: SheetPage2Props) {
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => window.print()}
+          onClick={() => void pechatat()}
           disabled={!done}
         >
           {REPETITORY_2.pechat}

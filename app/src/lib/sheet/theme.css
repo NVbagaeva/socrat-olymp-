@@ -62,6 +62,11 @@
    ЦВЕТНАЯ ТЕМА — значения один в один из styles/tokens.css.
    ══════════════════════════════════════════════════════════ */
 :root[data-sheet-theme='color'] {
+  /* Место для решения (space.css): клетка как в тетради — тонкие
+     светло-голубые линии, рамка того же цвета. */
+  --sheet-space-line: #cfdcf0;
+  --sheet-space-frame: #cfdcf0;
+
   --sheet-ink: #101728;
   --sheet-ink-2: #667389;
   --sheet-ink-3: #97a1b0;
@@ -154,6 +159,11 @@
    и два оттенка серого.
    ══════════════════════════════════════════════════════════ */
 :root[data-sheet-theme='print'] {
+  /* Место для решения: в ч/б серая клетка — светлая, но видна на
+     любом принтере. */
+  --sheet-space-line: #bdbdbd;
+  --sheet-space-frame: #bdbdbd;
+
   --sheet-ink: #000000;
   --sheet-ink-2: #3d3d3d;
   --sheet-ink-3: #6b6b6b;
@@ -254,6 +264,9 @@
    лист читается и на чёрно-белом принтере.
    ══════════════════════════════════════════════════════════ */
 :root[data-sheet-theme='strict'] {
+  --sheet-space-line: #c6d4ea;
+  --sheet-space-frame: #c6d4ea;
+
   --sheet-ink: #000000;
   --sheet-ink-2: #333333;
   --sheet-ink-3: #666666;

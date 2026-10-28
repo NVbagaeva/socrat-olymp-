@@ -688,11 +688,19 @@ export interface Ramka11 {
   items: string[];
 }
 
+/** Первая буква — заглавная: пояснение стоит отдельной строкой. */
+function sZaglavnoy(text: string): string {
+  return text.charAt(0).toLocaleUpperCase('ru') + text.slice(1);
+}
+
 /** Пункты рамки раздела: определение, главная формула и следствия. */
 function punktyTeorii(razdel: string, kratko: boolean): string[] {
   const r = RAZDELY_TEORII_11.find((x) => x.section === razdel);
   if (r?.formula === undefined) return [];
-  const formula = (tex: string, podpis: string) => `${typeset(`$${tex}$`)} — ${typeset(podpis)}`;
+  /* Формула, под ней пояснение словами (рамка листа, .sheet-recap-note):
+     без висячего тире после формулы и без переноса посреди пояснения. */
+  const formula = (tex: string, podpis: string) =>
+    `${typeset(`$${tex}$`)}<span class="sheet-recap-note">${typeset(sZaglavnoy(podpis))}</span>`;
   if (kratko) return [`<b>${typeset(r.title)}.</b> ${formula(r.formula.tex, r.formula.podpis)}`];
   return [
     typeset(r.lead),

@@ -5,10 +5,10 @@
 
    Клетка 5 мм: высота куска — целое число клеток (style="height"),
    ширина поля — целое число клеток (round()), сетка — линии SVG в
-   миллиметрах, рамка — граница блока. Фон браузер при печати
+   миллиметрах (0,2 мм), рамка — граница блока. Фон браузер при печати
    выбрасывает, поэтому ни сетки, ни рамки фоном нет; цвета печатаются
-   как есть (print-color-adjust: exact). Линии не светлее #BBBBBB —
-   видны и на ч/б принтере. */
+   как есть (print-color-adjust: exact). Цвет — светлый голубой палитры
+   листа (theme.css, --sheet-space-line), в ч/б — серый. */
 
 .sheet-space-wrap {
   /* Поле — на всю ширину текста задачи: отступ под номер задачи. */
@@ -25,22 +25,15 @@
 }
 
 .sheet-space--grid {
-  /* Ширина — целое число клеток, без обрезанной клетки справа. */
+  /* Ширина — целое число клеток, без обрезанной клетки справа. Рамка —
+     тонкая, того же цвета, что сетка, со скруглёнными углами, как поле
+     в тетради; линии сетки внутри (SVG) — рамку они не дублируют. */
   width: calc(100% - 2px);
   width: round(down, calc(100% - 2px), 5mm);
-  border-left: 1px solid var(--sheet-space-frame, #8c8c8c);
-  border-right: 1px solid var(--sheet-space-frame, #8c8c8c);
+  border: 1px solid var(--sheet-space-frame, #cfdcf0);
+  border-radius: 2mm;
 }
 
-.sheet-space--grid.sheet-space--first {
-  border-top: 1px solid var(--sheet-space-frame, #8c8c8c);
-}
-
-.sheet-space--grid.sheet-space--last {
-  border-bottom: 1px solid var(--sheet-space-frame, #8c8c8c);
-}
-
-/* Верхний кусок с рамкой сверху: высота клетки не съедается рамкой. */
 .sheet-space__grid {
   position: absolute;
   top: 0;
@@ -57,26 +50,12 @@
   width: 100%;
 }
 
+/* «Ответ: ____» — под полем, с отступом. */
 .sheet-space-wrap .sheet-answer-line {
   margin-top: 0;
-  padding-top: calc(var(--sheet-step, 4px) * 1.5);
-}
-
-/* Куски поля идут вплотную: строка за строкой. */
-.sheet-item.sheet-space-item {
-  margin-top: 0 !important;
+  padding-top: calc(var(--sheet-step, 4px) * 2.5);
 }
 
 .sheet-tasks--space .sheet-space-wrap {
   margin-top: calc(var(--sheet-step, 4px) * 2);
-}
-
-/* Верхняя линия куска — только у продолжения поля в начале страницы:
-   на стыке кусков одной страницы линия уже есть (нижняя у куска выше),
-   у первого куска поля — рамка. На раскладку не влияет: это линия SVG. */
-.sheet-space__top {
-  display: none;
-}
-.sheet-flow > .sheet-space-item:first-child .sheet-space__top {
-  display: inline;
 }

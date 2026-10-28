@@ -11,6 +11,7 @@ import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
 import { parseSheetQuery11, sheetSpec11, sobratList, type VidLista } from '@/lib/zadanie11/sheet11';
 import type { UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
+import { pechatat } from '@/lib/sheet/pechat';
 
 declare global {
   interface Window {
@@ -114,7 +115,7 @@ export function SheetPage11({ vid, bank }: { vid: VidLista; bank: UslovieBanka[]
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => window.print()}
+          onClick={() => void pechatat()}
           disabled={!done}
         >
           {PECHAT_11.knopka}

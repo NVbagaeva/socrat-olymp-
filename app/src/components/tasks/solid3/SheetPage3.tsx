@@ -9,6 +9,7 @@ import { buildDocument } from '@/lib/sheet/sheet.js';
 import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import type { ZadachaPechati } from '@/lib/zadanie3/pechat-dannye';
 import { type Vid, parametryIz, specLista } from '@/lib/zadanie3/pechat';
+import { pechatat } from '@/lib/sheet/pechat';
 
 declare global {
   interface Window {
@@ -93,7 +94,7 @@ export function SheetPage3({ vid, razdel, zadachi }: SheetPage3Props) {
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => window.print()}
+          onClick={() => void pechatat()}
           disabled={!done}
         >
           {SHEET_3.pechat}

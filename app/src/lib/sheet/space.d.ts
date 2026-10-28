@@ -26,7 +26,7 @@ export declare const SIZES: readonly SpaceSize[];
 export declare const ROWS: Readonly<Record<'S' | 'M' | 'L', number>>;
 export declare const AUTO: Readonly<{ min: number; max: number; from: number; perRow: number }>;
 export declare const CELL_MM: number;
-export declare const FIRST_ROWS: number;
+export declare const MIN_ROWS: number;
 export declare const DEFAULT: SheetSpace;
 
 export declare function encodeSpace(space: SheetSpace | null | undefined): string;
@@ -63,7 +63,7 @@ declare const api: {
   ROWS: typeof ROWS;
   AUTO: typeof AUTO;
   CELL_MM: typeof CELL_MM;
-  FIRST_ROWS: typeof FIRST_ROWS;
+  MIN_ROWS: typeof MIN_ROWS;
   DEFAULT: typeof DEFAULT;
   encodeSpace: typeof encodeSpace;
   decodeSpace: typeof decodeSpace;

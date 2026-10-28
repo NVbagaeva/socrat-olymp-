@@ -12,6 +12,7 @@ import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import { sobratList13 } from '@/lib/zadanie13/gen/list';
 import { onlaynHref13, parseGenQuery13, sQr13, vsegoZadach13 } from '@/lib/zadanie13/gen/params';
 import { sheetSpec13, type VidPechati13 } from '@/lib/zadanie13/gen/sheet';
+import { pechatat } from '@/lib/sheet/pechat';
 
 function specJson(html: string): string {
   const open = html.indexOf('<script type="application/json" id="sheet-spec">');
@@ -102,7 +103,7 @@ export function SheetPage13({ vid }: { vid: VidPechati13 }) {
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => window.print()}
+          onClick={() => void pechatat()}
           disabled={!done}
         >
           {PECHAT_13.knopka}

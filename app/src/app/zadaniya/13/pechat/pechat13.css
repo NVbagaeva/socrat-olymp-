@@ -207,7 +207,6 @@
   grid-template-rows: auto auto;
   margin-bottom: calc(var(--sheet-step) * 2);
   border: 0.75pt solid var(--sheet-ink);
-  break-inside: avoid;
 }
 .z13-kartochka__lico {
   display: grid;

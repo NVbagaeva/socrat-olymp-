@@ -109,6 +109,7 @@
     "test:illustrations": "node scripts/check-illustrations.mjs",
     "test:razdely-12-images": "node scripts/check-razdely-12-images.mjs",
     "test:print-pages": "node scripts/check-print-pages.mjs",
+    "test:pdf-listy": "node scripts/check-pdf-listy.mjs",
     "build:pdf-spravochnik-1": "node scripts/build-pdf-spravochnik-1.mjs",
     "test:pdf-spravochnik-1": "node scripts/check-pdf-spravochnik-1.mjs",
     "test:error-boundaries": "node scripts/check-error-boundaries.mjs",

@@ -27,6 +27,7 @@
  */
 
 import { storage } from '@/lib/storage';
+import { pechatat } from '@/lib/sheet/pechat';
 
 /** Область комплекта — задание, чей генератор его собрал. */
 export type KitScope =
@@ -515,9 +516,10 @@ export function printKitSheet(warning: string | null): void {
   if (warning !== null && !window.confirm(warning)) {
     return;
   }
-  window.print();
-  const next = nextSheetAfterPrint(window.location);
-  if (next !== null) {
-    window.location.assign(next);
-  }
+  void pechatat().then(() => {
+    const next = nextSheetAfterPrint(window.location);
+    if (next !== null) {
+      window.location.assign(next);
+    }
+  });
 }

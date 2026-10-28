@@ -17,7 +17,7 @@
 import marks from './marks.js';
 import typo from './typography.js';
 import { figureSize, strokeFloor } from './figureRules.js';
-import { FIRST_ROWS, spaceHtml } from './space.js';
+import { MIN_ROWS, spaceHtml } from './space.js';
 
 var THEMES = ['color', 'print', 'strict'];
 var LAYOUTS = ['single', 'double'];
@@ -54,14 +54,16 @@ function fullHead(head) {
     '</header>';
 }
 
-/* Следующие страницы — компактная шапка в одну строку. */
+/* Следующие страницы — компактная шапка в одну строку. Пустые части
+   (нет названия курса) не печатаются вместе с разделителем «·». */
 function compactHead(head, runner) {
+  var parts = [runner ? '<b>' + typo.text(runner) + '</b>' : '',
+    head.course ? typo.text(head.course) : ''].filter(Boolean);
   return '<header class="sheet-head sheet-head--compact">' +
     '<span class="sheet-logo">' + marks.logoMark(7) +
       '<span class="sheet-logo-word">Будет&nbsp;на&nbsp;ЕГЭ</span></span>' +
     '<span class="sheet-head-rule"></span>' +
-    '<span class="sheet-runner"><b>' + typo.text(runner) + '</b> · ' +
-      typo.text(head.course) + '</span>' +
+    '<span class="sheet-runner">' + parts.join(' · ') + '</span>' +
     tail() +
     '</header>';
 }
@@ -341,28 +343,21 @@ function pageItems(task, options) {
 }
 
 /**
- * Задача с полем для решения — несколько кусков потока: карточка и
- * первые FIRST_ROWS строк поля неделимы (не встали — задача целиком
- * уходит на следующую страницу), остальные строки — по одной: поле
- * продолжается на следующей странице только по границе строки клеток.
- * Последняя строка и «Ответ: ____» — один кусок.
+ * Задача с полем для решения — один неделимый кусок: карточка, поле
+ * и строка «Ответ: ____». Задача, её место и ответ не разъезжаются
+ * по разным страницам. Не встаёт — набор (paginate.js) делает поле
+ * ниже на целые строки клеток, но не меньше MIN_ROWS (data-space-min),
+ * а если и так не встаёт — переносит задачу целиком на новую страницу.
  */
 function spacedItems(task, options) {
   var field = task.space;
   var rows = field.rows;
-  var first = Math.min(FIRST_ROWS, rows);
   var withLine = task.answerLine !== undefined ? task.answerLine : options.withAnswerLine;
   var answer = withLine ? ANSWER_LINE : '';
-  var out = ['<div class="sheet-item sheet-tasks sheet-tasks--single sheet-tasks--space">' +
+  return ['<div class="sheet-item sheet-tasks sheet-tasks--single sheet-tasks--space"' +
+    ' data-space-min="' + Math.min(MIN_ROWS, rows) + '">' +
     taskCard(task, Object.assign({}, options, { layout: 'single' })) +
-    '<div class="sheet-space-wrap">' + spaceHtml(field, first, true, rows === first) +
-    (rows === first ? answer : '') + '</div></div>'];
-  for (var r = first; r < rows; r += 1) {
-    var last = r === rows - 1;
-    out.push('<div class="sheet-item sheet-space-item"><div class="sheet-space-wrap">' +
-      spaceHtml(field, 1, false, last) + (last ? answer : '') + '</div></div>');
-  }
-  return out;
+    '<div class="sheet-space-wrap">' + spaceHtml(field, rows, true, true) + answer + '</div></div>'];
 }
 
 /* ══════════════════════════════════════════════════════════
