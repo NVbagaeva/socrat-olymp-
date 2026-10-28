@@ -1,0 +1,14 @@
+Шрифты демо-страниц /styleguide/steklo и /styleguide/chertyozh.
+Подключаются только там (src/app/styleguide/steklo, src/app/styleguide/chertyozh).
+
+inter-*-opsz-normal.woff2 — @fontsource-variable/inter 5.3.0, оси wght и opsz:
+Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter) Inter-Italic[opsz,wght].ttf: Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
+
+onest-*-wght-normal.woff2 — @fontsource-variable/onest 5.3.1, ось wght:
+Copyright 2021 The Onest Project Authors (https://github.com/simpals/onest)
+
+jetbrains-mono-cifry-wght.woff2 — @fontsource-variable/jetbrains-mono 5.3.0,
+подмножество latin, урезанное pyftsubset до цифр и знаков номеров (0–9 . , : ; / – — - + × % · ( ) [ ] #):
+Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono) JetBrainsMono-Italic[wght].ttf: Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+
+Все три — SIL Open Font License 1.1, полный текст — в ../LICENSE.
