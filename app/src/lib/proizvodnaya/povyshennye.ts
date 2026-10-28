@@ -9,7 +9,7 @@
  */
 
 import { rngOf } from '../vychisleniya/rng';
-import { nuliUzlov } from './chtenie';
+import { ekstremumyUzlov, nuliUzlov, znakProizvodnoy } from './chtenie';
 import { figura } from './krivye';
 import { chislaOtvet } from './otvet';
 import { promezhutki, xRavno, znakiPomoshch } from './prototypes/chtenie-pom';
@@ -17,9 +17,9 @@ import { NE_IZ_BANKA, shag, sobrat, vopros } from './prototypes/common';
 import { zadacha921, zadachaNaibNaim } from './prototypes/kasatelnaya';
 import { zadachaZnak } from './prototypes/po-grafiku-f';
 import { znakZnacheniya } from './chtenie';
-import { d, otrezok } from './tex';
+import { d, interval, otrezok } from './tex';
 import type { Figura, Generated, Pomoshch, Uzel } from './types';
-import { grafikP } from './uslovie';
+import { grafikF, grafikP } from './uslovie';
 
 const MINUS_PLUS = 'с $-$ на $+$';
 const PLUS_MINUS = 'с $+$ на $-$';
@@ -1027,4 +1027,259 @@ export function kasatelnayaFormula(par: KasatelnayaFormula): Generated {
     seed: 'fixed',
     istochnik: NE_IZ_BANKA,
   };
+}
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+export interface CelyeZnak {
+  /** Узлы кривой f: [x, y], x по возрастанию, концы — границы интервала. */
+  uzly: [number, number][];
+  /** Что считаем: f′ > 0 (1) или f′ < 0 (−1). */
+  znak: 1 | -1;
+}
+
+/**
+ * Количество целых точек интервала, где f′ положительна (отрицательна),
+ * по графику f. Подвох — целые точки экстремумов не подходят (там
+ * f′ = 0), концы интервала выколоты, а знак f′ читают по направлению
+ * графика, а не по его положению относительно оси.
+ */
+export function celyeZnak(par: CelyeZnak): Generated | null {
+  const { znak } = par;
+  const uzly: Uzel[] = par.uzly.map(([x, y]) => ({ x, y }));
+  const a = uzly[0]!.x;
+  const b = uzly.at(-1)!.x;
+  const exs = ekstremumyUzlov(uzly);
+  const ps = promezhutki([a, ...exs.map((e) => e.x), b], (m) => znakProizvodnoy(uzly, m));
+  let k = 0;
+  let drugih = 0;
+  for (const pr of ps) {
+    const cnt = Math.ceil(pr.hi) - Math.floor(pr.lo) - 1;
+    if (pr.znak === znak) k += cnt;
+    else drugih += cnt;
+  }
+  const vsego = b - a - 1;
+  if (k < 1 || drugih < 1) return null;
+  const fig: Figura = figura('f', 'f(x)', uzly, {
+    pomoshch: [
+      ...exs.map((e): Pomoshch => ({ t: 'vert', x: e.x, podpis: d(e.x), shag: 1 })),
+      ...znakiPomoshch(ps, 2),
+    ],
+  });
+  const kod = `pv9cz|${znak}|${par.uzly.join(';')}`;
+  const r = rngOf(kod);
+  const pol = znak > 0;
+  const vverh = pol ? 'вверх' : 'вниз';
+  const nuzhnye = ps.filter((pr) => pr.znak === znak);
+  const schet = nuzhnye.map((pr) => {
+    const cnt = pr.hi - pr.lo - 1;
+    return cnt === 0
+      ? `$${interval(pr.lo, pr.hi)}$: целых чисел строго внутри нет.`
+      : `$${interval(pr.lo, pr.hi)}$: $${Array.from({ length: cnt }, (_, i) => d(pr.lo + 1 + i)).join(',\\ ')}$ — ${cnt} ${tochekSlovo(cnt)}.`;
+  });
+  const draft = sobrat(fig, { t: 'celye-znak', znak }, k, {
+    uslovie: `${grafikF(a, b)} Определите количество целых точек, в которых производная функции $f(x)$ ${pol ? 'положительна' : 'отрицательна'}.`,
+    shagi: [
+      shag(
+        'Знак производной по графику',
+        `$f'(x)${pol ? '>' : '<'}0$ там, где график идёт ${vverh}. В вершинах «горок» и «ямок» $f'(x)=0$ — эти точки не считаются.`,
+      ),
+      shag(
+        'Промежутки монотонности',
+        `Вершины графика: ${xRavno(exs.map((e) => e.x))}. Они делят интервал $${interval(a, b)}$ на части, концы интервала выколоты.`,
+      ),
+      shag(
+        `Целые точки там, где график идёт ${vverh}`,
+        ...schet,
+        nuzhnye.length > 1 ? `Всего: $${nuzhnye.map((pr) => pr.hi - pr.lo - 1).join('+')}=${k}$.` : `Всего: $${k}$.`,
+      ),
+      shag(
+        'Проверка',
+        `Целых точек в интервале $${vsego}$: из них $${exs.length}$ — вершины, $${drugih}$ — с другим знаком производной и $${k}$ — нужные; $${exs.length}+${drugih}+${k}=${vsego}$.`,
+      ),
+      shag('Ответ', `**Ответ: ${chislaOtvet(k)}**`),
+    ],
+    podskazka: [
+      vopros(
+        r,
+        `Где производная ${pol ? 'положительна' : 'отрицательна'}?`,
+        `Там, где график идёт ${vverh}`,
+        [
+          {
+            tekst: `Там, где график ${pol ? 'выше' : 'ниже'} оси $Ox$`,
+            pochemu: 'Положение графика относительно оси — знак самой функции, а не производной.',
+          },
+          { tekst: 'В вершинах графика', pochemu: "В вершинах $f'(x)=0$." },
+        ],
+      ),
+      vopros(
+        r,
+        'Считаются ли целые точки, где график имеет вершину?',
+        "Нет, там $f'(x)=0$",
+        [{ tekst: 'Да, они принадлежат промежутку', pochemu: 'Ноль не положителен и не отрицателен.' }],
+      ),
+      vopros(r, 'Сколько таких целых точек?', `$${k}$`, [
+        { tekst: `$${k + exs.length}$`, pochemu: 'Посчитаны и вершины.' },
+        { tekst: `$${drugih}$`, pochemu: 'Это точки с другим знаком производной.' },
+      ]),
+    ],
+    params: { a, b, znak, ans: k, uzly: par.uzly.map((u) => u.join(':')).join(',') },
+    signature: kod,
+  });
+  return draft === null
+    ? null
+    : { ...draft, prototype: pol ? 'PV9-CELYE-PLUS' : 'PV9-CELYE-MINUS', seed: 'fixed', istochnik: NE_IZ_BANKA };
+}
+
+export interface NuliProizvodnoy {
+  /** Узлы кривой f: [x, y], x по возрастанию, концы — границы интервала. */
+  uzly: [number, number][];
+  /** Отрезок вопроса; без него — весь интервал. */
+  p?: number;
+  q?: number;
+}
+
+/**
+ * Количество точек, где f′(x) = 0, по графику f — на всём интервале или
+ * на отрезке. Подвох — считать вершины «горок» и «ямок», а не точки
+ * пересечения графика с осью; на отрезке — только вершины внутри.
+ */
+export function nuliProizvodnoy(par: NuliProizvodnoy): Generated | null {
+  const uzly: Uzel[] = par.uzly.map(([x, y]) => ({ x, y }));
+  const a = uzly[0]!.x;
+  const b = uzly.at(-1)!.x;
+  const naOtrezke = par.p !== undefined && par.q !== undefined;
+  const p = par.p ?? a;
+  const q = par.q ?? b;
+  const exs = ekstremumyUzlov(uzly);
+  const vnutri = exs.filter((e) => e.x >= p && e.x <= q);
+  const vne = exs.filter((e) => e.x < p || e.x > q);
+  const ans = vnutri.length;
+  if (ans < 2 || (naOtrezke && vne.length === 0)) return null;
+  const nuliF = nuliUzlov(uzly).length;
+  const fig: Figura = figura('f', 'f(x)', uzly, {
+    pomoshch: [
+      ...(naOtrezke ? [{ t: 'otrezok', p, q, shag: 1 } as Pomoshch] : []),
+      ...exs.map((e): Pomoshch => ({ t: 'vert', x: e.x, podpis: d(e.x), shag: 2 })),
+    ],
+  });
+  const kod = `pv9nu|${naOtrezke ? `${p}|${q}` : 'vse'}|${par.uzly.join(';')}`;
+  const r = rngOf(kod);
+  const nmax = vnutri.filter((e) => e.tip === 'max').length;
+  const draft = sobrat(
+    fig,
+    naOtrezke ? { t: 'chislo-nuley-f', p, q } : { t: 'chislo-nuley' },
+    ans,
+    {
+      uslovie: naOtrezke
+        ? `${grafikF(a, b)} Найдите количество решений уравнения $f'(x)=0$ на отрезке $${otrezok(p, q)}$.`
+        : `${grafikF(a, b)} Определите количество точек, в которых производная функции $f(x)$ равна $0$.`,
+      shagi: [
+        shag(
+          "Где $f'(x)=0$",
+          "Производная — угловой коэффициент касательной. $f'(x)=0$ там, где касательная горизонтальна: в вершинах «горок» (максимумы) и «ямок» (минимумы). Точки пересечения графика с осью $Ox$ тут ни при чём.",
+        ),
+        shag(
+          'Находим вершины',
+          `Вершины графика: ${xRavno(exs.map((e) => e.x))}.`,
+          ...(naOtrezke
+            ? [`Вне отрезка $${otrezok(p, q)}$: ${xRavno(vne.map((e) => e.x))} — не считаем.`]
+            : ['Концы интервала выколоты, вершинами не считаются.']),
+          `Остаются ${xRavno(vnutri.map((e) => e.x))}: «горок» $${nmax}$, «ямок» $${ans - nmax}$, всего $${ans}$.`,
+        ),
+        shag('Ответ', `**Ответ: ${chislaOtvet(ans)}**`),
+      ],
+      podskazka: [
+        vopros(
+          r,
+          "В каких точках графика $f'(x)=0$?",
+          'В вершинах «горок» и «ямок»',
+          [
+            { tekst: 'В точках пересечения с осью $Ox$', pochemu: 'Там $f(x)=0$, а не производная.' },
+            { tekst: 'Там, где график идёт вверх', pochemu: "Там $f'(x)>0$." },
+          ],
+        ),
+        vopros(r, naOtrezke ? `Сколько вершин на отрезке $${otrezok(p, q)}$?` : 'Сколько вершин у графика?', `$${ans}$`, [
+          ...(naOtrezke ? [{ tekst: `$${exs.length}$`, pochemu: 'Посчитаны и вершины вне отрезка.' }] : []),
+          ...(nuliF !== ans ? [{ tekst: `$${nuliF}$`, pochemu: 'Это число пересечений с осью $Ox$.' }] : []),
+          { tekst: `$${nmax}$`, pochemu: 'Посчитаны только «горки».' },
+        ]),
+      ],
+      params: { a, b, p, q, ans, uzly: par.uzly.map((u) => u.join(':')).join(',') },
+      signature: kod,
+    },
+  );
+  return draft === null
+    ? null
+    : { ...draft, prototype: naOtrezke ? 'PV9-NULI-OTREZOK' : 'PV9-NULI-VSE', seed: 'fixed', istochnik: NE_IZ_BANKA };
+}
+
+/**
+ * Абсцисса точки отрезка, где касательная к графику f горизонтальна, по
+ * графику f′. Подвох — искать ноль f′ (пересечение графика f′ с осью),
+ * а не вершину графика f′; на отрезке он один.
+ */
+export function gorizontalnayaKasatelnaya(par: MaxNaOtrezke): Generated | null {
+  const { p, q } = par;
+  const uzly: Uzel[] = par.uzly.map(([x, y]) => ({ x, y }));
+  const a = uzly[0]!.x;
+  const b = uzly.at(-1)!.x;
+  const zs = nuliUzlov(uzly).map((z) => z.x);
+  const vnutri = zs.filter((x) => x >= p && x <= q);
+  if (vnutri.length !== 1) return null;
+  const ans = vnutri[0] as number;
+  const vne = zs.filter((x) => x < p || x > q);
+  const fig: Figura = figura('fprime', "f'(x)", uzly, {
+    pomoshch: [
+      { t: 'otrezok', p, q, shag: 1 },
+      ...zs.map((x): Pomoshch => ({ t: 'vert', x, podpis: d(x), shag: 2 })),
+    ],
+  });
+  const kod = `pv9gk|${par.uzly.join(';')}|${p}|${q}`;
+  const r = rngOf(kod);
+  const vershina = ekstremumyUzlov(uzly).map((e) => e.x).find((x) => x >= p && x <= q && x !== ans);
+  const draft = sobrat(fig, { t: 'extr-na-otrezke', p, q }, ans, {
+    uslovie: `${grafikP(a, b)} Найдите абсциссу точки, принадлежащей отрезку $${otrezok(p, q)}$, в которой касательная к графику функции $f(x)$ параллельна оси абсцисс или совпадает с ней.`,
+    shagi: [
+      shag(
+        'Переводим условие',
+        "Касательная параллельна оси $Ox$ (или совпадает с ней), когда её угловой коэффициент равен нулю, то есть $f'(x)=0$.",
+      ),
+      shag(
+        "Нули $f'$ по графику",
+        `График $f'$ пересекает ось $Ox$ при ${xRavno(zs)}.`,
+        ...(vne.length > 0 ? [`${xRavno(vne)} — вне отрезка $${otrezok(p, q)}$.`] : []),
+        `На отрезке остаётся $x=${d(ans)}$.`,
+      ),
+      shag('Ответ', `**Ответ: ${chislaOtvet(ans)}**`),
+    ],
+    podskazka: [
+      vopros(
+        r,
+        'Чему равен угловой коэффициент горизонтальной касательной?',
+        '$0$',
+        [{ tekst: '$1$', pochemu: 'Это касательная под углом $45^\\circ$.' }],
+        "Значит, ищем точку, где $f'(x)=0$.",
+      ),
+      vopros(
+        r,
+        "Как на графике $f'$ найти точку, где $f'(x)=0$?",
+        'Пересечение графика с осью $Ox$',
+        [
+          { tekst: "Вершина графика $f'$", pochemu: "Вершина графика $f'$ — экстремум производной, а не её ноль." },
+          { tekst: 'Пересечение с осью $Oy$', pochemu: "Там $x=0$, а $f'(0)$ может быть любым." },
+        ],
+      ),
+      vopros(r, 'Какая это точка отрезка?', `$${d(ans)}$`, [
+        ...(vershina !== undefined ? [{ tekst: `$${d(vershina)}$`, pochemu: "Это вершина графика $f'$." }] : []),
+        ...vne.slice(0, 1).map((x) => ({ tekst: `$${d(x)}$`, pochemu: 'Эта точка вне отрезка.' })),
+        { tekst: `$${d(p)}$`, pochemu: 'Это конец отрезка.' },
+      ]),
+    ],
+    params: { a, b, p, q, ans, uzly: par.uzly.map((u) => u.join(':')).join(',') },
+    signature: kod,
+  });
+  return draft === null
+    ? null
+    : { ...draft, prototype: 'PV9-GORIZONT', seed: 'fixed', istochnik: NE_IZ_BANKA };
 }

@@ -599,3 +599,345 @@ export function brigady(p: Record<string, number | string>): Solved {
     lifehacks: [],
   };
 }
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+/**
+ * Круговая трасса: велосипедист стартовал, через t0 минут за ним выехал
+ * мотоциклист; через t1 минут он впервые догнал велосипедиста, ещё через
+ * t2 минут — второй раз. Длина круга L км. ask 'moto' — скорость
+ * мотоциклиста, 'velo' — велосипедиста. Подвох — между обгонами
+ * мотоциклист проезжает на целый круг больше: разность скоростей
+ * L/(t2/60), а в первый раз — догоняет фору t0 минут.
+ */
+export function krugovayaTrassa(p: Record<string, number | string>): Solved {
+  const L = num(p, 'L');
+  const t0 = num(p, 't0');
+  const t1 = num(p, 't1');
+  const t2 = num(p, 't2');
+  const ask = str(p, 'ask', ['moto', 'velo'] as const);
+  const D = div(q(L * 60), q(t2));
+  const vc = div(mul(D, q(t1)), q(t0));
+  const vm = add(vc, D);
+  const ans = val(ask === 'moto' ? vm : vc);
+  if (!Number.isInteger(val(D)) || !(val(vc) > 0) || !Number.isInteger(ans * 100))
+    throw new Error(`№11: трасса ${JSON.stringify(p)}`);
+  return {
+    uslovie: `Из пункта А круговой трассы выехал велосипедист. Через ${txt(t0)} минут, когда он ещё не вернулся в А, следом за ним из А отправился мотоциклист. Через ${txt(t1)} минут после старта мотоциклист впервые догнал велосипедиста, а ещё через ${txt(t2)} минут догнал его во второй раз. Найдите скорость ${ask === 'moto' ? 'мотоциклиста' : 'велосипедиста'}, если длина трассы равна ${txt(L)} км. Ответ дайте в км/ч.`,
+    answer: ans,
+    etapy: etapy(
+      [
+        'Второй обгон',
+        [
+          `Между двумя обгонами мотоциклист проезжает ровно на круг больше: за $\\dfrac{${d(t2)}}{60}$ ч он «отыгрывает» $${d(L)}$ км.`,
+          `Разность скоростей: $v_{\\text{м}}-v_{\\text{в}}=${d(L)}:\\dfrac{${d(t2)}}{60}=${fq(D)}$ км/ч.`,
+        ],
+      ],
+      [
+        'Первый обгон',
+        [
+          `До первой встречи велосипедист ехал $${d(t0)}+${d(t1)}=${d(t0 + t1)}$ мин, мотоциклист — $${d(t1)}$ мин, и проехали они одно и то же: $v_{\\text{м}}\\cdot${d(t1)}=v_{\\text{в}}\\cdot${d(t0 + t1)}$.`,
+          `Отсюда $(v_{\\text{м}}-v_{\\text{в}})\\cdot${d(t1)}=v_{\\text{в}}\\cdot${d(t0)}$, $v_{\\text{в}}=\\dfrac{${fq(D)}\\cdot${d(t1)}}{${d(t0)}}=${fq(vc)}$ км/ч.`,
+        ],
+      ],
+      [
+        'Ответ',
+        [
+          ask === 'moto'
+            ? `$v_{\\text{м}}=${fq(vc)}+${fq(D)}=${fq(vm)}$ км/ч.`
+            : `Скорость велосипедиста — $${fq(vc)}$ км/ч.`,
+          otvet(ans),
+        ],
+      ],
+    ),
+    tables: [
+      dvizhenie([
+        ['Велосипедист', 'S', 'v_{\\text{в}}', `\\dfrac{${d(t0 + t1)}}{60}`],
+        ['Мотоциклист', 'S', 'v_{\\text{м}}', `\\dfrac{${d(t1)}}{60}`],
+      ]),
+    ],
+    hints: [
+      vopros(
+        'На сколько километров мотоциклист проезжает больше между двумя обгонами?',
+        `На длину круга, $${d(L)}$ км`,
+        ['На половину круга', 'На столько же, сколько до первого обгона'],
+        'Он снова догоняет велосипедиста — значит, обошёл его на целый круг.',
+      ),
+      vopros('Чему равна разность скоростей?', `$${fq(D)}$ км/ч`, [`$${d(L)}$ км/ч`, `$${d(L * t2)}$ км/ч`]),
+      chtoSprashivayut(ask === 'moto' ? 'скорость мотоциклиста' : 'скорость велосипедиста', [
+        ask === 'moto' ? 'скорость велосипедиста' : 'скорость мотоциклиста',
+        'разность скоростей',
+      ]),
+    ],
+    lifehacks: [],
+  };
+}
+
+/**
+ * Гонка: n кругов по трассе L км, первый гонщик финишировал на dt минут
+ * раньше и впервые обогнал второго на круг через t минут. ask 'vtoroy'
+ * или 'pervyy'. Подвох — обгон на круг даёт разность скоростей
+ * L/(t/60), дальше — квадратное уравнение по времени на всю дистанцию.
+ */
+export function gonki(p: Record<string, number | string>): Solved {
+  const n = num(p, 'n');
+  const L = num(p, 'L');
+  const dt = num(p, 'dt');
+  const t = num(p, 't');
+  const ask = str(p, 'ask', ['vtoroy', 'pervyy'] as const);
+  const S = n * L;
+  const D = val(div(q(L * 60), q(t)));
+  /* S/v − S/(v + D) = dt/60 ⇒ dt·v² + dt·D·v − 60·S·D = 0. */
+  const kv = kvadrat(dt, dt * D, -60 * S * D, 'v');
+  const v = val(kv.roots[1]);
+  if (!(v > 0) || !Number.isInteger(v) || !Number.isInteger(D)) throw new Error(`№11: гонки ${JSON.stringify(p)}`);
+  const ans = ask === 'vtoroy' ? v : v + D;
+  return {
+    uslovie: `Два гонщика стартовали одновременно и должны проехать ${txt(n)} кругов по кольцевой трассе длиной ${txt(L)} км. Первый гонщик пришёл к финишу на ${txt(dt)} минут раньше второго, а впервые обогнал второго на круг через ${txt(t)} минут после старта. Найдите среднюю скорость ${ask === 'vtoroy' ? 'второго' : 'первого'} гонщика. Ответ дайте в км/ч.`,
+    answer: ans,
+    etapy: etapy(
+      [
+        'Обгон на круг',
+        [
+          `За $${d(t)}$ мин первый проехал на круг больше: разность скоростей $${d(L)}:\\dfrac{${d(t)}}{60}=${d(D)}$ км/ч.`,
+          `Пусть скорость второго $v$ км/ч, тогда первого — $v+${d(D)}$. Дистанция $${d(n)}\\cdot${d(L)}=${d(S)}$ км.`,
+        ],
+      ],
+      [
+        'Уравнение по времени',
+        [
+          `$\\dfrac{${d(S)}}{v}-\\dfrac{${d(S)}}{v+${d(D)}}=\\dfrac{${d(dt)}}{60}$.`,
+          `Умножаем на $60v(v+${d(D)})$: $${kv.ishodnoe}$.`,
+          ...kv.lines,
+        ],
+      ],
+      [
+        'Отбор и ответ',
+        [
+          `Скорость положительна: $v=${d(v)}$ км/ч.`,
+          ask === 'vtoroy' ? `Скорость второго — $${d(v)}$ км/ч.` : `Скорость первого: $${d(v)}+${d(D)}=${d(ans)}$ км/ч.`,
+          otvet(ans),
+        ],
+      ],
+    ),
+    tables: [
+      dvizhenie([
+        ['Первый', d(S), `v+${d(D)}`, `\\dfrac{${d(S)}}{v+${d(D)}}`],
+        ['Второй', d(S), 'v', `\\dfrac{${d(S)}}{v}`],
+      ]),
+    ],
+    hints: [
+      vopros(
+        'Что значит «обогнал на круг через t минут»?',
+        'За это время он проехал на круг больше',
+        ['Он проехал круг за это время', 'Они встретились на старте'],
+      ),
+      vopros('Чему равна разность скоростей?', `$${d(D)}$ км/ч`, [`$${d(L)}$ км/ч`, `$${d(S)}$ км/ч`]),
+      chtoSprashivayut(ask === 'vtoroy' ? 'скорость второго' : 'скорость первого', [
+        ask === 'vtoroy' ? 'скорость первого' : 'скорость второго',
+        'время на дистанцию',
+      ]),
+    ],
+    lifehacks: [],
+  };
+}
+
+/**
+ * Два сплава с p1 % и p2 % металла дали M кг сплава с p3 %. ask
+ * 'raznica' — на сколько первого меньше второго (или больше), 'pervyy',
+ * 'vtoroy' — масса одного из них. Подвох — уравнение по массе металла,
+ * а не по процентам.
+ */
+export function splavy(p: Record<string, number | string>): Solved {
+  const p1 = num(p, 'p1');
+  const p2 = num(p, 'p2');
+  const p3 = num(p, 'p3');
+  const M = num(p, 'M');
+  const met = String(p['met'] ?? 'никеля');
+  const ask = str(p, 'ask', ['raznica', 'pervyy', 'vtoroy'] as const);
+  const m1 = div(mul(q(M), q(p2 - p3)), q(p2 - p1));
+  const m2 = sub(q(M), m1);
+  const raz = sub(m2, m1);
+  const ans = val(ask === 'pervyy' ? m1 : ask === 'vtoroy' ? m2 : val(raz) >= 0 ? raz : sub(m1, m2));
+  if (!(val(m1) > 0 && val(m2) > 0)) throw new Error(`№11: сплавы ${JSON.stringify(p)}`);
+  const menshe = val(raz) >= 0;
+  return {
+    uslovie: `Имеются два сплава: первый содержит ${txt(p1)} % ${met}, второй — ${txt(p2)} % ${met}. Из них получили третий сплав массой ${txt(M)} кг, содержащий ${txt(p3)} % ${met}. ${
+      ask === 'raznica'
+        ? `На сколько килограммов масса первого сплава ${menshe ? 'меньше' : 'больше'} массы второго?`
+        : `Сколько килограммов ${ask === 'pervyy' ? 'первого' : 'второго'} сплава пошло на третий?`
+    }`,
+    answer: ans,
+    etapy: etapy(
+      [
+        'Обозначаем',
+        [`Пусть масса первого сплава $x$ кг, тогда второго — $${d(M)}-x$ кг.`],
+      ],
+      [
+        `Уравнение по массе ${met}`,
+        [
+          `$${d(p1 / 100)}x+${d(p2 / 100)}(${d(M)}-x)=${d(p3 / 100)}\\cdot${d(M)}$.`,
+          `$${d((p2 - p1) / 100)}x=${d(((p2 - p3) * M) / 100)}$, $x=${fq(m1)}$.`,
+        ],
+      ],
+      [
+        'Ответ',
+        [
+          `Первый сплав — $${fq(m1)}$ кг, второй — $${fq(m2)}$ кг.`,
+          ...(ask === 'raznica' ? [`Разница: $${fq(menshe ? m2 : m1)}-${fq(menshe ? m1 : m2)}=${d(ans)}$ кг.`] : []),
+          otvet(ans),
+        ],
+      ],
+    ),
+    tables: [
+      koncentraciya([
+        { label: 'I', mvv: `${d(p1 / 100)}x`, mr: 'x', p: d(p1) },
+        { label: 'II', mvv: `${d(p2 / 100)}(${d(M)}-x)`, mr: `${d(M)}-x`, p: d(p2) },
+        { label: 'I + II', mvv: `${d(p3 / 100)}\\cdot${d(M)}`, mr: d(M), p: d(p3) },
+      ]),
+    ],
+    hints: [
+      vopros(`Что одинаково до и после сплавления?`, `Масса ${met}`, ['Процент металла', 'Масса каждого сплава']),
+      vopros('Какое уравнение получится?', `$${d(p1 / 100)}x+${d(p2 / 100)}(${d(M)}-x)=${d(p3 / 100)}\\cdot${d(M)}$`, [
+        `$${d(p1)}+${d(p2)}=${d(p3)}$`,
+        `$${d(p1 / 100)}x+${d(p2 / 100)}x=${d(p3 / 100)}\\cdot${d(M)}$`,
+      ]),
+      chtoSprashivayut(
+        ask === 'raznica' ? 'разницу масс' : ask === 'pervyy' ? 'массу первого сплава' : 'массу второго сплава',
+        ['массу третьего сплава', `массу ${met}`],
+      ),
+    ],
+    lifehacks: [],
+  };
+}
+
+const SUSHKA: Record<string, { syrye: string; syryeR: string; produkt: string; produktR: string; proces: string }> = {
+  izyum: { syrye: 'виноград', syryeR: 'винограда', produkt: 'изюм', produktR: 'изюма', proces: 'сушки винограда' },
+  kuraga: { syrye: 'абрикосы', syryeR: 'абрикосов', produkt: 'курага', produktR: 'кураги', proces: 'сушки абрикосов' },
+  chernosliv: { syrye: 'сливы', syryeR: 'слив', produkt: 'чернослив', produktR: 'чернослива', proces: 'сушки слив' },
+  griby: { syrye: 'свежие грибы', syryeR: 'свежих грибов', produkt: 'сушёные грибы', produktR: 'сушёных грибов', proces: 'сушки грибов' },
+};
+
+/**
+ * Сушка: сырьё содержит w1 % воды, продукт — w2 %. vid 'syrye' — сколько
+ * сырья нужно на M кг продукта; 'produkt' — сколько продукта выйдет из M
+ * кг сырья. Подвох — сохраняется сухое вещество, а не вода.
+ */
+export function sushka(p: Record<string, number | string>): Solved {
+  const w1 = num(p, 'w1');
+  const w2 = num(p, 'w2');
+  const M = num(p, 'M');
+  const s = SUSHKA[String(p['chto'])];
+  if (s === undefined) throw new Error(`№11: сушка ${String(p['chto'])}`);
+  const naSyrye = str(p, 'vid', ['syrye', 'produkt'] as const) === 'syrye';
+  const suhoe = div(mul(q(M), q(100 - (naSyrye ? w2 : w1))), q(100));
+  const otv = div(mul(suhoe, q(100)), q(100 - (naSyrye ? w1 : w2)));
+  const ans = val(otv);
+  const dano = naSyrye ? s.produkt : s.syrye;
+  return {
+    uslovie: naSyrye
+      ? `${s.produkt[0]!.toUpperCase()}${s.produkt.slice(1)} получают в процессе ${s.proces}. Сколько килограммов ${s.syryeR} потребуется, чтобы получить ${txt(M)} кг ${s.produktR}, если ${s.syrye} ${s.syrye.endsWith('ы') || s.syrye.endsWith('и') ? 'содержат' : 'содержит'} ${txt(w1)} % воды, а ${s.produkt} — ${txt(w2)} % воды?`
+      : `${s.produkt[0]!.toUpperCase()}${s.produkt.slice(1)} получают в процессе ${s.proces}. Сколько килограммов ${s.produktR} получится из ${txt(M)} кг ${s.syryeR}, если ${s.syrye} ${s.syrye.endsWith('ы') || s.syrye.endsWith('и') ? 'содержат' : 'содержит'} ${txt(w1)} % воды, а ${s.produkt} — ${txt(w2)} % воды?`,
+    answer: ans,
+    etapy: etapy(
+      [
+        'Что не меняется',
+        [
+          'При сушке испаряется только вода, сухое вещество остаётся тем же.',
+          `В ${dano === s.produkt ? s.produktR : s.syryeR} сухого вещества $100\\%-${d(naSyrye ? w2 : w1)}\\%=${d(100 - (naSyrye ? w2 : w1))}\\%$: $${d(M)}\\cdot${d((100 - (naSyrye ? w2 : w1)) / 100)}=${fq(suhoe)}$ кг.`,
+        ],
+      ],
+      [
+        'Ответ',
+        [
+          `В ${naSyrye ? s.syryeR : s.produktR} сухое вещество составляет $${d(100 - (naSyrye ? w1 : w2))}\\%$, поэтому масса — $${fq(suhoe)}:${d((100 - (naSyrye ? w1 : w2)) / 100)}=${d(ans)}$ кг.`,
+          otvet(ans),
+        ],
+      ],
+    ),
+    tables: [
+      koncentraciya([
+        { label: s.syrye, mvv: naSyrye ? `${d((100 - w1) / 100)}x` : fq(suhoe), mr: naSyrye ? 'x' : d(M), p: d(100 - w1) },
+        { label: s.produkt, mvv: naSyrye ? fq(suhoe) : `${d((100 - w2) / 100)}x`, mr: naSyrye ? d(M) : 'x', p: d(100 - w2) },
+      ]),
+    ],
+    hints: [
+      vopros('Что сохраняется при сушке?', 'Масса сухого вещества', ['Масса воды', 'Процент воды']),
+      vopros(
+        `Сколько килограммов сухого вещества в ${dano === s.produkt ? s.produktR : s.syryeR}?`,
+        `$${fq(suhoe)}$`,
+        [`$${d(val(div(mul(q(M), q(naSyrye ? w2 : w1)), q(100))))}$`, `$${d(M)}$`],
+      ),
+      chtoSprashivayut(naSyrye ? `массу ${s.syryeR}` : `массу ${s.produktR}`, ['массу воды', 'массу сухого вещества']),
+    ],
+    lifehacks: [],
+  };
+}
+
+/**
+ * Двое рабочих вместе делают работу за T дней; первый за a дней делает
+ * столько же, сколько второй за b дней. ask 'pervyy' / 'vtoroy' — за
+ * сколько дней справится один. Подвох — отношение производительностей
+ * обратно отношению дней: p₁ : p₂ = b : a.
+ */
+export function dvoeRabochih(p: Record<string, number | string>): Solved {
+  const T = num(p, 'T');
+  const a = num(p, 'a');
+  const b = num(p, 'b');
+  const ask = str(p, 'ask', ['pervyy', 'vtoroy'] as const);
+  const t1 = div(q(T * (a + b)), q(b));
+  const t2 = div(q(T * (a + b)), q(a));
+  const ans = val(ask === 'pervyy' ? t1 : t2);
+  const kto = ask === 'pervyy' ? 'первый' : 'второй';
+  return {
+    uslovie: `Двое рабочих, работая вместе, могут выполнить работу за ${txt(T)} ${T % 10 === 1 && T % 100 !== 11 ? 'день' : [2, 3, 4].includes(T % 10) && ![12, 13, 14].includes(T % 100) ? 'дня' : 'дней'}. За сколько дней, работая отдельно, выполнит эту работу ${kto} рабочий, если первый за ${txt(a)} ${a === 1 ? 'день' : a < 5 ? 'дня' : 'дней'} выполняет такую же часть работы, какую второй — за ${txt(b)} ${b === 1 ? 'день' : b < 5 ? 'дня' : 'дней'}?`,
+    answer: ans,
+    etapy: etapy(
+      [
+        'Отношение производительностей',
+        [
+          `Одна и та же часть работы: $${d(a)}p_1=${d(b)}p_2$, значит $p_1=\\dfrac{${d(b)}}{${d(a)}}p_2$.`,
+        ],
+      ],
+      [
+        'Совместная работа',
+        [
+          `$p_1+p_2=\\dfrac{1}{${d(T)}}$: $\\dfrac{${d(b)}}{${d(a)}}p_2+p_2=\\dfrac{${d(a + b)}}{${d(a)}}p_2=\\dfrac{1}{${d(T)}}$, $p_2=\\dfrac{${d(a)}}{${d(T * (a + b))}}$, $p_1=\\dfrac{${d(b)}}{${d(T * (a + b))}}$.`,
+        ],
+      ],
+      [
+        'Ответ',
+        [
+          ask === 'pervyy'
+            ? `Первый один: $\\dfrac{1}{p_1}=\\dfrac{${d(T * (a + b))}}{${d(b)}}=${fq(t1)}$ дня.`
+            : `Второй один: $\\dfrac{1}{p_2}=\\dfrac{${d(T * (a + b))}}{${d(a)}}=${fq(t2)}$ дня.`,
+          otvet(ans),
+        ],
+      ],
+    ),
+    tables: [
+      rabota(
+        [
+          ['Первый', '1', 'p_1', `\\dfrac{1}{p_1}`],
+          ['Второй', '1', 'p_2', `\\dfrac{1}{p_2}`],
+          ['Вместе', '1', 'p_1+p_2', d(T)],
+        ],
+        ['', ', работа/день', ', дн.'],
+      ),
+    ],
+    hints: [
+      vopros(
+        'Кто работает быстрее?',
+        a < b ? 'Первый' : 'Второй',
+        [a < b ? 'Второй' : 'Первый', 'Одинаково'],
+        'Быстрее тот, кто ту же часть работы делает за меньшее число дней.',
+      ),
+      vopros('Как связаны производительности?', `$${d(a)}p_1=${d(b)}p_2$`, [`$${d(b)}p_1=${d(a)}p_2$`, `$p_1+p_2=${d(a + b)}$`]),
+      chtoSprashivayut(`время работы ${ask === 'pervyy' ? 'первого' : 'второго'} в одиночку`, [
+        'время совместной работы',
+        'производительность',
+      ]),
+    ],
+    lifehacks: [],
+  };
+}

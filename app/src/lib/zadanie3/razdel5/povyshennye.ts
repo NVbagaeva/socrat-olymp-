@@ -9,6 +9,7 @@
  * погрешность приближения сокращается в отношении.
  */
 
+import { polygonStart, regularPolygon, rightPrism } from '../../solid/figures';
 import { hullVolume } from '../../solid/measure';
 import { type Model } from '../../solid/model';
 import { volumeUnits } from './common';
@@ -224,6 +225,76 @@ export const PV03_CILINDR_KONUS: Prototype = {
           num(p, 'vid') === 0
             ? `Значит, конус втрое меньше цилиндра: $\\dfrac{${ru(V)}}{3}=${ru(ans)}$.`
             : `Значит, цилиндр втрое больше конуса: $3\\cdot ${ru(V)}=${ru(ans)}$.`,
+        value: ans,
+      },
+    ];
+  },
+  varianty: [],
+};
+
+/* ── Партия 5. Сосуд — правильная треугольная призма ─────────────── */
+
+/** Правильный треугольник со стороной a в плоскости z = 0, сдвинутый на dx. */
+function treugolnikOsnovaniya(a: number, dx: number, z = 0): [number, number, number][] {
+  return regularPolygon(3, a / Math.sqrt(3), z, polygonStart(3)).map(
+    ([x, y, zz]) => [x + dx, y, zz] as [number, number, number],
+  );
+}
+
+/** Два сосуда-призмы рядом: второй шире; в первом — уровень жидкости. */
+function dvaSosudaPrizmy(alt: string): Model {
+  const a1 = 3;
+  const a2 = 5.2;
+  const h1 = 4.6;
+  const h2 = 3.2;
+  const p1 = rightPrism(treugolnikOsnovaniya(a1, 0), h1);
+  const p2 = rightPrism(treugolnikOsnovaniya(a2, a1 / 2 + a2 / 2 + 1.6), h2);
+  for (const t of [p1, p2]) t.names = t.names?.map(() => null);
+  return {
+    alt,
+    bodies: [p1, p2],
+    sections: [{ points: treugolnikOsnovaniya(a1, 0, h1 * 0.62) }],
+  };
+}
+
+/**
+ * Жидкость перелили из сосуда — правильной треугольной призмы — в другой
+ * такой же формы, у которого сторона основания в n раз больше. Подвох —
+ * площадь основания растёт как квадрат стороны: уровень падает в n²
+ * раз, а не в n.
+ */
+export const PV03_SOSUD_PRIZMA: Prototype = {
+  id: 'PV03-sosud-prizma',
+  razdel: 'V',
+  nazvanie: 'Сосуд — правильная треугольная призма: уровень жидкости после переливания',
+  tip: 'уровень падает во столько раз, во сколько выросла площадь основания',
+  zadachnik: [226, 229],
+  status: 'добавить',
+  format: 'десятичная',
+  uslovie: (p) =>
+    `В сосуде, имеющем форму правильной треугольной призмы, налита вода; её уровень достигает ${ru(num(p, 'h'))} см. Воду перелили в другой сосуд той же формы, у которого сторона основания в ${ru(num(p, 'n'))} ${razaWord(num(p, 'n'))} больше. На какой высоте окажется уровень воды во втором сосуде? Ответ дайте в сантиметрах.`,
+  dopustimo: (p) => num(p, 'h') > 0 && num(p, 'n') > 1,
+  otvet: (p) => Math.round((num(p, 'h') / num(p, 'n') ** 2) * 1e9) / 1e9,
+  /* Объём воды в первой призме, затем высота во второй — по объёмам тел. */
+  poModeli: (p) => {
+    const n = num(p, 'n');
+    const h = num(p, 'h');
+    const v1 = hullVolume(rightPrism(treugolnikOsnovaniya(1, 0), h).vertices);
+    const v2 = hullVolume(rightPrism(treugolnikOsnovaniya(n, 0), 1).vertices);
+    return Math.round((v1 / v2) * 1e6) / 1e6;
+  },
+  chertezh: () => dvaSosudaPrizmy('Два сосуда в форме правильной треугольной призмы: второй шире'),
+  shagi: (p) => {
+    const h = num(p, 'h');
+    const n = num(p, 'n');
+    const ans = h / (n * n);
+    return [
+      {
+        text: `Основания подобны: сторона больше в ${ru(n)} ${razaWord(n)}, значит площадь основания больше в $${ru(n)}^2=${ru(n * n)}$ ${razaWord(n * n)}.`,
+        value: n * n,
+      },
+      {
+        text: `Объём воды тот же: $V=S\\cdot h$, и уровень уменьшается во столько же раз, во сколько выросла площадь: $${ru(h)} : ${ru(n * n)} = ${ru(ans)}$ см.`,
         value: ans,
       },
     ];

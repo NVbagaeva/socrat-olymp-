@@ -5,7 +5,13 @@
  */
 
 import type { Params } from '../stseny/dsl';
-import { osnovaniya112, storony109, ugly107 } from '../stseny/povyshennye';
+import {
+  osnovaniya112,
+  storony109,
+  storony113,
+  ugly107,
+  vysota114,
+} from '../stseny/povyshennye';
 import { g, n, sokr, shag, sverkaDliny, sverkaUgla, variantyGradusov, vopros } from './obshchee';
 import type { Reshenie } from './types';
 
@@ -523,6 +529,71 @@ export const RESHENIYA_POVYSHENNYE: Record<number, (p: Params) => Reshenie> = {
         ),
       ],
       sverka: `Сверяем: основания $${n(ans)}$ и $${n(drugoe)}$, их полусумма $\\frac{${n(o.mal)}+${n(o.bol)}}{2} = ${n(p.m)}$ — это средняя линия, сходится.`,
+      otvet: ans,
+    };
+  },
+  113: (p) => {
+    const s = storony113(p);
+    const pol = s.per / 2;
+    const [iskomaya, dannaya] = p.k ? ['AB', 'CD'] : ['CD', 'AB'];
+    return {
+      shagi: [
+        shag(
+          'Свойство описанного четырёхугольника',
+          'Если в четырёхугольник вписана окружность, суммы его противоположных сторон равны: $AB + CD = BC + AD$. Обе суммы вместе дают периметр, значит, каждая — половина периметра.',
+          [`AB + CD = ${n(s.per)} : 2 = ${n(pol)}`],
+          1,
+        ),
+        shag('Искомая сторона', `Стороны $AB$ и $CD$ противолежащие: из половины периметра вычитаем $${dannaya}$.`, [
+          `${iskomaya} = ${n(pol)} - ${n(s.dano)} = ${n(s.ans)}`,
+        ]),
+      ],
+      voprosy: [
+        vopros(
+          'Чему равна сумма $AB + CD$?',
+          [`$${n(pol)}$`, `$${n(s.per)}$`, `$${n(s.per / 4)}$`],
+          'Суммы противоположных сторон равны, а вместе они дают периметр.',
+        ),
+      ],
+      sverka: `Сверяем: $${n(s.dano)} + ${n(s.ans)} = ${n(pol)}$, удвоенная сумма — $${n(s.per)}$, периметр, сходится.`,
+      otvet: s.ans,
+    };
+  },
+  114: (p) => {
+    const ans = vysota114(p);
+    const k = p.k ? p.a : p.b;
+    const drugaya = p.k ? p.b : p.a;
+    const s = sokr([p.s], k, 'h');
+    return {
+      shagi: [
+        shag(
+          'Какая высота меньше',
+          'Площадь параллелограмма — сторона, умноженная на проведённую к ней высоту. Площадь одна, поэтому к бо́льшей стороне проведена меньшая высота, к меньшей стороне — бо́льшая.',
+          [`S = ${n(p.a)}\cdot h_a = ${n(p.b)}\cdot h_b`],
+          1,
+        ),
+        shag(
+          p.k ? 'Бо́льшая высота' : 'Меньшая высота',
+          `Нужная высота проведена к стороне $${n(k)}$.`,
+          [`h = \dfrac{${n(p.s)}}{${n(k)}} = ${n(ans)}`],
+          undefined,
+          s.shagi,
+        ),
+      ],
+      voprosy: [
+        vopros(
+          `К какой стороне проведена ${p.k ? 'бо́льшая' : 'меньшая'} высота?`,
+          [`$${n(k)}$`, `$${n(drugaya)}$`, 'к любой'],
+          'Произведение стороны на высоту одно и то же — чем длиннее сторона, тем короче высота.',
+        ),
+      ],
+      sverka: sverkaDliny(
+        p.k ? 'бо́льшая высота' : 'меньшая высота',
+        ans,
+        'соседняя сторона',
+        drugaya,
+        'высота — перпендикуляр, он короче наклонной',
+      ),
       otvet: ans,
     };
   },

@@ -589,7 +589,7 @@ Object.assign(VTOROY, {
 });
 
 /* №4–5, где ответ — не вероятность: отношение вероятностей, число билетов. */
-const NE_VEROYATNOST = new Set(['z05.bernulli-otnoshenie', 'z05.bilety']);
+const NE_VEROYATNOST = new Set(['z05.bernulli-otnoshenie', 'z05.bilety', 'z05.kosti-otnoshenie']);
 
 /* Партия 4 (варианты 19–24). */
 const ugolMezhdu = (u, v) =>
@@ -674,6 +674,130 @@ Object.assign(VTOROY, {
   },
   'z12.dva-uzla': (p) => r6(GR.dvaUzla(p).proverka),
   /* P4-END */
+});
+
+/* Партия 5 (варианты 25–30). */
+const FIG1 = requireSrc('lib/planimetriya/figury');
+const dlina = (P, Q) => Math.hypot(P[0] - Q[0], P[1] - Q[1]);
+/** Расстояние от точки P до прямой AB. */
+const doPryamoy = (P, A, B) =>
+  Math.abs((B[0] - A[0]) * (A[1] - P[1]) - (A[0] - P[0]) * (B[1] - A[1])) / dlina(A, B);
+/** Точка окружности радиуса 1 по углу в градусах. */
+const naKruge = (g) => [Math.cos((g * Math.PI) / 180), Math.sin((g * Math.PI) / 180)];
+Object.assign(VTOROY, {
+  'z01.opisannyy-storona': (p) => {
+    /* Строим описанный четырёхугольник по всем сторонам и меряем искомую. */
+    const f = FIG1.opisannyyPoStoronam(p.ab, p.bc, p.cd, p.da);
+    return r6(p.k ? dlina(f.A, f.D) : dlina(f.C, f.D));
+  },
+  'z01.opisannyy-perimetr': (p) => {
+    /* Периметр построенной фигуры, минус данная сторона — от его половины. */
+    const f = FIG1.opisannyyPoStoronam(p.ab, p.bc, p.cd, p.ab + p.cd - p.bc);
+    const per = dlina(f.A, f.B) + dlina(f.B, f.C) + dlina(f.C, f.D) + dlina(f.D, f.A);
+    return r6(per / 2 - (p.k ? dlina(f.C, f.D) : dlina(f.A, f.B)));
+  },
+  'z01.parallelogramm-vysota': (p) => {
+    /* Угол по площади, вершины по координатам, высоты — расстояния от B до AD и CD. */
+    const u = Math.asin(p.s / (p.a * p.b));
+    const A = [0, 0];
+    const D = [p.b, 0];
+    const B = [p.a * Math.cos(u), p.a * Math.sin(u)];
+    const C = [B[0] + p.b, B[1]];
+    const h = [doPryamoy(B, A, D), doPryamoy(B, C, D)];
+    return r6(p.k ? Math.max(...h) : Math.min(...h));
+  },
+  'z01.vysoty-treugolnika': (p) => {
+    /* C в начале, CA = b вдоль Ox, B на расстоянии a под углом, где высота к CA равна h. */
+    const g = Math.asin(p.h / p.a);
+    const C = [0, 0];
+    const A = [p.b, 0];
+    const B = [p.a * Math.cos(g), p.a * Math.sin(g)];
+    return r6(doPryamoy(A, C, B));
+  },
+  'z01.vpisannyy-abc': (p) => {
+    /* Точки на окружности: дуга AD = 2·ABD, дуга DC = 2·CAD, B — на оставшейся дуге. */
+    const A = naKruge(0);
+    const D = naKruge(2 * p.abd);
+    const C = naKruge(2 * p.abd + 2 * p.cad);
+    const B = naKruge((2 * p.abd + 2 * p.cad + 360) / 2);
+    /* Построение сверяем с условием: углы ABD и CAD — те, что даны. */
+    if (Math.abs(ugol(A, B, D) - p.abd) > 1e-6 || Math.abs(ugol(C, A, D) - p.cad) > 1e-6) return NaN;
+    return r6(ugol(A, B, C));
+  },
+  'z01.vpisannyy-cad': (p) => {
+    const A = naKruge(0);
+    const D = naKruge(2 * p.abd);
+    const C = naKruge(2 * p.abc);
+    const B = naKruge((2 * p.abc + 360) / 2);
+    if (Math.abs(ugol(A, B, C) - p.abc) > 1e-6 || Math.abs(ugol(A, B, D) - p.abd) > 1e-6) return NaN;
+    return r6(ugol(C, A, D));
+  },
+  'z02.skalyar-treh': (p) => VK.skalyarnoeTrehPoRisunku(p).proverka,
+  'z03.sosud-prizma': (p) => Z3_5.PV03_SOSUD_PRIZMA.poModeli(p),
+  'z03.shar-cilindr-poverhnost': (p) => r6(Z3_8.PV03_SHAR_CILINDR_S.poModeli(p)),
+  'z03.shest-mnogogrannik': (p) => r6(Z3_2.PV03_SHEST.poModeli(p)),
+  'z04.zapasnaya': (p) => VER.PV4_ZAPASNAYA.perebor(p),
+  'z04.kruglyy-stol': (p) => VER.PV4_KRUGLYY_STOL.perebor(p),
+  'z04.ochered': (p) => VER.PV4_OCHERED.perebor(p),
+  'z05.dve-linii': (p) => VER.PV5_DVE_LINII.perebor(p),
+  'z05.kosti-otnoshenie': (p) => VER.PV5_KOSTI_OTNOSHENIE.perebor(p),
+  'z05.bilety-sochetaniya': (p) => VER.PV5_BILETY_SOCHETANIYA.perebor(p),
+  'z07.koren-drob': podstanovka7(Z7.PV7_KOREN_DROB),
+  'z07.log-mnozhitel': podstanovka7(Z7.PV7_LOG_MNOZHITEL),
+  'z08.log-skobki': (p) => r6(VY.logSkobki(p).proverka),
+  'z08.log-drob-summa': (p) => r6(VY.logDrobSumma(p).proverka),
+  'z08.stepeni-proizvedenie': (p) => r6(VY.stepeniProizvedenie(p).proverka),
+  'z08.sin-cos': (p) => r6(VY.sinCosProizvedenie(p).proverka),
+  'z09.celye-znak': (p) => PR9.celyeZnak(p).proverka,
+  'z09.nuli-proizvodnoy': (p) => PR9.nuliProizvodnoy(p).proverka,
+  'z09.gorizontalnaya': (p) => PR9.gorizontalnayaKasatelnaya(p).proverka,
+  'z10.udar': (p) =>
+    /* Наименьший 2α: энергия возрастает по α на (0°; 90°] — бисекция по α. */
+    r6(2 * bisekciya((a) => p.m * p.v ** 2 * Math.sin((a * Math.PI) / 180) ** 2 - p.Q, 0, 90)),
+  'z10.platforma': (p) =>
+    p.vid === 'v'
+      ? r6(bisekciya((v) => (p.m / (p.m + p.M)) * v * Math.cos((p.alpha * Math.PI) / 180) - p.u, 0, 1e4))
+      : r6(bisekciya((a) => -((p.m / (p.m + p.M)) * p.v * Math.cos((a * Math.PI) / 180) - p.u), 0, 90)),
+  'z10.kolodec': (p) => r6(5 * p.t1 ** 2 - 5 * (p.t1 - p.dt) ** 2),
+  'z10.arhimed': (p) =>
+    r6(bisekciya((x) => (p.vid === 'shar' ? p.alpha : 1) * p.rho * p.g * x ** 3 - p.F, 0, 100)),
+  'z11.krugovaya-trassa': (p) => {
+    /* Перебор скорости велосипедиста с шагом 0,01: первый обгон и второй через круг. */
+    for (let i = 1; i <= 30000; i += 1) {
+      const vc = i / 100;
+      const vm = (vc * (p.t0 + p.t1)) / p.t1;
+      if (Math.abs(((vm - vc) * p.t2) / 60 - p.L) < 1e-9) return p.ask === 'moto' ? r6(vm) : vc;
+    }
+    return NaN;
+  },
+  'z11.gonki': (p) => {
+    /* Перебор скорости второго: разность скоростей — круг за t минут, разница финиша — dt минут. */
+    for (let v = 1; v <= 500; v += 1) {
+      const S = p.n * p.L;
+      /* Обгон на круг через t минут: v₁ = v + 60L/t. */
+      const v1 = v + (p.L * 60) / p.t;
+      if (Math.abs((S / v - S / v1) * 60 - p.dt) < 1e-9) return p.ask === 'vtoroy' ? v : v1;
+    }
+    return NaN;
+  },
+  'z11.splavy': (p) => {
+    /* Бисекция по массе первого сплава: масса металла в смеси. */
+    const m1 = bisekciya((x) => -((x * p.p1 + (p.M - x) * p.p2) / 100 - (p.M * p.p3) / 100), 0, p.M);
+    const m2 = p.M - m1;
+    return r6(p.ask === 'pervyy' ? m1 : p.ask === 'vtoroy' ? m2 : Math.abs(m2 - m1));
+  },
+  'z11.sushka': (p) =>
+    r6(
+      p.vid === 'syrye'
+        ? bisekciya((x) => x * (1 - p.w1 / 100) - p.M * (1 - p.w2 / 100), 0, 1e5)
+        : bisekciya((x) => x * (1 - p.w2 / 100) - p.M * (1 - p.w1 / 100), 0, 1e5),
+    ),
+  'z11.dvoe-rabochih': (p) => {
+    /* Перебор: за сколько дней первый (второй) сделает всё, вместе — за T. */
+    const t = bisekciya((x) => -(1 / x + p.a / (p.b * x) - 1 / p.T), 1e-6, 1e5);
+    return r6(p.ask === 'pervyy' ? t : (t * p.b) / p.a);
+  },
+  'z12.dve-pryamye': (p) => r6(GR.dvePryamye(p).proverka),
 });
 
 /* ── Варианты ───────────────────────────────────────────────────── */

@@ -9,7 +9,14 @@
  */
 
 import { RAD } from '../geom';
-import { parallelogramm, poUglam, ravnobedrennyy, trapeciya, uglyTreugolnika } from '../figury';
+import {
+  opisannyyPoStoronam,
+  parallelogramm,
+  poUglam,
+  ravnobedrennyy,
+  trapeciya,
+  uglyTreugolnika,
+} from '../figury';
 import type { Element } from '../types';
 import {
   type PrototipChertezha,
@@ -21,6 +28,7 @@ import {
   korenTex,
   mn,
   oblast,
+  okr,
   otr,
   prod,
   scena,
@@ -614,8 +622,117 @@ const PROTOTIPY_PARTIYA_4: readonly PrototipChertezha[] = [
   },
 ];
 
+/** Прототип 113: стороны описанного четырёхугольника по AB, BC, CD; DA — из равенства сумм. */
+export function storony113(p: Params) {
+  const da = p.ab + p.cd - p.bc;
+  return { da, per: 2 * (p.ab + p.cd), ans: p.k ? p.ab : p.cd, dano: p.k ? p.cd : p.ab };
+}
+
+/** Прототип 114: площадь S и стороны a < b параллелограмма → меньшая (k = 0) или большая (k = 1) высота. */
+export function vysota114(p: Params) {
+  return p.k ? p.s / p.a : p.s / p.b;
+}
+
+/** Партия 5 (варианты 25–30). */
+const PROTOTIPY_PARTIYA_5: readonly PrototipChertezha[] = [
+  {
+    id: 113,
+    blok: 'VII',
+    nazvanie: 'Описанный четырёхугольник: периметр и одна сторона → противолежащая сторона',
+    fipi: [],
+    uslovie: (p) => {
+      const s = storony113(p);
+      return `Около окружности описан четырёхугольник $ABCD$, его периметр равен $${tex(s.per)}$, $${p.k ? 'CD' : 'AB'}=${tex(s.dano)}$. Найдите сторону $${p.k ? 'AB' : 'CD'}$.`;
+    },
+    otvet: (p) => storony113(p).ans,
+    primer: { ab: 9, bc: 8, cd: 11, k: 0 },
+    sluchaynye: (r) => {
+      const t = [r.int(3, 12), r.int(3, 12), r.int(3, 12), r.int(3, 12)];
+      return { ab: t[0]! + t[1]!, bc: t[1]! + t[2]!, cd: t[2]! + t[3]!, k: r.int(0, 1) };
+    },
+    stsena: (p) => {
+      const s = storony113(p);
+      const f = opisannyyPoStoronam(p.ab, p.bc, p.cd, s.da);
+      const [iA, iB] = p.k ? (['A', 'B'] as const) : (['C', 'D'] as const);
+      const [dA, dB] = p.k ? (['C', 'D'] as const) : (['A', 'B'] as const);
+      return {
+        tochki: { O: [0, 0], A: f.A, B: f.B, C: f.C, D: f.D },
+        okruzhnosti: { w: { centr: 'O', radius: f.r } },
+        elementy: [
+          mn(['A', 'B', 'C', 'D']),
+          okr('w'),
+          storona(dA, dB, chislo(s.dano)),
+          otr(iA, iB, { vydelit: 'iskomoe', znachenie: chislo(s.ans), otvet: true }),
+        ],
+        proverki: [],
+        otvet: chislo(s.ans),
+      };
+    },
+  },
+  {
+    id: 114,
+    blok: 'III',
+    nazvanie: 'Параллелограмм: площадь и две стороны → меньшая или большая высота',
+    fipi: [],
+    uslovie: (p) =>
+      `Стороны параллелограмма равны $${tex(p.a)}$ и $${tex(p.b)}$, а его площадь равна $${tex(p.s)}$. Найдите ${p.k ? 'бо́льшую' : 'меньшую'} высоту параллелограмма.`,
+    otvet: (p) => vysota114(p),
+    primer: { a: 12, b: 20, s: 150, k: 0 },
+    sluchaynye: (r) => {
+      const a = r.int(4, 20);
+      const b = r.int(a + 1, a + 20);
+      return { a, b, s: r.int(2, a - 1) * b, k: r.int(0, 1) };
+    },
+    stsena: (p, porog) => {
+      /* AD = b (бо́льшая сторона, внизу), AB = a; угол A — по высоте h_b = S/b. */
+      const u0 = Math.asin(Math.min(1, p.s / (p.a * p.b))) / RAD;
+      const u = clamp(u0, Math.max(porog, 35), 75);
+      const { t, sk } = parallelogrammPo(u, p.a, p.b);
+      const ans = vysota114(p);
+      const hB = p.s / p.b;
+      const hA = p.s / p.a;
+      return scena(
+        {
+          tochki: {
+            ...t,
+            H: { osnovanie: ['B', 'A', 'D'] },
+            K: { osnovanie: ['B', 'C', 'D'] },
+          },
+          elementy: [
+            mn(['A', 'B', 'C', 'D']),
+            storona('A', 'B', chislo(p.a)),
+            storona('A', 'D', chislo(p.b)),
+            ...vysota('B', 'A', 'D', 'H', null, {
+              vydelit: p.k ? undefined : 'iskomoe',
+              znachenie: p.k ? undefined : chislo(hB),
+              otvet: !p.k,
+            }),
+            /* Основание K от C на расстоянии b·cos u; дальше D — продолжаем CD пунктиром. */
+            ...vysota('B', 'C', 'D', 'K', p.b * Math.cos(u * RAD) > p.a + 1e-9 ? 'b' : null, {
+              vydelit: p.k ? 'iskomoe' : undefined,
+              znachenie: p.k ? chislo(hA) : undefined,
+              otvet: !!p.k,
+            }),
+          ],
+          proverki: [
+            {
+              parallelny: [
+                ['A', 'D'],
+                ['B', 'C'],
+              ],
+            },
+          ],
+          otvet: chislo(ans),
+        },
+        sk || Math.abs(u - u0) > 1e-9,
+      );
+    },
+  },
+];
+
 export const PROTOTIPY_POVYSHENNYE: readonly PrototipChertezha[] = [
   ...PROTOTIPY_PARTIYA_1_2,
   ...PROTOTIPY_PARTIYA_3,
   ...PROTOTIPY_PARTIYA_4,
+  ...PROTOTIPY_PARTIYA_5,
 ];

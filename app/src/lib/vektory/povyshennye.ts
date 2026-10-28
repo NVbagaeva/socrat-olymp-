@@ -425,3 +425,85 @@ export function dlinaKM(p: DlinaKM): Generated {
     seed: 'fixed',
   };
 }
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+/** Три вектора по рисунку: a·(b + c) или (a + b)·c. */
+export interface SkalyarnoeTreh {
+  ax: number;
+  ay: number;
+  bx: number;
+  by: number;
+  cx: number;
+  cy: number;
+  /** 'a(b+c)' — a на сумму b и c; '(a+b)c' — сумма a и b на c. */
+  vid: 'a(b+c)' | '(a+b)c';
+}
+
+/** Три вектора на клетчатой плоскости: первое окно, где рисунок чистый. */
+function risunokTreh(kod: string, v: readonly Tochka[]): Risunok {
+  for (const okno of OKNA) {
+    for (let i = 0; i < 40; i += 1) {
+      const vectors = razmestit(rngOf(`${kod}|${i}`), [...v], okno);
+      if (vectors === null) continue;
+      const r: Risunok = { vectors, window: okno, alt: 'Векторы a, b, c на координатной плоскости' };
+      if (risunokChist(r)) return r;
+    }
+  }
+  throw new Error(`№2: рисунок не сложился ${kod}`);
+}
+
+/**
+ * Как B9 раздела, но векторов три и один множитель — сумма двух других.
+ * Подвох: сначала сложить два вектора по координатам, потом умножать
+ * скалярно; проверка — распределительное свойство, по два произведения.
+ */
+export function skalyarnoeTrehPoRisunku(p: SkalyarnoeTreh): Generated {
+  const a: Tochka = [p.ax, p.ay];
+  const b: Tochka = [p.bx, p.by];
+  const c: Tochka = [p.cx, p.cy];
+  const levaya = p.vid === '(a+b)c';
+  const risunok = risunokTreh(`pv2t|${p.vid}|${signatureOf([a, b, c])}`, [a, b, c]);
+  const [x, y, odin] = levaya
+    ? ([['a', a], ['b', b], ['c', c]] as const)
+    : ([['b', b], ['c', c], ['a', a]] as const);
+  const S: Tochka = [x[1][0] + y[1][0], x[1][1] + y[1][1]];
+  const otvet = S[0] * odin[1][0] + S[1] * odin[1][1];
+  const dot = (u: Tochka, w: Tochka) => u[0] * w[0] + u[1] * w[1];
+  const summa = `(${vec(x[0])}+${vec(y[0])})`;
+  return {
+    uslovie: `${izobrazheny(['a', 'b', 'c'])} Найдите скалярное произведение $${
+      levaya ? `${summa}\cdot${vec('c')}` : `${vec('a')}\cdot${summa}`
+    }$.`,
+    risunok,
+    otvet,
+    /* Второй счёт: раскрыть скобки, сумма двух скалярных произведений. */
+    proverka: dot(x[1], odin[1]) + dot(y[1], odin[1]),
+    shagi: [
+      shagPoRisunku(risunok.vectors),
+      shagKombinatsiya(
+        [
+          [1, x[0], x[1]],
+          [1, y[0], y[1]],
+        ],
+        S,
+        'u',
+      ),
+      {
+        ...shagSkalyarnoe(levaya ? ['u', S] : ['a', a], levaya ? ['c', c] : ['u', S]),
+        zagolovok: `Скалярное произведение $${levaya ? `${vec('u')}\cdot${vec('c')}` : `${vec('a')}\cdot${vec('u')}`}$ по координатам`,
+      },
+      {
+        zagolovok: 'Проверка: раскрываем скобки',
+        stroki: [
+          `$${skalyarnoe(vec(x[0]), vec(odin[0]))}+${skalyarnoe(vec(y[0]), vec(odin[0]))} = ${d(dot(x[1], odin[1]))}${slagaemoe(dot(y[1], odin[1]), false)} = ${d(otvet)}$ — то же число.`,
+        ],
+      },
+      shagOtvet(otvet),
+    ],
+    params: { ...p },
+    signature: `${signatureOf([a, b, c])}|${p.vid}`,
+    prototype: 'P2-SKALYAR-TREH',
+    seed: 'fixed',
+  };
+}

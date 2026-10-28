@@ -27,6 +27,8 @@ import {
   pokazatelnayaOtnoshenie,
   type GiperbolaKB,
   type DvaUzla,
+  dvePryamye,
+  type DvePryamye,
   type GiperbolaPryamaya,
   type KorenPryamaya,
   type ParabolaPryamaya,
@@ -38,6 +40,11 @@ import {
   type PokazatelnayaOtnoshenie,
 } from '@/lib/graph/povyshennye';
 import {
+  celyeZnak,
+  gorizontalnayaKasatelnaya,
+  nuliProizvodnoy,
+  type CelyeZnak,
+  type NuliProizvodnoy,
   chisloNaOtrezke,
   kasatelnayaCherezNachalo,
   kasatelnayaPoUzlam,
@@ -71,6 +78,8 @@ import {
   perpendikulyarNeizvestnaya,
   skalyarnoeKombinatsiy,
   skalyarnoePoRisunku,
+  skalyarnoeTrehPoRisunku,
+  type SkalyarnoeTreh,
   type DlinaKM,
   type DlinaKombinatsii,
   type KosinusVektorov,
@@ -106,11 +115,21 @@ import {
   PV5_ODIN_TSVET,
   PV5_ODNA_GRUPPA,
   PV5_SUMMA_OCHKOV,
+  PV4_KRUGLYY_STOL,
+  PV4_OCHERED,
+  PV4_ZAPASNAYA,
+  PV5_BILETY_SOCHETANIYA,
+  PV5_DVE_LINII,
+  PV5_KOSTI_OTNOSHENIE,
 } from '@/lib/veroyatnost/povyshennye';
 import { dec, type Prototype as ProtoVer } from '@/lib/veroyatnost/types';
 import {
   korniProizvedenie,
   logRaznost,
+  logDrobSumma,
+  logSkobki,
+  sinCosProizvedenie,
+  stepeniProizvedenie,
   stepeniTriOsnovaniya,
   cosDvoynogo,
   logAmBn,
@@ -133,9 +152,14 @@ import { fn as fnTex, rad as radTex } from '@/lib/vychisleniya/tex';
 import type { Draft } from '@/lib/vychisleniya/types';
 import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
 import { PV03_PIRAMIDA_ABCA1B1, PV03_TETRAEDR_ABCB1 } from '@/lib/zadanie3/razdel1/povyshennye';
-import { P03_20S, P03_28S } from '@/lib/zadanie3/razdel2/povyshennye';
+import { P03_20S, P03_28S, PV03_SHEST } from '@/lib/zadanie3/razdel2/povyshennye';
 import { P03_48S, PV03_PIRAMIDA_POVERHNOST } from '@/lib/zadanie3/razdel3/povyshennye';
-import { P03_69S, PV03_CILINDR_KONUS, PV03_KRUZHKI } from '@/lib/zadanie3/razdel5/povyshennye';
+import {
+  P03_69S,
+  PV03_CILINDR_KONUS,
+  PV03_KRUZHKI,
+  PV03_SOSUD_PRIZMA,
+} from '@/lib/zadanie3/razdel5/povyshennye';
 import { PV03_SHAR_POVERHNOST } from '@/lib/zadanie3/razdel6/povyshennye';
 import { P03_74S, PV03_KONUS_BOKOVAYA } from '@/lib/zadanie3/razdel7/povyshennye';
 import {
@@ -145,6 +169,7 @@ import {
   PV03_PARALLELEPIPED_OKOLO_SFERY,
   PV03_SHAR,
   PV03_SHAR_OKOLO_KONUSA,
+  PV03_SHAR_CILINDR_S,
 } from '@/lib/zadanie3/razdel8/povyshennye';
 import type { Params as Params3, Prototype as Proto3 } from '@/lib/zadanie3/types';
 import { prototype as prototype6 } from '@/lib/zadanie6/prototypes';
@@ -159,6 +184,8 @@ import {
   PV7_LOG_STEPENI,
   PV7_POKAZATELNOE,
   PV7_STEPEN_KVADRATA,
+  PV7_KOREN_DROB,
+  PV7_LOG_MNOZHITEL,
 } from '@/lib/zadanie7/prototypes/povyshennye';
 import { prototype as prototype7 } from '@/lib/zadanie7/prototypes';
 import type { Prototype as Proto7 } from '@/lib/zadanie7/types';
@@ -199,6 +226,10 @@ import {
   PV10_RADIATOR,
   PV10_RAZGON,
   PV10_LINZA_MAX,
+  PV10_ARHIMED,
+  PV10_KOLODEC,
+  PV10_PLATFORMA,
+  PV10_UDAR,
 } from '@/lib/zadanie10/prototypes/povyshennye';
 import type { Params as Params11, Solved as Solved11 } from '@/lib/zadanie11/types';
 import {
@@ -210,6 +241,11 @@ import {
   ocheredno,
   rastvorIVoda,
   triRastvora,
+  dvoeRabochih,
+  gonki,
+  krugovayaTrassa,
+  splavy,
+  sushka,
 } from '@/lib/zadanie11/prototypes/povyshennye';
 import { razborUchenika } from '@/lib/variant/adapters/z01';
 import { krupnyyRisunok, minFont, shirinaPoKletke } from '@/lib/variant/pechat';
@@ -482,6 +518,51 @@ const HINTS_CILINDR_KONUS: HintLike[] = [
     options: ['Конус в 3 раза меньше', 'Конус в 3 раза больше', 'Объёмы равны'],
     correct: 0,
     comment: 'У конуса в формуле объёма есть множитель $\\dfrac13$.',
+  },
+];
+
+/** Подсказки к сосуду-призме. */
+const HINTS_SOSUD_PRIZMA: HintLike[] = [
+  {
+    question: 'Во сколько раз выросла площадь основания, если сторона выросла в n раз?',
+    options: ['В $n^2$ раз', 'В $n$ раз', 'В $n^3$ раз'],
+    correct: 0,
+    comment: 'Основания подобны, площади относятся как квадрат коэффициента подобия.',
+  },
+  {
+    question: 'Что не меняется при переливании?',
+    options: ['Объём жидкости', 'Высота уровня', 'Площадь основания'],
+    correct: 0,
+  },
+];
+
+/** Подсказки к шару в цилиндре по поверхности. */
+const HINTS_SHAR_CILINDR_S: HintLike[] = [
+  {
+    question: 'Чему равна высота цилиндра, описанного около шара радиуса R?',
+    options: ['$2R$', '$R$', '$\\pi R$'],
+    correct: 0,
+  },
+  {
+    question: 'Как связаны боковая поверхность такого цилиндра и поверхность шара?',
+    options: ['Равны', 'Шар вдвое больше', 'Цилиндр в 1,5 раза больше'],
+    correct: 0,
+    comment: '$2\\pi R\\cdot 2R=4\\pi R^2$; полная поверхность добавляет ещё два круга.',
+  },
+];
+
+/** Подсказки к многограннику в шестиугольной призме. */
+const HINTS_SHEST: HintLike[] = [
+  {
+    question: 'Какую часть шестиугольника занимает треугольник ABD?',
+    options: ['Треть', 'Шестую часть', 'Половину'],
+    correct: 0,
+    comment: 'Угол ABD прямой, катеты $a$ и $a\\sqrt3$: площадь $\\dfrac{a^2\\sqrt3}{2}$ — треть от $\\dfrac{3\\sqrt3}{2}a^2$.',
+  },
+  {
+    question: 'Чему равна высота многогранника?',
+    options: ['Боковому ребру призмы', 'Половине бокового ребра', 'Стороне основания'],
+    correct: 0,
   },
 ];
 
@@ -788,7 +869,10 @@ function hints08CosDvoynogo(p: CosDvoynogo): HintLike[] {
           question: `Чему равен $\\sqrt{${4 * p.A}}$?`,
           options: [`$2\\sqrt{${p.A}}$`, `$4\\sqrt{${p.A}}$`, `$\\sqrt{${2 * p.A}}$`],
           correct: 0,
-          comment: 'После этого в скобках остаётся $2\\cos^2\\alpha-1=\\cos2\\alpha$.',
+          comment:
+            p.vid === 'sinus'
+              ? 'После этого в скобках остаётся $1-2\\sin^2\\alpha=\\cos2\\alpha$.'
+              : 'После этого в скобках остаётся $2\\cos^2\\alpha-1=\\cos2\\alpha$.',
         },
     {
       question: 'В какой четверти лежит угол $2\\alpha$ после отбрасывания периодов?',
@@ -2227,6 +2311,290 @@ export const SHABLONY: Record<string, Shablon> = {
       'Экономика, тип D (вклады): два одинаковых пополнения за три года, найти первоначальный вклад в сотнях тысяч (обратная к z13.ravnye-popolneniya)',
     otkuda: 'novyy',
     zadacha: (p: VkladNachalnyy & Syuzhet13, klyuch: string) => z13(vkladNachalnyy(p), p, klyuch),
+  },
+  /* ── Партия 5 (варианты 25–30) ── */
+  'z01.opisannyy-storona': {
+    ege: 1,
+    prototip: 'Планиметрия, блок VII: описанный четырёхугольник, три стороны → четвёртая (прототип 41)',
+    otkuda: 'razdel',
+    zadacha: (p: { ab: number; bc: number; cd: number; da: number; k: number }) => z01(41, p),
+  },
+  'z01.opisannyy-perimetr': {
+    ege: 1,
+    prototip: 'Планиметрия, блок VII: описанный четырёхугольник, периметр и сторона → противолежащая (прототип 113)',
+    otkuda: 'novyy',
+    zadacha: (p: { ab: number; bc: number; cd: number; k: number }) => z01(113, p),
+  },
+  'z01.parallelogramm-vysota': {
+    ege: 1,
+    prototip: 'Планиметрия, блок III: параллелограмм, площадь и стороны → меньшая или большая высота (прототип 114)',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; b: number; s: number; k: number }) => z01(114, p),
+  },
+  'z01.vysoty-treugolnika': {
+    ege: 1,
+    prototip: 'Планиметрия, блок III: две стороны и высота к большей → высота к меньшей (прототип 16)',
+    otkuda: 'razdel',
+    zadacha: (p: { a: number; b: number; h: number }) => z01(16, p),
+  },
+  'z01.vpisannyy-abc': {
+    ege: 1,
+    prototip: 'Планиметрия, блок VIII: вписанный ABCD, углы ABD и CAD → угол ABC (прототип 45)',
+    otkuda: 'razdel',
+    zadacha: (p: { abd: number; cad: number; k: number }) => z01(45, p),
+  },
+  'z01.vpisannyy-cad': {
+    ege: 1,
+    prototip: 'Планиметрия, блок VIII: вписанный ABCD, углы ABC и ABD → угол CAD (прототип 46)',
+    otkuda: 'razdel',
+    zadacha: (p: { abc: number; abd: number }) => z01(46, p),
+  },
+  'z02.skalyar-treh': {
+    ege: 2,
+    prototip: 'Векторы, группа B: скалярное произведение a·(b + c) или (a + b)·c по рисунку с тремя векторами (как B9)',
+    otkuda: 'novyy',
+    zadacha: (p: SkalyarnoeTreh) =>
+      bezPoley(build02({ ...kand, seed: 'pv', n: null }, skalyarnoeTrehPoRisunku(p))),
+  },
+  'z03.sosud-prizma': {
+    ege: 3,
+    prototip: 'Стереометрия, раздел V: сосуд — правильная треугольная призма, уровень после переливания в сосуд шире (как P03-67)',
+    otkuda: 'novyy',
+    zadacha: (p: { h: number; n: number }) =>
+      z03(PV03_SOSUD_PRIZMA, p, HINTS_SOSUD_PRIZMA, `z03sz|${p.h}|${p.n}`),
+  },
+  'z03.shar-cilindr-poverhnost': {
+    ege: 3,
+    prototip: 'Стереометрия, раздел VIII: шар в цилиндре — поверхность шара по полной или боковой поверхности цилиндра (как P03-87)',
+    otkuda: 'novyy',
+    zadacha: (p: { S: number; vid: number }) =>
+      z03(PV03_SHAR_CILINDR_S, p, HINTS_SHAR_CILINDR_S, `z03scs|${p.vid}|${p.S}`),
+  },
+  'z03.shest-mnogogrannik': {
+    ege: 3,
+    prototip: 'Стереометрия, раздел II: многогранник на вершинах правильной шестиугольной призмы — тетраэдр ABDE₁ или пирамида ABDEC₁ (как P03-36…40)',
+    otkuda: 'novyy',
+    zadacha: (p: { S: number; h: number; vid: number; s: number }) =>
+      z03(PV03_SHEST, p, HINTS_SHEST, `z03sh|${p.vid}|${p.s}|${p.S}|${p.h}`),
+  },
+  'z04.zapasnaya': {
+    ege: 4,
+    prototip: 'Вероятность, классическое определение: рассадка по аудиториям, попасть в запасную (как p4-12)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_ZAPASNAYA, p),
+  },
+  'z04.kruglyy-stol': {
+    ege: 4,
+    prototip: 'Вероятность, классическое определение: круглый стол, двое через j человек или не рядом — первого сажаем, второму n − 1 мест',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_KRUGLYY_STOL, p),
+  },
+  'z04.ochered': {
+    ege: 4,
+    prototip: 'Вероятность, классическое определение: жребий порядка, участник на данном месте — из третьей страны (как p4-03)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(4, PV4_OCHERED, p),
+  },
+  'z05.dve-linii': {
+    ege: 5,
+    prototip: 'Вероятность: две линии с разным выпуском и браком — годное или бракованное изделие со склада (полная вероятность)',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_DVE_LINII, p),
+  },
+  'z05.kosti-otnoshenie': {
+    ege: 5,
+    prototip: 'Вероятность: две кости — во сколько раз одно событие вероятнее другого, отношение чисел исходов',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_KOSTI_OTNOSHENIE, p),
+  },
+  'z05.bilety-sochetaniya': {
+    ege: 5,
+    prototip: 'Вероятность: билеты без возвращения — ровно j выигрышных или хотя бы один, сочетания',
+    otkuda: 'novyy',
+    zadacha: (p: ParamsVer) => veroyatnost(5, PV5_BILETY_SOCHETANIYA, p),
+  },
+  'z07.koren-drob': {
+    ege: 7,
+    prototip: 'Простейшие уравнения, группа II: корень из дроби с линейным знаменателем равен десятичной дроби',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_KOREN_DROB),
+  },
+  'z07.log-mnozhitel': {
+    ege: 7,
+    prototip: 'Простейшие уравнения, группа IV: logₐ(kx + b) = n·logₐ c — множитель вносим степенью',
+    otkuda: 'novyy',
+    zadacha: (p: Params7) => z07(p, PV7_LOG_MNOZHITEL),
+  },
+  'z08.log-skobki': {
+    ege: 8,
+    prototip: 'Вычисления, логарифмы: (1 − logₐ(a·bᵐ))(1 − log_b(b·aⁿ)) = m·n — логарифм основания и обратные логарифмы',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; b: number; m: number; n: number }) =>
+      z08(
+        logSkobki(p),
+        [
+          {
+            question: `Чему равно $1-\\log_{${p.a}}(${p.a}\\cdot X)$?`,
+            options: [`$-\\log_{${p.a}} X$`, `$\\log_{${p.a}} X$`, '$0$'],
+            correct: 0,
+            comment: `$1=\\log_{${p.a}} ${p.a}$, логарифм произведения — сумма логарифмов.`,
+          },
+          {
+            question: `Чему равно $\\log_{${p.a}} ${p.b}\\cdot\\log_{${p.b}} ${p.a}$?`,
+            options: ['$1$', `$\\log_{${p.a}} ${p.a * p.b}$`, '$0$'],
+            correct: 0,
+          },
+        ],
+        `z08ls|${p.a}|${p.b}|${p.m}|${p.n}`,
+      ),
+  },
+  'z08.log-drob-summa': {
+    ege: 8,
+    prototip: 'Вычисления, логарифмы: log_a N : (k + log_a c) — число k как логарифм aᵏ, логарифм произведения',
+    otkuda: 'novyy',
+    zadacha: (p: { a: number; k: number; c: number; m: number; vid: 'pryamo' | 'obratno' }) =>
+      z08(
+        logDrobSumma(p),
+        [
+          {
+            question: `Как записать число $${p.k}$ логарифмом по основанию $${p.a}$?`,
+            options: [`$\\log_{${p.a}} ${p.a ** p.k}$`, `$\\log_{${p.a}} ${p.k}$`, `$\\log_{${p.a}} ${p.a * p.k}$`],
+            correct: 0,
+          },
+          {
+            question: 'Чему равна сумма логарифмов с одним основанием?',
+            options: ['Логарифму произведения', 'Произведению логарифмов', 'Логарифму суммы'],
+            correct: 0,
+          },
+        ],
+        `z08ld|${p.vid}|${p.a}|${p.k}|${p.c}|${p.m}`,
+      ),
+  },
+  'z08.stepeni-proizvedenie': {
+    ege: 8,
+    prototip: 'Вычисления, степени (как 8.C): произведение степеней с разными основаниями — степенями одного числа, дробные показатели',
+    otkuda: 'novyy',
+    zadacha: (p: { b: number; s1: number; s2: number; x: number; y: number }) =>
+      z08(
+        stepeniProizvedenie(p),
+        [
+          {
+            question: `Степенью какого числа являются $${p.b ** p.s1}$ и $${p.b ** p.s2}$?`,
+            options: [`$${p.b}$`, `$${p.b ** p.s2}$`, '$10$'],
+            correct: 0,
+          },
+          {
+            question: 'Как умножать степени с одинаковым основанием?',
+            options: ['Показатели сложить', 'Показатели перемножить', 'Основания сложить'],
+            correct: 0,
+          },
+        ],
+        `z08sp|${p.b}|${p.x}|${p.y}`,
+      ),
+  },
+  'z08.sin-cos': {
+    ege: 8,
+    prototip: 'Вычисления, тригонометрия: A·sin α·cos α — половина синуса двойного угла и формулы приведения',
+    otkuda: 'novyy',
+    zadacha: (p: { A: number; n: number; den: number }) =>
+      z08(
+        sinCosProizvedenie(p),
+        [
+          {
+            question: 'Какой формулой свернуть $\\sin\\alpha\\cos\\alpha$?',
+            options: ['$\\dfrac12\\sin2\\alpha$', '$\\sin2\\alpha$', '$\\cos2\\alpha$'],
+            correct: 0,
+          },
+          {
+            question: 'Как найти синус угла $2\\alpha$?',
+            options: ['Формулами приведения и таблицей', 'Только калькулятором', 'Он всегда равен 1'],
+            correct: 0,
+            comment: `$2\\alpha=${radTex(2 * p.n, p.den)}$.`,
+          },
+        ],
+        `z08sc|${p.A}|${p.n}|${p.den}`,
+      ),
+  },
+  'z09.celye-znak': {
+    ege: 9,
+    prototip: 'Производная, группа III: число целых точек, где f′ > 0 или f′ < 0, по графику f (как 9.3.3)',
+    otkuda: 'novyy',
+    zadacha: (p: CelyeZnak) => z09(celyeZnak(p), p),
+  },
+  'z09.nuli-proizvodnoy': {
+    ege: 9,
+    prototip: "Производная, группа III: число точек, где f′(x) = 0, по графику f — на интервале или на отрезке (как 9.3.5)",
+    otkuda: 'novyy',
+    zadacha: (p: NuliProizvodnoy) => z09(nuliProizvodnoy(p), p),
+  },
+  'z09.gorizontalnaya': {
+    ege: 9,
+    prototip: 'Производная, группа II: точка отрезка, где касательная параллельна оси абсцисс, по графику f′ (как 9.2.2)',
+    otkuda: 'novyy',
+    zadacha: (p: MaxNaOtrezke) => z09(gorizontalnayaKasatelnaya(p), p),
+  },
+  'z10.udar': {
+    ege: 10,
+    prototip: 'Прикладные, группа V: неупругий удар Q = mv²sin²α — наименьший угол 2α',
+    otkuda: 'novyy',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10s(PV10_UDAR, p, klyuch),
+  },
+  'z10.platforma': {
+    ege: 10,
+    prototip: 'Прикладные, группа V: прыжок на платформу u = m/(m + M)·v·cos α — наибольший угол',
+    otkuda: 'novyy',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10s(PV10_PLATFORMA, p, klyuch),
+  },
+  'z10.kolodec': {
+    ege: 10,
+    prototip: 'Прикладные, группа II: колодец h = 5t² — на сколько поднялась вода',
+    otkuda: 'novyy',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10s(PV10_KOLODEC, p, klyuch),
+  },
+  'z10.arhimed': {
+    ege: 10,
+    prototip: 'Прикладные, группа III: архимедова сила F = ρgl³ или αρgr³ — наибольший размер',
+    otkuda: 'novyy',
+    zadacha: (p: Params10 & { tekst: string }, klyuch: string) => z10s(PV10_ARHIMED, p, klyuch),
+  },
+  'z11.krugovaya-trassa': {
+    ege: 11,
+    prototip: 'Текстовые, движение по окружности: два обгона на круговой трассе — скорость (как ДО)',
+    otkuda: 'novyy',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('PV11-KRUGOVAYA', p, klyuch, krugovayaTrassa),
+  },
+  'z11.gonki': {
+    ege: 11,
+    prototip: 'Текстовые, движение по окружности: гонка на n кругов, обгон на круг — скорость, квадратное уравнение',
+    otkuda: 'novyy',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) => z11('PV11-GONKI', p, klyuch, gonki),
+  },
+  'z11.splavy': {
+    ege: 11,
+    prototip: 'Текстовые, смеси: два сплава дали третий — массы или их разница',
+    otkuda: 'novyy',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) => z11('PV11-SPLAVY', p, klyuch, splavy),
+  },
+  'z11.sushka': {
+    ege: 11,
+    prototip: 'Текстовые, смеси: сушка — сохраняется сухое вещество (виноград и изюм, абрикосы и курага)',
+    otkuda: 'novyy',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) => z11('PV11-SUSHKA', p, klyuch, sushka),
+  },
+  'z11.dvoe-rabochih': {
+    ege: 11,
+    prototip: 'Текстовые, работа: двое вместе за T дней, первый за a дней делает то же, что второй за b, — время одного',
+    otkuda: 'novyy',
+    zadacha: (p: Params11 & { tekst: string }, klyuch: string) =>
+      z11('PV11-DVOE', p, klyuch, dvoeRabochih),
+  },
+  'z12.dve-pryamye': {
+    ege: 12,
+    prototip: 'Графики: две прямые через узлы сетки, точка пересечения вне узлов — абсцисса или ордината (как 12L)',
+    otkuda: 'novyy',
+    zadacha: (p: DvePryamye) =>
+      z12((pe) => dvePryamye(p, pe), `z12dp|${p.P1.join(';')}|${p.Q1.join(';')}|${p.ask}`),
   },
 };
 

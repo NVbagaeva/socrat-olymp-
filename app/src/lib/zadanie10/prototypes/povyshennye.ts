@@ -558,3 +558,321 @@ export const PV10_KOLOKOL: Prototype = {
     };
   },
 };
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+/** Табличные углы: sin² и cos² как дроби. */
+const SIN2: Record<number, [number, number]> = { 30: [1, 4], 45: [1, 2], 60: [3, 4], 90: [1, 1] };
+const COS: Record<number, [number, number]> = { 0: [1, 1], 60: [1, 2] };
+
+/**
+ * Неупругий удар: Q = m·v²·sin²α, тела летят под углом 2α. Найти
+ * наименьший угол 2α, при котором выделится не меньше Q₀. Подвох —
+ * sin²α = Q₀/(mv²), α из таблицы, а ответ — удвоенный угол.
+ */
+export const PV10_UDAR: Prototype = {
+  id: 'PV10-UDAR',
+  no: 140,
+  group: 'V',
+  title: 'Неупругий удар: наименьший угол между направлениями',
+  formula: 'Q=mv^2\\sin^2\\alpha',
+  ask: 'наименьший угол 2α',
+  skills: ['trigonometriya', 'podstanovka'],
+  fipiNos: '',
+  alt: 'Два тела летят навстречу под углом и слипаются',
+  solve(p) {
+    const m = num(p, 'm');
+    const v = num(p, 'v');
+    const Q0 = num(p, 'Q');
+    const s2 = q(Q0, m * v * v);
+    const al = Object.entries(SIN2).find(([, [a, b]]) => a * s2.m === b * s2.n)?.[0];
+    if (al === undefined) throw new Error(`PV10-UDAR: sin²α = ${fq(s2)} — не табличный`);
+    const alpha = Number(al);
+    const ans = 2 * alpha;
+    const dn = [
+      dano('m', m, 'кг', 'масса каждого тела'),
+      dano('v', v, 'м/с', 'скорость тел'),
+      dano('Q', `\\ge${d(Q0)}`, 'Дж', 'выделившаяся энергия'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: '2\\alpha',
+      edinicy: '°',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          'Ищем угол $2\\alpha$. Энергия растёт вместе с $\\sin^2\\alpha$, поэтому наименьший угол — тот, при котором $Q$ ровно равна порогу.',
+        ],
+        vid: 'neravenstvo',
+        reshaem: [
+          `$${d(m)}\\cdot${d(v)}^2\\cdot\\sin^2\\alpha\\ge${d(Q0)}$, то есть $\\sin^2\\alpha\\ge\\dfrac{${d(Q0)}}{${d(m * v * v)}}=${fq(s2)}$.`,
+          `При острых $\\alpha$ это $\\alpha\\ge${alpha}^\\circ$: $\\sin^2${alpha}^\\circ=${fq(s2)}$.`,
+          `Угол между направлениями $2\\alpha\\ge${ans}^\\circ$, наименьший — $${ans}^\\circ$.`,
+        ],
+        proverka: [
+          `При $2\\alpha=${ans}^\\circ$: $Q=${d(m * v * v)}\\cdot${fq(s2)}=${d(Q0)}$ Дж — ровно порог.`,
+        ],
+        answer: ans,
+        ed: '°',
+      }),
+      vychisleniya: [],
+      hints: [
+        chtoNayti('угол $2\\alpha$ между направлениями', ['угол $\\alpha$', 'энергию $Q$']),
+        vopros('Чему равен $\\sin^2\\alpha$ на пороге?', `$${fq(s2)}$`, [
+          `$${fq(q(s2.m, s2.n))}$`,
+          `$${fq(q(Q0, m * v))}$`,
+        ]),
+        vopros(
+          'Что записать в ответ?',
+          `$${ans}$`,
+          [`$${alpha}$`, `$${180 - ans}$`],
+          'Спрашивают угол $2\\alpha$, а не $\\alpha$.',
+        ),
+      ],
+    };
+  },
+};
+
+/**
+ * Прыжок на платформу: u = m/(m + M)·v·cos α. Найти наибольший угол α,
+ * чтобы скорость платформы была не меньше u₀. Подвох — cos α убывает,
+ * поэтому неравенство u ≥ u₀ даёт α ≤ …, а не α ≥ ….
+ */
+export const PV10_PLATFORMA: Prototype = {
+  id: 'PV10-PLATFORMA',
+  no: 141,
+  group: 'V',
+  title: 'Прыжок на платформу: наибольший угол к рельсам',
+  formula: 'u=\\dfrac{m}{m+M}v\\cos\\alpha',
+  ask: 'наибольший угол α',
+  skills: ['trigonometriya', 'podstanovka'],
+  fipiNos: '',
+  alt: 'Человек запрыгивает на платформу, стоящую на рельсах',
+  solve(p) {
+    if (p['vid'] === 'v') return platformaSkorost(p);
+    const m = num(p, 'm');
+    const M = num(p, 'M');
+    const v = num(p, 'v');
+    const u = num(p, 'u');
+    const k = q(m, m + M);
+    const kv = mul(k, q(v));
+    const c = div(q(u), kv);
+    const al = Object.entries(COS).find(([, [a, b]]) => a * c.m === b * c.n)?.[0];
+    if (al === undefined || Number(al) === 0) throw new Error(`PV10-PLATFORMA: cos α = ${fq(c)} — не табличный`);
+    const ans = Number(al);
+    const dn = [
+      dano('m', m, 'кг', 'масса прыгуна со снарядом'),
+      dano('M', M, 'кг', 'масса платформы'),
+      dano('v', v, 'м/с', 'скорость прыжка'),
+      dano('u', `\\ge${d(u)}`, 'м/с', 'скорость платформы'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: '\\alpha',
+      edinicy: '°',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: ['Ищем наибольший угол $\\alpha$. Чем больше острый угол, тем меньше $\\cos\\alpha$ и тем медленнее платформа.'],
+        vid: 'neravenstvo',
+        reshaem: [
+          `Множитель $\\dfrac{m}{m+M}v=\\dfrac{${d(m)}}{${d(m + M)}}\\cdot${d(v)}=${fq(kv)}$.`,
+          `$${fq(kv)}\\cos\\alpha\\ge${d(u)}$, то есть $\\cos\\alpha\\ge${fq(c)}$.`,
+          `$\\cos\\alpha$ на острых углах убывает: $\\alpha\\le${ans}^\\circ$, наибольший — $${ans}^\\circ$.`,
+        ],
+        proverka: [`При $\\alpha=${ans}^\\circ$: $u=${fq(kv)}\\cdot${fq(c)}=${d(u)}$ м/с — ровно порог.`],
+        answer: ans,
+        ed: '°',
+      }),
+      vychisleniya: [],
+      hints: [
+        chtoNayti('наибольший угол $\\alpha$', ['скорость платформы', 'наименьший угол $\\alpha$']),
+        vopros('Чему должен быть не меньше $\\cos\\alpha$?', `$${fq(c)}$`, [
+          `$${fq(div(q(u), q(v)))}$`,
+          `$${fq(q(1, 1))}$`,
+        ]),
+        vopros(
+          'Неравенство $\\cos\\alpha\\ge c$ на острых углах — это…',
+          `$\\alpha\\le\\arccos c$`,
+          ['$\\alpha\\ge\\arccos c$', '$\\alpha=\\arccos c$ и только'],
+          'Косинус убывает: больший угол — меньший косинус.',
+        ),
+      ],
+    };
+  },
+};
+
+/**
+ * Тот же прыжок, но угол дан (α = 60°): найти наименьшую скорость прыжка
+ * v, при которой платформа поедет не медленнее u₀. Подвох — cos 60° = 1/2
+ * стоит в знаменателе и удваивает ответ.
+ */
+function platformaSkorost(p: Parameters<Prototype['solve']>[0]): ReturnType<Prototype['solve']> {
+  const m = num(p, 'm');
+  const M = num(p, 'M');
+  const u = num(p, 'u');
+  const al = num(p, 'alpha');
+  const c = COS[al];
+  if (c === undefined) throw new Error(`PV10-PLATFORMA: cos ${al}° не табличный рациональный`);
+  const cosQ = q(c[0], c[1]);
+  const k = q(m, m + M);
+  const v = div(q(u), mul(k, cosQ));
+  const ans = val(v);
+  const dn = [
+    dano('m', m, 'кг', 'масса прыгуна со снарядом'),
+    dano('M', M, 'кг', 'масса платформы'),
+    dano('\\alpha', `${al}^\\circ`, '', 'угол прыжка к рельсам'),
+    dano('u', `\\ge${d(u)}`, 'м/с', 'скорость платформы'),
+  ];
+  return {
+    answer: ans,
+    iskomoe: 'v',
+    edinicy: 'м/с',
+    dano: dn,
+    etapy: razbor({
+      dano: dn,
+      ishchem: ['Ищем наименьшую скорость прыжка $v$: скорость платформы растёт вместе с $v$, на пределе $u$ ровно равна порогу.'],
+      vid: 'neravenstvo',
+      reshaem: [
+        `$\\dfrac{${d(m)}}{${d(m + M)}}\\cdot v\\cdot\\cos${al}^\\circ\\ge${d(u)}$, где $\\cos${al}^\\circ=${fq(cosQ)}$.`,
+        `$${fq(mul(k, cosQ))}\\,v\\ge${d(u)}$, $v\\ge${d(u)}:${fq(mul(k, cosQ))}=${d(ans)}$ м/с.`,
+      ],
+      proverka: [`При $v=${d(ans)}$ м/с: $u=${fq(k)}\\cdot${d(ans)}\\cdot${fq(cosQ)}=${d(u)}$ м/с — ровно порог.`],
+      answer: ans,
+      ed: 'м/с',
+    }),
+    vychisleniya: [],
+    hints: [
+      chtoNayti('наименьшую скорость прыжка $v$', ['угол $\\alpha$', 'скорость платформы']),
+      vopros(`Чему равен $\\cos${al}^\\circ$?`, `$${fq(cosQ)}$`, ['$\\dfrac{\\sqrt3}{2}$', '$1$']),
+      vopros(
+        'Как меняется ответ из-за косинуса в знаменателе?',
+        'Скорость прыжка нужна больше',
+        ['Скорость прыжка нужна меньше', 'Не меняется'],
+        'Делим на число меньше единицы.',
+      ),
+    ],
+  };
+}
+
+/**
+ * Колодец: h = 5t². Время падения было t₁, после дождя изменилось на Δ
+ * (вода ближе — время меньше). На сколько поднялась вода? Подвох — время
+ * уменьшается, и ответ — разность расстояний, а не 5·Δ².
+ */
+export const PV10_KOLODEC: Prototype = {
+  id: 'PV10-KOLODEC',
+  no: 142,
+  group: 'II',
+  title: 'Колодец: на сколько поднялась вода по времени падения камешка',
+  formula: 'h=5t^2',
+  ask: 'на сколько метров поднялась вода',
+  skills: ['podstanovka'],
+  fipiNos: '',
+  alt: 'Камешек падает в колодец',
+  solve(p) {
+    const t1 = num(p, 't1');
+    const dt = num(p, 'dt');
+    const t2 = val(sub(q(t1), q(dt)));
+    const h1 = val(mul(q(5), mul(q(t1), q(t1))));
+    const h2 = val(mul(q(5), mul(q(t2), q(t2))));
+    const ans = val(sub(q(h1), q(h2)));
+    if (!(t2 > 0)) throw new Error('PV10-KOLODEC: время после дождя не положительно');
+    const dn = [
+      dano('t_1', t1, 'с', 'время падения до дождя'),
+      dano('\\Delta t', dt, 'с', 'на сколько изменилось время'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: '\\Delta h',
+      edinicy: 'м',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          'Ищем, на сколько уменьшилось расстояние до воды. Вода поднялась — камешек падает меньше, время уменьшилось.',
+        ],
+        vid: 'vychislyaem',
+        reshaem: [
+          `До дождя: $h_1=5\\cdot${d(t1)}^2=${d(h1)}$ м.`,
+          `После: $t_2=${d(t1)}-${d(dt)}=${d(t2)}$ с, $h_2=5\\cdot${d(t2)}^2=${d(h2)}$ м.`,
+          `Вода поднялась на $${d(h1)}-${d(h2)}=${d(ans)}$ м.`,
+        ],
+        proverka: [`Время уменьшилось, расстояние до воды тоже: $${d(h2)}<${d(h1)}$ — сходится.`],
+        answer: ans,
+        ed: 'м',
+      }),
+      vychisleniya: [],
+      hints: [
+        chtoNayti('на сколько поднялась вода', ['глубину колодца', 'новое время падения']),
+        vopros('Каким стало время падения после дождя?', `$${d(t2)}$ с`, [
+          `$${d(val(sub(q(t1), q(-dt))))}$ с`,
+          `$${d(dt)}$ с`,
+        ], 'Вода ближе — камешек падает меньше.'),
+        vopros('Чему равен ответ?', `$h_1-h_2$`, ['$5\\cdot(\\Delta t)^2$', '$h_1+h_2$']),
+      ],
+    };
+  },
+};
+
+/**
+ * Выталкивающая сила: куб F = ρgl³ (vid 'kub') или сфера F = αρgr³
+ * (vid 'shar'); сила не больше F₀ — найти наибольшую длину ребра или
+ * радиус. Подвох — из куба величины извлечь кубический корень, а не
+ * квадратный.
+ */
+export const PV10_ARHIMED: Prototype = {
+  id: 'PV10-ARHIMED',
+  no: 143,
+  group: 'III',
+  title: 'Архимедова сила: наибольший размер аппарата',
+  formula: 'F_A=\\rho g l^3',
+  ask: 'наибольшее ребро или радиус',
+  skills: ['koren', 'stepen'],
+  fipiNos: '',
+  alt: 'Аппарат погружается под воду',
+  solve(p) {
+    const shar = p['vid'] === 'shar';
+    const rho = num(p, 'rho');
+    const g = num(p, 'g');
+    const al = shar ? num(p, 'alpha') : 1;
+    const F = num(p, 'F');
+    const K = val(mul(q(al), q(rho * g)));
+    const kub = val(div(q(F), q(K)));
+    const x = Math.round(Math.cbrt(kub) * 1e6) / 1e6;
+    if (Math.abs(val(mul(q(x), mul(q(x), q(x)))) - kub) > 1e-9) throw new Error(`PV10-ARHIMED: ∛${kub} не конечная дробь`);
+    const bukva = shar ? 'r' : 'l';
+    const dn = [
+      ...(shar ? [dano('\\alpha', al, '', 'постоянная')] : []),
+      dano('\\rho', rho, 'кг/м³', 'плотность воды'),
+      dano('g', g, 'Н/кг', 'ускорение свободного падения'),
+      dano('F_A', `\\le${d(F)}`, 'Н', 'выталкивающая сила'),
+    ];
+    return {
+      answer: x,
+      iskomoe: bukva,
+      edinicy: 'м',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [`Ищем наибольшее $${bukva}$: сила растёт вместе с $${bukva}^3$, на пределе она равна $${d(F)}$ Н.`],
+        vid: 'neravenstvo',
+        reshaem: [
+          `Множитель при $${bukva}^3$: $${shar ? `${d(al)}\\cdot` : ''}${d(rho)}\\cdot${d(g)}=${d(K)}$.`,
+          `$${d(K)}\\,${bukva}^3\\le${d(F)}$, $${bukva}^3\\le\\dfrac{${d(F)}}{${d(K)}}=${d(kub)}$.`,
+          `$${bukva}\\le\\sqrt[3]{${d(kub)}}=${d(x)}$ м.`,
+        ],
+        proverka: [`$${d(x)}^3=${d(kub)}$ и $${d(K)}\\cdot${d(kub)}=${d(F)}$ — сходится.`],
+        answer: x,
+        ed: 'м',
+      }),
+      vychisleniya: sokrashchenie([F], K, `${bukva}^3`),
+      hints: [
+        chtoNayti(shar ? 'наибольший радиус $r$' : 'наибольшее ребро $l$', ['силу $F_A$', 'объём аппарата']),
+        vopros(`Чему равно наибольшее $${bukva}^3$?`, `$${d(kub)}$`, [`$${d(val(div(q(F), q(rho))))}$`, `$${d(F)}$`]),
+        vopros('Какой корень извлекаем?', 'Кубический', ['Квадратный', 'Никакой'], `$${bukva}$ стоит в третьей степени.`),
+      ],
+    };
+  },
+};

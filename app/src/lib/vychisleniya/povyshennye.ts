@@ -395,8 +395,8 @@ export interface CosDvoynogo {
   /** Угол α = n·π/den. */
   n: number;
   den: number;
-  /** raznost: √A·cos²α − √A·sin²α; odin: √(4A)·cos²α − √A. */
-  vid: 'raznost' | 'odin';
+  /** raznost: √A·cos²α − √A·sin²α; odin: √(4A)·cos²α − √A; sinus: √A − √(4A)·sin²α. */
+  vid: 'raznost' | 'odin' | 'sinus';
 }
 
 /** Квадрат функции угла в TeX: \cos^2\frac{19\pi}{12}. */
@@ -415,7 +415,9 @@ export function cosDvoynogo(p: CosDvoynogo): Draft {
   const vyr =
     vid === 'raznost'
       ? `\\sqrt{${A}}${c2}-\\sqrt{${A}}${s2}`
-      : `\\sqrt{${4 * A}}${c2}-\\sqrt{${A}}`;
+      : vid === 'sinus'
+        ? `\\sqrt{${A}}-\\sqrt{${4 * A}}${s2}`
+        : `\\sqrt{${4 * A}}${c2}-\\sqrt{${A}}`;
   const cep = trigCepochka(['cos', 2 * n, den]);
   const { zn, s, D } = cep.z;
   const koren = Math.round(Math.sqrt(A * s));
@@ -429,10 +431,14 @@ export function cosDvoynogo(p: CosDvoynogo): Draft {
     razbor: [
       vid === 'raznost'
         ? `Выносим общий множитель: $${vyr} = \\sqrt{${A}}\\left(${c2}-${s2}\\right)$.`
-        : `$\\sqrt{${4 * A}} = \\sqrt{4\\cdot${A}} = 2\\sqrt{${A}}$, поэтому $${vyr} = \\sqrt{${A}}\\left(2${c2}-1\\right)$.`,
+        : vid === 'sinus'
+          ? `$\\sqrt{${4 * A}} = \\sqrt{4\\cdot${A}} = 2\\sqrt{${A}}$, поэтому $${vyr} = \\sqrt{${A}}\\left(1-2${s2}\\right)$.`
+          : `$\\sqrt{${4 * A}} = \\sqrt{4\\cdot${A}} = 2\\sqrt{${A}}$, поэтому $${vyr} = \\sqrt{${A}}\\left(2${c2}-1\\right)$.`,
       vid === 'raznost'
         ? `Косинус двойного угла: $\\cos^2\\alpha-\\sin^2\\alpha = \\cos2\\alpha$, здесь $2\\alpha = ${dvaAlfa}$.`
-        : `Косинус двойного угла: $2\\cos^2\\alpha-1 = \\cos2\\alpha$, здесь $2\\alpha = ${dvaAlfa}$.`,
+        : vid === 'sinus'
+          ? `Косинус двойного угла: $1-2\\sin^2\\alpha = \\cos2\\alpha$, здесь $2\\alpha = ${dvaAlfa}$.`
+          : `Косинус двойного угла: $2\\cos^2\\alpha-1 = \\cos2\\alpha$, здесь $2\\alpha = ${dvaAlfa}$.`,
       `Формулы приведения: $${cep.tex}$.`,
       `Умножаем: $\\sqrt{${A}}\\cdot\\left(${cep.tex.split('=').pop()}\\right) = ${zn < 0 ? '-' : ''}\\dfrac{\\sqrt{${A * s}}}{${D}} = ${d(otvet)}$.`,
     ],
@@ -441,7 +447,9 @@ export function cosDvoynogo(p: CosDvoynogo): Draft {
       const a = (n * Math.PI) / den;
       return vid === 'raznost'
         ? Math.sqrt(A) * Math.cos(a) ** 2 - Math.sqrt(A) * Math.sin(a) ** 2
-        : Math.sqrt(4 * A) * Math.cos(a) ** 2 - Math.sqrt(A);
+        : vid === 'sinus'
+          ? Math.sqrt(A) - Math.sqrt(4 * A) * Math.sin(a) ** 2
+          : Math.sqrt(4 * A) * Math.cos(a) ** 2 - Math.sqrt(A);
     })(),
     signature: `cos2:${vid}:${A}:${n}:${den}`,
   };
@@ -645,5 +653,126 @@ export function korniProizvedenie(p: { k: number; A: number; n: number; m: numbe
     params: { k, A, n, m },
     proverka: k * A ** (1 / n) * A ** (1 / m),
     signature: `kpr:${k}:${A}:${n}:${m}`,
+  };
+}
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+/**
+ * (1 − log_a(a·bᵐ))·(1 − log_b(b·aⁿ)): каждая скобка — минус логарифм
+ * второго числа, (−m·log_a b)·(−n·log_b a) = m·n. Подвох — увидеть
+ * в 1 логарифм основания и что log_a b·log_b a = 1.
+ */
+export function logSkobki(p: { a: number; b: number; m: number; n: number }): Draft {
+  const { a, b, m, n } = p;
+  const X = a * b ** m;
+  const Y = b * a ** n;
+  const otvet = m * n;
+  const st = (c: number, k: number) => (k === 1 ? `${c}` : `${c}^{${k}}`);
+  return {
+    uslovie: `Найдите значение выражения $\\left(1-${log(String(a), String(X))}\\right)\\left(1-${log(String(b), String(Y))}\\right)$.`,
+    otvet,
+    razbor: [
+      `Разложим числа под логарифмами: $${X} = ${a}\\cdot ${st(b, m)}$, $${Y} = ${b}\\cdot ${st(a, n)}$.`,
+      `Логарифм произведения — сумма, и $${log(String(a), String(a))} = 1$: $1-${log(String(a), String(X))} = 1-1-${m === 1 ? '' : m}${log(String(a), String(b))} = -${m === 1 ? '' : m}${log(String(a), String(b))}$.`,
+      `Так же $1-${log(String(b), String(Y))} = -${n === 1 ? '' : n}${log(String(b), String(a))}$.`,
+      `Произведение: $${m * n === 1 ? '' : m * n}${log(String(a), String(b))}\\cdot ${log(String(b), String(a))} = ${m * n === 1 ? '' : `${m * n}\\cdot `}1 = ${otvet}$, потому что $${log(String(a), String(b))} = \\dfrac{1}{${log(String(b), String(a))}}$.`,
+    ],
+    params: { a, b, m, n },
+    proverka: (1 - Math.log(X) / Math.log(a)) * (1 - Math.log(Y) / Math.log(b)),
+    signature: `logsk:${a}:${b}:${m}:${n}`,
+  };
+}
+
+/**
+ * log_a N : (k + log_a c), где N = (aᵏ·c)ᵐ: знаменатель — логарифм
+ * aᵏ·c, числитель — m таких логарифмов. vid 'pryamo' — ответ m;
+ * vid 'obratno' (дробь перевёрнута) — 1/m. Подвох — записать k как
+ * log_a aᵏ и собрать знаменатель в один логарифм.
+ */
+export function logDrobSumma(p: { a: number; k: number; c: number; m: number; vid: 'pryamo' | 'obratno' }): Draft {
+  const { a, k, c, m, vid } = p;
+  const M = a ** k * c;
+  const N = M ** m;
+  const lN = log(String(a), String(N));
+  const zn = `${k}+${log(String(a), String(c))}`;
+  const otvet = vid === 'obratno' ? round9(1 / m) : m;
+  if (!konechnaya(otvet)) throw new Error(`logDrobSumma: 1/${m} — бесконечная дробь`);
+  return {
+    uslovie:
+      vid === 'obratno'
+        ? `Найдите значение выражения $\\dfrac{${zn}}{${lN}}$.`
+        : `Найдите значение выражения $\\dfrac{${lN}}{${zn}}$.`,
+    otvet,
+    razbor: [
+      `Число $${k}$ — это $${log(String(a), String(a ** k))}$, поэтому $${zn} = ${log(String(a), String(a ** k))}+${log(String(a), String(c))} = ${log(String(a), String(M))}$.`,
+      m === 1
+        ? `Под логарифмом в другой части дроби — то же число $${N}$.`
+        : `$${N} = ${M}^{${m}}$, поэтому $${lN} = ${m}${log(String(a), String(M))}$.`,
+      vid === 'obratno'
+        ? `Дробь равна $\\dfrac{${log(String(a), String(M))}}{${m === 1 ? '' : m}${log(String(a), String(M))}} = ${d(otvet)}$.`
+        : `Дробь равна $\\dfrac{${m === 1 ? '' : m}${log(String(a), String(M))}}{${log(String(a), String(M))}} = ${otvet}$.`,
+    ],
+    params: { a, k, c, m, vid },
+    proverka: (() => {
+      const num = Math.log(N) / Math.log(a);
+      const den = k + Math.log(c) / Math.log(a);
+      return vid === 'obratno' ? den / num : num / den;
+    })(),
+    signature: `logdr:${vid}:${a}:${k}:${c}:${m}`,
+  };
+}
+
+/**
+ * (b^s1)^x · (b^s2)^y: оба основания — степени b, показатели дробные,
+ * сумма s1·x + s2·y целая. Ответ b^(s1·x + s2·y).
+ */
+export function stepeniProizvedenie(p: { b: number; s1: number; s2: number; x: number; y: number }): Draft {
+  const { b, s1, s2, x, y } = p;
+  const B1 = b ** s1;
+  const B2 = b ** s2;
+  const e1 = round9(s1 * x);
+  const e2 = round9(s2 * y);
+  const e = round9(e1 + e2);
+  const otvet = round9(b ** e);
+  if (!konechnaya(otvet)) throw new Error(`stepeniProizvedenie: ответ ${otvet} — не конечная дробь`);
+  return {
+    uslovie: `Найдите значение выражения $${B1}^{${d(x)}}\\cdot ${B2}^{${d(y)}}$.`,
+    otvet,
+    razbor: [
+      `Оба основания — степени числа $${b}$: $${B1} = ${b}^{${s1}}$, $${B2} = ${b}^{${s2}}$.`,
+      `Степень в степени — показатели перемножаются: $${B1}^{${d(x)}} = ${b}^{${s1}\\cdot${d(x)}} = ${b}^{${d(e1)}}$, $${B2}^{${d(y)}} = ${b}^{${s2}\\cdot${d(y)}} = ${b}^{${d(e2)}}$.`,
+      `При умножении степеней показатели складываются: $${b}^{${d(e1)}+${d(e2)}} = ${b}^{${d(e)}} = ${d(otvet)}$.`,
+    ],
+    params: { b, s1, s2, x, y },
+    proverka: B1 ** x * B2 ** y,
+    signature: `stpr:${b}:${s1}:${s2}:${x}:${y}`,
+  };
+}
+
+/**
+ * A·sin α·cos α при α = n·π/den: это (A/2)·sin 2α, у угла 2α табличный
+ * синус ±1/2 или ±1. Подвох — увидеть половину синуса двойного угла и
+ * не ошибиться со знаком при приведении.
+ */
+export function sinCosProizvedenie(p: { A: number; n: number; den: number }): Draft {
+  const { A, n, den } = p;
+  const cep = trigCepochka(['sin', 2 * n, den]);
+  const { zn, s, D } = cep.z;
+  if (s !== 1) throw new Error(`sinCosProizvedenie: sin 2α = ±√${s}/${D} — с корнем`);
+  const otvet = round9((zn * A) / (2 * D));
+  if (!konechnaya(otvet)) throw new Error(`sinCosProizvedenie: ${zn * A}/${2 * D} — бесконечная дробь`);
+  const ugol = rad(n, den);
+  return {
+    uslovie: `Найдите значение выражения $${A}${fn('sin')}${ugol}\\cdot${fn('cos')}${ugol}$.`,
+    otvet,
+    razbor: [
+      `Синус двойного угла: $\\sin2\\alpha = 2\\sin\\alpha\\cos\\alpha$, поэтому $${A}\\sin\\alpha\\cos\\alpha = ${d(A / 2)}\\sin2\\alpha$, здесь $2\\alpha = ${rad(2 * n, den)}$.`,
+      `Формулы приведения: $${cep.tex}$.`,
+      `$${d(A / 2)}\\cdot\\left(${cep.tex.split('=').pop()}\\right) = ${d(otvet)}$.`,
+    ],
+    params: { A, n, den },
+    proverka: A * Math.sin((n * Math.PI) / den) * Math.cos((n * Math.PI) / den),
+    signature: `sincos:${A}:${n}:${den}`,
   };
 }

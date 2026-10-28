@@ -26,6 +26,7 @@ import {
   t,
   uslovieTekst,
   val,
+  voprosIz,
   vychDelenie,
   type Poryadok,
 } from '../kit';
@@ -1113,6 +1114,172 @@ export const PV7_STEPEN_KVADRATA: Prototype = {
           n % 2 === 1 ? 'Нечётная степень сохраняет знак.' : 'У чётной степени два корня с разными знаками.',
         ),
         hintOtbor('menshiy', `$${d(ans)}$`, [`$${d(-ans)}$`, `$${d(c - ans * ans)}$`]),
+      ],
+    };
+  },
+};
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+/** √(A / (kx + b)) = c: условие. */
+function uravnenieKorenDrob(p: Params): string {
+  const E = lin(num(p, 'k'), num(p, 'b'), 'x', (p.por ?? 'xb') as Poryadok);
+  return `\\sqrt{\\dfrac{${d(num(p, 'A'))}}{${E}}}=${d(num(p, 'c'))}`;
+}
+
+/**
+ * √(A / (kx + b)) = c: возвести в квадрат, перевернуть дробь, решить
+ * линейное. Подвох — c² десятичное (1,6² = 2,56), а знаменатель должен
+ * остаться положительным; корень один, хотя условие спрашивает
+ * «меньший из корней».
+ */
+export const PV7_KOREN_DROB: Prototype = {
+  id: 'PV7-KOREN-DROB',
+  no: 111,
+  group: 'II',
+  title: 'Корень из дроби с линейным знаменателем',
+  formula: '\\sqrt{\\dfrac{A}{kx+b}}=c',
+  skills: ['korni', 'perenos'],
+  fipiNos: '',
+  uravnenie: uravnenieKorenDrob,
+  uslovie(p) {
+    return uslovieTekst(uravnenieKorenDrob(p), voprosIz(p, ['koren', 'menshiy', 'bolshiy']));
+  },
+  vopros: (p) => voprosIz(p, ['koren', 'menshiy', 'bolshiy']),
+  chisla(p) {
+    const A = num(p, 'A');
+    const k = num(p, 'k');
+    const b = num(p, 'b');
+    return {
+      lhs: (x) => Math.sqrt(A / (k * x + b)),
+      rhs: () => num(p, 'c'),
+      odz: (x) => k * x + b > 0,
+    };
+  },
+  solve(p) {
+    const A = num(p, 'A');
+    const k = num(p, 'k');
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    const c2 = mul(q(c), q(c));
+    const zn = div(q(A), c2);
+    const x = div(sub(zn, q(b)), q(k));
+    if (!konechnaya(x)) throw new Error(`PV7-KOREN-DROB: корень — бесконечная дробь ${JSON.stringify(p)}`);
+    const ans = val(x);
+    const E = lin(k, b, 'x', (p.por ?? 'xb') as Poryadok);
+    return {
+      answer: ans,
+      uravnenie: uravnenieKorenDrob(p),
+      korni: [ans],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          'Справа положительное число, обе части неотрицательны — возводим в квадрат. Под корнем дробь: знаменатель не может быть нулём и должен быть положителен.',
+        ],
+        preobr: [
+          `$\\dfrac{${d(A)}}{${E}}=${d(c)}^2=${t(c2)}$.`,
+          `Знаменатель равен частному: $${E}=\\dfrac{${d(A)}}{${t(c2)}}=${t(zn)}$.`,
+          ...linReshenie(k, b, zn),
+        ],
+        korni: [`$x=${t(x)}$ — корень единственный: линейное уравнение.`],
+        proverka: [
+          `$${lin(k, 0)}+${d(b)}$ при $x=${t(x)}$ равно $${t(zn)}>0$, $\\dfrac{${d(A)}}{${t(zn)}}=${t(c2)}=${d(c)}^2$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: vychDelenie(q(A), c2),
+      hints: [
+        hint('Что сделать первым шагом?', 'Возвести обе части в квадрат', [
+          'Умножить обе части на знаменатель',
+          'Извлечь корень из числителя',
+        ]),
+        hint(`Чему равно $${d(c)}^2$?`, `$${t(c2)}$`, [`$${t(mul(q(c), q(2)))}$`, `$${t(q(c))}$`]),
+        hint('Чему равен знаменатель дроби?', `$${t(zn)}$`, [`$${t(c2)}$`, `$${t(mul(q(A), c2))}$`]),
+        hintOtbor(voprosIz(p, ['koren', 'menshiy', 'bolshiy']), `$${t(x)}$`, ryadom(x)),
+      ],
+    };
+  },
+};
+
+/** log_a(px + q) = n·log_a(c): условие. */
+function uravnenieLogMnozh(p: Params): string {
+  const a = num(p, 'a');
+  const n = num(p, 'n');
+  const E = lin(num(p, 'k'), num(p, 'b'), 'x', (p.por ?? 'bx') as Poryadok);
+  return `${logTex(a)}(${E})=${n === 1 ? '' : d(n)}${logTex(a)} ${d(num(p, 'c'))}`;
+}
+
+/**
+ * logₐ(kx + b) = n·logₐ c: внести множитель под логарифм (c^n), затем
+ * приравнять аргументы. Подвох — множитель n перед логарифмом — это
+ * степень числа c, а не множитель аргумента: kx + b = cⁿ, не n·c.
+ */
+export const PV7_LOG_MNOZHITEL: Prototype = {
+  id: 'PV7-LOG-MNOZHITEL',
+  no: 112,
+  group: 'IV',
+  title: 'Логарифм с множителем справа: logₐ(kx + b) = n·logₐ c',
+  formula: '\\log_a(kx+b)=n\\log_a c',
+  skills: ['log-svoystva', 'perenos'],
+  fipiNos: '',
+  uravnenie: uravnenieLogMnozh,
+  uslovie(p) {
+    return uslovieTekst(uravnenieLogMnozh(p), 'koren');
+  },
+  vopros: () => 'koren',
+  chisla(p) {
+    const k = num(p, 'k');
+    const b = num(p, 'b');
+    return {
+      lhs: (x) => Math.log(k * x + b),
+      rhs: () => num(p, 'n') * Math.log(num(p, 'c')),
+      odz: (x) => k * x + b > 0,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const k = num(p, 'k');
+    const b = num(p, 'b');
+    const n = num(p, 'n');
+    const c = num(p, 'c');
+    const C = c ** n;
+    const x = div(q(C - b), q(k));
+    if (!konechnaya(x)) throw new Error(`PV7-LOG-MNOZHITEL: корень — бесконечная дробь ${JSON.stringify(p)}`);
+    const ans = val(x);
+    const E = lin(k, b, 'x', (p.por ?? 'bx') as Poryadok);
+    const L = logTex(a);
+    return {
+      answer: ans,
+      uravnenie: uravnenieLogMnozh(p),
+      korni: [ans],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          `Логарифмы по одному основанию $${d(a)}$. План: внести множитель $${d(n)}$ под логарифм справа и приравнять аргументы.`,
+        ],
+        odz: [`Аргумент логарифма положителен: $${E}>0$.`],
+        preobr: [
+          `$${d(n)}${L} ${d(c)}=${L} ${d(c)}^{${d(n)}}=${L} ${d(C)}$.`,
+          `Основания равны — приравниваем аргументы: $${E}=${d(C)}$.`,
+          ...linReshenie(k, b, q(C), (p.por ?? 'bx') as Poryadok),
+        ],
+        korni: [`$x=${t(x)}$.`],
+        proverka: [
+          `$${E}$ при $x=${t(x)}$ равно $${d(C)}>0$ — ОДЗ выполнена, и $${L} ${d(C)}=${d(n)}${L} ${d(c)}$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(`Чему равно $${d(n)}${L} ${d(c)}$?`, `$${L} ${d(C)}$`, [
+          `$${L} ${d(n * c)}$`,
+          `$${L} ${d(c + n)}$`,
+        ]),
+        hint('Какое уравнение получится для аргументов?', `$${E}=${d(C)}$`, [
+          `$${E}=${d(n * c)}$`,
+          `$${E}=${d(c)}$`,
+        ]),
+        hint('Чему равен $x$?', `$${t(x)}$`, ryadom(x)),
       ],
     };
   },
