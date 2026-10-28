@@ -626,7 +626,9 @@
 .z9-zhivoy {
   display: grid;
   gap: var(--space-4);
-  margin: var(--space-6) 0 0;
+  /* Рамка ↔ абзац: шаг ритма --flow-block с обеих сторон, текст после
+     рисунка к рамке не прилипает. */
+  margin: var(--flow-block) 0;
   padding: var(--space-4);
   border: 1.5px solid var(--color-border-info);
   border-radius: var(--radius-lg);

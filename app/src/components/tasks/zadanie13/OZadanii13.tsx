@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { Details } from '@/components/ui';
+import { Badge, Callout, Details, Snoska } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
 import { O_ZADANII_13 } from '@/content/zadanie13';
+import { tipograf } from '@/lib/tipograf';
 import { SIGN } from '@/lib/zadanie13/proto/common';
 import { TYPE_NAMES, type TypeCode } from '@/lib/zadanie13/types';
 import { Razbor } from './Teoriya13';
@@ -36,25 +37,47 @@ export function OZadanii13({ base }: { base: string }) {
   return (
     <div className="z11-about z13-about">
       <div className="z11-about__main">
-        <section className="z11-about__lead">
-          <h2 className="t-h2 z11-about__title">{o.title}</h2>
-          <p className="z11-about__answer">{o.lead}</p>
-          <p className="z11-about__text">{o.kim}</p>
-          <p className="z11-about__text">
-            {o.demo}{' '}
+        <section className="z11-about__lead z13-about__lead flow">
+          <div className="z13-about__head">
+            <h2 className="z13-about__title">{o.title}</h2>
+            <ul className="z13-about__chipy" aria-label="Место в экзамене">
+              {o.chipy.map((c) => (
+                <li key={c}>
+                  <Badge>{tipograf(c)}</Badge>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="z13-about__lead-text">{tipograf(o.lead)}</p>
+          <p>
+            {tipograf(o.demo)}{' '}
             <a href={o.demoHref} target="_blank" rel="noopener noreferrer">
               {o.demoSsylka}
             </a>
             .
           </p>
-          <p className="z13-about__edinicy">{o.edinicy}</p>
+          <Callout
+            tone="vazhno"
+            primer={o.edinicyPrimer.map((t) => (
+              <p key={t}>
+                <Tex text={tipograf(t)} />
+              </p>
+            ))}
+          >
+            {o.edinicy.map((t) => (
+              <p key={t}>
+                <Tex text={tipograf(t)} />
+              </p>
+            ))}
+          </Callout>
+          <Snoska>{tipograf(o.kim)}</Snoska>
         </section>
 
         <section aria-labelledby="z13-about-tipy">
           <h3 className="t-h4 z11-about__sub" id="z13-about-tipy">
             {o.tipyTitle}
           </h3>
-          <p className="z11-about__text">{o.tipyLead}</p>
+          <p className="z11-about__text">{tipograf(o.tipyLead)}</p>
           <ul className="z13-about-tipy">
             {o.tipy.map((t, i) => (
               <li key={t.type} className="z13-about-tip">

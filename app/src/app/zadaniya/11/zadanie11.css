@@ -131,12 +131,9 @@
 }
 .z11-about__main {
   display: grid;
-  gap: var(--space-8);
+  /* Блок → следующий заголовок: общий ритм текста (tokens.css, --flow-*). */
+  gap: var(--flow-section);
   min-width: 0;
-}
-.z11-about__title {
-  padding-left: var(--space-3);
-  border-left: 4px solid var(--color-primary);
 }
 .z11-about__answer {
   margin-top: var(--space-2);

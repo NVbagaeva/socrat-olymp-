@@ -31,6 +31,10 @@
   --grey-300: #cfdae8;
   --grey-500: #97a1b0;
   --grey-700: #667389;
+  /* Между 700 и 900: серый для лида и вводных абзацев. 700-й на фоне
+     --ice даёт 4,5:1 впритык, 900-й неотличим от основного текста;
+     этот — 9:1, но остаётся «вторым голосом». */
+  --grey-800: #3b4658;
   --grey-900: #101728;
   --green-600: #16a34a;
   /* Зелёный для мелкого текста: 600-й на белом даёт 3,3:1. */
@@ -134,6 +138,8 @@
   --color-text: var(--grey-900);
   --color-text-secondary: var(--grey-700);
   --color-text-tertiary: var(--grey-500);
+  /* Лид под заголовком: темнее вторичного, светлее основного. */
+  --color-text-lead: var(--grey-800);
   --color-text-inverse: var(--white);
   --color-border: var(--grey-200);
   --color-border-strong: var(--grey-300);
@@ -288,6 +294,22 @@
   --color-metod-5: var(--violet-600);
   --color-metod-5-soft: var(--violet-50);
   --color-metod-5-border: color-mix(in srgb, var(--violet-600) 22%, var(--white));
+  /* Плашки Callout (components/ui/Callout.tsx): «Важно», «Запомни»,
+     «Лайфхак». Устройство одно — кремовая заливка, рамка 1px,
+     полоска 3px слева, метка со значком; меняется только акцент.
+     Свои имена, а не прямые ссылки на акцент и синий: направление,
+     выбранное в /styleguide, перекрасит плашки здесь, не трогая
+     компонент. Метка — цвет «для текста» (≥ 4,5:1 на заливке). */
+  --color-callout-surface: var(--cream-50);
+  --color-callout-vazhno: var(--terracotta);
+  --color-callout-vazhno-border: var(--terracotta-200);
+  --color-callout-vazhno-text: var(--terracotta-700);
+  --color-callout-zapomni: var(--blue-600);
+  --color-callout-zapomni-border: var(--blue-200);
+  --color-callout-zapomni-text: var(--blue-700);
+  --color-callout-layfhak: var(--amber-600);
+  --color-callout-layfhak-border: var(--cream-200);
+  --color-callout-layfhak-text: var(--amber-700);
   /* Звёзды сложности. */
   --color-star: var(--sun-500);
   --color-star-off: var(--grey-300);
@@ -419,6 +441,15 @@
   --space-12: 48px;
   --space-16: 64px;
 
+  /* ── Вертикальный ритм текста ─────────────────────────────────
+     Теория и «О задании»: абзац → абзац, абзац → рамка или карточка,
+     рамка → следующий заголовок. Разделы берут эти токены, своих
+     margin между блоками текста не пишут (класс .flow, callout.css).
+     От 1024 два крупных шага растут: 24 → 32 и 40 → 56. */
+  --flow-p: var(--space-4);
+  --flow-block: var(--space-6);
+  --flow-section: var(--space-10);
+
   --h-site-head: 72px;
   --h-control-sm: 36px;
   --h-control: 44px;
@@ -501,6 +532,12 @@
 /* ── Ярусы экранов ────────────────────────────────────────────────
    До 1439px всё как было. Дальше два яруса; задаются здесь и только
    здесь — компоненты читают токен и о ярусах не знают. */
+@media (min-width: 1024px) {
+  :root {
+    --flow-block: var(--space-8);
+    --flow-section: 56px;
+  }
+}
 @media (min-width: 1440px) {
   :root {
     --w-container: 1360px;

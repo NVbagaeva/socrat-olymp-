@@ -13,5 +13,6 @@
 @import './ramki.css' layer(components);
 @import './perehody.css' layer(components);
 @import './edinicy.css' layer(components);
+@import './callout.css' layer(components);
 
 @source '../**/*.{ts,tsx}';
