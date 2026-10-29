@@ -69,15 +69,6 @@ const TEMY: Record<string, Record<string, string>> = {
     RB: 'Работа',
     PG: 'Прогрессии',
   },
-  '12': {
-    linear: 'Линейная',
-    quadratic: 'Квадратичная',
-    rational: 'Дробно-линейная',
-    irrational: 'Иррациональная',
-    exponential: 'Показательная',
-    logarithmic: 'Логарифмическая',
-    trigonometric: 'Тригонометрические',
-  },
   '13': {
     A: 'Дифференцированный платёж',
     B: '«Поломанный» дифференцированный',

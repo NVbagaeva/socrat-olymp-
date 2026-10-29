@@ -86,8 +86,11 @@ export function AppShell({ active, search = false, children }: AppShellProps) {
         secondaryItems={withActive(sidebarExtras, active)}
         footer={
           /* Декор подвала: горы во всю ширину столбца, поверх них
-             рукописная подпись. Картинка — фон, поэтому alt пустой. */
-          <div className="sidebar__decor">
+             рукописная подпись. Картинка — фон, поэтому alt пустой.
+             Подвал приезжает из серверной оболочки в клиентский Sidebar
+             и встаёт там в ряд детей подвала — нужен явный ключ, иначе
+             React в разработке пишет «unique key». */
+          <div key="decor" className="sidebar__decor">
             <Image
               className="sidebar__mountains"
               src={assetUrl('/images/mountains-network.webp')}

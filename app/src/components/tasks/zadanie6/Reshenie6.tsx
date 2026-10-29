@@ -14,6 +14,7 @@ import { answerMatches } from '@/lib/zadanie6/secret';
 import type * as Prototypes from '@/lib/zadanie6/prototypes';
 import type { Rezhim6 } from '@/lib/zadanie6/trenazher';
 import type { Ris, Solved } from '@/lib/zadanie6/types';
+import { useBeforeFinish } from '../session/useBeforeFinish';
 import { useSessionReport } from '../session/useSessionReport';
 import { Podskazki7 } from '../zadanie7/Podskazki7';
 import { Razbor6 } from './Razbor6';
@@ -73,6 +74,8 @@ export interface Reshenie6Props {
   report: (ui: Trenazher6Ui) => void;
   elapsed: () => number;
   onFinish: () => void;
+  /** Обработчик оболочки «перед завершением»: проверка пишет статистику там. */
+  setBeforeFinish?: ((handler: (() => void) | null) => void) | undefined;
 }
 
 /** Состояние точки-шага: для подписи и цвета. */
@@ -85,6 +88,13 @@ function tochnyyUkazatel(): boolean {
   } catch {
     return false;
   }
+}
+
+/** Копия записи без ключа i. */
+function bez<V>(zapis: Record<number, V>, i: number): Record<number, V> {
+  const out = { ...zapis };
+  delete out[i];
+  return out;
 }
 
 /** Лёгкое покачивание поля при неверном ответе; без него — при «меньше движения». */
@@ -115,9 +125,10 @@ function kachnut(el: HTMLElement | null) {
  * метка источника и прототип, условие с рисунком и поле ответа:
  * принимается любая верная запись числа (0,75 = .75 = 3/4). Enter —
  * «Проверить», после ответа Enter — «Следующая». В тренировке — подсказка
- * вопросами и разбор в сворачиваемых блоках; в проверке — один ответ на
- * задачу, верно ли — в итогах. Исход пишется в хранилище тренажёра по
- * прототипу; состояние экрана — в общей сессии (TrainerSessionHost).
+ * вопросами и разбор в сворачиваемых блоках. В проверке ответ
+ * сохраняется и меняется до конца работы, верно ли — в итогах; в
+ * хранилище тренажёра по прототипу уходит последний ответ — один раз,
+ * при завершении. Состояние экрана — в общей сессии (TrainerSessionHost).
  */
 export function Reshenie6({
   zadachi,
@@ -128,6 +139,7 @@ export function Reshenie6({
   report,
   elapsed,
   onFinish,
+  setBeforeFinish,
 }: Reshenie6Props) {
   const proverka = rezhim === 'proverka';
   const [index, setIndex] = useState(restored?.index ?? 0);
@@ -145,6 +157,7 @@ export function Reshenie6({
   const [otvety, setOtvety] = useState<Record<number, string>>(restored?.otvety ?? {});
   const [razbory, setRazbory] = useState<number[]>(restored?.razbory ?? []);
   const [podskazki, setPodskazki] = useState<number[]>(restored?.podskazki ?? []);
+  const [prinyato, setPrinyato] = useState<Record<number, string>>(restored?.prinyato ?? {});
   const [zamechanie, setZamechanie] = useState<string | null>(null);
   /* Номер попытки: вердикт перерисовывается и анимируется заново. */
   const [popytka, setPopytka] = useState(0);
@@ -171,6 +184,31 @@ export function Reshenie6({
     otvety,
     razbory,
     podskazki,
+    prinyato,
+  });
+
+  /* Проверка: в статистику — последний сохранённый ответ каждой задачи,
+     один раз, когда работа завершается (кнопкой или из панели). */
+  useBeforeFinish(setBeforeFinish, () => {
+    if (!proverka) {
+      return;
+    }
+    const nomera = Object.keys(prinyato).map(Number);
+    const sekund = elapsed() / 1000 / Math.max(1, nomera.length);
+    for (const i of nomera) {
+      const zz = zadachi[i];
+      if (zz === undefined) {
+        continue;
+      }
+      const verno = marks[i] === 'right';
+      trenazher6.recordAttempt({
+        kind: zz.prototypeId,
+        taskId: zz.id,
+        right: verno,
+        clean: verno,
+        seconds: sekund,
+      });
+    }
   });
 
   /* Новая задача: фокус в поле, если перешли с клавиатуры или мышью. */
@@ -193,16 +231,21 @@ export function Reshenie6({
     return null;
   }
 
-  /** Задача закрыта: решена, открыт разбор, а в проверке — дан ответ. */
+  /** Задача закрыта: решена или открыт разбор, а в проверке — ответ сохранён. */
   const zakrytaNa = (i: number) =>
-    marks[i] !== undefined || razbory.includes(i) || (proverka && tried[i] === true);
-  const zakryta = zakrytaNa(index) || checked === 'right';
+    proverka ? prinyato[i] !== undefined : marks[i] !== undefined || razbory.includes(i);
+  /* Проверка: сохранённый ответ правят прямо в поле — тогда он «изменён». */
+  const sokhranen = proverka ? prinyato[index] : undefined;
+  const izmenen = sokhranen !== undefined && value.trim() !== sokhranen;
+  const zakryta = proverka
+    ? sokhranen !== undefined && !izmenen
+    : zakrytaNa(index) || checked === 'right';
   const last = index === zadachi.length - 1;
   const zakryto = zadachi.reduce((a, _, i) => a + (zakrytaNa(i) ? 1 : 0), 0);
 
   function sostoyanie(i: number): Sostoyanie {
     if (proverka) {
-      return marks[i] !== undefined || tried[i] === true ? 'otvet' : null;
+      return prinyato[i] !== undefined ? 'otvet' : null;
     }
     if (marks[i] !== undefined) {
       return marks[i];
@@ -239,19 +282,13 @@ export function Reshenie6({
     setPopytka((p) => p + 1);
     const verno = answerMatches(value, z.seal);
     if (proverka) {
-      /* Один ответ: исход пишется сразу, вердикт — в итогах. */
-      if (verno) {
-        zapisat(true, true);
-      } else {
-        trenazher6.recordAttempt({
-          kind: z.prototypeId,
-          taskId: z.id,
-          right: false,
-          clean: false,
-          seconds: (elapsed() - nachalo) / 1000,
-        });
-        setTried((t) => ({ ...t, [index]: true }));
-      }
+      /* Ответ сохраняется (новый заменяет старый); отметки для итогов
+         пересчитываются, статистика — при завершении. */
+      const i = index;
+      setPrinyato((o) => ({ ...o, [i]: value.trim() }));
+      setOtvety((o) => ({ ...o, [i]: value }));
+      setMarks((x) => (verno ? { ...x, [i]: 'right' } : bez(x, i)));
+      setTried((t) => (verno ? bez(t, i) : { ...t, [i]: true }));
       return;
     }
     if (verno) {
@@ -273,7 +310,7 @@ export function Reshenie6({
     }
     setOtvety((o) => ({ ...o, [index]: value }));
     setIndex(i);
-    setValue(otvety[i] ?? '');
+    setValue(otvety[i] ?? prinyato[i] ?? '');
     setChecked(marks[i] !== undefined && !proverka ? 'right' : null);
     setOshibalsya(tried[i] === true);
     setHintOpen(false);
@@ -308,11 +345,12 @@ export function Reshenie6({
     }
   }
 
-  const otvetDan = proverka && zakrytaNa(index);
   const verdikt: { cls: string; text: string } | null = zamechanie
     ? { cls: 'is-info', text: zamechanie }
-    : otvetDan
-      ? { cls: 'is-info', text: T.prinyat }
+    : proverka
+      ? sokhranen === undefined
+        ? null
+        : { cls: 'is-info', text: izmenen ? T.izmenen : T.prinyat }
       : checked === 'right' || (!proverka && marks[index] !== undefined)
         ? { cls: 'is-right', text: T.verno }
         : checked === 'wrong'
@@ -396,7 +434,7 @@ export function Reshenie6({
             autoComplete="off"
             enterKeyHint={zakryta ? 'next' : 'done'}
             value={value}
-            readOnly={zakryta}
+            readOnly={zakryta && !proverka}
             aria-invalid={verdikt?.cls === 'is-wrong' ? true : undefined}
             aria-describedby={`${podpisId} ${verdiktId}`}
             onKeyDown={naEnter}
@@ -422,7 +460,7 @@ export function Reshenie6({
           />
           {zakryta ? null : (
             <button type="submit" className="btn btn--primary z6t-otvet__btn">
-              {proverka ? T.otvetit : T.proverit}
+              {proverka ? (izmenen ? T.sokhranit : T.otvetit) : T.proverit}
             </button>
           )}
         </div>

@@ -179,7 +179,7 @@ export function Trenazher6({
           )}
         </>
       )}
-      screen={({ payload, restored, report, elapsed, finish }) => (
+      screen={({ payload, restored, report, elapsed, finish, setBeforeFinish }) => (
         <Reshenie6
           zadachi={payload.zadachi}
           prototipy={prototipy}
@@ -189,6 +189,7 @@ export function Trenazher6({
           report={report}
           elapsed={elapsed}
           onFinish={finish}
+          setBeforeFinish={setBeforeFinish}
         />
       )}
     />

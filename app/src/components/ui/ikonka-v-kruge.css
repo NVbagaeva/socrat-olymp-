@@ -42,8 +42,7 @@
 .ikonka-tela .it-v,
 .ikonka-tela .it-h,
 .ikonka-tela .it-a,
-.ikonka-tela .it-o,
-.ikonka-tela .it-g {
+.ikonka-tela .it-o {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -76,16 +75,11 @@
   fill: var(--color-primary);
   stroke: none;
 }
-/* Оси и клетки — тоньше и бледнее линий рисунка. */
+/* Оси — тоньше и бледнее линий рисунка. */
 .ikonka-tela .it-o {
   stroke: var(--color-primary);
   stroke-width: 1;
   opacity: 0.55;
-}
-.ikonka-tela .it-g {
-  stroke: var(--color-primary);
-  stroke-width: 0.6;
-  opacity: 0.28;
 }
 /* Белая заливка поверх стекла: колёса, карандаш. */
 .ikonka-tela .it-w {

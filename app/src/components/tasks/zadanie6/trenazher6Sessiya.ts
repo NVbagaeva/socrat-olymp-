@@ -80,6 +80,8 @@ export interface Trenazher6Ui extends BaseUi {
   razbory: number[];
   /** Задачи, где открывали подсказку: решение там уже не «начисто». */
   podskazki: number[];
+  /** Режим проверки: сохранённые ответы — номер → запись; их можно менять до конца. */
+  prinyato: Record<number, string>;
 }
 
 function otvetyIz(value: unknown): Record<number, string> {
@@ -111,5 +113,6 @@ export function readTrenazher6Ui(base: BaseUi): Trenazher6Ui {
     otvety: otvetyIz(raw['otvety']),
     razbory: asNumberList(raw['razbory']),
     podskazki: asNumberList(raw['podskazki']),
+    prinyato: otvetyIz(raw['prinyato']),
   };
 }

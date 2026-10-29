@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { IkonkaVKruge, IT } from '@/components/ui/IkonkaVKruge';
 
 /**
- * Значки тем генераторов №2, №6–№13 — рисунок темы в стеклянном круге,
+ * Значки тем генераторов №2, №6–№11, №13 — рисунок темы в стеклянном круге,
  * как значки тел №3 и блоков №1: та же рамка (ui/IkonkaVKruge), те же
  * линии (синие 1,6; пунктир 1; акцент оранжевым), то же стекло.
  *
@@ -13,7 +13,7 @@ import { IkonkaVKruge, IT } from '@/components/ui/IkonkaVKruge';
 
 type Risunok = (fill: string) => ReactNode;
 
-const { v: V, h: H, a: A, ah: AH, t: T, p: P, o: O, g: G, w: W, x: TX, xa: TXA, xr: TXR } = IT;
+const { v: V, h: H, a: A, ah: AH, t: T, p: P, o: O, w: W, x: TX, xa: TXA, xr: TXR } = IT;
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -76,13 +76,6 @@ function ramka(x0: number, x1: number, y0: number, y1: number) {
     },
     osi(): string {
       return `M8 ${Y(0)} H32 M${X(0)} 8 V32`;
-    },
-    /** Клетки с шагом step по обеим осям. */
-    setka(step = 1): string {
-      let d = '';
-      for (let x = Math.ceil(x0 / step) * step; x <= x1; x += step) d += `M${X(x)} 8 V32 `;
-      for (let y = Math.ceil(y0 / step) * step; y <= y1; y += step) d += `M8 ${Y(y)} H32 `;
-      return d.trim();
     },
     /** Корни f(x) = c на [x0, x1]. */
     korni(f: (x: number) => number, c: number): number[] {
@@ -148,28 +141,6 @@ function uravnenie(
       <path className={A} d={`M8 ${r.Y(c)} H32`} />
       {r.korni(f, c).map((x) => (
         <circle key={x} className={T} cx={r.X(x)} cy={r.Y(c)} r="1.8" />
-      ))}
-    </>
-  );
-  return risunok;
-}
-
-/* ── №12: график на клетках и две точки с целыми координатами ─────── */
-
-function grafik(
-  f: (x: number) => number,
-  [x0, x1, y0, y1]: [number, number, number, number],
-  tochki: [number, number][],
-): Risunok {
-  const r = ramka(x0, x1, y0, y1);
-  const risunok = (fill: string) => (
-    <>
-      <rect x="8" y="8" width="24" height="24" rx="3" fill={fill} />
-      <path className={G} d={r.setka()} />
-      <path className={O} d={r.osi()} />
-      <path className={V} d={r.kriva(f)} />
-      {tochki.map(([x, y]) => (
-        <circle key={`${x}:${y}`} className={T} cx={r.X(x)} cy={r.Y(y)} r="1.8" />
       ))}
     </>
   );
@@ -738,59 +709,6 @@ const RISUNKI: Record<string, Record<string, Risunok>> = {
         ))}
       </>
     ),
-  },
-
-  /* №12. Графики функций: кривая на клетках, две точки. */
-  '12': {
-    linear: grafik(
-      (x) => 0.5 * x + 1,
-      [-2.5, 3.5, -1.5, 4.5],
-      [
-        [-2, 0],
-        [2, 2],
-      ],
-    ),
-    quadratic: grafik(
-      (x) => (x - 1) ** 2 - 1,
-      [-2, 4, -2, 4],
-      [
-        [1, -1],
-        [3, 3],
-      ],
-    ),
-    rational: grafik(
-      (x) => 1 / x,
-      [-3, 3, -3, 3],
-      [
-        [1, 1],
-        [-1, -1],
-      ],
-    ),
-    irrational: grafik(
-      (x) => Math.sqrt(x + 1),
-      [-2, 4, -1, 3],
-      [
-        [0, 1],
-        [3, 2],
-      ],
-    ),
-    exponential: grafik(
-      (x) => 2 ** x,
-      [-3, 3, -1, 5],
-      [
-        [0, 1],
-        [2, 4],
-      ],
-    ),
-    logarithmic: grafik(
-      (x) => Math.log2(x),
-      [-1, 5, -3, 3],
-      [
-        [1, 0],
-        [4, 2],
-      ],
-    ),
-    trigonometric: grafik((x) => 1.5 * Math.sin(x), [-0.6, 6.6, -2.4, 2.4], [[Math.PI / 2, 1.5]]),
   },
 
   /* №13. Экономическая задача. */
