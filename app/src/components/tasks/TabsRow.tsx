@@ -58,6 +58,31 @@ export function TabsRow({ className, children }: TabsRowProps) {
     }
   });
 
+  /* Края прокручиваемой ленты: где за краем ещё есть вкладки, CSS
+     гасит его градиентом (components.css, data-ten-l / data-ten-r). */
+  useEffect(() => {
+    const lenty = [tiles.current!, panel.current!]
+      .map((row) => row.querySelector<HTMLElement>('.topic-tabs'))
+      .filter((el): el is HTMLElement => el !== null);
+    const otmetit = (el: HTMLElement) => {
+      const hvost = el.scrollWidth - el.clientWidth - el.scrollLeft;
+      el.toggleAttribute('data-ten-l', el.scrollLeft > 1);
+      el.toggleAttribute('data-ten-r', hvost > 1);
+    };
+    const handlers = lenty.map((el) => {
+      const h = () => otmetit(el);
+      el.addEventListener('scroll', h, { passive: true });
+      h();
+      return h;
+    });
+    const ro = new ResizeObserver(() => lenty.forEach(otmetit));
+    lenty.forEach((el) => ro.observe(el));
+    return () => {
+      ro.disconnect();
+      lenty.forEach((el, i) => el.removeEventListener('scroll', handlers[i]!));
+    };
+  }, [pathname]);
+
   /* Нажатие на вкладку в панели: содержимое новой вкладки начнётся
      под панелью. Подводим сразу и ещё раз, когда вкладка отрисуется. */
   function onPanelClick(event: MouseEvent<HTMLDivElement>) {

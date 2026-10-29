@@ -148,6 +148,21 @@ export function reshit(fig: Figura, zapros: Zapros): number | null {
       }
       return count;
     }
+    case 'summa-celyh': {
+      /* Целые точки интервала, где f′ нужного знака; нуль f′ — конец промежутка,
+         если рядом с ним f′ того же знака. */
+      let summa = 0;
+      for (let x = Math.floor(lo) + 1; x < hi; x += 1) {
+        const s = znak(y(x), 1e-6);
+        if (
+          s === sgn ||
+          (s === 0 && (znak(y(x - 0.01), 1e-6) === sgn || znak(y(x + 0.01), 1e-6) === sgn))
+        ) {
+          summa += x;
+        }
+      }
+      return summa;
+    }
     case 'chislo-nuley':
       return ekstremumy(fig, lo, hi).length;
     case 'chislo-nuley-f': {

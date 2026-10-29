@@ -218,6 +218,8 @@ export interface EUgol extends Bazovyy {
   b: string;
   dugi?: 1 | 2 | 3;
   pryamoy?: boolean;
+  /** Радиус дуги — доля короткой стороны угла (вместо PL.ugol.r): крупный угол на весь чертёж. */
+  dolyaRadiusa?: number;
 }
 
 export interface ETochka extends Bazovyy {

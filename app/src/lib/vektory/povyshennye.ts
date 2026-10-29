@@ -425,3 +425,223 @@ export function dlinaKM(p: DlinaKM): Generated {
     seed: 'fixed',
   };
 }
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+/** Три вектора по рисунку: a·(b + c) или (a + b)·c. */
+export interface SkalyarnoeTreh {
+  ax: number;
+  ay: number;
+  bx: number;
+  by: number;
+  cx: number;
+  cy: number;
+  /** 'a(b+c)' — a на сумму b и c; '(a+b)c' — сумма a и b на c. */
+  vid: 'a(b+c)' | '(a+b)c';
+}
+
+/** Три вектора на клетчатой плоскости: первое окно, где рисунок чистый. */
+function risunokTreh(kod: string, v: readonly Tochka[]): Risunok {
+  for (const okno of OKNA) {
+    for (let i = 0; i < 40; i += 1) {
+      const vectors = razmestit(rngOf(`${kod}|${i}`), [...v], okno);
+      if (vectors === null) continue;
+      const r: Risunok = {
+        vectors,
+        window: okno,
+        alt: 'Векторы a, b, c на координатной плоскости',
+      };
+      if (risunokChist(r)) return r;
+    }
+  }
+  throw new Error(`№2: рисунок не сложился ${kod}`);
+}
+
+/**
+ * Как B9 раздела, но векторов три и один множитель — сумма двух других.
+ * Подвох: сначала сложить два вектора по координатам, потом умножать
+ * скалярно; проверка — распределительное свойство, по два произведения.
+ */
+export function skalyarnoeTrehPoRisunku(p: SkalyarnoeTreh): Generated {
+  const a: Tochka = [p.ax, p.ay];
+  const b: Tochka = [p.bx, p.by];
+  const c: Tochka = [p.cx, p.cy];
+  const levaya = p.vid === '(a+b)c';
+  const risunok = risunokTreh(`pv2t|${p.vid}|${signatureOf([a, b, c])}`, [a, b, c]);
+  const [x, y, odin] = levaya
+    ? ([
+        ['a', a],
+        ['b', b],
+        ['c', c],
+      ] as const)
+    : ([
+        ['b', b],
+        ['c', c],
+        ['a', a],
+      ] as const);
+  const S: Tochka = [x[1][0] + y[1][0], x[1][1] + y[1][1]];
+  const otvet = S[0] * odin[1][0] + S[1] * odin[1][1];
+  const dot = (u: Tochka, w: Tochka) => u[0] * w[0] + u[1] * w[1];
+  const summa = `(${vec(x[0])}+${vec(y[0])})`;
+  return {
+    uslovie: `${izobrazheny(['a', 'b', 'c'])} Найдите скалярное произведение $${
+      levaya ? `${summa}\cdot${vec('c')}` : `${vec('a')}\cdot${summa}`
+    }$.`,
+    risunok,
+    otvet,
+    /* Второй счёт: раскрыть скобки, сумма двух скалярных произведений. */
+    proverka: dot(x[1], odin[1]) + dot(y[1], odin[1]),
+    shagi: [
+      shagPoRisunku(risunok.vectors),
+      shagKombinatsiya(
+        [
+          [1, x[0], x[1]],
+          [1, y[0], y[1]],
+        ],
+        S,
+        'u',
+      ),
+      {
+        ...shagSkalyarnoe(levaya ? ['u', S] : ['a', a], levaya ? ['c', c] : ['u', S]),
+        zagolovok: `Скалярное произведение $${levaya ? `${vec('u')}\cdot${vec('c')}` : `${vec('a')}\cdot${vec('u')}`}$ по координатам`,
+      },
+      {
+        zagolovok: 'Проверка: раскрываем скобки',
+        stroki: [
+          `$${skalyarnoe(vec(x[0]), vec(odin[0]))}+${skalyarnoe(vec(y[0]), vec(odin[0]))} = ${d(dot(x[1], odin[1]))}${slagaemoe(dot(y[1], odin[1]), false)} = ${d(otvet)}$ — то же число.`,
+        ],
+      },
+      shagOtvet(otvet),
+    ],
+    params: { ...p },
+    signature: `${signatureOf([a, b, c])}|${p.vid}`,
+    prototype: 'P2-SKALYAR-TREH',
+    seed: 'fixed',
+  };
+}
+
+/* ── Партия 6 (варианты 31–36) ──────────────────────────────────── */
+
+export interface DlinaTreh {
+  ax: number;
+  ay: number;
+  bx: number;
+  by: number;
+  cx: number;
+  cy: number;
+}
+
+/**
+ * Длина суммы трёх векторов по рисунку (как A6, но векторов три).
+ * Подвох — складывать координаты, а не длины: |a + b + c| ≠ |a| + |b| + |c|.
+ */
+export function dlinaTrehPoRisunku(p: DlinaTreh): Generated {
+  const a: Tochka = [p.ax, p.ay];
+  const b: Tochka = [p.bx, p.by];
+  const c: Tochka = [p.cx, p.cy];
+  const S: Tochka = [a[0] + b[0] + c[0], a[1] + b[1] + c[1]];
+  const len = Math.sqrt(S[0] * S[0] + S[1] * S[1]);
+  if (!Number.isInteger(Math.round(len * 1e9) / 1e9))
+    throw new Error(`№2: длина не целая ${JSON.stringify(p)}`);
+  const otvet = Math.round(len);
+  const risunok = risunokTreh(`pv2l3|${signatureOf([a, b, c])}`, [a, b, c]);
+  const terms = [
+    [1, 'a', a],
+    [1, 'b', b],
+    [1, 'c', c],
+  ] as const;
+  return {
+    uslovie: `${izobrazheny(['a', 'b', 'c'])} ${naydiDlinu(kombinatsiya(terms.map(([k, name]) => [k, name] as const)))}`,
+    risunok,
+    otvet,
+    /* Второй счёт: сумма квадратов длин и удвоенные попарные скалярные произведения. */
+    proverka: Math.sqrt(
+      [a, b, c].reduce((s, v) => s + v[0] * v[0] + v[1] * v[1], 0) +
+        2 * (a[0] * b[0] + a[1] * b[1] + a[0] * c[0] + a[1] * c[1] + b[0] * c[0] + b[1] * c[1]),
+    ),
+    shagi: [
+      shagPoRisunku(risunok.vectors),
+      shagKombinatsiya(terms, S, 'u'),
+      shagDlina('u', S, otvet),
+      shagOtvet(otvet),
+    ],
+    params: { ...p },
+    signature: `${signatureOf([a, b, c])}|dlina3`,
+    prototype: 'P2-DLINA-TREH',
+    seed: 'fixed',
+  };
+}
+
+export interface DlinaOtnoshenie {
+  ax: number;
+  ay: number;
+  /** Известная координата b; неизвестная — другая. */
+  bIzv: number;
+  /** Какая координата b неизвестна. */
+  neizv: 'bx' | 'by';
+  /** |b| = k·|a|. */
+  k: number;
+  /** Какой корень в ответ: меньший или больший. */
+  vybor: 'menshiy' | 'bolshiy';
+}
+
+/**
+ * |b| = k·|a|, одна координата b неизвестна: |b|² = k²|a|² даёт квадрат
+ * неизвестной и два значения ±. Подвох — возводить k в квадрат и
+ * выбрать нужный из двух корней.
+ */
+export function dlinaOtnoshenie(p: DlinaOtnoshenie): Generated {
+  const a2 = p.ax * p.ax + p.ay * p.ay;
+  const b2 = p.k * p.k * a2;
+  const t2 = Math.round((b2 - p.bIzv * p.bIzv) * 1e9) / 1e9;
+  if (!(t2 > 0)) throw new Error(`№2: квадрат неизвестной не положителен ${JSON.stringify(p)}`);
+  const t = Math.round(Math.sqrt(t2) * 1e9) / 1e9;
+  if (Math.abs(t * 1e4 - Math.round(t * 1e4)) > 1e-6)
+    throw new Error(`№2: корень не конечная дробь ${JSON.stringify(p)}`);
+  const otvet = p.vybor === 'menshiy' ? -t : t;
+  const bTex =
+    p.neizv === 'bx' ? `${vec('b')}(b_0;\\ ${d(p.bIzv)})` : `${vec('b')}(${d(p.bIzv)};\\ b_0)`;
+  return {
+    uslovie: `Даны векторы $${vec('a')}(${d(p.ax)};\\ ${d(p.ay)})$ и $${bTex}$. Найдите $b_0$, если $|${vec('b')}|=${d(p.k)}|${vec('a')}|$. Если таких значений несколько, в ответ запишите ${p.vybor === 'menshiy' ? 'меньшее' : 'большее'} из них.`,
+    risunok: null,
+    otvet,
+    /* Второй счёт: длина b при найденной координате делится на длину a. */
+    proverka: (() => {
+      /* Бисекция по |t|: длина (t; известная) растёт с t и должна стать k·|a|. */
+      const cel = p.k * Math.sqrt(a2);
+      let lo = 0;
+      let hi = 1e4;
+      for (let i = 0; i < 200; i += 1) {
+        const m = (lo + hi) / 2;
+        if (Math.hypot(m, p.bIzv) < cel) lo = m;
+        else hi = m;
+      }
+      return p.vybor === 'menshiy' ? -lo : lo;
+    })(),
+    shagi: [
+      {
+        zagolovok: 'Длины через координаты',
+        stroki: [
+          `$|${vec('a')}|^2 = ${kv(p.ax)} + ${kv(p.ay)} = ${d(a2)}$.`,
+          `$|${vec('b')}|=${d(p.k)}|${vec('a')}|$, поэтому $|${vec('b')}|^2 = ${d(p.k)}^2\\cdot ${d(a2)} = ${d(b2)}$.`,
+        ],
+      },
+      {
+        zagolovok: 'Уравнение на $b_0$',
+        stroki: [
+          `$b_0^2 + ${kv(p.bIzv)} = ${d(b2)}$, $b_0^2 = ${d(t2)}$, $b_0 = \\pm ${d(t)}$.`,
+          `${p.vybor === 'menshiy' ? 'Меньшее' : 'Большее'} из значений: $${d(otvet)}$.`,
+        ],
+      },
+      shagOtvet(otvet),
+    ],
+    params: { ...p },
+    signature: `pv2do|${p.ax}|${p.ay}|${p.bIzv}|${p.neizv}|${p.k}|${p.vybor}`,
+    prototype: 'P2-DLINA-OTNOSHENIE',
+    seed: 'fixed',
+  };
+}
+
+function kv(x: number): string {
+  return x < 0 ? `(${d(x)})^2` : `${d(x)}^2`;
+}

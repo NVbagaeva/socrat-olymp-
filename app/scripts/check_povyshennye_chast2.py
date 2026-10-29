@@ -1069,6 +1069,465 @@ def f20(p, kon):
     ok(min(N) == kon["Nmin"] and max(N) == kon["Nmax"] and (p["k0"] in ks) == bool(kon["a"]), "f20: перебор")
 
 
+# ── Семьи G, H, J (варианты 13–18) ──────────────────────────────
+
+from fractions import Fraction as Fr
+
+
+def dr(v):
+    return Fr(v[0], v[1])
+
+
+def nuli_mp(f, a0, a1, shag):
+    """Корни f на [a0; a1]: смена знака на сетке + уточнение findroot."""
+    out = []
+    t = mp.mpf(a0)
+    ft = f(t)
+    while t < a1:
+        u = t + shag
+        fu = f(u)
+        if ft == 0:
+            out.append(t)
+        elif ft * fu < 0:
+            out.append(mp.findroot(f, (t, u), solver="bisect"))
+        t, ft = u, fu
+    return out
+
+
+def sravn_spiski(where, a, b, tol=1e-9):
+    ok(len(a) == len(b) and all(abs(float(u) - float(v)) < tol for u, v in zip(sorted(a), sorted(b))), where, f"{[float(u) for u in a]} vs {b}")
+
+
+def g14(p, kon):
+    q, s, k = p["q"], p["sg"], p["k"]
+    S, P = p["t1"] + p["t2"], p["t1"] * p["t2"]
+    B1, B2, cc = mp.mpf(q) ** p["u1"], mp.mpf(q) ** p["u2"], mp.mpf(q) ** p["e"]
+    f = lambda x: B1 ** ((p["e"] + 2 * s * k * x) / p["u1"]) / cc - S * B2 ** ((p["e"] + s * k * x) / p["u2"]) / cc + P
+    korni = nuli_mp(f, -6, 6, mp.mpf(1) / 1024)
+    sravn_spiski("g14: корни", korni, kon["korni"])
+    sravn_spiski("g14: отбор", [r for r in korni if p["lo"] - 1e-12 <= r <= p["hi"] + 1e-12], kon["vybor"])
+
+
+def g15(p, kon):
+    a = mp.sqrt(p["a2"])
+    t = mp.mpf(p["m"]) / (p["m"] + p["n"])
+    h2 = p["a2"] * (mp.mpf(3) / 2 - t)
+    ok(near(h2, kon["h2"]), "g15: h²")
+    h = mp.sqrt(h2)
+    V = lambda *c_: mp.matrix(list(c_))
+    A, B, C, D = V(0, 0, 0), V(a, 0, 0), V(a, a, 0), V(0, a, 0)
+    z = V(0, 0, h)
+    A1, B1, C1, D1 = A + z, B + z, C + z, D + z
+    kr = lambda u, v: V(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0])
+    dt = lambda u, v: sum(u[i] * v[i] for i in range(3))
+    N = (A + B) / 2
+    K = C1 + t * (D1 - C1)
+    nrm = kr(K - N, D - B)
+    ok(mp.norm(kr(nrm, A1 - C)) < 1e-20 * mp.norm(nrm) * mp.norm(A1 - C) + 1e-12, "g15: а) CA₁ ⊥ α")
+    rebra = [(A, B), (B, C), (C, D), (D, A), (A1, B1), (B1, C1), (C1, D1), (D1, A1), (A, A1), (B, B1), (C, C1), (D, D1)]
+    pts = []
+    for X, Y in rebra:
+        den = dt(nrm, Y - X)
+        if abs(den) < 1e-20:
+            continue
+        lam = dt(nrm, N - X) / den
+        if -1e-15 <= lam <= 1 + 1e-15:
+            T = X + lam * (Y - X)
+            if all(mp.norm(T - Q) > 1e-9 for Q in pts):
+                pts.append(T)
+    ok(len(pts) == 6, "g15: сечение — шестиугольник", str(len(pts)))
+    c0 = sum(pts, V(0, 0, 0)) / len(pts)
+    e1 = (pts[0] - c0) / mp.norm(pts[0] - c0)
+    e2 = kr(nrm / mp.norm(nrm), e1)
+    uv = sorted(((dt(T - c0, e1), dt(T - c0, e2)) for T in pts), key=lambda w: mp.atan2(w[1], w[0]))
+    S = abs(sum(uv[i][0] * uv[(i + 1) % len(uv)][1] - uv[(i + 1) % len(uv)][0] * uv[i][1] for i in range(len(uv)))) / 2
+    zP = [T[2] for T in pts if abs(T[0] - a) < 1e-12 and abs(T[1]) < 1e-12]
+    ok(bool(zP) and near(zP[0], kon["zP"]), "g15: точка на BB₁")
+    rho = abs(dt(nrm, C - N)) / mp.norm(nrm)
+    otv = S if p["nado"] == "S" else S * rho / 3
+    ok(near(otv, kon["otvet"]), f"g15: {p['nado']}", f"{otv} {kon['otvet']}")
+
+
+def g16(p, kon):
+    q, c, K = mp.mpf(p["q"]), p["c"], p["K"]
+
+    def istina(x):
+        if abs(x) <= c:
+            return False
+        v = p["sg"] * mp.log((x - c) / (x + c)) / mp.log(1 / q) + 2 * mp.log(x * x - c * c) / mp.log(q * q)
+        return v >= K if p["znak"] == "ge" else v <= K
+
+    sverka_setki(istina, kon["kuski"], -30, 30, mp.mpf("0.00731"), "g16: сетка")
+
+
+def g18(p, kon):
+    mu = mp.mpf(p["m"]) / (p["m"] + p["n"])
+    s = mp.sqrt(p["s2"])
+
+    def tochki(al):
+        C = mp.matrix([0, 0])
+        B = mp.matrix([s, 0])
+        D = mp.matrix([s * mp.cos(al), s * mp.sin(al)])
+        A = B + D
+        M = B + mu * (C - B)
+        return A, B, C, D, M
+
+    def razn(al):
+        A, B, C, D, M = tochki(al)
+        return mp.norm(D - B) - mp.norm(D - M)
+
+    al = mp.findroot(razn, (mp.mpf("0.01"), mp.pi / 2 - mp.mpf("1e-9")), solver="bisect")
+    ok(near(mp.cos(al), kon["cos"]), "g18: косинус острого угла")
+    A, B, C, D, M = tochki(al)
+    d = M - D
+    H = D + d * ((B - D).T * d)[0] / (d.T * d)[0]
+    u = (H - B) / mp.norm(H - B)
+    Pl = lambda lam: B + lam * u
+    if p["vid"] == "vpis":
+        lam = mp.findroot(lambda l: mp.norm(Pl(l) - B) - mp.norm(Pl(l) - D), (mp.mpf("1e-6"), 10 * s), solver="bisect")
+        P = Pl(lam)
+        pts = [A, B, P, D]
+        S = abs(sum(pts[i][0] * pts[(i + 1) % 4][1] - pts[(i + 1) % 4][0] * pts[i][1] for i in range(4))) / 2
+        otv = S / ((2 * s + mp.norm(P - B) + mp.norm(P - D)) / 2)
+    else:
+        # Окружность через A, B, D: вторая точка на прямой BH — с положительным параметром.
+        O = mp.lu_solve(mp.matrix([[2 * (B[0] - A[0]), 2 * (B[1] - A[1])], [2 * (D[0] - A[0]), 2 * (D[1] - A[1])]]),
+                        mp.matrix([B[0] ** 2 + B[1] ** 2 - A[0] ** 2 - A[1] ** 2, D[0] ** 2 + D[1] ** 2 - A[0] ** 2 - A[1] ** 2]))
+        lam = 2 * ((O - B).T * u)[0]
+        ok(lam > 0, "g18: P на луче BH")
+        otv = mp.norm(O - A)
+    ok(near(otv, kon["otvet"]), f"g18: {p['vid']}", f"{otv} {kon['otvet']}")
+
+
+def kolvo_kusochno(fn, uzly):
+    """Число корней непрерывной кусочно-линейной fn с изломами в uzly (−1 — бесконечно много)."""
+    xs = sorted(set(uzly))
+    korni = {u for u in xs if fn(u) == 0}
+    for u, v in zip(xs, xs[1:]):
+        fu, fv = fn(u), fn(v)
+        if fu == 0 and fv == 0:
+            return -1
+        if fu * fv < 0:
+            korni.add(u + (v - u) * fu / (fu - fv))
+    # Лучи левее первого и правее последнего излома.
+    for x1, x2 in ((xs[0], xs[0] - 1), (xs[-1], xs[-1] + 1)):
+        f1, f2 = fn(x1), fn(x2)
+        if f1 == f2:
+            if f1 == 0:
+                return -1
+            continue
+        z = x1 - f1 * (x2 - x1) / (f2 - f1)
+        if (z - x1) * (x2 - x1) > 0:
+            korni.add(z)
+    return len(korni)
+
+
+def g19(p, kon):
+    k, sg = p["k"], p["sg"]
+    c, beta, gamma = dr(p["c"]), dr(p["beta"]), sg * dr(p["g"])
+
+    def chislo(a):
+        a = Fr(a)
+        fn = lambda x: abs(x - beta * a) + abs(k * x - k * gamma * a) - c - sg * a * x
+        return kolvo_kusochno(fn, [beta * a, gamma * a])
+
+    def istina(a):
+        a = Fr(str(a)) if not isinstance(a, Fr) else a
+        if (sg < 0 and a < 0) or (sg > 0 and a > 0) or (a == 0 and not p["nol"]):
+            return False
+        return chislo(a) == p["N"]
+
+    znak = 1 if sg < 0 else -1
+    konci = [v for i, v in enumerate(kon["kuski"]) if i % 4 < 2 and abs(v) < 1e9]
+    kraj = max(konci) * 1.5 + 2
+    plokho = []
+    for i in range(0, int(kraj * 997)):
+        a = Fr(i, 997) * znak
+        if all(abs(float(a) - v) > 1e-6 for v in konci) and istina(a) != v_kuski(kon["kuski"], float(a)):
+            plokho.append(float(a))
+    ok(not plokho, "g19: сетка", str(plokho[:5]))
+    for v in konci:
+        a = Fr(v).limit_denominator(10000)
+        ok(istina(a) == v_kuski(kon["kuski"], float(a)), f"g19: конец {v}")
+
+
+def g20(p, kon):
+    N, P, Q = p["N"], p["p"], p["q"]
+
+    def goditsya(nab):
+        s_ = sorted(nab)
+        return len(s_) == N and len(set(s_)) == N and sum(s_[:P]) > sum(s_[-Q:])
+
+    ok(goditsya(kon["primerA"]) and -p["X1"] in kon["primerA"], "g20: а) пример")
+    if kon["mozhnoB"]:
+        ok(goditsya(kon["primerB"]) and p["X2"] in kon["primerB"], "g20: б) пример")
+    else:
+        ok(Q - 1 == P, "g20: б) «нет» только при q − 1 = p")
+    ok(goditsya(kon["primerV"]) and sum(kon["primerV"]) == kon["maks"], "g20: в) пример")
+    # Оценка: a₁ и шаги g_j ≥ 1; условие линейно — перебираем распределения до 3 лишних единиц шага.
+    cP = [max(0, P - j) for j in range(1, N)]
+    cQ = [min(Q, N - j) for j in range(1, N)]
+    best = None
+    import itertools
+
+    for extra in range(0, 4):
+        for poz in itertools.combinations_with_replacement(range(N - 1), extra):
+            g = [1] * (N - 1)
+            for j in poz:
+                g[j] += 1
+            G = sum(g[j] * (cP[j] - cQ[j]) for j in range(N - 1))
+            a1 = (G - 1) // (Q - P)
+            tot = N * a1 + sum(g[j] * (N - 1 - j) for j in range(N - 1))
+            best = tot if best is None else max(best, tot)
+    ok(best == kon["maks"], "g20: в) перебор шагов", f"{best} {kon['maks']}")
+    # Каждая лишняя единица шага уменьшает сумму (без учёта округления) — дальше перебор не нужен.
+    ok(all((N - 1 - j) * (Q - P) + N * (cP[j] - cQ[j]) < 0 for j in range(N - 1)), "g20: шаг выгоден только минимальный")
+
+
+def h14(p, kon):
+    q, c = mp.mpf(p["q"]), p["c"]
+
+    def chlen(ch, x):
+        return mp.mpf(ch["A"][0]) / ch["A"][1] * (mp.log((x + c) ** ch["w"]) / mp.log(q ** (mp.mpf(ch["e"][0]) / ch["e"][1]))) ** ch["k"]
+
+    def f(x):
+        lev = sum((chlen(ch, x) for ch in p["chleny"] if not ch.get("prav")), mp.mpf(0)) + mp.mpf(p["Clev"][0]) / p["Clev"][1]
+        prav = sum((chlen(ch, x) for ch in p["chleny"] if ch.get("prav")), mp.mpf(0)) + mp.mpf(p["Cprav"][0]) / p["Cprav"][1]
+        return lev - prav
+
+    # Сетка по t = log_q(x + c): x = q^t − c.
+    korni = [q ** t - c for t in nuli_mp(lambda t: f(q ** t - c), -12, 12, mp.mpf(1) / 512)]
+    sravn_spiski("h14: корни", korni, kon["korni"])
+    lo = mp.log(dr(p["lo"]["y"])) / mp.log(dr(p["lo"]["b"]))
+    hi = mp.log(dr(p["hi"]["y"])) / mp.log(dr(p["hi"]["b"]))
+    ok(near(lo, kon["lo"]) and near(hi, kon["hi"]), "h14: концы отрезка")
+    sravn_spiski("h14: отбор", [r for r in korni if lo - 1e-12 <= r <= hi + 1e-12], kon["vybor"])
+
+
+def h15(p, kon):
+    a, h = sp.sqrt(p["a2"]), sp.sqrt(p["h2"])
+    A, B, C, D = [sp.Matrix(v) for v in ([0, 0, 0], [a, 0, 0], [a, a, 0], [0, a, 0])]
+    S = sp.Matrix([a / 2, a / 2, h])
+    K = (S + B) / 2
+    u, v = K - D, C - S
+    nrm = u.cross(v)
+    r2 = sp.simplify((D - S).dot(nrm) ** 2 / nrm.dot(nrm))
+    cos2 = sp.simplify(u.dot(v) ** 2 / (u.dot(u) * v.dot(v)))
+    ok(near(r2, kon["rasst2"]) and near(cos2, kon["cos2"]), "h15: ρ² и cos²", f"{r2} {cos2}")
+    otv = sp.sqrt(r2) if p["nado"] == "rasst" else sp.acos(sp.sqrt(cos2))
+    ok(near(otv, kon["otvet"]), "h15: ответ")
+
+
+def h16(p, kon):
+    B, x0 = mp.mpf(p["B"]), p["x0"]
+    A = B ** (2 * p["e2"] - p["e1"])
+
+    def istina(x):
+        w = x0 - x if p["luch"] == "le" else x - x0
+        if w < 0:
+            return False
+        zn = B ** (x * x - p["e1"]) - (A + 1) * B ** (x * x / 2 - p["e2"]) + 1
+        if abs(zn) < mp.mpf("1e-30"):
+            return False
+        v = mp.sqrt(w) / zn
+        return v <= 0 if p["znak"] == "le" else v >= 0
+
+    sverka_setki(istina, kon["kuski"], -12, 12, mp.mpf("0.00731"), "h16: сетка")
+    with mp.workdps(60):
+        for i in range(0, len(kon["kuski"]), 4):
+            for j in (0, 1):
+                v = kon["kuski"][i + j]
+                if abs(v) < 1e9:
+                    tv = mp.sqrt(mp.mpf(round(v * v, 9))) * (1 if v > 0 else -1)
+                    ok(istina(tv) == bool(kon["kuski"][i + 2 + j]), f"h16: конец {v}")
+
+
+def h18(p, kon):
+    # Угол θ при основании AD подбираем по отношению отрезков касательных CT : TD.
+    m, n, L = p["m"], p["n"], mp.mpf(p["L"])
+    th = mp.findroot(lambda t: mp.tan(t / 2) ** 2 - mp.mpf(m) / n, (mp.mpf("0.001"), mp.pi - mp.mpf("0.001")), solver="bisect")
+    H = L * mp.sin(th)
+    r = H / 2
+    TD = r / mp.tan(th / 2)
+    CT = r / mp.tan((mp.pi - th) / 2)
+    ok(near(CT + TD, L) and near(CT / TD, mp.mpf(m) / n), "h18: отрезки касательных")
+    # Окружности касаются друг друга: центры (±r; r), D = (r + TD; 0).
+    Dx = r + TD
+    Cx = Dx - L * mp.cos(th)
+    ok(Cx > 0, "h18: трапеция существует")
+    ok(near(r, kon["r"]) and near(Cx, kon["b"]) and near(Dx, kon["d"]), "h18: r и полуоснования", f"{r} {Cx} {Dx}")
+    if p["nado"] == "S":
+        otv = (Cx + Dx) * H
+    elif p["nado"] == "AC":
+        otv = mp.sqrt((Dx + Cx) ** 2 + H ** 2)
+    else:
+        y0 = (Cx ** 2 + H ** 2 - Dx ** 2) / (2 * H)
+        otv = mp.sqrt(Dx ** 2 + y0 ** 2)
+    ok(near(otv, kon["otvet"]), f"h18: {p['nado']}", f"{otv} {kon['otvet']}")
+
+
+def h19(p, kon):
+    al, be, ga, ka = (sp.Rational(*p[k_]) for k_ in ("alfa", "beta", "gamma", "kappa"))
+
+    def chislo(av):
+        X = x + al * av
+        Y = av * x + ga * av + be * av
+        pol = sp.Poly(sp.expand(X ** 4 - Y ** 4 - ka * av ** 2 * X ** 2 + ka * av ** 2 * Y ** 2), x)
+        if pol.is_zero:
+            return -1
+        return len(set(pol.real_roots()))
+
+    def istina(av):
+        if (p["dom"] == "pol" and av <= 0) or (p["dom"] == "otr" and av >= 0):
+            return False
+        return chislo(av) == 4
+
+    konci = [v for i, v in enumerate(kon["kuski"]) if i % 4 < 2 and abs(v) < 1e9]
+    kraj = max(abs(v) for v in konci) + 2
+    plokho = []
+    for i in range(-int(kraj * 53), int(kraj * 53) + 1):
+        av = sp.Rational(i, 53)
+        if all(abs(float(av) - v) > 1e-6 for v in konci) and istina(av) != v_kuski(kon["kuski"], float(av)):
+            plokho.append(float(av))
+    ok(not plokho, "h19: сетка", str(plokho[:5]))
+    for v in konci:
+        for d_ in (sp.Rational(1, 10 ** 7), -sp.Rational(1, 10 ** 7)):
+            av = sp.nsimplify(v, rational=True, tolerance=1e-12) + d_
+            ok(istina(av) == v_kuski(kon["kuski"], float(av)), f"h19: около конца {v}")
+
+
+H20_CIFRY = {
+    "vse": lambda d: range(1, 10),
+    "nechet": lambda d: range(1, 10, 2),
+    "chet": lambda d: range(2, 10, 2),
+    "ge": lambda d: range(d, 10),
+    "le": lambda d: range(1, d + 1),
+}
+
+
+def h20(p, kon):
+    D = list(H20_CIFRY[p["cifry"]](p.get("d")))
+    otn = {}
+    for a_ in D:
+        for b_ in D:
+            for c_ in D:
+                otn[100 * a_ + 10 * b_ + c_] = Fr(100 * a_ + 10 * b_ + c_, a_ * b_ * c_)
+    ok(any(v == p["k1"] for v in otn.values()) and otn.get(kon["p1"]) == p["k1"], "h20: а) да, пример")
+    ok(any(v == p["k2"] for v in otn.values()) == bool(kon["daB"]), "h20: б)")
+    vv = max(otn.values()) if p["nado"] == "max" else min(otn.values())
+    ok(near(vv, kon["otvC"]), "h20: в)", f"{vv} {kon['otvC']}")
+
+
+def j14(p, kon):
+    X = x
+    PLUS = [-sp.sin(2 * X - sp.pi / 2), sp.sin(2 * X + sp.pi / 2), -sp.cos(sp.pi - 2 * X), sp.sin(sp.pi / 2 - 2 * X)]
+    MINUS = [sp.sin(3 * sp.pi / 2 + 2 * X), sp.sin(2 * X - sp.pi / 2), sp.cos(sp.pi - 2 * X), -sp.sin(sp.pi / 2 + 2 * X)]
+    chisl = sp.sin(X) ** 4 + PLUS[p["zapis"]] - sp.cos(X) ** 2 if p["chisl"] == "sin" else sp.cos(X) ** 4 + MINUS[p["zapis"]] - sp.sin(X) ** 2
+    ok(sp.simplify(sp.expand_trig(chisl + sp.sin(X) ** 2 * sp.cos(X) ** 2)) == 0, "j14: числитель = −sin²x cos²x")
+    u = lambda mn: (-1 if mn else 1) * (X / 4 + p["fi"] * sp.pi / 8)
+    znam = (2 * sp.sin(u(p["minus1"])) ** 2 + p["B"] * sp.cos(u(p["minus2"])) - 2) if p["znam"] == "cos" else (2 * sp.cos(u(p["minus1"])) ** 2 - p["B"] * sp.sin(u(p["minus2"])) - 2)
+    e = sp.Rational(round(2 * kon["e"] / float(sp.pi)), 2) * sp.pi
+    ok(abs(sp.N(znam.subs(X, e), 30)) < 1e-20, "j14: исключённая точка")
+    vybor = [sp.pi * k_ / 2 for k_ in range(p["lo"], p["hi"] + 1) if abs(sp.N(znam.subs(X, sp.pi * k_ / 2), 30)) > 1e-20]
+    sravn_spiski("j14: отбор", vybor, kon["vybor"])
+
+
+def j15(p, kon):
+    lam = sp.Rational(*p["lam"])
+    A, C, B = sp.Matrix([0, 0, 0]), sp.Matrix([1, 0, 0]), sp.Matrix([sp.Rational(1, 2), sp.sqrt(3) / 2, 0])
+    z = sp.Matrix([0, 0, lam])
+    A1, B1, C1 = A + z, B + z, C + z
+    n1 = (C - A).cross(B1 - A)
+    na = (C1 - A1).cross(n1)
+    tt = sp.simplify(-na.dot(B - A1) / na.dot(B1 - B))
+    ok(near(tt, kon["tB"]), "j15: точка на BB₁", f"{tt}")
+    e = sp.Matrix([0, 0, 1])
+    N = {"BCC1": (C - B).cross(e), "ABB1": (B - A).cross(e), "ACC1": (C - A).cross(e), "ABC": e}[p["pl"]]
+    cs = sp.simplify(abs(na.dot(N)) / (na.norm() * N.norm()))
+    ok(near(cs, kon["cos"]) and near(sp.acos(cs), kon["ugol"]), "j15: угол")
+
+
+def j16(p, kon):
+    q = mp.mpf(p["p"] - p["r"]) ** 2 / 4
+
+    def istina(xx):
+        w = xx * xx - p["c"]
+        if -mp.mpf("1e-40") < w < 0:
+            w = mp.mpf(0)
+        if w < 0:
+            return False
+        t = mp.sqrt(w)
+        if abs(t - p["r"]) < mp.mpf("1e-30"):
+            return False
+        pr = p["p"] + q / (p["r"] - t)
+        return t < pr if p["znak"] == "lt" else t > pr
+
+    sverka_setki(istina, kon["kuski"], -20, 20, mp.mpf("0.00731"), "j16: сетка")
+    with mp.workdps(60):
+        for i in range(0, len(kon["kuski"]), 4):
+            for j in (0, 1):
+                v = kon["kuski"][i + j]
+                if abs(v) < 1e9:
+                    tv = mp.sqrt(mp.mpf(round(v * v, 9))) * (1 if v > 0 else -1)
+                    ok(istina(tv) == bool(kon["kuski"][i + 2 + j]), f"j16: конец {v}")
+
+
+def j18(p, kon):
+    R = mp.sqrt(p["R2"])
+    b = mp.radians(p["beta"])
+    B = mp.matrix([0, -R / mp.sin(b / 2)])
+    st = lambda zn: mp.matrix([zn * mp.sin(b / 2), mp.cos(b / 2)])
+    kas = lambda zn: B + st(zn) * ((-B).T * st(zn))[0]
+    A, C = kas(-1), kas(1)
+    D, E = -C, -A
+
+    def vtoraya(Q):
+        d = Q - B
+        aa, bb, cc = (d.T * d)[0], 2 * (B.T * d)[0], (B.T * B)[0] - R * R
+        tt = (-bb - mp.sqrt(bb * bb - 4 * aa * cc)) / (2 * aa)
+        return B + d * tt
+
+    N, P = vtoraya(D), vtoraya(E)
+    ok(near(mp.norm(N - B) / mp.norm(D - B), kon["k"]), "j18: BN : BD")
+    if p["nado"] == "S":
+        pts = [D, E, P, N]
+        otv = abs(sum(pts[i][0] * pts[(i + 1) % 4][1] - pts[(i + 1) % 4][0] * pts[i][1] for i in range(4))) / 2
+    else:
+        otv = {"PN": mp.norm(P - N), "BN": mp.norm(B - N), "DN": mp.norm(D - N)}[p["nado"]]
+    ok(near(otv, kon["otvet"]), f"j18: {p['nado']}", f"{otv} {kon['otvet']}")
+
+
+def j19(p, kon):
+    th = mp.acos(mp.mpf(str(p["C"])))
+    ok(p["t1"] < th < p["t2"], "j19: оценка arccos")
+
+    def kolvo(av):
+        if av == 0:
+            return 0
+        L, R_ = sorted((av * p["m"] * mp.pi, av * p["n"] * mp.pi))
+        k_ = 0
+        for z0 in (th, -th):
+            k_ += int(mp.floor((R_ - z0) / (2 * mp.pi)) - mp.ceil((L - z0) / (2 * mp.pi)) + 1)
+        return k_
+
+    kraj = max(abs(v) for v in kon["kuski"] if abs(v) < 1e9) + 1
+    sverka_setki(lambda av: kolvo(av) == p["K"], kon["kuski"], -kraj, kraj, mp.mpf("0.000731"), "j19: сетка")
+    for i in range(0, len(kon["kuski"]), 4):
+        for j, sd in ((0, -1), (1, 1)):
+            v = mp.mpf(kon["kuski"][i + j])
+            ok((kolvo(v + sd * mp.mpf("1e-9")) == p["K"]) is False, f"j19: снаружи конца {float(v)}")
+            ok((kolvo(v - sd * mp.mpf("1e-9")) == p["K"]), f"j19: внутри у конца {float(v)}")
+
+
+def j20(p, kon):
+    S = lambda n_: sum(map(int, str(n_)))
+    n_, v_, t_ = kon["primer"]
+    ok(v_ == p["lam"] * S(n_) and t_ == p["mu"] * S(v_) and n_ + v_ + t_ == p["A"] and len({n_, v_, t_}) == 3, "j20: а)")
+    ok(not any(m_ + p["lam"] * S(m_) + p["mu"] * S(p["lam"] * S(m_)) == p["B"] and len({m_, p["lam"] * S(m_), p["mu"] * S(p["lam"] * S(m_))}) == 3 for m_ in range(1, p["B"] + 1)), "j20: б)")
+    k_ = sum(1 for m_ in range(1000, 10000) if p["mu"] * S(p["lam"] * S(m_)) == p["T"] and len({m_, p["lam"] * S(m_), p["T"]}) == 3)
+    ok(k_ == kon["itog"], "j20: в)", f"{k_} {kon['itog']}")
+
+
 F = {
     "z14.logTrig": z14,
     "z15.rombPiramida": z15,
@@ -1112,6 +1571,24 @@ F = {
     "f18.trapeciyaOkr": f18,
     "f19.moduliKoren": f19,
     "f20.albomy": f20,
+    "g14.pokazKvadrat": g14,
+    "g15.prizmaSechenie": g15,
+    "g16.logDrob": g16,
+    "g18.rombVysota": g18,
+    "g19.dvaModulya": g19,
+    "g20.summyNabora": g20,
+    "h14.logKub": h14,
+    "h15.pravPiramida": h15,
+    "h16.korenPokaz": h16,
+    "h18.trapeciyaDveOkr": h18,
+    "h19.pryamyeOkr": h19,
+    "h20.chisloProizv": h20,
+    "j14.trigDrob": j14,
+    "j15.prizmaPerp": j15,
+    "j16.korenDrob": j16,
+    "j18.okrVUgle": j18,
+    "j19.cosKorni": j19,
+    "j20.summyCifr": j20,
 }
 
 rows = json.load(open(sys.argv[1], encoding="utf-8"))

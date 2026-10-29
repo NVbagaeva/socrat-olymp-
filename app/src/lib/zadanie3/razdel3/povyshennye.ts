@@ -17,7 +17,8 @@ import { unlabelled } from '../../solid/drawings/common';
 import { type Model } from '../../solid/model';
 import type { Vec3 } from '../../solid/vec';
 import { ru } from '../format';
-import { type Params, type Prototype, num } from '../types';
+import { type Params, type Prototype, num, text } from '../types';
+import { shapeHexPartABC, shapeVertexMidline } from './drawings';
 
 /** Точка ребра PQ, делящая его в отношении m : n от P. */
 function delit(P: Vec3, Q: Vec3, m: number, n: number): Vec3 {
@@ -158,8 +159,7 @@ export const PV03_PIRAMIDA_POVERHNOST: Prototype = {
   /* Настоящая пирамида: высота из ребра или дана, площадь — по граням. */
   poModeli: (p) => {
     const a = num(p, 'a');
-    const h =
-      num(p, 'vid') === 0 ? Math.sqrt(num(p, 'b') ** 2 - (a * a) / 2) : num(p, 'h');
+    const h = num(p, 'vid') === 0 ? Math.sqrt(num(p, 'b') ** 2 - (a * a) / 2) : num(p, 'h');
     return Math.round(surfaceArea(regularPyramid(4, a / Math.SQRT2, h)) * 1e6) / 1e6;
   },
   chertezh: () => {
@@ -184,7 +184,116 @@ export const PV03_PIRAMIDA_POVERHNOST: Prototype = {
         text: `Четыре боковые грани: $4\\cdot\\dfrac12\\cdot ${ru(a)}\\cdot ${ru(f)} = ${ru(bok)}$. Основание — квадрат: $${ru(a)}^2 = ${ru(osn)}$.`,
         value: bok,
       },
-      { text: `Полная поверхность: $${ru(osn)} + ${ru(bok)} = ${ru(osn + bok)}$.`, value: osn + bok },
+      {
+        text: `Полная поверхность: $${ru(osn)} + ${ru(bok)} = ${ru(osn + bok)}$.`,
+        value: osn + bok,
+      },
+    ];
+  },
+  varianty: [],
+};
+
+/* ── Партия 6 (варианты 31–36) ──────────────────────────────────── */
+
+/**
+ * Плоскость через вершину пирамиды и среднюю линию основания отсекает
+ * пирамиду (как P03-50): vid 'chast' — по объёму всей найти отсечённую,
+ * 'vsya' — наоборот. Подвох — средняя линия отсекает четверть площади
+ * основания (подобие 1:2), а не половину.
+ */
+export const PV03_SREDNYAYA: Prototype = {
+  id: 'PV03-srednyaya',
+  razdel: 'III',
+  nazvanie: 'Пирамида, отсечённая через вершину и среднюю линию основания',
+  tip: 'объём отсечённой пирамиды или всей пирамиды',
+  zadachnik: [156, 159],
+  status: 'добавить',
+  format: 'десятичная',
+  uslovie: (p) =>
+    text(p, 'vid') === 'chast'
+      ? `Через вершину треугольной пирамиды и среднюю линию её основания провели плоскость. Она отсекла от пирамиды треугольную пирамиду. Найдите объём отсечённой пирамиды, если объём исходной равен ${ru(num(p, 'V'))}.`
+      : `Через вершину треугольной пирамиды и среднюю линию её основания провели плоскость. Объём отсечённой треугольной пирамиды равен ${ru(num(p, 'V'))}. Найдите объём исходной пирамиды.`,
+  dopustimo: (p) => num(p, 'V') > 0,
+  otvet: (p) => (text(p, 'vid') === 'chast' ? num(p, 'V') / 4 : num(p, 'V') * 4),
+  poModeli: (p) => {
+    /* Своя неправильная пирамида объёма 1: доля отсечённой — по координатам вершин. */
+    const A: Vec3 = [0, 0, 0];
+    const B: Vec3 = [5, 0, 0];
+    const C: Vec3 = [1, 3, 0];
+    const S: Vec3 = [2, 1, 4];
+    const M = delit(C, A, 1, 1);
+    const N = delit(C, B, 1, 1);
+    const dolya = hullVolume([C, M, N, S]) / hullVolume([A, B, C, S]);
+    return (
+      Math.round((text(p, 'vid') === 'chast' ? num(p, 'V') * dolya : num(p, 'V') / dolya) * 1e6) /
+      1e6
+    );
+  },
+  chertezh: () =>
+    shapeVertexMidline('Треугольная пирамида, сечение через вершину и среднюю линию основания'),
+  shagi: (p) => {
+    const V = num(p, 'V');
+    const chast = text(p, 'vid') === 'chast';
+    return [
+      {
+        text: 'Высота у отсечённой пирамиды та же, что у исходной. Отрезок, соединяющий середины двух сторон основания, отрезает от него подобный треугольник с коэффициентом $\\frac12$, его площадь — $\\frac14$ площади основания. Значит, объём отсечённой пирамиды — четверть объёма исходной.',
+      },
+      chast
+        ? { text: `$${ru(V)} : 4 = ${ru(V / 4)}$.`, value: V / 4 }
+        : { text: `$${ru(V)}\\cdot 4 = ${ru(V * 4)}$.`, value: V * 4 },
+    ];
+  },
+  varianty: [],
+};
+
+/**
+ * Пирамида SABC — часть правильной шестиугольной пирамиды SABCDEF:
+ * vid 'vsya' — по объёму SABC найти объём всей, 'chast' — наоборот.
+ * Подвох — треугольник ABC составляет 1/6 правильного шестиугольника
+ * (а не 1/3 или 1/4): высота общая, отношение объёмов — отношение
+ * площадей оснований.
+ */
+export const PV03_SHEST_CHAST: Prototype = {
+  id: 'PV03-shest-chast',
+  razdel: 'III',
+  nazvanie: 'Пирамида SABC — часть правильной шестиугольной пирамиды SABCDEF',
+  tip: 'объём всей шестиугольной пирамиды по объёму SABC или наоборот',
+  zadachnik: [0, 0],
+  status: 'добавить',
+  format: 'десятичная',
+  uslovie: (p) =>
+    text(p, 'vid') === 'vsya'
+      ? `Треугольная пирамида $SABC$ является частью правильной шестиугольной пирамиды $SABCDEF$, её объём равен ${ru(num(p, 'V'))}. Найдите объём шестиугольной пирамиды.`
+      : `Объём правильной шестиугольной пирамиды $SABCDEF$ равен ${ru(num(p, 'V'))}. Найдите объём треугольной пирамиды $SABC$.`,
+  dopustimo: (p) => num(p, 'V') > 0,
+  otvet: (p) =>
+    Math.round((text(p, 'vid') === 'vsya' ? num(p, 'V') * 6 : num(p, 'V') / 6) * 1e9) / 1e9,
+  poModeli: (p) => {
+    const body = regularPyramid(6, 2, 3);
+    const v = (name: string) => vertex(body, name);
+    const dolya =
+      hullVolume([v('A'), v('B'), v('C'), v('S')]) /
+      hullVolume(['A', 'B', 'C', 'D', 'E', 'F', 'S'].map(v));
+    return (
+      Math.round((text(p, 'vid') === 'vsya' ? num(p, 'V') / dolya : num(p, 'V') * dolya) * 1e6) /
+      1e6
+    );
+  },
+  chertezh: () =>
+    shapeHexPartABC('Правильная шестиугольная пирамида SABCDEF с выделенной пирамидой SABC'),
+  shagi: (p) => {
+    const V = num(p, 'V');
+    const vsya = text(p, 'vid') === 'vsya';
+    return [
+      {
+        text: 'Высота у пирамид $SABC$ и $SABCDEF$ общая, поэтому их объёмы относятся как площади оснований.',
+      },
+      {
+        text: 'Правильный шестиугольник со стороной $a$ состоит из шести правильных треугольников площадью $\\frac{\\sqrt3}{4}a^2$. Треугольник $ABC$ — две стороны $a$ и угол $120^\\circ$: $S_{ABC}=\\frac12 a^2\\sin120^\\circ=\\frac{\\sqrt3}{4}a^2$, то есть $\\frac16$ шестиугольника.',
+      },
+      vsya
+        ? { text: `$V = 6\\cdot ${ru(V)} = ${ru(V * 6)}$.`, value: V * 6 }
+        : { text: `$V_{SABC} = ${ru(V)} : 6 = ${ru(V / 6)}$.`, value: V / 6 },
     ];
   },
   varianty: [],

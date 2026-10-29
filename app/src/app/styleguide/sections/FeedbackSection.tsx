@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
   Button,
+  Callout,
   Card,
   EmptyState,
   ErrorState,
@@ -117,6 +118,32 @@ export function FeedbackSection() {
           description="Работу уже начали 4 ученика. Их результаты будут удалены вместе с ней."
           footer={footer}
         />
+      </div>
+
+      <h3 className="t-h4 mt-8">Плашки Callout</h3>
+      <p className="spec">
+        Одна структура — кремовая заливка, рамка 1px, полоска 3px слева, метка со значком; цвет
+        акцента — токены --color-callout-*. «Важно» всегда идёт с примером.
+      </p>
+      <div className="g3 block grid">
+        <Callout
+          tone="vazhno"
+          primer={<p>Просят в рублях, считали в тысячах: 1 250 тыс. руб. → в ответ 1250000.</p>}
+        >
+          <p>
+            Модель не проверяют: <strong>ответ в чужих единицах — 0 баллов</strong>.
+          </p>
+        </Callout>
+        <Callout tone="zapomni">
+          <p>
+            Долг после платежа: <strong>долг × (1 + r) − платёж</strong>.
+          </p>
+        </Callout>
+        <Callout tone="layfhak">
+          <p>
+            Большие суммы считай в тысячах — <strong>переведи только в ответе</strong>.
+          </p>
+        </Callout>
       </div>
     </section>
   );

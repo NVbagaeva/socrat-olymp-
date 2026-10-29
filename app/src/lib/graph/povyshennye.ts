@@ -885,8 +885,7 @@ export function giperbolaKB(p: GiperbolaKB, pechat: Pechat = {}): GrafikTask {
     ymin: Math.min(ay, by, b - 3, -2) - 1,
     ymax: Math.max(ay, by, b + 3, 2) + 1,
   };
-  if (!zaOknom(p.x0, otvet, win))
-    throw new Error('giperbolaKB: f(x₀) читается по рисунку');
+  if (!zaOknom(p.x0, otvet, win)) throw new Error('giperbolaKB: f(x₀) читается по рисунку');
   const scene = (uchitel: boolean) => ({
     window: win,
     grid: { step: 1, show: true },
@@ -917,7 +916,9 @@ export function giperbolaKB(p: GiperbolaKB, pechat: Pechat = {}): GrafikTask {
     },
     {
       title: 'Значение функции',
-      lines: [`$f(${dec(p.x0)})=\\dfrac{${dec(k)}}{${mn(p.x0)}}${b < 0 ? '' : '+'}${dec(b)}=${dec(otvet)}$.`],
+      lines: [
+        `$f(${dec(p.x0)})=\\dfrac{${dec(k)}}{${mn(p.x0)}}${b < 0 ? '' : '+'}${dec(b)}=${dec(otvet)}$.`,
+      ],
     },
   ];
   const hints = [
@@ -978,7 +979,7 @@ export function korenPryamaya(par: KorenPryamaya, pechat: Pechat = {}): GrafikTa
   if (!celoe(otvet * 1e4)) throw new Error(`korenPryamaya: x_B = ${otvet}`);
   /* Второй счёт: бисекция p√x − kx на (x_B/4; 1000) — левее неё только O. */
   const h = (x: number) => pp * Math.sqrt(x) - k * x;
-  let lo = 1e-9 + ((pp / k) ** 2) / 4;
+  let lo = 1e-9 + (pp / k) ** 2 / 4;
   let hi = 10000;
   for (let i = 0; i < 300; i += 1) {
     const c = (lo + hi) / 2;
@@ -1131,7 +1132,9 @@ export function parabolaPryamaya(par: ParabolaPryamaya, pechat: Pechat = {}): Gr
     },
     {
       title: 'Прямая',
-      lines: [`Прямая проходит через $O$: $b=0$, $k=\\dfrac{${dec(ly)}}{${dec(lx)}}=${dec(k)}$, $f(x)=${dec(k)}x$.`],
+      lines: [
+        `Прямая проходит через $O$: $b=0$, $k=\\dfrac{${dec(ly)}}{${dec(lx)}}=${dec(k)}$, $f(x)=${dec(k)}x$.`,
+      ],
     },
     {
       title: 'Парабола',
@@ -1150,11 +1153,7 @@ export function parabolaPryamaya(par: ParabolaPryamaya, pechat: Pechat = {}): Gr
   const hints = [
     {
       question: 'Что даёт общая точка графиков в начале координат?',
-      options: [
-        'У прямой $b=0$, у параболы $c=0$',
-        'Абсциссу точки $A$',
-        'Вершину параболы',
-      ],
+      options: ['У прямой $b=0$, у параболы $c=0$', 'Абсциссу точки $A$', 'Вершину параболы'],
       correct: 0,
     },
     {
@@ -1190,9 +1189,20 @@ export function parabolaPryamaya(par: ParabolaPryamaya, pechat: Pechat = {}): Gr
 export interface DvaUzla {
   /**
    * pokazSdvig — f(x) = a^(x+b); logSdvig — f(x) = logₐ(x+b);
-   * giperbolaA — f(x) = k/(x+a); pokazPlus — f(x) = aˣ + b.
+   * giperbolaA — f(x) = k/(x+a); pokazPlus — f(x) = aˣ + b;
+   * logPlus — f(x) = c + logₐ x (узел A при x = 1); korenPlus —
+   * f(x) = b + k√x (узел A при x = 0); pryamaya — f(x) = ax + b;
+   * korenSdvig — f(x) = k√(x + p) (узел A — начало графика, на оси Ox).
    */
-  vid: 'pokazSdvig' | 'logSdvig' | 'giperbolaA' | 'pokazPlus';
+  vid:
+    | 'pokazSdvig'
+    | 'logSdvig'
+    | 'giperbolaA'
+    | 'pokazPlus'
+    | 'logPlus'
+    | 'korenPlus'
+    | 'pryamaya'
+    | 'korenSdvig';
   A: [number, number];
   B: [number, number];
   /** Спрашивают f(x0) … */
@@ -1227,6 +1237,28 @@ function koefDvaUzla(p: DvaUzla): Koef {
     const a = round9((by * bx - ay * ax) / (ay - by));
     return { a, b: 0, k: round9(ay * (ax + a)) };
   }
+  if (p.vid === 'logPlus') {
+    /* Узел A при x = 1: logₐ1 = 0 ⇒ c = y_A (хранится в b); logₐ x_B = y_B − c. */
+    if (ax !== 1) throw new Error('dvaUzla: у c + logₐ x узел A — при x = 1');
+    const a = bx ** (1 / (by - ay));
+    return { a, b: ay, k: 1 };
+  }
+  if (p.vid === 'korenPlus') {
+    /* Узел A при x = 0: b = y_A; k = (y_B − b)/√x_B. */
+    if (ax !== 0) throw new Error('dvaUzla: у b + k√x узел A — при x = 0');
+    return { a: 1, b: ay, k: round9((by - ay) / Math.sqrt(bx)) };
+  }
+  if (p.vid === 'pryamaya') {
+    /* Угловой коэффициент по двум узлам хранится в a, свободный член — в b. */
+    if (ax === bx) throw new Error('dvaUzla: вертикальная прямая');
+    const a = round9((by - ay) / (bx - ax));
+    return { a, b: round9(ay - a * ax), k: 1 };
+  }
+  if (p.vid === 'korenSdvig') {
+    /* Узел A — начало графика на оси Ox: x_A + p = 0 ⇒ p = −x_A (хранится в b); k = y_B/√(x_B + p). */
+    if (ay !== 0) throw new Error('dvaUzla: у k√(x + p) узел A — начало графика на оси Ox');
+    return { a: 1, b: -ax, k: round9(by / Math.sqrt(bx - ax)) };
+  }
   /* pokazPlus: узел A на оси Oy: a⁰ + b = y_A ⇒ b = y_A − 1; a^(x_B) = y_B − b. */
   if (ax !== 0) throw new Error('dvaUzla: у aˣ + b узел A — на оси Oy');
   const b = ay - 1;
@@ -1238,6 +1270,10 @@ function znachenie(vid: DvaUzla['vid'], c: Koef, x: number): number {
   if (vid === 'pokazSdvig') return c.a ** (x + c.b);
   if (vid === 'logSdvig') return Math.log(x + c.b) / Math.log(c.a);
   if (vid === 'giperbolaA') return c.k / (x + c.a);
+  if (vid === 'logPlus') return c.b + Math.log(x) / Math.log(c.a);
+  if (vid === 'korenPlus') return x < 0 ? Number.NaN : c.b + c.k * Math.sqrt(x);
+  if (vid === 'pryamaya') return c.a * x + c.b;
+  if (vid === 'korenSdvig') return x + c.b < 0 ? Number.NaN : c.k * Math.sqrt(x + c.b);
   return c.a ** x + c.b;
 }
 
@@ -1245,6 +1281,10 @@ function argument(vid: DvaUzla['vid'], c: Koef, y: number): number {
   if (vid === 'pokazSdvig') return Math.log(y) / Math.log(c.a) - c.b;
   if (vid === 'logSdvig') return c.a ** y - c.b;
   if (vid === 'giperbolaA') return c.k / y - c.a;
+  if (vid === 'logPlus') return c.a ** (y - c.b);
+  if (vid === 'korenPlus') return ((y - c.b) / c.k) ** 2;
+  if (vid === 'pryamaya') return (y - c.b) / c.a;
+  if (vid === 'korenSdvig') return (y / c.k) ** 2 - c.b;
   return Math.log(y - c.b) / Math.log(c.a);
 }
 
@@ -1265,13 +1305,19 @@ function osnTex(a: number): string {
  */
 export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
   const c = koefDvaUzla(p);
-  const osnovanie = p.vid !== 'giperbolaA';
+  const osnovanie =
+    p.vid !== 'giperbolaA' &&
+    p.vid !== 'korenPlus' &&
+    p.vid !== 'pryamaya' &&
+    p.vid !== 'korenSdvig';
   if (
     (osnovanie && (!(c.a > 0) || c.a === 1)) ||
     !Number.isFinite(c.a) ||
-    !celoe(c.b) ||
-    !celoe(c.k) ||
-    (!osnovanie && (c.a === 0 || c.k === 0))
+    (p.vid === 'pryamaya' ? !celoe(c.b * 1e4) || !celoe(c.a * 1e4) || c.a === 0 : !celoe(c.b)) ||
+    (p.vid === 'korenPlus' || p.vid === 'korenSdvig'
+      ? !celoe(c.k * 1e4) || c.k === 0
+      : !celoe(c.k)) ||
+    (p.vid === 'giperbolaA' && (c.a === 0 || c.k === 0))
   )
     throw new Error(`dvaUzla: коэффициенты ${JSON.stringify(c)}`);
   for (const [x, y] of [p.A, p.B]) {
@@ -1291,8 +1337,31 @@ export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
     proverka = f(p.x0 as number);
   } else {
     const y0 = p.y0 as number;
-    const lo0 = p.vid === 'logSdvig' ? -c.b + 1e-12 : p.vid === 'giperbolaA' ? (y0 * c.k > 0 ? -c.a + 1e-12 : -1e4) : -60;
-    const hi0 = p.vid === 'giperbolaA' ? (y0 * c.k > 0 ? 1e4 : -c.a - 1e-12) : p.vid === 'logSdvig' ? 1e7 : 60;
+    const lo0 =
+      p.vid === 'logSdvig' || p.vid === 'korenSdvig'
+        ? -c.b + 1e-12
+        : p.vid === 'pryamaya'
+          ? -1e4
+          : p.vid === 'logPlus' || p.vid === 'korenPlus'
+            ? 1e-12
+            : p.vid === 'giperbolaA'
+              ? y0 * c.k > 0
+                ? -c.a + 1e-12
+                : -1e4
+              : -60;
+    const hi0 =
+      p.vid === 'giperbolaA'
+        ? y0 * c.k > 0
+          ? 1e4
+          : -c.a - 1e-12
+        : p.vid === 'logSdvig' ||
+            p.vid === 'logPlus' ||
+            p.vid === 'korenPlus' ||
+            p.vid === 'korenSdvig'
+          ? 1e7
+          : p.vid === 'pryamaya'
+            ? 1e4
+            : 60;
     let lo = lo0;
     let hi = hi0;
     const g = (x: number) => f(x) - y0;
@@ -1331,7 +1400,15 @@ export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
         ? { type: 'loga', a: c.a, c: c.b, d: 0, k: 1 }
         : p.vid === 'giperbolaA'
           ? { type: 'rational', k: c.k, a: c.a, b: 0 }
-          : { type: 'expo', a: c.a, c: 0, d: c.b, k: 1 };
+          : p.vid === 'logPlus'
+            ? { type: 'loga', a: c.a, c: 0, d: c.b, k: 1 }
+            : p.vid === 'korenPlus'
+              ? { type: 'sqrt', a: c.k, c: 0, d: c.b }
+              : p.vid === 'pryamaya'
+                ? { type: 'line', k: c.a, b: c.b }
+                : p.vid === 'korenSdvig'
+                  ? { type: 'sqrt', a: c.k, c: -c.b, d: 0 }
+                  : { type: 'expo', a: c.a, c: 0, d: c.b, k: 1 };
   const scene = (uchitel: boolean) => ({
     window: win,
     grid: { step: 1, show: true },
@@ -1353,7 +1430,15 @@ export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
         ? '\\log_a(x+b)'
         : p.vid === 'giperbolaA'
           ? '\\dfrac{k}{x+a}'
-          : 'a^x+b';
+          : p.vid === 'logPlus'
+            ? 'c+\\log_a x'
+            : p.vid === 'korenPlus'
+              ? 'b+k\\sqrt{x}'
+              : p.vid === 'pryamaya'
+                ? 'ax+b'
+                : p.vid === 'korenSdvig'
+                  ? 'k\\sqrt{x+p}'
+                  : 'a^x+b';
   const sdvig = (b: number) => (b === 0 ? '' : b < 0 ? `-${dec(-b)}` : `+${dec(b)}`);
   const fTex =
     p.vid === 'pokazSdvig'
@@ -1362,7 +1447,15 @@ export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
         ? `\\log_{${osnTex(c.a)}}(x${sdvig(c.b)})`
         : p.vid === 'giperbolaA'
           ? `\\dfrac{${dec(c.k)}}{x${sdvig(c.a)}}`
-          : `${osnTex(c.a).includes('frac') || osnTex(c.a).includes('sqrt') ? `\\left(${osnTex(c.a)}\\right)` : osnTex(c.a)}^x${sdvig(c.b)}`;
+          : p.vid === 'logPlus'
+            ? `${dec(c.b)}+\\log_{${osnTex(c.a)}} x`.replace(/^0\+/, '')
+            : p.vid === 'korenPlus'
+              ? `${dec(c.b)}${c.k < 0 ? '-' : '+'}${Math.abs(c.k) === 1 ? '' : dec(Math.abs(c.k))}\\sqrt{x}`
+              : p.vid === 'pryamaya'
+                ? `${c.a === 1 ? '' : c.a === -1 ? '-' : dec(c.a)}x${sdvig(c.b)}`
+                : p.vid === 'korenSdvig'
+                  ? `${c.k === 1 ? '' : c.k === -1 ? '-' : dec(c.k)}\\sqrt{x${sdvig(c.b)}}`
+                  : `${osnTex(c.a).includes('frac') || osnTex(c.a).includes('sqrt') ? `\\left(${osnTex(c.a)}\\right)` : osnTex(c.a)}^x${sdvig(c.b)}`;
   const sistema =
     p.vid === 'pokazSdvig'
       ? [
@@ -1379,15 +1472,38 @@ export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
               `$\\dfrac{k}{${dec(ax)}+a}=${dec(ay)}$ и $\\dfrac{k}{${dec(bx)}+a}=${dec(by)}$, то есть $k=${mn(ay)}(${dec(ax)}+a)=${mn(by)}(${dec(bx)}+a)$.`,
               `Отсюда $a=${dec(c.a)}$, $k=${dec(c.k)}$.`,
             ]
-          : [
-              `Точка $${kv(p.A)}$ на оси $Oy$: $a^0+b=${dec(ay)}$, значит $b=${dec(c.b)}$.`,
-              `Вторая точка: $a^{${dec(bx)}}${sdvig(c.b)}=${dec(by)}$, то есть $a^{${dec(bx)}}=${dec(round9(by - c.b))}$ и $a=${osnTex(c.a)}$.`,
-            ];
+          : p.vid === 'logPlus'
+            ? [
+                `Точка $${kv(p.A)}$: $\\log_a 1=0$, поэтому $c=${dec(c.b)}$.`,
+                `Вторая точка: $${dec(c.b)}+\\log_a ${dec(bx)}=${dec(by)}$, то есть $\\log_a ${dec(bx)}=${dec(round9(by - c.b))}$ и $a=${osnTex(c.a)}$.`,
+              ]
+            : p.vid === 'korenPlus'
+              ? [
+                  `Точка $${kv(p.A)}$: $\\sqrt0=0$, поэтому $b=${dec(c.b)}$.`,
+                  `Вторая точка: $${dec(c.b)}+k\\sqrt{${dec(bx)}}=${dec(by)}$, то есть $${dec(Math.sqrt(bx))}k=${dec(round9(by - c.b))}$ и $k=${dec(c.k)}$.`,
+                ]
+              : p.vid === 'pryamaya'
+                ? [
+                    `Угловой коэффициент — приращение $y$ на приращение $x$ между узлами: $a=\\dfrac{${dec(by)}-${mn(ay)}}{${dec(bx)}-${mn(ax)}}=${dec(c.a)}$.`,
+                    `Из первой точки: $${mn(c.a)}\\cdot${mn(ax)}+b=${dec(ay)}$, откуда $b=${dec(c.b)}$.`,
+                  ]
+                : p.vid === 'korenSdvig'
+                  ? [
+                      `График начинается в точке $${kv(p.A)}$: там подкоренное выражение равно нулю, $${dec(ax)}+p=0$, $p=${dec(c.b)}$.`,
+                      `Вторая точка: $k\\sqrt{${dec(bx)}${sdvig(c.b)}}=${dec(by)}$, то есть $${dec(round9(Math.sqrt(bx + c.b)))}k=${dec(by)}$ и $k=${dec(c.k)}$.`,
+                    ]
+                  : [
+                      `Точка $${kv(p.A)}$ на оси $Oy$: $a^0+b=${dec(ay)}$, значит $b=${dec(c.b)}$.`,
+                      `Вторая точка: $a^{${dec(bx)}}${sdvig(c.b)}=${dec(by)}$, то есть $a^{${dec(bx)}}=${dec(round9(by - c.b))}$ и $a=${osnTex(c.a)}$.`,
+                    ];
   const otvetStr = poZnach
     ? `$f(${dec(p.x0 as number)})=${dec(otvet)}$.`
     : `$${fTex}=${dec(p.y0 as number)}$ при $x=${dec(otvet)}$.`;
   const shagi = [
-    { title: 'Читаем точки', lines: [`График проходит через узлы сетки $${kv(p.A)}$ и $${kv(p.B)}$.`] },
+    {
+      title: 'Читаем точки',
+      lines: [`График проходит через узлы сетки $${kv(p.A)}$ и $${kv(p.B)}$.`],
+    },
     { title: 'Коэффициенты', lines: [...sistema, `$f(x)=${fTex}$.`] },
     { title: poZnach ? 'Значение функции' : 'Решаем уравнение', lines: [otvetStr] },
   ];
@@ -1404,7 +1520,11 @@ export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
     },
     {
       question: 'Какая формула у функции?',
-      options: bezPovtorov([`$f(x)=${fTex}$`, `$f(x)=${dec(c.a)}x${sdvig(c.b)}$`, `$f(x)=${vidTex}$ при $a=1$`]),
+      options: bezPovtorov([
+        `$f(x)=${fTex}$`,
+        `$f(x)=${dec(c.a)}x${sdvig(c.b)}$`,
+        `$f(x)=${vidTex}$ при $a=1$`,
+      ]),
       correct: 0,
     },
   ];
@@ -1415,6 +1535,129 @@ export function dvaUzla(p: DvaUzla, pechat: Pechat = {}): GrafikTask {
     svg: risuy(scene(false), pechat),
     svgUchitel: risuy(scene(true), pechat),
     points: [p.A, p.B].map(([x, y]) => ({ x, y })),
+    shagi,
+    hints,
+  };
+}
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+export interface DvePryamye {
+  /** Две точки первой прямой — узлы сетки. */
+  P1: [number, number];
+  P2: [number, number];
+  /** Две точки второй прямой — узлы сетки. */
+  Q1: [number, number];
+  Q2: [number, number];
+  /** Что спрашивают: абсциссу или ординату точки пересечения. */
+  ask: 'x0' | 'y0';
+}
+
+/**
+ * Две прямые через узлы сетки пересекаются в точке A(x₀; y₀) вне узлов
+ * (часто — за рамкой). Найти x₀ или y₀. Подвох — точку не прочитать по
+ * рисунку: угловые коэффициенты по двум узлам, затем уравнение.
+ */
+export function dvePryamye(p: DvePryamye, pechat: Pechat = {}): GrafikTask {
+  const pryamaya = (A: T, B: T) => {
+    if (A[0] === B[0]) throw new Error('dvePryamye: вертикальная прямая');
+    const k = round9((B[1] - A[1]) / (B[0] - A[0]));
+    return { k, b: round9(A[1] - k * A[0]) };
+  };
+  const f = pryamaya(p.P1, p.P2);
+  const g = pryamaya(p.Q1, p.Q2);
+  if (Math.abs(f.k - g.k) < 1e-9) throw new Error('dvePryamye: прямые параллельны');
+  const x0 = round9((g.b - f.b) / (f.k - g.k));
+  const y0 = round9(f.k * x0 + f.b);
+  const otvet = p.ask === 'x0' ? x0 : y0;
+  if (!celoe(otvet * 1e4)) throw new Error(`dvePryamye: ответ ${otvet}`);
+  if (celoe(x0) && celoe(y0))
+    throw new Error('dvePryamye: точка пересечения — узел, читается по рисунку');
+  /* Второй счёт: бисекция по разности прямых. */
+  const h = (x: number) => f.k * x + f.b - (g.k * x + g.b);
+  let lo = -1e4;
+  let hi = 1e4;
+  for (let i = 0; i < 300; i += 1) {
+    const m = (lo + hi) / 2;
+    if (Math.sign(h(m)) === Math.sign(h(lo))) lo = m;
+    else hi = m;
+  }
+  const xb = (lo + hi) / 2;
+  const proverka = p.ask === 'x0' ? xb : f.k * xb + f.b;
+  const pts = [p.P1, p.P2, p.Q1, p.Q2];
+  const xs = [...pts.map((t) => t[0]), 0];
+  const ys = [...pts.map((t) => t[1]), 0];
+  const win = {
+    xmin: Math.min(...xs) - 2,
+    xmax: Math.max(...xs) + 2,
+    ymin: Math.min(...ys) - 2,
+    ymax: Math.max(...ys) + 2,
+  };
+  const scene = (uchitel: boolean) => ({
+    window: win,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    labelRules: 'strict',
+    axisLabels: 'minimal',
+    curves: [
+      { type: 'line', k: f.k, b: f.b, color: 'lineA', label: 'y = f(x)' },
+      { type: 'line', k: g.k, b: g.b, color: 'lineB', label: 'y = g(x)' },
+    ],
+    points: [
+      ...[p.P1, p.P2].map(([x, y]) => ({ x, y, style: 'solid', color: 'lineA', label: null })),
+      ...[p.Q1, p.Q2].map(([x, y]) => ({ x, y, style: 'solid', color: 'lineB', label: null })),
+    ],
+    shapes: uchitel ? napravlyayushchie(pts) : [],
+    alt: 'Графики двух линейных функций, на каждом отмечены две точки в узлах сетки',
+  });
+  const kv = (t: T) => `(${dec(t[0])};\\ ${dec(t[1])})`;
+  const lin = (c: { k: number; b: number }) =>
+    `${c.k === 1 ? '' : c.k === -1 ? '-' : dec(c.k)}x${c.b === 0 ? '' : c.b < 0 ? `-${dec(-c.b)}` : `+${dec(c.b)}`}`;
+  const koef = (A: T, B: T, c: { k: number; b: number }, imya: string) =>
+    `$k=\\dfrac{${dec(B[1])}-${mn(A[1])}}{${dec(B[0])}-${mn(A[0])}}=${dec(c.k)}$, $b=${dec(A[1])}-${mn(c.k)}\\cdot${mn(A[0])}=${dec(c.b)}$: $${imya}(x)=${lin(c)}$.`;
+  const shagi = [
+    {
+      title: 'Читаем точки',
+      lines: [
+        `Первая прямая проходит через $${kv(p.P1)}$ и $${kv(p.P2)}$, вторая — через $${kv(p.Q1)}$ и $${kv(p.Q2)}$.`,
+      ],
+    },
+    { title: 'Уравнения прямых', lines: [koef(p.P1, p.P2, f, 'f'), koef(p.Q1, p.Q2, g, 'g')] },
+    {
+      title: 'Точка пересечения',
+      lines: [
+        `$${lin(f)}=${lin(g)}$, откуда $x_0=${dec(x0)}$.`,
+        ...(p.ask === 'y0' ? [`$y_0=f(${dec(x0)})=${dec(y0)}$.`] : []),
+      ],
+    },
+  ];
+  const hints = [
+    {
+      question: 'Как найти точку пересечения, если её не видно на рисунке?',
+      options: [
+        'Составить уравнения прямых и приравнять',
+        'Продолжить прямые на глаз',
+        'Взять ближайший узел',
+      ],
+      correct: 0,
+    },
+    {
+      question: 'Чему равен угловой коэффициент первой прямой?',
+      options: bezPovtorov([`$${dec(f.k)}$`, `$${dec(round9(1 / f.k))}$`, `$${dec(-f.k)}$`]),
+      correct: 0,
+      comment: 'Отношение приращения ординаты к приращению абсциссы.',
+    },
+  ];
+  return {
+    uslovie:
+      p.ask === 'y0'
+        ? 'На рисунке изображены графики двух функций вида $f(x)=kx+b$, которые пересекаются в точке $A(x_0;\\ y_0)$. Найдите $y_0$.'
+        : 'На рисунке изображены графики двух линейных функций. Найдите абсциссу точки пересечения графиков.',
+    otvet,
+    proverka,
+    svg: risuy(scene(false), pechat),
+    svgUchitel: risuy(scene(true), pechat),
+    points: pts.map(([x, y]) => ({ x, y })),
     shagi,
     hints,
   };

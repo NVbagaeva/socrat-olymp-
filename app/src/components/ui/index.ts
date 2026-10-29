@@ -17,6 +17,7 @@ export { Skeleton, type SkeletonProps } from './Skeleton';
 export { Breadcrumbs, type BreadcrumbsProps, type Crumb } from './Breadcrumbs';
 export { HandNote, type HandNoteProps } from './HandNote';
 
+export { Callout, Snoska, type CalloutProps, type CalloutTone } from './Callout';
 export { Card, type CardProps } from './Card';
 export { MetricRow, type MetricRowProps } from './MetricRow';
 export { Metric, type MetricDirection, type MetricProps, type MetricSize } from './Metric';

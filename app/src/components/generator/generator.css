@@ -337,6 +337,22 @@
   width: 36px;
   height: 36px;
 }
+/* Значок тела №3 (components/stereo/IkonkaTela) крупнее — 48 px на
+   телефоне, 56 px шире: столбец значка растёт под него, текст и
+   степпер остаются в своих столбцах. */
+.gen-trow:has(.ikonka-tela) {
+  grid-template-columns: var(--ikonka-tela, 48px) minmax(0, 1fr) auto;
+  --ikonka-tela: 48px;
+}
+.gen-trow:has(.ikonka-tela) .gen-trow__icon {
+  width: auto;
+  height: auto;
+}
+@media (min-width: 760px) {
+  .gen-trow:has(.ikonka-tela) {
+    --ikonka-tela: 56px;
+  }
+}
 .gen-trow__name {
   display: grid;
   min-width: 0;
@@ -349,13 +365,21 @@
 .gen-trow__name b {
   font-size: var(--fs-caption);
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
+/* Подпись — обычный текст: переносится по словам внутри своего
+   столбца, «подтипы» со стрелкой — одним куском сразу после слова. */
 .gen-trow__name small {
+  display: block;
+  font-size: var(--fs-label);
+  color: var(--color-text-tertiary);
+}
+.gen-trow__podtipy {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  font-size: var(--fs-label);
-  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  vertical-align: bottom;
 }
 .gen-chev {
   width: 14px;
@@ -1215,13 +1239,18 @@
   .gen {
     gap: var(--space-3);
   }
+  /* Полоса на телефоне — сплошная, без стекла: карточки пресетов и
+     состав уходят под неё целиком, а не просвечивают. */
   .gen-strip {
     display: block;
+    z-index: 16;
     margin: 0 calc(-1 * var(--space-4));
     padding: var(--space-2) var(--space-4);
     border-width: 1px 0;
     border-radius: 0;
-    box-shadow: none;
+    background: var(--color-bg);
+    backdrop-filter: none;
+    box-shadow: 0 6px 12px -10px rgb(16 23 40 / 0.25);
   }
   .gen-strip__filters,
   .gen-strip__go {
@@ -1337,9 +1366,27 @@
   .gen-toast {
     bottom: calc(var(--h-bnav) + 120px + env(safe-area-inset-bottom));
   }
-  /* Кнопка «?» сайта — над панелью «Сгенерировать», а не поверх неё. */
+  /* Кнопка «?» сайта — внутри панели «Сгенерировать», справа от сводки,
+     над самой кнопкой: висящая выше, она закрывала «+» степперов
+     состава. Сводка оставляет ей место справа. */
   body:has(.gen-actbar) .help-fab.help-fab {
-    bottom: calc(var(--h-bnav) + 120px + env(safe-area-inset-bottom));
+    right: var(--space-3);
+    bottom: calc(
+      var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-3) + var(--h-control-lg) +
+        var(--space-2) - 8px
+    );
+  }
+  body:has(.gen-actbar) .help-fab .help-fab__button {
+    width: 40px;
+    height: 40px;
+    box-shadow: var(--shadow-sm);
+  }
+  body:has(.gen-actbar) .help-fab .help-fab__button svg {
+    width: 22px;
+    height: 22px;
+  }
+  .gen-actbar .gen-sum {
+    padding-right: 48px;
   }
 }
 

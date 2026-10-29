@@ -279,7 +279,11 @@ export const PV10_GORIZONT: Prototype = {
           '$h=\\dfrac{l}{2R}$',
           '$h=2Rl^2$',
         ]),
-        vKakihEdinicah('в метрах', ['в километрах', 'в сантиметрах'], 'Высоты получились в километрах — переводим.'),
+        vKakihEdinicah(
+          'в метрах',
+          ['в километрах', 'в сантиметрах'],
+          'Высоты получились в километрах — переводим.',
+        ),
       ],
     };
   },
@@ -318,9 +322,7 @@ export const PV10_KPD: Prototype = {
       dano: dn,
       etapy: razbor({
         dano: dn,
-        ishchem: [
-          `Ищем $T_1$. Подставляем: $${d(eta)}=\\dfrac{T_1-${d(T2)}}{T_1}\\cdot100$.`,
-        ],
+        ishchem: [`Ищем $T_1$. Подставляем: $${d(eta)}=\\dfrac{T_1-${d(T2)}}{T_1}\\cdot100$.`],
         vid: 'uravnenie',
         reshaem: [
           `Делим на $100$: $\\dfrac{T_1-${d(T2)}}{T_1}=${fq(q(eta, 100))}$, то есть $1-\\dfrac{${d(T2)}}{T_1}=${fq(q(eta, 100))}$.`,
@@ -359,7 +361,8 @@ export const PV10_RADIATOR: Prototype = {
   no: 137,
   group: 'IV',
   title: 'Радиатор: температура воды на выходе',
-  formula: 'x=\\alpha\\dfrac{cm}{\\gamma}\\log_2\\dfrac{T_{\\text{в}}-T_{\\text{п}}}{T-T_{\\text{п}}}',
+  formula:
+    'x=\\alpha\\dfrac{cm}{\\gamma}\\log_2\\dfrac{T_{\\text{в}}-T_{\\text{п}}}{T-T_{\\text{п}}}',
   ask: 'до какой температуры охладится вода',
   skills: ['logarifm', 'podstanovka'],
   fipiNos: '',
@@ -416,11 +419,7 @@ export const PV10_RADIATOR: Prototype = {
           [`$${d(x)}$`, `$${fq(K)}$`].filter((o) => o !== `$${d(Lv)}$`),
           'Делим длину трубы на множитель перед логарифмом.',
         ),
-        vopros(
-          'Что получается из $\\log_2 A=n$?',
-          '$A=2^n$',
-          ['$A=n^2$', '$A=2n$'],
-        ),
+        vopros('Что получается из $\\log_2 A=n$?', '$A=2^n$', ['$A=n^2$', '$A=2n$']),
       ],
     };
   },
@@ -478,9 +477,14 @@ export const PV10_RAZGON: Prototype = {
         vopros(
           `Как выразить $${naiti}$ из $v=\\sqrt{2la}$?`,
           naiti === 'a' ? '$a=\\dfrac{v^2}{2l}$' : '$l=\\dfrac{v^2}{2a}$',
-          naiti === 'a' ? ['$a=\\dfrac{v}{2l}$', '$a=\\dfrac{2l}{v^2}$'] : ['$l=\\dfrac{v}{2a}$', '$l=\\dfrac{2a}{v^2}$'],
+          naiti === 'a'
+            ? ['$a=\\dfrac{v}{2l}$', '$a=\\dfrac{2l}{v^2}$']
+            : ['$l=\\dfrac{v}{2a}$', '$l=\\dfrac{2a}{v^2}$'],
         ),
-        vKakihEdinicah(naiti === 'a' ? 'в км/ч²' : 'в километрах', naiti === 'a' ? ['в м/с²', 'в км/ч'] : ['в метрах', 'в км/ч']),
+        vKakihEdinicah(
+          naiti === 'a' ? 'в км/ч²' : 'в километрах',
+          naiti === 'a' ? ['в м/с²', 'в км/ч'] : ['в метрах', 'в км/ч'],
+        ),
       ],
     };
   },
@@ -516,7 +520,12 @@ export const PV10_KOLOKOL: Prototype = {
     const ans = val(poV ? q(nach, r) : mul(q(nach), q(r)));
     const dn = [
       dano('\\nu', nu, 'моль', 'количество воздуха'),
-      dano(poV ? 'V_1' : 'p_1', nach, poV ? 'л' : 'атм', poV ? 'начальный объём' : 'начальное давление'),
+      dano(
+        poV ? 'V_1' : 'p_1',
+        nach,
+        poV ? 'л' : 'атм',
+        poV ? 'начальный объём' : 'начальное давление',
+      ),
       dano('\\alpha', al, '', 'постоянная'),
       dano('T', T, 'К', 'температура'),
       dano('A', A, 'Дж', 'работа'),
@@ -528,7 +537,9 @@ export const PV10_KOLOKOL: Prototype = {
       dano: dn,
       etapy: razbor({
         dano: dn,
-        ishchem: [`Ищем $${poV ? 'V_2' : 'p_2'}$. Сначала множитель $\\alpha\\nu T$, потом логарифм.`],
+        ishchem: [
+          `Ищем $${poV ? 'V_2' : 'p_2'}$. Сначала множитель $\\alpha\\nu T$, потом логарифм.`,
+        ],
         vid: 'uravnenie',
         reshaem: [
           `$\\alpha\\nu T=${d(al)}\\cdot${d(nu)}\\cdot${d(T)}=${d(K)}$.`,
@@ -552,7 +563,432 @@ export const PV10_KOLOKOL: Prototype = {
         vopros(
           poV ? 'Как найти $V_2$?' : 'Как найти $p_2$?',
           poV ? `$V_2=\\dfrac{${d(nach)}}{${d(r)}}$` : `$p_2=${d(nach)}\\cdot${d(r)}$`,
-          poV ? [`$V_2=${d(nach)}\\cdot${d(r)}$`, `$V_2=${d(nach)}-${d(r)}$`] : [`$p_2=\\dfrac{${d(nach)}}{${d(r)}}$`, `$p_2=${d(nach)}+${d(r)}$`],
+          poV
+            ? [`$V_2=${d(nach)}\\cdot${d(r)}$`, `$V_2=${d(nach)}-${d(r)}$`]
+            : [`$p_2=\\dfrac{${d(nach)}}{${d(r)}}$`, `$p_2=${d(nach)}+${d(r)}$`],
+        ),
+      ],
+    };
+  },
+};
+
+/* ── Партия 5 (варианты 25–30) ──────────────────────────────────── */
+
+/** Табличные углы: sin² и cos² как дроби. */
+const SIN2: Record<number, [number, number]> = { 30: [1, 4], 45: [1, 2], 60: [3, 4], 90: [1, 1] };
+const COS: Record<number, [number, number]> = { 0: [1, 1], 60: [1, 2] };
+
+/**
+ * Неупругий удар: Q = m·v²·sin²α, тела летят под углом 2α. Найти
+ * наименьший угол 2α, при котором выделится не меньше Q₀. Подвох —
+ * sin²α = Q₀/(mv²), α из таблицы, а ответ — удвоенный угол.
+ */
+export const PV10_UDAR: Prototype = {
+  id: 'PV10-UDAR',
+  no: 140,
+  group: 'V',
+  title: 'Неупругий удар: наименьший угол между направлениями',
+  formula: 'Q=mv^2\\sin^2\\alpha',
+  ask: 'наименьший угол $2\\alpha$',
+  skills: ['trigonometriya', 'podstanovka'],
+  fipiNos: '',
+  alt: 'Два тела летят навстречу под углом и слипаются',
+  solve(p) {
+    const m = num(p, 'm');
+    const v = num(p, 'v');
+    const Q0 = num(p, 'Q');
+    const s2 = q(Q0, m * v * v);
+    const al = Object.entries(SIN2).find(([, [a, b]]) => a * s2.m === b * s2.n)?.[0];
+    if (al === undefined) throw new Error(`PV10-UDAR: sin²α = ${fq(s2)} — не табличный`);
+    const alpha = Number(al);
+    const ans = 2 * alpha;
+    const dn = [
+      dano('m', m, 'кг', 'масса каждого тела'),
+      dano('v', v, 'м/с', 'скорость тел'),
+      dano('Q', `\\ge${d(Q0)}`, 'Дж', 'выделившаяся энергия'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: '2\\alpha',
+      edinicy: '°',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          'Ищем угол $2\\alpha$. Энергия растёт вместе с $\\sin^2\\alpha$, поэтому наименьший угол — тот, при котором $Q$ ровно равна порогу.',
+        ],
+        vid: 'neravenstvo',
+        reshaem: [
+          `$${d(m)}\\cdot${d(v)}^2\\cdot\\sin^2\\alpha\\ge${d(Q0)}$, то есть $\\sin^2\\alpha\\ge\\dfrac{${d(Q0)}}{${d(m * v * v)}}=${fq(s2)}$.`,
+          `При острых $\\alpha$ это $\\alpha\\ge${alpha}^\\circ$: $\\sin^2${alpha}^\\circ=${fq(s2)}$.`,
+          `Угол между направлениями $2\\alpha\\ge${ans}^\\circ$, наименьший — $${ans}^\\circ$.`,
+        ],
+        proverka: [
+          `При $2\\alpha=${ans}^\\circ$: $Q=${d(m * v * v)}\\cdot${fq(s2)}=${d(Q0)}$ Дж — ровно порог.`,
+        ],
+        answer: ans,
+        ed: '°',
+      }),
+      vychisleniya: [],
+      hints: [
+        chtoNayti('угол $2\\alpha$ между направлениями', ['угол $\\alpha$', 'энергию $Q$']),
+        vopros('Чему равен $\\sin^2\\alpha$ на пороге?', `$${fq(s2)}$`, [
+          `$${fq(q(s2.m, s2.n))}$`,
+          `$${fq(q(Q0, m * v))}$`,
+        ]),
+        vopros(
+          'Что записать в ответ?',
+          `$${ans}$`,
+          [`$${alpha}$`, `$${180 - ans}$`],
+          'Спрашивают угол $2\\alpha$, а не $\\alpha$.',
+        ),
+      ],
+    };
+  },
+};
+
+/**
+ * Прыжок на платформу: u = m/(m + M)·v·cos α. Найти наибольший угол α,
+ * чтобы скорость платформы была не меньше u₀. Подвох — cos α убывает,
+ * поэтому неравенство u ≥ u₀ даёт α ≤ …, а не α ≥ ….
+ */
+export const PV10_PLATFORMA: Prototype = {
+  id: 'PV10-PLATFORMA',
+  no: 141,
+  group: 'V',
+  title: 'Прыжок на платформу: наибольший угол к рельсам',
+  formula: 'u=\\dfrac{m}{m+M}v\\cos\\alpha',
+  ask: 'наибольший угол $\\alpha$',
+  skills: ['trigonometriya', 'podstanovka'],
+  fipiNos: '',
+  alt: 'Человек запрыгивает на платформу, стоящую на рельсах',
+  solve(p) {
+    if (p['vid'] === 'v') return platformaSkorost(p);
+    const m = num(p, 'm');
+    const M = num(p, 'M');
+    const v = num(p, 'v');
+    const u = num(p, 'u');
+    const k = q(m, m + M);
+    const kv = mul(k, q(v));
+    const c = div(q(u), kv);
+    const al = Object.entries(COS).find(([, [a, b]]) => a * c.m === b * c.n)?.[0];
+    if (al === undefined || Number(al) === 0)
+      throw new Error(`PV10-PLATFORMA: cos α = ${fq(c)} — не табличный`);
+    const ans = Number(al);
+    const dn = [
+      dano('m', m, 'кг', 'масса прыгуна со снарядом'),
+      dano('M', M, 'кг', 'масса платформы'),
+      dano('v', v, 'м/с', 'скорость прыжка'),
+      dano('u', `\\ge${d(u)}`, 'м/с', 'скорость платформы'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: '\\alpha',
+      edinicy: '°',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          'Ищем наибольший угол $\\alpha$. Чем больше острый угол, тем меньше $\\cos\\alpha$ и тем медленнее платформа.',
+        ],
+        vid: 'neravenstvo',
+        reshaem: [
+          `Множитель $\\dfrac{m}{m+M}v=\\dfrac{${d(m)}}{${d(m + M)}}\\cdot${d(v)}=${fq(kv)}$.`,
+          `$${fq(kv)}\\cos\\alpha\\ge${d(u)}$, то есть $\\cos\\alpha\\ge${fq(c)}$.`,
+          `$\\cos\\alpha$ на острых углах убывает: $\\alpha\\le${ans}^\\circ$, наибольший — $${ans}^\\circ$.`,
+        ],
+        proverka: [
+          `При $\\alpha=${ans}^\\circ$: $u=${fq(kv)}\\cdot${fq(c)}=${d(u)}$ м/с — ровно порог.`,
+        ],
+        answer: ans,
+        ed: '°',
+      }),
+      vychisleniya: [],
+      hints: [
+        chtoNayti('наибольший угол $\\alpha$', ['скорость платформы', 'наименьший угол $\\alpha$']),
+        vopros('Чему должен быть не меньше $\\cos\\alpha$?', `$${fq(c)}$`, [
+          `$${fq(div(q(u), q(v)))}$`,
+          `$${fq(q(1, 1))}$`,
+        ]),
+        vopros(
+          'Неравенство $\\cos\\alpha\\ge c$ на острых углах — это…',
+          `$\\alpha\\le\\arccos c$`,
+          ['$\\alpha\\ge\\arccos c$', '$\\alpha=\\arccos c$ и только'],
+          'Косинус убывает: больший угол — меньший косинус.',
+        ),
+      ],
+    };
+  },
+};
+
+/**
+ * Тот же прыжок, но угол дан (α = 60°): найти наименьшую скорость прыжка
+ * v, при которой платформа поедет не медленнее u₀. Подвох — cos 60° = 1/2
+ * стоит в знаменателе и удваивает ответ.
+ */
+function platformaSkorost(p: Parameters<Prototype['solve']>[0]): ReturnType<Prototype['solve']> {
+  const m = num(p, 'm');
+  const M = num(p, 'M');
+  const u = num(p, 'u');
+  const al = num(p, 'alpha');
+  const c = COS[al];
+  if (c === undefined) throw new Error(`PV10-PLATFORMA: cos ${al}° не табличный рациональный`);
+  const cosQ = q(c[0], c[1]);
+  const k = q(m, m + M);
+  const v = div(q(u), mul(k, cosQ));
+  const ans = val(v);
+  const dn = [
+    dano('m', m, 'кг', 'масса прыгуна со снарядом'),
+    dano('M', M, 'кг', 'масса платформы'),
+    dano('\\alpha', `${al}^\\circ`, '', 'угол прыжка к рельсам'),
+    dano('u', `\\ge${d(u)}`, 'м/с', 'скорость платформы'),
+  ];
+  return {
+    answer: ans,
+    iskomoe: 'v',
+    edinicy: 'м/с',
+    dano: dn,
+    etapy: razbor({
+      dano: dn,
+      ishchem: [
+        'Ищем наименьшую скорость прыжка $v$: скорость платформы растёт вместе с $v$, на пределе $u$ ровно равна порогу.',
+      ],
+      vid: 'neravenstvo',
+      reshaem: [
+        `$\\dfrac{${d(m)}}{${d(m + M)}}\\cdot v\\cdot\\cos${al}^\\circ\\ge${d(u)}$, где $\\cos${al}^\\circ=${fq(cosQ)}$.`,
+        `$${fq(mul(k, cosQ))}\\,v\\ge${d(u)}$, $v\\ge${d(u)}:${fq(mul(k, cosQ))}=${d(ans)}$ м/с.`,
+      ],
+      proverka: [
+        `При $v=${d(ans)}$ м/с: $u=${fq(k)}\\cdot${d(ans)}\\cdot${fq(cosQ)}=${d(u)}$ м/с — ровно порог.`,
+      ],
+      answer: ans,
+      ed: 'м/с',
+    }),
+    vychisleniya: [],
+    hints: [
+      chtoNayti('наименьшую скорость прыжка $v$', ['угол $\\alpha$', 'скорость платформы']),
+      vopros(`Чему равен $\\cos${al}^\\circ$?`, `$${fq(cosQ)}$`, ['$\\dfrac{\\sqrt3}{2}$', '$1$']),
+      vopros(
+        'Как меняется ответ из-за косинуса в знаменателе?',
+        'Скорость прыжка нужна больше',
+        ['Скорость прыжка нужна меньше', 'Не меняется'],
+        'Делим на число меньше единицы.',
+      ),
+    ],
+  };
+}
+
+/**
+ * Колодец: h = 5t². Время падения было t₁, после дождя изменилось на Δ
+ * (вода ближе — время меньше). На сколько поднялась вода? Подвох — время
+ * уменьшается, и ответ — разность расстояний, а не 5·Δ².
+ */
+export const PV10_KOLODEC: Prototype = {
+  id: 'PV10-KOLODEC',
+  no: 142,
+  group: 'II',
+  title: 'Колодец: на сколько поднялась вода по времени падения камешка',
+  formula: 'h=5t^2',
+  ask: 'на сколько метров поднялась вода',
+  skills: ['podstanovka'],
+  fipiNos: '',
+  alt: 'Камешек падает в колодец',
+  solve(p) {
+    const t1 = num(p, 't1');
+    const dt = num(p, 'dt');
+    const t2 = val(sub(q(t1), q(dt)));
+    const h1 = val(mul(q(5), mul(q(t1), q(t1))));
+    const h2 = val(mul(q(5), mul(q(t2), q(t2))));
+    const ans = val(sub(q(h1), q(h2)));
+    if (!(t2 > 0)) throw new Error('PV10-KOLODEC: время после дождя не положительно');
+    const dn = [
+      dano('t_1', t1, 'с', 'время падения до дождя'),
+      dano('\\Delta t', dt, 'с', 'на сколько изменилось время'),
+    ];
+    return {
+      answer: ans,
+      iskomoe: '\\Delta h',
+      edinicy: 'м',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          'Ищем, на сколько уменьшилось расстояние до воды. Вода поднялась — камешек падает меньше, время уменьшилось.',
+        ],
+        vid: 'vychislyaem',
+        reshaem: [
+          `До дождя: $h_1=5\\cdot${d(t1)}^2=${d(h1)}$ м.`,
+          `После: $t_2=${d(t1)}-${d(dt)}=${d(t2)}$ с, $h_2=5\\cdot${d(t2)}^2=${d(h2)}$ м.`,
+          `Вода поднялась на $${d(h1)}-${d(h2)}=${d(ans)}$ м.`,
+        ],
+        proverka: [`Время уменьшилось, расстояние до воды тоже: $${d(h2)}<${d(h1)}$ — сходится.`],
+        answer: ans,
+        ed: 'м',
+      }),
+      vychisleniya: [],
+      hints: [
+        chtoNayti('на сколько поднялась вода', ['глубину колодца', 'новое время падения']),
+        vopros(
+          'Каким стало время падения после дождя?',
+          `$${d(t2)}$ с`,
+          [`$${d(val(sub(q(t1), q(-dt))))}$ с`, `$${d(dt)}$ с`],
+          'Вода ближе — камешек падает меньше.',
+        ),
+        vopros('Чему равен ответ?', `$h_1-h_2$`, ['$5\\cdot(\\Delta t)^2$', '$h_1+h_2$']),
+      ],
+    };
+  },
+};
+
+/**
+ * Выталкивающая сила: куб F = ρgl³ (vid 'kub') или сфера F = αρgr³
+ * (vid 'shar'); сила не больше F₀ — найти наибольшую длину ребра или
+ * радиус. Подвох — из куба величины извлечь кубический корень, а не
+ * квадратный.
+ */
+export const PV10_ARHIMED: Prototype = {
+  id: 'PV10-ARHIMED',
+  no: 143,
+  group: 'III',
+  title: 'Архимедова сила: наибольший размер аппарата',
+  formula: 'F_A=\\rho g l^3',
+  ask: 'наибольшее ребро или радиус',
+  skills: ['koren', 'stepen'],
+  fipiNos: '',
+  alt: 'Аппарат погружается под воду',
+  solve(p) {
+    const shar = p['vid'] === 'shar';
+    const rho = num(p, 'rho');
+    const g = num(p, 'g');
+    const al = shar ? num(p, 'alpha') : 1;
+    const F = num(p, 'F');
+    const K = val(mul(q(al), q(rho * g)));
+    const kub = val(div(q(F), q(K)));
+    const x = Math.round(Math.cbrt(kub) * 1e6) / 1e6;
+    if (Math.abs(val(mul(q(x), mul(q(x), q(x)))) - kub) > 1e-9)
+      throw new Error(`PV10-ARHIMED: ∛${kub} не конечная дробь`);
+    const bukva = shar ? 'r' : 'l';
+    const dn = [
+      ...(shar ? [dano('\\alpha', al, '', 'постоянная')] : []),
+      dano('\\rho', rho, 'кг/м³', 'плотность воды'),
+      dano('g', g, 'Н/кг', 'ускорение свободного падения'),
+      dano('F_A', `\\le${d(F)}`, 'Н', 'выталкивающая сила'),
+    ];
+    return {
+      answer: x,
+      iskomoe: bukva,
+      edinicy: 'м',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          `Ищем наибольшее $${bukva}$: сила растёт вместе с $${bukva}^3$, на пределе она равна $${d(F)}$ Н.`,
+        ],
+        vid: 'neravenstvo',
+        reshaem: [
+          `Множитель при $${bukva}^3$: $${shar ? `${d(al)}\\cdot` : ''}${d(rho)}\\cdot${d(g)}=${d(K)}$.`,
+          `$${d(K)}\\,${bukva}^3\\le${d(F)}$, $${bukva}^3\\le\\dfrac{${d(F)}}{${d(K)}}=${d(kub)}$.`,
+          `$${bukva}\\le\\sqrt[3]{${d(kub)}}=${d(x)}$ м.`,
+        ],
+        proverka: [`$${d(x)}^3=${d(kub)}$ и $${d(K)}\\cdot${d(kub)}=${d(F)}$ — сходится.`],
+        answer: x,
+        ed: 'м',
+      }),
+      vychisleniya: sokrashchenie([F], K, `${bukva}^3`),
+      hints: [
+        chtoNayti(shar ? 'наибольший радиус $r$' : 'наибольшее ребро $l$', [
+          'силу $F_A$',
+          'объём аппарата',
+        ]),
+        vopros(`Чему равно наибольшее $${bukva}^3$?`, `$${d(kub)}$`, [
+          `$${d(val(div(q(F), q(rho))))}$`,
+          `$${d(F)}$`,
+        ]),
+        vopros(
+          'Какой корень извлекаем?',
+          'Кубический',
+          ['Квадратный', 'Никакой'],
+          `$${bukva}$ стоит в третьей степени.`,
+        ),
+      ],
+    };
+  },
+};
+
+/* ── Партия 6 (варианты 31–36) ──────────────────────────────────── */
+
+/**
+ * Бак с краном: H(t) = H₀ − √(2gH₀)·kt + (g/2)k²t², g = 10; через сколько
+ * секунд останется доля объёма 1/n² (уровень H₀/n²). Подвох — правая
+ * часть — полный квадрат (√H₀ − √5·kt)², и квадратное уравнение решать
+ * не нужно; второй корень — после опустошения, он не годится.
+ */
+export const PV10_BAK_KOREN: Prototype = {
+  id: 'PV10-BAK-KOREN',
+  no: 144,
+  group: 'II',
+  title: 'Бак с краном: через сколько секунд останется доля объёма',
+  formula: 'H(t)=H_0-\\sqrt{2gH_0}\\,kt+\\dfrac{g}{2}k^2t^2',
+  ask: 'через сколько секунд останется заданная доля объёма',
+  skills: ['koren', 'podstanovka'],
+  fipiNos: '',
+  alt: 'Цилиндрический бак с краном у дна',
+  solve(p) {
+    const H0 = num(p, 'H0');
+    const kDen = num(p, 'kDen');
+    const n = num(p, 'n');
+    /* H₀ = 5s²: √H₀ = s√5. */
+    const s = Math.sqrt(H0 / 5);
+    if (!Number.isInteger(s)) throw new Error('PV10-BAK-KOREN: H₀ не вида 5s²');
+    const t = val(div(mul(q(s * (n - 1)), q(kDen)), q(n)));
+    const ost = n === 2 ? 'четверть' : n === 3 ? 'девятая часть' : `$\\dfrac{1}{${n * n}}$`;
+    const dn = [
+      dano('H_0', d(H0), 'м', 'начальная высота столба воды'),
+      dano('k', `\\dfrac{1}{${d(kDen)}}`, '', 'отношение площадей сечений крана и бака'),
+      dano('g', '10', 'м/с²', 'ускорение свободного падения'),
+    ];
+    return {
+      answer: t,
+      iskomoe: 't',
+      edinicy: 'с',
+      dano: dn,
+      etapy: razbor({
+        dano: dn,
+        ishchem: [
+          `Бак — цилиндр, объём пропорционален высоте столба воды. Останется ${ost} объёма, когда $H(t)=\\dfrac{H_0}{${n * n}}=${d(val(div(q(H0), q(n * n))))}$ м.`,
+        ],
+        vid: 'uravnenie',
+        reshaem: [
+          `При $g=10$: $\\sqrt{2gH_0}=\\sqrt{20\\cdot${d(H0)}}=${d(10 * s)}$, $\\dfrac g2=5$, и $H(t)=\\left(\\sqrt{H_0}-\\sqrt5\\,kt\\right)^2=\\left(${s === 1 ? '' : d(s)}\\sqrt5-\\sqrt5\\,kt\\right)^2=5\\left(${d(s)}-kt\\right)^2$.`,
+          `$5\\left(${d(s)}-kt\\right)^2=\\dfrac{5\\cdot${d(s * s)}}{${n * n}}$, то есть $${d(s)}-kt=\\dfrac{${d(s)}}{${n}}$ (вода ещё вытекает, скобка положительна).`,
+          `$kt=${d(s)}-\\dfrac{${d(s)}}{${n}}=\\dfrac{${d(s * (n - 1))}}{${n}}$, $t=\\dfrac{${d(s * (n - 1))}}{${n}}\\cdot${d(kDen)}=${d(t)}$ с.`,
+        ],
+        koren: [
+          `Второй корень, $${d(s)}-kt=-\\dfrac{${d(s)}}{${n}}$, приходится на время после опустошения бака: формула там уже не описывает уровень.`,
+        ],
+        proverka: [
+          `Бак опустеет при $kt=${d(s)}$, то есть через $${d(s * kDen)}$ с; $${d(t)}<${d(s * kDen)}$ — сходится.`,
+        ],
+        answer: t,
+        ed: 'с',
+      }),
+      vychisleniya: [],
+      hints: [
+        chtoNayti('время, когда уровень станет $\\dfrac{H_0}{' + n * n + '}$', [
+          'время полного опустошения',
+          'начальный уровень',
+        ]),
+        vopros(
+          'Какой уровень соответствует оставшейся доле объёма?',
+          `$\\dfrac{H_0}{${n * n}}$`,
+          [`$\\dfrac{H_0}{${n}}$`, `$H_0-${n * n}$`],
+          'Объём цилиндра пропорционален высоте.',
+        ),
+        vopros(
+          'Что удобно заметить в формуле $H(t)$?',
+          'Это полный квадрат',
+          ['Это линейная функция', 'Дискриминант отрицательный'],
+          '$H(t)=\\left(\\sqrt{H_0}-\\sqrt{g/2}\\,kt\\right)^2$.',
         ),
       ],
     };
