@@ -882,3 +882,76 @@ math-field.c2-math::part(menu-toggle) {
   min-width: 0;
   overflow-x: auto;
 }
+
+/* ── Рамки решения: теория перед выкладками, сноска после ответа ──
+   Плашка — Callout (styles/callout.css), здесь только место в решении,
+   заголовок и главная формула крупно по центру. */
+.c2-ramka {
+  max-width: 100%;
+  margin: var(--space-2) 0 var(--space-3);
+  padding: var(--space-4);
+  font-size: inherit;
+}
+.c2-ramka__t {
+  font-weight: 700;
+  color: var(--callout-text);
+}
+.c2-ramka__formula {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-size: 1.2em;
+  text-align: center;
+}
+.c2-ramka__formula .katex-display {
+  margin: var(--space-2) 0;
+}
+.c2-reshenie__snoska {
+  min-width: 0;
+}
+.c2-reshenie__snoska .c2-ramka {
+  margin-top: var(--space-3);
+}
+@media (max-width: 640px) {
+  .c2-ramka {
+    padding: var(--space-3);
+  }
+  .c2-ramka__formula {
+    font-size: 1.05em;
+  }
+}
+
+/* Пояснение мелким шрифтом под строками этапа. */
+.c2-etap__melko {
+  margin: var(--space-1) 0 0;
+  padding-left: 1.1em;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.c2-etap__melko > p {
+  margin: 0;
+}
+
+/* Значки отбора в строках решения. */
+.c2-znak {
+  font-weight: 700;
+}
+.c2-znak--da {
+  color: var(--color-success);
+}
+.c2-znak--net {
+  color: var(--color-error);
+}
+
+/* Рисунок с легендой (№19, оформление «касание»): чуть шире обычного. */
+.c2-etap__ris:has(> .c2-graf) {
+  max-width: 340px;
+}
+.c2-graf {
+  display: block;
+  width: 100%;
+  height: auto;
+}

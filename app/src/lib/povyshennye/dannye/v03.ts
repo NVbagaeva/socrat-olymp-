@@ -804,7 +804,7 @@ export const VARIANT: VariantPV = {
       },
       { s: 'b17.dzhoul', p: { E: 48, r: 1.5, syuzhet: 0 } },
       { s: 'b18.pryamougolnik', p: { vid: 'bis', a2: 3, d2: 5, vopros: 'AEP_BD' } },
-      { s: 'b19.koren4', p: { R: 3, c: 5, m: 4 } },
+      { s: 'b19.koren4', p: { R: 3, c: 5, m: 4, oformlenie: 'kasanie' } },
       {
         s: 'b20.pokupka',
         p: { ceny: [17, 21, 25, 29], M: 900, A: 35, B: 45, vid: 'min', tovar: 0 },

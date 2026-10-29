@@ -22,6 +22,7 @@ import { BALLY, MAX_BALL, MAX_PART2, ballText } from '@/content/variantOnline/ba
 import { CHAST2_TEXT } from '@/content/variantOnline/chast2Text';
 import {
   kriteriiHtml,
+  ramkaHtml,
   razborHtml,
   reshenieHtml,
   strokaHtml,
@@ -526,6 +527,7 @@ function blocksUchitel2(zadachi: readonly Chast2Zadacha[]): unknown[] {
           'var-sol',
           `<p class="var-razbor__answer"><b>${T.answer}:</b> ${strokaHtml(z.otvet, 'list')}</p>`,
         ),
+        ...(z.snoska === undefined ? [] : [item('var-sol', ramkaHtml(z.snoska, 'list'))]),
         item('var-sol c2-krit-item', kriteriiHtml(z)),
       ],
       tasks: [],

@@ -23,12 +23,31 @@ export interface Punkt {
   podpis?: string;
 }
 
+/**
+ * Рамка в решении: «теория» — справка с главной формулой перед
+ * выкладками этапа; «примечание» — сноска после ответа (почему выбран
+ * этот путь). Строки — с $…$, formula — TeX без долларов, набирается
+ * крупно по центру.
+ */
+export interface Ramka {
+  vid: 'teoriya' | 'primechanie';
+  title: string;
+  lines: string[];
+  formula?: string;
+  /** Строки после формулы. */
+  posle?: string[];
+}
+
 /** Этап решения учителя: подпись и строки; у этапа может быть свой чертёж. */
 export interface Etap {
   title: string;
   lines: string[];
   /** Чертёж к этапу (SVG движка) — лист учителя и решение на экране. */
   risunok?: string;
+  /** Рамка теории перед строками этапа. */
+  ramka?: Ramka;
+  /** Пояснения мелким шрифтом после строк этапа. */
+  melko?: string[];
 }
 
 /** Шаг разбора ученика: шаг словами и формула. */
@@ -50,6 +69,8 @@ export interface Chast2Zadacha {
   otvet: string;
   reshenie: Etap[];
   razbor: RazborShag[];
+  /** Сноска в рамке после ответа. */
+  snoska?: Ramka;
   /** Уточнения критериев (место {u} в kriterii.ts). */
   utochnenie?: Record<string, string>;
   /**
