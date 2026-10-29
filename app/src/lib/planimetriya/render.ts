@@ -583,6 +583,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     /* Острый маленький угол: дуга не короче 7,5 px, иначе её не видно. */
     let r = Math.max(PL.ugol.r, 7.5 / (th * RAD));
     r = Math.min(r, Math.max(PL.ugol.min, korotkaya * PL.ugol.korotkaya));
+    if (e.dolyaRadiusa !== undefined) r = Math.max(PL.ugol.min, korotkaya * e.dolyaRadiusa);
     /* Вложенные (уже посчитанные, меньшие) углы при той же вершине. */
     for (const { e: o } of poRazmeru) {
       if (o === e || o.v !== e.v) continue;

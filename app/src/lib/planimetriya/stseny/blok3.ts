@@ -1135,7 +1135,9 @@ export const BLOK_V_IX: PrototipChertezha[] = [
     primer: { k: 3, m: 2, g: 135 },
     sluchaynye: (r) => ({ k: r.int(1, 20), m: r.pick([1, 2, 3]), g: r.int(95, 170) }),
     stsena: (p, porog) => {
-      const gV = clamp(p.g, 91, 180 - 2 * porog);
+      /* Тупой угол на рисунке — не больше 125°: хорда AB ближе к центру,
+         треугольник крупный. Угол из условия тупее — рисунок схематичный. */
+      const gV = clamp(p.g, 91, Math.min(125, 180 - 2 * porog));
       const s = 360 - 2 * gV; // дуга AB, содержащая C
       return scena(
         {
@@ -1143,13 +1145,14 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             O: O0,
             A: { naDuge: { okr: 'w', gradus: 90 + s / 2 } },
             B: { naDuge: { okr: 'w', gradus: 90 - s / 2 } },
-            C: { naDuge: { okr: 'w', gradus: 90 + s * 0.12 } },
+            /* C — посередине меньшей дуги, сверху. */
+            C: { naDuge: { okr: 'w', gradus: 90 } },
           },
           okruzhnosti: OKR,
           elementy: [
             okr('w'),
             tri('A', 'B', 'C'),
-            ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(p.g) }),
+            ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(p.g), dolyaRadiusa: 0.22 }),
             storona('A', 'B', koren(p.k, p.m)),
             tochka('O', { sloy: 1 }),
             otr('O', 'A', { sloy: 1, vydelit: 'iskomoe', znachenie: 'R' }),
