@@ -427,14 +427,14 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
     bloki: [
       {
         vid: 'formula',
-        formula: 'E(X)=x_1p_1+x_2p_2+\\ldots+x_np_n=\\sum x_ip_i',
+        formula: '\\mathrm{M}(X)=x_1p_1+x_2p_2+\\ldots+x_np_n=\\sum x_ip_i',
         podpis: 'Каждое значение умножаем на его вероятность и складываем',
       },
       {
         vid: 'opredelenie',
         title: 'Смысл',
         paras: [
-          'Если повторить опыт очень много раз и усреднить значения, получится число, близкое к $E(X)$. Например, для таблицы из раздела 1: $E(X)=0\\cdot0{,}1+0{,}3+2\\cdot0{,}4+3\\cdot0{,}2=1{,}7$.',
+          'Если повторить опыт очень много раз и усреднить значения, получится число, близкое к $\\mathrm{M}(X)$. Например, для таблицы из раздела 1: $\\mathrm{M}(X)=0\\cdot0{,}1+0{,}3+2\\cdot0{,}4+3\\cdot0{,}2=1{,}7$.',
           'Само значение $1{,}7$ величина может никогда и не принимать — это среднее, а не «самое вероятное».',
         ],
       },
@@ -444,7 +444,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
         title: 'Лотерея',
         paras: [
           'Выигрыш на один билет — случайная величина. Её значения — выигрыши из таблицы **и $0$** у проигрышных билетов; вероятность значения — доля таких билетов среди всех $N$.',
-          'Поэтому $E=\\dfrac{\\text{сумма всех выигрышей}}{N}$: делим на число **всех** билетов.',
+          'Поэтому $\\mathrm{M}=\\dfrac{\\text{сумма всех выигрышей}}{N}$: делим на число **всех** билетов.',
         ],
       },
       { vid: 'primer', title: 'Лотерея с проигрышными билетами', zadacha: 'S04' },
@@ -452,8 +452,8 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
         vid: 'vazhno',
         title: 'Свойства — коротко',
         paras: [
-          '$E(X+c)=E(X)+c$: если ко всем значениям прибавить $c$, среднее сдвинется на $c$.',
-          '$E(cX)=c\\cdot E(X)$: если все значения умножить на $c$, среднее умножится на $c$.',
+          '$\\mathrm{M}(X+c)=\\mathrm{M}(X)+c$: если ко всем значениям прибавить $c$, среднее сдвинется на $c$.',
+          '$\\mathrm{M}(cX)=c\\cdot \\mathrm{M}(X)$: если все значения умножить на $c$, среднее умножится на $c$.',
         ],
       },
       {
@@ -466,7 +466,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
               {
                 vid: 'formula',
                 tekst: ['Добавляем к таблице строку $x_ip_i$ и складываем её.'],
-                formula: 'E(X)=\\sum x_ip_i',
+                formula: '\\mathrm{M}(X)=\\sum x_ip_i',
               },
               {
                 vid: 'vazhno',
@@ -483,12 +483,12 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
               {
                 vid: 'formula',
                 tekst: ['$x_i$ — выигрыш, $n_i$ — число таких билетов, $N$ — все билеты.'],
-                formula: 'E=\\dfrac{x_1n_1+x_2n_2+\\ldots}{N}',
+                formula: '\\mathrm{M}=\\dfrac{x_1n_1+x_2n_2+\\ldots}{N}',
               },
               {
                 vid: 'svoystvo',
                 tekst: [
-                  'Беспроигрышная лотерея: выигрыш есть у каждого билета, $n_1+n_2+\\ldots=N$. «На сколько цена выше ожидания» — это $\\text{цена}-E$.',
+                  'Беспроигрышная лотерея: выигрыш есть у каждого билета, $n_1+n_2+\\ldots=N$. «На сколько цена выше ожидания» — это $\\text{цена}-\\mathrm{M}$.',
                 ],
               },
               {
@@ -529,11 +529,11 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
                 tekst: [
                   'Полис стоит $c$, выплата $V$ бывает с вероятностью $p$. Доход: $c$ (без выплаты) или $c-V$ (с выплатой).',
                 ],
-                formula: 'E=c(1-p)+(c-V)p=c-V\\cdot p',
+                formula: '\\mathrm{M}=c(1-p)+(c-V)p=c-V\\cdot p',
               },
               {
                 vid: 'vazhno',
-                tekst: ['Ищем цену: $c=E+V\\cdot p$.'],
+                tekst: ['Ищем цену: $c=\\mathrm{M}+V\\cdot p$.'],
               },
             ],
             primer: 'S11',
@@ -556,24 +556,24 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
         vid: 'ris',
         ris: RIS_RAZBROS,
         podpis:
-          'У обеих величин $E=5$. Но $X$ почти всегда равна $5$, а $Y$ часто уходит к $1$ и $9$: $D(X)=0{,}2$, $D(Y)=8$.',
+          'У обеих величин $\\mathrm{M}=5$. Но $X$ почти всегда равна $5$, а $Y$ часто уходит к $1$ и $9$: $\\mathrm{D}(X)=0{,}2$, $\\mathrm{D}(Y)=8$.',
       },
       {
         vid: 'formula',
-        formula: 'D(X)=E\\Bigl(\\bigl(X-E(X)\\bigr)^2\\Bigr)=E(X^2)-\\left(E(X)\\right)^2',
+        formula: '\\mathrm{D}(X)=\\mathrm{M}\\Bigl(\\bigl(X-\\mathrm{M}(X)\\bigr)^2\\Bigr)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2',
         podpis:
           'Средний квадрат отклонения от среднего. Удобнее вторая форма: среднее квадрата минус квадрат среднего',
       },
       {
         vid: 'formula',
-        formula: '\\sigma(X)=\\sqrt{D(X)}',
+        formula: '\\sigma(X)=\\sqrt{\\mathrm{D}(X)}',
         podpis: 'Стандартное отклонение — в тех же единицах, что и сама величина',
       },
       { vid: 'primer', title: 'Дисперсия по распределению', zadacha: 'S18' },
       {
         vid: 'vazhno',
         paras: [
-          'Дисперсия не бывает отрицательной. Получилось $D<0$ — перепутали порядок: из $E(X^2)$ вычитают $\\left(E(X)\\right)^2$, а не наоборот.',
+          'Дисперсия не бывает отрицательной. Получилось $\\mathrm{D}<0$ — перепутали порядок: из $\\mathrm{M}(X^2)$ вычитают $\\left(\\mathrm{M}(X)\\right)^2$, а не наоборот.',
           'Спрашивают стандартное отклонение — не забудьте извлечь корень.',
         ],
       },
@@ -586,13 +586,13 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
             bloki: [
               {
                 vid: 'formula',
-                tekst: ['Строки $x_ip_i$ и $x_i^2p_i$ прямо в таблице, суммы — $E(X)$ и $E(X^2)$.'],
-                formula: 'D(X)=E(X^2)-\\left(E(X)\\right)^2',
+                tekst: ['Строки $x_ip_i$ и $x_i^2p_i$ прямо в таблице, суммы — $\\mathrm{M}(X)$ и $\\mathrm{M}(X^2)$.'],
+                formula: '\\mathrm{D}(X)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2',
               },
               {
                 vid: 'svoystvo',
                 tekst: [
-                  'Для величины со значениями $0$ и $1$: $D=p(1-p)$, где $p$ — вероятность единицы.',
+                  'Для величины со значениями $0$ и $1$: $\\mathrm{D}=p(1-p)$, где $p$ — вероятность единицы.',
                 ],
               },
             ],
@@ -606,11 +606,11 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
               {
                 vid: 'formula',
                 tekst: ['Сначала дисперсия, потом корень.'],
-                formula: '\\sigma=\\sqrt{D}',
+                formula: '\\sigma=\\sqrt{\\mathrm{D}}',
               },
               {
                 vid: 'vazhno',
-                tekst: ['$D=2{,}25$ — это не ответ: $\\sigma=\\sqrt{2{,}25}=1{,}5$.'],
+                tekst: ['$\\mathrm{D}=2{,}25$ — это не ответ: $\\sigma=\\sqrt{2{,}25}=1{,}5$.'],
               },
             ],
             primer: 'S19',
@@ -680,28 +680,28 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
     id: 'chebyshev',
     no: 7,
     title: 'Неравенство Чебышёва',
-    lead: 'Даже когда распределение неизвестно, по $E(X)$ и $D(X)$ можно сказать, насколько редко величина уходит далеко от среднего.',
+    lead: 'Даже когда распределение неизвестно, по $\\mathrm{M}(X)$ и $\\mathrm{D}(X)$ можно сказать, насколько редко величина уходит далеко от среднего.',
     bloki: [
       {
         vid: 'formula',
         formula:
-          'P\\left(|X-E(X)|\\geqslant\\varepsilon\\right)\\leqslant\\dfrac{D(X)}{\\varepsilon^2}',
+          'P\\left(|X-\\mathrm{M}(X)|\\geqslant\\varepsilon\\right)\\leqslant\\dfrac{\\mathrm{D}(X)}{\\varepsilon^2}',
         podpis:
-          'Вероятность отклониться от среднего не меньше чем на $\\varepsilon$ — не больше $\\dfrac{D}{\\varepsilon^2}$',
+          'Вероятность отклониться от среднего не меньше чем на $\\varepsilon$ — не больше $\\dfrac{\\mathrm{D}}{\\varepsilon^2}$',
       },
       {
         vid: 'opredelenie',
         title: 'Как найти отклонение от среднего',
         paras: [
-          'Событие в задаче пишут так: «$X\\leqslant4$ или $X\\geqslant8$». Смотрим, на сколько границы отстоят от среднего. При $E(X)=6$: $4=6-2$ и $8=6+2$, значит, событие — это $|X-6|\\geqslant2$, $\\varepsilon=2$.',
+          'Событие в задаче пишут так: «$X\\leqslant4$ или $X\\geqslant8$». Смотрим, на сколько границы отстоят от среднего. При $\\mathrm{M}(X)=6$: $4=6-2$ и $8=6+2$, значит, событие — это $|X-6|\\geqslant2$, $\\varepsilon=2$.',
         ],
       },
       { vid: 'primer', title: 'Оценка по неравенству Чебышёва', zadacha: 'S13' },
       {
         vid: 'vazhno',
         paras: [
-          'Это **оценка сверху**: настоящая вероятность может быть и меньше. Ответ — само число $\\dfrac{D}{\\varepsilon^2}$.',
-          'Оценка полезна, только если $\\varepsilon^2>D$: иначе получится число больше $1$, а это ничего не говорит.',
+          'Это **оценка сверху**: настоящая вероятность может быть и меньше. Ответ — само число $\\dfrac{\\mathrm{D}}{\\varepsilon^2}$.',
+          'Оценка полезна, только если $\\varepsilon^2>\\mathrm{D}$: иначе получится число больше $1$, а это ничего не говорит.',
         ],
       },
       {
@@ -714,9 +714,9 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
               {
                 vid: 'formula',
                 tekst: [
-                  'Событие «$X\\leqslant E-\\varepsilon$ или $X\\geqslant E+\\varepsilon$» — это $|X-E|\\geqslant\\varepsilon$.',
+                  'Событие «$X\\leqslant \\mathrm{M}(X)-\\varepsilon$ или $X\\geqslant \\mathrm{M}(X)+\\varepsilon$» — это $|X-\\mathrm{M}(X)|\\geqslant\\varepsilon$.',
                 ],
-                formula: 'P\\leqslant\\dfrac{D(X)}{\\varepsilon^2}',
+                formula: 'P\\leqslant\\dfrac{\\mathrm{D}(X)}{\\varepsilon^2}',
               },
               {
                 vid: 'vazhno',
@@ -795,7 +795,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
         title: 'Забыли проигрышные билеты',
         oshibka: 'Сумму выигрышей делят на число выигрышных билетов: $\\dfrac{180\\,000}{163}$.',
         pravilno:
-          'Делим на число **всех** билетов: проигрышные — тоже значение величины (выигрыш $0$). $E=\\dfrac{180\\,000}{10\\,000}=18$.',
+          'Делим на число **всех** билетов: проигрышные — тоже значение величины (выигрыш $0$). $\\mathrm{M}=\\dfrac{180\\,000}{10\\,000}=18$.',
       },
       {
         vid: 'lovushka',
@@ -814,7 +814,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       {
         vid: 'lovushka',
         title: 'Дали дисперсию вместо стандартного отклонения',
-        oshibka: 'Спрашивают стандартное отклонение, а в ответ пишут $D=2{,}25$.',
+        oshibka: 'Спрашивают стандартное отклонение, а в ответ пишут $\\mathrm{D}=2{,}25$.',
         pravilno: 'Стандартное отклонение — корень из дисперсии: $\\sigma=\\sqrt{2{,}25}=1{,}5$.',
       },
       {
@@ -862,10 +862,10 @@ export const SHPARGALKA_6 = {
     'Сумма вероятностей распределения равна $1$ — первая проверка любого условия',
     'Вероятность события — сумма вероятностей его исходов; на дереве вероятность исхода — произведение вдоль ветвей',
     '$P(A\\mid B)=\\dfrac{P(A\\cap B)}{P(B)}$',
-    '$E(X)=\\sum x_ip_i$; в лотерее делим сумму выигрышей на **все** билеты',
-    '$D(X)=E(X^2)-\\left(E(X)\\right)^2$, $\\sigma=\\sqrt{D}$',
+    '$\\mathrm{M}(X)=\\sum x_ip_i$; в лотерее делим сумму выигрышей на **все** билеты',
+    '$\\mathrm{D}(X)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2$, $\\sigma=\\sqrt{\\mathrm{D}}$',
     'Выборка: $S^2=\\dfrac{\\sum(x_i-\\overline{x})^2}{n-1}$',
-    'Чебышёв: $P\\left(|X-E|\\geqslant\\varepsilon\\right)\\leqslant\\dfrac{D}{\\varepsilon^2}$',
+    'Чебышёв: $P\\left(|X-\\mathrm{M}(X)|\\geqslant\\varepsilon\\right)\\leqslant\\dfrac{\\mathrm{D}}{\\varepsilon^2}$',
     '$<$ — граница не входит, $\\leqslant$ — входит',
   ],
   /** Разделы, карточки которых идут в шпаргалку. */

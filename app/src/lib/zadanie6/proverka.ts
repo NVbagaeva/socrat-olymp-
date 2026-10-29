@@ -305,7 +305,7 @@ const OZHIDANIE: ShablonProverki[] = [
       const ps = nomer === 0 ? [10, 30, 40, 20] : sotye(r, 3);
       const e = xs.reduce((s, x, i) => s + x * (ps[i] as number), 0) / 100;
       return {
-        uslovie: `$X\\sim\\begin{pmatrix}${xs.join('&')}\\\\${pz(ps).join('&')}\\end{pmatrix}$. Найдите $E(X)$.`,
+        uslovie: `$X\\sim\\begin{pmatrix}${xs.join('&')}\\\\${pz(ps).join('&')}\\end{pmatrix}$. Найдите $\\mathrm{M}(X)$.`,
         varianty: varianty(r, e, [
           {
             x: xs.reduce((s, x) => s + x, 0) / xs.length,
@@ -323,7 +323,7 @@ const OZHIDANIE: ShablonProverki[] = [
           },
         ]),
         razbor: [
-          `$E(X)=${xs.map((x, i) => (x === 1 ? d((ps[i] as number) / 100) : `${x < 0 ? `(${x})` : x}\\cdot${d((ps[i] as number) / 100)}`)).join('+')}=${d(Math.round(e * 1e9) / 1e9)}$.`,
+          `$\\mathrm{M}(X)=${xs.map((x, i) => (x === 1 ? d((ps[i] as number) / 100) : `${x < 0 ? `(${x})` : x}\\cdot${d((ps[i] as number) / 100)}`)).join('+')}=${d(Math.round(e * 1e9) / 1e9)}$.`,
         ],
         znachenie: e,
       };
@@ -355,7 +355,7 @@ const OZHIDANIE: ShablonProverki[] = [
           },
         ]),
         razbor: [
-          `$E=\\dfrac{${w}\\cdot${c}}{${N}}=${d(e)}$ — сумма выигрышей делится на все билеты.`,
+          `$\\mathrm{M}=\\dfrac{${w}\\cdot${c}}{${N}}=${d(e)}$ — сумма выигрышей делится на все билеты.`,
         ],
         znachenie: e,
       };
@@ -374,18 +374,18 @@ const DISPERSIYA: ShablonProverki[] = [
       const d0 = nomer === 0 ? 0.8 : r.pick([0.5, 0.8, 1.2, 1.5, 2, 2.4, 3]);
       const e2 = e * e + d0;
       return {
-        uslovie: `Известно: $E(X)=${d(e)}$, $E(X^2)=${d(Math.round(e2 * 1e9) / 1e9)}$. Найдите $D(X)$.`,
+        uslovie: `Известно: $\\mathrm{M}(X)=${d(e)}$, $\\mathrm{M}(X^2)=${d(Math.round(e2 * 1e9) / 1e9)}$. Найдите $\\mathrm{D}(X)$.`,
         varianty: varianty(r, d0, [
           {
             x: e2 - e,
             podskazka:
-              'Вычитают квадрат среднего, а не само среднее: $D=E(X^2)-\\left(E(X)\\right)^2$.',
+              'Вычитают квадрат среднего, а не само среднее: $\\mathrm{D}=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2$.',
           },
           { x: e2, podskazka: 'Это среднее квадрата. Из него нужно вычесть квадрат среднего.' },
           { x: e2 + e * e, podskazka: 'Квадрат среднего вычитают, а не прибавляют.' },
         ]),
         razbor: [
-          `$D(X)=E(X^2)-\\left(E(X)\\right)^2=${d(Math.round(e2 * 1e9) / 1e9)}-${d(e)}^2=${d(d0)}$.`,
+          `$\\mathrm{D}(X)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2=${d(Math.round(e2 * 1e9) / 1e9)}-${d(e)}^2=${d(d0)}$.`,
         ],
         znachenie: d0,
       };
@@ -401,7 +401,7 @@ const DISPERSIYA: ShablonProverki[] = [
         uslovie: `Дисперсия случайной величины равна $${d(D)}$. Найдите стандартное отклонение.`,
         varianty: varianty(r, s, [
           { x: D, podskazka: 'Это сама дисперсия. Стандартное отклонение — корень из неё.' },
-          { x: D / 2, podskazka: 'Корень — не половина: $\\sigma\\cdot\\sigma=D$.' },
+          { x: D / 2, podskazka: 'Корень — не половина: $\\sigma\\cdot\\sigma=\\mathrm{D}$.' },
           { x: D * D, podskazka: 'Возвели в квадрат, а нужно извлечь корень.' },
         ]),
         razbor: [`$\\sigma=\\sqrt{${d(D)}}=${d(s)}$.`],
@@ -475,12 +475,12 @@ const CHEBYSHEV: ShablonProverki[] = [
         nomer === 0 ? 1 : r.pick([0.4, 0.8, 1, 1.2, 2]) * (eps === 2 ? 1 : eps === 4 ? 4 : 5);
       const otv = D / (eps * eps);
       return {
-        uslovie: `$E(X)=${E}$, $D(X)=${d(D)}$. Какую оценку вероятности события «$X\\leqslant${E - eps}$ или $X\\geqslant${E + eps}$» даёт неравенство Чебышёва?`,
+        uslovie: `$\\mathrm{M}(X)=${E}$, $\\mathrm{D}(X)=${d(D)}$. Какую оценку вероятности события «$X\\leqslant${E - eps}$ или $X\\geqslant${E + eps}$» даёт неравенство Чебышёва?`,
         varianty: varianty(r, otv, [
           { x: D / eps, podskazka: 'В знаменателе — квадрат отклонения: $\\varepsilon^2$.' },
           {
             x: D / (4 * eps * eps),
-            podskazka: `Отклонение от среднего — $${eps}$, а не $${2 * eps}$: каждая граница отстоит от $E(X)$ на $${eps}$.`,
+            podskazka: `Отклонение от среднего — $${eps}$, а не $${2 * eps}$: каждая граница отстоит от $\\mathrm{M}(X)$ на $${eps}$.`,
           },
           {
             x: (eps * eps) / D / 10,
@@ -501,7 +501,7 @@ const CHEBYSHEV: ShablonProverki[] = [
       const E = nomer === 0 ? 6 : r.int(5, 40);
       const eps = nomer === 0 ? 2 : r.int(2, Math.min(9, E - 1));
       return {
-        uslovie: `$E(X)=${E}$. Чему равно $\\varepsilon$ в событии «$X\\leqslant${E - eps}$ или $X\\geqslant${E + eps}$»?`,
+        uslovie: `$\\mathrm{M}(X)=${E}$. Чему равно $\\varepsilon$ в событии «$X\\leqslant${E - eps}$ или $X\\geqslant${E + eps}$»?`,
         varianty: varianty(r, eps, [
           {
             x: 2 * eps,
@@ -602,7 +602,7 @@ const LOVUSHKI: ShablonProverki[] = [
             podskazka: 'Проверьте деление: сумма выигрышей делится на число всех билетов.',
           },
         ]),
-        razbor: [`Сумма выигрышей $${S}$ делится на все $${N}$ билетов: $E=${d(S / N)}$.`],
+        razbor: [`Сумма выигрышей $${S}$ делится на все $${N}$ билетов: $\\mathrm{M}=${d(S / N)}$.`],
         znachenie: S / N,
       };
     },

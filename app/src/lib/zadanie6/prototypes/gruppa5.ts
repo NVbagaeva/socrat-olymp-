@@ -298,17 +298,17 @@ function podskazkiD(r: Raspr, sigma: boolean): HintStep[] {
   const v = r.v;
   const out: HintStep[] = [
     vopros(
-      `Как найти $D(${v})$?`,
-      `$D(${v})=E(${v}^2)-\\left(E(${v})\\right)^2$`,
+      `Как найти $\\mathrm{D}(${v})$?`,
+      `$\\mathrm{D}(${v})=\\mathrm{M}(${v}^2)-\\left(\\mathrm{M}(${v})\\right)^2$`,
       [
-        `$D(${v})=E(${v}^2)-E(${v})$`,
-        `$D(${v})=\\left(E(${v})\\right)^2-E(${v}^2)$`,
-        `$D(${v})=E(${v}^2)$`,
+        `$\\mathrm{D}(${v})=\\mathrm{M}(${v}^2)-\\mathrm{M}(${v})$`,
+        `$\\mathrm{D}(${v})=\\left(\\mathrm{M}(${v})\\right)^2-\\mathrm{M}(${v}^2)$`,
+        `$\\mathrm{D}(${v})=\\mathrm{M}(${v}^2)$`,
       ],
       'Среднее квадрата минус квадрат среднего.',
     ),
     vopros(
-      `Чему равно $E(${v})$?`,
+      `Чему равно $\\mathrm{M}(${v})$?`,
       `$${qTex(r, E)}$`,
       lovushki(
         E,
@@ -323,7 +323,7 @@ function podskazkiD(r: Raspr, sigma: boolean): HintStep[] {
       ),
     ),
     vopros(
-      `Чему равно $E(${v}^2)$?`,
+      `Чему равно $\\mathrm{M}(${v}^2)$?`,
       `$${qTex(r, E2)}$`,
       lovushki(E2, [mul(E, E), E], (x) => qTex(r, x)),
     ),
@@ -333,13 +333,13 @@ function podskazkiD(r: Raspr, sigma: boolean): HintStep[] {
     out.push(
       vopros(
         'Что нужно дать в ответе?',
-        `$\\sigma=\\sqrt{D}=\\sqrt{${tq(D)}}=${tq(s as Q)}$`,
-        [`$D=${tq(D)}$`, `$D^2$`],
+        `$\\sigma=\\sqrt{\\mathrm{D}}=\\sqrt{${tq(D)}}=${tq(s as Q)}$`,
+        [`$\\mathrm{D}=${tq(D)}$`, `$\\mathrm{D}^2$`],
         'Стандартное отклонение — корень из дисперсии.',
       ),
     );
   } else {
-    out.push(vopros(`Чему равна $D(${v})$?`, `$${tq(D)}$`, lovushki(D, lovushkiD(r))));
+    out.push(vopros(`Чему равна $\\mathrm{D}(${v})$?`, `$${tq(D)}$`, lovushki(D, lovushkiD(r))));
   }
   return out;
 }
@@ -361,7 +361,7 @@ function reshenieD(p: Params, obyk: boolean, sigma: boolean): Solved {
     const last = etapyD.at(-1);
     if (last) {
       last.lines.push(
-        `Для величины со значениями $0$ и $1$ то же самое даёт формула $D=p(1-p)=${qTex(r, r.p[1] as Q)}\\cdot${qTex(r, r.p[0] as Q)}$.`,
+        `Для величины со значениями $0$ и $1$ то же самое даёт формула $\\mathrm{D}=p(1-p)=${qTex(r, r.p[1] as Q)}\\cdot${qTex(r, r.p[0] as Q)}$.`,
       );
     }
   }
@@ -373,7 +373,7 @@ function reshenieD(p: Params, obyk: boolean, sigma: boolean): Solved {
     answer = s.n / s.m;
     etapyD.push({
       title: `Шаг ${etapyD.length + 1}. Стандартное отклонение — корень из дисперсии`,
-      lines: [`$\\sigma(${r.v})=\\sqrt{D(${r.v})}=\\sqrt{${tq(D)}}=${tq(s)}$.`, otvetLine(answer)],
+      lines: [`$\\sigma(${r.v})=\\sqrt{\\mathrm{D}(${r.v})}=\\sqrt{${tq(D)}}=${tq(s)}$.`, otvetLine(answer)],
     });
   } else {
     etapyD.at(-1)?.lines.push(otvetLine(answer));
@@ -389,7 +389,7 @@ function reshenieD(p: Params, obyk: boolean, sigma: boolean): Solved {
 /** Панель для 6.13: приводим к общему знаменателю. */
 function schitaemDrobi(r: Raspr) {
   const D = dispersiya(r);
-  return D.m === 1 ? [] : schitaem(D.n, D.m, `D(${r.v})`);
+  return D.m === 1 ? [] : schitaem(D.n, D.m, `\\mathrm{D}(${r.v})`);
 }
 
 const P13: Prototype = {
@@ -397,7 +397,7 @@ const P13: Prototype = {
   no: 13,
   group: 'V',
   title: 'Дисперсия: вероятности — обыкновенные дроби',
-  formula: '$D(X)=E(X^2)-\\left(E(X)\\right)^2$',
+  formula: '$\\mathrm{D}(X)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2$',
   skills: ['kvadrat-e'],
   istochnik: 'Дисперсия, №2',
   ris: (p) => ({ vid: 'zapis', tex: zapisTex(raspr(p, true)) }),
@@ -428,7 +428,7 @@ function pereschetD(p: Params, sigma: boolean): number {
   const ps = arr(p, 'ps');
   const d0 = num(p, 'den');
   const E = xs.reduce((s, x, i) => s + (x * (ps[i] as number)) / d0, 0);
-  /* Через отклонения — другим путём, чем решатель (E(X²) − E²). */
+  /* Через отклонения — другим путём, чем решатель (M(X²) − M²). */
   const D = xs.reduce((s, x, i) => s + ((x - E) ** 2 * (ps[i] as number)) / d0, 0);
   return Math.round((sigma ? Math.sqrt(D) : D) * 1e9) / 1e9;
 }
@@ -438,7 +438,7 @@ const P14: Prototype = {
   no: 14,
   group: 'V',
   title: 'Дисперсия по распределению',
-  formula: '$D(X)=E(X^2)-\\left(E(X)\\right)^2$',
+  formula: '$\\mathrm{D}(X)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2$',
   skills: ['kvadrat-e', 'stroka-xp'],
   istochnik: 'Дисперсия, №3',
   ris(p) {
@@ -455,13 +455,13 @@ const P14: Prototype = {
     if (forma === 'tablica') {
       return s === null
         ? {
-            text: `В таблице показано распределение случайной величины $${r.v}$. Найдите $D(${r.v})$ — дисперсию этой случайной величины.`,
+            text: `В таблице показано распределение случайной величины $${r.v}$. Найдите $\\mathrm{D}(${r.v})$ — дисперсию этой случайной величины.`,
             ris,
           }
         : {
             text: `${s.kontekst} В таблице показано распределение случайной величины $${r.v}$ — ${s.velichina}.`,
             ris,
-            posle: `Найдите $D(${r.v})$ — дисперсию этой случайной величины.`,
+            posle: `Найдите $\\mathrm{D}(${r.v})$ — дисперсию этой случайной величины.`,
           };
     }
     return s === null
@@ -485,7 +485,7 @@ const P15: Prototype = {
   no: 15,
   group: 'V',
   title: 'Стандартное отклонение',
-  formula: '$\\sigma(X)=\\sqrt{D(X)}$',
+  formula: '$\\sigma(X)=\\sqrt{\\mathrm{D}(X)}$',
   skills: ['kvadrat-e'],
   istochnik: 'Дисперсия, №4',
   ris: (p) => ({ vid: 'zapis', tex: zapisTex(raspr(p)) }),
