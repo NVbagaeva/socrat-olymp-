@@ -28,6 +28,9 @@ import { provB } from './lib/prov-chast2-b.mjs';
 import { provD } from './lib/prov-chast2-d.mjs';
 import { provE } from './lib/prov-chast2-e.mjs';
 import { provF } from './lib/prov-chast2-f.mjs';
+import { provG } from './lib/prov-chast2-g.mjs';
+import { provH } from './lib/prov-chast2-h.mjs';
+import { provJ } from './lib/prov-chast2-j.mjs';
 
 const { MAX_BALL, MAX_PART1, MAX_PART2, MAX_TOTAL, ballText } = requireSrc(
   'content/variantOnline/bally',
@@ -833,6 +836,9 @@ const PROV = {
   ...provD({ ok, close, requireSrc }),
   ...provE({ ok, close, requireSrc }),
   ...provF({ ok, close, requireSrc }),
+  ...provG({ ok, close, requireSrc }),
+  ...provH({ ok, close, requireSrc }),
+  ...provJ({ ok, close, requireSrc }),
   'z14.logTrig': prov14,
   'z15.rombPiramida': prov15,
   'z16.pokazKoren': prov16,

@@ -845,8 +845,10 @@ def p3_step(p):
 
 
 def p3_pokaz(p):
-    a = p["a"]
-    return sp.solve(sp.Eq((a ** p["s"]) ** (p["k"] * x + p["b"]), (a ** p["r"]) ** (p["m"] * x + p["c"])), x)[0]
+    a = sp.nsimplify(p["a"])
+    assert a > 0 and a != 1
+    # Логарифмируем по основанию a: показатели степеней равны.
+    return sp.solve(sp.Eq(p["s"] * (p["k"] * x + p["b"]), p["r"] * (p["m"] * x + p["c"])), x)[0]
 
 
 def p3_logkv(p):
@@ -861,6 +863,8 @@ def p3_cos2(p):
     A = p["A"]
     if p["vid"] == "raznost":
         return sp.nsimplify(sp.simplify(sp.sqrt(A) * sp.cos(a) ** 2 - sp.sqrt(A) * sp.sin(a) ** 2))
+    if p["vid"] == "sinus":
+        return sp.nsimplify(sp.simplify(sp.sqrt(A) - sp.sqrt(4 * A) * sp.sin(a) ** 2))
     return sp.nsimplify(sp.simplify(sp.sqrt(4 * A) * sp.cos(a) ** 2 - sp.sqrt(A)))
 
 
@@ -1098,7 +1102,9 @@ def p4_druga(p):
 
 
 def p4_bern_otn(p):
-    n, k, q = p["n"], p["k"], R(p["p"])
+    n, k = p["n"], p["k"]
+    sy = p.get("syuzhet")
+    q = sp.Rational(1, 2) if sy == "moneta" else (1 - (1 - R(p["p"])) ** 2 if sy == "misheni2" else R(p["p"]))
     a = sp.binomial(n, k) * q**k * (1 - q) ** (n - k)
     b = sp.binomial(n, k - 1) * q ** (k - 1) * (1 - q) ** (n - k + 1)
     return okr2(a / b)
@@ -1217,10 +1223,22 @@ def p4_dva_uzla(p):
     elif vid == "giperbolaA":
         f = k / (x + a)
         sol = sp.solve([sp.Eq(f.subs(x, ax), ay), sp.Eq(f.subs(x, bx), by)], [a, k], dict=True)
+    elif vid == "logPlus":
+        f = b + sp.log(x) / sp.log(a)
+        sol = [{b: ay, a: bx ** (1 / (by - ay))}]
+    elif vid == "korenPlus":
+        f = b + k * sp.sqrt(x)
+        sol = [{b: ay, k: (by - ay) / sp.sqrt(bx), a: sp.Integer(1)}]
+    elif vid == "pryamaya":
+        f = a * x + b
+        sol = sp.solve([sp.Eq(f.subs(x, ax), ay), sp.Eq(f.subs(x, bx), by)], [a, b], dict=True)
+    elif vid == "korenSdvig":
+        f = k * sp.sqrt(x + b)
+        sol = [{b: -ax, k: by / sp.sqrt(bx - ax), a: sp.Integer(1)}]
     else:
         f = a**x + b
         sol = [{b: ay - 1, a: (by - ay + 1) ** (1 / bx)}]
-    sol = [s for s in sol if all(v.is_real for v in s.values()) and (vid == "giperbolaA" or s[a] > 0)]
+    sol = [s for s in sol if all(v.is_real for v in s.values()) and (vid in ("giperbolaA", "pryamaya") or s[a] > 0)]
     F = f.subs(sol[0])
     if "x0" in p:
         return sp.nsimplify(sp.simplify(F.subs(x, R(p["x0"]))))
@@ -1258,6 +1276,532 @@ SCHET.update({
     # P4-END
 })
 
+
+# ── Партия 5 (варианты 25–30) ──
+
+
+def p5_opis(p):
+    # Суммы противоположных сторон описанного четырёхугольника равны.
+    return R(p["ab"]) + R(p["cd"]) - R(p["bc"]) if p["k"] else R(p["bc"]) + R(p["da"]) - R(p["ab"])
+
+
+def p5_opis_per(p):
+    P = 2 * (R(p["ab"]) + R(p["cd"]))
+    return P / 2 - (R(p["cd"]) if p["k"] else R(p["ab"]))
+
+
+def p5_par_vys(p):
+    a, b, S = R(p["a"]), R(p["b"]), R(p["s"])
+    return S / a if p["k"] else S / b
+
+
+def p5_vys_tr(p):
+    return R(p["b"]) * R(p["h"]) / R(p["a"])
+
+
+def p5_vpis_abc(p):
+    # Вписанные углы на одну дугу равны: DBC = DAC.
+    return R(p["abd"]) + R(p["cad"])
+
+
+def p5_vpis_cad(p):
+    return R(p["abc"]) - R(p["abd"])
+
+
+def p5_treh(p):
+    a = sp.Matrix([p["ax"], p["ay"]])
+    b = sp.Matrix([p["bx"], p["by"]])
+    c = sp.Matrix([p["cx"], p["cy"]])
+    return ((a + b).dot(c)) if p["vid"] == "(a+b)c" else a.dot(b + c)
+
+
+def p5_sosud(p):
+    # Площадь правильного треугольника ∝ a²: h₂ = h₁·a²/(n·a)².
+    a = sp.symbols("a", positive=True)
+    S = sp.sqrt(3) / 4 * a**2
+    return sp.simplify(R(p["h"]) * S / S.subs(a, p["n"] * a))
+
+
+def p5_shar_cil(p):
+    r = sp.symbols("r", positive=True)
+    bok, poln, shar = 4 * sp.pi * r**2, 6 * sp.pi * r**2, 4 * sp.pi * r**2
+    return sp.simplify(R(p["S"]) * shar / (bok if p["vid"] == 1 else poln))
+
+
+def p5_shest(p):
+    # Правильный шестиугольник со стороной a: координаты вершин, объём по векторному произведению.
+    a = sp.sqrt(2 * R(p["S"]) / (3 * sp.sqrt(3)))
+    h = R(p["h"])
+    V = {n: sp.Matrix([a * sp.cos(sp.pi * i / 3), a * sp.sin(sp.pi * i / 3), 0]) for i, n in enumerate("ABCDEF")}
+    s = p["s"]
+    L = lambda k: "ABCDEF"[(s + k) % 6]
+    up = lambda n: V[n] + sp.Matrix([0, 0, h])
+    def tetra(P, Q, R2, T):
+        return sp.Abs((Q - P).dot((R2 - P).cross(T - P))) / 6
+    if p["vid"] == 0:
+        return sp.nsimplify(sp.simplify(tetra(V[L(0)], V[L(1)], V[L(3)], up(L(4)))))
+    T = up(L(2))
+    return sp.nsimplify(sp.simplify(tetra(V[L(0)], V[L(1)], V[L(3)], T) + tetra(V[L(0)], V[L(3)], V[L(4)], T)))
+
+
+def p5_zapas(p):
+    return R(p["N"] - p["k"] * p["m"]) / p["N"]
+
+
+def p5_stol(p):
+    n = p["n"]
+    vse = [(a, b) for a in range(n) for b in range(n) if a != b]
+    r = lambda a, b: min((a - b) % n, (b - a) % n)
+    da = [1 for a, b in vse if (r(a, b) != 1 if p["vid"] == "ne-ryadom" else r(a, b) == p["j"] + 1)]
+    return okr2(sp.Rational(len(da), len(vse)))
+
+
+def p5_ochered(p):
+    return sp.Rational(p["N"] - p["a"] - p["b"], p["N"])
+
+
+def p5_linii(p):
+    r = R(p["r"])
+    brak = (r * R(p["p1"]) + R(p["p2"])) / (r + 1)
+    return brak if p["vid"] == "brak" else 1 - brak
+
+
+KOSTI = {
+    "raznoe": lambda a, b: a != b,
+    "odinakovoe": lambda a, b: a == b,
+    "oba-nechet": lambda a, b: a % 2 == 1 and b % 2 == 1,
+    "oba-chet": lambda a, b: a % 2 == 0 and b % 2 == 0,
+    "raznye-nechet": lambda a, b: a % 2 == 1 and b % 2 == 1 and a != b,
+    "raznye-chet": lambda a, b: a % 2 == 0 and b % 2 == 0 and a != b,
+    "summa-chet": lambda a, b: (a + b) % 2 == 0,
+    "summa-nechet": lambda a, b: (a + b) % 2 == 1,
+    "hotya-by-shest": lambda a, b: 6 in (a, b),
+    "ni-razu-shest": lambda a, b: 6 not in (a, b),
+    "proizv-chet": lambda a, b: (a * b) % 2 == 0,
+    "odno-bolshe": lambda a, b: a > b,
+    "summa-sem": lambda a, b: a + b == 7,
+    "raznost-odin": lambda a, b: abs(a - b) == 1,
+}
+
+
+def p5_kosti(p):
+    n = lambda e: sum(1 for a in range(1, 7) for b in range(1, 7) if KOSTI[e](a, b))
+    return sp.Rational(n(p["a"]), 36) / sp.Rational(n(p["b"]), 36)
+
+
+def p5_bilety(p):
+    N, W, k = p["N"], p["W"], p["k"]
+    if p["vid"] == "hotya-by":
+        v = 1 - sp.Rational(sp.binomial(N - W, k), sp.binomial(N, k))
+    else:
+        v = sp.Rational(sp.binomial(W, p["j"]) * sp.binomial(N - W, k - p["j"]), sp.binomial(N, k))
+    return okr2(v)
+
+
+def p5_kor_drob(p):
+    r = sp.solve(sp.Eq(sp.sqrt(R(p["A"]) / (p["k"] * x + p["b"])), R(p["c"])), x)
+    return min(r) if p.get("v") != "bolshiy" else max(r)
+
+
+def p5_log_mn(p):
+    return sp.solve(sp.Eq(sp.log(p["k"] * x + p["b"], p["a"]), p["n"] * sp.log(p["c"], p["a"])), x)[0]
+
+
+def p5_log_sk(p):
+    a, b, m, n = p["a"], p["b"], p["m"], p["n"]
+    return sp.nsimplify(sp.simplify((1 - sp.log(a * b**m, a)) * (1 - sp.log(b * a**n, b))))
+
+
+def p5_log_dr(p):
+    a, k, c, m = p["a"], p["k"], p["c"], p["m"]
+    N = (a**k * c) ** m
+    v = sp.log(N, a) / (k + sp.log(c, a))
+    return sp.nsimplify(sp.simplify(1 / v if p["vid"] == "obratno" else v))
+
+
+def p5_st_pr(p):
+    b = p["b"]
+    return sp.nsimplify(sp.Integer(b ** p["s1"]) ** R(p["x"]) * sp.Integer(b ** p["s2"]) ** R(p["y"]))
+
+
+def p5_sin_cos(p):
+    a = p["n"] * sp.pi / p["den"]
+    return sp.nsimplify(sp.simplify(p["A"] * sp.sin(a) * sp.cos(a)))
+
+
+def _krivaya(uzly):
+    # Экстремумы узловой кривой: узлы, где меняется направление.
+    return [uzly[i][0] for i in range(1, len(uzly) - 1) if (uzly[i][1] - uzly[i - 1][1]) * (uzly[i + 1][1] - uzly[i][1]) < 0]
+
+
+def p5_celye(p):
+    u = p["uzly"]
+    a, b = u[0][0], u[-1][0]
+    ex = _krivaya(u)
+    gr = [a] + ex + [b]
+    cnt = 0
+    for lo, hi in zip(gr, gr[1:]):
+        y = {xx: yy for xx, yy in u}
+        rost = y[hi] > y[lo]
+        if rost == (p["znak"] > 0):
+            cnt += hi - lo - 1
+    return sp.Integer(cnt)
+
+
+def p5_nuli(p):
+    u = p["uzly"]
+    ex = _krivaya(u)
+    lo, hi = p.get("p", u[0][0]), p.get("q", u[-1][0])
+    return sp.Integer(len([e for e in ex if lo <= e <= hi]))
+
+
+def p5_gor(p):
+    u = p["uzly"]
+    z = [xx for xx, yy in u if yy == 0 and p["p"] <= xx <= p["q"]]
+    return sp.Integer(z[0])
+
+
+def p5_udar(p):
+    al = sp.symbols("al", positive=True)
+    r = sp.solve(sp.Eq(p["m"] * R(p["v"]) ** 2 * sp.sin(al * sp.pi / 180) ** 2, R(p["Q"])), al)
+    return 2 * min(t for t in r if 0 < t <= 90)
+
+
+def p5_plat(p):
+    m, M = R(p["m"]), R(p["M"])
+    if p.get("vid") == "v":
+        return sp.nsimplify(R(p["u"]) * (m + M) / (m * sp.cos(sp.pi * p["alpha"] / 180)))
+    al = sp.acos(R(p["u"]) * (m + M) / (m * R(p["v"])))
+    return sp.nsimplify(al * 180 / sp.pi)
+
+
+def p5_kolodec(p):
+    t1, dt = R(p["t1"]), R(p["dt"])
+    return 5 * t1**2 - 5 * (t1 - dt) ** 2
+
+
+def p5_arh(p):
+    K = (R(p["alpha"]) if p["vid"] == "shar" else 1) * R(p["rho"]) * R(p["g"])
+    return sp.nsimplify(sp.real_root(R(p["F"]) / K, 3))
+
+
+def p5_trassa(p):
+    vc, vm = sp.symbols("vc vm", positive=True)
+    s = sp.solve([sp.Eq(vm * p["t1"], vc * (p["t0"] + p["t1"])), sp.Eq((vm - vc) * p["t2"], 60 * p["L"])], [vc, vm], dict=True)[0]
+    return s[vm] if p["ask"] == "moto" else s[vc]
+
+
+def p5_gonki(p):
+    S, D = p["n"] * p["L"], sp.Rational(60 * p["L"], p["t"])
+    r = [t for t in sp.solve(sp.Eq((S / v - S / (v + D)) * 60, p["dt"]), v) if t > 0][0]
+    return r if p["ask"] == "vtoroy" else r + D
+
+
+def p5_splavy(p):
+    m1 = sp.solve(sp.Eq(R(p["p1"]) * x + R(p["p2"]) * (p["M"] - x), R(p["p3"]) * p["M"]), x)[0]
+    m2 = p["M"] - m1
+    return {"pervyy": m1, "vtoroy": m2}.get(p["ask"], sp.Abs(m2 - m1))
+
+
+def p5_sushka(p):
+    w1, w2 = R(p["w1"]) / 100, R(p["w2"]) / 100
+    return R(p["M"]) * (1 - w2) / (1 - w1) if p["vid"] == "syrye" else R(p["M"]) * (1 - w1) / (1 - w2)
+
+
+def p5_dvoe(p):
+    t1 = sp.solve(sp.Eq(1 / x + sp.Rational(p["a"], p["b"]) / x, sp.Rational(1, p["T"])), x)[0]
+    return t1 if p["ask"] == "pervyy" else t1 * sp.Rational(p["b"], p["a"])
+
+
+def p5_pryamye(p):
+    def line(P, Q):
+        k = sp.Rational(Q[1] - P[1], Q[0] - P[0])
+        return k, P[1] - k * P[0]
+    k1, b1 = line(p["P1"], p["P2"])
+    k2, b2 = line(p["Q1"], p["Q2"])
+    x0 = (b2 - b1) / (k1 - k2)
+    return x0 if p["ask"] == "x0" else k1 * x0 + b1
+
+
+SCHET.update({
+    "z01.opisannyy-storona": p5_opis,
+    "z01.opisannyy-perimetr": p5_opis_per,
+    "z01.parallelogramm-vysota": p5_par_vys,
+    "z01.vysoty-treugolnika": p5_vys_tr,
+    "z01.vpisannyy-abc": p5_vpis_abc,
+    "z01.vpisannyy-cad": p5_vpis_cad,
+    "z02.skalyar-treh": p5_treh,
+    "z03.sosud-prizma": p5_sosud,
+    "z03.shar-cilindr-poverhnost": p5_shar_cil,
+    "z03.shest-mnogogrannik": p5_shest,
+    "z04.zapasnaya": p5_zapas,
+    "z04.kruglyy-stol": p5_stol,
+    "z04.ochered": p5_ochered,
+    "z05.dve-linii": p5_linii,
+    "z05.kosti-otnoshenie": p5_kosti,
+    "z05.bilety-sochetaniya": p5_bilety,
+    "z07.koren-drob": p5_kor_drob,
+    "z07.log-mnozhitel": p5_log_mn,
+    "z08.log-skobki": p5_log_sk,
+    "z08.log-drob-summa": p5_log_dr,
+    "z08.stepeni-proizvedenie": p5_st_pr,
+    "z08.sin-cos": p5_sin_cos,
+    "z09.celye-znak": p5_celye,
+    "z09.nuli-proizvodnoy": p5_nuli,
+    "z09.gorizontalnaya": p5_gor,
+    "z10.udar": p5_udar,
+    "z10.platforma": p5_plat,
+    "z10.kolodec": p5_kolodec,
+    "z10.arhimed": p5_arh,
+    "z11.krugovaya-trassa": p5_trassa,
+    "z11.gonki": p5_gonki,
+    "z11.splavy": p5_splavy,
+    "z11.sushka": p5_sushka,
+    "z11.dvoe-rabochih": p5_dvoe,
+    "z12.dve-pryamye": p5_pryamye,
+})
+
+
+
+# ── Партия 6 (варианты 31–36) ─────────────────────────────────────
+
+def p6_sek_dae(p):
+    # Угол между секущими — полуразность дуг: f = (t − DE)/2, вписанный DAE = DE/2.
+    return (R(p["t"]) - 2 * R(p["f"])) / 2
+
+
+def p6_sek_acb(p):
+    return (R(p["t"]) - R(p["s"])) / 2
+
+
+def p6_horda(p):
+    Rad = p["a"] * sp.sqrt(p["m"])
+    g = sp.Rational(p["g"])
+    if p["k"] == 1:
+        return sp.nsimplify(sp.simplify(2 * Rad * sp.sin(g * sp.pi / 180)))
+    c = 2 * Rad * sp.sin(g * sp.pi / 180)
+    # По хорде: sin C = c/2R, тупой угол — 180° − arcsin.
+    return sp.nsimplify(180 - sp.asin(sp.simplify(c / (2 * Rad))) * 180 / sp.pi)
+
+
+def p6_pryamoy(p):
+    if p["k"] == 1:
+        cos = sp.Rational(p["v"]) / sp.sqrt(p["u"] ** 2 + p["v"] ** 2)
+        tg = sp.sqrt(1 - cos**2) / cos
+        return sp.nsimplify(sp.simplify(p["bc"] / tg))
+    sin = sp.Rational(p["p"], p["r"])
+    return p["ab"] * sp.sqrt(1 - sin**2)
+
+
+def p6_dlina3(p):
+    return sp.sqrt((p["ax"] + p["bx"] + p["cx"]) ** 2 + (p["ay"] + p["by"] + p["cy"]) ** 2)
+
+
+def p6_dlina_otn(p):
+    b0 = sp.symbols("b0", real=True)
+    a2 = p["ax"] ** 2 + p["ay"] ** 2
+    r = sp.solve(sp.Eq(b0**2 + R(p["bIzv"]) ** 2, R(p["k"]) ** 2 * a2), b0)
+    return min(r) if p["vybor"] == "menshiy" else max(r)
+
+
+def p6_detal(p):
+    if p["vid"] == "na":
+        return R(p["V"]) / R(p["H"]) * R(p["dh"])
+    return R(p["V"]) * (R(p["k"]) - 1)
+
+
+def p6_sredn(p):
+    return R(p["V"]) / 4 if p["vid"] == "chast" else R(p["V"]) * 4
+
+
+def p6_shest(p):
+    # Площадь ABC (две стороны a и угол 120°) к площади шестиугольника: (√3/4·a²)/(6·√3/4·a²).
+    dolya = (sp.Rational(1, 2) * sp.sin(2 * sp.pi / 3)) / (6 * sp.sqrt(3) / 4)
+    dolya = sp.nsimplify(sp.simplify(dolya))
+    return R(p["V"]) / dolya if p["vid"] == "vsya" else R(p["V"]) * dolya
+
+
+def p6_cil_s(p):
+    # Цилиндр (R, 2R): боковая 4πR², полная 6πR², шар 4πR².
+    return R(p["S"]) if p["vid"] == 1 else R(p["S"]) * sp.Rational(6, 4)
+
+
+def p6_vertolet(p):
+    return sp.Rational(p["k"], p["N"])
+
+
+def p6_sumki_na(p):
+    m = p["d"] if p["ask"] == "defekt" else p["q"]
+    return sp.Rational(m, p["q"] + p["d"])
+
+
+def p6_pary(p):
+    b1, b2, c1, c2 = p["b1"], p["b2"], p["c1"], p["c2"]
+    C = sp.binomial
+    v = sp.Rational(C(b1, 2) * C(c1, 2) + C(b2, 2) * C(c2, 2) + b1 * b2 * c1 * c2, C(b1 + b2, 2) * C(c1 + c2, 2))
+    return okr2(v)
+
+
+def p6_pervyy(p):
+    a, b, j = p["a"], p["b"], p["j"]
+    n = a + b
+    v = sp.Rational(b, n - j + 1)
+    for i in range(j - 1):
+        v *= sp.Rational(a - i, n - i)
+    return okr2(v)
+
+
+def p6_dva_cv(p):
+    n = p["x"] + p["y"] + p["z"]
+    return okr2(sp.Rational(p["x"] * p["y"], sp.binomial(n, 2)))
+
+
+def p6_tozhd(p):
+    r = sp.solve(sp.Eq(sp.Integer(p["a"]) ** (sp.log(p["kx"] * x + p["b"]) / sp.log(sp.Integer(p["a"]) ** p["k"])), R(p["D"])), x)
+    return sp.nsimplify(r[0])
+
+
+def p6_log_osn(p):
+    a, m = sp.Integer(p["a"]), p["m"]
+    F_ = p["k1"] * x + p["b1"]
+    G_ = p["k2"] * x + p["b2"]
+    kand = sp.solve(sp.Eq(F_**m, G_), x) if m > 0 else sp.solve(sp.Eq(F_ * G_, 1), x)
+    ok = [r for r in kand if F_.subs(x, r) > 0 and G_.subs(x, r) > 0]
+    return min(ok)
+
+
+def p6_vlozh(p):
+    b = sp.Integer(p["b"])
+    return (b ** p["s1"]) ** (p["x1"] * p["x2"]) / (b ** p["s2"]) ** (p["y1"] * p["y2"])
+
+
+def p6_cos2(p):
+    s_ = R(p["s"])
+    c2 = 1 - 2 * s_**2 if p["given"] == "sin" else 2 * s_**2 - 1
+    return p["k"] * c2
+
+
+def p6_korni(p):
+    A = R(p["A"])
+    e = sum(sp.Rational(1, n) for n in p["chisl"]) - sum(sp.Rational(1, n) for n in p["znam"])
+    return sp.nsimplify(A**e)
+
+
+def _uzly_znak(u, xm):
+    # Знак волны f′ в точке по узлам (между узлами — по сумме значений, как на рисунке).
+    for i, (ux, uy) in enumerate(u):
+        if ux == xm:
+            return sp.sign(uy)
+        if i + 1 < len(u) and ux < xm < u[i + 1][0]:
+            return sp.sign(uy + u[i + 1][1])
+    return 0
+
+
+def p6_summa(p):
+    u = p["uzly"]
+    a, b = u[0][0], u[-1][0]
+    zs = [ux for ux, uy in u[1:-1] if uy == 0]
+    gran = [a] + zs + [b]
+    tochki = set()
+    for lo, hi in zip(gran, gran[1:]):
+        if _uzly_znak(u, sp.Rational(lo + hi, 2)) == p["znak"]:
+            ot = lo + 1 if lo == a else lo
+            do = hi - 1 if hi == b else hi
+            tochki.update(range(ot, do + 1))
+    return sum(tochki)
+
+
+def p6_metki(p):
+    return sum(1 for m in p["metki"] if _uzly_znak(p["uzly"], m) == p["znak"])
+
+
+def p6_parallel(p):
+    u, k = p["uzly"], p["k"]
+    xs = []
+    for i in range(len(u) - 1):
+        (x0, y0), (x1, y1) = u[i], u[i + 1]
+        if i > 0 and y0 == k:
+            xs.append(x0)
+        elif (y0 - k) * (y1 - k) < 0:
+            xs.append(None)
+    return len(xs) if p["schitat"] == 1 else xs[0]
+
+
+def p6_bak_koren(p):
+    k = sp.Rational(1, p["kDen"])
+    H0 = sp.Integer(p["H0"])
+    H = H0 - sp.sqrt(20 * H0) * k * t + 5 * k**2 * t**2
+    r = [s_ for s_ in sp.solve(sp.Eq(H, H0 / p["n"] ** 2), t) if s_ > 0]
+    return min(r)
+
+
+def p6_kond(p):
+    aRC = R(p["alpha"]) * R(p["Cm"]) * R(p["Rm"])
+    return R(p["U0"]) / sp.Integer(2) ** (R(p["t"]) / aRC)
+
+
+def p6_nagrev(p):
+    a = sp.Rational(p["aNum"], p["aDen"])
+    r = sp.solve(sp.Eq(p["T0"] + p["b"] * t + a * t**2, p["Tmax"]), t)
+    return min(r)
+
+
+def p6_bak_kv(p):
+    a = sp.Rational(1, p["aDen"])
+    b = -sp.Rational(p["bNum"], p["bDen"])
+    r = sp.solve(sp.Eq(a * t**2 + b * t + R(p["H0"]), 0), t)
+    return min(r)
+
+
+def p6_truby(p):
+    r = [s_ for s_ in sp.solve(sp.Eq(R(p["V1"]) / x - R(p["V2"]) / (x + p["d"]), R(p["t"])), x) if s_ > 0][0]
+    return r if p["ask"] == "pervaya" else r + p["d"]
+
+
+def p6_teplohody(p):
+    r = [s_ for s_ in sp.solve(sp.Eq(R(p["S"]) / x - R(p["S"]) / (x + p["dv"]), R(p["t"])), x) if s_ > 0][0]
+    return r if p["ask"] == "pervyy" else r + p["dv"]
+
+
+def p6_tri(p):
+    S = R(p["S"]) * 1000
+    k = 1 + R(p["r"]) / 100
+    X = sp.solve(sp.Eq(((S * k - x) * k - x) * k - x, 0), x)[0]
+    return 3 * X
+
+
+SCHET.update({
+    "z01.sekushchie-dae": p6_sek_dae,
+    "z01.sekushchie-acb": p6_sek_acb,
+    "z01.horda-ugol": p6_horda,
+    "z01.pryamoy-katet": p6_pryamoy,
+    "z02.dlina-treh": p6_dlina3,
+    "z02.dlina-otnoshenie": p6_dlina_otn,
+    "z03.detal": p6_detal,
+    "z03.srednyaya-liniya": p6_sredn,
+    "z03.shest-chast": p6_shest,
+    "z03.cilindr-s-po-sharu": p6_cil_s,
+    "z04.vertolet": p6_vertolet,
+    "z04.sumki-na": p6_sumki_na,
+    "z05.chaynye-pary": p6_pary,
+    "z05.pervyy-raz": p6_pervyy,
+    "z05.dva-tsveta": p6_dva_cv,
+    "z07.tozhdestvo-stepen": p6_tozhd,
+    "z07.log-osnovaniya": p6_log_osn,
+    "z08.stepeni-vlozhennye": p6_vlozh,
+    "z08.cos-dvoynogo-po": p6_cos2,
+    "z08.korni-drob": p6_korni,
+    "z09.summa-celyh": p6_summa,
+    "z09.metki-fprime": p6_metki,
+    "z09.parallel-fprime": p6_parallel,
+    "z10.bak-koren": p6_bak_koren,
+    "z10.kondensator": p6_kond,
+    "z10.nagrev": p6_nagrev,
+    "z10.bak-kvadrat": p6_bak_kv,
+    "z11.truby": p6_truby,
+    "z11.teplohody": p6_teplohody,
+    "z13.tri-ravnyh-summa": p6_tri,
+})
 
 def konechnaya(q):
     q = F(q)

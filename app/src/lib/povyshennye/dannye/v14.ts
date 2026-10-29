@@ -416,4 +416,97 @@ export const VARIANT: VariantPV = {
       },
     ],
   ],
+  /** Часть 2: задания 14–20 по версиям; проверка — pnpm test:povyshennye-chast2. */
+  chast2: [
+    [
+      {
+        s: 'g14.pokazKvadrat',
+        p: { q: 2, e: 2, u1: 2, u2: 1, k: 5, sg: -1, t1: 2, t2: 9, lo: -0.8, hi: 0 },
+      },
+      { s: 'g15.prizmaSechenie', p: { a2: 20, m: 1, n: 4, nado: 'V' } },
+      { s: 'g16.logDrob', p: { q: 2, c: 3, sg: -1, K: -1, znak: 'ge', pervym: 'kvadrat' } },
+      { s: 'b17.dzhoul', p: { E: 50, r: 2, syuzhet: 3, vopros: 'P' } },
+      { s: 'g18.rombVysota', p: { m: 4, n: 1, s2: 16, vid: 'opis' } },
+      {
+        s: 'g19.dvaModulya',
+        p: { k: 2, sg: 1, c: [1, 2], beta: [-1, 1], g: [1, 1], N: 2, nol: false, pervyy: 2 },
+      },
+      { s: 'g20.summyNabora', p: { N: 40, p: 3, q: 6, X1: 250, X2: 200 } },
+    ],
+    [
+      {
+        s: 'g14.pokazKvadrat',
+        p: { q: 3, e: 2, u1: 1, u2: 2, k: 4, sg: -1, t1: 3, t2: 4, lo: -0.5, hi: 0 },
+      },
+      { s: 'g15.prizmaSechenie', p: { a2: 10, m: 2, n: 3, nado: 'V' } },
+      { s: 'g16.logDrob', p: { q: 2, c: 1, sg: -1, K: -2, znak: 'le', pervym: 'kvadrat' } },
+      { s: 'b17.dzhoul', p: { E: 64, r: 3.2, syuzhet: 4, vopros: 'P' } },
+      { s: 'g18.rombVysota', p: { m: 7, n: 1, s2: 50, vid: 'opis' } },
+      {
+        s: 'g19.dvaModulya',
+        p: { k: 3, sg: 1, c: [5, 4], beta: [-2, 1], g: [1, 1], N: 2, nol: false, pervyy: 1 },
+      },
+      { s: 'g20.summyNabora', p: { N: 60, p: 3, q: 4, X1: 400, X2: 100 } },
+    ],
+    [
+      {
+        s: 'g14.pokazKvadrat',
+        p: { q: 2, e: 4, u1: 4, u2: 2, k: 4, sg: -1, t1: 6, t2: 8, lo: -1, hi: -0.25 },
+      },
+      { s: 'g15.prizmaSechenie', p: { a2: 30, m: 1, n: 5, nado: 'V' } },
+      { s: 'g16.logDrob', p: { q: 3, c: 2, sg: -1, K: -1, znak: 'ge', pervym: 'kvadrat' } },
+      { s: 'b17.dzhoul', p: { E: 42, r: 1.4, syuzhet: 5, vopros: 'P' } },
+      { s: 'g18.rombVysota', p: { m: 5, n: 2, s2: 23, vid: 'opis' } },
+      {
+        s: 'g19.dvaModulya',
+        p: { k: 2, sg: 1, c: [1, 4], beta: [0, 1], g: [2, 1], N: 2, nol: false, pervyy: 2 },
+      },
+      { s: 'g20.summyNabora', p: { N: 35, p: 2, q: 7, X1: 150, X2: 400 } },
+    ],
+    [
+      {
+        s: 'g14.pokazKvadrat',
+        p: { q: 3, e: 1, u1: 1, u2: 1, k: 1, sg: 1, t1: 2, t2: 3, lo: 0, hi: 1 },
+      },
+      { s: 'g15.prizmaSechenie', p: { a2: 6, m: 5, n: 1, nado: 'S' } },
+      { s: 'g16.logDrob', p: { q: 2, c: 4, sg: -1, K: 1, znak: 'ge', pervym: 'drob' } },
+      { s: 'b17.dzhoul', p: { E: 80, r: 4, syuzhet: 6, vopros: 'P' } },
+      { s: 'g18.rombVysota', p: { m: 2, n: 3, s2: 100, vid: 'vpis' } },
+      {
+        s: 'g19.dvaModulya',
+        p: { k: 2, sg: 1, c: [1, 1], beta: [-1, 1], g: [2, 1], N: 2, nol: false, pervyy: 1 },
+      },
+      { s: 'g20.summyNabora', p: { N: 55, p: 4, q: 6, X1: 300, X2: 250 } },
+    ],
+    [
+      {
+        s: 'g14.pokazKvadrat',
+        p: { q: 2, e: 1, u1: 1, u2: 1, k: 3, sg: 1, t1: 4, t2: 7, lo: 0, hi: 1 },
+      },
+      { s: 'g15.prizmaSechenie', p: { a2: 16, m: 1, n: 3, nado: 'V' } },
+      { s: 'g16.logDrob', p: { q: 2, c: 5, sg: -1, K: -4, znak: 'le', pervym: 'kvadrat' } },
+      { s: 'b17.dzhoul', p: { E: 45, r: 1.5, syuzhet: 7, vopros: 'P' } },
+      { s: 'g18.rombVysota', p: { m: 9, n: 1, s2: 31, vid: 'opis' } },
+      {
+        s: 'g19.dvaModulya',
+        p: { k: 3, sg: 1, c: [1, 1], beta: [-1, 1], g: [3, 2], N: 2, nol: false, pervyy: 2 },
+      },
+      { s: 'g20.summyNabora', p: { N: 48, p: 4, q: 5, X1: 500, X2: 40 } },
+    ],
+    [
+      {
+        s: 'g14.pokazKvadrat',
+        p: { q: 2, e: 2, u1: 2, u2: 2, k: 2, sg: -1, t1: 2, t2: 5, lo: -1.5, hi: 0 },
+      },
+      { s: 'g15.prizmaSechenie', p: { a2: 40, m: 2, n: 3, nado: 'V' } },
+      { s: 'g16.logDrob', p: { q: 3, c: 1, sg: -1, K: 0, znak: 'ge', pervym: 'kvadrat' } },
+      { s: 'b17.dzhoul', p: { E: 32, r: 1.6, syuzhet: 0, vopros: 'P' } },
+      { s: 'g18.rombVysota', p: { m: 6, n: 1, s2: 88, vid: 'opis' } },
+      {
+        s: 'g19.dvaModulya',
+        p: { k: 2, sg: 1, c: [2, 1], beta: [-2, 1], g: [1, 1], N: 2, nol: false, pervyy: 1 },
+      },
+      { s: 'g20.summyNabora', p: { N: 42, p: 3, q: 8, X1: 200, X2: 350 } },
+    ],
+  ],
 };

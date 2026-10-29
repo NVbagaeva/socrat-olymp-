@@ -175,6 +175,8 @@ export interface Figura {
 export type ZaprosT =
   | 'znak-v-metkah'
   | 'celye-znak'
+  /* сумма целых точек промежутков возрастания (убывания) f по графику f′ (варианты повышенной сложности) */
+  | 'summa-celyh'
   | 'chislo-nuley'
   | 'nul-na-otrezke'
   | 'metki-na-vozrastanii'

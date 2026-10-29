@@ -18,9 +18,9 @@ import { prism, vertex } from '../../solid/figures';
 import { hullVolume, distance, surfaceArea } from '../../solid/measure';
 import { type Model } from '../../solid/model';
 import { edge, face, prismModel } from '../../solid/drawings/common';
-import { legPrismBody } from './common';
-import { shapeLeg } from './drawings';
-import { ru } from '../format';
+import { legPrismBody, regularPrismByArea } from './common';
+import { HEX_NAMES, shapeHexSolid, shapeLeg } from './drawings';
+import { letters, ru } from '../format';
 import { type Params, type Prototype, num } from '../types';
 
 /** k√q в TeX: «3\sqrt{3}», «\sqrt{2}». */
@@ -186,5 +186,87 @@ export const P03_28S: Prototype = {
     ];
   },
 
+  varianty: [],
+};
+
+/* ── Партия 5. Многогранник на вершинах шестиугольной призмы ────── */
+
+const SHEST = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
+
+/**
+ * Вершины многогранника: vid 0 — тетраэдр на вершинах X, Y, W нижнего
+ * основания (соседние X, Y и W через одну от Y) и вершине над соседней с W;
+ * vid 1 — пирамида с основанием-прямоугольником X, Y, W, Z и вершиной
+ * над оставшейся между Y и W. Сдвиг s поворачивает буквы по кругу.
+ */
+function shestVershiny(p: Params): string[] {
+  const s = num(p, 's');
+  const L = (k: number) => SHEST[(s + k) % 6] as string;
+  return num(p, 'vid') === 1 ? [L(0), L(1), L(3), L(4), `${L(2)}1`] : [L(0), L(1), L(3), `${L(4)}1`];
+}
+
+/**
+ * Объём многогранника на вершинах правильной шестиугольной призмы
+ * (как P03-36…40): тетраэдр с основанием ABD или пирамида с основанием
+ * ABDE. Подвох — треугольник ABD прямоугольный и занимает треть
+ * шестиугольника, прямоугольник ABDE — две трети; объём — треть
+ * произведения этой площади на боковое ребро.
+ */
+export const PV03_SHEST: Prototype = {
+  id: 'PV03-shest',
+  razdel: 'II',
+  nazvanie: 'Многогранник на вершинах правильной шестиугольной призмы: тетраэдр или пирамида',
+  tip: 'объём тетраэдра с основанием ABD или пирамиды с основанием ABDE',
+  zadachnik: [124, 125],
+  status: 'добавить',
+  format: 'десятичная',
+  uslovie: (p) =>
+    `Найдите объём многогранника, вершинами которого являются точки $${shestVershiny(p).map(letters).join(', ')}$ ` +
+    `правильной шестиугольной призмы $${HEX_NAMES}$, площадь основания которой равна ${ru(num(p, 'S'))}, ` +
+    `а боковое ребро равно ${ru(num(p, 'h'))}.`,
+  dopustimo: (p) => num(p, 'S') > 0 && num(p, 'h') > 0 && [0, 1].includes(num(p, 'vid')),
+  otvet: (p) => {
+    const k = num(p, 'vid') === 1 ? 2 : 1;
+    return Math.round(((k * num(p, 'S') * num(p, 'h')) / 9) * 1e9) / 1e9;
+  },
+  poModeli: (p) => {
+    const body = regularPrismByArea(6, num(p, 'S'), num(p, 'h'));
+    return hullVolume(shestVershiny(p).map((name) => vertex(body, name)));
+  },
+  chertezh: (p) => {
+    const v = shestVershiny(p);
+    const apex = v.at(-1) as string;
+    const osn = v.slice(0, -1);
+    const rebra: [string, string][] = [
+      ...osn.map((x, i) => [x, osn[(i + 1) % osn.length] as string] as [string, string]),
+      ...osn.map((x) => [apex, x] as [string, string]),
+    ];
+    return shapeHexSolid(
+      `Правильная шестиугольная призма ${HEX_NAMES}, выделен многогранник ${v.join(', ')}`,
+      rebra,
+    );
+  },
+  shagi: (p) => {
+    const S = num(p, 'S');
+    const h = num(p, 'h');
+    const v = shestVershiny(p).map(letters);
+    const pir = num(p, 'vid') === 1;
+    const osn = pir ? v.slice(0, 4).join('') : v.slice(0, 3).join('');
+    const dolya = pir ? 2 : 1;
+    const so = (dolya * S) / 3;
+    const ans = (so * h) / 3;
+    return [
+      {
+        text: pir
+          ? `Основание многогранника — прямоугольник $${osn}$: две его стороны — стороны шестиугольника, две другие — короткие диагонали. Он занимает две трети шестиугольника: $\\dfrac23\\cdot ${ru(S)}=${ru(so)}$.`
+          : `Основание многогранника — треугольник $${osn}$: угол при вершине $${v[1]}$ прямой, катеты — сторона $a$ и короткая диагональ $a\\sqrt3$. Его площадь $\\dfrac{a^2\\sqrt3}{2}$ — треть шестиугольника: $${ru(S)} : 3=${ru(so)}$.`,
+        value: so,
+      },
+      {
+        text: `Вершина $${v.at(-1)}$ лежит в другом основании, высота многогранника равна боковому ребру. Объём: $\\dfrac13\\cdot ${ru(so)}\\cdot ${ru(h)}=${ru(ans)}$.`,
+        value: ans,
+      },
+    ];
+  },
   varianty: [],
 };

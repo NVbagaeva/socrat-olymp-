@@ -9,18 +9,31 @@
  */
 
 import { RAD } from '../geom';
-import { parallelogramm, poUglam, ravnobedrennyy, trapeciya, uglyTreugolnika } from '../figury';
+import {
+  opisannyyPoStoronam,
+  parallelogramm,
+  poUglam,
+  pryamougolnyy,
+  ravnobedrennyy,
+  trapeciya,
+  uglyTreugolnika,
+} from '../figury';
 import type { Element } from '../types';
 import {
   type PrototipChertezha,
   chislo,
   clamp,
+  drobTex,
+  duga,
+  pryam,
+  tochka,
   gr,
   grTex,
   koren,
   korenTex,
   mn,
   oblast,
+  okr,
   otr,
   prod,
   scena,
@@ -387,7 +400,11 @@ const PROTOTIPY_PARTIYA_1_2: readonly PrototipChertezha[] = [
 /** Параллелограмм с острым углом u при A, AB : AD = ab : ad; на рисунке отношение — в пределах 0,3…0,8. */
 function parallelogrammPo(u: number | undefined, ab: number, ad: number) {
   const ratio = clamp(ab / ad, 0.3, 0.8);
-  return { t: parallelogramm(u ?? 60, 10, 10 * ratio), ratio, sk: Math.abs(ratio - ab / ad) > 1e-9 };
+  return {
+    t: parallelogramm(u ?? 60, 10, 10 * ratio),
+    ratio,
+    sk: Math.abs(ratio - ab / ad) > 1e-9,
+  };
 }
 
 /** Прототип 109: AB = AK = m частей, AD = m + n частей, периметр → AD. */
@@ -614,8 +631,312 @@ const PROTOTIPY_PARTIYA_4: readonly PrototipChertezha[] = [
   },
 ];
 
+/** Прототип 113: стороны описанного четырёхугольника по AB, BC, CD; DA — из равенства сумм. */
+export function storony113(p: Params) {
+  const da = p.ab + p.cd - p.bc;
+  return { da, per: 2 * (p.ab + p.cd), ans: p.k ? p.ab : p.cd, dano: p.k ? p.cd : p.ab };
+}
+
+/** Прототип 114: площадь S и стороны a < b параллелограмма → меньшая (k = 0) или большая (k = 1) высота. */
+export function vysota114(p: Params) {
+  return p.k ? p.s / p.a : p.s / p.b;
+}
+
+/** Партия 5 (варианты 25–30). */
+const PROTOTIPY_PARTIYA_5: readonly PrototipChertezha[] = [
+  {
+    id: 113,
+    blok: 'VII',
+    nazvanie: 'Описанный четырёхугольник: периметр и одна сторона → противолежащая сторона',
+    fipi: [],
+    uslovie: (p) => {
+      const s = storony113(p);
+      return `Около окружности описан четырёхугольник $ABCD$, его периметр равен $${tex(s.per)}$, $${p.k ? 'CD' : 'AB'}=${tex(s.dano)}$. Найдите сторону $${p.k ? 'AB' : 'CD'}$.`;
+    },
+    otvet: (p) => storony113(p).ans,
+    primer: { ab: 9, bc: 8, cd: 11, k: 0 },
+    sluchaynye: (r) => {
+      const t = [r.int(3, 12), r.int(3, 12), r.int(3, 12), r.int(3, 12)];
+      return { ab: t[0]! + t[1]!, bc: t[1]! + t[2]!, cd: t[2]! + t[3]!, k: r.int(0, 1) };
+    },
+    stsena: (p) => {
+      const s = storony113(p);
+      const f = opisannyyPoStoronam(p.ab, p.bc, p.cd, s.da);
+      const [iA, iB] = p.k ? (['A', 'B'] as const) : (['C', 'D'] as const);
+      const [dA, dB] = p.k ? (['C', 'D'] as const) : (['A', 'B'] as const);
+      return {
+        tochki: { O: [0, 0], A: f.A, B: f.B, C: f.C, D: f.D },
+        okruzhnosti: { w: { centr: 'O', radius: f.r } },
+        elementy: [
+          mn(['A', 'B', 'C', 'D']),
+          okr('w'),
+          storona(dA, dB, chislo(s.dano)),
+          otr(iA, iB, { vydelit: 'iskomoe', znachenie: chislo(s.ans), otvet: true }),
+        ],
+        proverki: [],
+        otvet: chislo(s.ans),
+      };
+    },
+  },
+  {
+    id: 114,
+    blok: 'III',
+    nazvanie: 'Параллелограмм: площадь и две стороны → меньшая или большая высота',
+    fipi: [],
+    uslovie: (p) =>
+      `Стороны параллелограмма равны $${tex(p.a)}$ и $${tex(p.b)}$, а его площадь равна $${tex(p.s)}$. Найдите ${p.k ? 'бо́льшую' : 'меньшую'} высоту параллелограмма.`,
+    otvet: (p) => vysota114(p),
+    primer: { a: 12, b: 20, s: 150, k: 0 },
+    sluchaynye: (r) => {
+      const a = r.int(4, 20);
+      const b = r.int(a + 1, a + 20);
+      return { a, b, s: r.int(2, a - 1) * b, k: r.int(0, 1) };
+    },
+    stsena: (p, porog) => {
+      /* AD = b (бо́льшая сторона, внизу), AB = a; угол A — по высоте h_b = S/b. */
+      const u0 = Math.asin(Math.min(1, p.s / (p.a * p.b))) / RAD;
+      const u = clamp(u0, Math.max(porog, 35), 75);
+      const { t, sk } = parallelogrammPo(u, p.a, p.b);
+      const ans = vysota114(p);
+      const hB = p.s / p.b;
+      const hA = p.s / p.a;
+      return scena(
+        {
+          tochki: {
+            ...t,
+            H: { osnovanie: ['B', 'A', 'D'] },
+            K: { osnovanie: ['B', 'C', 'D'] },
+          },
+          elementy: [
+            mn(['A', 'B', 'C', 'D']),
+            storona('A', 'B', chislo(p.a)),
+            storona('A', 'D', chislo(p.b)),
+            ...vysota('B', 'A', 'D', 'H', null, {
+              vydelit: p.k ? undefined : 'iskomoe',
+              znachenie: p.k ? undefined : chislo(hB),
+              otvet: !p.k,
+            }),
+            /* Основание K от C на расстоянии b·cos u; дальше D — продолжаем CD пунктиром. */
+            ...vysota('B', 'C', 'D', 'K', p.b * Math.cos(u * RAD) > p.a + 1e-9 ? 'b' : null, {
+              vydelit: p.k ? 'iskomoe' : undefined,
+              znachenie: p.k ? chislo(hA) : undefined,
+              otvet: !!p.k,
+            }),
+          ],
+          proverki: [
+            {
+              parallelny: [
+                ['A', 'D'],
+                ['B', 'C'],
+              ],
+            },
+          ],
+          otvet: chislo(ans),
+        },
+        sk || Math.abs(u - u0) > 1e-9,
+      );
+    },
+  },
+];
+
+/** k²·m = M: вынести множитель из-под корня. */
+export function uprostitKoren(M: number): [number, number] {
+  let k = 1;
+  let m = M;
+  for (let d = 2; d * d <= m; d += 1) {
+    while (m % (d * d) === 0) {
+      m /= d * d;
+      k *= d;
+    }
+  }
+  return [k, m];
+}
+
+/** Прототип 116: хорда AB = 2R·sin g; R = a√m. */
+export function horda116(p: Params): { k: number; m: number; val: number } {
+  const sinKv = p.g === 120 ? 3 : p.g === 135 ? 2 : 1;
+  /* AB = 2·a√m·sin g: sin 120° = √3/2, sin 135° = √2/2, sin 150° = 1/2. */
+  const [k, m] = uprostitKoren(p.m * sinKv);
+  return { k: p.a * k, m, val: p.a * Math.sqrt(p.m * sinKv) };
+}
+
+/** Прототип 117: AC прямоугольного треугольника; k = 0 — по AB и sin A, k = 1 — по BC и cos A. */
+export function katet117(p: Params): number {
+  return p.k ? (p.bc * p.v) / p.u : (p.ab * p.q) / p.r;
+}
+
+/** cos A = v/√(u² + v²) в виде n√m/d (tg A = u/v). */
+export function cos117(p: Params): { n: number; m: number; d: number } {
+  const [k, m] = uprostitKoren(p.u * p.u + p.v * p.v);
+  /* v/(k√m) = v√m/(k·m). */
+  let n = p.v;
+  let d = k * m;
+  const nod = (x: number, y: number): number => (y === 0 ? x : nod(y, x % y));
+  const g = nod(n, d);
+  n /= g;
+  d /= g;
+  return { n, m, d };
+}
+
+/** Партия 6 (варианты 31–36). */
+const PROTOTIPY_PARTIYA_6: readonly PrototipChertezha[] = [
+  {
+    id: 115,
+    blok: 'VI',
+    nazvanie: 'Секущие из точки $C$: дуги под вписанными углами $ADB$ и $DAE$ → угол $ACB$',
+    fipi: [],
+    uslovie: (p) =>
+      `Прямые $BD$ и $AE$ пересекаются в точке $C$ вне окружности (см. рисунок). Вписанные углы $ADB$ и $DAE$ опираются на дуги, градусные меры которых равны $${grTex(p.t)}$ и $${grTex(p.s)}$. Найдите угол $ACB$. ${VGRADUSAH}`,
+    otvet: (p) => (p.t - p.s) / 2,
+    primer: { t: 130, s: 40 },
+    sluchaynye: (r) => {
+      const s = 2 * r.int(8, 40);
+      return { s, t: 2 * r.int(s / 2 + 10, Math.min(150, 170 - s / 2)) };
+    },
+    stsena: (p, porog) => {
+      let delta = Math.max(p.s, 2 * porog);
+      let t = Math.min(Math.max(p.t, delta + 2 * porog + 20), 300);
+      if (t + delta > 310) {
+        const k = 310 / (t + delta);
+        t *= k;
+        delta = Math.max(delta * k, 2 * porog);
+      }
+      const x = (360 - t - delta) / 2;
+      const sk = delta !== p.s || t !== p.t || x < 25;
+      const xV = Math.max(x, 25);
+      const ans = (p.t - p.s) / 2;
+      return scena(
+        {
+          tochki: {
+            O: [0, 0],
+            D: { naDuge: { okr: 'w', gradus: delta / 2 } },
+            E: { naDuge: { okr: 'w', gradus: -delta / 2 } },
+            B: { naDuge: { okr: 'w', gradus: delta / 2 + xV } },
+            A: { naDuge: { okr: 'w', gradus: -delta / 2 - xV } },
+            C: {
+              peresechenie: [
+                ['B', 'D'],
+                ['A', 'E'],
+              ],
+            },
+          },
+          okruzhnosti: { w: { centr: 'O', radius: 5 } },
+          elementy: [
+            okr('w'),
+            tochka('O'),
+            otr('B', 'C'),
+            otr('A', 'C'),
+            otr('A', 'D'),
+            ug('A', 'D', 'B', { vydelit: 'dano', znachenie: gr(p.t / 2) }),
+            ug('D', 'A', 'E', { vydelit: 'dano', znachenie: gr(p.s / 2) }),
+            ug('A', 'C', 'B', { vydelit: 'iskomoe', znachenie: gr(ans), otvet: true }),
+            duga('w', 'B', 'A', { sloy: 1, znachenie: gr(p.t) }),
+            duga('w', 'E', 'D', { sloy: 1, znachenie: gr(p.s) }),
+          ],
+          otvet: gr(ans),
+        },
+        sk,
+      );
+    },
+    diapazon: { povorot: 180 },
+  },
+  {
+    id: 116,
+    blok: 'IX',
+    nazvanie: 'Окружность радиуса $a\\sqrt m$: хорда ↔ тупой вписанный угол',
+    fipi: [],
+    uslovie: (p) => {
+      const h = horda116(p);
+      return p.k
+        ? `Найдите хорду, на которую опирается вписанный угол $${grTex(p.g)}$, если радиус окружности равен $${korenTex(p.a, p.m)}$.`
+        : `Хорда окружности радиуса $${korenTex(p.a, p.m)}$ равна $${korenTex(h.k, h.m)}$. Найдите тупой вписанный угол, который опирается на эту хорду. ${VGRADUSAH}`;
+    },
+    otvet: (p) => (p.k ? horda116(p).val : p.g),
+    primer: { a: 2, m: 3, g: 120, k: 0 },
+    sluchaynye: (r) => ({
+      a: r.int(1, 9),
+      m: r.pick([1, 2, 3, 5, 6]),
+      g: r.pick([120, 135, 150]),
+      k: 0,
+    }),
+    stsena: (p, porog) => {
+      const gV = clamp(p.g, 91, 180 - 2 * porog);
+      const s = 360 - 2 * gV;
+      const h = horda116(p);
+      return scena(
+        {
+          tochki: {
+            O: [0, 0],
+            A: { naDuge: { okr: 'w', gradus: 90 + s / 2 } },
+            B: { naDuge: { okr: 'w', gradus: 90 - s / 2 } },
+            C: { naDuge: { okr: 'w', gradus: 90 + s * 0.12 } },
+          },
+          okruzhnosti: { w: { centr: 'O', radius: 5 } },
+          elementy: [
+            okr('w'),
+            otr('A', 'C'),
+            otr('B', 'C'),
+            p.k
+              ? ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(p.g) })
+              : ug('A', 'C', 'B', { vydelit: 'iskomoe', znachenie: gr(p.g), otvet: true }),
+            p.k
+              ? otr('A', 'B', { vydelit: 'iskomoe', znachenie: koren(h.k, h.m), otvet: true })
+              : otr('A', 'B', { vydelit: 'dano', znachenie: koren(h.k, h.m) }),
+            tochka('O', { sloy: 1 }),
+            otr('O', 'A', { sloy: 1, znachenie: koren(p.a, p.m) }),
+            otr('O', 'B', { sloy: 1 }),
+            ug('A', 'O', 'B', { sloy: 2, znachenie: gr(360 - 2 * p.g) }),
+          ],
+          proverki: [{ ugol: ['A', 'C', 'B'], vid: 'tupoy' }],
+          otvet: p.k ? koren(h.k, h.m) : gr(p.g),
+        },
+        gV !== p.g,
+      );
+    },
+  },
+  {
+    id: 117,
+    blok: 'V',
+    nazvanie: 'Прямоугольный треугольник: $AB$ и $\\sin A$ или $BC$ и $\\cos A$ → катет $AC$',
+    fipi: [],
+    uslovie: (p) => {
+      if (p.k) {
+        const c = cos117(p);
+        return `В треугольнике $ABC$ угол $C$ прямой, $BC=${tex(p.bc)}$, $\\cos A=${drobTex(c.n, c.d, c.m)}$. Найдите $AC$.`;
+      }
+      return `В треугольнике $ABC$ угол $C$ прямой, $AB=${tex(p.ab)}$, $\\sin A=${drobTex(p.p, p.r, 1, true)}$. Найдите $AC$.`;
+    },
+    otvet: (p) => katet117(p),
+    primer: { k: 0, ab: 10, p: 3, q: 4, r: 5 },
+    sluchaynye: (r) => ({ k: 1, bc: r.int(2, 12), u: r.int(1, 3), v: r.int(1, 4) }),
+    stsena: (p, porog) => {
+      /* Угол B = 90° − A. */
+      const ugolA = p.k ? Math.atan(p.u / p.v) / RAD : Math.asin(p.p / p.r) / RAD;
+      const bV = clamp(90 - ugolA, porog, 90 - porog);
+      const t = pryamougolnyy(bV, 'katety');
+      const ans = katet117(p);
+      return scena(
+        {
+          tochki: t,
+          elementy: [
+            tri('A', 'B', 'C'),
+            pryam('A', 'C', 'B'),
+            p.k ? storona('C', 'B', chislo(p.bc)) : storona('A', 'B', chislo(p.ab)),
+            ug('B', 'A', 'C', { vydelit: 'dano' }),
+            otr('A', 'C', { vydelit: 'iskomoe', znachenie: chislo(ans), otvet: true }),
+          ],
+          otvet: chislo(ans),
+        },
+        Math.abs(bV - (90 - ugolA)) > 1e-9,
+      );
+    },
+  },
+];
+
 export const PROTOTIPY_POVYSHENNYE: readonly PrototipChertezha[] = [
   ...PROTOTIPY_PARTIYA_1_2,
   ...PROTOTIPY_PARTIYA_3,
   ...PROTOTIPY_PARTIYA_4,
+  ...PROTOTIPY_PARTIYA_5,
+  ...PROTOTIPY_PARTIYA_6,
 ];
