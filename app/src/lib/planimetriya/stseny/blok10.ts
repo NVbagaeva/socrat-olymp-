@@ -483,7 +483,9 @@ export const BLOK_X: PrototipChertezha[] = [
     },
     stsena: (p, porog) => {
       const mal = (360 * Math.min(p.k, p.m)) / (p.k + p.m);
-      const malV = clamp(mal, 2 * porog + 20, 170);
+      /* Меньшая дуга не уже 60°: иначе C почти на хорде AB и дуга
+         тупого угла ACB ложится на хорду — рисунок схематичный. */
+      const malV = clamp(mal, Math.max(2 * porog + 20, 60), 170);
       return scena(
         {
           tochki: {

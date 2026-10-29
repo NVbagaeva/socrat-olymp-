@@ -3,6 +3,7 @@ import { OPORNYE } from '@/content/opornye';
 import { O_ZADANII_1, type Tip1 } from '@/content/zadanie1';
 import { POROG } from '@/lib/planimetriya/figury';
 import { renderPlan } from '@/lib/planimetriya/render';
+import { PL } from '@/lib/planimetriya/stil';
 import { prototip } from '@/lib/planimetriya/stseny';
 import type { Params } from '@/lib/planimetriya/stseny/dsl';
 import { ANALYSIS_ATTR, ANALYSIS_WORDS } from '../about/AnalysisPage';
@@ -20,7 +21,7 @@ export function razborHref(base: string, id: string): string {
 /** Миниатюра плашки: чертёж условия прототипа, как на листе ученика. */
 function mini(t: Tip1): string {
   const p = prototip(t.mini);
-  return renderPlan(p.stsena(p.primer as Params, POROG), { shirina: 150, vysota: 96 });
+  return renderPlan(p.stsena(p.primer as Params, POROG), { ...PL.mini });
 }
 
 /**

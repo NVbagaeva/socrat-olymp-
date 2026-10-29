@@ -23,8 +23,8 @@
  * различаются толщиной и штрихом.
  */
 
-import { THEME, esc, px } from '@/lib/graph/renderer.js';
-import { BUKVY, CHISLA, indeksSvg } from '@/lib/risunki/shrifty.js';
+import { esc, px } from '@/lib/graph/renderer.js';
+import { indeksSvg } from '@/lib/risunki/shrifty.js';
 import { POROG } from './figury';
 import {
   type Krug,
@@ -41,39 +41,12 @@ import {
   unit,
 } from './geom';
 import { type Prepyatstvie, type Pryam, blizhayshee } from './kollizii';
+import { PL } from './stil';
 import type { Element, Optsii, Otchet, Ramka, Rezhim, Scena, Sloy, T2 } from './types';
 
-/* ── Оформление ──────────────────────────────────────────────────── */
+/* ── Оформление: stil.ts ─────────────────────────────────────────── */
 
-export const PL = {
-  ink: THEME.colors.axis,
-  iskomoe: THEME.colors.lineA,
-  podskazka: THEME.colors.accent,
-  bg: THEME.colors.bg,
-  width: { line: 1.9, iskomoe: 2.9, novoe: 2.8, mark: 1.5, tick: 1.6 },
-  dash: { punktir: '6 4', prodolzhenie: '5 4' },
-  /* Подписи точек — курсив KaTeX_Math, как буквы в формулах сайта. */
-  font: {
-    bukva: BUKVY,
-    chislo: CHISLA,
-    slovo: THEME.font.family,
-    razmer: 19,
-    razmerZnach: 15,
-  },
-  /* Зазор подписи до линий и других подписей, px. */
-  gap: 2.5,
-  /* Ступени отступа подписи от точки, px. */
-  otstupy: [4, 7, 11, 16, 22, 29],
-  ugol: { r: 17, shag: 4, min: 8, rPryamoy: 9 },
-  tick: { half: 5, shag: 4 },
-  tochkaR: 2.6,
-  /* Наименьшие размеры на экране: короче — фигура вырождена. */
-  minOtrezok: 12,
-  minMezhduTochkami: 10,
-  minUgolMnogougolnika: 7,
-  razmer: { shirina: 280, vysota: 220 },
-  pole: 4,
-} as const;
+export { PL };
 
 /* Ширина глифов KaTeX_Math (курсив) и KaTeX_Main в долях кегля. */
 const SHIRINA: Record<string, number> = {
@@ -392,7 +365,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const p2 = S(add(k.c, polar(a2, k.r)));
     const large = a2 - a1 > 180 ? 1 : 0;
     sloyOtmetki.push(
-      `<path class="${st.cls} pl-duga"${st.data} d="M${px(p1[0])} ${px(p1[1])}A${px(r)} ${px(r)} 0 ${large} 0 ${px(p2[0])} ${px(p2[1])}" fill="none" stroke="${e.vydelit === 'iskomoe' || novoe(e) ? st.color : PL.podskazka}" stroke-width="${Math.max(st.w, 3.4)}" stroke-linecap="round" opacity="0.9"/>`,
+      `<path class="${st.cls} pl-duga"${st.data} d="M${px(p1[0])} ${px(p1[1])}A${px(r)} ${px(r)} 0 ${large} 0 ${px(p2[0])} ${px(p2[1])}" fill="none" stroke="${e.vydelit === 'iskomoe' || novoe(e) ? st.color : PL.podskazka}" stroke-width="${Math.max(st.w, PL.width.duga)}" stroke-linecap="round" opacity="0.9"/>`,
     );
     /* Концы дуги — короткие засечки поперёк окружности: две соседние
        дуги одного цвета так не сливаются в одну. */
@@ -405,7 +378,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
       prep.push({ tip: 'otrezok', a: q1, b: q2, r: 1, chto: `засечка дуги ${e.ot}${e.do}` });
     }
     sloyOtmetki.push(
-      `<path class="pl-duga-konec" d="${zas.join('')}" stroke="${e.vydelit === 'iskomoe' || novoe(e) ? st.color : PL.podskazka}" stroke-width="1.8" stroke-linecap="round"/>`,
+      `<path class="pl-duga-konec" d="${zas.join('')}" stroke="${e.vydelit === 'iskomoe' || novoe(e) ? st.color : PL.podskazka}" stroke-width="${PL.width.tick}" stroke-linecap="round"/>`,
     );
     if (e.znachenie !== undefined) {
       const am = (a1 + a2) / 2;
@@ -543,35 +516,96 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
 
   /* Углы: дуги (1–3) и значки прямого угла. */
   const ugly = vidimye.filter((e): e is Element & { tip: 'ugol' } => e.tip === 'ugol');
-  /* Вложенные углы при одной вершине — разными радиусами: больший угол дальше. */
-  const radiusUgla = new Map<Element, number>();
-  for (const e of ugly) {
-    if (e.pryamoy) continue;
+  /* Радиус дуги: PL.ugol.r, у короткой стороны — меньше. Вложенные
+     углы при одной вершине — разными радиусами: больший угол дальше
+     всех дуг вложенного. Дуга не задевает чужие линии и окружности —
+     иначе радиус уменьшается, но не меньше PL.ugol.min. */
+  const radiusUgla = new Map<Element & { tip: 'ugol' }, number>();
+  const vnutriUgla = (vtx: T2, a: T2, b: T2, q: T2) => {
+    const ua = angleOf(sub(a, vtx));
+    let span = (angleOf(sub(b, vtx)) - ua + 360) % 360;
+    let lo = ua;
+    if (span > 180) {
+      lo = angleOf(sub(b, vtx));
+      span = 360 - span;
+    }
+    return (angleOf(sub(q, vtx)) - lo + 360) % 360 <= span + 1e-6;
+  };
+  /* Точки дуги радиуса r — ломаная для проверок. */
+  const tochkiDugi = (vtx: T2, u: T2, w: T2, r: number, n = 12): T2[] => {
+    const th = angleAt(add(vtx, u), vtx, add(vtx, w)) * RAD;
+    const sweep = u[0] * w[1] - u[1] * w[0] > 0 ? 1 : -1;
+    const a0 = Math.atan2(u[1], u[0]);
+    const out: T2[] = [];
+    for (let k = 0; k <= n; k += 1) {
+      const t = a0 + sweep * th * (k / n);
+      out.push([vtx[0] + Math.cos(t) * r, vtx[1] + Math.sin(t) * r]);
+    }
+    return out;
+  };
+  /* Задевает ли дуга (с толщиной) чужую линию или окружность. Линии
+     и окружности через вершину или почти через неё (ближе PL.ugol.min)
+     не в счёт: их дуга пересекает при любом радиусе. */
+  const zadevaet = (vtx: T2, u: T2, w: T2, r: number): boolean => {
+    const pts = tochkiDugi(vtx, u, w, r).slice(1, -1);
+    for (const o of prep) {
+      if (o.tip === 'otrezok') {
+        const d = sub(o.b, o.a);
+        const l2 = d[0] * d[0] + d[1] * d[1] || 1;
+        const t = Math.max(
+          0,
+          Math.min(1, ((vtx[0] - o.a[0]) * d[0] + (vtx[1] - o.a[1]) * d[1]) / l2),
+        );
+        if (dist(add(o.a, mul(d, t)), vtx) < PL.ugol.min - 1) continue;
+        for (const q of pts) {
+          const tq = Math.max(
+            0,
+            Math.min(1, ((q[0] - o.a[0]) * d[0] + (q[1] - o.a[1]) * d[1]) / l2),
+          );
+          if (dist(add(o.a, mul(d, tq)), q) < o.r + 0.9) return true;
+        }
+      } else if (o.tip === 'krug') {
+        if (Math.abs(dist(o.c, vtx) - o.r) < PL.ugol.min - 1) continue;
+        for (const q of pts) if (Math.abs(dist(o.c, q) - o.r) < o.tolshchina / 2 + 0.9) return true;
+      }
+    }
+    return false;
+  };
+  const poRazmeru = ugly
+    .filter((e) => !e.pryamoy)
+    .map((e) => ({ e, th: angleAt(E(e.a), E(e.v), E(e.b)) }))
+    .sort((x, y) => x.th - y.th);
+  for (const { e, th } of poRazmeru) {
     const vtx = E(e.v);
     const a = E(e.a);
     const b = E(e.b);
-    const th = angleAt(a, vtx, b);
     const korotkaya = Math.min(dist(a, vtx), dist(b, vtx));
+    /* Острый маленький угол: дуга не короче 7,5 px, иначе её не видно. */
     let r = Math.max(PL.ugol.r, 7.5 / (th * RAD));
-    const sosedi = ugly.filter((o) => o !== e && !o.pryamoy && o.v === e.v);
-    const vlozhen = sosedi.filter((o) => {
-      const tO = angleAt(E(o.a), vtx, E(o.b));
-      if (tO >= th - 1e-6) return false;
-      const ua = angleOf(sub(a, vtx));
-      const ub = angleOf(sub(b, vtx));
-      const uo1 = angleOf(sub(E(o.a), vtx));
-      const uo2 = angleOf(sub(E(o.b), vtx));
-      const vnutri = (x: number) => {
-        let lo = ua;
-        let hi = ub;
-        if ((hi - lo + 360) % 360 > 180) [lo, hi] = [hi, lo];
-        const span = (hi - lo + 360) % 360;
-        return (x - lo + 360) % 360 <= span + 1e-6;
-      };
-      return vnutri(uo1) && vnutri(uo2);
-    }).length;
-    r += vlozhen * (PL.ugol.shag * 3 + 2);
-    r = Math.min(r, korotkaya * 0.6);
+    r = Math.min(r, Math.max(PL.ugol.min, korotkaya * PL.ugol.korotkaya));
+    if (e.dolyaRadiusa !== undefined) r = Math.max(PL.ugol.min, korotkaya * e.dolyaRadiusa);
+    /* Вложенные (уже посчитанные, меньшие) углы при той же вершине. */
+    for (const { e: o } of poRazmeru) {
+      if (o === e || o.v !== e.v) continue;
+      const ro = radiusUgla.get(o);
+      if (ro === undefined) continue;
+      if (!vnutriUgla(vtx, a, b, E(o.a)) || !vnutriUgla(vtx, a, b, E(o.b))) continue;
+      r = Math.max(r, ro + ((o.dugi ?? 1) - 1) * PL.ugol.shag + PL.ugol.shag + 2);
+    }
+    const u = unit(sub(a, vtx));
+    const w = unit(sub(b, vtx));
+    const vneshnyaya = (rr: number) => rr + ((e.dugi ?? 1) - 1) * PL.ugol.shag;
+    const svoi = [...radiusUgla.keys()].some((o) => o.v === e.v);
+    if (!svoi) {
+      while (r > PL.ugol.min && zadevaet(vtx, u, w, vneshnyaya(r)))
+        r = Math.max(PL.ugol.min, r - 0.5);
+      /* Совсем тесно (линия в 9–10 px от вершины) — до крайнего минимума. */
+      while (r > PL.ugol.minKrayniy && zadevaet(vtx, u, w, vneshnyaya(r)))
+        r = Math.max(PL.ugol.minKrayniy, r - 0.5);
+      if (zadevaet(vtx, u, w, vneshnyaya(r))) {
+        problems.push(`дуга угла ${e.a}${e.v}${e.b} задевает линию даже при радиусе ${r} px`);
+      }
+    }
     radiusUgla.set(e, r);
   }
   for (const e of ugly) {
@@ -587,7 +621,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
         : sloyOf(e) !== 'uslovie'
           ? PL.podskazka
           : PL.ink;
-    const wid = iz || novoe(e) ? 2.4 : PL.width.mark;
+    const wid = iz || novoe(e) ? PL.width.markIskomoe : PL.width.mark;
     const th = angleAt(E(e.a), vtx, E(e.b));
     if (e.pryamoy) {
       const k = PL.ugol.rPryamoy;
@@ -639,7 +673,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
       const p1 = add(vtx, mul(u, r0));
       const p2 = add(vtx, mul(w, r0));
       sloyOtmetki.push(
-        `<path class="pl-sektor" d="M${px(vtx[0])} ${px(vtx[1])}L${px(p1[0])} ${px(p1[1])}A${px(r0)} ${px(r0)} 0 0 ${sweep} ${px(p2[0])} ${px(p2[1])}Z" fill="${PL.iskomoe}" fill-opacity="0.14" stroke="none"/>`,
+        `<path class="pl-sektor" d="M${px(vtx[0])} ${px(vtx[1])}L${px(p1[0])} ${px(p1[1])}A${px(r0)} ${px(r0)} 0 0 ${sweep} ${px(p2[0])} ${px(p2[1])}Z" fill="${PL.iskomoe}" fill-opacity="${PL.ugol.sektor}" stroke="none"/>`,
       );
     }
     sloyOtmetki.push(
@@ -800,7 +834,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   const vynoskaSvg = (ot: T2, k: T2) => {
     /* Отрезок выноски — препятствие для следующих подписей. */
     zanyato.push({ tip: 'otrezok', a: ot, b: k, r: 0.4, chto: 'выноска' });
-    return `<line class="pl-vynoska" x1="${px(ot[0])}" y1="${px(ot[1])}" x2="${px(k[0])}" y2="${px(k[1])}" stroke="${PL.ink}" stroke-width="0.8" stroke-linecap="round"/>`;
+    return `<line class="pl-vynoska" x1="${px(ot[0])}" y1="${px(ot[1])}" x2="${px(k[0])}" y2="${px(k[1])}" stroke="${PL.ink}" stroke-width="${PL.width.vynoska}" stroke-linecap="round"/>`;
   };
 
   /* Сначала точки с большим числом линий: им тесно. */
@@ -872,7 +906,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const base = vybran.y + size * 0.72;
     const tx = vybran.x + 1;
     sloyPodpisi.push(
-      `<text class="pl-bukva" x="${px(tx)}" y="${px(base)}" font-family="${PL.font.bukva}" font-style="italic" font-size="${size}" fill="${PL.ink}" stroke="${PL.bg}" stroke-width="3" paint-order="stroke" stroke-linejoin="round">${esc(osn)}${ind ? indeksSvg(esc(ind), size) : ''}</text>`,
+      `<text class="pl-bukva" x="${px(tx)}" y="${px(base)}" font-family="${PL.font.bukva}" font-style="italic" font-size="${size}" fill="${PL.ink}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${esc(osn)}${ind ? indeksSvg(esc(ind), size) : ''}</text>`,
     );
     R.teksty.push(tekst);
   }
@@ -993,7 +1027,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
           ? PL.iskomoe
           : PL.ink;
     sloyPodpisi.push(
-      `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + zs * 0.74)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="3" paint-order="stroke" stroke-linejoin="round">${gradus(tekst)}</text>`,
+      `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + zs * 0.74)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${gradus(tekst)}</text>`,
     );
     R.teksty.push(tekst);
   }
@@ -1044,7 +1078,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
 
   const alt = optsii.alt;
   const head =
-    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="planimetriya" viewBox="${px(vx)} ${px(vy)} ${px(vw)} ${px(vh)}" width="${px(vw)}" height="${px(vh)}" class="pl" role="img"` +
+    `<svg xmlns="http://www.w3.org/2000/svg" data-engine="planimetriya" viewBox="${px(vx)} ${px(vy)} ${px(vw)} ${px(vh)}" width="${px(vw)}" height="${px(vh)}" class="pl" role="img" stroke-linecap="round" stroke-linejoin="round"` +
     (alt ? ` aria-label="${esc(alt)}"` : ' aria-hidden="true"') +
     ' style="max-width:100%;height:auto">' +
     (alt ? `<title>${esc(alt)}</title>` : '');
