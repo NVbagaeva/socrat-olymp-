@@ -5,12 +5,6 @@
    из styles/tokens.css. */
 
 .glavnaya {
-  /* Inter Variable с осью opsz (lib/fontsSteklo.ts): на крупном кегле
-     браузер сам берёт начертание Display. */
-  --font: var(--font-steklo);
-  --font-sans: var(--font);
-  font-family: var(--font);
-  font-optical-sizing: auto;
   position: relative;
   /* Свечения банка уходят за край экрана — без обрезки страница ехала бы
      вбок. clip, а не hidden: липкая шапка остаётся липкой. */
@@ -193,7 +187,7 @@
 .hero__title {
   font-size: 3.5rem;
   line-height: 1.04;
-  font-weight: 640;
+  font-weight: 600;
   letter-spacing: -0.025em;
   color: var(--color-text);
 }
@@ -246,7 +240,7 @@
 .door__title {
   font-size: 22px;
   line-height: 1.25;
-  font-weight: 620;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 .door__text {
@@ -307,7 +301,7 @@
   margin: 0;
   font-size: 32px;
   line-height: 1.15;
-  font-weight: 640;
+  font-weight: 600;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--color-text);
@@ -333,7 +327,7 @@ section.band {
 .band__head h2 {
   font-size: 2.25rem;
   line-height: 1.12;
-  font-weight: 620;
+  font-weight: 600;
   letter-spacing: -0.018em;
 }
 .band__head p {
@@ -370,14 +364,14 @@ section.band {
   box-shadow: var(--gloss-shadow);
   color: var(--color-text-inverse);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .step h3 {
   margin-bottom: var(--space-2);
   font-size: 19px;
   line-height: 1.3;
-  font-weight: 620;
+  font-weight: 600;
 }
 .step p {
   font-size: 15px;
@@ -450,7 +444,7 @@ section.band {
   transform: translateY(-4px) rotate(-3deg);
 }
 .glavnaya .task-card--bank .task-card__no {
-  font-weight: 650;
+  font-weight: 600;
 }
 .glavnaya .task-card--bank .task-card__go {
   background: var(--gloss);
@@ -750,6 +744,14 @@ section.band {
   .glavnaya .site-head--steklo .site-head__cta .btn {
     padding: 0 var(--space-3);
     font-size: 14px;
+  }
+}
+/* Уже 380px знак, название, кнопка и бургер в строку не входят — остаётся
+   знак. Название по-прежнему в ссылке (кегль 0): его читает скринридер. */
+@media (max-width: 379.98px) {
+  .glavnaya .site-head--steklo .logo {
+    gap: 0;
+    font-size: 0;
   }
 }
 
