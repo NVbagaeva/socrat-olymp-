@@ -13,6 +13,7 @@ import { renderPlan } from '@/lib/planimetriya/render';
 import type { Element, Scena } from '@/lib/planimetriya/types';
 import type { Kusok, Mnozhestvo } from '@/lib/chast2/sravnenie';
 import { sKornem, skTex, skToNumber, type SKornem } from './chisla';
+import { reshenieKasaniya } from './b19kasanie';
 import type { Chast2Zadacha, Shablon2 } from './types';
 
 export interface PB19 {
@@ -21,6 +22,12 @@ export interface PB19 {
   m: number;
   /** Сколько решений должно быть (в образцах — 2). */
   k?: number;
+  /**
+   * Оформление решения учителя: по умолчанию — особые положения и
+   * таблица; 'kasanie' — через формулу расстояния от точки до прямой,
+   * с рамкой теории, рисунком трёх прямых и сноской (b19kasanie.ts).
+   */
+  oformlenie?: 'kasanie';
 }
 
 const ratSK = (u: Rat): SKornem => ({ u, k: rat(0), m: 1n });
@@ -275,6 +282,11 @@ function sobrat(p: PB19): Chast2Zadacha {
   const kvTex = `${A2}a^2${A1 === 0 ? '' : A1 > 0 ? `+${A1}a` : `${A1}a`}${A0 === 0 ? '' : A0 > 0 ? `+${A0}` : `${A0}`}=0`;
   const Mt = `M(${m};\\,${-c})`;
 
+  const kasanie =
+    p.oformlenie === 'kasanie'
+      ? reshenieKasaniya({ R, c, m, list, kasVne, kv, tochki: (a) => tochkiDugi(p, a), otvet })
+      : null;
+
   return {
     no: 19,
     shablon: 'b19.koren4',
@@ -288,7 +300,8 @@ function sobrat(p: PB19): Chast2Zadacha {
       },
     ],
     otvet: `$a\\in${otvet}$`,
-    reshenie: [
+    ...(kasanie === null ? {} : { snoska: kasanie.snoska }),
+    reshenie: kasanie?.reshenie ?? [
       {
         title: 'Замена',
         lines: [
