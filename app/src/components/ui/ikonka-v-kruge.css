@@ -1,8 +1,8 @@
 /*
- * Значки разделов №3 (IkonkaTela.tsx): тело в светло-голубом стеклянном
- * круге. Размер круга — --ikonka-tela (48 px на телефоне, 56 px шире);
- * рисунок занимает 80 % круга. Цвета — из токенов: рёбра синие, грани —
- * голубое стекло, акцент — оранжевый.
+ * Значки в светло-голубом стеклянном круге (IkonkaVKruge.tsx): тела №3,
+ * блоки №1, темы генераторов. Размер круга — --ikonka-tela (48 px на
+ * телефоне, 56 px шире); рисунок занимает 80 % круга. Цвета — из
+ * токенов: линии синие, грани — голубое стекло, акцент — оранжевый.
  */
 
 .ikonka-tela {
@@ -41,7 +41,9 @@
 }
 .ikonka-tela .it-v,
 .ikonka-tela .it-h,
-.ikonka-tela .it-a {
+.ikonka-tela .it-a,
+.ikonka-tela .it-o,
+.ikonka-tela .it-g {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -68,6 +70,41 @@
   fill: var(--color-accent);
   stroke: var(--color-surface);
   stroke-width: 0.8;
+}
+/* Синяя точка: узел дерева, точка графика. */
+.ikonka-tela .it-p {
+  fill: var(--color-primary);
+  stroke: none;
+}
+/* Оси и клетки — тоньше и бледнее линий рисунка. */
+.ikonka-tela .it-o {
+  stroke: var(--color-primary);
+  stroke-width: 1;
+  opacity: 0.55;
+}
+.ikonka-tela .it-g {
+  stroke: var(--color-primary);
+  stroke-width: 0.6;
+  opacity: 0.28;
+}
+/* Белая заливка поверх стекла: колёса, карандаш. */
+.ikonka-tela .it-w {
+  fill: var(--color-surface);
+}
+/* Буквы и числа: математический курсив, «log» и цифры — прямым. */
+.ikonka-tela .it-x {
+  fill: var(--color-primary);
+  stroke: none;
+  font-family: KaTeX_Math, 'Times New Roman', serif;
+  font-style: italic;
+  text-anchor: middle;
+}
+.ikonka-tela .it-x--r {
+  font-family: KaTeX_Main, 'Times New Roman', serif;
+  font-style: normal;
+}
+.ikonka-tela .it-x--a {
+  fill: var(--color-accent);
 }
 /* Запасной значок — римская цифра раздела. */
 .ikonka-tela--nomer {

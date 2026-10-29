@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Generator } from '@/components/generator/Generator';
+import { ikonkiTem } from '@/components/generator/IkonkiTem';
 import { RazdelIkonka } from '@/components/tasks/razdely/RazdelIkonka';
 import type { IkonkaRazdela } from '@/components/tasks/razdely/types';
 import type { GenConfig } from '@/lib/generator/obshchiy/types';
@@ -29,14 +30,18 @@ export function Generator12({ config, base, ekran, ikonki }: Generator12Props) {
     [config, base, ekran],
   );
   const icons = useMemo(
-    () =>
-      Object.fromEntries(
+    () => ({
+      /* Плитка раздела — запасной значок; у типов функций — рисунок
+         в стеклянном круге, как у тел №3. */
+      ...Object.fromEntries(
         Object.entries(ikonki).map(([id, icon]) => [
           id,
           <RazdelIkonka key={id} icon={icon} sizes="36px" className="gen-z12-ikonka" />,
         ]),
       ),
-    [ikonki],
+      ...ikonkiTem('12', config.topics),
+    }),
+    [ikonki, config],
   );
   return <Generator config={config} engine={engine} icons={icons} />;
 }

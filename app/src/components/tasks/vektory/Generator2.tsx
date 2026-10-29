@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Generator } from '@/components/generator/Generator';
+import { ikonkiTem } from '@/components/generator/IkonkiTem';
 import { config2, engine2 } from '@/lib/vektory/generator2';
 
 /**
@@ -12,5 +13,7 @@ import { config2, engine2 } from '@/lib/vektory/generator2';
 export function Generator2({ base }: { base: string }) {
   const config = useMemo(() => config2(base), [base]);
   const engine = useMemo(() => engine2(config, base), [config, base]);
-  return <Generator config={config} engine={engine} />;
+  /* Значки тем — рисунки в стеклянном круге, как у тел №3. */
+  const icons = useMemo(() => ikonkiTem('2', config.topics), [config]);
+  return <Generator config={config} engine={engine} icons={icons} />;
 }

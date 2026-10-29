@@ -1,7 +1,5 @@
-import { clsx } from 'clsx';
-import { useId } from 'react';
 import type { ReactNode } from 'react';
-import './ikonka-tela.css';
+import { IkonkaNomer, IkonkaVKruge, IT } from '@/components/ui/IkonkaVKruge';
 
 /**
  * Значки разделов задания №3 — тела в стеклянном круге.
@@ -14,7 +12,8 @@ import './ikonka-tela.css';
  * Чертёж по правилам стереометрии: видимые рёбра сплошные, невидимые —
  * тонкий пунктир, основания тел вращения — эллипсы с пунктирной задней
  * половиной. Рёбра синие, грани — голубое стекло, один акцент оранжевым.
- * Все фигуры — в одном viewBox 0 0 40 40 и в одной рамке ≈ 24×24.
+ * Все фигуры — в одном viewBox 0 0 40 40 и в одной рамке ≈ 24×24;
+ * круг и стекло — общие (components/ui/IkonkaVKruge).
  */
 
 export type VidTela =
@@ -45,13 +44,12 @@ export function estIkonkaTela(vid: string): vid is VidTela {
 }
 
 /* Части рисунка: v — видимое ребро, h — невидимое, a — акцент. */
-const V = 'it-v';
-const H = 'it-h';
-const A = 'it-a';
+const V = IT.v;
+const H = IT.h;
+const A = IT.a;
 
-/** Рисунки тел: steklo — заливка силуэта, остальное — линии поверх. */
-function risunok(vid: VidTela, steklo: string): ReactNode {
-  const fill = `url(#${steklo})`;
+/** Рисунки тел: fill — заливка силуэта «стекло», остальное — линии поверх. */
+function risunok(vid: VidTela, fill: string): ReactNode {
   switch (vid) {
     case 'parallelepiped':
       /* Куб в косоугольной проекции: передняя грань 16×16, сдвиг (8, −6). */
@@ -163,37 +161,20 @@ export interface IkonkaTelaProps {
 }
 
 export function IkonkaTela({ vid, nomer, label, className }: IkonkaTelaProps) {
-  /* У каждого значка своя заливка: id из useId без двоеточий — так
-     ссылку url(#…) понимают все браузеры, включая Safari. */
-  const steklo = `it-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
   if (!estIkonkaTela(vid)) {
     return (
-      <span
-        className={clsx('ikonka-tela ikonka-tela--nomer', className)}
-        role="img"
-        aria-label={label ?? (nomer === undefined ? 'Раздел' : `Раздел ${nomer}`)}
-      >
-        <span aria-hidden="true" className="no-math-check">
-          {nomer ?? '•'}
-        </span>
-      </span>
+      <IkonkaNomer
+        nomer={nomer ?? '•'}
+        label={label ?? (nomer === undefined ? 'Раздел' : `Раздел ${nomer}`)}
+        {...(className === undefined ? {} : { className })}
+      />
     );
   }
   return (
-    <span
-      className={clsx('ikonka-tela', className)}
-      role="img"
-      aria-label={label ?? NAZVANIYA[vid]}
-    >
-      <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-        <defs>
-          <linearGradient id={steklo} x1="0" y1="0" x2="0.4" y2="1">
-            <stop offset="0" className="it-g0" />
-            <stop offset="1" className="it-g1" />
-          </linearGradient>
-        </defs>
-        {risunok(vid, steklo)}
-      </svg>
-    </span>
+    <IkonkaVKruge
+      risunok={(steklo) => risunok(vid, steklo)}
+      label={label ?? NAZVANIYA[vid]}
+      {...(className === undefined ? {} : { className })}
+    />
   );
 }
