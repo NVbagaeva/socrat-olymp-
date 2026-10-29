@@ -29,6 +29,21 @@
   margin: 0 0 var(--space-3);
   color: var(--color-text);
 }
+/* Название подтемы кеглем h3 — в шапке и в «О задании».
+   «Тригонометрические» на 320 px занимает строку впритык: на самых
+   узких экранах заголовок на ступень мельче, а слово, которое всё же
+   не помещается, переносится, а не растягивает страницу вбок. */
+.topic-head__subtitle,
+.about-lead__title {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+@media (max-width: 359.98px) {
+  .topic-head__subtitle,
+  .about-lead__title {
+    font-size: var(--fs-h4);
+  }
+}
 /* Название графика под ним: «График — парабола». */
 .topic-head__subtitle--wide {
   margin-bottom: var(--space-1);
@@ -336,6 +351,14 @@
 /* Раздела №19 в проекте ещё нет: кнопка приглушена и не нажимается. */
 .about-later__cta {
   margin-top: var(--space-5);
+  /* «Подробнее о тригонометрии» на 320 px едва помещается в строку:
+     длинная подпись переносится, кнопка растёт в высоту. */
+  max-width: 100%;
+  height: auto;
+  min-height: var(--h-control);
+  padding-block: var(--space-2);
+  white-space: normal;
+  text-align: center;
   opacity: 0.45;
   cursor: default;
   pointer-events: none;
@@ -2239,7 +2262,9 @@ a.tutor-card:hover {
 .about-type {
   position: relative;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .about-type:hover {
   border-color: var(--color-border-info);
