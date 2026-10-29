@@ -12,9 +12,8 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     /* Главная — первая страница в «Стеклянной сцене»: стеклянные шапка
-       и подвал, свечения, глянцевые кнопки. Шрифт — общий Inter сайта:
-       второй набор (Inter Variable) рядом с ним шёл бы лишними 77 КБ.
-       Остальные страницы переходят на сцену по одной. */
+       и подвал, свечения, глянцевые кнопки. Шрифт — общий Inter Variable
+       сайта (lib/fonts.ts). Остальные страницы переходят на сцену по одной. */
     <div className="glavnaya">
       <SiteHeader className="site-head--steklo" />
       <main>
