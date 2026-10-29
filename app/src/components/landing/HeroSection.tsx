@@ -1,74 +1,57 @@
 import Link from 'next/link';
-import { HeroImage } from './HeroImage';
-import { HeroLines } from './HeroLines';
-import { Metric, MetricRow } from '@/components/ui';
-import { PovEntry } from '@/components/povyshennye/PovEntry';
-import { VariantEntry } from '@/components/variant/VariantEntry';
 import { landing } from '@/content/landing';
-import { HOWTO_HREF, HOWTO_PILL } from '@/content/onboarding';
+import { Kristall } from './kristall/Kristall';
 
 const { hero, metrics } = landing;
 
 /**
- * Первый экран. Слева изображение во всю высоту экрана от самого края окна,
- * справа текст. Полоса показателей строится по длине массива metrics.
+ * Первый экран в «Стеклянной сцене». Заголовок и лид — для обеих
+ * аудиторий, под ними две стеклянные «двери»: ученику и учителю. Справа —
+ * кристалл целиком в кадре, его можно вращать пальцем и мышью. Позади
+ * стекла — три свечения: синее, оранжевое и терракотовое, без них
+ * размывать было бы нечего. Полоса показателей строится по длине metrics.
  */
 export function HeroSection() {
   return (
     <section className="hero">
-      <HeroLines />
-
-      {/* На телефоне и планшете кадр стоит над текстом и занимает первый
-          экран — плашка «Собрать вариант» встаёт над ним, чтобы её было
-          видно без прокрутки. На широком экране — среди кнопок. */}
-      <VariantEntry className="hero__variant hero__variant--top" />
-
-      <div className="hero__media">
-        <HeroImage />
+      <div className="aura" aria-hidden="true">
+        <span className="aura__spot aura__spot--blue" />
+        <span className="aura__spot aura__spot--orange" />
+        <span className="aura__spot aura__spot--terracotta" />
       </div>
 
-      <div className="hero__body">
-        <p className="hero__eyebrow">{hero.eyebrow}</p>
-
-        <h1 className="t-display hero__title">
-          {hero.titleLines.map((line) => (
-            <span key={line}>{line}</span>
-          ))}
-        </h1>
-
-        <p className="hero__lead">{hero.lead}</p>
-
-        <div className="hero__actions">
-          {/* Главное действие — плашка «Собрать вариант»: на телефоне она
-              на первом экране, без прокрутки. */}
-          <VariantEntry className="hero__variant hero__variant--actions" />
-          <PovEntry className="hero__variant" />
-          {/* Рядом с главной кнопкой — вход в инструкцию и тур. */}
-          <Link className="hero__howto" href={HOWTO_HREF}>
-            <span className="hero__howto-ico" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8.5" />
-                <path d="M9.6 9.6a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6" />
-                <path d="M12 16.9v.1" />
-              </svg>
-            </span>
-            <span className="hero__howto-text">
-              {HOWTO_PILL.label}
-              <span className="hero__howto-meta">{HOWTO_PILL.meta}</span>
-            </span>
-          </Link>
-          <a className="btn btn--secondary btn--lg" href={hero.secondaryAction.href}>
-            {hero.secondaryAction.label}
-          </a>
+      <div className="hero__in">
+        <div className="hero__text">
+          <p className="hero__eyebrow">{hero.eyebrow}</p>
+          <h1 className="hero__title">{hero.title}</h1>
+          <p className="hero__lead">{hero.lead}</p>
         </div>
 
-        <p className="hero__note">{hero.note}</p>
+        <Kristall className="hero__kristall" />
 
-        <MetricRow className="hero__metrics" columns={3}>
-          {metrics.map((metric) => (
-            <Metric key={metric.label} value={metric.value} label={metric.label} />
+        <div className="hero__doors">
+          {hero.doors.map((door) => (
+            <Link key={door.id} className={`door door--${door.id}`} href={door.href}>
+              <span className="door__title">{door.title}</span>
+              <span className="door__text">{door.text}</span>
+              <span className="door__action">
+                {door.action}
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M5 12h13M12 6l6 6-6 6" />
+                </svg>
+              </span>
+            </Link>
           ))}
-        </MetricRow>
+        </div>
+
+        <dl className="hero__facts">
+          {metrics.map((metric) => (
+            <div key={metric.label} className="hero__fact">
+              <dt>{metric.label}</dt>
+              <dd>{metric.value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

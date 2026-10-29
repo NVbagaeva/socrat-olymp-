@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { BankSection, HeroSection, HowSection } from '@/components/landing';
 import { landing } from '@/content/landing';
+import { interSteklo } from '@/lib/fontsSteklo';
 import './landing.css';
 
 export const metadata: Metadata = {
@@ -11,8 +12,11 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <>
-      <SiteHeader />
+    /* Главная — первая страница в «Стеклянной сцене»: свой шрифт
+       (Inter Variable с осью opsz) и стеклянные шапка и подвал. Остальные
+       страницы переходят на неё по одной. */
+    <div className={`glavnaya ${interSteklo.variable}`}>
+      <SiteHeader className="site-head--steklo" />
       <main>
         <HeroSection />
         <HowSection />
@@ -24,7 +28,7 @@ export default function HomePage() {
             CtaSection — «Узнай свой балл за 25 минут», та же диагностика. */}
         <BankSection />
       </main>
-      <SiteFooter />
-    </>
+      <SiteFooter className="site-foot--steklo" />
+    </div>
   );
 }

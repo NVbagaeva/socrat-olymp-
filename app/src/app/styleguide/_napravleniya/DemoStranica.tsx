@@ -3,7 +3,7 @@ import './karkas.css';
 import { TaskImage } from '@/components/tasks/TaskImage';
 import { Tex } from '@/components/ui/Tex';
 import { Rezhim, Slozhnost, Vkladki } from './Interaktiv';
-import { Kristall } from './Kristall';
+import { Kristall } from '@/components/landing/kristall/Kristall';
 import {
   GEROY,
   NAPRAVLENIYA,

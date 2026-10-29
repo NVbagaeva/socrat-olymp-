@@ -1,256 +1,491 @@
-/* Только то, что специфично для главной страницы.
-   Перенос блока стилей из design-reference/index.html: значения не менялись,
-   цвета переведены с хексов на семантические переменные. */
+/* Главная в «Стеклянной сцене» (DESIGN_AUDIT.md, раздел 5; демо —
+   /styleguide/steklo). Всё под .glavnaya: шапка, подвал, карточки банка
+   и плашки входа — общие компоненты, и на других страницах они остаются
+   прежними. Стекло и свечения — токены --glass-*, --gloss*, --aura-*
+   из styles/tokens.css. */
+
+.glavnaya {
+  /* Inter Variable с осью opsz (lib/fontsSteklo.ts): на крупном кегле
+     браузер сам берёт начертание Display. */
+  --font: var(--font-steklo);
+  --font-sans: var(--font);
+  font-family: var(--font);
+  font-optical-sizing: auto;
+  position: relative;
+  /* Свечения банка уходят за край экрана — без обрезки страница ехала бы
+     вбок. clip, а не hidden: липкая шапка остаётся липкой. */
+  overflow-x: clip;
+  background:
+    radial-gradient(60% 40% at 85% 55%, rgb(31 95 208 / 0.07), transparent 70%),
+    radial-gradient(50% 35% at 10% 85%, rgb(245 160 74 / 0.08), transparent 70%), var(--color-bg);
+}
+.glavnaya h1,
+.glavnaya h2 {
+  text-wrap: balance;
+}
+.glavnaya p {
+  text-wrap: pretty;
+}
+
+/* ══════════════════════════════════════════════
+   СТЕКЛО: шапка, подвал, кнопки
+   ══════════════════════════════════════════════ */
+
+.glavnaya .site-head--steklo {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 0;
+  box-shadow: 0 1px 0 rgb(31 95 208 / 0.08);
+}
+.glavnaya .site-foot--steklo {
+  background: var(--glass-bg);
+  border-top: 1px solid var(--glass-edge);
+  box-shadow: 0 -1px 0 rgb(31 95 208 / 0.06);
+}
+
+/* Главная кнопка — глянцевая «таблетка», вторичная — стекло. */
+.glavnaya .btn--primary {
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow);
+  border-radius: var(--radius-pill);
+  transition:
+    box-shadow var(--dur-hover) var(--ease),
+    filter var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.glavnaya .btn--primary:hover {
+  background: var(--gloss);
+  filter: brightness(1.06);
+  box-shadow: var(--gloss-shadow-hover);
+}
+.glavnaya .btn--primary:active {
+  transform: scale(0.98);
+}
+.glavnaya .btn--secondary {
+  background: var(--glass-bg);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.glavnaya .btn--secondary:hover {
+  background: var(--glass-bg-strong);
+}
+
+/* ══════════════════════════════════════════════
+   СВЕЧЕНИЯ ПОЗАДИ СТЕКЛА
+   ══════════════════════════════════════════════ */
+
+.aura {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.aura__spot {
+  position: absolute;
+  border-radius: 50%;
+}
+.aura__spot--blue {
+  width: 760px;
+  height: 760px;
+  right: -120px;
+  top: -140px;
+  background: radial-gradient(closest-side, var(--aura-blue), transparent);
+}
+.aura__spot--orange {
+  width: 520px;
+  height: 520px;
+  right: 18%;
+  bottom: -160px;
+  background: radial-gradient(closest-side, var(--aura-orange), transparent);
+}
+/* В пикселях, не в процентах: высота героя меняется, когда догружается
+   шрифт, и пятно в процентах сдвигалось бы (CLS). */
+.aura__spot--terracotta {
+  width: 420px;
+  height: 420px;
+  left: 30%;
+  top: 240px;
+  background: radial-gradient(closest-side, var(--aura-terracotta), transparent);
+}
+/* Медленный дрейф — только там, где есть мышь и движение не выключено:
+   на телефоне размытие поверх движущегося фона пересчитывалось бы
+   каждый кадр. Двигается только transform. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .aura__spot {
+    will-change: transform;
+  }
+  .aura__spot--blue {
+    animation: aura-dreyf-1 26s ease-in-out infinite alternate;
+  }
+  .aura__spot--orange {
+    animation: aura-dreyf-2 30s ease-in-out infinite alternate;
+  }
+  .aura__spot--terracotta {
+    animation: aura-dreyf-1 22s ease-in-out infinite alternate-reverse;
+  }
+}
+@keyframes aura-dreyf-1 {
+  to {
+    transform: translate3d(-60px, 40px, 0) scale(1.08);
+  }
+}
+@keyframes aura-dreyf-2 {
+  to {
+    transform: translate3d(80px, -50px, 0) scale(0.94);
+  }
+}
 
 /* ══════════════════════════════════════════════
    ПЕРВЫЙ ЭКРАН
-   Слева изображение во всю высоту от края окна, справа текст.
+   Слева текст и две двери, справа кристалл целиком в кадре.
    ══════════════════════════════════════════════ */
 
 .hero {
-  /* Ширина левой колонки. Ограничение 836px — половина натуральных 1672px
-     исходника: шире стекло замыливается. Колонка сужается, картинка
-     не растягивается. */
-  --hero-media: min(45%, 836px);
-
   position: relative;
-  display: grid;
-  grid-template-columns: var(--hero-media) minmax(0, 1fr);
-  align-items: center;
-  min-height: calc(100dvh - var(--h-site-head));
-  background: var(--color-bg);
-  /* Обрезает всё, что вытекает за левую границу окна. */
+  isolation: isolate;
   overflow: hidden;
 }
-
-.hero__media {
-  position: relative;
-  z-index: 1;
-  align-self: stretch;
-  min-height: 0;
+.hero__in {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  grid-template-areas:
+    'text kristall'
+    'doors kristall'
+    'facts facts';
+  align-items: center;
+  column-gap: var(--space-12);
+  row-gap: var(--space-10);
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-16) var(--space-8) var(--space-16);
 }
-
-.hero__art {
-  display: block;
-  width: 100%;
-  max-width: 836px;
-  height: 100%;
-  /* Выше натуральных 941px кадр не растягивается: стекло замылится.
-     На высоком экране он просто стоит по центру колонки — фон у кадра
-     прозрачный, поэтому стыка не видно. */
-  max-height: 941px;
-  object-fit: cover;
-  /* Кадр отражён и обрезан при сборке. Прижимаем его правым краем
-     к стыку колонок: там у кадра прозрачная кромка, и каустика не
-     выглядит обрубленной. Лишнее уходит за левую границу окна. */
-  object-position: right center;
+.hero__text {
+  grid-area: text;
+  align-self: end;
 }
-
-/* Линии построений уходят под изображение и выходят на светлый фон справа. */
-.hero__lines {
-  position: absolute;
-  z-index: 0;
-  top: 50%;
-  left: var(--hero-media);
-  transform: translate(-52%, -50%);
-  width: 640px;
-  height: 760px;
-  max-width: none;
-  pointer-events: none;
+.hero__kristall {
+  grid-area: kristall;
+  max-width: 560px;
+  justify-self: center;
 }
-.hero__lines-stroke {
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-width: 1;
-  opacity: 0.15;
+/* Кристалл парит. Только когда движение не выключено. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__kristall .kristall__oblast {
+    animation: kristall-parit 7s ease-in-out infinite alternate;
+  }
 }
-.hero__lines-node {
-  fill: var(--color-primary);
-  opacity: 0.3;
-}
-
-.hero__body {
-  position: relative;
-  z-index: 2;
-  padding: var(--space-12) var(--space-8);
-  max-width: 712px;
-  /* Полоса показателей решает свою раскладку по ширине этой колонки,
-     а не по ширине окна: в две колонки окно широкое, а места мало. */
-  container-type: inline-size;
+@keyframes kristall-parit {
+  to {
+    transform: translateY(-10px);
+  }
 }
 
 .hero__eyebrow {
-  /* Прописными и в разрядку — по прямому указанию к первому экрану.
-     В самой дизайн-системе метка идёт обычным регистром. */
+  margin-bottom: var(--space-5);
   font-size: 13px;
   line-height: 16px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-primary);
-  margin-bottom: var(--space-5);
 }
-
 .hero__title {
-  /* Верхняя ступень — display из общей шкалы, на широких экранах
-     растёт вместе с ней. Ниже кегль убавляется по ширине колонки,
-     чтобы ручной перенос держался и строка не ломалась сама.
-     Коэффициент: длинная строка «Учителю учителю —» занимает 9.83 кегля,
-     10cqi оставляет запас около 1.7%. */
-  font-size: clamp(30px, 10cqi, var(--fs-display));
-  line-height: 1.08;
-  margin-bottom: var(--space-6);
-}
-.hero__title span {
-  display: block;
-  /* Перенос только там, где он задан в контенте. */
-  white-space: nowrap;
-}
-
-.hero__lead {
-  /* Не приглушённый до неразличимости: 4.54:1 к фону секции. */
-  color: var(--color-text-secondary);
-  font-size: 18px;
-  line-height: 28px;
-  max-width: 60ch;
-}
-
-.hero__actions {
-  display: flex;
-  gap: var(--space-4);
-  align-items: center;
-  margin-top: var(--space-8);
-  flex-wrap: wrap;
-}
-
-/* Пилюля «Как пользоваться сайтом · 2 минуты» рядом с главной кнопкой. */
-.hero__howto {
-  display: inline-flex;
-  text-decoration: none;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: 56px;
-  padding: var(--space-2) var(--space-5) var(--space-2) var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  font-size: 3.5rem;
+  line-height: 1.04;
+  font-weight: 640;
+  letter-spacing: -0.025em;
   color: var(--color-text);
+}
+.hero__lead {
+  max-width: 56ch;
+  margin-top: var(--space-6);
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+/* Двери: синее стекло ученику, тёплое — учителю. */
+.hero__doors {
+  grid-area: doors;
+  align-self: start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.door {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-height: 100%;
+  padding: 22px 22px 20px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--color-text);
+  text-decoration: none;
   transition:
-    border-color var(--dur-hover) var(--ease),
-    box-shadow var(--dur-hover) var(--ease);
+    transform 220ms var(--ease),
+    box-shadow 220ms var(--ease);
 }
-.hero__howto:hover,
-.hero__howto:focus-visible {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-md);
+.door--uchenik {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.18), transparent 60%), var(--glass-bg);
 }
-.hero__howto-ico {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--color-surface-info);
-  color: var(--color-primary);
+.door--uchitel {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.22), transparent 60%), var(--glass-bg);
 }
-.hero__howto-ico svg {
-  width: 24px;
-  height: 24px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
+.door:hover,
+.door:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
 }
-.hero__howto-text {
-  display: grid;
+.door__title {
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.door__text {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+.door__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-2);
   font-size: 15px;
   font-weight: 600;
-  line-height: 1.25;
-  text-align: left;
+  color: var(--color-primary);
 }
-.hero__howto-meta {
-  color: var(--color-text-secondary);
-  font-size: 13px;
-  font-weight: 400;
+.door--uchitel .door__action {
+  color: var(--color-accent-text);
+}
+.door__action svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms var(--ease);
+}
+.door:hover .door__action svg {
+  transform: translateX(3px);
 }
 
-.hero__note {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  margin-top: var(--space-4);
-}
-
-.hero__metrics {
-  /* Ровно по числу показателей: пустых ячеек не бывает.
-     Правило перебивает общий свёрток .metric-row на 900px. */
+/* Показатели — строка стеклянных ячеек под дверями. */
+.hero__facts {
+  grid-area: facts;
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: var(--space-10);
+  margin: 0;
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
 }
-.hero__metrics .metric {
-  padding: var(--space-4);
+.hero__fact {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  padding: var(--space-5) var(--space-6);
 }
-.hero__metrics .metric__val {
+.hero__fact + .hero__fact {
+  border-left: 1px solid rgb(31 95 208 / 0.1);
+}
+.hero__fact dd {
+  margin: 0;
   font-size: 32px;
-  line-height: 40px;
+  line-height: 1.15;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
 }
-.hero__metrics .metric__lbl {
-  white-space: nowrap;
+.hero__fact dt {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
 }
+
+/* ══════════════════════════════════════════════
+   ПОЛОСЫ: «Мы взяли на себя…» и банк
+   ══════════════════════════════════════════════ */
 
 section.band {
-  padding: var(--space-16) 0;
-  border-top: 1px solid var(--color-border);
-}
-section.band--soft {
-  background: var(--color-surface);
+  position: relative;
+  padding: 88px 0;
 }
 .band__head {
   max-width: 62ch;
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-10);
 }
 .band__head h2 {
-  font-size: 40px;
-  line-height: 48px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 2.25rem;
+  line-height: 1.12;
+  font-weight: 620;
+  letter-spacing: -0.018em;
 }
 .band__head p {
+  margin-top: var(--space-4);
   font-size: 18px;
   line-height: 28px;
   color: var(--color-text-secondary);
-  margin-top: var(--space-4);
 }
 
+/* Четыре обещания — стеклянные карточки с номером в глянцевой таблетке. */
 .steps {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-6);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
 }
 .step {
-  padding-top: var(--space-5);
-  border-top: 2px solid var(--color-primary);
-}
-.step:nth-child(n + 2) {
-  border-top-color: var(--color-border-strong);
+  padding: var(--space-6);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
 }
 .step b {
-  display: block;
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 28px;
+  margin-bottom: var(--space-4);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow);
+  color: var(--color-text-inverse);
   font-size: 13px;
-  font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: var(--space-3);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 .step h3 {
-  font-size: 18px;
-  font-weight: 600;
   margin-bottom: var(--space-2);
+  font-size: 19px;
+  line-height: 1.3;
+  font-weight: 620;
 }
 .step p {
   font-size: 15px;
   line-height: 23px;
   color: var(--color-text-secondary);
 }
+
+/* Банк. Четыре колонки по 300px с зазорами 16 требуют 1248px под
+   сетку, общий контейнер даёт 1216 — блок расширяется на 32px. */
+#bank .wrap {
+  max-width: calc(var(--w-container) + var(--space-8));
+}
+#bank .aura__spot--blue {
+  top: 30%;
+  right: -260px;
+}
+#bank .aura__spot--orange {
+  right: auto;
+  left: -200px;
+  bottom: 10%;
+}
+
+/* Плашки «Собрать вариант» и «Варианты повышенной сложности» — стекло. */
+.glavnaya .bank-variant {
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background:
+    radial-gradient(80% 160% at 100% 50%, rgb(61 121 224 / 0.14), transparent 60%), var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.glavnaya .bank-variant:hover,
+.glavnaya .bank-variant:focus-visible {
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.glavnaya .bank-variant .var-entry__ico {
+  border-radius: 14px;
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow);
+}
+
+/* Карточки разделов — стекло, на наведении поднимаются и светятся. */
+.glavnaya .tasks-grid {
+  margin-top: var(--space-6);
+}
+.glavnaya .task-card--bank {
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transition:
+    transform 220ms var(--ease),
+    box-shadow 220ms var(--ease);
+}
+.glavnaya a.task-card--bank:hover,
+.glavnaya a.task-card--bank:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.glavnaya .task-card--bank .task-card__ill {
+  transition: transform 240ms var(--ease);
+}
+.glavnaya a.task-card--bank:hover .task-card__ill {
+  transform: translateY(-4px) rotate(-3deg);
+}
+.glavnaya .task-card--bank .task-card__no {
+  font-weight: 650;
+}
+.glavnaya .task-card--bank .task-card__go {
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow);
+}
+/* Неоткрытый раздел — то же стекло, но приглушённое. */
+.glavnaya .task-card--bank.task-card--soon {
+  background: rgb(255 255 255 / 0.4);
+  box-shadow: var(--glass-ring);
+}
+
+/* Ключевая мысль блока — под сеткой, обычным вторичным текстом. */
+.bank-note {
+  margin-top: var(--space-8);
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--color-text-secondary);
+  max-width: 72ch;
+}
+.bank-more {
+  margin-top: var(--space-6);
+}
+.glavnaya .bank-more {
+  height: var(--h-control-lg);
+  padding: 0 var(--space-6);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════
+   БЛОКИ, СНЯТЫЕ С ГЛАВНОЙ (app/page.tsx)
+   Диагностика, план, класс учителя, итоговый призыв. Компоненты на
+   месте, вернуть — одна строка; стили — прежние, в стекло их переведём,
+   когда блоки вернутся.
+   ══════════════════════════════════════════════ */
 
 .split {
   display: grid;
@@ -317,27 +552,6 @@ section.band--soft {
   margin-top: var(--space-4);
 }
 
-/* Четыре колонки по 300px с зазорами 16 требуют 1248px под сетку.
-   Общий контейнер 1280 с полями 32 даёт 1216 — не хватает ровно 32.
-   Блок банка расширяется на эту величину, остальные блоки страницы
-   остаются в общем контейнере. Ниже 1312px ширину всё равно
-   ограничивает экран, и колонок становится меньше само собой. */
-#bank .wrap {
-  max-width: calc(var(--w-container) + var(--space-8));
-}
-
-/* Ключевая мысль блока — под сеткой, обычным вторичным текстом. */
-.bank-note {
-  margin-top: var(--space-6);
-  font-size: 15px;
-  line-height: 24px;
-  color: var(--color-text-secondary);
-  max-width: 72ch;
-}
-.bank-more {
-  margin-top: var(--space-6);
-}
-
 .cta {
   background: var(--color-surface-brand);
   border-radius: var(--radius-xl);
@@ -394,6 +608,15 @@ section.band--soft {
   padding-bottom: var(--space-16);
 }
 
+/* ══════════════════════════════════════════════
+   АДАПТИВ
+   ══════════════════════════════════════════════ */
+
+/* Стрелка карточки — у правого края, а не по центру под миниатюрой. */
+.glavnaya .task-card--bank .task-card__go {
+  justify-self: end;
+}
+
 @media (max-width: 1024px) {
   .split {
     /* minmax(0, 1fr) вместо 1fr: иначе колонка не может стать уже
@@ -402,97 +625,109 @@ section.band--soft {
     gap: var(--space-10);
   }
   .steps {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* ── Первый экран на узком экране ──
-   Колонки складываются до 1024px, а не до 768: на планшете в портрете
-   левая колонка выходит 346×950, и кадр режется в узкую полосу —
-   объект перестаёт читаться. Изображение сверху, под ним текст. */
+/* Планшет: кристалл встаёт под текст, двери — под ним. */
 @media (max-width: 1023.98px) {
-  .hero {
+  .hero__in {
     grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-    min-height: 0;
-    overflow: visible;
+    grid-template-areas:
+      'text'
+      'kristall'
+      'doors'
+      'facts';
+    row-gap: var(--space-8);
+    padding: var(--space-12) var(--space-8) var(--space-12);
   }
-  .hero__media {
-    align-self: auto;
+  .hero__kristall {
+    max-width: 420px;
   }
-  .hero__art {
-    /* Кадр показывается целиком, без обрезки. */
-    width: 100%;
-    max-width: 836px;
-    height: auto;
-    object-fit: fill;
-    object-position: center;
-    margin-inline: auto;
+  .hero__title {
+    font-size: 2.75rem;
   }
-  /* Мелкая графика на маленьком экране превращается в мусор. */
-  .hero__lines {
-    display: none;
+}
+
+/* Телефон: первый экран — заголовку и дверям, кристалл не выше 240px
+   и после них: сначала действие, потом картинка. */
+@media (max-width: 767.98px) {
+  .hero__in {
+    grid-template-areas:
+      'text'
+      'doors'
+      'kristall'
+      'facts';
+    row-gap: var(--space-5);
+    padding: var(--space-8) var(--space-4) var(--space-10);
   }
-  .hero__body {
-    max-width: none;
-    padding: var(--space-8) var(--space-5) var(--space-12);
+  .hero__eyebrow {
+    margin-bottom: var(--space-3);
+  }
+  .hero__title {
+    font-size: 2.375rem;
+    line-height: 1.08;
   }
   .hero__lead {
+    margin-top: var(--space-4);
     font-size: 17px;
-    line-height: 27px;
   }
-  .hero__actions {
-    margin-top: var(--space-6);
+  .hero__kristall {
+    max-width: 285px;
   }
-  .hero__actions .btn {
-    width: 100%;
-  }
-}
-
-/* На планшете широкий кадр иначе съедает весь экран и выталкивает
-   заголовок за нижнюю кромку. На телефоне кадр вертикальный
-   и идёт во всю ширину — там ограничение не нужно. */
-@media (min-width: 768px) and (max-width: 1023.98px) {
-  .hero__art {
-    max-height: 44dvh;
-    object-fit: contain;
-  }
-}
-
-/* Ниже 768px picture отдаёт вертикальный кадр: у него свой предел. */
-@media (max-width: 767.98px) {
-  .hero__art {
-    max-width: 561px;
-  }
-}
-
-/* Три ячейки в строку, пока помещаются; иначе столбец
-   с горизонтальными разделителями. Порог — по самой длинной подписи
-   «заданий первой части» с полями ячейки. */
-@container (max-width: 554px) {
-  .hero__metrics {
+  .hero__doors {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
   }
-  .hero__metrics .metric {
-    border-left: 0;
-    border-top: 1px solid var(--color-border);
+  .door {
+    padding: var(--space-5);
+    border-radius: 18px;
   }
-  .hero__metrics .metric:first-child {
-    border-top: 0;
+  .door__title {
+    font-size: 19px;
+  }
+  .hero__fact {
+    padding: var(--space-4) var(--space-3);
+  }
+  .hero__fact dd {
+    font-size: 24px;
+  }
+  .hero__fact dt {
+    font-size: 12px;
+    line-height: 16px;
+  }
+  .aura__spot--blue {
+    width: 520px;
+    height: 520px;
+    right: -220px;
   }
 }
 
 @media (max-width: 760px) {
   section.band {
-    padding: var(--space-12) 0;
+    padding: 56px 0;
+  }
+  .band__head {
+    margin-bottom: var(--space-8);
   }
   .band__head h2 {
-    font-size: 28px;
-    line-height: 36px;
+    font-size: 1.625rem;
+    line-height: 1.2;
   }
   .steps {
-    grid-template-columns: 1fr;
-    gap: var(--space-8);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+  .step {
+    padding: var(--space-4);
+    border-radius: 16px;
+  }
+  .step h3 {
+    font-size: 16px;
+  }
+  .step p {
+    font-size: 14px;
+    line-height: 20px;
   }
   .split h3 {
     font-size: 24px;
@@ -507,25 +742,64 @@ section.band--soft {
   }
 }
 
-/* Плашка «Собрать вариант» — главное действие первого экрана: на
-   широком экране — среди кнопок, уже — над кадром (он идёт первым и
-   занимает экран). */
-.hero__variant {
-  flex: 1 1 320px;
-  max-width: 440px;
-}
-.hero .hero__variant--top {
-  display: none;
-}
-@media (max-width: 1023.98px) {
-  .hero .hero__variant--top {
-    display: flex;
-    position: relative;
-    z-index: 1;
-    max-width: none;
-    margin: var(--space-4) var(--space-5) 0;
+/* Телефон: логотип в одну строку — кнопка в шапке плотнее. */
+@media (max-width: 479.98px) {
+  .glavnaya .site-head--steklo .logo {
+    white-space: nowrap;
   }
-  .hero .hero__variant--actions {
+  .glavnaya .site-head--steklo .site-head__cta .btn {
+    padding: 0 var(--space-3);
+    font-size: 14px;
+  }
+}
+
+/* Телефон: разделы в две колонки, а не тринадцать карточек столбиком.
+   Номер и миниатюра — верхней строкой, название — под ними во всю
+   ширину карточки. Стрелки нет: на телефоне наведения не бывает. */
+@media (max-width: 767.98px) {
+  .glavnaya .tasks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+  .glavnaya .task-card--bank {
+    --card-pad: 14px;
+    --card-no: 22px;
+    --card-no-lh: 28px;
+    --card-title: 14px;
+    --card-title-lh: 19px;
+    --card-ill: 48px;
+    --card-title-lines: 3;
+    grid-template-rows: auto 1fr;
+    row-gap: var(--space-2);
+    min-height: 0;
+    border-radius: 16px;
+  }
+  .glavnaya .task-card--bank .task-card__ill {
+    grid-area: 1 / 2 / 2 / 3;
+    align-self: start;
+  }
+  .glavnaya .task-card--bank .task-card__body {
+    grid-area: 2 / 1 / 3 / 3;
+  }
+  .glavnaya .task-card--bank .task-card__go {
     display: none;
+  }
+}
+
+/* Сенсорные экраны: размытие остаётся у шапки и первого экрана, где
+   за стеклом свечения. У карточек ниже фон почти непрозрачный, и blur
+   там не виден, а пересчитывать его телефону на каждом кадре прокрутки
+   дорого: двадцать стеклянных поверхностей ощутимо роняли частоту
+   кадров. */
+@media (hover: none) {
+  .glavnaya .step,
+  .glavnaya .bank-variant,
+  .glavnaya .task-card--bank {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glavnaya .step,
+  .glavnaya .task-card--bank:not(.task-card--soon) {
+    background: var(--glass-bg-strong);
   }
 }

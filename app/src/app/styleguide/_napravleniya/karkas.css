@@ -272,95 +272,11 @@
   font-weight: 600;
 }
 
-/* Кристалл: целиком в кадре, пропорции файла рендера. */
-.dm-kristall {
-  position: relative;
-  width: 100%;
+/* Кристалл (components/landing/kristall): место в сетке героя. */
+.dm-root .kristall {
   max-width: 560px;
   justify-self: center;
-}
-.dm-kristall__oblast {
-  position: relative;
-  aspect-ratio: 1122 / 946;
-  cursor: grab;
-  /* Пальцем вбок — вращение, по вертикали — прокрутка страницы. */
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-user-select: none;
-}
-.dm-kristall__oblast:active {
-  cursor: grabbing;
-}
-.dm-kristall__poster img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.dm-kristall__poster,
-.dm-kristall__kholst {
-  transition: opacity 320ms ease;
-}
-.dm-kristall__kholst {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-}
-.dm-kristall__kholst::before {
-  /* Отсвет стекла на «полу», как на рендере. */
-  content: '';
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  top: 58%;
-  height: 30%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(61 121 224 / 0.38), rgb(61 121 224 / 0));
-  pointer-events: none;
-}
-.dm-kristall__kholst canvas {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.dm-kristall.is-zhivoy .dm-kristall__poster {
-  opacity: 0;
-}
-.dm-kristall.is-zhivoy .dm-kristall__kholst {
-  opacity: 1;
-}
-.dm-kristall__podpis {
-  position: absolute;
-  z-index: 2;
-  white-space: nowrap;
-  pointer-events: none;
-}
-.dm-kristall__hint {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  position: absolute;
-  left: 50%;
-  bottom: 2%;
-  transform: translateX(-50%);
-  font-size: 13px;
-  line-height: 16px;
-  color: var(--dm-text-3);
-  white-space: nowrap;
-  transition: opacity 240ms;
-  pointer-events: none;
-}
-.dm-kristall__hint svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.dm-kristall__hint.is-skryt {
-  opacity: 0;
+  --kristall-hint: var(--dm-text-3);
 }
 
 /* ── Секции ──────────────────────────────────────────────────── */
@@ -887,7 +803,7 @@
     margin-top: 16px;
   }
   /* Кристалл не выше 240px: первый экран — заголовку и дверям. */
-  .dm-kristall {
+  .dm-root .kristall {
     max-width: 285px;
   }
   .dm-dveri {

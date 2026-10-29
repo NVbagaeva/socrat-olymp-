@@ -1,0 +1,90 @@
+/* Кристалл героя (Kristall.tsx): рендер в покое, живая модель по
+   первому касанию. Ширину и место в сетке задаёт страница. */
+
+.kristall {
+  position: relative;
+  width: 100%;
+}
+.kristall__oblast {
+  position: relative;
+  aspect-ratio: 1122 / 946;
+  cursor: grab;
+  /* Пальцем вбок — вращение, по вертикали — прокрутка страницы. */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.kristall__oblast:active {
+  cursor: grabbing;
+}
+.kristall__poster img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.kristall__poster,
+.kristall__kholst {
+  transition: opacity 320ms ease;
+}
+.kristall__kholst {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.kristall__kholst::before {
+  /* Отсвет стекла на «полу», как на рендере. */
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 58%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(61 121 224 / 0.38), rgb(61 121 224 / 0));
+  pointer-events: none;
+}
+.kristall__kholst canvas {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.kristall.is-zhivoy .kristall__poster {
+  opacity: 0;
+}
+.kristall.is-zhivoy .kristall__kholst {
+  opacity: 1;
+}
+.kristall__podpis {
+  position: absolute;
+  z-index: 2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.kristall__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--kristall-hint, var(--color-text-tertiary));
+  white-space: nowrap;
+  transition: opacity 240ms;
+  pointer-events: none;
+}
+.kristall__hint svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.kristall__hint.is-skryt {
+  opacity: 0;
+}

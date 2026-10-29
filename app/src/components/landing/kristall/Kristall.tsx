@@ -4,12 +4,14 @@ import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { assetUrl } from '@/lib/assetUrl';
 import type { Kristall3d, TochkaId } from './kristall3d';
+import './kristall.css';
 
 /**
- * Кристалл героя для демо направлений. Целиком в кадре, не срезан краем.
+ * Кристалл героя главной и демо направлений. Целиком в кадре, не срезан
+ * краем.
  *
- * В покое — готовый рендер (тот же файл, что в герое главной, вертикальный
- * кадр): он лёгкий и красивый. Первое касание, перетаскивание или стрелка
+ * В покое — готовый рендер (кадр hero-mobile; на телефоне — его копия
+ * шириной 600px, hero-kristall-600): он лёгкий и красивый. Первое касание, перетаскивание или стрелка
  * клавиатуры подгружают живую модель (kristall3d.ts, three.js) и меняют
  * рендер на неё — дальше фигура вращается пальцем и мышью, как чертежи
  * стереометрии на сайте: пальцем — вбок, вертикальный жест остаётся
@@ -27,6 +29,12 @@ export interface KristallPodpis {
 export interface KristallProps {
   className?: string;
   podpisi?: readonly KristallPodpis[];
+  /**
+   * Ширина кристалла на экране — для выбора файла рендера: 600px или
+   * 1122px. По умолчанию — как на главной: 285px на телефоне, до 560px
+   * шире.
+   */
+  sizes?: string;
 }
 
 /* Ракурс модели, совпадающий с рендером. */
@@ -51,7 +59,11 @@ const FORMATY = [
   { ext: 'webp', type: 'image/webp' },
 ] as const;
 
-export function Kristall({ className, podpisi = [] }: KristallProps) {
+export function Kristall({
+  className,
+  podpisi = [],
+  sizes = '(max-width: 767.98px) 285px, (max-width: 1023.98px) 420px, 560px',
+}: KristallProps) {
   const oblast = useRef<HTMLDivElement>(null);
   const kholst = useRef<HTMLDivElement>(null);
   const model = useRef<Kristall3d | null>(null);
@@ -183,21 +195,28 @@ export function Kristall({ className, podpisi = [] }: KristallProps) {
   };
 
   return (
-    <div className={clsx('dm-kristall', zhivoy && 'is-zhivoy', className)}>
+    <div className={clsx('kristall', zhivoy && 'is-zhivoy', className)}>
       <div
         ref={oblast}
-        className="dm-kristall__oblast"
+        className="kristall__oblast"
         role="img"
         aria-label="Стеклянная правильная шестиугольная усечённая пирамида. Поворачивается перетаскиванием и стрелками."
         tabIndex={0}
         onKeyDown={onKeyDown}
       >
-        <picture className="dm-kristall__poster">
+        <picture className="kristall__poster">
           {FORMATY.map((f) => (
-            <source key={f.ext} type={f.type} srcSet={assetUrl(`/hero/hero-mobile.${f.ext}`)} />
+            <source
+              key={f.ext}
+              type={f.type}
+              srcSet={`${assetUrl(`/hero/hero-kristall-600.${f.ext}`)} 600w, ${assetUrl(`/hero/hero-mobile.${f.ext}`)} 1122w`}
+              sizes={sizes}
+            />
           ))}
           <img
-            src={assetUrl('/hero/hero-mobile.png')}
+            src={assetUrl('/hero/hero-kristall-600.png')}
+            srcSet={`${assetUrl('/hero/hero-kristall-600.png')} 600w, ${assetUrl('/hero/hero-mobile.png')} 1122w`}
+            sizes={sizes}
             alt=""
             width={1122}
             height={946}
@@ -206,18 +225,18 @@ export function Kristall({ className, podpisi = [] }: KristallProps) {
             draggable={false}
           />
         </picture>
-        <div ref={kholst} className="dm-kristall__kholst" />
+        <div ref={kholst} className="kristall__kholst" />
         {podpisi.map((p) => (
           <span
             key={p.id}
-            className={`dm-kristall__podpis dm-kristall__podpis--${p.id}`}
+            className={`kristall__podpis kristall__podpis--${p.id}`}
             style={{ left: `${tochki[p.id].x * 100}%`, top: `${tochki[p.id].y * 100}%` }}
           >
             {p.text}
           </span>
         ))}
       </div>
-      <p className={clsx('dm-kristall__hint', povernul && 'is-skryt')} aria-hidden="true">
+      <p className={clsx('kristall__hint', povernul && 'is-skryt')} aria-hidden="true">
         <svg viewBox="0 0 24 24" focusable="false">
           <path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" />
         </svg>

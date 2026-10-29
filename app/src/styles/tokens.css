@@ -313,6 +313,35 @@
   --color-uspeh-soft: var(--emerald-50);
   --color-uspeh-border: var(--emerald-200);
 
+  /* «Стеклянная сцена» (DESIGN_AUDIT.md, раздел 5; демо —
+     /styleguide/steklo). Одна рецептура стекла на все поверхности:
+     белое 55 %, размытие с насыщенностью, светлая кромка, тонкое
+     синее кольцо, блик по верхнему краю и двухслойная синяя тень.
+     Пока ими оформлена только главная; страницы переходят на них по
+     одной. */
+  --glass-bg: rgb(255 255 255 / 0.55);
+  --glass-bg-strong: rgb(255 255 255 / 0.74);
+  --glass-blur: blur(16px) saturate(140%);
+  --glass-edge: rgb(255 255 255 / 0.7);
+  --glass-ring: 0 0 0 1px rgb(31 95 208 / 0.08);
+  --glass-hi: inset 0 1px 0 rgb(255 255 255 / 0.9);
+  --glass-shadow: 0 1px 2px rgb(16 40 100 / 0.06), 0 12px 32px -10px rgb(31 95 208 / 0.22);
+  --glass-shadow-hover: 0 2px 4px rgb(16 40 100 / 0.06), 0 22px 44px -12px rgb(31 95 208 / 0.32);
+  /* Фирменный жест — глянцевая «таблетка»: главная кнопка и активная
+     вкладка. Градиент от светлой ступени синего к тёмной, блик сверху,
+     синяя тень снизу. */
+  --gloss: linear-gradient(180deg, var(--blue-400) 0%, var(--blue-600) 52%, var(--blue-700) 100%);
+  --gloss-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45), inset 0 -1px 0 rgb(0 0 0 / 0.12),
+    0 8px 18px -6px rgb(31 95 208 / 0.55);
+  --gloss-shadow-hover:
+    inset 0 1px 0 rgb(255 255 255 / 0.5), inset 0 -1px 0 rgb(0 0 0 / 0.12),
+    0 12px 24px -8px rgb(31 95 208 / 0.6);
+  /* Свечения позади стекла: без цвета за ним размывать нечего. */
+  --aura-blue: rgb(61 121 224 / 0.34);
+  --aura-orange: rgb(245 160 74 / 0.3);
+  --aura-terracotta: rgb(224 122 47 / 0.16);
+
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   /* Текст, в котором встречаются греческие буквы. Греческое
      подмножество Inter стоит первым, основной стек — за ним: в файле
@@ -495,6 +524,17 @@
     --lh-h1: 2.25rem;
     --fs-lg: 1rem;
     --lh-lg: 1.5rem;
+    /* На телефоне размытие слабее: оно пересчитывается каждый кадр. */
+    --glass-blur: blur(10px) saturate(140%);
+  }
+}
+
+/* Кто попросил меньше прозрачности — непрозрачное «стекло». */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: var(--white);
+    --glass-bg-strong: var(--white);
+    --glass-blur: none;
   }
 }
 

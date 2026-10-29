@@ -152,7 +152,7 @@
   box-shadow: var(--dm-glass-ring), var(--dm-glass-hi), var(--dm-glass-shadow-hover);
 }
 /* Кристалл парит. */
-.dm-steklo .dm-kristall__oblast {
+.dm-steklo .kristall__oblast {
   animation: dm-parit 7s ease-in-out infinite alternate;
 }
 @keyframes dm-parit {

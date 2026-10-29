@@ -89,7 +89,7 @@
   font-family: var(--dm-font-cifry);
 }
 /* Стеклянные подписи к рендеру — с выноской-точкой. */
-.dm-chertyozh .dm-kristall__podpis {
+.dm-chertyozh .kristall__podpis {
   display: inline-flex;
   align-items: center;
   height: 28px;
@@ -104,7 +104,7 @@
   border: 1px solid var(--dm-glass-edge);
   transform: translate(16px, -50%);
 }
-.dm-chertyozh .dm-kristall__podpis::before {
+.dm-chertyozh .kristall__podpis::before {
   content: '';
   position: absolute;
   left: -16px;
@@ -113,7 +113,7 @@
   height: 1px;
   background: rgb(255 255 255 / 0.9);
 }
-.dm-chertyozh .dm-kristall__podpis::after {
+.dm-chertyozh .kristall__podpis::after {
   content: '';
   position: absolute;
   left: -20px;
@@ -126,11 +126,11 @@
   box-shadow: 0 0 0 2px rgb(16 23 40 / 0.25);
 }
 /* Терракотовая точка героя — высота: то, что ищут в задаче. */
-.dm-chertyozh .dm-kristall__podpis--h::after {
+.dm-chertyozh .kristall__podpis--h::after {
   background: var(--dm-terra);
   box-shadow: 0 0 0 3px rgb(224 122 47 / 0.3);
 }
-.dm-chertyozh .dm-kristall__podpis--a {
+.dm-chertyozh .kristall__podpis--a {
   transform: translate(16px, -10%);
 }
 
@@ -304,14 +304,14 @@
 /* На телефоне правая подпись не помещается справа от точки —
    встаёт слева, выноска переходит на её правый край. */
 @media (max-width: 767.98px) {
-  .dm-chertyozh .dm-kristall__podpis--a {
+  .dm-chertyozh .kristall__podpis--a {
     transform: translate(calc(-100% - 16px), 20%);
   }
-  .dm-chertyozh .dm-kristall__podpis--a::before {
+  .dm-chertyozh .kristall__podpis--a::before {
     left: auto;
     right: -16px;
   }
-  .dm-chertyozh .dm-kristall__podpis--a::after {
+  .dm-chertyozh .kristall__podpis--a::after {
     left: auto;
     right: -20px;
   }
