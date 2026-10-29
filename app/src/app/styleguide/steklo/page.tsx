@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { DemoStranica } from '../_napravleniya/DemoStranica';
-import { interSteklo } from '@/lib/fontsSteklo';
 import './tokens-steklo.css';
 import './steklo.css';
 
@@ -12,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DemoStranica vid="steklo" shrifty={interSteklo.variable} />;
+  return <DemoStranica vid="steklo" shrifty="" />;
 }

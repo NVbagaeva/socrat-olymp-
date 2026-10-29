@@ -4,12 +4,11 @@
 
    Шрифт — Inter 4 Variable с осями wght и opsz: на крупном кегле
    браузер сам включает начертание Display (font-optical-sizing: auto).
-   Файлы объявлены в lib/fontsSteklo.ts (next/font/local): предзагрузка только
-   на страницах с ними и запасной шрифт с подогнанными метриками. */
+   Это общий шрифт сайта (lib/fonts.ts). */
 
 .dm-steklo {
   /* Шрифты: номера — тем же Inter, табличными цифрами. */
-  --dm-font: var(--font-steklo);
+  --dm-font: var(--font-sans);
   --dm-font-cifry: var(--dm-font);
 
   /* Палитра — фирменная. */

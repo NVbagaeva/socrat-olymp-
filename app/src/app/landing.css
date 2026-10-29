@@ -187,7 +187,7 @@
 .hero__title {
   font-size: 3.5rem;
   line-height: 1.04;
-  font-weight: 600;
+  font-weight: 640;
   letter-spacing: -0.025em;
   color: var(--color-text);
 }
@@ -240,7 +240,7 @@
 .door__title {
   font-size: 22px;
   line-height: 1.25;
-  font-weight: 600;
+  font-weight: 620;
   letter-spacing: -0.01em;
 }
 .door__text {
@@ -301,7 +301,7 @@
   margin: 0;
   font-size: 32px;
   line-height: 1.15;
-  font-weight: 600;
+  font-weight: 640;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--color-text);
@@ -327,7 +327,7 @@ section.band {
 .band__head h2 {
   font-size: 2.25rem;
   line-height: 1.12;
-  font-weight: 600;
+  font-weight: 620;
   letter-spacing: -0.018em;
 }
 .band__head p {
@@ -364,14 +364,14 @@ section.band {
   box-shadow: var(--gloss-shadow);
   color: var(--color-text-inverse);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
 .step h3 {
   margin-bottom: var(--space-2);
   font-size: 19px;
   line-height: 1.3;
-  font-weight: 600;
+  font-weight: 620;
 }
 .step p {
   font-size: 15px;
@@ -444,7 +444,7 @@ section.band {
   transform: translateY(-4px) rotate(-3deg);
 }
 .glavnaya .task-card--bank .task-card__no {
-  font-weight: 600;
+  font-weight: 650;
 }
 .glavnaya .task-card--bank .task-card__go {
   background: var(--gloss);

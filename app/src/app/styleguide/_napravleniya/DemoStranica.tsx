@@ -56,7 +56,10 @@ const IKONKI_TABBARA = [
 
 export interface DemoStranicaProps {
   vid: Napravlenie;
-  /** Классы переменных шрифтов направления (next/font, shrifty.ts страницы). */
+  /**
+   * Классы переменных шрифтов направления (next/font, shrifty.ts страницы).
+   * У «Стеклянной сцены» пусто: её шрифт — общий Inter сайта.
+   */
   shrifty: string;
 }
 

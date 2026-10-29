@@ -1,6 +1,6 @@
 Шрифты демо-страницы /styleguide/chertyozh (направление «Чертёж»).
 Подключаются только там (src/app/styleguide/chertyozh/shrifty.ts).
-Inter Variable «Стеклянной сцены» лежит уровнем выше (inter-opsz-*.woff2).
+Inter Variable — общий шрифт сайта, лежит уровнем выше (inter-variable.woff2).
 
 onest-*-wght-normal.woff2 — @fontsource-variable/onest 5.3.1, ось wght:
 Copyright 2021 The Onest Project Authors (https://github.com/simpals/onest)
