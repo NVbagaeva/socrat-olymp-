@@ -45,9 +45,9 @@ function ozhivit(svg: SVGSVGElement): (() => void) | null {
   const ruchka = svg.querySelector<SVGCircleElement>('.c2-graf__ruchka');
   const tochki = [...svg.querySelectorAll<SVGCircleElement>('.c2-graf__obshchaya')];
   const slider = panel?.querySelector<HTMLInputElement>('.c2-graf-panel__range') ?? null;
-  const status = panel?.querySelector<HTMLElement>('.c2-graf-panel__status') ?? null;
+  const znach = panel?.querySelector<HTMLElement>('.c2-graf-panel__znach') ?? null;
   const reset = panel?.querySelector<HTMLButtonElement>('.c2-graf-panel__reset') ?? null;
-  if (!panel || !linia || !hit || !ruchka || !slider || !status || !reset) return null;
+  if (!panel || !linia || !hit || !ruchka || !slider || !znach || !reset) return null;
 
   const geom = { R, c, m };
   const vb = svg.viewBox.baseVal.width;
@@ -89,7 +89,7 @@ function ozhivit(svg: SVGSVGElement): (() => void) | null {
           ? ` — через (0; ${R})`
           : '';
     const tochno = Math.abs(a * 100 - Math.round(a * 100)) < 1e-9;
-    status.innerHTML = `<i>a</i> ${tochno ? '=' : '≈'} ${fmt(a)}${nazv}: <b>${resheniy(n)}</b>`;
+    znach.innerHTML = `${tochno ? '=' : '≈'} ${fmt(a)}${nazv}: <b>${resheniy(n)}</b>`;
     svg.classList.toggle('is-moved', !blizko(a, aKas));
     if (!otPolzunka) slider.value = String(a);
   };

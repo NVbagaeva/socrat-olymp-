@@ -16,6 +16,7 @@ import { add, div, mul, rat, ratTex, sub, toNumber, type Rat } from '@/lib/zadan
 import { THEME } from '@/lib/graph/renderer.js';
 import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 import { skTex, skToNumber, type SKornem } from './chisla';
+import { typeset } from '@/lib/tex';
 import { chisloResheniy } from './b19geom';
 import { dec, sklon } from './tex';
 import type { Etap, Ramka } from './types';
@@ -443,7 +444,7 @@ function chertezh(p: ParamRis): string {
         () =>
           `<circle class="c2-graf__obshchaya" cx="0" cy="0" r="6" fill="none" stroke="${C.axis}" stroke-width="2" visibility="hidden"/>`,
       ),
-      `<circle class="c2-graf__ruchka" cx="${f1(X(th))}" cy="${f1(Y(yh))}" r="9" fill="${C.bg}" stroke="${STIL.kas.color}" stroke-width="2.5" style="touch-action:none"><title>Потяните, чтобы повернуть прямую вокруг A</title></circle>`,
+      `<circle class="c2-graf__ruchka" cx="${f1(X(th))}" cy="${f1(Y(yh))}" r="9" fill="${C.bg}" stroke="${STIL.kas.color}" stroke-width="2.5" style="touch-action:none"><title>Потяните, чтобы повернуть прямую</title></circle>`,
     );
   }
 
@@ -530,12 +531,9 @@ function panel(p: ParamRis, amin: number, amax: number): string {
   const a = `${chislo(+p.aKas!.toFixed(2)).replace('.', ',')}`;
   return (
     `<div class="c2-graf-panel" hidden>` +
-    `<p class="c2-graf-panel__sub">Тяните кружок на прямой или двигайте ползунок: прямая вращается вокруг $A$.</p>`.replace(
-      '$A$',
-      '<i>A</i>',
-    ) +
-    `<label class="c2-graf-panel__row"><i>a</i><input class="c2-graf-panel__range" type="range" min="${amin}" max="${amax}" step="0.01" value="${p.aKas}" aria-label="Угловой коэффициент a"></label>` +
-    `<p class="c2-graf-panel__status" aria-live="polite"><i>a</i> ≈ ${a} — касание: <b>${resheniy(n)}</b></p>` +
+    `<p class="c2-graf-panel__sub">${typeset('Тяните кружок на прямой или двигайте ползунок: прямая вращается вокруг точки $A$.')}</p>` +
+    `<label class="c2-graf-panel__row">${typeset('$a$')}<input class="c2-graf-panel__range" type="range" min="${amin}" max="${amax}" step="0.01" value="${p.aKas}" aria-label="Угловой коэффициент"></label>` +
+    `<p class="c2-graf-panel__status" aria-live="polite"><span class="c2-graf-panel__a">${typeset('$a$')}</span> <span class="c2-graf-panel__znach">≈ ${a} — касание: <b>${resheniy(n)}</b></span></p>` +
     `<button type="button" class="btn btn--secondary btn--sm c2-graf-panel__reset">Вернуть в положение касания</button>` +
     `</div>`
   );
