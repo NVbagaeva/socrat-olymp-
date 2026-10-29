@@ -22,14 +22,22 @@ import {
   type Trenazher6Ui,
 } from './trenazher6Sessiya';
 import { Vybor6 } from './Vybor6';
+import './trenazher6.css';
 
 const T = TRENAZHER_6;
 
 /** Задачи плана по id (тексты и параметры из public/data/zadanie6). */
-async function zadachiPlana(plan: string[], tipy: string[]): Promise<Trenazher6Payload | null> {
+async function zadachiPlana(
+  plan: string[],
+  tipy: string[],
+  rezhim: Nastroyki6['rezhim'],
+): Promise<Trenazher6Payload | null> {
   const vse = await zagruzitZadachi(tipy);
   const zadachi = plan.flatMap((id) => vse.get(id) ?? []);
-  return zadachi.length > 0 ? { zadachi } : null;
+  if (zadachi.length === 0) {
+    return null;
+  }
+  return rezhim === 'proverka' ? { zadachi, rezhim } : { zadachi };
 }
 
 /**
@@ -80,7 +88,7 @@ export function Trenazher6({
     try {
       const indeks = await zagruzitIndeks();
       const plan = planTrenirovki(indeks, n);
-      const payload = plan.length === 0 ? null : await zadachiPlana(plan, n.tipy);
+      const payload = plan.length === 0 ? null : await zadachiPlana(plan, n.tipy, n.rezhim);
       if (payload === null) {
         setOshibka(T.netZadach);
         return;
@@ -112,7 +120,9 @@ export function Trenazher6({
         Math.random,
         byli,
       );
-      return plan.length === 0 ? null : await zadachiPlana(plan, tipy);
+      return plan.length === 0
+        ? null
+        : await zadachiPlana(plan, tipy, payload.rezhim ?? 'trenirovka');
     } catch {
       return null;
     }
@@ -138,7 +148,8 @@ export function Trenazher6({
         }
         const p = prototipy.find((x) => x.id === z.prototypeId);
         return {
-          kind: p ? `${p.kod}` : z.prototypeId,
+          /* Название прототипа: код рядом стоит отдельной меткой. */
+          kind: p ? p.title : z.prototypeId,
           html: typeset(z.text),
           code: p?.kod ?? z.prototypeId,
           badge: metkaZadachi(z),
@@ -146,6 +157,7 @@ export function Trenazher6({
         };
       }}
       subset={(payload, indexes) => ({
+        ...payload,
         zadachi: indexes.flatMap((at) => payload.zadachi[at] ?? []),
       })}
       similar={pohozhie}
@@ -172,6 +184,7 @@ export function Trenazher6({
           zadachi={payload.zadachi}
           prototipy={prototipy}
           base={base}
+          rezhim={payload.rezhim}
           restored={restored === null ? null : readTrenazher6Ui(restored)}
           report={report}
           elapsed={elapsed}
