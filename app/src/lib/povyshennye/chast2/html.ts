@@ -111,6 +111,12 @@ export function reshenieHtml(z: Chast2Zadacha, vyvod: Vyvod = 'ekran'): string {
           (e.risunok === undefined ? '' : `<figure class="c2-etap__ris">${e.risunok}</figure>`) +
           (e.ramka === undefined ? '' : ramkaHtml(e.ramka, vyvod)) +
           `<ul class="c2-etap__l">${e.lines.map((l) => `<li>${strokaHtml(l, vyvod)}</li>`).join('')}</ul>` +
+          (e.spisok === undefined
+            ? ''
+            : `<ol class="c2-etap__sp">${e.spisok.map((l) => `<li>${strokaHtml(l, vyvod)}</li>`).join('')}</ol>`) +
+          (e.posle === undefined
+            ? ''
+            : `<ul class="c2-etap__l">${e.posle.map((l) => `<li>${strokaHtml(l, vyvod)}</li>`).join('')}</ul>`) +
           (e.melko === undefined
             ? ''
             : `<div class="c2-etap__melko">${e.melko.map((l) => `<p>${strokaHtml(l, vyvod)}</p>`).join('')}</div>`) +

@@ -417,3 +417,28 @@ html[data-sheet-dense] .var-instruction {
 .c2-etap__ris .c2-graf {
   width: 78mm;
 }
+
+/* Список «1) … 2) …» в этапе; живая панель рисунка №19 на бумаге не нужна. */
+.sheet-item .c2-etap__sp {
+  margin: 0;
+  padding-left: 4mm;
+  list-style: none;
+  counter-reset: c2sp;
+}
+.sheet-item .c2-etap__sp > li {
+  position: relative;
+  padding-left: 5mm;
+  counter-increment: c2sp;
+}
+.sheet-item .c2-etap__sp > li::before {
+  content: counter(c2sp) ')';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+.sheet-item .c2-graf-panel,
+.sheet-item .c2-graf__obshchaya,
+.sheet-item .c2-graf__ruchka,
+.sheet-item .c2-graf__hit {
+  display: none;
+}
