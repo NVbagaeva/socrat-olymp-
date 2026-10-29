@@ -95,8 +95,8 @@ export default function IkonkiPage() {
     <main className="sg-ik">
       <h1 className="t-h2">Значки в стеклянном круге</h1>
       <p className="sg-ik__lead">
-        Эталон — тела №3. Рамка, стекло и классы линий общие:
-        components/ui/IkonkaVKruge.tsx и ikonka-v-kruge.css.
+        Эталон — тела №3. Рамка, стекло и классы линий общие: components/ui/IkonkaVKruge.tsx и
+        ikonka-v-kruge.css.
       </p>
       <section>
         <h2 className="t-h4">№3 · тела (эталон)</h2>
