@@ -24,13 +24,7 @@ export function Generator1({
   const config = useMemo(() => config1(razdely, base), [razdely, base]);
   const engine = useMemo(() => engine1(config, razdely, bank, base), [config, razdely, bank, base]);
   const icons = useMemo(
-    () =>
-      Object.fromEntries(
-        razdely.map((r) => [
-          r.id,
-          <IkonkaBloka1 key={r.id} blok={r.id} className="gen-z11-ikonka" />,
-        ]),
-      ),
+    () => Object.fromEntries(razdely.map((r) => [r.id, <IkonkaBloka1 key={r.id} blok={r.id} />])),
     [razdely],
   );
   return <Generator config={config} engine={engine} icons={icons} />;
