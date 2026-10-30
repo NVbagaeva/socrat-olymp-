@@ -118,8 +118,6 @@ export interface ExamSection {
    * справа прежний график y = f(x) с подписью.
    */
   hero?: string;
-  /** Подсказка внизу окна выбора типа функции. */
-  dialogHint: string;
   /** Вкладка «О задании» страницы подтемы. */
   about: SectionAbout;
   /** Меню «Для репетиторов»: подпись кнопки и карточки материалов. */
@@ -135,8 +133,7 @@ export interface ExamSection {
   subtopics: Subtopic[];
 }
 
-/* Одна и та же авторская подсказка стоит и в окне выбора типа функции,
-   и на плашке вкладки «О задании»: текст записан один раз. */
+/* Авторская подсказка на плашке вкладки «О задании» подтемы. */
 const HINT_12 = 'Разные функции — разные истории, но одна идея: график всегда говорит правду.';
 
 /**
@@ -173,7 +170,6 @@ export const sections: ExamSection[] = [
       'Научитесь распознавать графики, читать свойства функций и использовать формулы для решения задач.',
     badge: 'Базовый и средний уровни',
     hero: '12',
-    dialogHint: HINT_12,
     about: {
       title: taskName('12'),
       description:
@@ -275,10 +271,6 @@ export function findSubtopic(sectionSlug: string, subtopicSlug: string): Subtopi
 /* ── Параметры статического экспорта ──────────────────────────────
    Сборка без сервера: каждый динамический сегмент перечисляется
    заранее. Списки считаются из конфига, руками нигде не повторяются. */
-
-export function sectionParams(): { task: string }[] {
-  return sections.map((section) => ({ task: section.slug }));
-}
 
 export function subtopicParams(): { task: string; type: string }[] {
   return sections.flatMap((section) =>

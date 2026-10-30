@@ -2,14 +2,12 @@
 /* scripts/check-ves12-site.mjs — «Весь №12» в браузере, на собранном
    сайте (out/, после pnpm build).
 
-     • Окно «Выберите тип функции»: в покое у карточек нет галочек,
-       синей рамки и стрелки; при наведении мышью — синяя рамка и
-       стрелка «→». Над типами — блок «Весь раздел» с двумя карточками.
-     • Телефон 390 (касание, без наведения): стрелка видна всегда,
-       после касания подсветка не остаётся.
-     • Строка «N прототипов · M заданий» не рвёт число и слово.
-     • Блок «Весь раздел» — на странице №12 и первым пунктом меню
-       «Все разделы».
+     • Карточка №12 в банке — обычная ссылка, как у остальных: тап
+       сразу открывает страницу раздела, промежуточного окна нет.
+     • Лента раздела №12 — та же, что у №9–11: «О задании», «Тренажёр»,
+       «Генератор» и последней «Зачётная работа»; без дублей. На
+       «О задании» — выбор типа функции.
+     • Блок «Весь раздел» — первым пунктом меню «Все разделы» подтемы.
      • Зачётная: «ФИПИ + аналоги», 2 варианта → лист учеников (оба
        варианта) и лист учителя (таблица ответов, шкала) → онлайн по
        ссылке: вариант, ответы, «Завершить» → оценка и итоги по типам.
@@ -95,108 +93,62 @@ async function shot(page, name, full = false) {
   }
 }
 
-async function openDialog(page) {
+/** Тап (или клик) по карточке №12 в банке: сразу страница раздела. */
+async function openRazdel(page, mobile) {
   await page.goto(BASE + '/zadaniya/', { waitUntil: 'networkidle' });
-  await page
-    .locator('.tasks-grid button, .tasks-grid [role=button]')
-    .filter({ hasText: /Графики функций/ })
-    .first()
-    .click();
-  await page.waitForSelector('.subtopic-modal');
-  /* Курсор остаётся там, где кликнули по плитке банка, — а там теперь
-     может оказаться карточка окна, и «покой» был бы наведением. Мышь
-     уводится в угол, за окно. */
-  await page.mouse.move(1, 1);
-  await page.waitForTimeout(500);
+  const card = page.locator('.tasks-grid a').filter({ hasText: /Графики функций/ }).first();
+  await card.scrollIntoViewIfNeeded();
+  await (mobile ? card.tap() : card.click());
+  await page.waitForURL('**/zadaniya/12/');
+  await page.waitForLoadState('networkidle');
 }
 
-/** Как выглядит карточка: рамка, фон, видна ли стрелка, есть ли галочка. */
-async function cardLook(page, selector, index) {
-  return page.evaluate(
-    ([sel, i]) => {
-      const card = document.querySelectorAll(sel)[i];
-      const go = card.querySelector('[class*="__go"]');
-      const style = getComputedStyle(card);
-      return {
-        border: style.borderTopColor,
-        background: style.backgroundColor,
-        arrow: go ? Number(getComputedStyle(go).opacity) : -1,
-        checks: card.querySelectorAll('[class*="__check"]').length,
-      };
-    },
-    [selector, index],
-  );
-}
+const VKLADKI_12 = ['О задании', 'Тренажёр', 'Генератор', 'Зачётная работа'];
 
-/* ── Компьютер: покой и наведение ───────────────────────────────── */
-{
-  const ctx = await context(1440, 900, false);
+for (const [width, height, mobile] of [
+  [1440, 900, false],
+  [390, 844, true],
+]) {
+  const ctx = await context(width, height, mobile);
   const page = await ctx.newPage();
-  await openDialog(page);
-  const rest = await cardLook(page, 'a.subtopic-card', 1);
-  check(rest.checks === 0, 'окно: у карточки в покое есть галочка');
-  check(rest.arrow === 0, `окно: стрелка видна без наведения (opacity ${rest.arrow})`);
-  const allChecks = await page.locator('.subtopic-modal .subtopic-card__check').count();
-  check(allChecks === 0, `окно: галочек на карточках ${allChecks}`);
-  check((await page.locator('.subtopic-modal .ves-card').count()) === 3, 'окно: нет трёх карточек «Весь раздел»');
-  check((await page.locator('.subtopic-modal .ves-or').count()) === 1, 'окно: нет заголовка «Или выберите тип функции»');
-  await shot(page, 'okno-pokoy-1440');
-  await page.locator('a.subtopic-card').nth(1).hover();
-  await page.waitForTimeout(400);
-  const hover = await cardLook(page, 'a.subtopic-card', 1);
-  check(hover.arrow === 1, `окно: при наведении стрелка не видна (opacity ${hover.arrow})`);
-  check(hover.border !== rest.border, 'окно: при наведении рамка не меняется');
-  check(hover.background !== rest.background, 'окно: при наведении фон не меняется');
-  const other = await cardLook(page, 'a.subtopic-card', 0);
-  check(other.arrow === 0 && other.border === rest.border, 'окно: подсвечена карточка не под мышью');
-  await shot(page, 'okno-navedenie-1440');
+  const where = (text) => `${width}: ${text}`;
 
-  /* Строка счёта: число и слово не разорваны. */
-  const counts = await page.$$eval('.subtopic-card__count', (nodes) => nodes.map((n) => n.textContent));
+  await openRazdel(page, mobile);
+  check((await page.locator('.modal, .subtopic-modal').count()) === 0, where('после тапа по №12 открылось окно'));
+  const vkladki = (await page.locator('.topic-tabs .tabs--lenta [role=tab]').allInnerTexts())
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const unique = [...new Set(vkladki)];
   check(
-    counts.length > 0 && counts.every((text) => /^\d+ \S+ · \d+ \S+$/.test(text)),
-    `окно: строка счёта без неразрывных пробелов: ${counts[0]}`,
+    JSON.stringify(unique) === JSON.stringify(VKLADKI_12),
+    where(`лента №12: ${unique.join(' | ')}`),
   );
+  check(
+    (await page.locator('.subtopics-grid a.subtopic').count()) > 0 ||
+      (await page.locator('.subtopics-grid a').count()) > 0,
+    where('«О задании» №12: нет выбора типа функции'),
+  );
+  await shot(page, `stranica-12-${width}`);
 
-  /* Страница №12 и меню «Все разделы». */
-  await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
-  check((await page.locator('.ves-razdel--page .ves-card').count()) === 3, 'страница №12: нет блока «Весь раздел»');
-  await page.locator('.ves-razdel--page').scrollIntoViewIfNeeded();
-  await shot(page, 'stranica-12-1440');
-  await page.goto(BASE + '/zadaniya/12/linear/', { waitUntil: 'networkidle' });
-  const plashka = page.locator('.razdely-plashka');
-  if ((await plashka.count()) > 0) {
-    await plashka.first().click();
-    await page.waitForSelector('.razdely-menu');
-    const first = await page.$eval('.razdely-menu__list > li', (li) => li.classList.contains('razdely-menu__ves'));
-    check(first, 'меню «Все разделы»: «Весь раздел» не первым пунктом');
-    check((await page.locator('.razdely-menu .ves-card').count()) === 3, 'меню: нет трёх карточек «Весь раздел»');
-    await page.waitForTimeout(400);
-    await shot(page, 'menu-1440');
+  const zachyot = page.locator('.topic-tabs .tabs--lenta a', { hasText: 'Зачётная работа' }).first();
+  await (mobile ? zachyot.tap() : zachyot.click());
+  await page.waitForURL('**/zadaniya/12/zachyot/**');
+  await page.waitForSelector('.steps');
+  check((await page.locator('.tabs--lenta').count()) > 0, where('зачётная работа — не во вкладке раздела'));
+
+  if (!mobile) {
+    await page.goto(BASE + '/zadaniya/12/linear/', { waitUntil: 'networkidle' });
+    const plashka = page.locator('.razdely-plashka');
+    if ((await plashka.count()) > 0) {
+      await plashka.first().click();
+      await page.waitForSelector('.razdely-menu');
+      const first = await page.$eval('.razdely-menu__list > li', (li) => li.classList.contains('razdely-menu__ves'));
+      check(first, 'меню «Все разделы»: «Весь раздел» не первым пунктом');
+      check((await page.locator('.razdely-menu .ves-card').count()) === 3, 'меню: нет трёх карточек «Весь раздел»');
+      await page.waitForTimeout(400);
+      await shot(page, 'menu-1440');
+    }
   }
-  await ctx.close();
-}
-
-/* ── Телефон: стрелка видна, подсветка не залипает ──────────────── */
-{
-  const ctx = await context(390, 844, true);
-  const page = await ctx.newPage();
-  await openDialog(page);
-  const rest = await cardLook(page, 'a.subtopic-card', 1);
-  check(rest.arrow === 1, `390: стрелка не видна без наведения (opacity ${rest.arrow})`);
-  check(rest.checks === 0, '390: у карточки есть галочка');
-  await shot(page, 'okno-390');
-  /* Касание без перехода: после него карточка такая же, как до. */
-  await page.evaluate(() =>
-    document.querySelectorAll('a.subtopic-card').forEach((a) => a.addEventListener('click', (e) => e.preventDefault())),
-  );
-  await page.locator('a.subtopic-card').nth(1).tap();
-  await page.waitForTimeout(400);
-  const after = await cardLook(page, 'a.subtopic-card', 1);
-  check(
-    after.background === rest.background && after.border === rest.border,
-    '390: подсветка осталась после касания',
-  );
   await ctx.close();
 }
 

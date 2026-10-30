@@ -24,14 +24,6 @@
 .ves-razdel__list > li {
   display: flex;
 }
-.ves-razdel--page {
-  margin-bottom: var(--space-8);
-}
-/* На странице №12 карточек три (зачёт, тренажёр, генератор) — в ряд:
-   карточки разделов остаются на первом экране (test:zadanie-hero). */
-.ves-razdel--page .ves-razdel__list {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
 .ves-razdel--menu .ves-razdel__list {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
@@ -168,20 +160,6 @@
   .ves-card:hover .ves-card__ico {
     transform: none;
   }
-}
-/* Заголовок «Или выберите тип функции» в окне. */
-.ves-or {
-  margin: var(--space-5) 0 0;
-  font-size: var(--fs-h4);
-  line-height: var(--lh-h4);
-  font-weight: 600;
-  color: var(--color-text-brand);
-}
-.ves-or--page {
-  margin: 0 0 var(--space-4);
-}
-.ves-razdel--dialog {
-  margin-top: var(--space-4);
 }
 @media (max-width: 767.98px) {
   .ves-razdel__list {
@@ -480,45 +458,5 @@
   }
   .exam__moves .btn--danger {
     margin-left: 0;
-  }
-}
-
-/* Страница №12 на телефоне: первая карточка раздела должна быть видна на
-   первом экране (test:zadanie-hero), поэтому «Весь раздел» здесь — строка
-   из трёх компактных кнопок, без значков, заголовков и подписей. */
-@media (max-width: 767.98px) {
-  .ves-razdel--page {
-    margin-bottom: var(--space-3);
-  }
-  .ves-razdel--page .ves-razdel__title,
-  .ves-or--page {
-    display: none;
-  }
-  .ves-razdel--page .ves-razdel__list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-2);
-  }
-  .ves-razdel--page .ves-card {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-2);
-    min-height: 52px;
-    padding: var(--space-2);
-  }
-  .ves-razdel--page .ves-card__ico {
-    width: 32px;
-    height: 32px;
-  }
-  .ves-razdel--page .ves-card__ico svg {
-    width: 20px;
-    height: 20px;
-  }
-  .ves-razdel--page .ves-card__name {
-    font-size: 14px;
-    line-height: 18px;
-  }
-  .ves-razdel--page .ves-card__ico,
-  .ves-razdel--page .ves-card__lead,
-  .ves-razdel--page .ves-card__go {
-    display: none;
   }
 }

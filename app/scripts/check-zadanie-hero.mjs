@@ -115,7 +115,7 @@ async function measure(page) {
     const img = document.querySelector('.zadanie-hero img');
     const box = img.getBoundingClientRect();
     const card = document.querySelector('.subtopic')?.getBoundingClientRect();
-    const tabs = document.querySelector('.topic-tabs, .tabs')?.getBoundingClientRect();
+    const tabs = document.querySelector('.topic-tabs-row:not(.topic-tabs-row--panel) .topic-tabs, .topic-tabs, .tabs')?.getBoundingClientRect();
     return {
       w: box.width,
       h: box.height,
@@ -147,9 +147,11 @@ async function measure(page) {
   const m = await measure(page);
   check(m.loaded, 'телефон: картинка не загрузилась');
   check(m.h >= 150 && m.h <= 210, `телефон: высота картинки ${Math.round(m.h)} px, нужно 160–200`);
+  /* Под шапкой — лента вкладок плитками, как у №9–11: она и есть меню
+     раздела и должна начинаться на первом экране. */
   check(
-    m.cardTop > 0 && m.cardTop < m.vh - 40,
-    `телефон: первая карточка раздела на ${Math.round(m.cardTop)} px — не видна на первом экране (${m.vh})`,
+    m.tabsTop > 0 && m.tabsTop < m.vh - 120,
+    `телефон: лента раздела на ${Math.round(m.tabsTop)} px — не видна на первом экране (${m.vh})`,
   );
   check(m.src.includes('hero-768.'), `телефон 2x: взят ${m.src.split('/').pop()}, нужен hero-768`);
   check(m.anim === 'none', `телефон: анимация «${m.anim}», нужна без неё`);

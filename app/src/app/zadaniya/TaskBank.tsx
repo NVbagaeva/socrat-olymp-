@@ -6,7 +6,7 @@ import { useId, useMemo, useState, useSyncExternalStore } from 'react';
 import { TaskGrid } from '@/components/tasks';
 import { VariantEntry } from '@/components/variant/VariantEntry';
 import { HandNote } from '@/components/ui';
-import type { ExamTask, TaskPart } from '@/content/tasks';
+import type { TaskPart } from '@/content/tasks';
 import { partRange, taskParts, tasks, tasksPage } from '@/content/tasks';
 
 import { assetUrl } from '@/lib/assetUrl';
@@ -65,14 +65,7 @@ function choosePart(next: TaskPart) {
   window.dispatchEvent(new Event(PART_EVENT));
 }
 
-export interface TaskBankProps {
-  /** Задание, которое открывается окном выбора подтемы. */
-  dialogSlug: string;
-  /** Открыть окно. Второй аргумент — карточка, от неё считается место. */
-  onOpenDialog: (task: ExamTask, card: HTMLElement) => void;
-}
-
-export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
+export function TaskBank() {
   const [query, setQuery] = useState('');
   const searchId = useId();
   /* Открытая часть живёт в адресе (?part=2), чтобы ссылка открывала
@@ -192,7 +185,7 @@ export function TaskBank({ dialogSlug, onOpenDialog }: TaskBankProps) {
       {shown.length === 0 ? (
         <p className="bank-empty">Ничего не найдено</p>
       ) : (
-        <TaskGrid bento tasks={shown} openInDialog={{ slug: dialogSlug, onOpen: onOpenDialog }} />
+        <TaskGrid bento tasks={shown} />
       )}
 
       <section className="bank-start">

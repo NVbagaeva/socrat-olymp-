@@ -105,9 +105,11 @@ const ALL_PAGES = [
   '/zadaniya/16/teoriya/',
   '/zadaniya/16/opornye-zadachi/',
   '/zadaniya/15/',
-  /* №12: страница подтем — лента строкой (SectionTabs), подтемы — над
-     лентой в той же строке плашка разделов (TopicTabs). */
+  /* №12: страница раздела — общая лента (RazdelTabs), как у №9–11;
+     подтемы — над лентой в той же строке плашка разделов (TopicTabs). */
   '/zadaniya/12/',
+  '/zadaniya/12/trenazher/',
+  '/zadaniya/12/zachyot/',
   '/zadaniya/12/irrational/',
   '/zadaniya/12/exponential/',
   '/zadaniya/12/logarithmic/',
