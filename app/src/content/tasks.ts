@@ -233,7 +233,9 @@ export const tasks = [
     stub: true,
     icon: 'svg',
   },
-  { no: '18', name: 'Планиметрия', slug: '18', part: 2, status: 'soon', stub: true, icon: 'svg' },
+  /* Раздел открыт вкладкой «Ключевые схемы» (lib/zadanie18, движок
+     чертежей lib/skhemy); остальные вкладки — заглушки. */
+  { no: '18', name: 'Планиметрия', slug: '18', part: 2, status: 'ready', icon: 'svg' },
   {
     no: '19',
     name: 'Задача с параметром',

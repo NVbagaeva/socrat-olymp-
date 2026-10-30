@@ -1,0 +1,859 @@
+/* Задание №18 «Планиметрия»: вкладка «Ключевые схемы».
+
+   Оболочка, лента вкладок и плашки — общие слои; здесь только своё:
+   вводная плашка, фильтры и плитки схем, страница схемы, панель
+   живого чертежа, карточки. Значения — только токены. Свои
+   блоки-якоря отступают под липкую ленту (docs/razdel-pravila.md). */
+
+.z18-head {
+  margin-bottom: var(--space-6);
+}
+
+.z18-vkladka {
+  display: grid;
+  gap: var(--flow-section);
+  min-width: 0;
+}
+
+/* ── Вводная плашка ─────────────────────────────────────────── */
+
+.z18-vv {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  padding: var(--space-6);
+  border: 1px solid var(--color-callout-zapomni-border);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, var(--color-surface-info), var(--color-surface) 55%)
+    padding-box;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+/* Полоса акцента сверху: плашка заметнее обычной «Запомни». */
+.z18-vv::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+}
+.z18-vv__ikonka {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.z18-vv__ikonka svg {
+  width: 44px;
+  height: 44px;
+}
+.z18-vv__metka {
+  margin: 0 0 var(--space-1);
+  color: var(--color-callout-zapomni-text);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.z18-vv__title {
+  margin: 0 0 var(--space-4);
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.z18-vv__tekst {
+  display: grid;
+  gap: var(--space-3);
+  color: var(--color-text-lead);
+  max-width: 72ch;
+}
+.z18-vv__tekst p {
+  margin: 0;
+}
+.z18-vv__tekst strong {
+  color: var(--color-text);
+}
+.z18-vv__niz {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-info);
+}
+.z18-vv__kak-title {
+  margin: 0 0 var(--space-3);
+  font-weight: 700;
+}
+.z18-vv__shagi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-vv__shagi li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z18-vv__shag-no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-size: 13px;
+  font-weight: 700;
+}
+.z18-vv__progress {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z18-vv__progress-tekst {
+  margin: 0;
+}
+.z18-vv__uchit {
+  justify-self: start;
+  margin-top: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .z18-vv {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-6);
+    padding: var(--space-8);
+  }
+  .z18-vv__niz {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* ── Фильтры и плитки ───────────────────────────────────────── */
+
+.z18-spisok-skhem {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.z18-spisok-skhem > h2 {
+  margin: 0;
+}
+.z18-filtry {
+  display: grid;
+  gap: var(--space-3);
+}
+.z18-filtry__ryad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z18-filtry__metka {
+  min-width: 64px;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z18-filtry .chip {
+  padding: var(--space-2) var(--space-4);
+}
+.z18-pusto {
+  color: var(--color-text-secondary);
+}
+.z18-gruppa {
+  display: grid;
+  gap: var(--space-3);
+}
+.z18-gruppa__title {
+  margin: var(--space-2) 0 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.z18-plitki {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-3);
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-plitka {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.z18-plitka:has(.z18-plitka__ssylka):hover {
+  border-color: var(--color-accent-soft);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.z18-plitka__ssylka {
+  display: grid;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  color: inherit;
+  text-decoration: none;
+  border-radius: inherit;
+}
+.z18-plitka__ssylka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.z18-plitka__mini {
+  display: block;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+.z18-mini .skh-tochka {
+  r: 2.2;
+}
+.z18-plitka__niz {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+.z18-plitka__no {
+  flex: none;
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+}
+.z18-plitka__nazvanie {
+  font-weight: 600;
+  line-height: 1.35;
+}
+.z18-plitka__status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z18-plitka__otkryt {
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z18-plitka--skoro {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-2);
+  box-shadow: none;
+  color: var(--color-text-secondary);
+}
+.z18-plitka--skoro .z18-plitka__nazvanie {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+}
+
+/* ── Страница схемы ─────────────────────────────────────────── */
+
+.z18-nazad {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  margin-bottom: var(--space-4);
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z18-nazad:hover {
+  text-decoration: underline;
+}
+.z18-sk__head {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+.z18-sk__head h2 {
+  margin: 0;
+}
+.z18-sk__eyebrow {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z18-sk__sut {
+  margin: 0;
+  color: var(--color-text-lead);
+  font-size: 17px;
+}
+.z18-sk__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+.z18-sk__tekst {
+  display: grid;
+  gap: var(--flow-block);
+  min-width: 0;
+  align-content: start;
+}
+/* Блоки после разбора: на широком экране — в две колонки. */
+.z18-sk__dalshe {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--flow-block);
+  margin-top: var(--flow-section);
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .z18-sk__dalshe {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-6) var(--space-8);
+  }
+}
+
+/* Телефон и планшет: чертёж прилипает под лентой, пока читаются
+   «Дано», следствия и доказательство, — подсветку видно, не листая
+   вверх. Обёртки чертежа «растворяются» (display: contents), чтобы
+   поле рисунка было прямым ребёнком сетки и липло на всю её высоту;
+   панель кнопок и величины уезжают вместе с текстом. */
+@media (max-width: 1023.98px) {
+  .z18-sk__chertezh,
+  .z18-sk__chertezh .z18-ch {
+    display: contents;
+  }
+  .z18-sk__grid {
+    gap: var(--space-4);
+  }
+  .z18-sk__chertezh .z18-ch__pole {
+    position: sticky;
+    top: var(--topic-sticky-top, 0px);
+    z-index: 2;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+  }
+  .z18-sk__chertezh .z18-ch__panel {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .z18-sk__grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: start;
+  }
+  .z18-sk__chertezh {
+    position: sticky;
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+  }
+}
+
+.z18-blok {
+  display: grid;
+  gap: var(--space-3);
+}
+.z18-blok > p {
+  margin: 0;
+}
+.z18-blok__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.z18-blok__podskazka {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-blok--dano {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-warm);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+}
+
+.z18-sled {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-sled__fakt {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.z18-sled__fakt:hover,
+.z18-sled__fakt.is-active {
+  border-color: var(--color-accent-soft);
+  background: var(--color-surface-info);
+}
+.z18-sled__fakt:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.z18-sled__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+.z18-sled__fakt.is-active .z18-sled__no {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z18-sled__tekst {
+  min-width: 0;
+}
+
+.z18-dok__toggle {
+  justify-self: start;
+}
+.z18-dok {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.z18-dok__tochki {
+  display: flex;
+  gap: var(--space-1);
+}
+.z18-dok__tochka {
+  flex: 1;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-track);
+  transition: background var(--dur-switch) var(--ease);
+}
+.z18-dok__tochka.is-done {
+  background: var(--color-accent-soft);
+}
+.z18-dok__tochka.is-active {
+  background: var(--color-primary);
+}
+.z18-dok__nomer {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z18-dok__tekst {
+  margin: 0;
+  animation: skh-poyavlenie var(--dur-reveal) var(--ease);
+}
+.z18-dok__knopki {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.z18-spisok {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+.z18-gde {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-gde li {
+  display: flex;
+  gap: var(--space-2);
+}
+.z18-gde__punkt {
+  flex: none;
+  min-width: 22px;
+  color: var(--color-accent-text);
+  font-weight: 700;
+}
+
+.z18-otmetka {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+.z18-otmetka__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z18-otmetka__metka,
+.z18-otmetka__korobka {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-otmetka__knopki {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.z18-sk__nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--flow-section);
+}
+.z18-sk__nav-link {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z18-sk__nav-link--vpered {
+  text-align: right;
+  margin-left: auto;
+}
+.z18-sk__nav-metka {
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+}
+
+/* ── Панель живого чертежа ──────────────────────────────────── */
+
+.z18-ch {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+.z18-ch__pole {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.z18-ch__shag {
+  position: absolute;
+  left: var(--space-2);
+  right: var(--space-2);
+  bottom: var(--space-2);
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-translucent);
+  color: var(--color-text-brand);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+}
+.z18-ch__panel {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+.z18-ch__povorot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z18-ch__povorot-metka {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z18-ch__povorot input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--color-primary);
+  height: 28px;
+}
+.z18-ch__povorot-chislo {
+  min-width: 40px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-ch__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z18-ch__knopki .btn {
+  gap: var(--space-1);
+}
+.z18-ch__ico {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.z18-ch__podpis {
+  display: grid;
+  gap: var(--space-2);
+}
+.z18-ch__znacheniya {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-ch__znacheniya li {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.z18-ch__tyani {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-ch__zametka {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-callout-vazhno);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft-surface);
+  font-size: var(--fs-caption);
+}
+
+/* ── Карточки ───────────────────────────────────────────────── */
+
+.z18-kart {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z18-kart > h2 {
+  margin: 0;
+}
+.z18-kart__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  max-width: 72ch;
+}
+.z18-kart__rezhimy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-kart__rezhim {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+.z18-kart__rezhim .btn {
+  justify-self: start;
+  margin-top: var(--space-2);
+}
+.z18-kart__rezhim-title {
+  margin: 0;
+  font-weight: 700;
+}
+.z18-kart__rezhim-tekst {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z18-kart__sessiya {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 560px;
+}
+.z18-kart__verh {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z18-kart__korobka {
+  margin-right: auto;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.z18-kart__otvety {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z18-kart__otvety .btn {
+  flex: 1 1 140px;
+}
+.z18-kart__podskazka {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+
+.z18-karta {
+  perspective: 1400px;
+  touch-action: pan-y;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform var(--dur-state) var(--ease);
+}
+.z18-karta__vnutri {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 560ms var(--ease);
+}
+.z18-karta.is-perevernuta .z18-karta__vnutri {
+  transform: rotateY(180deg);
+}
+.z18-karta__storona {
+  grid-area: 1 / 1;
+  display: grid;
+  gap: var(--space-3);
+  align-content: center;
+  min-height: 300px;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: border-color var(--dur-hover) var(--ease);
+}
+.z18-karta__storona--lico:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.z18-karta__storona--oborot {
+  transform: rotateY(180deg);
+  border-color: var(--color-border-info);
+  background: linear-gradient(180deg, var(--color-surface-info), var(--color-surface) 60%);
+}
+.z18-karta.is-znayu .z18-karta__storona--oborot {
+  border-color: var(--color-success);
+}
+.z18-karta.is-ne-znayu .z18-karta__storona--oborot {
+  border-color: var(--color-callout-vazhno);
+}
+.z18-karta__nazvanie {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.z18-karta__dano {
+  margin: 0;
+}
+.z18-karta__vopros {
+  margin: 0;
+  font-weight: 600;
+  text-align: center;
+}
+.z18-karta__podskazka {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+.z18-karta__spisok {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+.z18-kart__itog {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 560px;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.z18-kart__itog p {
+  margin: 0;
+}
+.z18-kart__itog-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+.z18-kart__itog-chisla {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: 18px;
+  font-weight: 700;
+}
+.z18-kart__itog-znayu {
+  color: var(--color-status-done-text);
+}
+.z18-kart__itog-povtorit {
+  color: var(--color-status-oshibki-text);
+}

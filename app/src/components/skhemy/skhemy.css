@@ -1,0 +1,229 @@
+/* Живые схемы (components/skhemy, движок lib/skhemy).
+
+   Цвета — только токены: линии — цвет осей чертежей (--graph-axis),
+   подсветка a — основной синий, b — акцент чертежей (терракота),
+   c — бирюзовый справочника. Толщины — те же ступени, что у движка
+   №1 (lib/planimetriya/stil.ts): линия 1,75 < выделенная 2,4.
+   Анимации отключает общее правило prefers-reduced-motion (base.css). */
+
+.skh {
+  --skh-ink: var(--graph-axis);
+  --skh-a: var(--color-primary);
+  --skh-b: var(--graph-accent);
+  --skh-c: var(--color-spr-svo);
+  --skh-bg: var(--color-surface);
+  --skh-cvet: var(--skh-a);
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.skh__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.skh-c-a {
+  --skh-cvet: var(--skh-a);
+}
+.skh-c-b {
+  --skh-cvet: var(--skh-b);
+}
+.skh-c-c {
+  --skh-cvet: var(--skh-c);
+}
+
+/* ── Линии ── */
+.skh-liniya line,
+.skh-shtrih {
+  stroke: var(--skh-ink);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  fill: none;
+  transition:
+    stroke var(--dur-switch) var(--ease),
+    stroke-width var(--dur-switch) var(--ease),
+    opacity var(--dur-switch) var(--ease);
+}
+.skh-shtrih {
+  stroke-width: 1.4;
+}
+.skh-punktir line {
+  stroke-dasharray: 5 4;
+  stroke-width: 1.4;
+}
+.skh-prodolzhenie line {
+  stroke-dasharray: 2 4;
+  stroke-width: 1.4;
+}
+.skh-liniya.is-lit line,
+.skh-liniya.is-lit .skh-shtrih {
+  stroke: var(--skh-cvet);
+  stroke-width: 2.4;
+}
+.skh-liniya.is-dim,
+.skh-okr.is-dim,
+.skh-ugol.is-dim,
+.skh-tochka.is-dim,
+.skh-podpis.is-dim {
+  opacity: 0.32;
+}
+
+/* ── Окружности ── */
+.skh-okr {
+  fill: none;
+  stroke: var(--skh-ink);
+  stroke-width: 1.5;
+  transition:
+    stroke var(--dur-switch) var(--ease),
+    opacity var(--dur-switch) var(--ease);
+}
+.skh-okr.skh-punktir {
+  stroke-dasharray: 6 5;
+}
+.skh-okr.is-lit {
+  stroke: var(--skh-cvet);
+  stroke-width: 1.75;
+  animation: skh-poyavlenie var(--dur-reveal) var(--ease);
+}
+
+/* ── Заливки и секторы ── */
+.skh-mnog {
+  fill: var(--skh-cvet);
+  fill-opacity: 0.14;
+  stroke: none;
+  animation: skh-poyavlenie var(--dur-reveal) var(--ease);
+}
+.skh-sektor {
+  fill: var(--skh-cvet);
+  fill-opacity: 0.18;
+  stroke: none;
+}
+
+/* ── Углы ── */
+.skh-ugol {
+  fill: none;
+  stroke: var(--skh-ink);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  transition:
+    stroke var(--dur-switch) var(--ease),
+    opacity var(--dur-switch) var(--ease);
+}
+.skh-ugol.is-lit {
+  stroke: var(--skh-cvet);
+  stroke-width: 1.75;
+}
+
+/* ── Точки и подписи ── */
+.skh-tochka {
+  fill: var(--skh-ink);
+  stroke: var(--skh-bg);
+  stroke-width: 1.2;
+  transition: fill var(--dur-switch) var(--ease);
+}
+.skh-tochka.is-lit {
+  fill: var(--skh-cvet);
+}
+.skh-podpis {
+  fill: var(--skh-ink);
+  font-size: 17px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  /* Белая обводка под буквой: линии под подписью не видны. */
+  paint-order: stroke;
+  stroke: var(--skh-bg);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  transition:
+    fill var(--dur-switch) var(--ease),
+    opacity var(--dur-switch) var(--ease);
+}
+.skh-podpis.is-lit {
+  fill: var(--skh-cvet);
+}
+.skh-indeks {
+  font-family: KaTeX_Main, 'Latin Modern Roman', 'Times New Roman', serif;
+  font-size: 12px;
+}
+
+/* ── Ручки перетаскивания ── */
+.skh-ruchka__kolco {
+  fill: var(--skh-a);
+  fill-opacity: 0.12;
+  stroke: var(--skh-a);
+  stroke-width: 1.25;
+  stroke-opacity: 0.55;
+  pointer-events: none;
+  transition:
+    fill-opacity var(--dur-hover) var(--ease),
+    stroke-opacity var(--dur-hover) var(--ease);
+}
+.skh-ruchka__zona {
+  fill: transparent;
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+}
+.skh-ruchka:hover .skh-ruchka__kolco,
+.skh-ruchka.is-active .skh-ruchka__kolco {
+  fill-opacity: 0.22;
+  stroke-opacity: 1;
+}
+.skh-ruchka__zona:focus-visible {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+}
+.skh.is-tyanem,
+.skh.is-tyanem .skh-ruchka__zona {
+  cursor: grabbing;
+}
+
+/* ── Пошаговое построение: новый элемент проявляется ── */
+.skh-liniya.is-novyy.skh-linia line {
+  stroke-dasharray: 1;
+  animation: skh-risovanie 640ms var(--ease) both;
+}
+.skh-liniya.is-novyy:not(.skh-linia),
+.skh-ugol.is-novyy,
+.skh-okr.is-novyy,
+.skh-podpis.is-novyy {
+  animation: skh-poyavlenie 480ms var(--ease) 240ms both;
+}
+.skh-tochka.is-novyy {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: skh-tochka 420ms var(--ease) 320ms both;
+}
+
+@keyframes skh-risovanie {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes skh-poyavlenie {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes skh-tochka {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
