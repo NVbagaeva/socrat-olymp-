@@ -262,9 +262,3 @@
 .z9-razbor .katex {
   white-space: nowrap;
 }
-
-/* Миниатюра группы в строке темы общего генератора: кружок значка 36 px. */
-.gen-trow__icon .z9-glyph {
-  width: 36px;
-  height: auto;
-}

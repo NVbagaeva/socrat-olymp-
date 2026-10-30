@@ -1,8 +1,8 @@
 /**
  * Группа IV. Оценка вероятности.
  *
- *   6.10  неравенство Чебышёва: $E(X)$, $D(X)$, событие «$X\leqslant E-\varepsilon$
- *         или $X\geqslant E+\varepsilon$» → оценка $\dfrac{D}{\varepsilon^2}$;
+ *   6.10  неравенство Чебышёва: $\mathrm{M}(X)$, $\mathrm{D}(X)$, событие «$X\leqslant \mathrm{M}(X)-\varepsilon$
+ *         или $X\geqslant \mathrm{M}(X)+\varepsilon$» → оценка $\dfrac{D}{\varepsilon^2}$;
  *   6.11  распределение → $P(a<Y<b)$ со строгими и нестрогими знаками,
  *         в том числе с границами, не совпадающими ни с одним значением.
  */
@@ -159,7 +159,7 @@ const P10: Prototype = {
   group: 'IV',
   title: 'Неравенство Чебышёва',
   formula:
-    '$P\\left(|X-E(X)|\\geqslant\\varepsilon\\right)\\leqslant\\dfrac{D(X)}{\\varepsilon^2}$',
+    '$P\\left(|X-\\mathrm{M}(X)|\\geqslant\\varepsilon\\right)\\leqslant\\dfrac{\\mathrm{D}(X)}{\\varepsilon^2}$',
   skills: ['otkloneniya'],
   istochnik: 'Оценка вероятности, №1',
   ris: () => undefined,
@@ -173,12 +173,12 @@ const P10: Prototype = {
     const vopr = `Найдите оценку вероятности события ${sob}, которую даёт неравенство Чебышёва.`;
     if (sj === undefined) {
       return {
-        text: `Про случайную величину $${v}$ известно, что $E(${v})=${t(E)}$ и $D(${v})=${t(D)}$. ${vopr}`,
+        text: `Про случайную величину $${v}$ известно, что $\\mathrm{M}(${v})=${t(E)}$ и $\\mathrm{D}(${v})=${t(D)}$. ${vopr}`,
       };
     }
     const s = CHEB.get(sj) as SyuzhetChebysheva;
     return {
-      text: `${s.kontekst} Случайная величина $${v}$ — ${s.velichina}; известно, что $E(${v})=${t(E)}$ и $D(${v})=${t(D)}$. ${vopr}`,
+      text: `${s.kontekst} Случайная величина $${v}$ — ${s.velichina}; известно, что $\\mathrm{M}(${v})=${t(E)}$ и $\\mathrm{D}(${v})=${t(D)}$. ${vopr}`,
     };
   },
   solve(p) {
@@ -198,14 +198,14 @@ const P10: Prototype = {
         {
           t: 'Переписываем событие через отклонение от среднего',
           lines: [
-            `$${t(E - eps)}=${t(E)}-${t(eps)}$ и $${t(E + eps)}=${t(E)}+${t(eps)}$: обе границы отстоят от $E(${v})=${t(E)}$ на одно и то же число $${t(eps)}$.`,
+            `$${t(E - eps)}=${t(E)}-${t(eps)}$ и $${t(E + eps)}=${t(E)}+${t(eps)}$: обе границы отстоят от $\\mathrm{M}(${v})=${t(E)}$ на одно и то же число $${t(eps)}$.`,
             `Значит, «$${sobytieCheb(v, E, eps)}$» — это событие $|${v}-${t(E)}|\\geqslant${t(eps)}$: величина отклонится от среднего не меньше чем на $\\varepsilon=${t(eps)}$.`,
           ],
         },
         {
           t: 'Применяем неравенство Чебышёва',
           lines: [
-            `$P\\left(|${v}-E(${v})|\\geqslant\\varepsilon\\right)\\leqslant\\dfrac{D(${v})}{\\varepsilon^2}=\\dfrac{${t(D)}}{${epsTex}}=\\dfrac{${t(D)}}{${tq(e2)}}=${tq(otv)}$.`,
+            `$P\\left(|${v}-\\mathrm{M}(${v})|\\geqslant\\varepsilon\\right)\\leqslant\\dfrac{\\mathrm{D}(${v})}{\\varepsilon^2}=\\dfrac{${t(D)}}{${epsTex}}=\\dfrac{${t(D)}}{${tq(e2)}}=${tq(otv)}$.`,
             `Это **оценка сверху**: вероятность события не больше $${tq(otv)}$.`,
             otvetLine(answer),
           ],
@@ -214,7 +214,7 @@ const P10: Prototype = {
       vychisleniya: [],
       hints: [
         vopros(
-          `Что значит «$${sobytieCheb(v, E, eps)}$» при $E(${v})=${t(E)}$?`,
+          `Что значит «$${sobytieCheb(v, E, eps)}$» при $\\mathrm{M}(${v})=${t(E)}$?`,
           `$|${v}-${t(E)}|\\geqslant${t(eps)}$`,
           [
             `$|${v}-${t(E)}|\\leqslant${t(eps)}$`,

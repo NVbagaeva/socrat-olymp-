@@ -1,0 +1,687 @@
+/*
+ * Тренажёр №6: стартовый экран (Vybor6) и экран задачи (Reshenie6).
+ * Карточки — как у .z6-zadacha: тонкая рамка, --radius-lg, белая
+ * поверхность. Цвета, отступы, тени и длительности — только токены.
+ * Нажимаемое — не меньше 44 px.
+ */
+
+/* ── Стартовый экран ─────────────────────────────────────────── */
+
+.z6t {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  max-width: 900px;
+}
+.z6t__head {
+  display: grid;
+  gap: var(--space-1);
+}
+.z6t__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z6t__hint {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.z6t-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+@media (min-width: 768px) {
+  .z6t-card {
+    padding: var(--space-5) var(--space-6);
+  }
+}
+.z6t-card__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+.z6t-card__title,
+.z6t-pole__label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Быстрый выбор: плитки шаблонов. */
+.z6t-shablony {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
+  gap: var(--space-2);
+}
+.z6t-shablon {
+  display: grid;
+  gap: var(--space-1);
+  min-height: 44px;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease),
+    box-shadow var(--dur-switch) var(--ease);
+}
+.z6t-shablon span {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.z6t-shablon:hover {
+  border-color: var(--color-border-info);
+  background: var(--color-surface-2);
+}
+.z6t-shablon:active {
+  background: var(--color-surface-soft);
+}
+.z6t-shablon[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+/* Флажок: нативный, крупнее и в цвете темы. */
+.z6t-check {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* Группы прототипов. */
+.z6t-gruppy {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z6t-gruppa {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease);
+}
+.z6t-gruppa.is-on {
+  border-color: var(--color-border-info);
+  background: color-mix(in srgb, var(--color-surface-info) 55%, transparent);
+}
+.z6t-gruppa__head {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+}
+.z6t-gruppa__label {
+  display: flex;
+  flex: 1;
+  gap: var(--space-3);
+  align-items: center;
+  min-width: 0;
+  min-height: 44px;
+  cursor: pointer;
+}
+.z6t-gruppa__label .ikonka-tela {
+  --ikonka-tela: 40px;
+}
+.z6t-gruppa__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.z6t-gruppa__text small {
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+/* Самые узкие экраны: значок и промежутки меньше — длинные слова названий влезают. */
+@media (max-width: 374.98px) {
+  .z6t-gruppa__head {
+    gap: var(--space-1);
+    padding-left: var(--space-2);
+  }
+  .z6t-gruppa__label {
+    gap: var(--space-2);
+  }
+  .z6t-gruppa__label .ikonka-tela {
+    --ikonka-tela: 32px;
+  }
+}
+.z6t-gruppa__body {
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.z6t-iconbtn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background var(--dur-hover) var(--ease);
+}
+.z6t-iconbtn:hover {
+  background: var(--color-surface-soft);
+}
+.z6t-iconbtn svg,
+.z6t-disclosure svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--dur-switch) var(--ease);
+}
+.z6t-iconbtn[aria-expanded='true'] svg,
+.z6t-disclosure[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+.z6t-chipy {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z6t-chip {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  height: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.z6t-chip:hover {
+  border-color: var(--color-border-info);
+}
+.z6t-chip.is-on {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.z6t-chip__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.z6t-chip__text small {
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+}
+
+/* Число задач, режим, дополнительно. */
+.z6t-nastroyki {
+  gap: var(--space-4);
+}
+.z6t-pole {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.z6t-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+}
+.z6t-seg__item {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    background var(--dur-switch) var(--ease),
+    color var(--dur-switch) var(--ease);
+}
+.z6t-seg__item:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+.z6t-seg__item.is-active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z6t-seg__item:has(:focus-visible),
+.z6t-rezhim:has(:focus-visible) {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.z6t-rezhimy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-2);
+  width: 100%;
+}
+.z6t-rezhim {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease),
+    box-shadow var(--dur-switch) var(--ease);
+}
+.z6t-rezhim span {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.z6t-rezhim:hover {
+  border-color: var(--color-border-info);
+}
+.z6t-rezhim.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.z6t-dop summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-primary);
+  font-weight: 500;
+  cursor: pointer;
+}
+.z6t-dop__body {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+/* «Начать»: прилипает к низу экрана, над нижней навигацией. */
+.z6t-start {
+  position: sticky;
+  bottom: var(--space-3);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+/* Нижняя навигация — до 1024 px; справа от панели — место кнопке «?» (52 px). */
+@media (max-width: 1023.98px) {
+  body:has(.bnav--shell) .z6t-start {
+    bottom: calc(var(--h-bnav) + var(--space-2) + env(safe-area-inset-bottom));
+  }
+  body:has(.help-fab) .z6t-start {
+    margin-right: calc(52px + var(--space-3));
+  }
+}
+.z6t-start__itog {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+.z6t-start__btn {
+  min-width: min(160px, 100%);
+}
+@media (max-width: 479px) {
+  .z6t-start__btn {
+    width: 100%;
+  }
+}
+
+/* ── Экран задачи ────────────────────────────────────────────── */
+
+.z6t-task {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  /* Переход к задаче прокручивает к её верху — под липкие вкладки. */
+  scroll-margin-top: 96px;
+}
+
+/* Точки-шаги и полоса прогресса. */
+.z6t-steps {
+  display: grid;
+  gap: var(--space-2);
+}
+.z6t-steps__bar {
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+}
+.z6t-steps__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+  transition: width var(--dur-state) var(--ease);
+}
+.z6t-steps__list {
+  display: flex;
+  gap: 2px;
+  margin: 0 calc(-1 * var(--space-1));
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+.z6t-steps__list::-webkit-scrollbar {
+  display: none;
+}
+/* Кнопка — 44 px для пальца, кружок внутри — 32 px. */
+.z6t-step {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.z6t-step span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  transition:
+    background var(--dur-switch) var(--ease),
+    border-color var(--dur-switch) var(--ease),
+    color var(--dur-switch) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.z6t-step:hover span {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.z6t-step:active span {
+  transform: scale(0.94);
+}
+.z6t-step:focus-visible {
+  outline: none;
+}
+.z6t-step:focus-visible span {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.z6t-step.is-right span {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.z6t-step.is-hinted span {
+  border-color: var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.z6t-step.is-wrong span {
+  border-color: var(--color-error);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.z6t-step.is-otvet span {
+  border-color: var(--color-border-info);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.z6t-step[aria-current='step'] span {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  color: var(--color-primary);
+}
+
+/* Условие: крупнее и просторнее. */
+.z6t-task__uslovie {
+  font-size: 17px;
+  line-height: 1.65;
+}
+@media (min-width: 768px) {
+  .z6t-task__uslovie {
+    font-size: 18px;
+  }
+}
+
+/* Поле ответа. */
+.z6t-otvet {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.z6t-otvet__label {
+  font-weight: 600;
+}
+.z6t-otvet__row {
+  display: flex;
+  gap: var(--space-2);
+}
+.z6t-otvet__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 280px;
+  height: var(--h-control-lg);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  /* Над нижней навигацией и клавиатурой телефона. */
+  scroll-margin-bottom: calc(var(--h-bnav) + var(--space-12));
+  transition:
+    border-color var(--dur-switch) var(--ease),
+    box-shadow var(--dur-switch) var(--ease),
+    background var(--dur-switch) var(--ease);
+}
+.z6t-otvet__input:focus-visible {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+.z6t-otvet__input[readonly] {
+  background: var(--color-surface-2);
+}
+.z6t-otvet.is-right .z6t-otvet__input {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-success) 16%, transparent);
+}
+.z6t-otvet.is-wrong .z6t-otvet__input {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 14%, transparent);
+}
+.z6t-otvet__btn {
+  height: var(--h-control-lg);
+}
+@media (pointer: coarse) {
+  .z6t__kbd {
+    display: none;
+  }
+}
+
+/* Вердикт: мягкая плашка, появляется плавно. */
+.z6t-verdikt-slot:empty {
+  display: none;
+}
+.z6t-verdikt {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  line-height: 1.45;
+  animation: z6t-poyavlenie var(--dur-state) var(--ease);
+}
+.z6t-verdikt__ico {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--color-text-inverse);
+  font-size: 13px;
+  font-weight: 700;
+}
+.z6t-verdikt.is-right {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.z6t-verdikt.is-right .z6t-verdikt__ico {
+  background: var(--color-success);
+  animation: z6t-galka var(--dur-state) var(--ease);
+}
+.z6t-verdikt.is-wrong {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.z6t-verdikt.is-wrong .z6t-verdikt__ico {
+  background: var(--color-error);
+}
+.z6t-verdikt.is-info {
+  background: var(--color-surface-info);
+  color: var(--color-text);
+}
+.z6t-verdikt.is-info .z6t-verdikt__ico {
+  background: var(--color-primary);
+}
+@keyframes z6t-poyavlenie {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes z6t-galka {
+  from {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+}
+
+/* Навигация: «Предыдущая» слева, «Пропустить» / «Следующая» справа. */
+.z6t-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+@media (max-width: 479px) {
+  .z6t-nav .btn {
+    flex: 1 1 0;
+  }
+}
+
+/* Подсказка и разбор: сворачиваемые блоки. */
+.z6t-help {
+  display: grid;
+  gap: var(--space-2);
+}
+.z6t-help__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z6t-disclosure {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--dur-hover) var(--ease),
+    border-color var(--dur-hover) var(--ease);
+}
+.z6t-disclosure:hover {
+  background: var(--color-surface-2);
+}
+.z6t-disclosure:active {
+  background: var(--color-surface-soft);
+}
+.z6t-disclosure[aria-expanded='true'] {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.z6t-panel:not([hidden]) {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  animation: z6t-poyavlenie var(--dur-state) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z6t-verdikt,
+  .z6t-verdikt__ico,
+  .z6t-panel:not([hidden]) {
+    animation: none;
+  }
+  .z6t-steps__bar span {
+    transition: none;
+  }
+}

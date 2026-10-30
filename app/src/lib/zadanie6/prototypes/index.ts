@@ -80,7 +80,7 @@ export const GROUPS: { id: GroupId; title: string; lead: string }[] = [
   {
     id: 'III',
     title: 'Математическое ожидание',
-    lead: 'Лотереи, распределения, частоты, страхование: $E(X)=\\sum x_ip_i$.',
+    lead: 'Лотереи, распределения, частоты, страхование: $\\mathrm{M}(X)=\\sum x_ip_i$.',
   },
   {
     id: 'IV',
@@ -90,7 +90,7 @@ export const GROUPS: { id: GroupId; title: string; lead: string }[] = [
   {
     id: 'V',
     title: 'Дисперсия',
-    lead: 'Несмещённая оценка по выборке, $D(X)=E(X^2)-\\left(E(X)\\right)^2$ и $\\sigma=\\sqrt{D}$.',
+    lead: 'Несмещённая оценка по выборке, $\\mathrm{D}(X)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2$ и $\\sigma=\\sqrt{\\mathrm{D}}$.',
   },
 ];
 

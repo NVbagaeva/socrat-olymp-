@@ -2,7 +2,7 @@
  * «Опорные задачи» задания №6: семь блоков навыков по 10 коротких
  * задач — то, из чего складывается любая задача №6: сложить вероятности,
  * перевести частоты в вероятности, умножить по дереву, строка $x_ip_i$,
- * $E(X^2)$ и квадрат $E$, отклонения от среднего, значения в промежутке.
+ * $\mathrm{M}(X^2)$ и квадрат $\mathrm{M}$, отклонения от среднего, значения в промежутке.
  *
  * Задачи свои (не из открытого банка), ответ — целое или конечная
  * десятичная дробь. Числа считаются в целых долях (сотых), поэтому
@@ -220,17 +220,17 @@ const STROKA_XP: MikroZadacha[] = XP_DANNYE.map(({ xs, ps }, i) => {
   const sum = xs.reduce((acc, x, j) => acc + x * (ps[j] as number), 0);
   return {
     id: `xp-${i + 1}`,
-    uslovie: `$X\\sim\\begin{pmatrix}${xs.map(d).join('&')}\\\\${ps.map(s).join('&')}\\end{pmatrix}$. Найдите $E(X)$.`,
+    uslovie: `$X\\sim\\begin{pmatrix}${xs.map(d).join('&')}\\\\${ps.map(s).join('&')}\\end{pmatrix}$. Найдите $\\mathrm{M}(X)$.`,
     answer: okr(sum / 100),
     podskazka: 'Строка $x_ip_i$: каждое значение умножаем на его вероятность, потом складываем.',
     razbor: [
-      `$E(X)=${xs.map((x, j) => (x === 1 ? s(ps[j] as number) : `${sk(x)}\\cdot${s(ps[j] as number)}`)).join('+')}=${s(sum)}$.`,
+      `$\\mathrm{M}(X)=${xs.map((x, j) => (x === 1 ? s(ps[j] as number) : `${sk(x)}\\cdot${s(ps[j] as number)}`)).join('+')}=${s(sum)}$.`,
     ],
     proverka: () => xs.map((x, j) => (x * (ps[j] as number)) / 100).reduce((a, b) => a + b, 0),
   };
 });
 
-/* ── 5. E(X²) и квадрат E ──────────────────────────────────────── */
+/* ── 5. M(X²) и квадрат M ──────────────────────────────────────── */
 
 const KV_DANNYE: { xs: number[]; ps: number[]; chto: 'E2' | 'D' }[] = [
   { xs: [0, 1, 2], ps: [30, 40, 30], chto: 'E2' },
@@ -252,20 +252,20 @@ const KVADRAT_E: MikroZadacha[] = KV_DANNYE.map(({ xs, ps, chto }, i) => {
   const zapis = `$X\\sim\\begin{pmatrix}${xs.map(d).join('&')}\\\\${ps.map(s).join('&')}\\end{pmatrix}$`;
   return {
     id: `kv-${i + 1}`,
-    uslovie: chto === 'E2' ? `${zapis}. Найдите $E(X^2)$.` : `${zapis}. Найдите $D(X)$.`,
+    uslovie: chto === 'E2' ? `${zapis}. Найдите $\\mathrm{M}(X^2)$.` : `${zapis}. Найдите $\\mathrm{D}(X)$.`,
     answer: okr(otvet),
     podskazka:
       chto === 'E2'
-        ? 'Квадраты значений умножаем на вероятности и складываем: $E(X^2)=\\sum x_i^2p_i$.'
-        : 'Сначала $E(X)$ и $E(X^2)$, потом $D=E(X^2)-\\left(E(X)\\right)^2$.',
+        ? 'Квадраты значений умножаем на вероятности и складываем: $\\mathrm{M}(X^2)=\\sum x_i^2p_i$.'
+        : 'Сначала $\\mathrm{M}(X)$ и $\\mathrm{M}(X^2)$, потом $\\mathrm{D}=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2$.',
     razbor:
       chto === 'E2'
         ? [
-            `$E(X^2)=${xs.map((x, j) => `${d(x * x)}\\cdot${s(ps[j] as number)}`).join('+')}=${d(okr(e2))}$.`,
+            `$\\mathrm{M}(X^2)=${xs.map((x, j) => `${d(x * x)}\\cdot${s(ps[j] as number)}`).join('+')}=${d(okr(e2))}$.`,
           ]
         : [
-            `$E(X)=${d(okr(e))}$, $E(X^2)=${d(okr(e2))}$.`,
-            `$D(X)=${d(okr(e2))}-${e < 0 ? `(${d(okr(e))})` : d(okr(e))}^2=${d(okr(otvet))}$.`,
+            `$\\mathrm{M}(X)=${d(okr(e))}$, $\\mathrm{M}(X^2)=${d(okr(e2))}$.`,
+            `$\\mathrm{D}(X)=${d(okr(e2))}-${e < 0 ? `(${d(okr(e))})` : d(okr(e))}^2=${d(okr(otvet))}$.`,
           ],
     proverka: () =>
       chto === 'E2'
@@ -427,7 +427,7 @@ export const BLOKI_OPORNYH: BlokOpornyh[] = [
     no: 4,
     nazvanie: 'Строка «значение на вероятность»',
     opisanie: 'Математическое ожидание по таблице распределения.',
-    zapomni: '$E(X)=x_1p_1+x_2p_2+\\ldots$ — добавляем строку $x_ip_i$ и складываем.',
+    zapomni: '$\\mathrm{M}(X)=x_1p_1+x_2p_2+\\ldots$ — добавляем строку $x_ip_i$ и складываем.',
     prototipy: ['P06', 'P07', 'P09'],
     zadachi: STROKA_XP,
   },
@@ -437,7 +437,7 @@ export const BLOKI_OPORNYH: BlokOpornyh[] = [
     no: 5,
     nazvanie: 'Среднее квадрата и квадрат среднего',
     opisanie: 'Дисперсия по распределению в два шага.',
-    zapomni: '$E(X^2)=\\sum x_i^2p_i$, $D(X)=E(X^2)-\\left(E(X)\\right)^2$.',
+    zapomni: '$\\mathrm{M}(X^2)=\\sum x_i^2p_i$, $\\mathrm{D}(X)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2$.',
     prototipy: ['P13', 'P14', 'P15'],
     zadachi: KVADRAT_E,
   },

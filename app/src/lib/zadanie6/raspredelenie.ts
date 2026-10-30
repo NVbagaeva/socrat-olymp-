@@ -1,6 +1,6 @@
 /**
  * Общее для прототипов с распределением (6.6, 6.7, 6.11, 6.13–6.15):
- * таблица и запись $X\sim(\ldots)$, точные $E(X)$, $E(X^2)$, $D(X)$,
+ * таблица и запись $X\sim(\ldots)$, точные $\mathrm{M}(X)$, $\mathrm{M}(X^2)$, $\mathrm{D}(X)$,
  * строки решения «$x_ip_i$» и «$x_i^2p_i$» прямо в таблице.
  *
  * Параметры: `xs` — значения по возрастанию, `ps` — вероятности в целых
@@ -145,7 +145,7 @@ export function tablicaReshenia(r: Raspr, sKvadratami: boolean): Tablica {
   return { stroki, vydelitStroki: sKvadratami ? [2, 3] : [2] };
 }
 
-/** Сумма строки $x_ip_i$: «$E(X)=…=3{,}9$». */
+/** Сумма строки $x_ip_i$: «$\mathrm{M}(X)=…=3{,}9$». */
 export function formulaE(r: Raspr): string {
   const E = ozhidanie(r);
   const sl = r.xs.map((_, i) => slagaemoeXP(r, i));
@@ -153,14 +153,14 @@ export function formulaE(r: Raspr): string {
     const v = mul(q(x), r.p[i] as Q);
     return v.n < 0 ? `(${qTex(r, v)})` : qTex(r, v);
   });
-  return `E(${r.v})=${plus(sl)}=${plus(zn)}=${qTex(r, E)}`;
+  return `\\mathrm{M}(${r.v})=${plus(sl)}=${plus(zn)}=${qTex(r, E)}`;
 }
 
 export function formulaEKv(r: Raspr): string {
   const E2 = ozhidanieKv(r);
   const sl = r.xs.map((_, i) => slagaemoeX2P(r, i));
   const zn = r.xs.map((x, i) => qTex(r, mul(q(x * x), r.p[i] as Q)));
-  return `E(${r.v}^2)=${plus(sl)}=${plus(zn)}=${qTex(r, E2)}`;
+  return `\\mathrm{M}(${r.v}^2)=${plus(sl)}=${plus(zn)}=${qTex(r, E2)}`;
 }
 
 /** Проверка распределения одной строкой: сумма вероятностей равна 1. */
@@ -174,7 +174,7 @@ function kvadratTex(r: Raspr, x: Q): string {
   return x.n < 0 || (r.obyk && x.m !== 1) ? `\\left(${s}\\right)^2` : `${s}^2`;
 }
 
-/** Шаги «$E(X)$ → $E(X^2)$ → $D(X)$» для 6.13–6.15. */
+/** Шаги «$\mathrm{M}(X)$ → $\mathrm{M}(X^2)$ → $\mathrm{D}(X)$» для 6.13–6.15. */
 export function shagiD(r: Raspr): { etapy: Etap[]; E: Q; E2: Q; D: Q } {
   const E = ozhidanie(r);
   const E2 = ozhidanieKv(r);
@@ -186,7 +186,7 @@ export function shagiD(r: Raspr): { etapy: Etap[]; E: Q; E2: Q; D: Q } {
     D,
     etapy: etapy(
       {
-        t: `Находим $E(${v})$ — строка $x_ip_i$`,
+        t: `Находим $\\mathrm{M}(${v})$ — строка $x_ip_i$`,
         lines: [
           strokaProverki(r),
           'Добавляем к таблице строки $x_ip_i$ и $x_i^2p_i$ и складываем первую из них:',
@@ -195,13 +195,13 @@ export function shagiD(r: Raspr): { etapy: Etap[]; E: Q; E2: Q; D: Q } {
         tablica: tablicaReshenia(r, true),
       },
       {
-        t: `Находим $E(${v}^2)$ — строка $x_i^2p_i$`,
+        t: `Находим $\\mathrm{M}(${v}^2)$ — строка $x_i^2p_i$`,
         lines: [`$${formulaEKv(r)}$.`],
       },
       {
         t: 'Дисперсия: среднее квадрата минус квадрат среднего',
         lines: [
-          `$D(${v})=E(${v}^2)-\\left(E(${v})\\right)^2=${qTex(r, E2)}-${kvadratTex(r, E)}=${qTex(r, E2)}-${qTex(r, mul(E, E))}=${qTex(r, D)}${r.obyk && D.m !== 1 ? `=${tq(D)}` : ''}$.`,
+          `$\\mathrm{D}(${v})=\\mathrm{M}(${v}^2)-\\left(\\mathrm{M}(${v})\\right)^2=${qTex(r, E2)}-${kvadratTex(r, E)}=${qTex(r, E2)}-${qTex(r, mul(E, E))}=${qTex(r, D)}${r.obyk && D.m !== 1 ? `=${tq(D)}` : ''}$.`,
         ],
       },
     ),

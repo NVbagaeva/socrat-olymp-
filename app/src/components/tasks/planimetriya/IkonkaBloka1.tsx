@@ -1,11 +1,9 @@
-import { clsx } from 'clsx';
-import { useId } from 'react';
 import type { ReactNode } from 'react';
-import '@/components/stereo/ikonka-tela.css';
+import { IkonkaNomer, IkonkaVKruge, IT } from '@/components/ui/IkonkaVKruge';
 
 /**
  * Значки блоков I–X задания №1 — фигура в стеклянном круге, как значки
- * тел №3 (components/stereo/IkonkaTela): тот же круг, те же классы и
+ * тел №3 (components/stereo/IkonkaTela): та же рамка (ui/IkonkaVKruge), те же классы и
  * цвета из токенов. Линии фигуры синие, заливка — голубое стекло,
  * акцент типа задач оранжевым: дуга угла, средняя линия, вписанная или
  * описанная окружность, касательная.
@@ -15,12 +13,11 @@ import '@/components/stereo/ikonka-tela.css';
  */
 
 /* Части рисунка: v — линия фигуры, a — акцент, t — точка. */
-const V = 'it-v';
-const A = 'it-a';
-const T = 'it-t';
+const V = IT.v;
+const A = IT.a;
+const T = IT.t;
 
-function risunok(blok: string, steklo: string): ReactNode {
-  const fill = `url(#${steklo})`;
+function risunok(blok: string, fill: string): ReactNode {
   switch (blok) {
     case 'I':
       /* Углы в треугольнике: треугольник и дуга угла. */
@@ -124,27 +121,9 @@ function risunok(blok: string, steklo: string): ReactNode {
 }
 
 export function IkonkaBloka1({ blok, className }: { blok: string; className?: string }) {
-  /* Своя заливка у каждого значка: id без двоеточий — для Safari. */
-  const steklo = `ib1-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
-  const pic = risunok(blok, steklo);
-  if (pic === null) {
-    return (
-      <span className={clsx('ikonka-tela ikonka-tela--nomer', className)} aria-hidden="true">
-        <span className="no-math-check">{blok || '•'}</span>
-      </span>
-    );
+  const cls = className === undefined ? {} : { className };
+  if (risunok(blok, '') === null) {
+    return <IkonkaNomer nomer={blok || '•'} {...cls} />;
   }
-  return (
-    <span className={clsx('ikonka-tela', className)} aria-hidden="true">
-      <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-        <defs>
-          <linearGradient id={steklo} x1="0" y1="0" x2="0.4" y2="1">
-            <stop offset="0" className="it-g0" />
-            <stop offset="1" className="it-g1" />
-          </linearGradient>
-        </defs>
-        {pic}
-      </svg>
-    </span>
-  );
+  return <IkonkaVKruge risunok={(steklo) => risunok(blok, steklo)} {...cls} />;
 }

@@ -2,13 +2,13 @@
  * Группа III. Математическое ожидание.
  *
  *   6.4  лотерея: всего N билетов, таблица «выигрыш — число выигрышных
- *        билетов» → E(выигрыша на один билет); проигрышные билеты —
+ *        билетов» → M(выигрыша на один билет); проигрышные билеты —
  *        N минус выигрышные, их выигрыш 0;
- *   6.5  беспроигрышная лотерея, цена билета → на сколько цена выше E;
- *   6.6  распределение таблицей → E(X);
- *   6.7  распределение записью X ∼ (…) → E(X);
- *   6.8  частоты «из 100 покупателей…» → E(количества в одной покупке);
- *   6.9  страхование: выплата, её вероятность и E(дохода) → цена полиса.
+ *   6.5  беспроигрышная лотерея, цена билета → на сколько цена выше M;
+ *   6.6  распределение таблицей → M(X);
+ *   6.7  распределение записью X ∼ (…) → M(X);
+ *   6.8  частоты «из 100 покупателей…» → M(количества в одной покупке);
+ *   6.9  страхование: выплата, её вероятность и M(дохода) → цена полиса.
  */
 
 import {
@@ -429,7 +429,7 @@ const P04: Prototype = {
   no: 4,
   group: 'III',
   title: 'Лотерея: выигрыш на один билет',
-  formula: '$E=\\dfrac{\\sum x_i\\cdot n_i}{N}$, проигрышные билеты — с выигрышем $0$',
+  formula: '$\\mathrm{M}=\\dfrac{\\sum x_i\\cdot n_i}{N}$, проигрышные билеты — с выигрышем $0$',
   skills: ['chastoty', 'stroka-xp'],
   istochnik: 'Математическое ожидание, №1, 4, 9',
   ris: (p) => ({ vid: 'tablica', tablica: tablicaLotterei(p, false) }),
@@ -496,13 +496,13 @@ const P04: Prototype = {
         {
           t: 'Считаем математическое ожидание',
           lines: [
-            `$E=\\sum x_ip_i=\\dfrac{${umn('0', t(pusto))}+${plus(slagaemyeWC(w, c))}}{${t(N)}}=\\dfrac{${t(S)}}{${t(N)}}=${tq(E)}$.`,
+            `$\\mathrm{M}=\\sum x_ip_i=\\dfrac{${umn('0', t(pusto))}+${plus(slagaemyeWC(w, c))}}{${t(N)}}=\\dfrac{${t(S)}}{${t(N)}}=${tq(E)}$.`,
             `В среднем на один ${ed.bilet} приходится $${tq(E)}$ ${edinicaOtveta(answer, ed.rub)} — это и есть «${ed.v} на один ${ed.bilet}».`,
             otvetLine(answer),
           ],
         },
       ),
-      vychisleniya: schitaem(S, N, 'E'),
+      vychisleniya: schitaem(S, N, '\\mathrm{M}'),
       hints: [
         vopros(
           `Сколько ${ed.biletov} ничего не выигрывают?`,
@@ -554,7 +554,7 @@ const P05: Prototype = {
   no: 5,
   group: 'III',
   title: 'Беспроигрышная лотерея: цена и ожидание выигрыша',
-  formula: '$\\text{цена}-E$, где $E=\\dfrac{\\sum x_i\\cdot n_i}{N}$',
+  formula: '$\\text{цена}-\\mathrm{M}$, где $\\mathrm{M}=\\dfrac{\\sum x_i\\cdot n_i}{N}$',
   skills: ['chastoty', 'stroka-xp'],
   istochnik: 'Математическое ожидание, №2, 5',
   ris: (p) => ({ vid: 'tablica', tablica: tablicaLotterei(p, true) }),
@@ -598,7 +598,7 @@ const P05: Prototype = {
         {
           t: 'Считаем математическое ожидание выигрыша',
           lines: [
-            `Вероятность выигрыша — доля таких ${ed.biletov} среди всех $${t(N)}$: $E=\\dfrac{${plus(slagaemyeWC(w, c))}}{${t(N)}}=\\dfrac{${t(S)}}{${t(N)}}=${tq(E)}$.`,
+            `Вероятность выигрыша — доля таких ${ed.biletov} среди всех $${t(N)}$: $\\mathrm{M}=\\dfrac{${plus(slagaemyeWC(w, c))}}{${t(N)}}=\\dfrac{${t(S)}}{${t(N)}}=${tq(E)}$.`,
           ],
         },
         {
@@ -609,7 +609,7 @@ const P05: Prototype = {
           ],
         },
       ),
-      vychisleniya: schitaem(S, N, 'E'),
+      vychisleniya: schitaem(S, N, '\\mathrm{M}'),
       hints: [
         vopros('На что делим общую сумму выигрышей?', `на число всех ${ed.biletov}, $${t(N)}$`, [
           `на число столбцов таблицы, $${w.length}$`,
@@ -645,7 +645,7 @@ const P05: Prototype = {
   },
 };
 
-/* ════════════════════ 6.6 и 6.7: E(X) по распределению ════════════════════ */
+/* ════════════════════ 6.6 и 6.7: M(X) по распределению ════════════════════ */
 
 function vstupleniyeVelichiny(p: Params): { kontekst: string; velichina: string } | null {
   const sj = strOpt(p, 'sj');
@@ -695,7 +695,7 @@ function reshenieE(p: Params): Solved {
     ),
     vychisleniya: [],
     hints: [
-      vopros(`Как найти $E(${r.v})$?`, 'сложить произведения значений на их вероятности', [
+      vopros(`Как найти $\\mathrm{M}(${r.v})$?`, 'сложить произведения значений на их вероятности', [
         'сложить значения и разделить на их число',
         'сложить вероятности',
         'взять значение с наибольшей вероятностью',
@@ -705,7 +705,7 @@ function reshenieE(p: Params): Solved {
         `$${slagaemoeXP(r, imax)}=${tq(xp)}$`,
         [`$${t(r.xs[imax] as number)}+${pTex(r, imax)}$`, `$${pTex(r, imax)}$`],
       ),
-      vopros(`Чему равно $E(${r.v})$?`, `$${tq(E)}$`, lovushki(E, [srednee, sumX, q(1)])),
+      vopros(`Чему равно $\\mathrm{M}(${r.v})$?`, `$${tq(E)}$`, lovushki(E, [srednee, sumX, q(1)])),
     ],
   };
 }
@@ -715,7 +715,7 @@ const P06: Prototype = {
   no: 6,
   group: 'III',
   title: 'Распределение таблицей: математическое ожидание',
-  formula: '$E(X)=x_1p_1+x_2p_2+\\ldots+x_np_n$',
+  formula: '$\\mathrm{M}(X)=x_1p_1+x_2p_2+\\ldots+x_np_n$',
   skills: ['stroka-xp'],
   istochnik: 'Математическое ожидание, №3',
   ris: (p) => ({ vid: 'tablica', tablica: tablicaRaspr(raspr(p)) }),
@@ -725,14 +725,14 @@ const P06: Prototype = {
     const s = vstupleniyeVelichiny(p);
     if (s === null) {
       return {
-        text: `В таблице показано распределение случайной величины $${r.v}$. Найдите $E(${r.v})$ — математическое ожидание этой случайной величины.`,
+        text: `В таблице показано распределение случайной величины $${r.v}$. Найдите $\\mathrm{M}(${r.v})$ — математическое ожидание этой случайной величины.`,
         ris,
       };
     }
     return {
       text: `${s.kontekst} В таблице показано распределение случайной величины $${r.v}$ — ${s.velichina}.`,
       ris,
-      posle: `Найдите $E(${r.v})$ — математическое ожидание этой случайной величины.`,
+      posle: `Найдите $\\mathrm{M}(${r.v})$ — математическое ожидание этой случайной величины.`,
     };
   },
   solve: reshenieE,
@@ -750,7 +750,7 @@ const P07: Prototype = {
   no: 7,
   group: 'III',
   title: 'Распределение записью $X\\sim(\\ldots)$: математическое ожидание',
-  formula: '$E(X)=x_1p_1+x_2p_2+\\ldots+x_np_n$',
+  formula: '$\\mathrm{M}(X)=x_1p_1+x_2p_2+\\ldots+x_np_n$',
   skills: ['stroka-xp'],
   istochnik: 'Математическое ожидание, №6',
   ris: (p) => ({ vid: 'zapis', tex: zapisTex(raspr(p)) }),
@@ -1092,7 +1092,7 @@ const P08: Prototype = {
   no: 8,
   group: 'III',
   title: 'Частоты «из 100 покупателей»: ожидание количества в покупке',
-  formula: '$p_i=\\dfrac{n_i}{100}$, $E=\\sum x_ip_i$',
+  formula: '$p_i=\\dfrac{n_i}{100}$, $\\mathrm{M}=\\sum x_ip_i$',
   skills: ['chastoty', 'stroka-xp'],
   istochnik: 'Математическое ожидание, №7',
   ris: () => undefined,
@@ -1143,7 +1143,7 @@ const P08: Prototype = {
         {
           t: 'Считаем математическое ожидание',
           lines: [
-            `$E=${plus(bezNulya)}=${plus(xs.map((x, i) => tq(mul(q(x), ps[i] as Q))))}=${tq(E)}$.`,
+            `$\\mathrm{M}=${plus(bezNulya)}=${plus(xs.map((x, i) => tq(mul(q(x), ps[i] as Q))))}=${tq(E)}$.`,
             otvetLine(answer),
           ],
         },
@@ -1320,7 +1320,7 @@ const P09: Prototype = {
   no: 9,
   group: 'III',
   title: 'Страхование: стоимость полиса по ожидаемому доходу',
-  formula: '$E(\\text{дохода})=c-V\\cdot p$, отсюда $c=E+V\\cdot p$',
+  formula: '$\\mathrm{M}(\\text{дохода})=c-V\\cdot p$, отсюда $c=\\mathrm{M}+V\\cdot p$',
   skills: ['stroka-xp'],
   istochnik: 'Математическое ожидание, №8',
   ris: () => undefined,
@@ -1366,7 +1366,7 @@ const P09: Prototype = {
         {
           t: 'Находим математическое ожидание дохода',
           lines: [
-            `$E=c\\cdot${tq(ne)}+(c-${t(V)})\\cdot${tq(pr)}=c-${t(V)}\\cdot${tq(pr)}=c-${tq(Vp)}$.`,
+            `$\\mathrm{M}=c\\cdot${tq(ne)}+(c-${t(V)})\\cdot${tq(pr)}=c-${t(V)}\\cdot${tq(pr)}=c-${tq(Vp)}$.`,
           ],
         },
         {

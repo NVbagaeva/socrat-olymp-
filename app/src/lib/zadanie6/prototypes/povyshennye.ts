@@ -66,14 +66,14 @@ function sluchayText(p: Params): { nachalo: string; sluchay: string } {
  * Как 6.9 (P09), но суммы в тысячах рублей: выплата V тыс. руб. с
  * вероятностью pn/pden, ожидаемый доход компании с полиса R тыс. руб.;
  * найти цену полиса в тысячах рублей. Подвох тот же: доход — случайная
- * величина «c или c − V», E = c − V·p, а не c − V.
+ * величина «c или c − V», M = c − V·p, а не c − V.
  */
 export const PV6_STRAHOVKA_TYS: Prototype = {
   id: 'pv6-strahovka-tys',
   no: 9,
   group: 'III',
   title: 'Страхование: стоимость полиса по ожидаемому доходу, в тысячах рублей',
-  formula: '$E(\\text{дохода})=c-V\\cdot p$, отсюда $c=E+V\\cdot p$',
+  formula: '$\\mathrm{M}(\\text{дохода})=c-V\\cdot p$, отсюда $c=\\mathrm{M}+V\\cdot p$',
   skills: ['stroka-xp'],
   istochnik: '',
   ris: () => undefined,
@@ -108,7 +108,7 @@ export const PV6_STRAHOVKA_TYS: Prototype = {
         {
           t: 'Находим математическое ожидание дохода',
           lines: [
-            `$E=c\\cdot${tq(ne)}+(c-${t(V)})\\cdot${tq(pr)}=c-${t(V)}\\cdot${tq(pr)}=c-${tq(Vp)}$.`,
+            `$\\mathrm{M}=c\\cdot${tq(ne)}+(c-${t(V)})\\cdot${tq(pr)}=c-${t(V)}\\cdot${tq(pr)}=c-${tq(Vp)}$.`,
           ],
         },
         {

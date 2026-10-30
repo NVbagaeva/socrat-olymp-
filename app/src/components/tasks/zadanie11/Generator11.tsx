@@ -2,10 +2,9 @@
 
 import { useMemo } from 'react';
 import { Generator } from '@/components/generator/Generator';
+import { ikonkiTem } from '@/components/generator/IkonkiTem';
 import { config11, engine11 } from '@/lib/zadanie11/generator11';
 import type { RazdelInfo, UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
-import type { SectionId } from '@/lib/zadanie11/types';
-import { IkonkaRazdela } from './Piktogrammy';
 
 /**
  * Вкладка «Генератор» задания №11: общий генератор (components/generator/)
@@ -26,15 +25,7 @@ export function Generator11({
     () => engine11(config, razdely, bank, base),
     [config, razdely, bank, base],
   );
-  const icons = useMemo(
-    () =>
-      Object.fromEntries(
-        razdely.map((r) => [
-          r.id,
-          <IkonkaRazdela key={r.id} section={r.id as SectionId} className="gen-z11-ikonka" />,
-        ]),
-      ),
-    [razdely],
-  );
+  /* Значки тем — рисунки в стеклянном круге, как у тел №3. */
+  const icons = useMemo(() => ikonkiTem('11', config.topics), [config]);
   return <Generator config={config} engine={engine} icons={icons} />;
 }
