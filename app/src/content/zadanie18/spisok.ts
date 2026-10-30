@@ -8,6 +8,10 @@ import { SKHEMA_BISSEKTRISA } from './bissektrisa';
 import { SKHEMA_MEDIANA } from './mediana';
 import { SKHEMA_RAVNYE_UGLY } from './ravnyeUgly';
 import { SKHEMA_SEKUSHCHIE } from './sekushchie';
+import { SKHEMA_PRYAMYE_UGLY } from './pryamyeUgly';
+import { SKHEMA_TREZUBEC } from './trezubec';
+import { SKHEMA_UGLY_DUGI } from './uglyDugi';
+import { SKHEMA_VPISANNYY } from './vpisannyy';
 import { SKHEMA_VYSOTY } from './vysoty';
 
 export const SPISOK_SKHEM: readonly SkhemaVSpiske[] = [
@@ -71,7 +75,7 @@ export const SPISOK_SKHEM: readonly SkhemaVSpiske[] = [
     no: 9,
     id: 'chetyrekhugolniki',
     gruppa: 'okruzhnost',
-    nazvanie: 'Вписанный и описанный четырёхугольник',
+    nazvanie: 'Вписанный четырёхугольник',
     klassicheskaya: false,
   },
   {
@@ -139,6 +143,10 @@ export const SOBRANNYE: readonly Skhema18[] = [
   SKHEMA_MEDIANA,
   SKHEMA_SEKUSHCHIE,
   SKHEMA_RAVNYE_UGLY,
+  SKHEMA_PRYAMYE_UGLY,
+  SKHEMA_TREZUBEC,
+  SKHEMA_UGLY_DUGI,
+  SKHEMA_VPISANNYY,
 ];
 
 export function skhema18(id: string): Skhema18 | undefined {

@@ -8,6 +8,10 @@ import { BISSEKTRISA } from './bissektrisa';
 import { MEDIANA } from './mediana';
 import { RAVNYE_UGLY } from './ravnyeUgly';
 import { SEKUSHCHIE } from './sekushchie';
+import { PRYAMYE_UGLY } from './pryamyeUgly';
+import { TREZUBEC } from './trezubec';
+import { UGLY_DUGI } from './uglyDugi';
+import { VPISANNYY } from './vpisannyy';
 import { VYSOTY } from './vysoty';
 
 const REESTR: Readonly<Record<string, ZhivayaSkhema>> = {
@@ -16,6 +20,10 @@ const REESTR: Readonly<Record<string, ZhivayaSkhema>> = {
   'udvoenie-mediany': MEDIANA,
   'dve-sekushchie': SEKUSHCHIE,
   'ravnye-ugly': RAVNYE_UGLY,
+  'pryamye-ugly': PRYAMYE_UGLY,
+  trezubec: TREZUBEC,
+  'ugly-i-dugi': UGLY_DUGI,
+  chetyrekhugolniki: VPISANNYY,
 };
 
 export function zhivayaSkhema18(id: string): ZhivayaSkhema | undefined {

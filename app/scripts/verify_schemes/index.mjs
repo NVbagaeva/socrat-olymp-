@@ -14,13 +14,27 @@ import { requireSrc } from '../lib/load-ts.mjs';
 import { zerno } from './obshchee.mjs';
 import { proverit as bissektrisa } from './bissektrisa.mjs';
 import { proverit as mediana } from './mediana.mjs';
+import { proverit as pryamyeUgly } from './pryamyeUgly.mjs';
+import { proverit as trezubec } from './trezubec.mjs';
+import { proverit as uglyDugi } from './uglyDugi.mjs';
+import { proverit as vpisannyy } from './vpisannyy.mjs';
 import { proverit as ravnyeUgly } from './ravnyeUgly.mjs';
 import { proverit as sekushchie } from './sekushchie.mjs';
 import { proverit as vysoty } from './vysoty.mjs';
 
 const N = Number(process.argv[2] ?? 1000);
 let plokho = 0;
-for (const proverit of [vysoty, bissektrisa, mediana, sekushchie, ravnyeUgly]) {
+for (const proverit of [
+  vysoty,
+  bissektrisa,
+  mediana,
+  sekushchie,
+  ravnyeUgly,
+  pryamyeUgly,
+  trezubec,
+  uglyDugi,
+  vpisannyy,
+]) {
   plokho += proverit(N).plokho;
 }
 
