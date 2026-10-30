@@ -127,6 +127,12 @@ jobs:
         working-directory: app
         run: pnpm test:povyshennye-chast2
 
+      # Ежемесячные варианты: все ответы частей 1 и 2 пересчитаны вторым
+      # способом, №19 и №20 — перебором, №6 не повторяет повышенные.
+      - name: Проверить ежемесячные варианты
+        working-directory: app
+        run: pnpm test:ezhemesyachnye
+
       # Часть 2: баллы 1–20, шкала 0…33, автопроверка ответов по типам полей.
       - name: Проверить баллы, шкалу и автопроверку части 2
         working-directory: app
