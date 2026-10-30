@@ -30,6 +30,11 @@ export interface TourStep {
    * подсказка по центру экрана без подсветки.
    */
   target: readonly string[];
+  /**
+   * Что подсветить на телефоне, если не то же самое: цель должна
+   * помещаться между липкими полосами и нижним листом подсказки.
+   */
+  narrowTarget?: readonly string[];
   title: string;
   text: string;
 }
@@ -89,7 +94,9 @@ export const TOUR_REPETITOR: Tour = {
       id: 'generator',
       short: 'Генератор',
       href: GENERATOR_HREF,
-      target: ['.gen-cfg'],
+      /* Пресеты, а не вся колонка настроек: она выше экрана, и рамка
+         уходила бы под полосу фильтров и за нижний край. */
+      target: ['.gen-presets__head', '.gen-presets'],
       title: 'Генератор вариантов',
       text:
         'Возьмите пресет — вариант ЕГЭ, домашку, самостоятельную — или соберите состав по темам. ' +
@@ -112,6 +119,8 @@ export const TOUR_REPETITOR: Tour = {
       /* Первый ряд готовых уроков: весь список выше экрана, и подсказке
          рядом с ним негде встать. */
       target: ['.z11-rep__marshruty > :nth-child(1)', '.z11-rep__marshruty > :nth-child(3)'],
+      /* На телефоне уроки стоят столбиком: два — выше свободного места. */
+      narrowTarget: ['.z11-rep__marshruty > :nth-child(1)'],
       title: 'Для репетиторов',
       text:
         'Готовые уроки: маршрут → лист в генераторе в один клик. Рядом — методические ' +
