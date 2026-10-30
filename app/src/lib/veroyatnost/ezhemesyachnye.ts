@@ -254,7 +254,7 @@ export function eilerSobytiyaSvg(p: Params, vydelit = false): string {
   const kr = 'fill="none" stroke="currentColor" stroke-width="1.25"';
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" data-engine="veroyatnost" data-min-font="16" class="pr-eiler" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" ` +
-    `aria-label="Диаграмма Эйлера: опыт S, события A и B, ${tochki.length} элементарных событий; только в A — ${nA}, в A и B — ${nAB}, только в B — ${nB}, вне A и B — ${n0}">` +
+    `aria-label="Диаграмма Эйлера двух событий: ${tochki.length} элементарных событий; только в первом — ${nA}, в обоих — ${nAB}, только во втором — ${nB}, вне обоих — ${n0}">` +
     `<rect class="pr-eiler__opyt" x="4" y="4" width="${w - 8}" height="${h - 8}" rx="3" ${kr}/>` +
     `<ellipse class="pr-eiler__opyt" cx="112" cy="97" rx="78" ry="62" ${kr}/>` +
     `<ellipse class="pr-eiler__opyt" cx="190" cy="97" rx="72" ry="62" ${kr}/>` +

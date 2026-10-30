@@ -733,7 +733,7 @@ for (const k of [1, 2, 3, 4]) {
       else {
         for (const txt of visibleTexts(t[pole])) {
           const raw = findRawTex(txt);
-          if (raw.length > 0) fail(where, `сырой TeX в ${pole}: ${raw[0]}`);
+          if (raw.length > 0) fail(where, `сырой TeX в ${pole}: ${raw[0].match}`);
         }
       }
     }

@@ -225,7 +225,7 @@ export function modulParaboly(p: ModulParaboly, pechat: Pechat = {}): GrafikTask
       ],
     },
     {
-      title: 'Знак и c',
+      title: 'Знак коэффициента и свободный член',
       lines: [
         `$c=f(0)=a\\cdot${mn(-x1)}\\cdot${mn(-x2)}=${dec(x1 * x2)}a$. По условию $c>0$, значит, $a=${dec(a)}$ и $c=${dec(x1 * x2)}\\cdot${mn(a)}=${dec(c)}$.`,
       ],

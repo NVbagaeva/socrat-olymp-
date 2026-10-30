@@ -162,7 +162,7 @@ function z15(): Chast2Zadacha {
     otvet: 'б) $\\dfrac{12\\sqrt{33}}{5}$',
     reshenie: [
       {
-        title: 'а) Где лежат L и M',
+        title: 'а) Где лежат $L$ и $M$',
         risunok: stereo(a),
         lines: [
           'По свойству биссектрисы в треугольнике $SAB$: $\\dfrac{SL}{LB}=\\dfrac{SA}{AB}=\\dfrac{12}{4}=3$, то есть $SL=\\dfrac34SB$. Так же $SM=\\dfrac34SD$.',
@@ -394,7 +394,7 @@ function z18(): Chast2Zadacha {
     otvet: 'б) $27$',
     reshenie: [
       {
-        title: 'а) Угол W',
+        title: 'а) Угол $W$',
         risunok: chertezh18('a'),
         lines: [
           'По {{t:teorema-sinusov|теореме синусов}} $\\dfrac{PQ}{\\sin W}=2R$, $\\sin W=\\dfrac{4}{5}$. Угол $W$ острый, поэтому $\\cos W=\\dfrac35$.',
@@ -474,7 +474,7 @@ function z19(): Chast2Zadacha {
         ],
       },
       {
-        title: 'Сколько решений при каждом a',
+        title: 'Сколько решений при каждом $a$',
         lines: [
           '$a<-11$: $f(x)\\le a$ ни при каком $x$ — решений нет. $a=-11$: $f(x)\\le-11$ только при $x=2$, и $\\cos2\\ge-11$ — одно решение.',
           '$-11<a<-1$: неравенство $f(x)\\le a$ выполнено на отрезке $\\left[2-\\sqrt{a+11};\\ 2+\\sqrt{a+11}\\right]$ ненулевой длины, а $a<-1\\le\\cos x$ — бесконечно много решений.',
