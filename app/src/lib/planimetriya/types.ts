@@ -220,6 +220,8 @@ export interface EUgol extends Bazovyy {
   pryamoy?: boolean;
   /** Радиус дуги — доля короткой стороны угла (вместо PL.ugol.r): крупный угол на весь чертёж. */
   dolyaRadiusa?: number;
+  /** Радиус дуги в пикселях — явно меньше обычного (тесный угол у подписей и значков). */
+  radiusPx?: number;
 }
 
 export interface ETochka extends Bazovyy {

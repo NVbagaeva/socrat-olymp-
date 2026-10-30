@@ -92,6 +92,31 @@ const SHIRINA: Record<string, number> = {
   R1: 0.76,
 };
 
+/* Черта над подкоренным числом. У знака «√» шрифта KaTeX_Main черты
+   нет: она рисуется линией от верхнего конца галочки до правого края
+   числа с запасом. Метрики KaTeX_Main (замер в браузере): «√» —
+   ширина 0,833 em, верх штриха на 0,8 em над базовой линией, толщина
+   штриха 0,04 em; цифра — 0,5 em. Текст выровнен по центру cx. */
+function chertyKornya(t: string, cx: number, base: number, size: number, color: string): string[] {
+  const out: string[] = [];
+  const x0 = cx - shirinaTeksta(t, size) / 2;
+  const tolshchina = size * 0.04;
+  const y = base - size * 0.8 + tolshchina / 2;
+  const re = /√([\d,.]+)/g;
+  let m = re.exec(t);
+  while (m !== null) {
+    const nachalo = x0 + shirinaTeksta(t.slice(0, m.index), size) + size * 0.81;
+    const konec =
+      x0 + shirinaTeksta(t.slice(0, m.index + 1 + (m[1] ?? '').length), size) + size * 0.06;
+    const d = `M${px(nachalo)} ${px(y)}H${px(konec)}`;
+    out.push(
+      `<path class="pl-koren" d="${d}" stroke="${color}" stroke-width="${px(tolshchina)}" fill="none"/>`,
+    );
+    m = re.exec(t);
+  }
+  return out;
+}
+
 function shirinaTeksta(t: string, size: number): number {
   let w = 0;
   for (const ch of t) w += /\d/.test(ch) ? 0.5 : (SHIRINA[ch] ?? 0.7);
@@ -584,6 +609,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     let r = Math.max(PL.ugol.r, 7.5 / (th * RAD));
     r = Math.min(r, Math.max(PL.ugol.min, korotkaya * PL.ugol.korotkaya));
     if (e.dolyaRadiusa !== undefined) r = Math.max(PL.ugol.min, korotkaya * e.dolyaRadiusa);
+    if (e.radiusPx !== undefined) r = e.radiusPx;
     /* Вложенные (уже посчитанные, меньшие) углы при той же вершине. */
     for (const { e: o } of poRazmeru) {
       if (o === e || o.v !== e.v) continue;
@@ -792,6 +818,12 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     bottom: r.y + r.h,
   });
   const zanyato: Prepyatstvie[] = [];
+  /* Занятая подпись для соседних подписей — во всю высоту строки, как её
+     рамку видит браузер (выносные элементы шрифта), а не только буквы. */
+  const stroka = (r: Ramka) => {
+    const p = ramkaPryam(r);
+    return { ...p, top: p.top - size * 0.2, bottom: p.bottom + size * 0.2 };
+  };
 
   /* Выноска: рядом с точкой или углом чистого места нет — подпись
      отодвигается дальше, туда, где она ничего не касается, и к ней
@@ -902,7 +934,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
       }
     }
     ramki.push(vybran);
-    zanyato.push({ tip: 'pryam', p: ramkaPryam(vybran), chto: `подпись ${tekst}` });
+    zanyato.push({ tip: 'pryam', p: stroka(vybran), chto: `подпись ${tekst}` });
     const base = vybran.y + size * 0.72;
     const tx = vybran.x + 1;
     sloyPodpisi.push(
@@ -1019,7 +1051,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     }
     ramki.push(vybran);
     if (e.vydelit !== 'dano') proverochnye.push(tekst);
-    zanyato.push({ tip: 'pryam', p: ramkaPryam(vybran), chto: `значение ${tekst}` });
+    zanyato.push({ tip: 'pryam', p: stroka(vybran), chto: `значение ${tekst}` });
     const color =
       novoe(e) || sloyOf(e) !== 'uslovie'
         ? PL.podskazka
@@ -1029,6 +1061,10 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     sloyPodpisi.push(
       `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + zs * 0.74)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${gradus(tekst)}</text>`,
     );
+    if (chislo)
+      sloyPodpisi.push(
+        ...chertyKornya(tekst, vybran.x + vybran.w / 2, vybran.y + zs * 0.74, zs, color),
+      );
     R.teksty.push(tekst);
   }
 
