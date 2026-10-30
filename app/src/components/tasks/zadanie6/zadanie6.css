@@ -3,12 +3,19 @@
 
 .z6-uslovie {
   display: grid;
+  /* Колонка не шире блока: иначе широкая таблица раздвигает условие,
+     а с ним и страницу — текст уходит за правый край телефона. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .z6-uslovie__text {
   margin: 0;
   line-height: 1.6;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .z6-ris {
@@ -89,9 +96,60 @@
 }
 
 .z6-tablica td.is-vydelen,
+.z6-tablica th.is-vydelen,
 .z6-tablica tr.is-vydelena td {
   background: color-mix(in srgb, var(--color-accent) 14%, transparent);
   font-weight: 600;
+}
+
+/* Узкий экран: ячейки плотнее, шрифт чуть мельче; заголовок строки
+   переносится по словам, числа — никогда. */
+@media (max-width: 600px) {
+  .z6-tablica th,
+  .z6-tablica td {
+    padding: var(--space-1) var(--space-2);
+    font-size: 15px;
+  }
+  .z6-tablica th {
+    min-width: 7em;
+    white-space: normal;
+  }
+  .z6-tablica td {
+    min-width: 2.5em;
+  }
+}
+
+/* Таблица из двух строк (Tablica6): в блоке уже 520 px показывается
+   перевёрнутой — два столбца, значения вниз. Ширину знает только блок,
+   поэтому — container query; на печати всегда обычный вид. */
+.z6-tablica-blok {
+  container-type: inline-size;
+  max-width: 100%;
+}
+.z6-tablica--vert {
+  display: none;
+}
+.z6-tablica--vert th {
+  min-width: 0;
+  text-align: center;
+  vertical-align: bottom;
+  white-space: normal;
+}
+@container (max-width: 520px) {
+  .z6-tablica--gor {
+    display: none;
+  }
+  .z6-tablica--vert {
+    display: block;
+  }
+}
+@media print {
+  .z6-tablica-blok .z6-tablica--gor {
+    display: block;
+  }
+  .z6-tablica-blok .z6-tablica--vert {
+    display: none;
+  }
 }
 
 /* ── Разбор ─────────────────────────────────────────────────────── */

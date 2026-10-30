@@ -250,6 +250,7 @@
 }
 .z6t-pole {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
   justify-items: start;
 }
@@ -387,6 +388,7 @@
 /* Точки-шаги и полоса прогресса. */
 .z6t-steps {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
 }
 .z6t-steps__bar {
@@ -497,6 +499,7 @@
 /* Поле ответа. */
 .z6t-otvet {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
   margin-top: var(--space-2);
 }
@@ -508,7 +511,10 @@
   gap: var(--space-2);
 }
 .z6t-otvet__input {
-  flex: 1 1 auto;
+  /* Ширина от строки, а не от size поля (≈20 знаков): иначе поле с
+     кнопкой шире телефона и раздвигают страницу. */
+  flex: 1 1 0;
+  width: 0;
   min-width: 0;
   max-width: 280px;
   height: var(--h-control-lg);
@@ -634,6 +640,7 @@
 /* Подсказка и разбор: сворачиваемые блоки. */
 .z6t-help {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
 }
 .z6t-help__btns {
