@@ -14,8 +14,9 @@
        (у вкладок раздела их две: плитки и липкая панель) с точностью
        до 1 px — после прокрутки к шагу;
      — цель целиком видна: не под липкими полосами сверху (панель
-       вкладок, полоса фильтров генератора) и не под нижним листом
-       подсказки на телефоне;
+       вкладок, полоса фильтров генератора) и не под подсказкой — ни
+       под карточкой на компьютере, ни под листом на телефоне, внизу
+       он или наверху;
      — на каждом кадре прокрутки страницы вверх и вниз, в том числе
        плавной, рамка совпадает с целью: без отставания и без
        анимации положения; то же при прокрутке ленты вкладок вбок и
@@ -260,25 +261,27 @@ for (const size of SIZES) {
             `цель под липкой полосой: верх ${p.target.top.toFixed(0)} < ${top.toFixed(0)}`,
           );
         }
-        const bottomLine = size.narrow && p.card ? p.card.top : p.vh;
-        const fitsSheet = p.target.bottom - p.target.top + 2 * PAD <= bottomLine - top;
-        if (size.narrow && p.card && p.card.top > p.vh / 2) {
-          checks++;
-          if (fitsSheet && p.target.bottom > bottomLine + EPS) {
-            fail(
-              where,
-              `нижний лист закрывает цель: низ цели ${p.target.bottom.toFixed(0)} > верх листа ${bottomLine.toFixed(0)}`,
-            );
-          }
-        }
-        if (!size.narrow && p.card && p.hole) {
+        /* Свободная полоса: под липкими полосами, над нижним листом
+           (лист наверху — под ним). Помещается цель — подсказка её не
+           закрывает. */
+        const sheetTop = size.narrow && p.card && p.card.top < p.vh / 2;
+        const from = sheetTop ? Math.max(top, p.card.bottom) : top;
+        const to = size.narrow && p.card && !sheetTop ? p.card.top : p.vh;
+        const fits = p.target.bottom - p.target.top + 2 * PAD <= to - from;
+        if (p.card) {
           checks++;
           const overlap =
-            p.card.left < p.hole.right &&
-            p.card.right > p.hole.left &&
-            p.card.top < p.hole.bottom &&
-            p.card.bottom > p.hole.top;
-          if (overlap && fitsSheet) fail(where, 'подсказка закрывает рамку');
+            p.card.left < p.target.right &&
+            p.card.right > p.target.left &&
+            p.card.top < p.target.bottom - EPS &&
+            p.card.bottom > p.target.top + EPS;
+          if (overlap && fits) {
+            fail(
+              where,
+              `подсказка закрывает цель: цель ${p.target.top.toFixed(0)}–${p.target.bottom.toFixed(0)}, ` +
+                `подсказка ${p.card.top.toFixed(0)}–${p.card.bottom.toFixed(0)}`,
+            );
+          }
         }
       }
 

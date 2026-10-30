@@ -67,11 +67,7 @@ export function HowtoView({ tab }: { tab: HowtoTab }) {
           <p className="howto__video-text">{content.video.text}</p>
           <div className="howto__video-actions">
             {content.cta.tour !== undefined ? (
-              <button
-                type="button"
-                className="btn btn--primary"
-                onClick={() => startTour('repetitor', 0)}
-              >
+              <button type="button" className="btn btn--primary" onClick={() => startTour(tab, 0)}>
                 {content.cta.tour}
               </button>
             ) : null}
@@ -150,11 +146,7 @@ export function HowtoView({ tab }: { tab: HowtoTab }) {
         </div>
         <div className="howto__cta-actions">
           {content.cta.tour !== undefined ? (
-            <button
-              type="button"
-              className="btn btn--secondary"
-              onClick={() => startTour('repetitor', 0)}
-            >
+            <button type="button" className="btn btn--secondary" onClick={() => startTour(tab, 0)}>
               {content.cta.tour}
             </button>
           ) : null}

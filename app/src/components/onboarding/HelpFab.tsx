@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { useCallback, useId, useRef, useState } from 'react';
-import { HELP, HOWTO_HREF, TOUR_REPETITOR } from '@/content/onboarding';
+import { HELP, HOWTO_HREF } from '@/content/onboarding';
 import { useDismiss } from '@/lib/dismiss';
-import { requestIntro, startTour, useOnboarding } from '@/lib/onboarding';
+import { requestIntro, useOnboarding } from '@/lib/onboarding';
+import { TourButtons } from './TourButtons';
 
 /**
- * Кнопка «?» в правом нижнем углу: туры и инструкция. Пока идёт тур,
+ * Кнопка «?» в правом нижнем углу: туры (начать, продолжить с того же
+ * шага, начать заново) и инструкция. Пока идёт тур,
  * кнопки нет — тур закрывается своим крестиком. На телефоне в кабинете
  * кнопка стоит над нижней панелью навигации (onboarding.css).
  */
@@ -22,51 +24,11 @@ export function HelpFab() {
 
   if (state.active !== null) return null;
 
-  const tutor = state.tours.repetitor;
-  const total = TOUR_REPETITOR.steps.length + 1;
-  const inProgress = tutor !== undefined && !tutor.done && tutor.step > 0;
-
-  const run = (step: number) => {
-    setOpen(false);
-    startTour('repetitor', step);
-  };
-
   return (
     <div className="help-fab" ref={root}>
       {open ? (
         <div className="help-fab__menu" id={menuId} role="menu" aria-label={HELP.title}>
-          {inProgress ? (
-            <>
-              <button
-                type="button"
-                role="menuitem"
-                className="help-fab__item"
-                onClick={() => run(tutor.step)}
-              >
-                {HELP.continueTour(tutor.step + 1, total)}
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="help-fab__item"
-                onClick={() => run(0)}
-              >
-                {HELP.restartTour}
-              </button>
-            </>
-          ) : (
-            <button type="button" role="menuitem" className="help-fab__item" onClick={() => run(0)}>
-              {HELP.tutorTour}
-            </button>
-          )}
-          <span
-            className="help-fab__item help-fab__item--soon"
-            role="menuitem"
-            aria-disabled="true"
-          >
-            {HELP.studentTour}
-            <span className="badge">{HELP.soon}</span>
-          </span>
+          <TourButtons className="help-fab__item" menuitem onRun={() => setOpen(false)} />
           <button
             type="button"
             role="menuitem"

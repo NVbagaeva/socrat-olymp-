@@ -2,9 +2,10 @@
 
 import { clsx } from 'clsx';
 import Link from 'next/link';
-import { HELP, HOWTO_HREF, TOUR_REPETITOR } from '@/content/onboarding';
+import { TourButtons } from '@/components/onboarding/TourButtons';
+import { HELP, HOWTO_HREF } from '@/content/onboarding';
 import type { PovTexts } from '@/content/povyshennye';
-import { requestIntro, startTour, useOnboarding } from '@/lib/onboarding';
+import { requestIntro } from '@/lib/onboarding';
 import type { PovStatus } from './PovScreen';
 
 const STATUSY: readonly PovStatus[] = ['new', 'progress', 'done', 'oshibki'];
@@ -24,15 +25,6 @@ export function PovInfo({
   chast2: readonly number[];
   onAction: () => void;
 }) {
-  const state = useOnboarding();
-  const tutor = state.tours.repetitor;
-  const total = TOUR_REPETITOR.steps.length + 1;
-  const inProgress = tutor !== undefined && !tutor.done && tutor.step > 0;
-  const run = (step: number) => {
-    onAction();
-    startTour('repetitor', step);
-  };
-
   return (
     <div className="pov-info" data-testid="pov-info-telo">
       <section>
@@ -74,20 +66,7 @@ export function PovInfo({
       <section>
         <h3>{T.info.pomoshch.title}</h3>
         <div className="pov-info__pomoshch">
-          {inProgress ? (
-            <>
-              <button type="button" onClick={() => run(tutor.step)}>
-                {HELP.continueTour(tutor.step + 1, total)}
-              </button>
-              <button type="button" onClick={() => run(0)}>
-                {HELP.restartTour}
-              </button>
-            </>
-          ) : (
-            <button type="button" onClick={() => run(0)}>
-              {HELP.tutorTour}
-            </button>
-          )}
+          <TourButtons onRun={onAction} />
           <button
             type="button"
             onClick={() => {
