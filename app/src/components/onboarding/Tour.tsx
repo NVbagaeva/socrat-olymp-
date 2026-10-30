@@ -3,15 +3,17 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useId, useRef, useSyncExternalStore } from 'react';
 import { TOURS, TOUR_UI, type Tour as TourData } from '@/content/onboarding';
 import { finishTour, pauseTour, setTourStep, startTour, useOnboarding } from '@/lib/onboarding';
+import { PAD, useSpotlight, type Box, type Occlusion } from './spotlight';
 
 /**
  * Тур по сайту. Описывается данными (content/onboarding.ts): страница,
  * что подсветить, заголовок и текст шага. Тур сам переходит на страницу
- * шага, ждёт нужный элемент, прокручивает к нему с поправкой на липкую
- * ленту вкладок и ставит подсказку туда, где хватает места.
+ * шага, ждёт нужный элемент, прокручивает к нему с поправкой на липкие
+ * полосы и подсказку и ставит подсказку туда, где хватает места. Рамку
+ * подсветки ведёт spotlight.ts — кадр в кадр с целью.
  *
  * Шире 768px подсказка — карточка у элемента, уже — нижний лист.
  * От 1280px слева, поверх сайдбара, — панель «Как проходит тур?»:
@@ -28,73 +30,10 @@ export function Tour() {
   return <TourRun key={`${id}:${step}`} tour={TOURS[id]} step={step} />;
 }
 
-interface Box {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-}
-
-/** Отступ рамки подсветки от элемента. */
-const PAD = 8;
 /** Отступ подсказки от рамки и от краёв экрана. */
 const GAP = 16;
-/** Сколько ждать элемент шага, прежде чем показать подсказку без подсветки. */
-const WAIT_MS = 4000;
 
 const slash = (p: string) => (p.endsWith('/') ? p : `${p}/`);
-
-function sameBox(a: Box | null, b: Box | null): boolean {
-  if (a === null || b === null) return a === b;
-  return (
-    Math.abs(a.top - b.top) < 0.5 &&
-    Math.abs(a.left - b.left) < 0.5 &&
-    Math.abs(a.width - b.width) < 0.5 &&
-    Math.abs(a.height - b.height) < 0.5
-  );
-}
-
-/** Общая рамка всех элементов шага; не нашлось хоть одного — null. */
-function measure(selectors: readonly string[]): { box: Box; els: Element[] } | null {
-  const els: Element[] = [];
-  for (const sel of selectors) {
-    const el = document.querySelector(sel);
-    if (el === null) return null;
-    els.push(el);
-  }
-  let top = Infinity;
-  let left = Infinity;
-  let right = -Infinity;
-  let bottom = -Infinity;
-  for (const el of els) {
-    const r = el.getBoundingClientRect();
-    if (r.width === 0 && r.height === 0) return null;
-    top = Math.min(top, r.top);
-    left = Math.min(left, r.left);
-    right = Math.max(right, r.right);
-    bottom = Math.max(bottom, r.bottom);
-  }
-  return { box: { top, left, width: right - left, height: bottom - top }, els };
-}
-
-/**
- * Сколько места сверху займут липкие полосы, когда прилипнут: лента
- * вкладок раздела, шапка. Считается по их top и высоте, а не по
- * текущему положению: до прокрутки лента стоит посреди страницы.
- */
-function stickyTop(): number {
-  let h = 0;
-  for (const el of document.querySelectorAll<HTMLElement>('.topic-tabs-row, .topbar, .site-head')) {
-    const style = getComputedStyle(el);
-    if (style.position !== 'sticky' && style.position !== 'fixed') continue;
-    h = Math.max(h, (parseFloat(style.top) || 0) + el.offsetHeight);
-  }
-  return h;
-}
-
-function reducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
 
 const NARROW = '(max-width: 767.98px)';
 
@@ -119,28 +58,23 @@ interface Place {
 }
 
 /** Куда поставить карточку: под элементом, над ним, справа, слева —
-    где хватает места; не хватает нигде — внизу по центру. */
-function place(box: Box, w: number, h: number): Place {
+    где хватает места; не хватает нигде — внизу по центру. Сверху место
+    считается от нижнего края липких полос. */
+function place(box: Box, w: number, h: number, occ: Occlusion): Place {
   const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  const vh = window.innerHeight - occ.bottom;
   const clampX = (x: number) => Math.min(Math.max(x, GAP), vw - w - GAP);
-  const clampY = (y: number) => Math.min(Math.max(y, GAP), vh - h - GAP);
+  const clampY = (y: number) => Math.min(Math.max(y, occ.top + GAP), vh - h - GAP);
   const top = box.top - PAD;
   const bottom = box.top + box.height + PAD;
   const left = box.left - PAD;
   const right = box.left + box.width + PAD;
-  const sticky = stickyTop();
   if (vh - bottom >= h + GAP * 2) return { top: bottom + GAP, left: clampX(left) };
-  if (top - sticky >= h + GAP * 2) return { top: top - GAP - h, left: clampX(left) };
+  if (top - occ.top >= h + GAP * 2) return { top: top - GAP - h, left: clampX(left) };
   if (vw - right >= w + GAP * 2) return { top: clampY(top), left: right + GAP };
   if (left >= w + GAP * 2) return { top: clampY(top), left: left - GAP - w };
   return { top: vh - h - GAP, left: (vw - w) / 2 };
 }
-
-const samePlace = (a: Place | null, b: Place | null) =>
-  a === null || b === null
-    ? a === b
-    : Math.abs(a.top - b.top) < 0.5 && Math.abs(a.left - b.left) < 0.5;
 
 function TourRun({ tour, step }: { tour: TourData; step: number }) {
   const router = useRouter();
@@ -149,17 +83,43 @@ function TourRun({ tour, step }: { tour: TourData; step: number }) {
   const isFinal = step >= tour.steps.length;
   const current = isFinal ? null : (tour.steps[step] ?? null);
 
-  const [found, setFound] = useState<Box | null>(null);
-  const [settled, setSettled] = useState(false);
-  const [pos, setPos] = useState<Place | null>(null);
   const narrow = useNarrow();
-  /* На финале подсвечивать нечего: карточка по центру сразу. */
-  const box = isFinal ? null : found;
-  const ready = isFinal || settled;
+  const root = useRef<HTMLDivElement>(null);
+  const hole = useRef<HTMLDivElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const pushedFor = useRef<number | null>(null);
   const titleId = useId();
   const textId = useId();
+
+  /* Карточка у элемента (шире 768px) ставится тем же кадром, что и
+     рамка, прямо в стиль; нижний лист стоит сам. */
+  const onBox = useCallback(
+    (box: Box | null, occ: Occlusion) => {
+      const el = card.current;
+      if (el === null || narrow) return;
+      if (box === null) {
+        el.dataset.place = 'center';
+        el.style.removeProperty('top');
+        el.style.removeProperty('left');
+        return;
+      }
+      const at = place(box, el.offsetWidth, el.offsetHeight, occ);
+      delete el.dataset.place;
+      el.style.top = `${at.top}px`;
+      el.style.left = `${at.left}px`;
+    },
+    [narrow],
+  );
+
+  const onPage = current !== null && slash(pathname) === slash(current.href);
+  const selectors =
+    current === null || !onPage
+      ? null
+      : narrow && current.narrowTarget !== undefined
+        ? current.narrowTarget
+        : current.target;
+  const spot = useSpotlight({ selectors, root, hole, card, sheet: narrow, onBox });
+  const ready = isFinal || (onPage && spot.ready);
 
   const go = useCallback(
     (to: number) => {
@@ -185,47 +145,6 @@ function TourRun({ tour, step }: { tour: TourData; step: number }) {
       pauseTour();
     }
   }, [current, pathname, router, step]);
-
-  /* Найти элемент шага, прокрутить к нему и дальше следить за ним
-     каждый кадр: страница может доезжать, лента — прилипать. */
-  useEffect(() => {
-    if (current === null) return;
-    if (slash(pathname) !== slash(current.href)) return;
-    let frame = 0;
-    let scrolled = false;
-    let settleAt = 0;
-    const started = performance.now();
-    const tick = () => {
-      const hit = current.target.length > 0 ? measure(current.target) : null;
-      const now = performance.now();
-      if (hit !== null && !scrolled) {
-        scrolled = true;
-        const inSticky = hit.els.some((el) => el.closest('.topic-tabs-row') !== null);
-        const offset = stickyTop() + (window.innerWidth < 768 ? 12 : 24);
-        const top = inSticky ? 0 : Math.max(0, hit.box.top + window.scrollY - offset - PAD);
-        const smooth = !reducedMotion();
-        window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
-        settleAt = now + (smooth ? 450 : 50);
-      }
-      if (hit !== null) {
-        setFound((prev) => (sameBox(prev, hit.box) ? prev : hit.box));
-        const el = card.current;
-        if (el !== null && !window.matchMedia(NARROW).matches) {
-          const next = place(hit.box, el.offsetWidth, el.offsetHeight);
-          setPos((prev) => (samePlace(prev, next) ? prev : next));
-        }
-        if (now >= settleAt) setSettled(true);
-      } else if (now - started > WAIT_MS || current.target.length === 0) {
-        /* Элемента нет — подсказка по центру, без подсветки. */
-        setFound(null);
-        setPos(null);
-        setSettled(true);
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [current, pathname]);
 
   /* Фокус — в карточку шага: читалка экрана сразу читает заголовок. */
   useEffect(() => {
@@ -281,22 +200,18 @@ function TourRun({ tour, step }: { tour: TourData; step: number }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [close, go, isFinal, step]);
 
-  const hole =
-    box !== null && ready
-      ? {
-          top: box.top - PAD,
-          left: box.left - PAD,
-          width: box.width + PAD * 2,
-          height: box.height + PAD * 2,
-        }
-      : null;
-
   return (
-    <div className="tour" data-tour-step={isFinal ? 'final' : current?.id}>
+    <div
+      ref={root}
+      className="tour"
+      data-tour-step={isFinal ? 'final' : current?.id}
+      data-spot="off"
+      data-ready={ready || undefined}
+    >
       {/* Слой ловит нажатия мимо: тур ведёт сам, страница под ним не
           должна уезжать по случайному клику. */}
-      <div className={clsx('tour__veil', hole === null && 'tour__veil--dim')} aria-hidden="true" />
-      {hole !== null ? <div className="tour__hole" style={hole} aria-hidden="true" /> : null}
+      <div className="tour__veil" aria-hidden="true" />
+      <div ref={hole} className="tour__hole" aria-hidden="true" />
 
       <ol className="tour-panel" aria-label={TOUR_UI.panelTitle}>
         <li className="tour-panel__title" aria-hidden="true">
@@ -323,10 +238,9 @@ function TourRun({ tour, step }: { tour: TourData; step: number }) {
           'tour-card',
           narrow && 'tour-card--sheet',
           isFinal && 'tour-card--final',
-          !narrow && !isFinal && pos === null && 'tour-card--center',
+          narrow && spot.sheetOnTop && !isFinal && 'tour-card--sheet-top',
           !ready && 'is-hidden',
         )}
-        style={!narrow && !isFinal && pos !== null ? { top: pos.top, left: pos.left } : undefined}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
