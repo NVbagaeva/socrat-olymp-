@@ -10,6 +10,7 @@
 import type { NavItem } from '@/components/ui';
 import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
+import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF } from '@/content/variant';
 
@@ -37,6 +38,14 @@ export const topNav: NavItem[] = [
     short: 'Повышенные',
     href: POV_HREF,
     icon: 'povyshennye',
+  },
+  /* 4 варианта по месяцам (октябрь 2026 — январь 2027): решать и печатать. */
+  {
+    id: 'ezhemesyachnye',
+    label: 'Ежемесячные варианты',
+    short: 'Ежемесячные',
+    href: EZH_HREF,
+    icon: 'ezhemesyachnye',
   },
   { id: 'stats', label: 'Статистика', href: '/statistika/', icon: 'stats' },
   /* Короткая подпись — для нижней панели и экрана «Ещё»: полное

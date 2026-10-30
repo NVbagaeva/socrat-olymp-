@@ -49,17 +49,17 @@ export interface Pechat {
 }
 
 /** Рисунок движком №12; лист задаёт наименьший кегль. */
-function risuy(sc: object, pechat: Pechat): string {
+export function risuy(sc: object, pechat: Pechat): string {
   return renderer.renderGraph(
     pechat.minFont === undefined ? sc : { ...sc, minFont: pechat.minFont },
   );
 }
 
 const log = (x: number, r: number) => Math.log(x) / Math.log(r);
-const round9 = (x: number) => Math.round(x * 1e9) / 1e9;
-const dec = (x: number) => String(round9(x)).replace('.', '{,}').replace('-', '-');
+export const round9 = (x: number) => Math.round(x * 1e9) / 1e9;
+export const dec = (x: number) => String(round9(x)).replace('.', '{,}').replace('-', '-');
 /** Целое ли (с допуском). */
-const celoe = (x: number) => Math.abs(x - Math.round(x)) < 1e-9;
+export const celoe = (x: number) => Math.abs(x - Math.round(x)) < 1e-9;
 
 function scene(p: KLog, points: { x: number; y: number }[], uchitel: boolean) {
   const ys = points.map((t) => t.y);
@@ -193,13 +193,13 @@ export interface GrafikTask extends Omit<KLogTask, 'points'> {
   points: { x: number; y: number }[];
 }
 
-type T = [number, number];
+export type T = [number, number];
 
 /** Множитель или вычитаемое: отрицательное — в скобках. */
-const mn = (x: number) => (x < 0 ? `(${dec(x)})` : dec(x));
+export const mn = (x: number) => (x < 0 ? `(${dec(x)})` : dec(x));
 
 /** Пунктиры от точки к осям — на рисунке учителя. */
-function napravlyayushchie(points: readonly T[]) {
+export function napravlyayushchie(points: readonly T[]) {
   return points.flatMap(([x, y]) => [
     ...(y !== 0
       ? [{ type: 'segment', from: [x, 0], to: [x, y], style: 'dashed', color: 'accent' }]
@@ -354,7 +354,7 @@ export interface KorenKoren {
   b: number;
 }
 
-const nod = (x: number, y: number): number => (y === 0 ? Math.abs(x) : nod(y, x % y));
+export const nod = (x: number, y: number): number => (y === 0 ? Math.abs(x) : nod(y, x % y));
 
 /**
  * f(x) = √(ax) и g(x) = √(x − b) пересекаются в A вне рисунка. По узлам
@@ -468,7 +468,7 @@ export function korenKoren(p: KorenKoren, pechat: Pechat = {}): GrafikTask {
 /* ── Партия 2: парабола и показательная по узлам сетки ────────────── */
 
 /** Многочлен ax² + bx + c в TeX: «0{,}4x^2-0{,}8x-2», «-x^2+3x+4». */
-function mnogochlen(a: number, b: number, c: number): string {
+export function mnogochlen(a: number, b: number, c: number): string {
   const chlen = (k: number, v: string, pervyy: boolean) => {
     if (k === 0) return '';
     const znak = k < 0 ? '-' : pervyy ? '' : '+';
@@ -479,10 +479,10 @@ function mnogochlen(a: number, b: number, c: number): string {
 }
 
 /** Множитель (x − r) в TeX: «(x+4)», «(x-1)», «x». */
-const skobka = (r: number) => (r === 0 ? 'x' : `(x${r < 0 ? '+' : '-'}${dec(Math.abs(r))})`);
+export const skobka = (r: number) => (r === 0 ? 'x' : `(x${r < 0 ? '+' : '-'}${dec(Math.abs(r))})`);
 
 /** Окно по точкам с полями: не уже восьми клеток по каждой оси. */
-function oknoPo(pts: readonly T[], vverh: boolean) {
+export function oknoPo(pts: readonly T[], vverh: boolean) {
   const xs = pts.map((t) => t[0]);
   const ys = pts.map((t) => t[1]);
   let xmin = Math.floor(Math.min(...xs, 0)) - 2;
@@ -502,7 +502,7 @@ function oknoPo(pts: readonly T[], vverh: boolean) {
 }
 
 /** Точка за окном — по рисунку её не прочесть. */
-function zaOknom(
+export function zaOknom(
   x: number,
   y: number,
   w: { xmin: number; xmax: number; ymin: number; ymax: number },

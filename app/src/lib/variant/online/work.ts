@@ -5,7 +5,7 @@
  * же прототипа с другими числами).
  */
 
-import { povNomer } from '@/lib/povyshennye/kod';
+import { naborRazdela } from '@/lib/povyshennye/razdely';
 import { rngOf } from '@/lib/vychisleniya/rng';
 import { loadAdapters } from '../load';
 import { buildSet, currentVersion, readCode } from '../session';
@@ -21,11 +21,11 @@ export interface LoadedSet {
 
 /** Собрать партию по коду. null — код не читается. */
 export async function loadSet(code: string): Promise<LoadedSet | null> {
-  /* Варианты повышенной сложности: набор версий раздела, не партия. */
-  const pv = povNomer(code);
-  if (pv !== null) {
-    const { povSet } = await import('@/lib/povyshennye/set');
-    const set = await povSet(pv);
+  /* Варианты повышенной сложности и ежемесячные: набор раздела, не партия. */
+  const nabor = naborRazdela(code);
+  if (nabor !== null) {
+    const { naborSet } = await import('@/lib/povyshennye/nabor');
+    const set = await naborSet(nabor);
     return set === null ? null : { set, outdated: false, failed: [] };
   }
   const d = readCode(code);
@@ -120,15 +120,17 @@ export async function oshibkiTasks(
     ids.add(t.taskId);
     used.set(t.egeNumber, ids);
   }
-  /* Варианты повышенной сложности: аналог — то же задание соседней
-     версии (тот же шаблон, другие числа). */
-  if (povNomer(set.code) !== null) {
+  /* Наборы разделов: аналог — то же задание соседней версии (тот же
+     шаблон, другие числа). У ежемесячных вариантов версия одна —
+     аналога пока нет, в работу над ошибками идут сами задания. */
+  if (naborRazdela(set.code) !== null) {
     const out: OshibkiItem[] = [];
     for (const i of wrong) {
       const task = tasks[i];
       if (task === undefined) continue;
       out.push({ task, from: i, analog: false });
-      const sosed = set.variants[variant % set.variants.length]?.tasks[i];
+      const sosed =
+        set.variants.length > 1 ? set.variants[variant % set.variants.length]?.tasks[i] : undefined;
       if (sosed !== undefined) out.push({ task: sosed, from: i, analog: true });
     }
     return out;

@@ -2,10 +2,10 @@
 
 import { useSearchParams } from 'next/navigation';
 import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
-import { POV_HREF, POV_SCREEN, POV_VERSION_LABEL } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_SCREEN } from '@/content/variant';
 import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
-import { povNomer, versiyaText } from '@/lib/povyshennye/kod';
+import { POV_SCREEN } from '@/content/povyshennye';
+import { naborHref, naborRazdela, naborRazdelTitle, naborVersiya } from '@/lib/povyshennye/razdely';
 
 /** Шапка «Решать онлайн» по умолчанию — раздел «Собрать вариант». */
 export function ShapkaReshatObshchaya() {
@@ -28,15 +28,15 @@ export function ShapkaReshatObshchaya() {
  */
 export function ShapkaReshat() {
   const q = useSearchParams();
-  const pv = povNomer(q.get('kod') ?? '');
+  const nabor = naborRazdela(q.get('kod') ?? '');
   const v = Number(q.get('v') ?? '1');
-  if (pv === null || !Number.isInteger(v) || v < 1) return <ShapkaReshatObshchaya />;
-  const label = POV_VERSION_LABEL(versiyaText(pv, v));
+  if (nabor === null || !Number.isInteger(v) || v < 1) return <ShapkaReshatObshchaya />;
+  const label = naborVersiya(nabor, v);
   return (
     <ShapkaRazdela
       crumbs={[
         { label: POV_SCREEN.crumbs.home, href: '/' },
-        { label: POV_SCREEN.title, href: POV_HREF },
+        { label: naborRazdelTitle(nabor), href: naborHref(nabor) },
         { label },
       ]}
       title={label}

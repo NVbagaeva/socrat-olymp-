@@ -12,7 +12,7 @@
 import { asNumber, asNumberList, asStringRecord, isRecord } from '@/lib/trainerSession/restore';
 import type { BaseUi } from '@/lib/trainerSession/types';
 import { readChast2, type Chast2Ui } from '@/lib/chast2/sostoyanie';
-import { povNomer } from '@/lib/povyshennye/kod';
+import { naborRazdela } from '@/lib/povyshennye/razdely';
 import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import type { HintStep, VariantTask } from '../types';
 import type { Mode, Timer } from './link';
@@ -103,11 +103,11 @@ export async function buildWork(
   const tasks = loaded.set.variants[base.variant - 1]?.tasks;
   if (tasks === undefined || tasks.length === 0) return null;
   if (wrong === null) {
-    const pv = povNomer(base.code);
+    const nabor = naborRazdela(base.code);
     const chast2 =
-      pv === null
+      nabor === null
         ? null
-        : await import('@/lib/povyshennye/chast2').then((m) => m.chast2Versii(pv, base.variant));
+        : await import('@/lib/povyshennye/nabor').then((m) => m.naborChast2(nabor, base.variant));
     return {
       ...base,
       tasks,
