@@ -6,8 +6,7 @@ import { VARIANT_SCREEN, WORK_KINDS } from '@/content/variant';
 import { katex } from '@/lib/graph/katex';
 import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { buildDocument } from '@/lib/sheet/sheet.js';
-import { POV_TITLE, POV_VERSION_LABEL } from '@/content/povyshennye';
-import { povNomer, versiyaText } from '@/lib/povyshennye/kod';
+import { naborRazdela, naborTitle, naborVersiya } from '@/lib/povyshennye/razdely';
 import { decodeSpace, encodeSpace } from '@/lib/sheet/space.js';
 import { spaceOfCode } from '@/lib/variant/code';
 import { loadMeta, payloadFromOpener, type PrintPayload } from '@/lib/variant/handoff';
@@ -19,12 +18,7 @@ import {
   sanitizeMeta,
 } from '@/lib/variant/session';
 import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
-import {
-  variantSheetSpec,
-  workTitle,
-  type Mesto2,
-  type SheetChoice,
-} from '@/lib/variant/sheets';
+import { variantSheetSpec, workTitle, type Mesto2, type SheetChoice } from '@/lib/variant/sheets';
 import { pechatat } from '@/lib/sheet/pechat';
 
 const CHOICES: readonly SheetChoice[] = ['uchenik', 'uchitel', 'razbor', 'vse'];
@@ -49,26 +43,26 @@ async function obtain(
 } | null> {
   const fromScreen = payloadFromOpener(code);
   if (fromScreen !== null) return { payload: fromScreen, warning: null };
-  /* Варианты повышенной сложности: набор версий раздела, шапка — своя. */
-  const pv = povNomer(code);
-  if (pv !== null) {
-    const { povSet } = await import('@/lib/povyshennye/set');
-    const full = await povSet(pv);
+  /* Наборы разделов (повышенной сложности, ежемесячные): шапка — своя. */
+  const nabor = naborRazdela(code);
+  if (nabor !== null) {
+    const { naborSet, naborChast2 } = await import('@/lib/povyshennye/nabor');
+    const full = await naborSet(nabor);
     if (full === null) return null;
-    /* Одна версия — её лист; без номера — все шесть подряд. */
+    /* Одна версия — её лист; без номера — все версии подряд. */
     const set =
       versiya === null
         ? full
         : { ...full, variants: full.variants.filter((v) => v.index === versiya) };
     if (set.variants.length === 0) return null;
-    const meta = { ...defaultMeta(), kind: 'custom', customTitle: POV_TITLE, duration: '' };
-    const { chast2Versii } = await import('@/lib/povyshennye/chast2');
+    const title = naborTitle(nabor);
+    const meta = { ...defaultMeta(), kind: 'custom', customTitle: title, duration: '' };
     const c2 = new Map<number, Chast2Zadacha[] | null>();
-    for (const v of set.variants) c2.set(v.index, await chast2Versii(pv, v.index));
+    for (const v of set.variants) c2.set(v.index, await naborChast2(nabor, v.index));
     return {
-      payload: { set, meta, workTitle: POV_TITLE },
+      payload: { set, meta, workTitle: title },
       warning: null,
-      variantLabel: (i: number) => POV_VERSION_LABEL(versiyaText(pv, i)),
+      variantLabel: (i: number) => naborVersiya(nabor, i),
       chast2: (i: number) => c2.get(i) ?? null,
     };
   }

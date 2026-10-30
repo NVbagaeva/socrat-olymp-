@@ -1172,6 +1172,19 @@ a.task-card--soon:hover {
   color: var(--color-primary);
   font-weight: 500;
 }
+/* Полные названия пунктов помещаются в шапку от 1600px; уже — короткие
+   (те же, что в нижней панели и на экране «Ещё»). */
+.topnav__short {
+  display: none;
+}
+@media (max-width: 1599.98px) {
+  .topnav__full {
+    display: none;
+  }
+  .topnav__short {
+    display: inline;
+  }
+}
 
 /* В оболочке кабинета поиск делит шапку с меню разделов: он больше
    не тянется во всю свободную ширину, иначе меню сжимает его в щель. */

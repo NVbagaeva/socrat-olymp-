@@ -376,7 +376,7 @@
 }
 .pov-v {
   display: grid;
-  grid-template-columns: 2.6em auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(2.6em, max-content) auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-3);
   min-height: 60px;
@@ -392,7 +392,7 @@
 }
 .pov-v__row {
   display: grid;
-  grid-template-columns: 2.6em auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(2.6em, max-content) auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-3);
   min-height: 52px;
@@ -408,6 +408,7 @@
 .pov-v__no {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .pov-v__info {
   display: grid;

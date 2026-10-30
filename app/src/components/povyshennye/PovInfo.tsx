@@ -3,8 +3,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { HELP, HOWTO_HREF, TOUR_REPETITOR } from '@/content/onboarding';
-import { POV_SCREEN as T } from '@/content/povyshennye';
-import { S_CHAST2 } from '@/lib/povyshennye/dannye';
+import type { PovTexts } from '@/content/povyshennye';
 import { requestIntro, startTour, useOnboarding } from '@/lib/onboarding';
 import type { PovStatus } from './PovScreen';
 
@@ -16,7 +15,15 @@ const STATUSY: readonly PovStatus[] = ['new', 'progress', 'done', 'oshibki'];
  * туры, приветствие и инструкция (раньше — кнопка «?» в углу; на этом
  * экране она убрана, чтобы не было двух кнопок помощи).
  */
-export function PovInfo({ onAction }: { onAction: () => void }) {
+export function PovInfo({
+  T,
+  chast2,
+  onAction,
+}: {
+  T: PovTexts;
+  chast2: readonly number[];
+  onAction: () => void;
+}) {
   const state = useOnboarding();
   const tutor = state.tours.repetitor;
   const total = TOUR_REPETITOR.steps.length + 1;
@@ -35,7 +42,7 @@ export function PovInfo({ onAction }: { onAction: () => void }) {
       <section>
         <h3>{T.info.chasti.title}</h3>
         <p>{T.info.chasti.chast1}</p>
-        <p>{T.info.chasti.chast2(S_CHAST2)}</p>
+        <p>{T.info.chasti.chast2(chast2)}</p>
       </section>
       <section>
         <h3>{T.info.rezhimy.title}</h3>

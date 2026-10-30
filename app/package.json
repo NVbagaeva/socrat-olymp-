@@ -81,6 +81,7 @@
     "test:variant-online": "node scripts/check-variant-online.mjs",
     "test:variant-online-site": "node scripts/check-variant-online-site.mjs",
     "test:povyshennye": "node scripts/check-povyshennye.mjs",
+    "test:ezhemesyachnye": "node scripts/check-ezhemesyachnye.mjs",
     "test:povyshennye-site": "node scripts/check-povyshennye-site.mjs",
     "test:povyshennye-chast2": "node scripts/check-povyshennye-chast2.mjs",
     "test:chast2": "node scripts/check-chast2.mjs",

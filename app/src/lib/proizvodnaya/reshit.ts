@@ -169,6 +169,12 @@ export function reshit(fig: Figura, zapros: Zapros): number | null {
       const inside = ekstremumy(fig, p, q);
       return inside.length;
     }
+    case 'chislo-nuley-funkcii':
+      return nuli(y, lo, hi).length;
+    case 'chislo-min-f':
+      return ekstremumy(fig, p, q).filter((z) => z.tip === 'minus-plus').length;
+    case 'chislo-max-f':
+      return ekstremumy(fig, p, q).filter((z) => z.tip === 'plus-minus').length;
     case 'nul-na-otrezke': {
       const inside = ekstremumy(fig, p, q);
       return inside.length === 1 ? (inside[0] as { x: number }).x : null;
