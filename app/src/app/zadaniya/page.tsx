@@ -1,47 +1,25 @@
 import type { Metadata } from 'next';
-import { findManifestFamily } from '@/lib/generator/manifest';
-import { findSection } from '@/content/sections';
+import { AppShell } from '@/components/layout/AppShell';
 import { tasksPage } from '@/content/tasks';
-import { subtopicBuilt } from '@/data/functionTypes';
-import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
-import { BankScreen } from './BankScreen';
-import type { SubtopicView } from './SubtopicDialog';
+import { TaskBank } from './TaskBank';
 import './zadaniya.css';
-import { href, ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: `${tasksPage.title} — Будет на ЕГЭ`,
   description: tasksPage.lead,
 };
 
-/* Раздел с окном выбора подтемы — тот, что открыт в банке. */
-const section = findSection('12');
-
-const dialog = {
-  slug: section?.slug ?? '',
-  no: section?.no ?? '',
-  subtitle: section?.subtitle ?? '',
-  hint: section?.dialogHint ?? '',
-  items: (section?.subtopics ?? []).map((item, index): SubtopicView => {
-    /* Числа на карточке — из манифеста генератора, он один считает
-       наборы движка. Семейство без наборов в манифесте есть, но с
-       нулями: карточка у него закрыта, и нулей она не показывает. */
-    const family = findManifestFamily(item.id);
-    return {
-      id: item.id,
-      no: String(index + 1).padStart(2, '0'),
-      title: item.title,
-      graphName: item.graphName,
-      icon: ikonkaRazdela(section?.slug ?? '12', item.icon),
-      status: item.status,
-      prototypes: family?.prototypes.sets ?? 0,
-      tasks: family?.prototypes.tasks ?? 0,
-      /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
-      href: subtopicBuilt(item) ? href(ZADANIYA, 12, item.id) : null,
-    };
-  }),
-};
-
+/**
+ * Банк заданий. Каждая карточка — ссылка на страницу раздела; №12
+ * открывается так же, как остальные, без промежуточного окна.
+ */
 export default function TasksPage() {
-  return <BankScreen dialog={dialog} />;
+  return (
+    /* Поиск в шапке выключен: на этой странице фильтрует свой. */
+    <AppShell active="tasks" search={false}>
+      {/* Шапка, поиск и сетка живут в клиентской части: фильтрация
+          идёт в браузере, серверу тут делать нечего. */}
+      <TaskBank />
+    </AppShell>
+  );
 }

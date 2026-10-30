@@ -21,7 +21,16 @@ import { OPORNYE } from './opornye';
  * незачем про это знать.
  */
 export type VkladkaIcon =
-  'sheet' | 'book' | 'bulb' | 'target' | 'dumbbell' | 'settings' | 'tasks' | 'stats' | 'materials';
+  | 'sheet'
+  | 'book'
+  | 'bulb'
+  | 'target'
+  | 'dumbbell'
+  | 'settings'
+  | 'tasks'
+  | 'stats'
+  | 'materials'
+  | 'zachyot';
 
 /**
  * Хвост адреса страницы материалов для репетитора. Заход по нему
@@ -77,14 +86,14 @@ export const VKLADKI_ZAGLUSHKI: readonly RazdelTab[] = [
 ];
 
 /**
- * Вкладки оглавления задания №12. Здесь вкладки переключают
- * содержимое на одной странице, а не ведут на свои адреса, поэтому
- * хвоста у них нет — только идентификатор, подпись и значок.
+ * Вкладки задания №12 — та же лента, что у №9–11. Тренажёр, генератор
+ * и зачётная работа — по всем типам функций; отдельный тип выбирается
+ * на «О задании» и открывает свою подтему. Зачётной работы у других
+ * разделов нет, поэтому она стоит последней.
  */
-export const VKLADKI_OGLAVLENIYA: readonly RazdelTab[] = [
-  { id: 'subtopics', label: 'Подтемы', tail: '', icon: 'tasks' },
-  { id: 'about', label: 'О задании', tail: '', icon: 'sheet' },
-  { id: 'prototypes', label: 'Прототипы', tail: '', icon: 'target' },
-  { id: 'stats', label: 'Статистика', tail: '', icon: 'stats' },
-  { id: 'materials', label: 'Материалы', tail: '', icon: 'materials' },
+export const VKLADKI_12: readonly RazdelTab[] = [
+  { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
+  { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
+  { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
+  { id: 'zachyot', label: 'Зачётная работа', tail: 'zachyot/', icon: 'zachyot' },
 ];

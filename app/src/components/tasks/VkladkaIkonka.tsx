@@ -23,6 +23,8 @@ const ZNACHKI: Record<VkladkaIcon, ReactElement> = {
   tasks: <NavIcon name="tasks" />,
   stats: <NavIcon name="stats" />,
   materials: <NavIcon name="materials" />,
+  /* Планшет с листом: зачётная работа №12. */
+  zachyot: <NavIcon name="assignments" />,
 };
 
 export function VkladkaIkonka({ name }: { name: VkladkaIcon }) {
