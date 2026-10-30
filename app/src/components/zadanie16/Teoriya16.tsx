@@ -43,7 +43,7 @@ function Otvet({ tex, zacherknut }: { tex: string; zacherknut?: boolean }) {
 }
 
 /** Значки меток карточек: книга, «!», лампочка, ось, предупреждение. */
-function Znachok({ ton }: { ton: Ton16 }) {
+export function Znachok16({ ton }: { ton: Ton16 }) {
   const d: Record<Ton16, string> = {
     opredelenie:
       'M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20',
@@ -86,7 +86,7 @@ function Kartochka({ k }: { k: Kartochka16 }) {
   return (
     <section className={`z16-card z16-card--${k.ton} z16-shir--${k.shirina ?? 2}`}>
       <p className="z16-metka">
-        <Znachok ton={k.ton} />
+        <Znachok16 ton={k.ton} />
         {k.metka ?? BLOKI_16.metki[k.ton]}
       </p>
       {k.title === undefined ? null : (

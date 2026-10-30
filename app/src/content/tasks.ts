@@ -234,14 +234,15 @@ export const tasks = [
     icon: 'svg',
   },
   { no: '18', name: 'Планиметрия', slug: '18', part: 2, status: 'soon', stub: true, icon: 'svg' },
+  /* Раздел открыт: вводные главы и метод 1 из 14, тренажёр по
+     открытым главам (content/teoriya19). Генератор — после банка. */
   {
     no: '19',
     name: 'Задача с параметром',
     shortTitle: 'Параметр',
     slug: '19',
     part: 2,
-    status: 'soon',
-    stub: true,
+    status: 'ready',
     icon: 'svg',
   },
   {

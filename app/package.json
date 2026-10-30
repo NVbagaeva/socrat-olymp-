@@ -92,6 +92,7 @@
     "test:zadanie15": "node scripts/check-zadanie15.mjs",
     "test:chertezh3": "node scripts/check-chertezh3.mjs",
     "test:zadanie16": "node scripts/check-zadanie16.mjs",
+    "test:param19": "node scripts/verify_param/dump.mjs /tmp/z19.json && python3 -I scripts/verify_param/run.py /tmp/z19.json",
     "test:zadanie15-vitrina": "node scripts/check-zadanie15-vitrina.mjs",
     "build:bank-2": "node scripts/build-bank-2.mjs",
     "build:bank-8": "node scripts/build-bank-8.mjs",
