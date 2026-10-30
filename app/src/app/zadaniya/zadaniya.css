@@ -347,7 +347,9 @@ a.subtopic-card:focus-visible {
   outline: none;
   border-color: var(--color-primary);
   background: var(--color-surface-info);
-  box-shadow: var(--shadow-md), 0 0 0 3px var(--color-focus-ring);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 3px var(--color-focus-ring);
   transform: translateY(-2px);
 }
 a.subtopic-card:focus-visible .subtopic-card__go {
@@ -445,7 +447,7 @@ a.subtopic-card:focus-visible .subtopic-card__ico {
 }
 /* Телефон: одна колонка, иконка справа от текста, стрелка — в своей
    колонке у правого края. Название не переносится по слову:
-   иконка 72px на самых узких экранах, шрифт чуть меньше. */
+   иконка 60px на самых узких экранах, шрифт чуть меньше. */
 @media (max-width: 767.98px) {
   .subtopic-list {
     grid-template-columns: minmax(0, 1fr);
@@ -476,14 +478,16 @@ a.subtopic-card:focus-visible .subtopic-card__ico {
     padding-right: 0;
   }
 }
+/* «Квадратичная функция» на 390 должна стоять в одну строку с
+   запасом: иконка 60px, а не 72px, — тексту на 12px больше. */
 @media (max-width: 430px) {
   .subtopic-card {
-    grid-template-columns: minmax(0, 1fr) 72px 20px;
+    grid-template-columns: minmax(0, 1fr) 60px 20px;
     column-gap: var(--space-2);
     padding: var(--space-3) 10px var(--space-3) 14px;
   }
   .subtopic-card__ico {
-    width: 72px;
+    width: 60px;
   }
   .subtopic-card__title {
     font-size: 14px;
