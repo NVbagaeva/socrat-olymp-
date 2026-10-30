@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useState, useSyncExternalStore } from 'react';
-import { TOUR_REPETITOR, howtoHref } from '@/content/onboarding';
+import { TOURS } from '@/content/onboarding';
 import type { IntroDecision } from '@/components/onboarding/intro/detect';
 import type { SplashInfo } from '@/components/onboarding/intro/IntroSplash';
 import { startTour } from '@/lib/onboarding';
@@ -106,12 +106,8 @@ export function DevIntro() {
       onInfo={setInfo}
       onChoose={(choice) => {
         setOpen(false);
-        if (choice === 'repetitor') {
-          startTour('repetitor', 0);
-          router.push(TOUR_REPETITOR.steps[0]!.href);
-        } else {
-          router.push(howtoHref('uchenik'));
-        }
+        startTour(choice, 0);
+        router.push(TOURS[choice].steps[0]!.href);
       }}
       onLater={() => setOpen(false)}
       onClose={() => setOpen(false)}

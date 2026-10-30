@@ -176,7 +176,7 @@ export const HOWTO = {
     tab: 'Ученику',
     video: {
       title: 'Видеоинструкция для ученика',
-      text: 'Тур для ученика тоже скоро. Пока — короткая инструкция ниже.',
+      text: 'Видео скоро. А пока — пройди тур по сайту или прочитай короткую инструкцию ниже.',
     },
     stepsTitle: 'С чего начать',
     steps: [
@@ -231,6 +231,7 @@ export const HOWTO = {
       title: 'Готов начать?',
       text: 'Выбери задание и начни с теории.',
       primary: { label: 'Открыть банк заданий', href: tasksPage.href },
+      tour: 'Пройти тур',
     },
   } satisfies HowtoTabContent,
 } as const;

@@ -374,12 +374,6 @@
 .help-fab__item:hover {
   background: var(--color-surface-2);
 }
-.help-fab__item--soon,
-.help-fab__item--soon:hover {
-  background: none;
-  color: var(--color-text-tertiary);
-  cursor: default;
-}
 
 @media (max-width: 767.98px) {
   .help-fab {

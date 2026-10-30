@@ -1,9 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { howtoHref } from '@/content/onboarding';
 import { markWelcomeSeen, startTour } from '@/lib/onboarding';
 
 /* Заставка со слоями — отдельный чанк: грузится только при показе. */
@@ -28,12 +26,9 @@ function somethingOpen(): boolean {
  * окна. «Уже видел» помнит тот же ключ, что и прежнее окно «Впервые
  * здесь?». Повторно — по просьбе (replay > 0), тогда сразу.
  *
- * «Тур для репетитора» запускает тур. Тура для ученика пока нет —
- * «Тур для ученика» открывает инструкцию для ученика на странице
- * «Как пользоваться».
+ * «Тур для ученика» и «Тур для репетитора» запускают свой тур.
  */
 export function IntroWelcome({ first, replay }: { first: boolean; replay: number }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [shownReplay, setShownReplay] = useState(0);
 
@@ -68,8 +63,7 @@ export function IntroWelcome({ first, replay }: { first: boolean; replay: number
       key={shownReplay}
       onChoose={(choice) => {
         close();
-        if (choice === 'repetitor') startTour('repetitor', 0);
-        else router.push(howtoHref('uchenik'));
+        startTour(choice, 0);
       }}
       onLater={close}
       onClose={close}

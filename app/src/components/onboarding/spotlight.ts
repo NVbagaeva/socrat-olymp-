@@ -28,10 +28,14 @@ import type { RefObject } from 'react';
 export const PAD = 8;
 /** Сколько ждать цель, прежде чем показать подсказку без подсветки. */
 const WAIT_MS = 4000;
+/** Сколько всего искать цель, показав подсказку без подсветки. */
+const LATE_MS = 15000;
 /** Дольше плавная прокрутка к шагу не ждётся. */
 const SCROLL_MS = 1500;
 /** Цикл слежения стоит, когда рамка не двигалась столько кадров. */
 const STILL_FRAMES = 10;
+/** Отступ карточки подсказки от рамки — GAP в Tour.tsx. */
+const CARD_GAP = 16;
 /** Отступ цели во вложенной ленте от её края: там растушёвка (TabsRow). */
 const INNER_GAP = 32;
 
@@ -258,11 +262,17 @@ function settle(targetY: number, alive: () => boolean): Promise<void> {
   });
 }
 
+/** Когда тур последний раз раскрывал блок шага, и сколько не повторять. */
+const lastOpen = { at: -Infinity };
+const OPEN_MS = 1000;
+
 const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
 
 export interface SpotlightOptions {
   /** Селекторы шага; null — шаг ещё не на своей странице или финал. */
   selectors: readonly string[] | null;
+  /** Кнопка, которую нажать перед шагом, если она видна (раскрыть блок). */
+  open?: string | null;
   /** Корень тура: в data-spot пишется, есть ли сейчас подсветка. */
   root: RefObject<HTMLElement | null>;
   hole: RefObject<HTMLElement | null>;
@@ -282,6 +292,7 @@ export interface Spotlight {
 
 export function useSpotlight({
   selectors,
+  open = null,
   root,
   hole,
   card,
@@ -306,11 +317,18 @@ export function useSpotlight({
     const bringIntoView = (els: Element[], smooth: boolean): { y: number; onTop: boolean } => {
       revealInScrollers(els);
       const box = unionBox(els);
-      if (box === null || inFixed(els[0]!)) return { y: window.scrollY, onTop: false };
+      if (box === null) return { y: window.scrollY, onTop: false };
       const vh = window.innerHeight;
+      const sheetH = sheet ? (card.current?.offsetHeight ?? 0) : 0;
+      /* Закреплённую цель (полоса «Начать тренировку» над нижней
+         панелью) прокруткой не сдвинуть: если её закрыл бы нижний
+         лист, лист — наверх. */
+      if (inFixed(els[0]!)) {
+        const under = box.top + box.height + PAD > vh - sheetH;
+        return { y: window.scrollY, onTop: sheet && under && box.top - PAD >= sheetH };
+      }
       const occ = occlusion(els, tour);
       const gap = sheet ? 12 : 24;
-      const sheetH = sheet ? (card.current?.offsetHeight ?? 0) : 0;
       const need = box.height + 2 * PAD + 2 * gap;
       /* Свободная полоса: лист снизу — между липкими полосами и листом;
          лист сверху — между листом и низом экрана. */
@@ -318,9 +336,25 @@ export function useSpotlight({
       const above = { from: Math.max(occ.top, sheetH), to: vh - occ.bottom };
       const max = document.documentElement.scrollHeight - vh;
       const y0 = window.scrollY;
+      /* Карточка у цели (компьютер): цель «на месте», только если рядом
+         есть место и для карточки — сбоку, снизу или сверху. Иначе
+         карточка легла бы на цель. */
+      const cw = sheet ? 0 : (card.current?.offsetWidth ?? 0);
+      const ch = sheet ? 0 : (card.current?.offsetHeight ?? 0);
+      const vw = window.innerWidth;
+      const beside =
+        sheet ||
+        vw - (box.left + box.width + PAD) >= cw + 2 * CARD_GAP ||
+        box.left - PAD >= cw + 2 * CARD_GAP;
       const plan = (free: { from: number; to: number }) => {
+        const roomFor = (top: number) =>
+          beside ||
+          free.to - (top + box.height + PAD) >= ch + 2 * CARD_GAP ||
+          top - PAD - free.from >= ch + 2 * CARD_GAP;
         const inView =
-          box.top - PAD - gap >= free.from && box.top + box.height + PAD + gap <= free.to;
+          box.top - PAD - gap >= free.from &&
+          box.top + box.height + PAD + gap <= free.to &&
+          roomFor(box.top);
         const wanted = inView ? y0 : y0 + box.top - (free.from + PAD + gap);
         const y = Math.min(Math.max(0, Math.round(wanted)), Math.max(0, max));
         const top = box.top - (y - y0);
@@ -446,7 +480,23 @@ export function useSpotlight({
     void (async () => {
       /* Цель может появиться не сразу: страница догружается. */
       const started = performance.now();
-      let els = selectors.length > 0 ? resolveTargets(selectors) : null;
+      /* Свёрнутый блок раскрываем один раз — как только кнопка видна.
+         Повторный запуск эффекта (смена ширины, строгий режим React)
+         не должен нажать её снова, пока раскрытие не отрисовалось:
+         второе нажатие свернуло бы блок. */
+      let opened = open === null;
+      const find = () => {
+        if (!opened && performance.now() - lastOpen.at > OPEN_MS) {
+          const btn = document.querySelector<HTMLElement>(open!);
+          if (btn !== null && btn.getClientRects().length > 0) {
+            btn.click();
+            opened = true;
+            lastOpen.at = performance.now();
+          }
+        }
+        return selectors.length > 0 ? resolveTargets(selectors) : null;
+      };
+      let els = find();
       while (
         alive &&
         els === null &&
@@ -454,14 +504,20 @@ export function useSpotlight({
         performance.now() - started < WAIT_MS
       ) {
         await nextFrame();
-        els = resolveTargets(selectors);
+        els = find();
       }
       if (!alive) return;
       if (els === null) {
-        /* Цели нет — подсказка без подсветки, по центру. */
+        /* Цели нет — подсказка без подсветки, по центру. Медленная сеть:
+           цель может появиться позже — ищем ещё, найдётся — подводим. */
         onBox?.(null, { top: 0, bottom: 0 });
         setState({ ready: true, sheetOnTop: false });
-        return;
+        if (selectors.length === 0) return;
+        while (alive && els === null && performance.now() - started < LATE_MS) {
+          await nextFrame();
+          els = find();
+        }
+        if (!alive || els === null) return;
       }
       const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       let { y, onTop } = bringIntoView(els, smooth);
@@ -486,7 +542,7 @@ export function useSpotlight({
       alive = false;
       stops.forEach((stop) => stop());
     };
-  }, [selectors, root, hole, card, sheet, onBox]);
+  }, [selectors, open, root, hole, card, sheet, onBox]);
 
   return selectors === null ? { ready: true, sheetOnTop: false } : state;
 }

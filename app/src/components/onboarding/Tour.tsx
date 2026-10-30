@@ -33,7 +33,11 @@ export function Tour() {
 /** Отступ подсказки от рамки и от краёв экрана. */
 const GAP = 16;
 
-const slash = (p: string) => (p.endsWith('/') ? p : `${p}/`);
+/** Путь без запроса и со слешем на конце: страница шага может быть с параметрами. */
+const slash = (p: string) => {
+  const path = p.split('?')[0]!;
+  return path.endsWith('/') ? path : `${path}/`;
+};
 
 const NARROW = '(max-width: 767.98px)';
 
@@ -118,7 +122,9 @@ function TourRun({ tour, step }: { tour: TourData; step: number }) {
       : narrow && current.narrowTarget !== undefined
         ? current.narrowTarget
         : current.target;
-  const spot = useSpotlight({ selectors, root, hole, card, sheet: narrow, onBox });
+  const open = onPage ? (current.open ?? null) : null;
+  const spot = useSpotlight({ selectors, open, root, hole, card, sheet: narrow, onBox });
+  const text = narrow && current?.narrowText !== undefined ? current.narrowText : current?.text;
   const ready = isFinal || (onPage && spot.ready);
 
   const go = useCallback(
@@ -307,7 +313,7 @@ function TourRun({ tour, step }: { tour: TourData; step: number }) {
               {current?.title}
             </h2>
             <p className="tour-card__text" id={textId}>
-              {current?.text}
+              {text}
             </p>
             <div className="tour-card__foot">
               <button
