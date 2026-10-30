@@ -1,0 +1,12 @@
+Шрифты демо-страницы /styleguide/chertyozh (направление «Чертёж»).
+Подключаются только там (src/app/styleguide/chertyozh/shrifty.ts).
+Inter Variable — общий шрифт сайта, лежит уровнем выше (inter-variable.woff2).
+
+onest-*-wght-normal.woff2 — @fontsource-variable/onest 5.3.1, ось wght:
+Copyright 2021 The Onest Project Authors (https://github.com/simpals/onest)
+
+jetbrains-mono-cifry-wght.woff2 — @fontsource-variable/jetbrains-mono 5.3.0,
+подмножество latin, урезанное pyftsubset до цифр и знаков номеров (0–9 . , : ; / – — - + × % · ( ) [ ] #):
+Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono) JetBrainsMono-Italic[wght].ttf: Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+
+Оба — SIL Open Font License 1.1, полный текст — в ../LICENSE.

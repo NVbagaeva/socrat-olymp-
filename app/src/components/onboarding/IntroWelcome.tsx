@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import { markWelcomeSeen, startTour } from '@/lib/onboarding';
 
 /* Заставка со слоями — отдельный чанк: грузится только при показе. */
-const IntroSplash = dynamic(() => import('./intro/IntroSplash').then((m) => m.IntroSplash), {
+const loadSplash = () => import('./intro/IntroSplash');
+const IntroSplash = dynamic(() => loadSplash().then((m) => m.IntroSplash), {
   ssr: false,
 });
 
@@ -17,6 +18,31 @@ const RETRY_MS = 1000;
 /** Открыто ли на странице другое окно или меню. */
 function somethingOpen(): boolean {
   return document.querySelector('[aria-modal="true"], .site-menu, .tour') !== null;
+}
+
+/**
+ * Вызвать, когда страница под заставкой догрузилась (событие load) и
+ * браузер свободен. Код и слои заставки не делят сеть и главный поток
+ * с картинками и скриптами самой страницы. На быстром соединении load
+ * наступает раньше DELAY_MS, и заставка выходит в прежний момент.
+ */
+function afterPageLoad(run: () => void): () => void {
+  let idle = 0;
+  let timer = 0;
+  const go = () => {
+    if (typeof window.requestIdleCallback === 'function') {
+      idle = window.requestIdleCallback(run, { timeout: 500 });
+    } else {
+      timer = window.setTimeout(run, 0);
+    }
+  };
+  if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go, { once: true });
+  return () => {
+    window.removeEventListener('load', go);
+    if (idle !== 0) window.cancelIdleCallback(idle);
+    window.clearTimeout(timer);
+  };
 }
 
 /**
@@ -32,18 +58,34 @@ export function IntroWelcome({ first, replay }: { first: boolean; replay: number
   const [open, setOpen] = useState(false);
   const [shownReplay, setShownReplay] = useState(0);
 
-  /* Первый визит: с задержкой, не поверх другого окна. */
+  /* Первый визит: с задержкой, не поверх другого окна и не раньше,
+     чем догрузится сама страница. Код заставки забирается заранее,
+     в свободное время после load: к показу он уже на месте. */
   useEffect(() => {
     if (!first) return;
-    let timer = window.setTimeout(function check() {
+    let loaded = false;
+    let due = false;
+    const show = () => {
       if (somethingOpen()) {
-        timer = window.setTimeout(check, RETRY_MS);
+        timer = window.setTimeout(show, RETRY_MS);
         return;
       }
       markWelcomeSeen();
       setOpen(true);
+    };
+    let timer = window.setTimeout(() => {
+      due = true;
+      if (loaded) show();
     }, DELAY_MS);
-    return () => window.clearTimeout(timer);
+    const cancelLoad = afterPageLoad(() => {
+      loaded = true;
+      void loadSplash();
+      if (due) show();
+    });
+    return () => {
+      window.clearTimeout(timer);
+      cancelLoad();
+    };
   }, [first]);
 
   /* Повтор по просьбе: сразу, со свежей анимацией. */

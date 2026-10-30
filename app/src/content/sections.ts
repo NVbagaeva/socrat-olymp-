@@ -126,7 +126,6 @@ export interface ExamSection {
   topic: {
     badge: string;
     lead: string;
-    quote: { text: string; author: string };
     /** Рукописная подпись под содержанием темы. */
     note: string;
   };
@@ -250,10 +249,6 @@ export const sections: ExamSection[] = [
     topic: {
       badge: 'Базовый и средний уровень',
       lead: 'Теория, графики и приёмы, которые понадобятся для решения задания №12.',
-      quote: {
-        text: 'Всё, что можно измерить, можно описать функциями.',
-        author: 'Г. Галилей',
-      },
       note: 'Математика — это не про числа, а про понимание зависимостей.',
     },
     subtopics: functionTypes,

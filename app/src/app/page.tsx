@@ -11,8 +11,11 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <>
-      <SiteHeader />
+    /* Главная — первая страница в «Стеклянной сцене»: стеклянные шапка
+       и подвал, свечения, глянцевые кнопки. Шрифт — общий Inter Variable
+       сайта (lib/fonts.ts). Остальные страницы переходят на сцену по одной. */
+    <div className="glavnaya">
+      <SiteHeader className="site-head--steklo" />
       <main>
         <HeroSection />
         <HowSection />
@@ -24,7 +27,7 @@ export default function HomePage() {
             CtaSection — «Узнай свой балл за 25 минут», та же диагностика. */}
         <BankSection />
       </main>
-      <SiteFooter />
-    </>
+      <SiteFooter className="site-foot--steklo" />
+    </div>
   );
 }

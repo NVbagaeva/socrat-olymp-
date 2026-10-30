@@ -136,6 +136,18 @@
   line-height: 1.65;
 }
 
+/* Телефон: поля карточки и блока вложены друг в друга — на 320 тексту
+   оставалось 204 px, а строчная формула (1/6)^(x−3) = … = 6^(3−x)
+   занимает 199. Поля уже: тексту на 24 px больше. */
+@media (max-width: 399.98px) {
+  .z7-k {
+    padding: var(--space-4) var(--space-3);
+  }
+  .z7-blok {
+    padding: var(--space-3);
+  }
+}
+
 .z7-blok__formula {
   margin: var(--space-2) 0 0;
   padding: var(--space-2) var(--space-3);

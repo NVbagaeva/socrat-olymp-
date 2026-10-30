@@ -1,7 +1,9 @@
 /**
  * Готовит AVIF и WebP для изображений героя из исходных PNG.
  *
- *   node scripts/build-hero-images.mjs
+ *   node scripts/build-hero-images.mjs [имя…]
+ *
+ * С именами — только эти кадры (например hero-kristall-600), без них — все.
  *
  * Качество подбирается вниз, пока файл не уложится в бюджет.
  * После конвертации проверяется альфа-канал: прозрачность должна
@@ -43,7 +45,20 @@ const SOURCES = [
        Ширина не меняется: предел показа 561px остаётся половиной от 1122. */
     crop: { left: 0, top: 0, width: 1122, height: 946 },
   },
+  {
+    /* Кристалл главной в «Стеклянной сцене»: на телефоне рамка 285px,
+       на компьютере до 560px. Тот же кадр, что hero-mobile, уменьшенный
+       до 600px — его хватает на телефон с удвоенной плотностью. */
+    name: 'hero-kristall-600',
+    from: 'hero-mobile',
+    width: 1122,
+    height: 1402,
+    crop: { left: 0, top: 0, width: 1122, height: 946 },
+    resize: 600,
+  },
 ];
+
+const ONLY = process.argv.slice(2);
 
 const TARGETS = [
   { ext: 'avif', budget: 120 * 1024, start: 70, floor: 40 },
@@ -55,17 +70,20 @@ let failed = false;
 await mkdir(OUT, { recursive: true });
 
 for (const source of SOURCES) {
-  const png = path.join(SRC, `${source.name}.png`);
+  if (ONLY.length > 0 && !ONLY.includes(source.name)) continue;
+  const png = path.join(SRC, `${source.from ?? source.name}.png`);
   let meta;
   try {
     meta = await sharp(png).metadata();
   } catch {
-    console.error(`✗ ${source.name}.png не найден в assets/hero/`);
+    console.error(`✗ ${source.from ?? source.name}.png не найден в assets/hero/`);
     failed = true;
     continue;
   }
 
-  console.log(`\n${source.name}.png — ${meta.width}×${meta.height}, ${kb((await stat(png)).size)}`);
+  console.log(
+    `\n${source.name} ← ${source.from ?? source.name}.png — ${meta.width}×${meta.height}, ${kb((await stat(png)).size)}`,
+  );
 
   if (meta.width !== source.width || meta.height !== source.height) {
     console.error(`  ✗ ожидались размеры ${source.width}×${source.height}`);
@@ -81,13 +99,19 @@ for (const source of SOURCES) {
   let prepared = sharp(png);
   if (source.crop) prepared = prepared.extract(source.crop);
   if (source.flop) prepared = prepared.flop();
+  if (source.resize) {
+    /* extract и resize в одной цепочке sharp выполняет в своём порядке —
+       кадр сначала доводим до PNG, потом уменьшаем. */
+    const cropped = await prepared.png().toBuffer();
+    prepared = sharp(cropped).resize({ width: source.resize });
+  }
   const input = await prepared.png({ compressionLevel: 9, effort: 10 }).toBuffer();
   const prep = await sharp(input).metadata();
 
-  if (source.crop || source.flop) {
+  if (source.crop || source.flop || source.resize) {
     console.log(
       `  кадр подготовлен: ${source.flop ? 'отражён, ' : ''}` +
-        `обрезан до ${prep.width}×${prep.height}`,
+        `${source.resize ? 'уменьшен, ' : ''}обрезан до ${prep.width}×${prep.height}`,
     );
   }
 

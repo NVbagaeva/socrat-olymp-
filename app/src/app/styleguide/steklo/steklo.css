@@ -1,0 +1,303 @@
+/* «Стеклянная сцена»: оформление поверх общего каркаса
+   (_napravleniya/karkas.css). Всё под .dm-steklo. */
+
+/* ── Стекло: одна рецептура на все поверхности ───────────────── */
+
+.dm-steklo .dm-shapka,
+.dm-steklo .dm-dver,
+.dm-steklo .dm-razdel,
+.dm-steklo .dm-panel,
+.dm-steklo .dm-oshibka,
+.dm-steklo .dm-vkladki,
+.dm-steklo .dm-tabbar,
+.dm-steklo .dm-btn--secondary {
+  background: var(--dm-glass-bg);
+  -webkit-backdrop-filter: var(--dm-glass-blur);
+  backdrop-filter: var(--dm-glass-blur);
+  box-shadow: var(--dm-glass-ring), var(--dm-glass-hi), var(--dm-glass-shadow);
+}
+.dm-steklo .dm-dver,
+.dm-steklo .dm-razdel,
+.dm-steklo .dm-panel,
+.dm-steklo .dm-oshibka {
+  border: 1px solid var(--dm-glass-edge);
+}
+
+/* Шапка и нижнее меню — стекло без тени снизу, только кромка. */
+.dm-steklo .dm-shapka {
+  background: var(--dm-glass-bg-strong);
+  box-shadow: 0 1px 0 rgb(31 95 208 / 0.08);
+}
+.dm-steklo .dm-tabbar {
+  background: var(--dm-glass-bg-strong);
+  box-shadow: 0 -1px 0 rgb(31 95 208 / 0.08);
+}
+
+/* ── Свечения позади стекла ──────────────────────────────────── */
+
+/* Без цвета позади blur нечего размывать. Три пятна — синее,
+   оранжевое, терракотовое; медленный дрейф только transform. */
+.dm-steklo {
+  background:
+    radial-gradient(60% 40% at 85% 55%, rgb(31 95 208 / 0.07), transparent 70%),
+    radial-gradient(50% 35% at 10% 85%, rgb(245 160 74 / 0.08), transparent 70%), var(--dm-bg);
+}
+.dm-steklo .dm-svecheniya {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.dm-steklo .dm-svechenie {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+.dm-steklo .dm-svechenie--siniy {
+  width: 760px;
+  height: 760px;
+  right: -120px;
+  top: -140px;
+  background: radial-gradient(closest-side, rgb(61 121 224 / 0.34), rgb(61 121 224 / 0) 100%);
+  animation: dm-dreyf-1 26s ease-in-out infinite alternate;
+}
+.dm-steklo .dm-svechenie--oranzh {
+  width: 520px;
+  height: 520px;
+  right: 18%;
+  bottom: -160px;
+  background: radial-gradient(closest-side, rgb(245 160 74 / 0.3), rgb(245 160 74 / 0) 100%);
+  animation: dm-dreyf-2 30s ease-in-out infinite alternate;
+}
+.dm-steklo .dm-svechenie--terra {
+  width: 420px;
+  height: 420px;
+  left: 30%;
+  /* В пикселях, не в процентах: высота героя меняется, когда
+     догружается шрифт, и пятно в процентах сдвигалось бы (CLS). */
+  top: 240px;
+  background: radial-gradient(closest-side, rgb(224 122 47 / 0.16), rgb(224 122 47 / 0) 100%);
+  animation: dm-dreyf-1 22s ease-in-out infinite alternate-reverse;
+}
+@keyframes dm-dreyf-1 {
+  to {
+    transform: translate3d(-60px, 40px, 0) scale(1.08);
+  }
+}
+@keyframes dm-dreyf-2 {
+  to {
+    transform: translate3d(80px, -50px, 0) scale(0.94);
+  }
+}
+
+/* ── Кнопки ──────────────────────────────────────────────────── */
+
+.dm-steklo .dm-btn--primary {
+  color: #fff;
+  background: var(--dm-gloss);
+  box-shadow: var(--dm-gloss-shadow);
+}
+.dm-steklo .dm-btn--primary:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -1px 0 rgb(0 0 0 / 0.12),
+    0 12px 24px -8px rgb(31 95 208 / 0.6);
+}
+.dm-steklo .dm-btn--secondary {
+  color: var(--dm-text);
+  border: 1px solid var(--dm-glass-edge);
+}
+.dm-steklo .dm-btn--secondary:hover {
+  background: var(--dm-glass-bg-strong);
+}
+.dm-steklo .dm-btn--ghost {
+  background: transparent;
+  color: var(--dm-blue);
+}
+.dm-steklo .dm-btn--ghost:hover {
+  background: rgb(31 95 208 / 0.08);
+}
+
+/* ── Герой ───────────────────────────────────────────────────── */
+
+.dm-steklo .dm-display {
+  color: var(--dm-text);
+}
+/* Двери: синее стекло ученику, тёплое — учителю. */
+.dm-steklo .dm-dver {
+  transition:
+    transform 220ms,
+    box-shadow 220ms;
+}
+.dm-steklo .dm-dver--uchenik {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.18), transparent 60%),
+    var(--dm-glass-bg);
+}
+.dm-steklo .dm-dver--uchitel {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.22), transparent 60%),
+    var(--dm-glass-bg);
+}
+.dm-steklo .dm-dver__deystvie {
+  color: var(--dm-blue);
+}
+.dm-steklo .dm-dver--uchitel .dm-dver__deystvie {
+  color: var(--dm-terra-text);
+}
+.dm-steklo .dm-dver:hover,
+.dm-steklo .dm-razdel:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--dm-glass-ring), var(--dm-glass-hi), var(--dm-glass-shadow-hover);
+}
+/* Кристалл парит. */
+.dm-steklo .kristall__oblast {
+  animation: dm-parit 7s ease-in-out infinite alternate;
+}
+@keyframes dm-parit {
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+/* ── Карточки разделов ───────────────────────────────────────── */
+
+.dm-steklo .dm-razdel__nomer {
+  color: var(--dm-blue);
+  font-weight: 600;
+}
+.dm-steklo .dm-razdel__ill {
+  border-radius: 24px;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0));
+}
+.dm-steklo .dm-razdel:hover .dm-razdel__ill {
+  transform: translateY(-4px) rotate(-3deg);
+}
+.dm-steklo .dm-razdel__go {
+  color: #fff;
+  background: var(--dm-gloss);
+  box-shadow: var(--dm-gloss-shadow);
+}
+
+/* ── Шапка раздела, бейджи, вкладки ──────────────────────────── */
+
+.dm-steklo .dm-razdel-golova__nomer {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  font-size: 22px;
+  font-weight: 650;
+  color: #fff;
+  background: var(--dm-gloss);
+  box-shadow: var(--dm-gloss-shadow);
+}
+.dm-steklo .dm-beydzh {
+  color: var(--dm-blue);
+  background: rgb(31 95 208 / 0.1);
+}
+.dm-steklo .dm-beydzh--novoe {
+  color: var(--dm-terra-text);
+  background: rgb(224 122 47 / 0.14);
+  box-shadow: inset 0 0 0 1px rgb(224 122 47 / 0.25);
+}
+.dm-steklo .dm-kroshki {
+  color: var(--dm-text-3);
+}
+/* Лента вкладок — стеклянная дорожка, активная — глянцевая таблетка. */
+.dm-steklo .dm-vkladki {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 5px;
+  border-radius: 999px;
+  border: 1px solid var(--dm-glass-edge);
+}
+.dm-steklo .dm-vkladka {
+  border-radius: 999px;
+  color: var(--dm-text-2);
+}
+.dm-steklo .dm-vkladka:hover {
+  color: var(--dm-text);
+  background: rgb(255 255 255 / 0.7);
+}
+.dm-steklo .dm-vkladka.is-active {
+  color: #fff;
+  background: var(--dm-gloss);
+  box-shadow: var(--dm-gloss-shadow);
+}
+
+/* ── Опции и звёзды ──────────────────────────────────────────── */
+
+.dm-steklo .dm-opciya,
+.dm-steklo .dm-zvezda {
+  background: rgb(255 255 255 / 0.6);
+  box-shadow:
+    inset 0 0 0 1px rgb(31 95 208 / 0.12),
+    var(--dm-glass-hi);
+}
+.dm-steklo .dm-opciya:hover,
+.dm-steklo .dm-zvezda:hover {
+  background: rgb(255 255 255 / 0.9);
+}
+.dm-steklo .dm-opciya.is-vybrana,
+.dm-steklo .dm-zvezda.is-gorit {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.95), rgb(232 240 252 / 0.95));
+  box-shadow:
+    inset 0 0 0 2px var(--dm-blue),
+    0 8px 20px -10px rgb(31 95 208 / 0.5);
+}
+.dm-steklo .dm-opciya__galka {
+  background: var(--dm-gloss);
+}
+.dm-steklo .dm-opciya.is-nedostupna {
+  opacity: 0.5;
+  box-shadow: inset 0 0 0 1px rgb(31 95 208 / 0.12);
+}
+.dm-steklo .dm-opciya.is-nedostupna:hover {
+  background: rgb(255 255 255 / 0.6);
+}
+.dm-steklo .dm-zvezda__ryad svg {
+  fill: #cfdae8;
+}
+.dm-steklo .dm-zvezda.is-gorit .dm-zvezda__ryad svg {
+  fill: var(--dm-orange);
+  filter: drop-shadow(0 1px 2px rgb(224 122 47 / 0.45));
+}
+
+/* ── Типы, ошибки, тренажёр ──────────────────────────────────── */
+
+.dm-steklo .dm-tip:hover {
+  background: rgb(255 255 255 / 0.75);
+}
+.dm-steklo .dm-tip + .dm-tip,
+.dm-steklo .dm-tipy li + li {
+  border-top: 1px solid var(--dm-line);
+}
+.dm-steklo .dm-tip__no {
+  color: var(--dm-blue);
+  font-weight: 600;
+}
+.dm-steklo .dm-oshibka {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgb(245 160 74 / 0.16), transparent 60%), var(--dm-glass-bg);
+}
+.dm-steklo .dm-oshibka__zagolovok {
+  color: var(--dm-terra-text);
+}
+.dm-steklo .dm-start {
+  background:
+    radial-gradient(80% 140% at 100% 50%, rgb(61 121 224 / 0.16), transparent 60%),
+    var(--dm-glass-bg);
+}
+.dm-steklo .dm-start__svodka li {
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: inset 0 0 0 1px rgb(31 95 208 / 0.1);
+}
+
+/* ── Шкала ───────────────────────────────────────────────────── */
+
+.dm-steklo .dm-obrazec--cifry {
+  font-weight: 500;
+}
