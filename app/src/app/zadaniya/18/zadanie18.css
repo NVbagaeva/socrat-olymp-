@@ -857,3 +857,11 @@
 .z18-kart__itog-povtorit {
   color: var(--color-status-oshibki-text);
 }
+
+/* Сворачивающаяся плашка под следствием: способы записи, подробности. */
+.z18-podrobno {
+  margin: var(--space-2) 0 0 var(--space-4);
+}
+.z18-podrobno .solution-details-body p {
+  margin: 0 0 var(--space-2);
+}

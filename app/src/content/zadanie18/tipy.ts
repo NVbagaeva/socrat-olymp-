@@ -21,6 +21,8 @@ export interface Podsvechennoe {
   tekst: string;
   /** Группы элементов чертежа, которые загораются. */
   gruppy: readonly string[];
+  /** Сворачивающаяся плашка под пунктом: подробности, способы записи. */
+  podrobno?: { title: string; abzacy: readonly string[] };
 }
 
 export interface Skhema18 {

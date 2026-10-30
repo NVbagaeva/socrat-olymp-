@@ -53,6 +53,11 @@ export function proverit(N = 1000) {
       tag,
     );
     sch.fakt('BL / LC = AB / AC', blizko(bl / lc, ab / ac), tag);
+    sch.fakt('LC / BL = AC / AB', blizko(lc / bl, ac / ab), tag);
+    sch.fakt('BL / AB = LC / AC', blizko(bl / ab, lc / ac), tag);
+    sch.fakt('BL·AC = LC·AB', blizko(bl * ac, lc * ab), tag);
+    sch.fakt('BL = BC·AB/(AB + AC), LC = BC·AC/(AB + AC)',
+      blizko(bl, (dist(B, C) * ab) / (ab + ac)) && blizko(lc, (dist(B, C) * ac) / (ab + ac)), tag);
     sch.fakt(
       'D на прямой AB, CD ∥ AL',
       Math.abs(orient(A, B, D)) < e * 100 &&

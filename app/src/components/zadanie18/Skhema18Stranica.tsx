@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Callout } from '@/components/ui';
+import { Callout, Details } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
 import { SKHEMA_18, ZADANIE18 } from '@/content/zadanie18';
 import { SOBRANNYE, skhema18 } from '@/content/zadanie18/spisok';
@@ -104,6 +104,15 @@ export function Skhema18Stranica({ id }: { id: string }) {
                     <span className="z18-sled__no">{i + 1}</span>
                     <Tex className="z18-sled__tekst" text={f.tekst} />
                   </button>
+                  {f.podrobno === undefined ? null : (
+                    <Details className="z18-podrobno" title={f.podrobno.title}>
+                      {f.podrobno.abzacy.map((a, k) => (
+                        <p key={k}>
+                          <Tex text={a} />
+                        </p>
+                      ))}
+                    </Details>
+                  )}
                 </li>
               ))}
             </ol>
