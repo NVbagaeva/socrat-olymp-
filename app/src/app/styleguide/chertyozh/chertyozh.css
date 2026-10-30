@@ -1,0 +1,318 @@
+/* «Чертёж»: оформление поверх общего каркаса (_napravleniya/karkas.css).
+   Всё под .dm-chertyozh.
+
+   Правила направления:
+   - линии 1 px вместо теней; теней нет вообще;
+   - синий — только то, что нажимается;
+   - терракота — одна точка внимания на экран: точка «h» на кристалле,
+     ремарка учителя у ошибок;
+   - стекло — шапка, нижнее меню и подписи к рендеру, больше нигде. */
+
+/* ── Поверхности: белое и линия ──────────────────────────────── */
+
+.dm-chertyozh .dm-dver,
+.dm-chertyozh .dm-razdel,
+.dm-chertyozh .dm-panel,
+.dm-chertyozh .dm-oshibka {
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-line);
+}
+
+/* ── Стекло: шапка, нижнее меню ──────────────────────────────── */
+
+.dm-chertyozh .dm-shapka,
+.dm-chertyozh .dm-tabbar {
+  background: var(--dm-glass-bg);
+  -webkit-backdrop-filter: var(--dm-glass-blur);
+  backdrop-filter: var(--dm-glass-blur);
+}
+.dm-chertyozh .dm-shapka {
+  border-bottom: 1px solid var(--dm-line);
+}
+.dm-chertyozh .dm-tabbar {
+  border-top: 1px solid var(--dm-line);
+}
+
+/* ── Кнопки ──────────────────────────────────────────────────── */
+
+.dm-chertyozh .dm-btn--primary {
+  color: #fff;
+  background: var(--dm-blue);
+}
+.dm-chertyozh .dm-btn--primary:hover {
+  background: var(--dm-blue-hover);
+}
+.dm-chertyozh .dm-btn--primary:active {
+  background: var(--dm-blue-press);
+}
+.dm-chertyozh .dm-btn--secondary {
+  color: var(--dm-text);
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-line-strong);
+}
+.dm-chertyozh .dm-btn--secondary:hover {
+  border-color: var(--dm-blue-line);
+  color: var(--dm-blue);
+}
+.dm-chertyozh .dm-btn--ghost {
+  color: var(--dm-blue);
+  background: transparent;
+}
+.dm-chertyozh .dm-btn--ghost:hover {
+  background: var(--dm-blue-soft);
+}
+
+/* ── Герой: миллиметровка и экспонат ─────────────────────────── */
+
+.dm-chertyozh .dm-setka {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(var(--dm-grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dm-grid-major) 1px, transparent 1px),
+    linear-gradient(var(--dm-grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dm-grid-minor) 1px, transparent 1px);
+  background-size:
+    40px 40px,
+    40px 40px,
+    8px 8px,
+    8px 8px;
+  background-position: -1px -1px;
+  -webkit-mask-image: radial-gradient(90% 80% at 70% 40%, #000 30%, transparent 85%);
+  mask-image: radial-gradient(90% 80% at 70% 40%, #000 30%, transparent 85%);
+}
+.dm-chertyozh .dm-geroy {
+  border-bottom: 1px solid var(--dm-line);
+}
+.dm-chertyozh .dm-nadzagolovok {
+  font-family: var(--dm-font-cifry);
+}
+/* Стеклянные подписи к рендеру — с выноской-точкой. */
+.dm-chertyozh .kristall__podpis {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dm-text);
+  background: rgb(255 255 255 / 0.62);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  backdrop-filter: blur(10px) saturate(150%);
+  border: 1px solid var(--dm-glass-edge);
+  transform: translate(16px, -50%);
+}
+.dm-chertyozh .kristall__podpis::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  width: 16px;
+  height: 1px;
+  background: rgb(255 255 255 / 0.9);
+}
+.dm-chertyozh .kristall__podpis::after {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgb(16 23 40 / 0.25);
+}
+/* Терракотовая точка героя — высота: то, что ищут в задаче. */
+.dm-chertyozh .kristall__podpis--h::after {
+  background: var(--dm-terra);
+  box-shadow: 0 0 0 3px rgb(224 122 47 / 0.3);
+}
+.dm-chertyozh .kristall__podpis--a {
+  transform: translate(16px, -10%);
+}
+
+.dm-chertyozh .dm-dver {
+  transition: border-color 200ms;
+}
+.dm-chertyozh .dm-dver:hover {
+  border-color: var(--dm-blue-line);
+}
+.dm-chertyozh .dm-dver__deystvie {
+  color: var(--dm-blue);
+}
+.dm-chertyozh .dm-dver .dm-strelka {
+  transition: transform 200ms;
+}
+.dm-chertyozh .dm-dver:hover .dm-strelka {
+  transform: translateX(4px);
+}
+
+/* ── Карточки разделов ───────────────────────────────────────── */
+
+.dm-chertyozh .dm-razdel:hover {
+  border-color: var(--dm-blue-line);
+}
+.dm-chertyozh .dm-razdel:hover .dm-razdel__ill {
+  transform: translateX(4px);
+}
+.dm-chertyozh .dm-razdel__nomer {
+  font-size: 13px;
+}
+.dm-chertyozh .dm-razdel__go {
+  color: var(--dm-blue);
+  border: 1px solid var(--dm-blue-line);
+}
+
+/* ── Шапка раздела, бейджи, вкладки ──────────────────────────── */
+
+.dm-chertyozh .dm-razdel-golova__nomer {
+  font-size: 15px;
+  line-height: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--dm-line-strong);
+  border-radius: 6px;
+  color: var(--dm-text-2);
+}
+.dm-chertyozh .dm-beydzh {
+  color: var(--dm-text-2);
+  background: transparent;
+  border: 1px solid var(--dm-line-strong);
+}
+.dm-chertyozh .dm-beydzh--novoe {
+  font-family: var(--dm-font-cifry);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--dm-navy);
+  border-color: var(--dm-navy);
+}
+/* Вкладки — строка с линией, активная — подчёркнута 2 px. */
+.dm-chertyozh .dm-vkladki {
+  border-bottom: 1px solid var(--dm-line);
+}
+.dm-chertyozh .dm-vkladka {
+  position: relative;
+  padding: 0 14px;
+  color: var(--dm-text-2);
+}
+.dm-chertyozh .dm-vkladka:first-child {
+  padding-left: 0;
+}
+.dm-chertyozh .dm-vkladka:hover {
+  color: var(--dm-text);
+}
+.dm-chertyozh .dm-vkladka::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: transparent;
+}
+.dm-chertyozh .dm-vkladka:first-child::after {
+  left: 0;
+}
+.dm-chertyozh .dm-vkladka.is-active {
+  color: var(--dm-blue);
+  font-weight: 600;
+}
+.dm-chertyozh .dm-vkladka.is-active::after {
+  background: var(--dm-blue);
+}
+
+/* ── Опции и звёзды ──────────────────────────────────────────── */
+
+.dm-chertyozh .dm-opciya,
+.dm-chertyozh .dm-zvezda {
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-line-strong);
+}
+.dm-chertyozh .dm-opciya:hover,
+.dm-chertyozh .dm-zvezda:hover {
+  border-color: var(--dm-blue-line);
+}
+.dm-chertyozh .dm-opciya.is-vybrana,
+.dm-chertyozh .dm-zvezda.is-gorit {
+  background: var(--dm-blue-soft);
+  border-color: var(--dm-blue);
+  box-shadow: inset 0 0 0 1px var(--dm-blue);
+}
+.dm-chertyozh .dm-opciya__galka {
+  background: var(--dm-blue);
+}
+.dm-chertyozh .dm-opciya.is-nedostupna {
+  opacity: 0.5;
+  border-style: dashed;
+}
+.dm-chertyozh .dm-opciya.is-nedostupna:hover {
+  border-color: var(--dm-line-strong);
+}
+.dm-chertyozh .dm-zvezda__ryad svg {
+  fill: #cfdae8;
+}
+.dm-chertyozh .dm-zvezda.is-gorit .dm-zvezda__ryad svg {
+  fill: var(--dm-blue);
+}
+
+/* ── Типы, ошибки, тренажёр ──────────────────────────────────── */
+
+.dm-chertyozh .dm-tipy li + li {
+  border-top: 1px solid var(--dm-line);
+}
+.dm-chertyozh .dm-tip {
+  border-radius: 0;
+}
+.dm-chertyozh .dm-tip:hover .dm-tip__text {
+  color: var(--dm-blue);
+}
+.dm-chertyozh .dm-tipy__gruppa .dm-cifry {
+  color: var(--dm-text-3);
+}
+.dm-chertyozh .dm-oshibka {
+  border-left: 3px solid var(--dm-navy);
+}
+/* Ручка учителя: одна ремарка на страницу, терракотой. */
+.dm-chertyozh .dm-remarka {
+  justify-self: end;
+  margin: 2px 8px 0 0;
+  font-family: var(--dm-font-ruka);
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--dm-terra-text);
+  transform: rotate(-2deg);
+}
+.dm-chertyozh .dm-remarka::before {
+  content: '↑ ';
+}
+.dm-chertyozh .dm-start__svodka li {
+  border: 1px solid var(--dm-line);
+  background: var(--dm-bg);
+}
+
+/* ── Шкала ───────────────────────────────────────────────────── */
+
+.dm-chertyozh .dm-obrazec--caption {
+  font-family: var(--dm-font-cifry);
+}
+
+/* До 1280px правая подпись не помещается справа от
+   точки — встаёт слева, выноска переходит на её правый край. */
+@media (max-width: 1279.98px) {
+  .dm-chertyozh .kristall__podpis--a {
+    transform: translate(calc(-100% - 16px), 20%);
+  }
+  .dm-chertyozh .kristall__podpis--a::before {
+    left: auto;
+    right: -16px;
+  }
+  .dm-chertyozh .kristall__podpis--a::after {
+    left: auto;
+    right: -20px;
+  }
+}

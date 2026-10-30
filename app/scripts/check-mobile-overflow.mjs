@@ -246,6 +246,16 @@ async function main() {
     console.log(`${x.put} @${x.shirina}: ${x.oshibka ?? `+${x.scroll}px`}`);
     for (const e of x.elementy ?? []) console.log(`    ${e.put}  [${e.left}…${e.right}]`);
   }
+  /* В GitHub Actions — ещё и аннотациями: страница и виновник видны во
+     вкладке проверок pull request, без чтения всего лога. */
+  if (process.env.GITHUB_ACTIONS === 'true') {
+    for (const x of prokrutka.slice(0, 20)) {
+      const chto =
+        x.oshibka ??
+        `+${x.scroll}px ${(x.elementy ?? []).map((e) => `${e.put} [${e.left}…${e.right}]`).join('; ')}`;
+      console.log(`::error title=Прокрутка ${x.put} @${x.shirina}::${chto.replace(/\r?\n/g, ' ')}`);
+    }
+  }
   console.log(
     `Страниц: ${puti.length}, проверок: ${zadachi.length}, с прокруткой страницы: ${prokrutka.length}`,
   );

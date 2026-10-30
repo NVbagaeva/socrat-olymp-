@@ -17,6 +17,12 @@ const { bank } = landing;
 export function BankSection() {
   return (
     <section className="band" id="bank">
+      {/* Свечения позади стеклянных карточек: без цвета за стеклом
+          размывать нечего. */}
+      <div className="aura" aria-hidden="true">
+        <span className="aura__spot aura__spot--blue" />
+        <span className="aura__spot aura__spot--orange" />
+      </div>
       <div className="wrap">
         <div className="band__head">
           <h2>{bank.title}</h2>

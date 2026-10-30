@@ -164,31 +164,10 @@ export function FunctionTopicPage({
         }
         badge={topic.badge}
         lead={topic.lead}
-        actions={
-          /* Цитата стоит строкой под подзаголовком, а не колонкой
-             рядом: деля ширину, они ломали друг друга. */
-          <figure className="topic-quote">
-            <blockquote className="topic-quote__text">
-              <HandNote>«{topic.quote.text}»</HandNote>
-            </blockquote>
-            <figcaption className="topic-quote__author">— {topic.quote.author}</figcaption>
-          </figure>
-        }
         media={
-          <>
-            {/* Портрет — декор: alt пустой, цитата рядом текстом. */}
-            <Image
-              className="topic-head__art"
-              src={assetUrl('/images/bust-galileo.webp')}
-              alt=""
-              width={814}
-              height={700}
-            />
-
-            {/* Прогресс подтемы: пункты — её вкладки с содержанием,
-                изучено — то, что ученик сделал, а не открыл. */}
-            <TopicProgress plan={plan} theoryKey={theoryKey} methodsKey={methodsKey} />
-          </>
+          /* Прогресс подтемы: пункты — её вкладки с содержанием,
+             изучено — то, что ученик сделал, а не открыл. */
+          <TopicProgress plan={plan} theoryKey={theoryKey} methodsKey={methodsKey} />
         }
       />
 

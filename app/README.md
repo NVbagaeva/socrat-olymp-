@@ -267,12 +267,35 @@ node scripts/check-alpha-detector.mjs
 
 ## Шрифт
 
-Inter берётся из пакета `@fontsource/inter`. Он поставляется отдельными файлами
-на каждый юникод-поддиапазон, а `next/font/local` не умеет задавать `unicode-range`
-для отдельного файла — поэтому latin, latin-ext, cyrillic и cyrillic-ext собраны
-в один woff2 на начертание (`src/fonts/inter-400.woff2` и далее).
-Пересобрать можно скриптом из истории коммита, если понадобится другой набор
-начертаний. Лицензия — `src/fonts/LICENSE`.
+Сайт набран **Inter 4 Variable** — один файл `src/fonts/inter-variable.woff2`
+(94 КБ) с осями wght (100–900) и opsz (14–32): любые веса и начертание Display
+на крупных кеглях, браузер ведёт ось opsz сам. Объявление — `src/lib/fonts.ts`.
+
+Файл собран из `InterVariable.ttf` релиза [Inter 4.1](https://github.com/rsms/inter/releases/tag/v4.1).
+Набор символов — пересечение прежних файлов `@fontsource/inter` (они лежат рядом,
+`src/fonts/inter-400.woff2` и далее) с диапазонами латиницы, латиницы-ext A,
+кириллицы, общей пунктуации, знаков-букв, стрелок, математических операторов
+и фигур — всё, что встречается в тексте сайта. Пересобрать:
+
+```bash
+python3 - <<'PY' > keep.txt   # коды символов: прежний набор ∩ диапазоны
+from fontTools.ttLib import TTFont
+old = set(TTFont('src/fonts/inter-400.woff2').getBestCmap())
+ranges = [(0x20,0x7E),(0xA0,0xFF),(0x100,0x17F),(0x131,0x131),(0x152,0x153),(0x2BB,0x2BC),
+          (0x2C6,0x2DD),(0x300,0x36F),(0x400,0x45F),(0x490,0x491),(0x4B0,0x4B1),(0x2000,0x206F),
+          (0x20AC,0x20AC),(0x20BD,0x20BD),(0x2100,0x214F),(0x2190,0x21FF),(0x2200,0x22FF),
+          (0x25A0,0x25FF),(0xFEFF,0xFEFF),(0xFFFD,0xFFFD)]
+want = {c for a, b in ranges for c in range(a, b + 1)}
+print(','.join('U+%04X' % c for c in sorted(old & want)))
+PY
+pyftsubset InterVariable.ttf --unicodes-file=keep.txt \
+  --layout-features=calt,ccmp,dnom,frac,locl,numr,pnum,tnum,kern,mark,mkmk \
+  --no-hinting --desubroutinize --flavor=woff2 --output-file=src/fonts/inter-variable.woff2
+```
+
+Прежние статические `inter-400…700.woff2` на сайт больше не грузятся: ими набирает
+PDF-листы `scripts/lib/sheet-render.mjs`, и листы от смены шрифта сайта не меняются.
+Лицензия — `src/fonts/LICENSE`.
 
 PT Serif — антиква карточки задачи (условие, «Решение», шаги разбора, обозначения
 на чертежах): `src/fonts/pt-serif-400.woff2` и `pt-serif-400-italic.woff2`, токен

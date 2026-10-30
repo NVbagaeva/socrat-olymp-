@@ -1,17 +1,28 @@
 import localFont from 'next/font/local';
 
 /**
- * Inter из @fontsource/inter, по одному файлу на начертание.
- * Поддиапазоны latin, latin-ext, cyrillic и cyrillic-ext слиты в один woff2:
- * next/font/local объявляет один @font-face на файл и не умеет unicode-range.
+ * Inter 4 Variable — оси wght (100–900) и opsz (14–32), один файл на все
+ * начертания (94 КБ вместо четырёх статических по 64–66 КБ). Ось opsz
+ * браузер ведёт сам по кеглю (font-optical-sizing: auto по умолчанию): на
+ * крупных заголовках — начертание Display, в тексте — обычное.
+ *
+ * Собран pyftsubset из InterVariable.ttf релиза Inter 4.1
+ * (github.com/rsms/inter, OFL — fonts/LICENSE). Набор символов — те, что
+ * были в прежних файлах из @fontsource/inter, в пределах латиницы,
+ * латиницы-ext A, кириллицы, общей пунктуации, знаков-букв (ℓ, №, ™),
+ * стрелок, математических операторов и фигур; это всё, что встречается
+ * в тексте сайта (проверено по собранным страницам). Остальные буквы, если
+ * встретятся, браузер возьмёт из запасного шрифта по одной. Возможности —
+ * как у прежних файлов: calt, ccmp, dnom, frac, locl, numr, pnum, tnum,
+ * kern, mark, mkmk; без хинтинга.
+ *
+ * Прежние статические inter-400…700.woff2 остаются в fonts/: ими набирает
+ * PDF-листы scripts/lib/sheet-render.mjs, и листы от замены не меняются.
  */
 export const inter = localFont({
-  src: [
-    { path: '../fonts/inter-400.woff2', weight: '400', style: 'normal' },
-    { path: '../fonts/inter-500.woff2', weight: '500', style: 'normal' },
-    { path: '../fonts/inter-600.woff2', weight: '600', style: 'normal' },
-    { path: '../fonts/inter-700.woff2', weight: '700', style: 'normal' },
-  ],
+  src: '../fonts/inter-variable.woff2',
+  weight: '100 900',
+  style: 'normal',
   variable: '--font-inter',
   display: 'swap',
   fallback: ['system-ui', '-apple-system', 'sans-serif'],

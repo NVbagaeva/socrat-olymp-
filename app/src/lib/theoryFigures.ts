@@ -731,7 +731,9 @@ function crossAxisLabels(w: Win, unitX: 'above' | 'none'): FigureLabel[] {
 }
 
 /* Стрелка «за рамкой»: слева от левой ветви f = x² − 4 у верхнего края,
-   вдоль неё; подпись — ниже стрелки, тоже левее ветви. */
+   вдоль неё; подпись — ниже стрелки, тоже левее ветви. Подпись стоит
+   на y = 2,2, а не 3,25: ниже ветвь правее, и до неё остаётся запас
+   под шрифт чуть шире (на раннере CI подпись ложилась на кривую). */
 const OUTSIDE_ARROW = {
   type: 'segment',
   from: [-3.3, 4.0],
@@ -741,7 +743,7 @@ const OUTSIDE_ARROW = {
   arrow: true,
 };
 const OUTSIDE_LABEL: FigureLabel = {
-  at: [-4.95, 3.25],
+  at: [-4.95, 2.2],
   text: 'за рамкой',
   tone: 'accent',
   size: 14,
@@ -932,7 +934,7 @@ function qbValueA(): TheoryFigure {
 
 /* Стрелка «за рамкой» вдоль левой ветви y = (x − 1)² − 4 у верхнего
    края; подпись — левее ветви. Как у разборов пересечений, сдвинуто
-   вправо на вершину. */
+   вправо на вершину; подпись тоже на y = 2,2 — с запасом до ветви. */
 const BASIC_ARROW_LEFT = {
   type: 'segment',
   from: [-2.3, 4.0],
@@ -942,7 +944,7 @@ const BASIC_ARROW_LEFT = {
   arrow: true,
 };
 const BASIC_LABEL_LEFT: FigureLabel = {
-  at: [-3.95, 3.25],
+  at: [-3.95, 2.2],
   text: 'за рамкой',
   tone: 'accent',
   size: 14,

@@ -647,6 +647,13 @@ console.log(`Навигация по разделам №12: проверок ${
 for (const f of failures) {
   console.log(`  ✗ ${f}`);
 }
+/* В GitHub Actions — ещё и аннотациями: что не прошло, видно во вкладке
+   проверок pull request, без чтения всего лога. */
+if (process.env.GITHUB_ACTIONS === 'true') {
+  for (const f of failures.slice(0, 20)) {
+    console.log(`::error title=Навигация по разделам №12::${String(f).replace(/\r?\n/g, ' ')}`);
+  }
+}
 if (failures.length > 0) {
   process.exitCode = 1;
 }

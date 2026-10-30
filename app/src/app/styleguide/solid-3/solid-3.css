@@ -55,6 +55,8 @@
 
 .s3__card-id {
   display: block;
+  /* Идентификатор без пробелов: на телефоне переносится где угодно. */
+  overflow-wrap: anywhere;
   font-size: 12px;
   font-weight: 400;
   color: var(--color-text-tertiary);
