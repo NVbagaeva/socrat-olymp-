@@ -25,6 +25,8 @@ const ZNACHKI: Record<VkladkaIcon, ReactElement> = {
   materials: <NavIcon name="materials" />,
   /* Планшет с листом: зачётная работа №12. */
   zachyot: <NavIcon name="assignments" />,
+  /* Две карточки внахлёст: «Карточки» — проверка теории. */
+  cards: <NavIcon name="cards" />,
 };
 
 export function VkladkaIkonka({ name }: { name: VkladkaIcon }) {

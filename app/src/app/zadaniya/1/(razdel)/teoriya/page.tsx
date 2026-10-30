@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { ProverkaTeorii } from '@/components/kartochki/ProverkaTeorii';
+import { kolodaNomera } from '@/content/kartochki';
 import { Spravochnik1 } from '@/components/tasks/planimetriya/spravochnik/Spravochnik1';
 import { ZADANIE1, zadanie1Title } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
@@ -24,10 +26,17 @@ function trenazher(proto: number): string {
  */
 export default function Teoriya1Tab() {
   return (
-    <Spravochnik1
-      trenazher={trenazher}
-      pdf={`${BASE}/pechat/spravochnik/`}
-      adresa={{ zadanie: `${BASE}/`, teoriya: `${BASE}/teoriya/` }}
-    />
+    <>
+      <ProverkaTeorii
+        task={1}
+        href={`${BASE}/kartochki/`}
+        ids={kolodaNomera(1).kartochki.map((k) => k.id)}
+      />
+      <Spravochnik1
+        trenazher={trenazher}
+        pdf={`${BASE}/pechat/spravochnik/`}
+        adresa={{ zadanie: `${BASE}/`, teoriya: `${BASE}/teoriya/` }}
+      />
+    </>
   );
 }
