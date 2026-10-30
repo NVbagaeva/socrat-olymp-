@@ -544,7 +544,8 @@ const PROTOTIPY_PARTIYA_3: readonly PrototipChertezha[] = [
             }),
             storona('A', 'C', chislo(p.a)),
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
-            ug('A', 'C', 'B', { sloy: 1 }),
+            /* Дуга у C — вдвое меньше обычной: рядом значок прямого угла у H и подписи. */
+            ug('A', 'C', 'B', { sloy: 1, radiusPx: 7 }),
             otr('C', 'H', { sloy: 2, tolkoShtrihi: true, znachenie: chislo(cosA * p.a) }),
           ],
           proverki: [
