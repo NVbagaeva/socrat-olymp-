@@ -19,14 +19,22 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-}
-.tour__veil--dim {
   background: var(--onb-veil);
+  transition: background-color var(--dur-switch) var(--ease);
+}
+/* Подсветка есть — затемняет тень «окна», слой только ловит нажатия. */
+.tour[data-spot='on'][data-ready] .tour__veil {
+  background: transparent;
 }
 
-/* «Окно» в затемнении: тень на весь экран вокруг подсвеченного места. */
+/* «Окно» в затемнении: тень на весь экран вокруг подсвеченного места.
+   Место ставит spotlight.ts каждый кадр, поэтому перехода по top/left/
+   width/height нет: он заставлял рамку догонять цель при прокрутке.
+   Анимируется только появление на новом шаге — прозрачностью. */
 .tour__hole {
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 61;
   border-radius: var(--radius-lg);
   outline: 2px solid var(--color-primary);
@@ -34,11 +42,18 @@
     0 0 0 6px color-mix(in srgb, var(--color-primary) 22%, transparent),
     0 0 0 200vmax var(--onb-veil);
   pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
   transition:
-    top var(--dur-state) var(--ease),
-    left var(--dur-state) var(--ease),
-    width var(--dur-state) var(--ease),
-    height var(--dur-state) var(--ease);
+    opacity var(--dur-switch) var(--ease),
+    visibility 0s linear var(--dur-switch);
+}
+.tour[data-spot='on'][data-ready] .tour__hole {
+  visibility: visible;
+  opacity: 1;
+  transition:
+    opacity var(--dur-switch) var(--ease),
+    visibility 0s;
 }
 
 .tour-card {
@@ -57,7 +72,7 @@
   visibility: hidden;
   opacity: 0;
 }
-.tour-card--center,
+.tour-card[data-place='center']:not(.tour-card--sheet),
 .tour-card--final {
   top: 50%;
   left: 50%;
@@ -66,6 +81,7 @@
 .tour-card--final {
   width: min(600px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
   overflow-y: auto;
   padding: var(--space-8);
 }
@@ -205,11 +221,22 @@
   right: 0;
   bottom: 0;
   width: auto;
+  /* dvh: на iOS 100vh — высота при свёрнутой адресной строке. */
   max-height: 70vh;
+  max-height: 70dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   transform: none;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   padding: var(--space-5) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+}
+/* Лист наверху: снизу он закрыл бы цель (spotlight.ts). */
+.tour-card--sheet.tour-card--sheet-top {
+  top: 0;
+  bottom: auto;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  padding-top: calc(var(--space-5) + env(safe-area-inset-top));
+  padding-bottom: var(--space-5);
 }
 .tour-card--sheet .btn {
   min-height: 48px;
@@ -220,6 +247,7 @@
 }
 .tour-card--sheet.tour-card--final {
   max-height: 88vh;
+  max-height: 88dvh;
   padding-top: var(--space-6);
 }
 .tour-card--sheet.tour-card--final .tour-card__skills {
@@ -371,7 +399,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .tour__veil,
   .tour__hole,
+  .tour[data-spot='on'][data-ready] .tour__hole,
   .tour-card,
   .help-fab__button {
     transition: none;
