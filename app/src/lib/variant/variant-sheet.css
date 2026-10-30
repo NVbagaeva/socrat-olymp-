@@ -391,3 +391,54 @@ html[data-sheet-dense] .var-instruction {
 .c2-razbor__f {
   display: block;
 }
+
+/* Рамки решения части 2 (теория, сноска) и рисунок с легендой. */
+.c2-ramka {
+  max-width: none;
+  margin: 1.5mm 0;
+  padding: 2mm 3mm;
+  font-size: inherit;
+}
+.c2-ramka__t {
+  margin: 0;
+  font-weight: 700;
+}
+.c2-ramka__formula {
+  text-align: center;
+  font-size: 1.1em;
+}
+.c2-etap__melko {
+  padding-left: 4mm;
+  font-size: 0.85em;
+}
+.c2-etap__melko > p {
+  margin: 0;
+}
+.c2-etap__ris .c2-graf {
+  width: 78mm;
+}
+
+/* Список «1) … 2) …» в этапе; живая панель рисунка №19 на бумаге не нужна. */
+.sheet-item .c2-etap__sp {
+  margin: 0;
+  padding-left: 4mm;
+  list-style: none;
+  counter-reset: c2sp;
+}
+.sheet-item .c2-etap__sp > li {
+  position: relative;
+  padding-left: 5mm;
+  counter-increment: c2sp;
+}
+.sheet-item .c2-etap__sp > li::before {
+  content: counter(c2sp) ')';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+.sheet-item .c2-graf-panel,
+.sheet-item .c2-graf__obshchaya,
+.sheet-item .c2-graf__ruchka,
+.sheet-item .c2-graf__hit {
+  display: none;
+}

@@ -300,14 +300,14 @@ import type { EgeNo, HintStep, VariantTask } from '@/lib/variant/types';
 import type { ShablonInfo, Zapis } from './types';
 
 /** Задача без полей версии: их проставляет `zadachaVersii`. */
-type Gotovaya = Omit<VariantTask, 'taskId' | 'prototypeId' | 'subtype' | 'source' | 'ref'>;
+export type Gotovaya = Omit<VariantTask, 'taskId' | 'prototypeId' | 'subtype' | 'source' | 'ref'>;
 
-interface Shablon extends ShablonInfo {
+export interface Shablon extends ShablonInfo {
   zadacha(p: never, klyuch: string): Gotovaya;
 }
 
 /** Общие поля, которые адаптер раздела заполняет по-своему, — убираем. */
-function bezPoley(t: VariantTask): Gotovaya {
+export function bezPoley(t: VariantTask): Gotovaya {
   const {
     taskId: _taskId,
     prototypeId: _prototypeId,
@@ -320,13 +320,19 @@ function bezPoley(t: VariantTask): Gotovaya {
 }
 
 /** Кандидат для `build` адаптера: только чтобы адаптер собрал разметку. */
-const kand = { taskId: 'pv', prototypeId: '', subtype: '', source: 'own' as const, stars: null };
+export const kand = {
+  taskId: 'pv',
+  prototypeId: '',
+  subtype: '',
+  source: 'own' as const,
+  stars: null,
+};
 
 /**
  * Подсказки с верной кнопкой на месте по ключу задачи: шаблоны, где
  * варианты перечислены «верный первым», не выдают ответ положением.
  */
-function peremeshat(h: readonly HintLike[], klyuch: string): HintLike[] {
+export function peremeshat(h: readonly HintLike[], klyuch: string): HintLike[] {
   return h.map((x, i) => {
     let s = 0;
     for (const ch of `${klyuch}|${i}`) s = (Math.imul(s, 31) + ch.charCodeAt(0)) >>> 0;
@@ -338,7 +344,7 @@ function peremeshat(h: readonly HintLike[], klyuch: string): HintLike[] {
 
 /* ── №1 ─────────────────────────────────────────────────────────── */
 
-function z01(proto: number, params: Record<string, number>): Gotovaya {
+export function z01(proto: number, params: Record<string, number>): Gotovaya {
   const s = sostavZadachi({
     proto,
     params: params as never,
@@ -712,7 +718,7 @@ const HINTS_CHAST_PARALLELEPIPEDA: HintLike[] = [
   },
 ];
 
-function z03(proto: Proto3, p: Params3, hints: HintLike[], klyuch: string): Gotovaya {
+export function z03(proto: Proto3, p: Params3, hints: HintLike[], klyuch: string): Gotovaya {
   const otvetChislo = proto.otvet(p);
   const otvet = answerHtml(otvetChislo);
   const shagi = proto.shagi(p).map((s) => s.text.replace(/\n/g, ' '));
@@ -746,7 +752,7 @@ function z03(proto: Proto3, p: Params3, hints: HintLike[], klyuch: string): Goto
 
 /* ── №4, №5 ─────────────────────────────────────────────────────── */
 
-function veroyatnost(ege: 4 | 5, proto: ProtoVer, p: ParamsVer): Gotovaya {
+export function veroyatnost(ege: 4 | 5, proto: ProtoVer, p: ParamsVer): Gotovaya {
   if (!proto.dopustimo(p)) throw new Error(`${proto.id}: недопустимые числа ${JSON.stringify(p)}`);
   const otvetChislo = proto.otvet(p);
   const r: Razbor45 = {
@@ -783,7 +789,7 @@ function veroyatnost(ege: 4 | 5, proto: ProtoVer, p: ParamsVer): Gotovaya {
  * Задача №6: условие и разбор — генератора раздела. `proto` — id
  * прототипа банка или свой шаблон (zadanie6/prototypes/povyshennye).
  */
-function z06(proto: string | Proto6, p: Params6, klyuch: string): Gotovaya {
+export function z06(proto: string | Proto6, p: Params6, klyuch: string): Gotovaya {
   const pr = typeof proto === 'string' ? prototype6(proto) : proto;
   const u = pr.uslovie(p);
   return bezPoley(
@@ -807,7 +813,7 @@ function z06(proto: string | Proto6, p: Params6, klyuch: string): Gotovaya {
 
 /* ── №7 ─────────────────────────────────────────────────────────── */
 
-function z07(p: Params7, proto: Proto7 = PV7_KOREN): Gotovaya {
+export function z07(p: Params7, proto: Proto7 = PV7_KOREN): Gotovaya {
   const s = proto.solve(p);
   const otvet = answerHtml(s.answer);
   const razbor = razbor7Html(s);
@@ -1056,7 +1062,7 @@ function hints08Tg(p: TgPoZnacheniyu): HintLike[] {
 }
 
 /** Задача №8 из черновика раздела и своих подсказок. */
-function z08(t: Draft, hints: HintLike[], klyuch: string): Gotovaya {
+export function z08(t: Draft, hints: HintLike[], klyuch: string): Gotovaya {
   const otvet = answerHtml(t.otvet);
   const h = peremeshat(hints, klyuch);
   return {
@@ -1078,7 +1084,7 @@ function z08(t: Draft, hints: HintLike[], klyuch: string): Gotovaya {
 
 /* ── №9 ──────────────────────────────────────────────────────────── */
 
-function z09(g: Generated9 | null, p: unknown): Gotovaya {
+export function z09(g: Generated9 | null, p: unknown): Gotovaya {
   if (g === null) throw new Error(`№9: рисунок не прошёл проверки ${JSON.stringify(p)}`);
   return bezPoley(build09({ ...kand, seed: 'pv' }, g, false));
 }
@@ -1086,7 +1092,7 @@ function z09(g: Generated9 | null, p: unknown): Gotovaya {
 /* ── №10 ────────────────────────────────────────────────────────── */
 
 /** Задача №10 прототипа раздела со своим текстом сюжета. */
-function z10(proto: string, p: Params10 & { tekst: string }, klyuch: string): Gotovaya {
+export function z10(proto: string, p: Params10 & { tekst: string }, klyuch: string): Gotovaya {
   const { tekst, ...params } = p;
   return bezPoley(
     build10({
@@ -1098,7 +1104,7 @@ function z10(proto: string, p: Params10 & { tekst: string }, klyuch: string): Go
 }
 
 /** То же для прототипа раздела «Варианты повышенной сложности» (не из реестра №10). */
-function z10s(proto: Proto10, p: Params10 & { tekst: string }, klyuch: string): Gotovaya {
+export function z10s(proto: Proto10, p: Params10 & { tekst: string }, klyuch: string): Gotovaya {
   const { tekst, ...params } = p;
   return bezPoley(
     build10(
@@ -1115,7 +1121,7 @@ function z10s(proto: Proto10, p: Params10 & { tekst: string }, klyuch: string): 
 /* ── №11 ────────────────────────────────────────────────────────── */
 
 /** Задача №11 по решателю подтипа, условие — свой текст сюжета. */
-function z11(
+export function z11(
   id: string,
   p: Params11 & { tekst: string },
   klyuch: string,
@@ -1135,7 +1141,7 @@ function z11(
  * Задача №12 из шаблона раздела: рисунки — движком №12 крупно, клетка
  * 7 мм (не меньше 6), подписи не мельче 10 pt (lib/variant/pechat).
  */
-function z12(sobrat: (pechat: { minFont: number }) => GrafikTask, klyuch: string): Gotovaya {
+export function z12(sobrat: (pechat: { minFont: number }) => GrafikTask, klyuch: string): Gotovaya {
   const kletka = krupnyyRisunok((kegl) => sobrat({ minFont: kegl }).svg).kletka;
   const t = sobrat({ minFont: minFont(kletka) });
   const otvet = answerHtml(t.otvet);
@@ -1163,14 +1169,14 @@ function z12(sobrat: (pechat: { minFont: number }) => GrafikTask, klyuch: string
 
 /* ── №13 ────────────────────────────────────────────────────────── */
 
-interface Syuzhet13 {
+export interface Syuzhet13 {
   imya: string;
   /** Цель кредита: «на открытие пекарни». */
   goal: string;
   year: number;
 }
 
-function z13(proto: Proto13, p: Syuzhet13, klyuch: string): Gotovaya {
+export function z13(proto: Proto13, p: Syuzhet13, klyuch: string): Gotovaya {
   /* Род глаголов условия берётся из списка имён раздела: чужое имя — ошибка данных. */
   const person = PEOPLE.find((x) => x.name === p.imya);
   if (person === undefined) throw new Error(`№13: имени «${p.imya}» нет в PEOPLE`);

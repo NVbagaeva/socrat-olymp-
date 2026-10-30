@@ -58,8 +58,16 @@ export function Topbar({
                 href={item.href}
                 className={clsx(item.active === true && 'is-active')}
                 aria-current={item.active === true ? 'page' : undefined}
+                aria-label={item.short !== undefined ? item.label : undefined}
               >
-                {item.label}
+                {item.short !== undefined ? (
+                  <>
+                    <span className="topnav__full">{item.label}</span>
+                    <span className="topnav__short">{item.short}</span>
+                  </>
+                ) : (
+                  item.label
+                )}
               </a>
             ))}
           </nav>

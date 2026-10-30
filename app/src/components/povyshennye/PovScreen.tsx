@@ -5,17 +5,14 @@ import Link from 'next/link';
 import { useMemo, useState, useSyncExternalStore } from 'react';
 import { StatsView } from '@/components/variant/online/StatsView';
 import { useArchive } from '@/components/variant/online/useArchive';
-import { POV_SCREEN as T } from '@/content/povyshennye';
 import { TESTOVYJ_33 } from '@/content/variantOnline/shkala';
-import { GOTOVY, S_CHAST2 } from '@/lib/povyshennye/dannye';
-import { povKod, povNomer, versiyaText } from '@/lib/povyshennye/kod';
-import { VARIANTOV, VERSIY } from '@/lib/povyshennye/types';
 import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
 import { PRINT_PATH } from '@/lib/variant/handoff';
 import type { ArchivedWork } from '@/lib/variant/online/archive';
 import { reshatHref, workScope, type Mode } from '@/lib/variant/online/link';
 import { PovInfo } from './PovInfo';
 import { PovShtorka } from './PovShtorka';
+import { RAZDELY_EKRANA, type RazdelEkrana } from './razdelEkrana';
 import './povyshennye.css';
 
 type Filtr = 'all' | 'nereshennye' | 'oshibki';
@@ -66,10 +63,11 @@ const imeetOshibki = (w: ArchivedWork) => w.primary < w.max;
  * тестовый — по шкале на 33, когда вторая часть проверена целиком.
  */
 function bally(
+  chast2: readonly number[],
   k: number,
   w: ArchivedWork,
 ): { primary: number; test: number | null; proverka: boolean } {
-  if (!S_CHAST2.includes(k)) return { primary: w.primary, test: w.test, proverka: false };
+  if (!chast2.includes(k)) return { primary: w.primary, test: w.test, proverka: false };
   const c = w.chast2;
   if (c === undefined) return { primary: w.primary, test: null, proverka: false };
   if (c.oceneno < c.vsego) return { primary: w.primary, test: null, proverka: true };
@@ -77,13 +75,19 @@ function bally(
   return { primary: vsego, test: TESTOVYJ_33[vsego] ?? null, proverka: false };
 }
 
-function ballyText(k: number, w: ArchivedWork): string {
-  const b = bally(k, w);
-  return b.proverka ? T.ballyNaProverke(b.primary) : T.bally(b.primary, b.test);
+function ballyText(r: RazdelEkrana, k: number, w: ArchivedWork): string {
+  const b = bally(r.chast2, k, w);
+  return b.proverka ? r.T.ballyNaProverke(b.primary) : r.T.bally(b.primary, b.test);
 }
 
-function printHref(k: number, v: number, list: (typeof LISTY)[number], mesto2 = true): string {
-  const q = new URLSearchParams({ kod: povKod(k), v: String(v), list });
+function printHref(
+  r: RazdelEkrana,
+  k: number,
+  v: number,
+  list: (typeof LISTY)[number],
+  mesto2 = true,
+): string {
+  const q = new URLSearchParams({ kod: r.kod(k), v: String(v), list });
   if (!mesto2) q.set('m2', '0');
   return `${PRINT_PATH}?${q.toString()}`;
 }
@@ -115,8 +119,13 @@ function Shevron({ vniz = false }: { vniz?: boolean }) {
  * с кодом раздела PV-07): лента номеров, клавиатура, режимы, пауза,
  * итоги, работа над ошибками и шкала — те же. Статус и баллы берутся из
  * его архива завершённых работ и записей незавершённых сессий.
+ *
+ * Тот же экран служит «Ежемесячным вариантам» (`razdel`): у них четыре
+ * варианта по одной версии, код EV-01.
  */
-export function PovScreen() {
+export function PovScreen({ razdel = 'pov' }: { razdel?: keyof typeof RAZDELY_EKRANA }) {
+  const r = RAZDELY_EKRANA[razdel];
+  const T = r.T;
   const works = useArchive();
   const active = useActiveTrainerScopes();
   const telefon = useTelefon();
@@ -127,10 +136,10 @@ export function PovScreen() {
   const [mesto2, setMesto2] = useState(true);
   const [info, setInfo] = useState(false);
 
-  const nashi = useMemo(() => (works ?? []).filter((w) => povNomer(w.code) !== null), [works]);
+  const nashi = useMemo(() => (works ?? []).filter((w) => r.nomer(w.code) !== null), [works, r]);
 
   const sostoyanie = (k: number, v: number): Sostoyanie => {
-    const code = povKod(k);
+    const code = r.kod(k);
     const done = nashi
       .filter((w) => w.code === code && w.variant === v)
       .sort((a, b) => b.finishedAt - a.finishedAt);
@@ -147,15 +156,15 @@ export function PovScreen() {
     return true;
   };
 
-  const kartochki = Array.from({ length: VARIANTOV }, (_, i) => i + 1).map((k) => {
-    const gotov = GOTOVY.includes(k);
-    const versii: Versiya[] = Array.from({ length: VERSIY }, (_, i) => i + 1).map((v) => {
+  const kartochki = Array.from({ length: r.variantov }, (_, i) => i + 1).map((k) => {
+    const gotov = r.gotovy.includes(k);
+    const versii: Versiya[] = Array.from({ length: r.versiy }, (_, i) => i + 1).map((v) => {
       const s: Sostoyanie = gotov ? sostoyanie(k, v) : { status: 'new', last: null };
       const vid: PovStatus =
         s.status === 'done' && s.last !== null && imeetOshibki(s.last) ? 'oshibki' : s.status;
       return { v, s, vid, vidna: pokazat(s) };
     });
-    return { k, gotov, versii, chast2: S_CHAST2.includes(k) };
+    return { k, gotov, versii, chast2: r.chast2.includes(k) };
   });
   const vidimye = kartochki.filter(
     (c) => filtr === 'all' || (c.gotov && c.versii.some((x) => x.vidna)),
@@ -164,10 +173,10 @@ export function PovScreen() {
   /* Сводка: решённые версии и средний тестовый балл последних попыток. */
   const vse = kartochki.flatMap((c) => c.versii.map((x) => ({ k: c.k, x })));
   const resheno = vse.filter(({ x }) => x.s.status === 'done').length;
-  const vsegoVersiy = VARIANTOV * VERSIY;
+  const vsegoVersiy = r.variantov * r.versiy;
   const testy = vse
     .filter(({ x }) => x.s.status === 'done' && x.s.last !== null)
-    .map(({ k, x }) => bally(k, x.s.last!).test)
+    .map(({ k, x }) => bally(r.chast2, k, x.s.last!).test)
     .filter((t): t is number => t !== null);
   const srednij =
     testy.length === 0 ? null : Math.round(testy.reduce((a, b) => a + b, 0) / testy.length);
@@ -175,12 +184,12 @@ export function PovScreen() {
 
   const href = (k: number, v: number) =>
     reshatHref({
-      code: povKod(k),
+      code: r.kod(k),
       variant: v,
       mode,
       timer:
         mode === 'kontrol'
-          ? { kind: 'down', minutes: S_CHAST2.includes(k) ? MINUT_KONTROL_VSE : MINUT_KONTROL }
+          ? { kind: 'down', minutes: r.chast2.includes(k) ? MINUT_KONTROL_VSE : MINUT_KONTROL }
           : { kind: 'none' },
       kind: 'ege',
       title: '',
@@ -198,13 +207,13 @@ export function PovScreen() {
         {c.versii
           .filter((x) => x.vidna)
           .map(({ v, s, vid: st }) => {
-            const kv = versiyaText(c.k, v);
-            const ball = s.last === null ? null : ballyText(c.k, s.last);
+            const kv = r.versiya(c.k, v);
+            const ball = s.last === null ? null : ballyText(r, c.k, s.last);
             const label = `${kv}: ${T.status[st]}${ball === null ? '' : `, ${ball}`}`;
             const deystvie = s.status === 'done' ? T.pereReshat : T.reshat;
             const tekst = (
               <>
-                <span className="pov-v__no">{kv}</span>
+                <span className="pov-v__no">{r.stroka(c.k, v)}</span>
                 <span className={clsx('pov-tochka', `is-${st}`)} aria-hidden="true" />
                 <span className="pov-v__info">
                   <span className={clsx('pov-v__status', `is-${st}`)}>{T.status[st]}</span>
@@ -286,14 +295,14 @@ export function PovScreen() {
             <tbody>
               {c.versii.map(({ v }) => (
                 <tr key={v}>
-                  <th scope="row">{versiyaText(c.k, v)}</th>
+                  <th scope="row">{r.versiya(c.k, v)}</th>
                   {LISTY.map((l) => (
                     <td key={l}>
                       <a
-                        href={printHref(c.k, v, l, mesto2)}
+                        href={printHref(r, c.k, v, l, mesto2)}
                         target="_blank"
                         rel="noopener"
-                        aria-label={`${T.card.printFor(versiyaText(c.k, v))}: ${T.card.sheets[l]}`}
+                        aria-label={`${T.card.printFor(r.versiya(c.k, v))}: ${T.card.sheets[l]}`}
                       >
                         {T.card.sheets[l]}
                       </a>
@@ -471,7 +480,7 @@ export function PovScreen() {
           <StatsView
             works={nashi}
             code={null}
-            label={(w) => versiyaText(povNomer(w.code) ?? 0, w.variant)}
+            label={(w) => r.versiya(r.nomer(w.code) ?? 0, w.variant)}
           />
         )}
       </section>
@@ -500,7 +509,7 @@ export function PovScreen() {
         testId="pov-info-shtorka"
         title={T.info.title}
       >
-        <PovInfo onAction={() => setInfo(false)} />
+        <PovInfo T={T} chast2={r.chast2} onAction={() => setInfo(false)} />
       </PovShtorka>
     </div>
   );

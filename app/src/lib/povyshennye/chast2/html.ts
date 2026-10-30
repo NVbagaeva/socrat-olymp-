@@ -7,9 +7,10 @@
 
 import { MAX_BALL } from '@/content/variantOnline/bally';
 import { kriteriiZadaniya } from '@/content/variantOnline/kriterii';
+import { katex } from '@/lib/graph/katex';
 import { chertezhTeoremy, SSYLKA, ssylkiV, teorema } from '@/lib/teoremy';
 import { typeset, typesetKrupno } from '@/lib/tex';
-import type { Chast2Zadacha } from './types';
+import type { Chast2Zadacha, Ramka } from './types';
 
 export type Vyvod = 'ekran' | 'list';
 
@@ -63,7 +64,43 @@ export function teoremyZadach(zadachi: readonly Chast2Zadacha[]): string[] {
   return ids;
 }
 
-/** Решение учителя: этапы с подписью, строки, чертёж этапа. */
+/**
+ * Значки рамок — поле 24×24, обводка currentColor, как у Callout
+ * (components/ui/Callout.tsx): теория — закладка «Запомни»,
+ * примечание — «i» в круге, как у сноски.
+ */
+const ZNAK_RAMKI: Record<Ramka['vid'], string> = {
+  teoriya: '<path d="M7 4.5h10a.5.5 0 0 1 .5.5v14.5L12 16l-5.5 3.5V5a.5.5 0 0 1 .5-.5z"/>',
+  primechanie: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.3"/>',
+};
+const METKA_RAMKI: Record<Ramka['vid'], string> = {
+  teoriya: 'Теория',
+  primechanie: 'Примечание',
+};
+
+/**
+ * Рамка решения на плашке Callout (styles/callout.css): теория — синим
+ * тоном «Запомни», примечание — тёплым тоном «Лайфхак»; форма у них
+ * одна, роль видна по метке и значку и на ч/б печати.
+ */
+export function ramkaHtml(r: Ramka, vyvod: Vyvod = 'ekran'): string {
+  const ton = r.vid === 'teoriya' ? 'zapomni' : 'layfhak';
+  const abz = (ls: readonly string[]) => ls.map((l) => `<p>${strokaHtml(l, vyvod)}</p>`).join('');
+  return (
+    `<aside class="callout callout--${ton} c2-ramka c2-ramka--${r.vid}">` +
+    `<p class="callout__metka"><svg class="callout__znak" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ZNAK_RAMKI[r.vid]}</svg>${METKA_RAMKI[r.vid]}</p>` +
+    `<div class="callout__telo">` +
+    `<p class="c2-ramka__t">${typeset(r.title)}</p>` +
+    abz(r.lines) +
+    (r.formula === undefined
+      ? ''
+      : `<div class="c2-ramka__formula">${katex.renderToString(r.formula, { throwOnError: false, displayMode: true })}</div>`) +
+    abz(r.posle ?? []) +
+    `</div></aside>`
+  );
+}
+
+/** Решение учителя: этапы с подписью, рамка теории, строки, чертёж этапа. */
 export function reshenieHtml(z: Chast2Zadacha, vyvod: Vyvod = 'ekran'): string {
   return (
     `<ol class="c2-etapy">` +
@@ -72,7 +109,18 @@ export function reshenieHtml(z: Chast2Zadacha, vyvod: Vyvod = 'ekran'): string {
         (e) =>
           `<li class="c2-etap"><p class="c2-etap__t">${typeset(e.title)}</p>` +
           (e.risunok === undefined ? '' : `<figure class="c2-etap__ris">${e.risunok}</figure>`) +
-          `<ul class="c2-etap__l">${e.lines.map((l) => `<li>${strokaHtml(l, vyvod)}</li>`).join('')}</ul></li>`,
+          (e.ramka === undefined ? '' : ramkaHtml(e.ramka, vyvod)) +
+          `<ul class="c2-etap__l">${e.lines.map((l) => `<li>${strokaHtml(l, vyvod)}</li>`).join('')}</ul>` +
+          (e.spisok === undefined
+            ? ''
+            : `<ol class="c2-etap__sp">${e.spisok.map((l) => `<li>${strokaHtml(l, vyvod)}</li>`).join('')}</ol>`) +
+          (e.posle === undefined
+            ? ''
+            : `<ul class="c2-etap__l">${e.posle.map((l) => `<li>${strokaHtml(l, vyvod)}</li>`).join('')}</ul>`) +
+          (e.melko === undefined
+            ? ''
+            : `<div class="c2-etap__melko">${e.melko.map((l) => `<p>${strokaHtml(l, vyvod)}</p>`).join('')}</div>`) +
+          `</li>`,
       )
       .join('') +
     `</ol>`

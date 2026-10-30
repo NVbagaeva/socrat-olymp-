@@ -1,4 +1,5 @@
 import type { ZadachaLite } from '@/lib/zadanie6/dannye';
+import type { Rezhim6 } from '@/lib/zadanie6/trenazher';
 import {
   asBool,
   asNumber,
@@ -17,6 +18,8 @@ import type { BaseUi } from '@/lib/trainerSession/types';
  */
 export interface Trenazher6Payload {
   zadachi: ZadachaLite[];
+  /** Режим проверки: ответ один, вердикт — в итогах. Нет поля — тренировка. */
+  rezhim?: Rezhim6;
 }
 
 function isZadacha(value: unknown): value is ZadachaLite {
@@ -45,6 +48,9 @@ function isZadacha(value: unknown): value is ZadachaLite {
 export function isTrenazher6Payload(value: unknown): value is Trenazher6Payload {
   return (
     isRecord(value) &&
+    (value['rezhim'] === undefined ||
+      value['rezhim'] === 'trenirovka' ||
+      value['rezhim'] === 'proverka') &&
     Array.isArray(value['zadachi']) &&
     value['zadachi'].length > 0 &&
     value['zadachi'].every(isZadacha)
@@ -68,6 +74,27 @@ export interface Trenazher6Ui extends BaseUi {
   razborOtkryt: boolean;
   /** Когда начата текущая задача, мс активного времени. */
   taskFrom: number | null;
+  /** Ответы по задачам: номер → последняя запись ученика (переход по точкам). */
+  otvety: Record<number, string>;
+  /** Задачи, у которых открыт разбор. */
+  razbory: number[];
+  /** Задачи, где открывали подсказку: решение там уже не «начисто». */
+  podskazki: number[];
+  /** Режим проверки: сохранённые ответы — номер → запись; их можно менять до конца. */
+  prinyato: Record<number, string>;
+}
+
+function otvetyIz(value: unknown): Record<number, string> {
+  if (!isRecord(value)) {
+    return {};
+  }
+  const out: Record<number, string> = {};
+  for (const [k, v] of Object.entries(value)) {
+    if (/^\d+$/.test(k) && typeof v === 'string') {
+      out[Number(k)] = v.slice(0, 40);
+    }
+  }
+  return out;
 }
 
 /** Достать из сохранённого состояния поля экрана; что не прочиталось — по умолчанию. */
@@ -83,5 +110,9 @@ export function readTrenazher6Ui(base: BaseUi): Trenazher6Ui {
     mimo: asNumberList(raw['mimo']),
     razborOtkryt: asBool(raw['razborOtkryt']),
     taskFrom: asNumberOrNull(raw['taskFrom']),
+    otvety: otvetyIz(raw['otvety']),
+    razbory: asNumberList(raw['razbory']),
+    podskazki: asNumberList(raw['podskazki']),
+    prinyato: otvetyIz(raw['prinyato']),
   };
 }

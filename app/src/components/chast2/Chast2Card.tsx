@@ -9,8 +9,9 @@ import { CHAST2_TEXT as T } from '@/content/variantOnline/chast2Text';
 import { kriteriiZadaniya } from '@/content/variantOnline/kriterii';
 import { proverit } from '@/lib/chast2/sravnenie';
 import { punktKey, vvodEst, type Chast2Ui } from '@/lib/chast2/sostoyanie';
-import { reshenieHtml, strokaHtml, uslovieHtml } from '@/lib/povyshennye/chast2/html';
+import { ramkaHtml, reshenieHtml, strokaHtml, uslovieHtml } from '@/lib/povyshennye/chast2/html';
 import { useOzhivit3d } from '@/components/stereo/useOzhivit3d';
+import { useOzhivitGrafik } from './useOzhivitGrafik';
 import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import { Kriterii } from './Kriterii';
 import { PoleOtveta } from './PoleOtveta';
@@ -36,13 +37,16 @@ export function Uslovie({ z }: { z: Chast2Zadacha }) {
   return <div className="c2-uslovie" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
-/** Решение по этапам со ссылками на теоремы и ответ. */
+/** Решение по этапам со ссылками на теоремы, ответ и сноска после ответа. */
 export function Reshenie({ z }: { z: Chast2Zadacha }) {
   const ref = useRef<HTMLDivElement>(null);
   const html = useMemo(() => reshenieHtml(z, 'ekran'), [z]);
   const otvet = useMemo(() => strokaHtml(z.otvet), [z]);
+  const snoska = useMemo(() => (z.snoska === undefined ? null : ramkaHtml(z.snoska)), [z]);
   /* Чертежи стереометрии в решении вращаются руками. */
   useOzhivit3d(ref, [html]);
+  /* Рисунок с подвижной прямой (№19) — тянется и двигается ползунком. */
+  useOzhivitGrafik(ref, [html]);
   return (
     <div className="c2-reshenie" ref={ref} data-testid={`c2-${z.no}-reshenie-telo`}>
       <h4 className="c2-h">{T.reshenieTitle}</h4>
@@ -50,6 +54,9 @@ export function Reshenie({ z }: { z: Chast2Zadacha }) {
       <p className="c2-reshenie__otvet">
         <b>{T.otvet}:</b> <span dangerouslySetInnerHTML={{ __html: otvet }} />
       </p>
+      {snoska === null ? null : (
+        <div className="c2-reshenie__snoska" dangerouslySetInnerHTML={{ __html: snoska }} />
+      )}
       <TeoremaOkno root={ref} />
     </div>
   );

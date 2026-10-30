@@ -145,11 +145,13 @@
 .section-panel {
   margin-top: var(--space-8);
 }
-.section-about {
-  font-size: 17px;
-  line-height: 26px;
-  color: var(--color-text-secondary);
-  max-width: 68ch;
+.z12-about {
+  display: grid;
+  gap: var(--space-10);
+}
+.z12-about__title {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-brand);
 }
 
 /* ── Карточки подтем ────────────────────────────────────────── */

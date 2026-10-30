@@ -1,7 +1,8 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Tex } from '@/components/ui/Tex';
 import { TRENAZHER_6 } from '@/content/zadanie6';
 import type { TaskMark } from '@/lib/trainerSession/types';
@@ -11,7 +12,9 @@ import { trenazher6 } from '@/lib/zadanie6/progress';
 import type { ProtoInfo6 } from '@/lib/zadanie6/protoInfo';
 import { answerMatches } from '@/lib/zadanie6/secret';
 import type * as Prototypes from '@/lib/zadanie6/prototypes';
+import type { Rezhim6 } from '@/lib/zadanie6/trenazher';
 import type { Ris, Solved } from '@/lib/zadanie6/types';
+import { useBeforeFinish } from '../session/useBeforeFinish';
 import { useSessionReport } from '../session/useSessionReport';
 import { Podskazki7 } from '../zadanie7/Podskazki7';
 import { Razbor6 } from './Razbor6';
@@ -65,32 +68,80 @@ export interface Reshenie6Props {
   zadachi: ZadachaLite[];
   prototipy: ProtoInfo6[];
   base: string;
+  /** Режим: тренировка (по умолчанию) или проверка. */
+  rezhim?: Rezhim6 | undefined;
   restored: Trenazher6Ui | null;
   report: (ui: Trenazher6Ui) => void;
   elapsed: () => number;
   onFinish: () => void;
+  /** Обработчик оболочки «перед завершением»: проверка пишет статистику там. */
+  setBeforeFinish?: ((handler: (() => void) | null) => void) | undefined;
+}
+
+/** Состояние точки-шага: для подписи и цвета. */
+type Sostoyanie = 'right' | 'hinted' | 'wrong' | 'otvet' | null;
+
+/** Мелкий экран и касание: туда фокус в поле не ставим — не выскакивает клавиатура. */
+function tochnyyUkazatel(): boolean {
+  try {
+    return window.matchMedia('(pointer: fine)').matches;
+  } catch {
+    return false;
+  }
+}
+
+/** Копия записи без ключа i. */
+function bez<V>(zapis: Record<number, V>, i: number): Record<number, V> {
+  const out = { ...zapis };
+  delete out[i];
+  return out;
+}
+
+/** Лёгкое покачивание поля при неверном ответе; без него — при «меньше движения». */
+function kachnut(el: HTMLElement | null) {
+  try {
+    if (el === null || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    el.animate(
+      [
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-4px)' },
+        { transform: 'translateX(4px)' },
+        { transform: 'translateX(-2px)' },
+        { transform: 'translateX(0)' },
+      ],
+      { duration: 240, easing: 'ease-out' },
+    );
+  } catch {
+    /* старый браузер без Web Animations — без покачивания */
+  }
 }
 
 /**
  * Экран задачи тренажёра №6.
  *
- * Сверху — метка источника и прототип, затем условие с рисунком (таблица,
- * запись распределения, диаграмма Эйлера, дерево) и поле ответа:
- * принимается любая верная запись числа (0,75 = 0.75 = 3/4). Подсказка —
- * вопросы с кнопками по шагам; «Показать разбор» — шаги с таблицами и
- * выделениями на рисунке; «Повторить теорию» ведёт на карточку прототипа.
- * Исход пишется в хранилище тренажёра по прототипу; всё состояние экрана
- * — в общей сессии (TrainerSessionHost).
+ * Сверху — точки-шаги (переход к любой задаче) и полоса прогресса, затем
+ * метка источника и прототип, условие с рисунком и поле ответа:
+ * принимается любая верная запись числа (0,75 = .75 = 3/4). Enter —
+ * «Проверить», после ответа Enter — «Следующая». В тренировке — подсказка
+ * вопросами и разбор в сворачиваемых блоках. В проверке ответ
+ * сохраняется и меняется до конца работы, верно ли — в итогах; в
+ * хранилище тренажёра по прототипу уходит последний ответ — один раз,
+ * при завершении. Состояние экрана — в общей сессии (TrainerSessionHost).
  */
 export function Reshenie6({
   zadachi,
   prototipy,
   base,
+  rezhim = 'trenirovka',
   restored,
   report,
   elapsed,
   onFinish,
+  setBeforeFinish,
 }: Reshenie6Props) {
+  const proverka = rezhim === 'proverka';
   const [index, setIndex] = useState(restored?.index ?? 0);
   const [marks, setMarks] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
   const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
@@ -103,8 +154,18 @@ export function Reshenie6({
   const [mimo, setMimo] = useState<number[]>(restored?.mimo ?? []);
   const [razborOtkryt, setRazborOtkryt] = useState(restored?.razborOtkryt ?? false);
   const [nachalo, setNachalo] = useState(() => restored?.taskFrom ?? elapsed());
+  const [otvety, setOtvety] = useState<Record<number, string>>(restored?.otvety ?? {});
+  const [razbory, setRazbory] = useState<number[]>(restored?.razbory ?? []);
+  const [podskazki, setPodskazki] = useState<number[]>(restored?.podskazki ?? []);
+  const [prinyato, setPrinyato] = useState<Record<number, string>>(restored?.prinyato ?? {});
   const [zamechanie, setZamechanie] = useState<string | null>(null);
+  /* Номер попытки: вердикт перерисовывается и анимируется заново. */
+  const [popytka, setPopytka] = useState(0);
   const m = useModul6();
+  const verh = useRef<HTMLElement>(null);
+  const pole = useRef<HTMLInputElement>(null);
+  const fokusPosle = useRef(false);
+  const uid = useId();
 
   useSessionReport<Trenazher6Ui>(report, {
     index,
@@ -120,7 +181,43 @@ export function Reshenie6({
     mimo,
     razborOtkryt,
     taskFrom: nachalo,
+    otvety,
+    razbory,
+    podskazki,
+    prinyato,
   });
+
+  /* Проверка: в статистику — последний сохранённый ответ каждой задачи,
+     один раз, когда работа завершается (кнопкой или из панели). */
+  useBeforeFinish(setBeforeFinish, () => {
+    if (!proverka) {
+      return;
+    }
+    const nomera = Object.keys(prinyato).map(Number);
+    const sekund = elapsed() / 1000 / Math.max(1, nomera.length);
+    for (const i of nomera) {
+      const zz = zadachi[i];
+      if (zz === undefined) {
+        continue;
+      }
+      const verno = marks[i] === 'right';
+      trenazher6.recordAttempt({
+        kind: zz.prototypeId,
+        taskId: zz.id,
+        right: verno,
+        clean: verno,
+        seconds: sekund,
+      });
+    }
+  });
+
+  /* Новая задача: фокус в поле, если перешли с клавиатуры или мышью. */
+  useEffect(() => {
+    if (fokusPosle.current) {
+      fokusPosle.current = false;
+      pole.current?.focus({ preventScroll: true });
+    }
+  }, [index]);
 
   const z = zadachi[index];
   const proto = useMemo(() => prototipy.find((p) => p.id === z?.prototypeId), [prototipy, z]);
@@ -129,11 +226,31 @@ export function Reshenie6({
       z && m && (hintOpen || razborOtkryt) ? m.prototype(z.prototypeId).solve(z.params) : null,
     [z, m, hintOpen, razborOtkryt],
   );
-  const zakryta = marks[index] !== undefined || razborOtkryt;
-  const last = index === zadachi.length - 1;
 
   if (z === undefined) {
     return null;
+  }
+
+  /** Задача закрыта: решена или открыт разбор, а в проверке — ответ сохранён. */
+  const zakrytaNa = (i: number) =>
+    proverka ? prinyato[i] !== undefined : marks[i] !== undefined || razbory.includes(i);
+  /* Проверка: сохранённый ответ правят прямо в поле — тогда он «изменён». */
+  const sokhranen = proverka ? prinyato[index] : undefined;
+  const izmenen = sokhranen !== undefined && value.trim() !== sokhranen;
+  const zakryta = proverka
+    ? sokhranen !== undefined && !izmenen
+    : zakrytaNa(index) || checked === 'right';
+  const last = index === zadachi.length - 1;
+  const zakryto = zadachi.reduce((a, _, i) => a + (zakrytaNa(i) ? 1 : 0), 0);
+
+  function sostoyanie(i: number): Sostoyanie {
+    if (proverka) {
+      return prinyato[i] !== undefined ? 'otvet' : null;
+    }
+    if (marks[i] !== undefined) {
+      return marks[i];
+    }
+    return tried[i] === true || razbory.includes(i) ? 'wrong' : null;
   }
 
   function zapisat(right: boolean, clean: boolean) {
@@ -153,45 +270,130 @@ export function Reshenie6({
   }
 
   function proverit() {
-    if (z === undefined || value.trim() === '' || checked === 'right') {
+    if (z === undefined || zakryta) {
       return;
     }
-    if (chisloIzVvoda(value) === null) {
+    if (value.trim() === '' || chisloIzVvoda(value) === null) {
       setZamechanie(T.nechislo);
+      setPopytka((p) => p + 1);
       return;
     }
     setZamechanie(null);
-    if (answerMatches(value, z.seal)) {
+    setPopytka((p) => p + 1);
+    const verno = answerMatches(value, z.seal);
+    if (proverka) {
+      /* Ответ сохраняется (новый заменяет старый); отметки для итогов
+         пересчитываются, статистика — при завершении. */
+      const i = index;
+      setPrinyato((o) => ({ ...o, [i]: value.trim() }));
+      setOtvety((o) => ({ ...o, [i]: value }));
+      setMarks((x) => (verno ? { ...x, [i]: 'right' } : bez(x, i)));
+      setTried((t) => (verno ? bez(t, i) : { ...t, [i]: true }));
+      return;
+    }
+    if (verno) {
       setChecked('right');
-      zapisat(true, !oshibalsya && !hintOpen && !razborOtkryt);
+      zapisat(true, !oshibalsya && !podskazki.includes(index) && !razborOtkryt);
     } else {
       setChecked('wrong');
+      kachnut(pole.current);
       setOshibalsya(true);
       setMisses((n) => n + 1);
       setTried((t) => ({ ...t, [index]: true }));
     }
   }
 
-  function dalshe() {
-    if (last) {
-      onFinish();
+  /** Перейти к задаче i: ответ текущей сохраняется, у новой — свой. */
+  function perejti(i: number, fokus = tochnyyUkazatel()) {
+    if (i === index || i < 0 || i >= zadachi.length) {
       return;
     }
-    setIndex(index + 1);
-    setValue('');
-    setChecked(null);
-    setOshibalsya(false);
+    setOtvety((o) => ({ ...o, [index]: value }));
+    setIndex(i);
+    setValue(otvety[i] ?? prinyato[i] ?? '');
+    setChecked(marks[i] !== undefined && !proverka ? 'right' : null);
+    setOshibalsya(tried[i] === true);
     setHintOpen(false);
     setShag(1);
     setMimo([]);
-    setRazborOtkryt(false);
+    setRazborOtkryt(razbory.includes(i));
     setZamechanie(null);
     setNachalo(elapsed());
-    window.scrollTo({ top: 0 });
+    fokusPosle.current = fokus;
+    verh.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
 
+  function dalshe(fokus?: boolean) {
+    if (last) {
+      setOtvety((o) => ({ ...o, [index]: value }));
+      onFinish();
+      return;
+    }
+    perejti(index + 1, fokus);
+  }
+
+  /* Enter в поле: до ответа — проверить, после — следующая. */
+  function naEnter(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing) {
+      return;
+    }
+    e.preventDefault();
+    if (zakryta) {
+      dalshe(true);
+    } else {
+      proverit();
+    }
+  }
+
+  const verdikt: { cls: string; text: string } | null = zamechanie
+    ? { cls: 'is-info', text: zamechanie }
+    : proverka
+      ? sokhranen === undefined
+        ? null
+        : { cls: 'is-info', text: izmenen ? T.izmenen : T.prinyat }
+      : checked === 'right' || (!proverka && marks[index] !== undefined)
+        ? { cls: 'is-right', text: T.verno }
+        : checked === 'wrong'
+          ? { cls: 'is-wrong', text: T.neverno }
+          : null;
+  const podpisId = `${uid}-podpis`;
+  const verdiktId = `${uid}-verdikt`;
+  const podskazkaId = `${uid}-podskazka`;
+  const razborId = `${uid}-razbor`;
+
   return (
-    <article className="z6-zadacha">
+    <article className="z6-zadacha z6t-task" ref={verh}>
+      <nav className="z6t-steps" aria-label={T.shagi}>
+        <div
+          className="z6t-steps__bar"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={zadachi.length}
+          aria-valuenow={zakryto}
+          aria-label={`${zakryto} из ${zadachi.length}`}
+        >
+          <span style={{ width: `${(zakryto / zadachi.length) * 100}%` }} />
+        </div>
+        <ol className="z6t-steps__list">
+          {zadachi.map((zz, i) => {
+            const st = sostoyanie(i);
+            return (
+              <li key={zz.id}>
+                <button
+                  type="button"
+                  className={clsx('z6t-step', st && `is-${st}`)}
+                  aria-current={i === index ? 'step' : undefined}
+                  aria-label={T.shag(i + 1, st ? T.sostoyaniya[st] : '')}
+                  onClick={() => perejti(i)}
+                >
+                  <span aria-hidden="true">{i + 1}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </nav>
+
       <p className="z6-zadacha__metka">
         {metkaZadachi(z)}
         {proto ? (
@@ -201,107 +403,185 @@ export function Reshenie6({
           </>
         ) : null}
       </p>
-      <UslovieLite z={z} m={m} />
+      <div className="z6t-task__uslovie">
+        <UslovieLite z={z} m={m} />
+      </div>
+
       <form
-        className="z6-otvet"
+        className={clsx(
+          'z6t-otvet',
+          verdikt?.cls === 'is-right' && 'is-right',
+          verdikt?.cls === 'is-wrong' && 'is-wrong',
+        )}
         onSubmit={(e) => {
           e.preventDefault();
-          proverit();
+          if (zakryta) {
+            dalshe(true);
+          } else {
+            proverit();
+          }
         }}
       >
-        <label htmlFor={`otvet-${z.id}`}>{T.otvet}</label>
-        <input
-          id={`otvet-${z.id}`}
-          className="z6-otvet__input"
-          inputMode="decimal"
-          autoComplete="off"
-          value={value}
-          disabled={checked === 'right'}
-          onChange={(e) => {
-            setValue(e.target.value);
-            if (checked === 'wrong') {
-              setChecked(null);
-            }
-          }}
-        />
-        <button type="submit" className="btn btn--primary" disabled={checked === 'right'}>
-          {T.proverit}
-        </button>
-      </form>
-      {zamechanie ? (
-        <p className="z6-otvet__itog" role="status">
-          <Tex text={zamechanie} />
-        </p>
-      ) : null}
-      {checked ? (
-        <p
-          className={clsx('z6-otvet__itog', checked === 'right' ? 'is-verno' : 'is-neverno')}
-          role="status"
-        >
-          {checked === 'right' ? T.verno : T.neverno}
-        </p>
-      ) : null}
-      <div className="z6-zadacha__dop">
-        {!razborOtkryt && checked !== 'right' ? (
-          <button
-            type="button"
-            className="btn btn--secondary"
-            aria-expanded={hintOpen}
-            onClick={() => setHintOpen(!hintOpen)}
-          >
-            {hintOpen ? T.skrytPodskazku : T.podskazka}
-          </button>
-        ) : null}
-        {!razborOtkryt ? (
-          <button
-            type="button"
-            className="btn btn--ghost"
-            onClick={() => {
-              setRazborOtkryt(true);
-              if (marks[index] === undefined) {
-                setTried((t) => ({ ...t, [index]: true }));
-                zapisat(false, false);
+        <label className="z6t-otvet__label" htmlFor={`otvet-${z.id}`}>
+          {T.otvet}
+        </label>
+        <div className="z6t-otvet__row">
+          <input
+            ref={pole}
+            id={`otvet-${z.id}`}
+            className="z6-otvet__input z6t-otvet__input"
+            inputMode="decimal"
+            autoComplete="off"
+            enterKeyHint={zakryta ? 'next' : 'done'}
+            value={value}
+            readOnly={zakryta && !proverka}
+            aria-invalid={verdikt?.cls === 'is-wrong' ? true : undefined}
+            aria-describedby={`${podpisId} ${verdiktId}`}
+            onKeyDown={naEnter}
+            onFocus={(e) => {
+              /* Клавиатура телефона поднимается не сразу: поле — в центр,
+                 над клавиатурой и нижней навигацией. */
+              if (tochnyyUkazatel()) {
+                return;
               }
+              const el = e.currentTarget;
+              window.setTimeout(
+                () => el.scrollIntoView({ block: 'center', behavior: 'smooth' }),
+                300,
+              );
             }}
-          >
-            {T.razbor}
-          </button>
-        ) : null}
-        {proto?.kartochka ? (
-          <a className="btn btn--ghost" href={`${base}/teoriya/#k-${proto.kartochka}`}>
-            {T.teoriya}
-          </a>
-        ) : null}
-      </div>
-      {hintOpen && !razborOtkryt ? (
-        s ? (
-          <Podskazki7
-            shagi={s.hints}
-            otkryto={shag}
-            mimo={mimo}
-            onVerno={() => {
-              setShag(shag + 1);
-              setMimo([]);
-            }}
-            onMimo={(j) => {
-              setMimo((x) => [...x, j]);
-              setMisses((n) => n + 1);
+            onChange={(e) => {
+              setValue(e.target.value);
+              if (checked === 'wrong') {
+                setChecked(null);
+              }
+              setZamechanie(null);
             }}
           />
-        ) : (
-          <p>{T.zagruzka}</p>
-        )
-      ) : null}
-      {razborOtkryt ? s ? <Razbor6 s={s} /> : <p>{T.zagruzka}</p> : null}
-      <div className="z6-tr__nav">
+          {zakryta ? null : (
+            <button type="submit" className="btn btn--primary z6t-otvet__btn">
+              {proverka ? (izmenen ? T.sokhranit : T.otvetit) : T.proverit}
+            </button>
+          )}
+        </div>
+        <p className="z6t__hint" id={podpisId}>
+          <Tex text={T.otvetPodskazka} />
+          <span className="z6t__kbd"> · {T.enter}</span>
+        </p>
+      </form>
+
+      <div id={verdiktId} role="status" className="z6t-verdikt-slot">
+        {verdikt ? (
+          <p key={popytka} className={clsx('z6t-verdikt', verdikt.cls)}>
+            <span className="z6t-verdikt__ico" aria-hidden="true">
+              {verdikt.cls === 'is-right' ? '✓' : verdikt.cls === 'is-wrong' ? '!' : 'i'}
+            </span>
+            <span>
+              <Tex text={verdikt.text} />
+            </span>
+          </p>
+        ) : null}
+      </div>
+
+      <div className="z6t-nav">
         <button
           type="button"
-          className={zakryta || checked === 'right' ? 'btn btn--primary' : 'btn btn--ghost'}
-          onClick={dalshe}
+          className="btn btn--ghost z6t-nav__back"
+          disabled={index === 0}
+          onClick={() => perejti(index - 1)}
         >
-          {last ? T.rezultat : zakryta || checked === 'right' ? T.dalshe : 'Пропустить'}
+          <span aria-hidden="true">←</span> {T.nazad}
         </button>
+        {zakryta ? (
+          <button type="button" className="btn btn--primary" onClick={() => dalshe()}>
+            {last ? T.rezultat : T.dalshe} <span aria-hidden="true">→</span>
+          </button>
+        ) : (
+          <button type="button" className="btn btn--secondary" onClick={() => dalshe()}>
+            {last ? T.rezultat : T.propustit}
+          </button>
+        )}
       </div>
+
+      {proverka ? null : (
+        <div className="z6t-help">
+          <div className="z6t-help__btns">
+            {razborOtkryt || checked === 'right' ? null : (
+              <button
+                type="button"
+                className="z6t-disclosure"
+                aria-expanded={hintOpen}
+                aria-controls={podskazkaId}
+                onClick={() => {
+                  setHintOpen(!hintOpen);
+                  if (!podskazki.includes(index)) {
+                    setPodskazki((p) => [...p, index]);
+                  }
+                }}
+              >
+                {hintOpen ? T.skrytPodskazku : T.podskazka}
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            )}
+            <button
+              type="button"
+              className="z6t-disclosure"
+              aria-expanded={razborOtkryt}
+              aria-controls={razborId}
+              onClick={() => {
+                if (razborOtkryt) {
+                  setRazborOtkryt(false);
+                  return;
+                }
+                setRazborOtkryt(true);
+                setHintOpen(false);
+                if (marks[index] === undefined && checked !== 'right') {
+                  setTried((t) => ({ ...t, [index]: true }));
+                  setRazbory((r) => [...r, index]);
+                  zapisat(false, false);
+                }
+              }}
+            >
+              {razborOtkryt ? T.skrytRazbor : T.razbor}
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            {proto?.kartochka ? (
+              <a className="btn btn--ghost" href={`${base}/teoriya/#k-${proto.kartochka}`}>
+                {T.teoriya}
+              </a>
+            ) : null}
+          </div>
+          {zakryta || razborOtkryt ? null : <p className="z6t__hint">{T.razborShtraf}</p>}
+          <div id={podskazkaId} className="z6t-panel" hidden={!hintOpen || razborOtkryt}>
+            {hintOpen && !razborOtkryt ? (
+              s ? (
+                <Podskazki7
+                  shagi={s.hints}
+                  otkryto={shag}
+                  mimo={mimo}
+                  onVerno={() => {
+                    setShag(shag + 1);
+                    setMimo([]);
+                  }}
+                  onMimo={(j) => {
+                    setMimo((x) => [...x, j]);
+                    setMisses((n) => n + 1);
+                  }}
+                />
+              ) : (
+                <p>{T.zagruzka}</p>
+              )
+            ) : null}
+          </div>
+          <div id={razborId} className="z6t-panel" hidden={!razborOtkryt}>
+            {razborOtkryt ? s ? <Razbor6 s={s} /> : <p>{T.zagruzka}</p> : null}
+          </div>
+        </div>
+      )}
     </article>
   );
 }

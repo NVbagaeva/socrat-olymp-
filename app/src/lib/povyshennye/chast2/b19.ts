@@ -13,6 +13,8 @@ import { renderPlan } from '@/lib/planimetriya/render';
 import type { Element, Scena } from '@/lib/planimetriya/types';
 import type { Kusok, Mnozhestvo } from '@/lib/chast2/sravnenie';
 import { sKornem, skTex, skToNumber, type SKornem } from './chisla';
+import { reshenieKasaniya } from './b19kasanie';
+import { chisloResheniy, tochkiDugi } from './b19geom';
 import type { Chast2Zadacha, Shablon2 } from './types';
 
 export interface PB19 {
@@ -21,30 +23,17 @@ export interface PB19 {
   m: number;
   /** Сколько решений должно быть (в образцах — 2). */
   k?: number;
+  /**
+   * Оформление решения учителя: по умолчанию — особые положения и
+   * таблица; 'kasanie' — через формулу расстояния от точки до прямой,
+   * с рамкой теории, рисунком трёх прямых и сноской (b19kasanie.ts).
+   */
+  oformlenie?: 'kasanie';
 }
 
 const ratSK = (u: Rat): SKornem => ({ u, k: rat(0), m: 1n });
 
-/** Точки пересечения прямой y = a(t − m) − c с дугой: t ∈ [0; R], y ≥ 0. */
-export function tochkiDugi(p: PB19, a: number): number[] {
-  const b = -a * p.m - p.c;
-  const A = 1 + a * a;
-  const B = 2 * a * b;
-  const C = b * b - p.R * p.R;
-  const D = B * B - 4 * A * C;
-  const eps = 1e-9;
-  if (D < -eps) return [];
-  const sq = Math.sqrt(Math.max(0, D));
-  const ts = D <= eps ? [-B / (2 * A)] : [(-B - sq) / (2 * A), (-B + sq) / (2 * A)];
-  return ts
-    .filter((t) => t >= -eps && t <= p.R + eps && a * t + b >= -eps)
-    .map((t) => Math.max(0, t));
-}
-
-/** Число решений исходного уравнения при данном a. */
-export function chisloResheniy(p: PB19, a: number): number {
-  return tochkiDugi(p, a).reduce((s, t) => s + (t < 1e-9 ? 1 : 2), 0);
-}
+export { tochkiDugi, chisloResheniy };
 
 interface Osoboe {
   a: SKornem;
@@ -275,6 +264,11 @@ function sobrat(p: PB19): Chast2Zadacha {
   const kvTex = `${A2}a^2${A1 === 0 ? '' : A1 > 0 ? `+${A1}a` : `${A1}a`}${A0 === 0 ? '' : A0 > 0 ? `+${A0}` : `${A0}`}=0`;
   const Mt = `M(${m};\\,${-c})`;
 
+  const kasanie =
+    p.oformlenie === 'kasanie'
+      ? reshenieKasaniya({ R, c, m, list, kasVne, kv, tochki: (a) => tochkiDugi(p, a), otvet })
+      : null;
+
   return {
     no: 19,
     shablon: 'b19.koren4',
@@ -288,7 +282,8 @@ function sobrat(p: PB19): Chast2Zadacha {
       },
     ],
     otvet: `$a\\in${otvet}$`,
-    reshenie: [
+    ...(kasanie === null ? {} : { snoska: kasanie.snoska }),
+    reshenie: kasanie?.reshenie ?? [
       {
         title: 'Замена',
         lines: [

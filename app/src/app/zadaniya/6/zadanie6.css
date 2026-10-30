@@ -375,70 +375,10 @@
 }
 
 /* ── Тренажёр и опорные ── */
-.z6-tr,
 .z6-op {
   max-width: 900px;
 }
 
-.z6-tr__istochnik {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 999px;
-  background: var(--color-surface-info);
-}
-
-.z6-tr__pereklyuchatel {
-  padding: var(--space-2) var(--space-4);
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.z6-tr__pereklyuchatel.is-active {
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-}
-
-.z6-tr__gruppa {
-  margin: var(--space-4) 0 0;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.z6-tr__gruppa legend {
-  padding: 0 var(--space-2);
-  font-weight: 600;
-}
-
-.z6-tr__chipy {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.z6-tr__chip {
-  display: inline-flex;
-  gap: var(--space-2);
-  align-items: center;
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.z6-tr__chip.is-active {
-  border-color: var(--color-primary);
-  background: var(--color-surface-soft);
-}
-
-.z6-tr__start,
-.z6-tr__nav,
 .z6-zadacha__dop {
   display: flex;
   flex-wrap: wrap;
@@ -754,45 +694,6 @@
 }
 
 /* Шаблоны выбора: кнопки «Весь №6», «Ожидание и дисперсия»… */
-.z6-tr__shablony {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
-  gap: var(--space-2);
-  margin: var(--space-2) 0 var(--space-4);
-}
-
-.z6-tr__shablon {
-  display: grid;
-  gap: 2px;
-  padding: var(--space-3);
-  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.z6-tr__shablon:hover {
-  background: var(--color-surface-info);
-}
-
-.z6-tr__shablon span {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.z6-tr__podzag {
-  margin: var(--space-4) 0 var(--space-1);
-  font-size: 15px;
-}
-
-.z6-tr__poyasnenie {
-  margin: var(--space-1) 0 0;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
 
 .z6-o__formula {
   display: block;

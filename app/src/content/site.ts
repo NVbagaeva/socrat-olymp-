@@ -7,6 +7,7 @@
 import { legalDocs } from '@/content/legal/documents';
 import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
+import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF } from '@/content/variant';
 
@@ -34,6 +35,7 @@ export const site = {
     { label: 'Банк заданий', href: tasksPage.href },
     { label: 'Собрать вариант', href: VARIANT_HREF },
     { label: 'Варианты повышенной сложности', href: POV_HREF },
+    { label: 'Ежемесячные варианты', href: EZH_HREF },
     { label: 'Как пользоваться', href: HOWTO_HREF },
     { label: 'Учителям', href: '/#how' },
   ] satisfies SiteLink[],

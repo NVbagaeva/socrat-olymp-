@@ -2,6 +2,13 @@
    плитки быстрого старта, строки типов со счётчиками, сегментированные
    переключатели, липкая сводка, на телефоне — нижняя панель. */
 
+/* Подпись над экраном на вкладке «Зачётная работа» раздела №12. */
+.zachyot-lead {
+  margin: 0 0 var(--space-6);
+  max-width: 68ch;
+  color: var(--color-text-secondary);
+}
+
 .zs__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;

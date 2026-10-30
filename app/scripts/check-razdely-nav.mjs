@@ -76,7 +76,6 @@ const RAZDELY = Array.from(
   TYPES_SRC.matchAll(/id: '([a-z]+)',\n\s+no: '\d+',[\s\S]*?status: '(active|soon)'/g),
 ).map((m) => ({ id: m[1], open: m[2] === 'active' }));
 const SOON = RAZDELY.filter((r) => !r.open).length;
-const OPEN = RAZDELY.filter((r) => r.open).length;
 if (RAZDELY.length !== 7) {
   console.error(`В data/functionTypes.ts найдено разделов ${RAZDELY.length}, ожидалось 7`);
   process.exit(1);
@@ -526,56 +525,19 @@ for (const size of SIZES) {
   );
   check(podtemy.overlap === 0, where('«Подтемы»: стрелка налезает на иконку'));
 
-  /* Окно выбора типа функции: иконки на месте, старых схем нет, названия
-     не рвутся по слову (на телефоне). Галочек нет совсем: это переход,
-     а не выбор; у открытых разделов — стрелка «→». */
+  /* Банк: карточка №12 — обычная ссылка на страницу раздела, как у
+     остальных заданий. Окна выбора типа функции больше нет. */
   await page.goto(BASE + '/zadaniya/', { waitUntil: 'networkidle' });
-  await page
-    .locator('.tasks-grid button, .tasks-grid [role=button]')
+  const bank12 = await page
+    .locator('.tasks-grid a')
     .filter({ hasText: /Графики функций/ })
     .first()
-    .click();
-  await page.waitForSelector('.subtopic-modal');
-  await page.waitForTimeout(500);
-  const okno = await page.evaluate(() => {
-    const cards = Array.from(document.querySelectorAll('.subtopic-card'));
-    const title = (name) =>
-      Array.from(document.querySelectorAll('.subtopic-card__title')).find(
-        (t) => t.textContent === name,
-      );
-    const quad = title('Квадратичная функция');
-    return {
-      cards: cards.length,
-      icons: document.querySelectorAll('.subtopic-card picture.razdel-ico img').length,
-      oldCharts: document.querySelectorAll('.subtopic-card__chart').length,
-      checks: document.querySelectorAll('.subtopic-card__check').length,
-      arrows: document.querySelectorAll('a.subtopic-card .subtopic-card__go').length,
-      links: document.querySelectorAll('a.subtopic-card').length,
-      soonDim: document.querySelectorAll('.subtopic-card--soon picture.razdel-ico--soon').length,
-      quadLines:
-        quad === undefined
-          ? -1
-          : Math.round(
-              quad.getBoundingClientRect().height /
-                parseFloat(getComputedStyle(quad).lineHeight || '20'),
-            ),
-      quadSize: quad === undefined ? 0 : parseFloat(getComputedStyle(quad).lineHeight),
-    };
-  });
+    .getAttribute('href');
+  check(bank12 === '/zadaniya/12/', where(`банк: карточка №12 ведёт на ${bank12}`));
   check(
-    okno.cards === 7 && okno.icons === 7,
-    where(`окно выбора: иконок ${okno.icons} из ${okno.cards}`),
+    (await page.locator('.tasks-grid button, .tasks-grid [role=button]').count()) === 0,
+    where('банк: карточка открывает окно, а не страницу раздела'),
   );
-  check(okno.oldCharts === 0, where('в окне выбора остались старые схематичные значки'));
-  check(okno.checks === 0, where(`окно выбора: галочек ${okno.checks}, а их быть не должно`));
-  check(
-    okno.arrows === okno.links && okno.links >= OPEN,
-    where(`окно выбора: стрелок ${okno.arrows} у ${okno.links} карточек-ссылок`),
-  );
-  check(okno.soonDim === SOON, where('окно выбора: иконки «Скоро» не бледные'));
-  if (size.isMobile) {
-    check(okno.quadLines === 1, where('в окне выбора «Квадратичная функция» переносится по слову'));
-  }
 
   /* Статистика тренажёра: иконка раздела и только свои наборы. Счётчики
      всех разделов лежат в одной записи budetege:trainer:v1. */

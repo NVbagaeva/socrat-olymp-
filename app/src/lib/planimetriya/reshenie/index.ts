@@ -7,6 +7,7 @@ import type { Params } from '../stseny/dsl';
 import { RESHENIYA_1 } from './blok1';
 import { RESHENIYA_2 } from './blok2';
 import { RESHENIYA_3 } from './blok3';
+import { RESHENIYA_EZHEMESYACHNYE } from './ezhemesyachnye';
 import { RESHENIYA_POVYSHENNYE } from './povyshennye';
 import type { Reshenie } from './types';
 
@@ -17,6 +18,7 @@ const VSE: Record<number, (p: Params) => Reshenie> = {
   ...RESHENIYA_2,
   ...RESHENIYA_3,
   ...RESHENIYA_POVYSHENNYE,
+  ...RESHENIYA_EZHEMESYACHNYE,
 };
 
 export function reshenie(proto: number, params: Params): Reshenie {

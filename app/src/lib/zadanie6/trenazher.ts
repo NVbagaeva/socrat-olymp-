@@ -1,7 +1,7 @@
 /**
  * Тренажёр задания №6: выбор тренировки и план задач.
  *
- * Выбор (источник, стиль, прототипы, число задач) живёт в sessionStorage
+ * Выбор (прототипы, число задач, режим, источник, стиль) живёт в sessionStorage
  * — на время вкладки браузера, как у №7 и №11; сама тренировка — в общей
  * сессии тренажёров (components/tasks/session): она переживает переход
  * между вкладками раздела и перезагрузку. План — чистая функция, её
@@ -14,16 +14,29 @@ import { podStil, type Stil } from './shablony';
 
 export type IstochnikVybora = 'fipi' | 'analog' | 'mix';
 
+/**
+ * Режим: тренировка — проверка сразу, попытки, подсказки и разбор;
+ * проверка — без подсказок, ответ меняется до конца, верно ли — только в итогах.
+ */
+export type Rezhim6 = 'trenirovka' | 'proverka';
+
 export interface Nastroyki6 {
   istochnik: IstochnikVybora;
   stil: Stil;
   tipy: string[];
   skolko: number;
+  rezhim: Rezhim6;
 }
 
 export const SKOLKO = [5, 10, 15, 20] as const;
 
-export const PO_UMOLCHANIYU: Nastroyki6 = { istochnik: 'mix', stil: 'vse', tipy: [], skolko: 10 };
+export const PO_UMOLCHANIYU: Nastroyki6 = {
+  istochnik: 'mix',
+  stil: 'vse',
+  tipy: [],
+  skolko: 10,
+  rezhim: 'trenirovka',
+};
 
 const KEY = 'budetege:zadanie-6:trenazher-vybor';
 
@@ -41,6 +54,7 @@ function razobrat(raw: string | null): Nastroyki6 {
       stil: v.stil === 'syuzhet' || v.stil === 'standart' ? v.stil : 'vse',
       tipy: Array.isArray(v.tipy) ? v.tipy.filter((x): x is string => typeof x === 'string') : [],
       skolko: (SKOLKO as readonly number[]).includes(v.skolko ?? 0) ? (v.skolko as number) : 10,
+      rezhim: v.rezhim === 'proverka' ? 'proverka' : 'trenirovka',
     };
   } catch {
     return PO_UMOLCHANIYU;

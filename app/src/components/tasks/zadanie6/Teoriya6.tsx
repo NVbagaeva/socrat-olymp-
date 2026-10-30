@@ -283,7 +283,7 @@ export function Teoriya6({ vkladka, base }: { vkladka: string; base: string }) {
       dekor={{
         kartinka: (
           <span className="z6-dekor">
-            <Tex text="$E(X)=\sum x_ip_i$" />
+            <Tex text="$\mathrm{M}(X)=\sum x_ip_i$" />
           </span>
         ),
         note: 'Распределение → ожидание → дисперсия → оценка',

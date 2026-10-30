@@ -1,28 +1,13 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
-import { katex } from '@/lib/graph/katex';
-import { AppShell } from '@/components/layout/AppShell';
-import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { TaskStub, stubTitle } from '@/components/tasks/TaskStub';
-import { Chart } from '@/components/graph/Chart';
-import { ZadanieHero } from '@/components/tasks/ZadanieHero';
-import { HandNote } from '@/components/ui';
-import { bankSets, findSection, sectionParams, type Subtopic } from '@/content/sections';
-import { taskHasPage, tasks, tasksPage, type ExamTask } from '@/content/tasks';
-import { subtopicBuilt } from '@/data/functionTypes';
-import { ikonkaRazdela } from '@/components/tasks/razdely/ikonka';
-import { lineScene } from '@/lib/scenes';
-import { href, ZADANIYA } from '@/lib/paths';
-import { typeset } from '@/lib/tex';
-import type { PrototypeView, SubtopicView } from './SectionTabs';
-import { SectionTabs } from './SectionTabs';
+import { taskHasPage, tasks, type ExamTask } from '@/content/tasks';
 import '../zadaniya.css';
 import './section.css';
 
 /* Неоткрытое задание со страницей-заглушкой (stub в content/tasks.ts).
-   Своего раздела у него нет — по его адресу собирается заглушка. */
+   Своего раздела у него нет — по его адресу собирается заглушка.
+   Открытые задания, №12 в том числе, живут в своих папках. */
 function stubTask(slug: string): ExamTask | undefined {
   return tasks.find(
     (task: ExamTask) => task.slug === slug && task.status !== 'ready' && taskHasPage(task),
@@ -30,139 +15,25 @@ function stubTask(slug: string): ExamTask | undefined {
 }
 
 /* Статический экспорт: список страниц известен до сборки и считается
-   из конфига. Незаявленные адреса не собираются и не открываются.
-   Раздел со своей страницей заглушкой не перекрывается. */
+   из конфига. Незаявленные адреса не собираются и не открываются. */
 export function generateStaticParams() {
-  const own = sectionParams();
-  const stubs = tasks
-    .filter((task) => stubTask(task.slug) !== undefined && !own.some((p) => p.task === task.slug))
+  return tasks
+    .filter((task) => stubTask(task.slug) !== undefined)
     .map((task) => ({ task: task.slug }));
-  return [...own, ...stubs];
 }
 export const dynamicParams = false;
 
 type Params = Promise<{ task: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const slug = (await params).task;
-  const section = findSection(slug);
-  if (!section) {
-    const task = stubTask(slug);
-    return task === undefined ? {} : { title: `${stubTitle(task)} — Будет на ЕГЭ` };
+  const task = stubTask((await params).task);
+  return task === undefined ? {} : { title: `${stubTitle(task)} — Будет на ЕГЭ` };
+}
+
+export default async function StubPage({ params }: { params: Params }) {
+  const task = stubTask((await params).task);
+  if (task === undefined) {
+    notFound();
   }
-  return {
-    title: `${section.title}. ${section.subtitle} — Будет на ЕГЭ`,
-    description: section.description,
-  };
-}
-
-/* Формулы вёрстываются на сборке: в браузер уходит готовая разметка,
-   а не библиотека ради шести постоянных строк. */
-function formulaHtml(tex: string): string {
-  return katex.renderToString(tex, { throwOnError: false, displayMode: false });
-}
-
-function toView(sectionSlug: string, subtopic: Subtopic): SubtopicView {
-  return {
-    slug: subtopic.id,
-    name: subtopic.title,
-    caption: subtopic.graphName,
-    icon: ikonkaRazdela(sectionSlug, subtopic.icon),
-    formulaHtml: formulaHtml(subtopic.formula),
-    status: subtopic.status,
-    /* Ссылка есть у собранной подтемы: открытой или в предпросмотре. */
-    href: subtopicBuilt(subtopic) ? href(ZADANIYA, sectionSlug, subtopic.id) : null,
-  };
-}
-
-export default async function SectionPage({ params }: { params: Params }) {
-  const slug = (await params).task;
-  const section = findSection(slug);
-  if (!section) {
-    const task = stubTask(slug);
-    if (task === undefined) {
-      notFound();
-    }
-    return <TaskStub task={task} />;
-  }
-
-  const subtopics = section.subtopics.map((item) => toView(section.slug, item));
-
-  /* Прототипы собираются из наборов движка по всем подтемам раздела.
-     Числа берутся из состава наборов и нигде не записаны руками. */
-  const seen = new Set<string>();
-  const prototypes: PrototypeView[] = section.subtopics.flatMap((subtopic) =>
-    bankSets(subtopic)
-      .filter((set) => set.kind === 'prototype' && !seen.has(set.id) && seen.add(set.id))
-      .map((set) => ({
-        id: set.id,
-        title: set.title,
-        subtitle: set.subtitle,
-        /* Формулы в названиях наборов ($…$) набираются здесь, на
-           сборке: вкладки — клиентский экран. */
-        titleHtml: typeset(set.title),
-        subtitleHtml: typeset(set.subtitle),
-        count: set.count,
-      })),
-  );
-
-  /* Первая открытая подтема — единственный осмысленный переход.
-     «Продолжить с места, где остановился» не делаем: хранилища
-     прогресса в проекте нет, это была бы имитация. */
-  const entry = section.subtopics.find((item) => item.status === 'active');
-
-  return (
-    <AppShell active="tasks">
-      <main className="app-main">
-        <ShapkaRazdela
-          crumbs={[
-            { label: 'Главная', href: '/' },
-            { label: 'Банк заданий', href: tasksPage.href },
-            { label: `№${section.no}` },
-          ]}
-          title={section.title}
-          {...(section.hero === undefined ? {} : { className: 'section-head--hero' })}
-          {...(section.badge === undefined ? {} : { badge: section.badge })}
-          lead={section.description}
-          actions={
-            entry === undefined ? null : (
-              <Link
-                className="btn btn--primary section-head__cta"
-                href={href(ZADANIYA, section.slug, entry.id)}
-              >
-                Продолжить подготовку
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M5 12h13M12 6l6 6-6 6" />
-                </svg>
-              </Link>
-            )
-          }
-          media={
-            <>
-              {section.hero === undefined ? (
-                <Chart
-                  className="section-head__chart"
-                  scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
-                />
-              ) : (
-                <ZadanieHero task={section.hero} />
-              )}
-              <HandNote className="section-head__note">Функции описывают мир вокруг нас</HandNote>
-            </>
-          }
-        />
-
-        {/* useSearchParams требует границы ожидания: без неё статический
-            экспорт отказывается собирать страницу. */}
-        <Suspense fallback={null}>
-          <SectionTabs
-            description={section.description}
-            subtopics={subtopics}
-            prototypes={prototypes}
-            vesRazdel={section.slug === '12'}
-          />
-        </Suspense>
-      </main>
-    </AppShell>
-  );
+  return <TaskStub task={task} />;
 }
