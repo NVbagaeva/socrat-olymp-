@@ -30,7 +30,8 @@ export type VkladkaIcon =
   | 'tasks'
   | 'stats'
   | 'materials'
-  | 'zachyot';
+  | 'zachyot'
+  | 'cards';
 
 /**
  * Хвост адреса страницы материалов для репетитора. Заход по нему

@@ -5,6 +5,8 @@ import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Tabs } from '@/components/ui';
 import type { RazdelTab } from '@/content/vkladki';
+import { VKLADKA_KARTOCHKI } from '@/content/kartochkiUi';
+import { NOMERA_S_KARTOCHKAMI } from '@/content/kartochki/spisok';
 import type { TutorMaterial } from '@/content/sections';
 import { TutorMenu } from './TutorMenu';
 import { TabsRow } from './TabsRow';
@@ -50,7 +52,22 @@ export interface RazdelTabsProps {
  * по вхождению строки: иначе «trenazher» нашёлся бы и внутри
  * «trenazher/uznay-metod».
  */
-export function RazdelTabs({ base, tabs, tutors, tutorsTail, before }: RazdelTabsProps) {
+/**
+ * Вкладка «Карточки» встаёт после «Теории» сама: у номера есть колода
+ * (content/kartochki/NN-*.ts) — в его ленте есть и вкладка. Конфиги
+ * вкладок номеров о ней не знают.
+ */
+function sKartochkami(base: string, tabs: readonly RazdelTab[]): readonly RazdelTab[] {
+  const nomer = base.match(/^\/zadaniya\/(\d+)$/)?.[1];
+  if (nomer === undefined || !NOMERA_S_KARTOCHKAMI.includes(nomer)) return tabs;
+  if (tabs.some((tab) => tab.id === VKLADKA_KARTOCHKI.id)) return tabs;
+  const teoriya = tabs.findIndex((tab) => tab.id === 'teoriya');
+  const kuda = teoriya === -1 ? tabs.length : teoriya + 1;
+  return [...tabs.slice(0, kuda), VKLADKA_KARTOCHKI, ...tabs.slice(kuda)];
+}
+
+export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: RazdelTabsProps) {
+  const tabs = sKartochkami(base, svoi);
   const pathname = usePathname();
   /* Узел ленты нужен меню материалов. Активную вкладку в видимую часть
      ленты подводит общая строка (TabsRow). */

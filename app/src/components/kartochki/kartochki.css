@@ -1,0 +1,568 @@
+/* Карточки по теории — вкладка «Карточки» и кнопка «Проверить теорию».
+   Только семантические токены (tokens.css) и общие классы: .card,
+   .btn, .pbar, .check, .input, .badge, t-*. */
+
+.kart {
+  max-width: 760px;
+  margin: 0 auto;
+  /* Прокрутка к экрану карточек — под липкую ленту вкладок. */
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+
+/* ── Старт ─────────────────────────────────────────────────────── */
+
+.kart-start {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+@media (min-width: 1024px) {
+  .kart {
+    max-width: 1080px;
+  }
+  .kart-start {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+
+.kart-start__main {
+  display: grid;
+  gap: var(--space-5);
+}
+.kart-start__lead {
+  color: var(--color-text-lead);
+}
+.kart-start__nechego {
+  color: var(--color-text-secondary);
+}
+.kart-start__main > .btn--lg {
+  justify-self: start;
+  min-width: 200px;
+}
+
+.kart-vyucheno {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.kart-vyucheno__note {
+  color: var(--color-text-secondary);
+}
+
+.kart-rezhimy,
+.kart-temy {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.kart-rezhimy legend {
+  margin-bottom: var(--space-2);
+}
+
+.kart-rezhim {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-hover) var(--ease),
+    background var(--dur-hover) var(--ease);
+}
+.kart-rezhim:hover {
+  border-color: var(--color-border-hover);
+}
+.kart-rezhim.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.kart-rezhim input {
+  margin-top: 3px;
+  accent-color: var(--color-primary);
+  flex: none;
+}
+.kart-rezhim:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.kart-rezhim__text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.kart-rezhim__title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  font-weight: 600;
+}
+.kart-rezhim__count {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.kart-rezhim__lead {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+
+.kart-temy {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+.kart-temy__vse {
+  justify-self: start;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.kart-klavishi {
+  color: var(--color-text-tertiary);
+}
+/* Клавиши — только там, где есть клавиатура. */
+@media (pointer: coarse) {
+  .kart-klavishi {
+    display: none;
+  }
+}
+
+.kart-start__temy {
+  display: grid;
+  gap: var(--space-4);
+}
+.kart-pbar {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+.kart-pbar__item {
+  display: grid;
+  gap: var(--space-2);
+}
+.kart-pbar__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.kart-pbar__n {
+  flex: none;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.kart-sbros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.kart-sbros__open {
+  justify-self: start;
+}
+
+/* ── Сессия ────────────────────────────────────────────────────── */
+
+.kart-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.kart-top__rezhim {
+  font-weight: 600;
+}
+.kart-top__schyot {
+  margin-left: auto;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.kart-top__bar {
+  margin-bottom: var(--space-5);
+}
+
+.kart-play {
+  display: grid;
+  gap: var(--space-4);
+}
+.kart-play__svayp {
+  text-align: center;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+@media (pointer: fine) {
+  .kart-play__svayp {
+    display: none;
+  }
+}
+
+/* Переворот: обе стороны в одной клетке сетки — высота карточки
+   по большей стороне, ничего не прыгает. */
+.kart-flip {
+  perspective: 1400px;
+  touch-action: pan-y;
+  transition: transform var(--dur-state) var(--ease);
+  animation: kart-in var(--dur-reveal) var(--ease);
+}
+.kart-flip.is-dragging {
+  transition: none;
+  cursor: grabbing;
+}
+.kart-flip__inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 480ms var(--ease);
+}
+.kart-flip.is-flipped .kart-flip__inner {
+  transform: rotateY(180deg);
+}
+
+.kart-card {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  min-height: 260px;
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.kart-card--back {
+  transform: rotateY(180deg);
+  outline: none;
+}
+.kart-flip.is-znayu .kart-card {
+  border-color: var(--color-success);
+}
+.kart-flip.is-ne .kart-card {
+  border-color: var(--color-warning);
+}
+
+.kart-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-secondary);
+}
+.kart-card__tema {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.kart-card__tap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-4);
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+.kart-card__tap:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 4px;
+}
+.kart-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.kart-card__vopros {
+  font-size: 20px;
+  line-height: 1.45;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.kart-card__hint {
+  margin-top: auto;
+  align-self: center;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+
+.kart-card__fig {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.kart-fig {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  max-width: 100%;
+}
+.kart-fig svg {
+  max-width: 100%;
+  height: auto;
+}
+/* Ключевой элемент чертежа — тот же цвет, что в справочнике №1. */
+.kart-fig .pl-iskomoe,
+.kart-fig .pl-iskomoe.pl-duga {
+  stroke: var(--color-spr-klyuch);
+}
+.kart-fig--solid svg,
+.kart-fig--vektory svg {
+  max-height: 240px;
+  width: auto;
+}
+
+.kart-card__vybor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: auto;
+}
+.kart-card__forma {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+.kart-card__pole {
+  display: grid;
+  gap: var(--space-2);
+  flex: 1 1 160px;
+}
+.kart-card__forma .field__msg {
+  flex-basis: 100%;
+  margin-top: 0;
+}
+
+.kart-card__itog {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+}
+.kart-card__itog.is-prav {
+  background: var(--color-success-soft);
+  color: var(--color-uspeh);
+}
+.kart-card__itog.is-neprav {
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+}
+.kart-card__otvet {
+  font-size: 19px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  /* Формула шире карточки прокручивается внутри себя, страница — нет. */
+  overflow-x: auto;
+}
+.kart-card__otvet .katex {
+  font-size: 1.12em;
+}
+.kart-card__pochemu {
+  color: var(--color-text-lead);
+}
+.kart-card__pochemu-label {
+  font-weight: 600;
+}
+.kart-card__niz {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+.kart-card__teoriya {
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.kart-card__teoriya:hover {
+  text-decoration: underline;
+}
+.kart-card__dobavleno {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  color: var(--color-text-tertiary);
+}
+.kart-card__nazad {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.kart-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.kart-actions > .btn--block {
+  grid-column: 1 / -1;
+}
+.kart-actions .btn {
+  min-height: 48px;
+}
+
+@keyframes kart-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ── Итог ──────────────────────────────────────────────────────── */
+
+.kart-itog {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 560px;
+  margin: 0 auto;
+}
+.kart-itog__chisla {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.kart-itog__chislo {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+}
+.kart-itog__chislo--da {
+  background: var(--color-success-soft);
+  color: var(--color-uspeh);
+}
+.kart-itog__chislo--ne {
+  background: var(--color-warning-soft);
+}
+.kart-itog__temy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.kart-itog__temy li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.kart-itog__count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.kart-itog__note {
+  color: var(--color-text-secondary);
+}
+.kart-itog__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ── «Проверить теорию» во вкладке «Теория» ────────────────────── */
+
+.kart-proverka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+.kart-proverka__text {
+  flex: 1 1 260px;
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.kart-proverka__title {
+  font-weight: 600;
+}
+.kart-proverka__lead {
+  color: var(--color-text-secondary);
+}
+.kart-proverka__btn {
+  flex: none;
+  text-decoration: none;
+}
+
+/* ── Телефон ───────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .kart-card {
+    min-height: 240px;
+    padding: var(--space-5) var(--space-4);
+  }
+  .kart-card__vopros {
+    font-size: 18px;
+  }
+  .kart-card__otvet {
+    font-size: 17px;
+  }
+  .kart-start__main > .btn--lg {
+    justify-self: stretch;
+  }
+  .kart-proverka__btn {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kart-flip,
+  .kart-flip__inner {
+    transition: none;
+    animation: none;
+  }
+}

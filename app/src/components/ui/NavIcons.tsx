@@ -29,7 +29,8 @@ export type NavIconName =
   | 'help'
   | 'variant'
   | 'povyshennye'
-  | 'ezhemesyachnye';
+  | 'ezhemesyachnye'
+  | 'cards';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
   /* Дом. */
@@ -130,6 +131,14 @@ const PATHS: Record<NavIconName, React.ReactNode> = {
       <path d="M8.5 3.5h8.2l3.3 3.3v10.7a1 1 0 0 1-1 1h-10.5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z" />
       <path d="M5.5 7v12.5a1 1 0 0 0 1 1h9" />
       <path d="M10.5 9.5h6M10.5 12.5h6M10.5 15.5h3.5" />
+    </>
+  ),
+  /* Две карточки внахлёст: проверка теории по карточкам. */
+  cards: (
+    <>
+      <rect x="8.5" y="4" width="11" height="15.5" rx="1.5" />
+      <path d="M8.5 7.4 5.3 8.2a1.2 1.2 0 0 0-.9 1.5l2.6 9.9a1.2 1.2 0 0 0 1.5.9" />
+      <path d="M11.5 9.5h5M11.5 13h3.5" />
     </>
   ),
   /* Стопка листов со звездой: варианты повышенной сложности. */
