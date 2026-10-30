@@ -16,6 +16,8 @@ import { add, div, mul, rat, ratTex, sub, toNumber, type Rat } from '@/lib/zadan
 import { THEME } from '@/lib/graph/renderer.js';
 import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 import { skTex, skToNumber, type SKornem } from './chisla';
+import { typeset } from '@/lib/tex';
+import { chisloResheniy } from './b19geom';
 import { dec, sklon } from './tex';
 import type { Etap, Ramka } from './types';
 
@@ -99,10 +101,13 @@ export function reshenieKasaniya(d: DannyeKasaniya): ReshenieKasaniya {
   /* ── 2. Графическая интерпретация ──────────────────────────── */
   const grafiki: Etap = {
     title: 'Графическая интерпретация',
-    lines: [
-      `$y=\\sqrt{${R2}-t^2}$, $t\\in[0;\\,${R}]$, — четверть окружности $t^2+y^2=${R2}$ ($y\\ge0$, $t\\ge0$): дуга от $(0;\\,${R})$ до $(${R};\\,0)$.`,
-      `$y=${pryamaya}$ — пучок прямых через точку $${At}$, $a$ — угловой коэффициент.`,
-      `Нужно найти $a$, при которых прямая пересекает дугу ровно в одной точке с $${tR}$ и не проходит через $(0;\\,${R})$.`,
+    lines: ['Рассмотрим левую и правую части уравнения как функции от $t$:'],
+    spisok: [
+      `$y=f(t)=\\sqrt{${R2}-t^2}$, $t\\in[0;\\,${R}]$ — левая часть. Её график — четверть окружности $t^2+y^2=${R2}$ ($y\\ge0$, $t\\ge0$): дуга от $(0;\\,${R})$ до $(${R};\\,0)$.`,
+      `$y=g(t)=${pryamaya}$ — правая часть. Её график — прямая с угловым коэффициентом $a$, проходящая через точку $${At}$; при разных $a$ получаем пучок прямых.`,
+    ],
+    posle: [
+      `Корни уравнения — это общие точки графиков. Нужно найти $a$, при которых прямая пересекает дугу ровно в одной точке с $${tR}$ и не проходит через $(0;\\,${R})$.`,
     ],
   };
 
@@ -348,8 +353,8 @@ function chertezh(p: ParamRis): string {
     B: { color: C.lineB, w: 2, dash: '7 4' },
     A: { color: C.lineC, w: 2, dash: '9 3 2 3' },
   } as const;
-  const liniya = (xy: number[], s: { color: string; w: number; dash: string }, kx = 1) =>
-    `<line x1="${f1(xy[0]!)}" y1="${f1(xy[1]!)}" x2="${f1(xy[2]!)}" y2="${f1(xy[3]!)}" stroke="${s.color}" stroke-width="${s.w * kx}"${s.dash ? ` stroke-dasharray="${s.dash}"` : ''} stroke-linecap="round"/>`;
+  const liniya = (xy: number[], s: { color: string; w: number; dash: string }, kx = 1, cls = '') =>
+    `<line${cls ? ` class="${cls}"` : ''} x1="${f1(xy[0]!)}" y1="${f1(xy[1]!)}" x2="${f1(xy[2]!)}" y2="${f1(xy[3]!)}" stroke="${s.color}" stroke-width="${s.w * kx}"${s.dash ? ` stroke-dasharray="${s.dash}"` : ''} stroke-linecap="round"/>`;
   const dugaD = (X_: (t: number) => number, Y_: (y: number) => number, r: number) =>
     `M${f1(X_(R))} ${f1(Y_(0))}A${f1(r)} ${f1(r)} 0 0 0 ${f1(X_(0))} ${f1(Y_(R))}`;
   const tochka = (x: number, y: number, fill: string = C.axis) =>
@@ -361,9 +366,17 @@ function chertezh(p: ParamRis): string {
     ...(p.aKas === null ? [] : [{ a: p.aKas, s: STIL.kas }]),
   ];
 
+  const AMIN = -9;
+  const AMAX = -0.4;
+  const yh = -c / 2;
+  const zh =
+    p.aKas === null
+      ? ''
+      : ` data-r="${R}" data-c="${c}" data-m="${m}" data-u="${u}" data-t0="${t0}" data-y1="${y1}" data-yh="${yh}" data-akas="${p.aKas}" data-ab="${p.aB}" data-aa="${p.aA}" data-amin="${AMIN}" data-amax="${AMAX}"`;
+
   const o: string[] = [];
   o.push(
-    `<svg class="c2-graf" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Четверть окружности, точка A и три прямые через A: касательная, через (${R}; 0) и через (0; ${R})">`,
+    `<svg class="c2-graf" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="group" aria-label="Четверть окружности, точка A и три прямые через A: касательная, через (${R}; 0) и через (0; ${R}). Прямую можно двигать"${zh}>`,
     `<defs><clipPath id="${id}-p"><rect x="0" y="0" width="${W}" height="${Hp}"/></clipPath>` +
       `<marker id="${id}-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1L9 5L0 9" fill="none" stroke="${C.axis}" stroke-width="1.6"/></marker></defs>`,
   );
@@ -389,7 +402,19 @@ function chertezh(p: ParamRis): string {
 
   /* Прямые. */
   o.push(`<g clip-path="url(#${id}-p)">`);
-  for (const l of lines) o.push(liniya(pryamaya(l.a, X, Y, t0 - 1, t1 + 1), l.s));
+  for (const l of lines)
+    o.push(
+      liniya(pryamaya(l.a, X, Y, t0 - 1, t1 + 1), l.s, 1, l.s === STIL.kas ? 'c2-graf__kas' : ''),
+    );
+  /* Подвижная прямая (grafikZhivoy.ts): в начале лежит на касательной;
+     прозрачная «толстая» копия — чтобы за прямую было удобно браться. */
+  if (p.aKas !== null) {
+    const xy = pryamaya(p.aKas, X, Y, t0 - 1, t1 + 1).map((v) => f1(v));
+    o.push(
+      `<line class="c2-graf__pryamaya" x1="${xy[0]}" y1="${xy[1]}" x2="${xy[2]}" y2="${xy[3]}" stroke="${STIL.kas.color}" stroke-width="${STIL.kas.w}" stroke-linecap="round"/>`,
+      `<line class="c2-graf__hit" x1="${xy[0]}" y1="${xy[1]}" x2="${xy[2]}" y2="${xy[3]}" stroke="transparent" stroke-width="28" pointer-events="stroke" style="touch-action:none"/>`,
+    );
+  }
   o.push('</g>');
 
   /* Перпендикуляр OB и точки. */
@@ -411,6 +436,17 @@ function chertezh(p: ParamRis): string {
     txt(X(0) - 6, Y(-c) + 4, chislo(-c), { anchor: 'end', size: 12 }),
   );
   if (B) o.push(txt(X(B[0]) - 10, Y(B[1]) - 9, 'B', { anchor: 'end', size: 15, bukva: true }));
+  if (p.aKas !== null) {
+    /* Общие точки подвижной прямой и дуги (показывает скрипт) и ручка на уровне y = yh. */
+    const th = m + (yh + c) / p.aKas;
+    o.push(
+      ...[0, 1].map(
+        () =>
+          `<circle class="c2-graf__obshchaya" cx="0" cy="0" r="6" fill="none" stroke="${C.axis}" stroke-width="2" visibility="hidden"/>`,
+      ),
+      `<circle class="c2-graf__ruchka" cx="${f1(X(th))}" cy="${f1(Y(yh))}" r="9" fill="${C.bg}" stroke="${STIL.kas.color}" stroke-width="2.5" style="touch-action:none"><title>Потяните, чтобы повернуть прямую</title></circle>`,
+    );
+  }
 
   /* Увеличенный фрагмент у (R; 0): касательная и прямая через (R; 0). */
   if (B) {
@@ -485,5 +521,20 @@ function chertezh(p: ParamRis): string {
   });
 
   o.push('</svg>');
+  if (p.aKas !== null) o.push(panel(p, AMIN, AMAX));
   return o.join('');
+}
+
+/** Панель под рисунком: ползунок, число решений, возврат в положение касания. */
+function panel(p: ParamRis, amin: number, amax: number): string {
+  const n = chisloResheniy(p, p.aKas!);
+  const a = `${chislo(+p.aKas!.toFixed(2)).replace('.', ',')}`;
+  return (
+    `<div class="c2-graf-panel" hidden>` +
+    `<p class="c2-graf-panel__sub">${typeset('Тяните кружок на прямой или двигайте ползунок: прямая вращается вокруг точки $A$.')}</p>` +
+    `<label class="c2-graf-panel__row">${typeset('$a$')}<input class="c2-graf-panel__range" type="range" min="${amin}" max="${amax}" step="0.01" value="${p.aKas}" aria-label="Угловой коэффициент"></label>` +
+    `<p class="c2-graf-panel__status" aria-live="polite"><span class="c2-graf-panel__a">${typeset('$a$')}</span> <span class="c2-graf-panel__znach">≈ ${a} — касание: <b>${resheniy(n)}</b></span></p>` +
+    `<button type="button" class="btn btn--secondary btn--sm c2-graf-panel__reset">Вернуть в положение касания</button>` +
+    `</div>`
+  );
 }
