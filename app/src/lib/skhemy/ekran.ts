@@ -49,6 +49,19 @@ export interface Sostoyanie {
 
 export const SOSTOYANIE_POLNOE: Sostoyanie = { lit: new Set(), shag: null, podpisi: true };
 
+/** Точки дуги против часовой от ot до do (градусы) — ломаная для отрисовки и рамки. */
+export function tochkiDugi(c: T2, r: number, ot: number, doU: number): T2[] {
+  let razmah = (((doU - ot) % 360) + 360) % 360;
+  if (razmah < 1e-9) razmah = 360;
+  const n = Math.max(8, Math.ceil(razmah / 4));
+  const out: T2[] = [];
+  for (let i = 0; i <= n; i += 1) {
+    const q = polar(ot + (razmah * i) / n, r);
+    out.push([c[0] + q[0], c[1] + q[1]]);
+  }
+  return out;
+}
+
 function goritEl(el: Element, lit: ReadonlySet<string>): boolean {
   return el.gruppy !== undefined && el.gruppy.some((g) => lit.has(g));
 }
@@ -103,6 +116,9 @@ export function ramkaKadra(kadr: Kadr, vid: Vid, sost: Sostoyanie): Ramka {
         break;
       case 'tochka':
         vzyat(el.p);
+        break;
+      case 'duga':
+        tochkiDugi(el.c, el.r, el.ot, el.do).forEach((p) => vzyat(p));
         break;
     }
   }
@@ -176,6 +192,11 @@ export interface EkrOkr extends Obshchee {
   stil: StilLinii;
 }
 
+export interface EkrDuga extends Obshchee {
+  d: string;
+  stil: StilLinii;
+}
+
 export interface EkrMnog extends Obshchee {
   points: string;
 }
@@ -206,6 +227,7 @@ export interface Ekran {
   H: number;
   mnog: EkrMnog[];
   okr: EkrOkr[];
+  dugi: EkrDuga[];
   linii: EkrLiniya[];
   ugly: EkrUgol[];
   tochki: EkrTochka[];
@@ -216,6 +238,10 @@ export interface Ekran {
 }
 
 const f1 = (x: number) => Math.round(x * 10) / 10;
+/* Координаты атрибутов SVG — до сотых пикселя: тригонометрия на
+   сервере и в браузере расходится в последних битах, и без округления
+   React ругается на несовпадение разметки при гидратации. */
+const f2 = (x: number) => Math.round(x * 100) / 100;
 
 function shtrihiPut(a: T2, b: T2, n: number): string {
   const d = unit(sub(b, a));
@@ -293,6 +319,8 @@ function konechnyy(el: Element): boolean {
       return ok(el.a) && ok(el.v) && ok(el.b);
     case 'tochka':
       return ok(el.p);
+    case 'duga':
+      return ok(el.c) && Number.isFinite(el.r) && el.r < 1e6;
   }
 }
 
@@ -317,6 +345,7 @@ export function raskladka(
     H,
     mnog: [],
     okr: [],
+    dugi: [],
     linii: [],
     ugly: [],
     tochki: [],
@@ -341,9 +370,10 @@ export function raskladka(
     };
     if (el.vid === 'tochka') {
       const p = E(el.p);
-      if (el.imya !== undefined) ekran.poImeni[el.imya] = p;
+      const ruchka = el.ruchka ?? el.imya;
+      if (ruchka !== undefined) ekran.poImeni[ruchka] = [f2(p[0]), f2(p[1])];
       if (!vidim) continue;
-      ekran.tochki.push({ ...obshchee, x: p[0], y: p[1], imya: el.imya ?? null });
+      ekran.tochki.push({ ...obshchee, x: f2(p[0]), y: f2(p[1]), imya: el.imya ?? null });
       prep.tochki.push(p);
       continue;
     }
@@ -355,10 +385,10 @@ export function raskladka(
         if (dist(a, b) < 0.5) break;
         ekran.linii.push({
           ...obshchee,
-          x1: a[0],
-          y1: a[1],
-          x2: b[0],
-          y2: b[1],
+          x1: f2(a[0]),
+          y1: f2(a[1]),
+          x2: f2(b[0]),
+          y2: f2(b[1]),
           stil: el.stil ?? 'linia',
           shtrihi: el.shtrihi === undefined ? '' : shtrihiPut(a, b, el.shtrihi),
         });
@@ -368,8 +398,24 @@ export function raskladka(
       case 'okruzhnost': {
         const c = E(el.c);
         const r = el.r * preob.s;
-        ekran.okr.push({ ...obshchee, cx: c[0], cy: c[1], r, stil: el.stil ?? 'linia' });
+        ekran.okr.push({
+          ...obshchee,
+          cx: f2(c[0]),
+          cy: f2(c[1]),
+          r: f2(r),
+          stil: el.stil ?? 'linia',
+        });
         prep.okruzhnosti.push([c, r]);
+        break;
+      }
+      case 'duga': {
+        const pts = tochkiDugi(el.c, el.r, el.ot, el.do).map(E);
+        ekran.dugi.push({
+          ...obshchee,
+          d: pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${f1(p[0])} ${f1(p[1])}`).join(''),
+          stil: el.stil ?? 'linia',
+        });
+        for (let i = 1; i < pts.length; i += 1) prep.otrezki.push([pts[i - 1]!, pts[i]!]);
         break;
       }
       case 'mnogougolnik': {
@@ -421,8 +467,8 @@ export function raskladka(
         dim: false,
         cvet: t.cvet,
         novyy: t.novyy,
-        x: m[0],
-        y: m[1],
+        x: f2(m[0]),
+        y: f2(m[1]),
         bukva: bukva ?? '',
         indeks: indeks ?? '',
       });

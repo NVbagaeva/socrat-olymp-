@@ -11,11 +11,46 @@
    Запуск: pnpm test:skhemy-18 [N] */
 
 import { requireSrc } from '../lib/load-ts.mjs';
+import { zerno } from './obshchee.mjs';
+import { proverit as bissektrisa } from './bissektrisa.mjs';
+import { proverit as mediana } from './mediana.mjs';
+import { proverit as ravnyeUgly } from './ravnyeUgly.mjs';
+import { proverit as sekushchie } from './sekushchie.mjs';
 import { proverit as vysoty } from './vysoty.mjs';
 
 const N = Number(process.argv[2] ?? 1000);
 let plokho = 0;
-plokho += vysoty(N).plokho;
+for (const proverit of [vysoty, bissektrisa, mediana, sekushchie, ravnyeUgly]) {
+  plokho += proverit(N).plokho;
+}
+
+/* Тексты и чертежи согласованы: у каждой собранной схемы есть живой
+   чертёж, каждая группа подсветки из следствий и шагов доказательства
+   есть у элементов чертежа, шаги построения подписаны. */
+const { SOBRANNYE } = requireSrc('content/zadanie18/spisok');
+const { zhivayaSkhema18 } = requireSrc('lib/zadanie18/skhemy');
+console.log('\nТексты ↔ чертежи');
+for (const s of SOBRANNYE) {
+  const z = zhivayaSkhema18(s.id);
+  if (z === undefined) {
+    console.log(`  ✗ ${s.id}: нет живого чертежа`);
+    plokho += 1;
+    continue;
+  }
+  const est = new Set();
+  const rnd = zerno(7);
+  for (const t of [z.nachalo, ...Array.from({ length: 60 }, () => z.sluchaynaya(rnd))]) {
+    for (const el of z.postroit(t).elementy) for (const g of el.gruppy ?? []) est.add(g);
+  }
+  const nuzhny = [...s.sledstviya, ...s.dokazatelstvo].flatMap((x) => x.gruppy);
+  const net = [...new Set(nuzhny)].filter((g) => !est.has(g));
+  const pustye = [...s.sledstviya, ...s.dokazatelstvo].filter((x) => x.gruppy.length === 0).length;
+  const ok = net.length === 0 && pustye === 0 && z.shagi.length > 0;
+  console.log(
+    `  ${ok ? '✓' : '✗'} ${s.no}. ${s.nazvanie}${net.length ? ` — нет групп: ${net.join(', ')}` : ''}${pustye ? ` — пунктов без подсветки: ${pustye}` : ''}`,
+  );
+  if (!ok) plokho += 1;
+}
 
 /* Коробки Лейтнера: «Знаю» — следующая (не ниже второй, не выше пятой),
    «Не знаю» — первая. */

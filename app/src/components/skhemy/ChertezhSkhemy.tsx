@@ -153,7 +153,11 @@ export function ChertezhSkhemy({
     ozhidaet.current = null;
     const m = ekranRef.current.preob.vModel(o.x, o.y);
     const p = skhema.ogranichit(o.imya, m, tRef.current);
-    if (p !== null) onTochki({ ...tRef.current, [o.imya]: p });
+    if (p === null) return;
+    const novye = { ...tRef.current, [o.imya]: p };
+    const itog =
+      skhema.prisposobit === undefined ? novye : skhema.prisposobit(novye, tRef.current, o.imya);
+    if (itog !== null) onTochki(itog);
   }
 
   function dvigat(imya: string, x: number, y: number): void {
@@ -232,6 +236,22 @@ export function ChertezhSkhemy({
               cx={o.cx}
               cy={o.cy}
               r={o.r}
+            />
+          ))}
+        </g>
+        <g className="skh__dugi">
+          {ekran.dugi.map((d) => (
+            <path
+              key={d.id}
+              className={clsx(
+                'skh-okr',
+                `skh-${d.stil}`,
+                d.lit && 'is-lit',
+                d.dim && 'is-dim',
+                d.novyy && 'is-novyy',
+                d.cvet && `skh-c-${d.cvet}`,
+              )}
+              d={d.d}
             />
           ))}
         </g>

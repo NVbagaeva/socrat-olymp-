@@ -4,10 +4,18 @@
  */
 
 import type { ZhivayaSkhema } from '@/lib/skhemy/tipy';
+import { BISSEKTRISA } from './bissektrisa';
+import { MEDIANA } from './mediana';
+import { RAVNYE_UGLY } from './ravnyeUgly';
+import { SEKUSHCHIE } from './sekushchie';
 import { VYSOTY } from './vysoty';
 
 const REESTR: Readonly<Record<string, ZhivayaSkhema>> = {
   vysoty: VYSOTY,
+  bissektrisa: BISSEKTRISA,
+  'udvoenie-mediany': MEDIANA,
+  'dve-sekushchie': SEKUSHCHIE,
+  'ravnye-ugly': RAVNYE_UGLY,
 };
 
 export function zhivayaSkhema18(id: string): ZhivayaSkhema | undefined {

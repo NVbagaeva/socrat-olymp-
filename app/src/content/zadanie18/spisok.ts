@@ -4,6 +4,10 @@
  */
 
 import type { Skhema18, SkhemaVSpiske } from './tipy';
+import { SKHEMA_BISSEKTRISA } from './bissektrisa';
+import { SKHEMA_MEDIANA } from './mediana';
+import { SKHEMA_RAVNYE_UGLY } from './ravnyeUgly';
+import { SKHEMA_SEKUSHCHIE } from './sekushchie';
 import { SKHEMA_VYSOTY } from './vysoty';
 
 export const SPISOK_SKHEM: readonly SkhemaVSpiske[] = [
@@ -129,7 +133,13 @@ export const SPISOK_SKHEM: readonly SkhemaVSpiske[] = [
 ];
 
 /** Собранные схемы: по ним живые чертежи, страницы и карточки. */
-export const SOBRANNYE: readonly Skhema18[] = [SKHEMA_VYSOTY];
+export const SOBRANNYE: readonly Skhema18[] = [
+  SKHEMA_VYSOTY,
+  SKHEMA_BISSEKTRISA,
+  SKHEMA_MEDIANA,
+  SKHEMA_SEKUSHCHIE,
+  SKHEMA_RAVNYE_UGLY,
+];
 
 export function skhema18(id: string): Skhema18 | undefined {
   return SOBRANNYE.find((s) => s.id === id);

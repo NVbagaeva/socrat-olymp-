@@ -164,7 +164,7 @@ export function ZhivoyChertezh18({ id, nazvanie, lit }: ZhivoyChertezh18Props) {
           }}
           dolyaVysoty={0.66}
           opisanie={CHERTEZH_18.podpisChertezha(nazvanie)}
-          podpisRuchki={CHERTEZH_18.ruchka}
+          podpisRuchki={(imya) => CHERTEZH_18.ruchka(skhema.imenaRuchek?.[imya] ?? `Точка ${imya}`)}
         />
         {podpisShaga === null ? null : (
           <p className="z18-ch__shag" aria-live="polite">

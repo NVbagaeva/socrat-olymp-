@@ -122,7 +122,7 @@ export const CHERTEZH_18 = {
   sbrosit: 'Сбросить',
   podskazkaTyani: 'Тяни вершины — схема пересчитывается, свойства сохраняются.',
   podpisChertezha: (nazvanie: string) => `Интерактивный чертёж: ${nazvanie}`,
-  ruchka: (imya: string) => `Точка ${imya}: перетащи или двигай стрелками`,
+  ruchka: (nazvanie: string) => `${nazvanie}: перетащи или двигай стрелками`,
 } as const;
 
 /* ── Карточки ───────────────────────────────────────────────────── */

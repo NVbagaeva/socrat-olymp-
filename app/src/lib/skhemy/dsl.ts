@@ -49,10 +49,29 @@ export const ug = (
   o: Opcii & { dugi?: 1 | 2 | 3; pryamoy?: boolean } = {},
 ): Element => ({ vid: 'ugol', id, a, v, b, ...o });
 
-export const tch = (imya: string, p: T2, o: Opcii = {}): Element => ({
+export const tch = (imya: string, p: T2, o: Opcii & { ruchka?: string } = {}): Element => ({
   vid: 'tochka',
   id: `t-${imya}`,
   p,
   imya,
   ...o,
 });
+
+/** Невидимая точка-ручка: перетаскивание без своей подписи. */
+export const ruchka = (imya: string, p: T2): Element => ({
+  vid: 'tochka',
+  id: `r-${imya}`,
+  p,
+  ruchka: imya,
+  skrytyy: true,
+});
+
+/** Дуга окружности против часовой от угла ot до угла do (градусы). */
+export const duga = (
+  id: string,
+  c: T2,
+  r: number,
+  ot: number,
+  doU: number,
+  o: Opcii & { stil?: StilLinii } = {},
+): Element => ({ vid: 'duga', id, c, r, ot, do: doU, ...o });
