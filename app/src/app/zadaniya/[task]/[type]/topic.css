@@ -29,6 +29,21 @@
   margin: 0 0 var(--space-3);
   color: var(--color-text);
 }
+/* Название подтемы кеглем h3 — в шапке и в «О задании».
+   «Тригонометрические» на 320 px занимает строку впритык: на самых
+   узких экранах заголовок на ступень мельче, а слово, которое всё же
+   не помещается, переносится, а не растягивает страницу вбок. */
+.topic-head__subtitle,
+.about-lead__title {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+@media (max-width: 359.98px) {
+  .topic-head__subtitle,
+  .about-lead__title {
+    font-size: var(--fs-h4);
+  }
+}
 /* Название графика под ним: «График — парабола». */
 .topic-head__subtitle--wide {
   margin-bottom: var(--space-1);
@@ -38,50 +53,6 @@
   font-size: var(--fs-lg);
   line-height: var(--lh-lg);
   color: var(--color-text-secondary);
-}
-
-/* ── Баннер с цитатой ───────────────────────────────────────── */
-
-/* Цитата — строка под подзаголовком, не колонка рядом с ним: деля
-   ширину, они ломали друг друга. Блок жмётся по длине самой цитаты,
-   поэтому подпись под ней встаёт по её правому краю. */
-.topic-quote {
-  display: grid;
-  justify-items: end;
-  gap: var(--space-1);
-  width: max-content;
-  max-width: 100%;
-  margin: var(--space-4) 0 0;
-}
-.topic-quote__text {
-  margin: 0;
-  /* Рукописный шрифт узкий, и рост строчных у него мелкий: при равном
-     кегле Caveat читается заметно мельче Inter. Поэтому ступень шкалы
-     выше, чем взял бы обычный текст той же роли. На телефоне цитата
-     скрыта, так что ступень касается только десктопа. */
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
-}
-/* Не осветлённый примерный синий, как у прочих рукописных пометок,
-   а тот же, которым набран текст страницы: цитата здесь не пометка
-   на полях, её читают. */
-.topic-quote__text .hand-note {
-  color: var(--color-text-brand);
-  opacity: 1;
-}
-.topic-quote__author {
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  color: var(--color-text-tertiary);
-}
-/* Портрет целиком в кадре: высота задана, ширина считается по файлу. */
-/* Портрет стоит отдельным элементом шапки, справа от текста. */
-.topic-head__art {
-  display: block;
-  width: auto;
-  height: 132px;
-  object-fit: contain;
-  flex: none;
 }
 
 /* ── Прогресс по разделам ───────────────────────────────────── */
@@ -380,6 +351,14 @@
 /* Раздела №19 в проекте ещё нет: кнопка приглушена и не нажимается. */
 .about-later__cta {
   margin-top: var(--space-5);
+  /* «Подробнее о тригонометрии» на 320 px едва помещается в строку:
+     длинная подпись переносится, кнопка растёт в высоту. */
+  max-width: 100%;
+  height: auto;
+  min-height: var(--h-control);
+  padding-block: var(--space-2);
+  white-space: normal;
+  text-align: center;
   opacity: 0.45;
   cursor: default;
   pointer-events: none;
@@ -1291,10 +1270,6 @@ a.tutor-card:hover {
 }
 
 @media (max-width: 1279.98px) {
-  /* Портрет уменьшается вместе с остальной шапкой. */
-  .topic-head__art {
-    height: 104px;
-  }
   .about-lead,
   .about-skills,
   .about-skills--figure {
@@ -1311,8 +1286,8 @@ a.tutor-card:hover {
     padding: var(--space-4);
   }
 
-  /* На телефоне шапка идёт столбиком: заголовок, подзаголовок,
-     цитата и прогресс — по строке на каждое. */
+  /* На телефоне шапка идёт столбиком: заголовок, подзаголовок
+     и прогресс — по строке на каждое. */
   .topic-head {
     align-items: flex-start;
     margin-bottom: var(--space-6);
@@ -1322,11 +1297,8 @@ a.tutor-card:hover {
   .topic-head .section-head__media {
     justify-content: flex-start;
   }
-  /* Цитата и пирамида — декор: на телефоне его нет, как и на
-     остальных страницах кабинета. Цитата весила 100px из 392
-     у шапки, а первый экран нужен вкладкам. */
-  .topic-quote,
-  .topic-head__art,
+  /* Пирамида — декор: на телефоне его нет, как и на остальных
+     страницах кабинета. */
   .topic-side__decor {
     display: none;
   }
@@ -2290,7 +2262,9 @@ a.tutor-card:hover {
 .about-type {
   position: relative;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .about-type:hover {
   border-color: var(--color-border-info);

@@ -267,18 +267,73 @@ node scripts/check-alpha-detector.mjs
 
 ## Шрифт
 
-Inter берётся из пакета `@fontsource/inter`. Он поставляется отдельными файлами
-на каждый юникод-поддиапазон, а `next/font/local` не умеет задавать `unicode-range`
-для отдельного файла — поэтому latin, latin-ext, cyrillic и cyrillic-ext собраны
-в один woff2 на начертание (`src/fonts/inter-400.woff2` и далее).
-Пересобрать можно скриптом из истории коммита, если понадобится другой набор
-начертаний. Лицензия — `src/fonts/LICENSE`.
+Сайт набран **Inter 4 Variable** — один файл `src/fonts/inter-variable.woff2`
+(94 КБ) с осями wght (100–900) и opsz (14–32): любые веса и начертание Display
+на крупных кеглях, браузер ведёт ось opsz сам. Объявление — `src/lib/fonts.ts`.
+
+Файл собран из `InterVariable.ttf` релиза [Inter 4.1](https://github.com/rsms/inter/releases/tag/v4.1).
+Набор символов — пересечение прежних файлов `@fontsource/inter` (они лежат рядом,
+`src/fonts/inter-400.woff2` и далее) с диапазонами латиницы, латиницы-ext A,
+кириллицы, общей пунктуации, знаков-букв, стрелок, математических операторов
+и фигур — всё, что встречается в тексте сайта. Пересобрать:
+
+```bash
+python3 - <<'PY' > keep.txt   # коды символов: прежний набор ∩ диапазоны
+from fontTools.ttLib import TTFont
+old = set(TTFont('src/fonts/inter-400.woff2').getBestCmap())
+ranges = [(0x20,0x7E),(0xA0,0xFF),(0x100,0x17F),(0x131,0x131),(0x152,0x153),(0x2BB,0x2BC),
+          (0x2C6,0x2DD),(0x300,0x36F),(0x400,0x45F),(0x490,0x491),(0x4B0,0x4B1),(0x2000,0x206F),
+          (0x20AC,0x20AC),(0x20BD,0x20BD),(0x2100,0x214F),(0x2190,0x21FF),(0x2200,0x22FF),
+          (0x25A0,0x25FF),(0xFEFF,0xFEFF),(0xFFFD,0xFFFD)]
+want = {c for a, b in ranges for c in range(a, b + 1)}
+print(','.join('U+%04X' % c for c in sorted(old & want)))
+PY
+pyftsubset InterVariable.ttf --unicodes-file=keep.txt \
+  --layout-features=calt,ccmp,dnom,frac,locl,numr,pnum,tnum,kern,mark,mkmk \
+  --no-hinting --desubroutinize --flavor=woff2 --output-file=src/fonts/inter-variable.woff2
+```
+
+Прежние статические `inter-400…700.woff2` на сайт больше не грузятся: ими набирает
+PDF-листы `scripts/lib/sheet-render.mjs`, и листы от смены шрифта сайта не меняются.
+Лицензия — `src/fonts/LICENSE`.
 
 PT Serif — антиква карточки задачи (условие, «Решение», шаги разбора, обозначения
 на чертежах): `src/fonts/pt-serif-400.woff2` и `pt-serif-400-italic.woff2`, токен
 `--font-serif`. Собраны из TTF репозитория google/fonts командой `pyftsubset`
 (поддиапазоны latin, latin-ext, cyrillic, cyrillic-ext и знаки сравнения) — по одному
 файлу на начертание, как и у Inter. Лицензия OFL, уведомление — в том же `LICENSE`.
+
+## Карточки по теории
+
+Вкладка «Карточки» — проверка теории номера: ученик отмечает «Знаю» или
+«Не знаю», система Лейтнера (5 коробок) чаще возвращает незнакомое.
+Движок один на все номера:
+
+| Путь                            | Что это                                                       |
+| ------------------------------- | ------------------------------------------------------------- |
+| `src/content/kartochki/NN-*.ts` | колода номера: подтемы, карточки, проверки формул             |
+| `src/lib/kartochki/`            | типы, Лейтнер и сессия, хранение прогресса, подготовка колоды |
+| `src/components/kartochki/`     | экран вкладки, карточка, кнопка «Проверить теорию»            |
+| `scripts/build-kartochki.mjs`   | списки колод `index.ts` и `spisok.ts` (перед dev и build)     |
+| `scripts/verify_cards/`         | проверка колод: `pnpm test:kartochki`                         |
+
+Прогресс — в `localStorage` через `lib/storage.ts`, ключ
+`budetege:kartochki:<номер>:v1`.
+
+### Как добавить колоду для нового номера
+
+1. Создайте `src/content/kartochki/NN-nazvanie.ts` (NN — номер двумя
+   цифрами) с `export default` объектом `Koloda` — образец
+   `01-planimetriya.ts`. Поле `source` карточки — якорь во вкладке
+   «Теория» номера (туда ведёт «Повторить теорию») или `'добавлено'`.
+2. Создайте страницу вкладки `src/app/zadaniya/N/(razdel)/kartochki/page.tsx`
+   (три строки, как у №1). Вкладка «Карточки» встанет в ленту сама.
+3. По желанию — кнопку «Проверить теорию» во вкладку «Теория»
+   (`components/kartochki/ProverkaTeorii.tsx`, как у №1).
+4. Добавьте сбор якорей теории номера в `scripts/verify_cards/yakorya.mjs`
+   и запустите `pnpm test:kartochki`: у вычислений нужен независимый
+   пересчёт `proverka`, у формул — проверки на случайных фигурах.
+   Ошибочная карточка не проходит проверку.
 
 ## Онбординг: окно, кнопка «?», туры
 

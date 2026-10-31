@@ -8,7 +8,9 @@
     "node": ">=22"
   },
   "scripts": {
+    "predev": "node scripts/build-kartochki.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/build-kartochki.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -93,6 +95,7 @@
     "test:zadanie15": "node scripts/check-zadanie15.mjs",
     "test:chertezh3": "node scripts/check-chertezh3.mjs",
     "test:zadanie16": "node scripts/check-zadanie16.mjs",
+    "test:param19": "node scripts/verify_param/dump.mjs /tmp/z19.json && python3 -I scripts/verify_param/run.py /tmp/z19.json",
     "test:zadanie15-vitrina": "node scripts/check-zadanie15-vitrina.mjs",
     "build:bank-2": "node scripts/build-bank-2.mjs",
     "build:bank-8": "node scripts/build-bank-8.mjs",
@@ -163,7 +166,9 @@
     "test:intro": "node scripts/check-intro.mjs",
     "test:tour": "node scripts/check-tour.mjs",
     "test:auth": "node scripts/check-auth.mjs",
-    "test:auth-disabled": "node scripts/check-auth.mjs --disabled"
+    "test:auth-disabled": "node scripts/check-auth.mjs --disabled",
+    "build:kartochki": "node scripts/build-kartochki.mjs",
+    "test:kartochki": "node scripts/verify_cards/index.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

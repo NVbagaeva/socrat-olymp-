@@ -1,6 +1,4 @@
-import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { prepPage } from '@/content/prepSkills';
 import type { PrepSkillId } from '@/content/prepSkills';
 import { PrepCardMeter } from './PrepCardMeter';
 import { PrepCardLink } from './PrepScroll';
@@ -8,7 +6,6 @@ import { TaskCountIcon } from './PrepIcons';
 import { Tex } from '@/components/ui/Tex';
 import { texPlain } from '@/lib/tex';
 
-import { assetUrl } from '@/lib/assetUrl';
 export interface PrepSkillItem {
   id: PrepSkillId;
   no: string;
@@ -68,23 +65,6 @@ export function PrepSkillsScreen({ items }: PrepSkillsScreenProps) {
           </li>
         ))}
       </ul>
-
-      <figure className="prep-quote">
-        {/* Бюст — декор, подпись к нему не читается: автор назван
-            текстом рядом. Фон у файла прозрачный. */}
-        <Image
-          className="prep-quote__art"
-          src={assetUrl('/images/bust-aristotle-glass.webp')}
-          alt=""
-          width={1027}
-          height={1505}
-          loading="lazy"
-        />
-        <div className="prep-quote__body">
-          <blockquote className="prep-quote__text">«{prepPage.quote.text}»</blockquote>
-          <figcaption className="prep-quote__author">— {prepPage.quote.author}</figcaption>
-        </div>
-      </figure>
     </>
   );
 }

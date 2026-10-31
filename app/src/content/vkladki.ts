@@ -31,6 +31,7 @@ export type VkladkaIcon =
   | 'stats'
   | 'materials'
   | 'zachyot'
+  | 'cards'
   | 'compass';
 
 /**
