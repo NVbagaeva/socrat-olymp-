@@ -25,6 +25,7 @@ import { SKHEMA_SEKUSHCHIE } from './sekushchie';
 import { SKHEMA_PRYAMYE_UGLY } from './pryamyeUgly';
 import { SKHEMA_SREDLIN_TRAP } from './sredlinTrap';
 import { SKHEMA_SREDLIN_TREUG } from './sredlinTreug';
+import { SKHEMA_STEPEN_TOCHKI } from './stepenTochki';
 import { SKHEMA_TREZUBEC } from './trezubec';
 import { SKHEMA_UGLY_DUGI } from './uglyDugi';
 import { SKHEMA_VPISANNYY } from './vpisannyy';
@@ -192,6 +193,13 @@ export const SPISOK_SKHEM: readonly SkhemaVSpiske[] = [
     nazvanie: '«Рельсы Евклида»',
     klassicheskaya: false,
   },
+  {
+    no: 24,
+    id: 'stepen-tochki',
+    gruppa: 'okruzhnost',
+    nazvanie: 'Степень точки',
+    klassicheskaya: false,
+  },
 ];
 
 /** Собранные схемы: по ним живые чертежи, страницы и карточки. */
@@ -219,6 +227,7 @@ export const SOBRANNYE: readonly Skhema18[] = [
   SKHEMA_OBSHCHAYA_VYSOTA,
   SKHEMA_OBSHCHIY_UGOL,
   SKHEMA_RELSY,
+  SKHEMA_STEPEN_TOCHKI,
 ];
 
 export function skhema18(id: string): Skhema18 | undefined {

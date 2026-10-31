@@ -20,6 +20,7 @@ import { SEKUSHCHIE } from './sekushchie';
 import { PRYAMYE_UGLY } from './pryamyeUgly';
 import { SREDLIN_TRAP } from './sredlinTrap';
 import { SREDLIN_TREUG } from './sredlinTreug';
+import { STEPEN_TOCHKI } from './stepenTochki';
 import { TREZUBEC } from './trezubec';
 import { UGLY_DUGI } from './uglyDugi';
 import { VPISANNYY } from './vpisannyy';
@@ -49,6 +50,7 @@ const REESTR: Readonly<Record<string, ZhivayaSkhema>> = {
   'obshchaya-vysota': OBSHCHAYA_VYSOTA,
   'obshchiy-ugol': OBSHCHIY_UGOL,
   'relsy-evklida': RELSY,
+  'stepen-tochki': STEPEN_TOCHKI,
 };
 
 export function zhivayaSkhema18(id: string): ZhivayaSkhema | undefined {
