@@ -75,7 +75,8 @@ export function chislo16(zapis: string): number | null {
   }
   /* Короткие записи KaTeX: \frac15, \frac9{16} — к виду \frac{1}{5}. */
   s = s.replace(/^(\\[dt]?frac)(\d)/, '$1{$2}').replace(/^(\\[dt]?frac\{[^{}]+\})(\d)$/, '$1{$2}');
-  const frac = /^\\[dt]?frac\{([^{}]+)\}\{([^{}]+)\}$/.exec(s);
+  /* Внутри дроби допустим один уровень скобок: \frac{4\sqrt{5}}{5}. */
+  const frac = /^\\[dt]?frac\{((?:[^{}]|\{[^{}]*\})+)\}\{((?:[^{}]|\{[^{}]*\})+)\}$/.exec(s);
   if (frac) {
     const a = chislo16(frac[1] ?? '');
     const b = chislo16(frac[2] ?? '');

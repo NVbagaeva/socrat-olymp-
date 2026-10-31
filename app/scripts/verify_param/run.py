@@ -20,8 +20,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from obshchee import sverit  # noqa: E402
 import m01  # noqa: E402
+import m02  # noqa: E402
 
-MODULI = [m01]
+MODULI = [m01, m02]
 
 
 def main():
