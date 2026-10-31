@@ -43,7 +43,8 @@ try {
 
 const { KOLODY } = requireSrc('content/kartochki/index');
 const { typeset } = requireSrc('lib/tex');
-const { narisovat } = requireSrc('lib/kartochki/podgotovka');
+const { narisovat, podgotovit } = requireSrc('lib/kartochki/podgotovka');
+const { otpechatok, VERNO, NEVERNO } = requireSrc('lib/kartochki/otvet');
 const { parseAnswer } = requireSrc('lib/answer');
 const L = requireSrc('lib/kartochki/leitner');
 
@@ -156,6 +157,30 @@ for (const k of KOLODY) {
       /* Ответ стоит в обороте — ученик видит то же число. */
       if (!c.back.replace(/\{,\}/g, ',').includes(c.otvet))
         fail(`${gde}: ответа ${c.otvet} нет на обороте`);
+    }
+  }
+
+  /* Что уходит в браузер: ни ответа, ни верно/неверно открыто. */
+  const gotovaya = podgotovit(k, `/zadaniya/${k.task}`);
+  const json = JSON.stringify(gotovaya);
+  if (/"(otvet|verno)":/.test(json)) fail(`№${k.task}: в данные страницы попал открытый ответ`);
+  for (const g of gotovaya.kartochki) {
+    const src = k.kartochki.find((c) => c.id === g.id);
+    if (src.type === 'vychislenie') {
+      if (!otpechatok.answerMatches(src.otvet, g.otpechatok))
+        fail(`${g.id}: отпечаток не сходится с ответом ${src.otvet}`);
+    }
+    if (src.type === 'verno') {
+      if (!otpechatok.choiceMatches(src.verno ? VERNO : NEVERNO, g.otpechatok))
+        fail(`${g.id}: отпечаток верно/неверно не сходится`);
+    }
+    if (src.type === 'verno' || src.type === 'vychislenie') {
+      if (g.back !== '' || g.zakryto === undefined) fail(`${g.id}: оборот с автопроверкой открыт`);
+      else {
+        const oborot = JSON.parse(otpechatok.openText(g.zakryto, g.id));
+        if (typeof oborot.back !== 'string' || oborot.back.trim() === '')
+          fail(`${g.id}: после ответа оборот пуст`);
+      }
     }
   }
 

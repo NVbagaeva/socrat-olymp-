@@ -10,6 +10,7 @@
  *   — №3: lib/solid, экранная тема «стекло».
  */
 
+import { parseAnswer } from '../answer';
 import { plain, typesetKrupno } from '../tex';
 import { chertezhTemy } from '../planimetriya/spravochnik-chertezhi';
 import { renderPlan } from '../planimetriya/render';
@@ -17,6 +18,7 @@ import type { Optsii, Scena } from '../planimetriya/types';
 import { renderVectorPlane } from '../vektory/render';
 import { stsena } from '../vektory/stseny';
 import { renderSolid } from '../solid/render';
+import { otpechatok, VERNO, NEVERNO } from './otvet';
 import {
   DOBAVLENO,
   type FiguraKartochki,
@@ -32,8 +34,14 @@ export interface KartochkaGotovaya {
   type: TipKartochki;
   level: string;
   front: string;
+  /**
+   * Обратная сторона. У карточек с автопроверкой — пусто: текст лежит
+   * в `zakryto` и открывается после ответа.
+   */
   back: string;
   pochemu?: string;
+  /** Текст оборота карточки с автопроверкой, зашифрованный JSON {back, pochemu}. */
+  zakryto?: string;
   /**
    * Варианты чертежа (SVG). Один — чертёж как есть; несколько —
    * повороты, экран берёт случайный при каждом показе.
@@ -43,8 +51,8 @@ export interface KartochkaGotovaya {
   figuraNaLitse: boolean;
   /** «Повторить теорию»: адрес фрагмента теории. Нет — карточка «добавлено». */
   teoriya?: string;
-  verno?: boolean;
-  otvet?: string;
+  /** Отпечаток ответа: «верно / неверно» или число. */
+  otpechatok?: string;
 }
 
 export interface KolodaGotovaya {
@@ -116,6 +124,13 @@ function adresTeorii(k: Kartochka, teoriya: string): string | undefined {
   return k.source === DOBAVLENO ? undefined : `${teoriya}#${k.source}`;
 }
 
+/** Ответ вычисления как число: по записи ЕГЭ, которую проверяет scripts/verify_cards. */
+function otvetChislo(k: Kartochka & { type: 'vychislenie' }): number {
+  const chislo = parseAnswer(k.otvet);
+  if (chislo === null) throw new Error(`карточка ${k.id}: ответ «${k.otvet}» не число`);
+  return chislo;
+}
+
 /** `base` — адрес раздела: «/zadaniya/1». */
 export function podgotovit(koloda: Koloda, base: string): KolodaGotovaya {
   const teoriya = `${base}/${koloda.teoriya}`;
@@ -129,19 +144,27 @@ export function podgotovit(koloda: Koloda, base: string): KolodaGotovaya {
     })),
     kartochki: koloda.kartochki.map((k) => {
       const teoriyaHref = adresTeorii(k, teoriya);
+      const avto = k.type === 'verno' || k.type === 'vychislenie';
+      const oborot = {
+        back: typesetKrupno(k.back),
+        ...(k.pochemu === undefined ? {} : { pochemu: typesetKrupno(k.pochemu) }),
+      };
       return {
         id: k.id,
         topic: k.topic,
         type: k.type,
         level: k.level,
         front: typesetKrupno(k.front),
-        back: typesetKrupno(k.back),
-        ...(k.pochemu === undefined ? {} : { pochemu: typesetKrupno(k.pochemu) }),
+        ...(avto
+          ? { back: '', zakryto: otpechatok.sealText(JSON.stringify(oborot), k.id) }
+          : oborot),
         figury: k.figure === undefined ? [] : narisovat(k.id, k.figure),
         figuraNaLitse: k.type === 'chertezh',
         ...(teoriyaHref === undefined ? {} : { teoriya: teoriyaHref }),
-        ...(k.type === 'verno' ? { verno: k.verno } : {}),
-        ...(k.type === 'vychislenie' ? { otvet: k.otvet } : {}),
+        ...(k.type === 'verno'
+          ? { otpechatok: otpechatok.sealChoice(k.verno ? VERNO : NEVERNO) }
+          : {}),
+        ...(k.type === 'vychislenie' ? { otpechatok: otpechatok.sealAnswer(otvetChislo(k)) } : {}),
       };
     }),
   };
