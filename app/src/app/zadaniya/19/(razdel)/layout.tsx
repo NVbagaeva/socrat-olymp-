@@ -6,6 +6,10 @@ import '../../[task]/section.css';
    «Поиграй» (.play) и карточки глав №16 (z16-*) — общие слои: №19
    устроен как №16 и берёт их без правок. Своё — zadanie19.css. */
 import '../../[task]/[type]/topic.css';
+/* Тренажёр: выбор тренировки и экран заданий — слои №8 и №12. */
+import '../../[task]/[type]/configurator.css';
+import '../../[task]/[type]/trainer.css';
+import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '../../16/zadanie16.css';
 import '../zadanie19.css';

@@ -162,3 +162,10 @@
   hyphens: auto;
   overflow-wrap: break-word;
 }
+
+/* ── Тренажёр на общей сессии: ответ — множество, поле шире числового ── */
+
+.z19-ttask .ttask__input {
+  width: 100%;
+  max-width: 560px;
+}

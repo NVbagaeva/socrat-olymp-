@@ -230,6 +230,24 @@ function answer6(payload, at) {
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
 
+/** №19: в записи — id задач банка; ответ — TeX-множество из контента, поле его принимает. */
+function answer19(payload, at) {
+  const { vseZadachi19 } = requireSrc('content/teoriya19/index');
+  const z = vseZadachi19().zadachi.find((item) => item.id === payload.ids[at]);
+  if (z === undefined) {
+    throw new Error(`№19: нет задачи ${payload.ids[at]}`);
+  }
+  return { text: z.otvet };
+}
+
+/** №19: количество «Все (N)» — все задачи открытых глав. */
+async function chooseAll19(page) {
+  await page
+    .getByRole('radio', { name: /^Все \(\d+\)/ })
+    .first()
+    .click();
+}
+
 /* ── Тренажёры ──────────────────────────────────────────────────
 
    Один объект — один адрес тренажёра:
@@ -273,6 +291,7 @@ async function chooseAllFiltry(page) {
 }
 
 const TRAINERS = [
+  { name: '№19', url: '/zadaniya/19/trenazher/', scope: '19', answer: answer19, all: chooseAll19 },
   ...['linear', 'quadratic', 'rational', 'irrational'].map((sub) => ({
     name: `№12 ${sub}`,
     url: `/zadaniya/12/${sub}/trenazher/`,
