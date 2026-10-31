@@ -9,6 +9,8 @@ import { SKHEMA_MEDIANA } from './mediana';
 import { SKHEMA_RAVNYE_UGLY } from './ravnyeUgly';
 import { SKHEMA_SEKUSHCHIE } from './sekushchie';
 import { SKHEMA_PRYAMYE_UGLY } from './pryamyeUgly';
+import { SKHEMA_SREDLIN_TRAP } from './sredlinTrap';
+import { SKHEMA_SREDLIN_TREUG } from './sredlinTreug';
 import { SKHEMA_TREZUBEC } from './trezubec';
 import { SKHEMA_UGLY_DUGI } from './uglyDugi';
 import { SKHEMA_VPISANNYY } from './vpisannyy';
@@ -80,55 +82,69 @@ export const SPISOK_SKHEM: readonly SkhemaVSpiske[] = [
   },
   {
     no: 10,
+    id: 'sredlin-treug',
+    gruppa: 'treugolnik',
+    nazvanie: 'Средняя линия треугольника',
+    klassicheskaya: false,
+  },
+  {
+    no: 11,
+    id: 'sredlin-trap',
+    gruppa: 'trapeciya',
+    nazvanie: 'Средняя линия трапеции',
+    klassicheskaya: false,
+  },
+  {
+    no: 12,
     id: 'kasatelnaya-sekushchaya',
     gruppa: 'kasatelnye',
     nazvanie: 'Касательная и секущая',
     klassicheskaya: false,
   },
   {
-    no: 11,
+    no: 13,
     id: 'otrezki-kasatelnyh',
     gruppa: 'kasatelnye',
     nazvanie: 'Отрезки касательных и полупериметр',
     klassicheskaya: false,
   },
   {
-    no: 12,
+    no: 14,
     id: 'kasayushchiesya',
     gruppa: 'kasatelnye',
     nazvanie: 'Касающиеся окружности',
     klassicheskaya: false,
   },
   {
-    no: 13,
+    no: 15,
     id: 'obshchaya-kasatelnaya',
     gruppa: 'kasatelnye',
     nazvanie: 'Общая касательная двух окружностей',
     klassicheskaya: false,
   },
   {
-    no: 14,
+    no: 16,
     id: 'babochka',
     gruppa: 'trapeciya',
     nazvanie: '«Бабочка» в трапеции',
     klassicheskaya: false,
   },
   {
-    no: 15,
+    no: 17,
     id: 'chetyre-tochki',
     gruppa: 'trapeciya',
     nazvanie: 'Замечательное свойство трапеции',
     klassicheskaya: false,
   },
   {
-    no: 16,
+    no: 18,
     id: 'ravnobokaya',
     gruppa: 'trapeciya',
     nazvanie: 'Равнобедренная трапеция',
     klassicheskaya: false,
   },
   {
-    no: 17,
+    no: 19,
     id: 'menelay-cheva',
     gruppa: 'otnosheniya',
     nazvanie: 'Теоремы Менелая и Чевы',
@@ -147,6 +163,8 @@ export const SOBRANNYE: readonly Skhema18[] = [
   SKHEMA_TREZUBEC,
   SKHEMA_UGLY_DUGI,
   SKHEMA_VPISANNYY,
+  SKHEMA_SREDLIN_TREUG,
+  SKHEMA_SREDLIN_TRAP,
 ];
 
 export function skhema18(id: string): Skhema18 | undefined {

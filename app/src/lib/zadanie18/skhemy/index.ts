@@ -9,6 +9,8 @@ import { MEDIANA } from './mediana';
 import { RAVNYE_UGLY } from './ravnyeUgly';
 import { SEKUSHCHIE } from './sekushchie';
 import { PRYAMYE_UGLY } from './pryamyeUgly';
+import { SREDLIN_TRAP } from './sredlinTrap';
+import { SREDLIN_TREUG } from './sredlinTreug';
 import { TREZUBEC } from './trezubec';
 import { UGLY_DUGI } from './uglyDugi';
 import { VPISANNYY } from './vpisannyy';
@@ -24,6 +26,8 @@ const REESTR: Readonly<Record<string, ZhivayaSkhema>> = {
   trezubec: TREZUBEC,
   'ugly-i-dugi': UGLY_DUGI,
   chetyrekhugolniki: VPISANNYY,
+  'sredlin-treug': SREDLIN_TREUG,
+  'sredlin-trap': SREDLIN_TRAP,
 };
 
 export function zhivayaSkhema18(id: string): ZhivayaSkhema | undefined {
