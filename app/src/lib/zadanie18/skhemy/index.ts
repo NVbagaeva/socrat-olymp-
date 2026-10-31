@@ -8,6 +8,7 @@ import { BABOCHKA } from './babochka';
 import { BISSEKTRISA } from './bissektrisa';
 import { CHETYRE_TOCHKI } from './chetyreTochki';
 import { MENELAY } from './menelay';
+import { METOD_PLOSHCHADEY, OBSHCHAYA_VYSOTA, OBSHCHIY_UGOL, RELSY } from './ploshchadi';
 import { RAVNOBOKAYA } from './ravnobokaya';
 import { KASATELNAYA } from './kasatelnaya';
 import { KASAYUSHCHIESYA } from './kasayushchiesya';
@@ -44,6 +45,10 @@ const REESTR: Readonly<Record<string, ZhivayaSkhema>> = {
   'chetyre-tochki': CHETYRE_TOCHKI,
   ravnobokaya: RAVNOBOKAYA,
   'menelay-cheva': MENELAY,
+  'metod-ploshchadey': METOD_PLOSHCHADEY,
+  'obshchaya-vysota': OBSHCHAYA_VYSOTA,
+  'obshchiy-ugol': OBSHCHIY_UGOL,
+  'relsy-evklida': RELSY,
 };
 
 export function zhivayaSkhema18(id: string): ZhivayaSkhema | undefined {

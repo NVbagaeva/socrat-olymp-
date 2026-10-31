@@ -8,6 +8,12 @@ import { SKHEMA_BABOCHKA } from './babochka';
 import { SKHEMA_BISSEKTRISA } from './bissektrisa';
 import { SKHEMA_CHETYRE_TOCHKI } from './chetyreTochki';
 import { SKHEMA_MENELAY } from './menelay';
+import {
+  SKHEMA_METOD,
+  SKHEMA_OBSHCHAYA_VYSOTA,
+  SKHEMA_OBSHCHIY_UGOL,
+  SKHEMA_RELSY,
+} from './ploshchadi';
 import { SKHEMA_RAVNOBOKAYA } from './ravnobokaya';
 import { SKHEMA_KASATELNAYA } from './kasatelnaya';
 import { SKHEMA_KASAYUSHCHIESYA } from './kasayushchiesya';
@@ -158,6 +164,34 @@ export const SPISOK_SKHEM: readonly SkhemaVSpiske[] = [
     nazvanie: 'Теоремы Менелая и Чевы',
     klassicheskaya: true,
   },
+  {
+    no: 20,
+    id: 'metod-ploshchadey',
+    gruppa: 'ploshchadi',
+    nazvanie: 'Метод площадей',
+    klassicheskaya: false,
+  },
+  {
+    no: 21,
+    id: 'obshchaya-vysota',
+    gruppa: 'ploshchadi',
+    nazvanie: 'Площади треугольников с общей высотой',
+    klassicheskaya: false,
+  },
+  {
+    no: 22,
+    id: 'obshchiy-ugol',
+    gruppa: 'ploshchadi',
+    nazvanie: 'Площади треугольников с общим углом',
+    klassicheskaya: false,
+  },
+  {
+    no: 23,
+    id: 'relsy-evklida',
+    gruppa: 'ploshchadi',
+    nazvanie: '«Рельсы Евклида»',
+    klassicheskaya: false,
+  },
 ];
 
 /** Собранные схемы: по ним живые чертежи, страницы и карточки. */
@@ -181,6 +215,10 @@ export const SOBRANNYE: readonly Skhema18[] = [
   SKHEMA_CHETYRE_TOCHKI,
   SKHEMA_RAVNOBOKAYA,
   SKHEMA_MENELAY,
+  SKHEMA_METOD,
+  SKHEMA_OBSHCHAYA_VYSOTA,
+  SKHEMA_OBSHCHIY_UGOL,
+  SKHEMA_RELSY,
 ];
 
 export function skhema18(id: string): Skhema18 | undefined {

@@ -7,7 +7,8 @@
  * переход к шагу зажигает ровно эти группы.
  */
 
-export type Gruppa18 = 'treugolnik' | 'okruzhnost' | 'kasatelnye' | 'trapeciya' | 'otnosheniya';
+export type Gruppa18 =
+  'treugolnik' | 'okruzhnost' | 'kasatelnye' | 'trapeciya' | 'otnosheniya' | 'ploshchadi';
 
 export const GRUPPY_18: readonly { id: Gruppa18; title: string }[] = [
   { id: 'treugolnik', title: 'Треугольник' },
@@ -15,6 +16,7 @@ export const GRUPPY_18: readonly { id: Gruppa18; title: string }[] = [
   { id: 'kasatelnye', title: 'Касательные' },
   { id: 'trapeciya', title: 'Трапеция' },
   { id: 'otnosheniya', title: 'Отношения отрезков' },
+  { id: 'ploshchadi', title: 'Площади' },
 ];
 
 export interface Podsvechennoe {

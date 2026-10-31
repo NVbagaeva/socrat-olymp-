@@ -17,6 +17,7 @@ import { proverit as kasatelnye } from './kasatelnye.mjs';
 import { proverit as mediana } from './mediana.mjs';
 import { proverit as menelay } from './menelay.mjs';
 import { proverit as trapecii } from './trapecii.mjs';
+import { proverit as ploshchadi } from './ploshchadi.mjs';
 import { proverit as pryamyeUgly } from './pryamyeUgly.mjs';
 import { proverit as sredlin } from './sredlin.mjs';
 import { proverit as trezubec } from './trezubec.mjs';
@@ -42,6 +43,7 @@ for (const proverit of [
   kasatelnye,
   trapecii,
   menelay,
+  ploshchadi,
 ]) {
   plokho += proverit(N).plokho;
 }
