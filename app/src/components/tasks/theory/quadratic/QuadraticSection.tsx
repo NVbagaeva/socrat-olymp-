@@ -31,13 +31,16 @@ function Card({
   card,
   sceneFor,
   figureFor,
+  yakor,
 }: {
   card: TheoryCard<string>;
   sceneFor: SceneFor;
   figureFor?: FigureFor;
+  yakor?: string | undefined;
 }) {
   return (
     <li
+      id={yakor}
       className={clsx(
         'qth-card',
         (card.scene !== undefined || card.illustration !== undefined) && 'qth-card--chart',
@@ -191,12 +194,18 @@ export function QuadraticSection({
   section,
   sceneFor = quadraticTheoryScene as SceneFor,
   figureFor,
+  yakorKartochki,
 }: {
   section: TheorySection<string>;
   /** Чертежи подтемы. Не задано — сцены квадратичной функции. */
   sceneFor?: SceneFor;
   /** Готовые рисунки по ключу вместо чертежей движка графиков. */
   figureFor?: FigureFor;
+  /**
+   * Якорь карточки по её id — туда ведёт «Повторить теорию» из
+   * карточек по теории (№2). Не задан — у карточек якорей нет.
+   */
+  yakorKartochki?: (id: string) => string;
 }) {
   return (
     <div className="qth">
@@ -206,7 +215,13 @@ export function QuadraticSection({
 
       <ul className="qth__cards">
         {section.cards.map((card) => (
-          <Card card={card} sceneFor={sceneFor} figureFor={figureFor} key={card.id} />
+          <Card
+            card={card}
+            sceneFor={sceneFor}
+            figureFor={figureFor}
+            yakor={yakorKartochki?.(card.id)}
+            key={card.id}
+          />
         ))}
       </ul>
 
