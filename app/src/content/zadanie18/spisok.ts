@@ -4,7 +4,11 @@
  */
 
 import type { Skhema18, SkhemaVSpiske } from './tipy';
+import { SKHEMA_BABOCHKA } from './babochka';
 import { SKHEMA_BISSEKTRISA } from './bissektrisa';
+import { SKHEMA_CHETYRE_TOCHKI } from './chetyreTochki';
+import { SKHEMA_MENELAY } from './menelay';
+import { SKHEMA_RAVNOBOKAYA } from './ravnobokaya';
 import { SKHEMA_KASATELNAYA } from './kasatelnaya';
 import { SKHEMA_KASAYUSHCHIESYA } from './kasayushchiesya';
 import { SKHEMA_MEDIANA } from './mediana';
@@ -173,6 +177,10 @@ export const SOBRANNYE: readonly Skhema18[] = [
   SKHEMA_OTREZKI_KASATELNYH,
   SKHEMA_KASAYUSHCHIESYA,
   SKHEMA_OBSHCHAYA_KASATELNAYA,
+  SKHEMA_BABOCHKA,
+  SKHEMA_CHETYRE_TOCHKI,
+  SKHEMA_RAVNOBOKAYA,
+  SKHEMA_MENELAY,
 ];
 
 export function skhema18(id: string): Skhema18 | undefined {

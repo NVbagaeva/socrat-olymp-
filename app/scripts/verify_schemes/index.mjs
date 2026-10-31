@@ -15,6 +15,8 @@ import { zerno } from './obshchee.mjs';
 import { proverit as bissektrisa } from './bissektrisa.mjs';
 import { proverit as kasatelnye } from './kasatelnye.mjs';
 import { proverit as mediana } from './mediana.mjs';
+import { proverit as menelay } from './menelay.mjs';
+import { proverit as trapecii } from './trapecii.mjs';
 import { proverit as pryamyeUgly } from './pryamyeUgly.mjs';
 import { proverit as sredlin } from './sredlin.mjs';
 import { proverit as trezubec } from './trezubec.mjs';
@@ -38,6 +40,8 @@ for (const proverit of [
   vpisannyy,
   sredlin,
   kasatelnye,
+  trapecii,
+  menelay,
 ]) {
   plokho += proverit(N).plokho;
 }

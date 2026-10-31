@@ -865,3 +865,21 @@
 .z18-podrobno .solution-details-body p {
   margin: 0 0 var(--space-2);
 }
+
+/* Узкий экран: блоки текста не шире колонки, а длинная строчная
+   формула прокручивается внутри себя (правило «Телефон и планшет»
+   из app/README.md), страница вбок не едет. */
+.z18-blok,
+.z18-sled li,
+.z18-sled__fakt,
+.z18-dok,
+.z18-otmetka {
+  min-width: 0;
+}
+.z18-sk .katex {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  vertical-align: middle;
+}
