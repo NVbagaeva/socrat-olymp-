@@ -6,6 +6,14 @@ import { stsena, type StsenaId } from '@/lib/vektory/stseny';
 import { QuadraticSection } from '../theory/quadratic/QuadraticSection';
 import { Risunok } from './Risunok';
 
+/**
+ * Якорь карточки теории: «t2-koordinaty-opredelenie». Сюда ведёт
+ * «Повторить теорию» из карточек (content/kartochki/02-vektory.ts).
+ */
+export function yakorKartochki2(razdel: string, kartochka: string): string {
+  return `t2-${razdel}-${kartochka}`;
+}
+
 /** Рисунок карточки теории по ключу сцены: рисует движок №2. */
 function figureFor(id: string): ReactNode {
   return <Risunok className="qth-card__chart z2-card-pic" config={stsena(id as StsenaId)} />;
@@ -30,7 +38,12 @@ export function Teoriya2({ vkladka }: { vkladka: string }) {
   const tela = Object.fromEntries(
     RAZDELY_TEORII.map((r) => [
       r.id,
-      <QuadraticSection section={r.section} figureFor={figureFor} key={r.id} />,
+      <QuadraticSection
+        section={r.section}
+        figureFor={figureFor}
+        yakorKartochki={(id) => yakorKartochki2(r.id, id)}
+        key={r.id}
+      />,
     ]),
   );
   return (
