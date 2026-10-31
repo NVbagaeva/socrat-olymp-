@@ -82,6 +82,18 @@ export function chislo16(zapis: string): number | null {
     const b = chislo16(frac[2] ?? '');
     return a === null || b === null || b === 0 ? null : (znak * a) / b;
   }
+  /* Сумма и разность: 1-√5, 3+\sqrt{10} — делим по последнему знаку вне скобок. */
+  let glub = 0;
+  for (let i = s.length - 1; i > 0; i--) {
+    const ch = s[i];
+    if (ch === '}' || ch === ')') glub++;
+    else if (ch === '{' || ch === '(') glub--;
+    else if (glub === 0 && (ch === '+' || ch === '-')) {
+      const a = chislo16(s.slice(0, i));
+      const b = chislo16(s.slice(i + 1));
+      return a === null || b === null ? null : znak * a + (ch === '+' ? b : -b);
+    }
+  }
   /* Дробь a/b: делим по последней черте, у каждой части — свой разбор. */
   const cherta = s.lastIndexOf('/');
   if (cherta > 0) {
