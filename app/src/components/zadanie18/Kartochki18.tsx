@@ -1,14 +1,22 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { ChertezhSkhemy } from '@/components/skhemy/ChertezhSkhemy';
 import { Tex } from '@/components/ui/Tex';
 import { KARTOCHKI_18, SKHEMA_18 } from '@/content/zadanie18';
 import { SOBRANNYE, skhema18 } from '@/content/zadanie18/spisok';
 import type { Sostoyanie } from '@/lib/skhemy/ekran';
 import { VID_ISHODNYY, type Tochki, type Vid } from '@/lib/skhemy/tipy';
-import { otmetit18, poryadokKolody, useProgress18 } from '@/lib/zadanie18/progress';
+import {
+  SOBYTIE_UCHIT,
+  kPovtoreniyu,
+  neznakomye,
+  otmetit18,
+  poryadokKolody,
+  useProgress18,
+  type PodborKolody,
+} from '@/lib/zadanie18/progress';
 import { trebuetsyaSkhema18 } from '@/lib/zadanie18/skhemy';
 import { YAKOR_KARTOCHEK } from './Vvodnaya18';
 
@@ -62,6 +70,32 @@ export function Kartochki18() {
     const koloda = poryadokKolody(ids ?? SOBRANNYE.map((s) => s.id), progress);
     setSessiya({ rezhim, karty: koloda.map(sobratKartu), i: 0, perevernuta: false, otvety: {} });
   }
+
+  /* Колода по умолчанию — схемы, которые пора повторить сегодня; если
+     таких нет — вся колода. */
+  function nachatPoPodboru(rezhim: Rezhim, podbor: PodborKolody): void {
+    const vse = SOBRANNYE.map((s) => s.id);
+    const ids =
+      podbor === 'neznakomye' ? neznakomye(vse, progress) : kPovtoreniyu(vse, progress, Date.now());
+    nachat(rezhim, ids.length > 0 ? ids : vse);
+  }
+
+  /* Кнопки вводной плашки запускают сессию событием. */
+  const nachatRef = useRef(nachatPoPodboru);
+  useEffect(() => {
+    nachatRef.current = nachatPoPodboru;
+  });
+  useEffect(() => {
+    const slushat = (e: Event) => {
+      const podbor = (e as CustomEvent<PodborKolody>).detail;
+      nachatRef.current('uznay', podbor);
+      document
+        .getElementById(YAKOR_KARTOCHEK)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    window.addEventListener(SOBYTIE_UCHIT, slushat);
+    return () => window.removeEventListener(SOBYTIE_UCHIT, slushat);
+  }, []);
 
   function otvetit(znayu: boolean): void {
     if (sessiya === null) return;
@@ -119,7 +153,7 @@ export function Kartochki18() {
               <button
                 type="button"
                 className="btn btn--primary btn--sm"
-                onClick={() => nachat(r.id as Rezhim)}
+                onClick={() => nachatPoPodboru(r.id as Rezhim, 'segodnya')}
               >
                 {KARTOCHKI_18.nachat}
               </button>

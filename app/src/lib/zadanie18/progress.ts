@@ -145,3 +145,44 @@ export function poryadokKolody(ids: readonly string[], p: Progress18): string[] 
     return (za?.kogda ?? 0) - (zb?.kogda ?? 0);
   });
 }
+
+/**
+ * Через сколько дней схему пора повторить, по коробке: первая — сразу,
+ * дальше 1, 3, 7 и 14 дней. Классическая лестница Лейтнера.
+ */
+export const INTERVAL_DNEY: Readonly<Record<number, number>> = { 1: 0, 2: 1, 3: 3, 4: 7, 5: 14 };
+const DEN = 24 * 60 * 60 * 1000;
+
+/** Пора ли повторять: новая схема — пора; иначе прошёл интервал её коробки. */
+export function poraPovtoryat(z: Zapis18 | undefined, seychas: number): boolean {
+  if (z === undefined) return true;
+  return seychas - z.kogda >= (INTERVAL_DNEY[z.korobka] ?? 0) * DEN;
+}
+
+/** Схемы к повторению сегодня, в порядке колоды. */
+export function kPovtoreniyu(ids: readonly string[], p: Progress18, seychas: number): string[] {
+  return poryadokKolody(
+    ids.filter((id) => poraPovtoryat(p[id], seychas)),
+    p,
+  );
+}
+
+/** Незнакомые: не начатые и из первой коробки. */
+export function neznakomye(ids: readonly string[], p: Progress18): string[] {
+  return poryadokKolody(
+    ids.filter((id) => status18(p[id]) !== 'known'),
+    p,
+  );
+}
+
+/* Запуск сессии карточек из другого места страницы (вводная плашка). */
+export const SOBYTIE_UCHIT = 'budetege:z18-uchit';
+export type PodborKolody = 'segodnya' | 'neznakomye';
+
+export function zapustitKartochki(podbor: PodborKolody): void {
+  try {
+    window.dispatchEvent(new CustomEvent<PodborKolody>(SOBYTIE_UCHIT, { detail: podbor }));
+  } catch {
+    /* Старый браузер без CustomEvent: кнопка просто прокрутит к карточкам. */
+  }
+}

@@ -4,7 +4,14 @@ import { ProgressBar } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
 import { VVODNAYA_18 } from '@/content/zadanie18';
 import { SOBRANNYE } from '@/content/zadanie18/spisok';
-import { status18, useProgress18 } from '@/lib/zadanie18/progress';
+import { useState } from 'react';
+import {
+  kPovtoreniyu,
+  neznakomye,
+  status18,
+  useProgress18,
+  zapustitKartochki,
+} from '@/lib/zadanie18/progress';
 
 /** Якорь блока карточек: кнопка «Учить схемы» ведёт к нему. */
 export const YAKOR_KARTOCHEK = 'uchit-skhemy';
@@ -18,6 +25,12 @@ export function Vvodnaya18() {
   const progress = useProgress18();
   const n = SOBRANNYE.length;
   const x = SOBRANNYE.filter((s) => status18(progress[s.id]) === 'known').length;
+  /* Время берётся один раз при монтировании: на сервере прогресс пуст,
+     и счётчики совпадают с первой отрисовкой в браузере. */
+  const [seychas] = useState(() => Date.now());
+  const ids = SOBRANNYE.map((s) => s.id);
+  const segodnya = kPovtoreniyu(ids, progress, seychas).length;
+  const nezn = neznakomye(ids, progress).length;
   return (
     <section className="z18-vv" aria-labelledby="z18-vv-title">
       <div className="z18-vv__ikonka" aria-hidden="true">
@@ -73,9 +86,25 @@ export function Vvodnaya18() {
               <strong>{VVODNAYA_18.progress(x, n)}</strong> {VVODNAYA_18.progressPodpis}
             </p>
             <ProgressBar value={n === 0 ? 0 : (x / n) * 100} label={VVODNAYA_18.progress(x, n)} />
-            <a className="btn btn--primary btn--sm z18-vv__uchit" href={`#${YAKOR_KARTOCHEK}`}>
-              {VVODNAYA_18.uchit}
-            </a>
+            <p className="z18-vv__segodnya">{VVODNAYA_18.segodnya(segodnya)}</p>
+            <div className="z18-vv__knopki">
+              <a
+                className="btn btn--primary btn--sm"
+                href={`#${YAKOR_KARTOCHEK}`}
+                onClick={() => zapustitKartochki('segodnya')}
+              >
+                {VVODNAYA_18.uchit}
+              </a>
+              {nezn > 0 && nezn < n ? (
+                <a
+                  className="btn btn--secondary btn--sm"
+                  href={`#${YAKOR_KARTOCHEK}`}
+                  onClick={() => zapustitKartochki('neznakomye')}
+                >
+                  {VVODNAYA_18.neznakomye(nezn)}
+                </a>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>

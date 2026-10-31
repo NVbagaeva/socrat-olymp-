@@ -883,3 +883,15 @@
   overflow-y: hidden;
   vertical-align: middle;
 }
+
+.z18-vv__segodnya {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-vv__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}

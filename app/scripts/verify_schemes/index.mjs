@@ -96,6 +96,32 @@ for (const [k, znayu, zhdu] of sluchai) {
     plokho += 1;
   }
 }
+/* Интервалы: коробка 1 — сразу, 2 — через сутки, 5 — через 14 дней. */
+const { poraPovtoryat, kPovtoreniyu, neznakomye } = requireSrc('lib/zadanie18/progress');
+const DEN = 864e5;
+const T0 = 1e12;
+const intervaly = [
+  [undefined, 0, true],
+  [{ korobka: 1, kogda: T0 }, T0, true],
+  [{ korobka: 2, kogda: T0 }, T0 + 0.5 * DEN, false],
+  [{ korobka: 2, kogda: T0 }, T0 + DEN, true],
+  [{ korobka: 3, kogda: T0 }, T0 + 2.9 * DEN, false],
+  [{ korobka: 5, kogda: T0 }, T0 + 14 * DEN, true],
+];
+for (const [z, seychas, zhdu] of intervaly) {
+  if (poraPovtoryat(z, seychas) !== zhdu) {
+    console.log(`✗ интервал: коробка ${z?.korobka}, ${(seychas - T0) / DEN} дн.: ${!zhdu}`);
+    plokho += 1;
+  }
+}
+const prog = { a: { korobka: 3, kogda: T0, otvetov: 1 }, b: { korobka: 1, kogda: T0, otvetov: 1 } };
+if (
+  [...kPovtoreniyu(['a', 'b', 'c'], prog, T0 + DEN)].sort().join('') !== 'bc' ||
+  [...neznakomye(['a', 'b', 'c'], prog)].sort().join('') !== 'bc'
+) {
+  console.log('✗ подбор колоды «сегодня» / «незнакомые»');
+  plokho += 1;
+}
 const st = [status18(undefined), status18({ korobka: 1 }), status18({ korobka: 3 })].join(',');
 if (st !== 'new,learning,known') {
   console.log(`✗ статусы: ${st}`);
