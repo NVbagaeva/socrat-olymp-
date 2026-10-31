@@ -37,16 +37,21 @@ const VSE = /^(?:r|ℝ|\\mathbb\{?r\}?|\(-∞;\+?∞\)|x∈r|x∈ℝ|любое�
 
 /** Запись к одному виду: TeX-команды — в знаки, пробелы долой. */
 function privesti(zapis: string): string {
-  return zapis
-    .replace(/\\left|\\right|\\[,;:! ]|\\quad|\\qquad/g, '')
-    .replace(/\\infty|\\infin|беск(?:онечность)?|inf(?:inity)?/gi, '∞')
-    .replace(/\\cup|\\bigcup/g, '∪')
-    .replace(/\\in\b/g, '∈')
-    .replace(/\\\{/g, '{')
-    .replace(/\\\}/g, '}')
-    .replace(/[−–—]/g, '-')
-    .replace(/\s+/g, '')
-    .replace(/^x∈/i, '');
+  return (
+    zapis
+      .replace(/\\left|\\right|\\[,;:! ]|\\quad|\\qquad/g, '')
+      /* Десятичная запятая TeX: 1{,}5. */
+      .replace(/\{,\}/g, ',')
+      .replace(/\\infty|\\infin|беск(?:онечность)?|inf(?:inity)?/gi, '∞')
+      .replace(/\\cup|\\bigcup/g, '∪')
+      .replace(/\\in\b/g, '∈')
+      .replace(/\\\{/g, '{')
+      .replace(/\\\}/g, '}')
+      .replace(/[−–—]/g, '-')
+      .replace(/\s+/g, '')
+      /* «x ∈ …» в №16, «a ∈ …», «k ∈ …» — у параметров №19. */
+      .replace(/^[a-z]∈/i, '')
+  );
 }
 
 /**
@@ -68,6 +73,8 @@ export function chislo16(zapis: string): number | null {
   } else if (s.startsWith('+')) {
     s = s.slice(1);
   }
+  /* Короткие записи KaTeX: \frac15, \frac9{16} — к виду \frac{1}{5}. */
+  s = s.replace(/^(\\[dt]?frac)(\d)/, '$1{$2}').replace(/^(\\[dt]?frac\{[^{}]+\})(\d)$/, '$1{$2}');
   const frac = /^\\[dt]?frac\{([^{}]+)\}\{([^{}]+)\}$/.exec(s);
   if (frac) {
     const a = chislo16(frac[1] ?? '');

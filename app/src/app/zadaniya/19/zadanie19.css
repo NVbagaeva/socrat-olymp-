@@ -1,0 +1,171 @@
+/* Задание №19 — добавки к слою №16 (zadanie16.css): рисунок движка
+   в карточке, этапы решения, строка «Почему этот метод», раскрывающиеся
+   подсказка и решение в работе, фильтры банка. Только токены. */
+
+/* ── Карточки №19 ─────────────────────────────────────────────
+   Колонка карточки не шире самой карточки. Формула, которую не
+   разбить (система в условии), прокручивается внутри своей строки —
+   страница на телефоне вбок не едет (scripts/check-mobile-overflow.mjs). */
+
+.z19-card,
+.z19-zad {
+  grid-template-columns: minmax(0, 1fr);
+}
+.z19-card .z16-card__text,
+.z19-card .z19-spisok li,
+.z19-card .z16-shagi li,
+.z19-zad .z16-card__text,
+.z19-zad .z19-spisok li {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 2px;
+}
+
+/* ── Рисунок ──────────────────────────────────────────────────── */
+
+.z19-ris {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  margin: 0;
+  min-width: 0;
+}
+.z19-ris__svg {
+  display: block;
+  overflow-x: auto;
+}
+.z19-ris__svg svg {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  margin-inline: auto;
+}
+.z19-dekor svg {
+  width: 100%;
+  height: auto;
+}
+
+/* ── Этапы решения ────────────────────────────────────────────── */
+
+.z19-etapy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--flow-block);
+  min-width: 0;
+}
+/* Колонка этапа не шире карточки: длинная формула прокручивается
+   в своей рамке, а не раздвигает страницу на телефоне. */
+.z19-etap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z19-etap__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.z19-formula {
+  text-align: center;
+}
+.z19-spisok {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-text-secondary);
+}
+.z19-spisok li {
+  list-style: disc;
+}
+.z19-spisok li::marker {
+  color: var(--color-primary);
+}
+.z19-uslovie {
+  color: var(--color-text);
+  overflow-x: auto;
+}
+
+.z19-pochemu {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-info);
+}
+.z19-pochemu__label {
+  font-weight: 600;
+}
+
+.z19-razbor,
+.z19-opornaya {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z19-zhivoy {
+  margin-top: var(--space-2);
+}
+
+/* ── Тренировочная работа ─────────────────────────────────────── */
+
+.z19-zad {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z19-zad__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.z19-zad__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z19-zad__podskazka,
+.z19-zad__reshenie {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  min-width: 0;
+}
+.z19-zad__podskazka[hidden],
+.z19-zad__reshenie[hidden] {
+  display: none;
+}
+
+/* ── Банк: фильтры ────────────────────────────────────────────── */
+
+.z19-bank {
+  display: grid;
+  gap: var(--flow-block);
+}
+.z19-bank__filtry {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.z19-bank__pole {
+  display: grid;
+  gap: var(--space-1);
+  min-width: min(100%, 280px);
+}
+
+/* ── «О задании»: план из 18 глав ─────────────────────────────────
+   Длинные названия методов («Тригонометрические…») с бейджем «Скоро»
+   на ширине 320 переносятся по слогам, а не раздвигают список. */
+
+.z19-about .z16-plan {
+  grid-template-columns: minmax(0, 1fr);
+}
+.z19-about .z16-plan__title {
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/* ── Тренажёр на общей сессии: ответ — множество, поле шире числового ── */
+
+.z19-ttask .ttask__input {
+  width: 100%;
+  max-width: 560px;
+}
