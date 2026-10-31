@@ -5,7 +5,11 @@
 
 import type { ZhivayaSkhema } from '@/lib/skhemy/tipy';
 import { BISSEKTRISA } from './bissektrisa';
+import { KASATELNAYA } from './kasatelnaya';
+import { KASAYUSHCHIESYA } from './kasayushchiesya';
 import { MEDIANA } from './mediana';
+import { OBSHCHAYA_KASATELNAYA } from './obshchayaKasatelnaya';
+import { OTREZKI_KASATELNYH } from './otrezkiKasatelnyh';
 import { RAVNYE_UGLY } from './ravnyeUgly';
 import { SEKUSHCHIE } from './sekushchie';
 import { PRYAMYE_UGLY } from './pryamyeUgly';
@@ -28,6 +32,10 @@ const REESTR: Readonly<Record<string, ZhivayaSkhema>> = {
   chetyrekhugolniki: VPISANNYY,
   'sredlin-treug': SREDLIN_TREUG,
   'sredlin-trap': SREDLIN_TRAP,
+  'kasatelnaya-sekushchaya': KASATELNAYA,
+  'otrezki-kasatelnyh': OTREZKI_KASATELNYH,
+  kasayushchiesya: KASAYUSHCHIESYA,
+  'obshchaya-kasatelnaya': OBSHCHAYA_KASATELNAYA,
 };
 
 export function zhivayaSkhema18(id: string): ZhivayaSkhema | undefined {

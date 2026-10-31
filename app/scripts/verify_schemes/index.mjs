@@ -13,6 +13,7 @@
 import { requireSrc } from '../lib/load-ts.mjs';
 import { zerno } from './obshchee.mjs';
 import { proverit as bissektrisa } from './bissektrisa.mjs';
+import { proverit as kasatelnye } from './kasatelnye.mjs';
 import { proverit as mediana } from './mediana.mjs';
 import { proverit as pryamyeUgly } from './pryamyeUgly.mjs';
 import { proverit as sredlin } from './sredlin.mjs';
@@ -36,6 +37,7 @@ for (const proverit of [
   uglyDugi,
   vpisannyy,
   sredlin,
+  kasatelnye,
 ]) {
   plokho += proverit(N).plokho;
 }
