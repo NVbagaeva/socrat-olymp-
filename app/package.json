@@ -68,6 +68,7 @@
     "test:vektory": "node scripts/check-vektory.mjs",
     "test:proizvodnaya": "node scripts/check-proizvodnaya.mjs",
     "test:planimetria": "node scripts/check-planimetria.mjs",
+    "test:skhemy-18": "node scripts/verify_schemes/index.mjs",
     "test:seriya-1": "node scripts/check-seriya-1.mjs",
     "test:spravochnik-1": "node scripts/check-spravochnik-1.mjs",
     "build:spravochnik-1": "node scripts/build-spravochnik-1.mjs",
