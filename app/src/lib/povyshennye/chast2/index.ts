@@ -55,6 +55,28 @@ import { J18_OKR_V_UGLE } from './j18';
 import { J19_COS_KORNI } from './j19';
 import { J20_SUMMY_CIFR } from './j20';
 import type { Chast2Zadacha, Shablon2 } from './types';
+/* Семьи K, L, M: варианты 19–24 (свои задачи по кодификатору). */
+import { K14_KOS_SUMMA } from './k14';
+import { K15_PIRAMIDA_PERP } from './k15';
+import { K16_LOG_DROB } from './k16';
+import { K17_LAMPA } from './k17';
+import { K18_VYSOTA_BISS } from './k18';
+import { K19_KVADRAT_OKR } from './k19';
+import { K20_SREDNEE } from './k20';
+import { L14_CHETVERTYE } from './l14';
+import { L15_MENELAY } from './l15';
+import { L16_ODNORODNOE } from './l16';
+import { L17_SPASATEL } from './l17';
+import { L18_ROMB_KASANIE } from './l18';
+import { L19_KORYTO } from './l19';
+import { L20_FISHKA } from './l20';
+import { M14_KVADRATY } from './m14';
+import { M15_PRIZMA_UGOL } from './m15';
+import { M16_GRUPPIROVKA } from './m16';
+import { M17_SUDNO } from './m17';
+import { M18_BISSEKTRISY } from './m18';
+import { M19_GALOCHKA } from './m19';
+import { M20_OSTATKI } from './m20';
 import { C14_TG_PODSTANOVKA } from './c14';
 import { C15_SFERA_PIRAMIDA } from './c15';
 import { C16_POKAZ_LOG } from './c16';
@@ -137,6 +159,28 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'j18.okrVUgle': J18_OKR_V_UGLE,
   'j19.cosKorni': J19_COS_KORNI,
   'j20.summyCifr': J20_SUMMY_CIFR,
+  /* Семьи K, L, M: варианты 19–20, 21–22, 23–24. */
+  'k14.kosSumma': K14_KOS_SUMMA,
+  'k15.piramidaPerp': K15_PIRAMIDA_PERP,
+  'k16.logDrob': K16_LOG_DROB,
+  'k17.lampa': K17_LAMPA,
+  'k18.vysotaBiss': K18_VYSOTA_BISS,
+  'k19.kvadratOkr': K19_KVADRAT_OKR,
+  'k20.srednee': K20_SREDNEE,
+  'l14.chetvertye': L14_CHETVERTYE,
+  'l15.menelay': L15_MENELAY,
+  'l16.odnorodnoe': L16_ODNORODNOE,
+  'l17.spasatel': L17_SPASATEL,
+  'l18.rombKasanie': L18_ROMB_KASANIE,
+  'l19.koryto': L19_KORYTO,
+  'l20.fishka': L20_FISHKA,
+  'm14.kvadraty': M14_KVADRATY,
+  'm15.prizmaUgol': M15_PRIZMA_UGOL,
+  'm16.gruppirovka': M16_GRUPPIROVKA,
+  'm17.sudno': M17_SUDNO,
+  'm18.bissektrisy': M18_BISSEKTRISY,
+  'm19.galochka': M19_GALOCHKA,
+  'm20.ostatki': M20_OSTATKI,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

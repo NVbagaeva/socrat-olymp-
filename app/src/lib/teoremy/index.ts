@@ -16,6 +16,7 @@ import { ALFA, BEZ, PLOSKOST, im, mn, otr, pr, pun, sh, tch, ug } from './elemen
 import { SPISOK_B } from './semyaB';
 import { SPISOK_D } from './semyaD';
 import { SPISOK_G } from './semyaG';
+import { SPISOK_K } from './semyaK';
 
 export type RazdelTeoremy = 'planimetriya' | 'stereometriya';
 
@@ -709,7 +710,7 @@ const SPISOK: Teorema[] = [
 ];
 
 export const TEOREMY: Readonly<Record<string, Teorema>> = Object.fromEntries(
-  [...SPISOK, ...SPISOK_B, ...SPISOK_D, ...SPISOK_G].map((t) => [t.id, t]),
+  [...SPISOK, ...SPISOK_B, ...SPISOK_D, ...SPISOK_G, ...SPISOK_K].map((t) => [t.id, t]),
 );
 
 export function teorema(id: string): Teorema {
