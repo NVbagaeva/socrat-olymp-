@@ -75,6 +75,13 @@ import { Q17_CENA_SPROS } from './q17';
 import { Q18_KVADRAT_PERP } from './q18';
 import { Q19_OKR_KOREN } from './q19';
 import { Q20_SREDNEE_NABORA } from './q20';
+import { R14_TRIG } from './r14';
+import { R15_STEREO } from './r15';
+import { R16_NERAVENSTVO } from './r16';
+import { R17_EKSTREMUM } from './r17';
+import { R18_PLANIMETRIYA } from './r18';
+import { R19_PARAMETR } from './r19';
+import { R20_TEORIYA_CHISEL } from './r20';
 import type { Chast2Zadacha, Shablon2 } from './types';
 /* Семьи K, L, M: варианты 19–24 (свои задачи по кодификатору). */
 import { K14_KOS_SUMMA } from './k14';
@@ -226,6 +233,14 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'q18.kvadratPerp': Q18_KVADRAT_PERP,
   'q19.okrKoren': Q19_OKR_KOREN,
   'q20.sredneeNabora': Q20_SREDNEE_NABORA,
+  /* Семья R: варианты 31–36 — свои задачи раздела по темам номеров. */
+  'r14.trig': R14_TRIG,
+  'r15.stereo': R15_STEREO,
+  'r16.neravenstvo': R16_NERAVENSTVO,
+  'r17.ekstremum': R17_EKSTREMUM,
+  'r18.planimetriya': R18_PLANIMETRIYA,
+  'r19.parametr': R19_PARAMETR,
+  'r20.teoriyaChisel': R20_TEORIYA_CHISEL,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

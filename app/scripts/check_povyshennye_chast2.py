@@ -2302,6 +2302,198 @@ def q20(p, kon):
     ok(est(dn, p["k2"], p["k2"] * p["A"]) == kon["b"], "q20: б)")
     best = max(n_ for n_ in range(2, p["M"] + 1) if est(dv, n_, n_ * p["A"]))
     ok(best == kon["v"], "q20: в)", f"{best} {kon['v']}")
+# ── Семья R: варианты 31–36, свои задачи раздела ─────────────────────
+def r14(p, kt):
+    X = sp.Symbol("X", real=True)
+    lo = sp.pi * p["lo"] / 2
+    hi = sp.pi * p["hi"] / 2
+    I = sp.Interval(lo, hi)
+    if p["vid"] in ("kvSin", "kvCos"):
+        A = sp.Integer(p["A"])
+        c1 = sp.Rational(*p["c1"])
+        c2 = sp.Rational(*p["c2"])
+        t = sp.sin(X) if p["vid"] == "kvSin" else sp.cos(X)
+        # A·cos2x + B·t + C: многочлен по t с корнями c1, c2 (sin: −2A(t−c1)(t−c2) = A(1−2t²) + Bt + C).
+        poly = sp.expand(-2 * A * (sp.Symbol("t") - c1) * (sp.Symbol("t") - c2)) if p["vid"] == "kvSin" else sp.expand(2 * A * (sp.Symbol("t") - c1) * (sp.Symbol("t") - c2))
+        T = sp.Symbol("t")
+        B = poly.coeff(T, 1)
+        C = poly.coeff(T, 0) - A if p["vid"] == "kvSin" else poly.coeff(T, 0) + A
+        expr = A * sp.cos(2 * X) + B * t + C
+        sol = [s_ for s_ in sp.solveset(expr, X, I)]
+    elif p["vid"] == "odnor":
+        TG = {"1": 1, "-1": -1, "k3": sp.sqrt(3), "-k3": -sp.sqrt(3), "k3/3": sp.sqrt(3) / 3, "-k3/3": -sp.sqrt(3) / 3}
+        t1, t2 = TG[p["t1"]], TG[p["t2"]]
+        sol = []
+        for tt in (t1, t2):
+            base = sp.atan(tt)
+            for kk in range(-8, 9):
+                xv = base + kk * sp.pi
+                if lo <= xv <= hi:
+                    sol.append(xv)
+    else:
+        f = sp.sin if p["f"] == "sin" else sp.cos
+        g = sp.cos if p["f"] == "sin" else sp.sin
+        sol = list(sp.solveset(g(X), X, I))
+        for s_ in sp.solveset(2 * f(X) - p["m"], X, I):
+            if p["sigma"] * g(s_) >= 0:
+                sol.append(s_)
+    sol = sorted(set(float(s_) for s_ in sol))
+    ok(len(sol) == len(kt["vybor"]) and all(near(u, v) for u, v in zip(sol, kt["vybor"])), "r14", f"{sol} vs {kt['vybor']}")
+
+
+def r15(p, kt):
+    a = sp.Integer(p["a"])
+    h = sp.Rational(p["hN"], p["hD"])
+    M3 = sp.Matrix
+    if p["vid"] == "kvPrizma":
+        B, D, M = M3([a, 0, 0]), M3([0, a, 0]), M3([a, a, h / 2])
+        v = (D - B).cross(M - B).norm() / 2
+    elif p["vid"] == "piramida":
+        B, D, S = M3([a, 0, 0]), M3([0, a, 0]), M3([a / 2, a / 2, h])
+        M = (S + M3([a, a, 0])) / 2
+        nrm = (D - B).cross(M - B)
+        v = sp.acos(sp.Abs(nrm[2]) / nrm.norm())
+    else:
+        A, B, C = M3([0, 0, 0]), M3([a, 0, 0]), M3([a / 2, a * sp.sqrt(3) / 2, 0])
+        M = M3([C[0], C[1], h / 2])
+        nrm = (B - A).cross(M - A)
+        v = sp.Abs(nrm.dot(C - A)) / nrm.norm()
+    ok(near(sp.N(v, 30), kt["otv"]), "r15", f"{sp.nsimplify(v)} vs {kt['otv']}")
+
+
+def kuski_iz(kt):
+    ks = kt["kuski"]
+    return [ks[i:i + 4] for i in range(0, len(ks), 4)]
+
+
+def r16(p, kt):
+    X = sp.Symbol("X", real=True)
+    if p["vid"] == "pokazDrob":
+        t = sp.Integer(p["b"]) ** X
+        e = (t - p["b"] ** p["al"]) * (t - p["b"] ** p["be"]) / (t - sp.Integer(p["b"]) ** p["ga"])
+        rel = e <= 0 if p["znak"] == "le" else e >= 0
+    elif p["vid"] == "logKvadrat":
+        y = sp.log(X + p["s"], p["b"])
+        e = (y - p["al"]) * (y - p["be"])
+        rel = sp.And(X + p["s"] > 0, e <= 0 if p["znak"] == "le" else e >= 0)
+    else:
+        w2 = p["u1"] + p["u2"] + 1 - p["w1"]
+        r = p["u1"] * p["u2"] - p["w1"] * w2
+        q = sp.Rational(*p["q"])
+        A = (X - p["u1"]) * (X - p["u2"])
+        B = X + r
+        rel = sp.And(A > 0, B > 0, (A <= B) if q > 1 else (A >= B))
+    sol = sp.solveset(rel, X, sp.S.Reals) if not isinstance(rel, sp.And) else sp.reduce_inequalities(list(rel.args), X).as_set()
+    # Сравниваем на сетке mpmath точек и в концах ответа.
+    def v_otvete(xv):
+        for lo, hi, lz, hz in kuski_iz(kt):
+            if (xv > lo or (lz and abs(xv - lo) < 1e-12)) and (xv < hi or (hz and abs(xv - hi) < 1e-12)):
+                return True
+        return False
+    bad = 0
+    tochki = [i / 37.0 for i in range(-30 * 37, 60 * 37)]
+    for lo, hi, lz, hz in kuski_iz(kt):
+        for c_ in (lo, hi):
+            if abs(c_) < 1e8:
+                tochki += [c_, c_ - 1e-6, c_ + 1e-6]
+    for xv in tochki:
+        if (sp.Float(xv) in sol) != v_otvete(xv):
+            bad += 1
+    ok(bad == 0, "r16", f"несовпадений {bad}")
+
+
+def r17(p, kt):
+    X = sp.Symbol("X", positive=True)
+    if p["vid"] == "korobka":
+        f = X * (p["a"] - 2 * X) * (p["b"] - 2 * X)
+        kr = [c_ for c_ in sp.solve(sp.diff(f, X), X) if 0 < c_ < sp.Rational(p["b"], 2)]
+        xs = kr[0]
+        v = f.subs(X, xs) if p["vopros"] == "V" else xs
+    elif p["vid"] == "pribyl":
+        f = (X - p["c"]) * (p["A"] - X**2)
+        kr = [c_ for c_ in sp.solve(sp.diff(f, X), X) if c_ > p["c"]]
+        v = f.subs(X, kr[0]) if p["vopros"] == "P" else kr[0]
+    else:
+        f = (p["L"] - X) / sp.Integer(p["v1"]) + sp.sqrt(X**2 + p["d"] ** 2) / p["v2"]
+        kr = [c_ for c_ in sp.solve(sp.diff(f, X), X) if 0 <= c_ <= p["L"]]
+        v = f.subs(X, kr[0]) if p["vopros"] == "T" else p["L"] - kr[0]
+    ok(near(sp.N(v, 30), kt["otv"]), "r17", f"{sp.nsimplify(v)} vs {kt['otv']}")
+
+
+def r18(p, kt):
+    if p["vid"] == "rombMediana":
+        A = sp.Matrix([-sp.Rational(p["d1"], 2), 0])
+        M = sp.Matrix([sp.Rational(p["d1"], 4), sp.Rational(p["d2"], 4)])
+        tpar = -A[0] / (M[0] - A[0])
+        K = A + tpar * (M - A)
+        v = (K - A).norm()
+    elif p["vid"] == "vpisPryam":
+        r = sp.Symbol("r", positive=True)
+        v = [s_ for s_ in sp.solve((p["m"] + r) ** 2 + (p["n"] + r) ** 2 - (p["m"] + p["n"]) ** 2, r) if s_ > 0][0]
+    else:
+        AB = sp.sqrt(p["p"] ** 2 + p["q"] ** 2)
+        v = 2 * p["p"] * p["q"] / AB
+    ok(near(sp.N(v, 30), kt["otv"]), "r18", f"{sp.nsimplify(v)} vs {kt['otv']}")
+
+
+def r19(p, kt):
+    # Критические значения параметра — точно; ответ из kontrol сравнивается с ними.
+    if p["vid"] == "polukrug":
+        k = sp.Rational(p["kn"], p["kd"])
+        R = p["R"]
+        kR, mR = k * R, R * sp.sqrt(1 + k**2)
+        nado = [[float(kR), float(mR), 1, 0]] if p["kol"] == 2 else [[float(-kR), float(kR), 1, 0], [float(mR), float(mR), 1, 1]]
+    elif p["vid"] == "okrModul":
+        R = p["R"]
+        r2 = float(-R * sp.sqrt(2))
+        nado = {2: [[r2, r2, 1, 1], [-R, R, 0, 0]], 3: [[-R, -R, 1, 1]], 4: [[r2, -R, 0, 0]]}[p["kol"]]
+    else:
+        s_ = p["s"]
+        at, am = (s_ - 1) ** 2, -((s_ + 1) ** 2)
+        nado = {2: [[-1e9, am, 0, 0], [0, 0, 1, 1], [at, 1e9, 0, 0]], 3: [[at, at, 1, 1]], 4: [[0, at, 0, 0]]}[p["kol"]]
+    est = kuski_iz(kt)
+    ok(len(est) == len(nado) and all(near(u, v) for a_, b_ in zip(est, nado) for u, v in zip(a_, b_)), "r19", f"{est} vs {nado}")
+
+
+def r20(p, kt):
+    from math import gcd
+    def cep(P, q):
+        a_ = P * (100 + q)
+        if a_ % 100:
+            return None
+        b_ = a_ // 100 * (100 - q)
+        if b_ % 100:
+            return None
+        return (a_ // 100, b_ // 100)
+    if p["vid"] == "ceny":
+        A = any((P - c_[1] == p["D"]) if p["aTip"] == "D" else (c_[1] == P) for P in range(1, 3001) for q in range(1, 100) for c_ in [cep(P, q)] if c_)
+        B = any(cep(p["P0"], q) for q in range(1, 100))
+        V = next(P for P in range(1, 100000) if cep(P, p["p0"]))
+    elif p["vid"] == "deliteli":
+        def tau(N):
+            return sp.divisor_count(N)
+        A = p["k"] % 2 == 1
+        V = next(N for N in range(1, 10**6) if tau(N) == p["k"])
+        f = sp.factorint(p["k"])
+        B = sum(f.values()) >= 3
+    else:
+        N = p["N"]
+        a1 = sp.Rational(*p["A1"])
+        A = any((n * a1).q == 1 and n * (n + 1) / 2 <= n * a1 <= n * (2 * N - n + 1) / 2 for n in range(2, N + 1))
+        # б): B = S/n + D(n + 1) — существует ли набор (перебор n ≤ 3 по суммам).
+        from itertools import combinations
+        B = False
+        for n in (2, 3):
+            for comb in combinations(range(1, N + 1), n):
+                S = sum(comb)
+                Bv = sp.Rational(S, n) + p["D"] * (n + 1)
+                if Bv.q == 1 and Bv <= N and int(Bv) not in comb:
+                    B = True
+                    break
+            if B:
+                break
+        V = max(n for n in range(2, N + 1) if n * (n + 1) / 2 <= n * p["A2"] <= n * (2 * N - n + 1) / 2)
+    ok(A == kt["a"] and B == kt["b"] and V == kt["v"], "r20", f"{A},{B},{V} vs {kt['a']},{kt['b']},{kt['v']}")
 
 
 F = {
@@ -2407,6 +2599,13 @@ F = {
     "q18.kvadratPerp": q18,
     "q19.okrKoren": q19,
     "q20.sredneeNabora": q20,
+    "r14.trig": r14,
+    "r15.stereo": r15,
+    "r16.neravenstvo": r16,
+    "r17.ekstremum": r17,
+    "r18.planimetriya": r18,
+    "r19.parametr": r19,
+    "r20.teoriyaChisel": r20,
 }
 
 rows = json.load(open(sys.argv[1], encoding="utf-8"))
