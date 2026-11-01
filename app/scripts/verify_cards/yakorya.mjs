@@ -95,6 +95,61 @@ const PO_NOMERAM = {
     if (lishnie.length > 0) throw new Error(`имена без блока: ${lishnie.join(', ')}`);
     return out;
   },
+  /* Теория №10: раздел — #teoriya-<id>, рамка, таблица или ловушка с
+     полем `yakor` — #t10-… (lib/zadanie10/teoriya-yakorya.ts), карточка
+     «Физика в двух словах» — #fizika-<прототип>, часть общей теории
+     единиц, которую раздел показывает, — #ed-<часть>. */
+  10: () => {
+    const { RAZDELY_TEORII_10 } = requireSrc('content/teoriya10');
+    const { YAKOR_10, BLOKI_10 } = requireSrc('lib/zadanie10/teoriya-yakorya');
+    const { PROTOTYPES } = requireSrc('lib/zadanie10/prototypes');
+    const { YAKOR_EDINIC } = requireSrc('content/teoriya-edinicy');
+    const out = new Set();
+    const postavleny = new Set();
+    for (const r of RAZDELY_TEORII_10) {
+      out.add(YAKOR_10.razdel(r.id));
+      for (const b of r.bloki) {
+        if (b.yakor !== undefined) {
+          if (postavleny.has(b.yakor)) throw new Error(`якорь «${b.yakor}» стоит на двух блоках`);
+          postavleny.add(b.yakor);
+          out.add(YAKOR_10.blok(b.yakor));
+        }
+        if (b.vid === 'edinicy') b.chasti.forEach((c) => out.add(YAKOR_EDINIC(c)));
+        if (b.vid === 'fizika') PROTOTYPES.forEach((p) => out.add(YAKOR_10.fizika(p.id)));
+      }
+    }
+    const lishnie = BLOKI_10.filter((id) => !postavleny.has(id));
+    if (lishnie.length > 0) throw new Error(`имена без блока: ${lishnie.join(', ')}`);
+    return out;
+  },
+  /* Теория №11: раздел — #teoriya-<id>, подпункт содержания — тот же
+     id, что у блока раздела (podpunkty: «smesi-formula», «ed-sostavnye»),
+     «Главное» — #<раздел>-glavnoe, карточка с полем `yakor` — #t11-…,
+     полный лайфхак — #layfhak-<id>, ловушка — #lovushka-<id>
+     (lib/zadanie11/teoriya-yakorya.ts). */
+  11: () => {
+    const { RAZDELY_TEORII_11 } = requireSrc('content/teoriya11');
+    const { podpunkty } = requireSrc('components/tasks/zadanie11/Teoriya11');
+    const { YAKOR_11, BLOKI_11 } = requireSrc('lib/zadanie11/teoriya-yakorya');
+    const out = new Set();
+    const postavleny = new Set();
+    for (const r of RAZDELY_TEORII_11) {
+      out.add(YAKOR_11.razdel(r.id));
+      podpunkty(r).forEach((p) => out.add(p.id));
+      if (r.idei.length > 0) out.add(YAKOR_11.chast(r.id, 'glavnoe'));
+      for (const k of r.kartochki ?? []) {
+        if (k.yakor === undefined) continue;
+        if (postavleny.has(k.yakor)) throw new Error(`якорь «${k.yakor}» стоит на двух карточках`);
+        postavleny.add(k.yakor);
+        out.add(YAKOR_11.kartochka(k.yakor));
+      }
+      if (r.id === 'layfhaki') r.layfhaki.forEach((id) => out.add(YAKOR_11.layfhak(id)));
+      if (r.id === 'lovushki') r.lovushki.forEach((id) => out.add(YAKOR_11.lovushka(id)));
+    }
+    const lishnie = BLOKI_11.filter((id) => !postavleny.has(id));
+    if (lishnie.length > 0) throw new Error(`имена без карточки: ${lishnie.join(', ')}`);
+    return out;
+  },
   /* №18: «теория» карточки — страница ключевой схемы /skhemy/<id>/;
      source — id собранной схемы (страницы строятся только для них). */
   18: () => {

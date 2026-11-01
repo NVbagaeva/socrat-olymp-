@@ -399,6 +399,13 @@
   max-width: 260px;
   height: auto;
 }
+/* №10: висячий мост (lib/zadanie10/chertezh/most.ts) — широкий рисунок. */
+.kart-fig--most10 svg {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+}
 /* №9: график движка lib/proizvodnaya (кривая на клетчатой сетке). */
 .kart-fig--proizvodnaya svg {
   display: block;

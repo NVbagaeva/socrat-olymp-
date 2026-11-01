@@ -17,6 +17,7 @@ import type { Risunok as RisunokVektorov } from '../vektory/types';
 import type { RisunokVeroyatnosti } from '../veroyatnost/risunkiKartochek';
 import type { RisEilera } from '../zadanie6/risunkiKartochek';
 import type { Figura as Figura9 } from '../proizvodnaya/types';
+import type { ParamsMosta } from '../zadanie10/chertezh/most';
 
 /**
  * Тип карточки.
@@ -54,6 +55,9 @@ export type UrovenKartochki = 'база' | 'важно для ЕГЭ';
  * - `proizvodnaya` — график движка №9 (lib/proizvodnaya/render.ts) в
  *   режиме ученика: кривая, касательная, отмеченные точки — без
  *   построений; `alt` фигуры — подпись для чтения с экрана;
+ * - `most10` — чертёж висячего моста №10 (lib/zadanie10/chertezh/most.ts)
+ *   в режиме ученика: та же композиция, что в теории и в условии задачи;
+ *   `title` — подпись для чтения с экрана;
  * - `svg` — путь к файлу в public/.
  *
  * `povorot` — рисовать в случайном повороте (тип `chertezh`).
@@ -68,6 +72,7 @@ export type FiguraKartochki =
   /** Сцена renderGraph; `alt` сцены — подпись для чтения с экрана. */
   | { dvizhok: 'graph'; scena: () => Record<string, unknown> }
   | { dvizhok: 'proizvodnaya'; fig: () => Figura9 }
+  | { dvizhok: 'most10'; most: ParamsMosta; title: string }
   | {
       dvizhok: 'skhema';
       skhema: () => ZhivayaSkhema;

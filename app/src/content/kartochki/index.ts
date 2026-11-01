@@ -8,10 +8,12 @@ import k05 from './05-veroyatnost';
 import k06 from './06-sluchaynye-velichiny';
 import k07 from './07-uravneniya';
 import k09 from './09-proizvodnaya';
+import k10 from './10-prikladnye';
+import k11 from './11-tekstovye';
 import k18 from './18-klyuchevye-skhemy';
 
 /** Все колоды по номеру задания. */
-export const KOLODY: readonly Koloda[] = [k01, k02, k03, k04, k05, k06, k07, k09, k18];
+export const KOLODY: readonly Koloda[] = [k01, k02, k03, k04, k05, k06, k07, k09, k10, k11, k18];
 
 export function kolodaNomera(task: number): Koloda {
   const k = KOLODY.find((x) => x.task === task);

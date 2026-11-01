@@ -16,12 +16,16 @@
  *     (lib/zadanie6/risunkiKartochek);
  *   — №7: движок чертежей lib/graph (единичная окружность);
  *   — №9: движок графиков lib/proizvodnaya (render.ts) в режиме ученика —
- *     без треугольников, пунктиров и знаков на промежутках.
+ *     без треугольников, пунктиров и знаков на промежутках;
+ *   — №10: висячий мост (lib/zadanie10/chertezh/most.ts) в режиме ученика,
+ *     параболы и кривая распада — движок чертежей lib/graph;
+ *   — №11: движок чертежей lib/graph (круговая трасса, тоннель, река).
  */
 
 import { renderGraph } from '../graph/renderer.js';
 import { eilerSvg } from '../zadanie6/risunkiKartochek';
 import { renderFigura } from '../proizvodnaya/render';
+import { chertezhMosta } from '../zadanie10/chertezh/most';
 
 import { parseAnswer } from '../answer';
 import { plain, typesetKrupno } from '../tex';
@@ -206,6 +210,8 @@ export function narisovat(id: string, f: FiguraKartochki): string[] {
       return [obertka(renderGraph(f.scena()) as string, 'graph')];
     case 'proizvodnaya':
       return [obertka(renderFigura(f.fig(), { rezhim: 'student' }), 'proizvodnaya')];
+    case 'most10':
+      return [obertka(chertezhMosta(f.most, 'uchenik', f.title).svg, 'most10')];
   }
 }
 

@@ -8,6 +8,7 @@ import type { KartochkaRazdela, Shagi } from '@/components/trenazher/types';
 import { TRENAZHER_11 } from '@/content/zadanie11';
 import { trenazher11 } from '@/lib/zadanie11/progress';
 import { answerMatches, choiceMatches } from '@/lib/zadanie11/secret';
+import { YAKOR_11 } from '@/lib/zadanie11/teoriya-yakorya';
 import type { SsylkiRazdela } from '@/lib/zadanie11/trenazher/dannye';
 import { planPoKlyuchu } from '@/lib/zadanie11/trenazher/filtry11';
 import type { UslovieBanka } from '@/lib/zadanie11/trenazher/sessiya';
@@ -94,7 +95,7 @@ export function kartochka11({
         <div className="ptask__question" dangerouslySetInnerHTML={{ __html: z.uslovieHtml }} />
         <nav className="z11-resh__links" aria-label={TRENAZHER_11.materialy}>
           {layfhak === undefined ? null : (
-            <Link className="z11-resh__link" href={`${base}/teoriya/#layfhak-${layfhak}`}>
+            <Link className="z11-resh__link" href={`${base}/teoriya/#${YAKOR_11.layfhak(layfhak)}`}>
               <Piktogramma name="bolt" />
               {TRENAZHER_11.layfhak}
             </Link>
