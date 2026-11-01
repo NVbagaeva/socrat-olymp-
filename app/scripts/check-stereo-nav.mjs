@@ -136,10 +136,21 @@ const VKLADKI = [
   ['generator/', 'Генератор'],
   ['dlya-repetitorov/', 'Для репетиторов'],
 ];
+/* «Карточки» встают в ленту после «Теории» сами, если у номера есть
+   колода (src/content/kartochki/spisok.ts, сейчас у №3 есть, у №15 нет). */
+const S_KARTOCHKAMI = new Set(
+  [...fs.readFileSync(path.join(APP, 'src/content/kartochki/spisok.ts'), 'utf8')
+    .matchAll(/'(\d+)'/g)].map((m) => m[1]),
+);
 const ZADANIYA = [
   { no: '3', glavy: GLAVY_3 },
   { no: '15', glavy: GLAVY_15 },
 ];
+function ozhidaemye(no) {
+  const labels = VKLADKI.map((v) => v[1]);
+  if (S_KARTOCHKAMI.has(no)) labels.splice(labels.indexOf('Теория') + 1, 0, 'Карточки');
+  return labels;
+}
 const SIZES = [
   { name: 'телефон', width: 390, height: 844, isMobile: true },
   { name: 'компьютер', width: 1440, height: 900, isMobile: false },
@@ -189,7 +200,7 @@ for (const size of SIZES) {
         .locator('.topic-tabs-row:not([inert]) .topic-tabs [role=tab]')
         .allInnerTexts();
       check(
-        tabs.map((t) => t.trim()).join('|') === VKLADKI.map((v) => v[1]).join('|'),
+        tabs.map((t) => t.trim()).join('|') === ozhidaemye(no).join('|'),
         where(`вкладки: ${tabs.join(', ')}`),
       );
       const active = await page.locator('[role=tab][aria-selected=true]').first().innerText();
