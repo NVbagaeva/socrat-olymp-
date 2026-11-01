@@ -19,7 +19,7 @@ const KARTOCHKI = `${ZADANIYA}/${ZADANIE18.slug}/${VKLADKA_KARTOCHKI.tail}`;
 
 /** Ширины и натуральные размеры — как в scripts/build-vvodnaya-18.mjs. */
 const KARTINKI = {
-  'treugolnik-vpisannaya': { width: 1226, height: 980, widths: [320, 640] },
+  'treugolnik-centr': { width: 1220, height: 1200, widths: [220, 440] },
   stomatolog: { width: 934, height: 560, widths: [360, 720] },
   payalnik: { width: 1042, height: 508, widths: [360, 720] },
 } as const;
@@ -236,10 +236,10 @@ function Blok({
 
 /**
  * Вводная карточка вкладки «Ключевые схемы» в «Стеклянной сцене».
- * Сразу видны метка, заголовок, главная картинка и вывод; объяснение
+ * Сразу видны метка, заголовок, треугольник и вывод; объяснение
  * разложено по трём строкам-аккордеонам (все свёрнуты): аналогии про
  * знания и инструменты, что даёт узнанная схема, как работать с
- * вкладкой. Ниже — общий прогресс и запуск карточек.
+ * вкладкой. Под треугольником — общий прогресс и запуск карточек.
  */
 export function Vvodnaya18() {
   const progress = useProgress18();
@@ -255,90 +255,97 @@ export function Vvodnaya18() {
   const v = VVODNAYA_18;
   return (
     <section className="z18-vv" aria-labelledby="z18-vv-title">
-      <div className="z18-vv__shapka">
+      {/* Две колонки на компьютере: слева текст и аккордеон, справа
+          одна группа — треугольник и прогресс. На планшете и телефоне
+          обёртки колонок растворяются (display: contents), и порядок
+          задают области сетки карточки. */}
+      <div className="z18-vv__levaya">
         <div className="z18-vv__zagolovok">
           <p className="z18-vv__metka">{v.metka}</p>
           <h2 id="z18-vv-title" className="z18-vv__title">
             {v.title}
           </h2>
         </div>
-        <div className="z18-vv__scena">
-          <Kartinka
-            name="treugolnik-vpisannaya"
-            className="z18-vv__glavnaya"
-            sizes="(min-width: 768px) 300px, 250px"
-            lazy={false}
-          />
+
+        <p className="z18-vv__vyvod">{v.vyvod}</p>
+
+        <div className="z18-vv__bloki">
+          <Blok id="z18-vv-zachem" ikonka={ZNACHKI.lampa} title={v.bloki.zachem}>
+            <div className="z18-vv__analogii">
+              {v.analogii.map((a) => (
+                <article key={a.kartinka} className="z18-vv__analogiya">
+                  <Kartinka
+                    name={a.kartinka}
+                    className="z18-vv__analogiya-kartinka"
+                    sizes="(min-width: 768px) 340px, 90vw"
+                  />
+                  <h3 className="z18-vv__analogiya-title">{a.title}</h3>
+                  <p className="z18-vv__analogiya-tekst">{a.text}</p>
+                </article>
+              ))}
+            </div>
+            <p className="z18-vv__oba">
+              <Tex text={v.obaNuzhny} />
+            </p>
+          </Blok>
+
+          <Blok id="z18-vv-daet" ikonka={ZNACHKI.lupa} title={v.bloki.daet}>
+            <div className="z18-vv__tekst">
+              {v.daet.map((a, i) => (
+                <p key={i}>
+                  <Tex text={a} />
+                </p>
+              ))}
+            </div>
+          </Blok>
+
+          <Blok id="z18-vv-kak" ikonka={ZNACHKI.spisok} title={v.bloki.kak}>
+            <ol className="z18-vv__shagi">
+              {v.shagi.map((s, i) => (
+                <li key={i}>
+                  <span className="z18-vv__shag-no" aria-hidden="true">
+                    {i + 1}
+                  </span>
+                  <span className="z18-vv__shag-ikonka">
+                    <Znachok>{ZNACHKI_SHAGOV[i]}</Znachok>
+                  </span>
+                  <span className="z18-vv__shag-tekst">{s}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="z18-vv__pochemu">
+              <Tex text={v.pochemu} />
+            </p>
+          </Blok>
         </div>
       </div>
 
-      <p className="z18-vv__vyvod">{v.vyvod}</p>
+      <div className="z18-vv__pravaya">
+        <div className="z18-vv__scena">
+          <Kartinka
+            name="treugolnik-centr"
+            className="z18-vv__glavnaya"
+            sizes="(min-width: 1024px) 210px, (min-width: 768px) 150px, 163px"
+            lazy={false}
+          />
+        </div>
 
-      <div className="z18-vv__bloki">
-        <Blok id="z18-vv-zachem" ikonka={ZNACHKI.lampa} title={v.bloki.zachem}>
-          <div className="z18-vv__analogii">
-            {v.analogii.map((a) => (
-              <article key={a.kartinka} className="z18-vv__analogiya">
-                <Kartinka
-                  name={a.kartinka}
-                  className="z18-vv__analogiya-kartinka"
-                  sizes="(min-width: 768px) 340px, 90vw"
-                />
-                <h3 className="z18-vv__analogiya-title">{a.title}</h3>
-                <p className="z18-vv__analogiya-tekst">{a.text}</p>
-              </article>
-            ))}
-          </div>
-          <p className="z18-vv__oba">
-            <Tex text={v.obaNuzhny} />
+        <div className="z18-vv__progress">
+          <p className="z18-vv__progress-tekst">
+            <strong>{v.progress(x, n)}</strong> {v.progressPodpis}
           </p>
-        </Blok>
-
-        <Blok id="z18-vv-daet" ikonka={ZNACHKI.lupa} title={v.bloki.daet}>
-          <div className="z18-vv__tekst">
-            {v.daet.map((a, i) => (
-              <p key={i}>
-                <Tex text={a} />
-              </p>
-            ))}
-          </div>
-        </Blok>
-
-        <Blok id="z18-vv-kak" ikonka={ZNACHKI.spisok} title={v.bloki.kak}>
-          <ol className="z18-vv__shagi">
-            {v.shagi.map((s, i) => (
-              <li key={i}>
-                <span className="z18-vv__shag-no" aria-hidden="true">
-                  {i + 1}
-                </span>
-                <span className="z18-vv__shag-ikonka">
-                  <Znachok>{ZNACHKI_SHAGOV[i]}</Znachok>
-                </span>
-                <span className="z18-vv__shag-tekst">{s}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="z18-vv__pochemu">
-            <Tex text={v.pochemu} />
-          </p>
-        </Blok>
-      </div>
-
-      <div className="z18-vv__progress">
-        <p className="z18-vv__progress-tekst">
-          <strong>{v.progress(x, n)}</strong> {v.progressPodpis}
-        </p>
-        <ProgressBar value={n === 0 ? 0 : (x / n) * 100} label={v.progress(x, n)} />
-        <p className="z18-vv__segodnya">{v.segodnya(segodnya)}</p>
-        <div className="z18-vv__knopki">
-          <Link className="btn btn--primary btn--sm" href={`${KARTOCHKI}?nabor=segodnya`}>
-            {v.uchit}
-          </Link>
-          {nezn > 0 && nezn < vsego ? (
-            <Link className="btn btn--secondary btn--sm" href={`${KARTOCHKI}?nabor=neznakomye`}>
-              {v.neznakomye(nezn)}
+          <ProgressBar value={n === 0 ? 0 : (x / n) * 100} label={v.progress(x, n)} />
+          <p className="z18-vv__segodnya">{v.segodnya(segodnya)}</p>
+          <div className="z18-vv__knopki">
+            <Link className="btn btn--primary btn--sm" href={`${KARTOCHKI}?nabor=segodnya`}>
+              {v.uchit}
             </Link>
-          ) : null}
+            {nezn > 0 && nezn < vsego ? (
+              <Link className="btn btn--secondary btn--sm" href={`${KARTOCHKI}?nabor=neznakomye`}>
+                {v.neznakomye(nezn)}
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
     </section>

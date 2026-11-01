@@ -25,10 +25,12 @@ const ROOT = path.join(import.meta.dirname, '..');
 const SRC = path.join(ROOT, 'assets', 'zadanie18', 'vvodnaya');
 const OUT = path.join(ROOT, 'public', 'images', 'zadaniya', '18', 'vvodnaya');
 
-/* Главная показывается не выше 200px на телефоне (≈250px шириной) и до
-   ≈300px на компьютере; мини-карточки — до ≈340px. Ширины — 1x и 2x. */
+/* Главная: на телефоне не выше 160px (≈163px шириной), на планшете
+   ≈150px, на компьютере 210px шириной; мини-карточки — до ≈340px.
+   Ширины — 1x и 2x. Кадр главной отцентрирован по самой фигуре, запас
+   под свечение симметричен — не обрезать. */
 const KARTINKI = [
-  { name: 'treugolnik-vpisannaya', width: 1226, height: 980, widths: [320, 640] },
+  { name: 'treugolnik-centr', width: 1220, height: 1200, widths: [220, 440] },
   { name: 'stomatolog', width: 934, height: 560, widths: [360, 720] },
   { name: 'payalnik', width: 1042, height: 508, widths: [360, 720] },
 ];

@@ -133,10 +133,24 @@
 
 /* Стекло — токены --glass-* (tokens.css): белое с размытием, светлая
    кромка, синее кольцо и тень. Полоса синий → терракота сверху
-   остаётся, свечения за главной картинкой дают стеклу цвет. */
+   остаётся.
+
+   Раскладка — области сетки карточки. Обёртки колонок (__levaya,
+   __pravaya) нужны только компьютеру: до 1024px они display: contents,
+   и их дети встают в области напрямую.
+     телефон:  треугольник / заголовок / вывод / аккордеон / прогресс;
+     планшет:  заголовок | треугольник, ниже всё на всю ширину;
+     ≥ 1024px: две колонки 62 / 38 — текст и аккордеон слева, справа
+               одна группа: треугольник, под ним прогресс. */
 .z18-vv {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'scena'
+    'zagolovok'
+    'vyvod'
+    'bloki'
+    'progress';
   gap: var(--space-5);
   padding: var(--space-6) var(--space-4) var(--space-5);
   border: 1px solid var(--glass-edge);
@@ -146,6 +160,9 @@
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
   position: relative;
+  /* Обрезает только полосу сверху по скруглению. Свечение треугольника
+     лежит внутри его собственного кадра, а кадр — внутри полей
+     карточки, так что сюда оно не достаёт. */
   overflow: hidden;
   isolation: isolate;
 }
@@ -156,10 +173,21 @@
   height: 4px;
   background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
 }
-.z18-vv__shapka {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
+.z18-vv__levaya,
+.z18-vv__pravaya {
+  display: contents;
+}
+.z18-vv__zagolovok {
+  grid-area: zagolovok;
+}
+.z18-vv__vyvod {
+  grid-area: vyvod;
+}
+.z18-vv__bloki {
+  grid-area: bloki;
+}
+.z18-vv__progress {
+  grid-area: progress;
 }
 .z18-vv__metka {
   margin: 0 0 var(--space-2);
@@ -179,34 +207,26 @@
   text-wrap: balance;
 }
 
-/* Сцена главной картинки: свечения позади, картинка по центру,
-   на телефоне не выше 200px. */
+/* Треугольник. Кадр отцентрирован по самой фигуре: прозрачный запас
+   сверху (≈19 % высоты) уравновешивает свечение снизу, поэтому центр
+   кадра — центр треугольника. Размер задаёт --tri-w (ширина кадра;
+   высота почти такая же, 1220 × 1200). */
 .z18-vv__scena {
-  position: relative;
+  --tri-w: 163px; /* телефон: высота кадра 160px */
+  grid-area: scena;
   display: grid;
-  place-items: center;
-  z-index: 0;
+  justify-items: center;
+  /* Сверху в кадре прозрачный запас: поднимаем кадр на его часть, чтобы
+     над вершиной не было лишней пустоты. Свечения там нет — нечего
+     обрезать. */
+  margin-top: calc(var(--tri-w) * -0.1);
+  margin-bottom: calc(var(--space-2) * -1);
 }
-.z18-vv__scena::before {
-  content: '';
-  position: absolute;
-  inset: 0 8%;
-  z-index: -1;
-  background:
-    radial-gradient(closest-side at 38% 55%, var(--aura-blue), transparent),
-    radial-gradient(closest-side at 64% 62%, var(--aura-orange), transparent);
-  filter: blur(8px);
-  pointer-events: none;
-}
-.z18-vv__glavnaya {
-  display: block;
-}
+.z18-vv__glavnaya,
 .z18-vv__glavnaya img {
   display: block;
-  width: auto;
-  max-width: 100%;
+  width: var(--tri-w);
   height: auto;
-  max-height: 200px;
 }
 /* «Парение»: только transform, 5px вверх-вниз. */
 @media (prefers-reduced-motion: no-preference) {
@@ -462,43 +482,72 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* Планшет: треугольник справа от заголовка, по центру блока
+   «надзаголовок + заголовок». */
 @media (min-width: 768px) {
   .z18-vv {
-    gap: var(--space-6);
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'zagolovok scena'
+      'vyvod vyvod'
+      'bloki bloki'
+      'progress progress';
+    column-gap: var(--space-6);
+    row-gap: var(--space-6);
     padding: var(--space-8);
+  }
+  .z18-vv__zagolovok,
+  .z18-vv__scena {
+    align-self: center;
+  }
+  .z18-vv__scena {
+    --tri-w: 152px;
+    margin: 0;
   }
   .z18-vv__title {
     font-size: 32px;
-  }
-  .z18-vv__glavnaya img {
-    max-height: 240px;
   }
   .z18-vv__vyvod {
     font-size: 1.25rem;
   }
 }
-/* Компьютер: заголовок слева, сцена справа; вывод, аккордеоны и
-   прогресс — двумя колонками под ними. */
+/* Компьютер: две колонки 62 / 38, поле карточки 40px со всех сторон.
+   Правая колонка — одна группа сверху вниз: треугольник, через 24px
+   прогресс во всю ширину колонки. Кадр треугольника поднят на долю
+   прозрачного запаса, чтобы вершина стояла вровень с надзаголовком:
+   над ней ни пустоты, ни обрезки (запас прозрачный, свечение внизу). */
 @media (min-width: 1024px) {
   .z18-vv {
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-    column-gap: var(--space-8);
+    grid-template-columns: minmax(0, 62fr) minmax(0, 38fr);
+    grid-template-areas: none;
+    column-gap: var(--space-10);
     align-items: start;
+    padding: var(--space-10);
   }
-  .z18-vv__shapka {
-    grid-column: 1 / -1;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-    align-items: center;
-    column-gap: var(--space-8);
+  .z18-vv__levaya {
+    display: grid;
+    gap: var(--space-6);
+    min-width: 0;
+  }
+  .z18-vv__pravaya {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    min-width: 0;
+  }
+  .z18-vv__zagolovok,
+  .z18-vv__vyvod,
+  .z18-vv__bloki,
+  .z18-vv__progress,
+  .z18-vv__scena {
+    grid-area: auto;
+  }
+  .z18-vv__scena {
+    --tri-w: 210px;
+    margin-top: calc(var(--tri-w) * -0.16);
   }
   .z18-vv__title {
     font-size: 36px;
-  }
-  .z18-vv__vyvod {
-    grid-column: 1 / -1;
-  }
-  .z18-vv__glavnaya img {
-    max-height: 260px;
   }
 }
 
