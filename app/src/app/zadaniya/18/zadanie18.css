@@ -1,8 +1,8 @@
-/* Задание №18 «Планиметрия»: вкладка «Ключевые схемы».
+/* Задание №18 «Планиметрия»: вкладки «О задании» и «Ключевые схемы».
 
    Оболочка, лента вкладок и плашки — общие слои; здесь только своё:
-   вводная плашка, фильтры и плитки схем, страница схемы, панель
-   живого чертежа, карточки. Значения — только токены. Свои
+   «О задании», вводная плашка, фильтры и плитки схем, страница схемы,
+   панель живого чертежа. Карточки — общая вкладка (components/kartochki). Значения — только токены. Свои
    блоки-якоря отступают под липкую ленту (docs/razdel-pravila.md). */
 
 .z18-head {
@@ -13,6 +13,120 @@
   display: grid;
   gap: var(--flow-section);
   min-width: 0;
+}
+
+/* ── «О задании» ────────────────────────────────────────────── */
+
+.z18-about {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 760px;
+  min-width: 0;
+}
+.z18-about__lead {
+  display: grid;
+  gap: var(--space-3);
+}
+.z18-about__answer {
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.z18-about__text {
+  color: var(--color-text-secondary);
+}
+.z18-chasti {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-chasti__item {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.z18-chasti__title {
+  font-weight: 600;
+}
+.z18-chasti__punkt {
+  color: var(--color-text-brand);
+}
+.z18-chasti__text {
+  color: var(--color-text-secondary);
+}
+.z18-kriterii {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+.z18-kriterii__item {
+  display: grid;
+  grid-template-columns: 6.5em minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.z18-kriterii__ball {
+  font-weight: 700;
+  color: var(--color-text-brand);
+  white-space: nowrap;
+}
+.z18-marshrut {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+.z18-marshrut__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.z18-marshrut__no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.z18-marshrut__telo {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.z18-marshrut__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+.z18-marshrut__text {
+  color: var(--color-text-secondary);
+}
+@media (max-width: 520px) {
+  .z18-kriterii__item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
 }
 
 /* ── Вводная плашка ─────────────────────────────────────────── */
@@ -671,191 +785,6 @@
   border-radius: var(--radius-sm);
   background: var(--color-accent-soft-surface);
   font-size: var(--fs-caption);
-}
-
-/* ── Карточки ───────────────────────────────────────────────── */
-
-.z18-kart {
-  display: grid;
-  gap: var(--space-4);
-  min-width: 0;
-  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
-}
-.z18-kart > h2 {
-  margin: 0;
-}
-.z18-kart__lead {
-  margin: 0;
-  color: var(--color-text-secondary);
-  max-width: 72ch;
-}
-.z18-kart__rezhimy {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.z18-kart__rezhim {
-  display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-xs);
-}
-.z18-kart__rezhim .btn {
-  justify-self: start;
-  margin-top: var(--space-2);
-}
-.z18-kart__rezhim-title {
-  margin: 0;
-  font-weight: 700;
-}
-.z18-kart__rezhim-tekst {
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-.z18-kart__sessiya {
-  display: grid;
-  gap: var(--space-4);
-  max-width: 560px;
-}
-.z18-kart__verh {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  font-weight: 600;
-}
-.z18-kart__korobka {
-  margin-right: auto;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface-soft);
-  color: var(--color-primary);
-}
-.z18-kart__otvety {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.z18-kart__otvety .btn {
-  flex: 1 1 140px;
-}
-.z18-kart__podskazka {
-  margin: 0;
-  color: var(--color-text-tertiary);
-  font-size: var(--fs-caption);
-  text-align: center;
-}
-
-.z18-karta {
-  perspective: 1400px;
-  touch-action: pan-y;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  transition: transform var(--dur-state) var(--ease);
-}
-.z18-karta__vnutri {
-  display: grid;
-  transform-style: preserve-3d;
-  transition: transform 560ms var(--ease);
-}
-.z18-karta.is-perevernuta .z18-karta__vnutri {
-  transform: rotateY(180deg);
-}
-.z18-karta__storona {
-  grid-area: 1 / 1;
-  display: grid;
-  gap: var(--space-3);
-  align-content: center;
-  min-height: 300px;
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transition: border-color var(--dur-hover) var(--ease);
-}
-.z18-karta__storona--lico:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-.z18-karta__storona--oborot {
-  transform: rotateY(180deg);
-  border-color: var(--color-border-info);
-  background: linear-gradient(180deg, var(--color-surface-info), var(--color-surface) 60%);
-}
-.z18-karta.is-znayu .z18-karta__storona--oborot {
-  border-color: var(--color-success);
-}
-.z18-karta.is-ne-znayu .z18-karta__storona--oborot {
-  border-color: var(--color-callout-vazhno);
-}
-.z18-karta__nazvanie {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-text-brand);
-}
-.z18-karta__dano {
-  margin: 0;
-}
-.z18-karta__vopros {
-  margin: 0;
-  font-weight: 600;
-  text-align: center;
-}
-.z18-karta__podskazka {
-  margin: 0;
-  color: var(--color-text-tertiary);
-  font-size: var(--fs-caption);
-  text-align: center;
-}
-.z18-karta__spisok {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding-left: var(--space-5);
-}
-
-.z18-kart__itog {
-  display: grid;
-  gap: var(--space-3);
-  max-width: 560px;
-  padding: var(--space-6);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-.z18-kart__itog p {
-  margin: 0;
-}
-.z18-kart__itog-title {
-  font-size: 20px;
-  font-weight: 700;
-}
-.z18-kart__itog-chisla {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  font-size: 18px;
-  font-weight: 700;
-}
-.z18-kart__itog-znayu {
-  color: var(--color-status-done-text);
-}
-.z18-kart__itog-povtorit {
-  color: var(--color-status-oshibki-text);
 }
 
 /* Сворачивающаяся плашка под следствием: способы записи, подробности. */

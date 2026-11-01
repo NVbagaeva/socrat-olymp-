@@ -161,6 +161,17 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
     figura === null ? null : (
       <div className="kart-card__fig" dangerouslySetInnerHTML={{ __html: figura }} />
     );
+  /* Свой чертёж оборота (схема с буквами) — тот же вариант, что на лицевой. */
+  const figuraOborota =
+    k.figuryOborota === undefined || k.figuryOborota.length === 0
+      ? null
+      : (k.figuryOborota[variant % k.figuryOborota.length] ?? null);
+  const figOborotaHtml =
+    figuraOborota === null ? (
+      figHtml
+    ) : (
+      <div className="kart-card__fig" dangerouslySetInnerHTML={{ __html: figuraOborota }} />
+    );
 
   const shapka = (
     <div className="kart-card__meta">
@@ -288,7 +299,7 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
               </>
             ) : null}
             {/* У «чертежа» тот же рисунок и на обороте: ответ читается по нему. */}
-            {figHtml}
+            {figOborotaHtml}
             <div className="kart-card__niz">
               {k.teoriya === undefined ? (
                 <span className="kart-card__dobavleno">{T.dobavleno}</span>

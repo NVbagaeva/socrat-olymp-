@@ -11,6 +11,7 @@
 
 import type { Model } from '../solid/model';
 import type { Scena } from '../planimetriya/types';
+import type { ZhivayaSkhema } from '../skhemy/tipy';
 import type { StsenaId } from '../vektory/stseny';
 import type { Risunok as RisunokVektorov } from '../vektory/types';
 
@@ -38,6 +39,10 @@ export type UrovenKartochki = 'база' | 'важно для ЕГЭ';
  * - `plan-scena` — своя сцена движка планиметрии;
  * - `vektory` — сцена теории №2 по ключу или своя конфигурация;
  * - `solid` — модель движка стереометрии;
+ * - `skhema` — живая схема движка lib/skhemy (ключевые схемы №18):
+ *   `povorot` — случайное положение, поворот и отражение; `bukvy` —
+ *   подписи точек на лицевой стороне, `bukvyNaOborote` — на обороте
+ *   (по умолчанию как на лицевой);
  * - `svg` — путь к файлу в public/.
  *
  * `povorot` — рисовать в случайном повороте (тип `chertezh`).
@@ -47,6 +52,14 @@ export type FiguraKartochki =
   | { dvizhok: 'plan-scena'; scena: () => Scena; povorot?: boolean; alt: string }
   | { dvizhok: 'vektory'; stsena: StsenaId | RisunokVektorov }
   | { dvizhok: 'solid'; model: () => Model }
+  | {
+      dvizhok: 'skhema';
+      skhema: () => ZhivayaSkhema;
+      alt: string;
+      povorot?: boolean;
+      bukvy?: boolean;
+      bukvyNaOborote?: boolean;
+    }
   | { svg: string; alt: string };
 
 interface KartochkaObshchee {
@@ -56,9 +69,9 @@ interface KartochkaObshchee {
   task: number;
   /** Подтема — id из `podtemy` колоды. */
   topic: string;
-  /** Вопрос. */
+  /** Вопрос. Перевод строки — новая строка карточки. */
   front: string;
-  /** Ответ: формула, свойство, вывод. */
+  /** Ответ: формула, свойство, вывод. Перевод строки — новая строка. */
   back: string;
   /** Одна строка «почему» под ответом. */
   pochemu?: string;
@@ -120,6 +133,12 @@ export interface Koloda {
   title: string;
   /** Хвост адреса вкладки «Теория» внутри раздела. */
   teoriya: string;
+  /**
+   * Теория номера разбита на страницы (ключевые схемы №18): хвост
+   * адреса страницы фрагмента `source` внутри раздела. Не задано —
+   * «Повторить теорию» ведёт на якорь вкладки `teoriya`.
+   */
+  stranitsa?: (source: string) => string;
   podtemy: readonly Podtema[];
   kartochki: readonly Kartochka[];
   /** Проверки формул для scripts/verify_cards. */

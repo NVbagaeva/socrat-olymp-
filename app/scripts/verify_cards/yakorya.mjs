@@ -42,6 +42,12 @@ const PO_NOMERAM = {
     RAZDELY_GLAVY_2.forEach((r) => out.add(r.id));
     return out;
   },
+  /* №18: «теория» карточки — страница ключевой схемы /skhemy/<id>/;
+     source — id собранной схемы (страницы строятся только для них). */
+  18: () => {
+    const { SOBRANNYE } = requireSrc('content/zadanie18/spisok');
+    return new Set(SOBRANNYE.map((s) => s.id));
+  },
 };
 
 /** Множество якорей теории номера; undefined — номер не описан. */

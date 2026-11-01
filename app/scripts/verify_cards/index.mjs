@@ -256,6 +256,38 @@ for (const k of KOLODY) {
   const tm = L.sobratOchered('temy', kart, {}, rnd, ['t2']);
   if (tm.length !== 6 || tm.some((id) => kart.find((x) => x.id === id).topic !== 't2'))
     fail('«По подтемам»: только отмеченные');
+
+  /* «На сегодня»: 1-я коробка — сразу, 2-я — через сутки, 5-я — через
+     14 дней; запись без времени (старая) — пора. */
+  const DEN = 864e5;
+  const T0 = 1e12;
+  const vr = L.otsenit({}, 'x', true, T0);
+  if (vr.x.t !== T0 || L.otsenit({}, 'x', true).x.t !== undefined)
+    fail('Лейтнер: время оценки пишется, только если передано');
+  const intervaly = [
+    [undefined, 0, true],
+    [{ b: 1, n: 1, t: T0 }, T0, true],
+    [{ b: 2, n: 1, t: T0 }, T0 + 0.5 * DEN, false],
+    [{ b: 2, n: 1, t: T0 }, T0 + DEN, true],
+    [{ b: 3, n: 1, t: T0 }, T0 + 2.9 * DEN, false],
+    [{ b: 5, n: 1, t: T0 }, T0 + 14 * DEN, true],
+    [{ b: 5, n: 1 }, T0, true],
+  ];
+  for (const [z, seychas, zhdu] of intervaly) {
+    const pp = z === undefined ? {} : { x: z };
+    if (L.poraPovtoryat(pp, 'x', seychas) !== zhdu)
+      fail(`«На сегодня»: коробка ${z?.b}, ${(seychas - T0) / DEN} дн. — ${!zhdu}`);
+  }
+  const sg = L.sobratOchered(
+    'segodnya',
+    kart,
+    { a: { b: 3, n: 1, t: T0 }, b: { b: 1, n: 1, t: T0 } },
+    rnd,
+    [],
+    T0 + DEN,
+  );
+  if (sg.includes('a') || !sg.includes('b') || sg.length !== 11)
+    fail('«На сегодня»: без карточек, которым ещё рано');
 }
 
 /* ── Сводка ── */
