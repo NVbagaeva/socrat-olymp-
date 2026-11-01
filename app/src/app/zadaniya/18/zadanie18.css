@@ -259,32 +259,74 @@
   text-wrap: pretty;
 }
 
-/* ── Строки-аккордеоны ── */
+/* ── Строки-аккордеоны ──
+   Строка: [плитка 44 со значком] [название + подзаголовок] [мини-превью,
+   только ≥ 768px] [стрелка]. Свёрнутые строки одной высоты:
+   --tekst-h ставит useRovnyeStroki (Vvodnaya18.tsx). Вид «открыто» —
+   [open] без data-zakryvaetsya: пока блок закрывается, строка уже
+   выглядит свёрнутой. Все переходы — 200 мс; при reduced-motion строка
+   не двигается (подъём, наклон значка и сдвиг стрелки выключены). */
 .z18-vv__bloki {
   display: grid;
   gap: var(--space-3);
 }
 .z18-vv__blok {
+  --ton: var(--color-primary);
+  --ton-2: var(--color-primary);
+  --ton-ikonka: var(--color-primary);
   border: 1px solid var(--glass-edge);
   border-radius: var(--radius-lg);
   background: var(--glass-bg);
   box-shadow: var(--glass-ring), var(--glass-hi);
-  transition: box-shadow var(--dur-hover) var(--ease);
+  transition:
+    transform 200ms var(--ease),
+    box-shadow 200ms var(--ease),
+    border-color 200ms var(--ease);
+}
+.z18-vv__blok--teplo {
+  --ton: var(--color-accent);
+  --ton-2: var(--color-accent);
+  --ton-ikonka: var(--color-accent);
+}
+.z18-vv__blok--gradient {
+  --ton-2: var(--color-accent);
+}
+/* Синий → терракота: оттенок второго конца ярче, иначе переход не виден. */
+.z18-vv__blok--gradient .z18-vv__plitka {
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--color-primary) 22%, white) 15%,
+    color-mix(in srgb, var(--color-accent) 24%, white)
+  );
+}
+.z18-vv__blok--gradient .z18-vv__plitka::before {
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--color-primary) 40%, white) 15%,
+    color-mix(in srgb, var(--color-accent) 40%, white)
+  );
 }
 .z18-vv__blok:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 28%, white);
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
 }
-/* Тап-зона — вся строка, не ниже 52px. */
+.z18-vv__blok:not([open]):hover {
+  transform: translateY(-2px);
+}
+
+/* Тап-зона — вся строка: ~72px на телефоне, ~76px от 768px. */
 .z18-vv__blok-stroka {
-  display: flex;
+  display: grid;
+  /* Телефон: стрелка уже и зазоры по 10px — названию остаётся
+     ширина, и самая длинная строка ложится в две строки, а не в три. */
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
   align-items: center;
-  gap: var(--space-3);
-  min-height: 56px;
-  padding: var(--space-2) var(--space-4);
+  column-gap: 10px;
+  min-height: 72px;
+  padding: var(--space-3);
   border-radius: inherit;
   cursor: pointer;
   list-style: none;
-  font-weight: 600;
   color: var(--color-text-brand);
   -webkit-tap-highlight-color: transparent;
 }
@@ -293,43 +335,250 @@
 }
 .z18-vv__blok-stroka:focus-visible {
   outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  /* Внутрь строки: соседние строки и края колонки рамку не срезают. */
+  outline-offset: -2px;
 }
-.z18-vv__blok-ikonka,
-.z18-vv__blok-shevron {
-  display: inline-grid;
+
+/* Плитка: матовое стекло с оттенком строки, блик сверху. Насыщенная
+   заливка открытого блока — отдельным слоем (::before), чтобы
+   переход был по прозрачности: градиенты сами не анимируются. */
+.z18-vv__plitka {
+  position: relative;
+  display: grid;
   place-items: center;
-  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgb(255 255 255 / 0.75);
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--ton) 20%, white),
+    color-mix(in srgb, var(--ton-2) 9%, white)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    0 0 0 1px color-mix(in srgb, var(--ton) 16%, transparent),
+    0 6px 14px -8px color-mix(in srgb, var(--ton) 70%, transparent);
+  color: var(--ton-ikonka);
+  overflow: hidden;
+  isolation: isolate;
 }
-.z18-vv__blok-ikonka {
-  width: 28px;
-  height: 28px;
-  color: var(--color-primary);
+.z18-vv__plitka::before,
+.z18-vv__plitka::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
 }
-.z18-vv__blok-ikonka svg {
-  width: 26px;
-  height: 26px;
+.z18-vv__plitka::before {
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--ton) 38%, white),
+    color-mix(in srgb, var(--ton-2) 26%, white)
+  );
+  opacity: 0;
+  transition: opacity 200ms var(--ease);
 }
-.z18-vv__blok:first-child .z18-vv__blok-ikonka {
-  color: var(--color-accent);
+/* Блик по верхней половине. */
+.z18-vv__plitka::after {
+  inset: 0 0 50%;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0));
+}
+.z18-vv__plitka svg {
+  width: 22px;
+  height: 22px;
+  transition: transform 200ms var(--ease);
+}
+.z18-vv__blok-stroka:hover .z18-vv__plitka svg {
+  transform: rotate(6deg);
+}
+
+.z18-vv__blok-tekst {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+  min-height: var(--tekst-h, 0px);
+  transition: min-height 200ms var(--ease);
 }
 .z18-vv__blok-title {
-  flex: 1;
-  min-width: 0;
-  line-height: 1.3;
+  font-size: var(--fs-body);
+  line-height: 1.25;
+  font-weight: 650;
 }
+.z18-vv__blok-podzag {
+  display: grid;
+  grid-template-rows: 1fr;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.3;
+  transition:
+    grid-template-rows 200ms var(--ease),
+    opacity 200ms var(--ease);
+}
+.z18-vv__blok-podzag > span {
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 2px;
+}
+
+.z18-vv__prevyu {
+  display: none;
+}
+
 .z18-vv__blok-shevron {
-  width: 24px;
+  --dy: 0px;
+  --rot: 0deg;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
   height: 24px;
   color: var(--color-text-secondary);
-  transition: transform 220ms var(--ease);
+  transform: translateY(var(--dy)) rotate(var(--rot));
+  transition: transform 200ms var(--ease);
 }
 .z18-vv__blok-shevron svg {
   width: 20px;
   height: 20px;
 }
-.z18-vv__blok[open] .z18-vv__blok-shevron {
-  transform: rotate(180deg);
+.z18-vv__blok-stroka:hover .z18-vv__blok-shevron {
+  --dy: 2px;
+}
+
+/* Открыто. */
+.z18-vv__blok[open]:not([data-zakryvaetsya]) .z18-vv__plitka::before {
+  opacity: 1;
+}
+.z18-vv__blok[open]:not([data-zakryvaetsya]) .z18-vv__blok-tekst {
+  min-height: 0;
+}
+.z18-vv__blok[open]:not([data-zakryvaetsya]) .z18-vv__blok-podzag {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.z18-vv__blok[open]:not([data-zakryvaetsya]) .z18-vv__blok-podzag > span {
+  padding-top: 0;
+}
+.z18-vv__blok[open]:not([data-zakryvaetsya]) .z18-vv__blok-shevron {
+  --rot: 180deg;
+}
+.z18-vv__blok[open]:not([data-zakryvaetsya]) .z18-vv__prevyu {
+  opacity: 0;
+  transform: scale(0.92);
+  visibility: hidden;
+}
+
+/* Мини-превью: от 768px, справа перед стрелкой. */
+@media (min-width: 768px) {
+  .z18-vv__blok-stroka {
+    grid-template-columns: 44px minmax(0, 1fr) auto 24px;
+    column-gap: var(--space-4);
+    min-height: 76px;
+    padding: var(--space-4);
+  }
+  .z18-vv__prevyu {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 64px;
+    transition:
+      opacity 200ms var(--ease),
+      transform 200ms var(--ease),
+      visibility 200ms;
+  }
+}
+/* 1024–1279: левая колонка карточки узкая (62 % от ~720px), и с
+   превью тексту остаётся ~160px — название в три строки. Здесь превью
+   убрано (оно декоративное), строка как на телефоне. Подзаголовок
+   переносится, а не режется многоточием; шире 1280 он в одну строку. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .z18-vv__blok-stroka {
+    grid-template-columns: 44px minmax(0, 1fr) 24px;
+    column-gap: var(--space-3);
+  }
+  .z18-vv__prevyu {
+    display: none;
+  }
+}
+@media (min-width: 1280px) {
+  .z18-vv__blok-podzag > span {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+/* Две миниатюры внахлёст. */
+.z18-vv__prevyu-para {
+  display: flex;
+}
+.z18-vv__mini {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 0.9);
+  background: color-mix(in srgb, var(--color-primary) 8%, white);
+  box-shadow: 0 4px 10px -6px rgb(31 95 208 / 0.5);
+  overflow: hidden;
+}
+.z18-vv__mini + .z18-vv__mini {
+  margin-left: -10px;
+}
+.z18-vv__mini img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Чертежи превью. */
+.z18-vv__prevyu-svg {
+  display: block;
+  width: 64px;
+  height: 40px;
+  overflow: visible;
+  fill: none;
+  stroke-linejoin: round;
+}
+.z18-vv__prevyu-bolshoy {
+  stroke: color-mix(in srgb, var(--color-primary) 45%, white);
+  stroke-width: 1.5;
+}
+.z18-vv__prevyu-malyy {
+  fill: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  stroke: var(--color-primary);
+  stroke-width: 1.2;
+  transition:
+    stroke 200ms var(--ease),
+    fill 200ms var(--ease);
+}
+.z18-vv__blok-stroka:hover .z18-vv__prevyu-malyy {
+  fill: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  stroke: var(--color-accent);
+}
+.z18-vv__prevyu-liniya {
+  stroke: color-mix(in srgb, var(--color-primary) 35%, white);
+  stroke-width: 1.2;
+}
+.z18-vv__prevyu-shag {
+  fill: white;
+  stroke: color-mix(in srgb, var(--color-primary) 45%, white);
+  stroke-width: 1.2;
+}
+.z18-vv__prevyu-no {
+  fill: var(--color-primary);
+  font-size: 9px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z18-vv__blok:not([open]):hover,
+  .z18-vv__blok-stroka:hover .z18-vv__plitka svg {
+    transform: none;
+  }
+  .z18-vv__blok-stroka:hover .z18-vv__blok-shevron {
+    --dy: 0px;
+  }
 }
 .z18-vv__blok-telo {
   overflow: hidden;

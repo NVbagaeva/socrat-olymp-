@@ -96,6 +96,42 @@ for (const k of KARTINKI) {
   }
 }
 
+/* Миниатюры для превью строки «Почему нужны и знания, и инструменты»:
+   квадратный узнаваемый фрагмент (кресло с лампой, паяльник с «?»),
+   круг рисует CSS; 36 и 72px. Бюджет — 8 КБ на файл: превью видно
+   сразу, грузиться должно мгновенно. */
+const MINI = {
+  stomatolog: { left: 60, top: 120, width: 440, height: 440 },
+  payalnik: { left: 70, top: 20, width: 470, height: 470 },
+};
+const MINI_BUDGET = 8 * 1024;
+for (const [name, kadr] of Object.entries(MINI)) {
+  console.log(`\n${name}.png → миниатюры`);
+  for (const size of [36, 72]) {
+    /* extract и resize в одной цепочке sharp выполняет в своём порядке —
+       сначала вырезаем, потом уменьшаем отдельным проходом. */
+    const vyrez = await sharp(path.join(SRC, `${name}.png`))
+      .extract(kadr)
+      .png()
+      .toBuffer();
+    const frame = await sharp(vyrez).resize({ width: size, height: size }).png().toBuffer();
+    for (const ext of ['avif', 'webp']) {
+      const out = await podobrat(frame, ext, MINI_BUDGET);
+      if (out === null) {
+        console.error(`  ✗ mini-${size}.${ext}: контур нечистый`);
+        failed = true;
+        continue;
+      }
+      await writeFile(path.join(OUT, `${name}-mini-${size}.${ext}`), out.buffer);
+      const ok = out.buffer.length <= MINI_BUDGET;
+      console.log(
+        `  ${ok ? '✓' : '✗'} mini-${size}.${ext}: ${kb(out.buffer.length)}, q${out.quality}`,
+      );
+      if (!ok) failed = true;
+    }
+  }
+}
+
 if (failed) {
   console.error('\nЕсть ошибки — см. ✗ выше.');
   process.exit(1);
