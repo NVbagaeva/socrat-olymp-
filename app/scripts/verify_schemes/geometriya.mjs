@@ -10,7 +10,8 @@
       Искомые площади (region-sought: menelay-pl, obshchiy-ugol,
       trap-seredina, ravnobok-perp) добавили подписи «S = ?», а пунктир
       искомой фигуры стал препятствием подписям — записи этих шаблонов и
-      буквы menelay-pl сняты заново намеренно.
+      буквы menelay-pl сняты заново намеренно. Так же — diag-trap,
+      vnevpis и vpis-lmn (тренажёр опорных задач 656–669).
       Обновить эталон после намеренной правки геометрии:
         node scripts/verify_schemes/geometriya.mjs --obnovit
    2. Роли темы: у каждого шаблона есть основная фигура (figure или
@@ -181,6 +182,11 @@ export function proverit() {
       );
     for (const t2 of t.varianty) proveritCveta(sch, t.id, scena18(t.id, t2), t.tekst(t2).b);
   }
+  /* Опорные задачи №18: те же правила цвета и площадей на их чертежах. */
+  const { OPORNYE_18 } = requireSrc('content/zadanie18/opornye');
+  const { trebuetsyaScenaOpornoy18 } = requireSrc('lib/zadanie18/opornye');
+  for (const o of OPORNYE_18)
+    proveritCveta(sch, `опорная ${o.no}`, trebuetsyaScenaOpornoy18(o.id), o.b);
   return { plokho: sch.itog() };
 }
 

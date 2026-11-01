@@ -4,7 +4,7 @@
  * content/zadanie18/opornye/trapeciya.ts.
  */
 
-import { mnog, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, ug, vel } from '@/lib/skhemy/dsl';
 import { angleAt, chisloTeX, dist, foot, intersect, mid, orient } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import { parametry, scena, signedS, vPromezhutke } from './obshchee';
@@ -63,6 +63,14 @@ export const OP_BABOCHKA = scena({
     const HB = foot(B, A, D);
     const HC = foot(C, A, D);
     const el: Element[] = [
+      /* б) ищет площадь: искомая фигура и «S = ?». */
+      mnog('isk', [A, B, C, D], { skrytyy: false, rol: 'region-sought' }),
+      vel(
+        'd-S',
+        'S_ABCD = ?',
+        { vnutri: [(A[0] + B[0] + O[0]) / 3, (A[1] + B[1] + O[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       mnog('f-abd', [A, B, D], { gruppy: ['obsh'], cvet: 'a' }),
       mnog('f-acd', [A, C, D], { gruppy: ['obsh'], cvet: 'b' }),
       mnog('f-aob', [A, O, B], { gruppy: ['rav', 'vys'], cvet: 'b' }),
@@ -189,6 +197,14 @@ export const OP_PERP_DIAG = scena({
   postroit(t) {
     const { A, B, C, D, O, P, Q, H } = tochkiPerpDiag(t);
     const el: Element[] = [
+      /* б) ищет площадь: искомая фигура и «S = ?». */
+      mnog('isk', [A, B, C, D], { skrytyy: false, rol: 'region-sought' }),
+      vel(
+        'd-S',
+        'S_ABCD = ?',
+        { vnutri: [(A[0] + B[0] + O[0]) / 3, (A[1] + B[1] + O[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       mnog('f-abcd', [A, B, C, D], { gruppy: ['pl'], cvet: 'c' }),
       mnog('f-aod', [A, O, D], { gruppy: ['pr', 'vys'], cvet: 'a' }),
       mnog('f-boc', [B, O, C], { gruppy: ['pr', 'vys'], cvet: 'b' }),

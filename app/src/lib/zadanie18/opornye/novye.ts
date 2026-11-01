@@ -93,7 +93,8 @@ export const OP_DIAG_TRAP = scena({
   postroit(t) {
     const { A, B, C, D, E, O, a, b, d1, d2 } = tochkiDiagTrap(t);
     const el: Element[] = [
-      mnog('fig', [A, B, C, D], { skrytyy: false, rol: 'figure' }),
+      /* б) ищет площадь трапеции. */
+      mnog('fig', [A, B, C, D], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-bced', [B, C, E, D], { gruppy: ['perenos'], cvet: 'b' }),
       mnog('f-ace', [A, C, E], { gruppy: ['treug', 'ploshchad'], cvet: 'a' }),
       otr('AB', A, B, { rol: 'figure' }),
@@ -122,6 +123,12 @@ export const OP_DIAG_TRAP = scena({
       velOtr('d-BC', ch(b), B, C),
       velOtr('d-AC', ch(d1), A, O),
       velOtr('d-BD', ch(d2), O, D),
+      vel(
+        'd-S',
+        'S_ABCD = ?',
+        { vnutri: [(A[0] + B[0] + O[0]) / 3, (A[1] + B[1] + O[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -838,7 +845,8 @@ export const OP_VNEVPIS = scena({
     const T2b = foot(kb.c, A, B);
     const prodl = (p: T2, q: T2, k: number) => add(q, mul(sub(q, p), k));
     const el: Element[] = [
-      mnog('fig', [A, B, C], { skrytyy: false, rol: 'figure' }),
+      /* б) ищет площадь ACB. */
+      mnog('fig', [A, B, C], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-kv', [C, P, ka.c, S], { gruppy: ['kv'], cvet: 'a' }),
       otr('AB', A, B, { rol: 'figure' }),
       otr('BC', B, C, { rol: 'figure' }),
@@ -849,7 +857,7 @@ export const OP_VNEVPIS = scena({
       otr('BC+', C, prodl(B, C, 1.6), { rol: 'construction', stil: 'prodolzhenie' }),
       okr('ka', ka.c, ka.r, { rol: 'figure' }),
       okr('kb', kb.c, kb.r, { rol: 'figure' }),
-      otr('AT', A, T, { rol: 'part-x', skrytyy: true, gruppy: ['kas', 'polu'], cvet: 'a' }),
+      otr('AT', A, T, { skrytyy: true, gruppy: ['kas', 'polu'], cvet: 'a' }),
       otr('AS', A, S, { skrytyy: true, gruppy: ['kas', 'polu'], cvet: 'a' }),
       otr('BT', B, T, { skrytyy: true, shtrihi: 1, gruppy: ['kas'], cvet: 'b' }),
       otr('BP', B, P, { skrytyy: true, shtrihi: 1, gruppy: ['kas'], cvet: 'b' }),
@@ -861,6 +869,12 @@ export const OP_VNEVPIS = scena({
       ug('pC', A, C, B, { pryamoy: true }),
       vel('d-ra', `r = ${ch(ka.r)}`, { vnutri: ka.c }),
       vel('d-rb', `r = ${ch(kb.r)}`, { vnutri: kb.c }),
+      vel(
+        'd-S',
+        'S_ACB = ?',
+        { vnutri: [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -1143,6 +1157,20 @@ export function tochkiVpisLMN(t: Tochki) {
   return { K: sk(K), L: sk(L), M: sk(M), N: sk(N), P: sk(P), O: [0, 0] as T2, R: R * k, uM };
 }
 
+/**
+ * Середина сегмента круга (c, r), отсечённого хордой pq, — точка между
+ * серединой хорды и серединой дуги pq (дуга против часовой от p к q).
+ */
+function segmentZaHordoy(c: T2, r: number, p: T2, q: T2): T2 {
+  const m = mid(p, q);
+  const d: T2 = [q[0] - p[0], q[1] - p[1]];
+  /* Нормаль вправо от направления p → q: туда лежит дуга против часовой от p к q. */
+  const l = Math.hypot(d[0], d[1]) || 1;
+  const n: T2 = [d[1] / l, -d[0] / l];
+  const h = r - ((m[0] - c[0]) * n[0] + (m[1] - c[1]) * n[1]);
+  return [m[0] + (n[0] * h) / 2, m[1] + (n[1] * h) / 2];
+}
+
 export const OP_VPIS_LMN = scena({
   id: 'vpisannyy-ravnye-hordy',
   /* K не в середине дуги: ответ б) от положения K не зависит — так это видно. */
@@ -1157,7 +1185,8 @@ export const OP_VPIS_LMN = scena({
     const { K, L, M, N, P, O, R, uM } = tochkiVpisLMN(t);
     const el: Element[] = [
       okr('k', O, R, { rol: 'figure' }),
-      mnog('fig', [K, L, M, N], { skrytyy: false, rol: 'figure' }),
+      /* б) ищет площадь KLMN. */
+      mnog('fig', [K, L, M, N], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-mlp', [M, L, P], { gruppy: ['pod'], cvet: 'a' }),
       mnog('f-mkl', [M, K, L], { gruppy: ['pod'], cvet: 'b' }),
       mnog('reg', [K, L, M, N], { gruppy: ['pl', 'otvet'], cvet: 'a' }),
@@ -1165,13 +1194,20 @@ export const OP_VPIS_LMN = scena({
       otr('LM', L, M, { rol: 'figure', shtrihi: 1 }),
       otr('MN', M, N, { rol: 'figure', shtrihi: 1 }),
       otr('NK', N, K, { rol: 'figure', gruppy: ['pl'], cvet: 'a' }),
-      otr('KM', K, M, { rol: 'part-x', gruppy: ['pod', 'pl'], cvet: 'b' }),
+      otr('KM', K, M, { rol: 'aux', gruppy: ['pod', 'pl'], cvet: 'b' }),
       otr('LN', L, N, { rol: 'aux', gruppy: ['pod', 'ptol'], cvet: 'a' }),
       ug('uMKL', M, K, L, { skrytyy: true, gruppy: ['ugly', 'pod', 'pl'], cvet: 'c' }),
       ug('uMLN', M, L, N, { skrytyy: true, gruppy: ['ugly', 'pod'], cvet: 'c' }),
       ug('uMKN', M, K, N, { skrytyy: true, gruppy: ['pl'], cvet: 'c' }),
       ug('uLMN', L, M, N, { rol: 'angle' }),
-      velOtr('d-KM', ch(dist(K, M)), K, P, { rol: 'part-x' }),
+      velOtr('d-KM', ch(dist(K, M)), K, P),
+      vel(
+        'd-S',
+        'S_KLMN = ?',
+        /* KLMN узкий: подпись — в свободном сегменте круга за хордой KN (дуга без M). */
+        { vnutri: segmentZaHordoy(O, R, K, N) },
+        { rol: 'region-sought' },
+      ),
       velUg('d-M', `${Math.round(uM)}°`, L, M, N),
       tch('K', K),
       tch('L', L),
