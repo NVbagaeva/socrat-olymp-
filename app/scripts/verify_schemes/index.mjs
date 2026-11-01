@@ -16,7 +16,6 @@ import { proverit as bissektrisa } from './bissektrisa.mjs';
 import { proverit as kasatelnye } from './kasatelnye.mjs';
 import { proverit as mediana } from './mediana.mjs';
 import { proverit as menelay } from './menelay.mjs';
-import { proverit as opornye } from './opornye.mjs';
 import { proverit as teoriya } from './teoriya.mjs';
 import { proverit as trenazher } from './trenazher.mjs';
 import { proverit as stepenTochki } from './stepenTochki.mjs';
@@ -49,7 +48,6 @@ for (const proverit of [
   menelay,
   ploshchadi,
   stepenTochki,
-  opornye,
   teoriya,
   trenazher,
 ]) {

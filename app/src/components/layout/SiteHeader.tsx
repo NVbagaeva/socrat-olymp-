@@ -1,7 +1,8 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { AuthWidget } from '@/components/auth/AuthWidget';
-import { site } from '@/content/site';
+import { isNavGroup, site } from '@/content/site';
+import { NavDropdown } from './NavDropdown';
 import { SiteMenu } from './SiteMenu';
 
 export interface SiteHeaderProps {
@@ -21,15 +22,19 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
         </Link>
 
         <nav className="site-nav" aria-label="Разделы сайта">
-          {site.nav.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              aria-current={link.href === currentHref ? 'page' : undefined}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {site.nav.map((link) =>
+            isNavGroup(link) ? (
+              <NavDropdown key={link.label} group={link} currentHref={currentHref} />
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={link.href === currentHref ? 'page' : undefined}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
         </nav>
 
         <div className="site-head__cta">
