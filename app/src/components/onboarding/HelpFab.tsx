@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { HELP, HOWTO_HREF } from '@/content/onboarding';
 import { useDismiss } from '@/lib/dismiss';
 import { requestIntro, useOnboarding } from '@/lib/onboarding';
@@ -12,6 +13,11 @@ import { TourButtons } from './TourButtons';
  * шага, начать заново) и инструкция. Пока идёт тур,
  * кнопки нет — тур закрывается своим крестиком. На телефоне в кабинете
  * кнопка стоит над нижней панелью навигации (onboarding.css).
+ *
+ * Место кнопки — только CSS (position: fixed и токены --fab-*), JS
+ * координат не считает. Кнопка выводится порталом прямо в body: внутри
+ * предка с transform, filter или backdrop-filter fixed прилипает
+ * к нему, а не к экрану, и кнопка ездит вместе с ним.
  */
 export function HelpFab() {
   const state = useOnboarding();
@@ -24,7 +30,7 @@ export function HelpFab() {
 
   if (state.active !== null) return null;
 
-  return (
+  return createPortal(
     <div className="help-fab" ref={root}>
       {open ? (
         <div className="help-fab__menu" id={menuId} role="menu" aria-label={HELP.title}>
@@ -65,6 +71,7 @@ export function HelpFab() {
           <circle cx="12" cy="18" r="0.6" />
         </svg>
       </button>
-    </div>
+    </div>,
+    document.body,
   );
 }

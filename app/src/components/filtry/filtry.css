@@ -380,7 +380,9 @@
 @media (max-width: 759.98px) {
   /* Место под липкую панель «Начать тренировку» — внизу страницы. */
   .app-main:has(.flt-go) {
-    padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + 96px);
+    /* Панель и над ней кнопка «?»: подъём кнопки (--fab-lift, в нём
+       и нижняя навигация) плюс её место (--fab-reserve). */
+    padding-bottom: calc(var(--fab-lift) + var(--fab-reserve) + env(safe-area-inset-bottom));
   }
   .flt-card {
     display: none;
@@ -439,7 +441,7 @@
     flex: none;
   }
   /* Кнопка «?» сайта — над панелью, а не поверх неё. */
-  body:has(.flt-go) .help-fab.help-fab {
-    bottom: calc(var(--h-bnav, 0px) + 80px + env(safe-area-inset-bottom));
+  body:has(.flt-go) {
+    --fab-lift: calc(var(--h-bnav, 0px) + 80px - var(--fab-gap));
   }
 }

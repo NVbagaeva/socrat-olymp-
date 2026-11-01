@@ -1257,6 +1257,11 @@ a.tutor-card:hover {
     position: sticky;
     /* Под прилипшей лентой вкладок. */
     top: calc(var(--topic-sticky-top, 0px) + var(--space-6));
+    /* Длинный список прокручивается внутри колонки и кончается выше
+       кнопки «?» (--fab-reserve): последние пункты не уходят под неё. */
+    max-height: calc(100dvh - var(--topic-sticky-top, 0px) - var(--space-6) - var(--fab-reserve));
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 

@@ -318,16 +318,31 @@
 }
 
 /* ── Кнопка «?» ────────────────────────────────────────────────── */
+/* Место кнопки задаёт только CSS, и только здесь: position: fixed,
+   отступы — токены --fab-* (tokens.css). JS координат не считает, на
+   прокрутку и смену размера окна не подписан. Разделы, где внизу
+   экрана своя панель (нижняя навигация, «Сгенерировать», «Начать
+   тренировку»), меняют не bottom, а токен --fab-lift — высоту того,
+   над чем кнопка стоит; значение одно на раскладку и при прокрутке не
+   меняется. Кнопка — прямой потомок body (портал в HelpFab.tsx):
+   предок с transform или backdrop-filter сделал бы fixed «прилипшим»
+   к нему, а не к экрану. Переходов у top/bottom/transform нет. */
 
 .help-fab {
   position: fixed;
-  right: var(--space-6);
-  bottom: var(--space-6);
+  right: calc(var(--fab-gap) + env(safe-area-inset-right));
+  bottom: calc(var(--fab-lift) + var(--fab-gap) + env(safe-area-inset-bottom));
   z-index: 40;
+  /* Скрытие — только прозрачностью: место кнопки не меняется. Показ
+     с небольшой задержкой — гистерезис: при переходе фокуса между
+     полями кнопка не мигает. */
+  transition:
+    opacity var(--dur-switch) var(--ease) 120ms,
+    visibility 0s linear 120ms;
 }
 .help-fab__button {
-  width: 52px;
-  height: 52px;
+  width: var(--fab-size);
+  height: var(--fab-size);
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -340,8 +355,8 @@
   background: var(--color-primary-hover);
 }
 .help-fab__button svg {
-  width: 26px;
-  height: 26px;
+  width: calc(var(--fab-size) / 2);
+  height: calc(var(--fab-size) / 2);
   fill: none;
   stroke: currentColor;
   stroke-width: 2.2;
@@ -375,29 +390,38 @@
   background: var(--color-surface-2);
 }
 
-@media (max-width: 767.98px) {
-  .help-fab {
-    right: var(--space-4);
-    bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
-  }
-  .help-fab__button {
-    width: 48px;
-    height: 48px;
+/* Открыта экранная клавиатура (поле ввода в фокусе на сенсорном
+   экране): кнопку прячем. В Safari на iPad закреплённое снизу при
+   открытой клавиатуре висит посреди страницы и ездит при прокрутке. */
+@media (hover: none) and (pointer: coarse) {
+  body:has(
+      :is(
+        input:not(
+          [type='checkbox'],
+          [type='radio'],
+          [type='range'],
+          [type='button'],
+          [type='submit']
+        ),
+        textarea,
+        [contenteditable='true']
+      ):focus
+    )
+    .help-fab:not(:focus-within) {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--dur-switch) var(--ease),
+      visibility 0s linear var(--dur-switch);
   }
 }
-/* В кабинете ниже 1024px внизу нижняя панель навигации: кнопка над ней. */
-@media (max-width: 1023.98px) {
-  body:has(.bnav--shell) .help-fab {
-    bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-4));
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .tour__veil,
   .tour__hole,
   .tour[data-spot='on'][data-ready] .tour__hole,
   .tour-card,
-  .help-fab__button {
+  .help-fab__button,
+  .help-fab {
     transition: none;
   }
 }
