@@ -506,7 +506,14 @@ const bad = [];
 let oknaVsego = 0;
 for (const file of files) {
   const rel = path.relative(outDir, file);
-  const text = raskryt(fs.readFileSync(file, 'utf8'));
+  /* Подпись формулы для скринридера (role="math" aria-label, lib/katexOdin.js)
+     повторяет словами формулу, которая и так видна на странице: открытая
+     выкладка теории «sin²α + cos²α = 1» — не утечка ответа. Подпись в
+     поиске не участвует; сами формулы (вёрстка) проверяются как раньше. */
+  const text = raskryt(fs.readFileSync(file, 'utf8')).replace(
+    /role="math" aria-label="[^"]*"/g,
+    'role="math"',
+  );
   const problemy = [];
 
   /* Ключи сервиса входа — во всех файлах сборки. */
