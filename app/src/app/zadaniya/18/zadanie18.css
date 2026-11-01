@@ -664,6 +664,10 @@
 .z18-sk__nav-link {
   display: grid;
   gap: var(--space-1);
+  /* Длинное название соседней схемы или задачи переносится, а не
+     выталкивает ссылку за край на 320 px. */
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--color-text);
   font-weight: 600;
   text-decoration: none;
