@@ -323,7 +323,7 @@ export const VARIANT: VariantPV = {
       { s: 'ae17.polukrug', p: { k: 15, vopros: 'S' } },
       { s: 'ae18.vnevpisannaya', p: { a: 12, b: 7, c: 9, nado: 'BL' } },
       { s: 'ae19.pokazOtrezok', p: { b: 3, c: 2, lo: -1, hi: 2, n: 2 } },
-      { s: 'ae20.progressiya', p: { S: 129, n1: 8, n2: 4 } },
+      { s: 'ae20.progressiya', p: { S: 187, n1: 11, n2: 14 } },
     ],
     [
       { s: 'ae14.logObratnyy', p: { b: 3, t1: 2, t2: 3, lo: 0, hi: 14 } },
@@ -332,7 +332,7 @@ export const VARIANT: VariantPV = {
       { s: 'ae17.polukrug', p: { k: 9, vopros: 'P' } },
       { s: 'ae18.vnevpisannaya', p: { a: 8, b: 10, c: 8, nado: 'KL' } },
       { s: 'ae19.pokazOtrezok', p: { b: 3, c: 29, lo: 0, hi: 4, n: 2 } },
-      { s: 'ae20.progressiya', p: { S: 173, n1: 4, n2: 12 } },
+      { s: 'ae20.progressiya', p: { S: 75, n1: 4, n2: 6 } },
     ],
     [
       { s: 'ae14.logObratnyy', p: { b: 5, t1: 1, t2: 3, lo: 1, hi: 63 } },
@@ -341,7 +341,7 @@ export const VARIANT: VariantPV = {
       { s: 'ae17.polukrug', p: { k: 18, vopros: 'P' } },
       { s: 'ae18.vnevpisannaya', p: { a: 10, b: 5, c: 11, nado: 'BL' } },
       { s: 'ae19.pokazOtrezok', p: { b: 3, c: 18, lo: -2, hi: 3, n: 2 } },
-      { s: 'ae20.progressiya', p: { S: 170, n1: 6, n2: 7 } },
+      { s: 'ae20.progressiya', p: { S: 135, n1: 10, n2: 12 } },
     ],
     [
       { s: 'ae14.logObratnyy', p: { b: 5, t1: 1, t2: 2, lo: 0, hi: 12 } },
@@ -350,7 +350,7 @@ export const VARIANT: VariantPV = {
       { s: 'ae17.polukrug', p: { k: 10, vopros: 'S' } },
       { s: 'ae18.vnevpisannaya', p: { a: 12, b: 6, c: 10, nado: 'BL' } },
       { s: 'ae19.pokazOtrezok', p: { b: 2, c: 3, lo: -2, hi: 2, n: 2 } },
-      { s: 'ae20.progressiya', p: { S: 100, n1: 4, n2: 10 } },
+      { s: 'ae20.progressiya', p: { S: 210, n1: 8, n2: 12 } },
     ],
     [
       { s: 'ae14.logObratnyy', p: { b: 2, t1: -1, t2: 2, lo: 0, hi: 3 } },
@@ -359,7 +359,7 @@ export const VARIANT: VariantPV = {
       { s: 'ae17.polukrug', p: { k: 12, vopros: 'S' } },
       { s: 'ae18.vnevpisannaya', p: { a: 7, b: 12, c: 11, nado: 'BL' } },
       { s: 'ae19.pokazOtrezok', p: { b: 2, c: 3, lo: -1, hi: 2, n: 1 } },
-      { s: 'ae20.progressiya', p: { S: 195, n1: 8, n2: 12 } },
+      { s: 'ae20.progressiya', p: { S: 171, n1: 3, n2: 4 } },
     ],
     [
       { s: 'ae14.logObratnyy', p: { b: 5, t1: 2, t2: 3, lo: 1, hi: 63 } },
@@ -368,7 +368,7 @@ export const VARIANT: VariantPV = {
       { s: 'ae17.polukrug', p: { k: 13, vopros: 'dlina' } },
       { s: 'ae18.vnevpisannaya', p: { a: 12, b: 6, c: 14, nado: 'BL' } },
       { s: 'ae19.pokazOtrezok', p: { b: 3, c: 20, lo: -1, hi: 3, n: 2 } },
-      { s: 'ae20.progressiya', p: { S: 197, n1: 7, n2: 10 } },
+      { s: 'ae20.progressiya', p: { S: 99, n1: 5, n2: 9 } },
     ],
   ],
 };

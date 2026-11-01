@@ -20,7 +20,16 @@ export function chislaV20(p: PV20) {
   let n = 1;
   while (2 ** (n - 1) < p.N2) n++;
   const summa = 2 ** p.m - 1;
-  return { daA, n, summa };
+  /* Пример к а): идём от a_k = N₁ назад, a_{j−1} = max(j − 1, ⌈a_j/2⌉). */
+  const primerA: number[] = [];
+  if (daA) {
+    let t = p.N1;
+    for (let j = p.k; j >= 1; j -= 1) {
+      primerA.unshift(t);
+      t = Math.max(j - 1, Math.ceil(t / 2));
+    }
+  }
+  return { daA, n, summa, primerA };
 }
 
 function sobrat(p: PV20): Chast2Zadacha {
@@ -53,7 +62,7 @@ function sobrat(p: PV20): Chast2Zadacha {
         title: 'а)',
         lines: ch.daA
           ? [
-              `Да: возьмём $a_j=j$ при малых $j$, а затем будем удваивать или увеличивать на нужную величину; так как $${p.k}\\le${p.N1}\\le2^{${p.k - 1}}$, можно дойти до $a_{${p.k}}=${p.N1}$ (каждый шаг — не больше удвоения).`,
+              `Да. Пример: $${ch.primerA.join(',\\ ')}$ — последовательность возрастает, начинается с $1$, каждый член не больше удвоенного предыдущего, и $a_{${p.k}}=${p.N1}$.`,
             ]
           : [
               `Нет: должно быть $${p.k}\\le a_{${p.k}}\\le 2^{${p.k - 1}}=${2 ** (p.k - 1)}$, а $${p.N1}$ этому не удовлетворяет.`,

@@ -405,7 +405,7 @@ export const VARIANT: VariantPV = {
       { s: 'i17.uchastok', p: { k: 18, vopros: 'y' } },
       { s: 'i18.dveOkrKasanie', p: { r: 2, R: 8, nado: 'AB' } },
       { s: 'i19.kubOtrezok', p: { lo: -2, hi: 4, n: 3 } },
-      { s: 'i20.summaCifr', p: { S: 10, d: 14 } },
+      { s: 'i20.summaCifr', p: { S: 13, d: 5 } },
     ],
     [
       { s: 'i14.kosTroynoy', p: { u: 6, sg: -1, lo: -4, hi: 4 } },
@@ -414,7 +414,7 @@ export const VARIANT: VariantPV = {
       { s: 'i17.uchastok', p: { k: 19, vopros: 'x' } },
       { s: 'i18.dveOkrKasanie', p: { r: 4, R: 9, nado: 'AB' } },
       { s: 'i19.kubOtrezok', p: { lo: -2, hi: 2, n: 2 } },
-      { s: 'i20.summaCifr', p: { S: 22, d: 11 } },
+      { s: 'i20.summaCifr', p: { S: 14, d: 25 } },
     ],
     [
       { s: 'i14.kosTroynoy', p: { u: 3, sg: -1, lo: -4, hi: 6 } },
@@ -423,7 +423,7 @@ export const VARIANT: VariantPV = {
       { s: 'i17.uchastok', p: { k: 22, vopros: 'y' } },
       { s: 'i18.dveOkrKasanie', p: { r: 1, R: 4, nado: 'KM' } },
       { s: 'i19.kubOtrezok', p: { lo: -3, hi: 2, n: 1 } },
-      { s: 'i20.summaCifr', p: { S: 17, d: 8 } },
+      { s: 'i20.summaCifr', p: { S: 18, d: 5 } },
     ],
     [
       { s: 'i14.kosTroynoy', p: { u: 3, sg: -1, lo: 1, hi: 3 } },
@@ -432,7 +432,7 @@ export const VARIANT: VariantPV = {
       { s: 'i17.uchastok', p: { k: 7, vopros: 'y' } },
       { s: 'i18.dveOkrKasanie', p: { r: 3, R: 27, nado: 'KM' } },
       { s: 'i19.kubOtrezok', p: { lo: -4, hi: 2, n: 2 } },
-      { s: 'i20.summaCifr', p: { S: 13, d: 8 } },
+      { s: 'i20.summaCifr', p: { S: 22, d: 25 } },
     ],
     [
       { s: 'i14.kosTroynoy', p: { u: 3, sg: 1, lo: 1, hi: 6 } },
@@ -441,7 +441,7 @@ export const VARIANT: VariantPV = {
       { s: 'i17.uchastok', p: { k: 10, vopros: 'x' } },
       { s: 'i18.dveOkrKasanie', p: { r: 1, R: 16, nado: 'AB' } },
       { s: 'i19.kubOtrezok', p: { lo: -4, hi: 4, n: 3 } },
-      { s: 'i20.summaCifr', p: { S: 15, d: 4 } },
+      { s: 'i20.summaCifr', p: { S: 24, d: 5 } },
     ],
     [
       { s: 'i14.kosTroynoy', p: { u: 6, sg: 1, lo: -4, hi: 2 } },
@@ -450,7 +450,7 @@ export const VARIANT: VariantPV = {
       { s: 'i17.uchastok', p: { k: 20, vopros: 'y' } },
       { s: 'i18.dveOkrKasanie', p: { r: 9, R: 16, nado: 'KM' } },
       { s: 'i19.kubOtrezok', p: { lo: -3, hi: 3, n: 1 } },
-      { s: 'i20.summaCifr', p: { S: 23, d: 4 } },
+      { s: 'i20.summaCifr', p: { S: 19, d: 25 } },
     ],
   ],
 };
