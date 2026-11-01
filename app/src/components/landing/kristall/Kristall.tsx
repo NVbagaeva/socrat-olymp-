@@ -2,6 +2,7 @@
 
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { assetUrl } from '@/lib/assetUrl';
 import type { Kristall3d, TochkaId } from './kristall3d';
 import './kristall.css';
@@ -23,7 +24,8 @@ import './kristall.css';
 
 export interface KristallPodpis {
   id: TochkaId;
-  text: string;
+  /** Текст ярлыка; разметкой — когда в нём буква-переменная («h — высота»). */
+  text: ReactNode;
 }
 
 export interface KristallProps {

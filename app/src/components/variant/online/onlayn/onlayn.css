@@ -186,6 +186,13 @@
   box-shadow: 0 0 0 2px var(--color-primary);
 }
 
+/* Буква-переменная в подписи: курсивная антиква, как у формул. */
+.onl-mat {
+  font-family: 'KaTeX_Math', 'Times New Roman', serif;
+  font-size: 1.15em;
+  font-weight: 400;
+}
+
 /* ── Кнопки: глянцевая «таблетка» и контур ──────────────────── */
 
 .onl-btn {

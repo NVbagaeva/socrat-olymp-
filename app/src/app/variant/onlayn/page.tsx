@@ -57,7 +57,18 @@ export default function Page() {
           </ul>
           <Kristall
             className="onl-geroy__kristall"
-            podpisi={[{ id: 'h', text: T.kristall.podpis }]}
+            podpisi={[
+              {
+                id: 'h',
+                /* Буква — курсивом, как в формуле; KaTeX ради одной буквы на
+                   страницу не грузим, поэтому ярлык — вне проверки разметки. */
+                text: (
+                  <span className="no-math-check">
+                    <i className="onl-mat">{T.kristall.bukva}</i> {T.kristall.podpis}
+                  </span>
+                ),
+              },
+            ]}
             hint={T.kristall.hint}
             sizes="(max-width: 759.98px) 261px, 420px"
           />
