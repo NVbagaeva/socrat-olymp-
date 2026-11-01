@@ -25,33 +25,30 @@ const NOT_TEXT_KEYS = new Set([
   /* prototip — служебное описание шаблона «Вариантов повышенной сложности»
      (lib/povyshennye/shablony.ts): для отчётов разработчика, на сайт не выводится. */
   'prototip',
-  /* №19: источник задачи (content/teoriya19/tipy.ts, Istochnik19) — служебное
-     поле, на сайт не выводится; polePodskazka — placeholder поля ответа,
-     в нём KaTeX не набрать. */
-  'sostavleno', 'pravka', 'polePodskazka',
+  /* pravka, sostavleno — служебные пометки об источнике задачи (teoriya19/tipy.ts),
+     на сайт не выводится. polePodskazka — placeholder поля ввода: там только
+     обычный текст, KaTeX не набрать. */
+  'pravka', 'sostavleno', 'polePodskazka',
 ]);
 
-/* Словари, все значения которых — не текст страницы: ключ у каждой
-   строки свой («C1», «A1»), смотрим на ключ самого словаря.
-   imenaRuchek (схемы №18, lib/skhemy/tipy.ts) — названия ручек чертежа
-   для aria-label: его читает скринридер, KaTeX там не набрать. */
-const NOT_TEXT_MAPS = new Set(['imenaRuchek']);
+/* Словари, значения которых — подписи для экранного диктора (aria-label):
+   там только обычный текст. Ключи у них — имена точек. */
+const ARIA_MAPS = new Set(['imenaRuchek']);
 
-/** Ключ словаря, в котором лежит строка: { imenaRuchek: { C1: '…' } } → imenaRuchek. */
-function mapKeyOf(node) {
+/** Строка — значение в словаре ARIA_MAPS ({ imenaRuchek: { C1: '…' } }). */
+function inAriaMap(node) {
   const prop = node.parent;
-  if (!prop || !ts.isPropertyAssignment(prop) || prop.initializer !== node) { return null; }
+  if (!prop || !ts.isPropertyAssignment(prop)) { return false; }
   const obj = prop.parent;
-  if (!obj || !ts.isObjectLiteralExpression(obj)) { return null; }
-  const owner = obj.parent;
-  if (!owner || !ts.isPropertyAssignment(owner) || owner.initializer !== obj) { return null; }
-  return owner.name.getText().replace(/['"]/g, '');
+  const outer = obj && obj.parent;
+  return Boolean(outer && ts.isPropertyAssignment(outer) &&
+    ARIA_MAPS.has(outer.name.getText().replace(/['"]/g, '')));
 }
 
-/* Вызовы, аргумент которых — TeX или служебная строка. scena (№19,
-   lib/zadanie19/risunok.ts) — строкой идёт только alt рисунка: его читает
-   скринридер, KaTeX там не набрать. */
-const TEX_CALLS = /^(?:prismModel|scena|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
+/* Вызовы, аргумент которых — TeX или служебная строка. */
+/* scena — рисунок №19 (lib/zadanie19/risunok.ts): строка в нём — alt для
+   экранного диктора, только обычный текст. */
+const TEX_CALLS = /^(?:scena|prismModel|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
 
 function keyOf(node) {
   const parent = node.parent;
@@ -117,8 +114,7 @@ export function codeTexts(file) {
     if (inMetadata(node)) { return; }
     const key = keyOf(node);
     if (key !== null && NOT_TEXT_KEYS.has(key)) { return; }
-    const map = mapKeyOf(node);
-    if (map !== null && NOT_TEXT_MAPS.has(map)) { return; }
+    if (inAriaMap(node)) { return; }
     const callee = calleeOf(node);
     if (callee !== null && TEX_CALLS.test(callee)) { return; }
     const { line } = sf.getLineAndCharacterOfPosition(node.getStart(sf));

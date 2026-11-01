@@ -183,7 +183,7 @@ export const R09_OKRUZHNOST: Razdel1 = {
             {
               etap: 'Дуга',
               tekst: 'Меньшая дуга $AB$ равна центральному углу $AOB$.',
-              tex: ['\\smile AB = 63^\\circ'],
+              tex: ['\\arc{AB} = 63^\\circ'],
             },
           ],
           otvet: '63^\\circ',
@@ -320,7 +320,7 @@ export const R09_OKRUZHNOST: Razdel1 = {
           nazvanie: 'Теорема о вписанном угле',
           slovami:
             'Вписанный угол равен половине дуги, на которую он опирается, то есть половине центрального угла, опирающегося на ту же дугу.',
-          formula: '\\angle ACB = \\tfrac12\\, \\angle AOB = \\tfrac12 \\smile AB',
+          formula: '\\angle ACB = \\tfrac12\\, \\angle AOB = \\tfrac12 \\arc{AB}',
         },
       ],
       primenenie: [
@@ -355,7 +355,7 @@ export const R09_OKRUZHNOST: Razdel1 = {
           shagi: [
             {
               etap: 'Третья дуга',
-              tex: ['\\smile AB = 360^\\circ - 120^\\circ - 82^\\circ = 158^\\circ'],
+              tex: ['\\arc{AB} = 360^\\circ - 120^\\circ - 82^\\circ = 158^\\circ'],
             },
             {
               etap: 'Вписанный угол',
@@ -450,7 +450,7 @@ export const R09_OKRUZHNOST: Razdel1 = {
         {
           slovami:
             'Угол, который образуют касательная и хорда из точки касания, равен половине дуги, лежащей внутри этого угла.',
-          formula: '\\angle ABC = \\tfrac12 \\smile AB',
+          formula: '\\angle ABC = \\tfrac12 \\arc{AB}',
         },
       ],
       primenenie: [
@@ -465,7 +465,7 @@ export const R09_OKRUZHNOST: Razdel1 = {
           shagi: [
             {
               etap: 'Теорема',
-              tex: ['\\smile AB = 2 \\cdot 58^\\circ = 116^\\circ'],
+              tex: ['\\arc{AB} = 2 \\cdot 58^\\circ = 116^\\circ'],
             },
           ],
           otvet: '116^\\circ',
@@ -543,13 +543,13 @@ export const R09_OKRUZHNOST: Razdel1 = {
           nazvanie: 'Хорды пересекаются внутри круга',
           slovami:
             'Угол между пересекающимися хордами равен полусумме дуг, заключённых между его сторонами и их продолжениями.',
-          formula: '\\angle AMC = \\dfrac{\\smile AC + \\smile BD}{2}',
+          formula: '\\angle AMC = \\dfrac{\\arc{AC} + \\arc{BD}}{2}',
         },
         {
           nazvanie: 'Секущие пересекаются вне круга',
           slovami:
             'Угол между двумя секущими, проведёнными из внешней точки, равен полуразности дальней и ближней дуг, заключённых между ними.',
-          formula: '\\angle ACB = \\dfrac{\\smile AB - \\smile DE}{2}',
+          formula: '\\angle ACB = \\dfrac{\\arc{AB} - \\arc{DE}}{2}',
         },
       ],
       primenenie: [
@@ -565,8 +565,8 @@ export const R09_OKRUZHNOST: Razdel1 = {
             {
               etap: 'Угол между секущими',
               tex: [
-                '54^\\circ = \\dfrac{138^\\circ - \\smile DE}{2}',
-                '\\smile DE = 138^\\circ - 108^\\circ = 30^\\circ',
+                '54^\\circ = \\dfrac{138^\\circ - \\arc{DE}}{2}',
+                '\\arc{DE} = 138^\\circ - 108^\\circ = 30^\\circ',
               ],
             },
             {

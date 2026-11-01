@@ -19,7 +19,12 @@ import {
   type Sessiya,
 } from '@/lib/kartochki/leitner';
 import type { KolodaGotovaya } from '@/lib/kartochki/podgotovka';
-import { sbrositProgress, useProgressKolody, zapisatProgress } from '@/lib/kartochki/progress';
+import {
+  prochitat,
+  sbrositProgress,
+  useProgressKolody,
+  zapisatProgress,
+} from '@/lib/kartochki/progress';
 import { persistent, type PersistentStore } from '@/lib/storage';
 import { KartochkaFlip } from './KartochkaFlip';
 
@@ -55,6 +60,13 @@ function godnaya(n: Nachataya | null, ids: ReadonlySet<string>): n is Nachataya 
 type Ekran = { vid: 'start' } | { vid: 'sessiya' } | { vid: 'itog'; s: Sessiya };
 
 const REZHIMY: readonly Rezhim[] = ['vse', 'temy', 'neznakomye', 'bystro'];
+
+/**
+ * Запуск ссылкой: `?nabor=segodnya` или `?nabor=neznakomye` сразу
+ * открывает сессию (так их запускает вводная плашка ключевых схем
+ * №18). «На сегодня» без карточек к повтору — вся колода.
+ */
+const NABORY: readonly Rezhim[] = ['segodnya', 'neznakomye', 'vse', 'bystro'];
 
 /**
  * Вкладка «Карточки»: проверка теории номера по системе Лейтнера.
@@ -99,20 +111,38 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
   const vsego = koloda.kartochki.length;
   const neznakomykh = koloda.kartochki.filter((k) => neznakoma(progress, k.id)).length;
 
-  function nachat(r: Rezhim, sostav?: readonly string[]) {
+  function nachat(r: Rezhim, sostav?: readonly string[], p = progress): boolean {
     const ochered =
       sostav === undefined
-        ? sobratOchered(r, koloda.kartochki, progress, Math.random, temy)
+        ? sobratOchered(r, koloda.kartochki, p, Math.random, temy, Date.now())
         : sobratOchered(
             'vse',
             koloda.kartochki.filter((k) => sostav.includes(k.id)),
-            progress,
+            p,
             Math.random,
           );
-    if (ochered.length === 0) return;
+    if (ochered.length === 0) return false;
     store.write({ s: novayaSessiya(r, ochered), seed: Math.floor(Math.random() * 1000) });
     pokazat({ vid: 'sessiya' });
+    return true;
   }
+
+  /* Запуск ссылкой ?nabor=…: один раз после загрузки, прогресс — прямо
+     из хранилища (снимок отрисовки при гидратации ещё пустой). */
+  const nachatRef = useRef(nachat);
+  useEffect(() => {
+    nachatRef.current = nachat;
+  });
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const nabor = url.searchParams.get('nabor') as Rezhim | null;
+    if (nabor === null || !NABORY.includes(nabor)) return;
+    url.searchParams.delete('nabor');
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+    const p = prochitat(task);
+    if (!nachatRef.current(nabor, undefined, p) && nabor === 'segodnya')
+      nachatRef.current('vse', undefined, p);
+  }, [task]);
 
   function zavershit(s: Sessiya) {
     store.write(null);
@@ -123,7 +153,8 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
     if (nachataya === null) return;
     const id = tekushchaya(nachataya.s);
     if (id === null) return;
-    if (menyaetKorobki(nachataya.s)) zapisatProgress(task, otsenit(progress, id, znayu));
+    if (menyaetKorobki(nachataya.s))
+      zapisatProgress(task, otsenit(progress, id, znayu, Date.now()));
     const dalshe = otmetit(nachataya.s, znayu);
     if (zakonchena(dalshe)) zavershit(dalshe);
     else store.write({ ...nachataya, s: dalshe });
@@ -227,7 +258,7 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
       : rezhim === 'neznakomye' && neznakomykh === 0
         ? T.nechego.neznakomye
         : null;
-  const skolko: Record<Rezhim, number> = {
+  const skolko: Partial<Record<Rezhim, number>> = {
     vse: vsego,
     temy: koloda.kartochki.filter((k) => temy.includes(k.topic)).length,
     neznakomye: neznakomykh,
@@ -273,7 +304,7 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
                 <span className="kart-rezhim__text">
                   <span className="kart-rezhim__title">
                     {T.rezhimy[r].title}
-                    <span className="kart-rezhim__count">{T.kartochek(skolko[r])}</span>
+                    <span className="kart-rezhim__count">{T.kartochek(skolko[r] ?? 0)}</span>
                   </span>
                   <span className="kart-rezhim__lead">{T.rezhimy[r].lead}</span>
                 </span>

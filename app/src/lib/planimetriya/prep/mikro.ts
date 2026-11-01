@@ -1735,7 +1735,7 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
       razbor: [`$\\angle AOB = 2\\cdot ${g(u)} = ${g(2 * u)}$.`],
     };
   }),
-  mikro('P1-8-03', 'Вписанный угол по дуге', '\\angle ACB = \\dfrac{\\smile AB}{2}', (r) => {
+  mikro('P1-8-03', 'Вписанный угол по дуге', '\\angle ACB = \\dfrac{\\arc{AB}}{2}', (r) => {
     const d = 2 * r.int(20, 150);
     return {
       uslovie: `Дуга $AB$, на которую опирается вписанный угол $ACB$, равна $${g(d)}$. Найдите угол $ACB$.`,
@@ -1753,7 +1753,7 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
       razbor: [`$${g(d)} : 2 = ${g(d / 2)}$.`],
     };
   }),
-  mikro('P1-8-04', 'Дуга по вписанному углу', '\\smile AB = 2\\angle ACB', (r) => {
+  mikro('P1-8-04', 'Дуга по вписанному углу', '\\arc{AB} = 2\\angle ACB', (r) => {
     const u = r.int(15, 85);
     return {
       uslovie: `Вписанный угол $ACB$ равен $${g(u)}$. Найдите градусную меру дуги $AB$, на которую он опирается.`,
@@ -1792,7 +1792,7 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
   mikro(
     'P1-8-06',
     'Вписанный по двум дугам',
-    '\\angle ACB = \\dfrac{360^\\circ - \\smile AC - \\smile BC}{2}',
+    '\\angle ACB = \\dfrac{360^\\circ - \\arc{AC} - \\arc{BC}}{2}',
     (r) => {
       const ac = r.int(60, 150);
       const bc = r.int(50, 280 - ac);
@@ -1838,7 +1838,7 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
       razbor: ['Вписанные углы на одну дугу равны.', `$\\angle ADB = ${g(u)}$.`],
     };
   }),
-  mikro('P1-8-08', 'Дуга как доля окружности', '\\smile = \\dfrac{k}{n}\\cdot 360^\\circ', (r) => {
+  mikro('P1-8-08', 'Дуга как доля окружности', '\\arc{} = \\dfrac{k}{n}\\cdot 360^\\circ', (r) => {
     const d = r.pick([3, 4, 5, 6, 8, 9, 10, 12, 18, 20]);
     const n = r.int(1, d - 1);
     if (nod(n, d) !== 1) return null;
@@ -1853,7 +1853,7 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
       ],
     };
   }),
-  mikro('P1-8-09', 'Хорда делит окружность', '\\angle = \\dfrac{\\smile}{2}', (r) => {
+  mikro('P1-8-09', 'Хорда делит окружность', '\\angle = \\dfrac{\\arc{}}{2}', (r) => {
     const a = 2 * r.int(30, 80);
     return {
       uslovie: `Хорда $AB$ стягивает дугу $${g(a)}$. Под каким углом она видна из точки $C$ большей дуги?`,
@@ -1972,7 +1972,7 @@ export const BLOK_KASATELNYE: Mikro[] = [
       ],
     };
   }),
-  mikro('P1-9-04', 'Хорда и касательная', '\\smile AB = 2\\varphi', (r) => {
+  mikro('P1-9-04', 'Хорда и касательная', '\\arc{AB} = 2\\varphi', (r) => {
     const f = r.int(15, 80);
     return {
       uslovie: `Угол между хордой $AB$ и касательной $BC$ равен $${g(f)}$. Найдите меньшую дугу $AB$.`,
@@ -1991,7 +1991,7 @@ export const BLOK_KASATELNYE: Mikro[] = [
       otvet: 2 * f,
       razbor: [
         'Угол между касательной и хордой равен половине дуги между ними.',
-        `$\\smile AB = 2\\cdot ${g(f)} = ${g(2 * f)}$.`,
+        `$\\arc{AB} = 2\\cdot ${g(f)} = ${g(2 * f)}$.`,
       ],
     };
   }),

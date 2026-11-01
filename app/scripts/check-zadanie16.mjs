@@ -23,6 +23,7 @@ import { requireSrc } from './lib/load-ts.mjs';
 
 const require = createRequire(import.meta.url);
 const katex = require('katex');
+requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex); // общие макросы KaTeX: \arc{…}
 const O = requireSrc('lib/zadanie16/otvet.ts');
 const C = requireSrc('lib/zadanie16/chertezh.ts');
 const P = requireSrc('lib/zadanie16/primery.ts');

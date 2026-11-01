@@ -98,6 +98,19 @@ export interface Kadr {
   znacheniya: string[];
 }
 
+/**
+ * Режим схемы: на одном треугольнике — две конструкции, которые нельзя
+ * показывать вместе (у Менелая и Чевы точки называются одинаково).
+ * Виден один режим; группы подсветки режима включают его сами.
+ */
+export interface Rezhim {
+  id: string;
+  /** Подпись переключателя. */
+  nazvanie: string;
+  /** Группы подсветки этого режима: горит такая группа — чертёж в этом режиме. */
+  gruppy: readonly string[];
+}
+
 /** Живая схема: начальное положение, подвижные точки, ограничения, построение. */
 export interface ZhivayaSkhema {
   id: string;
@@ -105,7 +118,13 @@ export interface ZhivayaSkhema {
   podvizhnye: readonly string[];
   /** Поле, за которое подвижные точки не выходят (minx, miny, maxx, maxy). */
   pole: readonly [number, number, number, number];
-  postroit: (t: Tochki) => Kadr;
+  /**
+   * Кадр по положениям точек. rezhim — id из rezhimy; не задан — первый
+   * режим. Ручки точек, которых нет в кадре режима, не рисуются.
+   */
+  postroit: (t: Tochki, rezhim?: string) => Kadr;
+  /** Режимы схемы; первый — по умолчанию. Нет — схема в одном режиме. */
+  rezhimy?: readonly Rezhim[];
   /** Новое положение точки или null — так тянуть нельзя (фигура выродится). */
   ogranichit: (imya: string, p: T2, t: Tochki) => T2 | null;
   /**

@@ -345,10 +345,87 @@
   max-height: 240px;
   width: auto;
 }
+/* Ключевая схема (lib/skhemy/svg.ts): чертёж фиксированного размера,
+   на узком экране сжимается вместе с карточкой. */
+.kart-fig--skhema .skh {
+  width: auto;
+  max-width: 100%;
+}
+.kart-fig--skhema .skh__svg {
+  width: 360px;
+  max-width: 100%;
+  height: auto;
+}
+/* Текст карточки в несколько строк: перевод строки в колоде. */
+.kart-stroka {
+  display: block;
+}
+.kart-stroka + .kart-stroka {
+  margin-top: var(--space-2);
+}
+.kart-card__vopros .kart-stroka + .kart-stroka {
+  font-weight: 400;
+}
 /* Сетка векторов мельче объёмного чертежа: клетки должны читаться. */
 .kart-fig--vektory svg {
   max-height: 320px;
   width: auto;
+}
+/* №4 и №5: диаграммы Эйлера — классы теории (app/zadaniya/veroyatnost.css),
+   лучи на координатной прямой — здесь (lib/veroyatnost/risunkiKartochek.ts). */
+.kart-fig--veroyatnost svg {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+}
+.kart-fig--veroyatnost .kart-luchi {
+  max-width: 360px;
+}
+.kart-luch__polosa {
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.kart-luch__polosa.kart-luch--a {
+  stroke: var(--color-primary);
+}
+.kart-luch__polosa.kart-luch--b {
+  stroke: var(--color-accent);
+}
+.kart-luch__strelka.kart-luch--a {
+  fill: var(--color-primary);
+}
+.kart-luch__strelka.kart-luch--b {
+  fill: var(--color-accent);
+}
+/* Неравенства строгие — кружок пустой. */
+.kart-luch__tochka {
+  fill: var(--color-surface);
+  stroke-width: 2;
+}
+.kart-luch__tochka.kart-luch--a {
+  stroke: var(--color-primary);
+}
+.kart-luch__tochka.kart-luch--b {
+  stroke: var(--color-accent);
+}
+.kart-luch__shtrikh {
+  stroke: var(--color-border-strong);
+  stroke-dasharray: 3 3;
+}
+.kart-luch__os {
+  stroke: var(--color-text-secondary);
+  stroke-width: 1.5;
+}
+.kart-luch__os-strelka {
+  fill: var(--color-text-secondary);
+}
+.kart-luch__podpis,
+.kart-luch__chislo {
+  fill: var(--color-text);
+  font-size: 15px;
+}
+.kart-luch__chislo {
+  font-family: var(--font-sans);
 }
 
 .kart-card__vybor {

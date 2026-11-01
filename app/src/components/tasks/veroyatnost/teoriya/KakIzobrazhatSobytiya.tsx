@@ -7,6 +7,7 @@ import { Details, EmptyState, HandNote } from '@/components/ui';
 import { IZOBRAZHENIE, type IzobrazhenieStroka } from '@/content/veroyatnost-teoriya';
 import { bezVersii } from '@/lib/assetUrl';
 import { plain } from '@/lib/tex';
+import { YAKOR_4 } from '@/lib/veroyatnost/teoriya-yakorya';
 import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
 
@@ -373,7 +374,7 @@ export function KakIzobrazhatSobytiya() {
       <p className="vteor-blok__lead">{lead}</p>
 
       {/* Две карточки способов. */}
-      <ul className="vizo-sposoby">
+      <ul className="vizo-sposoby" id={YAKOR_4.izoSposoby}>
         {sposoby.map((sposob) => (
           <li key={sposob.id} className="vizo-sposob">
             {sposob.id === 'eyler' ? <EylerMini /> : <PryamayaMini />}
@@ -457,7 +458,7 @@ export function KakIzobrazhatSobytiya() {
           </span>
         </div>
         {stroki.map((stroka) => (
-          <div key={stroka.id} className="vizo-tabl__ryad" role="row">
+          <div key={stroka.id} className="vizo-tabl__ryad" id={YAKOR_4.izo(stroka.id)} role="row">
             <div className="vizo-tabl__sobytie" role="rowheader">
               <h4 className="vizo-tabl__title">
                 <Tex text={stroka.sobytie} />
@@ -489,7 +490,7 @@ export function KakIzobrazhatSobytiya() {
 
       {/* Разберём на примере: одна кость, два события, оба рисунка и
           три строки формул. */}
-      <section className="vizo-primer">
+      <section className="vizo-primer" id={YAKOR_4.izoPrimer}>
         <h4 className="vizo-primer__title">{primer.title}</h4>
         <p className="vizo-primer__text">
           <Tex text={primer.text} />
@@ -513,7 +514,9 @@ export function KakIzobrazhatSobytiya() {
         </div>
       </section>
 
-      <p className="vizo-plashka">{plashka}</p>
+      <p className="vizo-plashka" id={YAKOR_4.izoVlozhenie}>
+        {plashka}
+      </p>
       <p className="vizo-plashka vizo-plashka--formula">
         <Tex text={formula.text} /> <Tex className="vizo-plashka__formula" text={formula.tex} />
       </p>

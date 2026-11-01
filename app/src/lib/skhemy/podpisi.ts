@@ -13,6 +13,11 @@
  * внутрь него. Кандидаты — 24 направления и пять отступов; штраф за
  * касание огромный, за удаление от точки и от желаемого направления —
  * небольшой.
+ *
+ * Выноска — как в движке №1: если рядом с точкой чистого места нет,
+ * буква отходит дальше (28–48 px) и соединяется с точкой тонкой
+ * линией. Выноска не должна задевать чужие подписи и точки; линии
+ * чертежа она пересекать может, но чем меньше, тем лучше.
  */
 
 import type { T2 } from './tipy';
@@ -28,6 +33,10 @@ export interface Prepyatstviya {
 export const ZAZOR = 2;
 const OTSTUPY = [3, 6, 10, 15, 21] as const;
 const NAPRAVLENIY = 24;
+/** Отступы подписи с выноской, px. */
+const OTSTUPY_VYNOSKI = [28, 36, 48] as const;
+/** Выноска начинается на таком расстоянии от точки, px. */
+const OT_TOCHKI = 4;
 
 export interface Gabarit {
   /** Полуширина и полувысота прямоугольника буквы. */
@@ -155,6 +164,33 @@ function raznostUglov(a: number, b: number): number {
   return d > Math.PI ? 2 * Math.PI - d : d;
 }
 
+/** Пересекаются ли отрезки ab и cd (касание концами не считается). */
+function otrezkiPeresekayutsya(a: T2, b: T2, c: T2, d: T2): boolean {
+  const o = (p: T2, q: T2, r: T2) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+  return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+}
+
+/** Конец выноски: точка на краю прямоугольника подписи по пути от p к его центру. */
+function konecVynoski(p: T2, pr: Pryamougolnik): T2 {
+  const c: T2 = [(pr[0] + pr[2]) / 2, (pr[1] + pr[3]) / 2];
+  const dx = c[0] - p[0];
+  const dy = c[1] - p[1];
+  const hw = (pr[2] - pr[0]) / 2 + 1;
+  const hh = (pr[3] - pr[1]) / 2 + 1;
+  /* Доля пути от центра обратно к p, на которой луч выходит из прямоугольника. */
+  const k = Math.min(
+    Math.abs(dx) < 1e-9 ? Infinity : hw / Math.abs(dx),
+    Math.abs(dy) < 1e-9 ? Infinity : hh / Math.abs(dy),
+  );
+  return [c[0] - dx * k, c[1] - dy * k];
+}
+
+/** Место подписи; `vynoska` — от точки до края буквы, если буква отнесена. */
+export interface MestoPodpisi {
+  c: T2;
+  vynoska: readonly [T2, T2] | null;
+}
+
 /**
  * Места подписей: центр каждой буквы в пикселях экрана. Точки, у
  * которых сходится больше линий, расставляются первыми — им теснее.
@@ -166,31 +202,53 @@ export function razmestitPodpisi(
   H: number,
   kegl: number,
 ): T2[] {
+  return razmestitSVynoskami(tochki, prep, W, H, kegl).map((m) => m.c);
+}
+
+/** То же, с выносками для букв, которым рядом с точкой нет чистого места. */
+export function razmestitSVynoskami(
+  tochki: readonly { p: T2; imya: string }[],
+  prep: Prepyatstviya,
+  W: number,
+  H: number,
+  kegl: number,
+): MestoPodpisi[] {
   const centr: T2 = [W / 2, H / 2];
   const poryadok = tochki
     .map((t, i) => ({ i, n: luchi(t.p, prep).length }))
     .sort((a, b) => b.n - a.n)
     .map((x) => x.i);
-  const mesta: T2[] = tochki.map((t) => t.p);
+  const mesta: MestoPodpisi[] = tochki.map((t) => ({ c: t.p, vynoska: null }));
   const zanyato: Pryamougolnik[] = [];
+  /* Выноски уже поставленных букв — препятствие следующим. */
+  const vynoski: [T2, T2][] = [];
   for (const i of poryadok) {
     const { p, imya } = tochki[i]!;
     const g = gabaritBukvy(imya, kegl);
     const zhel = zhelaemoe(p, prep, centr);
+    const prepI: Prepyatstviya = { ...prep, otrezki: [...prep.otrezki, ...vynoski] };
     let luchshee: T2 = [p[0] + g.hw + 4, p[1] - g.hh - 4];
     let luchshiyShtraf = Infinity;
     let luchshiyPr: Pryamougolnik | null = null;
+    let luchshayaVynoska: [T2, T2] | null = null;
+    const kandidat = (ug: number, ots: number): { c: T2; pr: Pryamougolnik; vne: number } => {
+      const dx = Math.cos(ug);
+      const dy = Math.sin(ug);
+      const vynos = ots + Math.abs(dx) * g.hw + Math.abs(dy) * g.hh;
+      const c: T2 = [p[0] + dx * vynos, p[1] + dy * vynos];
+      const pr: Pryamougolnik = [c[0] - g.hw, c[1] - g.hh, c[0] + g.hw, c[1] + g.hh];
+      const vne = pr[0] < 1 || pr[1] < 1 || pr[2] > W - 1 || pr[3] > H - 1 ? 1 : 0;
+      return { c, pr, vne };
+    };
     for (const ots of OTSTUPY) {
       for (let k = 0; k < NAPRAVLENIY; k += 1) {
         const ug = zhel + (k * 2 * Math.PI) / NAPRAVLENIY;
-        const dx = Math.cos(ug);
-        const dy = Math.sin(ug);
-        const vynos = ots + Math.abs(dx) * g.hw + Math.abs(dy) * g.hh;
-        const c: T2 = [p[0] + dx * vynos, p[1] + dy * vynos];
-        const pr: Pryamougolnik = [c[0] - g.hw, c[1] - g.hh, c[0] + g.hw, c[1] + g.hh];
-        const vne = pr[0] < 1 || pr[1] < 1 || pr[2] > W - 1 || pr[3] > H - 1 ? 1 : 0;
+        const { c, pr, vne } = kandidat(ug, ots);
         const shtraf =
-          1e4 * kasaniya(pr, prep, zanyato, p) + 3e3 * vne + ots * 1.6 + raznostUglov(ug, zhel) * 9;
+          1e4 * kasaniya(pr, prepI, zanyato, p) +
+          3e3 * vne +
+          ots * 1.6 +
+          raznostUglov(ug, zhel) * 9;
         if (shtraf < luchshiyShtraf) {
           luchshiyShtraf = shtraf;
           luchshee = c;
@@ -200,8 +258,51 @@ export function razmestitPodpisi(
       /* Нашлось чистое место на этом отступе — дальше не уходим. */
       if (luchshiyShtraf < 1e3) break;
     }
-    mesta[i] = luchshee;
+    /* Рядом тесно — буква с выноской, если так она встаёт чисто. */
+    if (luchshiyShtraf >= 1e3) {
+      let shtrafV = Infinity;
+      for (const ots of OTSTUPY_VYNOSKI) {
+        for (let k = 0; k < NAPRAVLENIY; k += 1) {
+          const ug = zhel + (k * 2 * Math.PI) / NAPRAVLENIY;
+          const { c, pr, vne } = kandidat(ug, ots);
+          if (vne === 1 || kasaniya(pr, prepI, zanyato, p) > 0) continue;
+          const nachalo: T2 = [p[0] + Math.cos(ug) * OT_TOCHKI, p[1] + Math.sin(ug) * OT_TOCHKI];
+          const konec = konecVynoski(p, pr);
+          /* Выноска не задевает чужие подписи и точки. */
+          const lin: Pryamougolnik = [
+            Math.min(nachalo[0], konec[0]),
+            Math.min(nachalo[1], konec[1]),
+            Math.max(nachalo[0], konec[0]),
+            Math.max(nachalo[1], konec[1]),
+          ];
+          if (zanyato.some((q) => otrezokVPryamougolnike(nachalo, konec, q))) continue;
+          const chuzhie = prep.tochki.some(
+            (q) =>
+              (q[0] !== p[0] || q[1] !== p[1]) &&
+              q[0] > lin[0] - 3 &&
+              q[0] < lin[2] + 3 &&
+              q[1] > lin[1] - 3 &&
+              q[1] < lin[3] + 3 &&
+              otrezokVPryamougolnike(nachalo, konec, [q[0] - 3, q[1] - 3, q[0] + 3, q[1] + 3]),
+          );
+          if (chuzhie) continue;
+          const perecheniy = prepI.otrezki.filter(([a, b]) =>
+            otrezkiPeresekayutsya(nachalo, konec, a, b),
+          ).length;
+          const shtraf = perecheniy * 40 + ots * 1.6 + raznostUglov(ug, zhel) * 9;
+          if (shtraf < shtrafV) {
+            shtrafV = shtraf;
+            luchshee = c;
+            luchshiyPr = pr;
+            luchshayaVynoska = [nachalo, konec];
+          }
+        }
+        if (luchshayaVynoska !== null) break;
+      }
+    }
+    mesta[i] = { c: luchshee, vynoska: luchshayaVynoska };
     if (luchshiyPr !== null) zanyato.push(luchshiyPr);
+    if (luchshayaVynoska !== null) vynoski.push(luchshayaVynoska);
   }
   return mesta;
 }
