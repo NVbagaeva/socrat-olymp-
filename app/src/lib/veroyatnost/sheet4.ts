@@ -143,7 +143,19 @@ export interface Sheet4Block {
  */
 export interface Kind45 {
   id: string;
-  variants: readonly { n: number; uslovie: string }[];
+  variants: readonly VariantVybora[];
+}
+
+/**
+ * Вариант для выбора: номер и условие. У оглавления листа
+ * (dannye45.ts) вместо условия — его отпечаток `u`: тогда повторы
+ * сверяются по отпечатку, и у заглушек, и у загруженных вариантов.
+ */
+export type VariantVybora = { n: number; uslovie: string; u?: string } | { n: number; u: string };
+
+/** По чему узнаётся повтор условия: отпечаток, если он есть, иначе само условие. */
+function povtor(variant: VariantVybora): string {
+  return variant.u ?? ('uslovie' in variant ? variant.uslovie : '');
 }
 
 /** Задача листа до раскладки: прототип и его вариант из банка. */
@@ -213,11 +225,11 @@ function vyborSleduyushchego<K extends Kind45>(
     const prezhnie = naMeste.get(i) ?? new Set<string>();
     const kandidaty = shuffle([...item.kind.variants], random);
     const vzyat =
-      kandidaty.find((v) => !bylo.has(v.uslovie) && !zdes.has(v.uslovie)) ??
-      kandidaty.find((v) => !prezhnie.has(v.uslovie) && !zdes.has(v.uslovie)) ??
-      kandidaty.find((v) => !zdes.has(v.uslovie)) ??
+      kandidaty.find((v) => !bylo.has(povtor(v)) && !zdes.has(povtor(v))) ??
+      kandidaty.find((v) => !prezhnie.has(povtor(v)) && !zdes.has(povtor(v))) ??
+      kandidaty.find((v) => !zdes.has(povtor(v))) ??
       item.variant;
-    zdes.add(vzyat.uslovie);
+    zdes.add(povtor(vzyat));
     return { kind: item.kind, variant: vzyat };
   });
 }
@@ -230,8 +242,8 @@ function vyborVariantov<K extends Kind45>(kinds: readonly K[], params: Sheet4Par
   const naMeste = new Map<number, Set<string>>();
   const zapomnit = (variant: Vybor<K>[]) => {
     variant.forEach((item, i) => {
-      bylo.add(item.variant.uslovie);
-      naMeste.set(i, (naMeste.get(i) ?? new Set<string>()).add(item.variant.uslovie));
+      bylo.add(povtor(item.variant));
+      naMeste.set(i, (naMeste.get(i) ?? new Set<string>()).add(povtor(item.variant)));
     });
   };
   zapomnit(pervyy);
@@ -320,6 +332,21 @@ export function idsLista45(
       v.map((x) => idZadachi45(x.kind.id, x.variant.n)),
     ),
   };
+}
+
+/**
+ * Задачи листа «прототип + номер» — по прежнему адресу (params) или
+ * по ключам генератора (z). Тот же выбор, что у sheet4Spec и
+ * sheet4SpecKlyuchi: лист печати по нему догружает только свои
+ * варианты (lib/veroyatnost/zagruzka45.ts).
+ */
+export function zadachiLista45(
+  kinds: readonly Kind45[],
+  zapros: { params: Sheet4Params } | { z: ZaprosBanka },
+): { kind: string; n: number }[] {
+  const vybor =
+    'z' in zapros ? poKlyucham45(kinds, zapros.z).vybor : vyborVariantov(kinds, zapros.params);
+  return vybor.flat().map((x) => ({ kind: x.kind.id, n: x.variant.n }));
 }
 
 /**

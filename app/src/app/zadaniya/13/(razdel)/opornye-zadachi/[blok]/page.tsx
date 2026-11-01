@@ -5,7 +5,7 @@ import { Opornye13Shell } from '@/components/tasks/zadanie13/Opornye13Shell';
 import { OPORNYE } from '@/content/opornye';
 import { ZADANIE13, zadanie13Title } from '@/content/zadanie13';
 import { BLOKI_13, blokBySlug13, zadachiBloka } from '@/lib/zadanie13/opornye/bloki';
-import { prepPool13 } from '@/lib/zadanie13/opornye/pool';
+import { pool13, zadachiStranitsy13 } from '@/lib/zadanie13/opornye/zakrytoe-server';
 import { ZADANIYA } from '@/lib/paths';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
@@ -24,12 +24,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 /**
  * Блок «Опорных задач» №13: десять задач в закрытом виде. Пул собран
- * на сборке — в разметку уходят условия, отпечатки ответов, закрытые
- * подсказки и решения.
+ * на сборке — в разметку уходят условия и отпечатки ответов, а
+ * закрытые подсказки и решения лежат файлами и загружаются по кнопке
+ * (lib/zadanie13/opornye/zakrytoe.ts).
  */
 export default async function Opornye13BlokPage({ params }: { params: Params }) {
   const { blok } = await params;
-  const found = prepPool13().find((item) => item.slug === blok);
+  const found = pool13().find((item) => item.slug === blok);
   if (found === undefined) {
     notFound();
   }
@@ -45,7 +46,7 @@ export default async function Opornye13BlokPage({ params }: { params: Params }) 
         no={found.no}
         title={found.nazvanie}
         vid={found.vid}
-        tasks={found.zadachi}
+        tasks={zadachiStranitsy13(found)}
         zapomniHtml={found.zapomniHtml}
         listHref={listHref}
       />

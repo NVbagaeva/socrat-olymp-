@@ -1,7 +1,6 @@
 import type { Zadanie } from '@/content/veroyatnost';
 import { OPORNYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
-import type { PoolKind } from '@/lib/veroyatnost/pool';
 
 /**
  * Навык тренажёра — то, по чему выбирают тренировку, считают прогресс
@@ -29,7 +28,7 @@ export function navykPoId(zadanie: Zadanie, id: string): Navyk | undefined {
 }
 
 /** Навык прототипа — его блок банка. */
-export function navykKind(kind: PoolKind): string {
+export function navykKind(kind: { blok: string }): string {
   return kind.blok;
 }
 

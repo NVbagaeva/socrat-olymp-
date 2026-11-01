@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
-import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
+import { bank5Pool } from '@/lib/veroyatnost/pool';
+import { indeksPool, indeksUznay } from '@/lib/veroyatnost/dannye45-server';
 import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
@@ -25,8 +26,8 @@ export default function Trenazher5Tab() {
       {/* Название вкладки — H2 панели: конфигуратор и подход — общие с №12 экраны без своего заголовка. */}
       <h2 className="t-h2 vtab__title">{vkladka('5', 'trenazher')}</h2>
       <Trenazher
-        pool={pool}
-        uznay={uznayMetodPool(5)}
+        pool={indeksPool(5)}
+        uznay={indeksUznay(5)}
         zadanie={5}
         base={`${ZADANIYA}/5/trenazher/`}
         metody={navykiMetodov(pool, 5)}

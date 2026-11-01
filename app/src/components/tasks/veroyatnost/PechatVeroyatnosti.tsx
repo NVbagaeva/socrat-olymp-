@@ -9,13 +9,15 @@ import { buildDocument } from '@/lib/sheet/sheet.js';
 import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { sheetWithSpace, spaceOfQuery, vseWithSpace } from '@/lib/sheetSpace';
 import { checkKitSheet, kitFootLabel, printKitSheet } from '@/lib/komplekt';
-import type { Pool } from '@/lib/veroyatnost/pool';
+import type { IndeksLista } from '@/lib/veroyatnost/dannye45';
+import { poolLista } from '@/lib/veroyatnost/zagruzka45';
 import {
   parseSheet4Query,
   parseZapros45,
   sheet4Spec,
   sheet4SpecKlyuchi,
   sheet4Vse,
+  zadachiLista45,
 } from '@/lib/veroyatnost/sheet4';
 
 declare global {
@@ -27,8 +29,11 @@ declare global {
 }
 
 export interface PechatVeroyatnostiProps {
-  /** Банк задания: условия, отпечатки, закрытые разборы. */
-  pool: Pool;
+  /**
+   * Оглавление банка: прототипы, номера вариантов и отпечатки условий.
+   * Варианты листа загружаются файлами (lib/veroyatnost/dannye45.ts).
+   */
+  indeks: IndeksLista;
   /** Номер задания: по нему берутся слова листа — название, колонтитул, разделы ответов. */
   zadanie: Zadanie;
   /**
@@ -56,7 +61,7 @@ function specJson(html: string): string {
  * повторно — лист будет тем же. Одна страница на оба задания: разница
  * только в банке и в словах листа.
  */
-export function PechatVeroyatnosti({ pool, zadanie, vid }: PechatVeroyatnostiProps) {
+export function PechatVeroyatnosti({ indeks, zadanie, vid }: PechatVeroyatnostiProps) {
   const withAnswers = vid !== 'uchenik';
   const list = listSlova(zadanie);
   const query = useSearchParams();
@@ -93,32 +98,42 @@ export function PechatVeroyatnosti({ pool, zadanie, vid }: PechatVeroyatnostiPro
       zapros?.qr === true
         ? qrSvg(adresListaUchenika(window.location.href)).catch(() => undefined)
         : Promise.resolve(undefined);
-    void qr.then((svg) => {
-      if (!alive) return;
-      const shapka = {
-        ...(zapros?.uchitel === undefined ? {} : { uchitel: zapros.uchitel }),
-        ...(svg === undefined ? {} : { qr: svg }),
-      };
-      const list4 = (answers: boolean) =>
-        zapros === null
-          ? sheet4Spec(pool, params, answers, list)
-          : sheet4SpecKlyuchi(pool, zapros, answers, list, shapka);
-      const built = list4(withAnswers);
-      /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
-      const kit = checkKitSheet(query, zadanie === 5 ? '5' : '4', withAnswers ? 'teacher' : 'student', built);
-      /* Место для решения (sp=) — только у листа ученика. */
-      const printed =
-        vid === 'vse'
-          ? vseWithSpace(sheet4Vse(list4(false), built), spaceOfQuery(query))
-          : sheetWithSpace(built, spaceOfQuery(query), !withAnswers, () => list4(true));
-      const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
-      import('@/lib/sheet/paginate.js').then(() => {
-        if (alive) {
-          setWarning(kit.warning);
-          setSpec(specJson(html));
-        }
-      });
-    });
+    /* Выбор задач — по оглавлению; загружаются только задачи листа. */
+    const zadachi = zadachiLista45(indeks.kinds, zapros === null ? { params } : { z: zapros });
+    const bank = poolLista(zadanie, indeks, zadachi);
+    void Promise.all([qr, bank])
+      .then(([svg, pool]) => {
+        if (!alive) return;
+        const shapka = {
+          ...(zapros?.uchitel === undefined ? {} : { uchitel: zapros.uchitel }),
+          ...(svg === undefined ? {} : { qr: svg }),
+        };
+        const list4 = (answers: boolean) =>
+          zapros === null
+            ? sheet4Spec(pool, params, answers, list)
+            : sheet4SpecKlyuchi(pool, zapros, answers, list, shapka);
+        const built = list4(withAnswers);
+        /* Код комплекта — в колонтитул; отпечаток условий — в «Мои комплекты». */
+        const kit = checkKitSheet(
+          query,
+          zadanie === 5 ? '5' : '4',
+          withAnswers ? 'teacher' : 'student',
+          built,
+        );
+        /* Место для решения (sp=) — только у листа ученика. */
+        const printed =
+          vid === 'vse'
+            ? vseWithSpace(sheet4Vse(list4(false), built), spaceOfQuery(query))
+            : sheetWithSpace(built, spaceOfQuery(query), !withAnswers, () => list4(true));
+        const html = buildDocument({ ...printed, kit: kitFootLabel(kit.code) }, {});
+        import('@/lib/sheet/paginate.js').then(() => {
+          if (alive) {
+            setWarning(kit.warning);
+            setSpec(specJson(html));
+          }
+        });
+      })
+      .catch((error: unknown) => console.error('Задачи листа не загрузились', error));
     return () => {
       alive = false;
     };

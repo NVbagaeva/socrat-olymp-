@@ -118,19 +118,20 @@ export function zadachiPodhoda(
 /**
  * «Похожие задачи»: на каждую задачу с ошибкой — другой вариант того
  * же прототипа, которого в тренировке не было. У прототипа все
- * варианты уже прошли — задача пропускается; не осталось ни одной —
- * null, аналогов нет.
+ * варианты уже прошли — задача пропускается.
+ *
+ * Выбор идёт по оглавлению банка (номера вариантов), а сами задачи
+ * собирает pohozhieIzSsylok, когда варианты загружены
+ * (lib/veroyatnost/zagruzka45.ts). Выбор тот же, что и раньше по
+ * полному банку: та же очередь задач, тот же случайный выбор.
  */
-export function pohozhieZadachi(
+export function pohozhieSsylki(
   payload: SessiyaPayload,
   indexes: readonly number[],
-  pool: Pool,
-  uznay: UznayPool,
-): SessiyaPayload | null {
+  kinds: readonly { id: string; variants: readonly { n: number }[] }[],
+): RoundItem[] {
   const byli = new Set(payload.tasks.map((t) => t.id));
-  const kinds: readonly { id: string; variants: readonly { n: number }[] }[] =
-    payload.rezhim === 'uznay' ? uznay.kinds : pool.kinds;
-  const tasks: SessiyaZadacha[] = [];
+  const out: RoundItem[] = [];
   for (const at of indexes) {
     const task = payload.tasks[at];
     const kind = task === undefined ? undefined : kinds.find((k) => k.id === task.kind);
@@ -139,12 +140,22 @@ export function pohozhieZadachi(
     }
     const svobodnye = kind.variants.filter((v) => !byli.has(zadachaId(kind.id, v.n)));
     const v = svobodnye[Math.floor(Math.random() * svobodnye.length)];
-    const next = v === undefined ? null : zadachaBanka(kind.id, v.n, payload.rezhim, pool, uznay);
-    if (next !== null) {
-      byli.add(next.id);
-      tasks.push(next);
+    if (v !== undefined) {
+      byli.add(zadachaId(kind.id, v.n));
+      out.push({ kind: kind.id, n: v.n });
     }
   }
+  return out;
+}
+
+/** Похожие задачи из загруженных вариантов; не осталось ни одной — null, аналогов нет. */
+export function pohozhieIzSsylok(
+  payload: SessiyaPayload,
+  ssylki: readonly RoundItem[],
+  pool: Pool,
+  uznay: UznayPool,
+): SessiyaPayload | null {
+  const tasks = zadachiPodhoda(ssylki, payload.rezhim, pool, uznay);
   return tasks.length === 0 ? null : { ...payload, tasks };
 }
 
@@ -197,8 +208,27 @@ function isSsylka(value: unknown): value is Ssylka {
 }
 
 /**
- * Ссылки из записи → задачи из банка страницы (unpack оболочки). Задачи
- * нет в банке или подпись не сошлась — null: тренировка устарела.
+ * Какие варианты нужны записи: режим и ссылки «прототип, номер». Их
+ * тренажёр загружает до raspakovat. Запись не того вида — null.
+ */
+export function ssylkiZapisi(packed: unknown): { rezhim: Rezhim; ssylki: RoundItem[] } | null {
+  if (!isRecord(packed) || !Array.isArray(packed['tasks']) || !packed['tasks'].every(isSsylka)) {
+    return null;
+  }
+  const rezhim = packed['rezhim'];
+  if (typeof rezhim !== 'string' || !(REZHIMY_SESSII as readonly string[]).includes(rezhim)) {
+    return null;
+  }
+  return {
+    rezhim: rezhim as Rezhim,
+    ssylki: (packed['tasks'] as Ssylka[]).map(([kind, n]) => ({ kind, n })),
+  };
+}
+
+/**
+ * Ссылки из записи → задачи из банка (unpack оболочки; варианты записи
+ * уже загружены — ssylkiZapisi). Задачи нет в банке или подпись не
+ * сошлась — null: тренировка устарела.
  */
 export function raspakovat(packed: unknown, pool: Pool, uznay: UznayPool): SessiyaPayload | null {
   if (!isRecord(packed) || !Array.isArray(packed['tasks']) || !packed['tasks'].every(isSsylka)) {
