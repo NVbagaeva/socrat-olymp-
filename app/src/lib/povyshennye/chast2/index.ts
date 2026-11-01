@@ -30,24 +30,6 @@ import { A18_PERP_HORDY } from './a18';
 import { A19_KVADRAT_PARAMETR } from './a19';
 import { A20_MONETY } from './a20';
 import { B17_DZHOUL } from './b17';
-import { G14_POKAZ_KVADRAT } from './g14';
-import { G15_PRIZMA_SECHENIE } from './g15';
-import { G16_LOG_DROB } from './g16';
-import { G18_ROMB_VYSOTA } from './g18';
-import { G19_DVA_MODULYA } from './g19';
-import { G20_SUMMY_NABORA } from './g20';
-import { H14_LOG_KUB } from './h14';
-import { H15_PRAV_PIRAMIDA } from './h15';
-import { H16_KOREN_POKAZ } from './h16';
-import { H18_TRAPECIYA_DVE_OKR } from './h18';
-import { H19_PRYAMYE_OKR } from './h19';
-import { H20_CHISLO_PROIZV } from './h20';
-import { J14_TRIG_DROB } from './j14';
-import { J15_PRIZMA_PERP } from './j15';
-import { J16_KOREN_DROB } from './j16';
-import { J18_OKR_V_UGLE } from './j18';
-import { J19_COS_KORNI } from './j19';
-import { J20_SUMMY_CIFR } from './j20';
 import { N14_LOG_KVADRAT } from './n14';
 import { N15_PIRAMIDA_SEREDINA } from './n15';
 import { N16_POKAZ_DROB } from './n16';
@@ -131,26 +113,8 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'c17.maksvell': C17_MAKSVELL,
   /* Семья D: варианты 7 и 8. */
   /* Семья G: варианты 13 и 14 (№17 — b17.dzhoul). */
-  'g14.pokazKvadrat': G14_POKAZ_KVADRAT,
-  'g15.prizmaSechenie': G15_PRIZMA_SECHENIE,
-  'g16.logDrob': G16_LOG_DROB,
-  'g18.rombVysota': G18_ROMB_VYSOTA,
-  'g19.dvaModulya': G19_DVA_MODULYA,
-  'g20.summyNabora': G20_SUMMY_NABORA,
   /* Семья H: варианты 15 и 16 (№17 — c17.maksvell). */
-  'h14.logKub': H14_LOG_KUB,
-  'h15.pravPiramida': H15_PRAV_PIRAMIDA,
-  'h16.korenPokaz': H16_KOREN_POKAZ,
-  'h18.trapeciyaDveOkr': H18_TRAPECIYA_DVE_OKR,
-  'h19.pryamyeOkr': H19_PRYAMYE_OKR,
-  'h20.chisloProizv': H20_CHISLO_PROIZV,
   /* Семья J: варианты 17 и 18 (№17 — z17.kachka). */
-  'j14.trigDrob': J14_TRIG_DROB,
-  'j15.prizmaPerp': J15_PRIZMA_PERP,
-  'j16.korenDrob': J16_KOREN_DROB,
-  'j18.okrVUgle': J18_OKR_V_UGLE,
-  'j19.cosKorni': J19_COS_KORNI,
-  'j20.summyCifr': J20_SUMMY_CIFR,
   /* Семьи K, L, M: варианты 19–20, 21–22, 23–24. */
   'k14.kosSumma': K14_KOS_SUMMA,
   'k15.piramidaPerp': K15_PIRAMIDA_PERP,
