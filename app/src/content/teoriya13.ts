@@ -12,6 +12,7 @@
  * их числа проверены независимым солвером.
  */
 
+import type { Blok13 } from '@/lib/zadanie13/teoriya-yakorya';
 import type { TableScheme } from '@/lib/zadanie13/types';
 
 /** Роль карточки: цвет рамки и ярлык (02-design.md, § 2.1). */
@@ -45,7 +46,12 @@ export interface TablitsaRuchnaya {
   podpis?: string;
 }
 
-export type Blok =
+/**
+ * Блок подраздела. `yakor` — имя блока для «Повторить теорию» из
+ * карточек по теории (lib/zadanie13/teoriya-yakorya.ts): на странице
+ * это id «t13-<имя>».
+ */
+export type Blok = { yakor?: Blok13 } & (
   | {
       vid: 'kartochka';
       rol: Rol;
@@ -69,7 +75,8 @@ export type Blok =
   | { vid: 'razbor'; title: string; prototypeId: string; seed: string }
   | { vid: 'priznaki'; title: string; stroki: { vizhu: string; tip: string; pochemu: string }[] }
   | { vid: 'opredeli'; title: string; zadachi: { text: string; tip: string; priznak: string }[] }
-  | { vid: 'delimost' };
+  | { vid: 'delimost' }
+);
 
 export interface Podrazdel {
   id: string;
@@ -134,6 +141,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'slovami',
+            yakor: 'oboznacheniya',
             title: 'Одни и те же буквы во всех разборах',
             text: 'Каждый разбор идёт в одном порядке: таблица в буквах → уравнение в буквах → преобразования → итоговая формула → и только в конце числа и ответ.',
             spisok: [
@@ -157,12 +165,14 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'slovami',
+            yakor: 'procent',
             title: 'Процент — сотая часть',
             text: '1 % — одна сотая часть числа. 100 % — всё число целиком, 50 % — половина, 25 % — четверть.',
           },
           {
             vid: 'kartochka',
             rol: 'pravilo',
+            yakor: 'sto-procentov',
             title: 'Что принимаем за 100 %',
             text: 'За 100 % принимаем то, **с чем сравниваем**, — то, что стоит после слова «чем». Если «чем» в вопросе нет, добавь его мысленно: «на сколько процентов выплаты больше, **чем** кредит».',
             primer: {
@@ -188,6 +198,7 @@ export const GLAVY_13: Glava[] = [
           },
           {
             vid: 'proporciya',
+            yakor: 'proporciya',
             title: 'Пропорция с краткой записью',
             stroki: [
               ['100\\,\\%', '200\\ (\\text{тыс.})'],
@@ -204,6 +215,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'pravilo',
+            yakor: 'koeffitsient',
             title: 'Увеличить на $r$ % — умножить на $k$',
             text: 'Было 100 %, стало $(100 + r)$ %. Значит, число умножили на $1 + \\dfrac{r}{100}$. Это число — **увеличивающий коэффициент** $k$: он показывает, во сколько раз вырос долг после начисления процентов.',
             tex: 'k = 1 + \\frac{r}{100}',
@@ -232,6 +244,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'vazhno',
+            yakor: 'ne-skladyvat',
             title: 'Проценты нельзя складывать',
             text: 'Два изменения подряд на $-50$ % и $+50$ % не дают «ноль». Каждое изменение считается от своего «100 %» — от того числа, которое было перед ним.',
             primer: {
@@ -257,6 +270,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'bystro',
+            yakor: 'k-drobyu',
             title: '$k$ удобно писать обыкновенной дробью',
             text: 'Тогда умножение превращается в сокращение, и столбик не нужен.',
             spisok: [
@@ -281,6 +295,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'umenshit',
             title: 'Уменьшить на $r$ % — не делить на $k$',
             text: 'Уменьшить на 20 % — значит умножить на $1 - 0{,}2 = 0{,}8$. Делить на $1{,}2$ — неверно: $\\dfrac{1}{1{,}2} \\approx 0{,}83$.',
           },
@@ -300,12 +315,14 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'slovami',
+            yakor: 'kredit',
             title: 'Кредит',
             text: 'Банк даёт сумму $S$ — это кредит. Каждый период (месяц или год) банк начисляет проценты на долг, а заёмщик вносит платёж. Так до тех пор, пока долг не станет нулём.',
           },
           {
             vid: 'kartochka',
             rol: 'slovami',
+            yakor: 'pereplata',
             title: 'Переплата',
             text: 'Переплата — деньги, которые отдаём банку **сверх** того, что взяли. За один месяц переплата — это проценты от долга на начало месяца.',
             tex: '\\text{переплата за месяц} = \\text{долг на начало}\\cdot\\frac{r}{100}',
@@ -313,12 +330,14 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'slovami',
+            yakor: 'izmenenie',
             title: 'Сумма изменения долга',
             text: 'На сколько уменьшился долг за месяц. Если сложить её за весь срок, получится ровно $S$: долг уменьшился с $S$ до нуля.',
           },
           {
             vid: 'kartochka',
             rol: 'pravilo',
+            yakor: 'dolg-na-konec',
             title: 'Долг на конец',
             text: 'Чтобы узнать долг на конец, от долга на начало отнимаем сумму изменения долга. Долг на конец этого месяца — это долг на начало следующего.',
             tex: '\\text{долг на конец} = \\text{долг на начало} - \\text{сумма изменения долга}',
@@ -338,6 +357,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'pravilo',
+            yakor: 'platezh',
             title: 'Платёж',
             text: 'Платёж месяца состоит из двух частей: сумма изменения долга и переплата.',
             tex: '\\text{платёж} = \\text{сумма изменения долга} + \\text{переплата}',
@@ -367,6 +387,7 @@ export const GLAVY_13: Glava[] = [
         bloki: [
           {
             vid: 'tablitsa',
+            yakor: 'petya',
             title:
               'Петя взял в кредит 1000 рублей на 4 месяца под 10 % в месяц. Долг каждый месяц уменьшается на одну и ту же сумму.',
             tablitsa: {
@@ -397,6 +418,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'vazhno',
+            yakor: 'vernut',
             title: 'Вернуть банку = кредит + переплата',
             text: 'Сумма столбца «Сумма изменения долга» — это весь кредит $S$, сумма столбца «Переплата» — переплата за весь срок. Поэтому всё, что вернули банку:',
             tex: 'S_{\\text{общ}} = S + S_{\\text{перепл}}',
@@ -417,6 +439,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-vernut',
             title: '«Вернуть банку» и «переплата» — разные вопросы',
             text: '«Сколько вернули банку» — это $S_{\\text{общ}}$: у Пети 1250. «Сколько переплатили» — только $S_{\\text{перепл}}$: 250. Читай вопрос до конца.',
           },
@@ -436,6 +459,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'risunok',
             risunok: 'dve-shemy',
+            yakor: 'ris-dve-shemy',
             title: 'Платежи по месяцам',
             podpis:
               'Каждый столбик — платёж месяца: внизу сумма изменения долга, сверху переплата. Кредит 8 месяцев под 10 %.',
@@ -443,18 +467,21 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'slovami',
+            yakor: 'dif-slovami',
             title: 'Дифференцированный платёж',
             text: 'Долг уменьшается на **одну и ту же величину** — сумма изменения долга одинаковая. Переплата уменьшается вместе с долгом, поэтому платежи становятся всё меньше.',
           },
           {
             vid: 'kartochka',
             rol: 'slovami',
+            yakor: 'ann-slovami',
             title: 'Аннуитет',
             text: 'Платежи **равные** весь срок. Внутри платежа меняется соотношение: в начале большая часть — переплата, к концу — основной долг.',
           },
           {
             vid: 'kartochka',
             rol: 'priznak',
+            yakor: 'kak-uznat',
             title: 'Как узнать схему',
             text: 'В условии сказано про долг — «на одну и ту же величину меньше» — это дифференцированный платёж. Сказано про платежи — «равными платежами», «в первый год выплатили …» — это аннуитет.',
           },
@@ -474,6 +501,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'pravilo',
+            yakor: 'tri-pravila',
             title: 'Три правила таблицы',
             text: 'Кредит $S$ на $n$ месяцев под $r$ % в месяц. Таблицу заполняем по столбцам — и решение собирается само.',
             spisok: [
@@ -506,6 +534,7 @@ export const GLAVY_13: Glava[] = [
           },
           {
             vid: 'tablitsa',
+            yakor: 'tablitsa-dif',
             title: 'Таблица в общем виде',
             tablitsa: {
               scheme: 'dif',
@@ -542,6 +571,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'vazhno',
+            yakor: 'formula-dif',
             title: 'Переплата при дифференцированном платеже',
             text: 'Формулу не нужно заучивать — её выводят за три строки, и на экзамене вывод обязателен.',
             tex: 'S_{\\text{перепл}} = S\\cdot\\frac{n+1}{2}\\cdot\\frac{r}{100}',
@@ -571,6 +601,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-n1',
             title: '$\\tfrac{n+1}{2},\\ \\text{а не}\\ \\tfrac{n}{2}$',
             text: 'В сумме долгов на начало есть и самый первый долг $S$, и последний $\\dfrac{S}{n}$. Поэтому в формуле $n + 1$.',
           },
@@ -600,6 +631,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'pravilo',
+            yakor: 'po-kuskam',
             title: 'Таблица та же, переплата — по кускам',
             text: 'Долг уменьшается не одной ровной лесенкой, но три правила работают: сумма изменений долга по-прежнему $S$, а переплата — ставка, умноженная на сумму долгов на начало. Эту сумму считаем по кускам.',
             tex: 'S_{\\text{общ}} = S + \\frac{r}{100}\\,(D_0 + D_1 + \\dots + D_{n-1})',
@@ -641,12 +673,14 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-periody',
             title: 'Периодов $n$, а уменьшений $n - 1$',
             text: '«С 1-го по 20-й месяц долг на 30 тыс. меньше, к 21-му погашен»: уменьшений 20, а периодов 21. Долг на 15-е число 20-го месяца — $S - 20\\cdot 30$, а не $S - 21\\cdot 30$.',
           },
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-kazhdaya',
             title: '«Каждая выплата» — проверяем все',
             text: 'Если выплаты должны быть целыми или больше какого-то числа, условие на **каждую** выплату: найди все и возьми самое строгое ограничение.',
           },
@@ -666,6 +700,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'pravilo',
+            yakor: 'tsepochka',
             title: 'Долг после начисления и долг на конец',
             text: 'Вводим $k = 1 + \\dfrac{r}{100}$ — увеличивающий коэффициент. Каждый год долг сначала умножается на $k$, потом уменьшается на платёж.',
             spisok: [
@@ -692,6 +727,7 @@ export const GLAVY_13: Glava[] = [
           },
           {
             vid: 'tablitsa',
+            yakor: 'tablitsa-ann',
             title: 'Таблица в общем виде: три равных платежа',
             tablitsa: {
               scheme: 'ann',
@@ -717,6 +753,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'vazhno',
+            yakor: 'geom',
             title: 'Раскрываем скобки — получаем геометрическую прогрессию',
             text: 'Для $n$ равных платежей после раскрытия скобок:',
             tex: 'Sk^n = x\\,(k^{n-1} + k^{n-2} + \\dots + k + 1)',
@@ -731,7 +768,7 @@ export const GLAVY_13: Glava[] = [
                 {
                   title: 'Раскрываем скобки',
                   text: 'Каждый платёж умножается на $k$ столько раз, сколько лет прошло после него.',
-                  tex: 'Sk^3 - Xk^2 - Xk - x = 0',
+                  tex: 'Sk^3 - xk^2 - xk - x = 0',
                 },
                 {
                   title: 'Выражаем платёж',
@@ -746,6 +783,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'bystro',
+            yakor: 'chetyre',
             title: 'Четыре платежа: раскладываем на множители',
             text: 'Сумма $k^3 + k^2 + k + 1$ раскладывается на множители, и дроби сокращаются.',
             tex: 'k^3 + k^2 + k + 1 = k^2(k + 1) + (k + 1) = (k^2 + 1)(k + 1)',
@@ -789,14 +827,16 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-k',
             title: 'Корень $k < 1$ отбрасываем',
             text: 'В квадратном уравнении относительно $k$ второй корень обычно отрицательный или меньше 1. Ставка положительная, значит, $k > 1$ — это и пишем в решении.',
           },
           {
             vid: 'kartochka',
             rol: 'lovushka',
-            title: 'Переплата — это $nX - S$',
-            text: 'При $n$ равных платежах по $x$ банку вернули $nX$, а переплатили $nX - S$.',
+            yakor: 'lov-pereplata-ann',
+            title: 'Переплата — это $nx - S$',
+            text: 'При $n$ равных платежах по $x$ банку вернули $nx$, а переплатили $nx - S$.',
           },
         ],
       },
@@ -814,6 +854,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'pravilo',
+            yakor: 'vklad',
             title: 'Начислили — потом пополнили или сняли',
             text: 'Каждый год вклад умножается на $k$, потом к нему прибавляют пополнение или вычитают снятие.',
             spisok: [
@@ -840,6 +881,7 @@ export const GLAVY_13: Glava[] = [
           },
           {
             vid: 'tablitsa',
+            yakor: 'tablitsa-vklad',
             title: 'Таблица в общем виде: пополнение $y$ после каждого начисления',
             tablitsa: {
               scheme: 'dep',
@@ -855,18 +897,21 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-nachalo',
             title: 'Пополнение «в начале года» — когда?',
             text: '«В начале третьего года» — это сразу после начисления за второй год: конец второго года и начало третьего — один момент. В таблице такое пополнение стоит в строке второго года.',
           },
           {
             vid: 'kartochka',
             rol: 'slovami',
+            yakor: 'punkty',
             title: 'Процентные пункты',
             text: '«Ставку увеличили на 30 **процентных пунктов**» — к ставке прибавили 30: было 40 %, стало 70 %. «Увеличили на 30 **процентов**» — ставку умножили на 1,3: было 40 %, стало 52 %.',
           },
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-nachislit',
             title: '«Банк начислит» — это проценты, а не итог',
             text: '«Банк начислит больше 5 млн» — речь о процентах: итог вклада минус первоначальная сумма минус все пополнения.',
           },
@@ -898,9 +943,15 @@ export const GLAVY_13: Glava[] = [
         id: 'tip-priznaki',
         title: 'Признаки',
         bloki: [
-          { vid: 'priznaki', title: 'Вижу в условии — значит', stroki: PRIZNAKI },
+          {
+            vid: 'priznaki',
+            yakor: 'priznaki',
+            title: 'Вижу в условии — значит',
+            stroki: PRIZNAKI,
+          },
           {
             vid: 'opredeli',
+            yakor: 'opredeli',
             title: 'Потренируйся: назови схему',
             zadachi: [
               {
@@ -951,12 +1002,14 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-edinicy',
             title: 'Единицы ответа',
             text: '«Ответ выразите в рублях» — значит, 1 200 000, а не 1200 (тысяч). Задание 13 оценивается в 1 балл, и ответ не в тех единицах — потерянный балл.',
           },
           {
             vid: 'kartochka',
             rol: 'bystro',
+            yakor: 'v-tysyachah',
             title: 'Считай в тысячах, ответ переводи',
             text: 'Длинные хвосты нулей мешают: считаем в тысячах или миллионах и переводим только в конце.',
             primer: {
@@ -974,12 +1027,14 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-stroka',
             title: 'Теряется первый или последний период',
             text: 'Если ответ не сошёлся — ищи ошибку в таблице: чаще всего теряется первая или последняя строка.',
           },
           {
             vid: 'kartochka',
             rol: 'lovushka',
+            yakor: 'lov-chem',
             title: '«На сколько процентов больше» — что здесь 100 %',
             text: '«На сколько процентов сумма выплат больше суммы кредита» — 100 % здесь **кредит**: он стоит после «чем».',
           },
@@ -992,6 +1047,7 @@ export const GLAVY_13: Glava[] = [
           {
             vid: 'kartochka',
             rol: 'bystro',
+            yakor: 'sokrashchaem',
             title: 'Сокращаем, а не умножаем столбиком',
             text: 'Прежде чем умножать, посмотри, что на что делится.',
             primer: {
@@ -1011,7 +1067,7 @@ export const GLAVY_13: Glava[] = [
               otvet: '180 000',
             },
           },
-          { vid: 'delimost' },
+          { vid: 'delimost', yakor: 'delimost' },
         ],
       },
     ],

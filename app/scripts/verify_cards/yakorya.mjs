@@ -150,6 +150,58 @@ const PO_NOMERAM = {
     if (lishnie.length > 0) throw new Error(`имена без карточки: ${lishnie.join(', ')}`);
     return out;
   },
+  /* Теория №13: глава — #teoriya-<id>, подраздел — его id
+     («dif-formula»), карточка, таблица, рисунок или блок с полем
+     `yakor` — #t13-… (lib/zadanie13/teoriya-yakorya.ts). */
+  13: () => {
+    const { GLAVY_13 } = requireSrc('content/teoriya13');
+    const { YAKOR_13, BLOKI_13 } = requireSrc('lib/zadanie13/teoriya-yakorya');
+    const out = new Set();
+    const postavleny = new Set();
+    for (const g of GLAVY_13) {
+      out.add(YAKOR_13.razdel(g.id));
+      for (const p of g.podrazdely) {
+        out.add(p.id);
+        for (const b of p.bloki) {
+          if (b.yakor === undefined) continue;
+          if (postavleny.has(b.yakor)) throw new Error(`якорь «${b.yakor}» стоит на двух блоках`);
+          postavleny.add(b.yakor);
+          out.add(YAKOR_13.blok(b.yakor));
+        }
+      }
+    }
+    const lishnie = BLOKI_13.filter((id) => !postavleny.has(id));
+    if (lishnie.length > 0) throw new Error(`имена без блока: ${lishnie.join(', ')}`);
+    return out;
+  },
+  /* Теория №16: открытая глава — #teoriya-<id>, написанный пункт — его
+     id («intervaly-vid»), карточка теории с полем `yakor` — #t16-…
+     (lib/zadanie16/teoriya-yakorya.ts). Глава «Скоро» и пункт
+     «Готовится» якорями не считаются: повторять там нечего. */
+  16: () => {
+    const { GLAVY_16 } = requireSrc('content/teoriya16');
+    const { YAKOR_16, KARTOCHKI_16 } = requireSrc('lib/zadanie16/teoriya-yakorya');
+    const out = new Set();
+    const postavleny = new Set();
+    for (const g of GLAVY_16) {
+      if (g.skoro) continue;
+      const napisany = g.teoriya.filter((p) => p.kartochki.length > 0);
+      if (napisany.length > 0) out.add(YAKOR_16.razdel(g.id));
+      for (const p of napisany) {
+        out.add(p.id);
+        for (const k of p.kartochki) {
+          if (k.yakor === undefined) continue;
+          if (postavleny.has(k.yakor))
+            throw new Error(`якорь «${k.yakor}» стоит на двух карточках`);
+          postavleny.add(k.yakor);
+          out.add(YAKOR_16.kartochka(k.yakor));
+        }
+      }
+    }
+    const lishnie = KARTOCHKI_16.filter((id) => !postavleny.has(id));
+    if (lishnie.length > 0) throw new Error(`имена без карточки: ${lishnie.join(', ')}`);
+    return out;
+  },
   /* №18: «теория» карточки — страница ключевой схемы /skhemy/<id>/;
      source — id собранной схемы (страницы строятся только для них). */
   18: () => {

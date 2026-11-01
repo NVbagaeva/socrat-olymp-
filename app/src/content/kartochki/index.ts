@@ -10,10 +10,12 @@ import k07 from './07-uravneniya';
 import k09 from './09-proizvodnaya';
 import k10 from './10-prikladnye';
 import k11 from './11-tekstovye';
+import k13 from './13-ekonomicheskie';
+import k16 from './16-neravenstva';
 import k18 from './18-klyuchevye-skhemy';
 
 /** Все колоды по номеру задания. */
-export const KOLODY: readonly Koloda[] = [k01, k02, k03, k04, k05, k06, k07, k09, k10, k11, k18];
+export const KOLODY: readonly Koloda[] = [k01, k02, k03, k04, k05, k06, k07, k09, k10, k11, k13, k16, k18];
 
 export function kolodaNomera(task: number): Koloda {
   const k = KOLODY.find((x) => x.task === task);

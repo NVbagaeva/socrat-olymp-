@@ -19,6 +19,7 @@
  */
 
 import { metodIntervalov16, type Chertezh16 } from '@/lib/zadanie16/chertezh';
+import type { Yakor16 } from '@/lib/zadanie16/teoriya-yakorya';
 
 /**
  * Вид карточки: даёт метку с значком и цвет. Метку можно заменить
@@ -39,6 +40,11 @@ export interface Variant16 {
 /** Карточка теории. */
 export interface Kartochka16 {
   ton: Ton16;
+  /**
+   * Имя карточки для «Повторить теорию» из карточек по теории
+   * (lib/zadanie16/teoriya-yakorya.ts): на странице это id «t16-<имя>».
+   */
+  yakor?: Yakor16;
   /** Своя подпись метки вместо стандартной. */
   metka?: string;
   title?: string;
@@ -150,11 +156,13 @@ const rabota = (id: string, title = 'Работа 1'): Rabota16 => ({ id, title,
 const STANDARTNYY_VID: Kartochka16[] = [
   {
     ton: 'opredelenie',
+    yakor: 'opredelenie',
     shirina: 3,
     text: '**Метод интервалов** — способ решения неравенств, основанный на определении знака выражения на промежутках, на которые числовая прямая разбивается его нулями.',
   },
   {
     ton: 'vyvod',
+    yakor: 'algoritm',
     shirina: 3,
     text: 'Чтобы решить неравенство $f(x)>0$ (или $f(x)<0$):',
     shagi: [
@@ -167,6 +175,7 @@ const STANDARTNYY_VID: Kartochka16[] = [
   },
   {
     ton: 'oshibka',
+    yakor: 'razlozhit',
     title: 'Не разложили до конца',
     text: 'Решим $(x-1)(x^2-6x+9)>0$. Квадратный трёхчлен — тоже произведение: $x^2-6x+9=(x-3)^2$.',
     shirina: 6,
@@ -208,11 +217,13 @@ const STANDARTNYY_VID: Kartochka16[] = [
 const ALGORITM_KRATNOST: Kartochka16[] = [
   {
     ton: 'vazhno',
+    yakor: 'kratnost',
     text: 'Знак многочлена меняется только при переходе через его нули **нечётной кратности**. При переходе через нуль **чётной кратности** знак не меняется.',
     shirina: 2,
   },
   {
     ton: 'primer',
+    yakor: 'primer-dva',
     title: 'Решить неравенство $(x-1)(x-4)>0$',
     shirina: 4,
     shagi: [
@@ -233,6 +244,7 @@ const ALGORITM_KRATNOST: Kartochka16[] = [
   },
   {
     ton: 'primer',
+    yakor: 'primer-kratnost',
     title: 'Кратность нуля',
     shirina: 3,
     text: 'Решим $(x-3)(2x-6)>0$. Вынесем $2$ из второй скобки:',
@@ -248,6 +260,7 @@ const ALGORITM_KRATNOST: Kartochka16[] = [
   },
   {
     ton: 'primer',
+    yakor: 'parabola',
     metka: 'Ещё пример',
     title: '$(x-5)^2>0$',
     shirina: 3,
@@ -269,6 +282,7 @@ const ALGORITM_KRATNOST: Kartochka16[] = [
 const SISTEMY: Kartochka16[] = [
   {
     ton: 'ogranicheniya',
+    yakor: 'ogranicheniya',
     title: 'Откуда берутся ограничения',
     shirina: 3,
     text: 'При решении неравенства важно учитывать **область допустимых значений** (ОДЗ): ограничения возникают из условий, при которых выражение имеет смысл.',
@@ -286,6 +300,7 @@ const SISTEMY: Kartochka16[] = [
   },
   {
     ton: 'algoritm',
+    yakor: 'sistema',
     title: 'Алгоритм решения системы',
     shirina: 3,
     shagi: [
