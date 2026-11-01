@@ -48,6 +48,12 @@ const PO_NOMERAM = {
      якорем не считается: повторять там нечего. */
   4: () => teoriyaVeroyatnosti(4),
   5: () => teoriyaVeroyatnosti(5),
+  /* №18: «теория» карточки — страница ключевой схемы /skhemy/<id>/;
+     source — id собранной схемы (страницы строятся только для них). */
+  18: () => {
+    const { SOBRANNYE } = requireSrc('content/zadanie18/spisok');
+    return new Set(SOBRANNYE.map((s) => s.id));
+  },
 };
 
 function teoriyaVeroyatnosti(task) {

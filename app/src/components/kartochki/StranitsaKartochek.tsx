@@ -4,6 +4,8 @@ import { kolodaNomera } from '@/content/kartochki';
 import { podgotovit } from '@/lib/kartochki/podgotovka';
 import { ZADANIYA } from '@/lib/paths';
 import { Kartochki } from './Kartochki';
+/* Чертежи ключевых схем (dvizhok: 'skhema') — классы skh-*. */
+import '@/components/skhemy/skhemy.css';
 import './kartochki.css';
 
 /** Заголовок окна: «Карточки · Планиметрия — Будет на ЕГЭ», как у остальных вкладок. */

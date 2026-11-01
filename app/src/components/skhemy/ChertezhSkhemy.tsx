@@ -317,6 +317,17 @@ export function ChertezhSkhemy({
             />
           ))}
         </g>
+        <g className="skh__vynoski">
+          {ekran.podpisi
+            .filter((p) => p.vynoska !== '')
+            .map((p) => (
+              <path
+                key={p.id}
+                className={clsx('skh-vynoska', p.cvet && `skh-c-${p.cvet}`)}
+                d={p.vynoska}
+              />
+            ))}
+        </g>
         <g className="skh__podpisi" style={{ fontFamily: BUKVY }}>
           {ekran.podpisi.map((p) => (
             <text

@@ -345,6 +345,27 @@
   max-height: 240px;
   width: auto;
 }
+/* Ключевая схема (lib/skhemy/svg.ts): чертёж фиксированного размера,
+   на узком экране сжимается вместе с карточкой. */
+.kart-fig--skhema .skh {
+  width: auto;
+  max-width: 100%;
+}
+.kart-fig--skhema .skh__svg {
+  width: 360px;
+  max-width: 100%;
+  height: auto;
+}
+/* Текст карточки в несколько строк: перевод строки в колоде. */
+.kart-stroka {
+  display: block;
+}
+.kart-stroka + .kart-stroka {
+  margin-top: var(--space-2);
+}
+.kart-card__vopros .kart-stroka + .kart-stroka {
+  font-weight: 400;
+}
 /* Сетка векторов мельче объёмного чертежа: клетки должны читаться. */
 .kart-fig--vektory svg {
   max-height: 320px;
