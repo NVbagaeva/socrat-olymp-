@@ -33,7 +33,15 @@ export interface Zadacha18 {
   razbor: string;
   /** JSON ShagVoprosa[] (HTML), закрыт отпечатком. */
   podskazka: string;
+  /** Ответ пункта б) строкой («3,6»), закрыт отпечатком: его открывает лист учителя генератора. */
+  otvet: string;
+  /** Уровень ★–★★★ и тема (группа схемы) — для генератора листов. */
+  uroven: Uroven;
 }
+
+/** Ответ числом в запись листа: десятичная запятая. */
+export const zapisOtveta18 = (x: number): string =>
+  String(Math.round(x * 1e6) / 1e6).replace('.', ',');
 
 /** Детерминированная перестановка вариантов ответа подсказки: верный не всегда первый. */
 function peremeshat(s: ShagVoprosa, zerno: string): ShagVoprosa {
@@ -82,6 +90,8 @@ export function bank18(typeset: (t: string) => string): Zadacha18[] {
         seal,
         razbor: zapechatatTekst18(key, razbor, seal),
         podskazka: zapechatatTekst18(key, podskazka, seal),
+        otvet: zapechatatTekst18(key, zapisOtveta18(t.otvet(p)), seal),
+        uroven: t.uroven,
       };
     });
   });

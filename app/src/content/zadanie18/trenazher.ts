@@ -25,6 +25,8 @@ export interface Tekst18 {
 export interface TipZadachi18 {
   /** Тип задачи; он же ключ чертежа (sceny.ts). */
   id: string;
+  /** Название типа в генераторе листов. */
+  nazvanie: string;
   /** Ключевая схема — чип фильтра. */
   skhema: string;
   uroven: Uroven;
@@ -54,6 +56,7 @@ const sh = (tekst: string, ...gruppy: string[]): Podsvechennoe => ({ tekst, grup
 export const TIPY_18: readonly TipZadachi18[] = [
   {
     id: 'vysoty-cos',
+    nazvanie: 'Две высоты: подобие с коэффициентом cos C',
     skhema: 'vysoty',
     uroven: 1,
     varianty: [
@@ -99,6 +102,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'bis-par',
+    nazvanie: 'Биссектриса и параллельная прямая',
     skhema: 'bissektrisa',
     uroven: 2,
     varianty: [
@@ -152,6 +156,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'mediana',
+    nazvanie: 'Удвоение медианы',
     skhema: 'udvoenie-mediany',
     uroven: 2,
     varianty: [
@@ -205,6 +210,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'vysoty-okr',
+    nazvanie: 'Две высоты и окружность на стороне',
     skhema: 'pryamye-ugly',
     uroven: 1,
     varianty: [
@@ -250,6 +256,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'trezubec-centr',
+    nazvanie: 'Трезубец: центр окружности AIC',
     skhema: 'trezubec',
     uroven: 3,
     varianty: [
@@ -309,6 +316,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'vpis-hordy',
+    nazvanie: 'Вписанный четырёхугольник: подобие при диагоналях',
     skhema: 'chetyrekhugolniki',
     uroven: 1,
     varianty: [
@@ -352,6 +360,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'vpis-pryam',
+    nazvanie: 'Вписанная окружность прямоугольного треугольника',
     skhema: 'otrezki-kasatelnyh',
     uroven: 2,
     varianty: [
@@ -405,6 +414,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'hordy',
+    nazvanie: 'Пересекающиеся хорды',
     skhema: 'stepen-tochki',
     uroven: 1,
     varianty: [
@@ -449,6 +459,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'sredlin-trap',
+    nazvanie: 'Середины диагоналей трапеции',
     skhema: 'sredlin-trap',
     uroven: 1,
     varianty: [
@@ -498,6 +509,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'ravnobok-perp',
+    nazvanie: 'Равнобедренная трапеция с перпендикулярными диагоналями',
     skhema: 'ravnobokaya',
     uroven: 2,
     varianty: [{ h: 7 }, { h: 6 }, { h: 9 }],
@@ -537,6 +549,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'menelay-pl',
+    nazvanie: 'Менелай и отношение площадей',
     skhema: 'menelay-cheva',
     uroven: 3,
     varianty: [{ S: 36 }, { S: 48 }, { S: 60 }],
@@ -578,6 +591,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'trap-seredina',
+    nazvanie: 'Середина боковой стороны трапеции',
     skhema: 'metod-ploshchadey',
     uroven: 2,
     varianty: [{ S: 18 }, { S: 15 }, { S: 21 }],
@@ -615,6 +629,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'obshchiy-ugol',
+    nazvanie: 'Площади треугольников с общим углом',
     skhema: 'obshchiy-ugol',
     uroven: 1,
     varianty: [
