@@ -102,6 +102,25 @@ import { M20_OSTATKI } from './m20';
 import { C14_TG_PODSTANOVKA } from './c14';
 import { C17_MAKSVELL } from './c17';
 import { Z17_KACHKA } from './z17';
+import { U14_TG_CTG } from './u14';
+import { U15_KUB_PLOSK } from './u15';
+import { U16_POKAZ_MODUL } from './u16';
+import { U17_KREDIT2 } from './u17';
+import { U18_DVE_OKR_KASAT } from './u18';
+import { U19_TREHCHLEN_KOREN } from './u19';
+import { U20_NEDELIMYE } from './u20';
+import { V14_KOS_KOREN } from './v14';
+import { V15_PRIZMA_MEDIANA } from './v15';
+import { V16_KOREN_LOG } from './v16';
+import { V18_DIAMETR_HORDA } from './v18';
+import { V19_DVA_KORNYA } from './v19';
+import { V20_UDVOENIE } from './v20';
+import { W15_TETRAEDR } from './w15';
+import { W16_LOG_MODUL } from './w16';
+import { W17_ZABOR_STENA } from './w17';
+import { W18_TRAPECIYA_PERP } from './w18';
+import { W19_V_GRAFIK } from './w19';
+import { W20_KAMNI } from './w20';
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- параметры у каждого шаблона свои */
 export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
@@ -207,6 +226,26 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'r18.planimetriya': R18_PLANIMETRIYA,
   'r19.parametr': R19_PARAMETR,
   'r20.teoriyaChisel': R20_TEORIYA_CHISEL,
+  /* Семьи U, V, W: варианты 1–6 (свои задачи по кодификатору). */
+  'u14.tgCtg': U14_TG_CTG,
+  'u15.kubPlosk': U15_KUB_PLOSK,
+  'u16.pokazModul': U16_POKAZ_MODUL,
+  'u17.kredit2': U17_KREDIT2,
+  'u18.dveOkrKasat': U18_DVE_OKR_KASAT,
+  'u19.trehchlenKoren': U19_TREHCHLEN_KOREN,
+  'u20.nedelimye': U20_NEDELIMYE,
+  'v14.kosKoren': V14_KOS_KOREN,
+  'v15.prizmaMediana': V15_PRIZMA_MEDIANA,
+  'v16.korenLog': V16_KOREN_LOG,
+  'v18.diametrHorda': V18_DIAMETR_HORDA,
+  'v19.dvaKornya': V19_DVA_KORNYA,
+  'v20.udvoenie': V20_UDVOENIE,
+  'w15.tetraedr': W15_TETRAEDR,
+  'w16.logModul': W16_LOG_MODUL,
+  'w17.zaborStena': W17_ZABOR_STENA,
+  'w18.trapeciyaPerp': W18_TRAPECIYA_PERP,
+  'w19.vGrafik': W19_V_GRAFIK,
+  'w20.kamni': W20_KAMNI,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
