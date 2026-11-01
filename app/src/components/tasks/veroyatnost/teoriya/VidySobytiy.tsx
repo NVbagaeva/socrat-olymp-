@@ -4,6 +4,7 @@ import { CheckIcon, HandNote } from '@/components/ui';
 import { PROVER_SEBYA, SVYAZANY, VIDY_SOBYTIY } from '@/content/veroyatnost-teoriya';
 import { typeset } from '@/lib/tex';
 import { voprosyVidovSobytiy } from '@/lib/veroyatnost/teoriya';
+import { YAKOR_4 } from '@/lib/veroyatnost/teoriya-yakorya';
 import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
 import { KrugiIcon, ZakladkaIcon, ZvenoIcon } from './IkonkiTeorii';
@@ -36,7 +37,11 @@ export function VidySobytiy() {
       <div className="vvidy">
         <ul className="vvidy__grid">
           {kartochki.map((karta) => (
-            <li className={clsx('vvid', `vvid--${karta.ton}`)} key={karta.id}>
+            <li
+              className={clsx('vvid', `vvid--${karta.ton}`)}
+              id={YAKOR_4.vid(karta.id)}
+              key={karta.id}
+            >
               <h4 className="vvid__title">{karta.title}</h4>
               <p className="vvid__opredelenie">
                 <Tex text={karta.opredelenie} />
@@ -76,7 +81,7 @@ export function VidySobytiy() {
         </ul>
 
         <div className="vvidy__side">
-          <section className="z4-karta">
+          <section className="z4-karta" id={YAKOR_4.vazhno}>
             <h4 className="z4-karta__title">
               <span className="z4-karta__ico" aria-hidden="true">
                 <HintIcon />
@@ -106,7 +111,7 @@ export function VidySobytiy() {
       </div>
 
       {/* Плашка «Запомни»: три типа события цепочкой. */}
-      <section className="vzapomni">
+      <section className="vzapomni" id={YAKOR_4.zapomni}>
         <div className="vzapomni__text">
           <h4 className="vzapomni__title">
             <span className="vzapomni__ico" aria-hidden="true">
@@ -158,7 +163,7 @@ export function VidySobytiy() {
 
         <ul className="vsvyaz__grid">
           {SVYAZANY.kartochki.map((karta) => (
-            <li className="vsvyaz" key={karta.id}>
+            <li className="vsvyaz" id={YAKOR_4.svyaz(karta.id)} key={karta.id}>
               <span className="vsvyaz__ico" aria-hidden="true">
                 {ZNACHKI[karta.znachok]}
               </span>

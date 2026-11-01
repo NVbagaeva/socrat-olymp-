@@ -6,7 +6,7 @@
    следствия и шага доказательства, плюс экранная раскладка. Факт,
    который не прошёл проверку, не публикуется: ненулевой код возврата.
 
-   Плюс механика коробок Лейтнера (lib/zadanie18/progress).
+   Плюс прогресс схем поверх общей колоды карточек (lib/zadanie18/progress).
 
    Запуск: pnpm test:skhemy-18 [N] */
 
@@ -16,6 +16,9 @@ import { proverit as bissektrisa } from './bissektrisa.mjs';
 import { proverit as kasatelnye } from './kasatelnye.mjs';
 import { proverit as mediana } from './mediana.mjs';
 import { proverit as menelay } from './menelay.mjs';
+import { proverit as opornye } from './opornye.mjs';
+import { proverit as teoriya } from './teoriya.mjs';
+import { proverit as trenazher } from './trenazher.mjs';
 import { proverit as stepenTochki } from './stepenTochki.mjs';
 import { proverit as trapecii } from './trapecii.mjs';
 import { proverit as ploshchadi } from './ploshchadi.mjs';
@@ -46,6 +49,9 @@ for (const proverit of [
   menelay,
   ploshchadi,
   stepenTochki,
+  opornye,
+  teoriya,
+  trenazher,
 ]) {
   plokho += proverit(N).plokho;
 }
@@ -64,75 +70,71 @@ for (const s of SOBRANNYE) {
     continue;
   }
   const est = new Set();
+  const povtorImen = new Set();
   const rnd = zerno(7);
   for (const t of [z.nachalo, ...Array.from({ length: 60 }, () => z.sluchaynaya(rnd))]) {
-    for (const el of z.postroit(t).elementy) for (const g of el.gruppy ?? []) est.add(g);
+    /* У схемы с режимами (Менелай / Чева) группы собираются по всем режимам. */
+    for (const rezhim of z.rezhimy?.map((m) => m.id) ?? [undefined]) {
+      const elementy = z.postroit(t, rezhim).elementy;
+      for (const el of elementy) for (const g of el.gruppy ?? []) est.add(g);
+      const imena = elementy.filter((el) => el.vid === 'tochka' && el.imya).map((el) => el.imya);
+      if (new Set(imena).size !== imena.length) povtorImen.add(rezhim ?? '—');
+    }
   }
   const nuzhny = [...s.sledstviya, ...s.dokazatelstvo].flatMap((x) => x.gruppy);
   const net = [...new Set(nuzhny)].filter((g) => !est.has(g));
   const pustye = [...s.sledstviya, ...s.dokazatelstvo].filter((x) => x.gruppy.length === 0).length;
-  const ok = net.length === 0 && pustye === 0 && z.shagi.length > 0;
+  /* Группа режима должна включать свой режим: иначе подсветка её не покажет. */
+  const chuzhie = (z.rezhimy ?? []).flatMap((m) =>
+    m.gruppy.filter(
+      (g) => !z.postroit(z.nachalo, m.id).elementy.some((el) => el.gruppy?.includes(g)),
+    ),
+  );
+  const ok =
+    net.length === 0 &&
+    pustye === 0 &&
+    z.shagi.length > 0 &&
+    povtorImen.size === 0 &&
+    chuzhie.length === 0;
   console.log(
-    `  ${ok ? '✓' : '✗'} ${s.no}. ${s.nazvanie}${net.length ? ` — нет групп: ${net.join(', ')}` : ''}${pustye ? ` — пунктов без подсветки: ${pustye}` : ''}`,
+    `  ${ok ? '✓' : '✗'} ${s.no}. ${s.nazvanie}${net.length ? ` — нет групп: ${net.join(', ')}` : ''}${pustye ? ` — пунктов без подсветки: ${pustye}` : ''}${povtorImen.size ? ` — одна буква у двух точек в режиме ${[...povtorImen].join(', ')}` : ''}${chuzhie.length ? ` — группы режима не на его чертеже: ${chuzhie.join(', ')}` : ''}`,
   );
   if (!ok) plokho += 1;
 }
 
-/* Коробки Лейтнера: «Знаю» — следующая (не ниже второй, не выше пятой),
-   «Не знаю» — первая. */
-const { sleduyushchayaKorobka, status18, poryadokKolody } = requireSrc('lib/zadanie18/progress');
-const sluchai = [
-  [undefined, true, 2],
-  [1, true, 2],
-  [2, true, 3],
-  [5, true, 5],
-  [4, false, 1],
-  [undefined, false, 1],
-];
-for (const [k, znayu, zhdu] of sluchai) {
-  const vyshlo = sleduyushchayaKorobka(k, znayu);
-  if (vyshlo !== zhdu) {
-    console.log(`✗ коробка ${k}, ${znayu ? 'Знаю' : 'Не знаю'}: ${vyshlo}, а нужно ${zhdu}`);
-    plokho += 1;
-  }
+/* Прогресс схем — поверх общей колоды карточек №18: статус схемы по
+   двум её карточкам, подбор «на сегодня» и «незнакомые». Сама механика
+   коробок и интервалов — pnpm test:kartochki. */
+const { status18, korobkaSkhemy, kPovtoreniyu, neznakomyh } = requireSrc('lib/zadanie18/progress');
+const { kartochkiSkhemy } = requireSrc('lib/zadanie18/kartochki');
+const { KOLODY } = requireSrc('content/kartochki/index');
+const koloda18 = KOLODY.find((k) => k.task === 18);
+const vKolode = new Set((koloda18?.kartochki ?? []).map((k) => k.id));
+const bezKartochek = SOBRANNYE.filter((s) => !kartochkiSkhemy(s.id).every((id) => vKolode.has(id)));
+if (koloda18 === undefined || bezKartochek.length > 0 || vKolode.size !== SOBRANNYE.length * 2) {
+  console.log(`✗ колода №18: нет карточек схем ${bezKartochek.map((s) => s.id).join(', ')}`);
+  plokho += 1;
 }
-/* Интервалы: коробка 1 — сразу, 2 — через сутки, 5 — через 14 дней. */
-const { poraPovtoryat, kPovtoreniyu, neznakomye } = requireSrc('lib/zadanie18/progress');
 const DEN = 864e5;
 const T0 = 1e12;
-const intervaly = [
-  [undefined, 0, true],
-  [{ korobka: 1, kogda: T0 }, T0, true],
-  [{ korobka: 2, kogda: T0 }, T0 + 0.5 * DEN, false],
-  [{ korobka: 2, kogda: T0 }, T0 + DEN, true],
-  [{ korobka: 3, kogda: T0 }, T0 + 2.9 * DEN, false],
-  [{ korobka: 5, kogda: T0 }, T0 + 14 * DEN, true],
-];
-for (const [z, seychas, zhdu] of intervaly) {
-  if (poraPovtoryat(z, seychas) !== zhdu) {
-    console.log(`✗ интервал: коробка ${z?.korobka}, ${(seychas - T0) / DEN} дн.: ${!zhdu}`);
-    plokho += 1;
-  }
-}
-const prog = { a: { korobka: 3, kogda: T0, otvetov: 1 }, b: { korobka: 1, kogda: T0, otvetov: 1 } };
-if (
-  [...kPovtoreniyu(['a', 'b', 'c'], prog, T0 + DEN)].sort().join('') !== 'bc' ||
-  [...neznakomye(['a', 'b', 'c'], prog)].sort().join('') !== 'bc'
-) {
-  console.log('✗ подбор колоды «сегодня» / «незнакомые»');
+const [ch, sv] = kartochkiSkhemy('x');
+const st = [
+  status18({}, 'x'),
+  status18({ [ch]: { b: 2, n: 1 } }, 'x'),
+  status18({ [ch]: { b: 2, n: 1 }, [sv]: { b: 1, n: 1 } }, 'x'),
+  status18({ [ch]: { b: 2, n: 1 }, [sv]: { b: 4, n: 3 } }, 'x'),
+].join(',');
+if (st !== 'new,learning,learning,known') {
+  console.log(`✗ статусы схемы: ${st}`);
   plokho += 1;
 }
-const st = [status18(undefined), status18({ korobka: 1 }), status18({ korobka: 3 })].join(',');
-if (st !== 'new,learning,known') {
-  console.log(`✗ статусы: ${st}`);
+if (korobkaSkhemy({ [ch]: { b: 3, n: 1 }, [sv]: { b: 2, n: 1 } }, 'x') !== 2) {
+  console.log('✗ коробка схемы — младшая из двух');
   plokho += 1;
 }
-const por = poryadokKolody(['a', 'b', 'c'], {
-  a: { korobka: 3, kogda: 1 },
-  b: { korobka: 1, kogda: 5 },
-}).join('');
-if (por !== 'bca' && por !== 'cba') {
-  console.log(`✗ порядок колоды: ${por}`);
+const pr = { [ch]: { b: 3, n: 1, t: T0 }, [sv]: { b: 1, n: 1, t: T0 } };
+if (kPovtoreniyu(['x', 'y'], pr, T0 + DEN) !== 3 || neznakomyh(['x', 'y'], pr) !== 3) {
+  console.log('✗ подбор карточек «на сегодня» / «незнакомые»');
   plokho += 1;
 }
 console.log(plokho === 0 ? '\nВсе проверки схем №18 пройдены.' : `\nПровалов: ${plokho}`);

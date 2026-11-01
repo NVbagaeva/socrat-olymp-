@@ -68,8 +68,8 @@ function postroit(t: Tochki): Kadr {
       : 'Точка $M$ вне круга — угол между секущими: полуразность дуг.',
     znacheniya: [
       `$\\angle AMD = ${Math.round(ugol)}^\\circ$`,
-      `$\\smile AD = ${Math.round(ad.velichina)}^\\circ$`,
-      `$\\smile BC = ${Math.round(bc.velichina)}^\\circ$`,
+      `$\\arc{AD} = ${Math.round(ad.velichina)}^\\circ$`,
+      `$\\arc{BC} = ${Math.round(bc.velichina)}^\\circ$`,
       formula,
     ],
   };

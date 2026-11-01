@@ -4,8 +4,10 @@
  * Своего SVG нет: здесь только сборка сцены. Графики, которых нет среди
  * семейств №12 («W» из модулей, полуокружность, кусок параболы), идут
  * штатным registerCurve: кривая 'f19' берёт функцию f и рисует её на
- * [ot; do], разрывы (f = null) режут линию на куски. Тело рендерера не
- * меняется — так же модуль-кривая заведена в graph/ezhemesyachnye.ts.
+ * [ot; do], разрывы (f = null) режут линию на куски. Окружность
+ * ('krug19') и ломаная по вершинам ('loman19') — тоже кривые: так их
+ * обходят подписи точек. Тело рендерера не меняется — так же
+ * модуль-кривая заведена в graph/ezhemesyachnye.ts.
  *
  * Обозначения на рисунке — как требует оформление решения: особые точки
  * большими латинскими буквами, выколотые точки пустыми кружками,
@@ -21,12 +23,18 @@ export type F19 = (x: number) => number | null;
 export type Cvet19 = 'lineA' | 'lineB' | 'lineC' | 'accent' | 'aux' | 'cross';
 
 export interface Krivaya19 {
-  type: 'f19' | 'line';
+  type: 'f19' | 'line' | 'krug19' | 'loman19';
   f?: F19;
   ot?: number;
   do?: number;
   k?: number;
   b?: number;
+  /** Окружность 'krug19': центр и радиус. */
+  centr?: [number, number];
+  r?: number;
+  /** Ломаная 'loman19': вершины по порядку; замкнутая — последняя соединена с первой. */
+  vershiny?: [number, number][];
+  zamknuta?: boolean;
   color: Cvet19;
   style?: 'solid' | 'dashed';
   label: null;
@@ -75,6 +83,36 @@ registerCurve('f19', (curve: Krivaya19, win: { xmin: number; xmax: number }) => 
   const f = curve.f;
   const shagov = Math.max(60, Math.ceil((dO - ot) * NA_KLETKU));
   return sample((x: number) => f(x), ot, dO, shagov) as { x: number; y: number }[][];
+});
+
+/* Окружность — замкнутая ломаная по углу: шаг такой, чтобы хорда
+   отходила от дуги меньше чем на сотую клетки. Окно у движка одного
+   масштаба по осям, поэтому окружность выходит окружностью, а куски
+   за рамкой отрезает общая обрезка кривых. Как кривая, а не фигура
+   (shape 'circle'), окружность — препятствие для подписей точек. */
+registerCurve('krug19', (curve: Krivaya19) => {
+  const [cx, cy] = curve.centr ?? [0, 0];
+  const r = curve.r ?? 0;
+  if (!(r > 0)) {
+    return [];
+  }
+  const n = Math.min(2000, Math.max(120, Math.ceil(2 * Math.PI * Math.sqrt(r / 0.02))));
+  const out: { x: number; y: number }[] = [];
+  for (let i = 0; i <= n; i++) {
+    const t = (2 * Math.PI * i) / n;
+    out.push({ x: cx + r * Math.cos(t), y: cy + r * Math.sin(t) });
+  }
+  return [out];
+});
+
+/* Ломаная по вершинам: ромб |x| + |y| = c, отрезок, многоугольник. */
+registerCurve('loman19', (curve: Krivaya19) => {
+  const v = curve.vershiny ?? [];
+  const tochki = (curve.zamknuta === true && v.length > 2 ? [...v, v[0]!] : v).map(([x, y]) => ({
+    x,
+    y,
+  }));
+  return tochki.length < 2 ? [] : [tochki];
 });
 
 /* ── Сборка сцены ────────────────────────────────────────────────── */
@@ -142,6 +180,27 @@ export function pryamaya(
   style: 'solid' | 'dashed' = 'solid',
 ): Krivaya19 {
   return { type: 'line', k, b, color: cvet, style, label: null };
+}
+
+/** Окружность с центром (cx; cy) радиуса r. */
+export function okruzhnost(
+  cx: number,
+  cy: number,
+  r: number,
+  cvet: Cvet19 = 'lineA',
+  style: 'solid' | 'dashed' = 'solid',
+): Krivaya19 {
+  return { type: 'krug19', centr: [cx, cy], r, color: cvet, style, label: null };
+}
+
+/** Ломаная по вершинам; zamknuta — многоугольник (ромб |x| + |y| = c). */
+export function lomanaya(
+  vershiny: [number, number][],
+  cvet: Cvet19 = 'lineA',
+  zamknuta = false,
+  style: 'solid' | 'dashed' = 'solid',
+): Krivaya19 {
+  return { type: 'loman19', vershiny, zamknuta, color: cvet, style, label: null };
 }
 
 /** Вертикальная прямая x = c — отрезком на всю высоту окна. */

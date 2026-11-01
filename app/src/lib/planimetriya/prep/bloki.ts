@@ -111,7 +111,7 @@ export const BLOKI: Blok[] = [
     nazvanie: 'Центральные и вписанные углы',
     lead: 'Дуги, вписанный угол, угол на диаметр',
     formuly: [
-      '\\angle ACB = \\dfrac12\\smile AB = \\dfrac12\\angle AOB',
+      '\\angle ACB = \\dfrac12\\arc{AB} = \\dfrac12\\angle AOB',
       '\\text{угол на диаметр} = 90^\\circ',
     ],
     zadachi: BLOK_OKRUZHNOST,

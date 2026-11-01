@@ -12,7 +12,7 @@
 
 import { useSyncExternalStore } from 'react';
 import { persistent, type PersistentStore } from '../storage';
-import { KOROBOK, type ProgressKolody } from './leitner';
+import { KOROBOK, type ProgressKolody, type ZapisKartochki } from './leitner';
 
 const PUSTO: ProgressKolody = {};
 
@@ -30,12 +30,16 @@ function store(task: number): PersistentStore<ProgressKolody> {
 /** Мусор и чужой формат из хранилища — пустота, а не падение. */
 function chistyy(raw: unknown): ProgressKolody {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return PUSTO;
-  const out: Record<string, { b: number; n: number }> = {};
+  const out: Record<string, ZapisKartochki> = {};
   for (const [id, z] of Object.entries(raw as Record<string, unknown>)) {
     if (typeof z !== 'object' || z === null) continue;
-    const { b, n } = z as { b?: unknown; n?: unknown };
+    const { b, n, t } = z as { b?: unknown; n?: unknown; t?: unknown };
     if (typeof b === 'number' && Number.isInteger(b) && b >= 1 && b <= KOROBOK) {
-      out[id] = { b, n: typeof n === 'number' && n > 0 ? n : 1 };
+      out[id] = {
+        b,
+        n: typeof n === 'number' && n > 0 ? n : 1,
+        ...(typeof t === 'number' && Number.isFinite(t) ? { t } : {}),
+      };
     }
   }
   return out;
@@ -43,7 +47,8 @@ function chistyy(raw: unknown): ProgressKolody {
 
 const chistye = new WeakMap<object, ProgressKolody>();
 
-function prochitat(task: number): ProgressKolody {
+/** Прогресс колоды прямо сейчас — для обработчиков вне отрисовки. */
+export function prochitat(task: number): ProgressKolody {
   const raw = store(task).read();
   const known = chistye.get(raw);
   if (known !== undefined) return known;

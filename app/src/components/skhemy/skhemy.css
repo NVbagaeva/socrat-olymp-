@@ -129,6 +129,16 @@
 .skh-tochka.is-lit {
   fill: var(--skh-cvet);
 }
+/* Выноска к отнесённой букве (lib/skhemy/podpisi.ts): тоньше линий
+   чертежа, чтобы не читаться как отрезок фигуры. */
+.skh-vynoska {
+  fill: none;
+  stroke: var(--skh-ink);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+
 .skh-podpis {
   fill: var(--skh-ink);
   font-size: 17px;

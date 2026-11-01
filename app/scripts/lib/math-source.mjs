@@ -25,22 +25,30 @@ const NOT_TEXT_KEYS = new Set([
   /* prototip — служебное описание шаблона «Вариантов повышенной сложности»
      (lib/povyshennye/shablony.ts): для отчётов разработчика, на сайт не выводится. */
   'prototip',
-  /* Служебные пометки об источнике задач №19 (content/teoriya19): на сайт не выводятся. */
-  'sostavleno', 'pravka',
-  /* Подсказка в поле ввода ответа (placeholder): KaTeX там не набрать. */
-  'polePodskazka',
+  /* pravka, sostavleno — служебные пометки об источнике задачи (teoriya19/tipy.ts),
+     на сайт не выводится. polePodskazka — placeholder поля ввода: там только
+     обычный текст, KaTeX не набрать. */
+  'pravka', 'sostavleno', 'polePodskazka',
 ]);
 
-/* Поля-словари, все значения которых — обычный текст для экранного
-   диктора (aria-label): подписи ручек перетаскивания на живых схемах №18. */
-const NOT_TEXT_PARENTS = new Set(['imenaRuchek']);
+/* Словари, значения которых — подписи для экранного диктора (aria-label):
+   там только обычный текст. Ключи у них — имена точек. */
+const ARIA_MAPS = new Set(['imenaRuchek']);
 
-/* Вызовы, последний аргумент которых — подпись рисунка для экранного
-   диктора (aria-label). KaTeX диктор не читает: там формула словами. */
-const ALT_CALLS = /^(?:scena)$/;
+/** Строка — значение в словаре ARIA_MAPS ({ imenaRuchek: { C1: '…' } }). */
+function inAriaMap(node) {
+  const prop = node.parent;
+  if (!prop || !ts.isPropertyAssignment(prop)) { return false; }
+  const obj = prop.parent;
+  const outer = obj && obj.parent;
+  return Boolean(outer && ts.isPropertyAssignment(outer) &&
+    ARIA_MAPS.has(outer.name.getText().replace(/['"]/g, '')));
+}
 
 /* Вызовы, аргумент которых — TeX или служебная строка. */
-const TEX_CALLS = /^(?:prismModel|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
+/* scena — рисунок №19 (lib/zadanie19/risunok.ts): строка в нём — alt для
+   экранного диктора, только обычный текст. */
+const TEX_CALLS = /^(?:scena|prismModel|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
 
 function keyOf(node) {
   const parent = node.parent;
@@ -53,21 +61,6 @@ function keyOf(node) {
     return parent.parent.name.getText();
   }
   return null;
-}
-
-/** Ключ объекта, внутри которого лежит поле со строкой: { imenaRuchek: { C1: '…' } } → imenaRuchek. */
-function parentKeyOf(node) {
-  const prop = node.parent;
-  const obj = prop && prop.parent;
-  const outer = obj && ts.isObjectLiteralExpression(obj) ? obj.parent : null;
-  return outer && ts.isPropertyAssignment(outer) ? outer.name.getText().replace(/['"]/g, '') : null;
-}
-
-/** Строка — последний аргумент вызова из ALT_CALLS (подпись для диктора). */
-function isAltArgument(node) {
-  const call = node.parent;
-  if (!call || !ts.isCallExpression(call) || !ALT_CALLS.test(call.expression.getText())) { return false; }
-  return call.arguments[call.arguments.length - 1] === node;
 }
 
 function calleeOf(node) {
@@ -121,8 +114,7 @@ export function codeTexts(file) {
     if (inMetadata(node)) { return; }
     const key = keyOf(node);
     if (key !== null && NOT_TEXT_KEYS.has(key)) { return; }
-    if (key !== null && NOT_TEXT_PARENTS.has(parentKeyOf(node))) { return; }
-    if (isAltArgument(node)) { return; }
+    if (inAriaMap(node)) { return; }
     const callee = calleeOf(node);
     if (callee !== null && TEX_CALLS.test(callee)) { return; }
     const { line } = sf.getLineAndCharacterOfPosition(node.getStart(sf));
