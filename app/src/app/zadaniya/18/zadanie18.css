@@ -1013,3 +1013,73 @@
     align-items: start;
   }
 }
+
+/* ── Тренажёр ───────────────────────────────────────────────────── */
+
+.z18-tr__karta {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z18-tr__uslovie p {
+  margin: 0 0 var(--space-2);
+}
+.z18-tr__punkt {
+  color: var(--color-accent-text);
+  font-weight: 700;
+}
+.z18-tr__proverka {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-tr__chertezh {
+  max-width: 460px;
+  width: 100%;
+  justify-self: center;
+}
+.z18-tr__razbor {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z18-tr__shagi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-tr__razbor-punkt {
+  margin: var(--space-2) 0 var(--space-1);
+  color: var(--color-accent-text);
+  font-weight: 700;
+}
+.z18-tr__shag {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.z18-tr__shagi li.is-active .z18-tr__shag {
+  border-color: var(--color-primary);
+  background: var(--color-surface-info);
+}
+.z18-tr__shag-hint {
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+}
+
+@media (min-width: 1024px) {
+  .z18-tr__karta,
+  .z18-tr__razbor {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    align-items: start;
+  }
+}
