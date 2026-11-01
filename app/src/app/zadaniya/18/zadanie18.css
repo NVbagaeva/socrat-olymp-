@@ -853,3 +853,71 @@
   gap: var(--space-2);
   margin-top: var(--space-2);
 }
+
+/* ── Опорные задачи ─────────────────────────────────────────────── */
+
+.z18-op-spisok {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.z18-op-spisok > h2 {
+  margin: 0;
+}
+.z18-op-spisok__lead {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z18-op-plitka__uslovie {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-op-plitka__skhemy {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-op__punkty {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-op__punkty li {
+  display: flex;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.z18-op__podskazka {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.z18-op__podskazka p {
+  margin: 0;
+}
+.z18-op__skhemy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-op__skhemy .chip {
+  /* Подпись схемы бывает длинной: на телефоне переносится, а не вылезает. */
+  max-width: 100%;
+  white-space: normal;
+  text-decoration: none;
+}
+.z18-op__otvet {
+  margin: 0;
+  font-size: var(--fs-h3);
+  font-weight: 700;
+}
