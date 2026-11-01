@@ -81,6 +81,8 @@ export const RABOTA_19 = {
 
 export const ZHIVOY_19 = {
   title: 'Поверни прямую сам',
+  /** Заголовок, когда параметр двигает окружность (метод 2). */
+  titleOkruzhnost: 'Измени окружность сам',
   resheniy: (n: number) =>
     n === Infinity
       ? 'бесконечно много решений'

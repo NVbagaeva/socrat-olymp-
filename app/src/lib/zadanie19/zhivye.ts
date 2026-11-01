@@ -7,7 +7,7 @@
  * не по картинке: для ломаных — по кускам, где функция линейна.
  */
 
-import { grafik, pryamaya, scena, tochka, type Scena19 } from './risunok';
+import { grafik, lomanaya, okruzhnost, pryamaya, scena, tochka, type Scena19 } from './risunok';
 
 export interface Osoboe19 {
   a: number;
@@ -16,6 +16,8 @@ export interface Osoboe19 {
 }
 
 export interface Zhivoy19 {
+  /** Что движет параметр: прямую (по умолчанию) или окружность — от этого заголовок блока. */
+  vid?: 'pryamaya' | 'okruzhnost';
   bukva: string;
   min: number;
   max: number;
@@ -52,7 +54,55 @@ export function korniKL(f: (x: number) => number, izlomy: number[]): number {
   return korni.length;
 }
 
+/** Общие точки окружности и ломаной (по звеньям): точные, совпавшие — одна. */
+export function tochkiOkrLomanoy(
+  centr: [number, number],
+  r: number,
+  vershiny: [number, number][],
+): number {
+  const [cx, cy] = centr;
+  const out: [number, number][] = [];
+  if (!(r >= 0)) return 0;
+  for (let i = 0; i < vershiny.length; i++) {
+    const [px, py] = vershiny[i]!;
+    const [qx, qy] = vershiny[(i + 1) % vershiny.length]!;
+    const dx = qx - px;
+    const dy = qy - py;
+    const fx = px - cx;
+    const fy = py - cy;
+    const A = dx * dx + dy * dy;
+    const B = 2 * (fx * dx + fy * dy);
+    const C = fx * fx + fy * fy - r * r;
+    /* Касание: дискриминант — нуль с ошибкой округления (R = √32), его
+       допуск — относительный, иначе одна точка касания дала бы две. */
+    const dop = 1e-9 * Math.max(1, B * B, Math.abs(4 * A * C));
+    let D = B * B - 4 * A * C;
+    if (D < -dop) continue;
+    if (D < dop) D = 0;
+    for (const t of [(-B - Math.sqrt(D)) / (2 * A), (-B + Math.sqrt(D)) / (2 * A)]) {
+      if (t < -1e-9 || t > 1 + 1e-9) continue;
+      const x = px + t * dx;
+      const y = py + t * dy;
+      if (!out.some(([u, v]) => Math.abs(u - x) < 1e-7 && Math.abs(v - y) < 1e-7)) {
+        out.push([x, y]);
+      }
+    }
+  }
+  return out.length;
+}
+
 const W = (x: number) => Math.abs(Math.abs(x) - 2);
+
+/** Ромб |x| + |y| = 2 разбора метода 2. */
+const ROMB_2: [number, number][] = [
+  [2, 0],
+  [0, 2],
+  [-2, 0],
+  [0, -2],
+];
+
+/** «a = 0,25»: для подписи рисунка, плоским текстом. */
+const chislo = (a: number) => String(Math.round(a * 100) / 100).replace('.', ',');
 
 const ZHIVYE: Record<string, Zhivoy19> = {
   /* Разбор метода 1: ||x| − 2| = a(x − 8) + 2, пучок через A(8; 2). */
@@ -76,9 +126,44 @@ const ZHIVYE: Record<string, Zhivoy19> = {
           curves: [grafik(W), pryamaya(a, 2 - 8 * a, 'lineB')],
           points: [tochka(8, 2, 'A'), tochka(2, 0, 'B'), tochka(-2, 0, 'C'), tochka(0, 2, 'D')],
         },
-        `Ломаная y = ||x| − 2| и прямая y = a(x − 8) + 2 при a = ${String(Math.round(a * 100) / 100).replace('.', ',')}`,
+        `Ломаная y = ||x| − 2| и прямая y = a(x − 8) + 2 при a = ${chislo(a)}`,
       ),
     resheniy: (a) => korniKL((x) => W(x) - a * (x - 8) - 2, [-2, 0, 2]),
+  },
+  /* Разбор метода 2: ромб |x| + |y| = 2 и окружность с центром C(3; 3), R² = a. */
+  'm02-r1': {
+    vid: 'okruzhnost',
+    bukva: 'a',
+    min: 0,
+    max: 40,
+    shag: 0.1,
+    start: 20,
+    osobye: [
+      { a: 8, tex: '8' },
+      { a: 10, tex: '10' },
+      { a: 32, tex: '32' },
+      { a: 34, tex: '34' },
+    ],
+    scena: (a) =>
+      scena(
+        { x: [-3, 9], y: [-3, 9] },
+        {
+          curves: [
+            lomanaya(ROMB_2, 'lineA', true),
+            ...(a > 0 ? [okruzhnost(3, 3, Math.sqrt(a), 'lineB')] : []),
+          ],
+          points: [
+            tochka(3, 3, 'C'),
+            tochka(2, 0, 'K'),
+            tochka(0, 2, 'L'),
+            tochka(-2, 0, 'M'),
+            tochka(0, -2, 'N'),
+          ],
+        },
+        `Ромб |x| + |y| = 2 и окружность с центром C(3; 3), квадрат радиуса a = ${chislo(a)}`,
+      ),
+    /* a = 0 — одна точка C, она не на ромбе. */
+    resheniy: (a) => (a <= 0 ? 0 : tochkiOkrLomanoy([3, 3], Math.sqrt(a), ROMB_2)),
   },
 };
 
