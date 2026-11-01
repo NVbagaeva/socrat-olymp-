@@ -16,6 +16,9 @@
    KaTeX не набрал и которая видна как есть («$\vec{b}$», «0{,}6»,
    «**жирный**»). Исключений у этого правила нет.
 
+   Дуга окружности пишется только \arc{AB}: \smile, \frown и символы
+   ◡ ⌣ ⌢ ⌒ в исходниках — ошибка (checkArcs).
+
    Падает с кодом 1 и списком «файл:строка — признак — текст».
 
    Исключения — явные списки ниже, у каждого причина. Точечное
@@ -42,42 +45,69 @@ const OUT = path.join(app, 'out');
 /* Файлы, которые не проверяются целиком (путь от src/). */
 const SKIP_FILES = [
   { re: /^app\/styleguide\//, why: 'служебная витрина компонентов, ученик её не видит' },
-  { re: /^content\/perenos-iz-04-v-05\.ts$/, why: 'заметки о переносе материала, на сайт не выводятся' },
+  {
+    re: /^content\/perenos-iz-04-v-05\.ts$/,
+    why: 'заметки о переносе материала, на сайт не выводятся',
+  },
   { re: /(?:^|\/)selftest\.ts$/, why: 'самопроверки генераторов, тексты сообщений об ошибках' },
-  { re: /^lib\/graph\/(?:renderer|math|katex|katex-upgrade|animate|preview-ui|triangle)\.js$/,
-    why: 'внутренности движка: разбор и вёрстка формул, подписи SVG' },
+  {
+    re: /^lib\/graph\/(?:renderer|math|katex|katex-upgrade|animate|preview-ui|triangle)\.js$/,
+    why: 'внутренности движка: разбор и вёрстка формул, подписи SVG',
+  },
   { re: /answers\.json$/, why: 'ключи ответов, не текст' },
-  { re: /^lib\/variant\/online\/normalizeCases\.json$/, why: 'таблица случаев ввода ответа для тестов: сырой ввод ученика, на сайт не выводится' },
+  {
+    re: /^lib\/variant\/online\/normalizeCases\.json$/,
+    why: 'таблица случаев ввода ответа для тестов: сырой ввод ученика, на сайт не выводится',
+  },
   { re: /^lib\/solid\/catalog\.ts$/, why: 'подписи каталога тел — только для /styleguide/' },
   { re: /^lib\/scenes\.ts$/, why: 'подписи внутри SVG-чертежей: KaTeX в <text> не встраивается' },
-  { re: /^lib\/vektory\/(?:render|obraztsy)\.ts$/, why: 'движок рисунков №2: подписи внутри SVG и образцы витрины' },
-  { re: /^lib\/proizvodnaya\/(?:render|reshit)\.ts$/,
-    why: 'движок рисунков №9: подписи внутри SVG и сообщения о нарушениях для разработчика' },
-  { re: /^lib\/veroyatnost\/illyustratsii\.ts$/, why: 'alt картинок: атрибут, только обычный текст' },
-  { re: /^lib\/variant\/adapters\/z\d\d\/info\.ts$/,
-    why: 'возможности адаптеров «Собрать вариант» для отчёта разработчика (notes), на страницы не выводятся' },
-  { re: /^content\/kabinet\/katalog\.json$/,
-    why: 'названия прототипов для списка «Выдать ДЗ» (<option>) и базы: обычный текст через texPlain, KaTeX там не набрать' },
-  { re: /^content\/legal\//, why: 'правовые документы: текст слово в слово, математики нет (пути и адреса через «/»)' },
+  {
+    re: /^lib\/vektory\/(?:render|obraztsy)\.ts$/,
+    why: 'движок рисунков №2: подписи внутри SVG и образцы витрины',
+  },
+  {
+    re: /^lib\/proizvodnaya\/(?:render|reshit)\.ts$/,
+    why: 'движок рисунков №9: подписи внутри SVG и сообщения о нарушениях для разработчика',
+  },
+  {
+    re: /^lib\/veroyatnost\/illyustratsii\.ts$/,
+    why: 'alt картинок: атрибут, только обычный текст',
+  },
+  {
+    re: /^lib\/variant\/adapters\/z\d\d\/info\.ts$/,
+    why: 'возможности адаптеров «Собрать вариант» для отчёта разработчика (notes), на страницы не выводятся',
+  },
+  {
+    re: /^content\/kabinet\/katalog\.json$/,
+    why: 'названия прототипов для списка «Выдать ДЗ» (<option>) и базы: обычный текст через texPlain, KaTeX там не набрать',
+  },
+  {
+    re: /^content\/legal\//,
+    why: 'правовые документы: текст слово в слово, математики нет (пути и адреса через «/»)',
+  },
 ];
 
 /* ── Исключения: собранный сайт ───────────────────────────────── */
 
-const SKIP_PAGES = [
-  { re: /^styleguide\//, why: 'служебная витрина компонентов' },
-];
+const SKIP_PAGES = [{ re: /^styleguide\//, why: 'служебная витрина компонентов' }];
 
 /* Тексты страницы, которые математикой не являются. */
 const SITE_TEXT_OK = [
   { re: /^[−-]?\d+(?:[,.]\d+)?$/, why: 'число в ячейке таблицы статистики (−2 к счёту)' },
   { re: /(?:https?:\/\/|t\.me\/|youtube\.com|youtu\.be)/, why: 'адрес ссылки' },
-  { re: /\b[a-z0-9-]+\.(?:ru|com|org)\/[a-z]/i, why: 'адрес сайта без протокола: budetege.ru/politika' },
+  {
+    re: /\b[a-z0-9-]+\.(?:ru|com|org)\/[a-z]/i,
+    why: 'адрес сайта без протокола: budetege.ru/politika',
+  },
 ];
 
 /* Найденные куски, которые математикой не являются. */
 const SITE_HIT_OK = [
-  { rule: 'fraction', re: /^\d+ \/ \d+$/,
-    why: 'счётчик «решено / всего», «вопрос 1 / 3», номер страницы листа: целые через « / »' },
+  {
+    rule: 'fraction',
+    re: /^\d+ \/ \d+$/,
+    why: 'счётчик «решено / всего», «вопрос 1 / 3», номер страницы листа: целые через « / »',
+  },
 ];
 
 /* ── Проверка ──────────────────────────────────────────────────── */
@@ -91,15 +121,43 @@ function short(text) {
   return flat.length > 110 ? flat.slice(0, 107) + '…' : flat;
 }
 
-function checkSources() {
-  const files = sourceFiles(SRC, SKIP_FILES.map((item) => item.re));
+/* Дуга окружности — только \arc{AB} (lib/graph/katex-makrosy.js).
+   Старые обозначения набирались по-разному: \smile — отношение, низко
+   и с кривыми пробелами, \frown и символы Юникода — вне шрифта
+   формул. Правило без исключений, кроме файла самого макроса. */
+const DUGA_ZAPRET = /\\(?:smile|frown)(?![a-zA-Z])|[\u25E1\u2323\u2322\u2312]/;
+
+function checkArcs() {
   const problems = [];
+  for (const file of sourceFiles(SRC, [/^lib\/graph\/katex-makrosy\.js$/])) {
+    fs.readFileSync(file, 'utf8')
+      .split('\n')
+      .forEach((line, i) => {
+        const m = line.match(DUGA_ZAPRET);
+        if (m !== null) {
+          problems.push(
+            `${path.relative(app, file)}:${i + 1} — дуга «${m[0]}»: пиши \\arc{AB} — «${short(line.trim())}»`,
+          );
+        }
+      });
+  }
+  return problems;
+}
+
+function checkSources() {
+  const files = sourceFiles(
+    SRC,
+    SKIP_FILES.map((item) => item.re),
+  );
+  const problems = [...checkArcs()];
   for (const file of files) {
     const items = file.endsWith('.json') ? jsonTexts(file) : codeTexts(file);
     for (const item of items) {
       const hits = findPlainMath(stripDollarMath(item.text));
       if (hits.length > 0) {
-        problems.push(`${path.relative(app, file)}:${item.line} — ${describe(hits)} — «${short(item.text)}»`);
+        problems.push(
+          `${path.relative(app, file)}:${item.line} — ${describe(hits)} — «${short(item.text)}»`,
+        );
       }
     }
   }
@@ -111,8 +169,13 @@ function htmlFiles(dir) {
   (function walk(current) {
     for (const name of fs.readdirSync(current)) {
       const full = path.join(current, name);
-      if (fs.statSync(full).isDirectory()) { walk(full); continue; }
-      if (name.endsWith('.html')) { files.push(full); }
+      if (fs.statSync(full).isDirectory()) {
+        walk(full);
+        continue;
+      }
+      if (name.endsWith('.html')) {
+        files.push(full);
+      }
     }
   })(dir);
   return files.sort();
@@ -136,15 +199,22 @@ function checkSite() {
     for (const text of visibleTexts(html)) {
       const raw = findRawTex(text);
       if (raw.length > 0) {
-        problems.push(`${path.relative(app, file)}:${lineOf(html, raw[0].match)} — сырой TeX: ` +
-          `${[...new Set(raw.map((h) => h.match))].join(' ')} — «${short(text)}»`);
+        problems.push(
+          `${path.relative(app, file)}:${lineOf(html, raw[0].match)} — сырой TeX: ` +
+            `${[...new Set(raw.map((h) => h.match))].join(' ')} — «${short(text)}»`,
+        );
         continue;
       }
-      if (SITE_TEXT_OK.some((item) => item.re.test(text))) { continue; }
-      const hits = findPlainMath(text)
-        .filter((hit) => !SITE_HIT_OK.some((ok) => ok.rule === hit.rule && ok.re.test(hit.match)));
+      if (SITE_TEXT_OK.some((item) => item.re.test(text))) {
+        continue;
+      }
+      const hits = findPlainMath(text).filter(
+        (hit) => !SITE_HIT_OK.some((ok) => ok.rule === hit.rule && ok.re.test(hit.match)),
+      );
       if (hits.length > 0) {
-        problems.push(`${path.relative(app, file)}:${lineOf(html, hits[0].match)} — ${describe(hits)} — «${short(text)}»`);
+        problems.push(
+          `${path.relative(app, file)}:${lineOf(html, hits[0].match)} — ${describe(hits)} — «${short(text)}»`,
+        );
       }
     }
   }
@@ -163,8 +233,10 @@ if (wantSrc) {
     failed = true;
     console.error(`Математика вне KaTeX в исходниках (${problems.length}):`);
     problems.forEach((line) => console.error('  ' + line));
-    console.error('Формулу пишите $…$ (см. lib/tex.ts). Если обычный текст нужен специально — ' +
-      'добавьте файл в SKIP_FILES или ключ в NOT_TEXT_KEYS (scripts/lib/math-source.mjs) с причиной.');
+    console.error(
+      'Формулу пишите $…$ (см. lib/tex.ts). Если обычный текст нужен специально — ' +
+        'добавьте файл в SKIP_FILES или ключ в NOT_TEXT_KEYS (scripts/lib/math-source.mjs) с причиной.',
+    );
   } else {
     console.log(`Исходники: ${checked} файлов, математики вне KaTeX нет.`);
   }
@@ -180,8 +252,10 @@ if (wantSite) {
     failed = true;
     console.error(`Математика вне KaTeX на страницах сайта (${problems.length}):`);
     problems.forEach((line) => console.error('  ' + line));
-    console.error('Исключение для отдельного элемента — класс .no-math-check, ' +
-      'для типа текста — SITE_TEXT_OK в этом файле.');
+    console.error(
+      'Исключение для отдельного элемента — класс .no-math-check, ' +
+        'для типа текста — SITE_TEXT_OK в этом файле.',
+    );
   } else {
     console.log(`Сайт: ${checked} страниц, математики вне KaTeX нет.`);
   }

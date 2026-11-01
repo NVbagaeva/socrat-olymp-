@@ -1,4 +1,5 @@
 import katex from 'katex';
+import '@/lib/graph/katex-makrosy.js';
 import { Tex } from '@/components/ui/Tex';
 import type { RazborStereo as Razbor } from '@/lib/stereo/razbory3';
 import { ORTHO_AZIMUTH, ORTHO_ELEVATION, orthoAt } from '@/lib/solid/project';

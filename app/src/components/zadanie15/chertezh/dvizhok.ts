@@ -29,6 +29,7 @@
  */
 
 import katex from 'katex';
+import '@/lib/graph/katex-makrosy.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {

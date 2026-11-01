@@ -32,6 +32,7 @@ import { soderzhanieMd } from './lib/spravochnik-1-md.mjs';
 
 const require = createRequire(import.meta.url);
 const katex = require('katex');
+requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex); // общие макросы KaTeX: \arc{…}
 const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
 
 const { checkSpravochnik, checkChertezhi, tekstySpravochnika, shkolnyeFormulirovki } = requireSrc(

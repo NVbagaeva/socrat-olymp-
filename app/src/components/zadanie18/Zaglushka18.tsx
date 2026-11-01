@@ -15,7 +15,7 @@ export function Zaglushka18({ vkladka }: { vkladka: string }) {
         title={ZAGLUSHKA_18.title}
         description={ZAGLUSHKA_18.text}
         action={
-          <Link className="btn btn--primary btn--sm" href={`${ZADANIYA}/${ZADANIE18.slug}/`}>
+          <Link className="btn btn--primary btn--sm" href={`${ZADANIYA}/${ZADANIE18.slug}/skhemy/`}>
             {ZAGLUSHKA_18.kSkhemam}
           </Link>
         }

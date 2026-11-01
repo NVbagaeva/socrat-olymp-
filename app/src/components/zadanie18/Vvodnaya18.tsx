@@ -1,20 +1,18 @@
 'use client';
 
+import Link from 'next/link';
+import { useState } from 'react';
 import { ProgressBar } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
-import { VVODNAYA_18 } from '@/content/zadanie18';
+import { VKLADKA_KARTOCHKI } from '@/content/kartochkiUi';
+import { VVODNAYA_18, ZADANIE18 } from '@/content/zadanie18';
 import { SOBRANNYE } from '@/content/zadanie18/spisok';
-import { useState } from 'react';
-import {
-  kPovtoreniyu,
-  neznakomye,
-  status18,
-  useProgress18,
-  zapustitKartochki,
-} from '@/lib/zadanie18/progress';
+import { ZADANIYA } from '@/lib/paths';
+import { kPovtoreniyu, neznakomyh, status18, useProgress18 } from '@/lib/zadanie18/progress';
 
-/** Якорь блока карточек: кнопка «Учить схемы» ведёт к нему. */
-export const YAKOR_KARTOCHEK = 'uchit-skhemy';
+/* Кнопки плашки открывают общую вкладку «Карточки» сразу с сессией:
+   ?nabor=… разбирает components/kartochki/Kartochki.tsx. */
+const KARTOCHKI = `${ZADANIYA}/${ZADANIE18.slug}/${VKLADKA_KARTOCHKI.tail}`;
 
 /**
  * Вводная плашка вкладки: зачем схемы (две аналогии), как работать с
@@ -24,13 +22,14 @@ export const YAKOR_KARTOCHEK = 'uchit-skhemy';
 export function Vvodnaya18() {
   const progress = useProgress18();
   const n = SOBRANNYE.length;
-  const x = SOBRANNYE.filter((s) => status18(progress[s.id]) === 'known').length;
+  const x = SOBRANNYE.filter((s) => status18(progress, s.id) === 'known').length;
   /* Время берётся один раз при монтировании: на сервере прогресс пуст,
      и счётчики совпадают с первой отрисовкой в браузере. */
   const [seychas] = useState(() => Date.now());
   const ids = SOBRANNYE.map((s) => s.id);
-  const segodnya = kPovtoreniyu(ids, progress, seychas).length;
-  const nezn = neznakomye(ids, progress).length;
+  const segodnya = kPovtoreniyu(ids, progress, seychas);
+  const nezn = neznakomyh(ids, progress);
+  const vsego = ids.length * 2;
   return (
     <section className="z18-vv" aria-labelledby="z18-vv-title">
       <div className="z18-vv__ikonka" aria-hidden="true">
@@ -88,21 +87,13 @@ export function Vvodnaya18() {
             <ProgressBar value={n === 0 ? 0 : (x / n) * 100} label={VVODNAYA_18.progress(x, n)} />
             <p className="z18-vv__segodnya">{VVODNAYA_18.segodnya(segodnya)}</p>
             <div className="z18-vv__knopki">
-              <a
-                className="btn btn--primary btn--sm"
-                href={`#${YAKOR_KARTOCHEK}`}
-                onClick={() => zapustitKartochki('segodnya')}
-              >
+              <Link className="btn btn--primary btn--sm" href={`${KARTOCHKI}?nabor=segodnya`}>
                 {VVODNAYA_18.uchit}
-              </a>
-              {nezn > 0 && nezn < n ? (
-                <a
-                  className="btn btn--secondary btn--sm"
-                  href={`#${YAKOR_KARTOCHEK}`}
-                  onClick={() => zapustitKartochki('neznakomye')}
-                >
+              </Link>
+              {nezn > 0 && nezn < vsego ? (
+                <Link className="btn btn--secondary btn--sm" href={`${KARTOCHKI}?nabor=neznakomye`}>
                   {VVODNAYA_18.neznakomye(nezn)}
-                </a>
+                </Link>
               ) : null}
             </div>
           </div>

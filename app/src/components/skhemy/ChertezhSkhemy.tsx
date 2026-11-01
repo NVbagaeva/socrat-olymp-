@@ -6,6 +6,7 @@ import {
   RUCHKA_R,
   ramkaKadra,
   raskladka,
+  rezhimKadra,
   smeshatRamki,
   type Ekran,
   type Sostoyanie,
@@ -27,6 +28,11 @@ export interface ChertezhSkhemyProps {
   sost: Sostoyanie;
   /** Задан — подвижные точки можно тянуть. */
   onTochki?: (t: Tochki) => void;
+  /**
+   * Задан — чертёж поворачивается двумя пальцами. Приходит приращение
+   * угла поворота, градусы против часовой (как Vid.ugol).
+   */
+  onPovorot?: (dUgol: number) => void;
   /** Подпись для чтения с экрана. */
   opisanie: string;
   /** Подпись ручки точки для чтения с экрана. */
@@ -65,6 +71,7 @@ export function ChertezhSkhemy({
   vid,
   sost,
   onTochki,
+  onPovorot,
   opisanie,
   podpisRuchki,
   dolyaVysoty = 0.72,
@@ -88,7 +95,8 @@ export function ChertezhSkhemy({
     return () => ro.disconnect();
   }, []);
 
-  const kadr = useMemo(() => skhema.postroit(t), [skhema, t]);
+  const rezhim = rezhimKadra(skhema, sost);
+  const kadr = useMemo(() => skhema.postroit(t, rezhim), [skhema, t, rezhim]);
   const cel = useMemo(() => ramkaKadra(kadr, vid, sost), [kadr, vid, sost]);
 
   /* Рамка: на первом кадре — сразу цель, дальше — плавно к ней. */
@@ -166,6 +174,71 @@ export function ChertezhSkhemy({
   }
 
   useEffect(() => () => cancelAnimationFrame(rafId.current), []);
+
+  /* ── Поворот двумя пальцами ──
+     Touch Events, а не Pointer Events: прокрутку страницы одним пальцем
+     оставляем браузеру (touch-action не трогаем), а жест двумя пальцами
+     забираем себе — preventDefault в touchmove гасит и прокрутку, и
+     масштаб страницы. Слушатели не пассивные — иначе preventDefault
+     не действует. Вершину, которую тянули первым пальцем, отпускаем. */
+  const onPovorotRef = useRef(onPovorot);
+  useEffect(() => {
+    onPovorotRef.current = onPovorot;
+  }, [onPovorot]);
+  const estPovorot = onPovorot !== undefined;
+
+  useEffect(() => {
+    const el = obertka.current;
+    if (el === null || !estPovorot) return undefined;
+    let prezhniy: number | null = null;
+
+    const ugolPaltsev = (e: TouchEvent): number | null => {
+      const a = e.touches[0];
+      const b = e.touches[1];
+      if (e.touches.length !== 2 || a === undefined || b === undefined) return null;
+      /* Экран: y вниз, так что atan2 растёт по часовой. */
+      return (Math.atan2(b.clientY - a.clientY, b.clientX - a.clientX) * 180) / Math.PI;
+    };
+
+    const nachalo = (e: TouchEvent) => {
+      prezhniy = ugolPaltsev(e);
+      if (prezhniy !== null) {
+        ozhidaet.current = null;
+        setTyanem(null);
+      }
+    };
+    const hod = (e: TouchEvent) => {
+      const u = ugolPaltsev(e);
+      if (u === null || prezhniy === null) return;
+      e.preventDefault();
+      let d = u - prezhniy;
+      if (d > 180) d -= 360;
+      if (d < -180) d += 360;
+      prezhniy = u;
+      /* По часовой на экране — минус в угле против часовой. */
+      if (Math.abs(d) > 1e-3) onPovorotRef.current?.(-d);
+    };
+    const konec = (e: TouchEvent) => {
+      prezhniy = ugolPaltsev(e);
+    };
+    /* Safari: свой жест масштаба страницы поверх touch-событий. */
+    const gest = (e: Event) => e.preventDefault();
+
+    el.addEventListener('touchstart', nachalo, { passive: true });
+    el.addEventListener('touchmove', hod, { passive: false });
+    el.addEventListener('touchend', konec);
+    el.addEventListener('touchcancel', konec);
+    el.addEventListener('gesturestart', gest);
+    el.addEventListener('gesturechange', gest);
+    return () => {
+      el.removeEventListener('touchstart', nachalo);
+      el.removeEventListener('touchmove', hod);
+      el.removeEventListener('touchend', konec);
+      el.removeEventListener('touchcancel', konec);
+      el.removeEventListener('gesturestart', gest);
+      el.removeEventListener('gesturechange', gest);
+    };
+  }, [estPovorot]);
 
   function nazhatie(imya: string, e: PointerEvent<SVGCircleElement>): void {
     if (onTochki === undefined) return;
@@ -316,6 +389,17 @@ export function ChertezhSkhemy({
               r={2.6}
             />
           ))}
+        </g>
+        <g className="skh__vynoski">
+          {ekran.podpisi
+            .filter((p) => p.vynoska !== '')
+            .map((p) => (
+              <path
+                key={p.id}
+                className={clsx('skh-vynoska', p.cvet && `skh-c-${p.cvet}`)}
+                d={p.vynoska}
+              />
+            ))}
         </g>
         <g className="skh__podpisi" style={{ fontFamily: BUKVY }}>
           {ekran.podpisi.map((p) => (
