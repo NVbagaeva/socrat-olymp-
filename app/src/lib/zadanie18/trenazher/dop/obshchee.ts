@@ -1,12 +1,11 @@
 /**
  * Общее для чертежей перенесённых задач тренажёра №18 (dop/): та же
- * неподвижная сцена, что у опорных задач 7–15
- * (lib/zadanie18/opornyeDop/obshchee.ts), и несколько своих построений.
+ * неподвижная сцена из ./osnova.ts и несколько своих построений.
  */
 
 import type { T2 } from '@/lib/skhemy/tipy';
 
-export { delit, naOsnovanie, parametry, scena, signedS } from '../../opornyeDop/obshchee';
+export { delit, naOsnovanie, parametry, scena, signedS } from './osnova';
 
 /** Треугольник по трём сторонам: B(0; 0), C(a; 0), A сверху. a = BC, b = CA, c = AB. */
 export function poStoronam(a: number, b: number, c: number): Record<'A' | 'B' | 'C', T2> {

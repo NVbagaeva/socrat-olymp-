@@ -5,7 +5,7 @@
  */
 
 import type { Uroven } from '@/lib/trenazher/types';
-import type { SkhemaVZadache } from '../opornyeDop/tipy';
+import type { SkhemaVZadache } from '../opornye/tipy';
 import type { Podsvechennoe } from '../tipy';
 
 export interface ZadachaDop18 {

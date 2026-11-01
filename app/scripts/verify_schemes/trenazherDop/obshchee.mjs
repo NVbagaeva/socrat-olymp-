@@ -1,12 +1,12 @@
 /* scripts/verify_schemes/trenazherDop/obshchee.mjs — общее для проверки
    перенесённых задач тренажёра №18: та же независимая от lib/ геометрия,
-   что у проверки опорных задач 7–15 (../opornyeDop/obshchee.mjs), и
+   что в ./osnova.mjs, и
    несколько своих построений. */
 
 export { skal } from '../obshchee.mjs';
-export * from '../opornyeDop/obshchee.mjs';
+export * from './osnova.mjs';
 
-import { add, dist, len, mul, sub } from '../opornyeDop/obshchee.mjs';
+import { add, dist, len, mul, sub } from './osnova.mjs';
 
 /** Периметр многоугольника. */
 export function perimetr(pts) {

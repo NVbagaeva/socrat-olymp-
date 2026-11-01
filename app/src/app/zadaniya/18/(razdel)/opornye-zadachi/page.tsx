@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
-import { Opornye18Spisok } from '@/components/zadanie18/Opornye18Spisok';
+import { Opornye18 } from '@/components/zadanie18/Opornye18';
 import { vkladka18, zadanie18Title } from '@/content/zadanie18';
 
+const VKLADKA = vkladka18('opornye');
+
 export const metadata: Metadata = {
-  title: zadanie18Title(vkladka18('opornye')),
+  title: zadanie18Title(VKLADKA),
 };
 
-/** Вкладка «Опорные задачи»: задачи уровня ЕГЭ через ключевые схемы. Страницы задач — [zadacha]/. */
+/** Вкладка «Опорные задачи» №18: задачи по темам ключевых схем. Страницы задач — [zadacha]/. */
 export default function Opornye18Tab() {
-  return <Opornye18Spisok />;
+  return <Opornye18 vkladka={VKLADKA} />;
 }
