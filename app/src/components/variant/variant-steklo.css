@@ -519,6 +519,14 @@ body:has(.var-stranica .var-bar) .help-fab {
   }
 }
 
+/* Телефон: над панелью «?» неизбежно ложится на плитки и чипы — на этой
+   странице её нет (помощь — в меню «Ещё»). */
+@media (max-width: 767.98px) {
+  body:has(.var-stranica .var-bar) .help-fab {
+    display: none;
+  }
+}
+
 /* ── Окна: общее ───────────────────────────────────────────────── */
 
 .okno .var-field__label {
