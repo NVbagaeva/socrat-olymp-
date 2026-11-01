@@ -42,7 +42,15 @@ function chertezh(
 }
 
 /* Треугольник для образцов ролей. */
-const T: Record<string, T2> = { A: [0, 0], B: [2.2, 3.4], C: [6, 0], K: [0.73, 1.13], M: [3, 0] };
+const T: Record<string, T2> = {
+  A: [0, 0],
+  B: [2.2, 3.4],
+  C: [6, 0],
+  K: [0.73, 1.13],
+  M: [3, 0],
+  /* ML = AM = 3, L на BC. */
+  L: [2.67, 2.98],
+};
 const kontur = (t: Record<string, T2>) => [
   otr('AB', t.A!, t.B!, { rol: 'figure' }),
   otr('BC', t.B!, t.C!, { rol: 'figure' }),
@@ -53,16 +61,19 @@ const tochki = (t: Record<string, T2>, imena: string[]) => imena.map((i) => tch(
 const ROLI: { rol: string; opisanie: string; elementy: (t: Record<string, T2>) => Element[] }[] = [
   {
     rol: 'figure',
-    opisanie: `Основная фигура: контур navy ${TEMA_CVET.navy}, ${TEMA_TOLSHCHINY.ekran.kontur} px; заливка синим ~7 %.`,
+    opisanie: `Основная фигура: контур navy ${TEMA_CVET.navy}, ${TEMA_TOLSHCHINY.ekran.kontur} px, без заливки (голубая заливка — только у искомой площади). Отрезок с конкретным числом (AB = 15, хорда) — тоже navy: цветная только подпись.`,
     elementy: (t) => [
       mnog('f', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'figure' }),
       ...kontur(t),
+      velOtr('ab', '15', t.A!, t.B!),
+      velOtr('ac', '18', t.A!, t.C!),
       ...tochki(t, ['A', 'B', 'C']),
     ],
   },
   {
     rol: 'region',
-    opisanie: `Фигура, площадь которой дана или ищется: заливка терракотой ~18 %, подпись площади — терракотой внутри фигуры.`,
+    opisanie:
+      'Данная площадь: заливка терракотой ~18 %, подпись с числом — терракотой внутри фигуры.',
     elementy: (t) => [
       mnog('r', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'region' }),
       ...kontur(t),
@@ -71,8 +82,19 @@ const ROLI: { rol: string; opisanie: string; elementy: (t: Record<string, T2>) =
     ],
   },
   {
+    rol: 'region-sought',
+    opisanie:
+      'Искомая площадь: лёгкая голубая заливка ~8 %, пунктирный контур внутри фигуры, подпись «S = ?» синим.',
+    elementy: (t) => [
+      mnog('r', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'region-sought' }),
+      ...kontur(t),
+      vel('s', 'S_ABC = ?', { vnutri: [2.7, 1.1] }, { rol: 'region-sought' }),
+      ...tochki(t, ['A', 'B', 'C']),
+    ],
+  },
+  {
     rol: 'part-x · part-y',
-    opisanie: `Части с подписями через x — синие, через y — терракотовые, ${TEMA_TOLSHCHINY.ekran.chast} px; подписи — тем же цветом.`,
+    opisanie: `Только части через переменные (семьи x и y): через x — терракота, через y — янтарь, ${TEMA_TOLSHCHINY.ekran.chast} px; подписи — тем же цветом.`,
     elementy: (t) => [
       ...kontur(t),
       otr('AK', t.A!, t.K!, { rol: 'part-x' }),
@@ -99,36 +121,41 @@ const ROLI: { rol: string; opisanie: string; elementy: (t: Record<string, T2>) =
   },
   {
     rol: 'equal-marks',
-    opisanie: `Штрихи равенства — цвета своего отрезка, ${TEMA_TOLSHCHINY.ekran.shtrih} px.`,
+    opisanie: `Равенство важнее принадлежности стороне: равные отрезки — всегда одного цвета и с одинаковыми засечками (${TEMA_TOLSHCHINY.ekran.shtrih} px, цвета отрезка). Равный отрезок на стороне — сторона разбита в точке: AM оформлен как ML, остаток MC — по своим правилам.`,
     elementy: (t) => [
       otr('AB', t.A!, t.B!, { rol: 'figure' }),
       otr('BC', t.B!, t.C!, { rol: 'figure' }),
-      otr('AM', t.A!, t.M!, { rol: 'part-y', shtrihi: 1 }),
-      otr('MC', t.M!, t.C!, { rol: 'part-y', shtrihi: 1 }),
-      otr('BM', t.B!, t.M!, { rol: 'aux' }),
-      ...tochki(t, ['A', 'B', 'C', 'M']),
+      otr('AM', t.A!, t.M!, { rol: 'figure', shtrihi: 1 }),
+      otr('MC', t.M!, t.C!, { rol: 'figure' }),
+      otr('ML', t.M!, t.L!, { rol: 'figure', shtrihi: 1 }),
+      ...tochki(t, ['A', 'B', 'C', 'M', 'L']),
     ],
   },
   {
     rol: 'angle',
-    opisanie: `Общий или данный угол: дуга ${TEMA_TOLSHCHINY.ekran.ugol} px и сектор тёплым оранжевым ~20 %.`,
+    opisanie: `Общий или данный угол: дуга ${TEMA_TOLSHCHINY.ekran.ugol} px и сектор тёплым оранжевым ~20 %. В ч/б — только дуги: одна, две, три для разных углов.`,
     elementy: (t) => [
       ...kontur(t),
       ug('a', t.B!, t.A!, t.C!, { rol: 'angle' }),
+      ug('c', t.A!, t.C!, t.B!, { rol: 'angle', dugi: 2 }),
       ...tochki(t, ['A', 'B', 'C']),
     ],
   },
   {
     rol: 'point · labels',
     opisanie:
-      'Точки — navy, радиус 3 px, белая обводка 1 px. Подписи вершин — navy, курсив KaTeX, никогда не окрашиваются.',
-    elementy: (t) => [
-      ...kontur(t),
-      otr('AK', t.A!, t.K!, { rol: 'part-x' }),
-      otr('KB', t.K!, t.B!, { rol: 'part-x' }),
-      ...tochki(t, ['A', 'B', 'C', 'K']),
-    ],
+      'Точки — синие, радиус 3 px, белая обводка 1 px. Подписи вершин — синий полужирный курсив, на 12 % крупнее; в ч/б — чёрный полужирный.',
+    elementy: (t) => [...kontur(t), ...tochki(t, ['A', 'B', 'C', 'K'])],
   },
+];
+
+/* Правила темы — коротко; проверка — scripts/verify_schemes/geometriya.mjs. */
+const PRAVILA: string[] = [
+  'Отрезок с конкретным числом (AB = 15, хорда) — линия navy, цветная только подпись (терракота).',
+  'Цвет линии — только у смысловых связей: части через x и y (семьи переменных) и равные отрезки.',
+  'Равные отрезки — всегда одного цвета и с одинаковыми засечками. Равный отрезок на стороне — сторона разбивается в точке.',
+  'Данная площадь — терракотовая заливка ~18 % и подпись с числом; искомая — голубая заливка ~8 %, пунктирный контур и «S = ?».',
+  'Чёрно-белые чертежи (печать, PDF листов по умолчанию) — без заливок вообще: углы только дугами, равенства — засечками, данная и искомая площадь различаются только подписью: «S = 18» и «S = ?».',
 ];
 
 /** Контраст с белым по WCAG. */
@@ -141,11 +168,15 @@ function kontrast(hex: string): string {
 
 const CVETA: { imya: string; hex: string; gde: string }[] = [
   { imya: 'navy', hex: TEMA_CVET.navy, gde: 'контуры фигур, вспомогательные отрезки' },
-  { imya: 'синий', hex: TEMA_CVET.vershina, gde: 'вершины и точки — только они' },
+  {
+    imya: 'синий',
+    hex: TEMA_CVET.vershina,
+    gde: 'вершины и точки; искомая площадь (заливка ~8 %, пунктир, «S = ?»)',
+  },
   {
     imya: 'терракота',
     hex: TEMA_CVET.velichina,
-    gde: 'величины, первая переменная (x, a), угол, площадь',
+    gde: 'величины, первая переменная (x, a), угол, данная площадь',
   },
   { imya: 'янтарь', hex: TEMA_CVET.velichina2, gde: 'вторая переменная (y, b)' },
   { imya: 'серо-синий', hex: TEMA_CVET.postroenie, gde: 'построения (пунктир)' },
@@ -202,8 +233,11 @@ const OBRAZCY: { imya: string; svg: (v: VersiyaTemy) => string }[] = [
     imya: '№3 · куб P03-02, дробь на диагонали (проверка)',
     svg: () => chertezh3('P03-02', 1, '\\dfrac{\\sqrt{3}}{2}'),
   },
-  { imya: '№18 · menelay-pl — две переменные', svg: shablon18('menelay-pl') },
-  { imya: '№18 · obshchiy-ugol', svg: shablon18('obshchiy-ugol') },
+  { imya: '№18 · mediana — числа: линии navy, подписи терракотой', svg: shablon18('mediana') },
+  { imya: '№18 · bis-par — AM = ML: сторона AC разбита в M', svg: shablon18('bis-par') },
+  { imya: '№18 · menelay-pl — дана S_ABC, ищется S_APC', svg: shablon18('menelay-pl') },
+  { imya: '№18 · obshchiy-ugol — ищется S_MBCN', svg: shablon18('obshchiy-ugol') },
+  { imya: '№18 · trap-seredina — ищется S_ABCD', svg: shablon18('trap-seredina') },
 ];
 
 export default function Page() {
@@ -213,16 +247,24 @@ export default function Page() {
       <p className="sg-ch__lead">
         Цвет и толщина элемента — по его смысловой роли, а не по шаблону. Шаблон помечает роли (
         <code>rol</code> в lib/skhemy), тема (lib/skhemy/tema.ts) задаёт оформление — его получают
-        все шаблоны. На экране — всегда цветная версия; на листах и в PDF по умолчанию печатная,
+        все шаблоны. На экране — всегда цветная версия; на листах и в PDF по умолчанию чёрно-белая,
         цветная — по переключателю «Цветные чертежи». Толщины — в пикселях экрана
         (non-scaling-stroke), на бумаге контур 1,2 pt, части 2 pt.
       </p>
 
+      <h2>Правила</h2>
+      <ol className="sg-ch__pravila">
+        {PRAVILA.map((p) => (
+          <li key={p}>{p}</li>
+        ))}
+      </ol>
+
       <h2>Образцы: три движка в одной теме</h2>
       <p className="sg-ch__note">
         Вершины и точки — синие, полужирный курсив, на 12 % крупнее; величины — тёплые (числа и
-        первая переменная — терракота, вторая — янтарь), отрезок с подписью — тем же цветом; контуры
-        — navy. Печать: вершины — чёрный полужирный, величины — чёрный обычный.
+        первая переменная — терракота, вторая — янтарь); цветная линия — только у частей через
+        переменные и равных отрезков; контуры — navy. Чёрно-белая: без заливок, вершины — чёрный
+        полужирный, величины — чёрный обычный.
       </p>
       <div className="sg-ch__shablony">
         {OBRAZCY.map((o) => (
@@ -235,7 +277,7 @@ export default function Page() {
               </figure>
               <figure className="sg-ch__pechat">
                 <div dangerouslySetInnerHTML={{ __html: o.svg('pechat') }} />
-                <figcaption>печать</figcaption>
+                <figcaption>чёрно-белая (печать)</figcaption>
               </figure>
             </div>
           </section>
@@ -257,7 +299,7 @@ export default function Page() {
               </figure>
               <figure>
                 <div dangerouslySetInnerHTML={{ __html: chertezh(r.elementy, T, 'pechat') }} />
-                <figcaption>печать</figcaption>
+                <figcaption>чёрно-белая (печать)</figcaption>
               </figure>
             </div>
           </section>
@@ -313,7 +355,7 @@ export default function Page() {
                 </figure>
                 <figure>
                   <div dangerouslySetInnerHTML={{ __html: svg('pechat') }} />
-                  <figcaption>печать (лист по умолчанию)</figcaption>
+                  <figcaption>чёрно-белая (лист по умолчанию)</figcaption>
                 </figure>
               </div>
             </section>

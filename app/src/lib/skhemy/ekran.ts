@@ -53,6 +53,7 @@ const SLOY_ROLI: Readonly<Record<Rol, number>> = {
   construction: 0,
   figure: 1,
   region: 1,
+  'region-sought': 1,
   angle: 1,
   'part-x': 2,
   'part-y': 2,
@@ -255,6 +256,56 @@ export interface EkrDuga extends Obshchee {
 
 export interface EkrMnog extends Obshchee {
   points: string;
+  /**
+   * Пунктирный контур искомой площади (роль region-sought): многоугольник,
+   * сдвинутый внутрь фигуры, — не сливается со сторонами. Иначе — ''.
+   */
+  kontur: string;
+}
+
+/** Отступ контура искомой площади внутрь фигуры, px. */
+const OTSTUP_ISKOMOY = 5;
+
+/**
+ * Многоугольник, сдвинутый внутрь на d px: каждая сторона — параллельно
+ * себе, вершины — пересечения соседних сдвинутых сторон. Для выпуклых
+ * фигур (искомые площади задач). Вырождается — [].
+ */
+function vnutrenniyKontur(pts: readonly T2[], d: number): T2[] {
+  const n = pts.length;
+  if (n < 3) return [];
+  let pl = 0;
+  for (let i = 0; i < n; i += 1) {
+    const a = pts[i]!;
+    const b = pts[(i + 1) % n]!;
+    pl += a[0] * b[1] - b[0] * a[1];
+  }
+  const zn = pl > 0 ? 1 : -1;
+  const linii = pts.map((a, i) => {
+    const b = pts[(i + 1) % n]!;
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const l = Math.hypot(dx, dy) || 1;
+    /* Внутренняя нормаль: при обходе против часовой (pl > 0) — слева. */
+    const nx = (-dy / l) * zn * d;
+    const ny = (dx / l) * zn * d;
+    return [
+      [a[0] + nx, a[1] + ny],
+      [b[0] + nx, b[1] + ny],
+    ] as const;
+  });
+  const out: T2[] = [];
+  for (let i = 0; i < n; i += 1) {
+    const [p1, p2] = linii[(i + n - 1) % n]!;
+    const [q1, q2] = linii[i]!;
+    const r: T2 = [p2[0] - p1[0], p2[1] - p1[1]];
+    const s: T2 = [q2[0] - q1[0], q2[1] - q1[1]];
+    const den = r[0] * s[1] - r[1] * s[0];
+    if (Math.abs(den) < 1e-9) return [];
+    const t = ((q1[0] - p1[0]) * s[1] - (q1[1] - p1[1]) * s[0]) / den;
+    out.push([p1[0] + r[0] * t, p1[1] + r[1] * t]);
+  }
+  return out;
 }
 
 export interface EkrUgol extends Obshchee {
@@ -565,10 +616,14 @@ function raskladka1(
       }
       case 'mnogougolnik': {
         const pts = el.tochki.map(E);
+        const k = el.rol === 'region-sought' ? vnutrenniyKontur(pts, OTSTUP_ISKOMOY) : [];
         ekran.mnog.push({
           ...obshchee,
           points: pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join(' '),
+          kontur: k.length === 0 ? '' : `M${k.map((p) => `${f1(p[0])} ${f1(p[1])}`).join('L')}Z`,
         });
+        /* Пунктир искомой площади — препятствие подписям. */
+        k.forEach((p, i) => prep.otrezki.push([p, k[(i + 1) % k.length]!]));
         break;
       }
       case 'ugol': {
