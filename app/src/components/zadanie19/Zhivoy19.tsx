@@ -15,6 +15,7 @@ function znachenie(bukva: string, v: number): string {
 
 /** Заголовок блока — по тому, что движет параметр. */
 function zagolovok(z: Opisanie19): string {
+  if (z.vid === 'sdvig') return ZHIVOY_19.titleSdvig;
   if (z.vid === 'okruzhnost') return ZHIVOY_19.titleOkruzhnost;
   if (z.vid === 'gorizontal') return ZHIVOY_19.titleGorizontal;
   return ZHIVOY_19.title;
