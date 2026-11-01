@@ -137,11 +137,26 @@ function polozhenie() {
   };
 }
 
+/** Ждать кнопку опросом из страницы, до 10 с. */
+async function zhdatKnopku(page) {
+  for (let i = 0; i < 100; i++) {
+    if (
+      await page
+        .evaluate(() => document.querySelector('.help-fab__button') !== null)
+        .catch(() => false)
+    ) {
+      return true;
+    }
+    await page.waitForTimeout(100);
+  }
+  return false;
+}
+
 async function otkryt(page, url) {
   await page.goto(BASE + url, { waitUntil: 'networkidle' });
   /* Онбординг — отдельный кусок (OnboardingLazy): кнопка приходит
      после загрузки страницы. */
-  await page.waitForSelector('.help-fab__button', { timeout: 10000 });
+  if (!(await zhdatKnopku(page))) throw new Error(`${url}: кнопки «?» нет`);
   await page.waitForTimeout(150);
 }
 
@@ -279,9 +294,15 @@ async function proverit(engine, browserType) {
       if ((await tab.count()) === 0) continue;
       await tab.click();
       await page.waitForURL('**' + url);
-      await page.waitForSelector('.help-fab__button', { timeout: 10000 });
+      check(await zhdatKnopku(page), `${tag}: после перехода на ${url} кнопки «?» нет`);
       await page.waitForTimeout(400);
       const seychas = await page.evaluate(polozhenie);
+      check(
+        seychas !== null && !seychas.skryta,
+        `${tag}: после перехода на ${url} кнопка спрятана (фокус: ${await page.evaluate(
+          () => document.activeElement?.outerHTML.slice(0, 80) ?? '—',
+        )})`,
+      );
       const e = etalon.get(`${size.w}x${size.h}${url}`);
       if (e && seychas) {
         check(
