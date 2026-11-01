@@ -461,9 +461,19 @@ ok(
   String(await self.locator('.vo-strip__no').count()),
 );
 const firstKod = selfUrl.searchParams.get('kod');
+await type(self, 0, '5');
+await type(self, 1, '7');
+await self.waitForTimeout(500);
 await self.goto(`${BASE}/variant/onlayn/`);
 const resume = self.getByTestId('vo-nachalo-resume');
 await resume.waitFor();
+const plashka = (await self.locator('.onl-plashka').textContent()) ?? '';
+ok(/решено 2 из 13/.test(plashka), 'плашка: «решено 2 из 13» — по ответам сессии', plashka);
+ok(
+  (await self.locator('.onl-plashka progress').getAttribute('value')) === '2',
+  'полоса прогресса — 2 из 13',
+  String(await self.locator('.onl-plashka progress').getAttribute('value')),
+);
 ok(
   (await resume.getAttribute('href'))?.includes(encodeURIComponent(firstKod ?? '')) === true,
   '«Вернуться к последнему варианту» ведёт на начатый',

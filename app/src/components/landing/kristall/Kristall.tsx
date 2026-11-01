@@ -35,6 +35,8 @@ export interface KristallProps {
    * шире.
    */
   sizes?: string;
+  /** Подсказка под фигурой. По умолчанию — на «вы», как на главной. */
+  hint?: string;
 }
 
 /* Ракурс модели, совпадающий с рендером. */
@@ -63,6 +65,7 @@ export function Kristall({
   className,
   podpisi = [],
   sizes = '(max-width: 767.98px) 285px, (max-width: 1023.98px) 420px, 560px',
+  hint = 'Покрутите фигуру',
 }: KristallProps) {
   const oblast = useRef<HTMLDivElement>(null);
   const kholst = useRef<HTMLDivElement>(null);
@@ -240,7 +243,7 @@ export function Kristall({
         <svg viewBox="0 0 24 24" focusable="false">
           <path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" />
         </svg>
-        Покрутите фигуру
+        {hint}
       </p>
     </div>
   );

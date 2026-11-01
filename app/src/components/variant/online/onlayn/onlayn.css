@@ -1,0 +1,537 @@
+/* «Решить вариант онлайн» (/variant/onlayn/) в «Стеклянной сцене».
+   Поверхности — общая рецептура стекла из tokens.css (--glass-*),
+   кнопки — глянцевая «таблетка» (--gloss, --gloss-warm). Всё под .onl:
+   другие страницы кабинета эти правила не видят. */
+
+.onl {
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  /* Кнопка «?» лежит поверх страницы в правом нижнем углу: снизу —
+     запас, чтобы последняя полоса не уходила под неё; на компьютере
+     справа — свободная полоса в её ширину, чтобы она не накрывала
+     кнопки карточек ни на первом экране, ни при прокрутке. */
+  padding-bottom: 104px;
+}
+@media (min-width: 768px) {
+  .onl {
+    padding-right: calc(var(--space-8) + 52px);
+  }
+}
+/* До 1024 внизу ещё и панель навигации: запас — в её высоту и «?». */
+@media (max-width: 1023.98px) {
+  .onl {
+    padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + 88px);
+  }
+}
+.onl > * {
+  min-width: 0;
+}
+
+/* ── Свечения позади стекла ─────────────────────────────────── */
+
+.onl__aura {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.onl__aura span {
+  position: absolute;
+  border-radius: 50%;
+}
+.onl__aura-siniy {
+  left: -18%;
+  top: 4%;
+  width: 62%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, var(--aura-blue), transparent);
+  opacity: 0.55;
+}
+.onl__aura-oranzh {
+  right: -16%;
+  top: 30%;
+  width: 54%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, var(--aura-orange), transparent);
+  opacity: 0.6;
+}
+
+/* ── Иконки: линейные, одна толщина на любом размере ─────────── */
+
+.onl-ik {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.onl-ik * {
+  vector-effect: non-scaling-stroke;
+}
+
+/* ── Герой: текст, чипы, кристалл ───────────────────────────── */
+
+.onl-geroy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+  grid-template-areas:
+    'tekst kristall'
+    'chipy kristall';
+  grid-template-rows: auto 1fr;
+  column-gap: var(--space-8);
+  align-items: start;
+  margin-top: var(--space-2);
+}
+.onl-geroy__tekst {
+  grid-area: tekst;
+}
+.onl-geroy__title {
+  margin: 0;
+}
+.onl-geroy__lead {
+  max-width: 64ch;
+  margin: var(--space-3) 0 0;
+  font-size: 17px;
+  line-height: 26px;
+  color: var(--color-text-secondary);
+}
+.onl-chipy {
+  grid-area: chipy;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.onl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    var(--glass-ring),
+    var(--glass-hi),
+    0 4px 14px -8px rgb(31 95 208 / 0.25);
+}
+.onl-chip .onl-ik {
+  color: var(--color-primary);
+}
+
+.onl-geroy__kristall {
+  grid-area: kristall;
+  /* Справа от фигуры остаётся место под подпись «h — высота». */
+  justify-self: start;
+  width: 360px;
+  max-width: 100%;
+  margin-top: calc(-1 * var(--space-6));
+  --kristall-hint: var(--color-text-tertiary);
+}
+/* Подпись «h — высота»: точка на пунктирной высоте, от неё — выноска
+   вправо к стеклянному ярлыку. Положение точки задаёт модель
+   (Kristall.tsx): фигуру крутят — подпись едет за отрезком. */
+.onl-geroy__kristall .kristall__podpis {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 var(--space-3);
+  margin-left: var(--onl-vynoska, 96px);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--color-text);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  backdrop-filter: blur(8px) saturate(140%);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  transform: translateY(-50%);
+}
+.onl-geroy__kristall .kristall__podpis::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: calc(var(--onl-vynoska, 96px) - 4px);
+  height: 1.5px;
+  background: var(--color-text);
+  opacity: 0.7;
+}
+.onl-geroy__kristall .kristall__podpis::after {
+  content: '';
+  position: absolute;
+  right: calc(100% + var(--onl-vynoska, 96px) - 6px);
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+/* ── Кнопки: глянцевая «таблетка» и контур ──────────────────── */
+
+.onl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 var(--space-6);
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    box-shadow var(--dur-hover) var(--ease),
+    filter var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.onl-btn:active {
+  transform: scale(0.98);
+}
+.onl-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.onl-btn[disabled] {
+  cursor: progress;
+  filter: saturate(0.7);
+}
+.onl-btn--shirokaya {
+  width: 100%;
+}
+.onl-btn--siniy {
+  color: #fff;
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+}
+.onl-btn--tyoplyy {
+  color: #fff;
+  background: var(--gloss-warm);
+  box-shadow: var(--gloss-warm-shadow-soft);
+}
+.onl-btn--siniy .onl-ik,
+.onl-btn--tyoplyy .onl-ik {
+  stroke-width: 2px;
+}
+.onl-ik__zalivka {
+  fill: currentColor;
+}
+.onl-btn--kontur {
+  height: 44px;
+  padding: 0 var(--space-5);
+  font-size: 16px;
+  color: var(--terracotta-700);
+  background: var(--glass-bg-strong);
+  box-shadow: inset 0 0 0 1.5px var(--terracotta);
+}
+@media (hover: hover) {
+  .onl-btn--siniy:hover {
+    filter: brightness(1.05);
+    box-shadow: var(--gloss-shadow-soft-hover);
+  }
+  .onl-btn--tyoplyy:hover {
+    filter: brightness(1.05);
+    box-shadow: var(--gloss-warm-shadow-soft-hover);
+  }
+  .onl-btn--kontur:hover {
+    background: var(--terracotta-50);
+  }
+}
+
+/* ── Плашка начатого варианта ───────────────────────────────── */
+
+.onl-plashka {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--flow-section);
+  padding: var(--space-5) var(--space-6);
+  border-radius: 20px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.onl-plashka__title {
+  margin: 0 0 var(--space-3);
+  font-size: 18px;
+  line-height: 26px;
+}
+.onl-plashka__title b {
+  font-weight: 650;
+}
+.onl-plashka__schet {
+  font-variant-numeric: tabular-nums;
+}
+.onl-plashka__polosa {
+  display: block;
+  width: 100%;
+  height: 10px;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  appearance: none;
+  background: rgb(31 95 208 / 0.12);
+}
+.onl-plashka__polosa::-webkit-progress-bar {
+  background: rgb(31 95 208 / 0.12);
+  border-radius: 999px;
+}
+.onl-plashka__polosa::-webkit-progress-value {
+  background: var(--gloss);
+  border-radius: 999px;
+}
+.onl-plashka__polosa::-moz-progress-bar {
+  background: var(--gloss);
+  border-radius: 999px;
+}
+
+/* ── Два режима: равноправные карточки ──────────────────────── */
+
+.onl-rezhimy {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--flow-section);
+}
+.onl-rezhim {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-8) var(--space-8) var(--space-6);
+  border-radius: 24px;
+  border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.onl-rezhim--trening {
+  --onl-akcent: var(--color-primary);
+  background: var(--glass-tint-blue);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.onl-rezhim--kontrol {
+  /* Иконки — графика, им достаточно 3:1: сама терракота даёт 3,0:1. */
+  --onl-akcent: var(--terracotta);
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow-warm);
+}
+.onl-rezhim__golova {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+.onl-rezhim__znak.onl-ik {
+  width: 36px;
+  height: 36px;
+  color: var(--onl-akcent);
+}
+.onl-rezhim__title {
+  margin: 0;
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+.onl-rezhim__lead {
+  margin: var(--space-2) 0 0;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--color-text-secondary);
+}
+.onl-rezhim__punkty {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-5) 0 28px;
+  padding: 0;
+  list-style: none;
+}
+.onl-rezhim__punkty li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--color-text);
+}
+.onl-rezhim__punkty .onl-ik {
+  color: var(--onl-akcent);
+}
+/* Кнопки двух карточек — одного размера и на одной линии: карточки
+   одной высоты (сетка), кнопка прижата к низу. */
+.onl-rezhim .onl-btn {
+  margin-top: auto;
+}
+
+/* ── Подпись под карточками ─────────────────────────────────── */
+
+.onl-zametka {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
+}
+.onl-zametka .onl-ik {
+  color: var(--color-text-tertiary);
+}
+
+/* ── Учителю ─────────────────────────────────────────────────── */
+
+.onl-uchitel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4) var(--space-5);
+  margin-top: var(--flow-section);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-6);
+  border-radius: 20px;
+  background: var(--glass-tint-warm);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi);
+}
+.onl-uchitel__znak.onl-ik {
+  width: 28px;
+  height: 28px;
+  color: var(--terracotta);
+}
+.onl-uchitel__tekst {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+.onl-uchitel__tekst b {
+  font-weight: 700;
+}
+
+/* ── Планшет ─────────────────────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  .onl-geroy {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+    grid-template-areas:
+      'tekst kristall'
+      'chipy chipy';
+    grid-template-rows: auto auto;
+    column-gap: var(--space-6);
+  }
+  .onl-geroy__kristall {
+    --onl-vynoska: 60px;
+    width: 280px;
+    margin-top: 0;
+  }
+  .onl-geroy__kristall .kristall__podpis {
+    height: 26px;
+    font-size: 13px;
+  }
+  .onl-rezhim {
+    padding: var(--space-6) var(--space-6) var(--space-5);
+  }
+  .onl-rezhim__title {
+    font-size: 24px;
+    line-height: 30px;
+  }
+}
+
+/* ── Телефон ─────────────────────────────────────────────────── */
+
+@media (max-width: 759.98px) {
+  .onl-geroy {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'tekst'
+      'chipy'
+      'kristall';
+    row-gap: var(--space-4);
+  }
+  .onl-geroy__lead {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .onl-chipy {
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+  }
+  .onl-chip {
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    font-size: 14px;
+  }
+  /* Кристалл под текстом, не выше 220px: ширина рендера 261px. */
+  .onl-geroy__kristall {
+    justify-self: center;
+    width: 261px;
+  }
+  .onl-plashka {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+  }
+  .onl-plashka__title {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  /* «Продолжить» — по ширине текста, слева: справа на телефоне висит «?». */
+  .onl-plashka .onl-btn {
+    justify-self: start;
+  }
+  .onl-plashka__tochka {
+    display: none;
+  }
+  .onl-plashka__schet {
+    display: block;
+  }
+  .onl-rezhimy {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+  .onl-rezhim {
+    padding: var(--space-5);
+  }
+  /* Кнопки на телефоне — одной ширины, слева: правую колонку экрана
+     занимает «?», и ни одна кнопка под неё не заходит даже при
+     прокрутке. */
+  .onl-rezhim .onl-btn,
+  .onl-uchitel .onl-btn {
+    justify-self: start;
+    width: 260px;
+    max-width: 100%;
+  }
+  .onl-rezhim__znak.onl-ik {
+    width: 32px;
+    height: 32px;
+  }
+  .onl-uchitel {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: var(--space-4) var(--space-5);
+  }
+  .onl-uchitel .onl-btn {
+    grid-column: 1 / -1;
+  }
+}
