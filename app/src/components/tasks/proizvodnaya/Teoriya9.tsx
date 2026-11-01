@@ -13,6 +13,7 @@ import { prototypesOfGroup } from '@/lib/proizvodnaya/skills';
 import { renderFigura } from '@/lib/proizvodnaya/render';
 import { stsena, type StsenaId } from '@/lib/proizvodnaya/stseny';
 import type { Generated } from '@/lib/proizvodnaya/types';
+import { YAKOR_9, type Blok9 } from '@/lib/proizvodnaya/teoriya-yakorya';
 import { WarnIcon } from '../theory/VerdictIcons';
 import { PONYATIE_9 } from '@/content/theoryPonyatie9';
 import { FiguraSvg9 } from './FiguraSvg9';
@@ -64,6 +65,11 @@ function RuchnoyPrimer({ block }: { block: PExample }) {
   );
 }
 
+/** id блока с полем `yakor`: на него ведёт «Повторить теорию» карточек. */
+function yakor(y: Blok9 | undefined) {
+  return y === undefined ? {} : { id: YAKOR_9.blok(y) };
+}
+
 /* Блок — обычная функция разметки, а не компонент: вложенные блоки
    (подраздел) зовут её же, ключ стоит на Fragment вокруг. */
 function renderBlock(block: PBlock): ReactNode {
@@ -81,7 +87,10 @@ function renderBlock(block: PBlock): ReactNode {
 
     case 'main-formula':
       return (
-        <div className={clsx('rich-main', block.figure !== undefined && 'rich-main--figure')}>
+        <div
+          className={clsx('rich-main', block.figure !== undefined && 'rich-main--figure')}
+          {...yakor(block.yakor)}
+        >
           <div className="rich-main__frame">
             <span className="rich-main__chip">
               <Tex text={block.chip} />
@@ -101,7 +110,7 @@ function renderBlock(block: PBlock): ReactNode {
 
     case 'steps':
       return (
-        <ol className="rich-steps">
+        <ol className="rich-steps" {...yakor(block.yakor)}>
           {block.items.map((item) => (
             <li className="rich-step" key={item.no}>
               <span className="rich-step__no" aria-hidden="true">
@@ -128,7 +137,7 @@ function renderBlock(block: PBlock): ReactNode {
 
     case 'remember':
       return (
-        <section className="nofn-note nofn-note--warm rich-remember">
+        <section className="nofn-note nofn-note--warm rich-remember" {...yakor(block.yakor)}>
           <h4 className="nofn-note__title">
             <WarnIcon />
             {block.title ?? 'Запомни'}
@@ -143,7 +152,7 @@ function renderBlock(block: PBlock): ReactNode {
 
     case 'memo':
       return (
-        <ol className="rich-memo">
+        <ol className="rich-memo" {...yakor(block.yakor)}>
           {block.items.map((item) => (
             <li key={item}>
               <Tex text={item} />
@@ -210,7 +219,7 @@ function renderBlock(block: PBlock): ReactNode {
 
     case 'table':
       return (
-        <div className="z9-tabl">
+        <div className="z9-tabl" {...yakor(block.yakor)}>
           <table className="z9-tabl__table">
             <thead>
               <tr>

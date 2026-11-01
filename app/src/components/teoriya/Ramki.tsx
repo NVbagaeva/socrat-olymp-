@@ -131,15 +131,17 @@ export function RamkaPrimer({
   shagi,
   otvet,
   children,
+  id,
 }: {
   title: string;
   uslovie?: string;
   shagi: readonly ShagPrimera[];
   otvet?: string;
   children?: ReactNode;
+  id?: string;
 }) {
   return (
-    <section className="ramka ramka--primer">
+    <section className="ramka ramka--primer" {...yakor(id)}>
       <span className="ramka__plashka ramka__plashka--primer">Пример</span>
       <h4 className="ramka__zagolovok">
         <Tex text={title} zagolovok />

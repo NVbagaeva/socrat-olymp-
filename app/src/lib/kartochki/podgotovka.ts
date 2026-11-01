@@ -14,11 +14,14 @@
  *     вида (lib/skhemy/svg.ts): случайное положение, поворот, отражение;
  *   — №6: диаграмма Эйлера с точками — раскладка и классы теории
  *     (lib/zadanie6/risunkiKartochek);
- *   — №7: движок чертежей lib/graph (единичная окружность).
+ *   — №7: движок чертежей lib/graph (единичная окружность);
+ *   — №9: движок графиков lib/proizvodnaya (render.ts) в режиме ученика —
+ *     без треугольников, пунктиров и знаков на промежутках.
  */
 
 import { renderGraph } from '../graph/renderer.js';
 import { eilerSvg } from '../zadanie6/risunkiKartochek';
+import { renderFigura } from '../proizvodnaya/render';
 
 import { parseAnswer } from '../answer';
 import { plain, typesetKrupno } from '../tex';
@@ -65,7 +68,11 @@ export interface KartochkaGotovaya {
    * лицевой стороне нет букв, на обороте есть): тот же номер варианта.
    */
   figuryOborota?: string[];
-  /** Чертёж на лицевой стороне (тип «чертёж») или на обороте. */
+  /**
+   * Чертёж на лицевой стороне или на обороте. На лицевой — у «чертежа» и
+   * у карточек с автопроверкой: там рисунок — часть условия (график №9,
+   * по которому считают ответ). У «формулы» и «свойства» — на обороте.
+   */
   figuraNaLitse: boolean;
   /** «Повторить теорию»: адрес фрагмента теории. Нет — карточка «добавлено». */
   teoriya?: string;
@@ -197,6 +204,8 @@ export function narisovat(id: string, f: FiguraKartochki): string[] {
       return [obertka(eilerSvg(f.ris), 'zadanie6')];
     case 'graph':
       return [obertka(renderGraph(f.scena()) as string, 'graph')];
+    case 'proizvodnaya':
+      return [obertka(renderFigura(f.fig(), { rezhim: 'student' }), 'proizvodnaya')];
   }
 }
 
@@ -249,7 +258,7 @@ export function podgotovit(koloda: Koloda, base: string): KolodaGotovaya {
           : oborot),
         figury: k.figure === undefined ? [] : narisovat(k.id, k.figure),
         ...(figOborota === undefined ? {} : { figuryOborota: figOborota }),
-        figuraNaLitse: k.type === 'chertezh',
+        figuraNaLitse: k.type === 'chertezh' || k.type === 'vychislenie' || k.type === 'verno',
         ...(teoriyaHref === undefined ? {} : { teoriya: teoriyaHref }),
         ...(teoriyaHref !== undefined && k.teoriyaNomera !== undefined
           ? { teoriyaNomer: k.teoriyaNomera }

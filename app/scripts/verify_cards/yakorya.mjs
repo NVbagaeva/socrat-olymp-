@@ -61,6 +61,40 @@ const PO_NOMERAM = {
     const { YAKOR_7, BLOKI_7 } = requireSrc('lib/zadanie7/teoriya-yakorya');
     return teoriyaRazdelami(RAZDELY_TEORII_7, kartochkiBloka7, YAKOR_7, BLOKI_7);
   },
+  /* Теория №9: раздел — #teoriya-<id>, подраздел — его id («z9-3-2»),
+     рамка, таблица или плашка с полем `yakor` — #t9-…
+     (lib/proizvodnaya/teoriya-yakorya.ts). У «Понятия производной»
+     подразделы и имена рамок — в его текстах (PONYATIE_9). */
+  9: () => {
+    const { RAZDELY_TEORII_9 } = requireSrc('content/theoryProizvodnaya');
+    const { PONYATIE_9 } = requireSrc('content/theoryPonyatie9');
+    const { YAKOR_9, BLOKI_9 } = requireSrc('lib/proizvodnaya/teoriya-yakorya');
+    const out = new Set();
+    const postavleny = new Set();
+    const postavit = (imya) => {
+      if (postavleny.has(imya)) throw new Error(`якорь «${imya}» стоит на двух блоках`);
+      postavleny.add(imya);
+      out.add(YAKOR_9.blok(imya));
+    };
+    const obhod = (bloki) => {
+      for (const b of bloki) {
+        if (b.yakor !== undefined) postavit(b.yakor);
+        if (b.type === 'sub') {
+          out.add(b.id);
+          obhod(b.blocks);
+        }
+      }
+    };
+    for (const r of RAZDELY_TEORII_9) {
+      out.add(YAKOR_9.razdel(r.id));
+      obhod(r.blocks);
+    }
+    Object.values(PONYATIE_9.razdely).forEach((r) => out.add(r.id));
+    Object.values(PONYATIE_9.yakorya).forEach(postavit);
+    const lishnie = BLOKI_9.filter((id) => !postavleny.has(id));
+    if (lishnie.length > 0) throw new Error(`имена без блока: ${lishnie.join(', ')}`);
+    return out;
+  },
   /* №18: «теория» карточки — страница ключевой схемы /skhemy/<id>/;
      source — id собранной схемы (страницы строятся только для них). */
   18: () => {
