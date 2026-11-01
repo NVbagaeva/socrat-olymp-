@@ -2,6 +2,7 @@
 
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { assetUrl } from '@/lib/assetUrl';
 import type { Kristall3d, TochkaId } from './kristall3d';
 import './kristall.css';
@@ -23,7 +24,8 @@ import './kristall.css';
 
 export interface KristallPodpis {
   id: TochkaId;
-  text: string;
+  /** Текст ярлыка; разметкой — когда в нём буква-переменная («h — высота»). */
+  text: ReactNode;
 }
 
 export interface KristallProps {
@@ -35,6 +37,8 @@ export interface KristallProps {
    * шире.
    */
   sizes?: string;
+  /** Подсказка под фигурой. По умолчанию — на «вы», как на главной. */
+  hint?: string;
 }
 
 /* Ракурс модели, совпадающий с рендером. */
@@ -63,6 +67,7 @@ export function Kristall({
   className,
   podpisi = [],
   sizes = '(max-width: 767.98px) 285px, (max-width: 1023.98px) 420px, 560px',
+  hint = 'Покрутите фигуру',
 }: KristallProps) {
   const oblast = useRef<HTMLDivElement>(null);
   const kholst = useRef<HTMLDivElement>(null);
@@ -240,7 +245,7 @@ export function Kristall({
         <svg viewBox="0 0 24 24" focusable="false">
           <path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" />
         </svg>
-        Покрутите фигуру
+        {hint}
       </p>
     </div>
   );
