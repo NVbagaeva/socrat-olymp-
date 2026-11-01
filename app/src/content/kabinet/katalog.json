@@ -2274,13 +2274,13 @@
   {
    "no": 18,
    "name": "Планиметрия",
-   "ready": false,
+   "ready": true,
    "prototypes": []
   },
   {
    "no": 19,
    "name": "Задача с параметром",
-   "ready": false,
+   "ready": true,
    "prototypes": []
   },
   {
