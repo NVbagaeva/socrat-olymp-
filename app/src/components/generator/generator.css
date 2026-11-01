@@ -1368,22 +1368,21 @@
   }
   /* Кнопка «?» сайта — внутри панели «Сгенерировать», справа от сводки,
      над самой кнопкой: висящая выше, она закрывала «+» степперов
-     состава. Сводка оставляет ей место справа. */
-  body:has(.gen-actbar) .help-fab.help-fab {
-    right: var(--space-3);
-    bottom: calc(
-      var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-3) + var(--h-control-lg) +
-        var(--space-2) - 8px
-    );
+     состава. Сводка оставляет ей место справа. Место — токенами
+     кнопки (onboarding.css), не своим bottom. */
+  body:has(.gen-actbar) {
+    --fab-size: 40px;
+    --fab-gap: var(--space-3);
+    --fab-lift: calc(var(--h-bnav) + var(--h-control-lg) + var(--space-2) - 8px);
   }
   body:has(.gen-actbar) .help-fab .help-fab__button {
-    width: 40px;
-    height: 40px;
     box-shadow: var(--shadow-sm);
   }
-  body:has(.gen-actbar) .help-fab .help-fab__button svg {
-    width: 22px;
-    height: 22px;
+  /* Под панелью «Сгенерировать» — ровно нижняя навигация: в конце
+     страницы панель стоит там же, где прилипшая, и кнопка «?» над её
+     сводкой не наезжает на «Сгенерировать». */
+  .app-main:has(.gen-actbar) {
+    padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom));
   }
   .gen-actbar .gen-sum {
     padding-right: 48px;

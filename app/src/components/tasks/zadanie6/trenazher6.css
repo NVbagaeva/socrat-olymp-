@@ -352,13 +352,13 @@
   background: var(--color-surface);
   box-shadow: var(--shadow-md);
 }
-/* Нижняя навигация — до 1024 px; справа от панели — место кнопке «?» (52 px). */
+/* Нижняя навигация — до 1024 px; справа от панели — место кнопке «?» (--fab-size). */
 @media (max-width: 1023.98px) {
   body:has(.bnav--shell) .z6t-start {
     bottom: calc(var(--h-bnav) + var(--space-2) + env(safe-area-inset-bottom));
   }
   body:has(.help-fab) .z6t-start {
-    margin-right: calc(52px + var(--space-3));
+    margin-right: calc(var(--fab-size) + var(--space-3));
   }
 }
 .z6t-start__itog {
