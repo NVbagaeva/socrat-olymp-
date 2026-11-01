@@ -65,15 +65,6 @@ LOG14 = {
 }
 
 
-def z17(p, kon):
-    T = sp.Rational(str(p["T"]))
-    tau = sp.symbols("tau", positive=True)
-    nn = sp.Rational(3, 10)
-    A2 = tau**4 / ((T**2 - tau**2) ** 2 + nn * tau**2 * T**2)
-    krit = [r for r in sp.solve(sp.diff(A2, tau), tau) if r.is_positive]
-    ok(len(krit) == 1 and sp.simplify(krit[0] - T * sp.sqrt(2 / (2 - nn))) == 0, "17: максимум (n = 0,3)", str(krit))
-
-
 def b17(p, kon):
     R = sp.symbols("R", positive=True)
     E, r = sp.nsimplify(p["E"]), sp.nsimplify(p["r"])
@@ -96,15 +87,6 @@ def c14(p, kon):
 
 
 OSN16 = {"0,5": sp.Rational(1, 2), "0,25": sp.Rational(1, 4), "0,2": sp.Rational(1, 5), "0,1": sp.Rational(1, 10), "0,04": sp.Rational(1, 25)}
-
-
-def c17(p, kon):
-    v, R, T, M = sp.symbols("v R T M", positive=True)
-    f = 4 * sp.pi * v**2 * (M / (2 * sp.pi * R * T)) ** sp.Rational(3, 2) * sp.exp(-M * v**2 / (2 * R * T))
-    krit = sp.solve(sp.diff(f, v), v)
-    ok(len(krit) == 1 and sp.simplify(krit[0] - sp.sqrt(2 * R * T / M)) == 0, "17: точка максимума")
-    Mv = sp.Rational([28, 4, 40, 20, 16, 44, 2][p["gaz"]], 1000)
-    ok(2 * sp.Integer(p["T"]) / Mv == kon["K"], "17: 2T/M", f"{2 * p['T'] / Mv} {kon['K']}")
 
 
 def v_kuski(kon_kuski, t):
@@ -2197,10 +2179,8 @@ def ae20(p, kon):
 
 
 F = {
-    "z17.kachka": z17,
     "b17.dzhoul": b17,
     "c14.tgPodstanovka": c14,
-    "c17.maksvell": c17,
     "k14.kosSumma": k14,
     "k15.piramidaPerp": k15,
     "k16.logDrob": k16,

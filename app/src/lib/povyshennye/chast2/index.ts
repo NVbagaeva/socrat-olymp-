@@ -102,8 +102,6 @@ import { M18_BISSEKTRISY } from './m18';
 import { M19_GALOCHKA } from './m19';
 import { M20_OSTATKI } from './m20';
 import { C14_TG_PODSTANOVKA } from './c14';
-import { C17_MAKSVELL } from './c17';
-import { Z17_KACHKA } from './z17';
 import { U14_TG_CTG } from './u14';
 import { U15_KUB_PLOSK } from './u15';
 import { U16_POKAZ_MODUL } from './u16';
@@ -126,15 +124,11 @@ import { W20_KAMNI } from './w20';
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- параметры у каждого шаблона свои */
 export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
-  'z17.kachka': Z17_KACHKA,
   'b17.dzhoul': B17_DZHOUL,
   /* Семья C: варианты 5 и 6. */
   'c14.tgPodstanovka': C14_TG_PODSTANOVKA,
-  'c17.maksvell': C17_MAKSVELL,
   /* Семья D: варианты 7 и 8. */
   /* Семья G: варианты 13 и 14 (№17 — b17.dzhoul). */
-  /* Семья H: варианты 15 и 16 (№17 — c17.maksvell). */
-  /* Семья J: варианты 17 и 18 (№17 — z17.kachka). */
   /* Семьи K, L, M: варианты 19–20, 21–22, 23–24. */
   'k14.kosSumma': K14_KOS_SUMMA,
   'k15.piramidaPerp': K15_PIRAMIDA_PERP,

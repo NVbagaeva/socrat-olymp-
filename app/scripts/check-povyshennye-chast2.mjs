@@ -90,28 +90,6 @@ for (const no of Object.keys(max2)) {
     `критерии №${no}: от ${MAX_BALL[no]} до 0`,
   );
 }
-function prov17(p, z) {
-  const T = z.kontrol.T;
-  for (const n of [0.05, 0.2, 0.35, 0.49]) {
-    const A = (t) => (t * t) / Math.sqrt((T * T - t * t) ** 2 + n * t * t * T * T);
-    let best = 0;
-    let bt = 0;
-    for (let t = 0.001; t < 5 * T; t += 0.0005) {
-      const v = A(t);
-      if (v > best) {
-        best = v;
-        bt = t;
-      }
-    }
-    ok(Math.abs(bt - T * Math.sqrt(2 / (2 - n))) < 2e-3, `№17: максимум при n = ${n}`, `${bt}`);
-  }
-  const verno = z.punkty[0].pole;
-  ok(
-    proverit(verno, `${String(T).replace('.', ',')}*sqrt(2/(2-n))`) === 'sovpadaet',
-    '№17: автопроверка принимает ответ',
-  );
-}
-
 function nuli(f, lo, hi, N = 60000) {
   const out = [];
   let px = lo;
@@ -157,37 +135,6 @@ function provC14(p, z) {
 
 const GAZ17 = [28, 4, 40, 20, 16, 44, 2];
 
-function provC17(p, z) {
-  const M = GAZ17[p.gaz] / 1000;
-  for (const R of [8.31, 8.314, 8.5]) {
-    const T = p.T;
-    const f = (v) =>
-      4 *
-      Math.PI *
-      v *
-      v *
-      (M / (2 * Math.PI * R * T)) ** 1.5 *
-      Math.exp((-M * v * v) / (2 * R * T));
-    /* Перебор с уточнением. */
-    let best = 0;
-    for (let v = 1; v < 10000; v += 1) if (f(v) > f(best)) best = v;
-    let a = best - 1;
-    let b = best + 1;
-    for (let k = 0; k < 200; k += 1) {
-      const m1 = a + (b - a) / 3;
-      const m2 = b - (b - a) / 3;
-      if (f(m1) < f(m2)) a = m1;
-      else b = m2;
-    }
-    ok(Math.abs((a + b) / 2 - Math.sqrt(z.kontrol.K * R)) < 1e-4, `№17: максимум при R = ${R}`);
-  }
-  const pole = z.punkty[0].pole;
-  ok(
-    proverit(pole, `\\sqrt{\\frac{2\\cdot${p.T}R}{${M}}}`) === 'sovpadaet',
-    '№17: ответ = √(2RT/M)',
-  );
-}
-
 const PROV = {
   ...provB({ ok, close, requireSrc }),
   ...provK({ ok, close, requireSrc }),
@@ -206,9 +153,7 @@ const PROV = {
   ...provO({ ok, close, requireSrc }),
   ...provI({ ok, close, requireSrc }),
   ...provAE({ ok, close, requireSrc }),
-  'z17.kachka': prov17,
   'c14.tgPodstanovka': provC14,
-  'c17.maksvell': provC17,
 };
 
 /* ── Варианты ─────────────────────────────────────────────────── */
