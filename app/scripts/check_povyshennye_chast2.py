@@ -1758,6 +1758,236 @@ def w20(p, kon):
     b = (p["M"] // m + 1) * m
     ok(kon["daA"] == int(p["n1"] % m != 0) and kon["b"] == b and kon["v"] == p["N"] // m, "w20: ответы")
 
+# ── Семьи X, Y, A (варианты 7–12): свои задачи ───────────────────
+
+
+def _kv_korni(B, C):
+    x = sp.symbols("x")
+    return sorted(set(sp.solve(sp.Eq(x**2 + B * x + C, 0), x)), key=lambda r: float(r))
+
+
+def x14(p, kon):
+    x = sp.symbols("x")
+    s = kon["s"]
+    # Отобранные корни — решения tg x + ctg x = s, и других на отрезке нет.
+    for v in kon["vybor"]:
+        ok(abs(mp.tan(v) + 1 / mp.tan(v) - s) < 1e-9, "x14: корень", str(v))
+    lo, hi = p["lo"] * sp.pi / 4, p["hi"] * sp.pi / 4
+    sol = sp.solveset(sp.Eq(sp.sin(2 * x), sp.nsimplify(2 / s)), x, sp.Interval(lo, hi))
+    ok(len(sol) == len(kon["vybor"]), "x14: число корней на отрезке", f"{sol} {kon['vybor']}")
+
+
+def x15(p, kon):
+    a = sp.sqrt(p["a2"])
+    cm = sp.Rational(p["h"] * p["m"], p["m"] + p["n"])
+    A, B, D, M = sp.Matrix([0, 0, 0]), sp.Matrix([a, 0, 0]), sp.Matrix([0, a, 0]), sp.Matrix([a, a, cm])
+    ok(sp.simplify((D - B).dot(M - A)) == 0, "x15: а) BD ⊥ AM")
+    ok(near(sp.N(sp.atan(cm / (a * sp.sqrt(2))), 30), kon["otvet"]), "x15: угол")
+
+
+def x16(p, kon):
+    x = sp.symbols("x", real=True)
+    L = max(-p["p"], -p["q"])
+    rel = (x + p["p"]) * (x + p["q"]) <= p["b"] ** p["c"] if p["znak"] == "le" else (x + p["p"]) * (x + p["q"]) >= p["b"] ** p["c"]
+    reshenie = sp.solve_univariate_inequality(rel, x, relational=False).intersect(sp.Interval.open(L, sp.oo))
+    ok(near(sp.N(reshenie.sup if p["znak"] == "le" else reshenie.inf), kon["r2"]), "x16: конец", str(reshenie))
+
+
+def x17(p, kon):
+    x = sp.symbols("x", positive=True)
+    S = x * (p["B"] - 2 * p["k2"] * x) / p["k1"]
+    xs = sp.solve(sp.diff(S, x), x)[0]
+    otv = S.subs(x, xs) if p["vopros"] == "S" else (p["B"] - 2 * p["k2"] * xs) / p["k1"]
+    ok(near(otv, kon["otvet"]), "x17: ответ", str(otv))
+
+
+def x18(p, kon):
+    a, b, c = p["a"], p["b"], p["c"]
+    r = sp.Rational(a + b - c, 2)
+    AH, BH, CH = sp.Rational(b * b, c), sp.Rational(a * a, c), sp.Rational(a * b, c)
+    r1, r2 = (AH + CH - b) / 2, (BH + CH - a) / 2
+    ok(r + r1 + r2 == CH, "x18: а)")
+    ok(near(r1 if p["nado"] == "r1" else r2, kon["otvet"]), "x18: радиус")
+
+
+def _chislo_modul(b, c, av):
+    sol = set()
+    for sg in (1, -1):
+        D = 4 * b * b + 4 * (c + sg * av)
+        if D < 0:
+            continue
+        for s in (1, -1):
+            sol.add(mp.nstr(b + s * mp.sqrt(D) / 2, 20))
+    return len(sol)
+
+
+def x19(p, kon):
+    nado = {"dva": lambda n: n == 2, "chetyre": lambda n: n == 4, "ne_menee3": lambda n: n >= 3}[p["vopros"]]
+    with mp.workdps(40):
+        istina = lambda av: av >= 0 and nado(_chislo_modul(p["b"], p["c"], av))
+        sverka_setki(istina, kon["kuski"], -5, kon["D"] + 10, mp.mpf("0.00731"), "x19: сетка")
+        for v in (0, kon["D"]):
+            ok(istina(mp.mpf(v)) == v_kuski_tol(kon["kuski"], v), f"x19: точка {v}")
+
+
+def x20(p, kon):
+    cif = lambda N: [N // 100, N // 10 % 10, N % 10]
+    est = lambda k: any(N == k * sum(cif(N)) for N in range(100, 1000))
+    ok(est(p["k1"]) == kon["a"] and est(p["k2"]) == kon["b"], "x20: а), б)")
+    ogr = {"vse": lambda c: True, "raznye": lambda c: len(set(c)) == 3, "bez0": lambda c: 0 not in c}[p["ogr"]]
+    m = min(Fr(N, sum(cif(N))) for N in range(100, 1000) if ogr(cif(N)))
+    ok(near(float(m), kon["min"]), "x20: в)", str(m))
+
+
+def y14(p, kon):
+    x = sp.symbols("x", real=True)
+    q, c = p["q"], p["e1"] + p["e2"]
+    sol = sorted(sp.solveset(sp.Eq(q**x + q ** (c - x), q ** p["e1"] + q ** p["e2"]), x, sp.S.Reals), key=float)
+    ok(len(sol) == len(kon["korni"]) and all(near(s_, k_) for s_, k_ in zip(sol, kon["korni"])), "y14: корни", str(sol))
+    lo, hi = sp.log(p["u"], q), sp.log(p["v"], q)
+    otb = [s_ for s_ in sol if float(lo) - 1e-12 <= float(s_) <= float(hi) + 1e-12]
+    ok(len(otb) == len(kon["vybor"]) and all(near(s_, k_) for s_, k_ in zip(otb, kon["vybor"])), "y14: отбор")
+
+
+def y15(p, kon):
+    a = sp.sqrt(p["a2"])
+    B, D, C1 = sp.Matrix([a, 0, 0]), sp.Matrix([0, a, 0]), sp.Matrix([a, a, a])
+    A1, C = sp.Matrix([0, 0, a]), sp.Matrix([a, a, 0])
+    n = (D - B).cross(C1 - B)
+    ok(sp.simplify(n.cross(C - A1)) == sp.zeros(3, 1), "y15: а) A₁C ∥ нормали")
+    T = A1 if p["ot"] == "A1" else sp.Matrix([0, 0, 0])
+    d = sp.Abs(n.dot(T - B)) / n.norm()
+    ok(near(sp.N(d, 30), kon["otvet"]), "y15: расстояние", str(sp.simplify(d)))
+
+
+def y16(p, kon):
+    x = sp.symbols("x", real=True)
+    f = (x - p["r1"]) * (x - p["r2"])
+    reshenie = sp.solve_univariate_inequality(f > 0, x, relational=False).intersect(
+        sp.solve_univariate_inequality(f <= 2 ** p["k"], x, relational=False)
+    )
+    ok(all(v_kuski_tol(kon["kuski"], float(t)) for t in (reshenie.inf, reshenie.sup)), "y16: концы", str(reshenie))
+    with mp.workdps(30):
+        istina = lambda t: f.subs(x, t) > 0 and f.subs(x, t) <= 2 ** p["k"]
+        sverka_setki(lambda t: bool(istina(sp.Float(t, 30))), kon["kuski"], p["r1"] - 20, p["r2"] + 20, mp.mpf("0.0371"), "y16: сетка")
+
+
+def y17(p, kon):
+    X = sp.symbols("X")
+    q = 1 + sp.Rational(p["r"], 100)
+    Xv = sp.solve(sp.Eq((p["S"] * q - X) * q - X, 0), X)[0]
+    otv = Xv if p["vopros"] == "X" else 2 * Xv - p["S"]
+    ok(near(otv, kon["otvet"]), "y17: ответ", str(otv))
+
+
+def y18(p, kon):
+    u, w = p["u"], p["w"]
+    otv = (u + w) ** 2 if p["nado"] == "S" else u * w
+    ok(near(otv, kon["otvet"]), "y18: ответ")
+
+
+def y19(p, kon):
+    nado = {"dva": lambda n: n == 2, "chetyre": lambda n: n == 4, "ne_menee3": lambda n: n >= 3}[p["vopros"]]
+
+    def kolvo(av):
+        sol = set()
+        for sg in (1, -1):
+            D = 4 * p["b"] ** 2 - 4 * (p["c"] - av)
+            if D < 0:
+                continue
+            for s in (1, -1):
+                u = (2 * p["b"] + s * mp.sqrt(D)) / 2
+                if u >= -mp.mpf("1e-30"):
+                    sol.add(mp.nstr(sg * u if abs(u) > 1e-30 else 0, 20))
+        return len(sol)
+
+    with mp.workdps(40):
+        istina = lambda av: nado(kolvo(av))
+        sverka_setki(istina, kon["kuski"], kon["m"] - 5, p["c"] + 10, mp.mpf("0.00731"), "y19: сетка")
+        for v in (kon["m"], p["c"]):
+            ok(istina(mp.mpf(v)) == v_kuski_tol(kon["kuski"], v), f"y19: точка {v}")
+
+
+def y20(p, kon):
+    from math import prod
+
+    cif = lambda N: [int(c) for c in str(N)]
+    ok(any(prod(cif(N)) == p["P1"] for N in range(10, 100)) == kon["a"], "y20: а)")
+    ok(any(prod(cif(N)) == p["P2"] and sum(cif(N)) == p["S2"] for N in range(100, 1000)) == kon["b"], "y20: б)")
+    ok(prod(cif(kon["v"])) == p["P3"], "y20: в) произведение")
+    n = len(str(kon["v"]))
+    ok(not any(prod(cif(N)) == p["P3"] for N in range(10 ** (n - 1), kon["v"])), "y20: в) меньших нет среди той же длины")
+
+
+def a14(p, kon):
+    # Корни на отрезке — сканированием знака и уточнением mpmath (solveset теряет часть корней).
+    k = mp.mpf(kon["k"])
+    f = lambda t: mp.cos(2 * t) - k * (mp.cos(t) - mp.sin(t))
+    with mp.workdps(30):
+        lo, hi = p["lo"] * mp.pi / 4, p["hi"] * mp.pi / 4
+        n = 20000
+        korni = []
+        for i in range(n + 1):
+            t = lo + (hi - lo) * i / n
+            if abs(f(t)) < mp.mpf("1e-20"):
+                korni.append(t)
+            elif i < n:
+                t2 = lo + (hi - lo) * (i + 1) / n
+                if f(t) * f(t2) < 0:
+                    korni.append(mp.findroot(f, (t, t2), solver="bisect"))
+        # Касания (двойные корни) — по минимуму |f|.
+        for v in kon["vybor"]:
+            if abs(f(mp.mpf(v))) < mp.mpf("1e-12") and not any(abs(r - v) < 1e-6 for r in korni):
+                korni.append(mp.mpf(v))
+        vals = sorted(float(r) for r in korni)
+        ded = [x for i, x in enumerate(vals) if i == 0 or abs(x - vals[i - 1]) > 1e-7]
+    ok(len(ded) == len(kon["vybor"]) and all(abs(u - v) < 1e-9 for u, v in zip(ded, kon["vybor"])), "a14: корни на отрезке", f"{ded} {kon['vybor']}")
+
+
+def a15(p, kon):
+    ok(near(sp.N(sp.acos(sp.Rational(p["a"], 2 * p["b"])), 30), kon["otvet"]), "a15: угол")
+
+
+def a16(p, kon):
+    x = sp.symbols("x", real=True)
+    b, c = p["r1"] + p["r2"], p["r1"] * p["r2"]
+    odz = sp.Interval.open(sp.Rational(c, b), sp.oo)
+    rel = b * x - c <= x**2 if p["znak"] == "le" else b * x - c >= x**2
+    reshenie = sp.solve_univariate_inequality(rel, x, relational=False).intersect(odz)
+    for t in (reshenie.inf, reshenie.sup):
+        if t.is_finite:
+            ok(abs(float(t) - min((v for i, v in enumerate(kon["kuski"]) if i % 4 < 2), key=lambda v: abs(v - float(t)))) < 1e-9, "a16: конец", str(t))
+
+
+def a17(p, kon):
+    t = sp.symbols("t")
+    rho2 = (p["d1"] - p["v1"] * t) ** 2 + (p["d2"] - p["v2"] * t) ** 2
+    ts = sp.solve(sp.diff(rho2, t), t)[0]
+    otv = sp.sqrt(rho2.subs(t, ts)) if p["vopros"] == "rho" else 60 * ts
+    ok(near(otv, kon["otvet"]), "a17: ответ", str(otv))
+
+
+def a18(p, kon):
+    ox, oy = sp.symbols("ox oy")
+    A, B, C = (-p["p"], 0), (p["q"], 0), (0, p["s"])
+    d2 = lambda P: (ox - P[0]) ** 2 + (oy - P[1]) ** 2
+    o = sp.solve([sp.Eq(d2(A), d2(B)), sp.Eq(d2(A), d2(C))], [ox, oy])
+    R = sp.sqrt(d2(A).subs(o))
+    ok(near(R if p["nado"] == "R" else 2 * R, kon["otvet"]), "a18: ответ", str(R))
+
+
+def a19(p, kon):
+    a = sp.symbols("a")
+    a0 = sp.solve(sp.Eq((a + p["m"]) ** 2 - a * (a + p["n"]), 0), a)
+    ok(len(a0) == 1 and near(a0[0], kon["a0"]), "a19: D = 0", str(a0))
+
+
+def a20(p, kon):
+    mozhno = lambda S: any((S - x * p["p"]) % p["q"] == 0 for x in range(S // p["p"] + 1))
+    ok(mozhno(p["S1"]) == kon["a"] and mozhno(p["S2"]) == kon["b"], "a20: а), б)")
+    F = max(S for S in range(1, 3 * p["p"] * p["q"]) if not mozhno(S))
+    ok(F == kon["F"], "a20: в)", str(F))
+
 
 F = {
     "z17.kachka": z17,
@@ -1850,6 +2080,27 @@ F = {
     "w18.trapeciyaPerp": w18,
     "w19.vGrafik": w19,
     "w20.kamni": w20,
+    "x14.tgCtg": x14,
+    "x15.prizmaBD": x15,
+    "x16.summaLog": x16,
+    "x17.uchastok": x17,
+    "x18.trivpisannye": x18,
+    "x19.modulParaboly": x19,
+    "x20.summaCifr": x20,
+    "y14.pokazSimm": y14,
+    "y15.kubDiagonal": y15,
+    "y16.logPolovina": y16,
+    "y17.kreditDvaGoda": y17,
+    "y18.trapeciyaDiagonali": y18,
+    "y19.modulVnutri": y19,
+    "y20.proizvCifr": y20,
+    "a14.cosRazn": a14,
+    "a15.piramidaSkreshch": a15,
+    "a16.logOsnovanieX": a16,
+    "a17.perekrestok": a17,
+    "a18.perpHordy": a18,
+    "a19.kvadratParametr": a19,
+    "a20.monety": a20,
 }
 
 rows = json.load(open(sys.argv[1], encoding="utf-8"))

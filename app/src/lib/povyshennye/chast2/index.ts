@@ -8,6 +8,27 @@
 
 import { zagruzitVariant } from '../dannye';
 import type { Zapis } from '../types';
+import { X14_TG_CTG } from './x14';
+import { X15_PRIZMA_BD } from './x15';
+import { X16_SUMMA_LOG } from './x16';
+import { X17_UCHASTOK } from './x17';
+import { X18_TRI_VPISANNYE } from './x18';
+import { X19_MODUL_PARABOLY } from './x19';
+import { X20_SUMMA_CIFR } from './x20';
+import { Y14_POKAZ_SIMM } from './y14';
+import { Y15_KUB_DIAGONAL } from './y15';
+import { Y16_LOG_POLOVINA } from './y16';
+import { Y17_KREDIT_DVA_GODA } from './y17';
+import { Y18_TRAPECIYA_DIAGONALI } from './y18';
+import { Y19_MODUL_VNUTRI } from './y19';
+import { Y20_PROIZV_CIFR } from './y20';
+import { A14_COS_RAZN } from './a14';
+import { A15_PIRAMIDA_SKRESHCH } from './a15';
+import { A16_LOG_OSNOVANIE_X } from './a16';
+import { A17_PEREKRESTOK } from './a17';
+import { A18_PERP_HORDY } from './a18';
+import { A19_KVADRAT_PARAMETR } from './a19';
+import { A20_MONETY } from './a20';
 import { B17_DZHOUL } from './b17';
 import { G14_POKAZ_KVADRAT } from './g14';
 import { G15_PRIZMA_SECHENIE } from './g15';
@@ -204,6 +225,28 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'w18.trapeciyaPerp': W18_TRAPECIYA_PERP,
   'w19.vGrafik': W19_V_GRAFIK,
   'w20.kamni': W20_KAMNI,
+  /* Семьи X, Y, A — варианты 7–12: свои задачи вместо шаблонов, близких к сборнику. */
+  'x14.tgCtg': X14_TG_CTG,
+  'x15.prizmaBD': X15_PRIZMA_BD,
+  'x16.summaLog': X16_SUMMA_LOG,
+  'x17.uchastok': X17_UCHASTOK,
+  'x18.trivpisannye': X18_TRI_VPISANNYE,
+  'x19.modulParaboly': X19_MODUL_PARABOLY,
+  'x20.summaCifr': X20_SUMMA_CIFR,
+  'y14.pokazSimm': Y14_POKAZ_SIMM,
+  'y15.kubDiagonal': Y15_KUB_DIAGONAL,
+  'y16.logPolovina': Y16_LOG_POLOVINA,
+  'y17.kreditDvaGoda': Y17_KREDIT_DVA_GODA,
+  'y18.trapeciyaDiagonali': Y18_TRAPECIYA_DIAGONALI,
+  'y19.modulVnutri': Y19_MODUL_VNUTRI,
+  'y20.proizvCifr': Y20_PROIZV_CIFR,
+  'a14.cosRazn': A14_COS_RAZN,
+  'a15.piramidaSkreshch': A15_PIRAMIDA_SKRESHCH,
+  'a16.logOsnovanieX': A16_LOG_OSNOVANIE_X,
+  'a17.perekrestok': A17_PEREKRESTOK,
+  'a18.perpHordy': A18_PERP_HORDY,
+  'a19.kvadratParametr': A19_KVADRAT_PARAMETR,
+  'a20.monety': A20_MONETY,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

@@ -32,6 +32,9 @@ import { provK } from './lib/prov-chast2-k.mjs';
 import { provL } from './lib/prov-chast2-l.mjs';
 import { provM } from './lib/prov-chast2-m.mjs';
 import { provN } from './lib/prov-chast2-n.mjs';
+import { provX } from './lib/prov-chast2-x.mjs';
+import { provY } from './lib/prov-chast2-y.mjs';
+import { provA } from './lib/prov-chast2-a.mjs';
 import { provP } from './lib/prov-chast2-p.mjs';
 import { provQ } from './lib/prov-chast2-q.mjs';
 import { provR } from './lib/prov-chast2-r.mjs';
@@ -194,6 +197,9 @@ const PROV = {
   ...provL({ ok, close, requireSrc }),
   ...provM({ ok, close, requireSrc }),
   ...provN({ ok, close, requireSrc }),
+  ...provX({ ok, close, requireSrc }),
+  ...provY({ ok, close, requireSrc }),
+  ...provA({ ok, close, requireSrc }),
   ...provP({ ok, close, requireSrc }),
   ...provQ({ ok, close, requireSrc }),
   ...provR({ ok, close, requireSrc }),
