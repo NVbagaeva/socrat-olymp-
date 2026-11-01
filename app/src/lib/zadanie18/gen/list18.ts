@@ -18,6 +18,7 @@ import { planPoKlyucham, slotySostava, type SlotShablon } from '@/lib/generator/
 import answers from '@/lib/sheet/answers.js';
 import { VID_ISHODNYY } from '@/lib/skhemy/tipy';
 import { svgSkhemy } from '@/lib/skhemy/svg';
+import type { VersiyaTemy } from '@/lib/skhemy/tema';
 import { rngOf } from '@/lib/vychisleniya/rng';
 import type { ShagRazbora18, Zadacha18 } from '../trenazher/bank';
 import { otkrytTekst18 } from '../trenazher/otvet';
@@ -116,7 +117,7 @@ function shagiHtml(shagi: readonly ShagRazbora18[]): string {
     .join('')}</ol>`;
 }
 
-function zadachaLista(z: Zadacha18, pos: string, no: number): ListZadacha18 {
+function zadachaLista(z: Zadacha18, pos: string, no: number, tema: VersiyaTemy): ListZadacha18 {
   const r = JSON.parse(otkrytTekst18(z.key, z.razbor, z.seal)) as {
     a: ShagRazbora18[];
     b: ShagRazbora18[];
@@ -127,7 +128,7 @@ function zadachaLista(z: Zadacha18, pos: string, no: number): ListZadacha18 {
     sk.nachalo,
     VID_ISHODNYY,
     { lit: new Set(), shag: null, podpisi: true },
-    { W: 360, H: 250, opisanie: '', samodostatochnyy: true },
+    { W: 360, H: 250, opisanie: '', samodostatochnyy: true, tema },
   );
   return {
     pos,
@@ -142,14 +143,23 @@ function zadachaLista(z: Zadacha18, pos: string, no: number): ListZadacha18 {
   };
 }
 
-export function sobratList18(p: SheetParams18, bank: readonly Zadacha18[]): SobrannyyList18 {
+/**
+ * tema — версия темы чертежей: на экране (предпросмотр генератора) —
+ * cvet; на листе печати и в PDF — по «Цветным чертежам», по умолчанию
+ * монохромная (lib/skhemy/tema.ts).
+ */
+export function sobratList18(
+  p: SheetParams18,
+  bank: readonly Zadacha18[],
+  tema: VersiyaTemy = p.dop.cvetnye === true ? 'cvet' : 'pechat',
+): SobrannyyList18 {
   const poKlyuchu = new Map(bank.map((z) => [z.key, z]));
   const plan = planLista18(p, bank);
   return {
     poVariantam: plan.poVariantam.map((zs) =>
       zs.flatMap((x, i) => {
         const z = poKlyuchu.get(x.klyuch);
-        return z === undefined ? [] : [zadachaLista(z, x.pos, i + 1)];
+        return z === undefined ? [] : [zadachaLista(z, x.pos, i + 1, tema)];
       }),
     ),
     povtor: plan.povtor,

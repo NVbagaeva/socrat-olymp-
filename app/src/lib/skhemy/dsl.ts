@@ -3,13 +3,14 @@
  * список построений, а не как простыня объектов.
  */
 
-import type { Cvet, Element, StilLinii, T2, Tochki, Yakor, ZhivayaSkhema } from './tipy';
+import type { Cvet, Element, Rol, StilLinii, T2, Tochki, Yakor, ZhivayaSkhema } from './tipy';
 
 type Opcii = Partial<{
   gruppy: readonly string[];
   shag: number;
   skrytyy: boolean;
   cvet: Cvet | Readonly<Record<string, Cvet>>;
+  rol: Rol;
 }>;
 
 export const otr = (

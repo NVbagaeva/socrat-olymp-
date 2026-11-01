@@ -91,6 +91,7 @@ export function config18(
       kinds: Object.entries(SHEET_GEN_18.vidy).map(([id, title]) => ({ id, title })),
       theory: false,
       examples: false,
+      flag: { title: GENERATOR18_TEXTS.cvetnye.title, note: GENERATOR18_TEXTS.cvetnye.note },
     },
   };
 }
@@ -103,6 +104,7 @@ function dopIzExtras(e: GenExtras): Dop18 {
     ...(e.kind === SVOY_VID && e.svoy !== undefined ? { svoy: e.svoy } : {}),
     data: e.date,
     uchitel: e.teacher,
+    ...(e.flag === true ? { cvetnye: true } : {}),
   };
 }
 
@@ -115,6 +117,7 @@ function extrasIzDop(dop: Dop18, config: GenConfig): GenExtras {
     date: dop.data,
     teacher: dop.uchitel || DOP_18.uchitel,
     ...(svoy ? { svoy: dop.svoy } : {}),
+    ...(dop.cvetnye === true ? { flag: true } : {}),
   };
 }
 
@@ -135,7 +138,8 @@ export function engine18(config: GenConfig, bank: readonly Zadacha18[], base: st
   return {
     async build(state) {
       const { sobratList18 } = await import('./list18');
-      const list = sobratList18(paramsIzSostoyaniya18(state), bank);
+      /* Предпросмотр на экране — всегда цветные чертежи. */
+      const list = sobratList18(paramsIzSostoyaniya18(state), bank, 'cvet');
       const sheet: GenSheet = {
         variants: list.poVariantam.map((zs) =>
           zs.map((z) => ({

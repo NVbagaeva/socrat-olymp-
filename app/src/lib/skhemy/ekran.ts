@@ -14,7 +14,18 @@
 import { angleOf, cross, dist, dot, len, polar, rotate, sub, unit } from './geometriya';
 import { KOREN, putKornya } from '../risunki/koren.js';
 import { gabaritBukvy, kasaniya, razmestitSVynoskami, type Prepyatstviya } from './podpisi';
-import type { Cvet, Element, Kadr, Ramka, StilLinii, T2, Vid, Yakor, ZhivayaSkhema } from './tipy';
+import type {
+  Cvet,
+  Element,
+  Kadr,
+  Ramka,
+  Rol,
+  StilLinii,
+  T2,
+  Vid,
+  Yakor,
+  ZhivayaSkhema,
+} from './tipy';
 
 /* ── Стиль ─────────────────────────────────────────────────────── */
 
@@ -30,6 +41,23 @@ export const SK = {
   /** Кегль величины (данные условия на чертеже), px. */
   keglVel: 15,
 } as const;
+
+/** Радиус точки в теме чертежа, px. */
+const TEMA_TOCHKA_R = 3;
+
+/**
+ * Порядок слоёв линий в теме: построения → контур фигуры → цветные
+ * части → вспомогательные. Без роли — вместе с контуром.
+ */
+const SLOY_ROLI: Readonly<Record<Rol, number>> = {
+  construction: 0,
+  figure: 1,
+  region: 1,
+  angle: 1,
+  'part-x': 2,
+  'part-y': 2,
+  aux: 3,
+};
 
 /** Радиус кольца ручки перетаскивания, px. */
 export const RUCHKA_R = 7;
@@ -199,6 +227,8 @@ interface Obshchee {
   cvet: Cvet | null;
   /** Появился на нынешнем шаге построения — рисуется с анимацией. */
   novyy: boolean;
+  /** Роль в теме чертежа (lib/skhemy/tema.ts); null — без темы. */
+  rol: Rol | null;
 }
 
 export interface EkrLiniya extends Obshchee {
@@ -238,6 +268,8 @@ export interface EkrUgol extends Obshchee {
 export interface EkrTochka extends Obshchee {
   x: number;
   y: number;
+  /** Радиус точки, px: в теме чертежа — 3. */
+  r: number;
   imya: string | null;
 }
 
@@ -292,6 +324,8 @@ export interface Ekran {
   podpisi: EkrPodpis[];
   /** Данные условия на чертеже: длины, углы, площади. */
   velichiny: EkrVelichina[];
+  /** У элементов есть роли — чертёж в теме (lib/skhemy/tema.ts). */
+  tema: boolean;
   /** Экранные положения именованных точек — ручки перетаскивания. */
   poImeni: Record<string, T2>;
   preob: Preobrazovanie;
@@ -442,6 +476,7 @@ function raskladka1(
     tochki: [],
     podpisi: [],
     velichiny: [],
+    tema: kadr.elementy.some((el) => el.rol !== undefined),
     poImeni: {},
     preob,
   };
@@ -461,13 +496,20 @@ function raskladka1(
       dim: sost.lit.size > 0 && !lit,
       cvet: cvetEl(el, sost.lit),
       novyy: sost.shag !== null && sost.shag > 0 && (el.shag ?? 0) === sost.shag,
+      rol: el.rol ?? null,
     };
     if (el.vid === 'tochka') {
       const p = E(el.p);
       const ruchka = el.ruchka ?? el.imya;
       if (ruchka !== undefined) ekran.poImeni[ruchka] = [f2(p[0]), f2(p[1])];
       if (!vidim) continue;
-      ekran.tochki.push({ ...obshchee, x: f2(p[0]), y: f2(p[1]), imya: el.imya ?? null });
+      ekran.tochki.push({
+        ...obshchee,
+        x: f2(p[0]),
+        y: f2(p[1]),
+        r: ekran.tema ? TEMA_TOCHKA_R : SK.tochkaR,
+        imya: el.imya ?? null,
+      });
       prep.tochki.push(p);
       continue;
     }
@@ -533,7 +575,8 @@ function raskladka1(
         ekran.ugly.push({
           ...obshchee,
           d: g.d,
-          sektor: lit ? g.sektor : '',
+          /* Угол темы (общий, данный) — с сектором всегда. */
+          sektor: lit || el.rol === 'angle' ? g.sektor : '',
           pryamoy: el.pryamoy === true,
         });
         for (const lom of g.lomanye) {
@@ -571,6 +614,7 @@ function raskladka1(
         /* Буквы не тускнеют: по ним читают и подсвеченное, и остальное. */
         dim: false,
         cvet: t.cvet,
+        rol: null,
         novyy: t.novyy,
         x: f2(m[0]),
         y: f2(m[1]),
@@ -602,6 +646,11 @@ function raskladka1(
       tolshchinaKornya: f2(KOREN.tolshchina * SK.keglVel * 1.25),
     });
   }
+  /* Слои линий темы; сортировка устойчивая, без темы порядок прежний. */
+  if (ekran.tema) {
+    const sloy = (l: EkrLiniya) => (l.rol === null ? 1 : SLOY_ROLI[l.rol]);
+    ekran.linii.sort((a, b) => sloy(a) - sloy(b));
+  }
   return [ekran, vne];
 }
 
@@ -609,11 +658,44 @@ function raskladka1(
 
 type Pryam = readonly [number, number, number, number];
 
+/** Прописные KaTeX_Math курсивом, доли кегля. */
+const PROPISNYE: Readonly<Record<string, number>> = {
+  A: 0.75,
+  B: 0.76,
+  C: 0.72,
+  D: 0.83,
+  E: 0.74,
+  F: 0.64,
+  G: 0.79,
+  H: 0.83,
+  I: 0.44,
+  J: 0.55,
+  K: 0.85,
+  L: 0.68,
+  M: 0.97,
+  N: 0.8,
+  O: 0.76,
+  P: 0.64,
+  Q: 0.79,
+  R: 0.76,
+  S: 0.61,
+  T: 0.58,
+  U: 0.68,
+  V: 0.58,
+  W: 0.94,
+  X: 0.83,
+  Y: 0.58,
+  Z: 0.68,
+};
+
 /** Ширина знака в долях кегля (KaTeX_Main / KaTeX_Math). */
 function shirinaZnaka(ch: string, kursiv: boolean): number {
   if (/[0-9]/.test(ch)) return 0.5;
-  if (/[A-Za-z]/.test(ch)) return kursiv ? 0.62 : 0.5;
-  if (ch === ' ') return 0.25;
+  /* Курсив KaTeX_Math: ширины прописных — по замеру, как у движка №1
+     (lib/planimetriya/render.ts). */
+  if (/[A-Z]/.test(ch)) return kursiv ? (PROPISNYE[ch] ?? 0.75) : 0.7;
+  if (/[a-z]/.test(ch)) return kursiv ? 0.57 : 0.5;
+  if (ch === ' ' || ch === '\u00a0') return 0.25;
   if (ch === '=' || ch === '+' || ch === '−') return 0.78;
   if (ch === '°') return 0.4;
   return 0.3;
@@ -653,7 +735,10 @@ export function chastiVelichiny(tekst: string): ChastVelichiny[] {
     else if (m[2] !== undefined) dobavit(m[2], /[A-Za-z]/.test(m[2]), false, true);
     else if (m[3] !== undefined) dobavit(m[3], /[A-Za-z]/.test(m[3]), true);
     else if (m[4] !== undefined) dobavit(m[4], true, false);
-    else if (m[5] !== undefined) dobavit(m[5], false, false);
+    /* Пробелы — неразрывные: SVG схлопывает пробел в начале куска («S_ABC = 60»). */ else if (
+      m[5] !== undefined
+    )
+      dobavit(m[5].replace(/ /g, '\u00a0'), false, false);
   }
   return out;
 }

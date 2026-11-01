@@ -13,6 +13,7 @@ import {
 } from '@/lib/skhemy/ekran';
 import type { Ramka, T2, Tochki, Vid, ZhivayaSkhema } from '@/lib/skhemy/tipy';
 import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
+import { cssTemy, klassTemy } from '@/lib/skhemy/tema';
 import './skhemy.css';
 
 /** Длительность подстройки рамки (масштаба) под новое содержимое, мс. */
@@ -278,18 +279,20 @@ export function ChertezhSkhemy({
     <div ref={obertka} className={clsx('skh', tyanem !== null && 'is-tyanem', className)}>
       <svg
         ref={svgRef}
-        className="skh__svg"
+        className={clsx('skh__svg', ekran.tema && klassTemy('cvet'))}
         viewBox={`0 0 ${W} ${H}`}
         width={W}
         height={H}
         role="img"
         aria-label={opisanie}
       >
+        {/* Тема чертежа (роли элементов): на экране — всегда цветная. */}
+        {ekran.tema ? <style>{cssTemy()}</style> : null}
         <g className="skh__mnog">
           {ekran.mnog.map((m) => (
             <polygon
               key={m.id}
-              className={clsx('skh-mnog', m.cvet && `skh-c-${m.cvet}`)}
+              className={clsx('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}
               points={m.points}
             />
           ))}
@@ -305,6 +308,7 @@ export function ChertezhSkhemy({
                 o.dim && 'is-dim',
                 o.novyy && 'is-novyy',
                 o.cvet && `skh-c-${o.cvet}`,
+                o.rol && `skh-r-${o.rol}`,
               )}
               cx={o.cx}
               cy={o.cy}
@@ -323,6 +327,7 @@ export function ChertezhSkhemy({
                 d.dim && 'is-dim',
                 d.novyy && 'is-novyy',
                 d.cvet && `skh-c-${d.cvet}`,
+                d.rol && `skh-r-${d.rol}`,
               )}
               d={d.d}
             />
@@ -334,7 +339,11 @@ export function ChertezhSkhemy({
             .map((u) => (
               <path
                 key={u.id}
-                className={clsx('skh-sektor', u.cvet && `skh-c-${u.cvet}`)}
+                className={clsx(
+                  'skh-sektor',
+                  u.cvet && `skh-c-${u.cvet}`,
+                  u.rol && `skh-r-${u.rol}`,
+                )}
                 d={u.sektor}
               />
             ))}
@@ -350,6 +359,7 @@ export function ChertezhSkhemy({
                 l.dim && 'is-dim',
                 l.novyy && 'is-novyy',
                 l.cvet && `skh-c-${l.cvet}`,
+                l.rol && `skh-r-${l.rol}`,
               )}
             >
               <line x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} pathLength={l.novyy ? 1 : undefined} />
@@ -368,6 +378,7 @@ export function ChertezhSkhemy({
                 u.dim && 'is-dim',
                 u.novyy && 'is-novyy',
                 u.cvet && `skh-c-${u.cvet}`,
+                u.rol && `skh-r-${u.rol}`,
               )}
               d={u.d}
             />
@@ -383,10 +394,11 @@ export function ChertezhSkhemy({
                 p.dim && 'is-dim',
                 p.novyy && 'is-novyy',
                 p.cvet && `skh-c-${p.cvet}`,
+                p.rol && `skh-r-${p.rol}`,
               )}
               cx={p.x}
               cy={p.y}
-              r={2.6}
+              r={p.r}
             />
           ))}
         </g>
@@ -396,7 +408,11 @@ export function ChertezhSkhemy({
             .map((p) => (
               <path
                 key={p.id}
-                className={clsx('skh-vynoska', p.cvet && `skh-c-${p.cvet}`)}
+                className={clsx(
+                  'skh-vynoska',
+                  p.cvet && `skh-c-${p.cvet}`,
+                  p.rol && `skh-r-${p.rol}`,
+                )}
                 d={p.vynoska}
               />
             ))}
@@ -411,6 +427,7 @@ export function ChertezhSkhemy({
                 p.dim && 'is-dim',
                 p.novyy && 'is-novyy',
                 p.cvet && `skh-c-${p.cvet}`,
+                p.rol && `skh-r-${p.rol}`,
               )}
               x={p.x}
               y={p.y}
@@ -431,6 +448,7 @@ export function ChertezhSkhemy({
               v.dim && 'is-dim',
               v.novyy && 'is-novyy',
               v.cvet && `skh-c-${v.cvet}`,
+              v.rol && `skh-r-${v.rol}`,
             );
             return (
               <g key={v.id}>
