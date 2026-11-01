@@ -79,7 +79,9 @@
 
 .onl-geroy {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+  /* Колонка — по кристаллу: подпись «h — высота» выходит за неё вправо,
+     в полосу под «?», а чипы на 1440 встают в один ряд. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
   grid-template-areas:
     'tekst kristall'
     'chipy kristall';
