@@ -9,7 +9,8 @@ import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
-import { VARIANT_HREF } from '@/content/variant';
+import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
+import { ONLINE_TEXT } from '@/content/variantOnline/text';
 
 export interface SiteLink {
   label: string;
@@ -54,6 +55,7 @@ export const site = {
       label: 'Варианты',
       items: [
         { label: 'Собрать вариант', href: VARIANT_HREF },
+        { label: ONLINE_TEXT.nachalo.menu, href: VARIANT_ONLAYN_HREF },
         { label: 'Варианты повышенной сложности', href: POV_HREF },
         { label: 'Ежемесячные варианты', href: EZH_HREF },
       ],
