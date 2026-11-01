@@ -43,11 +43,12 @@ export interface KusokX19 {
 
 export interface Zhivoy19 {
   /**
-   * Что движет параметр: прямую (по умолчанию), окружность или
-   * горизонтальную прямую a = const метода областей — от этого
-   * заголовок блока и строка под рисунком.
+   * Что движет параметр: поворачивает прямую (по умолчанию), сдвигает
+   * её параллельно ('sdvig'), меняет окружность или горизонтальную
+   * прямую a = const метода областей — от этого заголовок блока и
+   * строка под рисунком.
    */
-  vid?: 'pryamaya' | 'okruzhnost' | 'gorizontal';
+  vid?: 'pryamaya' | 'sdvig' | 'okruzhnost' | 'gorizontal';
   bukva: string;
   min: number;
   max: number;
@@ -241,7 +242,88 @@ function m03r1Mnozhestvo(a: number): KusokX19[] {
   );
 }
 
+/**
+ * Корни квадратного (при A = 0 — линейного) уравнения Ax² + Bx + C = 0.
+ * Касание — дискриминант нуль с ошибкой округления: допуск
+ * относительный, иначе особое значение 2√2 дало бы два корня или ни одного.
+ */
+function korniKv(A: number, B: number, C: number): number[] {
+  if (Math.abs(A) < 1e-12) {
+    return Math.abs(B) < 1e-12 ? [] : [-C / B];
+  }
+  const D = B * B - 4 * A * C;
+  const dop = 1e-9 * Math.max(1, B * B, Math.abs(4 * A * C));
+  if (D < -dop) return [];
+  if (D <= dop) return [-B / (2 * A)];
+  const s = Math.sqrt(D);
+  return [(-B - s) / (2 * A), (-B + s) / (2 * A)];
+}
+
+/* Разбор метода 4: √(4 − x²) = x + a. Корни 2x² + 2ax + a² − 4 = 0 с |x| ≤ 2 и x + a ≥ 0. */
+function m04r1Resheniy(a: number): number {
+  return korniKv(2, 2 * a, a * a - 4).filter((x) => Math.abs(x) <= 2 + 1e-9 && x + a >= -1e-9)
+    .length;
+}
+
+/* Разбор метода 4: 1/|x| = kx + 2. При x > 0 — kx² + 2x − 1 = 0, при x < 0 — kx² + 2x + 1 = 0. */
+function m04r3Resheniy(k: number): number {
+  const prav = korniKv(k, 2, -1).filter((x) => x > 1e-12);
+  const lev = korniKv(k, 2, 1).filter((x) => x < -1e-12);
+  return prav.length + lev.length;
+}
+
+const POLUOKR_2 = (x: number) => Math.sqrt(Math.max(0, 4 - x * x));
+const GIP_MOD = (x: number) => (Math.abs(x) < 0.12 ? null : 1 / Math.abs(x));
+
 const ZHIVYE: Record<string, Zhivoy19> = {
+  /* Разбор метода 4: полуокружность y = √(4 − x²) и прямые y = x + a — сдвиг параллельно. */
+  'm04-r1': {
+    vid: 'sdvig',
+    bukva: 'a',
+    min: -3,
+    max: 3.5,
+    shag: 0.01,
+    start: 1,
+    osobye: [
+      { a: -2, tex: '-2' },
+      { a: 2, tex: '2' },
+      { a: 2 * Math.SQRT2, tex: '2\\sqrt2' },
+    ],
+    scena: (a) =>
+      scena(
+        { x: [-4, 4], y: [-2, 4] },
+        {
+          curves: [grafik(POLUOKR_2, 'lineA', { ot: -2, do: 2 }), pryamaya(1, a, 'lineB')],
+          points: [tochka(-2, 0, 'A'), tochka(2, 0, 'B'), tochka(-Math.SQRT2, Math.SQRT2, 'T')],
+        },
+        `Полуокружность y = √(4 − x²) и прямая y = x + a при a = ${chislo(a)}`,
+      ),
+    resheniy: m04r1Resheniy,
+  },
+  /* Разбор метода 4: график y = 1/|x| и пучок прямых y = kx + 2 через A(0; 2). */
+  'm04-r3': {
+    bukva: 'k',
+    min: -2,
+    max: 2,
+    shag: 0.01,
+    start: 0.5,
+    osobye: [
+      { a: -1, tex: '-1' },
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+    ],
+    scena: (k) =>
+      scena(
+        { x: [-5, 5], y: [-2, 5] },
+        {
+          curves: [grafik(GIP_MOD, 'lineA'), pryamaya(k, 2, 'lineB')],
+          points: [tochka(0, 2, 'A'), tochka(1, 1, 'T₁'), tochka(-1, 1, 'T₂')],
+        },
+        `График y = 1/|x| и прямая y = kx + 2 при k = ${chislo(k)}`,
+      ),
+    resheniy: m04r3Resheniy,
+  },
+
   /* Разбор метода 1: ||x| − 2| = a(x − 8) + 2, пучок через A(8; 2). */
   'm01-r1': {
     bukva: 'a',
