@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
-import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { vkladka } from '@/content/veroyatnost';
 import { bank4Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
+import { BlokRazdela } from '@/components/seo/BlokRazdela';
 
-export const metadata: Metadata = {
-  title: veroyatnostTitle('4', vkladka('4', 'trenazher')),
-};
+export const metadata: Metadata = metaVkladki(4, 'trenazher');
 
 /**
  * Вкладка «Тренажёр» задания №4 — по макету trenazher.png: методы,
@@ -32,6 +32,7 @@ export default function Trenazher4Tab() {
         base={`${ZADANIYA}/4/trenazher/`}
         metody={navykiMetodov(pool, 4)}
       />
+      <BlokRazdela no={4} vid="trenazher" />
     </>
   );
 }

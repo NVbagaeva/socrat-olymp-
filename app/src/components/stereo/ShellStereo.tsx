@@ -17,6 +17,7 @@ import { ZADANIYA } from '@/lib/paths';
 import { StereoDrugie, StereoNav } from './StereoNav';
 import './stereo.css';
 import './metodika.css';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Миниатюра в шапке — чертёж движка lib/solid, пока нет иллюстрации
@@ -38,6 +39,7 @@ export function ShellStereo({ no, children }: { no: StereoNo; children: React.Re
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={Number(z.no)} slug={z.slug} />
         <ShapkaRazdela
           className="stereo-head section-head--art"
           crumbs={[

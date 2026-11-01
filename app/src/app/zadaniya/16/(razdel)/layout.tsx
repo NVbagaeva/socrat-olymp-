@@ -7,6 +7,11 @@ import '../../[task]/section.css';
 import '../../[task]/[type]/topic.css';
 import '../../veroyatnost.css';
 import '../zadanie16.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-16.png). */
+export const metadata: Metadata = ogRazdela(16);
 
 /**
  * Оболочка задания №16: крошки, заголовок и лента вкладок. Группа

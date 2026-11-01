@@ -10,6 +10,8 @@ import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { Progress1 } from './Progress1';
+import { zagolovokRazdela } from '@/content/seo';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №1: крошки, заголовок, кольцо прогресса и лента
@@ -26,6 +28,7 @@ export function Shell1({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={1} slug="1" />
         <ShapkaRazdela
           className="z1-head section-head--art"
           crumbs={[
@@ -33,7 +36,7 @@ export function Shell1({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(ZADANIE1.no)}` },
           ]}
-          title={ZADANIE1.title}
+          title={zagolovokRazdela(1, ZADANIE1.title)}
           badge={ZADANIE1.badge}
           lead={ZADANIE1.lead}
           media={<IllyustratsiyaShapki art={ZADANIE1.art} />}

@@ -10,6 +10,7 @@ import { href, ZADANIYA } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { ZadanieHero } from '../ZadanieHero';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №12: крошки, заголовок с иллюстрацией и лента
@@ -31,6 +32,7 @@ export function Shell12({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={Number(section.no)} slug={section.slug} />
         <ShapkaRazdela
           crumbs={[
             { label: 'Главная', href: '/' },

@@ -1,4 +1,4 @@
-import katex from 'katex';
+import { katexOdin } from '@/lib/katexOdin';
 import '@/lib/graph/katex-makrosy.js';
 import type { ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
@@ -19,7 +19,7 @@ import { Tex } from '@/components/ui/Tex';
  * styles/ramki.css (палитра сайта, ч/б печать остаётся читаемой: роль
  * рамки видна по форме — полоса, двойная линия, пунктир, значок, —
  * а не только по цвету). Вся математика — KaTeX: строки с $…$ идут
- * через Tex, формулы — через katex.renderToString.
+ * через Tex, формулы — через katexOdin (lib/katexOdin.ts).
  */
 
 function Formula({ tex, className }: { tex: string; className?: string }) {
@@ -27,7 +27,7 @@ function Formula({ tex, className }: { tex: string; className?: string }) {
     <span
       className={className}
       dangerouslySetInnerHTML={{
-        __html: katex.renderToString(tex, { throwOnError: false, displayMode: true }),
+        __html: katexOdin(tex, { throwOnError: false, displayMode: true }),
       }}
     />
   );

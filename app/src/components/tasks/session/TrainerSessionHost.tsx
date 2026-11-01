@@ -1,5 +1,6 @@
 'use client';
 
+import { cel } from '@/lib/metrika';
 import { Component, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { Button, Modal } from '@/components/ui';
@@ -485,6 +486,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       };
       enter(run, 0, false, 0);
       rememberEntry(scope);
+      cel('trenirovka_start', { razdel: scope });
       /* Запись появляется сразу, до первого действия: метка в меню
          загорается, а возврат на экран заданий возможен с первой секунды. */
       flush();

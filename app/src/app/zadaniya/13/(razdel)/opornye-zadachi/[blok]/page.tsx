@@ -3,10 +3,12 @@ import { notFound } from 'next/navigation';
 import { Opornye13Screen } from '@/components/tasks/zadanie13/Opornye13Screen';
 import { Opornye13Shell } from '@/components/tasks/zadanie13/Opornye13Shell';
 import { OPORNYE } from '@/content/opornye';
-import { ZADANIE13, zadanie13Title } from '@/content/zadanie13';
+import { ZADANIE13 } from '@/content/zadanie13';
 import { BLOKI_13, blokBySlug13, zadachiBloka } from '@/lib/zadanie13/opornye/bloki';
 import { prepPool13 } from '@/lib/zadanie13/opornye/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -19,7 +21,9 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const found = blokBySlug13(blok);
-  return { title: zadanie13Title(found === undefined ? OPORNYE.title : found.nazvanie) };
+  return found === undefined
+    ? metaVkladki(13, 'opornye')
+    : metaPodstranitsy(13, 'opornaya', tekstBezTex(found.nazvanie));
 }
 
 /**

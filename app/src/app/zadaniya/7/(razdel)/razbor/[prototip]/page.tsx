@@ -4,10 +4,12 @@ import { notFound } from 'next/navigation';
 import { Razbor7 } from '@/components/tasks/zadanie7/Razbor7';
 import { Tex } from '@/components/ui/Tex';
 import { TEORIYA_7_DLYA_PROTOTIPA } from '@/content/teoriya7';
-import { ZADANIE7, zadanie7Title } from '@/content/zadanie7';
+import { ZADANIE7 } from '@/content/zadanie7';
 import { zadachiPrototipa } from '@/lib/zadanie7/bank/index';
 import { kodNaSayte, PROTOTYPES, prototype } from '@/lib/zadanie7/prototypes';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 export function generateStaticParams() {
   return PROTOTYPES.map((p) => ({ prototip: p.id }));
@@ -15,9 +17,17 @@ export function generateStaticParams() {
 
 export const dynamicParams = false;
 
-export const metadata: Metadata = {
-  title: zadanie7Title('Разобранный пример'),
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ prototip: string }>;
+}): Promise<Metadata> {
+  const { prototip } = await params;
+  const p = PROTOTYPES.find((x) => x.id === prototip);
+  return p === undefined
+    ? metaVkladki(7, 'opornye')
+    : metaPodstranitsy(7, 'razbor', `${kodNaSayte(p.id)}. ${tekstBezTex(p.title)}`);
+}
 
 /**
  * Разобранный пример прототипа — на него ведут карточки «О задании».

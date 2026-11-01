@@ -1,13 +1,11 @@
 import type { Metadata } from 'next';
 import { PodgotovkaList } from '@/components/tasks/veroyatnost/PodgotovkaList';
 import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
-import { OPORNYE } from '@/content/opornye';
-import { PODGOTOVKA_SLOVA, veroyatnostTitle } from '@/content/veroyatnost';
+import { PODGOTOVKA_SLOVA } from '@/content/veroyatnost';
 import { prep5Pool } from '@/lib/veroyatnost/pool';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: veroyatnostTitle('5', OPORNYE.title),
-};
+export const metadata: Metadata = metaVkladki(5, 'opornye');
 
 /**
  * Вкладка «Опорные задачи» задания №5: список блоков.

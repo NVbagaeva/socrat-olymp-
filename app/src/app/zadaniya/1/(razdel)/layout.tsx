@@ -12,6 +12,11 @@ import '../../veroyatnost.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '../zadanie1.css';
 import '../spravochnik1-web.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-1.png). */
+export const metadata: Metadata = ogRazdela(1);
 
 /**
  * Оболочка задания №1: крошки, заголовок, кольцо прогресса и лента

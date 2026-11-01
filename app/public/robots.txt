@@ -1,0 +1,40 @@
+# robots.txt — budetege.ru
+#
+# Открыто всё учебное: разделы заданий, теория, опорные задачи,
+# тренажёры, генераторы, варианты. Закрыто служебное и то, что
+# повторяет страницы с другими параметрами.
+
+User-agent: *
+# Витрина дизайн-системы и служебные страницы
+Disallow: /styleguide/
+Disallow: /dev/
+# Кабинет и вход: у каждого ученика свои данные
+Disallow: /kabinet/
+Disallow: /voyti/
+# Печатные листы: тот же набор задач, что на странице генератора
+Disallow: /*/pechat/
+Disallow: /variant/pechat/
+# Решение и проверка варианта: открываются только по ссылке с кодом
+Disallow: /variant/reshat/
+Disallow: /variant/proverka/
+Disallow: /variant/seriya/
+Disallow: /variant/statistika/
+# Данные тренажёров: файлы для сценария страницы, не страницы
+Disallow: /*/dannye/
+Disallow: /data/
+Disallow: /*index.txt$
+# Адреса с параметрами генераторов и комплектов (?seed=, ?kit=, ?s=…)
+Disallow: /*?
+# Служебный список изменений для IndexNow
+Disallow: /seo-changed.txt
+Disallow: /seo-state.json
+
+# Яндекс: метки рекламных кампаний не порождают копий страниц
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&gclid
+
+# Главное зеркало — https://budetege.ru (без www). Яндекс директиву Host
+# больше не читает и определяет зеркало по 301-редиректам, но строка
+# не мешает и подсказывает зеркало тем, кто её ещё учитывает.
+Host: https://budetege.ru
+
+Sitemap: https://budetege.ru/sitemap.xml

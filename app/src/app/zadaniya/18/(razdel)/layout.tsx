@@ -4,6 +4,11 @@ import '../../zadaniya.css';
 import '../../[task]/section.css';
 import '../../[task]/[type]/topic.css';
 import '../zadanie18.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-18.png). */
+export const metadata: Metadata = ogRazdela(18);
 
 /**
  * Оболочка задания №18: крошки, заголовок и лента вкладок. Группа

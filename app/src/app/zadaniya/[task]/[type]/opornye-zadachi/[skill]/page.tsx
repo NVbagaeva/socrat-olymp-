@@ -17,6 +17,8 @@ import '../../trainer.css';
 import '../../configurator.css';
 import { texPlain, typeset } from '@/lib/tex';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, grafik12 } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Адреса перечислимы на сборке: подтемы с навыками × их навыки.
    Руками их никто не пишет — список навыков подтемы один и тот же
@@ -35,7 +37,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const subtopic = findSubtopic(task, type);
   const found = findPrepSkill(type, skill);
   return subtopic && found
-    ? { title: `${texPlain(found.title)} · ${prepPage.title} · ${subtopic.title} — Будет на ЕГЭ` }
+    ? metaPodstranitsy(
+        12,
+        'opornaya',
+        `${tekstBezTex(found.title)} (${grafik12(subtopic.graphName)})`,
+      )
     : {};
 }
 
@@ -63,7 +69,10 @@ export default async function Page({ params }: { params: Params }) {
         section={section}
         subtopic={subtopic}
         initialTab="prep"
-        trail={[{ label: prepPage.title, href: `${base}/${OPORNYE.tail}` }, { label: texPlain(found.title), labelHtml: typeset(found.title) }]}
+        trail={[
+          { label: prepPage.title, href: `${base}/${OPORNYE.tail}` },
+          { label: texPlain(found.title), labelHtml: typeset(found.title) },
+        ]}
         prep={<PrepTasks type={subtopic.id} skill={found} base={base} />}
       />
     </AppShell>

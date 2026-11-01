@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { Teoriya18 } from '@/components/zadanie18/Teoriya18';
-import { vkladka18, zadanie18Title } from '@/content/zadanie18';
+import { vkladka18 } from '@/content/zadanie18';
+import { metaVkladki } from '@/content/seo';
 
 const VKLADKA = vkladka18('teoriya');
 
-export const metadata: Metadata = {
-  title: zadanie18Title(VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(18, 'teoriya');
 
 /**
  * Вкладка «Теория» задания №18: факты для доказательств и вычислений

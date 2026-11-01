@@ -4,12 +4,9 @@ import { PovScreen } from '@/components/povyshennye/PovScreen';
 import '@/components/variant/sectionStyles';
 import '@/components/variant/variant.css';
 import '@/components/variant/online/online.css';
-import { EZH_SCREEN as T } from '@/content/ezhemesyachnye';
+import { SEO_STRANITSY } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: `${T.title} — Будет на ЕГЭ`,
-  description: T.lead,
-};
+export const metadata: Metadata = SEO_STRANITSY.ezhemesyachnye;
 
 /**
  * «Ежемесячные варианты»: четыре варианта (октябрь 2026 — январь 2027),

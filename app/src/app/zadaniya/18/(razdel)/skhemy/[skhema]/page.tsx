@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Skhema18Stranica } from '@/components/zadanie18/Skhema18Stranica';
-import { zadanie18Title } from '@/content/zadanie18';
 import { SOBRANNYE, skhema18 } from '@/content/zadanie18/spisok';
+import { metaPodstranitsy } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Статический экспорт: страницы есть только у собранных схем. */
 export function generateStaticParams() {
@@ -14,7 +15,7 @@ type Params = Promise<{ skhema: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const s = skhema18((await params).skhema);
-  return s === undefined ? {} : { title: zadanie18Title(s.nazvanie) };
+  return s === undefined ? {} : metaPodstranitsy(18, 'skhema', tekstBezTex(s.nazvanie));
 }
 
 /** Страница ключевой схемы: живой чертёж, следствия, доказательство, «Знаю / Не знаю». */

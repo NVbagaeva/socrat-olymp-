@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { nazvanieTipa, RazborStranitsa, tipySRazborom } from '@/components/stereo/RazborStranitsa';
-import { stereoTitle } from '@/content/stereo/zadaniya';
+import { metaPodstranitsy } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 export function generateStaticParams() {
   return tipySRazborom('15');
@@ -11,7 +12,7 @@ type Params = Promise<{ tip: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const title = nazvanieTipa('15', (await params).tip);
-  return title === undefined ? {} : { title: stereoTitle('15', `Разбор: ${title}`) };
+  return title === undefined ? {} : metaPodstranitsy(15, 'razbor', tekstBezTex(title));
 }
 
 /** Разобранная задача типа №15: решение по шагам на живом чертеже. */

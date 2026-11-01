@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { Teoriya9 } from '@/components/tasks/proizvodnaya/Teoriya9';
-import { PROIZVODNAYA, proizvodnayaTitle } from '@/content/proizvodnaya';
+import { PROIZVODNAYA } from '@/content/proizvodnaya';
+import { metaVkladki } from '@/content/seo';
 
 const VKLADKA = PROIZVODNAYA.tabs.find((tab) => tab.id === 'teoriya')?.label ?? 'Теория';
 
-export const metadata: Metadata = {
-  title: proizvodnayaTitle(VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(9, 'teoriya');
 
 /**
  * Вкладка «Теория» задания №9: семь разделов подряд (первый — «Понятие производной»), содержание

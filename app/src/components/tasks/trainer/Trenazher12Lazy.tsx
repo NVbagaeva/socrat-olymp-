@@ -15,11 +15,10 @@ import { razzhatRefs, type RefSzhato } from './refsSzhato';
  */
 const Lazy = dynamic(() => import('./Trenazher12').then((m) => m.Trenazher12), {
   ssr: false,
-  loading: () => (
-    <p className="lazy-loading" role="status">
-      Загружаем тренажёр…
-    </p>
-  ),
+  /* Пока код панели грузится — пустое место без надписи: в HTML страницы
+     под тренажёром стоит его описание с примерами задач
+     (components/seo/BlokRazdela.tsx), его и видит тот, у кого нет JavaScript. */
+  loading: () => <div className="lazy-loading" role="status" aria-label="Загружаем тренажёр" />,
 });
 
 /** Список задач приходит сжатым (refsSzhato): так легче HTML страницы. */

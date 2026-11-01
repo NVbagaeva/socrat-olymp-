@@ -11,6 +11,11 @@ import '../../komplekt.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/zadanie6/zadanie6.css';
 import '../zadanie6.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-6.png). */
+export const metadata: Metadata = ogRazdela(6);
 
 /**
  * Оболочка задания №6: крошки, заголовок и лента вкладок. Группа

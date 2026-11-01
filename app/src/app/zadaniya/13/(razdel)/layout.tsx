@@ -10,6 +10,11 @@ import '../../veroyatnost.css';
 import '../zadanie13.css';
 import '../reshenie13.css';
 import '../../komplekt.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-13.png). */
+export const metadata: Metadata = ogRazdela(13);
 
 /**
  * Оболочка задания №13: крошки, заголовок и лента вкладок. Группа

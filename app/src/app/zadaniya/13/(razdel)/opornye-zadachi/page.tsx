@@ -2,13 +2,12 @@ import type { Metadata } from 'next';
 import { Opornye13List, type BlokKartochka13 } from '@/components/tasks/zadanie13/Opornye13List';
 import { Opornye13Shell } from '@/components/tasks/zadanie13/Opornye13Shell';
 import { OPORNYE } from '@/content/opornye';
-import { ZADANIE13, zadanie13Title } from '@/content/zadanie13';
+import { ZADANIE13 } from '@/content/zadanie13';
 import { BLOKI_13, zadachiBloka } from '@/lib/zadanie13/opornye/bloki';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: zadanie13Title(OPORNYE.title),
-};
+export const metadata: Metadata = metaVkladki(13, 'opornye');
 
 /**
  * Вкладка «Опорные задачи» №13: 17 блоков по схемам. Список лёгкий —

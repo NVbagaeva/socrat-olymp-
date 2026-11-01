@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { builtSubtopicParams, findSubtopic } from '@/content/sections';
 import '../../../zadaniya.css';
+import { metaPodrazdela12 } from '@/content/seo';
 
 /* Вложенные разделы существуют только у собранных подтем. */
 export function generateStaticParams() {
@@ -15,7 +16,7 @@ type Params = Promise<{ task: string; type: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { task, type } = await params;
   const subtopic = findSubtopic(task, type);
-  return subtopic ? { title: `Интерактивная тетрадь · ${subtopic.title} — Будет на ЕГЭ` } : {};
+  return subtopic ? metaPodrazdela12(subtopic.title, subtopic.graphName, 'tetrad') : {};
 }
 
 export default async function Page({ params }: { params: Params }) {

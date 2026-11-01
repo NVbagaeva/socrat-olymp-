@@ -3,10 +3,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Opornye6 } from '@/components/tasks/zadanie6/Opornye6';
 import { Tex } from '@/components/ui/Tex';
-import { ZADANIE6, zadanie6Title } from '@/content/zadanie6';
+import { ZADANIE6 } from '@/content/zadanie6';
 import { BLOKI_OPORNYH, blokPoSlugu, opornyeDlyaBrauzera } from '@/lib/zadanie6/opornye';
 import { kodNaSayte, prototype } from '@/lib/zadanie6/prototypes';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 export function generateStaticParams() {
   return BLOKI_OPORNYH.map((b) => ({ blok: b.slug }));
@@ -14,9 +16,16 @@ export function generateStaticParams() {
 
 export const dynamicParams = false;
 
-export const metadata: Metadata = {
-  title: zadanie6Title('Опорные задачи'),
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ blok: string }>;
+}): Promise<Metadata> {
+  const b = blokPoSlugu((await params).blok);
+  return b === undefined
+    ? metaVkladki(6, 'opornye')
+    : metaPodstranitsy(6, 'opornaya', tekstBezTex(b.nazvanie));
+}
 
 export default async function Opornye6Blok({ params }: { params: Promise<{ blok: string }> }) {
   const { blok } = await params;

@@ -8,6 +8,8 @@ import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import { SUBTYPES } from '@/lib/zadanie11/prototypes';
 import { Progress11 } from './Progress11';
 import { ZADANIYA } from '@/lib/paths';
+import { zagolovokRazdela } from '@/content/seo';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №11: крошки, заголовок, кольцо прогресса и лента
@@ -19,6 +21,7 @@ export function Shell11({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={11} slug="11" />
         <ShapkaRazdela
           className="z11-head"
           crumbs={[
@@ -26,7 +29,7 @@ export function Shell11({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(ZADANIE11.no)}` },
           ]}
-          title={ZADANIE11.title}
+          title={zagolovokRazdela(11, ZADANIE11.title)}
           badge={ZADANIE11.badge}
           lead={ZADANIE11.lead}
           media={

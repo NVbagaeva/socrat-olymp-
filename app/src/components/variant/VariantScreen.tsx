@@ -1,5 +1,6 @@
 'use client';
 
+import { cel } from '@/lib/metrika';
 import { clsx } from 'clsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Select } from '@/components/ui';
@@ -162,6 +163,7 @@ export function VariantScreen() {
   }
 
   function sformirovat() {
+    cel('variant_sobran', { istochnik: 'variant' });
     setNotice(null);
     void run(config, newSeed(), {});
   }

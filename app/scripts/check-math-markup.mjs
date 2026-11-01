@@ -28,6 +28,9 @@
      node scripts/check-math-markup.mjs            исходники (+ out/, если собран)
      node scripts/check-math-markup.mjs --src      только исходники
      node scripts/check-math-markup.mjs --site     только собранный сайт (обязателен out/)
+
+   На сайте проверяется и то, что формула выведена одной копией с
+   подписью для скринридера (checkOdnaKopiya, часть 3).
 */
 
 import fs from 'node:fs';
@@ -44,6 +47,10 @@ const OUT = path.join(app, 'out');
 
 /* Файлы, которые не проверяются целиком (путь от src/). */
 const SKIP_FILES = [
+  /* Примеры задач для статических блоков: условия, уже набранные KaTeX
+     движком «Собрать вариант» (scripts/build-primery.mjs), и рисунки SVG.
+     Сырого TeX там нет — это проверяет часть 2 на собранном сайте. */
+  { re: /^data\/primery\.json$/, why: 'готовая вёрстка, собирается скриптом' },
   { re: /^app\/styleguide\//, why: 'служебная витрина компонентов, ученик её не видит' },
   {
     re: /^content\/perenos-iz-04-v-05\.ts$/,
@@ -221,6 +228,50 @@ function checkSite() {
   return { problems, checked: files.length };
 }
 
+/* ── 3. Одна копия формулы (lib/katexOdin.js) ─────────────────────
+
+   Формула выводится один раз — видимой вёрсткой KaTeX, с подписью
+   role="math" и aria-label для скринридера. MathML-копии (а в ней —
+   TeX) на странице нет: иначе робот поиска и копирование текста читают
+   формулу дважды-трижды («умножить на kkk»). Проверяется:
+     - в HTML страниц нет .katex-mathml и <annotation>;
+     - у каждой формулы .katex есть role="math" и непустой aria-label;
+     - в <title> и в тексте H1–H3 нет сырого TeX и тройных повторов
+       вида «kkk», «1a1a» от склеенных копий. */
+function checkOdnaKopiya() {
+  const problems = [];
+  const files = htmlFiles(OUT).filter((file) => {
+    const rel = path.relative(OUT, file).replace(/\\/g, '/');
+    return !SKIP_PAGES.some((item) => item.re.test(rel));
+  });
+  let formul = 0;
+  for (const file of files) {
+    const rel = path.relative(app, file);
+    /* Данные роутера в <script> — копия страницы для перехода, не текст. */
+    const html = fs.readFileSync(file, 'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+    if (html.includes('class="katex-mathml"') || html.includes('<annotation')) {
+      problems.push(`${rel} — MathML-копия формулы (katex-mathml/annotation)`);
+    }
+    for (const m of html.matchAll(/<span class="katex"([^>]*)>/g)) {
+      formul += 1;
+      const attrs = m[1];
+      if (!/role="math"/.test(attrs) || !/aria-label="[^"]+"/.test(attrs)) {
+        problems.push(`${rel} — формула без role="math" и aria-label`);
+        break;
+      }
+    }
+    const title = /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? '';
+    if (/\$|\\[a-zA-Z]+/.test(title)) problems.push(`${rel} — в title сырой TeX: «${title}»`);
+    for (const h of html.matchAll(/<h([1-3])\b[^>]*>([\s\S]*?)<\/h\1>/g)) {
+      const tekst = h[2].replace(/<[^>]+>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ');
+      if (/(\p{L})\1\1/u.test(tekst.replace(/[IVXМCDLXmcdlx]{3,}/g, '')) && /([a-zα-ω])\1\1/i.test(tekst)) {
+        problems.push(`${rel} — в H${h[1]} формула повторена: «${short(tekst)}»`);
+      }
+    }
+  }
+  return { problems, formul };
+}
+
 const args = new Set(process.argv.slice(2));
 const wantSrc = !args.has('--site');
 const wantSite = args.has('--site') || (!args.has('--src') && fs.existsSync(OUT));
@@ -258,6 +309,15 @@ if (wantSite) {
     );
   } else {
     console.log(`Сайт: ${checked} страниц, математики вне KaTeX нет.`);
+  }
+  const odna = checkOdnaKopiya();
+  if (odna.problems.length > 0) {
+    failed = true;
+    console.error(`Формула выведена не одной копией (${odna.problems.length}):`);
+    odna.problems.slice(0, 40).forEach((line) => console.error('  ' + line));
+    console.error('Набирайте формулы через lib/graph/katex.js или lib/katexOdin.js, а не katex напрямую.');
+  } else {
+    console.log(`Сайт: формул ${odna.formul}, у каждой одна копия и подпись для скринридера.`);
   }
 }
 

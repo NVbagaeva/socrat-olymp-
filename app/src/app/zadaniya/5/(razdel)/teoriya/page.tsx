@@ -2,13 +2,12 @@ import type { Metadata } from 'next';
 import { ProverkaTeorii } from '@/components/kartochki/ProverkaTeorii';
 import { TeoriyaShell, telaRazdelov5 } from '@/components/tasks/veroyatnost/teoriya';
 import { kolodaNomera } from '@/content/kartochki';
-import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { vkladka } from '@/content/veroyatnost';
 import { RAZDELY_5 } from '@/content/veroyatnost-teoriya';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: veroyatnostTitle('5', vkladka('5', 'teoriya')),
-};
+export const metadata: Metadata = metaVkladki(5, 'teoriya');
 
 /**
  * Вкладка «Теория» задания №5 — на своём адресе, как у №4; адрес

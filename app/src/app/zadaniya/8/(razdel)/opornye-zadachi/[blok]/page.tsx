@@ -3,11 +3,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Podgotovka8Screen } from '@/components/tasks/vychisleniya/Podgotovka8Screen';
 import { Podgotovka8Shell } from '@/components/tasks/vychisleniya/Podgotovka8Shell';
-import { OPORNYE } from '@/content/opornye';
-import { vychisleniyaTitle } from '@/content/vychisleniya';
 import { PREP_BLOCKS } from '@/lib/vychisleniya/prep/blocks';
 import { prepPool } from '@/lib/vychisleniya/prep/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -20,7 +20,9 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const block = PREP_BLOCKS.find((item) => item.slug === blok);
-  return { title: vychisleniyaTitle(block === undefined ? OPORNYE.title : block.nazvanie) };
+  return block === undefined
+    ? metaVkladki(8, 'opornye')
+    : metaPodstranitsy(8, 'opornaya', tekstBezTex(block.nazvanie));
 }
 
 /**

@@ -5,6 +5,8 @@ import { ZADANIYA } from '@/lib/paths';
 import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
+import { zagolovokRazdela } from '@/content/seo';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №7: крошки, заголовок (со слотом иллюстрации —
@@ -17,6 +19,7 @@ export function Shell7({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={7} slug="7" />
         <ShapkaRazdela
           className="z7-head"
           crumbs={[
@@ -24,7 +27,7 @@ export function Shell7({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(ZADANIE7.no)}` },
           ]}
-          title={ZADANIE7.title}
+          title={zagolovokRazdela(7, ZADANIE7.title)}
           badge={ZADANIE7.badge}
           lead={ZADANIE7.lead}
           {...(ZADANIE7.art ? { media: <IllyustratsiyaShapki art={ZADANIE7.art} /> } : {})}

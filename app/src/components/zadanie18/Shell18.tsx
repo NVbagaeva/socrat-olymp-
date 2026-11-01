@@ -5,6 +5,8 @@ import { tasksPage } from '@/content/tasks';
 import { ZADANIE18 } from '@/content/zadanie18';
 import { ZADANIYA } from '@/lib/paths';
 import { Perenos18 } from './Perenos18';
+import { zagolovokRazdela } from '@/content/seo';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №18: крошки, заголовок и лента вкладок — то же
@@ -15,6 +17,7 @@ export function Shell18({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={18} slug="18" />
         <ShapkaRazdela
           className="z18-head"
           crumbs={[
@@ -22,7 +25,7 @@ export function Shell18({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(ZADANIE18.no)}` },
           ]}
-          title={ZADANIE18.title}
+          title={zagolovokRazdela(18, ZADANIE18.title)}
           badge={ZADANIE18.badge}
           lead={ZADANIE18.lead}
         />

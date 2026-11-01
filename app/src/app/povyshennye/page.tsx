@@ -4,12 +4,9 @@ import { PovScreen } from '@/components/povyshennye/PovScreen';
 import '@/components/variant/sectionStyles';
 import '@/components/variant/variant.css';
 import '@/components/variant/online/online.css';
-import { POV_SCREEN as T } from '@/content/povyshennye';
+import { SEO_STRANITSY } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: `${T.title} — Будет на ЕГЭ`,
-  description: T.lead,
-};
+export const metadata: Metadata = SEO_STRANITSY.povyshennye;
 
 /**
  * «Варианты повышенной сложности»: 36 вариантов по 6 версий. Всё

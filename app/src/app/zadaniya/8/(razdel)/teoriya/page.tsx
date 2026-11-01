@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/ui';
-import { vychisleniyaTitle } from '@/content/vychisleniya';
+import { metaZaglushkiVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: vychisleniyaTitle('Теория'),
-};
+export const metadata: Metadata = metaZaglushkiVkladki(8, 'Теория');
 
 /**
  * Вкладка «Теория» задания №8.

@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import { Repetitory9 } from '@/components/tasks/proizvodnaya/Repetitory9';
-import { O_ZADANII_9, PROIZVODNAYA, REPETITORY_9, proizvodnayaTitle } from '@/content/proizvodnaya';
+import { O_ZADANII_9, PROIZVODNAYA } from '@/content/proizvodnaya';
 import { PROTOTYPES } from '@/lib/proizvodnaya/prototypes';
 import { typeset } from '@/lib/tex';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: proizvodnayaTitle(REPETITORY_9.title),
-};
+export const metadata: Metadata = metaVkladki(9, 'repetitory');
 
 /**
  * Число аналогов на прототип. Банк зафиксированных вариантов

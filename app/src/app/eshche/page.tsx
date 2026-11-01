@@ -4,8 +4,10 @@ import { AppShell } from '@/components/layout/AppShell';
 import { appNavMore, appNavMorePage } from '@/content/appNav';
 import './eshche.css';
 
+/* Экран меню для телефона: те же ссылки, что в боковой панели, — в поиске не нужен. */
 export const metadata: Metadata = {
   title: `${appNavMorePage.label} — Будет на ЕГЭ`,
+  robots: { index: false, follow: true },
 };
 
 /**

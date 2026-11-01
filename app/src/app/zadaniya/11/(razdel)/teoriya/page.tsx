@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import { Teoriya11 } from '@/components/tasks/zadanie11/Teoriya11';
-import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { ZADANIE11 } from '@/content/zadanie11';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
 const VKLADKA = ZADANIE11.tabs.find((tab) => tab.id === 'teoriya')?.label ?? 'Теория';
 
-export const metadata: Metadata = {
-  title: zadanie11Title(VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(11, 'teoriya');
 
 /**
  * Вкладка «Теория» задания №11: разделы подряд, содержание рядом.

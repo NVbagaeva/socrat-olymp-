@@ -4,11 +4,11 @@ import { AppShell } from '@/components/layout/AppShell';
 import { HowtoFromUrl, HowtoView } from '@/components/onboarding/HowtoPage';
 import { Breadcrumbs } from '@/components/ui';
 import { HOWTO } from '@/content/kakPolzovatsya';
+import { SEO_STRANITSY } from '@/content/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { faqLd } from '@/lib/schema';
 
-export const metadata: Metadata = {
-  title: HOWTO.meta.title,
-  description: HOWTO.meta.description,
-};
+export const metadata: Metadata = SEO_STRANITSY.kakPolzovatsya;
 
 /**
  * «Как пользоваться сайтом». Вкладка берётся из адреса (?dlya=…);
@@ -20,6 +20,8 @@ export default function Page() {
     <AppShell active="help">
       <main className="app-main">
         <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: HOWTO.crumbs }]} />
+        {/* Частые вопросы вкладки по умолчанию — те, что видны в HTML страницы. */}
+        <JsonLd data={faqLd(HOWTO.repetitor.faq)} />
         <Suspense fallback={<HowtoView tab="repetitor" />}>
           <HowtoFromUrl />
         </Suspense>

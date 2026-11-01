@@ -2,11 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Opornye10 } from '@/components/tasks/zadanie10/Opornye10';
-import { ZADANIE10, zadanie10Title } from '@/content/zadanie10';
+import { ZADANIE10 } from '@/content/zadanie10';
 import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
 import { BLOKI_OPORNYH, blokPoSlugu, opornyeDlyaBrauzera } from '@/lib/zadanie10/opornye';
 import { kodNaSayte, prototype } from '@/lib/zadanie10/prototypes';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 export function generateStaticParams() {
   return BLOKI_OPORNYH.map((b) => ({ blok: b.slug }));
@@ -14,9 +16,16 @@ export function generateStaticParams() {
 
 export const dynamicParams = false;
 
-export const metadata: Metadata = {
-  title: zadanie10Title('Опорные задачи'),
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ blok: string }>;
+}): Promise<Metadata> {
+  const b = blokPoSlugu((await params).blok);
+  return b === undefined
+    ? metaVkladki(10, 'opornye')
+    : metaPodstranitsy(10, 'opornaya', tekstBezTex(b.nazvanie));
+}
 
 export default async function Opornye10Blok({ params }: { params: Promise<{ blok: string }> }) {
   const { blok } = await params;

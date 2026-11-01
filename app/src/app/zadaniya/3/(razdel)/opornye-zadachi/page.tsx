@@ -1,19 +1,18 @@
 import type { Metadata } from 'next';
 import { OpornyeStereoList } from '@/components/stereo/opornye/OpornyeStereoList';
 import { OpornyeStereoShell } from '@/components/stereo/opornye/OpornyeStereoShell';
-import { STEREO, stereoTitle, vkladkaStereo } from '@/content/stereo/zadaniya';
+import { STEREO, vkladkaStereo } from '@/content/stereo/zadaniya';
 import { BLOKI_3, zadachiBloka } from '@/lib/stereo/opornye3/bloki';
 import { dekorBlokov, kartinkaBloka, piktogrammaBloka } from '@/lib/stereo/opornye3/piktogrammy';
 import { assetUrl } from '@/lib/assetUrl';
 import { renderSolid } from '@/lib/solid/render';
 import { ZADANIYA } from '@/lib/paths';
 import '../../../[task]/[type]/prep.css';
+import { metaVkladki } from '@/content/seo';
 
 const VKLADKA = vkladkaStereo('opornye');
 
-export const metadata: Metadata = {
-  title: stereoTitle('3', VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(3, 'opornye');
 
 /** Вкладка «Опорные задачи» №3: двенадцать блоков по умениям. */
 export default function Page() {

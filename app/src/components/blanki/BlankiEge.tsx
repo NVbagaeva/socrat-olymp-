@@ -1,5 +1,6 @@
 'use client';
 
+import { cel } from '@/lib/metrika';
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import { BLANKI_KITS, BLANKI_TEXT as T, type BlankKit } from '@/content/blanki';
@@ -49,6 +50,7 @@ export function BlankiEge({ defaultCopies = 1, className }: BlankiEgeProps) {
       const { sobratBlanki } = await import('@/lib/blankiPdf');
       const bytes = await sobratBlanki(kit.parts, n);
       saveBytes(bytes, n > 1 ? `${kit.file}-${n}-kopii` : kit.file);
+      cel('blank_skachan', { blank: kit.id, kopiy: n });
     } catch {
       setFailed(true);
     } finally {
@@ -68,7 +70,12 @@ export function BlankiEge({ defaultCopies = 1, className }: BlankiEgeProps) {
     const direct = kit.parts.length === 1 && (kit.copies !== true || copies === 1);
     if (direct && only !== undefined) {
       return (
-        <a className={cls} href={blankUrl(only)} download={`${kit.file}.pdf`}>
+        <a
+          className={cls}
+          href={blankUrl(only)}
+          download={`${kit.file}.pdf`}
+          onClick={() => cel('blank_skachan', { blank: kit.id })}
+        >
           {label}
         </a>
       );

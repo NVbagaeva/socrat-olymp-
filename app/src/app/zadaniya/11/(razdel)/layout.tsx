@@ -10,6 +10,11 @@ import '../../veroyatnost.css';
 import '../zadanie11.css';
 import '../../komplekt.css';
 import '../procenty.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-11.png). */
+export const metadata: Metadata = ogRazdela(11);
 
 /**
  * Оболочка задания №11: крошки, заголовок, кольцо прогресса и лента

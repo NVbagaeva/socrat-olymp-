@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
 import { OZadanii5 } from '@/components/tasks/veroyatnost/OZadanii5';
-import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: veroyatnostTitle('5', vkladka('5', 'o-zadanii')),
-};
+export const metadata: Metadata = metaVkladki(5, 'o-zadanii');
 
 /**
  * Вкладка «О задании» задания №5 — живёт на адресе самого раздела,

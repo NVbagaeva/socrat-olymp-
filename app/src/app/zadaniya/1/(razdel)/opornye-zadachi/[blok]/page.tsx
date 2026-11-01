@@ -3,10 +3,12 @@ import { notFound } from 'next/navigation';
 import { Opornye1Screen } from '@/components/tasks/planimetriya/Opornye1Screen';
 import { Opornye1Shell } from '@/components/tasks/planimetriya/Opornye1Shell';
 import { OPORNYE } from '@/content/opornye';
-import { ZADANIE1, zadanie1Title } from '@/content/zadanie1';
+import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
 import { BLOKI, blokBySlug } from '@/lib/planimetriya/prep/bloki';
 import { prepPool1 } from '@/lib/planimetriya/prep/pool';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 export function generateStaticParams() {
   return BLOKI.map((b) => ({ blok: b.slug }));
@@ -18,7 +20,9 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const found = blokBySlug(blok);
-  return { title: zadanie1Title(found === undefined ? OPORNYE.title : found.nazvanie) };
+  return found === undefined
+    ? metaVkladki(1, 'opornye')
+    : metaPodstranitsy(1, 'opornaya', tekstBezTex(found.nazvanie));
 }
 
 /** Блок тренировок: десять микрозадач в закрытом виде, собранных на сборке. */

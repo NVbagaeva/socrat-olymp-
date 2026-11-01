@@ -3,10 +3,12 @@ import { notFound } from 'next/navigation';
 import { Opornye2Screen } from '@/components/tasks/vektory/Opornye2Screen';
 import { Opornye2Shell } from '@/components/tasks/vektory/Opornye2Shell';
 import { OPORNYE } from '@/content/opornye';
-import { VEKTORY, vektoryTitle } from '@/content/vektory';
+import { VEKTORY } from '@/content/vektory';
 import { BLOKI, blokBySlug } from '@/lib/vektory/prep/bloki';
 import { prepPool2 } from '@/lib/vektory/prep/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -19,7 +21,9 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const found = blokBySlug(blok);
-  return { title: vektoryTitle(found === undefined ? OPORNYE.title : found.nazvanie) };
+  return found === undefined
+    ? metaVkladki(2, 'opornye')
+    : metaPodstranitsy(2, 'opornaya', tekstBezTex(found.nazvanie));
 }
 
 /**

@@ -1,15 +1,12 @@
 import type { Metadata } from 'next';
 import { Generator3 } from '@/components/tasks/solid3/Generator3';
-import { stereoTitle, vkladkaStereo } from '@/content/stereo/zadaniya';
 import { VariantFromSection } from '@/components/variant/VariantEntry';
 import { info3 } from '@/lib/zadanie3/gen/info';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
+import { BlokRazdela } from '@/components/seo/BlokRazdela';
 
-const VKLADKA = vkladkaStereo('generator');
-
-export const metadata: Metadata = {
-  title: stereoTitle('3', VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(3, 'generator');
 
 /**
  * Вкладка «Генератор» задания №3: лист ученика и лист учителя из одного
@@ -21,6 +18,7 @@ export default function Page() {
     <>
       <VariantFromSection />
       <Generator3 razdely={info3()} base={`${ZADANIYA}/3`} />
+      <BlokRazdela no={3} vid="generator" />
     </>
   );
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { SiteFooter, SiteHeader } from '@/components/layout';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { about } from '@/content/about';
+import { personLd } from '@/lib/schema';
 import './about.css';
 
 import { assetUrl } from '@/lib/assetUrl';
@@ -16,6 +18,15 @@ export default function AboutPage() {
     <>
       {/* Тот же SiteHeader, что и везде; currentHref подсвечивает пункт меню. */}
       <SiteHeader currentHref="/about/" />
+      {/* Автор платформы для поиска: имя, роль и подпись — из текста страницы. */}
+      <JsonLd
+        data={personLd({
+          name: 'Наталия Багаева',
+          jobTitle: 'Учитель математики',
+          description: hero.lead,
+          image: '/images/author/nata-portrait.webp',
+        })}
+      />
 
       <main>
         <section className="about-hero" aria-labelledby="about-title">

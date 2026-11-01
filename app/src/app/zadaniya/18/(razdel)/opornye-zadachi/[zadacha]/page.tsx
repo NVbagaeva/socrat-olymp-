@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Opornaya18Stranica } from '@/components/zadanie18/Opornaya18Stranica';
-import { zadanie18Title } from '@/content/zadanie18';
 import { OPORNYE_18, opornaya18 } from '@/content/zadanie18/opornye';
+import { metaPodstranitsy } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Статический экспорт: страницы — только у задач из списка. */
 export function generateStaticParams() {
@@ -14,7 +15,7 @@ type Params = Promise<{ zadacha: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const z = opornaya18((await params).zadacha);
-  return z === undefined ? {} : { title: zadanie18Title(z.nazvanie) };
+  return z === undefined ? {} : metaPodstranitsy(18, 'opornaya', tekstBezTex(z.nazvanie));
 }
 
 /** Страница опорной задачи: чертёж, условие, подсказка-схемы, решения по шагам, ответ. */

@@ -1,4 +1,4 @@
-import katex from 'katex';
+import { katexOdin } from '@/lib/katexOdin';
 import '@/lib/graph/katex-makrosy.js';
 import type { ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
@@ -31,7 +31,7 @@ export function Formula({ tex }: { tex: string }) {
     <span
       className="o3-formula"
       dangerouslySetInnerHTML={{
-        __html: katex.renderToString(tex, { throwOnError: false, displayMode: true }),
+        __html: katexOdin(tex, { throwOnError: false, displayMode: true }),
       }}
     />
   );

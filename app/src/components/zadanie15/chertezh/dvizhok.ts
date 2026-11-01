@@ -28,7 +28,7 @@
  * Вращение пальцем или мышью выбором не считается.
  */
 
-import katex from 'katex';
+import { katexOdin } from '@/lib/katexOdin';
 import '@/lib/graph/katex-makrosy.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -126,7 +126,7 @@ export function texHtml(s: string): string {
     .split(/(\$[^$]+\$)/)
     .map((part) =>
       part.startsWith('$') && part.endsWith('$') && part.length > 1
-        ? katex.renderToString(part.slice(1, -1), { throwOnError: false })
+        ? katexOdin(part.slice(1, -1), { throwOnError: false })
         : part.replace(/&/g, '&amp;').replace(/</g, '&lt;'),
     )
     .join('');
@@ -696,7 +696,7 @@ export class Dvizhok {
     this.podpisi = (this.sc?.metki ?? []).map((m) => {
       const el = document.createElement('span');
       el.className = clsxLabel(m.vid === 'tochka', m.vybrana === true);
-      el.innerHTML = katex.renderToString(m.name, { throwOnError: false });
+      el.innerHTML = katexOdin(m.name, { throwOnError: false });
       el.dataset.name = m.name;
       this.labels.appendChild(el);
       const r = el.getBoundingClientRect();

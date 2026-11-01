@@ -1,0 +1,43 @@
+/* Страница 404 (not-found.tsx): пустой экран .state и список разделов. */
+.nf .nf__title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.nf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+}
+.nf__razdely {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 var(--space-6) var(--space-10);
+}
+.nf__razdely h2 {
+  margin-bottom: var(--space-3);
+}
+.nf__razdely ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+}
+.nf__razdely a {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  text-decoration: none;
+  min-height: 44px;
+}
+.nf__razdely a:hover {
+  color: var(--color-primary);
+}
+.nf__no {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}

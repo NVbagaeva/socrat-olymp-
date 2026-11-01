@@ -2,13 +2,12 @@ import type { Metadata } from 'next';
 import { Opornye9List } from '@/components/tasks/proizvodnaya/Opornye9List';
 import { Opornye9Shell } from '@/components/tasks/proizvodnaya/Opornye9Shell';
 import { OPORNYE } from '@/content/opornye';
-import { PROIZVODNAYA, proizvodnayaTitle } from '@/content/proizvodnaya';
+import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { prepPool9 } from '@/lib/proizvodnaya/prep/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: proizvodnayaTitle(OPORNYE.title),
-};
+export const metadata: Metadata = metaVkladki(9, 'opornye');
 
 /**
  * Вкладка «Опорные задачи» №9: карточки шести блоков и разобранные

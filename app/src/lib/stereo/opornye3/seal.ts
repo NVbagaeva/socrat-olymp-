@@ -5,7 +5,7 @@
  * Модель чертежа уходит как есть: в ней только данные условия.
  */
 
-import katex from 'katex';
+import { katexOdin } from '@/lib/katexOdin';
 import '@/lib/graph/katex-makrosy.js';
 import { typeset } from '../../tex';
 import type { Model } from '../../solid/model';
@@ -64,7 +64,7 @@ const NOMERA = ['①', '②', '③', '④', '⑤'];
 export const SHAGI = ['Узнать тело', 'Найти рабочую фигуру', 'Обосновать прямой угол', 'Нарисовать отдельно', 'Посчитать удобно'];
 
 function formula(tex: string): string {
-  return katex.renderToString(tex, { throwOnError: false, displayMode: true });
+  return katexOdin(tex, { throwOnError: false, displayMode: true });
 }
 
 export function sealZadacha(z: ZadachaOp3, no: number): ZadachaOp3Sealed {

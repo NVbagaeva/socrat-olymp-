@@ -17,6 +17,7 @@ import 'katex/dist/katex.min.css';
 
 import './katex-makrosy.js';
 import upgradeModule from './katex-upgrade.js';
+import { opciiOdin, podpisat, podpisatUzel } from '../katexOdin.js';
 
 const { upgrade, render, inlineTex } = upgradeModule;
 
@@ -30,13 +31,22 @@ function keepsDfrac(options) {
   return !!(options && (options.displayMode || options.displayFrac));
 }
 
+/* Вывод один — видимая вёрстка с подписью role="math" и aria-label
+   (lib/katexOdin.ts): робот поиска и копирование текста больше не
+   видят формулу трижды (вёрстка + MathML + TeX). Явный output у вызова
+   сохраняется. */
 const katex = {
   ...katexLib,
   renderToString(tex, options) {
-    return katexLib.renderToString(keepsDfrac(options) ? tex : inlineTex(tex), options);
+    const o = opciiOdin(options);
+    const html = katexLib.renderToString(keepsDfrac(o) ? tex : inlineTex(tex), o);
+    return o.output === 'html' ? podpisat(html, tex) : html;
   },
   render(tex, node, options) {
-    return katexLib.render(keepsDfrac(options) ? tex : inlineTex(tex), node, options);
+    const o = opciiOdin(options);
+    const out = katexLib.render(keepsDfrac(o) ? tex : inlineTex(tex), node, o);
+    if (o.output === 'html') podpisatUzel(node, tex);
+    return out;
   },
 };
 

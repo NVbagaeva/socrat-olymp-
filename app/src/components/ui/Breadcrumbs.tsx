@@ -1,5 +1,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { breadcrumbLd } from '@/lib/schema';
 
 export interface Crumb {
   label: string;
@@ -16,6 +18,11 @@ export interface BreadcrumbsProps {
   items: Crumb[];
   /** Название цепочки для скринридера. */
   label?: string;
+  /**
+   * Разметка BreadcrumbList для поиска. Выключается у второй копии той
+   * же цепочки на странице (компактная панель), чтобы не дублировать.
+   */
+  ld?: boolean;
   className?: string;
 }
 
@@ -26,9 +33,11 @@ export interface BreadcrumbsProps {
  * Разделитель рисуется через ::before у пункта, а не текстом: символ
  * в разметке скринридер прочитал бы вслух.
  */
-export function Breadcrumbs({ items, label = 'Вы здесь', className }: BreadcrumbsProps) {
+export function Breadcrumbs({ items, label = 'Вы здесь', className, ld = true }: BreadcrumbsProps) {
   return (
     <nav className={clsx('crumbs', className)} aria-label={label}>
+      {/* Те же пункты для поиска: BreadcrumbList (lib/schema.ts). */}
+      {ld ? <JsonLd data={breadcrumbLd(items)} /> : null}
       <ol className="crumbs__list">
         {items.map((item, index) => {
           const last = index === items.length - 1;

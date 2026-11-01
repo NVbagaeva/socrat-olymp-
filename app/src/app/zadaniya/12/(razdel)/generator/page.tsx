@@ -3,18 +3,16 @@ import { VariantFromSection } from '@/components/variant/VariantEntry';
 import { Generator12 } from '@/components/tasks/generator/Generator12';
 import { razdelyZadaniya } from '@/components/tasks/razdely/razdely12';
 import { findSection } from '@/content/sections';
-import { generatorAllText } from '@/content/ves12';
 import { config12 } from '@/lib/ves12/generator12';
 import { ZADANIYA } from '@/lib/paths';
 import '../../../[task]/[type]/configurator.css';
 import '../../../komplekt.css';
 import '@/components/tasks/ves12/ves12.css';
 import '@/components/tasks/ves12/zachyot-setup.css';
+import { metaVkladki } from '@/content/seo';
+import { BlokRazdela } from '@/components/seo/BlokRazdela';
 
-export const metadata: Metadata = {
-  title: `${generatorAllText.pageTitle} — Будет на ЕГЭ`,
-  description: generatorAllText.lead,
-};
+export const metadata: Metadata = metaVkladki(12, 'generator');
 
 const BASE = `${ZADANIYA}/12/generator`;
 
@@ -31,6 +29,7 @@ export default function GeneratorAllPage() {
     <>
       <VariantFromSection />
       <Generator12 config={config12(BASE)} base={BASE} ekran={`${BASE}/?`} ikonki={ikonki} />
+      <BlokRazdela no={12} vid="generator" />
     </>
   );
 }

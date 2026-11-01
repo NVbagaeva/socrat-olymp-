@@ -2,13 +2,12 @@ import type { Metadata } from 'next';
 import { Opornye1List } from '@/components/tasks/planimetriya/Opornye1List';
 import { Opornye1Shell } from '@/components/tasks/planimetriya/Opornye1Shell';
 import { OPORNYE } from '@/content/opornye';
-import { ZADANIE1, zadanie1Title } from '@/content/zadanie1';
+import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
 import { prepPool1 } from '@/lib/planimetriya/prep/pool';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: zadanie1Title(OPORNYE.title),
-};
+export const metadata: Metadata = metaVkladki(1, 'opornye');
 
 /**
  * Вкладка «Опорные задачи» №1: блоки тренировок навыков и разобранные

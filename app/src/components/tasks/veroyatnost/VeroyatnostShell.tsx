@@ -5,6 +5,7 @@ import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { RazdelTabs } from '../RazdelTabs';
 import { ZADANIYA } from '@/lib/paths';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 export interface VeroyatnostShellProps {
   section: VeroyatnostSection;
@@ -29,6 +30,7 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
         {/* В заголовке стоит название темы, а номер задания — в
             крошках: страница задания здесь и есть страница темы,
             промежуточного выбора раздела, как в №3, у неё нет. */}
+        <RazdelJsonLd no={Number(section.no)} slug={section.slug} />
         <ShapkaRazdela
           className="veroyatnost-head"
           crumbs={[

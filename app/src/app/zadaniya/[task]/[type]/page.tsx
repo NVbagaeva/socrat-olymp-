@@ -12,6 +12,8 @@ import './prep.css';
 import './trainer.css';
 import './configurator.css';
 import '../../komplekt.css';
+import { metaPodrazdela12 } from '@/content/seo';
+import { VsyoPodrazdela12 } from '@/components/seo/VsyoVRazdele';
 
 /* Собираются все подтемы, включая закрытые: прямой заход на закрытую
    должен показывать «Скоро», а не 404. */
@@ -29,11 +31,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     return {};
   }
   /* Название и название графика — из общего списка разделов
-     (data/functionTypes.ts), одни и те же в заголовке, описании и
-     карточке при отправке ссылки. */
-  const title = `${subtopic.title} — Будет на ЕГЭ`;
-  const description = `Задание №${task}. ${subtopic.title}. ${subtopic.graphName}.`;
-  return { title, description, openGraph: { title, description } };
+     (data/functionTypes.ts); заголовок и описание — по шаблону
+     content/seo.ts, карточка при отправке ссылки собирается из них. */
+  return metaPodrazdela12(subtopic.title, subtopic.graphName, 'o');
 }
 
 export default async function SubtopicPage({ params }: { params: Params }) {
@@ -46,7 +46,11 @@ export default async function SubtopicPage({ params }: { params: Params }) {
 
   return (
     <AppShell active="tasks">
-      <FunctionTopicPage section={section} subtopic={subtopic} />
+      <FunctionTopicPage
+        section={section}
+        subtopic={subtopic}
+        posle={<VsyoPodrazdela12 type={type} />}
+      />
     </AppShell>
   );
 }

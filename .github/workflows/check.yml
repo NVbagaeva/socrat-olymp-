@@ -669,6 +669,31 @@ jobs:
         working-directory: app
         run: pnpm test:navigation
 
+      # Поиск: главное зеркало без www, /index.html → чистый адрес, старые
+      # адреса /ege/ и /about.html, своя страница 404 с кодом 404,
+      # robots.txt и sitemap.xml — на настоящем Apache с public/.htaccess.
+      - name: Проверить зеркало, редиректы и 404 (Apache)
+        working-directory: app
+        run: pnpm test:htaccess-seo
+
+      # Битые ссылки: каждая внутренняя ссылка и файл в разметке всех
+      # страниц ведут туда, где что-то есть, якоря — на существующие id.
+      - name: Проверить битые ссылки
+        working-directory: app
+        run: pnpm test:broken-links
+
+      # Микроразметка Schema.org, canonical, Open Graph, title, description
+      # и H1 на каждой индексируемой странице (scripts/check-structured-data.mjs).
+      - name: Проверить микроразметку и метатеги
+        working-directory: app
+        run: pnpm test:seo
+
+      # Картинки для соцсетей (public/og/) нарисованы по текущим
+      # названиям заданий: переименовали задание — пересоберите pnpm build:og.
+      - name: Проверить картинки Open Graph
+        working-directory: app
+        run: pnpm test:og
+
       # Сохранение тренировки во всех тренажёрах (№12 — четыре подтемы,
       # №8, №2, №11, №4, №5, «Узнай метод», №3 — все фигуры): верный ответ
       # (его тест считает в Node по рецепту из записи тем же кодом сайта),

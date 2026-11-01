@@ -8,6 +8,8 @@ import 'katex/dist/katex.min.css';
 import '../../../../zadaniya.css';
 import '../../../section.css';
 import '../../topic.css';
+import { metaPodstranitsy, grafik12 } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Разбор типа задачи со вкладки «О задании». Вкладка подгружает эту
    страницу по клику на плашку и вставляет из неё блок разбора; без
@@ -24,7 +26,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const subtopic = findSubtopic(task, type);
   const form = findAnalysis(task, type, id);
   return subtopic && form
-    ? { title: `${form.title.replace(/\$/g, '')} · ${subtopic.title} — Будет на ЕГЭ` }
+    ? metaPodstranitsy(12, 'razbor', `${tekstBezTex(form.title)} (${grafik12(subtopic.graphName)})`)
     : {};
 }
 

@@ -2,14 +2,13 @@ import type { Metadata } from 'next';
 import { ProverkaTeorii } from '@/components/kartochki/ProverkaTeorii';
 import { Teoriya2 } from '@/components/tasks/vektory/Teoriya2';
 import { kolodaNomera } from '@/content/kartochki';
-import { VEKTORY, vektoryTitle } from '@/content/vektory';
+import { VEKTORY } from '@/content/vektory';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
 const VKLADKA = VEKTORY.tabs.find((tab) => tab.id === 'teoriya')?.label ?? 'Теория';
 
-export const metadata: Metadata = {
-  title: vektoryTitle(VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(2, 'teoriya');
 
 /**
  * Вкладка «Теория» задания №2: восемь разделов подряд, содержание

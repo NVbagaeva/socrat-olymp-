@@ -11,16 +11,11 @@ import { bankSets, findSection, type Subtopic } from '@/content/sections';
 import { subtopicBuilt } from '@/data/functionTypes';
 import { href, ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
+import { metaVkladki } from '@/content/seo';
 
 const section = findSection('12');
 
-export const metadata: Metadata =
-  section === undefined
-    ? {}
-    : {
-        title: `${section.title}. ${section.subtitle} — Будет на ЕГЭ`,
-        description: section.description,
-      };
+export const metadata: Metadata = metaVkladki(12, 'o-zadanii');
 
 /* Формулы вёрстываются на сборке: в браузер уходит готовая разметка,
    а не библиотека ради шести постоянных строк. */

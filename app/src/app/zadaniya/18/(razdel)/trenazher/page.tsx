@@ -3,17 +3,16 @@ import type { Metadata } from 'next';
 import '@/components/tasks/card/problem-card.css';
 import type { SsylkiTipa } from '@/components/trenazher/types';
 import { Trenazher18 } from '@/components/zadanie18/Trenazher18';
-import { ZADANIE18, vkladka18, zadanie18Title } from '@/content/zadanie18';
+import { ZADANIE18, vkladka18 } from '@/content/zadanie18';
 import { OPORNYE_18 } from '@/content/zadanie18/opornye';
 import { ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
 import { bank18, trenazherConfig18, zadachi18 } from '@/lib/zadanie18/trenazher/bank';
+import { metaVkladki } from '@/content/seo';
 
 const VKLADKA = vkladka18('trenazher');
 
-export const metadata: Metadata = {
-  title: zadanie18Title(VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(18, 'trenazher');
 
 /**
  * Вкладка «Тренажёр» №18: задачи уровня ЕГЭ по ключевым схемам на

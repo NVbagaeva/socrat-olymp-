@@ -2,9 +2,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov, yarlyki } from '@/components/tasks/veroyatnost/navyki';
-import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { vkladka } from '@/content/veroyatnost';
 import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Адреса перечислимы на сборке: методы с задачами и два режима. */
 export function generateStaticParams() {
@@ -17,7 +19,13 @@ type Params = Promise<{ mode: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { mode } = await params;
   const found = yarlyki(bank5Pool(), 5).find((item) => item.id === mode);
-  return found === undefined ? {} : { title: veroyatnostTitle('5', `${found.title} · Тренажёр`) };
+  /* Режим — ярлык того же тренажёра: в поиске — основная страница тренажёра. */
+  return found === undefined
+    ? {}
+    : {
+        ...metaPodstranitsy(5, 'rezhim', tekstBezTex(found.title)),
+        alternates: { canonical: `/zadaniya/5/trenazher/` },
+      };
 }
 
 /**

@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import katex from 'katex';
+import { katexOdin } from '@/lib/katexOdin';
 import '@/lib/graph/katex-makrosy.js';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
@@ -39,7 +39,7 @@ function Formula({ tex }: { tex: string }) {
     <span
       className="ed-formula"
       dangerouslySetInnerHTML={{
-        __html: katex.renderToString(tex, { throwOnError: true, displayMode: true }),
+        __html: katexOdin(tex, { throwOnError: true, displayMode: true }),
       }}
     />
   );

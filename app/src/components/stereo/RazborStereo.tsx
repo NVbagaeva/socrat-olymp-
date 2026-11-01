@@ -1,4 +1,4 @@
-import katex from 'katex';
+import { katexOdin } from '@/lib/katexOdin';
 import '@/lib/graph/katex-makrosy.js';
 import { Tex } from '@/components/ui/Tex';
 import type { RazborStereo as Razbor } from '@/lib/stereo/razbory3';
@@ -44,7 +44,7 @@ export function RazborStereo({ razbor, title }: { razbor: Razbor; title: string 
       (s.formuly ?? [])
         .map(
           (f) =>
-            `<div class="stereo-razbor__formula">${katex.renderToString(f, {
+            `<div class="stereo-razbor__formula">${katexOdin(f, {
               throwOnError: true,
               displayMode: true,
             })}</div>`,

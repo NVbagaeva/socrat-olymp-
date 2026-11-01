@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Repetitory45 } from '@/components/tasks/veroyatnost/Repetitory45';
-import { veroyatnostBySlug, veroyatnostTitle } from '@/content/veroyatnost';
+import { veroyatnostBySlug } from '@/content/veroyatnost';
+import { metaVkladki } from '@/content/seo';
 
 const TUTORS = veroyatnostBySlug('4')?.tutors;
 
-export const metadata: Metadata = {
-  title: veroyatnostTitle('4', TUTORS?.title ?? 'Для репетиторов'),
-};
+export const metadata: Metadata = metaVkladki(4, 'repetitory');
 
 /**
  * Вкладка «Для репетиторов» задания №4: страница с карточками

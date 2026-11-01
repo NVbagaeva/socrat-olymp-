@@ -60,13 +60,36 @@ jobs:
       # NEXT_PUBLIC_AUTH_ENABLED=1, адрес проекта и его публичный ключ.
       # Переменных нет — сайт собирается без входа, как раньше. Секретный
       # ключ сервиса сюда не передаётся никогда (docs/AUTH.md).
+      # Прошлое состояние страниц (отпечатки текста и даты изменения) — с
+      # живого сайта. По нему сборка ставит в sitemap.xml честный lastmod
+      # и составляет список изменённых страниц для IndexNow
+      # (scripts/seo-postbuild.mjs). Первой выкладке брать нечего — пустой.
+      - name: Забрать прошлое состояние страниц с сайта
+        run: |
+          curl -fsS --max-time 30 https://budetege.ru/seo-state.json -o "$RUNNER_TEMP/seo-prev.json" \
+            || echo '{}' > "$RUNNER_TEMP/seo-prev.json"
+
+      # Поисковые переменные (Variables, не Secrets — значения публичные,
+      # они и так видны в коде страниц): коды подтверждения Яндекс
+      # Вебмастера и Google Search Console, номер счётчика Метрики, ключ
+      # IndexNow. Пусто — метатега, счётчика и файла ключа нет. Инструкция —
+      # docs/seo/poisk-nastroyka.md.
       - name: Собрать статический экспорт
         working-directory: app
         env:
           NEXT_PUBLIC_AUTH_ENABLED: ${{ vars.NEXT_PUBLIC_AUTH_ENABLED }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_YANDEX_VERIFICATION: ${{ vars.NEXT_PUBLIC_YANDEX_VERIFICATION }}
+          NEXT_PUBLIC_GOOGLE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_VERIFICATION }}
+          NEXT_PUBLIC_METRIKA_ID: ${{ vars.NEXT_PUBLIC_METRIKA_ID }}
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
+          SEO_PREV_STATE: ${{ runner.temp }}/seo-prev.json
         run: pnpm build
+
+      # Карта сайта и robots.txt — в выгрузке, иначе поиск ходит вслепую.
+      - name: Проверить, что sitemap.xml и robots.txt в выгрузке
+        run: test -s app/out/sitemap.xml && test -s app/out/robots.txt && test -s app/out/404.html
 
       - name: Проверить, что экспорт не пустой
         run: test -f app/out/index.html
@@ -164,3 +187,12 @@ jobs:
         run: |
           sleep 30
           pnpm test:razdely-12-images --url https://budetege.ru
+
+      # Изменённые страницы — Яндексу через IndexNow: так он узнаёт о
+      # них за минуты, а не ждёт обхода. Список — app/out/seo-changed.txt,
+      # ключ — переменная INDEXNOW_KEY. Нет ключа — шаг пропускается.
+      - name: Сообщить Яндексу об изменённых страницах (IndexNow)
+        working-directory: app
+        env:
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
+        run: node scripts/indexnow.mjs

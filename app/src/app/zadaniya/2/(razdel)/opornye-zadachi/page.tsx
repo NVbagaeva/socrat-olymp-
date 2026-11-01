@@ -2,14 +2,13 @@ import type { Metadata } from 'next';
 import { Opornye2List } from '@/components/tasks/vektory/Opornye2List';
 import { Opornye2Shell } from '@/components/tasks/vektory/Opornye2Shell';
 import { OPORNYE } from '@/content/opornye';
-import { VEKTORY, vektoryTitle } from '@/content/vektory';
+import { VEKTORY } from '@/content/vektory';
 import { opornyePool } from '@/lib/vektory/opornye';
 import { prepPool2 } from '@/lib/vektory/prep/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: vektoryTitle(OPORNYE.title),
-};
+export const metadata: Metadata = metaVkladki(2, 'opornye');
 
 /**
  * Вкладка «Опорные задачи» №2: блоки тренировок навыков и разобранные

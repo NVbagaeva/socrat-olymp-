@@ -22,6 +22,11 @@ import '../../4/zadanie4.css';
 /* Вкладки по макетам: значки методов, дорожка опорных задач, тренажёр,
    генератор по методам и страница «Для репетиторов». */
 import '../../veroyatnost-vkladki.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-5.png). */
+export const metadata: Metadata = ogRazdela(5);
 
 /**
  * Оболочка задания №5: крошки, заголовок и лента вкладок.

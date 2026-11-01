@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
 import { KlyuchevyeMetody } from '@/components/tasks/veroyatnost/KlyuchevyeMetody';
-import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: veroyatnostTitle('5', vkladka('5', 'metody')),
-};
+export const metadata: Metadata = metaVkladki(5, 'metody');
 
 /**
  * Вкладка «Ключевые методы решения» задания №5: десять методов автора

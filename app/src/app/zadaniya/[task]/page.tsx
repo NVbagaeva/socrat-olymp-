@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { TaskStub, stubTitle } from '@/components/tasks/TaskStub';
+import { TaskStub } from '@/components/tasks/TaskStub';
 import { taskHasPage, tasks, type ExamTask } from '@/content/tasks';
 import '../zadaniya.css';
 import './section.css';
+import { metaZaglushki } from '@/content/seo';
 
 /* Неоткрытое задание со страницей-заглушкой (stub в content/tasks.ts).
    Своего раздела у него нет — по его адресу собирается заглушка.
@@ -27,7 +28,7 @@ type Params = Promise<{ task: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const task = stubTask((await params).task);
-  return task === undefined ? {} : { title: `${stubTitle(task)} — Будет на ЕГЭ` };
+  return task === undefined ? {} : metaZaglushki(Number(task.no));
 }
 
 export default async function StubPage({ params }: { params: Params }) {

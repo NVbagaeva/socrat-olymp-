@@ -4,10 +4,12 @@ import { notFound } from 'next/navigation';
 import { Opornye9Screen } from '@/components/tasks/proizvodnaya/Opornye9Screen';
 import { Opornye9Shell } from '@/components/tasks/proizvodnaya/Opornye9Shell';
 import { OPORNYE } from '@/content/opornye';
-import { PROIZVODNAYA, proizvodnayaTitle } from '@/content/proizvodnaya';
+import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { PREP_BLOCKS } from '@/lib/proizvodnaya/prep/blocks';
 import { prepPool9 } from '@/lib/proizvodnaya/prep/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -20,7 +22,9 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const block = PREP_BLOCKS.find((item) => item.slug === blok);
-  return { title: proizvodnayaTitle(block === undefined ? OPORNYE.title : block.nazvanie) };
+  return block === undefined
+    ? metaVkladki(9, 'opornye')
+    : metaPodstranitsy(9, 'opornaya', tekstBezTex(block.nazvanie));
 }
 
 /** Блок опорных задач: десять микрозадач в закрытом виде. */

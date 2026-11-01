@@ -1,15 +1,13 @@
 import type { Metadata } from 'next';
 import { Generator11 } from '@/components/tasks/zadanie11/Generator11';
-import { ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { ZADANIE11 } from '@/content/zadanie11';
 import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
 import { ZADANIYA } from '@/lib/paths';
 import { VariantFromSection } from '@/components/variant/VariantEntry';
+import { metaVkladki } from '@/content/seo';
+import { BlokRazdela } from '@/components/seo/BlokRazdela';
 
-const VKLADKA = ZADANIE11.tabs.find((tab) => tab.id === 'generator')?.label ?? 'Генератор';
-
-export const metadata: Metadata = {
-  title: zadanie11Title(VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(11, 'generator');
 
 /**
  * Вкладка «Генератор» задания №11 (макет generator.png): лист
@@ -22,6 +20,7 @@ export default function Generator11Tab() {
     <>
       <VariantFromSection />
       <Generator11 razdely={d.razdely} bank={d.bank} base={`${ZADANIYA}/${ZADANIE11.slug}`} />
+      <BlokRazdela no={11} vid="generator" />
     </>
   );
 }

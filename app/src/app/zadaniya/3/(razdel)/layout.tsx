@@ -8,6 +8,11 @@ import '../../[task]/[type]/topic.css';
 import '../../veroyatnost.css';
 import '@/lib/solid/solid.css';
 import '../trenazher3.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-3.png). */
+export const metadata: Metadata = ogRazdela(3);
 
 /**
  * Оболочка задания №3: крошки, заголовок, лента вкладок с плашкой

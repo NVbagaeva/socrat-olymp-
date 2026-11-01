@@ -1,13 +1,10 @@
 import type { Metadata } from 'next';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { BankSection, HeroSection, HowSection } from '@/components/landing';
-import { landing } from '@/content/landing';
 import './landing.css';
+import { SEO_STRANITSY } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: landing.meta.title,
-  description: landing.meta.description,
-};
+export const metadata: Metadata = SEO_STRANITSY.glavnaya;
 
 export default function HomePage() {
   return (

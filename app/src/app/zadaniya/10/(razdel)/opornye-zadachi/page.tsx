@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ReshenoVBloke } from '@/components/tasks/zadanie10/Opornye10';
-import { ZADANIE10, zadanie10Title } from '@/content/zadanie10';
+import { ZADANIE10 } from '@/content/zadanie10';
 import { kartinkiPrototipov } from '@/lib/zadanie10/illyustracii';
 import { BLOKI_OPORNYH } from '@/lib/zadanie10/opornye';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: zadanie10Title('Опорные задачи'),
-};
+export const metadata: Metadata = metaVkladki(10, 'opornye');
 
 /**
  * Опорные задачи №10: семь блоков навыков по 10 задач. На карточке —

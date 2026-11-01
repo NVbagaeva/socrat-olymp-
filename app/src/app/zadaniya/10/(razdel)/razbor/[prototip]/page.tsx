@@ -6,10 +6,12 @@ import { Most10 } from '@/components/tasks/zadanie10/Most10';
 import { Razbor10 } from '@/components/tasks/zadanie10/Razbor10';
 import { Tex } from '@/components/ui/Tex';
 import { YAKOR_TEORII_10 } from '@/content/teoriya10';
-import { ZADANIE10, zadanie10Title } from '@/content/zadanie10';
+import { ZADANIE10 } from '@/content/zadanie10';
 import { zadachiPrototipa } from '@/lib/zadanie10/bank/index';
 import { kodNaSayte, PROTOTYPES, prototype } from '@/lib/zadanie10/prototypes';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 export function generateStaticParams() {
   return PROTOTYPES.map((p) => ({ prototip: p.id }));
@@ -17,9 +19,17 @@ export function generateStaticParams() {
 
 export const dynamicParams = false;
 
-export const metadata: Metadata = {
-  title: zadanie10Title('Разобранный пример'),
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ prototip: string }>;
+}): Promise<Metadata> {
+  const { prototip } = await params;
+  const p = PROTOTYPES.find((x) => x.id === prototip);
+  return p === undefined
+    ? metaVkladki(10, 'opornye')
+    : metaPodstranitsy(10, 'razbor', `${kodNaSayte(p.id)}. ${tekstBezTex(p.title)}`);
+}
 
 /**
  * Разобранный пример прототипа — на него ведут карточки «О задании».

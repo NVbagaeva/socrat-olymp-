@@ -3,16 +3,16 @@ import { Generator45 } from '@/components/tasks/veroyatnost/Generator45';
 import { navykiZadaniya } from '@/components/tasks/veroyatnost/metody';
 import { syuzhetyPrototipov } from '@/components/tasks/veroyatnost/navyki';
 import { VariantFromSection } from '@/components/variant/VariantEntry';
-import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
+import { vkladka } from '@/content/veroyatnost';
 import { config45 } from '@/lib/veroyatnost/generator45';
 import { bank5Pool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
+import { BlokRazdela } from '@/components/seo/BlokRazdela';
 
 const BASE = `${ZADANIYA}/5`;
 
-export const metadata: Metadata = {
-  title: veroyatnostTitle('5', vkladka('5', 'generator')),
-};
+export const metadata: Metadata = metaVkladki(5, 'generator');
 
 /**
  * Вкладка «Генератор» задания №5 на общем компоненте: темы — методы
@@ -30,6 +30,7 @@ export default function Generator5Tab() {
         base={BASE}
         zadanie={5}
       />
+      <BlokRazdela no={5} vid="generator" />
     </>
   );
 }

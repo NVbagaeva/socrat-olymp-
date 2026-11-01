@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { TrainerStats } from '@/components/tasks/trainer/TrainerStats';
 import { Trenazher12 } from '@/components/tasks/trainer/Trenazher12';
 import { ssylki12 } from '@/components/tasks/trainer/TrainerShell';
-import { trenazherAllText } from '@/content/ves12';
 import { trenazherConfig12, zadachi12 } from '@/lib/ves12/trenazher12';
 import { ZADANIYA } from '@/lib/paths';
 import 'katex/dist/katex.min.css';
@@ -10,11 +9,10 @@ import '@/lib/graph/graph.css';
 import '../../../[task]/[type]/topic.css';
 import '../../../[task]/[type]/prep.css';
 import '../../../[task]/[type]/trainer.css';
+import { metaVkladki } from '@/content/seo';
+import { BlokRazdela } from '@/components/seo/BlokRazdela';
 
-export const metadata: Metadata = {
-  title: `${trenazherAllText.pageTitle} — Будет на ЕГЭ`,
-  description: trenazherAllText.lead,
-};
+export const metadata: Metadata = metaVkladki(12, 'trenazher');
 
 const BASE = `${ZADANIYA}/12/trenazher/`;
 
@@ -27,14 +25,17 @@ export default function TrenazherAllPage() {
   const config = trenazherConfig12();
   const refs = zadachi12();
   return (
-    <section className="trainer">
-      <Trenazher12
-        config={config}
-        refs={refs}
-        backHref={BASE}
-        ssylki={ssylki12()}
-        pod={<TrainerStats total={refs.length} />}
-      />
-    </section>
+    <>
+      <section className="trainer">
+        <Trenazher12
+          config={config}
+          refs={refs}
+          backHref={BASE}
+          ssylki={ssylki12()}
+          pod={<TrainerStats total={refs.length} />}
+        />
+      </section>
+      <BlokRazdela no={12} vid="trenazher" />
+    </>
   );
 }

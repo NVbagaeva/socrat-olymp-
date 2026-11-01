@@ -1,18 +1,15 @@
 import type { Metadata } from 'next';
 import { Repetitory13 } from '@/components/tasks/zadanie13/Repetitory13';
-import { ZADANIE13, zadanie13Title } from '@/content/zadanie13';
+import { ZADANIE13 } from '@/content/zadanie13';
 import { BLOKI_13 } from '@/lib/zadanie13/opornye/bloki';
 import { PROTOTYPES } from '@/lib/zadanie13/proto';
 import { SIGN } from '@/lib/zadanie13/proto/common';
 import { TYPE_NAMES } from '@/lib/zadanie13/types';
 import { ZADANIYA } from '@/lib/paths';
 import '../../../11/zadanie11.css';
+import { metaVkladki } from '@/content/seo';
 
-const VKLADKA = ZADANIE13.tabs.find((tab) => tab.id === 'repetitory')?.label ?? '';
-
-export const metadata: Metadata = {
-  title: zadanie13Title(VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(13, 'repetitory');
 
 /**
  * Вкладка «Для репетиторов» задания №13: уроки с листами, заметки по

@@ -1,5 +1,6 @@
 'use client';
 
+import { cel } from '@/lib/metrika';
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
@@ -432,6 +433,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
       return;
     }
     const again = generated;
+    cel('variant_sobran', { istochnik: `generator-${config.slot}` });
     setBusy(true);
     setVariant(0);
     const { legacy: _legacy, ...rest } = st;

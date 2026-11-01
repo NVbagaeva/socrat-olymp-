@@ -4,6 +4,8 @@ import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { tasksPage } from '@/content/tasks';
 import { ZADANIE16 } from '@/content/zadanie16';
 import { ZADANIYA } from '@/lib/paths';
+import { zagolovokRazdela } from '@/content/seo';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №16: крошки, заголовок и лента вкладок — то же
@@ -14,6 +16,7 @@ export function Shell16({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={16} slug="16" />
         <ShapkaRazdela
           className="z16-head"
           crumbs={[
@@ -21,7 +24,7 @@ export function Shell16({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(ZADANIE16.no)}` },
           ]}
-          title={ZADANIE16.title}
+          title={zagolovokRazdela(16, ZADANIE16.title)}
           badge={ZADANIE16.badge}
           lead={ZADANIE16.lead}
         />

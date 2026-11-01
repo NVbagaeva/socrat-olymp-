@@ -7,11 +7,10 @@ import '@/components/variant/variant.css';
 import '@/components/variant/online/online.css';
 import { VARIANT_SCREEN as T } from '@/content/variant';
 import { tasksPage } from '@/content/tasks';
+import { SEO_STRANITSY } from '@/content/seo';
+import { BlokVarianta } from '@/components/seo/BlokRazdela';
 
-export const metadata: Metadata = {
-  title: `${T.title} — Будет на ЕГЭ`,
-  description: T.lead,
-};
+export const metadata: Metadata = SEO_STRANITSY.variant;
 
 /**
  * «Собрать вариант»: генератор вариантов первой части (задания 1–13).
@@ -31,6 +30,7 @@ export default function VariantPage() {
           lead={T.lead}
         />
         <VariantScreen />
+        <BlokVarianta />
       </main>
     </AppShell>
   );

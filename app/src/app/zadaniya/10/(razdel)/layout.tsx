@@ -9,6 +9,11 @@ import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '@/components/tasks/zadanie10/razbor10.css';
 import '../zadanie10.css';
+import type { Metadata } from 'next';
+import { ogRazdela } from '@/content/seo';
+
+/* Картинка ссылки в соцсетях — своя у раздела (public/og/zadanie-10.png). */
+export const metadata: Metadata = ogRazdela(10);
 
 /**
  * Оболочка задания №10: крошки, заголовок и лента вкладок. Группа

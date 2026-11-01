@@ -4,6 +4,8 @@ import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { ZADANIYA } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
+import { zagolovokRazdela } from '@/content/seo';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №9: крошки, заголовок и лента вкладок. Вызывается
@@ -17,6 +19,7 @@ export function ProizvodnayaShell({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={9} slug="9" />
         <ShapkaRazdela
           className="z9-head"
           crumbs={[
@@ -24,7 +27,7 @@ export function ProizvodnayaShell({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(PROIZVODNAYA.no)}` },
           ]}
-          title={PROIZVODNAYA.title}
+          title={zagolovokRazdela(9, PROIZVODNAYA.title)}
           badge={PROIZVODNAYA.badge}
           lead={PROIZVODNAYA.lead}
         />

@@ -15,6 +15,8 @@ import '../../prep.css';
 import '../../trainer.css';
 import '../../configurator.css';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, grafik12 } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Адреса перечислимы на сборке: подтемы с тренажёром × их ярлыки. */
 export function generateStaticParams() {
@@ -31,7 +33,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const subtopic = findSubtopic(task, type);
   const found = findTrainerShortcut(type, mode);
   return subtopic && found
-    ? { title: `${found.title} · ${trainerPage.title} · ${subtopic.title} — Будет на ЕГЭ` }
+    ? {
+        ...metaPodstranitsy(
+          12,
+          'rezhim',
+          `${tekstBezTex(found.title)} (${grafik12(subtopic.graphName)})`,
+        ),
+        /* Режим — ярлык того же тренажёра: в поиске — тренажёр подраздела. */
+        alternates: { canonical: `/zadaniya/${task}/${type}/trenazher/` },
+      }
     : {};
 }
 

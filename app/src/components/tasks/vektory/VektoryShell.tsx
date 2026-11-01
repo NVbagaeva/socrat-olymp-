@@ -8,6 +8,8 @@ import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { Progress2 } from './Progress2';
 import { ZADANIYA } from '@/lib/paths';
+import { zagolovokRazdela } from '@/content/seo';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №2: крошки, заголовок, кольцо прогресса и лента
@@ -26,6 +28,7 @@ export function VektoryShell({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={2} slug="2" />
         <ShapkaRazdela
           className="z2-head"
           crumbs={[
@@ -33,7 +36,7 @@ export function VektoryShell({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(VEKTORY.no)}` },
           ]}
-          title={VEKTORY.title}
+          title={zagolovokRazdela(2, VEKTORY.title)}
           badge={VEKTORY.badge}
           lead={VEKTORY.lead}
           media={

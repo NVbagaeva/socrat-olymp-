@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { Opornye19 } from '@/components/zadanie19/Opornye19';
-import { ZADANIE19, zadanie19Title } from '@/content/zadanie19';
+import { ZADANIE19 } from '@/content/zadanie19';
+import { metaVkladki } from '@/content/seo';
 
 const VKLADKA = ZADANIE19.tabs.find((tab) => tab.id === 'opornye')?.label ?? '';
 
-export const metadata: Metadata = {
-  title: zadanie19Title(VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(19, 'opornye');
 
 /** Вкладка «Опорные задачи» №19: опорные задачи глав методов. */
 export default function Opornye19Tab() {

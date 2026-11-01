@@ -6,15 +6,14 @@ import {
 } from '@/components/tasks/zadanie11/Opornye11List';
 import { Opornye11Shell } from '@/components/tasks/zadanie11/Opornye11Shell';
 import { OPORNYE } from '@/content/opornye';
-import { OPORNYE_11, O_ZADANII_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { OPORNYE_11, O_ZADANII_11, ZADANIE11 } from '@/content/zadanie11';
 import { BLOKI } from '@/lib/zadanie11/prep/bloki';
 import type { RazdelBloka } from '@/lib/zadanie11/prep/types';
 import { SECTIONS } from '@/lib/zadanie11/taxonomy';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: zadanie11Title(OPORNYE.title),
-};
+export const metadata: Metadata = metaVkladki(11, 'opornye');
 
 /**
  * Вкладка «Опорные задачи» №11: разминка и блоки навыков. Список

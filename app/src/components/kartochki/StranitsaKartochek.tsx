@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { VKLADKA_KARTOCHKI } from '@/content/kartochkiUi';
 import { kolodaNomera } from '@/content/kartochki';
 import { podgotovit } from '@/lib/kartochki/podgotovka';
 import { ZADANIYA } from '@/lib/paths';
@@ -7,10 +6,11 @@ import { Kartochki } from './Kartochki';
 /* Чертежи ключевых схем (dvizhok: 'skhema') — классы skh-*. */
 import '@/components/skhemy/skhemy.css';
 import './kartochki.css';
+import { metaVkladki } from '@/content/seo';
 
 /** Заголовок окна: «Карточки · Планиметрия — Будет на ЕГЭ», как у остальных вкладок. */
 export function metadataKartochek(task: number): Metadata {
-  return { title: `${VKLADKA_KARTOCHKI.label} · ${kolodaNomera(task).title} — Будет на ЕГЭ` };
+  return metaVkladki(task, 'kartochki');
 }
 
 /**

@@ -9,15 +9,15 @@ import { RAZDELY } from '@/lib/zadanie3';
 import { estScenariy } from '@/lib/zadanie3/chertezhi';
 import { fipiVarianta } from '@/lib/zadanie3/fipi';
 import { trenazherConfig3, zadachi3 } from '@/lib/zadanie3/trenazher/filtry3';
-import { stereoTitle, vkladkaStereo } from '@/content/stereo/zadaniya';
+import { vkladkaStereo } from '@/content/stereo/zadaniya';
 import { href, ZADANIYA } from '@/lib/paths';
 import { typeset } from '@/lib/tex';
+import { metaVkladki } from '@/content/seo';
+import { BlokRazdela } from '@/components/seo/BlokRazdela';
 
 const VKLADKA = vkladkaStereo('trenazher');
 
-export const metadata: Metadata = {
-  title: stereoTitle('3', VKLADKA),
-};
+export const metadata: Metadata = metaVkladki(3, 'trenazher');
 
 /**
  * Вкладка «Тренажёр» №3 на общей панели фильтров: разделы и прототипы
@@ -52,6 +52,7 @@ export default function Page() {
           nazvanie: r.nazvanie,
         }))}
       />
+      <BlokRazdela no={3} vid="trenazher" />
     </>
   );
 }

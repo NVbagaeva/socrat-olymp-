@@ -4,12 +4,14 @@ import { Chertezh3d } from '@/components/stereo/Chertezh3d';
 import { OpornyeStereoScreen } from '@/components/stereo/opornye/OpornyeStereoScreen';
 import { OpornyeStereoShell } from '@/components/stereo/opornye/OpornyeStereoShell';
 import { GLAVY_3 } from '@/content/stereo/glavy';
-import { STEREO, stereoTitle } from '@/content/stereo/zadaniya';
+import { STEREO } from '@/content/stereo/zadaniya';
 import { BLOKI_3, blokBySlug, zadachiBloka } from '@/lib/stereo/opornye3/bloki';
 import { sealZadacha } from '@/lib/stereo/opornye3/seal';
 import { renderSolid } from '@/lib/solid/render';
 import { ZADANIYA } from '@/lib/paths';
 import '../../../../[task]/[type]/prep.css';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Статический экспорт: страницы только у написанных блоков. */
 export function generateStaticParams() {
@@ -22,7 +24,9 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const found = blokBySlug(blok);
-  return { title: stereoTitle('3', found?.nazvanie ?? 'Опорные задачи') };
+  return found === undefined
+    ? metaVkladki(3, 'opornye')
+    : metaPodstranitsy(3, 'opornaya', tekstBezTex(found.nazvanie));
 }
 
 /**
@@ -38,7 +42,11 @@ export default async function Page({ params }: { params: Params }) {
   const base = `${ZADANIYA}/${STEREO['3'].slug}`;
   const zadachi = zadachiBloka(found.id);
   return (
-    <OpornyeStereoShell title={`${found.no}. ${found.nazvanie}`} listHref={`${base}/opornye-zadachi/`} vBloke>
+    <OpornyeStereoShell
+      title={`${found.no}. ${found.nazvanie}`}
+      listHref={`${base}/opornye-zadachi/`}
+      vBloke
+    >
       <OpornyeStereoScreen
         blokId={found.id}
         no={found.no}

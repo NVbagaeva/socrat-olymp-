@@ -1,13 +1,10 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/layout/AppShell';
-import { tasksPage } from '@/content/tasks';
 import { TaskBank } from './TaskBank';
 import './zadaniya.css';
+import { SEO_STRANITSY } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: `${tasksPage.title} — Будет на ЕГЭ`,
-  description: tasksPage.lead,
-};
+export const metadata: Metadata = SEO_STRANITSY.bank;
 
 /**
  * Банк заданий. Каждая карточка — ссылка на страницу раздела; №12

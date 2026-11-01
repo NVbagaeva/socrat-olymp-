@@ -2,13 +2,12 @@ import type { Metadata } from 'next';
 import { OpornyeDorozhka } from '@/components/tasks/veroyatnost/OpornyeDorozhka';
 import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
 import { OPORNYE } from '@/content/opornye';
-import { DOROZHKA_SLOVA, veroyatnostTitle } from '@/content/veroyatnost';
+import { DOROZHKA_SLOVA } from '@/content/veroyatnost';
 import { prep4Pool } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
+import { metaVkladki } from '@/content/seo';
 
-export const metadata: Metadata = {
-  title: veroyatnostTitle('4', OPORNYE.title),
-};
+export const metadata: Metadata = metaVkladki(4, 'opornye');
 
 /**
  * Вкладка «Опорные задачи» задания №4: дорожка блоков по макету.

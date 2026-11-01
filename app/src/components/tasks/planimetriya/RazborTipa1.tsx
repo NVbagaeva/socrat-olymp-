@@ -37,7 +37,11 @@ export function RazborTipa1({ tip, base }: { tip: Tip1; base: string }) {
         ))}
       </div>
       <div className="about-type__foot">
-        <a className="btn btn--secondary" href={`${base}/#${tip.id}`}>
+        {/* Тип «только тренажёр» на странице «О задании» карточки нет — назад без якоря. */}
+        <a
+          className="btn btn--secondary"
+          href={tip.tolkoTrenazher === true ? `${base}/` : `${base}/#${tip.id}`}
+        >
           {ANALYSIS_WORDS.back}
         </a>
         <a className="btn btn--primary" href={`${base}/${OPORNYE.tail}${tip.prep}/`}>

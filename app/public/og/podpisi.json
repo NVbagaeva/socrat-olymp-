@@ -1,0 +1,128 @@
+{
+  "sayt.png": {
+    "nomer": "",
+    "zagolovok": "Подготовка к ЕГЭ по профильной математике",
+    "podzagolovok": "Теория, опорные задачи, тренажёр и генератор вариантов по каждому заданию",
+    "ikonka": null
+  },
+  "zadanie-1.png": {
+    "nomer": "Задание 1",
+    "zagolovok": "Планиметрия",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-01.svg"
+  },
+  "zadanie-2.png": {
+    "nomer": "Задание 2",
+    "zagolovok": "Векторы",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-02.webp"
+  },
+  "zadanie-3.png": {
+    "nomer": "Задание 3",
+    "zagolovok": "Стереометрия",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-03.webp"
+  },
+  "zadanie-4.png": {
+    "nomer": "Задание 4",
+    "zagolovok": "Вероятность: простая",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-04.webp"
+  },
+  "zadanie-5.png": {
+    "nomer": "Задание 5",
+    "zagolovok": "Вероятность: сложная",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-05.webp"
+  },
+  "zadanie-6.png": {
+    "nomer": "Задание 6",
+    "zagolovok": "Случайные величины и распределения",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-06.webp"
+  },
+  "zadanie-7.png": {
+    "nomer": "Задание 7",
+    "zagolovok": "Уравнения",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-07.webp"
+  },
+  "zadanie-8.png": {
+    "nomer": "Задание 8",
+    "zagolovok": "Вычисления и преобразования",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-08.webp"
+  },
+  "zadanie-9.png": {
+    "nomer": "Задание 9",
+    "zagolovok": "Производная и первообразная",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-09.webp"
+  },
+  "zadanie-10.png": {
+    "nomer": "Задание 10",
+    "zagolovok": "Задачи с физическим смыслом",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-10.webp"
+  },
+  "zadanie-11.png": {
+    "nomer": "Задание 11",
+    "zagolovok": "Текстовые задачи",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-11.webp"
+  },
+  "zadanie-12.png": {
+    "nomer": "Задание 12",
+    "zagolovok": "Графики функций",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-12.webp"
+  },
+  "zadanie-13.png": {
+    "nomer": "Задание 13",
+    "zagolovok": "Финансовая грамотность и экономические задачи",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-13.webp"
+  },
+  "zadanie-14.png": {
+    "nomer": "Задание 14",
+    "zagolovok": "Уравнение",
+    "podzagolovok": "ЕГЭ профиль 2027 · раздел готовится",
+    "ikonka": "images/task-14.svg"
+  },
+  "zadanie-15.png": {
+    "nomer": "Задание 15",
+    "zagolovok": "Стереометрия",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-15.svg"
+  },
+  "zadanie-16.png": {
+    "nomer": "Задание 16",
+    "zagolovok": "Неравенство",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-16.svg"
+  },
+  "zadanie-17.png": {
+    "nomer": "Задание 17",
+    "zagolovok": "Задача на оптимизацию",
+    "podzagolovok": "ЕГЭ профиль 2027 · раздел готовится",
+    "ikonka": "images/task-17.svg"
+  },
+  "zadanie-18.png": {
+    "nomer": "Задание 18",
+    "zagolovok": "Планиметрия: задача с доказательством",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-18.svg"
+  },
+  "zadanie-19.png": {
+    "nomer": "Задание 19",
+    "zagolovok": "Задача с параметром",
+    "podzagolovok": "ЕГЭ профиль 2027 · теория, прототипы, тренажёр",
+    "ikonka": "images/task-19.svg"
+  },
+  "zadanie-20.png": {
+    "nomer": "Задание 20",
+    "zagolovok": "Олимпиадная задача",
+    "podzagolovok": "ЕГЭ профиль 2027 · раздел готовится",
+    "ikonka": "images/task-20.svg"
+  }
+}

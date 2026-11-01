@@ -4,6 +4,8 @@ import { VYCHISLENIYA } from '@/content/vychisleniya';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { ZADANIYA } from '@/lib/paths';
+import { zagolovokRazdela } from '@/content/seo';
+import { RazdelJsonLd } from '@/components/seo/RazdelJsonLd';
 
 /**
  * Оболочка задания №8: крошки, заголовок и лента вкладок.
@@ -18,6 +20,7 @@ export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
+        <RazdelJsonLd no={8} slug="8" />
         <ShapkaRazdela
           className="z8-head"
           crumbs={[
@@ -25,7 +28,7 @@ export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${Number(VYCHISLENIYA.no)}` },
           ]}
-          title={VYCHISLENIYA.title}
+          title={zagolovokRazdela(8, VYCHISLENIYA.title)}
           badge={VYCHISLENIYA.badge}
           lead={VYCHISLENIYA.lead}
         />

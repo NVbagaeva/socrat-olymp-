@@ -57,6 +57,8 @@ export interface FunctionTopicPageProps {
   trainer?: ReactNode;
   /** Продолжение хлебных крошек: у экрана навыка это его название. */
   trail?: Crumb[];
+  /** Блок в конце страницы: описание тренажёра для тех, кто без JavaScript. */
+  posle?: ReactNode;
 }
 
 /**
@@ -73,6 +75,7 @@ export function FunctionTopicPage({
   prep,
   trainer,
   trail = [],
+  posle,
 }: FunctionTopicPageProps) {
   const { topic } = section;
   const base = `${ZADANIYA}/${section.slug}/${subtopic.id}`;
@@ -234,6 +237,7 @@ export function FunctionTopicPage({
           </div>
         }
       />
+      {posle}
     </main>
   );
 }

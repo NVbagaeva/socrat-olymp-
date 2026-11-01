@@ -5,10 +5,12 @@ import { Razbor6 } from '@/components/tasks/zadanie6/Razbor6';
 import { Uslovie6 } from '@/components/tasks/zadanie6/Uslovie6';
 import { Tex } from '@/components/ui/Tex';
 import { TEORIYA_6_DLYA_PROTOTIPA } from '@/content/teoriya6';
-import { ZADANIE6, zadanie6Title } from '@/content/zadanie6';
+import { ZADANIE6 } from '@/content/zadanie6';
 import { podpisIstochnika, zadachiPrototipa } from '@/lib/zadanie6/bank/index';
 import { kodNaSayte, PROTOTYPES, prototype } from '@/lib/zadanie6/prototypes';
 import { ZADANIYA } from '@/lib/paths';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 export function generateStaticParams() {
   return PROTOTYPES.map((p) => ({ prototip: p.id }));
@@ -16,9 +18,17 @@ export function generateStaticParams() {
 
 export const dynamicParams = false;
 
-export const metadata: Metadata = {
-  title: zadanie6Title('Разобранный пример'),
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ prototip: string }>;
+}): Promise<Metadata> {
+  const { prototip } = await params;
+  const p = PROTOTYPES.find((x) => x.id === prototip);
+  return p === undefined
+    ? metaVkladki(6, 'opornye')
+    : metaPodstranitsy(6, 'razbor', `${kodNaSayte(p.id)}. ${tekstBezTex(p.title)}`);
+}
 
 /**
  * Разобранный пример прототипа — на него ведут карточки «О задании».

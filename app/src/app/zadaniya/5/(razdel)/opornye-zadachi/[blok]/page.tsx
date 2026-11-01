@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PodgotovkaBlok } from '@/components/tasks/veroyatnost/PodgotovkaBlok';
 import { PodgotovkaShell } from '@/components/tasks/veroyatnost/PodgotovkaShell';
-import { OPORNYE } from '@/content/opornye';
-import { PODGOTOVKA_SLOVA, veroyatnostTitle } from '@/content/veroyatnost';
+import { PODGOTOVKA_SLOVA } from '@/content/veroyatnost';
 import { prep5Pool } from '@/lib/veroyatnost/pool';
+import { metaPodstranitsy, metaVkladki } from '@/content/seo';
+import { tekstBezTex } from '@/lib/tekstFormul';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -17,9 +18,9 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const found = prep5Pool().find((item) => item.id === blok);
-  return {
-    title: veroyatnostTitle('5', found === undefined ? OPORNYE.title : found.nazvanie),
-  };
+  return found === undefined
+    ? metaVkladki(5, 'opornye')
+    : metaPodstranitsy(5, 'opornaya', tekstBezTex(found.nazvanie));
 }
 
 /** Блок подготовки задания №5: ряд кружков и одна задача на экране. */

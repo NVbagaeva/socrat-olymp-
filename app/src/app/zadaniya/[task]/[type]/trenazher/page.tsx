@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { FunctionTopicPage } from '@/components/tasks/FunctionTopicPage';
 import { findSection, findSubtopic, trainerSubtopicParams } from '@/content/sections';
-import { trainerPage } from '@/content/trainerModes';
 import 'katex/dist/katex.min.css';
 import '@/lib/graph/graph.css';
 import '../../../zadaniya.css';
@@ -12,6 +11,8 @@ import '../topic.css';
 import '../prep.css';
 import '../trainer.css';
 import '../configurator.css';
+import { metaPodrazdela12 } from '@/content/seo';
+import { BlokPodrazdela12 } from '@/components/seo/BlokRazdela';
 
 /* Тренажёр есть только у подтем с наборами прототипов в данных движка. */
 export function generateStaticParams() {
@@ -24,7 +25,7 @@ type Params = Promise<{ task: string; type: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { task, type } = await params;
   const subtopic = findSubtopic(task, type);
-  return subtopic ? { title: `${trainerPage.title} · ${subtopic.title} — Будет на ЕГЭ` } : {};
+  return subtopic ? metaPodrazdela12(subtopic.title, subtopic.graphName, 'trenazher') : {};
 }
 
 /**
@@ -44,7 +45,12 @@ export default async function Page({ params }: { params: Params }) {
 
   return (
     <AppShell active="tasks">
-      <FunctionTopicPage section={section} subtopic={subtopic} initialTab="trainer" />
+      <FunctionTopicPage
+        section={section}
+        subtopic={subtopic}
+        initialTab="trainer"
+        posle={<BlokPodrazdela12 type={type} />}
+      />
     </AppShell>
   );
 }

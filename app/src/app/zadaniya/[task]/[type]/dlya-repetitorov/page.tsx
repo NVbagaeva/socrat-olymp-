@@ -9,6 +9,7 @@ import '../topic.css';
 import '../prep.css';
 import '../trainer.css';
 import '../configurator.css';
+import { metaPodrazdela12 } from '@/content/seo';
 
 /* Вложенные разделы существуют только у собранных подтем. */
 export function generateStaticParams() {
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!section || !subtopic) {
     return {};
   }
-  return { title: `${section.tutors.title} · ${subtopic.title} — Будет на ЕГЭ` };
+  return metaPodrazdela12(subtopic.title, subtopic.graphName, 'repetitory');
 }
 
 /**
