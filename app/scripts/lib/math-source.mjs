@@ -25,10 +25,16 @@ const NOT_TEXT_KEYS = new Set([
   /* prototip — служебное описание шаблона «Вариантов повышенной сложности»
      (lib/povyshennye/shablony.ts): для отчётов разработчика, на сайт не выводится. */
   'prototip',
+  /* №19: источник задачи (content/teoriya19/tipy.ts, Istochnik19) — служебное
+     поле, на сайт не выводится; polePodskazka — placeholder поля ответа,
+     в нём KaTeX не набрать. */
+  'sostavleno', 'pravka', 'polePodskazka',
 ]);
 
-/* Вызовы, аргумент которых — TeX или служебная строка. */
-const TEX_CALLS = /^(?:prismModel|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
+/* Вызовы, аргумент которых — TeX или служебная строка. scena (№19,
+   lib/zadanie19/risunok.ts) — строкой идёт только alt рисунка: его читает
+   скринридер, KaTeX там не набрать. */
+const TEX_CALLS = /^(?:prismModel|scena|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
 
 function keyOf(node) {
   const parent = node.parent;
