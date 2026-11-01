@@ -672,7 +672,10 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
         ? PL.iskomoe
         : sloyOf(e) !== 'uslovie'
           ? PL.podskazka
-          : PL.ink;
+          : /* Угол с подписью — дуга цветом своей величины. */
+            e.znachenie !== undefined
+            ? PL.velichina
+            : PL.ink;
     const wid = iz || novoe(e) ? PL.width.markIskomoe : PL.width.mark;
     const th = angleAt(E(e.a), vtx, E(e.b));
     if (e.pryamoy) {
@@ -748,7 +751,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const c = E(e.t);
     const st = stil(e);
     sloyTochki.push(
-      `<circle class="${st.cls}"${st.data} cx="${px(c[0])}" cy="${px(c[1])}" r="${PL.tochkaR}" fill="${novoe(e) ? PL.podskazka : PL.ink}"/>`,
+      `<circle class="${st.cls}"${st.data} cx="${px(c[0])}" cy="${px(c[1])}" r="${PL.tochkaR}" fill="${novoe(e) ? PL.podskazka : PL.vershina}"/>`,
     );
     prep.push({ tip: 'tochka', c, r: PL.tochkaR, chto: `точка ${e.t}` });
   }
@@ -964,7 +967,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const base = vybran.y + size * 0.72;
     const tx = vybran.x + 1;
     sloyPodpisi.push(
-      `<text class="pl-bukva" x="${px(tx)}" y="${px(base)}" font-family="${PL.font.bukva}" font-style="italic" font-size="${size}" fill="${PL.ink}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${esc(osn)}${ind ? indeksSvg(esc(ind), size) : ''}</text>`,
+      `<text class="pl-bukva" x="${px(tx)}" y="${px(base)}" font-family="${PL.font.bukva}" font-style="italic" font-weight="700" font-size="${size}" fill="${PL.vershina}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${esc(osn)}${ind ? indeksSvg(esc(ind), size) : ''}</text>`,
     );
     R.teksty.push(tekst);
   }
@@ -1086,7 +1089,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
         ? PL.podskazka
         : e.vydelit === 'iskomoe'
           ? PL.iskomoe
-          : PL.ink;
+          : PL.velichina;
     if (sKornem) {
       const k = znachenieSKornem(tekst, vybran.x + vybran.w / 2, vybran.y + nizBazy, zs, color);
       sloyPodpisi.push(k.text, ...k.znaki);

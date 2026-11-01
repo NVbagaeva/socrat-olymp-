@@ -5,6 +5,12 @@ import { svgSkhemy } from '@/lib/skhemy/svg';
 import { TEMA_CVET, TEMA_TOLSHCHINY, type VersiyaTemy } from '@/lib/skhemy/tema';
 import { VID_ISHODNYY, type Element, type T2 } from '@/lib/skhemy/tipy';
 import { scena18 } from '@/lib/zadanie18/trenazher/sceny';
+import { chertezhSvg } from '@/lib/chertezh3';
+import { katex } from '@/lib/graph/katex';
+import { renderPlan } from '@/lib/planimetriya/render';
+import { risunokTeorii } from '@/lib/planimetriya/teoriya';
+import { RAZDELY } from '@/lib/zadanie3';
+import { chertezhVarianta } from '@/lib/zadanie3/chertezhi';
 import 'katex/dist/katex.min.css';
 import './chertezhi.css';
 
@@ -134,12 +140,70 @@ function kontrast(hex: string): string {
 }
 
 const CVETA: { imya: string; hex: string; gde: string }[] = [
-  { imya: 'navy', hex: TEMA_CVET.navy, gde: 'контур, точки, подписи вершин, вспомогательные' },
-  { imya: 'синий', hex: TEMA_CVET.siniy, gde: 'part-x и его подписи, заливка фигуры' },
-  { imya: 'терракота', hex: TEMA_CVET.terrakota, gde: 'part-y, region — линии и заливки' },
-  { imya: 'терракота (текст)', hex: TEMA_CVET.terrakotaTekst, gde: 'подписи part-y и region' },
+  { imya: 'navy', hex: TEMA_CVET.navy, gde: 'контуры фигур, вспомогательные отрезки' },
+  { imya: 'синий', hex: TEMA_CVET.vershina, gde: 'вершины и точки — только они' },
+  {
+    imya: 'терракота',
+    hex: TEMA_CVET.velichina,
+    gde: 'величины, первая переменная (x, a), угол, площадь',
+  },
+  { imya: 'янтарь', hex: TEMA_CVET.velichina2, gde: 'вторая переменная (y, b)' },
   { imya: 'серо-синий', hex: TEMA_CVET.postroenie, gde: 'построения (пунктир)' },
-  { imya: 'тёплый оранжевый', hex: TEMA_CVET.ugol, gde: 'дуга и сектор угла' },
+];
+
+const tex = (t: string) => katex.renderToString(t, { throwOnError: false });
+
+/** Чертёж №3 листа по прототипу и номеру варианта; podmena — свой TeX первого данного. */
+function chertezh3(pid: string, n: number, podmena?: string): string {
+  const p = RAZDELY.flatMap((r) => r.prototipy).find((x) => x.id === pid);
+  const v = p?.varianty.find((x) => x.n === n);
+  if (p === undefined || v === undefined) return '';
+  const ch = chertezhVarianta(p, v);
+  if (ch === null) return '';
+  const sc =
+    podmena === undefined
+      ? ch.scenariy
+      : {
+          ...ch.scenariy,
+          dannye: (ch.scenariy.dannye ?? []).map((d, i) =>
+            i === 0 ? { ...d, tekst: podmena } : d,
+          ),
+        };
+  return chertezhSvg(sc, { rezhim: 'uchenik', shirina: 320, kegl: 15, pechatMm: 62, katex: tex });
+}
+
+function shablon18(id: string) {
+  const t = TIPY_18.find((x) => x.id === id);
+  if (t === undefined) return () => '';
+  const sk = scena18(id, t.varianty[0]!);
+  return (v: VersiyaTemy) =>
+    svgSkhemy(sk, sk.nachalo, VID_ISHODNYY, SOST, {
+      W: 360,
+      H: 250,
+      opisanie: t.nazvanie,
+      samodostatochnyy: true,
+      tema: v,
+    });
+}
+
+/* Печать у №1 и №3 — ч/б тема листа (токены --chertezh-* чернеют,
+   см. .sg-ch__pechat в chertezhi.css), у №18 — печатная версия темы. */
+const OBRAZCY: { imya: string; svg: (v: VersiyaTemy) => string }[] = [
+  {
+    imya: '№1 · прямоугольный треугольник 30°, 60°, 90°',
+    svg: () => {
+      const r = risunokTeorii('30-60-90');
+      return renderPlan(r.scena, r.optsii);
+    },
+  },
+  { imya: '№3 · пирамида P03-47', svg: () => chertezh3('P03-47', 1) },
+  { imya: '№3 · куб P03-02', svg: () => chertezh3('P03-02', 1) },
+  {
+    imya: '№3 · куб P03-02, дробь на диагонали (проверка)',
+    svg: () => chertezh3('P03-02', 1, '\\dfrac{\\sqrt{3}}{2}'),
+  },
+  { imya: '№18 · menelay-pl — две переменные', svg: shablon18('menelay-pl') },
+  { imya: '№18 · obshchiy-ugol', svg: shablon18('obshchiy-ugol') },
 ];
 
 export default function Page() {
@@ -153,6 +217,30 @@ export default function Page() {
         цветная — по переключателю «Цветные чертежи». Толщины — в пикселях экрана
         (non-scaling-stroke), на бумаге контур 1,2 pt, части 2 pt.
       </p>
+
+      <h2>Образцы: три движка в одной теме</h2>
+      <p className="sg-ch__note">
+        Вершины и точки — синие, полужирный курсив, на 12 % крупнее; величины — тёплые (числа и
+        первая переменная — терракота, вторая — янтарь), отрезок с подписью — тем же цветом; контуры
+        — navy. Печать: вершины — чёрный полужирный, величины — чёрный обычный.
+      </p>
+      <div className="sg-ch__shablony">
+        {OBRAZCY.map((o) => (
+          <section key={o.imya} className="sg-ch__shablon">
+            <h3>{o.imya}</h3>
+            <div className="sg-ch__para">
+              <figure>
+                <div dangerouslySetInnerHTML={{ __html: o.svg('cvet') }} />
+                <figcaption>цветная (экран, цветной PDF)</figcaption>
+              </figure>
+              <figure className="sg-ch__pechat">
+                <div dangerouslySetInnerHTML={{ __html: o.svg('pechat') }} />
+                <figcaption>печать</figcaption>
+              </figure>
+            </div>
+          </section>
+        ))}
+      </div>
 
       <h2>Роли</h2>
       <div className="sg-ch__roli">

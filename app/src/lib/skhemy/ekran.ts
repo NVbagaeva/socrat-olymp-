@@ -36,8 +36,8 @@ export const SK = {
   ugol: { r: 15, shag: 4, min: 7, dolya: 0.38, pryamoy: 10 },
   shtrih: { pol: 4, shag: 3.5 },
   tochkaR: 2.6,
-  /** Кегль подписи точки, px. */
-  kegl: 17,
+  /** Кегль подписи точки, px: полужирный курсив темы (lib/skhemy/tema.ts, KEGL_VERSHINY). */
+  kegl: 19,
   /** Кегль величины (данные условия на чертеже), px. */
   keglVel: 15,
 } as const;
@@ -476,7 +476,9 @@ function raskladka1(
     tochki: [],
     podpisi: [],
     velichiny: [],
-    tema: kadr.elementy.some((el) => el.rol !== undefined),
+    /* Тема чертежа — у всех чертежей движка: вершины и точки синие,
+       величины тёплые; роли элементов уточняют цвет и толщину. */
+    tema: true,
     poImeni: {},
     preob,
   };

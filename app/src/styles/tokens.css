@@ -235,6 +235,12 @@
   --graph-axis: var(--grey-900);
   --graph-grid: var(--grey-300);
   --graph-accent: var(--terracotta);
+  /* Тема чертежей (lib/skhemy/tema.ts, планиметрия, стереометрия):
+     вершины и точки — синие, величины — тёплые; вторая переменная
+     (y, b) — янтарь из палитры (4,9 : 1 на белом). */
+  --chertezh-vershina: var(--blue-600);
+  --chertezh-velichina: var(--terracotta);
+  --chertezh-velichina-2: var(--amber-700);
   --graph-aux-axis: var(--graph-accent);
   /* Асимптота: значимая линия чертежа, а не фон. Цвет оси с
      прозрачностью — темнее сетки, но не спорит с самими осями. */
