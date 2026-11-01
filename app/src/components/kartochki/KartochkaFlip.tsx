@@ -1,12 +1,13 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { Badge, Button, Input } from '@/components/ui';
 import { KARTOCHKI_UI as T } from '@/content/kartochkiUi';
-import { parseAnswer, sameNumber } from '@/lib/answer';
+import { parseAnswer } from '@/lib/answer';
 import type { KartochkaGotovaya } from '@/lib/kartochki/podgotovka';
+import { NEVERNO, VERNO, otpechatok } from '@/lib/kartochki/otvet';
 import { SAMOOCENKA } from '@/lib/kartochki/tipy';
 
 export interface KartochkaFlipProps {
@@ -49,6 +50,16 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
   const oborot = useRef<HTMLDivElement>(null);
   const pole = useRef<HTMLInputElement>(null);
 
+  /* Оборот: открытый текст, а у автопроверки — расшифрованный после ответа. */
+  const tekstOborota = useMemo<{ back: string; pochemu?: string }>(
+    () =>
+      k.zakryto === undefined
+        ? { back: k.back, ...(k.pochemu === undefined ? {} : { pochemu: k.pochemu }) }
+        : (JSON.parse(otpechatok.openText(k.zakryto, k.id)) as { back: string; pochemu?: string }),
+    [k],
+  );
+  const oborotVidno = k.zakryto === undefined || avto !== null;
+
   const mozhnoOtsenit = sama && perevernuta;
   const otvecheno = avto !== null;
 
@@ -58,20 +69,21 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
   }
 
   function otvetitVerno(skazal: boolean) {
-    if (k.verno === undefined || otvecheno) return;
-    setAvto({ prav: skazal === k.verno, vvod: skazal ? T.verno : T.neverno });
+    if (k.otpechatok === undefined || otvecheno) return;
+    const prav = otpechatok.choiceMatches(skazal ? VERNO : NEVERNO, k.otpechatok);
+    setAvto({ prav, vvod: skazal ? T.verno : T.neverno });
     setPerevernuta(true);
   }
 
   function proverit(e?: FormEvent) {
     e?.preventDefault();
-    if (k.otvet === undefined || otvecheno) return;
+    if (k.otpechatok === undefined || otvecheno) return;
     if (parseAnswer(vvod) === null) {
       setOshibkaVvoda(true);
       pole.current?.focus();
       return;
     }
-    setAvto({ prav: sameNumber(vvod, k.otvet), vvod: vvod.trim() });
+    setAvto({ prav: otpechatok.answerMatches(vvod, k.otpechatok), vvod: vvod.trim() });
     setPerevernuta(true);
   }
 
@@ -259,13 +271,22 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
                 <span>{T.rezultat.vashOtvet(avto.vvod)}</span>
               </p>
             )}
-            <div className="kart-card__otvet" dangerouslySetInnerHTML={{ __html: k.back }} />
-            {k.pochemu === undefined ? null : (
-              <p className="kart-card__pochemu">
-                <span className="kart-card__pochemu-label">{T.pochemu}: </span>
-                <span dangerouslySetInnerHTML={{ __html: k.pochemu }} />
-              </p>
-            )}
+            {/* С автопроверкой текст оборота появляется только после ответа:
+                в разметке его не было до этого. */}
+            {oborotVidno ? (
+              <>
+                <div
+                  className="kart-card__otvet"
+                  dangerouslySetInnerHTML={{ __html: tekstOborota.back }}
+                />
+                {tekstOborota.pochemu === undefined ? null : (
+                  <p className="kart-card__pochemu">
+                    <span className="kart-card__pochemu-label">{T.pochemu}: </span>
+                    <span dangerouslySetInnerHTML={{ __html: tekstOborota.pochemu }} />
+                  </p>
+                )}
+              </>
+            ) : null}
             {/* У «чертежа» тот же рисунок и на обороте: ответ читается по нему. */}
             {figHtml}
             <div className="kart-card__niz">
