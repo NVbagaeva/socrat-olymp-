@@ -194,12 +194,36 @@ function podKnopkoy(vse) {
   if (!btn) return [];
   const f = btn.getBoundingClientRect();
   const out = [];
+  /* Закреплён — внутри fixed или прилипшего sticky (стоит на своём
+     top/bottom). Sticky в потоке едет со страницей, как любой текст. */
   const zakreplen = (el) => {
     for (let e = el; e && e !== document.body; e = e.parentElement) {
-      const p = getComputedStyle(e).position;
-      if (p === 'fixed' || p === 'sticky') return true;
+      const cs = getComputedStyle(e);
+      if (cs.position === 'fixed') return true;
+      if (cs.position === 'sticky') {
+        const r = e.getBoundingClientRect();
+        if (cs.top !== 'auto' && Math.abs(r.top - parseFloat(cs.top)) < 2) return true;
+        if (cs.bottom !== 'auto' && Math.abs(innerHeight - r.bottom - parseFloat(cs.bottom)) < 2) {
+          return true;
+        }
+      }
     }
     return false;
+  };
+  /* Видимая часть элемента: предки с overflow (колонка содержания,
+     прокручиваемая таблица) обрезают то, что за их краем. */
+  const vidimaya = (el) => {
+    let r = el.getBoundingClientRect();
+    let { left, top, right, bottom } = r;
+    for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) {
+      if (getComputedStyle(e).overflow === 'visible') continue;
+      const c = e.getBoundingClientRect();
+      left = Math.max(left, c.left);
+      top = Math.max(top, c.top);
+      right = Math.min(right, c.right);
+      bottom = Math.min(bottom, c.bottom);
+    }
+    return { left, top, right, bottom };
   };
   const sel = 'a[href], button, input:not([type=hidden]), select, textarea, [role=button], summary';
   for (const el of document.querySelectorAll(sel)) {
@@ -209,12 +233,13 @@ function podKnopkoy(vse) {
     const cs = getComputedStyle(el);
     if (cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) continue;
     if (!vse && !zakreplen(el)) continue;
-    const x = Math.min(r.right, f.right) - Math.max(r.left, f.left);
-    const y = Math.min(r.bottom, f.bottom) - Math.max(r.top, f.top);
+    const v = vidimaya(el);
+    const x = Math.min(v.right, f.right) - Math.max(v.left, f.left);
+    const y = Math.min(v.bottom, f.bottom) - Math.max(v.top, f.top);
     if (x > 1 && y > 1) {
       /* Перекрытие только если сверху действительно кнопка. */
-      const cx = Math.max(r.left, f.left) + x / 2;
-      const cy = Math.max(r.top, f.top) + y / 2;
+      const cx = Math.max(v.left, f.left) + x / 2;
+      const cy = Math.max(v.top, f.top) + y / 2;
       const top = document.elementFromPoint(cx, cy);
       if (top && top.closest('.help-fab')) {
         out.push(
