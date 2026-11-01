@@ -25,6 +25,8 @@ const ZNACHKI: Record<VkladkaIcon, ReactElement> = {
   materials: <NavIcon name="materials" />,
   /* Планшет с листом: зачётная работа №12. */
   zachyot: <NavIcon name="assignments" />,
+  /* Циркуль: «Ключевые схемы» №18. */
+  compass: <NavIcon name="compass" />,
   /* Две карточки внахлёст: «Карточки» — проверка теории. */
   cards: <NavIcon name="cards" />,
 };
