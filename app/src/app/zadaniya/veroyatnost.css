@@ -1495,8 +1495,20 @@
   /* Переход по содержанию: заголовок встаёт под лентой и полосой.
      Правило здесь, а не рядом с полосой в components.css: тот файл
      в слое @layer, и базовое .vteor-razdel отсюда его перебило бы. */
-  .vteor .vteor-razdel {
+  .vteor .vteor-razdel,
+  .vteor [id^='t4-'],
+  .vteor [id^='t5-'] {
     scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+}
+
+/* Блок теории — якорь «Повторить теорию» из карточек по теории
+   (lib/veroyatnost/teoriya-yakorya.ts): встаёт под липкую ленту. На
+   узком экране к ней добавляется полоса «Содержание» — правило выше. */
+@media (min-width: 1024px) {
+  .vteor [id^='t4-'],
+  .vteor [id^='t5-'] {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
   }
 }
 

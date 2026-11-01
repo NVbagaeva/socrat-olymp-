@@ -89,6 +89,8 @@ export const KARTOCHKI_UI = {
   },
   pochemu: 'Почему',
   povtoritTeoriyu: 'Повторить теорию',
+  /** Фрагмент — в теории соседнего номера (теория вероятностей одна на №4 и №5). */
+  povtoritTeoriyuNomera: (n: number) => `Повторить теорию №${n}`,
   dobavleno: 'Этой темы пока нет во вкладке «Теория».',
   znayu: 'Знаю',
   neZnayu: 'Не знаю',

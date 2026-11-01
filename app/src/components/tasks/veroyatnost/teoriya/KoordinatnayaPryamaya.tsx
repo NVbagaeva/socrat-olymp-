@@ -4,6 +4,7 @@ import { CoordinateLine } from '@/components/probability';
 import { PRYAMAYA } from '@/content/veroyatnost-teoriya';
 import { HintIcon } from '../../prep/PrepIcons';
 import { Tex } from '../Tex';
+import { YAKOR_5 } from '@/lib/veroyatnost/teoriya-yakorya';
 import { Vykladka } from './Vykladka';
 
 /**
@@ -105,7 +106,7 @@ export function KoordinatnayaPryamaya() {
 
       {/* ── Главная идея ─────────────────────────────────────────── */}
 
-      <section className="vteor-ideya">
+      <section className="vteor-ideya" id={YAKOR_5.pryamaya('ideya')}>
         <span className="vteor-ideya__znak" aria-hidden="true">
           <HintIcon />
         </span>
@@ -136,7 +137,7 @@ export function KoordinatnayaPryamaya() {
 
       {/* ── Случай 1: один промежуток внутри другого ─────────────── */}
 
-      <article className="vteor-sluchay">
+      <article className="vteor-sluchay" id={YAKOR_5.pryamaya('vlozhenie')}>
         <Shapka
           kartinka={pervaya.kartinka}
           zagolovok={pervaya.zagolovok}
@@ -185,7 +186,7 @@ export function KoordinatnayaPryamaya() {
 
       {/* ── Случай 2: промежутки пересекаются ────────────────────── */}
 
-      <article className="vteor-sluchay">
+      <article className="vteor-sluchay" id={YAKOR_5.pryamaya('peresechenie')}>
         <Shapka
           kartinka={vtoraya.kartinka}
           zagolovok={vtoraya.zagolovok}
@@ -226,7 +227,7 @@ export function KoordinatnayaPryamaya() {
 
         {/* Разбор через противоположное событие — во всю ширину
             карточки: шаги идут подряд и делят её на три. */}
-        <section className="vteor-protivopolozhnoe">
+        <section className="vteor-protivopolozhnoe" id={YAKOR_5.pryamaya('protivopolozhnoe')}>
           <h5 className="vteor-protivopolozhnoe__title">{vtoraya.protivopolozhnoe.title}</h5>
           <ol className="vteor-protivopolozhnoe__shagi">
             {vtoraya.protivopolozhnoe.shagi.map((shag, i) => (
@@ -258,7 +259,7 @@ export function KoordinatnayaPryamaya() {
       {/* ── Три карточки итога ───────────────────────────────────── */}
 
       <div className="vteor-itogi">
-        <section className="vteor-itog">
+        <section className="vteor-itog" id={YAKOR_5.pryamaya('vyvod')}>
           <h4 className="vteor-itog__title">
             <span className="vteor-itog__znak" aria-hidden="true">
               <NavIcon name="notes" />
@@ -268,7 +269,7 @@ export function KoordinatnayaPryamaya() {
           <p>{vyvod.text}</p>
         </section>
 
-        <section className="vteor-itog">
+        <section className="vteor-itog" id={YAKOR_5.pryamaya('algoritm')}>
           <h4 className="vteor-itog__title">
             <span className="vteor-itog__znak" aria-hidden="true">
               <NavIcon name="assignments" />
@@ -287,7 +288,7 @@ export function KoordinatnayaPryamaya() {
           </ol>
         </section>
 
-        <section className="vteor-itog vteor-itog--syuzhety">
+        <section className="vteor-itog vteor-itog--syuzhety" id={YAKOR_5.pryamaya('syuzhety')}>
           <h4 className="vteor-itog__title">
             <span className="vteor-itog__znak" aria-hidden="true">
               <HintIcon />

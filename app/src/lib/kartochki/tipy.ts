@@ -13,6 +13,7 @@ import type { Model } from '../solid/model';
 import type { Scena } from '../planimetriya/types';
 import type { StsenaId } from '../vektory/stseny';
 import type { Risunok as RisunokVektorov } from '../vektory/types';
+import type { RisunokVeroyatnosti } from '../veroyatnost/risunkiKartochek';
 
 /**
  * Тип карточки.
@@ -38,6 +39,7 @@ export type UrovenKartochki = 'база' | 'важно для ЕГЭ';
  * - `plan-scena` — своя сцена движка планиметрии;
  * - `vektory` — сцена теории №2 по ключу или своя конфигурация;
  * - `solid` — модель движка стереометрии;
+ * - `veroyatnost` — диаграмма Эйлера или лучи на прямой (№4, №5);
  * - `svg` — путь к файлу в public/.
  *
  * `povorot` — рисовать в случайном повороте (тип `chertezh`).
@@ -47,6 +49,7 @@ export type FiguraKartochki =
   | { dvizhok: 'plan-scena'; scena: () => Scena; povorot?: boolean; alt: string }
   | { dvizhok: 'vektory'; stsena: StsenaId | RisunokVektorov }
   | { dvizhok: 'solid'; model: () => Model }
+  | { dvizhok: 'veroyatnost'; risunok: RisunokVeroyatnosti }
   | { svg: string; alt: string };
 
 interface KartochkaObshchee {
@@ -70,6 +73,13 @@ interface KartochkaObshchee {
    * в теории приложения этого нет, карточка добавлена сверх неё.
    */
   source: string;
+  /**
+   * Якорь `source` — во вкладке «Теория» другого номера. Теория
+   * вероятностей одна на №4 и №5: разделы о событиях живут в №4,
+   * координатная прямая — в №5, и карточки обоих номеров ведут туда,
+   * где фрагмент написан. Не задан — теория своего номера.
+   */
+  teoriyaNomera?: number;
 }
 
 export interface KartochkaSamoocenka extends KartochkaObshchee {

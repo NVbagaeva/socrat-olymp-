@@ -116,6 +116,20 @@ for (const k of KOLODY) {
 
     if (c.source === 'добавлено') {
       dobavleno.push(`№${k.task} · ${c.id}: ${c.front.replace(/\$/g, '')}`);
+      if (c.teoriyaNomera !== undefined) fail(`${gde}: «добавлено» с номером теории`);
+    } else if (c.teoriyaNomera !== undefined) {
+      /* Якорь в теории соседнего номера (№4 ↔ №5). */
+      let chuzhie;
+      try {
+        chuzhie = yakorya(c.teoriyaNomera);
+      } catch (e) {
+        fail(`${gde}: якоря теории №${c.teoriyaNomera} не собраны — ${e.message}`);
+      }
+      if (c.teoriyaNomera === k.task) fail(`${gde}: teoriyaNomera — свой же номер`);
+      if (chuzhie === undefined)
+        fail(`${gde}: теория №${c.teoriyaNomera} не описана в yakorya.mjs`);
+      else if (!chuzhie.has(c.source))
+        fail(`${gde}: якоря «#${c.source}» нет во вкладке «Теория» №${c.teoriyaNomera}`);
     } else if (anchors && !anchors.has(c.source)) {
       fail(`${gde}: якоря «#${c.source}» нет во вкладке «Теория» №${k.task}`);
     }
