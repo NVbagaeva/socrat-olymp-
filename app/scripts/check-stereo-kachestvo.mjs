@@ -220,7 +220,9 @@ function proveritOformlenie(ishodnyy, mm, where) {
         Math.abs(pt(d) - 4) < 0.6 && Math.abs(pt(g) - 3) < 0.5,
         `${where}: штрих ${pt(d).toFixed(1)}/${pt(g).toFixed(1)} pt`,
       );
-    } else if (!/marker|angle/.test(l)) {
+    } else if (!/marker|angle|ch3-koren/.test(l)) {
+      /* Знак корня (ch3-koren, lib/risunki/koren.js) — штрих подписи,
+         а не линия чертежа: его толщина — от кегля, как у букв. */
       ok(pt(w) >= 1.18 && pt(w) <= 1.52, `${where}: видимая линия ${pt(w).toFixed(2)} pt`);
     }
   }

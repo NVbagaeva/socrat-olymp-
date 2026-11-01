@@ -307,6 +307,9 @@ async function figureMetrics(page) {
       for (const el of svg.querySelectorAll(
         'path, line, polyline, polygon, circle, ellipse, rect',
       )) {
+        /* Знак корня (lib/risunki/koren.js) — штрих подписи, его толщина
+           идёт от кегля, а не от линий чертежа. */
+        if (el.closest('.ch3-koren, .skh-koren, .pl-koren')) continue;
         const cs = getComputedStyle(el);
         if (cs.stroke === 'none' || cs.display === 'none') continue;
         const sw = parseFloat(cs.strokeWidth);
