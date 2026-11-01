@@ -1,4 +1,5 @@
 import katex from 'katex';
+import '@/lib/graph/katex-makrosy.js';
 import type { ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
 

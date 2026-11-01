@@ -21,6 +21,7 @@ Next.js и запускает Node в служебных скриптах.
 | `animate.js` | показ разбора по шагам поверх готового SVG |
 | `math.js` | набор формул: курсивные переменные, дроби, `data-tex` для KaTeX |
 | `katex.js` | KaTeX в приложении: обычный импорт пакета |
+| `katex-makrosy.js` | общие макросы KaTeX (`\arc{…}` — дуга) |
 | `katex-upgrade.js` | подстановка вёрстки KaTeX в готовую разметку |
 | `preview-ui.js` | служебная страница контроля: монтируется в любой контейнер |
 | `data/index.js` | наборы задач статическим импортом |
@@ -165,6 +166,19 @@ pnpm add katex
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 ```
+
+### Общие макросы и правила записи
+
+Макросы проекта — `katex-makrosy.js`. Модуль подключается побочным
+импортом в `katex.js` и в местах с прямым `import katex from 'katex'`;
+скрипты Node с `require('katex')` вызывают
+`requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex)`.
+
+- **Дуга — только `\arc{…}`**: `\arc{BD} - \arc{AC}` → ∪BD − ∪AC.
+  Знак ∪ стоит перед буквами и набран как обычный символ, поэтому
+  пробелы у минуса и плюса правильные. `\arc{}` — знак без букв.
+  `\smile`, `\frown`, `\overset{\smile}{…}` и символы ◡ ⌣ ⌢ ⌒ в
+  исходниках запрещены: на них падает `pnpm test:math-markup --src`.
 
 `katex-upgrade.js` получает экземпляр аргументом и ничего не импортирует,
 поэтому одна и та же замена разметки работает и на странице проекта,

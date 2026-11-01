@@ -27,6 +27,7 @@ import { formulyStroki, proveritFormulu, schitat } from './lib/schet-edinic.mjs'
 
 const require = createRequire(import.meta.url);
 const katex = require('katex');
+requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex); // общие макросы KaTeX: \arc{…}
 const { NABORY_PROVERKI, krasivoe } = requireSrc('lib/teoriya/proverka-edinic');
 const { rngOf } = requireSrc('lib/vychisleniya/rng');
 const { zadachiProverki, EKZEMPLYAROV } = requireSrc('lib/teoriya/proverka-server');

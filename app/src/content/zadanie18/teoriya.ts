@@ -153,7 +153,7 @@ export const GLAVY_18: readonly Glava18[] = [
         title: 'Угол между хордами',
         tekst:
           'Угол между пересекающимися хордами $AB$ и $CD$ равен полусумме дуг, которые высекают на окружности его стороны и их продолжения.',
-        formula: '\\angle APC = \\tfrac12\\bigl(\\cup AC + \\cup BD\\bigr)',
+        formula: '\\angle APC = \\tfrac12\\bigl(\\arc{AC} + \\arc{BD}\\bigr)',
         dok: [
           'Угол $APC$ — внешний угол треугольника $APD$: $\\angle APC = \\angle PAD + \\angle PDA$.',
           'Вписанные углы $BAD$ и $ADC$ равны половинам дуг $BD$ и $AC$ — отсюда полусумма.',
@@ -167,7 +167,7 @@ export const GLAVY_18: readonly Glava18[] = [
         title: 'Угол между секущими',
         tekst:
           'Угол между двумя секущими, проведёнными из внешней точки $P$, равен полуразности дуг, заключённых между его сторонами.',
-        formula: '\\angle BPD = \\tfrac12\\bigl(\\cup BD - \\cup AC\\bigr)',
+        formula: '\\angle BPD = \\tfrac12\\bigl(\\arc{BD} - \\arc{AC}\\bigr)',
         dok: [
           'Угол $BAD$ — внешний угол треугольника $PAD$: $\\angle BPD = \\angle BAD - \\angle ADP$.',
           'Это вписанные углы, опирающиеся на дуги $BD$ и $AC$, — отсюда полуразность.',
