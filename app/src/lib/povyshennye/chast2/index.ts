@@ -54,6 +54,27 @@ import { J16_KOREN_DROB } from './j16';
 import { J18_OKR_V_UGLE } from './j18';
 import { J19_COS_KORNI } from './j19';
 import { J20_SUMMY_CIFR } from './j20';
+import { N14_LOG_KVADRAT } from './n14';
+import { N15_PIRAMIDA_SEREDINA } from './n15';
+import { N16_POKAZ_DROB } from './n16';
+import { N17_KONCENTRACIYA } from './n17';
+import { N18_PARALL_BISS } from './n18';
+import { N19_KVADRAT_OKR } from './n19';
+import { N20_PODRYAD } from './n20';
+import { P14_TRIG_DROB_SIN } from './p14';
+import { P15_PRIZMA_ABM } from './p15';
+import { P16_KOREN_DROB } from './p16';
+import { P17_KOROBKA } from './p17';
+import { P18_KASATELNAYA_PARALLEL } from './p18';
+import { P19_DVA_KRUGA } from './p19';
+import { P20_GIRI } from './p20';
+import { Q14_KOREN_POKAZ } from './q14';
+import { Q15_PIRAMIDA_PERP } from './q15';
+import { Q16_LOG_MNOZHITEL } from './q16';
+import { Q17_CENA_SPROS } from './q17';
+import { Q18_KVADRAT_PERP } from './q18';
+import { Q19_OKR_KOREN } from './q19';
+import { Q20_SREDNEE_NABORA } from './q20';
 import type { Chast2Zadacha, Shablon2 } from './types';
 /* Семьи K, L, M: варианты 19–24 (свои задачи по кодификатору). */
 import { K14_KOS_SUMMA } from './k14';
@@ -181,6 +202,30 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'm18.bissektrisy': M18_BISSEKTRISY,
   'm19.galochka': M19_GALOCHKA,
   'm20.ostatki': M20_OSTATKI,
+  /* Семья N: варианты 25 и 26 — свои задачи по кодификатору. */
+  'n14.logKvadrat': N14_LOG_KVADRAT,
+  'n15.piramidaSeredina': N15_PIRAMIDA_SEREDINA,
+  'n16.pokazDrob': N16_POKAZ_DROB,
+  'n17.koncentraciya': N17_KONCENTRACIYA,
+  'n18.parallBiss': N18_PARALL_BISS,
+  'n19.kvadratOkr': N19_KVADRAT_OKR,
+  'n20.podryad': N20_PODRYAD,
+  /* Семья P: варианты 27 и 28. */
+  'p14.trigDrobSin': P14_TRIG_DROB_SIN,
+  'p15.prizmaABM': P15_PRIZMA_ABM,
+  'p16.korenDrob': P16_KOREN_DROB,
+  'p17.korobka': P17_KOROBKA,
+  'p18.kasatelnayaParallel': P18_KASATELNAYA_PARALLEL,
+  'p19.dvaKruga': P19_DVA_KRUGA,
+  'p20.giri': P20_GIRI,
+  /* Семья Q: варианты 29 и 30. */
+  'q14.korenPokaz': Q14_KOREN_POKAZ,
+  'q15.piramidaPerp': Q15_PIRAMIDA_PERP,
+  'q16.logMnozhitel': Q16_LOG_MNOZHITEL,
+  'q17.cenaSpros': Q17_CENA_SPROS,
+  'q18.kvadratPerp': Q18_KVADRAT_PERP,
+  'q19.okrKoren': Q19_OKR_KOREN,
+  'q20.sredneeNabora': Q20_SREDNEE_NABORA,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
