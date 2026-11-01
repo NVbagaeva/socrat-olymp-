@@ -58,7 +58,9 @@
      №3       — prototype.otvet(параметры варианта) из lib/zadanie3;
      №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
      №6       — то же из lib/zadanie6
-                (в записи — условие и параметры задачи, без ответа).
+                (в записи — условие и параметры задачи, без ответа);
+     №19, №18 — id задач банка: ответ из контента (content/teoriya19,
+                content/zadanie18/trenazher).
 
    Новый тренажёр — один объект в TRAINERS ниже: адрес, раздел, как
    начать тренировку и как по записи получить верный ответ. Поле ответа,
@@ -248,6 +250,16 @@ async function chooseAll19(page) {
     .click();
 }
 
+/** №18: в записи — id задач банка; ответ б) — число из TeX, как его набрал бы ученик. */
+function answer18(payload, at) {
+  const { ZADACHI_18 } = requireSrc('content/zadanie18/trenazher/index');
+  const z = ZADACHI_18.find((item) => item.id === payload.ids[at]);
+  if (z === undefined) {
+    throw new Error(`№18: нет задачи ${payload.ids[at]}`);
+  }
+  return { text: z.otvet.replace(/\$/g, '').replace(/\{,\}/g, ',') };
+}
+
 /* ── Тренажёры ──────────────────────────────────────────────────
 
    Один объект — один адрес тренажёра:
@@ -292,6 +304,8 @@ async function chooseAllFiltry(page) {
 
 const TRAINERS = [
   { name: '№19', url: '/zadaniya/19/trenazher/', scope: '19', answer: answer19, all: chooseAll19 },
+  /* №18: тот же выбор «Все (N)», что у №19. */
+  { name: '№18', url: '/zadaniya/18/trenazher/', scope: '18', answer: answer18, all: chooseAll19 },
   ...['linear', 'quadratic', 'rational', 'irrational'].map((sub) => ({
     name: `№12 ${sub}`,
     url: `/zadaniya/12/${sub}/trenazher/`,

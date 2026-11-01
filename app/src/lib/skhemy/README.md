@@ -42,3 +42,7 @@
 (сцена из короткого описания — `obshchee.ts`, `scena()`), исходное
 положение — данные пункта б). Проверка — `pnpm test:opornye-18`
 (`scripts/verify_opornye18/`).
+
+Чертежи задач тренажёра №18 устроены так же: `lib/zadanie18/trenazher/`
+(сцены через тот же `scena()`). Проверка — `pnpm test:trenazher-18`
+(`scripts/verify_trenazher18/`).
