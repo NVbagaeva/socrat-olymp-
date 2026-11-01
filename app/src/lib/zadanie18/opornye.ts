@@ -21,6 +21,7 @@ import {
   tangentPoints,
 } from '@/lib/skhemy/geometriya';
 import type { T2, ZhivayaSkhema } from '@/lib/skhemy/tipy';
+import { CHERTEZHI_OPORNYH_DOP } from './opornyeDop';
 
 /* ── 1. Высоты: A₁BC₁ ∼ ABC, A₁C₁ = AC·cos B ───────────────────── */
 
@@ -253,6 +254,8 @@ const REESTR: Readonly<Record<string, ZhivayaSkhema>> = {
   'babochka-ploshchad': BABOCHKA,
   'menelay-otnoshenie': MENELAY,
   'kasayushchiesya-pryamoy-ugol': KASAYUSHCHIESYA,
+  /* Задачи 7–15 — lib/zadanie18/opornyeDop. */
+  ...CHERTEZHI_OPORNYH_DOP,
 };
 
 /** Чертёж опорной задачи; страницы строятся только для задач с чертежом. */

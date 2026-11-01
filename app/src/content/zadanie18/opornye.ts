@@ -6,9 +6,12 @@
  * промежуточный факт и ответ.
  *
  * Шаг решения подсвечивает на чертеже свои группы — как шаг
- * доказательства на странице схемы.
+ * доказательства на странице схемы. Задачи 7–15 — в opornyeDop/
+ * (чертежи lib/zadanie18/opornyeDop), их ответы и утверждения а)
+ * проверяет scripts/verify_schemes/opornyeDop.
  */
 
+import { OPORNYE_18_DOP } from './opornyeDop';
 import type { Podsvechennoe } from './tipy';
 
 export interface Opornaya18 {
@@ -21,8 +24,10 @@ export interface Opornaya18 {
   b: string;
   /** Ключевые схемы, которые нужно узнать: id из spisok.ts. */
   skhemy: readonly string[];
-  /** Что в условии подсказывает схему. */
-  signal: string;
+  /** Что в условии подсказывает схему (задачи 1–6). */
+  signal?: string;
+  /** Чем каждая схема помогает в задаче — в порядке skhemy (задачи 7–15). */
+  zachem?: readonly string[];
   reshenieA: readonly Podsvechennoe[];
   reshenieB: readonly Podsvechennoe[];
   /** Ответ пункта б), TeX. */
@@ -268,6 +273,8 @@ export const OPORNYE_18: readonly Opornaya18[] = [
     otvet: '$12$',
     otvetChislo: 12,
   },
+  /* Задачи 7–15 — content/zadanie18/opornyeDop. */
+  ...OPORNYE_18_DOP,
 ];
 
 export function opornaya18(id: string): Opornaya18 | undefined {

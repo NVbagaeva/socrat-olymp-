@@ -17,8 +17,10 @@ import { proverit as kasatelnye } from './kasatelnye.mjs';
 import { proverit as mediana } from './mediana.mjs';
 import { proverit as menelay } from './menelay.mjs';
 import { proverit as opornye } from './opornye.mjs';
+import { proverit as opornyeDop } from './opornyeDop/index.mjs';
 import { proverit as teoriya } from './teoriya.mjs';
 import { proverit as trenazher } from './trenazher.mjs';
+import { proverit as trenazherDop } from './trenazherDop/index.mjs';
 import { proverit as stepenTochki } from './stepenTochki.mjs';
 import { proverit as trapecii } from './trapecii.mjs';
 import { proverit as ploshchadi } from './ploshchadi.mjs';
@@ -50,8 +52,10 @@ for (const proverit of [
   ploshchadi,
   stepenTochki,
   opornye,
+  opornyeDop,
   teoriya,
   trenazher,
+  trenazherDop,
 ]) {
   plokho += proverit(N).plokho;
 }

@@ -95,18 +95,27 @@ export function Opornaya18Stranica({ id }: { id: string }) {
             </button>
             {podskazka ? (
               <div id="z18-op-podskazka" className="z18-op__podskazka">
-                <p>
-                  <Tex text={z.signal} />
-                </p>
+                {z.signal === undefined ? null : (
+                  <p>
+                    <Tex text={z.signal} />
+                  </p>
+                )}
                 <ul className="z18-op__skhemy">
-                  {z.skhemy.map((sid) => {
+                  {z.skhemy.map((sid, i) => {
                     const s = skhema18(sid);
                     if (s === undefined) return null;
+                    const zachem = z.zachem?.[i];
                     return (
-                      <li key={sid}>
+                      <li key={sid} className={zachem === undefined ? undefined : 'z18-op__skhema'}>
                         <Link className="chip" href={`${BASE}/skhemy/${sid}/`}>
                           Схема {s.no}. {s.nazvanie}
                         </Link>
+                        {zachem === undefined ? null : (
+                          <span className="z18-op__zachem">
+                            {' — '}
+                            <Tex text={zachem} />
+                          </span>
+                        )}
                       </li>
                     );
                   })}

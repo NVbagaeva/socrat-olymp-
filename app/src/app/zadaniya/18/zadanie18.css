@@ -920,6 +920,13 @@
   white-space: normal;
   text-decoration: none;
 }
+/* Схема с пояснением «чем помогает» — строкой во всю ширину. */
+.z18-op__skhema {
+  flex-basis: 100%;
+}
+.z18-op__zachem {
+  color: var(--color-text-secondary);
+}
 .z18-op__otvet {
   margin: 0;
   font-size: var(--fs-h3);
