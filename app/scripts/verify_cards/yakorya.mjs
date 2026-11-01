@@ -18,6 +18,30 @@ const PO_NOMERAM = {
     }
     return out;
   },
+  /* Теория №2: раздел — #teoriya-<id>, карточка — #t2-<раздел>-<карточка>. */
+  2: () => {
+    const { RAZDELY_TEORII } = requireSrc('content/theoryVektory');
+    const { yakorKartochki2 } = requireSrc('components/tasks/vektory/Teoriya2');
+    const out = new Set();
+    for (const r of RAZDELY_TEORII) {
+      out.add(`teoriya-${r.id}`);
+      r.section.cards.forEach((c) => out.add(yakorKartochki2(r.id, c.id)));
+    }
+    return out;
+  },
+  /* Теория №3: глава — #teoriya-<id>, раздел главы — #<id раздела> («g3-kub»). */
+  3: () => {
+    const { GLAVY_3 } = requireSrc('content/stereo/glavy');
+    const { GLAVY_DANNYE_3 } = requireSrc('lib/stereo/glavy/index');
+    const { RAZDELY_GLAVY_2 } = requireSrc('components/stereo/glavy/Glava2Treugolnik');
+    const out = new Set();
+    GLAVY_3.forEach((g) => out.add(`teoriya-${g.id}`));
+    Object.values(GLAVY_DANNYE_3).forEach((dannye) =>
+      dannye().razdely.forEach((r) => out.add(r.id)),
+    );
+    RAZDELY_GLAVY_2.forEach((r) => out.add(r.id));
+    return out;
+  },
 };
 
 /** Множество якорей теории номера; undefined — номер не описан. */

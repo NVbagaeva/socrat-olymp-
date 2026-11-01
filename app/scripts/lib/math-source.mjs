@@ -31,6 +31,23 @@ const NOT_TEXT_KEYS = new Set([
   'sostavleno', 'pravka', 'polePodskazka',
 ]);
 
+/* Словари, все значения которых — не текст страницы: ключ у каждой
+   строки свой («C1», «A1»), смотрим на ключ самого словаря.
+   imenaRuchek (схемы №18, lib/skhemy/tipy.ts) — названия ручек чертежа
+   для aria-label: его читает скринридер, KaTeX там не набрать. */
+const NOT_TEXT_MAPS = new Set(['imenaRuchek']);
+
+/** Ключ словаря, в котором лежит строка: { imenaRuchek: { C1: '…' } } → imenaRuchek. */
+function mapKeyOf(node) {
+  const prop = node.parent;
+  if (!prop || !ts.isPropertyAssignment(prop) || prop.initializer !== node) { return null; }
+  const obj = prop.parent;
+  if (!obj || !ts.isObjectLiteralExpression(obj)) { return null; }
+  const owner = obj.parent;
+  if (!owner || !ts.isPropertyAssignment(owner) || owner.initializer !== obj) { return null; }
+  return owner.name.getText().replace(/['"]/g, '');
+}
+
 /* Вызовы, аргумент которых — TeX или служебная строка. scena (№19,
    lib/zadanie19/risunok.ts) — строкой идёт только alt рисунка: его читает
    скринридер, KaTeX там не набрать. */
@@ -100,6 +117,8 @@ export function codeTexts(file) {
     if (inMetadata(node)) { return; }
     const key = keyOf(node);
     if (key !== null && NOT_TEXT_KEYS.has(key)) { return; }
+    const map = mapKeyOf(node);
+    if (map !== null && NOT_TEXT_MAPS.has(map)) { return; }
     const callee = calleeOf(node);
     if (callee !== null && TEX_CALLS.test(callee)) { return; }
     const { line } = sf.getLineAndCharacterOfPosition(node.getStart(sf));
