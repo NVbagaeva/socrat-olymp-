@@ -31,6 +31,7 @@ import { findPlainMath, findRawTex, stripDollarMath } from './lib/math-markup.mj
 
 const require = createRequire(import.meta.url);
 const katex = require('katex');
+requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex); // общие макросы KaTeX: \arc{…}
 const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
 
 const { checkBank, checkRazminka, checkGenerators, allTexts } =

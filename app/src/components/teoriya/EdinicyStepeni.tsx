@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import katex from 'katex';
+import '@/lib/graph/katex-makrosy.js';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';

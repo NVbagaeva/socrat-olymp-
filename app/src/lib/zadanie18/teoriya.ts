@@ -113,8 +113,8 @@ const RISUNKI: Readonly<Record<string, ZhivayaSkhema>> = {
     const C1 = blizh(D);
     return nepodvizhnaya('t-ugol-sekushchie', { O, P, A: A1, B, C: C1, D }, (t) => [
       okr('k', t.O!, r),
-      duga('dBD', t.O!, r, 300, 415, { cvet: 'b', gruppy: ['g'] }),
-      duga('dAC', t.O!, r, ugolTochki(t.A!), ugolTochki(t.C!), { cvet: 'a', gruppy: ['g'] }),
+      duga('dBD', t.O!, r, 300, 415, { cvet: 'a', gruppy: ['g'] }),
+      duga('dAC', t.O!, r, ugolTochki(t.A!), ugolTochki(t.C!), { cvet: 'b', gruppy: ['g'] }),
       otr('PB', t.P!, t.B!),
       otr('PD', t.P!, t.D!),
       ug('uP', t.B!, t.P!, t.D!),

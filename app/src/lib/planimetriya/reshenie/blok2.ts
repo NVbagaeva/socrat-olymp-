@@ -471,7 +471,7 @@ export const RESHENIYA_2: Record<number, (p: Params) => Reshenie> = {
   35: (p) => {
     const duga = (360 * p.n) / p.d;
     const ans = duga / 2;
-    const s = sokr([360, p.n], p.d, '\\smile');
+    const s = sokr([360, p.n], p.d, '\\arc{}');
     return {
       shagi: [
         shag(
@@ -510,7 +510,7 @@ export const RESHENIYA_2: Record<number, (p: Params) => Reshenie> = {
         shag(
           'Дуга $AB$',
           'Три дуги $AC$, $CB$ и $BA$ вместе составляют окружность.',
-          [`\\smile AB = 360^\\circ - ${g(p.ac)} - ${g(p.bc)} = ${g(ab)}`],
+          [`\\arc{AB} = 360^\\circ - ${g(p.ac)} - ${g(p.bc)} = ${g(ab)}`],
           2,
         ),
         shag(
@@ -547,7 +547,7 @@ export const RESHENIYA_2: Record<number, (p: Params) => Reshenie> = {
           [
             p.k
               ? `\\angle ACO = 90^\\circ - ${g(p.u)} = ${g(ans)}`
-              : `\\smile AB = \\angle AOB = 90^\\circ - ${g(p.u)} = ${g(ans)}`,
+              : `\\arc{AB} = \\angle AOB = 90^\\circ - ${g(p.u)} = ${g(ans)}`,
           ],
           2,
         ),
@@ -592,7 +592,7 @@ export const RESHENIYA_2: Record<number, (p: Params) => Reshenie> = {
         shag(
           'Дуга $AD$',
           '$BD$ — диаметр, угол $AOD$ смежный с $AOB$; центральный угол равен своей дуге.',
-          [`\\smile AD = 180^\\circ - ${g(aob)} = ${g(ans)}`],
+          [`\\arc{AD} = 180^\\circ - ${g(aob)} = ${g(ans)}`],
         ),
       ],
       voprosy: [
