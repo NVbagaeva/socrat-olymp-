@@ -2,7 +2,8 @@
 
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef, useSyncExternalStore } from 'react';
+import { hasAnalyticsConsent, subscribeCookieChoice } from '@/lib/legal/cookies';
 import { METRIKA_ID, prosmotr } from '@/lib/metrika';
 
 /**
@@ -17,6 +18,10 @@ import { METRIKA_ID, prosmotr } from '@/lib/metrika';
  * Сайт переходит между страницами без перезагрузки, поэтому счётчик
  * заведён с defer: true, а просмотр каждой страницы, и первой тоже,
  * отправляет компонент по смене адреса.
+ *
+ * Без согласия посетителя (баннер о cookie, lib/legal/cookies.ts)
+ * файл счётчика не грузится вовсе. Согласие дали — счётчик подключается
+ * сразу, без перезагрузки; отказались — не подключается.
  */
 function Prosmotry() {
   const pathname = usePathname();
@@ -31,7 +36,9 @@ function Prosmotry() {
 }
 
 export function Metrika() {
-  if (!/^\d+$/.test(METRIKA_ID)) return null;
+  /* Счётчик — только после «Разрешить Метрику» в баннере о cookie. */
+  const soglasie = useSyncExternalStore(subscribeCookieChoice, hasAnalyticsConsent, () => false);
+  if (!/^\d+$/.test(METRIKA_ID) || !soglasie) return null;
   return (
     <>
       <Script src="https://mc.yandex.ru/metrika/tag.js" strategy="lazyOnload" />

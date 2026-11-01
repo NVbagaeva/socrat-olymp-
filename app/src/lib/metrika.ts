@@ -3,7 +3,8 @@
  *
  * Номер — переменная окружения сборки NEXT_PUBLIC_METRIKA_ID
  * (Settings → Secrets and variables → Actions → Variables). Пусто —
- * счётчика на сайте нет, цели молча не отправляются.
+ * счётчика на сайте нет, цели молча не отправляются. Есть номер —
+ * счётчик работает только после согласия посетителя в баннере о cookie.
  *
  * Цели (заводятся в интерфейсе Метрики как «JavaScript-событие» с
  * тем же идентификатором):
@@ -13,7 +14,10 @@
  *   blank_skachan      — скачал бланк ЕГЭ, параметр blank.
  */
 
-export const METRIKA_ID = process.env.NEXT_PUBLIC_METRIKA_ID ?? '';
+import { METRIKA_ID } from '@/content/legal/cookies';
+import { hasAnalyticsConsent } from '@/lib/legal/cookies';
+
+export { METRIKA_ID };
 
 export type MetrikaCel = 'trenirovka_start' | 'variant_sobran' | 'blank_skachan';
 
@@ -36,7 +40,9 @@ const INIT = {
  * Метрики: вызовы копятся в ym.a и уходят при загрузке, первым — init.
  */
 function ym(): Ym | null {
-  if (METRIKA_ID === '' || typeof window === 'undefined') return null;
+  /* Без согласия посетителя (кнопка «Разрешить Метрику» в баннере о cookie)
+     счётчика нет: ни очереди, ни целей, ни просмотров. */
+  if (METRIKA_ID === '' || typeof window === 'undefined' || !hasAnalyticsConsent()) return null;
   const w = window as unknown as { ym?: Ym };
   if (typeof w.ym !== 'function') {
     const stub: Ym = (...args: unknown[]) => {

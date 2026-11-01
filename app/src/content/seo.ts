@@ -79,6 +79,28 @@ function korotkiy(nachalo: string, hvosty: readonly string[]): string {
   return nachalo;
 }
 
+/**
+ * Разделы, где открыты не все вкладки: заголовок и описание страницы
+ * раздела называют только то, что уже есть. Открылась вкладка —
+ * поправить строку здесь (остальные разделы — по общему шаблону).
+ */
+const SOSTAV: Record<number, { hvosty: string[]; est: string }> = {
+  8: {
+    hvosty: ['прототипы, тренажёр, генератор', 'прототипы и тренажёр'],
+    est: 'Опорные задачи с решениями, тренажёр и генератор вариантов',
+  },
+  15: { hvosty: ['теория', 'теория раздела'], est: 'Теория раздела' },
+  16: { hvosty: ['теория', 'теория раздела'], est: 'Теория раздела' },
+  18: {
+    hvosty: ['теория, схемы, тренажёр', 'теория и схемы', 'теория'],
+    est: 'Теория, ключевые схемы, опорные задачи и тренажёр',
+  },
+  19: {
+    hvosty: ['теория, опорные задачи, тренажёр', 'теория и тренажёр', 'теория'],
+    est: 'Теория, опорные задачи и тренажёр',
+  },
+};
+
 /** Вкладки раздела, у которых свой шаблон. */
 export type SeoVkladka =
   | 'o-zadanii'
@@ -100,16 +122,33 @@ export function seoVkladki(
   no: number,
   vkladka: SeoVkladka,
 ): { title: string; description: string } {
+  return bezEgeProf(no, tekstVkladki(no, vkladka));
+}
+
+/**
+ * На страницах №4 и №5 нельзя писать «ЕГЭ профиль»: задачи там собраны
+ * в том числе по сборнику «ЕГЭпроф», и проверка скрытых источников
+ * (scripts/check-istochniki-skryty.mjs) ловит любое написание
+ * «ЕГЭ…проф». Поэтому у них «профильного ЕГЭ» — тот же смысл и тот же
+ * поисковый запрос, другим порядком слов.
+ */
+function bezEgeProf<T extends { title?: unknown; description?: unknown }>(no: number, m: T): T {
+  if (no !== 4 && no !== 5) return m;
+  const zamena = (v: unknown) =>
+    typeof v === 'string' ? v.replace(/ЕГЭ профиль/g, 'профильного ЕГЭ') : v;
+  return { ...m, title: zamena(m.title), description: zamena(m.description) };
+}
+
+function tekstVkladki(no: number, vkladka: SeoVkladka): { title: string; description: string } {
   const t = TEMA[no] ?? '';
   switch (vkladka) {
     case 'o-zadanii':
       return {
-        title: korotkiy(`Задание ${no} ЕГЭ профиль ${EGE_GOD}: ${t}`, [
-          'теория, прототипы, тренажёр',
-          'теория и прототипы',
-          'теория',
-        ]),
-        description: `${LEAD[no] ?? ''} Теория, опорные задачи с решениями, тренажёр и генератор вариантов — бесплатно.`,
+        title: korotkiy(
+          `Задание ${no} ЕГЭ профиль ${EGE_GOD}: ${t}`,
+          SOSTAV[no]?.hvosty ?? ['теория, прототипы, тренажёр', 'теория и прототипы', 'теория'],
+        ),
+        description: `${LEAD[no] ?? ''} ${SOSTAV[no]?.est ?? 'Теория, опорные задачи с решениями, тренажёр и генератор вариантов'} — бесплатно.`,
       };
     case 'teoriya':
       return {
@@ -181,6 +220,10 @@ export type SeoPodstranitsa = 'opornaya' | 'razbor' | 'skhema' | 'rezhim';
  * страницы, поэтому title не повторяются.
  */
 export function metaPodstranitsy(no: number, vid: SeoPodstranitsa, nazvanie: string): Metadata {
+  return bezEgeProf(no, tekstPodstranitsy(no, vid, nazvanie));
+}
+
+function tekstPodstranitsy(no: number, vid: SeoPodstranitsa, nazvanie: string): Metadata {
   const t = TEMA[no] ?? '';
   const imya = nazvanie.trim();
   switch (vid) {
@@ -287,7 +330,10 @@ function tekstPodrazdela12(
   switch (vkladka) {
     case 'o':
       return {
-        title: `Задание 12 ЕГЭ: ${nm} по графику — теория и тренажёр`,
+        title: korotkiy(`${nazvanie} по графику`, [
+          'задание 12 ЕГЭ: теория и тренажёр',
+          'задание 12 ЕГЭ',
+        ]),
         description: `${nazvanie}. ${grafik}. Задание 12 ЕГЭ профиль: как по графику найти коэффициенты, значение и точки пересечения.`,
       };
     case 'opornye':

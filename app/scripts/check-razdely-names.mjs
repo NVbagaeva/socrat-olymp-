@@ -28,8 +28,7 @@
        в том же порядке;
      — карточки в разметке (блок «Другие разделы», страница выбора) —
        из таблицы;
-     — title, description и Open Graph страниц разделов — с названием
-       функции и графика из таблицы (шаблон — content/seo.ts);
+     — title, description и Open Graph страниц разделов — из таблицы;
      — на странице листа для печати нет прежних названий. */
 
 import fs from 'node:fs';
@@ -283,12 +282,9 @@ function checkSite() {
     }
     check(ordered, `/zadaniya/12/${row.id}/: порядок разделов в данных не как в таблице`);
 
-    /* Заголовок страницы, описание, Open Graph. Шаблон заголовка —
-       content/seo.ts («Задание 12 ЕГЭ: линейная функция по графику — …»):
-       название функции в нём со строчной, поэтому сверка без учёта регистра. */
+    /* Заголовок страницы, описание, Open Graph. */
     const title = html.match(/<title>([^<]*)<\/title>/)?.[1] ?? '';
-    const est = (s, what) => s.toLowerCase().includes(what.toLowerCase());
-    check(est(title, row.title), `/zadaniya/12/${row.id}/: title «${title}»`);
+    check(title.startsWith(row.title), `/zadaniya/12/${row.id}/: title «${title}»`);
     const description = html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? '';
     check(
       description.includes(row.title) && description.includes(row.graphName),
@@ -297,7 +293,7 @@ function checkSite() {
     const ogTitle = html.match(/<meta property="og:title" content="([^"]*)"/)?.[1] ?? '';
     const ogDescription =
       html.match(/<meta property="og:description" content="([^"]*)"/)?.[1] ?? '';
-    check(est(ogTitle, row.title), `/zadaniya/12/${row.id}/: og:title «${ogTitle}»`);
+    check(ogTitle.startsWith(row.title), `/zadaniya/12/${row.id}/: og:title «${ogTitle}»`);
     check(
       ogDescription.includes(row.graphName),
       `/zadaniya/12/${row.id}/: og:description «${ogDescription}»`,
