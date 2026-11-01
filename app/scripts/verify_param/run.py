@@ -7,7 +7,7 @@
 
 dump.mjs выгружает из контента раздела все задачи с ответами:
 {id: {"otvet": TeX, "title": …}}. Для каждой задачи модуль метода
-(m01.py, …) знает условие; ответ берётся из контента — так проверяется
+(m01.py, m02.py, …) знает условие; ответ берётся из контента — так проверяется
 ровно то, что видит ученик. Задача без проверки или проверка без
 задачи — ошибка. Итог — таблица «задача — ответ — проверка».
 """
@@ -20,8 +20,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from obshchee import sverit  # noqa: E402
 import m01  # noqa: E402
+import m02  # noqa: E402
 
-MODULI = [m01]
+MODULI = [m01, m02]
 
 
 def main():
@@ -43,9 +44,10 @@ def main():
             print(f"НЕТ ЗАДАЧИ    {zid}")
             oshibki += 1
             continue
-        uslovie, (lo, hi), osobye = proverki[zid]
+        # Четвёртое поле — свой шаг сетки по параметру (широкий промежуток).
+        uslovie, (lo, hi), osobye, *shag = proverki[zid]
         otvet = zadachi[zid]["otvet"]
-        plohie = sverit(otvet, uslovie, lo, hi, osobye=osobye)
+        plohie = sverit(otvet, uslovie, lo, hi, osobye=osobye, **({"shag": shag[0]} if shag else {}))
         if plohie:
             oshibki += 1
             print(f"РАСХОЖДЕНИЕ  {zid}  {otvet}")

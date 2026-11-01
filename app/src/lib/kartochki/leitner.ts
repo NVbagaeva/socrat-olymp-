@@ -9,14 +9,22 @@
  *
  * «Быстрая проверка» коробки не трогает: 10 случайных карточек,
  * каждая один раз.
+ *
+ * «На сегодня» — карточки, которые пора повторить по лестнице
+ * Лейтнера: из 1-й коробки — сразу, из 2–5-й — через 1, 3, 7 и 14
+ * дней после последней оценки. Режим не стоит в списке экрана, его
+ * открывают ссылкой (`?nabor=segodnya`, например из вводной плашки
+ * ключевых схем №18).
  */
 
 export const KOROBOK = 5;
 
-/** Запись карточки: коробка 1…5 и сколько раз её оценивали. */
+/** Запись карточки: коробка 1…5, сколько раз её оценивали и когда последний раз (мс). */
 export interface ZapisKartochki {
   b: number;
   n: number;
+  /** Нет у записей, сделанных до появления режима «На сегодня». */
+  t?: number;
 }
 
 /** Прогресс колоды номера: id карточки → запись. Новых карточек в нём нет. */
@@ -35,16 +43,34 @@ export function neznakoma(p: ProgressKolody, id: string): boolean {
   return korobka(p, id) <= 1;
 }
 
-/** Оценка карточки: новый прогресс, старый не меняется. */
-export function otsenit(p: ProgressKolody, id: string, znayu: boolean): ProgressKolody {
+/** Оценка карточки: новый прогресс, старый не меняется. `seychas` — время оценки, мс. */
+export function otsenit(
+  p: ProgressKolody,
+  id: string,
+  znayu: boolean,
+  seychas?: number,
+): ProgressKolody {
   const bylo = p[id];
   const b = znayu ? Math.min(KOROBOK, Math.max(1, bylo?.b ?? 1) + 1) : 1;
-  return { ...p, [id]: { b, n: (bylo?.n ?? 0) + 1 } };
+  const z: ZapisKartochki = { b, n: (bylo?.n ?? 0) + 1 };
+  if (seychas !== undefined) z.t = seychas;
+  return { ...p, [id]: z };
+}
+
+/** Через сколько дней пора повторить карточку из коробки: лестница Лейтнера. */
+export const INTERVAL_DNEY: Readonly<Record<number, number>> = { 1: 0, 2: 1, 3: 3, 4: 7, 5: 14 };
+const DEN = 24 * 60 * 60 * 1000;
+
+/** Пора ли повторять: новая или без времени оценки — пора; иначе прошёл интервал коробки. */
+export function poraPovtoryat(p: ProgressKolody, id: string, seychas: number): boolean {
+  const z = p[id];
+  if (z === undefined || z.t === undefined) return true;
+  return seychas - z.t >= (INTERVAL_DNEY[z.b] ?? 0) * DEN;
 }
 
 /* ── Режимы ─────────────────────────────────────────────────────── */
 
-export type Rezhim = 'vse' | 'temy' | 'neznakomye' | 'bystro';
+export type Rezhim = 'vse' | 'temy' | 'neznakomye' | 'bystro' | 'segodnya';
 
 export const BYSTRO_KARTOCHEK = 10;
 
@@ -65,7 +91,8 @@ function peremeshat<T>(items: readonly T[], rnd: () => number): T[] {
 /**
  * Очередь сессии. В обучающих режимах сначала младшие коробки —
  * то, что ученик знает хуже, — внутри коробки порядок случайный.
- * «По подтемам» — только отмеченные подтемы.
+ * «По подтемам» — только отмеченные подтемы, «На сегодня» — те, что
+ * пора повторить к моменту `seychas`.
  */
 export function sobratOchered(
   rezhim: Rezhim,
@@ -73,6 +100,7 @@ export function sobratOchered(
   p: ProgressKolody,
   rnd: () => number,
   temy: readonly string[] = [],
+  seychas = 0,
 ): string[] {
   if (rezhim === 'bystro') {
     return peremeshat(kartochki, rnd)
@@ -82,6 +110,7 @@ export function sobratOchered(
   const otbor = kartochki.filter((k) => {
     if (rezhim === 'temy') return temy.includes(k.topic);
     if (rezhim === 'neznakomye') return neznakoma(p, k.id);
+    if (rezhim === 'segodnya') return poraPovtoryat(p, k.id, seychas);
     return true;
   });
   /* Коробка 0 (новая) и 1 («Не знаю») — одна очередь: обе незнакомы. */

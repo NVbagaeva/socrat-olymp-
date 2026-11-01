@@ -13,7 +13,7 @@ function znachenie(bukva: string, v: number): string {
 }
 
 /**
- * Живой рисунок: подвижная прямая на ползунке параметра и число
+ * Живой рисунок: подвижная прямая (или окружность) на ползунке параметра и число
  * решений под рисунком. Кнопки ставят прямую в особые положения —
  * в них число решений меняется. Стили — блок «Поиграй с параболой»
  * (.play, topic.css); сцену собирает тот же движок №12.
@@ -30,7 +30,7 @@ export function Zhivoy19({ id }: { id: string }) {
   return (
     <section className="play z19-zhivoy" aria-labelledby={`${uid}-t`}>
       <h5 className="qth-card__title play__title" id={`${uid}-t`}>
-        {ZHIVOY_19.title}
+        {z.vid === 'okruzhnost' ? ZHIVOY_19.titleOkruzhnost : ZHIVOY_19.title}
       </h5>
       <div className="play__body">
         <div className="play__stage">

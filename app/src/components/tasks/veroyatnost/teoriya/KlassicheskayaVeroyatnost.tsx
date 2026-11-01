@@ -4,6 +4,7 @@ import { AlertIcon } from '@/components/ui';
 import { KLASSICHESKAYA } from '@/content/veroyatnost-teoriya';
 import { typeset } from '@/lib/tex';
 import { voprosyPonimaniya } from '@/lib/veroyatnost/teoriya-ponimanie';
+import { YAKOR_4 } from '@/lib/veroyatnost/teoriya-yakorya';
 import { HintIcon } from '../../prep/PrepIcons';
 import { KostIcon, TreugolnikIcon, ZakladkaIcon } from './IkonkiTeorii';
 import { ProverPonimanie } from './ProverPonimanie';
@@ -68,7 +69,7 @@ export function KlassicheskayaVeroyatnost() {
 
       <ul className="vklass__grid">
         {/* ── Определение и формула ──────────────────────────────── */}
-        <li className="vklass">
+        <li className="vklass" id={YAKOR_4.klass('opredelenie')}>
           <Zagolovok znak={<ZakladkaIcon />}>{opredelenie.title}</Zagolovok>
           <Stroka className="vklass__vrezka" tex={opredelenie.text} />
           <Formula tex={opredelenie.formula} />
@@ -83,7 +84,7 @@ export function KlassicheskayaVeroyatnost() {
         </li>
 
         {/* ── Почему вероятность не больше единицы ───────────────── */}
-        <li className="vklass">
+        <li className="vklass" id={YAKOR_4.klass('pochemu')}>
           <Zagolovok
             znak={
               <span className="vklass__znak vklass__znak--accent">
@@ -103,7 +104,7 @@ export function KlassicheskayaVeroyatnost() {
         </li>
 
         {/* ── Разобранный пример ─────────────────────────────────── */}
-        <li className="vklass">
+        <li className="vklass" id={YAKOR_4.klass('primer')}>
           <Zagolovok znak={<ZakladkaIcon />}>{primer.title}</Zagolovok>
           <p className="vklass__text">{primer.usloviye}</p>
 
@@ -139,7 +140,7 @@ export function KlassicheskayaVeroyatnost() {
         </li>
 
         {/* ── Равновозможные исходы ──────────────────────────────── */}
-        <li className="vklass">
+        <li className="vklass" id={YAKOR_4.klass('ravnovozmozhnye')}>
           <Zagolovok znak={<KostIcon />}>{ravnovozmozhnye.title}</Zagolovok>
           <p className="vklass__text">{ravnovozmozhnye.text}</p>
           <p className="vklass__text">
@@ -164,7 +165,7 @@ export function KlassicheskayaVeroyatnost() {
         </li>
 
         {/* ── Признаки такой задачи на экзамене ──────────────────── */}
-        <li className="vklass">
+        <li className="vklass" id={YAKOR_4.klass('kak-uznat')}>
           <Zagolovok znak={<HintIcon />}>{kakUznat.title}</Zagolovok>
           <p className="vklass__text">{kakUznat.text}</p>
           <ol className="vklass-shagi">

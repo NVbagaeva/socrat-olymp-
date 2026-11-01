@@ -49,7 +49,7 @@ export function Skhema18Stranica({ id }: { id: string }) {
 
   return (
     <article className="z18-sk">
-      <Link className="z18-nazad" href={`${BASE}/`}>
+      <Link className="z18-nazad" href={`${BASE}/skhemy/`}>
         <span aria-hidden="true">‹</span> {SKHEMA_18.nazad}
       </Link>
 

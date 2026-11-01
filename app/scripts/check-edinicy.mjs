@@ -29,6 +29,7 @@ import { formulyStroki, proveritFormulu } from './lib/schet-edinic.mjs';
 
 const require = createRequire(import.meta.url);
 const katex = require('katex');
+requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex); // общие макросы KaTeX: \arc{…}
 const problems = [];
 const add = (where, what) => problems.push(`${where}: ${what}`);
 

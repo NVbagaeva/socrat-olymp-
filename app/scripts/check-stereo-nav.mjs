@@ -128,7 +128,7 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = 'http://127.0.0.1:' + server.address().port;
 
-const VKLADKI = [
+const VKLADKI_15 = [
   ['', 'О задании'],
   ['teoriya/', 'Теория'],
   ['opornye-zadachi/', 'Опорные задачи'],
@@ -136,11 +136,11 @@ const VKLADKI = [
   ['generator/', 'Генератор'],
   ['dlya-repetitorov/', 'Для репетиторов'],
 ];
-/* У №3 есть вкладка «Карточки» (колода по теории), у №15 пока нет. */
-const VKLADKI_3 = [VKLADKI[0], VKLADKI[1], ['kartochki/', 'Карточки'], ...VKLADKI.slice(2)];
+/* У №3 есть колода карточек по теории — вкладка «Карточки» сразу за «Теорией». */
+const VKLADKI_3 = [...VKLADKI_15.slice(0, 2), ['kartochki/', 'Карточки'], ...VKLADKI_15.slice(2)];
 const ZADANIYA = [
   { no: '3', glavy: GLAVY_3, vkladki: VKLADKI_3 },
-  { no: '15', glavy: GLAVY_15, vkladki: VKLADKI },
+  { no: '15', glavy: GLAVY_15, vkladki: VKLADKI_15 },
 ];
 const SIZES = [
   { name: 'телефон', width: 390, height: 844, isMobile: true },

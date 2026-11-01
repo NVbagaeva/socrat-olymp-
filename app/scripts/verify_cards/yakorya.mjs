@@ -42,7 +42,32 @@ const PO_NOMERAM = {
     RAZDELY_GLAVY_2.forEach((r) => out.add(r.id));
     return out;
   },
+  /* Теория №4 и №5 (одна теория вероятностей на два номера): написанный
+     раздел — #teoriya-<id>, блок раздела — #t4-… / #t5-…
+     (lib/veroyatnost/teoriya-yakorya.ts). Раздел «Материал готовится»
+     якорем не считается: повторять там нечего. */
+  4: () => teoriyaVeroyatnosti(4),
+  5: () => teoriyaVeroyatnosti(5),
+  /* №18: «теория» карточки — страница ключевой схемы /skhemy/<id>/;
+     source — id собранной схемы (страницы строятся только для них). */
+  18: () => {
+    const { SOBRANNYE } = requireSrc('content/zadanie18/spisok');
+    return new Set(SOBRANNYE.map((s) => s.id));
+  },
 };
+
+function teoriyaVeroyatnosti(task) {
+  const { RAZDELY_4, RAZDELY_5 } = requireSrc('content/veroyatnost-teoriya');
+  const { telaRazdelov4, telaRazdelov5 } = requireSrc('components/tasks/veroyatnost/teoriya/index');
+  const Y = requireSrc('lib/veroyatnost/teoriya-yakorya');
+  const [razdely, tela, bloki] =
+    task === 4
+      ? [RAZDELY_4, telaRazdelov4, Y.yakoryaBlokov4()]
+      : [RAZDELY_5, telaRazdelov5, Y.yakoryaBlokov5()];
+  const out = new Set(bloki);
+  razdely.filter((r) => r.id in tela).forEach((r) => out.add(`teoriya-${r.id}`));
+  return out;
+}
 
 /** Множество якорей теории номера; undefined — номер не описан. */
 export function yakorya(task) {

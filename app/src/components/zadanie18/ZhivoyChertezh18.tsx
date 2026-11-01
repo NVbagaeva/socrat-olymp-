@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChertezhSkhemy } from '@/components/skhemy/ChertezhSkhemy';
 import { Tex } from '@/components/ui/Tex';
 import { CHERTEZH_18 } from '@/content/zadanie18';
-import type { Sostoyanie } from '@/lib/skhemy/ekran';
+import { rezhimKadra, type Sostoyanie } from '@/lib/skhemy/ekran';
 import { VID_ISHODNYY, type T2, type Tochki, type Vid } from '@/lib/skhemy/tipy';
 import { trebuetsyaSkhema18 } from '@/lib/zadanie18/skhemy';
 
@@ -61,14 +61,20 @@ export function ZhivoyChertezh18({ id, nazvanie, lit }: ZhivoyChertezh18Props) {
   const [vid, setVid] = useState<Vid>(VID_ISHODNYY);
   const [shag, setShag] = useState<number | null>(null);
   const [sobiraem, setSobiraem] = useState(false);
+  /* Режим, выбранный переключателем; подсветка группы режима сильнее. */
+  const [vybranRezhim, setVybranRezhim] = useState<string | undefined>(undefined);
   const anim = useRef(0);
   const sostoyanie = useRef({ t, vid });
   useEffect(() => {
     sostoyanie.current = { t, vid };
   }, [t, vid]);
 
-  const sost: Sostoyanie = useMemo(() => ({ lit: new Set(lit), shag, podpisi: true }), [lit, shag]);
-  const kadr = useMemo(() => skhema.postroit(t), [skhema, t]);
+  const sost: Sostoyanie = useMemo(
+    () => ({ lit: new Set(lit), shag, podpisi: true, rezhim: vybranRezhim }),
+    [lit, shag, vybranRezhim],
+  );
+  const rezhim = rezhimKadra(skhema, sost);
+  const kadr = useMemo(() => skhema.postroit(t, rezhim), [skhema, t, rezhim]);
 
   function ostanovitAnimaciyu(): void {
     cancelAnimationFrame(anim.current);
@@ -144,6 +150,7 @@ export function ZhivoyChertezh18({ id, nazvanie, lit }: ZhivoyChertezh18Props) {
   function sbrosit(): void {
     setSobiraem(false);
     setShag(null);
+    setVybranRezhim(undefined);
     perejti(VID_ISHODNYY, skhema.nachalo);
   }
 
@@ -162,6 +169,10 @@ export function ZhivoyChertezh18({ id, nazvanie, lit }: ZhivoyChertezh18Props) {
             ostanovitAnimaciyu();
             setT(novye);
           }}
+          onPovorot={(d) => {
+            ostanovitAnimaciyu();
+            setVid((v) => ({ ugol: (((v.ugol + d) % 360) + 360) % 360, otrazhenie: v.otrazhenie }));
+          }}
           dolyaVysoty={0.66}
           opisanie={CHERTEZH_18.podpisChertezha(nazvanie)}
           podpisRuchki={(imya) => CHERTEZH_18.ruchka(skhema.imenaRuchek?.[imya] ?? `Точка ${imya}`)}
@@ -174,6 +185,21 @@ export function ZhivoyChertezh18({ id, nazvanie, lit }: ZhivoyChertezh18Props) {
       </div>
 
       <div className="z18-ch__panel">
+        {skhema.rezhimy === undefined ? null : (
+          <div className="z18-ch__rezhimy" role="group" aria-label={CHERTEZH_18.rezhim}>
+            {skhema.rezhimy.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className={clsx('z18-ch__rezhim', rezhim === m.id && 'is-active')}
+                aria-pressed={rezhim === m.id}
+                onClick={() => setVybranRezhim(m.id)}
+              >
+                {m.nazvanie}
+              </button>
+            ))}
+          </div>
+        )}
         <label className="z18-ch__povorot">
           <span className="z18-ch__povorot-metka">{CHERTEZH_18.povorot}</span>
           <input

@@ -84,6 +84,20 @@ export function proverit(N = 1000) {
       MENELAY.podvizhnye.every((k) => MENELAY.ogranichit(k, t[k], t) !== null),
     );
   }
+  /* Режимы: в каждом — одна конструкция, у каждой точки своя буква;
+     ручки чужого режима не рисуются. */
+  for (const [rezhim, ruchki, net] of [
+    ['menelay', ['C1', 'A1'], 'P'],
+    ['cheva', ['P'], 'C1'],
+  ]) {
+    const el = MENELAY.postroit(MENELAY.nachalo, rezhim).elementy;
+    const imena = el.filter((x) => x.vid === 'tochka').map((x) => x.imya);
+    sch.fakt(`режим ${rezhim}: буквы точек не повторяются`, new Set(imena).size === imena.length);
+    sch.fakt(
+      `режим ${rezhim}: есть ручки ${ruchki.join(', ')}, нет ручки ${net}`,
+      ruchki.every((r) => el.some((x) => x.ruchka === r)) && !el.some((x) => x.ruchka === net),
+    );
+  }
   sch.fakt(
     'сцена: начальное положение допустимо',
     MENELAY.podvizhnye.every(

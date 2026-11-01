@@ -123,6 +123,7 @@ def _chislo_tex(s):
     s = re.sub(r"\\frac(\{[^{}]*\})(\d)", r"\\frac\1{\2}", s)
     s = re.sub(r"\\frac\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}", r"((\1)/(\2))", s)
     s = re.sub(r"\\sqrt\{([^{}]*)\}", r"sqrt(\1)", s)
+    s = re.sub(r"\\sqrt(\d+)", r"sqrt(\1)", s)  # короткая запись KaTeX: \sqrt5
     s = re.sub(r"(\d|\))(sqrt|\()", r"\1*\2", s)
     s = s.replace("\\pi", "pi")
     s = re.sub(r"(\d|\))pi", r"\1*pi", s)
