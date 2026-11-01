@@ -25,10 +25,30 @@ const NOT_TEXT_KEYS = new Set([
   /* prototip — служебное описание шаблона «Вариантов повышенной сложности»
      (lib/povyshennye/shablony.ts): для отчётов разработчика, на сайт не выводится. */
   'prototip',
+  /* pravka, sostavleno — служебные пометки об источнике задачи (teoriya19/tipy.ts),
+     на сайт не выводится. polePodskazka — placeholder поля ввода: там только
+     обычный текст, KaTeX не набрать. */
+  'pravka', 'sostavleno', 'polePodskazka',
 ]);
 
+/* Словари, значения которых — подписи для экранного диктора (aria-label):
+   там только обычный текст. Ключи у них — имена точек. */
+const ARIA_MAPS = new Set(['imenaRuchek']);
+
+/** Строка — значение в словаре ARIA_MAPS ({ imenaRuchek: { C1: '…' } }). */
+function inAriaMap(node) {
+  const prop = node.parent;
+  if (!prop || !ts.isPropertyAssignment(prop)) { return false; }
+  const obj = prop.parent;
+  const outer = obj && obj.parent;
+  return Boolean(outer && ts.isPropertyAssignment(outer) &&
+    ARIA_MAPS.has(outer.name.getText().replace(/['"]/g, '')));
+}
+
 /* Вызовы, аргумент которых — TeX или служебная строка. */
-const TEX_CALLS = /^(?:prismModel|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
+/* scena — рисунок №19 (lib/zadanie19/risunok.ts): строка в нём — alt для
+   экранного диктора, только обычный текст. */
+const TEX_CALLS = /^(?:scena|prismModel|shape\w*|cube\w*|katex\.renderToString|renderToString|formula|math|tex|texNum|texFactor|m|keyMath|field|katexHtml|formulaHtml|require|import|t\.?|querySelector(?:All)?|getElementById|addEventListener|setAttribute|getAttribute|classList\.\w+|console\.\w+|Error|RegExp|Intl\.\w+|new\s+\w+)$/;
 
 function keyOf(node) {
   const parent = node.parent;
@@ -94,6 +114,7 @@ export function codeTexts(file) {
     if (inMetadata(node)) { return; }
     const key = keyOf(node);
     if (key !== null && NOT_TEXT_KEYS.has(key)) { return; }
+    if (inAriaMap(node)) { return; }
     const callee = calleeOf(node);
     if (callee !== null && TEX_CALLS.test(callee)) { return; }
     const { line } = sf.getLineAndCharacterOfPosition(node.getStart(sf));
