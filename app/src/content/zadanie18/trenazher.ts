@@ -56,7 +56,7 @@ const sh = (tekst: string, ...gruppy: string[]): Podsvechennoe => ({ tekst, grup
 export const TIPY_18: readonly TipZadachi18[] = [
   {
     id: 'vysoty-cos',
-    nazvanie: 'Две высоты: подобие с коэффициентом cos C',
+    nazvanie: 'Две высоты: подобие с коэффициентом — косинусом угла',
     skhema: 'vysoty',
     uroven: 1,
     varianty: [

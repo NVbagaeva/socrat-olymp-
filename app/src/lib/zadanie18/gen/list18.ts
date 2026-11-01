@@ -127,7 +127,7 @@ function zadachaLista(z: Zadacha18, pos: string, no: number): ListZadacha18 {
     sk.nachalo,
     VID_ISHODNYY,
     { lit: new Set(), shag: null, podpisi: true },
-    { W: 360, H: 250, opisanie: '' },
+    { W: 360, H: 250, opisanie: '', samodostatochnyy: true },
   );
   return {
     pos,
