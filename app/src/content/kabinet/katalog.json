@@ -2280,7 +2280,7 @@
   {
    "no": 19,
    "name": "Задача с параметром",
-   "ready": false,
+   "ready": true,
    "prototypes": []
   },
   {
