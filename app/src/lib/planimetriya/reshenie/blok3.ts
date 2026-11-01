@@ -313,7 +313,7 @@ export const RESHENIYA_3: Record<number, (p: Params) => Reshenie> = {
         shag(
           'Угол между хордой и касательной',
           'Угол между касательной и хордой, проведённой в точку касания, равен половине дуги, заключённой между ними.',
-          [`\\smile AB = 2\\cdot ${g(p.f)} = ${g(ans)}`],
+          [`\\arc{AB} = 2\\cdot ${g(p.f)} = ${g(ans)}`],
           2,
         ),
       ],
@@ -551,7 +551,7 @@ export const RESHENIYA_3: Record<number, (p: Params) => Reshenie> = {
         shag(
           'Дуга $BAD$',
           'Угол $C$ опирается на дугу $BAD$ — остаток окружности после дуг $BC$ и $CD$.',
-          [`\\smile BAD = 360^\\circ - ${g(p.b)} - ${g(p.c)} = ${g(bad)}`],
+          [`\\arc{BAD} = 360^\\circ - ${g(p.b)} - ${g(p.c)} = ${g(bad)}`],
           1,
         ),
         shag('Вписанный угол', '', [`\\angle C = ${g(bad)} : 2 = ${g(ans)}`]),

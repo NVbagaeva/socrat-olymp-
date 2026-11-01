@@ -213,7 +213,7 @@ const odnaDuga: ZhivayaStsena = {
   znacheniya: (t) => {
     const u = ugolGr(pt(t, 'A'), pt(t, 'C'), pt(t, 'B'));
     return [
-      `\\angle ACB = \\angle ADB = ${Math.round(u)}^\\circ = \\tfrac12 \\overset{\\smile}{AB}`,
+      `\\angle ACB = \\angle ADB = ${Math.round(u)}^\\circ = \\tfrac12 \\arc{AB}`,
     ];
   },
 };

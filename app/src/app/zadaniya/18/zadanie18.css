@@ -721,6 +721,35 @@
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-border);
 }
+.z18-ch__rezhimy {
+  display: inline-flex;
+  justify-self: start;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+.z18-ch__rezhim {
+  /* Нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.z18-ch__rezhim.is-active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z18-ch__rezhim:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
 .z18-ch__povorot {
   display: flex;
   align-items: center;
@@ -809,9 +838,7 @@
 .z18-otmetka {
   min-width: 0;
 }
-.z18-sk .katex,
-.z18-tr .katex,
-.z18-tr__razbor .katex {
+.z18-sk .katex {
   display: inline-block;
   max-width: 100%;
   overflow-x: auto;
@@ -831,232 +858,232 @@
   margin-top: var(--space-2);
 }
 
-/* ── Опорные задачи ─────────────────────────────────────────── */
+/* ── Опорные задачи ─────────────────────────────────────────────── */
 
-.z18-op-spisok__lead {
-  max-width: 72ch;
-  margin: 0 0 var(--space-4);
-  color: var(--color-text-lead);
+.z18-op-spisok {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
 }
-.z18-op-spisok__kak {
+.z18-op-spisok > h2 {
+  margin: 0;
+}
+.z18-op-spisok__lead {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z18-op-plitka__uslovie {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-op-plitka__skhemy {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-op__punkty {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-op__punkty li {
+  display: flex;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.z18-op__podskazka {
   display: grid;
   gap: var(--space-3);
-  margin-bottom: var(--space-6);
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--color-border-info);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-info);
+  margin-top: var(--space-3);
 }
-.z18-op-spisok__kak-title {
+.z18-op__podskazka p {
   margin: 0;
+}
+.z18-op__skhemy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-op__skhemy .chip {
+  /* Подпись схемы бывает длинной: на телефоне переносится, а не вылезает. */
+  max-width: 100%;
+  white-space: normal;
+  text-decoration: none;
+}
+.z18-op__otvet {
+  margin: 0;
+  font-size: var(--fs-h3);
   font-weight: 700;
 }
-.z18-op-spisok__sostavleno {
+
+/* ── Теория ─────────────────────────────────────────────────────── */
+
+.z18-t {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.z18-t__lead {
+  max-width: 68ch;
   margin: 0;
   color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
 }
-.z18-op-plitka__a {
-  display: block;
+.z18-t__fakt {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  scroll-margin-top: var(--space-8);
+}
+.z18-t__shapka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.z18-t__title {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.z18-t__ssylka {
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.z18-t__ssylka--mozhno {
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+}
+.z18-t__ssylka--dokazhi {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+}
+.z18-t__telo {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z18-t__tekst {
+  min-width: 0;
+}
+.z18-t__tekst p {
+  margin: 0;
+}
+.z18-t__formula {
+  overflow-x: auto;
+  margin-top: var(--space-3);
+}
+.z18-t__risunok {
+  max-width: 360px;
+  justify-self: center;
+}
+.z18-t__skhemy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+.z18-t__skhemy-metka {
   color: var(--color-text-secondary);
   font-size: var(--fs-caption);
-  line-height: 1.45;
 }
-.z18-op-plitka__punkt,
-.z18-op-punkty__bukva {
+.z18-t__skhemy .chip {
+  max-width: 100%;
+  white-space: normal;
+  text-decoration: none;
+}
+
+@media (min-width: 768px) {
+  .z18-t__telo--s-risunkom {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+    align-items: start;
+  }
+}
+
+/* ── Тренажёр ───────────────────────────────────────────────────── */
+
+.z18-tr__karta {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z18-tr__uslovie p {
+  margin: 0 0 var(--space-2);
+}
+.z18-tr__punkt {
   color: var(--color-accent-text);
   font-weight: 700;
 }
-.z18-op-plitka__metka {
-  color: var(--color-text-tertiary);
+.z18-tr__proverka {
+  color: var(--color-text-secondary);
   font-size: var(--fs-caption);
 }
-
-.z18-op-punkty,
-.z18-op-skhemy {
+.z18-tr__chertezh {
+  max-width: 460px;
+  width: 100%;
+  justify-self: center;
+}
+.z18-tr__razbor {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z18-tr__shagi {
   display: grid;
   gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.z18-op-skhemy li {
+.z18-tr__razbor-punkt {
+  margin: var(--space-2) 0 var(--space-1);
+  color: var(--color-accent-text);
+  font-weight: 700;
+}
+.z18-tr__shag {
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-3) var(--space-4);
+  width: 100%;
+  padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
-.z18-op-skhemy__ssylka {
-  display: inline-flex;
-  gap: var(--space-2);
-  align-items: baseline;
-  color: var(--color-primary);
-  font-weight: 600;
-  text-decoration: none;
-}
-.z18-op-skhemy__ssylka:hover {
-  text-decoration: underline;
-}
-.z18-op-skhemy__no {
-  color: var(--color-text-tertiary);
-  font-weight: 700;
-}
-.z18-op-skhemy__zachem {
-  color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-}
-.z18-op-shagi .z18-sled__tekst {
-  animation: skh-poyavlenie var(--dur-reveal) var(--ease);
-}
-.z18-op-knopki {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.z18-op-otvet {
-  justify-self: start;
-  margin: 0;
-  padding: var(--space-3) var(--space-5);
-  border: 1px solid var(--color-callout-zapomni-border);
-  border-radius: var(--radius-lg);
+.z18-tr__shagi li.is-active .z18-tr__shag {
+  border-color: var(--color-primary);
   background: var(--color-surface-info);
-  font-size: 18px;
-  font-weight: 600;
 }
-.z18-op-otvet__knopka {
-  justify-self: start;
-}
-
-/* ── Тренажёр на общей сессии ─────────────────────────────────────
-   Карточка задачи: чертёж и условие рядом на компьютере, друг под
-   другом на телефоне (без липкого чертежа: сверху и так липнет
-   панель тренировки). Ниже — пункт а) с самопроверкой и пункт б)
-   с полем ответа. */
-
-.z18-tr {
-  display: grid;
-  gap: var(--flow-block);
-}
-.z18-tr__card {
-  display: grid;
-  gap: var(--space-4);
-  min-width: 0;
-}
-.z18-tr__head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-}
-.z18-tr__sostavleno {
-  color: var(--color-text-tertiary);
+.z18-tr__shag-hint {
+  color: var(--color-primary);
   font-size: var(--fs-caption);
 }
-.z18-tr__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5);
-}
+
 @media (min-width: 1024px) {
-  .z18-tr__grid {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-    gap: var(--space-8);
+  .z18-tr__karta,
+  .z18-tr__razbor {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
     align-items: start;
   }
-}
-.z18-tr__chertezh,
-.z18-tr__tekst {
-  min-width: 0;
-}
-.z18-tr__tekst {
-  display: grid;
-  gap: var(--space-3);
-  align-content: start;
-}
-.z18-tr__nazvanie {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-}
-.z18-tr__uslovie {
-  display: grid;
-  gap: var(--space-3);
-}
-.z18-tr__uslovie > p {
-  margin: 0;
-}
-.z18-tr__punkt {
-  display: grid;
-  gap: var(--space-3);
-  min-width: 0;
-}
-.z18-tr__punkt > p {
-  margin: 0;
-}
-.z18-tr .ttask__input {
-  max-width: 320px;
-}
-.z18-tr__samo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-}
-.z18-tr__samo-vopros {
-  font-weight: 600;
-  margin-right: var(--space-1);
-}
-.z18-tr__otmetka {
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-.z18-tr__neverno {
-  margin: 0;
-  color: var(--color-error);
-}
-.z18-tr__hint,
-.z18-tr__reshenie {
-  display: grid;
-  gap: var(--space-3);
-  justify-self: stretch;
-  min-width: 0;
-}
-.z18-tr__reshenie {
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-}
-.z18-tr__reshenie > p,
-.z18-tr__hint > p {
-  margin: 0;
-}
-.z18-tr__hint-sub {
-  font-weight: 600;
-}
-.z18-tr__razbor {
-  display: grid;
-  gap: var(--space-2);
-}
-.z18-tr__razbor > p {
-  margin: 0;
-}
-.z18-tr__razbor-shagi {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding-left: var(--space-5);
-}
-.z18-tr__itog {
-  display: grid;
-  gap: var(--space-2);
-  justify-items: start;
-}
-.z18-tr__itog > p {
-  margin: 0;
-}
-.z18-tr__itog-stroka {
-  font-weight: 600;
 }

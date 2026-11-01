@@ -5,14 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChertezhSkhemy } from '@/components/skhemy/ChertezhSkhemy';
 import { Tex } from '@/components/ui/Tex';
 import { CHERTEZH_18 } from '@/content/zadanie18';
-import type { Sostoyanie } from '@/lib/skhemy/ekran';
-import {
-  VID_ISHODNYY,
-  type T2,
-  type Tochki,
-  type Vid,
-  type ZhivayaSkhema,
-} from '@/lib/skhemy/tipy';
+import { rezhimKadra, type Sostoyanie } from '@/lib/skhemy/ekran';
+import { VID_ISHODNYY, type T2, type Tochki, type Vid } from '@/lib/skhemy/tipy';
 import { trebuetsyaSkhema18 } from '@/lib/zadanie18/skhemy';
 
 /** Пауза между шагами сборки, мс. */
@@ -48,20 +42,10 @@ function smeshat(a: Tochki, b: Tochki, x: number): Tochki {
 }
 
 export interface ZhivoyChertezh18Props {
-  /** id ключевой схемы; чертёж берётся из реестра схем, если не задан skhema. */
   id: string;
   nazvanie: string;
   /** Горящие группы: наведённое следствие или шаг доказательства. */
   lit: readonly string[];
-  /** Своя сцена вместо схемы из реестра — чертёж опорной задачи. */
-  skhema?: ZhivayaSkhema;
-  /** Подсказка под чертежом вместо «Тяни вершины…». */
-  podskazka?: string;
-  /**
-   * Показывать пересчитанные величины под чертежом. В тренажёре до ответа
-   * они скрыты: в исходном положении величина может совпасть с ответом б).
-   */
-  znacheniya?: boolean;
 }
 
 /**
@@ -70,28 +54,27 @@ export interface ZhivoyChertezh18Props {
  * пересчитанные величины и пояснение к особому положению (тупой угол,
  * вырождение).
  */
-export function ZhivoyChertezh18({
-  id,
-  nazvanie,
-  lit,
-  skhema: svoya,
-  podskazka,
-  znacheniya = true,
-}: ZhivoyChertezh18Props) {
-  const skhema = svoya ?? trebuetsyaSkhema18(id);
+export function ZhivoyChertezh18({ id, nazvanie, lit }: ZhivoyChertezh18Props) {
+  const skhema = trebuetsyaSkhema18(id);
 
   const [t, setT] = useState<Tochki>(skhema.nachalo);
   const [vid, setVid] = useState<Vid>(VID_ISHODNYY);
   const [shag, setShag] = useState<number | null>(null);
   const [sobiraem, setSobiraem] = useState(false);
+  /* Режим, выбранный переключателем; подсветка группы режима сильнее. */
+  const [vybranRezhim, setVybranRezhim] = useState<string | undefined>(undefined);
   const anim = useRef(0);
   const sostoyanie = useRef({ t, vid });
   useEffect(() => {
     sostoyanie.current = { t, vid };
   }, [t, vid]);
 
-  const sost: Sostoyanie = useMemo(() => ({ lit: new Set(lit), shag, podpisi: true }), [lit, shag]);
-  const kadr = useMemo(() => skhema.postroit(t), [skhema, t]);
+  const sost: Sostoyanie = useMemo(
+    () => ({ lit: new Set(lit), shag, podpisi: true, rezhim: vybranRezhim }),
+    [lit, shag, vybranRezhim],
+  );
+  const rezhim = rezhimKadra(skhema, sost);
+  const kadr = useMemo(() => skhema.postroit(t, rezhim), [skhema, t, rezhim]);
 
   function ostanovitAnimaciyu(): void {
     cancelAnimationFrame(anim.current);
@@ -167,6 +150,7 @@ export function ZhivoyChertezh18({
   function sbrosit(): void {
     setSobiraem(false);
     setShag(null);
+    setVybranRezhim(undefined);
     perejti(VID_ISHODNYY, skhema.nachalo);
   }
 
@@ -185,6 +169,10 @@ export function ZhivoyChertezh18({
             ostanovitAnimaciyu();
             setT(novye);
           }}
+          onPovorot={(d) => {
+            ostanovitAnimaciyu();
+            setVid((v) => ({ ugol: (((v.ugol + d) % 360) + 360) % 360, otrazhenie: v.otrazhenie }));
+          }}
           dolyaVysoty={0.66}
           opisanie={CHERTEZH_18.podpisChertezha(nazvanie)}
           podpisRuchki={(imya) => CHERTEZH_18.ruchka(skhema.imenaRuchek?.[imya] ?? `Точка ${imya}`)}
@@ -197,6 +185,21 @@ export function ZhivoyChertezh18({
       </div>
 
       <div className="z18-ch__panel">
+        {skhema.rezhimy === undefined ? null : (
+          <div className="z18-ch__rezhimy" role="group" aria-label={CHERTEZH_18.rezhim}>
+            {skhema.rezhimy.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className={clsx('z18-ch__rezhim', rezhim === m.id && 'is-active')}
+                aria-pressed={rezhim === m.id}
+                onClick={() => setVybranRezhim(m.id)}
+              >
+                {m.nazvanie}
+              </button>
+            ))}
+          </div>
+        )}
         <label className="z18-ch__povorot">
           <span className="z18-ch__povorot-metka">{CHERTEZH_18.povorot}</span>
           <input
@@ -242,17 +245,15 @@ export function ZhivoyChertezh18({
       </div>
 
       <figcaption className="z18-ch__podpis">
-        {znacheniya ? (
-          <ul className="z18-ch__znacheniya" aria-live="off">
-            {kadr.znacheniya.map((z, i) => (
-              <li key={i}>
-                <Tex text={z} />
-              </li>
-            ))}
-          </ul>
-        ) : null}
+        <ul className="z18-ch__znacheniya" aria-live="off">
+          {kadr.znacheniya.map((z, i) => (
+            <li key={i}>
+              <Tex text={z} />
+            </li>
+          ))}
+        </ul>
         {kadr.zametka === null ? (
-          <p className="z18-ch__tyani">{podskazka ?? CHERTEZH_18.podskazkaTyani}</p>
+          <p className="z18-ch__tyani">{CHERTEZH_18.podskazkaTyani}</p>
         ) : (
           <p className="z18-ch__zametka" role="status">
             <Tex text={kadr.zametka} />

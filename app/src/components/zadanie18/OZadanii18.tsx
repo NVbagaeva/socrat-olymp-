@@ -7,7 +7,13 @@ import { ZADANIYA } from '@/lib/paths';
 const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
 
 /* Наполненные вкладки: остальные в маршруте — «Скоро», без ссылки. */
-const GOTOVY: ReadonlySet<string> = new Set(['skhemy', 'kartochki', 'opornye', 'trenazher']);
+const GOTOVY: ReadonlySet<string> = new Set([
+  'skhemy',
+  'kartochki',
+  'teoriya',
+  'opornye',
+  'trenazher',
+]);
 
 function vkladka(id: string) {
   return ZADANIE18.tabs.find((t) => t.id === id);

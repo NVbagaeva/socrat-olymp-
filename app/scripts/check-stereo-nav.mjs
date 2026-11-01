@@ -128,7 +128,7 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = 'http://127.0.0.1:' + server.address().port;
 
-const VKLADKI = [
+const VKLADKI_15 = [
   ['', 'О задании'],
   ['teoriya/', 'Теория'],
   ['opornye-zadachi/', 'Опорные задачи'],
@@ -136,21 +136,12 @@ const VKLADKI = [
   ['generator/', 'Генератор'],
   ['dlya-repetitorov/', 'Для репетиторов'],
 ];
-/* «Карточки» встают в ленту после «Теории» сами, если у номера есть
-   колода (src/content/kartochki/spisok.ts, сейчас у №3 есть, у №15 нет). */
-const S_KARTOCHKAMI = new Set(
-  [...fs.readFileSync(path.join(APP, 'src/content/kartochki/spisok.ts'), 'utf8')
-    .matchAll(/'(\d+)'/g)].map((m) => m[1]),
-);
+/* У №3 есть колода карточек по теории — вкладка «Карточки» сразу за «Теорией». */
+const VKLADKI_3 = [...VKLADKI_15.slice(0, 2), ['kartochki/', 'Карточки'], ...VKLADKI_15.slice(2)];
 const ZADANIYA = [
-  { no: '3', glavy: GLAVY_3 },
-  { no: '15', glavy: GLAVY_15 },
+  { no: '3', glavy: GLAVY_3, vkladki: VKLADKI_3 },
+  { no: '15', glavy: GLAVY_15, vkladki: VKLADKI_15 },
 ];
-function ozhidaemye(no) {
-  const labels = VKLADKI.map((v) => v[1]);
-  if (S_KARTOCHKAMI.has(no)) labels.splice(labels.indexOf('Теория') + 1, 0, 'Карточки');
-  return labels;
-}
 const SIZES = [
   { name: 'телефон', width: 390, height: 844, isMobile: true },
   { name: 'компьютер', width: 1440, height: 900, isMobile: false },
@@ -190,8 +181,8 @@ for (const size of SIZES) {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
 
-  for (const { no, glavy } of ZADANIYA) {
-    for (const [tail, label] of VKLADKI) {
+  for (const { no, glavy, vkladki } of ZADANIYA) {
+    for (const [tail, label] of vkladki) {
       const url = `/zadaniya/${no}/${tail}`;
       const where = (what) => `${size.name}, ${url}: ${what}`;
       await page.goto(BASE + url, { waitUntil: 'networkidle' });
@@ -200,7 +191,7 @@ for (const size of SIZES) {
         .locator('.topic-tabs-row:not([inert]) .topic-tabs [role=tab]')
         .allInnerTexts();
       check(
-        tabs.map((t) => t.trim()).join('|') === ozhidaemye(no).join('|'),
+        tabs.map((t) => t.trim()).join('|') === vkladki.map((v) => v[1]).join('|'),
         where(`вкладки: ${tabs.join(', ')}`),
       );
       const active = await page.locator('[role=tab][aria-selected=true]').first().innerText();

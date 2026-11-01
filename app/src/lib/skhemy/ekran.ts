@@ -13,7 +13,7 @@
 
 import { angleOf, cross, dist, dot, len, polar, rotate, sub, unit } from './geometriya';
 import { razmestitSVynoskami, type Prepyatstviya } from './podpisi';
-import type { Cvet, Element, Kadr, Ramka, StilLinii, T2, Vid } from './tipy';
+import type { Cvet, Element, Kadr, Ramka, StilLinii, T2, Vid, ZhivayaSkhema } from './tipy';
 
 /* ── Стиль ─────────────────────────────────────────────────────── */
 
@@ -45,6 +45,20 @@ export interface Sostoyanie {
   shag: number | null;
   /** Подписи точек: на лицевой стороне карточки «Узнай схему» их нет. */
   podpisi: boolean;
+  /** Выбранный режим схемы (ZhivayaSkhema.rezhimy); не задан — первый. */
+  rezhim?: string;
+}
+
+/**
+ * Режим, в котором рисовать кадр: горит группа режима — он; иначе
+ * выбранный; иначе первый. У схемы без режимов — undefined.
+ */
+export function rezhimKadra(skhema: ZhivayaSkhema, sost: Sostoyanie): string | undefined {
+  const r = skhema.rezhimy;
+  if (r === undefined || r.length === 0) return undefined;
+  const poPodsvetke = r.find((m) => m.gruppy.some((g) => sost.lit.has(g)));
+  if (poPodsvetke !== undefined) return poPodsvetke.id;
+  return r.find((m) => m.id === sost.rezhim)?.id ?? r[0]!.id;
 }
 
 export const SOSTOYANIE_POLNOE: Sostoyanie = { lit: new Set(), shag: null, podpisi: true };
