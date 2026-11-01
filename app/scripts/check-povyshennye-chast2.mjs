@@ -25,9 +25,6 @@
 import fs from 'node:fs';
 import { requireSrc } from './lib/load-ts.mjs';
 import { provB } from './lib/prov-chast2-b.mjs';
-import { provD } from './lib/prov-chast2-d.mjs';
-import { provE } from './lib/prov-chast2-e.mjs';
-import { provF } from './lib/prov-chast2-f.mjs';
 import { provG } from './lib/prov-chast2-g.mjs';
 import { provH } from './lib/prov-chast2-h.mjs';
 import { provJ } from './lib/prov-chast2-j.mjs';
@@ -190,9 +187,6 @@ function provC17(p, z) {
 
 const PROV = {
   ...provB({ ok, close, requireSrc }),
-  ...provD({ ok, close, requireSrc }),
-  ...provE({ ok, close, requireSrc }),
-  ...provF({ ok, close, requireSrc }),
   ...provG({ ok, close, requireSrc }),
   ...provH({ ok, close, requireSrc }),
   ...provJ({ ok, close, requireSrc }),

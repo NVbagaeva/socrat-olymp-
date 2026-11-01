@@ -9,27 +9,6 @@
 import { zagruzitVariant } from '../dannye';
 import type { Zapis } from '../types';
 import { B17_DZHOUL } from './b17';
-import { D14_POKAZ_TRIG } from './d14';
-import { D15_PRIZMA_PYATIUGOLNIK } from './d15';
-import { D16_LOG_LOG } from './d16';
-import { D17_KATUSHKA } from './d17';
-import { D18_PARALLELOGRAMM } from './d18';
-import { D19_PARA_PRYAMYH } from './d19';
-import { D20_RYAD_KVADRAT } from './d20';
-import { E14_LOG_KOREN } from './e14';
-import { E15_PRIZMA_TRAPECIYA } from './e15';
-import { E16_POKAZ_RAZLOZH } from './e16';
-import { E17_SNOS } from './e17';
-import { E18_VYSOTY_RAVNOBEDR } from './e18';
-import { E19_OKR_PRYAMYE } from './e19';
-import { E20_PERESTANOVKA } from './e20';
-import { F14_KOREN3 } from './f14';
-import { F15_PIRAMIDA_MEDIANY } from './f15';
-import { F16_DROB_LOG } from './f16';
-import { F17_RASPREDELENIE } from './f17';
-import { F18_TRAPECIYA_OKR } from './f18';
-import { F19_MODULI_KOREN } from './f19';
-import { F20_ALBOMY } from './f20';
 import { G14_POKAZ_KVADRAT } from './g14';
 import { G15_PRIZMA_SECHENIE } from './g15';
 import { G16_LOG_DROB } from './g16';
@@ -130,27 +109,6 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'c14.tgPodstanovka': C14_TG_PODSTANOVKA,
   'c17.maksvell': C17_MAKSVELL,
   /* Семья D: варианты 7 и 8. */
-  'd14.pokazTrig': D14_POKAZ_TRIG,
-  'd15.prizmaPyatiugolnik': D15_PRIZMA_PYATIUGOLNIK,
-  'd16.logLog': D16_LOG_LOG,
-  'd17.katushka': D17_KATUSHKA,
-  'd18.parallelogrammBiss': D18_PARALLELOGRAMM,
-  'd19.paraPryamyh': D19_PARA_PRYAMYH,
-  'd20.ryadKvadrat': D20_RYAD_KVADRAT,
-  'e14.logKoren': E14_LOG_KOREN,
-  'e15.prizmaTrapeciya': E15_PRIZMA_TRAPECIYA,
-  'e16.pokazRazlozh': E16_POKAZ_RAZLOZH,
-  'e17.snos': E17_SNOS,
-  'e18.vysotyRavnobedr': E18_VYSOTY_RAVNOBEDR,
-  'e19.okrPrjamye': E19_OKR_PRYAMYE,
-  'e20.perestanovkaCifr': E20_PERESTANOVKA,
-  'f14.koren3': F14_KOREN3,
-  'f15.piramidaMediany': F15_PIRAMIDA_MEDIANY,
-  'f16.drobLog': F16_DROB_LOG,
-  'f17.raspredelenie': F17_RASPREDELENIE,
-  'f18.trapeciyaOkr': F18_TRAPECIYA_OKR,
-  'f19.moduliKoren': F19_MODULI_KOREN,
-  'f20.albomy': F20_ALBOMY,
   /* Семья G: варианты 13 и 14 (№17 — b17.dzhoul). */
   'g14.pokazKvadrat': G14_POKAZ_KVADRAT,
   'g15.prizmaSechenie': G15_PRIZMA_SECHENIE,
