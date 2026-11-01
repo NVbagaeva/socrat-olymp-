@@ -15,6 +15,7 @@
 import katexLib from 'katex';
 import 'katex/dist/katex.min.css';
 
+import './katex-makrosy.js';
 import upgradeModule from './katex-upgrade.js';
 
 const { upgrade, render, inlineTex } = upgradeModule;

@@ -3,7 +3,7 @@
  * список построений, а не как простыня объектов.
  */
 
-import type { Cvet, Element, StilLinii, T2 } from './tipy';
+import type { Cvet, Element, StilLinii, T2, Tochki, ZhivayaSkhema } from './tipy';
 
 type Opcii = Partial<{
   gruppy: readonly string[];
@@ -75,3 +75,24 @@ export const duga = (
   doU: number,
   o: Opcii & { stil?: StilLinii } = {},
 ): Element => ({ vid: 'duga', id, c, r, ot, do: doU, ...o });
+
+/**
+ * Сцена без подвижных точек: чертёж задачи или теоремы, а не живая
+ * схема. Тот же движок — подписи, подсветка групп, экранная раскладка.
+ */
+export function nepodvizhnaya(
+  id: string,
+  t: Tochki,
+  elementy: (t: Tochki) => Element[],
+): ZhivayaSkhema {
+  return {
+    id,
+    nachalo: t,
+    podvizhnye: [],
+    pole: [-100, -100, 100, 100],
+    postroit: (x) => ({ elementy: elementy(x), zametka: null, znacheniya: [] }),
+    ogranichit: () => null,
+    sluchaynaya: () => t,
+    shagi: ['Чертёж'],
+  };
+}

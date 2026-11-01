@@ -49,6 +49,7 @@ const { SKILL_FORMULA } = requireSrc('content/vychisleniya');
    пакетом, тот же вызов renderToString, что и в lib/tex.ts. */
 const require = createRequire(import.meta.url);
 const katex = require('katex');
+requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex); // общие макросы KaTeX: \arc{…}
 function typeset(text) {
   return String(text).replace(/\$([^$]+)\$/g, (_match, formula) =>
     katex.renderToString(formula, { throwOnError: false, displayMode: false }));

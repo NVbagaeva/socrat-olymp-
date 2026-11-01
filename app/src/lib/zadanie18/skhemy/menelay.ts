@@ -1,9 +1,11 @@
 /**
  * Схема 19. Теоремы Менелая и Чевы.
  *
- * Треугольник ABC. Менелай: прямая через C₁ на AB и A₁ на BC
- * пересекает продолжение AC в B₁ (ручки — C₁ и A₁, скользят по
- * сторонам). Чева: точка P внутри треугольника, чевианы AA₂, BB₂, CC₂.
+ * Треугольник ABC, два режима (переключатель над чертежом).
+ * Менелай: прямая через C₁ на AB и A₁ на BC пересекает продолжение AC
+ * в B₁ (ручки — C₁ и A₁, скользят по сторонам). Чева: точка P внутри
+ * треугольника, чевианы AA₁, BB₁, CC₁ — буквы как в источнике; в коде
+ * их основания — A2, B2, C2, чтобы не путать с точками Менелая.
  * Пока тянут вершины, C₁ и A₁ сохраняют доли на сторонах, а P —
  * барицентрические координаты.
  */
@@ -45,41 +47,58 @@ export function tochkiMenelaya(t: Tochki) {
   };
 }
 
-function postroit(t: Tochki): Kadr {
+/** Режимы: у Менелая и Чевы точки на сторонах называются одинаково — A₁, B₁, C₁. */
+const REZHIMY = [
+  { id: 'menelay', nazvanie: 'Менелай', gruppy: ['menelay', 'menelay-dok'] },
+  { id: 'cheva', nazvanie: 'Чева', gruppy: ['cheva', 'cheva-dok'] },
+] as const;
+
+function postroit(t: Tochki, rezhim?: string): Kadr {
   const { A, B, C, C1, A1, B1, P, A2, B2, C2 } = tochkiMenelaya(t);
+  const treugolnik: Element[] = [otr('AB', A, B), otr('BC', B, C), otr('CA', C, A)];
+  if (rezhim === 'cheva') {
+    const che =
+      (dist(A, C2) / dist(C2, B)) * (dist(B, A2) / dist(A2, C)) * (dist(C, B2) / dist(B2, A));
+    return {
+      elementy: [
+        mnog('f-apc', [A, P, C], { gruppy: ['cheva-dok'], cvet: 'a' }),
+        mnog('f-bpc', [B, P, C], { gruppy: ['cheva-dok'], cvet: 'b' }),
+        ...treugolnik,
+        otr('AA1', A, A2, { gruppy: ['cheva', 'cheva-dok'], cvet: 'a' }),
+        otr('BB1', B, B2, { gruppy: ['cheva', 'cheva-dok'], cvet: 'a' }),
+        otr('CC1', C, C2, { gruppy: ['cheva', 'cheva-dok'], cvet: 'a' }),
+        tch('A', A, { gruppy: ['cheva'], cvet: 'a' }),
+        tch('B', B, { gruppy: ['cheva'], cvet: 'a' }),
+        tch('C', C, { gruppy: ['cheva'], cvet: 'a' }),
+        tch('P', P, { ruchka: 'P', gruppy: ['cheva', 'cheva-dok'], cvet: 'b' }),
+        tch('A_1', A2, { gruppy: ['cheva'], cvet: 'a' }),
+        tch('B_1', B2, { gruppy: ['cheva'], cvet: 'a' }),
+        tch('C_1', C2, { gruppy: ['cheva'], cvet: 'a' }),
+      ],
+      zametka: null,
+      znacheniya: [
+        `Чева: $\\tfrac{AC_1}{C_1B}\\cdot\\tfrac{BA_1}{A_1C}\\cdot\\tfrac{CB_1}{B_1A} = ${chisloTeX(che)}$`,
+      ],
+    };
+  }
   const daleko = dist(C, B1) < dist(A, B1) ? C : A;
-  const el: Element[] = [
-    mnog('f-apc', [A, P, C], { gruppy: ['cheva-dok'], cvet: 'a' }),
-    mnog('f-bpc', [B, P, C], { gruppy: ['cheva-dok'], cvet: 'b' }),
-    otr('AB', A, B),
-    otr('BC', B, C),
-    otr('CA', C, A),
-    otr('CB1', daleko, B1, { stil: 'prodolzhenie', gruppy: ['menelay'] }),
-    otr('men', C1, B1, { gruppy: ['menelay', 'menelay-dok'], cvet: 'b' }),
-    otr('AA2', A, A2, { skrytyy: true, gruppy: ['cheva', 'cheva-dok'], cvet: 'a' }),
-    otr('BB2', B, B2, { skrytyy: true, gruppy: ['cheva', 'cheva-dok'], cvet: 'a' }),
-    otr('CC2', C, C2, { skrytyy: true, gruppy: ['cheva', 'cheva-dok'], cvet: 'a' }),
-    tch('A', A, { gruppy: ['menelay'], cvet: 'a' }),
-    tch('B', B, { gruppy: ['menelay'], cvet: 'a' }),
-    tch('C', C, { gruppy: ['menelay'], cvet: 'a' }),
-    tch('C_1', C1, { ruchka: 'C1', gruppy: ['menelay'], cvet: 'b' }),
-    tch('A_1', A1, { ruchka: 'A1', gruppy: ['menelay'], cvet: 'b' }),
-    tch('B_1', B1, { gruppy: ['menelay'], cvet: 'b' }),
-    tch('P', P, { skrytyy: true, ruchka: 'P', gruppy: ['cheva', 'cheva-dok'], cvet: 'a' }),
-    tch('A_2', A2, { skrytyy: true, gruppy: ['cheva'], cvet: 'a' }),
-    tch('B_2', B2, { skrytyy: true, gruppy: ['cheva'], cvet: 'a' }),
-    tch('C_2', C2, { skrytyy: true, gruppy: ['cheva'], cvet: 'a' }),
-  ];
   const men =
     (dist(A, C1) / dist(C1, B)) * (dist(B, A1) / dist(A1, C)) * (dist(C, B1) / dist(B1, A));
-  const che =
-    (dist(A, C2) / dist(C2, B)) * (dist(B, A2) / dist(A2, C)) * (dist(C, B2) / dist(B2, A));
   return {
-    elementy: el,
+    elementy: [
+      ...treugolnik,
+      otr('CB1', daleko, B1, { stil: 'prodolzhenie', gruppy: ['menelay'] }),
+      otr('men', C1, B1, { gruppy: ['menelay', 'menelay-dok'], cvet: 'b' }),
+      tch('A', A, { gruppy: ['menelay'], cvet: 'a' }),
+      tch('B', B, { gruppy: ['menelay'], cvet: 'a' }),
+      tch('C', C, { gruppy: ['menelay'], cvet: 'a' }),
+      tch('C_1', C1, { ruchka: 'C1', gruppy: ['menelay'], cvet: 'b' }),
+      tch('A_1', A1, { ruchka: 'A1', gruppy: ['menelay'], cvet: 'b' }),
+      tch('B_1', B1, { gruppy: ['menelay'], cvet: 'b' }),
+    ],
     zametka: null,
     znacheniya: [
       `Менелай: $\\tfrac{AC_1}{C_1B}\\cdot\\tfrac{BA_1}{A_1C}\\cdot\\tfrac{CB_1}{B_1A} = ${chisloTeX(men)}$`,
-      `Чева: $\\tfrac{AC_2}{C_2B}\\cdot\\tfrac{BA_2}{A_2C}\\cdot\\tfrac{CB_2}{B_2A} = ${chisloTeX(che)}$`,
     ],
   };
 }
@@ -177,6 +196,7 @@ export const MENELAY: ZhivayaSkhema = {
   ogranichit,
   prisposobit,
   sluchaynaya,
+  rezhimy: REZHIMY,
   shagi: ['Треугольник $ABC$ и прямая через $C_1$ и $A_1$, пересекающая продолжение $AC$ в $B_1$'],
   imenaRuchek: {
     C1: 'Точка C₁ на стороне AB',
