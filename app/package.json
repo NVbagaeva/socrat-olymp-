@@ -120,6 +120,7 @@
     "test:pdf-spravochnik-1": "node scripts/check-pdf-spravochnik-1.mjs",
     "test:error-boundaries": "node scripts/check-error-boundaries.mjs",
     "test:sticky-tabs": "node scripts/check-sticky-tabs.mjs",
+    "test:fab-stable": "node scripts/check-fab-stable.mjs",
     "test:mobile-overflow": "node scripts/check-mobile-overflow.mjs",
     "test:zadanie-hero": "node scripts/check-zadanie-hero.mjs",
     "test:razdely-nav": "node scripts/check-razdely-nav.mjs",
