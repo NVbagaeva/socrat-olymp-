@@ -30,7 +30,7 @@ export function SpisokSkhem18() {
     if (status !== null) {
       /* Фильтр по статусу — только среди собранных схем. */
       if (skhema18(s.id) === undefined) return false;
-      if (status18(progress[s.id]) !== status) return false;
+      if (status18(progress, s.id) !== status) return false;
     }
     return true;
   });
@@ -108,7 +108,7 @@ export function SpisokSkhem18() {
                     </li>
                   );
                 }
-                const st = status18(progress[s.id]);
+                const st = status18(progress, s.id);
                 return (
                   <li key={s.id} className="z18-plitka">
                     <Link className="z18-plitka__ssylka" href={`${BASE}/skhemy/${s.id}/`}>

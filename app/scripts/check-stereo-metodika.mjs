@@ -29,6 +29,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import katex from 'katex';
+requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex); // общие макросы KaTeX: \arc{…}
 import { APP, requireSrc } from './lib/load-ts.mjs';
 
 const failures = [];

@@ -10,6 +10,7 @@
 
 import { useEffect, useRef } from 'react';
 import katex from 'katex';
+import '@/lib/graph/katex-makrosy.js';
 
 import 'katex/dist/katex.min.css';
 import '@/lib/graph/graph.css';

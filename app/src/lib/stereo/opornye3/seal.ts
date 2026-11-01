@@ -6,6 +6,7 @@
  */
 
 import katex from 'katex';
+import '@/lib/graph/katex-makrosy.js';
 import { typeset } from '../../tex';
 import type { Model } from '../../solid/model';
 import type { Vec3 } from '../../solid/vec';

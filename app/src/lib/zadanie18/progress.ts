@@ -1,188 +1,103 @@
 'use client';
 
 /**
- * Прогресс ключевых схем №18 — коробки Лейтнера.
+ * Прогресс ключевых схем №18 — поверх общего прогресса карточек по
+ * теории (lib/kartochki/progress, ключ budetege:kartochki:18:v1).
  *
- * Одно хранилище на плитки схем, кнопки «Знаю / Не знаю» на странице
- * схемы, карточки и индикатор во вводной плашке: ответ в одном месте
- * сразу виден во всех. Устройство — как у lib/progressStore.ts:
- * localStorage под своим ключом, чтение через useSyncExternalStore,
- * на сервере — пустой снимок, любое обращение к хранилищу в try/catch.
+ * У схемы две карточки общей колоды (lib/zadanie18/kartochki):
+ * «Узнай схему по чертежу» и «Вспомни следствия». Плитки, «Знаю / Не
+ * знаю» на странице схемы и вводная плашка читают и пишут те же
+ * коробки, что вкладка «Карточки»: ответ в одном месте сразу виден
+ * во всех.
  *
- * Коробки 1…5. «Знаю» переводит схему в следующую коробку (не ниже
- * второй), «Не знаю» возвращает в первую. Статус: коробки нет —
- * «Не начинал», первая — «Учу», вторая и выше — «Знаю».
+ * Статус схемы: ни одна карточка ещё не оценена — «Не начинал»; обе
+ * во 2-й коробке и выше (последний ответ — «Знаю») — «Знаю»; иначе —
+ * «Учу». «Знаю / Не знаю» на странице схемы оценивает обе карточки.
  */
 
-import { useSyncExternalStore } from 'react';
 import type { Status18 } from '@/content/zadanie18';
+import {
+  korobka,
+  neznakoma,
+  otsenit,
+  poraPovtoryat,
+  type ProgressKolody,
+} from '@/lib/kartochki/leitner';
+import { prochitat, useProgressKolody, zapisatProgress } from '@/lib/kartochki/progress';
+import { storage } from '@/lib/storage';
+import { NOMER_18, kartochkiSkhemy } from './kartochki';
 
-export const KLYUCH_18 = 'budetege:planimetriya-18:skhemy:v1';
-export const KOROBOK = 5;
-
-export interface Zapis18 {
-  korobka: number;
-  /** Сколько раз отвечал по схеме. */
-  otvetov: number;
-  /** Когда отвечал последний раз, мс. */
-  kogda: number;
+export function useProgress18(): ProgressKolody {
+  return useProgressKolody(NOMER_18);
 }
 
-export type Progress18 = Readonly<Record<string, Zapis18>>;
+export function status18(p: ProgressKolody, skhema: string): Status18 {
+  const b = kartochkiSkhemy(skhema).map((id) => korobka(p, id));
+  if (b.every((x) => x === 0)) return 'new';
+  return b.every((x) => x >= 2) ? 'known' : 'learning';
+}
 
-const PUSTO: Progress18 = {};
+/** Младшая коробка карточек схемы; 0 — схему ещё не открывали. */
+export function korobkaSkhemy(p: ProgressKolody, skhema: string): number {
+  return Math.min(...kartochkiSkhemy(skhema).map((id) => korobka(p, id)));
+}
 
-function razobrat(raw: string | null): Progress18 {
-  if (raw === null) return PUSTO;
-  try {
-    const v: unknown = JSON.parse(raw);
-    if (typeof v !== 'object' || v === null) return PUSTO;
-    const out: Record<string, Zapis18> = {};
-    for (const [id, z] of Object.entries(v as Record<string, unknown>)) {
-      if (typeof z !== 'object' || z === null) continue;
-      const k = (z as Record<string, unknown>).korobka;
-      const n = (z as Record<string, unknown>).otvetov;
-      const t = (z as Record<string, unknown>).kogda;
-      if (typeof k !== 'number' || k < 1 || k > KOROBOK) continue;
-      out[id] = {
-        korobka: Math.round(k),
-        otvetov: typeof n === 'number' && n > 0 ? n : 1,
-        kogda: typeof t === 'number' ? t : 0,
+/** «Знаю / Не знаю» на странице схемы: оценка обеих её карточек. */
+export function otmetit18(skhema: string, znayu: boolean): void {
+  const seychas = Date.now();
+  const p = kartochkiSkhemy(skhema).reduce(
+    (acc, id) => otsenit(acc, id, znayu, seychas),
+    prochitat(NOMER_18),
+  );
+  zapisatProgress(NOMER_18, p);
+}
+
+/** Карточки колоды схем, которые пора повторить к `seychas`. */
+export function kPovtoreniyu(
+  skhemy: readonly string[],
+  p: ProgressKolody,
+  seychas: number,
+): number {
+  return skhemy.flatMap(kartochkiSkhemy).filter((id) => poraPovtoryat(p, id, seychas)).length;
+}
+
+/** Незнакомые карточки колоды схем: новые и с последним «Не знаю». */
+export function neznakomyh(skhemy: readonly string[], p: ProgressKolody): number {
+  return skhemy.flatMap(kartochkiSkhemy).filter((id) => neznakoma(p, id)).length;
+}
+
+/* ── Перенос старого прогресса ─────────────────────────────────── */
+
+/**
+ * До общей колоды у схем было своё хранилище: схема → {korobka,
+ * otvetov, kogda}, ключ budetege:planimetriya-18:skhemy:v1. Коробка
+ * схемы переносится в обе её карточки (вместе со временем ответа —
+ * «На сегодня» считает по нему), если у карточки ещё нет своей записи.
+ * Старый ключ после переноса удаляется: перенос один раз.
+ */
+const STARYY_KLYUCH = 'planimetriya-18:skhemy:v1';
+
+export function perenestiStaryyProgress(): void {
+  const raw = storage.get<unknown>(STARYY_KLYUCH, null);
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) return;
+  let p = prochitat(NOMER_18);
+  const bylo = p;
+  for (const [skhema, z] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof z !== 'object' || z === null) continue;
+    const { korobka: k, otvetov, kogda } = z as Record<string, unknown>;
+    if (typeof k !== 'number' || !Number.isInteger(k) || k < 1 || k > 5) continue;
+    for (const id of kartochkiSkhemy(skhema)) {
+      if (p[id] !== undefined) continue;
+      p = {
+        ...p,
+        [id]: {
+          b: k,
+          n: typeof otvetov === 'number' && otvetov > 0 ? otvetov : 1,
+          ...(typeof kogda === 'number' && kogda > 0 ? { t: kogda } : {}),
+        },
       };
     }
-    return out;
-  } catch {
-    return PUSTO;
   }
-}
-
-let cache: Progress18 | null = null;
-const slushateli = new Set<() => void>();
-
-function snimok(): Progress18 {
-  if (cache === null) {
-    try {
-      cache = razobrat(window.localStorage.getItem(KLYUCH_18));
-    } catch {
-      cache = PUSTO;
-    }
-  }
-  return cache;
-}
-
-function opovestit(): void {
-  slushateli.forEach((fn) => fn());
-}
-
-function podpisatsya(fn: () => void): () => void {
-  slushateli.add(fn);
-  const sync = (e: StorageEvent) => {
-    if (e.key === KLYUCH_18 || e.key === null) {
-      cache = null;
-      opovestit();
-    }
-  };
-  window.addEventListener('storage', sync);
-  return () => {
-    slushateli.delete(fn);
-    window.removeEventListener('storage', sync);
-  };
-}
-
-function sohranit(next: Progress18): void {
-  cache = next;
-  try {
-    window.localStorage.setItem(KLYUCH_18, JSON.stringify(next));
-  } catch {
-    /* Хранилище недоступно — прогресс живёт до перезагрузки. */
-  }
-  opovestit();
-}
-
-export function useProgress18(): Progress18 {
-  return useSyncExternalStore(podpisatsya, snimok, () => PUSTO);
-}
-
-/** Следующая коробка по ответу: чистая функция, её проверяет тест. */
-export function sleduyushchayaKorobka(korobka: number | undefined, znayu: boolean): number {
-  if (!znayu) return 1;
-  return Math.min(KOROBOK, Math.max(2, (korobka ?? 0) + 1));
-}
-
-export function otmetit18(id: string, znayu: boolean): void {
-  const tek = snimok();
-  const z = tek[id];
-  sohranit({
-    ...tek,
-    [id]: {
-      korobka: sleduyushchayaKorobka(z?.korobka, znayu),
-      otvetov: (z?.otvetov ?? 0) + 1,
-      kogda: Date.now(),
-    },
-  });
-}
-
-export function sbrosit18(): void {
-  sohranit(PUSTO);
-}
-
-export function status18(z: Zapis18 | undefined): Status18 {
-  if (z === undefined) return 'new';
-  return z.korobka >= 2 ? 'known' : 'learning';
-}
-
-/**
- * Порядок колоды: сначала младшие коробки, внутри коробки — давно не
- * повторявшиеся. Новые схемы идут вместе с первой коробкой.
- */
-export function poryadokKolody(ids: readonly string[], p: Progress18): string[] {
-  return [...ids].sort((a, b) => {
-    const za = p[a];
-    const zb = p[b];
-    const ka = za?.korobka ?? 1;
-    const kb = zb?.korobka ?? 1;
-    if (ka !== kb) return ka - kb;
-    return (za?.kogda ?? 0) - (zb?.kogda ?? 0);
-  });
-}
-
-/**
- * Через сколько дней схему пора повторить, по коробке: первая — сразу,
- * дальше 1, 3, 7 и 14 дней. Классическая лестница Лейтнера.
- */
-export const INTERVAL_DNEY: Readonly<Record<number, number>> = { 1: 0, 2: 1, 3: 3, 4: 7, 5: 14 };
-const DEN = 24 * 60 * 60 * 1000;
-
-/** Пора ли повторять: новая схема — пора; иначе прошёл интервал её коробки. */
-export function poraPovtoryat(z: Zapis18 | undefined, seychas: number): boolean {
-  if (z === undefined) return true;
-  return seychas - z.kogda >= (INTERVAL_DNEY[z.korobka] ?? 0) * DEN;
-}
-
-/** Схемы к повторению сегодня, в порядке колоды. */
-export function kPovtoreniyu(ids: readonly string[], p: Progress18, seychas: number): string[] {
-  return poryadokKolody(
-    ids.filter((id) => poraPovtoryat(p[id], seychas)),
-    p,
-  );
-}
-
-/** Незнакомые: не начатые и из первой коробки. */
-export function neznakomye(ids: readonly string[], p: Progress18): string[] {
-  return poryadokKolody(
-    ids.filter((id) => status18(p[id]) !== 'known'),
-    p,
-  );
-}
-
-/* Запуск сессии карточек из другого места страницы (вводная плашка). */
-export const SOBYTIE_UCHIT = 'budetege:z18-uchit';
-export type PodborKolody = 'segodnya' | 'neznakomye';
-
-export function zapustitKartochki(podbor: PodborKolody): void {
-  try {
-    window.dispatchEvent(new CustomEvent<PodborKolody>(SOBYTIE_UCHIT, { detail: podbor }));
-  } catch {
-    /* Старый браузер без CustomEvent: кнопка просто прокрутит к карточкам. */
-  }
+  if (p !== bylo) zapisatProgress(NOMER_18, p);
+  storage.remove(STARYY_KLYUCH);
 }

@@ -4,6 +4,7 @@ import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { tasksPage } from '@/content/tasks';
 import { ZADANIE18 } from '@/content/zadanie18';
 import { ZADANIYA } from '@/lib/paths';
+import { Perenos18 } from './Perenos18';
 
 /**
  * Оболочка задания №18: крошки, заголовок и лента вкладок — то же
@@ -27,6 +28,7 @@ export function Shell18({ children }: { children: React.ReactNode }) {
         />
         <RazdelTabs base={base} tabs={ZADANIE18.tabs} />
         <div className="section-panel">{children}</div>
+        <Perenos18 />
       </main>
     </AppShell>
   );

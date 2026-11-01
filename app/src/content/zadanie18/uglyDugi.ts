@@ -15,29 +15,29 @@ export const SKHEMA_UGLY_DUGI: Skhema18 = {
   sledstviya: [
     {
       tekst:
-        '**Хорды** пересекаются внутри круга: $\\angle AMD = \\dfrac{\\smile AD + \\smile BC}{2}$.',
+        '**Хорды** пересекаются внутри круга: $\\angle AMD = \\dfrac{\\arc{AD} + \\arc{BC}}{2}$.',
       gruppy: ['hordy'],
     },
     {
       tekst:
-        '**Секущие** пересекаются вне круга: $\\angle AMD = \\dfrac{\\smile AD - \\smile BC}{2}$ (бо́льшая дуга минус меньшая). Перетащи $M$ из круга наружу.',
+        '**Секущие** пересекаются вне круга: $\\angle AMD = \\dfrac{\\arc{AD} - \\arc{BC}}{2}$ (бо́льшая дуга минус меньшая). Перетащи $M$ из круга наружу.',
       gruppy: ['sekushchie'],
     },
   ],
   dokazatelstvo: [
     {
       tekst:
-        'Оба случая доказываются одним дополнительным построением — хордой $BD$. Вписанные углы: $\\angle ABD = \\dfrac{\\smile AD}{2}$, $\\angle CDB = \\dfrac{\\smile BC}{2}$.',
+        'Оба случая доказываются одним дополнительным построением — хордой $BD$. Вписанные углы: $\\angle ABD = \\dfrac{\\arc{AD}}{2}$, $\\angle CDB = \\dfrac{\\arc{BC}}{2}$.',
       gruppy: ['vpisannyy'],
     },
     {
       tekst:
-        '$M$ внутри круга: $\\angle AMD$ — внешний угол треугольника $BMD$, он равен сумме двух углов, не смежных с ним: $\\angle AMD = \\angle MBD + \\angle MDB = \\dfrac{\\smile AD}{2} + \\dfrac{\\smile BC}{2}$.',
+        '$M$ внутри круга: $\\angle AMD$ — внешний угол треугольника $BMD$, он равен сумме двух углов, не смежных с ним: $\\angle AMD = \\angle MBD + \\angle MDB = \\dfrac{\\arc{AD}}{2} + \\dfrac{\\arc{BC}}{2}$.',
       gruppy: ['dok', 'hordy'],
     },
     {
       tekst:
-        '$M$ вне круга: теперь внешний угол треугольника $BMD$ — это $\\angle ABD$: $\\angle ABD = \\angle BMD + \\angle BDM$. Отсюда $\\angle AMD = \\angle ABD - \\angle BDC = \\dfrac{\\smile AD}{2} - \\dfrac{\\smile BC}{2}$.',
+        '$M$ вне круга: теперь внешний угол треугольника $BMD$ — это $\\angle ABD$: $\\angle ABD = \\angle BMD + \\angle BDM$. Отсюда $\\angle AMD = \\angle ABD - \\angle BDC = \\dfrac{\\arc{AD}}{2} - \\dfrac{\\arc{BC}}{2}$.',
       gruppy: ['dok', 'sekushchie'],
     },
   ],
@@ -59,8 +59,8 @@ export const SKHEMA_UGLY_DUGI: Skhema18 = {
   zapominalka:
     '**Внутри — полусумма, снаружи — полуразность.** Вершина на окружности — просто половина дуги.',
   kartochka: [
-    'хорды: $\\angle = \\dfrac{\\smile AD + \\smile BC}{2}$',
-    'секущие: $\\angle = \\dfrac{\\smile AD - \\smile BC}{2}$',
+    'хорды: $\\angle = \\dfrac{\\arc{AD} + \\arc{BC}}{2}$',
+    'секущие: $\\angle = \\dfrac{\\arc{AD} - \\arc{BC}}{2}$',
     'доп. построение — хорда $BD$',
   ],
 };
