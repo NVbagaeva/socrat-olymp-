@@ -38,6 +38,9 @@ import { provR } from './lib/prov-chast2-r.mjs';
 import { provU } from './lib/prov-chast2-u.mjs';
 import { provV } from './lib/prov-chast2-v.mjs';
 import { provW } from './lib/prov-chast2-w.mjs';
+import { provO } from './lib/prov-chast2-o.mjs';
+import { provI } from './lib/prov-chast2-i.mjs';
+import { provAE } from './lib/prov-chast2-ae.mjs';
 
 const { MAX_BALL, MAX_PART1, MAX_PART2, MAX_TOTAL, ballText } = requireSrc(
   'content/variantOnline/bally',
@@ -200,6 +203,9 @@ const PROV = {
   ...provU({ ok, close }),
   ...provV({ ok, close }),
   ...provW({ ok, close }),
+  ...provO({ ok, close, requireSrc }),
+  ...provI({ ok, close, requireSrc }),
+  ...provAE({ ok, close, requireSrc }),
   'z17.kachka': prov17,
   'c14.tgPodstanovka': provC14,
   'c17.maksvell': provC17,

@@ -7,6 +7,26 @@
  */
 
 import { zagruzitVariant } from '../dannye';
+import { O14_POKAZ_KOS } from './o14';
+import { O15_PIRAMIDA_RASST } from './o15';
+import { O16_MODUL_DROB } from './o16';
+import { O18_BISS_VYSOTA_MEDIANA } from './o18';
+import { O19_W_KOREN } from './o19';
+import { O20_NOD_NOK } from './o20';
+import { I14_KOS_TROYNOY } from './i14';
+import { I15_PRIZMA_DIAG } from './i15';
+import { I16_LOG_OSNOVANIE } from './i16';
+import { I17_UCHASTOK } from './i17';
+import { I18_DVE_OKR_KASANIE } from './i18';
+import { I19_KUB_OTREZOK } from './i19';
+import { I20_SUMMA_CIFR } from './i20';
+import { AE14_LOG_OBRATNYY } from './ae14';
+import { AE15_SHESTIUG_PIRAMIDA } from './ae15';
+import { AE16_KOREN_TREHCHLEN } from './ae16';
+import { AE17_POLUKRUG } from './ae17';
+import { AE18_VNEVPISANNAYA } from './ae18';
+import { AE19_POKAZ_OTREZOK } from './ae19';
+import { AE20_PROGRESSIYA } from './ae20';
 import type { Zapis } from '../types';
 import { X14_TG_CTG } from './x14';
 import { X15_PRIZMA_BD } from './x15';
@@ -211,6 +231,26 @@ export const SHABLONY_2: Readonly<Record<string, Shablon2<any>>> = {
   'a18.perpHordy': A18_PERP_HORDY,
   'a19.kvadratParametr': A19_KVADRAT_PARAMETR,
   'a20.monety': A20_MONETY,
+  'o14.pokazKos': O14_POKAZ_KOS,
+  'o15.piramidaRasst': O15_PIRAMIDA_RASST,
+  'o16.modulDrob': O16_MODUL_DROB,
+  'o18.bissVysotaMediana': O18_BISS_VYSOTA_MEDIANA,
+  'o19.wKoren': O19_W_KOREN,
+  'o20.nodNok': O20_NOD_NOK,
+  'i14.kosTroynoy': I14_KOS_TROYNOY,
+  'i15.prizmaDiag': I15_PRIZMA_DIAG,
+  'i16.logOsnovanie': I16_LOG_OSNOVANIE,
+  'i17.uchastok': I17_UCHASTOK,
+  'i18.dveOkrKasanie': I18_DVE_OKR_KASANIE,
+  'i19.kubOtrezok': I19_KUB_OTREZOK,
+  'i20.summaCifr': I20_SUMMA_CIFR,
+  'ae14.logObratnyy': AE14_LOG_OBRATNYY,
+  'ae15.shestiugPiramida': AE15_SHESTIUG_PIRAMIDA,
+  'ae16.korenTrehchlen': AE16_KOREN_TREHCHLEN,
+  'ae17.polukrug': AE17_POLUKRUG,
+  'ae18.vnevpisannaya': AE18_VNEVPISANNAYA,
+  'ae19.pokazOtrezok': AE19_POKAZ_OTREZOK,
+  'ae20.progressiya': AE20_PROGRESSIYA,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
