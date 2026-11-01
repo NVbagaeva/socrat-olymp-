@@ -6,6 +6,11 @@
  * решений, а само множество решений по x — кусками, с точными концами
  * (концы — нули множителей, их формулы знает описание рисунка).
  *
+ * Для чётности (глава 5) параметр меняет сам симметричный график:
+ * решения отмечены точками, решение с x = 0 — акцентным цветом, а под
+ * числом решений — вывод: при найденном значении решение одно, при
+ * отброшенном кандидате кроме x = 0 есть ещё пара.
+ *
  * Описание — данные и функции; функции в браузер со страницы не
  * передать, поэтому компонент (components/zadanie19/Zhivoy19.tsx)
  * берёт описание здесь по id. Число решений считается точно —
@@ -45,10 +50,11 @@ export interface Zhivoy19 {
   /**
    * Что движет параметр: поворачивает прямую (по умолчанию), сдвигает
    * её параллельно ('sdvig'), меняет окружность или горизонтальную
-   * прямую a = const метода областей — от этого заголовок блока и
-   * строка под рисунком.
+   * прямую a = const метода областей или сам график ('grafik', метод 5:
+   * график чётной функции меняется вместе с параметром) — от этого
+   * заголовок блока и строка под рисунком.
    */
-  vid?: 'pryamaya' | 'sdvig' | 'okruzhnost' | 'gorizontal';
+  vid?: 'pryamaya' | 'sdvig' | 'okruzhnost' | 'gorizontal' | 'grafik';
   bukva: string;
   min: number;
   max: number;
@@ -60,7 +66,7 @@ export interface Zhivoy19 {
   resheniy?: (a: number) => number;
   /** Метод областей: множество решений по x при этом a. */
   mnozhestvo?: (a: number) => KusokX19[];
-  /** Строка-вывод под множеством: текст с формулами в долларах. */
+  /** Строка-вывод под множеством или после числа решений: текст с формулами в долларах. */
   itog?: (a: number) => string;
 }
 
@@ -275,7 +281,104 @@ function m04r3Resheniy(k: number): number {
 const POLUOKR_2 = (x: number) => Math.sqrt(Math.max(0, 4 - x * x));
 const GIP_MOD = (x: number) => (Math.abs(x) < 0.12 ? null : 1 / Math.abs(x));
 
+/* ── Метод 5: чётность ───────────────────────────────────────────── */
+
+const blizko = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+
+/**
+ * Корни уравнения φ(|x|) = 0 по корням t ≥ 0 уравнения φ(t) = 0:
+ * t = 0 даёт один корень x = 0, каждое t > 0 — пару ±t.
+ */
+function korniChetnye(t: number[]): number[] {
+  const out: number[] = [];
+  for (const v of t) {
+    if (Math.abs(v) < 1e-9) out.push(0);
+    else if (v > 0) out.push(-v, v);
+  }
+  return [...new Set(out)].sort((p, q) => p - q);
+}
+
+/* Разбор метода 5: x² + a|x| + a² − 4 = 0, при x ≥ 0 — t² + at + a² − 4 = 0. */
+function m05r1Korni(a: number): number[] {
+  return korniChetnye(korniKv(1, a, a * a - 4));
+}
+
+/* Разбор метода 5: y = x² + a, x² + y² = 1. Подстановка x² = y − a: y² + y − a − 1 = 0, x² = y − a ≥ 0. */
+function m05r3Tochki(a: number): [number, number][] {
+  const out: [number, number][] = [];
+  for (const y of korniKv(1, 1, -a - 1)) {
+    const x2 = y - a;
+    if (Math.abs(x2) < 1e-9) out.push([0, y]);
+    else if (x2 > 0) out.push([-Math.sqrt(x2), y], [Math.sqrt(x2), y]);
+  }
+  return out;
+}
+
 const ZHIVYE: Record<string, Zhivoy19> = {
+  /* Разбор метода 5: график y = x² + a|x| + a² − 4 и его нули — симметричные пары и x = 0. */
+  'm05-r1': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -3,
+    max: 3,
+    shag: 0.01,
+    start: 1,
+    osobye: [
+      { a: -4 / Math.sqrt(3), tex: '-\\frac{4}{\\sqrt3}' },
+      { a: -2, tex: '-2' },
+      { a: 2, tex: '2' },
+      { a: 4 / Math.sqrt(3), tex: '\\frac{4}{\\sqrt3}' },
+    ],
+    scena: (a) =>
+      scena(
+        { x: [-4, 4], y: [-5, 6] },
+        {
+          curves: [grafik((x) => x * x + a * Math.abs(x) + a * a - 4, 'lineA')],
+          points: m05r1Korni(a).map((x) => tochka(x, 0, null, false, x === 0 ? 'accent' : 'cross')),
+        },
+        `График y = x² + a|x| + a² − 4 при a = ${chislo(a)} и его нули`,
+      ),
+    resheniy: (a) => m05r1Korni(a).length,
+    itog: (a) => {
+      if (blizko(a, 2)) return 'найденное значение: корень один, $x=0$';
+      if (blizko(a, -2)) return 'кандидат отброшен: кроме $x=0$ ещё $x=\\pm2$';
+      return m05r1Korni(a).length > 0 ? 'корни парами $\\pm x_0$, $x=0$ не корень' : 'корней нет';
+    },
+  },
+  /* Разбор метода 5: окружность x² + y² = 1 и парабола y = x² + a, сдвигающаяся по вертикали. */
+  'm05-r3': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -2,
+    max: 2,
+    shag: 0.01,
+    start: 0,
+    osobye: [
+      { a: -1.25, tex: '-\\frac54' },
+      { a: -1, tex: '-1' },
+      { a: 1, tex: '1' },
+    ],
+    scena: (a) =>
+      scena(
+        { x: [-2.5, 2.5], y: [-2, 2.5] },
+        {
+          curves: [okruzhnost(0, 0, 1, 'lineA'), grafik((x) => x * x + a, 'lineB')],
+          points: m05r3Tochki(a).map(([x, y]) =>
+            tochka(x, y, null, false, x === 0 ? 'accent' : 'cross'),
+          ),
+        },
+        `Окружность x² + y² = 1 и парабола y = x² + a при a = ${chislo(a)}`,
+      ),
+    resheniy: (a) => m05r3Tochki(a).length,
+    itog: (a) => {
+      if (blizko(a, 1)) return 'найденное значение: решение одно, $(0;\\,1)$';
+      if (blizko(a, -1)) return 'кандидат отброшен: кроме $(0;\\,-1)$ ещё $(\\pm1;\\,0)$';
+      return m05r3Tochki(a).length > 0
+        ? 'решения парами $(\\pm x_0;\\,y_0)$, $x=0$ ни в одном'
+        : 'решений нет';
+    },
+  },
+
   /* Разбор метода 4: полуокружность y = √(4 − x²) и прямые y = x + a — сдвиг параллельно. */
   'm04-r1': {
     vid: 'sdvig',

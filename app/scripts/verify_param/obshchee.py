@@ -185,22 +185,28 @@ def kontsy(kuski):
 # ── Сверка ответа ───────────────────────────────────────────────────
 
 
-def sverit(otvet_tex, uslovie, a_lo, a_hi, shag=0.02, osobye=(), epsy=(1e-2, 1e-3)):
+def sverit(otvet_tex, uslovie, a_lo, a_hi, shag=0.02, osobye=(), epsy=(1e-2, 1e-3), do_pervogo=False):
     """Сравнить ответ с перебором параметра.
 
     uslovie(a) -> bool: выполняется ли условие задачи при этом a.
     Возвращает список расхождений: (a, по_перебору, по_ответу).
+    do_pervogo — до первого расхождения: для заведомо неверного ответа
+    сначала проверяются концы и особые значения, где он обычно и ошибается.
     """
     kuski = mnozhestvo(otvet_tex)
-    znach = set(np.round(np.arange(a_lo, a_hi + shag / 2, shag), 10))
+    setka = set(np.round(np.arange(a_lo, a_hi + shag / 2, shag), 10))
+    osob = set()
     for v in list(kontsy(kuski)) + list(osobye):
-        znach.add(v)
+        osob.add(v)
         for e in epsy:
-            znach.update((v - e, v + e))
+            osob.update((v - e, v + e))
+    poryadok = sorted(osob) + sorted(setka - osob) if do_pervogo else sorted(setka | osob)
     plohie = []
-    for a in sorted(znach):
+    for a in poryadok:
         p = bool(uslovie(a))
         o = prinadlezhit(a, kuski)
         if p != o:
             plohie.append((a, p, o))
+            if do_pervogo:
+                break
     return plohie

@@ -18,16 +18,18 @@ function zagolovok(z: Opisanie19): string {
   if (z.vid === 'sdvig') return ZHIVOY_19.titleSdvig;
   if (z.vid === 'okruzhnost') return ZHIVOY_19.titleOkruzhnost;
   if (z.vid === 'gorizontal') return ZHIVOY_19.titleGorizontal;
+  if (z.vid === 'grafik') return ZHIVOY_19.titleGrafik;
   return ZHIVOY_19.title;
 }
 
-/** Строка под рисунком: множество решений по x (метод областей) или число решений. */
+/** Строка под рисунком: множество решений по x (метод областей) или число решений — и вывод, если он есть. */
 function itogHtml(z: Opisanie19, a: number): string {
   if (z.mnozhestvo !== undefined) {
     const mn = katex.renderToString(mnozhestvoTex(z.mnozhestvo(a)), { throwOnError: true });
     return z.itog === undefined ? mn : `${mn}; ${typeset(z.itog(a))}`;
   }
-  return ZHIVOY_19.resheniy(z.resheniy?.(a) ?? 0);
+  const n = ZHIVOY_19.resheniy(z.resheniy?.(a) ?? 0);
+  return z.itog === undefined ? n : `${n}; ${typeset(z.itog(a))}`;
 }
 
 /**
