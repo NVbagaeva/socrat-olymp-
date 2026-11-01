@@ -8,7 +8,7 @@
  */
 
 import { BUKVY } from '../risunki/shrifty.js';
-import { ramkaKadra, raskladka, type Sostoyanie } from './ekran';
+import { ramkaKadra, raskladka, rezhimKadra, type Sostoyanie } from './ekran';
 import type { Tochki, Vid, ZhivayaSkhema } from './tipy';
 
 export interface OpciiSvg {
@@ -40,7 +40,7 @@ export function svgSkhemy(
   sost: Sostoyanie,
   { W, H, opisanie }: OpciiSvg,
 ): string {
-  const kadr = skhema.postroit(t);
+  const kadr = skhema.postroit(t, rezhimKadra(skhema, sost));
   const e = raskladka(kadr, vid, ramkaKadra(kadr, vid, sost), W, H, sost);
   const out: string[] = [];
   out.push(

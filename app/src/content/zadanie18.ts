@@ -197,12 +197,14 @@ export const SKHEMA_18 = {
 
 export const CHERTEZH_18 = {
   povorot: 'Поворот',
+  rezhim: 'Какую теорему показать',
   otrazit: 'Отразить',
   sluchayno: 'Случайное положение',
   sobrat: 'Собрать схему',
   stop: 'Остановить',
   sbrosit: 'Сбросить',
-  podskazkaTyani: 'Тяни вершины — схема пересчитывается, свойства сохраняются.',
+  podskazkaTyani:
+    'Тяни вершины — схема пересчитывается, свойства сохраняются. На сенсорном экране чертёж поворачивается двумя пальцами.',
   podpisChertezha: (nazvanie: string) => `Интерактивный чертёж: ${nazvanie}`,
   ruchka: (nazvanie: string) => `${nazvanie}: перетащи или двигай стрелками`,
 } as const;

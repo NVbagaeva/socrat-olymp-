@@ -717,6 +717,35 @@
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-border);
 }
+.z18-ch__rezhimy {
+  display: inline-flex;
+  justify-self: start;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+.z18-ch__rezhim {
+  /* Нажимается пальцем: не ниже 44px. */
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.z18-ch__rezhim.is-active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z18-ch__rezhim:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
 .z18-ch__povorot {
   display: flex;
   align-items: center;

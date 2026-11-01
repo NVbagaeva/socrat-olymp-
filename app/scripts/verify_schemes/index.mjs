@@ -64,16 +64,34 @@ for (const s of SOBRANNYE) {
     continue;
   }
   const est = new Set();
+  const povtorImen = new Set();
   const rnd = zerno(7);
   for (const t of [z.nachalo, ...Array.from({ length: 60 }, () => z.sluchaynaya(rnd))]) {
-    for (const el of z.postroit(t).elementy) for (const g of el.gruppy ?? []) est.add(g);
+    /* У схемы с режимами (Менелай / Чева) группы собираются по всем режимам. */
+    for (const rezhim of z.rezhimy?.map((m) => m.id) ?? [undefined]) {
+      const elementy = z.postroit(t, rezhim).elementy;
+      for (const el of elementy) for (const g of el.gruppy ?? []) est.add(g);
+      const imena = elementy.filter((el) => el.vid === 'tochka' && el.imya).map((el) => el.imya);
+      if (new Set(imena).size !== imena.length) povtorImen.add(rezhim ?? '—');
+    }
   }
   const nuzhny = [...s.sledstviya, ...s.dokazatelstvo].flatMap((x) => x.gruppy);
   const net = [...new Set(nuzhny)].filter((g) => !est.has(g));
   const pustye = [...s.sledstviya, ...s.dokazatelstvo].filter((x) => x.gruppy.length === 0).length;
-  const ok = net.length === 0 && pustye === 0 && z.shagi.length > 0;
+  /* Группа режима должна включать свой режим: иначе подсветка её не покажет. */
+  const chuzhie = (z.rezhimy ?? []).flatMap((m) =>
+    m.gruppy.filter(
+      (g) => !z.postroit(z.nachalo, m.id).elementy.some((el) => el.gruppy?.includes(g)),
+    ),
+  );
+  const ok =
+    net.length === 0 &&
+    pustye === 0 &&
+    z.shagi.length > 0 &&
+    povtorImen.size === 0 &&
+    chuzhie.length === 0;
   console.log(
-    `  ${ok ? '✓' : '✗'} ${s.no}. ${s.nazvanie}${net.length ? ` — нет групп: ${net.join(', ')}` : ''}${pustye ? ` — пунктов без подсветки: ${pustye}` : ''}`,
+    `  ${ok ? '✓' : '✗'} ${s.no}. ${s.nazvanie}${net.length ? ` — нет групп: ${net.join(', ')}` : ''}${pustye ? ` — пунктов без подсветки: ${pustye}` : ''}${povtorImen.size ? ` — одна буква у двух точек в режиме ${[...povtorImen].join(', ')}` : ''}${chuzhie.length ? ` — группы режима не на его чертеже: ${chuzhie.join(', ')}` : ''}`,
   );
   if (!ok) plokho += 1;
 }

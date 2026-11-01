@@ -80,9 +80,9 @@ const podpisi = requireSrc('lib/skhemy/podpisi');
  * предупреждение: при перетаскивании тесные положения бывают).
  */
 export function proveritEkran(skhema, t, rnd, sch, lit = []) {
-  const kadr = skhema.postroit(t);
-  const vid = { ugol: rnd() * 360, otrazhenie: rnd() < 0.5 ? 1 : -1 };
   const sost = { lit: new Set(lit), shag: null, podpisi: true };
+  const kadr = skhema.postroit(t, ekran.rezhimKadra(skhema, sost));
+  const vid = { ugol: rnd() * 360, otrazhenie: rnd() < 0.5 ? 1 : -1 };
   const W = rnd() < 0.5 ? 343 : 640;
   const H = Math.round(W * 0.72);
   const ramka = ekran.ramkaKadra(kadr, vid, sost);
