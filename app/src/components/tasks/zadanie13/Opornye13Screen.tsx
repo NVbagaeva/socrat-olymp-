@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Input } from '@/components/ui';
 import { OPORNYE_13 } from '@/content/zadanie13';
@@ -14,6 +14,7 @@ import {
   type ShagHtml,
   type Zadacha13Sealed,
 } from '@/lib/zadanie13/opornye/seal';
+import { zakrytoe13, type Zadacha13Bloka } from '@/lib/zadanie13/opornye/zakrytoe';
 import { itog13, opornye13, zadachaId13, zapisat13 } from '@/lib/zadanie13/progress';
 import { answerMatches, choiceMatches, openText } from '@/lib/zadanie13/secret';
 import { RightIcon, WrongIcon } from '../prep/PrepIcons';
@@ -27,8 +28,11 @@ export interface Opornye13ScreenProps {
   no: string;
   title: string;
   vid: 'zadachi' | 'tip';
-  /** Десять задач блока в закрытом виде, собраны на сборке. */
-  tasks: (Zadacha13Sealed & { no: number })[];
+  /**
+   * Десять задач блока в закрытом виде, собраны на сборке. Разбор и
+   * подсказки задачи банка — файлом по адресу `zakryto`.
+   */
+  tasks: Zadacha13Bloka[];
   /** Плашка «Запомни», свёрстана. */
   zapomniHtml: string[];
   listHref: string;
@@ -80,6 +84,9 @@ export function Opornye13Screen({
   const [shagi, setShagi] = useState<ShagHtml[] | null>(null);
   /* Свежие варианты по номеру задачи: пока не просили — задача банка. */
   const [fresh, setFresh] = useState<Record<number, Zadacha13Sealed>>({});
+  /* Номер показа задачи: растёт при смене задачи, и загруженный
+     разбор прежней задачи на экран уже не попадёт. */
+  const pokaz = useRef(0);
 
   const status: TaskStatus[] = tasks.map((item) => {
     const itog = itog13(progress, blockId, item.no);
@@ -92,7 +99,7 @@ export function Opornye13Screen({
   if (base === undefined) {
     return null;
   }
-  const task: Zadacha13Sealed = fresh[base.no] ?? base;
+  const task: Zadacha13Sealed & { zakryto?: string } = fresh[base.no] ?? base;
   const total = tasks.length;
   const nextOpen = nextUnsolved(status, index);
   const right = status.filter((item) => item === 'right').length;
@@ -101,6 +108,7 @@ export function Opornye13Screen({
   const solved = checked === 'right';
 
   function reset() {
+    pokaz.current += 1;
     setValue('');
     setChecked(null);
     setRazbor(null);
@@ -149,15 +157,40 @@ export function Opornye13Screen({
     reset();
   }
 
-  function toggleHint() {
-    setShagi(shagi === null ? izJson<ShagHtml[]>(openText(task.podskazki, task.seal)) : null);
+  /** Закрытая часть задачи: у задачи банка — из файла. Не загрузилась — ничего не открываем. */
+  async function zakrytoe(t: Zadacha13Sealed & { zakryto?: string }) {
+    const bylo = pokaz.current;
+    try {
+      const z = await zakrytoe13(t);
+      return pokaz.current === bylo ? z : null;
+    } catch (error) {
+      console.error('Разбор задачи не загрузился', error);
+      return null;
+    }
   }
 
-  function showSolution() {
+  async function toggleHint() {
+    if (shagi !== null) {
+      setShagi(null);
+      return;
+    }
+    const t = task;
+    const z = await zakrytoe(t);
+    if (z !== null) {
+      setShagi(izJson<ShagHtml[]>(openText(z.podskazki, t.seal)));
+    }
+  }
+
+  async function showSolution() {
     if (base === undefined) return;
-    setRazbor(izJson<Razbor13>(openText(task.razbor, task.seal)));
-    if (status[index] !== 'right') {
-      zapisat13(blockId, base.no, 'revealed');
+    const t = task;
+    const no = base.no;
+    const reshena = status[index] === 'right';
+    const z = await zakrytoe(t);
+    if (z === null) return;
+    setRazbor(izJson<Razbor13>(openText(z.razbor, t.seal)));
+    if (!reshena) {
+      zapisat13(blockId, no, 'revealed');
     }
   }
 
@@ -324,11 +357,15 @@ export function Opornye13Screen({
               <Button onClick={check} disabled={!ready}>
                 Проверить
               </Button>
-              <Button variant="ghost" onClick={toggleHint}>
+              <Button variant="ghost" onClick={() => void toggleHint()}>
                 {shagi === null ? OPORNYE_13.podskazka : OPORNYE_13.skrytPodskazku}
               </Button>
               {checked !== null ? (
-                <Button variant="ghost" onClick={showSolution} disabled={razbor !== null}>
+                <Button
+                  variant="ghost"
+                  onClick={() => void showSolution()}
+                  disabled={razbor !== null}
+                >
                   Показать решение
                 </Button>
               ) : (
@@ -348,7 +385,11 @@ export function Opornye13Screen({
                   {nextOpen === index + 1 ? 'Следующая задача →' : 'Следующая нерешённая →'}
                 </Button>
               )}
-              <Button variant="ghost" onClick={showSolution} disabled={razbor !== null}>
+              <Button
+                variant="ghost"
+                onClick={() => void showSolution()}
+                disabled={razbor !== null}
+              >
                 Показать решение
               </Button>
             </>

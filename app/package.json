@@ -27,6 +27,8 @@
     "build:graph-answers": "node scripts/build-graph-answers.mjs",
     "test:zadanie3": "node scripts/check-zadanie3.mjs",
     "test:veroyatnost": "node scripts/check-veroyatnost.mjs",
+    "test:dannye-45": "node scripts/check-dannye-45.mjs",
+    "test:zakrytoe-13": "node scripts/check-zakrytoe-13.mjs",
     "test:prep-order": "node scripts/check-prep-order.mjs",
     "test:opornye-5": "node scripts/check-opornye-5.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",

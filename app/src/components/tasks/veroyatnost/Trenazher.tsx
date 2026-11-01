@@ -1,13 +1,14 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { TrainerSessionHost } from '@/components/tasks/session';
 import { REZHIMY, type Rezhim, type Zadanie } from '@/content/veroyatnost';
 import { createProgressStore, type ProgressStore } from '@/lib/progressStore';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
-import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
+import type { IndeksPool, IndeksUznay } from '@/lib/veroyatnost/dannye45';
+import { poolIz, PUSTOY_POOL, PUSTOY_UZNAY, uznayIz } from '@/lib/veroyatnost/zagruzka45';
 import { sealMetod } from '@/lib/veroyatnost/secret';
-import { sobratPodhod, type RoundKind } from '@/lib/veroyatnost/useRound';
+import { sobratPodhod, type RoundItem, type RoundKind } from '@/lib/veroyatnost/useRound';
 import { navykKind, navykiZadaniya, zadachaId } from './metody';
 import type { MetodKarta } from './navyki';
 import { ProgressPoMetodam } from './ProgressPoMetodam';
@@ -15,8 +16,10 @@ import { Sessiya } from './Sessiya';
 import { SessiyaRazbor, UznayRazbor } from './SessiyaRazbor';
 import {
   isSessiyaPayload,
-  pohozhieZadachi,
+  pohozhieIzSsylok,
+  pohozhieSsylki,
   raspakovat,
+  ssylkiZapisi,
   upakovat,
   zadachiPodhoda,
   type SessiyaPayload,
@@ -30,9 +33,14 @@ import {
 } from './TrenazherKonfigurator';
 
 export interface TrenazherProps {
-  pool: Pool;
-  /** Задачи режима «Узнай метод»: только условия и отпечатки методов. */
-  uznay: UznayPool;
+  /**
+   * Оглавление банка: прототипы и номера вариантов. Сами варианты
+   * (условие, отпечаток ответа, закрытый разбор) загружаются файлами,
+   * когда попадают в подход (lib/veroyatnost/dannye45.ts).
+   */
+  pool: IndeksPool;
+  /** Оглавление «Узнай метод»: варианты — тоже файлами. */
+  uznay: IndeksUznay;
   /** Чей тренажёр: у №4 семь разделов, у №5 десять методов; хранилища разные. */
   zadanie: Zadanie;
   /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
@@ -56,9 +64,10 @@ export interface TrenazherProps {
  * «Начать тренировку» собирает подход из банка тут же, в браузере, и
  * отдаёт его оболочке сессии (components/tasks/session): она ведёт
  * таймер и паузу, показывает итоги и возвращает ученика в
- * незавершённую тренировку. В хранилище задачи лежат ссылками на банк
- * страницы с контрольной подписью (sessiyaPayload.ts) и при возвращении
- * собираются из того же pool, что пришёл в пропсах. Прогресс
+ * незавершённую тренировку. Задачи подхода загружаются файлами в момент
+ * старта — только те, что в него попали. В хранилище они лежат ссылками
+ * на банк с контрольной подписью (sessiyaPayload.ts) и при возвращении
+ * загружаются и собираются заново. Прогресс
  * считается отдельно по каждому методу и живёт в своих хранилищах:
  * у каждого задания своё, у «Узнай метод» — своё, сброс здесь не
  * трогает ни задание №12, ни соседнее задание.
@@ -94,7 +103,8 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
   const spisokMetodov = navykiZadaniya(zadanie);
   /* Название навыка по идентификатору и отпечатки навыков «Узнай метод». */
   const nazvaniya = useMemo(
-    () => Object.fromEntries(spisokMetodov.map((m) => [m.id, m.nazvanie])) as Record<string, string>,
+    () =>
+      Object.fromEntries(spisokMetodov.map((m) => [m.id, m.nazvanie])) as Record<string, string>,
     [spisokMetodov],
   );
   const otpechatki = useMemo(
@@ -136,6 +146,16 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
   const sekund = Object.values(progress.kinds).reduce((sum, t) => sum + t.seconds, 0);
   const sekundNaZadachu = zakryto >= 5 && sekund > 0 ? sekund / zakryto : SEKUND_NA_ZADACHU;
 
+  /** Банк из вариантов подхода: загружается только нужный набор. */
+  async function zagruzit(rezhim: Rezhim, ssylki: readonly RoundItem[]) {
+    return rezhim === 'uznay'
+      ? { p: PUSTOY_POOL(pool), u: await uznayIz(zadanie, uznay, ssylki) }
+      : { p: await poolIz(zadanie, pool, ssylki), u: PUSTOY_UZNAY };
+  }
+
+  /* Пока загружаются задачи подхода, повторное нажатие «Начать» не считается. */
+  const zapuskaetsya = useRef(false);
+
   function istochnik(rezhim: Rezhim, vybrannye: string[]): RoundKind[] {
     switch (rezhim) {
       case 'mistakes':
@@ -152,18 +172,31 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
     }
   }
 
-  /** Собрать подход и отдать его оболочке сессии; пустой — не начинать. */
-  function start(zapros: TrenazherZapros, begin: (payload: SessiyaPayload) => void) {
+  /**
+   * Собрать подход, загрузить его задачи и отдать оболочке сессии;
+   * пустой — не начинать. Не загрузилось (нет сети) — тренировка не
+   * начинается, кнопка снова доступна.
+   */
+  async function start(zapros: TrenazherZapros, begin: (payload: SessiyaPayload) => void) {
+    if (zapuskaetsya.current) {
+      return;
+    }
     const source = istochnik(zapros.rezhim, zapros.metody);
     if (source.length === 0) {
       return;
     }
-    const tasks = zadachiPodhoda(
-      sobratPodhod(source, zapros.count),
-      zapros.rezhim,
-      pool,
-      uznay,
-    );
+    const round = sobratPodhod(source, zapros.count);
+    zapuskaetsya.current = true;
+    let tasks;
+    try {
+      const { p, u } = await zagruzit(zapros.rezhim, round);
+      tasks = zadachiPodhoda(round, zapros.rezhim, p, u);
+    } catch (error) {
+      console.error('Задачи тренировки не загрузились', error);
+      return;
+    } finally {
+      zapuskaetsya.current = false;
+    }
     if (tasks.length === 0) {
       return;
     }
@@ -186,7 +219,14 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
       backHref={base}
       isPayload={isSessiyaPayload}
       pack={upakovat}
-      unpack={(packed) => raspakovat(packed, pool, uznay)}
+      unpack={async (packed) => {
+        const zapis = ssylkiZapisi(packed);
+        if (zapis === null) {
+          return null;
+        }
+        const { p, u } = await zagruzit(zapis.rezhim, zapis.ssylki);
+        return raspakovat(packed, p, u);
+      }}
       count={(payload) => payload.tasks.length}
       describe={(payload, at) => {
         const task = payload.tasks[at];
@@ -211,7 +251,18 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
         ...payload,
         tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
       })}
-      similar={(payload, indexes) => pohozhieZadachi(payload, indexes, pool, uznay)}
+      similar={async (payload, indexes) => {
+        const ssylki = pohozhieSsylki(
+          payload,
+          indexes,
+          payload.rezhim === 'uznay' ? uznay.kinds : pool.kinds,
+        );
+        if (ssylki.length === 0) {
+          return null;
+        }
+        const { p, u } = await zagruzit(payload.rezhim, ssylki);
+        return pohozhieIzSsylok(payload, ssylki, p, u);
+      }}
       configurator={(api) => (
         <TrenazherKonfigurator
           zadanie={zadanie}
@@ -220,7 +271,7 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
           tally={progress.kinds}
           preset={preset}
           sekundNaZadachu={sekundNaZadachu}
-          onStart={(zapros) => start(zapros, api.start)}
+          onStart={(zapros) => void start(zapros, api.start)}
           stats={
             <ProgressPoMetodam
               zadanie={zadanie}
