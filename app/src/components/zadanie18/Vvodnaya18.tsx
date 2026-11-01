@@ -1,7 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState, type MouseEvent, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { ProgressBar } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
 import { VKLADKA_KARTOCHKI } from '@/content/kartochkiUi';
@@ -61,6 +68,30 @@ function Kartinka({
   );
 }
 
+/**
+ * Круглая миниатюра для превью строки: квадратный кадр 36px (1x/2x),
+ * готовится тем же скриптом (…-mini-36/72). Декор — alt пустой.
+ */
+function Mini({ name }: { name: 'stomatolog' | 'payalnik' }) {
+  const file = (w: number, ext: string) =>
+    assetUrl(`/images/zadaniya/18/vvodnaya/${name}-mini-${w}.${ext}`);
+  const set = (ext: string) => `${file(36, ext)} 1x, ${file(72, ext)} 2x`;
+  return (
+    <picture className="z18-vv__mini">
+      <source type="image/avif" srcSet={set('avif')} />
+      <img
+        src={file(36, 'webp')}
+        srcSet={set('webp')}
+        width={36}
+        height={36}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
+  );
+}
+
 /* ── Значки ─────────────────────────────────────────────────────── */
 
 /** Линейный значок 24×24 в стиле NavIcon: обводка 1.6, скругления. */
@@ -97,11 +128,11 @@ const ZNACHKI = {
       <path d="m15.4 15.4 5.6 5.6" />
     </>
   ),
-  /* Список с маркерами: «как работать». */
+  /* Список шагов: «как работать». */
   spisok: (
     <>
-      <path d="M9 6h12M9 12h12M9 18h12" />
-      <path d="M4 6h.01M4 12h.01M4 18h.01" strokeWidth="2.6" />
+      <path d="M10 6h10M10 12h10M10 18h10" />
+      <path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" strokeWidth="3" />
     </>
   ),
   /* Треугольник с вершинами: интерактивный чертёж. */
@@ -139,21 +170,71 @@ const ZNACHKI_SHAGOV = [ZNACHKI.chertezh, ZNACHKI.karandash, ZNACHKI.kartochki] 
 const DLIT = 220;
 const EASE = 'cubic-bezier(0.2, 0, 0, 1)';
 
+/* ── Мини-превью строк (≥ 768px) ───────────────────────────────── */
+
+/** Две истории: миниатюры стоматолога и паяльника внахлёст. */
+const PREVYU_ZACHEM = (
+  <span className="z18-vv__prevyu-para">
+    <Mini name="stomatolog" />
+    <Mini name="payalnik" />
+  </span>
+);
+
+/** Чертёж 64×40: в большом треугольнике выделен маленький подобный —
+    «спрятанная схема»; на ховере строки он загорается терракотой. */
+const PREVYU_DAET = (
+  <svg className="z18-vv__prevyu-svg" viewBox="0 0 64 40" width="64" height="40">
+    <path className="z18-vv__prevyu-bolshoy" d="M24 4 4 36h56L24 4Z" />
+    <path className="z18-vv__prevyu-malyy" d="M24 4 14 20h28L24 4Z" />
+  </svg>
+);
+
+/** Три шага 1 · 2 · 3, соединённые линией. */
+const PREVYU_KAK = (
+  <svg className="z18-vv__prevyu-svg" viewBox="0 0 64 40" width="64" height="40">
+    <path className="z18-vv__prevyu-liniya" d="M10 20h44" />
+    {[10, 32, 54].map((x, i) => (
+      <g key={x}>
+        <circle className="z18-vv__prevyu-shag" cx={x} cy="20" r="8" />
+        <text className="z18-vv__prevyu-no" x={x} y="20">
+          {i + 1}
+        </text>
+      </g>
+    ))}
+  </svg>
+);
+
+/* ── Аккордеон ──────────────────────────────────────────────────── */
+
 /**
  * Строка-аккордеон на нативных <details>/<summary>: клавиатура, поиск
- * по странице и работа без JS — от браузера, текст лежит в HTML.
- * Скрипт только добавляет плавность: высота и прозрачность тела за
- * DLIT мс. При prefers-reduced-motion — обычное мгновенное раскрытие.
+ * по странице, состояние «развёрнуто» для скринридера (summary сам
+ * сообщает expanded/collapsed) и работа без JS — от браузера, текст
+ * лежит в HTML. Скрипт только добавляет плавность: высота и
+ * прозрачность тела за DLIT мс. При prefers-reduced-motion — обычное
+ * мгновенное раскрытие.
+ *
+ * Строка: [плитка со значком] [название + подзаголовок] [мини-превью]
+ * [стрелка]. Вид «открыто» (плитка насыщеннее, подзаголовок и превью
+ * прячутся, стрелка вверх) задаёт [open]; пока блок закрывается,
+ * data-zakryvaetsya снимает этот вид сразу, не дожидаясь конца анимации.
  */
 function Blok({
   id,
+  ton,
   ikonka,
   title,
+  podzag,
+  prevyu,
   children,
 }: {
   id: string;
+  /** Оттенок плитки: тёплый, синий, синий → терракота. */
+  ton: 'teplo' | 'siniy' | 'gradient';
   ikonka: ReactNode;
   title: string;
+  podzag: string;
+  prevyu: ReactNode;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDetailsElement>(null);
@@ -174,15 +255,16 @@ function Blok({
     }
     e.preventDefault();
     /* Текущая высота и прозрачность — с них и продолжаем, даже если
-       нажали посреди предыдущей анимации. */
-    /* У закрытого <details> Chrome всё равно раскладывает тело
-       (content-visibility: hidden) и отдаёт полную высоту — считаем 0. */
+       нажали посреди предыдущей анимации. У закрытого <details> Chrome
+       всё равно раскладывает тело (content-visibility: hidden) и отдаёт
+       полную высоту — считаем 0. */
     const ot = d.open ? b.getBoundingClientRect().height : 0;
     const opacity = d.open ? getComputedStyle(b).opacity : '0';
     anim.current?.cancel();
     const otkryt = !d.open || zakryvaetsya.current;
     if (otkryt) {
       zakryvaetsya.current = false;
+      delete d.dataset.zakryvaetsya;
       d.open = true;
       const k = b.scrollHeight;
       anim.current = b.animate(
@@ -197,6 +279,7 @@ function Blok({
       };
     } else {
       zakryvaetsya.current = true;
+      d.dataset.zakryvaetsya = '';
       anim.current = b.animate(
         [
           { height: `${ot}px`, opacity },
@@ -207,21 +290,30 @@ function Blok({
       anim.current.onfinish = () => {
         d.open = false;
         zakryvaetsya.current = false;
+        delete d.dataset.zakryvaetsya;
         anim.current = null;
       };
     }
   };
 
   return (
-    <details ref={ref} className="z18-vv__blok">
+    <details ref={ref} className={`z18-vv__blok z18-vv__blok--${ton}`}>
       <summary className="z18-vv__blok-stroka" onClick={onClick}>
-        <span className="z18-vv__blok-ikonka">
+        <span className="z18-vv__plitka" aria-hidden="true">
           <Znachok>{ikonka}</Znachok>
         </span>
-        <span className="z18-vv__blok-title" id={`${id}-title`}>
-          {title}
+        <span className="z18-vv__blok-tekst">
+          <span className="z18-vv__blok-title" id={`${id}-title`}>
+            {title}
+          </span>
+          <span className="z18-vv__blok-podzag">
+            <span>{podzag}</span>
+          </span>
         </span>
-        <span className="z18-vv__blok-shevron">
+        <span className="z18-vv__prevyu" aria-hidden="true">
+          {prevyu}
+        </span>
+        <span className="z18-vv__blok-shevron" aria-hidden="true">
           <Znachok>{ZNACHKI.shevron}</Znachok>
         </span>
       </summary>
@@ -230,6 +322,38 @@ function Blok({
       </div>
     </details>
   );
+}
+
+/**
+ * Свёрнутые строки — одной высоты, даже когда на телефоне название или
+ * подзаголовок переносятся по-разному. Высота текста самой высокой
+ * строки (название + подзаголовок, даже если подзаголовок сейчас
+ * спрятан) ставится всем как --tekst-h. Пересчёт — при смене ширины и
+ * после загрузки шрифтов; без JS строки просто своей высоты.
+ */
+function useRovnyeStroki(ref: RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const box = ref.current;
+    if (box === null) return;
+    let shirina = -1;
+    const izmerit = () => {
+      const vysoty = [...box.querySelectorAll<HTMLElement>('.z18-vv__blok-tekst')].map((t) => {
+        const title = t.querySelector<HTMLElement>('.z18-vv__blok-title');
+        const podzag = t.querySelector<HTMLElement>('.z18-vv__blok-podzag > span');
+        return (title?.offsetHeight ?? 0) + (podzag?.scrollHeight ?? 0);
+      });
+      box.style.setProperty('--tekst-h', `${Math.ceil(Math.max(0, ...vysoty))}px`);
+    };
+    const ro = new ResizeObserver(([e]) => {
+      const w = e?.contentRect.width ?? 0;
+      if (w === shirina) return;
+      shirina = w;
+      izmerit();
+    });
+    ro.observe(box);
+    void document.fonts?.ready.then(izmerit);
+    return () => ro.disconnect();
+  }, [ref]);
 }
 
 /* ── Карточка ───────────────────────────────────────────────────── */
@@ -253,6 +377,8 @@ export function Vvodnaya18() {
   const nezn = neznakomyh(ids, progress);
   const vsego = ids.length * 2;
   const v = VVODNAYA_18;
+  const bloki = useRef<HTMLDivElement>(null);
+  useRovnyeStroki(bloki);
   return (
     <section className="z18-vv" aria-labelledby="z18-vv-title">
       {/* Две колонки на компьютере: слева текст и аккордеон, справа
@@ -269,8 +395,15 @@ export function Vvodnaya18() {
 
         <p className="z18-vv__vyvod">{v.vyvod}</p>
 
-        <div className="z18-vv__bloki">
-          <Blok id="z18-vv-zachem" ikonka={ZNACHKI.lampa} title={v.bloki.zachem}>
+        <div ref={bloki} className="z18-vv__bloki">
+          <Blok
+            id="z18-vv-zachem"
+            ton="teplo"
+            ikonka={ZNACHKI.lampa}
+            title={v.bloki.zachem.title}
+            podzag={v.bloki.zachem.podzag}
+            prevyu={PREVYU_ZACHEM}
+          >
             <div className="z18-vv__analogii">
               {v.analogii.map((a) => (
                 <article key={a.kartinka} className="z18-vv__analogiya">
@@ -289,7 +422,14 @@ export function Vvodnaya18() {
             </p>
           </Blok>
 
-          <Blok id="z18-vv-daet" ikonka={ZNACHKI.lupa} title={v.bloki.daet}>
+          <Blok
+            id="z18-vv-daet"
+            ton="siniy"
+            ikonka={ZNACHKI.lupa}
+            title={v.bloki.daet.title}
+            podzag={v.bloki.daet.podzag}
+            prevyu={PREVYU_DAET}
+          >
             <div className="z18-vv__tekst">
               {v.daet.map((a, i) => (
                 <p key={i}>
@@ -299,7 +439,14 @@ export function Vvodnaya18() {
             </div>
           </Blok>
 
-          <Blok id="z18-vv-kak" ikonka={ZNACHKI.spisok} title={v.bloki.kak}>
+          <Blok
+            id="z18-vv-kak"
+            ton="gradient"
+            ikonka={ZNACHKI.spisok}
+            title={v.bloki.kak.title}
+            podzag={v.bloki.kak.podzag}
+            prevyu={PREVYU_KAK}
+          >
             <ol className="z18-vv__shagi">
               {v.shagi.map((s, i) => (
                 <li key={i}>
