@@ -33,6 +33,22 @@ import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import { goditsyaTreugolnik, scena, vPromezhutke } from './obshchee';
 
 const RAD = Math.PI / 180;
+/** Отношение p : q малыми целыми (до 9), если оно такое; иначе null. */
+function malyeChisla(x: number): [number, number] | null {
+  for (let q = 1; q <= 9; q += 1) {
+    const p = Math.round(x * q);
+    if (p >= 1 && p <= 9 && Math.abs(x - p / q) < 1e-7) return [p, q];
+  }
+  return null;
+}
+/** Часть отношения: 1 → «x», 3 → «3x». */
+const chast = (n: number, b: string) => (n === 1 ? b : `${n}${b}`);
+/** Дробь b/c, если обе — целые; иначе десятичная запись. */
+function drobIliChislo(b: number, c: number): string {
+  const cel = (x: number) => Math.abs(x - Math.round(x)) < 1e-9;
+  return cel(b) && cel(c) ? `${Math.round(b)}/${Math.round(c)}` : ch(b / c);
+}
+
 /** Число для записи на чертеже: «4,5», «12». */
 const ch = (x: number) => String(Math.round(x * 100) / 100).replace('.', ',');
 const p2 = (t: Tochki, k: string, z: T2): T2 => t[k] ?? z;
@@ -236,9 +252,10 @@ export const OP_KVADRATY = scena({
   podvizhnye: ['A', 'B', 'C'],
   pole: [-40, -40, 40, 40],
   goditsya: (t) => goditsyaTreugolnik(t.A!, t.B!, t.C!, 12, 3),
+  /* Угол C не острее 60°: при остром угле квадраты наползают друг на друга, и чертёж не читается. */
   sluchaynaya: (rnd) => ({
-    A: [vPromezhutke(rnd, 9, 16), 0],
-    B: polar(vPromezhutke(rnd, 40, 150), vPromezhutke(rnd, 9, 16)),
+    A: [vPromezhutke(rnd, 10, 16), 0],
+    B: polar(vPromezhutke(rnd, 60, 150), vPromezhutke(rnd, 10, 16)),
     C: C658,
   }),
   postroit(t) {
@@ -312,9 +329,15 @@ export const OP_KVADRATY = scena({
       otr('MO2', M, O2, { rol: 'aux', skrytyy: true, gruppy: ['ak', 'otvet'], cvet: 'a' }),
       ug('uCAC2', C, A, C2, { skrytyy: true, gruppy: ['ugly', 'ravn'], cvet: 'c' }),
       ug('uDCK', D, C, K, { skrytyy: true, gruppy: ['ugly', 'ravn'], cvet: 'c' }),
-      velOtr('d-AC', ch(dist(A, C)), A, C),
-      velOtr('d-BC', ch(dist(B, C)), B, C),
-      velUg('d-C', `${Math.round(angleAt(A, C, B))}°`, A, C, B),
+      /* Данные б) — только в их положении: в случайном это не данные задачи,
+         а квадраты с треугольником оставляют числам мало места. */
+      ...(Math.abs(angleAt(A, C, B) - 150) < 1e-6
+        ? [
+            velOtr('d-AC', ch(dist(A, C)), A, C),
+            velOtr('d-BC', ch(dist(B, C)), B, C),
+            velUg('d-C', `${Math.round(angleAt(A, C, B))}°`, A, C, B),
+          ]
+        : []),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -439,7 +462,7 @@ export const OP_DVE_OKR = scena({
       ug('pB', A, B, C, { pryamoy: true, skrytyy: true, gruppy: ['diam', 'b'], cvet: 'a' }),
       ug('pD', A, D, E, { pryamoy: true, skrytyy: true, gruppy: ['b'], cvet: 'a' }),
       /* Общая хорда короткая и зажата дугами — запись «AB = 2» рядом с ней. */
-      vel('d-AB', 'AB = 2', { vnutri: mid(mid(A, B), O1) }),
+      vel('d-AB', `AB = ${ch(dist(A, B))}`, { vnutri: mid(mid(A, B), O1) }),
       tch('O_1', O1),
       tch('O_2', O2),
       tch('A', A),
@@ -475,6 +498,16 @@ export function tochkiCherezCentr(t: Tochki) {
   return { O, A, B, C, M, P, Q, K, R, fi };
 }
 
+/** sin угла с cos = 1/d: «√15/4» (d = 4), иначе десятичной дробью. */
+function zapisSinusa(fiGr: number): string {
+  const d = 1 / Math.cos(fiGr * RAD);
+  if (Math.abs(d - Math.round(d)) < 1e-9) {
+    const n = Math.round(d) ** 2 - 1;
+    return `√${n}/${Math.round(d)}`;
+  }
+  return ch(Math.sin(fiGr * RAD));
+}
+
 export const OP_CHEREZ_CENTR = scena({
   id: 'okruzhnost-cherez-centr',
   nachalo: { p: [Math.acos(0.25) / RAD, 6] },
@@ -485,7 +518,7 @@ export const OP_CHEREZ_CENTR = scena({
   },
   sluchaynaya: (rnd) => ({ p: [vPromezhutke(rnd, 22, 80) * (rnd() < 0.5 ? 1 : -1), 6] }),
   postroit(t) {
-    const { O, A, B, C, M, P, Q, K, R } = tochkiCherezCentr(t);
+    const { O, A, B, C, M, P, Q, K, R, fi } = tochkiCherezCentr(t);
     const el: Element[] = [
       okr('big', O, R, { rol: 'figure' }),
       okr('small', mid(A, O), R / 2, { rol: 'aux', gruppy: ['pryamye'], cvet: 'c' }),
@@ -512,7 +545,11 @@ export const OP_CHEREZ_CENTR = scena({
       mnog('f-kmc', [K, M, C], { gruppy: ['pod'], cvet: 'b' }),
       ug('pM', A, M, O, { pryamoy: true, skrytyy: true, gruppy: ['pryamye', 'par'], cvet: 'a' }),
       ug('pQ', A, Q, P, { pryamoy: true, skrytyy: true, gruppy: ['pryamye', 'par'], cvet: 'a' }),
-      ug('uAOC', A, O, C, { rol: 'angle', skrytyy: true, gruppy: ['dugi'], cvet: 'c' }),
+      ug('uAOC', A, O, C, { rol: 'angle', gruppy: ['dugi'], cvet: 'c' }),
+      /* Синус — записью снаружи окружности против угла AOC: внутри тесно от хорд. */
+      vel('d-AOC', `sin ∠AOC = ${zapisSinusa(Math.abs(fi))}`, {
+        vnutri: rotate(mul(A, 1.22), O, -fi / 2),
+      }),
       tch('O', O),
       tch('A', A),
       tch('B', B),
@@ -572,8 +609,16 @@ export const OP_VPIS_KLM = scena({
       otr('MB', M, B, { skrytyy: true, shtrihi: 3, gruppy: ['kas', 'b'], cvet: 'c' }),
       otr('MC', M, C, { rol: 'part-x', shtrihi: 3, gruppy: ['kas'], cvet: 'c' }),
       ug('uK', L, K, M, { rol: 'angle' }),
-      velOtr('d-KC', '3x', K, C, { rol: 'part-x' }),
-      velOtr('d-CM', '2x', C, M, { rol: 'part-x' }),
+      /* Отношение KC : CM частями x — когда оно из малых целых (данные б)). */
+      ...(() => {
+        const o = malyeChisla(kc / cm);
+        return o === null
+          ? []
+          : [
+              velOtr('d-KC', chast(o[0], 'x'), K, C, { rol: 'part-x' }),
+              velOtr('d-CM', chast(o[1], 'x'), C, M, { rol: 'part-x' }),
+            ];
+      })(),
       velUg('d-K', `${Math.round(angleAt(L, K, M))}°`, L, K, M),
       tch('K', K),
       tch('L', L),
@@ -717,7 +762,7 @@ export const OP_BISS_SRED = scena({
   postroit(t) {
     const { A, B, C, M, N, L } = tochkiBissSred(t);
     const [b, a] = p2(t, 'p', [7, 24]);
-    const cosA = b / Math.hypot(a, b);
+    const cosZapis = drobIliChislo(b, Math.hypot(a, b));
     const el: Element[] = [
       mnog('fig', [A, B, C], { skrytyy: false, rol: 'figure' }),
       mnog('f-blc', [B, L, C], { gruppy: ['pod', 'lb'], cvet: 'a' }),
@@ -740,7 +785,7 @@ export const OP_BISS_SRED = scena({
       ug('u3', A, L, M, { skrytyy: true, gruppy: ['ml'], cvet: 'c' }),
       ug('u4', L, B, C, { skrytyy: true, gruppy: ['lbc'], cvet: 'c' }),
       ug('uA', B, A, C, { rol: 'angle' }),
-      velUg('d-A', `cos A = ${Math.abs(cosA - 0.28) < 1e-9 ? '7/25' : ch(cosA)}`, B, A, C),
+      velUg('d-A', `cos A = ${cosZapis}`, B, A, C),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -832,8 +877,8 @@ export const OP_VNEVPIS = scena({
 
 /** p = (CM, 0); сторона квадрата 7. */
 export function tochkiKvadratPer(t: Tochki) {
-  const s = 7;
-  const [m] = p2(t, 'p', [3, 0]);
+  const [m, s0] = p2(t, 'p', [3, 7]);
+  const s = s0 > 0 ? s0 : 7;
   /* CN из CM + CN + MN = 2s. */
   const n = (2 * s * s - 2 * s * m) / (2 * s - m);
   const A: T2 = [0, 0];
@@ -849,14 +894,13 @@ export function tochkiKvadratPer(t: Tochki) {
 
 export const OP_KVADRAT_PER = scena({
   id: 'kvadrat-perimetr',
-  nachalo: { p: [3, 0] },
+  nachalo: { p: [3, 7] },
   pole: [-20, -20, 20, 20],
   goditsya: (t) => {
-    const [m] = p2(t, 'p', [3, 0]);
-    const { n, s } = tochkiKvadratPer(t);
+    const { m, n, s } = tochkiKvadratPer(t);
     return m > 0.8 && m < s - 0.8 && n > 0.8 && n < s - 0.8;
   },
-  sluchaynaya: (rnd) => ({ p: [vPromezhutke(rnd, 1.2, 5.8), 0] }),
+  sluchaynaya: (rnd) => ({ p: [vPromezhutke(rnd, 1.2, 5.8), 7] }),
   postroit(t) {
     const { A, B, C, D, M, N, P, s } = tochkiKvadratPer(t);
     const el: Element[] = [
@@ -891,7 +935,7 @@ export const OP_KVADRAT_PER = scena({
       ug('pD', C, D, A, { pryamoy: true, skrytyy: true, gruppy: ['okr'], cvet: 'a' }),
       ug('pP', A, P, M, { pryamoy: true, skrytyy: true, gruppy: ['kas'], cvet: 'a' }),
       ug('uMAN', M, A, N, { rol: 'angle', skrytyy: true, gruppy: ['bis', 'otvet'] }),
-      velOtr('d-AB', '7', A, B),
+      velOtr('d-AB', ch(s), A, B),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -917,14 +961,16 @@ export const OP_KVADRAT_PER = scena({
 /** p = (∠A, ∠C) — углы в градусах; BC = 2√3. */
 export function tochkiSerVys(t: Tochki) {
   const [uA, uC] = p2(t, 'p', [60, 45]);
+  const [k] = p2(t, 'q', [1, 0]);
   const uB = 180 - uA - uC;
-  const a = 2 * Math.sqrt(3);
+  /* BC = 2√3 · k. */
+  const a = 2 * Math.sqrt(3) * (k > 0 ? k : 1);
   const c = (a * Math.sin(uC * RAD)) / Math.sin(uA * RAD);
   const B: T2 = [0, 0];
   const C: T2 = [a, 0];
   const A = polar(uB, c);
   const H = foot(A, B, C);
-  return { A, B, C, H, A1: mid(B, C), B1: mid(A, C), C1: mid(A, B), uA, uB, uC };
+  return { A, B, C, H, A1: mid(B, C), B1: mid(A, C), C1: mid(A, B), uA, uB, uC, k: k > 0 ? k : 1 };
 }
 
 export const OP_SER_VYS = scena({
@@ -936,9 +982,9 @@ export const OP_SER_VYS = scena({
     /* Основание высоты — на стороне, не совпадает с серединой. */
     return Math.min(uA, uB, uC) > 25 && uB < 88 && uC < 88 && dist(H, A1) > 0.12 * dist(B, C);
   },
-  sluchaynaya: (rnd) => ({ p: [vPromezhutke(rnd, 40, 90), vPromezhutke(rnd, 30, 70)] }),
+  sluchaynaya: (rnd) => ({ p: [vPromezhutke(rnd, 40, 90), vPromezhutke(rnd, 30, 70)], q: [1, 0] }),
   postroit(t) {
-    const { A, B, C, H, A1, B1, C1, uA, uC } = tochkiSerVys(t);
+    const { A, B, C, H, A1, B1, C1, uA, uC, k: kk } = tochkiSerVys(t);
     const k = circumcircle(A1, B1, C1);
     const el: Element[] = [
       mnog('fig', [A, B, C], { skrytyy: false, rol: 'figure' }),
@@ -970,7 +1016,7 @@ export const OP_SER_VYS = scena({
       ug('uC', A, C, B, { rol: 'angle', dugi: 2 }),
       velUg('d-A', `${Math.round(uA)}°`, B, A, C),
       velUg('d-C', `${Math.round(uC)}°`, A, C, B),
-      velOtr('d-BC', '2√3', B, C),
+      velOtr('d-BC', kk === 1 ? '2√3' : `${ch(2 * kk)}√3`, B, C),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -1057,7 +1103,7 @@ export const OP_KV_GIP_OTN = scena({
       ug('u1', A, C, O, { skrytyy: true, gruppy: ['oa', 'biss'], cvet: 'c' }),
       ug('u2', O, C, B, { skrytyy: true, gruppy: ['oa', 'biss'], cvet: 'c' }),
       ug('uA', B, A, C, { rol: 'angle' }),
-      velUg('d-A', `sin A = ${ch(sinA)}`, B, A, C),
+      velUg('d-A', `sin A = ${String(Math.round(sinA * 1000) / 1000).replace('.', ',')}`, B, A, C),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -1090,8 +1136,9 @@ export function tochkiVpisLMN(t: Tochki) {
   /* K — на дуге LN, не содержащей M. */
   const K: T2 = polar(90 + polu + s * (360 - 2 * polu), R);
   const P = intersect(K, M, L, N) ?? mid(L, N);
-  /* Масштаб: KM = 8. */
-  const k = 8 / dist(K, M);
+  /* Масштаб: KM задано (по умолчанию 8). */
+  const [km] = p2(t, 'q', [8, 0]);
+  const k = (km > 0 ? km : 8) / dist(K, M);
   const sk = (p: T2): T2 => [p[0] * k, p[1] * k];
   return { K: sk(K), L: sk(L), M: sk(M), N: sk(N), P: sk(P), O: [0, 0] as T2, R: R * k, uM };
 }
@@ -1124,7 +1171,7 @@ export const OP_VPIS_LMN = scena({
       ug('uMLN', M, L, N, { skrytyy: true, gruppy: ['ugly', 'pod'], cvet: 'c' }),
       ug('uMKN', M, K, N, { skrytyy: true, gruppy: ['pl'], cvet: 'c' }),
       ug('uLMN', L, M, N, { rol: 'angle' }),
-      velOtr('d-KM', '8', K, P, { rol: 'part-x' }),
+      velOtr('d-KM', ch(dist(K, M)), K, P, { rol: 'part-x' }),
       velUg('d-M', `${Math.round(uM)}°`, L, M, N),
       tch('K', K),
       tch('L', L),
