@@ -7,7 +7,9 @@
  *   — №1: lib/planimetriya (чертёж темы справочника по якорю или своя
  *     сцена), случайный поворот — вариант движка (variant.ts);
  *   — №2: lib/vektory (сцена теории по ключу или своя);
- *   — №3: lib/solid, экранная тема «стекло».
+ *   — №3: lib/solid, экранная тема «стекло»;
+ *   — №4 и №5: диаграммы Эйлера и лучи на прямой
+ *     (lib/veroyatnost/risunkiKartochek) — классы и геометрия теории.
  */
 
 import { parseAnswer } from '../answer';
@@ -18,6 +20,7 @@ import type { Optsii, Scena } from '../planimetriya/types';
 import { renderVectorPlane } from '../vektory/render';
 import { stsena } from '../vektory/stseny';
 import { renderSolid } from '../solid/render';
+import { risunokVeroyatnosti } from '../veroyatnost/risunkiKartochek';
 import { otpechatok, VERNO, NEVERNO } from './otvet';
 import {
   DOBAVLENO,
@@ -51,6 +54,8 @@ export interface KartochkaGotovaya {
   figuraNaLitse: boolean;
   /** «Повторить теорию»: адрес фрагмента теории. Нет — карточка «добавлено». */
   teoriya?: string;
+  /** Фрагмент — в теории другого номера (№5 → №4): номер для подписи ссылки. */
+  teoriyaNomer?: number;
   /** Отпечаток ответа: «верно / неверно» или число. */
   otpechatok?: string;
 }
@@ -117,11 +122,21 @@ export function narisovat(id: string, f: FiguraKartochki): string[] {
     }
     case 'solid':
       return [obertka(renderSolid(f.model(), { tema: 'ekran' }), 'solid')];
+    case 'veroyatnost':
+      return [obertka(risunokVeroyatnosti(id, f.risunok), 'veroyatnost')];
   }
 }
 
-function adresTeorii(k: Kartochka, teoriya: string): string | undefined {
-  return k.source === DOBAVLENO ? undefined : `${teoriya}#${k.source}`;
+/**
+ * `base` — адрес раздела («/zadaniya/5»), `tail` — хвост вкладки
+ * «Теория». Фрагмент в теории другого номера — в соседнем разделе:
+ * /zadaniya/4/teoriya/#….
+ */
+function adresTeorii(k: Kartochka, base: string, tail: string): string | undefined {
+  if (k.source === DOBAVLENO) return undefined;
+  const razdel =
+    k.teoriyaNomera === undefined ? base : base.replace(/\/[^/]+$/, `/${k.teoriyaNomera}`);
+  return `${razdel}/${tail}#${k.source}`;
 }
 
 /** Ответ вычисления как число: по записи ЕГЭ, которую проверяет scripts/verify_cards. */
@@ -133,7 +148,6 @@ function otvetChislo(k: Kartochka & { type: 'vychislenie' }): number {
 
 /** `base` — адрес раздела: «/zadaniya/1». */
 export function podgotovit(koloda: Koloda, base: string): KolodaGotovaya {
-  const teoriya = `${base}/${koloda.teoriya}`;
   return {
     task: koloda.task,
     title: koloda.title,
@@ -143,7 +157,7 @@ export function podgotovit(koloda: Koloda, base: string): KolodaGotovaya {
       podpis: plain(t.title),
     })),
     kartochki: koloda.kartochki.map((k) => {
-      const teoriyaHref = adresTeorii(k, teoriya);
+      const teoriyaHref = adresTeorii(k, base, koloda.teoriya);
       const avto = k.type === 'verno' || k.type === 'vychislenie';
       const oborot = {
         back: typesetKrupno(k.back),
@@ -161,6 +175,9 @@ export function podgotovit(koloda: Koloda, base: string): KolodaGotovaya {
         figury: k.figure === undefined ? [] : narisovat(k.id, k.figure),
         figuraNaLitse: k.type === 'chertezh',
         ...(teoriyaHref === undefined ? {} : { teoriya: teoriyaHref }),
+        ...(teoriyaHref !== undefined && k.teoriyaNomera !== undefined
+          ? { teoriyaNomer: k.teoriyaNomera }
+          : {}),
         ...(k.type === 'verno'
           ? { otpechatok: otpechatok.sealChoice(k.verno ? VERNO : NEVERNO) }
           : {}),

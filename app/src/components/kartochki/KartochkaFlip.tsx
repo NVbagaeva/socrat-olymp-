@@ -294,7 +294,10 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
                 <span className="kart-card__dobavleno">{T.dobavleno}</span>
               ) : (
                 <a className="kart-card__teoriya" href={k.teoriya}>
-                  {T.povtoritTeoriyu} →
+                  {k.teoriyaNomer === undefined
+                    ? T.povtoritTeoriyu
+                    : T.povtoritTeoriyuNomera(k.teoriyaNomer)}{' '}
+                  →
                 </a>
               )}
               {sama ? (
