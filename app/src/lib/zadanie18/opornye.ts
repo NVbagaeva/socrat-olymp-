@@ -8,7 +8,7 @@
  * вспомогательная окружность и т. д. (имена — внутри одной задачи).
  */
 
-import { mnog, okr, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, nepodvizhnaya as scena, okr, otr, tch, ug } from '@/lib/skhemy/dsl';
 import {
   RAD,
   dist,
@@ -20,21 +20,7 @@ import {
   polar,
   tangentPoints,
 } from '@/lib/skhemy/geometriya';
-import type { Element, T2, Tochki, ZhivayaSkhema } from '@/lib/skhemy/tipy';
-
-/** Сцена без подвижных точек: чертёж задачи, а не живая схема. */
-function scena(id: string, t: Tochki, elementy: (t: Tochki) => Element[]): ZhivayaSkhema {
-  return {
-    id,
-    nachalo: t,
-    podvizhnye: [],
-    pole: [-100, -100, 100, 100],
-    postroit: (x) => ({ elementy: elementy(x), zametka: null, znacheniya: [] }),
-    ogranichit: () => null,
-    sluchaynaya: () => t,
-    shagi: ['Чертёж задачи'],
-  };
-}
+import type { T2, ZhivayaSkhema } from '@/lib/skhemy/tipy';
 
 /* ── 1. Высоты: A₁BC₁ ∼ ABC, A₁C₁ = AC·cos B ───────────────────── */
 
