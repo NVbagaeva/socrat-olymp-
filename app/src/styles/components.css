@@ -918,7 +918,9 @@ a.task-card--soon:hover {
 .app-main {
   /* Своя система координат: декор страницы позиционируется от неё. */
   position: relative;
-  padding: var(--space-10) var(--space-8) var(--space-16);
+  /* Снизу — не меньше места кнопки «?»: последняя кнопка страницы
+     не уходит под неё (--fab-reserve, tokens.css). */
+  padding: var(--space-10) var(--space-8) max(var(--space-16), var(--fab-reserve));
   /* Содержимое растёт до контейнера своего яруса и дальше не тянется:
      на 2560 остаются симметричные поля, а строки — читаемой длины.
      Сайдбар в контейнер не входит, у него своя фиксированная ширина. */
@@ -1373,6 +1375,10 @@ a.task-card--soon:hover {
     width: 24px;
     height: 24px;
     flex: none;
+  } /* Кнопка «?» стоит над панелью: подъём — её высота, тем же токеном,
+     что и сама панель. Одно значение на раскладку, без замеров. */
+  body:has(.bnav--shell) {
+    --fab-lift: var(--h-bnav);
   }
 }
 
@@ -2229,7 +2235,7 @@ html[data-tabs-pending] .topic-panel,
      добавляется тем же слагаемым, что и в самой панели. */
   .app-main {
     padding: var(--space-8) var(--space-5)
-      calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-6));
+      calc(var(--h-bnav) + env(safe-area-inset-bottom) + max(var(--space-6), var(--fab-reserve)));
   }
   /* Верхняя безопасная зона iPhone: шапка забирает её себе тем же
      слагаемым, каким нижняя панель забирает свою. Под чёлкой и
