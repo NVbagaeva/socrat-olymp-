@@ -824,3 +824,101 @@
   gap: var(--space-2);
   margin-top: var(--space-2);
 }
+
+/* ── Опорные задачи ─────────────────────────────────────────── */
+
+.z18-op-spisok__lead {
+  max-width: 72ch;
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-lead);
+}
+.z18-op-spisok__kak {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.z18-op-spisok__kak-title {
+  margin: 0;
+  font-weight: 700;
+}
+.z18-op-spisok__sostavleno {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-op-plitka__a {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: 1.45;
+}
+.z18-op-plitka__punkt,
+.z18-op-punkty__bukva {
+  color: var(--color-accent-text);
+  font-weight: 700;
+}
+.z18-op-plitka__metka {
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+
+.z18-op-punkty,
+.z18-op-skhemy {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z18-op-skhemy li {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.z18-op-skhemy__ssylka {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z18-op-skhemy__ssylka:hover {
+  text-decoration: underline;
+}
+.z18-op-skhemy__no {
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+}
+.z18-op-skhemy__zachem {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-op-shagi .z18-sled__tekst {
+  animation: skh-poyavlenie var(--dur-reveal) var(--ease);
+}
+.z18-op-knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.z18-op-otvet {
+  justify-self: start;
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--color-callout-zapomni-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+  font-size: 18px;
+  font-weight: 600;
+}
+.z18-op-otvet__knopka {
+  justify-self: start;
+}

@@ -6,7 +6,13 @@ import { ChertezhSkhemy } from '@/components/skhemy/ChertezhSkhemy';
 import { Tex } from '@/components/ui/Tex';
 import { CHERTEZH_18 } from '@/content/zadanie18';
 import type { Sostoyanie } from '@/lib/skhemy/ekran';
-import { VID_ISHODNYY, type T2, type Tochki, type Vid } from '@/lib/skhemy/tipy';
+import {
+  VID_ISHODNYY,
+  type T2,
+  type Tochki,
+  type Vid,
+  type ZhivayaSkhema,
+} from '@/lib/skhemy/tipy';
 import { trebuetsyaSkhema18 } from '@/lib/zadanie18/skhemy';
 
 /** Пауза между шагами сборки, мс. */
@@ -42,10 +48,15 @@ function smeshat(a: Tochki, b: Tochki, x: number): Tochki {
 }
 
 export interface ZhivoyChertezh18Props {
+  /** id ключевой схемы; чертёж берётся из реестра схем, если не задан skhema. */
   id: string;
   nazvanie: string;
   /** Горящие группы: наведённое следствие или шаг доказательства. */
   lit: readonly string[];
+  /** Своя сцена вместо схемы из реестра — чертёж опорной задачи. */
+  skhema?: ZhivayaSkhema;
+  /** Подсказка под чертежом вместо «Тяни вершины…». */
+  podskazka?: string;
 }
 
 /**
@@ -54,8 +65,14 @@ export interface ZhivoyChertezh18Props {
  * пересчитанные величины и пояснение к особому положению (тупой угол,
  * вырождение).
  */
-export function ZhivoyChertezh18({ id, nazvanie, lit }: ZhivoyChertezh18Props) {
-  const skhema = trebuetsyaSkhema18(id);
+export function ZhivoyChertezh18({
+  id,
+  nazvanie,
+  lit,
+  skhema: svoya,
+  podskazka,
+}: ZhivoyChertezh18Props) {
+  const skhema = svoya ?? trebuetsyaSkhema18(id);
 
   const [t, setT] = useState<Tochki>(skhema.nachalo);
   const [vid, setVid] = useState<Vid>(VID_ISHODNYY);
@@ -227,7 +244,7 @@ export function ZhivoyChertezh18({ id, nazvanie, lit }: ZhivoyChertezh18Props) {
           ))}
         </ul>
         {kadr.zametka === null ? (
-          <p className="z18-ch__tyani">{CHERTEZH_18.podskazkaTyani}</p>
+          <p className="z18-ch__tyani">{podskazka ?? CHERTEZH_18.podskazkaTyani}</p>
         ) : (
           <p className="z18-ch__zametka" role="status">
             <Tex text={kadr.zametka} />

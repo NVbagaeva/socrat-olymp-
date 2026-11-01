@@ -37,3 +37,8 @@
 Пример — `lib/zadanie18/skhemy/vysoty.ts`. Проверка схем — `pnpm test:skhemy-18`
 (`scripts/verify_schemes/`): каждое следствие и шаг доказательства на
 1000 случайных конфигурациях и экранная раскладка.
+
+Чертежи опорных задач №18 — те же схемы: `lib/zadanie18/opornye/`
+(сцена из короткого описания — `obshchee.ts`, `scena()`), исходное
+положение — данные пункта б). Проверка — `pnpm test:opornye-18`
+(`scripts/verify_opornye18/`).
