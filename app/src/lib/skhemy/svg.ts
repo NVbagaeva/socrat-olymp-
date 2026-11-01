@@ -85,6 +85,14 @@ export function svgSkhemy(
   e.tochki.forEach((p) =>
     out.push(`<circle class="${cls('skh-tochka', ...metki(p))}" cx="${p.x}" cy="${p.y}" r="2.6"/>`),
   );
+  out.push('</g><g class="skh__vynoski">');
+  e.podpisi
+    .filter((p) => p.vynoska !== '')
+    .forEach((p) =>
+      out.push(
+        `<path class="${cls('skh-vynoska', p.cvet && `skh-c-${p.cvet}`)}" d="${p.vynoska}"/>`,
+      ),
+    );
   out.push(`</g><g class="skh__podpisi" style="font-family:${esc(BUKVY)}">`);
   e.podpisi.forEach((p) => {
     const indeks =

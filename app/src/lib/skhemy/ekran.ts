@@ -12,7 +12,7 @@
  */
 
 import { angleOf, cross, dist, dot, len, polar, rotate, sub, unit } from './geometriya';
-import { razmestitPodpisi, type Prepyatstviya } from './podpisi';
+import { razmestitSVynoskami, type Prepyatstviya } from './podpisi';
 import type { Cvet, Element, Kadr, Ramka, StilLinii, T2, Vid } from './tipy';
 
 /* ── Стиль ─────────────────────────────────────────────────────── */
@@ -220,6 +220,8 @@ export interface EkrPodpis extends Obshchee {
   y: number;
   bukva: string;
   indeks: string;
+  /** Выноска от точки к отнесённой букве: путь SVG или пустая строка. */
+  vynoska: string;
 }
 
 export interface Ekran {
@@ -450,7 +452,7 @@ export function raskladka(
 
   if (sost.podpisi) {
     const imennye = ekran.tochki.filter((t) => t.imya !== null);
-    const mesta = razmestitPodpisi(
+    const mesta = razmestitSVynoskami(
       imennye.map((t) => ({ p: [t.x, t.y] as T2, imya: t.imya ?? '' })),
       prep,
       W,
@@ -458,7 +460,7 @@ export function raskladka(
       SK.kegl,
     );
     imennye.forEach((t, i) => {
-      const m = mesta[i]!;
+      const { c: m, vynoska: v } = mesta[i]!;
       const [bukva, indeks] = (t.imya ?? '').split('_');
       ekran.podpisi.push({
         id: `p-${t.id}`,
@@ -471,6 +473,7 @@ export function raskladka(
         y: f2(m[1]),
         bukva: bukva ?? '',
         indeks: indeks ?? '',
+        vynoska: v === null ? '' : `M${f2(v[0][0])} ${f2(v[0][1])}L${f2(v[1][0])} ${f2(v[1][1])}`,
       });
     });
   }
