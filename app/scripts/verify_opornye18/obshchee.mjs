@@ -143,6 +143,8 @@ export function texChislo(tex) {
   if (!/^\$[^$]+\$$/.test(s)) throw new Error(`ответ не в одной формуле: ${tex}`);
   s = s.slice(1, -1).replace(/\s+/g, '');
   s = s.replace(/\{,\}/g, '.');
+  /* Градусы: «45^\circ» — число градусов. */
+  s = s.replace(/\^\{?\\circ\}?/g, '');
   s = s.replace(/\\sqrt\{([^{}]*)\}/g, 'R($1)').replace(/\\sqrt(\d)/g, 'R($1)');
   for (let i = 0; i < 10 && /\\d?frac/.test(s); i += 1)
     s = s.replace(/\\d?frac\{([^{}]*)\}\{([^{}]*)\}/g, '(($1)/($2))');

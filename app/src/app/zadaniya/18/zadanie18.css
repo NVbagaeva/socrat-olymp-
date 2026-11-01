@@ -1117,3 +1117,51 @@
     align-items: start;
   }
 }
+
+/* ── Опорная задача: вариация, подсказки-вопросы, типичные ошибки ── */
+.z18-op-variaciya {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-caption);
+}
+.z18-op-podskazki,
+.z18-op-oshibki {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+.z18-op-podskazka summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z18-op-podskazka summary {
+  list-style: none;
+}
+.z18-op-podskazka summary::-webkit-details-marker {
+  display: none;
+}
+/* Стрелка «открыть»: у summary с display: flex свой маркер браузер не рисует. */
+.z18-op-podskazka summary::before {
+  content: '›';
+  flex: none;
+  width: 1em;
+  color: var(--color-primary);
+  font-weight: 700;
+  transition: transform var(--dur-switch) var(--ease);
+}
+.z18-op-podskazka[open] summary::before {
+  transform: rotate(90deg);
+}
+.z18-op-podskazka p {
+  margin: var(--space-1) 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-surface-info);
+  border-radius: var(--radius-sm);
+}
+.z18-op-podskazka__metka {
+  font-weight: 600;
+}

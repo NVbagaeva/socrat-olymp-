@@ -8,6 +8,7 @@ import { OP_KAS_OKR, OP_KAS_SEK, OP_OPIS_TRAP } from './kasatelnye';
 import { OP_DVE_VERSHINY, OP_KVADRAT, OP_TREZUBEC } from './okruzhnost';
 import { OP_BISS_MED, OP_MENELAY } from './otnosheniya';
 import { OP_RASSTOYANIYA, OP_TRI_UGLA } from './ploshchadi';
+import { SCENY_NOVYE } from './novye';
 import { OP_BABOCHKA, OP_CHETYRE, OP_PERP_DIAG } from './trapeciya';
 import { OP_BISSEKTRISA, OP_MEDIANA, OP_VYSOTY } from './treugolnik';
 
@@ -28,6 +29,7 @@ const SCENY: readonly ZhivayaSkhema[] = [
   OP_BISS_MED,
   OP_TRI_UGLA,
   OP_RASSTOYANIYA,
+  ...SCENY_NOVYE,
 ];
 
 const REESTR: Readonly<Record<string, ZhivayaSkhema>> = Object.fromEntries(
