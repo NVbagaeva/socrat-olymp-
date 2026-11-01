@@ -7,6 +7,9 @@ import { counted } from '@/lib/plural';
 
 export const VARIANT_HREF = '/variant/';
 
+/** Решить свежий вариант онлайн самому, без ссылки от учителя. */
+export const VARIANT_ONLAYN_HREF = '/variant/onlayn/';
+
 /** Типы работы для шапки листа. */
 export const WORK_KINDS = [
   { id: 'ege', label: 'Вариант в формате ЕГЭ' },
