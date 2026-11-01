@@ -51,20 +51,111 @@
 
 .site-nav {
   display: flex;
+  align-items: center;
   gap: var(--space-6);
   margin-left: var(--space-6);
 }
-.site-nav a {
+/* Пункты и логотип — всегда в одну строку: если не помещаются, меню
+   уезжает в бургер раньше (порог ниже), а не переносится. */
+.logo,
+.site-nav a,
+.nav-drop__button {
+  white-space: nowrap;
+}
+.site-nav > a,
+.nav-drop__button {
   font-size: 15px;
   color: var(--color-text-secondary);
   text-decoration: none;
 }
-.site-nav a:hover {
+.site-nav > a:hover,
+.nav-drop__button:hover,
+.nav-drop[data-open] .nav-drop__button {
   color: var(--color-primary);
 }
 /* Текущая страница: тем же синим, что и наведение, плюс вес.
    Подчёркивания нет — в шапке оно спорит с нижней границей. */
-.site-nav a[aria-current='page'] {
+.site-nav > a[aria-current='page'],
+.nav-drop__button.is-current {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ── Группа меню со списком («Варианты») ── */
+
+.nav-drop {
+  position: relative;
+}
+.nav-drop__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  font: inherit;
+  font-size: 15px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.nav-drop__button svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--dur-hover) var(--ease);
+}
+.nav-drop[data-open] .nav-drop__button svg {
+  transform: rotate(180deg);
+}
+/* Список висит под кнопкой. Сверху — прозрачный мостик padding-top:
+   мышь идёт от кнопки к списку и не выходит из группы. */
+.nav-drop__list {
+  position: absolute;
+  top: 100%;
+  left: -16px;
+  z-index: 31;
+  min-width: 260px;
+  margin: 0;
+  padding: 12px 0 0;
+  list-style: none;
+}
+.nav-drop__list[hidden] {
+  display: none;
+}
+.nav-drop__list::before {
+  content: '';
+  position: absolute;
+  inset: 12px 0 0;
+  z-index: -1;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
+.nav-drop__list li:first-child {
+  padding-top: 6px;
+}
+.nav-drop__list li:last-child {
+  padding-bottom: 6px;
+}
+.site-nav .nav-drop__item {
+  display: block;
+  margin: 0 6px;
+  padding: 10px 10px;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.site-nav .nav-drop__item:hover,
+.site-nav .nav-drop__item:focus-visible {
+  color: var(--color-primary);
+  background: var(--color-bg);
+}
+.site-nav .nav-drop__item[aria-current='page'] {
   color: var(--color-primary);
   font-weight: 600;
 }
@@ -182,7 +273,7 @@
 
 /* Бургер показывается везде, где спрятано меню: иначе на планшете
    и небольшом ноутбуке навигации не остаётся вовсе. */
-@media (max-width: 939.98px) {
+@media (max-width: 1023.98px) {
   .burger {
     display: grid;
   }
@@ -247,12 +338,24 @@
   flex-wrap: wrap;
 }
 
-/* Шапка с меню требует 936px: логотип, четыре пункта, «Войти»
-   и «Начать бесплатно». Ниже меню прячется, иначе страница едет вбок.
-   Остальные правила оболочки остаются на эталонном пороге 760px. */
-@media (max-width: 939.98px) {
+/* Шапка с меню требует ~1004px: логотип, пять пунктов (один из них —
+   «Варианты» со списком) и «Начать бесплатно». Ниже меню прячется в
+   бургер, иначе пункты не помещаются и страница едет вбок. Порог тот же
+   в SiteMenu.tsx (NARROW). */
+@media (max-width: 1023.98px) {
   .site-nav {
     display: none;
+  }
+}
+/* Со входом в шапке есть ещё «Войти» (AuthWidget): ему нужно на ~40px
+   больше, и до 1100px меню уходит в бургер раньше. Без входа правило
+   не срабатывает. */
+@media (max-width: 1099.98px) {
+  .site-head__in:has(.auth-widget__login) .site-nav {
+    display: none;
+  }
+  .site-head__in:has(.auth-widget__login) .burger {
+    display: grid;
   }
 }
 

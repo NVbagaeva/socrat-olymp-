@@ -16,6 +16,21 @@ export interface SiteLink {
   href: string;
 }
 
+/**
+ * Группа пунктов меню: в широкой шапке — кнопка с выпадающим списком,
+ * в бургер-меню — те же ссылки подряд, без заголовка.
+ */
+export interface NavGroup {
+  label: string;
+  items: SiteLink[];
+}
+
+export type NavItem = SiteLink | NavGroup;
+
+export function isNavGroup(item: NavItem): item is NavGroup {
+  return 'items' in item;
+}
+
 /** Внешняя ссылка: открывается в новой вкладке. */
 export interface ExternalLink extends SiteLink {
   external: true;
@@ -33,12 +48,19 @@ export const site = {
   nav: [
     { label: 'Об авторе', href: '/about/' },
     { label: 'Банк заданий', href: tasksPage.href },
-    { label: 'Собрать вариант', href: VARIANT_HREF },
-    { label: 'Варианты повышенной сложности', href: POV_HREF },
-    { label: 'Ежемесячные варианты', href: EZH_HREF },
+    /* Всё про варианты — одной группой: семь пунктов в одну строку не
+       помещались даже на 1440 px, и шапка переносилась в две строки. */
+    {
+      label: 'Варианты',
+      items: [
+        { label: 'Собрать вариант', href: VARIANT_HREF },
+        { label: 'Варианты повышенной сложности', href: POV_HREF },
+        { label: 'Ежемесячные варианты', href: EZH_HREF },
+      ],
+    },
     { label: 'Как пользоваться', href: HOWTO_HREF },
     { label: 'Учителям', href: '/#how' },
-  ] satisfies SiteLink[],
+  ] as NavItem[],
 
   /* «Войти» здесь больше нет: вход живёт в components/auth/AuthWidget и
      появляется только при включённом флаге (lib/auth/config.ts).
@@ -64,3 +86,8 @@ export const site = {
     operatorLabel: 'Оператор персональных данных:',
   },
 } as const;
+
+/** Все ссылки меню подряд, группы раскрыты — для бургер-меню. */
+export const navLinks: SiteLink[] = site.nav.flatMap((item) =>
+  isNavGroup(item) ? item.items : [item],
+);
