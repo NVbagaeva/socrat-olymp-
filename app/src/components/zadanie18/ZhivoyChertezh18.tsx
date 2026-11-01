@@ -57,6 +57,11 @@ export interface ZhivoyChertezh18Props {
   skhema?: ZhivayaSkhema;
   /** Подсказка под чертежом вместо «Тяни вершины…». */
   podskazka?: string;
+  /**
+   * Показывать пересчитанные величины под чертежом. В тренажёре до ответа
+   * они скрыты: в исходном положении величина может совпасть с ответом б).
+   */
+  znacheniya?: boolean;
 }
 
 /**
@@ -71,6 +76,7 @@ export function ZhivoyChertezh18({
   lit,
   skhema: svoya,
   podskazka,
+  znacheniya = true,
 }: ZhivoyChertezh18Props) {
   const skhema = svoya ?? trebuetsyaSkhema18(id);
 
@@ -236,13 +242,15 @@ export function ZhivoyChertezh18({
       </div>
 
       <figcaption className="z18-ch__podpis">
-        <ul className="z18-ch__znacheniya" aria-live="off">
-          {kadr.znacheniya.map((z, i) => (
-            <li key={i}>
-              <Tex text={z} />
-            </li>
-          ))}
-        </ul>
+        {znacheniya ? (
+          <ul className="z18-ch__znacheniya" aria-live="off">
+            {kadr.znacheniya.map((z, i) => (
+              <li key={i}>
+                <Tex text={z} />
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {kadr.zametka === null ? (
           <p className="z18-ch__tyani">{podskazka ?? CHERTEZH_18.podskazkaTyani}</p>
         ) : (

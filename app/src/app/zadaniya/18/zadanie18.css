@@ -809,7 +809,9 @@
 .z18-otmetka {
   min-width: 0;
 }
-.z18-sk .katex {
+.z18-sk .katex,
+.z18-tr .katex,
+.z18-tr__razbor .katex {
   display: inline-block;
   max-width: 100%;
   overflow-x: auto;
@@ -925,4 +927,136 @@
 }
 .z18-op-otvet__knopka {
   justify-self: start;
+}
+
+/* ── Тренажёр на общей сессии ─────────────────────────────────────
+   Карточка задачи: чертёж и условие рядом на компьютере, друг под
+   другом на телефоне (без липкого чертежа: сверху и так липнет
+   панель тренировки). Ниже — пункт а) с самопроверкой и пункт б)
+   с полем ответа. */
+
+.z18-tr {
+  display: grid;
+  gap: var(--flow-block);
+}
+.z18-tr__card {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z18-tr__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.z18-tr__sostavleno {
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+.z18-tr__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+@media (min-width: 1024px) {
+  .z18-tr__grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: start;
+  }
+}
+.z18-tr__chertezh,
+.z18-tr__tekst {
+  min-width: 0;
+}
+.z18-tr__tekst {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+.z18-tr__nazvanie {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+.z18-tr__uslovie {
+  display: grid;
+  gap: var(--space-3);
+}
+.z18-tr__uslovie > p {
+  margin: 0;
+}
+.z18-tr__punkt {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z18-tr__punkt > p {
+  margin: 0;
+}
+.z18-tr .ttask__input {
+  max-width: 320px;
+}
+.z18-tr__samo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.z18-tr__samo-vopros {
+  font-weight: 600;
+  margin-right: var(--space-1);
+}
+.z18-tr__otmetka {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.z18-tr__neverno {
+  margin: 0;
+  color: var(--color-error);
+}
+.z18-tr__hint,
+.z18-tr__reshenie {
+  display: grid;
+  gap: var(--space-3);
+  justify-self: stretch;
+  min-width: 0;
+}
+.z18-tr__reshenie {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+.z18-tr__reshenie > p,
+.z18-tr__hint > p {
+  margin: 0;
+}
+.z18-tr__hint-sub {
+  font-weight: 600;
+}
+.z18-tr__razbor {
+  display: grid;
+  gap: var(--space-2);
+}
+.z18-tr__razbor > p {
+  margin: 0;
+}
+.z18-tr__razbor-shagi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+.z18-tr__itog {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+.z18-tr__itog > p {
+  margin: 0;
+}
+.z18-tr__itog-stroka {
+  font-weight: 600;
 }
