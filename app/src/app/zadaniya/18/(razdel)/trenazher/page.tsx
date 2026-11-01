@@ -27,7 +27,7 @@ export default function Trenazher18Tab() {
   const ssylki: Record<string, SsylkiTipa> = {};
   for (const t of config.temy) {
     for (const p of t.podtipy) {
-      const op = OPORNYE_18.find((z) => z.skhemy.includes(p.id));
+      const op = OPORNYE_18.find((z) => z.skhemy.some((s) => s.id === p.id));
       ssylki[p.id] = {
         teoriya: `${base}/skhemy/${p.id}/`,
         ...(op === undefined ? {} : { opornye: `${base}/opornye-zadachi/${op.id}/` }),
