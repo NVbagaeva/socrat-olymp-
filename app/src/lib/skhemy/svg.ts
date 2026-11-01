@@ -106,11 +106,12 @@ export function svgSkhemy(
   /* Тема — после оформления чертежа: роли сильнее общих правил. */
   if (e.tema) out.push(`<style>${cssTemy()}</style>`);
   out.push('<g class="skh__mnog">');
-  e.mnog.forEach((m) =>
+  e.mnog.forEach((m) => {
     out.push(
       `<polygon class="${cls('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}" points="${m.points}"/>`,
-    ),
-  );
+    );
+    if (m.kontur !== '') out.push(`<path class="skh-iskomaya" d="${m.kontur}"/>`);
+  });
   out.push('</g><g class="skh__okr">');
   e.okr.forEach((o) =>
     out.push(

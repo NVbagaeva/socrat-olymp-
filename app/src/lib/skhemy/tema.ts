@@ -8,8 +8,11 @@
  * строкой для листов (lib/skhemy/svg.ts). Две версии:
  *   • cvet — фирменные цвета сайта: на экране всегда, на листе — по
  *     переключателю «Цветные чертежи»;
- *   • pechat — монохромная для печати (по умолчанию на листах и в PDF):
- *     всё чёрное, площадь и угол — серой заливкой.
+ *   • pechat — чёрно-белая для печати (по умолчанию на листах и в PDF):
+ *     всё чёрное, БЕЗ ЗАЛИВОК — ни фигур, ни площадей, ни секторов углов.
+ *     Углы — только дугами (одна, две, три), равенства — засечками,
+ *     данная и искомая площадь различаются только подписью: «S = 18» и
+ *     «S = ?».
  *
  * Толщины — в пикселях экрана (vector-effect: non-scaling-stroke): при
  * любом масштабе SVG линии одинаковые, на телефоне чертёж не
@@ -18,9 +21,21 @@
  *
  * Цвета (вторая редакция): контуры — navy; вершины и точки — синие,
  * полужирный курсив, крупнее; величины — тёплые: числа и первая
- * переменная (x, a) — терракота, вторая (y, b) — янтарь; отрезок с
- * подписью — тем же цветом (part-x, part-y), угол — дуга, сектор и
- * подпись одним цветом. Синий на чертеже — только у вершин и точек.
+ * переменная (x, a) — терракота, вторая (y, b) — янтарь; угол — дуга,
+ * сектор и подпись одним цветом.
+ *
+ * Цвет линии — только у смысловых связей:
+ *   • части через переменные (part-x, part-y) — отрезок цветом своей
+ *     семьи. Отрезок с конкретным числом (AB = 15, хорда) — navy,
+ *     цветная только подпись;
+ *   • равные отрезки — всегда одного цвета и с одинаковыми засечками
+ *     (засечки — цвета отрезка). Равный отрезок на стороне — сторона
+ *     разбита в точке, участок красится как его равный.
+ * Проверка — scripts/verify_schemes/geometriya.mjs.
+ *
+ * Площади: данная (region) — заливка цветом величин ~18 % и подпись с
+ * числом; искомая (region-sought) — лёгкая голубая заливка ~8 %,
+ * пунктирный контур внутри фигуры и подпись «S = ?».
  *
  * Доступность: цвет не единственный носитель смысла — все подписи на
  * месте; синий и тёплые различимы при дальтонизме. Контраст на белом:
@@ -70,19 +85,22 @@ export function cssTemy(): string {
   const S = '.skh--tema';
   const P = '.skh--tema.skh--pechat';
   return [
-    `${S}{--t-navy:${c.navy};--t-v:var(--chertezh-vershina,${c.vershina});--t-x:var(--chertezh-velichina,${c.velichina});--t-y:var(--chertezh-velichina-2,${c.velichina2});--t-fig:${c.vershina};--t-fig-a:.07;--t-reg-a:.18;--t-post:${c.postroenie};--t-ugol-a:.2}`,
-    `${P}{--t-navy:#000;--t-v:#000;--t-x:#000;--t-y:#000;--t-fig-a:0;--t-reg-a:.15;--t-post:#000;--t-ugol-a:.18}`,
+    `${S}{--t-navy:${c.navy};--t-v:var(--chertezh-vershina,${c.vershina});--t-x:var(--chertezh-velichina,${c.velichina});--t-y:var(--chertezh-velichina-2,${c.velichina2});--t-fig:${c.vershina};--t-fig-a:0;--t-reg-a:.18;--t-isk-a:.08;--t-post:${c.postroenie};--t-ugol-a:.2}`,
+    `${P}{--t-navy:#000;--t-v:#000;--t-x:#000;--t-y:#000;--t-fig-a:0;--t-reg-a:0;--t-isk-a:0;--t-post:#000;--t-ugol-a:0}`,
     /* Толщины в пикселях экрана при любом масштабе SVG. */
     `${S} line,${S} path,${S} circle,${S} polygon{vector-effect:non-scaling-stroke}`,
     `${S} line,${S} path{stroke-linecap:round;stroke-linejoin:round}`,
     /* Линии без роли и засечки — navy (контур). */
     `${S} .skh-liniya line,${S} .skh-okr,${S} .skh-ugol{stroke:var(--t-navy)}`,
     `${S} .skh-shtrih{stroke:var(--t-navy);stroke-width:${e.shtrih}px}`,
-    /* figure: контур navy и лёгкая заливка. */
+    /* figure: контур navy, без заливки — голубая заливка только у искомой площади. */
     `${S} .skh-r-figure line,${S} .skh-okr.skh-r-figure{stroke:var(--t-navy);stroke-width:${e.kontur}px}`,
     `${S} .skh-mnog.skh-r-figure{fill:var(--t-fig);fill-opacity:var(--t-fig-a)}`,
     /* region: площадь дана или ищется — терракота, подпись тем же цветом. */
     `${S} .skh-mnog.skh-r-region{fill:var(--t-x);fill-opacity:var(--t-reg-a)}`,
+    /* region-sought: площадь ищется — голубая заливка, пунктир внутри фигуры, подпись «S = ?» синим. */
+    `${S} .skh-mnog.skh-r-region-sought{fill:var(--t-v);fill-opacity:var(--t-isk-a)}`,
+    `${S} .skh-iskomaya{fill:none;stroke:var(--t-v);stroke-width:1.5px;stroke-dasharray:5 4}`,
     /* part-x — терракота, part-y — янтарь; засечки и подписи — того же цвета. */
     `${S} .skh-r-part-x line{stroke:var(--t-x);stroke-width:${e.chast}px}`,
     `${S} .skh-r-part-x .skh-shtrih{stroke:var(--t-x)}`,
@@ -102,8 +120,12 @@ export function cssTemy(): string {
     /* Величины — тёплые: первая переменная и числа — терракота, вторая — янтарь. */
     `${S} .skh-velichina,${S} .skh-velichina.is-lit{fill:var(--t-x);font-weight:400}`,
     `${S} .skh-velichina.skh-r-part-y{fill:var(--t-y)}`,
+    `${S} .skh-velichina.skh-r-region-sought{fill:var(--t-v)}`,
     `${S} .skh-koren{stroke:var(--t-x)}`,
     `${S} .skh-koren.skh-r-part-y{stroke:var(--t-y)}`,
+    /* Печать: без заливок вообще — ни фигур, ни площадей, ни секторов
+       углов, ни подсветки; пунктир искомой площади тоже убран. */
+    `${P} .skh-mnog,${P} .skh-sektor,${P} .skh-iskomaya{display:none}`,
     /* Печать: толщины в pt. */
     `${P} .skh-shtrih{stroke-width:${p.shtrih}px}`,
     `${P} .skh-r-figure line,${P} .skh-okr.skh-r-figure{stroke-width:${p.kontur}px}`,

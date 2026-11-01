@@ -98,3 +98,13 @@
   --graph-accent: #000000;
   --color-primary: #000000;
 }
+
+.sg-ch__pravila {
+  max-width: 72ch;
+  padding-left: 1.4em;
+  line-height: 1.5;
+}
+
+.sg-ch__pravila li + li {
+  margin-top: 0.4em;
+}
