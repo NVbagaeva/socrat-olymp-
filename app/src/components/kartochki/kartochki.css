@@ -341,9 +341,13 @@
 .kart-fig .pl-iskomoe.pl-duga {
   stroke: var(--color-spr-klyuch);
 }
-.kart-fig--solid svg,
-.kart-fig--vektory svg {
+.kart-fig--solid svg {
   max-height: 240px;
+  width: auto;
+}
+/* Сетка векторов мельче объёмного чертежа: клетки должны читаться. */
+.kart-fig--vektory svg {
+  max-height: 320px;
   width: auto;
 }
 

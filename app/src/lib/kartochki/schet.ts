@@ -24,7 +24,9 @@ export function ugol(a: P, v: P, b: P): number {
   const y1 = a[1] - v[1];
   const x2 = b[0] - v[0];
   const y2 = b[1] - v[1];
-  return Math.acos((x1 * x2 + y1 * y2) / (Math.hypot(x1, y1) * Math.hypot(x2, y2)));
+  /* У коллинеарных векторов отношение выходит за 1 на погрешность счёта. */
+  const c = (x1 * x2 + y1 * y2) / (Math.hypot(x1, y1) * Math.hypot(x2, y2));
+  return Math.acos(Math.min(1, Math.max(-1, c)));
 }
 
 export const gr = (rad: number): number => (rad * 180) / Math.PI;
