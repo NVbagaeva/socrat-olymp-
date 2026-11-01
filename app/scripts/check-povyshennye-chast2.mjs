@@ -133,8 +133,6 @@ function provC14(p, z) {
   );
 }
 
-const GAZ17 = [28, 4, 40, 20, 16, 44, 2];
-
 const PROV = {
   ...provB({ ok, close, requireSrc }),
   ...provK({ ok, close, requireSrc }),
