@@ -425,33 +425,48 @@ export function ChertezhSkhemy({
           ))}
         </g>
         <g className="skh__velichiny" style={{ fontFamily: CHISLA }}>
-          {ekran.velichiny.map((v) => (
-            <text
-              key={v.id}
-              className={clsx(
-                'skh-velichina',
-                v.lit && 'is-lit',
-                v.dim && 'is-dim',
-                v.novyy && 'is-novyy',
-                v.cvet && `skh-c-${v.cvet}`,
-              )}
-              x={v.x}
-              y={v.y}
-            >
-              {v.chasti.map((c, i) => (
-                <tspan
-                  key={i}
-                  className={
-                    clsx(c.kursiv && 'skh-kursiv', c.indeks && 'skh-indeks-vel') || undefined
-                  }
-                  style={c.kursiv ? { fontFamily: BUKVY } : undefined}
-                  dy={c.indeks ? 4 : v.chasti[i - 1]?.indeks === true ? -4 : undefined}
-                >
-                  {c.t}
-                </tspan>
-              ))}
-            </text>
-          ))}
+          {ekran.velichiny.map((v) => {
+            const klass = clsx(
+              v.lit && 'is-lit',
+              v.dim && 'is-dim',
+              v.novyy && 'is-novyy',
+              v.cvet && `skh-c-${v.cvet}`,
+            );
+            return (
+              <g key={v.id}>
+                <text className={clsx('skh-velichina', klass)}>
+                  {v.chasti.map((c, i) => (
+                    <tspan
+                      key={i}
+                      className={
+                        clsx(c.kursiv && 'skh-kursiv', c.indeks && 'skh-indeks-vel') || undefined
+                      }
+                      style={c.kursiv ? { fontFamily: BUKVY } : undefined}
+                      x={Math.round((v.levo + c.dx) * 100) / 100}
+                      y={c.indeks ? v.base + 4 : v.base}
+                      /* Подкоренное — заданной ширины: черта знака ровно над ним. */
+                      {...(c.koren
+                        ? {
+                            textLength: Math.round(c.w * 100) / 100,
+                            lengthAdjust: 'spacingAndGlyphs',
+                          }
+                        : {})}
+                    >
+                      {c.t}
+                    </tspan>
+                  ))}
+                </text>
+                {v.korni.map((d, i) => (
+                  <path
+                    key={i}
+                    className={clsx('skh-koren', klass)}
+                    d={d}
+                    style={{ strokeWidth: v.tolshchinaKornya }}
+                  />
+                ))}
+              </g>
+            );
+          })}
         </g>
         <g className="skh__ruchki">
           {ruchki.map((imya) => {

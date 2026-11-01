@@ -104,12 +104,25 @@ export function Chertezh3({
   useLayoutEffect(() => {
     const box = zamer.current;
     if (!box) return;
-    const m = new Map<string, { w: number; h: number }>();
-    box.querySelectorAll<HTMLElement>('[data-tex]').forEach((el) => {
-      const r = el.getBoundingClientRect();
-      m.set(el.dataset.tex ?? '', { w: Math.ceil(r.width) + 2, h: Math.ceil(r.height) });
-    });
-    setRazmery(m);
+    let zhiv = true;
+    const zamerit = () => {
+      if (!zhiv) return;
+      const m = new Map<string, { w: number; h: number }>();
+      box.querySelectorAll<HTMLElement>('[data-tex]').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        /* Запас по высоте: черта корня и дроби KaTeX выходит за строку. */
+        m.set(el.dataset.tex ?? '', { w: Math.ceil(r.width) + 2, h: Math.ceil(r.height) + 2 });
+      });
+      setRazmery(m);
+    };
+    zamerit();
+    /* До загрузки шрифтов KaTeX размеры — по запасному шрифту: корень
+       и дробь у́же и ниже. Когда шрифты готовы — замер заново. */
+    if (typeof document !== 'undefined' && document.fonts !== undefined)
+      void document.fonts.ready.then(zamerit);
+    return () => {
+      zhiv = false;
+    };
   }, [teksty]);
 
   const H = vysotaPo(shirina);
