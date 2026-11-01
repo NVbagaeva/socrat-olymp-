@@ -7,7 +7,7 @@
  * (lib/kartochki/podgotovka). Ручек перетаскивания и анимации нет.
  */
 
-import { BUKVY } from '../risunki/shrifty.js';
+import { BUKVY, CHISLA } from '../risunki/shrifty.js';
 import { ramkaKadra, raskladka, rezhimKadra, type Sostoyanie } from './ekran';
 import type { Tochki, Vid, ZhivayaSkhema } from './tipy';
 
@@ -51,6 +51,10 @@ const STIL_SAM = [
   '.skh-sam .skh-vynoska{fill:none;stroke:var(--i);stroke-width:.9;stroke-linecap:round;opacity:.6}',
   '.skh-sam .skh-podpis{fill:var(--i);font-size:17px;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
   '.skh-sam .skh-podpis.is-lit{fill:var(--k)}',
+  '.skh-sam .skh-velichina{fill:var(--i);font-size:15px;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
+  '.skh-sam .skh-velichina.is-lit{fill:var(--k)}',
+  '.skh-sam .skh-kursiv{font-style:italic}',
+  '.skh-sam .skh-indeks-vel{font-size:70%}',
   ".skh-sam .skh-indeks{font-family:KaTeX_Main,'Latin Modern Roman','Times New Roman',serif;font-size:70%}",
 ].join('');
 
@@ -136,6 +140,21 @@ export function svgSkhemy(
       p.indeks === '' ? '' : `<tspan class="skh-indeks" dy="4">${esc(p.indeks)}</tspan>`;
     out.push(
       `<text class="${cls('skh-podpis', ...metki(p))}" x="${p.x}" y="${p.y}">${esc(p.bukva)}${indeks}</text>`,
+    );
+  });
+  out.push(`</g><g class="skh__velichiny" style="font-family:${esc(CHISLA)}">`);
+  e.velichiny.forEach((v) => {
+    const chasti = v.chasti
+      .map((c, i) => {
+        const pred = v.chasti[i - 1];
+        const dy = c.indeks ? ' dy="4"' : pred?.indeks === true ? ' dy="-4"' : '';
+        const klass = cls(c.kursiv && 'skh-kursiv', c.indeks && 'skh-indeks-vel');
+        const shrift = c.kursiv ? ` style="font-family:${esc(BUKVY)}"` : '';
+        return `<tspan${klass === '' ? '' : ` class="${klass}"`}${shrift}${dy}>${esc(c.t)}</tspan>`;
+      })
+      .join('');
+    out.push(
+      `<text class="${cls('skh-velichina', ...metki(v))}" x="${v.x}" y="${v.y}">${chasti}</text>`,
     );
   });
   out.push('</g></svg>');

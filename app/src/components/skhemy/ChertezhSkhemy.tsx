@@ -12,7 +12,7 @@ import {
   type Sostoyanie,
 } from '@/lib/skhemy/ekran';
 import type { Ramka, T2, Tochki, Vid, ZhivayaSkhema } from '@/lib/skhemy/tipy';
-import { BUKVY } from '@/lib/risunki/shrifty.js';
+import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 import './skhemy.css';
 
 /** Длительность подстройки рамки (масштаба) под новое содержимое, мс. */
@@ -421,6 +421,35 @@ export function ChertezhSkhemy({
                   {p.indeks}
                 </tspan>
               )}
+            </text>
+          ))}
+        </g>
+        <g className="skh__velichiny" style={{ fontFamily: CHISLA }}>
+          {ekran.velichiny.map((v) => (
+            <text
+              key={v.id}
+              className={clsx(
+                'skh-velichina',
+                v.lit && 'is-lit',
+                v.dim && 'is-dim',
+                v.novyy && 'is-novyy',
+                v.cvet && `skh-c-${v.cvet}`,
+              )}
+              x={v.x}
+              y={v.y}
+            >
+              {v.chasti.map((c, i) => (
+                <tspan
+                  key={i}
+                  className={
+                    clsx(c.kursiv && 'skh-kursiv', c.indeks && 'skh-indeks-vel') || undefined
+                  }
+                  style={c.kursiv ? { fontFamily: BUKVY } : undefined}
+                  dy={c.indeks ? 4 : v.chasti[i - 1]?.indeks === true ? -4 : undefined}
+                >
+                  {c.t}
+                </tspan>
+              ))}
             </text>
           ))}
         </g>
