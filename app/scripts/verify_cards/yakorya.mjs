@@ -48,6 +48,19 @@ const PO_NOMERAM = {
      якорем не считается: повторять там нечего. */
   4: () => teoriyaVeroyatnosti(4),
   5: () => teoriyaVeroyatnosti(5),
+  /* Теория №6 и №7: раздел — #teoriya-<id>, карточка теории — #k-<id>,
+     рамка или таблица с полем `yakor` — #t6-… / #t7-…
+     (lib/zadanie6|7/teoriya-yakorya.ts). */
+  6: () => {
+    const { RAZDELY_TEORII_6, kartochkiBloka6 } = requireSrc('content/teoriya6');
+    const { YAKOR_6, BLOKI_6 } = requireSrc('lib/zadanie6/teoriya-yakorya');
+    return teoriyaRazdelami(RAZDELY_TEORII_6, kartochkiBloka6, YAKOR_6, BLOKI_6);
+  },
+  7: () => {
+    const { RAZDELY_TEORII_7, kartochkiBloka7 } = requireSrc('content/teoriya7');
+    const { YAKOR_7, BLOKI_7 } = requireSrc('lib/zadanie7/teoriya-yakorya');
+    return teoriyaRazdelami(RAZDELY_TEORII_7, kartochkiBloka7, YAKOR_7, BLOKI_7);
+  },
   /* №18: «теория» карточки — страница ключевой схемы /skhemy/<id>/;
      source — id собранной схемы (страницы строятся только для них). */
   18: () => {
@@ -66,6 +79,27 @@ function teoriyaVeroyatnosti(task) {
       : [RAZDELY_5, telaRazdelov5, Y.yakoryaBlokov5()];
   const out = new Set(bloki);
   razdely.filter((r) => r.id in tela).forEach((r) => out.add(`teoriya-${r.id}`));
+  return out;
+}
+
+/* Теория из разделов с блоками (№6, №7). Имя рамки в BLOKI, которое
+   ни один блок не ставит, — ошибка: якорь объявлен, а на странице его нет. */
+function teoriyaRazdelami(razdely, kartochkiBloka, Y, BLOKI) {
+  const out = new Set();
+  const postavleny = new Set();
+  for (const r of razdely) {
+    out.add(Y.razdel(r.id));
+    for (const b of r.bloki) {
+      kartochkiBloka(b).forEach((k) => out.add(Y.kartochka(k.id)));
+      if (b.yakor !== undefined) {
+        if (postavleny.has(b.yakor)) throw new Error(`якорь «${b.yakor}» стоит на двух блоках`);
+        postavleny.add(b.yakor);
+        out.add(Y.blok(b.yakor));
+      }
+    }
+  }
+  const lishnie = BLOKI.filter((id) => !postavleny.has(id));
+  if (lishnie.length > 0) throw new Error(`имена без блока: ${lishnie.join(', ')}`);
   return out;
 }
 

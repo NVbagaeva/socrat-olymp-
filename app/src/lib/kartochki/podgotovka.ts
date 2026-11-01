@@ -11,8 +11,14 @@
  *   — №4 и №5: диаграммы Эйлера и лучи на прямой
  *     (lib/veroyatnost/risunkiKartochek) — классы и геометрия теории.
  *   — №18: lib/skhemy (живые ключевые схемы), неподвижный SVG того же
- *     вида (lib/skhemy/svg.ts): случайное положение, поворот, отражение.
+ *     вида (lib/skhemy/svg.ts): случайное положение, поворот, отражение;
+ *   — №6: диаграмма Эйлера с точками — раскладка и классы теории
+ *     (lib/zadanie6/risunkiKartochek);
+ *   — №7: движок чертежей lib/graph (единичная окружность).
  */
+
+import { renderGraph } from '../graph/renderer.js';
+import { eilerSvg } from '../zadanie6/risunkiKartochek';
 
 import { parseAnswer } from '../answer';
 import { plain, typesetKrupno } from '../tex';
@@ -187,6 +193,10 @@ export function narisovat(id: string, f: FiguraKartochki): string[] {
       return [obertka(risunokVeroyatnosti(id, f.risunok), 'veroyatnost')];
     case 'skhema':
       return skhemy(id, f, f.bukvy === true);
+    case 'zadanie6':
+      return [obertka(eilerSvg(f.ris), 'zadanie6')];
+    case 'graph':
+      return [obertka(renderGraph(f.scena()) as string, 'graph')];
   }
 }
 

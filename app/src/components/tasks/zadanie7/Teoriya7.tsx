@@ -20,6 +20,7 @@ import {
 import { PROGRESS_7 } from '@/content/zadanie7';
 import { BANK } from '@/lib/zadanie7/bank/index';
 import { prototype } from '@/lib/zadanie7/prototypes';
+import { YAKOR_7 } from '@/lib/zadanie7/teoriya-yakorya';
 import type { BankItem } from '@/lib/zadanie7/types';
 import { KartochkaTelo7 } from './KartochkaTelo7';
 import { GdeNaEge7 } from './GdeNaEge7';
@@ -59,9 +60,19 @@ export function PrimerIzBanka7({ title, zadacha }: { title: string; zadacha: str
   return <RamkaPrimer title={title} uslovie={`${metka(z)} ${z.text}`} shagi={shagi} />;
 }
 
-function Tablica({ head, rows, title }: { head: string[]; rows: string[][]; title?: string }) {
+function Tablica({
+  head,
+  rows,
+  title,
+  id,
+}: {
+  head: string[];
+  rows: string[][];
+  title?: string;
+  id?: string;
+}) {
   return (
-    <div className="z7-tablica">
+    <div {...(id === undefined ? {} : { id })} className="z7-tablica">
       {title ? (
         <p className="z7-tablica__title">
           <Tex text={title} />
@@ -137,15 +148,20 @@ export function Blok7({
   b,
   trenazher,
   bezPrimerov = false,
+  yakorya = false,
 }: {
   b: BlokTeorii7;
   trenazher?: string;
   bezPrimerov?: boolean;
+  /** Ставить якоря рамок (#t7-…) — только во вкладке «Теория»: на ней они уникальны. */
+  yakorya?: boolean;
 }): ReactNode {
+  const id = yakorya && b.yakor !== undefined ? { id: YAKOR_7.blok(b.yakor) } : {};
   switch (b.vid) {
     case 'opredelenie':
       return (
         <RamkaOpredelenie
+          {...id}
           title={b.title ?? 'Определение'}
           {...(b.formula ? { formula: b.formula } : {})}
         >
@@ -162,7 +178,9 @@ export function Blok7({
         </RamkaOpredelenie>
       );
     case 'formula':
-      return <RamkaFormula formula={b.formula} {...(b.podpis ? { podpis: b.podpis } : {})} />;
+      return (
+        <RamkaFormula {...id} formula={b.formula} {...(b.podpis ? { podpis: b.podpis } : {})} />
+      );
     case 'primer':
       return bezPrimerov ? null : <PrimerIzBanka7 title={b.title} zadacha={b.zadacha} />;
     case 'primerRuchnoy':
@@ -176,18 +194,20 @@ export function Blok7({
       );
     case 'vazhno':
       return (
-        <RamkaVazhno title={b.title ?? 'Важно!'}>
+        <RamkaVazhno {...id} title={b.title ?? 'Важно!'}>
           <Abzacy paras={b.paras} />
         </RamkaVazhno>
       );
     case 'vyvod':
       return (
-        <RamkaVyvod title={b.title ?? 'Вывод'}>
+        <RamkaVyvod {...id} title={b.title ?? 'Вывод'}>
           <Abzacy paras={b.paras} />
         </RamkaVyvod>
       );
     case 'tablica':
-      return <Tablica head={b.head} rows={b.rows} {...(b.title ? { title: b.title } : {})} />;
+      return (
+        <Tablica {...id} head={b.head} rows={b.rows} {...(b.title ? { title: b.title } : {})} />
+      );
     case 'lovushka':
       return (
         <RamkaVazhno title={b.title}>
@@ -228,7 +248,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii7; trenazher: string }) {
         <Tex text={r.lead} />
       </p>
       {r.bloki.map((b, i) => (
-        <Blok7 b={b} trenazher={trenazher} key={`${r.id}-${i}`} />
+        <Blok7 b={b} trenazher={trenazher} yakorya key={`${r.id}-${i}`} />
       ))}
     </div>
   );

@@ -381,6 +381,24 @@
 .kart-fig--veroyatnost .kart-luchi {
   max-width: 360px;
 }
+/* №6: диаграмма Эйлера с точками — классы теории (components/tasks/
+   zadanie6/zadanie6.css, components/probability/probability.css); здесь
+   только место на карточке (lib/zadanie6/risunkiKartochek.ts). */
+.kart-fig--zadanie6 .z6-ris {
+  margin: 0;
+  max-width: 100%;
+}
+.kart-fig--zadanie6 .pr-eiler {
+  width: 280px;
+  max-width: 100%;
+  height: auto;
+}
+/* №7: единичная окружность движка lib/graph. */
+.kart-fig--graph svg {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+}
 .kart-luch__polosa {
   stroke-width: 4;
   stroke-linecap: round;

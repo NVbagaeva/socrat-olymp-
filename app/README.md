@@ -353,6 +353,14 @@ PT Serif — антиква карточки задачи (условие, «Р�
 в теории соседнего номера, задаёт `teoriyaNomera` — «Повторить теорию
 №4» ведёт туда. Якоря блоков этих вкладок — `lib/veroyatnost/teoriya-yakorya.ts`.
 
+У №6 и №7 «Повторить теорию» ведёт на карточку теории (`#k-<id>`) или на
+рамку раздела (`#t6-…`, `#t7-…`). Имена рамок — `lib/zadanie6/teoriya-yakorya.ts`
+и `lib/zadanie7/teoriya-yakorya.ts`; блоку теории имя ставит поле `yakor`
+(`content/teoriya6.ts`, `content/teoriya7.ts`), а `verify_cards` собирает
+якоря из тех же данных. Чертежи этих колод: `dvizhok: 'zadanie6'` — рисунок
+задачи №6 (диаграмма Эйлера, дерево), `dvizhok: 'graph'` — сцена движка
+`lib/graph` (единичная окружность №7).
+
 ## Онбординг: окно, кнопка «?», туры
 
 Всё в `src/components/onboarding/`, тексты — в `src/content/onboarding.ts`

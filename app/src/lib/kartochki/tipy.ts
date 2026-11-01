@@ -15,6 +15,7 @@ import type { ZhivayaSkhema } from '../skhemy/tipy';
 import type { StsenaId } from '../vektory/stseny';
 import type { Risunok as RisunokVektorov } from '../vektory/types';
 import type { RisunokVeroyatnosti } from '../veroyatnost/risunkiKartochek';
+import type { RisEilera } from '../zadanie6/risunkiKartochek';
 
 /**
  * Тип карточки.
@@ -45,6 +46,10 @@ export type UrovenKartochki = 'база' | 'важно для ЕГЭ';
  *   `povorot` — случайное положение, поворот и отражение; `bukvy` —
  *   подписи точек на лицевой стороне, `bukvyNaOborote` — на обороте
  *   (по умолчанию как на лицевой);
+ * - `zadanie6` — диаграмма Эйлера с точками-исходами №6 (та же модель
+ *   рисунка, что в теории и тренажёре);
+ * - `graph` — сцена движка чертежей lib/graph (renderGraph): у №7 —
+ *   единичная окружность;
  * - `svg` — путь к файлу в public/.
  *
  * `povorot` — рисовать в случайном повороте (тип `chertezh`).
@@ -55,6 +60,9 @@ export type FiguraKartochki =
   | { dvizhok: 'vektory'; stsena: StsenaId | RisunokVektorov }
   | { dvizhok: 'solid'; model: () => Model }
   | { dvizhok: 'veroyatnost'; risunok: RisunokVeroyatnosti }
+  | { dvizhok: 'zadanie6'; ris: RisEilera }
+  /** Сцена renderGraph; `alt` сцены — подпись для чтения с экрана. */
+  | { dvizhok: 'graph'; scena: () => Record<string, unknown> }
   | {
       dvizhok: 'skhema';
       skhema: () => ZhivayaSkhema;
