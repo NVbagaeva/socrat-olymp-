@@ -651,6 +651,9 @@ function raskladka1(
 
   const zanyato: Pryam[] = [];
   let vneBukv = false;
+  /* Букве не нашлось чистого места даже с выноской — фигура мельчает,
+     по краям появляется поле (как при выходе подписи за край). */
+  let tesnoBukv = false;
   if (sost.podpisi) {
     const imennye = ekran.tochki.filter((t) => t.imya !== null);
     const mesta = razmestitSVynoskami(
@@ -661,7 +664,8 @@ function raskladka1(
       SK.kegl,
     );
     imennye.forEach((t, i) => {
-      const { c: m, vynoska: v } = mesta[i]!;
+      const { c: m, vynoska: v, tesno } = mesta[i]!;
+      if (tesno === true) tesnoBukv = true;
       const [bukva, indeks] = (t.imya ?? '').split('_');
       const g = gabaritBukvy(t.imya ?? '', SK.kegl);
       /* Буква за краем чертежа (раскладка ставит её туда, когда рядом с
@@ -695,7 +699,7 @@ function raskladka1(
       });
     });
   }
-  let vne = vneBukv;
+  let vne = vneBukv || tesnoBukv;
   for (const { el, obshchee } of velichiny) {
     const chasti = chastiVelichiny(el.tekst);
     const { hw, hh, base } = gabaritVelichiny(chasti);

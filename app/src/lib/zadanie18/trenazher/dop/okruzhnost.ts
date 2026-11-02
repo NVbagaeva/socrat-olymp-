@@ -4,7 +4,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, okr, otr, tch, ug, velOtr } from '@/lib/skhemy/dsl';
+import { mnog, okr, otr, tch, ug, vel, velOtr } from '@/lib/skhemy/dsl';
 import { circumcircle, foot, intersect, mid, orthocenter, polar } from '@/lib/skhemy/geometriya';
 import type { Element, Tochki } from '@/lib/skhemy/tipy';
 import { chChertezh } from '@/content/zadanie18/trenazherDop/tipy';
@@ -78,7 +78,15 @@ export const OK_ORTOCENTR = (p: Parametry) =>
         ug('uAOC', A, O.c, C, { skrytyy: true, gruppy: ['oac'], cvet: 'b', dugi: 2 }),
         /* Данные условия на чертеже. */
         velOtr('d-BC', chChertezh(p.BC!), B, C),
-        velOtr('d-R', `R = ${chChertezh(p.R!)}`, O.c, C),
+        /* R — в свободном сегменте круга под хордой BC: у радиуса OC в
+         треугольнике с большой хордой тесно. */
+        vel('d-R', `R = ${chChertezh(p.R!)}`, {
+          vnutri: [
+            (B[0] + C[0]) / 2,
+            (B[1] + C[1]) / 2 -
+              (O.r - Math.hypot(O.c[0] - (B[0] + C[0]) / 2, O.c[1] - (B[1] + C[1]) / 2)) / 2,
+          ],
+        }),
         tch('A', A),
         tch('B', B),
         tch('C', C),

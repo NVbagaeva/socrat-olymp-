@@ -31,10 +31,18 @@ export interface Prepyatstviya {
 
 /** Зазор подписи до препятствий, px. */
 export const ZAZOR = 2;
+/**
+ * Раскладка держит чуть больший зазор: координаты на экране округляются
+ * до сотых, и буква, поставленная ровно на зазор, после округления
+ * касалась бы линии.
+ */
+const ZAZOR_RASKLADKI = ZAZOR + 0.05;
 const OTSTUPY = [3, 6, 10, 15, 21] as const;
 const NAPRAVLENIY = 24;
+/** Для выноски направлений больше: в тесноте чистое место бывает узким. */
+const NAPRAVLENIY_VYNOSKI = 48;
 /** Отступы подписи с выноской, px. */
-const OTSTUPY_VYNOSKI = [28, 36, 48] as const;
+const OTSTUPY_VYNOSKI = [28, 36, 48, 64, 80] as const;
 /** Выноска начинается на таком расстоянии от точки, px. */
 const OT_TOCHKI = 4;
 
@@ -102,8 +110,9 @@ export function kasaniya(
   prep: Prepyatstviya,
   zanyato: readonly Pryamougolnik[],
   svoya: T2 | null,
+  zazor: number = ZAZOR,
 ): number {
-  const z: Pryamougolnik = [r[0] - ZAZOR, r[1] - ZAZOR, r[2] + ZAZOR, r[3] + ZAZOR];
+  const z: Pryamougolnik = [r[0] - zazor, r[1] - zazor, r[2] + zazor, r[3] + zazor];
   let n = 0;
   for (const [a, b] of prep.otrezki) if (otrezokVPryamougolnike(a, b, z)) n += 1;
   for (const [c, rad] of prep.okruzhnosti) if (okruzhnostVPryamougolnike(c, rad, z)) n += 1;
@@ -189,6 +198,8 @@ function konecVynoski(p: T2, pr: Pryamougolnik): T2 {
 export interface MestoPodpisi {
   c: T2;
   vynoska: readonly [T2, T2] | null;
+  /** Чистого места не нашлось ни рядом, ни с выноской: буква касается чего-то. */
+  tesno?: boolean;
 }
 
 /**
@@ -245,7 +256,7 @@ export function razmestitSVynoskami(
         const ug = zhel + (k * 2 * Math.PI) / NAPRAVLENIY;
         const { c, pr, vne } = kandidat(ug, ots);
         const shtraf =
-          1e4 * kasaniya(pr, prepI, zanyato, p) +
+          1e4 * kasaniya(pr, prepI, zanyato, p, ZAZOR_RASKLADKI) +
           3e3 * vne +
           ots * 1.6 +
           raznostUglov(ug, zhel) * 9;
@@ -262,10 +273,10 @@ export function razmestitSVynoskami(
     if (luchshiyShtraf >= 1e3) {
       let shtrafV = Infinity;
       for (const ots of OTSTUPY_VYNOSKI) {
-        for (let k = 0; k < NAPRAVLENIY; k += 1) {
-          const ug = zhel + (k * 2 * Math.PI) / NAPRAVLENIY;
+        for (let k = 0; k < NAPRAVLENIY_VYNOSKI; k += 1) {
+          const ug = zhel + (k * 2 * Math.PI) / NAPRAVLENIY_VYNOSKI;
           const { c, pr, vne } = kandidat(ug, ots);
-          if (vne === 1 || kasaniya(pr, prepI, zanyato, p) > 0) continue;
+          if (vne === 1 || kasaniya(pr, prepI, zanyato, p, ZAZOR_RASKLADKI) > 0) continue;
           const nachalo: T2 = [p[0] + Math.cos(ug) * OT_TOCHKI, p[1] + Math.sin(ug) * OT_TOCHKI];
           const konec = konecVynoski(p, pr);
           /* Выноска не задевает чужие подписи и точки. */
@@ -300,7 +311,11 @@ export function razmestitSVynoskami(
         if (luchshayaVynoska !== null) break;
       }
     }
-    mesta[i] = { c: luchshee, vynoska: luchshayaVynoska };
+    mesta[i] = {
+      c: luchshee,
+      vynoska: luchshayaVynoska,
+      tesno: luchshiyShtraf >= 1e3 && luchshayaVynoska === null,
+    };
     if (luchshiyPr !== null) zanyato.push(luchshiyPr);
     if (luchshayaVynoska !== null) vynoski.push(luchshayaVynoska);
   }
