@@ -18,6 +18,7 @@ import { GLAVA_M08 } from './m08';
 import { GLAVA_M09 } from './m09';
 import { GLAVA_M10 } from './m10';
 import { GLAVA_M11 } from './m11';
+import { GLAVA_M12 } from './m12';
 import type { Glava19, Opornaya19, Razbor19, Zadacha19 } from './tipy';
 import { VVEDENIE_19 } from './vvedenie';
 
@@ -51,6 +52,7 @@ const GOTOVYE: Glava19[] = [
   GLAVA_M09,
   GLAVA_M10,
   GLAVA_M11,
+  GLAVA_M12,
 ];
 
 function skoro(metod: number): Glava19 {

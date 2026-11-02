@@ -45,6 +45,12 @@
  * отрезке — точкой: акцентом, если оно положительно, цветом пересечения,
  * если нет; вершина вне отрезка — пустой точкой.
  *
+ * Для тригонометрических уравнений (глава 12) ползунок двигает
+ * горизонталь y = a над синусоидой, взятой только на отрезке из условия
+ * (вне его — пунктиром), концы отрезка — точками. Корни на отрезке
+ * считаются по формулам серий x = arcsin a + 2πk, x = π − arcsin a + 2πk:
+ * концы отрезка включены, при a = ±1 серии совпадают — корень один.
+ *
  * Описание — данные и функции; функции в браузер со страницы не
  * передать, поэтому компонент (components/zadanie19/Zhivoy19.tsx)
  * берёт описание здесь по id. Число решений считается точно —
@@ -456,6 +462,47 @@ const m11r3Min = (a: number) => Math.min(4, Math.max(0, a));
 const m11r3Mnozhestvo = (a: number): KusokX19[] =>
   mnozhestvoX((x) => m11r3F(a, x) > 1e-12, korniKv(1, -2 * a, 2 * a + 3));
 
+/* ── Метод 12: тригонометрические уравнения ───────────────────────── */
+
+/* Разбор метода 12: sin x = a на отрезке [−π/6; 4π/3]. */
+const M12_OT = -Math.PI / 6;
+const M12_DO = (4 * Math.PI) / 3;
+
+/**
+ * Корни sin x = a на отрезке [ot; do] — по формулам серий x = arcsin a + 2πk
+ * и x = π − arcsin a + 2πk, концы отрезка включены, совпавшие (a = ±1) — один раз.
+ */
+export function korniSinNaOtrezke(a: number, ot: number, dO: number): number[] {
+  if (a < -1 - 1e-12 || a > 1 + 1e-12) return [];
+  const x0 = Math.asin(Math.max(-1, Math.min(1, a)));
+  const out: number[] = [];
+  for (let k = -3; k <= 3; k++) {
+    for (const x of [x0 + 2 * Math.PI * k, Math.PI - x0 + 2 * Math.PI * k]) {
+      if (x >= ot - 1e-9 && x <= dO + 1e-9 && !out.some((y) => Math.abs(y - x) < 1e-9)) {
+        out.push(x);
+      }
+    }
+  }
+  return out.sort((p, q) => p - q);
+}
+
+/** Вывод под живым рисунком метода 12: откуда корни и почему их столько. */
+function m12r1Itog(a: number): string {
+  const s3 = Math.sqrt(3) / 2;
+  if (a > 1 + 1e-9 || a < -1 - 1e-9) return 'прямая не пересекает синусоиду: $|a|>1$';
+  if (Math.abs(a - 1) < 1e-9)
+    return 'прямая касается графика в вершине $x=\\frac\\pi2$ — корень один';
+  if (a >= -0.5 - 1e-9) {
+    const kray = Math.abs(a + 0.5) < 1e-9 ? ' (левый — сам конец $x=-\\frac\\pi6$)' : '';
+    return `по корню на каждой ветви: $x=\\arcsin a$ и $x=\\pi-\\arcsin a$${kray}`;
+  }
+  if (a >= -s3 - 1e-9) {
+    const kray = Math.abs(a + s3) < 1e-9 ? ' — это сам конец $x=\\frac{4\\pi}3$' : '';
+    return `только $x=\\pi-\\arcsin a$${kray}: на возрастающей ветви $\\sin x\\ge-\\frac12$`;
+  }
+  return 'на отрезке синус не меньше $-\\frac{\\sqrt3}2$ — корней нет, хотя $|a|\\le1$';
+}
+
 /* ── Метод 10: прямая параметра ──────────────────────────────────── */
 
 const kA = (ot: number, dO: number, otVkl = true, doVkl = true): KusokA19 => ({
@@ -578,6 +625,63 @@ function zhivoyParametr(z: {
 }
 
 const ZHIVYE: Record<string, Zhivoy19> = {
+  /*
+   * Разбор метода 12: синусоида на отрезке [−π/6; 4π/3] (вне отрезка — пунктиром)
+   * и горизонталь y = a; корни на отрезке — точками пересечения, концы отрезка — A и B.
+   * Число корней — по формулам серий, а не по картинке.
+   */
+  'm12-r1': {
+    vid: 'sdvig',
+    bukva: 'a',
+    min: -1.5,
+    max: 1.5,
+    shag: 0.01,
+    start: 0.5,
+    osobye: [
+      { a: -1, tex: '-1' },
+      { a: -Math.sqrt(3) / 2, tex: '-\\frac{\\sqrt3}2' },
+      { a: -0.5, tex: '-\\frac12' },
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+    ],
+    scena: (a) => {
+      /* Деления у края окна движок не ставит: до −π/6, 4π/3 и ±1 — больше клетки. */
+      const okno = { x: [-1.6, 5.3] as [number, number], y: [-2.05, 2.05] as [number, number] };
+      const korni = korniSinNaOtrezke(a, M12_OT, M12_DO);
+      return scena(
+        {
+          ...okno,
+          shag: 0.5,
+          kletka: 52,
+          deleniya: {
+            x: [
+              [M12_OT, '−π/6'],
+              [Math.PI / 2, 'π/2'],
+              [Math.PI, 'π'],
+              [M12_DO, '4π/3'],
+            ],
+            y: [-1, 1],
+          },
+        },
+        {
+          curves: [
+            grafik((x) => Math.sin(x), 'lineA', { ot: okno.x[0], do: M12_OT }, 'dashed'),
+            grafik((x) => Math.sin(x), 'lineA', { ot: M12_DO, do: okno.x[1] }, 'dashed'),
+            grafik((x) => Math.sin(x), 'lineA', { ot: M12_OT, do: M12_DO }),
+          ],
+          shapes: [gorizontal(a, okno.x)],
+          points: [
+            tochka(M12_OT, -0.5, 'A', false, 'lineA'),
+            tochka(M12_DO, -Math.sqrt(3) / 2, 'B', false, 'lineA'),
+            ...korni.map((x) => tochka(x, a, null)),
+          ],
+        },
+        `График y = sin x на отрезке [−π/6; 4π/3] и прямая y = ${chislo(a)}; корней на отрезке: ${korni.length}`,
+      );
+    },
+    resheniy: (a) => korniSinNaOtrezke(a, M12_OT, M12_DO).length,
+    itog: m12r1Itog,
+  },
   /*
    * Разбор метода 11: парабола y = x² − 2ax + 2a + 3 и отрезок [0; 4] на оси;
    * под рисунком — множество решений неравенства > 0 и вывод: наименьшее
