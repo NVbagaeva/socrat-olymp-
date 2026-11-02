@@ -1,5 +1,5 @@
 /**
- * Группа III — показательные уравнения (П-15 … П-19, П-29).
+ * Группа III — показательные уравнения (П-15 … П-19, П-29, П-31, П-32).
  *
  * Общий приём: записать обе части степенями одного основания и
  * приравнять показатели. Показательная функция монотонна — каждое
@@ -10,25 +10,33 @@
 import {
   add,
   d,
+  fq,
   hint,
+  hintOtbor,
   koef,
+  konechnaya,
   lin,
+  linReshenie,
   linOboih,
   linVal,
   mul,
   num,
   podst,
+  pokazatel,
   por,
+  powQ,
   pw,
   q,
   razbor,
   t,
   uslovieTekst,
   val,
+  voprosIz,
   vychDelenie,
   type Poryadok,
   type Q,
 } from '../kit';
+import { kvadratQ, poly } from '../../zadanie10/kit';
 import type { Params, Prototype, Solved } from '../types';
 import { ryadom } from './gruppa1';
 
@@ -69,9 +77,15 @@ function kakStepenOsn(o: Osnovanie, a: number): string | null {
   return `$${o.obratnoe ? `\\dfrac{1}{${d(o.chislo)}}` : d(o.chislo)}=${pw(d(a), String(e))}$`;
 }
 
-/** Правая часть-число: a^t как число (t ≥ 0) или 1/a^|t|. */
-function chisloTex(a: number, tt: number): string {
-  return tt >= 0 ? d(a ** tt) : `\\dfrac{1}{${d(a ** -tt)}}`;
+/**
+ * Правая часть-число: a^t как число (t ≥ 0) или 1/a^|t|; `dec` —
+ * дробь десятичной записью, если она конечная: «0,5» вместо 1/2.
+ */
+function chisloTex(a: number, tt: number, dec = false): string {
+  if (tt >= 0) {
+    return d(a ** tt);
+  }
+  return dec && konechnaya(q(1, a ** -tt)) ? d(1 / a ** -tt) : `\\dfrac{1}{${d(a ** -tt)}}`;
 }
 
 interface Pokazatelnoe {
@@ -81,8 +95,11 @@ interface Pokazatelnoe {
   k: number;
   b: number;
   pr: Poryadok;
-  /** Правая часть: число a^tt или степень основания R с показателем k2·x + b2. */
-  R: { tt: number } | { osn: Osnovanie; k2: number; b2: number; pr2: Poryadok };
+  /**
+   * Правая часть: число a^tt (`dec` — десятичной дробью: «0,5») или
+   * степень основания R с показателем k2·x + b2.
+   */
+  R: { tt: number; dec?: boolean } | { osn: Osnovanie; k2: number; b2: number; pr2: Poryadok };
   uravnenie: string;
 }
 
@@ -111,16 +128,18 @@ function reshitPokazatelnoe(u: Pokazatelnoe, plan: string): Solved {
   let pravayaPri: (x: Q) => string = () => '';
   if ('tt' in u.R) {
     const tt = u.R.tt;
+    const dec = u.R.dec === true;
     rk = 0;
     rb = tt;
     pravyy = d(tt);
-    pravayaChast = chisloTex(a, tt);
+    pravayaChast = chisloTex(a, tt, dec);
+    const drobyu = pravayaChast === chisloTex(a, tt) ? '' : `=${chisloTex(a, tt)}`;
     stroki.push(
       tt === 1
         ? `Число $${d(a)}$ — это $${d(a)}$ в первой степени: показатель равен $1$.`
         : tt === 0
           ? `Число $1$ — это $${d(a)}^0$.`
-          : `Правая часть: $${chisloTex(a, tt)}=${pw(d(a), String(tt))}$${tt < 0 ? ` (число $\\dfrac{1}{a^n}$ — это $a^{-n}$)` : ''}.`,
+          : `Правая часть: $${pravayaChast}${drobyu}=${pw(d(a), String(tt))}$${tt < 0 ? ` (число $\\dfrac{1}{a^n}$ — это $a^{-n}$)` : ''}.`,
     );
   } else {
     const { osn, k2, b2, pr2 } = u.R;
@@ -181,7 +200,7 @@ function reshitPokazatelnoe(u: Pokazatelnoe, plan: string): Solved {
       ...('tt' in u.R && u.R.tt !== 1
         ? [
             hint(
-              `Как записать $${chisloTex(a, u.R.tt)}$ степенью числа $${d(a)}$?`,
+              `Как записать $${chisloTex(a, u.R.tt, u.R.dec === true)}$ степенью числа $${d(a)}$?`,
               `$${pw(d(a), String(u.R.tt))}$`,
               [`$${pw(d(a), String(-u.R.tt))}$`, `$${pw(d(a), String(2 * u.R.tt))}$`],
               u.R.tt < 0 ? 'Дробь $\\dfrac{1}{a^n}$ — это $a^{-n}$.' : undefined,
@@ -351,6 +370,8 @@ function u18(p: Params): Pokazatelnoe {
   const b = num(p, 'b');
   const tt = num(p, 'tt');
   const pr = por(p);
+  /* dec = 1 — правая часть десятичной дробью: $16^{x-9}=0{,}5$. */
+  const dec = p.dec === 1;
   const L = { chislo: a ** s, obratnoe: inv };
   return {
     a,
@@ -358,8 +379,8 @@ function u18(p: Params): Pokazatelnoe {
     k,
     b,
     pr,
-    R: { tt },
-    uravnenie: `${pw(osnTex(L), lin(k, b, 'x', pr))}=${tt === 1 ? d(a) : chisloTex(a, tt)}`,
+    R: { tt, dec },
+    uravnenie: `${pw(osnTex(L), lin(k, b, 'x', pr))}=${tt === 1 ? d(a) : chisloTex(a, tt, dec)}`,
   };
 }
 
@@ -481,4 +502,314 @@ const P29: Prototype = {
     ),
 };
 
-export const GRUPPA_III: Prototype[] = [P15, P16, P17, P18, P19, P29];
+/* ── П-31 a^m / a^(x+b) = a^t — частное степеней ──────────────── */
+
+/** Показатель рационального t по основанию a: 1/81 при a = 3 → −4; не степень — null. */
+export function pokazatelQ(x: Q, a: number): number | null {
+  if (x.n <= 0) {
+    return null;
+  }
+  if (x.m === 1) {
+    return pokazatel(x.n, a);
+  }
+  if (x.n === 1) {
+    const e = pokazatel(x.m, a);
+    return e === null ? null : -e;
+  }
+  return null;
+}
+
+/** «Число $3$ — это $3$ в первой степени», «$9=3^2$», «$\dfrac{1}{81}=3^{-4}$». */
+function chisloKakStepen(a: number, e: number): string {
+  if (e === 1) {
+    return `число $${d(a)}$ — это $${d(a)}$ в первой степени`;
+  }
+  return `$${chisloTex(a, e)}=${pw(d(a), d(e))}$`;
+}
+
+const P31: Prototype = {
+  id: 'P31',
+  no: 31,
+  group: 'III',
+  title: 'Частное степеней с одним основанием',
+  formula: '\\dfrac{a^m}{a^{x+b}}=a^k',
+  skills: ['stepeni', 'perenos'],
+  fipiNos: '',
+  uravnenie(p) {
+    const a = num(p, 'a');
+    return `\\dfrac{${d(a ** num(p, 'm'))}}{${pw(d(a), lin(1, num(p, 'b')))}}=${chisloTex(a, num(p, 'tt'))}`;
+  },
+  uslovie(p) {
+    return uslovieTekst(this.uravnenie(p), 'koren');
+  },
+  vopros: () => 'koren',
+  chisla(p) {
+    const a = num(p, 'a');
+    const m = num(p, 'm');
+    const b = num(p, 'b');
+    const tt = num(p, 'tt');
+    return { lhs: (x) => a ** m / a ** (x + b), rhs: () => a ** tt, odz: () => true };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const m = num(p, 'm');
+    const b = num(p, 'b');
+    const tt = num(p, 'tt');
+    const M = a ** m;
+    const Z = lin(1, b);
+    /* Показатель после деления: m − (x + b) = (m − b) − x. */
+    const E = lin(-1, m - b, 'x', 'bx');
+    const x = m - b - tt;
+    const xq = q(x);
+    const prav = chisloTex(a, tt);
+    const pokZ = x + b;
+    return {
+      answer: x,
+      uravnenie: this.uravnenie(p),
+      korni: [x],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          'Показательное уравнение: слева частное двух степеней одного числа. План: записать числитель и правую часть степенями одного основания, разделить степени (показатели вычитаются) и приравнять показатели.',
+        ],
+        preobr: [
+          `Числитель: ${chisloKakStepen(a, m)}.`,
+          `При делении степеней с одинаковым основанием показатели вычитаются: $\\dfrac{${pw(d(a), d(m))}}{${pw(d(a), Z)}}=${pw(d(a), b === 0 ? E : `${d(m)}-(${Z})`)}${b === 0 ? '' : `=${pw(d(a), E)}`}$.`,
+          `Правая часть: ${chisloKakStepen(a, tt)}.`,
+          `Основания равны — приравниваем показатели: $${E}=${d(tt)}$.`,
+          ...linReshenie(-1, m - b, q(tt), 'bx'),
+        ],
+        korni: [`$x=${d(x)}$ — единственный корень (показательная функция монотонна).`],
+        proverka: [
+          `$\\dfrac{${d(M)}}{${pw(d(a), d(pokZ))}}=${pw(d(a), d(m - pokZ))}${tt === 1 ? '' : `=${prav}`}$ — верно.`,
+        ],
+        answer: x,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(
+          'Как записать левую часть одной степенью?',
+          `$${pw(d(a), E)}$`,
+          [`$${pw(d(a), lin(1, b - m))}$`, `$${pw(d(a), lin(1, b + m))}$`],
+          'Делим степени — показатели вычитаются: $\\dfrac{a^m}{a^n}=a^{m-n}$.',
+        ),
+        ...(tt === 1
+          ? []
+          : [
+              hint(
+                `Как записать $${prav}$ степенью числа $${d(a)}$?`,
+                `$${pw(d(a), d(tt))}$`,
+                tt === 0
+                  ? [`$${pw(d(a), '-1')}$`, `$${d(a)}$`]
+                  : [`$${pw(d(a), d(-tt))}$`, `$${pw(d(a), d(2 * tt))}$`],
+                tt < 0 ? 'Дробь $\\dfrac{1}{a^n}$ — это $a^{-n}$.' : undefined,
+              ),
+            ]),
+        hint('Какое уравнение для показателей получится?', `$${E}=${d(tt)}$`, [
+          `$${lin(1, b - m)}=${d(tt)}$`,
+          `$${lin(1, b + m)}=${d(tt)}$`,
+        ]),
+        hint('Чему равен $x$?', `$${d(x)}$`, ryadom(xq)),
+      ],
+    };
+  },
+};
+
+/* ── П-32 (a²)^(x+p) ± K·a^(x+q) + c = 0 — замена t = aˣ ────────── */
+
+interface Kv32 {
+  a: number;
+  p: number;
+  s: number;
+  K: number;
+  qq: number;
+  c: number;
+  /** Коэффициенты квадратного уравнения A·t² + B·t + C = 0, t = aˣ. */
+  A: number;
+  B: number;
+  C: number;
+}
+
+function kv32(p: Params): Kv32 {
+  const a = num(p, 'a');
+  const pp = num(p, 'p');
+  const s = num(p, 's');
+  const K = num(p, 'K');
+  const qq = num(p, 'q');
+  const c = num(p, 'c');
+  return { a, p: pp, s, K, qq, c, A: a ** (2 * pp), B: s * K * a ** qq, C: c };
+}
+
+/** Средний член: «-2^{x+3}», «+4\cdot3^x». */
+function chlen32(u: Kv32, pokazatel: string): string {
+  return `${u.s < 0 ? '-' : '+'}${u.K === 1 ? '' : `${d(u.K)}\\cdot`}${pw(d(u.a), pokazatel)}`;
+}
+
+/** Слагаемое-число со знаком: «+1», «-24». */
+function svobodnyy(c: number): string {
+  return `${c < 0 ? '-' : '+'}${d(Math.abs(c))}`;
+}
+
+/** A·(aˣ)² + B·aˣ + C в TeX. */
+function cherezAx(u: Kv32): string {
+  const ax = `${d(u.a)}^x`;
+  const pervyy = u.A === 1 ? `(${ax})^2` : `${d(u.A)}\\cdot(${ax})^2`;
+  const B = Math.abs(u.B);
+  return `${pervyy}${u.B < 0 ? '-' : '+'}${B === 1 ? '' : `${d(B)}\\cdot`}${ax}${svobodnyy(u.C)}`;
+}
+
+const P32: Prototype = {
+  id: 'P32',
+  no: 32,
+  group: 'III',
+  title: 'Показательное уравнение, сводящееся к квадратному',
+  formula: '\\left(a^2\\right)^{x+p}+k\\cdot a^{x+q}+c=0',
+  skills: ['stepeni', 'diskriminant'],
+  fipiNos: '',
+  uravnenie(p) {
+    const u = kv32(p);
+    return `${pw(d(u.a * u.a), lin(1, u.p))}${chlen32(u, lin(1, u.qq))}${svobodnyy(u.c)}=0`;
+  },
+  uslovie(p) {
+    return uslovieTekst(this.uravnenie(p), this.vopros(p));
+  },
+  vopros: (p) => voprosIz(p, ['koren', 'menshiy', 'bolshiy']),
+  chisla(p) {
+    const u = kv32(p);
+    const b = u.a * u.a;
+    return {
+      lhs: (x) => b ** (x + u.p) + u.s * u.K * u.a ** (x + u.qq) + u.c,
+      rhs: () => 0,
+      odz: () => true,
+    };
+  },
+  solve(p) {
+    const u = kv32(p);
+    const { a, A, B, C } = u;
+    const b = a * a;
+    const v = this.vopros(p);
+    const kv = kvadratQ(q(A), q(B), q(C), 't');
+    const [t1, t2] = kv.roots;
+    const tKorni = t1.n * t2.m === t2.n * t1.m ? [t1] : [t1, t2];
+    const otbros = tKorni.filter((x) => x.n <= 0);
+    const ostalis = tKorni.filter((x) => x.n > 0);
+    const korni = ostalis.map((x) => {
+      const e = pokazatelQ(x, a);
+      if (e === null) {
+        throw new Error(`П-32: t = ${fq(x)} — не степень ${a}`);
+      }
+      return { t: x, x: e };
+    });
+    if (korni.length === 0) {
+      throw new Error('П-32: нет положительных t');
+    }
+    if ((korni.length === 1) !== (v === 'koren')) {
+      throw new Error(`П-32: корней ${korni.length}, вопрос ${v}`);
+    }
+    const xs = korni.map((k) => k.x).sort((x, y) => x - y);
+    const ans = v === 'bolshiy' ? (xs.at(-1) as number) : (xs[0] as number);
+    const tStr = (x: Q) => fq(x);
+    const kvTex = `${poly(A, B, C, 't')}=0`;
+    const pervyy =
+      u.p === 0
+        ? `$${pw(d(b), 'x')}=(${d(a)}^2)^x=(${d(a)}^x)^2$.`
+        : `$${pw(d(b), lin(1, u.p))}=${pw(d(b), d(u.p))}\\cdot${d(b)}^x=${d(A)}\\cdot(${d(a)}^x)^2$.`;
+    const vtoroy =
+      u.qq === 0
+        ? []
+        : [
+            `$${pw(d(a), lin(1, u.qq))}=${pw(d(a), d(u.qq))}\\cdot${d(a)}^x${u.qq === 1 ? '' : `=${d(a ** u.qq)}\\cdot${d(a)}^x`}$.`,
+          ];
+    /* Подстановка ответа: значения слагаемых. */
+    const T1 = powQ(q(b), ans + u.p);
+    const T2 = mul(q(u.K), powQ(q(a), ans + u.qq));
+    const drugoy = xs.find((x) => x !== ans);
+    return {
+      answer: ans,
+      uravnenie: this.uravnenie(p),
+      korni: xs,
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          `Показательное уравнение, которое сводится к квадратному: $${d(b)}=${d(a)}^2$, поэтому $${d(b)}^x=(${d(a)}^x)^2$. План: записать все степени через $${d(a)}^x$, сделать замену $t=${d(a)}^x$ ($t>0$), решить квадратное уравнение, отбросить неположительные $t$ и вернуться к $x$.`,
+        ],
+        preobr: [
+          pervyy,
+          ...vtoroy,
+          `Уравнение: $${cherezAx(u)}=0$.`,
+          `Замена $t=${d(a)}^x$, где $t>0$: $${kvTex}$.`,
+          ...kv.lines,
+          ...otbros.map(
+            (x) =>
+              `$t=${tStr(x)}$ не подходит: $${d(a)}^x>0$ при любом $x$ — уравнение $${d(a)}^x=${tStr(x)}$ корней не имеет.`,
+          ),
+          ...korni.map((k) =>
+            k.x === 1
+              ? `$${d(a)}^x=${d(a)}$, откуда $x=1$.`
+              : `$${d(a)}^x=${tStr(k.t)}=${pw(d(a), d(k.x))}$, откуда $x=${d(k.x)}$.`,
+          ),
+        ],
+        korni: [
+          xs.length === 1
+            ? `$x=${d(ans)}$.`
+            : `$x=${d(xs[0] as number)}$ или $x=${d(xs[1] as number)}$.`,
+        ],
+        ...(xs.length > 1
+          ? {
+              otbor: [
+                `Корней два: $${d(xs[0] as number)}$ и $${d(xs[1] as number)}$. В ответ — ${v === 'menshiy' ? 'меньший' : 'больший'}: $${d(ans)}$.`,
+              ],
+            }
+          : {}),
+        proverka: [
+          `$${pw(d(b), d(ans + u.p))}${chlen32(u, d(ans + u.qq))}${svobodnyy(u.c)}=${t(T1)}${u.s < 0 ? '-' : '+'}${t(T2)}${svobodnyy(u.c)}=0$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [
+        {
+          tekst: 'Корни квадратного уравнения удобно проверить по теореме Виета:',
+          tex: `t_1+t_2=${t(q(-B, A))},\\quad t_1t_2=${t(q(C, A))}`,
+        },
+      ],
+      hints: [
+        hint(
+          'Какую замену сделать?',
+          `$t=${d(a)}^x$`,
+          [`$t=${d(b)}^x$`, '$t=x^2$', `$t=${d(a)}x$`],
+          `$${d(b)}^x=(${d(a)}^x)^2=t^2$.`,
+        ),
+        hint('Какое квадратное уравнение получится?', `$${kvTex}$`, [
+          A === 1 ? `$${poly(A, -B, C, 't')}=0$` : `$${poly(1, B, C, 't')}=0$`,
+          `$${poly(A, B, -C, 't')}=0$`,
+        ]),
+        tKorni.length === 1
+          ? hint('Чему равен корень квадратного уравнения?', `$t=${tStr(t1)}$`, [
+              `$t=${tStr(q(-t1.n, t1.m))}$`,
+              `$t=${tStr(mul(t1, q(a)))}$`,
+            ])
+          : hint('Какие корни у квадратного уравнения?', `$${tStr(t1)}$ и $${tStr(t2)}$`, [
+              `$${tStr(q(-t1.n, t1.m))}$ и $${tStr(q(-t2.n, t2.m))}$`,
+              `$${tStr(t1)}$ и $${tStr(q(-t2.n, t2.m))}$`,
+            ]),
+        ...otbros.map((x) =>
+          hint(
+            `Подходит ли $t=${tStr(x)}$?`,
+            `нет: $${d(a)}^x>0$`,
+            ['да', `да, если $x<0$`],
+            'Степень положительного числа всегда положительна.',
+          ),
+        ),
+        xs.length === 1
+          ? hint('Чему равен $x$?', `$${d(ans)}$`, ryadom(q(ans)))
+          : hintOtbor(
+              v,
+              `$${d(ans)}$`,
+              [`$${d(drugoy as number)}$`, `$${d(-ans)}$`].filter((o) => o !== `$${d(ans)}$`),
+            ),
+      ],
+    };
+  },
+};
+
+export const GRUPPA_III: Prototype[] = [P15, P16, P17, P18, P19, P29, P31, P32];

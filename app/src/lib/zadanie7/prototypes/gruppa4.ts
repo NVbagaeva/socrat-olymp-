@@ -1,5 +1,5 @@
 /**
- * Группа IV — логарифмические уравнения (П-20 … П-25, П-30).
+ * Группа IV — логарифмические уравнения (П-20 … П-25, П-30, П-33 … П-35).
  *
  * Общий приём: по определению логарифма $\log_a A=c\iff A=a^c$ или по
  * равенству логарифмов с одним основанием $\log_aA=\log_aB\iff A=B>0$.
@@ -9,13 +9,16 @@
 import {
   d,
   hint,
+  fq,
   hintOtbor,
+  korenN,
   lin,
   linKoren,
   linReshenie,
   linVal,
   num,
   podst,
+  pokazatel,
   por,
   pw,
   q,
@@ -27,6 +30,7 @@ import {
   vychDelenie,
   type Q,
 } from '../kit';
+import { kvadratQ, poly } from '../../zadanie10/kit';
 import type { Params, Prototype, Solved } from '../types';
 import { ryadom } from './gruppa1';
 
@@ -578,4 +582,365 @@ const P30: Prototype = {
   },
 };
 
-export const GRUPPA_IV: Prototype[] = [P20, P21, P22, P23, P24, P25, P30];
+/* ── П-33 logₐ(a^(x+p) + b) = c — под логарифмом степень ─────────── */
+
+const P33: Prototype = {
+  id: 'P33',
+  no: 33,
+  group: 'IV',
+  title: 'Под логарифмом — степень с $x$',
+  formula: '\\log_a\\left(a^{x+p}+b\\right)=c',
+  skills: ['log-opredelenie', 'stepeni'],
+  fipiNos: '',
+  uravnenie(p) {
+    const a = num(p, 'a');
+    const b = num(p, 'b');
+    return `${logTex(a)}(${pw(d(a), lin(1, num(p, 'p')))}${b < 0 ? '-' : '+'}${d(Math.abs(b))})=${d(num(p, 'c'))}`;
+  },
+  uslovie(p) {
+    return uslovieTekst(this.uravnenie(p), 'koren');
+  },
+  vopros: () => 'koren',
+  chisla(p) {
+    const a = num(p, 'a');
+    const pp = num(p, 'p');
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    return {
+      lhs: (x) => Math.log(a ** (x + pp) + b) / Math.log(a),
+      rhs: () => c,
+      odz: (x) => a ** (x + pp) + b > 0,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const pp = num(p, 'p');
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    const L = logTex(a);
+    const E = lin(1, pp);
+    const S = pw(d(a), E);
+    const A = `${S}${b < 0 ? '-' : '+'}${d(Math.abs(b))}`;
+    const ac = a ** c;
+    const R = ac - b;
+    const m = pokazatel(R, a);
+    if (m === null) {
+      throw new Error(`П-33: ${R} — не степень ${a}`);
+    }
+    const x = m - pp;
+    const pokazateli =
+      m === 1
+        ? `Число $${d(a)}$ — это $${d(a)}$ в первой степени, приравниваем показатели: $${E}=1$.`
+        : `$${d(R)}=${pw(d(a), d(m))}$, приравниваем показатели: $${E}=${d(m)}$.`;
+    const variantyA = [a * c, c, a ** (c + 1)].filter(
+      (v, i, all) => v !== ac && all.indexOf(v) === i,
+    );
+    return {
+      answer: x,
+      uravnenie: this.uravnenie(p),
+      korni: [x],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          'Логарифм равен числу, а под логарифмом — степень с $x$. План: по определению логарифма $\\log_aA=c\\iff A=a^c$ убрать логарифм, получить простейшее показательное уравнение и привести его к одному основанию.',
+        ],
+        odz: [`Аргумент логарифма положителен: $${A}>0$. Проверим это для найденного корня.`],
+        preobr: [
+          `По определению логарифма: $${A}=${c === 1 ? d(a) : `${pw(d(a), d(c))}=${d(ac)}`}$.`,
+          `Переносим $${d(b)}$ в правую часть с противоположным знаком: $${S}=${d(ac)}${b > 0 ? '-' : '+'}${d(Math.abs(b))}=${d(R)}$.`,
+          pokazateli,
+          ...(pp === 0 ? [] : linReshenie(1, pp, q(m))),
+        ],
+        korni: [`$x=${d(x)}$.`],
+        otbor: [
+          `При $x=${d(x)}$ аргумент $${A}=${d(R)}${b < 0 ? '-' : '+'}${d(Math.abs(b))}=${d(ac)}>0$ — корень входит в ОДЗ.`,
+        ],
+        proverka: [
+          `$${L}(${pw(d(a), d(m))}${b < 0 ? '-' : '+'}${d(Math.abs(b))})=${L} ${d(ac)}=${d(c)}$ — верно.`,
+        ],
+        answer: x,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(
+          `Что означает запись $${L}(${A})=${d(c)}$?`,
+          `$${A}=${d(ac)}$`,
+          variantyA.slice(0, 2).map((v) => `$${A}=${d(v)}$`),
+          'Логарифм — показатель степени: $A=a^c$.',
+        ),
+        hint(`Чему равно $${S}$?`, `$${d(R)}$`, [`$${d(ac + b)}$`, `$${d(ac)}$`]),
+        hintOdz(A),
+        hint('Чему равен $x$?', `$${d(x)}$`, ryadom(q(x))),
+      ],
+    };
+  },
+};
+
+/* ── П-34 log²ₐx + B·logₐx + C = 0 — замена t = logₐx ──────────── */
+
+/** «\log_2^2 x-3\log_2 x+2» с аргументом X (x или число). */
+function kvLog(a: number, B: number, C: number, X: string): string {
+  const L = logTex(a);
+  const sr =
+    B === 0 ? '' : `${B < 0 ? '-' : '+'}${Math.abs(B) === 1 ? '' : d(Math.abs(B))}${L} ${X}`;
+  const sv = C === 0 ? '' : `${C < 0 ? '-' : '+'}${d(Math.abs(C))}`;
+  return `${L}^2 ${X}${sr}${sv}`;
+}
+
+/** Значение y² + B·y + C слагаемыми: «1-1», «4-6+2»; все нули — «0». */
+function kvLogZnach(y: number, B: number, C: number): string {
+  const chleny = [y * y, B * y, C].filter((v) => v !== 0);
+  if (chleny.length === 0) {
+    return '0';
+  }
+  return chleny.map((v, i) => (i === 0 ? d(v) : `${v < 0 ? '-' : '+'}${d(Math.abs(v))}`)).join('');
+}
+
+const P34: Prototype = {
+  id: 'P34',
+  no: 34,
+  group: 'IV',
+  title: 'Квадратное уравнение относительно логарифма',
+  formula: '\\log_a^2x+B\\log_ax+C=0',
+  skills: ['log-opredelenie', 'diskriminant'],
+  fipiNos: '',
+  uravnenie(p) {
+    return `${kvLog(num(p, 'a'), num(p, 'B'), num(p, 'C'), 'x')}=0`;
+  },
+  uslovie(p) {
+    return uslovieTekst(this.uravnenie(p), this.vopros(p));
+  },
+  vopros: (p) => voprosIz(p, ['menshiy', 'bolshiy']),
+  chisla(p) {
+    const a = num(p, 'a');
+    const B = num(p, 'B');
+    const C = num(p, 'C');
+    return {
+      lhs: (x) => {
+        const y = Math.log(x) / Math.log(a);
+        return y * y + B * y + C;
+      },
+      rhs: () => 0,
+      odz: (x) => x > 0,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const B = num(p, 'B');
+    const C = num(p, 'C');
+    const v = this.vopros(p);
+    const L = logTex(a);
+    const kv = kvadratQ(q(1), q(B), q(C), 't');
+    const [r1, r2] = kv.roots;
+    if (r1.m !== 1 || r2.m !== 1 || r1.n === r2.n) {
+      throw new Error('П-34: нужны два разных целых корня для t');
+    }
+    const ys = [r1.n, r2.n];
+    const xq = ys.map((y) => stepenQ(a, y));
+    const xs = xq.map(val);
+    const ans = v === 'menshiy' ? Math.min(...xs) : Math.max(...xs);
+    const drugoy = xs.find((x) => x !== ans) as number;
+    const yAns = ys[xs.indexOf(ans)] as number;
+    const vozvrat = (y: number, x: Q) =>
+      y === 1 ? `$${L} x=1$ ⇒ $x=${d(a)}$` : `$${L} x=${d(y)}$ ⇒ $x=${pw(d(a), d(y))}=${t(x)}$`;
+    /* Для подсказки «как найти x» — корень t, не равный 0 и 1, если есть. */
+    const yh = ys.find((y) => y !== 0 && y !== 1) ?? (ys.find((y) => y !== 0) as number);
+    const xh = val(stepenQ(a, yh));
+    const neVerno = [a * yh, yh, a + yh].filter((w, i, all) => w !== xh && all.indexOf(w) === i);
+    const neVernoKv = [
+      ...(B === 0 ? [] : [`$${poly(1, -B, C, 't')}=0$`]),
+      ...(C === 0 ? [] : [`$${poly(1, B, -C, 't')}=0$`]),
+      `$${poly(2, B, C, 't')}=0$`,
+    ];
+    /* Неверные пары корней t: другие множества, чем верное, и без повторов. */
+    const klyuch = (pr: number[]) => [...pr].sort((x, y) => x - y).join(';');
+    const zanyatyePary = new Set([klyuch(ys)]);
+    const neVernoT: string[] = [];
+    for (const pr of [ys.map((y) => -y), ys.map((y) => y + 1), ys.map((y) => y - 1)]) {
+      if (neVernoT.length < 2 && !zanyatyePary.has(klyuch(pr))) {
+        zanyatyePary.add(klyuch(pr));
+        neVernoT.push(`$${d(pr[0] as number)}$ и $${d(pr[1] as number)}$`);
+      }
+    }
+    const neVernoOtvet = [`$${d(drugoy)}$`, `$${d(yAns)}$`].filter(
+      (o, i, all) => o !== `$${d(ans)}$` && all.indexOf(o) === i,
+    );
+    const znach = kvLogZnach(yAns, B, C);
+    return {
+      answer: ans,
+      uravnenie: this.uravnenie(p),
+      korni: [...xs].sort((x, y) => x - y),
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          `Уравнение квадратное относительно $${L} x$: $${L}^2 x$ — это $(${L} x)^2$. План: ОДЗ, замена $t=${L} x$, квадратное уравнение, возврат к $x$ по определению логарифма и выбор нужного корня.`,
+        ],
+        odz: ['Аргумент логарифма положителен: $x>0$.'],
+        preobr: [
+          `Замена $t=${L} x$: $${poly(1, B, C, 't')}=0$.`,
+          ...kv.lines,
+          `Возвращаемся к $x$ по определению логарифма: ${vozvrat(ys[0] as number, xq[0] as Q)}; ${vozvrat(ys[1] as number, xq[1] as Q)}.`,
+        ],
+        korni: [`$x=${t(xq[0] as Q)}$ или $x=${t(xq[1] as Q)}$.`],
+        otbor: [
+          'Оба корня положительны — оба входят в ОДЗ.',
+          `В ответ — ${v === 'menshiy' ? 'меньший' : 'больший'}: $${d(ans)}$.`,
+        ],
+        proverka: [
+          `При $x=${d(ans)}$: $${L} ${d(ans)}=${d(yAns)}$, и $${kvLog(a, B, C, d(ans))}${znach === '0' ? '' : `=${znach}`}=0$ — верно.`,
+        ],
+        answer: ans,
+      }),
+      vychisleniya: [
+        {
+          tekst: 'Корни для $t$ удобно подобрать по теореме Виета:',
+          tex: `t_1+t_2=${d(-B)},\\quad t_1t_2=${d(C)}`,
+        },
+      ],
+      hints: [
+        hint(
+          'Какую замену сделать?',
+          `$t=${L} x$`,
+          [`$t=${L}^2 x$`, '$t=x^2$', `$t=${d(a)}^x$`],
+          `$${L}^2 x=(${L} x)^2=t^2$.`,
+        ),
+        hint('Какое квадратное уравнение получится?', `$${poly(1, B, C, 't')}=0$`, neVernoKv),
+        hint(
+          'Какие корни у уравнения для $t$?',
+          `$${d(ys[0] as number)}$ и $${d(ys[1] as number)}$`,
+          neVernoT,
+        ),
+        hint(
+          `Как найти $x$ из $${L} x=${d(yh)}$?`,
+          yh === 1 ? `$x=${d(a)}$` : `$x=${pw(d(a), d(yh))}$`,
+          neVerno.slice(0, 2).map((w) => `$x=${d(w)}$`),
+          'По определению логарифма: $\\log_ax=t\\iff x=a^t$.',
+        ),
+        hintOtbor(v, `$${d(ans)}$`, neVernoOtvet, 'В ответ пишем $x$, а не значение $t$.'),
+      ],
+    };
+  },
+};
+
+/* ── П-35 logₐ(log_b(log_c x)) = m — логарифм от логарифма ──────── */
+
+const P35: Prototype = {
+  id: 'P35',
+  no: 35,
+  group: 'IV',
+  title: 'Логарифм от логарифма',
+  formula: '\\log_a\\left(\\log_b\\left(\\log_cx\\right)\\right)=m',
+  skills: ['log-opredelenie', 'stepeni'],
+  fipiNos: '',
+  uravnenie(p) {
+    return `${logTex(num(p, 'a'))}(${logTex(num(p, 'b'))}(${logTex(num(p, 'c'))} x))=${d(num(p, 'm'))}`;
+  },
+  uslovie(p) {
+    return uslovieTekst(this.uravnenie(p), 'koren');
+  },
+  vopros: () => 'koren',
+  chisla(p) {
+    const a = num(p, 'a');
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    const m = num(p, 'm');
+    const lc = (x: number) => Math.log(x) / Math.log(c);
+    const lb = (x: number) => Math.log(lc(x)) / Math.log(b);
+    return {
+      lhs: (x) => Math.log(lb(x)) / Math.log(a),
+      rhs: () => m,
+      odz: (x) => x > 0 && lc(x) > 0 && lb(x) > 0,
+    };
+  },
+  solve(p) {
+    const a = num(p, 'a');
+    const b = num(p, 'b');
+    const c = num(p, 'c');
+    const m = num(p, 'm');
+    const La = logTex(a);
+    const Lb = logTex(b);
+    const Lc = logTex(c);
+    /* Снаружи внутрь: log_b(log_c x) = u = aᵐ, log_c x = w = bᵘ, x = cʷ. */
+    const u = stepenQ(a, m);
+    let w: number | null;
+    if (u.m === 1) {
+      w = b ** u.n;
+    } else if (u.n === 1) {
+      w = korenN(b, u.m);
+    } else {
+      w = null;
+    }
+    if (w === null || !Number.isInteger(w) || w < 2) {
+      throw new Error('П-35: log_c x — не целое больше 1');
+    }
+    const x = c ** w;
+    const uTex = fq(u);
+    const shag1 =
+      m === 1 ? `$${Lb}(${Lc} x)=${d(a)}$` : `$${Lb}(${Lc} x)=${pw(d(a), d(m))}=${uTex}$`;
+    const bu =
+      u.m === 1
+        ? u.n === 1
+          ? `$${Lc} x=${d(b)}$`
+          : `$${Lc} x=${pw(d(b), d(u.n))}=${d(w)}$`
+        : `$${Lc} x=${pw(d(b), `\\frac{1}{${d(u.m)}}`)}=\\sqrt${u.m === 2 ? '' : `[${u.m}]`}{${d(b)}}=${d(w)}$`;
+    const vPrimer = [a, m, 0, -1]
+      .map((v) => q(v))
+      .filter((v, i, all) => val(v) !== val(u) && all.findIndex((z) => val(z) === val(v)) === i)
+      .slice(0, 2)
+      .map((v) => `$${fq(v)}$`);
+    const vW = [val(u), b, w + 1]
+      .filter((v, i, all) => v !== w && all.indexOf(v) === i)
+      .slice(0, 2)
+      .map((v) => `$${d(v)}$`);
+    const vX = [c * w, c + w, w ** c, x * c, x + 1]
+      .filter((v, i, all) => v !== x && all.indexOf(v) === i)
+      .slice(0, 2)
+      .map((v) => `$${d(v)}$`);
+    return {
+      answer: x,
+      uravnenie: this.uravnenie(p),
+      korni: [x],
+      postoronnie: [],
+      etapy: razbor({
+        plan: [
+          'Логарифм от логарифма. План: снимаем логарифмы по одному снаружи внутрь — каждый раз по определению $\\log_aA=c\\iff A=a^c$, а затем проверяем ОДЗ всех трёх логарифмов.',
+        ],
+        odz: [
+          `Аргументы всех логарифмов положительны: $x>0$, $${Lc} x>0$, $${Lb}(${Lc} x)>0$. Проверим это для найденного корня.`,
+        ],
+        preobr: [
+          `Внешний логарифм по определению: ${shag1}.`,
+          `Следующий: ${bu}.`,
+          `Внутренний: $x=${pw(d(c), d(w))}=${d(x)}$.`,
+        ],
+        korni: [`$x=${d(x)}$.`],
+        otbor: [
+          `При $x=${d(x)}$: $${Lc} ${d(x)}=${d(w)}>0$ и $${Lb} ${d(w)}=${uTex}>0$ — все аргументы положительны, корень входит в ОДЗ.`,
+        ],
+        proverka: [
+          `$${La}(${Lb}(${Lc} ${d(x)}))=${La}(${Lb} ${d(w)})=${La} ${uTex}=${d(m)}$ — верно.`,
+        ],
+        answer: x,
+      }),
+      vychisleniya: [],
+      hints: [
+        hint(
+          `Чему равен $${Lb}(${Lc} x)$?`,
+          `$${uTex}$`,
+          vPrimer,
+          `По определению: $${La} A=${d(m)}\\iff A=${pw(d(a), d(m))}$.`,
+        ),
+        hint(`Чему равен $${Lc} x$?`, `$${d(w)}$`, vW),
+        hint('Чему равен $x$?', `$${d(x)}$`, vX),
+        hint(
+          'Какие условия входят в ОДЗ?',
+          `$x>0$, $${Lc} x>0$ и $${Lb}(${Lc} x)>0$`,
+          ['только $x>0$', 'ограничений нет'],
+          'Аргумент каждого логарифма должен быть положительным.',
+        ),
+      ],
+    };
+  },
+};
+
+export const GRUPPA_IV: Prototype[] = [P20, P21, P22, P23, P24, P25, P30, P33, P34, P35];

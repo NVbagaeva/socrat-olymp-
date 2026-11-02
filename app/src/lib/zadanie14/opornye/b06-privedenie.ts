@@ -1,0 +1,433 @@
+/**
+ * Блок 06 «Формулы приведения»: сначала приводим аргумент к $x$
+ * (меняется ли функция, какой знак), потом решаем. Задачи из
+ * сторонних подборок — с новыми промежутками, остальные — свои.
+ */
+
+import { cos, ctg, otrezok, PI, promezhutok, s, sin, sqrt, tg, u, ur, v } from '../dsl';
+import type { Zadacha14 } from '../tipy';
+
+export const ZADACHI_06: Zadacha14[] = [
+  ur({
+    id: 'z06-01',
+    iz: 'сторонний задачник',
+    uravnenie: '2\\cos\\left(\\dfrac{3\\pi}{2}+x\\right)\\cos x=\\sqrt{3}\\sin x',
+    f: (x) => 2 * cos((3 * PI) / 2 + x) * cos(x) - sqrt(3) * sin(x),
+    serii: [s(u(0), 1), s(u(1, 6)), s(u(-1, 6))],
+    promezhutok: otrezok(u(-2), u(-1, 2)),
+    otbor: 'krug',
+    metody: ['privedenie', 'dvoynoy'],
+    reshenie: [
+      'Сначала упрощаем $\\cos\\left(\\dfrac{3\\pi}{2}+x\\right)$ по формуле приведения. **Меняется ли функция?** К $x$ прибавлено $\\dfrac{3\\pi}{2}$ — это «вертикальная» точка окружности, поэтому косинус меняется на синус.',
+      '**Какой знак?** Считаем $x$ малым положительным углом. Тогда $\\dfrac{3\\pi}{2}+x$ чуть больше $\\dfrac{3\\pi}{2}$ — это IV четверть. Знак берём у **исходной** функции: косинус в IV четверти положителен. Значит, $\\cos\\left(\\dfrac{3\\pi}{2}+x\\right)=\\sin x$.',
+      'Уравнение принимает вид $2\\sin x\\cos x=\\sqrt{3}\\sin x\\ \\Leftrightarrow\\ 2\\sin x\\cos x-\\sqrt{3}\\sin x=0$.',
+      '**Не сокращай на $\\sin x$!** Он может равняться нулю, и тогда при делении потеряется вся серия $\\sin x=0$. Вместо этого выносим общий множитель: $\\sin x\\,(2\\cos x-\\sqrt{3})=0$.',
+      'Произведение равно нулю, если хотя бы один множитель равен нулю, а другой при этом имеет смысл. Оба множителя определены при любом $x$, поэтому $\\sin x\\,(2\\cos x-\\sqrt{3})=0\\ \\Leftrightarrow\\ \\left[\\begin{aligned}&\\sin x=0,\\\\&\\cos x=\\dfrac{\\sqrt{3}}{2}.\\end{aligned}\\right.$',
+      '$\\sin x=0$ в точках $0$ и $\\pi$ — они противоположны, серия $x=\\pi k$. $\\cos x=\\dfrac{\\sqrt{3}}{2}$ в точках $\\pm\\dfrac{\\pi}{6}$: $x=\\pm\\dfrac{\\pi}{6}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Меняется ли функция в $\\cos\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['Да, косинус меняется на синус', 'Нет, остаётся косинус'],
+        0,
+        'Есть $\\dfrac{3\\pi}{2}$ — функция меняется.',
+      ),
+      v(
+        'В какой четверти угол $\\dfrac{3\\pi}{2}+x$ при малом $x>0$ и какой там знак косинуса?',
+        [
+          'IV четверть, косинус положителен',
+          'III четверть, косинус отрицателен',
+          'IV четверть, косинус отрицателен',
+        ],
+        0,
+      ),
+      v(
+        'Что делать с $\\sin x$ в обеих частях $2\\sin x\\cos x=\\sqrt{3}\\sin x$?',
+        ['Перенести всё влево и вынести $\\sin x$', 'Сократить на $\\sin x$', 'Возвести в квадрат'],
+        0,
+        'Сокращение потеряет серию $x=\\pi k$.',
+      ),
+      v(
+        'Решения $\\cos x=\\dfrac{\\sqrt{3}}{2}$:',
+        [
+          '$x=\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$x=\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$x=\\dfrac{\\pi}{6}+\\pi k$',
+        ],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z06-02',
+    iz: 'сторонний задачник',
+    uravnenie: '\\cos 2x=\\sin\\left(x+\\dfrac{\\pi}{2}\\right)',
+    f: (x) => cos(2 * x) - sin(x + PI / 2),
+    serii: [s(u(0)), s(u(2, 3)), s(u(-2, 3))],
+    promezhutok: otrezok(u(1), u(3)),
+    otbor: 'krug',
+    metody: ['privedenie', 'zamena-preobr'],
+    reshenie: [
+      '$\\sin\\left(x+\\dfrac{\\pi}{2}\\right)$: есть $\\dfrac{\\pi}{2}$ — синус меняется на косинус; угол во II четверти, синус там положителен. Итог: $\\cos x$.',
+      'Косинус двойного угла записываем через косинус: $2\\cos^2 x-1=\\cos x\\ \\Leftrightarrow\\ 2\\cos^2 x-\\cos x-1=0$.',
+      'Замена $t=\\cos x$: $2t^2-t-1=0$, корни $t=1$ и $t=-\\dfrac{1}{2}$ — оба подходят.',
+      '$\\cos x=1$: $x=2\\pi k$; $\\cos x=-\\dfrac{1}{2}$: $x=\\pm\\dfrac{2\\pi}{3}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\sin\\left(x+\\dfrac{\\pi}{2}\\right)$?',
+        ['$\\cos x$', '$-\\cos x$', '$\\sin x$'],
+        0,
+      ),
+      v(
+        'Какой вид $\\cos 2x$ выбрать?',
+        ['$2\\cos^2 x-1$', '$1-2\\sin^2 x$', '$\\cos^2 x-\\sin^2 x$'],
+        0,
+        'Справа $\\cos x$ — пусть и слева останется только косинус.',
+      ),
+      v(
+        'Корни $2t^2-t-1=0$:',
+        ['$1$ и $-\\dfrac{1}{2}$', '$-1$ и $\\dfrac{1}{2}$', '$2$ и $-1$'],
+        0,
+      ),
+      v('Решения $\\cos x=1$:', ['$x=2\\pi k$', '$x=\\pi k$', '$x=\\dfrac{\\pi}{2}+2\\pi k$'], 0),
+    ],
+  }),
+  ur({
+    id: 'z06-03',
+    iz: 'сторонний задачник',
+    uravnenie: '6\\sin^2 x+15\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)-12=0',
+    f: (x) => 6 * sin(x) ** 2 + 15 * sin((3 * PI) / 2 + x) - 12,
+    serii: [s(u(2, 3)), s(u(-2, 3))],
+    promezhutok: otrezok(u(-3), u(-1)),
+    otbor: 'nerav',
+    metody: ['privedenie', 'zamena-preobr'],
+    reshenie: [
+      '$\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)$: синус меняется на косинус; угол в IV четверти, синус там отрицателен. Итог: $-\\cos x$.',
+      '$6(1-\\cos^2 x)-15\\cos x-12=0\\ \\Leftrightarrow\\ 2\\cos^2 x+5\\cos x+2=0$ (разделили на $-3$).',
+      'Замена $t=\\cos x$: корни $t=-\\dfrac{1}{2}$ и $t=-2$; $t=-2$ не подходит.',
+      '$\\cos x=-\\dfrac{1}{2}$: $x=\\pm\\dfrac{2\\pi}{3}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['$-\\cos x$', '$\\cos x$', '$-\\sin x$'],
+        0,
+        'IV четверть, синус там отрицателен.',
+      ),
+      v(
+        'Какое уравнение получится после замены $t=\\cos x$?',
+        ['$2t^2+5t+2=0$', '$2t^2-5t+2=0$', '$2t^2+5t-2=0$'],
+        0,
+      ),
+      v('Какой корень отбрасываем?', ['$t=-2$', '$t=-\\dfrac{1}{2}$', 'Никакой'], 0),
+      v(
+        'Решения $\\cos x=-\\dfrac{1}{2}$:',
+        [
+          '$\\pm\\dfrac{2\\pi}{3}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$-\\dfrac{\\pi}{6}+2\\pi k$',
+        ],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z06-04',
+    iz: 'сторонний задачник',
+    uravnenie: '8\\cos^2 x+2\\sqrt{3}\\sin\\left(\\dfrac{3\\pi}{2}-x\\right)=9',
+    f: (x) => 8 * cos(x) ** 2 + 2 * sqrt(3) * sin((3 * PI) / 2 - x) - 9,
+    serii: [s(u(5, 6)), s(u(-5, 6))],
+    promezhutok: otrezok(u(1, 2), u(3)),
+    otbor: 'krug',
+    metody: ['privedenie', 'zamena-preobr'],
+    reshenie: [
+      '$\\sin\\left(\\dfrac{3\\pi}{2}-x\\right)$: синус меняется на косинус; угол в III четверти, синус отрицателен. Итог: $-\\cos x$.',
+      '$8\\cos^2 x-2\\sqrt{3}\\cos x-9=0$. Замена $t=\\cos x$: $\\dfrac{D}{4}=3+72=75$, $\\sqrt{75}=5\\sqrt{3}$, $t=\\dfrac{\\sqrt{3}\\pm5\\sqrt{3}}{8}$.',
+      '$t=\\dfrac{3\\sqrt{3}}{4}>1$ — не подходит ($3\\sqrt{3}=\\sqrt{27}>4$). Остаётся $\\cos x=-\\dfrac{\\sqrt{3}}{2}$.',
+      '$x=\\pm\\dfrac{5\\pi}{6}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\sin\\left(\\dfrac{3\\pi}{2}-x\\right)$?',
+        ['$-\\cos x$', '$\\cos x$', '$-\\sin x$'],
+        0,
+        'III четверть, синус там отрицателен.',
+      ),
+      v(
+        'Корни $8t^2-2\\sqrt{3}t-9=0$:',
+        [
+          '$\\dfrac{3\\sqrt{3}}{4}$ и $-\\dfrac{\\sqrt{3}}{2}$',
+          '$-\\dfrac{3\\sqrt{3}}{4}$ и $\\dfrac{\\sqrt{3}}{2}$',
+          '$\\dfrac{\\sqrt{3}}{2}$ и $\\dfrac{3}{4}$',
+        ],
+        0,
+      ),
+      v(
+        'Подходит ли $t=\\dfrac{3\\sqrt{3}}{4}$?',
+        ['Нет, это больше $1$', 'Да, это меньше $1$'],
+        0,
+        '$\\left(\\dfrac{3\\sqrt{3}}{4}\\right)^2=\\dfrac{27}{16}>1$.',
+      ),
+      v(
+        'Решения $\\cos x=-\\dfrac{\\sqrt{3}}{2}$:',
+        [
+          '$\\pm\\dfrac{5\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{2\\pi}{3}+2\\pi k$',
+        ],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z06-05',
+    iz: 'сторонний задачник',
+    uravnenie: '2\\sin(\\pi+x)\\sin\\left(\\dfrac{\\pi}{2}+x\\right)=\\sin x',
+    f: (x) => 2 * sin(PI + x) * sin(PI / 2 + x) - sin(x),
+    serii: [s(u(0), 1), s(u(2, 3)), s(u(-2, 3))],
+    promezhutok: otrezok(u(-5, 2), u(-1)),
+    otbor: 'nerav',
+    metody: ['privedenie', 'dvoynoy'],
+    reshenie: [
+      '$\\sin(\\pi+x)$: функция не меняется, угол в III четверти, синус отрицателен — $-\\sin x$. $\\sin\\left(\\dfrac{\\pi}{2}+x\\right)=\\cos x$.',
+      '$-2\\sin x\\cos x=\\sin x\\ \\Leftrightarrow\\ \\sin x\\,(2\\cos x+1)=0$ — выносим $\\sin x$, а не сокращаем.',
+      'Оба множителя определены при всех $x$: $\\left[\\begin{aligned}&\\sin x=0,\\\\&\\cos x=-\\dfrac{1}{2};\\end{aligned}\\right.$ $x=\\pi k$, $x=\\pm\\dfrac{2\\pi}{3}+2\\pi k$.',
+    ],
+    podskazki: [
+      v('Чему равно $\\sin(\\pi+x)$?', ['$-\\sin x$', '$\\sin x$', '$-\\cos x$'], 0),
+      v(
+        'Как получить произведение?',
+        [
+          '$\\sin x\\,(2\\cos x+1)=0$',
+          '$\\sin x\\,(2\\cos x-1)=0$',
+          'Сократить на $\\sin x$: $-2\\cos x=1$',
+        ],
+        0,
+        'Перенесли $\\sin x$ влево: $-2\\sin x\\cos x-\\sin x=0$, умножили на $-1$.',
+      ),
+      v(
+        'Сколько серий в ответе?',
+        [
+          'Три: $\\pi k$ и $\\pm\\dfrac{2\\pi}{3}+2\\pi k$',
+          'Две: $\\pm\\dfrac{2\\pi}{3}+2\\pi k$',
+          'Одна: $\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Неравенство для $x=\\pi k$ на $\\left[-\\dfrac{5\\pi}{2};\\,-\\pi\\right]$ даёт',
+        ['$k=-2,\\,-1$', '$k=-1$', '$k=-3,\\,-2,\\,-1$'],
+        0,
+        '$-\\dfrac{5}{2}\\le k\\le-1$.',
+      ),
+    ],
+  }),
+  ur({
+    id: 'z06-06',
+    iz: 'сторонний задачник',
+    uravnenie: '\\cos 2x-\\sin\\left(\\dfrac{\\pi}{2}+x\\right)+1=0',
+    f: (x) => cos(2 * x) - sin(PI / 2 + x) + 1,
+    serii: [s(u(1, 2), 1), s(u(1, 3)), s(u(-1, 3))],
+    promezhutok: promezhutok(otrezok(u(-1), u(1, 2)), [true, false]),
+    otbor: 'krug',
+    metody: ['privedenie', 'dvoynoy'],
+    reshenie: [
+      '$\\sin\\left(\\dfrac{\\pi}{2}+x\\right)=\\cos x$; $\\cos 2x=2\\cos^2 x-1$.',
+      '$2\\cos^2 x-1-\\cos x+1=0\\ \\Leftrightarrow\\ \\cos x\\,(2\\cos x-1)=0$.',
+      '$\\left[\\begin{aligned}&\\cos x=0,\\\\&\\cos x=\\dfrac{1}{2};\\end{aligned}\\right.$ $x=\\dfrac{\\pi}{2}+\\pi k$, $x=\\pm\\dfrac{\\pi}{3}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\sin\\left(\\dfrac{\\pi}{2}+x\\right)$?',
+        ['$\\cos x$', '$-\\cos x$', '$\\sin x$'],
+        0,
+      ),
+      v(
+        'Какой вид $\\cos 2x$ удобен?',
+        ['$2\\cos^2 x-1$', '$1-2\\sin^2 x$', '$\\cos^2 x-\\sin^2 x$'],
+        0,
+        'Чтобы осталась одна функция — косинус.',
+      ),
+      v(
+        'Что получится после упрощения?',
+        ['$\\cos x\\,(2\\cos x-1)=0$', '$2\\cos^2 x-\\cos x+2=0$', '$\\cos x\\,(2\\cos x+1)=0$'],
+        0,
+      ),
+      v(
+        'Входит ли $\\dfrac{\\pi}{2}$ в промежуток $\\left[-\\pi;\\,\\dfrac{\\pi}{2}\\right)$?',
+        ['Нет, правый конец не входит', 'Да'],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z06-07',
+    iz: 'авторская',
+    uravnenie:
+      '\\operatorname{tg}(\\pi+x)\\cdot\\operatorname{ctg}\\left(\\dfrac{\\pi}{2}-x\\right)=3',
+    f: (x) => tg(PI + x) * ctg(PI / 2 - x) - 3,
+    odz: (x) => Math.abs(cos(x)) > 1e-6,
+    serii: [s(u(1, 3), 1), s(u(-1, 3), 1)],
+    promezhutok: otrezok(u(1, 2), u(2)),
+    otbor: 'krug',
+    metody: ['privedenie'],
+    reshenie: [
+      '$\\operatorname{tg}(\\pi+x)$: функция не меняется, угол в III четверти, тангенс там положителен — $\\operatorname{tg} x$.',
+      '$\\operatorname{ctg}\\left(\\dfrac{\\pi}{2}-x\\right)$: котангенс меняется на тангенс, угол в I четверти — знак плюс: $\\operatorname{tg} x$. ОДЗ: $\\cos x\\ne0$.',
+      '$\\operatorname{tg}^2 x=3\\ \\Leftrightarrow\\ \\operatorname{tg} x=\\pm\\sqrt{3}$: $x=\\pm\\dfrac{\\pi}{3}+\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\operatorname{tg}(\\pi+x)$?',
+        ['$\\operatorname{tg} x$', '$-\\operatorname{tg} x$', '$\\operatorname{ctg} x$'],
+        0,
+        'Период тангенса — $\\pi$.',
+      ),
+      v(
+        'Чему равно $\\operatorname{ctg}\\left(\\dfrac{\\pi}{2}-x\\right)$?',
+        ['$\\operatorname{tg} x$', '$-\\operatorname{tg} x$', '$\\operatorname{ctg} x$'],
+        0,
+      ),
+      v(
+        'Решения $\\operatorname{tg}^2 x=3$:',
+        [
+          '$\\pm\\dfrac{\\pi}{3}+\\pi k$',
+          '$\\dfrac{\\pi}{3}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+\\pi k$',
+        ],
+        0,
+        'Не забудь знак минус: $\\operatorname{tg} x=-\\sqrt{3}$ тоже подходит.',
+      ),
+    ],
+  }),
+  ur({
+    id: 'z06-08',
+    iz: 'авторская',
+    uravnenie: '2\\sin^2 x+3\\cos(x-\\pi)=0',
+    f: (x) => 2 * sin(x) ** 2 + 3 * cos(x - PI),
+    serii: [s(u(1, 3)), s(u(-1, 3))],
+    promezhutok: otrezok(u(-4), u(-1)),
+    otbor: 'nerav',
+    metody: ['privedenie', 'zamena-preobr'],
+    reshenie: [
+      'Косинус чётный: $\\cos(x-\\pi)=\\cos(\\pi-x)$. Функция не меняется, угол $\\pi-x$ во II четверти, косинус отрицателен: $-\\cos x$.',
+      '$2(1-\\cos^2 x)-3\\cos x=0\\ \\Leftrightarrow\\ 2\\cos^2 x+3\\cos x-2=0$.',
+      'Замена $t=\\cos x$: корни $t=\\dfrac{1}{2}$ и $t=-2$; $t=-2$ не подходит.',
+      '$\\cos x=\\dfrac{1}{2}$: $x=\\pm\\dfrac{\\pi}{3}+2\\pi k$.',
+    ],
+    podskazki: [
+      v('Чему равно $\\cos(x-\\pi)$?', ['$-\\cos x$', '$\\cos x$', '$\\sin x$'], 0),
+      v(
+        'Корни $2t^2+3t-2=0$:',
+        ['$\\dfrac{1}{2}$ и $-2$', '$-\\dfrac{1}{2}$ и $2$', '$1$ и $-\\dfrac{3}{2}$'],
+        0,
+      ),
+      v(
+        'Решения $\\cos x=\\dfrac{1}{2}$:',
+        [
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\dfrac{\\pi}{3}+\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Сколько корней на $[-4\\pi;\\,-\\pi]$?',
+        ['Три', 'Два', 'Четыре'],
+        0,
+        '$-\\dfrac{11\\pi}{3}$, $-\\dfrac{7\\pi}{3}$, $-\\dfrac{5\\pi}{3}$.',
+      ),
+    ],
+  }),
+  ur({
+    id: 'z06-09',
+    iz: 'авторская',
+    uravnenie: '\\cos\\left(\\dfrac{\\pi}{2}+x\\right)=\\sin(\\pi-x)+\\sqrt{3}',
+    f: (x) => cos(PI / 2 + x) - sin(PI - x) - sqrt(3),
+    serii: [s(u(-1, 3)), s(u(-2, 3))],
+    promezhutok: otrezok(u(1), u(3)),
+    otbor: 'nerav',
+    metody: ['privedenie'],
+    reshenie: [
+      '$\\cos\\left(\\dfrac{\\pi}{2}+x\\right)$: косинус меняется на синус, угол во II четверти, косинус отрицателен — $-\\sin x$.',
+      '$\\sin(\\pi-x)$: функция не меняется, II четверть, синус положителен — $\\sin x$.',
+      '$-\\sin x=\\sin x+\\sqrt{3}\\ \\Leftrightarrow\\ \\sin x=-\\dfrac{\\sqrt{3}}{2}$: $x=-\\dfrac{\\pi}{3}+2\\pi k$, $x=-\\dfrac{2\\pi}{3}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\cos\\left(\\dfrac{\\pi}{2}+x\\right)$?',
+        ['$-\\sin x$', '$\\sin x$', '$-\\cos x$'],
+        0,
+      ),
+      v('Чему равно $\\sin(\\pi-x)$?', ['$\\sin x$', '$-\\sin x$', '$\\cos x$'], 0),
+      v(
+        'Что получится?',
+        [
+          '$\\sin x=-\\dfrac{\\sqrt{3}}{2}$',
+          '$\\sin x=\\dfrac{\\sqrt{3}}{2}$',
+          '$0=\\sqrt{3}$, корней нет',
+        ],
+        0,
+      ),
+      v(
+        'Сколько корней на $[\\pi;\\,3\\pi]$?',
+        ['Два', 'Три', 'Четыре'],
+        0,
+        '$\\dfrac{4\\pi}{3}$ и $\\dfrac{5\\pi}{3}$.',
+      ),
+    ],
+  }),
+  ur({
+    id: 'z06-10',
+    iz: 'авторская',
+    uravnenie:
+      '\\operatorname{tg}(\\pi+x)-\\operatorname{tg}\\left(\\dfrac{\\pi}{2}+x\\right)=\\dfrac{4\\sqrt{3}}{3}',
+    f: (x) => tg(PI + x) - tg(PI / 2 + x) - (4 * sqrt(3)) / 3,
+    odz: (x) => Math.abs(sin(x)) > 1e-6 && Math.abs(cos(x)) > 1e-6,
+    serii: [s(u(1, 6), 1), s(u(1, 3), 1)],
+    promezhutok: otrezok(u(-1), u(1, 4)),
+    otbor: 'krug',
+    metody: ['privedenie', 'zamena'],
+    reshenie: [
+      '$\\operatorname{tg}(\\pi+x)=\\operatorname{tg} x$. $\\operatorname{tg}\\left(\\dfrac{\\pi}{2}+x\\right)$: тангенс меняется на котангенс, угол во II четверти, тангенс отрицателен — $-\\operatorname{ctg} x$. ОДЗ: $\\sin x\\ne0$, $\\cos x\\ne0$.',
+      '$\\operatorname{tg} x+\\operatorname{ctg} x=\\dfrac{4\\sqrt{3}}{3}$. Замена $t=\\operatorname{tg} x$, $t\\ne0$: $t^2-\\dfrac{4\\sqrt{3}}{3}t+1=0$.',
+      'По теореме Виета: сумма $\\dfrac{4\\sqrt{3}}{3}$, произведение $1$ — корни $t=\\sqrt{3}$ и $t=\\dfrac{\\sqrt{3}}{3}$.',
+      '$x=\\dfrac{\\pi}{3}+\\pi k$ и $x=\\dfrac{\\pi}{6}+\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\operatorname{tg}\\left(\\dfrac{\\pi}{2}+x\\right)$?',
+        ['$-\\operatorname{ctg} x$', '$\\operatorname{ctg} x$', '$-\\operatorname{tg} x$'],
+        0,
+      ),
+      v(
+        'Какое уравнение получится?',
+        [
+          '$\\operatorname{tg} x+\\operatorname{ctg} x=\\dfrac{4\\sqrt{3}}{3}$',
+          '$\\operatorname{tg} x-\\operatorname{ctg} x=\\dfrac{4\\sqrt{3}}{3}$',
+          '$2\\operatorname{tg} x=\\dfrac{4\\sqrt{3}}{3}$',
+        ],
+        0,
+      ),
+      v(
+        'Корни $t^2-\\dfrac{4\\sqrt{3}}{3}t+1=0$:',
+        [
+          '$\\sqrt{3}$ и $\\dfrac{\\sqrt{3}}{3}$',
+          '$-\\sqrt{3}$ и $-\\dfrac{\\sqrt{3}}{3}$',
+          '$1$ и $\\dfrac{\\sqrt{3}}{3}$',
+        ],
+        0,
+      ),
+      v(
+        'Серии:',
+        [
+          '$\\dfrac{\\pi}{3}+\\pi k$ и $\\dfrac{\\pi}{6}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+\\pi k$',
+          '$\\dfrac{\\pi}{3}+2\\pi k$ и $\\dfrac{\\pi}{6}+2\\pi k$',
+        ],
+        0,
+      ),
+    ],
+  }),
+];
