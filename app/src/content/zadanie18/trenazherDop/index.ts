@@ -93,6 +93,7 @@ function podskazka(z: ZadachaDop18): ShagVoprosa[] {
 
 export const TIPY_DOP_18: readonly TipZadachi18[] = ZADACHI_DOP_18.map((z) => ({
   id: z.id,
+  nazvanie: z.nazvanie,
   skhema: z.skhemy[0]!.id,
   uroven: z.uroven,
   varianty: [{}],

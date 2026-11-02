@@ -21,9 +21,10 @@
  * data-line-pt).
  */
 
+import { KOREN, znakKornyaSvg } from '@/lib/risunki/koren.js';
 import { BUKVY, CHISLA, indeksSvg } from '@/lib/risunki/shrifty.js';
 import { escSvg, imyaSvg } from '@/lib/stereo/proekciya';
-import type { Kadr, LiniyaKadra, PodpisKadra } from './kadr';
+import { KOEF_IMENI, type Kadr, type LiniyaKadra, type PodpisKadra } from './kadr';
 
 export interface OpciiSvg {
   /** Подписи: текстом SVG или не рисовать (интерактив кладёт свои, KaTeX). */
@@ -50,6 +51,11 @@ const FIKS = {
   podsvetka: '#e07a2f',
   tekst: '#101728',
   fon: '#ffffff',
+  /* Тема чертежей (styles/tokens.css, lib/sheet/theme.css): вершины и
+     точки — синие, величины — терракота; в ч/б теме листа — чёрные.
+     Запасной цвет — для чертежа вне страницы (файл). */
+  vershina: 'var(--chertezh-vershina, #1f5fd0)',
+  velichina: 'var(--chertezh-velichina, #e07a2f)',
 };
 const TOKENY = FIKS;
 
@@ -117,19 +123,77 @@ export function texSvg(tex: string): string | null {
     .replace(/\{,\}/g, ',')
     .replace(/\^\\circ/g, '°')
     .replace(/\\circ/g, '°');
-  const parts: string[] = [];
-  const re = /\\sqrt\{([^{}]*)\}/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(rest)) !== null) {
-    parts.push(plain(rest.slice(last, m.index)));
-    parts.push(`√<tspan text-decoration="overline">${plain(m[1] ?? '')}</tspan>`);
-    last = m.index + m[0].length;
-  }
-  parts.push(plain(rest.slice(last)));
-  rest = parts.join('');
+  /* Корень — не текстом: знак и черта рисуются путём (podpisSKornem). */
+  if (/\\sqrt/.test(rest)) return null;
+  rest = plain(rest);
   if (/\\/.test(rest)) return null;
   return rest;
+}
+
+/** Ширина простого текста подписи в долях кегля (цифры KaTeX_Main — 0,5). */
+function shirinaPlain(t: string): number {
+  let w = 0;
+  for (const ch of t) {
+    if (/[0-9]/.test(ch)) w += 0.5;
+    else if (/[A-Za-z]/.test(ch)) w += 0.62;
+    else if (ch === ' ') w += 0.25;
+    else if (ch === '°') w += 0.4;
+    else w += 0.3;
+  }
+  return w;
+}
+
+/**
+ * Подпись с корнем («\\sqrt{12}», «35\\sqrt{2}», «a\\sqrt{3}»): куски
+ * текста на рассчитанных местах, подкоренное — заданной ширины, знак и
+ * черта над всем подкоренным — путь (lib/risunki/koren.js). null —
+ * запись сложнее (дробь под корнем и т. п.): её наберёт KaTeX.
+ */
+function podpisSKornem(
+  tex: string,
+  x0: number,
+  base: number,
+  kegl: number,
+  shrift: string,
+  fill: string,
+  op: string,
+): string | null {
+  const t = tex
+    .replace(/\{,\}/g, ',')
+    .replace(/\^\\circ/g, '°')
+    .trim();
+  const re = /\\sqrt\{([0-9A-Za-z,]+)\}/g;
+  const kuski: { t: string; koren: boolean }[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(t)) !== null) {
+    if (m.index > last) kuski.push({ t: t.slice(last, m.index), koren: false });
+    kuski.push({ t: m[1] ?? '', koren: true });
+    last = m.index + m[0].length;
+  }
+  if (last < t.length) kuski.push({ t: t.slice(last), koren: false });
+  if (kuski.length === 0 || kuski.some((k) => /[\\{}^_]/.test(k.t))) return null;
+  let x = x0;
+  const tspany: string[] = [];
+  const znaki: string[] = [];
+  for (const k of kuski) {
+    const w = shirinaPlain(k.t) * kegl;
+    if (k.koren) {
+      znaki.push(znakKornyaSvg(x, base, w, kegl, fill, 'ch3-koren'));
+      x += KOREN.znak * kegl;
+      tspany.push(
+        `<tspan x="${f2(x)}" textLength="${f2(w)}" lengthAdjust="spacingAndGlyphs">${plain(k.t)}</tspan>`,
+      );
+      x += w + KOREN.hvost * kegl;
+    } else {
+      tspany.push(`<tspan x="${f2(x)}">${plain(k.t)}</tspan>`);
+      x += w;
+    }
+  }
+  return (
+    `<g${op}><text y="${f(base)}" font-family="${shrift}" font-size="${f2(kegl)}" fill="${fill}">` +
+    `${tspany.join('')}</text>${znaki.join('')}</g>`
+  );
 }
 
 /** Обозначения латиницей — курсивом, числа — прямо. */
@@ -153,20 +217,36 @@ const SHRIFT_IMENI = BUKVY;
 const SHRIFT_CHISLA = CHISLA;
 
 function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
-  const op = p.tusklo ? ' opacity="0.35"' : p.skryta === true ? ' opacity="0.55" data-skryt="1"' : '';
-  const fill = p.yarko ? c.podsvetka : p.vid === 'imya' ? c.tekst : c.akcent;
+  const op = p.tusklo
+    ? ' opacity="0.35"'
+    : p.skryta === true
+      ? ' opacity="0.55" data-skryt="1"'
+      : '';
+  const imya = p.vid === 'imya';
+  const fill = p.yarko ? c.podsvetka : imya ? c.vershina : c.velichina;
   const txt = texSvg(p.tex);
+  const shrift = imya ? SHRIFT_IMENI : SHRIFT_CHISLA;
+  if (txt === null) {
+    const s = podpisSKornem(p.tex, p.x + 1, p.y + p.h * 0.78, o.kegl, shrift, fill, op);
+    if (s !== null) return s;
+  }
   if (txt === null && o.katex) {
+    /* Формулу (дробь, корень из дроби) набирает KaTeX. Размер блока
+       меряется оценкой, а у KaTeX черта корня и черта дроби выше и
+       ниже строки: блок с запасом по высоте и overflow: visible —
+       иначе SVG обрезает их по краю foreignObject. */
+    const zapas = o.kegl * 0.6;
     return (
-      `<foreignObject x="${f(p.x)}" y="${f(p.y)}" width="${f(p.w + 4)}" height="${f(p.h + 4)}"${op}>` +
-      `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:${o.kegl}px;line-height:1;color:${fill}">${o.katex(p.tex)}</div></foreignObject>`
+      `<foreignObject x="${f(p.x)}" y="${f(p.y - zapas / 2)}" width="${f(p.w + 8)}" height="${f(p.h + zapas + 4)}" style="overflow:visible"${op}>` +
+      `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:${o.kegl}px;line-height:1;padding-top:${f(zapas / 2)}px;color:${fill};overflow:visible;white-space:nowrap">${o.katex(p.tex)}</div></foreignObject>`
     );
   }
-  const shrift = p.vid === 'imya' ? SHRIFT_IMENI : SHRIFT_CHISLA;
   /* Индекс (indeksSvg) — цифры прямым KaTeX_Main, как в формуле. */
   const tekst = txt ?? escSvg(p.tex);
+  /* Вершина — полужирный курсив, на 12 % крупнее (KOEF_IMENI). */
+  const kegl = imya ? o.kegl * KOEF_IMENI : o.kegl;
   return (
-    `<text x="${f(p.x + 1)}" y="${f(p.y + p.h * 0.78)}" font-family="${shrift}" font-size="${f2(o.kegl)}" fill="${fill}"${op}>` +
+    `<text class="${imya ? 'ch3-imya' : 'ch3-velichina'}" x="${f(p.x + 1)}" y="${f(p.y + p.h * 0.78)}" font-family="${shrift}" font-size="${f2(kegl)}"${imya ? ' font-weight="700"' : ''} fill="${fill}"${op}>` +
     `${tekst}</text>`
   );
 }
@@ -197,7 +277,7 @@ export function kadrSvg(k: Kadr, o: OpciiSvg): string {
   }
   for (const t of k.tochki) {
     out.push(
-      `<circle cx="${f(t.p[0])}" cy="${f(t.p[1])}" r="${t.yarko ? 3.6 : 2.8}" fill="${t.yarko ? c.podsvetka : c.tekst}"${t.tusklo ? ' opacity="0.35"' : ''}/>`,
+      `<circle cx="${f(t.p[0])}" cy="${f(t.p[1])}" r="${t.yarko ? 3.6 : 2.8}" fill="${t.yarko ? c.podsvetka : c.vershina}"${t.tusklo ? ' opacity="0.35"' : ''}/>`,
     );
   }
   if (o.podpisi !== 'net') {

@@ -19,6 +19,18 @@ export interface SkhemaVZadache {
   zachem: string;
 }
 
+/** Подсказка-вопрос перед решением: вопрос виден, ответ — по кнопке. */
+export interface Podskazka18 {
+  vopros: string;
+  otvet: string;
+}
+
+/** «Важно» — правило сайта: только вместе с конкретным примером. */
+export interface Vazhno18 {
+  tekst: string;
+  primer: string;
+}
+
 export interface Opornaya18 {
   id: string;
   no: number;
@@ -35,4 +47,17 @@ export interface Opornaya18 {
   reshenieB: readonly Podsvechennoe[];
   /** Ответ пункта б): формула в долларах. */
   otvet: string;
+  /** Подсказки-вопросы перед решением (2–3). */
+  podskazki?: readonly Podskazka18[];
+  /** «Типичные ошибки» — 1–2 пункта. */
+  oshibki?: readonly string[];
+  /** «Важно» с примером. */
+  vazhno?: Vazhno18;
+  /** Вариация к опорной задаче с этим id: та же ключевая идея, другой вопрос. */
+  variaciya?: string;
+  /**
+   * Откуда условие: нет — составлено для сайта; «kurs» — из курса
+   * подготовки, решение написано заново и проверено вычислением.
+   */
+  istochnik?: 'kurs';
 }

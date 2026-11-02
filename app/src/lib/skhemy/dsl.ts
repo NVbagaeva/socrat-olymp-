@@ -3,13 +3,14 @@
  * список построений, а не как простыня объектов.
  */
 
-import type { Cvet, Element, StilLinii, T2, Tochki, ZhivayaSkhema } from './tipy';
+import type { Cvet, Element, Rol, StilLinii, T2, Tochki, Yakor, ZhivayaSkhema } from './tipy';
 
 type Opcii = Partial<{
   gruppy: readonly string[];
   shag: number;
   skrytyy: boolean;
   cvet: Cvet | Readonly<Record<string, Cvet>>;
+  rol: Rol;
 }>;
 
 export const otr = (
@@ -75,6 +76,26 @@ export const duga = (
   doU: number,
   o: Opcii & { stil?: StilLinii } = {},
 ): Element => ({ vid: 'duga', id, c, r, ot, do: doU, ...o });
+
+/**
+ * Величина на чертеже — данные условия: длина у отрезка, градусы у
+ * угла, площадь внутри фигуры. Ответ задачи так не подписывают.
+ */
+export const vel = (id: string, tekst: string, yakor: Yakor, o: Opcii = {}): Element => ({
+  vid: 'velichina',
+  id,
+  tekst,
+  yakor,
+  ...o,
+});
+
+/** Величина вдоль отрезка ab. */
+export const velOtr = (id: string, tekst: string, a: T2, b: T2, o: Opcii = {}): Element =>
+  vel(id, tekst, { otrezok: [a, b] }, o);
+
+/** Величина у угла avb. */
+export const velUg = (id: string, tekst: string, a: T2, v: T2, b: T2, o: Opcii = {}): Element =>
+  vel(id, tekst, { ugol: [a, v, b] }, o);
 
 /**
  * Сцена без подвижных точек: чертёж задачи или теоремы, а не живая

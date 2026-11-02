@@ -17,6 +17,7 @@ import type { Uroven } from '@/lib/trenazher/types';
 import type { Parametry } from '@/lib/zadanie18/trenazher/sceny';
 import type { Podsvechennoe } from './tipy';
 import { TIPY_DOP_18 } from './trenazherDop';
+import { TIPY_18_NOVYE } from './trenazherNovye';
 
 export interface Tekst18 {
   uslovie: string;
@@ -27,6 +28,8 @@ export interface Tekst18 {
 export interface TipZadachi18 {
   /** Тип задачи; он же ключ чертежа (sceny.ts). */
   id: string;
+  /** Название типа в генераторе листов. */
+  nazvanie: string;
   /** Ключевая схема — чип фильтра. */
   skhema: string;
   uroven: Uroven;
@@ -52,10 +55,13 @@ const v = (question: string, options: string[], comment: string | null = null): 
   comment,
 });
 const sh = (tekst: string, ...gruppy: string[]): Podsvechennoe => ({ tekst, gruppy });
+/** Часть отношения, как на чертеже: 1 → $x$, 3 → $3x$. */
+const chast = (n: number, bukva: string) => (n === 1 ? bukva : `${n}${bukva}`);
 
-export const TIPY_18: readonly TipZadachi18[] = [
+const TIPY_18_OSNOVNYE: readonly TipZadachi18[] = [
   {
     id: 'vysoty-cos',
+    nazvanie: 'Две высоты: подобие с коэффициентом — косинусом угла',
     skhema: 'vysoty',
     uroven: 1,
     varianty: [
@@ -79,28 +85,42 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        'В прямоугольном треугольнике $AA_1C$: $CA_1 = AC\\cos C$. В прямоугольном треугольнике $BB_1C$: $CB_1 = BC\\cos C$. Треугольник остроугольный, поэтому основания высот лежат на сторонах.',
+        'Треугольник $ABC$ остроугольный, поэтому основания высот лежат на сторонах: $A_1$ — на $BC$, $B_1$ — на $AC$.',
+        'h',
+      ),
+      sh(
+        'Треугольник $AA_1C$ прямоугольный: $\\angle AA_1C = 90^\\circ$, потому что $AA_1$ — высота. По определению косинуса острого угла прямоугольного треугольника $\\cos C = \\dfrac{CA_1}{AC}$, то есть $CA_1 = AC\\cdot\\cos C$.',
         'h',
         'koef',
       ),
       sh(
-        'Значит, $\\dfrac{CA_1}{CA} = \\dfrac{CB_1}{CB} = \\cos C$, а угол $C$ общий. По двум пропорциональным сторонам и углу между ними $\\triangle A_1B_1C \\sim \\triangle ABC$ ($A_1 \\to A$, $B_1 \\to B$).',
+        'Точно так же в прямоугольном треугольнике $BB_1C$ ($\\angle BB_1C = 90^\\circ$): $CB_1 = BC\\cdot\\cos C$.',
+        'h',
+        'koef',
+      ),
+      sh(
+        'Получаем $\\dfrac{CA_1}{CA} = \\dfrac{CB_1}{CB} = \\cos C$, а угол $C$ у треугольников $A_1B_1C$ и $ABC$ общий. По второму признаку подобия (две стороны пропорциональны, углы между ними равны) $\\triangle A_1B_1C \\sim \\triangle ABC$, причём $A_1 \\to A$, $B_1 \\to B$, $C \\to C$. Что и требовалось доказать.',
         'podobie',
       ),
     ],
     reshenieB: (p) => [
       sh(
-        `Коэффициент подобия $k = \\cos C = ${ch(p.cosC!)}$, сторона $A_1B_1$ соответствует стороне $AB$.`,
+        `По пункту а) $\\triangle A_1B_1C \\sim \\triangle ABC$ с коэффициентом подобия $k = \\dfrac{CA_1}{CA} = \\cos C = ${ch(p.cosC!)}$.`,
         'koef',
       ),
       sh(
-        `$A_1B_1 = AB\\cos C = ${ch(p.AB!)}\\cdot ${ch(p.cosC!)} = ${ch(p.AB! * p.cosC!)}$.`,
+        'В подобных треугольниках сходственные стороны относятся как коэффициент подобия. Стороне $A_1B_1$ соответствует сторона $AB$: обе лежат против общего угла $C$.',
+        'podobie',
+      ),
+      sh(
+        `$A_1B_1 = k\\cdot AB = ${ch(p.cosC!)}\\cdot ${ch(p.AB!)} = ${ch(p.AB! * p.cosC!)}$.`,
         'otvet',
       ),
     ],
   },
   {
     id: 'bis-par',
+    nazvanie: 'Биссектриса и параллельная прямая',
     skhema: 'bissektrisa',
     uroven: 2,
     varianty: [
@@ -129,11 +149,12 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        '$LM \\parallel AB$, поэтому $\\angle MLA = \\angle LAB$ как накрест лежащие углы при секущей $AL$.',
+        '$LM \\parallel AB$, а $AL$ — секущая. Углы $MLA$ и $LAB$ накрест лежащие при параллельных прямых, поэтому $\\angle MLA = \\angle LAB$.',
         'par',
       ),
+      sh('$AL$ — биссектриса угла $BAC$, поэтому $\\angle LAB = \\angle LAM$.', 'bis'),
       sh(
-        '$AL$ — биссектриса: $\\angle LAB = \\angle LAM$. Значит, $\\angle MLA = \\angle MAL$, треугольник $AML$ равнобедренный и $AM = ML$.',
+        'Значит, $\\angle MLA = \\angle MAL$. В треугольнике $AML$ два угла равны, поэтому он равнобедренный с основанием $AL$ (признак равнобедренного треугольника) и $AM = ML$. Что и требовалось доказать.',
         'ravnobed',
       ),
     ],
@@ -141,12 +162,19 @@ export const TIPY_18: readonly TipZadachi18[] = [
       const s = p.AB! + p.AC!;
       return [
         sh(
-          `По свойству биссектрисы $BL : LC = AB : AC = ${ch(p.AB!)} : ${ch(p.AC!)}$, поэтому $\\dfrac{CL}{CB} = \\dfrac{${ch(p.AC!)}}{${ch(s)}}$.`,
+          `По свойству биссектрисы треугольника она делит противолежащую сторону на отрезки, пропорциональные прилежащим сторонам: $\\dfrac{BL}{LC} = \\dfrac{AB}{AC} = \\dfrac{${ch(p.AB!)}}{${ch(p.AC!)}}$.`,
           'bis',
         ),
         sh(
-          `$LM \\parallel AB$, поэтому $\\triangle CML \\sim \\triangle CAB$ с коэффициентом $\\dfrac{CL}{CB}$: $LM = AB\\cdot\\dfrac{CL}{CB} = ${ch(p.AB!)}\\cdot\\dfrac{${ch(p.AC!)}}{${ch(s)}} = ${ch((p.AB! * p.AC!) / s)}$.`,
+          `Значит, $CL$ составляет $\\dfrac{AC}{AB + AC}$ стороны $BC$: $\\dfrac{CL}{CB} = \\dfrac{${ch(p.AC!)}}{${ch(s)}}$.`,
+          'bis',
+        ),
+        sh(
+          'Треугольники $CML$ и $CAB$ подобны по двум углам: угол $C$ общий, $\\angle CLM = \\angle CBA$ как соответственные углы при параллельных прямых $LM$ и $AB$. Коэффициент подобия равен $\\dfrac{CL}{CB}$, стороне $LM$ соответствует сторона $AB$.',
           'podobie',
+        ),
+        sh(
+          `$LM = AB\\cdot\\dfrac{CL}{CB} = ${ch(p.AB!)}\\cdot\\dfrac{${ch(p.AC!)}}{${ch(s)}} = ${ch((p.AB! * p.AC!) / s)}$.`,
           'otvet',
         ),
       ];
@@ -154,6 +182,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'mediana',
+    nazvanie: 'Удвоение медианы',
     skhema: 'udvoenie-mediany',
     uroven: 2,
     varianty: [
@@ -184,22 +213,25 @@ export const TIPY_18: readonly TipZadachi18[] = [
       ]),
     ],
     reshenieA: () => [
+      sh('$AM$ — медиана, поэтому $M$ — середина стороны $BC$: $BM = MC$.', 'diag'),
+      sh('По построению $MD = AM$, поэтому $M$ — середина отрезка $AD$.', 'diag'),
       sh(
-        '$BM = MC$, потому что $AM$ — медиана, и $AM = MD$ по построению. Диагонали $AD$ и $BC$ четырёхугольника $ABDC$ точкой пересечения делятся пополам — значит, это параллелограмм.',
+        'Диагонали $AD$ и $BC$ четырёхугольника $ABDC$ пересекаются в точке $M$ и делятся ею пополам. По признаку параллелограмма (диагонали четырёхугольника точкой пересечения делятся пополам) $ABDC$ — параллелограмм. Что и требовалось доказать.',
         'par',
-        'diag',
       ),
     ],
     reshenieB: (p) => {
       const m2 = (2 * p.AB! ** 2 + 2 * p.AC! ** 2 - p.BC! ** 2) / 4;
       return [
+        sh('В параллелограмме противоположные стороны равны: $BD = AC$, $DC = AB$.', 'par'),
         sh(
-          'В параллелограмме сумма квадратов диагоналей равна сумме квадратов всех сторон: $AD^2 + BC^2 = 2(AB^2 + AC^2)$.',
+          'По свойству параллелограмма сумма квадратов диагоналей равна сумме квадратов всех сторон: $AD^2 + BC^2 = AB^2 + BD^2 + DC^2 + CA^2 = 2(AB^2 + AC^2)$.',
           'par',
           'diag',
         ),
+        sh(`$AD = 2AM$, поэтому $AD^2 = 4AM^2 = 4\\cdot ${m2} = ${4 * m2}$.`, 'diag'),
         sh(
-          `$AD = 2AM$, $AD^2 = 4\\cdot ${m2} = ${4 * m2}$. Тогда $BC^2 = 2(${p.AB! ** 2} + ${p.AC! ** 2}) - ${4 * m2} = ${p.BC! ** 2}$ и $BC = ${p.BC}$.`,
+          `$BC^2 = 2(AB^2 + AC^2) - AD^2 = 2(${p.AB! ** 2} + ${p.AC! ** 2}) - ${4 * m2} = ${p.BC! ** 2}$, откуда $BC = ${p.BC}$.`,
           'otvet',
         ),
       ];
@@ -207,6 +239,7 @@ export const TIPY_18: readonly TipZadachi18[] = [
   },
   {
     id: 'vysoty-okr',
+    nazvanie: 'Две высоты и окружность на стороне',
     skhema: 'pryamye-ugly',
     uroven: 1,
     varianty: [
@@ -234,24 +267,35 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        '$\\angle BB_1C = 90^\\circ$ и $\\angle BC_1C = 90^\\circ$: отрезок $BC$ виден из точек $B_1$ и $C_1$ под прямым углом. Поэтому обе точки лежат на окружности с диаметром $BC$.',
+        '$BB_1$ — высота, поэтому $\\angle BB_1C = 90^\\circ$; $CC_1$ — высота, поэтому $\\angle BC_1C = 90^\\circ$.',
         'pryamye',
+      ),
+      sh(
+        'Если отрезок виден из точки под прямым углом, то эта точка лежит на окружности, построенной на отрезке как на диаметре (вписанный угол, опирающийся на диаметр, прямой, — и обратно).',
         'okr',
+      ),
+      sh(
+        'Отрезок $BC$ виден под прямым углом из точек $B_1$ и $C_1$, поэтому обе они лежат на окружности с диаметром $BC$ — на той же окружности, что и точки $B$ и $C$. Что и требовалось доказать.',
+        'okr',
+        'pryamye',
       ),
     ],
     reshenieB: (p) => [
       sh(
-        'Вписанные углы $BB_1C_1$ и $BCC_1$ опираются на одну дугу $BC_1$, поэтому они равны.',
+        'По пункту а) точки $B$, $C$, $B_1$, $C_1$ лежат на одной окружности. Вписанные углы $BB_1C_1$ и $BCC_1$ опираются на одну и ту же дугу $BC_1$, поэтому они равны.',
         'ugly',
       ),
       sh(
-        `В прямоугольном треугольнике $BCC_1$: $\\angle BCC_1 = 90^\\circ - \\angle B = 90^\\circ - ${p.uB}^\\circ = ${90 - p.uB!}^\\circ$.`,
-        'otvet',
+        `Треугольник $BC_1C$ прямоугольный: $\\angle BC_1C = 90^\\circ$, а $\\angle C_1BC = \\angle ABC = ${p.uB}^\\circ$. Сумма острых углов прямоугольного треугольника равна $90^\\circ$: $\\angle BCC_1 = 90^\\circ - ${p.uB}^\\circ = ${90 - p.uB!}^\\circ$.`,
+        'ugly',
+        'pryamye',
       ),
+      sh(`Значит, $\\angle BB_1C_1 = \\angle BCC_1 = ${90 - p.uB!}^\\circ$.`, 'otvet'),
     ],
   },
   {
     id: 'trezubec-centr',
+    nazvanie: 'Трезубец: центр окружности AIC',
     skhema: 'trezubec',
     uroven: 3,
     varianty: [
@@ -284,33 +328,51 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        '$BW$ — биссектриса, поэтому вписанные углы $ABW$ и $WBC$ равны и опираются на равные дуги $AW$ и $WC$. Значит, $WA = WC$.',
+        '$BW$ — биссектриса угла $B$, поэтому вписанные углы $ABW$ и $WBC$ равны. Равные вписанные углы опираются на равные дуги: $\\arc{AW} = \\arc{WC}$. Равные дуги стягиваются равными хордами, поэтому $WA = WC$.',
         'bis',
         'ravn',
       ),
       sh(
-        '$\\angle WAI = \\angle WAC + \\angle CAI = \\angle WBC + \\tfrac{\\angle A}{2} = \\tfrac{\\angle B}{2} + \\tfrac{\\angle A}{2}$. Угол $WIA$ — внешний угол треугольника $ABI$: $\\angle WIA = \\tfrac{\\angle A}{2} + \\tfrac{\\angle B}{2}$. Треугольник $WAI$ равнобедренный: $WA = WI$.',
+        '$I$ — центр вписанной окружности — лежит на биссектрисах углов треугольника, поэтому $\\angle CAI = \\angle IAB = \\tfrac{\\angle A}{2}$ и $\\angle IBA = \\tfrac{\\angle B}{2}$.',
         'ugly',
-        'ravn',
       ),
       sh(
-        '$WA = WI = WC$, поэтому $W$ — центр окружности, проходящей через $A$, $I$ и $C$.',
+        'Вписанные углы $WAC$ и $WBC$ опираются на одну дугу $WC$, поэтому $\\angle WAC = \\angle WBC = \\tfrac{\\angle B}{2}$. Тогда $\\angle WAI = \\angle WAC + \\angle CAI = \\tfrac{\\angle B}{2} + \\tfrac{\\angle A}{2}$.',
+        'ugly',
+      ),
+      sh(
+        'Угол $WIA$ — внешний угол треугольника $ABI$ при вершине $I$. Внешний угол треугольника равен сумме двух внутренних углов, не смежных с ним: $\\angle WIA = \\angle IAB + \\angle IBA = \\tfrac{\\angle A}{2} + \\tfrac{\\angle B}{2}$.',
+        'ugly',
+      ),
+      sh('Углы $WAI$ и $WIA$ равны, поэтому треугольник $AWI$ равнобедренный: $WA = WI$.', 'ravn'),
+      sh(
+        '$WA = WI = WC$: точка $W$ равноудалена от $A$, $I$ и $C$, значит, это центр окружности, описанной около треугольника $AIC$ (лемма о трезубце). Что и требовалось доказать.',
         'okr2',
       ),
     ],
     reshenieB: (p) => [
       sh(
-        '$\\angle B = 90^\\circ$, поэтому $AC$ — диаметр описанной окружности. Угол $AWC$ опирается на диаметр и прямой, а $WA = WC$: треугольник $AWC$ — равнобедренный прямоугольный.',
+        '$\\angle ABC = 90^\\circ$ — вписанный угол, опирающийся на хорду $AC$. Вписанный угол прямой тогда и только тогда, когда он опирается на диаметр, поэтому $AC$ — диаметр описанной окружности.',
         'ravn',
       ),
       sh(
-        `Радиус окружности $AIC$ равен $WA = \\dfrac{AC}{\\sqrt2} = \\dfrac{${p.k}\\sqrt2}{\\sqrt2} = ${p.k}$.`,
+        'Точка $W$ лежит на той же окружности, и угол $AWC$ тоже опирается на диаметр $AC$: $\\angle AWC = 90^\\circ$. Вместе с $WA = WC$ это значит, что треугольник $AWC$ равнобедренный прямоугольный.',
+        'ravn',
+      ),
+      sh(
+        `По теореме Пифагора $WA^2 + WC^2 = AC^2$, то есть $2WA^2 = (${p.k}\\sqrt2)^2 = ${2 * p.k! ** 2}$ и $WA = ${p.k}$.`,
+        'ravn',
+      ),
+      sh(
+        `По пункту а) $W$ — центр окружности, описанной около треугольника $AIC$, а её радиус равен $WA = ${p.k}$.`,
         'otvet',
+        'okr2',
       ),
     ],
   },
   {
     id: 'vpis-hordy',
+    nazvanie: 'Вписанный четырёхугольник: подобие при диагоналях',
     skhema: 'chetyrekhugolniki',
     uroven: 1,
     varianty: [
@@ -339,21 +401,29 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        'Вписанные углы $BAC$ и $BDC$ опираются на одну дугу $BC$, поэтому $\\angle BAP = \\angle CDP$. Углы $APB$ и $DPC$ вертикальные. По двум углам $\\triangle APB \\sim \\triangle DPC$ ($A \\to D$, $P \\to P$, $B \\to C$).',
+        'Вписанные углы $BAC$ и $BDC$ опираются на одну и ту же дугу $BC$, поэтому они равны: $\\angle BAP = \\angle CDP$.',
         'ugly',
+      ),
+      sh('Углы $APB$ и $DPC$ равны как вертикальные.', 'podobie'),
+      sh(
+        'По первому признаку подобия (по двум углам) $\\triangle APB \\sim \\triangle DPC$, вершины соответствуют так: $A \\to D$, $P \\to P$, $B \\to C$. Что и требовалось доказать.',
         'podobie',
       ),
     ],
     reshenieB: (p) => [
       sh(
-        `Из подобия $\\dfrac{CD}{AB} = \\dfrac{DP}{AP}$, откуда $CD = \\dfrac{${p.AB}\\cdot ${p.DP}}{${p.AP}} = ${ch((p.AB! * p.DP!) / p.AP!)}$.`,
+        'В подобных треугольниках стороны, лежащие против равных углов, пропорциональны: $\\dfrac{DC}{AB} = \\dfrac{DP}{AP} = \\dfrac{PC}{PB}$.',
         'podobie',
+      ),
+      sh(
+        `$CD = AB\\cdot\\dfrac{DP}{AP} = ${p.AB}\\cdot\\dfrac{${p.DP}}{${p.AP}} = ${ch((p.AB! * p.DP!) / p.AP!)}$.`,
         'otvet',
       ),
     ],
   },
   {
     id: 'vpis-pryam',
+    nazvanie: 'Вписанная окружность прямоугольного треугольника',
     skhema: 'otrezki-kasatelnyh',
     uroven: 2,
     varianty: [
@@ -382,31 +452,53 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        'Отрезки касательных из одной вершины равны. Из вершины $C$ оба отрезка равны $r$: радиусы в точки касания образуют с катетами квадрат. Поэтому $AC = AK + r$, $BC = BK + r$.',
+        'Пусть $I$ — центр вписанной окружности, $r$ — её радиус, $P$ и $Q$ — точки касания с катетами $AC$ и $BC$.',
         'kas',
       ),
       sh(
-        'По теореме Пифагора $(AK + r)^2 + (BK + r)^2 = (AK + BK)^2$, откуда $r^2 + r(AK + BK) = AK\\cdot BK$.',
+        'Радиус, проведённый в точку касания, перпендикулярен касательной: $IP \\perp AC$, $IQ \\perp BC$. Вместе с прямым углом $C$ получаем прямоугольник $CPIQ$ с равными соседними сторонами $IP = IQ = r$ — квадрат. Поэтому $CP = CQ = r$.',
+        'kas',
         'pifagor',
       ),
       sh(
-        '$S = \\tfrac12(AK + r)(BK + r) = \\tfrac12\\bigl(AK\\cdot BK + r(AK + BK) + r^2\\bigr) = \\tfrac12\\cdot 2AK\\cdot BK = AK\\cdot BK$.',
+        'Отрезки касательных, проведённых к окружности из одной точки, равны: $AP = AK$, $BQ = BK$. Поэтому $AC = AK + r$, $BC = BK + r$, $AB = AK + BK$.',
+        'kas',
+      ),
+      sh(
+        'По теореме Пифагора $AC^2 + BC^2 = AB^2$: $(AK + r)^2 + (BK + r)^2 = (AK + BK)^2$. Раскроем скобки, сократим $AK^2$ и $BK^2$ и разделим на $2$: $r^2 + r(AK + BK) = AK\\cdot BK$.',
+        'pifagor',
+      ),
+      sh(
+        'Площадь прямоугольного треугольника равна половине произведения катетов: $S = \\tfrac12(AK + r)(BK + r) = \\tfrac12(AK\\cdot BK + r(AK + BK) + r^2)$.',
+        'pifagor',
+      ),
+      sh(
+        'По доказанному $r^2 + r(AK + BK) = AK\\cdot BK$, поэтому $S = \\tfrac12\\cdot 2AK\\cdot BK = AK\\cdot BK$. Что и требовалось доказать.',
         'pifagor',
       ),
     ],
     reshenieB: (p) => {
-      const r = (-(p.AK! + p.BK!) + Math.sqrt((p.AK! + p.BK!) ** 2 + 4 * p.AK! * p.BK!)) / 2;
+      const s = p.AK! + p.BK!;
+      const pr = p.AK! * p.BK!;
+      const D = s * s + 4 * pr;
+      const kD = Math.sqrt(D);
+      const r = (-s + kD) / 2;
       return [
-        sh(`Из пункта а): $r^2 + ${p.AK! + p.BK!}r = ${p.AK! * p.BK!}$.`, 'pifagor'),
         sh(
-          `Корни уравнения $r^2 + ${p.AK! + p.BK!}r - ${p.AK! * p.BK!} = 0$: $r = ${ch(r)}$ и отрицательный. Радиус $r = ${ch(r)}$.`,
-          'kas',
+          `Из пункта а) $r^2 + r(AK + BK) = AK\\cdot BK$, то есть $r^2 + ${s}r - ${pr} = 0$.`,
+          'pifagor',
         ),
+        sh(
+          `Дискриминант $D = ${s}^2 + 4\\cdot ${pr} = ${D}$, $\\sqrt D = ${koren(D)}$. Корни: $r = \\dfrac{-${s} \\pm ${koren(D)}}{2}$, то есть $r = ${ch(r)}$ или $r = ${ch((-s - kD) / 2)}$.`,
+          'pifagor',
+        ),
+        sh(`Радиус положителен, поэтому $r = ${ch(r)}$.`, 'kas'),
       ];
     },
   },
   {
     id: 'hordy',
+    nazvanie: 'Пересекающиеся хорды',
     skhema: 'stepen-tochki',
     uroven: 1,
     varianty: [
@@ -434,23 +526,36 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        'Вписанные углы $CAB$ и $CDB$ опираются на дугу $CB$ и равны, углы $APC$ и $DPB$ вертикальные. По двум углам $\\triangle APC \\sim \\triangle DPB$, откуда $\\dfrac{AP}{DP} = \\dfrac{CP}{BP}$, то есть $AP\\cdot PB = CP\\cdot PD$.',
+        'Проведём хорды $AC$ и $BD$. Вписанные углы $CAB$ и $CDB$ опираются на одну и ту же дугу $CB$, поэтому $\\angle CAP = \\angle BDP$.',
         'podobie',
+      ),
+      sh('Углы $APC$ и $DPB$ равны как вертикальные.', 'podobie'),
+      sh(
+        'По первому признаку подобия (по двум углам) $\\triangle APC \\sim \\triangle DPB$: $A \\to D$, $P \\to P$, $C \\to B$.',
+        'podobie',
+      ),
+      sh(
+        'Сходственные стороны пропорциональны: $\\dfrac{AP}{DP} = \\dfrac{PC}{PB}$, откуда $AP\\cdot PB = CP\\cdot PD$. Что и требовалось доказать (это теорема о пересекающихся хордах).',
+        'otrezki',
       ),
     ],
     reshenieB: (p) => {
       const pd = (p.AP! * p.PB!) / p.CP!;
       return [
         sh(
-          `$PD = \\dfrac{AP\\cdot PB}{CP} = \\dfrac{${p.AP! * p.PB!}}{${p.CP}} = ${ch(pd)}$.`,
+          `По пункту а) $CP\\cdot PD = AP\\cdot PB$, поэтому $PD = \\dfrac{AP\\cdot PB}{CP} = \\dfrac{${p.AP}\\cdot ${p.PB}}{${p.CP}} = ${ch(pd)}$.`,
           'otrezki',
         ),
-        sh(`$CD = CP + PD = ${p.CP} + ${ch(pd)} = ${ch(p.CP! + pd)}$.`, 'otvet'),
+        sh(
+          `Точка $P$ лежит на хорде $CD$ между её концами, поэтому $CD = CP + PD = ${p.CP} + ${ch(pd)} = ${ch(p.CP! + pd)}$.`,
+          'otvet',
+        ),
       ];
     },
   },
   {
     id: 'sredlin-trap',
+    nazvanie: 'Середины диагоналей трапеции',
     skhema: 'sredlin-trap',
     uroven: 1,
     varianty: [
@@ -483,23 +588,34 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        'Пусть $K$ — середина $CD$. Отрезок $MK$ — средняя линия треугольника $ACD$: $MK \\parallel AD$ и $MK = \\tfrac12 AD$.',
+        'Пусть $K$ — середина боковой стороны $CD$. В треугольнике $ACD$ отрезок $MK$ соединяет середины сторон $AC$ и $CD$, то есть это средняя линия. По теореме о средней линии треугольника $MK \\parallel AD$ и $MK = \\tfrac12 AD$.',
         'acd',
       ),
       sh(
-        'Отрезок $NK$ — средняя линия треугольника $BCD$: $NK \\parallel BC \\parallel AD$ и $NK = \\tfrac12 BC$. Через $K$ проходит только одна прямая, параллельная $AD$, поэтому $M$, $N$, $K$ лежат на ней и $MN \\parallel AD$.',
+        'В треугольнике $BCD$ отрезок $NK$ соединяет середины сторон $BD$ и $CD$ — тоже средняя линия: $NK \\parallel BC$ и $NK = \\tfrac12 BC$.',
+        'bcd',
+      ),
+      sh(
+        'Основания трапеции параллельны, $BC \\parallel AD$, поэтому и $NK \\parallel AD$. Через точку $K$ проходит только одна прямая, параллельная $AD$ (аксиома параллельных). Значит, точки $M$, $N$, $K$ лежат на этой прямой и $MN \\parallel AD \\parallel BC$. Что и требовалось доказать.',
+        'acd',
         'bcd',
       ),
     ],
     reshenieB: (p) => [
       sh(
-        `Точки $M$ и $N$ лежат на одном луче от $K$, поэтому $MN = MK - NK = \\dfrac{AD - BC}{2} = \\dfrac{${p.AD} - ${p.BC}}{2} = ${ch((p.AD! - p.BC!) / 2)}$.`,
+        `$MK = \\tfrac12 AD = ${ch(p.AD! / 2)}$, $NK = \\tfrac12 BC = ${ch(p.BC! / 2)}$.`,
+        'acd',
+        'bcd',
+      ),
+      sh(
+        `Точки $M$ и $N$ лежат на одном луче с началом $K$, и $NK < MK$, так как $BC < AD$. Поэтому $MN = MK - NK = \\dfrac{AD - BC}{2} = \\dfrac{${p.AD} - ${p.BC}}{2} = ${ch((p.AD! - p.BC!) / 2)}$.`,
         'otvet',
       ),
     ],
   },
   {
     id: 'ravnobok-perp',
+    nazvanie: 'Равнобедренная трапеция с перпендикулярными диагоналями',
     skhema: 'ravnobokaya',
     uroven: 2,
     varianty: [{ h: 7 }, { h: 6 }, { h: 9 }],
@@ -524,21 +640,37 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        'Трапеция равнобедренная, поэтому $OA = OD$ и $OB = OC$. С прямым углом при $O$ треугольники $AOD$ и $BOC$ равнобедренные прямоугольные.',
+        'В равнобедренной трапеции углы при основании равны. Треугольники $BAD$ и $CDA$ равны по двум сторонам и углу между ними: $AB = DC$, $AD$ — общая, $\\angle BAD = \\angle CDA$. Отсюда $\\angle BDA = \\angle CAD$, и треугольник $AOD$ равнобедренный: $OA = OD$. Так же $OB = OC$.',
         'ravnobed',
         'diag',
       ),
       sh(
-        'Проведём высоту $EF$ через $O$. В треугольнике $AOD$ она и медиана: $OF = \\tfrac12 AD$; так же $OE = \\tfrac12 BC$. Значит, $EF = \\dfrac{AD + BC}{2}$ — средняя линия.',
+        'По условию $\\angle AOD = 90^\\circ$, поэтому треугольники $AOD$ и $BOC$ равнобедренные прямоугольные.',
+        'ravnobed',
+      ),
+      sh(
+        'Проведём через $O$ высоту трапеции $EF$ ($E$ на $BC$, $F$ на $AD$). В равнобедренном треугольнике $AOD$ высота $OF$ является и медианой, а медиана прямоугольного треугольника, проведённая к гипотенузе, равна её половине: $OF = \\tfrac12 AD$. Так же в треугольнике $BOC$: $OE = \\tfrac12 BC$.',
+        'h',
+      ),
+      sh(
+        'Тогда $EF = OE + OF = \\dfrac{AD + BC}{2}$ — это средняя линия трапеции. Значит, высота трапеции равна её средней линии. Что и требовалось доказать.',
         'h',
       ),
     ],
     reshenieB: (p) => [
-      sh(`$S = \\dfrac{AD + BC}{2}\\cdot h = h\\cdot h = ${p.h}^2 = ${p.h! ** 2}$.`, 'otvet'),
+      sh(
+        'Площадь трапеции равна произведению полусуммы оснований (средней линии) на высоту: $S = \\dfrac{AD + BC}{2}\\cdot h$.',
+        'h',
+      ),
+      sh(
+        `По пункту а) средняя линия равна высоте, поэтому $S = h\\cdot h = ${p.h}^2 = ${p.h! ** 2}$.`,
+        'otvet',
+      ),
     ],
   },
   {
     id: 'menelay-pl',
+    nazvanie: 'Менелай и отношение площадей',
     skhema: 'menelay-cheva',
     uroven: 3,
     varianty: [{ S: 36 }, { S: 48 }, { S: 60 }],
@@ -559,27 +691,37 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        'Прямая $KC$ пересекает сторону $AB$ треугольника $ABL$ в точке $K$, сторону $AL$ — в точке $P$ и продолжение стороны $BL$ — в точке $C$. По теореме Менелая $\\dfrac{AK}{KB}\\cdot\\dfrac{BC}{CL}\\cdot\\dfrac{LP}{PA} = 1$.',
+        'Рассмотрим треугольник $ABL$ и прямую $KC$. Она пересекает сторону $AB$ в точке $K$, сторону $AL$ — в точке $P$, а продолжение стороны $BL$ — в точке $C$.',
         'men',
       ),
       sh(
-        '$\\dfrac{AK}{KB} = \\dfrac12$, $\\dfrac{BC}{CL} = 4$, поэтому $\\dfrac{LP}{PA} = \\dfrac12$ и $AP : PL = 2 : 1$.',
+        'По теореме Менелая $\\dfrac{AK}{KB}\\cdot\\dfrac{BC}{CL}\\cdot\\dfrac{LP}{PA} = 1$.',
+        'men',
+      ),
+      sh(
+        'По условию $\\dfrac{AK}{KB} = \\dfrac12$. Пусть $LC = y$, тогда $BL = 3y$, $BC = 4y$ и $\\dfrac{BC}{CL} = 4$.',
+        'men',
+      ),
+      sh(
+        'Подставим: $\\dfrac12\\cdot 4\\cdot\\dfrac{LP}{PA} = 1$, откуда $\\dfrac{LP}{PA} = \\dfrac12$, то есть $AP : PL = 2 : 1$. Что и требовалось доказать.',
         'men',
       ),
     ],
     reshenieB: (p) => [
       sh(
-        `У треугольников $ALC$ и $ABC$ общая высота из $A$: $S_{ALC} = \\dfrac{LC}{BC}\\cdot S_{ABC} = \\dfrac14\\cdot ${p.S} = ${ch(p.S! / 4)}$.`,
+        `У треугольников $ALC$ и $ABC$ общая высота из вершины $A$ на прямую $BC$, поэтому их площади относятся как основания: $\\dfrac{S_{ALC}}{S_{ABC}} = \\dfrac{LC}{BC} = \\dfrac14$, $S_{ALC} = \\dfrac14\\cdot ${p.S} = ${ch(p.S! / 4)}$.`,
         'alc',
       ),
       sh(
-        `У треугольников $APC$ и $ALC$ общая высота из $C$: $S_{APC} = \\dfrac{AP}{AL}\\cdot S_{ALC} = \\dfrac23\\cdot ${ch(p.S! / 4)} = ${ch(p.S! / 6)}$.`,
+        'У треугольников $APC$ и $ALC$ общая высота из вершины $C$ на прямую $AL$, поэтому $\\dfrac{S_{APC}}{S_{ALC}} = \\dfrac{AP}{AL}$. По пункту а) $AP : PL = 2 : 1$, значит, $\\dfrac{AP}{AL} = \\dfrac23$.',
         'pl',
       ),
+      sh(`$S_{APC} = \\dfrac23\\cdot ${ch(p.S! / 4)} = ${ch(p.S! / 6)}$.`, 'pl'),
     ],
   },
   {
     id: 'trap-seredina',
+    nazvanie: 'Середина боковой стороны трапеции',
     skhema: 'metod-ploshchadey',
     uroven: 2,
     varianty: [{ S: 18 }, { S: 15 }, { S: 21 }],
@@ -604,19 +746,29 @@ export const TIPY_18: readonly TipZadachi18[] = [
     ],
     reshenieA: () => [
       sh(
-        'Пусть $h$ — высота трапеции. $E$ — середина $CD$, поэтому расстояния от $E$ до прямых $BC$ и $AD$ равны $\\tfrac h2$.',
+        'Пусть $h$ — высота трапеции. Проведём через $E$ перпендикуляр к основаниям: так как $BC \\parallel AD$, его отрезки до прямых $BC$ и $AD$ вместе дают высоту $h$.',
         'ugly',
       ),
       sh(
-        '$S_{BCE} + S_{ADE} = \\tfrac12\\cdot BC\\cdot\\tfrac h2 + \\tfrac12\\cdot AD\\cdot\\tfrac h2 = \\tfrac12\\cdot\\dfrac{AD + BC}{2}\\cdot h = \\tfrac12 S_{ABCD}$.',
+        'Эти отрезки — катеты прямоугольных треугольников с гипотенузами $CE$ и $ED$. Треугольники равны по гипотенузе и острому углу: $CE = ED$, углы при $E$ вертикальные. Поэтому расстояния от $E$ до прямых $BC$ и $AD$ равны $\\tfrac h2$.',
         'ugly',
       ),
-      sh('Значит, $S_{ABE} = S_{ABCD} - (S_{BCE} + S_{ADE}) = \\tfrac12 S_{ABCD}$.', 'abe'),
+      sh(
+        'Площадь треугольника равна половине произведения основания на высоту: $S_{BCE} + S_{ADE} = \\tfrac12\\cdot BC\\cdot\\tfrac h2 + \\tfrac12\\cdot AD\\cdot\\tfrac h2 = \\tfrac12\\cdot\\dfrac{AD + BC}{2}\\cdot h = \\tfrac12 S_{ABCD}$ — площадь трапеции равна полусумме оснований на высоту.',
+        'ugly',
+      ),
+      sh(
+        'Трапеция складывается из треугольников $BCE$, $ADE$ и $ABE$, поэтому $S_{ABE} = S_{ABCD} - (S_{BCE} + S_{ADE}) = \\tfrac12 S_{ABCD}$. Что и требовалось доказать.',
+        'abe',
+      ),
     ],
-    reshenieB: (p) => [sh(`$S_{ABCD} = 2S_{ABE} = 2\\cdot ${p.S} = ${2 * p.S!}$.`, 'abe')],
+    reshenieB: (p) => [
+      sh(`По пункту а) $S_{ABCD} = 2S_{ABE} = 2\\cdot ${p.S} = ${2 * p.S!}$.`, 'abe'),
+    ],
   },
   {
     id: 'obshchiy-ugol',
+    nazvanie: 'Площади треугольников с общим углом',
     skhema: 'obshchiy-ugol',
     uroven: 1,
     varianty: [
@@ -645,7 +797,15 @@ export const TIPY_18: readonly TipZadachi18[] = [
       const d = drob(p.m! * p.p!, (p.m! + p.n!) * (p.p! + p.q!));
       return [
         sh(
-          `$S_{AMN} = \\tfrac12\\,AM\\cdot AN\\sin A$ и $S_{ABC} = \\tfrac12\\,AB\\cdot AC\\sin A$, поэтому $\\dfrac{S_{AMN}}{S_{ABC}} = \\dfrac{AM}{AB}\\cdot\\dfrac{AN}{AC} = \\dfrac{${p.m}}{${p.m! + p.n!}}\\cdot\\dfrac{${p.p}}{${p.p! + p.q!}} = ${d}$.`,
+          'Площадь треугольника равна половине произведения двух сторон на синус угла между ними. У треугольников $AMN$ и $ABC$ угол $A$ общий: $S_{AMN} = \\tfrac12\\,AM\\cdot AN\\sin A$, $S_{ABC} = \\tfrac12\\,AB\\cdot AC\\sin A$.',
+          'amn',
+        ),
+        sh(
+          'Разделим одно на другое: $\\dfrac{S_{AMN}}{S_{ABC}} = \\dfrac{AM}{AB}\\cdot\\dfrac{AN}{AC}$.',
+          'amn',
+        ),
+        sh(
+          `Пусть $AM = ${chast(p.m!, 'x')}$, $MB = ${chast(p.n!, 'x')}$, $AN = ${chast(p.p!, 'y')}$, $NC = ${chast(p.q!, 'y')}$. Тогда $AB = ${chast(p.m! + p.n!, 'x')}$, $AC = ${chast(p.p! + p.q!, 'y')}$ и $\\dfrac{S_{AMN}}{S_{ABC}} = \\dfrac{${p.m}}{${p.m! + p.n!}}\\cdot\\dfrac{${p.p}}{${p.p! + p.q!}} = ${d}$. Что и требовалось доказать.`,
           'amn',
         ),
       ];
@@ -654,15 +814,21 @@ export const TIPY_18: readonly TipZadachi18[] = [
       const amn = (p.S! * p.m! * p.p!) / ((p.m! + p.n!) * (p.p! + p.q!));
       return [
         sh(
-          `$S_{AMN} = ${drob(p.m! * p.p!, (p.m! + p.n!) * (p.p! + p.q!))}\\cdot ${p.S} = ${ch(amn)}$.`,
+          `По пункту а) $S_{AMN} = ${drob(p.m! * p.p!, (p.m! + p.n!) * (p.p! + p.q!))}\\cdot ${p.S} = ${ch(amn)}$.`,
           'amn',
         ),
-        sh(`$S_{MBCN} = S_{ABC} - S_{AMN} = ${p.S} - ${ch(amn)} = ${ch(p.S! - amn)}$.`, 'otvet'),
+        sh(
+          `Четырёхугольник $MBCN$ — это треугольник $ABC$ без треугольника $AMN$: $S_{MBCN} = S_{ABC} - S_{AMN} = ${p.S} - ${ch(amn)} = ${ch(p.S! - amn)}$.`,
+          'otvet',
+        ),
       ];
     },
   } /* Перенесённые задачи с одним набором чисел — trenazherDop/. */,
   ...TIPY_DOP_18,
 ];
+
+/** Все типы: исходные и по новым опорным задачам (trenazherNovye.ts). */
+export const TIPY_18: readonly TipZadachi18[] = [...TIPY_18_OSNOVNYE, ...TIPY_18_NOVYE];
 
 /** Несократимая дробь в TeX. */
 function drob(a: number, b: number): string {

@@ -60,6 +60,9 @@ function zapomnit(scena: object, k: Kadr): void {
   for (const p of k.podpisi) m.set(p.klyuch, p.dir);
 }
 
+/** TeX подписи-вершины: «A», «A_1», «B'» — как имя в lib/chertezh3/svg.ts. */
+const IMYA_TEX = /^[A-Z]('*)(?:_\{?\d+\}?)?$/;
+
 /** Высота окна чертежа по ширине: почти квадрат, на телефоне ниже. */
 function vysotaPo(w: number): number {
   return Math.round(Math.min(w * 0.86, 420));
@@ -104,12 +107,25 @@ export function Chertezh3({
   useLayoutEffect(() => {
     const box = zamer.current;
     if (!box) return;
-    const m = new Map<string, { w: number; h: number }>();
-    box.querySelectorAll<HTMLElement>('[data-tex]').forEach((el) => {
-      const r = el.getBoundingClientRect();
-      m.set(el.dataset.tex ?? '', { w: Math.ceil(r.width) + 2, h: Math.ceil(r.height) });
-    });
-    setRazmery(m);
+    let zhiv = true;
+    const zamerit = () => {
+      if (!zhiv) return;
+      const m = new Map<string, { w: number; h: number }>();
+      box.querySelectorAll<HTMLElement>('[data-tex]').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        /* Запас по высоте: черта корня и дроби KaTeX выходит за строку. */
+        m.set(el.dataset.tex ?? '', { w: Math.ceil(r.width) + 2, h: Math.ceil(r.height) + 2 });
+      });
+      setRazmery(m);
+    };
+    zamerit();
+    /* До загрузки шрифтов KaTeX размеры — по запасному шрифту: корень
+       и дробь у́же и ниже. Когда шрифты готовы — замер заново. */
+    if (typeof document !== 'undefined' && document.fonts !== undefined)
+      void document.fonts.ready.then(zamerit);
+    return () => {
+      zhiv = false;
+    };
   }, [teksty]);
 
   const H = vysotaPo(shirina);
@@ -188,7 +204,8 @@ export function Chertezh3({
               <span
                 key={t}
                 data-tex={t}
-                className="ch3__label"
+                /* Вершина меряется своим начертанием: полужирная и крупнее. */
+                className={clsx('ch3__label', IMYA_TEX.test(t) && 'ch3__label--imya')}
                 dangerouslySetInnerHTML={{ __html: podpisiHtml[t] ?? t }}
               />
             ))}

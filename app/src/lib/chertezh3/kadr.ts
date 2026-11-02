@@ -108,20 +108,66 @@ export interface OpciiKadra {
   prezhnie?: ReadonlyMap<string, number>;
 }
 
-/** Оценка ширины TeX-подписи без браузера. */
-export function ocenkaRazmera(tex: string, kegl: number): { w: number; h: number } {
+/**
+ * Подписи вершин (vid 'imya') — полужирный курсив, на 12 % крупнее
+ * остальных (тема чертежей, вторая редакция).
+ */
+export const KOEF_IMENI = 1.12;
+
+/** Аргумент в фигурных скобках с позиции i (учитывая вложенные скобки). */
+function argument(tex: string, i: number): { arg: string; konec: number } | null {
+  if (tex[i] !== '{') return null;
+  let glubina = 0;
+  for (let k = i; k < tex.length; k += 1) {
+    if (tex[k] === '{') glubina += 1;
+    else if (tex[k] === '}') {
+      glubina -= 1;
+      if (glubina === 0) return { arg: tex.slice(i + 1, k), konec: k + 1 };
+    }
+  }
+  return null;
+}
+
+/** Ширина строки (без дробей) в долях кегля. */
+function shirinaStroki(tex: string, kegl: number): number {
   const plain = tex
     .replace(/\\sqrt\{([^}]*)\}/g, '√$1')
-    .replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, '$1/$2')
     .replace(/\^\\circ/g, '°')
     .replace(/\{,\}/g, ',')
     .replace(/\\[a-zA-Z]+/g, 'x')
     .replace(/[{}^]/g, '');
   const sub = /_\{?(\w+)\}?/.exec(plain);
   const base = plain.replace(/_\{?\w+\}?/, '');
-  const w = kegl * (0.6 * base.length + 0.42 * (sub?.[1]?.length ?? 0)) + 2;
-  const h = kegl * (/\\frac/.test(tex) ? 1.9 : 1.2);
-  return { w, h };
+  return kegl * (0.6 * base.length + 0.42 * (sub?.[1]?.length ?? 0));
+}
+
+/**
+ * Оценка размера TeX-подписи без браузера. Дробь (\\frac, \\dfrac,
+ * \\tfrac) — двухэтажная: ширина — по более широкому из числителя и
+ * знаменателя, высота — на оба этажа и черту корня в числителе. Иначе
+ * дробь, оценённая строкой «√3/2», получала рамку в одну строку, а
+ * KaTeX рисовал её вдвое выше — и она упиралась в рёбра.
+ */
+export function ocenkaRazmera(tex: string, kegl: number): { w: number; h: number } {
+  const m = /\\[dt]?frac/.exec(tex);
+  if (m !== null) {
+    const chis = argument(tex, m.index + m[0].length);
+    const znam = chis === null ? null : argument(tex, chis.konec);
+    if (chis !== null && znam !== null) {
+      const pered = tex.slice(0, m.index);
+      const posle = tex.slice(znam.konec);
+      const melko = m[0] === '\\tfrac' ? 0.75 : 1;
+      const w =
+        shirinaStroki(pered + posle, kegl) +
+        melko * Math.max(shirinaStroki(chis.arg, kegl), shirinaStroki(znam.arg, kegl)) +
+        kegl * 0.4 +
+        2;
+      const koren = /\\sqrt/.test(chis.arg) || /\\sqrt/.test(znam.arg) ? 0.35 : 0;
+      return { w, h: kegl * ((m[0] === '\\tfrac' ? 1.6 : 2.3) + koren) };
+    }
+  }
+  const w = shirinaStroki(tex, kegl) + 2;
+  return { w, h: kegl * (/\\sqrt/.test(tex) ? 1.4 : 1.2) };
 }
 
 /** Ссылка на ребро «AB1» или «A-B1» → ключ «A-B1». */
@@ -313,7 +359,10 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
 
   /* ── Подписи ──────────────────────────────────────────────── */
   const centr2 = P(scena.geom.centr);
-  const razmer = o.razmer ?? ((tex: string) => ocenkaRazmera(tex, o.kegl));
+  const razmer =
+    o.razmer ??
+    ((tex: string, vid: VidPodpisi) =>
+      ocenkaRazmera(tex, vid === 'imya' ? o.kegl * KOEF_IMENI : o.kegl));
   interface Zad {
     klyuch: string;
     tex: string;
