@@ -69,6 +69,8 @@ export interface Scena19 {
     ticks?: { x?: { at: number; label: string }[]; y?: { at: number; label: string }[] };
   };
   axisLabels: 'minimal' | 'full' | 'none';
+  /** Пикселей на клетку; по умолчанию — как у движка (34). */
+  cell?: number;
   curves: Krivaya19[];
   points: Tochka19[];
   shapes: Figura19[];
@@ -130,6 +132,11 @@ export interface Okno19 {
   /** Свои подписи делений: числа, которые важны для решения. */
   deleniya?: { x?: number[]; y?: number[] };
   shag?: number;
+  /**
+   * Крупнее клетка (пикселей на единицу): у маленького окна, где кривые
+   * касаются в одной точке и почти сливаются, подписи точки иначе негде встать.
+   */
+  kletka?: number;
 }
 
 /** Число на делении: десятичная запятая и минус, как в бланке. */
@@ -160,6 +167,7 @@ export function scena(
     grid: { step: okno.shag ?? 1, show: true },
     axes: { labelX, labelY, origin: '0', ...(ticks === undefined ? {} : { ticks }) },
     axisLabels: ticks === undefined ? 'minimal' : 'full',
+    ...(okno.kletka === undefined ? {} : { cell: okno.kletka }),
     curves: sostav.curves ?? [],
     points: sostav.points ?? [],
     shapes: sostav.shapes ?? [],
