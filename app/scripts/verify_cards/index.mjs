@@ -47,6 +47,7 @@ const { narisovat, podgotovit } = requireSrc('lib/kartochki/podgotovka');
 const { otpechatok, VERNO, NEVERNO } = requireSrc('lib/kartochki/otvet');
 const { parseAnswer } = requireSrc('lib/answer');
 const L = requireSrc('lib/kartochki/leitner');
+const { renderFigura, pustoyOtchet } = requireSrc('lib/proizvodnaya/render');
 
 /* Детерминированный генератор: прогоны повторяемы. */
 function mulberry(seed) {
@@ -140,6 +141,13 @@ for (const k of KOLODY) {
         if (svg.length === 0 || svg.some((s) => !s.includes('<'))) fail(`${gde}: пустой чертёж`);
       } catch (e) {
         fail(`${gde}: чертёж не рисуется — ${e.message}`);
+      }
+      /* График №9: подписи не пересекаются друг с другом и с кривой —
+         тот же отчёт движка, что у рисунков теории (sceny9Problemy). */
+      if (c.figure.dvizhok === 'proizvodnaya') {
+        const rep = pustoyOtchet();
+        renderFigura(c.figure.fig(), { rezhim: 'student' }, rep);
+        rep.problems.forEach((p) => fail(`${gde}: рисунок — ${p}`));
       }
     }
     if (c.type === 'chertezh' && c.figure === undefined)

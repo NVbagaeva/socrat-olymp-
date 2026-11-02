@@ -1720,3 +1720,15 @@
     min-height: 42px;
   }
 }
+
+/* Блок теории — якорь «Повторить теорию» из карточек по теории
+   (lib/zadanie13/teoriya-yakorya.ts): встаёт под липкую ленту, на узком
+   экране — ещё и под полосу «Содержание». */
+.vteor [id^='t13-'] {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+@media (max-width: 1023.98px) {
+  .vteor [id^='t13-'] {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+}
