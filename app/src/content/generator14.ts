@@ -41,11 +41,23 @@ export const GENERATOR14_SOURCES = [
 
 /** Темы генератора — группы методов; подтипы — методы (блоки опорных задач). */
 export const GRUPPY_14 = [
-  { id: 'OS', title: 'Основа: простейшие и серии', metody: ['prosteyshie', 'argument', 'obedinenie'] },
+  {
+    id: 'OS',
+    title: 'Основа: простейшие и серии',
+    metody: ['prosteyshie', 'argument', 'obedinenie'],
+  },
   { id: 'OT', title: 'Отбор корней', metody: ['otbor-krug', 'otbor-nerav'] },
-  { id: 'FO', title: 'Формулы', metody: ['privedenie', 'privedenie-kvadrat', 'dvoynoy', 'slozhenie'] },
+  {
+    id: 'FO',
+    title: 'Формулы',
+    metody: ['privedenie', 'privedenie-kvadrat', 'dvoynoy', 'slozhenie'],
+  },
   { id: 'ZA', title: 'Замена переменной', metody: ['zamena', 'zamena-preobr'] },
-  { id: 'OD', title: 'Однородные и вспомогательный угол', metody: ['odnorodnye-1', 'odnorodnye-2', 'vspomogatelnyy', 'abc'] },
+  {
+    id: 'OD',
+    title: 'Однородные и вспомогательный угол',
+    metody: ['odnorodnye-1', 'odnorodnye-2', 'vspomogatelnyy', 'abc'],
+  },
 ] as const;
 
 export const GENERATOR14_PRESETS: GenPreset[] = [

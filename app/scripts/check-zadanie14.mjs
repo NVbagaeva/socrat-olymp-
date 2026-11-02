@@ -43,17 +43,33 @@ const ok = (cond, what) => {
 /* ── Ядро ───────────────────────────────────────────────── */
 {
   const et = [U.s(U.u(1, 6)), U.s(U.u(5, 6))];
-  ok(P.proveritSerii(['(-1)^{k}\\frac{\\pi}{6}+\\pi k'], et).itog === 'verno', 'ядро: (−1)^k не засчитана');
-  ok(P.proveritSerii(['\\frac{\\pi}{6}+2\\pi n', '\\frac{5\\pi}{6}+2\\pi n'], et).itog === 'verno', 'ядро: пара серий не засчитана');
-  ok(P.proveritSerii(['\\frac{\\pi}{6}+2\\pi k'], et).itog === 'neverno', 'ядро: потеря серии засчитана');
-  ok(P.proveritSerii(['\\frac{\\pi}{6}+\\pi k'], et).itog === 'neverno', 'ядро: лишние корни засчитаны');
+  ok(
+    P.proveritSerii(['(-1)^{k}\\frac{\\pi}{6}+\\pi k'], et).itog === 'verno',
+    'ядро: (−1)^k не засчитана',
+  );
+  ok(
+    P.proveritSerii(['\\frac{\\pi}{6}+2\\pi n', '\\frac{5\\pi}{6}+2\\pi n'], et).itog === 'verno',
+    'ядро: пара серий не засчитана',
+  );
+  ok(
+    P.proveritSerii(['\\frac{\\pi}{6}+2\\pi k'], et).itog === 'neverno',
+    'ядро: потеря серии засчитана',
+  );
+  ok(
+    P.proveritSerii(['\\frac{\\pi}{6}+\\pi k'], et).itog === 'neverno',
+    'ядро: лишние корни засчитаны',
+  );
   const et2 = [U.s(U.u(1, 4), 1, 2)];
   ok(
     P.proveritSerii(['\\frac{\\pi}{4}+\\frac{\\pi k}{2}'], et2).itog === 'verno' &&
       P.proveritSerii(['\\pm\\frac{\\pi}{4}+\\pi k'], et2).itog === 'verno',
     'ядро: серия с шагом π/2 и запись ± не совпали',
   );
-  const k = U.korniNaPromezhutke([U.s(U.u(0), 1)], { ot: U.u(-5, 2), do: U.u(-1), vkl: [true, false] });
+  const k = U.korniNaPromezhutke([U.s(U.u(0), 1)], {
+    ot: U.u(-5, 2),
+    do: U.u(-1),
+    vkl: [true, false],
+  });
   ok(k.length === 1 && U.ugolTex(k[0]) === '-2\\pi', 'ядро: полуоткрытый промежуток взял конец');
   ok(P.proveritKorni('-2\\pi', k).itog === 'verno', 'ядро: ответ б не засчитан');
   ok(P.proveritKorni('-\\pi;-2\\pi', k).itog === 'neverno', 'ядро: лишний корень засчитан');
@@ -82,7 +98,8 @@ function strokaOk(s, where) {
   }
   kuski.forEach((k, i) => {
     if (i % 2 === 1) texOk(k, where);
-    else if (/\\[a-zA-Z]|\^|_\{/.test(k)) problems.push(`${where}: TeX вне долларов «${k.slice(0, 40)}»`);
+    else if (/\\[a-zA-Z]|\^|_\{/.test(k))
+      problems.push(`${where}: TeX вне долларов «${k.slice(0, 40)}»`);
   });
 }
 
@@ -154,21 +171,37 @@ function proveritZadachu(z, gde) {
     for (const x of nuliF(z.f, z.odz)) {
       checks += 1;
       if (!et.some((y) => Math.abs(x - y) < 1e-4)) {
-        problems.push(`${gde}: корень x≈${x.toFixed(5)} (${(x / Math.PI).toFixed(4)}π) не входит в серии`);
+        problems.push(
+          `${gde}: корень x≈${x.toFixed(5)} (${(x / Math.PI).toFixed(4)}π) не входит в серии`,
+        );
       }
     }
     if (z.promezhutok) {
       const L = (U.znach(z.promezhutok.do) - U.znach(z.promezhutok.ot)) / Math.PI;
       ok(L <= 3 + 1e-9, `${gde}: промежуток длиннее 3π — больше двух окружностей`);
       const n = U.korniNaPromezhutke(z.serii, z.promezhutok).length;
-      const CHISLA = { Ни: 0, Один: 1, Одна: 1, Два: 2, Две: 2, Три: 3, Четыре: 4, Пять: 5, Шесть: 6 };
+      const CHISLA = {
+        Ни: 0,
+        Один: 1,
+        Одна: 1,
+        Два: 2,
+        Две: 2,
+        Три: 3,
+        Четыре: 4,
+        Пять: 5,
+        Шесть: 6,
+      };
       z.podskazki.forEach((h, i) => {
         if (!/Сколько.*корн/.test(h.question)) return;
         const t = h.options[h.correct] ?? '';
         const slovo = Object.keys(CHISLA).find((w) => t.startsWith(w));
         const m = /\$(\d+)\$/.exec(t);
         const chislo = slovo !== undefined ? CHISLA[slovo] : m ? Number(m[1]) : null;
-        if (chislo !== null) ok(chislo === n, `${gde}: подсказка ${i + 1} говорит «${t}», а корней на промежутке ${n}`);
+        if (chislo !== null)
+          ok(
+            chislo === n,
+            `${gde}: подсказка ${i + 1} говорит «${t}», а корней на промежутке ${n}`,
+          );
       });
     }
     if (z.promezhutok) {
@@ -176,12 +209,15 @@ function proveritZadachu(z, gde) {
       ok(korni.length > 0, `${gde}: на промежутке нет корней`);
       if (z.otbor === 'nerav') {
         try {
-          O.otborNerav(z.serii, z.promezhutok).forEach((s, i) => strokaOk(s, `${gde}: отбор ${i + 1}`));
+          O.otborNerav(z.serii, z.promezhutok).forEach((s, i) =>
+            strokaOk(s, `${gde}: отбор ${i + 1}`),
+          );
         } catch (e) {
           problems.push(`${gde}: отбор неравенством — ${e.message}`);
         }
       }
-      for (const spec of H.krugiOtbora(z.serii, z.promezhutok)) proveritKrug(spec, `${gde}: окружность б`);
+      for (const spec of H.krugiOtbora(z.serii, z.promezhutok))
+        proveritKrug(spec, `${gde}: окружность б`);
     }
     proveritKrug(H.krugSerii(z.serii), `${gde}: окружность а`);
     if (z.zapisA) {
@@ -197,8 +233,14 @@ function proveritZadachu(z, gde) {
   z.podskazki.forEach((h, i) => {
     strokaOk(h.question, `${gde}: подсказка ${i + 1}`);
     h.options.forEach((o, j) => strokaOk(o, `${gde}: подсказка ${i + 1}, кнопка ${j + 1}`));
-    ok(new Set(h.options).size === h.options.length, `${gde}: подсказка ${i + 1} — одинаковые кнопки`);
-    ok(h.correct >= 0 && h.correct < h.options.length, `${gde}: подсказка ${i + 1} — нет верной кнопки`);
+    ok(
+      new Set(h.options).size === h.options.length,
+      `${gde}: подсказка ${i + 1} — одинаковые кнопки`,
+    );
+    ok(
+      h.correct >= 0 && h.correct < h.options.length,
+      `${gde}: подсказка ${i + 1} — нет верной кнопки`,
+    );
     if (h.comment) strokaOk(h.comment, `${gde}: подсказка ${i + 1}, отклик`);
   });
 }
@@ -207,10 +249,12 @@ function proveritKrug(spec, gde) {
   const g = K.geomKruga(spec);
   g.podpisi.forEach((p, i) => {
     checks += 1;
-    if (p.vid !== 'os' && K.naLiniiKruga(p.ramka, 0)) problems.push(`${gde}: подпись «${p.tex}» на линии окружности`);
+    if (p.vid !== 'os' && K.naLiniiKruga(p.ramka, 0))
+      problems.push(`${gde}: подпись «${p.tex}» на линии окружности`);
     g.podpisi.slice(i + 1).forEach((q2) => {
       checks += 1;
-      if (K.peresekayutsya(p.ramka, q2.ramka, 0)) problems.push(`${gde}: подписи «${p.tex}» и «${q2.tex}» пересекаются`);
+      if (K.peresekayutsya(p.ramka, q2.ramka, 0))
+        problems.push(`${gde}: подписи «${p.tex}» и «${q2.tex}» пересекаются`);
     });
   });
 }
@@ -238,7 +282,6 @@ for (const z of B.BANK_14) {
   ok(z.vid === 'uravnenie' && z.promezhutok !== undefined, `банк ${z.id}: нет пункта б`);
   proveritZadachu(z, `банк ${z.id}`);
 }
-
 
 /* ── Теория ─────────────────────────────────────────────── */
 function proveritRisunok(r, gde) {
@@ -271,11 +314,15 @@ for (const g of TE.GLAVY_14) {
       else if (b.vid === 'spisok') b.punkty.forEach((t) => strokaOk(t, w));
       else if (b.vid === 'ramka') {
         strokaOk(b.text, w);
-        ok(b.primer !== undefined && b.primer.shagi.length > 0, `${w}: рамка без разобранного примера`);
+        ok(
+          b.primer !== undefined && b.primer.shagi.length > 0,
+          `${w}: рамка без разобранного примера`,
+        );
         if (b.primer) proveritPrimer(b.primer, `${w} (пример рамки)`);
       } else if (b.vid === 'primer') proveritPrimer(b.primer, w);
       else if (b.vid === 'risunok') proveritRisunok(b.risunok, w);
-      else if (b.vid === 'tablica') [...b.zagolovki, ...b.stroki.flat()].forEach((t) => strokaOk(t, w));
+      else if (b.vid === 'tablica')
+        [...b.zagolovki, ...b.stroki.flat()].forEach((t) => strokaOk(t, w));
     });
   }
 }

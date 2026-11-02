@@ -41,9 +41,20 @@ export function proverit14(z: Zadacha14, v: Vvod14): Itog14 {
     const t = v.chislo.trim();
     if (t === '') return { a: 'pusto', b: null, otklik: [] };
     const x = chisloZapisi(t);
-    if (x === null) return { a: 'ne-razobrano', b: null, otklik: ['Не получилось прочитать число — запиши его так: $-0{,}5$ или $4$.'] };
+    if (x === null)
+      return {
+        a: 'ne-razobrano',
+        b: null,
+        otklik: ['Не получилось прочитать число — запиши его так: $-0{,}5$ или $4$.'],
+      };
     const ok = Math.abs(x - z.otvet) < 1e-6;
-    return { a: ok ? 'verno' : 'neverno', b: null, otklik: ok ? [] : ['Число не то. Выпиши несколько корней серий рядом с нулём и выбери нужный.'] };
+    return {
+      a: ok ? 'verno' : 'neverno',
+      b: null,
+      otklik: ok
+        ? []
+        : ['Число не то. Выпиши несколько корней серий рядом с нулём и выбери нужный.'],
+    };
   }
   const otklik: string[] = [];
   let a: Punkt = 'pusto';
@@ -52,14 +63,18 @@ export function proverit14(z: Zadacha14, v: Vvod14): Itog14 {
     if (r.itog === 'verno') a = 'verno';
     else if (r.itog === 'ne-razobrano') {
       a = 'ne-razobrano';
-      otklik.push(`Пункт а: не получилось прочитать серию ${r.stroka + 1}. Пример записи: $\\dfrac{\\pi}{6}+2\\pi k$.`);
+      otklik.push(
+        `Пункт а: не получилось прочитать серию ${r.stroka + 1}. Пример записи: $\\dfrac{\\pi}{6}+2\\pi k$.`,
+      );
     } else {
       a = 'neverno';
       if (r.poteryany.length > 0) {
         otklik.push(`Пункт а: потеряны корни — например, $x=${kakPi(r.poteryany[0] as number)}$.`);
       }
       if (r.lishnie.length > 0) {
-        otklik.push(`Пункт а: есть лишние корни — например, $x=${kakPi(r.lishnie[0] as number)}$ не подходит.`);
+        otklik.push(
+          `Пункт а: есть лишние корни — например, $x=${kakPi(r.lishnie[0] as number)}$ не подходит.`,
+        );
       }
     }
   }
@@ -71,7 +86,9 @@ export function proverit14(z: Zadacha14, v: Vvod14): Itog14 {
       if (r.itog === 'verno') b = 'verno';
       else if (r.itog === 'ne-razobrano') {
         b = 'ne-razobrano';
-        otklik.push('Пункт б: не получилось прочитать корни. Пиши их через точку с запятой: $-\\dfrac{7\\pi}{6};\\ -\\pi$.');
+        otklik.push(
+          'Пункт б: не получилось прочитать корни. Пиши их через точку с запятой: $-\\dfrac{7\\pi}{6};\\ -\\pi$.',
+        );
       } else {
         b = 'neverno';
         const chasti: string[] = [];

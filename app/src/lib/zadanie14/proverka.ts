@@ -37,7 +37,10 @@ export function korniZapisi(zapis: string, lo = -OKNO, hi = OKNO): number[] | nu
   for (const c of chast) {
     const u = razobrat(c);
     if (u === null) return null;
-    const bukva = BUKVY.find((b) => new RegExp(`(^|[^a-z])${b}([^a-z]|$)`).test(c.replace(/\\[a-zA-Z]+/g, ' '))) ?? 'k';
+    const bukva =
+      BUKVY.find((b) =>
+        new RegExp(`(^|[^a-z])${b}([^a-z]|$)`).test(c.replace(/\\[a-zA-Z]+/g, ' ')),
+      ) ?? 'k';
     let est = false;
     for (let k = -400; k <= 400; k += 1) {
       const x = vychislit(u, { [bukva]: k });

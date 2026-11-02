@@ -82,8 +82,7 @@ export function KrugZhivoy14() {
   const ugolTex = kratnyy ? piTex(q(n12, 12)) : `${chislo(ugol)}`;
   const oboroty = kratnyy ? Math.floor((n12 + 1e-9) / 24) : 0;
   const ostatok = kratnyy ? piTex(q(n12 - 24 * oboroty, 12)) : '';
-  const razlozhenie =
-    kratnyy && (oboroty !== 0) ? `=${piTex(q(2 * oboroty))}+${ostatok}` : '';
+  const razlozhenie = kratnyy && oboroty !== 0 ? `=${piTex(q(2 * oboroty))}+${ostatok}` : '';
   const ex = kratnyy ? tochno(ugol) : null;
   const gradusy = Math.round((ugol * 180) / Math.PI);
   /* Дуга угла от 0 до текущего (в пределах одного оборота от начала). */
@@ -159,13 +158,25 @@ export function KrugZhivoy14() {
         </div>
       </dl>
       <div className="z14-inter__nav">
-        <button type="button" className="btn btn--secondary btn--sm" onClick={() => setUgol((u0) => u0 + 2 * Math.PI)}>
+        <button
+          type="button"
+          className="btn btn--secondary btn--sm"
+          onClick={() => setUgol((u0) => u0 + 2 * Math.PI)}
+        >
           + оборот
         </button>
-        <button type="button" className="btn btn--secondary btn--sm" onClick={() => setUgol((u0) => u0 - 2 * Math.PI)}>
+        <button
+          type="button"
+          className="btn btn--secondary btn--sm"
+          onClick={() => setUgol((u0) => u0 - 2 * Math.PI)}
+        >
           − оборот
         </button>
-        <button type="button" className="btn btn--ghost btn--sm" onClick={() => setUgol(Math.PI / 6)}>
+        <button
+          type="button"
+          className="btn btn--ghost btn--sm"
+          onClick={() => setUgol(Math.PI / 6)}
+        >
           Сначала
         </button>
       </div>

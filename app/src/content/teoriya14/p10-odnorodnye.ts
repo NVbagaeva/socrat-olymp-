@@ -26,7 +26,8 @@ export const PUNKT_10: Punkt14 = {
           'Раз $\\cos x\\ne0$ для всех корней, деление на $\\cos^2x$ — равносильный переход: $\\operatorname{tg}^2x-4\\operatorname{tg}x+3=0$.',
           'Квадратное относительно $\\operatorname{tg}x$: корни $1$ и $3$ (по теореме Виета: сумма $4$, произведение $3$). $\\left[\\begin{aligned}&\\operatorname{tg}x=1,\\\\&\\operatorname{tg}x=3\\end{aligned}\\right.\\ \\Leftrightarrow\\ \\left[\\begin{aligned}&x=\\dfrac{\\pi}{4}+\\pi k,\\\\&x=\\operatorname{arctg}3+\\pi k,\\end{aligned}\\right.$ $k\\in\\mathbb{Z}$.',
         ],
-        otvet: '$x=\\dfrac{\\pi}{4}+\\pi k$, $x=\\operatorname{arctg}3+\\pi k$, $k\\in\\mathbb{Z}$.',
+        otvet:
+          '$x=\\dfrac{\\pi}{4}+\\pi k$, $x=\\operatorname{arctg}3+\\pi k$, $k\\in\\mathbb{Z}$.',
       },
     },
     {
@@ -81,7 +82,8 @@ export const PUNKT_10: Punkt14 = {
           '$D=25+56=81$, $\\operatorname{tg}x=\\dfrac{-5\\pm9}{14}$: $\\operatorname{tg}x=\\dfrac{2}{7}$ или $\\operatorname{tg}x=-1$.',
           '$x=\\operatorname{arctg}\\dfrac{2}{7}+\\pi k$, $x=-\\dfrac{\\pi}{4}+\\pi k$, $k\\in\\mathbb{Z}$. Проверка при $x=-\\dfrac{\\pi}{4}$: $10\\cdot\\dfrac{1}{2}+5\\cdot\\left(-\\dfrac{1}{2}\\right)+\\dfrac{1}{2}=3$ — верно.',
         ],
-        otvet: '$x=-\\dfrac{\\pi}{4}+\\pi k$, $x=\\operatorname{arctg}\\dfrac{2}{7}+\\pi k$, $k\\in\\mathbb{Z}$.',
+        otvet:
+          '$x=-\\dfrac{\\pi}{4}+\\pi k$, $x=\\operatorname{arctg}\\dfrac{2}{7}+\\pi k$, $k\\in\\mathbb{Z}$.',
       },
     },
   ],

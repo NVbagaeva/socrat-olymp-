@@ -81,7 +81,12 @@ export function SheetPage14({ vid }: { vid: VidPechati14 }) {
   return (
     <>
       <div className="z14-print-bar" data-print-bar>
-        <button type="button" className="btn btn--primary" onClick={() => void pechatat()} disabled={!done}>
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={() => void pechatat()}
+          disabled={!done}
+        >
           {SHEET_14.pechat}
         </button>
         <span className="z14-print-bar__lead">{SHEET_14.pechatLead}</span>
@@ -89,7 +94,11 @@ export function SheetPage14({ vid }: { vid: VidPechati14 }) {
       <div id="sheet-measure" />
       <div id="sheet-pages" />
       {spec === null ? null : (
-        <script id="sheet-spec" type="application/json" dangerouslySetInnerHTML={{ __html: spec }} />
+        <script
+          id="sheet-spec"
+          type="application/json"
+          dangerouslySetInnerHTML={{ __html: spec }}
+        />
       )}
     </>
   );

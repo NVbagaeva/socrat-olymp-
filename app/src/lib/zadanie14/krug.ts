@@ -92,7 +92,13 @@ export interface GeomKruga {
   osi: { x1: number; x2: number; y1: number; y2: number };
   osTg?: { x: number; y1: number; y2: number };
   osCtg?: { y: number; x1: number; x2: number };
-  linii: { x1: number; y1: number; x2: number; y2: number; vid: 'sechenie' | 'proekciya' | 'luch' | 'tg' }[];
+  linii: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    vid: 'sechenie' | 'proekciya' | 'luch' | 'tg';
+  }[];
   /** Дуга промежутка: path, стрелка, концы. */
   duga?: { d: string; strelka: string };
   zasechki: { x1: number; y1: number; x2: number; y2: number }[];
@@ -121,7 +127,8 @@ export function razmerTex(tex: string, kegl = KEGL): { w: number; h: number } {
   const fr = /\\[dt]?frac\{((?:[^{}]|\{[^{}]*\})*)\}\{((?:[^{}]|\{[^{}]*\})*)\}/.exec(tex);
   if (fr !== null) {
     const ost = tex.replace(fr[0], '');
-    const w = Math.max(prostoy(fr[1] as string), prostoy(fr[2] as string)) * 0.6 + prostoy(ost) * 0.62;
+    const w =
+      Math.max(prostoy(fr[1] as string), prostoy(fr[2] as string)) * 0.6 + prostoy(ost) * 0.62;
     return { w: (w + 0.5) * em + minus, h: 2.5 * em };
   }
   return { w: (prostoy(tex) * 0.62 + 0.4) * em + minus, h: 1.35 * em };
@@ -282,7 +289,19 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
     const y = -spec.sechenieSin.a * R;
     linii.push({ x1: -OS + 8, y1: y, x2: OS - 8, y2: y, vid: 'sechenie' });
     zanyato.push({ x1: -OS, x2: OS, y1: y - T, y2: y + T });
-    const p = postavitRyadom(spec.sechenieSin.tex, 0, y, [[-1.15, -1], [1.15, -1], [-1.15, 1], [1.15, 1]], zanyato, 'znach');
+    const p = postavitRyadom(
+      spec.sechenieSin.tex,
+      0,
+      y,
+      [
+        [-1.15, -1],
+        [1.15, -1],
+        [-1.15, 1],
+        [1.15, 1],
+      ],
+      zanyato,
+      'znach',
+    );
     if (p) podpisi.push(p);
     tochki.push({ x: 0, y, akcent: true, vykolota: false, znach: true });
     OPIS.push(`прямая sin x = ${spec.sechenieSin.tex}`);
@@ -291,7 +310,19 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
     const x = spec.sechenieCos.a * R;
     linii.push({ x1: x, y1: -OS + 8, x2: x, y2: OS - 8, vid: 'sechenie' });
     zanyato.push({ x1: x - T, x2: x + T, y1: -OS, y2: OS });
-    const p = postavitRyadom(spec.sechenieCos.tex, x, 0, [[-1, 1.2], [1, 1.2], [-1, -1.2], [1, -1.2]], zanyato, 'znach');
+    const p = postavitRyadom(
+      spec.sechenieCos.tex,
+      x,
+      0,
+      [
+        [-1, 1.2],
+        [1, 1.2],
+        [-1, -1.2],
+        [1, -1.2],
+      ],
+      zanyato,
+      'znach',
+    );
     if (p) podpisi.push(p);
     tochki.push({ x, y: 0, akcent: true, vykolota: false, znach: true });
     OPIS.push(`прямая cos x = ${spec.sechenieCos.tex}`);
@@ -299,13 +330,35 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
   if (!pustoy && spec.tgZnach !== undefined) {
     const y = -spec.tgZnach.a * R;
     tochki.push({ x: R, y, akcent: true, vykolota: false, znach: true });
-    const p = postavitRyadom(spec.tgZnach.tex, R, y, [[1.25, 0], [1.25, -1], [1.25, 1]], zanyato, 'znach');
+    const p = postavitRyadom(
+      spec.tgZnach.tex,
+      R,
+      y,
+      [
+        [1.25, 0],
+        [1.25, -1],
+        [1.25, 1],
+      ],
+      zanyato,
+      'znach',
+    );
     if (p) podpisi.push(p);
   }
   if (!pustoy && spec.ctgZnach !== undefined) {
     const x = spec.ctgZnach.a * R;
     tochki.push({ x, y: -R, akcent: true, vykolota: false, znach: true });
-    const p = postavitRyadom(spec.ctgZnach.tex, x, -R, [[0, -1.3], [1, -1.3], [-1, -1.3]], zanyato, 'znach');
+    const p = postavitRyadom(
+      spec.ctgZnach.tex,
+      x,
+      -R,
+      [
+        [0, -1.3],
+        [1, -1.3],
+        [-1, -1.3],
+      ],
+      zanyato,
+      'znach',
+    );
     if (p) podpisi.push(p);
   }
 
@@ -342,7 +395,9 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
       { theta: t1, tex: ugolTex(spec.duga.ot), vkl: spec.duga.vkl[0] },
       { theta: t1 + dl, tex: ugolTex(spec.duga.do), vkl: spec.duga.vkl[1] },
     );
-    OPIS.push(`выделена дуга от ${ugolTex(spec.duga.ot)} до ${ugolTex(spec.duga.do)} против часовой стрелки`);
+    OPIS.push(
+      `выделена дуга от ${ugolTex(spec.duga.ot)} до ${ugolTex(spec.duga.do)} против часовой стрелки`,
+    );
   }
 
   /* Точки: сначала ключевые, их подписи ставятся первыми. */
@@ -350,7 +405,9 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
     t,
     theta: znach(t.ugol),
   }));
-  const poryadok = [...vse].sort((a, b) => Number(b.t.akcent ?? false) - Number(a.t.akcent ?? false));
+  const poryadok = [...vse].sort(
+    (a, b) => Number(b.t.akcent ?? false) - Number(a.t.akcent ?? false),
+  );
   for (const { t, theta } of vse) {
     const p = naKruge(theta);
     if (t.luch) linii.push({ x1: 0, y1: 0, x2: p.x, y2: p.y, vid: 'luch' });
@@ -376,13 +433,19 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
     const tex = t.tex ?? ugolTex(t.ugol);
     if (tex === '') continue;
     const tk = vKruge(theta);
-    if (podpisannye.some((pp) => Math.abs(vKruge(pp.theta) - tk) < 1e-6 && pp.tex === tex)) continue;
+    if (podpisannye.some((pp) => Math.abs(vKruge(pp.theta) - tk) < 1e-6 && pp.tex === tex))
+      continue;
     podpisannye.push({ theta, tex });
     podpisi.push(postavit(tex, theta, zanyato, 'tochka', t.akcent === true));
   }
   if (spec.duga?.podpisi !== false) {
     for (const k of konci) {
-      if (podpisannye.some((pp) => Math.abs(vKruge(pp.theta) - vKruge(k.theta)) < 1e-6 && pp.tex === k.tex)) continue;
+      if (
+        podpisannye.some(
+          (pp) => Math.abs(vKruge(pp.theta) - vKruge(k.theta)) < 1e-6 && pp.tex === k.tex,
+        )
+      )
+        continue;
       podpisannye.push({ theta: k.theta, tex: k.tex });
       podpisi.push(postavit(k.tex, k.theta, zanyato, 'konec', false));
     }

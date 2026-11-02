@@ -26,10 +26,33 @@ export const ZADACHI_07: Zadacha14[] = [
       '$\\cos x=0$ в точках $\\pm\\dfrac{\\pi}{2}$ — они противоположны, серия $x=\\dfrac{\\pi}{2}+\\pi k$. $\\cos x=\\dfrac{\\sqrt{3}}{2}$ при $x=\\pm\\dfrac{\\pi}{6}+2\\pi k$.',
     ],
     podskazki: [
-      v('На какую функцию меняется $\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)$?', ['На косинус', 'Остаётся синусом', 'На тангенс'], 0, 'Есть $\\dfrac{3\\pi}{2}$ — функция меняется.'),
-      v('Чему равно $\\sin^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?', ['$\\cos^2 x$', '$-\\cos^2 x$', '$\\sin^2 x$'], 0, 'Минус под квадратом исчезает: $(-\\cos x)^2=\\cos^2 x$.'),
-      v('Что делать с $\\cos x$ в уравнении $2\\cos^2 x=\\sqrt{3}\\cos x$?', ['Перенести влево и вынести $\\cos x$', 'Сократить на $\\cos x$', 'Заменить $\\cos^2 x=1-\\sin^2 x$'], 0, 'Сокращение потеряет серию $x=\\dfrac{\\pi}{2}+\\pi k$.'),
-      v('Решения $\\cos x=0$:', ['$x=\\dfrac{\\pi}{2}+\\pi k$', '$x=\\pi k$', '$x=\\dfrac{\\pi}{2}+2\\pi k$'], 0),
+      v(
+        'На какую функцию меняется $\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['На косинус', 'Остаётся синусом', 'На тангенс'],
+        0,
+        'Есть $\\dfrac{3\\pi}{2}$ — функция меняется.',
+      ),
+      v(
+        'Чему равно $\\sin^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['$\\cos^2 x$', '$-\\cos^2 x$', '$\\sin^2 x$'],
+        0,
+        'Минус под квадратом исчезает: $(-\\cos x)^2=\\cos^2 x$.',
+      ),
+      v(
+        'Что делать с $\\cos x$ в уравнении $2\\cos^2 x=\\sqrt{3}\\cos x$?',
+        [
+          'Перенести влево и вынести $\\cos x$',
+          'Сократить на $\\cos x$',
+          'Заменить $\\cos^2 x=1-\\sin^2 x$',
+        ],
+        0,
+        'Сокращение потеряет серию $x=\\dfrac{\\pi}{2}+\\pi k$.',
+      ),
+      v(
+        'Решения $\\cos x=0$:',
+        ['$x=\\dfrac{\\pi}{2}+\\pi k$', '$x=\\pi k$', '$x=\\dfrac{\\pi}{2}+2\\pi k$'],
+        0,
+      ),
     ],
   }),
   ur({
@@ -47,9 +70,26 @@ export const ZADACHI_07: Zadacha14[] = [
       '$2x=\\pm\\dfrac{\\pi}{3}+2\\pi k$, $x=\\pm\\dfrac{\\pi}{6}+\\pi k$.',
     ],
     podskazki: [
-      v('Чему равно $\\cos^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?', ['$\\sin^2 x$', '$-\\sin^2 x$', '$\\cos^2 x$'], 0),
-      v('Что получится после приведения?', ['$\\cos 2x=\\dfrac{1}{2}$', '$\\cos 2x=-\\dfrac{1}{2}$', '$1=\\dfrac{1}{2}$'], 0, '$\\cos^2 x-\\sin^2 x=\\cos 2x$.'),
-      v('Серии для $x$:', ['$\\pm\\dfrac{\\pi}{6}+\\pi k$', '$\\pm\\dfrac{\\pi}{3}+2\\pi k$', '$\\pm\\dfrac{\\pi}{6}+2\\pi k$'], 0),
+      v(
+        'Чему равно $\\cos^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['$\\sin^2 x$', '$-\\sin^2 x$', '$\\cos^2 x$'],
+        0,
+      ),
+      v(
+        'Что получится после приведения?',
+        ['$\\cos 2x=\\dfrac{1}{2}$', '$\\cos 2x=-\\dfrac{1}{2}$', '$1=\\dfrac{1}{2}$'],
+        0,
+        '$\\cos^2 x-\\sin^2 x=\\cos 2x$.',
+      ),
+      v(
+        'Серии для $x$:',
+        [
+          '$\\pm\\dfrac{\\pi}{6}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -68,8 +108,24 @@ export const ZADACHI_07: Zadacha14[] = [
     ],
     podskazki: [
       v('Чему равно $\\sin^2(\\pi+x)$?', ['$\\sin^2 x$', '$-\\sin^2 x$', '$\\cos^2 x$'], 0),
-      v('Разложение на множители:', ['$\\sin x\\,(2\\sin x-\\sqrt{2})=0$', '$\\sin x\\,(2\\sin x+\\sqrt{2})=0$', '$2\\sin x=\\sqrt{2}$'], 0),
-      v('Решения $\\sin x=\\dfrac{\\sqrt{2}}{2}$:', ['$\\dfrac{\\pi}{4}+2\\pi k$ и $\\dfrac{3\\pi}{4}+2\\pi k$', '$\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$\\dfrac{\\pi}{4}+\\pi k$'], 0),
+      v(
+        'Разложение на множители:',
+        [
+          '$\\sin x\\,(2\\sin x-\\sqrt{2})=0$',
+          '$\\sin x\\,(2\\sin x+\\sqrt{2})=0$',
+          '$2\\sin x=\\sqrt{2}$',
+        ],
+        0,
+      ),
+      v(
+        'Решения $\\sin x=\\dfrac{\\sqrt{2}}{2}$:',
+        [
+          '$\\dfrac{\\pi}{4}+2\\pi k$ и $\\dfrac{3\\pi}{4}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+          '$\\dfrac{\\pi}{4}+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -88,10 +144,31 @@ export const ZADACHI_07: Zadacha14[] = [
       '$\\cos x=\\dfrac{1}{2}$: $x=\\pm\\dfrac{\\pi}{3}+2\\pi k$.',
     ],
     podskazki: [
-      v('Чему равно $\\cos^2\\left(\\dfrac{\\pi}{2}+x\\right)$?', ['$\\sin^2 x$', '$-\\sin^2 x$', '$\\cos^2 x$'], 0),
-      v('Корни $4t^2+4t-3=0$:', ['$\\dfrac{1}{2}$ и $-\\dfrac{3}{2}$', '$-\\dfrac{1}{2}$ и $\\dfrac{3}{2}$', '$1$ и $-3$'], 0),
-      v('Решения $\\cos x=\\dfrac{1}{2}$:', ['$\\pm\\dfrac{\\pi}{3}+2\\pi k$', '$\\pm\\dfrac{\\pi}{6}+2\\pi k$', '$\\dfrac{\\pi}{3}+\\pi k$'], 0),
-      v('Сколько корней на $[-3\\pi;\\,-\\pi]$?', ['Два', 'Один', 'Три'], 0, '$-\\dfrac{7\\pi}{3}$ и $-\\dfrac{5\\pi}{3}$.'),
+      v(
+        'Чему равно $\\cos^2\\left(\\dfrac{\\pi}{2}+x\\right)$?',
+        ['$\\sin^2 x$', '$-\\sin^2 x$', '$\\cos^2 x$'],
+        0,
+      ),
+      v(
+        'Корни $4t^2+4t-3=0$:',
+        ['$\\dfrac{1}{2}$ и $-\\dfrac{3}{2}$', '$-\\dfrac{1}{2}$ и $\\dfrac{3}{2}$', '$1$ и $-3$'],
+        0,
+      ),
+      v(
+        'Решения $\\cos x=\\dfrac{1}{2}$:',
+        [
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\dfrac{\\pi}{3}+\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Сколько корней на $[-3\\pi;\\,-\\pi]$?',
+        ['Два', 'Один', 'Три'],
+        0,
+        '$-\\dfrac{7\\pi}{3}$ и $-\\dfrac{5\\pi}{3}$.',
+      ),
     ],
   }),
   ur({
@@ -109,9 +186,26 @@ export const ZADACHI_07: Zadacha14[] = [
       '$\\operatorname{tg} x=\\pm1$: $x=\\pm\\dfrac{\\pi}{4}+\\pi k$. Четыре точки идут через $\\dfrac{\\pi}{2}$: $x=\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{2}$.',
     ],
     podskazki: [
-      v('Чему равно $\\operatorname{tg}^2(\\pi-x)$?', ['$\\operatorname{tg}^2 x$', '$-\\operatorname{tg}^2 x$', '$\\operatorname{ctg}^2 x$'], 0),
-      v('Решения $\\operatorname{tg}^2 x=1$ одной серией:', ['$\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{2}$', '$\\dfrac{\\pi}{4}+\\pi k$', '$\\pm\\dfrac{\\pi}{4}+2\\pi k$'], 0),
-      v('Неравенство $\\dfrac{1}{2}\\le\\dfrac{1}{4}+\\dfrac{k}{2}\\le2$ даёт', ['$k=1,\\,2,\\,3$', '$k=0,\\,1,\\,2,\\,3$', '$k=1,\\,2$'], 0, '$\\dfrac{1}{2}\\le k\\le\\dfrac{7}{2}$.'),
+      v(
+        'Чему равно $\\operatorname{tg}^2(\\pi-x)$?',
+        ['$\\operatorname{tg}^2 x$', '$-\\operatorname{tg}^2 x$', '$\\operatorname{ctg}^2 x$'],
+        0,
+      ),
+      v(
+        'Решения $\\operatorname{tg}^2 x=1$ одной серией:',
+        [
+          '$\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{2}$',
+          '$\\dfrac{\\pi}{4}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Неравенство $\\dfrac{1}{2}\\le\\dfrac{1}{4}+\\dfrac{k}{2}\\le2$ даёт',
+        ['$k=1,\\,2,\\,3$', '$k=0,\\,1,\\,2,\\,3$', '$k=1,\\,2$'],
+        0,
+        '$\\dfrac{1}{2}\\le k\\le\\dfrac{7}{2}$.',
+      ),
     ],
   }),
   ur({
@@ -130,10 +224,26 @@ export const ZADACHI_07: Zadacha14[] = [
       '$\\cos x=-1$: $x=\\pi+2\\pi k$; $\\cos x=\\dfrac{1}{2}$: $x=\\pm\\dfrac{\\pi}{3}+2\\pi k$.',
     ],
     podskazki: [
-      v('Где знак формулы приведения важен?', ['В $\\cos(\\pi+x)$ — он без квадрата', 'В $\\cos^2\\left(\\dfrac{3\\pi}{2}-x\\right)$', 'Нигде'], 0),
+      v(
+        'Где знак формулы приведения важен?',
+        [
+          'В $\\cos(\\pi+x)$ — он без квадрата',
+          'В $\\cos^2\\left(\\dfrac{3\\pi}{2}-x\\right)$',
+          'Нигде',
+        ],
+        0,
+      ),
       v('Чему равно $\\cos(\\pi+x)$?', ['$-\\cos x$', '$\\cos x$', '$-\\sin x$'], 0),
-      v('Корни $2t^2+t-1=0$:', ['$\\dfrac{1}{2}$ и $-1$', '$-\\dfrac{1}{2}$ и $1$', '$1$ и $-\\dfrac{1}{2}$'], 0),
-      v('Решения $\\cos x=-1$:', ['$x=\\pi+2\\pi k$', '$x=\\pi k$', '$x=-\\dfrac{\\pi}{2}+2\\pi k$'], 0),
+      v(
+        'Корни $2t^2+t-1=0$:',
+        ['$\\dfrac{1}{2}$ и $-1$', '$-\\dfrac{1}{2}$ и $1$', '$1$ и $-\\dfrac{1}{2}$'],
+        0,
+      ),
+      v(
+        'Решения $\\cos x=-1$:',
+        ['$x=\\pi+2\\pi k$', '$x=\\pi k$', '$x=-\\dfrac{\\pi}{2}+2\\pi k$'],
+        0,
+      ),
     ],
   }),
   ur({
@@ -151,15 +261,33 @@ export const ZADACHI_07: Zadacha14[] = [
       'Четыре точки $\\pm\\dfrac{\\pi}{6}$, $\\pm\\dfrac{5\\pi}{6}$; противоположные объединяем: $x=\\pm\\dfrac{\\pi}{6}+\\pi k$.',
     ],
     podskazki: [
-      v('Чему равно $\\sin^2\\left(\\dfrac{\\pi}{2}+x\\right)$?', ['$\\cos^2 x$', '$\\sin^2 x$', '$-\\cos^2 x$'], 0),
-      v('Чему равно $\\cos^2 x$?', ['$\\dfrac{3}{4}$', '$\\dfrac{1}{4}$', '$\\dfrac{1}{3}$'], 0, '$4\\cos^2 x=3$.'),
-      v('Серии:', ['$\\pm\\dfrac{\\pi}{6}+\\pi k$', '$\\pm\\dfrac{\\pi}{6}+2\\pi k$', '$\\pm\\dfrac{\\pi}{3}+\\pi k$'], 0),
+      v(
+        'Чему равно $\\sin^2\\left(\\dfrac{\\pi}{2}+x\\right)$?',
+        ['$\\cos^2 x$', '$\\sin^2 x$', '$-\\cos^2 x$'],
+        0,
+      ),
+      v(
+        'Чему равно $\\cos^2 x$?',
+        ['$\\dfrac{3}{4}$', '$\\dfrac{1}{4}$', '$\\dfrac{1}{3}$'],
+        0,
+        '$4\\cos^2 x=3$.',
+      ),
+      v(
+        'Серии:',
+        [
+          '$\\pm\\dfrac{\\pi}{6}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
     id: 'z07-08',
     iz: 'авторская',
-    uravnenie: '\\operatorname{ctg}^2\\left(\\dfrac{3\\pi}{2}+x\\right)=\\sqrt{3}\\operatorname{tg}(\\pi+x)',
+    uravnenie:
+      '\\operatorname{ctg}^2\\left(\\dfrac{3\\pi}{2}+x\\right)=\\sqrt{3}\\operatorname{tg}(\\pi+x)',
     f: (x) => ctg((3 * PI) / 2 + x) ** 2 - sqrt(3) * tg(PI + x),
     odz: (x) => Math.abs(cos(x)) > 1e-6,
     serii: [s(u(0), 1), s(u(1, 3), 1)],
@@ -172,8 +300,21 @@ export const ZADACHI_07: Zadacha14[] = [
       '$\\left[\\begin{aligned}&\\operatorname{tg} x=0,\\\\&\\operatorname{tg} x=\\sqrt{3};\\end{aligned}\\right.$ $x=\\pi k$, $x=\\dfrac{\\pi}{3}+\\pi k$.',
     ],
     podskazki: [
-      v('Чему равно $\\operatorname{ctg}^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?', ['$\\operatorname{tg}^2 x$', '$\\operatorname{ctg}^2 x$', '$-\\operatorname{tg}^2 x$'], 0),
-      v('Что делать с $\\operatorname{tg} x$?', ['Вынести за скобки', 'Сократить на него', 'Заменить на $\\dfrac{1}{\\operatorname{ctg} x}$'], 0, 'Сократив, потеряем серию $x=\\pi k$.'),
+      v(
+        'Чему равно $\\operatorname{ctg}^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['$\\operatorname{tg}^2 x$', '$\\operatorname{ctg}^2 x$', '$-\\operatorname{tg}^2 x$'],
+        0,
+      ),
+      v(
+        'Что делать с $\\operatorname{tg} x$?',
+        [
+          'Вынести за скобки',
+          'Сократить на него',
+          'Заменить на $\\dfrac{1}{\\operatorname{ctg} x}$',
+        ],
+        0,
+        'Сократив, потеряем серию $x=\\pi k$.',
+      ),
       v('Входит ли $x=0$ в ответ пункта б?', ['Нет, правый конец $0$ не входит', 'Да'], 0),
     ],
   }),
@@ -192,9 +333,23 @@ export const ZADACHI_07: Zadacha14[] = [
       '$\\left[\\begin{aligned}&\\cos x=0,\\\\&\\cos x=-1;\\end{aligned}\\right.$ $x=\\dfrac{\\pi}{2}+\\pi k$, $x=\\pi+2\\pi k$.',
     ],
     podskazki: [
-      v('Как упростить уравнение?', ['$\\cos^2 x=-\\cos x$', '$\\cos^2 x=\\cos x$', '$-\\cos^2 x=-\\cos x$'], 0, 'Справа знак не пропадает.'),
-      v('Разложение:', ['$\\cos x\\,(\\cos x+1)=0$', '$\\cos x\\,(\\cos x-1)=0$', '$\\cos x+1=0$'], 0),
-      v('Сколько корней на $\\left[-\\dfrac{5\\pi}{2};\\,-\\pi\\right]$?', ['Три', 'Два', 'Четыре'], 0, '$-\\dfrac{5\\pi}{2}$, $-\\dfrac{3\\pi}{2}$, $-\\pi$.'),
+      v(
+        'Как упростить уравнение?',
+        ['$\\cos^2 x=-\\cos x$', '$\\cos^2 x=\\cos x$', '$-\\cos^2 x=-\\cos x$'],
+        0,
+        'Справа знак не пропадает.',
+      ),
+      v(
+        'Разложение:',
+        ['$\\cos x\\,(\\cos x+1)=0$', '$\\cos x\\,(\\cos x-1)=0$', '$\\cos x+1=0$'],
+        0,
+      ),
+      v(
+        'Сколько корней на $\\left[-\\dfrac{5\\pi}{2};\\,-\\pi\\right]$?',
+        ['Три', 'Два', 'Четыре'],
+        0,
+        '$-\\dfrac{5\\pi}{2}$, $-\\dfrac{3\\pi}{2}$, $-\\pi$.',
+      ),
     ],
   }),
   ur({
@@ -213,10 +368,31 @@ export const ZADACHI_07: Zadacha14[] = [
       '$\\sin x=\\dfrac{1}{2}$: $x=\\dfrac{\\pi}{6}+2\\pi k$, $x=\\dfrac{5\\pi}{6}+2\\pi k$.',
     ],
     podskazki: [
-      v('Чему равно $\\sin^2\\left(\\dfrac{3\\pi}{2}-x\\right)$?', ['$\\cos^2 x$', '$-\\cos^2 x$', '$\\sin^2 x$'], 0),
-      v('Какое квадратное уравнение получится для $t=\\sin x$?', ['$2t^2+3t-2=0$', '$2t^2-3t-2=0$', '$2t^2+3t+2=0$'], 0),
-      v('Решения $\\sin x=\\dfrac{1}{2}$:', ['$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$', '$\\pm\\dfrac{\\pi}{6}+2\\pi k$', '$\\pm\\dfrac{\\pi}{3}+2\\pi k$'], 0),
-      v('Сколько корней на $\\left[-4\\pi;\\,-\\dfrac{3\\pi}{2}\\right]$?', ['Три', 'Два', 'Четыре'], 0, '$-\\dfrac{23\\pi}{6}$, $-\\dfrac{19\\pi}{6}$, $-\\dfrac{11\\pi}{6}$.'),
+      v(
+        'Чему равно $\\sin^2\\left(\\dfrac{3\\pi}{2}-x\\right)$?',
+        ['$\\cos^2 x$', '$-\\cos^2 x$', '$\\sin^2 x$'],
+        0,
+      ),
+      v(
+        'Какое квадратное уравнение получится для $t=\\sin x$?',
+        ['$2t^2+3t-2=0$', '$2t^2-3t-2=0$', '$2t^2+3t+2=0$'],
+        0,
+      ),
+      v(
+        'Решения $\\sin x=\\dfrac{1}{2}$:',
+        [
+          '$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Сколько корней на $\\left[-4\\pi;\\,-\\dfrac{3\\pi}{2}\\right]$?',
+        ['Три', 'Два', 'Четыре'],
+        0,
+        '$-\\dfrac{23\\pi}{6}$, $-\\dfrac{19\\pi}{6}$, $-\\dfrac{11\\pi}{6}$.',
+      ),
     ],
   }),
 ];

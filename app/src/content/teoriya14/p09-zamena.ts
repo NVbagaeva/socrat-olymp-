@@ -53,7 +53,8 @@ export const PUNKT_9: Punkt14 = {
           'Замена $t=\\sin x$, $|t|\\le1$: $2t^2-3t+1=0$, $D=9-8=1$, $t=\\dfrac{3\\pm1}{4}$: $t=1$ или $t=\\dfrac{1}{2}$ — оба подходят.',
           '$\\left[\\begin{aligned}&\\sin x=1,\\\\&\\sin x=\\dfrac{1}{2}\\end{aligned}\\right.\\ \\Leftrightarrow\\ \\left[\\begin{aligned}&x=\\dfrac{\\pi}{2}+2\\pi k,\\\\&x=\\dfrac{\\pi}{6}+2\\pi k,\\\\&x=\\dfrac{5\\pi}{6}+2\\pi k,\\end{aligned}\\right.$ $k\\in\\mathbb{Z}$.',
         ],
-        otvet: '$x=\\dfrac{\\pi}{2}+2\\pi k$, $x=\\dfrac{\\pi}{6}+2\\pi k$, $x=\\dfrac{5\\pi}{6}+2\\pi k$, $k\\in\\mathbb{Z}$.',
+        otvet:
+          '$x=\\dfrac{\\pi}{2}+2\\pi k$, $x=\\dfrac{\\pi}{6}+2\\pi k$, $x=\\dfrac{5\\pi}{6}+2\\pi k$, $k\\in\\mathbb{Z}$.',
       },
     },
     {
@@ -81,7 +82,8 @@ export const PUNKT_9: Punkt14 = {
           'Умножаем на $t\\ne0$ — переход равносилен именно благодаря этому условию: $\\begin{cases}t^2+t-2=0,\\\\t\\ne0\\end{cases}\\ \\Leftrightarrow\\ \\left[\\begin{aligned}&t=1,\\\\&t=-2.\\end{aligned}\\right.$',
           '$\\operatorname{tg}x=1\\ \\Leftrightarrow\\ x=\\dfrac{\\pi}{4}+\\pi k$; $\\operatorname{tg}x=-2\\ \\Leftrightarrow\\ x=-\\operatorname{arctg}2+\\pi k$, $k\\in\\mathbb{Z}$. Значение $-2$ не табличное, но для тангенса годится любое число.',
         ],
-        otvet: '$x=\\dfrac{\\pi}{4}+\\pi k$, $x=-\\operatorname{arctg}2+\\pi k$, $k\\in\\mathbb{Z}$.',
+        otvet:
+          '$x=\\dfrac{\\pi}{4}+\\pi k$, $x=-\\operatorname{arctg}2+\\pi k$, $k\\in\\mathbb{Z}$.',
       },
     },
   ],

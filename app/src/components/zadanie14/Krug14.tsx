@@ -1,3 +1,4 @@
+import { Tex } from '@/components/ui/Tex';
 import { krugHtml, krugiHtml, krugiOtbora, krugSerii } from '@/lib/zadanie14/krugHtml';
 import type { KrugSpec } from '@/lib/zadanie14/krug';
 import type { Risunok14 } from '@/lib/zadanie14/teoriyaTipy';
@@ -21,7 +22,12 @@ export function Krugi14({ specs, className }: { specs: KrugSpec[]; className?: s
 
 /** Рисунок теории или разбора по описанию. */
 export function Risunok14View({ r }: { r: Risunok14 }) {
-  const podpis = 'podpis' in r && r.podpis ? <figcaption className="z14-ris__podpis">{r.podpis}</figcaption> : null;
+  const podpis =
+    'podpis' in r && r.podpis ? (
+      <figcaption className="z14-ris__podpis">
+        <Tex text={r.podpis} />
+      </figcaption>
+    ) : null;
   let telo: React.ReactNode;
   switch (r.vid) {
     case 'krug':

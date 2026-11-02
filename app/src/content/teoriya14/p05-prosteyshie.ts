@@ -17,7 +17,12 @@ export const PUNKT_5: Punkt14 = {
     },
     {
       vid: 'risunok',
-      risunok: { vid: 'sechenie', funkciya: 'sin', podpis: 'Выбери значение $a$: прямая $y=a$ отсекает на окружности точки — корни уравнения $\\sin x=a$.' },
+      risunok: {
+        vid: 'sechenie',
+        funkciya: 'sin',
+        podpis:
+          'Выбери значение $a$: прямая $y=a$ отсекает на окружности точки — корни уравнения $\\sin x=a$.',
+      },
     },
     {
       vid: 'ramka',
@@ -40,7 +45,8 @@ export const PUNKT_5: Punkt14 = {
             ],
           },
         },
-        otvet: '$x=-\\dfrac{\\pi}{4}+2\\pi k$, $x=\\dfrac{5\\pi}{4}+2\\pi k$, $k\\in\\mathbb{Z}$; во втором уравнении корней нет.',
+        otvet:
+          '$x=-\\dfrac{\\pi}{4}+2\\pi k$, $x=\\dfrac{5\\pi}{4}+2\\pi k$, $k\\in\\mathbb{Z}$; во втором уравнении корней нет.',
       },
     },
     {
@@ -48,7 +54,8 @@ export const PUNKT_5: Punkt14 = {
       ton: 'vazhno',
       text: 'В учебниках две серии синуса часто склеивают в одну: $x=(-1)^k\\arcsin a+\\pi k$, $k\\in\\mathbb{Z}$. Это **равносильная** запись — она даёт ровно те же корни. Но для отбора корней удобнее две отдельные серии, поэтому в решениях мы пишем их.',
       primer: {
-        uslovie: 'Проверим, что $x=(-1)^k\\dfrac{\\pi}{6}+\\pi k$ — это решения уравнения $\\sin x=\\dfrac{1}{2}$.',
+        uslovie:
+          'Проверим, что $x=(-1)^k\\dfrac{\\pi}{6}+\\pi k$ — это решения уравнения $\\sin x=\\dfrac{1}{2}$.',
         shagi: [
           'Чётное $k=2n$, $n\\in\\mathbb{Z}$: $(-1)^{2n}=1$, получаем $x=\\dfrac{\\pi}{6}+2\\pi n$ — первая серия.',
           'Нечётное $k=2n+1$: $(-1)^{2n+1}=-1$, получаем $x=-\\dfrac{\\pi}{6}+\\pi+2\\pi n=\\dfrac{5\\pi}{6}+2\\pi n$ — вторая серия.',
@@ -63,7 +70,12 @@ export const PUNKT_5: Punkt14 = {
     },
     {
       vid: 'risunok',
-      risunok: { vid: 'sechenie', funkciya: 'cos', podpis: 'Прямая $x=a$ отсекает на окружности две точки, симметричные относительно оси косинусов.' },
+      risunok: {
+        vid: 'sechenie',
+        funkciya: 'cos',
+        podpis:
+          'Прямая $x=a$ отсекает на окружности две точки, симметричные относительно оси косинусов.',
+      },
     },
     {
       vid: 'primer',

@@ -57,7 +57,7 @@ export function sdvig(a: Ugol, t: Q): Ugol {
 export function protiv(a: Ugol): Ugol {
   return {
     pi: q(-a.pi.n, a.pi.m),
-    ...(a.arc === undefined ? {} : { arc: { ...a.arc, znak: (-a.arc.znak) as 1 | -1 } }),
+    ...(a.arc === undefined ? {} : { arc: { ...a.arc, znak: -a.arc.znak as 1 | -1 } }),
   };
 }
 

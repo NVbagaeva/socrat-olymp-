@@ -7,13 +7,19 @@
 import { PI, cos, otrezok, s, sin, sqrt, u, ur, v } from '../dsl';
 import type { Zadacha14 } from '../tipy';
 
-const SVERTKA = ['$\\sin(\\alpha+\\beta)$', '$\\cos(\\alpha-\\beta)$', '$\\cos(\\alpha+\\beta)$', '$\\sin(\\alpha-\\beta)$'];
+const SVERTKA = [
+  '$\\sin(\\alpha+\\beta)$',
+  '$\\cos(\\alpha-\\beta)$',
+  '$\\cos(\\alpha+\\beta)$',
+  '$\\sin(\\alpha-\\beta)$',
+];
 
 export const ZADACHI_09: Zadacha14[] = [
   ur({
     id: 'z09-01',
     iz: 'авторская',
-    uravnenie: '\\sin\\left(\\dfrac{\\pi}{6}-x\\right)-\\cos\\left(\\dfrac{\\pi}{3}-x\\right)=\\sqrt{3}',
+    uravnenie:
+      '\\sin\\left(\\dfrac{\\pi}{6}-x\\right)-\\cos\\left(\\dfrac{\\pi}{3}-x\\right)=\\sqrt{3}',
     f: (x) => sin(PI / 6 - x) - cos(PI / 3 - x) - sqrt(3),
     serii: [s(u(-1, 2))],
     promezhutok: otrezok(u(-3), u(0)),
@@ -28,10 +34,36 @@ export const ZADACHI_09: Zadacha14[] = [
       'Синус равен $-1$ в одной точке окружности — нижней, $-\\dfrac{\\pi}{2}$. Она повторяется через полный оборот: $x=-\\dfrac{\\pi}{2}+2\\pi k,\\ k\\in\\mathbb{Z}$.',
     ],
     podskazki: [
-      v('Чему равно $\\sin\\left(\\dfrac{\\pi}{6}-x\\right)$?', ['$\\dfrac{1}{2}\\cos x-\\dfrac{\\sqrt{3}}{2}\\sin x$', '$\\dfrac{1}{2}\\cos x+\\dfrac{\\sqrt{3}}{2}\\sin x$', '$\\dfrac{\\sqrt{3}}{2}\\cos x-\\dfrac{1}{2}\\sin x$'], 0),
-      v('Чему равно $\\cos\\left(\\dfrac{\\pi}{3}-x\\right)$?', ['$\\dfrac{1}{2}\\cos x+\\dfrac{\\sqrt{3}}{2}\\sin x$', '$\\dfrac{1}{2}\\cos x-\\dfrac{\\sqrt{3}}{2}\\sin x$', '$\\dfrac{\\sqrt{3}}{2}\\cos x+\\dfrac{1}{2}\\sin x$'], 0, 'В косинусе разности — знак «плюс».'),
-      v('Что остаётся после вычитания скобок?', ['$-\\sqrt{3}\\sin x=\\sqrt{3}$', '$\\cos x=\\sqrt{3}$', '$0=\\sqrt{3}$'], 0, 'Минус перед второй скобкой меняет знак у обоих её слагаемых.'),
-      v('Решения $\\sin x=-1$:', ['$x=-\\dfrac{\\pi}{2}+2\\pi k$', '$x=-\\dfrac{\\pi}{2}+\\pi k$', '$x=\\pi+2\\pi k$'], 0),
+      v(
+        'Чему равно $\\sin\\left(\\dfrac{\\pi}{6}-x\\right)$?',
+        [
+          '$\\dfrac{1}{2}\\cos x-\\dfrac{\\sqrt{3}}{2}\\sin x$',
+          '$\\dfrac{1}{2}\\cos x+\\dfrac{\\sqrt{3}}{2}\\sin x$',
+          '$\\dfrac{\\sqrt{3}}{2}\\cos x-\\dfrac{1}{2}\\sin x$',
+        ],
+        0,
+      ),
+      v(
+        'Чему равно $\\cos\\left(\\dfrac{\\pi}{3}-x\\right)$?',
+        [
+          '$\\dfrac{1}{2}\\cos x+\\dfrac{\\sqrt{3}}{2}\\sin x$',
+          '$\\dfrac{1}{2}\\cos x-\\dfrac{\\sqrt{3}}{2}\\sin x$',
+          '$\\dfrac{\\sqrt{3}}{2}\\cos x+\\dfrac{1}{2}\\sin x$',
+        ],
+        0,
+        'В косинусе разности — знак «плюс».',
+      ),
+      v(
+        'Что остаётся после вычитания скобок?',
+        ['$-\\sqrt{3}\\sin x=\\sqrt{3}$', '$\\cos x=\\sqrt{3}$', '$0=\\sqrt{3}$'],
+        0,
+        'Минус перед второй скобкой меняет знак у обоих её слагаемых.',
+      ),
+      v(
+        'Решения $\\sin x=-1$:',
+        ['$x=-\\dfrac{\\pi}{2}+2\\pi k$', '$x=-\\dfrac{\\pi}{2}+\\pi k$', '$x=\\pi+2\\pi k$'],
+        0,
+      ),
     ],
   }),
   ur({
@@ -51,7 +83,16 @@ export const ZADACHI_09: Zadacha14[] = [
     podskazki: [
       v('Какую формулу «сворачиваем» в левой части?', SVERTKA, 0),
       v('Левая часть равна', ['$\\sin 5x$', '$\\cos 5x$', '$\\sin x$'], 0),
-      v('Решения $\\operatorname{tg}5x=1$:', ['$x=\\dfrac{\\pi}{20}+\\dfrac{\\pi k}{5}$', '$x=\\dfrac{\\pi}{20}+\\pi k$', '$x=\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{5}$'], 0, 'Период $\\pi$ тоже делится на $5$.'),
+      v(
+        'Решения $\\operatorname{tg}5x=1$:',
+        [
+          '$x=\\dfrac{\\pi}{20}+\\dfrac{\\pi k}{5}$',
+          '$x=\\dfrac{\\pi}{20}+\\pi k$',
+          '$x=\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{5}$',
+        ],
+        0,
+        'Период $\\pi$ тоже делится на $5$.',
+      ),
     ],
   }),
   ur({
@@ -70,15 +111,29 @@ export const ZADACHI_09: Zadacha14[] = [
     ],
     podskazki: [
       v('Какую формулу «сворачиваем» в левой части?', SVERTKA, 2),
-      v('Почему можно делить на $\\cos 4x$?', ['Иначе и $\\sin 4x=0$, а так не бывает', 'Косинус никогда не равен нулю', 'Делить нельзя'], 0),
-      v('Решения $\\operatorname{tg}4x=1$:', ['$x=\\dfrac{\\pi}{16}+\\dfrac{\\pi k}{4}$', '$x=\\dfrac{\\pi}{16}+\\pi k$', '$x=\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{4}$'], 0),
+      v(
+        'Почему можно делить на $\\cos 4x$?',
+        ['Иначе и $\\sin 4x=0$, а так не бывает', 'Косинус никогда не равен нулю', 'Делить нельзя'],
+        0,
+      ),
+      v(
+        'Решения $\\operatorname{tg}4x=1$:',
+        [
+          '$x=\\dfrac{\\pi}{16}+\\dfrac{\\pi k}{4}$',
+          '$x=\\dfrac{\\pi}{16}+\\pi k$',
+          '$x=\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{4}$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
     id: 'z09-04',
     iz: 'сторонний задачник',
-    uravnenie: '\\sin\\dfrac{5x}{2}\\sin\\dfrac{3x}{2}+\\cos\\dfrac{5x}{2}\\cos\\dfrac{3x}{2}=2\\cos^2 x',
-    f: (x) => sin((5 * x) / 2) * sin((3 * x) / 2) + cos((5 * x) / 2) * cos((3 * x) / 2) - 2 * cos(x) ** 2,
+    uravnenie:
+      '\\sin\\dfrac{5x}{2}\\sin\\dfrac{3x}{2}+\\cos\\dfrac{5x}{2}\\cos\\dfrac{3x}{2}=2\\cos^2 x',
+    f: (x) =>
+      sin((5 * x) / 2) * sin((3 * x) / 2) + cos((5 * x) / 2) * cos((3 * x) / 2) - 2 * cos(x) ** 2,
     serii: [s(u(1, 2), 1), s(u(1, 3)), s(u(-1, 3))],
     promezhutok: otrezok(u(-2), u(-1, 2)),
     otbor: 'krug',
@@ -90,14 +145,27 @@ export const ZADACHI_09: Zadacha14[] = [
     ],
     podskazki: [
       v('Какую формулу «сворачиваем» в левой части?', SVERTKA, 1),
-      v('Можно ли разделить $\\cos x=2\\cos^2x$ на $\\cos x$?', ['Нет: потеряем корни $\\cos x=0$, выносим множитель', 'Да, это равносильный переход'], 0),
-      v('Решения $\\cos x=\\dfrac{1}{2}$:', ['$x=\\pm\\dfrac{\\pi}{3}+2\\pi k$', '$x=\\pm\\dfrac{\\pi}{6}+2\\pi k$', '$x=\\dfrac{\\pi}{3}+\\pi k$'], 0),
+      v(
+        'Можно ли разделить $\\cos x=2\\cos^2x$ на $\\cos x$?',
+        ['Нет: потеряем корни $\\cos x=0$, выносим множитель', 'Да, это равносильный переход'],
+        0,
+      ),
+      v(
+        'Решения $\\cos x=\\dfrac{1}{2}$:',
+        [
+          '$x=\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$x=\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$x=\\dfrac{\\pi}{3}+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
     id: 'z09-05',
     iz: 'авторская',
-    uravnenie: '\\sin\\left(x+\\dfrac{\\pi}{3}\\right)+\\sin\\left(x-\\dfrac{\\pi}{3}\\right)=\\dfrac{\\sqrt{2}}{2}',
+    uravnenie:
+      '\\sin\\left(x+\\dfrac{\\pi}{3}\\right)+\\sin\\left(x-\\dfrac{\\pi}{3}\\right)=\\dfrac{\\sqrt{2}}{2}',
     f: (x) => sin(x + PI / 3) + sin(x - PI / 3) - sqrt(2) / 2,
     serii: [s(u(1, 4)), s(u(3, 4))],
     promezhutok: otrezok(u(-2), u(-1, 2)),
@@ -109,8 +177,21 @@ export const ZADACHI_09: Zadacha14[] = [
       '$x=\\dfrac{\\pi}{4}+2\\pi k$ или $x=\\dfrac{3\\pi}{4}+2\\pi k$.',
     ],
     podskazki: [
-      v('Чему равна левая часть после раскрытия скобок?', ['$\\sin x$', '$\\sqrt{3}\\cos x$', '$2\\sin x$'], 0, '$2\\sin x\\cos\\dfrac{\\pi}{3}=2\\cdot\\dfrac{1}{2}\\sin x$.'),
-      v('Решения $\\sin x=\\dfrac{\\sqrt{2}}{2}$:', ['$\\dfrac{\\pi}{4}+2\\pi k$ и $\\dfrac{3\\pi}{4}+2\\pi k$', '$\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$\\dfrac{\\pi}{4}+\\pi k$'], 0),
+      v(
+        'Чему равна левая часть после раскрытия скобок?',
+        ['$\\sin x$', '$\\sqrt{3}\\cos x$', '$2\\sin x$'],
+        0,
+        '$2\\sin x\\cos\\dfrac{\\pi}{3}=2\\cdot\\dfrac{1}{2}\\sin x$.',
+      ),
+      v(
+        'Решения $\\sin x=\\dfrac{\\sqrt{2}}{2}$:',
+        [
+          '$\\dfrac{\\pi}{4}+2\\pi k$ и $\\dfrac{3\\pi}{4}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+          '$\\dfrac{\\pi}{4}+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -130,7 +211,15 @@ export const ZADACHI_09: Zadacha14[] = [
     podskazki: [
       v('Сумма скобок равна', ['$\\sqrt{2}\\cos x$', '$\\sqrt{2}\\sin x$', '$\\cos x$'], 0),
       v('Чему равен $\\cos x$?', ['$\\dfrac{\\sqrt{2}}{2}$', '$\\sqrt{2}$', '$\\dfrac{1}{2}$'], 0),
-      v('Решения:', ['$x=\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$x=\\dfrac{\\pi}{4}+\\pi k$', '$x=\\pm\\dfrac{3\\pi}{4}+2\\pi k$'], 0),
+      v(
+        'Решения:',
+        [
+          '$x=\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+          '$x=\\dfrac{\\pi}{4}+\\pi k$',
+          '$x=\\pm\\dfrac{3\\pi}{4}+2\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -148,9 +237,22 @@ export const ZADACHI_09: Zadacha14[] = [
       '$\\cos x=1$: $x=2\\pi k$; $\\cos x=-\\dfrac{1}{2}$: $x=\\pm\\dfrac{2\\pi}{3}+2\\pi k$.',
     ],
     podskazki: [
-      v('Что остаётся в левой части после раскрытия скобки?', ['$\\cos x$', '$\\cos x+2\\sqrt{3}\\sin x$', '$\\sqrt{3}\\cos x$'], 0),
-      v('Как записать $\\cos 2x$?', ['$2\\cos^2x-1$', '$1-2\\sin^2x$', '$2\\cos x-1$'], 0, 'Слева только косинус — выражаем через косинус и правую часть.'),
-      v('Корни $2t^2-t-1=0$:', ['$1$ и $-\\dfrac{1}{2}$', '$-1$ и $\\dfrac{1}{2}$', '$2$ и $-1$'], 0),
+      v(
+        'Что остаётся в левой части после раскрытия скобки?',
+        ['$\\cos x$', '$\\cos x+2\\sqrt{3}\\sin x$', '$\\sqrt{3}\\cos x$'],
+        0,
+      ),
+      v(
+        'Как записать $\\cos 2x$?',
+        ['$2\\cos^2x-1$', '$1-2\\sin^2x$', '$2\\cos x-1$'],
+        0,
+        'Слева только косинус — выражаем через косинус и правую часть.',
+      ),
+      v(
+        'Корни $2t^2-t-1=0$:',
+        ['$1$ и $-\\dfrac{1}{2}$', '$-1$ и $\\dfrac{1}{2}$', '$2$ и $-1$'],
+        0,
+      ),
     ],
   }),
   ur({
@@ -169,8 +271,17 @@ export const ZADACHI_09: Zadacha14[] = [
     ],
     podskazki: [
       v('Какую формулу «сворачиваем» в левой части?', SVERTKA, 3),
-      v('После формулы двойного угла:', ['$\\cos x(2\\sin x-1)=0$', '$2\\sin x=1$', '$\\sin x(2\\cos x-1)=0$'], 0, 'Сокращать на $\\cos x$ нельзя — выносим за скобку.'),
-      v('Решения $\\cos x=0$:', ['$x=\\dfrac{\\pi}{2}+\\pi k$', '$x=\\dfrac{\\pi}{2}+2\\pi k$', '$x=\\pi k$'], 0),
+      v(
+        'После формулы двойного угла:',
+        ['$\\cos x(2\\sin x-1)=0$', '$2\\sin x=1$', '$\\sin x(2\\cos x-1)=0$'],
+        0,
+        'Сокращать на $\\cos x$ нельзя — выносим за скобку.',
+      ),
+      v(
+        'Решения $\\cos x=0$:',
+        ['$x=\\dfrac{\\pi}{2}+\\pi k$', '$x=\\dfrac{\\pi}{2}+2\\pi k$', '$x=\\pi k$'],
+        0,
+      ),
     ],
   }),
   ur({
@@ -189,7 +300,16 @@ export const ZADACHI_09: Zadacha14[] = [
     podskazki: [
       v('Какую формулу «сворачиваем» в левой части?', SVERTKA, 1),
       v('Левая часть равна', ['$\\cos 2x$', '$\\cos 8x$', '$\\sin 2x$'], 0),
-      v('Решения $\\cos 2x=\\dfrac{\\sqrt{2}}{2}$:', ['$x=\\pm\\dfrac{\\pi}{8}+\\pi k$', '$x=\\pm\\dfrac{\\pi}{8}+2\\pi k$', '$x=\\pm\\dfrac{\\pi}{4}+\\pi k$'], 0, 'Делим на $2$ и угол, и период.'),
+      v(
+        'Решения $\\cos 2x=\\dfrac{\\sqrt{2}}{2}$:',
+        [
+          '$x=\\pm\\dfrac{\\pi}{8}+\\pi k$',
+          '$x=\\pm\\dfrac{\\pi}{8}+2\\pi k$',
+          '$x=\\pm\\dfrac{\\pi}{4}+\\pi k$',
+        ],
+        0,
+        'Делим на $2$ и угол, и период.',
+      ),
     ],
   }),
   ur({
@@ -207,8 +327,17 @@ export const ZADACHI_09: Zadacha14[] = [
       '$\\sin x=0$: $x=\\pi k$; $\\sin x=\\dfrac{1}{2}$: $x=\\dfrac{\\pi}{6}+2\\pi k$ или $x=\\dfrac{5\\pi}{6}+2\\pi k$.',
     ],
     podskazki: [
-      v('Чему равно $\\sqrt{2}\\sin\\left(x-\\dfrac{\\pi}{4}\\right)$?', ['$\\sin x-\\cos x$', '$\\sin x+\\cos x$', '$\\cos x-\\sin x$'], 0),
-      v('Что делаем с $\\sin x=2\\sin^2x$?', ['Выносим $\\sin x$ за скобку', 'Делим на $\\sin x$', 'Делаем замену $t=\\cos x$'], 0, 'При делении потерялись бы корни $\\sin x=0$.'),
+      v(
+        'Чему равно $\\sqrt{2}\\sin\\left(x-\\dfrac{\\pi}{4}\\right)$?',
+        ['$\\sin x-\\cos x$', '$\\sin x+\\cos x$', '$\\cos x-\\sin x$'],
+        0,
+      ),
+      v(
+        'Что делаем с $\\sin x=2\\sin^2x$?',
+        ['Выносим $\\sin x$ за скобку', 'Делим на $\\sin x$', 'Делаем замену $t=\\cos x$'],
+        0,
+        'При делении потерялись бы корни $\\sin x=0$.',
+      ),
       v('Решения $\\sin x=0$:', ['$x=\\pi k$', '$x=2\\pi k$', '$x=\\dfrac{\\pi}{2}+\\pi k$'], 0),
     ],
   }),

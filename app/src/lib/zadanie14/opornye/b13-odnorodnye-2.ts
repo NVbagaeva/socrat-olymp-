@@ -37,9 +37,25 @@ export const ZADACHI_13: Zadacha14[] = [
     podskazki: [
       v('На что делим обе части?', ['$\\cos^2x$', '$\\cos x$', '$\\sin x\\cos x$'], 0),
       v('Почему $\\cos x\\ne0$?', POCHEMU, 0),
-      v('Уравнение после деления:', ['$\\operatorname{tg}^2x+2\\operatorname{tg}x-3=0$', '$\\operatorname{tg}^2x+2\\operatorname{tg}x=0$', '$2\\operatorname{tg}x-3=0$'], 0),
+      v(
+        'Уравнение после деления:',
+        [
+          '$\\operatorname{tg}^2x+2\\operatorname{tg}x-3=0$',
+          '$\\operatorname{tg}^2x+2\\operatorname{tg}x=0$',
+          '$2\\operatorname{tg}x-3=0$',
+        ],
+        0,
+      ),
       v('Корни $t^2+2t-3=0$:', ['$1$ и $-3$', '$-1$ и $3$', '$1$ и $3$'], 0),
-      v('Решения $\\operatorname{tg}x=-3$:', ['$x=-\\operatorname{arctg}3+\\pi k$', '$x=-\\operatorname{arctg}3+2\\pi k$', '$x=\\pm\\operatorname{arctg}3+\\pi k$'], 0),
+      v(
+        'Решения $\\operatorname{tg}x=-3$:',
+        [
+          '$x=-\\operatorname{arctg}3+\\pi k$',
+          '$x=-\\operatorname{arctg}3+2\\pi k$',
+          '$x=\\pm\\operatorname{arctg}3+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -58,9 +74,26 @@ export const ZADACHI_13: Zadacha14[] = [
       '$x=-\\dfrac{\\pi}{4}+\\pi k$ или $x=\\operatorname{arctg}\\dfrac{2}{7}+\\pi k$.',
     ],
     podskazki: [
-      v('Что делаем с числом $3$ справа?', ['$3=3(\\sin^2x+\\cos^2x)$', 'Делим всё на $3$', 'Переносим влево и делим на $\\cos^2x$'], 0, 'Иначе после деления на $\\cos^2x$ останется $\\dfrac{3}{\\cos^2x}$.'),
-      v('Однородное уравнение после переноса:', ['$7\\sin^2x+5\\sin x\\cos x-2\\cos^2x=0$', '$7\\sin^2x+5\\sin x\\cos x+\\cos^2x=0$', '$10\\sin^2x+5\\sin x\\cos x-2\\cos^2x=0$'], 0),
-      v('Корни $7t^2+5t-2=0$:', ['$\\dfrac{2}{7}$ и $-1$', '$-\\dfrac{2}{7}$ и $1$', '$\\dfrac{1}{7}$ и $-2$'], 0),
+      v(
+        'Что делаем с числом $3$ справа?',
+        ['$3=3(\\sin^2x+\\cos^2x)$', 'Делим всё на $3$', 'Переносим влево и делим на $\\cos^2x$'],
+        0,
+        'Иначе после деления на $\\cos^2x$ останется $\\dfrac{3}{\\cos^2x}$.',
+      ),
+      v(
+        'Однородное уравнение после переноса:',
+        [
+          '$7\\sin^2x+5\\sin x\\cos x-2\\cos^2x=0$',
+          '$7\\sin^2x+5\\sin x\\cos x+\\cos^2x=0$',
+          '$10\\sin^2x+5\\sin x\\cos x-2\\cos^2x=0$',
+        ],
+        0,
+      ),
+      v(
+        'Корни $7t^2+5t-2=0$:',
+        ['$\\dfrac{2}{7}$ и $-1$', '$-\\dfrac{2}{7}$ и $1$', '$\\dfrac{1}{7}$ и $-2$'],
+        0,
+      ),
     ],
   }),
   ur({
@@ -78,9 +111,21 @@ export const ZADACHI_13: Zadacha14[] = [
       '$\\sin x-\\sqrt{3}\\cos x=0$ — однородное первой степени. Если $\\cos x=0$, то и $\\sin x=0$ — противоречие с $\\sin^2x+\\cos^2x=1$; делим на $\\cos x\\ne0$: $\\operatorname{tg}x=\\sqrt{3}$, $x=\\dfrac{\\pi}{3}+\\pi k$.',
     ],
     podskazki: [
-      v('Что делаем первым шагом?', ['Выносим $\\sin x$ за скобку', 'Делим на $\\sin x$', 'Делим на $\\sin^2x$'], 0),
+      v(
+        'Что делаем первым шагом?',
+        ['Выносим $\\sin x$ за скобку', 'Делим на $\\sin x$', 'Делим на $\\sin^2x$'],
+        0,
+      ),
       v('Решения $\\sin x=0$:', ['$x=\\pi k$', '$x=2\\pi k$', '$x=\\dfrac{\\pi}{2}+\\pi k$'], 0),
-      v('Решения $\\sin x-\\sqrt{3}\\cos x=0$:', ['$x=\\dfrac{\\pi}{3}+\\pi k$', '$x=\\dfrac{\\pi}{6}+\\pi k$', '$x=-\\dfrac{\\pi}{3}+\\pi k$'], 0),
+      v(
+        'Решения $\\sin x-\\sqrt{3}\\cos x=0$:',
+        [
+          '$x=\\dfrac{\\pi}{3}+\\pi k$',
+          '$x=\\dfrac{\\pi}{6}+\\pi k$',
+          '$x=-\\dfrac{\\pi}{3}+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -99,9 +144,29 @@ export const ZADACHI_13: Zadacha14[] = [
       '$\\sqrt{3}\\sin x+\\cos x=0$: если $\\cos x=0$, то и $\\sin x=0$ — противоречие; делим на $\\cos x$: $\\operatorname{tg}x=-\\dfrac{\\sqrt{3}}{3}$, $x=-\\dfrac{\\pi}{6}+\\pi k$.',
     ],
     podskazki: [
-      v('Уравнение после переноса $5(\\sin^2x+\\cos^2x)$ влево:', ['$\\sqrt{3}\\sin x\\cos x+\\cos^2x=0$', '$\\sqrt{3}\\sin x\\cos x+6\\cos^2x=0$', '$\\sqrt{3}\\sin x\\cos x+\\cos^2x=5$'], 0),
-      v('Можно ли теперь делить на $\\cos^2x$?', ['Нет: $\\cos x=0$ — корни, выносим $\\cos x$', 'Да, как всегда'], 0),
-      v('Решения $\\sqrt{3}\\sin x+\\cos x=0$:', ['$x=-\\dfrac{\\pi}{6}+\\pi k$', '$x=-\\dfrac{\\pi}{3}+\\pi k$', '$x=\\dfrac{\\pi}{6}+\\pi k$'], 0),
+      v(
+        'Уравнение после переноса $5(\\sin^2x+\\cos^2x)$ влево:',
+        [
+          '$\\sqrt{3}\\sin x\\cos x+\\cos^2x=0$',
+          '$\\sqrt{3}\\sin x\\cos x+6\\cos^2x=0$',
+          '$\\sqrt{3}\\sin x\\cos x+\\cos^2x=5$',
+        ],
+        0,
+      ),
+      v(
+        'Можно ли теперь делить на $\\cos^2x$?',
+        ['Нет: $\\cos x=0$ — корни, выносим $\\cos x$', 'Да, как всегда'],
+        0,
+      ),
+      v(
+        'Решения $\\sqrt{3}\\sin x+\\cos x=0$:',
+        [
+          '$x=-\\dfrac{\\pi}{6}+\\pi k$',
+          '$x=-\\dfrac{\\pi}{3}+\\pi k$',
+          '$x=\\dfrac{\\pi}{6}+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -121,7 +186,11 @@ export const ZADACHI_13: Zadacha14[] = [
     podskazki: [
       v('Почему $\\cos x\\ne0$?', POCHEMU, 0),
       v('Корни $t^2-4t+3=0$:', ['$1$ и $3$', '$-1$ и $-3$', '$1$ и $-3$'], 0),
-      v('Решения $\\operatorname{tg}x=3$:', ['$x=\\operatorname{arctg}3+\\pi k$', '$x=\\operatorname{arctg}3+2\\pi k$', '$x=3+\\pi k$'], 0),
+      v(
+        'Решения $\\operatorname{tg}x=3$:',
+        ['$x=\\operatorname{arctg}3+\\pi k$', '$x=\\operatorname{arctg}3+2\\pi k$', '$x=3+\\pi k$'],
+        0,
+      ),
     ],
   }),
   ur({
@@ -138,9 +207,25 @@ export const ZADACHI_13: Zadacha14[] = [
       '$\\operatorname{tg}x=\\sqrt{3}$ или $\\operatorname{tg}x=-\\sqrt{3}$: $x=\\pm\\dfrac{\\pi}{3}+\\pi k$.',
     ],
     podskazki: [
-      v('Уравнение после деления на $\\cos^2x$:', ['$\\operatorname{tg}^2x=3$', '$\\operatorname{tg}x=3$', '$\\operatorname{ctg}^2x=3$'], 0),
-      v('Сколько значений у $\\operatorname{tg}x$?', ['Два: $\\pm\\sqrt{3}$', 'Одно: $\\sqrt{3}$', 'Одно: $3$'], 0),
-      v('Решения:', ['$x=\\pm\\dfrac{\\pi}{3}+\\pi k$', '$x=\\dfrac{\\pi}{3}+\\pi k$', '$x=\\pm\\dfrac{\\pi}{6}+\\pi k$'], 0),
+      v(
+        'Уравнение после деления на $\\cos^2x$:',
+        ['$\\operatorname{tg}^2x=3$', '$\\operatorname{tg}x=3$', '$\\operatorname{ctg}^2x=3$'],
+        0,
+      ),
+      v(
+        'Сколько значений у $\\operatorname{tg}x$?',
+        ['Два: $\\pm\\sqrt{3}$', 'Одно: $\\sqrt{3}$', 'Одно: $3$'],
+        0,
+      ),
+      v(
+        'Решения:',
+        [
+          '$x=\\pm\\dfrac{\\pi}{3}+\\pi k$',
+          '$x=\\dfrac{\\pi}{3}+\\pi k$',
+          '$x=\\pm\\dfrac{\\pi}{6}+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -159,8 +244,24 @@ export const ZADACHI_13: Zadacha14[] = [
     ],
     podskazki: [
       v('Чему равен $\\operatorname{tg}\\dfrac{x}{3}$?', ['$\\pm1$', '$1$', '$0$'], 0),
-      v('Объединённая серия для $\\dfrac{x}{3}$:', ['$\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{2}$', '$\\dfrac{\\pi}{4}+\\pi k$', '$\\pm\\dfrac{\\pi}{4}+2\\pi k$'], 0),
-      v('Решения:', ['$x=\\dfrac{3\\pi}{4}+\\dfrac{3\\pi k}{2}$', '$x=\\dfrac{\\pi}{12}+\\dfrac{\\pi k}{6}$', '$x=\\dfrac{3\\pi}{4}+\\dfrac{\\pi k}{2}$'], 0),
+      v(
+        'Объединённая серия для $\\dfrac{x}{3}$:',
+        [
+          '$\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{2}$',
+          '$\\dfrac{\\pi}{4}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Решения:',
+        [
+          '$x=\\dfrac{3\\pi}{4}+\\dfrac{3\\pi k}{2}$',
+          '$x=\\dfrac{\\pi}{12}+\\dfrac{\\pi k}{6}$',
+          '$x=\\dfrac{3\\pi}{4}+\\dfrac{\\pi k}{2}$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -178,15 +279,32 @@ export const ZADACHI_13: Zadacha14[] = [
       '$x=\\operatorname{arctg}3+\\pi k$ или $x=-\\dfrac{\\pi}{4}+\\pi k$.',
     ],
     podskazki: [
-      v('Однородное уравнение после переноса:', ['$\\sin^2x-2\\sin x\\cos x-3\\cos^2x=0$', '$\\sin^2x-2\\sin x\\cos x=0$', '$4\\sin^2x-2\\sin x\\cos x-3\\cos^2x=0$'], 0),
+      v(
+        'Однородное уравнение после переноса:',
+        [
+          '$\\sin^2x-2\\sin x\\cos x-3\\cos^2x=0$',
+          '$\\sin^2x-2\\sin x\\cos x=0$',
+          '$4\\sin^2x-2\\sin x\\cos x-3\\cos^2x=0$',
+        ],
+        0,
+      ),
       v('Корни $t^2-2t-3=0$:', ['$3$ и $-1$', '$-3$ и $1$', '$3$ и $1$'], 0),
-      v('Решения $\\operatorname{tg}x=-1$:', ['$x=-\\dfrac{\\pi}{4}+\\pi k$', '$x=\\dfrac{3\\pi}{4}+2\\pi k$', '$x=-\\dfrac{\\pi}{4}+2\\pi k$'], 0),
+      v(
+        'Решения $\\operatorname{tg}x=-1$:',
+        [
+          '$x=-\\dfrac{\\pi}{4}+\\pi k$',
+          '$x=\\dfrac{3\\pi}{4}+2\\pi k$',
+          '$x=-\\dfrac{\\pi}{4}+2\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
     id: 'z13-09',
     iz: 'сторонний задачник',
-    uravnenie: '3\\sin^2\\dfrac{x}{3}+4\\cos^2\\dfrac{x}{3}=3+\\sqrt{3}\\sin\\dfrac{x}{3}\\cos\\dfrac{x}{3}',
+    uravnenie:
+      '3\\sin^2\\dfrac{x}{3}+4\\cos^2\\dfrac{x}{3}=3+\\sqrt{3}\\sin\\dfrac{x}{3}\\cos\\dfrac{x}{3}',
     f: (x) => 3 * sin(x / 3) ** 2 + 4 * cos(x / 3) ** 2 - 3 - sqrt(3) * sin(x / 3) * cos(x / 3),
     serii: [s(u(3, 2), 3), s(u(1, 2), 3)],
     promezhutok: otrezok(u(1), u(4)),
@@ -199,9 +317,33 @@ export const ZADACHI_13: Zadacha14[] = [
       'Во второй скобке $\\cos\\dfrac{x}{3}\\ne0$ (иначе и синус равен нулю), делим: $\\operatorname{tg}\\dfrac{x}{3}=\\dfrac{1}{\\sqrt{3}}$, $\\dfrac{x}{3}=\\dfrac{\\pi}{6}+\\pi k$, $x=\\dfrac{\\pi}{2}+3\\pi k$.',
     ],
     podskazki: [
-      v('Что остаётся после переноса числа $3=3\\left(\\sin^2\\dfrac{x}{3}+\\cos^2\\dfrac{x}{3}\\right)$?', ['$\\cos^2\\dfrac{x}{3}-\\sqrt{3}\\sin\\dfrac{x}{3}\\cos\\dfrac{x}{3}=0$', '$4\\cos^2\\dfrac{x}{3}-\\sqrt{3}\\sin\\dfrac{x}{3}\\cos\\dfrac{x}{3}=0$', '$\\cos^2\\dfrac{x}{3}=3$'], 0),
-      v('Что делаем дальше?', ['Выносим $\\cos\\dfrac{x}{3}$', 'Делим на $\\cos^2\\dfrac{x}{3}$', 'Делим на $\\sin\\dfrac{x}{3}$'], 0),
-      v('Решения $\\cos\\dfrac{x}{3}=0$:', ['$x=\\dfrac{3\\pi}{2}+3\\pi k$', '$x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{3}$', '$x=\\dfrac{3\\pi}{2}+\\pi k$'], 0),
+      v(
+        'Что остаётся после переноса числа $3=3\\left(\\sin^2\\dfrac{x}{3}+\\cos^2\\dfrac{x}{3}\\right)$?',
+        [
+          '$\\cos^2\\dfrac{x}{3}-\\sqrt{3}\\sin\\dfrac{x}{3}\\cos\\dfrac{x}{3}=0$',
+          '$4\\cos^2\\dfrac{x}{3}-\\sqrt{3}\\sin\\dfrac{x}{3}\\cos\\dfrac{x}{3}=0$',
+          '$\\cos^2\\dfrac{x}{3}=3$',
+        ],
+        0,
+      ),
+      v(
+        'Что делаем дальше?',
+        [
+          'Выносим $\\cos\\dfrac{x}{3}$',
+          'Делим на $\\cos^2\\dfrac{x}{3}$',
+          'Делим на $\\sin\\dfrac{x}{3}$',
+        ],
+        0,
+      ),
+      v(
+        'Решения $\\cos\\dfrac{x}{3}=0$:',
+        [
+          '$x=\\dfrac{3\\pi}{2}+3\\pi k$',
+          '$x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{3}$',
+          '$x=\\dfrac{3\\pi}{2}+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -218,9 +360,29 @@ export const ZADACHI_13: Zadacha14[] = [
       '$x=\\operatorname{arctg}5+\\pi k$ или $x=-\\operatorname{arctg}\\dfrac{1}{3}+\\pi k$.',
     ],
     podskazki: [
-      v('Однородное уравнение после переноса:', ['$3\\sin^2x-14\\sin x\\cos x-5\\cos^2x=0$', '$5\\sin^2x-14\\sin x\\cos x-5\\cos^2x=0$', '$3\\sin^2x-14\\sin x\\cos x-3\\cos^2x=0$'], 0),
-      v('Корни $3t^2-14t-5=0$:', ['$5$ и $-\\dfrac{1}{3}$', '$-5$ и $\\dfrac{1}{3}$', '$3$ и $-\\dfrac{5}{3}$'], 0),
-      v('Решения $\\operatorname{tg}x=-\\dfrac{1}{3}$:', ['$x=-\\operatorname{arctg}\\dfrac{1}{3}+\\pi k$', '$x=\\operatorname{arctg}3+\\pi k$', '$x=-\\operatorname{arctg}3+\\pi k$'], 0),
+      v(
+        'Однородное уравнение после переноса:',
+        [
+          '$3\\sin^2x-14\\sin x\\cos x-5\\cos^2x=0$',
+          '$5\\sin^2x-14\\sin x\\cos x-5\\cos^2x=0$',
+          '$3\\sin^2x-14\\sin x\\cos x-3\\cos^2x=0$',
+        ],
+        0,
+      ),
+      v(
+        'Корни $3t^2-14t-5=0$:',
+        ['$5$ и $-\\dfrac{1}{3}$', '$-5$ и $\\dfrac{1}{3}$', '$3$ и $-\\dfrac{5}{3}$'],
+        0,
+      ),
+      v(
+        'Решения $\\operatorname{tg}x=-\\dfrac{1}{3}$:',
+        [
+          '$x=-\\operatorname{arctg}\\dfrac{1}{3}+\\pi k$',
+          '$x=\\operatorname{arctg}3+\\pi k$',
+          '$x=-\\operatorname{arctg}3+\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
 ];

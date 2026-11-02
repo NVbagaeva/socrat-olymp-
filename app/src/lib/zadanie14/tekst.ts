@@ -5,18 +5,14 @@
 
 import { otborKrug, otborNerav } from './otbor';
 import type { Razminka14, Uravnenie14, Zadacha14 } from './tipy';
-import {
-  korniNaPromezhutke,
-  otvetATex,
-  otvetBTex,
-  promezhutokSlovo,
-  promezhutokTex,
-} from './ugol';
+import { korniNaPromezhutke, otvetATex, otvetBTex, promezhutokSlovo, promezhutokTex } from './ugol';
 
 export function uslovieA(z: Zadacha14): string {
   if (z.vid === 'razminka') {
     const vopros =
-      z.vopros === 'min-pol' ? 'наименьший положительный корень' : 'наибольший отрицательный корень';
+      z.vopros === 'min-pol'
+        ? 'наименьший положительный корень'
+        : 'наибольший отрицательный корень';
     return `Решите уравнение $${z.uravnenie}$. В ответе напишите ${vopros}.`;
   }
   return `${z.promezhutok ? 'а) ' : ''}Решите уравнение $${z.uravnenie}$.`;

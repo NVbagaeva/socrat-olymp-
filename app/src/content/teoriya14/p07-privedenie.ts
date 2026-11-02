@@ -40,8 +40,20 @@ export const PUNKT_7: Punkt14 = {
         ['$\\cos\\left(\\dfrac{3\\pi}{2}-x\\right)$', 'меняется', 'III', '$\\cos<0$', '$-\\sin x$'],
         ['$\\sin(\\pi+x)$', 'не меняется', 'III', '$\\sin<0$', '$-\\sin x$'],
         ['$\\cos(\\pi-x)$', 'не меняется', 'II', '$\\cos<0$', '$-\\cos x$'],
-        ['$\\operatorname{tg}\\left(\\dfrac{\\pi}{2}+x\\right)$', 'меняется', 'II', '$\\operatorname{tg}<0$', '$-\\operatorname{ctg}x$'],
-        ['$\\operatorname{ctg}\\left(\\dfrac{3\\pi}{2}+x\\right)$', 'меняется', 'IV', '$\\operatorname{ctg}<0$', '$-\\operatorname{tg}x$'],
+        [
+          '$\\operatorname{tg}\\left(\\dfrac{\\pi}{2}+x\\right)$',
+          'меняется',
+          'II',
+          '$\\operatorname{tg}<0$',
+          '$-\\operatorname{ctg}x$',
+        ],
+        [
+          '$\\operatorname{ctg}\\left(\\dfrac{3\\pi}{2}+x\\right)$',
+          'меняется',
+          'IV',
+          '$\\operatorname{ctg}<0$',
+          '$-\\operatorname{tg}x$',
+        ],
         ['$\\sin(2\\pi-x)$', 'не меняется', 'IV', '$\\sin<0$', '$-\\sin x$'],
         ['$\\cos(5\\pi+2x)=\\cos(\\pi+2x)$', 'не меняется', 'III', '$\\cos<0$', '$-\\cos2x$'],
       ],
@@ -86,7 +98,8 @@ export const PUNKT_7: Punkt14 = {
       metka: 'Приведение под квадратом',
       text: 'Если выражение стоит **в квадрате** (или в любой чётной степени), знак можно не определять: квадрат его всё равно уберёт. Остаётся только решить, меняется ли функция. В нечётной степени (например, в кубе) знак сохраняется — там его нужно считать.',
       primer: {
-        uslovie: 'Упростим $\\sin^2\\left(\\dfrac{3\\pi}{2}-x\\right)$, $\\cos^2\\left(\\dfrac{\\pi}{2}+x\\right)$ и $\\operatorname{tg}^2(\\pi+x)$.',
+        uslovie:
+          'Упростим $\\sin^2\\left(\\dfrac{3\\pi}{2}-x\\right)$, $\\cos^2\\left(\\dfrac{\\pi}{2}+x\\right)$ и $\\operatorname{tg}^2(\\pi+x)$.',
         shagi: [
           '$\\sin\\left(\\dfrac{3\\pi}{2}-x\\right)=-\\cos x$, поэтому $\\sin^2\\left(\\dfrac{3\\pi}{2}-x\\right)=(-\\cos x)^2=\\cos^2x$. Знак «$-$» исчез при возведении в квадрат.',
           '$\\dfrac{\\pi}{2}$ — вертикальная ось, косинус меняется на синус: $\\cos^2\\left(\\dfrac{\\pi}{2}+x\\right)=\\sin^2x$. Знак даже не выясняем.',

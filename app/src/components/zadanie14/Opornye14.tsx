@@ -6,7 +6,13 @@ import { Callout } from '@/components/ui';
 import { Tex } from '@/components/ui/Tex';
 import { BLOKI_14 } from '@/lib/zadanie14/opornye';
 import { opornye14 } from '@/lib/zadanie14/progress';
-import { PUSTOY_VVOD, proverit14, verno14, type Itog14, type Vvod14 } from '@/lib/zadanie14/proverkaZadachi';
+import {
+  PUSTOY_VVOD,
+  proverit14,
+  verno14,
+  type Itog14,
+  type Vvod14,
+} from '@/lib/zadanie14/proverkaZadachi';
 import { Otvet14 } from './Otvet14';
 import { Podskazki14 } from './Podskazki14';
 import { Reshenie14 } from './Reshenie14';
@@ -77,7 +83,9 @@ export function Opornye14({ slug }: { slug: string }) {
         })}
       </ol>
       <article className="z14-zadacha flow">
-        <p className="z14-zadacha__metka">{razbor ? 'Разбор' : `Задача ${i + 1} из ${blok.zadachi.length}`}</p>
+        <p className="z14-zadacha__metka">
+          {razbor ? 'Разбор' : `Задача ${i + 1} из ${blok.zadachi.length}`}
+        </p>
         <Uslovie14 z={z} />
         {razbor ? (
           <Reshenie14 z={z} />
@@ -104,7 +112,11 @@ export function Opornye14({ slug }: { slug: string }) {
             />
             <div className="z14-zadacha__dop">
               {s.otkryto === 0 ? (
-                <button type="button" className="btn btn--secondary" onClick={() => obnovit({ otkryto: 1 })}>
+                <button
+                  type="button"
+                  className="btn btn--secondary"
+                  onClick={() => obnovit({ otkryto: 1 })}
+                >
                   Подсказка
                 </button>
               ) : null}

@@ -60,7 +60,7 @@ export function OZadanii14({ base }: { base: string }) {
         <p>{T.tipyLead}</p>
         <ul className="z14-tipy">
           {TIPY_14.map((t) => (
-            <li key={t.id} className={`z14-tip${t.gotovo ? '' : ' z14-tip--skoro'}`}>
+            <li key={t.id} className={`z14-tip${t.gotovo ? '' : 'z14-tip--skoro'}`}>
               <Link className="z14-tip__link" href={`${base}/teoriya/#teoriya-${t.id}`}>
                 <span className="z14-tip__head">
                   <span className="z14-tip__title">{t.title}</span>

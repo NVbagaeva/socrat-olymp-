@@ -50,27 +50,42 @@ export function krugHtml(spec: KrugSpec, klass = ''): string {
     `<path class="k14__strelka" d="M-4.5 ${f(o.y2 + 9)}L0 ${f(o.y2)}L4.5 ${f(o.y2 + 9)}Z"/>`,
   );
   if (g.osTg) {
-    svg.push(`<line class="k14__os-tg" x1="${f(g.osTg.x)}" y1="${f(g.osTg.y1)}" x2="${f(g.osTg.x)}" y2="${f(g.osTg.y2)}"/>`);
+    svg.push(
+      `<line class="k14__os-tg" x1="${f(g.osTg.x)}" y1="${f(g.osTg.y1)}" x2="${f(g.osTg.x)}" y2="${f(g.osTg.y2)}"/>`,
+    );
   }
   if (g.osCtg) {
-    svg.push(`<line class="k14__os-tg" x1="${f(g.osCtg.x1)}" y1="${f(g.osCtg.y)}" x2="${f(g.osCtg.x2)}" y2="${f(g.osCtg.y)}"/>`);
+    svg.push(
+      `<line class="k14__os-tg" x1="${f(g.osCtg.x1)}" y1="${f(g.osCtg.y)}" x2="${f(g.osCtg.x2)}" y2="${f(g.osCtg.y)}"/>`,
+    );
   }
   svg.push('<circle class="k14__okr" cx="0" cy="0" r="100"/>');
   for (const z of g.zasechki) {
-    svg.push(`<line class="k14__zasechka" x1="${f(z.x1)}" y1="${f(z.y1)}" x2="${f(z.x2)}" y2="${f(z.y2)}"/>`);
+    svg.push(
+      `<line class="k14__zasechka" x1="${f(z.x1)}" y1="${f(z.y1)}" x2="${f(z.x2)}" y2="${f(z.y2)}"/>`,
+    );
   }
   for (const l of g.linii) {
-    svg.push(`<line class="k14__${l.vid}" x1="${f(l.x1)}" y1="${f(l.y1)}" x2="${f(l.x2)}" y2="${f(l.y2)}"/>`);
+    svg.push(
+      `<line class="k14__${l.vid}" x1="${f(l.x1)}" y1="${f(l.y1)}" x2="${f(l.x2)}" y2="${f(l.y2)}"/>`,
+    );
   }
   if (g.duga) {
     svg.push(`<path class="k14__duga" d="${g.duga.d}"/>`);
     if (g.duga.strelka !== '') svg.push(`<path class="k14__duga-strelka" d="${g.duga.strelka}"/>`);
   }
   for (const t of g.tochki) {
-    const k = ['k14__tochka', t.akcent ? 'k14__tochka--akcent' : '', t.vykolota ? 'k14__tochka--vykolota' : '', t.znach ? 'k14__tochka--znach' : '']
+    const k = [
+      'k14__tochka',
+      t.akcent ? 'k14__tochka--akcent' : '',
+      t.vykolota ? 'k14__tochka--vykolota' : '',
+      t.znach ? 'k14__tochka--znach' : '',
+    ]
       .filter(Boolean)
       .join(' ');
-    svg.push(`<circle class="${k}" cx="${f(t.x)}" cy="${f(t.y)}" r="${t.znach ? 3.6 : t.akcent ? 5.2 : 4.4}"/>`);
+    svg.push(
+      `<circle class="${k}" cx="${f(t.x)}" cy="${f(t.y)}" r="${t.znach ? 3.6 : t.akcent ? 5.2 : 4.4}"/>`,
+    );
   }
   svg.push('</svg>');
   const podpisi = g.podpisi
@@ -105,7 +120,11 @@ export function tochkiSeriy(serii: readonly Seriya[]): Ugol[] {
     for (let j = 0; j < n; j += 1) {
       const a = sdvig(sr.nach, q(sr.shag.n * j, sr.shag.m));
       const t = ((znach(a) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-      if (!out.some((b) => Math.abs((((znach(b) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) - t) < 1e-7)) {
+      if (
+        !out.some(
+          (b) => Math.abs((((znach(b) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) - t) < 1e-7,
+        )
+      ) {
         out.push(a);
       }
     }
@@ -141,13 +160,26 @@ export function krugiOtbora(serii: readonly Seriya[], p: Promezhutok): KrugSpec[
      столько, чтобы каждая была короче оборота. */
   for (let n = Math.floor((b - a) / (2 * Math.PI)) + 1; n < 12; n += 1) {
     const granicy: number[] = [];
-    for (let j = 1; j < n; j += 1) granicy.push(Math.round((a + ((b - a) * j) / n) / (Math.PI / 2)));
+    for (let j = 1; j < n; j += 1)
+      granicy.push(Math.round((a + ((b - a) * j) / n) / (Math.PI / 2)));
     const xs = [a, ...granicy.map((g) => (g * Math.PI) / 2), b];
-    if (xs.some((x, i) => i > 0 && (x - (xs[i - 1] as number) >= 2 * Math.PI - 1e-9 || x <= (xs[i - 1] as number) + 1e-9))) continue;
+    if (
+      xs.some(
+        (x, i) =>
+          i > 0 &&
+          (x - (xs[i - 1] as number) >= 2 * Math.PI - 1e-9 || x <= (xs[i - 1] as number) + 1e-9),
+      )
+    )
+      continue;
     const ugly: Ugol[] = [p.ot, ...granicy.map((g) => ({ pi: q(g, 2) })), p.do];
-    return ugly.slice(0, -1).map((ot, i) =>
-      kusok(ot, ugly[i + 1] as Ugol, [i === 0 ? p.vkl[0] : false, i === ugly.length - 2 ? p.vkl[1] : true]),
-    );
+    return ugly
+      .slice(0, -1)
+      .map((ot, i) =>
+        kusok(ot, ugly[i + 1] as Ugol, [
+          i === 0 ? p.vkl[0] : false,
+          i === ugly.length - 2 ? p.vkl[1] : true,
+        ]),
+      );
   }
   return [kusok(p.ot, p.do, p.vkl)];
 }

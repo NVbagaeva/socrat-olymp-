@@ -20,7 +20,12 @@ import {
   SHEET_14,
 } from '@/content/generator14';
 import { GEN_UI } from '@/content/generatorUi';
-import { razobratSostav, slotySostava, sostavIzSlotov, sostavStroka } from '@/lib/generator/obshchiy/klyuchi';
+import {
+  razobratSostav,
+  slotySostava,
+  sostavIzSlotov,
+  sostavStroka,
+} from '@/lib/generator/obshchiy/klyuchi';
 import { defaultExtras, vidRabotyIz, vidRabotyText } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
@@ -55,7 +60,9 @@ function istochnikPul(src: SourceId): Uravnenie14[] {
 export function pulMetoda(m: string, src: SourceId): Uravnenie14[] {
   const pul = istochnikPul(src);
   const glavnye = pul.filter((z) => z.metody[0] === m);
-  return glavnye.length >= 4 ? glavnye : [...glavnye, ...pul.filter((z) => z.metody[0] !== m && z.metody.includes(m as Metod14))];
+  return glavnye.length >= 4
+    ? glavnye
+    : [...glavnye, ...pul.filter((z) => z.metody[0] !== m && z.metody.includes(m as Metod14))];
 }
 
 /** Перестановка пула по seed и методу — своя у каждого набора. */
@@ -132,7 +139,8 @@ export function otvetHtml(z: Uravnenie14): string {
 }
 
 export function resheniyeHtml(z: Uravnenie14): string {
-  const sh = (xs: string[]) => `<ol class="z14-list-shagi">${xs.map((t) => `<li>${typeset(t)}</li>`).join('')}</ol>`;
+  const sh = (xs: string[]) =>
+    `<ol class="z14-list-shagi">${xs.map((t) => `<li>${typeset(t)}</li>`).join('')}</ol>`;
   const b = otvetB(z);
   return (
     `<p><b>а)</b></p>${sh(z.reshenie)}<p>Ответ а: ${typeset(otvetA(z))}</p>` +
@@ -143,7 +151,9 @@ export function resheniyeHtml(z: Uravnenie14): string {
 export const PUSTOY_KRUG = (): string => krugHtml({ pustoy: true }, 'k14--list');
 
 export function krugUchitelya(z: Uravnenie14): string {
-  return z.promezhutok === undefined ? '' : krugiHtml(krugiOtbora(z.serii, z.promezhutok), 'k14--list');
+  return z.promezhutok === undefined
+    ? ''
+    : krugiHtml(krugiOtbora(z.serii, z.promezhutok), 'k14--list');
 }
 
 /** «Запомни» блока метода — рамка с правилом и примером. */
@@ -161,9 +171,7 @@ export function obrazecHtml(metod: string): string {
   const b = BLOKI_14.find((x) => x.id === metod);
   const z = b?.zadachi[0];
   if (z === undefined || z.vid !== 'uravnenie') return '';
-  return (
-    `<div class="gen-recap z14-list-obrazec"><b>${SHEET_14.obrazec}</b>${uslovieHtml(z)}${resheniyeHtml(z)}</div>`
-  );
+  return `<div class="gen-recap z14-list-obrazec"><b>${SHEET_14.obrazec}</b>${uslovieHtml(z)}${resheniyeHtml(z)}</div>`;
 }
 
 /* ── Конфиг и адрес ─────────────────────────────────────────────── */
@@ -267,7 +275,10 @@ export function parseQuery14(q: URLSearchParams): Params14 | null {
 function extrasIzParams(p: Params14, config: GenConfig): GenExtras {
   return {
     ...defaultExtras(config),
-    ...vidRabotyIz(config, p.kind === 'svoy' ? p.svoy : p.kind === null ? '' : (VIDY[p.kind] ?? '')),
+    ...vidRabotyIz(
+      config,
+      p.kind === 'svoy' ? p.svoy : p.kind === null ? '' : (VIDY[p.kind] ?? ''),
+    ),
     date: p.date,
     teacher: p.teacher,
     theory: p.theory,

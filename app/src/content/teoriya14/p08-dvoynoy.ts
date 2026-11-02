@@ -27,7 +27,8 @@ export const PUNKT_8: Punkt14 = {
           'Квадратное относительно $\\sin x$: $D=1+8=9$, $\\sin x=\\dfrac{1\\pm3}{4}$, то есть $\\left[\\begin{aligned}&\\sin x=1,\\\\&\\sin x=-\\dfrac{1}{2}.\\end{aligned}\\right.$ Оба значения в $[-1;\\,1]$.',
           '$\\sin x=1\\ \\Leftrightarrow\\ x=\\dfrac{\\pi}{2}+2\\pi k$; $\\sin x=-\\dfrac{1}{2}\\ \\Leftrightarrow\\ x=-\\dfrac{\\pi}{6}+2\\pi k$ или $x=-\\dfrac{5\\pi}{6}+2\\pi k$, $k\\in\\mathbb{Z}$.',
         ],
-        otvet: '$x=\\dfrac{\\pi}{2}+2\\pi k$, $x=-\\dfrac{\\pi}{6}+2\\pi k$, $x=-\\dfrac{5\\pi}{6}+2\\pi k$, $k\\in\\mathbb{Z}$.',
+        otvet:
+          '$x=\\dfrac{\\pi}{2}+2\\pi k$, $x=-\\dfrac{\\pi}{6}+2\\pi k$, $x=-\\dfrac{5\\pi}{6}+2\\pi k$, $k\\in\\mathbb{Z}$.',
       },
     },
     {
@@ -55,7 +56,8 @@ export const PUNKT_8: Punkt14 = {
           'Произведение равно нулю, когда хотя бы один множитель равен нулю: $\\left[\\begin{aligned}&\\cos x=0,\\\\&\\sin x=\\dfrac{1}{2}\\end{aligned}\\right.\\ \\Leftrightarrow\\ \\left[\\begin{aligned}&x=\\dfrac{\\pi}{2}+\\pi k,\\\\&x=\\dfrac{\\pi}{6}+2\\pi k,\\\\&x=\\dfrac{5\\pi}{6}+2\\pi k,\\end{aligned}\\right.$ $k\\in\\mathbb{Z}$.',
           'Что было бы при сокращении на $\\cos x$: осталось бы $2\\sin x=1$, и серия $x=\\dfrac{\\pi}{2}+\\pi k$ потерялась бы. А она — корни: при $x=\\dfrac{\\pi}{2}$ слева $\\sin\\pi=0$, справа $\\cos\\dfrac{\\pi}{2}=0$.',
         ],
-        otvet: '$x=\\dfrac{\\pi}{2}+\\pi k$, $x=\\dfrac{\\pi}{6}+2\\pi k$, $x=\\dfrac{5\\pi}{6}+2\\pi k$, $k\\in\\mathbb{Z}$.',
+        otvet:
+          '$x=\\dfrac{\\pi}{2}+\\pi k$, $x=\\dfrac{\\pi}{6}+2\\pi k$, $x=\\dfrac{5\\pi}{6}+2\\pi k$, $k\\in\\mathbb{Z}$.',
       },
     },
     {
@@ -70,7 +72,8 @@ export const PUNKT_8: Punkt14 = {
       vid: 'primer',
       title: 'Формулы сложения в уравнении',
       primer: {
-        uslovie: 'Решим уравнение $\\sin\\left(\\dfrac{\\pi}{6}-x\\right)-\\cos\\left(\\dfrac{\\pi}{3}-x\\right)=\\sqrt{3}$.',
+        uslovie:
+          'Решим уравнение $\\sin\\left(\\dfrac{\\pi}{6}-x\\right)-\\cos\\left(\\dfrac{\\pi}{3}-x\\right)=\\sqrt{3}$.',
         shagi: [
           'Синус разности: $\\sin\\left(\\dfrac{\\pi}{6}-x\\right)=\\sin\\dfrac{\\pi}{6}\\cos x-\\cos\\dfrac{\\pi}{6}\\sin x=\\dfrac{1}{2}\\cos x-\\dfrac{\\sqrt{3}}{2}\\sin x$.',
           'Косинус разности: $\\cos\\left(\\dfrac{\\pi}{3}-x\\right)=\\cos\\dfrac{\\pi}{3}\\cos x+\\sin\\dfrac{\\pi}{3}\\sin x=\\dfrac{1}{2}\\cos x+\\dfrac{\\sqrt{3}}{2}\\sin x$.',

@@ -57,7 +57,8 @@ export const O_ZADANII_14 = {
   kriteriiNote:
     'Критерии — по проекту демонстрационного варианта ЕГЭ‑2027 (ФИПИ). Максимум — 2 балла. Правильный ответ без решения оценивается в 0 баллов.',
   tipyTitle: 'Типы уравнений',
-  tipyLead: 'Уравнение №14 бывает разных типов. Начни с тригонометрии — она встречается чаще всего.',
+  tipyLead:
+    'Уравнение №14 бывает разных типов. Начни с тригонометрии — она встречается чаще всего.',
   kTeorii: 'Открыть теорию',
 } as const;
 
@@ -123,7 +124,12 @@ export const SKORO_14 = 'Скоро';
  * Задачи будущих глав: сохранены заранее, решения и разборы появятся
  * вместе с главой. На сайте пока не показываются.
  */
-export const OTLOZHENO_14: { glava: TipId14; podtip?: string; uravnenie: string; promezhutok: string }[] = [
+export const OTLOZHENO_14: {
+  glava: TipId14;
+  podtip?: string;
+  uravnenie: string;
+  promezhutok: string;
+}[] = [
   { glava: 'pokaz', uravnenie: '4^x-2^{x+3}+15=0', promezhutok: '\\left[2;\\,\\sqrt{10}\\right]' },
   {
     glava: 'komb',
@@ -140,13 +146,15 @@ export const OTLOZHENO_14: { glava: TipId14; podtip?: string; uravnenie: string;
   {
     glava: 'komb',
     podtip: 'pokaz',
-    uravnenie: '\\left(\\dfrac{1}{16}\\right)^{\\cos x}+3\\cdot\\left(\\dfrac{1}{4}\\right)^{\\cos x}-4=0',
+    uravnenie:
+      '\\left(\\dfrac{1}{16}\\right)^{\\cos x}+3\\cdot\\left(\\dfrac{1}{4}\\right)^{\\cos x}-4=0',
     promezhutok: '\\left[4\\pi;\\,7\\pi\\right]',
   },
   {
     glava: 'komb',
     podtip: 'pokaz',
-    uravnenie: '\\left(\\dfrac{1}{9}\\right)^{\\cos\\left(\\frac{\\pi}{2}-x\\right)}=3^{2\\sin\\left(x+\\frac{\\pi}{2}\\right)}',
+    uravnenie:
+      '\\left(\\dfrac{1}{9}\\right)^{\\cos\\left(\\frac{\\pi}{2}-x\\right)}=3^{2\\sin\\left(x+\\frac{\\pi}{2}\\right)}',
     promezhutok: '\\left[-\\dfrac{7\\pi}{2};\\,-2\\pi\\right]',
   },
   {

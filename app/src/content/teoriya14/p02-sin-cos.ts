@@ -15,8 +15,12 @@ export const PUNKT_2: Punkt14 = {
       vid: 'risunok',
       risunok: {
         vid: 'krug',
-        spec: { delenie: 12, tochki: [{ ugol: u(1, 3), akcent: true, luch: true, proekcii: true }] },
-        podpis: 'Точка $\\dfrac{\\pi}{3}$: пунктир вниз попадает в $\\cos\\dfrac{\\pi}{3}=\\dfrac{1}{2}$, пунктир влево — в $\\sin\\dfrac{\\pi}{3}=\\dfrac{\\sqrt{3}}{2}$.',
+        spec: {
+          delenie: 12,
+          tochki: [{ ugol: u(1, 3), akcent: true, luch: true, proekcii: true }],
+        },
+        podpis:
+          'Точка $\\dfrac{\\pi}{3}$: пунктир вниз попадает в $\\cos\\dfrac{\\pi}{3}=\\dfrac{1}{2}$, пунктир влево — в $\\sin\\dfrac{\\pi}{3}=\\dfrac{\\sqrt{3}}{2}$.',
       },
     },
     {
@@ -28,7 +32,8 @@ export const PUNKT_2: Punkt14 = {
       ton: 'vyvod',
       text: 'Любую точку окружности со знаменателем $6$, $4$ или $3$ можно **отразить** в первую четверть относительно осей. При отражении координаты меняют только знак, а по модулю остаются теми же. Поэтому значение берём из первой четверти, а знак — по тому, куда смотрит проекция.',
       primer: {
-        uslovie: 'Найдём $\\sin\\dfrac{5\\pi}{6}$, $\\cos\\dfrac{4\\pi}{3}$ и $\\sin\\left(-\\dfrac{\\pi}{4}\\right)$.',
+        uslovie:
+          'Найдём $\\sin\\dfrac{5\\pi}{6}$, $\\cos\\dfrac{4\\pi}{3}$ и $\\sin\\left(-\\dfrac{\\pi}{4}\\right)$.',
         shagi: [
           'Точка $\\dfrac{5\\pi}{6}$ не доходит до $\\pi$ на $\\dfrac{\\pi}{6}$, значит, она симметрична точке $\\dfrac{\\pi}{6}$ относительно вертикальной оси. Высота у них одинаковая, и она над осью: $\\sin\\dfrac{5\\pi}{6}=\\sin\\dfrac{\\pi}{6}=\\dfrac{1}{2}$.',
           'Точка $\\dfrac{4\\pi}{3}=\\pi+\\dfrac{\\pi}{3}$ — это точка $\\dfrac{\\pi}{3}$, отражённая через центр. Её абсцисса по модулю равна $\\dfrac{1}{2}$, но точка слева от вертикальной оси: $\\cos\\dfrac{4\\pi}{3}=-\\dfrac{1}{2}$.',

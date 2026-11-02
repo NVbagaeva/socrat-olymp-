@@ -12,7 +12,11 @@ export function generateStaticParams() {
   return BLOKI_14.map((b) => ({ blok: b.slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ blok: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ blok: string }>;
+}): Promise<Metadata> {
   const { blok } = await params;
   const b = BLOKI_14.find((x) => x.slug === blok);
   return { title: zadanie14Title(b ? b.nazvanie : 'Опорные задачи') };

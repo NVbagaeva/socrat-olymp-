@@ -22,7 +22,9 @@ export const METODY_14: { id: Metod14; title: string }[] = BLOKI_14.map((b) => (
 
 export function kandidaty14(n: Pick<Nastroyki14, 'metody' | 'istochnik'>): Uravnenie14[] {
   const pul = n.istochnik === 'bank' ? BANK_14 : vseUravneniya14();
-  return n.metody.length === 0 ? pul : pul.filter((z) => z.metody.some((m) => n.metody.includes(m)));
+  return n.metody.length === 0
+    ? pul
+    : pul.filter((z) => z.metody.some((m) => n.metody.includes(m)));
 }
 
 export function planTrenirovki14(

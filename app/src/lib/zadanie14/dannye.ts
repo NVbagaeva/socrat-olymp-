@@ -23,7 +23,6 @@ export function vseUravneniya14(): Uravnenie14[] {
 
 export function zadachaPoId14(id: string): Zadacha14 | undefined {
   return (
-    BANK_14.find((z) => z.id === id) ??
-    BLOKI_14.flatMap((b) => b.zadachi).find((z) => z.id === id)
+    BANK_14.find((z) => z.id === id) ?? BLOKI_14.flatMap((b) => b.zadachi).find((z) => z.id === id)
   );
 }

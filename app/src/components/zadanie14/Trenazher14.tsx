@@ -40,7 +40,10 @@ function Vybor14({ onStart }: { onStart: (n: Nastroyki14) => void }) {
   const [n, setN] = useState<Nastroyki14>({ metody: [], istochnik: 'bank', skolko: 10 });
   const dostupno = kandidaty14(n).length;
   const pereklyuchit = (m: Metod14) =>
-    setN({ ...n, metody: n.metody.includes(m) ? n.metody.filter((x) => x !== m) : [...n.metody, m] });
+    setN({
+      ...n,
+      metody: n.metody.includes(m) ? n.metody.filter((x) => x !== m) : [...n.metody, m],
+    });
   return (
     <section className="z14-tr-vybor flow">
       <p className="z14-tr-vybor__lead">
@@ -221,9 +224,7 @@ function Ekran14({
   const pokazatReshenie = reshenie || itog !== null;
   return (
     <article className="z14-zadacha flow">
-      <p className="z14-zadacha__metka">
-        {z.metody.map((m) => nazvanieMetoda(m)).join(' · ')}
-      </p>
+      <p className="z14-zadacha__metka">{z.metody.map((m) => nazvanieMetoda(m)).join(' · ')}</p>
       <Uslovie14 z={z} />
       <Otvet14
         z={z}
@@ -260,7 +261,11 @@ function Ekran14({
             Показать решение
           </button>
         )}
-        <button type="button" className={clsx('btn', reshena ? 'btn--primary' : 'btn--ghost')} onClick={dalshe}>
+        <button
+          type="button"
+          className={clsx('btn', reshena ? 'btn--primary' : 'btn--ghost')}
+          onClick={dalshe}
+        >
           {last ? 'Смотреть результат →' : 'Дальше →'}
         </button>
       </div>
@@ -347,4 +352,3 @@ export function Trenazher14({ base }: { base: string }) {
     />
   );
 }
-

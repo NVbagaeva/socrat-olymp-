@@ -6,7 +6,13 @@ import { krugHtml } from '@/lib/zadanie14/krugHtml';
 import { u } from '@/lib/zadanie14/ugol';
 
 const UGLY = ['0', '\\dfrac{\\pi}{6}', '\\dfrac{\\pi}{4}', '\\dfrac{\\pi}{3}', '\\dfrac{\\pi}{2}'];
-const KORNI = ['\\dfrac{\\sqrt{0}}{2}', '\\dfrac{\\sqrt{1}}{2}', '\\dfrac{\\sqrt{2}}{2}', '\\dfrac{\\sqrt{3}}{2}', '\\dfrac{\\sqrt{4}}{2}'];
+const KORNI = [
+  '\\dfrac{\\sqrt{0}}{2}',
+  '\\dfrac{\\sqrt{1}}{2}',
+  '\\dfrac{\\sqrt{2}}{2}',
+  '\\dfrac{\\sqrt{3}}{2}',
+  '\\dfrac{\\sqrt{4}}{2}',
+];
 const ZNACH = ['0', '\\dfrac{1}{2}', '\\dfrac{\\sqrt{2}}{2}', '\\dfrac{\\sqrt{3}}{2}', '1'];
 
 const SHAGI = [
@@ -66,9 +72,16 @@ export function TablicaKorni14() {
       <p className="z14-inter__text" aria-live="polite">
         <Tex text={SHAGI[shag] as string} />
       </p>
-      {krug === null ? null : <div className="z14-inter__krug" dangerouslySetInnerHTML={{ __html: krug }} />}
+      {krug === null ? null : (
+        <div className="z14-inter__krug" dangerouslySetInnerHTML={{ __html: krug }} />
+      )}
       <div className="z14-inter__nav">
-        <button type="button" className="btn btn--secondary btn--sm" disabled={shag === 0} onClick={() => setShag(shag - 1)}>
+        <button
+          type="button"
+          className="btn btn--secondary btn--sm"
+          disabled={shag === 0}
+          onClick={() => setShag(shag - 1)}
+        >
           Назад
         </button>
         <span className="z14-inter__schet">

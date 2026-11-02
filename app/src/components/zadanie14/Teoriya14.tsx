@@ -61,7 +61,11 @@ function Blok({ b }: { b: BlokTeorii14 }) {
           <Tex text={t} />
         </li>
       ));
-      return b.numeraciya ? <ol className="z14-spisok">{items}</ol> : <ul className="z14-spisok">{items}</ul>;
+      return b.numeraciya ? (
+        <ol className="z14-spisok">{items}</ol>
+      ) : (
+        <ul className="z14-spisok">{items}</ul>
+      );
     }
     case 'ramka': {
       const t = TON[b.ton];
@@ -168,7 +172,12 @@ export function Teoriya14({ vkladka }: { vkladka: string }) {
         title: g.title,
         ...(g.skoro ? { skoro: true } : {}),
         ...(g.punkty.length > 0
-          ? { podpunkty: g.punkty.map((p) => ({ id: p.id, title: `${p.no}. ${p.title.replace(/\$[^$]*\$/g, '…')}` })) }
+          ? {
+              podpunkty: g.punkty.map((p) => ({
+                id: p.id,
+                title: `${p.no}. ${p.title.replace(/\$[^$]*\$/g, '…')}`,
+              })),
+            }
           : {}),
       }))}
       tela={tela}

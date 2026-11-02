@@ -17,12 +17,22 @@ export function rz(z: Omit<Razminka14, 'vid'>): Razminka14 {
 }
 
 /** Вопрос подсказки: верная кнопка — по номеру (с нуля). */
-export function v(question: string, options: string[], correct: number, comment?: string): HintStep {
-  return comment === undefined ? { question, options, correct } : { question, options, correct, comment };
+export function v(
+  question: string,
+  options: string[],
+  correct: number,
+  comment?: string,
+): HintStep {
+  return comment === undefined
+    ? { question, options, correct }
+    : { question, options, correct, comment };
 }
 
 /** Полуоткрытый промежуток: какие концы входят. */
-export function promezhutok<T extends { vkl: [boolean, boolean] }>(p: T, vkl: [boolean, boolean]): T {
+export function promezhutok<T extends { vkl: [boolean, boolean] }>(
+  p: T,
+  vkl: [boolean, boolean],
+): T {
   return { ...p, vkl };
 }
 

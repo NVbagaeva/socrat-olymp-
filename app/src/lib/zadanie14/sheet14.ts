@@ -106,7 +106,10 @@ export function sheetSpec14(p: Params14, vid: VidPechati14) {
     subtitle: SHEET_14.text,
     ...(variant === null || nV === 1 ? {} : { variant: `Вариант ${variant + 1}` }),
   });
-  const uchenik = (ryad: Poziciya14[], i: number) => ({ title: title(i, false), blocks: uchenikBloki(p, ryad) });
+  const uchenik = (ryad: Poziciya14[], i: number) => ({
+    title: title(i, false),
+    blocks: uchenikBloki(p, ryad),
+  });
   const uchitel = (ryad: Poziciya14[], i: number) => {
     const b = uchitelBloki(ryad);
     const svodka = answers.table(

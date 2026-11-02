@@ -27,10 +27,40 @@ export const ZADACHI_02: Zadacha14[] = [
       'Найденные $x$ входят в ОДЗ: в них $\\operatorname{tg}2x=\\sqrt{3}$ — число, значит $\\cos 2x\\ne 0$.',
     ],
     podskazki: [
-      v('Чему равен $\\operatorname{tg}(5\\pi+2x)$?', ['$\\operatorname{tg}2x$', '$-\\operatorname{tg}2x$', '$\\operatorname{ctg}2x$'], 0, '$5\\pi$ — целое число периодов тангенса.'),
-      v('Какое простейшее уравнение получилось?', ['$\\operatorname{tg}2x=\\sqrt{3}$', '$\\operatorname{tg}2x=3$', '$\\operatorname{tg}2x=\\dfrac{\\sqrt{3}}{3}$'], 0),
-      v('Решение относительно $2x$:', ['$2x=\\dfrac{\\pi}{3}+\\pi k$', '$2x=\\dfrac{\\pi}{6}+\\pi k$', '$2x=\\dfrac{\\pi}{3}+2\\pi k$'], 0),
-      v('Ответ пункта а:', ['$x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{2}$', '$x=\\dfrac{\\pi}{6}+\\pi k$', '$x=\\dfrac{\\pi}{3}+\\dfrac{\\pi k}{2}$'], 0, 'Период тоже делится на $2$.'),
+      v(
+        'Чему равен $\\operatorname{tg}(5\\pi+2x)$?',
+        ['$\\operatorname{tg}2x$', '$-\\operatorname{tg}2x$', '$\\operatorname{ctg}2x$'],
+        0,
+        '$5\\pi$ — целое число периодов тангенса.',
+      ),
+      v(
+        'Какое простейшее уравнение получилось?',
+        [
+          '$\\operatorname{tg}2x=\\sqrt{3}$',
+          '$\\operatorname{tg}2x=3$',
+          '$\\operatorname{tg}2x=\\dfrac{\\sqrt{3}}{3}$',
+        ],
+        0,
+      ),
+      v(
+        'Решение относительно $2x$:',
+        [
+          '$2x=\\dfrac{\\pi}{3}+\\pi k$',
+          '$2x=\\dfrac{\\pi}{6}+\\pi k$',
+          '$2x=\\dfrac{\\pi}{3}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Ответ пункта а:',
+        [
+          '$x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{2}$',
+          '$x=\\dfrac{\\pi}{6}+\\pi k$',
+          '$x=\\dfrac{\\pi}{3}+\\dfrac{\\pi k}{2}$',
+        ],
+        0,
+        'Период тоже делится на $2$.',
+      ),
     ],
   }),
   ur({
@@ -47,9 +77,30 @@ export const ZADACHI_02: Zadacha14[] = [
       'Делим на $3$ всё: $x=\\pm\\dfrac{\\pi}{12}+\\dfrac{2\\pi k}{3},\\ k\\in\\mathbb{Z}$.',
     ],
     podskazki: [
-      v('Решение относительно $3x$:', ['$3x=\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$3x=\\pm\\dfrac{\\pi}{4}+\\pi k$', '$3x=\\dfrac{\\pi}{4}+2\\pi k$'], 0),
-      v('Ответ:', ['$x=\\pm\\dfrac{\\pi}{12}+\\dfrac{2\\pi k}{3}$', '$x=\\pm\\dfrac{\\pi}{12}+2\\pi k$', '$x=\\pm\\dfrac{3\\pi}{4}+6\\pi k$'], 0),
-      v('Сколько корней на $[0;\\,\\pi]$?', ['Три', 'Два', 'Один'], 0, 'Это $\\dfrac{\\pi}{12}$, $\\dfrac{7\\pi}{12}$ и $\\dfrac{3\\pi}{4}$.'),
+      v(
+        'Решение относительно $3x$:',
+        [
+          '$3x=\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+          '$3x=\\pm\\dfrac{\\pi}{4}+\\pi k$',
+          '$3x=\\dfrac{\\pi}{4}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Ответ:',
+        [
+          '$x=\\pm\\dfrac{\\pi}{12}+\\dfrac{2\\pi k}{3}$',
+          '$x=\\pm\\dfrac{\\pi}{12}+2\\pi k$',
+          '$x=\\pm\\dfrac{3\\pi}{4}+6\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Сколько корней на $[0;\\,\\pi]$?',
+        ['Три', 'Два', 'Один'],
+        0,
+        'Это $\\dfrac{\\pi}{12}$, $\\dfrac{7\\pi}{12}$ и $\\dfrac{3\\pi}{4}$.',
+      ),
     ],
   }),
   ur({
@@ -67,9 +118,29 @@ export const ZADACHI_02: Zadacha14[] = [
       'Делим на $2$: $x=\\dfrac{\\pi}{4}+\\pi k$ или $x=-\\dfrac{5\\pi}{12}+\\pi k,\\ k\\in\\mathbb{Z}$. Серий две: после сдвига на $\\dfrac{\\pi}{6}$ знак $\\pm$ уже не вынести.',
     ],
     podskazki: [
-      v('Первый шаг:', ['$2x+\\dfrac{\\pi}{6}=\\pm\\dfrac{2\\pi}{3}+2\\pi k$', '$2x=\\pm\\dfrac{2\\pi}{3}+2\\pi k$', '$2x+\\dfrac{\\pi}{6}=\\pm\\dfrac{\\pi}{3}+2\\pi k$'], 0),
-      v('Чему равно $\\dfrac{2\\pi}{3}-\\dfrac{\\pi}{6}$?', ['$\\dfrac{\\pi}{2}$', '$\\dfrac{\\pi}{3}$', '$\\dfrac{5\\pi}{6}$'], 0),
-      v('Серии:', ['$x=\\dfrac{\\pi}{4}+\\pi k$ и $x=-\\dfrac{5\\pi}{12}+\\pi k$', '$x=\\pm\\dfrac{\\pi}{4}+\\pi k$', '$x=\\dfrac{\\pi}{4}+2\\pi k$ и $x=-\\dfrac{5\\pi}{12}+2\\pi k$'], 0),
+      v(
+        'Первый шаг:',
+        [
+          '$2x+\\dfrac{\\pi}{6}=\\pm\\dfrac{2\\pi}{3}+2\\pi k$',
+          '$2x=\\pm\\dfrac{2\\pi}{3}+2\\pi k$',
+          '$2x+\\dfrac{\\pi}{6}=\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Чему равно $\\dfrac{2\\pi}{3}-\\dfrac{\\pi}{6}$?',
+        ['$\\dfrac{\\pi}{2}$', '$\\dfrac{\\pi}{3}$', '$\\dfrac{5\\pi}{6}$'],
+        0,
+      ),
+      v(
+        'Серии:',
+        [
+          '$x=\\dfrac{\\pi}{4}+\\pi k$ и $x=-\\dfrac{5\\pi}{12}+\\pi k$',
+          '$x=\\pm\\dfrac{\\pi}{4}+\\pi k$',
+          '$x=\\dfrac{\\pi}{4}+2\\pi k$ и $x=-\\dfrac{5\\pi}{12}+2\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -86,7 +157,15 @@ export const ZADACHI_02: Zadacha14[] = [
       'Делим на $2$: $x=\\dfrac{\\pi}{6}+\\pi k$ или $x=\\dfrac{\\pi}{3}+\\pi k,\\ k\\in\\mathbb{Z}$.',
     ],
     podskazki: [
-      v('Решения относительно $2x$:', ['$\\dfrac{\\pi}{3}+2\\pi k$ и $\\dfrac{2\\pi}{3}+2\\pi k$', '$\\pm\\dfrac{\\pi}{3}+2\\pi k$', '$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$'], 0),
+      v(
+        'Решения относительно $2x$:',
+        [
+          '$\\dfrac{\\pi}{3}+2\\pi k$ и $\\dfrac{2\\pi}{3}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$',
+        ],
+        0,
+      ),
       v('Период серий для $x$:', ['$\\pi$', '$2\\pi$', '$4\\pi$'], 0),
     ],
   }),
@@ -105,9 +184,29 @@ export const ZADACHI_02: Zadacha14[] = [
       'Можно и без приведения: $3x+\\dfrac{\\pi}{2}=-\\dfrac{\\pi}{4}+2\\pi k$ или $-\\dfrac{3\\pi}{4}+2\\pi k$ — получатся те же серии, только с другими началами.',
     ],
     podskazki: [
-      v('$\\sin\\left(3x+\\dfrac{\\pi}{2}\\right)$ равен', ['$\\cos 3x$', '$-\\cos 3x$', '$\\sin 3x$'], 0),
-      v('Решения $\\cos 3x=-\\dfrac{\\sqrt{2}}{2}$ относительно $3x$:', ['$\\pm\\dfrac{3\\pi}{4}+2\\pi k$', '$\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$-\\dfrac{\\pi}{4}+2\\pi k$'], 0),
-      v('Ответ:', ['$x=\\pm\\dfrac{\\pi}{4}+\\dfrac{2\\pi k}{3}$', '$x=\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$x=\\pm\\dfrac{\\pi}{12}+\\dfrac{2\\pi k}{3}$'], 0),
+      v(
+        '$\\sin\\left(3x+\\dfrac{\\pi}{2}\\right)$ равен',
+        ['$\\cos 3x$', '$-\\cos 3x$', '$\\sin 3x$'],
+        0,
+      ),
+      v(
+        'Решения $\\cos 3x=-\\dfrac{\\sqrt{2}}{2}$ относительно $3x$:',
+        [
+          '$\\pm\\dfrac{3\\pi}{4}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+          '$-\\dfrac{\\pi}{4}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Ответ:',
+        [
+          '$x=\\pm\\dfrac{\\pi}{4}+\\dfrac{2\\pi k}{3}$',
+          '$x=\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+          '$x=\\pm\\dfrac{\\pi}{12}+\\dfrac{2\\pi k}{3}$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -125,9 +224,29 @@ export const ZADACHI_02: Zadacha14[] = [
       '$3x=\\dfrac{5\\pi}{6}-\\dfrac{\\pi}{4}+\\pi k=\\dfrac{7\\pi}{12}+\\pi k\\ \\Leftrightarrow\\ x=\\dfrac{7\\pi}{36}+\\dfrac{\\pi k}{3},\\ k\\in\\mathbb{Z}$.',
     ],
     podskazki: [
-      v('$\\operatorname{ctg}t=-1$ при', ['$t=-\\dfrac{\\pi}{4}+\\pi k$', '$t=\\dfrac{\\pi}{4}+\\pi k$', '$t=-\\dfrac{\\pi}{4}+2\\pi k$'], 0),
-      v('$\\dfrac{5\\pi}{6}-\\dfrac{\\pi}{4}=$', ['$\\dfrac{7\\pi}{12}$', '$\\dfrac{13\\pi}{12}$', '$\\dfrac{\\pi}{2}$'], 0),
-      v('Ответ:', ['$x=\\dfrac{7\\pi}{36}+\\dfrac{\\pi k}{3}$', '$x=\\dfrac{7\\pi}{36}+\\pi k$', '$x=\\dfrac{7\\pi}{12}+\\dfrac{\\pi k}{3}$'], 0),
+      v(
+        '$\\operatorname{ctg}t=-1$ при',
+        [
+          '$t=-\\dfrac{\\pi}{4}+\\pi k$',
+          '$t=\\dfrac{\\pi}{4}+\\pi k$',
+          '$t=-\\dfrac{\\pi}{4}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        '$\\dfrac{5\\pi}{6}-\\dfrac{\\pi}{4}=$',
+        ['$\\dfrac{7\\pi}{12}$', '$\\dfrac{13\\pi}{12}$', '$\\dfrac{\\pi}{2}$'],
+        0,
+      ),
+      v(
+        'Ответ:',
+        [
+          '$x=\\dfrac{7\\pi}{36}+\\dfrac{\\pi k}{3}$',
+          '$x=\\dfrac{7\\pi}{36}+\\pi k$',
+          '$x=\\dfrac{7\\pi}{12}+\\dfrac{\\pi k}{3}$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -146,9 +265,29 @@ export const ZADACHI_02: Zadacha14[] = [
       '$2x=\\dfrac{\\pi}{6}+\\pi k\\ \\Leftrightarrow\\ x=\\dfrac{\\pi}{12}+\\dfrac{\\pi k}{2},\\ k\\in\\mathbb{Z}$.',
     ],
     podskazki: [
-      v('$\\operatorname{tg}(7\\pi-2x)$ равен', ['$-\\operatorname{tg}2x$', '$\\operatorname{tg}2x$', '$-\\operatorname{ctg}2x$'], 0),
-      v('Простейшее уравнение:', ['$\\operatorname{tg}2x=\\dfrac{\\sqrt{3}}{3}$', '$\\operatorname{tg}2x=-\\dfrac{\\sqrt{3}}{3}$', '$\\operatorname{tg}2x=\\sqrt{3}$'], 0),
-      v('Ответ:', ['$x=\\dfrac{\\pi}{12}+\\dfrac{\\pi k}{2}$', '$x=\\dfrac{\\pi}{12}+\\pi k$', '$x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{2}$'], 0),
+      v(
+        '$\\operatorname{tg}(7\\pi-2x)$ равен',
+        ['$-\\operatorname{tg}2x$', '$\\operatorname{tg}2x$', '$-\\operatorname{ctg}2x$'],
+        0,
+      ),
+      v(
+        'Простейшее уравнение:',
+        [
+          '$\\operatorname{tg}2x=\\dfrac{\\sqrt{3}}{3}$',
+          '$\\operatorname{tg}2x=-\\dfrac{\\sqrt{3}}{3}$',
+          '$\\operatorname{tg}2x=\\sqrt{3}$',
+        ],
+        0,
+      ),
+      v(
+        'Ответ:',
+        [
+          '$x=\\dfrac{\\pi}{12}+\\dfrac{\\pi k}{2}$',
+          '$x=\\dfrac{\\pi}{12}+\\pi k$',
+          '$x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{2}$',
+        ],
+        0,
+      ),
     ],
   }),
   ur({
@@ -166,9 +305,30 @@ export const ZADACHI_02: Zadacha14[] = [
       'Умножаем на $2$ — и период тоже удваивается: $x=4\\pi k$ или $x=\\dfrac{4\\pi}{3}+4\\pi k,\\ k\\in\\mathbb{Z}$.',
     ],
     podskazki: [
-      v('Решения относительно аргумента $t=\\dfrac{x}{2}+\\dfrac{\\pi}{6}$:', ['$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$', '$\\pm\\dfrac{\\pi}{6}+2\\pi k$', '$\\dfrac{\\pi}{3}+2\\pi k$ и $\\dfrac{2\\pi}{3}+2\\pi k$'], 0),
-      v('Какой период у серий для $x$?', ['$4\\pi$', '$2\\pi$', '$\\pi$'], 0, 'Аргумент делится на $2$, значит при умножении на $2$ период растёт вдвое.'),
-      v('Серии:', ['$x=4\\pi k$ и $x=\\dfrac{4\\pi}{3}+4\\pi k$', '$x=2\\pi k$ и $x=\\dfrac{2\\pi}{3}+2\\pi k$', '$x=4\\pi k$ и $x=\\dfrac{5\\pi}{3}+4\\pi k$'], 0),
+      v(
+        'Решения относительно аргумента $t=\\dfrac{x}{2}+\\dfrac{\\pi}{6}$:',
+        [
+          '$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\dfrac{\\pi}{3}+2\\pi k$ и $\\dfrac{2\\pi}{3}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Какой период у серий для $x$?',
+        ['$4\\pi$', '$2\\pi$', '$\\pi$'],
+        0,
+        'Аргумент делится на $2$, значит при умножении на $2$ период растёт вдвое.',
+      ),
+      v(
+        'Серии:',
+        [
+          '$x=4\\pi k$ и $x=\\dfrac{4\\pi}{3}+4\\pi k$',
+          '$x=2\\pi k$ и $x=\\dfrac{2\\pi}{3}+2\\pi k$',
+          '$x=4\\pi k$ и $x=\\dfrac{5\\pi}{3}+4\\pi k$',
+        ],
+        0,
+      ),
     ],
   }),
   rz({
@@ -189,8 +349,20 @@ export const ZADACHI_02: Zadacha14[] = [
       'Отрицательные корни: при $k=0$ — $-\\dfrac{1}{2}$, остальные ($-5{,}5$; $-6{,}5$; …) меньше. Наибольший отрицательный корень $-0{,}5$.',
     ],
     podskazki: [
-      v('Решения относительно $\\dfrac{\\pi x}{3}$:', ['$\\pm\\dfrac{\\pi}{6}+2\\pi k$', '$\\pm\\dfrac{\\pi}{3}+2\\pi k$', '$\\dfrac{\\pi}{6}+\\pi k$'], 0),
-      v('Корни в числах:', ['$x=\\pm\\dfrac{1}{2}+6k$', '$x=\\pm\\dfrac{1}{2}+2k$', '$x=\\pm 1+6k$'], 0),
+      v(
+        'Решения относительно $\\dfrac{\\pi x}{3}$:',
+        [
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$\\dfrac{\\pi}{6}+\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Корни в числах:',
+        ['$x=\\pm\\dfrac{1}{2}+6k$', '$x=\\pm\\dfrac{1}{2}+2k$', '$x=\\pm 1+6k$'],
+        0,
+      ),
       v('Наибольший отрицательный корень:', ['$-0{,}5$', '$-5{,}5$', '$-6{,}5$'], 0),
     ],
   }),
@@ -209,7 +381,11 @@ export const ZADACHI_02: Zadacha14[] = [
       'Наименьший положительный корень: $1$ (предыдущий, $-2$, отрицателен).',
     ],
     podskazki: [
-      v('Решения относительно аргумента:', ['$-\\dfrac{\\pi}{3}+\\pi k$', '$-\\dfrac{\\pi}{6}+\\pi k$', '$\\dfrac{2\\pi}{3}+2\\pi k$'], 0),
+      v(
+        'Решения относительно аргумента:',
+        ['$-\\dfrac{\\pi}{3}+\\pi k$', '$-\\dfrac{\\pi}{6}+\\pi k$', '$\\dfrac{2\\pi}{3}+2\\pi k$'],
+        0,
+      ),
       v('Корни в числах:', ['$x=4+3k$', '$x=4+k$', '$x=6+3k$'], 0),
       v('Наименьший положительный корень:', ['$1$', '$4$', '$2$'], 0),
     ],

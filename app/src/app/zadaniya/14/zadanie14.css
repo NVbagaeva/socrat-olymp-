@@ -68,7 +68,9 @@
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
   color: var(--color-text);
   text-decoration: none;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 .z14-tip__link:hover {
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);

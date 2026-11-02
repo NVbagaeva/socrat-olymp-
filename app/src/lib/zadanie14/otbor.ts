@@ -59,11 +59,10 @@ export function nerav(sr: Seriya, p: Promezhutok): string[] {
   const lo = p.ot.pi;
   const hi = p.do.pi;
   const shagi: string[] = [];
-  shagi.push(
-    `Серия $x=${seriyaTex(sr)}$: $${piTex(lo)}${l}${seriyaTex(sr)}${r}${piTex(hi)}$.`,
-  );
+  shagi.push(`Серия $x=${seriyaTex(sr)}$: $${piTex(lo)}${l}${seriyaTex(sr)}${r}${piTex(hi)}$.`);
   /* Делим на π. */
-  const hk = h.m === 1 ? `${h.n === 1 ? '' : d(h.n)}k` : `\\dfrac{${h.n === 1 ? '' : d(h.n)}k}{${d(h.m)}}`;
+  const hk =
+    h.m === 1 ? `${h.n === 1 ? '' : d(h.n)}k` : `\\dfrac{${h.n === 1 ? '' : d(h.n)}k}{${d(h.m)}}`;
   const sered = x0.n === 0 ? hk : `${drobTex(x0)}+${hk}`;
   shagi.push(`Делим все части на $\\pi$: $${drobTex(lo)}${l}${sered}${r}${drobTex(hi)}$.`);
   let a = lo;
@@ -88,9 +87,7 @@ export function nerav(sr: Seriya, p: Promezhutok): string[] {
     shagi.push('Целых $k$ здесь нет — корней этой серии на промежутке нет.');
   } else {
     const korni = ks.map((k) => ugolTex({ pi: add(x0, mul(h, q(k))) }));
-    shagi.push(
-      `Целые $k$: $${ks.map((k) => d(k)).join(';\\ ')}$. Корни: $${korni.join(';\\ ')}$.`,
-    );
+    shagi.push(`Целые $k$: $${ks.map((k) => d(k)).join(';\\ ')}$. Корни: $${korni.join(';\\ ')}$.`);
   }
   return shagi;
 }

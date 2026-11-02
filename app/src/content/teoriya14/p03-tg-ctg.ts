@@ -34,7 +34,11 @@ export const PUNKT_3: Punkt14 = {
         ],
         risunok: {
           vid: 'krug',
-          spec: { osTg: true, tgZnach: { a: 1, tex: '1' }, tochki: [{ ugol: u(1, 4), akcent: true, luch: true }] },
+          spec: {
+            osTg: true,
+            tgZnach: { a: 1, tex: '1' },
+            tochki: [{ ugol: u(1, 4), akcent: true, luch: true }],
+          },
         },
         otvet: '$1$.',
       },
@@ -103,12 +107,14 @@ export const PUNKT_3: Punkt14 = {
       ton: 'zapomni',
       text: 'Если луч **параллелен** оси, точки пересечения нет — значения не существует. Тангенс не существует в верхней и нижней точках: $x\\ne\\dfrac{\\pi}{2}+\\pi k$, $k\\in\\mathbb{Z}$. Котангенс не существует в левой и правой точках: $x\\ne\\pi k$, $k\\in\\mathbb{Z}$.',
       primer: {
-        uslovie: 'Найдём $\\operatorname{tg}\\dfrac{3\\pi}{2}$ и $\\operatorname{ctg}\\dfrac{3\\pi}{2}$.',
+        uslovie:
+          'Найдём $\\operatorname{tg}\\dfrac{3\\pi}{2}$ и $\\operatorname{ctg}\\dfrac{3\\pi}{2}$.',
         shagi: [
           'Точка $\\dfrac{3\\pi}{2}$ — нижняя, $(0;\\,-1)$. Луч через неё идёт по вертикальной оси и параллелен оси тангенсов $x=1$: пересечения нет, $\\operatorname{tg}\\dfrac{3\\pi}{2}$ не существует. Делением то же: $\\cos\\dfrac{3\\pi}{2}=0$, на ноль делить нельзя.',
           'Продолжим ту же прямую через центр вверх: она пересекает ось котангенсов $y=1$ в точке $(0;\\,1)$. Абсцисса $0$, значит, $\\operatorname{ctg}\\dfrac{3\\pi}{2}=\\dfrac{0}{-1}=0$.',
         ],
-        otvet: '$\\operatorname{tg}\\dfrac{3\\pi}{2}$ не существует, $\\operatorname{ctg}\\dfrac{3\\pi}{2}=0$.',
+        otvet:
+          '$\\operatorname{tg}\\dfrac{3\\pi}{2}$ не существует, $\\operatorname{ctg}\\dfrac{3\\pi}{2}=0$.',
       },
     },
   ],
