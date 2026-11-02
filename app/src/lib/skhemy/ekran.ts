@@ -493,8 +493,8 @@ export function raskladka(
   /** Точки с ручками перетаскивания: кольцо ручки — препятствие подписи. */
   ruchki: readonly string[] = [],
 ): Ekran {
-  /* Величина не уместилась в поле — фигура чуть мельчает, чтобы
-     запись не обрезалась краем чертежа. */
+  /* Величина или буква не уместилась в поле — фигура чуть мельчает,
+     чтобы подпись не обрезалась краем чертежа. */
   let r = ramka;
   for (let i = 0; ; i += 1) {
     const [ekran, vne] = raskladka1(kadr, vid, r, W, H, sost, ruchki);
@@ -650,6 +650,7 @@ function raskladka1(
   }
 
   const zanyato: Pryam[] = [];
+  let vneBukv = false;
   if (sost.podpisi) {
     const imennye = ekran.tochki.filter((t) => t.imya !== null);
     const mesta = razmestitSVynoskami(
@@ -663,6 +664,19 @@ function raskladka1(
       const { c: m, vynoska: v } = mesta[i]!;
       const [bukva, indeks] = (t.imya ?? '').split('_');
       const g = gabaritBukvy(t.imya ?? '', SK.kegl);
+      /* Буква за краем чертежа (раскладка ставит её туда, когда рядом с
+         точкой всё занято линиями) — фигура мельчает, как для величин.
+         Границы — по рамке текста в браузере: 0,5 кегля над центром и
+         под ним, с индексом (опущен на 4 px) — 0,66 кегля под центром; допуск
+         1 px, как у проверки в браузере (test:drawing-labels). */
+      const niz = SK.kegl * (indeks === undefined ? 0.5 : 0.66);
+      if (
+        m[0] - g.hw < -1 ||
+        m[1] - SK.kegl * 0.5 < -1 ||
+        m[0] + g.hw > W + 1 ||
+        m[1] + niz > H + 1
+      )
+        vneBukv = true;
       zanyato.push([m[0] - g.hw, m[1] - g.hh, m[0] + g.hw, m[1] + g.hh]);
       if (v !== null) prep.otrezki.push([v[0], v[1]]);
       ekran.podpisi.push({
@@ -681,7 +695,7 @@ function raskladka1(
       });
     });
   }
-  let vne = false;
+  let vne = vneBukv;
   for (const { el, obshchee } of velichiny) {
     const chasti = chastiVelichiny(el.tekst);
     const { hw, hh, base } = gabaritVelichiny(chasti);
