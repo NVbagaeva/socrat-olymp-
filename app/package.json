@@ -42,6 +42,7 @@
     "test:graph-trigonometric": "node scripts/check-graph-trigonometric.mjs",
     "test:graph-sqrt": "node scripts/check-graph-sqrt.mjs",
     "test:point-labels": "node scripts/check-point-labels.mjs",
+    "test:drawing-labels": "node scripts/check-drawing-labels.mjs",
     "test:komplekty": "node scripts/check-komplekty.mjs",
     "test:generator": "node scripts/check-generator.mjs",
     "test:theory-labels": "node scripts/check-theory-labels.mjs",

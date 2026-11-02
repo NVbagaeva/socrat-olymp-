@@ -28,6 +28,7 @@ import { ZADACHI as OTNOSHENIYA } from './otnosheniya.mjs';
 import { ZADACHI as PLOSHCHADI } from './ploshchadi.mjs';
 import { ZADACHI as TRAPECIYA } from './trapeciya.mjs';
 import { ZADACHI as TREUGOLNIK } from './treugolnik.mjs';
+import { ZADACHI as NOVYE } from './novye.mjs';
 
 const N = Number(process.argv[2] ?? 1000);
 const PROVERKI = [
@@ -37,6 +38,7 @@ const PROVERKI = [
   ...TRAPECIYA,
   ...OTNOSHENIYA,
   ...PLOSHCHADI,
+  ...NOVYE,
 ];
 
 const { OPORNYE_18 } = requireSrc('content/zadanie18/opornye/index');

@@ -1,7 +1,15 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from 'react';
 import {
   RUCHKA_R,
   ramkaKadra,
@@ -12,7 +20,8 @@ import {
   type Sostoyanie,
 } from '@/lib/skhemy/ekran';
 import type { Ramka, T2, Tochki, Vid, ZhivayaSkhema } from '@/lib/skhemy/tipy';
-import { BUKVY } from '@/lib/risunki/shrifty.js';
+import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
+import { cssTemy, klassTemy } from '@/lib/skhemy/tema';
 import './skhemy.css';
 
 /** Длительность подстройки рамки (масштаба) под новое содержимое, мс. */
@@ -278,20 +287,24 @@ export function ChertezhSkhemy({
     <div ref={obertka} className={clsx('skh', tyanem !== null && 'is-tyanem', className)}>
       <svg
         ref={svgRef}
-        className="skh__svg"
+        className={clsx('skh__svg', ekran.tema && klassTemy('cvet'))}
         viewBox={`0 0 ${W} ${H}`}
         width={W}
         height={H}
         role="img"
         aria-label={opisanie}
       >
+        {/* Тема чертежа (роли элементов): на экране — всегда цветная. */}
+        {ekran.tema ? <style>{cssTemy()}</style> : null}
         <g className="skh__mnog">
           {ekran.mnog.map((m) => (
-            <polygon
-              key={m.id}
-              className={clsx('skh-mnog', m.cvet && `skh-c-${m.cvet}`)}
-              points={m.points}
-            />
+            <Fragment key={m.id}>
+              <polygon
+                className={clsx('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}
+                points={m.points}
+              />
+              {m.kontur === '' ? null : <path className="skh-iskomaya" d={m.kontur} />}
+            </Fragment>
           ))}
         </g>
         <g className="skh__okr">
@@ -305,6 +318,7 @@ export function ChertezhSkhemy({
                 o.dim && 'is-dim',
                 o.novyy && 'is-novyy',
                 o.cvet && `skh-c-${o.cvet}`,
+                o.rol && `skh-r-${o.rol}`,
               )}
               cx={o.cx}
               cy={o.cy}
@@ -323,6 +337,7 @@ export function ChertezhSkhemy({
                 d.dim && 'is-dim',
                 d.novyy && 'is-novyy',
                 d.cvet && `skh-c-${d.cvet}`,
+                d.rol && `skh-r-${d.rol}`,
               )}
               d={d.d}
             />
@@ -334,7 +349,11 @@ export function ChertezhSkhemy({
             .map((u) => (
               <path
                 key={u.id}
-                className={clsx('skh-sektor', u.cvet && `skh-c-${u.cvet}`)}
+                className={clsx(
+                  'skh-sektor',
+                  u.cvet && `skh-c-${u.cvet}`,
+                  u.rol && `skh-r-${u.rol}`,
+                )}
                 d={u.sektor}
               />
             ))}
@@ -350,6 +369,7 @@ export function ChertezhSkhemy({
                 l.dim && 'is-dim',
                 l.novyy && 'is-novyy',
                 l.cvet && `skh-c-${l.cvet}`,
+                l.rol && `skh-r-${l.rol}`,
               )}
             >
               <line x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} pathLength={l.novyy ? 1 : undefined} />
@@ -368,6 +388,7 @@ export function ChertezhSkhemy({
                 u.dim && 'is-dim',
                 u.novyy && 'is-novyy',
                 u.cvet && `skh-c-${u.cvet}`,
+                u.rol && `skh-r-${u.rol}`,
               )}
               d={u.d}
             />
@@ -383,10 +404,11 @@ export function ChertezhSkhemy({
                 p.dim && 'is-dim',
                 p.novyy && 'is-novyy',
                 p.cvet && `skh-c-${p.cvet}`,
+                p.rol && `skh-r-${p.rol}`,
               )}
               cx={p.x}
               cy={p.y}
-              r={2.6}
+              r={p.r}
             />
           ))}
         </g>
@@ -396,7 +418,11 @@ export function ChertezhSkhemy({
             .map((p) => (
               <path
                 key={p.id}
-                className={clsx('skh-vynoska', p.cvet && `skh-c-${p.cvet}`)}
+                className={clsx(
+                  'skh-vynoska',
+                  p.cvet && `skh-c-${p.cvet}`,
+                  p.rol && `skh-r-${p.rol}`,
+                )}
                 d={p.vynoska}
               />
             ))}
@@ -411,6 +437,7 @@ export function ChertezhSkhemy({
                 p.dim && 'is-dim',
                 p.novyy && 'is-novyy',
                 p.cvet && `skh-c-${p.cvet}`,
+                p.rol && `skh-r-${p.rol}`,
               )}
               x={p.x}
               y={p.y}
@@ -423,6 +450,51 @@ export function ChertezhSkhemy({
               )}
             </text>
           ))}
+        </g>
+        <g className="skh__velichiny" style={{ fontFamily: CHISLA }}>
+          {ekran.velichiny.map((v) => {
+            const klass = clsx(
+              v.lit && 'is-lit',
+              v.dim && 'is-dim',
+              v.novyy && 'is-novyy',
+              v.cvet && `skh-c-${v.cvet}`,
+              v.rol && `skh-r-${v.rol}`,
+            );
+            return (
+              <g key={v.id}>
+                <text className={clsx('skh-velichina', klass)}>
+                  {v.chasti.map((c, i) => (
+                    <tspan
+                      key={i}
+                      className={
+                        clsx(c.kursiv && 'skh-kursiv', c.indeks && 'skh-indeks-vel') || undefined
+                      }
+                      style={c.kursiv ? { fontFamily: BUKVY } : undefined}
+                      x={Math.round((v.levo + c.dx) * 100) / 100}
+                      y={c.indeks ? v.base + 4 : v.base}
+                      /* Подкоренное — заданной ширины: черта знака ровно над ним. */
+                      {...(c.koren
+                        ? {
+                            textLength: Math.round(c.w * 100) / 100,
+                            lengthAdjust: 'spacingAndGlyphs',
+                          }
+                        : {})}
+                    >
+                      {c.t}
+                    </tspan>
+                  ))}
+                </text>
+                {v.korni.map((d, i) => (
+                  <path
+                    key={i}
+                    className={clsx('skh-koren', klass)}
+                    d={d}
+                    style={{ strokeWidth: v.tolshchinaKornya }}
+                  />
+                ))}
+              </g>
+            );
+          })}
         </g>
         <g className="skh__ruchki">
           {ruchki.map((imya) => {

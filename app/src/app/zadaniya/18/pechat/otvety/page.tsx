@@ -1,0 +1,30 @@
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { SheetPageGen18 } from '@/components/zadanie18/SheetPageGen18';
+import { PECHAT_GEN_18 } from '@/content/generator18';
+import { zadanie18Title } from '@/content/zadanie18';
+import { typeset } from '@/lib/tex';
+import { bank18 } from '@/lib/zadanie18/trenazher/bank';
+import 'katex/dist/katex.min.css';
+import '@/lib/sheet/theme.css';
+import '@/lib/sheet/sheet.css';
+import '@/components/skhemy/skhemy.css';
+import '../pechat18.css';
+
+export const metadata: Metadata = {
+  title: zadanie18Title(PECHAT_GEN_18.uchitel),
+  robots: { index: false },
+};
+
+/**
+ * Лист учителя генератора №18: те же задачи с доказательством а),
+ * решением б) и ответом, в конце — ответы б). Параметры листа — в адресе;
+ * оболочки сайта нет. Банк собран здесь, на сборке: ответы закрыты.
+ */
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <SheetPageGen18 vid="uchitel" bank={bank18(typeset)} />
+    </Suspense>
+  );
+}

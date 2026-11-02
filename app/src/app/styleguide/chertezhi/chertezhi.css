@@ -1,0 +1,110 @@
+/* Стильгайд темы чертежа (/styleguide/chertezhi). */
+.sg-ch {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+  color: var(--color-text);
+}
+.sg-ch h1 {
+  font-size: var(--fs-h1);
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+.sg-ch h2 {
+  font-size: var(--fs-h3);
+  margin: 32px 0 12px;
+}
+.sg-ch h3 {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.sg-ch__lead,
+.sg-ch__note {
+  max-width: 72ch;
+  color: var(--color-text-secondary);
+}
+.sg-ch__roli,
+.sg-ch__shablony {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr));
+  gap: 16px;
+}
+.sg-ch__rol,
+.sg-ch__shablon {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  background: var(--color-surface);
+}
+.sg-ch__rol p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+.sg-ch__para {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.sg-ch__para figure {
+  margin: 0;
+  min-width: 0;
+}
+/* Только svg самого чертежа: svg внутри формулы KaTeX (знак корня) не трогаем —
+   белый фон закрыл бы подкоренное число. */
+.sg-ch__para figure > div > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #fff;
+  border-radius: 6px;
+}
+.sg-ch__para figcaption {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: 2px;
+}
+.sg-ch__cveta {
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.sg-ch__cveta td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+.sg-ch__plashka {
+  display: inline-block;
+  width: 28px;
+  height: 18px;
+  border-radius: 4px;
+}
+@media (max-width: 560px) {
+  .sg-ch__para {
+    grid-template-columns: 1fr;
+  }
+  .sg-ch__cveta td:last-child {
+    display: none;
+  }
+}
+
+/* Печатная версия образцов №1 и №3: токены чертежей — как в ч/б теме листа. */
+.sg-ch__pechat {
+  --chertezh-vershina: #000000;
+  --chertezh-velichina: #000000;
+  --chertezh-velichina-2: #000000;
+  --graph-axis: #000000;
+  --graph-accent: #000000;
+  --color-primary: #000000;
+}
+
+.sg-ch__pravila {
+  max-width: 72ch;
+  padding-left: 1.4em;
+  line-height: 1.5;
+}
+
+.sg-ch__pravila li + li {
+  margin-top: 0.4em;
+}

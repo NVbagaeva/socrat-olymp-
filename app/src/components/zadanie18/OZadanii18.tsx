@@ -13,6 +13,7 @@ const GOTOVY: ReadonlySet<string> = new Set([
   'teoriya',
   'opornye',
   'trenazher',
+  'generator',
 ]);
 
 function vkladka(id: string) {

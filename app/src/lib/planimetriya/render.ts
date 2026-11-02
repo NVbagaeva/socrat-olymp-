@@ -24,6 +24,7 @@
  */
 
 import { esc, px } from '@/lib/graph/renderer.js';
+import { KOREN, znakKornyaSvg } from '@/lib/risunki/koren.js';
 import { indeksSvg } from '@/lib/risunki/shrifty.js';
 import { POROG } from './figury';
 import {
@@ -92,29 +93,54 @@ const SHIRINA: Record<string, number> = {
   R1: 0.76,
 };
 
-/* Черта над подкоренным числом. У знака «√» шрифта KaTeX_Main черты
-   нет: она рисуется линией от верхнего конца галочки до правого края
-   числа с запасом. Метрики KaTeX_Main (замер в браузере): «√» —
-   ширина 0,833 em, верх штриха на 0,8 em над базовой линией, толщина
-   штриха 0,04 em; цифра — 0,5 em. Текст выровнен по центру cx. */
-function chertyKornya(t: string, cx: number, base: number, size: number, color: string): string[] {
-  const out: string[] = [];
-  const x0 = cx - shirinaTeksta(t, size) / 2;
-  const tolshchina = size * 0.04;
-  const y = base - size * 0.8 + tolshchina / 2;
-  const re = /√([\d,.]+)/g;
-  let m = re.exec(t);
+/* Запись с корнем («5√2», «a√3»): знак и черта — путь общей
+   типографики рисунков (lib/risunki/koren.js), подкоренное набрано
+   заданной ширины (textLength) — черта ровно над ним в любом браузере
+   и в PDF. Раньше знак был символом шрифта, а черта рисовалась только
+   у чисто числовых записей: у «a√3» её не было. Текст по центру cx. */
+function znachenieSKornem(
+  tekst: string,
+  cx: number,
+  base: number,
+  size: number,
+  color: string,
+): { text: string; znaki: string[] } {
+  const kuski: { t: string; koren: boolean }[] = [];
+  const re = /√([\d,.]+|[a-zA-Z]\w*)/g;
+  let last = 0;
+  let m = re.exec(tekst);
   while (m !== null) {
-    const nachalo = x0 + shirinaTeksta(t.slice(0, m.index), size) + size * 0.81;
-    const konec =
-      x0 + shirinaTeksta(t.slice(0, m.index + 1 + (m[1] ?? '').length), size) + size * 0.06;
-    const d = `M${px(nachalo)} ${px(y)}H${px(konec)}`;
-    out.push(
-      `<path class="pl-koren" d="${d}" stroke="${color}" stroke-width="${px(tolshchina)}" fill="none"/>`,
-    );
-    m = re.exec(t);
+    if (m.index > last) kuski.push({ t: tekst.slice(last, m.index), koren: false });
+    kuski.push({ t: m[1] ?? '', koren: true });
+    last = m.index + m[0].length;
+    m = re.exec(tekst);
   }
-  return out;
+  if (last < tekst.length) kuski.push({ t: tekst.slice(last), koren: false });
+  const shirina = (k: { t: string; koren: boolean }) =>
+    shirinaTeksta(k.t, size) + (k.koren ? (KOREN.znak + KOREN.hvost) * size : 0);
+  let x = cx - kuski.reduce((a, k) => a + shirina(k), 0) / 2;
+  const tspany: string[] = [];
+  const znaki: string[] = [];
+  for (const k of kuski) {
+    const w = shirinaTeksta(k.t, size);
+    const bukvy = /[a-zA-Z]/.test(k.t);
+    const shrift = `font-family="${bukvy ? PL.font.bukva : PL.font.chislo}"${bukvy ? ' font-style="italic"' : ''}`;
+    if (k.koren) {
+      znaki.push(znakKornyaSvg(x, base, w, size, color, 'pl-koren'));
+      x += KOREN.znak * size;
+      tspany.push(
+        `<tspan x="${px(x)}" ${shrift} textLength="${px(w)}" lengthAdjust="spacingAndGlyphs">${gradus(k.t)}</tspan>`,
+      );
+      x += w + KOREN.hvost * size;
+    } else {
+      tspany.push(`<tspan x="${px(x)}" ${shrift}>${gradus(k.t)}</tspan>`);
+      x += w;
+    }
+  }
+  return {
+    text: `<text class="pl-znachenie" y="${px(base)}" font-size="${size}" fill="${color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${tspany.join('')}</text>`,
+    znaki,
+  };
 }
 
 function shirinaTeksta(t: string, size: number): number {
@@ -646,7 +672,10 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
         ? PL.iskomoe
         : sloyOf(e) !== 'uslovie'
           ? PL.podskazka
-          : PL.ink;
+          : /* Угол с подписью — дуга цветом своей величины. */
+            e.znachenie !== undefined
+            ? PL.velichina
+            : PL.ink;
     const wid = iz || novoe(e) ? PL.width.markIskomoe : PL.width.mark;
     const th = angleAt(E(e.a), vtx, E(e.b));
     if (e.pryamoy) {
@@ -722,7 +751,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const c = E(e.t);
     const st = stil(e);
     sloyTochki.push(
-      `<circle class="${st.cls}"${st.data} cx="${px(c[0])}" cy="${px(c[1])}" r="${PL.tochkaR}" fill="${novoe(e) ? PL.podskazka : PL.ink}"/>`,
+      `<circle class="${st.cls}"${st.data} cx="${px(c[0])}" cy="${px(c[1])}" r="${PL.tochkaR}" fill="${novoe(e) ? PL.podskazka : PL.vershina}"/>`,
     );
     prep.push({ tip: 'tochka', c, r: PL.tochkaR, chto: `точка ${e.t}` });
   }
@@ -938,7 +967,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const base = vybran.y + size * 0.72;
     const tx = vybran.x + 1;
     sloyPodpisi.push(
-      `<text class="pl-bukva" x="${px(tx)}" y="${px(base)}" font-family="${PL.font.bukva}" font-style="italic" font-size="${size}" fill="${PL.ink}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${esc(osn)}${ind ? indeksSvg(esc(ind), size) : ''}</text>`,
+      `<text class="pl-bukva" x="${px(tx)}" y="${px(base)}" font-family="${PL.font.bukva}" font-style="italic" font-weight="700" font-size="${size}" fill="${PL.vershina}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${esc(osn)}${ind ? indeksSvg(esc(ind), size) : ''}</text>`,
     );
     R.teksty.push(tekst);
   }
@@ -968,7 +997,10 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const slovo = /[а-яё]/i.test(tekst);
     const zs = PL.font.razmerZnach;
     const w = shirinaTeksta(tekst, zs) + 3;
-    const h = zs * 0.78;
+    /* С корнем запись выше: черта знака над цифрами. */
+    const sKornem = tekst.includes('√');
+    const h = sKornem ? zs * 0.98 : zs * 0.78;
+    const nizBazy = sKornem ? zs * 0.9 : zs * 0.74;
     const vse = [...prep, ...zanyato];
     const kandidaty: Ramka[] = [];
     if (z.vdol) {
@@ -1057,13 +1089,13 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
         ? PL.podskazka
         : e.vydelit === 'iskomoe'
           ? PL.iskomoe
-          : PL.ink;
-    sloyPodpisi.push(
-      `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + zs * 0.74)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${gradus(tekst)}</text>`,
-    );
-    if (chislo)
+          : PL.velichina;
+    if (sKornem) {
+      const k = znachenieSKornem(tekst, vybran.x + vybran.w / 2, vybran.y + nizBazy, zs, color);
+      sloyPodpisi.push(k.text, ...k.znaki);
+    } else
       sloyPodpisi.push(
-        ...chertyKornya(tekst, vybran.x + vybran.w / 2, vybran.y + zs * 0.74, zs, color),
+        `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + nizBazy)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${gradus(tekst)}</text>`,
       );
     R.teksty.push(tekst);
   }

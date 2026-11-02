@@ -1,6 +1,7 @@
 /**
- * Опорные задачи №18 в порядке тем ключевых схем. Задачи составлены
- * для сайта в духе задания 18 ЕГЭ (не взяты из сборников). Чертежи —
+ * Опорные задачи №18 в порядке тем ключевых схем. Первые задачи
+ * составлены для сайта в духе задания 18 ЕГЭ; задачи из novye.ts —
+ * условия из курса подготовки, решения написаны заново (istochnik). Чертежи —
  * lib/zadanie18/opornye, проверка — pnpm test:opornye-18.
  */
 
@@ -8,30 +9,61 @@ import { OP18_KAS_OKR, OP18_KAS_SEK, OP18_OPIS_TRAP } from './kasatelnye';
 import { OP18_DVE_VERSHINY, OP18_KVADRAT, OP18_TREZUBEC } from './okruzhnost';
 import { OP18_BISS_MED, OP18_MENELAY } from './otnosheniya';
 import { OP18_RASSTOYANIYA, OP18_TRI_UGLA } from './ploshchadi';
+import {
+  OP18_BISS_SRED,
+  OP18_CHEREZ_CENTR,
+  OP18_DIAG_TRAP,
+  OP18_DVE_OKR,
+  OP18_KAS_EF,
+  OP18_KV_GIP_OTN,
+  OP18_KVADRAT_PER,
+  OP18_KVADRATY,
+  OP18_SER_VYS,
+  OP18_VNEVPIS,
+  OP18_VPIS_KLM,
+  OP18_VPIS_LMN,
+  OP18_VYS_PERP,
+} from './novye';
 import type { Opornaya18 } from './tipy';
 import { OP18_BABOCHKA, OP18_CHETYRE, OP18_PERP_DIAG } from './trapeciya';
 import { OP18_BISSEKTRISA, OP18_MEDIANA, OP18_VYSOTY } from './treugolnik';
 
 export type { Opornaya18, SkhemaVZadache } from './tipy';
 
-export const OPORNYE_18: readonly Opornaya18[] = [
+/* Порядок — по темам ключевых схем; номер задачи — её место в списке. */
+const PO_TEMAM: readonly Opornaya18[] = [
   OP18_VYSOTY,
+  OP18_VYS_PERP,
   OP18_BISSEKTRISA,
+  OP18_BISS_SRED,
   OP18_MEDIANA,
+  OP18_KVADRATY,
+  OP18_SER_VYS,
   OP18_TREZUBEC,
   OP18_KVADRAT,
+  OP18_KV_GIP_OTN,
   OP18_DVE_VERSHINY,
+  OP18_DVE_OKR,
+  OP18_CHEREZ_CENTR,
+  OP18_VPIS_LMN,
   OP18_KAS_SEK,
   OP18_OPIS_TRAP,
   OP18_KAS_OKR,
+  OP18_KAS_EF,
+  OP18_VPIS_KLM,
+  OP18_VNEVPIS,
+  OP18_KVADRAT_PER,
   OP18_BABOCHKA,
   OP18_CHETYRE,
   OP18_PERP_DIAG,
+  OP18_DIAG_TRAP,
   OP18_MENELAY,
   OP18_BISS_MED,
   OP18_TRI_UGLA,
   OP18_RASSTOYANIYA,
 ];
+
+export const OPORNYE_18: readonly Opornaya18[] = PO_TEMAM.map((o, i) => ({ ...o, no: i + 1 }));
 
 export function opornaya18(id: string): Opornaya18 | undefined {
   return OPORNYE_18.find((o) => o.id === id);
@@ -73,4 +105,10 @@ export const OPORNYE_18_UI = {
   predydushchaya: 'Предыдущая задача',
   sleduyushchaya: 'Следующая задача',
   zadacha: (no: number) => `Задача ${no}`,
+  izKursa: 'Условие из курса подготовки, решение — наше',
+  variaciya: (no: number) => `Вариация к задаче ${no}`,
+  podskazki: 'Подсказки',
+  podskazkiPodskazka: 'Ответь на вопрос сам, потом сверься.',
+  podskazkaOtvet: 'Ответ на вопрос',
+  oshibki: 'Типичные ошибки',
 } as const;

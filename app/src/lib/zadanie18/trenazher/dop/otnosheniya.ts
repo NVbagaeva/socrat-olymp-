@@ -4,7 +4,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, otr, tch } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, vel, velOtr } from '@/lib/skhemy/dsl';
 import { add, intersect, mid } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import { delit, scena } from './obshchee';
@@ -27,15 +27,35 @@ export const OT_MEDIANY = scena({
   postroit(t) {
     const { A, B, C, M, N, G } = tochkiMedian(t);
     const el: Element[] = [
+      /* б) ищет площадь AGB. */
+      mnog('t-isk', [A, G, B], { skrytyy: false, rol: 'region-sought' }),
+      mnog('t-fig', [A, B, C], { skrytyy: false, rol: 'region' }),
       mnog('f-gmn', [G, M, N], { gruppy: ['pod'], cvet: 'b' }),
       mnog('f-gab', [G, A, B], { gruppy: ['pod', 'pl'], cvet: 'a' }),
       mnog('f-abm', [A, B, M], { gruppy: ['pl'], cvet: 'c' }),
-      otr('AB', A, B, { gruppy: ['sredlin', 'pod'], cvet: 'a' }),
-      otr('BC', B, C),
-      otr('CA', C, A),
-      otr('AM', A, M),
-      otr('BN', B, N),
-      otr('MN', M, N, { skrytyy: true, stil: 'punktir', gruppy: ['sredlin', 'pod'], cvet: 'b' }),
+      otr('AB', A, B, { rol: 'figure', gruppy: ['sredlin', 'pod'], cvet: 'a' }),
+      otr('BC', B, C, { rol: 'figure' }),
+      otr('CA', C, A, { rol: 'figure' }),
+      otr('AM', A, M, { rol: 'aux' }),
+      otr('BN', B, N, { rol: 'aux' }),
+      otr('MN', M, N, {
+        rol: 'construction',
+        skrytyy: true,
+        stil: 'punktir',
+        gruppy: ['sredlin', 'pod'],
+        cvet: 'b',
+      }),
+      /* Данные условия на чертеже. */
+      /* Площадь — в свободном четырёхугольнике GMCN (центр масс ABC — точка G). */
+      vel(
+        'd-S',
+        'S_ABC = 24',
+        {
+          vnutri: [(G[0] + M[0] + C[0] + N[0]) / 4, (G[1] + M[1] + C[1] + N[1]) / 4],
+        },
+        { rol: 'region' },
+      ),
+      velOtr('d-Sx', 'S_AGB = ?', A, B, { rol: 'region-sought' }),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -65,13 +85,20 @@ export const OT_MENELAY = scena({
   postroit(t) {
     const { A, B, C, M, K, P } = tochkiMenelaya(t);
     const el: Element[] = [
-      otr('AB', A, B, { gruppy: ['menelay'], cvet: 'a' }),
-      otr('BC', B, C, { gruppy: ['menelay'], cvet: 'a' }),
-      otr('CA', C, A, { gruppy: ['menelay', 'otv'], cvet: 'a' }),
-      otr('CP', C, P, { stil: 'prodolzhenie', gruppy: ['otv'], cvet: 'b' }),
-      otr('MP', M, P, { gruppy: ['menelay'], cvet: 'b' }),
-      otr('AM-r', A, M, { skrytyy: true, shtrihi: 1, gruppy: ['menelay'], cvet: 'c' }),
-      otr('MB-r', M, B, { skrytyy: true, shtrihi: 1, gruppy: ['menelay'], cvet: 'c' }),
+      mnog('t-fig', [A, B, C], { skrytyy: false, rol: 'figure' }),
+      otr('BK', B, K, { rol: 'part-x' }),
+      otr('KC', K, C, { rol: 'part-x' }),
+      otr('AB', A, B, { rol: 'figure', gruppy: ['menelay'], cvet: 'a' }),
+      otr('BC', B, C, { rol: 'figure', gruppy: ['menelay'], cvet: 'a' }),
+      otr('CA', C, A, { rol: 'figure', gruppy: ['menelay', 'otv'], cvet: 'a' }),
+      otr('CP', C, P, { rol: 'construction', stil: 'prodolzhenie', gruppy: ['otv'], cvet: 'b' }),
+      otr('MP', M, P, { rol: 'aux', gruppy: ['menelay'], cvet: 'b' }),
+      otr('AM-r', A, M, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['menelay'], cvet: 'c' }),
+      otr('MB-r', M, B, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['menelay'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AC', '8', A, C),
+      velOtr('d-BK', '3x', B, K, { rol: 'part-x' }),
+      velOtr('d-KC', 'x', K, C, { rol: 'part-x' }),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -101,15 +128,30 @@ export const OT_CHEVA = scena({
   postroit(t) {
     const { A, B, C, A1, B1, P, C1 } = tochkiChevy(t);
     const el: Element[] = [
+      mnog('t-fig', [A, B, C], { skrytyy: false, rol: 'figure' }),
+      otr('BA1p', B, A1, { rol: 'part-x' }),
+      otr('A1Cp', A1, C, { rol: 'part-x' }),
+      otr('CB1p', C, B1, { rol: 'part-y' }),
+      otr('B1Ap', B1, A, { rol: 'part-y' }),
       mnog('f-aba1', [A, B, A1], { gruppy: ['menelay'], cvet: 'b' }),
-      otr('AB', A, B, { gruppy: ['cheva'], cvet: 'a' }),
-      otr('BC', B, C, { gruppy: ['cheva'], cvet: 'a' }),
-      otr('CA', C, A, { gruppy: ['cheva'], cvet: 'a' }),
-      otr('AA1', A, A1, { gruppy: ['menelay'], cvet: 'b' }),
-      otr('BB1', B, B1),
-      otr('CC1', C, C1, { stil: 'punktir', gruppy: ['cheva', 'menelay'], cvet: 'c' }),
-      otr('AC1-r', A, C1, { skrytyy: true, shtrihi: 1, gruppy: ['cheva'], cvet: 'c' }),
-      otr('C1B-r', C1, B, { skrytyy: true, shtrihi: 1, gruppy: ['cheva'], cvet: 'c' }),
+      otr('AB', A, B, { rol: 'figure', gruppy: ['cheva'], cvet: 'a' }),
+      otr('BC', B, C, { rol: 'figure', gruppy: ['cheva'], cvet: 'a' }),
+      otr('CA', C, A, { rol: 'figure', gruppy: ['cheva'], cvet: 'a' }),
+      otr('AA1', A, A1, { rol: 'aux', gruppy: ['menelay'], cvet: 'b' }),
+      otr('BB1', B, B1, { rol: 'aux' }),
+      otr('CC1', C, C1, {
+        rol: 'construction',
+        stil: 'punktir',
+        gruppy: ['cheva', 'menelay'],
+        cvet: 'c',
+      }),
+      otr('AC1-r', A, C1, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['cheva'], cvet: 'c' }),
+      otr('C1B-r', C1, B, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['cheva'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-BA1', 'x', B, A1, { rol: 'part-x' }),
+      velOtr('d-A1C', '2x', A1, C, { rol: 'part-x' }),
+      velOtr('d-CB1', '2y', C, B1, { rol: 'part-y' }),
+      velOtr('d-B1A', 'y', B1, A, { rol: 'part-y' }),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -150,18 +192,41 @@ export const OT_PARALLELOGRAMM = scena({
   postroit(t) {
     const { A, B, C, D, K, M, P, Q } = tochkiParallelogramma(t);
     const el: Element[] = [
+      /* б) ищет площадь APQ. */
+      mnog('t-isk', [A, P, Q], { skrytyy: false, rol: 'region-sought' }),
+      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'region' }),
+      otr('CMp', C, M, { rol: 'part-x' }),
+      otr('MDp', M, D, { rol: 'part-x' }),
       mnog('f-bpk', [B, P, K], { gruppy: ['bab1'], cvet: 'a' }),
       mnog('f-dpa', [D, P, A], { gruppy: ['bab1'], cvet: 'b' }),
       mnog('f-dqm', [D, Q, M], { gruppy: ['bab2'], cvet: 'a' }),
       mnog('f-bqa', [B, Q, A], { gruppy: ['bab2'], cvet: 'b' }),
       mnog('f-apq', [A, P, Q], { gruppy: ['pl'], cvet: 'c' }),
-      otr('AB', A, B),
-      otr('BC', B, C),
-      otr('CD', C, D),
-      otr('DA', D, A),
-      otr('BD', B, D, { gruppy: ['pl'], cvet: 'c' }),
-      otr('AK', A, K),
-      otr('AM', A, M),
+      otr('AB', A, B, { rol: 'figure' }),
+      otr('BC', B, C, { rol: 'figure' }),
+      otr('CD', C, D, { rol: 'figure' }),
+      otr('DA', D, A, { rol: 'figure' }),
+      otr('BD', B, D, { rol: 'aux', gruppy: ['pl'], cvet: 'c' }),
+      otr('AK', A, K, { rol: 'aux' }),
+      otr('AM', A, M, { rol: 'aux' }),
+      /* Данные условия на чертеже. */
+      /* Площадь — в свободном треугольнике ADQ (центр — на диагонали BD). */
+      vel(
+        'd-S',
+        'S_ABCD = 60',
+        {
+          vnutri: [(A[0] + D[0] + Q[0]) / 3, (A[1] + D[1] + Q[1]) / 3],
+        },
+        { rol: 'region' },
+      ),
+      velOtr('d-CM', 'x', C, M, { rol: 'part-x' }),
+      velOtr('d-MD', '2x', M, D, { rol: 'part-x' }),
+      vel(
+        'd-Sx',
+        'S_APQ = ?',
+        { vnutri: [(A[0] + P[0] + Q[0]) / 3, (A[1] + P[1] + Q[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),

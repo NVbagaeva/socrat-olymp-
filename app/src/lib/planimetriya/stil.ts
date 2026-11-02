@@ -15,8 +15,14 @@ import { BUKVY, CHISLA } from '@/lib/risunki/shrifty.js';
 
 export const PL = {
   ink: THEME.colors.axis,
-  iskomoe: THEME.colors.lineA,
-  podskazka: THEME.colors.accent,
+  /* Тема чертежей (вторая редакция, styles/tokens.css --chertezh-*):
+     синий — только у вершин и точек; величины и искомое — терракота;
+     подсказки и построения учителя — янтарь. В ч/б теме листа токены
+     чернеют. */
+  vershina: 'var(--chertezh-vershina, #1F5FD0)',
+  velichina: 'var(--chertezh-velichina, #E07A2F)',
+  iskomoe: 'var(--chertezh-velichina, #E07A2F)',
+  podskazka: 'var(--chertezh-velichina-2, #A85F06)',
   bg: THEME.colors.bg,
   /* Толщины: основные линии и окружность < выделенный элемент. */
   width: {
@@ -39,7 +45,8 @@ export const PL = {
     bukva: BUKVY,
     chislo: CHISLA,
     slovo: THEME.font.family,
-    razmer: 16,
+    /* Подписи вершин — полужирный курсив, на 12 % крупнее прежних 16. */
+    razmer: 18,
     razmerZnach: 13.5,
   },
   /* Зазор подписи до линий и других подписей, px. */
