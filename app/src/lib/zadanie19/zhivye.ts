@@ -21,6 +21,11 @@
  * акцентным цветом, если оно там выполнено, и цветом пересечения, если
  * нарушено.
  *
+ * Для метода оценки (глава 8) на рисунке обе части уравнения и граница
+ * оценки y = M пунктиром: графики касаются, только когда границы
+ * сходятся. Число решений считается точно — по точкам, где границы
+ * достигаются, — точка касания акцентным цветом.
+ *
  * Описание — данные и функции; функции в браузер со страницы не
  * передать, поэтому компонент (components/zadanie19/Zhivoy19.tsx)
  * берёт описание здесь по id. Число решений считается точно —
@@ -378,7 +383,141 @@ const m07r3G = (a: number, x: number) => x * x + 2 * Math.abs(x - a) - a * a;
 const proverka = (x: number, y: number, verno: boolean) =>
   tochka(x, y, null, false, verno ? 'accent' : 'cross');
 
+/* ── Метод 8: оценка ─────────────────────────────────────────────── */
+
+/* Разбор метода 8: cos πx = (x − a)² + (a − 2)² + 1 — правая часть ≥ 1 ≥ левой. */
+const m08r1Prav = (a: number, x: number) => (x - a) ** 2 + (a - 2) ** 2 + 1;
+
+/* Разбор метода 8: √(x² − 5x + 4) + |(x − 2)(x − a)|; на (1; 4) не определена. */
+const m08r2G = (a: number, x: number) => {
+  const p = x * x - 5 * x + 4;
+  return p < 0 ? null : Math.sqrt(p) + Math.abs((x - 2) * (x - a));
+};
+
+/** Корни разбора 2 метода 8: сумма неотрицательных — нуль только в нулях корня x = 1, x = 4. */
+const m08r2Korni = (a: number) => [1, 4].filter((x) => Math.abs(m08r2G(a, x) ?? 1) < 1e-9);
+
+/* Разбор метода 8: 2^|x| + |a − 1| + |a − 3| = 2 + cos x; сдвиг левой части — |a − 1| + |a − 3|. */
+const m08r3Sdvig = (a: number) => Math.abs(a - 1) + Math.abs(a - 3);
+
 const ZHIVYE: Record<string, Zhivoy19> = {
+  /* Разбор метода 8: косинусоида и парабола с вершиной (a; (a − 2)² + 1); касание только при a = 2. */
+  'm08-r1': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -1,
+    max: 5,
+    shag: 0.01,
+    start: 0.5,
+    osobye: [
+      { a: 1, tex: '1' },
+      { a: 2, tex: '2' },
+      { a: 3, tex: '3' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-2, 6] as [number, number], y: [-1.5, 6] as [number, number] };
+      const vershina = (a - 2) ** 2 + 1;
+      return scena(
+        okno,
+        {
+          curves: [
+            grafik((x) => Math.cos(Math.PI * x), 'lineA'),
+            grafik((x) => m08r1Prav(a, x), 'lineB'),
+            pryamaya(0, 1, 'aux', 'dashed'),
+          ],
+          points:
+            vershina <= okno.y[1]
+              ? [tochka(a, vershina, null, false, blizko(a, 2) ? 'accent' : 'cross')]
+              : [],
+        },
+        `График y = cos πx, парабола y = (x − a)² + (a − 2)² + 1 при a = ${chislo(a)} и прямая y = 1`,
+      );
+    },
+    resheniy: (a) => (blizko(a, 2) ? 1 : 0),
+    itog: (a) =>
+      blizko(a, 2)
+        ? 'оценки сошлись: обе части равны $1$ при $x=2$'
+        : `вершина параболы выше прямой $y=1$: правая часть не меньше $${chisloTex((a - 2) ** 2 + 1)}$`,
+  },
+  /* Разбор метода 8: график суммы неотрицательных на её области и нули модуля пунктиром. */
+  'm08-r2': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -1,
+    max: 6,
+    shag: 0.01,
+    start: 2.5,
+    osobye: [
+      { a: 1, tex: '1' },
+      { a: 2, tex: '2' },
+      { a: 4, tex: '4' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-1.5, 6.5] as [number, number], y: [-1, 7] as [number, number] };
+      return scena(
+        okno,
+        {
+          curves: [
+            grafik((x) => m08r2G(a, x), 'lineA'),
+            grafik((x) => Math.abs((x - 2) * (x - a)), 'aux', {}, 'dashed'),
+          ],
+          points: [1, 4]
+            .map((x) => [x, m08r2G(a, x) ?? 0] as const)
+            .filter(([, y]) => y <= okno.y[1])
+            .map(([x, y]) => proverka(x, y, Math.abs(y) < 1e-9)),
+        },
+        `График y = √(x² − 5x + 4) + |(x − 2)(x − a)| при a = ${chislo(a)} на области x ≤ 1, x ≥ 4; пунктиром — y = |(x − 2)(x − a)|`,
+      );
+    },
+    resheniy: (a) => m08r2Korni(a).length,
+    itog: (a) => {
+      if (blizko(a, 1)) return 'при $x=1$ оба слагаемых — нули';
+      if (blizko(a, 4)) return 'при $x=4$ оба слагаемых — нули';
+      if (blizko(a, 2)) return 'модуль — нуль только при $x=2$, а там корень не определён';
+      return 'в точках $x=1$ и $x=4$ модуль не нуль';
+    },
+  },
+  /* Разбор метода 8: y = 2^|x| + |a − 1| + |a − 3| и y = 2 + cos x; касание в (0; 3) при 1 ≤ a ≤ 3. */
+  'm08-r3': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -1,
+    max: 5,
+    shag: 0.01,
+    start: 0,
+    osobye: [
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+      { a: 2, tex: '2' },
+      { a: 3, tex: '3' },
+      { a: 4, tex: '4' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-4, 4] as [number, number], y: [-0.5, 7] as [number, number] };
+      const niz = 1 + m08r3Sdvig(a);
+      return scena(
+        okno,
+        {
+          curves: [
+            grafik((x) => 2 + Math.cos(x), 'lineA'),
+            grafik((x) => 2 ** Math.abs(x) + m08r3Sdvig(a), 'lineB'),
+            pryamaya(0, 3, 'aux', 'dashed'),
+          ],
+          points:
+            niz <= okno.y[1]
+              ? [tochka(0, niz, null, false, niz <= 3 + 1e-9 ? 'accent' : 'cross')]
+              : [],
+        },
+        `Графики y = 2^|x| + |a − 1| + |a − 3| при a = ${chislo(a)} и y = 2 + cos x, прямая y = 3`,
+      );
+    },
+    resheniy: (a) => (m08r3Sdvig(a) <= 2 + 1e-9 ? 1 : 0),
+    itog: (a) =>
+      m08r3Sdvig(a) <= 2 + 1e-9
+        ? '$|a-1|+|a-3|=2$: графики касаются в $(0;\\,3)$'
+        : `$|a-1|+|a-3|=${chisloTex(m08r3Sdvig(a))}>2$: левая часть больше $3$`,
+  },
+
   /* Разбор метода 7: прямые y = (a² − ab)x − 3a + 2 + b при b = −2…2; при a = 1 все через (1; 0). */
   'm07-r1': {
     vid: 'grafik',
