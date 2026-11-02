@@ -1,0 +1,948 @@
+/* «Собрать вариант» в «Стеклянной сцене»: шапка с иллюстрацией, плитки
+   состава, чипы настроек, плашка бланков, «призрачный» лист, панель
+   «Сформировать» и содержимое окон. Поверхности — общая рецептура
+   стекла (--glass-*), главное действие — тёплая «таблетка» (--gloss-warm).
+   Окна выводятся в body (Okno.tsx), поэтому их правила — под .okno. */
+
+/* ── Страница и свечения ───────────────────────────────────────── */
+
+.var-stranica {
+  isolation: isolate;
+  --var-bar-h: 104px;
+  /* Снизу — ровно липкий отступ панели «Сформировать»: в конце страницы
+     панель стоит там же, где при прокрутке, и «?» над ней её не задевает. */
+}
+.app-main.var-stranica {
+  padding-bottom: var(--space-4);
+}
+@media (max-width: 1023.98px) {
+  .app-main.var-stranica {
+    padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-2));
+  }
+}
+.var-aura {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.var-aura span {
+  position: absolute;
+  border-radius: 50%;
+}
+.var-aura__siniy {
+  left: -20%;
+  top: 2%;
+  width: 60%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, var(--aura-blue), transparent);
+  opacity: 0.5;
+}
+.var-aura__oranzh {
+  right: -18%;
+  top: 0;
+  width: 46%;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, var(--aura-orange), transparent);
+  opacity: 0.55;
+}
+
+/* ── Шапка: заголовок, лид, иллюстрация ────────────────────────── */
+
+.var-geroy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-2);
+}
+.var-geroy__title {
+  margin: 0;
+}
+.var-geroy__lead {
+  max-width: 48ch;
+  margin: var(--space-3) 0 0;
+  font-size: 17px;
+  line-height: 26px;
+  color: var(--color-text-secondary);
+}
+.var-geroy__ill {
+  display: block;
+  justify-self: end;
+  width: 100%;
+  max-width: 340px;
+}
+.var-geroy__ill img {
+  display: block;
+  width: 100%;
+  height: auto;
+  animation: var-parenie 7s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes var-parenie {
+  from {
+    transform: translateY(-2.5px);
+  }
+  to {
+    transform: translateY(2.5px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .var-geroy__ill img {
+    animation: none;
+  }
+}
+
+/* ── Общее: стекло, кнопки ─────────────────────────────────────── */
+
+.var.var--steklo {
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding-bottom: 0;
+}
+.var.var--steklo .var-panel {
+  border: 1px solid var(--glass-edge);
+  border-radius: 24px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+
+.var-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-6);
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    box-shadow var(--dur-hover) var(--ease),
+    filter var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.var-btn:active {
+  transform: scale(0.98);
+}
+.var-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.var-btn:disabled {
+  cursor: default;
+  filter: saturate(0.4);
+  opacity: 0.6;
+}
+.var-btn--tyoplyy {
+  color: #fff;
+  background: var(--gloss-warm);
+  box-shadow: var(--gloss-warm-shadow-soft);
+}
+@media (hover: hover) {
+  .var-btn--tyoplyy:not(:disabled):hover {
+    filter: brightness(1.05);
+    box-shadow: var(--gloss-warm-shadow-soft-hover);
+  }
+}
+.var-btn--block {
+  width: 100%;
+}
+
+/* ── Состав: плитки ────────────────────────────────────────────── */
+
+.var-sostav {
+  gap: var(--space-3);
+}
+.var-sostav__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.var-sostav__title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 650;
+}
+.var-sostav__count {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.var-sostav__actions {
+  display: flex;
+  gap: var(--space-5);
+}
+.var-sostav__actions .var-link {
+  min-height: 44px;
+}
+.var-sostav__note {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
+}
+
+.var-plitki {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.var-plitka {
+  position: relative;
+  min-width: 0;
+}
+.var-plitka__main {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  min-height: 76px;
+  padding: 10px 12px 10px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  text-align: left;
+  font: inherit;
+  color: var(--color-text-tertiary);
+  background: rgb(255 255 255 / 0.4);
+  box-shadow: var(--glass-ring);
+  cursor: pointer;
+  -webkit-touch-callout: none;
+  user-select: none;
+  transition:
+    background var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.var-plitka__main:active {
+  transform: scale(0.98);
+}
+.var-plitka__main:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+/* Выбранная — синее стекло: светлая синяя заливка, синий номер. */
+.var-plitka.is-on .var-plitka__main {
+  color: var(--color-text);
+  background: linear-gradient(160deg, rgb(236 243 255 / 0.95), rgb(214 229 255 / 0.85));
+  box-shadow:
+    0 0 0 1px rgb(31 95 208 / 0.22),
+    var(--glass-hi),
+    0 6px 16px -10px rgb(31 95 208 / 0.45);
+}
+.var-plitka__no {
+  font-size: 22px;
+  line-height: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.var-plitka.is-on .var-plitka__no {
+  color: var(--color-primary);
+}
+.var-plitka__name {
+  font-size: 14px;
+  line-height: 18px;
+}
+/* Метка «2 подтипа»: выбраны не все подтипы. Стоит в строке номера,
+   справа от него, слева от «⋯». */
+.var-plitka__metka {
+  position: absolute;
+  top: 13px;
+  left: 42px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--terracotta-600);
+  pointer-events: none;
+}
+/* «⋯» — окно подтипов; тап-зона 44×44 в правом верхнем углу плитки,
+   в строке номера: название под ней остаётся открытым. */
+.var-plitka__more {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 0 14px 0 14px;
+  color: var(--color-text-secondary);
+  align-items: start;
+  justify-items: end;
+  padding: 8px 8px 0 0;
+  background: transparent;
+  cursor: pointer;
+}
+.var-plitka__more svg {
+  width: 22px;
+  height: 22px;
+  padding: 2px;
+  border-radius: 8px;
+  fill: currentColor;
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: 0 0 0 1px rgb(31 95 208 / 0.12);
+}
+.var-plitka.is-on .var-plitka__more {
+  color: var(--color-primary);
+}
+.var-plitka__more:hover svg {
+  background: #fff;
+}
+.var-plitka__more:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -4px;
+}
+
+/* ── Быстрые настройки ─────────────────────────────────────────── */
+
+.var-bystro {
+  display: grid;
+  gap: var(--space-2);
+}
+.var-bystro__chipy {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.var-bystro__chip {
+  display: grid;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 14px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  text-align: left;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  cursor: pointer;
+}
+.var-bystro__chip:hover {
+  background: var(--glass-bg-strong);
+}
+.var-bystro__chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.var-bystro__label {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-secondary);
+}
+.var-bystro__value {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.var-bystro__chip--level .var-bystro__value {
+  color: var(--amber-700);
+}
+.var-bystro__eshche {
+  justify-self: center;
+  min-height: 44px;
+}
+
+/* ── Бланки: свёрнутая тёплая плашка ───────────────────────────── */
+
+.var-blanki {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 56px;
+  padding: 0 var(--space-5);
+  border: 1px solid var(--glass-edge);
+  border-radius: 16px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: left;
+  color: var(--terracotta-700);
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi);
+  cursor: pointer;
+}
+.var-blanki:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.var-blanki__ik {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--terracotta);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.var-blanki__strelka {
+  margin-left: auto;
+  font-size: 22px;
+}
+
+/* ── «Призрачный» лист до первого набора ───────────────────────── */
+
+.var-prizrak {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-6);
+  border: 1px dashed rgb(31 95 208 / 0.22);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.4);
+}
+.var-prizrak__list {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  flex: none;
+  width: 168px;
+  aspect-ratio: 210 / 297;
+  max-height: 150px;
+  overflow: hidden;
+  padding: 16px 16px 0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(31 95 208 / 0.1),
+    0 10px 24px -14px rgb(16 40 100 / 0.35);
+}
+.var-prizrak__stroka {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: rgb(31 95 208 / 0.1);
+}
+.var-prizrak__stroka--w60 {
+  width: 60%;
+}
+.var-prizrak__stroka--w70 {
+  width: 70%;
+}
+.var-prizrak__stroka--w80 {
+  width: 80%;
+}
+.var-prizrak__ris {
+  width: 64%;
+  justify-self: center;
+  fill: rgb(31 95 208 / 0.06);
+  stroke: rgb(31 95 208 / 0.3);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.var-prizrak__text {
+  margin: 0;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+
+/* ── Панель «Сформировать» ─────────────────────────────────────── */
+
+.var-bar {
+  position: sticky;
+  bottom: var(--space-4);
+  z-index: 20;
+  display: grid;
+  gap: 2px;
+  min-height: var(--var-bar-h);
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-1);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow:
+    var(--glass-ring),
+    var(--glass-hi),
+    0 10px 32px -12px rgb(16 40 100 / 0.3);
+}
+.var-bar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.var-bar__summary {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.var-bar__kod {
+  justify-self: center;
+  min-height: 36px;
+  font-size: 14px;
+}
+/* «?» и плашка cookie на этой странице — над панелью, не на кнопке.
+   Место «?» задаётся только токеном --fab-lift (onboarding.css, tokens.css):
+   высота того, над чем кнопка стоит, — здесь это низ панели плюс сама
+   панель; одно значение на раскладку, при прокрутке не меняется. */
+body:has(.var-stranica .var-bar) {
+  --var-bar-h: 104px;
+  --fab-lift: calc(var(--space-4) + var(--var-bar-h) + var(--space-3) - var(--fab-gap));
+}
+body:has(.var-stranica .var-bar) .cookie-notice {
+  bottom: calc(var(--space-4) + var(--var-bar-h) + var(--space-3));
+}
+@media (max-width: 1023.98px) {
+  .var-bar {
+    bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-2));
+  }
+  body:has(.var-stranica .var-bar) {
+    --fab-lift: calc(
+      var(--h-bnav) + var(--space-2) + var(--var-bar-h) + var(--space-3) - var(--fab-gap)
+    );
+  }
+  body:has(.var-stranica .var-bar) .cookie-notice {
+    bottom: calc(
+      var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-2) + var(--var-bar-h) +
+        var(--space-3)
+    );
+  }
+}
+
+/* Телефон: над панелью «?» неизбежно ложится на плитки и чипы — на этой
+   странице она скрыта (помощь — в меню «Ещё»). Скрытие — прозрачностью,
+   как у самой кнопки: место её не меняется. */
+@media (max-width: 767.98px) {
+  body:has(.var-stranica .var-bar) .help-fab {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* ── Окна: общее ───────────────────────────────────────────────── */
+
+.okno .var-field__label {
+  margin: 0 0 var(--space-2);
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--color-text);
+}
+.okno .var-field__sub {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+.okno .var-field__note,
+.okno .sp-opt__note {
+  margin: var(--space-2) 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-secondary);
+}
+/* Сегменты: активный — белая «таблетка» с синим текстом на светло-серой
+   подложке, без сплошной заливки. */
+.okno .var-seg,
+.okno .sp-opt__seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 0;
+  border-radius: 14px;
+  background: rgb(16 23 40 / 0.055);
+}
+.okno .var-seg__btn,
+.okno .sp-opt__btn {
+  flex: 1 1 0;
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: transparent;
+  box-shadow: none;
+}
+.okno .var-seg__btn.is-active,
+.okno .sp-opt__btn.is-active {
+  color: var(--color-primary);
+  font-weight: 650;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(16 23 40 / 0.08),
+    0 2px 8px -2px rgb(16 40 100 / 0.12);
+}
+/* Звёзды: выбранные — тёплый оранжевый, остальные — серые, читаемые. */
+.okno .var-seg .var-seg__btn.var-stars {
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: #6b7588;
+}
+.okno .var-seg .var-seg__btn.var-stars.is-active {
+  color: var(--amber-600);
+}
+.var-nastroyki > div + div {
+  margin-top: var(--space-6);
+}
+.var-count-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+}
+.okno .var-count__btn {
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--glass-ring);
+  border: 0;
+}
+.okno .var-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.okno .var-form .var-field {
+  display: grid;
+  gap: 4px;
+}
+.okno .var-field--wide {
+  margin-top: var(--space-4);
+}
+.okno .var-textarea {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+.okno .sp-opt__label {
+  margin: 0 0 var(--space-2);
+  font-size: 16px;
+  font-weight: 650;
+}
+.okno .sp-opt__label--sub {
+  margin-top: var(--space-3);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── Окно подтипов ─────────────────────────────────────────────── */
+
+.var-podtipy {
+  display: grid;
+  gap: var(--space-3);
+}
+.var-podtipy__tegi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+}
+.var-podtipy__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.var-podtip {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 76px;
+  padding: 8px 16px 8px 10px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 16px;
+  text-align: left;
+  font: inherit;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--color-text);
+  background: #fff;
+  box-shadow:
+    var(--glass-ring),
+    0 4px 14px -10px rgb(16 40 100 / 0.3);
+  cursor: pointer;
+}
+.var-podtip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.var-podtip[aria-disabled='true'] {
+  cursor: default;
+}
+.var-podtip__check {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1.5px rgb(16 23 40 / 0.35);
+  background: #fff;
+}
+.var-podtip__check svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+.var-podtip.is-on .var-podtip__check {
+  background: var(--color-primary);
+  box-shadow: none;
+}
+.var-podtip.is-on .var-podtip__check svg {
+  opacity: 1;
+}
+
+/* Пиктограммы подтипов: линия #0c3ebc, голубая заливка, точки-узлы. */
+.pikt {
+  width: 64px;
+  height: 64px;
+  fill: none;
+  stroke: #0c3ebc;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pikt .z {
+  fill: #c3dffa;
+  fill-opacity: 0.55;
+}
+.pikt .a {
+  fill: #7faeea;
+  fill-opacity: 0.35;
+}
+.pikt .t {
+  fill: #0c3ebc;
+  stroke: none;
+}
+.pikt .s {
+  stroke-dasharray: 2.5 2.5;
+}
+.pikt .n {
+  fill: #0c3ebc;
+  stroke: none;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+/* ── Окно бланков ──────────────────────────────────────────────── */
+
+.bv {
+  display: grid;
+  gap: var(--space-3);
+}
+.bv__lead,
+.bv__print {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+.bv__list {
+  display: grid;
+  gap: 8px;
+}
+/* Выбор — светлая заливка, обводка 2px и галочка, без сплошной заливки. */
+.bv__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 14px;
+  text-align: left;
+  font: inherit;
+  color: var(--color-text);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgb(16 23 40 / 0.12);
+  cursor: pointer;
+}
+.bv__row.is-on {
+  background: rgb(236 243 255);
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+.bv__row:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.bv__text {
+  display: grid;
+}
+.bv__label {
+  font-size: 16px;
+  font-weight: 600;
+}
+.bv__note {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+.bv__galka {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  opacity: 0;
+  background: var(--color-primary);
+}
+.bv__galka svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.bv__row.is-on .bv__galka {
+  opacity: 1;
+}
+.bv__copies {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 15px;
+}
+.bv__copies-input {
+  width: 96px;
+}
+.bv__error {
+  margin: 0;
+  color: var(--color-danger, #b42318);
+}
+.bv__deystvie .var-btn {
+  width: 100%;
+}
+
+/* ── Окно «Открыть по коду» ────────────────────────────────────── */
+
+.var-kod {
+  display: grid;
+  gap: var(--space-3);
+}
+.var-kod .var-field__note {
+  margin: 0;
+}
+
+/* ── Планшет ───────────────────────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  .var-geroy {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 280px);
+  }
+  .var-bystro__chipy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── Телефон ───────────────────────────────────────────────────── */
+
+@media (max-width: 767.98px) {
+  .var-geroy {
+    grid-template-columns: minmax(0, 1fr) 45%;
+    gap: var(--space-2);
+  }
+  .var-geroy__title {
+    font-size: 30px;
+    line-height: 34px;
+  }
+  .var-geroy__lead {
+    font-size: 15px;
+    line-height: 21px;
+  }
+  .var-plitki {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .var-plitka__main {
+    min-height: 68px;
+    padding: 8px 10px;
+  }
+  .var-plitka__no {
+    font-size: 19px;
+    line-height: 22px;
+  }
+  .var-plitka__name {
+    font-size: 12.5px;
+    line-height: 16px;
+  }
+  /* На телефоне в строке номера места нет — метка под названием. */
+  .var-plitka__metka {
+    position: static;
+    justify-self: start;
+    font-size: 10.5px;
+    padding: 1px 6px;
+  }
+  .var-bystro__chipy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .var-prizrak {
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+  .var-prizrak__list {
+    width: 120px;
+    max-height: 110px;
+    padding: 12px 12px 0;
+    gap: 7px;
+  }
+  .var-bar {
+    padding: var(--space-3) var(--space-3) 0;
+  }
+  .var-bar__row {
+    gap: var(--space-3);
+  }
+  .var-bar__summary {
+    min-width: 0;
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .var-bar .var-btn {
+    flex: none;
+  }
+  .var-bar .var-btn {
+    min-height: 46px;
+    padding: 0 var(--space-4);
+    font-size: 16px;
+  }
+  .var-bystro__value {
+    font-size: 14px;
+  }
+  .okno .var-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .var-podtip {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    gap: var(--space-3);
+  }
+  .pikt {
+    width: 56px;
+    height: 56px;
+  }
+}

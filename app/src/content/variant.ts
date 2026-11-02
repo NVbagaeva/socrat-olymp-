@@ -7,6 +7,9 @@ import { counted } from '@/lib/plural';
 
 export const VARIANT_HREF = '/variant/';
 
+/** Решить свежий вариант онлайн самому, без ссылки от учителя. */
+export const VARIANT_ONLAYN_HREF = '/variant/onlayn/';
+
 /** Типы работы для шапки листа. */
 export const WORK_KINDS = [
   { id: 'ege', label: 'Вариант в формате ЕГЭ' },
@@ -115,8 +118,8 @@ export const VARIANT_SCREEN = {
     1: 'Планиметрия',
     2: 'Векторы',
     3: 'Стереометрия',
-    4: 'Вероятности',
-    5: 'Сложные события',
+    4: 'Вероятность: простая',
+    5: 'Вероятность: сложная',
     6: 'Случайные величины',
     7: 'Уравнения',
     8: 'Вычисления',
@@ -126,15 +129,15 @@ export const VARIANT_SCREEN = {
     12: 'Графики',
     13: 'Экономика',
   } as Record<number, string>,
-  sostavNote: 'Нажмите на номер, чтобы выключить задание; стрелка — выбрать подтипы.',
-  all: 'Все задания',
+  sostavNote: 'Нажмите на плитку\u00a0— задание выключится; «⋯» в\u00a0углу\u00a0— подтипы.',
+  all: 'Все',
   none: 'Очистить',
   allSubtypes: 'Все подтипы',
   subtypesOf: (n: number) => `Подтипы задания ${n}`,
   source: 'Источник',
   sources: [
     { id: 'mix', label: 'Вперемешку' },
-    { id: 'fipi', label: 'Открытый банк ФИПИ' },
+    { id: 'fipi', label: 'Банк ФИПИ' },
     { id: 'own', label: 'Свои' },
   ],
   level: 'Сложность',
@@ -209,6 +212,42 @@ export const VARIANT_SCREEN = {
   summary: (tasks: number, variants: number) =>
     `${counted(tasks, 'задание', 'задания', 'заданий')} · ` +
     counted(variants, 'вариант', 'варианта', 'вариантов'),
+  /* ── «Стеклянная сцена»: шапка, плитки, чипы, окна ───────────── */
+  leadKratko: 'Один набор\u00a0— три листа: ученику, учителю и\u00a0разбор.',
+  podtipovMetka: (k: number) => counted(k, 'подтип', 'подтипа', 'подтипов').replace(' ', '\u00a0'),
+  podtipyKnopka: (n: number, name: string) => `Подтипы задания ${n}: ${name}`,
+  bystro: {
+    source: 'Источник',
+    sourceValue: { mix: 'вперемешку', fipi: 'банк ФИПИ', own: 'свои' } as Record<string, string>,
+    level: 'Сложность',
+    levelAny: 'любая',
+    count: 'Вариантов',
+    countParallel: 'параллельные',
+    listy: 'Листы',
+    listyValue: { large: 'крупные рисунки', normal: 'обычные рисунки' } as Record<string, string>,
+    eshche: 'Ещё настройки',
+  },
+  nastroyki: 'Настройки листов',
+  gotovo: 'Готово',
+  podtipy: {
+    title: (n: number, name: string) => `Задание №${n}. ${name}`,
+    vybrano: (k: number, n: number) => `Выбрано ${k}\u00a0из\u00a0${n}`,
+    vse: 'Выбрать все',
+    poslednij: 'Хотя бы один подтип остаётся выбранным.',
+    primenit: 'Применить',
+  },
+  blankiOtkryt: 'Бланки',
+  blankiSkachat: 'Скачать PDF',
+  prizrak: 'Здесь появится лист ученика',
+  /** Счёт в панели «Сформировать»: число и слово не разрываются. */
+  summaryNbsp: (tasks: number, variants: number) =>
+    `${counted(tasks, 'задание', 'задания', 'заданий')} · ${counted(variants, 'вариант', 'варианта', 'вариантов')}`.replace(
+      /(\d) /g,
+      '$1\u00a0',
+    ),
+  kodOtkryt: 'Открыть по коду',
+  kodTitle: 'Открыть по коду',
+  zakryt: 'Закрыть',
   entry: {
     title: 'Собрать вариант',
     note: 'Задания 1–13 · три листа: ученик, учитель, разбор',

@@ -1,4 +1,4 @@
 /* Сгенерировано scripts/build-kartochki.mjs — не править руками. */
 
 /** Номера заданий, у которых есть колода карточек (адрес раздела /zadaniya/{номер}/). */
-export const NOMERA_S_KARTOCHKAMI: readonly string[] = ['1', '2', '3', '4', '5', '18'];
+export const NOMERA_S_KARTOCHKAMI: readonly string[] = ['1', '2', '3', '4', '5', '6', '7', '9', '10', '11', '13', '16', '18'];

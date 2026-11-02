@@ -73,178 +73,6 @@
 .var-link:hover {
   text-decoration: underline;
 }
-
-/* ── Чипы заданий ──────────────────────────────────────────── */
-.var-chips {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-@media (max-width: 767px) {
-  .var-chips {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-.var-chip {
-  display: flex;
-  min-width: 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  opacity: 0.72;
-  transition:
-    border-color var(--dur-hover) var(--ease),
-    opacity var(--dur-hover) var(--ease);
-}
-.var-chip.is-on {
-  border-color: var(--color-primary);
-  background: var(--color-surface-info);
-  opacity: 1;
-}
-.var-chip.is-open {
-  box-shadow: 0 0 0 2px var(--color-accent-soft);
-}
-.var-chip__main {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-  min-height: 44px;
-  padding: var(--space-1) var(--space-2);
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.var-chip__no {
-  display: inline-grid;
-  flex: none;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-info);
-  color: var(--color-text-brand);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.var-chip.is-on .var-chip__no {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-inverse);
-}
-.var-chip__label {
-  display: -webkit-box;
-  min-width: 0;
-  overflow: hidden;
-  font-size: var(--fs-caption);
-  line-height: 1.25;
-  /* Слова не рвутся: подпись в одно-два слова переносится по пробелу. */
-  overflow-wrap: normal;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-.var-chip:not(.is-on) .var-chip__label {
-  text-decoration: line-through;
-  color: var(--color-text-secondary);
-}
-.var-chip__dot {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-accent);
-}
-.var-chip__more {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 36px;
-  border: 0;
-  border-left: 1px solid var(--color-border);
-  background: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-.var-chip__more svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  transition: transform var(--dur-hover) var(--ease);
-}
-.var-chip.is-open .var-chip__more svg {
-  transform: rotate(180deg);
-}
-/* Телефон: две колонки чипов — номер и стрелка уже, подпись мельче,
-   чтобы «Стереометрия» и «Планиметрия» помещались целиком. */
-@media (max-width: 767px) {
-  .var-chip__main {
-    gap: 6px;
-    padding: var(--space-1) 4px var(--space-1) 6px;
-  }
-  .var-chip__no {
-    width: 24px;
-    height: 24px;
-    font-size: 13px;
-  }
-  .var-chip__label {
-    font-size: 11.5px;
-    letter-spacing: -0.01em;
-  }
-  .var-chip__more {
-    width: 26px;
-  }
-}
-
-.var-subtypes {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  border: 1px dashed var(--color-border-info);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.var-subtypes__title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  margin: 0;
-  font-size: var(--fs-caption);
-  font-weight: 600;
-}
-.var-subtypes__list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.var-sub {
-  min-height: 36px;
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  font: inherit;
-  font-size: var(--fs-caption);
-  cursor: pointer;
-  text-decoration: line-through;
-}
-.var-sub.is-on {
-  border-color: var(--color-primary);
-  background: var(--color-surface-info);
-  color: var(--color-text);
-  text-decoration: none;
-}
 .var-tag {
   padding: 1px var(--space-2);
   border-radius: var(--radius-pill);
@@ -255,20 +83,6 @@
   font-weight: 500;
 }
 
-/* ── Строка настроек ───────────────────────────────────────── */
-.var-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4) var(--space-6);
-  align-items: start;
-}
-.var-row > .var-field {
-  flex: 0 1 auto;
-  max-width: 100%;
-}
-.var-row > .var-field--note {
-  flex: 1 1 260px;
-}
 .var-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
@@ -399,35 +213,6 @@
   font-weight: 600;
 }
 
-/* ── Шапка работы ──────────────────────────────────────────── */
-.var-header {
-  display: grid;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.var-header[open] {
-  padding-bottom: var(--space-4);
-}
-.var-header__summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-3);
-  min-height: 32px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.var-header__current {
-  color: var(--color-text-secondary);
-  font-size: var(--fs-caption);
-  font-weight: 500;
-}
-.var-header > * + * {
-  margin-top: var(--space-3);
-}
 .var-textarea {
   width: 100%;
   min-height: 84px;
@@ -442,24 +227,6 @@
   resize: vertical;
 }
 
-/* ── Кнопки ────────────────────────────────────────────────── */
-.var-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-}
-.var-code-in {
-  display: flex;
-  flex: 1 1 260px;
-  gap: var(--space-2);
-  min-width: 0;
-  max-width: 420px;
-}
-.var-code-in > :first-child {
-  flex: 1;
-  min-width: 0;
-}
 .var-status {
   margin: 0;
   font-size: var(--fs-caption);
@@ -471,27 +238,7 @@
 .var-status--warn {
   color: var(--color-accent-text);
 }
-@media (max-width: 767px) {
-  .var-actions > .btn {
-    width: 100%;
-  }
-  .var-code-in {
-    max-width: none;
-  }
-}
 
-/* ── Набор: код и листы; рядом — бланки ─────────────────────── */
-.var-out {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5);
-  align-items: start;
-}
-@media (min-width: 1100px) {
-  .var-out--two {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  }
-}
 .var-kit__code {
   display: flex;
   flex-wrap: wrap;

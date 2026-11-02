@@ -17,9 +17,15 @@
  * Тексты — свои. Вся математика — в $…$, формулы рамок — TeX без $.
  */
 
+import type { Blok6 } from '@/lib/zadanie6/teoriya-yakorya';
 import type { Ris } from '@/lib/zadanie6/types';
 
-export type BlokTeorii6 =
+/**
+ * Блок раздела. `yakor` — имя рамки для «Повторить теорию» из карточек
+ * по теории (lib/zadanie6/teoriya-yakorya.ts): на странице это id
+ * «t6-<имя>».
+ */
+export type BlokTeorii6 = { yakor?: Blok6 } & (
   | { vid: 'opredelenie'; title?: string; paras: string[]; formula?: string; spisok?: string[] }
   | { vid: 'formula'; formula: string; podpis?: string }
   /** Разобранный пример — задача банка с разбором решателя. */
@@ -39,7 +45,8 @@ export type BlokTeorii6 =
   | { vid: 'lovushka'; title: string; oshibka: string; pravilno: string }
   | { vid: 'kartochki'; kartochki: Kartochka6[] }
   /** «Проверь себя» раздела: набор шаблонов lib/zadanie6/proverka.ts. */
-  | { vid: 'proverka'; nabor: string };
+  | { vid: 'proverka'; nabor: string }
+);
 
 /** Цветной блок карточки: как в справочнике №1. */
 export interface BlokKartochki6 {
@@ -151,6 +158,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'velichina',
         title: 'Случайная величина',
         paras: [
           '**Случайная величина** — величина, которая в результате опыта принимает одно из своих возможных значений, и заранее неизвестно, какое именно.',
@@ -237,6 +245,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'eiler-chtenie',
         title: 'Как читать диаграмму Эйлера',
         paras: [
           'Каждая точка — элементарное событие. Над точкой — значение случайной величины в этом исходе, справа снизу — вероятность исхода.',
@@ -264,6 +273,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       },
       {
         vid: 'opredelenie',
+        yakor: 'derevo-chtenie',
         title: 'Как читать дерево',
         paras: [
           'Корень $S$ — начало опыта. На рёбрах — вероятности; рёбра из одной вершины в сумме дают $1$. Лист — элементарное событие.',
@@ -348,6 +358,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'uslovnaya-smysl',
         title: 'Смысл',
         paras: [
           'Раз $B$ уже наступило, все исходы вне $B$ невозможны. Новый «весь мир» — это $B$, и внутри него нас интересуют исходы, где наступает и $A$, то есть $A\\cap B$.',
@@ -386,6 +397,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       },
       {
         vid: 'vazhno',
+        yakor: 'uslovnaya-cherta',
         paras: [
           '$P(A\\mid B)$ и $P(B\\mid A)$ — разные числа: делим на вероятность того события, которое стоит **после черты**.',
         ],
@@ -432,6 +444,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       },
       {
         vid: 'opredelenie',
+        yakor: 'ozhidanie-smysl',
         title: 'Смысл',
         paras: [
           'Если повторить опыт очень много раз и усреднить значения, получится число, близкое к $\\mathrm{M}(X)$. Например, для таблицы из раздела 1: $\\mathrm{M}(X)=0\\cdot0{,}1+0{,}3+2\\cdot0{,}4+3\\cdot0{,}2=1{,}7$.',
@@ -450,6 +463,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       { vid: 'primer', title: 'Лотерея с проигрышными билетами', zadacha: 'S04' },
       {
         vid: 'vazhno',
+        yakor: 'ozhidanie-svoystva',
         title: 'Свойства — коротко',
         paras: [
           '$\\mathrm{M}(X+c)=\\mathrm{M}(X)+c$: если ко всем значениям прибавить $c$, среднее сдвинется на $c$.',
@@ -554,13 +568,15 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
     bloki: [
       {
         vid: 'ris',
+        yakor: 'dispersiya-razbros',
         ris: RIS_RAZBROS,
         podpis:
           'У обеих величин $\\mathrm{M}=5$. Но $X$ почти всегда равна $5$, а $Y$ часто уходит к $1$ и $9$: $\\mathrm{D}(X)=0{,}2$, $\\mathrm{D}(Y)=8$.',
       },
       {
         vid: 'formula',
-        formula: '\\mathrm{D}(X)=\\mathrm{M}\\Bigl(\\bigl(X-\\mathrm{M}(X)\\bigr)^2\\Bigr)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2',
+        formula:
+          '\\mathrm{D}(X)=\\mathrm{M}\\Bigl(\\bigl(X-\\mathrm{M}(X)\\bigr)^2\\Bigr)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2',
         podpis:
           'Средний квадрат отклонения от среднего. Удобнее вторая форма: среднее квадрата минус квадрат среднего',
       },
@@ -572,6 +588,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       { vid: 'primer', title: 'Дисперсия по распределению', zadacha: 'S18' },
       {
         vid: 'vazhno',
+        yakor: 'dispersiya-znak',
         paras: [
           'Дисперсия не бывает отрицательной. Получилось $\\mathrm{D}<0$ — перепутали порядок: из $\\mathrm{M}(X^2)$ вычитают $\\left(\\mathrm{M}(X)\\right)^2$, а не наоборот.',
           'Спрашивают стандартное отклонение — не забудьте извлечь корень.',
@@ -586,7 +603,9 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
             bloki: [
               {
                 vid: 'formula',
-                tekst: ['Строки $x_ip_i$ и $x_i^2p_i$ прямо в таблице, суммы — $\\mathrm{M}(X)$ и $\\mathrm{M}(X^2)$.'],
+                tekst: [
+                  'Строки $x_ip_i$ и $x_i^2p_i$ прямо в таблице, суммы — $\\mathrm{M}(X)$ и $\\mathrm{M}(X^2)$.',
+                ],
                 formula: '\\mathrm{D}(X)=\\mathrm{M}(X^2)-\\left(\\mathrm{M}(X)\\right)^2',
               },
               {
@@ -631,6 +650,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
     bloki: [
       {
         vid: 'formula',
+        yakor: 'vyborka-srednee',
         formula: '\\overline{x}=\\dfrac{x_1+x_2+\\ldots+x_n}{n}',
         podpis: 'Выборочное среднее',
       },
@@ -642,6 +662,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       },
       {
         vid: 'opredelenie',
+        yakor: 'vyborka-pochemu',
         title: 'Почему делим на число на единицу меньше',
         paras: [
           'Среднее $\\overline{x}$ мы посчитали по этой же выборке — оно уже «подогнано» под неё: значения выборки к нему ближе, чем к настоящему среднему. Поэтому разброс вокруг $\\overline{x}$ получается заниженным.',
@@ -691,6 +712,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       },
       {
         vid: 'opredelenie',
+        yakor: 'chebyshev-epsilon',
         title: 'Как найти отклонение от среднего',
         paras: [
           'Событие в задаче пишут так: «$X\\leqslant4$ или $X\\geqslant8$». Смотрим, на сколько границы отстоят от среднего. При $\\mathrm{M}(X)=6$: $4=6-2$ и $8=6+2$, значит, событие — это $|X-6|\\geqslant2$, $\\varepsilon=2$.',
@@ -699,6 +721,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       { vid: 'primer', title: 'Оценка по неравенству Чебышёва', zadacha: 'S13' },
       {
         vid: 'vazhno',
+        yakor: 'chebyshev-otsenka',
         paras: [
           'Это **оценка сверху**: настоящая вероятность может быть и меньше. Ответ — само число $\\dfrac{\\mathrm{D}}{\\varepsilon^2}$.',
           'Оценка полезна, только если $\\varepsilon^2>\\mathrm{D}$: иначе получится число больше $1$, а это ничего не говорит.',
@@ -749,6 +772,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
       { vid: 'primer', title: 'Строгие знаки', zadacha: 'S14' },
       {
         vid: 'vazhno',
+        yakor: 'promezhutok-znak',
         title: 'Важно: строгий или нестрогий знак',
         paras: [
           'Знак $<$ — граница **не входит**: в $3<Y<6$ значения $3$ и $6$ не берём.',

@@ -9,6 +9,8 @@
  * Рисунки и числа живых рисунков — lib/proizvodnaya/stsenyPonyatiya.ts.
  */
 
+import type { Blok9 } from '@/lib/proizvodnaya/teoriya-yakorya';
+
 const TG = '\\operatorname{tg}';
 const LIM = (pod: string) => `\\lim\\limits_{${pod}}`;
 
@@ -21,6 +23,25 @@ export const PONYATIE_9 = {
     net: { id: 'z9-0-3', title: 'Функции, не имеющие производной в точке' },
     ege: { id: 'z9-0-4', title: 'Где это на ЕГЭ' },
   },
+
+  /**
+   * Имена рамок блока (#t9-…, lib/proizvodnaya/teoriya-yakorya.ts): на
+   * них ведёт «Повторить теорию» карточек по теории, а
+   * PonyatieProizvodnoy9 ставит их рамкам как id.
+   */
+  yakorya: {
+    skorost: 'skorost',
+    kasatelnayaOpr: 'kasatelnaya-opr',
+    uglovoy: 'uglovoy',
+    kasatelnayaK: 'kasatelnaya-k',
+    opredelenie: 'opredelenie',
+    smysl: 'smysl',
+    algoritm: 'algoritm',
+    primerX2: 'primer-x2',
+    modul: 'modul',
+    odnostoronnie: 'odnostoronnie',
+    netVyvod: 'net-vyvod',
+  } satisfies Record<string, Blok9>,
 
   vvedenie: [
     'Производная появилась из двух вопросов: с какой скоростью движется точка в данный момент и как провести касательную к кривой. Оба вопроса решаются одним и тем же приёмом — отношением приращений и его пределом.',
