@@ -4,7 +4,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, otr, tch } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, vel, velOtr } from '@/lib/skhemy/dsl';
 import { add, intersect, mid } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import { delit, scena } from './obshchee';
@@ -36,6 +36,11 @@ export const OT_MEDIANY = scena({
       otr('AM', A, M),
       otr('BN', B, N),
       otr('MN', M, N, { skrytyy: true, stil: 'punktir', gruppy: ['sredlin', 'pod'], cvet: 'b' }),
+      /* Данные условия на чертеже. */
+      /* Площадь — в свободном четырёхугольнике GMCN (центр масс ABC — точка G). */
+      vel('d-S', 'S_ABC = 24', {
+        vnutri: [(G[0] + M[0] + C[0] + N[0]) / 4, (G[1] + M[1] + C[1] + N[1]) / 4],
+      }),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -72,6 +77,10 @@ export const OT_MENELAY = scena({
       otr('MP', M, P, { gruppy: ['menelay'], cvet: 'b' }),
       otr('AM-r', A, M, { skrytyy: true, shtrihi: 1, gruppy: ['menelay'], cvet: 'c' }),
       otr('MB-r', M, B, { skrytyy: true, shtrihi: 1, gruppy: ['menelay'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AC', '8', A, C),
+      velOtr('d-BK', '3x', B, K),
+      velOtr('d-KC', 'x', K, C),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -110,6 +119,11 @@ export const OT_CHEVA = scena({
       otr('CC1', C, C1, { stil: 'punktir', gruppy: ['cheva', 'menelay'], cvet: 'c' }),
       otr('AC1-r', A, C1, { skrytyy: true, shtrihi: 1, gruppy: ['cheva'], cvet: 'c' }),
       otr('C1B-r', C1, B, { skrytyy: true, shtrihi: 1, gruppy: ['cheva'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-BA1', 'x', B, A1),
+      velOtr('d-A1C', '2x', A1, C),
+      velOtr('d-CB1', '2y', C, B1),
+      velOtr('d-B1A', 'y', B1, A),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -162,6 +176,13 @@ export const OT_PARALLELOGRAMM = scena({
       otr('BD', B, D, { gruppy: ['pl'], cvet: 'c' }),
       otr('AK', A, K),
       otr('AM', A, M),
+      /* Данные условия на чертеже. */
+      /* Площадь — в свободном треугольнике ADQ (центр — на диагонали BD). */
+      vel('d-S', 'S_ABCD = 60', {
+        vnutri: [(A[0] + D[0] + Q[0]) / 3, (A[1] + D[1] + Q[1]) / 3],
+      }),
+      velOtr('d-CM', 'x', C, M),
+      velOtr('d-MD', '2x', M, D),
       tch('A', A),
       tch('B', B),
       tch('C', C),

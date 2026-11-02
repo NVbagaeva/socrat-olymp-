@@ -1,0 +1,51 @@
+/* Страницы печати генератора №18: только лист, без оболочки сайта.
+   Та же основа, что у pechat3.css; сверху — кнопка «Скачать PDF /
+   Печать», видимая только на экране. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+  .z18-print-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-sans);
+  }
+  .z18-print-bar__lead {
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    color: var(--color-text-secondary);
+  }
+}
+
+@media print {
+  .z18-print-bar {
+    display: none;
+  }
+}
+
+/* Чертёж задачи на листе: SVG движка схем, ширину задаёт карточка (figureWidth). */
+.sheet-figure .skh,
+.sheet-figure .skh__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.sheet-step-head {
+  margin: 0.6em 0 0.2em;
+}

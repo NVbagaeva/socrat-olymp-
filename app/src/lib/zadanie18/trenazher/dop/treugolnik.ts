@@ -5,7 +5,7 @@
  */
 
 import { bisectorFoot } from '@/lib/planimetriya/geom';
-import { mnog, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, ug, velOtr } from '@/lib/skhemy/dsl';
 import { intersect, mid } from '@/lib/skhemy/geometriya';
 import type { Element, Tochki } from '@/lib/skhemy/tipy';
 import { naOsnovanie, poStoronam, scena } from './obshchee';
@@ -34,6 +34,9 @@ export const TR_SREDLIN = scena({
       otr('NK', N, K, { gruppy: ['nk', 'par', 'per'], cvet: 'b' }),
       otr('AM-r', A, M, { skrytyy: true, shtrihi: 1, gruppy: ['per'], cvet: 'c' }),
       otr('AK-r', A, K, { skrytyy: true, shtrihi: 2, gruppy: ['per'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AB', '10', A, B),
+      velOtr('d-AC', '14', A, C),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -75,6 +78,10 @@ export const TR_INCENTR = scena({
       ug('uA2', A1, A, C, { gruppy: ['bisA'], cvet: 'c' }),
       ug('uB1', A, B, B1, { gruppy: ['bisB'], cvet: 'c', dugi: 2 }),
       ug('uB2', B1, B, C, { gruppy: ['bisB'], cvet: 'c', dugi: 2 }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AB', '6', A, B),
+      velOtr('d-AC', '9', A, C),
+      velOtr('d-BC', '10', B, C),
       tch('A', A),
       tch('B', B),
       tch('C', C),

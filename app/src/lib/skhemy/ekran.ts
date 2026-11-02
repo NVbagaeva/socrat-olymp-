@@ -12,8 +12,8 @@
  */
 
 import { angleOf, cross, dist, dot, len, polar, rotate, sub, unit } from './geometriya';
-import { razmestitSVynoskami, type Prepyatstviya } from './podpisi';
-import type { Cvet, Element, Kadr, Ramka, StilLinii, T2, Vid, ZhivayaSkhema } from './tipy';
+import { gabaritBukvy, kasaniya, razmestitSVynoskami, type Prepyatstviya } from './podpisi';
+import type { Cvet, Element, Kadr, Ramka, StilLinii, T2, Vid, Yakor, ZhivayaSkhema } from './tipy';
 
 /* ── Стиль ─────────────────────────────────────────────────────── */
 
@@ -26,6 +26,8 @@ export const SK = {
   tochkaR: 2.6,
   /** Кегль подписи точки, px. */
   kegl: 17,
+  /** Кегль величины (данные условия на чертеже), px. */
+  keglVel: 15,
 } as const;
 
 /** Радиус кольца ручки перетаскивания, px. */
@@ -134,10 +136,19 @@ export function ramkaKadra(kadr: Kadr, vid: Vid, sost: Sostoyanie): Ramka {
       case 'duga':
         tochkiDugi(el.c, el.r, el.ot, el.do).forEach((p) => vzyat(p));
         break;
+      case 'velichina':
+        tochkiYakorya(el.yakor).forEach((p) => vzyat(p));
+        break;
     }
   }
   if (!Number.isFinite(minx)) return [-1, -1, 1, 1];
   return [minx, miny, maxx, maxy];
+}
+
+function tochkiYakorya(y: Yakor): readonly T2[] {
+  if ('otrezok' in y) return y.otrezok;
+  if ('ugol' in y) return [y.ugol[1]];
+  return [y.vnutri];
 }
 
 /** Плавный переход рамки: доля t ∈ [0; 1] пути от a к b. */
@@ -238,6 +249,23 @@ export interface EkrPodpis extends Obshchee {
   vynoska: string;
 }
 
+/**
+ * Кусок текста величины: цифры, знаки и имена функций (cos) прямо,
+ * латинские буквы курсивом; indeks — нижний индекс (S_ABC).
+ */
+export interface ChastVelichiny {
+  t: string;
+  kursiv: boolean;
+  indeks: boolean;
+}
+
+export interface EkrVelichina extends Obshchee {
+  /** Центр текста. */
+  x: number;
+  y: number;
+  chasti: ChastVelichiny[];
+}
+
 export interface Ekran {
   W: number;
   H: number;
@@ -248,6 +276,8 @@ export interface Ekran {
   ugly: EkrUgol[];
   tochki: EkrTochka[];
   podpisi: EkrPodpis[];
+  /** Данные условия на чертеже: длины, углы, площади. */
+  velichiny: EkrVelichina[];
   /** Экранные положения именованных точек — ручки перетаскивания. */
   poImeni: Record<string, T2>;
   preob: Preobrazovanie;
@@ -337,6 +367,8 @@ function konechnyy(el: Element): boolean {
       return ok(el.p);
     case 'duga':
       return ok(el.c) && Number.isFinite(el.r) && el.r < 1e6;
+    case 'velichina':
+      return tochkiYakorya(el.yakor).every(ok);
   }
 }
 
@@ -354,6 +386,27 @@ export function raskladka(
   /** Точки с ручками перетаскивания: кольцо ручки — препятствие подписи. */
   ruchki: readonly string[] = [],
 ): Ekran {
+  /* Величина не уместилась в поле — фигура чуть мельчает, чтобы
+     запись не обрезалась краем чертежа. */
+  let r = ramka;
+  for (let i = 0; ; i += 1) {
+    const [ekran, vne] = raskladka1(kadr, vid, r, W, H, sost, ruchki);
+    if (!vne || i === 3) return ekran;
+    const dx = (r[2] - r[0]) * 0.1;
+    const dy = (r[3] - r[1]) * 0.1;
+    r = [r[0] - dx, r[1] - dy, r[2] + dx, r[3] + dy];
+  }
+}
+
+function raskladka1(
+  kadr: Kadr,
+  vid: Vid,
+  ramka: Ramka,
+  W: number,
+  H: number,
+  sost: Sostoyanie,
+  ruchki: readonly string[],
+): [Ekran, boolean] {
   const preob = preobrazovanie(ramka, vid, W, H);
   const E = preob.vEkran;
   const ekran: Ekran = {
@@ -366,10 +419,13 @@ export function raskladka(
     ugly: [],
     tochki: [],
     podpisi: [],
+    velichiny: [],
     poImeni: {},
     preob,
   };
   const prep: Prepyatstviya = { otrezki: [], okruzhnosti: [], tochki: [] };
+  /* Величины ставятся последними: им мешают и линии, и буквы. */
+  const velichiny: { el: Element & { vid: 'velichina' }; obshchee: Obshchee }[] = [];
 
   for (const el of kadr.elementy) {
     /* Промежуточный кадр анимации может пройти через вырожденную
@@ -394,6 +450,10 @@ export function raskladka(
       continue;
     }
     if (!vidim) continue;
+    if (el.vid === 'velichina') {
+      velichiny.push({ el, obshchee });
+      continue;
+    }
     switch (el.vid) {
       case 'otrezok': {
         const a = E(el.a);
@@ -464,6 +524,7 @@ export function raskladka(
     if (p !== undefined) prep.okruzhnosti.push([p, RUCHKA_R]);
   }
 
+  const zanyato: Pryam[] = [];
   if (sost.podpisi) {
     const imennye = ekran.tochki.filter((t) => t.imya !== null);
     const mesta = razmestitSVynoskami(
@@ -476,6 +537,9 @@ export function raskladka(
     imennye.forEach((t, i) => {
       const { c: m, vynoska: v } = mesta[i]!;
       const [bukva, indeks] = (t.imya ?? '').split('_');
+      const g = gabaritBukvy(t.imya ?? '', SK.kegl);
+      zanyato.push([m[0] - g.hw, m[1] - g.hh, m[0] + g.hw, m[1] + g.hh]);
+      if (v !== null) prep.otrezki.push([v[0], v[1]]);
       ekran.podpisi.push({
         id: `p-${t.id}`,
         lit: t.lit,
@@ -491,7 +555,156 @@ export function raskladka(
       });
     });
   }
-  return ekran;
+  let vne = false;
+  for (const { el, obshchee } of velichiny) {
+    const chasti = chastiVelichiny(el.tekst);
+    const { hw, hh } = gabaritVelichiny(chasti);
+    const c = mestoVelichiny(el.yakor, hw, hh, E, prep, zanyato, W, H);
+    if (c[0] - hw < 1 || c[1] - hh < 1 || c[0] + hw > W - 1 || c[1] + hh > H - 1) vne = true;
+    zanyato.push([c[0] - hw, c[1] - hh, c[0] + hw, c[1] + hh]);
+    ekran.velichiny.push({ ...obshchee, x: f2(c[0]), y: f2(c[1]), chasti });
+  }
+  return [ekran, vne];
+}
+
+/* ── Величины ──────────────────────────────────────────────────── */
+
+type Pryam = readonly [number, number, number, number];
+
+/** «S_ABC = 60», «cos C = 0,6» → куски для набора. */
+export function chastiVelichiny(tekst: string): ChastVelichiny[] {
+  const out: ChastVelichiny[] = [];
+  const dobavit = (t: string, kursiv: boolean, indeks: boolean) => {
+    const posl = out[out.length - 1];
+    if (posl !== undefined && posl.kursiv === kursiv && posl.indeks === indeks) posl.t += t;
+    else out.push({ t, kursiv, indeks });
+  };
+  const re = /(cos|sin|tg|ctg)|_([A-Za-z0-9]+)|([A-Za-z])|([^A-Za-z_]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(tekst)) !== null) {
+    if (m[1] !== undefined) dobavit(m[1], false, false);
+    else if (m[2] !== undefined) dobavit(m[2], /[A-Za-z]/.test(m[2]), true);
+    else if (m[3] !== undefined) dobavit(m[3], true, false);
+    else if (m[4] !== undefined) dobavit(m[4], false, false);
+  }
+  return out;
+}
+
+/** Полуширина и полувысота записи величины, px. */
+export function gabaritVelichiny(chasti: readonly ChastVelichiny[]): { hw: number; hh: number } {
+  return { hw: shirinaVelichiny(chasti, SK.keglVel) / 2 + 1, hh: SK.keglVel * 0.42 };
+}
+
+/** Ширина текста величины, px (оценка по классам знаков). */
+function shirinaVelichiny(chasti: readonly ChastVelichiny[], kegl: number): number {
+  let w = 0;
+  for (const c of chasti) {
+    const k = c.indeks ? 0.7 : 1;
+    for (const ch of c.t) {
+      let x = 0.3;
+      if (/[0-9]/.test(ch)) x = 0.5;
+      else if (/[A-Za-z]/.test(ch)) x = c.kursiv ? 0.62 : 0.5;
+      else if (ch === ' ') x = 0.25;
+      else if (ch === '=' || ch === '+' || ch === '−') x = 0.78;
+      else if (ch === '√') x = 0.85;
+      else if (ch === '°') x = 0.4;
+      w += x * k;
+    }
+  }
+  return w * kegl;
+}
+
+/**
+ * Место величины: первый кандидат, который ничего не задевает.
+ * У отрезка — снаружи фигуры по нормали к середине, потом ближе к
+ * концам и с другой стороны; у угла — по биссектрисе за дугой угла;
+ * внутри — около точки по спирали.
+ */
+function mestoVelichiny(
+  y: Yakor,
+  hw: number,
+  hh: number,
+  E: (p: T2) => T2,
+  prep: Prepyatstviya,
+  zanyato: readonly Pryam[],
+  W: number,
+  H: number,
+): T2 {
+  const centr: T2 = [W / 2, H / 2];
+  const kand: { c: T2; cena: number }[] = [];
+  const vynos = (d: T2) => Math.abs(d[0]) * hw + Math.abs(d[1]) * hh;
+  if ('otrezok' in y) {
+    const a = E(y.otrezok[0]);
+    const b = E(y.otrezok[1]);
+    const u = unit(sub(b, a));
+    const nr: T2 = [-u[1], u[0]];
+    const m: T2 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    const naruzhu = dot(sub(m, centr), nr) >= 0 ? 1 : -1;
+    const l = dist(a, b);
+    for (const ots of [4, 7, 11, 16]) {
+      for (const t of [0, 0.15, -0.15, 0.3, -0.3]) {
+        for (const storona of [naruzhu, -naruzhu]) {
+          const d: T2 = [nr[0] * storona, nr[1] * storona];
+          const k = ots + vynos(d);
+          kand.push({
+            c: [m[0] + u[0] * t * l + d[0] * k, m[1] + u[1] * t * l + d[1] * k],
+            cena: ots + Math.abs(t) * 30 + (storona === naruzhu ? 0 : 12),
+          });
+        }
+      }
+    }
+  } else if ('ugol' in y) {
+    const a = E(y.ugol[0]);
+    const v = E(y.ugol[1]);
+    const b = E(y.ugol[2]);
+    const ua = unit(sub(a, v));
+    const ub = unit(sub(b, v));
+    let bis: T2 = [ua[0] + ub[0], ua[1] + ub[1]];
+    bis = len(bis) < 1e-6 ? [-ua[1], ua[0]] : unit(bis);
+    const r0 = Math.max(
+      SK.ugol.min,
+      Math.min(SK.ugol.r, SK.ugol.dolya * Math.min(dist(a, v), dist(b, v))),
+    );
+    for (const ots of [4, 8, 13, 19, 26]) {
+      for (const da of [0, 12, -12, 24, -24, 40, -40]) {
+        const d = rotate(bis, [0, 0], da);
+        const k = r0 + ots + vynos(d);
+        kand.push({ c: [v[0] + d[0] * k, v[1] + d[1] * k], cena: ots + Math.abs(da) * 0.4 });
+      }
+    }
+    /* Узкий угол: длинная запись не помещается внутри — встаёт снаружи
+       вершины, на продолжении биссектрисы. */
+    for (const ots of [5, 9, 14]) {
+      for (const da of [0, 25, -25, 50, -50]) {
+        const d = rotate([-bis[0], -bis[1]], [0, 0], da);
+        const k = ots + vynos(d);
+        kand.push({ c: [v[0] + d[0] * k, v[1] + d[1] * k], cena: 60 + ots + Math.abs(da) * 0.4 });
+      }
+    }
+  } else {
+    const p = E(y.vnutri);
+    kand.push({ c: p, cena: 0 });
+    for (const ots of [6, 12, 18, 26]) {
+      for (let i = 0; i < 12; i += 1) {
+        const d = polar(i * 30, 1);
+        kand.push({ c: [p[0] + d[0] * ots, p[1] + d[1] * ots], cena: ots });
+      }
+    }
+  }
+  kand.sort((x, z) => x.cena - z.cena);
+  let luchshee: T2 = kand[0]?.c ?? centr;
+  let luchshiy = Infinity;
+  for (const { c, cena } of kand) {
+    const pr: Pryam = [c[0] - hw, c[1] - hh, c[0] + hw, c[1] + hh];
+    const vne = pr[0] < 1 || pr[1] < 1 || pr[2] > W - 1 || pr[3] > H - 1 ? 1 : 0;
+    const shtraf = 1e4 * kasaniya(pr, prep, zanyato, null) + 3e3 * vne + cena;
+    if (shtraf < luchshiy) {
+      luchshiy = shtraf;
+      luchshee = c;
+    }
+    if (shtraf < 1e3) break;
+  }
+  return luchshee;
 }
 
 /** Длина экранного вектора — для проверок. */

@@ -4,7 +4,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, okr, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, okr, otr, tch, ug, velOtr } from '@/lib/skhemy/dsl';
 import {
   add,
   circumcircle,
@@ -47,6 +47,10 @@ export const KS_OTREZKI = scena({
       otr('BL', B, L, { skrytyy: true, shtrihi: 2, gruppy: ['ravny'], cvet: 'b' }),
       otr('CL', C, L, { skrytyy: true, shtrihi: 3, gruppy: ['ravny'], cvet: 'c' }),
       otr('CM', C, M, { skrytyy: true, shtrihi: 3, gruppy: ['ravny'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AB', '7', A, B),
+      velOtr('d-BC', '8', B, C),
+      velOtr('d-CA', '9', C, A),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -91,6 +95,9 @@ export const KS_DVE_KASATELNYE = scena({
       ug('uBAO', B, A, O, { skrytyy: true, gruppy: ['rb'], cvet: 'c' }),
       ug('uOAC', O, A, C, { skrytyy: true, gruppy: ['rb'], cvet: 'c' }),
       ug('pH', B, H, A, { skrytyy: true, pryamoy: true, gruppy: ['perp', 'pr'], cvet: 'b' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-r', 'r = 6', O, B),
+      velOtr('d-AO', '10', A, O),
       tch('O', O),
       tch('A', A),
       tch('B', B),
@@ -154,6 +161,10 @@ export const KS_VNUTR_KASANIE = scena({
       ug('pC', Q, C, B, { skrytyy: true, pryamoy: true, gruppy: ['parall'], cvet: 'b' }),
       ug('uAKC', A, K, C, { skrytyy: true, gruppy: ['duga', 'otv'], cvet: 'c' }),
       ug('uCKB', C, K, B, { skrytyy: true, gruppy: ['duga', 'otv'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-KA', '6', K, A),
+      velOtr('d-KB', '9', K, B),
+      velOtr('d-AC', '4', A, C),
       tch('K', K),
       tch('A', A),
       tch('B', B),
@@ -202,6 +213,9 @@ export const KS_PRYAM_TRAP = scena({
       ug('uODA', O, D, A, { skrytyy: true, gruppy: ['bis'], cvet: 'a', dugi: 2 }),
       ug('pO', C, O, D, { skrytyy: true, pryamoy: true, gruppy: ['prya'], cvet: 'b' }),
       ug('pE', O, E, D, { skrytyy: true, pryamoy: true, gruppy: ['r'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-OC', '15', O, C),
+      velOtr('d-OD', '20', O, D),
       tch('A', A),
       tch('B', B),
       tch('C', C),

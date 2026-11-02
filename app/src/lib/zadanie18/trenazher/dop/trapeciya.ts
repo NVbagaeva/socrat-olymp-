@@ -5,7 +5,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, ug, velOtr } from '@/lib/skhemy/dsl';
 import { add, foot, intersect, mid, mul, polar, sub } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import { scena } from './obshchee';
@@ -53,6 +53,9 @@ export const TP_RAVNOBOKAYA = scena({
       otr('HD-r', H, D, { skrytyy: true, shtrihi: 2, gruppy: ['proekcii'], cvet: 'c' }),
       otr('GH-r', G, H, { skrytyy: true, gruppy: ['ah'], cvet: 'b' }),
       otr('AH', A, H, { skrytyy: true, gruppy: ['ah', 'pl'], cvet: 'b' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AC', '10', A, C),
+      velOtr('d-CH', '6', C, H),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -105,6 +108,9 @@ export const TP_BABOCHKA = scena({
       otr('BD', B, D),
       otr('KO', K, O, { shtrihi: 1, gruppy: ['pod1', 'otv'], cvet: 'b' }),
       otr('OL', O, L, { shtrihi: 1, gruppy: ['pod2', 'otv'], cvet: 'b' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-BC', '3', B, C),
+      velOtr('d-AD', '6', A, D),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -160,6 +166,10 @@ export const TP_UGOL_90 = scena({
       otr('MC-r', M, C, { skrytyy: true, shtrihi: 2, gruppy: ['med'], cvet: 'b' }),
       ug('uA', B, A, D, { skrytyy: true, gruppy: ['p'], cvet: 'c' }),
       ug('uD', A, D, C, { skrytyy: true, gruppy: ['p'], cvet: 'c', dugi: 2 }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AD', '14', A, D),
+      velOtr('d-BC', '4', B, C),
+      velOtr('d-AB', '6', A, B),
       tch('A', A),
       tch('B', B),
       tch('C', C),

@@ -5,7 +5,7 @@
  */
 
 import { bisectorFoot } from '@/lib/planimetriya/geom';
-import { mnog, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, ug, vel, velOtr, velUg } from '@/lib/skhemy/dsl';
 import { foot, mid } from '@/lib/skhemy/geometriya';
 import type { Element, Tochki } from '@/lib/skhemy/tipy';
 import { delit, poDvumStoronam, scena } from './obshchee';
@@ -39,6 +39,10 @@ export const PL_OBSHCHAYA_VYSOTA = scena({
       otr('NM-r', N, M, { skrytyy: true, shtrihi: 1, gruppy: ['n'], cvet: 'c' }),
       otr('AH', A, H, { skrytyy: true, stil: 'punktir', gruppy: ['h'], cvet: 'c' }),
       ug('pH', A, H, C, { skrytyy: true, pryamoy: true, gruppy: ['h'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-BM', '2x', B, M),
+      velOtr('d-MC', '3x', M, C),
+      vel('d-S', 'S_ABC = 40', { vnutri: [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3] }),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -74,6 +78,10 @@ export const PL_BISSEKTRISA = scena({
       otr('AL', A, L, { gruppy: ['otv'], cvet: 'b' }),
       ug('u1', B, A, L, { gruppy: ['pl', 'otv'], cvet: 'c' }),
       ug('u2', L, A, C, { gruppy: ['pl', 'otv'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AB', '3', A, B),
+      velOtr('d-AC', '6', A, C),
+      velUg('d-A', '120°', B, A, C),
       tch('A', A),
       tch('B', B),
       tch('C', C),

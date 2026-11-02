@@ -85,7 +85,24 @@ export type Element =
       ot: number;
       do: number;
       stil?: StilLinii;
+    })
+  | (Obshchee & {
+      vid: 'velichina';
+      /**
+       * Число или выражение данных условия: «15», «35°», «2x», «S = 60».
+       * Цифры — прямым шрифтом, латинские буквы — курсивом.
+       */
+      tekst: string;
+      /**
+       * К чему относится: вдоль отрезка (снаружи фигуры), у угла (по
+       * биссектрисе, за дугой) или внутри фигуры (площадь).
+       */
+      yakor: Yakor;
     });
+
+/** Привязка величины на чертеже. */
+export type Yakor =
+  { otrezok: readonly [T2, T2] } | { ugol: readonly [T2, T2, T2] } | { vnutri: T2 };
 
 export type VidElementa = Element['vid'];
 

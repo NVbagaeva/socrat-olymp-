@@ -4,7 +4,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, okr, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, okr, otr, tch, ug, velOtr } from '@/lib/skhemy/dsl';
 import { circumcircle, foot, intersect, mid, orthocenter, polar } from '@/lib/skhemy/geometriya';
 import type { Element, Tochki } from '@/lib/skhemy/tipy';
 import { naOkr, scena } from './obshchee';
@@ -55,6 +55,9 @@ export const OK_ORTOCENTR = scena({
       ug('uOAC', O.c, A, C, { skrytyy: true, gruppy: ['oac', 'itog'], cvet: 'c' }),
       ug('uB', A, B, C, { skrytyy: true, gruppy: ['bah', 'oac'], cvet: 'a', dugi: 2 }),
       ug('uAOC', A, O.c, C, { skrytyy: true, gruppy: ['oac'], cvet: 'b', dugi: 2 }),
+      /* Данные условия на чертеже. */
+      velOtr('d-BC', '8', B, C),
+      velOtr('d-R', 'R = 5', O.c, C),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -98,6 +101,11 @@ export const OK_SEKUSHCHIE = scena({
       ug('uP', A, P, C, { skrytyy: true, gruppy: ['pod'], cvet: 'a', dugi: 2 }),
       ug('uPCA', P, C, A, { skrytyy: true, gruppy: ['ugly', 'pod'], cvet: 'c' }),
       ug('uPBD', P, B, D, { skrytyy: true, gruppy: ['ugly', 'pod'], cvet: 'c' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-PA', '4', P, A),
+      velOtr('d-PB', 'PB = 9', P, B),
+      velOtr('d-PC', '3', P, C),
+      velOtr('d-BD', '12', B, D),
       tch('P', P),
       tch('A', A),
       tch('B', B),
@@ -155,6 +163,9 @@ export const OK_BRAHMAGUPTA = scena({
       ug('uKPD', K, P, D, { skrytyy: true, gruppy: ['ugly', 'perp'], cvet: 'c' }),
       ug('uPDA', P, D, A, { skrytyy: true, gruppy: ['perp'], cvet: 'a', dugi: 2 }),
       ug('pK', P, K, D, { skrytyy: true, pryamoy: true, gruppy: ['perp'], cvet: 'b' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-BC', '6', B, C),
+      velOtr('d-AD', '8', A, D),
       tch('A', A),
       tch('B', B),
       tch('C', C),

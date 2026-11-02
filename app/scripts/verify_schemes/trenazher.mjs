@@ -255,6 +255,73 @@ const PROVERKI = {
 export function proverit() {
   const sc = requireSrc('lib/zadanie18/trenazher/sceny');
   const { TIPY_18 } = requireSrc('content/zadanie18/trenazher');
+  const ekran = requireSrc('lib/skhemy/ekran');
+  const podpisi = requireSrc('lib/skhemy/podpisi');
+  /* Данные условия на чертеже (lib/skhemy, элемент «величина»): на
+     листе (360×250) и на телефоне (343×247) каждая запись в кадре,
+     не задевает линий, окружностей, букв и других записей; числа в
+     записях — только из условия (ответа на чертеже нет). */
+  const proveritVelichiny = (scena, t, p, sch) => {
+    const tekst = Object.values(t.tekst(p)).join(' ').replace(/\{,\}/g, ',');
+    const kadr = scena.postroit(scena.nachalo);
+    const zapisi = kadr.elementy.filter((el) => el.vid === 'velichina');
+    sch.fakt('на чертеже есть данные условия', zapisi.length > 0, t.id);
+    for (const el of zapisi) {
+      const chisla = el.tekst.match(/\d+(,\d+)?/g) ?? [];
+      sch.fakt(
+        'на чертеже только числа условия',
+        chisla.every((c) => new RegExp(`(^|[^\\d,])${c}($|[^\\d,])`).test(tekst)),
+        `${t.id}: ${el.tekst}`,
+      );
+    }
+    for (const [W, H] of [
+      [360, 250],
+      [343, 247],
+    ]) {
+      const sost = { lit: new Set(), shag: null, podpisi: true };
+      const e = ekran.raskladka(
+        kadr,
+        { ugol: 0, otrazhenie: 1 },
+        ekran.ramkaKadra(kadr, { ugol: 0, otrazhenie: 1 }, sost),
+        W,
+        H,
+        sost,
+      );
+      const prep = {
+        otrezki: e.linii.map((l) => [
+          [l.x1, l.y1],
+          [l.x2, l.y2],
+        ]),
+        okruzhnosti: e.okr.map((o) => [[o.cx, o.cy], o.r]),
+        tochki: e.tochki.map((q) => [q.x, q.y]),
+      };
+      const bukvy = e.podpisi.map((q) => {
+        const g = podpisi.gabaritBukvy(
+          q.indeks ? `${q.bukva}_${q.indeks}` : q.bukva,
+          ekran.SK.kegl,
+        );
+        return [q.x - g.hw, q.y - g.hh, q.x + g.hw, q.y + g.hh];
+      });
+      const ramki = e.velichiny.map((v) => {
+        const g = ekran.gabaritVelichiny(v.chasti);
+        return [v.x - g.hw, v.y - g.hh, v.x + g.hw, v.y + g.hh];
+      });
+      ramki.forEach((r, i) => {
+        const v = e.velichiny[i];
+        sch.fakt(
+          'запись на чертеже в кадре',
+          r[0] >= 0 && r[1] >= 0 && r[2] <= W && r[3] <= H,
+          `${t.id} ${W}: ${v.chasti.map((c) => c.t).join('')}`,
+        );
+        const drugie = [...bukvy, ...ramki.filter((_, j) => j !== i)];
+        sch.fakt(
+          'запись на чертеже ничего не задевает',
+          podpisi.kasaniya(r, prep, drugie, null) === 0,
+          `${t.id} ${JSON.stringify(p)} ${W}: ${v.chasti.map((c) => c.t).join('')}`,
+        );
+      });
+    }
+  };
   const { SOBRANNYE } = requireSrc('content/zadanie18/spisok');
   const { bank18, trenazherConfig18, zadachi18 } = requireSrc('lib/zadanie18/trenazher/bank');
   const { otvetVeren18, otkrytTekst18 } = requireSrc('lib/zadanie18/trenazher/otvet');
@@ -295,6 +362,7 @@ export function proverit() {
         t.podskazka(p).every((v) => v.options[v.correct] !== undefined && v.options.length >= 2),
         t.id,
       );
+      proveritVelichiny(scena, t, p, sch);
       for (const lit of [[], ...shagi.map((s) => s.gruppy)].slice(0, 4))
         tesno += proveritEkran(scena, scena.nachalo, rnd, sch, lit);
     }
