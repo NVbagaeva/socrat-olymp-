@@ -26,6 +26,19 @@
  * сходятся. Число решений считается точно — по точкам, где границы
  * достигаются, — точка касания акцентным цветом.
  *
+ * Для аналитического способа (глава 9) на рисунке — корни x₁(a), x₂(a),
+ * найденные по формуле: нули графика левой части или общие точки двух
+ * графиков. Число корней считается по формуле, а не по картинке: корень,
+ * ушедший за рамку, тоже считается, совпавшие корни — один раз,
+ * посторонний корень (вне области) — пустой точкой и не в счёт.
+ *
+ * Для метода прямой параметра (глава 10) рисунок — сама прямая
+ * параметра: полосы корней, а ползунок двигает по ней вертикальную метку.
+ * На каждой полосе у метки — точка: закрашенная, если этот корень при
+ * текущем a — решение, пустая, если нет. Число корней считается по
+ * формулам корней: годные корни, совпавшие — один раз; под рисунком —
+ * сами корни и пометка о совпавших.
+ *
  * Описание — данные и функции; функции в браузер со страницы не
  * передать, поэтому компонент (components/zadanie19/Zhivoy19.tsx)
  * берёт описание здесь по id. Число решений считается точно —
@@ -40,9 +53,12 @@ import {
   okruzhnost,
   otrezokNa,
   pryamaya,
+  pryamayaParametra,
   scena,
   tochka,
   type Figura19,
+  type KusokA19,
+  type PryamayaParametra19,
   type Scena19,
   type Tochka19,
 } from './risunok';
@@ -69,7 +85,7 @@ export interface Zhivoy19 {
    * график чётной функции меняется вместе с параметром) — от этого
    * заголовок блока и строка под рисунком.
    */
-  vid?: 'pryamaya' | 'sdvig' | 'okruzhnost' | 'gorizontal' | 'grafik';
+  vid?: 'pryamaya' | 'sdvig' | 'okruzhnost' | 'gorizontal' | 'grafik' | 'parametr';
   bukva: string;
   min: number;
   max: number;
@@ -400,7 +416,311 @@ const m08r2Korni = (a: number) => [1, 4].filter((x) => Math.abs(m08r2G(a, x) ?? 
 /* Разбор метода 8: 2^|x| + |a − 1| + |a − 3| = 2 + cos x; сдвиг левой части — |a − 1| + |a − 3|. */
 const m08r3Sdvig = (a: number) => Math.abs(a - 1) + Math.abs(a - 3);
 
+/* ── Метод 9: аналитический способ ───────────────────────────────── */
+
+/** Корни квадратного (при A = 0 — линейного) уравнения по порядку. */
+const korniPoPoryadku = (A: number, B: number, C: number) => korniKv(A, B, C).sort((p, q) => p - q);
+
+/* Разбор метода 9: (a − 1)x² + 2ax + a + 3 = 0; при a = 1 уравнение линейное. */
+const m09r1Korni = (a: number) => korniPoPoryadku(a - 1, 2 * a, a + 3);
+
+/* Разбор метода 9: √(x + a) = x ⇔ x² − x − a = 0 и x ≥ 0; корень с x < 0 — посторонний. */
+const m09r3Kvadrat = (a: number) => korniPoPoryadku(1, -1, -a);
+const m09r3Korni = (a: number) => m09r3Kvadrat(a).filter((x) => x >= -1e-12);
+
+/* Разбор метода 9: x² − 2ax + a + 2 = 0 и отрезок [0; 3]; корни на отрезке — акцентом. */
+const m09r6Korni = (a: number) => korniPoPoryadku(1, -2 * a, a + 2);
+const m09r6NaOtrezke = (x: number) => x >= -1e-9 && x <= 3 + 1e-9;
+
+/** Корни строкой TeX: «$x_1=-1{,}62$, $x_2=0{,}62$», один — «$x=-2$». */
+function korniTex(korni: number[]): string {
+  if (korni.length === 1) return `$x=${chisloTex(korni[0]!)}$`;
+  return korni.map((x, i) => `$x_${i + 1}=${chisloTex(x)}$`).join(', ');
+}
+
+/* ── Метод 10: прямая параметра ──────────────────────────────────── */
+
+const kA = (ot: number, dO: number, otVkl = true, doVkl = true): KusokA19 => ({
+  ot,
+  do: dO,
+  otVkl,
+  doVkl,
+});
+const VSYA_A = kA(-Infinity, Infinity, false, false);
+
+/** Корень-кандидат: имя (TeX), формула и условие, при котором он — решение. */
+interface KorenA19 {
+  imya: string;
+  x: (a: number) => number;
+  verno: (a: number) => boolean;
+}
+
+/** Годные корни при этом a, совпавшие — один раз. */
+function godnye(korni: KorenA19[], a: number): number[] {
+  const out: number[] = [];
+  for (const k of korni) {
+    if (!k.verno(a)) continue;
+    const x = k.x(a);
+    if (!out.some((y) => blizko(x, y))) out.push(x);
+  }
+  return out.sort((p, q) => p - q);
+}
+
+/** Строка под рисунком: корни и что с ними при этом a. */
+function itogKorney(korni: KorenA19[], a: number): string {
+  const chasti: string[] = [];
+  const vzyaty: { imya: string; x: number }[] = [];
+  const sovpali: string[] = [];
+  for (const k of korni) {
+    if (!k.verno(a)) continue;
+    const x = k.x(a);
+    const pr = vzyaty.find((v) => blizko(v.x, x));
+    if (pr === undefined) vzyaty.push({ imya: k.imya, x });
+    else sovpali.push(`$${k.imya}$ совпал с $${pr.imya}$`);
+  }
+  const ne = korni.filter((k) => !k.verno(a)).map((k) => `$${k.imya}$`);
+  chasti.push(
+    vzyaty.length === 0
+      ? 'годных корней нет'
+      : `корни ${vzyaty.map((v) => `$${chisloTex(v.x)}$`).join(', ')}`,
+  );
+  if (sovpali.length > 0) chasti.push(sovpali.join(', '));
+  if (ne.length > 0) chasti.push(`не решение: ${ne.join(', ')}`);
+  return chasti.join('; ');
+}
+
+/** Прямая параметра разбора 1 метода 10: (x² − 3ax + 2a² − a − 1)·lg(x + 1) = 0. */
+export const OPISANIE_M10_R1: Omit<PryamayaParametra19, 'alt'> = {
+  a: [-3, 1.8],
+  masshtab: 2,
+  osobye: [-2, -1, -0.5, 0, 1],
+  podpisi: ['−2', '−1', '−1/2', '0', '1'],
+  polosy: [
+    { imya: 'x = 0', kuski: [VSYA_A], cvet: 'lineA' },
+    { imya: 'x = 2a + 1', kuski: [kA(-1, Infinity, false, false)], cvet: 'lineB' },
+    { imya: 'x = a − 1', kuski: [kA(0, Infinity, false, false)], cvet: 'lineC' },
+  ],
+  schet: { promezhutki: [1, 1, 2, 2, 3, 3], tochki: [1, 1, 1, 2, 2] },
+};
+
+const KORNI_M10_R1: KorenA19[] = [
+  { imya: 'x=0', x: () => 0, verno: () => true },
+  { imya: 'x=2a+1', x: (a) => 2 * a + 1, verno: (a) => 2 * a + 1 > -1 + 1e-12 },
+  { imya: 'x=a-1', x: (a) => a - 1, verno: (a) => a - 1 > -1 + 1e-12 },
+];
+
+/** Прямая параметра разбора 2 метода 10: (x² − (2a + 1)x + a² + a)/(x − 2) = 0 на [0; 3]. */
+export const OPISANIE_M10_R2: Omit<PryamayaParametra19, 'alt'> = {
+  a: [-2, 4],
+  masshtab: 1.5,
+  osobye: [-1, 0, 1, 2, 3],
+  polosy: [
+    { imya: 'x = a', kuski: [kA(0, 2, true, false), kA(2, 3, false, true)], cvet: 'lineA' },
+    {
+      imya: 'x = a + 1',
+      kuski: [kA(-1, 1, true, false), kA(1, 2, false, true)],
+      cvet: 'lineB',
+    },
+  ],
+  schet: { promezhutki: [0, 1, 2, 2, 1, 0], tochki: [1, 2, 1, 1, 1] },
+};
+
+const naOtrezke03 = (x: number) => x >= -1e-12 && x <= 3 + 1e-12 && !blizko(x, 2);
+const KORNI_M10_R2: KorenA19[] = [
+  { imya: 'x=a', x: (a) => a, verno: (a) => naOtrezke03(a) },
+  { imya: 'x=a+1', x: (a) => a + 1, verno: (a) => naOtrezke03(a + 1) },
+];
+
+/** Живой рисунок метода 10 по описанию прямой и корням. */
+function zhivoyParametr(z: {
+  opisanie: Omit<PryamayaParametra19, 'alt'>;
+  korni: KorenA19[];
+  osobye: Osoboe19[];
+  start: number;
+  alt: string;
+}): Zhivoy19 {
+  const { opisanie, korni } = z;
+  return {
+    vid: 'parametr',
+    bukva: 'a',
+    min: opisanie.a[0],
+    max: opisanie.a[1],
+    shag: 0.01,
+    start: z.start,
+    osobye: z.osobye,
+    scena: (a) =>
+      pryamayaParametra({
+        ...opisanie,
+        metka: { a, verny: korni.map((k) => k.verno(a)) },
+        alt: `${z.alt} при a = ${chislo(a)}`,
+      }),
+    resheniy: (a) => godnye(korni, a).length,
+    itog: (a) => itogKorney(korni, a),
+  };
+}
+
 const ZHIVYE: Record<string, Zhivoy19> = {
+  /* Разбор метода 10: прямая параметра, метка a и годные корни на полосах. */
+  'm10-r1': zhivoyParametr({
+    opisanie: OPISANIE_M10_R1,
+    korni: KORNI_M10_R1,
+    osobye: [
+      { a: -2, tex: '-2' },
+      { a: -1, tex: '-1' },
+      { a: -0.5, tex: '-\\frac12' },
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+    ],
+    start: -0.25,
+    alt: 'Прямая параметра уравнения (x² − 3ax + 2a² − a − 1)·lg(x + 1) = 0, метка',
+  }),
+  'm10-r2': zhivoyParametr({
+    opisanie: OPISANIE_M10_R2,
+    korni: KORNI_M10_R2,
+    osobye: [
+      { a: -1, tex: '-1' },
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+      { a: 2, tex: '2' },
+      { a: 3, tex: '3' },
+    ],
+    start: 0.5,
+    alt: 'Прямая параметра уравнения (x² − (2a + 1)x + a² + a)/(x − 2) = 0 на [0; 3], метка',
+  }),
+  /* Разбор метода 9: график y = (a − 1)x² + 2ax + a + 3 и его нули; при a = 1 — прямая. */
+  'm09-r1': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -1,
+    max: 3,
+    shag: 0.01,
+    start: 0,
+    osobye: [
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+      { a: 1.5, tex: '\\frac32' },
+      { a: 2, tex: '2' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-7, 4] as [number, number], y: [-5, 7] as [number, number] };
+      const korni = m09r1Korni(a);
+      return scena(
+        okno,
+        {
+          curves: [grafik((x) => (a - 1) * x * x + 2 * a * x + a + 3, 'lineA')],
+          points: korni
+            .filter((x) => x >= okno.x[0] && x <= okno.x[1])
+            .map((x) => tochka(x, 0, null, false, korni.length === 1 ? 'accent' : 'cross')),
+        },
+        `График y = (a − 1)x² + 2ax + a + 3 при a = ${chislo(a)} и его нули`,
+      );
+    },
+    resheniy: (a) => m09r1Korni(a).length,
+    itog: (a) => {
+      const korni = m09r1Korni(a);
+      if (blizko(a, 1))
+        return 'старший коэффициент — нуль: уравнение $2x+4=0$ линейное, корень $x=-2$';
+      if (korni.length === 0) return '$\\frac D4=3-2a<0$: корней нет';
+      if (korni.length === 1) return `$\\frac D4=0$: корень один, ${korniTex(korni)}`;
+      const za = korni.some((x) => x < -7 || x > 4) ? ' (один — за рамкой рисунка)' : '';
+      return `${korniTex(korni)}${za}`;
+    },
+  },
+  /* Разбор метода 9: y = √(x + a) и y = x; посторонний корень x² − x − a = 0 с x < 0 — пустой точкой. */
+  'm09-r3': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -1,
+    max: 2,
+    shag: 0.01,
+    start: -0.1,
+    osobye: [
+      { a: -0.25, tex: '-\\frac14' },
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+    ],
+    scena: (a) => {
+      const kv = m09r3Kvadrat(a);
+      return scena(
+        { x: [-2, 4], y: [-2, 3.5] },
+        {
+          curves: [
+            grafik((x) => (x + a < 0 ? null : Math.sqrt(x + a)), 'lineA', { ot: -a }),
+            grafik((x) => (x + a < 0 ? null : -Math.sqrt(x + a)), 'lineC', { ot: -a }, 'dashed'),
+            pryamaya(1, 0, 'lineB'),
+          ],
+          points: kv.map((x) =>
+            x >= -1e-12
+              ? tochka(x, x, null, false, kv.length === 1 ? 'accent' : 'cross')
+              : tochka(x, x, null, true, 'cross'),
+          ),
+        },
+        `Графики y = √(x + a) при a = ${chislo(a)} и y = x; пунктиром — y = −√(x + a)`,
+      );
+    },
+    resheniy: (a) => m09r3Korni(a).length,
+    itog: (a) => {
+      const kv = m09r3Kvadrat(a);
+      const korni = m09r3Korni(a);
+      if (kv.length === 0) return 'у $x^2-x-a=0$ корней нет: $1+4a<0$';
+      if (kv.length === 1) return `корни $x^2-x-a=0$ совпали: ${korniTex(korni)}`;
+      if (korni.length === 1)
+        return `$x=${chisloTex(kv[0]!)}<0$ — посторонний: он корень уравнения $-\\sqrt{x+a}=x$`;
+      return `оба корня $x^2-x-a=0$ не меньше нуля: ${korniTex(korni)}`;
+    },
+  },
+
+  /* Разбор метода 9: парабола y = x² − 2ax + a + 2 и отрезок [0; 3]; под рисунком — сколько корней на отрезке. */
+  'm09-r6': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -3,
+    max: 3.5,
+    shag: 0.01,
+    start: 0.5,
+    osobye: [
+      { a: -2, tex: '-2' },
+      { a: -1, tex: '-1' },
+      { a: 2, tex: '2' },
+      { a: 2.1, tex: '2{,}1' },
+      { a: 2.2, tex: '\\frac{11}5' },
+      { a: 3, tex: '3' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-4, 6] as [number, number], y: [-4, 7] as [number, number] };
+      const korni = m09r6Korni(a);
+      return scena(
+        okno,
+        {
+          curves: [grafik((x) => x * x - 2 * a * x + a + 2, 'lineA')],
+          shapes: [
+            otrezokNa(0, 0, 3, 0, 'aux', 'solid', 4),
+            otrezokNa(3, okno.y[0], 3, okno.y[1], 'aux', 'dashed', 1.4),
+          ],
+          points: korni
+            .filter((x) => x >= okno.x[0] && x <= okno.x[1])
+            .map((x) => tochka(x, 0, null, false, m09r6NaOtrezke(x) ? 'accent' : 'cross')),
+        },
+        `Парабола y = x² − 2ax + a + 2 при a = ${chislo(a)}, отрезок [0; 3] на оси x и нули параболы`,
+      );
+    },
+    itog: (a) => {
+      const korni = m09r6Korni(a);
+      const na = korni.filter(m09r6NaOtrezke).length;
+      const kontsy = `$f(0)=${chisloTex(a + 2)}$, $f(3)=${chisloTex(11 - 5 * a)}$`;
+      if (korni.length === 0) return `корней нет: $\\frac D4=a^2-a-2<0$; ${kontsy}`;
+      const za = korni.some((x) => x < -4 || x > 6) ? ' (один — за рамкой рисунка)' : '';
+      if (na === 0) {
+        const vne = korni.length === 1 ? 'двойной корень' : 'оба корня';
+        return `на отрезке $[0;\\,3]$ корней нет, ${vne} вне его: ${korniTex(korni)}; ${kontsy}`;
+      }
+      const skolko =
+        na === 1 ? 'на отрезке $[0;\\,3]$ ровно один корень' : 'на отрезке $[0;\\,3]$ два корня';
+      const dvoynoy = korni.length === 1 ? ' (двойной)' : '';
+      return `${skolko}${dvoynoy}: ${korniTex(korni)}${za}; ${kontsy}`;
+    },
+  },
+
   /* Разбор метода 8: косинусоида и парабола с вершиной (a; (a − 2)² + 1); касание только при a = 2. */
   'm08-r1': {
     vid: 'grafik',

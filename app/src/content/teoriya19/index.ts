@@ -15,6 +15,8 @@ import { GLAVA_M05 } from './m05';
 import { GLAVA_M06 } from './m06';
 import { GLAVA_M07 } from './m07';
 import { GLAVA_M08 } from './m08';
+import { GLAVA_M09 } from './m09';
+import { GLAVA_M10 } from './m10';
 import type { Glava19, Opornaya19, Razbor19, Zadacha19 } from './tipy';
 import { VVEDENIE_19 } from './vvedenie';
 
@@ -30,7 +32,7 @@ export const METODY_19 = [
   'Метод оценки',
   'Аналитический способ',
   'Метод прямой параметра',
-  'Квадратные уравнения и неравенства с параметром',
+  'Квадратные неравенства с параметром',
   'Тригонометрические уравнения с параметром',
   'Свойства функций: непрерывность, монотонность, нечётность',
   'Метод упрощающего значения',
@@ -45,6 +47,8 @@ const GOTOVYE: Glava19[] = [
   GLAVA_M06,
   GLAVA_M07,
   GLAVA_M08,
+  GLAVA_M09,
+  GLAVA_M10,
 ];
 
 function skoro(metod: number): Glava19 {
