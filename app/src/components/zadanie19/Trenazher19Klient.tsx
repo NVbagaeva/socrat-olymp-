@@ -323,6 +323,7 @@ function Ekran19({
           >
             {UROVNI_19[z.uroven]}
           </Badge>
+          {z.tema === undefined ? null : <span className="z19-zad__tema">{z.tema}</span>}
         </div>
         <div className="z16-zad__uslovie ptask__question">{z.uslovie}</div>
       </article>

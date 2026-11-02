@@ -418,6 +418,10 @@ const m09r1Korni = (a: number) => korniPoPoryadku(a - 1, 2 * a, a + 3);
 const m09r3Kvadrat = (a: number) => korniPoPoryadku(1, -1, -a);
 const m09r3Korni = (a: number) => m09r3Kvadrat(a).filter((x) => x >= -1e-12);
 
+/* Разбор метода 9: x² − 2ax + a + 2 = 0 и отрезок [0; 3]; корни на отрезке — акцентом. */
+const m09r6Korni = (a: number) => korniPoPoryadku(1, -2 * a, a + 2);
+const m09r6NaOtrezke = (x: number) => x >= -1e-9 && x <= 3 + 1e-9;
+
 /** Корни строкой TeX: «$x_1=-1{,}62$, $x_2=0{,}62$», один — «$x=-2$». */
 function korniTex(korni: number[]): string {
   if (korni.length === 1) return `$x=${chisloTex(korni[0]!)}$`;
@@ -505,6 +509,57 @@ const ZHIVYE: Record<string, Zhivoy19> = {
       if (korni.length === 1)
         return `$x=${chisloTex(kv[0]!)}<0$ — посторонний: он корень уравнения $-\\sqrt{x+a}=x$`;
       return `оба корня $x^2-x-a=0$ не меньше нуля: ${korniTex(korni)}`;
+    },
+  },
+
+  /* Разбор метода 9: парабола y = x² − 2ax + a + 2 и отрезок [0; 3]; под рисунком — сколько корней на отрезке. */
+  'm09-r6': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -3,
+    max: 3.5,
+    shag: 0.01,
+    start: 0.5,
+    osobye: [
+      { a: -2, tex: '-2' },
+      { a: -1, tex: '-1' },
+      { a: 2, tex: '2' },
+      { a: 2.1, tex: '2{,}1' },
+      { a: 2.2, tex: '\\frac{11}5' },
+      { a: 3, tex: '3' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-4, 6] as [number, number], y: [-4, 7] as [number, number] };
+      const korni = m09r6Korni(a);
+      return scena(
+        okno,
+        {
+          curves: [grafik((x) => x * x - 2 * a * x + a + 2, 'lineA')],
+          shapes: [
+            otrezokNa(0, 0, 3, 0, 'aux', 'solid', 4),
+            otrezokNa(3, okno.y[0], 3, okno.y[1], 'aux', 'dashed', 1.4),
+          ],
+          points: korni
+            .filter((x) => x >= okno.x[0] && x <= okno.x[1])
+            .map((x) => tochka(x, 0, null, false, m09r6NaOtrezke(x) ? 'accent' : 'cross')),
+        },
+        `Парабола y = x² − 2ax + a + 2 при a = ${chislo(a)}, отрезок [0; 3] на оси x и нули параболы`,
+      );
+    },
+    itog: (a) => {
+      const korni = m09r6Korni(a);
+      const na = korni.filter(m09r6NaOtrezke).length;
+      const kontsy = `$f(0)=${chisloTex(a + 2)}$, $f(3)=${chisloTex(11 - 5 * a)}$`;
+      if (korni.length === 0) return `корней нет: $\\frac D4=a^2-a-2<0$; ${kontsy}`;
+      const za = korni.some((x) => x < -4 || x > 6) ? ' (один — за рамкой рисунка)' : '';
+      if (na === 0) {
+        const vne = korni.length === 1 ? 'двойной корень' : 'оба корня';
+        return `на отрезке $[0;\\,3]$ корней нет, ${vne} вне его: ${korniTex(korni)}; ${kontsy}`;
+      }
+      const skolko =
+        na === 1 ? 'на отрезке $[0;\\,3]$ ровно один корень' : 'на отрезке $[0;\\,3]$ два корня';
+      const dvoynoy = korni.length === 1 ? ' (двойной)' : '';
+      return `${skolko}${dvoynoy}: ${korniTex(korni)}${za}; ${kontsy}`;
     },
   },
 
