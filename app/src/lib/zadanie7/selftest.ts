@@ -9,8 +9,9 @@
  *     численно найденными; посторонний корень не проходит ОДЗ или
  *     подстановку; в аналогах П-09, П-13, П-30 посторонние корни есть, у
  *     П-13 есть и аналоги без них (оба корня подходят, «меньший» решает);
- *   — распределение ответов: 20 аналогов, не меньше 12 разных, ни один
- *     не чаще двух раз (исключения — с причиной); ответы — целые или
+ *   — распределение ответов: 20 подобранных аналогов (и задачи листа
+ *     учителя после них), не меньше 12 разных, ни один не чаще двух
+ *     раз (исключения — с причиной); ответы — целые или
  *     конечные десятичные дроби; файл аналогов совпадает с подбором;
  *     нет двух одинаковых уравнений с точностью до перестановки;
  *   — разметка формул: KaTeX в строгом режиме, нет «1x», «x^1», «^1»,
@@ -24,6 +25,7 @@ import { FIPI } from './bank/fipi';
 import { ANALOGI_PO_PROTOTIPAM } from './bank/index';
 import {
   ANALOGOV,
+  analogovPrototipa,
   GENERATORY,
   otpechatok,
   otvetEge,
@@ -317,11 +319,13 @@ export function checkBank(typeset: (tex: string) => string): Itog {
   for (const p of PROTOTYPES) {
     const a = ANALOGI_PO_PROTOTIPAM[p.id] ?? [];
     const where = `${p.id} аналоги`;
-    if (a.length !== ANALOGOV) {
-      problems.push({ where, what: `аналогов ${a.length}, нужно ${ANALOGOV}` });
+    const nado = analogovPrototipa(p.id);
+    if (a.length !== nado) {
+      problems.push({ where, what: `аналогов ${a.length}, нужно ${nado}` });
     }
+    /* Разнообразие ответов — у 20 подобранных; задачи листа идут после них. */
     const cnt = new Map<number, number>();
-    a.forEach((x) => cnt.set(x.answer, (cnt.get(x.answer) ?? 0) + 1));
+    a.slice(0, ANALOGOV).forEach((x) => cnt.set(x.answer, (cnt.get(x.answer) ?? 0) + 1));
     const pr = pravila(p.id);
     if (cnt.size < pr.minRaznyh) {
       problems.push({ where, what: `разных ответов ${cnt.size}, нужно не меньше ${pr.minRaznyh}` });
@@ -339,18 +343,18 @@ export function checkBank(typeset: (tex: string) => string): Itog {
       }
     }
     const post = a.filter((x) => solved.find((z) => z.item.id === x.id)?.s.postoronnie.length);
-    const nado = S_POSTORONNIM[p.id];
-    if (nado) {
-      if (post.length < nado.min) {
+    const sPost = S_POSTORONNIM[p.id];
+    if (sPost) {
+      if (post.length < sPost.min) {
         problems.push({
           where,
-          what: `с посторонним корнем ${post.length} аналогов, нужно не меньше ${nado.min}`,
+          what: `с посторонним корнем ${post.length} аналогов, нужно не меньше ${sPost.min}`,
         });
       }
-      if (nado.bezNih !== undefined && a.length - post.length < nado.bezNih) {
+      if (sPost.bezNih !== undefined && a.length - post.length < sPost.bezNih) {
         problems.push({
           where,
-          what: `без постороннего корня ${a.length - post.length}, нужно не меньше ${nado.bezNih}`,
+          what: `без постороннего корня ${a.length - post.length}, нужно не меньше ${sPost.bezNih}`,
         });
       }
     }

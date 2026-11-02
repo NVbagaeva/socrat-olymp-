@@ -746,7 +746,7 @@ export const BLOKI_OPORNYH: BlokOpornyh[] = [
     opisanie: 'Степень в степени, отрицательные и дробные показатели, одно основание.',
     zapomni:
       '$a^m\\cdot a^n=a^{m+n}$, $(a^m)^n=a^{mn}$, $a^{-n}=\\dfrac{1}{a^n}$, $a^{\\frac{m}{n}}=\\sqrt[n]{a^m}$.',
-    prototipy: ['P15', 'P16', 'P17', 'P18', 'P19', 'P29'],
+    prototipy: ['P15', 'P16', 'P17', 'P18', 'P19', 'P29', 'P31', 'P32'],
     zadachi: STEPENI,
   },
   {
@@ -767,7 +767,7 @@ export const BLOKI_OPORNYH: BlokOpornyh[] = [
     nazvanie: 'Логарифм по определению',
     opisanie: 'В какую степень возвести основание, чтобы получить число.',
     zapomni: '$\\log_ab=c\\iff a^c=b$; $\\log_a1=0$, $\\log_aa=1$.',
-    prototipy: ['P21', 'P22', 'P30'],
+    prototipy: ['P21', 'P22', 'P30', 'P33', 'P34', 'P35'],
     zadachi: LOG_OPR,
   },
   {
@@ -810,7 +810,7 @@ export const BLOKI_OPORNYH: BlokOpornyh[] = [
     opisanie: 'Корни квадратного уравнения, меньший и больший корень.',
     zapomni:
       '$D=b^2-4ac$, $x_{1,2}=\\dfrac{-b\\pm\\sqrt D}{2a}$; для $x^2+px+q=0$: $x_1+x_2=-p$, $x_1x_2=q$.',
-    prototipy: ['P06', 'P07', 'P10'],
+    prototipy: ['P06', 'P07', 'P10', 'P32', 'P34'],
     zadachi: KVADRAT,
   },
   {

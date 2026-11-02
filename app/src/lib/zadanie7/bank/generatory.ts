@@ -480,6 +480,130 @@ export const GENERATORY: Record<string, Generator> = {
     }
     return { a, N: s * s, v: r.next() < 0.6 ? 'menshiy' : 'bolshiy' };
   },
+  /* aᵐ / a^(x + b) = aᵗ */
+  P31(r) {
+    const a = r.pick([2, 3, 3, 4, 5, 6, 7]);
+    const m = r.int(1, 3);
+    const tt = r.int(-4, 3);
+    if (a ** m > 216 || a ** Math.abs(tt) > 729) {
+      return null;
+    }
+    const b = r.next() < 0.4 ? 0 : nenol(r, -9, 9);
+    return { a, m, b, tt };
+  },
+  /* (a²)^(x + p) ± K·a^(x + q) + c = 0: сначала корни t = aˣ, потом коэффициенты */
+  P32(r) {
+    const a = r.pick([2, 2, 2, 3, 3, 5]);
+    const [lo, hi] = a === 2 ? [-5, 7] : a === 3 ? [-3, 4] : [-2, 3];
+    const stepen = (m: number): [number, number] => (m >= 0 ? [a ** m, 1] : [1, a ** -m]);
+    const vid = r.pick(['dva', 'postor', 'postor', 'dvoyn'] as const);
+    const m1 = r.int(lo, hi);
+    const t1 = stepen(m1);
+    let t2: [number, number];
+    if (vid === 'dva') {
+      const m2 = r.int(lo, hi);
+      if (m2 === m1) {
+        return null;
+      }
+      t2 = stepen(m2);
+    } else if (vid === 'postor') {
+      t2 = [-r.int(1, 12), 1];
+    } else {
+      t2 = t1;
+    }
+    /* Сумма и произведение корней — дроби S = Sn/Z, P = Pn/Z. */
+    const Z = t1[1] * t2[1];
+    const Sn = t1[0] * t2[1] + t2[0] * t1[1];
+    const Pn = t1[0] * t2[0];
+    const pMax = a === 2 ? 3 : 2;
+    let p = 0;
+    while (p <= pMax && ((a ** (2 * p) * Sn) % Z !== 0 || (a ** (2 * p) * Pn) % Z !== 0)) {
+      p += 1;
+    }
+    if (p < pMax && r.next() < 0.25) {
+      p += 1;
+    }
+    if (p > pMax) {
+      return null;
+    }
+    const A = a ** (2 * p);
+    const B = (-A * Sn) / Z;
+    const C = (A * Pn) / Z;
+    if (!isInt(B) || !isInt(C) || B === 0 || C === 0 || Math.abs(B) > 200 || Math.abs(C) > 600) {
+      return null;
+    }
+    let vq = 0;
+    while (Math.abs(B) % a ** (vq + 1) === 0) {
+      vq += 1;
+    }
+    const q = r.int(0, Math.min(vq, 4));
+    const K = Math.abs(B) / a ** q;
+    if (K > 60) {
+      return null;
+    }
+    return {
+      a,
+      p,
+      s: B < 0 ? -1 : 1,
+      K,
+      q,
+      c: C,
+      v: vid === 'dva' ? (r.next() < 0.5 ? 'menshiy' : 'bolshiy') : 'koren',
+    };
+  },
+  /* logₐ(a^(x + p) + b) = c */
+  P33(r) {
+    const a = r.pick([2, 2, 3, 3, 4, 5, 6, 7]);
+    const c = r.int(1, 4);
+    const m = r.int(0, 6);
+    if (m === c || a ** c > 700 || a ** m > 700) {
+      return null;
+    }
+    const b = a ** c - a ** m;
+    if (Math.abs(b) > 600) {
+      return null;
+    }
+    return { a, p: r.next() < 0.4 ? 0 : nenol(r, -6, 6), b, c };
+  },
+  /* log²ₐx + B·logₐx + C = 0: корни t = logₐx — целые, x — конечные дроби */
+  P34(r) {
+    const a = r.pick([2, 2, 2, 3, 4, 5, 7, 10]);
+    const [lo, hi] = (
+      { 2: [-5, 9], 3: [0, 6], 4: [-2, 4], 5: [-2, 4], 7: [0, 3], 10: [-1, 2] } as Record<
+        number,
+        [number, number]
+      >
+    )[a] as [number, number];
+    const y1 = r.int(lo, hi);
+    const y2 = r.int(lo, hi);
+    if (y1 === y2 || Math.abs(y1 * y2) > 40) {
+      return null;
+    }
+    return { a, B: -(y1 + y2), C: y1 * y2, v: r.next() < 0.5 ? 'menshiy' : 'bolshiy' };
+  },
+  /* logₐ(log_b(log_c x)) = m */
+  P35(r) {
+    const a = r.pick([2, 3, 5, 7, 10, 11, 13]);
+    const m = r.pick([0, 0, 1, -1, -1]);
+    const b = r.int(2, 32);
+    const c = r.int(2, 10);
+    if (a === b) {
+      return null;
+    }
+    let w: number | null = null;
+    if (m === 0) {
+      w = b;
+    } else if (m === 1) {
+      w = b ** a;
+    } else {
+      const k = Math.round(b ** (1 / a));
+      w = k ** a === b ? k : null;
+    }
+    if (w === null || w < 2 || w > 12 || c ** w >= 1000) {
+      return null;
+    }
+    return { a, b, c, m };
+  },
   P26: trig('sin'),
   P27: trig('cos'),
   P28: trig('tg'),
