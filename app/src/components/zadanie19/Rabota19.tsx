@@ -15,6 +15,8 @@ export interface Zadanie19View {
   otvet: string;
   podskazka: ReactNode;
   reshenie: ReactNode;
+  /** Подметод главы, к которому относится задание (большая глава метода 9). */
+  tema?: ReactNode;
 }
 
 const TON = { razminka: 'success', ege: 'info', povyshennyy: 'warning' } as const;
@@ -55,6 +57,7 @@ function Zadanie({ z, no, onVerno }: { z: Zadanie19View; no: number; onVerno: ()
       <div className="z19-zad__head">
         <span className="z16-zad__no">{no}.</span>
         <Badge tone={TON[z.uroven]}>{UROVNI_19[z.uroven]}</Badge>
+        {z.tema === undefined ? null : <span className="z19-zad__tema">{z.tema}</span>}
       </div>
       <div className="z16-zad__uslovie">{z.uslovie}</div>
       <form

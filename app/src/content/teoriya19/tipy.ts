@@ -73,6 +73,22 @@ export interface Punkt19 {
   id: string;
   title: string;
   kartochki: Kartochka19[];
+  /** Подметод главы (id из Glava19.podmetody): перед первым пунктом подметода — его заголовок. */
+  podmetod?: string;
+}
+
+/**
+ * Подметод — часть большой главы (метод 9 «Аналитический способ»):
+ * свой заголовок на вкладках «Теория» и «Разбор», свои карточки,
+ * разборы, опорные и задания. Глава без подметодов выглядит как раньше.
+ */
+export interface Podmetod19 {
+  id: string;
+  /** Метка над заголовком: «Подметод 2», «Итоги». */
+  metka: string;
+  title: string;
+  /** Короткая строка под заголовком. */
+  lead?: string;
 }
 
 /** Этап решения: подзаголовок, строки, формулы крупно, рисунок. */
@@ -106,6 +122,8 @@ export interface Razbor19 {
   otvet: string;
   /** «Другой способ» — коротко. */
   drugoy?: Etap19;
+  /** Подметод главы — id из Glava19.podmetody. */
+  podmetod?: string;
 }
 
 /** Опорная задача — короткий «кирпичик» решения. */
@@ -118,6 +136,8 @@ export interface Opornaya19 {
   shagi: string[];
   risunok?: Risunok19;
   otvet: string;
+  /** Подметод главы — id из Glava19.podmetody. */
+  podmetod?: string;
 }
 
 export type Uroven19 = 'razminka' | 'ege' | 'povyshennyy';
@@ -133,6 +153,8 @@ export interface Zadacha19 {
   /** Подсказка: с чего начать. */
   podskazka: string;
   reshenie: Etap19[];
+  /** Подметод главы — id из Glava19.podmetody. */
+  podmetod?: string;
 }
 
 export interface Glava19 {
@@ -142,6 +164,8 @@ export interface Glava19 {
   metod?: number;
   skoro?: true;
   lead?: string;
+  /** Подметоды большой главы — по порядку; задают заголовки на вкладках «Теория» и «Разбор». */
+  podmetody?: Podmetod19[];
   teoriya: Punkt19[];
   razbory: Razbor19[];
   opornye: Opornaya19[];
