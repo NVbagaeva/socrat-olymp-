@@ -11,6 +11,10 @@
  * числом решений — вывод: при найденном значении решение одно, при
  * отброшенном кандидате кроме x = 0 есть ещё пара.
  *
+ * Для симметрии (глава 6) — то же на плоскости xOy и для замены
+ * x → 4 − x: решения на неподвижном множестве (прямая y = x, точка
+ * x = 2) — акцентным цветом, остальные идут симметричными парами.
+ *
  * Описание — данные и функции; функции в браузер со страницы не
  * передать, поэтому компонент (components/zadanie19/Zhivoy19.tsx)
  * берёт описание здесь по id. Число решений считается точно —
@@ -176,15 +180,15 @@ export function korniKL(f: (x: number) => number, izlomy: number[]): number {
   return korni.length;
 }
 
-/** Общие точки окружности и ломаной (по звеньям): точные, совпавшие — одна. */
-export function tochkiOkrLomanoy(
+/** Общие точки окружности и замкнутой ломаной (по звеньям): точные, совпавшие — одна. */
+export function peresecheniyaOkrLomanoy(
   centr: [number, number],
   r: number,
   vershiny: [number, number][],
-): number {
+): [number, number][] {
   const [cx, cy] = centr;
   const out: [number, number][] = [];
-  if (!(r >= 0)) return 0;
+  if (!(r >= 0)) return out;
   for (let i = 0; i < vershiny.length; i++) {
     const [px, py] = vershiny[i]!;
     const [qx, qy] = vershiny[(i + 1) % vershiny.length]!;
@@ -210,7 +214,16 @@ export function tochkiOkrLomanoy(
       }
     }
   }
-  return out.length;
+  return out;
+}
+
+/** Число общих точек окружности и ломаной. */
+export function tochkiOkrLomanoy(
+  centr: [number, number],
+  r: number,
+  vershiny: [number, number][],
+): number {
+  return peresecheniyaOkrLomanoy(centr, r, vershiny).length;
 }
 
 const W = (x: number) => Math.abs(Math.abs(x) - 2);
@@ -314,6 +327,30 @@ function m05r3Tochki(a: number): [number, number][] {
   return out;
 }
 
+/* ── Метод 6: симметрия ──────────────────────────────────────────── */
+
+const S2 = Math.SQRT2;
+
+/* Разбор метода 6: ромб |x| + |y| = 2 и окружность с центром (a; a) радиуса √2. */
+function m06r1Tochki(a: number): [number, number][] {
+  return peresecheniyaOkrLomanoy([a, a], S2, ROMB_2);
+}
+
+/**
+ * Разбор метода 6: x² − 4x + a(|x − 1| + |x − 3|) = a² + 3a − 6. При t = x − 2:
+ * на |t| ≤ 1 — t² = a² + a − 2, на |t| > 1 — u² + 2au − (a² + 3a − 2) = 0, u = |t|.
+ */
+function m06r2F(a: number, x: number): number {
+  return x * x - 4 * x + a * (Math.abs(x - 1) + Math.abs(x - 3)) - (a * a + 3 * a - 6);
+}
+
+function m06r2Korni(a: number): number[] {
+  const c = a * a + a - 2;
+  const vnutri = Math.abs(c) < 1e-9 ? [0] : c > 0 && c <= 1 + 1e-12 ? [Math.sqrt(c)] : [];
+  const snaruzhi = korniKv(1, 2 * a, -(a * a + 3 * a - 2)).filter((u) => u > 1 + 1e-12);
+  return korniChetnye([...vnutri, ...snaruzhi]).map((t) => t + 2);
+}
+
 const ZHIVYE: Record<string, Zhivoy19> = {
   /* Разбор метода 5: график y = x² + a|x| + a² − 4 и его нули — симметричные пары и x = 0. */
   'm05-r1': {
@@ -376,6 +413,78 @@ const ZHIVYE: Record<string, Zhivoy19> = {
       return m05r3Tochki(a).length > 0
         ? 'решения парами $(\\pm x_0;\\,y_0)$, $x=0$ ни в одном'
         : 'решений нет';
+    },
+  },
+
+  /* Разбор метода 6: ромб |x| + |y| = 2 и окружность с центром (a; a) на прямой y = x. */
+  'm06-r1': {
+    vid: 'okruzhnost',
+    bukva: 'a',
+    min: -3,
+    max: 3,
+    shag: 0.01,
+    start: 0.5,
+    osobye: [
+      { a: -2, tex: '-2' },
+      { a: 0, tex: '0' },
+      { a: 2, tex: '2' },
+    ],
+    scena: (a) =>
+      scena(
+        { x: [-3.5, 4.5], y: [-3.5, 4.5] },
+        {
+          curves: [
+            lomanaya(ROMB_2, 'lineA', true),
+            pryamaya(1, 0, 'aux', 'dashed'),
+            okruzhnost(a, a, S2, 'lineB'),
+          ],
+          points: m06r1Tochki(a).map(([x, y]) =>
+            tochka(x, y, null, false, Math.abs(x - y) < 1e-9 ? 'accent' : 'cross'),
+          ),
+        },
+        `Ромб |x| + |y| = 2, прямая y = x и окружность с центром (a; a) радиуса √2 при a = ${chislo(a)}`,
+      ),
+    resheniy: (a) => m06r1Tochki(a).length,
+    itog: (a) => {
+      if (blizko(a, 2)) return 'найденное значение: решение одно, $(1;\\,1)$ на прямой $y=x$';
+      if (blizko(a, -2)) return 'найденное значение: решение одно, $(-1;\\,-1)$ на прямой $y=x$';
+      if (blizko(a, 0)) return 'кандидат отброшен: решений четыре, $(\\pm1;\\,\\pm1)$';
+      return m06r1Tochki(a).length > 0
+        ? 'решения парами, симметричными относительно $y=x$'
+        : 'решений нет';
+    },
+  },
+  /* Разбор метода 6: график y = x² − 4x + a(|x − 1| + |x − 3|) − (a² + 3a − 6), симметричный относительно x = 2. */
+  'm06-r2': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -3,
+    max: 2,
+    shag: 0.01,
+    start: 1.5,
+    osobye: [
+      { a: -2, tex: '-2' },
+      { a: 1, tex: '1' },
+    ],
+    scena: (a) =>
+      scena(
+        { x: [-1.5, 5.5], y: [-5, 6] },
+        {
+          curves: [grafik((x) => m06r2F(a, x), 'lineA')],
+          shapes: [otrezokNa(2, -5, 2, 6, 'aux', 'dashed', 1.4)],
+          points: m06r2Korni(a).map((x) =>
+            tochka(x, 0, null, false, Math.abs(x - 2) < 1e-9 ? 'accent' : 'cross'),
+          ),
+        },
+        `График y = x² − 4x + a(|x − 1| + |x − 3|) − (a² + 3a − 6) при a = ${chislo(a)}, ось симметрии x = 2`,
+      ),
+    resheniy: (a) => m06r2Korni(a).length,
+    itog: (a) => {
+      if (blizko(a, 1)) return 'найденное значение: корень один, $x=2$';
+      if (blizko(a, -2)) return 'кандидат отброшен: кроме $x=2$ ещё $x=0$ и $x=4$';
+      return m06r2Korni(a).length > 0
+        ? 'корни парами $x_0$ и $4-x_0$, $x=2$ не корень'
+        : 'корней нет';
     },
   },
 
