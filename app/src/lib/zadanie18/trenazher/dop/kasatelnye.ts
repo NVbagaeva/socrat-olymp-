@@ -253,13 +253,12 @@ export const KS_PRYAM_TRAP = (p: Parametry) =>
         ug('pE', O, E, D, { skrytyy: true, pryamoy: true, gruppy: ['r'], cvet: 'c' }),
         /* Данные условия на чертеже. */
         velOtr('d-OC', chChertezh(p.OC!), O, C),
-        /* Середина OD почти на окружности (r = 12, OD = 20): подпись — у внешней части. */
-        velOtr(
-          'd-OD',
-          chChertezh(p.OD!),
-          [O[0] + (D[0] - O[0]) * 0.6, O[1] + (D[1] - O[1]) * 0.6],
-          D,
-        ),
+        /* Середина OD почти на окружности (r : OD = 3 : 5): подпись — у части
+           внутри круга, как у OC; снаружи, у вершины D, её читали бы как AD. */
+        velOtr('d-OD', chChertezh(p.OD!), O, [
+          O[0] + (D[0] - O[0]) * 0.6,
+          O[1] + (D[1] - O[1]) * 0.6,
+        ]),
         vel(
           'd-Sx',
           'S_ABCD = ?',

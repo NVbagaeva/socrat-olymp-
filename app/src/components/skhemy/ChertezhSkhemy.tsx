@@ -1,15 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import {
-  Fragment,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type PointerEvent,
-} from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import {
   RUCHKA_R,
   ramkaKadra,
@@ -297,14 +289,17 @@ export function ChertezhSkhemy({
         {/* Тема чертежа (роли элементов): на экране — всегда цветная. */}
         {ekran.tema ? <style>{cssTemy()}</style> : null}
         <g className="skh__mnog">
+          {ekran.okr
+            .filter((o) => o.zalivka)
+            .map((o) => (
+              <circle key={`z-${o.id}`} className="skh-zalivka-okr" cx={o.cx} cy={o.cy} r={o.r} />
+            ))}
           {ekran.mnog.map((m) => (
-            <Fragment key={m.id}>
-              <polygon
-                className={clsx('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}
-                points={m.points}
-              />
-              {m.kontur === '' ? null : <path className="skh-iskomaya" d={m.kontur} />}
-            </Fragment>
+            <polygon
+              key={m.id}
+              className={clsx('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}
+              points={m.points}
+            />
           ))}
         </g>
         <g className="skh__okr">
@@ -377,6 +372,14 @@ export function ChertezhSkhemy({
             </g>
           ))}
         </g>
+        {/* Контур искомой площади — поверх сторон: одна толстая линия. */}
+        <g className="skh__iskomaya">
+          {ekran.mnog
+            .filter((m) => m.kontur !== '')
+            .map((m) => (
+              <path key={m.id} className="skh-kontur-isk" d={m.kontur} />
+            ))}
+        </g>
         <g className="skh__ugly">
           {ekran.ugly.map((u) => (
             <path
@@ -439,7 +442,7 @@ export function ChertezhSkhemy({
                 p.cvet && `skh-c-${p.cvet}`,
                 p.rol && `skh-r-${p.rol}`,
               )}
-              x={p.x}
+              x={Math.round((p.x - p.sdvig) * 100) / 100}
               y={p.y}
             >
               {p.bukva}

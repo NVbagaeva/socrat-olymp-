@@ -8,8 +8,8 @@
  */
 
 import { BUKVY, CHISLA } from '../risunki/shrifty.js';
-import { ramkaKadra, raskladka, rezhimKadra, type Sostoyanie } from './ekran';
-import { cssTemy, klassTemy, type VersiyaTemy } from './tema';
+import { ramkaKadra, raskladka, rezhimKadra, SK, type Sostoyanie } from './ekran';
+import { cssTemy, klassTemy, uzorShtrihovki, type VersiyaTemy } from './tema';
 import type { Tochki, Vid, ZhivayaSkhema } from './tipy';
 
 export interface OpciiSvg {
@@ -36,7 +36,7 @@ export interface OpciiSvg {
    Индекс — 70 % буквы (те же 12 px): лист печати подбирает ширину
    чертежа по самому мелкому кеглю в px (lib/sheet/figureRules.js),
    мерилом должна быть буква, а не индекс. */
-const STIL_SAM = [
+export const STIL_SAM = [
   '.skh-sam{--i:#101728;--k:#1f5fd0}',
   '.skh-sam .skh-c-a{--k:#1f5fd0}.skh-sam .skh-c-b{--k:#e07a2f}.skh-sam .skh-c-c{--k:#0b6f64}',
   '.skh-sam .skh-liniya line,.skh-sam .skh-shtrih{stroke:var(--i);stroke-width:1.75;stroke-linecap:round;fill:none}',
@@ -48,8 +48,12 @@ const STIL_SAM = [
   '.skh-sam .skh-okr{fill:none;stroke:var(--i);stroke-width:1.5}',
   '.skh-sam .skh-okr.skh-punktir{stroke-dasharray:6 5}',
   '.skh-sam .skh-okr.is-lit{stroke:var(--k);stroke-width:1.75}',
-  '.skh-sam .skh-mnog{fill:var(--k);fill-opacity:.14;stroke:none}',
-  '.skh-sam .skh-sektor{fill:var(--k);fill-opacity:.18;stroke:none}',
+  /* Заливки непрозрачные: тон — цвет, смешанный с белым (не альфа), — наложений нет. */
+  '.skh-sam .skh-mnog{fill:color-mix(in srgb,var(--k) 14%,#fff);stroke:none}',
+  '.skh-sam .skh-sektor{fill:color-mix(in srgb,var(--k) 18%,#fff);stroke:none}',
+  '.skh-sam .skh-shtrihovka{display:none}',
+  '.skh-sam .skh-zalivka-okr{fill:color-mix(in srgb,var(--k) 10%,#fff);stroke:none}',
+  '.skh-sam .skh-kontur-isk{fill:none;stroke:var(--k);stroke-width:3;stroke-linejoin:round}',
   '.skh-sam .skh-ugol{fill:none;stroke:var(--i);stroke-width:1.25;stroke-linecap:round}',
   '.skh-sam .skh-ugol.is-lit{stroke:var(--k);stroke-width:1.75}',
   '.skh-sam .skh-tochka{fill:var(--i);stroke:#fff;stroke-width:1.2}',
@@ -57,7 +61,7 @@ const STIL_SAM = [
   '.skh-sam .skh-vynoska{fill:none;stroke:var(--i);stroke-width:.9;stroke-linecap:round;opacity:.6}',
   '.skh-sam .skh-podpis{fill:var(--i);font-size:17px;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
   '.skh-sam .skh-podpis.is-lit{fill:var(--k)}',
-  '.skh-sam .skh-velichina{fill:var(--i);font-size:15px;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
+  `.skh-sam .skh-velichina{fill:var(--i);font-size:${SK.keglVel}px;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}`,
   '.skh-sam .skh-velichina.is-lit{fill:var(--k)}',
   '.skh-sam .skh-koren{fill:none;stroke:var(--i);stroke-linecap:round;stroke-linejoin:round}',
   '.skh-sam .skh-koren.is-lit{stroke:var(--k)}',
@@ -89,6 +93,9 @@ const metki = (m: Metki) => [
   m.rol && `skh-r-${m.rol}`,
 ];
 
+/** Номер узора штриховки: id в документе не повторяются. */
+let nomerShtrihovki = 0;
+
 export function svgSkhemy(
   skhema: ZhivayaSkhema,
   t: Tochki,
@@ -105,12 +112,25 @@ export function svgSkhemy(
   if (samodostatochnyy) out.push(`<style>${STIL_SAM}</style>`);
   /* Тема — после оформления чертежа: роли сильнее общих правил. */
   if (e.tema) out.push(`<style>${cssTemy()}</style>`);
+  const isk = e.mnog.filter((m) => m.kontur !== '');
+  /* Штриховка искомой площади (видна только в ч/б): узор — свой у
+     каждого чертежа, на листе их много. */
+  const shtrihovka = `skh-sht-${(nomerShtrihovki += 1)}`;
+  if (isk.length > 0) out.push(`<defs>${uzorShtrihovki(shtrihovka)}</defs>`);
   out.push('<g class="skh__mnog">');
+  e.okr
+    .filter((o) => o.zalivka)
+    .forEach((o) =>
+      out.push(`<circle class="skh-zalivka-okr" cx="${o.cx}" cy="${o.cy}" r="${o.r}"/>`),
+    );
   e.mnog.forEach((m) => {
     out.push(
       `<polygon class="${cls('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}" points="${m.points}"/>`,
     );
-    if (m.kontur !== '') out.push(`<path class="skh-iskomaya" d="${m.kontur}"/>`);
+    if (m.kontur !== '')
+      out.push(
+        `<polygon class="skh-shtrihovka" points="${m.points}" style="fill:url(#${shtrihovka})"/>`,
+      );
   });
   out.push('</g><g class="skh__okr">');
   e.okr.forEach((o) =>
@@ -137,6 +157,9 @@ export function svgSkhemy(
     if (l.shtrihi !== '') out.push(`<path class="skh-shtrih" d="${l.shtrihi}"/>`);
     out.push('</g>');
   });
+  /* Контур искомой площади — поверх сторон: одна толстая линия. */
+  out.push('</g><g class="skh__iskomaya">');
+  isk.forEach((m) => out.push(`<path class="skh-kontur-isk" d="${m.kontur}"/>`));
   out.push('</g><g class="skh__ugly">');
   e.ugly.forEach((u) =>
     out.push(
@@ -162,7 +185,7 @@ export function svgSkhemy(
     const indeks =
       p.indeks === '' ? '' : `<tspan class="skh-indeks" dy="4">${esc(p.indeks)}</tspan>`;
     out.push(
-      `<text class="${cls('skh-podpis', ...metki(p))}" x="${p.x}" y="${p.y}">${esc(p.bukva)}${indeks}</text>`,
+      `<text class="${cls('skh-podpis', ...metki(p))}" x="${f2(p.x - p.sdvig)}" y="${p.y}">${esc(p.bukva)}${indeks}</text>`,
     );
   });
   out.push(`</g><g class="skh__velichiny" style="font-family:${esc(CHISLA)}">`);
