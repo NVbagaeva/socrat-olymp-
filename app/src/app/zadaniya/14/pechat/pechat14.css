@@ -46,7 +46,7 @@
   align-items: start;
 }
 .k14--list {
-  max-width: 48mm;
+  width: 48mm;
 }
 .z14-list-reshenie .k14-ryad {
   grid-template-columns: repeat(auto-fit, minmax(44mm, 52mm));

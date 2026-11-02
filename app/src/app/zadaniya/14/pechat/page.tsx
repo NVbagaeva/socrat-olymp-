@@ -5,7 +5,7 @@ import { zadanie14Title } from '@/content/zadanie14';
 import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
-import './../krug14.css';
+import '../krug14.css';
 import './pechat14.css';
 
 export const metadata: Metadata = {

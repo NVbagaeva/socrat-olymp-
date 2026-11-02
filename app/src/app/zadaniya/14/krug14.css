@@ -5,9 +5,13 @@
    Иерархия толщин: оси 1,6 < окружность 2 < ключевые линии 3,2. */
 
 .k14 {
+  /* Ширина своя, а не «по содержимому»: у контейнера с container-type
+     собственной ширины нет, и в сжимающемся родителе (сетка с
+     центровкой, ячейка генератора) рисунок схлопывался бы в ноль. */
   container-type: inline-size;
-  width: 100%;
-  max-width: 340px;
+  display: block;
+  width: 340px;
+  max-width: 100%;
   margin: 0 auto;
 }
 .k14__holst {
@@ -107,10 +111,11 @@
   align-items: start;
 }
 .k14-ryad .k14 {
+  width: 100%;
   max-width: 300px;
 }
 @media print {
   .k14 {
-    max-width: 62mm;
+    width: 62mm;
   }
 }
