@@ -832,7 +832,15 @@ export function checkPonyatie(
     }
     if (node !== null && typeof node === 'object') {
       for (const [k, v] of Object.entries(node)) {
-        if (k === 'id' || k === 'anchor' || k === 'gruppa' || k === 'fiz' || k === 'geom') continue;
+        if (
+          k === 'id' ||
+          k === 'anchor' ||
+          k === 'gruppa' ||
+          k === 'fiz' ||
+          k === 'geom' ||
+          k === 'yakorya'
+        )
+          continue;
         obhod(v, `${path}.${k}`, k === 'formula' || k === 'formuly');
       }
     }

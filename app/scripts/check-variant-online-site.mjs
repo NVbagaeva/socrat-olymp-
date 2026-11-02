@@ -21,6 +21,9 @@
         верный со второй попытки — в баллы не идёт.
      4. Серия из 10 вариантов: страница серии, карточки и статусы,
         статистика серии после трёх завершённых вариантов.
+     6. «Решить вариант онлайн» из меню «Варианты»: /variant/onlayn/,
+        режим → новый вариант 1–13 на странице решения, «Вернуться к
+        последнему варианту».
    --shots — снимки экрана в docs/variant-onlayn-snimki/ (телефон и
    компьютер): экран решения, клавиатура, результаты, статистика серии. */
 
@@ -424,6 +427,66 @@ ok(
 );
 await build.getByTestId('vo-panel').scrollIntoViewIfNeeded();
 await shot(build, 'sobrat-variant-onlayn');
+
+/* ── 6. «Решить вариант онлайн» из меню: свой вариант без учителя ─ */
+
+console.log('6. «Решить вариант онлайн» из меню «Варианты»');
+const self = await desk.newPage();
+self.on('pageerror', (e) => errors.push(String(e)));
+await self.goto(`${BASE}/about/`);
+await self.locator('.nav-drop__button').click();
+await self.getByRole('link', { name: 'Решить вариант онлайн' }).click();
+await self.waitForURL(/\/variant\/onlayn\/$/);
+ok(true, 'пункт меню ведёт на /variant/onlayn/');
+ok(
+  (await self.getByTestId('vo-nachalo-resume').count()) === 0,
+  'до первого варианта «Вернуться» нет',
+  'есть',
+);
+await self.getByTestId('vo-nachalo-kontrol').click();
+await self.waitForURL(/\/variant\/reshat\/\?kod=/, { timeout: 30_000 });
+const selfUrl = new URL(self.url());
+ok(
+  selfUrl.searchParams.get('v') === '1' &&
+    selfUrl.searchParams.get('r') === 'k' &&
+    selfUrl.searchParams.get('tm') === 's',
+  '«Как на ЕГЭ» — контрольная с секундомером',
+  self.url(),
+);
+await self.getByTestId('vo-begin').click({ timeout: 60_000 });
+await self.getByTestId('vo-card').waitFor();
+ok(
+  (await self.locator('.vo-strip__no').count()) === 13,
+  'в варианте 13 заданий',
+  String(await self.locator('.vo-strip__no').count()),
+);
+const firstKod = selfUrl.searchParams.get('kod');
+await type(self, 0, '5');
+await type(self, 1, '7');
+await self.waitForTimeout(500);
+await self.goto(`${BASE}/variant/onlayn/`);
+const resume = self.getByTestId('vo-nachalo-resume');
+await resume.waitFor();
+const plashka = (await self.locator('.onl-plashka').textContent()) ?? '';
+ok(/решено 2 из 13/.test(plashka), 'плашка: «решено 2 из 13» — по ответам сессии', plashka);
+ok(
+  (await self.locator('.onl-plashka progress').getAttribute('value')) === '2',
+  'полоса прогресса — 2 из 13',
+  String(await self.locator('.onl-plashka progress').getAttribute('value')),
+);
+ok(
+  (await resume.getAttribute('href'))?.includes(encodeURIComponent(firstKod ?? '')) === true,
+  '«Вернуться к последнему варианту» ведёт на начатый',
+  String(await resume.getAttribute('href')),
+);
+await self.getByTestId('vo-nachalo-trening').click();
+await self.waitForURL(/\/variant\/reshat\/\?kod=/, { timeout: 30_000 });
+const selfUrl2 = new URL(self.url());
+ok(
+  selfUrl2.searchParams.get('r') === 't' && selfUrl2.searchParams.get('kod') !== firstKod,
+  '«Тренировка» — новый вариант, режим тренировки',
+  self.url(),
+);
 
 ok(errors.length === 0, 'ошибок на страницах нет', errors.join('\n'));
 

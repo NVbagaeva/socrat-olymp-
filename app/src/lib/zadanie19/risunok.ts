@@ -9,6 +9,11 @@
  * обходят подписи точек. Тело рендерера не меняется — так же
  * модуль-кривая заведена в graph/ezhemesyachnye.ts.
  *
+ * Метод областей рисует на плоскости (x; a): закрашенная область —
+ * штатная фигура 'polygon' (oblast, oblastMezhdu — между двумя
+ * графиками), горизонталь a = c и куски решения на ней — фигуры
+ * 'segment' (gorizontal, otrezokNa), чтобы толстый кусок лёг поверх.
+ *
  * Обозначения на рисунке — как требует оформление решения: особые точки
  * большими латинскими буквами, выколотые точки пустыми кружками,
  * крайние положения подвижной прямой — вторым и третьим цветом.
@@ -236,6 +241,57 @@ export function oblast(
   prozrachnost = 0.14,
 ): Figura19 {
   return { type: 'polygon', points: tochki, color: cvet, fillOpacity: prozrachnost };
+}
+
+/**
+ * Закрашенная область между графиками: niz(x) ≤ y ≤ verh(x) на [ot; do].
+ * Метод областей (№19, глава 3): множество точек (x; a), где выполнено
+ * условие. Края — выборка по x, высота обрезана окном y: пересечение
+ * области с полосой окна — та же область между обрезанными графиками,
+ * поэтому за рамку заливка не выходит. Концы [ot; do] — внутри окна.
+ */
+export function oblastMezhdu(
+  niz: (x: number) => number,
+  verh: (x: number) => number,
+  ot: number,
+  dO: number,
+  y: [number, number],
+  cvet: Cvet19 = 'lineA',
+  prozrachnost = 0.14,
+): Figura19 {
+  const kray = (v: number) => Math.min(y[1], Math.max(y[0], v));
+  const n = Math.max(8, Math.ceil((dO - ot) * 24));
+  const xs = Array.from({ length: n + 1 }, (_, i) => ot + ((dO - ot) * i) / n);
+  const verhT = xs.map((x): [number, number] => [x, kray(verh(x))]);
+  const nizT = [...xs].reverse().map((x): [number, number] => [x, kray(niz(x))]);
+  return oblast([...verhT, ...nizT], cvet, prozrachnost);
+}
+
+/** Отрезок от (x1; y1) до (x2; y2): кусок решения на прямой a = const, граница области. */
+export function otrezokNa(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  cvet: Cvet19 = 'accent',
+  style: 'solid' | 'dashed' = 'solid',
+  width = 3.2,
+): Figura19 {
+  return { type: 'segment', from: [x1, y1], to: [x2, y2], color: cvet, style, width };
+}
+
+/**
+ * Горизонталь a = c на всю ширину окна — фигурой, а не кривой: фигуры
+ * рисуются под кривыми и в порядке списка, поэтому толстые куски
+ * решения (otrezokNa после неё) ложатся поверх прямой, а не под неё.
+ */
+export function gorizontal(
+  c: number,
+  x: [number, number],
+  cvet: Cvet19 = 'lineB',
+  style: 'solid' | 'dashed' = 'solid',
+): Figura19 {
+  return otrezokNa(x[0], c, x[1], c, cvet, style, 2.4);
 }
 
 /** SVG рисунка строкой: страница вставляет её как есть. */

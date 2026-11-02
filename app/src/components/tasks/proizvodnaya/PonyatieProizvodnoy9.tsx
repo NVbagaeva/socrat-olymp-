@@ -11,6 +11,7 @@ import {
 import { Tex } from '@/components/ui/Tex';
 import { PONYATIE_9 as T } from '@/content/theoryPonyatie9';
 import { href } from '@/lib/paths';
+import { YAKOR_9 } from '@/lib/proizvodnaya/teoriya-yakorya';
 import { stsenaSvg, type StsenaId } from '@/lib/proizvodnaya/stseny';
 import { FiguraSvg9 } from './FiguraSvg9';
 import { ZhivayaSekushchaya, ZhivayaSkorost, ZhivoyModul } from './ZhivyeRisunki9';
@@ -53,6 +54,9 @@ function Podrazdel({
   );
 }
 
+/** id рамки по имени из PONYATIE_9.yakorya. */
+const Y = (imya: keyof typeof T.yakorya) => YAKOR_9.blok(T.yakorya[imya]);
+
 export function PonyatieProizvodnoy9() {
   return (
     <div className="rich z9-teoriya z9-ponyatie">
@@ -65,15 +69,19 @@ export function PonyatieProizvodnoy9() {
           <Abzacy paras={T.skorost.uslovie} />
           <ZhivayaSkorost />
           <Abzacy paras={T.skorost.hod} />
-          <RamkaFormula formula={T.skorost.formula} podpis={T.skorost.formulaPodpis} />
+          <RamkaFormula
+            formula={T.skorost.formula}
+            podpis={T.skorost.formulaPodpis}
+            id={Y('skorost')}
+          />
         </RamkaZadacha>
 
         <RamkaZadacha no={2} title={T.kasatelnaya.title}>
-          <RamkaOpredelenie title="Касательная">
+          <RamkaOpredelenie title="Касательная" id={Y('kasatelnayaOpr')}>
             <Abzacy paras={T.kasatelnaya.opredelenie} />
           </RamkaOpredelenie>
           <Risunok id="ponyatie-sekushchie" label="Секущие стремятся к касательной" />
-          <RamkaVazhno>
+          <RamkaVazhno id={Y('uglovoy')}>
             <Abzacy paras={T.kasatelnaya.vazhno} />
           </RamkaVazhno>
           <Abzacy paras={T.kasatelnaya.ugol} />
@@ -82,7 +90,11 @@ export function PonyatieProizvodnoy9() {
             label="Приращения аргумента и функции, секущая и касательная"
           />
           <Abzacy paras={T.kasatelnaya.hod} />
-          <RamkaFormula formula={T.kasatelnaya.formula} podpis={T.kasatelnaya.formulaPodpis} />
+          <RamkaFormula
+            formula={T.kasatelnaya.formula}
+            podpis={T.kasatelnaya.formulaPodpis}
+            id={Y('kasatelnayaK')}
+          />
           <ZhivayaSekushchaya />
           <p className="ramka__p z9-ssylka">
             <Tex text={T.kasatelnaya.ssylka.text} />{' '}
@@ -93,17 +105,21 @@ export function PonyatieProizvodnoy9() {
 
       <Podrazdel id={T.razdely.proizvodnaya.id} no="II." title={T.razdely.proizvodnaya.title}>
         <Abzacy paras={T.proizvodnaya.vvod} />
-        <RamkaOpredelenie title="Определение производной" formula={T.proizvodnaya.formula}>
+        <RamkaOpredelenie
+          title="Определение производной"
+          formula={T.proizvodnaya.formula}
+          id={Y('opredelenie')}
+        >
           <Abzacy paras={T.proizvodnaya.opredelenie} />
         </RamkaOpredelenie>
-        <RamkaVyvod>
+        <RamkaVyvod id={Y('smysl')}>
           <Abzacy paras={T.proizvodnaya.vyvod} />
           <p className="ramka__p">
             Подробнее: <a href={`#${T.proizvodnaya.ssylki.fiz}`}>физический смысл производной</a>,{' '}
             <a href={`#${T.proizvodnaya.ssylki.geom}`}>геометрический смысл производной</a>.
           </p>
         </RamkaVyvod>
-        <RamkaOpredelenie title="Алгоритм: производная по определению">
+        <RamkaOpredelenie title="Алгоритм: производная по определению" id={Y('algoritm')}>
           <ol className="ramka__algoritm">
             {T.proizvodnaya.algoritm.map((shag) => (
               <li key={shag}>
@@ -117,6 +133,7 @@ export function PonyatieProizvodnoy9() {
           uslovie={T.proizvodnaya.primer.uslovie}
           shagi={T.proizvodnaya.primer.shagi}
           otvet={T.proizvodnaya.primer.otvet}
+          id={Y('primerX2')}
         />
       </Podrazdel>
 
@@ -133,14 +150,15 @@ export function PonyatieProizvodnoy9() {
           uslovie={T.net.primer3.uslovie}
           shagi={T.net.primer3.shagi}
           otvet={T.net.primer3.otvet}
+          id={Y('modul')}
         >
           <Risunok id="ponyatie-galochka" label="График модуля: излом в нуле" />
         </RamkaPrimer>
         <ZhivoyModul />
-        <RamkaVazhno>
+        <RamkaVazhno id={Y('odnostoronnie')}>
           <Abzacy paras={T.net.odnostoronnie} />
         </RamkaVazhno>
-        <RamkaVyvod>
+        <RamkaVyvod id={Y('netVyvod')}>
           <Abzacy paras={T.net.vyvod} />
         </RamkaVyvod>
       </Podrazdel>

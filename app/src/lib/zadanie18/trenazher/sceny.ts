@@ -22,6 +22,7 @@ import {
 } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki, ZhivayaSkhema } from '@/lib/skhemy/tipy';
 import * as N from '@/lib/zadanie18/opornye/novye';
+import { SCENY_DOP } from './dop';
 
 export type Parametry = Readonly<Record<string, number>>;
 
@@ -675,8 +676,15 @@ const SCENY_NOVYE: Readonly<Record<string, Postroenie>> = {
 /** Чертёж задачи тренажёра: тип и параметры варианта. */
 export function scena18(tip: string, p: Parametry): ZhivayaSkhema {
   const f = SCENY[tip] ?? SCENY_NOVYE[tip];
-  if (f === undefined) throw new Error(`Нет чертежа задачи тренажёра ${tip}`);
-  return f(p);
+  if (f !== undefined) return f(p);
+  /* Перенесённые задачи с одним набором чисел — dop/. */
+  const s = SCENY_DOP[tip];
+  if (s === undefined) throw new Error(`Нет чертежа задачи тренажёра ${tip}`);
+  return s;
 }
 
-export const TIPY_SCEN_18: readonly string[] = [...Object.keys(SCENY), ...Object.keys(SCENY_NOVYE)];
+export const TIPY_SCEN_18: readonly string[] = [
+  ...Object.keys(SCENY),
+  ...Object.keys(SCENY_NOVYE),
+  ...Object.keys(SCENY_DOP),
+];

@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { AUTH_UI } from '@/content/auth-ui';
-import { site } from '@/content/site';
+import { navLinks } from '@/content/site';
 import { AUTH_ENABLED, AUTH_HREF } from '@/lib/auth/config';
 import { useSessionUser } from '@/lib/auth/session';
 import { LogoutItem } from '@/components/auth/AuthLive';
@@ -15,7 +15,7 @@ type MenuState = 'open' | 'closing';
 const FOCUSABLE = 'a[href], button:not([disabled])';
 
 /** Ширина, ниже которой меню уезжает в бургер. Совпадает с site.css. */
-const NARROW = '(max-width: 939.98px)';
+const NARROW = '(max-width: 1023.98px)';
 
 /**
  * Бургер-меню узкой шапки: пункты навигации и «Войти» уезжают сюда,
@@ -94,7 +94,7 @@ export function SiteMenu() {
      Вошедшему вместо «Войти» — «Мой кабинет» и «Выйти». */
   const user = useSessionUser();
   const items = [
-    ...site.nav.map((link) => ({ ...link, separated: false })),
+    ...navLinks.map((link) => ({ ...link, separated: false })),
     ...(AUTH_ENABLED && user === null
       ? [{ label: AUTH_UI.login, href: AUTH_HREF.voyti, separated: true }]
       : []),

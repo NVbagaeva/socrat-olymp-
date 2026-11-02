@@ -57,9 +57,12 @@ export function proverit(N = 200) {
       'только задачи выбранных типов',
       a.poVariantam.flat().every((z) => vybor.includes(z.klyuch.split('#')[0])),
     );
-    const nuzhno = Math.max(...p.sostav.map((x) => x.n)) * p.variants;
+    /* Чисел хватает: каждому типу нужно не больше наборов, чем у него есть
+       (у перенесённых задач — один набор, у остальных — три). */
+    const naborov = new Map(TIPY_18.map((t) => [t.id, t.varianty.length]));
+    const hvataet = p.sostav.every((x) => x.n * p.variants <= naborov.get(x.id));
     const kluchi = a.poVariantam.flat().map((z) => z.klyuch);
-    if (nuzhno <= 3)
+    if (hvataet)
       sch.fakt(
         'без повторов, пока чисел хватает',
         new Set(kluchi).size === kluchi.length && a.povtor === 0,

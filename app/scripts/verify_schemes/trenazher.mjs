@@ -1,6 +1,8 @@
 /* scripts/verify_schemes/trenazher.mjs — тренажёр №18.
 
-   У каждой задачи (content/zadanie18/trenazher.ts) три набора чисел;
+   У каждой задачи (content/zadanie18/trenazher.ts) три набора чисел
+   (у перенесённых из trenazherDop — один, их ответы и утверждения а)
+   независимо проверяет trenazherDop/index.mjs);
    чертёж варианта построен по этим числам (lib/zadanie18/trenazher/sceny.ts).
    Здесь по координатам чертежа заново считаются данные условия, факт
    пункта а) и ответ пункта б) — и сравниваются с otvet(p). Плюс: банк
@@ -10,6 +12,7 @@
 
 import { requireSrc } from '../lib/load-ts.mjs';
 import { blizko, dist, mid, orient, proveritEkran, schetchik, ugol, zerno } from './obshchee.mjs';
+import { PROVERKI as PROVERKI_DOP } from './trenazherDop/index.mjs';
 
 const N = () => requireSrc('lib/zadanie18/opornye/novye');
 /** Площадь многоугольника. */
@@ -529,11 +532,18 @@ export function proverit() {
   const rnd = zerno(1818);
   let tesno = 0;
 
+  /* Перенесённые задачи (один набор чисел) проверяет trenazherDop/:
+     ответ по данным без кода сайта, утверждение а) на случайных фигурах. */
+  const dop = new Set(PROVERKI_DOP.map((x) => x.id));
   for (const t of TIPY_18) {
     const pr = PROVERKI[t.id];
-    sch.fakt('у типа задачи есть проверка по чертежу', pr !== undefined, t.id);
+    sch.fakt('у типа задачи есть проверка по чертежу', pr !== undefined || dop.has(t.id), t.id);
     sch.fakt('схема типа существует', ids.has(t.skhema), t.skhema);
-    sch.fakt('три варианта', t.varianty.length === 3, t.id);
+    sch.fakt(
+      'три варианта (у перенесённой задачи — один)',
+      t.varianty.length === (dop.has(t.id) ? 1 : 3),
+      t.id,
+    );
     for (const p of t.varianty) {
       const otv = t.otvet(p);
       if (pr !== undefined)

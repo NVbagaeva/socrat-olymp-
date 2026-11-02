@@ -1,7 +1,8 @@
 /**
- * Тренажёр №18: задачи уровня ЕГЭ, у каждой — три набора чисел.
- * Условия составлены заново. Задача решается через ключевую схему
- * (podtip — id схемы из spisok.ts), тема — группа схемы.
+ * Тренажёр №18: задачи уровня ЕГЭ, у каждой — три набора чисел
+ * (у 18 перенесённых задач trenazherDop/ — один). Условия составлены
+ * заново. Задача решается через ключевую схему (podtip — id схемы из
+ * spisok.ts), тема — группа схемы.
  *
  * Проверяется ответ пункта б): он уходит в браузер отпечатком
  * (lib/zadanie18/trenazher/bank.ts), этот модуль в браузер не попадает.
@@ -15,6 +16,7 @@ import type { ShagVoprosa } from '@/components/trenazher/ShagiVoprosy';
 import type { Uroven } from '@/lib/trenazher/types';
 import type { Parametry } from '@/lib/zadanie18/trenazher/sceny';
 import type { Podsvechennoe } from './tipy';
+import { TIPY_DOP_18 } from './trenazherDop';
 import { TIPY_18_NOVYE } from './trenazherNovye';
 
 export interface Tekst18 {
@@ -821,7 +823,8 @@ const TIPY_18_OSNOVNYE: readonly TipZadachi18[] = [
         ),
       ];
     },
-  },
+  } /* Перенесённые задачи с одним набором чисел — trenazherDop/. */,
+  ...TIPY_DOP_18,
 ];
 
 /** Все типы: исходные и по новым опорным задачам (trenazherNovye.ts). */
