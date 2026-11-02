@@ -26,6 +26,12 @@
  * сходятся. Число решений считается точно — по точкам, где границы
  * достигаются, — точка касания акцентным цветом.
  *
+ * Для аналитического способа (глава 9) на рисунке — корни x₁(a), x₂(a),
+ * найденные по формуле: нули графика левой части или общие точки двух
+ * графиков. Число корней считается по формуле, а не по картинке: корень,
+ * ушедший за рамку, тоже считается, совпавшие корни — один раз,
+ * посторонний корень (вне области) — пустой точкой и не в счёт.
+ *
  * Описание — данные и функции; функции в браузер со страницы не
  * передать, поэтому компонент (components/zadanie19/Zhivoy19.tsx)
  * берёт описание здесь по id. Число решений считается точно —
@@ -400,7 +406,108 @@ const m08r2Korni = (a: number) => [1, 4].filter((x) => Math.abs(m08r2G(a, x) ?? 
 /* Разбор метода 8: 2^|x| + |a − 1| + |a − 3| = 2 + cos x; сдвиг левой части — |a − 1| + |a − 3|. */
 const m08r3Sdvig = (a: number) => Math.abs(a - 1) + Math.abs(a - 3);
 
+/* ── Метод 9: аналитический способ ───────────────────────────────── */
+
+/** Корни квадратного (при A = 0 — линейного) уравнения по порядку. */
+const korniPoPoryadku = (A: number, B: number, C: number) => korniKv(A, B, C).sort((p, q) => p - q);
+
+/* Разбор метода 9: (a − 1)x² + 2ax + a + 3 = 0; при a = 1 уравнение линейное. */
+const m09r1Korni = (a: number) => korniPoPoryadku(a - 1, 2 * a, a + 3);
+
+/* Разбор метода 9: √(x + a) = x ⇔ x² − x − a = 0 и x ≥ 0; корень с x < 0 — посторонний. */
+const m09r3Kvadrat = (a: number) => korniPoPoryadku(1, -1, -a);
+const m09r3Korni = (a: number) => m09r3Kvadrat(a).filter((x) => x >= -1e-12);
+
+/** Корни строкой TeX: «$x_1=-1{,}62$, $x_2=0{,}62$», один — «$x=-2$». */
+function korniTex(korni: number[]): string {
+  if (korni.length === 1) return `$x=${chisloTex(korni[0]!)}$`;
+  return korni.map((x, i) => `$x_${i + 1}=${chisloTex(x)}$`).join(', ');
+}
+
 const ZHIVYE: Record<string, Zhivoy19> = {
+  /* Разбор метода 9: график y = (a − 1)x² + 2ax + a + 3 и его нули; при a = 1 — прямая. */
+  'm09-r1': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -1,
+    max: 3,
+    shag: 0.01,
+    start: 0,
+    osobye: [
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+      { a: 1.5, tex: '\\frac32' },
+      { a: 2, tex: '2' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-7, 4] as [number, number], y: [-5, 7] as [number, number] };
+      const korni = m09r1Korni(a);
+      return scena(
+        okno,
+        {
+          curves: [grafik((x) => (a - 1) * x * x + 2 * a * x + a + 3, 'lineA')],
+          points: korni
+            .filter((x) => x >= okno.x[0] && x <= okno.x[1])
+            .map((x) => tochka(x, 0, null, false, korni.length === 1 ? 'accent' : 'cross')),
+        },
+        `График y = (a − 1)x² + 2ax + a + 3 при a = ${chislo(a)} и его нули`,
+      );
+    },
+    resheniy: (a) => m09r1Korni(a).length,
+    itog: (a) => {
+      const korni = m09r1Korni(a);
+      if (blizko(a, 1))
+        return 'старший коэффициент — нуль: уравнение $2x+4=0$ линейное, корень $x=-2$';
+      if (korni.length === 0) return '$\\frac D4=3-2a<0$: корней нет';
+      if (korni.length === 1) return `$\\frac D4=0$: корень один, ${korniTex(korni)}`;
+      const za = korni.some((x) => x < -7 || x > 4) ? ' (один — за рамкой рисунка)' : '';
+      return `${korniTex(korni)}${za}`;
+    },
+  },
+  /* Разбор метода 9: y = √(x + a) и y = x; посторонний корень x² − x − a = 0 с x < 0 — пустой точкой. */
+  'm09-r3': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -1,
+    max: 2,
+    shag: 0.01,
+    start: -0.1,
+    osobye: [
+      { a: -0.25, tex: '-\\frac14' },
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+    ],
+    scena: (a) => {
+      const kv = m09r3Kvadrat(a);
+      return scena(
+        { x: [-2, 4], y: [-2, 3.5] },
+        {
+          curves: [
+            grafik((x) => (x + a < 0 ? null : Math.sqrt(x + a)), 'lineA', { ot: -a }),
+            grafik((x) => (x + a < 0 ? null : -Math.sqrt(x + a)), 'lineC', { ot: -a }, 'dashed'),
+            pryamaya(1, 0, 'lineB'),
+          ],
+          points: kv.map((x) =>
+            x >= -1e-12
+              ? tochka(x, x, null, false, kv.length === 1 ? 'accent' : 'cross')
+              : tochka(x, x, null, true, 'cross'),
+          ),
+        },
+        `Графики y = √(x + a) при a = ${chislo(a)} и y = x; пунктиром — y = −√(x + a)`,
+      );
+    },
+    resheniy: (a) => m09r3Korni(a).length,
+    itog: (a) => {
+      const kv = m09r3Kvadrat(a);
+      const korni = m09r3Korni(a);
+      if (kv.length === 0) return 'у $x^2-x-a=0$ корней нет: $1+4a<0$';
+      if (kv.length === 1) return `корни $x^2-x-a=0$ совпали: ${korniTex(korni)}`;
+      if (korni.length === 1)
+        return `$x=${chisloTex(kv[0]!)}<0$ — посторонний: он корень уравнения $-\\sqrt{x+a}=x$`;
+      return `оба корня $x^2-x-a=0$ не меньше нуля: ${korniTex(korni)}`;
+    },
+  },
+
   /* Разбор метода 8: косинусоида и парабола с вершиной (a; (a − 2)² + 1); касание только при a = 2. */
   'm08-r1': {
     vid: 'grafik',
