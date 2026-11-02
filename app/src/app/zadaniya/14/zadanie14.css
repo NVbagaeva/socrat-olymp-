@@ -574,3 +574,48 @@
   font-size: 18px;
   font-weight: 700;
 }
+
+/* ── Узкий экран: широкие формулы не распирают страницу ─────────
+   Элементы сетки по умолчанию не уже своего содержимого (min-width:
+   auto), и совокупность или система в строке растягивала всю главу.
+   Разрешаем сужаться, а длинная формула прокручивается внутри своего
+   абзаца или пункта списка. */
+.z14-glava > *,
+.z14-punkt,
+.z14-primer,
+.z14-reshenie,
+.z14-podskazki__shag {
+  min-width: 0;
+}
+.z14-punkt p,
+.z14-punkt li,
+.z14-primer p,
+.z14-shagi li,
+.z14-otvet,
+.z14-podskazki__vopros,
+.z14-glava__lead {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+/* Обёртка рисунка — во всю ширину колонки: окружность (.k14) сама
+   центрируется и сжимается до неё (max-width: 100%). */
+.z14-ris {
+  justify-items: stretch;
+}
+.z14-ris > * {
+  width: 100%;
+  min-width: 0;
+}
+/* Содержимое интерактива — по ширине блока: ряды кнопок переносятся,
+   таблица прокручивается внутри. */
+.z14-inter {
+  justify-items: stretch;
+  min-width: 0;
+}
+.z14-inter > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.z14-zhivoy__svg {
+  justify-self: center;
+}
