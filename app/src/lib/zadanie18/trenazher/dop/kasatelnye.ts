@@ -215,7 +215,8 @@ export const KS_PRYAM_TRAP = scena({
       ug('pE', O, E, D, { skrytyy: true, pryamoy: true, gruppy: ['r'], cvet: 'c' }),
       /* Данные условия на чертеже. */
       velOtr('d-OC', '15', O, C),
-      velOtr('d-OD', '20', O, D),
+      /* Середина OD почти на окружности (r = 12, OD = 20): подпись — у внешней части. */
+      velOtr('d-OD', '20', [O[0] + (D[0] - O[0]) * 0.6, O[1] + (D[1] - O[1]) * 0.6], D),
       tch('A', A),
       tch('B', B),
       tch('C', C),
