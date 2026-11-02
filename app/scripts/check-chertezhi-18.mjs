@@ -518,7 +518,16 @@ for (const tip of TIPY_18) {
         dlyaBrauzera.push({
           id: `${id}, ${tema}`,
           svg: kod,
-          ramki: podpisi.map((q) => ({ imya: q.imya, r: q.r })),
+          ramki: podpisi.map((q) => ({
+            imya: q.imya,
+            r: q.r,
+            kuski:
+              q.vel === null
+                ? ''
+                : q.vel.chasti
+                    .map((ch) => `${ch.t}:${(q.vel.levo + ch.dx).toFixed(1)}+${ch.w.toFixed(1)}`)
+                    .join(' '),
+          })),
         });
       fakt(
         'у основной фигуры есть заливка',
@@ -608,7 +617,12 @@ ${dlyaBrauzera.map((c, i) => `<div data-i="${i}">${c.svg}</div>`).join('\n')}`,
     [...document.querySelectorAll('div[data-i]')].map((d) =>
       [...d.querySelectorAll('text.skh-podpis, text.skh-velichina')].map((t) => {
         const r = t.getBBox();
-        return [r.x, r.x + r.width];
+        /* Куски записи (tspan): начало и ширина — для разбора расхождений. */
+        const kuski = [...t.querySelectorAll('tspan')].map((ts) => {
+          const q = ts.getBBox();
+          return `${ts.textContent}:${q.x.toFixed(1)}+${q.width.toFixed(1)}`;
+        });
+        return [r.x, r.x + r.width, kuski.join(' ')];
       }),
     ),
   );
@@ -622,7 +636,8 @@ ${dlyaBrauzera.map((c, i) => `<div data-i="${i}">${c.svg}</div>`).join('\n')}`,
       fakt(
         'браузер: подпись в ширине раскладки (± 1 px)',
         x[0] >= q.r[0] - 1 && x[1] <= q.r[2] + 1,
-        `${c.id}: «${q.imya}» ${x[0].toFixed(1)}…${x[1].toFixed(1)}, раскладка ${q.r[0].toFixed(1)}…${q.r[2].toFixed(1)}`,
+        `${c.id}: «${q.imya}» ${x[0].toFixed(1)}…${x[1].toFixed(1)}, раскладка ${q.r[0].toFixed(1)}…${q.r[2].toFixed(1)}` +
+          (q.kuski ? `; куски в браузере ${x[2]}, по раскладке ${q.kuski}` : ''),
       );
     });
   });

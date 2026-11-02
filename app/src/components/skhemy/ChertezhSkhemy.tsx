@@ -475,8 +475,9 @@ export function ChertezhSkhemy({
                       style={c.kursiv ? { fontFamily: BUKVY } : undefined}
                       x={Math.round((v.levo + c.dx) * 100) / 100}
                       y={c.indeks ? v.base + 4 : v.base}
-                      /* Подкоренное — заданной ширины: черта знака ровно над ним. */
-                      {...(c.koren
+                      /* Подкоренное и «∠» — заданной ширины: черта знака ровно
+                         над подкоренным, знак угла не шире раскладки при любом шрифте. */
+                      {...(c.koren || c.t === '∠'
                         ? {
                             textLength: Math.round(c.w * 100) / 100,
                             lengthAdjust: 'spacingAndGlyphs',

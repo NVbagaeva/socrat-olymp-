@@ -953,8 +953,10 @@ export function chastiVelichiny(tekst: string): ChastVelichiny[] {
     const posl = out[out.length - 1];
     if (
       !koren &&
+      t !== '∠' &&
       posl !== undefined &&
       !posl.koren &&
+      posl.t !== '∠' &&
       posl.kursiv === kursiv &&
       posl.indeks === indeks
     ) {
@@ -973,7 +975,10 @@ export function chastiVelichiny(tekst: string): ChastVelichiny[] {
     /* Пробелы — неразрывные: SVG схлопывает пробел в начале куска («S_ABC = 60»). */ else if (
       m[5] !== undefined
     )
-      dobavit(m[5].replace(/ /g, '\u00a0'), false, false);
+      /* «∠» — отдельным куском заданной ширины (zadannaya): глифа нет в
+         части шрифтов, и браузер подставляет другой — запись шире раскладки. */
+      for (const kusok of m[5].replace(/ /g, '\u00a0').split(/(∠)/))
+        if (kusok !== '') dobavit(kusok, false, false);
   }
   return out;
 }
