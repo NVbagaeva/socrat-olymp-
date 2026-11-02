@@ -524,7 +524,10 @@ function razlozhit(
   const nPl = kadr.elementy.filter(
     (el) => el.vid === 'velichina' && vidimEl(el, sost) && etoPloshchad(el),
   ).length;
-  const polosa = nPl === 0 ? 0 : POLOSA_PLOSHCHADEY.otstup + nPl * POLOSA_PLOSHCHADEY.stroka;
+  const polosa =
+    nPl === 0
+      ? 0
+      : POLOSA_PLOSHCHADEY.otstup + nPl * POLOSA_PLOSHCHADEY.stroka + POLOSA_PLOSHCHADEY.niz;
   /* Величина или буква не уместилась в поле или ей нет чистого места —
      фигура чуть мельчает (до трёх раз). Из попыток берётся лучшая, при
      равенстве — крупнейшая: мельчание не всегда помогает (подписи того
@@ -771,7 +774,8 @@ function raskladka1(
       plokho += 1;
       if ('ugol' in el.yakor || 'otrezok' in el.yakor) nechistyeUgly.push(el.id);
     }
-    if (c[0] - hw < 1 || c[1] - hh < 1 || c[0] + hw > W - 1 || c[1] + hh > H - 1) plokho += 3;
+    if (c[0] - hw < 1 || c[1] - hh < 1 || c[0] + hw > W - 1 || c[1] + hh + SPUSK_VELICHINY > H - 1)
+      plokho += 3;
     zanyato.push([c[0] - hw, c[1] - hh, c[0] + hw, c[1] + hh]);
     const levo = c[0] - hw + 1;
     const b = c[1] + base;
@@ -800,7 +804,14 @@ function raskladka1(
 /* ── Подписи площадей ──────────────────────────────────────────── */
 
 /** Полоса подписей площадей под чертежом, px. */
-const POLOSA_PLOSHCHADEY = { otstup: 8, stroka: 26 } as const;
+const POLOSA_PLOSHCHADEY = { otstup: 8, stroka: 26, niz: 6 } as const;
+
+/**
+ * Спуск шрифта величины, px: рамка текста в браузере опускается ниже
+ * прямоугольника раскладки (индекс S_ABC, нижние выносные) — у нижнего
+ * края чертежа нужен этот запас, иначе подпись обрезается.
+ */
+const SPUSK_VELICHINY = 4;
 
 /**
  * Запись в полосе под чертежом: площадь, данная или искомая
@@ -1099,7 +1110,7 @@ function mestoVelichiny(
   let luchshiy = Infinity;
   for (const { c, cena } of kand) {
     const pr: Pryam = [c[0] - hw, c[1] - hh, c[0] + hw, c[1] + hh];
-    const vne = pr[0] < 1 || pr[1] < 1 || pr[2] > W - 1 || pr[3] > H - 1 ? 1 : 0;
+    const vne = pr[0] < 1 || pr[1] < 1 || pr[2] > W - 1 || pr[3] + SPUSK_VELICHINY > H - 1 ? 1 : 0;
     const shtraf = 1e4 * kasaniya(pr, prep, zanyato, null) + 3e3 * vne + 1.5e3 * dalshe(pr) + cena;
     if (shtraf < luchshiy) {
       luchshiy = shtraf;
