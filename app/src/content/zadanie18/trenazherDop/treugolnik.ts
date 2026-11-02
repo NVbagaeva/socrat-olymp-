@@ -4,15 +4,21 @@
  * scripts/verify_schemes/trenazherDop/treugolnik.mjs.
  */
 
-import type { ZadachaDop18 } from './tipy';
+import { ch, drob, type ZadachaDop18 } from './tipy';
 
 export const TR18_SREDLIN: ZadachaDop18 = {
   id: 'tr-sredlin',
   uroven: 1,
   nazvanie: 'Середины трёх сторон',
+  /* BC — только для формы чертежа: периметр от него не зависит. */
+  varianty: [
+    { AB: 10, AC: 14, BC: 12 },
+    { AB: 8, AC: 12, BC: 10 },
+    { AB: 6, AC: 10, BC: 12 },
+  ],
   uslovie: 'Точки $M$, $N$ и $K$ — середины сторон $AB$, $BC$ и $CA$ треугольника $ABC$.',
   a: 'Докажите, что четырёхугольник $AMNK$ — параллелограмм.',
-  b: 'Найдите периметр четырёхугольника $AMNK$, если $AB = 10$ и $AC = 14$.',
+  b: (p) => `Найдите периметр четырёхугольника $AMNK$, если $AB = ${p.AB}$ и $AC = ${p.AC}$.`,
   skhemy: [
     {
       id: 'sredlin-treug',
@@ -33,27 +39,31 @@ export const TR18_SREDLIN: ZadachaDop18 = {
       gruppy: ['nk', 'par'],
     },
   ],
-  reshenieB: [
+  reshenieB: (p) => [
     {
-      tekst: 'Стороны параллелограмма: $AM = \\dfrac12 AB = 5$ и $AK = \\dfrac12 AC = 7$.',
+      tekst: `Стороны параллелограмма: $AM = \\dfrac12 AB = ${ch(p.AB! / 2)}$ и $AK = \\dfrac12 AC = ${ch(p.AC! / 2)}$.`,
       gruppy: ['per'],
     },
     {
-      tekst:
-        'Противоположные стороны параллелограмма равны: $MN = AK = 7$, $NK = AM = 5$. Периметр $P = 2(5 + 7) = 24$.',
+      tekst: `Противоположные стороны параллелограмма равны: $MN = AK = ${ch(p.AC! / 2)}$, $NK = AM = ${ch(p.AB! / 2)}$. Периметр $P = 2(${ch(p.AB! / 2)} + ${ch(p.AC! / 2)}) = ${ch(p.AB! + p.AC!)}$.`,
       gruppy: ['par'],
     },
   ],
-  otvet: 24,
+  otvet: (p) => p.AB! + p.AC!,
 };
 
 export const TR18_INCENTR: ZadachaDop18 = {
   id: 'tr-incentr',
   uroven: 2,
   nazvanie: 'Как центр вписанной окружности делит биссектрису',
+  varianty: [
+    { AB: 6, AC: 9, BC: 10 },
+    { AB: 5, AC: 7, BC: 6 },
+    { AB: 10, AC: 12, BC: 8 },
+  ],
   uslovie: 'Биссектрисы $AA_1$ и $BB_1$ треугольника $ABC$ пересекаются в точке $I$.',
   a: 'Докажите, что $AI : IA_1 = (AB + AC) : BC$.',
-  b: 'Найдите $AI : IA_1$, если $AB = 6$, $AC = 9$ и $BC = 10$.',
+  b: (p) => `Найдите $AI : IA_1$, если $AB = ${p.AB}$, $AC = ${p.AC}$ и $BC = ${p.BC}$.`,
   skhemy: [
     {
       id: 'bissektrisa',
@@ -75,12 +85,11 @@ export const TR18_INCENTR: ZadachaDop18 = {
       gruppy: ['bisB'],
     },
   ],
-  reshenieB: [
+  reshenieB: (p) => [
     {
-      tekst:
-        'По пункту а) $\\dfrac{AI}{IA_1} = \\dfrac{AB + AC}{BC} = \\dfrac{6 + 9}{10} = \\dfrac32$.',
+      tekst: `По пункту а) $\\dfrac{AI}{IA_1} = \\dfrac{AB + AC}{BC} = \\dfrac{${p.AB} + ${p.AC}}{${p.BC}} = ${drob(p.AB! + p.AC!, p.BC!)}$.`,
       gruppy: ['otv'],
     },
   ],
-  otvet: 3 / 2,
+  otvet: (p) => (p.AB! + p.AC!) / p.BC!,
 };
