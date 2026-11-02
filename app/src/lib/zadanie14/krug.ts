@@ -265,14 +265,14 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
     zanyato.push({ x1: R - T, x2: R + T, y1: -OS, y2: OS });
     const p = postavitRyadom('\\operatorname{tg}', R + 22, -OS + 6, [[0, 0]], zanyato, 'os');
     if (p) podpisi.push(p);
-    OPIS.push('ось тангенсов — касательная x = 1');
+    OPIS.push('ось тангенсов — касательная справа');
   }
   if (!pustoy && spec.osCtg) {
     osCtg = { y: -R, x1: -OS, x2: OS };
     zanyato.push({ x1: -OS, x2: OS, y1: -R - T, y2: -R + T });
     const p = postavitRyadom('\\operatorname{ctg}', OS - 4, -R - 16, [[0, 0]], zanyato, 'os');
     if (p) podpisi.push(p);
-    OPIS.push('ось котангенсов — касательная y = 1');
+    OPIS.push('ось котангенсов — касательная сверху');
   }
 
   if (!pustoy && spec.delenie !== undefined) {
@@ -304,7 +304,7 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
     );
     if (p) podpisi.push(p);
     tochki.push({ x: 0, y, akcent: true, vykolota: false, znach: true });
-    OPIS.push(`прямая sin x = ${spec.sechenieSin.tex}`);
+    OPIS.push(`горизонтальная прямая — сечение для синуса, значение ${spec.sechenieSin.tex.replace(/\\[a-z]+|[{}]/g, ' ').trim()}`);
   }
   if (!pustoy && spec.sechenieCos !== undefined) {
     const x = spec.sechenieCos.a * R;
@@ -325,7 +325,7 @@ export function geomKruga(spec: KrugSpec): GeomKruga {
     );
     if (p) podpisi.push(p);
     tochki.push({ x, y: 0, akcent: true, vykolota: false, znach: true });
-    OPIS.push(`прямая cos x = ${spec.sechenieCos.tex}`);
+    OPIS.push(`вертикальная прямая — сечение для косинуса, значение ${spec.sechenieCos.tex.replace(/\\[a-z]+|[{}]/g, ' ').trim()}`);
   }
   if (!pustoy && spec.tgZnach !== undefined) {
     const y = -spec.tgZnach.a * R;
