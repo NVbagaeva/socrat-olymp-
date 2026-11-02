@@ -1,0 +1,116 @@
+/* Тригонометрическая окружность №14 (lib/zadanie14/krugHtml.ts).
+   Линии — SVG, подписи — KaTeX поверх рисунка в процентах; кегль —
+   доля ширины рисунка (--k14-kegl, cqi), поэтому подписи масштабируются
+   вместе с линиями и не съезжают с рассчитанных мест.
+   Иерархия толщин: оси 1,6 < окружность 2 < ключевые линии 3,2. */
+
+.k14 {
+  container-type: inline-size;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+.k14__holst {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.k14__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.k14__os {
+  stroke: var(--graph-axis, #101728);
+  stroke-width: 1.6;
+}
+.k14__strelka {
+  fill: var(--graph-axis, #101728);
+}
+.k14__os-tg {
+  stroke: var(--color-text-tertiary, #6b7280);
+  stroke-width: 1.6;
+  stroke-dasharray: 6 4;
+}
+.k14__okr {
+  fill: none;
+  stroke: var(--graph-axis, #101728);
+  stroke-width: 2;
+}
+.k14__zasechka {
+  stroke: var(--color-primary, #1f5fd0);
+  stroke-width: 2.4;
+}
+.k14__sechenie {
+  stroke: var(--graph-accent, #e07a2f);
+  stroke-width: 2.4;
+  stroke-dasharray: 7 5;
+}
+.k14__proekciya {
+  stroke: var(--color-primary, #1f5fd0);
+  stroke-width: 1.4;
+  stroke-dasharray: 4 4;
+}
+.k14__luch {
+  stroke: var(--color-primary, #1f5fd0);
+  stroke-width: 2;
+}
+.k14__duga {
+  fill: none;
+  stroke: var(--graph-accent, #e07a2f);
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+.k14__duga-strelka {
+  fill: var(--graph-line-c, #a8500f);
+}
+.k14__tochka {
+  fill: var(--color-primary, #1f5fd0);
+  stroke: var(--color-surface, #fff);
+  stroke-width: 1.6;
+}
+.k14__tochka--akcent {
+  fill: var(--graph-line-c, #a8500f);
+}
+.k14__tochka--znach {
+  fill: var(--graph-accent, #e07a2f);
+}
+.k14__tochka--vykolota {
+  fill: var(--color-surface, #fff);
+  stroke: var(--graph-line-c, #a8500f);
+  stroke-width: 2.2;
+}
+.k14__podpis {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: max(11px, var(--k14-kegl, 4.5cqi));
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  color: var(--color-primary, #1f5fd0);
+}
+.k14__podpis--os {
+  color: var(--graph-axis, #101728);
+}
+.k14__podpis--znach {
+  color: var(--color-accent-text, #a8500f);
+}
+.k14__podpis--konec {
+  color: var(--color-accent-text, #a8500f);
+}
+.k14-ryad {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4, 16px);
+  align-items: start;
+}
+.k14-ryad .k14 {
+  max-width: 300px;
+}
+@media print {
+  .k14 {
+    max-width: 62mm;
+  }
+}

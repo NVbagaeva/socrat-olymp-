@@ -1,0 +1,217 @@
+/**
+ * Блок 02 «Аргумент kx + b»: простейшее уравнение относительно всего
+ * аргумента, потом выражаем x и делим период. Первая задача — с полным
+ * разбором (промежуток б свой), две разминки — в формате части 1.
+ */
+
+import { cos, ctg, otrezok, PI, s, sin, sqrt, tg, u, ur, rz, v } from '../dsl';
+import type { Zadacha14 } from '../tipy';
+
+export const ZADACHI_02: Zadacha14[] = [
+  ur({
+    id: 'z02-01',
+    iz: 'ваше решение, №16',
+    uravnenie: '\\sqrt{3}\\operatorname{tg}(5\\pi+2x)=3',
+    f: (x) => sqrt(3) * tg(5 * PI + 2 * x) - 3,
+    odz: (x) => Math.abs(cos(2 * x)) > 1e-6,
+    serii: [s(u(1, 6), 1, 2)],
+    promezhutok: otrezok(u(-1), u(0)),
+    otbor: 'nerav',
+    metody: ['argument', 'privedenie'],
+    reshenie: [
+      'Сначала упростим аргумент. Период тангенса — $\\pi$, а $5\\pi$ — это пять периодов, поэтому их можно отбросить: $\\operatorname{tg}(5\\pi+2x)=\\operatorname{tg}2x$. Уравнение определено, когда $\\cos 2x\\ne0$.',
+      'Делим обе части на $\\sqrt{3}$, чтобы тангенс остался один: $\\sqrt{3}\\operatorname{tg}2x=3\\ \\Leftrightarrow\\ \\operatorname{tg}2x=\\dfrac{3}{\\sqrt{3}}=\\sqrt{3}$.',
+      'Теперь это простейшее уравнение относительно всего аргумента $t=2x$: $\\operatorname{tg}t=\\sqrt{3}$, $t=\\dfrac{\\pi}{3}+\\pi k$. Подставлять $x$ рано — сначала решаем для $t$ целиком.',
+      'Возвращаемся к $x$: $2x=\\dfrac{\\pi}{3}+\\pi k\\ \\Leftrightarrow\\ x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{2},\\ k\\in\\mathbb{Z}$. Делим на $2$ обе части целиком — и начало серии, и период.',
+      'Почему это важно: если оставить $\\pi k$, получится $x=\\dfrac{\\pi}{6}+\\pi k$ — потеряется половина корней, например $x=\\dfrac{2\\pi}{3}$, для которого $\\operatorname{tg}\\dfrac{4\\pi}{3}=\\sqrt{3}$.',
+      'Найденные $x$ входят в ОДЗ: в них $\\operatorname{tg}2x=\\sqrt{3}$ — число, значит $\\cos 2x\\ne 0$.',
+    ],
+    podskazki: [
+      v('Чему равен $\\operatorname{tg}(5\\pi+2x)$?', ['$\\operatorname{tg}2x$', '$-\\operatorname{tg}2x$', '$\\operatorname{ctg}2x$'], 0, '$5\\pi$ — целое число периодов тангенса.'),
+      v('Какое простейшее уравнение получилось?', ['$\\operatorname{tg}2x=\\sqrt{3}$', '$\\operatorname{tg}2x=3$', '$\\operatorname{tg}2x=\\dfrac{\\sqrt{3}}{3}$'], 0),
+      v('Решение относительно $2x$:', ['$2x=\\dfrac{\\pi}{3}+\\pi k$', '$2x=\\dfrac{\\pi}{6}+\\pi k$', '$2x=\\dfrac{\\pi}{3}+2\\pi k$'], 0),
+      v('Ответ пункта а:', ['$x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{2}$', '$x=\\dfrac{\\pi}{6}+\\pi k$', '$x=\\dfrac{\\pi}{3}+\\dfrac{\\pi k}{2}$'], 0, 'Период тоже делится на $2$.'),
+    ],
+  }),
+  ur({
+    id: 'z02-02',
+    iz: 'авторская',
+    uravnenie: '\\cos 3x=\\dfrac{\\sqrt{2}}{2}',
+    f: (x) => cos(3 * x) - sqrt(2) / 2,
+    serii: [s(u(1, 12), 2, 3), s(u(-1, 12), 2, 3)],
+    promezhutok: otrezok(u(0), u(1)),
+    otbor: 'nerav',
+    metody: ['argument'],
+    reshenie: [
+      'Решаем относительно $3x$: $3x=\\pm\\dfrac{\\pi}{4}+2\\pi k$.',
+      'Делим на $3$ всё: $x=\\pm\\dfrac{\\pi}{12}+\\dfrac{2\\pi k}{3},\\ k\\in\\mathbb{Z}$.',
+    ],
+    podskazki: [
+      v('Решение относительно $3x$:', ['$3x=\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$3x=\\pm\\dfrac{\\pi}{4}+\\pi k$', '$3x=\\dfrac{\\pi}{4}+2\\pi k$'], 0),
+      v('Ответ:', ['$x=\\pm\\dfrac{\\pi}{12}+\\dfrac{2\\pi k}{3}$', '$x=\\pm\\dfrac{\\pi}{12}+2\\pi k$', '$x=\\pm\\dfrac{3\\pi}{4}+6\\pi k$'], 0),
+      v('Сколько корней на $[0;\\,\\pi]$?', ['Три', 'Два', 'Один'], 0, 'Это $\\dfrac{\\pi}{12}$, $\\dfrac{7\\pi}{12}$ и $\\dfrac{3\\pi}{4}$.'),
+    ],
+  }),
+  ur({
+    id: 'z02-03',
+    iz: 'авторская',
+    uravnenie: '\\cos\\left(2x+\\dfrac{\\pi}{6}\\right)=-\\dfrac{1}{2}',
+    f: (x) => cos(2 * x + PI / 6) + 0.5,
+    serii: [s(u(1, 4), 1), s(u(-5, 12), 1)],
+    promezhutok: otrezok(u(1, 2), u(2)),
+    otbor: 'nerav',
+    metody: ['argument'],
+    reshenie: [
+      'Относительно всего аргумента: $2x+\\dfrac{\\pi}{6}=\\pm\\dfrac{2\\pi}{3}+2\\pi k$.',
+      'Переносим $\\dfrac{\\pi}{6}$: $2x=\\dfrac{2\\pi}{3}-\\dfrac{\\pi}{6}+2\\pi k=\\dfrac{\\pi}{2}+2\\pi k$ или $2x=-\\dfrac{2\\pi}{3}-\\dfrac{\\pi}{6}+2\\pi k=-\\dfrac{5\\pi}{6}+2\\pi k$.',
+      'Делим на $2$: $x=\\dfrac{\\pi}{4}+\\pi k$ или $x=-\\dfrac{5\\pi}{12}+\\pi k,\\ k\\in\\mathbb{Z}$. Серий две: после сдвига на $\\dfrac{\\pi}{6}$ знак $\\pm$ уже не вынести.',
+    ],
+    podskazki: [
+      v('Первый шаг:', ['$2x+\\dfrac{\\pi}{6}=\\pm\\dfrac{2\\pi}{3}+2\\pi k$', '$2x=\\pm\\dfrac{2\\pi}{3}+2\\pi k$', '$2x+\\dfrac{\\pi}{6}=\\pm\\dfrac{\\pi}{3}+2\\pi k$'], 0),
+      v('Чему равно $\\dfrac{2\\pi}{3}-\\dfrac{\\pi}{6}$?', ['$\\dfrac{\\pi}{2}$', '$\\dfrac{\\pi}{3}$', '$\\dfrac{5\\pi}{6}$'], 0),
+      v('Серии:', ['$x=\\dfrac{\\pi}{4}+\\pi k$ и $x=-\\dfrac{5\\pi}{12}+\\pi k$', '$x=\\pm\\dfrac{\\pi}{4}+\\pi k$', '$x=\\dfrac{\\pi}{4}+2\\pi k$ и $x=-\\dfrac{5\\pi}{12}+2\\pi k$'], 0),
+    ],
+  }),
+  ur({
+    id: 'z02-04',
+    iz: 'авторская',
+    uravnenie: '\\sin 2x=\\dfrac{\\sqrt{3}}{2}',
+    f: (x) => sin(2 * x) - sqrt(3) / 2,
+    serii: [s(u(1, 6), 1), s(u(1, 3), 1)],
+    promezhutok: otrezok(u(-1), u(0)),
+    otbor: 'nerav',
+    metody: ['argument'],
+    reshenie: [
+      '$2x=\\dfrac{\\pi}{3}+2\\pi k$ или $2x=\\dfrac{2\\pi}{3}+2\\pi k$.',
+      'Делим на $2$: $x=\\dfrac{\\pi}{6}+\\pi k$ или $x=\\dfrac{\\pi}{3}+\\pi k,\\ k\\in\\mathbb{Z}$.',
+    ],
+    podskazki: [
+      v('Решения относительно $2x$:', ['$\\dfrac{\\pi}{3}+2\\pi k$ и $\\dfrac{2\\pi}{3}+2\\pi k$', '$\\pm\\dfrac{\\pi}{3}+2\\pi k$', '$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$'], 0),
+      v('Период серий для $x$:', ['$\\pi$', '$2\\pi$', '$4\\pi$'], 0),
+    ],
+  }),
+  ur({
+    id: 'z02-05',
+    iz: 'авторская',
+    uravnenie: '\\sin\\left(3x+\\dfrac{\\pi}{2}\\right)=-\\dfrac{\\sqrt{2}}{2}',
+    f: (x) => sin(3 * x + PI / 2) + sqrt(2) / 2,
+    serii: [s(u(1, 4), 2, 3), s(u(-1, 4), 2, 3)],
+    promezhutok: otrezok(u(1, 2), u(3, 2)),
+    otbor: 'nerav',
+    metody: ['argument', 'privedenie'],
+    reshenie: [
+      'По формуле приведения $\\sin\\left(3x+\\dfrac{\\pi}{2}\\right)=\\cos 3x$, так что уравнение равносильно $\\cos 3x=-\\dfrac{\\sqrt{2}}{2}$.',
+      '$3x=\\pm\\dfrac{3\\pi}{4}+2\\pi k\\ \\Leftrightarrow\\ x=\\pm\\dfrac{\\pi}{4}+\\dfrac{2\\pi k}{3},\\ k\\in\\mathbb{Z}$.',
+      'Можно и без приведения: $3x+\\dfrac{\\pi}{2}=-\\dfrac{\\pi}{4}+2\\pi k$ или $-\\dfrac{3\\pi}{4}+2\\pi k$ — получатся те же серии, только с другими началами.',
+    ],
+    podskazki: [
+      v('$\\sin\\left(3x+\\dfrac{\\pi}{2}\\right)$ равен', ['$\\cos 3x$', '$-\\cos 3x$', '$\\sin 3x$'], 0),
+      v('Решения $\\cos 3x=-\\dfrac{\\sqrt{2}}{2}$ относительно $3x$:', ['$\\pm\\dfrac{3\\pi}{4}+2\\pi k$', '$\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$-\\dfrac{\\pi}{4}+2\\pi k$'], 0),
+      v('Ответ:', ['$x=\\pm\\dfrac{\\pi}{4}+\\dfrac{2\\pi k}{3}$', '$x=\\pm\\dfrac{\\pi}{4}+2\\pi k$', '$x=\\pm\\dfrac{\\pi}{12}+\\dfrac{2\\pi k}{3}$'], 0),
+    ],
+  }),
+  ur({
+    id: 'z02-06',
+    iz: 'сторонний задачник',
+    uravnenie: '\\operatorname{ctg}\\left(3x-\\dfrac{5\\pi}{6}\\right)=-1',
+    f: (x) => ctg(3 * x - (5 * PI) / 6) + 1,
+    odz: (x) => Math.abs(sin(3 * x - (5 * PI) / 6)) > 1e-6,
+    serii: [s(u(7, 36), 1, 3)],
+    promezhutok: otrezok(u(0), u(1)),
+    otbor: 'nerav',
+    metody: ['argument'],
+    reshenie: [
+      '$\\operatorname{ctg}t=-1$ при $t=\\dfrac{3\\pi}{4}+\\pi k$ (или, что то же, $-\\dfrac{\\pi}{4}+\\pi k$). Возьмём $3x-\\dfrac{5\\pi}{6}=-\\dfrac{\\pi}{4}+\\pi k$.',
+      '$3x=\\dfrac{5\\pi}{6}-\\dfrac{\\pi}{4}+\\pi k=\\dfrac{7\\pi}{12}+\\pi k\\ \\Leftrightarrow\\ x=\\dfrac{7\\pi}{36}+\\dfrac{\\pi k}{3},\\ k\\in\\mathbb{Z}$.',
+    ],
+    podskazki: [
+      v('$\\operatorname{ctg}t=-1$ при', ['$t=-\\dfrac{\\pi}{4}+\\pi k$', '$t=\\dfrac{\\pi}{4}+\\pi k$', '$t=-\\dfrac{\\pi}{4}+2\\pi k$'], 0),
+      v('$\\dfrac{5\\pi}{6}-\\dfrac{\\pi}{4}=$', ['$\\dfrac{7\\pi}{12}$', '$\\dfrac{13\\pi}{12}$', '$\\dfrac{\\pi}{2}$'], 0),
+      v('Ответ:', ['$x=\\dfrac{7\\pi}{36}+\\dfrac{\\pi k}{3}$', '$x=\\dfrac{7\\pi}{36}+\\pi k$', '$x=\\dfrac{7\\pi}{12}+\\dfrac{\\pi k}{3}$'], 0),
+    ],
+  }),
+  ur({
+    id: 'z02-07',
+    iz: '13-Уравнения',
+    uravnenie: '\\sqrt{3}\\operatorname{tg}(7\\pi-2x)=-1',
+    f: (x) => sqrt(3) * tg(7 * PI - 2 * x) + 1,
+    odz: (x) => Math.abs(cos(2 * x)) > 1e-6,
+    serii: [s(u(1, 12), 1, 2)],
+    promezhutok: otrezok(u(1), u(2)),
+    otbor: 'nerav',
+    metody: ['argument', 'privedenie'],
+    reshenie: [
+      '$7\\pi$ — целое число периодов тангенса, а тангенс нечётен: $\\operatorname{tg}(7\\pi-2x)=\\operatorname{tg}(-2x)=-\\operatorname{tg}2x$.',
+      'Уравнение: $-\\sqrt{3}\\operatorname{tg}2x=-1\\ \\Leftrightarrow\\ \\operatorname{tg}2x=\\dfrac{\\sqrt{3}}{3}$.',
+      '$2x=\\dfrac{\\pi}{6}+\\pi k\\ \\Leftrightarrow\\ x=\\dfrac{\\pi}{12}+\\dfrac{\\pi k}{2},\\ k\\in\\mathbb{Z}$.',
+    ],
+    podskazki: [
+      v('$\\operatorname{tg}(7\\pi-2x)$ равен', ['$-\\operatorname{tg}2x$', '$\\operatorname{tg}2x$', '$-\\operatorname{ctg}2x$'], 0),
+      v('Простейшее уравнение:', ['$\\operatorname{tg}2x=\\dfrac{\\sqrt{3}}{3}$', '$\\operatorname{tg}2x=-\\dfrac{\\sqrt{3}}{3}$', '$\\operatorname{tg}2x=\\sqrt{3}$'], 0),
+      v('Ответ:', ['$x=\\dfrac{\\pi}{12}+\\dfrac{\\pi k}{2}$', '$x=\\dfrac{\\pi}{12}+\\pi k$', '$x=\\dfrac{\\pi}{6}+\\dfrac{\\pi k}{2}$'], 0),
+    ],
+  }),
+  ur({
+    id: 'z02-08',
+    iz: 'авторская',
+    uravnenie: '\\sin\\left(\\dfrac{x}{2}+\\dfrac{\\pi}{6}\\right)=\\dfrac{1}{2}',
+    f: (x) => sin(x / 2 + PI / 6) - 0.5,
+    serii: [s(u(0), 4), s(u(4, 3), 4)],
+    promezhutok: otrezok(u(-3), u(0)),
+    otbor: 'nerav',
+    metody: ['argument'],
+    reshenie: [
+      '$\\dfrac{x}{2}+\\dfrac{\\pi}{6}=\\dfrac{\\pi}{6}+2\\pi k$ или $\\dfrac{x}{2}+\\dfrac{\\pi}{6}=\\dfrac{5\\pi}{6}+2\\pi k$.',
+      'Тогда $\\dfrac{x}{2}=2\\pi k$ или $\\dfrac{x}{2}=\\dfrac{2\\pi}{3}+2\\pi k$.',
+      'Умножаем на $2$ — и период тоже удваивается: $x=4\\pi k$ или $x=\\dfrac{4\\pi}{3}+4\\pi k,\\ k\\in\\mathbb{Z}$.',
+    ],
+    podskazki: [
+      v('Решения относительно аргумента $t=\\dfrac{x}{2}+\\dfrac{\\pi}{6}$:', ['$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$', '$\\pm\\dfrac{\\pi}{6}+2\\pi k$', '$\\dfrac{\\pi}{3}+2\\pi k$ и $\\dfrac{2\\pi}{3}+2\\pi k$'], 0),
+      v('Какой период у серий для $x$?', ['$4\\pi$', '$2\\pi$', '$\\pi$'], 0, 'Аргумент делится на $2$, значит при умножении на $2$ период растёт вдвое.'),
+      v('Серии:', ['$x=4\\pi k$ и $x=\\dfrac{4\\pi}{3}+4\\pi k$', '$x=2\\pi k$ и $x=\\dfrac{2\\pi}{3}+2\\pi k$', '$x=4\\pi k$ и $x=\\dfrac{5\\pi}{3}+4\\pi k$'], 0),
+    ],
+  }),
+  rz({
+    id: 'z02-09',
+    iz: 'лист 22, №12',
+    uravnenie: '\\cos\\dfrac{2\\pi x}{6}=\\dfrac{\\sqrt{3}}{2}',
+    vopros: 'max-otr',
+    f: (x) => cos((2 * PI * x) / 6) - sqrt(3) / 2,
+    serii: [
+      { x0: 0.5, h: 6, tex: '$x=\\dfrac12+6k$' },
+      { x0: -0.5, h: 6, tex: '$x=-\\dfrac12+6k$' },
+    ],
+    otvet: -0.5,
+    metody: ['argument'],
+    reshenie: [
+      'Сократим дробь в аргументе: $\\dfrac{2\\pi x}{6}=\\dfrac{\\pi x}{3}$. Решаем относительно него: $\\dfrac{\\pi x}{3}=\\pm\\dfrac{\\pi}{6}+2\\pi k$.',
+      'Умножаем на $\\dfrac{3}{\\pi}$: $x=\\pm\\dfrac{1}{2}+6k,\\ k\\in\\mathbb{Z}$.',
+      'Отрицательные корни: при $k=0$ — $-\\dfrac{1}{2}$, остальные ($-5{,}5$; $-6{,}5$; …) меньше. Наибольший отрицательный корень $-0{,}5$.',
+    ],
+    podskazki: [
+      v('Решения относительно $\\dfrac{\\pi x}{3}$:', ['$\\pm\\dfrac{\\pi}{6}+2\\pi k$', '$\\pm\\dfrac{\\pi}{3}+2\\pi k$', '$\\dfrac{\\pi}{6}+\\pi k$'], 0),
+      v('Корни в числах:', ['$x=\\pm\\dfrac{1}{2}+6k$', '$x=\\pm\\dfrac{1}{2}+2k$', '$x=\\pm 1+6k$'], 0),
+      v('Наибольший отрицательный корень:', ['$-0{,}5$', '$-5{,}5$', '$-6{,}5$'], 0),
+    ],
+  }),
+  rz({
+    id: 'z02-10',
+    iz: 'лист 22, №13',
+    uravnenie: '\\operatorname{tg}\\dfrac{\\pi(x-5)}{3}=-\\sqrt{3}',
+    vopros: 'min-pol',
+    f: (x) => tg((PI * (x - 5)) / 3) + sqrt(3),
+    serii: [{ x0: 1, h: 3, tex: '$x=1+3k$' }],
+    otvet: 1,
+    metody: ['argument'],
+    reshenie: [
+      'Решаем относительно аргумента: $\\dfrac{\\pi(x-5)}{3}=-\\dfrac{\\pi}{3}+\\pi k$.',
+      'Умножаем на $\\dfrac{3}{\\pi}$: $x-5=-1+3k$, то есть $x=4+3k=1+3(k+1)$ — корни $\\ldots,\\ -2,\\ 1,\\ 4,\\ \\ldots$ Сдвинув номер, пишем $x=1+3k,\\ k\\in\\mathbb{Z}$.',
+      'Наименьший положительный корень: $1$ (предыдущий, $-2$, отрицателен).',
+    ],
+    podskazki: [
+      v('Решения относительно аргумента:', ['$-\\dfrac{\\pi}{3}+\\pi k$', '$-\\dfrac{\\pi}{6}+\\pi k$', '$\\dfrac{2\\pi}{3}+2\\pi k$'], 0),
+      v('Корни в числах:', ['$x=4+3k$', '$x=4+k$', '$x=6+3k$'], 0),
+      v('Наименьший положительный корень:', ['$1$', '$4$', '$2$'], 0),
+    ],
+  }),
+];
