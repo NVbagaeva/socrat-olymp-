@@ -808,7 +808,13 @@ function drawGraph(scene, report) {
     var field = { left: sx(win.xmin), right: sx(win.xmax),
                   top: sy(win.ymax), bottom: sy(win.ymin) };
     var spot;
-    if (shape.slide) {
+    if (shape.fixed) {
+      /* Подпись на своём месте, без подбора: числа над прямой параметра
+         (№19) стоят ровно над своим промежутком или точкой. Привязка
+         'start' — якорь у левого края подписи, 'end' — у правого. */
+      var shiftX = shape.anchor === 'start' ? halfW : shape.anchor === 'end' ? -halfW : 0;
+      spot = { x: sx(shape.at[0]) + offset[0] + shiftX, y: sy(shape.at[1]) + offset[1] };
+    } else if (shape.slide) {
       spot = slideLabelSpot(shape, sx, sy, halfW, halfH, cloud, field);
     } else {
       /* Якорей может быть несколько, но они перечислены по удалению

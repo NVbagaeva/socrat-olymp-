@@ -302,6 +302,132 @@ export function gorizontal(
   return otrezokNa(x[0], c, x[1], c, cvet, style, 2.4);
 }
 
+/* ── Прямая параметра (метод 10) ─────────────────────────────────── */
+
+/** Кусок прямой параметра: от ot до do (±Infinity — луч), включены ли концы; точка — ot = do. */
+export interface KusokA19 {
+  ot: number;
+  do: number;
+  otVkl: boolean;
+  doVkl: boolean;
+}
+
+/** Полоса одного корня: где на прямой параметра он — решение. */
+export interface Polosa19 {
+  /** Имя корня над полосой: «x = 2a + 1» (короткая строка, как подпись линии). */
+  imya: string;
+  kuski: KusokA19[];
+  cvet: Cvet19;
+}
+
+export interface PryamayaParametra19 {
+  /** Видимый кусок прямой параметра. */
+  a: [number, number];
+  /** Клеток на единицу параметра: близкие особые точки разводятся крупнее. */
+  masshtab?: number;
+  /** Особые точки по возрастанию: совпадения корней, границы ограничений. */
+  osobye: number[];
+  /** Подписи особых точек под осью; по умолчанию — число с запятой. */
+  podpisi?: string[];
+  polosy: Polosa19[];
+  /**
+   * Число корней над прямой: на промежутках между особыми точками
+   * (на один больше, чем точек) и в самих точках — посчитанное, а не
+   * прочитанное по закрашенным концам полос.
+   */
+  schet?: { promezhutki: number[]; tochki: number[] };
+  /** Подпись для экранного диктора — обычный текст. */
+  alt: string;
+  /** Ползунок: текущее a — вертикальная метка и точки корней на полосах. */
+  metka?: { a: number; verny: boolean[] };
+}
+
+/**
+ * Прямая параметра: ось a снизу, над ней по полосе на каждый корень
+ * (куски, где корень — решение; концы закрашенные или пустые), сверху —
+ * число корней на каждом промежутке и в каждой особой точке. Окно сдвинуто
+ * так, что x = 0 движка левее рамки: вертикальной оси на рисунке нет, а
+ * деления оси — свои подписи значений a.
+ */
+export function pryamayaParametra(p: PryamayaParametra19): Scena19 {
+  const m = p.masshtab ?? 1;
+  const [aLo, aHi] = p.a;
+  /* Окно начинается с x = 3 движка: ось y (x = 0) уходит за край рисунка. */
+  const X0 = 3;
+  const u = (a: number) => X0 + (Math.min(aHi, Math.max(aLo, a)) - aLo) * m;
+  const uMax = u(aHi);
+  const n = p.polosy.length;
+  const verh = n + (p.schet === undefined ? 0.6 : 1.85);
+  const shapes: Figura19[] = [];
+  const points: Tochka19[] = [];
+  for (const a of p.osobye) {
+    shapes.push(
+      otrezokNa(u(a), 0, u(a), p.schet === undefined ? n + 0.35 : n + 1.1, 'aux', 'dashed', 1.2),
+    );
+  }
+  p.polosy.forEach((pol, i) => {
+    const y = i + 1;
+    for (const k of pol.kuski) {
+      if (k.do < aLo || k.ot > aHi) continue;
+      if (k.ot === k.do) {
+        points.push(tochka(u(k.ot), y, null, !k.otVkl, pol.cvet));
+        continue;
+      }
+      shapes.push(otrezokNa(u(k.ot), y, u(k.do), y, pol.cvet, 'solid', 4.5));
+      if (Number.isFinite(k.ot) && k.ot >= aLo)
+        points.push(tochka(u(k.ot), y, null, !k.otVkl, pol.cvet));
+      if (Number.isFinite(k.do) && k.do <= aHi)
+        points.push(tochka(u(k.do), y, null, !k.doVkl, pol.cvet));
+    }
+    shapes.push({ ...podpis(X0 + 0.1, y - 0.4, pol.imya, pol.cvet), size: 13, fixed: true });
+  });
+  if (p.schet !== undefined) {
+    const granicy = [aLo, ...p.osobye, aHi];
+    p.schet.promezhutki.forEach((c, i) => {
+      const x = (u(granicy[i]!) + u(granicy[i + 1]!)) / 2;
+      shapes.push({
+        type: 'label',
+        at: [x, n + 0.72],
+        text: String(c),
+        color: 'cross',
+        anchor: 'middle',
+        fixed: true,
+      });
+    });
+    p.schet.tochki.forEach((c, i) => {
+      shapes.push({
+        type: 'label',
+        at: [u(p.osobye[i]!), n + 1.45],
+        text: String(c),
+        color: 'accent',
+        anchor: 'middle',
+        fixed: true,
+      });
+    });
+  }
+  if (p.metka !== undefined) {
+    const x = u(p.metka.a);
+    shapes.push(otrezokNa(x, -0.3, x, n + 0.45, 'cross', 'solid', 1.6));
+    p.metka.verny.forEach((v, i) =>
+      points.push(tochka(x, i + 1, null, !v, v ? 'accent' : 'cross')),
+    );
+  }
+  const s = scena({ x: [X0, uMax], y: [-0.6, verh], osi: ['a', ''] }, { shapes, points }, p.alt);
+  return {
+    ...s,
+    grid: { step: 1, show: false },
+    axes: {
+      ...s.axes,
+      origin: '',
+      ticks: {
+        x: p.osobye.map((a, i) => ({ at: u(a), label: p.podpisi?.[i] ?? chisloPodpis(a) })),
+        y: [],
+      },
+    },
+    axisLabels: 'full',
+  };
+}
+
 /** SVG рисунка строкой: страница вставляет её как есть. */
 export function svg19(s: Scena19): string {
   return renderGraph(s) as string;

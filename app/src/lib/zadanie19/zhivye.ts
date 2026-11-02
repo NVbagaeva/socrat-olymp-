@@ -32,6 +32,13 @@
  * ушедший за рамку, тоже считается, совпавшие корни — один раз,
  * посторонний корень (вне области) — пустой точкой и не в счёт.
  *
+ * Для метода прямой параметра (глава 10) рисунок — сама прямая
+ * параметра: полосы корней, а ползунок двигает по ней вертикальную метку.
+ * На каждой полосе у метки — точка: закрашенная, если этот корень при
+ * текущем a — решение, пустая, если нет. Число корней считается по
+ * формулам корней: годные корни, совпавшие — один раз; под рисунком —
+ * сами корни и пометка о совпавших.
+ *
  * Описание — данные и функции; функции в браузер со страницы не
  * передать, поэтому компонент (components/zadanie19/Zhivoy19.tsx)
  * берёт описание здесь по id. Число решений считается точно —
@@ -46,9 +53,12 @@ import {
   okruzhnost,
   otrezokNa,
   pryamaya,
+  pryamayaParametra,
   scena,
   tochka,
   type Figura19,
+  type KusokA19,
+  type PryamayaParametra19,
   type Scena19,
   type Tochka19,
 } from './risunok';
@@ -75,7 +85,7 @@ export interface Zhivoy19 {
    * график чётной функции меняется вместе с параметром) — от этого
    * заголовок блока и строка под рисунком.
    */
-  vid?: 'pryamaya' | 'sdvig' | 'okruzhnost' | 'gorizontal' | 'grafik';
+  vid?: 'pryamaya' | 'sdvig' | 'okruzhnost' | 'gorizontal' | 'grafik' | 'parametr';
   bukva: string;
   min: number;
   max: number;
@@ -424,7 +434,155 @@ function korniTex(korni: number[]): string {
   return korni.map((x, i) => `$x_${i + 1}=${chisloTex(x)}$`).join(', ');
 }
 
+/* ── Метод 10: прямая параметра ──────────────────────────────────── */
+
+const kA = (ot: number, dO: number, otVkl = true, doVkl = true): KusokA19 => ({
+  ot,
+  do: dO,
+  otVkl,
+  doVkl,
+});
+const VSYA_A = kA(-Infinity, Infinity, false, false);
+
+/** Корень-кандидат: имя (TeX), формула и условие, при котором он — решение. */
+interface KorenA19 {
+  imya: string;
+  x: (a: number) => number;
+  verno: (a: number) => boolean;
+}
+
+/** Годные корни при этом a, совпавшие — один раз. */
+function godnye(korni: KorenA19[], a: number): number[] {
+  const out: number[] = [];
+  for (const k of korni) {
+    if (!k.verno(a)) continue;
+    const x = k.x(a);
+    if (!out.some((y) => blizko(x, y))) out.push(x);
+  }
+  return out.sort((p, q) => p - q);
+}
+
+/** Строка под рисунком: корни и что с ними при этом a. */
+function itogKorney(korni: KorenA19[], a: number): string {
+  const chasti: string[] = [];
+  const vzyaty: { imya: string; x: number }[] = [];
+  const sovpali: string[] = [];
+  for (const k of korni) {
+    if (!k.verno(a)) continue;
+    const x = k.x(a);
+    const pr = vzyaty.find((v) => blizko(v.x, x));
+    if (pr === undefined) vzyaty.push({ imya: k.imya, x });
+    else sovpali.push(`$${k.imya}$ совпал с $${pr.imya}$`);
+  }
+  const ne = korni.filter((k) => !k.verno(a)).map((k) => `$${k.imya}$`);
+  chasti.push(
+    vzyaty.length === 0
+      ? 'годных корней нет'
+      : `корни ${vzyaty.map((v) => `$${chisloTex(v.x)}$`).join(', ')}`,
+  );
+  if (sovpali.length > 0) chasti.push(sovpali.join(', '));
+  if (ne.length > 0) chasti.push(`не решение: ${ne.join(', ')}`);
+  return chasti.join('; ');
+}
+
+/** Прямая параметра разбора 1 метода 10: (x² − 3ax + 2a² − a − 1)·lg(x + 1) = 0. */
+export const OPISANIE_M10_R1: Omit<PryamayaParametra19, 'alt'> = {
+  a: [-3, 1.8],
+  masshtab: 2,
+  osobye: [-2, -1, -0.5, 0, 1],
+  podpisi: ['−2', '−1', '−1/2', '0', '1'],
+  polosy: [
+    { imya: 'x = 0', kuski: [VSYA_A], cvet: 'lineA' },
+    { imya: 'x = 2a + 1', kuski: [kA(-1, Infinity, false, false)], cvet: 'lineB' },
+    { imya: 'x = a − 1', kuski: [kA(0, Infinity, false, false)], cvet: 'lineC' },
+  ],
+  schet: { promezhutki: [1, 1, 2, 2, 3, 3], tochki: [1, 1, 1, 2, 2] },
+};
+
+const KORNI_M10_R1: KorenA19[] = [
+  { imya: 'x=0', x: () => 0, verno: () => true },
+  { imya: 'x=2a+1', x: (a) => 2 * a + 1, verno: (a) => 2 * a + 1 > -1 + 1e-12 },
+  { imya: 'x=a-1', x: (a) => a - 1, verno: (a) => a - 1 > -1 + 1e-12 },
+];
+
+/** Прямая параметра разбора 2 метода 10: (x² − (2a + 1)x + a² + a)/(x − 2) = 0 на [0; 3]. */
+export const OPISANIE_M10_R2: Omit<PryamayaParametra19, 'alt'> = {
+  a: [-2, 4],
+  masshtab: 1.5,
+  osobye: [-1, 0, 1, 2, 3],
+  polosy: [
+    { imya: 'x = a', kuski: [kA(0, 2, true, false), kA(2, 3, false, true)], cvet: 'lineA' },
+    {
+      imya: 'x = a + 1',
+      kuski: [kA(-1, 1, true, false), kA(1, 2, false, true)],
+      cvet: 'lineB',
+    },
+  ],
+  schet: { promezhutki: [0, 1, 2, 2, 1, 0], tochki: [1, 2, 1, 1, 1] },
+};
+
+const naOtrezke03 = (x: number) => x >= -1e-12 && x <= 3 + 1e-12 && !blizko(x, 2);
+const KORNI_M10_R2: KorenA19[] = [
+  { imya: 'x=a', x: (a) => a, verno: (a) => naOtrezke03(a) },
+  { imya: 'x=a+1', x: (a) => a + 1, verno: (a) => naOtrezke03(a + 1) },
+];
+
+/** Живой рисунок метода 10 по описанию прямой и корням. */
+function zhivoyParametr(z: {
+  opisanie: Omit<PryamayaParametra19, 'alt'>;
+  korni: KorenA19[];
+  osobye: Osoboe19[];
+  start: number;
+  alt: string;
+}): Zhivoy19 {
+  const { opisanie, korni } = z;
+  return {
+    vid: 'parametr',
+    bukva: 'a',
+    min: opisanie.a[0],
+    max: opisanie.a[1],
+    shag: 0.01,
+    start: z.start,
+    osobye: z.osobye,
+    scena: (a) =>
+      pryamayaParametra({
+        ...opisanie,
+        metka: { a, verny: korni.map((k) => k.verno(a)) },
+        alt: `${z.alt} при a = ${chislo(a)}`,
+      }),
+    resheniy: (a) => godnye(korni, a).length,
+    itog: (a) => itogKorney(korni, a),
+  };
+}
+
 const ZHIVYE: Record<string, Zhivoy19> = {
+  /* Разбор метода 10: прямая параметра, метка a и годные корни на полосах. */
+  'm10-r1': zhivoyParametr({
+    opisanie: OPISANIE_M10_R1,
+    korni: KORNI_M10_R1,
+    osobye: [
+      { a: -2, tex: '-2' },
+      { a: -1, tex: '-1' },
+      { a: -0.5, tex: '-\\frac12' },
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+    ],
+    start: -0.25,
+    alt: 'Прямая параметра уравнения (x² − 3ax + 2a² − a − 1)·lg(x + 1) = 0, метка',
+  }),
+  'm10-r2': zhivoyParametr({
+    opisanie: OPISANIE_M10_R2,
+    korni: KORNI_M10_R2,
+    osobye: [
+      { a: -1, tex: '-1' },
+      { a: 0, tex: '0' },
+      { a: 1, tex: '1' },
+      { a: 2, tex: '2' },
+      { a: 3, tex: '3' },
+    ],
+    start: 0.5,
+    alt: 'Прямая параметра уравнения (x² − (2a + 1)x + a² + a)/(x − 2) = 0 на [0; 3], метка',
+  }),
   /* Разбор метода 9: график y = (a − 1)x² + 2ax + a + 3 и его нули; при a = 1 — прямая. */
   'm09-r1': {
     vid: 'grafik',
