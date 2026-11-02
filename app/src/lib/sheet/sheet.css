@@ -615,6 +615,15 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
    одинакова на всех задачах, и точки читаются одинаково. */
 .sheet-figure { flex: none; margin: 0; }
 .sheet-figure svg { display: block; width: 100%; height: auto; }
+/* Формула KaTeX внутри чертежа (foreignObject): правило выше задевает
+   и svg формулы — знак корня сплющивается, черта пропадает. Внутри
+   формулы — размеры KaTeX (как styles/base.css на сайте). */
+foreignObject .katex svg {
+  width: 100% !important;
+  height: inherit !important;
+  max-width: none !important;
+  max-height: none !important;
+}
 
 .sheet-task--double .sheet-figure { align-self: center; }
 

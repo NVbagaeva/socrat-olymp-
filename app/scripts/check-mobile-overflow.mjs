@@ -146,6 +146,17 @@ function zamer() {
   };
 }
 
+/* Шрифты готовы: document.fonts.ready отвечает и тогда, когда шрифт ещё
+   не начал грузиться (браузер грузит его, только когда текст им набран).
+   Ждём, пока не останется грузящихся шрифтов, — до трёх кругов. */
+async function shriftyGotovy() {
+  for (let krug = 0; krug < 3; krug += 1) {
+    await document.fonts.ready;
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    if (![...document.fonts].some((f) => f.status === 'loading')) return;
+  }
+}
+
 async function main() {
   const args = process.argv.slice(2);
   let jsonOut = null;
@@ -200,14 +211,21 @@ async function main() {
         waitUntil: 'load',
         timeout: 30000 * z.dolgo,
       });
-      /* Старый адрес уводит на новый сам, пока ждём шрифты. */
-      await sroch(
-        page.evaluate(() => document.fonts.ready),
-        15000,
-        'шрифты',
-      );
+      /* Старый адрес уводит на новый сам, пока ждём шрифты. Срок — как
+         у перехода и замера: на тяжёлой странице шрифты встают позже. */
+      await sroch(page.evaluate(shriftyGotovy), 15000 * z.dolgo, 'шрифты');
       await page.waitForTimeout(400);
-      const r = await sroch(page.evaluate(zamer), 15000 * z.dolgo, 'замер');
+      let r = await sroch(page.evaluate(zamer), 15000 * z.dolgo, 'замер');
+      /* Шрифт, который понадобился только после первой раскладки (KaTeX
+         в свёрнутом блоке, ленивая картинка с подписью), ещё грузится: до
+         него текст набран запасным, более широким шрифтом. Прокрутку
+         перемеряем после шрифтов и паузы — в итог идёт только то, что
+         осталось. */
+      if (r.scroll > 0 || r.elementy.length > 0) {
+        await sroch(page.evaluate(shriftyGotovy), 15000 * z.dolgo, 'шрифты');
+        await page.waitForTimeout(1500);
+        r = await sroch(page.evaluate(zamer), 15000 * z.dolgo, 'замер');
+      }
       if (r.scroll > 0 || r.elementy.length > 0)
         itog.push({ put: z.put, shirina: z.shirina, ...r });
     } catch (e) {

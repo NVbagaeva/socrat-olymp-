@@ -14,6 +14,16 @@ import { requireSrc } from '../lib/load-ts.mjs';
 import { blizko, dist, mid, orient, proveritEkran, schetchik, ugol, zerno } from './obshchee.mjs';
 import { PROVERKI as PROVERKI_DOP } from './trenazherDop/index.mjs';
 
+const N = () => requireSrc('lib/zadanie18/opornye/novye');
+/** Площадь многоугольника. */
+const ploshchad = (pts) =>
+  Math.abs(
+    pts.reduce(
+      (s, p, i) => s + p[0] * pts[(i + 1) % pts.length][1] - pts[(i + 1) % pts.length][0] * p[1],
+      0,
+    ),
+  ) / 2;
+
 const S = (...pts) => {
   let s = 0;
   for (let i = 0; i < pts.length; i += 1) {
@@ -250,11 +260,269 @@ const PROVERKI = {
       ['б: S(MBCN) = ответ', blizko(S(M, B, C, N) * k, otv)],
     ];
   },
+  /* ── Типы по новым опорным задачам: точки — сцена опорной задачи ── */
+  'diag-trap': (sc, p, otv) => {
+    const t = N().tochkiDiagTrap(sc.scena18('diag-trap', p).nachalo);
+    const O = t.O;
+    return [
+      [
+        'условие: основания и диагонали',
+        blizko(dist(t.A, t.D), p.a) &&
+          blizko(dist(t.B, t.C), p.b) &&
+          blizko(dist(t.A, t.C), p.d1) &&
+          blizko(dist(t.B, t.D), p.d2) &&
+          parall(t.A, t.D, t.B, t.C),
+      ],
+      ['а: AC ⊥ BD', blizko(ugol(t.A, O, t.B), 90)],
+      ['б: S = ответ', blizko(ploshchad([t.A, t.B, t.C, t.D]), otv)],
+    ];
+  },
+  'kas-ef': (sc, p, otv) => {
+    const t = N().tochkiKasEF(sc.scena18('kas-ef', p).nachalo);
+    return [
+      [
+        'условие: касание в K, AB касается обеих',
+        blizko(dist(t.O1, t.K), p.R1) &&
+          blizko(dist(t.O2, t.K), p.R2) &&
+          blizko(dist(t.O1, t.O2), p.R1 + p.R2) &&
+          blizko(dist(t.O1, t.A), p.R1) &&
+          blizko(ugol(t.O1, t.A, t.B), 90),
+      ],
+      ['а: ∠O₁NO₂ = ∠AKB', blizko(ugol(t.O1, t.N, t.O2), ugol(t.A, t.K, t.B))],
+      ['б: EF = ответ', blizko(dist(t.E, t.F), otv)],
+    ];
+  },
+  kvadraty: (sc, p, otv) => {
+    const t = N().tochkiKvadraty(sc.scena18('kvadraty', p).nachalo);
+    return [
+      [
+        'условие: AC, BC, ∠C = 150°',
+        blizko(dist(t.A, t.C), p.AC) &&
+          blizko(dist(t.B, t.C), p.BC) &&
+          blizko(ugol(t.A, t.C, t.B), 150),
+      ],
+      ['а: CM = DK/2', blizko(dist(t.C, t.M), dist(t.D, t.K) / 2)],
+      ['б: MO₁ = ответ', blizko(dist(t.M, t.O1), otv) && blizko(dist(t.M, t.O2), otv)],
+    ];
+  },
+  'dve-okr': (sc, p, otv) => {
+    const t = N().tochkiDveOkr(sc.scena18('dve-okr', p).nachalo);
+    const s1 = [dist(t.C, t.B), dist(t.B, t.D), dist(t.C, t.D)];
+    const s2 = [dist(t.O1, t.A), dist(t.A, t.O2), dist(t.O1, t.O2)];
+    return [
+      [
+        'условие: R = k·r, AB, ∠DAE = ∠BAC',
+        blizko(t.r2, p.k * t.r1) &&
+          blizko(dist(t.A, t.B), p.AB) &&
+          blizko(ugol(t.D, t.A, t.E), ugol(t.B, t.A, t.C)),
+      ],
+      [
+        'а: △CBD ∼ △O₁AO₂',
+        blizko(s1[0] / s2[0], s1[1] / s2[1]) && blizko(s1[0] / s2[0], s1[2] / s2[2]),
+      ],
+      ['б: AD = ответ', blizko(dist(t.A, t.D), otv)],
+    ];
+  },
+  'cherez-centr': (sc, p, otv) => {
+    const t = N().tochkiCherezCentr(sc.scena18('cherez-centr', p).nachalo);
+    return [
+      [
+        'условие: cos ∠AOC = 1/d, C на дуге AQ без P',
+        blizko(Math.cos((ugol(t.A, t.O, t.C) * Math.PI) / 180), 1 / p.d) &&
+          dist(t.C, t.A) < dist(t.C, t.P),
+      ],
+      ['а: PQ ∥ BC', parall(t.P, t.Q, t.B, t.C)],
+      ['б: KA/QK = ответ', blizko(dist(t.K, t.A) / dist(t.Q, t.K), otv)],
+    ];
+  },
+  'vpis-klm': (sc, p, otv) => {
+    const t = N().tochkiVpisKLM(sc.scena18('vpis-klm', p).nachalo);
+    return [
+      [
+        'условие: KC : CM, ∠K = 60°',
+        blizko(dist(t.K, t.C) / dist(t.C, t.M), p.m / p.n) && blizko(ugol(t.L, t.K, t.M), 60),
+      ],
+      [
+        'а: KC = (KL + KM − LM)/2',
+        blizko(dist(t.K, t.C), (dist(t.K, t.L) + dist(t.K, t.M) - dist(t.L, t.M)) / 2),
+      ],
+      ['б: BL/BM = ответ', blizko(dist(t.B, t.L) / dist(t.B, t.M), otv)],
+    ];
+  },
+  'vys-perp': (sc, p, otv) => {
+    const t = N().tochkiVysPerp(sc.scena18('vys-perp', p).nachalo);
+    return [
+      [
+        'условие: ∠B, остроугольный',
+        blizko(ugol(t.A, t.B, t.C), p.B) && Math.max(ugol(t.B, t.A, t.C), ugol(t.A, t.C, t.B)) < 90,
+      ],
+      ['а: EH ∥ AC', parall(t.E, t.H, t.A, t.C)],
+      ['б: EH/AC = ответ', blizko(dist(t.E, t.H) / dist(t.A, t.C), otv)],
+    ];
+  },
+  'biss-sred': (sc, p, otv) => {
+    const t = N().tochkiBissSred(sc.scena18('biss-sred', p).nachalo);
+    const s1 = [dist(t.B, t.L), dist(t.L, t.C), dist(t.B, t.C)];
+    const s2 = [dist(t.A, t.M), dist(t.M, t.L), dist(t.A, t.L)];
+    return [
+      [
+        'условие: прямой угол C, cos A',
+        blizko(ugol(t.A, t.C, t.B), 90) &&
+          blizko(Math.cos((ugol(t.B, t.A, t.C) * Math.PI) / 180), p.b / Math.hypot(p.a, p.b)),
+      ],
+      [
+        'а: △BLC ∼ △AML',
+        blizko(s1[0] / s2[0], s1[1] / s2[1]) && blizko(s1[0] / s2[0], s1[2] / s2[2]),
+      ],
+      [
+        'б: S_BLC / S_AML = ответ',
+        blizko(ploshchad([t.B, t.L, t.C]) / ploshchad([t.A, t.M, t.L]), otv),
+      ],
+    ];
+  },
+  vnevpis: (sc, p, otv) => {
+    const t = N().tochkiVnevpis(sc.scena18('vnevpis', p).nachalo);
+    return [
+      [
+        'условие: радиусы r₁, r₂, прямой угол C',
+        blizko(Math.min(t.ka.r, t.kb.r), p.r1) &&
+          blizko(Math.max(t.ka.r, t.kb.r), p.r2) &&
+          blizko(ugol(t.A, t.C, t.B), 90),
+      ],
+      ['б: S = ответ', blizko(ploshchad([t.A, t.B, t.C]), otv)],
+    ];
+  },
+  'kvadrat-per': (sc, p, otv) => {
+    const t = N().tochkiKvadratPer(sc.scena18('kvadrat-per', p).nachalo);
+    return [
+      [
+        'условие: сторона, периметр CMN = 2·сторона',
+        blizko(dist(t.A, t.B), p.s) &&
+          blizko(dist(t.C, t.M) + dist(t.C, t.N) + dist(t.M, t.N), 2 * p.s),
+      ],
+      [
+        'а: окружность (A; s) касается MN',
+        blizko(Math.abs(orient(t.M, t.N, t.A)) / dist(t.M, t.N), p.s),
+      ],
+      ['б: ∠MAN = ответ', blizko(ugol(t.M, t.A, t.N), otv)],
+    ];
+  },
+  'ser-vys': (sc, p, otv) => {
+    const t = N().tochkiSerVys(sc.scena18('ser-vys', p).nachalo);
+    return [
+      [
+        'условие: ∠A = 60°, ∠C = 45°, BC = 2√3·k',
+        blizko(ugol(t.B, t.A, t.C), 60) &&
+          blizko(ugol(t.A, t.C, t.B), 45) &&
+          blizko(dist(t.B, t.C), 2 * Math.sqrt(3) * p.k),
+      ],
+      [
+        'а: HC₁ = A₁B₁, C₁B₁ ∥ BC',
+        blizko(dist(t.H, t.C1), dist(t.A1, t.B1)) && parall(t.C1, t.B1, t.B, t.C),
+      ],
+      ['б: A₁H = ответ', blizko(dist(t.A1, t.H), otv)],
+    ];
+  },
+  'kv-gip': (sc, p, otv) => {
+    const t = N().tochkiKvGipOtn(sc.scena18('kv-gip', p).nachalo);
+    return [
+      [
+        'условие: прямой угол C, sin A',
+        blizko(ugol(t.A, t.C, t.B), 90) &&
+          blizko(dist(t.B, t.C) / dist(t.A, t.B), p.a / Math.hypot(p.a, p.b)),
+      ],
+      [
+        'а: центр вписанной окружности на OC',
+        Math.abs(orient(t.O, t.C, t.I)) < 1e-6 * dist(t.O, t.C) ** 2,
+      ],
+      ['б: CM/OM = ответ', blizko(dist(t.C, t.M) / dist(t.O, t.M), otv)],
+    ];
+  },
+  'vpis-lmn': (sc, p, otv) => {
+    const t = N().tochkiVpisLMN(sc.scena18('vpis-lmn', p).nachalo);
+    return [
+      [
+        'условие: KM, ∠LMN = 150°, LM = MN',
+        blizko(dist(t.K, t.M), p.KM) &&
+          blizko(ugol(t.L, t.M, t.N), 150) &&
+          blizko(dist(t.L, t.M), dist(t.M, t.N)),
+      ],
+      ['а: KM·MP = LM²', blizko(dist(t.K, t.M) * dist(t.M, t.P), dist(t.L, t.M) ** 2)],
+      ['б: S = ответ', blizko(ploshchad([t.K, t.L, t.M, t.N]), otv)],
+    ];
+  },
 };
 
 export function proverit() {
   const sc = requireSrc('lib/zadanie18/trenazher/sceny');
   const { TIPY_18 } = requireSrc('content/zadanie18/trenazher');
+  const ekran = requireSrc('lib/skhemy/ekran');
+  const podpisi = requireSrc('lib/skhemy/podpisi');
+  /* Данные условия на чертеже (lib/skhemy, элемент «величина»): на
+     листе (360×250) и на телефоне (343×247) каждая запись в кадре,
+     не задевает линий, окружностей, букв и других записей; числа в
+     записях — только из условия (ответа на чертеже нет). */
+  const proveritVelichiny = (scena, t, p, sch) => {
+    const tekst = Object.values(t.tekst(p)).join(' ').replace(/\{,\}/g, ',');
+    const kadr = scena.postroit(scena.nachalo);
+    const zapisi = kadr.elementy.filter((el) => el.vid === 'velichina');
+    sch.fakt('на чертеже есть данные условия', zapisi.length > 0, t.id);
+    for (const el of zapisi) {
+      const chisla = el.tekst.match(/\d+(,\d+)?/g) ?? [];
+      sch.fakt(
+        'на чертеже только числа условия',
+        chisla.every((c) => new RegExp(`(^|[^\\d,])${c}($|[^\\d,])`).test(tekst)),
+        `${t.id}: ${el.tekst}`,
+      );
+    }
+    for (const [W, H] of [
+      [360, 250],
+      [343, 247],
+    ]) {
+      const sost = { lit: new Set(), shag: null, podpisi: true };
+      const e = ekran.raskladka(
+        kadr,
+        { ugol: 0, otrazhenie: 1 },
+        ekran.ramkaKadra(kadr, { ugol: 0, otrazhenie: 1 }, sost),
+        W,
+        H,
+        sost,
+      );
+      const prep = {
+        otrezki: e.linii.map((l) => [
+          [l.x1, l.y1],
+          [l.x2, l.y2],
+        ]),
+        okruzhnosti: e.okr.map((o) => [[o.cx, o.cy], o.r]),
+        tochki: e.tochki.map((q) => [q.x, q.y]),
+      };
+      const bukvy = e.podpisi.map((q) => {
+        const g = podpisi.gabaritBukvy(
+          q.indeks ? `${q.bukva}_${q.indeks}` : q.bukva,
+          ekran.SK.kegl,
+        );
+        return [q.x - g.hw, q.y - g.hh, q.x + g.hw, q.y + g.hh];
+      });
+      const ramki = e.velichiny.map((v) => {
+        const g = ekran.gabaritVelichiny(v.chasti);
+        return [v.x - g.hw, v.y - g.hh, v.x + g.hw, v.y + g.hh];
+      });
+      ramki.forEach((r, i) => {
+        const v = e.velichiny[i];
+        sch.fakt(
+          'запись на чертеже в кадре',
+          r[0] >= 0 && r[1] >= 0 && r[2] <= W && r[3] <= H,
+          `${t.id} ${W}: ${v.chasti.map((c) => c.t).join('')}`,
+        );
+        const drugie = [...bukvy, ...ramki.filter((_, j) => j !== i)];
+        sch.fakt(
+          'запись на чертеже ничего не задевает',
+          podpisi.kasaniya(r, prep, drugie, null) === 0,
+          `${t.id} ${JSON.stringify(p)} ${W}: ${v.chasti.map((c) => c.t).join('')}`,
+        );
+      });
+    }
+  };
   const { SOBRANNYE } = requireSrc('content/zadanie18/spisok');
   const { bank18, trenazherConfig18, zadachi18 } = requireSrc('lib/zadanie18/trenazher/bank');
   const { otvetVeren18, otkrytTekst18 } = requireSrc('lib/zadanie18/trenazher/otvet');
@@ -295,6 +563,7 @@ export function proverit() {
         t.podskazka(p).every((v) => v.options[v.correct] !== undefined && v.options.length >= 2),
         t.id,
       );
+      proveritVelichiny(scena, t, p, sch);
       for (const lit of [[], ...shagi.map((s) => s.gruppy)].slice(0, 4))
         tesno += proveritEkran(scena, scena.nachalo, rnd, sch, lit);
     }

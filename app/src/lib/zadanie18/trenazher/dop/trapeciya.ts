@@ -5,7 +5,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, ug, vel, velOtr } from '@/lib/skhemy/dsl';
 import { add, foot, intersect, mid, mul, polar, sub } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import { scena } from './obshchee';
@@ -37,22 +37,39 @@ export const TP_RAVNOBOKAYA = scena({
   postroit(t) {
     const { A, B, C, D, H, G } = tochkiRavnobokoy(t);
     const el: Element[] = [
+      /* б) ищет площадь трапеции. */
+      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-abg', [A, B, G], { gruppy: ['proekcii'], cvet: 'a' }),
       mnog('f-dch', [D, C, H], { gruppy: ['proekcii'], cvet: 'a' }),
       mnog('f-ach', [A, C, H], { gruppy: ['pl'], cvet: 'b' }),
-      otr('AB', A, B, { shtrihi: 1 }),
-      otr('BC', B, C, { gruppy: ['ah'], cvet: 'b' }),
-      otr('CD', C, D, { shtrihi: 1 }),
-      otr('DA', D, A),
-      otr('AC', A, C, { gruppy: ['pl'], cvet: 'b' }),
-      otr('CH', C, H, { stil: 'punktir' }),
+      otr('AB', A, B, { rol: 'figure', shtrihi: 1 }),
+      otr('BC', B, C, { rol: 'figure', gruppy: ['ah'], cvet: 'b' }),
+      otr('CD', C, D, { rol: 'figure', shtrihi: 1 }),
+      otr('DA', D, A, { rol: 'figure' }),
+      otr('AC', A, C, { rol: 'aux', gruppy: ['pl'], cvet: 'b' }),
+      otr('CH', C, H, { rol: 'construction', stil: 'punktir' }),
       ug('pH', C, H, D, { pryamoy: true }),
-      otr('BG', B, G, { skrytyy: true, stil: 'punktir', gruppy: ['proekcii'], cvet: 'a' }),
+      otr('BG', B, G, {
+        rol: 'construction',
+        skrytyy: true,
+        stil: 'punktir',
+        gruppy: ['proekcii'],
+        cvet: 'a',
+      }),
       ug('pG', B, G, A, { skrytyy: true, pryamoy: true, gruppy: ['proekcii'], cvet: 'a' }),
-      otr('AG-r', A, G, { skrytyy: true, shtrihi: 2, gruppy: ['proekcii'], cvet: 'c' }),
-      otr('HD-r', H, D, { skrytyy: true, shtrihi: 2, gruppy: ['proekcii'], cvet: 'c' }),
-      otr('GH-r', G, H, { skrytyy: true, gruppy: ['ah'], cvet: 'b' }),
-      otr('AH', A, H, { skrytyy: true, gruppy: ['ah', 'pl'], cvet: 'b' }),
+      otr('AG-r', A, G, { rol: 'aux', skrytyy: true, shtrihi: 2, gruppy: ['proekcii'], cvet: 'c' }),
+      otr('HD-r', H, D, { rol: 'aux', skrytyy: true, shtrihi: 2, gruppy: ['proekcii'], cvet: 'c' }),
+      otr('GH-r', G, H, { rol: 'aux', skrytyy: true, gruppy: ['ah'], cvet: 'b' }),
+      otr('AH', A, H, { rol: 'aux', skrytyy: true, gruppy: ['ah', 'pl'], cvet: 'b' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AC', '10', A, C),
+      velOtr('d-CH', '6', C, H),
+      vel(
+        'd-Sx',
+        'S_ABCD = ?',
+        { vnutri: [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -91,20 +108,24 @@ export const TP_BABOCHKA = scena({
   postroit(t) {
     const { A, B, C, D, O, K, L } = tochkiBabochki(t);
     const el: Element[] = [
+      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'figure' }),
       mnog('f-boc', [B, O, C], { gruppy: ['bab'], cvet: 'a' }),
       mnog('f-doa', [D, O, A], { gruppy: ['bab'], cvet: 'b' }),
       mnog('f-ako', [A, K, O], { gruppy: ['pod1'], cvet: 'b' }),
       mnog('f-abc', [A, B, C], { gruppy: ['pod1'], cvet: 'a' }),
       mnog('f-dlo', [D, L, O], { gruppy: ['pod2'], cvet: 'b' }),
       mnog('f-dcb', [D, C, B], { gruppy: ['pod2'], cvet: 'a' }),
-      otr('AB', A, B),
-      otr('BC', B, C, { gruppy: ['pod1', 'pod2'], cvet: 'a' }),
-      otr('CD', C, D),
-      otr('DA', D, A),
-      otr('AC', A, C),
-      otr('BD', B, D),
-      otr('KO', K, O, { shtrihi: 1, gruppy: ['pod1', 'otv'], cvet: 'b' }),
-      otr('OL', O, L, { shtrihi: 1, gruppy: ['pod2', 'otv'], cvet: 'b' }),
+      otr('AB', A, B, { rol: 'figure' }),
+      otr('BC', B, C, { rol: 'figure', gruppy: ['pod1', 'pod2'], cvet: 'a' }),
+      otr('CD', C, D, { rol: 'figure' }),
+      otr('DA', D, A, { rol: 'figure' }),
+      otr('AC', A, C, { rol: 'aux' }),
+      otr('BD', B, D, { rol: 'aux' }),
+      otr('KO', K, O, { rol: 'aux', shtrihi: 1, gruppy: ['pod1', 'otv'], cvet: 'b' }),
+      otr('OL', O, L, { rol: 'aux', shtrihi: 1, gruppy: ['pod2', 'otv'], cvet: 'b' }),
+      /* Данные условия на чертеже. */
+      velOtr('d-BC', '3', B, C),
+      velOtr('d-AD', '6', A, D),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -145,21 +166,38 @@ export const TP_UGOL_90 = scena({
   postroit(t) {
     const { A, B, C, D, P, M, N } = tochkiUgol90(t);
     const el: Element[] = [
+      /* б) ищет площадь трапеции. */
+      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-apd', [A, P, D], { gruppy: ['p', 'h'], cvet: 'a' }),
-      otr('AB', A, B),
-      otr('BC', B, C, { gruppy: ['med'], cvet: 'b' }),
-      otr('CD', C, D),
-      otr('DA', D, A, { gruppy: ['med'], cvet: 'a' }),
-      otr('BP', B, P, { stil: 'prodolzhenie' }),
-      otr('CP', C, P, { stil: 'prodolzhenie' }),
+      otr('AB', A, B, { rol: 'figure' }),
+      otr('BC', B, C, { rol: 'figure', gruppy: ['med'], cvet: 'b' }),
+      otr('CD', C, D, { rol: 'figure' }),
+      otr('DA', D, A, { rol: 'figure', gruppy: ['med'], cvet: 'a' }),
+      otr('BP', B, P, { rol: 'construction', stil: 'prodolzhenie' }),
+      otr('CP', C, P, { rol: 'construction', stil: 'prodolzhenie' }),
       ug('pP', A, P, D, { pryamoy: true, gruppy: ['p'], cvet: 'b' }),
-      otr('PN', P, N, { stil: 'punktir', gruppy: ['pryamaya', 'med'], cvet: 'c' }),
-      otr('AN-r', A, N, { skrytyy: true, shtrihi: 1, gruppy: ['med'], cvet: 'a' }),
-      otr('ND-r', N, D, { skrytyy: true, shtrihi: 1, gruppy: ['med'], cvet: 'a' }),
-      otr('BM-r', B, M, { skrytyy: true, shtrihi: 2, gruppy: ['med'], cvet: 'b' }),
-      otr('MC-r', M, C, { skrytyy: true, shtrihi: 2, gruppy: ['med'], cvet: 'b' }),
+      otr('PN', P, N, {
+        rol: 'construction',
+        stil: 'punktir',
+        gruppy: ['pryamaya', 'med'],
+        cvet: 'c',
+      }),
+      otr('AN-r', A, N, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['med'], cvet: 'a' }),
+      otr('ND-r', N, D, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['med'], cvet: 'a' }),
+      otr('BM-r', B, M, { rol: 'aux', skrytyy: true, shtrihi: 2, gruppy: ['med'], cvet: 'b' }),
+      otr('MC-r', M, C, { rol: 'aux', skrytyy: true, shtrihi: 2, gruppy: ['med'], cvet: 'b' }),
       ug('uA', B, A, D, { skrytyy: true, gruppy: ['p'], cvet: 'c' }),
       ug('uD', A, D, C, { skrytyy: true, gruppy: ['p'], cvet: 'c', dugi: 2 }),
+      /* Данные условия на чертеже. */
+      velOtr('d-AD', '14', A, D),
+      velOtr('d-BC', '4', B, C),
+      velOtr('d-AB', '6', A, B),
+      vel(
+        'd-Sx',
+        'S_ABCD = ?',
+        { vnutri: [(A[0] + B[0] + M[0] + N[0]) / 4, (A[1] + B[1] + M[1] + N[1]) / 4] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),

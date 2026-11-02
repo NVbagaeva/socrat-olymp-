@@ -18,6 +18,8 @@ import { proverit as mediana } from './mediana.mjs';
 import { proverit as menelay } from './menelay.mjs';
 import { proverit as teoriya } from './teoriya.mjs';
 import { proverit as trenazher } from './trenazher.mjs';
+import { proverit as generator } from './generator.mjs';
+import { proverit as geometriya } from './geometriya.mjs';
 import { proverit as trenazherDop } from './trenazherDop/index.mjs';
 import { proverit as stepenTochki } from './stepenTochki.mjs';
 import { proverit as trapecii } from './trapecii.mjs';
@@ -52,6 +54,8 @@ for (const proverit of [
   teoriya,
   trenazher,
   trenazherDop,
+  generator,
+  geometriya,
 ]) {
   plokho += proverit(N).plokho;
 }

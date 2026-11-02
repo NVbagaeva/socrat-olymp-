@@ -69,7 +69,8 @@
 .skh-okr.is-dim,
 .skh-ugol.is-dim,
 .skh-tochka.is-dim,
-.skh-podpis.is-dim {
+.skh-podpis.is-dim,
+.skh-velichina.is-dim {
   opacity: 0.32;
 }
 
@@ -159,6 +160,42 @@
 .skh-indeks {
   font-family: KaTeX_Main, 'Latin Modern Roman', 'Times New Roman', serif;
   font-size: 12px;
+}
+
+/* Величины — данные условия на чертеже (длины, углы, площади):
+   мельче букв, цифры прямым шрифтом, латинские буквы курсивом. */
+.skh-velichina {
+  fill: var(--skh-ink);
+  font-size: 15px;
+  paint-order: stroke;
+  stroke: var(--skh-bg);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  transition:
+    fill var(--dur-switch) var(--ease),
+    opacity var(--dur-switch) var(--ease);
+}
+.skh-velichina.is-lit {
+  fill: var(--skh-cvet);
+}
+/* Знак корня — путь (lib/risunki/koren.js): черта над всем подкоренным. */
+.skh-koren {
+  fill: none;
+  stroke: var(--skh-ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.skh-koren.is-lit {
+  stroke: var(--skh-cvet);
+}
+.skh-koren.is-dim {
+  opacity: 0.32;
+}
+.skh-kursiv {
+  font-style: italic;
+}
+.skh-indeks-vel {
+  font-size: 70%;
 }
 
 /* ── Ручки перетаскивания ── */

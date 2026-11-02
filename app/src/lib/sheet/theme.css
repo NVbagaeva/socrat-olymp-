@@ -122,6 +122,9 @@
      (lib/sheet/figureRules.js, проверяет test:print-pages). */
   --graph-grid: #a9b9cf;
   --graph-accent: #e07a2f;
+  --chertezh-vershina: #1f5fd0;
+  --chertezh-velichina: #e07a2f;
+  --chertezh-velichina-2: #a85f06;
   --graph-aux-axis: #e07a2f;
   --graph-asymptote: #8a8f9c;
   --solid-edge: #1f5fd0;
@@ -216,6 +219,10 @@
   --graph-axis: #000000;
   --graph-grid: #b9b9b9;
   --graph-accent: #000000;
+  /* Тема чертежей в ч/б: вершины — чёрный полужирный, величины — чёрный. */
+  --chertezh-vershina: #000000;
+  --chertezh-velichina: #000000;
+  --chertezh-velichina-2: #000000;
   /* Вспомогательные оси разбора — серым пунктиром: чёрные слились бы
      с основными осями. */
   --graph-aux-axis: #8a8a8a;
@@ -314,6 +321,10 @@
   --graph-axis: #000000;
   --graph-grid: #b9b9b9;
   --graph-accent: #000000;
+  /* Тема чертежей в ч/б: вершины — чёрный полужирный, величины — чёрный. */
+  --chertezh-vershina: #000000;
+  --chertezh-velichina: #000000;
+  --chertezh-velichina-2: #000000;
   --graph-aux-axis: #8a8a8a;
   --graph-asymptote: #6b6b6b;
   --solid-edge: #000000;
@@ -358,6 +369,9 @@
   --graph-axis: #101728;
   --graph-grid: #a9b9cf;
   --graph-accent: #e07a2f;
+  --chertezh-vershina: #1f5fd0;
+  --chertezh-velichina: #e07a2f;
+  --chertezh-velichina-2: #a85f06;
   --graph-aux-axis: #e07a2f;
   --graph-asymptote: #8a8f9c;
   --solid-edge: #1f5fd0;
@@ -398,4 +412,24 @@
 [data-sheet-theme='print'] .graph-strict .graph-curve--lineB,
 [data-sheet-theme='strict']:not([data-sheet-chertezhi='color']) .graph-strict .graph-curve--lineB {
   stroke-dasharray: var(--graph-curve-b-dash, 11 7);
+}
+
+/* Чёрно-белые чертежи геометрии — без заливок вообще: ни штриховки
+   областей и секторов углов (№1), ни закрашенных граней и сечений (№3),
+   ни площадей (№18 — версия темы pechat, lib/skhemy/tema.ts). Углы —
+   только дугами, равенства — засечками, данная и искомая площадь
+   различаются подписью: «S = 18» и «S = ?». */
+[data-sheet-theme='print'] svg[data-engine='planimetriya'] .pl-sektor,
+[data-sheet-theme='print'] svg[data-engine='planimetriya'] path[fill^='url(#plh-'],
+[data-sheet-theme='print'] svg[data-engine='chertezh3'] polygon[fill-opacity],
+[data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  svg[data-engine='planimetriya']
+  .pl-sektor,
+[data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  svg[data-engine='planimetriya']
+  path[fill^='url(#plh-'],
+[data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  svg[data-engine='chertezh3']
+  polygon[fill-opacity] {
+  display: none;
 }

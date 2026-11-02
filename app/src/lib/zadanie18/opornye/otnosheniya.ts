@@ -4,7 +4,7 @@
  * content/zadanie18/opornye/otnosheniya.ts.
  */
 
-import { mnog, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, ug, vel } from '@/lib/skhemy/dsl';
 import { add, chisloTeX, dist, intersect, mid, sub, unit } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import { delit, goditsyaTreugolnik, scena, treugolnikNaBC, vPromezhutke } from './obshchee';
@@ -32,6 +32,14 @@ export const OP_MENELAY = scena({
   postroit(t) {
     const { A, B, C, M, K, N } = tochkiMenelaya(t);
     const el: Element[] = [
+      /* б) ищет площадь: искомая фигура и «S = ?». */
+      mnog('isk', [K, M, C, N], { skrytyy: false, rol: 'region-sought' }),
+      vel(
+        'd-S',
+        'S_KMCN = ?',
+        { vnutri: [(K[0] + M[0] + C[0] + N[0]) / 4, (K[1] + M[1] + C[1] + N[1]) / 4] },
+        { rol: 'region-sought' },
+      ),
       mnog('f-amc', [A, M, C], { gruppy: ['men', 'amc'], cvet: 'a' }),
       mnog('f-akn', [A, K, N], { gruppy: ['akn'], cvet: 'b' }),
       mnog('f-kmcn', [K, M, C, N], { gruppy: ['itog'], cvet: 'c' }),
@@ -92,6 +100,14 @@ export const OP_BISS_MED = scena({
   postroit(t) {
     const { A, B, C, M, L, P } = tochkiBissMed(t);
     const el: Element[] = [
+      /* б) ищет площадь: искомая фигура и «S = ?». */
+      mnog('isk', [A, B, P], { skrytyy: false, rol: 'region-sought' }),
+      vel(
+        'd-S',
+        'S_ABP = ?',
+        { vnutri: [(A[0] + B[0] + P[0]) / 3, (A[1] + B[1] + P[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       mnog('f-abm', [A, B, M], { gruppy: ['bis', 'abm'], cvet: 'a' }),
       mnog('f-abp', [A, B, P], { gruppy: ['abp'], cvet: 'b' }),
       otr('AB', A, B, { gruppy: ['bis'], cvet: 'a' }),

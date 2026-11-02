@@ -7,8 +7,9 @@
  * (lib/kartochki/podgotovka). Ручек перетаскивания и анимации нет.
  */
 
-import { BUKVY } from '../risunki/shrifty.js';
+import { BUKVY, CHISLA } from '../risunki/shrifty.js';
 import { ramkaKadra, raskladka, rezhimKadra, type Sostoyanie } from './ekran';
+import { cssTemy, klassTemy, type VersiyaTemy } from './tema';
 import type { Tochki, Vid, ZhivayaSkhema } from './tipy';
 
 export interface OpciiSvg {
@@ -16,7 +17,56 @@ export interface OpciiSvg {
   H: number;
   /** Подпись для чтения с экрана. */
   opisanie: string;
+  /**
+   * Версия темы чертежа (lib/skhemy/tema.ts) — у шаблонов с ролями:
+   * cvet — фирменные цвета (по умолчанию), pechat — монохромная для печати.
+   */
+  tema?: VersiyaTemy;
+  /**
+   * Оформление внутри самого SVG, без skhemy.css: для листов печати
+   * (lib/sheet) — там стили страницы схем могут быть не подключены,
+   * а без них линии не видны, а круг заливается чёрным.
+   */
+  samodostatochnyy?: boolean;
 }
+
+/* Оформление skhemy.css для неподвижного чертежа — те же толщины,
+   цвета — значения токенов (линии --grey-900, a --blue-600,
+   b --terracotta, c --teal-700). Селекторы — только внутри .skh-sam.
+   Индекс — 70 % буквы (те же 12 px): лист печати подбирает ширину
+   чертежа по самому мелкому кеглю в px (lib/sheet/figureRules.js),
+   мерилом должна быть буква, а не индекс. */
+const STIL_SAM = [
+  '.skh-sam{--i:#101728;--k:#1f5fd0}',
+  '.skh-sam .skh-c-a{--k:#1f5fd0}.skh-sam .skh-c-b{--k:#e07a2f}.skh-sam .skh-c-c{--k:#0b6f64}',
+  '.skh-sam .skh-liniya line,.skh-sam .skh-shtrih{stroke:var(--i);stroke-width:1.75;stroke-linecap:round;fill:none}',
+  '.skh-sam .skh-shtrih{stroke-width:1.4}',
+  '.skh-sam .skh-punktir line{stroke-dasharray:5 4;stroke-width:1.4}',
+  '.skh-sam .skh-prodolzhenie line{stroke-dasharray:2 4;stroke-width:1.4}',
+  '.skh-sam .skh-liniya.is-lit line,.skh-sam .skh-liniya.is-lit .skh-shtrih{stroke:var(--k);stroke-width:2.4}',
+  '.skh-sam .is-dim{opacity:.32}',
+  '.skh-sam .skh-okr{fill:none;stroke:var(--i);stroke-width:1.5}',
+  '.skh-sam .skh-okr.skh-punktir{stroke-dasharray:6 5}',
+  '.skh-sam .skh-okr.is-lit{stroke:var(--k);stroke-width:1.75}',
+  '.skh-sam .skh-mnog{fill:var(--k);fill-opacity:.14;stroke:none}',
+  '.skh-sam .skh-sektor{fill:var(--k);fill-opacity:.18;stroke:none}',
+  '.skh-sam .skh-ugol{fill:none;stroke:var(--i);stroke-width:1.25;stroke-linecap:round}',
+  '.skh-sam .skh-ugol.is-lit{stroke:var(--k);stroke-width:1.75}',
+  '.skh-sam .skh-tochka{fill:var(--i);stroke:#fff;stroke-width:1.2}',
+  '.skh-sam .skh-tochka.is-lit{fill:var(--k)}',
+  '.skh-sam .skh-vynoska{fill:none;stroke:var(--i);stroke-width:.9;stroke-linecap:round;opacity:.6}',
+  '.skh-sam .skh-podpis{fill:var(--i);font-size:17px;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
+  '.skh-sam .skh-podpis.is-lit{fill:var(--k)}',
+  '.skh-sam .skh-velichina{fill:var(--i);font-size:15px;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
+  '.skh-sam .skh-velichina.is-lit{fill:var(--k)}',
+  '.skh-sam .skh-koren{fill:none;stroke:var(--i);stroke-linecap:round;stroke-linejoin:round}',
+  '.skh-sam .skh-koren.is-lit{stroke:var(--k)}',
+  '.skh-sam .skh-kursiv{font-style:italic}',
+  '.skh-sam .skh-indeks-vel{font-size:70%}',
+  ".skh-sam .skh-indeks{font-family:KaTeX_Main,'Latin Modern Roman','Times New Roman',serif;font-size:70%}",
+].join('');
+
+const f2 = (x: number) => Math.round(x * 100) / 100;
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -29,29 +79,39 @@ interface Metki {
   lit: boolean;
   dim: boolean;
   cvet: string | null;
+  rol: string | null;
 }
 
-const metki = (m: Metki) => [m.lit && 'is-lit', m.dim && 'is-dim', m.cvet && `skh-c-${m.cvet}`];
+const metki = (m: Metki) => [
+  m.lit && 'is-lit',
+  m.dim && 'is-dim',
+  m.cvet && `skh-c-${m.cvet}`,
+  m.rol && `skh-r-${m.rol}`,
+];
 
 export function svgSkhemy(
   skhema: ZhivayaSkhema,
   t: Tochki,
   vid: Vid,
   sost: Sostoyanie,
-  { W, H, opisanie }: OpciiSvg,
+  { W, H, opisanie, samodostatochnyy = false, tema = 'cvet' }: OpciiSvg,
 ): string {
   const kadr = skhema.postroit(t, rezhimKadra(skhema, sost));
   const e = raskladka(kadr, vid, ramkaKadra(kadr, vid, sost), W, H, sost);
   const out: string[] = [];
   out.push(
-    `<svg class="skh__svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(opisanie)}">`,
+    `<svg class="${cls('skh__svg', samodostatochnyy && 'skh-sam', e.tema && klassTemy(tema))}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(opisanie)}">`,
   );
+  if (samodostatochnyy) out.push(`<style>${STIL_SAM}</style>`);
+  /* Тема — после оформления чертежа: роли сильнее общих правил. */
+  if (e.tema) out.push(`<style>${cssTemy()}</style>`);
   out.push('<g class="skh__mnog">');
-  e.mnog.forEach((m) =>
+  e.mnog.forEach((m) => {
     out.push(
-      `<polygon class="${cls('skh-mnog', m.cvet && `skh-c-${m.cvet}`)}" points="${m.points}"/>`,
-    ),
-  );
+      `<polygon class="${cls('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}" points="${m.points}"/>`,
+    );
+    if (m.kontur !== '') out.push(`<path class="skh-iskomaya" d="${m.kontur}"/>`);
+  });
   out.push('</g><g class="skh__okr">');
   e.okr.forEach((o) =>
     out.push(
@@ -66,7 +126,9 @@ export function svgSkhemy(
   e.ugly
     .filter((u) => u.sektor !== '')
     .forEach((u) =>
-      out.push(`<path class="${cls('skh-sektor', u.cvet && `skh-c-${u.cvet}`)}" d="${u.sektor}"/>`),
+      out.push(
+        `<path class="${cls('skh-sektor', u.cvet && `skh-c-${u.cvet}`, u.rol && `skh-r-${u.rol}`)}" d="${u.sektor}"/>`,
+      ),
     );
   out.push('</g><g class="skh__linii">');
   e.linii.forEach((l) => {
@@ -83,7 +145,9 @@ export function svgSkhemy(
   );
   out.push('</g><g class="skh__tochki">');
   e.tochki.forEach((p) =>
-    out.push(`<circle class="${cls('skh-tochka', ...metki(p))}" cx="${p.x}" cy="${p.y}" r="2.6"/>`),
+    out.push(
+      `<circle class="${cls('skh-tochka', ...metki(p))}" cx="${p.x}" cy="${p.y}" r="${p.r}"/>`,
+    ),
   );
   out.push('</g><g class="skh__vynoski">');
   e.podpisi
@@ -99,6 +163,25 @@ export function svgSkhemy(
       p.indeks === '' ? '' : `<tspan class="skh-indeks" dy="4">${esc(p.indeks)}</tspan>`;
     out.push(
       `<text class="${cls('skh-podpis', ...metki(p))}" x="${p.x}" y="${p.y}">${esc(p.bukva)}${indeks}</text>`,
+    );
+  });
+  out.push(`</g><g class="skh__velichiny" style="font-family:${esc(CHISLA)}">`);
+  e.velichiny.forEach((v) => {
+    const chasti = v.chasti
+      .map((c) => {
+        const klass = cls(c.kursiv && 'skh-kursiv', c.indeks && 'skh-indeks-vel');
+        const shrift = c.kursiv ? ` style="font-family:${esc(BUKVY)}"` : '';
+        /* Подкоренное — заданной ширины: черта знака ровно над ним. */
+        const shirina = c.koren ? ` textLength="${f2(c.w)}" lengthAdjust="spacingAndGlyphs"` : '';
+        const y = c.indeks ? v.base + 4 : v.base;
+        return `<tspan${klass === '' ? '' : ` class="${klass}"`}${shrift} x="${f2(v.levo + c.dx)}" y="${f2(y)}"${shirina}>${esc(c.t)}</tspan>`;
+      })
+      .join('');
+    out.push(`<text class="${cls('skh-velichina', ...metki(v))}">${chasti}</text>`);
+    v.korni.forEach((d) =>
+      out.push(
+        `<path class="${cls('skh-koren', ...metki(v))}" d="${d}" style="stroke-width:${v.tolshchinaKornya}px"/>`,
+      ),
     );
   });
   out.push('</g></svg>');
