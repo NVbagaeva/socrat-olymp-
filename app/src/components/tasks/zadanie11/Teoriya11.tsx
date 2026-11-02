@@ -10,6 +10,7 @@ import { PROGRESS_11 } from '@/content/zadanie11';
 import { katex } from '@/lib/graph/katex';
 import { kodNaSayte } from '@/lib/zadanie11/taxonomy';
 import { SUBTYPES } from '@/lib/zadanie11/prototypes';
+import { YAKOR_11, type ChastRazdela11 } from '@/lib/zadanie11/teoriya-yakorya';
 import type { LifehackId } from '@/lib/zadanie11/types';
 import { IkonkaRazdela, MiniKartinka, Piktogramma, tsvetRazdela, Zvezdy } from './Piktogrammy';
 import { Tablitsa11 } from './Tablitsa11';
@@ -23,7 +24,12 @@ function Krupno({ tex, className }: { tex: string; className?: string }) {
 function KartaLayfhak({ id, polnyy }: { id: LifehackId; polnyy: boolean }) {
   const l = LAYFHAKI[id];
   return (
-    <section className="z11-card z11-card--layfhak" id={`layfhak-${id}`}>
+    /* Якорь — только у полной карточки (раздел «Лайфхаки»): в разделах
+       задач тот же лайфхак повторяется, а id на странице один. */
+    <section
+      className="z11-card z11-card--layfhak"
+      {...(polnyy ? { id: YAKOR_11.layfhak(id) } : {})}
+    >
       <h4 className="z11-card__title">
         <Piktogramma name="bulb" className="z11-card__icon" />
         {l.title}
@@ -78,13 +84,17 @@ function KartaLayfhak({ id, polnyy }: { id: LifehackId; polnyy: boolean }) {
   );
 }
 
-function KartaLovushka({ id }: { id: string }) {
+/** `yakor` — ставить id (раздел «Ловушки»: там собраны все, id на странице один). */
+function KartaLovushka({ id, yakor = false }: { id: string; yakor?: boolean }) {
   const l = LOVUSHKI[id];
   if (!l) {
     return null;
   }
   return (
-    <section className="z11-card z11-card--lovushka">
+    <section
+      className="z11-card z11-card--lovushka"
+      {...(yakor ? { id: YAKOR_11.lovushka(id) } : {})}
+    >
       <h4 className="z11-card__title">
         <Piktogramma name="alert" className="z11-card__icon" />
         {l.title}
@@ -103,14 +113,15 @@ function KartaLovushka({ id }: { id: string }) {
 export function podpunkty(r: RazdelTeorii11): { id: string; title: string }[] {
   const out: { id: string; title: string }[] = [];
   for (const c of r.obshchaya ?? []) out.push({ id: YAKOR_EDINIC(c), title: chastEdinic(c).title });
-  if (r.vvedenie) out.push({ id: `${r.id}-opredelenie`, title: 'Определение' });
-  if (r.formula) out.push({ id: `${r.id}-formula`, title: 'Главная формула' });
-  if (r.tablitsa || r.paraTablits) out.push({ id: `${r.id}-tablitsa`, title: 'Таблица' });
+  const Y = (chast: ChastRazdela11) => YAKOR_11.chast(r.id, chast);
+  if (r.vvedenie) out.push({ id: Y('opredelenie'), title: 'Определение' });
+  if (r.formula) out.push({ id: Y('formula'), title: 'Главная формула' });
+  if (r.tablitsa || r.paraTablits) out.push({ id: Y('tablitsa'), title: 'Таблица' });
   if (r.zapomnit || r.layfhaki.length > 0) {
-    out.push({ id: `${r.id}-layfhaki`, title: 'Лайфхаки' });
+    out.push({ id: Y('layfhaki'), title: 'Лайфхаки' });
   }
-  if (r.lovushki.length > 0) out.push({ id: `${r.id}-lovushki`, title: 'Ловушки' });
-  if (r.section) out.push({ id: `${r.id}-tipy`, title: 'Типы задач' });
+  if (r.lovushki.length > 0) out.push({ id: Y('lovushki'), title: 'Ловушки' });
+  if (r.section) out.push({ id: Y('tipy'), title: 'Типы задач' });
   return out;
 }
 
@@ -131,7 +142,7 @@ function FormulaSoSledstviyami({ r }: { r: RazdelTeorii11 }) {
     return null;
   }
   return (
-    <section className="z11-card z11-glavnaya" id={`${r.id}-formula`}>
+    <section className="z11-card z11-glavnaya" id={YAKOR_11.chast(r.id, 'formula')}>
       <h4 className="z11-blok-title">Главная формула</h4>
       <div className="z11-glavnaya__body">
         <div className="z11-glavnaya__formula">
@@ -223,7 +234,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       {r.obshchaya ? <EdinicyStepeni chasti={r.obshchaya} /> : null}
 
       {r.vvedenie ? (
-        <section className="z11-card z11-vved" id={`${r.id}-opredelenie`}>
+        <section className="z11-card z11-vved" id={YAKOR_11.chast(r.id, 'opredelenie')}>
           <h4 className="z11-blok-title">{r.vvedenie.title}</h4>
           <p className="z11-vved__opredelenie">
             <Tex text={r.vvedenie.opredelenie} />
@@ -249,7 +260,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
         <div className="z11-teor__formula-ryad">
           <FormulaSoSledstviyami r={r} />
           {r.zapomnit ? (
-            <div id={`${r.id}-layfhaki`}>
+            <div id={YAKOR_11.chast(r.id, 'layfhaki')}>
               <Zapomnit z={r.zapomnit} />
             </div>
           ) : null}
@@ -257,7 +268,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       ) : null}
 
       {r.paraTablits ? (
-        <div className="z11-teor__para" id={`${r.id}-tablitsa`}>
+        <div className="z11-teor__para" id={YAKOR_11.chast(r.id, 'tablitsa')}>
           {r.paraTablits.map((pt) => (
             <section className="z11-card" key={pt.title}>
               <h4 className="z11-card__title">
@@ -283,7 +294,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
           }
         >
           {r.formula && !r.formula.sledstviya ? (
-            <section className="z11-card" id={`${r.id}-formula`}>
+            <section className="z11-card" id={YAKOR_11.chast(r.id, 'formula')}>
               <h4 className="z11-card__title">
                 <Piktogramma name="book" className="z11-card__icon" />
                 Главная формула
@@ -295,7 +306,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
             </section>
           ) : null}
           {r.tablitsa ? (
-            <section className="z11-card" id={`${r.id}-tablitsa`}>
+            <section className="z11-card" id={YAKOR_11.chast(r.id, 'tablitsa')}>
               <h4 className="z11-card__title">
                 <Piktogramma name="table" className="z11-card__icon" />
                 {r.tablitsa.title}
@@ -326,7 +337,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       ) : null}
 
       {r.idei.length > 0 ? (
-        <section className="z11-card z11-card--idei">
+        <section className="z11-card z11-card--idei" id={YAKOR_11.chast(r.id, 'glavnoe')}>
           <h4 className="z11-card__title">
             <Piktogramma name="flag" className="z11-card__icon" />
             Главное
@@ -344,7 +355,11 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       {r.kartochki ? (
         <div className="z11-teor__grid">
           {r.kartochki.map((k) => (
-            <section className="z11-card" key={k.title}>
+            <section
+              className="z11-card"
+              key={k.title}
+              {...(k.yakor === undefined ? {} : { id: YAKOR_11.kartochka(k.yakor) })}
+            >
               <h4 className="z11-card__title">{k.title}</h4>
               <p className="z11-card__text">
                 <Tex text={k.text} />
@@ -358,7 +373,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       {r.layfhaki.length > 0 ? (
         <div
           className={polnyy ? 'z11-teor__stack' : 'z11-teor__grid'}
-          id={r.zapomnit ? undefined : `${r.id}-layfhaki`}
+          id={r.zapomnit ? undefined : YAKOR_11.chast(r.id, 'layfhaki')}
         >
           {r.layfhaki.map((id) => (
             <KartaLayfhak id={id} polnyy={polnyy} key={id} />
@@ -367,15 +382,19 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
       ) : null}
 
       {r.lovushki.length > 0 ? (
-        <div className="z11-teor__grid" id={`${r.id}-lovushki`}>
+        <div className="z11-teor__grid" id={YAKOR_11.chast(r.id, 'lovushki')}>
           {r.lovushki.map((id) => (
-            <KartaLovushka id={id} key={id} />
+            <KartaLovushka id={id} yakor={r.id === 'lovushki'} key={id} />
           ))}
         </div>
       ) : null}
 
       {tipy.length > 0 ? (
-        <section className="z11-tipy" aria-label="Типы задач этого раздела" id={`${r.id}-tipy`}>
+        <section
+          className="z11-tipy"
+          aria-label="Типы задач этого раздела"
+          id={YAKOR_11.chast(r.id, 'tipy')}
+        >
           <h4 className="z11-tipy__title">Типы задач этого раздела</h4>
           <ul className="z11-tipy__list">
             {tipy.map((st) => (

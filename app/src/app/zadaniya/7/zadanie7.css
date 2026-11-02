@@ -848,3 +848,17 @@
     padding: var(--space-4);
   }
 }
+
+/* Рамка теории — якорь «Повторить теорию» из карточек по теории
+   (lib/zadanie7/teoriya-yakorya.ts): встаёт под липкую ленту. На узком
+   экране к ней добавляется полоса «Содержание» — и карточка теории
+   (#k-…) тоже не должна под ней прятаться. */
+.vteor [id^='t7-'] {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+@media (max-width: 1023.98px) {
+  .vteor [id^='t7-'],
+  .vteor [id^='k-'] {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+}

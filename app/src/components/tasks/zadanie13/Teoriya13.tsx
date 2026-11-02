@@ -15,6 +15,7 @@ import { generate } from '@/lib/zadanie13/generate';
 import { kletkiUsloviya, otvetText } from '@/lib/zadanie13/html';
 import { reshenieHtml } from '@/lib/zadanie13/reshenieHtml';
 import { TABLE_HEAD } from '@/lib/zadanie13/tablica';
+import { YAKOR_13 } from '@/lib/zadanie13/teoriya-yakorya';
 import { DveShemy, LesenkaAnn, LesenkaDif } from './Risunki13';
 
 /** Формула крупно (display), набранная на сервере. */
@@ -171,10 +172,12 @@ function Risunok({ risunok }: { risunok: 'dve-shemy' | 'lesenka-dif' | 'lesenka-
 }
 
 function BlokView({ b }: { b: Blok }) {
+  /* Якорь «Повторить теорию» из карточек по теории (#t13-…). */
+  const id = b.yakor === undefined ? {} : { id: YAKOR_13.blok(b.yakor) };
   switch (b.vid) {
     case 'kartochka':
       return (
-        <section className={`z13-card z13-card--${b.rol}`}>
+        <section {...id} className={`z13-card z13-card--${b.rol}`}>
           <header className="z13-card__head">
             <span className="z13-card__yarlyk">{ROL_YARLYK[b.rol]}</span>
             <h4 className="z13-card__title">
@@ -206,7 +209,7 @@ function BlokView({ b }: { b: Blok }) {
       );
     case 'tablitsa':
       return (
-        <section className="z13-blok">
+        <section {...id} className="z13-blok">
           <h4 className="z13-blok__title">
             <Tex text={b.title} />
           </h4>
@@ -215,7 +218,7 @@ function BlokView({ b }: { b: Blok }) {
       );
     case 'proporciya':
       return (
-        <section className="z13-blok z13-proporciya">
+        <section {...id} className="z13-blok z13-proporciya">
           <h4 className="z13-blok__title">{b.title}</h4>
           <div className="z13-proporciya__zapis">
             {b.stroki.map(([l, r]) => (
@@ -231,7 +234,7 @@ function BlokView({ b }: { b: Blok }) {
       );
     case 'risunok':
       return (
-        <figure className="z13-blok z13-risunok">
+        <figure {...id} className="z13-blok z13-risunok">
           <h4 className="z13-blok__title">{b.title}</h4>
           <Risunok risunok={b.risunok} />
           <figcaption>
@@ -243,7 +246,7 @@ function BlokView({ b }: { b: Blok }) {
       return <Razbor title={b.title} prototypeId={b.prototypeId} seed={b.seed} />;
     case 'priznaki':
       return (
-        <section className="z13-blok">
+        <section {...id} className="z13-blok">
           <h4 className="z13-blok__title">{b.title}</h4>
           <ul className="z13-priznaki">
             {b.stroki.map((s) => (
@@ -261,7 +264,7 @@ function BlokView({ b }: { b: Blok }) {
       );
     case 'opredeli':
       return (
-        <section className="z13-blok">
+        <section {...id} className="z13-blok">
           <h4 className="z13-blok__title">{b.title}</h4>
           <ol className="z13-opredeli">
             {b.zadachi.map((z) => (
@@ -281,15 +284,17 @@ function BlokView({ b }: { b: Blok }) {
       );
     case 'delimost':
       return (
-        <Details title="Признаки делимости" className="z13-primer z13-delimost">
-          <ul>
-            {DELIMOST.map((d) => (
-              <li key={d.na}>
-                <b>На {d.na}:</b> {d.pravilo}
-              </li>
-            ))}
-          </ul>
-        </Details>
+        <div {...id}>
+          <Details title="Признаки делимости" className="z13-primer z13-delimost">
+            <ul>
+              {DELIMOST.map((d) => (
+                <li key={d.na}>
+                  <b>На {d.na}:</b> {d.pravilo}
+                </li>
+              ))}
+            </ul>
+          </Details>
+        </div>
       );
   }
 }

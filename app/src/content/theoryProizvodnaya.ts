@@ -15,6 +15,7 @@
  */
 
 import type { StsenaId } from '@/lib/proizvodnaya/stseny';
+import type { Blok9 } from '@/lib/proizvodnaya/teoriya-yakorya';
 import { PONYATIE_9 } from './theoryPonyatie9';
 import type { Gruppa } from '@/lib/proizvodnaya/types';
 
@@ -30,6 +31,8 @@ export interface PText {
 }
 
 export interface PMainFormula {
+  /** Якорь блока во вкладке «Теория» (#t9-…): сюда ведут карточки по теории. */
+  yakor?: Blok9;
   type: 'main-formula';
   chip: string;
   formula: string;
@@ -46,17 +49,23 @@ export interface PStep {
 }
 
 export interface PSteps {
+  /** Якорь блока во вкладке «Теория» (#t9-…): сюда ведут карточки по теории. */
+  yakor?: Blok9;
   type: 'steps';
   items: PStep[];
 }
 
 export interface PRemember {
+  /** Якорь блока во вкладке «Теория» (#t9-…): сюда ведут карточки по теории. */
+  yakor?: Blok9;
   type: 'remember';
   title?: string;
   paras: string[];
 }
 
 export interface PMemo {
+  /** Якорь блока во вкладке «Теория» (#t9-…): сюда ведут карточки по теории. */
+  yakor?: Blok9;
   type: 'memo';
   items: string[];
 }
@@ -119,6 +128,8 @@ export interface PSsylka {
 
 /** Таблица «вопрос — где смотреть». Заголовки и ячейки — со строками $…$. */
 export interface PTable {
+  /** Якорь блока во вкладке «Теория» (#t9-…): сюда ведут карточки по теории. */
+  yakor?: Blok9;
   type: 'table';
   head: string[];
   rows: string[][];
@@ -167,6 +178,7 @@ const geometricheskiy: RazdelTeorii9 = {
     },
     {
       type: 'main-formula',
+      yakor: 'glavnaya',
       chip: 'Главная формула',
       formula: `f'(x_0)=k=${TG}\\,\\alpha`,
       note: '$k$ — угловой коэффициент касательной, $\\alpha$ — угол между касательной и положительным направлением оси $Ox$.',
@@ -185,6 +197,7 @@ const geometricheskiy: RazdelTeorii9 = {
         },
         {
           type: 'steps',
+          yakor: 'treugolnik',
           items: [
             {
               no: '1',
@@ -267,6 +280,7 @@ const geometricheskiy: RazdelTeorii9 = {
         },
         {
           type: 'main-formula',
+          yakor: 'tupoy',
           chip: 'Тупой угол',
           formula: `${TG}\\,\\alpha=-${TG}(180^\\circ-\\alpha)=-\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}`,
           note: 'Катеты считаются положительными длинами, знак «минус» ставится из-за того, что прямая убывает.',
@@ -307,6 +321,7 @@ const geometricheskiy: RazdelTeorii9 = {
         },
         {
           type: 'remember',
+          yakor: 'znak-chislo',
           paras: [
             'Сначала определите **знак** — по направлению прямой, потом **число** — по катетам. Катеты всегда положительные, а минус ставится отдельно.',
             'Катеты не путать: вертикальный катет — в числителе, горизонтальный — в знаменателе.',
@@ -346,6 +361,7 @@ const znakIMonotonnost: RazdelTeorii9 = {
     },
     {
       type: 'main-formula',
+      yakor: 'znak',
       chip: 'Знак и поведение',
       formula:
         "\\begin{aligned} f'(x)>0&\\ \\Rightarrow\\ f\\ \\nearrow\\\\ f'(x)<0&\\ \\Rightarrow\\ f\\ \\searrow \\end{aligned}",
@@ -386,6 +402,7 @@ const znakIMonotonnost: RazdelTeorii9 = {
         },
         {
           type: 'table',
+          yakor: 'tablica',
           head: ['Спрашивают', 'На графике $f$ смотрим', "На графике $f'$ смотрим"],
           rows: [
             ['$f$ возрастает', 'график идёт вверх', "график $f'$ выше оси $Ox$"],
@@ -403,6 +420,7 @@ const znakIMonotonnost: RazdelTeorii9 = {
         },
         {
           type: 'remember',
+          yakor: 'vyshe-osi',
           title: 'Запомни',
           paras: [
             "Если нарисован график $f'$, то «выше оси» — это **не** «график растёт». Выше оси означает $f'>0$, то есть **функция $f$** растёт. Сам график $f'$ при этом может идти и вниз.",
@@ -449,6 +467,7 @@ const ekstremumy: RazdelTeorii9 = {
     },
     {
       type: 'main-formula',
+      yakor: 'max-min',
       chip: 'Максимум и минимум',
       formula:
         '\\begin{aligned} +\\to-&\\ \\Rightarrow\\ \\max\\\\ -\\to+&\\ \\Rightarrow\\ \\min \\end{aligned}',
@@ -462,6 +481,7 @@ const ekstremumy: RazdelTeorii9 = {
       blocks: [
         {
           type: 'steps',
+          yakor: 'ekstr-shagi',
           items: [
             {
               no: '1',
@@ -538,6 +558,7 @@ const ekstremumy: RazdelTeorii9 = {
         },
         {
           type: 'remember',
+          yakor: 'kasanie-osi',
           paras: [
             "Экстремум = $f'=0$ **и** смена знака. Только ноль без смены знака — не экстремум.",
           ],
@@ -626,6 +647,7 @@ const fizicheskiy: RazdelTeorii9 = {
     },
     {
       type: 'main-formula',
+      yakor: 'skorost-uskorenie',
       chip: 'Скорость и ускорение',
       formula: "\\begin{aligned} v(t)&=x'(t)\\\\ a(t)&=v'(t)=x''(t) \\end{aligned}",
       note: 'Здесь $t$ — время от начала движения, $x(t)$ — координата, $v$ — скорость, $a$ — ускорение (производная скорости).',
@@ -644,6 +666,7 @@ const fizicheskiy: RazdelTeorii9 = {
         },
         {
           type: 'main-formula',
+          yakor: 'pravila',
           chip: 'Правила для многочленов',
           formula:
             "\\begin{aligned} (t^n)'&=n\\,t^{n-1}\\\\ (c\\,u)'&=c\\,u',\\ \\ (c)'=0 \\end{aligned}",
@@ -659,6 +682,7 @@ const fizicheskiy: RazdelTeorii9 = {
       blocks: [
         {
           type: 'steps',
+          yakor: 'fiz-shagi',
           items: [
             {
               no: '1',
@@ -688,6 +712,7 @@ const fizicheskiy: RazdelTeorii9 = {
         },
         {
           type: 'remember',
+          yakor: 'ne-v-zakon',
           paras: [
             'Не подставляйте $t_0$ в сам закон $x(t)$: он даёт положение, а не скорость. Скорость — только после дифференцирования.',
           ],
@@ -714,6 +739,7 @@ const kasatelnaya: RazdelTeorii9 = {
     },
     {
       type: 'main-formula',
+      yakor: 'parallel',
       chip: 'Параллельность',
       formula: "f'(x_0)=k",
       note: 'Касательная к графику $f$ в точке $x_0$ параллельна прямой $y=kx+m$ (или совпадает с ней), когда производная в этой точке равна $k$. Число $m$ значения не имеет.',
@@ -783,12 +809,14 @@ const kasatelnaya: RazdelTeorii9 = {
         },
         {
           type: 'main-formula',
+          yakor: 'usloviya',
           chip: 'Условия касания',
           formula: "\\begin{cases} f(x_0)=kx_0+m,\\\\ f'(x_0)=k. \\end{cases}",
           note: 'Первое — общая точка, второе — одинаковый наклон. Из второго условия находим $x_0$, из первого — параметр (например $c$).',
         },
         {
           type: 'remember',
+          yakor: 'proverka-kasaniya',
           paras: [
             "Не останавливайтесь на условии $f'(x_0)=k$: оно может дать лишние $x_0$. Каждый найденный корень проверяется вторым условием.",
           ],
@@ -819,6 +847,7 @@ const pervoobraznaya: RazdelTeorii9 = {
     },
     {
       type: 'main-formula',
+      yakor: 'F-opredelenie',
       chip: 'Определение',
       formula: "F'(x)=f(x)",
       note: "Все, что мы знали про производную, теперь применяется к $F$: её знак — это знак $f$, а нули $F'$ — нули $f$.",
@@ -919,6 +948,7 @@ const pervoobraznaya: RazdelTeorii9 = {
         },
         {
           type: 'main-formula',
+          yakor: 'nyuton',
           chip: 'Ньютон—Лейбниц',
           formula: 'S=F(b)-F(a)',
           note: 'Это площадь под графиком $f\\geqslant 0$ на отрезке $[a;\\ b]$. В общем случае $F(b)-F(a)$ — «площадь со знаком».',
@@ -984,6 +1014,7 @@ const pervoobraznaya: RazdelTeorii9 = {
         { type: 'proto', gruppa: 'V', nomer: 0, title: 'Пример 17. Задание из банка' },
         {
           type: 'memo',
+          yakor: 'pamyatka',
           items: [
             "Сначала выясните, чей график нарисован ($f$, $f'$ или $F$) и о чём вопрос.",
             "Производная в точке — угловой коэффициент касательной: $f'(x_0)=\\operatorname{tg}\\alpha$. Две целые точки → треугольник под прямой → катеты длинами → противолежащий катет делим на прилежащий. Прямая убывает — ставим минус.",

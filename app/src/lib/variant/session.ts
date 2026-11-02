@@ -7,7 +7,7 @@
 import { INSTRUCTION_BLANK, INSTRUCTION_LEGACY, INSTRUCTION_PLAIN } from '@/content/variant';
 import { generatorVersion } from '@/lib/komplekt';
 import { buildVariantSet } from './build';
-import { decodeCode, encodeCode } from './code';
+import { decodeCode, encodeCode, newSeed } from './code';
 import { loadAdapters } from './load';
 import { SUBTYPE_IDS } from './sections';
 import {
@@ -127,6 +127,18 @@ export async function buildSet(
   const code = encodeCode({ seed, config, zameny, version }, SUBTYPE_IDS);
   const set = buildVariantSet({ config, seed, zameny, version, code }, adapters);
   return { set, failed };
+}
+
+/**
+ * Код новой партии без сборки задач: настройки, свежий seed и версия.
+ * Задачи по коду соберёт страница решения (/variant/reshat/) — так
+ * «Решить вариант онлайн» из меню не грузит генераторы дважды.
+ */
+export function freshCode(config: VariantConfig = defaultConfig()): string {
+  return encodeCode(
+    { seed: newSeed(), config, zameny: {}, version: currentVersion() },
+    SUBTYPE_IDS,
+  );
 }
 
 /** Код → настройки, seed и замены. null — код не читается. */

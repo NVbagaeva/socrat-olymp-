@@ -772,3 +772,17 @@
     overflow: visible;
   }
 }
+
+/* Рамка, таблица или плашка теории — якорь «Повторить теорию» из
+   карточек по теории (lib/proizvodnaya/teoriya-yakorya.ts): встаёт под
+   липкую ленту. На узком экране к ней добавляется полоса «Содержание» —
+   и подраздел (#z9-…) тоже не должен под ней прятаться. */
+.vteor [id^='t9-'] {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+@media (max-width: 1023.98px) {
+  .vteor [id^='t9-'],
+  .vteor .z9-sub {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+}

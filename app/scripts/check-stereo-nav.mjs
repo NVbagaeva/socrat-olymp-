@@ -51,6 +51,7 @@ const { GLAVY_3, GLAVY_15, FIGURA_GLAVA } = requireSrc('content/stereo/glavy.ts'
 const { TIPY_3, TIPY_15 } = requireSrc('content/stereo/tipy.ts');
 const { RAZBORY_3 } = requireSrc('lib/stereo/razbory3.ts');
 const { RAZBORY_15 } = requireSrc('lib/stereo/razbory15.ts');
+const { NOMERA_S_KARTOCHKAMI } = requireSrc('content/kartochki/spisok.ts');
 const { BANK } = requireSrc('lib/zadanie3/index.ts');
 const { SOLID_THEME } = requireSrc('lib/solid/render.ts');
 const HL = SOLID_THEME.width.hl;
@@ -136,11 +137,16 @@ const VKLADKI_15 = [
   ['generator/', 'Генератор'],
   ['dlya-repetitorov/', 'Для репетиторов'],
 ];
-/* У №3 есть колода карточек по теории — вкладка «Карточки» сразу за «Теорией». */
-const VKLADKI_3 = [...VKLADKI_15.slice(0, 2), ['kartochki/', 'Карточки'], ...VKLADKI_15.slice(2)];
+/* Есть колода карточек по теории (content/kartochki/spisok.ts) — вкладка
+   «Карточки» сразу за «Теорией». Сейчас она у №3; у №15 появится вместе
+   с колодой. */
+const vkladki = (no) =>
+  NOMERA_S_KARTOCHKAMI.includes(no)
+    ? [...VKLADKI_15.slice(0, 2), ['kartochki/', 'Карточки'], ...VKLADKI_15.slice(2)]
+    : VKLADKI_15;
 const ZADANIYA = [
-  { no: '3', glavy: GLAVY_3, vkladki: VKLADKI_3 },
-  { no: '15', glavy: GLAVY_15, vkladki: VKLADKI_15 },
+  { no: '3', glavy: GLAVY_3, vkladki: vkladki('3') },
+  { no: '15', glavy: GLAVY_15, vkladki: vkladki('15') },
 ];
 const SIZES = [
   { name: 'телефон', width: 390, height: 844, isMobile: true },

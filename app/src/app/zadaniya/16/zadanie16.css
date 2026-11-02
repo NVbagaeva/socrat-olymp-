@@ -580,3 +580,15 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Карточка теории — якорь «Повторить теорию» из карточек по теории
+   (lib/zadanie16/teoriya-yakorya.ts): встаёт под липкую ленту, на узком
+   экране — ещё и под полосу «Содержание». */
+.vteor [id^='t16-'] {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+@media (max-width: 1023.98px) {
+  .vteor [id^='t16-'] {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+}
