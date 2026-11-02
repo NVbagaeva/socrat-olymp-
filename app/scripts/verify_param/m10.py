@@ -36,7 +36,13 @@ NEVERNYE — заведомо неверные ответы: совпавшие 
 
 import numpy as np
 
-from m09 import koren, rovno, setka
+from m09 import rovno, setka
+
+
+def koren(v):
+    """√v там, где v ≥ 0; вне области — nan (без предупреждений numpy)."""
+    v = np.asarray(v, dtype=float)
+    return np.sqrt(np.where(v >= 0, v, np.nan))
 
 
 def na_otrezke(lo, hi, tochki=(), n=200_001):
