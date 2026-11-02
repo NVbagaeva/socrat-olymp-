@@ -113,8 +113,48 @@
 }
 .z19-zad__head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
+}
+.z19-zad__tema {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  min-width: 0;
+}
+
+/* ── Подметоды большой главы (метод 9) ────────────────────────── */
+
+.z19-gruppa {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z19-podmetod {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  min-width: 0;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z19-podmetod__metka {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+.z19-podmetod__title {
+  font-size: calc(var(--fs-h4) * 1.2);
+  font-weight: 700;
+  line-height: 1.25;
+}
+.z19-podmetod__lead {
+  color: var(--color-text-secondary);
 }
 .z19-zad__knopki {
   display: flex;

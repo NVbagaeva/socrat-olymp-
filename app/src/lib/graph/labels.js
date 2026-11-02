@@ -411,7 +411,7 @@ function placePointLabel(req) {
       /* Запасной вариант на случай, если свободных мест нет: самое
          малое нарушение, а при равенстве — ближайшее кольцо. */
       if (!fallback || room > fallback.room + 1e-9) {
-        fallback = { x: box.x, y: box.y, ring: ring, room: room };
+        fallback = { x: box.x, y: box.y, halfW: halfW, halfH: halfH, ring: ring, room: room };
       }
     }
   }
@@ -424,14 +424,20 @@ function placePointLabel(req) {
   };
 }
 
-/* Выноска: от края кружка к ближайшей точке рамки. */
+/* Выноска: от края кружка к ближайшей точке рамки.
+
+   Рамке нужны полуразмеры: без них (запасной вариант перебора их
+   когда-то не хранил) ближайшая точка рамки — NaN, а `len <= r + 1`
+   с NaN ложно, и выноска уходила в SVG с координатами NaN. Поэтому
+   любое нечисло даёт «без выноски»: рамка либо стоит вплотную, либо
+   выноска честная — NaN на рисунок не попадает никогда. */
 function leaderOf(ax, ay, r, box) {
   var cx = Math.max(box.x - box.halfW, Math.min(ax, box.x + box.halfW));
   var cy = Math.max(box.y - box.halfH, Math.min(ay, box.y + box.halfH));
   var dx = cx - ax,
     dy = cy - ay;
   var len = Math.sqrt(dx * dx + dy * dy);
-  if (len <= r + 1) {
+  if (!isFinite(len) || !isFinite(r) || len <= r + 1) {
     return null;
   }
   var k = (r + 1) / len;
@@ -445,8 +451,9 @@ var api = {
   segRectDist: segRectDist,
   obstaclesOf: obstaclesOf,
   placePointLabel: placePointLabel,
+  leaderOf: leaderOf,
   slack: slack,
 };
 
 export default api;
-export { CLEAR, pointTextWidth, plainOfTex, segRectDist, obstaclesOf, placePointLabel, slack };
+export { CLEAR, pointTextWidth, plainOfTex, segRectDist, obstaclesOf, placePointLabel, leaderOf, slack };

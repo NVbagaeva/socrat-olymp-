@@ -19,6 +19,7 @@ function zagolovok(z: Opisanie19): string {
   if (z.vid === 'okruzhnost') return ZHIVOY_19.titleOkruzhnost;
   if (z.vid === 'gorizontal') return ZHIVOY_19.titleGorizontal;
   if (z.vid === 'grafik') return ZHIVOY_19.titleGrafik;
+  if (z.vid === 'parametr') return ZHIVOY_19.titleParametr;
   return ZHIVOY_19.title;
 }
 
