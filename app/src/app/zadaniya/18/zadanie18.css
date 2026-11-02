@@ -472,6 +472,37 @@
   }
 }
 
+/* Телефон в альбомной ориентации: во всю ширину чертёж выше экрана
+   (462 px при высоте 360–390) и уходит под ленту вкладок. Здесь — две
+   колонки, как на компьютере: чертёж слева прилипает целиком. Правила
+   книжного телефона выше снимаются. */
+@media (max-width: 1023.98px) and (min-width: 600px) and (max-height: 560px) and (orientation: landscape) {
+  .z18-sk__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+  .z18-sk__chertezh {
+    display: block;
+    position: sticky;
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-2));
+  }
+  .z18-sk__chertezh .z18-ch {
+    display: grid;
+  }
+  .z18-sk__chertezh .z18-ch__pole {
+    position: relative;
+    top: auto;
+    z-index: auto;
+    border: 0;
+    box-shadow: none;
+  }
+  .z18-sk__chertezh .z18-ch__panel {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+}
+
 @media (min-width: 1024px) {
   .z18-sk__grid {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
