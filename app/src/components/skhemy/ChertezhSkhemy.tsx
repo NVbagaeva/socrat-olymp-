@@ -1,7 +1,15 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from 'react';
 import {
   RUCHKA_R,
   ramkaKadra,
@@ -290,11 +298,13 @@ export function ChertezhSkhemy({
         {ekran.tema ? <style>{cssTemy()}</style> : null}
         <g className="skh__mnog">
           {ekran.mnog.map((m) => (
-            <polygon
-              key={m.id}
-              className={clsx('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}
-              points={m.points}
-            />
+            <Fragment key={m.id}>
+              <polygon
+                className={clsx('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}
+                points={m.points}
+              />
+              {m.kontur === '' ? null : <path className="skh-iskomaya" d={m.kontur} />}
+            </Fragment>
           ))}
         </g>
         <g className="skh__okr">

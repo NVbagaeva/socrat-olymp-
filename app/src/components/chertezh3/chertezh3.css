@@ -55,9 +55,15 @@
 }
 .ch3__label--dannoe,
 .ch3__label--oboznachenie {
-  color: var(--graph-accent);
+  color: var(--chertezh-velichina, var(--graph-accent));
 }
-/* Числа и имена — не жирно: шрифт KaTeX, как в условии. */
+/* Вершины — синий полужирный курсив, на 12 % крупнее (тема чертежей,
+   KOEF_IMENI в lib/chertezh3/kadr.ts); величины — обычные. */
+.ch3__label--imya {
+  color: var(--chertezh-vershina, #1f5fd0);
+  font-size: 16.8px;
+  font-weight: 700;
+}
 .ch3__label.is-bright {
   color: var(--color-accent);
 }

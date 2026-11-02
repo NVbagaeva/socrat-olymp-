@@ -5,7 +5,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, otr, tch, ug, velOtr } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, ug, vel, velOtr } from '@/lib/skhemy/dsl';
 import { add, foot, intersect, mid, mul, polar, sub } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import { scena } from './obshchee';
@@ -37,7 +37,8 @@ export const TP_RAVNOBOKAYA = scena({
   postroit(t) {
     const { A, B, C, D, H, G } = tochkiRavnobokoy(t);
     const el: Element[] = [
-      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'figure' }),
+      /* б) ищет площадь трапеции. */
+      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-abg', [A, B, G], { gruppy: ['proekcii'], cvet: 'a' }),
       mnog('f-dch', [D, C, H], { gruppy: ['proekcii'], cvet: 'a' }),
       mnog('f-ach', [A, C, H], { gruppy: ['pl'], cvet: 'b' }),
@@ -63,6 +64,12 @@ export const TP_RAVNOBOKAYA = scena({
       /* Данные условия на чертеже. */
       velOtr('d-AC', '10', A, C),
       velOtr('d-CH', '6', C, H),
+      vel(
+        'd-Sx',
+        'S_ABCD = ?',
+        { vnutri: [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -159,7 +166,8 @@ export const TP_UGOL_90 = scena({
   postroit(t) {
     const { A, B, C, D, P, M, N } = tochkiUgol90(t);
     const el: Element[] = [
-      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'figure' }),
+      /* б) ищет площадь трапеции. */
+      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-apd', [A, P, D], { gruppy: ['p', 'h'], cvet: 'a' }),
       otr('AB', A, B, { rol: 'figure' }),
       otr('BC', B, C, { rol: 'figure', gruppy: ['med'], cvet: 'b' }),
@@ -184,6 +192,12 @@ export const TP_UGOL_90 = scena({
       velOtr('d-AD', '14', A, D),
       velOtr('d-BC', '4', B, C),
       velOtr('d-AB', '6', A, B),
+      vel(
+        'd-Sx',
+        'S_ABCD = ?',
+        { vnutri: [(A[0] + B[0] + M[0] + N[0]) / 4, (A[1] + B[1] + M[1] + N[1]) / 4] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),

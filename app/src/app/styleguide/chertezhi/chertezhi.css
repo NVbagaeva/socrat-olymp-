@@ -51,7 +51,9 @@
   margin: 0;
   min-width: 0;
 }
-.sg-ch__para svg {
+/* Только svg самого чертежа: svg внутри формулы KaTeX (знак корня) не трогаем —
+   белый фон закрыл бы подкоренное число. */
+.sg-ch__para figure > div > svg {
   display: block;
   width: 100%;
   height: auto;
@@ -85,4 +87,24 @@
   .sg-ch__cveta td:last-child {
     display: none;
   }
+}
+
+/* Печатная версия образцов №1 и №3: токены чертежей — как в ч/б теме листа. */
+.sg-ch__pechat {
+  --chertezh-vershina: #000000;
+  --chertezh-velichina: #000000;
+  --chertezh-velichina-2: #000000;
+  --graph-axis: #000000;
+  --graph-accent: #000000;
+  --color-primary: #000000;
+}
+
+.sg-ch__pravila {
+  max-width: 72ch;
+  padding-left: 1.4em;
+  line-height: 1.5;
+}
+
+.sg-ch__pravila li + li {
+  margin-top: 0.4em;
 }

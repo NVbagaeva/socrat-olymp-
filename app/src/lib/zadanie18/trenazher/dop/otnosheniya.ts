@@ -27,6 +27,8 @@ export const OT_MEDIANY = scena({
   postroit(t) {
     const { A, B, C, M, N, G } = tochkiMedian(t);
     const el: Element[] = [
+      /* б) ищет площадь AGB. */
+      mnog('t-isk', [A, G, B], { skrytyy: false, rol: 'region-sought' }),
       mnog('t-fig', [A, B, C], { skrytyy: false, rol: 'region' }),
       mnog('f-gmn', [G, M, N], { gruppy: ['pod'], cvet: 'b' }),
       mnog('f-gab', [G, A, B], { gruppy: ['pod', 'pl'], cvet: 'a' }),
@@ -53,6 +55,7 @@ export const OT_MEDIANY = scena({
         },
         { rol: 'region' },
       ),
+      velOtr('d-Sx', 'S_AGB = ?', A, B, { rol: 'region-sought' }),
       tch('A', A),
       tch('B', B),
       tch('C', C),
@@ -189,6 +192,8 @@ export const OT_PARALLELOGRAMM = scena({
   postroit(t) {
     const { A, B, C, D, K, M, P, Q } = tochkiParallelogramma(t);
     const el: Element[] = [
+      /* б) ищет площадь APQ. */
+      mnog('t-isk', [A, P, Q], { skrytyy: false, rol: 'region-sought' }),
       mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'region' }),
       otr('CMp', C, M, { rol: 'part-x' }),
       otr('MDp', M, D, { rol: 'part-x' }),
@@ -216,6 +221,12 @@ export const OT_PARALLELOGRAMM = scena({
       ),
       velOtr('d-CM', 'x', C, M, { rol: 'part-x' }),
       velOtr('d-MD', '2x', M, D, { rol: 'part-x' }),
+      vel(
+        'd-Sx',
+        'S_APQ = ?',
+        { vnutri: [(A[0] + P[0] + Q[0]) / 3, (A[1] + P[1] + Q[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),

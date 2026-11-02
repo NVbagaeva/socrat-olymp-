@@ -233,7 +233,7 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       mnog('t-fig', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'figure' }),
       mnog('f-abc', [t.A!, t.B!, t.C!], { gruppy: ['podobie'], cvet: 'a' }),
       mnog('f-a1b1c', [t.A1!, t.B1!, t.C!], { gruppy: ['podobie', 'koef'], cvet: 'b' }),
-      otr('AB', t.A!, t.B!, { gruppy: ['otvet'], cvet: 'a', rol: 'part-x' }),
+      otr('AB', t.A!, t.B!, { gruppy: ['otvet'], cvet: 'a', rol: 'figure' }),
       otr('BC', t.B!, t.C!, { rol: 'figure' }),
       otr('CA', t.C!, t.A!, { rol: 'figure' }),
       otr('AA1', t.A!, t.A1!, { gruppy: ['h', 'koef'], cvet: 'a', rol: 'aux' }),
@@ -242,7 +242,7 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       ug('pA1', t.A!, t.A1!, t.C!, { pryamoy: true, gruppy: ['h'], cvet: 'a' }),
       ug('pB1', t.C!, t.B1!, t.B!, { pryamoy: true, gruppy: ['h'], cvet: 'a' }),
       ug('uC', t.A!, t.C!, t.B!, { gruppy: ['koef', 'podobie'], cvet: 'b', rol: 'angle' }),
-      velOtr('d-AB', chislo(p.AB!), t.A!, t.B!, { rol: 'part-x' }),
+      velOtr('d-AB', chislo(p.AB!), t.A!, t.B!),
       velUg('d-cos', `cos C = ${chislo(p.cosC!)}`, t.A!, t.C!, t.B!, {
         gruppy: ['koef'],
         cvet: 'b',
@@ -256,22 +256,23 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       mnog('t-fig', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'figure' }),
       mnog('f-cml', [t.C!, t.M!, t.L!], { gruppy: ['podobie'], cvet: 'b' }),
       mnog('f-cab', [t.C!, t.A!, t.B!], { gruppy: ['podobie'], cvet: 'a' }),
-      otr('AB', t.A!, t.B!, { gruppy: ['par', 'podobie'], cvet: 'a', rol: 'part-x' }),
+      otr('AB', t.A!, t.B!, { gruppy: ['par', 'podobie'], cvet: 'a', rol: 'figure' }),
       otr('BC', t.B!, t.C!, { rol: 'figure' }),
-      otr('CA', t.C!, t.A!, { rol: 'part-y' }),
+      /* Сторона AC разбита в M: участок AM равен ML и оформлен как ML. */
+      otr('CM', t.C!, t.M!, { rol: 'figure' }),
       otr('AL', t.A!, t.L!, { gruppy: ['bis', 'ravnobed'], cvet: 'a', rol: 'aux' }),
       otr('LM', t.L!, t.M!, {
         gruppy: ['par', 'ravnobed', 'otvet'],
         cvet: 'b',
         shtrihi: 1,
-        rol: 'aux',
+        rol: 'figure',
       }),
-      otr('AM', t.A!, t.M!, { gruppy: ['ravnobed'], cvet: 'b', shtrihi: 1, rol: 'part-y' }),
+      otr('AM', t.A!, t.M!, { gruppy: ['ravnobed'], cvet: 'b', shtrihi: 1, rol: 'figure' }),
       ug('u1', t.B!, t.A!, t.L!, { gruppy: ['bis', 'ravnobed'], cvet: 'a' }),
       ug('u2', t.L!, t.A!, t.C!, { gruppy: ['bis', 'ravnobed'], cvet: 'a' }),
       ug('u3', t.A!, t.L!, t.M!, { gruppy: ['par', 'ravnobed'], cvet: 'a' }),
-      velOtr('d-AB', chislo(p.AB!), t.A!, t.B!, { rol: 'part-x' }),
-      velOtr('d-AC', chislo(p.AC!), t.A!, t.C!, { rol: 'part-y' }),
+      velOtr('d-AB', chislo(p.AB!), t.A!, t.B!),
+      velOtr('d-AC', chislo(p.AC!), t.A!, t.C!),
       ...tochki3(t, ['A', 'B', 'C', 'L', 'M']),
     ]);
   },
@@ -280,17 +281,18 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
     return nepodvizhnaya('tr-mediana', t0, (t) => [
       mnog('t-fig', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'figure' }),
       mnog('f-abdc', [t.A!, t.B!, t.D!, t.C!], { gruppy: ['par'], cvet: 'a' }),
-      otr('AB', t.A!, t.B!, { rol: 'part-x' }),
+      otr('AB', t.A!, t.B!, { rol: 'figure' }),
       otr('BM', t.B!, t.M!, { gruppy: ['diag', 'otvet'], cvet: 'b', shtrihi: 2, rol: 'figure' }),
       otr('MC', t.M!, t.C!, { gruppy: ['diag', 'otvet'], cvet: 'b', shtrihi: 2, rol: 'figure' }),
-      otr('CA', t.C!, t.A!, { rol: 'part-y' }),
+      otr('CA', t.C!, t.A!, { rol: 'figure' }),
       otr('AM', t.A!, t.M!, { gruppy: ['diag'], cvet: 'b', shtrihi: 1, rol: 'aux' }),
+      /* MD = AM: тот же цвет и засечки, пунктир — продолжение медианы. */
       otr('MD', t.M!, t.D!, {
         stil: 'punktir',
         gruppy: ['diag', 'par'],
         cvet: 'b',
         shtrihi: 1,
-        rol: 'construction',
+        rol: 'aux',
       }),
       otr('BD', t.B!, t.D!, {
         stil: 'punktir',
@@ -306,8 +308,8 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
         cvet: 'a',
         rol: 'construction',
       }),
-      velOtr('d-AB', chislo(p.AB!), t.A!, t.B!, { rol: 'part-x' }),
-      velOtr('d-AC', chislo(p.AC!), t.A!, t.C!, { rol: 'part-y' }),
+      velOtr('d-AB', chislo(p.AB!), t.A!, t.B!),
+      velOtr('d-AC', chislo(p.AC!), t.A!, t.C!),
       velOtr('d-AM', koren((2 * p.AB! ** 2 + 2 * p.AC! ** 2 - p.BC! ** 2) / 4), t.A!, t.M!),
       ...tochki3(t, ['A', 'B', 'C', 'M', 'D']),
     ]);
@@ -353,7 +355,7 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       }),
       otr('AB', t.A!, t.B!, { rol: 'figure' }),
       otr('BC', t.B!, t.C!, { rol: 'figure' }),
-      otr('CA', t.C!, t.A!, { rol: 'part-x' }),
+      otr('CA', t.C!, t.A!, { rol: 'figure' }),
       otr('BW', t.B!, t.W!, { gruppy: ['bis'], cvet: 'a', rol: 'aux' }),
       otr('AI', t.A!, t.I!, { gruppy: ['ugly'], cvet: 'a', rol: 'aux' }),
       otr('WA', t.W!, t.A!, {
@@ -370,7 +372,7 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       }),
       otr('WC', t.W!, t.C!, { gruppy: ['ravn', 'okr2'], cvet: 'b', shtrihi: 1, rol: 'aux' }),
       ug('pB', t.A!, t.B!, t.C!, { pryamoy: true }),
-      velOtr('d-AC', `${p.k}√2`, t.A!, t.C!, { rol: 'part-x' }),
+      velOtr('d-AC', `${p.k}√2`, t.A!, t.C!),
       ...tochki3(t, ['A', 'B', 'C', 'I', 'W']),
     ]);
   },
@@ -380,18 +382,16 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       okr('k', t.O!, R, { rol: 'figure' }),
       mnog('f-apb', [t.A!, t.P!, t.B!], { gruppy: ['podobie'], cvet: 'a' }),
       mnog('f-dpc', [t.D!, t.P!, t.C!], { gruppy: ['podobie'], cvet: 'b' }),
-      otr('AB', t.A!, t.B!, { gruppy: ['podobie'], cvet: 'a', rol: 'part-x' }),
+      /* Хорды и диагонали с числами — navy, цветные только подписи. */
+      otr('AB', t.A!, t.B!, { gruppy: ['podobie'], cvet: 'a', rol: 'aux' }),
       otr('CD', t.C!, t.D!, { gruppy: ['podobie', 'otvet'], cvet: 'b', rol: 'aux' }),
       otr('AC', t.A!, t.C!, { rol: 'aux' }),
-      /* Данные на диагоналях: AP и DP (DP = AB — тем же цветом). */
-      otr('AP', t.A!, t.P!, { rol: 'part-y' }),
       otr('BD', t.B!, t.D!, { rol: 'aux' }),
-      otr('DP', t.D!, t.P!, { rol: 'part-x' }),
       ug('uA', t.B!, t.A!, t.C!, { gruppy: ['ugly'], cvet: 'a' }),
       ug('uD', t.B!, t.D!, t.C!, { gruppy: ['ugly'], cvet: 'a' }),
-      velOtr('d-AB', chislo(p.AB!), t.A!, t.B!, { rol: 'part-x' }),
-      velOtr('d-AP', chislo(p.AP!), t.A!, t.P!, { rol: 'part-y' }),
-      velOtr('d-DP', chislo(p.DP!), t.D!, t.P!, { rol: 'part-x' }),
+      velOtr('d-AB', chislo(p.AB!), t.A!, t.B!),
+      velOtr('d-AP', chislo(p.AP!), t.A!, t.P!),
+      velOtr('d-DP', chislo(p.DP!), t.D!, t.P!),
       ...tochki3(t, ['A', 'B', 'C', 'D', 'P']),
     ]);
   },
@@ -400,17 +400,18 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
     return nepodvizhnaya('tr-vpis-pryam', t0, (t) => [
       mnog('t-fig', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'figure' }),
       okr('k', t.I!, r, { rol: 'aux' }),
-      otr('AK', t.A!, t.K!, { gruppy: ['kas'], cvet: 'a', shtrihi: 1, rol: 'part-x' }),
-      otr('AP', t.A!, t.P!, { gruppy: ['kas'], cvet: 'a', shtrihi: 1, rol: 'part-x' }),
-      otr('KB', t.K!, t.B!, { gruppy: ['kas'], cvet: 'b', shtrihi: 2, rol: 'part-y' }),
-      otr('BQ', t.B!, t.Q!, { gruppy: ['kas'], cvet: 'b', shtrihi: 2, rol: 'part-y' }),
+      /* Отрезки касательных: равные — одинаковые засечки; длины числами — линии navy. */
+      otr('AK', t.A!, t.K!, { gruppy: ['kas'], cvet: 'a', shtrihi: 1, rol: 'figure' }),
+      otr('AP', t.A!, t.P!, { gruppy: ['kas'], cvet: 'a', shtrihi: 1, rol: 'figure' }),
+      otr('KB', t.K!, t.B!, { gruppy: ['kas'], cvet: 'b', shtrihi: 2, rol: 'figure' }),
+      otr('BQ', t.B!, t.Q!, { gruppy: ['kas'], cvet: 'b', shtrihi: 2, rol: 'figure' }),
       otr('PC', t.P!, t.C!, { gruppy: ['kas', 'pifagor'], cvet: 'c', rol: 'figure' }),
       otr('CQ', t.C!, t.Q!, { gruppy: ['kas', 'pifagor'], cvet: 'c', rol: 'figure' }),
       otr('IP', t.I!, t.P!, { stil: 'punktir', rol: 'construction' }),
       otr('IQ', t.I!, t.Q!, { stil: 'punktir', rol: 'construction' }),
       ug('pC', t.A!, t.C!, t.B!, { pryamoy: true, gruppy: ['pifagor'], cvet: 'a' }),
-      velOtr('d-AK', chislo(p.AK!), t.A!, t.K!, { rol: 'part-x' }),
-      velOtr('d-BK', chislo(p.BK!), t.K!, t.B!, { rol: 'part-y' }),
+      velOtr('d-AK', chislo(p.AK!), t.A!, t.K!),
+      velOtr('d-BK', chislo(p.BK!), t.K!, t.B!),
       ...tochki3(t, ['A', 'B', 'C', 'K', 'I', 'P', 'Q']),
     ]);
   },
@@ -420,8 +421,8 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       okr('k', t.O!, R, { rol: 'figure' }),
       mnog('f-apc', [t.A!, t.P!, t.C!], { gruppy: ['podobie'], cvet: 'a' }),
       mnog('f-dpb', [t.D!, t.P!, t.B!], { gruppy: ['podobie'], cvet: 'b' }),
-      otr('AB', t.A!, t.B!, { gruppy: ['otrezki'], cvet: 'a', rol: 'part-x' }),
-      otr('CD', t.C!, t.D!, { gruppy: ['otrezki', 'otvet'], cvet: 'b', rol: 'part-y' }),
+      otr('AB', t.A!, t.B!, { gruppy: ['otrezki'], cvet: 'a', rol: 'aux' }),
+      otr('CD', t.C!, t.D!, { gruppy: ['otrezki', 'otvet'], cvet: 'b', rol: 'aux' }),
       otr('AC', t.A!, t.C!, {
         stil: 'punktir',
         skrytyy: true,
@@ -436,9 +437,9 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
         cvet: 'b',
         rol: 'construction',
       }),
-      velOtr('d-AP', chislo(p.AP!), t.A!, t.P!, { rol: 'part-x' }),
-      velOtr('d-PB', chislo(p.PB!), t.P!, t.B!, { rol: 'part-x' }),
-      velOtr('d-CP', chislo(p.CP!), t.C!, t.P!, { rol: 'part-y' }),
+      velOtr('d-AP', chislo(p.AP!), t.A!, t.P!),
+      velOtr('d-PB', chislo(p.PB!), t.P!, t.B!),
+      velOtr('d-CP', chislo(p.CP!), t.C!, t.P!),
       ...tochki3(t, ['A', 'B', 'C', 'D', 'P']),
     ]);
   },
@@ -449,9 +450,9 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       mnog('f-acd', [t.A!, t.C!, t.D!], { gruppy: ['acd'], cvet: 'a' }),
       mnog('f-bcd', [t.B!, t.C!, t.D!], { gruppy: ['bcd'], cvet: 'b' }),
       otr('AB', t.A!, t.B!, { rol: 'figure' }),
-      otr('BC', t.B!, t.C!, { gruppy: ['bcd'], cvet: 'b', rol: 'part-y' }),
+      otr('BC', t.B!, t.C!, { gruppy: ['bcd'], cvet: 'b', rol: 'figure' }),
       otr('CD', t.C!, t.D!, { rol: 'figure' }),
-      otr('DA', t.D!, t.A!, { gruppy: ['acd'], cvet: 'a', rol: 'part-x' }),
+      otr('DA', t.D!, t.A!, { gruppy: ['acd'], cvet: 'a', rol: 'figure' }),
       otr('AC', t.A!, t.C!, { rol: 'aux' }),
       otr('BD', t.B!, t.D!, { rol: 'aux' }),
       otr('MK', t.M!, t.K!, {
@@ -469,8 +470,8 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
         rol: 'construction',
       }),
       otr('MN', t.M!, t.N!, { gruppy: ['otvet'], cvet: 'b', rol: 'aux' }),
-      velOtr('d-AD', chislo(p.AD!), t.A!, t.D!, { rol: 'part-x' }),
-      velOtr('d-BC', chislo(p.BC!), t.B!, t.C!, { rol: 'part-y' }),
+      velOtr('d-AD', chislo(p.AD!), t.A!, t.D!),
+      velOtr('d-BC', chislo(p.BC!), t.B!, t.C!),
       ...tochki3(t, ['A', 'B', 'C', 'D', 'M', 'N']),
       tch('K', t.K!, { skrytyy: true, gruppy: ['acd', 'bcd'], cvet: 'a' }),
     ]);
@@ -478,7 +479,8 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
   'ravnobok-perp': (p) => {
     const t0 = tochkiRavnobokPerp(p);
     return nepodvizhnaya('tr-ravnobok-perp', t0, (t) => [
-      mnog('t-fig', [t.A!, t.B!, t.C!, t.D!], { skrytyy: false, rol: 'figure' }),
+      /* Площадь трапеции ищется. */
+      mnog('t-isk', [t.A!, t.B!, t.C!, t.D!], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-aod', [t.A!, t.O!, t.D!], { gruppy: ['ravnobed'], cvet: 'a' }),
       mnog('f-boc', [t.B!, t.O!, t.C!], { gruppy: ['ravnobed'], cvet: 'b' }),
       otr('AB', t.A!, t.B!, { shtrihi: 1, rol: 'figure' }),
@@ -488,10 +490,16 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       otr('AC', t.A!, t.C!, { gruppy: ['diag'], cvet: 'a', rol: 'aux' }),
       otr('BD', t.B!, t.D!, { gruppy: ['diag'], cvet: 'a', rol: 'aux' }),
       /* Высота — данное условия: видна всегда, вдоль неё — её длина. */
-      otr('EF', t.E!, t.F!, { stil: 'punktir', gruppy: ['h', 'otvet'], cvet: 'b', rol: 'part-x' }),
+      otr('EF', t.E!, t.F!, { stil: 'punktir', gruppy: ['h', 'otvet'], cvet: 'b', rol: 'aux' }),
       ug('pF', t.D!, t.F!, t.E!, { pryamoy: true }),
       ug('pO', t.A!, t.O!, t.D!, { pryamoy: true, gruppy: ['diag', 'ravnobed'], cvet: 'a' }),
-      vel('d-h', chislo(p.h!), { vnutri: lerp(t.O!, t.F!, 0.5) }, { rol: 'part-x' }),
+      vel('d-h', chislo(p.h!), { vnutri: lerp(t.O!, t.F!, 0.5) }),
+      vel(
+        'd-S',
+        'S_ABCD = ?',
+        { vnutri: [(t.A![0] + t.B![0] + t.O![0]) / 3, (t.A![1] + t.B![1] + t.O![1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       ...tochki3(t, ['A', 'B', 'C', 'D', 'O', 'E', 'F']),
     ]);
   },
@@ -500,6 +508,8 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
     return nepodvizhnaya('tr-menelay-pl', t0, (t) => [
       /* Площадь ABC дана: вся фигура — region. */
       mnog('t-reg', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'region' }),
+      /* Площадь APC ищется. */
+      mnog('t-isk', [t.A!, t.P!, t.C!], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-abl', [t.A!, t.B!, t.L!], { gruppy: ['men'], cvet: 'a' }),
       mnog('f-alc', [t.A!, t.L!, t.C!], { gruppy: ['alc'], cvet: 'a' }),
       mnog('f-apc', [t.A!, t.P!, t.C!], { gruppy: ['pl'], cvet: 'b' }),
@@ -529,13 +539,16 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
         },
         { rol: 'region' },
       ),
+      /* APC узкий — подпись под стороной AC, снаружи. */
+      velOtr('d-Sx', 'S_APC = ?', t.A!, t.C!, { rol: 'region-sought' }),
       ...tochki3(t, ['A', 'B', 'C', 'K', 'L', 'P']),
     ]);
   },
   'trap-seredina': (p) => {
     const t0 = tochkiTrapSeredina();
     return nepodvizhnaya('tr-trap-seredina', t0, (t) => [
-      mnog('t-fig', [t.A!, t.B!, t.C!, t.D!], { skrytyy: false, rol: 'figure' }),
+      /* Площадь трапеции ищется, площадь ABE дана. */
+      mnog('t-isk', [t.A!, t.B!, t.C!, t.D!], { skrytyy: false, rol: 'region-sought' }),
       mnog('t-reg', [t.A!, t.B!, t.E!], { skrytyy: false, rol: 'region' }),
       mnog('f-bce', [t.B!, t.C!, t.E!], { gruppy: ['ugly'], cvet: 'a' }),
       mnog('f-ade', [t.A!, t.D!, t.E!], { gruppy: ['ugly'], cvet: 'a' }),
@@ -555,6 +568,12 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
         },
         { rol: 'region' },
       ),
+      vel(
+        'd-Sx',
+        'S_ABCD = ?',
+        { vnutri: [(t.A![0] + t.E![0] + t.D![0]) / 3, (t.A![1] + t.E![1] + t.D![1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       ...tochki3(t, ['A', 'B', 'C', 'D', 'E']),
     ]);
   },
@@ -563,6 +582,8 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
     return nepodvizhnaya('tr-obshchiy-ugol', t0, (t) => [
       /* Площадь ABC дана: вся фигура — region. */
       mnog('t-reg', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'region' }),
+      /* Площадь MBCN ищется. */
+      mnog('t-isk', [t.M!, t.B!, t.C!, t.N!], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-amn', [t.A!, t.M!, t.N!], { gruppy: ['amn'], cvet: 'b' }),
       mnog('f-bmnc', [t.B!, t.M!, t.N!, t.C!], { gruppy: ['otvet'], cvet: 'a' }),
       otr('AB', t.A!, t.B!, { rol: 'figure' }),
@@ -578,12 +599,29 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
       velOtr('d-MB', chast(p.n!, 'x'), t.M!, t.B!, { rol: 'part-x' }),
       velOtr('d-AN', chast(p.p!, 'y'), t.A!, t.N!, { rol: 'part-y' }),
       velOtr('d-NC', chast(p.q!, 'y'), t.N!, t.C!, { rol: 'part-y' }),
-      /* Площадь — внутри фигуры. */
+      /* Площади — внутри фигуры: данная — у вершины B, искомая — в MBCN. */
       vel(
         'd-S',
         `S_ABC = ${chislo(p.S!)}`,
-        { vnutri: [(t.A![0] + t.B![0] + t.C![0]) / 3, (t.A![1] + t.B![1] + t.C![1]) / 3] },
+        {
+          vnutri: lerp(
+            t.B!,
+            [(t.A![0] + t.B![0] + t.C![0]) / 3, (t.A![1] + t.B![1] + t.C![1]) / 3],
+            0.5,
+          ),
+        },
         { rol: 'region' },
+      ),
+      vel(
+        'd-Sx',
+        'S_MBCN = ?',
+        {
+          vnutri: [
+            (t.M![0] + t.B![0] + t.C![0] + t.N![0]) / 4,
+            (t.M![1] + t.B![1] + t.C![1] + t.N![1]) / 4,
+          ],
+        },
+        { rol: 'region-sought' },
       ),
       ...tochki3(t, ['A', 'B', 'C', 'M', 'N']),
     ]);

@@ -27,6 +27,8 @@ export const PL_OBSHCHAYA_VYSOTA = scena({
   postroit(t) {
     const { A, B, C, M, N, H } = tochkiObshchVysoty(t);
     const el: Element[] = [
+      /* б) ищет площадь ABN. */
+      mnog('t-isk', [A, B, N], { skrytyy: false, rol: 'region-sought' }),
       mnog('t-fig', [A, B, C], { skrytyy: false, rol: 'region' }),
       otr('BMp', B, M, { rol: 'part-x' }),
       otr('MCp', M, C, { rol: 'part-x' }),
@@ -56,6 +58,12 @@ export const PL_OBSHCHAYA_VYSOTA = scena({
         'S_ABC = 40',
         { vnutri: [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3] },
         { rol: 'region' },
+      ),
+      vel(
+        'd-Sx',
+        'S_ABN = ?',
+        { vnutri: [(A[0] + B[0] + N[0]) / 3, (A[1] + B[1] + N[1]) / 3] },
+        { rol: 'region-sought' },
       ),
       tch('A', A),
       tch('B', B),

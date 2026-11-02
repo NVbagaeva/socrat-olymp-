@@ -36,8 +36,8 @@ export const SK = {
   ugol: { r: 15, shag: 4, min: 7, dolya: 0.38, pryamoy: 10 },
   shtrih: { pol: 4, shag: 3.5 },
   tochkaR: 2.6,
-  /** Кегль подписи точки, px. */
-  kegl: 17,
+  /** Кегль подписи точки, px: полужирный курсив темы (lib/skhemy/tema.ts, KEGL_VERSHINY). */
+  kegl: 19,
   /** Кегль величины (данные условия на чертеже), px. */
   keglVel: 15,
 } as const;
@@ -53,6 +53,7 @@ const SLOY_ROLI: Readonly<Record<Rol, number>> = {
   construction: 0,
   figure: 1,
   region: 1,
+  'region-sought': 1,
   angle: 1,
   'part-x': 2,
   'part-y': 2,
@@ -255,6 +256,56 @@ export interface EkrDuga extends Obshchee {
 
 export interface EkrMnog extends Obshchee {
   points: string;
+  /**
+   * Пунктирный контур искомой площади (роль region-sought): многоугольник,
+   * сдвинутый внутрь фигуры, — не сливается со сторонами. Иначе — ''.
+   */
+  kontur: string;
+}
+
+/** Отступ контура искомой площади внутрь фигуры, px. */
+const OTSTUP_ISKOMOY = 5;
+
+/**
+ * Многоугольник, сдвинутый внутрь на d px: каждая сторона — параллельно
+ * себе, вершины — пересечения соседних сдвинутых сторон. Для выпуклых
+ * фигур (искомые площади задач). Вырождается — [].
+ */
+function vnutrenniyKontur(pts: readonly T2[], d: number): T2[] {
+  const n = pts.length;
+  if (n < 3) return [];
+  let pl = 0;
+  for (let i = 0; i < n; i += 1) {
+    const a = pts[i]!;
+    const b = pts[(i + 1) % n]!;
+    pl += a[0] * b[1] - b[0] * a[1];
+  }
+  const zn = pl > 0 ? 1 : -1;
+  const linii = pts.map((a, i) => {
+    const b = pts[(i + 1) % n]!;
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const l = Math.hypot(dx, dy) || 1;
+    /* Внутренняя нормаль: при обходе против часовой (pl > 0) — слева. */
+    const nx = (-dy / l) * zn * d;
+    const ny = (dx / l) * zn * d;
+    return [
+      [a[0] + nx, a[1] + ny],
+      [b[0] + nx, b[1] + ny],
+    ] as const;
+  });
+  const out: T2[] = [];
+  for (let i = 0; i < n; i += 1) {
+    const [p1, p2] = linii[(i + n - 1) % n]!;
+    const [q1, q2] = linii[i]!;
+    const r: T2 = [p2[0] - p1[0], p2[1] - p1[1]];
+    const s: T2 = [q2[0] - q1[0], q2[1] - q1[1]];
+    const den = r[0] * s[1] - r[1] * s[0];
+    if (Math.abs(den) < 1e-9) return [];
+    const t = ((q1[0] - p1[0]) * s[1] - (q1[1] - p1[1]) * s[0]) / den;
+    out.push([p1[0] + r[0] * t, p1[1] + r[1] * t]);
+  }
+  return out;
 }
 
 export interface EkrUgol extends Obshchee {
@@ -442,8 +493,8 @@ export function raskladka(
   /** Точки с ручками перетаскивания: кольцо ручки — препятствие подписи. */
   ruchki: readonly string[] = [],
 ): Ekran {
-  /* Величина не уместилась в поле — фигура чуть мельчает, чтобы
-     запись не обрезалась краем чертежа. */
+  /* Величина или буква не уместилась в поле — фигура чуть мельчает,
+     чтобы подпись не обрезалась краем чертежа. */
   let r = ramka;
   for (let i = 0; ; i += 1) {
     const [ekran, vne] = raskladka1(kadr, vid, r, W, H, sost, ruchki);
@@ -476,7 +527,9 @@ function raskladka1(
     tochki: [],
     podpisi: [],
     velichiny: [],
-    tema: kadr.elementy.some((el) => el.rol !== undefined),
+    /* Тема чертежа — у всех чертежей движка: вершины и точки синие,
+       величины тёплые; роли элементов уточняют цвет и толщину. */
+    tema: true,
     poImeni: {},
     preob,
   };
@@ -563,10 +616,14 @@ function raskladka1(
       }
       case 'mnogougolnik': {
         const pts = el.tochki.map(E);
+        const k = el.rol === 'region-sought' ? vnutrenniyKontur(pts, OTSTUP_ISKOMOY) : [];
         ekran.mnog.push({
           ...obshchee,
           points: pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join(' '),
+          kontur: k.length === 0 ? '' : `M${k.map((p) => `${f1(p[0])} ${f1(p[1])}`).join('L')}Z`,
         });
+        /* Пунктир искомой площади — препятствие подписям. */
+        k.forEach((p, i) => prep.otrezki.push([p, k[(i + 1) % k.length]!]));
         break;
       }
       case 'ugol': {
@@ -593,6 +650,7 @@ function raskladka1(
   }
 
   const zanyato: Pryam[] = [];
+  let vneBukv = false;
   if (sost.podpisi) {
     const imennye = ekran.tochki.filter((t) => t.imya !== null);
     const mesta = razmestitSVynoskami(
@@ -606,6 +664,19 @@ function raskladka1(
       const { c: m, vynoska: v } = mesta[i]!;
       const [bukva, indeks] = (t.imya ?? '').split('_');
       const g = gabaritBukvy(t.imya ?? '', SK.kegl);
+      /* Буква за краем чертежа (раскладка ставит её туда, когда рядом с
+         точкой всё занято линиями) — фигура мельчает, как для величин.
+         Границы — по рамке текста в браузере: 0,5 кегля над центром и
+         под ним, с индексом (опущен на 4 px) — 0,66 кегля под центром; допуск
+         1 px, как у проверки в браузере (test:drawing-labels). */
+      const niz = SK.kegl * (indeks === undefined ? 0.5 : 0.66);
+      if (
+        m[0] - g.hw < -1 ||
+        m[1] - SK.kegl * 0.5 < -1 ||
+        m[0] + g.hw > W + 1 ||
+        m[1] + niz > H + 1
+      )
+        vneBukv = true;
       zanyato.push([m[0] - g.hw, m[1] - g.hh, m[0] + g.hw, m[1] + g.hh]);
       if (v !== null) prep.otrezki.push([v[0], v[1]]);
       ekran.podpisi.push({
@@ -624,7 +695,7 @@ function raskladka1(
       });
     });
   }
-  let vne = false;
+  let vne = vneBukv;
   for (const { el, obshchee } of velichiny) {
     const chasti = chastiVelichiny(el.tekst);
     const { hw, hh, base } = gabaritVelichiny(chasti);

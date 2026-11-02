@@ -231,7 +231,12 @@ function proveritOformlenie(ishodnyy, mm, where) {
     if (/var\(--solid-face\)|var\(--solid-liquid\)|#e8eef9|--solid/.test(ctx.slice(-120))) continue;
     ok(Number(f[1]) <= 0.15 + 1e-9, `${where}: заливка ${f[1]}`);
   }
-  ok(!/font-weight="(?:6|7|bold)/.test(svg), `${where}: жирная подпись`);
+  /* Жирные — только подписи вершин (тема чертежей): величины обычные. */
+  for (const t of svg.matchAll(/<text\b[^>]*>/g)) {
+    const zhir = /font-weight="(?:6|7|bold)/.test(t[0]);
+    if (/class="ch3-imya"/.test(t[0])) ok(zhir, `${where}: вершина не полужирная`);
+    else ok(!zhir, `${where}: жирная подпись величины`);
+  }
   for (const m of svg.matchAll(/<text\b[^>]*font-size="([\d.]+)"/g)) {
     ok(pt(Number(m[1])) >= 9.95, `${where}: кегль ${pt(Number(m[1])).toFixed(1)} pt`);
   }

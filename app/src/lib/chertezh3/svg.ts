@@ -24,7 +24,7 @@
 import { KOREN, znakKornyaSvg } from '@/lib/risunki/koren.js';
 import { BUKVY, CHISLA, indeksSvg } from '@/lib/risunki/shrifty.js';
 import { escSvg, imyaSvg } from '@/lib/stereo/proekciya';
-import type { Kadr, LiniyaKadra, PodpisKadra } from './kadr';
+import { KOEF_IMENI, type Kadr, type LiniyaKadra, type PodpisKadra } from './kadr';
 
 export interface OpciiSvg {
   /** Подписи: текстом SVG или не рисовать (интерактив кладёт свои, KaTeX). */
@@ -51,6 +51,11 @@ const FIKS = {
   podsvetka: '#e07a2f',
   tekst: '#101728',
   fon: '#ffffff',
+  /* Тема чертежей (styles/tokens.css, lib/sheet/theme.css): вершины и
+     точки — синие, величины — терракота; в ч/б теме листа — чёрные.
+     Запасной цвет — для чертежа вне страницы (файл). */
+  vershina: 'var(--chertezh-vershina, #1f5fd0)',
+  velichina: 'var(--chertezh-velichina, #e07a2f)',
 };
 const TOKENY = FIKS;
 
@@ -217,9 +222,10 @@ function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
     : p.skryta === true
       ? ' opacity="0.55" data-skryt="1"'
       : '';
-  const fill = p.yarko ? c.podsvetka : p.vid === 'imya' ? c.tekst : c.akcent;
+  const imya = p.vid === 'imya';
+  const fill = p.yarko ? c.podsvetka : imya ? c.vershina : c.velichina;
   const txt = texSvg(p.tex);
-  const shrift = p.vid === 'imya' ? SHRIFT_IMENI : SHRIFT_CHISLA;
+  const shrift = imya ? SHRIFT_IMENI : SHRIFT_CHISLA;
   if (txt === null) {
     const s = podpisSKornem(p.tex, p.x + 1, p.y + p.h * 0.78, o.kegl, shrift, fill, op);
     if (s !== null) return s;
@@ -237,8 +243,10 @@ function podpisSvg(p: PodpisKadra, c: typeof TOKENY, o: OpciiSvg): string {
   }
   /* Индекс (indeksSvg) — цифры прямым KaTeX_Main, как в формуле. */
   const tekst = txt ?? escSvg(p.tex);
+  /* Вершина — полужирный курсив, на 12 % крупнее (KOEF_IMENI). */
+  const kegl = imya ? o.kegl * KOEF_IMENI : o.kegl;
   return (
-    `<text x="${f(p.x + 1)}" y="${f(p.y + p.h * 0.78)}" font-family="${shrift}" font-size="${f2(o.kegl)}" fill="${fill}"${op}>` +
+    `<text class="${imya ? 'ch3-imya' : 'ch3-velichina'}" x="${f(p.x + 1)}" y="${f(p.y + p.h * 0.78)}" font-family="${shrift}" font-size="${f2(kegl)}"${imya ? ' font-weight="700"' : ''} fill="${fill}"${op}>` +
     `${tekst}</text>`
   );
 }
@@ -269,7 +277,7 @@ export function kadrSvg(k: Kadr, o: OpciiSvg): string {
   }
   for (const t of k.tochki) {
     out.push(
-      `<circle cx="${f(t.p[0])}" cy="${f(t.p[1])}" r="${t.yarko ? 3.6 : 2.8}" fill="${t.yarko ? c.podsvetka : c.tekst}"${t.tusklo ? ' opacity="0.35"' : ''}/>`,
+      `<circle cx="${f(t.p[0])}" cy="${f(t.p[1])}" r="${t.yarko ? 3.6 : 2.8}" fill="${t.yarko ? c.podsvetka : c.vershina}"${t.tusklo ? ' opacity="0.35"' : ''}/>`,
     );
   }
   if (o.podpisi !== 'net') {

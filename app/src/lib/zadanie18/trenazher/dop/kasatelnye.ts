@@ -4,7 +4,7 @@
  * и проверка scripts/verify_schemes/trenazherDop.
  */
 
-import { mnog, okr, otr, tch, ug, velOtr } from '@/lib/skhemy/dsl';
+import { mnog, okr, otr, tch, ug, vel, velOtr } from '@/lib/skhemy/dsl';
 import {
   add,
   circumcircle,
@@ -205,7 +205,8 @@ export const KS_PRYAM_TRAP = scena({
   postroit(t) {
     const { A, B, C, D, O, r, E } = tochkiPryamTrap(t);
     const el: Element[] = [
-      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'figure' }),
+      /* б) ищет площадь трапеции. */
+      mnog('t-fig', [A, B, C, D], { skrytyy: false, rol: 'region-sought' }),
       mnog('f-cod', [C, O, D], { gruppy: ['prya', 'r'], cvet: 'b' }),
       okr('o', O, r, { rol: 'figure' }),
       otr('AB', A, B, { rol: 'figure', gruppy: ['pito'], cvet: 'a' }),
@@ -233,6 +234,12 @@ export const KS_PRYAM_TRAP = scena({
       velOtr('d-OC', '15', O, C),
       /* Середина OD почти на окружности (r = 12, OD = 20): подпись — у внешней части. */
       velOtr('d-OD', '20', [O[0] + (D[0] - O[0]) * 0.6, O[1] + (D[1] - O[1]) * 0.6], D),
+      vel(
+        'd-Sx',
+        'S_ABCD = ?',
+        { vnutri: [O[0] - r * 0.45, O[1] - r * 0.45] },
+        { rol: 'region-sought' },
+      ),
       tch('A', A),
       tch('B', B),
       tch('C', C),

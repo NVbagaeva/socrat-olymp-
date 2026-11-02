@@ -60,6 +60,9 @@ function zapomnit(scena: object, k: Kadr): void {
   for (const p of k.podpisi) m.set(p.klyuch, p.dir);
 }
 
+/** TeX подписи-вершины: «A», «A_1», «B'» — как имя в lib/chertezh3/svg.ts. */
+const IMYA_TEX = /^[A-Z]('*)(?:_\{?\d+\}?)?$/;
+
 /** Высота окна чертежа по ширине: почти квадрат, на телефоне ниже. */
 function vysotaPo(w: number): number {
   return Math.round(Math.min(w * 0.86, 420));
@@ -201,7 +204,8 @@ export function Chertezh3({
               <span
                 key={t}
                 data-tex={t}
-                className="ch3__label"
+                /* Вершина меряется своим начертанием: полужирная и крупнее. */
+                className={clsx('ch3__label', IMYA_TEX.test(t) && 'ch3__label--imya')}
                 dangerouslySetInnerHTML={{ __html: podpisiHtml[t] ?? t }}
               />
             ))}
