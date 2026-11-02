@@ -9,6 +9,7 @@
 
 import { BUKVY, CHISLA } from '../risunki/shrifty.js';
 import { ramkaKadra, raskladka, rezhimKadra, type Sostoyanie } from './ekran';
+import { cssTemy, klassTemy, type VersiyaTemy } from './tema';
 import type { Tochki, Vid, ZhivayaSkhema } from './tipy';
 
 export interface OpciiSvg {
@@ -16,6 +17,11 @@ export interface OpciiSvg {
   H: number;
   /** Подпись для чтения с экрана. */
   opisanie: string;
+  /**
+   * Версия темы чертежа (lib/skhemy/tema.ts) — у шаблонов с ролями:
+   * cvet — фирменные цвета (по умолчанию), pechat — монохромная для печати.
+   */
+  tema?: VersiyaTemy;
   /**
    * Оформление внутри самого SVG, без skhemy.css: для листов печати
    * (lib/sheet) — там стили страницы схем могут быть не подключены,
@@ -73,28 +79,36 @@ interface Metki {
   lit: boolean;
   dim: boolean;
   cvet: string | null;
+  rol: string | null;
 }
 
-const metki = (m: Metki) => [m.lit && 'is-lit', m.dim && 'is-dim', m.cvet && `skh-c-${m.cvet}`];
+const metki = (m: Metki) => [
+  m.lit && 'is-lit',
+  m.dim && 'is-dim',
+  m.cvet && `skh-c-${m.cvet}`,
+  m.rol && `skh-r-${m.rol}`,
+];
 
 export function svgSkhemy(
   skhema: ZhivayaSkhema,
   t: Tochki,
   vid: Vid,
   sost: Sostoyanie,
-  { W, H, opisanie, samodostatochnyy = false }: OpciiSvg,
+  { W, H, opisanie, samodostatochnyy = false, tema = 'cvet' }: OpciiSvg,
 ): string {
   const kadr = skhema.postroit(t, rezhimKadra(skhema, sost));
   const e = raskladka(kadr, vid, ramkaKadra(kadr, vid, sost), W, H, sost);
   const out: string[] = [];
   out.push(
-    `<svg class="${cls('skh__svg', samodostatochnyy && 'skh-sam')}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(opisanie)}">`,
+    `<svg class="${cls('skh__svg', samodostatochnyy && 'skh-sam', e.tema && klassTemy(tema))}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(opisanie)}">`,
   );
   if (samodostatochnyy) out.push(`<style>${STIL_SAM}</style>`);
+  /* Тема — после оформления чертежа: роли сильнее общих правил. */
+  if (e.tema) out.push(`<style>${cssTemy()}</style>`);
   out.push('<g class="skh__mnog">');
   e.mnog.forEach((m) =>
     out.push(
-      `<polygon class="${cls('skh-mnog', m.cvet && `skh-c-${m.cvet}`)}" points="${m.points}"/>`,
+      `<polygon class="${cls('skh-mnog', m.cvet && `skh-c-${m.cvet}`, m.rol && `skh-r-${m.rol}`)}" points="${m.points}"/>`,
     ),
   );
   out.push('</g><g class="skh__okr">');
@@ -111,7 +125,9 @@ export function svgSkhemy(
   e.ugly
     .filter((u) => u.sektor !== '')
     .forEach((u) =>
-      out.push(`<path class="${cls('skh-sektor', u.cvet && `skh-c-${u.cvet}`)}" d="${u.sektor}"/>`),
+      out.push(
+        `<path class="${cls('skh-sektor', u.cvet && `skh-c-${u.cvet}`, u.rol && `skh-r-${u.rol}`)}" d="${u.sektor}"/>`,
+      ),
     );
   out.push('</g><g class="skh__linii">');
   e.linii.forEach((l) => {
@@ -128,7 +144,9 @@ export function svgSkhemy(
   );
   out.push('</g><g class="skh__tochki">');
   e.tochki.forEach((p) =>
-    out.push(`<circle class="${cls('skh-tochka', ...metki(p))}" cx="${p.x}" cy="${p.y}" r="2.6"/>`),
+    out.push(
+      `<circle class="${cls('skh-tochka', ...metki(p))}" cx="${p.x}" cy="${p.y}" r="${p.r}"/>`,
+    ),
   );
   out.push('</g><g class="skh__vynoski">');
   e.podpisi

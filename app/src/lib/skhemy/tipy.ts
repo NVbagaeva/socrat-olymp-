@@ -24,6 +24,20 @@ export type Tochki = Readonly<Record<string, T2>>;
  */
 export type Cvet = 'a' | 'b' | 'c';
 
+/**
+ * Смысловая роль элемента в теме чертежа (lib/skhemy/tema.ts): цвет и
+ * толщину задаёт тема, а не шаблон. Нет роли — прежнее оформление
+ * (ключевые схемы, карточки).
+ *   figure — основная фигура: контур и лёгкая заливка;
+ *   region — фигура, площадь которой дана или ищется;
+ *   part-x, part-y — части отрезков, подписанные через x и через y;
+ *   aux — вспомогательные отрезки и чевианы;
+ *   construction — продолжения и построения (пунктир);
+ *   angle — общий или данный угол (дуга и сектор).
+ * Точки, подписи вершин и засечки — роли без пометки: их вид у темы свой.
+ */
+export type Rol = 'figure' | 'region' | 'part-x' | 'part-y' | 'aux' | 'construction' | 'angle';
+
 /** linia — сплошная; punktir — вспомогательное построение; prodolzhenie — продолжение стороны. */
 export type StilLinii = 'linia' | 'punktir' | 'prodolzhenie';
 
@@ -42,6 +56,8 @@ interface Obshchee {
    * треугольников и терракотовая в другой.
    */
   cvet?: Cvet | Readonly<Record<string, Cvet>>;
+  /** Роль в теме чертежа; нет — прежнее оформление. */
+  rol?: Rol;
 }
 
 export type Element =

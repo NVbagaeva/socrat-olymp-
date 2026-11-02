@@ -22,6 +22,8 @@ export interface Dop18 {
   /** Дата на листе: «2026-10-24»; пусто — пустая линия. */
   data: string;
   uchitel: string;
+  /** «Цветные чертежи»: на листе и в PDF — фирменные цвета; нет — монохромные. */
+  cvetnye?: boolean;
 }
 
 export const DOP_18: Dop18 = {
@@ -61,6 +63,7 @@ export function sheetQuery18(p: SheetParams18): string {
   else if (d.svoy !== undefined && d.svoy !== '') q.set('vt', d.svoy);
   if (d.data !== '') q.set('d', d.data);
   if (d.uchitel !== DOP_18.uchitel) q.set('uch', d.uchitel);
+  if (d.cvetnye === true) q.set('cv', '1');
   return q.toString();
 }
 
@@ -95,6 +98,7 @@ export function parseSheetQuery18(
       ...(vid === null && vt !== '' ? { svoy: vt } : {}),
       data: /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : '',
       uchitel: chistyy(q.get('uch') ?? '', 60) || DOP_18.uchitel,
+      ...(q.get('cv') === '1' ? { cvetnye: true } : {}),
     },
   };
 }

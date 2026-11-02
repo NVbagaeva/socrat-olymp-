@@ -26,14 +26,15 @@ export const TR_SREDLIN = scena({
   postroit(t) {
     const { A, B, C, M, N, K } = tochkiSredlin(t);
     const el: Element[] = [
+      mnog('t-fig', [A, B, C], { skrytyy: false, rol: 'figure' }),
       mnog('f-amnk', [A, M, N, K], { gruppy: ['par', 'per'], cvet: 'b' }),
-      otr('AB', A, B, { gruppy: ['nk'], cvet: 'a' }),
-      otr('BC', B, C),
-      otr('CA', C, A, { gruppy: ['mn'], cvet: 'a' }),
-      otr('MN', M, N, { gruppy: ['mn', 'par', 'per'], cvet: 'b' }),
-      otr('NK', N, K, { gruppy: ['nk', 'par', 'per'], cvet: 'b' }),
-      otr('AM-r', A, M, { skrytyy: true, shtrihi: 1, gruppy: ['per'], cvet: 'c' }),
-      otr('AK-r', A, K, { skrytyy: true, shtrihi: 2, gruppy: ['per'], cvet: 'c' }),
+      otr('AB', A, B, { rol: 'figure', gruppy: ['nk'], cvet: 'a' }),
+      otr('BC', B, C, { rol: 'figure' }),
+      otr('CA', C, A, { rol: 'figure', gruppy: ['mn'], cvet: 'a' }),
+      otr('MN', M, N, { rol: 'aux', gruppy: ['mn', 'par', 'per'], cvet: 'b' }),
+      otr('NK', N, K, { rol: 'aux', gruppy: ['nk', 'par', 'per'], cvet: 'b' }),
+      otr('AM-r', A, M, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['per'], cvet: 'c' }),
+      otr('AK-r', A, K, { rol: 'aux', skrytyy: true, shtrihi: 2, gruppy: ['per'], cvet: 'c' }),
       /* Данные условия на чертеже. */
       velOtr('d-AB', '10', A, B),
       velOtr('d-AC', '14', A, C),
@@ -67,13 +68,14 @@ export const TR_INCENTR = scena({
   postroit(t) {
     const { A, B, C, A1, B1, I } = tochkiIncentra(t);
     const el: Element[] = [
+      mnog('t-fig', [A, B, C], { skrytyy: false, rol: 'figure' }),
       mnog('f-aba1', [A, B, A1], { gruppy: ['bisB'], cvet: 'a' }),
-      otr('AB', A, B, { gruppy: ['bisA', 'bisB'], cvet: 'a' }),
-      otr('BC', B, C),
-      otr('CA', C, A, { gruppy: ['bisA'], cvet: 'a' }),
-      otr('AA1', A, A1, { gruppy: ['otv'], cvet: 'b' }),
-      otr('BB1', B, B1),
-      otr('BA1', B, A1, { skrytyy: true, gruppy: ['bisA', 'bisB'], cvet: 'b' }),
+      otr('AB', A, B, { rol: 'figure', gruppy: ['bisA', 'bisB'], cvet: 'a' }),
+      otr('BC', B, C, { rol: 'figure' }),
+      otr('CA', C, A, { rol: 'figure', gruppy: ['bisA'], cvet: 'a' }),
+      otr('AA1', A, A1, { rol: 'aux', gruppy: ['otv'], cvet: 'b' }),
+      otr('BB1', B, B1, { rol: 'aux' }),
+      otr('BA1', B, A1, { rol: 'aux', skrytyy: true, gruppy: ['bisA', 'bisB'], cvet: 'b' }),
       ug('uA1', B, A, A1, { gruppy: ['bisA'], cvet: 'c' }),
       ug('uA2', A1, A, C, { gruppy: ['bisA'], cvet: 'c' }),
       ug('uB1', A, B, B1, { gruppy: ['bisB'], cvet: 'c', dugi: 2 }),
