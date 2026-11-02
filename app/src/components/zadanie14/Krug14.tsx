@@ -20,6 +20,9 @@ export function Krugi14({ specs, className }: { specs: KrugSpec[]; className?: s
   return <div className={className} dangerouslySetInnerHTML={{ __html: krugiHtml(specs) }} />;
 }
 
+/** Якорь первого макета окружности (четверти / пополам / на три части). */
+export const MAKETY_ID = 'makety-okruzhnosti';
+
 /** Рисунок теории или разбора по описанию. */
 export function Risunok14View({ r }: { r: Risunok14 }) {
   const podpis =
@@ -53,7 +56,7 @@ export function Risunok14View({ r }: { r: Risunok14 }) {
       break;
   }
   return (
-    <figure className="z14-ris">
+    <figure className="z14-ris" {...(r.vid === 'delenie' ? { id: MAKETY_ID } : {})}>
       {telo}
       {podpis}
     </figure>

@@ -50,6 +50,8 @@ export type BlokTeorii14 =
     }
   | { vid: 'primer'; primer: Primer14; title?: string }
   | { vid: 'risunok'; risunok: Risunok14 }
+  /** Баннер «грустный котик» с кнопкой к макетам окружности. */
+  | { vid: 'kotik' }
   /** Таблица: заголовки и строки (строки с $…$). */
   | { vid: 'tablica'; zagolovki: string[]; stroki: string[][] };
 

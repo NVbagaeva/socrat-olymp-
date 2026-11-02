@@ -7,7 +7,8 @@ import { katex } from '@/lib/graph/katex';
 import { krugSerii } from '@/lib/zadanie14/krugHtml';
 import { s, u } from '@/lib/zadanie14/ugol';
 import type { BlokTeorii14, Glava14, Primer14 } from '@/lib/zadanie14/teoriyaTipy';
-import { Krug14, Risunok14View } from './Krug14';
+import { Krug14, MAKETY_ID, Risunok14View } from './Krug14';
+import { KotikBanner14 } from './KotikBanner14';
 
 function display(tex: string): string {
   return katex.renderToString(tex, { throwOnError: true, displayMode: true });
@@ -84,6 +85,8 @@ function Blok({ b }: { b: BlokTeorii14 }) {
       );
     case 'risunok':
       return <Risunok14View r={b.risunok} />;
+    case 'kotik':
+      return <KotikBanner14 href={`#${MAKETY_ID}`} />;
     case 'tablica':
       return (
         <div className="z14-tablica-wrap">
