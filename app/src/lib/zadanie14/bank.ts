@@ -132,7 +132,7 @@ export const BANK_14: Uravnenie14[] = [
   }),
   ur({
     id: 'bank-04',
-    iz: 'лист 22, №13',
+    iz: 'файл решений, №13',
     uravnenie: '8\\sin^2x+2\\sqrt{3}\\cos x+1=0',
     f: (x) => 8 * sin(x) ** 2 + 2 * sqrt(3) * cos(x) + 1,
     serii: [s(u(5, 6)), s(u(-5, 6))],
