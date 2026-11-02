@@ -18,9 +18,15 @@
  * генератора в браузере, а примеры считает сервер.
  */
 
+import type { Blok10 } from '@/lib/zadanie10/teoriya-yakorya';
 import type { ChastEdinic } from './teoriya-edinicy';
 
-export type BlokTeorii10 =
+/**
+ * Блок раздела. `yakor` — имя рамки, таблицы или ловушки для «Повторить
+ * теорию» из карточек по теории (lib/zadanie10/teoriya-yakorya.ts): на
+ * странице это id «t10-<имя>».
+ */
+export type BlokTeorii10 = { yakor?: Blok10 } & (
   | { vid: 'opredelenie'; title?: string; paras: string[]; formula?: string; spisok?: string[] }
   | { vid: 'formula'; formula: string; podpis?: string }
   | { vid: 'primer'; title: string; zadacha: string; kratko?: boolean }
@@ -58,7 +64,8 @@ export type BlokTeorii10 =
       chasti: ChastEdinic['id'][];
       izBanka?: string;
       kratko?: boolean;
-    };
+    }
+);
 
 export interface RazdelTeorii10 {
   id: string;
@@ -79,6 +86,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'algoritm',
         title: 'Алгоритм',
         paras: [
           'Прикладная задача ЕГЭ — это формула из физики или экономики и вопрос «найдите такую-то величину». Знать физику не нужно: все буквы объяснены в условии. Решаем по шести шагам:',
@@ -96,6 +104,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'primer', title: 'Мост: длина ванты', zadacha: 'F001' },
       {
         vid: 'vazhno',
+        yakor: 'vanta',
         paras: [
           'Ванта висит вертикально от цепи до полотна, а полотно лежит на оси $Ox$. Поэтому длина ванты — это просто значение $y$ в точке $x$: никаких теорем Пифагора.',
           'Длинное условие почти всегда сокращается до одной строки «подставь и посчитай».',
@@ -103,6 +112,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'vyvod',
+        yakor: 'formula-dana',
         paras: [
           'Формула дана — ищем не «как решить физику», а какую букву неизвестно и какие числа подставить.',
         ],
@@ -118,6 +128,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'edinicy-v-formule',
         title: 'Что такое единицы в формуле',
         paras: [
           'Числа в формулу подставляют в тех единицах, в которых она записана: если скорость в км/ч, а ускорение в км/ч², то время из формулы получится в часах.',
@@ -130,6 +141,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'primer', title: 'Горизонт: высота сразу в метрах', zadacha: 'F091', kratko: true },
       {
         vid: 'vazhno',
+        yakor: 'otvet-v-edinicah',
         paras: [
           'Ответ записывают в тех единицах, которые просят в **последнем** предложении условия. Перечитайте его перед тем, как писать число в бланк (см. пример «Мотоциклист»: время вышло в часах, а спрашивали минуты).',
           'В формуле горизонта $l=\\sqrt{\\dfrac{Rh}{500}}$ радиус $R$ — в километрах, а высота $h$ — в метрах: $2R\\cdot\\dfrac{h}{1000}=\\dfrac{Rh}{500}$. Деление на $500$ уже переводит метры в километры, поэтому $h$ подставляют в метрах и ещё раз умножать на $1000$ не нужно (см. пример «Горизонт»).',
@@ -152,6 +164,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'proporciya',
         title: 'Пропорция',
         paras: [
           'Если две дроби равны, то произведения «крест-накрест» тоже равны. Так дробное уравнение превращается в линейное.',
@@ -161,6 +174,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'formula',
+        yakor: 'vyrazit-r',
         formula:
           '\\begin{gathered}U=\\dfrac{\\varepsilon R}{R+r}\\;\\Longrightarrow\\; U(R+r)=\\varepsilon R\\\\ \\Longrightarrow\\; R=\\dfrac{Ur}{\\varepsilon-U}\\end{gathered}',
         podpis: 'Перемножили «крест-накрест», собрали $R$ в одной части, вынесли за скобку',
@@ -180,6 +194,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'vazhno',
+        yakor: 'znamenatel',
         title: 'Когда знаменатель не ноль',
         paras: [
           'Умножать обе части на знаменатель можно, только если он не ноль. В задачах это видно по смыслу: $R+r>0$ — сопротивления положительны (см. пример «Источник ЭДС»); $c-v>0$ — звук быстрее, чем движется участник со скоростью $v$ (см. пример «Источник и приёмник»).',
@@ -203,6 +218,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
     bloki: [
       {
         vid: 'formula',
+        yakor: 'formula-korney',
         formula:
           '\\begin{gathered}at^2+bt+c=0,\\quad D=b^2-4ac,\\\\ t_{1,2}=\\dfrac{-b\\pm\\sqrt{D}}{2a}\\end{gathered}',
         podpis:
@@ -210,6 +226,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'opredelenie',
+        yakor: 'vybor-kornya',
         title: 'Выбор корня по смыслу',
         paras: [
           '**Отрицательное время** не подходит — момент до начала наблюдения.',
@@ -221,6 +238,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'primer', title: 'Нагреватель: когда отключить', zadacha: 'F029', kratko: true },
       {
         vid: 'opredelenie',
+        yakor: 'neravenstvo',
         title: '«Наибольшее / наименьшее» через неравенство',
         paras: [
           'Условие «выручка не менее 100» — это неравенство $r(p)\\ge100$. Решаем его: парабола ветвями вверх меньше или равна нулю **между корнями**. Наибольшая цена — правый конец промежутка.',
@@ -229,6 +247,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'primer', title: 'Спрос и выручка: наибольшая цена', zadacha: 'F017', kratko: true },
       {
         vid: 'opredelenie',
+        yakor: 'vershina',
         title: 'Дискриминант равен нулю: вершина',
         paras: [
           'В задаче про бак $D=0$: парабола касается оси времени в одной точке — это вершина $t=-\\dfrac{b}{2a}$. В этот момент вода вытекла до уровня крана.',
@@ -237,6 +256,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'primer', title: 'Бак: время вытекания', zadacha: 'F023', kratko: true },
       {
         vid: 'opredelenie',
+        yakor: 'promezhutok',
         title: 'Длина промежутка: мяч выше отметки',
         paras: [
           'Мяч летит вверх, пересекает отметку $H$ в момент $t_1$, поднимается, падает и пересекает её снова в момент $t_2$. Он выше отметки $t_2-t_1$ секунд — нужны **оба** корня. Подвигайте ползунок: отметка выше — промежуток короче.',
@@ -245,6 +265,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'zhivoy', chto: 'myach' },
       {
         vid: 'vazhno',
+        yakor: 'pervyy-koren',
         paras: [
           'Не спешите вписывать в бланк первый найденный корень. Спросите себя: что происходит в этот момент? Машина ещё едет (см. пример «Торможение»: корень $10$ — после остановки)? Прибор ещё цел (см. пример «Нагреватель»: после $4$ минут он уже испорчен)?',
         ],
@@ -264,6 +285,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'vozvedenie',
         title: 'Возведение обеих частей',
         paras: [
           'Корень убирают возведением обеих частей в квадрат: $v=\\sqrt{2la}\\;\\Rightarrow\\;v^2=2la$. Так можно делать, потому что обе части неотрицательны.',
@@ -272,6 +294,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'formula',
+        yakor: 'drobnyy-pokazatel',
         formula:
           '\\begin{gathered}a^{\\frac{m}{n}}=\\left(\\sqrt[n]{a}\\right)^m,\\qquad 1{,}4=\\dfrac{7}{5},\\\\ x^{\\frac{7}{5}}=2^7\\;\\Rightarrow\\;x=2^5\\end{gathered}',
         podpis: 'Дробный показатель: сначала корень, потом степень',
@@ -279,6 +302,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'primer', title: 'Адиабата: объём после сжатия', zadacha: 'F115' },
       {
         vid: 'opredelenie',
+        yakor: 'standartnyy-vid',
         title: 'Стандартный вид числа',
         paras: [
           'Очень большие и очень маленькие числа записывают как $a\\cdot10^n$, где $1\\le a<10$: мощность звезды $9{,}12\\cdot10^{25}$ Вт, постоянная $5{,}7\\cdot10^{-8}$.',
@@ -293,6 +317,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'vazhno',
+        yakor: 'odno-osnovanie',
         paras: [
           'Удобно представлять числа степенями одного основания: $128=2^7$, $32=2^5$, $625=5^4$. Тогда корень извлекается в уме (см. примеры «Адиабата» и «Звезда»).',
         ],
@@ -314,6 +339,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'raspad',
         title: 'Что значит степень двойки в законе распада',
         paras: [
           'За время $T$ (период полураспада) масса уменьшается **вдвое**. Показатель $\\dfrac{t}{T}$ — сколько раз она успела уменьшиться вдвое за время $t$.',
@@ -325,6 +351,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'primer', title: 'Распад: через сколько минут', zadacha: 'F109' },
       {
         vid: 'opredelenie',
+        yakor: 'logarifm',
         title: 'Логарифм как «сколько раз удвоить»',
         paras: [
           '$\\log_2 x$ — показатель степени, в которую нужно возвести $2$, чтобы получить $x$. Например, $\\log_2 8=3$, потому что $2^3=8$.',
@@ -359,9 +386,10 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
           zametka: true,
         },
       },
-      { vid: 'pochemuKondensator', zadacha: 'F131' },
+      { vid: 'pochemuKondensator', yakor: 'pochemu', zadacha: 'F131' },
       {
         vid: 'tablica',
+        yakor: 'stepeni-dvoyki',
         title: 'Степени двойки',
         head: ['$k$', '$1$', '$2$', '$3$', '$4$', '$5$', '$6$', '$7$'],
         rows: [['$2^k$', '$2$', '$4$', '$8$', '$16$', '$32$', '$64$', '$128$']],
@@ -369,6 +397,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'vazhno',
+        yakor: 'rc',
         paras: [
           'Произведение $RC$ почти всегда «чистое»: множители вида $10^k$ и $10^{-k}$ дают $10^0=1$. Сократите их до вычислений — меньше шансов ошибиться (см. шаг 1 примера).',
           '«Прошло не менее $t$ секунд» → $t\\ge\\ldots$, и из-за того, что время и напряжение меняются в разные стороны, ответ — наибольшее напряжение: решаем неравенство и берём границу (см. рамку «Почему так»).',
@@ -376,6 +405,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'vyvod',
+        yakor: 'celoe-k',
         paras: [
           'В таких задачах после деления на $\\alpha RC$ получается целое число $k$: $\\log_2\\dfrac{U_0}{U}\\ge k$. Значит, на границе $\\dfrac{U_0}{U}=2^k$ — степень двойки, и ответ $U=U_0:2^k$. Таблица степеней двойки выше нужна именно для этого шага.',
           'Если число $k$ вышло нецелым — перепроверьте $\\alpha RC$.',
@@ -392,6 +422,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
     bloki: [
       {
         vid: 'tablica',
+        yakor: 'tablichnye',
         title: 'Табличные значения',
         head: [
           '$\\alpha$',
@@ -422,6 +453,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'opredelenie',
+        yakor: 'monotonnost',
         title: 'Синус не меньше числа → наименьший угол',
         paras: [
           'Угол броска острый: от $0^\\circ$ до $90^\\circ$. На этом промежутке синус **растёт**, поэтому $\\sin\\alpha\\ge\\dfrac{1}{2}$ выполняется при $\\alpha\\ge30^\\circ$. Наименьший угол — тот, у которого синус ровно $\\dfrac{1}{2}$.',
@@ -431,6 +463,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       { vid: 'primer', title: 'Мяч под углом: наименьший угол', zadacha: 'F139' },
       {
         vid: 'formula',
+        yakor: 'ponizhenie',
         formula:
           '\\sin^2\\alpha=\\dfrac{1-\\cos2\\alpha}{2},\\qquad 1-\\cos2\\alpha=2\\sin^2\\alpha',
         podpis: 'Формула понижения степени: связывает $\\sin^2\\alpha$ и $\\cos2\\alpha$',
@@ -450,6 +483,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'vazhno',
+        yakor: 'kakoy-ugol',
         paras: [
           'Читайте, **какой** угол спрашивают: $\\alpha$ или $2\\alpha$. В задаче о соударении ответ — $2\\alpha$, в задаче о мячике над стеной — $\\alpha$ (см. примеры «Неупругое соударение» и «Мячик над стеной»).',
           'В формуле груза на пружине $\\dfrac{2\\pi t}{T}$ — угол в радианах: $\\pi$ — это $180^\\circ$ (см. пример «Груз на пружине»: $\\dfrac{2\\pi}{3}$ — это $120^\\circ$).',
@@ -478,6 +512,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
     bloki: [
       {
         vid: 'lovushka',
+        yakor: 'lov-edinicy',
         title: 'Не перевели единицы',
         oshibka: 'Нашли $t=\\dfrac{1}{3}$ и записали в бланк $0{,}33$ — а спрашивали минуты.',
         pravilno:
@@ -485,6 +520,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'lovushka',
+        yakor: 'lov-koren',
         title: 'Взяли не тот корень',
         oshibka: 'Торможение: корни $t=6$ и $t=10$, в ответе $10$.',
         pravilno:
@@ -492,6 +528,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'lovushka',
+        yakor: 'lov-znak',
         title: 'Перепутали «не менее» и «не более»',
         oshibka: '«Выручка не менее $100$» записали как $r(p)\\le100$.',
         pravilno:
@@ -499,6 +536,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'lovushka',
+        yakor: 'lov-smysl',
         title: 'Ответ не по смыслу',
         oshibka: 'Получили отрицательное время $t=-7$ или отрицательную длину и записали в бланк.',
         pravilno:
@@ -506,6 +544,7 @@ export const RAZDELY_TEORII_10: RazdelTeorii10[] = [
       },
       {
         vid: 'vyvod',
+        yakor: 'pered-otvetom',
         paras: [
           'Перед тем как записать ответ: единицы, тот ли корень, тот ли знак неравенства, похоже ли на правду.',
         ],

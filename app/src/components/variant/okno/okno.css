@@ -1,0 +1,206 @@
+/* Окно «Собрать вариант» (Okno.tsx): на телефоне — нижняя шторка, от
+   768px — диалог по центру. Стекло — общая рецептура (--glass-*). */
+
+.okno {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.okno__fon {
+  position: absolute;
+  inset: 0;
+  background: rgb(14 35 80 / 0.32);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: okno-fon-in 220ms var(--ease) both;
+}
+.okno__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100dvh - 48px - var(--okno-klava, 0px));
+  margin-bottom: var(--okno-klava, 0px);
+  padding-bottom: env(safe-area-inset-bottom);
+  border-radius: 24px 24px 0 0;
+  background: rgb(250 252 255 / 0.94);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--glass-edge);
+  border-bottom: 0;
+  box-shadow:
+    var(--glass-hi),
+    0 -12px 40px -12px rgb(16 40 100 / 0.3);
+  outline: none;
+  animation: okno-in 220ms var(--ease) both;
+  touch-action: pan-y;
+}
+.okno__panel.is-drag {
+  animation: none;
+  transition: none;
+}
+.okno[data-state='closing'] .okno__fon {
+  animation: okno-fon-out 220ms var(--ease) both;
+}
+.okno[data-state='closing'] .okno__panel {
+  animation: okno-out 220ms var(--ease) both;
+}
+@keyframes okno-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes okno-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes okno-fon-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes okno-fon-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.okno__ruchka {
+  display: grid;
+  place-items: center;
+  height: 22px;
+  cursor: grab;
+  touch-action: none;
+}
+.okno__ruchka span {
+  width: 40px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgb(16 23 40 / 0.18);
+}
+.okno__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-5) var(--space-3);
+  touch-action: none;
+}
+.okno__title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+.okno__sub {
+  margin: var(--space-1) 0 0;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+.okno__close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -6px -10px 0 0;
+  border: 0;
+  border-radius: 12px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+.okno__close:hover {
+  background: rgb(16 23 40 / 0.06);
+}
+.okno__close svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.okno__close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.okno__telo {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-1) var(--space-5) var(--space-5);
+}
+.okno__niz {
+  flex: none;
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  border-top: 1px solid rgb(31 95 208 / 0.08);
+}
+
+/* Планшет и компьютер: диалог по центру. */
+@media (min-width: 768px) {
+  .okno {
+    align-items: center;
+    padding: var(--space-6);
+  }
+  .okno__panel {
+    width: min(560px, 100%);
+    max-height: min(86vh, 860px);
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-radius: 24px;
+    border-bottom: 1px solid var(--glass-edge);
+    box-shadow:
+      var(--glass-hi),
+      0 24px 64px -16px rgb(16 40 100 / 0.35);
+    animation-name: okno-in-centr;
+  }
+  .okno--small .okno__panel {
+    width: min(440px, 100%);
+  }
+  .okno[data-state='closing'] .okno__panel {
+    animation-name: okno-out-centr;
+  }
+  .okno__ruchka {
+    display: none;
+  }
+  .okno__head {
+    padding-top: var(--space-5);
+  }
+}
+@keyframes okno-in-centr {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+@keyframes okno-out-centr {
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .okno__fon,
+  .okno__panel,
+  .okno[data-state='closing'] .okno__fon,
+  .okno[data-state='closing'] .okno__panel {
+    animation: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .okno__panel {
+    background: var(--white);
+  }
+  .okno__fon {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

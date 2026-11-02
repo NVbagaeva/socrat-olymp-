@@ -3,24 +3,13 @@
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import { BLANKI_KITS, BLANKI_TEXT as T, type BlankKit } from '@/content/blanki';
-import { blankUrl } from '@/lib/blanki';
+import { pryamayaSsylka, sobratISkachat } from './skachat';
 import './blanki.css';
 
 export interface BlankiEgeProps {
   /** Копий бланка ответов № 1 по умолчанию: на «Собрать вариант» — число вариантов. */
   defaultCopies?: number;
   className?: string;
-}
-
-function saveBytes(bytes: Uint8Array, name: string): void {
-  const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: 'application/pdf' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${name}.pdf`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 /**
@@ -42,13 +31,10 @@ export function BlankiEge({ defaultCopies = 1, className }: BlankiEgeProps) {
   const copies = copiesTyped ?? Math.max(1, defaultCopies);
 
   async function skachat(kit: BlankKit) {
-    const n = kit.copies === true ? copies : 1;
     setBusy(kit.id);
     setFailed(false);
     try {
-      const { sobratBlanki } = await import('@/lib/blankiPdf');
-      const bytes = await sobratBlanki(kit.parts, n);
-      saveBytes(bytes, n > 1 ? `${kit.file}-${n}-kopii` : kit.file);
+      await sobratISkachat(kit, copies);
     } catch {
       setFailed(true);
     } finally {
@@ -64,11 +50,10 @@ export function BlankiEge({ defaultCopies = 1, className }: BlankiEgeProps) {
         {kit.note === undefined ? null : <span className="blanki__note">{kit.note}</span>}
       </>
     );
-    const [only] = kit.parts;
-    const direct = kit.parts.length === 1 && (kit.copies !== true || copies === 1);
-    if (direct && only !== undefined) {
+    const href = pryamayaSsylka(kit, copies);
+    if (href !== null) {
       return (
-        <a className={cls} href={blankUrl(only)} download={`${kit.file}.pdf`}>
+        <a className={cls} href={href} download={`${kit.file}.pdf`}>
           {label}
         </a>
       );

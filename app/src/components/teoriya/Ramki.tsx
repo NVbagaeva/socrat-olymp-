@@ -46,17 +46,24 @@ export function Abzacy({ paras }: { paras: readonly string[] }) {
   );
 }
 
+/** Якорь рамки на странице (id): сюда ведёт ссылка на фрагмент теории. */
+function yakor(id: string | undefined) {
+  return id === undefined ? {} : { id };
+}
+
 export function RamkaOpredelenie({
   title = 'Определение',
   children,
   formula,
+  id,
 }: {
   title?: string;
   children?: ReactNode;
   formula?: string;
+  id?: string;
 }) {
   return (
-    <section className="ramka ramka--opredelenie">
+    <section className="ramka ramka--opredelenie" {...yakor(id)}>
       <span className="ramka__plashka">{title}</span>
       {children}
       {formula === undefined ? null : <Formula tex={formula} className="ramka__formula" />}
@@ -64,9 +71,17 @@ export function RamkaOpredelenie({
   );
 }
 
-export function RamkaFormula({ formula, podpis }: { formula: string; podpis?: string }) {
+export function RamkaFormula({
+  formula,
+  podpis,
+  id,
+}: {
+  formula: string;
+  podpis?: string;
+  id?: string;
+}) {
   return (
-    <figure className="ramka ramka--formula">
+    <figure className="ramka ramka--formula" {...yakor(id)}>
       <Formula tex={formula} className="ramka__formula ramka__formula--glavnaya" />
       {podpis === undefined ? null : (
         <figcaption className="ramka__podpis">
@@ -117,15 +132,17 @@ export function RamkaPrimer({
   shagi,
   otvet,
   children,
+  id,
 }: {
   title: string;
   uslovie?: string;
   shagi: readonly ShagPrimera[];
   otvet?: string;
   children?: ReactNode;
+  id?: string;
 }) {
   return (
-    <section className="ramka ramka--primer">
+    <section className="ramka ramka--primer" {...yakor(id)}>
       <span className="ramka__plashka ramka__plashka--primer">Пример</span>
       <h4 className="ramka__zagolovok">
         <Tex text={title} zagolovok />
@@ -166,12 +183,14 @@ export function RamkaPrimer({
 export function RamkaVazhno({
   title = 'Важно!',
   children,
+  id,
 }: {
   title?: string;
   children?: ReactNode;
+  id?: string;
 }) {
   return (
-    <aside className="ramka ramka--vazhno">
+    <aside className="ramka ramka--vazhno" {...yakor(id)}>
       <span className="ramka__znak" aria-hidden="true">
         !
       </span>
@@ -186,12 +205,14 @@ export function RamkaVazhno({
 export function RamkaVyvod({
   title = 'Вывод',
   children,
+  id,
 }: {
   title?: string;
   children?: ReactNode;
+  id?: string;
 }) {
   return (
-    <aside className="ramka ramka--vyvod">
+    <aside className="ramka ramka--vyvod" {...yakor(id)}>
       <span className="ramka__znak ramka__znak--vyvod" aria-hidden="true">
         ⇒
       </span>

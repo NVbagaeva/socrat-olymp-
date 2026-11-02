@@ -15,6 +15,9 @@ import type { ZhivayaSkhema } from '../skhemy/tipy';
 import type { StsenaId } from '../vektory/stseny';
 import type { Risunok as RisunokVektorov } from '../vektory/types';
 import type { RisunokVeroyatnosti } from '../veroyatnost/risunkiKartochek';
+import type { RisEilera } from '../zadanie6/risunkiKartochek';
+import type { Figura as Figura9 } from '../proizvodnaya/types';
+import type { ParamsMosta } from '../zadanie10/chertezh/most';
 
 /**
  * Тип карточки.
@@ -45,6 +48,16 @@ export type UrovenKartochki = 'база' | 'важно для ЕГЭ';
  *   `povorot` — случайное положение, поворот и отражение; `bukvy` —
  *   подписи точек на лицевой стороне, `bukvyNaOborote` — на обороте
  *   (по умолчанию как на лицевой);
+ * - `zadanie6` — диаграмма Эйлера с точками-исходами №6 (та же модель
+ *   рисунка, что в теории и тренажёре);
+ * - `graph` — сцена движка чертежей lib/graph (renderGraph): у №7 —
+ *   единичная окружность;
+ * - `proizvodnaya` — график движка №9 (lib/proizvodnaya/render.ts) в
+ *   режиме ученика: кривая, касательная, отмеченные точки — без
+ *   построений; `alt` фигуры — подпись для чтения с экрана;
+ * - `most10` — чертёж висячего моста №10 (lib/zadanie10/chertezh/most.ts)
+ *   в режиме ученика: та же композиция, что в теории и в условии задачи;
+ *   `title` — подпись для чтения с экрана;
  * - `svg` — путь к файлу в public/.
  *
  * `povorot` — рисовать в случайном повороте (тип `chertezh`).
@@ -55,6 +68,11 @@ export type FiguraKartochki =
   | { dvizhok: 'vektory'; stsena: StsenaId | RisunokVektorov }
   | { dvizhok: 'solid'; model: () => Model }
   | { dvizhok: 'veroyatnost'; risunok: RisunokVeroyatnosti }
+  | { dvizhok: 'zadanie6'; ris: RisEilera }
+  /** Сцена renderGraph; `alt` сцены — подпись для чтения с экрана. */
+  | { dvizhok: 'graph'; scena: () => Record<string, unknown> }
+  | { dvizhok: 'proizvodnaya'; fig: () => Figura9 }
+  | { dvizhok: 'most10'; most: ParamsMosta; title: string }
   | {
       dvizhok: 'skhema';
       skhema: () => ZhivayaSkhema;

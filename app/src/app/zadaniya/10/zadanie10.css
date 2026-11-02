@@ -891,3 +891,17 @@
     padding: var(--space-4) var(--space-3);
   }
 }
+
+/* Рамка теории — якорь «Повторить теорию» из карточек по теории
+   (lib/zadanie10/teoriya-yakorya.ts): встаёт под липкую ленту. На узком
+   экране к ней добавляется полоса «Содержание» — и карточка «Физика в
+   двух словах» (#fizika-…) тоже не должна под ней прятаться. */
+.vteor [id^='t10-'] {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+@media (max-width: 1023.98px) {
+  .vteor [id^='t10-'],
+  .vteor .z10-fizika__karta {
+    scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
+  }
+}

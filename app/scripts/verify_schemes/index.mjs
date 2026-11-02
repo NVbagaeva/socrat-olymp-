@@ -20,6 +20,7 @@ import { proverit as teoriya } from './teoriya.mjs';
 import { proverit as trenazher } from './trenazher.mjs';
 import { proverit as generator } from './generator.mjs';
 import { proverit as geometriya } from './geometriya.mjs';
+import { proverit as trenazherDop } from './trenazherDop/index.mjs';
 import { proverit as stepenTochki } from './stepenTochki.mjs';
 import { proverit as trapecii } from './trapecii.mjs';
 import { proverit as ploshchadi } from './ploshchadi.mjs';
@@ -52,6 +53,7 @@ for (const proverit of [
   stepenTochki,
   teoriya,
   trenazher,
+  trenazherDop,
   generator,
   geometriya,
 ]) {
