@@ -3,7 +3,8 @@
    pnpm test:drawing-labels [--brauzer] [--snimki папка]
 
    Шаблоны чертежей с записями (числа, корни, дроби):
-     • №18 — движок схем (lib/skhemy): все сцены тренажёра и генератора;
+     • №18 — движок схем (lib/skhemy): все сцены тренажёра и генератора
+       и чертежи опорных задач;
      • №3 — стереометрия (lib/chertezh3): варианты банка с корнем на чертеже;
      • №1 — планиметрия (lib/planimetriya): прототипы, где на чертеже корень.
    У каждого шаблона — 20 вариантов (числа, ракурс, поворот, размер).
@@ -45,7 +46,7 @@ function fakt(imya, ok, podrobno = '') {
   if (ok) s.ok += 1;
   else {
     plokho += 1;
-    if (s.primery.length < 5) s.primery.push(podrobno);
+    if (s.primery.length < (process.env.VSE ? 999 : 5)) s.primery.push(podrobno);
   }
   schet.set(imya, s);
 }
@@ -79,11 +80,31 @@ const chertezhi = [];
   const { KOREN } = requireSrc('lib/risunki/koren.js');
   const rnd = zerno(1801);
   const sost = { lit: new Set(), shag: null, podpisi: true };
-  for (const t of TIPY_18) {
+  /* Шаблоны движка схем с записями: сцены тренажёра и генератора №18
+     (варианты чисел) и опорные задачи №18 (исходное положение и
+     случайные положения). */
+  const { OPORNYE_18 } = requireSrc('content/zadanie18/opornye/index');
+  const { trebuetsyaScenaOpornoy18 } = requireSrc('lib/zadanie18/opornye/index');
+  const SHABLONY = [
+    ...TIPY_18.map((t) => ({
+      id: t.id,
+      sk: (i) => {
+        const z = scena18(t.id, t.varianty[i % t.varianty.length]);
+        return { z, tt: z.nachalo };
+      },
+    })),
+    ...OPORNYE_18.map((o) => ({
+      id: `opornaya-${o.id}`,
+      sk: (i) => {
+        const z = trebuetsyaScenaOpornoy18(o.id);
+        return { z, tt: i === 0 ? z.nachalo : z.sluchaynaya(rnd) };
+      },
+    })),
+  ];
+  for (const t of SHABLONY) {
     for (let i = 0; i < N; i += 1) {
-      const p = t.varianty[i % t.varianty.length];
-      const sk = scena18(t.id, p);
-      const kadr = sk.postroit(sk.nachalo);
+      const { z: sk, tt } = t.sk(i);
+      const kadr = sk.postroit(tt);
       /* Первые три — как на листе и в тренажёре, дальше — повороты,
          отражение и размеры экрана. */
       const vid =
@@ -168,7 +189,7 @@ const chertezhi = [];
         chertezhi.push({
           id,
           dvizhok: '18',
-          svg: svgSkhemy(sk, sk.nachalo, vid, sost, { W, H, opisanie: '', samodostatochnyy: true }),
+          svg: svgSkhemy(sk, tt, vid, sost, { W, H, opisanie: '', samodostatochnyy: true }),
         });
     }
   }

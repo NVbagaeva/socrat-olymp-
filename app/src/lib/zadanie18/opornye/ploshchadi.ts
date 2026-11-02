@@ -4,7 +4,7 @@
  * Тексты — content/zadanie18/opornye/ploshchadi.ts.
  */
 
-import { mnog, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, otr, tch, ug, vel } from '@/lib/skhemy/dsl';
 import { chisloTeX, dist, foot, mid } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki } from '@/lib/skhemy/tipy';
 import {
@@ -37,6 +37,14 @@ export const OP_TRI_UGLA = scena({
   postroit(t) {
     const { A, B, C, K, L, M } = tochkiTrehUglov(t);
     const el: Element[] = [
+      /* б) ищет площадь: искомая фигура и «S = ?». */
+      mnog('isk', [K, L, M], { skrytyy: false, rol: 'region-sought' }),
+      vel(
+        'd-S',
+        'S_KLM = ?',
+        { vnutri: [(K[0] + L[0] + M[0]) / 3, (K[1] + L[1] + M[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       mnog('f-abc', [A, B, C], { gruppy: ['geron'], cvet: 'c' }),
       mnog('f-akm', [A, K, M], { gruppy: ['akm', 'ugly'], cvet: 'a' }),
       mnog('f-bkl', [B, L, K], { gruppy: ['bkl', 'ugly'], cvet: 'b' }),

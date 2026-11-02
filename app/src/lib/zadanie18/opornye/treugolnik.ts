@@ -5,7 +5,7 @@
  * проверка scripts/verify_opornye18.
  */
 
-import { mnog, okr, otr, tch, ug } from '@/lib/skhemy/dsl';
+import { mnog, okr, otr, tch, ug, vel } from '@/lib/skhemy/dsl';
 import {
   add,
   chisloTeX,
@@ -190,6 +190,14 @@ export const OP_MEDIANA = scena({
   postroit(t) {
     const { A, B, C, M, D } = tochkiMediany(t);
     const el: Element[] = [
+      /* б) ищет площадь: искомая фигура и «S = ?». */
+      mnog('isk', [A, B, C], { skrytyy: false, rol: 'region-sought' }),
+      vel(
+        'd-S',
+        'S_ABC = ?',
+        { vnutri: [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3] },
+        { rol: 'region-sought' },
+      ),
       mnog('f-amc', [A, M, C], { gruppy: ['udv', 'pl'], cvet: 'b' }),
       mnog('f-dmb', [D, M, B], { gruppy: ['udv', 'pl'], cvet: 'b' }),
       mnog('f-abm', [A, B, M], { gruppy: ['pl'], cvet: 'a' }),

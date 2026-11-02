@@ -17,6 +17,7 @@ import type { Uroven } from '@/lib/trenazher/types';
 import type { Parametry } from '@/lib/zadanie18/trenazher/sceny';
 import type { Podsvechennoe } from './tipy';
 import { TIPY_DOP_18 } from './trenazherDop';
+import { TIPY_18_NOVYE } from './trenazherNovye';
 
 export interface Tekst18 {
   uslovie: string;
@@ -57,7 +58,7 @@ const sh = (tekst: string, ...gruppy: string[]): Podsvechennoe => ({ tekst, grup
 /** Часть отношения, как на чертеже: 1 → $x$, 3 → $3x$. */
 const chast = (n: number, bukva: string) => (n === 1 ? bukva : `${n}${bukva}`);
 
-export const TIPY_18: readonly TipZadachi18[] = [
+const TIPY_18_OSNOVNYE: readonly TipZadachi18[] = [
   {
     id: 'vysoty-cos',
     nazvanie: 'Две высоты: подобие с коэффициентом — косинусом угла',
@@ -825,6 +826,9 @@ export const TIPY_18: readonly TipZadachi18[] = [
   } /* Перенесённые задачи с одним набором чисел — trenazherDop/. */,
   ...TIPY_DOP_18,
 ];
+
+/** Все типы: исходные и по новым опорным задачам (trenazherNovye.ts). */
+export const TIPY_18: readonly TipZadachi18[] = [...TIPY_18_OSNOVNYE, ...TIPY_18_NOVYE];
 
 /** Несократимая дробь в TeX. */
 function drob(a: number, b: number): string {

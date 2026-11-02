@@ -42,6 +42,7 @@ export function Opornaya18Stranica({ id }: { id: string }) {
   const pred = nomer > 0 ? OPORNYE_18[nomer - 1] : undefined;
   const sled = nomer + 1 < OPORNYE_18.length ? OPORNYE_18[nomer + 1] : undefined;
   const gruppa = GRUPPY_18.find((g) => g.id === o.gruppa)?.title ?? '';
+  const bazovaya = o.variaciya === undefined ? undefined : opornaya18(o.variaciya);
 
   function otkryt(chast: Chast, n: number): void {
     const vsego = shagi[chast].length;
@@ -58,9 +59,16 @@ export function Opornaya18Stranica({ id }: { id: string }) {
 
       <header className="z18-sk__head">
         <p className="z18-sk__eyebrow">
-          {UI.zadacha(o.no)} · {gruppa} · {UI.sostavleno}
+          {UI.zadacha(o.no)} · {gruppa} · {o.istochnik === 'kurs' ? UI.izKursa : UI.sostavleno}
         </p>
         <h2 className="t-h2">{o.nazvanie}</h2>
+        {bazovaya === undefined ? null : (
+          <p className="z18-op-variaciya">
+            <Link href={`${BASE}/opornye-zadachi/${bazovaya.id}/`}>
+              {UI.variaciya(bazovaya.no)}: {bazovaya.nazvanie}
+            </Link>
+          </p>
+        )}
       </header>
 
       <div className="z18-sk__grid">
@@ -116,6 +124,30 @@ export function Opornaya18Stranica({ id }: { id: string }) {
             </ul>
           </section>
 
+          {o.podskazki === undefined || o.podskazki.length === 0 ? null : (
+            <section className="z18-blok" aria-labelledby="z18-op-podskazki">
+              <h3 id="z18-op-podskazki" className="z18-blok__title">
+                {UI.podskazki}
+              </h3>
+              <p className="z18-blok__podskazka">{UI.podskazkiPodskazka}</p>
+              <ol className="z18-op-podskazki">
+                {o.podskazki.map((p, i) => (
+                  <li key={i}>
+                    <details className="z18-op-podskazka">
+                      <summary>
+                        <Tex text={p.vopros} />
+                      </summary>
+                      <p>
+                        <span className="z18-op-podskazka__metka">{UI.podskazkaOtvet}: </span>
+                        <Tex text={p.otvet} />
+                      </p>
+                    </details>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
           <Callout tone="layfhak" label="Сначала сам">
             <p>{UI.snachalaSam}</p>
           </Callout>
@@ -153,6 +185,29 @@ export function Opornaya18Stranica({ id }: { id: string }) {
               </button>
             )}
           </section>
+
+          {o.oshibki === undefined || o.oshibki.length === 0 ? null : (
+            <section className="z18-blok" aria-labelledby="z18-op-oshibki">
+              <h3 id="z18-op-oshibki" className="z18-blok__title">
+                {UI.oshibki}
+              </h3>
+              <ul className="z18-op-oshibki">
+                {o.oshibki.map((t, i) => (
+                  <li key={i}>
+                    <Tex text={t} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {o.vazhno === undefined ? null : (
+            <Callout primer={<Tex text={o.vazhno.primer} />}>
+              <p>
+                <Tex text={o.vazhno.tekst} />
+              </p>
+            </Callout>
+          )}
         </div>
       </div>
 

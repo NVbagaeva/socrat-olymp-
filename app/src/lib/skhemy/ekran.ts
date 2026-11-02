@@ -768,7 +768,8 @@ function shirinaZnaka(ch: string, kursiv: boolean): number {
   if (/[a-z]/.test(ch)) return kursiv ? 0.57 : 0.5;
   if (ch === ' ' || ch === '\u00a0') return 0.25;
   if (ch === '=' || ch === '+' || ch === '−') return 0.78;
-  if (ch === '°') return 0.4;
+  /* KaTeX_Main: «°» — 0,5 кегля по замеру в Chromium и WebKit (было 0,4 — запись угла ложилась вплотную к линии). */
+  if (ch === '°') return 0.5;
   return 0.3;
 }
 

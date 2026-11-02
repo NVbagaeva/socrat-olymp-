@@ -21,6 +21,7 @@ import {
   polar,
 } from '@/lib/skhemy/geometriya';
 import type { Element, T2, Tochki, ZhivayaSkhema } from '@/lib/skhemy/tipy';
+import * as N from '@/lib/zadanie18/opornye/novye';
 import { SCENY_DOP } from './dop';
 
 export type Parametry = Readonly<Record<string, number>>;
@@ -628,9 +629,53 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
   },
 };
 
+/* Типы по новым опорным задачам: сцена опорной задачи с числами набора. */
+const sNachalom = (z: ZhivayaSkhema, nachalo: Tochki): ZhivayaSkhema => ({ ...z, nachalo });
+const SCENY_NOVYE: Readonly<Record<string, Postroenie>> = {
+  'diag-trap': (p) => sNachalom(N.OP_DIAG_TRAP, { p: [p.a!, p.b!], q: [p.d1!, p.d2!] }),
+  'kas-ef': (p) => sNachalom(N.OP_KAS_EF, { p: [p.R1!, p.R2!] }),
+  kvadraty: (p) => sNachalom(N.OP_KVADRATY, { A: [p.AC!, 0], B: polar(150, p.BC!), C: [0, 0] }),
+  'dve-okr': (p) => {
+    /* cos α из 2cos²α + cos α / k − 1 = 0 (а): AE — диаметр, sin ∠AEB = cos α / k). */
+    const k = p.k!;
+    const c = (-1 / k + Math.sqrt(1 / (k * k) + 8)) / 4;
+    const r = p.AB! / 2 / c;
+    return sNachalom(N.OP_DVE_OKR, { p: [r, k * r], q: [p.AB! / 2, 0] });
+  },
+  'cherez-centr': (p) => sNachalom(N.OP_CHEREZ_CENTR, { p: [Math.acos(1 / p.d!) / RAD, 6] }),
+  'vpis-klm': (p) => {
+    const u = (p.m! * (p.m! + p.n!)) / (3 * p.n! - p.m!);
+    return sNachalom(N.OP_VPIS_KLM, {
+      K: [0, 0],
+      L: [p.m! + u, 0],
+      M: polar(60, p.m! + p.n!),
+    });
+  },
+  'vys-perp': (p) => {
+    const uB = p.B!;
+    const uA = (180 - uB) / 2 + 8;
+    const uC = 180 - uA - uB;
+    return sNachalom(N.OP_VYS_PERP, {
+      A: polar(uB, (10 * Math.sin(uC * RAD)) / Math.sin(uA * RAD)),
+      B: [0, 0],
+      C: [10, 0],
+    });
+  },
+  'biss-sred': (p) => sNachalom(N.OP_BISS_SRED, { p: [p.b!, p.a!] }),
+  vnevpis: (p) => {
+    const d = p.r2! - p.r1!;
+    const a = (-d + Math.sqrt(d * d + 8 * p.r1! * p.r2!)) / 2;
+    return sNachalom(N.OP_VNEVPIS, { p: [a, a + d] });
+  },
+  'kvadrat-per': (p) => sNachalom(N.OP_KVADRAT_PER, { p: [p.m!, p.s!] }),
+  'ser-vys': (p) => sNachalom(N.OP_SER_VYS, { p: [60, 45], q: [p.k!, 0] }),
+  'kv-gip': (p) => sNachalom(N.OP_KV_GIP_OTN, { p: [p.b!, p.a!] }),
+  'vpis-lmn': (p) => sNachalom(N.OP_VPIS_LMN, { p: [150, 0.35], q: [p.KM!, 0] }),
+};
+
 /** Чертёж задачи тренажёра: тип и параметры варианта. */
 export function scena18(tip: string, p: Parametry): ZhivayaSkhema {
-  const f = SCENY[tip];
+  const f = SCENY[tip] ?? SCENY_NOVYE[tip];
   if (f !== undefined) return f(p);
   /* Перенесённые задачи с одним набором чисел — dop/. */
   const s = SCENY_DOP[tip];
@@ -638,4 +683,8 @@ export function scena18(tip: string, p: Parametry): ZhivayaSkhema {
   return s;
 }
 
-export const TIPY_SCEN_18: readonly string[] = [...Object.keys(SCENY), ...Object.keys(SCENY_DOP)];
+export const TIPY_SCEN_18: readonly string[] = [
+  ...Object.keys(SCENY),
+  ...Object.keys(SCENY_NOVYE),
+  ...Object.keys(SCENY_DOP),
+];
