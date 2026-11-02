@@ -113,7 +113,8 @@ export function chislaOtveta(vvod: string): number[] | null {
   if (t === '') return [];
   const out: number[] = [];
   for (const kusok of t.split(/;|\\;|\n/u)) {
-    const c = kusok.replace(/^\\\s*/, '').trim();
+    /* После «;» в TeX часто стоит пробел «\\ » или «\\,» — убираем его, но не «\\frac». */
+    const c = kusok.replace(/^(?:\s|\\[ ,;:!])+/, '').trim();
     if (c === '') continue;
     const u = razobrat(c);
     if (u === null) return null;

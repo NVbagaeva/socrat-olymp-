@@ -73,6 +73,11 @@ const ok = (cond, what) => {
   ok(k.length === 1 && U.ugolTex(k[0]) === '-2\\pi', 'ядро: полуоткрытый промежуток взял конец');
   ok(P.proveritKorni('-2\\pi', k).itog === 'verno', 'ядро: ответ б не засчитан');
   ok(P.proveritKorni('-\\pi;-2\\pi', k).itog === 'neverno', 'ядро: лишний корень засчитан');
+  {
+    const kk = U.korniNaPromezhutke([U.s(U.u(1, 2), 1)], U.otrezok(U.u(0), U.u(2)));
+    ok(P.proveritKorni('\\frac{\\pi}{2};\\ \\frac{3\\pi}{2}', kk).itog === 'verno', 'ядро: ответ б, начинающийся с \\frac, не прочитан');
+    ok(P.proveritKorni('\\dfrac{3\\pi}{2};\\,\\dfrac{\\pi}{2}', kk).itog === 'verno', 'ядро: ответ б с пробелом TeX после «;» не прочитан');
+  }
 }
 
 /* ── Формулы ─────────────────────────────────────────────── */

@@ -609,6 +609,9 @@ async function give(page, answer) {
         await setPole(page, 'z14-korni', korni);
       }
     }
+    /* Значение поля доходит до состояния экрана через событие input:
+       даём React отрисовать его до нажатия «Проверить». */
+    await page.waitForTimeout(300);
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
   } else if (answer.text !== undefined) {
     await page.locator(ANSWER_INPUT).first().fill(answer.text);
