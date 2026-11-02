@@ -61,6 +61,17 @@ svg {
 .katex svg {
   max-width: none;
 }
+/* Формула KaTeX внутри чертежа (foreignObject): правила вида
+   «.контейнер svg { width: 100%; height: auto }» для самого чертежа
+   задевают и svg внутри формулы — знак корня (\sqrt) и стрелки
+   сплющиваются в ноль, черта корня пропадает. Внутри формулы — размеры
+   KaTeX, сильнее любых правил контейнеров. */
+foreignObject .katex svg {
+  width: 100% !important;
+  height: inherit !important;
+  max-width: none !important;
+  max-height: none !important;
+}
 
 :focus-visible {
   outline: 2px solid var(--color-primary);

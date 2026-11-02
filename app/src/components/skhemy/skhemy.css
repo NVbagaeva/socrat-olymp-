@@ -167,8 +167,6 @@
 .skh-velichina {
   fill: var(--skh-ink);
   font-size: 15px;
-  text-anchor: middle;
-  dominant-baseline: central;
   paint-order: stroke;
   stroke: var(--skh-bg);
   stroke-width: 3;
@@ -179,6 +177,19 @@
 }
 .skh-velichina.is-lit {
   fill: var(--skh-cvet);
+}
+/* Знак корня — путь (lib/risunki/koren.js): черта над всем подкоренным. */
+.skh-koren {
+  fill: none;
+  stroke: var(--skh-ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.skh-koren.is-lit {
+  stroke: var(--skh-cvet);
+}
+.skh-koren.is-dim {
+  opacity: 0.32;
 }
 .skh-kursiv {
   font-style: italic;

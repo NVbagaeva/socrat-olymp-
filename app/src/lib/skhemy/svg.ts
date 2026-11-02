@@ -51,12 +51,16 @@ const STIL_SAM = [
   '.skh-sam .skh-vynoska{fill:none;stroke:var(--i);stroke-width:.9;stroke-linecap:round;opacity:.6}',
   '.skh-sam .skh-podpis{fill:var(--i);font-size:17px;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
   '.skh-sam .skh-podpis.is-lit{fill:var(--k)}',
-  '.skh-sam .skh-velichina{fill:var(--i);font-size:15px;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
+  '.skh-sam .skh-velichina{fill:var(--i);font-size:15px;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}',
   '.skh-sam .skh-velichina.is-lit{fill:var(--k)}',
+  '.skh-sam .skh-koren{fill:none;stroke:var(--i);stroke-linecap:round;stroke-linejoin:round}',
+  '.skh-sam .skh-koren.is-lit{stroke:var(--k)}',
   '.skh-sam .skh-kursiv{font-style:italic}',
   '.skh-sam .skh-indeks-vel{font-size:70%}',
   ".skh-sam .skh-indeks{font-family:KaTeX_Main,'Latin Modern Roman','Times New Roman',serif;font-size:70%}",
 ].join('');
+
+const f2 = (x: number) => Math.round(x * 100) / 100;
 
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -145,16 +149,20 @@ export function svgSkhemy(
   out.push(`</g><g class="skh__velichiny" style="font-family:${esc(CHISLA)}">`);
   e.velichiny.forEach((v) => {
     const chasti = v.chasti
-      .map((c, i) => {
-        const pred = v.chasti[i - 1];
-        const dy = c.indeks ? ' dy="4"' : pred?.indeks === true ? ' dy="-4"' : '';
+      .map((c) => {
         const klass = cls(c.kursiv && 'skh-kursiv', c.indeks && 'skh-indeks-vel');
         const shrift = c.kursiv ? ` style="font-family:${esc(BUKVY)}"` : '';
-        return `<tspan${klass === '' ? '' : ` class="${klass}"`}${shrift}${dy}>${esc(c.t)}</tspan>`;
+        /* Подкоренное — заданной ширины: черта знака ровно над ним. */
+        const shirina = c.koren ? ` textLength="${f2(c.w)}" lengthAdjust="spacingAndGlyphs"` : '';
+        const y = c.indeks ? v.base + 4 : v.base;
+        return `<tspan${klass === '' ? '' : ` class="${klass}"`}${shrift} x="${f2(v.levo + c.dx)}" y="${f2(y)}"${shirina}>${esc(c.t)}</tspan>`;
       })
       .join('');
-    out.push(
-      `<text class="${cls('skh-velichina', ...metki(v))}" x="${v.x}" y="${v.y}">${chasti}</text>`,
+    out.push(`<text class="${cls('skh-velichina', ...metki(v))}">${chasti}</text>`);
+    v.korni.forEach((d) =>
+      out.push(
+        `<path class="${cls('skh-koren', ...metki(v))}" d="${d}" style="stroke-width:${v.tolshchinaKornya}px"/>`,
+      ),
     );
   });
   out.push('</g></svg>');
