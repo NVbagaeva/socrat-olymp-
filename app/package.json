@@ -170,7 +170,8 @@
     "test:auth": "node scripts/check-auth.mjs",
     "test:auth-disabled": "node scripts/check-auth.mjs --disabled",
     "build:kartochki": "node scripts/build-kartochki.mjs",
-    "test:kartochki": "node scripts/verify_cards/index.mjs"
+    "test:kartochki": "node scripts/verify_cards/index.mjs",
+    "build:variant-images": "node scripts/build-variant-images.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
