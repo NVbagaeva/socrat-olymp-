@@ -129,8 +129,12 @@ export interface Okno19 {
   y: [number, number];
   /** Подписи осей: (x; y) по умолчанию, (x; a) — для метода областей. */
   osi?: [string, string];
-  /** Свои подписи делений: числа, которые важны для решения. */
-  deleniya?: { x?: number[]; y?: number[] };
+  /**
+   * Свои подписи делений: числа, которые важны для решения. Деление
+   * парой [где, подпись] — подпись строкой: доли π («π/2», «−π/6»),
+   * которые числом не записать.
+   */
+  deleniya?: { x?: Delenie19[]; y?: Delenie19[] };
   shag?: number;
   /**
    * Крупнее клетка (пикселей на единицу): у маленького окна, где кривые
@@ -145,6 +149,12 @@ function chisloPodpis(v: number): string {
   return s.startsWith('-') ? `−${s.slice(1)}` : s;
 }
 
+/** Деление оси: число (подпись — оно же) или пара [где, подпись]. */
+export type Delenie19 = number | [number, string];
+
+const delenie = (d: Delenie19) =>
+  typeof d === 'number' ? { at: d, label: chisloPodpis(d) } : { at: d[0], label: d[1] };
+
 export function scena(
   okno: Okno19,
   sostav: { curves?: Krivaya19[]; points?: Tochka19[]; shapes?: Figura19[] },
@@ -155,12 +165,8 @@ export function scena(
     okno.deleniya === undefined
       ? undefined
       : {
-          ...(okno.deleniya.x === undefined
-            ? {}
-            : { x: okno.deleniya.x.map((at) => ({ at, label: chisloPodpis(at) })) }),
-          ...(okno.deleniya.y === undefined
-            ? {}
-            : { y: okno.deleniya.y.map((at) => ({ at, label: chisloPodpis(at) })) }),
+          ...(okno.deleniya.x === undefined ? {} : { x: okno.deleniya.x.map(delenie) }),
+          ...(okno.deleniya.y === undefined ? {} : { y: okno.deleniya.y.map(delenie) }),
         };
   return {
     window: { xmin: okno.x[0], xmax: okno.x[1], ymin: okno.y[0], ymax: okno.y[1] },
@@ -204,6 +210,31 @@ export function okruzhnost(
   style: 'solid' | 'dashed' = 'solid',
 ): Krivaya19 {
   return { type: 'krug19', centr: [cx, cy], r, color: cvet, style, label: null };
+}
+
+/**
+ * Дуга окружности с центром (cx; cy) радиуса r от угла ot до угла do
+ * (радианы, против часовой стрелки) — ломаной 'loman19' с шагом не больше
+ * 0,02 радиана: хорда отходит от дуги меньше чем на 10⁻⁴ радиуса. Промежуток
+ * значений x на единичной окружности: дуга промежутка сплошная, остальная
+ * окружность — пунктиром (как график вне отрезка). Как кривая, дуга —
+ * препятствие для подписей точек.
+ */
+export function duga(
+  cx: number,
+  cy: number,
+  r: number,
+  ot: number,
+  dO: number,
+  cvet: Cvet19 = 'lineA',
+  style: 'solid' | 'dashed' = 'solid',
+): Krivaya19 {
+  const n = Math.max(2, Math.ceil(Math.abs(dO - ot) / 0.02));
+  const vershiny = Array.from({ length: n + 1 }, (_, i): [number, number] => {
+    const t = ot + ((dO - ot) * i) / n;
+    return [cx + r * Math.cos(t), cy + r * Math.sin(t)];
+  });
+  return lomanaya(vershiny, cvet, false, style);
 }
 
 /** Ломаная по вершинам; zamknuta — многоугольник (ромб |x| + |y| = c). */
