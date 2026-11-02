@@ -13,6 +13,7 @@ import { GLAVA_M03 } from './m03';
 import { GLAVA_M04 } from './m04';
 import { GLAVA_M05 } from './m05';
 import { GLAVA_M06 } from './m06';
+import { GLAVA_M07 } from './m07';
 import type { Glava19, Opornaya19, Razbor19, Zadacha19 } from './tipy';
 import { VVEDENIE_19 } from './vvedenie';
 
@@ -34,7 +35,15 @@ export const METODY_19 = [
   'Метод упрощающего значения',
 ] as const;
 
-const GOTOVYE: Glava19[] = [GLAVA_M01, GLAVA_M02, GLAVA_M03, GLAVA_M04, GLAVA_M05, GLAVA_M06];
+const GOTOVYE: Glava19[] = [
+  GLAVA_M01,
+  GLAVA_M02,
+  GLAVA_M03,
+  GLAVA_M04,
+  GLAVA_M05,
+  GLAVA_M06,
+  GLAVA_M07,
+];
 
 function skoro(metod: number): Glava19 {
   return {

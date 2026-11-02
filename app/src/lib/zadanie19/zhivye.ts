@@ -15,6 +15,12 @@
  * x → 4 − x: решения на неподвижном множестве (прямая y = x, точка
  * x = 2) — акцентным цветом, остальные идут симметричными парами.
  *
+ * Для метода инварианта (глава 7) спрашивают не про число решений, а
+ * про свойство «при всех x» или «при любом b»: под рисунком только
+ * вывод (itog), числа решений нет. Точки, где проверяется свойство, —
+ * акцентным цветом, если оно там выполнено, и цветом пересечения, если
+ * нарушено.
+ *
  * Описание — данные и функции; функции в браузер со страницы не
  * передать, поэтому компонент (components/zadanie19/Zhivoy19.tsx)
  * берёт описание здесь по id. Число решений считается точно —
@@ -66,7 +72,10 @@ export interface Zhivoy19 {
   start: number;
   osobye: Osoboe19[];
   scena: (a: number) => Scena19;
-  /** Число решений; Infinity — бесконечно много. */
+  /**
+   * Число решений; Infinity — бесконечно много. Нет его и нет множества —
+   * под рисунком только вывод itog (метод 7: свойство «при всех x»).
+   */
   resheniy?: (a: number) => number;
   /** Метод областей: множество решений по x при этом a. */
   mnozhestvo?: (a: number) => KusokX19[];
@@ -351,7 +360,132 @@ function m06r2Korni(a: number): number[] {
   return korniChetnye([...vnutri, ...snaruzhi]).map((t) => t + 2);
 }
 
+/* ── Метод 7: инвариант ──────────────────────────────────────────── */
+
+/** Значения b, при которых рисуются прямые семейства разбора 1. */
+const B_M07: number[] = [-2, -1, 0, 1, 2];
+
+/* Разбор метода 7: a²x − 3a + 2 = b(ax − 1). Левая часть минус правая — прямая по x. */
+const m07r1F = (a: number, b: number, x: number) => (a * a - a * b) * x - 3 * a + 2 + b;
+
+/* Разбор метода 7: sin²x + 2a cos x < a² + 3/4. Левая часть минус правая. */
+const m07r2G = (a: number, x: number) => Math.sin(x) ** 2 + 2 * a * Math.cos(x) - a * a - 0.75;
+
+/* Разбор метода 7: x² + 2|x − a| ≥ a². Левая часть минус правая. */
+const m07r3G = (a: number, x: number) => x * x + 2 * Math.abs(x - a) - a * a;
+
+/** Точка проверки: акцентом — свойство выполнено, цветом пересечения — нарушено. */
+const proverka = (x: number, y: number, verno: boolean) =>
+  tochka(x, y, null, false, verno ? 'accent' : 'cross');
+
 const ZHIVYE: Record<string, Zhivoy19> = {
+  /* Разбор метода 7: прямые y = (a² − ab)x − 3a + 2 + b при b = −2…2; при a = 1 все через (1; 0). */
+  'm07-r1': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -1,
+    max: 3,
+    shag: 0.01,
+    start: 0.5,
+    osobye: [
+      { a: 1, tex: '1' },
+      { a: 2, tex: '2' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-2, 4] as [number, number], y: [-5, 5] as [number, number] };
+      const tochki = B_M07.map((b) => m07r1F(a, b, 1))
+        .filter((y) => y >= okno.y[0] && y <= okno.y[1])
+        .filter((y, i, v) => v.findIndex((u) => Math.abs(u - y) < 1e-9) === i)
+        .map((y) => proverka(1, y, Math.abs(y) < 1e-9));
+      return scena(
+        okno,
+        {
+          curves: B_M07.map((b) => grafik((x) => m07r1F(a, b, x), b === 0 ? 'lineB' : 'lineA')),
+          shapes: [otrezokNa(1, okno.y[0], 1, okno.y[1], 'aux', 'dashed', 1.4)],
+          points: tochki,
+        },
+        `Прямые y = (a² − ab)x − 3a + 2 + b при b = −2, −1, 0, 1, 2 и a = ${chislo(a)}; пунктиром — прямая x = 1`,
+      );
+    },
+    itog: (a) => {
+      if (blizko(a, 1)) return 'все прямые проходят через $(1;\\,0)$: $x=1$ — корень при любом $b$';
+      if (blizko(a, 2))
+        return 'кандидат отброшен: через $(1;\\,0)$ проходит только прямая при $b=0$';
+      return `$x=1$ — корень только при $b=${chisloTex(a - 2)}$, а не при любом $b$`;
+    },
+  },
+  /* Разбор метода 7: график y = sin²x + 2a cos x − a² − 3/4 и проверка в x = 0, π/2, π. */
+  'm07-r2': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -2.5,
+    max: 2.5,
+    shag: 0.01,
+    start: 0,
+    osobye: [
+      { a: -1.5, tex: '-\\frac32' },
+      { a: -0.5, tex: '-\\frac12' },
+      { a: 0, tex: '0' },
+      { a: 0.5, tex: '\\frac12' },
+      { a: 1.5, tex: '\\frac32' },
+    ],
+    scena: (a) => {
+      const okno = { x: [-1, 7] as [number, number], y: [-7, 2] as [number, number] };
+      return scena(
+        okno,
+        {
+          curves: [grafik((x) => m07r2G(a, x), 'lineA')],
+          points: [0, Math.PI / 2, Math.PI]
+            .map((x) => [x, m07r2G(a, x)] as const)
+            .filter(([, y]) => y >= okno.y[0] && y <= okno.y[1])
+            .map(([x, y]) => proverka(x, y, y < 0)),
+        },
+        `График y = sin²x + 2a·cos x − a² − 3/4 при a = ${chislo(a)} и его точки при x = 0, π/2, π`,
+      );
+    },
+    itog: (a) => {
+      /* Наибольшее значение: 1/4 − d², d — расстояние от a до отрезка [−1; 1] (t = cos x). */
+      const d = Math.max(0, Math.abs(a) - 1);
+      if (0.25 - d * d < 0) return 'график ниже оси: неравенство верно при всех $x$';
+      if (m07r2G(a, Math.PI / 2) >= 0) return 'неравенство нарушено при $x=\\frac\\pi2$';
+      if (m07r2G(a, 0) >= 0) return 'неравенство нарушено при $x=0$';
+      return 'неравенство нарушено при $x=\\pi$';
+    },
+  },
+  /* Разбор метода 7: график y = x² + 2|x − a| − a² всегда проходит через (a; 0). */
+  'm07-r3': {
+    vid: 'grafik',
+    bukva: 'a',
+    min: -2.5,
+    max: 2.5,
+    shag: 0.01,
+    start: 0.5,
+    osobye: [
+      { a: -2, tex: '-2' },
+      { a: -1, tex: '-1' },
+      { a: 1, tex: '1' },
+      { a: 2, tex: '2' },
+    ],
+    scena: (a) =>
+      scena(
+        { x: [-4, 4], y: [-3, 7] },
+        {
+          curves: [grafik((x) => m07r3G(a, x), 'lineA')],
+          points: [
+            proverka(a, 0, Math.abs(a) <= 1 + 1e-9),
+            ...(a > 1 + 1e-9 ? [proverka(1, m07r3G(a, 1), false)] : []),
+            ...(a < -1 - 1e-9 ? [proverka(-1, m07r3G(a, -1), false)] : []),
+          ],
+        },
+        `График y = x² + 2|x − a| − a² при a = ${chislo(a)}: он проходит через точку (a; 0)`,
+      ),
+    itog: (a) => {
+      if (a > 1 + 1e-9) return 'неравенство нарушено при $x=1$: там значение $-(a-1)^2<0$';
+      if (a < -1 - 1e-9) return 'неравенство нарушено при $x=-1$: там значение $-(a+1)^2<0$';
+      return 'график не ниже оси и касается её в $x=a$: неравенство верно при всех $x$';
+    },
+  },
+
   /* Разбор метода 5: график y = x² + a|x| + a² − 4 и его нули — симметричные пары и x = 0. */
   'm05-r1': {
     vid: 'grafik',
