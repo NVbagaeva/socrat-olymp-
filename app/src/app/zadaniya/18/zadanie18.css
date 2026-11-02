@@ -367,6 +367,7 @@
   gap: var(--space-2);
 }
 .z18-plitka__otkryt {
+  margin-left: auto;
   color: var(--color-primary);
   font-size: var(--fs-caption);
   font-weight: 600;
@@ -1164,4 +1165,39 @@
 }
 .z18-op-podskazka__metka {
   font-weight: 600;
+}
+
+/* Прогресс опорных задач: счётчик над списком, отметка на странице, значок на плитке. */
+.z18-op-schet {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-4) 0;
+}
+.z18-op-schet__tekst {
+  margin: 0;
+}
+.z18-op-schet__polosa {
+  grid-column: 1 / -1;
+}
+.z18-op-schet__sbros {
+  grid-row: 1;
+  grid-column: 2;
+}
+.z18-op-otmetka__itog {
+  min-height: 1.4em;
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z18-op-status {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.z18-op-status.is-reshena {
+  color: var(--color-success);
+}
+.z18-op-status.is-ne {
+  color: var(--color-text-tertiary);
 }
