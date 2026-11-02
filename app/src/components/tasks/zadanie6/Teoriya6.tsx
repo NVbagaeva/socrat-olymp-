@@ -21,6 +21,7 @@ import {
 import { PROGRESS_6 } from '@/content/zadanie6';
 import { zadachiIzShablonov } from '@/lib/teoriya/proverka-server';
 import { BANK } from '@/lib/zadanie6/bank/index';
+import { YAKOR_6 } from '@/lib/zadanie6/teoriya-yakorya';
 import { NABORY_PROVERKI_6 } from '@/lib/zadanie6/proverka';
 import { kodNaSayte, prototype } from '@/lib/zadanie6/prototypes';
 import type { BankItem } from '@/lib/zadanie6/types';
@@ -119,9 +120,19 @@ export function Kartochka6View({
   );
 }
 
-function Tablica({ head, rows, title }: { head: string[]; rows: string[][]; title?: string }) {
+function Tablica({
+  head,
+  rows,
+  title,
+  id,
+}: {
+  head: string[];
+  rows: string[][];
+  title?: string;
+  id?: string;
+}) {
   return (
-    <div className="z6-tablica-teorii">
+    <div {...(id === undefined ? {} : { id })} className="z6-tablica-teorii">
       {title ? (
         <p className="z6-tablica-teorii__title">
           <Tex text={title} />
@@ -157,15 +168,20 @@ export function Blok6({
   b,
   trenazher,
   bezPrimerov = false,
+  yakorya = false,
 }: {
   b: BlokTeorii6;
   trenazher?: string;
   bezPrimerov?: boolean;
+  /** Ставить якоря рамок (#t6-…) — только во вкладке «Теория»: на ней они уникальны. */
+  yakorya?: boolean;
 }): ReactNode {
+  const id = yakorya && b.yakor !== undefined ? { id: YAKOR_6.blok(b.yakor) } : {};
   switch (b.vid) {
     case 'opredelenie':
       return (
         <RamkaOpredelenie
+          {...id}
           title={b.title ?? 'Определение'}
           {...(b.formula ? { formula: b.formula } : {})}
         >
@@ -182,7 +198,9 @@ export function Blok6({
         </RamkaOpredelenie>
       );
     case 'formula':
-      return <RamkaFormula formula={b.formula} {...(b.podpis ? { podpis: b.podpis } : {})} />;
+      return (
+        <RamkaFormula {...id} formula={b.formula} {...(b.podpis ? { podpis: b.podpis } : {})} />
+      );
     case 'primer':
       return bezPrimerov ? null : <PrimerIzBanka6 title={b.title} zadacha={b.zadacha} />;
     case 'primerRuchnoy':
@@ -196,19 +214,19 @@ export function Blok6({
       );
     case 'vazhno':
       return (
-        <RamkaVazhno title={b.title ?? 'Важно!'}>
+        <RamkaVazhno {...id} title={b.title ?? 'Важно!'}>
           <Abzacy paras={b.paras} />
         </RamkaVazhno>
       );
     case 'vyvod':
       return (
-        <RamkaVyvod title={b.title ?? 'Вывод'}>
+        <RamkaVyvod {...id} title={b.title ?? 'Вывод'}>
           <Abzacy paras={b.paras} />
         </RamkaVyvod>
       );
     case 'ris':
       return (
-        <figure className="z6-ris-teorii">
+        <figure className="z6-ris-teorii" {...id}>
           <Ris6 ris={b.ris} />
           {b.podpis ? (
             <figcaption className="z6-ris-teorii__podpis">
@@ -218,7 +236,9 @@ export function Blok6({
         </figure>
       );
     case 'tablica':
-      return <Tablica head={b.head} rows={b.rows} {...(b.title ? { title: b.title } : {})} />;
+      return (
+        <Tablica {...id} head={b.head} rows={b.rows} {...(b.title ? { title: b.title } : {})} />
+      );
     case 'lovushka':
       return (
         <RamkaVazhno title={b.title}>
@@ -261,7 +281,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii6; trenazher: string }) {
         <Tex text={r.lead} />
       </p>
       {r.bloki.map((b, i) => (
-        <Blok6 b={b} trenazher={trenazher} key={`${r.id}-${i}`} />
+        <Blok6 b={b} trenazher={trenazher} yakorya key={`${r.id}-${i}`} />
       ))}
     </div>
   );

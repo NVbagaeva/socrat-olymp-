@@ -18,9 +18,15 @@
  * Вся математика — в $…$, формулы рамок — TeX без $.
  */
 
+import type { Blok7 } from '@/lib/zadanie7/teoriya-yakorya';
 import { IRRACIONALNYE_7 } from './teoriya7-irr';
 
-export type BlokTeorii7 =
+/**
+ * Блок раздела. `yakor` — имя рамки или таблицы для «Повторить теорию»
+ * из карточек по теории (lib/zadanie7/teoriya-yakorya.ts): на странице
+ * это id «t7-<имя>».
+ */
+export type BlokTeorii7 = { yakor?: Blok7 } & (
   | { vid: 'opredelenie'; title?: string; paras: string[]; formula?: string; spisok?: string[] }
   | { vid: 'formula'; formula: string; podpis?: string }
   | { vid: 'primer'; title: string; zadacha: string }
@@ -38,7 +44,8 @@ export type BlokTeorii7 =
   | { vid: 'krug' }
   | { vid: 'kartochki'; kartochki: Kartochka7[] }
   /** Большой блок «Иррациональные уравнения»: данные — content/teoriya7-irr.ts. */
-  | { vid: 'irracionalnye' };
+  | { vid: 'irracionalnye' }
+);
 
 /** Цветной блок карточки: как в справочнике №1. */
 export interface BlokKartochki7 {
@@ -105,6 +112,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'koren',
         title: 'Корень уравнения',
         paras: [
           '**Корень уравнения** — число, при подстановке которого вместо $x$ уравнение превращается в верное числовое равенство. Решить уравнение — найти все его корни или доказать, что их нет.',
@@ -113,6 +121,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'opredelenie',
+        yakor: 'ravnosilnye',
         title: 'Равносильные переходы',
         paras: [
           'Уравнения **равносильны**, если у них одни и те же корни. Решение — цепочка равносильных переходов: каждый шаг не теряет корни и не добавляет лишних.',
@@ -122,6 +131,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'formula',
+        yakor: 'sovokupnost',
         formula:
           '\\begin{gathered}A\\cdot B=0\\iff A=0\\ \\text{или}\\ B=0\\\\[2pt] \\sqrt{A}=B\\iff \\begin{cases}A=B^2\\\\ B\\ge0\\end{cases}\\end{gathered}',
         podpis:
@@ -129,6 +139,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'opredelenie',
+        yakor: 'odz',
         title: 'ОДЗ — область допустимых значений',
         paras: [
           'ОДЗ — все $x$, при которых обе части уравнения имеют смысл. Записывать её нужно, когда в уравнении есть:',
@@ -142,6 +153,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       { vid: 'primer', title: 'Посторонний корень после возведения в квадрат', zadacha: 'F112' },
       {
         vid: 'tablica',
+        yakor: 'vopros',
         title: 'Как читать вопрос задачи',
         head: ['Фраза в условии', 'Что делаем'],
         rows: [
@@ -163,6 +175,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'vazhno',
+        yakor: 'odno-chislo',
         paras: [
           'Фраза «если корней больше одного» не значит, что их обязательно два. Если после отбора остался один корень, его и пишем.',
           'В бланк записывается **одно** число: целое или конечная десятичная дробь. Два корня через точку с запятой — ошибка.',
@@ -185,6 +198,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'lineynoe',
         title: 'Линейное уравнение',
         paras: [
           'Уравнение вида $kx+b=c$. Переносим число в другую часть с противоположным знаком: $kx=c-b$. Делим на коэффициент: $x=\\dfrac{c-b}{k}$, если $k\\ne0$.',
@@ -192,6 +206,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'formula',
+        yakor: 'proporciya',
         formula: '\\dfrac{a}{b}=\\dfrac{c}{d}\\iff a\\cdot d=b\\cdot c,\\quad b\\ne0,\\ d\\ne0',
         podpis: 'Пропорция: произведение «крест-накрест». Знаменатели не равны нулю',
       },
@@ -312,6 +327,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'koren-n',
         title: 'Корень нечётной и чётной степени',
         paras: [
           '$\\sqrt[n]{b}$ — число, которое в $n$-й степени даёт $b$. Для нечётного $n$ корень есть у любого числа, в том числе у отрицательного: $\\sqrt[3]{-125}=-5$.',
@@ -319,6 +335,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'tablica',
+        yakor: 'skolko-korney',
         title: 'Сколько корней у уравнения $t^n=b$',
         head: ['Степень', '$b>0$', '$b=0$', '$b<0$'],
         rows: [
@@ -397,6 +414,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     bloki: [
       {
         vid: 'formula',
+        yakor: 'formula-korney',
         formula: 'D=b^2-4ac,\\qquad x_{1,2}=\\dfrac{-b\\pm\\sqrt{D}}{2a}',
         podpis: 'При $D>0$ — два корня, при $D=0$ — один, при $D<0$ — корней нет',
       },
@@ -465,6 +483,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'vazhno',
+        yakor: 'menshiy',
         title: 'Когда «меньший корень»',
         paras: [
           'Если спрашивают меньший корень, сравниваем числа на прямой: $-5<3$, хотя $5>3$. Меньший из $-3{,}5$ и $3{,}5$ — это $-3{,}5$.',
@@ -489,6 +508,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     bloki: [
       {
         vid: 'tablica',
+        yakor: 'svoystva-stepeney',
         title: 'Свойства степеней',
         head: ['Свойство', 'Пример'],
         rows: [
@@ -503,6 +523,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'formula',
+        yakor: 'pokazateli',
         formula: 'a^{E}=a^{F}\\iff E=F\\qquad(a>0,\\ a\\ne1)',
         podpis:
           'Функция $y=a^t$ монотонна: каждое значение принимает один раз, поэтому показатели равны и корень единственный',
@@ -595,6 +616,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'logarifm',
         title: 'Логарифм',
         paras: [
           '$\\log_ab$ — показатель степени, в которую нужно возвести $a$, чтобы получить $b$. Определён при $b>0$, $a>0$, $a\\ne1$.',
@@ -604,11 +626,13 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'formula',
+        yakor: 'tozhdestvo',
         formula: 'a^{\\log_ab}=b',
         podpis: 'Основное логарифмическое тождество',
       },
       {
         vid: 'tablica',
+        yakor: 'svoystva-log',
         title: 'Свойства логарифмов ($a>0$, $a\\ne1$, $b>0$, $c>0$)',
         head: ['Свойство', 'Пример'],
         rows: [
@@ -737,6 +761,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       },
       {
         vid: 'vazhno',
+        yakor: 'odz-log',
         paras: [
           'ОДЗ логарифма: аргумент **строго** больше нуля. $\\log_2 0$ и $\\log_2(-4)$ не существуют.',
         ],
@@ -752,6 +777,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     bloki: [
       {
         vid: 'opredelenie',
+        yakor: 'okruzhnost',
         title: 'Единичная окружность',
         paras: [
           'Угол $\\alpha$ откладываем от положительного направления оси $Ox$ против часовой стрелки. Точка окружности радиуса $1$ имеет координаты $(\\cos\\alpha;\\ \\sin\\alpha)$.',
@@ -762,6 +788,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
       { vid: 'krug' },
       {
         vid: 'tablica',
+        yakor: 'znacheniya',
         title: 'Таблица значений',
         head: [
           '$\\alpha$',

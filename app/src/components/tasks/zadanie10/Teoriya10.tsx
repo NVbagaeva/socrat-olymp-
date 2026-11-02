@@ -27,6 +27,7 @@ import {
   primerKondensatora,
 } from '@/lib/zadanie10/teoriya-kondensator';
 import { primerStefana } from '@/lib/zadanie10/teoriya-stepeni';
+import { YAKOR_10 } from '@/lib/zadanie10/teoriya-yakorya';
 import { GROUPS, kodNaSayte, PROTOTYPES, prototype } from '@/lib/zadanie10/prototypes';
 import { Illyustraciya10 } from './Illyustraciya10';
 import { Most10 } from './Most10';
@@ -69,14 +70,16 @@ function Tablica({
   rows,
   title,
   podpis,
+  id,
 }: {
   head: string[];
   rows: string[][];
   title?: string;
   podpis?: string;
+  id?: string;
 }) {
   return (
-    <div className="z10-tablica">
+    <div {...(id === undefined ? {} : { id })} className="z10-tablica">
       {title ? <p className="z10-tablica__title">{title}</p> : null}
       <table>
         <thead>
@@ -132,11 +135,11 @@ function PrimerKondensator({
 }
 
 /** «Почему так»: «не менее t» → «не более U», таблица и график разряда. */
-function PochemuKondensator({ zadacha }: { zadacha: string }) {
+function PochemuKondensator({ zadacha, id }: { zadacha: string; id?: string }) {
   const p = paramsKondensatora(zadachaBanka(zadacha).params);
   const pq = pochemuKondensatora(p);
   return (
-    <RamkaOpredelenie title="Почему так">
+    <RamkaOpredelenie title="Почему так" {...(id === undefined ? {} : { id })}>
       <Abzacy paras={pq.paras} />
       <Tablica head={pq.head} rows={pq.rows} podpis={pq.podpis} />
       <figure className="z10-razryad-wrap">
@@ -214,11 +217,20 @@ function FizikaKarty() {
   );
 }
 
-export function Blok10({ b }: { b: BlokTeorii10 }): ReactNode {
+export function Blok10({
+  b,
+  yakorya = false,
+}: {
+  b: BlokTeorii10;
+  /** Ставить якоря рамок (#t10-…) — только во вкладке «Теория»: на ней они уникальны. */
+  yakorya?: boolean;
+}): ReactNode {
+  const id = yakorya && b.yakor !== undefined ? { id: YAKOR_10.blok(b.yakor) } : {};
   switch (b.vid) {
     case 'opredelenie':
       return (
         <RamkaOpredelenie
+          {...id}
           title={b.title ?? 'Определение'}
           {...(b.formula ? { formula: b.formula } : {})}
         >
@@ -235,7 +247,9 @@ export function Blok10({ b }: { b: BlokTeorii10 }): ReactNode {
         </RamkaOpredelenie>
       );
     case 'formula':
-      return <RamkaFormula formula={b.formula} {...(b.podpis ? { podpis: b.podpis } : {})} />;
+      return (
+        <RamkaFormula {...id} formula={b.formula} {...(b.podpis ? { podpis: b.podpis } : {})} />
+      );
     case 'primer':
       return <PrimerIzBanka title={b.title} zadacha={b.zadacha} />;
     case 'primerRuchnoy':
@@ -249,19 +263,20 @@ export function Blok10({ b }: { b: BlokTeorii10 }): ReactNode {
       );
     case 'vazhno':
       return (
-        <RamkaVazhno title={b.title ?? 'Важно!'}>
+        <RamkaVazhno {...id} title={b.title ?? 'Важно!'}>
           <Abzacy paras={b.paras} />
         </RamkaVazhno>
       );
     case 'vyvod':
       return (
-        <RamkaVyvod title={b.title ?? 'Вывод'}>
+        <RamkaVyvod {...id} title={b.title ?? 'Вывод'}>
           <Abzacy paras={b.paras} />
         </RamkaVyvod>
       );
     case 'tablica':
       return (
         <Tablica
+          {...id}
           head={b.head}
           rows={b.rows}
           {...(b.title ? { title: b.title } : {})}
@@ -278,7 +293,7 @@ export function Blok10({ b }: { b: BlokTeorii10 }): ReactNode {
       return <FizikaKarty />;
     case 'lovushka':
       return (
-        <RamkaVazhno title={b.title}>
+        <RamkaVazhno {...id} title={b.title}>
           <p className="ramka__p z10-lovushka__oshibka">
             <Tex text={`**Ошибка.** ${b.oshibka}`} />
           </p>
@@ -304,7 +319,7 @@ export function Blok10({ b }: { b: BlokTeorii10 }): ReactNode {
         />
       );
     case 'pochemuKondensator':
-      return <PochemuKondensator zadacha={b.zadacha} />;
+      return <PochemuKondensator zadacha={b.zadacha} {...id} />;
     case 'edinicy':
       return (
         <EdinicyStepeni
@@ -347,7 +362,7 @@ function Telo({ r, trenazher }: { r: RazdelTeorii10; trenazher: string }) {
         <Tex text={r.lead} />
       </p>
       {r.bloki.map((b, i) => (
-        <Blok10 b={b} key={`${r.id}-${i}`} />
+        <Blok10 b={b} yakorya key={`${r.id}-${i}`} />
       ))}
       <GdeNaEge prototipy={r.prototipy} trenazher={trenazher} />
     </div>

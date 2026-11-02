@@ -17,6 +17,7 @@ import {
 } from '@/content/teoriya16';
 import { katex } from '@/lib/graph/katex';
 import { typeset } from '@/lib/tex';
+import { YAKOR_16 } from '@/lib/zadanie16/teoriya-yakorya';
 import { Chertezh16 } from './Chertezh16';
 import { Rabota16 } from './Rabota16';
 import { VkladkiGlavy16 } from './VkladkiGlavy16';
@@ -83,8 +84,10 @@ function Variant({ v, verno }: { v: Variant16; verno: boolean }) {
 }
 
 function Kartochka({ k }: { k: Kartochka16 }) {
+  /* Якорь «Повторить теорию» из карточек по теории (#t16-…). */
+  const id = k.yakor === undefined ? {} : { id: YAKOR_16.kartochka(k.yakor) };
   return (
-    <section className={`z16-card z16-card--${k.ton} z16-shir--${k.shirina ?? 2}`}>
+    <section {...id} className={`z16-card z16-card--${k.ton} z16-shir--${k.shirina ?? 2}`}>
       <p className="z16-metka">
         <Znachok16 ton={k.ton} />
         {k.metka ?? BLOKI_16.metki[k.ton]}

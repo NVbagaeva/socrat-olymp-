@@ -7,9 +7,13 @@
 
 dump.mjs выгружает из контента раздела все задачи с ответами:
 {id: {"otvet": TeX, "title": …}}. Для каждой задачи модуль метода
-(m01.py, m02.py, …) знает условие; ответ берётся из контента — так проверяется
+(m01.py … m05.py, …) знает условие; ответ берётся из контента — так проверяется
 ровно то, что видит ученик. Задача без проверки или проверка без
 задачи — ошибка. Итог — таблица «задача — ответ — проверка».
+
+У модуля может быть словарь NEVERNYE {id: [неверные ответы]}: каждый из
+них перебор обязан опровергнуть — так видно, что проверка различает
+ответ и, например, отброшенного кандидата.
 """
 
 import json
@@ -21,8 +25,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from obshchee import sverit  # noqa: E402
 import m01  # noqa: E402
 import m02  # noqa: E402
+import m03  # noqa: E402
+import m04  # noqa: E402
+import m05  # noqa: E402
 
-MODULI = [m01, m02]
+MODULI = [m01, m02, m03, m04, m05]
 
 
 def main():
@@ -55,7 +62,24 @@ def main():
                 print(f"     a = {a:.6f}: по перебору {'да' if p else 'нет'}, по ответу {'да' if o else 'нет'}")
         else:
             print(f"ок           {zid}  {otvet}")
-    print(f"\nЗадач: {len(zadachi)}, расхождений и пропусков: {oshibki}")
+    nevernye = {}
+    for m in MODULI:
+        nevernye.update(getattr(m, "NEVERNYE", {}))
+    for zid in sorted(nevernye):
+        if zid not in proverki:
+            print(f"НЕТ ПРОВЕРКИ  {zid} (неверные ответы)")
+            oshibki += 1
+            continue
+        uslovie, (lo, hi), osobye, *shag = proverki[zid]
+        for neverno in nevernye[zid]:
+            kw = {"shag": shag[0]} if shag else {}
+            if sverit(neverno, uslovie, lo, hi, osobye=osobye, do_pervogo=True, **kw):
+                print(f"отвергнут    {zid}  {neverno}")
+            else:
+                oshibki += 1
+                print(f"НЕ ОТВЕРГНУТ {zid}  {neverno}")
+    n_nev = sum(len(v) for v in nevernye.values())
+    print(f"\nЗадач: {len(zadachi)}, неверных ответов на опровержение: {n_nev}, расхождений и пропусков: {oshibki}")
     return 1 if oshibki else 0
 
 
