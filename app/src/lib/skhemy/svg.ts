@@ -194,10 +194,10 @@ export function svgSkhemy(
       .map((c) => {
         const klass = cls(c.kursiv && 'skh-kursiv', c.indeks && 'skh-indeks-vel');
         const shrift = c.kursiv ? ` style="font-family:${esc(BUKVY)}"` : '';
-        /* Подкоренное и «∠» — заданной ширины: черта знака ровно над подкоренным,
-           знак угла не шире раскладки при любом шрифте. */
-        const shirina =
-          c.koren || c.t === '∠' ? ` textLength="${f2(c.w)}" lengthAdjust="spacingAndGlyphs"` : '';
+        /* Каждый кусок — ровно своей ширины по раскладке: черта корня над
+           подкоренным, и запись не шире своего места, какой бы шрифт ни
+           подставил браузер (в CI «°», «=» и «∠» шире метрик KaTeX). */
+        const shirina = ` textLength="${f2(c.w)}" lengthAdjust="spacingAndGlyphs"`;
         const y = c.indeks ? v.base + 4 : v.base;
         return `<tspan${klass === '' ? '' : ` class="${klass}"`}${shrift} x="${f2(v.levo + c.dx)}" y="${f2(y)}"${shirina}>${esc(c.t)}</tspan>`;
       })
