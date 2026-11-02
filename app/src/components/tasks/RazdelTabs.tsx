@@ -83,9 +83,28 @@ export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: Raz
     tabs.find((tab) => tab.tail !== '' && tail.startsWith(tab.tail)) ??
     tabs.find((tab) => tab.tail === '');
 
-  /* Метка на «Тренажёре»: в нём осталась незавершённая тренировка. */
+  /* Метка на вкладке тренажёра: в нём осталась незавершённая
+     тренировка. У раздела бывает второй тренажёр со своим разделом
+     сессии (№14: …/okruzhnost/trenazher/ → «14:okruzhnost») — его
+     тренировка метит свою вкладку, а не общий «Тренажёр». */
   const sessions = useActiveTrainerScopes();
-  const trainerActive = hasActiveScope(sessions, scopeOfPath(base));
+  const tabScope = (tab: RazdelTab): string | null =>
+    tab.id === 'trenazher'
+      ? scopeOfPath(base)
+      : tab.tail.endsWith('trenazher/')
+        ? scopeOfPath(`${base}/${tab.tail}`)
+        : null;
+  const scopyVkladok = tabs.map(tabScope).filter((sc): sc is string => sc !== null);
+  const trainerActive = (tab: RazdelTab): boolean => {
+    const sc = tabScope(tab);
+    return (
+      sc !== null &&
+      hasActiveScope(
+        sessions.filter((s) => s === sc || !scopyVkladok.includes(s)),
+        sc,
+      )
+    );
+  };
 
   const lenta = (
     <Tabs
@@ -98,7 +117,7 @@ export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: Raz
         label: tab.label,
         icon: tab.icon === undefined ? undefined : <VkladkaIkonka name={tab.icon} />,
         href: `${base}/${tab.tail}`,
-        ...(tab.id === 'trenazher' && trainerActive ? { badge: sessionText.menuDot } : {}),
+        ...(trainerActive(tab) ? { badge: sessionText.menuDot } : {}),
       }))}
     />
   );

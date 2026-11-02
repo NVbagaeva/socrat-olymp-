@@ -72,3 +72,27 @@ export function KotikBanner14({
     </aside>
   );
 }
+
+/**
+ * Свёрнутый баннер: узкая полоска с котиком и той же кнопкой. Так
+ * баннер выглядит в тренажёре окружности после первой проверки.
+ */
+export function KotikPolosa14({
+  href,
+  knopka = 'Выучить макеты →',
+}: {
+  href: string;
+  knopka?: string;
+}) {
+  return (
+    <aside className="z14-kotik-polosa" aria-label="Зачем учить макеты окружности">
+      <span className="z14-kotik-polosa__kot" aria-hidden="true">
+        <Sloy imya="kot" w={480} h={350} className="z14-kotik-polosa__kartinka" />
+      </span>
+      <p className="z14-kotik-polosa__tekst">Котик грустит, когда не знаешь макеты окружности.</p>
+      <a className="btn btn--secondary btn--sm" href={href}>
+        {knopka}
+      </a>
+    </aside>
+  );
+}
