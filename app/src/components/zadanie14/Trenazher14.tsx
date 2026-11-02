@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import { TrainerSessionHost, useSessionReport } from '@/components/tasks/session';
+import { Tex } from '@/components/ui/Tex';
 import { typeset } from '@/lib/tex';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
 import type { TaskMark } from '@/lib/trainerSession/types';
@@ -69,7 +70,7 @@ function Vybor14({ onStart }: { onStart: (n: Nastroyki14) => void }) {
               aria-pressed={n.metody.includes(m.id)}
               onClick={() => pereklyuchit(m.id)}
             >
-              {m.title}
+              <Tex text={m.title} />
             </button>
           ))}
         </div>
@@ -224,7 +225,9 @@ function Ekran14({
   const pokazatReshenie = reshenie || itog !== null;
   return (
     <article className="z14-zadacha flow">
-      <p className="z14-zadacha__metka">{z.metody.map((m) => nazvanieMetoda(m)).join(' · ')}</p>
+      <p className="z14-zadacha__metka">
+        <Tex text={z.metody.map((m) => nazvanieMetoda(m)).join(' · ')} />
+      </p>
       <Uslovie14 z={z} />
       <Otvet14
         z={z}
@@ -311,7 +314,7 @@ export function Trenazher14({ base }: { base: string }) {
         const z = zadachaPoId14(p.ids[at] ?? '');
         if (z === undefined) throw new Error('Нет задачи');
         return {
-          kind: nazvanieMetoda(z.metody[0] ?? 'prosteyshie'),
+          kind: nazvanieMetoda(z.metody[0] ?? 'prosteyshie').replace(/\$/g, ''),
           html: typeset(uslovieA(z)),
           review: () => <Reshenie14 z={z} />,
         };

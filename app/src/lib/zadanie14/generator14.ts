@@ -161,7 +161,7 @@ export function zapomniHtml(metod: string): string {
   const b = BLOKI_14.find((x) => x.id === metod);
   if (b === undefined) return '';
   return (
-    `<div class="gen-recap z14-list-ramka"><b>${SHEET_14.ramka}. ${b.nazvanie}</b>` +
+    `<div class="gen-recap z14-list-ramka"><b>${SHEET_14.ramka}. ${typeset(b.nazvanie)}</b>` +
     `<p>${typeset(b.zapomni)}</p><p><i>Пример.</i> ${typeset(b.primer)}</p></div>`
   );
 }
@@ -191,7 +191,8 @@ export function config14(): GenConfig {
         return {
           id: m,
           code: String(b?.no ?? ''),
-          title: b?.nazvanie ?? m,
+          title: (b?.nazvanie ?? m).replace(/\$/g, ''),
+          ...(b?.nazvanie.includes('$') ? { titleHtml: typeset(b.nazvanie) } : {}),
           level: 1 as const,
           bank: pulMetoda(m, 'mix').length,
         };

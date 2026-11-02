@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Tex } from '@/components/ui/Tex';
 import { Opornye14 } from '@/components/zadanie14/Opornye14';
 import { ZADANIE14, zadanie14Title } from '@/content/zadanie14';
 import { BLOKI_14 } from '@/lib/zadanie14/opornye';
@@ -19,7 +20,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { blok } = await params;
   const b = BLOKI_14.find((x) => x.slug === blok);
-  return { title: zadanie14Title(b ? b.nazvanie : 'Опорные задачи') };
+  return { title: zadanie14Title(b ? b.nazvanie.replace(/\$/g, '') : 'Опорные задачи') };
 }
 
 /** Блок опорных задач №14: «Запомни», разбор первой задачи и девять задач с подсказками. */
@@ -33,7 +34,7 @@ export default async function Blok14Page({ params }: { params: Promise<{ blok: s
         ← Все блоки
       </Link>
       <h2 className="t-h2">
-        {b.no}. {b.nazvanie}
+        {b.no}. <Tex text={b.nazvanie} />
       </h2>
       <Opornye14 slug={b.slug} />
     </div>

@@ -88,6 +88,7 @@ export interface Blok14 {
   id: Metod14;
   slug: string;
   no: number;
+  /** Название блока; формула — в $…$ (выводится через Tex). */
   nazvanie: string;
   /** Для карточки блока — без формул (docs/razdel-pravila.md, п. 3). */
   opisanie: string;

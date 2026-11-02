@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Tex } from '@/components/ui/Tex';
 import { ReshenoVBloke14 } from '@/components/zadanie14/Opornye14';
 import { ZADANIE14, zadanie14Title } from '@/content/zadanie14';
 import { BLOKI_14 } from '@/lib/zadanie14/opornye';
@@ -26,7 +27,9 @@ export default function Opornye14Tab() {
         {BLOKI_14.map((b) => (
           <li key={b.id} className="z14-op-karta">
             <span className="z14-op-karta__no">{b.no}</span>
-            <h3 className="z14-op-karta__title">{b.nazvanie}</h3>
+            <h3 className="z14-op-karta__title">
+              <Tex text={b.nazvanie} />
+            </h3>
             <p className="z14-op-karta__opisanie">{b.opisanie}</p>
             <p className="z14-op-karta__schet">
               {b.zadachi.length} задач · <ReshenoVBloke14 ids={b.zadachi.map((z) => z.id)} />
