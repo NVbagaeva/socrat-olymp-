@@ -52,6 +52,7 @@ export function Otvet14({
             value={vvod.chislo}
             onChange={(t) => onVvod({ ...vvod, chislo: t })}
             label="Ответ — число"
+            testId="z14-chislo"
             placeholder="-0,5"
             readOnly={zakryto}
           />
@@ -94,6 +95,7 @@ export function Otvet14({
               value={t}
               onChange={(x) => setSeriya(i, x)}
               label={`Серия ${i + 1}`}
+              testId={`z14-seriya-${i}`}
               placeholder="\frac{\pi}{6}+2\pi k"
               readOnly={zakryto}
             />
@@ -132,6 +134,7 @@ export function Otvet14({
               value={vvod.korni}
               onChange={(x) => onVvod({ ...vvod, korni: x })}
               label="Корни через точку с запятой"
+              testId="z14-korni"
               placeholder="-\frac{7\pi}{6};-\pi"
               readOnly={zakryto}
             />

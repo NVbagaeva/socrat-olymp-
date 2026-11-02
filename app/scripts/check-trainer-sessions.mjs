@@ -230,6 +230,41 @@ function answer6(payload, at) {
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
 
+/**
+ * №14: в записи — id задач; ответ — серии пункта а (по полю на серию),
+ * корни пункта б или число разминки. Поля — формулы (MathLive), их
+ * значение ставит setPole.
+ */
+function answer14(payload, at) {
+  const { zadachaPoId14 } = requireSrc('lib/zadanie14/dannye');
+  const U = requireSrc('lib/zadanie14/ugol');
+  const z = zadachaPoId14(payload.ids[at]);
+  if (z === undefined) {
+    throw new Error(`№14: нет задачи ${payload.ids[at]}`);
+  }
+  if (z.vid === 'razminka') {
+    return { mf: { serii: [], korni: null, chislo: String(z.otvet) } };
+  }
+  return {
+    mf: {
+      serii: z.serii.map((sr) => U.seriyaTex(sr)),
+      korni:
+        z.promezhutok === undefined
+          ? null
+          : U.korniNaPromezhutke(z.serii, z.promezhutok)
+              .map((a) => U.ugolTex(a))
+              .join(';'),
+      chislo: null,
+    },
+  };
+}
+
+/** №14: самая большая тренировка — 15 задач вместе с опорными. */
+async function chooseAll14(page) {
+  await page.getByRole('button', { name: 'Вместе с опорными', exact: true }).click();
+  await page.getByRole('button', { name: '15', exact: true }).click();
+}
+
 /** №19: в записи — id задач банка; ответ — TeX-множество из контента, поле его принимает. */
 function answer19(payload, at) {
   const { vseZadachi19 } = requireSrc('content/teoriya19/index');
@@ -291,6 +326,7 @@ async function chooseAllFiltry(page) {
 }
 
 const TRAINERS = [
+  { name: '№14', url: '/zadaniya/14/trenazher/', scope: '14', answer: answer14, all: chooseAll14 },
   { name: '№19', url: '/zadaniya/19/trenazher/', scope: '19', answer: answer19, all: chooseAll19 },
   ...['linear', 'quadratic', 'rational', 'irrational'].map((sub) => ({
     name: `№12 ${sub}`,
@@ -457,6 +493,7 @@ const QUESTION = [
   '.z3t__question',
   '.z7-uslovie__text',
   '.z6-uslovie__text',
+  '.z14-uslovie',
 ]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
@@ -533,9 +570,47 @@ function totalOf(record) {
 }
 
 /** Ввести ответ (или выбрать вариант, метод) и проверить. */
+/** Поле формулы №14 по data-testid: MathLive или обычное поле (запасной вид). */
+async function setPole(page, id, value) {
+  const pole = page.locator(`${BODY} [data-testid="${id}"]`).first();
+  await pole.waitFor({ state: 'attached' });
+  if ((await pole.evaluate((el) => el.tagName)) === 'INPUT') {
+    await pole.fill(value);
+    return;
+  }
+  await pole.evaluate((el, v) => {
+    el.value = v;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, value);
+}
+
+async function readPole(page, id) {
+  const pole = page.locator(`${BODY} [data-testid="${id}"]`);
+  if ((await pole.count()) === 0) {
+    return null;
+  }
+  return pole.first().evaluate((el) => el.value ?? '');
+}
+
 async function give(page, answer) {
   const body = page.locator(BODY);
-  if (answer.text !== undefined) {
+  if (answer.mf !== undefined) {
+    const { serii, korni, chislo } = answer.mf;
+    if (chislo !== null) {
+      await setPole(page, 'z14-chislo', chislo);
+    } else {
+      for (let i = 0; i < serii.length; i += 1) {
+        if ((await page.locator(`${BODY} [data-testid="z14-seriya-${i}"]`).count()) === 0) {
+          await body.getByRole('button', { name: '+ Ещё серия', exact: true }).click();
+        }
+        await setPole(page, `z14-seriya-${i}`, serii[i]);
+      }
+      if (korni !== null) {
+        await setPole(page, 'z14-korni', korni);
+      }
+    }
+    await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
+  } else if (answer.text !== undefined) {
     await page.locator(ANSWER_INPUT).first().fill(answer.text);
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
   } else if (answer.option !== undefined) {
@@ -557,6 +632,17 @@ async function give(page, answer) {
 
 /** Неверный ответ того же вида, что верный. */
 async function wrongOf(page, right) {
+  if (right.mf !== undefined) {
+    return right.mf.chislo !== null
+      ? { mf: { serii: [], korni: null, chislo: '987654' } }
+      : {
+          mf: {
+            serii: ['\\frac{\\pi}{7}+2\\pi k'],
+            korni: right.mf.korni === null ? null : '\\frac{\\pi}{7}',
+            chislo: null,
+          },
+        };
+  }
   if (right.text !== undefined) {
     return { text: right.text === '987654' ? '987653' : '987654' };
   }
@@ -570,6 +656,22 @@ async function wrongOf(page, right) {
 
 /** Что сейчас введено или выбрано на экране задания — в той же форме, что ответ. */
 async function shownAnswer(page, like) {
+  if (like.mf !== undefined) {
+    if (like.mf.chislo !== null) {
+      return { mf: { serii: [], korni: null, chislo: await readPole(page, 'z14-chislo') } };
+    }
+    const serii = [];
+    for (let i = 0; i < like.mf.serii.length; i += 1) {
+      serii.push((await readPole(page, `z14-seriya-${i}`)) ?? '');
+    }
+    return {
+      mf: {
+        serii,
+        korni: like.mf.korni === null ? null : await readPole(page, 'z14-korni'),
+        chislo: null,
+      },
+    };
+  }
   if (like.text !== undefined) {
     return { text: await page.locator(ANSWER_INPUT).first().inputValue() };
   }
