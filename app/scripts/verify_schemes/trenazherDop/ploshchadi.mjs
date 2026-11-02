@@ -38,10 +38,10 @@ function proveritVysotu(sch, { A, B, C, M, N }, imya) {
 }
 const OBSHCHAYA_VYSOTA = {
   id: 'pl-obshchaya-vysota',
-  b(sch, rnd) {
+  b(sch, rnd, d) {
     const otvety = Array.from({ length: 5 }, () => {
       const t = sluchaynyyTreugolnik(rnd);
-      const k = Math.sqrt(40 / ploshchad([t.A, t.B, t.C]));
+      const k = Math.sqrt(d.S / ploshchad([t.A, t.B, t.C]));
       const p = vysota({ A: mul(t.A, k), B: mul(t.B, k), C: mul(t.C, k) });
       return ploshchad([p.A, p.B, p.N]);
     });
@@ -51,9 +51,9 @@ const OBSHCHAYA_VYSOTA = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiObshchVysoty(t);
-    sch.fakt('данные: S(ABC) = 40', blizko(ploshchad([p.A, p.B, p.C]), 40));
+    sch.fakt(`данные: S(ABC) = ${d.S}`, blizko(ploshchad([p.A, p.B, p.C]), d.S));
     return ploshchad([p.A, p.B, p.N]);
   },
   a(rnd, sch) {
@@ -81,14 +81,16 @@ function proveritBiss(sch, { A, B, C, L: Lt }, imya) {
 }
 const BISSEKTRISA = {
   id: 'pl-bissektrisa',
-  b() {
-    return dist([0, 0], bissektrisa({ A: [0, 0], B: polar(-30, 3), C: polar(90, 6) }).L);
+  b(_sch, _rnd, d) {
+    return dist([0, 0], bissektrisa({ A: [0, 0], B: polar(-30, d.AB), C: polar(90, d.AC) }).L);
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiBissektrisy(t);
     sch.fakt(
-      'данные: AB = 3, AC = 6, ∠A = 120°',
-      blizko(dist(p.A, p.B), 3) && blizko(dist(p.A, p.C), 6) && blizko(ugol(p.B, p.A, p.C), 120),
+      `данные: AB = ${d.AB}, AC = ${d.AC}, ∠A = 120°`,
+      blizko(dist(p.A, p.B), d.AB) &&
+        blizko(dist(p.A, p.C), d.AC) &&
+        blizko(ugol(p.B, p.A, p.C), 120),
     );
     return dist(p.A, p.L);
   },

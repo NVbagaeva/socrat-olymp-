@@ -677,10 +677,10 @@ const SCENY_NOVYE: Readonly<Record<string, Postroenie>> = {
 export function scena18(tip: string, p: Parametry): ZhivayaSkhema {
   const f = SCENY[tip] ?? SCENY_NOVYE[tip];
   if (f !== undefined) return f(p);
-  /* Перенесённые задачи с одним набором чисел — dop/. */
+  /* Перенесённые задачи — dop/. */
   const s = SCENY_DOP[tip];
   if (s === undefined) throw new Error(`Нет чертежа задачи тренажёра ${tip}`);
-  return s;
+  return s(p);
 }
 
 export const TIPY_SCEN_18: readonly string[] = [
