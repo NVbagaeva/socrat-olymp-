@@ -21,6 +21,8 @@ import {
 } from '@/lib/trainerSession/store';
 import { TRAINER_SCHEMA_VERSION, type BaseUi } from '@/lib/trainerSession/types';
 import { SessionBar } from './SessionBar';
+import type { OtchetOZadache } from '@/lib/otchet/sobrat';
+import type { OtchetDopolnenie } from '@/lib/otchet/types';
 import { TrainerSummary, type SummaryData, type SummaryItem } from './TrainerSummary';
 import { sessionText } from './text';
 import './session.css';
@@ -72,6 +74,8 @@ export interface DescribedTask {
   code?: string;
   /** Откуда задача: «Открытый банк», «Аналог», «Новая». */
   badge?: string;
+  /** Для результата учителю: тема, «ФИПИ № 37», введённый ответ, тип для фильтра. */
+  otchet?: OtchetOZadache;
 }
 
 /** Что ещё показать на экране итогов: у каждого тренажёра своё. */
@@ -83,6 +87,8 @@ export interface SummaryOptions {
   hintedLabel?: string;
   /** Свой блок под общими строками итогов: рекомендации, ссылки на теорию. */
   extra?: (data: SummaryData) => ReactNode;
+  /** Что добавить к результату для учителя: режим, адрес тренажёра. */
+  otchet?: (data: SummaryData) => OtchetDopolnenie;
 }
 
 export interface ConfiguratorApi<P> {
@@ -625,6 +631,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
           icon: described.icon,
           code: described.code,
           badge: described.badge,
+          otchet: described.otchet,
           mark: mark ?? (ui?.tried[position] === true ? 'wrong' : 'skipped'),
         });
       }
@@ -632,6 +639,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
       return {
         items,
         seconds: Math.round(elapsed() / 1000),
+        finishedAt: Date.now(),
         payload: run.payload,
         ...(misses === undefined ? {} : { misses }),
       };
@@ -985,6 +993,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         onRetrySame={subset === undefined ? undefined : () => retrySame(view.data)}
         onRetrySimilar={similar === undefined ? undefined : () => void retrySimilar(view.data)}
         buildingSimilar={building}
+        otchet={{ scope, dopolnenie: summary?.otchet?.(view.data) }}
       />
     );
   }
