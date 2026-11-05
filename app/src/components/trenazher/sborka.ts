@@ -89,5 +89,5 @@ export function zagruzitDvizhok<T>(K: KartochkaRazdela<T>): Promise<Postroitel<T
 /** Последние состояния задач тренировки: итогам нужны время и номер «похожей». */
 export const SOSTOYANIYA = new WeakMap<
   TrenPayload,
-  Record<number, { pohozhaya: number; sek: number }>
+  Record<number, { pohozhaya: number; sek: number; v?: string }>
 >();

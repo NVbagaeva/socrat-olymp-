@@ -1,0 +1,317 @@
+/* «Отправить результат учителю» (экран итогов) и страница учителя /rezultat/. */
+
+/* ── Кнопка на экране итогов ─────────────────────────────────── */
+
+.otp {
+  width: 100%;
+  max-width: 720px;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-info, var(--color-border));
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info, var(--color-surface));
+  text-align: left;
+}
+.otp__title {
+  margin: 0 0 var(--space-1);
+  font-size: 16px;
+  font-weight: 600;
+}
+.otp__lead {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.otp__label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: 14px;
+  font-weight: 600;
+}
+.otp__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.otp__input {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.otp__btn {
+  flex: 0 0 auto;
+}
+.otp__hint {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+.otp__hint--error {
+  color: var(--color-error);
+}
+.otp__status {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-success-soft);
+  color: var(--color-text);
+  font-size: 14px;
+}
+.otp__status p {
+  margin: 0;
+}
+@media (max-width: 767px) {
+  .otp__btn {
+    flex-basis: 100%;
+    min-height: 44px;
+  }
+}
+
+/* ── Страница учителя ─────────────────────────────────────────── */
+
+.rez {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 880px;
+  margin-top: var(--space-4);
+}
+.rez__card {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+.rez__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.rez__kicker {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+.rez__name {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.rez__score {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.rez__percent {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+}
+.rez__percent--green {
+  color: var(--color-success);
+}
+.rez__percent--yellow {
+  color: var(--color-warning);
+}
+.rez__percent--red {
+  color: var(--color-error);
+}
+.rez__of {
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+.rez__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-5) 0 0;
+}
+.rez__meta div {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.rez__meta dt {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+.rez__meta dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+.rez__h {
+  margin: 0 0 var(--space-3);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.rez-temy {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rez-tema {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+.rez-tema__svet {
+  font-size: 16px;
+  line-height: 1;
+}
+.rez-tema__name {
+  overflow-wrap: anywhere;
+}
+.rez-tema__score {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rez-table-wrap {
+  overflow-x: auto;
+}
+.rez-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.rez-table th,
+.rez-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+.rez-table th {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rez-table__ist {
+  white-space: nowrap;
+}
+.rez-itog {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rez-itog--right {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+.rez-itog--wrong {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+.rez-itog--hinted {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+.rez-itog--skipped {
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+}
+
+.rez__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.rez__note {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+.rez__state {
+  max-width: 560px;
+}
+.rez__state h1 {
+  margin: 0 0 var(--space-2);
+  font-size: 22px;
+}
+.rez__state p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Телефон: таблица превращается в карточки задач. */
+@media (max-width: 599px) {
+  .rez__card {
+    padding: var(--space-4);
+  }
+  .rez__name {
+    font-size: 22px;
+  }
+  .rez-table thead {
+    display: none;
+  }
+  .rez-table,
+  .rez-table tbody,
+  .rez-table tr,
+  .rez-table td {
+    display: block;
+    width: 100%;
+  }
+  .rez-table tr {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .rez-table td {
+    padding: 2px 0;
+    border: 0;
+  }
+  .rez-table td.rez-table__no {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+  }
+  .rez-table td.rez-table__no::before {
+    content: 'Задача ';
+  }
+  .rez-table td[data-k]::before {
+    content: attr(data-k) ': ';
+    color: var(--color-text-secondary);
+  }
+  .rez__actions .btn {
+    flex: 1 1 100%;
+  }
+}
+
+@media print {
+  .rez__actions {
+    display: none;
+  }
+  .rez__card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
+
+/* Печать страницы учителя: только карточка результата, без оболочки сайта. */
+@media print {
+  body:has(.rez) .sidebar,
+  body:has(.rez) .topbar,
+  body:has(.rez) .bnav--shell,
+  body:has(.rez) .crumbs,
+  body:has(.rez) .help-fab,
+  body:has(.rez) .cookie-notice {
+    display: none !important;
+  }
+  .rez {
+    max-width: none;
+    margin: 0;
+  }
+}

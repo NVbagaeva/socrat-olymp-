@@ -57,6 +57,7 @@ export function zadachi1(dannye: DannyeTrenazhera1): ZadachaRef[] {
       podtip: b.id,
       uroven: level.get(b.id) ?? null,
       istochnik: b.analog ? 'new' : 'fipi',
+      ...(b.analog ? {} : { fipi: b.no }),
     };
   });
 }

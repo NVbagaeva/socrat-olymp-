@@ -125,6 +125,12 @@ export const ITOGI = {
   teoriya: 'Теория',
   opornye: 'Опорные задачи',
   vremya: 'Время по задачам',
+  /** Откуда задача — в результате для учителя. */
+  istochnik: {
+    fipi: (no: number | undefined) => (no === undefined ? 'ФИПИ' : `ФИПИ № ${no}`),
+    analog: 'аналог',
+    novaya: 'новая задача',
+  },
   sek: (s: number) =>
     s < 60 ? `${Math.round(s)} с` : `${Math.floor(s / 60)} мин ${Math.round(s % 60)} с`,
 } as const;

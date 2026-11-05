@@ -6,7 +6,10 @@ import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui';
+import { OtpravitUchitelyu } from '@/components/otchet/OtpravitUchitelyu';
 import { assetUrl } from '@/lib/assetUrl';
+import { estReshennye, sobratOtchet, type OtchetOZadache } from '@/lib/otchet/sobrat';
+import type { OtchetDopolnenie } from '@/lib/otchet/types';
 import { KindName } from '../trainer/KindName';
 import { sessionText, timeText } from './text';
 
@@ -27,6 +30,8 @@ export interface SummaryItem {
   code?: string | undefined;
   /** Откуда задача: «Открытый банк», «Аналог». */
   badge?: string | undefined;
+  /** Для результата учителю: тема, источник, введённый ответ, тип для фильтра. */
+  otchet?: OtchetOZadache | undefined;
 }
 
 export interface SummaryData {
@@ -37,6 +42,14 @@ export interface SummaryData {
   payload: unknown;
   /** Сколько раз ответ не сошёлся. Нет — экран счётчика не ведёт. */
   misses?: number;
+  /** Когда тренировка завершена, мс. Нет — момент показа итогов. */
+  finishedAt?: number;
+}
+
+/** «Отправить результат учителю»: раздел тренажёра и что он добавляет. */
+export interface SummaryOtchet {
+  scope: string;
+  dopolnenie?: OtchetDopolnenie | undefined;
 }
 
 export interface TrainerSummaryProps {
@@ -55,6 +68,11 @@ export interface TrainerSummaryProps {
   extra?: ReactNode;
   /** Свои подписи итогов: у зачётной работы — «Работа завершена». */
   texts?: Partial<typeof sessionText.summary> | undefined;
+  /**
+   * Кнопка «Отправить результат учителю» — временная, до кабинета на
+   * сервере (lib/otchet/otpravka.ts). Не задано — кнопки нет.
+   */
+  otchet?: SummaryOtchet | undefined;
 }
 
 interface KindRow {
@@ -138,6 +156,7 @@ export function TrainerSummary({
   hintedLabel,
   extra,
   texts,
+  otchet,
 }: TrainerSummaryProps) {
   const t = { ...sessionText.summary, ...texts };
   const { items } = data;
@@ -212,6 +231,22 @@ export function TrainerSummary({
           <dd>{timeText(data.seconds)}</dd>
         </div>
       </dl>
+
+      {/* Отправка учителю — сразу под счётом: на телефоне ниже её не найти. */}
+      {otchet === undefined || !estReshennye(items) ? null : (
+        <OtpravitUchitelyu
+          sobrat={(imya) =>
+            sobratOtchet({
+              imya,
+              scope: otchet.scope,
+              items,
+              sekund: data.seconds,
+              vremya: data.finishedAt ?? Date.now(),
+              dopolnenie: otchet.dopolnenie,
+            })
+          }
+        />
+      )}
 
       <div className="tdone__actions">
         <Button onClick={onNew}>{t.newTraining}</Button>

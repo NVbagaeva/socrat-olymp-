@@ -79,6 +79,8 @@ export interface ZadachaRef {
   istochnik: Istochnik;
   /** Правило ответа (№12): им сужают набор ярлыки прежних адресов. */
   pravilo?: string;
+  /** Номер задачи в открытом банке ФИПИ, если раздел его знает: для результата учителю. */
+  fipi?: number;
 }
 
 export type IstochnikFiltra = 'vse' | Istochnik;

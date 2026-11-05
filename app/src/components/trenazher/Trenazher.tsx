@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { FiltrPanel } from '@/components/filtry/FiltrPanel';
 import { TrainerSessionHost, type ConfiguratorApi } from '@/components/tasks/session';
-import { ITOGI } from '@/content/trenazherFiltry';
+import { FILTRY, ITOGI } from '@/content/trenazherFiltry';
 import { NACHALNYY, estVSsylke, kRazdelu, naydeno, sostav, vSsylku } from '@/lib/trenazher/filtr';
 import { useFiltr } from '@/lib/trenazher/zapomnit';
 import { randomSeed } from '@/lib/randomSeed';
@@ -67,6 +67,11 @@ export function Trenazher<T>({
   );
 
   const refsByKey = useMemo(() => new Map(refs.map((r) => [r.key, r])), [refs]);
+  /* Подтип → тема: итог по темам в результате для учителя. */
+  const temyTipov = useMemo(
+    () => new Map(config.temy.flatMap((t) => t.podtipy.map((p) => [p.id, t.title] as const))),
+    [config],
+  );
   const tipy = useMemo(
     () =>
       new Map(
@@ -114,8 +119,25 @@ export function Trenazher<T>({
         const item = p.items[at];
         const ref = item === undefined ? undefined : refsByKey.get(item.k);
         const task = zadachaIzKesha(K, p, at, pohozhayaNa(p, at));
+        const sost = SOSTOYANIYA.get(p)?.[at];
         return {
           kind: ref === undefined ? '' : (tipy.get(ref.podtip) ?? ref.podtip),
+          ...(ref === undefined
+            ? {}
+            : {
+                otchet: {
+                  tipId: ref.podtip,
+                  ...(temyTipov.has(ref.podtip) ? { tema: temyTipov.get(ref.podtip) } : {}),
+                  /* «Похожая задача» — новая задача генератора, уже не та, что в списке. */
+                  istochnik:
+                    (sost?.pohozhaya ?? 0) > 0
+                      ? ITOGI.istochnik.novaya
+                      : ref.istochnik === 'new'
+                        ? ITOGI.istochnik.analog
+                        : ITOGI.istochnik.fipi(ref.fipi),
+                  ...(sost?.v === undefined ? {} : { otvet: sost.v }),
+                },
+              }),
           html: task === null || task === undefined ? '' : K.html(task),
           ...(task === null || task === undefined || !K.estRazbor(task)
             ? {}
@@ -141,6 +163,10 @@ export function Trenazher<T>({
       })}
       labels={{ summary: { retrySimilar: ITOGI.pererreshat } }}
       summary={{
+        otchet: (data) => ({
+          rezhim: FILTRY.rezhimy[(data.payload as TrenPayload).rezhim].title,
+          put: window.location.pathname,
+        }),
         extra: (data) => {
           const p = data.payload as TrenPayload;
           const podtipy = new Set<string>();
