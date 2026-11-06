@@ -19,7 +19,7 @@ import { tex, tochnee, tochno, veroyatnost } from './obshchee';
 const P06: Prototype = prototip({
   id: 'p5-06',
   blok: 'nezavisimye',
-  nazvanie: 'Шахматист: выиграет обе партии',
+  nazvanie: 'Рисуем дерево — Шахматист: выиграет обе партии',
   tip: 'Независимые события: перемножаем',
   sourceRange: [29, 32],
   format: 'десятичная',
@@ -128,7 +128,7 @@ function shema(p: Params): string {
 const P07: Prototype = prototip({
   id: 'p5-07',
   blok: 'nezavisimye',
-  nazvanie: 'Стрелок: четыре мишени по одному выстрелу',
+  nazvanie: 'Рисуем дерево — Стрелок: четыре мишени по одному выстрелу',
   tip: 'Независимые события: перемножаем',
   sourceRange: [33, 36],
   format: 'десятичная',
@@ -283,7 +283,7 @@ const SLOVAMI: Record<number, string> = { 2: 'две', 3: 'три', 4: 'четы
 const P08: Prototype = prototip({
   id: 'p5-08',
   blok: 'hotya-by',
-  nazvanie: 'Лампы: хотя бы одна не перегорит',
+  nazvanie: 'Рисуем дерево — Лампы: хотя бы одна не перегорит',
   tip: '«Хотя бы один»: через «ни одного»',
   sourceRange: [37, 40],
   format: 'десятичная',
@@ -413,7 +413,7 @@ function n09(p: Params): number {
 const P09: Prototype = prototip({
   id: 'p5-09',
   blok: 'dva-predmeta',
-  nazvanie: 'Фломастеры: один синий и один красный',
+  nazvanie: 'Рисуем дерево — Фломастеры: один синий и один красный',
   tip: 'Два предмета без возвращения',
   sourceRange: [41, 44],
   format: 'десятичная',
@@ -585,7 +585,7 @@ const P09: Prototype = prototip({
 const P10: Prototype = prototip({
   id: 'p5-10',
   blok: 'nezavisimye',
-  nazvanie: 'Футбол: хотя бы 4 очка в двух играх',
+  nazvanie: 'Рисуем дерево — Футбол: хотя бы 4 очка в двух играх',
   tip: 'Независимые события: перемножаем',
   sourceRange: [45, 48],
   format: 'десятичная',

@@ -358,6 +358,77 @@ export function bank5Pool(): Pool {
   return pool5;
 }
 
+/* ── Разборы отдельными файлами ──────────────────────────────────── */
+
+/**
+ * Закрытые разборы и подсказки вариантов одного прототипа: номер
+ * варианта → то, что страница тренажёра не несёт. Лежат файлами сборки
+ * (app/zadaniya/{4,5}/dannye/razbory/{прототип}.json), экран тренировки
+ * грузит их только для задач своего подхода (razboryKlient.ts).
+ */
+export type RazboryVida = Record<string, { steps: string; podskazka?: string }>;
+
+/**
+ * Банк для страницы тренажёра — без закрытых разборов и подсказок.
+ *
+ * Зашифрованный разбор почти не сжимается: целиком банк №5 — больше
+ * десяти мегабайт даже в gzip, и страница грузилась бы так же долго.
+ * Без разборов — десятки килобайт: условия, отпечатки ответов, рисунки.
+ */
+export function bezRazborov(pool: Pool): Pool {
+  return {
+    bloki: pool.bloki,
+    kinds: pool.kinds.map((kind) => ({
+      ...kind,
+      variants: kind.variants.map((v) => ({
+        n: v.n,
+        uslovie: v.uslovie,
+        seal: v.seal,
+        steps: '',
+        ...(v.model === undefined ? {} : { model: v.model }),
+      })),
+    })),
+  };
+}
+
+/** Разборы вариантов прототипа; прототипа нет — ошибка сборки. */
+export function razboryVida(pool: Pool, kindId: string): RazboryVida {
+  const kind = pool.kinds.find((k) => k.id === kindId);
+  if (kind === undefined) {
+    throw new Error(`Нет прототипа ${kindId}`);
+  }
+  return Object.fromEntries(
+    kind.variants.map((v) => [
+      String(v.n),
+      { steps: v.steps, ...(v.podskazka === undefined ? {} : { podskazka: v.podskazka }) },
+    ]),
+  );
+}
+
+/**
+ * Версия файлов разборов: отпечаток всех разборов банка. Меняется с
+ * любым разбором, и браузер не возьмёт из кеша вчерашний файл.
+ */
+const VERSII = new WeakMap<Pool, string>();
+export function versiyaRazborov(pool: Pool): string {
+  let v = VERSII.get(pool);
+  if (v === undefined) {
+    v = fingerprintRazborov(
+      pool.kinds.map((k) => k.variants.map((x) => x.steps + (x.podskazka ?? '')).join('')).join(''),
+    );
+    VERSII.set(pool, v);
+  }
+  return v;
+}
+
+function fingerprintRazborov(text: string): string {
+  let a = 0x811c9dc5;
+  for (let i = 0; i < text.length; i += 1) {
+    a = Math.imul(a ^ text.charCodeAt(i), 0x01000193) >>> 0;
+  }
+  return a.toString(16).padStart(8, '0');
+}
+
 /* ── Опорные задачи ──────────────────────────────────────────────── */
 
 export interface PrepPoolZadacha {

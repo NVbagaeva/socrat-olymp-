@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
-import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
+import { bank5Pool, bezRazborov, uznayMetodPool, versiyaRazborov } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
@@ -14,9 +14,11 @@ export const metadata: Metadata = {
  * конфигуратор задания №12, режимы отработки, смешанный, повтор
  * ошибок и «Узнай метод», прогресс по шести методам.
  *
- * Банк собирается на сборке: 12 прототипов, у каждого варианты
- * задачника и десять сгенерированных. Вниз уезжают условия, открытые
- * параметры рисунка, отпечатки ответов и закрытые разборы.
+ * Банк собирается на сборке: у каждого прототипа варианты задачника
+ * и сгенерированные. Со страницей уезжают условия, открытые параметры
+ * рисунка и отпечатки ответов. Закрытые разборы и подсказки весят
+ * мегабайты и почти не сжимаются, поэтому лежат файлами по прототипам
+ * (dannye/razbory/) и грузятся только для задач подхода.
  */
 export default function Trenazher5Tab() {
   const pool = bank5Pool();
@@ -25,7 +27,8 @@ export default function Trenazher5Tab() {
       {/* Название вкладки — H2 панели: конфигуратор и подход — общие с №12 экраны без своего заголовка. */}
       <h2 className="t-h2 vtab__title">{vkladka('5', 'trenazher')}</h2>
       <Trenazher
-        pool={pool}
+        pool={bezRazborov(pool)}
+        versiyaRazborov={versiyaRazborov(pool)}
         uznay={uznayMetodPool(5)}
         zadanie={5}
         base={`${ZADANIYA}/5/trenazher/`}

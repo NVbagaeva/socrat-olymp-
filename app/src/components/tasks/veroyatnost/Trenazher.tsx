@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { TrainerSessionHost } from '@/components/tasks/session';
 import { REZHIMY, type Rezhim, type Zadanie } from '@/content/veroyatnost';
 import { createProgressStore, type ProgressStore } from '@/lib/progressStore';
@@ -11,6 +11,7 @@ import { sobratPodhod, type RoundKind } from '@/lib/veroyatnost/useRound';
 import { navykKind, navykiZadaniya, zadachaId } from './metody';
 import type { MetodKarta } from './navyki';
 import { ProgressPoMetodam } from './ProgressPoMetodam';
+import { useSRazborami } from './razboryKlient';
 import { Sessiya } from './Sessiya';
 import { SessiyaRazbor, UznayRazbor } from './SessiyaRazbor';
 import {
@@ -41,6 +42,49 @@ export interface TrenazherProps {
   metody: MetodKarta[];
   /** Что выбрано при заходе по ярлыку адреса. */
   preset?: TrenazherPreset | null;
+  /**
+   * Версия файлов с разборами: банк страницы приходит без них
+   * (pool.ts, bezRazborov), экран тренировки догружает их сам.
+   */
+  versiyaRazborov: string;
+}
+
+/**
+ * Экран тренировки — когда разборы задач подхода загружены. Банк
+ * страницы лёгкий, разборы и подсказки лежат файлами по прототипам.
+ */
+function SRazborami({
+  payload,
+  versiya,
+  children,
+}: {
+  payload: SessiyaPayload;
+  versiya: string;
+  children: (payload: SessiyaPayload) => ReactNode;
+}) {
+  const { sostoyanie, povtorit } = useSRazborami(payload.tasks, payload.zadanie, versiya);
+  const gotovyy = useMemo(
+    () => (typeof sostoyanie === 'object' ? { ...payload, tasks: sostoyanie.gotovo } : null),
+    [payload, sostoyanie],
+  );
+  if (sostoyanie === 'oshibka') {
+    return (
+      <div className="lazy-loading" role="alert">
+        <p>Не удалось загрузить задачи. Проверьте интернет и попробуйте ещё раз.</p>
+        <button type="button" className="btn btn--secondary" onClick={povtorit}>
+          Повторить
+        </button>
+      </div>
+    );
+  }
+  if (gotovyy === null) {
+    return (
+      <p className="lazy-loading" role="status">
+        Загружаем задачи…
+      </p>
+    );
+  }
+  return children(gotovyy);
 }
 
 /**
@@ -87,14 +131,23 @@ function vsegoVariantov(kinds: readonly { variants: readonly unknown[] }[]): num
   return kinds.reduce((sum, kind) => sum + kind.variants.length, 0);
 }
 
-export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }: TrenazherProps) {
+export function Trenazher({
+  pool,
+  uznay,
+  zadanie,
+  base,
+  metody,
+  preset = null,
+  versiyaRazborov,
+}: TrenazherProps) {
   const store = STORES[zadanie];
   const uznayStore = UZNAY_STORES[zadanie];
   const progress = store.useProgress();
   const spisokMetodov = navykiZadaniya(zadanie);
   /* Название навыка по идентификатору и отпечатки навыков «Узнай метод». */
   const nazvaniya = useMemo(
-    () => Object.fromEntries(spisokMetodov.map((m) => [m.id, m.nazvanie])) as Record<string, string>,
+    () =>
+      Object.fromEntries(spisokMetodov.map((m) => [m.id, m.nazvanie])) as Record<string, string>,
     [spisokMetodov],
   );
   const otpechatki = useMemo(
@@ -158,12 +211,7 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
     if (source.length === 0) {
       return;
     }
-    const tasks = zadachiPodhoda(
-      sobratPodhod(source, zapros.count),
-      zapros.rezhim,
-      pool,
-      uznay,
-    );
+    const tasks = zadachiPodhoda(sobratPodhod(source, zapros.count), zapros.rezhim, pool, uznay);
     if (tasks.length === 0) {
       return;
     }
@@ -204,7 +252,9 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
         return {
           kind: nazvaniya[task.metod] ?? payload.metod,
           html: task.uslovie,
-          review: () => <SessiyaRazbor task={task} />,
+          review: () => (
+            <SessiyaRazbor task={task} zadanie={payload.zadanie} versiya={versiyaRazborov} />
+          ),
         };
       }}
       subset={(payload, indexes) => ({
@@ -232,15 +282,19 @@ export function Trenazher({ pool, uznay, zadanie, base, metody, preset = null }:
         />
       )}
       screen={({ payload, restored, report, elapsed, finish }) => (
-        <Sessiya
-          payload={payload}
-          restored={restored === null ? null : readSessiyaUi(restored)}
-          report={report}
-          elapsed={elapsed}
-          onFinish={finish}
-          store={store}
-          uznayStore={uznayStore}
-        />
+        <SRazborami payload={payload} versiya={versiyaRazborov}>
+          {(sRazborami) => (
+            <Sessiya
+              payload={sRazborami}
+              restored={restored === null ? null : readSessiyaUi(restored)}
+              report={report}
+              elapsed={elapsed}
+              onFinish={finish}
+              store={store}
+              uznayStore={uznayStore}
+            />
+          )}
+        </SRazborami>
       )}
     />
   );

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
 import { navykiMetodov, yarlyki } from '@/components/tasks/veroyatnost/navyki';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
-import { bank5Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
+import { bank5Pool, bezRazborov, uznayMetodPool, versiyaRazborov } from '@/lib/veroyatnost/pool';
 import { ZADANIYA } from '@/lib/paths';
 
 /* Адреса перечислимы на сборке: методы с задачами и два режима. */
@@ -36,7 +36,8 @@ export default async function Page({ params }: { params: Params }) {
       {/* Название вкладки — H2 панели: конфигуратор и подход — общие с №12 экраны без своего заголовка. */}
       <h2 className="t-h2 vtab__title">{vkladka('5', 'trenazher')}</h2>
       <Trenazher
-        pool={pool}
+        pool={bezRazborov(pool)}
+        versiyaRazborov={versiyaRazborov(pool)}
         uznay={uznayMetodPool(5)}
         zadanie={5}
         base={`${ZADANIYA}/5/trenazher/`}
