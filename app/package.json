@@ -147,6 +147,7 @@
     "test:seriya-9": "node scripts/check-seriya-9.mjs",
     "test:dev-pages": "node scripts/check-dev-pages.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
+    "test:links": "node scripts/check-links.mjs",
     "test:navigation": "node scripts/check-navigation.mjs",
     "build:bank-10": "node scripts/build-bank-10.mjs",
     "build:bank-7": "node scripts/build-bank-7.mjs",
