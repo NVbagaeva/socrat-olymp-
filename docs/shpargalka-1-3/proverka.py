@@ -144,3 +144,39 @@ for _ in range(100):
     M=(P[0]+P[2])/2; N=(P[1]+P[2])/2; chk('S_бок×½', abs(lat([M,N,P[2]])/lat(P)-0.5)<1e-9)
     Rr=rng.uniform(1,5); chk('l=R√2', abs(math.hypot(Rr,Rr)-Rr*math.sqrt(2))<1e-12)
 print('Формулы теории:', 'все верны' if not bad else 'ОШИБКИ: '+', '.join(sorted(set(bad))))
+
+# ---- добавленные формулы (вторая редакция теории) ----
+bad2=[]
+exp={  # таблица со с. 20: sin, cos, tg, ctg
+ 30:(0.5, math.sqrt(3)/2, math.sqrt(3)/3, math.sqrt(3)),
+ 45:(math.sqrt(2)/2, math.sqrt(2)/2, 1, 1),
+ 60:(math.sqrt(3)/2, 0.5, math.sqrt(3), math.sqrt(3)/3),
+ 90:(1, 0, None, 0),
+ 120:(math.sqrt(3)/2, -0.5, -math.sqrt(3), -math.sqrt(3)/3),
+ 135:(math.sqrt(2)/2, -math.sqrt(2)/2, -1, -1),
+ 150:(0.5, -math.sqrt(3)/2, -math.sqrt(3)/3, -math.sqrt(3))}
+for x,(sn,cs,tg,ctg) in exp.items():
+    t=math.radians(x)
+    if abs(math.sin(t)-sn)>1e-12 or abs(math.cos(t)-cs)>1e-12: bad2.append(f'таблица {x}')
+    if tg is not None and abs(math.tan(t)-tg)>1e-9: bad2.append(f'tg {x}')
+    if abs(math.cos(t)/math.sin(t)-ctg)>1e-9: bad2.append(f'ctg {x}')
+for _ in range(300):
+    a,b=rng.uniform(0.5,5,2); C=np.array((0,0)); A=np.array((b,0)); B=np.array((0,a)); H=foot(C,A,B)
+    if abs(np.linalg.norm(H-C)**2-np.linalg.norm(A-H)*np.linalg.norm(H-B))>1e-9: bad2.append('h²=AH·HB')
+    al=ang(C,A,B); be=ang(A,B,C)
+    if abs(al+be-90)>1e-9: bad2.append('сумма острых')
+    # ctg A = прилежащий / противолежащий
+    if abs(1/math.tan(math.radians(al))-b/a)>1e-9: bad2.append('ctg')
+for _ in range(300):  # биссектрисы параллелограмма
+    A=np.array((0.,0.)); u=rng.uniform(0.3,3); Dq=np.array((rng.uniform(1,5),0.)); B=np.array((rng.uniform(-2,2),u)); C=B+Dq
+    bis=lambda V,P,Q: (P-V)/np.linalg.norm(P-V)+(Q-V)/np.linalg.norm(Q-V)
+    dA=bis(A,B,Dq); dB=bis(B,A,C); dC=bis(C,B,Dq)
+    if abs(dA@dB)>1e-9: bad2.append('AK⊥BL')
+    if abs(dA[0]*dC[1]-dA[1]*dC[0])>1e-9: bad2.append('AK∥CN')
+    # K = пересечение биссектрисы из A с прямой BC; AB = BK
+    t=(B[1])/dA[1]; K=A+t*dA
+    if abs(np.linalg.norm(B-A)-np.linalg.norm(K-B))>1e-9: bad2.append('AB=BK')
+    # ромб: диагонали — биссектрисы
+    s_=np.linalg.norm(B-A); Dr=np.array((s_,0.)); Cr=B+Dr
+    if abs(ang(B,A,Cr)-ang(Cr,A,Dr))>1e-7: bad2.append('ромб')
+print('Добавленные формулы:', 'все верны' if not bad2 else 'ОШИБКИ: '+', '.join(sorted(set(bad2))))

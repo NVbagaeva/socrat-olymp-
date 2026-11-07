@@ -25,7 +25,7 @@
 \smallskip
 Карманная шпаргалка ЕГЭ-2027, профильная математика, задания 1–3, страницы 12–51.\\
 Исходник: \texttt{docs/shpargalka-1-3/shpargalka\_1-3.tex}. Пересчёт ответов и численная проверка формул:
-\texttt{docs/shpargalka-1-3/proverka.py} (результат: «ВСЁ ВЕРНО», «Формулы теории: все верны»).
+\texttt{docs/shpargalka-1-3/proverka.py} (результат: «ВСЁ ВЕРНО», «Формулы теории: все верны», «Добавленные формулы: все верны»).
 
 \section*{1. Прототипы и ответы}
 Каждый ответ пересчитан отдельно, построением в координатах, а не формулой из решения. Все ответы~— целые числа или конечные десятичные дроби.
@@ -59,11 +59,11 @@
 
 \section*{2. Ход решения прототипов}
 \begin{enumerate}[label=\textbf{\arabic*.},leftmargin=7mm]
-\item[1.1] $CM=AM\Rightarrow\angle ACM=\angle A=72^\circ$; $\angle ACH=90^\circ-72^\circ=18^\circ$; $72^\circ-18^\circ=54^\circ$.
+\item[1.1] $CM=AM\Rightarrow\angle ACM=\angle A=72^\circ$; $\angle ACH=90^\circ-72^\circ=18^\circ$ (с.~19); $72^\circ-18^\circ=54^\circ$.
 \item[1.2] В $ADOE$: $360^\circ-90^\circ-90^\circ-52^\circ=128^\circ$.
 \item[1.3] $\angle A=\angle B$; в $\triangle ABH$ $\cos B=BH/AB=0{,}4$. (Треугольник остроугольный, $H$ лежит на отрезке $BC$: $BC=12{,}5>4$.)
-\item[1.4] $OA\perp CA$; $\angle AOC=66^\circ$; $\angle AOD=114^\circ=\cup AD$.
-\item[1.5] $AB+CD=26$, $AB=11=2r$, $r=5{,}5$. (Трапеция существует: основания $\approx18{,}10$ и $7{,}90$.)
+\item[1.4] $OA\perp CA$ (с.~23); $\angle AOC=66^\circ$; $\angle AOD=114^\circ$ (с.~13) $=\cup AD$ (с.~23).
+\item[1.5] $AB+CD=26$ (с.~20), $AB=11=2r$, $r=5{,}5$. (Трапеция существует: основания $\approx18{,}10$ и $7{,}90$.)
 \item[1.6] $2R=AB/\sin120^\circ=10$.
 \item[2.1] $(2-3-3;\ 1-4{,}5-4)=(-4;-7{,}5)$, $\sqrt{72{,}25}=8{,}5$.
 \item[2.2] $\vec a(5;2)$, $\vec b(6;-2)$, $30-4=26$.
@@ -82,15 +82,15 @@
 \begin{itemize}
 \item[с.~13] Вертикальные: $\angle1=\angle4$, $\angle2=\angle3$; смежные: $\angle1+\angle2=180^\circ$. При $a\parallel b$: накрест лежащие $\angle3=\angle6$, $\angle4=\angle5$; соответственные $\angle1=\angle5$, $\angle2=\angle6$, $\angle3=\angle7$, $\angle4=\angle8$; односторонние $\angle3+\angle5=\angle4+\angle6=180^\circ$; обратное утверждение~— признак параллельности.
 \item[с.~14] $\alpha+\beta+\gamma=180^\circ$; внешний $\delta=\alpha+\beta$; четырёхугольник $360^\circ$, $n$-угольник $180^\circ(n-2)$; высоты $BD$, $CE$: $\angle DOE=180^\circ-\angle A$; $AB=BC\Rightarrow\angle A=\angle C$, $BH$~— медиана, биссектриса, высота.
-\item[с.~15] Медиана делит площадь пополам; $BG:GM=2:1$; средняя линия $PN\parallel AC$, $PN=\tfrac12AC$; $\dfrac{AL}{LC}=\dfrac{AB}{BC}$.
-\item[с.~16] $S=\tfrac12bh_b=\tfrac12ab\sin\gamma=\sqrt{p(p-a)(p-b)(p-c)}=pr=\dfrac{abc}{4R}$.
-\item[с.~17] $\dfrac{a}{\sin\alpha}=\dfrac{b}{\sin\beta}=\dfrac{c}{\sin\gamma}=2R$; $c^2=a^2+b^2-2ab\cos\gamma$; $\sin(180^\circ-\alpha)=\sin\alpha$, $\cos(180^\circ-\alpha)=-\cos\alpha$; $\sin120^\circ=\tfrac{\sqrt3}2$, $\sin135^\circ=\tfrac{\sqrt2}2$, $\sin150^\circ=\tfrac12$; подобие: длины $\times k$, площади $\times k^2$; признаки~— два угла; две стороны (пропорциональны) и угол между ними (равен); три стороны (пропорциональны).
-\item[с.~18] $c^2=a^2+b^2$; $\sin A=\tfrac ac$, $\cos A=\tfrac bc$, $\operatorname{tg}A=\tfrac ab=\tfrac{\sin A}{\cos A}$; $\sin^2A+\cos^2A=1$; $CM=AM=BM=\tfrac c2=R\Rightarrow\angle ACM=\angle A$; $\angle ACH=90^\circ-\angle A=\angle B$.
-\item[с.~19] $h=\tfrac{ab}c$, $r=\tfrac{a+b-c}2$; тройки 3-4-5, 5-12-13, 8-15-17, 7-24-25; таблица $\sin$, $\cos$, $\operatorname{tg}$ для $30^\circ$, $45^\circ$, $60^\circ$; катет против $30^\circ$ равен $\tfrac c2$.
-\item[с.~20] $S=ah=ab\sin\alpha$; $d_1^2+d_2^2=2(a^2+b^2)$; ромб $S=\tfrac12d_1d_2$, $d_1\perp d_2$; квадрат $d=a\sqrt2$.
-\item[с.~21] $m=\tfrac{a+b}2$, $S=\tfrac{a+b}2h$; в равнобедренной высота отсекает $\tfrac{a-b}2$; четырёхугольник $S=\tfrac12d_1d_2\sin\varphi$.
-\item[с.~22] $L=2\pi R$, $S=\pi R^2$; $l=\tfrac{\pi R\alpha}{180}$; $S_{\text{сект}}=\tfrac{\pi R^2\alpha}{360}$; $\angle AOB=\cup AB$; $\angle ACB=\tfrac12\cup AB$; на одну дугу~— равны; на диаметр~— $90^\circ$; на одну хорду с разных сторон~— $180^\circ$; центры вписанной и описанной окружностей.
-\item[с.~23] $OA\perp CA$, $CA=CB$; $\angle CAB=\tfrac12\cup AB$; вписанный четырёхугольник $\angle A+\angle C=\angle B+\angle D=180^\circ$; описанный $AB+CD=BC+AD$; трапеция около окружности $h=2r$.
+\item[с.~15] Медиана делит площадь пополам; $BG:GM=2:1$; средняя линия $PN\parallel AC$, $PN=\tfrac12AC$; признак средней линии: прямая через середину стороны, параллельная другой стороне; свойство биссектрисы $\dfrac{AL}{LC}=\dfrac{AB}{BC}$ (словами: делит сторону на отрезки, пропорциональные двум другим сторонам).
+\item[с.~16] $S=\tfrac12bh_b$ ($h_b=BH$) $=\tfrac12ab\sin\gamma=\sqrt{p(p-a)(p-b)(p-c)}$; $S=pr$, $r$~— радиус вписанной окружности, верно для любого многоугольника, в который вписана окружность; $S=\tfrac{abc}{4R}$, $R$~— радиус описанной.
+\item[с.~17] Теорема синусов $\dfrac{a}{\sin\alpha}=\dfrac{b}{\sin\beta}=\dfrac{c}{\sin\gamma}=2R$; теорема косинусов $c^2=a^2+b^2-2ab\cos\gamma$; подобие: стороны, высоты, медианы, периметры относятся как $k$, площади~— как $k^2$; признаки~— два угла; две стороны и угол между ними; три стороны.
+\item[с.~18] $c^2=a^2+b^2$; $\angle A+\angle B=90^\circ$; $\sin A=\tfrac ac$, $\cos A=\tfrac bc$, $\operatorname{tg}A=\tfrac ab$, $\operatorname{ctg}A=\tfrac ba$ («косинус, котангенс~— ко мне прилежащий»); $\sin^2A+\cos^2A=1$; $\operatorname{tg}A=\tfrac{\sin A}{\cos A}$.
+\item[с.~19] $h=CH=\tfrac{ab}c$; $h^2=AH\cdot HB$; $\angle ACH=\angle B$; $CM=AM=BM=\tfrac c2=R$, $\angle ACM=\angle A$; $r=\tfrac{a+b-c}2$.
+\item[с.~20] Таблица $\sin$, $\cos$, $\operatorname{tg}$, $\operatorname{ctg}$ для $30^\circ$, $45^\circ$, $60^\circ$, $90^\circ$, $120^\circ$, $135^\circ$, $150^\circ$ (для $\operatorname{tg}90^\circ$~— прочерк); $\sin(180^\circ-\alpha)=\sin\alpha$, $\cos(180^\circ-\alpha)=-\cos\alpha$; катет против $30^\circ$~— половина гипотенузы; пифагоровы тройки и их кратные ($6,8,10$; $9,12,15$); вписанный четырёхугольник $\angle A+\angle C=\angle B+\angle D=180^\circ$; описанный $AB+CD=BC+AD$; трапеция около окружности $h=2r$.
+\item[с.~21] Свойства параллелограмма; $S=ah=ab\sin\alpha$; $d_1^2+d_2^2=2(a^2+b^2)$; биссектриса угла отсекает равнобедренный треугольник ($AB=BK$); биссектрисы углов при одной стороне перпендикулярны; биссектрисы противоположных углов параллельны.
+\item[с.~22] Ромб: диагонали перпендикулярны и являются биссектрисами его углов, $S=\tfrac12d_1d_2$; квадрат $d=a\sqrt2$; прямоугольник~— диагонали равны; трапеция $m=\tfrac{a+b}2$, $S=\tfrac{a+b}2h$, в равнобедренной высота отсекает $\tfrac{a-b}2$; любой четырёхугольник $S=\tfrac12d_1d_2\sin\varphi$.
+\item[с.~23] $L=2\pi R$, $S=\pi R^2$, дуга $\tfrac{\pi R\alpha}{180}$, сектор $\tfrac{\pi R^2\alpha}{360}$; $\angle AOB=\cup AB$; $\angle ACB=\tfrac12\cup AB$; вписанные углы на одну дугу равны (отдельный чертёж: $\angle ACB=\angle ADB=\angle AEB$); на диаметр~— $90^\circ$; на одну хорду с разных сторон~— $180^\circ$; касательная: радиус в точку касания перпендикулярен касательной, отрезки касательных из одной точки равны, угол между касательной и хордой $\tfrac12\cup AB$.
 \end{itemize}
 \textbf{Задание 2}
 \begin{itemize}
@@ -112,6 +112,8 @@
 \section*{4. Что прошу проверить \chk}
 \begin{enumerate}[leftmargin=7mm]
 \item с.~17: признаки подобия записаны коротко («две стороны и угол между ними»). Подразумевается: две стороны пропорциональны, а углы между ними равны. Не нужно ли написать полностью?
+\item с.~18: мнемоника «косинус, котангенс~— ко мне прилежащий». Проверьте, корректно ли она сформулирована для котангенса: прилежащий катет стоит в числителе.
+\item с.~20: в таблице $\operatorname{tg}90^\circ$ обозначен прочерком (не существует).
 \item с.~24 (1.1): угол $72^\circ$ у вершины $A$ узкий, подпись набрана мелким кеглем внутри угла. Читается ли она при печати?
 \item с.~31: формулы $x=|\vec a|\cos\varphi$, $y=|\vec a|\sin\varphi$ верны для направленного угла поворота от оси $Ox$. Понятна ли школьнику формулировка «угол поворота от оси $Ox$ к вектору»?
 \item с.~47 (3.2): в условии сказано «найдите боковую поверхность» вместо «площадь боковой поверхности». Так короче, но формулировка ФИПИ другая.
