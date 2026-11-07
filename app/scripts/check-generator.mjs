@@ -572,8 +572,16 @@ async function proverit(R) {
           sheet.variants.length === state.variants,
           `${label}/${seed}: вариантов ${state.variants}`,
         );
+        /* №11, «только открытый банк»: банк кончился — задач меньше, чем
+           выбрано, без подмены новыми, и лист говорит об этом сообщением. */
+        const korotkiy = sheet.variants.some((v) => v.length < state.plan.length);
         ok(
-          sheet.variants.every((v) => v.length === state.plan.length),
+          sheet.variants.every((v) => v.length === state.plan.length) ||
+            (R.name === '№11' &&
+              source === 'bank' &&
+              korotkiy &&
+              /^В банке по выбранным типам/.test(sheet.note ?? '') &&
+              sheet.variants.every((v) => v.every((t) => t.fromBank))),
           `${label}/${seed}: задач в варианте ${state.plan.length}`,
         );
         ok(

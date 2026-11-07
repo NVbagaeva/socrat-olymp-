@@ -82,7 +82,7 @@ for (const path of LISTY) {
     const pdf = join(dir, `${paper}-${margin}.pdf`);
     execFileSync(
       'xvfb-run',
-      ['-a', PYTHON, join(here, 'pechat-webkit/wkprint.py'), base + path, pdf, paper, margin, '7'],
+      ['-a', PYTHON, join(here, 'pechat-webkit/wkprint.py'), base + path, pdf, paper, margin, '15'],
       { stdio: 'ignore', timeout: 180000 },
     );
     const info = execFileSync('pdfinfo', [pdf]).toString();
