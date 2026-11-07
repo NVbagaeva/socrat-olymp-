@@ -146,7 +146,7 @@ function parseKlyuchi8(query: URLSearchParams): SheetParams8 {
   const zameny: Record<string, number> = {};
   for (const item of (query.get('z') ?? '').split(',')) {
     const [pos = '', k = ''] = item.split(':');
-    if (/^\d+\.8\.[A-Z]_\d{1,2}$/.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
+    if (/^\d+\.8\.[A-Z]_\d{1,3}$/.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
   }
   return {
     skills: [...new Set(sostav.map((x) => skillOfPrototype(x.id)?.id ?? ''))],

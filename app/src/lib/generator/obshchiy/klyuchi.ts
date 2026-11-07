@@ -15,6 +15,14 @@
 
 import { rngOf } from '@/lib/vychisleniya/rng';
 
+/**
+ * Страховка, а не ограничение: столько задач на лист (и одного типа)
+ * учитель не выберет — это десятки страниц. Число защищает браузер от
+ * опечатки в адресе вида «s=PR-04:99999». Поле ввода в генераторе и
+ * разбор адреса листа во всех разделах берут его отсюда.
+ */
+export const ZADACH_NA_LIST_MAX = 200;
+
 /** Позиция состава: подтип и номер внутри подтипа. */
 export interface Slot {
   id: string;
@@ -82,10 +90,10 @@ export function razobratSostav(
     .split(',')
     .map((x) => x.split(':'))
     .map(([tok = '', n = '1']) => {
-      const m = new RegExp(`^(${idRe.source})(?:\\.(\\d{1,2}))?$`).exec(tok);
+      const m = new RegExp(`^(${idRe.source})(?:\\.(\\d{1,3}))?$`).exec(tok);
       const id = m === null || (!poKlyucham && m[2] !== undefined) ? '' : (m[1] ?? '');
       const k = m?.[2] !== undefined && id !== '' ? { k: Number(m[2]) } : {};
-      return { id, n: Math.max(1, Math.min(20, Number(n) || 1)), ...k };
+      return { id, n: Math.max(1, Math.min(ZADACH_NA_LIST_MAX, Number(n) || 1)), ...k };
     })
     .filter((x) => x.id !== '' && est(x.id));
 }
@@ -153,6 +161,12 @@ export interface PlanPoKlyuchamOpts<S extends SlotShablon, B, P> {
    * один подтип на десяток задач). Нет — места плотные, k × вариантов + v.
    */
   mestNaVariant?: number;
+  /**
+   * «Только открытый банк» без подмены: банк подтипа кончился — на место
+   * встаёт эта пометка (лист её выбрасывает), а не аналог или новая
+   * задача; такие места считаются в nehvatka. Нет — прежняя подмена.
+   */
+  bezPodmeny?: (c: Yacheyka<S>) => P;
 }
 
 /** Задачи листа по позициям: банк → аналоги → новые, затем замены. */
@@ -207,7 +221,10 @@ export function planPoKlyucham<S extends SlotShablon, B, P>(
   for (const c of bezBanka) {
     const b = bankDlya(c.s.id).sKontsa();
     if (b !== undefined) postavit(c, o.bankPoz(b));
-    else {
+    else if (c.s.istochnik === 'bank' && o.bezPodmeny !== undefined) {
+      nehvatka += 1;
+      postavit(c, o.bezPodmeny(c));
+    } else {
       if (c.s.istochnik === 'bank') nehvatka += 1;
       nuzhenAnalog.push(c);
     }
@@ -240,6 +257,9 @@ export function planPoKlyucham<S extends SlotShablon, B, P>(
         next = o.bankPoz(b);
         left -= 1;
       }
+      /* Только банк без подмены: банк кончился — остаётся последняя
+         найденная задача банка или прежняя. */
+      if (c.s.istochnik === 'bank' && o.bezPodmeny !== undefined) left = 0;
     }
     while (left > 0) {
       const a = analogDlya(c.s.id).sKontsa();

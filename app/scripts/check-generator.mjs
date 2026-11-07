@@ -572,8 +572,16 @@ async function proverit(R) {
           sheet.variants.length === state.variants,
           `${label}/${seed}: вариантов ${state.variants}`,
         );
+        /* №11, «только открытый банк»: банк кончился — задач меньше, чем
+           выбрано, без подмены новыми, и лист говорит об этом сообщением. */
+        const korotkiy = sheet.variants.some((v) => v.length < state.plan.length);
         ok(
-          sheet.variants.every((v) => v.length === state.plan.length),
+          sheet.variants.every((v) => v.length === state.plan.length) ||
+            (R.name === '№11' &&
+              source === 'bank' &&
+              korotkiy &&
+              /^В банке по выбранным типам/.test(sheet.note ?? '') &&
+              sheet.variants.every((v) => v.every((t) => t.fromBank))),
           `${label}/${seed}: задач в варианте ${state.plan.length}`,
         );
         ok(
@@ -1092,18 +1100,29 @@ console.log('№9: серия уроков');
 console.log('Изменения состава');
 const ege = G.stateFromPreset(config, config.presets[0], 'mix');
 {
+  /* Потолка «6 задач одного типа» больше нет: степпер ставит ровно то
+     число, что выбрал учитель, — и 11, и 40 (ZADACH_NA_LIST_MAX — только
+     страховка от опечатки в адресе). */
   let plan = ege.plan;
   for (let i = 0; i < 10; i += 1) plan = G.setTopicCount(config, plan, 'VD', i + 2, ege.levels);
-  ok(
-    G.countsByTopic(config, plan).VD === config.limits.maxPerTopic,
-    'степпер темы не выходит за предел на тип',
-  );
-  ok(G.problems(config, { ...ege, plan }).length === 0, 'состав в пределах после степпера');
+  ok(G.countsByTopic(config, plan).VD === 11, 'степпер темы ставит 11 задач одного типа');
+  ok(G.problems(config, { ...ege, plan }).length === 0, 'состав годен после степпера');
+  plan = G.setTopicCount(config, plan, 'VD', 40, ege.levels);
+  ok(G.countsByTopic(config, plan).VD === 40, 'вписанное число 40 — ровно 40 задач типа');
+  ok(G.problems(config, { ...ege, plan }).length === 0, '40 задач одного типа — состав годен');
+  const sub = config.topics.find((t) => t.id === 'PR').subtypes[0].id;
+  plan = G.setSubtypeCount(config, plan, sub, 25);
+  ok(plan.filter((s) => s.id === sub).length === 25, 'подтип: ровно 25 задач');
   let big = [];
-  for (const t of config.topics)
-    big = G.setTopicCount(config, big, t.id, config.limits.maxPerTopic, [1, 2, 3]);
-  ok(big.length <= config.limits.maxTasks, `всего задач не больше ${config.limits.maxTasks}`);
-
+  for (const t of config.topics) big = G.setTopicCount(config, big, t.id, 6, [1, 2, 3]);
+  ok(
+    big.length === 6 * config.topics.length,
+    `по 6 задач во всех темах — ${6 * config.topics.length}, без обрезки`,
+  );
+  ok(
+    G.setTopicCount(config, [], 'VD', 10 ** 6, [1, 2, 3]).length === 200,
+    'страховка: не больше 200 задач на лист',
+  );
   const only3 = G.relayout(config, ege.plan, [3]);
   const c0 = G.countsByTopic(config, ege.plan);
   const c3 = G.countsByTopic(config, only3);

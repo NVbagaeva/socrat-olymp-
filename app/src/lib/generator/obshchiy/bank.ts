@@ -97,7 +97,7 @@ export function parseZaprosBanka(
   const pr = Number(q.get('pr') ?? 0);
   const zameny: Record<string, number> = {};
   for (const part of (q.get('z') ?? '').split(',')) {
-    const m = /^(\d{1,2}\.[A-Za-z0-9-]+_\d{1,2}):(\d{1,3})$/.exec(part);
+    const m = /^(\d{1,2}\.[A-Za-z0-9-]+_\d{1,3}):(\d{1,3})$/.exec(part);
     if (m !== null) zameny[m[1] as string] = Number(m[2]);
   }
   const st = q.get('st') ?? '';
