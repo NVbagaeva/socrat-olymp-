@@ -36,6 +36,7 @@ import {
   slotySostava,
   sostavIzSlotov,
   sostavStroka,
+  ZADACH_NA_LIST_MAX,
 } from '@/lib/generator/obshchiy/klyuchi';
 import answers from '@/lib/sheet/answers.js';
 import sheet from '@/lib/sheet/sheet.js';
@@ -200,7 +201,10 @@ export function parseSheetQuery1(q: URLSearchParams): SheetParams1 {
     : (q.get('s') ?? '')
         .split(',')
         .map((x) => x.split(':'))
-        .map(([id = '', n = '1']) => ({ id, n: Math.max(1, Math.min(20, Number(n) || 1)) }))
+        .map(([id = '', n = '1']) => ({
+          id,
+          n: Math.max(1, Math.min(ZADACH_NA_LIST_MAX, Number(n) || 1)),
+        }))
         .filter((x) => IDS.has(x.id));
   /* Повтор ключа в адресе — лишняя позиция: убирается. */
   const sostav = poKlyucham ? sostavIzSlotov(slotySostava(razobrannyy)) : razobrannyy;
@@ -217,7 +221,7 @@ export function parseSheetQuery1(q: URLSearchParams): SheetParams1 {
   const zameny: Record<string, number> = {};
   for (const item of (q.get('z') ?? '').split(',')) {
     const [pos = '', k = ''] = item.split(':');
-    const fmt = poKlyucham ? /^\d+\.p\d{2}_\d{1,2}$/ : /^\d+\.\d+$/;
+    const fmt = poKlyucham ? /^\d+\.p\d{2}_\d{1,3}$/ : /^\d+\.\d+$/;
     if (fmt.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
   }
   return {

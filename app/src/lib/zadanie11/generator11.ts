@@ -66,7 +66,7 @@ export function config11(razdely: readonly RazdelInfo[], slot: string): GenConfi
     levels: GENERATOR11_LEVELS,
     sources: GENERATOR11_SOURCES,
     presets: GENERATOR11_PRESETS,
-    limits: { maxPerTopic: 6, maxTasks: 20, variantsMax: 8 },
+    limits: { variantsMax: 8 },
     extras: {
       kinds: Object.entries(SHEET_11.vidy).map(([id, title]) => ({ id, title })),
     },
@@ -200,7 +200,15 @@ export function engine11(
             };
           });
         }),
-        note: list.nehvatka > 0 ? GENERATOR11_TEXTS.nehvatka(list.nehvatka) : null,
+        note:
+          list.nehvatka > 0
+            ? GENERATOR11_TEXTS.nehvatka({
+                vBanke: list.vBanke,
+                vybrano: list.vybrano,
+                popalo: list.poVariantam.reduce((sum, zs) => sum + zs.length, 0),
+                variants: list.poVariantam.length,
+              })
+            : null,
       };
       return sheet;
     },

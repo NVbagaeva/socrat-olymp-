@@ -81,11 +81,30 @@
   color: var(--color-border-strong);
   cursor: default;
 }
-.gen-step output {
+.gen-step output,
+.gen-step input {
   min-width: 26px;
   text-align: center;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+/* Число вписывается: поле без рамки и без стрелок браузера — как прежде
+   цифра между «−» и «+»; рамка фокуса — общая. */
+.gen-step input {
+  height: 100%;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.gen-step input::-webkit-outer-spin-button,
+.gen-step input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
 }
 .gen-lvcard[aria-pressed='true'] {
   border-color: color-mix(in srgb, var(--color-warning) 45%, transparent);

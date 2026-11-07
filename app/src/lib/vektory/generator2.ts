@@ -51,7 +51,7 @@ export function config2(slot: string): GenConfig {
     levels: [],
     sources: GENERATOR2_SOURCES,
     presets: GENERATOR2_PRESETS,
-    limits: { maxPerTopic: 6, maxTasks: 20, variantsMax: 4 },
+    limits: { variantsMax: 4 },
     /* Рамок теории и разобранных примеров у листа №2 нет. */
     extras: {
       kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })),

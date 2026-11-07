@@ -104,7 +104,12 @@ export interface GenConfig {
   filtr?: { title: string; options: { id: string; title: string; note: string }[] };
   /** Первый — по умолчанию. */
   presets: GenPreset[];
-  limits: { maxPerTopic: number; maxTasks: number; variantsMax: number };
+  /**
+   * Только число вариантов. Число задач не ограничено: на лист идёт ровно
+   * столько, сколько выбрал учитель (страховка от опечатки в адресе —
+   * ZADACH_NA_LIST_MAX в klyuchi.ts, она же у полей ввода).
+   */
+  limits: { variantsMax: number };
   /**
    * «Дополнительно» к листу; нет поля — раздел его не поддерживает.
    * theory, examples: false — рамки теории или разобранных примеров у

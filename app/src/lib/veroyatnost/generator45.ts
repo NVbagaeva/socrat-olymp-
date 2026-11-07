@@ -53,7 +53,7 @@ export function config45(
     levels: [],
     sources: GENERATOR45_SOURCES,
     presets: presets45(topics.map((t) => ({ id: t.id, syuzhetov: t.subtypes.length }))),
-    limits: { maxPerTopic: 12, maxTasks: 30, variantsMax: VARIANTOV_45 },
+    limits: { variantsMax: VARIANTOV_45 },
     /* Рамок теории и разобранных примеров у листа №4 и №5 нет. */
     extras: {
       kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })),

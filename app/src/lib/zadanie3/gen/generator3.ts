@@ -69,7 +69,7 @@ export function config3(razdely: readonly Razdel3[], slot: string): GenConfig {
     levels: [],
     sources: GENERATOR3_SOURCES,
     presets: GENERATOR3_PRESETS,
-    limits: { maxPerTopic: 8, maxTasks: 20, variantsMax: 8 },
+    limits: { variantsMax: 8 },
     extras: {
       kinds: Object.entries(SHEET_GEN_3.vidy).map(([id, title]) => ({ id, title })),
       theory: false,

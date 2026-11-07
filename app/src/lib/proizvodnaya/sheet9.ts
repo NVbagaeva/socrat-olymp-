@@ -245,7 +245,7 @@ function parseKlyuchi9(query: URLSearchParams): SheetParams9 {
   const zameny: Record<string, number> = {};
   for (const item of (query.get('z') ?? '').split(',')) {
     const [pos = '', k = ''] = item.split(':');
-    if (/^\d+\.9\.\d\.\d{1,2}_\d{1,2}$/.test(pos) && Number(k) > 0) {
+    if (/^\d+\.9\.\d\.\d{1,2}_\d{1,3}$/.test(pos) && Number(k) > 0) {
       zameny[pos] = Math.min(50, Number(k));
     }
   }
