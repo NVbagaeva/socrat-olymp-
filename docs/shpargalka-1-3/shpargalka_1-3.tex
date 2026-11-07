@@ -1038,10 +1038,23 @@ $r^2=R^2-d^2$, $d$~— расстояние от центра $O$ до плос�
 \begin{scope}[shift={(0,1.2)}]\ball{1.2}\end{scope}
 \draw[hid] (0,1.2)--(1.2,1.2); \node[right,lb] at (1.2,1.2) {$R$};
 \end{tikzpicture}\quad
-\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.41]
-\cube{0}{0}{1.8}
-\draw (1.26,1.17) circle (1.75);
-\node[below,lb] at (0.9,0) {$a$};
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.4]
+% куб a=2, центр O=(0,0,0), R=a\sqrt3/2=\sqrt3; ортогональная проекция,
+% взгляд вдоль (1,-2,1)/\sqrt6 (перпендикулярен диагонали (1,1,1))
+\coordinate (O) at (0,0);
+\coordinate (P1) at (-1.342,-1.095); \coordinate (P2) at (-1.342,0.730); % (-1,-1,∓1)
+\coordinate (P3) at (-0.447,-0.365); \coordinate (P4) at (-0.447,1.461); % (-1,1,∓1)
+\coordinate (P5) at (0.447,-1.461);  \coordinate (P6) at (0.447,0.365);  % (1,-1,∓1)
+\coordinate (P7) at (1.342,-0.730);  \coordinate (P8) at (1.342,1.095);  % (1,1,∓1)
+\draw (O) circle (1.732);
+\draw (-1.732,0) arc[start angle=180,end angle=360,x radius=1.732,y radius=0.707];
+\draw[hid] (1.732,0) arc[start angle=0,end angle=180,x radius=1.732,y radius=0.707];
+\draw (P1)--(P5)--(P7)--(P8)--(P4)--(P2)--cycle (P2)--(P6)--(P8) (P6)--(P5);
+\draw[hid] (P3)--(P1) (P3)--(P7) (P3)--(P4);
+\draw[hid] (P1)--(P8);
+\fill (O) circle (0.08); \node[lb] at (-0.2,0.24) {$O$};
+\node[lb] at (0.55,0.75) {$R$};
+\node[below,lb] at ($(P1)!0.5!(P5)+(0,-0.05)$) {$a$};
 \end{tikzpicture}\quad
 \begin{tikzpicture}[baseline=(current bounding box.center),scale=0.5]
 \draw (0,0) circle (1.4);
@@ -1049,7 +1062,7 @@ $r^2=R^2-d^2$, $d$~— расстояние от центра $O$ до плос�
 \draw[hid] (1.4,0) arc[start angle=0,end angle=180,x radius=1.4,y radius=0.32];
 \draw (-1.4,0)--(0,1.4)--(1.4,0); \draw[hid] (0,0)--(0,1.4) (0,0)--(-1.4,0);
 \fill (0,0) circle (0.07); \node[below,lb] at (0,-0.3) {$O$};
-\node[right,lb] at (0.72,0.75) {$l$}; \node[lb] at (-0.75,0.3) {$R$};
+\node[right,lb] at (0.72,0.75) {$l$}; \node[lb] at (0.24,0.72) {$R$};
 \end{tikzpicture}}
 \begin{fbx}
 Шар в цилиндре: $h=2R$,\ $r_{\text{цил}}=R$\\
