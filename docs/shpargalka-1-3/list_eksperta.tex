@@ -1,0 +1,120 @@
+\documentclass[fontsize=10pt]{scrartcl}
+\usepackage[a4paper,margin=16mm]{geometry}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+\setmainfont{Inter}[BoldFont={Inter Bold}]
+\setsansfont{Inter}[BoldFont={Inter Bold}]
+\newfontfamily\cyrillicfont{Inter}[BoldFont={Inter Bold}]
+\newfontfamily\cyrillicfontsf{Inter}[BoldFont={Inter Bold}]
+\usepackage{amsmath}
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}
+\usepackage{icomma}
+\setmonofont{DejaVu Sans Mono}[Scale=0.85]
+\usepackage{enumitem}
+\usepackage{array,longtable,booktabs}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\raggedright
+\addtokomafont{disposition}{\rmfamily}
+\setlist{nosep,leftmargin=5mm}
+\newcommand{\chk}{\textbf{[ПРОВЕРИТЬ ЭКСПЕРТУ]}}
+\begin{document}
+{\LARGE\bfseries Лист для эксперта\par}
+\smallskip
+Карманная шпаргалка ЕГЭ-2027, профильная математика, задания 1–3, страницы 12–51.\\
+Исходник: \texttt{docs/shpargalka-1-3/shpargalka\_1-3.tex}. Пересчёт ответов и численная проверка формул:
+\texttt{docs/shpargalka-1-3/proverka.py} (результат: «ВСЁ ВЕРНО», «Формулы теории: все верны»).
+
+\section*{1. Прототипы и ответы}
+Каждый ответ пересчитан отдельно, построением в координатах, а не формулой из решения. Все ответы~— целые числа или конечные десятичные дроби.
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}p{9mm}p{8mm}p{70mm}p{14mm}p{58mm}@{}}
+\toprule
+\textbf{№} & \textbf{с.} & \textbf{Условие в шпаргалке} & \textbf{Ответ} & \textbf{Исходная задача базы (её числа и ответ)}\\
+\midrule\endhead
+1.1 & 24 & Прямоугольный треугольник, острые углы $72^\circ$ и $18^\circ$. Угол между высотой и медианой из прямого угла. & 54 & ФИПИ, блок 1, \textbf{№~29} (прототип 8): $84^\circ$, $6^\circ$ $\to$ 78\\
+1.2 & 25 & $\angle A=52^\circ$, $B$, $C$ острые, высоты $BD$, $CE$ пересекаются в $O$. Найти $\angle DOE$. & 128 & ФИПИ, блок 1, \textbf{№~37} (прототип 10): $44^\circ$ $\to$ 136\\
+1.3 & 26 & $AC=BC$, $AB=10$, $AH$~— высота, $BH=4$. Найти $\cos\angle BAC$. & 0,4 & ФИПИ, блок 1, \textbf{№~121} (прототип 32): $AB=8$, $BH=2$ $\to$ 0,25\\
+1.4 & 27 & $\angle ACO=24^\circ$, $CA$~— касательная, $CO$ пересекает окружность в $B$, $D$. Дуга $AD$ внутри угла. & 114 & ФИПИ, блок 1, \textbf{№~159} (прототип 38): $28^\circ$ $\to$ 118\\
+1.5 & 28 & Прямоугольная трапеция около окружности, $P=52$, большая боковая сторона $15$. Найти $r$. & 5,5 & ФИПИ, блок 1, \textbf{№~179} (прототип 43): $P=40$, $c=11$ $\to$ 4,5\\
+1.6 & 29 & $AB=5\sqrt3$, $\angle C=120^\circ$. Найти $R$ описанной окружности. & 5 & ФИПИ, блок 1, \textbf{№~211} (прототип 49): $3\sqrt2$, $135^\circ$ $\to$ 3\\
+\midrule
+2.1 & 34 & На клетках $\vec a(4;2)$, $\vec b(-2;-3)$, $\vec c(3;4)$. Длина $0{,}5\vec a+1{,}5\vec b-\vec c$. Решено методом треугольника. & 8,5 & Банк задания 2, \textbf{тип A8, №~1}: $0{,}5\vec a+1{,}2\vec b-\vec c$ $\to$ 9,5\\
+2.2 & 35 & Без сетки: $\vec a$ из $(1;1)$ в $(6;3)$, $\vec b$ из $(3;7)$ в $(9;5)$. Найти $\vec a\cdot\vec b$. & 26 & Банк задания 2, \textbf{тип B7, №~1}: $(1;3)\to(7;9)$, $(1;1)\to(9;2)$ $\to$ 54\\
+2.3 & 36 & На клетках $\vec a(4;-1)$, $\vec b(-2;3)$, $\vec c(3;2)$. Найти $(\vec a-\vec b)\cdot\vec c$. Метод треугольника. & 10 & Банк задания 2, \textbf{тип B8, №~1} $\to$ 11\\
+2.4 & 37 & На клетках $\vec a(-3;4)$, $\vec b(3;4)$. Косинус угла. Метод треугольника. & 0,28 & Банк задания 2, \textbf{тип C2, №~1} $\to$ 0,6\\
+\midrule
+3.1 & 46 & Параллелепипед, $AB=8$, $BC=6$, $BB_1=5$. Объём многогранника $A,B,C,B_1$. & 40 & Каталог стереометрии \textbf{P03-19}, задача \textbf{№~62}: 9, 7, 6 $\to$ 63\\
+3.2 & 47 & Боковая поверхность призмы 46; плоскость через среднюю линию основания $\parallel$ боковому ребру. Боковая поверхность отсечённой призмы. & 23 & \textbf{P03-24}, задача \textbf{№~78}: 75 $\to$ 37,5\\
+3.3 & 48 & Правильная пирамида $SABCD$, $V=84$, $E$~— середина $SB$. Объём $EABC$. & 21 & \textbf{P03-48}, задача \textbf{№~150}: 116 $\to$ 29\\
+3.4 & 49 & Конический сосуд, жидкость до $\tfrac13$ высоты, 5~мл. Сколько долить. & 130 & \textbf{P03-61}, задача \textbf{№~200}: $\tfrac14$, 1~мл $\to$ 63\\
+3.5 & 50 & Полная поверхность конуса 50, сечение $\parallel$ основанию делит высоту $2:3$ от вершины. Полная поверхность отсечённого конуса. & 8 & \textbf{P03-62}, задача \textbf{№~204}: 35, $3:2$ $\to$ 12,6\\
+3.6 & 51 & Сфера около конуса, центр сферы~— центр основания, $l=17\sqrt2$. Найти $R$. & 17 & \textbf{P03-89}, задача \textbf{№~314}: $29\sqrt2$ $\to$ 29\\
+\bottomrule
+\end{longtable}
+Где база: задание~1~— \texttt{app/src/lib/planimetriya/bank/fipi.ts} и \texttt{stseny/}; задание~2~— \texttt{docs/tasks/02-vektory-02-bank.md}; задание~3~— \texttt{content-source/stereometria/prototipy-91.json} (номера задач~— нумерация задачника, по которому составлен каталог).
+
+\section*{2. Ход решения прототипов}
+\begin{enumerate}[label=\textbf{\arabic*.},leftmargin=7mm]
+\item[1.1] $CM=AM\Rightarrow\angle ACM=\angle A=72^\circ$; $\angle ACH=90^\circ-72^\circ=18^\circ$; $72^\circ-18^\circ=54^\circ$.
+\item[1.2] В $ADOE$: $360^\circ-90^\circ-90^\circ-52^\circ=128^\circ$.
+\item[1.3] $\angle A=\angle B$; в $\triangle ABH$ $\cos B=BH/AB=0{,}4$. (Треугольник остроугольный, $H$ лежит на отрезке $BC$: $BC=12{,}5>4$.)
+\item[1.4] $OA\perp CA$; $\angle AOC=66^\circ$; $\angle AOD=114^\circ=\cup AD$.
+\item[1.5] $AB+CD=26$, $AB=11=2r$, $r=5{,}5$. (Трапеция существует: основания $\approx18{,}10$ и $7{,}90$.)
+\item[1.6] $2R=AB/\sin120^\circ=10$.
+\item[2.1] $(2-3-3;\ 1-4{,}5-4)=(-4;-7{,}5)$, $\sqrt{72{,}25}=8{,}5$.
+\item[2.2] $\vec a(5;2)$, $\vec b(6;-2)$, $30-4=26$.
+\item[2.3] $\vec a-\vec b=(6;-4)$, $18-8=10$.
+\item[2.4] $(-9+16)/25=0{,}28$.
+\item[3.1] $\tfrac13\cdot\tfrac{8\cdot6}{2}\cdot5=40$.
+\item[3.2] Стороны основания вдвое меньше, высота боковых граней та же: $46:2=23$ (верно и для наклонной призмы: грани отсечённой призмы параллельны граням исходной).
+\item[3.3] $\tfrac12\cdot\tfrac12\cdot84=21$.
+\item[3.4] $k=\tfrac13$, сосуд $5\cdot27=135$, долить $130$.
+\item[3.5] $k=\tfrac25$, $50\cdot\tfrac4{25}=8$.
+\item[3.6] $h=r=R$, $l=R\sqrt2$, $R=17$.
+\end{enumerate}
+
+\section*{3. Формулы теории по страницам}
+\textbf{Задание 1}
+\begin{itemize}
+\item[с.~13] Вертикальные: $\angle1=\angle4$, $\angle2=\angle3$; смежные: $\angle1+\angle2=180^\circ$. При $a\parallel b$: накрест лежащие $\angle3=\angle6$, $\angle4=\angle5$; соответственные $\angle1=\angle5$, $\angle2=\angle6$, $\angle3=\angle7$, $\angle4=\angle8$; односторонние $\angle3+\angle5=\angle4+\angle6=180^\circ$; обратное утверждение~— признак параллельности.
+\item[с.~14] $\alpha+\beta+\gamma=180^\circ$; внешний $\delta=\alpha+\beta$; четырёхугольник $360^\circ$, $n$-угольник $180^\circ(n-2)$; высоты $BD$, $CE$: $\angle DOE=180^\circ-\angle A$; $AB=BC\Rightarrow\angle A=\angle C$, $BH$~— медиана, биссектриса, высота.
+\item[с.~15] Медиана делит площадь пополам; $BG:GM=2:1$; средняя линия $PN\parallel AC$, $PN=\tfrac12AC$; $\dfrac{AL}{LC}=\dfrac{AB}{BC}$.
+\item[с.~16] $S=\tfrac12bh_b=\tfrac12ab\sin\gamma=\sqrt{p(p-a)(p-b)(p-c)}=pr=\dfrac{abc}{4R}$.
+\item[с.~17] $\dfrac{a}{\sin\alpha}=\dfrac{b}{\sin\beta}=\dfrac{c}{\sin\gamma}=2R$; $c^2=a^2+b^2-2ab\cos\gamma$; $\sin(180^\circ-\alpha)=\sin\alpha$, $\cos(180^\circ-\alpha)=-\cos\alpha$; $\sin120^\circ=\tfrac{\sqrt3}2$, $\sin135^\circ=\tfrac{\sqrt2}2$, $\sin150^\circ=\tfrac12$; подобие: длины $\times k$, площади $\times k^2$; признаки~— два угла; две стороны (пропорциональны) и угол между ними (равен); три стороны (пропорциональны).
+\item[с.~18] $c^2=a^2+b^2$; $\sin A=\tfrac ac$, $\cos A=\tfrac bc$, $\operatorname{tg}A=\tfrac ab=\tfrac{\sin A}{\cos A}$; $\sin^2A+\cos^2A=1$; $CM=AM=BM=\tfrac c2=R\Rightarrow\angle ACM=\angle A$; $\angle ACH=90^\circ-\angle A=\angle B$.
+\item[с.~19] $h=\tfrac{ab}c$, $r=\tfrac{a+b-c}2$; тройки 3-4-5, 5-12-13, 8-15-17, 7-24-25; таблица $\sin$, $\cos$, $\operatorname{tg}$ для $30^\circ$, $45^\circ$, $60^\circ$; катет против $30^\circ$ равен $\tfrac c2$.
+\item[с.~20] $S=ah=ab\sin\alpha$; $d_1^2+d_2^2=2(a^2+b^2)$; ромб $S=\tfrac12d_1d_2$, $d_1\perp d_2$; квадрат $d=a\sqrt2$.
+\item[с.~21] $m=\tfrac{a+b}2$, $S=\tfrac{a+b}2h$; в равнобедренной высота отсекает $\tfrac{a-b}2$; четырёхугольник $S=\tfrac12d_1d_2\sin\varphi$.
+\item[с.~22] $L=2\pi R$, $S=\pi R^2$; $l=\tfrac{\pi R\alpha}{180}$; $S_{\text{сект}}=\tfrac{\pi R^2\alpha}{360}$; $\angle AOB=\cup AB$; $\angle ACB=\tfrac12\cup AB$; на одну дугу~— равны; на диаметр~— $90^\circ$; на одну хорду с разных сторон~— $180^\circ$; центры вписанной и описанной окружностей.
+\item[с.~23] $OA\perp CA$, $CA=CB$; $\angle CAB=\tfrac12\cup AB$; вписанный четырёхугольник $\angle A+\angle C=\angle B+\angle D=180^\circ$; описанный $AB+CD=BC+AD$; трапеция около окружности $h=2r$.
+\end{itemize}
+\textbf{Задание 2}
+\begin{itemize}
+\item[с.~31] Метод треугольника: горизонтальный катет~— $x$, вертикальный~— $y$, знаки по направлению; $|\vec a|=\sqrt{x^2+y^2}$; $x=|\vec a|\cos\varphi$, $y=|\vec a|\sin\varphi$, $\varphi$~— угол поворота от оси $Ox$ к вектору. Пример: $\vec a(4;3)$, $\vec b(-3;4)$, длины по 5.
+\item[с.~32] $\overrightarrow{AB}=(x_B-x_A;\ y_B-y_A)$; $\vec a\pm\vec b$, $k\vec a$ покоординатно; середина $\bigl(\tfrac{x_A+x_B}2;\tfrac{y_A+y_B}2\bigr)$; коллинеарность $\tfrac{x_1}{x_2}=\tfrac{y_1}{y_2}$.
+\item[с.~33] $\vec a\cdot\vec b=|\vec a||\vec b|\cos\varphi=x_1x_2+y_1y_2$; $\cos\varphi=\tfrac{x_1x_2+y_1y_2}{|\vec a||\vec b|}$; $\vec a\perp\vec b\Leftrightarrow\vec a\cdot\vec b=0$; $\vec a\cdot\vec a=|\vec a|^2$; $|\vec a\pm\vec b|^2=|\vec a|^2\pm2\vec a\cdot\vec b+|\vec b|^2$.
+\end{itemize}
+\textbf{Задание 3}
+\begin{itemize}
+\item[с.~39] $V=S_{\text{осн}}h$; прямая призма $S_{\text{бок}}=P_{\text{осн}}h$; $V=abc$, $d^2=a^2+b^2+c^2$, $S=2(ab+bc+ac)$; куб $V=a^3$, $S=6a^2$, $d=a\sqrt3$.
+\item[с.~40] $V_{ABCB_1}=\tfrac{abc}6$, $V_{ABCDB_1}=\tfrac{abc}3$; отсечённая через среднюю линию призма: $S_{\text{осн}}$ и $V$ $\times\tfrac14$, $S_{\text{бок}}$ $\times\tfrac12$.
+\item[с.~41] $V=\tfrac13S_{\text{осн}}h$; $S_{\text{бок}}=\tfrac12P_{\text{осн}}k$; $SA^2=h^2+OA^2$; $E$~— середина $SB$: $EF=\tfrac h2$; $V_{\text{пир}}=\tfrac13V_{\text{пр}}$.
+\item[с.~42] Цилиндр $V=\pi R^2h$, $S_{\text{бок}}=2\pi Rh$, $S_{\text{полн}}=2\pi R(R+h)$; конус $V=\tfrac13\pi R^2h$, $l^2=R^2+h^2$, $S_{\text{бок}}=\pi Rl$, $S_{\text{полн}}=\pi R(R+l)$; осевые сечения.
+\item[с.~43] $V=\tfrac43\pi R^3$, $S=4\pi R^2$; $r^2=R^2-d^2$, площадь сечения $\pi r^2$.
+\item[с.~44] Подобные тела, $k=\tfrac{h_1}h$: длины $\times k$, площади $\times k^2$, объёмы $\times k^3$; сосуд $V_{\text{сосуда}}=V_{\text{жидк}}:k^3$.
+\item[с.~45] Шар в цилиндре $h=2R$; куб в шаре $a\sqrt3=2R$; шар в кубе $a=2R$; конус в шаре с центром в центре основания $h=r=R$, $l=R\sqrt2$; $V_{\text{кон}}=\tfrac13V_{\text{цил}}$.
+\end{itemize}
+
+\section*{4. Что прошу проверить \chk}
+\begin{enumerate}[leftmargin=7mm]
+\item с.~17: признаки подобия записаны коротко («две стороны и угол между ними»). Подразумевается: две стороны пропорциональны, а углы между ними равны. Не нужно ли написать полностью?
+\item с.~24 (1.1): угол $72^\circ$ у вершины $A$ узкий, подпись набрана мелким кеглем внутри угла. Читается ли она при печати?
+\item с.~31: формулы $x=|\vec a|\cos\varphi$, $y=|\vec a|\sin\varphi$ верны для направленного угла поворота от оси $Ox$. Понятна ли школьнику формулировка «угол поворота от оси $Ox$ к вектору»?
+\item с.~47 (3.2): в условии сказано «найдите боковую поверхность» вместо «площадь боковой поверхности». Так короче, но формулировка ФИПИ другая.
+\item с.~49 (3.4): сосуд стоит вершиной вниз. Так понимают и в ФИПИ, но в условии об этом не сказано.
+\end{enumerate}
+\end{document}
