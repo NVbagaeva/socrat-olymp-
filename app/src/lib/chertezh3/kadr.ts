@@ -283,7 +283,7 @@ export function kadr(scena: Scena3, o: OpciiKadra): Kadr {
       const [p, v, q] = e.pts as [V, V, V];
       const u1 = norm(sub(p, v));
       const u2 = norm(sub(q, v));
-      const r = Math.min(ugolRazmer, dist(p, v) * 0.35, dist(q, v) * 0.35);
+      const r = Math.min(ugolRazmer, dist(p, v) * 0.18, dist(q, v) * 0.18);
       let pts: V[];
       if (e.el.vid === 'pryamoy-ugol') {
         pts = [add(v, scale(u1, r)), add(v, add(scale(u1, r), scale(u2, r))), add(v, scale(u2, r))];

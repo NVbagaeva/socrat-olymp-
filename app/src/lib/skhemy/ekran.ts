@@ -33,7 +33,7 @@ export const SK = {
   /** Поле вокруг фигуры: место под подписи. */
   pole: 30,
   poleUzkoe: 24,
-  ugol: { r: 15, shag: 4, min: 7, dolya: 0.38, pryamoy: 10 },
+  ugol: { r: 15, shag: 4, min: 7, dolya: 0.18, pryamoy: 10 },
   shtrih: { pol: 4, shag: 3.5 },
   tochkaR: 2.6,
   /** Кегль подписи точки, px: полужирный курсив темы (lib/skhemy/tema.ts, KEGL_VERSHINY). */

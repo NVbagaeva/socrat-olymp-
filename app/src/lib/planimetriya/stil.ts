@@ -61,7 +61,7 @@ export const PL = {
    * с вершиной — до minKrayniy. rPryamoy — сторона квадратика прямого
    * угла, sektor — прозрачность заливки искомого угла.
    */
-  ugol: { r: 13, shag: 4, min: 9, minKrayniy: 7, korotkaya: 0.35, rPryamoy: 9, sektor: 0.14 },
+  ugol: { r: 13, shag: 4, min: 9, minKrayniy: 7, korotkaya: 0.18, rPryamoy: 9, sektor: 0.14 },
   /* Засечки равных отрезков: длина 2·half, шаг между засечками. */
   tick: { half: 3.5, shag: 3 },
   tochkaR: 2.5,

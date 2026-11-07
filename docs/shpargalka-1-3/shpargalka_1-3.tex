@@ -138,7 +138,7 @@
 
 \newpage %13
 \blk{Углы и параллельные прямые}
-\fig{\begin{tikzpicture}[scale=0.82]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.82]
 \coordinate (Pb) at (1.8,0); \coordinate (Pa) at (2.724,1.6);
 \draw (0,0)--(5,0) node[right,lb]{$b$};
 \draw (0,1.6)--(5,1.6) node[right,lb]{$a$};
@@ -163,25 +163,25 @@ $a\parallel b$:\\[0.3mm]
 
 \newpage %14
 \blk{Углы треугольника}
-\fig{\begin{tikzpicture}[scale=0.5]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.5]
 \coordinate (A) at (0,0); \coordinate (B) at (1.3,2); \coordinate (C) at (3.2,0); \coordinate (D) at (4.6,0);
 \draw (A)--(B)--(C)--cycle; \draw (C)--(D);
-\pic[draw,angle radius=2.6mm] {angle=C--A--B};
-\pic[draw,angle radius=2.6mm] {angle=A--B--C};
-\pic[draw,angle radius=2.2mm] {angle=B--C--A};
-\pic[draw,angle radius=3.2mm] {angle=D--C--B};
-\node[lb] at ($(A)+(28:0.85)$) {$\alpha$}; \node[lb] at ($(B)+(-80:0.85)$) {$\beta$};
-\node[lb] at ($(C)+(150:0.8)$) {$\gamma$}; \node[lb] at ($(C)+(62:0.95)$) {$\delta$};
+\pic[draw,angle radius=1.8mm] {angle=C--A--B};
+\pic[draw,angle radius=1.8mm] {angle=A--B--C};
+\pic[draw,angle radius=2.1mm] {angle=B--C--A};
+\pic[draw,angle radius=2.6mm] {angle=D--C--B};
+\node[lb] at ($(A)+(28:0.70)$) {$\alpha$}; \node[lb] at ($(B)+(-80:0.70)$) {$\beta$};
+\node[lb] at ($(C)+(150:0.75)$) {$\gamma$}; \node[lb] at ($(C)+(62:0.85)$) {$\delta$};
 \node[below,lb] at (A) {$A$}; \node[above,lb] at (B) {$B$}; \node[below,lb] at (C) {$C$}; \node[below,lb] at (D) {$D$};
 \end{tikzpicture}\quad
-\begin{tikzpicture}[scale=0.5]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.5]
 \coordinate (A) at (0,0); \coordinate (B) at (1.6,2.3); \coordinate (C) at (3.4,0);
 \coordinate (D) at ($(A)!(B)!(C)$); \coordinate (E) at ($(A)!(C)!(B)$);
 \coordinate (O) at (intersection of B--D and C--E);
 \draw (A)--(B)--(C)--cycle; \draw (B)--(D) (C)--(E);
 \pic[draw,angle radius=1.6mm] {right angle=B--D--A};
 \pic[draw,angle radius=1.6mm] {right angle=A--E--C};
-\pic[draw,angle radius=2.6mm] {angle=C--A--B};
+\pic[draw,angle radius=2.1mm] {angle=C--A--B};
 \fill (O) circle (0.05);
 \node[below,lb] at (A) {$A$}; \node[above,lb] at (B) {$B$}; \node[below,lb] at (C) {$C$};
 \node[below,lb] at (D) {$D$}; \node[above left,lb] at (E) {$E$}; \node[lb] at ($(O)+(27.6:0.4)$) {$O$};
@@ -194,11 +194,11 @@ $\alpha+\beta+\gamma=180^\circ$\qquad Внешний: $\delta=\alpha+\beta$
 Высоты $BD$, $CE$: в $ADOE$ $\angle D=\angle E=90^\circ\Rightarrow$\\
 $\angle DOE=180^\circ-\angle A$
 \end{fbx}
-\fig{\begin{tikzpicture}[scale=0.5]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.5]
 \coordinate (A) at (0,0); \coordinate (B) at (1.5,2); \coordinate (C) at (3,0); \coordinate (H) at (1.5,0);
 \draw (A)--(B)--(C)--cycle; \draw[hid] (B)--(H);
 \pic[draw,angle radius=1.6mm] {right angle=B--H--C};
-\pic[draw,angle radius=2.6mm] {angle=C--A--B}; \pic[draw,angle radius=2.6mm] {angle=B--C--A};
+\pic[draw,angle radius=1.9mm] {angle=C--A--B}; \pic[draw,angle radius=1.9mm] {angle=B--C--A};
 \draw ($(A)!0.5!(B)+(-0.1,0.07)$)--++(0.2,-0.14); \draw ($(B)!0.5!(C)+(-0.1,-0.07)$)--++(0.2,0.14);
 \node[below,lb] at (A) {$A$}; \node[above,lb] at (B) {$B$}; \node[below,lb] at (C) {$C$}; \node[below,lb] at (H) {$H$};
 \end{tikzpicture}}
@@ -208,7 +208,7 @@ $AB=BC\Rightarrow\angle A=\angle C$;\ $BH$~— медиана, биссектр�
 
 \newpage %15
 \blk{Медиана, средняя линия, биссектриса}
-\fig{\begin{tikzpicture}[scale=0.36]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.36]
 \tri
 \coordinate (M) at (2,0); \coordinate (P) at (0.6,1); \coordinate (N) at (2.6,1);
 \draw (B)--(M); \draw (A)--(N); \draw[hid] (P)--(N);
@@ -217,11 +217,11 @@ $AB=BC\Rightarrow\angle A=\angle C$;\ $BH$~— медиана, биссектр�
 \node[right,lb] at ($(G)+(0.1,-0.16)$) {$G$};
 \draw (1,-0.12)--(1,0.12) (3,-0.12)--(3,0.12);
 \end{tikzpicture}\qquad
-\begin{tikzpicture}[scale=0.36]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.36]
 \tri
 \coordinate (L) at (1.616,0); \draw (B)--(L); \node[below,lb] at (L){$L$};
-\pic[draw,angle radius=3.2mm] {angle=A--B--L};
-\pic[draw,angle radius=3.8mm] {angle=L--B--C};
+\pic[draw,angle radius=1.7mm] {angle=A--B--L};
+\pic[draw,angle radius=1.7mm] {angle=L--B--C};
 \end{tikzpicture}}
 \begin{fbx}
 \textbf{Медиана} $BM$ делит площадь пополам.\\
@@ -237,20 +237,20 @@ $AB=BC\Rightarrow\angle A=\angle C$;\ $BH$~— медиана, биссектр�
 
 \newpage %16
 \blk{Площадь треугольника}
-\fig{\begin{tikzpicture}[scale=0.38]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.38]
 \tri
 \coordinate (H) at (1.2,0);
 \draw[hid] (B)--(H); \pic[draw,angle radius=1.4mm] {right angle=B--H--C};
 \node[right,lb] at (1.24,1.0){$h_b$}; \node[below,lb] at (H) {$H$};
 \node[below,lb] at (2.6,0){$b$}; \node[above right,lb] at (2.6,1){$a$}; \node[above left,lb] at (0.6,1){$c$};
-\pic[draw,angle radius=3.6mm] {angle=B--C--A}; \node[lb] at ($(C)+(165:1.05)$) {$\gamma$};
+\pic[draw,angle radius=2.0mm] {angle=B--C--A}; \node[lb] at ($(C)+(165:1.08)$) {$\gamma$};
 \end{tikzpicture}\enspace
-\begin{tikzpicture}[scale=0.26]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.31]
 \tri
 \coordinate (I) at (1.4457,0.8186); \draw (I) circle (0.8186); \fill (I) circle (0.07);
 \draw (I)--(1.4457,0); \node[right,lb] at (1.4457,0.4) {$r$};
 \end{tikzpicture}\enspace
-\begin{tikzpicture}[scale=0.26]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.26]
 \tri
 \coordinate (O) at (2,0.16); \draw (O) circle (2.0064); \fill (O) circle (0.08);
 \draw (O)--(C); \node[above,lb] at (3.05,0.1) {$R$};
@@ -267,15 +267,15 @@ $S=\tfrac{abc}{4R}$, $R$~— радиус \textbf{описанной} окруж
 \end{fbx}
 
 \newpage %17
-\fig{\begin{tikzpicture}[scale=0.38]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.38]
 \tri
 \coordinate (O) at (2,0.16); \draw (O) circle (2.0064); \fill (O) circle (0.07);
 \draw[hid] (O)--(0.58,-1.25); \node[right,lb] at (1.25,-0.65) {$R$};
 \node[above right,lb] at (2.6,1){$a$}; \node[below,lb] at (2.8,0){$b$}; \node[lb] at (0.88,0.88){$c$};
-\pic[draw,angle radius=3mm] {angle=C--A--B};
-\pic[draw,angle radius=2.6mm] {angle=A--B--C};
-\pic[draw,angle radius=4mm] {angle=B--C--A};
-\node[lb] at ($(A)+(22:1.2)$) {$\alpha$}; \node[lb] at ($(B)+(-74:1.15)$) {$\beta$}; \node[lb] at ($(C)+(166.7:1.45)$) {$\gamma$};
+\pic[draw,angle radius=1.5mm] {angle=C--A--B};
+\pic[draw,angle radius=1.5mm] {angle=A--B--C};
+\pic[draw,angle radius=2.0mm] {angle=B--C--A};
+\node[lb] at ($(A)+(22:0.84)$) {$\alpha$}; \node[lb] at ($(B)+(-74:0.84)$) {$\beta$}; \node[lb] at ($(C)+(166.7:1.08)$) {$\gamma$};
 \end{tikzpicture}}
 \begin{fbx}
 \textbf{Теорема синусов:} $\frac{a}{\sin\alpha}=\frac{b}{\sin\beta}=\frac{c}{\sin\gamma}=2R$
@@ -283,7 +283,7 @@ $S=\tfrac{abc}{4R}$, $R$~— радиус \textbf{описанной} окруж
 \begin{fbx}
 \textbf{Теорема косинусов:} $c^2=a^2+b^2-2ab\cos\gamma$
 \end{fbx}
-\fig{\begin{tikzpicture}[scale=0.22]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.22]
 \tri
 \begin{scope}[shift={(8,0)},scale=1.5]
 \coordinate (A1) at (0,0); \coordinate (B1) at (1.2,2); \coordinate (C1) at (4,0);
@@ -298,11 +298,11 @@ $S=\tfrac{abc}{4R}$, $R$~— радиус \textbf{описанной} окруж
 
 \newpage %18
 \blk{Прямоугольный треугольник}
-\fig{\begin{tikzpicture}[scale=0.55]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.55]
 \coordinate (C) at (0,0); \coordinate (A) at (4,0); \coordinate (B) at (0,2.6);
 \draw (C)--(A)--(B)--cycle;
 \pic[draw,angle radius=2mm] {right angle=A--C--B};
-\pic[draw,line width=0.8pt,angle radius=5mm] {angle=B--A--C};
+\pic[draw,line width=0.8pt,angle radius=3.0mm] {angle=B--A--C};
 \node[below,lb] at (C) {$C$}; \node[below right,lb] at (A) {$A$}; \node[left,lb] at (B) {$B$};
 \node[below,lb] at (1.6,0) {$b$ (прилежащий)}; \node[left,lb] at (0,1.3) {$a$};
 \node[above right,lb] at (2,1.3) {$c$};
@@ -320,7 +320,7 @@ $\sin^2A+\cos^2A=1$,\quad $\operatorname{tg}A=\dfrac{\sin A}{\cos A}$
 
 \newpage %19
 \blk{Высота и медиана из прямого угла}
-\fig{\begin{tikzpicture}[scale=0.6]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.6]
 \coordinate (A) at (0,0); \coordinate (B) at (4.4,0); \coordinate (C) at (1.1,1.9053);
 \coordinate (M) at (2.2,0); \coordinate (H) at (1.1,0);
 \draw (A)--(B)--(C)--cycle; \draw (C)--(M); \draw[hid] (C)--(H);
@@ -339,7 +339,7 @@ $\angle ACH=90^\circ-\angle A=\angle B$
 \begin{fbx}
 $CM=AM=BM=\tfrac c2=R\ \Rightarrow\ \angle ACM=\angle A$
 \end{fbx}
-\fig{\begin{tikzpicture}[scale=0.34]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.34]
 \coordinate (C) at (0,0); \coordinate (A) at (4,0); \coordinate (B) at (0,2.6);
 \draw (C)--(A)--(B)--cycle;
 \pic[draw,angle radius=0.9mm] {right angle=A--C--B};
@@ -370,12 +370,12 @@ $\sin(180^\circ-\alpha)=\sin\alpha$,\ $\cos(180^\circ-\alpha)=-\cos\alpha$\\[0.3
 \begin{fbx}
 Тройки: $3,4,5$;\ $5,12,13$;\ $8,15,17$;\ $7,24,25$\\ Стороны $\times k$, гипотенуза $\times k$: $6,8,10$;\ $9,12,15$
 \end{fbx}
-\fig{\begin{tikzpicture}[scale=0.28]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.32]
 \draw (0,0) circle (1.2);
 \draw (200:1.2) coordinate (A)--(110:1.2) coordinate (B)--(30:1.2) coordinate (C)--(-60:1.2) coordinate (D)--cycle;
 \node[left,lb] at (A){$A$}; \node[above,lb] at (B){$B$}; \node[right,lb] at (C){$C$}; \node[below,lb] at (D){$D$};
 \end{tikzpicture}\qquad
-\begin{tikzpicture}[scale=0.28]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.28]
 \coordinate (A) at (0,0); \coordinate (D) at (3.2,0); \coordinate (C) at (2.0,1.6); \coordinate (B) at (1.2,1.6);
 \draw (A)--(B)--(C)--(D)--cycle; \draw (1.6,0.8) circle (0.8);
 \draw[hid] (1.6,0.8)--(1.6,0); \node[right,lb] at (1.6,0.35) {$r$};
@@ -391,14 +391,14 @@ $\sin(180^\circ-\alpha)=\sin\alpha$,\ $\cos(180^\circ-\alpha)=-\cos\alpha$\\[0.3
 
 \newpage %21
 \blk{Параллелограмм}
-\fig{\begin{tikzpicture}[scale=0.38]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.38]
 \coordinate (A) at (0,0); \coordinate (B) at (1.2,1.6); \coordinate (C) at (5,1.6); \coordinate (D) at (3.8,0);
 \draw (A)--(B)--(C)--(D)--cycle; \draw[hid] (A)--(C) (B)--(D);
 \draw[hid] (B)--(1.2,0); \draw (1.2,0.24)--(1.44,0.24)--(1.44,0); \node[right,lb] at (1.2,1.0) {$h$};
 \node[below,lb] at (2.5,0) {$a$}; \node[left,lb] at (0.6,0.8) {$b$};
 \node[lb] at (4.2,0.92) {$d_1$}; \node[lb] at (3.4,0.6) {$d_2$};
-\pic[draw,angle radius=2.4mm] {angle=D--A--B};
-\node[lb] at ($(A)+(27:1.0)$) {$\alpha$};
+\pic[draw,angle radius=1.5mm] {angle=D--A--B};
+\node[lb] at ($(A)+(27:0.84)$) {$\alpha$};
 \node[below,lb] at (A) {$A$}; \node[above,lb] at (B) {$B$}; \node[above,lb] at (C) {$C$}; \node[below,lb] at (D) {$D$};
 \end{tikzpicture}}
 
@@ -406,18 +406,18 @@ $\sin(180^\circ-\alpha)=\sin\alpha$,\ $\cos(180^\circ-\alpha)=-\cos\alpha$\\[0.3
 Противоположные стороны и~углы равны, соседние~— в~сумме $180^\circ$, диагонали делятся пополам\\[0.3mm]
 $S=a\,h=ab\sin\alpha$\qquad $d_1^2+d_2^2=2(a^2+b^2)$
 \end{fbx}
-\fig{\begin{tikzpicture}[scale=0.36]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.36]
 \coordinate (A) at (0,0); \coordinate (B) at (0.9,1.5588); \coordinate (C) at (5.1,1.5588); \coordinate (D) at (4.2,0);
 \coordinate (K) at (2.7,1.5588);
 \fill[black!18] (A)--(B)--(K)--cycle;
 \draw (A)--(B)--(C)--(D)--cycle; \draw (A)--(K);
-\pic[draw,angle radius=4.5mm] {angle=D--A--K}; \pic[draw,angle radius=4.5mm] {angle=K--A--B};
-\pic[draw,angle radius=4.5mm] {angle=B--K--A};
+\pic[draw,angle radius=1.7mm] {angle=D--A--K}; \pic[draw,angle radius=1.7mm] {angle=K--A--B};
+\pic[draw,angle radius=1.5mm] {angle=B--K--A};
 \draw[line width=0.7pt] ($(A)!0.5!(B)+(-0.15,0.09)$)--++(0.3,-0.18); \draw[line width=0.7pt] ($(B)!0.5!(K)+(0,-0.17)$)--++(0,0.34);
 \node[below,lb] at (A) {$A$}; \node[above,lb] at (B) {$B$}; \node[above,lb] at (C) {$C$}; \node[below,lb] at (D) {$D$};
 \node[above,lb] at (K) {$K$};
 \end{tikzpicture}\qquad
-\begin{tikzpicture}[scale=0.36]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.36]
 \coordinate (A) at (0,0); \coordinate (B) at (0.9,1.5588); \coordinate (C) at (5.1,1.5588); \coordinate (D) at (4.2,0);
 \coordinate (K) at (2.7,1.5588); \coordinate (L) at (1.8,0); \coordinate (N) at (2.4,0); \coordinate (X) at (1.35,0.7794);
 \draw (A)--(B)--(C)--(D)--cycle; \draw (A)--(K) (B)--(L) (C)--(N);
@@ -432,16 +432,16 @@ $S=a\,h=ab\sin\alpha$\qquad $d_1^2+d_2^2=2(a^2+b^2)$
 
 \newpage %22
 \blk{Ромб, квадрат, трапеция}
-\fig{\begin{tikzpicture}[scale=0.47]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.54]
 \coordinate (L) at (0,0); \coordinate (T) at (1.6,1); \coordinate (R) at (3.2,0); \coordinate (W) at (1.6,-1); \coordinate (O) at (1.6,0);
 \draw (L)--(T)--(R)--(W)--cycle;
 \draw[hid] (L)--(R) (T)--(W);
 \pic[draw,angle radius=1.3mm] {right angle=R--O--T};
-\pic[draw,angle radius=3mm] {angle=R--L--T}; \pic[draw,angle radius=3.7mm] {angle=W--L--R};
+\pic[draw,angle radius=1.7mm] {angle=R--L--T}; \pic[draw,angle radius=1.7mm] {angle=W--L--R};
 \node[lb] at (2.42,0.2) {$d_1$}; \node[lb] at (1.3,-0.42) {$d_2$};
 \node[lb] at (0.64,0.75) {$a$};
 \end{tikzpicture}\qquad
-\begin{tikzpicture}[scale=0.46]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.44]
 \draw (0,-1) rectangle (2,1); \draw[hid] (0,-1)--(2,1);
 \draw (0,0.75)--(0.25,0.75)--(0.25,1);
 \node[left,lb] at (0,0) {$a$}; \node[below,lb] at (1,-1) {$a$}; \node[lb] at (1.4,-0.1) {$d$};
@@ -450,7 +450,7 @@ $S=a\,h=ab\sin\alpha$\qquad $d_1^2+d_2^2=2(a^2+b^2)$
 \textbf{Ромб:} диагонали перпендикулярны и~являются биссектрисами его углов; $S=\tfrac12\,d_1d_2$\\
 \textbf{Квадрат:} $d=a\sqrt2$. Прямоугольник: диагонали равны
 \end{fbx}
-\fig{\begin{tikzpicture}[scale=0.42]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.36]
 \coordinate (A) at (0,0); \coordinate (D) at (4.5,0); \coordinate (C) at (3.4,1.5); \coordinate (B) at (1.1,1.5);
 \draw (A)--(B)--(C)--(D)--cycle;
 \draw[hid] (0.55,0.75)--(3.95,0.75); \node[lb] at (2.6,1.07) {$m$};
@@ -459,12 +459,12 @@ $S=a\,h=ab\sin\alpha$\qquad $d_1^2+d_2^2=2(a^2+b^2)$
 \draw[decorate,decoration={brace,mirror,amplitude=2pt}] (0,-0.08)--(1.1,-0.08);
 \node[below,lb] at (0.55,-0.2) {$\frac{a-b}{2}$};
 \end{tikzpicture}\quad
-\begin{tikzpicture}[scale=0.33]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.52]
 \coordinate (P) at (0,0); \coordinate (Q) at (0.8,1.6); \coordinate (R) at (3.8,1.4); \coordinate (T) at (3.2,-0.2);
 \draw (P)--(Q)--(R)--(T)--cycle; \draw[hid] (P)--(R) (Q)--(T);
 \coordinate (X) at (intersection of P--R and Q--T);
-\pic[draw,angle radius=1.8mm] {angle=R--X--Q};
-\node[lb] at ($(X)+(81.6:1.0)$) {$\varphi$};
+\pic[draw,angle radius=1.5mm] {angle=R--X--Q};
+\node[lb] at ($(X)+(81.6:0.62)$) {$\varphi$};
 \node[lb] at (3.28,0.7) {$d_1$}; \node[lb] at (1.0,1.0) {$d_2$};
 \end{tikzpicture}}
 \begin{fbx}
@@ -474,30 +474,30 @@ $S=a\,h=ab\sin\alpha$\qquad $d_1^2+d_2^2=2(a^2+b^2)$
 
 \newpage %23
 \blk{Окружность и углы в ней}
-\fig{\begin{tikzpicture}[scale=0.37]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.37]
 \coordinate (O) at (0,0);
 \coordinate (A) at (215:1.4); \coordinate (B) at (325:1.4); \coordinate (C) at (75:1.4);
 \fill[black!18] (O)--(A) arc[start angle=215,end angle=325,radius=1.4]--cycle;
 \draw (O) circle (1.4);
 \draw (A)--(O)--(B); \draw (A)--(C)--(B);
-\pic[draw,angle radius=2.2mm] {angle=A--O--B}; \node[lb] at (0,-0.62) {$\alpha$};
-\pic[draw,angle radius=2.8mm] {angle=A--C--B};
+\pic[draw,angle radius=1.5mm] {angle=A--O--B}; \node[lb] at (0,-0.88) {$\alpha$};
+\pic[draw,angle radius=1.5mm] {angle=A--C--B};
 \fill (O) circle (0.07);
 \node[lb] at (0.32,0.16) {$O$}; \node[below left,lb] at (A) {$A$};
 \node[below right,lb] at (B) {$B$}; \node[above,lb] at (C) {$C$};
 \draw[hid] (O)--(160:1.4); \node[lb] at (148:0.95) {$R$};
 \end{tikzpicture}\enspace
-\begin{tikzpicture}[scale=0.37]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.37]
 \coordinate (A) at (220:1.4); \coordinate (B) at (320:1.4);
 \coordinate (C) at (45:1.4); \coordinate (D) at (90:1.4); \coordinate (E) at (135:1.4);
 \draw (0,0) circle (1.4);
 \draw[line width=1.3pt] (220:1.4) arc[start angle=220,end angle=320,radius=1.4];
 \draw (A)--(C)--(B) (A)--(D)--(B) (A)--(E)--(B);
-\pic[draw,angle radius=3.2mm] {angle=A--C--B}; \pic[draw,angle radius=3.2mm] {angle=A--D--B}; \pic[draw,angle radius=3.2mm] {angle=A--E--B};
+\pic[draw,angle radius=1.5mm] {angle=A--C--B}; \pic[draw,angle radius=1.5mm] {angle=A--D--B}; \pic[draw,angle radius=1.5mm] {angle=A--E--B};
 \node[below left,lb] at (A) {$A$}; \node[below right,lb] at (B) {$B$};
 \node[above right,lb] at (C) {$C$}; \node[above,lb] at (D) {$D$}; \node[above left,lb] at (E) {$E$};
 \end{tikzpicture}\enspace
-\begin{tikzpicture}[scale=0.31]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.31]
 \coordinate (O) at (0,0); \coordinate (C) at (-3,0);
 \coordinate (A) at (113.58:1.2); \coordinate (B) at (-113.58:1.2);
 \draw (O) circle (1.2); \draw (C)--($(C)!1.25!(A)$) (C)--(B);
@@ -522,15 +522,15 @@ $L=2\pi R$,\ $S=\pi R^2$,\ дуга $\tfrac{\pi R\alpha}{180}$,\ сектор $\
 \newpage %24
 \task{1}{Прототипы}
 \proto{1.1}{Высота и медиана из прямого угла}
-\fig{\begin{tikzpicture}[scale=1.0]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=1.0]
 \coordinate (A) at (0,0); \coordinate (B) at (4.4,0); \coordinate (C) at (0.4202,1.2931);
 \coordinate (H) at (0.4202,0); \coordinate (M) at (2.2,0);
 \draw (A)--(B)--(C)--cycle; \draw (C)--(M); \draw[hid] (C)--(H);
 \pic[draw,angle radius=1.8mm] {right angle=A--C--B};
 \pic[draw,angle radius=1.4mm] {right angle=C--H--B};
-\pic[draw,angle radius=1.8mm] {angle=B--A--C}; \node[lb] at ($(A)+(36:0.3)$) {\tiny$72^\circ$};
-\pic[draw,angle radius=6mm] {angle=C--B--A}; \node[lb] at ($(B)+(171:0.85)$) {$18^\circ$};
-\pic[draw,angle radius=5mm] {angle=H--C--M}; \node[lb] at ($(C)+(-63:0.6)$) {?};
+\pic[draw,angle radius=2.0mm] {angle=B--A--C}; \node[lb] at ($(A)+(36:0.37)$) {\tiny$72^\circ$};
+\pic[draw,angle radius=3.0mm] {angle=C--B--A}; \node[lb] at ($(B)+(171:0.80)$) {$18^\circ$};
+\pic[draw,angle radius=1.9mm] {angle=H--C--M}; \node[lb] at ($(C)+(-63:0.36)$) {?};
 \node[below,lb] at (A) {$A$}; \node[below,lb] at (B) {$B$}; \node[above,lb] at (C) {$C$};
 \node[below,lb] at (H) {$H$}; \node[below,lb] at (M) {$M$};
 \end{tikzpicture}}
@@ -547,7 +547,7 @@ $\angle HCM=72^\circ-18^\circ=54^\circ$
 
 \newpage %25
 \proto{1.2}{Угол между высотами}
-\fig{\begin{tikzpicture}[scale=0.62]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.62]
 \coordinate (A) at (0,0); \coordinate (B) at (1.889,2.418); \coordinate (C) at (3.4,0);
 \coordinate (D) at ($(A)!(B)!(C)$); \coordinate (E) at ($(A)!(C)!(B)$);
 \coordinate (O) at (intersection of B--D and C--E);
@@ -555,11 +555,11 @@ $\angle HCM=72^\circ-18^\circ=54^\circ$
 \draw (A)--(B)--(C)--cycle; \draw (B)--(D) (C)--(E);
 \pic[draw,angle radius=1.6mm] {right angle=B--D--A};
 \pic[draw,angle radius=1.6mm] {right angle=A--E--C};
-\pic[draw,angle radius=3mm] {angle=D--A--E}; \node[lb] at ($(A)+(26:0.75)$) {$52^\circ$};
-\pic[draw,angle radius=2.2mm] {angle=E--O--D}; \node[lb] at ($(O)+(205:0.6)$) {?};
+\pic[draw,angle radius=1.9mm] {angle=D--A--E}; \node[lb] at ($(A)+(26:0.59)$) {$52^\circ$};
+\pic[draw,angle radius=1.5mm] {angle=E--O--D}; \node[lb] at ($(O)+(205:0.52)$) {?};
 \fill (O) circle (0.04);
 \node[below,lb] at (A) {$A$}; \node[above,lb] at (B) {$B$}; \node[below,lb] at (C) {$C$};
-\node[below,lb] at (D) {$D$}; \node[above left,lb] at (E) {$E$}; \node[lb] at ($(O)+(26:0.4)$) {$O$};
+\node[below,lb] at (D) {$D$}; \node[above left,lb] at (E) {$E$}; \node[lb] at ($(O)+(26:0.52)$) {$O$};
 \end{tikzpicture}}
 \begin{ex}
 В треугольнике $ABC$ угол $A$ равен $52^\circ$, углы $B$ и~$C$~— острые, высоты $BD$ и~$CE$ пересекаются в~точке $O$. Найдите угол $DOE$. Ответ дайте в~градусах.
@@ -573,12 +573,12 @@ $\angle DOE=360^\circ-90^\circ-90^\circ-52^\circ=128^\circ$
 
 \newpage %26
 \proto{1.3}{Высота к боковой стороне}
-\fig{\begin{tikzpicture}[scale=0.6]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.6]
 \coordinate (A) at (0,0); \coordinate (B) at (2.5,0); \coordinate (C) at (1.25,2.864);
 \coordinate (H) at (2.1,0.9165);
 \draw (A)--(B)--(C)--cycle; \draw[hid] (A)--(H);
 \pic[draw,angle radius=1.6mm] {right angle=A--H--B};
-\pic[draw,angle radius=3mm] {angle=B--A--C}; \node[lb] at ($(A)+(33:0.8)$) {?};
+\pic[draw,angle radius=2.2mm] {angle=B--A--C}; \node[lb] at ($(A)+(33:0.66)$) {?};
 \draw ($(A)!0.5!(C)+(-0.09,0.04)$)--++(0.18,-0.08); \draw ($(B)!0.5!(C)+(-0.09,-0.04)$)--++(0.18,0.08);
 \node[below,lb] at (1.25,0) {10}; \node[right,lb] at (2.32,0.45) {4};
 \node[below,lb] at (A) {$A$}; \node[below,lb] at (B) {$B$}; \node[above,lb] at (C) {$C$}; \node[right,lb] at (H) {$H$};
@@ -595,14 +595,14 @@ $\triangle ABH$: $\cos B=\dfrac{BH}{AB}=\dfrac4{10}=0{,}4$ \ (с.~18)
 
 \newpage %27
 \proto{1.4}{Касательная и секущая через центр}
-\fig{\begin{tikzpicture}[scale=0.64]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.64]
 \coordinate (O) at (0,0); \coordinate (C) at (-2.95,0);
 \coordinate (A) at (114:1.2); \coordinate (B) at (-1.2,0); \coordinate (D) at (1.2,0);
 \draw (O) circle (1.2);
 \draw[line width=1.4pt] (1.2,0) arc[start angle=0,end angle=114,radius=1.2];
 \draw (C)--($(C)!1.3!(A)$); \draw (C)--(1.7,0); \draw[hid] (O)--(A);
 \pic[draw,angle radius=1.6mm] {right angle=C--A--O};
-\pic[draw,angle radius=7mm] {angle=O--C--A}; \node[lb] at ($(C)+(12:1.3)$) {$24^\circ$};
+\pic[draw,angle radius=2.6mm] {angle=O--C--A}; \node[lb] at ($(C)+(12:0.94)$) {$24^\circ$};
 \fill (O) circle (0.04);
 \node[below,lb] at (O) {$O$}; \node[below,lb] at (C) {$C$}; \node[above left,lb] at (A) {$A$};
 \node[below left,lb] at (B) {$B$}; \node[below right,lb] at (D) {$D$};
@@ -620,7 +620,7 @@ $\angle AOD=180^\circ-66^\circ=114^\circ$ \ (с.~13);\ $\cup AD=114^\circ$ \ (с
 
 \newpage %28
 \proto{1.5}{Прямоугольная трапеция около окружности}
-\fig{\begin{tikzpicture}[scale=0.72]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.72]
 \coordinate (A) at (0,0); \coordinate (D) at (2.715,0); \coordinate (C) at (1.185,1.65); \coordinate (B) at (0,1.65);
 \draw (A)--(B)--(C)--(D)--cycle;
 \draw (A)++(0,0.16)--++(0.16,0)--++(0,-0.16); \draw (B)++(0,-0.16)--++(0.16,0)--++(0,0.16);
@@ -641,12 +641,12 @@ $AB=26-15=11$. $AB\perp AD$, поэтому $AB=h=2r$:\ $r=5{,}5$
 
 \newpage %29
 \proto{1.6}{Тупой угол и описанная окружность}
-\fig{\begin{tikzpicture}[scale=0.74]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.74]
 \coordinate (O) at (0,0);
 \coordinate (A) at (210:1.2); \coordinate (B) at (330:1.2); \coordinate (C) at (270:1.2);
 \draw (O) circle (1.2); \draw (A)--(B)--(C)--cycle;
 \draw[hid] (O)--(A); \node[lb] at (-0.66,-0.08) {$R=?$};
-\pic[draw,angle radius=2.4mm] {angle=B--C--A}; \node[lb] at ($(C)+(90:0.42)$) {\tiny$120^\circ$};
+\pic[draw,angle radius=1.5mm] {angle=B--C--A}; \node[lb] at ($(C)+(90:0.43)$) {\tiny$120^\circ$};
 \fill (O) circle (0.035);
 \node[above,lb] at (O) {$O$}; \node[left,lb] at (A) {$A$}; \node[right,lb] at (B) {$B$}; \node[below,lb] at (C) {$C$};
 \node[lb] at (0.62,-0.46) {$5\sqrt3$};
@@ -679,13 +679,13 @@ $2R=\dfrac{AB}{\sin120^\circ}=\dfrac{5\sqrt3}{\sqrt3/2}=10$,\quad $R=5$
 
 \newpage %31
 \blk{Координаты через треугольник}
-\fig{\begin{tikzpicture}[scale=0.37]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.37]
 \draw[black!45,line width=0.5pt] (0,0) grid (12,6);
 \coordinate (S) at (1,1); \coordinate (E) at (5,1); \coordinate (T) at (5,4);
 \draw[hid,line width=0.6pt] (1,1)--(5,1)--(5,4);
 \draw[hid,line width=0.6pt] (11,1)--(8,1)--(8,5);
 \draw[vec] (1,1)--(5,4); \draw[vec] (11,1)--(8,5);
-\pic[draw,angle radius=3mm] {angle=E--S--T};
+\pic[draw,angle radius=2.2mm] {angle=E--S--T};
 \node[lb,fill=white,inner sep=0.6pt] at (3,0.5) {$+4$}; \node[lb,fill=white,inner sep=0.6pt] at (5.6,2.5) {$+3$};
 \node[lb,fill=white,inner sep=0.6pt] at (9.5,0.5) {$-3$}; \node[lb,fill=white,inner sep=0.6pt] at (7.4,3) {$+4$};
 \node[lb,fill=white,inner sep=0.6pt] at (2.4,3.1) {$\vec a$}; \node[lb,fill=white,inner sep=0.6pt] at (10.4,3.6) {$\vec b$};
@@ -705,7 +705,7 @@ $|\vec a|=\sqrt{x^2+y^2}$\qquad $x=|\vec a|\cos\varphi$,\ \ $y=|\vec a|\sin\varp
 
 \newpage %32
 \blk{Координаты и действия}
-\fig{\begin{tikzpicture}[scale=0.45]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.3]
 \axes{-0.3}{5}{-0.3}{4}
 \coordinate (A) at (1,1); \coordinate (B) at (4,3); \coordinate (M) at (2.5,2);
 \draw[vec] (A)--(B);
@@ -714,7 +714,7 @@ $|\vec a|=\sqrt{x^2+y^2}$\qquad $x=|\vec a|\cos\varphi$,\ \ $y=|\vec a|\sin\varp
 \draw[hid] (A)--(4,1)--(B);
 \node[below,lb] at (2.5,1) {$x_B-x_A$}; \node[right,lb] at (4,2) {$y_B-y_A$};
 \end{tikzpicture}\quad
-\begin{tikzpicture}[scale=0.6]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.7]
 \coordinate (O) at (0,0); \coordinate (A) at (2.4,0); \coordinate (B) at (0.8,1.3); \coordinate (S) at (3.2,1.3);
 \draw[hid] (A)--(S)--(B);
 \draw[vec] (O)--(A); \node[below,lb] at (1.2,0) {$\vec a$};
@@ -738,10 +738,10 @@ $\vec a\parallel\vec b$:\ координаты пропорциональны, $
 
 \newpage %33
 \blk{Скалярное произведение}
-\fig{\begin{tikzpicture}[scale=0.62]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.62]
 \coordinate (O) at (0,0); \coordinate (A) at (2.6,0.4); \coordinate (B) at (1,1.6);
 \draw[vec] (O)--(A) node[right,lb]{$\vec a(x_1;\,y_1)$}; \draw[vec] (O)--(B) node[above,lb]{$\vec b(x_2;\,y_2)$};
-\pic[draw,angle radius=4mm] {angle=A--O--B}; \node[lb] at ($(O)+(35:0.95)$) {$\varphi$};
+\pic[draw,angle radius=1.8mm] {angle=A--O--B}; \node[lb] at ($(O)+(35:0.56)$) {$\varphi$};
 \end{tikzpicture}}
 \begin{fbx}
 $\vec a\cdot\vec b=|\vec a|\,|\vec b|\cos\varphi=x_1x_2+y_1y_2$
@@ -758,7 +758,7 @@ $|\vec a\pm\vec b|^2=|\vec a|^2\pm2\,\vec a\cdot\vec b+|\vec b|^2$
 \newpage %34
 \task{2}{Прототипы}
 \proto{2.1}{Три вектора на клетках, дробные коэффициенты}
-\fig{\begin{tikzpicture}[scale=0.26]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.26]
 \draw[black!45,line width=0.5pt] (0,0) grid (11,8);
 \draw[hid,line width=0.6pt] (5,5)--(9,5)--(9,7);
 \draw[hid,line width=0.6pt] (10,4)--(8,4)--(8,1);
@@ -784,7 +784,7 @@ $\sqrt{16+56{,}25}=\sqrt{72{,}25}=8{,}5$
 
 \newpage %35
 \proto{2.2}{Векторы не из начала координат}
-\fig{\begin{tikzpicture}[scale=0.26]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.26]
 \axes{-0.4}{10}{-0.4}{8}
 \draw[hid] (1,0)--(1,1)--(0,1) (6,0)--(6,3)--(0,3) (3,0)--(3,7)--(0,7) (9,0)--(9,5)--(0,5);
 \draw[vec] (1,1)--(6,3); \draw[vec] (3,7)--(9,5);
@@ -805,7 +805,7 @@ $\vec a\cdot\vec b=5\cdot6+2\cdot(-2)=26$ \ (с.~33)
 
 \newpage %36
 \proto{2.3}{Скалярное произведение разности}
-\fig{\begin{tikzpicture}[scale=0.36]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.36]
 \draw[black!45,line width=0.5pt] (0,0) grid (11,6);
 \draw[hid,line width=0.6pt] (1,5)--(5,5)--(5,4);
 \draw[hid,line width=0.6pt] (9,1)--(7,1)--(7,4);
@@ -831,7 +831,7 @@ $(\vec a-\vec b)\cdot\vec c=18-8=10$ \ (с.~33)
 
 \newpage %37
 \proto{2.4}{Косинус угла по рисунку}
-\fig{\begin{tikzpicture}[scale=0.36]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.36]
 \draw[black!45,line width=0.5pt] (0,0) grid (11,6);
 \draw[hid,line width=0.6pt] (4,1)--(1,1)--(1,5);
 \draw[hid,line width=0.6pt] (6,1)--(9,1)--(9,5);
@@ -870,12 +870,12 @@ $\cos\varphi=\dfrac{-9+16}{5\cdot5}=\dfrac{7}{25}=0{,}28$ \ (с.~33)
 
 \newpage %39
 \blk{Призма}
-\fig{\begin{tikzpicture}[scale=0.45]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.45]
 \draw (0,0)--(2.4,0)--(2.4,2)--(0,2)--cycle; \draw (0,2)--(1,2.7)--(2.4,2);
 \draw[hid] (0,0)--(1,0.7)--(2.4,0) (1,0.7)--(1,2.7);
 \node[right,lb] at (2.4,1) {$h$};
 \end{tikzpicture}\quad
-\begin{tikzpicture}[scale=0.45]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.45]
 \draw (0,0) rectangle (3,1.6);
 \draw (0,1.6)--(1,2.3)--(4,2.3)--(3,1.6);
 \draw (4,2.3)--(4,0.7)--(3,0);
@@ -897,7 +897,7 @@ $V=abc$\quad $d^2=a^2+b^2+c^2$\quad $S=2(ab+bc+ac)$
 
 \newpage %40
 \blk{Части многогранника}
-\fig{\begin{tikzpicture}[scale=0.5]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.5]
 \coordinate (A) at (0,0); \coordinate (B) at (3,0); \coordinate (C) at (4,0.7); \coordinate (D) at (1,0.7);
 \coordinate (A1) at (0,1.6); \coordinate (B1) at (3,1.6); \coordinate (C1) at (4,2.3); \coordinate (D1) at (1,2.3);
 \fill[black!18] (A)--(B)--(C)--(B1)--cycle;
@@ -911,7 +911,7 @@ $V=abc$\quad $d^2=a^2+b^2+c^2$\quad $S=2(ab+bc+ac)$
 \begin{fbx}
 $V_{ABCB_1}=\tfrac13\cdot\tfrac{ab}{2}\cdot c=\dfrac{abc}{6}$\qquad $V_{ABCDB_1}=\dfrac{abc}{3}$
 \end{fbx}
-\fig{\begin{tikzpicture}[scale=0.55]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.55]
 \coordinate (A) at (0,0); \coordinate (B) at (2.6,0); \coordinate (C) at (1.2,0.8);
 \coordinate (A1) at (0,2); \coordinate (B1) at (2.6,2); \coordinate (C1) at (1.2,2.8);
 \coordinate (M) at (0.6,0.4); \coordinate (N) at (1.9,0.4); \coordinate (M1) at (0.6,2.4); \coordinate (N1) at (1.9,2.4);
@@ -927,7 +927,7 @@ $V_{ABCB_1}=\tfrac13\cdot\tfrac{ab}{2}\cdot c=\dfrac{abc}{6}$\qquad $V_{ABCDB_1}
 
 \newpage %41
 \blk{Пирамида}
-\fig{\begin{tikzpicture}[scale=0.78]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.78]
 \coordinate (A) at (0,0); \coordinate (B) at (2.6,0); \coordinate (C) at (3.6,0.9); \coordinate (D) at (1,0.9);
 \coordinate (O) at (1.8,0.45); \coordinate (S) at (1.8,2.6); \coordinate (K) at (1.3,0);
 \coordinate (E) at (2.2,1.3); \coordinate (F) at (2.2,0.225);
@@ -955,12 +955,12 @@ $E$~— середина $SB$: высота $EF=\tfrac h2$\\
 \end{fbx}
 
 \newpage %42
-\fig{\begin{tikzpicture}[scale=0.42]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.42]
 \cyl{0}{1.2}{2.6}{0}
 \draw[hid] (0,0)--(0,2.6) (0,0)--(1.2,0);
 \node[left,lb] at (0,1.3) {$h$}; \node[above,lb,fill=white,inner sep=0.4pt] at (0.6,0.05) {$R$};
 \end{tikzpicture}\qquad
-\begin{tikzpicture}[scale=0.42]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.42]
 \cone{1.6}{2.6}
 \draw[hid] (0,0)--(0,2.6) (0,0)--(1.6,0);
 \node[left,lb] at (0,1.1) {$h$}; \node[above,lb,fill=white,inner sep=0.4pt] at (0.75,0.05) {$R$}; \node[right,lb] at (0.85,1.4) {$l$};
@@ -980,7 +980,7 @@ $S_{\text{бок}}=\pi Rl$\quad $S_{\text{полн}}=\pi R(R+l)$
 
 \newpage %43
 \blk{Шар}
-\fig{\begin{tikzpicture}[scale=0.6]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.6]
 \draw (0,0) circle (1.3);
 \draw (-1.3,0) arc[start angle=180,end angle=360,x radius=1.3,y radius=0.3];
 \draw[hid] (1.3,0) arc[start angle=0,end angle=180,x radius=1.3,y radius=0.3];
@@ -1004,14 +1004,14 @@ $r^2=R^2-d^2$, $d$~— расстояние от центра $O$ до плос�
 
 \newpage %44
 \blk{«Во сколько раз»}
-\fig{\begin{tikzpicture}[scale=0.42]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.42]
 \fill[black!18] (0,0)--(-0.8,1.3)--(0.8,1.3)--cycle;
 \draw (-1.6,2.6)--(0,0)--(1.6,2.6); \draw (0,2.6) ellipse[x radius=1.6,y radius=0.35];
 \draw (0,1.3) ellipse[x radius=0.8,y radius=0.18];
 \draw[hid] (2,0)--(2,1.3); \draw (1.9,0)--(2.1,0) (1.9,1.3)--(2.1,1.3); \node[right,lb] at (2,0.65) {$h_1$};
 \draw[hid] (2.8,0)--(2.8,2.6); \draw (2.7,0)--(2.9,0) (2.7,2.6)--(2.9,2.6); \node[right,lb] at (2.8,1.3) {$h$};
 \end{tikzpicture}\qquad
-\begin{tikzpicture}[scale=0.42]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.42]
 \fill[black!18] (0,2.6)--(-0.6,1.56) arc[start angle=180,end angle=360,x radius=0.6,y radius=0.14]--cycle;
 \cone{1.5}{2.6}
 \draw (0,1.56) ellipse[x radius=0.6,y radius=0.14];
@@ -1033,17 +1033,17 @@ $r^2=R^2-d^2$, $d$~— расстояние от центра $O$ до плос�
 
 \newpage %45
 \blk{Комбинации тел}
-\fig{\begin{tikzpicture}[scale=0.46]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.46]
 \cyl{0}{1.2}{2.4}{0}
 \begin{scope}[shift={(0,1.2)}]\ball{1.2}\end{scope}
 \draw[hid] (0,1.2)--(1.2,1.2); \node[right,lb] at (1.2,1.2) {$R$};
 \end{tikzpicture}\quad
-\begin{tikzpicture}[scale=0.46]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.41]
 \cube{0}{0}{1.8}
 \draw (1.26,1.17) circle (1.75);
 \node[below,lb] at (0.9,0) {$a$};
 \end{tikzpicture}\quad
-\begin{tikzpicture}[scale=0.46]
+\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.5]
 \draw (0,0) circle (1.4);
 \draw (-1.4,0) arc[start angle=180,end angle=360,x radius=1.4,y radius=0.32];
 \draw[hid] (1.4,0) arc[start angle=0,end angle=180,x radius=1.4,y radius=0.32];
@@ -1065,7 +1065,7 @@ $r^2=R^2-d^2$, $d$~— расстояние от центра $O$ до плос�
 \newpage %46
 \task{3}{Прототипы}
 \proto{3.1}{Пирамида внутри параллелепипеда}
-\fig{\begin{tikzpicture}[scale=0.5]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.5]
 \coordinate (A) at (0,0); \coordinate (B) at (3,0); \coordinate (C) at (4,0.7); \coordinate (D) at (1,0.7);
 \coordinate (A1) at (0,1.6); \coordinate (B1) at (3,1.6); \coordinate (C1) at (4,2.3); \coordinate (D1) at (1,2.3);
 \fill[black!18] (A)--(B)--(C)--(B1)--cycle;
@@ -1089,7 +1089,7 @@ $V=\tfrac13\cdot\tfrac{8\cdot6}{2}\cdot5=40$
 
 \newpage %47
 \proto{3.2}{Призма, отсечённая через среднюю линию}
-\fig{\begin{tikzpicture}[scale=0.46]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.46]
 \coordinate (A) at (0,0); \coordinate (B) at (2.6,0); \coordinate (C) at (1.2,0.8);
 \coordinate (A1) at (0,2); \coordinate (B1) at (2.6,2); \coordinate (C1) at (1.2,2.8);
 \coordinate (M) at (0.6,0.4); \coordinate (N) at (1.9,0.4); \coordinate (M1) at (0.6,2.4); \coordinate (N1) at (1.9,2.4);
@@ -1112,7 +1112,7 @@ $S_{\text{бок}}=46:2=23$
 
 \newpage %48
 \proto{3.3}{Пирамида с вершиной на середине ребра}
-\fig{\begin{tikzpicture}[scale=0.68]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.68]
 \coordinate (A) at (0,0); \coordinate (B) at (2.6,0); \coordinate (C) at (3.6,0.9); \coordinate (D) at (1,0.9);
 \coordinate (O) at (1.8,0.45); \coordinate (S) at (1.8,2.6); \coordinate (K) at (1.3,0);
 \coordinate (E) at (2.2,1.3); \coordinate (F) at (2.2,0.225);
@@ -1138,7 +1138,7 @@ $V=\tfrac12\cdot\tfrac12\cdot84=21$
 
 \newpage %49
 \proto{3.4}{Конический сосуд}
-\fig{\begin{tikzpicture}[scale=0.5]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.5]
 \fill[black!18] (0,0)--(-0.5,0.9)--(0.5,0.9)--cycle;
 \fill[black!18] (0,0.9) ellipse[x radius=0.5,y radius=0.11];
 \draw (-1.5,2.7)--(0,0)--(1.5,2.7); \draw (0,2.7) ellipse[x radius=1.5,y radius=0.33];
@@ -1159,7 +1159,7 @@ $V=\tfrac12\cdot\tfrac12\cdot84=21$
 
 \newpage %50
 \proto{3.5}{Отсечённый конус}
-\fig{\begin{tikzpicture}[scale=0.44]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.44]
 \fill[black!18] (0,2.7)--(-0.6,1.62) arc[start angle=180,end angle=360,x radius=0.6,y radius=0.14]--cycle;
 \cone{1.5}{2.7}
 \draw (0,1.62) ellipse[x radius=0.6,y radius=0.14];
@@ -1180,7 +1180,7 @@ $S=50\cdot\tfrac4{25}=8$
 
 \newpage %51
 \proto{3.6}{Сфера, описанная около конуса}
-\fig{\begin{tikzpicture}[scale=0.9]
+\fig{\begin{tikzpicture}[baseline=(current bounding box.center),scale=0.9]
 \draw (0,0) circle (1.4);
 \draw (-1.4,0) arc[start angle=180,end angle=360,x radius=1.4,y radius=0.32];
 \draw[hid] (1.4,0) arc[start angle=0,end angle=180,x radius=1.4,y radius=0.32];
