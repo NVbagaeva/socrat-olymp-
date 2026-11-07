@@ -27,7 +27,7 @@ export default function Podgotovka5Tab() {
       active="all"
       bloki={bloki}
     >
-      <PodgotovkaList zadanie={5} bloki={bloki} listHref="/zadaniya/5/podgotovka/" />
+      <PodgotovkaList zadanie={5} bloki={bloki} listHref={`/zadaniya/5/${OPORNYE.tail}`} />
     </PodgotovkaShell>
   );
 }
