@@ -693,6 +693,11 @@ export async function sozdatKotika(canvas: HTMLCanvasElement, opcii: KotikOpcii)
     if (m.name !== 'telo') m.visible = false;
   }
 
+  const dlyaLucha: THREE.Object3D[] = [];
+  kotik.traverse((o) => {
+    if (o instanceof THREE.Mesh && /^(golova|ushi|telo|manishka)$/.test(o.name)) dlyaLucha.push(o);
+  });
+
   const obl = oblako();
   scena.add(obl.gruppa);
   scena.add(pol());
@@ -796,7 +801,8 @@ export async function sozdatKotika(canvas: HTMLCanvasElement, opcii: KotikOpcii)
     },
     popal(x, y) {
       raycaster.setFromCamera(new THREE.Vector2(x * 2 - 1, -(y * 2 - 1)), kamera);
-      const hits = raycaster.intersectObjects(kotik.children, true);
+      /* Луч — только по основным мешам, без слоёв меха: быстро. */
+      const hits = raycaster.intersectObjects(dlyaLucha, false);
       for (const h of hits) {
         const n = h.object.name;
         if (n.startsWith('golova') || n.startsWith('ushi')) return 'golova';
