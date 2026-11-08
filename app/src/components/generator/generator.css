@@ -1335,6 +1335,8 @@
     display: none;
   }
   .gen {
+    /* Высота нижней панели «Сгенерировать»: кнопка 48 px, поля, рамка. */
+    --gen-actbar-h: calc(48px + 2 * var(--space-2) + 1px);
     gap: var(--space-3);
   }
   /* Полоса на телефоне — сплошная, без стекла: карточки пресетов и
@@ -1444,9 +1446,13 @@
     width: 100px;
   }
   /* ── Состав на телефоне: от края до края, внутренние поля 16 px ── */
+  /* Нижний отступ состава — высота панели «Сгенерировать», нижней
+     навигации и safe-area: последняя тема и подсказка не уходят под
+     прилипшие панели при прокрутке. */
   .gen-sostav {
     margin: 0 calc(-1 * var(--space-4));
-    padding: var(--space-3) var(--space-4) var(--space-2);
+    padding: var(--space-3) var(--space-4)
+      calc(var(--space-2) + var(--gen-actbar-h) + var(--h-bnav) + env(safe-area-inset-bottom));
     border-width: 1px 0;
     border-radius: 0;
   }
@@ -1492,7 +1498,6 @@
 
   /* ── Нижняя панель: одна строка — сводка и кнопка 48 px ────────── */
   .gen-actbar {
-    --gen-actbar-h: calc(48px + 2 * var(--space-2) + 1px);
     display: flex;
     align-items: center;
     gap: var(--space-3);
