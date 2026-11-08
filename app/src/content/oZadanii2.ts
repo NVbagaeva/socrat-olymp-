@@ -516,19 +516,19 @@ export const TIPY_2 = {
     {
       id: 'A',
       title: 'Длина вектора',
-      lead: 'Группа A: сначала координаты, потом длина',
+      lead: 'Сначала координаты, потом длина',
       tipy: [DLINA, SUMMA, KOMBINATSIYA],
     },
     {
       id: 'B',
       title: 'Скалярное произведение',
-      lead: 'Группа B: по координатам, по рисунку, через угол',
+      lead: 'По координатам, по рисунку, через угол',
       tipy: [SKALYARNOE_KOORD, SKALYARNOE_RISUNOK, SKALYARNOE_UGOL],
     },
     {
       id: 'C',
       title: 'Косинус угла',
-      lead: 'Группа C: всё вместе в одной задаче',
+      lead: 'Всё вместе в одной задаче',
       tipy: [KOSINUS],
     },
   ] satisfies Gruppa2[],
