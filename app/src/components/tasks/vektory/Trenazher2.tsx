@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Badge, Button } from '@/components/ui';
 import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
 import { trainerModes, trainerPage, type TrainerModeId } from '@/content/trainerModes';
@@ -94,7 +94,10 @@ function Trenazher2Review({ task }: { task: Task2 }) {
       <ol className="z2-shagi">
         {razbor.shagi.map((shag, i) => (
           <li className="z2-shag" key={i}>
-            <p className="z2-shag__title" dangerouslySetInnerHTML={{ __html: shag.zagolovokHtml }} />
+            <p
+              className="z2-shag__title"
+              dangerouslySetInnerHTML={{ __html: shag.zagolovokHtml }}
+            />
             {shag.strokiHtml.map((line, j) => (
               <p className="z2-shag__line" key={j} dangerouslySetInnerHTML={{ __html: line }} />
             ))}
@@ -127,6 +130,19 @@ function Trenazher2Configurator({
   const [skillId, setSkillId] = useState(first?.id ?? '');
   const [mode, setMode] = useState<TrainerModeId>('practice');
   const [count, setCount] = useState<number | null>(10);
+
+  /* Переход с карточки типа на «О задании»: …/trenazher/?tip=A6 —
+     конфигуратор открывается с этим прототипом. Адрес читается после
+     гидратации: страница статическая, на сборке параметра нет. */
+  useEffect(() => {
+    const tip = new URLSearchParams(window.location.search).get('tip');
+    if (tip === null || !skills.some((item) => item.id === tip)) return;
+    const timer = window.setTimeout(() => {
+      setSkillId(tip);
+      document.getElementById('z2-step-skill')?.scrollIntoView({ block: 'start' });
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [skills]);
 
   const progress = progress2.useProgress();
   const hasMistakes = progress.mistakes.length > 0;

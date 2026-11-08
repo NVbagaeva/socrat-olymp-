@@ -12,45 +12,8 @@
 
 /* ── Вкладка «О задании» ──────────────────────────────────────── */
 
-.z2-about {
-  display: grid;
-  gap: var(--space-8);
-}
-.z2-about__lead {
-  max-width: 64ch;
-}
-.z2-about__text {
-  margin-top: var(--space-2);
-  color: var(--color-text-secondary);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-}
-.z2-about__sub {
-  margin-bottom: var(--space-4);
-}
-.z2-format__text {
-  max-width: 64ch;
-  font-size: var(--fs-body);
-  line-height: var(--lh-lg);
-}
-.z2-about__groups {
-  display: grid;
-  gap: var(--space-6);
-}
-.z2-group {
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.z2-group__title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: var(--fs-h4);
-  line-height: var(--lh-h4);
-  font-weight: 600;
-}
+/* Код группы A/B/C: им же помечены группы в тренажёре, опорных
+   задачах и банке для репетиторов. */
 .z2-group__code {
   display: inline-grid;
   place-items: center;
@@ -62,89 +25,8 @@
   font-size: var(--fs-label);
   font-weight: 700;
 }
-.z2-group__lead {
-  margin-top: var(--space-1);
-  color: var(--color-text-secondary);
-  font-size: var(--fs-body);
-}
 
-/* Карточка прототипа: код, название, мини-рисунок или формула. */
-.z2-protos {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-}
-.z2-proto {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-}
-.z2-proto__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  min-width: 0;
-}
-.z2-proto__code {
-  flex: 0 0 auto;
-  color: var(--color-text-brand);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-}
-.z2-proto__title {
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  color: var(--color-text);
-}
-.z2-proto__title .katex,
-.z2-proto__formula .katex {
-  white-space: nowrap;
-}
-.z2-proto__formula {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 72px;
-  color: var(--color-text-secondary);
-  font-size: var(--fs-body);
-  overflow-x: auto;
-}
-.z2-proto__pic {
-  align-self: center;
-  width: 100%;
-  max-width: 220px;
-  margin: 0 auto;
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-}
-
-/* Типичные ошибки: карточки в две колонки. */
-.z2-oshibki__list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-4);
-}
-.z2-oshibka {
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--color-warning);
-  border-radius: var(--radius-lg);
-  background: var(--color-warning-soft);
-}
-.z2-oshibka__title {
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  font-weight: 600;
-}
-.z2-oshibka__text {
-  margin-top: var(--space-2);
-  font-size: var(--fs-body);
-  line-height: var(--lh-lg);
-}
+/* Сама вкладка — слой ozadanii2.css. */
 
 /* ── Вкладка «Теория» ─────────────────────────────────────────── */
 

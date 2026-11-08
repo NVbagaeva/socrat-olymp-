@@ -43,6 +43,7 @@ import { STSENY_IDS, stsena } from './stseny';
 import { keySpec2, sheetBlocks2, sheetVariants2, type SheetParams2 } from './sheet2';
 import { RAZDELY_TEORII } from '@/content/theoryVektory';
 import { O_ZADANII } from '@/content/vektory';
+import { OSHIBKI_2, UMET_2, VSE_TIPY_2, type Tip2 } from '@/content/oZadanii2';
 
 export interface Problem {
   where: string;
@@ -1088,6 +1089,7 @@ function tekstyRazdela(seeds: number): { where: string; text: string }[] {
   }
   add('о задании', O_ZADANII.format.text);
   for (const o of O_ZADANII.oshibki) add(`о задании: ${o.id}`, o.text);
+  for (const { where, text } of tekstyOZadanii2()) add(where, text);
   for (const x of POYASNENIE_TRI_ZNAKA) add('три знака', x);
   for (const t of OPORNYE_KOSINUS_TRI_ZNAKA) {
     add('три знака условие', t.uslovie);
@@ -1134,4 +1136,142 @@ export function checkStrelki(seeds = 5): GenReport {
     }
   }
   return { prototypes: teksty.length, generated: formul, problems };
+}
+
+/* ── Вкладка «О задании»: рисунки, формулы и ответы разборов ───── */
+
+/** Тексты вкладки с формулами в $…$: выкладки обёрнуты в доллары. */
+function tekstyOZadanii2(): { where: string; text: string }[] {
+  const out: { where: string; text: string }[] = [];
+  const add = (where: string, text: string) => out.push({ where, text });
+  for (const n of UMET_2.navyki) {
+    add('о задании: уметь', `$${n.formula}$`);
+    add('о задании: уметь', `$${n.naRisunke}$`);
+  }
+  for (const t of VSE_TIPY_2) {
+    const where = `о задании: ${t.id}`;
+    add(where, t.uslovie);
+    add(where, t.otvet);
+    for (const sh of t.shagi) {
+      add(where, sh.label);
+      for (const x of sh.paras ?? []) add(where, x);
+      for (const x of sh.lines ?? []) add(where, `$${x}$`);
+    }
+  }
+  for (const o of OSHIBKI_2.spisok) {
+    const where = `о задании: ошибка ${o.id}`;
+    add(where, o.text);
+    add(where, o.primer);
+    add(where, `$${o.neverno}$`);
+    add(where, `$${o.verno}$`);
+  }
+  return out;
+}
+
+/** Координаты вектора сцены по имени: конец минус начало. */
+function koordinatyStseny(t: Tip2, name: string): [number, number] {
+  const v = t.risunok.vectors.find((x) => x.name === name);
+  if (v === undefined) throw new Error(`${t.id}: нет вектора ${name}`);
+  return [v.to[0] - v.from[0], v.to[1] - v.from[1]];
+}
+
+/** Числа ответа: «$0{,}28$» → [0.28], «$\vec{a}\,(5;\ -3)$» → [5, -3]. */
+function chislaOtveta(tex: string): number[] {
+  return [...tex.matchAll(/-?\d+(?:\{,\}\d+)?/g)].map((m) => Number(m[0].replace('{,}', '.')));
+}
+
+const skalyarno = (t: Tip2) => {
+  const [ax, ay] = koordinatyStseny(t, 'a');
+  const [bx, by] = koordinatyStseny(t, 'b');
+  return [ax * bx + ay * by];
+};
+
+/**
+ * Независимый пересчёт ответов разборов — по координатам векторов со
+ * сцены, а не по числам из текста: рисунок, условие и ответ не
+ * разойдутся, если поправить что-то одно.
+ */
+const PERESCHET_2: Record<string, (t: Tip2) => number[]> = {
+  koordinaty: (t) => [...koordinatyStseny(t, 'a')],
+  dlina: (t) => [Math.hypot(...koordinatyStseny(t, 'a'))],
+  'summa-raznost': (t) => {
+    const [ax, ay] = koordinatyStseny(t, 'a');
+    const [bx, by] = koordinatyStseny(t, 'b');
+    const [cx, cy] = koordinatyStseny(t, 'c');
+    if (cx !== ax + bx || cy !== ay + by) throw new Error('на рисунке c ≠ a + b');
+    return [Math.hypot(ax + bx, ay + by)];
+  },
+  kombinatsiya: (t) => {
+    const [ax, ay] = koordinatyStseny(t, 'a');
+    const [bx, by] = koordinatyStseny(t, 'b');
+    return [Math.hypot(2 * ax - 3 * bx, 2 * ay - 3 * by)];
+  },
+  'skalyarnoe-koordinaty': skalyarno,
+  'skalyarnoe-risunok': skalyarno,
+  'skalyarnoe-ugol': (t) => {
+    const [ax, ay] = koordinatyStseny(t, 'a');
+    const [bx, by] = koordinatyStseny(t, 'b');
+    const la = Math.hypot(ax, ay);
+    const lb = Math.hypot(bx, by);
+    if (Math.abs(la - 3 * Math.SQRT2) > 1e-9 || lb !== 4) {
+      throw new Error('длины на рисунке не те, что в условии');
+    }
+    if (Math.abs(Math.acos((ax * bx + ay * by) / (la * lb)) - Math.PI / 4) > 1e-9) {
+      throw new Error('угол на рисунке не 45°');
+    }
+    /* По условию: 3√2 · 4 · cos 45°. */
+    return [3 * Math.SQRT2 * 4 * Math.cos(Math.PI / 4)];
+  },
+  kosinus: (t) => {
+    const [ax, ay] = koordinatyStseny(t, 'a');
+    const [bx, by] = koordinatyStseny(t, 'b');
+    return [(ax * bx + ay * by) / (Math.hypot(ax, ay) * Math.hypot(bx, by))];
+  },
+};
+
+/**
+ * Вкладка «О задании»: рисунок «Что нужно уметь» и рисунки разборов и
+ * карточек чисты (подписи ничего не касаются), ответы восьми разборов
+ * сходятся с пересчётом, все формулы KaTeX принимает строго.
+ */
+export function checkOZadanii2(typeset: Typeset): GenReport {
+  const problems: Problem[] = [];
+  /* Векторы с общим началом (сумма, угол) касаются — так задумано;
+     подписи же не касаются ничего. */
+  const chisto = (where: string, r: Risunok) =>
+    checkRisunok(where, r).filter((p) => !/пересекаются или касаются|ближе клетки/.test(p.what));
+  problems.push(...chisto('о задании: уметь', UMET_2.risunok));
+  for (const t of VSE_TIPY_2) {
+    const where = `о задании: ${t.id}`;
+    problems.push(...chisto(`${where} (разбор)`, t.risunok));
+    problems.push(
+      ...chisto(`${where} (карточка)`, {
+        vectors: t.risunok.vectors,
+        window: 'tight',
+      }),
+    );
+    const pereschet = PERESCHET_2[t.id];
+    if (pereschet === undefined) {
+      problems.push({ where, what: 'нет пересчёта ответа' });
+      continue;
+    }
+    try {
+      const nado = pereschet(t);
+      const est = chislaOtveta(t.otvet);
+      const sovpalo =
+        nado.length === est.length && nado.every((x, i) => Math.abs(x - (est[i] ?? NaN)) < 1e-9);
+      if (!sovpalo) {
+        problems.push({ where, what: `ответ «${t.otvet}», пересчёт даёт ${nado.join('; ')}` });
+      }
+    } catch (error) {
+      problems.push({ where, what: String(error) });
+    }
+  }
+  const teksty = tekstyOZadanii2();
+  for (const { where, text } of teksty) {
+    for (const tex of formulyTeksta(text)) {
+      proverit((what) => problems.push({ where, what }), typeset, tex);
+    }
+  }
+  return { prototypes: VSE_TIPY_2.length, generated: teksty.length, problems };
 }
