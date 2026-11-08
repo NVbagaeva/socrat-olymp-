@@ -11,6 +11,7 @@ import {
   type AktivnyyFiltr,
 } from '@/components/filtry/chasti';
 import { GEN_UI } from '@/content/generatorUi';
+import { typesetText } from '@/lib/tex';
 import {
   changeLevelAt,
   countsByTopic,
@@ -161,6 +162,43 @@ function stars(l: number): string {
   return '★'.repeat(l);
 }
 
+/** Подпись с формулами в $…$ → HTML KaTeX; без формул — undefined (текст как есть). */
+function mathHtml(text: string, html?: string): string | undefined {
+  return html ?? (text.includes('$') ? typesetText(text) : undefined);
+}
+
+/**
+ * Подписи конфига, набранные KaTeX: в правиле сайта математика — только
+ * KaTeX, а разделы заполняют titleHtml не всегда (у №1 названия
+ * подтипов — с $…$ без него). Здесь набирается всё, что с формулами.
+ */
+function sFormulami(config: GenConfig): GenConfig {
+  return {
+    ...config,
+    topics: config.topics.map((t) => {
+      const titleHtml = mathHtml(t.title, t.titleHtml);
+      return {
+        ...t,
+        ...(titleHtml === undefined ? {} : { titleHtml }),
+        subtypes: t.subtypes.map((s) => {
+          const sHtml = mathHtml(s.title, s.titleHtml);
+          return sHtml === undefined ? s : { ...s, titleHtml: sHtml };
+        }),
+      };
+    }),
+  };
+}
+
+/** Код подтипа на экране: число — номер прототипа «№49», иначе код как есть («ПР-04»). */
+function codeLabel(code: string): string {
+  return /^\d+$/.test(code) ? `№${Number(code)}` : code;
+}
+
+/** Текст подписи: HTML с формулами или обычная строка. */
+function Podpis({ text, html }: { text: string; html?: string }) {
+  return html === undefined ? <>{text}</> : <span dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
 /**
  * Общий генератор листов (docs/generator/02-design.md, макет А).
  *
@@ -175,7 +213,8 @@ function stars(l: number): string {
  * комплекте раздела (lib/komplekt.ts): после перезагрузки или
  * возвращения на вкладку открывается тот же лист.
  */
-export function Generator({ config, engine, icons }: GeneratorProps) {
+export function Generator({ config: ishodnyy, engine, icons }: GeneratorProps) {
+  const config = useMemo(() => sFormulami(ishodnyy), [ishodnyy]);
   /* Памятка и пример — по виду работы, пока учитель их не переключил сам. */
   const ege = (s: GenState) => engine.formatEge?.(s) ?? false;
   const poTipu = (s: GenState, r: Rucnye): GenState => ({
@@ -908,8 +947,12 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 aria-pressed={presetId === p.id}
                 onClick={() => applyPreset(p.id)}
               >
-                <b>{p.title}</b>
-                <span>{p.sub}</span>
+                <b>
+                  <Podpis text={p.title} html={mathHtml(p.title)} />
+                </b>
+                <span>
+                  <Podpis text={p.sub} html={mathHtml(p.sub)} />
+                </span>
               </button>
             ))}
           </div>
@@ -927,6 +970,9 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
               const meta = !allowed
                 ? GEN_UI.netVIstochnike
                 : (t.note ?? (st.source === 'new' ? GEN_UI.generiruyutsya : GEN_UI.vBanke(bank)));
+              /* Темы, которой нет в открытом банке, — пометка бейджем, а не
+                 серым: добавить её можно, задачи будут авторские. */
+              const bezBanka = allowed && t.sources !== undefined && !t.sources.includes('bank');
               const isOpen = open[t.id] === true;
               return (
                 <div key={t.id} className="gen-trow-wrap">
@@ -959,10 +1005,22 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                       ) : (
                         <b dangerouslySetInnerHTML={{ __html: t.titleHtml }} />
                       )}
-                      {/* «подтипы» и стрелка не разрываются: подпись
-                          переносится перед ними, а не между ними. */}
-                      <small>
-                        {meta} ·{' '}
+                      {/* Мета-строка — неразрывными кусками: «в банке 16 ·» и
+                          «подтипы ⌄» не рвутся посередине; не влезают — «подтипы»
+                          целиком уходят на следующую строку. */}
+                      <small className="gen-trow__meta">
+                        {bezBanka ? (
+                          <span className="gen-tag">{meta}</span>
+                        ) : (
+                          <span
+                            className={clsx(
+                              'gen-trow__metatext',
+                              allowed && t.note !== undefined && 'is-note',
+                            )}
+                          >
+                            {meta} ·
+                          </span>
+                        )}
                         <span className="gen-trow__podtipy">
                           {GEN_UI.podtipy}
                           <GenIcon
@@ -1000,21 +1058,24 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                         const k = st.plan.filter((x) => x.id === s.id).length;
                         return (
                           <div key={s.id} className="gen-sub">
-                            <span className="gen-sub__name">
-                              <span className="gen-sub__code">{s.code}</span>{' '}
-                              {s.titleHtml === undefined ? (
-                                s.title
-                              ) : (
-                                <span dangerouslySetInnerHTML={{ __html: s.titleHtml }} />
-                              )}{' '}
-                              {hasLevels ? (
-                                <span
-                                  className="gen-sub__lv"
-                                  aria-label={`Сложность ${urovniPodtipa(s).join('–')} из ${config.levels.length}`}
-                                >
-                                  {levelsText(urovniPodtipa(s))}
+                            <span className="gen-sub__text">
+                              <span className="gen-sub__name">
+                                <Podpis text={s.title} html={s.titleHtml} />
+                              </span>
+                              {/* Мета-строка: номер прототипа бейджем, звёзды — в конце. */}
+                              <span className="gen-sub__meta">
+                                <span className="gen-sub__code no-math-check">
+                                  {codeLabel(s.code)}
                                 </span>
-                              ) : null}
+                                {hasLevels ? (
+                                  <span
+                                    className="gen-sub__lv"
+                                    aria-label={`Сложность ${urovniPodtipa(s).join('–')} из ${config.levels.length}`}
+                                  >
+                                    {levelsText(urovniPodtipa(s))}
+                                  </span>
+                                ) : null}
+                              </span>
                             </span>
                             <Stepper
                               value={k}
@@ -1191,11 +1252,18 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
         </div>
       </div>
 
+      {/* Телефон: одна строка — сводка (тап — фильтры) и кнопка; справа
+          ячейка под кнопку «?» сайта, чтобы та не ложилась на кнопки. */}
       <div className="gen-actbar">
-        <span className="gen-sum">
+        <button
+          type="button"
+          className="gen-sum gen-actbar__sum"
+          title={sum.full}
+          onClick={() => setOverlay({ kind: 'filters' })}
+        >
           <b>{sum.main}</b>
-          {sum.rest === '' ? null : ` · ${sum.rest}`}
-        </span>
+          {sum.rest === '' ? null : <small>{sum.rest}</small>}
+        </button>
         {go}
       </div>
 
