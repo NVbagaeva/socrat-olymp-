@@ -1,6 +1,11 @@
 import type { Metadata } from 'next';
 import { KakNaiti14 } from '@/components/zadanie14/KakNaiti14';
-import { KotikBanner14, KotikPolosa14 } from '@/components/zadanie14/KotikBanner14';
+import {
+  KotikBanner14,
+  KotikKartinka14,
+  KotikPolosa14,
+} from '@/components/zadanie14/KotikBanner14';
+import { Kotik3d } from '@/components/zadanie14/kotik3d/Kotik3d';
 import { MAKETY_ID } from '@/components/zadanie14/Krug14';
 import { Okruzhnost14 } from '@/components/zadanie14/Okruzhnost14';
 import { ZADANIE14, zadanie14Title } from '@/content/zadanie14';
@@ -30,7 +35,14 @@ export default function Okruzhnost14Tab() {
       <Okruzhnost14
         base={ADRES}
         scope={scopeOfPath(ADRES) ?? '14:okruzhnost'}
-        kotikPolny={<KotikBanner14 href={MAKETY} className="ok14-kotik__banner" />}
+        kotikPolny={
+          <KotikBanner14
+            href={MAKETY}
+            className="ok14-kotik__banner"
+            kartinka={<Kotik3d rezhim="banner" zapasnaya={<KotikKartinka14 />} />}
+          />
+        }
+        kotikKartinka={<KotikKartinka14 />}
         kotikPolosa={<KotikPolosa14 href={MAKETY} />}
         spravka={<KakNaiti14 teoriyaHref={`${BASE}/teoriya/#t-p01-okruzhnost`} />}
       />

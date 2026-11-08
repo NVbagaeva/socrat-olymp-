@@ -163,12 +163,27 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
    * «тренировка», и спрашивает о завершении по-своему. Не заданы — общие.
    */
   labels?: HostLabels<U>;
+  /**
+   * Своя кнопка на панели тренировки, перед «Паузой». Получает паузу и
+   * продолжение: окно поверх тренажёра ставит таймер на паузу, пока
+   * открыто (окружность №14 — «Погладь котика»).
+   */
+  barExtra?: (api: BarExtraApi) => ReactNode;
   /** Экран выбора тренировки. */
   configurator: (api: ConfiguratorApi<P>) => ReactNode;
   /** Экран заданий. */
   screen: (context: ScreenContext<P, U>) => ReactNode;
   /** Что внутри, для сообщения об ошибке. */
   what?: string;
+}
+
+/** Что получает своя кнопка панели тренировки. */
+export interface BarExtraApi {
+  paused: boolean;
+  pause: () => void;
+  resume: () => void;
+  /** Активное время тренировки, мс. */
+  elapsed: () => number;
 }
 
 /** Подписи и поведение оболочки, которые тренажёр может переопределить. */
@@ -313,6 +328,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   onEntryResolved,
   backHref,
   labels,
+  barExtra,
   configurator,
   screen,
   what = 'тренажёр',
@@ -1025,6 +1041,11 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         {...(labels?.finish === undefined ? {} : { finishShortLabel: labels.finish })}
         pausable={labels?.pausable !== false}
         clock={labels?.clock !== false}
+        extra={
+          barExtra === undefined ? undefined : (
+            <Slot render={barExtra} arg={{ paused, pause, resume: unpause, elapsed }} />
+          )
+        }
       />
       {available && saveProblem === null ? null : (
         <p className="tsess__nosave" role="status">

@@ -38,6 +38,8 @@ import {
   type Rezhim,
   type Uroven,
 } from '@/lib/zadanie14/okruzhnost';
+import { PogladKotika } from './kotik3d/PogladKotika';
+import { kotikProverka, kotikRad } from './kotik3d/signal';
 import {
   isOkruzhnost14Payload,
   readOkruzhnost14Ui,
@@ -589,6 +591,8 @@ function Ekran({
     if (zakryt) return;
     const it = proveritRaskladku(r, raskl);
     setItog(it);
+    kotikProverka(it.vse);
+    if (it.vse) kotikRad();
     setVybrana(null);
     setKotikSvernut(true);
     if (it.vse) {
@@ -817,12 +821,15 @@ export function Okruzhnost14({
   scope,
   kotikPolny,
   kotikPolosa,
+  kotikKartinka,
   spravka,
 }: {
   base: string;
   scope: string;
   kotikPolny: ReactNode;
   kotikPolosa: ReactNode;
+  /** Картинка котика — запасная для окна «Погладь котика». */
+  kotikKartinka: ReactNode;
   spravka: ReactNode;
 }) {
   const kotik = (svernut: boolean, onToggle: () => void) => (
@@ -852,6 +859,7 @@ export function Okruzhnost14({
         subset={(p, idx) => ({ ...p, seeds: idx.flatMap((i) => p.seeds[i] ?? []) })}
         similar={(p, idx) => ({ ...p, seeds: novyeZerna(idx.length) })}
         summary={{ hintedLabel: 'Исправлено после проверки' }}
+        barExtra={(api) => <PogladKotika api={api} zapasnaya={kotikKartinka} />}
         configurator={(api) => (
           <>
             <div className="ok14-kotik">{kotikPolny}</div>

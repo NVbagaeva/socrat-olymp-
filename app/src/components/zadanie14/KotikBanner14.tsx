@@ -42,14 +42,27 @@ function Sloy({
  * prefers-reduced-motion анимации нет. Подложка — «Стеклянная сцена»,
  * в тёмной схеме за котиком тёплое свечение.
  */
+/** Котик под облаком — два слоя картинки (запасная для 3D-котика). */
+export function KotikKartinka14() {
+  return (
+    <>
+      <Sloy imya="oblako" w={480} h={166} className="z14-kotik__oblako" />
+      <Sloy imya="kot" w={480} h={350} className="z14-kotik__kot" />
+    </>
+  );
+}
+
 export function KotikBanner14({
   href,
   knopka = 'Выучить макеты →',
   className,
+  kartinka,
 }: {
   href: string;
   knopka?: string;
   className?: string;
+  /** Вместо картинки — своё (в тренажёре окружности — 3D-котик). */
+  kartinka?: React.ReactNode;
 }) {
   return (
     <aside
@@ -66,8 +79,7 @@ export function KotikBanner14({
         </a>
       </div>
       <div className="z14-kotik__kartinka" aria-hidden="true">
-        <Sloy imya="oblako" w={480} h={166} className="z14-kotik__oblako" />
-        <Sloy imya="kot" w={480} h={350} className="z14-kotik__kot" />
+        {kartinka ?? <KotikKartinka14 />}
       </div>
     </aside>
   );

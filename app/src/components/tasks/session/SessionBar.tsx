@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui';
 import { clockText, sessionText } from './text';
 
@@ -26,6 +26,8 @@ export interface SessionBarProps {
   pausable?: boolean;
   /** Часы на панели. У зачётной работы свой обратный отсчёт. */
   clock?: boolean;
+  /** Своя кнопка тренажёра перед «Паузой» (окружность №14 — «Погладь котика»). */
+  extra?: ReactNode;
 }
 
 /**
@@ -77,6 +79,7 @@ export function SessionBar({
   finishShortLabel = sessionText.finish,
   pausable = true,
   clock = true,
+  extra,
 }: SessionBarProps) {
   const shown = total === 0 ? 0 : Math.min(index + 1, total);
   return (
@@ -89,6 +92,7 @@ export function SessionBar({
       </p>
       {clock ? <SessionClock elapsed={elapsed} /> : null}
       <div className="tsess__actions">
+        {extra}
         {!pausable ? null : paused ? (
           <Button size="sm" onClick={onResume} disabled={blocked}>
             {sessionText.resume}
