@@ -39,8 +39,8 @@ export type Istochnik = 'fipi' | 'analog' | 'mix';
 export const GRUPPY_PROTOTIPOV: Record<string, string[]> = {
   I: ['P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10'],
   II: ['P11', 'P12', 'P13', 'P14'],
-  III: ['P15', 'P16', 'P17', 'P18', 'P19', 'P29'],
-  IV: ['P20', 'P21', 'P22', 'P23', 'P24', 'P25', 'P30'],
+  III: ['P15', 'P16', 'P17', 'P18', 'P19', 'P29', 'P31', 'P32'],
+  IV: ['P20', 'P21', 'P22', 'P23', 'P24', 'P25', 'P30', 'P33', 'P34', 'P35'],
   V: ['P26', 'P27', 'P28'],
 };
 

@@ -1,0 +1,70 @@
+/* Страницы печати задания №14: только лист, без оболочки сайта. Та же
+   основа, что у pechat13.css; плюс условие рядом с пустой окружностью
+   и решения учителя с окружностями отбора. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+  .z14-print-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-sans);
+  }
+  .z14-print-bar__lead {
+    font-size: var(--fs-caption);
+    color: var(--color-text-secondary);
+  }
+}
+
+@media print {
+  .z14-print-bar {
+    display: none;
+  }
+}
+
+/* Условие слева, пустая окружность справа — место для отбора корней. */
+.z14-list-zadacha {
+  display: grid;
+  grid-template-columns: 1fr 48mm;
+  gap: 4mm;
+  align-items: start;
+}
+.k14--list {
+  width: 48mm;
+}
+.z14-list-reshenie .k14-ryad {
+  grid-template-columns: repeat(auto-fit, minmax(44mm, 52mm));
+}
+.z14-list-reshenie .k14 {
+  max-width: 52mm;
+  margin: 0;
+}
+.z14-list-shagi {
+  padding-left: 5mm;
+}
+.z14-list-ramka,
+.z14-list-obrazec {
+  padding: 3mm 4mm;
+  border: 0.3mm solid #c3d3e6;
+  border-left: 1mm solid #1f5fd0;
+  border-radius: 2mm;
+}
+.z14-list-obrazec {
+  border-left-color: #e07a2f;
+}

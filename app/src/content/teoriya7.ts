@@ -603,6 +603,46 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
             primer: 'F069',
             prototipy: ['P19', 'P29'],
           },
+          {
+            id: 'chastnoe-stepeney',
+            title: 'Частное степеней',
+            bloki: [
+              {
+                vid: 'svoystvo',
+                tekst: ['При делении степеней с одинаковым основанием показатели вычитаются:'],
+                formula: '\\dfrac{a^m}{a^n}=a^{m-n}',
+              },
+              {
+                vid: 'vazhno',
+                tekst: [
+                  '$\\dfrac{3}{3^x}=3^{1-x}$, а $\\dfrac{1}{81}=3^{-4}$, значит $1-x=-4$ и $x=5$.',
+                ],
+              },
+            ],
+            primer: 'P31-a21',
+            prototipy: ['P31'],
+          },
+          {
+            id: 'zamena-pokazatelnaya',
+            title: 'Замена $t=a^x$',
+            bloki: [
+              {
+                vid: 'svoystvo',
+                tekst: [
+                  'Если в уравнении есть $a^{2x}$ (например, $4^x=(2^x)^2$) и $a^x$, замена $t=a^x$ даёт квадратное уравнение:',
+                ],
+                formula: '4^{x+2}-2^{x+3}+1=0\\iff 16t^2-8t+1=0,\\quad t=2^x',
+              },
+              {
+                vid: 'vazhno',
+                tekst: [
+                  '$t=a^x>0$ при любом $x$: отрицательный корень $t$ отбрасываем — уравнение $a^x=t$ при $t\\le0$ корней не имеет.',
+                ],
+              },
+            ],
+            primer: 'P32-a21',
+            prototipy: ['P32'],
+          },
         ],
       },
     ],
@@ -756,6 +796,55 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
             ],
             primer: 'P30-a01',
             prototipy: ['P30'],
+          },
+          {
+            id: 'log-stepen-x',
+            title: 'Под логарифмом — степень с $x$',
+            bloki: [
+              {
+                vid: 'teorema',
+                tekst: [
+                  'Снимаем логарифм по определению — остаётся простейшее показательное уравнение:',
+                ],
+                formula: '\\log_2(2^x-8)=3\\iff 2^x-8=8\\iff 2^x=2^4',
+              },
+            ],
+            primer: 'P33-a21',
+            prototipy: ['P33'],
+          },
+          {
+            id: 'log-kvadrat',
+            title: 'Квадрат логарифма',
+            bloki: [
+              {
+                vid: 'svoystvo',
+                tekst: [
+                  '$\\log_a^2x$ — это $(\\log_ax)^2$, а не $\\log_a(x^2)$. Замена $t=\\log_ax$ даёт квадратное уравнение, потом $x=a^t$.',
+                ],
+              },
+              {
+                vid: 'vazhno',
+                tekst: [
+                  '$\\log_2^2x+\\log_2x=0$: $t^2+t=0$, $t=0$ или $t=-1$, то есть $x=1$ или $x=0{,}5$. В ответ пишем $x$, а не $t$.',
+                ],
+              },
+            ],
+            primer: 'P34-a21',
+            prototipy: ['P34'],
+          },
+          {
+            id: 'log-vlozhennyy',
+            title: 'Логарифм от логарифма',
+            bloki: [
+              {
+                vid: 'svoystvo',
+                tekst: ['Снимаем логарифмы по одному, снаружи внутрь, каждый раз по определению:'],
+                formula:
+                  '\\log_{13}(\\log_2(\\log_5x))=0\\iff\\log_2(\\log_5x)=1\\iff\\log_5x=2\\iff x=25',
+              },
+            ],
+            primer: 'P35-a21',
+            prototipy: ['P35'],
           },
         ],
       },
