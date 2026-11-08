@@ -261,7 +261,8 @@ function Tipy() {
     id: g.id,
     head: (
       <header className="z2t-gruppa__head" data-reveal="">
-        <span className="z2t-gruppa__code" aria-hidden="true">
+        {/* Код группы банка, а не переменная: KaTeX здесь не нужен. */}
+        <span className="z2t-gruppa__code no-math-check" aria-hidden="true">
           {g.id === 'baza' ? '0' : g.id}
         </span>
         <h3 className="z2t-gruppa__title" id={`z2t-${g.id}`}>
