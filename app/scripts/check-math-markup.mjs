@@ -59,6 +59,10 @@ const SKIP_FILES = [
     re: /^lib\/variant\/online\/normalizeCases\.json$/,
     why: 'таблица случаев ввода ответа для тестов: сырой ввод ученика, на сайт не выводится',
   },
+  {
+    re: /^components\/zadanie14\/kotik3d\/scena\.ts$/,
+    why: '3D-котик: код шейдеров GLSL в строках, на экран не выводится',
+  },
   { re: /^lib\/solid\/catalog\.ts$/, why: 'подписи каталога тел — только для /styleguide/' },
   { re: /^lib\/scenes\.ts$/, why: 'подписи внутри SVG-чертежей: KaTeX в <text> не встраивается' },
   {

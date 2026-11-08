@@ -332,6 +332,154 @@ for (const g of TE.GLAVY_14) {
   }
 }
 
+/* ── Тренажёр «Тригонометрическая окружность» ───────────────
+   Генератор: каждый режим × уровень × 200 раундов — карточка ровно на
+   одной точке режима, дробь несократима, углы не повторяются, на точке
+   не больше карточек, чем вмещает ячейка; верная раскладка проходит
+   проверку, неверная — нет. Разбор: каждое «=» цепочки верно численно.
+   Ячейки: не пересекаются друг с другом, с осями и подписями, не
+   задевают окружность и лежат в рисунке. Правила справки: цепочки и
+   ответ «точка …» верны численно. */
+const OK = requireSrc('lib/zadanie14/okruzhnost.ts');
+const OKT = requireSrc('content/okruzhnost14.ts');
+
+/** Численное значение TeX-выражения вида −\dfrac{72\pi}{6}+5\cdot2\pi. */
+function chisloTex(tex) {
+  let js = tex
+    .replace(/\\[,;!: ]/g, '')
+    .replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, '(($1)/($2))')
+    .replace(/\\cdot/g, '*')
+    .replace(/(\d)\s*\\pi/g, '$1*P')
+    .replace(/\\pi/g, 'P')
+    .replace(/(\d|\))\s*\(/g, '$1*(')
+    .replace(/\s+/g, '');
+  if (!/^[-+*/().\dP]+$/.test(js)) return NaN;
+  return Function('P', `return (${js});`)(Math.PI);
+}
+function cepochkaVerna(tex, where) {
+  const chasti = tex.split('=');
+  const v = chasti.map(chisloTex);
+  ok(v.every((x) => Number.isFinite(x)), `${where}: не разобрал цепочку ${tex}`);
+  ok(
+    v.every((x) => Math.abs(x - v[0]) < 1e-7 * Math.max(1, Math.abs(v[0]))),
+    `${where}: неверное равенство ${tex}`,
+  );
+  return v[0];
+}
+const vKrugeOk = (x) => ((x % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+const odnaTochka = (a, b) => {
+  const d = Math.abs(vKrugeOk(a) - vKrugeOk(b));
+  return Math.min(d, 2 * Math.PI - d) < 1e-7;
+};
+const nodOk = (a, b) => (b === 0 ? Math.abs(a) : nodOk(b, a % b));
+
+for (const rz of OK.REZHIMY) {
+  for (const ur of rz.urovni) {
+    const e = OK.emkost(rz.id, ur);
+    for (let seed = 1; seed <= 200; seed += 1) {
+      const where = `окружность ${rz.id}/${ur}, зерно ${seed}`;
+      const r = OK.raund(rz.id, ur, seed);
+      const ozhid = rz.id === 'chetverti' ? 4 : rz.id === 'mix' ? 8 : ur === 'bolshie' ? (rz.id === 'shest' ? 10 : 8) : rz.tochki.length;
+      ok(r.kartochki.length === ozhid, `${where}: карточек ${r.kartochki.length}, а нужно ${ozhid}`);
+      const naTochke = new Map();
+      const vidal = new Set();
+      let otric = 0;
+      for (const c of r.kartochki) {
+        const { n, d } = c.ugol;
+        ok([1, 2, 3, 4, 6].includes(d), `${where}: знаменатель ${d}`);
+        ok(nodOk(n, d) === 1, `${where}: дробь ${n}/${d} не сокращена`);
+        ok(OK.tochkaUgla(c.ugol) === c.k, `${where}: карточка ${n}π/${d} не на своей точке`);
+        ok(rz.tochki.includes(c.k), `${where}: точки ${c.k} нет в режиме`);
+        ok(!vidal.has(`${n}/${d}`), `${where}: угол ${n}π/${d} повторяется`);
+        vidal.add(`${n}/${d}`);
+        naTochke.set(c.k, (naTochke.get(c.k) ?? 0) + 1);
+        const v = n / d;
+        if (n < 0) otric += 1;
+        if (ur === 'osnovnye') ok(v >= 0 && v < 2, `${where}: ${n}π/${d} не из [0; 2π)`);
+        if (ur === 'otric') ok(v > -2.0001 && v < 2, `${where}: ${n}π/${d} не из [−2π; 2π)`);
+        if (ur === 'bolshie') ok(Math.abs(v) >= 2, `${where}: ${n}π/${d} — не больше оборота`);
+        const rb = OK.razborUgla(c.ugol);
+        if (seed <= 20) {
+          texOk(rb.cepochka, `${where}, разбор`);
+          strokaOk(rb.poyasnenie, `${where}, пояснение`);
+          const v0 = cepochkaVerna(rb.cepochka, `${where}, разбор`);
+          ok(Math.abs(v0 - OK.radiany(c.ugol)) < 1e-9, `${where}: цепочка не о том угле`);
+          ok(odnaTochka(chisloTex(rb.tochka), OK.radiany(c.ugol)), `${where}: точка разбора не та`);
+        }
+      }
+      ok([...naTochke.values()].every((x) => x <= e), `${where}: на точке больше ${e} карточек`);
+      if (ur === 'otric') ok(otric * 2 >= r.kartochki.length, `${where}: отрицательных меньше половины`);
+      if (e === 2 && rz.id !== 'chetverti')
+        ok([...naTochke.values()].some((x) => x === 2), `${where}: нет точки с двумя углами`);
+      const verno = Object.fromEntries(r.kartochki.map((c) => [c.id, c.k]));
+      ok(OK.proveritRaskladku(r, verno).vse, `${where}: верная раскладка не принята`);
+      const sdvig = Object.fromEntries(
+        r.kartochki.map((c) => [c.id, rz.tochki[(rz.tochki.indexOf(c.k) + 1) % rz.tochki.length]]),
+      );
+      ok(OK.proveritRaskladku(r, sdvig).verno === 0, `${where}: неверная раскладка засчитана`);
+      const pusto = { ...verno, [r.kartochki[0].id]: null };
+      const it = OK.proveritRaskladku(r, pusto);
+      ok(!it.vse && it.otmetki[r.kartochki[0].id] === 'pusto', `${where}: неразложенная карточка не ошибка`);
+      ok(OK.raund(rz.id, ur, seed).kartochki.every((c, i) => OK.ravnyUgly(c.ugol, r.kartochki[i].ugol)), `${where}: зерно не повторяет раунд`);
+    }
+    /* Ячейки и подписи. */
+    const g = OK.geomOkruzhnosti(rz.id, e);
+    const where = `окружность ${rz.id}, ячейки на ${e}`;
+    ok(g.yacheyki.length === rz.tochki.length, `${where}: ячеек не столько, сколько точек`);
+    const { w: yw, h: yh } = OK.razmerYacheyki(e);
+    const ramki = g.yacheyki.map((y) => y.ramka);
+    g.yacheyki.forEach((y, i) => {
+      const r = y.ramka;
+      ok(Math.abs(r.x2 - r.x1 - yw) < 1e-9 && Math.abs(r.y2 - r.y1 - yh) < 1e-9, `${where}: ячейка ${y.k} не того размера`);
+      ok(K.rasstoyaniyaRamki(r).min >= K.R + 6, `${where}: ячейка ${y.k} задевает окружность`);
+      ok(!(r.x1 < 2.5 && r.x2 > -2.5 && r.y1 < OK.OS_OK + 4 && r.y2 > -OK.OS_OK - 4), `${where}: ячейка ${y.k} на оси синусов`);
+      ok(!(r.y1 < 2.5 && r.y2 > -2.5 && r.x1 < OK.OS_OK + 4 && r.x2 > -OK.OS_OK - 4), `${where}: ячейка ${y.k} на оси косинусов`);
+      ok(r.x1 >= g.vb.x && r.x2 <= g.vb.x + g.vb.w && r.y1 >= g.vb.y && r.y2 <= g.vb.y + g.vb.h, `${where}: ячейка ${y.k} за краем рисунка`);
+      ramki.forEach((q, j) => {
+        if (j > i) ok(!K.peresekayutsya(r, q, 2), `${where}: ячейки ${y.k} и ${g.yacheyki[j].k} пересекаются`);
+      });
+      g.podpisi.forEach((p) => ok(!K.peresekayutsya(r, p.ramka, 1), `${where}: ячейка ${y.k} на подписи ${p.tex}`));
+      /* Выноски не пересекают друг друга. */
+      const ot = (c) => [c.x0, c.y0, Math.max(c.ramka.x1, Math.min(c.x0, c.ramka.x2)), Math.max(c.ramka.y1, Math.min(c.y0, c.ramka.y2))];
+      g.yacheyki.forEach((z, j) => {
+        if (j <= i || !y.vynoska || !z.vynoska) return;
+        const [a, b, c, d] = ot(y);
+        const [p, q, u, v] = ot(z);
+        const cr = (x1, y1, x2, y2, x3, y3) => (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+        const peres = cr(a, b, c, d, p, q) * cr(a, b, c, d, u, v) < 0 && cr(p, q, u, v, a, b) * cr(p, q, u, v, c, d) < 0;
+        ok(!peres, `${where}: выноски ${y.k} и ${z.k} пересекаются`);
+      });
+    });
+    for (const p of g.podpisi) {
+      texOk(p.tex, `${where}, подпись`);
+      ok(!K.naLiniiKruga(p.ramka, 2), `${where}: подпись ${p.tex} на окружности`);
+    }
+    /* Телефон: рисунок 360 px — карточка не мельче 34 px по высоте. */
+    ok((360 / g.vb.w) * OK.KARTA.h >= 34, `${where}: карточка на телефоне мельче 34 px`);
+  }
+}
+/* Справка «Как найти точку для большого угла». */
+OKT.PRAVILA_OK14.forEach((pr, i) => {
+  const where = `справка окружности, правило ${i + 1}`;
+  strokaOk(pr.title, where);
+  strokaOk(pr.text, where);
+  ok(pr.primery.length >= 3, `${where}: меньше трёх примеров`);
+  for (const t of pr.primery) {
+    strokaOk(t, where);
+    const formuly = t.split('$').filter((_, j) => j % 2 === 1);
+    let ugol = null;
+    for (const f of formuly) if (f.includes('=')) {
+      const v = cepochkaVerna(f, where);
+      if (ugol === null && f.includes('\\pi')) ugol = v;
+    }
+    const m = /точка \$([^$]*)\$/.exec(t);
+    if (m && ugol !== null) ok(odnaTochka(chisloTex(m[1]), ugol), `${where}: «точка ${m[1]}» не та — ${t}`);
+  }
+});
+for (const t of ['3005\\pi', '179\\pi']) {
+  ok(OKT.PRAVILA_OK14.some((pr) => pr.primery.some((x) => x.includes(t))), `справка окружности: нет примера ${t}`);
+}
+
 if (problems.length) {
   console.error(`check-zadanie14: ${problems.length} проблем из ${checks} проверок:`);
   for (const p of problems.slice(0, 200)) console.error(`  — ${p}`);

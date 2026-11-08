@@ -42,14 +42,27 @@ function Sloy({
  * prefers-reduced-motion анимации нет. Подложка — «Стеклянная сцена»,
  * в тёмной схеме за котиком тёплое свечение.
  */
+/** Котик под облаком — два слоя картинки (запасная для 3D-котика). */
+export function KotikKartinka14() {
+  return (
+    <>
+      <Sloy imya="oblako" w={480} h={166} className="z14-kotik__oblako" />
+      <Sloy imya="kot" w={480} h={350} className="z14-kotik__kot" />
+    </>
+  );
+}
+
 export function KotikBanner14({
   href,
   knopka = 'Выучить макеты →',
   className,
+  kartinka,
 }: {
   href: string;
   knopka?: string;
   className?: string;
+  /** Вместо картинки — своё (в тренажёре окружности — 3D-котик). */
+  kartinka?: React.ReactNode;
 }) {
   return (
     <aside
@@ -66,9 +79,32 @@ export function KotikBanner14({
         </a>
       </div>
       <div className="z14-kotik__kartinka" aria-hidden="true">
-        <Sloy imya="oblako" w={480} h={166} className="z14-kotik__oblako" />
-        <Sloy imya="kot" w={480} h={350} className="z14-kotik__kot" />
+        {kartinka ?? <KotikKartinka14 />}
       </div>
+    </aside>
+  );
+}
+
+/**
+ * Свёрнутый баннер: узкая полоска с котиком и той же кнопкой. Так
+ * баннер выглядит в тренажёре окружности после первой проверки.
+ */
+export function KotikPolosa14({
+  href,
+  knopka = 'Выучить макеты →',
+}: {
+  href: string;
+  knopka?: string;
+}) {
+  return (
+    <aside className="z14-kotik-polosa" aria-label="Зачем учить макеты окружности">
+      <span className="z14-kotik-polosa__kot" aria-hidden="true">
+        <Sloy imya="kot" w={480} h={350} className="z14-kotik-polosa__kartinka" />
+      </span>
+      <p className="z14-kotik-polosa__tekst">Котик грустит, когда не знаешь макеты окружности.</p>
+      <a className="btn btn--secondary btn--sm" href={href}>
+        {knopka}
+      </a>
     </aside>
   );
 }

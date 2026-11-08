@@ -1,5 +1,6 @@
 export {
   TrainerSessionHost,
+  type BarExtraApi,
   type ConfiguratorApi,
   type DescribedTask,
   type ScreenContext,

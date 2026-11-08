@@ -21,6 +21,7 @@ export const ZADANIE14 = {
   tabs: [
     { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
     { id: 'teoriya', label: 'Теория', tail: 'teoriya/', icon: 'book' },
+    { id: 'okruzhnost', label: 'Окружность', tail: 'okruzhnost/trenazher/', icon: 'compass' },
     { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
     { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
     { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
