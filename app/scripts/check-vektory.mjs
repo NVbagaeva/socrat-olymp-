@@ -51,6 +51,7 @@ const {
   checkStsenyITeksty,
   checkListy,
   checkStrelki,
+  checkOZadanii2,
 } = requireSrc('lib/vektory/selftest');
 
 const renderer = checkRenderer(Math.min(seeds, 300));
@@ -82,6 +83,11 @@ console.log(
   `сцены теории и тексты: ${stseny.prototypes} сцен, ${stseny.generated} текстов, проблем ${stseny.problems.length}`,
 );
 
+const oZadanii = checkOZadanii2(typeset);
+console.log(
+  `о задании: ${oZadanii.prototypes} разборов, ${oZadanii.generated} текстов, проблем ${oZadanii.problems.length}`,
+);
+
 const listy = checkListy();
 console.log(
   `листы для печати: ${listy.generated} задач на листах и в банке, проблем ${listy.problems.length}`,
@@ -93,6 +99,7 @@ console.log(
 );
 
 const problems = [
+  ...oZadanii.problems,
   ...strelki.problems,
   ...listy.problems,
   ...renderer.problems,

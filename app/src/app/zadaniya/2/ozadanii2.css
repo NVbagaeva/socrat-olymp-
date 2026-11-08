@@ -1,0 +1,1125 @@
+/* Задание №2, вкладка «О задании» — направление «Стеклянная сцена».
+
+   Только токены сайта: стекло (--glass-*), глянец (--gloss*), ауры
+   (--aura-*), палитра синий / оранжевый / терракотовый. Отступы — по
+   шкале 4/8 (--space-*). Рисунки внутри SVG красит движок lib/vektory.
+
+   Раскладка — от телефона: одна колонка; карточки типов перестраиваются
+   по ширине самого блока (container queries), а не окна, — у вкладки
+   бывает боковое меню, и ширина колонки от окна не следует. */
+
+.z2o {
+  --z2o-r-panel: 24px;
+  --z2o-r-card: 20px;
+  --z2o-section: var(--space-12);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: var(--z2o-section);
+  padding-bottom: var(--space-8);
+}
+@media (min-width: 768px) {
+  .z2o {
+    --z2o-r-panel: 28px;
+    --z2o-section: var(--space-16);
+  }
+}
+
+/* Свечения позади стекла: без цвета позади blur нечего размывать.
+   Отдельный слой во всю вкладку — фон из двух радиальных пятен. Слой
+   ничего не обрезает, поэтому обводка фокуса у карточек видна целиком
+   и горизонтальной прокрутки нет. */
+.z2o-aury {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(420px 420px at 100% 0, var(--aura-blue), transparent 70%),
+    radial-gradient(360px 360px at 0 42%, var(--aura-orange), transparent 70%);
+  opacity: 0.5;
+}
+
+/* ── Общие куски ──────────────────────────────────────────────── */
+
+.z2o-glass {
+  background: var(--glass-tint-blue);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--z2o-r-panel);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+
+.z2o-head {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  max-width: 64ch;
+}
+@media (min-width: 768px) {
+  .z2o-head {
+    margin-bottom: var(--space-8);
+  }
+}
+.z2o-h2 {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: clamp(1.625rem, 1.2rem + 1.4vw, 2.25rem);
+  line-height: 1.12;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.z2o-lead {
+  margin: 0;
+  color: var(--color-text-lead);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+}
+.z2o-eyebrow {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Кнопки вкладки: глянцевая «таблетка», стекло, текстовая. */
+.z2-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+.z2-btn svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z2-btn:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.z2-btn--primary {
+  color: var(--color-text-inverse);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+}
+.z2-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--gloss-shadow-soft-hover);
+}
+.z2-btn--secondary {
+  color: var(--blue-700);
+  background: rgb(255 255 255 / 0.78);
+  border-color: var(--color-border-info);
+  box-shadow: var(--glass-hi);
+}
+.z2-btn--secondary:hover {
+  background: var(--white);
+  border-color: var(--color-accent-soft);
+}
+.z2-btn--ghost {
+  color: var(--blue-700);
+  background: transparent;
+}
+.z2-btn--ghost:hover {
+  background: rgb(31 95 208 / 0.08);
+}
+
+/* ── Паспорт ──────────────────────────────────────────────────── */
+
+.z2o-pasport {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-5);
+}
+@media (min-width: 768px) {
+  .z2o-pasport {
+    padding: var(--space-8);
+  }
+}
+@media (min-width: 1100px) {
+  .z2o-pasport {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: var(--space-8);
+  }
+}
+.z2o-pasport__main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (min-width: 768px) {
+  .z2o-pasport__main {
+    gap: var(--space-6);
+  }
+}
+.z2o-pasport__no {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  color: var(--color-text-inverse);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow);
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+@media (min-width: 768px) {
+  .z2o-pasport__no {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    font-size: 2.25rem;
+  }
+}
+.z2o-pasport__text {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z2o-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z2o-chip {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: rgb(31 95 208 / 0.08);
+  color: var(--blue-700);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+}
+.z2o-chip--warm {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+  box-shadow: inset 0 0 0 1px var(--color-border-accent);
+}
+.z2o-pasport__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: clamp(1.375rem, 1.1rem + 1vw, 1.875rem);
+  line-height: 1.15;
+  font-weight: 650;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+}
+.z2o-pasport__desc {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--color-text-lead);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+/* Формат ответа: отдельная колонка, отбитая тонкой линией. */
+.z2o-pasport__otvet {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding-top: var(--space-5);
+  border-top: 1px solid rgb(31 95 208 / 0.12);
+}
+@media (min-width: 1100px) {
+  .z2o-pasport__otvet {
+    padding: 0 0 0 var(--space-8);
+    border-top: 0;
+    border-left: 1px solid rgb(31 95 208 / 0.12);
+  }
+}
+.z2o-pasport__otvet-text {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  font-weight: 600;
+}
+.z2o-pasport__blanks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-2) 0;
+}
+/* Клетки бланка ЕГЭ: один символ — одна клетка. */
+.z2o-blank {
+  display: inline-flex;
+  gap: 3px;
+}
+.z2o-blank__cell {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 32px;
+  border: 1.5px solid var(--color-accent-soft);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--color-text-brand);
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 768px) {
+  .z2o-blank__cell {
+    width: 28px;
+    height: 36px;
+  }
+}
+.z2o-pasport__note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* ── Что нужно уметь ──────────────────────────────────────────── */
+
+.z2o-umet__grid {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+@media (min-width: 1100px) {
+  .z2o-umet__grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: var(--space-10);
+  }
+  /* Рисунок стоит, пока читается цепочка. */
+  .z2o-umet__fig {
+    position: sticky;
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-6));
+  }
+}
+.z2o-umet__fig {
+  margin: 0;
+  padding: var(--space-3);
+}
+@media (min-width: 768px) {
+  .z2o-umet__fig {
+    padding: var(--space-4);
+  }
+}
+.z2o-umet__pic {
+  border-radius: var(--space-4);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  overflow: hidden;
+}
+.z2o-umet__caption {
+  margin: var(--space-3) var(--space-2) var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* Цепочка навыков: номер в кружке, линия-связка между шагами. */
+.z2o-chain {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z2o-chain__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--space-4);
+}
+.z2o-chain__item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 44px;
+  bottom: calc(var(--space-4) * -1 + 4px);
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(var(--blue-200), rgb(215 229 250 / 0.3));
+}
+.z2o-chain__no {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-accent-soft),
+    var(--glass-shadow);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.z2o-chain__body {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-top: var(--space-2);
+}
+.z2o-chain__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.0625rem;
+  line-height: 1.35;
+  font-weight: 650;
+}
+.z2o-chain__formula {
+  color: var(--color-text-lead);
+}
+.z2o-chain__value {
+  justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-6);
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: rgb(255 255 255 / 0.72);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-info),
+    var(--glass-hi);
+  color: var(--color-text);
+}
+
+/* ── Типы задач ───────────────────────────────────────────────── */
+
+.z2o-tipy {
+  container-type: inline-size;
+}
+.z2t-gruppa + .z2t-gruppa {
+  margin-top: var(--space-10);
+}
+.z2t-gruppa__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+.z2t-gruppa__code {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--blue-700);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.z2t-gruppa__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  line-height: 1.25;
+  font-weight: 650;
+}
+.z2t-gruppa__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+.z2t-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-flow: row dense;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Карточка: стекло, миниатюра движка, номер, название, «что найти». */
+.z2t-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--z2o-r-card);
+  background: var(--glass-tint-blue);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.25s ease;
+}
+.z2t-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.z2t-card.is-open {
+  transform: none;
+  box-shadow:
+    0 0 0 2px var(--color-primary),
+    var(--glass-hi),
+    var(--glass-shadow-hover);
+}
+.z2t-card__btn {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.z2t-card__btn:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.z2t-card__pic {
+  display: block;
+  height: 192px;
+  padding: var(--space-2);
+  border-radius: var(--radius-xl);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  overflow: hidden;
+}
+/* Рисунок вписан в рамку целиком: обёртка растянута по рамке, SVG
+   масштабируется по viewBox с сохранением пропорций. */
+.z2t-card__pic {
+  position: relative;
+}
+.z2t-card__pic .vp-wrap {
+  position: absolute;
+  inset: var(--space-2);
+}
+/* Движок пишет в SVG style="height:auto" (рисунок по ширине колонки);
+   в рамке миниатюры высота задана рамкой — перекрываем только здесь. */
+.z2t-card__pic .vp-wrap .vp {
+  width: 100%;
+  height: 100% !important;
+}
+.z2t-card__text {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--space-1);
+  padding: 0 var(--space-2) var(--space-1);
+  min-width: 0;
+}
+.z2t-card__no {
+  color: var(--color-accent-text);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+.z2t-card__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  font-weight: 650;
+  text-wrap: balance;
+}
+.z2t-card__nayti {
+  color: var(--color-text-lead);
+  font-size: var(--fs-caption);
+  line-height: 1.45;
+}
+.z2t-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.z2t-card__protos {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+}
+.z2t-card__go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.z2t-card__go svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z2t-card:hover .z2t-card__go {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.z2t-card.is-open .z2t-card__go {
+  transform: rotate(180deg);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Планшет: карточки горизонтальные, одна колонка — ряды по три не
+   разваливаются на «два плюс сирота». */
+@container (min-width: 560px) {
+  .z2t-card {
+    grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+    grid-template-rows: none;
+    align-items: stretch;
+  }
+  .z2t-card__pic {
+    height: 184px;
+  }
+  .z2t-card__text {
+    padding: var(--space-2) var(--space-2) var(--space-1) 0;
+  }
+}
+
+/* Широкая колонка: три в ряд; базовый навык и косинус — широкие. */
+@container (min-width: 900px) {
+  .z2t-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+  .z2t-card {
+    grid-template-columns: none;
+    grid-template-rows: auto 1fr;
+  }
+  .z2t-card__pic {
+    height: 200px;
+  }
+  .z2t-card__text {
+    padding: 0 var(--space-2) var(--space-1);
+  }
+  .z2t-card--wide {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    grid-template-rows: none;
+    gap: var(--space-6);
+  }
+  .z2t-card--wide .z2t-card__pic {
+    height: 224px;
+  }
+  .z2t-card--wide .z2t-card__text {
+    align-content: center;
+    grid-template-rows: none;
+    padding: var(--space-4) var(--space-4) var(--space-4) 0;
+  }
+  .z2t-card--wide .z2t-card__title {
+    font-size: var(--fs-h4);
+  }
+  .z2t-card--wide .z2t-card__nayti {
+    font-size: var(--fs-body);
+  }
+}
+
+/* ── Разбор под карточкой ─────────────────────────────────────── */
+
+.z2t-panel {
+  grid-column: 1 / -1;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z2t-panel[hidden] {
+  display: none;
+}
+.z2t-panel:not([hidden]) {
+  animation: z2t-open 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes z2t-open {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+.z2t-panel__back {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
+.z2r {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--z2o-r-panel);
+  background: rgb(255 255 255 / 0.86);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+@container (min-width: 560px) {
+  .z2r {
+    padding: var(--space-6);
+  }
+}
+@container (min-width: 900px) {
+  .z2r {
+    padding: var(--space-8);
+    gap: var(--space-6);
+  }
+}
+.z2r__head {
+  display: grid;
+  gap: var(--space-1);
+}
+.z2r__title {
+  margin: 0;
+  color: var(--color-text-brand);
+  font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.5rem);
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+}
+.z2r__label {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.z2r__uslovie {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  background: var(--blue-50);
+}
+.z2r__uslovie-text {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-lg);
+  line-height: 1.6;
+}
+.z2r__grid {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+@container (min-width: 900px) {
+  .z2r__grid {
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+  .z2r__fig {
+    position: sticky;
+    top: calc(var(--topic-sticky-top, 0px) + var(--space-6));
+  }
+}
+.z2r__fig {
+  margin: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-xl);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+@container (min-width: 560px) {
+  .z2r__fig {
+    max-width: 480px;
+  }
+}
+.z2r__reshenie {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z2r__steps {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z2r-step {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.z2r-step__no {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--color-text-inverse);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.z2r-step__body {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-top: 3px;
+}
+.z2r-step__label {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+  font-weight: 650;
+}
+.z2r-step__p {
+  margin: 0;
+  color: var(--color-text-lead);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+.z2r-step__lines {
+  justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-6);
+  row-gap: var(--space-1);
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+/* Проверка — тёплая плашка: второй акцент сайта, а не новый цвет. */
+.z2r-step.is-check {
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm);
+}
+.z2r-step.is-check .z2r-step__no {
+  color: var(--color-text-inverse);
+  background: var(--gloss-warm);
+  box-shadow: var(--gloss-warm-shadow-soft);
+}
+.z2r-step.is-check .z2r-step__label {
+  color: var(--color-accent-text);
+}
+.z2r__otvet {
+  justify-self: start;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  box-shadow: inset 0 0 0 1px var(--color-border-info);
+  color: var(--color-text-brand);
+  font-size: 1.0625rem;
+  font-weight: 650;
+}
+.z2r__foot {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+@container (min-width: 560px) {
+  .z2r__foot {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Типичные ошибки ──────────────────────────────────────────── */
+
+.z2o-oshibki {
+  container-type: inline-size;
+}
+.z2o-oshibki__list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@container (min-width: 720px) {
+  .z2o-oshibki__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+}
+.z2o-oshibka {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--z2o-r-card);
+  background: var(--glass-tint-warm);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow-warm);
+}
+.z2o-oshibka__title {
+  margin: 0;
+  color: var(--color-accent-text);
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 650;
+}
+.z2o-oshibka__text {
+  margin: 0;
+  color: var(--color-text-lead);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+.z2o-oshibka__primer {
+  align-self: end;
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: rgb(255 255 255 / 0.8);
+  box-shadow: inset 0 0 0 1px rgb(224 122 47 / 0.14);
+}
+.z2o-oshibka__context {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.z2o-sravn {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+/* На узкой карточке метка стоит над формулой: колонка меток съедала
+   бы ширину, и выкладка рвалась бы внутри скобок. */
+.z2o-sravn__row {
+  display: grid;
+  gap: var(--space-1);
+}
+@container (min-width: 420px) {
+  .z2o-sravn__row {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+}
+.z2o-sravn__row dt {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.z2o-sravn__row dd {
+  margin: 0;
+  min-width: 0;
+}
+.z2o-sravn__row--ne dt {
+  color: var(--color-accent-text);
+}
+.z2o-sravn__row--ne dd {
+  color: var(--color-text-secondary);
+  text-decoration: line-through;
+  text-decoration-color: rgb(224 122 47 / 0.7);
+  text-decoration-thickness: 1.5px;
+}
+.z2o-sravn__row--da dt {
+  color: var(--blue-700);
+}
+.z2o-sravn__row--da dd {
+  color: var(--color-text);
+}
+
+/* ── Что дальше ───────────────────────────────────────────────── */
+
+.z2o-dalshe__title {
+  margin-bottom: var(--space-6);
+}
+.z2o-dalshe__grid {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 640px) {
+  .z2o-dalshe__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+}
+.z2o-dver {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-height: 168px;
+  padding: var(--space-6);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--z2o-r-panel);
+  color: inherit;
+  text-decoration: none;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.25s ease;
+}
+.z2o-dver--blue {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.18), transparent 60%),
+    var(--glass-bg-strong);
+}
+.z2o-dver--warm {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.24), transparent 60%),
+    var(--glass-bg-strong);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow-warm);
+}
+.z2o-dver:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.z2o-dver:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.z2o-dver__title {
+  color: var(--color-text-brand);
+  font-size: var(--fs-h4);
+  line-height: 1.25;
+  font-weight: 650;
+}
+.z2o-dver__text {
+  color: var(--color-text-lead);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+.z2o-dver__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  color: var(--blue-700);
+  font-weight: 650;
+}
+.z2o-dver--warm .z2o-dver__action {
+  color: var(--color-accent-text);
+}
+.z2o-dver__action svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.25s ease;
+}
+.z2o-dver:hover .z2o-dver__action svg {
+  transform: translateX(4px);
+}
+
+/* ── Появление при прокрутке (Poyavlenie.tsx) ─────────────────── */
+
+/* Прячет только скрипт и только то, что ниже экрана: без скрипта всё
+   видно. Анимация, а не transition: у карточек свой transform при
+   наведении, и задержка лесенки не должна тормозить отклик на мышь. */
+.z2o.is-reveal [data-reveal].is-hidden {
+  opacity: 0;
+}
+.z2o.is-reveal [data-reveal].is-in {
+  animation: z2o-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes z2o-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z2o *,
+  .z2o *::before,
+  .z2o *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .z2t-card:hover,
+  .z2o-dver:hover,
+  .z2-btn--primary:hover {
+    transform: none;
+  }
+}
+
+/* Кто попросил меньше прозрачности — непрозрачные поверхности. */
+@media (prefers-reduced-transparency: reduce) {
+  .z2o-glass,
+  .z2t-card,
+  .z2o-oshibka,
+  .z2o-dver,
+  .z2r {
+    background: var(--white);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Выкладки вкладки: переносятся по знакам, а не уходят за край. */
+.z2o-math {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.z2o-math .katex,
+.z2o-math .katex .katex-html {
+  white-space: normal;
+}
+.z2o-math .katex {
+  font-size: 1.12em;
+  line-height: 1.8;
+}
