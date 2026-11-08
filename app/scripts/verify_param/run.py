@@ -7,7 +7,7 @@
 
 dump.mjs выгружает из контента раздела все задачи с ответами:
 {id: {"otvet": TeX, "title": …}}. Для каждой задачи модуль метода
-(m01.py … m06.py, …) знает условие; ответ берётся из контента — так проверяется
+(m01.py … m14.py) знает условие; ответ берётся из контента — так проверяется
 ровно то, что видит ученик. Задача без проверки или проверка без
 задачи — ошибка. Итог — таблица «задача — ответ — проверка».
 
@@ -29,8 +29,16 @@ import m03  # noqa: E402
 import m04  # noqa: E402
 import m05  # noqa: E402
 import m06  # noqa: E402
+import m07  # noqa: E402
+import m08  # noqa: E402
+import m09  # noqa: E402
+import m10  # noqa: E402
+import m11  # noqa: E402
+import m12  # noqa: E402
+import m13  # noqa: E402
+import m14  # noqa: E402
 
-MODULI = [m01, m02, m03, m04, m05, m06]
+MODULI = [m01, m02, m03, m04, m05, m06, m07, m08, m09, m10, m11, m12, m13, m14]
 
 
 def main():

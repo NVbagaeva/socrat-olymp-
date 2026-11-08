@@ -42,7 +42,7 @@ export default async function Podgotovka8BlockPage({ params }: { params: Params 
           title={block.nazvanie}
           tasks={block.zadachi}
           formulyHtml={block.formulyHtml}
-          listHref={`${base}/podgotovka/`}
+          listHref={`${base}/${OPORNYE.tail}`}
         />
       </ErrorBoundary>
     </Podgotovka8Shell>

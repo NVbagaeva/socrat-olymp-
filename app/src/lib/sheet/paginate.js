@@ -40,6 +40,20 @@
 (function () {
   'use strict';
 
+  /* ── Печать в Safari ────────────────────────────────────────────
+     Safari на Mac, iPhone и iPad (у всех браузеров iOS тот же движок
+     WebKit) печатает со своими полями и своей бумагой. Для него у
+     печатного стиля свой режим (sheet.css, data-sheet-webkit): лист
+     уменьшается под печатную область целиком, и пустых страниц после
+     каждой страницы листа нет. */
+  function naWebKit() {
+    var ua = navigator.userAgent || '';
+    var ios = /iPad|iPhone|iPod/.test(ua) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return ios || (/AppleWebKit/.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Android/.test(ua));
+  }
+  if (naWebKit()) { document.documentElement.setAttribute('data-sheet-webkit', ''); }
+
   function el(html) {
     var box = document.createElement('div');
     box.innerHTML = html;

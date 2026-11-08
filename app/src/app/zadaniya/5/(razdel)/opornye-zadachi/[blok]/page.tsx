@@ -38,7 +38,7 @@ export default async function Podgotovka5BlokPage({ params }: { params: Params }
       active={found.id}
       bloki={bloki}
     >
-      <PodgotovkaBlok zadanie={5} blok={found} listHref="/zadaniya/5/podgotovka/" />
+      <PodgotovkaBlok zadanie={5} blok={found} listHref={`/zadaniya/5/${OPORNYE.tail}`} />
     </PodgotovkaShell>
   );
 }

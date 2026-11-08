@@ -14,7 +14,7 @@ import type { ZadachaBanka } from '@/lib/generator/obshchiy/bank';
 import type { GenConfig } from '@/lib/generator/obshchiy/types';
 import type { ProtoInfo10 } from '../../components/tasks/zadanie10/Trenazher10';
 import { typeset } from '../tex';
-import { NA_TIP_MAX, VARIANTOV_MAX } from './sborka';
+import { VARIANTOV_MAX } from './sborka';
 
 const VIDY = GEN_UI.vidyRaboty as Record<string, string>;
 
@@ -51,7 +51,7 @@ export function config10(
     levels: [],
     sources: GENERATOR10_SOURCES,
     presets: GENERATOR10_PRESETS,
-    limits: { maxPerTopic: 2 * NA_TIP_MAX, maxTasks: 30, variantsMax: VARIANTOV_MAX },
+    limits: { variantsMax: VARIANTOV_MAX },
     extras: {
       kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })),
       flag: GENERATOR10_TEXTS.flag,

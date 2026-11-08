@@ -19,14 +19,19 @@ function zagolovok(z: Opisanie19): string {
   if (z.vid === 'okruzhnost') return ZHIVOY_19.titleOkruzhnost;
   if (z.vid === 'gorizontal') return ZHIVOY_19.titleGorizontal;
   if (z.vid === 'grafik') return ZHIVOY_19.titleGrafik;
+  if (z.vid === 'parametr') return ZHIVOY_19.titleParametr;
   return ZHIVOY_19.title;
 }
 
-/** Строка под рисунком: множество решений по x (метод областей) или число решений — и вывод, если он есть. */
+/** Строка под рисунком: множество решений по x (метод областей) или число решений — и вывод, если он есть; у метода 7 — только вывод. */
 function itogHtml(z: Opisanie19, a: number): string {
   if (z.mnozhestvo !== undefined) {
     const mn = katex.renderToString(mnozhestvoTex(z.mnozhestvo(a)), { throwOnError: true });
     return z.itog === undefined ? mn : `${mn}; ${typeset(z.itog(a))}`;
+  }
+  /* Метод 7: спрашивают про свойство «при всех x», а не про число решений. */
+  if (z.resheniy === undefined && z.itog !== undefined) {
+    return typeset(z.itog(a));
   }
   const n = ZHIVOY_19.resheniy(z.resheniy?.(a) ?? 0);
   return z.itog === undefined ? n : `${n}; ${typeset(z.itog(a))}`;

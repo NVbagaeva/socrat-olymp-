@@ -86,7 +86,7 @@ export function config18(
     ],
     sources: GENERATOR18_SOURCES,
     presets: GENERATOR18_PRESETS,
-    limits: { maxPerTopic: 6, maxTasks: 12, variantsMax: 6 },
+    limits: { variantsMax: 6 },
     extras: {
       kinds: Object.entries(SHEET_GEN_18.vidy).map(([id, title]) => ({ id, title })),
       theory: false,

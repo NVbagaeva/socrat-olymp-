@@ -61,6 +61,7 @@ import {
   type Kit,
   type SheetWhich,
 } from '@/lib/komplekt';
+import { ZADACH_NA_LIST_MAX } from '@/lib/generator/obshchiy/klyuchi';
 import { adresListaUchenika, qrSvg } from '@/lib/generator/qr';
 import { withSpace } from '@/lib/sheet/space.js';
 import { SpaceOption } from '@/components/tasks/space/SpaceOption';
@@ -104,6 +105,19 @@ function Stepper({
   label: string;
   onChange: (n: number) => void;
 }) {
+  /* Число можно вписать: десятки задач кнопкой «+» не набирают. Черновик
+     живёт, пока поле в фокусе; вписанное применяется по Enter и при уходе
+     из поля, лишнее приводится к границам. */
+  const [draft, setDraft] = useState<string | null>(null);
+  const commit = () => {
+    if (draft === null) return;
+    const n = Math.floor(Number(draft));
+    setDraft(null);
+    if (draft.trim() !== '' && Number.isFinite(n)) {
+      const v = Math.max(min, Math.min(max, n));
+      if (v !== value) onChange(v);
+    }
+  };
   return (
     <span className="gen-step">
       <button
@@ -114,7 +128,23 @@ function Stepper({
       >
         −
       </button>
-      <output aria-label={label}>{value}</output>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={min}
+        max={max}
+        step={1}
+        aria-label={label}
+        value={draft ?? String(value)}
+        onFocus={(e) => e.currentTarget.select()}
+        onChange={(e) => setDraft(e.currentTarget.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') setDraft(null);
+        }}
+        style={{ width: `${Math.max(2, String(draft ?? value).length) + 1.2}ch` }}
+      />
       <button
         type="button"
         aria-label={`${label}: больше`}
@@ -955,7 +985,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                       <Stepper
                         value={n}
                         min={0}
-                        max={config.limits.maxPerTopic}
+                        max={ZADACH_NA_LIST_MAX}
                         label={t.title}
                         onChange={(v) => setTopic(t, v)}
                       />
@@ -989,7 +1019,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                             <Stepper
                               value={k}
                               min={0}
-                              max={config.limits.maxPerTopic}
+                              max={ZADACH_NA_LIST_MAX}
                               label={s.title}
                               onChange={(v) => {
                                 if (allowed) changePlan(setSubtypeCount(config, st.plan, s.id, v));
@@ -1003,7 +1033,7 @@ export function Generator({ config, engine, icons }: GeneratorProps) {
                 </div>
               );
             })}
-            <p className="gen-hint gen-sostav__limit">{GEN_UI.limit(config.limits.maxPerTopic)}</p>
+            <p className="gen-hint gen-sostav__limit">{GEN_UI.limit}</p>
           </section>
           {dopControls === null ? null : (
             <section className="gen-card gen-dop" aria-label={GEN_UI.dopolnitelno}>

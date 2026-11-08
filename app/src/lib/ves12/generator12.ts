@@ -84,10 +84,7 @@ export function config12(slot: string, podtema?: { tip: string; title: string })
             podtema.tip,
             (topics[0]?.subtypes ?? []).map((s) => s.id),
           ),
-    limits:
-      podtema === undefined
-        ? { maxPerTopic: 6, maxTasks: 24, variantsMax: 4 }
-        : { maxPerTopic: 20, maxTasks: 20, variantsMax: 4 },
+    limits: { variantsMax: 4 },
     extras: { kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })) },
   };
 }

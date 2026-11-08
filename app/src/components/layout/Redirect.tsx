@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/ui';
-import { AppShell } from './AppShell';
+import { RedirectNow } from './RedirectNow';
 
 export interface RedirectProps {
   /** Новый адрес страницы. */
@@ -13,45 +12,63 @@ export interface RedirectProps {
 /**
  * Прежний адрес страницы: уводит на новый.
  *
- * Сайт собирается статическим экспортом, сервера у него нет, и
- * настоящий 301 отдавать некому. Перенос делает сама страница:
- * `<meta http-equiv="refresh">` уводит браузер сразу, а видимая
- * кнопка остаётся для тех, у кого обновление не сработало. В поиске
- * такая страница не нужна — отсюда `REDIRECT_METADATA`.
+ * Главный перенос — серверный 301 в public/.htaccess: до этой
+ * страницы браузер обычно не доходит. Она — страховка на случай,
+ * когда правила сервера не сработали, и уводит сразу, ничего не
+ * показывая:
  *
- * Появляется только там, откуда страница переехала: новых адресов
- * этим компонентом не заводят.
+ * - `<meta http-equiv="refresh" content="0">` и `<link rel="canonical">`
+ *   React поднимает в `<head>`;
+ * - встроенный скрипт делает `location.replace()` (без записи в
+ *   историю, «Назад» не возвращает на заглушку), сохраняя ?… и #…;
+ * - при переходе внутри сайта (без перезагрузки) встроенный скрипт не
+ *   выполняется — его делает `RedirectNow`;
+ * - текст «Страница переехала» виден только без JavaScript (`<noscript>`).
+ *
+ * Внутренние ссылки сайта на такие адреса не ведут: их ловит
+ * scripts/check-links.mjs. Новых адресов этим компонентом не заводят.
  */
 export const REDIRECT_METADATA: Metadata = { robots: { index: false, follow: true } };
+
+/** Скрипт переноса: новый адрес + прежние ?… и #…, если у нового своих нет. */
+function redirectScript(href: string): string {
+  const target = JSON.stringify(href).replace(/</g, '\\u003c');
+  return (
+    `(function(){var u=${target},l=window.location;` +
+    `if(u.indexOf('?')<0&&u.indexOf('#')<0)u+=l.search;` +
+    `if(u.indexOf('#')<0)u+=l.hash;` +
+    `l.replace(u);})();`
+  );
+}
 
 export function Redirect({ href, title }: RedirectProps) {
   return (
     <>
       <meta httpEquiv="refresh" content={`0; url=${href}`} />
-      <EmptyState
-        title="Страница переехала"
-        description="Этот адрес больше не используется. Сейчас откроется новый."
-        action={
-          <Link className="btn btn--primary" href={href}>
-            {title}
-          </Link>
-        }
-      />
+      <link rel="canonical" href={href} />
+      <script dangerouslySetInnerHTML={{ __html: redirectScript(href) }} />
+      <RedirectNow href={href} />
+      <noscript>
+        <main className="app-main">
+          <EmptyState
+            title="Страница переехала"
+            description="Этот адрес больше не используется."
+            action={
+              <a className="btn btn--primary" href={href}>
+                {title}
+              </a>
+            }
+          />
+        </main>
+      </noscript>
     </>
   );
 }
 
 /**
- * То же самое отдельной страницей — с оболочкой кабинета. Нужна там,
- * где прежний адрес лежит вне оболочки раздела: у заданий №4, №5, №8
- * и у страниц темы.
+ * То же самое отдельной страницей. Оболочку кабинета (шапку, меню) не
+ * рисуем: страница живёт долю секунды, и мелькать на ней нечему.
  */
-export function RedirectPage({ href, title }: RedirectProps) {
-  return (
-    <AppShell active="tasks">
-      <main className="app-main">
-        <Redirect href={href} title={title} />
-      </main>
-    </AppShell>
-  );
+export function RedirectPage(props: RedirectProps) {
+  return <Redirect {...props} />;
 }

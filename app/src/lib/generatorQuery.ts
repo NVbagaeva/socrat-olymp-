@@ -13,6 +13,7 @@ import {
   slotySostava,
   sostavIzSlotov,
   sostavStroka,
+  ZADACH_NA_LIST_MAX,
 } from './generator/obshchiy/klyuchi';
 
 export interface SheetParams {
@@ -168,7 +169,7 @@ function parseKlyuchi(query: URLSearchParams): SheetParams {
   const zameny: Record<string, number> = {};
   for (const item of (query.get('z') ?? '').split(',')) {
     const [pos = '', k = ''] = item.split(':');
-    if (new RegExp(`^\\d+\\.${NABOR.source}_\\d{1,2}$`).test(pos) && Number(k) > 0) {
+    if (new RegExp(`^\\d+\\.${NABOR.source}_\\d{1,3}$`).test(pos) && Number(k) > 0) {
       zameny[pos] = Math.min(50, Number(k));
     }
   }
@@ -208,7 +209,13 @@ function perFrom(raw: string | null): { per?: Record<string, number> } {
   raw.split(',').forEach((pair) => {
     const [id, n] = pair.split(':');
     const count = Number(n);
-    if (id !== undefined && id !== '' && Number.isInteger(count) && count > 0 && count <= 20) {
+    if (
+      id !== undefined &&
+      id !== '' &&
+      Number.isInteger(count) &&
+      count > 0 &&
+      count <= ZADACH_NA_LIST_MAX
+    ) {
       per[id] = count;
     }
   });

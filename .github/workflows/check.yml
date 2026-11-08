@@ -575,6 +575,13 @@ jobs:
         working-directory: app
         run: pnpm test:trailing-slash
 
+      # Внутренние ссылки не ведут на страницы-заглушки старых адресов
+      # («Страница переехала») и в 404; у каждой заглушки есть 301 в
+      # public/.htaccess (scripts/check-links.mjs).
+      - name: Проверить ссылки (заглушки и 404)
+        working-directory: app
+        run: pnpm test:links
+
       # То же на собранных страницах: формулы, склеенные из кусков.
       - name: Проверить, что математика набрана KaTeX (сайт)
         working-directory: app

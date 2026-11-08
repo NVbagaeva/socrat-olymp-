@@ -201,7 +201,7 @@ export function config14(): GenConfig {
     levels: [],
     sources: GENERATOR14_SOURCES,
     presets: GENERATOR14_PRESETS,
-    limits: { maxPerTopic: 12, maxTasks: 20, variantsMax: 4 },
+    limits: { variantsMax: 4 },
     extras: { kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })) },
   };
 }

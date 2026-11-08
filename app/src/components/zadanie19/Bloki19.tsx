@@ -1,6 +1,6 @@
 import { Tex } from '@/components/ui/Tex';
 import { BLOKI_19, RABOTA_19 } from '@/content/zadanie19';
-import type { Opornaya19, Razbor19, Zadacha19 } from '@/content/teoriya19/tipy';
+import type { Opornaya19, Podmetod19, Razbor19, Zadacha19 } from '@/content/teoriya19/tipy';
 import { Etapy19, Otvet19, Risunok, Uslovie19 } from './Chasti19';
 import { Rabota19, type Zadanie19View } from './Rabota19';
 
@@ -54,26 +54,44 @@ export function Opornaya({ o, no }: { o: Opornaya19; no: number }) {
 }
 
 /** Задания банка → вид для тренировочной работы: всё набрано на сервере. */
-export function zadaniyaView(zadachi: readonly Zadacha19[]): Zadanie19View[] {
-  return zadachi.map((z) => ({
-    id: z.id,
-    uroven: z.uroven,
-    otvet: z.otvet,
-    uslovie: <Uslovie19 text={z.uslovie} />,
-    podskazka: (
-      <p className="z16-card__text">
-        <Tex text={z.podskazka} />
-      </p>
-    ),
-    reshenie: (
-      <>
-        <Etapy19 etapy={z.reshenie} />
-        <Otvet19 tex={z.otvet} bukva={z.bukva} />
-      </>
-    ),
-  }));
+export function zadaniyaView(
+  zadachi: readonly Zadacha19[],
+  podmetody?: readonly Podmetod19[],
+): Zadanie19View[] {
+  return zadachi.map((z) => {
+    const pm = podmetody?.find((p) => p.id === z.podmetod);
+    return {
+      id: z.id,
+      uroven: z.uroven,
+      ...(pm === undefined ? {} : { tema: <Tex text={pm.title} /> }),
+      otvet: z.otvet,
+      uslovie: <Uslovie19 text={z.uslovie} />,
+      podskazka: (
+        <p className="z16-card__text">
+          <Tex text={z.podskazka} />
+        </p>
+      ),
+      reshenie: (
+        <>
+          <Etapy19 etapy={z.reshenie} />
+          <Otvet19 tex={z.otvet} bukva={z.bukva} />
+        </>
+      ),
+    };
+  });
 }
 
-export function Rabota({ zadachi }: { zadachi: readonly Zadacha19[] }) {
-  return <Rabota19 zadaniya={zadaniyaView(zadachi)} primer={<Tex text={RABOTA_19.primer} />} />;
+export function Rabota({
+  zadachi,
+  podmetody,
+}: {
+  zadachi: readonly Zadacha19[];
+  podmetody?: readonly Podmetod19[] | undefined;
+}) {
+  return (
+    <Rabota19
+      zadaniya={zadaniyaView(zadachi, podmetody)}
+      primer={<Tex text={RABOTA_19.primer} />}
+    />
+  );
 }

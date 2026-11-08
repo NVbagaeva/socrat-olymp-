@@ -5,6 +5,9 @@
  */
 
 import type { GenPreset, Level } from '@/lib/generator/obshchiy/types';
+import { plural } from '@/lib/plural';
+
+const skolkoZadach = (n: number) => `${n} ${plural(n, 'задача', 'задачи', 'задач')}`;
 
 export const GENERATOR11_TEXTS = {
   section: '№11 · Текстовые задачи',
@@ -15,8 +18,12 @@ export const GENERATOR11_TEXTS = {
     teacher: 'Багаева Н.В.',
   },
   razminkaNote: 'не входит в ЕГЭ',
-  /* Нехватка банка: часть задач «из банка» стала новыми того же типа. */
-  nehvatka: (n: number) => `В открытом банке не хватило задач: ${n} заменены новыми того же типа.`,
+  /* «Только открытый банк»: задач банка меньше, чем выбрано. Лист не
+     добирает их новыми — учитель видит, сколько есть. */
+  nehvatka: (x: { vBanke: number; vybrano: number; popalo: number; variants: number }) =>
+    `В банке по выбранным типам ${skolkoZadach(x.vBanke)}, на ${x.variants > 1 ? 'листы' : 'лист'} попало ${x.popalo}` +
+    ` из ${x.vybrano} выбранных${x.variants > 1 ? ` (${x.variants} ${plural(x.variants, 'вариант', 'варианта', 'вариантов')})` : ''}.` +
+    ' Задачи ФИПИ на листе не повторяются; чтобы добрать до нужного числа, выберите «Банк + новые».',
 };
 
 export const GENERATOR11_LEVELS: { level: Level; words: string }[] = [

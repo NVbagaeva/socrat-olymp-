@@ -11,7 +11,7 @@ import { Trenazher19Klient } from './Trenazher19Klient';
  */
 export function Trenazher19({ vkladka, base }: { vkladka: string; base: string }) {
   const bank = GLAVY_19.filter((g) => g.metod !== undefined && g.zadachi.length > 0).flatMap((g) =>
-    zadaniyaView(g.zadachi).map((v, i) => ({
+    zadaniyaView(g.zadachi, g.podmetody).map((v, i) => ({
       ...v,
       metod: g.metod!,
       metodTitle: `${BLOKI_19.metod(g.metod!)}. ${g.title}`,
