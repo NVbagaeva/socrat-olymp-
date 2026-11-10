@@ -41,6 +41,14 @@
      • сброс пароля: письмо → новый пароль → вход новым паролем;
      • два устройства: тренировка №8, начатая на компьютере, продолжается
        на телефоне с той же задачи; решённое и закладка видны в кабинете;
+     • классы и ДЗ №8 (этап 3): репетитор создаёт класс и получает код,
+       ученик вступает по ссылке (код помнится до входа) и по коду,
+       неверный код — понятный отказ; псевдоним ученика; выдача ДЗ из
+       формы с типами; ученик решает: дробь с верным значением и «5 см» —
+       подсказки без траты попытки, попытки считает база, решение сразу
+       после ответа, «Показать решение», «Сдать»; таблица результатов,
+       что вводил ученик, комментарий к задаче, сводка по типам, работа
+       над ошибками; ученику форма выдачи недоступна;
      • комплект репетитора записывается в аккаунт;
      • удаление аккаунта с подтверждением;
      • SDK не входит в первую загрузку главной и страницы задания;
@@ -62,6 +70,7 @@ import { chromium } from 'playwright';
 import { bezBanneraCookie } from './lib/cookie-notice.mjs';
 import { APP, requireSrc } from './lib/load-ts.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
+import { applyFilters, createDzMock } from './lib/dz-mock.mjs';
 
 const { generate } = requireSrc('lib/vychisleniya/generate.ts');
 const { parseTaskId } = requireSrc('lib/vychisleniya/ids.ts');
@@ -147,6 +156,9 @@ const ALLOWED = new Set([
   'uchenik@example.ru',
   'shkolnik@example.ru',
   'dva@example.ru',
+  'dz-repetitor@example.ru',
+  'dz-uchenik1@example.ru',
+  'dz-uchenik2@example.ru',
 ]);
 
 /** Данные формы регистрации, как их шлёт сайт. */
@@ -396,6 +408,9 @@ function makeMock() {
       if (!me) return err(401, 'PGRST301', 'JWT expired');
       const table = p.slice('/rest/v1/'.length);
       const idEq = (u.searchParams.get('user_id') ?? '').replace(/^eq\./, '');
+      /* Классы и ДЗ этапа 3 — отдельный мок (scripts/lib/dz-mock.mjs). */
+      const dzAnswer = dz.handle(table, method, u, body, me, prefersObject);
+      if (dzAnswer !== null) return dzAnswer;
       if (table === 'profiles' && method === 'GET') {
         /* RLS: свой профиль, свои ученики (репетитору), свой репетитор (ученику). */
         const mine = profiles.get(me.id);
@@ -409,7 +424,7 @@ function makeMock() {
             );
           return mine?.role === 'tutor' ? shared(me.id, row.user_id) : shared(row.user_id, me.id);
         });
-        const rows = idEq === '' ? visible : visible.filter((row) => row.user_id === idEq);
+        const rows = applyFilters(visible, u.searchParams);
         if (prefersObject) {
           return rows.length === 1
             ? { status: 200, body: rows[0] }
@@ -547,6 +562,8 @@ function makeMock() {
   }
 
   /** Тестовые данные, как их кладёт кнопка «Сервер: тестовые данные». */
+  const dz = createDzMock({ profiles, classes, members });
+
   function seedClass(tutorEmail, studentEmails, name = 'Тестовый класс') {
     const id = `class-${classes.length + 1}`;
     classes.push({
@@ -563,6 +580,7 @@ function makeMock() {
 
   return {
     handle,
+    dz,
     users,
     mailbox,
     kits,
@@ -1448,6 +1466,307 @@ async function runEnabled() {
       'телефон: задача отмечена «Отложить на потом»',
     );
     await phone.context.close();
+  }
+
+  /* 7в. Классы и ДЗ №8: класс и код, вступление, выдача, решение,
+         результаты, работа над ошибками. */
+  {
+    registerInMock(mock, 'dz-repetitor@example.ru', 'dz-repetitor-1', 'Ирина Петровна', 'tutor');
+    registerInMock(mock, 'dz-uchenik1@example.ru', 'dz-uchenik-1', 'Аня Смирнова', 'student');
+    registerInMock(mock, 'dz-uchenik2@example.ru', 'dz-uchenik-2', 'Петя Иванов', 'student');
+    const tutorUser = mock.users.get('dz-repetitor@example.ru');
+    const s1 = mock.users.get('dz-uchenik1@example.ru');
+    const text = async (page, sel) =>
+      (await page.locator(sel).first().innerText()).replace(/\s+/g, ' ');
+
+    /* Репетитор: пустые состояния, класс и код. */
+    const tutor = await newPage(mock, 1280, errors);
+    await welcomeSeen(tutor.context);
+    await login(tutor.page, 'dz-repetitor@example.ru', 'dz-repetitor-1');
+    await tutor.page.waitForFunction(
+      () => !document.querySelector('[data-section="classes"]')?.textContent?.includes('…'),
+    );
+    check(
+      (await text(tutor.page, '[data-section="classes"]')).includes(
+        'У вас пока нет классов — создайте первый',
+      ),
+      'ДЗ: репетитор без классов — «У вас пока нет классов — создайте первый»',
+    );
+    await tutor.page.waitForFunction(
+      () => !document.querySelector('[data-section="homework"]')?.textContent?.includes('…'),
+    );
+    check(
+      (await text(tutor.page, '[data-section="homework"]')).includes('Заданий пока нет'),
+      'ДЗ: репетитор без заданий — «Заданий пока нет»',
+    );
+    await tutor.page.fill('input[name="class-name"]', 'Группа по средам');
+    await tutor.page.locator('[data-section="classes"] button:has-text("Создать класс")').click();
+    await tutor.page.waitForSelector('.dz-klassy__item');
+    const code = (await tutor.page.locator('.dz-klassy__code').innerText()).trim();
+    check(/^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{6}$/.test(code), `ДЗ: у класса код из 6 знаков (${code})`);
+    await shot(tutor.page, 'dz-kabinet-repetitor-1280');
+    await tutor.page.locator('.dz-klassy__name').click();
+    await tutor.page.waitForSelector('.dz-code');
+    check(
+      (await tutor.page.locator('.dz-link').innerText()).includes(`/kabinet/vstupit/?kod=${code}`),
+      'ДЗ: на странице класса — ссылка-приглашение с кодом',
+    );
+    const classUrl = tutor.page.url();
+
+    /* Ученик 1: ссылка до входа — код помнится и подставляется после входа. */
+    const st1 = await newPage(mock, 390, errors);
+    await welcomeSeen(st1.context);
+    await st1.page.goto(`${SITE}/kabinet/vstupit/?kod=${code}`, { waitUntil: 'networkidle' });
+    await st1.page.waitForSelector('text=войди в кабинет ученика');
+    check(true, 'ДЗ: ссылка-приглашение без входа — «войди в кабинет ученика»');
+    await login(st1.page, 'dz-uchenik1@example.ru', 'dz-uchenik-1');
+    await st1.page.waitForSelector('[data-form="join"] input[name="class-code"]');
+    check(
+      (await st1.page.inputValue('[data-form="join"] input[name="class-code"]')) === code,
+      'ДЗ: после входа код из ссылки уже в форме «Вступить»',
+    );
+    await st1.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st1.page.waitForSelector('[data-form="join"] .dz-ok');
+    check(
+      (await text(st1.page, '[data-form="join"] .dz-ok')).includes('Группа по средам'),
+      'ДЗ: ученик вступил по ссылке — «Готово: ты в классе …»',
+    );
+
+    /* Ученик 2: неверный код, потом код строчными и с дефисом. */
+    const st2 = await newPage(mock, 1280, errors);
+    await welcomeSeen(st2.context);
+    await login(st2.page, 'dz-uchenik2@example.ru', 'dz-uchenik-2');
+    await st2.page.waitForSelector('[data-form="join"] input[name="class-code"]');
+    await st2.page.fill('[data-form="join"] input[name="class-code"]', 'ZZZZZZ');
+    await st2.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st2.page.waitForFunction(() =>
+      document.querySelector('[data-form="join"]')?.textContent?.includes('Такого кода нет'),
+    );
+    check(
+      (await text(st2.page, '[data-form="join"]')).includes('Такого кода нет'),
+      'ДЗ: неверный код — «Такого кода нет или класс сейчас не принимает учеников»',
+    );
+    await st2.page.fill(
+      '[data-form="join"] input[name="class-code"]',
+      `${code.slice(0, 3).toLowerCase()}-${code.slice(3).toLowerCase()}`,
+    );
+    await st2.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st2.page.waitForSelector('[data-form="join"] .dz-ok');
+    check(true, 'ДЗ: код строчными и с дефисом тоже подходит');
+
+    /* Репетитор: двое в классе, псевдоним ученика. */
+    await tutor.page.goto(classUrl, { waitUntil: 'networkidle' });
+    await tutor.page.waitForSelector('.dz-members__item');
+    check(
+      (await tutor.page.locator('.dz-members__item').count()) === 2,
+      'ДЗ: в классе двое учеников',
+    );
+    const petya = tutor.page.locator('.dz-members__item', { hasText: 'Петя Иванов' });
+    await petya.locator('button:has-text("Переименовать")').click();
+    await tutor.page.locator('.dz-members__item input').fill('Петя (среда)');
+    await tutor.page.locator('.dz-members__item button:has-text("Сохранить")').click();
+    await tutor.page.waitForSelector('.dz-members__name:has-text("Петя (среда)")');
+    check(true, 'ДЗ: репетитор переименовал ученика для себя');
+    await shot(tutor.page, 'dz-klass-1280');
+
+    /* Выдать ДЗ из формы: типы 8.A и 8.B по одной задаче, 2 попытки, решения сразу. */
+    await tutor.page.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`, {
+      waitUntil: 'networkidle',
+    });
+    await tutor.page.waitForSelector('[data-section="preview"] .dz-preview__item');
+    await tutor.page.waitForFunction(
+      () => document.querySelectorAll('[data-section="preview"] .dz-preview__item').length === 2,
+    );
+    check(true, 'ДЗ: форма выдачи из тренажёра — типы уже отмечены, в предпросмотре 2 задачи');
+    check(
+      (await tutor.page.locator('[data-list="students"] input:checked').count()) === 3,
+      'ДЗ: по умолчанию — всему классу (галочка «Всему классу» и оба ученика)',
+    );
+    check(
+      !(await tutor.page.getByRole('checkbox', { name: 'Показывать «Запомни»' }).isChecked()) &&
+        !(await tutor.page
+          .getByRole('checkbox', { name: 'Показывать разобранный пример' })
+          .isChecked()),
+      'ДЗ: «Запомни» и разобранный пример по умолчанию выключены',
+    );
+    await tutor.page.fill('input[name="title"]', 'ДЗ: степени и корни');
+    await tutor.page.getByRole('radio', { name: '2', exact: true }).check();
+    await tutor.page.getByRole('radio', { name: 'Сразу после ответа' }).check();
+    await shot(tutor.page, 'dz-vydat-1280');
+    await tutor.page.locator('button[type="submit"]:has-text("Выдать")').click();
+    await tutor.page.waitForSelector('text=Задание выдано');
+    const hw = mock.dz.homework.find((h) => h.title === 'ДЗ: степени и корни');
+    check(
+      hw !== undefined &&
+        hw.attempts_limit === 2 &&
+        hw.solutions_when === 'instant' &&
+        !hw.show_memo,
+      'ДЗ: в базе — 2 попытки, решения сразу, «Запомни» выключено',
+    );
+    const hwTasks = mock.dz.tasks
+      .filter((t) => t.homework_id === hw.id)
+      .sort((a, b) => a.position - b.position);
+    const keyOf = (task) => mock.dz.keys.find((k) => k.task_id === task.id).answer;
+    check(
+      hwTasks.length === 2 && hwTasks.every((t) => t.student_id === null),
+      'ДЗ: один набор на всех — 2 общие задачи',
+    );
+    check(
+      !hwTasks.some((t) => /банк|новая/.test(t.question_html)),
+      'ДЗ: в условии для ученика нет меток «банк/новая»',
+    );
+
+    /* Ученик 1 (телефон): ДЗ в кабинете, плашка в №8, решение. */
+    await st1.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await st1.page.waitForSelector('[data-section="homework"] .dz-list__item');
+    check(
+      (await text(st1.page, '[data-section="homework"]')).includes('ДЗ: степени и корни') &&
+        (await text(st1.page, '[data-section="homework"]')).includes('не начато'),
+      'ДЗ: у ученика в кабинете — задание «не начато»',
+    );
+    await st1.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
+    await st1.page.waitForSelector('[data-block="dz-plashka"]');
+    check(
+      (await text(st1.page, '[data-block="dz-plashka"]')).includes('У вас домашнее задание до'),
+      'ДЗ: в разделе №8 — плашка «У вас домашнее задание до …»',
+    );
+    await shot(st1.page, 'dz-plashka-390');
+    await st1.page.locator('[data-block="dz-plashka"] a').click();
+    await st1.page.waitForSelector('.dz-task');
+    const field = '.dz-answer .otvet-input__field';
+    const left = () => st1.page.locator('[data-left]').getAttribute('data-left');
+    const key1 = keyOf(hwTasks[0]);
+    const asFraction = (decimal) => {
+      const [int, frac = ''] = decimal.replace('-', '').split('.');
+      const den = 10 ** frac.length;
+      const num = Number(`${int}${frac}`);
+      const g = (a, b) => (b === 0 ? a : g(b, a % b));
+      const d = g(num, den) || 1;
+      return `${decimal.startsWith('-') ? '−' : ''}${(num / d) * (den / d === 1 ? 2 : 1)}/${den / d === 1 ? 2 : den / d}`;
+    };
+    await st1.page.fill(field, asFraction(key1));
+    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
+    await st1.page.waitForSelector('.dz-answer .otvet-hint');
+    check(
+      (await text(st1.page, '.dz-answer .otvet-hint')).startsWith('Значение верное') &&
+        (await left()) === '2',
+      `ДЗ: «${asFraction(key1)}» — «Значение верное…», попытка не потрачена`,
+    );
+    await st1.page.fill(field, '5 см');
+    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
+    await st1.page.waitForSelector('.dz-answer .otvet-hint');
+    check(
+      (await text(st1.page, '.dz-answer .otvet-hint')).includes('только число') &&
+        (await left()) === '2',
+      'ДЗ: «5 см» — подсказка о записи, попытка не потрачена',
+    );
+    const wrong1 = String(Number(key1) + 1).replace('.', ',');
+    await st1.page.fill(field, wrong1);
+    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
+    await st1.page.waitForSelector('.dz-verdict--wrong');
+    check((await left()) === '1', 'ДЗ: неверный ответ — осталась 1 попытка');
+    await st1.page.fill(field, key1.replace('.', ','));
+    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
+    await st1.page.waitForSelector('.dz-verdict--right');
+    await st1.page.waitForSelector('.z8-razbor');
+    check(true, 'ДЗ: верно — и сразу решение по шагам (решения «сразу после ответа»)');
+    check(await noHorizontalScroll(st1.page), 'ДЗ: решение ДЗ 390 — горизонтальной прокрутки нет');
+    await shot(st1.page, 'dz-reshenie-390');
+    await st1.page.locator('.dz-strip__btn').nth(1).click();
+    await st1.page.waitForSelector(`.dz-task[data-task="${hwTasks[1].id}"]`);
+    await st1.page.locator('.dz-answer button:has-text("Показать решение")').click();
+    await st1.page
+      .locator(
+        '.modal button:has-text("Показать решение"), [role="dialog"] button:has-text("Показать решение")',
+      )
+      .last()
+      .click();
+    await st1.page.waitForSelector('.z8-razbor');
+    check(
+      (await st1.page.locator('.dz-strip__btn.is-revealed').count()) === 1,
+      'ДЗ: «Показать решение» закрывает задачу — в ленте она отмечена',
+    );
+    await st1.page.locator('.dz-submit button:has-text("Сдать задание")').click();
+    await st1.page.locator('[role="dialog"] button:has-text("Сдать задание")').click();
+    await st1.page.waitForSelector('[data-state="submitted"]');
+    check(
+      (await text(st1.page, '[data-state="submitted"]')).includes('Верно 1 из 2'),
+      'ДЗ: после «Сдать» — «Сдано … · Верно 1 из 2»',
+    );
+
+    /* Ученику форма выдачи недоступна. */
+    await st2.page.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
+    await st2.page.waitForSelector('text=Эта страница — для репетитора.');
+    check(true, 'ДЗ: ученику форма выдачи — «Эта страница — для репетитора»');
+
+    /* Репетитор: таблица, что вводил ученик, комментарий, работа над ошибками. */
+    await tutor.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+    await tutor.page.waitForSelector('.dz-table');
+    const row1 = tutor.page.locator(`tr[data-student="${s1.id}"]`);
+    const marks1 = await row1
+      .locator('.dz-cell')
+      .evaluateAll((els) => els.map((e) => e.dataset.mark));
+    check(
+      marks1.join(',') === 'right,revealed',
+      `ДЗ: в таблице у ученика 1 — верно, с решением (${marks1.join(',')})`,
+    );
+    const marks2 = await tutor.page
+      .locator('tr[data-student]')
+      .nth(1)
+      .locator('.dz-cell')
+      .evaluateAll((els) => els.map((e) => e.dataset.mark));
+    check(marks2.join(',') === 'none,none', 'ДЗ: у ученика 2 — не решал');
+    check(
+      (await text(tutor.page, '[data-section="kinds"]')).includes('1 из 2 ошиблись') ||
+        (await text(tutor.page, '[data-section="kinds"]')).includes('1 из 2 ошибся'),
+      'ДЗ: сводка по типам — «1 из 2 ошиблись»',
+    );
+    await row1.locator('.dz-cell').first().click();
+    await tutor.page.waitForSelector('[data-section="cell"]');
+    check(
+      (await text(tutor.page, '[data-section="cell"] [data-field="entered"]')).includes(wrong1),
+      `ДЗ: клик по клетке — что вводил ученик (${wrong1})`,
+    );
+    await shot(tutor.page, 'dz-rezultaty-1280');
+    await tutor.page
+      .locator('[data-section="task-comment"] textarea')
+      .fill('Посмотри, как сокращаются степени');
+    await tutor.page.locator('[data-section="task-comment"] button:has-text("Сохранить")').click();
+    await tutor.page.waitForSelector('[data-section="task-comment"] .dz-ok');
+    check(
+      hwTasks[0].comment === 'Посмотри, как сокращаются степени',
+      'ДЗ: комментарий к задаче сохранён',
+    );
+    await st1.page.reload({ waitUntil: 'networkidle' });
+    await st1.page.locator('.dz-strip__btn').first().click();
+    await st1.page.waitForSelector('[data-note="task"]');
+    check(true, 'ДЗ: ученик видит комментарий репетитора к задаче');
+
+    await tutor.page
+      .locator('[data-section="kinds"] a:has-text("Выдать работу над ошибками")')
+      .click();
+    await tutor.page.waitForSelector('[data-section="preview"] .dz-preview-people');
+    check(
+      (await tutor.page.locator('[data-list="students"] input').count()) === 1,
+      'ДЗ: работа над ошибками — только тому, кто ошибся',
+    );
+    await tutor.page.locator('button[type="submit"]:has-text("Выдать")').click();
+    await tutor.page.waitForSelector('text=Задание выдано');
+    const fix = mock.dz.homework.find((h) => h.parent_id === hw.id);
+    const fixTasks = fix === undefined ? [] : mock.dz.tasks.filter((t) => t.homework_id === fix.id);
+    check(
+      fix !== undefined &&
+        fix.origin === 'oshibki' &&
+        fixTasks.length === 1 &&
+        fixTasks[0].student_id === s1.id &&
+        fixTasks[0].kind === hwTasks[1].kind &&
+        fixTasks[0].question_html !== hwTasks[1].question_html,
+      'ДЗ: работа над ошибками — новый аналог задачи с ошибкой, тот же тип, ученику 1',
+    );
+    void tutorUser;
+    await st1.context.close();
+    await st2.context.close();
+    await tutor.context.close();
   }
 
   /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */

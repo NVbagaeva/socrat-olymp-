@@ -141,9 +141,7 @@ export function HomeworkSolve({
         return { hint: formatHint(read.problem, read.meant), wrong: false };
     }
     try {
-      const result = await (
-        await dzApi()
-      ).checkAnswer(current.id, read.ok ? read.value : value, seconds);
+      const result = await (await dzApi()).checkAnswer(current.id, value, seconds); // как ввёл ученик: база приводит запись сама
       if (result.kind === 'format') return { hint: formatHint('other', null), wrong: false };
       if (result.kind === 'fractionRight')
         return { hint: fractionRightHint(result.decimal), wrong: false };
