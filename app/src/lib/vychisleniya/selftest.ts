@@ -14,7 +14,8 @@ import { nice, round9, ru } from './numbers';
 import { PREP_BLOCKS } from './prep/blocks';
 import { fixedSeed, generatePrep } from './prep/generate';
 import { PROTOTYPES } from './prototypes';
-import { sealAnswer } from './secret';
+import { normalizeAnswer } from '../otvet';
+import { answerRecord, readSealed, sealAnswer } from './secret';
 import { SKILLS } from './skills';
 import type { Generated, Level } from './types';
 
@@ -51,6 +52,21 @@ export function checkTask(task: Generated, typeset: ((tex: string) => void) | nu
   }
   if (!Number.isFinite(task.proverka) || Math.abs(task.proverka - task.otvet) > 1e-6) {
     problems.push({ where, what: `независимый счёт ${task.proverka} не сходится с ответом ${task.otvet}` });
+  }
+  if (Number.isFinite(task.otvet)) {
+    /* Ответ сверяется точно, по нормальной записи: запись верного ответа
+       должна быть записью бланка, а ответ, введённый как в бланке, —
+       засчитываться. */
+    const record = answerRecord(task.otvet);
+    const normal = normalizeAnswer(record);
+    if (!normal.ok || normal.value !== record) {
+      problems.push({ where, what: `запись ответа ${record} не в формате бланка` });
+    }
+    const typed = ru(task.otvet);
+    const reading = readSealed(typed, sealAnswer(task.otvet));
+    if (reading.kind !== 'answer' || !reading.right) {
+      problems.push({ where, what: `ответ «${typed}», введённый как в бланке, не засчитывается` });
+    }
   }
   if (Math.abs(task.otvet) > 10000) {
     problems.push({ where, what: `ответ слишком велик: ${task.otvet}` });
