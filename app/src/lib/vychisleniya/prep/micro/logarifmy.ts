@@ -1,6 +1,7 @@
 /** Блок P8-2 · Логарифмы. */
 
 import { round9 } from '../../numbers';
+import { shag } from '../../prototypes/common';
 import { d, log, root } from '../../tex';
 import type { PrepMicro } from '../types';
 import { micro, naydi } from './common';
@@ -14,6 +15,16 @@ function isPowerOf(x: number, b: number): boolean {
   return false;
 }
 
+/** Хвост выкладки: log_a a^c = c; при c = 1 степень не пишем. */
+function doPokazatelya(a: number, c: number): string {
+  return c === 1 ? `${c}` : `${log(String(a), `${a}^{${c}}`)} = ${c}`;
+}
+
+/** Подпись: число — само основание или его степень. */
+function stepenOsnovaniya(a: number, c: number): string {
+  return c === 1 ? 'это само основание' : `степень основания: $${a ** c} = ${a}^{${c}}$`;
+}
+
 export const LOGARIFMY: PrepMicro[] = [
   micro('P8-2-01', 'Определение логарифма', '\\log_a b = c \\Leftrightarrow a^c = b', (r) => {
     const a = r.pick([2, 3, 5, 7, 10]);
@@ -25,7 +36,12 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(log(String(a), String(b))),
       otvet: c,
-      razbor: `$${log(String(a), String(b))} = ${c}$, так как $${a}^{${c}} = ${b}$`,
+      razbor: [
+        shag(
+          `Логарифм — это показатель, в который возводим основание, чтобы получить число. Записываем $${b}$ как степень основания: $${b} = ${a}^{${c}}$`,
+          `${log(String(a), String(b))} = ${log(String(a), `${a}^{${c}}`)} = ${c}`,
+        ),
+      ],
       proverka: Math.log(b) / Math.log(a),
     };
   }),
@@ -41,7 +57,12 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(log(String(a), arg)),
       otvet: -n,
-      razbor: `$${arg} = ${a}^{-${n}}$, поэтому $${log(String(a), arg)} = -${n}$`,
+      razbor: [
+        shag(
+          `${dec ? `Переводим $${arg}$ в обыкновенную дробь и записываем её` : 'Записываем дробь'} как степень основания с отрицательным показателем: $\\dfrac{1}{a^{n}} = a^{-n}$. Логарифм равен этому показателю`,
+          `${log(String(a), arg)} = ${dec ? `${log(String(a), `\\dfrac{1}{${a ** n}}`)} = ` : ''}${log(String(a), `${a}^{-${n}}`)} = -${n}`,
+        ),
+      ],
       proverka: Math.log(value) / Math.log(a),
     };
   }),
@@ -52,9 +73,17 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(tex),
       otvet: one ? 0 : 1,
-      razbor: one
-        ? `$${tex} = 0$, так как $${a}^{0} = 1$`
-        : `$${tex} = 1$, так как $${a}^{1} = ${a}$`,
+      razbor: [
+        one
+          ? shag(
+              'Любое основание в нулевой степени равно единице: $a^{0} = 1$, поэтому логарифм единицы равен нулю',
+              `${tex} = ${log(String(a), `${a}^{0}`)} = 0`,
+            )
+          : shag(
+              'Основание в первой степени — само основание: $a^{1} = a$, поэтому логарифм основания равен единице',
+              `${tex} = ${log(String(a), `${a}^{1}`)} = 1`,
+            ),
+      ],
       proverka: one ? 0 : 1,
     };
   }),
@@ -74,7 +103,12 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(tex),
       otvet: c,
-      razbor: `$${tex} = ${log(String(a), `(${x} \\cdot ${y})`)} = ${log(String(a), String(T))} = ${c}$`,
+      razbor: [
+        shag(
+          `Основания одинаковые — сумма логарифмов равна логарифму произведения: $\\log_a x + \\log_a y = \\log_a (xy)$. Произведение $${x} \\cdot ${y} = ${T}$ — ${stepenOsnovaniya(a, c)}`,
+          `${tex} = ${log(String(a), `(${x} \\cdot ${y})`)} = ${log(String(a), String(T))} = ${doPokazatelya(a, c)}`,
+        ),
+      ],
       proverka: Math.log(x) / Math.log(a) + Math.log(y) / Math.log(a),
     };
   }),
@@ -90,7 +124,12 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(tex),
       otvet: c,
-      razbor: `$${tex} = ${log(String(a), `\\dfrac{${x}}{${y}}`)} = ${log(String(a), String(a ** c))} = ${c}$`,
+      razbor: [
+        shag(
+          `Основания одинаковые — разность логарифмов равна логарифму частного: $\\log_a x - \\log_a y = \\log_a \\dfrac{x}{y}$. Частное $${x} : ${y} = ${a ** c}$ — ${stepenOsnovaniya(a, c)}`,
+          `${tex} = ${log(String(a), `\\dfrac{${x}}{${y}}`)} = ${log(String(a), String(a ** c))} = ${doPokazatelya(a, c)}`,
+        ),
+      ],
       proverka: Math.log(x) / Math.log(a) - Math.log(y) / Math.log(a),
     };
   }),
@@ -105,7 +144,12 @@ export const LOGARIFMY: PrepMicro[] = [
       return {
         uslovie: naydi(log(String(a), arg)),
         otvet: ans,
-        razbor: `$${arg} = ${a}^{\\frac{${j}}{${n}}}$, поэтому $${log(String(a), arg)} = \\dfrac{${j}}{${n}} = ${d(ans)}$`,
+        razbor: [
+          shag(
+            `Корень записываем как степень с дробным показателем: $${root(n, 'a^{m}')} = a^{\\frac{m}{${n}}}$. Показатель выносим вперёд: $\\log_a b^{k} = k \\log_a b$, а $${log(String(a), String(a))} = 1$`,
+            `${log(String(a), arg)} = ${log(String(a), `${a}^{\\frac{${j}}{${n}}}`)} = \\dfrac{${j}}{${n}} \\cdot ${log(String(a), String(a))} = \\dfrac{${j}}{${n}} = ${d(ans)}`,
+          ),
+        ],
         proverka: Math.log(Math.pow(a ** j, 1 / n)) / Math.log(a),
       };
     }
@@ -118,7 +162,12 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(log(String(a), arg)),
       otvet: k * j,
-      razbor: `$${log(String(a), arg)} = ${k} \\cdot ${log(String(a), String(b))} = ${k} \\cdot ${j} = ${k * j}$`,
+      razbor: [
+        shag(
+          `Показатель степени под логарифмом выносим вперёд множителем: $\\log_a b^{k} = k \\log_a b$. Возводить $${b}$ в степень не нужно`,
+          `${log(String(a), arg)} = ${k} \\cdot ${log(String(a), String(b))} = ${j === 1 ? '' : `${k} \\cdot ${log(String(a), `${a}^{${j}}`)} = `}${k} \\cdot ${j} = ${k * j}`,
+        ),
+      ],
       proverka: (k * Math.log(b)) / Math.log(a),
     };
   }),
@@ -135,10 +184,21 @@ export const LOGARIFMY: PrepMicro[] = [
       return null;
     }
     const arg = String(a ** j);
+    const argPow = j === 1 ? String(a) : `${a}^{${j}}`;
+    const razbor =
+      k === 0.5
+        ? shag(
+            `Корень — степень с показателем $\\frac{1}{2}$: $\\sqrt{${a}} = ${a}^{\\frac{1}{2}}$. Показатель основания уходит в знаменатель: $\\log_{a^{k}} b = \\dfrac{1}{k}\\log_a b$, а делить на $\\frac{1}{2}$ — то же, что умножать на $2$`,
+            `${log(base, arg)} = ${log(`${a}^{\\frac{1}{2}}`, argPow)} = 2 \\cdot ${log(String(a), argPow)} = 2 \\cdot ${j} = ${d(ans)}`,
+          )
+        : shag(
+            `Записываем основание и число как степени $${a}$: $${a ** k} = ${a}^{${k}}$${j === 1 ? '' : `, $${arg} = ${argPow}$`}. Показатель основания уходит в знаменатель: $\\log_{a^{k}} b = \\dfrac{1}{k}\\log_a b$`,
+            `${log(base, arg)} = ${log(`${a}^{${k}}`, argPow)} = \\dfrac{1}{${k}} \\cdot ${log(String(a), argPow)} = \\dfrac{${j}}{${k}} = ${d(ans)}`,
+          );
     return {
       uslovie: naydi(log(base, arg)),
       otvet: ans,
-      razbor: `$${log(base, arg)} = \\dfrac{1}{${d(k)}} \\cdot ${log(String(a), arg)} = \\dfrac{${j}}{${d(k)}} = ${d(ans)}$`,
+      razbor: [razbor],
       proverka: Math.log(a ** j) / Math.log(a ** k),
     };
   }),
@@ -153,10 +213,17 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(tex),
       otvet: b ** k,
-      razbor:
+      razbor: [
         k === 1
-          ? `$${tex} = ${b}$`
-          : `$${tex} = (${a}^{${log(String(a), String(b))}})^{${k}} = ${b}^{${k}} = ${b ** k}$`,
+          ? shag(
+              `Основное логарифмическое тождество: $${log(String(a), String(b))}$ — это показатель, в который возводим $${a}$, чтобы получить $${b}$. Поэтому $a^{\\log_a b} = b$`,
+              `${tex} = ${b}`,
+            )
+          : shag(
+              `Множитель $${k}$ в показателе выносим как внешнюю степень: $a^{${k}x} = (a^{x})^{${k}}$. В скобках основное логарифмическое тождество: $a^{\\log_a b} = b$`,
+              `${tex} = (${a}^{${log(String(a), String(b))}})^{${k}} = ${b}^{${k}} = ${b ** k}`,
+            ),
+      ],
       proverka: Math.pow(a, (k * Math.log(b)) / Math.log(a)),
     };
   }),
@@ -172,7 +239,12 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(tex),
       otvet: j,
-      razbor: `$${tex} = ${log(String(a), String(c))} = ${log(String(a), `${a}^{${j}}`)} = ${j}$`,
+      razbor: [
+        shag(
+          `Число $${b}$ — аргумент первого логарифма и основание второго, поэтому оно сокращается: $\\log_a b \\cdot \\log_b c = \\log_a c$. Остаётся логарифм степени основания: $${c} = ${a}^{${j}}$`,
+          `${tex} = ${log(String(a), String(c))} = ${log(String(a), `${a}^{${j}}`)} = ${j}`,
+        ),
+      ],
       proverka: (Math.log(b) / Math.log(a)) * (Math.log(c) / Math.log(b)),
     };
   }),
@@ -192,7 +264,12 @@ export const LOGARIFMY: PrepMicro[] = [
       return {
         uslovie: naydi(tex),
         otvet: j,
-        razbor: `$${tex} = ${log(String(a), String(b))} = ${log(String(a), `${a}^{${j}}`)} = ${j}$`,
+        razbor: [
+          shag(
+            `Частное логарифмов с одинаковым основанием $${c}$ — это логарифм по новому основанию: $\\dfrac{\\log_c b}{\\log_c a} = \\log_a b$. Знаменатель становится основанием, а $${b} = ${a}^{${j}}$`,
+            `${tex} = ${log(String(a), String(b))} = ${log(String(a), `${a}^{${j}}`)} = ${j}`,
+          ),
+        ],
         proverka: Math.log(b) / Math.log(c) / (Math.log(a) / Math.log(c)),
       };
     },

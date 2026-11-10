@@ -1,12 +1,15 @@
 /** Блок P8-3 · Знаки и четверти. */
 
-import { round9 } from '../../numbers';
-import { d, fn, quarterInterval } from '../../tex';
+import { gcd, round9 } from '../../numbers';
+import { shag } from '../../prototypes/common';
+import { d, fn, paren, quarterInterval } from '../../tex';
+import type { Shag } from '../../types';
 import type { PrepMicro } from '../types';
 import { micro, ZNAK } from './common';
 
 type Q = 1 | 2 | 3 | 4;
-const SIGN: Record<'sin' | 'cos' | 'tg', Record<Q, 1 | -1>> = {
+type F = 'sin' | 'cos' | 'tg';
+const SIGN: Record<F, Record<Q, 1 | -1>> = {
   sin: { 1: 1, 2: 1, 3: -1, 4: -1 },
   cos: { 1: 1, 2: -1, 3: -1, 4: 1 },
   tg: { 1: 1, 2: -1, 3: 1, 4: -1 },
@@ -14,7 +17,32 @@ const SIGN: Record<'sin' | 'cos' | 'tg', Record<Q, 1 | -1>> = {
 const ROMAN: Record<Q, string> = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV' };
 const DEG: Record<Q, [number, number]> = { 1: [0, 90], 2: [90, 180], 3: [180, 270], 4: [270, 360] };
 
-function znak(f: 'sin' | 'cos' | 'tg', formula: string, id: string, nazvanie: string): PrepMicro {
+/** Имя функции: «синус»; в родительном падеже: «синуса». */
+const IMYA: Record<F, string> = { sin: 'синус', cos: 'косинус', tg: 'тангенс' };
+const IMYA_R: Record<F, string> = { sin: 'синуса', cos: 'косинуса', tg: 'тангенса' };
+
+/** «В I четверти», «Во II четверти». */
+function vChetverti(q: Q): string {
+  return `${q === 2 ? 'Во' : 'В'} ${ROMAN[q]} четверти`;
+}
+
+/** Четверть в выкладке: \text{III четверть}. */
+function chetvert(q: Q): string {
+  return `\\text{${ROMAN[q]} четверть}`;
+}
+
+function mark(s: number): string {
+  return s > 0 ? '> 0' : '< 0';
+}
+
+/** Почему у функции такой знак в четвертях. */
+const PRAVILO: Record<F, string> = {
+  sin: 'Синус — ордината точки на единичной окружности: выше оси $Ox$, в I и II четвертях, он положителен, ниже, в III и IV, — отрицателен',
+  cos: 'Косинус — абсцисса точки на единичной окружности: правее оси $Oy$, в I и IV четвертях, он положителен, левее, во II и III, — отрицателен',
+  tg: 'Тангенс — частное синуса и косинуса: где их знаки одинаковые (I и III четверти), он положителен, где разные (II и IV) — отрицателен',
+};
+
+function znak(f: F, formula: string, id: string, nazvanie: string): PrepMicro {
   return micro(
     id,
     nazvanie,
@@ -26,14 +54,46 @@ function znak(f: 'sin' | 'cos' | 'tg', formula: string, id: string, nazvanie: st
         ? `${DEG[q][0]}^\\circ < \\alpha < ${DEG[q][1]}^\\circ`
         : `\\alpha \\in ${quarterInterval(q)}`;
       const plus = SIGN[f][q] > 0;
+      const chetvertTex =
+        f === 'tg'
+          ? `${chetvert(q)}:\\ \\sin\\alpha ${mark(SIGN.sin[q])},\\ \\cos\\alpha ${mark(SIGN.cos[q])}`
+          : chetvert(q);
       return {
         uslovie: `Определите знак $${fn(f)}\\alpha$, если $${where}$.`,
         otvet: plus ? '1' : '2',
-        razbor: `$\\alpha$ в ${ROMAN[q]} четверти, там $${fn(f)}\\alpha ${plus ? '> 0' : '< 0'}$: знак «${plus ? 'плюс' : 'минус'}»`,
+        razbor: [
+          shag(
+            PRAVILO[f],
+            `${where} \\;\\Rightarrow\\; ${chetvertTex} \\;\\Rightarrow\\; ${fn(f)}\\alpha ${plus ? '> 0' : '< 0'}`,
+          ),
+        ],
         proverka: null,
       };
     },
     ZNAK,
+  );
+}
+
+/**
+ * Квадрат из основного тождества: find² = 1 − given², given = g.
+ * Минус у g при возведении в квадрат пропадает.
+ */
+function kvadrat(find: 'sin' | 'cos', given: 'sin' | 'cos', g: number): Shag {
+  const f2 = round9(1 - g * g);
+  return shag(
+    `Из основного тождества $\\sin^2\\alpha + \\cos^2\\alpha = 1$ находим квадрат ${IMYA_R[find]}${
+      g < 0 ? `. Минус у ${IMYA_R[given]} при возведении в квадрат пропадает` : ''
+    }`,
+    `${fn(find)}^2\\alpha = 1 - ${fn(given)}^2\\alpha = 1 - ${paren(round9(g))}^{2} = 1 - ${d(round9(g * g))} = ${d(f2)}`,
+  );
+}
+
+/** Корень из квадрата со знаком по четверти: f — искомое значение. */
+function koren(find: 'sin' | 'cos', q: Q, f: number): Shag {
+  const plus = f > 0;
+  return shag(
+    `${vChetverti(q)} ${IMYA[find]} ${plus ? 'положителен' : 'отрицателен'}, поэтому берём корень со знаком ${plus ? 'плюс' : 'минус'}. Корень находим подбором: $${d(Math.abs(f))}^{2} = ${d(round9(f * f))}$`,
+    `${fn(find)}\\alpha = ${plus ? '' : '-'}\\sqrt{${d(round9(f * f))}} = ${d(round9(f))}`,
   );
 }
 
@@ -58,7 +118,14 @@ export const ZNAKI: PrepMicro[] = [
       return {
         uslovie: `Укажите номер четверти, в которой лежит $\\alpha$, если $${where}$.`,
         otvet: q,
-        razbor: `$${where}$ — это ${ROMAN[q]} четверть, номер ${q}`,
+        razbor: [
+          shag(
+            degrees
+              ? 'Четверти отделены друг от друга углами $0^\\circ$, $90^\\circ$, $180^\\circ$, $270^\\circ$ и $360^\\circ$ — смотрим, между какими из них лежит $\\alpha$'
+              : 'Четверти отделены друг от друга углами $0$, $\\frac{\\pi}{2}$, $\\pi$, $\\frac{3\\pi}{2}$ и $2\\pi$ — смотрим, между какими из них лежит $\\alpha$',
+            `${where} \\;\\Rightarrow\\; \\text{${ROMAN[q]} четверть, номер } ${q}`,
+          ),
+        ],
         proverka: q,
       };
     },
@@ -89,7 +156,7 @@ export const ZNAKI: PrepMicro[] = [
     return {
       uslovie: `Найдите $${fn(find)}^2\\alpha$, если $${fn(given)}\\alpha = ${d(s)}$.`,
       otvet: ans,
-      razbor: `$${fn(find)}^2\\alpha = 1 - ${fn(given)}^2\\alpha = 1 - ${d(round9(s * s))} = ${d(ans)}$`,
+      razbor: [kvadrat(find, given, s)],
       proverka: 1 - s * s,
     };
   }),
@@ -105,7 +172,7 @@ export const ZNAKI: PrepMicro[] = [
       return {
         uslovie: `Найдите $${fn(find)}\\alpha$, если $${fn(given)}\\alpha = ${d(g)}$ и $\\alpha \\in \\left(0; \\frac{\\pi}{2}\\right)$.`,
         otvet: round9(f),
-        razbor: `$${fn(find)}^2\\alpha = 1 - ${d(round9(g * g))} = ${d(round9(f * f))}$, в I четверти $${fn(find)}\\alpha > 0$, поэтому $${fn(find)}\\alpha = ${d(f)}$`,
+        razbor: [kvadrat(find, given, g), koren(find, 1, f)],
         proverka: Math.sqrt(1 - g * g),
       };
     },
@@ -124,10 +191,30 @@ export const ZNAKI: PrepMicro[] = [
       if (!Number.isInteger(ans * 100)) {
         return null;
       }
+      /* Без запятых: числитель и знаменатель умножаем на 10 или 100. */
+      const scale =
+        Number.isInteger(round9(s * 10)) && Number.isInteger(round9(co * 10)) ? 10 : 100;
+      const top = Math.round(s * scale);
+      const bottom = Math.round(co * scale);
+      const g = gcd(top, bottom);
+      const minus = ans < 0 ? '-' : '';
+      const znaki =
+        sinV < 0 && cosV < 0
+          ? '. Синус и косинус оба отрицательны — частное положительно'
+          : ans < 0
+            ? '. Знаки синуса и косинуса разные — частное отрицательно'
+            : '';
       return {
         uslovie: `Найдите $\\operatorname{tg}\\alpha$, если $\\sin\\alpha = ${d(sinV)}$, $\\cos\\alpha = ${d(cosV)}$.`,
         otvet: ans,
-        razbor: `$\\operatorname{tg}\\alpha = \\dfrac{${d(sinV)}}{${d(cosV)}} = ${d(ans)}$`,
+        razbor: [
+          shag(
+            `Тангенс — отношение синуса к косинусу: $\\operatorname{tg}\\alpha = \\dfrac{\\sin\\alpha}{\\cos\\alpha}$${znaki}. Убираем запятые — умножаем числитель и знаменатель на $${scale}$ — и сокращаем`,
+            `\\operatorname{tg}\\alpha = \\dfrac{${d(sinV)}}{${d(cosV)}} = ${minus}\\dfrac{${top}}{${bottom}} = ${
+              g === 1 ? '' : `${minus}\\dfrac{${top / g}}{${bottom / g}} = `
+            }${d(ans)}`,
+          ),
+        ],
         proverka: sinV / cosV,
       };
     },
@@ -140,12 +227,22 @@ export const ZNAKI: PrepMicro[] = [
       const s = r.pick([-9, -8, -7, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9]) / 10;
       const given = r.pick(['sin', 'cos'] as const);
       const ans = round9(given === 'sin' ? 1 - 2 * s * s : 2 * s * s - 1);
+      const s2 = round9(s * s);
       const line =
-        given === 'sin' ? `1 - 2 \\cdot ${d(round9(s * s))}` : `2 \\cdot ${d(round9(s * s))} - 1`;
+        given === 'sin'
+          ? `1 - 2\\sin^2\\alpha = 1 - 2 \\cdot ${paren(s)}^{2} = 1 - 2 \\cdot ${d(s2)} = 1 - ${d(round9(2 * s2))}`
+          : `2\\cos^2\\alpha - 1 = 2 \\cdot ${paren(s)}^{2} - 1 = 2 \\cdot ${d(s2)} - 1 = ${d(round9(2 * s2))} - 1`;
       return {
         uslovie: `Найдите $\\cos 2\\alpha$, если $${fn(given)}\\alpha = ${d(s)}$.`,
         otvet: ans,
-        razbor: `$\\cos 2\\alpha = ${line} = ${d(ans)}$`,
+        razbor: [
+          shag(
+            `Берём формулу косинуса двойного угла, в которой есть только ${IMYA[given]}: $\\cos 2\\alpha = ${
+              given === 'sin' ? '1 - 2\\sin^2\\alpha' : '2\\cos^2\\alpha - 1'
+            }$${s < 0 ? `. Знак ${IMYA_R[given]} не важен — он стоит в квадрате` : ''}`,
+            `\\cos 2\\alpha = ${line} = ${d(ans)}`,
+          ),
+        ],
         proverka: Math.cos(2 * (given === 'sin' ? Math.asin(s) : Math.acos(s))),
       };
     },
@@ -168,11 +265,21 @@ export const ZNAKI: PrepMicro[] = [
       const sf = SIGN[f][q];
       const sg = SIGN[g][q];
       const plus = sf * sg > 0;
-      const mark = (s: number) => (s > 0 ? '> 0' : '< 0');
       return {
         uslovie: `Определите знак $${fn(f)}\\alpha \\cdot ${fn(g)}\\alpha$, если $${where}$.`,
         otvet: plus ? '1' : '2',
-        razbor: `$\\alpha$ в ${ROMAN[q]} четверти: $${fn(f)}\\alpha ${mark(sf)}$, $${fn(g)}\\alpha ${mark(sg)}$, поэтому произведение ${plus ? 'положительно' : 'отрицательно'}: знак «${plus ? 'плюс' : 'минус'}»`,
+        razbor: [
+          shag(
+            `Находим четверть, а в ней — знаки множителей: ${IMYA_R[f]} и ${IMYA_R[g]}`,
+            `${where} \\;\\Rightarrow\\; ${chetvert(q)}:\\ ${fn(f)}\\alpha ${mark(sf)},\\ ${fn(g)}\\alpha ${mark(sg)}`,
+          ),
+          shag(
+            plus
+              ? `Знаки множителей одинаковые — произведение положительно${sf < 0 ? ': минус на минус даёт плюс' : ''}`
+              : 'Знаки множителей разные — произведение отрицательно: плюс на минус даёт минус',
+            `${fn(f)}\\alpha \\cdot ${fn(g)}\\alpha ${plus ? '> 0' : '< 0'}`,
+          ),
+        ],
         proverka: null,
       };
     },
@@ -193,7 +300,7 @@ export const ZNAKI: PrepMicro[] = [
       return {
         uslovie: `Найдите $${fn(find)}\\alpha$, если $${fn(given)}\\alpha = ${d(round9(g))}$ и $\\alpha \\in ${quarterInterval(q)}$.`,
         otvet: round9(f),
-        razbor: `$${fn(find)}^2\\alpha = 1 - ${d(round9(g * g))} = ${d(round9(f * f))}$; в ${ROMAN[q]} четверти $${fn(find)}\\alpha ${f > 0 ? '> 0' : '< 0'}$, поэтому $${fn(find)}\\alpha = ${d(round9(f))}$`,
+        razbor: [kvadrat(find, given, g), koren(find, q, f)],
         proverka: f,
       };
     },
