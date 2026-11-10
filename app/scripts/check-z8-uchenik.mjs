@@ -2,6 +2,8 @@
 /* scripts/check-z8-uchenik.mjs — №8 глазами ученика, в браузере.
 
    Запуск после pnpm build: pnpm test:z8-uchenik [папка-для-снимков]
+   Снимки для описания PR (375, 390, 430, 768, 1280, без проверок):
+     node scripts/check-z8-uchenik.mjs --gallery папка
 
    Гость (без входа), телефон с сенсорным экраном и компьютер:
      • прогресс прежнего формата переносится в журнал: карточки навыков
@@ -17,6 +19,8 @@
      • «Отложить на потом» — закладка, по ссылке из списка открывается
        та же задача; закладка на опорной задаче открывает её номер;
      • итоги: «Просели: …», запись в истории тренировок;
+     • на телефоне поле ответа, «−» и кнопки задачи не уходят под «?»
+       и закреплённые панели — ни в начале страницы, ни в конце;
      • горизонтальной прокрутки нет на 375, 390, 430, 768, 1280;
        ошибок в консоли нет. */
 
@@ -30,7 +34,11 @@ import { welcomeSeen } from './lib/onboarding.mjs';
 
 const OUT = path.join(APP, 'out');
 const PORT = 4183;
-const SHOTS = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null;
+const GALLERY = process.argv.includes('--gallery')
+  ? (process.argv[process.argv.indexOf('--gallery') + 1] ?? 'snimki-z8')
+  : null;
+const SHOTS =
+  GALLERY !== null ? null : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   console.error('Нет out/index.html — сначала pnpm build.');
@@ -40,6 +48,8 @@ if (!fs.existsSync(path.join(OUT, 'index.html'))) {
 const { generate } = requireSrc('lib/vychisleniya/generate.ts');
 const { parseTaskId, isBankTask } = requireSrc('lib/vychisleniya/ids.ts');
 const { ru } = requireSrc('lib/vychisleniya/numbers.ts');
+const { BANK } = requireSrc('lib/vychisleniya/bank.ts');
+const { zadachaHref } = requireSrc('lib/vychisleniya/links.ts');
 
 const failures = [];
 let checks = 0;
@@ -139,6 +149,55 @@ async function newPage(options) {
 
 const noScroll = (page) =>
   page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+/**
+ * Элементы управления, которые чем-то закрыты: «?», закреплённой
+ * панелью, шапкой. Смотрим в начале страницы и в самом её конце — там
+ * последние кнопки ближе всего к нижним панелям. Точка — центр
+ * элемента: что в ней сверху, на то и нажмёт палец.
+ */
+async function coveredControls(page, selector) {
+  const out = [];
+  for (const where of ['top', 'bottom']) {
+    out.push(
+      ...(await page.evaluate(
+        ([sel, at]) => {
+          window.scrollTo(0, at === 'top' ? 0 : document.documentElement.scrollHeight);
+          const bad = [];
+          for (const el of document.querySelectorAll(sel)) {
+            const r = el.getBoundingClientRect();
+            if (r.width === 0 || r.height === 0) continue;
+            const x = r.left + r.width / 2;
+            const y = r.top + r.height / 2;
+            if (y < 0 || y >= window.innerHeight || x < 0 || x >= window.innerWidth) continue;
+            /* В начале страницы смотрим верхнюю половину экрана (шапка,
+               вкладки), в конце — нижнюю («?», нижние панели): посередине
+               прокрутки элемент под панелью законно уезжает за неё. */
+            if ((at === 'bottom') !== y >= window.innerHeight / 2) continue;
+            const hit = document.elementFromPoint(x, y);
+            if (hit !== null && !el.contains(hit) && !hit.contains(el)) {
+              const name = (node) =>
+                `${node.tagName.toLowerCase()}.${String(node.className).split(' ')[0]}`;
+              bad.push(`${name(el)} под ${name(hit)} (${at})`);
+            }
+          }
+          return bad;
+        },
+        [selector, where],
+      )),
+    );
+  }
+  await page.evaluate(() => window.scrollTo(0, 0));
+  return out;
+}
+
+const TASK_CONTROLS = [
+  '.ttask .otvet-input__field',
+  '.ttask .otvet-input__minus',
+  '.ttask__actions button',
+  '.ttask .zakladka',
+  '.z8-delimost summary',
+].join(', ');
+
 const store = (page, key) =>
   page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), key);
 
@@ -171,6 +230,110 @@ async function nextTask(page) {
   const next = page.locator('.ttask__actions button:has-text("Следующее задание")');
   if ((await next.count()) > 0) await next.click();
   else await page.locator('.ttask__actions button:has-text("Смотреть результат")').click();
+}
+
+/* ── Снимки для описания PR ────────────────────────────────────── */
+
+/** Задача банка, в решении которой есть панель «Признаки делимости». */
+function taskWithDelimost() {
+  for (const entry of BANK) {
+    for (const v of entry.variants) {
+      const task = generate(entry.prototype, v.seed, v.level);
+      if ((task.delimost ?? []).length > 0)
+        return `${entry.prototype}|${v.seed}|${v.level ?? 'any'}`;
+    }
+  }
+  return null;
+}
+
+async function runGallery(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const withDelimost = taskWithDelimost();
+  for (const width of [375, 390, 430, 768, 1280]) {
+    const phone = width < 500;
+    const { context, page } = await newPage({
+      viewport: { width, height: phone ? 812 : 900 },
+      deviceScaleFactor: 2,
+      hasTouch: phone,
+      isMobile: phone,
+    });
+    const snap = async (name, fullPage = false) => {
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: path.join(dir, `${width}-${name}.png`), fullPage });
+    };
+
+    /* Тренировка: дробь с верным значением, ошибка, закладка, итоги. */
+    await startTraining(page);
+    const id1 = await currentTask(page);
+    await answer(page, asFraction(answerOf(id1)));
+    await page.waitForSelector('.ttask .otvet-hint');
+    await snap('01-podskazka-formata');
+    await answer(page, ru(answerOf(id1)));
+    await page.waitForSelector('.tverdict--right');
+    await nextTask(page);
+    const id2 = await currentTask(page);
+    await answer(page, String(answerOf(id2) + 1).replace('.', ','));
+    await page.waitForSelector('.tverdict--wrong');
+    await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
+    await page.waitForSelector('.z8-razbor');
+    await snap('02-oshibka-i-reshenie', true);
+    await nextTask(page);
+    await page.locator('.ttask .zakladka').click();
+    for (let i = 0; i < 3; i += 1) {
+      await answer(page, ru(answerOf(await currentTask(page))));
+      await page.waitForSelector('.tverdict--right');
+      await nextTask(page);
+    }
+    await page.waitForSelector('.tsum');
+    await snap('03-itogi', true);
+    await page.locator('.tdone__actions button:has-text("Новая тренировка")').click();
+    await page.waitForSelector('.z8-progress');
+    await page.locator('.z8-progress').scrollIntoViewIfNeeded();
+    await snap('04-progress', true);
+
+    /* Решение по шагам с панелью «Признаки делимости». */
+    if (withDelimost !== null) {
+      await page.goto(`${SITE}${zadachaHref(withDelimost)}`, { waitUntil: 'networkidle' });
+      await page.waitForSelector('.ttask .ptask__card[data-task]');
+      await answer(page, String(answerOf(withDelimost) + 1).replace('.', ','));
+      await page.waitForSelector('.tverdict--wrong');
+      await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
+      await page.waitForSelector('.z8-delimost');
+      await page.locator('.z8-delimost summary').click();
+      await page.locator('.z8-razbor').scrollIntoViewIfNeeded();
+      await snap('05-reshenie-priznaki', true);
+    }
+
+    /* «О задании»: карточки навыков с прогрессом. */
+    await page.goto(ABOUT, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.z8-about-progress .tp-card');
+    await snap('06-o-zadanii', true);
+
+    /* Опорная задача: закладка и решение. */
+    await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/stepeni-korni/?zadacha=3`, {
+      waitUntil: 'networkidle',
+    });
+    await page.waitForSelector('.ptask .zakladka');
+    await page.locator('.ptask .zakladka').click();
+    const reveal = page.locator('.ptask__actions button:has-text("Показать решение")');
+    if ((await reveal.count()) > 0) {
+      await reveal.first().click();
+      await page.waitForSelector('.z8-razbor');
+    }
+    await snap('07-opornaya', true);
+    await context.close();
+  }
+  console.log(`Снимки: ${dir}`);
+}
+
+if (GALLERY !== null) {
+  try {
+    await runGallery(GALLERY);
+  } finally {
+    await browser.close();
+    server.close();
+  }
+  process.exit(0);
 }
 
 try {
@@ -233,6 +396,13 @@ try {
     await page.locator('.ttask .otvet-input__minus').click();
     check((await input.inputValue()) === '3', 'и убирает его');
     check(await noScroll(page), 'тренажёр 390: горизонтальной прокрутки нет');
+    {
+      const covered = await coveredControls(page, TASK_CONTROLS);
+      check(
+        covered.length === 0,
+        `телефон: поле, «−» и кнопки задачи ничем не закрыты${covered.length ? `: ${covered.join('; ')}` : ''}`,
+      );
+    }
 
     /* Задание 1: дробь с верным значением, неверные записи, потом верно. */
     const id1 = await currentTask(page);
@@ -277,6 +447,13 @@ try {
     await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
     await page.waitForSelector('.z8-razbor');
     check(true, 'решение открывается');
+    {
+      const covered = await coveredControls(page, TASK_CONTROLS);
+      check(
+        covered.length === 0,
+        `телефон, открыто решение: кнопки ничем не закрыты${covered.length ? `: ${covered.join('; ')}` : ''}`,
+      );
+    }
     await nextTask(page);
 
     /* Задание 3: отложить на потом. */
@@ -435,6 +612,13 @@ try {
     ]) {
       await page.goto(url, { waitUntil: 'networkidle' });
       check(await noScroll(page), `${name} ${width}: горизонтальной прокрутки нет`);
+      if (name === 'trenazher') {
+        const covered = await coveredControls(page, '.cfg-opt, .cfg-bar__start');
+        check(
+          covered.length === 0,
+          `тренажёр ${width}: выбор и «Начать» ничем не закрыты${covered.length ? `: ${covered.join('; ')}` : ''}`,
+        );
+      }
     }
     await context.close();
   }
