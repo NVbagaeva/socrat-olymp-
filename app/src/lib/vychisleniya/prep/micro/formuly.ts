@@ -162,4 +162,43 @@ export const FORMULY: PrepMicro[] = [
       proverka: k * Math.tan(toRad(x)) * Math.tan(toRad(90 - x)),
     };
   }),
+  micro('P8-4-09', 'Нечётность синуса и тангенса', '\\sin(-x) = -\\sin x,\\quad \\operatorname{tg}(-x) = -\\operatorname{tg} x', (r) => {
+    const f = r.pick(['sin', 'tg'] as const);
+    const x = r.pick([30, 45, 60]);
+    const t = table(f, x);
+    if (t === null) {
+      return null;
+    }
+    const c = r.int(2, 12);
+    const ans = round9(-c * t.v * t.r);
+    if (!nice(ans, 1) || ans < -100) {
+      return null;
+    }
+    const radians = r.int(0, 1) === 0;
+    const angle = radians ? `-${angleTex(x, true)}` : `-${x}^\\circ`;
+    const coef = coefRoot(c, t.r);
+    const tex = `${coef === '1' ? '' : coef}${fn(f)}\\left(${angle}\\right)`;
+    const tab = t.r === 1 ? (t.v === 1 ? '1' : '\\frac{1}{2}') : t.v === 1 ? `\\sqrt{${t.r}}` : `\\frac{\\sqrt{${t.r}}}{${t.v === 0.5 ? 2 : 3}}`;
+    return {
+      uslovie: naydi(tex),
+      otvet: ans,
+      razbor: `$${fn(f)}\\left(${angle}\\right) = -${fn(f)}${angleTex(x, radians)} = -${tab}$, поэтому $${tex} = ${d(ans)}$`,
+      proverka: -c * Math.sqrt(t.r) * numeric(f, x),
+    };
+  }),
+  micro('P8-4-10', 'Основное тригонометрическое тождество', '\\sin^2 x + \\cos^2 x = 1', (r) => {
+    const x = r.pick([13, 17, 22, 28, 34, 41, 52, 67, 71, 83]);
+    const k = r.int(2, 12);
+    const radians = r.int(0, 1) === 0;
+    const angle = radians ? rad(1, r.pick([5, 7, 8, 9])) : deg(x);
+    const kk = String(k);
+    const second = r.int(0, 1) === 0;
+    const tex = second
+      ? `\\dfrac{${kk} - ${kk}\\sin^2${angle}}{\\cos^2${angle}}`
+      : `${kk}\\sin^2${angle} + ${kk}\\cos^2${angle}`;
+    const razbor = second
+      ? `$${kk} - ${kk}\\sin^2${angle} = ${kk}(1 - \\sin^2${angle}) = ${kk}\\cos^2${angle}$, поэтому $${tex} = ${kk}$`
+      : `$${tex} = ${kk}(\\sin^2${angle} + \\cos^2${angle}) = ${kk} \\cdot 1 = ${kk}$`;
+    return { uslovie: naydi(tex), otvet: k, razbor, proverka: k };
+  }),
 ];
