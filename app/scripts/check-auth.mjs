@@ -1742,9 +1742,12 @@ async function runGalleryZ8(dir) {
       { timeout: 15000 },
     );
     await page.evaluate(() => document.fonts.ready);
+    /* «?» закреплена в углу экрана: на склеенном снимке всей страницы
+       она висела бы посреди блока. */
     await page.screenshot({
       path: path.join(dir, `${width}-08-kabinet-progress.png`),
       fullPage: true,
+      style: '.help-fab { visibility: hidden !important; }',
     });
     await context.close();
   }
