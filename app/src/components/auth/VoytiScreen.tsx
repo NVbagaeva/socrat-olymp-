@@ -21,9 +21,13 @@ import {
   REGISTER_FORM,
   emailLooksValid,
 } from '@/content/auth';
+import { ConsentChecks } from '@/components/account/ConsentChecks';
+import { legalDocs } from '@/content/legal/documents';
+import { birthYearValid, parentConsentNeeded } from '@/lib/account/consents';
 import { AUTH_HREF } from '@/lib/auth/config';
 import { AUTH_ERRORS, describeAuthError } from '@/lib/auth/errors';
 import { setRememberMe, useSessionUser, type UserRole } from '@/lib/auth/session';
+import { documentsVersion, operatorFilled } from '@/lib/legal/operator';
 import { PasswordField } from './PasswordField';
 import { RoleCards } from './RoleCards';
 
@@ -319,9 +323,18 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<UserRole | null>(null);
+  const [birthYear, setBirthYear] = useState('');
+  const [parentEmail, setParentEmail] = useState('');
+  const [consents, setConsents] = useState({ soglashenie: false, soglasie: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
+
+  /* Ученик указывает год рождения; младше 18 — ещё и почту родителя
+     (те же правила, что в базе: lib/account/consents.ts). */
+  const year = /^\d{4}$/.test(birthYear.trim()) ? Number(birthYear.trim()) : null;
+  const yearOk = year !== null && birthYearValid(year);
+  const needsParent = role === 'student' && yearOk && parentConsentNeeded(year);
   const [resent, setResent] = useState(false);
   const [cooldown, startCooldown] = useCooldown();
 
@@ -397,6 +410,29 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
       setError(REGISTER_FORM.roleRequired);
       return;
     }
+    const cleanParent = parentEmail.trim().toLowerCase();
+    if (role === 'student') {
+      if (!yearOk) {
+        setError(REGISTER_FORM.birthYearInvalid);
+        return;
+      }
+      if (needsParent && !emailLooksValid(cleanParent)) {
+        setError(REGISTER_FORM.parentEmailInvalid);
+        return;
+      }
+      if (needsParent && cleanParent === cleanEmail.toLowerCase()) {
+        setError(REGISTER_FORM.parentEmailSame);
+        return;
+      }
+    }
+    if (!consents.soglashenie || !consents.soglasie) {
+      setError(REGISTER_FORM.consentsRequired);
+      return;
+    }
+    if (!operatorFilled) {
+      setError(REGISTER_FORM.draftDocuments);
+      return;
+    }
     setBusy(true);
     try {
       /* Новый аккаунт — сессию помним: так ссылка из письма сразу откроет кабинет. */
@@ -407,7 +443,18 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
         email: cleanEmail,
         password,
         options: {
-          data: { name: cleanName, role },
+          /* Галочки и редакция документов уходят вместе с формой: база
+             не создаст аккаунт без них (триггер согласий), а дату и IP
+             согласия записывает сама. */
+          data: {
+            name: cleanName,
+            role,
+            documents_version: documentsVersion,
+            accept_soglashenie: true,
+            accept_soglasie: true,
+            ...(role === 'student' ? { birth_year: year } : {}),
+            ...(needsParent ? { parent_email: cleanParent } : {}),
+          },
           emailRedirectTo: backTo(AUTH_HREF.podtverzhdenie),
         },
       });
@@ -479,10 +526,57 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
           disabled={busy}
         />
       </fieldset>
+      {role === 'student' ? (
+        <div className="field">
+          <FieldLabel htmlFor={`${id}-year`}>{REGISTER_FORM.birthYear}</FieldLabel>
+          <Input
+            id={`${id}-year`}
+            name="birth-year"
+            type="text"
+            inputMode="numeric"
+            autoComplete="bday-year"
+            maxLength={4}
+            placeholder={REGISTER_FORM.birthYearPlaceholder}
+            value={birthYear}
+            onChange={(event) => setBirthYear(event.target.value.replace(/\D/g, ''))}
+            disabled={busy}
+          />
+          <FieldMessage>{REGISTER_FORM.birthYearHint}</FieldMessage>
+        </div>
+      ) : null}
+      {needsParent ? (
+        <div className="field">
+          <FieldLabel htmlFor={`${id}-parent`}>{REGISTER_FORM.parentEmail}</FieldLabel>
+          <Input
+            id={`${id}-parent`}
+            name="parent-email"
+            type="email"
+            inputMode="email"
+            autoComplete="off"
+            placeholder={LOGIN_FORM.emailPlaceholder}
+            value={parentEmail}
+            onChange={(event) => setParentEmail(event.target.value)}
+            disabled={busy}
+          />
+          <FieldMessage>{REGISTER_FORM.parentEmailHint}</FieldMessage>
+        </div>
+      ) : null}
+      <ConsentChecks value={consents} onChange={setConsents} />
+      <p className="auth-form__hint auth-form__politika">
+        {REGISTER_FORM.politika.before}{' '}
+        <a href={legalDocs.politika.href} target="_blank" rel="noopener">
+          {REGISTER_FORM.politika.link}
+        </a>
+      </p>
       {error !== null ? <FieldMessage tone="error">{error}</FieldMessage> : null}
       <Button type="submit" size="lg" fullWidth loading={busy}>
         {REGISTER_FORM.submit}
       </Button>
+      {!consents.soglashenie || !consents.soglasie ? (
+        <FieldMessage className="auth-form__consents-hint">
+          {REGISTER_FORM.consentsHint}
+        </FieldMessage>
+      ) : null}
       <p className="auth-form__switch">
         {REGISTER_FORM.haveAccount}{' '}
         <button type="button" className="auth-form__link" onClick={onLogin}>

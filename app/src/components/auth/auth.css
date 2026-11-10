@@ -209,13 +209,157 @@
   padding: var(--space-12) 0;
 }
 
-/* Кабинет: заголовок и три карточки. */
+/* Кабинет: заголовок, вкладки и карточки разделов. */
 .kabinet {
   display: grid;
   gap: var(--space-5);
 }
 .kabinet .auth-card__title {
   margin-bottom: 0;
+}
+.kabinet__head {
+  display: grid;
+  gap: var(--space-2);
+}
+.kabinet__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+.kabinet__role {
+  padding: 2px var(--space-3);
+  border-radius: 999px;
+  background: var(--color-surface-soft);
+  color: var(--color-primary-active);
+  font-size: 13px;
+  font-weight: 600;
+}
+.kabinet__name {
+  overflow-wrap: anywhere;
+}
+.kabinet__trial {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}
+.kabinet__notice {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.kabinet__notice--ok {
+  border-color: var(--color-border-info);
+  background: var(--color-surface-info);
+}
+/* Разделы — в две колонки, пока хватает ширины. */
+.kabinet__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  align-items: start;
+}
+.kabinet-stub {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+.kabinet-stub .card__head {
+  margin-bottom: 0;
+}
+.kabinet-stub__empty {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.kabinet-stub .btn {
+  justify-self: start;
+}
+.kabinet__hint,
+.kabinet__line {
+  display: block;
+}
+.kabinet__hint {
+  margin-top: var(--space-1);
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+}
+.kabinet__line + .kabinet__line {
+  margin-top: var(--space-1);
+}
+.kabinet__docs {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: 15px;
+}
+.kabinet__docs a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.kabinet__docs a:hover {
+  text-decoration: underline;
+}
+.kabinet__card .auth-form__actions + .auth-form__hint,
+.kabinet__card [data-field='consent'] + .auth-form__actions {
+  margin-top: var(--space-3);
+}
+.klass-list {
+  display: grid;
+  gap: var(--space-3);
+}
+.klass-list + .auth-form__text {
+  margin-top: var(--space-4);
+}
+.klass-list__item {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+}
+.klass-list__name {
+  font-weight: 600;
+}
+.klass-list__meta {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+}
+.klass-list__students {
+  display: grid;
+  gap: 2px;
+  margin-top: var(--space-1);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+.import-list {
+  display: grid;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  padding-left: var(--space-5);
+  list-style: disc;
+  font-size: 15px;
+  font-weight: 600;
+}
+.auth-form__politika {
+  margin-top: calc(var(--space-2) * -1);
+}
+.auth-form__politika a {
+  color: var(--color-primary);
+}
+.auth-form__consents-hint {
+  margin-top: calc(var(--space-2) * -1);
+  text-align: center;
 }
 .kabinet__facts {
   display: grid;
@@ -302,6 +446,12 @@
   .kabinet__facts > div {
     grid-template-columns: 1fr;
     gap: var(--space-1);
+  }
+  .kabinet__grid {
+    grid-template-columns: 1fr;
+  }
+  .kabinet__notice {
+    padding: var(--space-4);
   }
   .kit-list__item {
     grid-template-columns: auto minmax(0, 1fr);
