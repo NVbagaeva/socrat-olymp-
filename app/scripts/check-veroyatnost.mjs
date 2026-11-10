@@ -60,7 +60,8 @@ function walk(dir) {
 const out = fs.mkdtempSync(path.join(os.tmpdir(), 'veroyatnost-'));
 const src = path.join(root, 'src', 'lib');
 
-/* Банк тянет за собой разбор ответа из lib/answer.ts, общее
+/* Банк тянет за собой разбор ответа из lib/answer.ts (а тот — общий
+   модуль записи ответа lib/otvet), общее
    устройство печатей из lib/secret.ts, источник случайных чисел
    генератора из lib/zadanie3/podhod.ts, набор формул из lib/tex.ts (с
    разбором строки lib/razmetka.ts) и
@@ -75,6 +76,7 @@ const src = path.join(root, 'src', 'lib');
 for (const file of [
   ...walk(path.join(src, 'veroyatnost')),
   path.join(src, 'answer.ts'),
+  path.join(src, 'otvet', 'index.ts'),
   path.join(src, 'secret.ts'),
   path.join(src, 'plural.ts'),
   path.join(src, 'tex.ts'),
