@@ -466,3 +466,15 @@
     transition: none;
   }
 }
+
+/* Прогресс №8 в кабинете ученика: блок тренажёра внутри карточки. */
+.kabinet__progress .tstats {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.kabinet__progress-go {
+  margin: var(--space-4) 0 0;
+}

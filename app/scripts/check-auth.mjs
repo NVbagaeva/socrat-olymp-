@@ -1231,16 +1231,17 @@ async function runEnabled() {
       (await page.locator('.kabinet__role').innerText()) === 'Кабинет ученика',
       'кабинет: «Кабинет ученика»',
     );
-    for (const [section, title] of [
-      ['progress', 'Прогресс'],
-      ['mistakes', 'Мои ошибки'],
-      ['later', 'Отложенные'],
-      ['homework', 'Домашние задания'],
+    for (const [section, title, empty] of [
+      ['progress', 'Мой прогресс в №8', 'Решено 0 из 260'],
+      ['mistakes8', 'Мои ошибки', 'Ошибок нет'],
+      ['later8', 'Отложенные', 'Ничего не отложено'],
+      ['history8', 'История тренировок', 'Завершённых тренировок пока нет'],
+      ['homework', 'Домашние задания', 'Заданий пока нет'],
     ]) {
-      const text = await page.locator(`[data-section="${section}"]`).innerText();
+      const text = (await page.locator(`[data-section="${section}"]`).innerText()).replace(/\s+/g, ' ');
       check(
-        text.includes(title) && text.length > title.length + 40,
-        `ученик: «${title}» с пояснением`,
+        text.includes(title) && text.includes(empty),
+        `ученик: «${title}» — «${empty}»`,
       );
     }
     check(

@@ -23,6 +23,8 @@ import type { SavedKit } from '@/lib/auth/kits';
 import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
+import { Progress8, type Names8 } from '@/components/tasks/vychisleniya/Progress8';
+import { BANK_TOTAL } from '@/lib/vychisleniya/ids';
 import {
   importedGroups,
   localProgress,
@@ -46,7 +48,7 @@ const TRAINER_8 = '/zadaniya/8/trenazher/';
  * сохранено, документы, выход и удаление аккаунта. Показывает только
  * то, что действительно лежит в базе.
  */
-export function KabinetScreen() {
+export function KabinetScreen({ names8 }: { names8: Names8 }) {
   const user = useSessionUser();
   const [view, setView] = useState<View>('loading');
   const [tab, setTab] = useState<Tab>('home');
@@ -227,7 +229,7 @@ export function KabinetScreen() {
       {tab === 'home' ? (
         <>
           <p className="kabinet__trial">{KABINET.trial}</p>
-          {profile.role === 'student' ? <StudentHome klassy={klassy} /> : null}
+          {profile.role === 'student' ? <StudentHome klassy={klassy} names8={names8} /> : null}
           {profile.role === 'tutor' ? <TutorHome klassy={klassy} kits={kits} /> : null}
           {profile.role === 'admin' ? (
             <Card className="kabinet__card" title={KABINET.admin.title}>
@@ -291,36 +293,26 @@ function Stub({
 
 /* ── Кабинет ученика ──────────────────────────────────────────── */
 
-function StudentHome({ klassy }: { klassy: KlassView[] | null }) {
+function StudentHome({ klassy, names8 }: { klassy: KlassView[] | null; names8: Names8 }) {
   const t = KABINET.student;
   return (
     <>
-      <div className="kabinet__grid">
-        <Stub
-          section="progress"
-          title={t.progress.title}
-          empty={t.progress.empty}
-          text={t.progress.text}
-          action={
-            <Link className="btn btn--secondary btn--sm" href={TRAINER_8}>
-              {t.progress.go}
-            </Link>
-          }
-        />
-        <Stub
-          section="mistakes"
-          title={t.mistakes.title}
-          empty={t.mistakes.empty}
-          text={t.mistakes.text}
-        />
-        <Stub section="later" title={t.later.title} empty={t.later.empty} text={t.later.text} />
-        <Stub
-          section="homework"
-          title={t.homework.title}
-          empty={t.homework.empty}
-          text={t.homework.text}
-        />
-      </div>
+      <Stub
+        section="homework"
+        title={t.homework.title}
+        empty={t.homework.empty}
+        text={t.homework.text}
+      />
+      {/* Прогресс №8: журнал, «Мои ошибки», «Отложенные», история — то же,
+         что под тренажёром; со входом — с любого устройства. */}
+      <Card className="kabinet__card kabinet__progress" data-section="progress">
+        <Progress8 total={BANK_TOTAL} names={names8} showReset={false} />
+        <p className="kabinet__progress-go">
+          <Link className="btn btn--secondary btn--sm" href={TRAINER_8}>
+            {t.progress.go}
+          </Link>
+        </p>
+      </Card>
       <Card className="kabinet__card" title={t.classes.title} data-section="classes">
         {klassy === null ? (
           <p className="auth-form__muted">…</p>
