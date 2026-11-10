@@ -31,7 +31,7 @@
 import { getClient } from '@/lib/auth/client';
 import { currentUser } from '@/lib/auth/session';
 import { importAnswer, localProgress, rememberImportAnswer } from '@/lib/progressImport';
-import { migrateAllLegacyLogs } from '@/lib/progressLog';
+import { LEGACY_LOGS, migrateAllLegacyLogs } from '@/lib/progressLog';
 import { browserStorage } from '@/lib/storage';
 import { LOCAL_CHANGE_EVENT, SYNC_APPLIED_EVENT } from '@/lib/syncedStore';
 import { notifySessionsChanged } from '@/lib/trainerSession/store';
@@ -174,7 +174,9 @@ export function stashGuestProgress(userId: string): void {
   const target = browserStorage();
   if (target === null) return;
   migrateAllLegacyLogs();
-  for (const key of SYNCED_KEYS) {
+  /* Прежние ключи — тоже в сторону: иначе следующий проход свернёт их в
+     журнал заново и отправит прогресс гостя в аккаунт вопреки «Нет». */
+  for (const key of [...SYNCED_KEYS, ...Object.values(LEGACY_LOGS)]) {
     try {
       const raw = target.getItem(key);
       if (raw === null) continue;
@@ -217,6 +219,18 @@ export async function importStash(): Promise<SyncResult> {
         target.removeItem(`${STASH_PREFIX}${key}`);
       } catch {
         /* Испорченное отложенное — пропускаем. */
+      }
+    }
+    /* Прежние ключи возвращаются на место как были (на случай отката):
+       журнал из них уже свёрнут и слит, второй раз он не сворачивается. */
+    for (const legacy of Object.values(LEGACY_LOGS)) {
+      try {
+        const raw = target.getItem(`${STASH_PREFIX}${legacy}`);
+        if (raw === null) continue;
+        if (target.getItem(legacy) === null) target.setItem(legacy, raw);
+        target.removeItem(`${STASH_PREFIX}${legacy}`);
+      } catch {
+        /* Не вышло вернуть — прежний ключ нужен только для отката. */
       }
     }
     window.dispatchEvent(

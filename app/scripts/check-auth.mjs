@@ -719,7 +719,10 @@ function* walk(dir) {
 
 /* ── Сборка со входом ──────────────────────────────────────────── */
 
+/* Прогресс №8 прежнего формата: при входе он сворачивается в журнал LOG_8,
+   в аккаунт уходит журнал, а сам прежний ключ остаётся в браузере. */
 const PROGRESS_8 = 'budetege:vychisleniya-8:v1';
+const LOG_8 = 'budetege:vychisleniya-8:log:v1';
 const PREP_8 = 'budetege:vychisleniya-8:prep:v1';
 
 /** Отметить обе галочки согласий в форме регистрации. */
@@ -988,12 +991,15 @@ async function runEnabled() {
         .map((r) => r.key)
         .sort();
       check(
-        keys.length === 2 && keys.includes(PROGRESS_8) && keys.includes(PREP_8),
-        '«Да»: ключи №8 записаны в аккаунт',
+        keys.length === 2 && keys.includes(LOG_8) && keys.includes(PREP_8),
+        `«Да»: журнал №8 и опорные записаны в аккаунт (${keys.join(', ')})`,
+      );
+      const archive = Object.values(
+        mock.storage.find((r) => r.user_id === me.id && r.key === LOG_8)?.value?.archive ?? {},
       );
       check(
-        mock.storage.find((r) => r.key === PROGRESS_8)?.value?.kinds?.['8.A']?.done === 3,
-        '«Да»: значение перенесено как есть',
+        archive.length === 1 && archive[0]?.['8.A']?.done === 3,
+        '«Да»: прежние счётчики перенесены в журнал',
       );
     }
     check(
@@ -1286,6 +1292,10 @@ async function runEnabled() {
     check(
       (await page.locator('[role="dialog"]').count()) === 0,
       '«Нет» запомнено: вопрос не повторяется',
+    );
+    check(
+      mock.storage.filter((r) => r.user_id === student.id).length === 0,
+      '«Нет»: и после следующего прохода синхронизации прогресс гостя не в аккаунте',
     );
 
     /* Тестовый класс, как после кнопки «Сервер: тестовые данные». */
