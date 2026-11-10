@@ -178,3 +178,44 @@
 .z8-skill-tile__formula .katex {
   white-space: nowrap;
 }
+
+/* ── Задача тренажёра и опорная: инструменты и поле ответа ── */
+.z8-task__tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-4);
+}
+.z8-answer {
+  width: 100%;
+}
+
+/* ── Прогресс №8 ── */
+.z8-progress {
+  display: grid;
+  gap: var(--space-4);
+}
+.z8-counter b {
+  font-variant-numeric: tabular-nums;
+}
+.z8-sum-mistakes {
+  margin: 0;
+  font-size: 15px;
+}
+.z8-about-progress {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-10);
+}
+.z8-about-progress__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.z8-about-progress__head .tstats__counter {
+  margin: 0;
+}
+.z8-about-progress__foot {
+  margin: 0;
+}

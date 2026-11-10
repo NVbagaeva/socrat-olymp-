@@ -39,6 +39,7 @@ export default async function Podgotovka8BlockPage({ params }: { params: Params 
       <ErrorBoundary what="задачи">
         <Podgotovka8Screen
           blockId={block.id}
+          slug={block.slug}
           title={block.nazvanie}
           tasks={block.zadachi}
           formulyHtml={block.formulyHtml}

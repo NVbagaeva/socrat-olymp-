@@ -2,11 +2,16 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
-import { Button, Input } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
+import { formatHint, fractionRightHint } from '@/lib/otvet';
 import { pickRound, useRound } from '@/lib/trainerRound';
-import { progress8 } from '@/lib/vychisleniya/progress';
-import { answerMatches, openText } from '@/lib/vychisleniya/secret';
+import { zadachaHref } from '@/lib/vychisleniya/links';
+import { log8 } from '@/lib/vychisleniya/progress';
+import { openText, readSealed } from '@/lib/vychisleniya/secret';
 import { kindTitle, type Task8 } from '@/lib/vychisleniya/session';
+import type { LogOutcome } from '@/lib/progressLog';
+import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
 import { SKILL_FORMULA } from '@/content/vychisleniya';
 import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { Formula } from './Formula';
@@ -83,6 +88,11 @@ export function Trenazher8Screen({
      задание, от первой проверки. */
   const [taskFrom, setTaskFrom] = useState<number | null>(restored?.taskFrom ?? null);
   const [failed, setFailed] = useState(restored?.failed ?? false);
+  /* Подсказка о записи ответа: дробь, «5 см», «3 1/2». Не ошибка, попытка
+     не тратится; не хранится — при возврате ученик просто проверит снова. */
+  const [hint, setHint] = useState<string | null>(null);
+  /* Неверный ответ был записан дробью: к вердикту — напоминание о записи. */
+  const [viaFraction, setViaFraction] = useState(false);
 
   function startClock() {
     if (taskFrom === null) {
@@ -94,8 +104,18 @@ export function Trenazher8Screen({
     return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
   }
 
-  function remember(item: Task8, right: boolean, clean: boolean) {
-    progress8.recordAttempt({ kind: item.prototype, taskId: item.id, right, clean, seconds: taskSeconds() });
+  /* Журнал попыток (lib/progressLog): из него считаются прогресс по
+     типам, «Стоит повторить» и «Мои ошибки». Аналог из «Работы над
+     ошибками» записывается с задачей, ошибку в которой он закрывает. */
+  function remember(item: Task8, outcome: LogOutcome) {
+    log8.record({
+      task: item.id,
+      kind: item.prototype,
+      outcome,
+      seconds: Math.round(taskSeconds()),
+      session: roundKey,
+      ...(item.fixes === undefined ? {} : { fixes: item.fixes }),
+    });
   }
 
   /* Всё состояние экрана — оболочке сессии: она сохраняет его при
@@ -127,12 +147,26 @@ export function Trenazher8Screen({
 
   function check() {
     startClock();
-    const right = answerMatches(value, task.seal);
+    const reading = readSealed(value, task.seal, 'trenazher');
+    if (reading.kind === 'format') {
+      /* Неверная запись: подсказка, попытка не тратится. */
+      setHint(formatHint(reading.problem, reading.meant));
+      return;
+    }
+    if (reading.kind === 'fractionRight') {
+      /* Значение верное, но дробью: не засчитано и не ошибка. */
+      setHint(fractionRightHint(reading.decimal));
+      return;
+    }
+    setHint(null);
+    const right = reading.right;
+    setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       const clean = !failed && solution === null;
       setMarks({ ...marks, [index]: clean || solution === null ? 'right' : 'hinted' });
-      remember(task, solution === null, clean);
+      /* Решение открыто раньше — исход уже записан как «открыто решение». */
+      if (solution === null) remember(task, clean ? 'right' : 'wrong');
     } else {
       setFailed(true);
       setMisses(misses + 1);
@@ -146,7 +180,7 @@ export function Trenazher8Screen({
     if (checked !== 'right') {
       /* Решение открыто до ответа: задача пройдена с подсказкой. */
       setMarks({ ...marks, [index]: 'hinted' });
-      remember(task, false, false);
+      remember(task, 'revealed');
     }
   }
 
@@ -157,6 +191,8 @@ export function Trenazher8Screen({
     setValue('');
     setChecked(null);
     setSolutionOpen(false);
+    setHint(null);
+    setViaFraction(false);
   }
 
   const nextButton = last ? (
@@ -186,27 +222,44 @@ export function Trenazher8Screen({
         <div className="ptask__text">
           <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.questionHtml }} />
         </div>
+        <div className="z8-task__tools">
+          <BookmarkButton
+            section="8"
+            place="trenazher"
+            refId={task.id}
+            title={`№8 · тренажёр, тип ${task.prototype}`}
+            href={zadachaHref(task.id)}
+          />
+        </div>
       </article>
 
       <div className="ttask__answer">
         <p className="ptask__label" id="ttask-answer-label">
           Ваш ответ:
         </p>
-        <Input
-          className="ttask__input"
-          value={value}
-          state={checked === null ? 'default' : checked === 'right' ? 'success' : 'error'}
-          inputMode="text"
-          autoComplete="off"
-          aria-labelledby="ttask-answer-label"
-          readOnly={checked === 'right'}
-          onChange={(event) => {
-            setValue(event.target.value);
-            if (checked === 'wrong') {
-              setChecked(null);
-            }
+        <form
+          className="z8-answer"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (ready && !done) check();
           }}
-        />
+        >
+          <AnswerInput
+            className="ttask__input"
+            value={value}
+            state={checked === null ? 'default' : checked === 'right' ? 'success' : 'error'}
+            aria-labelledby="ttask-answer-label"
+            readOnly={checked === 'right'}
+            onChange={(next) => {
+              setValue(next);
+              setHint(null);
+              if (checked === 'wrong') {
+                setChecked(null);
+              }
+            }}
+          />
+        </form>
+        {hint === null ? null : <FormatHint text={hint} />}
 
         {checked === null ? null : (
           <div className={clsx('tverdict', `tverdict--${checked}`)} role="status">
@@ -220,7 +273,9 @@ export function Trenazher8Screen({
                   ? revealed
                     ? 'Ответ верный, но решение было открыто — задача не засчитана.'
                     : 'Ответ сошёлся с отпечатком верного.'
-                  : 'Проверьте вычисления: ответ не сошёлся. Можно исправить и проверить ещё раз.'}
+                  : viaFraction
+                    ? 'Ответ не сошёлся. И ещё: в бланк ЕГЭ записывают десятичную дробь, а не обыкновенную.'
+                    : 'Проверьте вычисления: ответ не сошёлся. Можно исправить и проверить ещё раз.'}
               </p>
             )}
           </div>

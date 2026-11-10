@@ -15,6 +15,7 @@ import { PREP_BLOCKS } from './prep/blocks';
 import { fixedSeed, generatePrep } from './prep/generate';
 import { PROTOTYPES } from './prototypes';
 import { normalizeAnswer } from '../otvet';
+import { PROTOTYPE_NAMES } from './ids';
 import { answerRecord, readSealed, sealAnswer } from './secret';
 import { SKILLS } from './skills';
 import type { Generated, Level } from './types';
@@ -99,6 +100,15 @@ export function checkTask(task: Generated, typeset: ((tex: string) => void) | nu
 export function checkGenerators(seedsPerLevel: number, typeset: ((tex: string) => void) | null): Report {
   const problems: Problem[] = [];
   let generated = 0;
+  /* Лёгкий список названий (ids.ts) совпадает с прототипами. */
+  for (const prototype of PROTOTYPES) {
+    if (PROTOTYPE_NAMES[prototype.id] !== prototype.nazvanie) {
+      problems.push({ where: prototype.id, what: `название в ids.ts не совпадает с прототипом: ${prototype.nazvanie}` });
+    }
+  }
+  if (Object.keys(PROTOTYPE_NAMES).length !== PROTOTYPES.length) {
+    problems.push({ where: 'ids.ts', what: 'в списке названий лишние или недостающие прототипы' });
+  }
   for (const prototype of PROTOTYPES) {
     const levels: (Level | null)[] = [null, 'base', 'advanced'].filter(
       (level) => level === null || hasLevel(prototype, level as Level),

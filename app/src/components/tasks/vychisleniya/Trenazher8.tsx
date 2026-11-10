@@ -1,19 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 import { Badge, Button } from '@/components/ui';
 import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
 import { trainerModes, trainerPage, type TrainerModeId } from '@/content/trainerModes';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
 import { counted } from '@/lib/plural';
-import { progress8 } from '@/lib/vychisleniya/progress';
-import { buildSession8, kindTitle } from '@/lib/vychisleniya/session';
+import { closedTasks, mistakes as openMistakes } from '@/lib/progressLog';
+import { OSHIBKI8 } from '@/lib/vychisleniya/links';
+import { log8 } from '@/lib/vychisleniya/progress';
+import {
+  BANK_TOTAL,
+  buildMistakes8,
+  buildSession8,
+  kindTitle,
+  prototypeOfTask,
+  taskById,
+} from '@/lib/vychisleniya/session';
 import { LEVELS } from '@/lib/vychisleniya/skills';
 import type { Level } from '@/lib/vychisleniya/types';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
 import { TrainerSessionHost, type ConfiguratorApi } from '../session';
 import { Trenazher8Screen, razborOf } from './Trenazher8Screen';
-import { Trenazher8Stats } from './Trenazher8Stats';
+import { Progress8, type Names8 } from './Progress8';
 import {
   isTrenazher8Payload,
   packTrenazher8,
@@ -30,21 +40,40 @@ export interface Trenazher8Props {
   skills: SkillItem[];
   /** Сколько заданий во всём банке раздела. */
   total: number;
+  /** Названия прототипов, набранные KaTeX на сборке. */
+  names: Names8;
 }
 
 const COUNTS: (number | null)[] = [5, 10, 20, null];
+
+/**
+ * Режимы №8: те же, что у других тренажёров, но вместо «Повтора ошибок»
+ * — «Работа над ошибками»: новые задачи того же типа, а не те же самые.
+ */
+const MODES8 = trainerModes.map((item) =>
+  item.id === 'mistakes'
+    ? { ...item, title: 'Работа над ошибками', lead: 'Новые задачи того же типа, что и ошибки' }
+    : item,
+);
 
 /**
  * Тренажёр задания №8: оболочка сессии вокруг конфигуратора и экрана.
  * Задания собираются в браузере; в хранилище уходит только рецепт
  * (идентификаторы задач и подписи), открытые числа туда не попадают.
  */
-export function Trenazher8({ base, skills, total }: Trenazher8Props) {
+export function Trenazher8({ base, skills, total, names }: Trenazher8Props) {
+  /* Вход по ссылке: одна задача из закладки (?zadacha=) или «Работа над
+     ошибками» (?rezhim=oshibki). Читается до первой отрисовки оболочки:
+     при незавершённой тренировке она спросит, продолжить её или начать
+     новую по ссылке. */
+  const [intent] = useState<Intent>(readIntent);
   return (
     <TrainerSessionHost<Trenazher8Payload, Trenazher8Ui>
       scope={scopeOfPath(base) ?? '8'}
       what="тренажёр"
       backHref={base}
+      entryIntent={intent !== null}
+      onEntryResolved={clearIntent}
       isPayload={isTrenazher8Payload}
       count={(payload) => payload.tasks.length}
       describe={(payload, at) => {
@@ -65,17 +94,21 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
           ),
         };
       }}
-      subset={(payload, indexes) => ({
-        ...payload,
-        tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
-      })}
+      /* «Прорешать те же задачи» нет: повтор той же задачи ничего не
+         проверяет. Вместо него — «Похожие задачи»: новые аналоги. */
       similar={similarTrenazher8}
       /* В записи — рецепт (идентификаторы и подписи): задачи по нему
          собираются заново тем же генератором. */
       pack={packTrenazher8}
       unpack={unpackTrenazher8}
-      summary={{ hintedLabel: 'Решено с открытым решением' }}
-      configurator={(api) => <Trenazher8Configurator skills={skills} total={total} api={api} />}
+      summary={{
+        hintedLabel: 'Решено с открытым решением',
+        showWeak: true,
+        extra: () => <MistakesLink />,
+      }}
+      configurator={(api) => (
+        <Trenazher8Configurator skills={skills} total={total} names={names} api={api} intent={intent} />
+      )}
       screen={({ payload, sessionId, restored, report, elapsed, finish }) => (
         <Trenazher8Screen
           pool={payload.tasks}
@@ -91,6 +124,38 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
   );
 }
 
+type Intent = { kind: 'zadacha'; id: string } | { kind: 'oshibki' } | null;
+
+function readIntent(): Intent {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('zadacha');
+  if (id !== null && taskById(id) !== null) return { kind: 'zadacha', id };
+  if (params.get('rezhim') === 'oshibki') return { kind: 'oshibki' };
+  return null;
+}
+
+/** Убрать параметры ссылки из адреса: вопрос о незавершённой тренировке не повторится. */
+function clearIntent() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('zadacha');
+  url.searchParams.delete('rezhim');
+  window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+}
+
+/** Под итогами: сколько задач в «Моих ошибках» и ссылка на работу над ними. */
+function MistakesLink() {
+  const log = log8.use();
+  const open = openMistakes(log, prototypeOfTask);
+  if (open.length === 0) return null;
+  return (
+    <p className="z8-sum-mistakes">
+      В «Моих ошибках» — {counted(open.length, 'задача', 'задачи', 'задач')}.{' '}
+      <Link href={OSHIBKI8}>Работа над ошибками →</Link>
+    </p>
+  );
+}
+
 /**
  * Конфигуратор тренировки №8: навыки → режим → количество → уровень.
  * Навыков можно выбрать несколько: «Отработка» и «Контроль» идут по
@@ -103,23 +168,36 @@ export function Trenazher8({ base, skills, total }: Trenazher8Props) {
 function Trenazher8Configurator({
   skills,
   total,
+  names,
   api,
+  intent,
 }: {
   skills: SkillItem[];
   total: number;
+  names: Names8;
   api: ConfiguratorApi<Trenazher8Payload>;
+  intent: Intent;
 }) {
   const first = skills[0];
   /* Навыков можно выбрать несколько; последний снять нельзя. */
   const [selected, setSelected] = useState<string[]>(first === undefined ? [] : [first.id]);
-  const [mode, setMode] = useState<TrainerModeId>('practice');
+  const [mode, setMode] = useState<TrainerModeId>(intent?.kind === 'oshibki' ? 'mistakes' : 'practice');
+  /* Закладка: одна задача сразу, без выбора тренировки. Один раз. */
+  const opened = useRef(false);
+  useEffect(() => {
+    if (opened.current || intent?.kind !== 'zadacha') return;
+    opened.current = true;
+    const task = taskById(intent.id);
+    if (task !== null) api.start({ tasks: [task], control: false });
+  }, [intent, api]);
   const [count, setCount] = useState<number | null>(10);
   const [level, setLevel] = useState<Level>('base');
 
-  /* История ошибок только читается: «Повтор ошибок» доступен, когда
-     есть что повторять. */
-  const progress = progress8.useProgress();
-  const hasMistakes = progress.mistakes.length > 0;
+  /* Журнал только читается: «Работа над ошибками» доступна, когда есть
+     ошибки; задачи банка, которые уже решались, не повторяются. */
+  const log = log8.use();
+  const mistakeList = openMistakes(log, prototypeOfTask);
+  const hasMistakes = mistakeList.length > 0;
 
   function toggleSkill(id: string) {
     const next = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
@@ -146,8 +224,8 @@ function Trenazher8Configurator({
           : counted(chosen.length, 'навык', 'навыка', 'навыков');
 
   const allCount =
-    mode === 'mixed' ? total : mode === 'mistakes' ? progress.mistakes.length : chosenTotal;
-  const modeTitle = trainerModes.find((item) => item.id === mode)?.title ?? '';
+    mode === 'mixed' ? total : mode === 'mistakes' ? mistakeList.length * 2 : chosenTotal;
+  const modeTitle = MODES8.find((item) => item.id === mode)?.title ?? '';
   const chosenCount = count ?? allCount;
 
   function start() {
@@ -162,7 +240,8 @@ function Trenazher8Configurator({
       level: mode === 'mistakes' ? null : level,
       count: chosenCount,
       mode,
-      mistakes: progress.mistakes,
+      mistakes: mistakeList,
+      closed: closedTasks(log),
     });
     if (tasks.length === 0) {
       return;
@@ -206,7 +285,7 @@ function Trenazher8Configurator({
             />
             <div className="cfg-params">
               <OptionGroup id="z8-param-mode" label={trainerPage.params.mode}>
-                {trainerModes.map((item) => {
+                {MODES8.map((item) => {
                   const locked = item.id === 'mistakes' && !hasMistakes;
                   return (
                     <Option
@@ -277,7 +356,14 @@ function Trenazher8Configurator({
         </p>
       </div>
 
-      <Trenazher8Stats total={total} />
+      <Progress8
+        total={BANK_TOTAL}
+        names={names}
+        onFixMistakes={() => {
+          const tasks = buildMistakes8(mistakeList, Math.min(20, mistakeList.length * 2));
+          if (tasks.length > 0) api.start({ tasks, control: false });
+        }}
+      />
     </div>
   );
 }

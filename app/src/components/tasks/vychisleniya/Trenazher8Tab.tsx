@@ -3,6 +3,7 @@ import { TabScrollOnMount } from '../TabScroll';
 import { trainerPage } from '@/content/trainerModes';
 import { SKILL_FORMULA } from '@/content/vychisleniya';
 import { BANK } from '@/lib/vychisleniya/bank';
+import { names8Html } from '@/lib/vychisleniya/names';
 import { SKILLS } from '@/lib/vychisleniya/skills';
 import { Formula } from './Formula';
 import { Trenazher8 } from './Trenazher8';
@@ -31,7 +32,7 @@ export function Trenazher8Tab({ base }: { base: string }) {
         <h2 className="t-h2 trainer__title">{trainerPage.title}</h2>
       </header>
       <TabScrollOnMount />
-      <Trenazher8 base={base} skills={skills} total={total} />
+      <Trenazher8 base={base} skills={skills} total={total} names={names8Html()} />
     </section>
   );
 }

@@ -1,6 +1,9 @@
 import { ABOUT_GROUPS, VYCHISLENIYA, SKILL_FORMULA } from '@/content/vychisleniya';
+import { BANK_TOTAL } from '@/lib/vychisleniya/ids';
+import { names8Html } from '@/lib/vychisleniya/names';
 import { SKILLS } from '@/lib/vychisleniya/skills';
 import { Formula } from './Formula';
+import { Progress8Compact } from './Progress8';
 
 /**
  * Вкладка «О задании» задания №8.
@@ -16,6 +19,9 @@ export function VychisleniyaAbout() {
         <h2 className="t-h2 z8-about__title">{VYCHISLENIYA.about.title}</h2>
         <p className="z8-about__text">{VYCHISLENIYA.about.lead}</p>
       </section>
+
+      {/* Прогресс ученика по навыкам: из браузера, со входом — из кабинета. */}
+      <Progress8Compact total={BANK_TOTAL} names={names8Html()} />
 
       <section className="z8-about__groups">
         <h3 className="t-h4 z8-about__sub">{VYCHISLENIYA.about.groupsTitle}</h3>
