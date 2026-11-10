@@ -72,11 +72,17 @@ const PORT = 4181;
 const SUPABASE = 'http://127.0.0.1:54321';
 const DISABLED = process.argv.includes('--disabled');
 const NO_HEADER = process.argv.includes('--no-header');
+/* Снимки кабинета ученика с прогрессом №8 для описания PR этапа 2. */
+const GALLERY_Z8 = process.argv.includes('--gallery-z8')
+  ? (process.argv[process.argv.indexOf('--gallery-z8') + 1] ?? 'snimki-z8-kabinet')
+  : null;
 const GALLERY = process.argv.includes('--gallery')
   ? (process.argv[process.argv.indexOf('--gallery') + 1] ?? 'snimki-pr')
   : null;
 const SHOTS =
-  GALLERY !== null ? null : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
+  GALLERY !== null || GALLERY_Z8 !== null
+    ? null
+    : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   console.error('Нет out/index.html — сначала pnpm build.');
@@ -1665,6 +1671,86 @@ async function runNoHeader() {
 /** Ключевые экраны на четырёх ширинах, с плотностью 2 — их смотрит человек.
     Запуск: node scripts/check-auth.mjs --gallery <папка>. Проверок здесь
     нет: только снимки. Годится любая сборка со входом. */
+/**
+ * Кабинет ученика после тренировки №8: решено, ошибка, закладка, история.
+ * Тренировка проходит один раз на компьютере; на остальных ширинах тот же
+ * ученик входит заново, и прогресс приходит из аккаунта.
+ */
+async function runGalleryZ8(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const mock = makeMock();
+  registerInMock(mock, 'dva@example.ru', 'dva-ustroystva-1', 'Анна Смирнова', 'student');
+  const me = mock.users.get('dva@example.ru');
+  const CARD = '.ttask .ptask__card[data-task]';
+  const answerOf = (id) => {
+    const p = parseTaskId(id);
+    return generate(p.prototype, p.seed, p.level).otvet;
+  };
+  let trained = false;
+  for (const width of [1280, 375, 390, 430, 768]) {
+    const context = await browser.newContext({
+      viewport: { width, height: width < 500 ? 812 : 900 },
+      deviceScaleFactor: 2,
+      hasTouch: width < 500,
+    });
+    await welcomeSeen(context);
+    await installMock(context, mock);
+    const page = await context.newPage();
+    await login(page, 'dva@example.ru', 'dva-ustroystva-1');
+    if (!trained) {
+      await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+      await page.waitForSelector('.cfg');
+      await page
+        .locator('[aria-labelledby="z8-param-count"] .cfg-opt')
+        .filter({ hasText: /^5$/ })
+        .first()
+        .click();
+      await page.locator('.cfg-bar__start').click();
+      for (let i = 0; i < 5; i += 1) {
+        await page.waitForSelector(CARD);
+        const id = await page.locator(CARD).getAttribute('data-task');
+        const right = answerOf(id);
+        await page.fill('.ttask .otvet-input__field', ru(i === 1 ? right + 1 : right));
+        await page.locator('.ttask__actions button:has-text("Проверить")').click();
+        if (i === 1) {
+          await page.waitForSelector('.tverdict--wrong');
+          await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
+        }
+        if (i === 2) await page.locator('.ttask .zakladka').click();
+        const next = page.locator('.ttask__actions button:has-text("Следующее задание")');
+        if ((await next.count()) > 0) await next.click();
+        else await page.locator('.ttask__actions button:has-text("Смотреть результат")').click();
+      }
+      await page.waitForSelector('.tsum');
+      /* Записи — в аккаунт: после паузы синхронизации в моке есть журнал. */
+      const until = Date.now() + 15000;
+      while (
+        Date.now() < until &&
+        !mock.storage.some((r) => r.user_id === me.id && r.key === 'budetege:istoriya:v1')
+      ) {
+        await new Promise((done) => setTimeout(done, 250));
+      }
+      trained = true;
+      await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    }
+    await page.waitForFunction(
+      () =>
+        /Решено\s*5\s*из\s*260/.test(
+          document.querySelector('[data-section="progress"]')?.textContent ?? '',
+        ),
+      null,
+      { timeout: 15000 },
+    );
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({
+      path: path.join(dir, `${width}-08-kabinet-progress.png`),
+      fullPage: true,
+    });
+    await context.close();
+  }
+  console.log(`Снимки: ${dir}`);
+}
+
 async function runGallery(dir) {
   fs.mkdirSync(dir, { recursive: true });
   const mock = makeMock();
@@ -1730,6 +1816,7 @@ async function runGallery(dir) {
 try {
   if (DISABLED) await runDisabled();
   else if (GALLERY !== null) await runGallery(GALLERY);
+  else if (GALLERY_Z8 !== null) await runGalleryZ8(GALLERY_Z8);
   else if (NO_HEADER) await runNoHeader();
   else await runEnabled();
 } finally {

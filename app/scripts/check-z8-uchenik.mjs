@@ -261,6 +261,34 @@ async function runGallery(dir) {
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({ path: path.join(dir, `${width}-${name}.png`), fullPage });
     };
+    /* Блок целиком, без шапки и подвала: так снимок читается в описании PR. */
+    const snapBlock = async (name, selector) => {
+      await page.evaluate(() => document.fonts.ready);
+      /* Высокий блок снимается по частям, и закреплённые ленты и кнопки
+         оказались бы посреди снимка: на время снимка они скрыты. */
+      await page.evaluate((sel) => {
+        const block = document.querySelector(sel);
+        for (const el of document.querySelectorAll('body *')) {
+          const pos = getComputedStyle(el).position;
+          if ((pos === 'fixed' || pos === 'sticky') && !block?.contains(el)) {
+            el.setAttribute('data-shot-hide', '');
+          }
+        }
+      }, selector);
+      await page
+        .locator(selector)
+        .first()
+        .screenshot({
+          path: path.join(dir, `${width}-${name}.png`),
+          style:
+            '[data-shot-hide], [data-shot-hide] * { visibility: hidden !important; opacity: 0 !important; }',
+        });
+      await page.evaluate(() =>
+        document
+          .querySelectorAll('[data-shot-hide]')
+          .forEach((el) => el.removeAttribute('data-shot-hide')),
+      );
+    };
 
     /* Тренировка: дробь с верным значением, ошибка, закладка, итоги. */
     await startTraining(page);
@@ -276,7 +304,7 @@ async function runGallery(dir) {
     await page.waitForSelector('.tverdict--wrong');
     await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
     await page.waitForSelector('.z8-razbor');
-    await snap('02-oshibka-i-reshenie', true);
+    await snapBlock('02-oshibka-i-reshenie', '.ttask');
     await nextTask(page);
     await page.locator('.ttask .zakladka').click();
     for (let i = 0; i < 3; i += 1) {
@@ -285,11 +313,10 @@ async function runGallery(dir) {
       await nextTask(page);
     }
     await page.waitForSelector('.tsum');
-    await snap('03-itogi', true);
+    await snapBlock('03-itogi', '.tsum');
     await page.locator('.tdone__actions button:has-text("Новая тренировка")').click();
     await page.waitForSelector('.z8-progress');
-    await page.locator('.z8-progress').scrollIntoViewIfNeeded();
-    await snap('04-progress', true);
+    await snapBlock('04-progress', '.z8-progress');
 
     /* Решение по шагам с панелью «Признаки делимости». */
     if (withDelimost !== null) {
@@ -300,14 +327,13 @@ async function runGallery(dir) {
       await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
       await page.waitForSelector('.z8-delimost');
       await page.locator('.z8-delimost summary').click();
-      await page.locator('.z8-razbor').scrollIntoViewIfNeeded();
-      await snap('05-reshenie-priznaki', true);
+      await snapBlock('05-reshenie-priznaki', '.z8-razbor');
     }
 
     /* «О задании»: карточки навыков с прогрессом. */
     await page.goto(ABOUT, { waitUntil: 'networkidle' });
     await page.waitForSelector('.z8-about-progress .tp-card');
-    await snap('06-o-zadanii', true);
+    await snapBlock('06-o-zadanii', '.z8-about-progress');
 
     /* Опорная задача: закладка и решение. */
     await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/stepeni-korni/?zadacha=3`, {
@@ -315,12 +341,17 @@ async function runGallery(dir) {
     });
     await page.waitForSelector('.ptask .zakladka');
     await page.locator('.ptask .zakladka').click();
+    const field = page.locator('.ptask .otvet-input__field');
+    if ((await field.count()) === 1) {
+      await field.fill('1');
+      await page.locator('.ptask__actions button:has-text("Проверить")').click();
+    }
     const reveal = page.locator('.ptask__actions button:has-text("Показать решение")');
     if ((await reveal.count()) > 0) {
       await reveal.first().click();
       await page.waitForSelector('.z8-razbor');
     }
-    await snap('07-opornaya', true);
+    await snapBlock('07-opornaya', '.ptask');
     await context.close();
   }
   console.log(`Снимки: ${dir}`);
