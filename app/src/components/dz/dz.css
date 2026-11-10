@@ -1,0 +1,540 @@
+/* Классы и домашние задания (components/dz). Токены — styles/tokens.css,
+   карточки — те же, что в кабинете (.kabinet__card). Статусы: верно —
+   зелёный, ошибка — терракотовый, «решает» — янтарный, как в прогрессе. */
+
+.dz-page {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+.dz-back {
+  justify-self: start;
+  font-size: var(--fs-caption);
+  color: var(--color-primary);
+}
+.dz-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+.dz-head__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  color: var(--color-text-brand);
+  overflow-wrap: anywhere;
+}
+.dz-head__due {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.dz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+.dz-actions--end {
+  justify-content: flex-end;
+}
+.dz-ok {
+  margin: 0;
+  color: var(--color-success);
+}
+.dz-empty__title {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Строка «поле + кнопка»: на телефоне кнопка уходит под поле. */
+.dz-inline-form {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.dz-inline-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.dz-inline-form__row > .input,
+.dz-inline-form__row > input {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+.dz-textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+  font: inherit;
+}
+.dz-field-title {
+  margin: var(--space-3) 0 var(--space-1);
+  font-weight: 600;
+}
+
+/* ── Классы ── */
+.dz-klassy,
+.dz-list,
+.dz-members {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dz-klassy__item,
+.dz-list__item,
+.dz-members__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+.dz-klassy__item:last-child,
+.dz-list__item:last-child,
+.dz-members__item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.dz-klassy__name,
+.dz-list__title {
+  font-weight: 600;
+  color: var(--color-primary);
+  overflow-wrap: anywhere;
+}
+.dz-klassy__meta,
+.dz-list__meta,
+.dz-members__real {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.dz-klassy__code {
+  margin-left: auto;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.12em;
+  color: var(--color-text-brand);
+}
+.dz-list__note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.dz-members__name {
+  font-weight: 600;
+}
+.dz-members__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+/* Код класса — крупно, чтобы продиктовать на занятии. */
+.dz-code {
+  margin: var(--space-3) 0 var(--space-1);
+  font-family: var(--font-mono, monospace);
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.dz-link {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* ── Статусы ДЗ ── */
+.dz-status--submitted {
+  color: var(--color-status-done-text);
+}
+.dz-status--started {
+  color: var(--color-status-progress-text);
+}
+.dz-status--late,
+.dz-status--closed {
+  color: var(--color-status-oshibki-text);
+}
+
+/* ── Выдать ДЗ ── */
+.dz-checks,
+.dz-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-3) 0;
+}
+.dz-kinds {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-4);
+  margin: var(--space-3) 0;
+}
+.dz-kinds__skill {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+}
+.dz-kinds__skill legend {
+  padding: 0 var(--space-1);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.dz-hand,
+.dz-preview {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.dz-preview {
+  padding-left: var(--space-5);
+  list-style: decimal;
+}
+.dz-preview__item {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.dz-preview__kind {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.dz-preview__q,
+.dz-hand {
+  overflow-x: auto;
+}
+.dz-preview-people {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+/* ── Решение ДЗ ── */
+.dz-note {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-warm);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-warm);
+}
+.dz-note__title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-accent-text);
+}
+.dz-note__text {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.dz-banner {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+}
+.dz-banner--ok {
+  background: var(--color-success-soft);
+  color: var(--color-status-done-text);
+}
+.dz-banner--warn {
+  background: var(--color-warning-soft);
+  color: var(--color-status-progress-text);
+}
+
+/* Лента задач: свободное переключение, цвет — как в таблице результатов. */
+.dz-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.dz-strip__btn {
+  min-width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.dz-strip__btn.is-right {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-status-done-text);
+}
+.dz-strip__btn.is-wrong,
+.dz-strip__btn.is-revealed {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+}
+.dz-strip__btn.is-trying {
+  border-color: var(--color-warning);
+}
+.dz-strip__btn.is-current {
+  outline: 3px solid var(--color-focus-ring);
+  border-color: var(--color-primary);
+}
+.dz-strip__btn:focus-visible {
+  outline: 3px solid var(--color-primary);
+}
+
+.dz-task {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+.dz-task__no {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.dz-task__q {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+.dz-memo {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+  overflow-x: auto;
+}
+.dz-memo__title {
+  margin: 0 0 var(--space-1);
+  font-weight: 600;
+}
+.dz-example summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.dz-answer {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.dz-answer__label {
+  margin: 0;
+  font-weight: 600;
+}
+.dz-verdict {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+}
+.dz-verdict--right {
+  background: var(--color-success-soft);
+  color: var(--color-status-done-text);
+}
+.dz-verdict--wrong {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+}
+.dz-entries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.dz-entry {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
+}
+.dz-entry.is-right {
+  background: var(--color-success-soft);
+  color: var(--color-status-done-text);
+}
+.dz-entry.is-wrong {
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+  text-decoration: line-through;
+}
+.dz-submit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.dz-submit .auth-form__muted {
+  margin: 0;
+}
+
+/* ── Результаты ── */
+/* Таблица широкая — прокручивается внутри карточки, страница на месте. */
+.dz-table-wrap {
+  overflow-x: auto;
+  margin: 0 calc(var(--space-2) * -1);
+  padding: 0 var(--space-2);
+}
+.dz-table {
+  border-collapse: separate;
+  border-spacing: 4px;
+  font-size: var(--fs-caption);
+}
+.dz-table th {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.dz-table__name {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 8rem;
+  max-width: 12rem;
+  padding-right: var(--space-2);
+  background: var(--color-surface);
+  text-align: left !important;
+  color: var(--color-text) !important;
+  overflow-wrap: anywhere;
+}
+.dz-table__done {
+  display: block;
+  font-weight: 400;
+  color: var(--color-status-done-text);
+}
+.dz-table__total {
+  white-space: nowrap;
+  font-weight: 600;
+  text-align: center;
+}
+.dz-table__time {
+  display: block;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}
+.dz-cell {
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dz-cell--right {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+.dz-cell--wrong {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+.dz-cell--revealed {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+}
+.dz-cell--trying {
+  border-color: var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-status-progress-text);
+}
+.dz-cell--legend {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-right: var(--space-1);
+  vertical-align: -0.15em;
+  cursor: default;
+}
+.dz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.dz-kinds-summary {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+.dz-kinds-summary .has-errors {
+  color: var(--color-accent-text);
+}
+.dz-facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+.dz-facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.dz-facts dt {
+  min-width: 8rem;
+  color: var(--color-text-secondary);
+}
+.dz-facts dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+}
+.dz-note-editor {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* ── Плашка в разделе №8 ── */
+.dz-plashka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.dz-vydat-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}

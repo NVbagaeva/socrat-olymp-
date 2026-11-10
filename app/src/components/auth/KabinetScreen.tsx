@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
-import type { FormEvent, ReactNode } from 'react';
+import type { FormEvent } from 'react';
 import {
   Button,
   Card,
@@ -24,6 +24,13 @@ import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
 import { Progress8, type Names8 } from '@/components/tasks/vychisleniya/Progress8';
+import {
+  JoinClassForm,
+  StudentHomeworkCard,
+  TutorClassesCard,
+  TutorHomeworkCard,
+} from '@/components/dz/KabinetDz';
+import { forgetCode, pendingCode } from '@/components/dz/JoinScreen';
 import { BANK_TOTAL } from '@/lib/vychisleniya/ids';
 import {
   importedGroups,
@@ -229,8 +236,19 @@ export function KabinetScreen({ names8 }: { names8: Names8 }) {
       {tab === 'home' ? (
         <>
           <p className="kabinet__trial">{KABINET.trial}</p>
-          {profile.role === 'student' ? <StudentHome klassy={klassy} names8={names8} /> : null}
-          {profile.role === 'tutor' ? <TutorHome klassy={klassy} kits={kits} /> : null}
+          {profile.role === 'student' ? (
+            <StudentHome
+              klassy={klassy}
+              names8={names8}
+              onJoined={() => {
+                forgetCode();
+                void import('@/lib/auth/klassy').then(async ({ loadKlassy }) =>
+                  setKlassy(await loadKlassy()),
+                );
+              }}
+            />
+          ) : null}
+          {profile.role === 'tutor' ? <TutorHome kits={kits} /> : null}
           {profile.role === 'admin' ? (
             <Card className="kabinet__card" title={KABINET.admin.title}>
               <p className="auth-form__text">{KABINET.admin.text}</p>
@@ -268,41 +286,23 @@ export function KabinetScreen({ names8 }: { names8: Names8 }) {
 /* ── Пустое состояние раздела ─────────────────────────────────── */
 
 /** Раздел, которого ещё нет: что здесь появится — простыми словами. */
-function Stub({
-  title,
-  empty,
-  text,
-  action,
-  section,
-}: {
-  title: string;
-  empty: string;
-  text: string;
-  action?: ReactNode;
-  /** Имя раздела для проверок и стилей. */
-  section: string;
-}) {
-  return (
-    <Card className="kabinet__card kabinet-stub" title={title} data-section={section}>
-      <p className="kabinet-stub__empty">{empty}</p>
-      <p className="auth-form__text">{text}</p>
-      {action}
-    </Card>
-  );
-}
-
 /* ── Кабинет ученика ──────────────────────────────────────────── */
 
-function StudentHome({ klassy, names8 }: { klassy: KlassView[] | null; names8: Names8 }) {
+function StudentHome({
+  klassy,
+  names8,
+  onJoined,
+}: {
+  klassy: KlassView[] | null;
+  names8: Names8;
+  onJoined: () => void;
+}) {
   const t = KABINET.student;
+  /* Код из ссылки-приглашения, открытой до входа (/kabinet/vstupit/). */
+  const [initialCode] = useState(pendingCode);
   return (
     <>
-      <Stub
-        section="homework"
-        title={t.homework.title}
-        empty={t.homework.empty}
-        text={t.homework.text}
-      />
+      <StudentHomeworkCard />
       {/* Прогресс №8: журнал, «Мои ошибки», «Отложенные», история — то же,
          что под тренажёром; со входом — с любого устройства. */}
       <Card className="kabinet__card kabinet__progress" data-section="progress">
@@ -330,6 +330,8 @@ function StudentHome({ klassy, names8 }: { klassy: KlassView[] | null; names8: N
             ))}
           </ul>
         )}
+        {/* Вступить в класс по коду от репетитора. */}
+        <JoinClassForm initial={initialCode} onJoined={onJoined} />
       </Card>
     </>
   );
@@ -337,48 +339,13 @@ function StudentHome({ klassy, names8 }: { klassy: KlassView[] | null; names8: N
 
 /* ── Кабинет репетитора ───────────────────────────────────────── */
 
-function TutorHome({ klassy, kits }: { klassy: KlassView[] | null; kits: SavedKit[] | null }) {
+function TutorHome({ kits }: { kits: SavedKit[] | null }) {
   const t = KABINET.tutor;
   return (
     <>
       <div className="kabinet__grid">
-        {klassy !== null && klassy.length > 0 ? (
-          <Card className="kabinet__card" title={t.classes.title} data-section="classes">
-            <ul className="klass-list">
-              {klassy.map((klass) => (
-                <li key={klass.id} className="klass-list__item">
-                  <span className="klass-list__name">{klass.name}</span>
-                  <span className="klass-list__meta">
-                    {t.classes.students(klass.students.length)}
-                  </span>
-                  {klass.students.length > 0 ? (
-                    <ul className="klass-list__students">
-                      {klass.students.map((name, index) => (
-                        <li key={`${index}-${name}`}>{name}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <span className="klass-list__meta">{t.classes.noStudents}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <p className="auth-form__text">{t.classes.text}</p>
-          </Card>
-        ) : (
-          <Stub
-            section="classes"
-            title={t.classes.title}
-            empty={klassy === null ? '…' : t.classes.empty}
-            text={t.classes.text}
-          />
-        )}
-        <Stub
-          section="homework"
-          title={t.homework.title}
-          empty={t.homework.empty}
-          text={t.homework.text}
-        />
+        <TutorClassesCard />
+        <TutorHomeworkCard />
       </div>
       <Card className="kabinet__card" title={t.kits.title} data-section="kits">
         {kits === null ? (

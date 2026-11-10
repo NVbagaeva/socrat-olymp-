@@ -4,6 +4,7 @@ import { VYCHISLENIYA } from '@/content/vychisleniya';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { ZADANIYA } from '@/lib/paths';
+import { HomeworkBanner8 } from '@/components/dz/Razdel8Dz';
 
 /**
  * Оболочка задания №8: крошки, заголовок и лента вкладок.
@@ -32,7 +33,11 @@ export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
 
         <RazdelTabs base={base} tabs={VYCHISLENIYA.tabs} tutors={VYCHISLENIYA.tutors} />
 
-        <div className="section-panel">{children}</div>
+        <div className="section-panel">
+          {/* Ученику со входом — «У вас домашнее задание до …». Гостю — ничего. */}
+          <HomeworkBanner8 />
+          {children}
+        </div>
       </main>
     </AppShell>
   );
