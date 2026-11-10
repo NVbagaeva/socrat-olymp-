@@ -1036,13 +1036,19 @@ async function runEnabled() {
       (await page.locator('.kabinet__role').innerText()) === 'Кабинет репетитора',
       'кабинет: «Кабинет репетитора»',
     );
+    /* Классы и ДЗ грузятся каждый сам (components/dz/KabinetDz.tsx). */
+    await page.waitForFunction(() =>
+      ['classes', 'homework'].every(
+        (name) => !document.querySelector(`[data-section="${name}"]`)?.textContent?.includes('…'),
+      ),
+    );
     const home = await page.locator('.kabinet').innerText();
     check(
       home.includes('Мои классы') && home.includes('У вас пока нет классов'),
       'репетитор: «Мои классы» — «У вас пока нет классов»',
     );
     check(
-      home.includes('Домашние задания') && home.includes('Домашних заданий пока нет'),
+      home.includes('Домашние задания') && home.includes('Заданий пока нет'),
       'репетитор: «Домашние задания» — пустое состояние',
     );
     check(home.includes('Пока ни одного'), 'репетитор: кодов комплектов честно нет');
@@ -1282,6 +1288,9 @@ async function runEnabled() {
     check(
       (await page.locator('.kabinet__role').innerText()) === 'Кабинет ученика',
       'кабинет: «Кабинет ученика»',
+    );
+    await page.waitForFunction(
+      () => !document.querySelector('[data-section="homework"]')?.textContent?.includes('…'),
     );
     for (const [section, title, empty] of [
       ['progress', 'Мой прогресс в №8', 'Решено 0 из 260'],
