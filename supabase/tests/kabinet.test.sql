@@ -40,18 +40,34 @@ do $$ begin
   raise notice 'ok 1: без приглашения регистрации нет';
 end $$;
 
--- 2. Администратор — первый пользователь с bootstrap_admin, и только один раз.
+-- 2. Администратор назначается только на сервере (grant_admin) и только один.
+--    Отметка bootstrap_admin из формы ничего не даёт.
+select pg_temp.fails($q$insert into auth.users (email, raw_user_meta_data)
+  values ('evil@x.ru', pg_temp.meta('{"role":"admin","bootstrap_admin":true}'))$q$, 'invite_required');
+insert into vault.secrets (name, secret) values ('allowed_emails', 'admin@x.ru, Second@X.ru');
+select pg_temp.fails($q$insert into auth.users (email, raw_user_meta_data)
+  values ('admin@x.ru', pg_temp.meta('{"role":"admin","name":"Наталья"}'))$q$, 'bad_role');
 insert into auth.users (id, email, raw_user_meta_data)
-values ('a0000000-0000-0000-0000-000000000000', 'admin@x.ru',
-        pg_temp.meta('{"role":"admin","name":"Наталья","bootstrap_admin":true}'));
+values ('a0000000-0000-0000-0000-000000000000', 'admin@x.ru', pg_temp.meta('{"name":"Наталья"}'));
+insert into auth.users (id, email, raw_user_meta_data)
+values ('a1000000-0000-0000-0000-000000000000', 'second@x.ru', pg_temp.meta('{"name":"Вторая"}'));
+select public.grant_admin('Admin@x.ru');
 do $$ begin
   if (select role from public.profiles where user_id = 'a0000000-0000-0000-0000-000000000000') <> 'admin' then
     raise exception 'FAIL: нет администратора';
   end if;
-  perform pg_temp.fails($q$insert into auth.users (email, raw_user_meta_data)
-    values ('evil@x.ru', pg_temp.meta('{"role":"admin","bootstrap_admin":true}'))$q$, 'admin_exists');
-  raise notice 'ok 2: администратор один';
+  perform pg_temp.fails($q$select public.grant_admin('second@x.ru')$q$, 'profiles_one_admin');
+  perform pg_temp.fails($q$select public.grant_admin('nobody@x.ru')$q$, 'no_user');
 end $$;
+set role authenticated;
+select set_config('request.jwt.claim.sub', 'a1000000-0000-0000-0000-000000000000', false);
+select pg_temp.fails($q$select public.grant_admin('second@x.ru')$q$, 'permission denied');
+select pg_temp.fails($q$update public.profiles set role = 'admin' where user_id = auth.uid()$q$, 'permission denied');
+reset role;
+-- Вторая больше не нужна: дальше счёт людей идёт без неё.
+delete from auth.users where id = 'a1000000-0000-0000-0000-000000000000';
+update vault.secrets set secret = 'admin@x.ru' where name = 'allowed_emails';
+do $$ begin raise notice 'ok 2: администратор один и назначается на сервере'; end $$;
 
 -- 3. Админ приглашает репетитора; роль из формы должна совпасть.
 set role authenticated;

@@ -1,0 +1,52 @@
+name: 'Сервер: тестовые данные'
+
+# «Тестовый класс» и тестовые ученики для пробного режима — у вашего
+# аккаунта репетитора, на ваших адресах-алиасах (секреты
+# SEED_TUTOR_EMAIL и SEED_STUDENT_EMAILS). Только эта кнопка и только с
+# подтверждением: в «Развернуть» и «Миграции» тестовые данные не входят
+# и сами в базу не попадают.
+#
+# Новым ученикам уходит письмо «Сброс пароля»: по ссылке из него вы
+# задаёте пароль. Повторный запуск ничего не дублирует. Режим
+# «удалить» убирает тестовых учеников и класс — перед тем как пускать
+# настоящих.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Что сделать
+        type: choice
+        options: [создать, удалить]
+        default: создать
+      confirm:
+        description: Подтверждение — впишите ТЕСТ
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    name: Тестовый класс и ученики
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Тестовые данные
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          SEED_TUTOR_EMAIL: ${{ secrets.SEED_TUTOR_EMAIL }}
+          SEED_STUDENT_EMAILS: ${{ secrets.SEED_STUDENT_EMAILS }}
+          MODE: ${{ inputs.mode == 'удалить' && 'remove' || 'create' }}
+          CONFIRM: ${{ inputs.confirm }}
+        run: infra/lite/actions/seed.sh

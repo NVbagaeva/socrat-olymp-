@@ -69,12 +69,12 @@ env_line() {
 }
 
 # Файлы набора на сервер: compose, Caddyfile, скрипты, шаблоны писем,
-# миграции по списку migrations.txt. Секреты (.env.*) и состояние
+# миграции по списку migrations.txt, каталог банка. Секреты (.env.*) и состояние
 # (state/) на сервере не трогаются.
 sync_files() {
   local stage="$WORK/stage"
   rm -rf "$stage"
-  mkdir -p "$stage/templates" "$stage/migrations"
+  mkdir -p "$stage/templates" "$stage/migrations" "$stage/catalog"
   cp -R "$LITE_SRC/compose.yml" "$LITE_SRC/compose.ci.yml" "$LITE_SRC/Caddyfile" \
     "$LITE_SRC/db" "$LITE_SRC/bin" "$LITE_SRC/server" "$stage/"
   cp "$REPO_ROOT"/supabase/templates/*.html "$stage/templates/"
@@ -84,7 +84,9 @@ sync_files() {
     n=$((n + 1))
     cp "$REPO_ROOT/$path" "$stage/migrations/$(printf '%03d' "$n")-$(basename "$path")"
   done < "$LITE_SRC/migrations.txt"
-  log "На сервер: набор, $(ls "$stage/templates" | wc -l) шаблона писем, миграций $n"
+  # Каталог банка для кабинета: применяется при каждом «Миграции».
+  cp "$REPO_ROOT/supabase/seed/kabinet_katalog.sql" "$stage/catalog/"
+  log "На сервер: набор, $(ls "$stage/templates" | wc -l) шаблона писем, миграций $n, каталог банка"
   # Файлы без секретов: читать их можно всем, и postgres в контейнере
   # (uid 70) должен видеть db/. Секреты — в .env.*, они здесь не трогаются.
   rsync -rlpt --delete --chmod=D755,F644 \
