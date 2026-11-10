@@ -318,7 +318,7 @@ export function formatHint(problem: FormatProblem, meant: NormalAnswer | null): 
     case 'space':
       return as === null ? 'Без пробелов внутри числа.' : `Без пробелов внутри числа: ${as}.`;
     case 'other':
-      return 'Так число не записывают. Нужно целое число или десятичная дробь, например −2,25.';
+      return 'Так число не записывают. Нужно целое число или десятичная дробь, например 2,25.';
   }
 }
 
