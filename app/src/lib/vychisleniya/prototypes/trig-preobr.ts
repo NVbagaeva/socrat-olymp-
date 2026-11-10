@@ -21,7 +21,13 @@ interface Tab {
 export function table(f: Fn, angle: number): Tab | null {
   const a = ((angle % 360) + 360) % 360;
   const ref = a <= 90 ? a : a <= 180 ? 180 - a : a <= 270 ? a - 180 : 360 - a;
-  const sinTab: Record<number, Tab> = { 0: { v: 0, r: 1 }, 30: { v: 1 / 2, r: 1 }, 45: { v: 1 / 2, r: 2 }, 60: { v: 1 / 2, r: 3 }, 90: { v: 1, r: 1 } };
+  const sinTab: Record<number, Tab> = {
+    0: { v: 0, r: 1 },
+    30: { v: 1 / 2, r: 1 },
+    45: { v: 1 / 2, r: 2 },
+    60: { v: 1 / 2, r: 3 },
+    90: { v: 1, r: 1 },
+  };
   const s = sinTab[ref];
   const c = sinTab[90 - ref];
   if (s === undefined || c === undefined) {
@@ -105,7 +111,10 @@ function tabTex(t: Tab): string {
 }
 
 const BASE_ANGLES = [30, 45, 60, 120, 135, 150, 210, 225, 240, 300, 315, 330];
-const EXTRA_ANGLES = [-30, -45, -60, -120, -135, -150, -210, -225, -240, -300, -315, -330, 390, 405, 420, 480, 495, 510, 570, 585, 600, 660, 675, 690, 750];
+const EXTRA_ANGLES = [
+  -30, -45, -60, -120, -135, -150, -210, -225, -240, -300, -315, -330, 390, 405, 420, 480, 495, 510,
+  570, 585, 600, 660, 675, 690, 750,
+];
 
 /* ── 8.Q  произведение табличных значений ────────────────────── */
 
@@ -130,7 +139,13 @@ function drawQ(r: Rng, advanced: boolean): Draft | null {
       return null;
     }
     product = multiply(t1, t2);
-    if (advanced && !EXTRA_ANGLES.includes(a1) && !EXTRA_ANGLES.includes(a2) && f1 !== 'tg' && f2 !== 'tg') {
+    if (
+      advanced &&
+      !EXTRA_ANGLES.includes(a1) &&
+      !EXTRA_ANGLES.includes(a2) &&
+      f1 !== 'tg' &&
+      f2 !== 'tg'
+    ) {
       return null;
     }
   } else if (!EXTRA_ANGLES.includes(a1)) {
@@ -143,16 +158,20 @@ function drawQ(r: Rng, advanced: boolean): Draft | null {
     return null;
   }
   const coefTex = coefRoot(c, product.r);
-  const body = single ? `${fn(f1)}${angleTex(a1, radians)}` : `${fn(f1)}${angleTex(a1, radians)} \\cdot ${fn(f2)}${angleTex(a2, radians)}`;
+  const body = single
+    ? `${fn(f1)}${angleTex(a1, radians)}`
+    : `${fn(f1)}${angleTex(a1, radians)} \\cdot ${fn(f2)}${angleTex(a2, radians)}`;
   const tex = `${coefTex === '1' ? '' : coefTex}${body}`;
-  const values = single ? `${fn(f1)}${angleTex(a1, radians)} = ${tabTex(t1)}` : `${fn(f1)}${angleTex(a1, radians)} = ${tabTex(t1)}$, $${fn(f2)}${angleTex(a2, radians)} = ${tabTex(table(f2, a2) as Tab)}`;
+  const values = single
+    ? `${fn(f1)}${angleTex(a1, radians)} = ${tabTex(t1)}`
+    : `${fn(f1)}${angleTex(a1, radians)} = ${tabTex(t1)}$, $${fn(f2)}${angleTex(a2, radians)} = ${tabTex(table(f2, a2) as Tab)}`;
   return {
     uslovie: naydi(tex),
     otvet: ans,
     razbor: [`$${values}$`, `$${tex} = ${d(ans)}$`],
     proverka: c * Math.sqrt(product.r) * numeric(f1, a1) * (single ? 1 : numeric(f2, a2)),
     signature: single ? `${a1}` : `${a1}:${a2}`,
-        params: single ? { f1, a1, c } : { f1, a1, f2, a2, c },
+    params: single ? { f1, a1, c } : { f1, a1, f2, a2, c },
   };
 }
 
@@ -160,7 +179,10 @@ export const P8Q: Prototype = {
   id: '8.Q',
   group: 'IV',
   nazvanie: 'Табличные значения',
-  podtipy: [podtip('base', 'base', (r) => drawQ(r, false)), podtip('adv', 'advanced', (r) => drawQ(r, true))],
+  podtipy: [
+    podtip('base', 'base', (r) => drawQ(r, false)),
+    podtip('adv', 'advanced', (r) => drawQ(r, true)),
+  ],
   isklyucheniya: keys([
     { f1: 'cos', a1: 45, f2: 'cos', a2: 240, c: 26 },
     { f1: 'cos', a1: 135, f2: 'cos', a2: 60, c: 28 },
@@ -180,7 +202,9 @@ export const P8Q: Prototype = {
 /* ── 8.R  синус двойного угла ────────────────────────────────── */
 
 /** Углы, у которых удвоенный — табличный: кратные 15° и нечётные π/8. */
-const HALF_ANGLES = [15, 75, 105, 165, 195, 255, 285, 345, 22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5];
+const HALF_ANGLES = [
+  15, 75, 105, 165, 195, 255, 285, 345, 22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5,
+];
 
 /** Запись угла в радианах; 22,5° = π/8 бывает только в радианах. */
 function halfTex(x: number): string {
@@ -233,7 +257,10 @@ export const P8R: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: c,
-        razbor: [`$2\\sin${deg(x)}\\cos${deg(x)} = \\sin${deg(2 * x)}$`, `$\\dfrac{${c}\\sin${deg(2 * x)}}{\\sin${deg(2 * x)}} = ${c}$`],
+        razbor: [
+          `$2\\sin${deg(x)}\\cos${deg(x)} = \\sin${deg(2 * x)}$`,
+          `$\\dfrac{${c}\\sin${deg(2 * x)}}{\\sin${deg(2 * x)}} = ${c}$`,
+        ],
         proverka: (2 * c * Math.sin(toRad(x)) * Math.cos(toRad(x))) / Math.sin(toRad(2 * x)),
         signature: `${x}`,
         params: { x, c, form: 'cancel' },
@@ -253,7 +280,8 @@ export const P8R: Prototype = {
           `$\\sin${deg(180 - 2 * y)} = \\sin${deg(2 * y)} = 2\\sin${deg(y)}\\cos${deg(y)}$, $\\cos${deg(90 - y)} = \\sin${deg(y)}$`,
           `$\\dfrac{${2 * c}\\sin${deg(y)}\\cos${deg(y)}}{\\cos${deg(y)}\\sin${deg(y)}} = ${2 * c}$`,
         ],
-        proverka: (c * Math.sin(toRad(180 - 2 * y))) / (Math.cos(toRad(y)) * Math.cos(toRad(90 - y))),
+        proverka:
+          (c * Math.sin(toRad(180 - 2 * y))) / (Math.cos(toRad(y)) * Math.cos(toRad(90 - y))),
         signature: `${y}`,
         params: { y, c, form: 'reduce' },
       };
@@ -310,7 +338,10 @@ export const P8S: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: ans,
-        razbor: [`$\\cos^2${angle} - \\sin^2${angle} = \\cos${doubled} = ${tabTex(t)}$`, `$${tex} = ${d(ans)}$`],
+        razbor: [
+          `$\\cos^2${angle} - \\sin^2${angle} = \\cos${doubled} = ${tabTex(t)}$`,
+          `$${tex} = ${d(ans)}$`,
+        ],
         proverka: c * Math.sqrt(t.r) * (Math.cos(toRad(x)) ** 2 - Math.sin(toRad(x)) ** 2),
         signature: `${x}`,
         params: { x, c, form: 'diff' },
@@ -333,14 +364,21 @@ export const P8S: Prototype = {
       const big = hiddenCoef(2 * c, t.r, hidden);
       const small = hiddenCoef(c, t.r, hidden);
       const form = r.pick(['cos', 'sin'] as const);
-      const tex = form === 'cos' ? `${big}\\cos^2${angle} - ${small}` : `${small} - ${big}\\sin^2${angle}`;
+      const tex =
+        form === 'cos' ? `${big}\\cos^2${angle} - ${small}` : `${small} - ${big}\\sin^2${angle}`;
       const doubled = inDegrees ? deg(2 * x) : angleTex(2 * x, true);
       const identity = form === 'cos' ? `2\\cos^2${angle} - 1` : `1 - 2\\sin^2${angle}`;
       return {
         uslovie: naydi(tex),
         otvet: ans,
-        razbor: [`$${tex} = ${small}(${identity}) = ${small}\\cos${doubled}$`, `$\\cos${doubled} = ${tabTex(t)}$, поэтому значение равно $${d(ans)}$`],
-        proverka: form === 'cos' ? 2 * c * Math.sqrt(t.r) * Math.cos(toRad(x)) ** 2 - c * Math.sqrt(t.r) : c * Math.sqrt(t.r) - 2 * c * Math.sqrt(t.r) * Math.sin(toRad(x)) ** 2,
+        razbor: [
+          `$${tex} = ${small}(${identity}) = ${small}\\cos${doubled}$`,
+          `$\\cos${doubled} = ${tabTex(t)}$, поэтому значение равно $${d(ans)}$`,
+        ],
+        proverka:
+          form === 'cos'
+            ? 2 * c * Math.sqrt(t.r) * Math.cos(toRad(x)) ** 2 - c * Math.sqrt(t.r)
+            : c * Math.sqrt(t.r) - 2 * c * Math.sqrt(t.r) * Math.sin(toRad(x)) ** 2,
         signature: `${x}:${form}`,
         params: { x, c, form },
       };
@@ -356,8 +394,12 @@ export const P8S: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: ans,
-        razbor: [`$\\sin^2${deg(x)} - \\cos^2${deg(x)} = -\\cos${deg(2 * x)}$`, `$\\dfrac{-${c}\\cos${deg(2 * x)}}{2\\cos${deg(2 * x)}} = -\\dfrac{${c}}{2} = ${d(ans)}$`],
-        proverka: (c * (Math.sin(toRad(x)) ** 2 - Math.cos(toRad(x)) ** 2)) / (2 * Math.cos(toRad(2 * x))),
+        razbor: [
+          `$\\sin^2${deg(x)} - \\cos^2${deg(x)} = -\\cos${deg(2 * x)}$`,
+          `$\\dfrac{-${c}\\cos${deg(2 * x)}}{2\\cos${deg(2 * x)}} = -\\dfrac{${c}}{2} = ${d(ans)}$`,
+        ],
+        proverka:
+          (c * (Math.sin(toRad(x)) ** 2 - Math.cos(toRad(x)) ** 2)) / (2 * Math.cos(toRad(2 * x))),
         signature: `${x}`,
         params: { x, c, form: 'cancel' },
       };
@@ -408,7 +450,10 @@ export const P8T: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: c + dd,
-        razbor: [`$${fn(f)}${deg(90 - x)} = ${fn(other)}${deg(x)}$, дробь равна $${c}$`, `$${c} ${dd < 0 ? '-' : '+'} ${Math.abs(dd)} = ${c + dd}$`],
+        razbor: [
+          `$${fn(f)}${deg(90 - x)} = ${fn(other)}${deg(x)}$, дробь равна $${c}$`,
+          `$${c} ${dd < 0 ? '-' : '+'} ${Math.abs(dd)} = ${c + dd}$`,
+        ],
         proverka: (c * numeric(f, 90 - x)) / numeric(other, x) + dd,
         signature: `${x}`,
         params: { form: 'co', f, x, c, d: dd },
@@ -430,7 +475,10 @@ export const P8T: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: sign * c,
-        razbor: [`$${fn(f)}${deg(big)} = ${fn(f)}${deg(big - 360 * Math.round((big - x) / 360))}$`, `$${tex} = ${sign * c}$`],
+        razbor: [
+          `$${fn(f)}${deg(big)} = ${fn(f)}${deg(big - 360 * Math.round((big - x) / 360))}$`,
+          `$${tex} = ${sign * c}$`,
+        ],
         proverka: (sign * c * numeric(f, up ? big : x)) / numeric(f, up ? x : big),
         signature: `${x}`,
         params: { form: 'period', f, x, c, big, sign, up: up ? 1 : 0 },
@@ -451,7 +499,10 @@ export const P8T: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: value * c,
-        razbor: [`$${fn(f)}${deg(angle)} = ${value < 0 ? '-' : ''}${fn(f)}${deg(x)}$`, `$${tex} = ${value * c}$`],
+        razbor: [
+          `$${fn(f)}${deg(angle)} = ${value < 0 ? '-' : ''}${fn(f)}${deg(x)}$`,
+          `$${tex} = ${value * c}$`,
+        ],
         proverka: (c * numeric(f, angle)) / numeric(f, x),
         signature: `${x}`,
         params: { form: 'pi', f, x, c, plus: plus ? 1 : 0 },
@@ -487,7 +538,10 @@ export const P8U: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: c + dd,
-        razbor: [`$\\operatorname{tg}${deg(90 - x)} = \\operatorname{ctg}${deg(x)}$, поэтому $\\operatorname{tg}${deg(x)} \\cdot \\operatorname{tg}${deg(90 - x)} = 1$`, `$${c} ${dd < 0 ? '-' : '+'} ${Math.abs(dd)} = ${c + dd}$`],
+        razbor: [
+          `$\\operatorname{tg}${deg(90 - x)} = \\operatorname{ctg}${deg(x)}$, поэтому $\\operatorname{tg}${deg(x)} \\cdot \\operatorname{tg}${deg(90 - x)} = 1$`,
+          `$${c} ${dd < 0 ? '-' : '+'} ${Math.abs(dd)} = ${c + dd}$`,
+        ],
         proverka: c * Math.tan(toRad(x)) * Math.tan(toRad(90 - x)) + dd,
         signature: `${x}`,
         params: { x, c, d: dd, unit: 'deg' },
@@ -510,7 +564,10 @@ export const P8U: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: c + dd,
-        razbor: [`$${rad(a, den)} + ${rad(b, den)} = \\dfrac{\\pi}{2}$, поэтому $\\operatorname{tg}${rad(a, den)} \\cdot \\operatorname{tg}${rad(b, den)} = 1$`, `$${cTex} ${dd < 0 ? '-' : '+'} ${Math.abs(dd)} = ${c + dd}$`],
+        razbor: [
+          `$${rad(a, den)} + ${rad(b, den)} = \\dfrac{\\pi}{2}$, поэтому $\\operatorname{tg}${rad(a, den)} \\cdot \\operatorname{tg}${rad(b, den)} = 1$`,
+          `$${cTex} ${dd < 0 ? '-' : '+'} ${Math.abs(dd)} = ${c + dd}$`,
+        ],
         proverka: c * Math.tan((Math.PI * a) / den) * Math.tan((Math.PI * b) / den) + dd,
         signature: `${a}:${den}`,
         params: { a, den, c, d: dd, unit: 'rad' },
@@ -557,7 +614,10 @@ export const P8V: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: ans,
-        razbor: [`$${fn(f)}^2${deg(y)} = ${fn(other)}^2${deg(x)}$, знаменатель равен $1 + ${dd} = ${1 + dd}$`, `$\\dfrac{${c}}{${1 + dd}} = ${d(ans)}$`],
+        razbor: [
+          `$${fn(f)}^2${deg(y)} = ${fn(other)}^2${deg(x)}$, знаменатель равен $1 + ${dd} = ${1 + dd}$`,
+          `$\\dfrac{${c}}{${1 + dd}} = ${d(ans)}$`,
+        ],
         proverka: c / (numeric(f, x) ** 2 + dd + numeric(f, y) ** 2),
         signature: `${x}`,
         params: { form, x, d: dd, c },
@@ -582,7 +642,10 @@ export const P8V: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: ans,
-        razbor: [`$${fn(f)}^2${deg(y)} = ${fn(other)}^2${deg(x)}$, знаменатель равен $1 + ${dd} = ${1 + dd}$`, `$\\dfrac{${c}}{${1 + dd}} = ${d(ans)}$`],
+        razbor: [
+          `$${fn(f)}^2${deg(y)} = ${fn(other)}^2${deg(x)}$, знаменатель равен $1 + ${dd} = ${1 + dd}$`,
+          `$\\dfrac{${c}}{${1 + dd}} = ${d(ans)}$`,
+        ],
         proverka: c / (numeric(f, x) ** 2 + dd + numeric(f, y) ** 2),
         signature: `${x}`,
         params: { form, x, d: dd, c },

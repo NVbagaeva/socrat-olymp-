@@ -63,7 +63,12 @@ export function randomSeed(): string {
 export { BANK_TOTAL, isBankTask, parseTaskId, prototypeOfTask, taskId } from './ids';
 
 /** Задача по прототипу и seed, сразу в закрытом виде. */
-export function makeTask(prototype: string, seed: string, level: Level | null, fixes?: string): Task8 {
+export function makeTask(
+  prototype: string,
+  seed: string,
+  level: Level | null,
+  fixes?: string,
+): Task8 {
   const task = generate(prototype, seed, level);
   const seal = sealAnswer(task.otvet);
   const razbor = sealText(JSON.stringify(task.razbor.map((line) => typeset(line))), seal);
@@ -99,7 +104,11 @@ const ATTEMPTS = 20;
  * Аналог задачи: тот же прототип и уровень, свежий seed, условие другое.
  * avoid — условия, которые уже есть в тренировке.
  */
-export function analogOf(id: string, fixes?: string, avoid: ReadonlySet<string> = new Set()): Task8 | null {
+export function analogOf(
+  id: string,
+  fixes?: string,
+  avoid: ReadonlySet<string> = new Set(),
+): Task8 | null {
   const parsed = parseTaskId(id);
   if (parsed === null) return null;
   const source = taskById(id);

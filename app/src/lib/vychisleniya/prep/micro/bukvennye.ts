@@ -151,18 +151,23 @@ export const BUKVENNYE: PrepMicro[] = [
       proverka: (a ** m * a ** n) / a ** k,
     };
   }),
-  micro('P8-5-10', 'Сумма квадратов через сумму и произведение', 'a^2 + b^2 = (a + b)^2 - 2ab', (r) => {
-    const s = r.int(0, 1) === 0 ? r.int(2, 12) : tenth(r, 1.5, 9.9);
-    const p = r.int(-20, 20);
-    if (p === 0 || s * s - 4 * p < 0) {
-      return null;
-    }
-    const ans = round9(s * s - 2 * p);
-    return {
-      uslovie: `Найдите значение выражения $a^2 + b^2$, если $a + b = ${d(s)}$ и $ab = ${d(p)}$.`,
-      otvet: ans,
-      razbor: `$a^2 + b^2 = (a + b)^2 - 2ab = ${par(s)}^2 - 2 \\cdot ${par(p)} = ${d(round9(s * s))} ${p > 0 ? '-' : '+'} ${d(Math.abs(2 * p))} = ${d(ans)}$`,
-      proverka: s * s - 2 * p,
-    };
-  }),
+  micro(
+    'P8-5-10',
+    'Сумма квадратов через сумму и произведение',
+    'a^2 + b^2 = (a + b)^2 - 2ab',
+    (r) => {
+      const s = r.int(0, 1) === 0 ? r.int(2, 12) : tenth(r, 1.5, 9.9);
+      const p = r.int(-20, 20);
+      if (p === 0 || s * s - 4 * p < 0) {
+        return null;
+      }
+      const ans = round9(s * s - 2 * p);
+      return {
+        uslovie: `Найдите значение выражения $a^2 + b^2$, если $a + b = ${d(s)}$ и $ab = ${d(p)}$.`,
+        otvet: ans,
+        razbor: `$a^2 + b^2 = (a + b)^2 - 2ab = ${par(s)}^2 - 2 \\cdot ${par(p)} = ${d(round9(s * s))} ${p > 0 ? '-' : '+'} ${d(Math.abs(2 * p))} = ${d(ans)}$`,
+        proverka: s * s - 2 * p,
+      };
+    },
+  ),
 ];

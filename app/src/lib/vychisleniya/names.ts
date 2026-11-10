@@ -8,5 +8,7 @@ import { typeset } from '../tex';
 import { PROTOTYPE_NAMES } from './ids';
 
 export function names8Html(): Record<string, string> {
-  return Object.fromEntries(Object.entries(PROTOTYPE_NAMES).map(([id, name]) => [id, typeset(name)]));
+  return Object.fromEntries(
+    Object.entries(PROTOTYPE_NAMES).map(([id, name]) => [id, typeset(name)]),
+  );
 }

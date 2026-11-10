@@ -179,7 +179,10 @@ export const P8C: Prototype = {
           `$${left} = ${pw(String(b), d(round9(s1 * x)))}$, $${right} = ${pw(String(b), d(round9(s2 * y)))}$`,
           `$${pw(String(b), String(e))} = \\dfrac{1}{${b ** -e}} = ${d(ans)}$`,
         ],
-        proverka: op === 'quot' ? Math.pow(b ** s1, x) / Math.pow(b ** s2, y) : Math.pow(b ** s1, x) * Math.pow(b ** s2, y),
+        proverka:
+          op === 'quot'
+            ? Math.pow(b ** s1, x) / Math.pow(b ** s2, y)
+            : Math.pow(b ** s1, x) * Math.pow(b ** s2, y),
         signature: `${b}:${s1}:${s2}:neg`,
         params: { b, s1, s2, x, y, op },
       };

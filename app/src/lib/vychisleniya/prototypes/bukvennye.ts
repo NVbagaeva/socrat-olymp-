@@ -60,7 +60,7 @@ function drawW1(r: Rng, decimal: boolean): Draft | null {
     ],
     proverka: (p * p * a * a - q * q * b * b) / den,
     signature: `${p}:${q}`,
-        params: { p, q, a, b, minus: minus ? 1 : 0 },
+    params: { p, q, a, b, minus: minus ? 1 : 0 },
   };
 }
 
@@ -80,7 +80,10 @@ export const P8W: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a, b)),
         otvet: ans,
-        razbor: [`$(a + b)^2 - (a - b)^2 = 4ab$`, `$\\dfrac{4ab}{${k(kk)}ab} = \\dfrac{4}{${kk}} = ${d(ans)}$ при любых $a$, $b$`],
+        razbor: [
+          `$(a + b)^2 - (a - b)^2 = 4ab$`,
+          `$\\dfrac{4ab}{${k(kk)}ab} = \\dfrac{4}{${kk}} = ${d(ans)}$ при любых $a$, $b$`,
+        ],
         proverka: ((a + b) ** 2 - (a - b) ** 2) / (kk * a * b),
         signature: `${kk}`,
         params: { k: kk, a, b },
@@ -98,7 +101,10 @@ export const P8W: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a, b)),
         otvet: ans,
-        razbor: [`$\\dfrac{a^2 - b^2}{a - b} = a + b$`, `$${d(a)} + ${b < 0 ? `(${d(b)})` : d(b)} = ${d(ans)}$`],
+        razbor: [
+          `$\\dfrac{a^2 - b^2}{a - b} = a + b$`,
+          `$${d(a)} + ${b < 0 ? `(${d(b)})` : d(b)} = ${d(ans)}$`,
+        ],
         proverka: (a * a) / (a - b) - (b * b) / (a - b),
         signature: `${a}`,
         params: { a, b, form: 'common' },
@@ -127,7 +133,10 @@ export const P8X: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a, b)),
         otvet: ans,
-        razbor: [`$a - b = (\\sqrt{a} - \\sqrt{b})(\\sqrt{a} + \\sqrt{b})$, дробь равна $\\sqrt{a} + \\sqrt{b}$`, `$\\sqrt{${d(a)}} + \\sqrt{${d(b)}} = ${d(sa)} + ${d(sb)} = ${d(ans)}$`],
+        razbor: [
+          `$a - b = (\\sqrt{a} - \\sqrt{b})(\\sqrt{a} + \\sqrt{b})$, дробь равна $\\sqrt{a} + \\sqrt{b}$`,
+          `$\\sqrt{${d(a)}} + \\sqrt{${d(b)}} = ${d(sa)} + ${d(sb)} = ${d(ans)}$`,
+        ],
         proverka: (a - b) / (Math.sqrt(a) - Math.sqrt(b)),
         signature: `${a}`,
         params: { a, b, form: 'conjugate' },
@@ -142,7 +151,10 @@ export const P8X: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a, b)),
         otvet: ans,
-        razbor: [`$\\sqrt{a^2 b} = \\lvert a \\rvert \\cdot \\sqrt{b}$`, `$\\lvert ${d(a)} \\rvert \\cdot \\sqrt{${b}} = ${d(-a)} \\cdot ${rootB} = ${d(ans)}$`],
+        razbor: [
+          `$\\sqrt{a^2 b} = \\lvert a \\rvert \\cdot \\sqrt{b}$`,
+          `$\\lvert ${d(a)} \\rvert \\cdot \\sqrt{${b}} = ${d(-a)} \\cdot ${rootB} = ${d(ans)}$`,
+        ],
         proverka: Math.sqrt(a * a * b),
         signature: `${b}`,
         params: { a, b, form: 'modulus' },
@@ -159,7 +171,10 @@ export const P8X: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a, b)),
         otvet: ans,
-        razbor: [`$(\\sqrt{a} - \\sqrt{b})^2 = a - 2\\sqrt{ab} + b$, вместе с $2\\sqrt{ab}$ остаётся $a + b$`, `$${d(a)} + ${d(b)} = ${d(ans)}$`],
+        razbor: [
+          `$(\\sqrt{a} - \\sqrt{b})^2 = a - 2\\sqrt{ab} + b$, вместе с $2\\sqrt{ab}$ остаётся $a + b$`,
+          `$${d(a)} + ${d(b)} = ${d(ans)}$`,
+        ],
         proverka: (Math.sqrt(a) - Math.sqrt(b)) ** 2 + 2 * Math.sqrt(a * b),
         signature: `${a}`,
         params: { a, b, form: 'square' },
@@ -176,7 +191,10 @@ export const P8X: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a, b)),
         otvet: ans,
-        razbor: [`$(\\sqrt{a} + \\sqrt{b})(\\sqrt{a} - \\sqrt{b}) = a - b$`, `$${d(a)} - ${d(b)} = ${d(ans)}$`],
+        razbor: [
+          `$(\\sqrt{a} + \\sqrt{b})(\\sqrt{a} - \\sqrt{b}) = a - b$`,
+          `$${d(a)} - ${d(b)} = ${d(ans)}$`,
+        ],
         proverka: (Math.sqrt(a) + Math.sqrt(b)) * (Math.sqrt(a) - Math.sqrt(b)),
         signature: `${a}`,
         params: { a, b, form: 'product' },
@@ -225,7 +243,10 @@ export const P8Y: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a)),
         otvet: ans,
-        razbor: [`$a^{${d(x)}} \\cdot a^{${d(y)}} : a^{${d(z)}} = a^{${d(x)} ${y < 0 ? '-' : '+'} ${d(Math.abs(y))} - ${d(z)}} = a^{${d(target)}}$`, `$${d(a)}^{${d(target)}} = ${d(ans)}$`],
+        razbor: [
+          `$a^{${d(x)}} \\cdot a^{${d(y)}} : a^{${d(z)}} = a^{${d(x)} ${y < 0 ? '-' : '+'} ${d(Math.abs(y))} - ${d(z)}} = a^{${d(target)}}$`,
+          `$${d(a)}^{${d(target)}} = ${d(ans)}$`,
+        ],
         proverka: (Math.pow(a, x) * Math.pow(a, y)) / Math.pow(a, z),
         signature: `${target}:${a}`,
         params: { x, y, z, a },
@@ -245,7 +266,10 @@ export const P8Y: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a)),
         otvet: ans,
-        razbor: [`$(${c}a)^{${p}} = ${c ** p}a^{${p}}$, после деления на $a${expTex(s)}$ остаётся $${c ** p}${e === 0 ? '' : `a${expTex(e)}`}$`, `$${c ** p}${e === 0 ? '' : ` \\cdot ${d(a)}${expTex(e)}`} = ${d(ans)}$`],
+        razbor: [
+          `$(${c}a)^{${p}} = ${c ** p}a^{${p}}$, после деления на $a${expTex(s)}$ остаётся $${c ** p}${e === 0 ? '' : `a${expTex(e)}`}$`,
+          `$${c ** p}${e === 0 ? '' : ` \\cdot ${d(a)}${expTex(e)}`} = ${d(ans)}$`,
+        ],
         proverka: Math.pow(c * a, p) / Math.pow(a, s),
         signature: `${c}:${p}:${s}`,
         params: { c, p, s, a },
@@ -266,7 +290,7 @@ function drawY(r: Rng, negatives: boolean): Draft | null {
   if (Math.abs(ea) > 2 || Math.abs(eb) > 2 || (ea === 0 && eb === 0)) {
     return null;
   }
-  if (!negatives && (s === 0 && t === 0)) {
+  if (!negatives && s === 0 && t === 0) {
     return null;
   }
   const a = r.pick(VALUES_Y);
@@ -277,17 +301,22 @@ function drawY(r: Rng, negatives: boolean): Draft | null {
   }
   const inner = `a${expTex(p)} b${expTex(q)}`;
   const top = `(${inner})^{${rr}}`;
-  const bottomParts = [s === 0 ? '' : `a${expTex(s)}`, t === 0 ? '' : `b${expTex(t)}`].filter(Boolean);
+  const bottomParts = [s === 0 ? '' : `a${expTex(s)}`, t === 0 ? '' : `b${expTex(t)}`].filter(
+    Boolean,
+  );
   const bottom = bottomParts.join(' ');
   const tex = bottom === '' ? top : `\\dfrac{${top}}{${bottom}}`;
   const monom = (x: string, e: number) => (e === 0 ? '' : `${x}${expTex(e)}`);
   return {
     uslovie: naydiPri(tex, pri(a, b)),
     otvet: ans,
-    razbor: [`$${top} = a^{${p * rr}} b^{${q * rr}}$, после деления: $${monom('a', ea)}${monom('b', eb)}$`, `$${ea === 0 ? '' : `${d(a)}${expTex(ea)}`}${ea !== 0 && eb !== 0 ? ' \\cdot ' : ''}${eb === 0 ? '' : `${d(b)}${expTex(eb)}`} = ${d(ans)}$`],
+    razbor: [
+      `$${top} = a^{${p * rr}} b^{${q * rr}}$, после деления: $${monom('a', ea)}${monom('b', eb)}$`,
+      `$${ea === 0 ? '' : `${d(a)}${expTex(ea)}`}${ea !== 0 && eb !== 0 ? ' \\cdot ' : ''}${eb === 0 ? '' : `${d(b)}${expTex(eb)}`} = ${d(ans)}$`,
+    ],
     proverka: Math.pow(Math.pow(a, p) * Math.pow(b, q), rr) / (Math.pow(a, s) * Math.pow(b, t)),
     signature: `${ea}:${eb}:${a}:${b}`,
-        params: { p, q, r: rr, s, t, a, b },
+    params: { p, q, r: rr, s, t, a, b },
   };
 }
 
@@ -309,7 +338,10 @@ export const P8Z: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a, b)),
         otvet: p,
-        razbor: [`$${log('a', `(a^{${p}} b)`)} = ${p} + ${log('a', 'b')}$`, `$${p} + ${log('a', 'b')} - ${log('a', 'b')} = ${p}$ при любых допустимых $a$, $b$`],
+        razbor: [
+          `$${log('a', `(a^{${p}} b)`)} = ${p} + ${log('a', 'b')}$`,
+          `$${p} + ${log('a', 'b')} - ${log('a', 'b')} = ${p}$ при любых допустимых $a$, $b$`,
+        ],
         proverka: Math.log(a ** p * b) / Math.log(a) - Math.log(b) / Math.log(a),
         signature: `${p}:${a}`,
         params: { p, a, b },
@@ -326,7 +358,10 @@ export const P8Z: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a, b)),
         otvet: p,
-        razbor: [`$${log('a', 'b')} \\cdot ${log('b', `a^{${p}}`)} = ${log('a', `a^{${p}}`)}$`, `$${log('a', `a^{${p}}`)} = ${p}$`],
+        razbor: [
+          `$${log('a', 'b')} \\cdot ${log('b', `a^{${p}}`)} = ${log('a', `a^{${p}}`)}$`,
+          `$${log('a', `a^{${p}}`)} = ${p}$`,
+        ],
         proverka: (Math.log(b) / Math.log(a)) * (Math.log(a ** p) / Math.log(b)),
         signature: `${p}:${a}`,
         params: { p, a, b, form: 'chain' },
@@ -340,7 +375,10 @@ export const P8Z: Prototype = {
       return {
         uslovie: naydiPri(tex, `b = ${b}`),
         otvet: root,
-        razbor: [`$${log(String(a * a), 'b')} = \\dfrac{1}{2}${log(String(a), 'b')} = ${log(String(a), '\\sqrt{b}')}$`, `$${a}^{${log(String(a), '\\sqrt{b}')}} = \\sqrt{b} = \\sqrt{${b}} = ${root}$`],
+        razbor: [
+          `$${log(String(a * a), 'b')} = \\dfrac{1}{2}${log(String(a), 'b')} = ${log(String(a), '\\sqrt{b}')}$`,
+          `$${a}^{${log(String(a), '\\sqrt{b}')}} = \\sqrt{b} = \\sqrt{${b}} = ${root}$`,
+        ],
         proverka: Math.pow(a, Math.log(b) / Math.log(a * a)),
         signature: `${a}:${root}`,
         params: { a, b },
@@ -354,11 +392,18 @@ export const P8Z: Prototype = {
       const m = r.int(2, 5);
       const n = r.int(1, m - 1);
       const ans = round9((m - n) * t);
-      const tex = `${log('a', `b^{${m}}`)} + ${log('a', `\\dfrac{1}{b^{${n === 1 ? '' : n}}}`)}`.replace('^{}', '');
+      const tex =
+        `${log('a', `b^{${m}}`)} + ${log('a', `\\dfrac{1}{b^{${n === 1 ? '' : n}}}`)}`.replace(
+          '^{}',
+          '',
+        );
       return {
         uslovie: `Найдите значение выражения $${tex}$, если $${log('a', 'b')} = ${d(t)}$.`,
         otvet: ans,
-        razbor: [`$${log('a', `b^{${m}}`)} = ${m}${log('a', 'b')}$, $${log('a', `\\dfrac{1}{b^{${n}}}`)} = -${n}${log('a', 'b')}$`, `$(${m} - ${n}) \\cdot ${d(t)} = ${d(ans)}$`],
+        razbor: [
+          `$${log('a', `b^{${m}}`)} = ${m}${log('a', 'b')}$, $${log('a', `\\dfrac{1}{b^{${n}}}`)} = -${n}${log('a', 'b')}$`,
+          `$(${m} - ${n}) \\cdot ${d(t)} = ${d(ans)}$`,
+        ],
         proverka: m * t + -n * t,
         signature: `${m}:${n}`,
         params: { t, m, n },

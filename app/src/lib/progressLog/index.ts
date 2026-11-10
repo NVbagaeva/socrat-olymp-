@@ -42,7 +42,11 @@ export function migrateLegacyLog(key: string): void {
     const raw = target.getItem(legacy);
     if (raw === null) return;
     const log = fromLegacy(JSON.parse(raw), `ustroystvo-${newAttemptId()}`);
-    if (log.attempts.length === 0 && Object.keys(log.archive).length === 0 && log.legacyMistakes.length === 0) {
+    if (
+      log.attempts.length === 0 &&
+      Object.keys(log.archive).length === 0 &&
+      log.legacyMistakes.length === 0
+    ) {
       return;
     }
     target.setItem(key, JSON.stringify(log));

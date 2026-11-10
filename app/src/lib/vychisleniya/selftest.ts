@@ -52,7 +52,10 @@ export function checkTask(task: Generated, typeset: ((tex: string) => void) | nu
     problems.push({ where, what: `ответ не целый и не конечная десятичная дробь: ${task.otvet}` });
   }
   if (!Number.isFinite(task.proverka) || Math.abs(task.proverka - task.otvet) > 1e-6) {
-    problems.push({ where, what: `независимый счёт ${task.proverka} не сходится с ответом ${task.otvet}` });
+    problems.push({
+      where,
+      what: `независимый счёт ${task.proverka} не сходится с ответом ${task.otvet}`,
+    });
   }
   if (Number.isFinite(task.otvet)) {
     /* Ответ сверяется точно, по нормальной записи: запись верного ответа
@@ -97,13 +100,19 @@ export function checkTask(task: Generated, typeset: ((tex: string) => void) | nu
 }
 
 /** Генераторы на многих seed: каждый прототип, каждый уровень. */
-export function checkGenerators(seedsPerLevel: number, typeset: ((tex: string) => void) | null): Report {
+export function checkGenerators(
+  seedsPerLevel: number,
+  typeset: ((tex: string) => void) | null,
+): Report {
   const problems: Problem[] = [];
   let generated = 0;
   /* Лёгкий список названий (ids.ts) совпадает с прототипами. */
   for (const prototype of PROTOTYPES) {
     if (PROTOTYPE_NAMES[prototype.id] !== prototype.nazvanie) {
-      problems.push({ where: prototype.id, what: `название в ids.ts не совпадает с прототипом: ${prototype.nazvanie}` });
+      problems.push({
+        where: prototype.id,
+        what: `название в ids.ts не совпадает с прототипом: ${prototype.nazvanie}`,
+      });
     }
   }
   if (Object.keys(PROTOTYPE_NAMES).length !== PROTOTYPES.length) {
@@ -121,12 +130,18 @@ export function checkGenerators(seedsPerLevel: number, typeset: ((tex: string) =
         try {
           task = generate(prototype.id, seed, level);
         } catch (error) {
-          problems.push({ where: `${prototype.id} level=${String(level)} seed=${seed}`, what: String(error) });
+          problems.push({
+            where: `${prototype.id} level=${String(level)} seed=${seed}`,
+            what: String(error),
+          });
           continue;
         }
         generated += 1;
         if (level !== null && task.level !== level) {
-          problems.push({ where: `${prototype.id} seed=${seed}`, what: `просили уровень ${level}, получили ${task.level}` });
+          problems.push({
+            where: `${prototype.id} seed=${seed}`,
+            what: `просили уровень ${level}, получили ${task.level}`,
+          });
         }
         problems.push(...checkTask(task, typeset));
         seen.set(task.uslovie, (seen.get(task.uslovie) ?? 0) + 1);
@@ -135,7 +150,10 @@ export function checkGenerators(seedsPerLevel: number, typeset: ((tex: string) =
          чем в четверти случаев — иначе тренажёр повторяется. */
       const max = Math.max(...seen.values());
       if (seedsPerLevel >= 100 && max > seedsPerLevel / 4) {
-        problems.push({ where: `${prototype.id} level=${String(level)}`, what: `одно условие повторилось ${max} раз из ${seedsPerLevel}` });
+        problems.push({
+          where: `${prototype.id} level=${String(level)}`,
+          what: `одно условие повторилось ${max} раз из ${seedsPerLevel}`,
+        });
       }
     }
   }
@@ -154,7 +172,10 @@ export function checkBank(typeset: ((tex: string) => void) | null): Report {
       continue;
     }
     if (entry.variants.length !== 10) {
-      problems.push({ where: prototype.id, what: `в банке ${entry.variants.length} вариантов, а не 10` });
+      problems.push({
+        where: prototype.id,
+        what: `в банке ${entry.variants.length} вариантов, а не 10`,
+      });
     }
     const statements = new Set<string>();
     const signatures = new Set<string>();
@@ -165,12 +186,18 @@ export function checkBank(typeset: ((tex: string) => void) | null): Report {
       generated += 1;
       problems.push(...checkTask(task, typeset));
       if (statements.has(task.uslovie)) {
-        problems.push({ where: `${prototype.id} seed=${variant.seed}`, what: 'условие повторяет другой вариант банка' });
+        problems.push({
+          where: `${prototype.id} seed=${variant.seed}`,
+          what: 'условие повторяет другой вариант банка',
+        });
       }
       statements.add(task.uslovie);
       const signature = `${task.podtip}|${task.signature ?? ''}`;
       if (task.signature !== undefined && signatures.has(signature)) {
-        problems.push({ where: `${prototype.id} seed=${variant.seed}`, what: `подпись «${task.signature}» уже есть в банке` });
+        problems.push({
+          where: `${prototype.id} seed=${variant.seed}`,
+          what: `подпись «${task.signature}» уже есть в банке`,
+        });
       }
       signatures.add(signature);
       const key = ru(task.otvet);
@@ -181,23 +208,35 @@ export function checkBank(typeset: ((tex: string) => void) | null): Report {
       const seal = sealAnswer(task.otvet);
       const taken = seals.get(seal);
       if (taken !== undefined && taken !== String(round9(task.otvet))) {
-        problems.push({ where: `${prototype.id} seed=${variant.seed}`, what: `столкновение отпечатков: ${taken} и ${task.otvet}` });
+        problems.push({
+          where: `${prototype.id} seed=${variant.seed}`,
+          what: `столкновение отпечатков: ${taken} и ${task.otvet}`,
+        });
       }
       seals.set(seal, String(round9(task.otvet)));
     }
     for (const [answer, count] of answers) {
       if (count > 3) {
-        problems.push({ where: prototype.id, what: `ответ ${answer} встречается ${count} раза в банке` });
+        problems.push({
+          where: prototype.id,
+          what: `ответ ${answer} встречается ${count} раза в банке`,
+        });
       }
     }
     if (hasLevel(prototype, 'base') && hasLevel(prototype, 'advanced') && (base < 5 || base > 7)) {
-      problems.push({ where: prototype.id, what: `базовых вариантов в банке ${base}, ожидается 5–7` });
+      problems.push({
+        where: prototype.id,
+        what: `базовых вариантов в банке ${base}, ожидается 5–7`,
+      });
     }
   }
   for (const skill of SKILLS) {
     for (const id of skill.prototypes) {
       if (!PROTOTYPES.some((p) => p.id === id)) {
-        problems.push({ where: skill.id, what: `навык ссылается на несуществующий прототип ${id}` });
+        problems.push({
+          where: skill.id,
+          what: `навык ссылается на несуществующий прототип ${id}`,
+        });
       }
     }
   }
@@ -229,7 +268,10 @@ export function checkPrep(seedsPerTask: number, typeset: ((tex: string) => void)
         try {
           typeset(micro.formula);
         } catch (error) {
-          problems.push({ where: micro.id, what: `KaTeX не принял формулу-подсказку: ${String(error)}` });
+          problems.push({
+            where: micro.id,
+            what: `KaTeX не принял формулу-подсказку: ${String(error)}`,
+          });
         }
       }
       const seeds = [fixedSeed(micro), ...Array.from({ length: seedsPerTask }, (_, k) => `t${k}`)];
@@ -245,17 +287,33 @@ export function checkPrep(seedsPerTask: number, typeset: ((tex: string) => void)
         generated += 1;
         if (micro.answerType === 'number') {
           if (typeof task.otvet !== 'number' || !nice(task.otvet, 3)) {
-            problems.push({ where, what: `ответ не целый и не конечная десятичная дробь: ${String(task.otvet)}` });
+            problems.push({
+              where,
+              what: `ответ не целый и не конечная десятичная дробь: ${String(task.otvet)}`,
+            });
           }
-          if (task.proverka === null || typeof task.otvet !== 'number' || Math.abs(task.proverka - task.otvet) > 1e-6) {
-            problems.push({ where, what: `независимый счёт ${String(task.proverka)} не сходится с ответом ${String(task.otvet)}` });
+          if (
+            task.proverka === null ||
+            typeof task.otvet !== 'number' ||
+            Math.abs(task.proverka - task.otvet) > 1e-6
+          ) {
+            problems.push({
+              where,
+              what: `независимый счёт ${String(task.proverka)} не сходится с ответом ${String(task.otvet)}`,
+            });
           }
           const tail = task.razbor.replace(/\{,\}/g, ',').replace(/\s/g, '');
           if (typeof task.otvet === 'number' && !tail.includes(ru(task.otvet))) {
-            problems.push({ where, what: `разбор не содержит ответа ${ru(task.otvet)}: ${task.razbor}` });
+            problems.push({
+              where,
+              what: `разбор не содержит ответа ${ru(task.otvet)}: ${task.razbor}`,
+            });
           }
         } else if (!(micro.choices ?? []).some((c) => c.number === task.otvet)) {
-          problems.push({ where, what: `ответ-выбор ${String(task.otvet)} не из списка вариантов` });
+          problems.push({
+            where,
+            what: `ответ-выбор ${String(task.otvet)} не из списка вариантов`,
+          });
         }
         if (/NaN|Infinity|undefined/.test(task.uslovie + task.razbor)) {
           problems.push({ where, what: 'NaN или undefined в тексте' });
@@ -266,7 +324,10 @@ export function checkPrep(seedsPerTask: number, typeset: ((tex: string) => void)
               try {
                 typeset(match[1] as string);
               } catch (error) {
-                problems.push({ where, what: `KaTeX не принял «${match[1] as string}»: ${String(error)}` });
+                problems.push({
+                  where,
+                  what: `KaTeX не принял «${match[1] as string}»: ${String(error)}`,
+                });
               }
             }
           }

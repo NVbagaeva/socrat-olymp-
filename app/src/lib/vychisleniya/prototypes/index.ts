@@ -11,11 +11,32 @@ import { P8M, P8N, P8O, P8P } from './trig-chetvert';
 import { P8Q, P8R, P8S, P8T, P8U, P8V } from './trig-preobr';
 
 export const PROTOTYPES: Prototype[] = [
-  P8A, P8B, P8C, P8D, P8E, P8F, P8G,
-  P8H, P8I, P8J, P8K, P8L,
-  P8M, P8N, P8O, P8P,
-  P8Q, P8R, P8S, P8T, P8U, P8V,
-  P8W, P8X, P8Y, P8Z,
+  P8A,
+  P8B,
+  P8C,
+  P8D,
+  P8E,
+  P8F,
+  P8G,
+  P8H,
+  P8I,
+  P8J,
+  P8K,
+  P8L,
+  P8M,
+  P8N,
+  P8O,
+  P8P,
+  P8Q,
+  P8R,
+  P8S,
+  P8T,
+  P8U,
+  P8V,
+  P8W,
+  P8X,
+  P8Y,
+  P8Z,
 ];
 
 export function prototypeById(id: string): Prototype | undefined {

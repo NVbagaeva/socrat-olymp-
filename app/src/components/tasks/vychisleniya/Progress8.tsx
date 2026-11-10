@@ -133,12 +133,13 @@ export function Progress8({
 
       <section className="tstats__kinds">
         <h3 className="tstats__title">По навыкам</h3>
-        <TypeCards groups={groups8(names)} log={log} label="Прогресс по навыкам №8" />
+        <TypeCards groups={groups8(names)} log={log} hideEmpty label="Прогресс по навыкам №8" />
       </section>
 
       <section className="tstats__kinds" data-section="mistakes8">
         <h3 className="tstats__title">
-          Мои ошибки{open.length === 0 ? '' : ` · ${counted(open.length, 'задача', 'задачи', 'задач')}`}
+          Мои ошибки
+          {open.length === 0 ? '' : ` · ${counted(open.length, 'задача', 'задачи', 'задач')}`}
         </h3>
         <MistakesList
           items={open}

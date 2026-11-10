@@ -36,7 +36,9 @@ function parsePrep(raw: unknown): Record<string, number[]> {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return out;
   for (const [id, list] of Object.entries(raw as Record<string, unknown>)) {
     if (Array.isArray(list)) {
-      out[id] = list.filter((n): n is number => typeof n === 'number' && Number.isInteger(n) && n > 0);
+      out[id] = list.filter(
+        (n): n is number => typeof n === 'number' && Number.isInteger(n) && n > 0,
+      );
     }
   }
   return out;
@@ -62,14 +64,20 @@ interface SessionHead {
 function head(value: unknown): SessionHead | null {
   if (typeof value !== 'object' || value === null) return null;
   const v = value as Record<string, unknown>;
-  return typeof v.id === 'string' && typeof v.updatedAt === 'number' ? { id: v.id, updatedAt: v.updatedAt } : null;
+  return typeof v.id === 'string' && typeof v.updatedAt === 'number'
+    ? { id: v.id, updatedAt: v.updatedAt }
+    : null;
 }
 
 /**
  * Тренировка: более свежая из двух; завершённая (её идентификатор есть
  * в истории) — никакая. null — записи быть не должно.
  */
-export function mergeSession(local: unknown, server: unknown, finished: ReadonlySet<string>): unknown {
+export function mergeSession(
+  local: unknown,
+  server: unknown,
+  finished: ReadonlySet<string>,
+): unknown {
   const a = head(local);
   const b = head(server);
   const alive = (h: SessionHead | null) => h !== null && !finished.has(h.id);
@@ -95,7 +103,11 @@ export function mergeSessionRaw(
   };
   const merged = mergeSession(parse(local), parse(server), finished);
   if (merged === null) return null;
-  return merged === parse(local) ? local : merged === parse(server) ? server : JSON.stringify(merged);
+  return merged === parse(local)
+    ? local
+    : merged === parse(server)
+      ? server
+      : JSON.stringify(merged);
 }
 
 /* ── Общее ───────────────────────────────────────────────────── */
@@ -104,14 +116,21 @@ export function mergeSessionRaw(
  * Слить значения ключа. null на любой стороне — значения там нет.
  * finished — идентификаторы завершённых тренировок (из слитой истории).
  */
-export function mergeValue(key: string, local: unknown, server: unknown, finished: ReadonlySet<string>): unknown {
+export function mergeValue(
+  key: string,
+  local: unknown,
+  server: unknown,
+  finished: ReadonlySet<string>,
+): unknown {
   if (SESSION.test(key)) return mergeSession(local, server, finished);
   if (local === null || local === undefined) return server ?? null;
   if (server === null || server === undefined) return local;
   if (key.endsWith(':log:v1')) return mergeLogs(parseLog(local), parseLog(server));
   if (key.endsWith(':prep:v1')) return mergePrep(local, server);
-  if (key === 'budetege:zakladki:v1') return mergeBookmarks(parseBookmarks(local), parseBookmarks(server));
-  if (key === 'budetege:istoriya:v1') return mergeHistory(parseHistory(local), parseHistory(server));
+  if (key === 'budetege:zakladki:v1')
+    return mergeBookmarks(parseBookmarks(local), parseBookmarks(server));
+  if (key === 'budetege:istoriya:v1')
+    return mergeHistory(parseHistory(local), parseHistory(server));
   /* Неизвестный вид данных: аккаунт главнее. */
   return server;
 }

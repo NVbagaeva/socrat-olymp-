@@ -61,7 +61,10 @@ const kindOf = (task) => task.split('|')[0];
   log = at(log, `8.A|s${clock}|base`, 'right');
   log = at(log, `8.A|s${clock}|base`, 'right');
   s = L.kindStats(log).get('8.A');
-  check(s.repeat === false, `после трёх верных подряд одна ошибка в пяти — не повторять: ${s.recent}`);
+  check(
+    s.repeat === false,
+    `после трёх верных подряд одна ошибка в пяти — не повторять: ${s.recent}`,
+  );
   /* Сведение типов в группы (у №8 — навыки). */
   log = at(log, '8.C|x1|base', 'wrong');
   log = at(log, '8.D|x2|base', 'wrong');
@@ -90,7 +93,10 @@ const kindOf = (task) => task.split('|')[0];
   check(open.find((m) => m.task === '8.A|bad|base')?.streak === 0, 'неверный аналог — счёт с нуля');
   check(!open.some((m) => m.task === '8.A|an2|base'), 'неверный аналог сам в ошибки не попадает');
   log = at(log, '8.A|an3|base', 'right', { fixes: '8.A|bad|base' });
-  check(L.mistakes(log, kindOf).some((m) => m.task === '8.A|bad|base'), 'один верный после неверного — ещё в списке');
+  check(
+    L.mistakes(log, kindOf).some((m) => m.task === '8.A|bad|base'),
+    'один верный после неверного — ещё в списке',
+  );
   log = at(log, '8.A|an4|base', 'right', { fixes: '8.A|bad|base' });
   open = L.mistakes(log, kindOf);
   check(!open.some((m) => m.task === '8.A|bad|base'), 'два верных аналога подряд — задача ушла');
@@ -98,7 +104,10 @@ const kindOf = (task) => task.split('|')[0];
   /* Верный аналог чужой ошибки ничего не закрывает. */
   log = at(log, '8.B|x|base', 'right');
   log = at(log, '8.B|y|base', 'right');
-  check(L.mistakes(log, kindOf).length === 1, 'обычные верные задачи того же типа ошибку не закрывают');
+  check(
+    L.mistakes(log, kindOf).length === 1,
+    'обычные верные задачи того же типа ошибку не закрывают',
+  );
 }
 
 /* ── Решено разных задач банка ──────────────────────────────────── */
@@ -115,16 +124,35 @@ const kindOf = (task) => task.split('|')[0];
 
 /* ── Старый формат ──────────────────────────────────────────────── */
 {
-  const legacy = { kinds: { '8.A': { done: 7, right: 5, seconds: 210 } }, mistakes: ['8.A|old|any'], outcomes: {} };
+  const legacy = {
+    kinds: { '8.A': { done: 7, right: 5, seconds: 210 } },
+    mistakes: ['8.A|old|any'],
+    outcomes: {},
+  };
   const log = L.fromLegacy(legacy, 'ustroystvo-1');
   const s = L.kindStats(log).get('8.A');
-  check(s.done === 7 && s.right === 5 && s.mistakes === 2, `старые счётчики перенесены: ${JSON.stringify(s)}`);
-  check(L.mistakes(log, kindOf).some((m) => m.task === '8.A|old|any'), 'старые ошибки перенесены');
+  check(
+    s.done === 7 && s.right === 5 && s.mistakes === 2,
+    `старые счётчики перенесены: ${JSON.stringify(s)}`,
+  );
+  check(
+    L.mistakes(log, kindOf).some((m) => m.task === '8.A|old|any'),
+    'старые ошибки перенесены',
+  );
   const twice = L.mergeLogs(log, log);
-  check(L.kindStats(twice).get('8.A').done === 7, 'одно и то же устройство при слиянии не удваивается');
+  check(
+    L.kindStats(twice).get('8.A').done === 7,
+    'одно и то же устройство при слиянии не удваивается',
+  );
   const other = L.fromLegacy(legacy, 'ustroystvo-2');
-  check(L.kindStats(L.mergeLogs(log, other)).get('8.A').done === 14, 'два устройства со старыми счётчиками — сумма');
-  check(L.parseLog(JSON.parse(JSON.stringify(log))).archive['ustroystvo-1']['8.A'].done === 7, 'журнал переживает JSON');
+  check(
+    L.kindStats(L.mergeLogs(log, other)).get('8.A').done === 14,
+    'два устройства со старыми счётчиками — сумма',
+  );
+  check(
+    L.parseLog(JSON.parse(JSON.stringify(log))).archive['ustroystvo-1']['8.A'].done === 7,
+    'журнал переживает JSON',
+  );
 }
 
 /* ── Слияние двух устройств ─────────────────────────────────────── */
@@ -137,8 +165,14 @@ const kindOf = (task) => task.split('|')[0];
   phone = L.mergeLogs(phone, shared);
   laptop = L.mergeLogs(laptop, shared);
   const merged = L.mergeLogs(phone, laptop);
-  check(merged.attempts.length === 3, `слияние: три попытки без дублей, получили ${merged.attempts.length}`);
-  check(JSON.stringify(L.mergeLogs(laptop, phone)) === JSON.stringify(merged), 'слияние не зависит от порядка');
+  check(
+    merged.attempts.length === 3,
+    `слияние: три попытки без дублей, получили ${merged.attempts.length}`,
+  );
+  check(
+    JSON.stringify(L.mergeLogs(laptop, phone)) === JSON.stringify(merged),
+    'слияние не зависит от порядка',
+  );
   check(L.mergeLogs(merged, merged).attempts.length === 3, 'слияние с собой ничего не меняет');
   /* Мусор не ломает журнал. */
   const parsed = L.parseLog({ attempts: [{ id: 1 }, null, 'x', merged.attempts[0]], archive: 5 });
@@ -148,17 +182,28 @@ const kindOf = (task) => task.split('|')[0];
 /* ── Предел журнала ─────────────────────────────────────────────── */
 {
   let log = L.EMPTY_LOG;
-  for (let i = 0; i < L.LOG_LIMIT + 20; i += 1) log = at(log, `8.A|t${i}|base`, i % 4 === 0 ? 'wrong' : 'right');
+  for (let i = 0; i < L.LOG_LIMIT + 20; i += 1)
+    log = at(log, `8.A|t${i}|base`, i % 4 === 0 ? 'wrong' : 'right');
   check(log.attempts.length === L.LOG_LIMIT, 'журнал не растёт выше предела');
   check(L.totals(log).done === L.LOG_LIMIT + 20, 'свёрнутые попытки остаются в счёте');
   const merged = L.mergeLogs(log, log);
   check(L.totals(merged).done === L.LOG_LIMIT + 20, 'свёртка не удваивается при слиянии');
-  check(JSON.stringify(log).length < 300000, `журнал помещается в предел базы: ${JSON.stringify(log).length}`);
+  check(
+    JSON.stringify(log).length < 300000,
+    `журнал помещается в предел базы: ${JSON.stringify(log).length}`,
+  );
 }
 
 /* ── Закладки ───────────────────────────────────────────────────── */
 {
-  const item = { id: Z.bookmarkId('8', 'trenazher', '8.A|s|base'), section: '8', place: 'trenazher', ref: '8.A|s|base', title: '№8', href: '/zadaniya/8/trenazher/?zadacha=x' };
+  const item = {
+    id: Z.bookmarkId('8', 'trenazher', '8.A|s|base'),
+    section: '8',
+    place: 'trenazher',
+    ref: '8.A|s|base',
+    title: '№8',
+    href: '/zadaniya/8/trenazher/?zadacha=x',
+  };
   let phone = Z.toggleBookmark(Z.EMPTY_BOOKMARKS, item, 100);
   check(Z.isBookmarked(phone, item.id), 'отложено');
   const laptop = Z.mergeBookmarks(Z.EMPTY_BOOKMARKS, phone);
@@ -168,13 +213,29 @@ const kindOf = (task) => task.split('|')[0];
   check(!Z.isBookmarked(merged, item.id), 'снятая на телефоне не вернулась с ноутбука');
   const again = Z.toggleBookmark(merged, item, 300);
   check(Z.activeBookmarks(again, '8').length === 1, 'отложить снова');
-  const bad = Z.parseBookmarks({ items: [{ ...item, href: 'https://evil.example/' }, { ...item, href: '//evil' }] });
+  const bad = Z.parseBookmarks({
+    items: [
+      { ...item, href: 'https://evil.example/' },
+      { ...item, href: '//evil' },
+    ],
+  });
   check(bad.items.length === 0, 'закладка не уводит с сайта');
 }
 
 /* ── История и тренировка между устройствами ────────────────────── */
 {
-  const entry = { id: 's1', scope: '8', at: 10, total: 10, right: 7, hinted: 1, wrong: 2, skipped: 0, seconds: 300, weak: ['Свойства степеней'] };
+  const entry = {
+    id: 's1',
+    scope: '8',
+    at: 10,
+    total: 10,
+    right: 7,
+    hinted: 1,
+    wrong: 2,
+    skipped: 0,
+    seconds: 300,
+    weak: ['Свойства степеней'],
+  };
   let a = H.addHistory(H.EMPTY_HISTORY, entry);
   const b = H.addHistory(H.EMPTY_HISTORY, { ...entry, id: 's2', at: 20, scope: '12:linear' });
   const both = H.mergeHistory(a, b);
@@ -183,22 +244,51 @@ const kindOf = (task) => task.split('|')[0];
   a = H.mergeHistory(both, both);
   check(a.items.length === 2, 'без дублей');
 
-  const session = (id, updatedAt) => JSON.stringify({ schemaVersion: 2, scope: '8', id, updatedAt, payload: {} });
-  check(M.mergeSessionRaw(session('s3', 5), session('s3', 9), new Set()) === session('s3', 9), 'тренировка: новее побеждает');
-  check(M.mergeSessionRaw(session('s3', 9), null, new Set()) === session('s3', 9), 'тренировка есть только здесь — остаётся');
-  check(M.mergeSessionRaw(null, session('s1', 9), new Set(['s1'])) === null, 'завершённая на другом устройстве не воскресает');
-  check(M.mergeSessionRaw('мусор', session('s4', 1), new Set()) === session('s4', 1), 'испорченная запись уступает');
+  const session = (id, updatedAt) =>
+    JSON.stringify({ schemaVersion: 2, scope: '8', id, updatedAt, payload: {} });
+  check(
+    M.mergeSessionRaw(session('s3', 5), session('s3', 9), new Set()) === session('s3', 9),
+    'тренировка: новее побеждает',
+  );
+  check(
+    M.mergeSessionRaw(session('s3', 9), null, new Set()) === session('s3', 9),
+    'тренировка есть только здесь — остаётся',
+  );
+  check(
+    M.mergeSessionRaw(null, session('s1', 9), new Set(['s1'])) === null,
+    'завершённая на другом устройстве не воскресает',
+  );
+  check(
+    M.mergeSessionRaw('мусор', session('s4', 1), new Set()) === session('s4', 1),
+    'испорченная запись уступает',
+  );
 }
 
 /* ── Слияние по ключам ──────────────────────────────────────────── */
 {
-  const prep = M.mergeValue('budetege:vychisleniya-8:prep:v1', { 'P8-1': [1, 3] }, { 'P8-1': [2, 3], 'P8-2': [5] }, new Set());
-  check(JSON.stringify(prep) === JSON.stringify({ 'P8-1': [1, 2, 3], 'P8-2': [5] }), `опорные: объединение ${JSON.stringify(prep)}`);
-  check(M.isSyncedKey('budetege:vychisleniya-8:log:v1') && M.isSyncedKey('budetege:trainer:8:session'), 'ключи №8 синхронизируются');
-  check(!M.isSyncedKey('budetege-auth') && !M.isSyncedKey('budetege:import:answers'), 'сессия входа и ответы на вопрос не синхронизируются');
+  const prep = M.mergeValue(
+    'budetege:vychisleniya-8:prep:v1',
+    { 'P8-1': [1, 3] },
+    { 'P8-1': [2, 3], 'P8-2': [5] },
+    new Set(),
+  );
+  check(
+    JSON.stringify(prep) === JSON.stringify({ 'P8-1': [1, 2, 3], 'P8-2': [5] }),
+    `опорные: объединение ${JSON.stringify(prep)}`,
+  );
+  check(
+    M.isSyncedKey('budetege:vychisleniya-8:log:v1') && M.isSyncedKey('budetege:trainer:8:session'),
+    'ключи №8 синхронизируются',
+  );
+  check(
+    !M.isSyncedKey('budetege-auth') && !M.isSyncedKey('budetege:import:answers'),
+    'сессия входа и ответы на вопрос не синхронизируются',
+  );
 }
 
-console.log(`Журнал попыток, закладки, история и слияние: ${checks} проверок, не прошло ${failures.length}.`);
+console.log(
+  `Журнал попыток, закладки, история и слияние: ${checks} проверок, не прошло ${failures.length}.`,
+);
 if (failures.length > 0) {
   for (const f of failures) console.error(`  НЕТ ${f}`);
   process.exit(1);

@@ -137,7 +137,6 @@
 
 /* ── Итоги: оформление (раньше жило в trainer.css №12) ── */
 
-
 .tdone {
   display: grid;
   justify-items: center;
@@ -298,8 +297,6 @@
   border-radius: var(--radius-pill);
   background: var(--color-primary);
 }
-
-
 
 /* Итоговый экран: две кнопки в ряд. */
 .tdone__actions {

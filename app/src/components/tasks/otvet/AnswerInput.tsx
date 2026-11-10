@@ -6,8 +6,10 @@ import { Input, type FieldState } from '@/components/ui';
 import { useCoarsePointer } from '@/components/ui';
 import './otvet.css';
 
-export interface AnswerInputProps
-  extends Omit<ComponentPropsWithoutRef<'input'>, 'value' | 'onChange' | 'type'> {
+export interface AnswerInputProps extends Omit<
+  ComponentPropsWithoutRef<'input'>,
+  'value' | 'onChange' | 'type'
+> {
   value: string;
   onChange: (value: string) => void;
   state?: FieldState;

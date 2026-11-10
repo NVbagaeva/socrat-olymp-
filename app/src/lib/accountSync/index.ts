@@ -219,7 +219,9 @@ export async function importStash(): Promise<SyncResult> {
         /* Испорченное отложенное — пропускаем. */
       }
     }
-    window.dispatchEvent(new CustomEvent(SYNC_APPLIED_EVENT, { detail: { keys: [...SYNCED_KEYS] } }));
+    window.dispatchEvent(
+      new CustomEvent(SYNC_APPLIED_EVENT, { detail: { keys: [...SYNCED_KEYS] } }),
+    );
   }
   return syncNow();
 }

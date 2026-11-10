@@ -102,7 +102,10 @@ for (const [input, want, meant] of NORMAL) {
   const n = normalizeAnswer(input);
   const shown = JSON.stringify(input);
   if (meant === undefined) {
-    check(n.ok && n.value === want, `запись ${shown}: ждали ${want}, получили ${JSON.stringify(n)}`);
+    check(
+      n.ok && n.value === want,
+      `запись ${shown}: ждали ${want}, получили ${JSON.stringify(n)}`,
+    );
   } else {
     check(
       !n.ok && n.problem === want && n.meant === meant,
@@ -111,7 +114,10 @@ for (const [input, want, meant] of NORMAL) {
     if (!n.ok) {
       const hint = formatHint(n.problem, n.meant);
       check(
-        typeof hint === 'string' && hint.length > 10 && !hint.includes('undefined') && !hint.includes('null'),
+        typeof hint === 'string' &&
+          hint.length > 10 &&
+          !hint.includes('undefined') &&
+          !hint.includes('null'),
         `подсказка для ${shown}: ${hint}`,
       );
     }
@@ -167,7 +173,10 @@ for (const [input, mode, correct, want] of READ) {
       : r.kind === 'fractionRight'
         ? 'fraction-right'
         : r.problem;
-  check(got === want, `чтение ${JSON.stringify(input)} (${mode}, верно ${correct}): ждали ${want}, получили ${got}`);
+  check(
+    got === want,
+    `чтение ${JSON.stringify(input)} (${mode}, верно ${correct}): ждали ${want}, получили ${got}`,
+  );
   if (r.kind === 'fractionRight') {
     const hint = fractionRightHint(r.decimal);
     check(
@@ -181,6 +190,11 @@ check(
   fractionRightHint('0.25') ===
     'Значение верное, но в бланк ЕГЭ записывают десятичную дробь: 0,25. Введите ответ так.',
   'текст подсказки «значение верное» — как в задании',
+);
+check(
+  fractionRightHint('-3') ===
+    'Значение верное, но в бланк ЕГЭ записывают целое число: −3. Введите ответ так.',
+  'дробь с целым значением: «записывают целое число»',
 );
 check(displayAnswer('-2.25') === '−2,25', 'запись для экрана: −2,25');
 
@@ -203,7 +217,10 @@ for (const [input, want] of NUMBER) {
     want === null ? got === null : got !== null && Math.abs(got - want) < 1e-12,
     `число из ${JSON.stringify(input)}: ждали ${want}, получили ${got}`,
   );
-  check(parseAnswer(input) === got, `lib/answer.ts повторяет lib/otvet для ${JSON.stringify(input)}`);
+  check(
+    parseAnswer(input) === got,
+    `lib/answer.ts повторяет lib/otvet для ${JSON.stringify(input)}`,
+  );
 }
 check(sameNumber('0,5', '1/2'), 'разделы с допуском: 0,5 = 1/2');
 check(!sameNumber('1e3', '1000'), 'разделы с допуском: «1e3» больше не число');

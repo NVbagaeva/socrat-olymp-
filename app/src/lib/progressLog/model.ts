@@ -91,7 +91,14 @@ function parseAttempt(value: unknown): LogAttempt | null {
   const kind = str(v.kind, 40);
   const outcome = OUTCOMES.find((item) => item === v.outcome);
   if (id === null || task === null || kind === null || outcome === undefined) return null;
-  const out: LogAttempt = { id, task, kind, outcome, seconds: Math.round(num(v.seconds)), at: num(v.at) };
+  const out: LogAttempt = {
+    id,
+    task,
+    kind,
+    outcome,
+    seconds: Math.round(num(v.seconds)),
+    at: num(v.at),
+  };
   const fixes = str(v.fixes);
   if (fixes !== null) out.fixes = fixes;
   const session = str(v.session, 64);
@@ -357,9 +364,7 @@ export function mistakes(log: ProgressLog, kindOfTask: (task: string) => string)
     m.streak = item.outcome === 'right' ? m.streak + 1 : 0;
     if (m.streak >= FIX_STREAK) cleared.add(item.fixes);
   }
-  return [...open.values()]
-    .filter((m) => !cleared.has(m.task))
-    .sort((a, b) => b.at - a.at);
+  return [...open.values()].filter((m) => !cleared.has(m.task)).sort((a, b) => b.at - a.at);
 }
 
 /** Новый идентификатор попытки: время и случайный хвост. */

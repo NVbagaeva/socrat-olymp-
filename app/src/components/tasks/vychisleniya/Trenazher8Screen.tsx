@@ -43,7 +43,9 @@ const VERDICT = {
 export function razborOf(task: Task8): string[] {
   try {
     const value: unknown = JSON.parse(openText(task.razbor, task.seal));
-    return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+    return Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === 'string')
+      : [];
   } catch {
     return [];
   }
@@ -69,7 +71,10 @@ export function Trenazher8Screen({
   const build = useCallback(() => pickRound(kinds, pool.length), [kinds, pool.length]);
   const order = useRound(roundKey, build, restored?.order);
   const tasks = useMemo(
-    () => (order.length === 0 ? pool : order.map((at) => pool[at]).filter((item): item is Task8 => item !== undefined)),
+    () =>
+      order.length === 0
+        ? pool
+        : order.map((at) => pool[at]).filter((item): item is Task8 => item !== undefined),
     [order, pool],
   );
 
@@ -211,16 +216,24 @@ export function Trenazher8Screen({
         {tasks.map((item, i) => (
           <li
             key={`${i}-${item.id}`}
-            className={clsx('ttask__dot', marks[i] === 'right' && 'is-done', marks[i] === 'hinted' && 'is-hinted', i === index && 'is-current')}
+            className={clsx(
+              'ttask__dot',
+              marks[i] === 'right' && 'is-done',
+              marks[i] === 'hinted' && 'is-hinted',
+              i === index && 'is-current',
+            )}
           >
             {marks[i] === undefined ? i + 1 : <RightIcon />}
           </li>
         ))}
       </ol>
 
-      <article className="ptask__card">
+      <article className="ptask__card" data-task={task.id}>
         <div className="ptask__text">
-          <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.questionHtml }} />
+          <div
+            className="ptask__question"
+            dangerouslySetInnerHTML={{ __html: task.questionHtml }}
+          />
         </div>
         <div className="z8-task__tools">
           <BookmarkButton
@@ -264,7 +277,9 @@ export function Trenazher8Screen({
         {checked === null ? null : (
           <div className={clsx('tverdict', `tverdict--${checked}`)} role="status">
             <p className="tverdict__title">
-              <span className="tverdict__ico">{checked === 'right' ? <RightIcon /> : <WrongIcon />}</span>
+              <span className="tverdict__ico">
+                {checked === 'right' ? <RightIcon /> : <WrongIcon />}
+              </span>
               {VERDICT[checked].title}
             </p>
             {control ? null : (

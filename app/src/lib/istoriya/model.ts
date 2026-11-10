@@ -64,7 +64,9 @@ export function parseHistory(raw: unknown): History {
       skipped: num(v.skipped),
       seconds: num(v.seconds),
       weak: Array.isArray(v.weak)
-        ? v.weak.filter((item): item is string => typeof item === 'string' && item.length <= 120).slice(0, 20)
+        ? v.weak
+            .filter((item): item is string => typeof item === 'string' && item.length <= 120)
+            .slice(0, 20)
         : [],
     });
   }
@@ -76,7 +78,10 @@ function sortHistory(items: HistoryEntry[]): HistoryEntry[] {
 }
 
 export function addHistory(list: History, entry: HistoryEntry): History {
-  return { v: 1, items: sortHistory([entry, ...list.items.filter((item) => item.id !== entry.id)]) };
+  return {
+    v: 1,
+    items: sortHistory([entry, ...list.items.filter((item) => item.id !== entry.id)]),
+  };
 }
 
 export function mergeHistory(a: History, b: History): History {
@@ -87,5 +92,7 @@ export function mergeHistory(a: History, b: History): History {
 
 /** Тренировки раздела: «8» — и «8», и «8:что-то». */
 export function historyOf(list: History, section: string): HistoryEntry[] {
-  return list.items.filter((item) => item.scope === section || item.scope.startsWith(`${section}:`));
+  return list.items.filter(
+    (item) => item.scope === section || item.scope.startsWith(`${section}:`),
+  );
 }

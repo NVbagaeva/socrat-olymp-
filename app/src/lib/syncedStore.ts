@@ -55,7 +55,11 @@ export interface SyncedStore<T> {
  * ключа нет) и обязан вернуть годное значение: мусор и чужой формат —
  * пустое значение, а не исключение.
  */
-export function createSyncedStore<T>(key: string, parse: (raw: unknown) => T, empty: T): SyncedStore<T> {
+export function createSyncedStore<T>(
+  key: string,
+  parse: (raw: unknown) => T,
+  empty: T,
+): SyncedStore<T> {
   let cache: T | null = null;
   const listeners = new Set<() => void>();
 

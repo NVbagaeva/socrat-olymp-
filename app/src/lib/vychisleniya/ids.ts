@@ -44,9 +44,16 @@ export function taskId(prototype: string, seed: string, level: Level | null): st
 }
 
 /** Части идентификатора задачи. null — идентификатор не читается. */
-export function parseTaskId(id: string): { prototype: string; seed: string; level: Level | null } | null {
+export function parseTaskId(
+  id: string,
+): { prototype: string; seed: string; level: Level | null } | null {
   const [prototype, seed, level] = id.split('|');
-  if (prototype === undefined || seed === undefined || seed === '' || PROTOTYPE_NAMES[prototype] === undefined) {
+  if (
+    prototype === undefined ||
+    seed === undefined ||
+    seed === '' ||
+    PROTOTYPE_NAMES[prototype] === undefined
+  ) {
     return null;
   }
   return { prototype, seed, level: level === 'base' || level === 'advanced' ? level : null };

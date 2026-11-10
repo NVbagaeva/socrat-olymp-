@@ -66,12 +66,28 @@ export function parseBookmarks(raw: unknown): Bookmarks {
     const ref = str(v.ref, 160);
     const title = str(v.title, 200);
     const href = str(v.href, 400);
-    if (id === null || section === null || place === null || ref === null || title === null || href === null) {
+    if (
+      id === null ||
+      section === null ||
+      place === null ||
+      ref === null ||
+      title === null ||
+      href === null
+    ) {
       continue;
     }
     /* Адрес — только внутренний: закладка не уводит с сайта. */
     if (!href.startsWith('/') || href.startsWith('//')) continue;
-    const item: Bookmark = { id, section, place, ref, title, href, addedAt: num(v.addedAt), updatedAt: num(v.updatedAt) };
+    const item: Bookmark = {
+      id,
+      section,
+      place,
+      ref,
+      title,
+      href,
+      addedAt: num(v.addedAt),
+      updatedAt: num(v.updatedAt),
+    };
     if (typeof v.removedAt === 'number' && v.removedAt > 0) item.removedAt = v.removedAt;
     items.push(item);
   }
@@ -95,7 +111,9 @@ export function mergeBookmarks(a: Bookmarks, b: Bookmarks): Bookmarks {
 /** Отложенные задачи: без снятых, новые сверху. */
 export function activeBookmarks(list: Bookmarks, section?: string): Bookmark[] {
   return list.items
-    .filter((item) => item.removedAt === undefined && (section === undefined || item.section === section))
+    .filter(
+      (item) => item.removedAt === undefined && (section === undefined || item.section === section),
+    )
     .sort((a, b) => b.addedAt - a.addedAt);
 }
 

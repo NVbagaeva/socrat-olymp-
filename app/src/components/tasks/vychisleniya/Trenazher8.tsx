@@ -107,7 +107,13 @@ export function Trenazher8({ base, skills, total, names }: Trenazher8Props) {
         extra: () => <MistakesLink />,
       }}
       configurator={(api) => (
-        <Trenazher8Configurator skills={skills} total={total} names={names} api={api} intent={intent} />
+        <Trenazher8Configurator
+          skills={skills}
+          total={total}
+          names={names}
+          api={api}
+          intent={intent}
+        />
       )}
       screen={({ payload, sessionId, restored, report, elapsed, finish }) => (
         <Trenazher8Screen
@@ -181,7 +187,9 @@ function Trenazher8Configurator({
   const first = skills[0];
   /* Навыков можно выбрать несколько; последний снять нельзя. */
   const [selected, setSelected] = useState<string[]>(first === undefined ? [] : [first.id]);
-  const [mode, setMode] = useState<TrainerModeId>(intent?.kind === 'oshibki' ? 'mistakes' : 'practice');
+  const [mode, setMode] = useState<TrainerModeId>(
+    intent?.kind === 'oshibki' ? 'mistakes' : 'practice',
+  );
   /* Закладка: одна задача сразу, без выбора тренировки. Один раз. */
   const opened = useRef(false);
   useEffect(() => {

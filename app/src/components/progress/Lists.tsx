@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui';
 import { FIX_STREAK, type Mistake } from '@/lib/progressLog';
@@ -87,12 +86,16 @@ export function BookmarksList({
         <li key={item.id} className="tp-row tp-row--action">
           <span className="tp-row__title">{renderTitle?.(item) ?? item.title}</span>
           <span className="tp-row__meta">
-            {item.place === 'opornye' ? 'Опорная задача' : 'Тренажёр'} · отложено {dateTime(item.addedAt)}
+            {item.place === 'opornye' ? 'Опорная задача' : 'Тренажёр'} · отложено{' '}
+            {dateTime(item.addedAt)}
           </span>
           <span className="tp-row__actions">
-            <Link className="btn btn--secondary btn--sm" href={item.href}>
+            {/* Обычная ссылка, а не переход внутри приложения: тренажёр
+                читает задачу из адреса при входе, и с той же страницы
+                закладка должна открыться так же, как с любой другой. */}
+            <a className="btn btn--secondary btn--sm" href={item.href}>
               Открыть
-            </Link>
+            </a>
             <Button
               variant="ghost"
               size="sm"
@@ -100,7 +103,9 @@ export function BookmarksList({
                 bookmarks.update((current) => ({
                   v: 1,
                   items: current.items.map((entry) =>
-                    entry.id === item.id ? { ...entry, removedAt: Date.now(), updatedAt: Date.now() } : entry,
+                    entry.id === item.id
+                      ? { ...entry, removedAt: Date.now(), updatedAt: Date.now() }
+                      : entry,
                   ),
                 }))
               }
@@ -115,7 +120,15 @@ export function BookmarksList({
 }
 
 /** История тренировок раздела: когда, сколько верно, время, что просело. */
-export function HistoryList({ section, empty, limit = 10 }: { section: string; empty: string; limit?: number }) {
+export function HistoryList({
+  section,
+  empty,
+  limit = 10,
+}: {
+  section: string;
+  empty: string;
+  limit?: number;
+}) {
   const list = history.use();
   const items = historyOf(list, section).slice(0, limit);
   if (items.length === 0) {

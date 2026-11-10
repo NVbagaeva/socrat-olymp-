@@ -39,7 +39,14 @@ function drawH(r: Rng, decimalArgs: boolean, base: number, e: number) {
   }
   const y = Math.round((op === '+' ? T / x : x / T) * 100) / 100;
   const back = round9(op === '+' ? x * y : x / y);
-  if (Math.abs(back - T) > 1e-9 || y === x || y === 1 || y < 0.01 || y > 999 || isPowerOf(y, base)) {
+  if (
+    Math.abs(back - T) > 1e-9 ||
+    y === x ||
+    y === 1 ||
+    y < 0.01 ||
+    y > 999 ||
+    isPowerOf(y, base)
+  ) {
     return null;
   }
   if (!decimalArgs && (!Number.isInteger(y) || !Number.isInteger(x))) {
@@ -51,10 +58,16 @@ function drawH(r: Rng, decimalArgs: boolean, base: number, e: number) {
   return {
     uslovie: naydi(tex),
     otvet: e,
-    razbor: [`$${tex} = ${log(b, `(${inner})`)} = ${log(b, d(T))}$`, `$${log(b, d(T))} = ${e}$, так как $${b}^{${e}} = ${d(T)}$`],
-    proverka: op === '+' ? Math.log(x) / Math.log(base) + Math.log(y) / Math.log(base) : Math.log(x) / Math.log(base) - Math.log(y) / Math.log(base),
+    razbor: [
+      `$${tex} = ${log(b, `(${inner})`)} = ${log(b, d(T))}$`,
+      `$${log(b, d(T))} = ${e}$, так как $${b}^{${e}} = ${d(T)}$`,
+    ],
+    proverka:
+      op === '+'
+        ? Math.log(x) / Math.log(base) + Math.log(y) / Math.log(base)
+        : Math.log(x) / Math.log(base) - Math.log(y) / Math.log(base),
     signature: `${base}:${op}:${e}`,
-        params: { b: base, x, y, op },
+    params: { b: base, x, y, op },
   };
 }
 
@@ -64,7 +77,9 @@ export const P8H: Prototype = {
   nazvanie: 'Сумма и разность логарифмов',
   podtipy: [
     podtip('int', 'base', (r) => drawH(r, false, r.pick([2, 3, 4, 5, 6, 7, 8, 9]), r.int(1, 4))),
-    podtip('dec-args', 'advanced', (r) => drawH(r, true, r.pick([2, 3, 4, 5, 6, 7, 8, 9]), r.pick([-2, -1, 1, 2, 3]))),
+    podtip('dec-args', 'advanced', (r) =>
+      drawH(r, true, r.pick([2, 3, 4, 5, 6, 7, 8, 9]), r.pick([-2, -1, 1, 2, 3])),
+    ),
     podtip('dec-base', 'advanced', (r) =>
       drawH(r, r.pick([true, false]), r.pick([0.2, 0.5, 0.7, 0.8]), r.pick([-2, -1, 1, 2])),
     ),
@@ -116,7 +131,8 @@ export const P8I: Prototype = {
           `$\\dfrac{${log(String(c), String(a))}}{${log(String(c), String(b))}} = ${log(String(b), String(a))}$`,
           `$${log(String(b), String(a))} + ${log(String(b), d(dd))} = ${log(String(b), `(${a} \\cdot ${d(dd)})`)} = ${log(String(b), d(round9(a * dd)))} = ${e}$`,
         ],
-        proverka: Math.log(a) / Math.log(c) / (Math.log(b) / Math.log(c)) + Math.log(dd) / Math.log(b),
+        proverka:
+          Math.log(a) / Math.log(c) / (Math.log(b) / Math.log(c)) + Math.log(dd) / Math.log(b),
         signature: `${b}:${e}`,
         params: { b, c, a, d: dd },
       };
@@ -222,7 +238,10 @@ export const P8K: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: e,
-        razbor: [`$${tex} = ${log(String(b), String(c))}$`, `$${log(String(b), String(c))} = ${log(String(b), `${b}^{${e}}`)} = ${e}$`],
+        razbor: [
+          `$${tex} = ${log(String(b), String(c))}$`,
+          `$${log(String(b), String(c))} = ${log(String(b), `${b}^{${e}}`)} = ${e}$`,
+        ],
         proverka: (Math.log(a) / Math.log(b)) * (Math.log(c) / Math.log(a)),
         signature: `${b}:${e}`,
         params: { b, a, c, k: 1 },
@@ -281,7 +300,10 @@ export const P8L: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: ans,
-        razbor: [`$${log(root(n, String(b)), String(b))} = ${log(`${b}^{\\frac{1}{${n}}}`, String(b))} = ${n}$`, `$${k} \\cdot ${n} = ${ans}$`],
+        razbor: [
+          `$${log(root(n, String(b)), String(b))} = ${log(`${b}^{\\frac{1}{${n}}}`, String(b))} = ${n}$`,
+          `$${k} \\cdot ${n} = ${ans}$`,
+        ],
         proverka: (k * Math.log(b)) / Math.log(Math.pow(b, 1 / n)),
         signature: `${n}:base`,
         params: { n, b, m: 1, k, where: 'base' },
@@ -319,7 +341,10 @@ export const P8L: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: ans,
-        razbor: [`$${log(String(b), root(n, String(b)))} = ${log(String(b), `${b}^{\\frac{1}{${n}}}`)} = \\dfrac{1}{${n}}$`, `$${k} \\cdot \\dfrac{1}{${n}} = ${d(ans)}$`],
+        razbor: [
+          `$${log(String(b), root(n, String(b)))} = ${log(String(b), `${b}^{\\frac{1}{${n}}}`)} = \\dfrac{1}{${n}}$`,
+          `$${k} \\cdot \\dfrac{1}{${n}} = ${d(ans)}$`,
+        ],
         proverka: (k * Math.log(Math.pow(b, 1 / n))) / Math.log(b),
         signature: `${n}:${k}:arg`,
         params: { n, b, m: 1, k, where: 'arg' },

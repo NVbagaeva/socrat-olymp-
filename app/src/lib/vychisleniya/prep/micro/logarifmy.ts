@@ -52,7 +52,9 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(tex),
       otvet: one ? 0 : 1,
-      razbor: one ? `$${tex} = 0$, так как $${a}^{0} = 1$` : `$${tex} = 1$, так как $${a}^{1} = ${a}$`,
+      razbor: one
+        ? `$${tex} = 0$, так как $${a}^{0} = 1$`
+        : `$${tex} = 1$, так как $${a}^{1} = ${a}$`,
       proverka: one ? 0 : 1,
     };
   }),
@@ -151,7 +153,10 @@ export const LOGARIFMY: PrepMicro[] = [
     return {
       uslovie: naydi(tex),
       otvet: b ** k,
-      razbor: k === 1 ? `$${tex} = ${b}$` : `$${tex} = (${a}^{${log(String(a), String(b))}})^{${k}} = ${b}^{${k}} = ${b ** k}$`,
+      razbor:
+        k === 1
+          ? `$${tex} = ${b}$`
+          : `$${tex} = (${a}^{${log(String(a), String(b))}})^{${k}} = ${b}^{${k}} = ${b ** k}$`,
       proverka: Math.pow(a, (k * Math.log(b)) / Math.log(a)),
     };
   }),
@@ -171,20 +176,25 @@ export const LOGARIFMY: PrepMicro[] = [
       proverka: (Math.log(b) / Math.log(a)) * (Math.log(c) / Math.log(b)),
     };
   }),
-  micro('P8-2-10', 'Переход к новому основанию', '\\log_a b = \\dfrac{\\log_c b}{\\log_c a}', (r) => {
-    const a = r.pick([2, 3, 5]);
-    const c = r.pick([2, 3, 5, 7, 10]);
-    const j = r.int(2, 5);
-    if (c === a || a ** j > 1000) {
-      return null;
-    }
-    const b = a ** j;
-    const tex = `\\dfrac{${log(String(c), String(b))}}{${log(String(c), String(a))}}`;
-    return {
-      uslovie: naydi(tex),
-      otvet: j,
-      razbor: `$${tex} = ${log(String(a), String(b))} = ${log(String(a), `${a}^{${j}}`)} = ${j}$`,
-      proverka: Math.log(b) / Math.log(c) / (Math.log(a) / Math.log(c)),
-    };
-  }),
+  micro(
+    'P8-2-10',
+    'Переход к новому основанию',
+    '\\log_a b = \\dfrac{\\log_c b}{\\log_c a}',
+    (r) => {
+      const a = r.pick([2, 3, 5]);
+      const c = r.pick([2, 3, 5, 7, 10]);
+      const j = r.int(2, 5);
+      if (c === a || a ** j > 1000) {
+        return null;
+      }
+      const b = a ** j;
+      const tex = `\\dfrac{${log(String(c), String(b))}}{${log(String(c), String(a))}}`;
+      return {
+        uslovie: naydi(tex),
+        otvet: j,
+        razbor: `$${tex} = ${log(String(a), String(b))} = ${log(String(a), `${a}^{${j}}`)} = ${j}$`,
+        proverka: Math.log(b) / Math.log(c) / (Math.log(a) / Math.log(c)),
+      };
+    },
+  ),
 ];

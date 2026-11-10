@@ -316,9 +316,7 @@ export function formatHint(problem: FormatProblem, meant: NormalAnswer | null): 
         ? 'С обеих сторон от запятой нужны цифры.'
         : `С обеих сторон от запятой нужны цифры: ${as}.`;
     case 'space':
-      return as === null
-        ? 'Без пробелов внутри числа.'
-        : `Без пробелов внутри числа: ${as}.`;
+      return as === null ? 'Без пробелов внутри числа.' : `Без пробелов внутри числа: ${as}.`;
     case 'other':
       return 'Так число не записывают. Нужно целое число или десятичная дробь, например −2,25.';
   }
@@ -326,7 +324,9 @@ export function formatHint(problem: FormatProblem, meant: NormalAnswer | null): 
 
 /** Подсказка тренажёра, когда дробью записано верное значение. */
 export function fractionRightHint(decimal: NormalAnswer): string {
-  return `Значение верное, но в бланк ЕГЭ записывают десятичную дробь: ${displayAnswer(decimal)}. Введите ответ так.`;
+  /* Дробь «3/1» — это целое число: так и говорим. */
+  const what = decimal.includes('.') ? 'десятичную дробь' : 'целое число';
+  return `Значение верное, но в бланк ЕГЭ записывают ${what}: ${displayAnswer(decimal)}. Введите ответ так.`;
 }
 
 /* ── Число из записи — для разделов с допуском ────────────────────

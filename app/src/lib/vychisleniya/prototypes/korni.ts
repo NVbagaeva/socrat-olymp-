@@ -30,7 +30,7 @@ function squareB(r: Rng, integer: boolean) {
     ],
     proverka: (c * Math.sqrt(dd)) ** 2 / e,
     signature: `${dd}:${e}`,
-        params: { c, d: dd, e },
+    params: { c, d: dd, e },
   };
 }
 
@@ -233,7 +233,13 @@ export const P8F: Prototype = {
       const b = nonSquare(r, 2, 40);
       /* Числа под корнями — без квадратных множителей, как и их
          произведение: √20 в условии выглядело бы неупрощённым. */
-      if (a >= b || a * b > 99 || simpRoot(a).k !== 1 || simpRoot(b).k !== 1 || simpRoot(a * b).k !== 1) {
+      if (
+        a >= b ||
+        a * b > 99 ||
+        simpRoot(a).k !== 1 ||
+        simpRoot(b).k !== 1 ||
+        simpRoot(a * b).k !== 1
+      ) {
         return null;
       }
       const m = r.pick([2, 4, 5, 8, 10, 20, 25]);
@@ -252,7 +258,9 @@ export const P8F: Prototype = {
           `$(\\sqrt{${a}} ${sign} \\sqrt{${b}})^2 = ${a + b} ${sign} 2\\sqrt{${a * b}}$`,
           `$${denom} = ${m}(${a + b} ${sign} 2\\sqrt{${a * b}})$, поэтому дробь равна $\\dfrac{${c}}{${m}} = ${d(ans)}$`,
         ],
-        proverka: (c * (Math.sqrt(a) + (sign === '-' ? -1 : 1) * Math.sqrt(b)) ** 2) / (m * (a + b) + (sign === '-' ? -1 : 1) * 2 * m * Math.sqrt(a * b)),
+        proverka:
+          (c * (Math.sqrt(a) + (sign === '-' ? -1 : 1) * Math.sqrt(b)) ** 2) /
+          (m * (a + b) + (sign === '-' ? -1 : 1) * 2 * m * Math.sqrt(a * b)),
         signature: `${a}:${b}`,
         params: { a, b, m, c, sign },
       };

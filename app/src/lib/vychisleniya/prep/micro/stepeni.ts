@@ -104,34 +104,39 @@ export const STEPENI: PrepMicro[] = [
       proverka: a ** n * b ** n,
     };
   }),
-  micro('P8-1-07', 'Произведение и частное корней', '\\sqrt{a} \\cdot \\sqrt{b} = \\sqrt{ab},\\quad \\dfrac{\\sqrt{a}}{\\sqrt{b}} = \\sqrt{\\dfrac{a}{b}}', (r) => {
-    const k = r.int(2, 12);
-    const a = r.pick([2, 3, 5, 6, 7, 8, 10, 12, 18, 20]);
-    const quotient = r.int(0, 1) === 0;
-    if (quotient) {
-      const b = a;
-      const top = a * k * k;
+  micro(
+    'P8-1-07',
+    'Произведение и частное корней',
+    '\\sqrt{a} \\cdot \\sqrt{b} = \\sqrt{ab},\\quad \\dfrac{\\sqrt{a}}{\\sqrt{b}} = \\sqrt{\\dfrac{a}{b}}',
+    (r) => {
+      const k = r.int(2, 12);
+      const a = r.pick([2, 3, 5, 6, 7, 8, 10, 12, 18, 20]);
+      const quotient = r.int(0, 1) === 0;
+      if (quotient) {
+        const b = a;
+        const top = a * k * k;
+        return {
+          uslovie: naydi(`\\dfrac{\\sqrt{${top}}}{\\sqrt{${b}}}`),
+          otvet: k,
+          razbor: `$\\dfrac{\\sqrt{${top}}}{\\sqrt{${b}}} = \\sqrt{\\dfrac{${top}}{${b}}} = \\sqrt{${k * k}} = ${k}$`,
+          proverka: Math.sqrt(top) / Math.sqrt(b),
+        };
+      }
+      if ((k * k) % a !== 0) {
+        return null;
+      }
+      const b = (k * k) / a;
+      if (b < 2 || b === a) {
+        return null;
+      }
       return {
-        uslovie: naydi(`\\dfrac{\\sqrt{${top}}}{\\sqrt{${b}}}`),
+        uslovie: naydi(`\\sqrt{${a}} \\cdot \\sqrt{${b}}`),
         otvet: k,
-        razbor: `$\\dfrac{\\sqrt{${top}}}{\\sqrt{${b}}} = \\sqrt{\\dfrac{${top}}{${b}}} = \\sqrt{${k * k}} = ${k}$`,
-        proverka: Math.sqrt(top) / Math.sqrt(b),
+        razbor: `$\\sqrt{${a}} \\cdot \\sqrt{${b}} = \\sqrt{${a * b}} = ${k}$`,
+        proverka: Math.sqrt(a) * Math.sqrt(b),
       };
-    }
-    if ((k * k) % a !== 0) {
-      return null;
-    }
-    const b = (k * k) / a;
-    if (b < 2 || b === a) {
-      return null;
-    }
-    return {
-      uslovie: naydi(`\\sqrt{${a}} \\cdot \\sqrt{${b}}`),
-      otvet: k,
-      razbor: `$\\sqrt{${a}} \\cdot \\sqrt{${b}} = \\sqrt{${a * b}} = ${k}$`,
-      proverka: Math.sqrt(a) * Math.sqrt(b),
-    };
-  }),
+    },
+  ),
   micro('P8-1-08', 'Корень из степени', '\\sqrt[n]{a^{nk}} = a^k', (r) => {
     const a = r.pick([2, 3, 5, 7, 10]);
     const n = r.pick([2, 3, 4]);
@@ -148,30 +153,35 @@ export const STEPENI: PrepMicro[] = [
       proverka: Math.pow(a ** (n * k), 1 / n),
     };
   }),
-  micro('P8-1-09', 'Степень дроби', '\\left(\\dfrac{a}{b}\\right)^n = \\dfrac{a^n}{b^n},\\quad \\left(\\dfrac{a}{b}\\right)^{-n} = \\left(\\dfrac{b}{a}\\right)^n', (r) => {
-    const [p, q] = r.pick([
-      [1, 2],
-      [3, 2],
-      [1, 4],
-      [3, 4],
-      [1, 5],
-      [2, 5],
-      [3, 5],
-      [5, 2],
-    ] as const);
-    const n = r.pick([2, 3, -2, -3]);
-    const k = Math.abs(n);
-    const ans = round9((p / q) ** n);
-    if (!nice(ans, 3) || ans > 1000) {
-      return null;
-    }
-    const tex = `\\left(\\dfrac{${p}}{${q}}\\right)^{${n}}`;
-    const razbor =
-      n > 0
-        ? `$${tex} = \\dfrac{${p}^{${k}}}{${q}^{${k}}} = \\dfrac{${p ** k}}{${q ** k}} = ${d(ans)}$`
-        : `$${tex} = \\left(\\dfrac{${q}}{${p}}\\right)^{${k}} = \\dfrac{${q ** k}}{${p ** k}} = ${d(ans)}$`;
-    return { uslovie: naydi(tex), otvet: ans, razbor, proverka: (p / q) ** n };
-  }),
+  micro(
+    'P8-1-09',
+    'Степень дроби',
+    '\\left(\\dfrac{a}{b}\\right)^n = \\dfrac{a^n}{b^n},\\quad \\left(\\dfrac{a}{b}\\right)^{-n} = \\left(\\dfrac{b}{a}\\right)^n',
+    (r) => {
+      const [p, q] = r.pick([
+        [1, 2],
+        [3, 2],
+        [1, 4],
+        [3, 4],
+        [1, 5],
+        [2, 5],
+        [3, 5],
+        [5, 2],
+      ] as const);
+      const n = r.pick([2, 3, -2, -3]);
+      const k = Math.abs(n);
+      const ans = round9((p / q) ** n);
+      if (!nice(ans, 3) || ans > 1000) {
+        return null;
+      }
+      const tex = `\\left(\\dfrac{${p}}{${q}}\\right)^{${n}}`;
+      const razbor =
+        n > 0
+          ? `$${tex} = \\dfrac{${p}^{${k}}}{${q}^{${k}}} = \\dfrac{${p ** k}}{${q ** k}} = ${d(ans)}$`
+          : `$${tex} = \\left(\\dfrac{${q}}{${p}}\\right)^{${k}} = \\dfrac{${q ** k}}{${p ** k}} = ${d(ans)}$`;
+      return { uslovie: naydi(tex), otvet: ans, razbor, proverka: (p / q) ** n };
+    },
+  ),
   micro('P8-1-10', 'Вынесение степени за скобки', 'a^{n+k} + a^n = a^n(a^k + 1)', (r) => {
     const a = r.pick([2, 3, 5]);
     const n = r.int(3, 9);
