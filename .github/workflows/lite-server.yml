@@ -244,6 +244,11 @@ jobs:
           sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -c 'delete from public.kits'
           MODE=server CONFIRM=ВОССТАНОВИТЬ infra/lite/actions/restore-check.sh
           test "$(sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -tAc 'select count(*) from public.kits')" -ge 1
+          # Восстановление не вернуло снятые права: аноним не читает людей и
+          # не вызывает служебные функции, вошедший не назначает администратора.
+          test "$(sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -tAc "select has_table_privilege('anon', 'public.profiles', 'select') or has_function_privilege('anon', 'public.grant_admin(text)', 'execute') or has_function_privilege('authenticated', 'public.grant_admin(text)', 'execute') or has_function_privilege('authenticated', 'public.accept_documents(uuid, date, inet)', 'execute')")" = f
+          # А права по умолчанию после восстановления на месте — как при первом запуске.
+          test "$(sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -tAc "select count(*) from pg_default_acl d join pg_namespace n on n.oid = d.defaclnamespace where n.nspname = 'public'")" = 3
 
       - name: Проверить здоровье
         run: |
