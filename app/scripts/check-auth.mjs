@@ -1776,6 +1776,27 @@ async function runEnabled() {
         fixTasks[0].question_html !== hwTasks[1].question_html,
       'ДЗ: работа над ошибками — новый аналог задачи с ошибкой, тот же тип, ученику 1',
     );
+    /* Телефон: экраны репетитора без горизонтальной прокрутки. */
+    await tutor.page.setViewportSize({ width: 390, height: 844 });
+    for (const [what, url] of [
+      ['кабинет', `${SITE}/kabinet/`],
+      ['класс', classUrl],
+      ['выдача', `${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`],
+      ['результаты', `${SITE}/kabinet/domashka/?id=${hw.id}`],
+    ]) {
+      await tutor.page.goto(url, { waitUntil: 'networkidle' });
+      await tutor.page.waitForTimeout(800);
+      check(
+        await noHorizontalScroll(tutor.page),
+        `ДЗ: репетитор, ${what} 390 — горизонтальной прокрутки нет`,
+      );
+    }
+    await st1.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await st1.page.waitForSelector('[data-section="homework"] .dz-list__item');
+    check(
+      await noHorizontalScroll(st1.page),
+      'ДЗ: ученик, кабинет 390 — горизонтальной прокрутки нет',
+    );
     void tutorUser;
     await st1.context.close();
     await st2.context.close();
@@ -1786,12 +1807,21 @@ async function runEnabled() {
   {
     const { context, page } = await newPage(mock, 390, errors);
     await login(page, 'svoy@example.ru', 'sovsem-novyy-parol');
-    await page.waitForSelector('.klass-list');
+    await page.waitForSelector('.dz-klassy__item');
     const klass = await page.locator('[data-section="classes"]').innerText();
     check(
-      klass.includes('Тестовый класс') && klass.includes('Тестовый ученик 1'),
-      'репетитор: свой класс и ученик в нём',
+      klass.includes('Тестовый класс') && klass.includes('1 ученик'),
+      'репетитор: свой класс и сколько в нём учеников',
     );
+    /* Имена учеников — на странице класса. */
+    await page.locator('.dz-klassy__name', { hasText: 'Тестовый класс' }).click();
+    await page.waitForSelector('.dz-members__item');
+    check(
+      (await page.locator('.dz-members').innerText()).includes('Тестовый ученик 1'),
+      'репетитор: на странице класса — ученик',
+    );
+    await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.dz-klassy__item');
     check(await noHorizontalScroll(page), 'кабинет 390: горизонтальной прокрутки нет');
     await shot(page, 'kabinet-repetitor-390');
 
@@ -2274,7 +2304,7 @@ async function runGallery(dir) {
 
     /* Репетитор: свой класс с учениками. */
     await login(page, 'svoy@example.ru', 'moy-dlinnyy-parol');
-    await page.waitForSelector('.klass-list');
+    await page.waitForSelector('.dz-klassy__item');
     await page.waitForSelector('[role="dialog"]');
     await page.click('[role="dialog"] button:has-text("Нет")');
     await page.waitForSelector('[role="dialog"]', { state: 'detached' });

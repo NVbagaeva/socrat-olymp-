@@ -2,6 +2,15 @@
    карточки — те же, что в кабинете (.kabinet__card). Статусы: верно —
    зелёный, ошибка — терракотовый, «решает» — янтарный, как в прогрессе. */
 
+/* Шапка карточки с кнопкой («Выдать домашнее задание», «Другие
+   задачи»): на телефоне кнопка уходит под заголовок, а не за край. */
+.dz-page .card__head,
+.kabinet__card[data-section='homework'] .card__head,
+.kabinet__card[data-section='classes'] .card__head {
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
 .dz-page {
   display: grid;
   gap: var(--space-5);
