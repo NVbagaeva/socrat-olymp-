@@ -13,6 +13,7 @@ import {
   useTrainerProgress,
   type TrainerProgress,
 } from '@/lib/trainerProgress';
+import './tstats.css';
 
 export interface TrainerStatsProps {
   /** Сколько заданий всего есть в наборах: знаменатель счётчика. */

@@ -12,6 +12,7 @@ import { log8 } from '@/lib/vychisleniya/progress';
 import { isBankTask, prototypeOfTask } from '@/lib/vychisleniya/ids';
 import { SKILLS } from '@/lib/vychisleniya/skills';
 import type { Bookmark } from '@/lib/zakladki';
+import '@/components/tasks/trainer/tstats.css';
 
 const perPrototype = new Map(BANK.map((entry) => [entry.prototype, entry.variants.length]));
 
