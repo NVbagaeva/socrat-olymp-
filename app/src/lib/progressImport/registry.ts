@@ -30,12 +30,24 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z8',
     title: '№8 «Вычисления»',
     keys: [
-      /* Прогресс тренажёра по типам и список ошибок (lib/vychisleniya/progress.ts). */
-      'budetege:vychisleniya-8:v1',
+      /* Журнал попыток тренажёра (lib/vychisleniya/progress.ts). Прежний
+         ключ budetege:vychisleniya-8:v1 сворачивается в него на месте
+         (lib/progressLog, LEGACY_LOGS) и сам не переносится. */
+      'budetege:vychisleniya-8:log:v1',
       /* Решённые опорные задачи (там же, PREP8_KEY). */
       'budetege:vychisleniya-8:prep:v1',
       /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «8»). */
       'budetege:trainer:8:session',
+    ],
+  },
+  {
+    id: 'obshchee',
+    title: 'Отложенные задачи и история тренировок',
+    keys: [
+      /* «Отложить на потом» (lib/zakladki). */
+      'budetege:zakladki:v1',
+      /* Завершённые тренировки (lib/istoriya). */
+      'budetege:istoriya:v1',
     ],
   },
 ];

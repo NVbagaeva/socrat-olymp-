@@ -26,7 +26,6 @@ import { currentUser, useSessionUser } from '@/lib/auth/session';
 import {
   importedGroups,
   localProgress,
-  rememberImportAnswer,
   shouldAskImport,
   type ImportedKey,
   type LocalGroup,
@@ -59,6 +58,8 @@ export function KabinetScreen() {
   const [imported, setImported] = useState<ImportedKey[]>([]);
   const [ask, setAsk] = useState<LocalGroup[] | null>(null);
   const [importNote, setImportNote] = useState<string | null>(null);
+  /* Отложенный прогресс гостя (ответ «Нет»): его можно перенести позже. */
+  const [stash, setStash] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -97,9 +98,10 @@ export function KabinetScreen() {
       }
       setView('ready');
 
-      const [{ loadImportedKeys }, { loadKlassy }] = await Promise.all([
+      const [{ loadImportedKeys }, { loadKlassy }, { hasStash }] = await Promise.all([
         import('@/lib/progressImport'),
         import('@/lib/auth/klassy'),
+        import('@/lib/accountSync'),
       ]);
       const [given, keys, classes] = await Promise.all([
         loadConsents(),
@@ -115,6 +117,7 @@ export function KabinetScreen() {
          всё равно не примет. */
       const parentPending = given.parent !== null && given.parent.confirmedAt === null;
       if (!parentPending && shouldAskImport(synced.id)) setAsk(localProgress());
+      setStash(!parentPending && hasStash());
 
       if (synced.role === 'tutor') {
         const { loadKits } = await import('@/lib/auth/kits');
@@ -180,9 +183,14 @@ export function KabinetScreen() {
   const parent = consents?.parent ?? null;
   const parentPending = parent !== null && parent.confirmedAt === null;
 
-  const askAgain = () => {
-    const found = localProgress();
-    if (found.length > 0) setAsk(found);
+  /* «Перенести с этого устройства»: отложенный при «Нет» прогресс гостя. */
+  const importLater = async () => {
+    const { importStash } = await import('@/lib/accountSync');
+    const { loadImportedKeys } = await import('@/lib/progressImport');
+    const result = await importStash();
+    setStash(false);
+    setImported(await loadImportedKeys());
+    setImportNote(KABINET.importAsk.done(result.pushed.length));
   };
 
   return (
@@ -233,8 +241,8 @@ export function KabinetScreen() {
           <SavedCard
             profile={profile}
             imported={imported}
-            canImport={!parentPending && localProgress().length > 0}
-            onImport={askAgain}
+            canImport={stash}
+            onImport={() => void importLater()}
           />
           <DocumentsCard consents={consents} />
           <DangerCard role={profile.role} onRemoved={() => setView('removed')} />
@@ -428,10 +436,16 @@ function ImportModal({
   const [error, setError] = useState<string | null>(null);
   const t = KABINET.importAsk;
 
-  const refuse = () => {
+  const refuse = async () => {
     if (busy) return;
-    rememberImportAnswer(userId, 'no');
-    onClose();
+    setBusy(true);
+    try {
+      const { refuseImport } = await import('@/lib/accountSync');
+      refuseImport(userId);
+    } finally {
+      setBusy(false);
+      onClose();
+    }
   };
 
   const accept = async () => {
@@ -439,10 +453,13 @@ function ImportModal({
     setBusy(true);
     setError(null);
     try {
-      const { uploadLocalProgress, loadImportedKeys } = await import('@/lib/progressImport');
-      const count = await uploadLocalProgress(groups);
-      rememberImportAnswer(userId, 'yes');
-      onDone(count, await loadImportedKeys());
+      const [{ acceptImport }, { loadImportedKeys }] = await Promise.all([
+        import('@/lib/accountSync'),
+        import('@/lib/progressImport'),
+      ]);
+      const result = await acceptImport(userId);
+      if (result.readOnly) throw new Error('read only');
+      onDone(result.pushed.length, await loadImportedKeys());
     } catch {
       setError(t.failed);
     } finally {
@@ -453,12 +470,12 @@ function ImportModal({
   return (
     <Modal
       open={groups !== null}
-      onClose={refuse}
+      onClose={() => void refuse()}
       title={t.title}
       description={t.text}
       footer={
         <>
-          <Button variant="secondary" onClick={refuse} disabled={busy}>
+          <Button variant="secondary" onClick={() => void refuse()} disabled={busy}>
             {t.no}
           </Button>
           <Button onClick={accept} loading={busy}>

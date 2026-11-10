@@ -5,15 +5,15 @@
  *
  * Гость пользуется сайтом без входа: прогресс лежит в localStorage. При
  * первом входе в кабинет сайт спрашивает: «Перенести ваш прогресс с
- * этого устройства в кабинет?» «Да» — значения ключей из registry.ts
- * уходят в таблицу user_storage как есть; «Нет» — ничего не уходит.
+ * этого устройства в кабинет?» «Да» — прогресс сливается с аккаунтом;
+ * «Нет» — откладывается в сторону и в аккаунт не уходит (lib/accountSync).
  * Ответ запоминается для этого аккаунта в этом браузере, второй раз
- * вопроса нет. Сам localStorage не меняется: сайт продолжает работать
- * с ним, как раньше.
+ * вопроса нет.
  *
- * Чтение хранилища здесь без SDK; SDK подтягивается только на «Да».
+ * Чтение хранилища здесь без SDK.
  */
 
+import { migrateAllLegacyLogs } from '@/lib/progressLog';
 import { browserStorage } from '@/lib/storage';
 import {
   IMPORT_GROUPS,
@@ -39,6 +39,8 @@ export interface LocalGroup {
 export function localProgress(): LocalGroup[] {
   const target = browserStorage();
   if (target === null) return [];
+  /* Прогресс прежнего формата сначала сворачивается в журнал. */
+  migrateAllLegacyLogs();
   const found: LocalGroup[] = [];
   for (const group of IMPORT_GROUPS) {
     const entries: LocalEntry[] = [];
@@ -100,24 +102,11 @@ export function shouldAskImport(userId: string): boolean {
   return importAnswer(userId) === null && localProgress().length > 0;
 }
 
-/* ── Запись в аккаунт ─────────────────────────────────────────── */
+/* ── Что лежит в аккаунте ─────────────────────────────────────── */
 
 export interface ImportedKey {
   key: string;
   updatedAt: string;
-}
-
-/** Перенести найденное в аккаунт. Возвращает число записанных ключей. */
-export async function uploadLocalProgress(groups: readonly LocalGroup[]): Promise<number> {
-  const rows = groups.flatMap((item) =>
-    item.entries.map((entry) => ({ key: entry.key, value: entry.value })),
-  );
-  if (rows.length === 0) return 0;
-  const { getClient } = await import('@/lib/auth/client');
-  const supabase = await getClient();
-  const { error } = await supabase.from('user_storage').upsert(rows, { onConflict: 'user_id,key' });
-  if (error) throw new Error(error.message);
-  return rows.length;
 }
 
 /** Что уже лежит в аккаунте. Ошибка чтения — пустой список. */
