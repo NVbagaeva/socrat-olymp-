@@ -4,9 +4,61 @@
 
 import { gcd, nice, round9 } from '../numbers';
 import type { Rng } from '../rng';
-import { CDOT, d, fracExp, pw } from '../tex';
-import type { Prototype } from '../types';
-import { keys, naydi, podtip, PRIME_PAIRS, tenth } from './common';
+import { CDOT, d, fracExp, paren, pw } from '../tex';
+import type { Prototype, Shag } from '../types';
+import { keys, naydi, podtip, PRIME_PAIRS, shag, tenth } from './common';
+
+/* ── Шаги, общие для степеней ─────────────────────────────────── */
+
+/** Значение степени: целый показатель — число, отрицательный — через дробь. */
+function znachenie(b: number, e: number): string {
+  if (e >= 0) return String(b ** e);
+  return `\\dfrac{1}{${b ** -e}}`;
+}
+
+/** Что осталось после сокращения: степени с ненулевым показателем. */
+function ostatok(p: number, ep: number, q: number, eq: number): string {
+  const parts = [
+    ...(ep === 0 ? [] : [pw(String(p), String(ep))]),
+    ...(eq === 0 ? [] : [pw(String(q), String(eq))]),
+  ];
+  return parts.length === 0 ? '1' : parts.join(' \\cdot ');
+}
+
+/** Последний шаг: степень с целым показателем — число. */
+function schitaem(b: number, e: number, ans: number): Shag {
+  if (e === -1) {
+    return shag(
+      'Показатель $-1$ означает обратное число: $a^{-1} = \\dfrac{1}{a}$',
+      `${pw(String(b), '-1')} = \\dfrac{1}{${b}} = ${d(ans)}`,
+    );
+  }
+  if (e < 0) {
+    return shag(
+      'Отрицательный показатель означает дробь: $a^{-n} = \\dfrac{1}{a^{n}}$',
+      `${pw(String(b), String(e))} = \\dfrac{1}{${pw(String(b), String(-e))}} = \\dfrac{1}{${b ** -e}} = ${d(ans)}`,
+    );
+  }
+  if (e === 0) {
+    return shag(
+      'Любое число, кроме нуля, в нулевой степени равно единице',
+      `${pw(String(b), '0')} = ${d(ans)}`,
+    );
+  }
+  return shag('Считаем степень', `${pw(String(b), String(e))} = ${d(ans)}`);
+}
+
+/**
+ * Основание — степень числа b: b^s в степени x равно b^{s·x}. При s = 1
+ * основание уже b, и шага нет.
+ */
+function kOsnovaniyu(b: number, s: number, exp: string, prod: string): Shag | null {
+  if (s === 1) return null;
+  return shag(
+    `Записываем $${b ** s}$ как степень числа $${b}$: $${b ** s} = ${pw(String(b), String(s))}$. Степень в степени — показатели перемножаются`,
+    `${pw(String(b ** s), exp)} = ${pw(`(${pw(String(b), String(s))})`, exp)} = ${pw(String(b), `${s} \\cdot ${exp}`)} = ${pw(String(b), prod)}`,
+  );
+}
 
 /* ── 8.A  (a^m)^n : a^k ──────────────────────────────────────── */
 
@@ -16,10 +68,17 @@ function formA(a: number, m: number, n: number, k: number, form: string): string
   return form === 'frac' ? `\\dfrac{${top}}{${bottom}}` : `${top} : ${bottom}`;
 }
 
-function razborA(a: number, m: number, n: number, k: number, ans: number): string[] {
+function razborA(a: number, m: number, n: number, k: number, ans: number): Shag[] {
   return [
-    `$(${a}^{${m}})^{${n}} = ${a}^{${m} \\cdot ${n}} = ${a}^{${m * n}}$`,
-    `$${a}^{${m * n}} : ${a}^{${k}} = ${a}^{${m * n} - ${k}} = ${a}^{${m * n - k}} = ${d(ans)}$`,
+    shag(
+      'Степень возводим в степень — показатели перемножаются: $(a^{m})^{n} = a^{m \\cdot n}$',
+      `(${a}^{${m}})^{${n}} = ${a}^{${m} \\cdot ${n}} = ${a}^{${m * n}}`,
+    ),
+    shag(
+      'Основания одинаковые, поэтому при делении показатели вычитаются: $a^{x} : a^{y} = a^{x - y}$. Большую степень считать не нужно',
+      `${a}^{${m * n}} : ${a}^{${k}} = ${a}^{${m * n} - ${k}} = ${a}^{${m * n - k}}`,
+    ),
+    schitaem(a, m * n - k, ans),
   ];
 }
 
@@ -65,10 +124,7 @@ export const P8A: Prototype = {
       return {
         uslovie: naydi(formA(a, m, n, k, form)),
         otvet: ans,
-        razbor: [
-          ...razborA(a, m, n, k, ans).slice(0, 1),
-          `$${a}^{${m * n}} : ${a}^{${k}} = ${a}^{${m * n - k}} = \\dfrac{1}{${a ** -e}} = ${d(ans)}$`,
-        ],
+        razbor: razborA(a, m, n, k, ans),
         proverka: Math.exp((m * n - k) * Math.log(a)),
         signature: `${a}:${e}`,
         params: { a, m, n, k },
@@ -111,6 +167,43 @@ function decimalC(r: Rng, e: number, op: 'quot' | 'prod') {
   return { b, s1, s2, x, y };
 }
 
+/**
+ * Решение 8.C: основания — к одному числу b, потом сложить или вычесть
+ * показатели. x, y — показатели в условии, px, py — после приведения
+ * (уже записаны в TeX).
+ */
+function razborC(
+  b: number,
+  s1: number,
+  s2: number,
+  x: string,
+  y: string,
+  px: string,
+  py: string,
+  op: 'quot' | 'prod',
+  e: number,
+  ans: number,
+): Shag[] {
+  const steps: Shag[] = [];
+  const first = kOsnovaniyu(b, s1, x, px);
+  const second = kOsnovaniyu(b, s2, y, py);
+  if (first !== null) steps.push(first);
+  if (second !== null) steps.push(second);
+  steps.push(
+    op === 'quot'
+      ? shag(
+          'Основания одинаковые — при делении показатели вычитаются: $a^{x} : a^{y} = a^{x - y}$',
+          `${pw(String(b), px)} : ${pw(String(b), py)} = ${pw(String(b), `${px} - ${py}`)} = ${pw(String(b), String(e))}`,
+        )
+      : shag(
+          'Основания одинаковые — при умножении показатели складываются: $a^{x} \\cdot a^{y} = a^{x + y}$',
+          `${pw(String(b), px)} \\cdot ${pw(String(b), py)} = ${pw(String(b), `${px} + ${py}`)} = ${pw(String(b), String(e))}`,
+        ),
+  );
+  steps.push(schitaem(b, e, ans));
+  return steps;
+}
+
 export const P8C: Prototype = {
   id: '8.C',
   group: 'I',
@@ -129,10 +222,7 @@ export const P8C: Prototype = {
       return {
         uslovie: naydi(`\\dfrac{${top}}{${bottom}}`),
         otvet: ans,
-        razbor: [
-          `$${top} = ${pw(String(b), d(round9(s1 * x)))}$, $${bottom} = ${pw(String(b), d(round9(s2 * y)))}$`,
-          `$${pw(String(b), d(round9(s1 * x)))} : ${pw(String(b), d(round9(s2 * y)))} = ${pw(String(b), String(e))} = ${ans}$`,
-        ],
+        razbor: razborC(b, s1, s2, d(x), d(y), d(round9(s1 * x)), d(round9(s2 * y)), 'quot', e, ans),
         proverka: Math.pow(b ** s1, x) / Math.pow(b ** s2, y),
         signature: `${b}:${s1}:${s2}`,
         params: { b, s1, s2, x, y, op: 'quot' },
@@ -151,10 +241,7 @@ export const P8C: Prototype = {
       return {
         uslovie: naydi(`${left}${CDOT}${right}`),
         otvet: ans,
-        razbor: [
-          `$${left} = ${pw(String(b), d(round9(s1 * x)))}$, $${right} = ${pw(String(b), d(round9(s2 * y)))}$`,
-          `$${pw(String(b), d(round9(s1 * x)))} \\cdot ${pw(String(b), d(round9(s2 * y)))} = ${pw(String(b), String(e))} = ${ans}$`,
-        ],
+        razbor: razborC(b, s1, s2, d(x), d(y), d(round9(s1 * x)), d(round9(s2 * y)), 'prod', e, ans),
         proverka: Math.pow(b ** s1, x) * Math.pow(b ** s2, y),
         signature: `${b}:${s1}:${s2}`,
         params: { b, s1, s2, x, y, op: 'prod' },
@@ -175,10 +262,7 @@ export const P8C: Prototype = {
       return {
         uslovie: naydi(tex),
         otvet: ans,
-        razbor: [
-          `$${left} = ${pw(String(b), d(round9(s1 * x)))}$, $${right} = ${pw(String(b), d(round9(s2 * y)))}$`,
-          `$${pw(String(b), String(e))} = \\dfrac{1}{${b ** -e}} = ${d(ans)}$`,
-        ],
+        razbor: razborC(b, s1, s2, d(x), d(y), d(round9(s1 * x)), d(round9(s2 * y)), op, e, ans),
         proverka:
           op === 'quot'
             ? Math.pow(b ** s1, x) / Math.pow(b ** s2, y)
@@ -221,10 +305,18 @@ export const P8C: Prototype = {
       return {
         uslovie: naydi(`${left}${CDOT}${right}`),
         otvet: ans,
-        razbor: [
-          `$${left} = ${pw(String(b), fracExp(s1 * num1, den1))}$, $${right} = ${pw(String(b), fracExp(s2 * n2, d2))}$`,
-          `$${pw(String(b), fracExp(s1 * num1, den1))} \\cdot ${pw(String(b), fracExp(s2 * n2, d2))} = ${pw(String(b), String(e))} = ${ans}$`,
-        ],
+        razbor: razborC(
+          b,
+          s1,
+          s2,
+          fracExp(num1, den1),
+          fracExp(n2, d2),
+          fracExp(s1 * num1, den1),
+          fracExp(s2 * n2, d2),
+          'prod',
+          e,
+          ans,
+        ),
         proverka: Math.pow(b ** s1, num1 / den1) * Math.pow(b ** s2, n2 / d2),
         signature: `${b}:${s1}:${s2}:frac`,
         params: { b, s1, s2, num1, den1, n2, d2 },
@@ -252,8 +344,19 @@ export const P8C: Prototype = {
         uslovie: naydi(`${left} : ${right}`),
         otvet: ans,
         razbor: [
-          `$${left} = ${pw(String(b), String(s1 * m * n))}$, $${right} = ${pw(String(b), String(s2 * k * l))}$`,
-          `$${pw(String(b), String(s1 * m * n))} : ${pw(String(b), String(s2 * k * l))} = ${pw(String(b), String(e))} = ${ans}$`,
+          shag(
+            `Записываем $${b ** s1}$ и $${b ** s2}$ как степени числа $${b}$: $${b ** s1} = ${pw(String(b), String(s1))}$, $${b ** s2} = ${pw(String(b), String(s2))}$`,
+            `${left} : ${right} = ${pw(`(${pw(`(${pw(String(b), String(s1))})`, String(m))})`, String(n))} : ${pw(`(${pw(`(${pw(String(b), String(s2))})`, String(k))})`, String(l))}`,
+          ),
+          shag(
+            'Степень в степени — показатели перемножаются, сколько бы скобок ни было',
+            `${pw(String(b), `${s1} \\cdot ${m} \\cdot ${n}`)} : ${pw(String(b), `${s2} \\cdot ${k} \\cdot ${l}`)} = ${pw(String(b), String(s1 * m * n))} : ${pw(String(b), String(s2 * k * l))}`,
+          ),
+          shag(
+            'Основания одинаковые — при делении показатели вычитаются. Большие степени не считаем',
+            `${pw(String(b), String(s1 * m * n))} : ${pw(String(b), String(s2 * k * l))} = ${pw(String(b), `${s1 * m * n} - ${s2 * k * l}`)} = ${pw(String(b), String(e))}`,
+          ),
+          schitaem(b, e, ans),
         ],
         proverka: Math.exp((s1 * m * n - s2 * k * l) * Math.log(b)),
         signature: `${b}:${s1}:${s2}:chain`,
@@ -306,8 +409,15 @@ export const P8D: Prototype = {
         uslovie: naydi(`\\dfrac{${top}}{${bottom}}`),
         otvet: ans,
         razbor: [
-          `$${top} = (${p} \\cdot ${q})^{${d(x)}} = ${pw(String(N), d(x))}$`,
-          `$${pw(String(N), d(x))} : ${bottom} = ${pw(String(N), String(e))} = ${ans}$`,
+          shag(
+            'Показатели в числителе одинаковые — перемножаем основания: $a^{x} \\cdot b^{x} = (ab)^{x}$',
+            `${top} = (${p} \\cdot ${q})^{${d(x)}} = ${pw(String(N), d(x))}`,
+          ),
+          shag(
+            `Теперь и в числителе, и в знаменателе основание $${N}$ — при делении показатели вычитаются`,
+            `${pw(String(N), d(x))} : ${bottom} = ${pw(String(N), `${d(x)} - ${d(y)}`)} = ${pw(String(N), String(e))}`,
+          ),
+          schitaem(N, e, ans),
         ],
         proverka: (Math.pow(p, x) * Math.pow(q, x)) / Math.pow(N, y),
         signature: `${p}:${q}:same`,
@@ -340,8 +450,22 @@ export const P8D: Prototype = {
         uslovie: naydi(tex),
         otvet: ans,
         razbor: [
-          `$${pw(String(N), d(x))} = ${pw(String(p), d(x))} \\cdot ${pw(String(q), d(x))}$`,
-          `$${pw(String(p), `${d(x)} ${y < 0 ? '-' : '+'} ${d(Math.abs(y))}`)} \\cdot ${pw(String(q), `${d(x)} - ${d(z)}`)} = ${pw(String(p), String(ep))} \\cdot ${pw(String(q), String(eq))} = ${d(ans)}$`,
+          shag(
+            `Раскладываем основание на простые множители: $${N} = ${p} \\cdot ${q}$, а степень произведения — произведение степеней`,
+            `${pw(String(N), d(x))} = ${pw(String(p), d(x))} \\cdot ${pw(String(q), d(x))}`,
+          ),
+          shag(
+            `Собираем степени числа $${p}$ — при умножении показатели складываются`,
+            `${pw(String(p), d(x))} \\cdot ${pw(String(p), d(y))} = ${pw(String(p), `${d(x)} + ${paren(y)}`)} = ${pw(String(p), String(ep))}`,
+          ),
+          shag(
+            `Степени числа $${q}$ делим — показатели вычитаются`,
+            `${pw(String(q), d(x))} : ${pw(String(q), d(z))} = ${pw(String(q), `${d(x)} - ${d(z)}`)} = ${pw(String(q), String(eq))}`,
+          ),
+          shag(
+            'Остались небольшие степени — считаем их и перемножаем',
+            `${pw(String(p), String(ep))} \\cdot ${pw(String(q), String(eq))} = ${znachenie(p, ep)} \\cdot ${znachenie(q, eq)} = ${d(ans)}`,
+          ),
         ],
         proverka: (Math.pow(N, x) * Math.pow(p, y)) / Math.pow(q, z),
         signature: `${p}:${q}:${ep}:${eq}`,
@@ -376,8 +500,26 @@ export const P8D: Prototype = {
         uslovie: naydi(`\\dfrac{${top}}{${bottom}}`),
         otvet: ans,
         razbor: [
-          `$${top} = ${pw(String(p), String(ep))} \\cdot ${pw(String(q), String(eq))}$, $${bottom} = ${pw(String(p), String(m))} \\cdot ${pw(String(q), String(m))}$`,
-          `$${pw(String(p), String(ep - m))} \\cdot ${pw(String(q), String(eq - m))} = ${ans}$`,
+          shag(
+            'Возводим произведение в степень: каждый множитель отдельно, показатели перемножаются',
+            `${top} = ${pw(String(p), `${fracExp(a1, b1)} \\cdot ${n}`)} \\cdot ${pw(String(q), `${fracExp(c1, d1)} \\cdot ${n}`)} = ${pw(String(p), String(ep))} \\cdot ${pw(String(q), String(eq))}`,
+          ),
+          shag(
+            `Знаменатель раскладываем на те же множители: $${N} = ${p} \\cdot ${q}$`,
+            `${bottom} = (${p} \\cdot ${q})^{${m}} = ${pw(String(p), String(m))} \\cdot ${pw(String(q), String(m))}`,
+          ),
+          shag(
+            `Сокращаем одинаковые основания — показатели вычитаются${
+              ep === m || eq === m ? `, а $${ep === m ? p : q}$ сокращается полностью` : ''
+            }. Так не нужно считать $${pw(String(N), String(m))}$`,
+            `\\dfrac{${pw(String(p), String(ep))} \\cdot ${pw(String(q), String(eq))}}{${pw(String(p), String(m))} \\cdot ${pw(String(q), String(m))}} = ${ostatok(p, ep - m, q, eq - m)}`,
+          ),
+          shag(
+            'Считаем то, что осталось',
+            `${ostatok(p, ep - m, q, eq - m)} = ${
+              ep === m || eq === m ? '' : `${p ** (ep - m)} \\cdot ${q ** (eq - m)} = `
+            }${ans}`,
+          ),
         ],
         proverka: Math.pow(Math.pow(p, a1 / b1) * Math.pow(q, c1 / d1), n) / Math.pow(N, m),
         signature: `${p}:${q}:fracpow`,

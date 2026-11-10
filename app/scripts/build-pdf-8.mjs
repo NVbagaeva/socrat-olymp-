@@ -59,15 +59,9 @@ function typeset(text) {
    Банк
    ══════════════════════════════════════════════════════════ */
 
-/** Разбор задачи: шаги и строка ответа — та же вёрстка, что у листа
-    из генератора (lib/vychisleniya/sheet8.ts), своя копия здесь:
-    сборник PDF и интерактивный генератор не делят код по правилу
-    «одна страница — один источник задач». */
-function razborHtml(lines, answerText) {
-  const items = lines.map((line) => '<li class="sheet-step">' + typeset(line) + '</li>').join('');
-  return '<ol class="sheet-steps">' + items + '</ol>' +
-    '<p class="sheet-task-answer">Ответ: <b>' + answerText + '</b></p>';
-}
+/** Решение задачи: шаги с подписями и строка ответа — та же вёрстка,
+    что у листа учителя из генератора (lib/vychisleniya/razbor.ts). */
+const { razborSheetHtml } = requireSrc('lib/vychisleniya/razbor.ts');
 
 /**
  * Блоки сборника — по одному на навык S1…S11, сквозная нумерация.
@@ -102,7 +96,7 @@ function collectBlocks(limitSkills, limitTasks, withAnswers) {
           figureSvg: null,
           answer: answerText,
           answerHtml: null,
-          solutionHtml: withAnswers ? razborHtml(task.razbor, answerText) : null,
+          solutionHtml: withAnswers ? razborSheetHtml(task.razbor, answerText, task.delimost) : null,
         };
       }),
     };

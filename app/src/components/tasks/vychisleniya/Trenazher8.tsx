@@ -24,6 +24,7 @@ import { scopeOfPath } from '@/lib/trainerSession/scope';
 import { TrainerSessionHost, type ConfiguratorApi } from '../session';
 import { Trenazher8Screen, razborOf } from './Trenazher8Screen';
 import { Progress8, type Names8 } from './Progress8';
+import { Razbor8 } from './Razbor8';
 import {
   isTrenazher8Payload,
   packTrenazher8,
@@ -85,13 +86,7 @@ export function Trenazher8({ base, skills, total, names }: Trenazher8Props) {
           kind: kindTitle(task.prototype),
           html: task.questionHtml,
           /* Разбор открывается только здесь, на итогах: он закрыт отпечатком. */
-          review: () => (
-            <ol className="z8-razbor__steps">
-              {razborOf(task).map((line, i) => (
-                <li key={i} dangerouslySetInnerHTML={{ __html: line }} />
-              ))}
-            </ol>
-          ),
+          review: () => <Razbor8 razbor={razborOf(task)} title={null} />,
         };
       }}
       /* «Прорешать те же задачи» нет: повтор той же задачи ничего не

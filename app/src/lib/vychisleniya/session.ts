@@ -16,6 +16,7 @@
 
 import { BANK } from './bank';
 import { PROTOTYPE_NAMES, isBankTask, parseTaskId, prototypeOfTask, taskId } from './ids';
+import { razborData } from './razbor';
 import { sealAnswer, sealText } from './secret';
 import { generate, hasLevel } from './generate';
 import { prototypeById } from './prototypes';
@@ -35,7 +36,7 @@ export interface Task8 {
   questionHtml: string;
   /** Отпечаток ответа. */
   seal: string;
-  /** Разбор шагами (JSON), закрытый отпечатком. */
+  /** Решение (RazborHtml, JSON), закрытое отпечатком. */
   razbor: string;
   /** Задача банка (а не свежая из генератора). */
   bank: boolean;
@@ -71,7 +72,8 @@ export function makeTask(
 ): Task8 {
   const task = generate(prototype, seed, level);
   const seal = sealAnswer(task.otvet);
-  const razbor = sealText(JSON.stringify(task.razbor.map((line) => typeset(line))), seal);
+  /* Решение шагами вместе с признаками делимости — закрыто отпечатком ответа. */
+  const razbor = sealText(JSON.stringify(razborData(task.razbor, task.delimost)), seal);
   const id = taskId(prototype, seed, level);
   return {
     id,

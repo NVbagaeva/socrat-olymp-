@@ -6,6 +6,7 @@
  */
 
 import { typeset } from '../../tex';
+import { razborData } from '../razbor';
 import { sealAnswer, sealChoice, sealText } from '../secret';
 import { generatePrep } from './generate';
 import type { PrepChoice, PrepMicro } from './types';
@@ -21,7 +22,7 @@ export interface PrepSealed {
   seal: string;
   /** Формула-подсказка, свёрстана. Ответа в ней нет. */
   formulaHtml: string;
-  /** Разбор одной строкой HTML, закрытый отпечатком. */
+  /** Решение (RazborHtml, JSON), закрытое отпечатком. */
   razbor: string;
 }
 
@@ -37,6 +38,6 @@ export function sealPrep(micro: PrepMicro, seed: string): PrepSealed {
     choices: micro.choices ?? null,
     seal,
     formulaHtml: typeset(`$${micro.formula}$`),
-    razbor: sealText(typeset(task.razbor), seal),
+    razbor: sealText(JSON.stringify(razborData(task.razbor)), seal),
   };
 }

@@ -9,12 +9,14 @@ import { pickRound, useRound } from '@/lib/trainerRound';
 import { zadachaHref } from '@/lib/vychisleniya/links';
 import { log8 } from '@/lib/vychisleniya/progress';
 import { openText, readSealed } from '@/lib/vychisleniya/secret';
+import type { PriznakHtml, RazborHtml, ShagHtml } from '@/lib/vychisleniya/razbor';
 import { kindTitle, type Task8 } from '@/lib/vychisleniya/session';
 import type { LogOutcome } from '@/lib/progressLog';
 import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
 import { SKILL_FORMULA } from '@/content/vychisleniya';
 import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { Formula } from './Formula';
+import { Razbor8 } from './Razbor8';
 import { useSessionReport } from '../session/useSessionReport';
 import type { TaskMark } from '@/lib/trainerSession/types';
 import type { Trenazher8Ui } from './trenazher8Ui';
@@ -39,15 +41,25 @@ const VERDICT = {
   wrong: { title: 'Есть ошибка' },
 };
 
-/** Разбор: закрыт тем же отпечатком, что и ответ; раскрывается по нажатию. */
-export function razborOf(task: Task8): string[] {
+/** Решение: закрыто тем же отпечатком, что и ответ; раскрывается по нажатию. */
+export function razborOf(task: Task8): RazborHtml {
   try {
-    const value: unknown = JSON.parse(openText(task.razbor, task.seal));
-    return Array.isArray(value)
-      ? value.filter((item): item is string => typeof item === 'string')
+    const value = JSON.parse(openText(task.razbor, task.seal)) as Partial<RazborHtml>;
+    const shagi = Array.isArray(value.shagi)
+      ? value.shagi.filter(
+          (item): item is ShagHtml =>
+            typeof item === 'object' && item !== null && typeof item.chto === 'string' && typeof item.tex === 'string',
+        )
       : [];
+    const delimost = Array.isArray(value.delimost)
+      ? value.delimost.filter(
+          (item): item is PriznakHtml =>
+            typeof item === 'object' && item !== null && typeof item.title === 'string' && typeof item.html === 'string',
+        )
+      : [];
+    return { shagi, delimost };
   } catch {
-    return [];
+    return { shagi: [], delimost: [] };
   }
 }
 
@@ -311,16 +323,7 @@ export function Trenazher8Screen({
           </aside>
         ) : null}
 
-        {solution === null ? null : (
-          <div className="z8-razbor" role="region" aria-label="Решение">
-            <p className="z8-razbor__title">Решение</p>
-            <ol className="z8-razbor__steps">
-              {solution.map((line, i) => (
-                <li key={i} dangerouslySetInnerHTML={{ __html: line }} />
-              ))}
-            </ol>
-          </div>
-        )}
+        {solution === null ? null : <Razbor8 razbor={solution} />}
 
         <div className="ttask__actions">
           {done ? (

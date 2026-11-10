@@ -16,6 +16,7 @@ import { fixedSeed, generatePrep } from './prep/generate';
 import { PROTOTYPES } from './prototypes';
 import { normalizeAnswer } from '../otvet';
 import { PROTOTYPE_NAMES } from './ids';
+import { PRIZNAKI } from './priznaki';
 import { answerRecord, readSealed, sealAnswer } from './secret';
 import { SKILLS } from './skills';
 import type { Generated, Level } from './types';
@@ -31,15 +32,60 @@ export interface Report {
   problems: Problem[];
 }
 
-/** Формулы условия и разбора: всё между долларами. */
+/** Формулы условия и решения: всё между долларами и выкладки шагов. */
 function formulas(task: Generated): string[] {
   const out: string[] = [];
-  for (const text of [task.uslovie, ...task.razbor]) {
+  const steps = Array.isArray(task.razbor) ? task.razbor : [];
+  const texts = [task.uslovie, ...steps.map((step) => (typeof step?.chto === 'string' ? step.chto : String(step)))];
+  for (const text of texts) {
     for (const match of text.matchAll(/\$([^$]+)\$/g)) {
       out.push(match[1] as string);
     }
   }
+  for (const step of steps) {
+    if (typeof step?.tex === 'string') out.push(step.tex);
+  }
   return out;
+}
+
+/**
+ * Решение по шагам — то, что обещано разделу: у каждого шага подпись
+ * «что делаем и почему» и выкладка, шагов не меньше двух, последний
+ * кончается ответом. Подпись — с большой буквы, без точки в конце, не
+ * «перемножим всё».
+ */
+function checkSteps(task: Generated, where: string, problems: Problem[]): void {
+  if (!Array.isArray(task.razbor) || task.razbor.length < 2) {
+    problems.push({ where, what: `в решении меньше двух шагов` });
+    return;
+  }
+  for (const [i, step] of task.razbor.entries()) {
+    if (typeof step !== 'object' || step === null || typeof step.chto !== 'string' || typeof step.tex !== 'string') {
+      problems.push({ where, what: `шаг ${i + 1} не в формате {chto, tex}` });
+      continue;
+    }
+    const chto = step.chto.trim();
+    if (chto.replace(/\$[^$]*\$/g, '').trim().length < 10) {
+      problems.push({ where, what: `шаг ${i + 1}: подпись без слов «что делаем и почему»: «${chto}»` });
+    }
+    if (!/^[А-ЯЁ]/.test(chto)) {
+      problems.push({ where, what: `шаг ${i + 1}: подпись не с большой буквы: «${chto}»` });
+    }
+    if (/[.]$/.test(chto)) {
+      problems.push({ where, what: `шаг ${i + 1}: подпись с точкой в конце: «${chto}»` });
+    }
+    if (/перемнож\S* всё|посчитаем всё/i.test(chto)) {
+      problems.push({ where, what: `шаг ${i + 1}: «перемножим всё» вместо приёма: «${chto}»` });
+    }
+    if (step.tex.trim() === '' || step.tex.includes('$')) {
+      problems.push({ where, what: `шаг ${i + 1}: выкладка пустая или с долларами` });
+    }
+  }
+  for (const priznak of task.delimost ?? []) {
+    if (PRIZNAKI[priznak] === undefined) {
+      problems.push({ where, what: `неизвестный признак делимости ${priznak}` });
+    }
+  }
 }
 
 /** Проверка одной задачи; typeset — набор KaTeX, если он есть. */
@@ -75,16 +121,17 @@ export function checkTask(task: Generated, typeset: ((tex: string) => void) | nu
   if (Math.abs(task.otvet) > 10000) {
     problems.push({ where, what: `ответ слишком велик: ${task.otvet}` });
   }
-  const last = task.razbor[task.razbor.length - 1] ?? '';
+  checkSteps(task, where, problems);
+  const last = String(task.razbor[task.razbor.length - 1]?.tex ?? '');
   const answerText = ru(task.otvet);
   const tail = last.replace(/\{,\}/g, ',').replace(/\s/g, '');
-  if (!tail.includes(answerText)) {
-    problems.push({ where, what: `разбор не заканчивается ответом ${answerText}: ${last}` });
+  if (!tail.endsWith(answerText)) {
+    problems.push({ where, what: `решение не кончается ответом ${answerText}: ${last}` });
   }
   if (/\d+[,.]\d{4,}/.test(task.uslovie.replace(/\{,\}/g, ','))) {
     problems.push({ where, what: `длинный хвост в условии: ${task.uslovie}` });
   }
-  if (/NaN|Infinity|undefined/.test(task.uslovie + task.razbor.join(''))) {
+  if (/NaN|Infinity|undefined|\[object/.test(task.uslovie + JSON.stringify(task.razbor))) {
     problems.push({ where, what: 'NaN или undefined в тексте' });
   }
   if (typeset !== null) {
@@ -103,6 +150,7 @@ export function checkTask(task: Generated, typeset: ((tex: string) => void) | nu
 export function checkGenerators(
   seedsPerLevel: number,
   typeset: ((tex: string) => void) | null,
+  only: readonly string[] | null = null,
 ): Report {
   const problems: Problem[] = [];
   let generated = 0;
@@ -119,6 +167,7 @@ export function checkGenerators(
     problems.push({ where: 'ids.ts', what: 'в списке названий лишние или недостающие прототипы' });
   }
   for (const prototype of PROTOTYPES) {
+    if (only !== null && !only.includes(prototype.id)) continue;
     const levels: (Level | null)[] = [null, 'base', 'advanced'].filter(
       (level) => level === null || hasLevel(prototype, level as Level),
     ) as (Level | null)[];
@@ -161,11 +210,15 @@ export function checkGenerators(
 }
 
 /** Банк: десять seed на прототип, разные условия, отпечатки. */
-export function checkBank(typeset: ((tex: string) => void) | null): Report {
+export function checkBank(
+  typeset: ((tex: string) => void) | null,
+  only: readonly string[] | null = null,
+): Report {
   const problems: Problem[] = [];
   let generated = 0;
   const seals = new Map<string, string>();
   for (const prototype of PROTOTYPES) {
+    if (only !== null && !only.includes(prototype.id)) continue;
     const entry = BANK.find((item) => item.prototype === prototype.id);
     if (entry === undefined) {
       problems.push({ where: prototype.id, what: 'нет в банке' });
@@ -249,7 +302,29 @@ export function checkBank(typeset: ((tex: string) => void) | null): Report {
   return { prototypes: PROTOTYPES.length, generated, problems };
 }
 
-/** Подготовка: сорок микро-задач на многих seed и их зафиксированные варианты. */
+/** Решение микро-задачи: шаги того же вида, что у тренажёра, но шаг может быть один. */
+function checkPrepSteps(razbor: unknown, where: string, problems: Problem[]): void {
+  if (!Array.isArray(razbor) || razbor.length === 0) {
+    problems.push({ where, what: 'решение не по шагам {chto, tex}' });
+    return;
+  }
+  for (const [i, step] of (razbor as unknown[]).entries()) {
+    const s = step as { chto?: unknown; tex?: unknown } | null;
+    if (typeof s?.chto !== 'string' || typeof s?.tex !== 'string') {
+      problems.push({ where, what: `шаг ${i + 1} не в формате {chto, tex}` });
+      continue;
+    }
+    const chto = s.chto.trim();
+    if (chto.replace(/\$[^$]*\$/g, '').trim().length < 10 || !/^[А-ЯЁ]/.test(chto) || /[.]$/.test(chto)) {
+      problems.push({ where, what: `шаг ${i + 1}: подпись «что делаем и почему» не по правилам: «${chto}»` });
+    }
+    if (s.tex.trim() === '' || s.tex.includes('$')) {
+      problems.push({ where, what: `шаг ${i + 1}: выкладка пустая или с долларами` });
+    }
+  }
+}
+
+/** Подготовка: пятьдесят микро-задач на многих seed и их зафиксированные варианты. */
 export function checkPrep(seedsPerTask: number, typeset: ((tex: string) => void) | null): Report {
   const problems: Problem[] = [];
   let generated = 0;
@@ -302,11 +377,12 @@ export function checkPrep(seedsPerTask: number, typeset: ((tex: string) => void)
               what: `независимый счёт ${String(task.proverka)} не сходится с ответом ${String(task.otvet)}`,
             });
           }
-          const tail = task.razbor.replace(/\{,\}/g, ',').replace(/\s/g, '');
-          if (typeof task.otvet === 'number' && !tail.includes(ru(task.otvet))) {
+          const lastTex = String(task.razbor[task.razbor.length - 1]?.tex ?? '');
+          const tail = lastTex.replace(/\{,\}/g, ',').replace(/\s/g, '');
+          if (typeof task.otvet === 'number' && !tail.endsWith(ru(task.otvet))) {
             problems.push({
               where,
-              what: `разбор не содержит ответа ${ru(task.otvet)}: ${task.razbor}`,
+              what: `решение не кончается ответом ${ru(task.otvet)}: ${lastTex}`,
             });
           }
         } else if (!(micro.choices ?? []).some((c) => c.number === task.otvet)) {
@@ -315,11 +391,21 @@ export function checkPrep(seedsPerTask: number, typeset: ((tex: string) => void)
             what: `ответ-выбор ${String(task.otvet)} не из списка вариантов`,
           });
         }
-        if (/NaN|Infinity|undefined/.test(task.uslovie + task.razbor)) {
+        if (/NaN|Infinity|undefined|\[object/.test(task.uslovie + JSON.stringify(task.razbor))) {
           problems.push({ where, what: 'NaN или undefined в тексте' });
         }
+        checkPrepSteps(task.razbor, where, problems);
         if (typeset !== null) {
-          for (const text of [task.uslovie, task.razbor]) {
+          const steps = Array.isArray(task.razbor) ? task.razbor : [];
+          for (const step of steps) {
+            if (typeof step?.tex !== 'string') continue;
+            try {
+              typeset(step.tex);
+            } catch (error) {
+              problems.push({ where, what: `KaTeX не принял «${step.tex}»: ${String(error)}` });
+            }
+          }
+          for (const text of [task.uslovie, ...steps.map((step) => String(step?.chto ?? step))]) {
             for (const match of text.matchAll(/\$([^$]+)\$/g)) {
               try {
                 typeset(match[1] as string);

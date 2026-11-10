@@ -17,6 +17,8 @@ import { choiceMatches, openText, readSealed } from '@/lib/vychisleniya/secret';
 import { randomSeed } from '@/lib/vychisleniya/session';
 import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
+import { Razbor8 } from './Razbor8';
+import type { RazborHtml } from '@/lib/vychisleniya/razbor';
 
 type Attempt = 'wrong' | 'skipped';
 
@@ -62,7 +64,7 @@ export function Podgotovka8Screen({
   const [picked, setPicked] = useState<number | null>(null);
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
-  const [solution, setSolution] = useState<string | null>(null);
+  const [solution, setSolution] = useState<RazborHtml | null>(null);
   const [memo, setMemo] = useState(false);
   /* Свежие варианты по номеру задачи: пока не просили — зафиксированный. */
   const [fresh, setFresh] = useState<Record<number, PrepSealed>>({});
@@ -158,7 +160,11 @@ export function Podgotovka8Screen({
   }
 
   function showSolution() {
-    setSolution(openText(task.razbor, task.seal));
+    try {
+      setSolution(JSON.parse(openText(task.razbor, task.seal)) as RazborHtml);
+    } catch {
+      setSolution({ shagi: [], delimost: [] });
+    }
   }
 
   return (
@@ -302,12 +308,7 @@ export function Podgotovka8Screen({
           </div>
         )}
 
-        {solution === null ? null : (
-          <div className="z8-razbor" role="region" aria-label="Решение">
-            <p className="z8-razbor__title">Решение</p>
-            <p className="z8-razbor__line" dangerouslySetInnerHTML={{ __html: solution }} />
-          </div>
-        )}
+        {solution === null ? null : <Razbor8 razbor={solution} />}
 
         <div className="ptask__actions">
           {checked !== 'right' ? (
