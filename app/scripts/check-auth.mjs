@@ -2078,7 +2078,7 @@ async function runGalleryDz(dir) {
       await page.screenshot({
         path: path.join(dir, `${width}-${name}.png`),
         fullPage,
-        style: '.help-fab { visibility: hidden !important; }',
+        style: '.help-fab, .help-fab * { visibility: hidden !important; }',
       });
     };
 
@@ -2245,7 +2245,7 @@ async function runGalleryZ8(dir) {
     await page.screenshot({
       path: path.join(dir, `${width}-08-kabinet-progress.png`),
       fullPage: true,
-      style: '.help-fab { visibility: hidden !important; }',
+      style: '.help-fab, .help-fab * { visibility: hidden !important; }',
     });
     await context.close();
   }

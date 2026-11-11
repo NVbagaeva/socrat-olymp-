@@ -289,6 +289,7 @@ export function HomeworkSolve({
         key={task.id}
         task={task}
         state={state}
+        last={answer?.entries[answer.entries.length - 1]?.a ?? ''}
         canAnswer={canAnswer}
         left={left}
         instant={hw.solutionsWhen === 'instant'}
@@ -355,6 +356,7 @@ export function HomeworkSolve({
 function AnswerBox({
   task,
   state,
+  last,
   canAnswer,
   left,
   instant,
@@ -365,6 +367,8 @@ function AnswerBox({
 }: {
   task: HwTaskView;
   state: HwState;
+  /** Последний проверенный ответ: у закрытой задачи он и стоит в поле. */
+  last: string;
   canAnswer: boolean;
   left: number | null;
   instant: boolean;
@@ -373,7 +377,7 @@ function AnswerBox({
   onReveal: () => void;
   onNext: () => void;
 }) {
-  const [value, setValue] = useState(() => readDraft(task.id));
+  const [value, setValue] = useState(() => (state === 'open' ? readDraft(task.id) : last));
   const [hint, setHint] = useState<string | null>(null);
   const [wrong, setWrong] = useState(false);
   const [busy, setBusy] = useState(false);
