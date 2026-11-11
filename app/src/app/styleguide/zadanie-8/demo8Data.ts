@@ -179,10 +179,10 @@ export const FORMULY8: { gruppa: string; ton: Gruppa8['ton']; formuly: Formula8[
 
 export const DELIMOST8 = [
   { na: '2', pravilo: 'последняя цифра чётная', primer: '704' },
-  { na: '3', pravilo: 'сумма цифр делится на 3', primer: '243: 2 + 4 + 3 = 9' },
-  { na: '4', pravilo: 'число из двух последних цифр делится на 4', primer: '1024: 24' },
+  { na: '3', pravilo: 'сумма цифр делится на 3', primer: '$243$: $2 + 4 + 3 = 9$' },
+  { na: '4', pravilo: 'число из двух последних цифр делится на 4', primer: '$1024$: $24$' },
   { na: '5', pravilo: 'последняя цифра 0 или 5', primer: '625' },
-  { na: '9', pravilo: 'сумма цифр делится на 9', primer: '576: 5 + 7 + 6 = 18' },
+  { na: '9', pravilo: 'сумма цифр делится на 9', primer: '$576$: $5 + 7 + 6 = 18$' },
 ];
 
 export const VARIANTY8 = [
