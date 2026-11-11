@@ -2078,7 +2078,10 @@ async function runGalleryDz(dir) {
       await page.screenshot({
         path: path.join(dir, `${width}-${name}.png`),
         fullPage,
-        style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+        /* Высокая страница снимается по частям: закреплённая шапка иначе
+           повторилась бы посреди снимка. */
+        style:
+          '.help-fab, .help-fab * { visibility: hidden !important; } .site-head { position: static !important; }',
       });
     };
 
