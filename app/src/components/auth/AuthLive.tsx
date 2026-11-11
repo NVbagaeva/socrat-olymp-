@@ -22,6 +22,23 @@ export function LiveWidget({ variant, className }: AuthWidgetProps) {
   const root = useRef<HTMLDivElement>(null);
   const menuId = useId();
 
+  /* Вошёл — прогресс (журнал, закладки, история, тренировка) живёт и в
+     аккаунте и сливается между устройствами. Код синхронизации грузится
+     только сейчас. */
+  const userId = user?.id ?? null;
+  useEffect(() => {
+    if (userId === null) return undefined;
+    let stop: (() => void) | null = null;
+    let cancelled = false;
+    void import('@/lib/accountSync').then(({ startAccountSync }) => {
+      if (!cancelled) stop = startAccountSync();
+    });
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
+  }, [userId]);
+
   /* Репетитор вошёл — его комплекты уходят и в аккаунт. */
   useEffect(() => {
     if (user === null || user.role !== 'tutor') return undefined;

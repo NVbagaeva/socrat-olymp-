@@ -23,10 +23,11 @@ import type { SavedKit } from '@/lib/auth/kits';
 import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
+import { Progress8, type Names8 } from '@/components/tasks/vychisleniya/Progress8';
+import { BANK_TOTAL } from '@/lib/vychisleniya/ids';
 import {
   importedGroups,
   localProgress,
-  rememberImportAnswer,
   shouldAskImport,
   type ImportedKey,
   type LocalGroup,
@@ -47,7 +48,7 @@ const TRAINER_8 = '/zadaniya/8/trenazher/';
  * сохранено, документы, выход и удаление аккаунта. Показывает только
  * то, что действительно лежит в базе.
  */
-export function KabinetScreen() {
+export function KabinetScreen({ names8 }: { names8: Names8 }) {
   const user = useSessionUser();
   const [view, setView] = useState<View>('loading');
   const [tab, setTab] = useState<Tab>('home');
@@ -59,6 +60,8 @@ export function KabinetScreen() {
   const [imported, setImported] = useState<ImportedKey[]>([]);
   const [ask, setAsk] = useState<LocalGroup[] | null>(null);
   const [importNote, setImportNote] = useState<string | null>(null);
+  /* Отложенный прогресс гостя (ответ «Нет»): его можно перенести позже. */
+  const [stash, setStash] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -97,9 +100,10 @@ export function KabinetScreen() {
       }
       setView('ready');
 
-      const [{ loadImportedKeys }, { loadKlassy }] = await Promise.all([
+      const [{ loadImportedKeys }, { loadKlassy }, { hasStash }] = await Promise.all([
         import('@/lib/progressImport'),
         import('@/lib/auth/klassy'),
+        import('@/lib/accountSync'),
       ]);
       const [given, keys, classes] = await Promise.all([
         loadConsents(),
@@ -115,6 +119,7 @@ export function KabinetScreen() {
          всё равно не примет. */
       const parentPending = given.parent !== null && given.parent.confirmedAt === null;
       if (!parentPending && shouldAskImport(synced.id)) setAsk(localProgress());
+      setStash(!parentPending && hasStash());
 
       if (synced.role === 'tutor') {
         const { loadKits } = await import('@/lib/auth/kits');
@@ -180,9 +185,14 @@ export function KabinetScreen() {
   const parent = consents?.parent ?? null;
   const parentPending = parent !== null && parent.confirmedAt === null;
 
-  const askAgain = () => {
-    const found = localProgress();
-    if (found.length > 0) setAsk(found);
+  /* «Перенести с этого устройства»: отложенный при «Нет» прогресс гостя. */
+  const importLater = async () => {
+    const { importStash } = await import('@/lib/accountSync');
+    const { loadImportedKeys } = await import('@/lib/progressImport');
+    const result = await importStash();
+    setStash(false);
+    setImported(await loadImportedKeys());
+    setImportNote(KABINET.importAsk.done(result.pushed.length));
   };
 
   return (
@@ -219,7 +229,7 @@ export function KabinetScreen() {
       {tab === 'home' ? (
         <>
           <p className="kabinet__trial">{KABINET.trial}</p>
-          {profile.role === 'student' ? <StudentHome klassy={klassy} /> : null}
+          {profile.role === 'student' ? <StudentHome klassy={klassy} names8={names8} /> : null}
           {profile.role === 'tutor' ? <TutorHome klassy={klassy} kits={kits} /> : null}
           {profile.role === 'admin' ? (
             <Card className="kabinet__card" title={KABINET.admin.title}>
@@ -233,8 +243,8 @@ export function KabinetScreen() {
           <SavedCard
             profile={profile}
             imported={imported}
-            canImport={!parentPending && localProgress().length > 0}
-            onImport={askAgain}
+            canImport={stash}
+            onImport={() => void importLater()}
           />
           <DocumentsCard consents={consents} />
           <DangerCard role={profile.role} onRemoved={() => setView('removed')} />
@@ -283,36 +293,26 @@ function Stub({
 
 /* ── Кабинет ученика ──────────────────────────────────────────── */
 
-function StudentHome({ klassy }: { klassy: KlassView[] | null }) {
+function StudentHome({ klassy, names8 }: { klassy: KlassView[] | null; names8: Names8 }) {
   const t = KABINET.student;
   return (
     <>
-      <div className="kabinet__grid">
-        <Stub
-          section="progress"
-          title={t.progress.title}
-          empty={t.progress.empty}
-          text={t.progress.text}
-          action={
-            <Link className="btn btn--secondary btn--sm" href={TRAINER_8}>
-              {t.progress.go}
-            </Link>
-          }
-        />
-        <Stub
-          section="mistakes"
-          title={t.mistakes.title}
-          empty={t.mistakes.empty}
-          text={t.mistakes.text}
-        />
-        <Stub section="later" title={t.later.title} empty={t.later.empty} text={t.later.text} />
-        <Stub
-          section="homework"
-          title={t.homework.title}
-          empty={t.homework.empty}
-          text={t.homework.text}
-        />
-      </div>
+      <Stub
+        section="homework"
+        title={t.homework.title}
+        empty={t.homework.empty}
+        text={t.homework.text}
+      />
+      {/* Прогресс №8: журнал, «Мои ошибки», «Отложенные», история — то же,
+         что под тренажёром; со входом — с любого устройства. */}
+      <Card className="kabinet__card kabinet__progress" data-section="progress">
+        <Progress8 total={BANK_TOTAL} names={names8} showReset={false} />
+        <p className="kabinet__progress-go">
+          <Link className="btn btn--secondary btn--sm" href={TRAINER_8}>
+            {t.progress.go}
+          </Link>
+        </p>
+      </Card>
       <Card className="kabinet__card" title={t.classes.title} data-section="classes">
         {klassy === null ? (
           <p className="auth-form__muted">…</p>
@@ -428,10 +428,16 @@ function ImportModal({
   const [error, setError] = useState<string | null>(null);
   const t = KABINET.importAsk;
 
-  const refuse = () => {
+  const refuse = async () => {
     if (busy) return;
-    rememberImportAnswer(userId, 'no');
-    onClose();
+    setBusy(true);
+    try {
+      const { refuseImport } = await import('@/lib/accountSync');
+      refuseImport(userId);
+    } finally {
+      setBusy(false);
+      onClose();
+    }
   };
 
   const accept = async () => {
@@ -439,10 +445,13 @@ function ImportModal({
     setBusy(true);
     setError(null);
     try {
-      const { uploadLocalProgress, loadImportedKeys } = await import('@/lib/progressImport');
-      const count = await uploadLocalProgress(groups);
-      rememberImportAnswer(userId, 'yes');
-      onDone(count, await loadImportedKeys());
+      const [{ acceptImport }, { loadImportedKeys }] = await Promise.all([
+        import('@/lib/accountSync'),
+        import('@/lib/progressImport'),
+      ]);
+      const result = await acceptImport(userId);
+      if (result.readOnly) throw new Error('read only');
+      onDone(result.pushed.length, await loadImportedKeys());
     } catch {
       setError(t.failed);
     } finally {
@@ -453,12 +462,12 @@ function ImportModal({
   return (
     <Modal
       open={groups !== null}
-      onClose={refuse}
+      onClose={() => void refuse()}
       title={t.title}
       description={t.text}
       footer={
         <>
-          <Button variant="secondary" onClick={refuse} disabled={busy}>
+          <Button variant="secondary" onClick={() => void refuse()} disabled={busy}>
             {t.no}
           </Button>
           <Button onClick={accept} loading={busy}>

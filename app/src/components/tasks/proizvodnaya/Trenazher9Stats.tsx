@@ -5,6 +5,7 @@ import { trainerStats } from '@/content/trainerModes';
 import { progress9 } from '@/lib/proizvodnaya/progress';
 import { isOpenId, kindTitle } from '@/lib/proizvodnaya/session';
 import { summarize, type TrainerProgress } from '@/lib/trainerProgress';
+import '@/components/tasks/trainer/tstats.css';
 
 interface KindRow {
   title: string;

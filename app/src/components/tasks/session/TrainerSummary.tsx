@@ -53,6 +53,8 @@ export interface TrainerSummaryProps {
   hintedLabel?: string | undefined;
   /** Свой блок тренажёра под строками итогов. */
   extra?: ReactNode;
+  /** Типы, которые просели: строка под счётом. Не задано — строки нет. */
+  weak?: string[] | undefined;
   /** Свои подписи итогов: у зачётной работы — «Работа завершена». */
   texts?: Partial<typeof sessionText.summary> | undefined;
 }
@@ -137,6 +139,7 @@ export function TrainerSummary({
   buildingSimilar = false,
   hintedLabel,
   extra,
+  weak,
   texts,
 }: TrainerSummaryProps) {
   const t = { ...sessionText.summary, ...texts };
@@ -177,6 +180,18 @@ export function TrainerSummary({
           <span className="tdone__cap">{t.percentLabel}</span>
         </p>
       </div>
+
+      {weak === undefined ? null : (
+        <p className="tdone__weak" data-weak={weak.length}>
+          {weak.length === 0 ? (
+            t.weakNone
+          ) : (
+            <>
+              <b>{t.weak}</b> {weak.join(', ')}
+            </>
+          )}
+        </p>
+      )}
 
       <dl className="tdone__rows">
         <div className="tdone__row">

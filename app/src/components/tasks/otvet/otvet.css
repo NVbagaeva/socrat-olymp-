@@ -1,0 +1,47 @@
+/* Поле ответа ЕГЭ: на сенсорном экране слева кнопка «−». */
+.otvet-input {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  width: 100%;
+}
+.otvet-input__field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.otvet-input__minus {
+  flex: 0 0 auto;
+  min-width: 48px;
+  min-height: 48px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+.otvet-input__minus:active {
+  background: var(--color-surface-soft);
+}
+.otvet-input__minus:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.otvet-input__minus:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Подсказка о формате: не ошибка — спокойный цвет. */
+.otvet-hint {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-info);
+  background: var(--color-surface-info);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.5;
+}

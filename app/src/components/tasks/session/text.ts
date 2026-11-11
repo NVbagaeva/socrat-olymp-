@@ -79,6 +79,8 @@ export const sessionText = {
     retrySimilar: (count: number) => `Похожие задачи (${count})`,
     retryLead: 'Ошибки и задачи с подсказкой:',
     misses: 'Неверных попыток',
+    weak: 'Просели:',
+    weakNone: 'Ни один тип не просел — все задачи решены верно.',
     back: 'Вернуться к заданиям',
     trophyAlt: 'Кубок',
   },

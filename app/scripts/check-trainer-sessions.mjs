@@ -477,6 +477,8 @@ const BODY = '.tsess__body';
 /** Поле ответа: у каждого экрана своё, но оно одно. */
 const ANSWER_INPUT = [
   'input.ttask__input',
+  /* Общее поле ответа бланка ЕГЭ (components/tasks/otvet/AnswerInput). */
+  'input.otvet-input__field',
   'input.z11-resh__input',
   'input.pc__input',
   'input.z3t__input',

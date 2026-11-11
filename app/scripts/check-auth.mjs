@@ -39,6 +39,8 @@
        почты → «Подтвердите почту…» и повторная отправка;
      • «Запомнить меня» выключено → сессия в sessionStorage;
      • сброс пароля: письмо → новый пароль → вход новым паролем;
+     • два устройства: тренировка №8, начатая на компьютере, продолжается
+       на телефоне с той же задачи; решённое и закладка видны в кабинете;
      • комплект репетитора записывается в аккаунт;
      • удаление аккаунта с подтверждением;
      • SDK не входит в первую загрузку главной и страницы задания;
@@ -58,18 +60,29 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { bezBanneraCookie } from './lib/cookie-notice.mjs';
-import { APP } from './lib/load-ts.mjs';
+import { APP, requireSrc } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
+
+const { generate } = requireSrc('lib/vychisleniya/generate.ts');
+const { parseTaskId } = requireSrc('lib/vychisleniya/ids.ts');
+const { ru } = requireSrc('lib/vychisleniya/numbers.ts');
 
 const OUT = path.join(APP, 'out');
 const PORT = 4181;
 const SUPABASE = 'http://127.0.0.1:54321';
 const DISABLED = process.argv.includes('--disabled');
 const NO_HEADER = process.argv.includes('--no-header');
+/* Снимки кабинета ученика с прогрессом №8 для описания PR этапа 2. */
+const GALLERY_Z8 = process.argv.includes('--gallery-z8')
+  ? (process.argv[process.argv.indexOf('--gallery-z8') + 1] ?? 'snimki-z8-kabinet')
+  : null;
 const GALLERY = process.argv.includes('--gallery')
   ? (process.argv[process.argv.indexOf('--gallery') + 1] ?? 'snimki-pr')
   : null;
 const SHOTS =
-  GALLERY !== null ? null : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
+  GALLERY !== null || GALLERY_Z8 !== null
+    ? null
+    : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   console.error('Нет out/index.html — сначала pnpm build.');
@@ -133,6 +146,7 @@ const ALLOWED = new Set([
   'vtoroy@example.ru',
   'uchenik@example.ru',
   'shkolnik@example.ru',
+  'dva@example.ru',
 ]);
 
 /** Данные формы регистрации, как их шлёт сайт. */
@@ -494,6 +508,20 @@ function makeMock() {
       if (table === 'user_storage' && method === 'GET') {
         return { status: 200, body: storage.filter((r) => r.user_id === me.id) };
       }
+      if (table === 'user_storage' && method === 'DELETE') {
+        /* key=in.(a,b) — значения могут быть в кавычках. */
+        const list = /^in\.\((.*)\)$/.exec(u.searchParams.get('key') ?? '');
+        const keys = new Set(
+          (list?.[1] ?? '')
+            .split(',')
+            .map((k) => k.trim().replace(/^"(.*)"$/, '$1'))
+            .filter(Boolean),
+        );
+        for (let i = storage.length - 1; i >= 0; i -= 1) {
+          if (storage[i].user_id === me.id && keys.has(storage[i].key)) storage.splice(i, 1);
+        }
+        return { status: 204, body: null };
+      }
       if (table === 'kits' && method === 'POST') {
         const rows = Array.isArray(body) ? body : [body];
         for (const r of rows) {
@@ -697,7 +725,10 @@ function* walk(dir) {
 
 /* ── Сборка со входом ──────────────────────────────────────────── */
 
+/* Прогресс №8 прежнего формата: при входе он сворачивается в журнал LOG_8,
+   в аккаунт уходит журнал, а сам прежний ключ остаётся в браузере. */
 const PROGRESS_8 = 'budetege:vychisleniya-8:v1';
+const LOG_8 = 'budetege:vychisleniya-8:log:v1';
 const PREP_8 = 'budetege:vychisleniya-8:prep:v1';
 
 /** Отметить обе галочки согласий в форме регистрации. */
@@ -966,12 +997,15 @@ async function runEnabled() {
         .map((r) => r.key)
         .sort();
       check(
-        keys.length === 2 && keys.includes(PROGRESS_8) && keys.includes(PREP_8),
-        '«Да»: ключи №8 записаны в аккаунт',
+        keys.length === 2 && keys.includes(LOG_8) && keys.includes(PREP_8),
+        `«Да»: журнал №8 и опорные записаны в аккаунт (${keys.join(', ')})`,
+      );
+      const archive = Object.values(
+        mock.storage.find((r) => r.user_id === me.id && r.key === LOG_8)?.value?.archive ?? {},
       );
       check(
-        mock.storage.find((r) => r.key === PROGRESS_8)?.value?.kinds?.['8.A']?.done === 3,
-        '«Да»: значение перенесено как есть',
+        archive.length === 1 && archive[0]?.['8.A']?.done === 3,
+        '«Да»: прежние счётчики перенесены в журнал',
       );
     }
     check(
@@ -1231,17 +1265,18 @@ async function runEnabled() {
       (await page.locator('.kabinet__role').innerText()) === 'Кабинет ученика',
       'кабинет: «Кабинет ученика»',
     );
-    for (const [section, title] of [
-      ['progress', 'Прогресс'],
-      ['mistakes', 'Мои ошибки'],
-      ['later', 'Отложенные'],
-      ['homework', 'Домашние задания'],
+    for (const [section, title, empty] of [
+      ['progress', 'Мой прогресс в №8', 'Решено 0 из 260'],
+      ['mistakes8', 'Мои ошибки', 'Ошибок нет'],
+      ['later8', 'Отложенные', 'Ничего не отложено'],
+      ['history8', 'История тренировок', 'Завершённых тренировок пока нет'],
+      ['homework', 'Домашние задания', 'Заданий пока нет'],
     ]) {
-      const text = await page.locator(`[data-section="${section}"]`).innerText();
-      check(
-        text.includes(title) && text.length > title.length + 40,
-        `ученик: «${title}» с пояснением`,
+      const text = (await page.locator(`[data-section="${section}"]`).innerText()).replace(
+        /\s+/g,
+        ' ',
       );
+      check(text.includes(title) && text.includes(empty), `ученик: «${title}» — «${empty}»`);
     }
     check(
       (await page.locator('[data-section="classes"]').innerText()).includes('пока не в классе'),
@@ -1263,6 +1298,10 @@ async function runEnabled() {
     check(
       (await page.locator('[role="dialog"]').count()) === 0,
       '«Нет» запомнено: вопрос не повторяется',
+    );
+    check(
+      mock.storage.filter((r) => r.user_id === student.id).length === 0,
+      '«Нет»: и после следующего прохода синхронизации прогресс гостя не в аккаунте',
     );
 
     /* Тестовый класс, как после кнопки «Сервер: тестовые данные». */
@@ -1303,6 +1342,112 @@ async function runEnabled() {
     );
     await shot(page, 'kabinet-shkolnik-1440');
     await context.close();
+  }
+
+  /* 7б. Два устройства: тренировка №8, начатая на компьютере, продолжается
+         на телефоне с той же задачи; решённое и закладка — в кабинете. */
+  {
+    registerInMock(mock, 'dva@example.ru', 'dva-ustroystva-1', 'Ученик Два', 'student');
+    const dva = mock.users.get('dva@example.ru');
+    const KEYS = [
+      'budetege:vychisleniya-8:log:v1',
+      'budetege:trainer:8:session',
+      'budetege:zakladki:v1',
+    ];
+    /* Записи браузера совпали с аккаунтом — синхронизация дошла. */
+    const pushed = async (page) => {
+      const until = Date.now() + 15000;
+      for (;;) {
+        const local = await page.evaluate((ks) => ks.map((k) => localStorage.getItem(k)), KEYS);
+        const same = KEYS.every((key, i) => {
+          const row = mock.storage.find((r) => r.user_id === dva.id && r.key === key);
+          return (
+            row !== undefined &&
+            local[i] !== null &&
+            JSON.stringify(row.value) === JSON.stringify(JSON.parse(local[i]))
+          );
+        });
+        if (same || Date.now() > until) return same;
+        await new Promise((done) => setTimeout(done, 250));
+      }
+    };
+    const TRAINER = `${SITE}/zadaniya/8/trenazher/`;
+    const CARD = '.ttask .ptask__card[data-task]';
+
+    const desk = await newPage(mock, 1280, errors);
+    await welcomeSeen(desk.context);
+    await login(desk.page, 'dva@example.ru', 'dva-ustroystva-1');
+    check(
+      (await desk.page.locator('[role="dialog"]').count()) === 0,
+      'два устройства: без прогресса гостя вопроса о переносе нет',
+    );
+    await desk.page.goto(TRAINER, { waitUntil: 'networkidle' });
+    await desk.page.waitForSelector('.cfg');
+    await desk.page
+      .locator('[aria-labelledby="z8-param-count"] .cfg-opt')
+      .filter({ hasText: /^5$/ })
+      .first()
+      .click();
+    await desk.page.locator('.cfg-bar__start').click();
+    await desk.page.waitForSelector(CARD);
+    const first = await desk.page.locator(CARD).getAttribute('data-task');
+    const parsed = parseTaskId(first);
+    const right = ru(generate(parsed.prototype, parsed.seed, parsed.level).otvet);
+    await desk.page.fill('.ttask .otvet-input__field', right);
+    await desk.page.locator('.ttask__actions button:has-text("Проверить")').click();
+    await desk.page.locator('.ttask__actions button:has-text("Следующее задание")').click();
+    await desk.page.waitForFunction(
+      ([sel, id]) => document.querySelector(sel)?.getAttribute('data-task') !== id,
+      [CARD, first],
+    );
+    const second = await desk.page.locator(CARD).getAttribute('data-task');
+    await desk.page.locator('.ttask .zakladka').click();
+    check(await pushed(desk.page), 'компьютер: журнал, тренировка и закладка ушли в аккаунт');
+    await desk.context.close();
+
+    const phone = await newPage(mock, 390, errors);
+    await welcomeSeen(phone.context);
+    await login(phone.page, 'dva@example.ru', 'dva-ustroystva-1');
+    await phone.page
+      .waitForFunction(
+        () =>
+          /Решено\s*1\s*из\s*260/.test(
+            document.querySelector('[data-section="progress"]')?.textContent ?? '',
+          ),
+        null,
+        { timeout: 10000 },
+      )
+      .catch(() => {});
+    const progress = (await phone.page.locator('[data-section="progress"]').innerText()).replace(
+      /\s+/g,
+      ' ',
+    );
+    check(
+      progress.includes('Решено 1 из 260'),
+      `телефон: в кабинете решённое на компьютере — «Решено 1 из 260»`,
+    );
+    const later = phone.page.locator('[data-section="later8"] a[href*="zadacha="]');
+    check(
+      (await later.count()) === 1 &&
+        decodeURIComponent((await later.getAttribute('href')) ?? '').includes(second),
+      'телефон: закладка с компьютера — в «Отложенных»',
+    );
+    check(
+      await noHorizontalScroll(phone.page),
+      'кабинет с прогрессом 390: горизонтальной прокрутки нет',
+    );
+    await shot(phone.page, 'kabinet-uchenik-progress-390');
+    await phone.page.goto(TRAINER, { waitUntil: 'networkidle' });
+    await phone.page.waitForSelector(CARD);
+    check(
+      (await phone.page.locator(CARD).getAttribute('data-task')) === second,
+      'телефон: тренировка продолжается с той же задачи',
+    );
+    check(
+      (await phone.page.locator('.ttask .zakladka').getAttribute('aria-pressed')) === 'true',
+      'телефон: задача отмечена «Отложить на потом»',
+    );
+    await phone.context.close();
   }
 
   /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */
@@ -1526,6 +1671,89 @@ async function runNoHeader() {
 /** Ключевые экраны на четырёх ширинах, с плотностью 2 — их смотрит человек.
     Запуск: node scripts/check-auth.mjs --gallery <папка>. Проверок здесь
     нет: только снимки. Годится любая сборка со входом. */
+/**
+ * Кабинет ученика после тренировки №8: решено, ошибка, закладка, история.
+ * Тренировка проходит один раз на компьютере; на остальных ширинах тот же
+ * ученик входит заново, и прогресс приходит из аккаунта.
+ */
+async function runGalleryZ8(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const mock = makeMock();
+  registerInMock(mock, 'dva@example.ru', 'dva-ustroystva-1', 'Анна Смирнова', 'student');
+  const me = mock.users.get('dva@example.ru');
+  const CARD = '.ttask .ptask__card[data-task]';
+  const answerOf = (id) => {
+    const p = parseTaskId(id);
+    return generate(p.prototype, p.seed, p.level).otvet;
+  };
+  let trained = false;
+  for (const width of [1280, 375, 390, 430, 768]) {
+    const context = await browser.newContext({
+      viewport: { width, height: width < 500 ? 812 : 900 },
+      deviceScaleFactor: 2,
+      hasTouch: width < 500,
+    });
+    await welcomeSeen(context);
+    await installMock(context, mock);
+    const page = await context.newPage();
+    await login(page, 'dva@example.ru', 'dva-ustroystva-1');
+    if (!trained) {
+      await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+      await page.waitForSelector('.cfg');
+      await page
+        .locator('[aria-labelledby="z8-param-count"] .cfg-opt')
+        .filter({ hasText: /^5$/ })
+        .first()
+        .click();
+      await page.locator('.cfg-bar__start').click();
+      for (let i = 0; i < 5; i += 1) {
+        await page.waitForSelector(CARD);
+        const id = await page.locator(CARD).getAttribute('data-task');
+        const right = answerOf(id);
+        await page.fill('.ttask .otvet-input__field', ru(i === 1 ? right + 1 : right));
+        await page.locator('.ttask__actions button:has-text("Проверить")').click();
+        if (i === 1) {
+          await page.waitForSelector('.tverdict--wrong');
+          await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
+        }
+        if (i === 2) await page.locator('.ttask .zakladka').click();
+        const next = page.locator('.ttask__actions button:has-text("Следующее задание")');
+        if ((await next.count()) > 0) await next.click();
+        else await page.locator('.ttask__actions button:has-text("Смотреть результат")').click();
+      }
+      await page.waitForSelector('.tsum');
+      /* Записи — в аккаунт: после паузы синхронизации в моке есть журнал. */
+      const until = Date.now() + 15000;
+      while (
+        Date.now() < until &&
+        !mock.storage.some((r) => r.user_id === me.id && r.key === 'budetege:istoriya:v1')
+      ) {
+        await new Promise((done) => setTimeout(done, 250));
+      }
+      trained = true;
+      await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    }
+    await page.waitForFunction(
+      () =>
+        /Решено\s*5\s*из\s*260/.test(
+          document.querySelector('[data-section="progress"]')?.textContent ?? '',
+        ),
+      null,
+      { timeout: 15000 },
+    );
+    await page.evaluate(() => document.fonts.ready);
+    /* «?» закреплена в углу экрана: на склеенном снимке всей страницы
+       она висела бы посреди блока. */
+    await page.screenshot({
+      path: path.join(dir, `${width}-08-kabinet-progress.png`),
+      fullPage: true,
+      style: '.help-fab { visibility: hidden !important; }',
+    });
+    await context.close();
+  }
+  console.log(`Снимки: ${dir}`);
+}
+
 async function runGallery(dir) {
   fs.mkdirSync(dir, { recursive: true });
   const mock = makeMock();
@@ -1591,6 +1819,7 @@ async function runGallery(dir) {
 try {
   if (DISABLED) await runDisabled();
   else if (GALLERY !== null) await runGallery(GALLERY);
+  else if (GALLERY_Z8 !== null) await runGalleryZ8(GALLERY_Z8);
   else if (NO_HEADER) await runNoHeader();
   else await runEnabled();
 } finally {

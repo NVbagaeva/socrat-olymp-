@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 /**
- * Блок подготовки: восемь микро-задач в закрытом виде. Пул собран на
+ * Блок подготовки: десять микро-задач в закрытом виде. Пул собран на
  * сборке — в разметку уходят условия, отпечатки и закрытые разборы.
  */
 export default async function Podgotovka8BlockPage({ params }: { params: Params }) {
@@ -39,6 +39,7 @@ export default async function Podgotovka8BlockPage({ params }: { params: Params 
       <ErrorBoundary what="задачи">
         <Podgotovka8Screen
           blockId={block.id}
+          slug={block.slug}
           title={block.nazvanie}
           tasks={block.zadachi}
           formulyHtml={block.formulyHtml}
