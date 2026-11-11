@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
 import { TIPY_3 } from '@/content/stereo/tipy';
 import { GLAVY_3 } from '@/content/stereo/glavy';
-import { ZADANIYA } from '@/lib/paths';
 import { razbor3 } from '@/lib/stereo/razbory3';
 import type { BlokGlavy, GlavaDannye, PrimerGlavy, ZadachaBloka } from '@/lib/stereo/glavy/tipy';
 import { renderPloskiy } from '@/lib/stereo/ploskiy';

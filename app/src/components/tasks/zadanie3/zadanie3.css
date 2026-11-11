@@ -328,3 +328,167 @@
 .z3-primer__svernut {
   white-space: nowrap;
 }
+
+/* ── «Опорные задачи» ──────────────────────────────────────────── */
+.z3-opornye {
+  display: grid;
+  gap: var(--space-5);
+}
+.z3-opornye .kz-razdel__head {
+  display: grid;
+  gap: var(--space-1);
+}
+.z3-navyki {
+  display: grid;
+  gap: var(--space-6);
+}
+.z3-navyk {
+  display: grid;
+  gap: var(--space-3);
+}
+.z3-navyk__head {
+  display: grid;
+  gap: 2px;
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--ton);
+}
+.z3-navyk__zag {
+  margin: 0;
+}
+.z3-navyk__lead {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.z3-bloki {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 768px) {
+  .z3-bloki {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1100px) {
+  .z3-bloki {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.z3-blok {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  min-height: 88px;
+  padding: var(--space-4);
+  color: inherit;
+  text-decoration: none;
+}
+.z3-blok:hover {
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover, var(--glass-shadow));
+}
+.z3-blok:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z3-blok__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.z3-blok__text b {
+  font-size: 1.0625rem;
+  line-height: 1.25;
+}
+.z3-blok__schet {
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.z3-blok__polosa {
+  grid-column: 1 / -1;
+}
+
+/* Внутри блока: список задач от простой к сложной. */
+.z3-spisok {
+  margin-top: var(--space-5);
+}
+.z3-spisok__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 768px) {
+  .z3-spisok__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z3-spisok__zadacha {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 14px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.z3-spisok__zadacha:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z3-spisok__zadacha.is-current {
+  box-shadow:
+    inset 0 0 0 2px var(--blue-600),
+    var(--glass-shadow);
+}
+.z3-spisok__no {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.z3-spisok__no svg {
+  width: 16px;
+  height: 16px;
+}
+.z3-spisok__zadacha.is-right .z3-spisok__no {
+  background: var(--emerald-600);
+  color: var(--white);
+}
+.z3-spisok__zadacha.is-wrong .z3-spisok__no {
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+}
+.z3-spisok__text {
+  min-width: 0;
+  line-height: 1.3;
+}
+.z3-spisok__zvezdy {
+  color: var(--amber-600);
+  font-size: 0.8125rem;
+  letter-spacing: 1px;
+}
+/* Карточка задачи блока — стеклянная поверхность сцены. */
+.z3-opornye-blok .o3-zad,
+.o3-prep .o3-zad {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
