@@ -163,6 +163,20 @@ const SUITES = [
     ],
   },
   {
+    /* Правила доступа единой схемы на фоне прав своего сервера: аноним,
+       чужой ученик, чужой класс, репетитор без класса; регистрация по
+       списку адресов. */
+    name: 'Правила доступа (RLS)',
+    db: 'rls',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['rls.test.sql', path.join(SUPA, 'tests', 'rls.test.sql')],
+    ],
+  },
+  {
     /* Онлайн-вариант через кабинет: выдача, проверка в базе, ключ закрыт
        от ученика. В начало теста — таблица случаев нормализации ответа,
        общая с сайтом (тот же файл проверяет check-variant-online.mjs). */
@@ -207,4 +221,4 @@ for (const suite of SUITES) {
 
 stop();
 if (failed) process.exit(1);
-console.log('\nСогласия, кабинет и онлайн-вариант в базе: все проверки прошли.');
+console.log('\nСогласия, кабинет, правила доступа и онлайн-вариант в базе: все проверки прошли.');

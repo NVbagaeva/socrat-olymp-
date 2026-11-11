@@ -35,9 +35,10 @@ end $$;
 
 -- Люди: администратор, два репетитора, класс; ученики — в классе, отдельный
 -- и чужой (у второго репетитора).
+insert into vault.secrets (name, secret) values ('allowed_emails', 'admin@x.ru');
 insert into auth.users (id, email, raw_user_meta_data)
-values ('a0000000-0000-0000-0000-000000000000', 'admin@x.ru',
-        pg_temp.meta('{"role":"admin","name":"Наталья","bootstrap_admin":true}'));
+values ('a0000000-0000-0000-0000-000000000000', 'admin@x.ru', pg_temp.meta('{"name":"Наталья"}'));
+select public.grant_admin('admin@x.ru');
 set role authenticated;
 select set_config('request.jwt.claim.sub', 'a0000000-0000-0000-0000-000000000000', false);
 select public.create_invitation('tutor') as tutor_code \gset

@@ -57,13 +57,17 @@ jobs:
       #
       # Вход в кабинет включается переменными репозитория (Settings →
       # Secrets and variables → Actions → вкладка Variables, не Secrets):
-      # NEXT_PUBLIC_AUTH_ENABLED=1, адрес проекта и его публичный ключ.
+      # NEXT_PUBLIC_AUTH_ENABLED=1, адрес сервера входа и его публичный
+      # ключ (их записывает кнопка «Сервер: ключ для сайта»).
+      # NEXT_PUBLIC_AUTH_IN_HEADER=1 показывает «Войти» в шапке; без неё
+      # страница входа открывается только по прямой ссылке (пробный режим).
       # Переменных нет — сайт собирается без входа, как раньше. Секретный
       # ключ сервиса сюда не передаётся никогда (docs/AUTH.md).
       - name: Собрать статический экспорт
         working-directory: app
         env:
           NEXT_PUBLIC_AUTH_ENABLED: ${{ vars.NEXT_PUBLIC_AUTH_ENABLED }}
+          NEXT_PUBLIC_AUTH_IN_HEADER: ${{ vars.NEXT_PUBLIC_AUTH_IN_HEADER }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: pnpm build

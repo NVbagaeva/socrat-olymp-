@@ -101,7 +101,8 @@ services:
       GOTRUE_JWT_ISSUER: https://${API_DOMAIN}/auth/v1
 
       # Только почта и пароль; регистрацию пропускает хук по списку
-      # приглашённых (supabase/trial/auth_trial.sql, bin/migrate.sh).
+      # приглашённых (supabase/migrations/…_probnyy_vhod.sql,
+      # bin/migrate.sh), и тот же отбор повторяет триггер базы.
       GOTRUE_DISABLE_SIGNUP: 'false'
       GOTRUE_EXTERNAL_EMAIL_ENABLED: 'true'
       GOTRUE_EXTERNAL_PHONE_ENABLED: 'false'

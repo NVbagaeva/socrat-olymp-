@@ -53,8 +53,15 @@ code=$(api "https://$API_DOMAIN/health" 2>/dev/null)
 [ "$code" = "200" ] && ok "Caddy: /health 200" || bad "Caddy: /health ответил ${code:-ничего}"
 code=$(api -H "apikey: $ANON_KEY" "https://$API_DOMAIN/auth/v1/health" 2>/dev/null)
 [ "$code" = "200" ] && ok "GoTrue: /auth/v1/health 200" || bad "GoTrue: /auth/v1/health ответил ${code:-ничего}"
-code=$(api -H "apikey: $ANON_KEY" "https://$API_DOMAIN/rest/v1/profiles?select=id&limit=1" 2>/dev/null)
-[ "$code" = "200" ] && ok "PostgREST: /rest/v1/profiles 200" || bad "PostgREST: /rest/v1/profiles ответил ${code:-ничего}"
+# Справочник заданий открыт всем: он отвечает 200 и без входа. Люди и
+# прогресс анониму закрыты — там должен быть отказ.
+code=$(api -H "apikey: $ANON_KEY" "https://$API_DOMAIN/rest/v1/ege_tasks?select=no&limit=1" 2>/dev/null)
+[ "$code" = "200" ] && ok "PostgREST: /rest/v1/ege_tasks 200" || bad "PostgREST: /rest/v1/ege_tasks ответил ${code:-ничего}"
+code=$(api -H "apikey: $ANON_KEY" "https://$API_DOMAIN/rest/v1/profiles?select=user_id&limit=1" 2>/dev/null)
+case "$code" in
+  401 | 403) ok "PostgREST: профили без входа закрыты ($code)" ;;
+  *) bad "PostgREST: /rest/v1/profiles без входа ответил ${code:-ничего} — должен быть отказ" ;;
+esac
 
 # ── Сертификат ──────────────────────────────────────────────────────
 min_days=${CERT_MIN_DAYS:-14}

@@ -1,0 +1,39 @@
+name: 'Сервер: ключ для сайта'
+
+# Адрес API и публичный ключ anon с сервера — в Variables репозитория
+# (NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY), откуда их
+# берёт сборка сайта. Ключ не нужно копировать руками, в журнале он
+# закрыт. Вход на сайте этим не включается: флаг
+# NEXT_PUBLIC_AUTH_ENABLED вы ставите сами.
+#
+# Нажимать один раз после первого «Развернуть» и после переезда на
+# другой сервер. Нужен секрет GH_SECRETS_TOKEN с правами Secrets и
+# Variables (docs/SERVER.md).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server
+  cancel-in-progress: false
+
+jobs:
+  site-key:
+    name: Ключ для сайта
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Записать адрес и ключ в Variables
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+          API_DOMAIN: ${{ vars.API_DOMAIN || 'api.budetege.ru' }}
+          GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: infra/lite/actions/site-key.sh

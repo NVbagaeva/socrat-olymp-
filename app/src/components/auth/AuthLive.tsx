@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { AUTH_UI } from '@/content/auth-ui';
 import { site } from '@/content/site';
-import { AUTH_HREF } from '@/lib/auth/config';
+import { AUTH_HREF, AUTH_IN_HEADER } from '@/lib/auth/config';
 import { initialsOf, useSessionUser } from '@/lib/auth/session';
 import type { AuthWidgetProps } from './AuthWidget';
 import './auth-widget.css';
@@ -55,6 +55,15 @@ export function LiveWidget({ variant, className }: AuthWidgetProps) {
   }, [open, close]);
 
   if (user === null) {
+    /* Пробный режим: вход работает, но в шапке его не видно — она
+       выглядит как без входа. На /voyti/ попадают по прямой ссылке. */
+    if (!AUTH_IN_HEADER) {
+      return variant === 'site' ? (
+        <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
+          {site.headerActions.signup.label}
+        </a>
+      ) : null;
+    }
     return (
       <>
         <Link

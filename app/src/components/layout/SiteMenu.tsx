@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { AUTH_UI } from '@/content/auth-ui';
 import { navLinks } from '@/content/site';
-import { AUTH_ENABLED, AUTH_HREF } from '@/lib/auth/config';
+import { AUTH_ENABLED, AUTH_HREF, AUTH_IN_HEADER } from '@/lib/auth/config';
 import { useSessionUser } from '@/lib/auth/session';
 import { LogoutItem } from '@/components/auth/AuthLive';
 
@@ -95,7 +95,7 @@ export function SiteMenu() {
   const user = useSessionUser();
   const items = [
     ...navLinks.map((link) => ({ ...link, separated: false })),
-    ...(AUTH_ENABLED && user === null
+    ...(AUTH_IN_HEADER && user === null
       ? [{ label: AUTH_UI.login, href: AUTH_HREF.voyti, separated: true }]
       : []),
     ...(AUTH_ENABLED && user !== null
