@@ -1,6 +1,6 @@
 import { TabScrollOnMount } from '../TabScroll';
 import type { GruppaVybora } from '../trening';
-import { GRUPPY8, TIPY8 } from '@/content/vychisleniya8';
+import { GRUPPY8, TIPY8, TRENAZHER8 } from '@/content/vychisleniya8';
 import { prototypeById } from '@/lib/vychisleniya/prototypes';
 import { typeset } from '@/lib/tex';
 import { Trenazher8 } from './Trenazher8';
@@ -25,7 +25,12 @@ export function Trenazher8Tab({ base }: { base: string }) {
     })),
   }));
   return (
-    <section className="trainer z8-trening trn-host">
+    <section className="trainer z8-trening trn-host" aria-labelledby="z8-trening-title">
+      {/* Заголовок вкладки — для порядка заголовков и читалок; на экране его
+          заменяет активная вкладка ленты. */}
+      <h2 className="sr-only" id="z8-trening-title">
+        {TRENAZHER8.title}
+      </h2>
       <TabScrollOnMount />
       <Trenazher8 base={base} gruppy={gruppy} />
     </section>

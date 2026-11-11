@@ -279,8 +279,10 @@
   margin: 0;
   padding: 3px var(--space-3);
   border-radius: var(--radius-pill);
-  background: var(--ton);
-  color: var(--white);
+  /* Тёмный текст тона на светлой заливке: контраст ≥ 4,5:1 у всех тонов. */
+  background: var(--ton-soft);
+  box-shadow: inset 0 0 0 1.5px var(--ton-border);
+  color: var(--ton-text);
   font-size: var(--fs-caption);
   line-height: 1.4;
   font-weight: 600;
