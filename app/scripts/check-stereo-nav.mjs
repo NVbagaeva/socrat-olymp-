@@ -244,7 +244,28 @@ for (const size of SIZES) {
       check(plate.height >= 44, where(`высота плашки ${plate.height} < 44`));
       check(plate.text.includes(`Задание №${no}`), where('на плашке нет номера задания'));
 
-      await page.locator('.topic-tabs-row:not([inert]) .razdely-plashka').click();
+      /* Плашка в ленте есть в двух копиях: в самой ленте и в прилипшей
+         панели. Ждём, пока видимой станет именно плашка ленты, — и только
+         тогда жмём: в момент переключения копий клик попадал мимо. */
+      /* Прокрутка в самое начало: прилипшая панель скрыта, в ленте одна
+         плашка на месте. Переход между копиями при прокрутке — отдельная
+         тема (общий слой ленты), здесь он не проверяется. */
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(500);
+      const plashka = page.locator('.topic-tabs-row:not([inert]) .razdely-plashka');
+      await plashka.waitFor({ state: 'visible' });
+      await page.waitForFunction(
+        () => {
+          const node = document.querySelector('.topic-tabs-row:not([inert]) .razdely-plashka');
+          if (node === null || node.getBoundingClientRect().height === 0) return false;
+          const b = node.getBoundingClientRect();
+          const top = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+          return top !== null && node.contains(top);
+        },
+        null,
+        { timeout: 15000 },
+      );
+      await plashka.click();
       await page.waitForSelector('.razdely-menu');
       await page.waitForTimeout(400);
       const menu = await page.evaluate(() => {

@@ -49,7 +49,7 @@ export const NAVYKI3: Navyk3[] = [
   },
   {
     id: 'k',
-    nazvanie: 'Что будет, если увеличить в k раз',
+    nazvanie: 'Что будет, если увеличить в $k$ раз',
     lead: 'Длины, площади и объёмы растут по-разному',
     ton: 'terra',
     bloki: ['vo-skolko-raz'],

@@ -5,6 +5,7 @@ import { PrepCardLink } from '@/components/tasks/prep/PrepScroll';
 import { Metka, Polosa, Znak, type Ton } from '../steklo';
 import { OPORNYE3 } from '@/content/zadanie3/navyki';
 import { opornye3 } from '@/lib/stereo/opornye3/progress';
+import { typeset } from '@/lib/tex';
 
 export interface BlokNavyka3 {
   slug: string;
@@ -41,7 +42,7 @@ export function Navyki3({ navyki, listHref }: { navyki: NavykKartochki3[]; listH
         >
           <div className="z3-navyk__head">
             <h3 className="stk-h4 z3-navyk__zag" id={`z3-navyk-${navyk.id}`}>
-              {navyk.nazvanie}
+              <span dangerouslySetInnerHTML={{ __html: typeset(navyk.nazvanie) }} />
             </h3>
             <p className="z3-navyk__lead">
               {navyk.lead} · {OPORNYE3.blokov(navyk.bloki.length)}

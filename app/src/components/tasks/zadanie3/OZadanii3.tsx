@@ -3,7 +3,7 @@ import { FormulyRamka, KartaGruppa, KartaShapka, KartaTip } from '../karta';
 import { FORMULY3, GRUPPY3, PODOBIE3, SHAPKA3, TIPY3 } from '@/content/zadanie3';
 import { blokHref3, tipTrenazherHref3 } from '@/lib/zadanie3/links';
 import { primer3 } from '@/lib/zadanie3/primery';
-import { texPlain, typeset } from '@/lib/tex';
+import { typeset } from '@/lib/tex';
 import { CHERTEZHI_FORMUL, chertezhPodobiya } from './chertezhiFormul';
 import { Figurka } from './Figurka';
 import { GruppaProgress3 } from './GruppaProgress3';
@@ -44,14 +44,17 @@ export function OZadanii3() {
           <h3 className="stk-h3" id="z3-gruppy-title">
             {SHAPKA3.gruppyTitle}
           </h3>
-          <p className="stk-lead">{SHAPKA3.gruppyLead}</p>
+          <p
+            className="stk-lead"
+            dangerouslySetInnerHTML={{ __html: typeset(SHAPKA3.gruppyLead) }}
+          />
         </div>
         <div className="kz-gruppy">
           {GRUPPY3.map((g, gi) => (
             <KartaGruppa
               key={g.id}
               id={g.id}
-              nazvanie={g.nazvanie}
+              nazvanie={typeset(g.nazvanie)}
               znakHtml=""
               znak={<Figurka prototip={g.znak} />}
               ton={g.ton}
@@ -76,7 +79,7 @@ export function OZadanii3() {
                     key={tip}
                     id={tip}
                     nazvanieHtml={typeset(teksty.nazvanie)}
-                    lead={texPlain(teksty.lead)}
+                    lead={typeset(teksty.lead)}
                     open={open}
                   >
                     {srazu === null ? (
@@ -111,7 +114,7 @@ export function OZadanii3() {
           {FORMULY3.map((blok) => (
             <FormulyRamka
               key={blok.id}
-              nazvanie={blok.nazvanie}
+              nazvanie={typeset(blok.nazvanie)}
               ton={blok.ton}
               formuly={blok.formuly.map((f, i) => ({
                 html: tex(f.tex),
@@ -128,9 +131,11 @@ export function OZadanii3() {
           className="z3-podobie stk-glass stk-glass--warm"
           aria-labelledby="z3-podobie-title"
         >
-          <h4 className="z3-podobie__zag" id="z3-podobie-title">
-            {PODOBIE3.nazvanie}
-          </h4>
+          <h4
+            className="z3-podobie__zag"
+            id="z3-podobie-title"
+            dangerouslySetInnerHTML={{ __html: typeset(PODOBIE3.nazvanie) }}
+          />
           <div className="z3-podobie__telo">
             <div className="z3-podobie__chertezh">
               <Chertezh3d model={chertezhPodobiya(PODOBIE3.alt)} tema="ekran" />
@@ -149,7 +154,7 @@ export function OZadanii3() {
                         __html: `${PODOBIE3.vRaz} ${tex(s.vo)} ${PODOBIE3.raz}`,
                       }}
                     />
-                    <i>{PODOBIE3.pri(s.primer)}</i>
+                    <i dangerouslySetInnerHTML={{ __html: typeset(PODOBIE3.pri(s.primer)) }} />
                   </li>
                 ))}
               </ul>

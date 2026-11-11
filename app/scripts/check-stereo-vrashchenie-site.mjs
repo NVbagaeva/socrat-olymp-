@@ -313,9 +313,13 @@ for (const size of SIZES) {
       check(html1 !== html0, where('перетаскивание не повернуло чертёж'));
       check((await vybrano()) === 0, where('перетаскивание выбрало цель'));
       /* Касание — выбор. */
+      /* После поворота чертёж перерисован: цель берём заново, по её
+         текущей позиции на экране (старый элемент уже не виден). */
+      await nazhmi.locator('[data-cel]').first().waitFor({ state: 'visible' });
       const cel2 = nazhmi.locator('[data-cel]').first();
-      if (size.touch) await cel2.tap({ force: true });
-      else await cel2.click({ force: true });
+      const cb2 = await cel2.boundingBox();
+      if (size.touch) await page.touchscreen.tap(cb2.x + cb2.width / 2, cb2.y + cb2.height / 2);
+      else await page.mouse.click(cb2.x + cb2.width / 2, cb2.y + cb2.height / 2);
       await page.waitForTimeout(400);
       check((await vybrano()) > 0, where('касание по цели её не выбрало'));
     }
