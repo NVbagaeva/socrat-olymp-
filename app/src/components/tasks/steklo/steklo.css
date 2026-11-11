@@ -395,3 +395,8 @@ details[open] > summary .stk-shevron {
   width: 100%;
   height: 100%;
 }
+
+/* Шаг решения без выкладки: пустой рамки формулы нет. */
+.stk-shag__formula:empty {
+  display: none;
+}

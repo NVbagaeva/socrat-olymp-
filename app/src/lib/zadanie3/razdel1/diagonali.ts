@@ -11,7 +11,15 @@ import { vertex } from '../../solid/figures';
 import { distance, polygonArea, polyhedronVolume } from '../../solid/measure';
 import { NAMES, shapeLines, shapeSection } from '../../solid/drawings/section1';
 import { letters, ru, segment } from '../format';
-import { type HintStep, type Params, type Prototype, type Variant, num, pair, text } from '../types';
+import {
+  type HintStep,
+  type Params,
+  type Prototype,
+  type Variant,
+  num,
+  pair,
+  text,
+} from '../types';
 import { baseNames, boxOf, coversAllDims, sides } from './common';
 import { solveBySearch } from '../search';
 import { chisla, chislo, tex, vopros } from '../podskazka';
@@ -238,7 +246,9 @@ export const P03_02: Prototype = {
     const k = num(p, 'k');
     const d2 = 3 * k * k;
     return [
-      { text: `Диагональ куба с ребром $a$ равна $a\\sqrt{3}$, значит $a\\sqrt{3} = \\sqrt{${ru(d2)}}$.` },
+      {
+        text: `Диагональ куба с ребром $a$ равна $a\\sqrt{3}$, значит $a\\sqrt{3} = \\sqrt{${ru(d2)}}$.`,
+      },
       { text: `Отсюда $a = \\sqrt{${ru(d2)}} / \\sqrt{3} = ${ru(k)}$.`, value: k },
       { text: `Объём куба: $a^3 = ${ru(k)}^3 = ${ru(k * k * k)}$.`, value: k * k * k },
     ];
@@ -297,7 +307,9 @@ export const P03_03: Prototype = {
     const c = num(p, 'c');
     const side = Math.hypot(b, c);
     return [
-      { text: 'Сечение через $A$, $B$ и $C_1$ — прямоугольник $ABC_1D_1$: $AB$ параллельно $D_1C_1$.' },
+      {
+        text: 'Сечение через $A$, $B$ и $C_1$ — прямоугольник $ABC_1D_1$: $AB$ параллельно $D_1C_1$.',
+      },
       {
         text: `Вторая сторона $BC_1$ — диагональ боковой грани: $BC_1 = \\sqrt{${ru(b)}^2 + ${ru(c)}^2} = ${ru(side)}$.`,
         value: side,
@@ -441,15 +453,11 @@ function podskazka01(p: Params): HintStep[] {
       chisla([(a + b) ** 2, a + b, a * a + c * c], base, otvet),
       `$${tex(a)}^2 + ${tex(b)}^2 = ${tex(base)}$`,
     ),
-    vopros(
-      `Как найти $${diag}$?`,
-      `$\\sqrt{${tex(base)} + ${tex(c)}^2}$`,
-      [
-        `$${tex(base)} + ${tex(c)}^2$`,
-        `$\\sqrt{${tex(base)}} + ${tex(c)}$`,
-        `$\\sqrt{${tex(base)} - ${tex(c)}^2}$`,
-      ],
-    ),
+    vopros(`Как найти $${diag}$?`, `$\\sqrt{${tex(base)} + ${tex(c)}^2}$`, [
+      `$${tex(base)} + ${tex(c)}^2$`,
+      `$\\sqrt{${tex(base)}} + ${tex(c)}$`,
+      `$\\sqrt{${tex(base)} - ${tex(c)}^2}$`,
+    ]),
   ];
 }
 
@@ -493,11 +501,11 @@ function podskazka03(p: Params): HintStep[] {
       chisla([b + c, b * c, Math.abs(c - b)], bc1, otvet),
       `$BC_1 = \\sqrt{${tex(b)}^2 + ${tex(c)}^2}$`,
     ),
-    vopros(
-      'Как найти площадь сечения?',
-      '$AB \\cdot BC_1$',
-      ['$AB \\cdot BC$', '$\\frac{1}{2}\\, AB \\cdot BC_1$', '$AB \\cdot AA_1$'],
-    ),
+    vopros('Как найти площадь сечения?', '$AB \\cdot BC_1$', [
+      '$AB \\cdot BC$',
+      '$\\frac{1}{2}\\, AB \\cdot BC_1$',
+      '$AB \\cdot AA_1$',
+    ]),
   ];
 }
 
@@ -522,14 +530,10 @@ function podskazka04(p: Params): HintStep[] {
       chisla([a + b, a * b, d * d], d, otvet),
       `$\\sqrt{${tex(a)}^2 + ${tex(b)}^2}$`,
     ),
-    vopros(
-      'Как найти площадь сечения?',
-      'Диагональ основания умножить на боковое ребро',
-      [
-        'Половина произведения диагонали основания и ребра',
-        'Произведение двух рёбер основания',
-        'Квадрат диагонали основания',
-      ],
-    ),
+    vopros('Как найти площадь сечения?', 'Диагональ основания умножить на боковое ребро', [
+      'Половина произведения диагонали основания и ребра',
+      'Произведение двух рёбер основания',
+      'Квадрат диагонали основания',
+    ]),
   ];
 }

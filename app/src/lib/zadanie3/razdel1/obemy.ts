@@ -352,7 +352,9 @@ export const P03_16: Prototype = {
       {
         text: 'Отсечённая призма — прямая, её основание — прямоугольный треугольник с катетами по половине ребра куба.',
       },
-      { text: 'Объём призмы: $\\frac{1}{2} \\cdot \\frac{a}{2} \\cdot \\frac{a}{2} \\cdot a = \\frac{a^3}{8}$ — восьмая часть объёма куба.' },
+      {
+        text: 'Объём призмы: $\\frac{1}{2} \\cdot \\frac{a}{2} \\cdot \\frac{a}{2} \\cdot a = \\frac{a^3}{8}$ — восьмая часть объёма куба.',
+      },
       { text: `Объём призмы: $${ru(v)} : 8 = ${ru(v / 8)}$.`, value: v / 8 },
     ];
   },
@@ -394,10 +396,22 @@ function rebra17(p: Params): [string, number][] {
   const [a, b, c] = abc(p);
   const v = vershina17(p);
   const osnovanie: Record<typeof v, [string, number][]> = {
-    A: [['AB', a], ['AD', b]],
-    B: [['AB', a], ['BC', b]],
-    C: [['BC', b], ['CD', a]],
-    D: [['AD', b], ['CD', a]],
+    A: [
+      ['AB', a],
+      ['AD', b],
+    ],
+    B: [
+      ['AB', a],
+      ['BC', b],
+    ],
+    C: [
+      ['BC', b],
+      ['CD', a],
+    ],
+    D: [
+      ['AD', b],
+      ['CD', a],
+    ],
   };
   return [...osnovanie[v], [`${v}${v}_1`, c]];
 }
@@ -418,7 +432,8 @@ export const P03_17: Prototype = {
       .map(([name, x]) => `$${name}=${ru(x)}$`)
       .join(', ')}.`,
 
-  dopustimo: (p) => positive(p) && (p['v'] === undefined || ['A', 'B', 'C', 'D'].includes(String(p['v']))),
+  dopustimo: (p) =>
+    positive(p) && (p['v'] === undefined || ['A', 'B', 'C', 'D'].includes(String(p['v']))),
   otvet: (p) => {
     const [a, b, c] = abc(p);
     return (a * b * c) / 3;
@@ -430,9 +445,7 @@ export const P03_17: Prototype = {
     return shapeLines(
       'box',
       `Прямоугольный параллелепипед ${NAMES}, выделена пирамида с основанием ABCD и вершиной ${letters(`${v}1`)}`,
-      ['A', 'B', 'C', 'D']
-        .filter((x) => x !== v)
-        .map((x): [string, string] => [x, `${v}1`]),
+      ['A', 'B', 'C', 'D'].filter((x) => x !== v).map((x): [string, string] => [x, `${v}1`]),
     );
   },
 
@@ -633,7 +646,11 @@ function dolya(chto: string, verno: string, comment: string): HintStep {
 function podskazka12(p: Params): HintStep[] {
   const v = abc(p).reduce((x, y) => x * y, 1);
   return [
-    dolya('параллелепипеда', 'Половину', 'Плоскость $ACC_1A_1$ режет параллелепипед на две равные призмы.'),
+    dolya(
+      'параллелепипеда',
+      'Половину',
+      'Плоскость $ACC_1A_1$ режет параллелепипед на две равные призмы.',
+    ),
     obemParallelepipeda(p, v / 2),
   ];
 }
@@ -641,7 +658,11 @@ function podskazka12(p: Params): HintStep[] {
 function podskazka13(p: Params): HintStep[] {
   const v = abc(p).reduce((x, y) => x * y, 1);
   return [
-    dolya('параллелепипеда', 'Половину', 'Плоскость $A_1B_1CD$ режет параллелепипед на две равные части.'),
+    dolya(
+      'параллелепипеда',
+      'Половину',
+      'Плоскость $A_1B_1CD$ режет параллелепипед на две равные части.',
+    ),
     obemParallelepipeda(p, v / 2),
   ];
 }
@@ -649,7 +670,11 @@ function podskazka13(p: Params): HintStep[] {
 function podskazka14(p: Params): HintStep[] {
   const v = abc(p).reduce((x, y) => x * y, 1);
   return [
-    dolya('параллелепипеда', 'Половину', 'Плоскость $ABC_1D_1$ режет параллелепипед на две равные призмы.'),
+    dolya(
+      'параллелепипеда',
+      'Половину',
+      'Плоскость $ABC_1D_1$ режет параллелепипед на две равные призмы.',
+    ),
     obemParallelepipeda(p, v / 2),
   ];
 }
@@ -662,11 +687,11 @@ function podskazka15(p: Params): HintStep[] {
       'Восьмую',
       'Основание призмы — треугольник с катетами $\\frac{a}{2}$: это восьмая часть грани, а высота — всё ребро.',
     ),
-    vopros(
-      'Как найти объём куба?',
-      `$8 \\cdot ${tex(v)}$`,
-      [`$${tex(v)} : 8$`, `$4 \\cdot ${tex(v)}$`, `$2 \\cdot ${tex(v)}$`],
-    ),
+    vopros('Как найти объём куба?', `$8 \\cdot ${tex(v)}$`, [
+      `$${tex(v)} : 8$`,
+      `$4 \\cdot ${tex(v)}$`,
+      `$2 \\cdot ${tex(v)}$`,
+    ]),
   ];
 }
 
@@ -678,11 +703,11 @@ function podskazka16(p: Params): HintStep[] {
       'Восьмую',
       'Основание призмы — треугольник с катетами $\\frac{a}{2}$: это восьмая часть грани, а высота — всё ребро.',
     ),
-    vopros(
-      'Как найти объём призмы?',
-      `$${tex(v)} : 8$`,
-      [`$${tex(v)} : 4$`, `$${tex(v)} : 2$`, `$8 \\cdot ${tex(v)}$`],
-    ),
+    vopros('Как найти объём призмы?', `$${tex(v)} : 8$`, [
+      `$${tex(v)} : 4$`,
+      `$${tex(v)} : 2$`,
+      `$8 \\cdot ${tex(v)}$`,
+    ]),
   ];
 }
 
@@ -690,15 +715,11 @@ function podskazka17(p: Params): HintStep[] {
   const obem = abc(p).reduce((x, y) => x * y, 1);
   const v = vershina17(p);
   return [
-    vopros(
-      'Что это за многогранник?',
-      `Пирамида с основанием $ABCD$ и высотой $${v}${v}_1$`,
-      [
-        'Призма с основанием $ABCD$',
-        'Пирамида с основанием $ABB_1A_1$ и вершиной $D$',
-        `Тетраэдр $ABC${v}_1$`,
-      ],
-    ),
+    vopros('Что это за многогранник?', `Пирамида с основанием $ABCD$ и высотой $${v}${v}_1$`, [
+      'Призма с основанием $ABCD$',
+      'Пирамида с основанием $ABB_1A_1$ и вершиной $D$',
+      `Тетраэдр $ABC${v}_1$`,
+    ]),
     dolya('параллелепипеда', 'Треть', 'У пирамиды и параллелепипеда общие основание и высота.'),
     obemParallelepipeda(p, obem / 3),
   ];
@@ -735,7 +756,11 @@ function podskazka19(p: Params): HintStep[] {
         'Треугольник $ABC$, высота — диагональ $AC$',
       ],
     ),
-    dolya('параллелепипеда', 'Шестую', '$\\frac{1}{2}$ основания и $\\frac{1}{3}$ от пирамиды: вместе $\\frac{1}{6}$.'),
+    dolya(
+      'параллелепипеда',
+      'Шестую',
+      '$\\frac{1}{2}$ основания и $\\frac{1}{3}$ от пирамиды: вместе $\\frac{1}{6}$.',
+    ),
     obemParallelepipeda(p, v / 6),
   ];
 }

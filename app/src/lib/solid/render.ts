@@ -1507,11 +1507,14 @@ export interface SolidDiagnostics {
  * у которого стоит величина из условия, — цвет величин и толщину.
  * Геометрия и видимость не меняются.
  */
-function ekrannayaScena(model: Model, scene: Scene): Scene {
+function ekrannayaScena(model: Model, scene: Scene, shag?: number): Scene {
   const eps = modelExtent(model) * 1e-6;
   const ryadom = (p: Vec3, q: Vec3) =>
     Math.abs(p[0] - q[0]) <= eps && Math.abs(p[1] - q[1]) <= eps && Math.abs(p[2] - q[2]) <= eps;
-  const measures = model.measures ?? [];
+  /* Величина, которой на этом шаге решения ещё нет, ребро не красит. */
+  const measures = (model.measures ?? []).filter(
+    (m) => shag === undefined || m.shag === undefined || m.shag <= shag,
+  );
   const sVelichinoy = (seg: { a: Vec3; b: Vec3 }) =>
     measures.some(
       (m) =>
@@ -1538,7 +1541,7 @@ function odnaLiniya(model: Model, scene: Scene): Scene {
 function pixelScene(model: Model, options: RenderOptions, risovat = true): Scene {
   const sobrana = buildScene(model, options);
   const odna = risovat ? odnaLiniya(model, sobrana) : sobrana;
-  const scene = options.tema === 'ekran' ? ekrannayaScena(model, odna) : odna;
+  const scene = options.tema === 'ekran' ? ekrannayaScena(model, odna, options.shag) : odna;
   if (!options.ustoychivo) {
     return toPixels(scene);
   }

@@ -202,7 +202,9 @@ const SHEST = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
 function shestVershiny(p: Params): string[] {
   const s = num(p, 's');
   const L = (k: number) => SHEST[(s + k) % 6] as string;
-  return num(p, 'vid') === 1 ? [L(0), L(1), L(3), L(4), `${L(2)}1`] : [L(0), L(1), L(3), `${L(4)}1`];
+  return num(p, 'vid') === 1
+    ? [L(0), L(1), L(3), L(4), `${L(2)}1`]
+    : [L(0), L(1), L(3), `${L(4)}1`];
 }
 
 /**

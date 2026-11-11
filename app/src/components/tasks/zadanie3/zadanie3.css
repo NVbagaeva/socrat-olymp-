@@ -67,3 +67,264 @@
     grid-column: 1 / -1;
   }
 }
+
+/* ── «О задании» ───────────────────────────────────────────────── */
+
+/* Значок группы крупнее: фигуру должно быть видно. */
+.z3-karta .kz-gruppa .stk-znak {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+}
+/* Чертёж примера закреплён: карточкам группы и типа — clip вместо
+   hidden (обрезка по скруглению остаётся, sticky работает). */
+.z3-karta .kz-gruppa,
+.z3-karta .kz-tip {
+  overflow: clip;
+}
+.z3-karta .kz-gruppa,
+.z3-karta .kz-tip,
+.z3-karta .kz-razdel {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+@media (min-width: 1000px) {
+  .z3-karta .kz-gruppy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .z3-karta .kz-gruppa[open] {
+    grid-column: 1 / -1;
+  }
+  .z3-karta .kz-gruppa:not([open]) .kz-gruppa__summary {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .z3-karta .kz-gruppa:not([open]) .kz-gruppa__progress {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+/* Пример типа: чертёж рядом с шагами. */
+.z3-primer {
+  max-width: none;
+}
+.z3-primer__telo {
+  display: grid;
+  gap: var(--space-4);
+}
+.z3-primer__chertezh {
+  position: sticky;
+  top: calc(var(--topic-sticky-top, 0px) + var(--space-2));
+  z-index: 2;
+  align-self: start;
+  padding: var(--space-1);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+}
+.z3-primer__chertezh .z3d {
+  background: var(--white);
+  gap: var(--space-1);
+  padding: 0;
+}
+.z3-primer__panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+}
+.z3-primer__gde {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--terracotta-700);
+  font-weight: 600;
+}
+.z3-primer__svernut {
+  min-height: 44px;
+}
+.z3-primer__shagi {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z3-shag {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: 14px;
+  border: 1px solid transparent;
+}
+.z3-shag.is-on {
+  background: var(--terracotta-50);
+  border-color: var(--terracotta-200);
+}
+.z3-shag__knopka {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  min-height: 44px;
+  padding: var(--space-1);
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.z3-shag__knopka:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z3-shag__no {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.z3-shag.is-on .z3-shag__no {
+  background: var(--terracotta);
+  color: var(--white);
+}
+.z3-shag .stk-shag__formula > div + div {
+  margin-top: var(--space-2);
+}
+@media (max-width: 767.98px) {
+  /* На телефоне закреплённый чертёж — не выше трети экрана. */
+  .z3-primer__chertezh svg.solid {
+    max-height: 26vh;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+}
+@media (min-width: 768px) {
+  .z3-primer__telo {
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    align-items: start;
+  }
+  /* Рядом с шагами чертёж не мешает: сворачивать нечего. */
+  .z3-primer__svernut {
+    display: none;
+  }
+  .z3-primer__panel {
+    justify-content: center;
+  }
+}
+
+/* Чертёж у формулы: крупнее миниатюры, величины читаются. */
+.z3-karta .kz-ramka__s-risunkom {
+  grid-template-columns: minmax(0, 1fr);
+}
+.z3-karta .kz-ramka__risunok {
+  grid-row: auto;
+  width: 100%;
+  max-width: 260px;
+  margin-inline: auto;
+}
+@media (min-width: 560px) {
+  .z3-karta .kz-ramka__s-risunkom {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+  .z3-karta .kz-ramka__risunok {
+    grid-row: span 2;
+  }
+}
+
+/* Рамка «Подобные тела». */
+.z3-podobie {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+.z3-podobie__zag {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--terracotta-700);
+}
+.z3-podobie__telo {
+  display: grid;
+  gap: var(--space-4);
+}
+.z3-podobie__chertezh {
+  width: 100%;
+  max-width: 340px;
+  margin-inline: auto;
+}
+.z3-podobie__stroki {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  padding: 0;
+  list-style: none;
+}
+.z3-podobie__stroki li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--space-3);
+  padding: var(--space-3);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.85);
+}
+.z3-podobie__stroki b {
+  color: var(--terracotta-700);
+  white-space: nowrap;
+}
+.z3-podobie__stroki i {
+  grid-column: 1 / -1;
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+  font-style: normal;
+}
+.z3-podobie__primer {
+  margin: 0;
+  line-height: 1.55;
+}
+@media (min-width: 768px) {
+  .z3-podobie__telo {
+    grid-template-columns: 320px minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+/* Печать: закреплённый чертёж встаёт в поток, кнопок нет. */
+@media print {
+  .z3-primer__chertezh {
+    position: static;
+    box-shadow: none;
+  }
+  .z3-primer__svernut {
+    display: none;
+  }
+}
+
+/* Закреплённый чертёж примера на телефоне — не выше трети экрана:
+   подсказка «Крутите фигуру» уходит (она есть у чертежей задач),
+   кнопки вида остаются. */
+@media (max-width: 767.98px) {
+  .z3-primer__chertezh svg.solid {
+    max-height: 21vh;
+  }
+  .z3-primer__chertezh .vr__podskazka {
+    display: none;
+  }
+  .z3-primer__panel {
+    min-height: 40px;
+  }
+}
+
+.z3-primer__gde,
+.z3-primer__svernut {
+  white-space: nowrap;
+}

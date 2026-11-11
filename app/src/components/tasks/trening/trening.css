@@ -947,7 +947,3 @@
 .trn-uslovie--tekst .katex {
   font-size: 1.08em;
 }
-/* Шаг решения без выкладки: пустой рамки формулы нет. */
-.stk-shag__formula:empty {
-  display: none;
-}

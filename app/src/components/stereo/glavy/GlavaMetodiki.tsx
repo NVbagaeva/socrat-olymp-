@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
 import { TIPY_3 } from '@/content/stereo/tipy';
 import { GLAVY_3 } from '@/content/stereo/glavy';
-import { STEREO } from '@/content/stereo/zadaniya';
 import { ZADANIYA } from '@/lib/paths';
 import { razbor3 } from '@/lib/stereo/razbory3';
 import type { BlokGlavy, GlavaDannye, PrimerGlavy, ZadachaBloka } from '@/lib/stereo/glavy/tipy';
@@ -24,6 +23,7 @@ import {
 } from '../metodika/Bloki';
 import { IkKub, IkStrelka, IkTreugolnik } from '../metodika/Ikonki';
 import { RisDekor, RisSteklo } from './Glava2Treugolnik';
+import { tipHref3 } from '@/lib/zadanie3/links';
 
 /** «C2» → «C_2». */
 function tex(name: string): string {
@@ -152,7 +152,6 @@ function Primer({ primer }: { primer: PrimerGlavy }) {
 
 /** Типы задач №3 со ссылками на разборы и на главу. */
 function Tipy() {
-  const base = `${ZADANIYA}/${STEREO['3'].slug}`;
   return (
     <ul className="o3-tipy">
       {TIPY_3.map((tip, i) => {
@@ -168,9 +167,7 @@ function Tipy() {
                 <Tex text={tip.title} />
               </span>
               <span className="o3-tip__ssylki">
-                {estRazbor ? (
-                  <Link href={`${base}/razbor/${tip.id}/`}>Разобранный пример</Link>
-                ) : null}
+                {estRazbor ? <Link href={tipHref3(tip.id)}>Разобранный пример</Link> : null}
                 {glava === undefined ? null : (
                   <a href={`#teoriya-${glava.id}`}>Глава {glava.nomer}</a>
                 )}

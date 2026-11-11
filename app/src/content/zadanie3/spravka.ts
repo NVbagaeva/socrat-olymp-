@@ -42,7 +42,7 @@ export const SHAPKA3 = {
   /* Пример с чертежом. */
   chertezhUsloviya: 'Чертёж условия',
   naChertezhe: (n: number) => `На чертеже — шаг ${n}`,
-  svernut: 'Свернуть чертёж',
+  svernut: 'Свернуть',
   razvernut: 'Показать чертёж',
   shagKnopka: 'Показать шаг на чертеже',
 };

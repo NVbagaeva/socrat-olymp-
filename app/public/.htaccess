@@ -66,6 +66,8 @@ Options -Indexes
   RewriteRule ^zadaniya/3/(parallelepiped|prizma|piramida)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/teoriya/#teoriya-mnogogranniki [R=301,L,NE]
   RewriteRule ^zadaniya/3/(konus|cilindr|shar)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/teoriya/#teoriya-vrashcheniya [R=301,L,NE]
   RewriteRule ^zadaniya/3/(vpisannyy-cilindr|vpisannaya-sfera)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/teoriya/#teoriya-kombinacii [R=301,L,NE]
+  # Задание №3: разбор типа раскрывается на вкладке «О задании».
+  RewriteRule ^zadaniya/3/razbor/([a-z0-9-]+)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/#tip-$1 [R=301,L,NE]
   # Задание №18: «О задании» стало главной страницей раздела.
   RewriteRule ^zadaniya/18/o-zadanii(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/18/ [R=301,L]
   # «Подготовительные задачи» → «Опорные задачи» (content/opornye.ts):

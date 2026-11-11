@@ -188,7 +188,10 @@ export const P03_57: Prototype = {
     const h = num(p, 'h');
     const r = Math.sqrt(k);
     return [
-      { text: `Площадь основания $\\pi r^2 = ${ru(k)}\\pi$, значит $r = \\sqrt{${ru(k)}} = ${ru(r)}$.`, value: r },
+      {
+        text: `Площадь основания $\\pi r^2 = ${ru(k)}\\pi$, значит $r = \\sqrt{${ru(k)}} = ${ru(r)}$.`,
+        value: r,
+      },
       { text: `Осевое сечение: $${ru(r)} \\cdot ${ru(h)} = ${ru(r * h)}$.`, value: r * h },
     ];
   },
@@ -282,11 +285,7 @@ function podskazka57(p: Params): HintStep[] {
       [`$2\\pi r = ${tex(k)}\\pi$`, `$\\pi d^2 = ${tex(k)}\\pi$`, `$\\pi r = ${tex(k)}\\pi$`],
       'Основание — круг, его площадь $\\pi r^2$.',
     ),
-    vopros(
-      'Чему равен радиус основания?',
-      chislo(r),
-      chisla([k, k / 2, 2 * r], r, r * h),
-    ),
+    vopros('Чему равен радиус основания?', chislo(r), chisla([k, k / 2, 2 * r], r, r * h)),
     chtoTakoeSechenie(),
     ploshchadSecheniya(2 * r, h),
   ];

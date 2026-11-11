@@ -103,8 +103,9 @@ export function Trenazher3Screen({
   const [pohozhie, setPohozhie] = useState<Record<string, string>>(restored?.pohozhie ?? {});
   const [format, setFormat] = useState<string | null>(null);
   const [viaFraction, setViaFraction] = useState(false);
-  /* Файлы прототипов: 'zhdyom' → 'gotovo' или 'oshibka'. */
-  const [zagruzka, setZagruzka] = useState<'zhdyom' | 'gotovo' | 'oshibka'>('zhdyom');
+  /* Файлы прототипов: приехали — счётчик растёт, и экран читает кеш заново. */
+  const [, setPriehalo] = useState(0);
+  const [oshibkaZagruzki, setOshibkaZagruzki] = useState(false);
   const [popytka, setPopytka] = useState(0);
 
   const poolIndex = order.length === 0 ? index : (order[index] ?? index);
@@ -129,16 +130,14 @@ export function Trenazher3Screen({
     let zhiv = true;
     const ids = [...pool.map((t) => t.id), ...Object.values(pohozhie)];
     if (ids.every((id) => zadachaIzKesha(id) !== undefined)) {
-      setZagruzka('gotovo');
       return undefined;
     }
-    setZagruzka('zhdyom');
     zagruzitZadachi(ids)
       .then(() => {
-        if (zhiv) setZagruzka('gotovo');
+        if (zhiv) setPriehalo((n) => n + 1);
       })
       .catch(() => {
-        if (zhiv) setZagruzka('oshibka');
+        if (zhiv) setOshibkaZagruzki(true);
       });
     return () => {
       zhiv = false;
@@ -146,7 +145,7 @@ export function Trenazher3Screen({
   }, [pool, pohozhie, popytka]);
 
   const task = zameny[poolIndex] ?? pool[poolIndex];
-  const zadacha = zagruzka === 'gotovo' && task !== undefined ? zadachaIzKesha(task.id) : undefined;
+  const zadacha = task === undefined ? undefined : zadachaIzKesha(task.id);
 
   useSessionReport<Trenazher3Ui>(report, {
     index,
@@ -202,13 +201,16 @@ export function Trenazher3Screen({
   if (zadacha === undefined || model === null) {
     return (
       <div className="trn-ekran z3-zagruzka" role="status" aria-live="polite">
-        {zagruzka === 'oshibka' ? (
+        {oshibkaZagruzki ? (
           <>
             <p>{TRENAZHER3.ekran.oshibkaZagruzki}</p>
             <button
               type="button"
               className="stk-btn stk-btn--primary"
-              onClick={() => setPopytka(popytka + 1)}
+              onClick={() => {
+                setOshibkaZagruzki(false);
+                setPopytka(popytka + 1);
+              }}
             >
               {TRENAZHER3.ekran.povtorit}
             </button>

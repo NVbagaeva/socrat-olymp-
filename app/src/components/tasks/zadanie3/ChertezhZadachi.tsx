@@ -40,13 +40,13 @@ function zagruzitDvizhok(): Promise<Kadr> {
 }
 
 export function ChertezhZadachi({ model, alt }: { model: Model; alt: string }) {
-  const [kadr, setKadr] = useState<ReturnType<Kadr> | null>(null);
+  /* Кадр помнит свою модель: у новой задачи старый чертёж не мелькнёт. */
+  const [gotov, setGotov] = useState<{ model: Model; kadr: ReturnType<Kadr> } | null>(null);
   useEffect(() => {
     let zhiv = true;
-    setKadr(null);
     zagruzitDvizhok()
       .then((narisovat) => {
-        if (zhiv) setKadr(narisovat(model));
+        if (zhiv) setGotov({ model, kadr: narisovat(model) });
       })
       .catch(() => {
         /* Чертёж не нарисовался — задача решается и по условию. */
@@ -55,6 +55,7 @@ export function ChertezhZadachi({ model, alt }: { model: Model; alt: string }) {
       zhiv = false;
     };
   }, [model]);
+  const kadr = gotov !== null && gotov.model === model ? gotov.kadr : null;
   if (kadr === null) {
     return <div className="z3-chertezh z3-chertezh--zhdyot" role="img" aria-label={alt} />;
   }

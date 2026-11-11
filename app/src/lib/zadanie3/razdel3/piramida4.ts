@@ -203,7 +203,10 @@ export const P03_43: Prototype = {
         text: `Половина диагонали — катет прямоугольного треугольника с гипотенузой $${text(p, 'edge')}$ и катетом $SO$: $\\sqrt{${ru(ev)}^2 - ${ru(so)}^2} = ${ru(half)}$.`,
         value: half,
       },
-      { text: `Диагональ $${text(p, 'diag')}$: $${ru(half)} \\cdot 2 = ${ru(2 * half)}$.`, value: 2 * half },
+      {
+        text: `Диагональ $${text(p, 'diag')}$: $${ru(half)} \\cdot 2 = ${ru(2 * half)}$.`,
+        value: 2 * half,
+      },
     ];
   },
 
