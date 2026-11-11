@@ -22,6 +22,7 @@ const OUT = path.join(APP, 'out');
 const DEV_ROUTES = [
   'styleguide/zadanie-6',
   'styleguide/zadanie-7',
+  'styleguide/zadanie-8',
   'styleguide/zadanie-9',
   'styleguide/zadanie-10',
   'styleguide/soglasiya',
@@ -43,6 +44,8 @@ const MARKERS = [
   'g6__stat',
   '/styleguide/zadanie-7',
   'g7__stat',
+  '/styleguide/zadanie-8',
+  'd8-kadr',
   '/styleguide/zadanie-9',
   'g9__stat',
   '/styleguide/zadanie-10',

@@ -6,7 +6,7 @@
      node scripts/check-z8-uchenik.mjs --gallery папка
 
    Гость (без входа), телефон с сенсорным экраном и компьютер:
-     • прогресс прежнего формата переносится в журнал: карточки навыков
+     • прогресс прежнего формата переносится в журнал: карточки групп
        на «О задании» показывают прежние счётчики;
      • поле ответа: inputmode="decimal", на телефоне кнопка «−»;
      • «1/4» при верном значении — подсказка «Значение верное, но…»,
@@ -191,11 +191,11 @@ async function coveredControls(page, selector) {
 }
 
 const TASK_CONTROLS = [
-  '.ttask .otvet-input__field',
-  '.ttask .otvet-input__minus',
-  '.ttask__actions button',
-  '.ttask .zakladka',
-  '.z8-delimost summary',
+  '.trn-ekran .otvet-input__field',
+  '.trn-ekran .otvet-input__minus',
+  '.trn-knopki button',
+  '.trn-zadacha .zakladka',
+  '.stk-delimost summary',
 ].join(', ');
 
 const store = (page, key) =>
@@ -204,32 +204,48 @@ const store = (page, key) =>
 const LOG = 'budetege:vychisleniya-8:log:v1';
 const LEGACY = 'budetege:vychisleniya-8:v1';
 
-/** Начать тренировку из конфигуратора: первый навык, 5 заданий. */
+/** Начать тренировку со стартового экрана: «Выбрать темы», все типы, 5 задач. */
 async function startTraining(page) {
   await page.goto(TRENAZHER, { waitUntil: 'networkidle' });
-  await page.waitForSelector('.cfg');
-  await page
-    .locator('[aria-labelledby="z8-param-count"] .cfg-opt')
-    .filter({ hasText: /^5$/ })
-    .first()
-    .click();
-  await page.locator('.cfg-bar__start').click();
-  await page.waitForSelector('.ttask .ptask__card[data-task]');
+  await page.waitForSelector('.trn-start');
+  await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+  await page.locator('.trn-vybor button:has-text("Выбрать все")').click();
+  await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
+  await page.locator('.trn-vybor__start').click();
+  await page.waitForSelector(CARD);
 }
 
+const CARD = '.trn-zadacha[data-task]';
+
 async function currentTask(page) {
-  return page.locator('.ttask .ptask__card').getAttribute('data-task');
+  return page.locator(CARD).getAttribute('data-task');
+}
+
+/** «3 из 10» на карточке задачи: сколько задач в тренировке. */
+async function totalTasks(page) {
+  const text = await page.locator('.trn-zadacha__nomer').innerText();
+  return Number(text.split('из')[1]?.trim() ?? '0');
 }
 
 async function answer(page, text) {
-  await page.fill('.ttask .otvet-input__field', text);
-  await page.locator('.ttask__actions button:has-text("Проверить")').click();
+  await page.fill('.trn-ekran .otvet-input__field', text);
+  await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
 }
 
 async function nextTask(page) {
-  const next = page.locator('.ttask__actions button:has-text("Следующее задание")');
-  if ((await next.count()) > 0) await next.click();
-  else await page.locator('.ttask__actions button:has-text("Смотреть результат")').click();
+  const next = page.locator('.trn-knopki button:has-text("Дальше")');
+  if ((await next.count()) > 0) await next.first().click();
+  else await page.locator('.trn-knopki button:has-text("К итогам")').first().click();
+}
+
+/** С итогов — на стартовый экран, панель прогресса раскрыта. */
+async function toProgress(page) {
+  await page.locator('.trn-itogi button:has-text("К выбору тем")').click();
+  await page.locator('.trn-vybor button[aria-label="К режимам"]').click();
+  await page.waitForSelector('.trn-progress');
+  const panel = page.locator('.trn-progress');
+  if ((await panel.getAttribute('open')) === null) await panel.locator('> summary').click();
+  await page.waitForSelector('.trn-progress[open]');
 }
 
 /* ── Снимки для описания PR ────────────────────────────────────── */
@@ -294,46 +310,45 @@ async function runGallery(dir) {
     await startTraining(page);
     const id1 = await currentTask(page);
     await answer(page, asFraction(answerOf(id1)));
-    await page.waitForSelector('.ttask .otvet-hint');
+    await page.waitForSelector('.trn-otvetnaya .otvet-hint');
     await snap('01-podskazka-formata');
     await answer(page, ru(answerOf(id1)));
-    await page.waitForSelector('.tverdict--right');
+    await page.waitForSelector('.trn-verdikt--da');
     await nextTask(page);
     const id2 = await currentTask(page);
     await answer(page, String(answerOf(id2) + 1).replace('.', ','));
-    await page.waitForSelector('.tverdict--wrong');
-    await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
-    await page.waitForSelector('.z8-razbor');
-    await snapBlock('02-oshibka-i-reshenie', '.ttask');
+    await page.waitForSelector('.trn-verdikt--net');
+    await page.locator('.trn-knopki button:has-text("Решение")').first().click();
+    await page.waitForSelector('.trn-reshenie');
+    await snapBlock('02-oshibka-i-reshenie', '.trn-ekran');
     await nextTask(page);
-    await page.locator('.ttask .zakladka').click();
+    await page.locator('.trn-zadacha .zakladka').click();
     for (let i = 0; i < 3; i += 1) {
       await answer(page, ru(answerOf(await currentTask(page))));
-      await page.waitForSelector('.tverdict--right');
+      await page.waitForSelector('.trn-verdikt--da');
       await nextTask(page);
     }
-    await page.waitForSelector('.tsum');
-    await snapBlock('03-itogi', '.tsum');
-    await page.locator('.tdone__actions button:has-text("Новая тренировка")').click();
-    await page.waitForSelector('.z8-progress');
-    await snapBlock('04-progress', '.z8-progress');
+    await page.waitForSelector('.trn-itogi');
+    await snapBlock('03-itogi', '.trn-itogi');
+    await toProgress(page);
+    await snapBlock('04-progress', '.trn-progress');
 
     /* Решение по шагам с панелью «Признаки делимости». */
     if (withDelimost !== null) {
       await page.goto(`${SITE}${zadachaHref(withDelimost)}`, { waitUntil: 'networkidle' });
-      await page.waitForSelector('.ttask .ptask__card[data-task]');
+      await page.waitForSelector(CARD);
       await answer(page, String(answerOf(withDelimost) + 1).replace('.', ','));
-      await page.waitForSelector('.tverdict--wrong');
-      await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
-      await page.waitForSelector('.z8-delimost');
-      await page.locator('.z8-delimost summary').click();
-      await snapBlock('05-reshenie-priznaki', '.z8-razbor');
+      await page.waitForSelector('.trn-verdikt--net');
+      await page.locator('.trn-knopki button:has-text("Решение")').first().click();
+      await page.waitForSelector('.stk-delimost');
+      await page.locator('.stk-delimost summary').click();
+      await snapBlock('05-reshenie-priznaki', '.trn-reshenie');
     }
 
-    /* «О задании»: карточки навыков с прогрессом. */
+    /* «О задании»: карточки групп с прогрессом. */
     await page.goto(ABOUT, { waitUntil: 'networkidle' });
-    await page.waitForSelector('.z8-about-progress .tp-card');
-    await snapBlock('06-o-zadanii', '.z8-about-progress');
+    await page.waitForSelector('.kz-gruppa');
+    await snapBlock('06-o-zadanii', '.kz-gruppy');
 
     /* Опорная задача: закладка и решение. */
     await page.goto(`${SITE}/zadaniya/8/opornye-zadachi/stepeni-korni/?zadacha=3`, {
@@ -385,15 +400,21 @@ try {
       [LEGACY],
     );
     await page.reload({ waitUntil: 'networkidle' });
-    await page.waitForSelector('.z8-about-progress .tp-card');
-    const s1 = await page.locator('.z8-about-progress .tp-card[data-group="S1"]').innerText();
+    await page.waitForSelector('.kz-gruppa');
+    /* 8.A — группа «Степени»: прежние счётчики видны на её карточке. */
+    await page.waitForFunction(() =>
+      /решено\s*6/.test(
+        document.querySelector('#gruppa-stepeni .kz-gruppa__schet')?.textContent ?? '',
+      ),
+    );
+    const s1 = await page.locator('#gruppa-stepeni .kz-gruppa__schet').innerText();
     check(
-      /решено\s*6/.test(s1) && /верно\s*4/.test(s1) && /ошибки\s*2/.test(s1),
-      `«О задании»: прежние счётчики в карточке навыка (${s1.replace(/\s+/g, ' ')})`,
+      /решено\s*6/.test(s1) && /верно\s*4/.test(s1),
+      `«О задании»: прежние счётчики на карточке группы (${s1.replace(/\s+/g, ' ')})`,
     );
     check(
-      (await page.locator('.z8-about-progress .tp-card').count()) === 11,
-      '«О задании»: карточки всех 11 навыков',
+      (await page.locator('.kz-gruppa').count()) === 5,
+      '«О задании»: карточки всех пяти групп',
     );
     const log = await store(page, LOG);
     check(log !== null && Object.keys(log.archive).length === 1, 'прежний формат свёрнут в журнал');
@@ -412,19 +433,19 @@ try {
       isMobile: true,
     });
     await startTraining(page);
-    const input = page.locator('.ttask .otvet-input__field');
+    const input = page.locator('.trn-ekran .otvet-input__field');
     check(
       (await input.getAttribute('inputmode')) === 'decimal',
       'поле ответа: inputmode="decimal"',
     );
     check(
-      (await page.locator('.ttask .otvet-input__minus').count()) === 1,
+      (await page.locator('.trn-ekran .otvet-input__minus').count()) === 1,
       'телефон: рядом с полем кнопка «−»',
     );
     await input.fill('3');
-    await page.locator('.ttask .otvet-input__minus').click();
+    await page.locator('.trn-ekran .otvet-input__minus').click();
     check((await input.inputValue()) === '−3', 'кнопка «−» ставит минус');
-    await page.locator('.ttask .otvet-input__minus').click();
+    await page.locator('.trn-ekran .otvet-input__minus').click();
     check((await input.inputValue()) === '3', 'и убирает его');
     check(await noScroll(page), 'тренажёр 390: горизонтальной прокрутки нет');
     {
@@ -441,13 +462,13 @@ try {
     const a1 = answerOf(id1);
     await answer(page, asFraction(a1));
     check(
-      (await page.locator('.ttask .otvet-hint').innerText()).startsWith(
+      (await page.locator('.trn-otvetnaya .otvet-hint').innerText()).startsWith(
         'Значение верное, но в бланк ЕГЭ записывают',
       ),
       `«${asFraction(a1)}» — «Значение верное, но…»`,
     );
     check(
-      (await page.locator('.tverdict').count()) === 0,
+      (await page.locator('.trn-verdikt').count()) === 0,
       'дробь с верным значением — не ошибка, вердикта нет',
     );
     await shot(page, 'drob-verno-390');
@@ -459,24 +480,24 @@ try {
     ]) {
       await answer(page, text);
       check(
-        (await page.locator('.ttask .otvet-hint').innerText()).startsWith(starts) &&
-          (await page.locator('.tverdict').count()) === 0,
+        (await page.locator('.trn-otvetnaya .otvet-hint').innerText()).startsWith(starts) &&
+          (await page.locator('.trn-verdikt').count()) === 0,
         `«${text}» — подсказка о формате, попытка не тратится`,
       );
     }
     await answer(page, ru(a1));
-    await page.waitForSelector('.tverdict--right');
+    await page.waitForSelector('.trn-verdikt--da');
     check(true, `ответ «${ru(a1)}» с запятой засчитан`);
     await nextTask(page);
 
     /* Задание 2: неверный ответ, потом открыть решение. */
     mistakeTask = await currentTask(page);
     await answer(page, String(answerOf(mistakeTask) + 1).replace('.', ','));
-    await page.waitForSelector('.tverdict--wrong');
-    check(true, 'неверный ответ — «Есть ошибка»');
+    await page.waitForSelector('.trn-verdikt--net');
+    check(true, 'неверный ответ — «Пока не так»');
     await shot(page, 'oshibka-390');
-    await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
-    await page.waitForSelector('.z8-razbor');
+    await page.locator('.trn-knopki button:has-text("Решение")').first().click();
+    await page.waitForSelector('.trn-reshenie');
     check(true, 'решение открывается');
     {
       const covered = await coveredControls(page, TASK_CONTROLS);
@@ -489,30 +510,29 @@ try {
 
     /* Задание 3: отложить на потом. */
     bookmarked = await currentTask(page);
-    await page.locator('.ttask .zakladka').click();
+    await page.locator('.trn-zadacha .zakladka').click();
     check(
-      (await page.locator('.ttask .zakladka').getAttribute('aria-pressed')) === 'true',
+      (await page.locator('.trn-zadacha .zakladka').getAttribute('aria-pressed')) === 'true',
       'кнопка «Отложить на потом» нажата',
     );
     for (let i = 0; i < 3; i += 1) {
       const id = await currentTask(page);
       await answer(page, ru(answerOf(id)));
-      await page.waitForSelector('.tverdict--right');
+      await page.waitForSelector('.trn-verdikt--da');
       await nextTask(page);
     }
-    await page.waitForSelector('.tsum');
+    await page.waitForSelector('.trn-itogi');
     check(
-      (await page.locator('.tdone__weak').innerText()).startsWith('Просели:'),
-      'итоги: «Просели: …»',
+      (await page.locator('.trn-itogi .trn-razbivka .stk-metka:has-text("Просел")').count()) >= 1,
+      'итоги: в разбивке по группам метка «Просел»',
     );
     check(
-      (await page.locator('.tdone__actions button:has-text("Прорешать те же задачи")').count()) ===
-        0,
+      (await page.locator('.trn-itogi button:has-text("Прорешать")').count()) === 0,
       'итоги: повтора тех же задач нет',
     );
     check(
-      (await page.locator('.tdone__actions button:has-text("Похожие задачи")').count()) === 1,
-      'итоги: «Похожие задачи» — новые аналоги',
+      (await page.locator('.trn-itogi button:has-text("Работа над ошибками")').count()) === 1,
+      'итоги: «Работа над ошибками» — новые аналоги',
     );
     await shot(page, 'itogi-390', true);
 
@@ -532,10 +552,9 @@ try {
     const zakladki = await store(page, 'budetege:zakladki:v1');
     check(zakladki?.items?.[0]?.ref === bookmarked, 'закладка сохранена');
 
-    /* Прогресс под конфигуратором. */
-    await page.locator('.tdone__actions button:has-text("Новая тренировка")').click();
-    await page.waitForSelector('.z8-progress');
-    const counter = await page.locator('.z8-progress .z8-counter').innerText();
+    /* Панель прогресса на стартовом экране. */
+    await toProgress(page);
+    const counter = await page.locator('.trn-progress .z8-counter').innerText();
     check(
       /Решено\s*5\s*из\s*260/.test(counter),
       `«решено X из 260» — разные задачи банка: ${counter}`,
@@ -557,27 +576,26 @@ try {
 
     /* Работа над ошибками: аналоги, два верных подряд. */
     await page.locator('[data-section="mistakes8"] button:has-text("Работа над ошибками")').click();
-    await page.waitForSelector('.ttask .ptask__card[data-task]');
+    await page.waitForSelector(CARD);
     const analog1 = await currentTask(page);
     check(
       analog1 !== mistakeTask && analog1.split('|')[0] === mistakeTask.split('|')[0],
       'аналог: тот же тип, другая задача',
     );
-    check((await page.locator('.ttask__dots li').count()) === 2, 'на одну ошибку — два аналога');
+    check((await totalTasks(page)) === 2, 'на одну ошибку — два аналога');
     for (let i = 0; i < 2; i += 1) {
       const id = await currentTask(page);
       await answer(page, ru(answerOf(id)));
-      await page.waitForSelector('.tverdict--right');
+      await page.waitForSelector('.trn-verdikt--da');
       await nextTask(page);
     }
-    await page.waitForSelector('.tsum');
+    await page.waitForSelector('.trn-itogi');
     const after = await store(page, LOG);
     check(
       after.attempts.filter((a) => a.fixes === mistakeTask).length === 2,
       'аналоги записаны как работа над этой ошибкой',
     );
-    await page.locator('.tdone__actions button:has-text("Новая тренировка")').click();
-    await page.waitForSelector('.z8-progress');
+    await toProgress(page);
     check(
       (await page.locator('[data-section="mistakes8"] .tp-row').count()) === 0,
       'два верных аналога подряд — задача ушла из «Моих ошибок»',
@@ -585,9 +603,9 @@ try {
 
     /* Закладка открывает ту же задачу. */
     await page.locator('[data-section="later8"] a:has-text("Открыть")').click();
-    await page.waitForSelector('.ttask .ptask__card[data-task]');
+    await page.waitForSelector(CARD);
     check((await currentTask(page)) === bookmarked, 'закладка открывает ту же задачу');
-    check((await page.locator('.ttask__dots li').count()) === 1, 'из закладки — одна задача');
+    check((await totalTasks(page)) === 1, 'из закладки — одна задача');
     await context.close();
   }
 
@@ -644,7 +662,7 @@ try {
       await page.goto(url, { waitUntil: 'networkidle' });
       check(await noScroll(page), `${name} ${width}: горизонтальной прокрутки нет`);
       if (name === 'trenazher') {
-        const covered = await coveredControls(page, '.cfg-opt, .cfg-bar__start');
+        const covered = await coveredControls(page, '.trn-rezhim, .trn-progress > summary');
         check(
           covered.length === 0,
           `тренажёр ${width}: выбор и «Начать» ничем не закрыты${covered.length ? `: ${covered.join('; ')}` : ''}`,

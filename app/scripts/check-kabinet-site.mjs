@@ -217,14 +217,15 @@ try {
   await page.getByRole('link', { name: 'Решать' }).first().click();
   await page.waitForURL(/\/zadaniya\/8\/$/);
   await go('/zadaniya/8/trenazher/');
+  /* Тренажёр №8 начинается карточкой «Все типы вперемешку». */
   await page
-    .getByRole('button', { name: /^Начать тренировку/ })
+    .getByRole('button', { name: /^Все типы вперемешку/ })
     .first()
     .click();
   await page.locator('.tsess__bar').first().waitFor();
   for (let at = 0; at < 2; at += 1) {
     const record = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), KEY8);
-    await page.locator('input.ttask__input, input.pc__input').first().fill(answer8(record, at));
+    await page.locator('input.trn-input, input.pc__input').first().fill(answer8(record, at));
     await page
       .locator('.tsess__body')
       .getByRole('button', { name: 'Проверить', exact: true })
@@ -283,14 +284,15 @@ try {
 
   console.log('5б. «Завершить тренировку» в самом тренажёре');
   await go('/zadaniya/8/trenazher/');
+  /* Тренажёр №8 начинается карточкой «Все типы вперемешку». */
   await page
-    .getByRole('button', { name: /^Начать тренировку/ })
+    .getByRole('button', { name: /^Все типы вперемешку/ })
     .first()
     .click();
   await page.locator('.tsess__bar').first().waitFor();
   {
     const record = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), KEY8);
-    await page.locator('input.ttask__input, input.pc__input').first().fill(answer8(record, 0));
+    await page.locator('input.trn-input, input.pc__input').first().fill(answer8(record, 0));
     await page
       .locator('.tsess__body')
       .getByRole('button', { name: 'Проверить', exact: true })
@@ -365,7 +367,7 @@ try {
   const guest = await (await browser.newContext()).newPage();
   await guest.goto(`${BASE}/zadaniya/8/trenazher/`, { waitUntil: 'load' });
   await guest
-    .getByRole('button', { name: /^Начать тренировку/ })
+    .getByRole('button', { name: /^Все типы вперемешку/ })
     .first()
     .click();
   await guest.locator('.tsess__bar').first().waitFor();

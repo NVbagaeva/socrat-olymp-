@@ -4,6 +4,7 @@ export {
   type ConfiguratorApi,
   type DescribedTask,
   type ScreenContext,
+  type SummaryActions,
   type SummaryOptions,
   type TrainerSessionHostProps,
 } from './TrainerSessionHost';

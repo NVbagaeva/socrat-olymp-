@@ -1403,7 +1403,7 @@ async function runEnabled() {
       }
     };
     const TRAINER = `${SITE}/zadaniya/8/trenazher/`;
-    const CARD = '.ttask .ptask__card[data-task]';
+    const CARD = '.trn-zadacha[data-task]';
 
     const desk = await newPage(mock, 1280, errors);
     await welcomeSeen(desk.context);
@@ -1413,26 +1413,24 @@ async function runEnabled() {
       'два устройства: без прогресса гостя вопроса о переносе нет',
     );
     await desk.page.goto(TRAINER, { waitUntil: 'networkidle' });
-    await desk.page.waitForSelector('.cfg');
-    await desk.page
-      .locator('[aria-labelledby="z8-param-count"] .cfg-opt')
-      .filter({ hasText: /^5$/ })
-      .first()
-      .click();
-    await desk.page.locator('.cfg-bar__start').click();
+    /* Стартовый экран тренажёра: «Выбрать темы» → 5 задач → «Начать». */
+    await desk.page.waitForSelector('.trn-start');
+    await desk.page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+    await desk.page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
+    await desk.page.locator('.trn-vybor__start').click();
     await desk.page.waitForSelector(CARD);
     const first = await desk.page.locator(CARD).getAttribute('data-task');
     const parsed = parseTaskId(first);
     const right = ru(generate(parsed.prototype, parsed.seed, parsed.level).otvet);
-    await desk.page.fill('.ttask .otvet-input__field', right);
-    await desk.page.locator('.ttask__actions button:has-text("Проверить")').click();
-    await desk.page.locator('.ttask__actions button:has-text("Следующее задание")').click();
+    await desk.page.fill('.trn-ekran .otvet-input__field', right);
+    await desk.page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+    await desk.page.locator('.trn-knopki button:has-text("Дальше")').click();
     await desk.page.waitForFunction(
       ([sel, id]) => document.querySelector(sel)?.getAttribute('data-task') !== id,
       [CARD, first],
     );
     const second = await desk.page.locator(CARD).getAttribute('data-task');
-    await desk.page.locator('.ttask .zakladka').click();
+    await desk.page.locator('.trn-zadacha .zakladka').click();
     check(await pushed(desk.page), 'компьютер: журнал, тренировка и закладка ушли в аккаунт');
     await desk.context.close();
 
@@ -1475,7 +1473,7 @@ async function runEnabled() {
       'телефон: тренировка продолжается с той же задачи',
     );
     check(
-      (await phone.page.locator('.ttask .zakladka').getAttribute('aria-pressed')) === 'true',
+      (await phone.page.locator('.trn-zadacha .zakladka').getAttribute('aria-pressed')) === 'true',
       'телефон: задача отмечена «Отложить на потом»',
     );
     await phone.context.close();
@@ -2182,7 +2180,7 @@ async function runGalleryZ8(dir) {
   const mock = makeMock();
   registerInMock(mock, 'dva@example.ru', 'dva-ustroystva-1', 'Анна Смирнова', 'student');
   const me = mock.users.get('dva@example.ru');
-  const CARD = '.ttask .ptask__card[data-task]';
+  const CARD = '.trn-zadacha[data-task]';
   const answerOf = (id) => {
     const p = parseTaskId(id);
     return generate(p.prototype, p.seed, p.level).otvet;
@@ -2200,29 +2198,27 @@ async function runGalleryZ8(dir) {
     await login(page, 'dva@example.ru', 'dva-ustroystva-1');
     if (!trained) {
       await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
-      await page.waitForSelector('.cfg');
-      await page
-        .locator('[aria-labelledby="z8-param-count"] .cfg-opt')
-        .filter({ hasText: /^5$/ })
-        .first()
-        .click();
-      await page.locator('.cfg-bar__start').click();
+      /* Стартовый экран тренажёра: «Выбрать темы» → 5 задач → «Начать». */
+      await page.waitForSelector('.trn-start');
+      await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+      await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
+      await page.locator('.trn-vybor__start').click();
       for (let i = 0; i < 5; i += 1) {
         await page.waitForSelector(CARD);
         const id = await page.locator(CARD).getAttribute('data-task');
         const right = answerOf(id);
-        await page.fill('.ttask .otvet-input__field', ru(i === 1 ? right + 1 : right));
-        await page.locator('.ttask__actions button:has-text("Проверить")').click();
+        await page.fill('.trn-ekran .otvet-input__field', ru(i === 1 ? right + 1 : right));
+        await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
         if (i === 1) {
-          await page.waitForSelector('.tverdict--wrong');
-          await page.locator('.ttask__actions button:has-text("Показать решение")').first().click();
+          await page.waitForSelector('.trn-verdikt--net');
+          await page.locator('.trn-knopki button:has-text("Решение")').first().click();
         }
-        if (i === 2) await page.locator('.ttask .zakladka').click();
-        const next = page.locator('.ttask__actions button:has-text("Следующее задание")');
+        if (i === 2) await page.locator('.trn-zadacha .zakladka').click();
+        const next = page.locator('.trn-knopki button:has-text("Дальше")');
         if ((await next.count()) > 0) await next.click();
-        else await page.locator('.ttask__actions button:has-text("Смотреть результат")').click();
+        else await page.locator('.trn-knopki button:has-text("К итогам")').click();
       }
-      await page.waitForSelector('.tsum');
+      await page.waitForSelector('.trn-itogi');
       /* Записи — в аккаунт: после паузы синхронизации в моке есть журнал. */
       const until = Date.now() + 15000;
       while (

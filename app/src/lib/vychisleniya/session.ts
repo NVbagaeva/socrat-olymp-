@@ -33,6 +33,12 @@ export interface Task8 {
   /** Навык прототипа: S1 … S11. */
   skill: string;
   level: Level;
+  /**
+   * Подтип прототипа («1», «brackets»): по нему подбирается подсказка
+   * (content/vychisleniya8/tipy.ts). У записей до редизайна нет —
+   * генератор восстанавливает его при сборке задачи по рецепту.
+   */
+  podtip?: string;
   questionHtml: string;
   /** Отпечаток ответа. */
   seal: string;
@@ -80,6 +86,7 @@ export function makeTask(
     prototype,
     skill: skillOfPrototype(prototype)?.id ?? '',
     level: task.level,
+    podtip: task.podtip,
     questionHtml: typeset(task.uslovie),
     seal,
     razbor,
@@ -220,6 +227,48 @@ export function buildSession8(request: Session8Request): Task8[] {
     }
     if (task === null || seen.has(task.questionHtml)) {
       /* Генератор не подобрал параметры на этом seed — берём следующий. */
+      misses += 1;
+      continue;
+    }
+    seen.add(task.questionHtml);
+    tasks.push(task);
+  }
+  return tasks;
+}
+
+/**
+ * Тренировка по типам (прототипам) — выбор тем на вкладке «Тренажёр»:
+ * сначала нерешённые задачи банка каждого типа, когда они кончились —
+ * свежие задачи генератора; оба уровня вперемешку; условия в одной
+ * тренировке не повторяются.
+ */
+export function buildByPrototypes(
+  prototypes: readonly string[],
+  count: number,
+  closed: ReadonlySet<string> = new Set(),
+): Task8[] {
+  const order = shuffled(prototypes.filter((id) => prototypeById(id) !== undefined));
+  if (order.length === 0) {
+    return [];
+  }
+  const queues = new Map(order.map((id) => [id, bankLeft(id, null, closed)]));
+  const tasks: Task8[] = [];
+  const seen = new Set<string>();
+  let misses = 0;
+  for (let i = 0; tasks.length < count && misses < 200; i += 1) {
+    const prototype = order[i % order.length] as string;
+    const fromBank = queues.get(prototype)?.shift();
+    let task: Task8 | null = null;
+    if (fromBank !== undefined) {
+      task = taskById(fromBank);
+    } else {
+      try {
+        task = makeTask(prototype, randomSeed(), null);
+      } catch {
+        task = null;
+      }
+    }
+    if (task === null || seen.has(task.questionHtml)) {
       misses += 1;
       continue;
     }

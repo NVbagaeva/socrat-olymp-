@@ -71,3 +71,37 @@ export function prep8MarkSolved(block: string, no: number): void {
   }
   prep8.set({ ...current, [block]: [...(current[block] ?? []), no].sort((a, b) => a - b) });
 }
+
+/* ── Последний выбор тренировки: типы, число задач, таймер, без подсказок ── */
+
+export interface Vybor8 {
+  /** Выбранные типы (прототипы). Пусто — все. */
+  tipy: string[];
+  /** Сколько задач; null — без конца. */
+  count: number | null;
+  timer: boolean;
+  /** Без подсказок и решений до итогов. */
+  bezPodskazok: boolean;
+}
+
+export const VYBOR8_DEFAULT: Vybor8 = { tipy: [], count: 10, timer: true, bezPodskazok: false };
+
+function parseVybor(value: unknown): Vybor8 {
+  if (typeof value !== 'object' || value === null) {
+    return VYBOR8_DEFAULT;
+  }
+  const v = value as Partial<Vybor8>;
+  return {
+    tipy: Array.isArray(v.tipy) ? v.tipy.filter((x): x is string => typeof x === 'string') : [],
+    count: v.count === null ? null : typeof v.count === 'number' && v.count > 0 ? v.count : 10,
+    timer: v.timer !== false,
+    bezPodskazok: v.bezPodskazok === true,
+  };
+}
+
+/** Последний выбор на вкладке «Тренажёр»: со входом — и в аккаунте. */
+export const vybor8 = createSyncedStore<Vybor8>(
+  'budetege:vychisleniya-8:vybor:v1',
+  parseVybor,
+  VYBOR8_DEFAULT,
+);
