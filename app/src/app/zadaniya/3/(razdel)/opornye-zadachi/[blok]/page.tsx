@@ -38,7 +38,11 @@ export default async function Page({ params }: { params: Params }) {
   const base = `${ZADANIYA}/${STEREO['3'].slug}`;
   const zadachi = zadachiBloka(found.id);
   return (
-    <OpornyeStereoShell title={`${found.no}. ${found.nazvanie}`} listHref={`${base}/opornye-zadachi/`} vBloke>
+    <OpornyeStereoShell
+      title={`${found.no}. ${found.nazvanie}`}
+      listHref={`${base}/opornye-zadachi/`}
+      vBloke
+    >
       <OpornyeStereoScreen
         blokId={found.id}
         no={found.no}

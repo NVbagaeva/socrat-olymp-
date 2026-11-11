@@ -1,0 +1,69 @@
+/* Задание №3 в «Стеклянной сцене»: только то, чего нет в общих слоях
+   (steklo, karta, trening). Префикс z3-. */
+
+/* Значок-фигура: рисунок занимает весь стеклянный квадрат. */
+.z3-figurka {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.z3-figurka svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  filter: none;
+}
+
+/* Живой чертёж внутри стеклянной карточки: без второй рамки. */
+.z3-chertezh.z3d,
+.trn-risunok .z3d,
+.kz .z3d,
+.z3-opornye .z3d {
+  max-width: 100%;
+  padding: var(--space-2);
+  border: 0;
+  background: rgb(255 255 255 / 0.7);
+}
+/* Место под чертёж, пока движок едет: страница не прыгает. */
+.z3-chertezh--zhdyot {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  background: rgb(255 255 255 / 0.5);
+}
+/* Экран задачи на телефоне: чертёж не выше трети экрана — поле ответа
+   остаётся рядом. */
+@media (max-width: 767.98px) {
+  .trn-risunok svg.solid {
+    max-height: 34vh;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+  .z3-chertezh--zhdyot {
+    max-height: 34vh;
+    margin-inline: auto;
+  }
+}
+.z3-zagruzka {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.z3-schet {
+  margin: 0;
+}
+
+/* Выбор тем: у №3 четыре настройки (с источником задач) — на широком
+   экране две колонки, переключатель «без подсказок» во всю ширину. */
+@media (min-width: 768px) {
+  .z3-trening .trn-nastroyki {
+    grid-template-columns: repeat(2, max-content);
+  }
+  .z3-trening .trn-nastroyki > .trn-pereklyuchatel {
+    grid-column: 1 / -1;
+  }
+}

@@ -8,6 +8,7 @@
  */
 
 import { parseAnswer } from '../answer';
+import { readAnswer, type Reading } from '../otvet';
 import { fingerprint as otpechatok, roundNumber, sealValue } from '../secret';
 
 export { openText, sealText } from '../secret';
@@ -56,4 +57,17 @@ export function sealAnswer(answer: number, klyuch: string): string {
 export function answerMatches(input: string, sealed: string, klyuch: string): boolean {
   const value = canonical(input);
   return value !== null && sealValue(SALT, klyuch, value) === sealed;
+}
+
+/**
+ * Прочитать ответ ученика по правилам бланка ЕГЭ (lib/otvet) и сверить
+ * с отпечатком задачи. Неверная запись («1/2», «5 см») приходит
+ * причиной: экран показывает подсказку о формате и попытку не тратит.
+ */
+export function readSealed3(input: string, sealed: string, klyuch: string): Reading {
+  return readAnswer(
+    input,
+    'trenazher',
+    (value) => sealValue(SALT, klyuch, roundNumber(Number(value))) === sealed,
+  );
 }

@@ -27,6 +27,8 @@ export * from './model';
 /** Журнал → ключ прежнего формата. Синхронизация сворачивает их до слияния с аккаунтом. */
 export const LEGACY_LOGS: Record<string, string> = {
   'budetege:vychisleniya-8:log:v1': 'budetege:vychisleniya-8:v1',
+  /* №3: счётчики по прототипам и список ошибок прежнего тренажёра. */
+  'budetege:zadanie-3:log:v1': 'budetege:z3:trainer:v1',
 };
 
 /**

@@ -204,14 +204,14 @@ function answer45(payload, at) {
   return { text: numberText(otvetUchenika(prototype, variant.params)) };
 }
 
-/** №3 (тренажёр с фильтрами): задание «P03-01#3» → prototype.otvet(параметры варианта). */
+/** №3: задание записи {id: «P03-01#3»} → prototype.otvet(параметры варианта). */
 function answer3(payload, at) {
   const { prototypeById } = requireSrc('lib/zadanie3/index');
-  const [id, n] = payload.items[at].k.split('#');
+  const [id, n] = payload.tasks[at].id.split('#');
   const prototype = prototypeById(id);
   const variant = prototype?.varianty.find((entry) => entry.n === Number(n));
   if (variant === undefined) {
-    throw new Error(`№3: нет варианта ${payload.items[at].k}`);
+    throw new Error(`№3: нет варианта ${payload.tasks[at].id}`);
   }
   return { text: numberText(prototype.otvet(variant.params)) };
 }
@@ -447,7 +447,10 @@ const TRAINERS = [
     url: '/zadaniya/3/trenazher/',
     scope: '3',
     answer: answer3,
-    all: chooseAllFiltry,
+    /* Стартовый экран — три режима, как у №8: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
     rep: true,
   },
 ];

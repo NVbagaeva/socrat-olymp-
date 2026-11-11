@@ -64,6 +64,11 @@ export interface EkranZadachiProps {
   pod?: ReactNode;
   /** Чертёж задачи: над условием (стереометрия, планиметрия). */
   risunok?: ReactNode;
+  /**
+   * Условие — текст задачи, а не одно выражение: набирается обычным
+   * кеглем по левому краю (у №8 выражение стоит крупно по центру).
+   */
+  tekst?: boolean;
 }
 
 /**
@@ -95,6 +100,7 @@ export function EkranZadachi({
   labels,
   pod,
   risunok,
+  tekst = false,
 }: EkranZadachiProps) {
   const pole = useRef<HTMLSpanElement>(null);
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
@@ -145,7 +151,10 @@ export function EkranZadachi({
           {zakladka}
         </div>
         {risunok === undefined ? null : <div className="trn-risunok">{risunok}</div>}
-        <div className="trn-uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
+        <div
+          className={clsx('trn-uslovie', tekst && 'trn-uslovie--tekst')}
+          dangerouslySetInnerHTML={{ __html: uslovieHtml }}
+        />
         {pod}
       </article>
 

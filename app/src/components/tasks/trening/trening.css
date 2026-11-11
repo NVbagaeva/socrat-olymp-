@@ -245,9 +245,13 @@
 .trn-nastroyki > div {
   display: grid;
   gap: var(--space-2);
+  min-width: 0;
 }
 .trn-seg {
   display: inline-flex;
+  /* Длинные подписи (источник задач №3) на узком экране переносятся
+     на вторую строку, а не раздвигают страницу. */
+  flex-wrap: wrap;
   max-width: 100%;
   padding: 4px;
   border-radius: 14px;
@@ -932,4 +936,18 @@
   width: 100%;
   max-width: 400px;
   margin-inline: auto;
+}
+
+/* Условие-текст (стереометрия): обычный кегль, по левому краю. */
+.trn-uslovie--tekst {
+  text-align: left;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+.trn-uslovie--tekst .katex {
+  font-size: 1.08em;
+}
+/* Шаг решения без выкладки: пустой рамки формулы нет. */
+.stk-shag__formula:empty {
+  display: none;
 }
