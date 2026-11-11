@@ -670,6 +670,7 @@ jobs:
       - name: Поставить Apache, Chromium и WebKit для проверок в браузере
         working-directory: app
         run: |
+          bash "$GITHUB_WORKSPACE/.github/scripts/apt-mirror.sh" || true
           sudo apt-get update -q
           sudo apt-get install -y -q apache2 poppler-utils
           pnpm exec playwright install --with-deps chromium webkit

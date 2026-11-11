@@ -64,7 +64,7 @@ fi
 deploy_pub=$(ssh-keygen -y -f "$WORK/deploy_key")
 
 # ── Ключи шифрования копий ──────────────────────────────────────────
-command -v age-keygen >/dev/null || sudo apt-get install -y -q age >/dev/null
+command -v age-keygen >/dev/null || runner_install age
 if [ -n "${BACKUP_AGE_IDENTITY:-}" ]; then
   printf '%s\n' "$BACKUP_AGE_IDENTITY" > "$WORK/age_identity"
 else
@@ -82,7 +82,7 @@ if "${as_deploy[@]}" true 2>/dev/null; then
   as_admin=("${as_deploy[@]}" sudo)
 else
   : "${SERVER_ROOT_PASSWORD:?нет секрета SERVER_ROOT_PASSWORD (пароль root из письма провайдера)}"
-  command -v sshpass >/dev/null || sudo apt-get install -y -q sshpass >/dev/null
+  command -v sshpass >/dev/null || runner_install sshpass
   export SSHPASS=$SERVER_ROOT_PASSWORD
   as_admin=(sshpass -e ssh "${common[@]}" -o PreferredAuthentications=password -o PubkeyAuthentication=no "root@$SERVER_HOST")
 fi

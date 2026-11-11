@@ -19,6 +19,26 @@ chmod 700 "$WORK"
 
 log() { printf '%s %s\n' "$(date -u +%H:%M:%S)" "$*"; }
 
+# Пакеты Ubuntu на машину GitHub (не на сервер). Зеркало Azure, с
+# которого машина берёт пакеты, бывает недоступно часами: тогда
+# повторяем со свежим списком пакетов, а затем переводим машину на
+# запасное зеркало (.github/scripts/apt-mirror.sh). Меняется только
+# временная машина GitHub.
+runner_install() {
+  local try
+  for try in 1 2 3; do
+    case $try in
+      2) sudo apt-get update -q -o Acquire::Retries=3 >/dev/null || true ;;
+      3) bash "$REPO_ROOT/.github/scripts/apt-mirror.sh" --force || true ;;
+    esac
+    if sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q -o Acquire::Retries=3 "$@" >/dev/null; then
+      return 0
+    fi
+  done
+  echo "Не удалось поставить на машину GitHub: $*. Это сбой у GitHub или у серверов Ubuntu, не вашего сервера и не секретов: запустите кнопку ещё раз позже."
+  return 1
+}
+
 # Значение не попадает в журнал GitHub Actions, даже если его напечатать.
 mask() {
   if [ -n "${GITHUB_ACTIONS:-}" ] && [ -n "${1:-}" ]; then

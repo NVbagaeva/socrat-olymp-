@@ -29,6 +29,7 @@ on:
       - supabase/templates/**
       - app/src/content/legal/operator.json
       - .github/workflows/lite-server.yml
+      - .github/scripts/**
       - .github/workflows/server-*.yml
   workflow_dispatch:
 
@@ -54,7 +55,8 @@ jobs:
         run: |
           command -v shellcheck >/dev/null || sudo apt-get install -y -q shellcheck
           shellcheck --version | head -2
-          LC_ALL=C.UTF-8 shellcheck -x -S warning infra/lite/actions/*.sh infra/lite/bin/*.sh infra/lite/bin/dc \
+          LC_ALL=C.UTF-8 shellcheck -x -S warning .github/scripts/*.sh \
+            infra/lite/actions/*.sh infra/lite/bin/*.sh infra/lite/bin/dc \
             infra/lite/server/prepare.sh infra/lite/db/*.sh
 
   server:
@@ -104,12 +106,13 @@ jobs:
         working-directory: app
         run: |
           pnpm install --frozen-lockfile
+          bash "$GITHUB_WORKSPACE/.github/scripts/apt-mirror.sh" || true
           pnpm exec playwright install --with-deps chromium
 
       - name: Машина CI — «чистый сервер»
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y -q openssh-server sshpass rclone age postgresql-client
+          # Тем же способом, каким кнопки ставят age, sshpass и rclone.
+          ( . infra/lite/actions/lib.sh; runner_install openssh-server sshpass rclone age postgresql-client )
           # Как у провайдера: вход root по паролю открыт.
           printf 'PermitRootLogin yes\nPasswordAuthentication yes\n' | sudo tee /etc/ssh/sshd_config.d/60-ci-root.conf >/dev/null
           sudo systemctl restart ssh || sudo systemctl restart sshd

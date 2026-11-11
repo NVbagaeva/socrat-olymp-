@@ -40,6 +40,6 @@ jobs:
         if: failure()
         env:
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
-          SMTP_USER: ${{ vars.SMTP_USER }}
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
           SMTP_PASS: ${{ secrets.SMTP_PASSWORD }}
         run: infra/lite/actions/notify.sh '«Подготовить сервер» не прошло'
