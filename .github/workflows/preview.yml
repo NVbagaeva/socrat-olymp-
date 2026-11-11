@@ -73,7 +73,9 @@ jobs:
       # в onlyBuiltDependencies.
       - name: Поставить Chromium
         working-directory: app
-        run: pnpm exec playwright install --with-deps chromium
+        run: |
+          bash "$GITHUB_WORKSPACE/.github/scripts/apt-mirror.sh" || true
+          pnpm exec playwright install --with-deps chromium
 
       - name: Собрать статический экспорт
         working-directory: app

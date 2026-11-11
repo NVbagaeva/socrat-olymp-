@@ -113,6 +113,7 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
+          bash "$GITHUB_WORKSPACE/.github/scripts/apt-mirror.sh" || true
           sudo apt-get update -q
           sudo apt-get install -y -q lftp
           lftp --env-password -u "$FTP_USERNAME" -p 21 "$FTP_SERVER" -e "

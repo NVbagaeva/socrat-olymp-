@@ -21,20 +21,15 @@ log() { printf '%s %s\n' "$(date -u +%H:%M:%S)" "$*"; }
 
 # Пакеты Ubuntu на машину GitHub (не на сервер). Зеркало Azure, с
 # которого машина берёт пакеты, бывает недоступно часами: тогда
-# повторяем со свежим списком пакетов, а затем убираем зеркало Azure и
-# берём с archive.ubuntu.com. Меняется только временная машина GitHub.
+# повторяем со свежим списком пакетов, а затем переводим машину на
+# archive.ubuntu.com (.github/scripts/apt-mirror.sh). Меняется только
+# временная машина GitHub.
 runner_install() {
   local try
   for try in 1 2 3; do
     case $try in
       2) sudo apt-get update -q -o Acquire::Retries=3 >/dev/null || true ;;
-      3)
-        log "Зеркало Azure недоступно — беру пакеты с archive.ubuntu.com"
-        sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt 2>/dev/null || true
-        sudo sed -i 's#https\?://azure\.archive\.ubuntu\.com#http://archive.ubuntu.com#g' \
-          /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null || true
-        sudo apt-get update -q -o Acquire::Retries=3 >/dev/null || true
-        ;;
+      3) bash "$REPO_ROOT/.github/scripts/apt-mirror.sh" --force || true ;;
     esac
     if sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q -o Acquire::Retries=3 "$@" >/dev/null; then
       return 0
