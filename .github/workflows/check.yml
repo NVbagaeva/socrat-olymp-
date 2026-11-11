@@ -97,12 +97,15 @@ jobs:
         run: pnpm test:stereo-engine
 
       - name: Чертежи №3 в экранной теме (буквы вершин, величины, видимость)
+        working-directory: app
         run: pnpm test:stereo-ekran
 
       - name: Тренажёр №3 — карта типов, сборка тренировок, данные прототипов
+        working-directory: app
         run: pnpm test:zadanie3-trening
 
       - name: Тексты №3 для вычитки совпадают с исходниками
+        working-directory: app
         run: pnpm test:zadanie-3-teksty
 
       # Чертежи стереометрии при вращении руками: банк №3, опорные,
