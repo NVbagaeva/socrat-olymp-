@@ -18,7 +18,8 @@
        подряд задача уходит из списка; «Прорешать те же задачи» нет;
      • «Отложить на потом» — закладка, по ссылке из списка открывается
        та же задача; закладка на опорной задаче открывает её номер;
-     • итоги: «Просели: …», запись в истории тренировок;
+     • итоги: «Просел» — у групп, где верных меньше половины; запись в
+       истории тренировок;
      • на телефоне поле ответа, «−» и кнопки задачи не уходят под «?»
        и закреплённые панели — ни в начале страницы, ни в конце;
      • горизонтальной прокрутки нет на 375, 390, 430, 768, 1280;
@@ -522,10 +523,38 @@ try {
       await nextTask(page);
     }
     await page.waitForSelector('.trn-itogi');
-    check(
-      (await page.locator('.trn-itogi .trn-razbivka .stk-metka:has-text("Просел")').count()) >= 1,
-      'итоги: в разбивке по группам метка «Просел»',
-    );
+    /* Метка «Просел» — у группы, где верных меньше половины. Задачи
+       тренировки случайные: ошибка одна, и попасть она может в группу
+       с одной задачей (0 из 1 — «Просел») или с несколькими (1 из 2 —
+       метки нет). Поэтому сверяем каждую строку разбивки с её счётом,
+       а не ждём метку всегда. */
+    {
+      const stroki = await page.locator('.trn-itogi .trn-razbivka li').evaluateAll((items) =>
+        items.map((li) => {
+          const schet = /(\d+)\s*из\s*(\d+)/.exec(
+            li.querySelector('.trn-razbivka__schet')?.textContent ?? '',
+          );
+          return {
+            verno: schet === null ? NaN : Number(schet[1]),
+            vsego: schet === null ? NaN : Number(schet[2]),
+            metka: li.querySelector('.stk-metka')?.textContent?.trim() ?? '',
+          };
+        }),
+      );
+      const neTak = stroki.filter((s) => (s.metka === 'Просел') !== s.verno / s.vsego < 0.5);
+      check(
+        stroki.length > 0 && neTak.length === 0,
+        `итоги: «Просел» ровно у групп, где верных меньше половины${
+          neTak.length ? `: ${JSON.stringify(neTak)}` : ''
+        }`,
+      );
+      check(
+        stroki.reduce((sum, s) => sum + s.vsego, 0) === 5 &&
+          stroki.reduce((sum, s) => sum + s.verno, 0) === 4 &&
+          stroki.filter((s) => s.verno < s.vsego).length === 1,
+        `итоги: в разбивке пять задач, одна группа с ошибкой: ${JSON.stringify(stroki)}`,
+      );
+    }
     check(
       (await page.locator('.trn-itogi button:has-text("Прорешать")').count()) === 0,
       'итоги: повтора тех же задач нет',
