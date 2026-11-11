@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useId } from 'react';
+import { useId, type ReactNode } from 'react';
 import { Ikonka, Znak } from '../steklo';
 import type { GruppaVybora } from './types';
 
@@ -36,6 +36,8 @@ export interface VyborTemProps {
   onBezPodskazok: (value: boolean) => void;
   onStart: () => void;
   onBack?: () => void;
+  /** Ещё настройки раздела рядом с числом задач: например, источник задач (№3). */
+  dop?: ReactNode;
   labels: VyborTemLabels;
 }
 
@@ -57,6 +59,7 @@ export function VyborTem({
   onBezPodskazok,
   onStart,
   onBack,
+  dop,
   labels,
 }: VyborTemProps) {
   const uid = useId();
@@ -191,6 +194,7 @@ export function VyborTem({
             </button>
           </div>
         </div>
+        {dop}
         <label className="trn-pereklyuchatel">
           <input
             type="checkbox"

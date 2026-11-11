@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useId, useState, type ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { Button, Input } from '@/components/ui';
+import { AnswerInput } from '@/components/tasks/otvet/AnswerInput';
+import { Button } from '@/components/ui';
 import { OPORNYE_3 } from '@/content/stereo/opornye3';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { scrollTabTo } from '@/lib/tabScroll';
@@ -19,7 +20,6 @@ export interface OpornyeStereoScreenProps {
   blokId: string;
   no: number;
   title: string;
-  umenie: string;
   tasks: ZadachaOp3Sealed[];
   /** Живые чертежи задач, собранные на сборке (у «нажми» — свой, интерактивный). */
   risunki: ReactNode[];
@@ -57,7 +57,6 @@ export function OpornyeStereoScreen({
   blokId,
   no,
   title,
-  umenie,
   tasks,
   risunki,
   miniatyury,
@@ -154,10 +153,6 @@ export function OpornyeStereoScreen({
 
   return (
     <section className="o3-blok">
-      <p className="o3-blok__umenie">
-        {OPORNYE_3.umenie}: <b>{umenie}</b>
-      </p>
-
       {pokazatItog ? (
         <ItogBloka
           nazvanie={`${no}. ${title}`}
@@ -184,7 +179,6 @@ export function OpornyeStereoScreen({
               <span className="o3-zad__lv" aria-label={`Уровень ${task.uroven} из 3`}>
                 {OPORNYE_3.uroven(task.uroven)}
               </span>
-              <span className="o3-zad__src">{OPORNYE_3.istochnik[task.istochnik]}</span>
               <span className="o3-zad__strelki">
                 <button
                   type="button"
@@ -237,15 +231,13 @@ export function OpornyeStereoScreen({
             </p>
 
             {task.vid === 'chislo' ? (
-              <Input
+              <AnswerInput
                 className="o3-zad__input"
                 value={value}
                 state={checked === null ? 'default' : solved ? 'success' : 'error'}
-                inputMode="decimal"
-                autoComplete="off"
                 aria-labelledby={labelId}
                 readOnly={solved}
-                onChange={(event) => pick(event.target.value)}
+                onChange={pick}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') check();
                 }}
@@ -392,44 +384,54 @@ export function OpornyeStereoScreen({
               )}
             </div>
 
-            <nav className="o3-tochki" aria-label="Задачи блока">
-              <span className="o3-tochki__t" aria-hidden="true">
-                {OPORNYE_3.izN(task.no, total)}
-              </span>
-              <ol className="o3-tochki__list">
-                {tasks.map((t, i) => {
-                  const s = status[i] ?? null;
-                  return (
-                    <li key={t.id}>
-                      <button
-                        type="button"
-                        className={clsx(
-                          'o3-tochka',
-                          s !== null && `is-${s}`,
-                          i === index && 'is-current',
-                        )}
-                        aria-current={i === index ? 'step' : undefined}
-                        onClick={() => open(i)}
-                      >
-                        <span className="sr-only">
-                          {OPORNYE_3.zadacha(t.no, total)}
-                          {s === 'right' ? ' — решено верно' : null}
-                          {s === 'wrong' ? ' — решено неверно' : null}
-                          {s === 'skipped' ? ' — пропущено' : null}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ol>
-              {done ? (
-                <button type="button" className="o3-tochki__itog" onClick={kItogu}>
-                  {OPORNYE_3.kItogu}
-                </button>
-              ) : null}
-            </nav>
+            {done ? (
+              <button type="button" className="stk-ssylka o3-tochki__itog" onClick={kItogu}>
+                {OPORNYE_3.kItogu}
+              </button>
+            ) : null}
           </div>
         </div>
+      )}
+
+      {pokazatItog ? null : (
+        /* Все задачи блока — от простой к сложной: видно, что впереди. */
+        <nav className="z3-spisok" aria-label="Задачи блока">
+          <ol className="z3-spisok__list">
+            {tasks.map((t, i) => {
+              const st = status[i] ?? null;
+              return (
+                <li key={t.id}>
+                  <button
+                    type="button"
+                    className={clsx(
+                      'z3-spisok__zadacha stk-glass',
+                      st !== null && `is-${st}`,
+                      i === index && 'is-current',
+                    )}
+                    aria-current={i === index ? 'step' : undefined}
+                    onClick={() => open(i)}
+                  >
+                    <span className="z3-spisok__no" aria-hidden="true">
+                      {st === 'right' ? <IkGalochka /> : t.no}
+                    </span>
+                    <span className="z3-spisok__text">
+                      <span className="sr-only">{OPORNYE_3.zadacha(t.no, total)}. </span>
+                      <span dangerouslySetInnerHTML={{ __html: t.kratkoHtml }} />
+                      <span className="sr-only">
+                        {st === 'right' ? ' — решено верно' : null}
+                        {st === 'wrong' ? ' — решено неверно' : null}
+                        {st === 'skipped' ? ' — пропущено' : null}
+                      </span>
+                    </span>
+                    <span className="z3-spisok__zvezdy" aria-label={`Сложность ${t.uroven} из 3`}>
+                      {'★'.repeat(t.uroven)}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
       )}
     </section>
   );

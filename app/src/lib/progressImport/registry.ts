@@ -41,6 +41,18 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     ],
   },
   {
+    id: 'z3',
+    title: '№3 «Стереометрия»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie3/trening/progress.ts). Прежний
+         ключ budetege:z3:trainer:v1 сворачивается в него на месте
+         (lib/progressLog, LEGACY_LOGS) и сам не переносится. */
+      'budetege:zadanie-3:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «3»). */
+      'budetege:trainer:3:session',
+    ],
+  },
+  {
     id: 'obshchee',
     title: 'Отложенные задачи и история тренировок',
     keys: [

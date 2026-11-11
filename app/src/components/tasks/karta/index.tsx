@@ -140,7 +140,7 @@ export function KartaGruppa({
       <summary className="kz-gruppa__summary stk-summary">
         <Znak html={znakHtml} figura={znak} ton={ton} />
         <span className="kz-gruppa__text">
-          <span className="kz-gruppa__nazvanie">{nazvanie}</span>
+          <span className="kz-gruppa__nazvanie" dangerouslySetInnerHTML={{ __html: nazvanie }} />
           <span className="kz-gruppa__tipov">{labels.tipov(tipov)}</span>
         </span>
         <span className="kz-gruppa__progress">{progress}</span>
@@ -182,7 +182,9 @@ export function KartaTip({
       >
         <span className="kz-tip__text">
           <span className="kz-tip__nazvanie" dangerouslySetInnerHTML={{ __html: nazvanieHtml }} />
-          {lead === undefined ? null : <span className="kz-tip__lead">{lead}</span>}
+          {lead === undefined ? null : (
+            <span className="kz-tip__lead" dangerouslySetInnerHTML={{ __html: lead }} />
+          )}
         </span>
         <span className="stk-shevron" aria-hidden="true" />
       </summary>
@@ -272,7 +274,7 @@ export function FormulyRamka({
 }) {
   return (
     <section className={clsx('kz-ramka', `stk-ton--${ton}`)}>
-      <h4 className="kz-ramka__plashka">{nazvanie}</h4>
+      <h4 className="kz-ramka__plashka" dangerouslySetInnerHTML={{ __html: nazvanie }} />
       <ul className="kz-ramka__spisok">
         {formuly.map((f, i) => (
           <li key={i} className={f.risunok === undefined ? undefined : 'kz-ramka__s-risunkom'}>
