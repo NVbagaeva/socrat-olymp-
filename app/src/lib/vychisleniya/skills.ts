@@ -34,7 +34,12 @@ export const SKILLS: Skill[] = [
   { id: 'S1', group: 'I', nazvanie: 'Свойства степеней', prototypes: ['8.A', '8.C', '8.D'] },
   { id: 'S2', group: 'I', nazvanie: 'Свойства корней', prototypes: ['8.B', '8.E', '8.F', '8.G'] },
   { id: 'S3', group: 'II', nazvanie: 'Сумма и разность логарифмов', prototypes: ['8.H', '8.L'] },
-  { id: 'S4', group: 'II', nazvanie: 'Новое основание логарифма', prototypes: ['8.I', '8.J', '8.K'] },
+  {
+    id: 'S4',
+    group: 'II',
+    nazvanie: 'Новое основание логарифма',
+    prototypes: ['8.I', '8.J', '8.K'],
+  },
   { id: 'S5', group: 'III', nazvanie: 'Синус и косинус по четверти', prototypes: ['8.M', '8.N'] },
   { id: 'S6', group: 'III', nazvanie: 'Тангенс и двойной угол', prototypes: ['8.O', '8.P'] },
   { id: 'S7', group: 'IV', nazvanie: 'Табличные значения', prototypes: ['8.Q'] },

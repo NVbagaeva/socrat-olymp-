@@ -229,9 +229,11 @@ export function KartaPrimer({
         {labels.otvet}: <b>{otvet}</b>
       </p>
       <div className="kz-knopki">
-        <Link className="stk-btn stk-btn--primary" href={trenirovatHref}>
+        {/* Обычная ссылка, а не переход внутри приложения: тренажёр
+            читает тип из адреса при входе — так же, как закладки. */}
+        <a className="stk-btn stk-btn--primary" href={trenirovatHref}>
           {labels.trenirovat}
-        </Link>
+        </a>
         <Link className="stk-btn stk-btn--tihaya" href={opornyeHref}>
           {labels.opornye}
         </Link>

@@ -2,29 +2,27 @@
 
 import { KartaGruppaProgress } from '../karta';
 import { SHAPKA8 } from '@/content/vychisleniya8';
-import { nedavnie8, progress8, stoitPovtorit8 } from '@/lib/vychisleniya/progress';
+import { kindStats } from '@/lib/progressLog';
+import { log8 } from '@/lib/vychisleniya/progress';
 
 /**
- * Прогресс группы №8 из хранилища браузера: решено и верно — по
- * счётчикам прототипов группы, «Стоит повторить» — по последним пяти
- * попыткам. Маленький клиентский островок внутри серверной карточки
- * группы: типы с примерами в данные клиента не попадают.
+ * Прогресс группы №8 из журнала попыток: решено и верно — по
+ * прототипам группы, «Стоит повторить» — в последних пяти задачах
+ * группы две ошибки и больше. Маленький клиентский островок внутри
+ * серверной карточки группы: типы с примерами в данные клиента не
+ * попадают.
  */
 export function GruppaProgress8({ prototypes }: { prototypes: string[] }) {
-  const progress = progress8.useProgress();
-  const nedavnie = nedavnie8.use();
-  let resheno = 0;
-  let verno = 0;
-  for (const prototype of prototypes) {
-    const tally = progress.kinds[prototype];
-    if (tally !== undefined) {
-      resheno += tally.done;
-      verno += tally.right;
-    }
-  }
+  const log = log8.use();
+  const own = new Set(prototypes);
+  const stats = kindStats(log, (kind) => (own.has(kind) ? 'gruppa' : kind)).get('gruppa');
   return (
     <KartaGruppaProgress
-      progress={{ resheno, verno, povtorit: stoitPovtorit8(nedavnie, prototypes) }}
+      progress={{
+        resheno: stats?.done ?? 0,
+        verno: stats?.right ?? 0,
+        povtorit: stats?.repeat === true,
+      }}
       labels={SHAPKA8}
     />
   );

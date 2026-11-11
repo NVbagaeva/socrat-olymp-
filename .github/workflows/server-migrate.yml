@@ -1,9 +1,12 @@
 name: 'Сервер: миграции'
 
-# Новые миграции из infra/lite/migrations.txt, список приглашённых
-# (секрет ALLOWED_EMAILS) и пароль роли budetege_admin для туннеля к
-# базе (секрет DB_ADMIN_PASSWORD). Уже применённые миграции
-# пропускаются; поменять список приглашённых — тоже эта кнопка.
+# Новые миграции из infra/lite/migrations.txt, каталог банка, список
+# приглашённых (секрет ALLOWED_EMAILS), редакция правовых документов
+# (дата из app/src/content/legal/operator.json), администратор (секрет
+# ADMIN_EMAIL, необязательно) и пароль роли budetege_admin для туннеля
+# к базе (секрет DB_ADMIN_PASSWORD). Уже применённые миграции
+# пропускаются; поменять список приглашённых или опубликовать новую
+# редакцию документов — тоже эта кнопка.
 
 on:
   workflow_dispatch:
@@ -30,6 +33,7 @@ jobs:
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
           SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
           ALLOWED_EMAILS: ${{ secrets.ALLOWED_EMAILS }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           DB_ADMIN_PASSWORD: ${{ secrets.DB_ADMIN_PASSWORD }}
         run: infra/lite/actions/migrate.sh
 

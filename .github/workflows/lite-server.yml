@@ -7,8 +7,10 @@ name: Lite server
 #   подготовка: вход root по паролю → пользователи, ufw, fail2ban,
 #     автообновления, swap → вход deploy по ключу → root и пароли выключены;
 #   развёртывание с HTTPS (свой центр Caddy вместо Let's Encrypt);
-#   миграции и список приглашённых;
+#   миграции единой схемы, каталог банка, редакция документов и список
+#     приглашённых;
 #   сценарий пробного кабинета supabase-js из браузера + замер памяти;
+#   тестовые данные (класс и ученики) и выдача ключа для сайта;
 #   копия в S3 (rclone вместо Yandex Object Storage) и письмо о её сбое;
 #   проверка восстановления в пустую базу и восстановление на «сервер»;
 #   проверка здоровья снаружи и изнутри, таймеры systemd;
@@ -19,11 +21,13 @@ name: Lite server
 
 on:
   pull_request:
-    branches: [main, claude/trial-account-auth-yqmaxx]
+    branches: [main]
     paths:
       - infra/lite/**
-      - supabase/trial/**
+      - supabase/migrations/**
+      - supabase/seed/**
       - supabase/templates/**
+      - app/src/content/legal/operator.json
       - .github/workflows/lite-server.yml
       - .github/workflows/server-*.yml
   workflow_dispatch:
@@ -75,6 +79,9 @@ jobs:
       COMPOSE_EXTRA: compose.ci.yml
       CADDY_EXTRA_GLOBAL: local_certs
       CERT_MIN_DAYS: '0'
+      # Записи почты (SPF, DKIM, DMARC) у выдуманного домена проверять
+      # незачем; на настоящем сервере проверка включена.
+      MAIL_DNS_CHECK: '0'
 
     steps:
       - name: Забрать репозиторий
@@ -166,9 +173,11 @@ jobs:
 
       - name: Миграции и список приглашённых
         env:
-          ALLOWED_EMAILS: anna@example.test, Boris@Example.test
+          ALLOWED_EMAILS: anna@example.test, Boris@Example.test, vera@example.test, seed1@example.test, seed2@example.test, seed3@example.test
         run: |
-          infra/lite/actions/migrate.sh
+          infra/lite/actions/migrate.sh | tee "$RUNNER_TEMP/migrate.log"
+          # Редакция документов — дата из operator.json.
+          grep -E 'Редакция документов: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$RUNNER_TEMP/migrate.log" >/dev/null
           # Повтор ничего не применяет.
           infra/lite/actions/migrate.sh | grep 'Новых миграций: 0' >/dev/null
 
@@ -181,6 +190,38 @@ jobs:
           LITE_OUT="$RUNNER_TEMP/out" LITE_DC="sudo -u deploy /opt/budetege-api/bin/dc" \
             node infra/lite/test/scenario.mjs
           rm -f "$RUNNER_TEMP/lite.env"
+
+      - name: Тестовые данные и ключ для сайта
+        env:
+          # Вера — репетитор, которого зарегистрировал сценарий.
+          SEED_TUTOR_EMAIL: Vera@example.test
+          SEED_STUDENT_EMAILS: seed1@example.test, Seed2@example.test,seed3@example.test
+          SITE_KEY_OUT: ${{ runner.temp }}/site-key
+        run: |
+          psql_db() { sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -tAc "$1"; }
+          # Без подтверждения — отказ.
+          ! CONFIRM=да infra/lite/actions/seed.sh
+          CONFIRM=ТЕСТ infra/lite/actions/seed.sh | tee "$RUNNER_TEMP/seed.log"
+          grep 'учеников 3; создано аккаунтов 3, писем «Сброс пароля» отправлено 3' "$RUNNER_TEMP/seed.log" >/dev/null
+          # Адреса в журнал не попадают.
+          ! grep -i 'example.test' "$RUNNER_TEMP/seed.log"
+          # Повтор ничего не дублирует.
+          CONFIRM=ТЕСТ infra/lite/actions/seed.sh | grep 'учеников 3; создано аккаунтов 0' >/dev/null
+          test "$(psql_db "select count(*) from public.class_members m join public.classes c on c.id = m.class_id where c.name = 'Тестовый класс'")" = 3
+          test "$(psql_db "select count(*) from public.tutor_students where ended_at is null")" = 3
+          curl -s --get --data-urlencode 'query=to:seed2@example.test subject:"Сброс пароля"' http://127.0.0.1:8025/api/v1/search | jq -e '.messages | length == 1'
+          # Удаление убирает учеников и класс; затем создаём снова — они уйдут в копию.
+          MODE=remove CONFIRM=ТЕСТ infra/lite/actions/seed.sh | grep 'Удалено тестовых учеников: 3' >/dev/null
+          test "$(psql_db "select count(*) from public.classes")" = 0
+          CONFIRM=ТЕСТ infra/lite/actions/seed.sh >/dev/null
+
+          # Ключ для сайта: в файлы вместо Variables; это ключ anon, и он работает.
+          infra/lite/actions/site-key.sh
+          test "$(cat "$SITE_KEY_OUT/NEXT_PUBLIC_SUPABASE_URL")" = "https://api.lite.test"
+          code=$(curl -s -k -o /dev/null -w '%{http_code}' -H "apikey: $(cat "$SITE_KEY_OUT/NEXT_PUBLIC_SUPABASE_ANON_KEY")" 'https://api.lite.test/rest/v1/ege_tasks?select=no&limit=1')
+          test "$code" = 200
+          ! sudo grep -F "SERVICE_ROLE_KEY='$(cat "$SITE_KEY_OUT/NEXT_PUBLIC_SUPABASE_ANON_KEY")'" /opt/budetege-api/.env.generated
+          rm -rf "$SITE_KEY_OUT"
 
       - name: Копия базы и письмо о её сбое
         run: |
@@ -203,6 +244,11 @@ jobs:
           sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -c 'delete from public.kits'
           MODE=server CONFIRM=ВОССТАНОВИТЬ infra/lite/actions/restore-check.sh
           test "$(sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -tAc 'select count(*) from public.kits')" -ge 1
+          # Восстановление не вернуло снятые права: аноним не читает людей и
+          # не вызывает служебные функции, вошедший не назначает администратора.
+          test "$(sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -tAc "select has_table_privilege('anon', 'public.profiles', 'select') or has_function_privilege('anon', 'public.grant_admin(text)', 'execute') or has_function_privilege('authenticated', 'public.grant_admin(text)', 'execute') or has_function_privilege('authenticated', 'public.accept_documents(uuid, date, inet)', 'execute')")" = f
+          # А права по умолчанию после восстановления на месте — как при первом запуске.
+          test "$(sudo -u deploy /opt/budetege-api/bin/dc exec -T db psql -U postgres -tAc "select count(*) from pg_default_acl d join pg_namespace n on n.oid = d.defaclnamespace where n.nspname = 'public'")" = 3
 
       - name: Проверить здоровье
         run: |

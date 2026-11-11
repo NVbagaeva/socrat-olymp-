@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Modal } from '@/components/ui';
 import { Metka, Polosa, Znak } from '../steklo';
 import type { StrokaGruppy } from './types';
@@ -18,16 +18,22 @@ export function ProgressPanel({
   stroki,
   resheno,
   verno,
+  counter,
   onReset,
   labels,
   open = false,
+  children,
 }: {
   stroki: StrokaGruppy[];
   resheno: number;
   verno: number;
+  /** Строка-счётчик под заголовком: «Решено X из N задач банка». */
+  counter?: ReactNode;
   onReset: () => void;
   labels: ProgressPanelLabels;
   open?: boolean;
+  /** Под строками групп: списки ошибок, отложенных, истории. */
+  children?: ReactNode;
 }) {
   const [confirm, setConfirm] = useState(false);
   return (
@@ -45,6 +51,7 @@ export function ProgressPanel({
         <span className="stk-shevron" aria-hidden="true" />
       </summary>
       <div className="trn-progress__telo">
+        {counter}
         {resheno === 0 ? (
           <p className="stk-lead">{labels.pusto}</p>
         ) : (
@@ -97,6 +104,7 @@ export function ProgressPanel({
             />
           </>
         )}
+        {children}
       </div>
     </details>
   );

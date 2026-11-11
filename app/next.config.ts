@@ -60,6 +60,17 @@ const nextConfig: NextConfig = {
       (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '') !== ''
         ? '1'
         : '0',
+    // Кнопка «Войти» в шапке и в меню телефона: «1» — показывать. Без
+    // флага вход работает (страница /voyti/ открывается по прямой
+    // ссылке), но в шапке его не видно — так живёт пробный режим.
+    // Кружок с инициалами после входа показывается при любом значении.
+    AUTH_HEADER:
+      process.env.NEXT_PUBLIC_AUTH_ENABLED === '1' &&
+      (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '') !== '' &&
+      (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '') !== '' &&
+      process.env.NEXT_PUBLIC_AUTH_IN_HEADER === '1'
+        ? '1'
+        : '0',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,

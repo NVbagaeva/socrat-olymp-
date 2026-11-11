@@ -7,9 +7,17 @@
 # повторный запуск их пропускает, а изменённый задним числом файл
 # останавливает миграции — правка уже применённого SQL идёт новым файлом.
 #
+# После миграций — каталог банка (catalog/*.sql): он пересобирается
+# вместе с банком и применяется каждый раз, повтор безопасен.
+#
 # Со стандартного ввода приходят строки KEY=value (из GitHub Secrets,
 # не печатаются):
 #   ALLOWED_EMAILS     — адреса через запятую, кому открыта регистрация;
+#   DOCUMENTS_VERSION  — дата редакции правовых документов, ГГГГ-ММ-ДД
+#                        (из app/src/content/legal/operator.json): без
+#                        неё регистрация закрыта, с новой датой люди
+#                        заново отмечают галочки согласий;
+#   ADMIN_EMAIL        — почта аккаунта администратора (необязательно);
 #   DB_ADMIN_PASSWORD  — пароль роли budetege_admin для доступа к базе
 #                        через SSH-туннель (необязательно).
 set -eu
@@ -18,10 +26,14 @@ load_env
 cd "$LITE_DIR"
 
 ALLOWED_EMAILS=
+DOCUMENTS_VERSION=
+ADMIN_EMAIL=
 DB_ADMIN_PASSWORD=
 while IFS= read -r line; do
   case "$line" in
     ALLOWED_EMAILS=*) ALLOWED_EMAILS=${line#ALLOWED_EMAILS=} ;;
+    DOCUMENTS_VERSION=*) DOCUMENTS_VERSION=${line#DOCUMENTS_VERSION=} ;;
+    ADMIN_EMAIL=*) ADMIN_EMAIL=${line#ADMIN_EMAIL=} ;;
     DB_ADMIN_PASSWORD=*) DB_ADMIN_PASSWORD=${line#DB_ADMIN_PASSWORD=} ;;
   esac
 done
@@ -52,6 +64,27 @@ SQL
 done
 log "Новых миграций: $applied"
 
+# Каталог банка: номера заданий и прототипы, на которые ссылаются ДЗ,
+# попытки и тренировки.
+for file in catalog/*.sql; do
+  [ -e "$file" ] || continue
+  psql_db < "$file"
+  log "Каталог банка обновлён: $(basename "$file")"
+done
+
+# Редакция правовых документов. Регистрация сверяет с ней дату, которую
+# человек видел на сайте; новая дата — новая строка, старые остаются.
+case "$DOCUMENTS_VERSION" in
+  [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])
+    psql_db -v version="$DOCUMENTS_VERSION" <<'SQL'
+insert into public.legal_editions (version) values (:'version') on conflict (version) do nothing;
+SQL
+    log "Редакция документов: $(psql_db -tAc 'select public.current_documents_version()')"
+    ;;
+  '') log "Редакция документов не передана — в базе $(psql_db -tAc "select coalesce(public.current_documents_version()::text, 'ни одной: регистрация закрыта')")" ;;
+  *) log "DOCUMENTS_VERSION должна быть датой ГГГГ-ММ-ДД"; exit 1 ;;
+esac
+
 # Список приглашённых: витрина vault.decrypted_secrets (db/10-vault-shim.sql),
 # её читает хук регистрации. Пустой список — регистрация закрыта для всех.
 psql_db -v emails="$ALLOWED_EMAILS" <<'SQL'
@@ -60,6 +93,22 @@ on conflict (name) do update set secret = excluded.secret, updated_at = now();
 SQL
 count=$(printf '%s' "$ALLOWED_EMAILS" | tr ',' '\n' | grep -c '@' || true)
 log "Список приглашённых обновлён: адресов $count"
+
+# Администратор — один на базу, назначается только здесь. Аккаунт должен
+# быть уже зарегистрирован; нет его — подскажем и пойдём дальше.
+if [ -n "$ADMIN_EMAIL" ]; then
+  if [ "$(psql_db -tA -v email="$ADMIN_EMAIL" <<'SQL'
+select count(*) from auth.users where lower(email) = lower(trim(:'email'));
+SQL
+)" = "1" ]; then
+    psql_db -v email="$ADMIN_EMAIL" <<'SQL' >/dev/null
+select public.grant_admin(:'email');
+SQL
+    log "Администратор назначен"
+  else
+    log "Администратор не назначен: аккаунта с почтой из ADMIN_EMAIL ещё нет. Зарегистрируйте его и нажмите «Миграции» ещё раз."
+  fi
+fi
 
 # Роль для просмотра и правки данных через SSH-туннель: читает и пишет
 # все таблицы, видит строки всех пользователей (bypassrls), но не

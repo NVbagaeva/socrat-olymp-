@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui';
+import { BookmarksList, HistoryList, MistakesList } from '@/components/progress/Lists';
 import { TrainerSessionHost, type ConfiguratorApi, type SummaryActions } from '../session';
 import type { SummaryData } from '../session/TrainerSummary';
 import { ShagiResheniya } from '../steklo';
 import {
-  EkranZadachi as _EkranZadachi,
   ItogiSessii,
   ProgressPanel,
   StartRezhimy,
@@ -15,24 +16,20 @@ import {
   type Rezhim,
   type StrokaGruppy,
 } from '../trening';
-import { GRUPPY8, PROTOTYPES8_ORDER, TRENAZHER8, gruppaOfPrototype } from '@/content/vychisleniya8';
+import { PROTOTYPES8_ORDER, TIPY8, TRENAZHER8, gruppaOfPrototype } from '@/content/vychisleniya8';
+import { closedTasks, kindStats, mistakes as openMistakes } from '@/lib/progressLog';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
 import { readSession } from '@/lib/trainerSession/store';
-import {
-  nedavnie8,
-  progress8,
-  stoitPovtorit8,
-  vybor8,
-  zakladki8,
-  type Vybor8,
-} from '@/lib/vychisleniya/progress';
+import { activeBookmarks, bookmarks } from '@/lib/zakladki';
+import { BANK_TOTAL, prototypeOfTask } from '@/lib/vychisleniya/ids';
+import { log8, vybor8, type Vybor8 } from '@/lib/vychisleniya/progress';
 import {
   buildByPrototypes,
-  makeTask,
-  mistakePrototypes,
-  prototypeOfTaskId,
+  buildMistakes8,
+  taskById,
   type Task8,
 } from '@/lib/vychisleniya/session';
+import { BankCounter8, bookmarkTitle8 } from './Progress8';
 import { Trenazher8Screen, shagiOf } from './Trenazher8Screen';
 import {
   isTrenazher8Payload,
@@ -43,10 +40,6 @@ import {
   type Trenazher8Payload,
 } from './trenazher8Payload';
 import { readTrenazher8Ui, type Trenazher8Ui } from './trenazher8Ui';
-
-/* Компонент экрана подключается через Trenazher8Screen; импорт типа
-   нужен только проверке, что общий экран и тренажёр не разошлись. */
-void _EkranZadachi;
 
 export interface Trenazher8Props {
   /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
@@ -63,21 +56,40 @@ const BYSTRO = 10;
 
 type Ekran = 'rezhimy' | 'temy';
 
-/** Адрес вкладки без ?tip=…: вопрос по ссылке не повторяется после перезагрузки. */
-function stripTip(): void {
-  const url = new URL(window.location.href);
-  if (url.searchParams.has('tip')) {
-    url.searchParams.delete('tip');
-    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
-  }
+/**
+ * Вход по ссылке: одна задача из закладки (?zadacha=), «Работа над
+ * ошибками» (?rezhim=oshibki) из кабинета и «Моих ошибок», один тип
+ * (?tip=) с вкладки «О задании». Все три приходят обычной ссылкой, а не
+ * переходом внутри приложения: адрес читается до первой отрисовки
+ * оболочки, и при незавершённой тренировке она спросит, продолжить её
+ * или начать новую по ссылке.
+ */
+type Intent =
+  { kind: 'zadacha'; id: string } | { kind: 'oshibki' } | { kind: 'tip'; tip: string } | null;
+
+function readIntent(): Intent {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('zadacha');
+  if (id !== null && taskById(id) !== null) return { kind: 'zadacha', id };
+  if (params.get('rezhim') === 'oshibki') return { kind: 'oshibki' };
+  const tip = params.get('tip');
+  if (tip !== null && PROTOTYPES8_ORDER.includes(tip)) return { kind: 'tip', tip };
+  return null;
 }
 
-function tipFromLocation(): string | null {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-  const tip = new URLSearchParams(window.location.search).get('tip');
-  return tip !== null && PROTOTYPES8_ORDER.includes(tip) ? tip : null;
+/** Убрать параметры ссылки из адреса: вопрос о незавершённой тренировке не повторится. */
+function clearIntent() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('zadacha');
+  url.searchParams.delete('rezhim');
+  url.searchParams.delete('tip');
+  window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+}
+
+/** Название типа текстом: для итогов оболочки и истории тренировок. */
+function tipNazvanie(prototype: string): string {
+  return TIPY8[prototype]?.nazvanie ?? prototype;
 }
 
 /**
@@ -91,6 +103,7 @@ export function Trenazher8({ base, gruppy }: Trenazher8Props) {
     gruppy.flatMap((g) => g.tipy.map((t) => [t.id, t.nazvanieHtml])),
   );
   const [ekran, setEkran] = useState<Ekran>('rezhimy');
+  const [intent] = useState<Intent>(readIntent);
   /* Часы на панели: по выбору ученика при старте или из записи. */
   const [clock, setClock] = useState(true);
 
@@ -99,11 +112,12 @@ export function Trenazher8({ base, gruppy }: Trenazher8Props) {
       scope={scopeOfPath(base) ?? '8'}
       what="тренажёр"
       backHref={base}
-      /* Прямой заход по ссылке с типом: при незавершённой тренировке оболочка спросит. */
-      entryIntent={tipFromLocation() !== null}
+      entryIntent={intent !== null}
       onEntryResolved={() => {
-        stripTip();
-        setEkran('temy');
+        clearIntent();
+        if (intent?.kind === 'tip') {
+          setEkran('temy');
+        }
       }}
       isPayload={isTrenazher8Payload}
       count={(payload) => payload.tasks.length}
@@ -112,12 +126,15 @@ export function Trenazher8({ base, gruppy }: Trenazher8Props) {
         if (task === undefined) {
           throw new Error('Нет задания');
         }
+        const reshenie = shagiOf(task);
         return {
-          kind: task.prototype,
+          kind: tipNazvanie(task.prototype),
           html: task.questionHtml,
-          review: () => <ShagiResheniya shagi={shagiOf(task)} />,
+          review: () => <ShagiResheniya shagi={reshenie.shagi} delimost={reshenie.delimost} />,
         };
       }}
+      /* «Прорешать те же задачи» нет: повтор той же задачи ничего не
+         проверяет. «Работа над ошибками» — новые аналоги. */
       similar={similarTrenazher8}
       pack={packTrenazher8}
       unpack={(packed) => {
@@ -131,8 +148,10 @@ export function Trenazher8({ base, gruppy }: Trenazher8Props) {
       configurator={(api) => (
         <Konfigurator8
           gruppy={gruppy}
+          nazvaniya={nazvaniya}
           ekran={ekran}
           setEkran={setEkran}
+          intent={intent}
           api={{
             ...api,
             start: (payload) => {
@@ -172,61 +191,59 @@ export function Trenazher8({ base, gruppy }: Trenazher8Props) {
   );
 }
 
-/** Строки прогресса по группам: решено, верно, «Стоит повторить». */
-function useStrokiProgressa(gruppy: GruppaVybora[]) {
-  const progress = progress8.useProgress();
-  const nedavnie = nedavnie8.use();
+/** Строки прогресса по группам из журнала: решено, верно, «Стоит повторить». */
+function strokiProgressa(
+  gruppy: GruppaVybora[],
+  log: ReturnType<typeof log8.use>,
+): { stroki: StrokaGruppy[]; resheno: number; verno: number } {
+  const groupOf = new Map(gruppy.flatMap((g) => g.tipy.map((t) => [t.id, g.id] as const)));
+  const stats = kindStats(log, (kind) => groupOf.get(kind) ?? kind);
   let resheno = 0;
   let verno = 0;
-  const stroki: StrokaGruppy[] = gruppy.map((g) => {
-    let done = 0;
-    let right = 0;
-    for (const t of g.tipy) {
-      const tally = progress.kinds[t.id];
-      if (tally !== undefined) {
-        done += tally.done;
-        right += tally.right;
-      }
-    }
-    resheno += done;
-    verno += right;
+  const stroki = gruppy.map((g) => {
+    const s = stats.get(g.id);
+    resheno += s?.done ?? 0;
+    verno += s?.right ?? 0;
     return {
       id: g.id,
       nazvanie: g.nazvanie,
       znakHtml: g.znakHtml,
       ton: g.ton,
-      verno: right,
-      vsego: done,
-      ...(stoitPovtorit8(
-        nedavnie,
-        g.tipy.map((t) => t.id),
-      )
-        ? { metka: TRENAZHER8.progress.povtorit }
-        : {}),
+      verno: s?.right ?? 0,
+      vsego: s?.done ?? 0,
+      ...(s?.repeat === true ? { metka: TRENAZHER8.progress.povtorit } : {}),
     };
   });
-  return { stroki, resheno, verno, mistakes: progress.mistakes };
+  return { stroki, resheno, verno };
 }
 
 function Konfigurator8({
   gruppy,
+  nazvaniya,
   ekran,
   setEkran,
+  intent,
   api,
 }: {
   gruppy: GruppaVybora[];
+  nazvaniya: Record<string, string>;
   ekran: Ekran;
   setEkran: (ekran: Ekran) => void;
+  intent: Intent;
   api: ConfiguratorApi<Trenazher8Payload>;
 }) {
-  const { stroki, resheno, verno, mistakes } = useStrokiProgressa(gruppy);
-  const zakladki = zakladki8.use();
+  const log = log8.use();
+  const { stroki, resheno, verno } = strokiProgressa(gruppy, log);
+  const mistakeList = openMistakes(log, prototypeOfTask);
+  const otlozhennye = activeBookmarks(bookmarks.use(), '8').filter(
+    (item) => item.place === 'trenazher',
+  );
   /* Последний выбор живёт в хранилище браузера: на сервере — по умолчанию. */
   const vybor = vybor8.use();
   const selected = new Set(vybor.tipy.length === 0 ? PROTOTYPES8_ORDER : vybor.tipy);
 
   function zapomnit(next: Vybor8) {
-    vybor8.write(next);
+    vybor8.set(next);
   }
 
   function start(tasks: Task8[], control = vybor.bezPodskazok, timer = vybor.timer) {
@@ -235,29 +252,34 @@ function Konfigurator8({
     }
   }
 
-  /* Пришли по ссылке «Потренировать этот тип»: тип запоминается как
-     выбранный; если нет незавершённой тренировки — сразу в задачи (иначе
-     оболочка спросит, и выбор тем откроется с этим типом). Адрес читается
-     в эффекте: при переходе по ссылке внутри сайта он обновляется после
-     первой отрисовки. */
-  useEffect(() => {
-    const tip = tipFromLocation();
-    if (tip === null) {
-      return;
-    }
-    vybor8.write({ ...vybor8.read(), tipy: [tip] });
-    if (readSession(scopeOfPath(window.location.pathname) ?? '8').status !== 'ok') {
-      stripTip();
-      const tasks = buildByPrototypes([tip], BYSTRO);
-      if (tasks.length > 0) {
-        api.start({ tasks, control: false, timer: vybor8.read().timer });
-      }
-    }
-    // Один раз при входе.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  function startOshibki() {
+    start(buildMistakes8(mistakeList, BYSTRO), false);
+  }
 
-  const oshibki = mistakePrototypes(mistakes);
+  /* Вход по ссылке — один раз: если незавершённой тренировки нет, сразу
+     в задачи (иначе оболочка спросит, и выбор откроется как надо). */
+  const opened = useRef(false);
+  useEffect(() => {
+    if (opened.current || intent === null) return;
+    opened.current = true;
+    if (intent.kind === 'tip') {
+      vybor8.set({ ...vybor8.get(), tipy: [intent.tip] });
+    }
+    if (readSession(scopeOfPath(window.location.pathname) ?? '8').status === 'ok') return;
+    clearIntent();
+    const closed = closedTasks(log8.get());
+    if (intent.kind === 'zadacha') {
+      const task = taskById(intent.id);
+      if (task !== null) api.start({ tasks: [task], control: false, timer: vybor8.get().timer });
+    } else if (intent.kind === 'tip') {
+      const tasks = buildByPrototypes([intent.tip], BYSTRO, closed);
+      if (tasks.length > 0) api.start({ tasks, control: false, timer: vybor8.get().timer });
+    } else {
+      const tasks = buildMistakes8(openMistakes(log8.get(), prototypeOfTask), BYSTRO);
+      if (tasks.length > 0) api.start({ tasks, control: false, timer: vybor8.get().timer });
+    }
+  }, [intent, api]);
+
   const rezhimy: Rezhim[] = [
     {
       id: 'mix',
@@ -275,35 +297,30 @@ function Konfigurator8({
       id: 'oshibki',
       ikonka: 'oshibki',
       zag: TRENAZHER8.rezhimy.oshibki.zag,
-      lead: TRENAZHER8.rezhimy.oshibki.lead(oshibki.length),
+      lead: TRENAZHER8.rezhimy.oshibki.lead(mistakeList.length),
       warm: true,
-      disabled: oshibki.length === 0,
+      disabled: mistakeList.length === 0,
     },
   ];
 
   function pick(id: string) {
     if (id === 'mix') {
-      start(buildByPrototypes(PROTOTYPES8_ORDER, BYSTRO), false);
+      start(buildByPrototypes(PROTOTYPES8_ORDER, BYSTRO, closedTasks(log)), false);
     } else if (id === 'temy') {
       setEkran('temy');
     } else if (id === 'oshibki') {
-      start(buildByPrototypes(oshibki, BYSTRO), false);
+      startOshibki();
     }
   }
 
   function startOtlozhennye() {
-    const tasks = zakladki.flatMap((id) => {
-      const [prototype, seed, level] = id.split('|');
-      if (prototype === undefined || seed === undefined) {
-        return [];
-      }
-      try {
-        return [makeTask(prototype, seed, level === 'base' || level === 'advanced' ? level : null)];
-      } catch {
-        return [];
-      }
-    });
-    start(tasks, false);
+    start(
+      otlozhennye.flatMap((item) => {
+        const task = taskById(item.ref);
+        return task === null ? [] : [task];
+      }),
+      false,
+    );
   }
 
   if (ekran === 'temy') {
@@ -313,7 +330,10 @@ function Konfigurator8({
           gruppy={gruppy}
           selected={selected}
           onSelected={(next) =>
-            zapomnit({ ...vybor, tipy: next.size === PROTOTYPES8_ORDER.length ? [] : [...next] })
+            zapomnit({
+              ...vybor,
+              tipy: next.size === PROTOTYPES8_ORDER.length ? [] : [...next],
+            })
           }
           counts={COUNTS}
           count={vybor.count}
@@ -325,7 +345,7 @@ function Konfigurator8({
           onBack={() => setEkran('rezhimy')}
           onStart={() => {
             const tipy = PROTOTYPES8_ORDER.filter((id) => selected.has(id));
-            start(buildByPrototypes(tipy, vybor.count ?? BEZ_KONCA));
+            start(buildByPrototypes(tipy, vybor.count ?? BEZ_KONCA, closedTasks(log)));
           }}
           labels={TRENAZHER8.vybor}
         />
@@ -341,25 +361,62 @@ function Konfigurator8({
         onPick={pick}
         dop={
           <>
-            {zakladki.length === 0 ? null : (
+            {otlozhennye.length === 0 ? null : (
               <button
                 type="button"
                 className="stk-btn stk-btn--tihaya trn-otlozhennye"
                 onClick={startOtlozhennye}
               >
-                {TRENAZHER8.rezhimy.otlozhennye(zakladki.length)}
+                {TRENAZHER8.rezhimy.otlozhennye(otlozhennye.length)}
               </button>
             )}
             <ProgressPanel
               stroki={stroki}
               resheno={resheno}
               verno={verno}
-              onReset={() => {
-                progress8.reset();
-                nedavnie8.clear();
-              }}
+              counter={<BankCounter8 total={BANK_TOTAL} />}
+              onReset={() => log8.reset()}
               labels={{ ...TRENAZHER8.progress, otmena: 'Отмена' }}
-            />
+            >
+              {/* Списки кабинета ученика — те же, что в кабинете: ошибки,
+                  отложенные, история (components/progress). */}
+              <section className="trn-progress__spisok" data-section="mistakes8">
+                <h4 className="stk-h4">
+                  {TRENAZHER8.progress.oshibki}
+                  {mistakeList.length === 0 ? '' : ` · ${mistakeList.length}`}
+                </h4>
+                <MistakesList
+                  items={mistakeList}
+                  titleOf={(m) => (
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: nazvaniya[prototypeOfTask(m.task)] ?? prototypeOfTask(m.task),
+                      }}
+                    />
+                  )}
+                  action={
+                    mistakeList.length === 0 ? null : (
+                      <Button size="sm" onClick={startOshibki}>
+                        {TRENAZHER8.rezhimy.oshibki.zag}
+                      </Button>
+                    )
+                  }
+                  empty={TRENAZHER8.progress.oshibokNet}
+                />
+              </section>
+              <section className="trn-progress__spisok" data-section="later8">
+                <h4 className="stk-h4">{TRENAZHER8.progress.otlozhennye}</h4>
+                <BookmarksList
+                  section="8"
+                  empty={TRENAZHER8.progress.otlozhennyhNet}
+                  renderTitle={(item) => bookmarkTitle8(nazvaniya, item)}
+                />
+              </section>
+              <section className="trn-progress__spisok" data-section="history8">
+                <h4 className="stk-h4">{TRENAZHER8.progress.istoriya}</h4>
+                <HistoryList section="8" empty={TRENAZHER8.progress.istoriiNet} />
+              </section>
+            </ProgressPanel>
           </>
         }
       />
@@ -383,8 +440,7 @@ function Itogi8({
   const payload = data.payload as Trenazher8Payload;
   const poGruppam = new Map<string, { verno: number; vsego: number }>();
   const zadachi: ItogZadacha[] = data.items.map((item) => {
-    const task = taskAt8(payload, item.poolIndex);
-    const prototype = task?.prototype ?? prototypeOfTaskId(item.kind);
+    const prototype = taskAt8(payload, item.poolIndex)?.prototype ?? '';
     const gruppa = gruppaOfPrototype(prototype);
     if (gruppa !== undefined) {
       const row = poGruppam.get(gruppa.id) ?? { verno: 0, vsego: 0 };
@@ -393,7 +449,7 @@ function Itogi8({
       poGruppam.set(gruppa.id, row);
     }
     return {
-      kindHtml: nazvaniya[prototype] ?? prototype,
+      kindHtml: nazvaniya[prototype] ?? item.kind,
       uslovieHtml: item.html,
       mark: item.mark,
       razbor: item.review,
@@ -425,7 +481,7 @@ function Itogi8({
 
   function eshcheRaz() {
     const prototypes = payload.tasks.map((t) => t.prototype);
-    const tasks = buildByPrototypes(prototypes, payload.tasks.length);
+    const tasks = buildByPrototypes(prototypes, payload.tasks.length, closedTasks(log8.get()));
     if (tasks.length > 0) {
       actions.start({ tasks, control: payload.control, timer: payload.timer !== false });
     }
@@ -455,6 +511,3 @@ function Itogi8({
     </div>
   );
 }
-
-/* GRUPPY8 нужен проверке типов: группы приходят пропсами с сервера. */
-void GRUPPY8;

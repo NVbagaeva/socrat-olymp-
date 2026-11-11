@@ -16,7 +16,8 @@ const ATTEMPTS = 400;
 
 /** Подтипы прототипа для уровня; null — все. */
 export function podtipyFor(prototype: Prototype, level: Level | null): Podtip[] {
-  const fit = level === null ? prototype.podtipy : prototype.podtipy.filter((p) => p.level === level);
+  const fit =
+    level === null ? prototype.podtipy : prototype.podtipy.filter((p) => p.level === level);
   return fit.length > 0 ? fit : prototype.podtipy;
 }
 

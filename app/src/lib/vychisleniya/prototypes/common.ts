@@ -3,7 +3,29 @@
  */
 
 import type { Rng } from '../rng';
-import type { Draft, Level, Params, Podtip } from '../types';
+import type { Draft, Level, Params, Podtip, Priznak, Shag } from '../types';
+
+/** Шаг решения: что делаем и почему, и выкладка (TeX без долларов). */
+export function shag(chto: string, tex: string): Shag {
+  return { chto, tex };
+}
+
+/**
+ * Признаки делимости, которыми видно, что число делится на g: по
+ * простым множителям g (4 и 9 — своими признаками, 10 и 25 — тоже).
+ */
+export function priznakiDlya(g: number): Priznak[] {
+  const out: Priznak[] = [];
+  const n = Math.abs(Math.round(g));
+  if (n % 100 === 0 || n % 10 === 0) out.push('10');
+  if (n % 25 === 0) out.push('25');
+  else if (n % 5 === 0 && n % 10 !== 0) out.push('5');
+  if (n % 4 === 0) out.push('4');
+  else if (n % 2 === 0 && n % 10 !== 0) out.push('2');
+  if (n % 9 === 0) out.push('9');
+  else if (n % 3 === 0) out.push('3');
+  return out;
+}
 
 /** Подтип: идентификатор, уровень, генератор. */
 export function podtip(id: string, level: Level, generate: (r: Rng) => Draft | null): Podtip {

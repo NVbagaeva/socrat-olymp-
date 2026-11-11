@@ -22,6 +22,7 @@ import {
   type StoredSession,
   type WriteResult,
 } from './types';
+import { notifyLocalChange } from '../syncedStore';
 
 const PREFIX = 'budetege:trainer:';
 const SUFFIX = ':session';
@@ -113,6 +114,8 @@ export function writeRaw(scope: string, raw: string): WriteResult {
   for (;;) {
     try {
       target.setItem(key, raw);
+      /* Вошедшему тренировка уходит и в аккаунт (lib/accountSync). */
+      notifyLocalChange(key);
       return 'ok';
     } catch (error) {
       if (!isQuotaError(error)) {
@@ -161,6 +164,7 @@ export function clearSession(scope: string): void {
     /* Запретили запись — удалять нечего. */
   }
   notifySessionsChanged();
+  notifyLocalChange(sessionKey(scope));
 }
 
 /* ── Чтение ─────────────────────────────────────────────────────── */

@@ -8,8 +8,14 @@ name: Auth
 # check.yml. Здесь сайт собирается со входом и ненастоящими адресом
 # и ключом проекта (их видит только мок внутри Playwright), а потом
 # Chromium проходит сценарии scripts/check-auth.mjs: регистрация по
-# списку и чужой почтой, письмо и подтверждение, вход, кабинет, смена
-# роли, выход, сброс пароля, удаление аккаунта, телефон 390 px.
+# списку и чужой почтой, галочки согласий, письмо и подтверждение, вход,
+# кабинет ученика и репетитора, перенос прогресса с устройства, выход,
+# сброс пароля, удаление аккаунта, телефон 390 px.
+#
+# Сборок две — по флагу NEXT_PUBLIC_AUTH_IN_HEADER:
+#   «с кнопкой» — «Войти» видна в шапке и в меню телефона: полный сценарий;
+#   «без кнопки» — так сайт живёт в пробном режиме: «Войти» в шапке нет,
+#     /voyti/ открывается по прямой ссылке, после входа кружок на месте.
 # Секреты не нужны и не используются; сеть наружу — тоже.
 
 on:
@@ -31,8 +37,20 @@ env:
 
 jobs:
   auth:
-    name: Вход и кабинет в браузере
+    name: Вход и кабинет в браузере (${{ matrix.name }})
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: с кнопкой в шапке
+            header: '1'
+            test: test:auth
+            shots: snimki-auth
+          - name: без кнопки в шапке
+            header: '0'
+            test: test:auth-no-header
+            shots: snimki-auth-bez-knopki
 
     steps:
       - name: Забрать репозиторий
@@ -59,6 +77,7 @@ jobs:
         working-directory: app
         env:
           NEXT_PUBLIC_AUTH_ENABLED: '1'
+          NEXT_PUBLIC_AUTH_IN_HEADER: ${{ matrix.header }}
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
           NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key # не секрет: ключ мока
         run: pnpm build
@@ -69,7 +88,7 @@ jobs:
 
       - name: Проверить вход, регистрацию и кабинет
         working-directory: app
-        run: pnpm test:auth snimki-auth
+        run: pnpm ${{ matrix.test }} ${{ matrix.shots }}
 
       # Бюджет первой загрузки — и со включённым входом: SDK грузится
       # отдельным куском только на страницах входа и кабинета.
@@ -89,6 +108,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: snimki-auth
-          path: app/snimki-auth
+          name: ${{ matrix.shots }}
+          path: app/${{ matrix.shots }}
           if-no-files-found: ignore

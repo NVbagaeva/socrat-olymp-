@@ -191,6 +191,30 @@
   overflow-y: hidden;
 }
 
+.stk-reshenie {
+  display: grid;
+  gap: var(--space-3);
+}
+.stk-delimost > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--blue-700);
+}
+.stk-delimost ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-6);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
 /* Кнопки сцены: глянцевая, тёплая, тихая. Высота ≥ 44 px. */
 .stk-btn {
   display: inline-flex;

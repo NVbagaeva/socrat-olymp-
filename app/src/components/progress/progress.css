@@ -1,0 +1,167 @@
+/* Прогресс ученика: карточки типов, списки ошибок, закладок и истории.
+   Общие для тренажёров и кабинета. */
+
+.tp-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tp-cards--compact {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+.tp-card {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-xs);
+}
+.tp-card.is-repeat {
+  border-color: var(--color-border-accent);
+}
+.tp-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.tp-card__title {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.tp-card__flag {
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tp-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-track);
+  overflow: hidden;
+}
+.tp-bar__right {
+  background: var(--color-primary);
+}
+.tp-bar__wrong {
+  background: var(--color-status-oshibki);
+}
+.tp-card__nums {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.tp-card__nums b {
+  color: var(--color-text);
+}
+.tp-card__right b {
+  color: var(--color-primary);
+}
+.tp-card__wrong b {
+  color: var(--color-status-oshibki-text);
+}
+.tp-card__nums--empty {
+  color: var(--color-text-tertiary);
+}
+.tp-card__kinds {
+  display: grid;
+  gap: 2px;
+  margin: var(--space-1) 0 0;
+  padding: var(--space-2) 0 0;
+  border-top: 1px solid var(--color-border);
+  list-style: none;
+}
+.tp-kind {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+.tp-kind.is-repeat .tp-kind__title {
+  color: var(--color-accent-text);
+}
+.tp-kind__score {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tp-empty {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}
+.tp-list-wrap {
+  display: grid;
+  gap: var(--space-4);
+}
+.tp-list-wrap > .btn,
+.tp-list-wrap > a {
+  justify-self: start;
+}
+.tp-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tp-row {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow-wrap: anywhere;
+}
+.tp-row__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.tp-row__meta {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+}
+.tp-row__weak {
+  font-size: 13px;
+  color: var(--color-accent-text);
+}
+.tp-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.tp-hidden {
+  margin: var(--space-3) 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}

@@ -55,6 +55,21 @@ export const VYCHISLENIYA = {
   },
 } as const;
 
+/** Формула навыка, в записи TeX: «Запомни» в домашнем задании (lib/vychisleniya/names.ts). */
+export const SKILL_FORMULA: Record<string, string> = {
+  S1: 'a^{m} \\cdot a^{n} = a^{m+n}',
+  S2: '\\sqrt[n]{a} \\cdot \\sqrt[n]{b} = \\sqrt[n]{ab}',
+  S3: '\\log_a x + \\log_a y = \\log_a xy',
+  S4: '\\log_a b = \\dfrac{\\log_c b}{\\log_c a}',
+  S5: '\\sin^2\\alpha + \\cos^2\\alpha = 1',
+  S6: '\\operatorname{tg}\\alpha = \\dfrac{\\sin\\alpha}{\\cos\\alpha}',
+  S7: '\\sin 30^\\circ = \\dfrac{1}{2}',
+  S8: '\\sin 2\\alpha = 2\\sin\\alpha\\cos\\alpha',
+  S9: '\\sin(90^\\circ - \\alpha) = \\cos\\alpha',
+  S10: 'a^2 - b^2 = (a - b)(a + b)',
+  S11: '\\sqrt{a}\\cdot\\sqrt{b} = \\sqrt{ab}',
+};
+
 /** Заголовок окна браузера: «Вкладка · Вычисления и преобразования — Будет на ЕГЭ». */
 export function vychisleniyaTitle(tab: string): string {
   return `${tab} · ${VYCHISLENIYA.title} — Будет на ЕГЭ`;

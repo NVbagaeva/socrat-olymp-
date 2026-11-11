@@ -75,20 +75,57 @@ export interface Shag {
   formulaHtml: string;
 }
 
-/** Решение по шагам: номер, подпись «что делаем», формула. */
-export function ShagiResheniya({ shagi, className }: { shagi: Shag[]; className?: string }) {
+/** Признак делимости под решением: «На 4» и правило с примером (HTML). */
+export interface PriznakDelimosti {
+  title: string;
+  html: string;
+}
+
+/**
+ * Решение по шагам: номер, подпись «что делаем», формула. Под шагами,
+ * если сокращение держится на признаках делимости, — сворачиваемая
+ * панель с ними.
+ */
+export function ShagiResheniya({
+  shagi,
+  delimost = [],
+  delimostTitle = 'Признаки делимости',
+  className,
+}: {
+  shagi: Shag[];
+  delimost?: PriznakDelimosti[];
+  delimostTitle?: string;
+  className?: string;
+}) {
   return (
-    <ol className={clsx('stk-shagi', className)}>
-      {shagi.map((shag, i) => (
-        <li className="stk-shag" key={i}>
-          <p className="stk-shag__chto" dangerouslySetInnerHTML={{ __html: shag.chtoHtml }} />
-          <div
-            className="stk-shag__formula"
-            dangerouslySetInnerHTML={{ __html: shag.formulaHtml }}
-          />
-        </li>
-      ))}
-    </ol>
+    <div className={clsx('stk-reshenie', className)}>
+      <ol className="stk-shagi">
+        {shagi.map((shag, i) => (
+          <li className="stk-shag" key={i}>
+            <p className="stk-shag__chto" dangerouslySetInnerHTML={{ __html: shag.chtoHtml }} />
+            <div
+              className="stk-shag__formula"
+              dangerouslySetInnerHTML={{ __html: shag.formulaHtml }}
+            />
+          </li>
+        ))}
+      </ol>
+      {delimost.length === 0 ? null : (
+        <details className="stk-delimost">
+          <summary className="stk-summary">
+            {delimostTitle}
+            <span className="stk-shevron" aria-hidden="true" />
+          </summary>
+          <ul>
+            {delimost.map((item) => (
+              <li key={item.title}>
+                <b>{item.title}:</b> <span dangerouslySetInnerHTML={{ __html: item.html }} />
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
   );
 }
 

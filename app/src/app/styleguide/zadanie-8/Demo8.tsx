@@ -153,9 +153,9 @@ function Primer({ prototype }: { prototype: string }) {
       <ol className="d8-shagi">
         {t.razbor.map((line, i) => (
           <li className="d8-shag" key={i}>
-            <p className="d8-shag__chto">{podpisi?.shagi[i] ?? `Шаг ${i + 1}`}</p>
+            <p className="d8-shag__chto">{podpisi?.shagi[i] ?? line.chto}</p>
             <div className="d8-shag__formula">
-              <Tex text={line} />
+              <Tex text={`$${line.tex}$`} />
             </div>
           </li>
         ))}
@@ -569,9 +569,9 @@ function Zadacha({
               <ol className="d8-shagi">
                 {t.razbor.map((line, i) => (
                   <li className="d8-shag" key={i}>
-                    <p className="d8-shag__chto">{podpisi?.shagi[i] ?? `Шаг ${i + 1}`}</p>
+                    <p className="d8-shag__chto">{podpisi?.shagi[i] ?? line.chto}</p>
                     <div className="d8-shag__formula">
-                      <Tex text={line} />
+                      <Tex text={`$${line.tex}$`} />
                     </div>
                   </li>
                 ))}

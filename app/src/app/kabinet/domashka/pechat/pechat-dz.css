@@ -1,0 +1,67 @@
+/* Страница печати домашнего задания: только лист, без оболочки сайта.
+   Лист — как у листов №8 (zadaniya/8/pechat/pechat8.css), сверху —
+   панель печати (как у №11), на бумагу она не идёт. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+
+  .dz-print-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-sans);
+  }
+  .dz-print-bar__lead,
+  .dz-print-bar__back {
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+    color: var(--color-text-secondary);
+  }
+  /* Варианты учеников индивидуального ДЗ: «Все ученики · Аня · Борис». */
+  .dz-print-bar__students {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+  }
+  .dz-print-bar__students a[aria-current='page'] {
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  /* Сообщение вместо листа: не вошли, не репетитор, задание не найдено. */
+  .dz-print-message {
+    max-width: 36rem;
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4);
+    font-family: var(--font-sans);
+  }
+  .dz-print-message__wait {
+    text-align: center;
+    color: var(--color-text-secondary);
+  }
+}
+
+@media print {
+  .dz-print-bar {
+    display: none;
+  }
+}

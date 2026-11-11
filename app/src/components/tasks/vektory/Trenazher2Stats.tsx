@@ -5,6 +5,7 @@ import { trainerStats } from '@/content/trainerModes';
 import { summarize, type TrainerProgress } from '@/lib/trainerProgress';
 import { progress2 } from '@/lib/vektory/progress';
 import { kindTitle } from '@/lib/vektory/session';
+import '@/components/tasks/trainer/tstats.css';
 
 interface KindRow {
   title: string;

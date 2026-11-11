@@ -13,11 +13,14 @@
    такой файл нельзя, и в его отчёте так и написано.
 
    Задачи, условия, ответы и разборы приходят из движка
-   lib/vychisleniya/generate.ts и того же банка, что видит ученик
-   в тренажёре (lib/vychisleniya/bank.ts): десять зафиксированных
-   вариантов на каждый из 26 прототипов, сгруппированных по 11
-   навыкам. В этом файле ни одного условия и ни одного ответа нет
-   и быть не может: движок и банк считают их сами.
+   lib/vychisleniya/generate.ts по зафиксированному банку
+   lib/vychisleniya/bank.ts: десять вариантов на каждый из 26
+   прототипов, сгруппированных по 11 навыкам, — 260 задач. Тренажёр
+   берёт задачи из этого же банка, пока в нём есть нерешённые
+   учеником, и только потом — новые от генератора
+   (lib/vychisleniya/session.ts → bankLeft). В этом файле ни одного
+   условия и ни одного ответа нет и быть не может: движок и банк
+   считают их сами.
 
    Слова листа — в src/content/sheet8.js, вёрстка — в src/lib/sheet/.
 */
@@ -59,15 +62,9 @@ function typeset(text) {
    Банк
    ══════════════════════════════════════════════════════════ */
 
-/** Разбор задачи: шаги и строка ответа — та же вёрстка, что у листа
-    из генератора (lib/vychisleniya/sheet8.ts), своя копия здесь:
-    сборник PDF и интерактивный генератор не делят код по правилу
-    «одна страница — один источник задач». */
-function razborHtml(lines, answerText) {
-  const items = lines.map((line) => '<li class="sheet-step">' + typeset(line) + '</li>').join('');
-  return '<ol class="sheet-steps">' + items + '</ol>' +
-    '<p class="sheet-task-answer">Ответ: <b>' + answerText + '</b></p>';
-}
+/** Решение задачи: шаги с подписями и строка ответа — та же вёрстка,
+    что у листа учителя из генератора (lib/vychisleniya/razbor.ts). */
+const { razborSheetHtml } = requireSrc('lib/vychisleniya/razbor.ts');
 
 /**
  * Блоки сборника — по одному на навык S1…S11, сквозная нумерация.
@@ -102,7 +99,7 @@ function collectBlocks(limitSkills, limitTasks, withAnswers) {
           figureSvg: null,
           answer: answerText,
           answerHtml: null,
-          solutionHtml: withAnswers ? razborHtml(task.razbor, answerText) : null,
+          solutionHtml: withAnswers ? razborSheetHtml(task.razbor, answerText, task.delimost) : null,
         };
       }),
     };

@@ -6,7 +6,6 @@ import {
   GRUPPY8,
   SHAPKA8,
   TIPY8,
-  shagiTipa,
   type Gruppa8,
 } from '@/content/vychisleniya8';
 import { generate } from '@/lib/vychisleniya/generate';
@@ -78,13 +77,13 @@ function TipySpisok({
            25 собираются в браузере по раскрытию (PrimerLazy8): иначе
            страница несла бы их все с формулами в разметке. */
         const ex = open ? primer(id) : null;
-        const podpisi = ex === null ? null : shagiTipa(id, ex.podtip);
+        /* Подписи шагов — из генератора: они зависят от чисел задачи. */
         const shagi: Shag[] =
           ex === null
             ? []
-            : ex.razbor.map((line, k) => ({
-                chtoHtml: typeset(podpisi?.[k] ?? ''),
-                formulaHtml: typeset(line),
+            : ex.razbor.map((step) => ({
+                chtoHtml: typeset(step.chto),
+                formulaHtml: typeset(`$${step.tex}$`),
               }));
         return (
           <KartaTip

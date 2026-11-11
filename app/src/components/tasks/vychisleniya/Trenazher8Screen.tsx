@@ -1,21 +1,21 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
 import { useBeforeFinish } from '../session/useBeforeFinish';
 import { useSessionReport } from '../session/useSessionReport';
 import type { Shag } from '../steklo';
 import { EkranZadachi, type SostoyanieZadachi } from '../trening';
-import { TRENAZHER8, podskazkaTipa, shagiTipa } from '@/content/vychisleniya8';
+import { TRENAZHER8, podskazkaTipa } from '@/content/vychisleniya8';
+import { formatHint, fractionRightHint } from '@/lib/otvet';
+import type { LogOutcome } from '@/lib/progressLog';
 import { pickRound, useRound } from '@/lib/trainerRound';
 import type { TaskMark } from '@/lib/trainerSession/types';
-import {
-  progress8,
-  toggleZakladka8,
-  zakladki8,
-  zapisatPopytku8,
-} from '@/lib/vychisleniya/progress';
-import { answerMatches, openText } from '@/lib/vychisleniya/secret';
-import { levelOfTaskId, makeTask, randomSeed, type Task8 } from '@/lib/vychisleniya/session';
+import { zadachaHref } from '@/lib/vychisleniya/links';
+import { log8 } from '@/lib/vychisleniya/progress';
+import type { PriznakHtml, RazborHtml, ShagHtml } from '@/lib/vychisleniya/razbor';
+import { openText, readSealed } from '@/lib/vychisleniya/secret';
+import { analogOf, parseTaskId, makeTask, type Task8 } from '@/lib/vychisleniya/session';
 import { typeset } from '@/lib/tex';
 import { ZAMENY8, type Trenazher8Payload } from './trenazher8Payload';
 import type { Trenazher8Ui } from './trenazher8Ui';
@@ -34,39 +34,53 @@ export interface Trenazher8ScreenProps {
   nazvaniya: Record<string, string>;
 }
 
-/** Разбор: закрыт тем же отпечатком, что и ответ; раскрывается по нажатию. */
-export function razborOf(task: Task8): string[] {
+/** Решение: закрыто тем же отпечатком, что и ответ; раскрывается по нажатию. */
+export function razborOf(task: Task8): RazborHtml {
   try {
-    const value: unknown = JSON.parse(openText(task.razbor, task.seal));
-    return Array.isArray(value)
-      ? value.filter((item): item is string => typeof item === 'string')
+    const value = JSON.parse(openText(task.razbor, task.seal)) as Partial<RazborHtml>;
+    const shagi = Array.isArray(value.shagi)
+      ? value.shagi.filter(
+          (item): item is ShagHtml =>
+            typeof item === 'object' &&
+            item !== null &&
+            typeof item.chto === 'string' &&
+            typeof item.tex === 'string',
+        )
       : [];
+    const delimost = Array.isArray(value.delimost)
+      ? value.delimost.filter(
+          (item): item is PriznakHtml =>
+            typeof item === 'object' &&
+            item !== null &&
+            typeof item.title === 'string' &&
+            typeof item.html === 'string',
+        )
+      : [];
+    return { shagi, delimost };
   } catch {
-    return [];
+    return { shagi: [], delimost: [] };
   }
 }
 
-/** Шаги решения с подписями: формулы из разбора, подписи — по подтипу. */
-export function shagiOf(task: Task8): Shag[] {
-  const podpisi = shagiTipa(task.prototype, task.podtip);
-  return razborOf(task).map((line, i) => ({
-    chtoHtml: typeset(podpisi?.[i] ?? ''),
-    formulaHtml: line,
-  }));
+/** Решение в виде шагов сцены: подпись «что делаем и почему» и выкладка — из генератора. */
+export function shagiOf(task: Task8): { shagi: Shag[]; delimost: PriznakHtml[] } {
+  const razbor = razborOf(task);
+  return {
+    shagi: razbor.shagi.map((step) => ({ chtoHtml: step.chto, formulaHtml: step.tex })),
+    delimost: razbor.delimost,
+  };
 }
-
-/** Сколько seed пробовать для похожей задачи. */
-const ATTEMPTS = 20;
 
 /**
  * Экран задания тренажёра №8.
  *
  * Условие и одно поле для ответа. Ответ сверяется с отпечатком: числа
- * в разметке нет. Подсказка (первый шаг вопросом) бесплатна; решение
- * открывается по просьбе — тогда задача «решена с разбором» и в
- * прогресс как верная не идёт. «Похожая задача» заменяет текущую
- * свежей того же типа. В режиме без подсказок ни того, ни другого
- * нет до итогов.
+ * в разметке нет; неверная запись (дробь, единицы) — подсказка о
+ * формате, попытка не тратится. Подсказка (первый шаг вопросом)
+ * бесплатна; решение открывается по просьбе — тогда задача «решена с
+ * разбором» и в журнал идёт как открытое решение. «Похожая задача»
+ * заменяет текущую свежей того же типа. В режиме без подсказок ни
+ * того, ни другого нет до итогов.
  */
 export function Trenazher8Screen({
   payload,
@@ -96,7 +110,10 @@ export function Trenazher8Screen({
   const [taskFrom, setTaskFrom] = useState<number | null>(() => restored?.taskFrom ?? elapsed());
   const [failed, setFailed] = useState(restored?.failed ?? false);
   const [pohozhie, setPohozhie] = useState<Record<string, string>>(restored?.pohozhie ?? {});
-  const zakladki = zakladki8.use();
+  /* Подсказка о записи ответа: не ошибка, попытка не тратится; не хранится. */
+  const [format, setFormat] = useState<string | null>(null);
+  /* Неверный ответ был записан дробью: к вердикту — напоминание о записи. */
+  const [viaFraction, setViaFraction] = useState(false);
 
   const poolIndex = order.length === 0 ? index : (order[index] ?? index);
   const total = order.length === 0 ? pool.length : order.length;
@@ -106,11 +123,12 @@ export function Trenazher8Screen({
     const out: Record<number, Task8> = {};
     for (const [at, seed] of Object.entries(pohozhie)) {
       const source = pool[Number(at)];
-      if (source === undefined) {
+      const parsed = source === undefined ? null : parseTaskId(source.id);
+      if (source === undefined || parsed === null) {
         continue;
       }
       try {
-        out[Number(at)] = makeTask(source.prototype, seed, levelOfTaskId(source.id));
+        out[Number(at)] = makeTask(source.prototype, seed, parsed.level, source.fixes);
       } catch {
         /* Сайт обновился и seed не подошёл — остаётся исходная задача. */
       }
@@ -138,7 +156,10 @@ export function Trenazher8Screen({
     pohozhie,
   });
 
-  const shagi = useMemo(() => (task === undefined ? [] : shagiOf(task)), [task]);
+  const reshenie = useMemo(
+    () => (task === undefined ? { shagi: [], delimost: [] } : shagiOf(task)),
+    [task],
+  );
   const podskazkaHtml = useMemo(() => {
     const text = task === undefined ? null : podskazkaTipa(task.prototype, task.podtip);
     return text === null ? null : typeset(text);
@@ -148,22 +169,24 @@ export function Trenazher8Screen({
     return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
   }
 
-  function remember(item: Task8, itog: 'right' | 'wrong' | 'revealed', clean: boolean) {
-    progress8.recordAttempt({
+  /* Журнал попыток (lib/progressLog): из него считаются прогресс по
+     типам, «Стоит повторить» и «Мои ошибки». Аналог из «Работы над
+     ошибками» записывается с задачей, ошибку в которой он закрывает. */
+  function remember(item: Task8, outcome: LogOutcome) {
+    log8.record({
+      task: item.id,
       kind: item.prototype,
-      taskId: item.id,
-      right: itog === 'right',
-      clean,
-      seconds: taskSeconds(),
-      itog,
+      outcome,
+      seconds: Math.round(taskSeconds()),
+      session: roundKey,
+      ...(item.fixes === undefined ? {} : { fixes: item.fixes }),
     });
-    zapisatPopytku8(item.prototype, itog === 'right' && clean);
   }
 
-  /* Досрочное «Завершить»: начатая, но не закрытая задача с ошибкой — в историю. */
+  /* Досрочное «Завершить»: начатая, но не закрытая задача с ошибкой — в журнал. */
   useBeforeFinish(setBeforeFinish, () => {
     if (task !== undefined && checked === 'wrong' && marks[index] === undefined) {
-      remember(task, 'wrong', false);
+      remember(task, 'wrong');
     }
   });
 
@@ -179,12 +202,24 @@ export function Trenazher8Screen({
   const zakryta = marks[index] !== undefined;
 
   function check() {
-    const right = answerMatches(value, zadacha.seal);
+    const reading = readSealed(value, zadacha.seal, 'trenazher');
+    if (reading.kind === 'format') {
+      /* Неверная запись: подсказка, попытка не тратится. */
+      setFormat(formatHint(reading.problem, reading.meant));
+      return;
+    }
+    if (reading.kind === 'fractionRight') {
+      /* Значение верное, но дробью: не засчитано и не ошибка. */
+      setFormat(fractionRightHint(reading.decimal));
+      return;
+    }
+    setFormat(null);
+    const right = reading.right;
+    setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
-      const clean = !failed;
       setMarks({ ...marks, [index]: 'right' });
-      remember(zadacha, 'right', clean);
+      remember(zadacha, failed ? 'wrong' : 'right');
     } else {
       setFailed(true);
       setMisses(misses + 1);
@@ -198,7 +233,7 @@ export function Trenazher8Screen({
     if (!wasOpen && checked !== 'right' && !zakryta) {
       /* Решение открыто до ответа: задача закрыта «с разбором». */
       setMarks({ ...marks, [index]: 'hinted' });
-      remember(zadacha, 'revealed', false);
+      remember(zadacha, 'revealed');
     }
   }
 
@@ -209,11 +244,13 @@ export function Trenazher8Screen({
     setChecked(null);
     setSolutionOpen(false);
     setHintOpen(false);
+    setFormat(null);
+    setViaFraction(false);
   }
 
   function next() {
     if (checked === 'wrong' && !zakryta) {
-      remember(zadacha, 'wrong', false);
+      remember(zadacha, 'wrong');
     }
     if (last) {
       onFinish();
@@ -224,31 +261,26 @@ export function Trenazher8Screen({
   }
 
   function pohozhaya() {
-    for (let i = 0; i < ATTEMPTS; i += 1) {
-      const seed = randomSeed();
-      try {
-        const fresh = makeTask(zadacha.prototype, seed, levelOfTaskId(zadacha.id));
-        if (fresh.questionHtml === zadacha.questionHtml) {
-          continue;
-        }
-      } catch {
-        continue;
-      }
-      /* Закрытая задача уходит из отметок: решается новая. */
-      const nextMarks = { ...marks };
-      delete nextMarks[index];
-      const nextTried = { ...tried };
-      delete nextTried[index];
-      setMarks(nextMarks);
-      setTried(nextTried);
-      setPohozhie({ ...pohozhie, [poolIndex]: seed });
-      resetTask();
+    const avoid = new Set(pool.map((item) => item.questionHtml));
+    const fresh = analogOf(zadacha.id, zadacha.fixes ?? zadacha.id, avoid);
+    const parsed = fresh === null ? null : parseTaskId(fresh.id);
+    if (fresh === null || parsed === null) {
       return;
     }
+    /* Закрытая задача уходит из отметок: решается новая. */
+    const nextMarks = { ...marks };
+    delete nextMarks[index];
+    const nextTried = { ...tried };
+    delete nextTried[index];
+    setMarks(nextMarks);
+    setTried(nextTried);
+    setPohozhie({ ...pohozhie, [poolIndex]: parsed.seed });
+    resetTask();
   }
 
   return (
     <EkranZadachi
+      taskId={zadacha.id}
       nomer={index + 1}
       vsego={total}
       tipHtml={nazvaniya[zadacha.prototype] ?? zadacha.prototype}
@@ -256,26 +288,47 @@ export function Trenazher8Screen({
       value={value}
       onValue={(next) => {
         setValue(next);
+        setFormat(null);
         if (checked === 'wrong') {
           setChecked(null);
         }
       }}
       sostoyanie={sostoyanie}
       onCheck={check}
+      formatHint={format}
       podskazka={
         control || podskazkaHtml === null
           ? null
           : { html: podskazkaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }
       }
-      reshenie={control ? null : { shagi, open: solutionOpen, onToggle: reveal }}
+      reshenie={
+        control
+          ? null
+          : {
+              shagi: reshenie.shagi,
+              delimost: reshenie.delimost,
+              open: solutionOpen,
+              onToggle: reveal,
+            }
+      }
       onPohozhaya={pohozhaya}
       onNext={next}
       last={last}
-      zakladka={{ on: zakladki.includes(zadacha.id), onToggle: () => toggleZakladka8(zadacha.id) }}
+      zakladka={
+        <BookmarkButton
+          section="8"
+          place="trenazher"
+          refId={zadacha.id}
+          title={`№8 · тренажёр, тип ${zadacha.prototype}`}
+          href={zadachaHref(zadacha.id)}
+          className="trn-zakladka"
+        />
+      }
       bezPodskazok={control}
       labels={{
         ...TRENAZHER8.ekran,
         vernoLead: TRENAZHER8.ekran.vernoLead(checked === 'right' ? taskSeconds() : null),
+        nevernoLead: viaFraction ? TRENAZHER8.ekran.nevernoDrob : TRENAZHER8.ekran.nevernoLead,
       }}
     />
   );

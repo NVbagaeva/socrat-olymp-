@@ -8,7 +8,7 @@
  */
 
 import type { Shag } from '../steklo';
-import { TIPY8, shagiTipa } from '@/content/vychisleniya8';
+import { TIPY8 } from '@/content/vychisleniya8';
 import { generate } from '@/lib/vychisleniya/generate';
 import { ru } from '@/lib/vychisleniya/numbers';
 import { typeset } from '@/lib/tex';
@@ -25,13 +25,12 @@ export function primer8(prototype: string): Primer8 | null {
   for (let i = 1; i <= 5; i += 1) {
     try {
       const ex = generate(prototype, `o-zadanii#${i}`, 'base');
-      const podpisi = shagiTipa(prototype, ex.podtip);
       const opasno = TIPY8[prototype]?.opasno;
       return {
         uslovieHtml: typeset(ex.uslovie),
-        shagi: ex.razbor.map((line, k) => ({
-          chtoHtml: typeset(podpisi?.[k] ?? ''),
-          formulaHtml: typeset(line),
+        shagi: ex.razbor.map((step) => ({
+          chtoHtml: typeset(step.chto),
+          formulaHtml: typeset(`$${step.tex}$`),
         })),
         otvet: ru(ex.otvet),
         opasnoHtml: opasno === undefined ? undefined : typeset(opasno),

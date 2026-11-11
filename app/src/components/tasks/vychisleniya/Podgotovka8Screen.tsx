@@ -1,25 +1,33 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { clsx } from 'clsx';
-import { Button, Input } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
+import { formatHint, fractionRightHint } from '@/lib/otvet';
+import { opornayaHref } from '@/lib/vychisleniya/links';
 import { prep8Page } from '@/content/vychisleniya';
 import { nextUnsolved, type TaskStatus } from '@/lib/prepOrder';
 import { scrollTabTo } from '@/lib/tabScroll';
 import { prepMicroById } from '@/lib/vychisleniya/prep/blocks';
 import { sealPrep, type PrepSealed } from '@/lib/vychisleniya/prep/seal';
 import { prep8IsSolved, prep8MarkSolved, usePrep8Progress } from '@/lib/vychisleniya/progress';
-import { answerMatches, choiceMatches, openText } from '@/lib/vychisleniya/secret';
+import { choiceMatches, openText, readSealed } from '@/lib/vychisleniya/secret';
 import { randomSeed } from '@/lib/vychisleniya/session';
 import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
+import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
+import { Razbor8 } from './Razbor8';
+import type { RazborHtml } from '@/lib/vychisleniya/razbor';
 
 type Attempt = 'wrong' | 'skipped';
 
 export interface Podgotovka8ScreenProps {
   blockId: string;
+  /** Хвост адреса блока: по нему закладка открывает задачу. */
+  slug: string;
   title: string;
-  /** Восемь задач блока в закрытом виде, собраны на сборке. */
+  /** Десять задач блока в закрытом виде, собраны на сборке. */
   tasks: (PrepSealed & { no: number })[];
   /** Плашка «Запомни!»: формулы блока, свёрстаны. */
   formulyHtml: string[];
@@ -45,6 +53,7 @@ function firstOpen(status: TaskStatus[]): number {
  */
 export function Podgotovka8Screen({
   blockId,
+  slug,
   title,
   tasks,
   formulyHtml,
@@ -55,10 +64,25 @@ export function Podgotovka8Screen({
   const [picked, setPicked] = useState<number | null>(null);
   const [value, setValue] = useState('');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
-  const [solution, setSolution] = useState<string | null>(null);
+  const [solution, setSolution] = useState<RazborHtml | null>(null);
   const [memo, setMemo] = useState(false);
   /* Свежие варианты по номеру задачи: пока не просили — зафиксированный. */
   const [fresh, setFresh] = useState<Record<number, PrepSealed>>({});
+  /* Подсказка о записи ответа: не ошибка, попытка не тратится. */
+  const [hint, setHint] = useState<string | null>(null);
+
+  /* Из закладки: ?zadacha=<номер> открывает эту задачу блока. */
+  useEffect(() => {
+    const no = Number(new URLSearchParams(window.location.search).get('zadacha'));
+    const at = tasks.findIndex((item) => item.no === no);
+    if (at < 0) return undefined;
+    /* После гидратации: разметка сборки одна для всех адресов блока. */
+    const timer = window.setTimeout(() => {
+      setPicked(at);
+      scrollTabTo('.ptask__card');
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [tasks]);
 
   const status: TaskStatus[] = tasks.map((item) =>
     prep8IsSolved(progress, blockId, item.no) ? 'right' : (attempts[item.no] ?? null),
@@ -80,6 +104,7 @@ export function Podgotovka8Screen({
     setValue('');
     setChecked(null);
     setSolution(null);
+    setHint(null);
   }
 
   function open(next: number) {
@@ -92,10 +117,22 @@ export function Podgotovka8Screen({
     if (!ready) {
       return;
     }
-    const correct =
-      task.answerType === 'choice'
-        ? choiceMatches(value, task.seal)
-        : answerMatches(value, task.seal);
+    let correct: boolean;
+    if (task.answerType === 'choice') {
+      correct = choiceMatches(value, task.seal);
+    } else {
+      const reading = readSealed(value, task.seal, 'trenazher');
+      if (reading.kind === 'format') {
+        setHint(formatHint(reading.problem, reading.meant));
+        return;
+      }
+      if (reading.kind === 'fractionRight') {
+        setHint(fractionRightHint(reading.decimal));
+        return;
+      }
+      correct = reading.right;
+    }
+    setHint(null);
     setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
     if (correct) {
@@ -123,7 +160,11 @@ export function Podgotovka8Screen({
   }
 
   function showSolution() {
-    setSolution(openText(task.razbor, task.seal));
+    try {
+      setSolution(JSON.parse(openText(task.razbor, task.seal)) as RazborHtml);
+    } catch {
+      setSolution({ shagi: [], delimost: [] });
+    }
   }
 
   return (
@@ -179,6 +220,15 @@ export function Podgotovka8Screen({
         <div className="ptask__text">
           <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.uslovieHtml }} />
         </div>
+        <div className="z8-task__tools">
+          <BookmarkButton
+            section="8"
+            place="opornye"
+            refId={`${slug}#${base.no}`}
+            title={`№8 · Опорные задачи: ${title}, задача ${base.no}`}
+            href={opornayaHref(slug, base.no)}
+          />
+        </div>
         {/* Подсказка — точная формула свойства. Появляется после ошибки
             или по кнопке «Формула»: ответа в ней нет. */}
         {checked === 'wrong' || memo ? (
@@ -226,22 +276,30 @@ export function Podgotovka8Screen({
             ))}
           </ul>
         ) : (
-          <Input
-            className="ptask__input"
-            value={value}
-            state={checked === null ? 'default' : checked === 'right' ? 'success' : 'error'}
-            inputMode="text"
-            autoComplete="off"
-            aria-labelledby="p8-answer-label"
-            onChange={(event) => {
-              setValue(event.target.value);
-              if (checked === 'wrong') {
-                setChecked(null);
-              }
+          <form
+            className="z8-answer"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (checked !== 'right') check();
             }}
-            readOnly={checked === 'right'}
-          />
+          >
+            <AnswerInput
+              className="ptask__input"
+              value={value}
+              state={checked === null ? 'default' : checked === 'right' ? 'success' : 'error'}
+              aria-labelledby="p8-answer-label"
+              onChange={(next) => {
+                setValue(next);
+                setHint(null);
+                if (checked === 'wrong') {
+                  setChecked(null);
+                }
+              }}
+              readOnly={checked === 'right'}
+            />
+          </form>
         )}
+        {hint === null ? null : <FormatHint text={hint} />}
 
         {checked === null ? null : (
           <div className={clsx('pverdict', `pverdict--${checked}`)} role="status">
@@ -250,12 +308,7 @@ export function Podgotovka8Screen({
           </div>
         )}
 
-        {solution === null ? null : (
-          <div className="z8-razbor" role="region" aria-label="Решение">
-            <p className="z8-razbor__title">Решение</p>
-            <p className="z8-razbor__line" dangerouslySetInnerHTML={{ __html: solution }} />
-          </div>
-        )}
+        {solution === null ? null : <Razbor8 razbor={solution} />}
 
         <div className="ptask__actions">
           {checked !== 'right' ? (

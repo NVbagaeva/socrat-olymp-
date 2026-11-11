@@ -2,7 +2,8 @@
 
 import { clsx } from 'clsx';
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
-import { Ikonka, Metka, ShagiResheniya, type Shag } from '../steklo';
+import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
+import { Ikonka, Metka, ShagiResheniya, type PriznakDelimosti, type Shag } from '../steklo';
 
 export type SostoyanieZadachi = 'vvod' | 'verno' | 'neverno' | 'razbor';
 
@@ -16,8 +17,6 @@ export interface EkranZadachiLabels {
   pohozhaya: string;
   dalshe: string;
   itogi: string;
-  otlozhit: string;
-  otlozheno: string;
   verno: string;
   vernoLead: string;
   neverno: string;
@@ -30,6 +29,8 @@ export interface EkranZadachiLabels {
 }
 
 export interface EkranZadachiProps {
+  /** Идентификатор задачи: data-task на карточке (проверки сайта, кабинет). */
+  taskId?: string;
   /** Номер текущей задачи (с единицы) и сколько всего. */
   nomer: number;
   vsego: number;
@@ -40,17 +41,23 @@ export interface EkranZadachiProps {
   onValue: (value: string) => void;
   sostoyanie: SostoyanieZadachi;
   onCheck: () => void;
+  /** Подсказка о записи ответа («1/4», «5 см»): попытка не тратится. */
+  formatHint?: string | null;
   /** Подсказка: текст (HTML), открыта ли, открыть. null — подсказок нет. */
   podskazka: { html: string; open: boolean; onOpen: () => void } | null;
   /** Решение по шагам: открыто ли, переключить. null — решения до итогов нет. */
-  reshenie: { shagi: Shag[]; open: boolean; onToggle: () => void } | null;
+  reshenie: {
+    shagi: Shag[];
+    delimost?: PriznakDelimosti[];
+    open: boolean;
+    onToggle: () => void;
+  } | null;
   onPohozhaya?: () => void;
   onNext: () => void;
   /** Последняя задача: «Дальше» становится «К итогам». */
   last: boolean;
-  zakladka: { on: boolean; onToggle: () => void } | null;
-  /** Правильный ответ, если его показывать после неверного (режим без подсказок — нет). */
-  pravilnyOtvet?: string | null;
+  /** Кнопка «Отложить на потом» (components/zakladki/BookmarkButton). */
+  zakladka?: ReactNode;
   bezPodskazok?: boolean;
   labels: EkranZadachiLabels;
   /** Под условием: например, секундомер задачи. */
@@ -61,9 +68,12 @@ export interface EkranZadachiProps {
  * Экран задачи: тонкая полоса прогресса, условие крупно, поле ответа с
  * кнопкой, вердикт, подсказка, решение по шагам, кнопки после ответа.
  * Состояние держит тренажёр; здесь — только вид и клавиатура (Enter —
- * проверить или дальше).
+ * проверить или дальше). Поле — общее поле ответа бланка ЕГЭ
+ * (components/tasks/otvet): inputmode=decimal, на сенсорном экране
+ * кнопка «−».
  */
 export function EkranZadachi({
+  taskId,
   nomer,
   vsego,
   tipHtml,
@@ -72,26 +82,27 @@ export function EkranZadachi({
   onValue,
   sostoyanie,
   onCheck,
+  formatHint = null,
   podskazka,
   reshenie,
   onPohozhaya,
   onNext,
   last,
   zakladka,
-  pravilnyOtvet,
   bezPodskazok = false,
   labels,
   pod,
 }: EkranZadachiProps) {
-  const input = useRef<HTMLInputElement>(null);
+  const pole = useRef<HTMLSpanElement>(null);
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
   const ready = value.trim() !== '';
+  const input = () => pole.current?.querySelector('input') ?? null;
 
   /* Новая задача — курсор в поле (на телефоне клавиатура сама не
      открывается без касания, и это правильно). */
   useEffect(() => {
     if (sostoyanie === 'vvod' && window.matchMedia('(pointer: fine)').matches) {
-      input.current?.focus();
+      input()?.focus();
     }
   }, [nomer, sostoyanie]);
 
@@ -110,7 +121,7 @@ export function EkranZadachi({
   /* Поле под клавиатурой телефона: подвести к видимой области. */
   function onFocus() {
     window.setTimeout(() => {
-      input.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      input()?.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }, 250);
   }
 
@@ -120,7 +131,7 @@ export function EkranZadachi({
         <span style={{ width: `${(nomer / Math.max(1, vsego)) * 100}%` }} />
       </div>
 
-      <article className="trn-zadacha stk-glass">
+      <article className="trn-zadacha stk-glass" data-task={taskId}>
         <div className="trn-zadacha__verh">
           <Metka>
             <span dangerouslySetInnerHTML={{ __html: tipHtml }} />
@@ -128,21 +139,7 @@ export function EkranZadachi({
           <span className="trn-zadacha__nomer">
             {nomer} {labels.iz} {vsego}
           </span>
-          {zakladka === null ? null : (
-            <button
-              type="button"
-              className={clsx(
-                'stk-kruglaya stk-kruglaya--tihaya trn-zakladka',
-                zakladka.on && 'is-on',
-              )}
-              onClick={zakladka.onToggle}
-              aria-pressed={zakladka.on}
-              aria-label={zakladka.on ? labels.otlozheno : labels.otlozhit}
-              title={zakladka.on ? labels.otlozheno : labels.otlozhit}
-            >
-              <Ikonka name={zakladka.on ? 'zakladka-on' : 'zakladka'} />
-            </button>
-          )}
+          {zakladka}
         </div>
         <div className="trn-uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
         {pod}
@@ -151,20 +148,16 @@ export function EkranZadachi({
       <div className="trn-otvetnaya stk-glass">
         <label className="trn-pole">
           <span className="stk-podpis">{labels.otvet}</span>
-          <span className="trn-pole__ryad">
-            <input
-              ref={input}
+          <span className="trn-pole__ryad" ref={pole}>
+            <AnswerInput
               className="trn-input"
-              inputMode="decimal"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint={otvechen ? 'next' : 'done'}
               placeholder={labels.placeholder}
               value={value}
+              state={
+                sostoyanie === 'neverno' ? 'error' : sostoyanie === 'verno' ? 'success' : 'default'
+              }
               readOnly={otvechen}
-              aria-invalid={sostoyanie === 'neverno' || undefined}
-              onChange={(e) => onValue(e.target.value)}
+              onChange={onValue}
               onKeyDown={onKey}
               onFocus={onFocus}
             />
@@ -180,6 +173,7 @@ export function EkranZadachi({
             )}
           </span>
         </label>
+        {formatHint === null ? null : <FormatHint text={formatHint} />}
 
         {sostoyanie === 'verno' || sostoyanie === 'neverno' || sostoyanie === 'razbor' ? (
           <div
@@ -212,12 +206,6 @@ export function EkranZadachi({
                   : sostoyanie === 'neverno'
                     ? labels.nevernoLead
                     : labels.sRazboromLead}
-                {sostoyanie === 'razbor' && pravilnyOtvet != null ? (
-                  <>
-                    {' '}
-                    {labels.otvet}: <b>{pravilnyOtvet}</b>.
-                  </>
-                ) : null}
               </span>
             </span>
           </div>
@@ -243,7 +231,7 @@ export function EkranZadachi({
         {reshenie !== null && reshenie.open ? (
           <div className="trn-reshenie" role="region" aria-label={labels.shagi}>
             <p className="stk-podpis">{labels.shagi}</p>
-            <ShagiResheniya shagi={reshenie.shagi} />
+            <ShagiResheniya shagi={reshenie.shagi} delimost={reshenie.delimost} />
           </div>
         ) : null}
 
