@@ -381,3 +381,17 @@ details[open] > summary .stk-shevron {
     transform: none;
   }
 }
+
+/* Значок-фигура: рисунок тела вместо формулы (№3). */
+.stk-znak--figura {
+  padding: 5px;
+  overflow: hidden;
+}
+.stk-znak--figura.stk-znak--sm {
+  padding: 3px;
+}
+.stk-znak--figura svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

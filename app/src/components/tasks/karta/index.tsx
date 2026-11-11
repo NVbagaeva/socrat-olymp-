@@ -111,6 +111,7 @@ export function KartaGruppa({
   id,
   nazvanie,
   znakHtml,
+  znak,
   ton,
   tipov,
   progress,
@@ -121,6 +122,8 @@ export function KartaGruppa({
   id: string;
   nazvanie: string;
   znakHtml: string;
+  /** Значок-фигура вместо формулы (стереометрия). */
+  znak?: ReactNode;
   ton: Ton;
   tipov: number;
   progress: ReactNode;
@@ -135,7 +138,7 @@ export function KartaGruppa({
       open={open}
     >
       <summary className="kz-gruppa__summary stk-summary">
-        <Znak html={znakHtml} ton={ton} />
+        <Znak html={znakHtml} figura={znak} ton={ton} />
         <span className="kz-gruppa__text">
           <span className="kz-gruppa__nazvanie">{nazvanie}</span>
           <span className="kz-gruppa__tipov">{labels.tipov(tipov)}</span>
@@ -198,6 +201,7 @@ export interface KartaPrimerLabels {
 
 /** Разобранный пример типа: условие, шаги, ловушка, ответ, две кнопки. */
 export function KartaPrimer({
+  risunok,
   uslovieHtml,
   shagi,
   otvet,
@@ -206,6 +210,8 @@ export function KartaPrimer({
   opornyeHref,
   labels,
 }: {
+  /** Чертёж к примеру: между условием и шагами (стереометрия). */
+  risunok?: ReactNode;
   uslovieHtml: string;
   shagi: Shag[];
   otvet: string;
@@ -219,6 +225,7 @@ export function KartaPrimer({
     <div className="kz-primer">
       <p className="kz-primer__metka">{labels.primer}</p>
       <div className="kz-uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
+      {risunok === undefined ? null : <div className="kz-primer__risunok">{risunok}</div>}
       <ShagiResheniya shagi={shagi} />
       {opasnoHtml === undefined ? null : (
         <p className="kz-lovushka">
@@ -247,6 +254,8 @@ export interface FormulaSPrimerom {
   html: string;
   /** Пример применения, HTML KaTeX. */
   primerHtml: string;
+  /** Маленький чертёж к формуле: что в ней a, h, r. */
+  risunok?: ReactNode;
 }
 
 /** Цветная рамка с формулами группы: каждая — с примером применения. */
@@ -266,7 +275,10 @@ export function FormulyRamka({
       <h4 className="kz-ramka__plashka">{nazvanie}</h4>
       <ul className="kz-ramka__spisok">
         {formuly.map((f, i) => (
-          <li key={i}>
+          <li key={i} className={f.risunok === undefined ? undefined : 'kz-ramka__s-risunkom'}>
+            {f.risunok === undefined ? null : (
+              <span className="kz-ramka__risunok">{f.risunok}</span>
+            )}
             <span className="kz-ramka__formula" dangerouslySetInnerHTML={{ __html: f.html }} />
             <span className="kz-ramka__primer">
               <i>{primerLabel}</i> <span dangerouslySetInnerHTML={{ __html: f.primerHtml }} />

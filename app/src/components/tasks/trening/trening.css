@@ -926,3 +926,10 @@
     animation: none;
   }
 }
+
+/* Чертёж задачи над условием (стереометрия). */
+.trn-risunok {
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+}

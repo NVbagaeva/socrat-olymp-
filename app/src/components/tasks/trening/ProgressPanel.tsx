@@ -59,7 +59,7 @@ export function ProgressPanel({
             <ul className="trn-razbivka">
               {stroki.map((s) => (
                 <li key={s.id}>
-                  <Znak html={s.znakHtml} ton={s.ton} size="sm" />
+                  <Znak html={s.znakHtml} figura={s.znak} ton={s.ton} size="sm" />
                   <span className="trn-razbivka__nazvanie">{s.nazvanie}</span>
                   <Polosa
                     dolya={s.vsego === 0 ? 0 : s.verno / s.vsego}

@@ -62,6 +62,8 @@ export interface EkranZadachiProps {
   labels: EkranZadachiLabels;
   /** Под условием: например, секундомер задачи. */
   pod?: ReactNode;
+  /** Чертёж задачи: над условием (стереометрия, планиметрия). */
+  risunok?: ReactNode;
 }
 
 /**
@@ -92,6 +94,7 @@ export function EkranZadachi({
   bezPodskazok = false,
   labels,
   pod,
+  risunok,
 }: EkranZadachiProps) {
   const pole = useRef<HTMLSpanElement>(null);
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
@@ -141,6 +144,7 @@ export function EkranZadachi({
           </span>
           {zakladka}
         </div>
+        {risunok === undefined ? null : <div className="trn-risunok">{risunok}</div>}
         <div className="trn-uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
         {pod}
       </article>

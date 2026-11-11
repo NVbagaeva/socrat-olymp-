@@ -15,18 +15,39 @@ export type Ton = 'blue' | 'navy' | 'orange' | 'terra' | 'green';
 
 export { Ikonka, type IkonkaName } from './Ikonka';
 
-/** Значок группы: формула (готовый HTML KaTeX) в стеклянном квадрате. */
+/**
+ * Значок группы в стеклянном квадрате: формула (готовый HTML KaTeX)
+ * или фигура — маленький рисунок тела (стереометрия, планиметрия).
+ */
 export function Znak({
   html,
+  figura,
   ton,
   size = 'md',
   className,
 }: {
   html: string;
+  /** Рисунок вместо формулы: готовый узел (SVG). */
+  figura?: ReactNode;
   ton: Ton;
   size?: 'md' | 'sm';
   className?: string;
 }) {
+  if (figura !== undefined) {
+    return (
+      <span
+        className={clsx(
+          'stk-znak stk-znak--figura',
+          `stk-ton--${ton}`,
+          size === 'sm' && 'stk-znak--sm',
+          className,
+        )}
+        aria-hidden="true"
+      >
+        {figura}
+      </span>
+    );
+  }
   return (
     <span
       className={clsx('stk-znak', `stk-ton--${ton}`, size === 'sm' && 'stk-znak--sm', className)}
