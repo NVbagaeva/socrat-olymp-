@@ -11,6 +11,7 @@ import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
+import { TARIFY_HREF } from '@/lib/tarify/config';
 
 export interface SiteLink {
   label: string;
@@ -42,7 +43,8 @@ export const site = {
 
   /**
    * Пункты меню. Каждый ведёт на работающую страницу или блок.
-   * «Тарифы» сняты: раздела нет, платного ничего нет. «Учителям» ведёт
+   * «Тарифы» — страница с тарифами; оплата на ней пока выключена
+   * (lib/tarify/config.ts, PAYMENTS_ENABLED). «Учителям» ведёт
    * на блок «Мы взяли на себя то, что обычно забирает ваш вечер» —
    * он про самостоятельные, домашние и проверку, то есть для учителя.
    */
@@ -62,6 +64,7 @@ export const site = {
     },
     { label: 'Как пользоваться', href: HOWTO_HREF },
     { label: 'Учителям', href: '/#how' },
+    { label: 'Тарифы', href: TARIFY_HREF },
   ] as NavItem[],
 
   /* «Войти» здесь больше нет: вход живёт в components/auth/AuthWidget и
@@ -74,13 +77,14 @@ export const site = {
 
   footer: {
     copyright: '© 2026 Будет на ЕГЭ',
-    /* Правовые документы — свои страницы сайта; связь — через
+    /* Оферты здесь нет: её ссылка и реквизиты — content/legal/rekvizity.ts,
+       подвал покажет их, когда они будут готовы. Правовые документы — свои страницы сайта; связь — через
        Telegram-канал платформы, тот же, что на печатных листах, он
        открывается в новой вкладке. */
     links: [
       { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
       { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
-      { label: 'Оферта', href: '#' },
+      { label: 'Тарифы', href: TARIFY_HREF },
       { label: 'Контакты', href: '#' },
       { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
     ] satisfies (SiteLink | ExternalLink)[],

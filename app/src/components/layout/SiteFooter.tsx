@@ -1,4 +1,5 @@
 import { clsx } from 'clsx';
+import { REKVIZITY } from '@/content/legal/rekvizity';
 import { site } from '@/content/site';
 import { operator } from '@/lib/legal/operator';
 
@@ -16,6 +17,12 @@ export function SiteFooter({ className }: SiteFooterProps) {
           <span>
             {site.footer.operatorLabel} {operator.fio}
           </span>
+          {/* Реквизиты продавца — появятся, когда будут заполнены. */}
+          {REKVIZITY.stroki.map((stroka) => (
+            <span key={stroka} className="site-foot__rekvizit">
+              {stroka}
+            </span>
+          ))}
         </div>
         <nav className="site-foot__links" aria-label="Правовая информация и связь">
           {site.footer.links.map((link) =>
@@ -29,6 +36,9 @@ export function SiteFooter({ className }: SiteFooterProps) {
               </a>
             ),
           )}
+          {REKVIZITY.oferta.gotova ? (
+            <a href={REKVIZITY.oferta.href}>{REKVIZITY.oferta.label}</a>
+          ) : null}
         </nav>
       </div>
     </footer>

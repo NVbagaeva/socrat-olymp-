@@ -724,6 +724,13 @@ jobs:
         working-directory: app
         run: pnpm test:dev-pages
 
+      # Тарифы: цены и ступени «До ЕГЭ» — из единого конфига; оплата
+      # выключена — на сайте нет ни одной активной кнопки оплаты, нет
+      # разметки Offer и страницы оферты (scripts/check-tarify.mjs).
+      - name: Тарифы и выключенная оплата
+        working-directory: app
+        run: pnpm test:tarify
+
       - name: Проверить, что сырой RSC-текст не показывается
         working-directory: app
         run: pnpm test:rsc-serving
