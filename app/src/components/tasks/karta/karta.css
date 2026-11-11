@@ -207,6 +207,9 @@
   gap: var(--space-4);
   padding: var(--space-2) var(--space-4) var(--space-4);
 }
+.kz-primer--zhdyot {
+  min-height: 72px;
+}
 .kz-primer__metka {
   margin: 0;
   font-size: var(--fs-label);

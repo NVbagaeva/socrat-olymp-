@@ -17,13 +17,15 @@ import { typeset } from '@/lib/tex';
 import type { Shag } from '../steklo';
 import {
   FormulyRamka,
+  KartaGruppa,
   KartaPodgruppa,
   KartaPrimer,
   KartaShapka,
   KartaTip,
   Svernut,
 } from '../karta';
-import { Gruppa8 as Gruppa8Kartochka } from './Gruppa8';
+import { GruppaProgress8 } from './GruppaProgress8';
+import { PrimerLazy8 } from './PrimerLazy8';
 
 /**
  * Вкладка «О задании» №8: карта задания по типам.
@@ -69,7 +71,13 @@ function TipySpisok({
         if (proto === undefined || teksty === undefined) {
           return null;
         }
-        const ex = primer(id);
+        const open = openFirst && i === 0;
+        const trenirovatHref = `${BASE}/trenazher/?tip=${encodeURIComponent(id)}`;
+        const opornyeHref = `${BASE}/${OPORNYE.tail}${gruppa.opornye}/`;
+        /* Раскрытый с самого начала пример набирается на сборке; остальные
+           25 собираются в браузере по раскрытию (PrimerLazy8): иначе
+           страница несла бы их все с формулами в разметке. */
+        const ex = open ? primer(id) : null;
         const podpisi = ex === null ? null : shagiTipa(id, ex.podtip);
         const shagi: Shag[] =
           ex === null
@@ -85,16 +93,22 @@ function TipySpisok({
             nazvanieHtml={typeset(teksty.nazvanie)}
             lead={teksty.lead}
             kod={id}
-            open={openFirst && i === 0}
+            open={open}
           >
-            {ex === null ? null : (
+            {ex === null ? (
+              <PrimerLazy8
+                prototype={id}
+                trenirovatHref={trenirovatHref}
+                opornyeHref={opornyeHref}
+              />
+            ) : (
               <KartaPrimer
                 uslovieHtml={typeset(ex.uslovie)}
                 shagi={shagi}
                 otvet={ru(ex.otvet)}
                 opasnoHtml={typeset(teksty.opasno)}
-                trenirovatHref={`${BASE}/trenazher/?tip=${encodeURIComponent(id)}`}
-                opornyeHref={`${BASE}/${OPORNYE.tail}${gruppa.opornye}/`}
+                trenirovatHref={trenirovatHref}
+                opornyeHref={opornyeHref}
                 labels={SHAPKA8}
               />
             )}
@@ -126,13 +140,15 @@ export function VychisleniyaAbout() {
         </div>
         <div className="kz-gruppy">
           {GRUPPY8.map((g, gi) => (
-            <Gruppa8Kartochka
+            <KartaGruppa
               key={g.id}
               id={g.id}
               nazvanie={g.nazvanie}
               znakHtml={tex(g.znak)}
               ton={g.ton}
-              prototypes={g.prototypes}
+              tipov={g.prototypes.length}
+              progress={<GruppaProgress8 prototypes={g.prototypes} />}
+              labels={SHAPKA8}
               open={gi === 0}
             >
               {g.podgruppy === undefined ? (
@@ -145,7 +161,7 @@ export function VychisleniyaAbout() {
                   </div>
                 ))
               )}
-            </Gruppa8Kartochka>
+            </KartaGruppa>
           ))}
         </div>
       </section>

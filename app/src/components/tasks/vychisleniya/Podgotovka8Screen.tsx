@@ -43,7 +43,13 @@ function firstOpen(status: TaskStatus[]): number {
  * формула свойства, разбор закрыт и открывается по кнопке. «Ещё
  * вариант» собирает ту же задачу на новом seed прямо в браузере.
  */
-export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref }: Podgotovka8ScreenProps) {
+export function Podgotovka8Screen({
+  blockId,
+  title,
+  tasks,
+  formulyHtml,
+  listHref,
+}: Podgotovka8ScreenProps) {
   const progress = usePrep8Progress();
   const [attempts, setAttempts] = useState<Record<number, Attempt>>({});
   const [picked, setPicked] = useState<number | null>(null);
@@ -54,7 +60,9 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
   /* Свежие варианты по номеру задачи: пока не просили — зафиксированный. */
   const [fresh, setFresh] = useState<Record<number, PrepSealed>>({});
 
-  const status: TaskStatus[] = tasks.map((item) => (prep8IsSolved(progress, blockId, item.no) ? 'right' : (attempts[item.no] ?? null)));
+  const status: TaskStatus[] = tasks.map((item) =>
+    prep8IsSolved(progress, blockId, item.no) ? 'right' : (attempts[item.no] ?? null),
+  );
   const index = picked ?? firstOpen(status);
   const found = tasks[index];
   if (found === undefined) {
@@ -84,7 +92,10 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
     if (!ready) {
       return;
     }
-    const correct = task.answerType === 'choice' ? choiceMatches(value, task.seal) : answerMatches(value, task.seal);
+    const correct =
+      task.answerType === 'choice'
+        ? choiceMatches(value, task.seal)
+        : answerMatches(value, task.seal);
     setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
     if (correct) {
@@ -144,7 +155,11 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
             <li key={item.id}>
               <button
                 type="button"
-                className={clsx('pdot', state !== null && `is-${state}`, i === index && 'is-current')}
+                className={clsx(
+                  'pdot',
+                  state !== null && `is-${state}`,
+                  i === index && 'is-current',
+                )}
                 aria-current={i === index ? 'true' : undefined}
                 onClick={() => open(i)}
               >
@@ -172,7 +187,10 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
               <HintIcon />
               Формула
             </p>
-            <div className="ptask__hint-text" dangerouslySetInnerHTML={{ __html: task.formulaHtml }} />
+            <div
+              className="ptask__hint-text"
+              dangerouslySetInnerHTML={{ __html: task.formulaHtml }}
+            />
           </aside>
         ) : null}
       </article>
@@ -188,7 +206,11 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
               <li key={option.number}>
                 <button
                   type="button"
-                  className={clsx('popt', value === option.number && 'is-chosen', value === option.number && checked !== null && `is-${checked}`)}
+                  className={clsx(
+                    'popt',
+                    value === option.number && 'is-chosen',
+                    value === option.number && checked !== null && `is-${checked}`,
+                  )}
                   aria-pressed={value === option.number}
                   onClick={() => {
                     if (checked !== 'right') {
@@ -261,7 +283,9 @@ export function Podgotovka8Screen({ blockId, title, tasks, formulyHtml, listHref
                   К списку блоков →
                 </Link>
               ) : (
-                <Button onClick={() => open(nextOpen)}>{nextOpen === index + 1 ? 'Следующее задание →' : 'Следующая нерешённая →'}</Button>
+                <Button onClick={() => open(nextOpen)}>
+                  {nextOpen === index + 1 ? 'Следующее задание →' : 'Следующая нерешённая →'}
+                </Button>
               )}
               <Button variant="ghost" onClick={showSolution} disabled={solution !== null}>
                 Показать решение

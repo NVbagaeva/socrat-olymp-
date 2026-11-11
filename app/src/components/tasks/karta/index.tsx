@@ -79,7 +79,34 @@ export interface KartaGruppaLabels {
   resheno: (resheno: number, verno: number) => string;
 }
 
-/** Карточка группы: значок, название, число типов, мини-прогресс; внутри — типы. */
+/** Мини-прогресс группы: «решено · верно», полоса, метка «Стоит повторить». */
+export function KartaGruppaProgress({
+  progress,
+  labels,
+}: {
+  /** null — прогресс ещё не прочитан (первая отрисовка). */
+  progress: GruppaProgress | null;
+  labels: KartaGruppaLabels;
+}) {
+  const nachato = progress !== null && progress.resheno > 0;
+  const dolya = nachato ? progress.verno / progress.resheno : 0;
+  return (
+    <>
+      <span className="kz-gruppa__schet">
+        {nachato ? labels.resheno(progress.resheno, progress.verno) : labels.neNachato}
+      </span>
+      <Polosa dolya={dolya} ton={progress?.povtorit === true ? 'terra' : 'blue'} />
+      {progress?.povtorit === true ? <Metka ton="terra">{labels.povtorit}</Metka> : null}
+    </>
+  );
+}
+
+/**
+ * Карточка группы: значок, название, число типов, мини-прогресс;
+ * внутри — типы. Прогресс приходит готовым узлом: это маленький
+ * клиентский островок, а сама карточка с типами и примерами остаётся
+ * серверной разметкой и в данные клиента не попадает.
+ */
 export function KartaGruppa({
   id,
   nazvanie,
@@ -96,14 +123,11 @@ export function KartaGruppa({
   znakHtml: string;
   ton: Ton;
   tipov: number;
-  /** null — прогресс ещё не прочитан (первая отрисовка). */
-  progress: GruppaProgress | null;
-  labels: KartaGruppaLabels;
+  progress: ReactNode;
+  labels: Pick<KartaGruppaLabels, 'tipov'>;
   open?: boolean;
   children: ReactNode;
 }) {
-  const nachato = progress !== null && progress.resheno > 0;
-  const dolya = nachato ? progress.verno / progress.resheno : 0;
   return (
     <details
       className={clsx('kz-gruppa stk-glass', `stk-ton--${ton}`)}
@@ -116,13 +140,7 @@ export function KartaGruppa({
           <span className="kz-gruppa__nazvanie">{nazvanie}</span>
           <span className="kz-gruppa__tipov">{labels.tipov(tipov)}</span>
         </span>
-        <span className="kz-gruppa__progress">
-          <span className="kz-gruppa__schet">
-            {nachato ? labels.resheno(progress.resheno, progress.verno) : labels.neNachato}
-          </span>
-          <Polosa dolya={dolya} ton={progress?.povtorit === true ? 'terra' : 'blue'} />
-          {progress?.povtorit === true ? <Metka ton="terra">{labels.povtorit}</Metka> : null}
-        </span>
+        <span className="kz-gruppa__progress">{progress}</span>
         <span className="stk-shevron" aria-hidden="true" />
       </summary>
       <div className="kz-tipy">{children}</div>

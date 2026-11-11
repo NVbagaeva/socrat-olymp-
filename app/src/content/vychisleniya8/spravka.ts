@@ -32,6 +32,8 @@ export const SHAPKA8 = {
   neNachato: 'ещё не начато',
   resheno: (resheno: number, verno: number) => `решено ${resheno} · верно ${verno}`,
   primer: 'Разобранный пример',
+  primerZhdyot: 'Собираем пример…',
+  primerNet: 'Пример не собрался — попробуйте тренажёр.',
   otvet: 'Ответ',
   trenirovat: 'Потренировать этот тип',
   opornye: 'Опорные задачи',
