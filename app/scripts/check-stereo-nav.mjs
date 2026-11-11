@@ -420,7 +420,8 @@ for (const size of SIZES) {
   await context.close();
 }
 
-/* Разборы типов («О задании» → карточка): лента на «О задании»,
+/* Разборы типов. №3 — пример в карточке типа на «О задании» (прежний
+   адрес разбора — переадресация на якорь типа). №15 — страница разбора:
    чертёж на месте, «Начать решение» выделяет первый шаг в тексте и на
    чертеже, страница не уезжает вбок; карточки «О задании» ведут сюда. */
 for (const size of SIZES) {
@@ -432,10 +433,57 @@ for (const size of SIZES) {
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  for (const [no, razbory] of [
-    ['3', RAZBORY_3],
-    ['15', RAZBORY_15],
-  ]) {
+  /* №3: разобранный пример раскрывается на «О задании», в карточке
+     типа; прежний адрес разбора ведёт туда с якорем типа. */
+  for (const r of RAZBORY_3) {
+    const url = `/zadaniya/3/razbor/${r.tip}/`;
+    const where = (what) => `${size.name}, ${url}: ${what}`;
+    await page.goto(BASE + url, { waitUntil: 'networkidle' });
+    await page.waitForURL(`**/zadaniya/3/#tip-${r.tip}`, { timeout: 10000 }).catch(() => {});
+    check(
+      page.url().endsWith(`/zadaniya/3/#tip-${r.tip}`),
+      where(`переход не на карточку типа: ${page.url()}`),
+    );
+    const tip = page.locator(`#tip-${r.tip}`);
+    check(await tip.evaluate((el) => el.open === true), where('карточка типа не раскрыта'));
+    const ris = tip.locator('.z3-primer .z3d__kholst svg');
+    await ris
+      .first()
+      .waitFor({ timeout: 15000 })
+      .catch(() => {});
+    check((await ris.count()) === 1, where('нет чертежа примера'));
+    const active = await page.locator('[role=tab][aria-selected=true]').first().innerText();
+    check(active.trim() === 'О задании', where(`подсвечена вкладка «${active.trim()}»`));
+    const wide = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    );
+    check(wide <= 1, where(`страница шире окна на ${wide}px`));
+    if ((await ris.count()) !== 1) continue;
+    await tip.locator('.z3-shag__knopka').first().click();
+    await page.waitForTimeout(400);
+    check(
+      (await tip.locator('.z3-shag.is-on').count()) === 1,
+      where('после нажатия на шаг он не выделен'),
+    );
+    const svg = await tip.locator('.z3-primer .z3d__kholst').innerHTML();
+    const m = r.model();
+    const sShagami = [
+      ...(m.lines ?? []),
+      ...(m.sections ?? []),
+      ...(m.angles ?? []),
+      ...(m.marks ?? []),
+    ].some((x) => x.shag === 1);
+    check(
+      !sShagami ||
+        [HL, HL_HIDDEN, SOLID_THEME.width.hlMarker].some((x) =>
+          svg.includes(`stroke-width="${x}"`),
+        ) ||
+        svg.includes('data-hl="1"'),
+      where('на чертеже шаг 1 не выделен'),
+    );
+  }
+
+  for (const [no, razbory] of [['15', RAZBORY_15]]) {
     await page.goto(BASE + `/zadaniya/${no}/`, { waitUntil: 'networkidle' });
     const ssylki = await page
       .locator('.stereo-tip--razbor')

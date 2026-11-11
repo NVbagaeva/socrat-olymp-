@@ -492,3 +492,13 @@
   border-radius: 20px;
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
 }
+
+/* Живой чертёж внутри стеклянной карточки: размытие фона под карточкой
+   (backdrop-filter) пересчитывается на каждом кадре поворота — кадр
+   вырастал с 17 до 33 мс. У таких карточек размытия нет: фон стекла и
+   так почти непрозрачный. */
+.stk-glass:has(.vr__oblast),
+.o3-prep .o3-zad {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
