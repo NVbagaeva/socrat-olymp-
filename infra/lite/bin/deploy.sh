@@ -4,7 +4,8 @@
 #
 # 1. Секреты сервера — один раз (bin/gen-env.sh).
 # 2. Таймеры ночной копии и проверки здоровья (systemd).
-# 3. Образы и контейнеры: docker compose pull и up --wait.
+# 3. Образы, свободные порты 80 и 443 (bin/free-ports.sh), контейнеры:
+#    docker compose pull и up --wait.
 set -eu
 . "$(dirname "$0")/lib.sh"
 cd "$LITE_DIR"
@@ -44,6 +45,8 @@ until dc pull --quiet; do
   attempt=$((attempt + 1))
   sleep $((attempt * 15))
 done
+
+"$LITE_DIR/bin/free-ports.sh"
 
 log "Контейнеры"
 dc up -d --wait --wait-timeout 180 --remove-orphans

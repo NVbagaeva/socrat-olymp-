@@ -38,7 +38,15 @@ if [ "${MAIL_NO_AUTH:-}" = "1" ]; then
 else
   auth=$(printf 'user = "%s:%s"' "$SMTP_USER" "$SMTP_PASS")
 fi
-printf '%s\n' "$auth" | curl --silent --show-error --config - \
+# Подробный вывод curl остаётся в переменной: в нём есть строка входа.
+# Наружу — только ответ почтового сервера с кодом ошибки (4xx/5xx).
+if err=$(printf '%s\n' "$auth" | curl --verbose --silent --show-error --config - \
   --url "$scheme://$host:$port" \
-  --mail-from "${SMTP_FROM:-$SMTP_USER}" --mail-rcpt "$to" --upload-file "$body"
-log "Письмо ушло: $subject"
+  --mail-from "${SMTP_FROM:-$SMTP_USER}" --mail-rcpt "$to" --upload-file "$body" 2>&1 >/dev/null); then
+  log "Письмо ушло: $subject"
+else
+  rc=$?
+  printf '%s\n' "$err" | grep -E '^(curl: |< [45][0-9][0-9][ -])' \
+    | sed 's/^< /Ответ почтового сервера: /' >&2 || true
+  exit "$rc"
+fi
