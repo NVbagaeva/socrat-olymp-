@@ -7,6 +7,7 @@ import { names8Html } from '@/lib/vychisleniya/names';
 import { SKILLS } from '@/lib/vychisleniya/skills';
 import { Formula } from './Formula';
 import { Trenazher8 } from './Trenazher8';
+import { IssueHomeworkSkills8 } from '@/components/dz/Razdel8Dz';
 
 /**
  * Вкладка «Тренажёр» задания №8: заголовок и конфигуратор.
@@ -33,6 +34,8 @@ export function Trenazher8Tab({ base }: { base: string }) {
       </header>
       <TabScrollOnMount />
       <Trenazher8 base={base} skills={skills} total={total} names={names8Html()} />
+      {/* Репетитору со входом: ДЗ по одному типу. */}
+      <IssueHomeworkSkills8 />
     </section>
   );
 }

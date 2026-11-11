@@ -556,6 +556,12 @@ jobs:
         working-directory: app
         run: pnpm test:progress-import
 
+      # Печать ДЗ: лист ученика и лист учителя — из одних и тех же задач ДЗ,
+      # на листе ученика нет ответов и меток «банк/новая», клетка — только у него.
+      - name: Печать ДЗ — один набор задач на листе ученика и учителя
+        working-directory: app
+        run: pnpm test:dz-print
+
       # Каталог прототипов кабинета (src/content/kabinet/katalog.json и
       # supabase/seed/kabinet_katalog.sql) совпадает с банком в коде.
       - name: Каталог банка для кабинета

@@ -34,7 +34,10 @@ export function shagHtml(step: Shag): ShagHtml {
 }
 
 export function priznakiHtml(list: readonly Priznak[] | undefined): PriznakHtml[] {
-  return (list ?? []).map((id) => ({ title: PRIZNAKI[id].title, html: typeset(PRIZNAKI[id].text) }));
+  return (list ?? []).map((id) => ({
+    title: PRIZNAKI[id].title,
+    html: typeset(PRIZNAKI[id].text),
+  }));
 }
 
 export function razborData(steps: readonly Shag[], delimost?: readonly Priznak[]): RazborHtml {
@@ -47,17 +50,22 @@ export function razborData(steps: readonly Shag[], delimost?: readonly Priznak[]
  * №12. Признаки делимости — строкой под шагами.
  */
 export function razborStepsHtml(steps: readonly Shag[], delimost?: readonly Priznak[]): string {
-  const items = steps
-    .map((step) => {
-      const s = shagHtml(step);
-      return `<li class="sheet-step"><b>${s.chto}.</b> ${s.tex}</li>`;
-    })
+  return razborSheetSteps(razborData(steps, delimost));
+}
+
+/**
+ * То же по готовому решению (RazborHtml) — печать ДЗ берёт решение из
+ * базы, а не из движка. Разметка шагов не очищается и не экранируется
+ * здесь: решение из базы очищает тот, кто его передаёт (lib/dz/print.ts).
+ */
+export function razborSheetSteps(razbor: RazborHtml): string {
+  const items = razbor.shagi
+    .map((s) => `<li class="sheet-step"><b>${s.chto}.</b> ${s.tex}</li>`)
     .join('');
-  const signs = priznakiHtml(delimost);
   const tail =
-    signs.length === 0
+    razbor.delimost.length === 0
       ? ''
-      : `<p class="sheet-step-note"><b>Признаки делимости.</b> ${signs
+      : `<p class="sheet-step-note"><b>Признаки делимости.</b> ${razbor.delimost
           .map((p) => `${p.title}: ${p.html}`)
           .join(' ')}</p>`;
   return `<ol class="sheet-steps">${items}</ol>${tail}`;

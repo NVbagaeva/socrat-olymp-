@@ -3,9 +3,11 @@
 
    Запуск: pnpm test:soglasiya-sql (или pnpm test:kabinet-sql — то же)
 
-   Два набора, каждый в своей базе. Кабинет (роли, приглашения, классы,
+   Наборы, каждый в своей базе. Кабинет (роли, приглашения, классы,
    ДЗ, попытки, сессии тренажёра) — supabase/tests/kabinet.test.sql,
-   план — docs/kabinet-roli-dz.md. Согласия:
+   план — docs/kabinet-roli-dz.md. Кабинет репетитора и ДЗ №8 (код
+   класса, задачи и проверка ответа в базе) — supabase/tests/dz.test.sql,
+   контракт — docs/kabinet-dz-8.md. Согласия:
 
    Поднимает временный PostgreSQL (initdb в папке ОС для временных
    файлов, свой порт и сокет), применяет заглушку Supabase
@@ -188,6 +190,21 @@ const SUITES = [
       ['variant.test.sql', path.join(SUPA, 'tests', 'variant.test.sql'), normalizeCasesSql],
     ],
   },
+  {
+    /* Кабинет репетитора и ДЗ №8 (docs/kabinet-dz-8.md): код класса и
+       вступление по коду, имя ученика для репетитора, задачи ДЗ и ключ,
+       проверка ответа в базе, когда ученик видит решение. На фоне прав
+       своего сервера — как правила доступа. */
+    name: 'Кабинет репетитора и ДЗ №8',
+    db: 'dz',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['dz.test.sql', path.join(SUPA, 'tests', 'dz.test.sql')],
+    ],
+  },
 ];
 
 let failed = false;
@@ -221,4 +238,6 @@ for (const suite of SUITES) {
 
 stop();
 if (failed) process.exit(1);
-console.log('\nСогласия, кабинет, правила доступа и онлайн-вариант в базе: все проверки прошли.');
+console.log(
+  '\nСогласия, кабинет, правила доступа, онлайн-вариант и ДЗ №8 в базе: все проверки прошли.',
+);

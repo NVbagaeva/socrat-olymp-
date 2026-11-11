@@ -1,6 +1,7 @@
 'use client';
 
 import type { RazborHtml } from '@/lib/vychisleniya/razbor';
+import './razbor8.css';
 
 /**
  * Решение задачи №8 по шагам: у каждого шага — подпись «что делаем и

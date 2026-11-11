@@ -178,6 +178,7 @@
     "test:auth-disabled": "node scripts/check-auth.mjs --disabled",
     "test:auth-no-header": "node scripts/check-auth.mjs --no-header",
     "test:progress-import": "node scripts/check-progress-import.mjs",
+    "test:dz-print": "node scripts/check-dz-print.mjs",
     "test:otvet": "node scripts/check-otvet.mjs",
     "test:progress-log": "node scripts/check-progress-log.mjs",
     "test:z8-uchenik": "node scripts/check-z8-uchenik.mjs",
