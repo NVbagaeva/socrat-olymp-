@@ -18,7 +18,7 @@ mask "${S3_ACCESS_KEY_ID:-}"
 mask "${S3_SECRET_ACCESS_KEY:-}"
 : "${BACKUP_AGE_IDENTITY:?нет секрета BACKUP_AGE_IDENTITY}"
 for tool in rclone age; do
-  command -v "$tool" >/dev/null || sudo apt-get install -y -q "$tool" >/dev/null
+  command -v "$tool" >/dev/null || runner_install "$tool"
 done
 
 # Хранилище — те же переменные, что на сервере (bin/lib.sh, s3_env).
