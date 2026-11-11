@@ -1,105 +1,128 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import { clsx } from 'clsx';
-import { Button, Input } from '@/components/ui';
-import { pickRound, useRound } from '@/lib/trainerRound';
-import { progress8 } from '@/lib/vychisleniya/progress';
-import { answerMatches, openText } from '@/lib/vychisleniya/secret';
-import { kindTitle, type Task8 } from '@/lib/vychisleniya/session';
-import { SKILL_FORMULA } from '@/content/vychisleniya';
-import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
-import { Formula } from './Formula';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useBeforeFinish } from '../session/useBeforeFinish';
 import { useSessionReport } from '../session/useSessionReport';
+import type { Shag } from '../steklo';
+import { EkranZadachi, type SostoyanieZadachi } from '../trening';
+import { TRENAZHER8, podskazkaTipa, shagiTipa } from '@/content/vychisleniya8';
+import { pickRound, useRound } from '@/lib/trainerRound';
 import type { TaskMark } from '@/lib/trainerSession/types';
+import {
+  progress8,
+  toggleZakladka8,
+  zakladki8,
+  zapisatPopytku8,
+} from '@/lib/vychisleniya/progress';
+import { answerMatches, openText } from '@/lib/vychisleniya/secret';
+import { levelOfTaskId, makeTask, randomSeed, type Task8 } from '@/lib/vychisleniya/session';
+import { typeset } from '@/lib/tex';
+import { ZAMENY8, type Trenazher8Payload } from './trenazher8Payload';
 import type { Trenazher8Ui } from './trenazher8Ui';
 
 export interface Trenazher8ScreenProps {
-  pool: Task8[];
+  payload: Trenazher8Payload;
   roundKey: string;
   /** Состояние экрана из сохранённой тренировки. null — тренировка новая. */
   restored: Trenazher8Ui | null;
-  /** Сообщить оболочке сессии о новом состоянии (она его сохранит). */
   report: (ui: Trenazher8Ui) => void;
   /** Активное время тренировки, мс: пауза и скрытая вкладка не идут. */
   elapsed: () => number;
-  /** Последнее задание решено: показать итоги. */
   onFinish: () => void;
-  /** Контроль: без решения до конца сессии. */
-  control?: boolean;
+  setBeforeFinish: (handler: (() => void) | null) => void;
+  /** Название типа над условием: прототип → HTML. */
+  nazvaniya: Record<string, string>;
 }
-
-const VERDICT = {
-  right: { title: 'Верно!' },
-  wrong: { title: 'Есть ошибка' },
-};
 
 /** Разбор: закрыт тем же отпечатком, что и ответ; раскрывается по нажатию. */
 export function razborOf(task: Task8): string[] {
   try {
     const value: unknown = JSON.parse(openText(task.razbor, task.seal));
-    return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+    return Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === 'string')
+      : [];
   } catch {
     return [];
   }
 }
 
+/** Шаги решения с подписями: формулы из разбора, подписи — по подтипу. */
+export function shagiOf(task: Task8): Shag[] {
+  const podpisi = shagiTipa(task.prototype, task.podtip);
+  return razborOf(task).map((line, i) => ({
+    chtoHtml: typeset(podpisi?.[i] ?? ''),
+    formulaHtml: line,
+  }));
+}
+
+/** Сколько seed пробовать для похожей задачи. */
+const ATTEMPTS = 20;
+
 /**
  * Экран задания тренажёра №8.
  *
- * Условие и одно поле для ответа. Ответ сверяется с отпечатком:
- * числа в разметке нет. Разбор закрыт и открывается только по
- * просьбе ученика; открытое решение не засчитывается.
+ * Условие и одно поле для ответа. Ответ сверяется с отпечатком: числа
+ * в разметке нет. Подсказка (первый шаг вопросом) бесплатна; решение
+ * открывается по просьбе — тогда задача «решена с разбором» и в
+ * прогресс как верная не идёт. «Похожая задача» заменяет текущую
+ * свежей того же типа. В режиме без подсказок ни того, ни другого
+ * нет до итогов.
  */
 export function Trenazher8Screen({
-  pool,
+  payload,
   roundKey,
   restored,
   report,
   elapsed,
   onFinish,
-  control = false,
+  setBeforeFinish,
+  nazvaniya,
 }: Trenazher8ScreenProps) {
-  const kinds = useMemo(() => pool.map((item) => kindTitle(item.prototype)), [pool]);
+  const pool = payload.tasks;
+  const control = payload.control;
+  const kinds = useMemo(() => pool.map((item) => item.prototype), [pool]);
   const build = useCallback(() => pickRound(kinds, pool.length), [kinds, pool.length]);
   const order = useRound(roundKey, build, restored?.order);
-  const tasks = useMemo(
-    () => (order.length === 0 ? pool : order.map((at) => pool[at]).filter((item): item is Task8 => item !== undefined)),
-    [order, pool],
-  );
 
-  /* Всё, что ученик успел сделать, приходит из сохранённой тренировки:
-     вернувшись в тренажёр, он продолжает с того же места. */
   const [index, setIndex] = useState(restored?.index ?? 0);
   const [value, setValue] = useState(restored?.value ?? '');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(restored?.checked ?? null);
   const [marks, setMarks] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
-  /* Задания, в которых была ошибка: на итогах они отличаются от пропущенных. */
   const [tried, setTried] = useState<Record<number, true>>(restored?.tried ?? {});
-  /* Решение хранится флагом: текст закрыт отпечатком и раскрывается заново. */
   const [solutionOpen, setSolutionOpen] = useState(restored?.solutionOpen ?? false);
+  const [hintOpen, setHintOpen] = useState(restored?.hintOpen ?? false);
   const [misses, setMisses] = useState(restored?.misses ?? 0);
-  /* Время тренировки считает оболочка сессии; здесь — время на одно
-     задание, от первой проверки. */
-  const [taskFrom, setTaskFrom] = useState<number | null>(restored?.taskFrom ?? null);
+  /* Время на задачу — с показа; у восстановленной тренировки — как было. */
+  const [taskFrom, setTaskFrom] = useState<number | null>(() => restored?.taskFrom ?? elapsed());
   const [failed, setFailed] = useState(restored?.failed ?? false);
+  const [pohozhie, setPohozhie] = useState<Record<string, string>>(restored?.pohozhie ?? {});
+  const zakladki = zakladki8.use();
 
-  function startClock() {
-    if (taskFrom === null) {
-      setTaskFrom(elapsed());
+  const poolIndex = order.length === 0 ? index : (order[index] ?? index);
+  const total = order.length === 0 ? pool.length : order.length;
+
+  /* Замены «Похожая задача» собираются по seed при каждом входе. */
+  const zameny = useMemo(() => {
+    const out: Record<number, Task8> = {};
+    for (const [at, seed] of Object.entries(pohozhie)) {
+      const source = pool[Number(at)];
+      if (source === undefined) {
+        continue;
+      }
+      try {
+        out[Number(at)] = makeTask(source.prototype, seed, levelOfTaskId(source.id));
+      } catch {
+        /* Сайт обновился и seed не подошёл — остаётся исходная задача. */
+      }
     }
-  }
+    return out;
+  }, [pohozhie, pool]);
+  useEffect(() => {
+    ZAMENY8.set(payload, zameny);
+  }, [payload, zameny]);
 
-  function taskSeconds(): number {
-    return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
-  }
+  const task = zameny[poolIndex] ?? pool[poolIndex];
 
-  function remember(item: Task8, right: boolean, clean: boolean) {
-    progress8.recordAttempt({ kind: item.prototype, taskId: item.id, right, clean, seconds: taskSeconds() });
-  }
-
-  /* Всё состояние экрана — оболочке сессии: она сохраняет его при
-     каждом изменении, а при возвращении отдаёт обратно (restored). */
   useSessionReport<Trenazher8Ui>(report, {
     index,
     marks,
@@ -108,31 +131,60 @@ export function Trenazher8Screen({
     value,
     checked,
     solutionOpen,
+    hintOpen,
     misses,
     failed,
     taskFrom,
+    pohozhie,
   });
 
-  const found = tasks[index];
-  if (found === undefined) {
+  const shagi = useMemo(() => (task === undefined ? [] : shagiOf(task)), [task]);
+  const podskazkaHtml = useMemo(() => {
+    const text = task === undefined ? null : podskazkaTipa(task.prototype, task.podtip);
+    return text === null ? null : typeset(text);
+  }, [task]);
+
+  function taskSeconds(): number {
+    return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
+  }
+
+  function remember(item: Task8, itog: 'right' | 'wrong' | 'revealed', clean: boolean) {
+    progress8.recordAttempt({
+      kind: item.prototype,
+      taskId: item.id,
+      right: itog === 'right',
+      clean,
+      seconds: taskSeconds(),
+      itog,
+    });
+    zapisatPopytku8(item.prototype, itog === 'right' && clean);
+  }
+
+  /* Досрочное «Завершить»: начатая, но не закрытая задача с ошибкой — в историю. */
+  useBeforeFinish(setBeforeFinish, () => {
+    if (task !== undefined && checked === 'wrong' && marks[index] === undefined) {
+      remember(task, 'wrong', false);
+    }
+  });
+
+  if (task === undefined) {
     return null;
   }
-  const task: Task8 = found;
-  const total = tasks.length;
+  const zadacha: Task8 = task;
+
+  const revealed = solutionOpen && checked !== 'right';
+  const sostoyanie: SostoyanieZadachi =
+    checked === 'right' ? 'verno' : revealed ? 'razbor' : checked === 'wrong' ? 'neverno' : 'vvod';
   const last = index === total - 1;
-  const ready = value.trim() !== '';
-  /* Открытое решение до верного ответа — задача не засчитана. */
-  const solution = solutionOpen ? razborOf(task) : null;
-  const revealed = solution !== null && checked !== 'right';
+  const zakryta = marks[index] !== undefined;
 
   function check() {
-    startClock();
-    const right = answerMatches(value, task.seal);
+    const right = answerMatches(value, zadacha.seal);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
-      const clean = !failed && solution === null;
-      setMarks({ ...marks, [index]: clean || solution === null ? 'right' : 'hinted' });
-      remember(task, solution === null, clean);
+      const clean = !failed;
+      setMarks({ ...marks, [index]: 'right' });
+      remember(zadacha, 'right', clean);
     } else {
       setFailed(true);
       setMisses(misses + 1);
@@ -141,144 +193,90 @@ export function Trenazher8Screen({
   }
 
   function reveal() {
-    startClock();
-    setSolutionOpen(true);
-    if (checked !== 'right') {
-      /* Решение открыто до ответа: задача пройдена с подсказкой. */
+    const wasOpen = solutionOpen;
+    setSolutionOpen(!wasOpen);
+    if (!wasOpen && checked !== 'right' && !zakryta) {
+      /* Решение открыто до ответа: задача закрыта «с разбором». */
       setMarks({ ...marks, [index]: 'hinted' });
-      remember(task, false, false);
+      remember(zadacha, 'revealed', false);
     }
   }
 
-  function next() {
-    setTaskFrom(null);
+  function resetTask() {
+    setTaskFrom(elapsed());
     setFailed(false);
-    setIndex(index + 1);
     setValue('');
     setChecked(null);
     setSolutionOpen(false);
+    setHintOpen(false);
   }
 
-  const nextButton = last ? (
-    <Button onClick={onFinish}>Смотреть результат →</Button>
-  ) : (
-    <Button onClick={next}>Следующее задание →</Button>
-  );
+  function next() {
+    if (checked === 'wrong' && !zakryta) {
+      remember(zadacha, 'wrong', false);
+    }
+    if (last) {
+      onFinish();
+      return;
+    }
+    resetTask();
+    setIndex(index + 1);
+  }
 
-  const done = checked === 'right' || revealed;
+  function pohozhaya() {
+    for (let i = 0; i < ATTEMPTS; i += 1) {
+      const seed = randomSeed();
+      try {
+        const fresh = makeTask(zadacha.prototype, seed, levelOfTaskId(zadacha.id));
+        if (fresh.questionHtml === zadacha.questionHtml) {
+          continue;
+        }
+      } catch {
+        continue;
+      }
+      /* Закрытая задача уходит из отметок: решается новая. */
+      const nextMarks = { ...marks };
+      delete nextMarks[index];
+      const nextTried = { ...tried };
+      delete nextTried[index];
+      setMarks(nextMarks);
+      setTried(nextTried);
+      setPohozhie({ ...pohozhie, [poolIndex]: seed });
+      resetTask();
+      return;
+    }
+  }
 
   return (
-    <section className="ttask">
-      {/* Номер задания, решённое и время показывает панель тренировки
-          над экраном (components/tasks/session). */}
-      <ol className="ttask__dots" aria-hidden="true">
-        {tasks.map((item, i) => (
-          <li
-            key={`${i}-${item.id}`}
-            className={clsx('ttask__dot', marks[i] === 'right' && 'is-done', marks[i] === 'hinted' && 'is-hinted', i === index && 'is-current')}
-          >
-            {marks[i] === undefined ? i + 1 : <RightIcon />}
-          </li>
-        ))}
-      </ol>
-
-      <article className="ptask__card">
-        <div className="ptask__text">
-          <div className="ptask__question" dangerouslySetInnerHTML={{ __html: task.questionHtml }} />
-        </div>
-      </article>
-
-      <div className="ttask__answer">
-        <p className="ptask__label" id="ttask-answer-label">
-          Ваш ответ:
-        </p>
-        <Input
-          className="ttask__input"
-          value={value}
-          state={checked === null ? 'default' : checked === 'right' ? 'success' : 'error'}
-          inputMode="text"
-          autoComplete="off"
-          aria-labelledby="ttask-answer-label"
-          readOnly={checked === 'right'}
-          onChange={(event) => {
-            setValue(event.target.value);
-            if (checked === 'wrong') {
-              setChecked(null);
-            }
-          }}
-        />
-
-        {checked === null ? null : (
-          <div className={clsx('tverdict', `tverdict--${checked}`)} role="status">
-            <p className="tverdict__title">
-              <span className="tverdict__ico">{checked === 'right' ? <RightIcon /> : <WrongIcon />}</span>
-              {VERDICT[checked].title}
-            </p>
-            {control ? null : (
-              <p className="tverdict__text">
-                {checked === 'right'
-                  ? revealed
-                    ? 'Ответ верный, но решение было открыто — задача не засчитана.'
-                    : 'Ответ сошёлся с отпечатком верного.'
-                  : 'Проверьте вычисления: ответ не сошёлся. Можно исправить и проверить ещё раз.'}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Бесплатная подсказка: только формула навыка, без разбора чисел.
-            Зачёт не снимает — в отличие от «Показать решение». В режиме
-            «Контроль» подсказок нет вовсе. */}
-        {checked === 'wrong' && !control ? (
-          <aside className="ptask__hint">
-            <p className="ptask__hint-head">
-              <HintIcon />
-              Подсказка
-            </p>
-            <div className="ptask__hint-text">
-              <Formula tex={SKILL_FORMULA[task.skill] ?? ''} />
-            </div>
-          </aside>
-        ) : null}
-
-        {solution === null ? null : (
-          <div className="z8-razbor" role="region" aria-label="Решение">
-            <p className="z8-razbor__title">Решение</p>
-            <ol className="z8-razbor__steps">
-              {solution.map((line, i) => (
-                <li key={i} dangerouslySetInnerHTML={{ __html: line }} />
-              ))}
-            </ol>
-          </div>
-        )}
-
-        <div className="ttask__actions">
-          {done ? (
-            <>
-              {nextButton}
-              {solution === null && !control ? (
-                <Button variant="ghost" onClick={reveal}>
-                  Показать решение
-                </Button>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <Button onClick={check} disabled={!ready}>
-                Проверить
-              </Button>
-              {control ? null : (
-                <span className="thint__offer">
-                  <Button variant="ghost" onClick={reveal}>
-                    Показать решение
-                  </Button>
-                  <span className="thint__warn">Задача не будет засчитана.</span>
-                </span>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </section>
+    <EkranZadachi
+      nomer={index + 1}
+      vsego={total}
+      tipHtml={nazvaniya[zadacha.prototype] ?? zadacha.prototype}
+      uslovieHtml={zadacha.questionHtml}
+      value={value}
+      onValue={(next) => {
+        setValue(next);
+        if (checked === 'wrong') {
+          setChecked(null);
+        }
+      }}
+      sostoyanie={sostoyanie}
+      onCheck={check}
+      podskazka={
+        control || podskazkaHtml === null
+          ? null
+          : { html: podskazkaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }
+      }
+      reshenie={control ? null : { shagi, open: solutionOpen, onToggle: reveal }}
+      onPohozhaya={pohozhaya}
+      onNext={next}
+      last={last}
+      zakladka={{ on: zakladki.includes(zadacha.id), onToggle: () => toggleZakladka8(zadacha.id) }}
+      bezPodskazok={control}
+      labels={{
+        ...TRENAZHER8.ekran,
+        vernoLead: TRENAZHER8.ekran.vernoLead(checked === 'right' ? taskSeconds() : null),
+      }}
+    />
   );
 }

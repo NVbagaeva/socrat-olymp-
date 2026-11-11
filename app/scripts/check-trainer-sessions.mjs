@@ -293,6 +293,8 @@ async function chooseAll19(page) {
                { text } — ввести в поле, { option } — номер варианта
                (.popt), { method } — название метода (.z4-picker__btn);
      start   — как начать тренировку (по умолчанию «Начать тренировку»);
+     configButton — кнопка, по которой виден выбор тренировки (по
+               умолчанию «Начать тренировку»; у №8 — карточка режима);
      all     — как выбрать «Все» задания (для замера восстановления);
      rep     — представитель: на нём идут сценарии 4, 5, 7, 8;
      tabs    — false, если у страницы нет ленты вкладок (метку не искать). */
@@ -305,7 +307,25 @@ async function pressStart(page, timeout) {
     .click(timeout === undefined ? {} : { timeout });
 }
 
-/** Самая большая тренировка №8, №2: режим «Смешанная», количество «Все (N)». */
+/** №8: карточка «Все типы вперемешку» — десять задач, без выбора. */
+async function start8(page, timeout) {
+  await page
+    .getByRole('button', { name: /^Все типы вперемешку/ })
+    .first()
+    .click(timeout === undefined ? {} : { timeout });
+}
+
+/** Самая большая тренировка №8: «Выбрать темы» → все типы → «Без конца»; дальше — «Начать тренировку». */
+async function chooseAll8(page) {
+  await page
+    .getByRole('button', { name: /^Выбрать темы/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: 'Выбрать все', exact: true }).click();
+  await page.getByRole('button', { name: 'Без конца', exact: true }).click();
+}
+
+/** Самая большая тренировка №2: режим «Смешанная», количество «Все (N)». */
 async function chooseAll(page) {
   await page
     .getByRole('radio', { name: /^Смешанная/ })
@@ -350,7 +370,10 @@ const TRAINERS = [
     url: '/zadaniya/8/trenazher/',
     scope: '8',
     answer: answer8,
-    all: chooseAll,
+    /* Стартовый экран — три режима: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
     rep: true,
   },
   { name: '№2', url: '/zadaniya/2/trenazher/', scope: '2', answer: answer2, all: chooseAll },
@@ -482,6 +505,7 @@ const ANSWER_INPUT = [
   'input.z3t__input',
   'input.z7-otvet__input',
   'input.z6-otvet__input',
+  'input.trn-input',
 ]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
@@ -494,6 +518,7 @@ const QUESTION = [
   '.z7-uslovie__text',
   '.z6-uslovie__text',
   '.z14-uslovie',
+  '.trn-uslovie',
 ]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
@@ -851,11 +876,13 @@ async function basicScenario(trainer) {
       rows['Верно'] === '1' && rows['Неверно'] === '1' && rows['Пропущено'] === String(total - 2),
       `${tag}: итоги — Верно 1, Неверно 1, Пропущено ${total - 2} (${JSON.stringify(rows)})`,
     );
-    const items = page.locator('.tsum__list .tsum__item');
+    /* Список задач итогов: общий экран (.tsum) или экран «Стеклянной
+       сцены» (.trn-itog-zadachi, №8); отметка — в классе строки. */
+    const items = page.locator('.tsum__list .tsum__item, .trn-itog-zadachi .trn-itog-zadacha');
     const first = await items.nth(0).getAttribute('class');
     const second = await items.nth(1).getAttribute('class');
     check(
-      /tsum__item--right/.test(first ?? '') && /tsum__item--wrong/.test(second ?? ''),
+      /--right/.test(first ?? '') && /--wrong/.test(second ?? ''),
       `${tag}: в списке итогов задание 1 «Верно», задание 2 «Неверно»`,
     );
     check(await waitNoRecord(page, trainer.scope), `${tag}: после итогов записи нет`);
@@ -1227,7 +1254,7 @@ async function staleScenario(trainer) {
       }
       check(
         await page
-          .getByRole('button', { name: /^Начать тренировку/ })
+          .getByRole('button', { name: trainer.configButton ?? /^Начать тренировку/ })
           .first()
           .isVisible(),
         `${tag}: выбор тренировки доступен`,

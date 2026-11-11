@@ -141,7 +141,7 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
    * Свой экран итогов вместо общего (онлайн-вариант: баллы, таблица
    * ответов, код результата). Не задан — общий экран итогов.
    */
-  summaryView?: (data: SummaryData, actions: { onNew: () => void }) => ReactNode;
+  summaryView?: (data: SummaryData, actions: SummaryActions<P>) => ReactNode;
   /**
    * Вход по ссылке на конкретный набор (ярлык режима, «Потренироваться»
    * с прототипа, ?tip=). Если в тренажёре есть незавершённая тренировка,
@@ -175,6 +175,22 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
   screen: (context: ScreenContext<P, U>) => ReactNode;
   /** Что внутри, для сообщения об ошибке. */
   what?: string;
+}
+
+/** Что получает свой экран итогов. */
+export interface SummaryActions<P> {
+  /** К выбору тренировки. */
+  onNew: () => void;
+  /** Начать новую тренировку сразу, минуя выбор. */
+  start: (payload: P) => void;
+  /** «Похожие задачи» по ошибкам и подсказкам: есть, когда задан similar и есть что повторять. */
+  onRetrySimilar?: () => void;
+  /** «Те же задачи» по ошибкам: есть, когда задан subset и есть что повторять. */
+  onRetrySame?: () => void;
+  /** Сколько заданий пойдёт в повтор. */
+  retryCount: number;
+  /** Похожие собираются: кнопка ждёт. */
+  building: boolean;
 }
 
 /** Что получает своя кнопка панели тренировки. */
@@ -981,9 +997,23 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   );
 
   if (view.kind === 'summary' && summaryView !== undefined) {
+    const retryCount = mistakesOf(view.data).length;
     return (
       <Slot
-        render={(data: SummaryData) => summaryView(data, { onNew: toConfig })}
+        render={(data: SummaryData) =>
+          summaryView(data, {
+            onNew: toConfig,
+            start,
+            retryCount,
+            building,
+            ...(similar === undefined || retryCount === 0
+              ? {}
+              : { onRetrySimilar: () => void retrySimilar(data) }),
+            ...(subset === undefined || retryCount === 0
+              ? {}
+              : { onRetrySame: () => retrySame(data) }),
+          })
+        }
         arg={view.data}
       />
     );

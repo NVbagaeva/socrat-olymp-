@@ -1,283 +1,460 @@
 'use client';
 
-import { useState } from 'react';
-import { Badge, Button } from '@/components/ui';
-import { Note, Option, OptionGroup, SkillCards, StepHead, type SkillItem } from '../configurator';
-import { trainerModes, trainerPage, type TrainerModeId } from '@/content/trainerModes';
-import { VYCHISLENIYA } from '@/content/vychisleniya';
-import { counted } from '@/lib/plural';
-import { progress8 } from '@/lib/vychisleniya/progress';
-import { buildSession8, kindTitle } from '@/lib/vychisleniya/session';
-import { LEVELS } from '@/lib/vychisleniya/skills';
-import type { Level } from '@/lib/vychisleniya/types';
+import { useEffect, useState } from 'react';
+import { TrainerSessionHost, type ConfiguratorApi, type SummaryActions } from '../session';
+import type { SummaryData } from '../session/TrainerSummary';
+import { ShagiResheniya } from '../steklo';
+import {
+  EkranZadachi as _EkranZadachi,
+  ItogiSessii,
+  ProgressPanel,
+  StartRezhimy,
+  VyborTem,
+  type GruppaVybora,
+  type ItogZadacha,
+  type Rezhim,
+  type StrokaGruppy,
+} from '../trening';
+import { GRUPPY8, PROTOTYPES8_ORDER, TRENAZHER8, gruppaOfPrototype } from '@/content/vychisleniya8';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
-import { TrainerSessionHost, type ConfiguratorApi } from '../session';
-import { Trenazher8Screen, razborOf } from './Trenazher8Screen';
-import { Trenazher8Stats } from './Trenazher8Stats';
+import { readSession } from '@/lib/trainerSession/store';
+import {
+  nedavnie8,
+  progress8,
+  stoitPovtorit8,
+  vybor8,
+  zakladki8,
+  type Vybor8,
+} from '@/lib/vychisleniya/progress';
+import {
+  buildByPrototypes,
+  makeTask,
+  mistakePrototypes,
+  prototypeOfTaskId,
+  type Task8,
+} from '@/lib/vychisleniya/session';
+import { Trenazher8Screen, shagiOf } from './Trenazher8Screen';
 import {
   isTrenazher8Payload,
   packTrenazher8,
   similarTrenazher8,
+  taskAt8,
   unpackTrenazher8,
   type Trenazher8Payload,
 } from './trenazher8Payload';
 import { readTrenazher8Ui, type Trenazher8Ui } from './trenazher8Ui';
 
+/* Компонент экрана подключается через Trenazher8Screen; импорт типа
+   нужен только проверке, что общий экран и тренажёр не разошлись. */
+void _EkranZadachi;
+
 export interface Trenazher8Props {
   /** Адрес вкладки: туда ведёт кнопка возврата с итогового экрана. */
   base: string;
-  /** Карточки навыков: собраны на сервере, формулы набраны KaTeX. */
-  skills: SkillItem[];
-  /** Сколько заданий во всём банке раздела. */
-  total: number;
+  /** Группы и типы для выбора тем: названия уже набраны KaTeX. */
+  gruppy: GruppaVybora[];
 }
 
 const COUNTS: (number | null)[] = [5, 10, 20, null];
+/** «Без конца»: столько задач собирается за раз. */
+const BEZ_KONCA = 40;
+/** Задач в быстрых режимах: «вперемешку» и «работа над ошибками». */
+const BYSTRO = 10;
+
+type Ekran = 'rezhimy' | 'temy';
+
+/** Адрес вкладки без ?tip=…: вопрос по ссылке не повторяется после перезагрузки. */
+function stripTip(): void {
+  const url = new URL(window.location.href);
+  if (url.searchParams.has('tip')) {
+    url.searchParams.delete('tip');
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+  }
+}
+
+function tipFromLocation(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  const tip = new URLSearchParams(window.location.search).get('tip');
+  return tip !== null && PROTOTYPES8_ORDER.includes(tip) ? tip : null;
+}
 
 /**
- * Тренажёр задания №8: оболочка сессии вокруг конфигуратора и экрана.
- * Задания собираются в браузере; в хранилище уходит только рецепт
- * (идентификаторы задач и подписи), открытые числа туда не попадают.
+ * Тренажёр задания №8: оболочка сессии вокруг стартовых режимов,
+ * выбора тем, экрана задачи и итогов. Задания собираются в браузере;
+ * в хранилище уходит только рецепт (идентификаторы задач и подписи),
+ * открытые числа туда не попадают.
  */
-export function Trenazher8({ base, skills, total }: Trenazher8Props) {
+export function Trenazher8({ base, gruppy }: Trenazher8Props) {
+  const nazvaniya = Object.fromEntries(
+    gruppy.flatMap((g) => g.tipy.map((t) => [t.id, t.nazvanieHtml])),
+  );
+  const [ekran, setEkran] = useState<Ekran>('rezhimy');
+  /* Часы на панели: по выбору ученика при старте или из записи. */
+  const [clock, setClock] = useState(true);
+
   return (
     <TrainerSessionHost<Trenazher8Payload, Trenazher8Ui>
       scope={scopeOfPath(base) ?? '8'}
       what="тренажёр"
       backHref={base}
+      /* Прямой заход по ссылке с типом: при незавершённой тренировке оболочка спросит. */
+      entryIntent={tipFromLocation() !== null}
+      onEntryResolved={() => {
+        stripTip();
+        setEkran('temy');
+      }}
       isPayload={isTrenazher8Payload}
       count={(payload) => payload.tasks.length}
       describe={(payload, at) => {
-        const task = payload.tasks[at];
+        const task = taskAt8(payload, at);
         if (task === undefined) {
           throw new Error('Нет задания');
         }
         return {
-          kind: kindTitle(task.prototype),
+          kind: task.prototype,
           html: task.questionHtml,
-          /* Разбор открывается только здесь, на итогах: он закрыт отпечатком. */
-          review: () => (
-            <ol className="z8-razbor__steps">
-              {razborOf(task).map((line, i) => (
-                <li key={i} dangerouslySetInnerHTML={{ __html: line }} />
-              ))}
-            </ol>
-          ),
+          review: () => <ShagiResheniya shagi={shagiOf(task)} />,
         };
       }}
-      subset={(payload, indexes) => ({
-        ...payload,
-        tasks: indexes.flatMap((at) => payload.tasks[at] ?? []),
-      })}
       similar={similarTrenazher8}
-      /* В записи — рецепт (идентификаторы и подписи): задачи по нему
-         собираются заново тем же генератором. */
       pack={packTrenazher8}
-      unpack={unpackTrenazher8}
-      summary={{ hintedLabel: 'Решено с открытым решением' }}
-      configurator={(api) => <Trenazher8Configurator skills={skills} total={total} api={api} />}
-      screen={({ payload, sessionId, restored, report, elapsed, finish }) => (
-        <Trenazher8Screen
-          pool={payload.tasks}
-          roundKey={sessionId}
-          restored={restored === null ? null : readTrenazher8Ui(restored)}
-          report={report}
-          elapsed={elapsed}
-          onFinish={finish}
-          control={payload.control}
+      unpack={(packed) => {
+        const payload = unpackTrenazher8(packed);
+        if (payload !== null) {
+          setClock(payload.timer !== false);
+        }
+        return payload;
+      }}
+      labels={{ clock }}
+      configurator={(api) => (
+        <Konfigurator8
+          gruppy={gruppy}
+          ekran={ekran}
+          setEkran={setEkran}
+          api={{
+            ...api,
+            start: (payload) => {
+              setClock(payload.timer !== false);
+              api.start(payload);
+            },
+          }}
         />
+      )}
+      summaryView={(data, actions) => (
+        <Itogi8
+          data={data}
+          actions={actions}
+          nazvaniya={nazvaniya}
+          gruppy={gruppy}
+          onVybor={() => {
+            setEkran('temy');
+            actions.onNew();
+          }}
+        />
+      )}
+      screen={({ payload, sessionId, restored, report, elapsed, finish, setBeforeFinish }) => (
+        <div className="trn">
+          <Trenazher8Screen
+            payload={payload}
+            roundKey={sessionId}
+            restored={restored === null ? null : readTrenazher8Ui(restored)}
+            report={report}
+            elapsed={elapsed}
+            onFinish={finish}
+            setBeforeFinish={setBeforeFinish}
+            nazvaniya={nazvaniya}
+          />
+        </div>
       )}
     />
   );
 }
 
-/**
- * Конфигуратор тренировки №8: навыки → режим → количество → уровень.
- * Навыков можно выбрать несколько: «Отработка» и «Контроль» идут по
- * выбранным, «Смешанная» и «Повтор ошибок» — по всему банку.
- *
- * Тот же порядок шагов, что у №12, свой компонент. «Начать
- * тренировку» собирает задачи в браузере: генератор считает свежие
- * числа, ответы сразу закрываются отпечатком.
- */
-function Trenazher8Configurator({
-  skills,
-  total,
+/** Строки прогресса по группам: решено, верно, «Стоит повторить». */
+function useStrokiProgressa(gruppy: GruppaVybora[]) {
+  const progress = progress8.useProgress();
+  const nedavnie = nedavnie8.use();
+  let resheno = 0;
+  let verno = 0;
+  const stroki: StrokaGruppy[] = gruppy.map((g) => {
+    let done = 0;
+    let right = 0;
+    for (const t of g.tipy) {
+      const tally = progress.kinds[t.id];
+      if (tally !== undefined) {
+        done += tally.done;
+        right += tally.right;
+      }
+    }
+    resheno += done;
+    verno += right;
+    return {
+      id: g.id,
+      nazvanie: g.nazvanie,
+      znakHtml: g.znakHtml,
+      ton: g.ton,
+      verno: right,
+      vsego: done,
+      ...(stoitPovtorit8(
+        nedavnie,
+        g.tipy.map((t) => t.id),
+      )
+        ? { metka: TRENAZHER8.progress.povtorit }
+        : {}),
+    };
+  });
+  return { stroki, resheno, verno, mistakes: progress.mistakes };
+}
+
+function Konfigurator8({
+  gruppy,
+  ekran,
+  setEkran,
   api,
 }: {
-  skills: SkillItem[];
-  total: number;
+  gruppy: GruppaVybora[];
+  ekran: Ekran;
+  setEkran: (ekran: Ekran) => void;
   api: ConfiguratorApi<Trenazher8Payload>;
 }) {
-  const first = skills[0];
-  /* Навыков можно выбрать несколько; последний снять нельзя. */
-  const [selected, setSelected] = useState<string[]>(first === undefined ? [] : [first.id]);
-  const [mode, setMode] = useState<TrainerModeId>('practice');
-  const [count, setCount] = useState<number | null>(10);
-  const [level, setLevel] = useState<Level>('base');
+  const { stroki, resheno, verno, mistakes } = useStrokiProgressa(gruppy);
+  const zakladki = zakladki8.use();
+  /* Последний выбор живёт в хранилище браузера: на сервере — по умолчанию. */
+  const vybor = vybor8.use();
+  const selected = new Set(vybor.tipy.length === 0 ? PROTOTYPES8_ORDER : vybor.tipy);
 
-  /* История ошибок только читается: «Повтор ошибок» доступен, когда
-     есть что повторять. */
-  const progress = progress8.useProgress();
-  const hasMistakes = progress.mistakes.length > 0;
+  function zapomnit(next: Vybor8) {
+    vybor8.write(next);
+  }
 
-  function toggleSkill(id: string) {
-    const next = selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id];
-    if (next.length > 0) {
-      setSelected(next);
+  function start(tasks: Task8[], control = vybor.bezPodskazok, timer = vybor.timer) {
+    if (tasks.length > 0) {
+      api.start({ tasks, control, timer });
     }
   }
 
-  const picked = skills.filter((item) => selected.includes(item.id));
-  const skill = picked[0] ?? first;
-  if (skill === undefined) {
-    return null;
-  }
-  const chosen = picked.length === 0 ? [skill] : picked;
-  const chosenTotal = chosen.reduce((sum, item) => sum + item.count, 0);
-  /* В строке сводки: один навык — названием, два — через «и», больше — числом. */
-  const chosenTitle =
-    mode === 'mixed'
-      ? 'Все навыки'
-      : chosen.length === 1
-        ? skill.title
-        : chosen.length === 2
-          ? chosen.map((item) => item.title).join(' и ')
-          : counted(chosen.length, 'навык', 'навыка', 'навыков');
-
-  const allCount =
-    mode === 'mixed' ? total : mode === 'mistakes' ? progress.mistakes.length : chosenTotal;
-  const modeTitle = trainerModes.find((item) => item.id === mode)?.title ?? '';
-  const chosenCount = count ?? allCount;
-
-  function start() {
-    if (skill === undefined) {
+  /* Пришли по ссылке «Потренировать этот тип»: тип запоминается как
+     выбранный; если нет незавершённой тренировки — сразу в задачи (иначе
+     оболочка спросит, и выбор тем откроется с этим типом). Адрес читается
+     в эффекте: при переходе по ссылке внутри сайта он обновляется после
+     первой отрисовки. */
+  useEffect(() => {
+    const tip = tipFromLocation();
+    if (tip === null) {
       return;
     }
-    const tasks = buildSession8({
-      skills:
-        mode === 'mixed' || mode === 'mistakes'
-          ? skills.map((item) => item.id)
-          : chosen.map((item) => item.id),
-      level: mode === 'mistakes' ? null : level,
-      count: chosenCount,
-      mode,
-      mistakes: progress.mistakes,
+    vybor8.write({ ...vybor8.read(), tipy: [tip] });
+    if (readSession(scopeOfPath(window.location.pathname) ?? '8').status !== 'ok') {
+      stripTip();
+      const tasks = buildByPrototypes([tip], BYSTRO);
+      if (tasks.length > 0) {
+        api.start({ tasks, control: false, timer: vybor8.read().timer });
+      }
+    }
+    // Один раз при входе.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const oshibki = mistakePrototypes(mistakes);
+  const rezhimy: Rezhim[] = [
+    {
+      id: 'mix',
+      ikonka: 'mix',
+      zag: TRENAZHER8.rezhimy.mix.zag,
+      lead: TRENAZHER8.rezhimy.mix.lead(BYSTRO),
+    },
+    {
+      id: 'temy',
+      ikonka: 'temy',
+      zag: TRENAZHER8.rezhimy.temy.zag,
+      lead: TRENAZHER8.rezhimy.temy.lead,
+    },
+    {
+      id: 'oshibki',
+      ikonka: 'oshibki',
+      zag: TRENAZHER8.rezhimy.oshibki.zag,
+      lead: TRENAZHER8.rezhimy.oshibki.lead(oshibki.length),
+      warm: true,
+      disabled: oshibki.length === 0,
+    },
+  ];
+
+  function pick(id: string) {
+    if (id === 'mix') {
+      start(buildByPrototypes(PROTOTYPES8_ORDER, BYSTRO), false);
+    } else if (id === 'temy') {
+      setEkran('temy');
+    } else if (id === 'oshibki') {
+      start(buildByPrototypes(oshibki, BYSTRO), false);
+    }
+  }
+
+  function startOtlozhennye() {
+    const tasks = zakladki.flatMap((id) => {
+      const [prototype, seed, level] = id.split('|');
+      if (prototype === undefined || seed === undefined) {
+        return [];
+      }
+      try {
+        return [makeTask(prototype, seed, level === 'base' || level === 'advanced' ? level : null)];
+      } catch {
+        return [];
+      }
     });
-    if (tasks.length === 0) {
-      return;
-    }
-    /* Оболочка сессии сохранит рецепт заданий и вернёт ученика в них. */
-    api.start({ tasks, control: mode === 'control' });
+    start(tasks, false);
+  }
+
+  if (ekran === 'temy') {
+    return (
+      <div className="trn">
+        <VyborTem
+          gruppy={gruppy}
+          selected={selected}
+          onSelected={(next) =>
+            zapomnit({ ...vybor, tipy: next.size === PROTOTYPES8_ORDER.length ? [] : [...next] })
+          }
+          counts={COUNTS}
+          count={vybor.count}
+          onCount={(count) => zapomnit({ ...vybor, count })}
+          timer={vybor.timer}
+          onTimer={(timer) => zapomnit({ ...vybor, timer })}
+          bezPodskazok={vybor.bezPodskazok}
+          onBezPodskazok={(bezPodskazok) => zapomnit({ ...vybor, bezPodskazok })}
+          onBack={() => setEkran('rezhimy')}
+          onStart={() => {
+            const tipy = PROTOTYPES8_ORDER.filter((id) => selected.has(id));
+            start(buildByPrototypes(tipy, vybor.count ?? BEZ_KONCA));
+          }}
+          labels={TRENAZHER8.vybor}
+        />
+      </div>
+    );
   }
 
   return (
-    <div className="cfg">
-      <h3 className="t-h3 cfg__title">{trainerPage.builder}</h3>
-
-      <div className="cfg__layout">
-        <div className="cfg__steps">
-          <section className="cfg-step" aria-labelledby="z8-step-skill">
-            <StepHead
-              id="z8-step-skill"
-              no={trainerPage.skill.step}
-              title={trainerPage.skill.title}
-              lead={trainerPage.skill.lead.replace('{family}', VYCHISLENIYA.title)}
+    <div className="trn">
+      <StartRezhimy
+        title={TRENAZHER8.rezhimy.title}
+        rezhimy={rezhimy}
+        onPick={pick}
+        dop={
+          <>
+            {zakladki.length === 0 ? null : (
+              <button
+                type="button"
+                className="stk-btn stk-btn--tihaya trn-otlozhennye"
+                onClick={startOtlozhennye}
+              >
+                {TRENAZHER8.rezhimy.otlozhennye(zakladki.length)}
+              </button>
+            )}
+            <ProgressPanel
+              stroki={stroki}
+              resheno={resheno}
+              verno={verno}
+              onReset={() => {
+                progress8.reset();
+                nedavnie8.clear();
+              }}
+              labels={{ ...TRENAZHER8.progress, otmena: 'Отмена' }}
             />
-            {/* Обёртка со своим классом: на узком экране карточка с формулой
-                раскладывается иначе, чем карточка с чертежом у №12. */}
-            <div className="z8-skills">
-              <SkillCards
-                items={skills}
-                selected={chosen.map((item) => item.id)}
-                onToggle={toggleSkill}
-                multiple
-                labelledBy="z8-step-skill"
-              />
-            </div>
-          </section>
-
-          <section className="cfg-step" aria-labelledby="z8-step-params">
-            <StepHead
-              id="z8-step-params"
-              no={trainerPage.params.step}
-              title={trainerPage.params.title}
-              lead={trainerPage.params.lead}
-            />
-            <div className="cfg-params">
-              <OptionGroup id="z8-param-mode" label={trainerPage.params.mode}>
-                {trainerModes.map((item) => {
-                  const locked = item.id === 'mistakes' && !hasMistakes;
-                  return (
-                    <Option
-                      key={item.id}
-                      checked={mode === item.id}
-                      disabled={locked}
-                      onSelect={() => setMode(item.id)}
-                      title={item.title}
-                      lead={locked ? trainerPage.params.noMistakes : item.lead}
-                    />
-                  );
-                })}
-              </OptionGroup>
-
-              <OptionGroup id="z8-param-count" label={trainerPage.params.count} compact>
-                {COUNTS.map((item) => (
-                  <Option
-                    key={item ?? 'all'}
-                    checked={count === item}
-                    onSelect={() => setCount(item)}
-                    title={item === null ? `${trainerPage.params.all} (${allCount})` : item}
-                  />
-                ))}
-              </OptionGroup>
-
-              {mode === 'mistakes' ? null : (
-                <OptionGroup id="z8-param-level" label={trainerPage.params.level}>
-                  {LEVELS.map((item) => (
-                    <Option
-                      key={item.id}
-                      checked={level === item.id}
-                      onSelect={() => setLevel(item.id)}
-                      title={item.nazvanie}
-                      lead={item.lead}
-                    />
-                  ))}
-                </OptionGroup>
-              )}
-            </div>
-          </section>
-        </div>
-
-        <aside className="cfg-summary" aria-labelledby="z8-summary-title">
-          <h3 className="cfg-summary__title" id="z8-summary-title">
-            {trainerPage.summary.title}
-          </h3>
-          <Badge tone="info">{VYCHISLENIYA.title}</Badge>
-          <p className="cfg-summary__skill">{chosenTitle}</p>
-          <p className="cfg-summary__count">
-            {counted(chosenCount, 'задание', 'задания', 'заданий')}
-          </p>
-          {chosen.length === 1 && mode !== 'mixed' ? (
-            <div className="cfg-summary__chart z8-formula z8-formula--big" aria-hidden="true">
-              {skill.chart}
-            </div>
-          ) : null}
-          <Note>{trainerPage.summary.note}</Note>
-        </aside>
-      </div>
-
-      <div className="cfg-bar">
-        <Button className="cfg-bar__start" size="lg" onClick={start}>
-          {trainerPage.start}
-        </Button>
-        <p className="cfg-bar__summary">
-          {VYCHISLENIYA.title} · {chosenTitle} · {modeTitle} ·{' '}
-          {counted(chosenCount, 'задание', 'задания', 'заданий')}
-        </p>
-      </div>
-
-      <Trenazher8Stats total={total} />
+          </>
+        }
+      />
     </div>
   );
 }
+
+function Itogi8({
+  data,
+  actions,
+  nazvaniya,
+  gruppy,
+  onVybor,
+}: {
+  data: SummaryData;
+  actions: SummaryActions<Trenazher8Payload>;
+  nazvaniya: Record<string, string>;
+  gruppy: GruppaVybora[];
+  onVybor: () => void;
+}) {
+  const payload = data.payload as Trenazher8Payload;
+  const poGruppam = new Map<string, { verno: number; vsego: number }>();
+  const zadachi: ItogZadacha[] = data.items.map((item) => {
+    const task = taskAt8(payload, item.poolIndex);
+    const prototype = task?.prototype ?? prototypeOfTaskId(item.kind);
+    const gruppa = gruppaOfPrototype(prototype);
+    if (gruppa !== undefined) {
+      const row = poGruppam.get(gruppa.id) ?? { verno: 0, vsego: 0 };
+      row.vsego += 1;
+      row.verno += item.mark === 'right' ? 1 : 0;
+      poGruppam.set(gruppa.id, row);
+    }
+    return {
+      kindHtml: nazvaniya[prototype] ?? prototype,
+      uslovieHtml: item.html,
+      mark: item.mark,
+      razbor: item.review,
+    };
+  });
+  const stroki: StrokaGruppy[] = gruppy.flatMap((g) => {
+    const row = poGruppam.get(g.id);
+    if (row === undefined) {
+      return [];
+    }
+    const prosel = row.verno / row.vsego < 0.5;
+    return [
+      {
+        id: g.id,
+        nazvanie: g.nazvanie,
+        znakHtml: g.znakHtml,
+        ton: g.ton,
+        verno: row.verno,
+        vsego: row.vsego,
+        ...(prosel ? { metka: TRENAZHER8.itogi.prosel } : {}),
+      },
+    ];
+  });
+  const verno = zadachi.filter((z) => z.mark === 'right').length;
+  const sRazborom = zadachi.filter((z) => z.mark === 'hinted').length;
+  const vsego = zadachi.length;
+  const dolya = vsego === 0 ? 0 : verno / vsego;
+  const srednee = vsego === 0 ? null : Math.round(data.seconds / vsego);
+
+  function eshcheRaz() {
+    const prototypes = payload.tasks.map((t) => t.prototype);
+    const tasks = buildByPrototypes(prototypes, payload.tasks.length);
+    if (tasks.length > 0) {
+      actions.start({ tasks, control: payload.control, timer: payload.timer !== false });
+    }
+  }
+
+  return (
+    <div className="trn">
+      <ItogiSessii
+        verno={verno}
+        vsego={vsego}
+        stroki={stroki}
+        zadachi={zadachi}
+        onRabota={actions.onRetrySimilar}
+        rabotaBusy={actions.building}
+        onEshcheRaz={eshcheRaz}
+        onVybor={onVybor}
+        labels={{
+          ...TRENAZHER8.itogi,
+          title: TRENAZHER8.itogi.title(dolya),
+          lead: TRENAZHER8.itogi.lead(data.seconds, srednee, sRazborom),
+          rabota:
+            actions.onRetrySimilar === undefined
+              ? null
+              : TRENAZHER8.itogi.rabota(actions.retryCount),
+        }}
+      />
+    </div>
+  );
+}
+
+/* GRUPPY8 нужен проверке типов: группы приходят пропсами с сервера. */
+void GRUPPY8;

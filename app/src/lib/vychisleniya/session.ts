@@ -23,6 +23,12 @@ export interface Task8 {
   /** Навык прототипа: S1 … S11. */
   skill: string;
   level: Level;
+  /**
+   * Подтип прототипа («1», «brackets»): по нему подбираются подписи
+   * шагов (content/vychisleniya8/tipy.ts). У записей до редизайна нет —
+   * тогда подписи общие для прототипа.
+   */
+  podtip?: string;
   questionHtml: string;
   /** Отпечаток ответа. */
   seal: string;
@@ -59,6 +65,7 @@ export function makeTask(prototype: string, seed: string, level: Level | null): 
     prototype,
     skill: skillOfPrototype(prototype)?.id ?? '',
     level: task.level,
+    podtip: task.podtip,
     questionHtml: typeset(task.uslovie),
     seal,
     razbor,
@@ -101,7 +108,9 @@ export function buildSession8(request: Session8Request): Task8[] {
           return [];
         }
         try {
-          return [makeTask(prototype, seed, level === 'base' || level === 'advanced' ? level : null)];
+          return [
+            makeTask(prototype, seed, level === 'base' || level === 'advanced' ? level : null),
+          ];
         } catch {
           return [];
         }
@@ -127,6 +136,81 @@ export function buildSession8(request: Session8Request): Task8[] {
 /** Название типа задания для статистики: название навыка. */
 export function kindTitle(prototype: string): string {
   return skillOfPrototype(prototype)?.nazvanie ?? prototype;
+}
+
+/* ── Сборка по прототипам: тренажёр после редизайна ──────────────
+   Выбор тем идёт по типам (прототипам), а не по навыкам; уровень не
+   выбирается — подтипы обоих уровней вперемешку. */
+
+/** Сколько попыток подобрать seed на одну задачу. */
+const ATTEMPTS = 20;
+
+/** Свежая задача прототипа: seed, на котором генератор не справился, заменяется следующим. */
+export function freshTask(prototype: string, level: Level | null = null): Task8 | null {
+  for (let i = 0; i < ATTEMPTS; i += 1) {
+    try {
+      return makeTask(prototype, randomSeed(), level);
+    } catch {
+      /* Параметры не подобрались — следующий seed. */
+    }
+  }
+  return null;
+}
+
+/**
+ * Тренировка из прототипов: задачи идут по кругу по перемешанному
+ * списку, числа у каждой свои. Условия не повторяются в пределах
+ * тренировки.
+ */
+export function buildByPrototypes(prototypes: string[], count: number): Task8[] {
+  const order = shuffled(prototypes.filter((id) => prototypeById(id) !== undefined));
+  if (order.length === 0) {
+    return [];
+  }
+  const tasks: Task8[] = [];
+  const seen = new Set<string>();
+  let misses = 0;
+  while (tasks.length < count && misses < count * ATTEMPTS) {
+    const prototype = order[(tasks.length + misses) % order.length] as string;
+    const task = freshTask(prototype);
+    if (task === null || seen.has(task.questionHtml)) {
+      misses += 1;
+      continue;
+    }
+    seen.add(task.questionHtml);
+    tasks.push(task);
+  }
+  return tasks;
+}
+
+/** Прототип задачи по её идентификатору «8.A|seed|base». */
+export function prototypeOfTaskId(id: string): string {
+  return id.split('|')[0] ?? id;
+}
+
+/**
+ * Уровень, с которым задача была собрана, по идентификатору: «any» —
+ * уровень не задавался (null). Похожая задача собирается с тем же
+ * условием на уровень, что и исходная, а не с уровнем её подтипа.
+ */
+export function levelOfTaskId(id: string): Level | null {
+  const level = id.split('|')[2];
+  return level === 'base' || level === 'advanced' ? level : null;
+}
+
+/**
+ * Типы, где были ошибки: по списку ошибочных задач из прогресса,
+ * без повторов, самые свежие первыми.
+ */
+export function mistakePrototypes(mistakes: readonly string[]): string[] {
+  const out: string[] = [];
+  for (let i = mistakes.length - 1; i >= 0; i -= 1) {
+    const prototype = prototypeOfTaskId(mistakes[i] as string);
+    if (!out.includes(prototype) && prototypeById(prototype) !== undefined) {
+      out.push(prototype);
+    }
+  }
+  return out;
 }
 
 export { SKILLS };

@@ -179,8 +179,8 @@ export const P8J: Prototype = {
         uslovie: naydi(tex),
         otvet: ans,
         razbor: [
-          `$${log(String(b ** m), String(a))} = \\dfrac{1}{${m}}${log(String(b), String(a))}$, $${log(String(b ** n), String(a))} = \\dfrac{1}{${n}}${log(String(b), String(a))}$`,
-          `$\\dfrac{1}{${m}} : \\dfrac{1}{${n}} = \\dfrac{${n}}{${m}} = ${d(ans)}$`,
+          `$${log(String(b ** m), String(a))} = ${odnaDolya(m)}${log(String(b), String(a))}$, $${log(String(b ** n), String(a))} = ${odnaDolya(n)}${log(String(b), String(a))}$`,
+          `$${odnaDolya(m, '1')} : ${odnaDolya(n, '1')} = ${m === 1 ? String(n) : `\\dfrac{${n}}{${m}}`} = ${d(ans)}$`,
         ],
         proverka: Math.log(a) / Math.log(b ** m) / (Math.log(a) / Math.log(b ** n)),
         signature: `${b}:${m}:${n}`,
@@ -247,7 +247,7 @@ export const P8K: Prototype = {
         otvet: ans,
         razbor: [
           `$${log(d(b), String(a))} \\cdot ${log(String(a), d(c))} = ${log(d(b), d(c))} = ${e}$, так как $${d(b)}^{${e}} = ${d(c)}$`,
-          `$${k} \\cdot (${e}) = ${ans}$`,
+          `$${k} \\cdot ${e < 0 ? `(${e})` : e} = ${ans}$`,
         ],
         proverka: k * (Math.log(a) / Math.log(b)) * (Math.log(c) / Math.log(a)),
         signature: `${b}:${e}`,
@@ -360,3 +360,8 @@ export const P8L: Prototype = {
     { n: 4, b: 3, m: 3, k: 20, where: 'arg' },
   ]),
 };
+
+/** Коэффициент 1/n перед логарифмом: при n = 1 — пусто (или «1», если нужна запись). */
+function odnaDolya(n: number, odin = ''): string {
+  return n === 1 ? odin : `\\dfrac{1}{${n}}`;
+}

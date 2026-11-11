@@ -215,7 +215,7 @@ export const P8R: Prototype = {
         uslovie: naydi(tex),
         otvet: ans,
         razbor: [
-          `$\\sin${angle} \\cdot \\cos${angle} = \\dfrac{1}{2}\\sin${doubled} = \\dfrac{1}{2} \\cdot ${tabTex(t)}$`,
+          `$\\sin${angle} \\cdot \\cos${angle} = \\dfrac{1}{2}\\sin${doubled} = \\dfrac{1}{2} \\cdot ${t.v < 0 ? `(${tabTex(t)})` : tabTex(t)}$`,
           `$${tex} = ${d(ans)}$`,
         ],
         proverka: c * Math.sqrt(t.r) * Math.sin(toRad(x)) * Math.cos(toRad(x)),

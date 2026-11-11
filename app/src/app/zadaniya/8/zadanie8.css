@@ -10,25 +10,6 @@
   margin-bottom: var(--space-6);
 }
 
-/* Лента вкладок: на узком экране едет вбок, а не переносится. */
-/* Формула вместо чертежа на карточке навыка и в сводке. */
-.z8-formula {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 56px;
-  color: var(--color-text);
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-}
-.z8-formula--big {
-  min-height: 72px;
-  font-size: var(--fs-lg);
-}
-.z8-formula .katex {
-  white-space: nowrap;
-}
-
 /* Разбор: рамка с шагами, как у плашки подсказки. */
 .z8-razbor {
   margin-top: var(--space-4);
@@ -82,99 +63,16 @@
   overflow-x: auto;
 }
 
-/* Карточка навыка с формулой. В общем слое на узком экране карточка —
-   строка с миниатюрой 64px справа; формула в такую ширину не входит,
-   поэтому здесь карточка остаётся столбиком: название, под ним формула. */
-.z8-skills .z8-formula {
-  max-width: 100%;
-  overflow-x: auto;
-}
-@media (max-width: 767.98px) {
-  .z8-skills .cfg-skill {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-2);
-  }
-  .z8-skills .cfg-skill__chart {
-    width: 100%;
-    max-width: none;
-  }
-  .z8-skills .z8-formula {
-    justify-content: flex-start;
-    min-height: 0;
-    font-size: var(--fs-caption);
-  }
-  .z8-memo__list,
-  .z8-razbor__steps {
-    font-size: var(--fs-caption);
-  }
-}
 /* Формулы в плашке «Запомни» не переносятся посередине: каждая — одна
    строка, длинная уезжает вбок вместе со списком. */
 .z8-memo__list .katex {
   white-space: nowrap;
 }
 
-/* ── Вкладка «О задании» ──────────────────────────────────────── */
-
-.z8-about {
-  display: grid;
-  gap: var(--space-8);
-}
-.z8-about__lead {
-  max-width: 64ch;
-}
-.z8-about__text {
-  margin-top: var(--space-2);
-  color: var(--color-text-secondary);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-}
-.z8-about__sub {
-  margin-bottom: var(--space-4);
-}
-.z8-about__groups {
-  display: grid;
-  gap: var(--space-6);
-}
-.z8-group {
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.z8-group__title {
-  font-size: var(--fs-h4);
-  line-height: var(--lh-h4);
-  font-weight: 600;
-}
-.z8-group__lead {
-  margin-top: var(--space-1);
-  color: var(--color-text-secondary);
-  font-size: var(--fs-body);
-}
-.z8-group__skills {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-}
-.z8-skill-tile {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-}
-.z8-skill-tile__title {
-  font-size: var(--fs-caption);
-  font-weight: 600;
-  color: var(--color-text);
-}
-.z8-skill-tile__formula {
-  color: var(--color-text-secondary);
-  overflow-x: auto;
-}
-.z8-skill-tile__formula .katex {
-  white-space: nowrap;
+/* ── Вкладки «О задании» и «Тренажёр» ─────────────────────────────
+   Оформлены общими компонентами «Стеклянной сцены»
+   (components/tasks/karta, components/tasks/trening): своих правил
+   у №8 здесь нет, только поле под липкую кнопку на телефоне. */
+.z8-trening .trainer__head {
+  display: none;
 }

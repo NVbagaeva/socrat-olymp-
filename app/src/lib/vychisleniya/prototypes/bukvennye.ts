@@ -56,7 +56,7 @@ function drawW1(r: Rng, decimal: boolean): Draft | null {
     otvet: ans,
     razbor: [
       `$${top} = (${k(p)}a - ${k(q)}b)(${k(p)}a + ${k(q)}b)$, после сокращения остаётся $${simplified}$`,
-      `$${k(p)} \\cdot ${d(a) === String(a) && a < 0 ? `(${d(a)})` : d(a)} ${minus ? '+' : '-'} ${k(q)} \\cdot ${b < 0 ? `(${d(b)})` : d(b)} = ${d(ans)}$`,
+      `$${d(p)} \\cdot ${a < 0 ? `(${d(a)})` : d(a)} ${minus ? '+' : '-'} ${d(q)} \\cdot ${b < 0 ? `(${d(b)})` : d(b)} = ${d(ans)}$`,
     ],
     proverka: (p * p * a * a - q * q * b * b) / den,
     signature: `${p}:${q}`,
@@ -225,7 +225,7 @@ export const P8Y: Prototype = {
       return {
         uslovie: naydiPri(tex, pri(a)),
         otvet: ans,
-        razbor: [`$a^{${d(x)}} \\cdot a^{${d(y)}} : a^{${d(z)}} = a^{${d(x)} ${y < 0 ? '-' : '+'} ${d(Math.abs(y))} - ${d(z)}} = a^{${d(target)}}$`, `$${d(a)}^{${d(target)}} = ${d(ans)}$`],
+        razbor: [`$a^{${d(x)}} \\cdot a^{${d(y)}} : a^{${d(z)}} = a^{${d(x)} ${y < 0 ? '-' : '+'} ${d(Math.abs(y))} - ${z < 0 ? `(${d(z)})` : d(z)}} = a^{${d(target)}}$`, `$${d(a)}^{${d(target)}} = ${d(ans)}$`],
         proverka: (Math.pow(a, x) * Math.pow(a, y)) / Math.pow(a, z),
         signature: `${target}:${a}`,
         params: { x, y, z, a },

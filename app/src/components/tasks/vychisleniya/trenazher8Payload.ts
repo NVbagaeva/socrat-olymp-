@@ -1,13 +1,15 @@
 import { isRecord } from '@/lib/trainerSession/restore';
 import { fingerprint } from '@/lib/vychisleniya/secret';
-import { makeTask, randomSeed, type Task8 } from '@/lib/vychisleniya/session';
+import { levelOfTaskId, makeTask, randomSeed, type Task8 } from '@/lib/vychisleniya/session';
 import type { Level } from '@/lib/vychisleniya/types';
 
 /** Задания тренировки №8 в том виде, в каком они лежат в сессии. */
 export interface Trenazher8Payload {
   tasks: Task8[];
-  /** Контроль: без решения и подсказок до конца. */
+  /** Без подсказок и решений до итогов. */
   control: boolean;
+  /** Часы на панели. Нет поля (записи до редизайна) — есть. */
+  timer?: boolean;
 }
 
 function isTask(value: unknown): value is Task8 {
@@ -17,6 +19,7 @@ function isTask(value: unknown): value is Task8 {
     typeof value['prototype'] === 'string' &&
     typeof value['skill'] === 'string' &&
     (value['level'] === 'base' || value['level'] === 'advanced') &&
+    (value['podtip'] === undefined || typeof value['podtip'] === 'string') &&
     typeof value['questionHtml'] === 'string' &&
     typeof value['seal'] === 'string' &&
     typeof value['razbor'] === 'string'
@@ -41,6 +44,7 @@ export function isTrenazher8Payload(value: unknown): value is Trenazher8Payload 
  */
 export interface Trenazher8Packed {
   control: boolean;
+  timer?: boolean;
   /** [идентификатор, подпись] по порядку пула. */
   tasks: [string, string][];
 }
@@ -61,6 +65,7 @@ function levelOfId(level: string | undefined): Level | null {
 export function packTrenazher8(payload: Trenazher8Payload): Trenazher8Packed {
   return {
     control: payload.control,
+    ...(payload.timer === undefined ? {} : { timer: payload.timer }),
     tasks: payload.tasks.map((task) => [task.id, signOf(task)]),
   };
 }
@@ -95,7 +100,9 @@ export function unpackTrenazher8(packed: unknown): Trenazher8Payload | null {
     }
     tasks.push(task);
   }
-  return tasks.length === 0 ? null : { control: packed['control'], tasks };
+  return tasks.length === 0
+    ? null
+    : { control: packed['control'], timer: packed['timer'] !== false, tasks };
 }
 
 /** Сколько seed пробовать на одну задачу, если генератор не подобрал параметры. */
@@ -117,7 +124,7 @@ export function similarTrenazher8(
     }
     for (let i = 0; i < ATTEMPTS; i += 1) {
       try {
-        const task = makeTask(source.prototype, randomSeed(), source.level);
+        const task = makeTask(source.prototype, randomSeed(), levelOfTaskId(source.id));
         if (task.questionHtml !== source.questionHtml) {
           return [task];
         }
@@ -128,4 +135,16 @@ export function similarTrenazher8(
     return [];
   });
   return tasks.length === 0 ? null : { ...payload, tasks };
+}
+
+/* ── «Похожая задача»: замены на экране ────────────────────────
+   Экран подменяет задачу пула свежей того же прототипа и кладёт её
+   сюда, чтобы итоги описывали ту задачу, которую ученик решал. Ключ —
+   задания тренировки (по ссылке), значение — номер в пуле → задача. */
+
+export const ZAMENY8 = new WeakMap<Trenazher8Payload, Record<number, Task8>>();
+
+/** Задача пула с учётом замены. */
+export function taskAt8(payload: Trenazher8Payload, poolIndex: number): Task8 | undefined {
+  return ZAMENY8.get(payload)?.[poolIndex] ?? payload.tasks[poolIndex];
 }

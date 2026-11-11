@@ -1,0 +1,282 @@
+import { clsx } from 'clsx';
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+import { Metka, Polosa, ShagiResheniya, Znak, type Shag, type Ton } from '../steklo';
+import './karta.css';
+
+/**
+ * Карта задания — вкладка «О задании» в «Стеклянной сцене».
+ *
+ * Шапка (что проверяет, баллы, минуты, чем опасно), группы типов с
+ * прогрессом ученика, карточки типов с разобранным примером, блок
+ * формул с примерами и сворачиваемая панель. Компоненты ничего не
+ * знают о номере задания: тексты, формулы (уже набранные KaTeX) и
+ * прогресс приходят пропсами, так что те же карточки пойдут на №7,
+ * №5 и остальные разделы.
+ *
+ * Раскрытия — на <details>: работают без JS и в статической сборке.
+ */
+
+export interface Fakt {
+  znachenie: string;
+  podpis: string;
+}
+
+export function KartaShapka({
+  nadzagolovok,
+  zagolovok,
+  lead,
+  fakty,
+  opasnoTitle,
+  opasno,
+}: {
+  nadzagolovok: string;
+  zagolovok: string;
+  lead: string;
+  fakty: Fakt[];
+  opasnoTitle: string;
+  /** Пункты «чем опасно», HTML (формулы набраны). */
+  opasno: string[];
+}) {
+  return (
+    <header className="kz-shapka stk-glass">
+      <div className="kz-shapka__text">
+        <p className="stk-nad">{nadzagolovok}</p>
+        <h2 className="kz-h2">{zagolovok}</h2>
+        <p className="stk-lead">{lead}</p>
+      </div>
+      <ul className="kz-fakty">
+        {fakty.map((f) => (
+          <li className="kz-fakt" key={f.podpis}>
+            <b>{f.znachenie}</b>
+            <span>{f.podpis}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="kz-opasno">
+        <p className="kz-opasno__zag">{opasnoTitle}</p>
+        <ul>
+          {opasno.map((line, i) => (
+            <li key={i} dangerouslySetInnerHTML={{ __html: line }} />
+          ))}
+        </ul>
+      </div>
+    </header>
+  );
+}
+
+export interface GruppaProgress {
+  resheno: number;
+  verno: number;
+  /** Из последних пяти попыток две и больше неверных. */
+  povtorit: boolean;
+}
+
+export interface KartaGruppaLabels {
+  tipov: (n: number) => string;
+  povtorit: string;
+  neNachato: string;
+  resheno: (resheno: number, verno: number) => string;
+}
+
+/** Карточка группы: значок, название, число типов, мини-прогресс; внутри — типы. */
+export function KartaGruppa({
+  id,
+  nazvanie,
+  znakHtml,
+  ton,
+  tipov,
+  progress,
+  labels,
+  open = false,
+  children,
+}: {
+  id: string;
+  nazvanie: string;
+  znakHtml: string;
+  ton: Ton;
+  tipov: number;
+  /** null — прогресс ещё не прочитан (первая отрисовка). */
+  progress: GruppaProgress | null;
+  labels: KartaGruppaLabels;
+  open?: boolean;
+  children: ReactNode;
+}) {
+  const nachato = progress !== null && progress.resheno > 0;
+  const dolya = nachato ? progress.verno / progress.resheno : 0;
+  return (
+    <details
+      className={clsx('kz-gruppa stk-glass', `stk-ton--${ton}`)}
+      id={`gruppa-${id}`}
+      open={open}
+    >
+      <summary className="kz-gruppa__summary stk-summary">
+        <Znak html={znakHtml} ton={ton} />
+        <span className="kz-gruppa__text">
+          <span className="kz-gruppa__nazvanie">{nazvanie}</span>
+          <span className="kz-gruppa__tipov">{labels.tipov(tipov)}</span>
+        </span>
+        <span className="kz-gruppa__progress">
+          <span className="kz-gruppa__schet">
+            {nachato ? labels.resheno(progress.resheno, progress.verno) : labels.neNachato}
+          </span>
+          <Polosa dolya={dolya} ton={progress?.povtorit === true ? 'terra' : 'blue'} />
+          {progress?.povtorit === true ? <Metka ton="terra">{labels.povtorit}</Metka> : null}
+        </span>
+        <span className="stk-shevron" aria-hidden="true" />
+      </summary>
+      <div className="kz-tipy">{children}</div>
+    </details>
+  );
+}
+
+/** Подзаголовок внутри группы: «Формулы двойного угла». */
+export function KartaPodgruppa({ children }: { children: ReactNode }) {
+  return <p className="kz-podgruppa">{children}</p>;
+}
+
+/** Карточка типа: человеческое название, код мелко, внутри — разобранный пример. */
+export function KartaTip({
+  id,
+  nazvanieHtml,
+  lead,
+  kod,
+  open = false,
+  children,
+}: {
+  id: string;
+  /** Название, HTML (в названии может быть формула). */
+  nazvanieHtml: string;
+  lead?: string;
+  /** Код прототипа: мелко справа, с подсказкой. */
+  kod?: string;
+  open?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details className="kz-tip" id={`tip-${id}`} open={open}>
+      <summary
+        className="kz-tip__summary stk-summary"
+        title={kod === undefined ? undefined : `Тип ${kod}`}
+      >
+        <span className="kz-tip__text">
+          <span className="kz-tip__nazvanie" dangerouslySetInnerHTML={{ __html: nazvanieHtml }} />
+          {lead === undefined ? null : <span className="kz-tip__lead">{lead}</span>}
+        </span>
+        <span className="stk-shevron" aria-hidden="true" />
+      </summary>
+      {children}
+    </details>
+  );
+}
+
+export interface KartaPrimerLabels {
+  primer: string;
+  otvet: string;
+  lovushka: string;
+  trenirovat: string;
+  opornye: string;
+}
+
+/** Разобранный пример типа: условие, шаги, ловушка, ответ, две кнопки. */
+export function KartaPrimer({
+  uslovieHtml,
+  shagi,
+  otvet,
+  opasnoHtml,
+  trenirovatHref,
+  opornyeHref,
+  labels,
+}: {
+  uslovieHtml: string;
+  shagi: Shag[];
+  otvet: string;
+  /** «Где теряют балл», HTML. */
+  opasnoHtml?: string;
+  trenirovatHref: string;
+  opornyeHref: string;
+  labels: KartaPrimerLabels;
+}) {
+  return (
+    <div className="kz-primer">
+      <p className="kz-primer__metka">{labels.primer}</p>
+      <div className="kz-uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
+      <ShagiResheniya shagi={shagi} />
+      {opasnoHtml === undefined ? null : (
+        <p className="kz-lovushka">
+          <b>{labels.lovushka}.</b> <span dangerouslySetInnerHTML={{ __html: opasnoHtml }} />
+        </p>
+      )}
+      <p className="kz-otvet">
+        {labels.otvet}: <b>{otvet}</b>
+      </p>
+      <div className="kz-knopki">
+        <Link className="stk-btn stk-btn--primary" href={trenirovatHref}>
+          {labels.trenirovat}
+        </Link>
+        <Link className="stk-btn stk-btn--tihaya" href={opornyeHref}>
+          {labels.opornye}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export interface FormulaSPrimerom {
+  /** Формула, HTML KaTeX. */
+  html: string;
+  /** Пример применения, HTML KaTeX. */
+  primerHtml: string;
+}
+
+/** Цветная рамка с формулами группы: каждая — с примером применения. */
+export function FormulyRamka({
+  nazvanie,
+  ton,
+  formuly,
+  primerLabel = 'например',
+}: {
+  nazvanie: string;
+  ton: Ton;
+  formuly: FormulaSPrimerom[];
+  primerLabel?: string;
+}) {
+  return (
+    <section className={clsx('kz-ramka', `stk-ton--${ton}`)}>
+      <h4 className="kz-ramka__plashka">{nazvanie}</h4>
+      <ul className="kz-ramka__spisok">
+        {formuly.map((f, i) => (
+          <li key={i}>
+            <span className="kz-ramka__formula" dangerouslySetInnerHTML={{ __html: f.html }} />
+            <span className="kz-ramka__primer">
+              <i>{primerLabel}</i> <span dangerouslySetInnerHTML={{ __html: f.primerHtml }} />
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Сворачиваемая стеклянная панель: заголовок в строке, внутри что угодно. */
+export function Svernut({
+  title,
+  open = false,
+  className,
+  children,
+}: {
+  title: ReactNode;
+  open?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className={clsx('kz-svernut stk-glass', className)} open={open}>
+      <summary className="kz-svernut__summary stk-summary">
+        <span className="kz-svernut__title">{title}</span>
+        <span className="stk-shevron" aria-hidden="true" />
+      </summary>
+      <div className="kz-svernut__telo">{children}</div>
+    </details>
+  );
+}
