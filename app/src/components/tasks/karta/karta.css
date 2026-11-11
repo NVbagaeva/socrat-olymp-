@@ -397,3 +397,25 @@
     gap: var(--space-5);
   }
 }
+
+/* Чертёж в разобранном примере и у формулы (стереометрия). */
+.kz-primer__risunok {
+  max-width: 420px;
+  margin-inline: auto;
+  width: 100%;
+}
+.kz-ramka__s-risunkom {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: center;
+}
+.kz-ramka__risunok {
+  grid-row: span 2;
+  display: block;
+}
+.kz-ramka__risunok svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { Ton } from '../steklo';
 
 /** Тип задач в выборе тем: прототип с человеческим названием. */
@@ -12,6 +13,8 @@ export interface GruppaVybora {
   id: string;
   nazvanie: string;
   znakHtml: string;
+  /** Значок-фигура вместо формулы (стереометрия). */
+  znak?: ReactNode;
   ton: Ton;
   tipy: TipVybora[];
 }
@@ -21,6 +24,7 @@ export interface StrokaGruppy {
   id: string;
   nazvanie: string;
   znakHtml: string;
+  znak?: ReactNode;
   ton: Ton;
   verno: number;
   vsego: number;

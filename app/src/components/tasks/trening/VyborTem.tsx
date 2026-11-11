@@ -124,7 +124,7 @@ export function VyborTem({
                   className={clsx('trn-galka', allOn && 'is-on', on > 0 && !allOn && 'is-part')}
                   aria-hidden="true"
                 />
-                <Znak html={g.znakHtml} ton={g.ton} size="sm" />
+                <Znak html={g.znakHtml} figura={g.znak} ton={g.ton} size="sm" />
                 <b>{g.nazvanie}</b>
                 <span className="trn-chip__n">
                   {on > 0 && !allOn ? `${on} / ${ids.length}` : ids.length}
