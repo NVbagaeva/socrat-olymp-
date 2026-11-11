@@ -115,6 +115,40 @@ export function rubli(summa: number): string {
 
 /* ── Тексты плашек ────────────────────────────────────────────── */
 
+/* ── Главная ценность: методические подсказки ─────────────────── */
+
+/**
+ * Во всех тренажёрах и опорных задачах подсказка — не готовый ответ, а
+ * вопрос к следующему шагу с вариантами ответа. После ошибки — подсказка
+ * и вторая попытка. Это и есть то, за что платят: занятие с учителем,
+ * а не сборник ответов.
+ */
+export const PODSKAZKI = {
+  punkt: 'Методические подсказки во всех тренажёрах и опорных задачах',
+  punktBesplatno: 'Методические подсказки к каждому шагу решения',
+  zagolovok: 'Подсказки, которые учат решать, а не выдают ответ',
+  lid: 'Каждый тренажёр и каждая опорная задача сопровождаются подсказками, которые составил учитель. Они ведут к решению так, как это делают на занятии.',
+  primery: [
+    {
+      nazvanie: 'Вопрос вместо ответа',
+      tekst:
+        'Застряли — подсказка задаёт вопрос к следующему шагу и предлагает варианты. Ученик сам делает шаг и понимает, почему он верный.',
+    },
+    {
+      nazvanie: 'Разбор ошибки сразу',
+      tekst:
+        'Ответ проверяется сразу. Ошибся — подсказка показывает, где свернул не туда, и даёт вторую попытку.',
+    },
+    {
+      nazvanie: 'Приём, который пригодится снова',
+      tekst:
+        'Подсказки называют приём, а не только числа: тот же ход сработает в следующей задаче этого типа и на экзамене.',
+    },
+  ],
+} as const;
+
+/* ── Плашки ───────────────────────────────────────────────────── */
+
 export interface Plashka {
   id: TarifId;
   nazvanie: string;
@@ -131,6 +165,7 @@ const besplatno: Plashka = {
   nazvanie: 'Бесплатно',
   dlyaKogo: 'Чтобы начать и заниматься в своём темпе',
   vhodit: [
+    PODSKAZKI.punktBesplatno,
     'Теория и «О задании» — целиком',
     'Опорные задачи: первый блок каждого навыка',
     `Тренажёр: ${BESPLATNO.trenazherVDen} задач в день`,
@@ -147,6 +182,7 @@ const probnyy: Record<Rol, Plashka> = {
     dlyaKogo: 'Чтобы посмотреть всё, прежде чем платить',
     vhodit: [
       `Всё из тарифа «Ученик» на ${PROBNYY.dney} дней`,
+      PODSKAZKI.punkt,
       'Тренажёр без ограничений',
       'Все опорные задачи',
       'Работа над ошибками, прогресс и история',
@@ -160,6 +196,7 @@ const probnyy: Record<Rol, Plashka> = {
     dlyaKogo: 'Чтобы посмотреть всё, прежде чем платить',
     vhodit: [
       `Всё из тарифа «Репетитор» на ${PROBNYY.dney} дней`,
+      PODSKAZKI.punkt,
       'Генератор и «Собрать вариант» без ограничений',
       'Листы учителя с решениями',
       `Классы до ${KLASS_MAKS} учеников`,
@@ -175,6 +212,7 @@ const platnye: Record<Rol, Plashka> = {
     nazvanie: PLATNYE.uchenik.nazvanie,
     dlyaKogo: 'Тому, кто готовится к экзамену сам',
     vhodit: [
+      PODSKAZKI.punkt,
       'Тренажёр без ограничений',
       'Все опорные задачи',
       'Работа над ошибками',
@@ -189,7 +227,7 @@ const platnye: Record<Rol, Plashka> = {
     nazvanie: PLATNYE.repetitor.nazvanie,
     dlyaKogo: 'Тому, кто готовит к экзамену других',
     vhodit: [
-      'Всё из тарифа «Ученик»',
+      'Всё из «Ученика», включая подсказки во всех задачах',
       'Генератор и «Собрать вариант» без ограничений',
       'Листы учителя с решениями',
       `Классы до ${KLASS_MAKS} учеников`,
@@ -205,6 +243,69 @@ const platnye: Record<Rol, Plashka> = {
 export function plashki(rol: Rol): [Plashka, Plashka, Plashka] {
   return [besplatno, probnyy[rol], platnye[rol]];
 }
+
+/* ── Таблица сравнения ────────────────────────────────────────── */
+
+/** Ячейка: true — входит, false — нет, строка — входит с условием. */
+export type Yacheyka = boolean | string;
+
+export interface StrokaSravneniya {
+  vozmozhnost: string;
+  besplatno: Yacheyka;
+  uchenik: Yacheyka;
+  repetitor: Yacheyka;
+}
+
+export const SRAVNENIE: StrokaSravneniya[] = [
+  { vozmozhnost: 'Методические подсказки', besplatno: true, uchenik: true, repetitor: true },
+  { vozmozhnost: 'Теория и «О задании»', besplatno: true, uchenik: true, repetitor: true },
+  {
+    vozmozhnost: 'Опорные задачи',
+    besplatno: 'первый блок навыка',
+    uchenik: 'все',
+    repetitor: 'все',
+  },
+  {
+    vozmozhnost: 'Тренажёр',
+    besplatno: `${BESPLATNO.trenazherVDen} задач в день`,
+    uchenik: 'без ограничений',
+    repetitor: 'без ограничений',
+  },
+  { vozmozhnost: 'Работа над ошибками', besplatno: false, uchenik: true, repetitor: true },
+  { vozmozhnost: 'Прогресс и история', besplatno: false, uchenik: true, repetitor: true },
+  {
+    vozmozhnost: 'Варианты онлайн с баллами',
+    besplatno: `${BESPLATNO.variantovOnlayn} вариант`,
+    uchenik: 'все',
+    repetitor: 'все',
+  },
+  {
+    vozmozhnost: 'Варианты повышенной сложности',
+    besplatno: false,
+    uchenik: true,
+    repetitor: true,
+  },
+  {
+    vozmozhnost: 'Генератор и «Собрать вариант»',
+    besplatno: `${BESPLATNO.generatorVDen} вариант в день`,
+    /* Платный не хуже бесплатного: у ученика тот же лимит генератора. */
+    uchenik: `${BESPLATNO.generatorVDen} вариант в день`,
+    repetitor: 'без ограничений',
+  },
+  { vozmozhnost: 'Листы учителя с решениями', besplatno: false, uchenik: false, repetitor: true },
+  {
+    vozmozhnost: 'Классы',
+    besplatno: false,
+    uchenik: false,
+    repetitor: `до ${KLASS_MAKS} учеников`,
+  },
+  {
+    vozmozhnost: 'Домашние задания и таблица результатов',
+    besplatno: false,
+    uchenik: false,
+    repetitor: true,
+  },
+];
 
 /** Общие подписи. */
 export const TARIFY_TEXT = {

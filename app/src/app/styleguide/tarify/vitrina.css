@@ -26,7 +26,38 @@
   font-weight: 620;
   letter-spacing: -0.018em;
 }
-.tfv__variant {
+.tfv__blok {
+  padding-top: var(--space-10);
+}
+.tfv__lid {
+  margin: var(--space-2) 0 0;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+.tfv__knopki,
+.tfv__stena {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 var(--space-8) var(--space-12);
+}
+.tfv__knopki {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 340px));
+  gap: var(--space-8);
+}
+.tfv__stolbec {
+  display: grid;
+  gap: var(--space-3);
+}
+.tfv__metka {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+.tfv__stena {
   padding-top: var(--space-8);
 }
 .tfv__podpis {
@@ -49,7 +80,9 @@
 }
 @media (max-width: 599.98px) {
   .tfv__shapka,
-  .tfv__podpis {
+  .tfv__podpis,
+  .tfv__knopki,
+  .tfv__stena {
     padding-inline: var(--space-4);
   }
   .tfv__shapka h1 {
@@ -57,5 +90,8 @@
   }
   .tfv__podpis {
     padding-bottom: 0;
+  }
+  .tfv__knopki {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

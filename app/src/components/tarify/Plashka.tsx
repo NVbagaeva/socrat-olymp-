@@ -15,9 +15,9 @@ import {
 
 /* Украшения — только готовые стеклянные картинки сайта. */
 const KARTINKI: Record<'besplatno' | 'probnyy' | 'platnyy', string> = {
-  besplatno: '/images/pyramid-glass.webp',
-  probnyy: '/images/glass/crystal-sharp.png',
-  platnyy: '/images/trophy-glass.webp',
+  besplatno: assetUrl('/images/tarify/piramida-320.webp'),
+  probnyy: assetUrl('/images/tarify/kristall-320.webp'),
+  platnyy: assetUrl('/images/tarify/kubok-320.webp'),
 };
 
 function Galka() {
@@ -37,6 +37,9 @@ function Cherta() {
 
 export interface PlashkaProps {
   plashka: PlashkaData;
+  /** Переопределить флаг оплаты — только для витрины. */
+  oplata?: boolean;
+  predprosmotr?: boolean;
   rol: Rol;
   srok: Srok;
   /** Дата покупки для цены «До ЕГЭ» (ГГГГ-ММ-ДД). */
@@ -44,12 +47,39 @@ export interface PlashkaProps {
   className?: string;
 }
 
+export interface KnopkaTarifaProps {
+  plashka: PlashkaData;
+  rol: Rol;
+  srok: Srok;
+  /** Включена ли оплата. По умолчанию — флаг NEXT_PUBLIC_PAYMENTS_ENABLED. */
+  oplata?: boolean;
+  /**
+   * Только для витрины: состояние «оплата включена» рисуется неактивным
+   * макетом, без ссылки. Так на сайте нет ни одной активной кнопки оплаты,
+   * пока флаг выключен, — даже на служебной странице.
+   */
+  predprosmotr?: boolean;
+}
+
+/** Куда ведёт кнопка при включённой оплате: регистрация с выбранным тарифом. */
+export function hrefOplaty(id: PlashkaData['id'], rol: Rol, srok: Srok): string {
+  const params = new URLSearchParams({ tarif: id, rol });
+  if (id !== 'probnyy') params.set('srok', srok);
+  return `/voyti/?${params.toString()}`;
+}
+
 /**
  * Кнопка плашки. Оплата выключена — активна только «Начать заниматься»,
- * остальные неактивны. Включена — ссылки на регистрацию; самой оплаты
- * здесь нет, её добавит следующий PR.
+ * остальные неактивны. Включена — ссылки на регистрацию с тарифом;
+ * самой оплаты здесь нет, её добавит следующий PR.
  */
-function Knopka({ plashka }: { plashka: PlashkaData }) {
+export function KnopkaTarifa({
+  plashka,
+  rol,
+  srok,
+  oplata = PAYMENTS_ENABLED,
+  predprosmotr = false,
+}: KnopkaTarifaProps) {
   const { knopki } = TARIFY_TEXT;
   if (plashka.id === 'besplatno') {
     return (
@@ -60,26 +90,42 @@ function Knopka({ plashka }: { plashka: PlashkaData }) {
   }
   const glavnaya = plashka.id !== 'probnyy';
   const vid = glavnaya ? 'tf-knopka--teplaya' : 'tf-knopka--sinyaya';
-  if (!PAYMENTS_ENABLED) {
+  if (!oplata) {
     return (
       <button type="button" className={clsx('tf-knopka', vid)} disabled data-oplata="vyklyuchena">
         {knopki.skoro}
       </button>
     );
   }
+  const podpis = glavnaya ? knopki.oplatit : knopki.probnyy;
+  if (predprosmotr) {
+    return (
+      <span className={clsx('tf-knopka', vid)} data-oplata="predprosmotr" aria-disabled="true">
+        {podpis}
+      </span>
+    );
+  }
   return (
     <Link
       className={clsx('tf-knopka', vid)}
-      href={`/voyti/?tarif=${plashka.id}`}
+      href={hrefOplaty(plashka.id, rol, srok)}
       data-oplata="vklyuchena"
     >
-      {glavnaya ? knopki.oplatit : knopki.probnyy}
+      {podpis}
     </Link>
   );
 }
 
 /** Стеклянная плашка тарифа: название, цена, для кого, пункты, кнопка. */
-export function Plashka({ plashka, rol, srok, data, className }: PlashkaProps) {
+export function Plashka({
+  plashka,
+  rol,
+  srok,
+  data,
+  oplata,
+  predprosmotr,
+  className,
+}: PlashkaProps) {
   const platnyy = plashka.id === 'uchenik' || plashka.id === 'repetitor';
   const summa = platnyy ? tsena(rol, srok, data) : 0;
   const vid = platnyy ? 'platnyy' : plashka.id === 'probnyy' ? 'probnyy' : 'besplatno';
@@ -88,17 +134,18 @@ export function Plashka({ plashka, rol, srok, data, className }: PlashkaProps) {
     <article className={clsx('tf-plashka', `tf-plashka--${vid}`, className)}>
       <img
         className="tf-plashka__kartinka"
-        src={assetUrl(KARTINKI[vid])}
+        src={KARTINKI[vid]}
         alt=""
         width={160}
         height={160}
-        loading="lazy"
+        /* Платная плашка видна в первом экране — её картинку не откладываем. */
+        loading={platnyy ? 'eager' : 'lazy'}
         decoding="async"
       />
       {platnyy ? <p className="tf-plashka__metka">{TARIFY_TEXT.metkaGlavnoy}</p> : null}
       <h3 className="tf-plashka__nazvanie">{plashka.nazvanie}</h3>
       <p className="tf-plashka__tsena">
-        <span className="tf-plashka__summa">{rubli(summa ?? 0)}</span>
+        <span className="tf-plashka__summa">{summa === null ? '—' : rubli(summa)}</span>
         <span className="tf-plashka__srok">
           {platnyy ? (srok === 'd30' ? TARIFY_TEXT.za30 : DO_EGE.podpis) : TARIFY_TEXT.bezKarty}
         </span>
@@ -121,7 +168,13 @@ export function Plashka({ plashka, rol, srok, data, className }: PlashkaProps) {
       </ul>
 
       <div className="tf-plashka__niz">
-        <Knopka plashka={plashka} />
+        <KnopkaTarifa
+          plashka={plashka}
+          rol={rol}
+          srok={srok}
+          {...(oplata === undefined ? {} : { oplata })}
+          {...(predprosmotr === undefined ? {} : { predprosmotr })}
+        />
         {platnyy ? <p className="tf-plashka__snoska">{TARIFY_TEXT.bezAvtoprodleniya}</p> : null}
       </div>
     </article>

@@ -68,6 +68,14 @@
     white-space: nowrap;
   }
 }
+/* С пунктом «Тарифы» шесть пунктов на 1024–1279 px помещаются только
+   с промежутками поуже: иначе «Начать бесплатно» уезжает за край. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .site-nav {
+    gap: var(--space-4);
+    margin-left: var(--space-4);
+  }
+}
 .site-nav > a,
 .nav-drop__button {
   font-size: 15px;
