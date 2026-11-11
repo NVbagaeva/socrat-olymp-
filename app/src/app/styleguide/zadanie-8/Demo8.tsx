@@ -270,7 +270,9 @@ function ChtoZnat() {
             <li key={row.na}>
               <b>на {row.na}</b>
               <span>{row.pravilo}</span>
-              <i>{row.primer}</i>
+              <i>
+                <Tex text={row.primer} />
+              </i>
             </li>
           ))}
         </ul>

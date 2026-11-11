@@ -188,7 +188,7 @@ export function VychisleniyaAbout() {
               <li key={row.na}>
                 <b>на {row.na}</b>
                 <span>{row.pravilo}</span>
-                <i>{row.primer}</i>
+                <i dangerouslySetInnerHTML={{ __html: typeset(row.primer) }} />
               </li>
             ))}
           </ul>
