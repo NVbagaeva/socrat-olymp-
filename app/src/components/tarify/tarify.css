@@ -1,0 +1,445 @@
+/* Тарифы в «Стеклянной сцене». Всё под .tf; стекло и свечения — токены
+   --glass-*, --gloss*, --aura-* из styles/tokens.css.
+   Два оформления плашек: .tf--a «Светлое стекло» и .tf--b «Ночная сцена». */
+
+.tf {
+  position: relative;
+  isolation: isolate;
+}
+
+/* ── Свечения позади стекла ──────────────────────────────────── */
+
+.tf-aura {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tf-aura span {
+  position: absolute;
+  border-radius: 50%;
+}
+.tf-aura__siniy {
+  width: 620px;
+  height: 620px;
+  left: -160px;
+  top: -80px;
+  background: radial-gradient(closest-side, var(--aura-blue), transparent);
+}
+.tf-aura__teplyy {
+  width: 640px;
+  height: 640px;
+  right: -120px;
+  top: 40px;
+  background: radial-gradient(closest-side, var(--aura-orange), transparent);
+}
+.tf-aura__terra {
+  width: 420px;
+  height: 420px;
+  left: 38%;
+  top: 320px;
+  background: radial-gradient(closest-side, var(--aura-terracotta), transparent);
+}
+
+/* ── Ряд плашек ──────────────────────────────────────────────── */
+
+.tf-ryad {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.14fr);
+  align-items: center;
+  gap: var(--space-5);
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-8) var(--space-12);
+}
+
+.tf-plashka {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 28px 26px 26px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 28px;
+  background: var(--glass-tint-blue);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--color-text);
+  transition:
+    transform 240ms var(--ease),
+    box-shadow 240ms var(--ease);
+}
+/* Блик по верхней кромке: стекло ловит свет. */
+.tf-plashka::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    150deg,
+    rgb(255 255 255 / 0.55) 0%,
+    rgb(255 255 255 / 0) 34%,
+    rgb(255 255 255 / 0) 100%
+  );
+  pointer-events: none;
+}
+.tf-plashka > * {
+  position: relative;
+}
+
+.tf-plashka__kartinka {
+  position: absolute;
+  top: -34px;
+  right: 14px;
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 18px rgb(31 95 208 / 0.28));
+  pointer-events: none;
+  transition: transform 320ms var(--ease);
+}
+
+.tf-plashka__metka {
+  align-self: flex-start;
+  margin: 0 0 var(--space-3);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent-text);
+  background: rgb(224 122 47 / 0.14);
+  box-shadow: inset 0 0 0 1px rgb(224 122 47 / 0.28);
+}
+.tf-plashka__nazvanie {
+  margin: 0;
+  max-width: calc(100% - 96px);
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.tf-plashka__tsena {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: var(--space-4) 0 0;
+}
+.tf-plashka__summa {
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 660;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.tf-plashka__srok {
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--color-text-secondary);
+}
+.tf-plashka__dlya {
+  margin: var(--space-3) 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+
+.tf-punkty {
+  display: grid;
+  gap: 10px;
+  margin: var(--space-5) 0 0;
+  padding: var(--space-5) 0 0;
+  border-top: 1px solid rgb(31 95 208 / 0.12);
+  list-style: none;
+}
+.tf-punkt {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 15px;
+  line-height: 22px;
+}
+.tf-punkt__znak {
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: 50%;
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: rgb(31 95 208 / 0.1);
+}
+.tf-punkt--net {
+  color: var(--color-text-tertiary);
+}
+.tf-punkt--net .tf-punkt__znak {
+  stroke: currentColor;
+  background: rgb(16 23 40 / 0.06);
+}
+
+.tf-plashka__niz {
+  margin-top: auto;
+  padding-top: var(--space-6);
+}
+.tf-plashka__snoska {
+  margin: var(--space-3) 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+/* ── Кнопки ──────────────────────────────────────────────────── */
+
+.tf-knopka {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    box-shadow var(--dur-hover) var(--ease),
+    filter var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.tf-knopka--steklo {
+  color: var(--color-text);
+  background: var(--glass-bg-strong);
+  box-shadow:
+    inset 0 0 0 1px rgb(31 95 208 / 0.2),
+    var(--glass-hi);
+}
+.tf-knopka--steklo:hover {
+  background: #fff;
+}
+.tf-knopka--sinyaya {
+  color: #fff;
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+}
+.tf-knopka--teplaya {
+  color: #fff;
+  background: var(--gloss-warm);
+  box-shadow: var(--gloss-warm-shadow-soft);
+}
+.tf-knopka--sinyaya:hover,
+.tf-knopka--teplaya:hover {
+  filter: brightness(1.06);
+}
+.tf-knopka:active {
+  transform: scale(0.98);
+}
+/* Неактивная: читается, но не зовёт нажать. Текст 4,5:1 на своём фоне. */
+.tf-knopka[disabled] {
+  cursor: default;
+  color: var(--color-text-secondary);
+  background: rgb(255 255 255 / 0.5);
+  box-shadow: inset 0 0 0 1px rgb(16 23 40 / 0.14);
+  filter: none;
+  transform: none;
+}
+
+/* ── Главная плашка: крупнее, тёплое свечение ────────────────── */
+
+.tf-plashka--platnyy {
+  padding: 34px 30px 30px;
+  border-color: rgb(255 255 255 / 0.8);
+  background: var(--glass-tint-warm);
+  box-shadow:
+    0 0 0 1px rgb(224 122 47 / 0.22),
+    var(--glass-hi),
+    0 2px 4px rgb(100 50 16 / 0.06),
+    0 28px 60px -18px rgb(224 122 47 / 0.5),
+    0 0 90px -24px rgb(245 160 74 / 0.55);
+}
+.tf-plashka--platnyy .tf-plashka__kartinka {
+  top: -52px;
+  right: 10px;
+  width: 132px;
+  height: 132px;
+  filter: drop-shadow(0 16px 22px rgb(191 86 28 / 0.36));
+}
+.tf-plashka--platnyy .tf-plashka__nazvanie {
+  font-size: 24px;
+}
+.tf-plashka--platnyy .tf-plashka__summa {
+  font-size: 56px;
+}
+.tf-plashka--platnyy .tf-punkty {
+  border-top-color: rgb(224 122 47 / 0.2);
+}
+.tf-plashka--platnyy .tf-punkt:not(.tf-punkt--net) .tf-punkt__znak {
+  stroke: #fff;
+  background: var(--gloss-warm);
+}
+
+/* ── Вариант Б «Ночная сцена»: главная плашка — тёмное стекло ── */
+
+.tf--b .tf-plashka--platnyy {
+  color: #f4f7fd;
+  border-color: rgb(255 255 255 / 0.16);
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgb(245 160 74 / 0.34), transparent 62%),
+    radial-gradient(90% 60% at 0% 100%, rgb(79 134 230 / 0.3), transparent 65%),
+    linear-gradient(165deg, rgb(20 44 96 / 0.94), rgb(10 24 58 / 0.96));
+  box-shadow:
+    0 0 0 1px rgb(245 160 74 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 30px 64px -18px rgb(14 35 80 / 0.6),
+    0 0 100px -20px rgb(245 160 74 / 0.6);
+}
+.tf--b .tf-plashka--platnyy::before {
+  background: linear-gradient(150deg, rgb(255 255 255 / 0.16) 0%, rgb(255 255 255 / 0) 30%);
+}
+.tf--b .tf-plashka--platnyy .tf-plashka__metka {
+  color: #ffd9b0;
+  background: rgb(245 160 74 / 0.18);
+  box-shadow: inset 0 0 0 1px rgb(245 160 74 / 0.45);
+}
+.tf--b .tf-plashka--platnyy .tf-plashka__srok,
+.tf--b .tf-plashka--platnyy .tf-plashka__dlya,
+.tf--b .tf-plashka--platnyy .tf-plashka__snoska {
+  color: #c3d0e8;
+}
+.tf--b .tf-plashka--platnyy .tf-punkty {
+  border-top-color: rgb(255 255 255 / 0.16);
+}
+.tf--b .tf-plashka--platnyy .tf-punkt--net {
+  color: #9fb0cf;
+}
+.tf--b .tf-plashka--platnyy .tf-punkt--net .tf-punkt__znak {
+  background: rgb(255 255 255 / 0.1);
+}
+.tf--b .tf-plashka--platnyy .tf-knopka[disabled] {
+  color: #dbe4f5;
+  background: rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28);
+}
+/* Соседние плашки в варианте Б — чистое светлое стекло без оттенка. */
+.tf--b .tf-plashka:not(.tf-plashka--platnyy) {
+  background: var(--glass-bg);
+}
+
+/* ── Наведение и появление ───────────────────────────────────── */
+
+@media (hover: hover) and (pointer: fine) {
+  .tf-plashka:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+  }
+  .tf-plashka--platnyy:hover {
+    box-shadow:
+      0 0 0 1px rgb(224 122 47 / 0.3),
+      var(--glass-hi),
+      0 2px 4px rgb(100 50 16 / 0.06),
+      0 36px 70px -18px rgb(224 122 47 / 0.56),
+      0 0 110px -22px rgb(245 160 74 / 0.66);
+  }
+  .tf--b .tf-plashka--platnyy:hover {
+    box-shadow:
+      0 0 0 1px rgb(245 160 74 / 0.5),
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      0 38px 72px -18px rgb(14 35 80 / 0.66),
+      0 0 120px -18px rgb(245 160 74 / 0.72);
+  }
+  .tf-plashka:hover .tf-plashka__kartinka {
+    transform: translateY(-6px) rotate(-4deg);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tf-plashka {
+    animation: tf-poyavlenie 520ms var(--ease) both;
+  }
+  .tf-plashka:nth-child(2) {
+    animation-delay: 70ms;
+  }
+  .tf-plashka:nth-child(3) {
+    animation-delay: 140ms;
+  }
+}
+@keyframes tf-poyavlenie {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tf-plashka,
+  .tf-plashka__kartinka,
+  .tf-knopka {
+    transition: none;
+  }
+}
+
+/* ── Планшет: платная сверху во всю ширину ───────────────────── */
+
+@media (max-width: 1023.98px) and (min-width: 600px) {
+  .tf-ryad {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    row-gap: var(--space-12);
+    padding-inline: var(--space-6);
+  }
+  .tf-plashka--platnyy {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}
+
+/* ── Телефон: свайп с прилипанием, платная первой ────────────── */
+
+@media (max-width: 599.98px) {
+  .tf-ryad {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-3);
+    max-width: none;
+    padding: 64px var(--space-4) var(--space-10);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-4);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tf-ryad::-webkit-scrollbar {
+    display: none;
+  }
+  .tf-plashka {
+    flex: 0 0 86%;
+    scroll-snap-align: start;
+    padding: 24px 20px 22px;
+    border-radius: 24px;
+  }
+  .tf-plashka--platnyy {
+    order: -1;
+    padding: 26px 20px 22px;
+  }
+  .tf-plashka__summa {
+    font-size: 40px;
+  }
+  .tf-plashka--platnyy .tf-plashka__summa {
+    font-size: 48px;
+  }
+  .tf-plashka--platnyy .tf-plashka__kartinka {
+    width: 112px;
+    height: 112px;
+    top: -46px;
+  }
+}
