@@ -647,3 +647,27 @@
     margin-inline: auto;
   }
 }
+
+/* Вариант Б: закреплённый чертёж. У карточек группы и типа обрезка
+   по скруглению — clip вместо hidden, иначе sticky не работает. */
+.d3--b .kz-gruppa,
+.d3--b .kz-tip {
+  overflow: clip;
+}
+/* Закреплённый чертёж непрозрачный: текст шагов под ним не просвечивает. */
+.d3 .d3-sinhron__chertezh,
+.d3 .d3-sinhron__chertezh .z3d {
+  background: var(--white, #fff);
+}
+@media (max-width: 767.98px) {
+  .d3 .d3-sinhron__chertezh {
+    padding: var(--space-1);
+  }
+  .d3 .d3-sinhron__chertezh svg.solid {
+    max-height: 26vh;
+  }
+  .d3 .d3-sinhron__chertezh .z3d {
+    gap: var(--space-1);
+    padding: 0;
+  }
+}
