@@ -1,0 +1,1107 @@
+/* Черновик композиции «Об авторе» (шаг 0): два варианта на одних блоках.
+   Всё под .oa. Стекло, свечения и глянец — общие токены «Стеклянной
+   сцены» (styles/tokens.css), отступы — из шкалы --space-*. Сетка —
+   12 колонок в том же контейнере, что шапка сайта (.wrap): левый край
+   текста совпадает с логотипом на любой ширине. */
+
+.oa {
+  --oa-gap: var(--space-8);
+  --oa-sec: clamp(72px, 9vw, 128px);
+  --oa-ink: var(--navy-900);
+  --oa-text: var(--grey-800);
+  --oa-line: rgb(31 95 208 / 0.14);
+  position: relative;
+  overflow-x: clip;
+  color: var(--oa-text);
+  background:
+    radial-gradient(46% 30% at 88% 6%, rgb(245 160 74 / 0.12), transparent 70%),
+    radial-gradient(50% 30% at 6% 38%, rgb(31 95 208 / 0.07), transparent 70%),
+    radial-gradient(44% 26% at 92% 72%, rgb(31 95 208 / 0.06), transparent 70%), var(--color-bg);
+}
+.oa h1,
+.oa h2,
+.oa h3 {
+  text-wrap: balance;
+}
+.oa p {
+  text-wrap: pretty;
+}
+
+/* Шапка, подвал и кнопки — как на главной (landing.css, .glavnaya). */
+.oa .site-head--steklo {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 0;
+  box-shadow: 0 1px 0 rgb(31 95 208 / 0.08);
+}
+.oa .site-foot--steklo {
+  background: var(--glass-bg);
+  border-top: 1px solid var(--glass-edge);
+}
+.oa .btn--primary {
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  border-radius: var(--radius-pill);
+}
+.oa .btn--primary:hover {
+  filter: brightness(1.06);
+  box-shadow: var(--gloss-shadow-soft-hover);
+}
+.oa .btn--secondary {
+  background: var(--glass-bg-strong);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.oa .btn--lg {
+  min-height: 48px;
+}
+
+.oa-wrap {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+/* ── Типографика: одна шкала на страницу ─────────────────────── */
+
+.oa-kicker {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent-text);
+}
+.oa-h2 {
+  margin-top: var(--space-4);
+  font-size: clamp(28px, 3.1vw, 42px);
+  line-height: 1.14;
+  font-weight: 650;
+  letter-spacing: -0.022em;
+  color: var(--oa-ink);
+}
+.oa-h3 {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--oa-ink);
+}
+.oa-h3--big {
+  font-size: clamp(22px, 2vw, 26px);
+  line-height: 1.25;
+}
+.oa-lead {
+  max-width: 30em;
+  font-size: clamp(20px, 1.9vw, 24px);
+  line-height: 1.45;
+  color: var(--oa-ink);
+}
+.oa-text {
+  max-width: 34em;
+  font-size: 18px;
+  line-height: 1.6;
+}
+.oa-lead + .oa-text,
+.oa-text + .oa-text,
+.oa-h3 + .oa-text {
+  margin-top: var(--space-4);
+}
+
+/* Место, где текста на странице сейчас нет. Только в черновике. */
+.oa-todo {
+  max-width: 34em;
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px dashed var(--terracotta-200);
+  border-radius: var(--radius-lg);
+  background: rgb(253 241 234 / 0.6);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-accent-text);
+}
+.oa-lead + .oa-todo,
+.oa-todo + * {
+  margin-top: var(--space-6);
+}
+
+/* ── Стекло: одна рецептура, два оттенка ─────────────────────── */
+
+.oa-steklo {
+  padding: clamp(24px, 3vw, 40px);
+  border: 1px solid var(--glass-edge);
+  border-radius: 28px;
+  background: var(--glass-tint-blue);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.oa-steklo--teplo {
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow);
+}
+
+/* ── Первый экран: общее ─────────────────────────────────────── */
+
+.oa-hero__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--oa-gap);
+}
+.oa-imya {
+  color: var(--oa-ink);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.oa-imya > span {
+  display: block;
+}
+.oa-foto {
+  display: block;
+  width: auto;
+  max-width: none;
+}
+
+/* ── Сцена: геометрия, портрет, живая парабола ───────────────── */
+
+.oa-hero {
+  position: relative;
+  overflow: clip;
+}
+.oa-hero__grid {
+  position: relative;
+  z-index: 1;
+}
+.oa-stsena {
+  --px: 0;
+  --py: 0;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  /* Жест по горизонтали достаётся сцене, прокрутка — странице. */
+  touch-action: pan-y;
+}
+.oa-stsena__geo {
+  /* Построение сдвинуто влево от портрета: его видно, а не только угадывается. */
+  position: absolute;
+  left: -12%;
+  top: -3%;
+  width: 104%;
+  height: 104%;
+  overflow: visible;
+  transform: translate3d(calc(var(--px) * -10px), calc(var(--py) * -8px), 0);
+}
+.oa-geo-diska {
+  fill: rgb(226 237 255 / 0.55);
+}
+.oa-geo-line,
+.oa-geo-dash,
+.oa-geo-os,
+.oa-geo-tik {
+  fill: none;
+  stroke: var(--blue-600);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+.oa-geo-line {
+  stroke-opacity: 0.55;
+}
+.oa-geo-dash {
+  stroke-opacity: 0.38;
+  stroke-dasharray: 5 6;
+}
+.oa-geo-os,
+.oa-geo-tik {
+  stroke: var(--navy-700);
+  stroke-opacity: 0.4;
+}
+.oa-geo-parabola {
+  fill: none;
+  stroke: var(--terracotta);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.oa-geo-vershina {
+  fill: var(--color-bg);
+  stroke: var(--terracotta);
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+.oa-geo-tochka {
+  fill: var(--color-bg);
+  stroke: var(--blue-600);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.oa-geo-bukva {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  fill: var(--navy-700);
+}
+/* Линии построения прочерчиваются при загрузке. */
+.oa-stsena.is-zhivaya .oa-geo-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: oa-cherta 1400ms var(--ease) 150ms forwards;
+}
+.oa-stsena.is-zhivaya .oa-geo-draw--2 {
+  animation-delay: 600ms;
+}
+@keyframes oa-cherta {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.oa-stsena__foto {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * 6px), 0, 0);
+}
+.oa-stsena__foto .oa-foto {
+  position: absolute;
+  left: 60%;
+  bottom: 0;
+  height: 103%;
+  transform: translateX(-50%);
+}
+.oa-piramida {
+  position: absolute;
+  left: -10%;
+  bottom: 0;
+  width: 27%;
+  z-index: 2;
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * 18px), calc(var(--py) * 12px), 0);
+}
+.oa-piramida svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 18px 22px rgb(31 95 208 / 0.16));
+}
+.oa-stsena.is-zhivaya .oa-piramida svg {
+  animation: oa-parit 7s ease-in-out infinite alternate;
+}
+@keyframes oa-parit {
+  to {
+    transform: translateY(-6px);
+  }
+}
+.oa-stsena__formula {
+  position: absolute;
+  left: -10%;
+  top: 12%;
+  z-index: 3;
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow);
+  transform: translate3d(calc(var(--px) * 12px), calc(var(--py) * 10px), 0);
+}
+.oa-stsena__chisla {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 18px;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--color-accent-text);
+}
+.oa-stsena__podskazka {
+  display: none;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  .oa-stsena.is-zhivaya .oa-stsena__podskazka--myshka {
+    display: block;
+  }
+}
+@media not ((hover: hover) and (pointer: fine)) {
+  .oa-stsena.is-zhivaya .oa-stsena__podskazka--palets {
+    display: block;
+  }
+}
+
+/* Фоновые надписи: формулы крупным курсивом, почти в тон фона. */
+.oa-fon {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.oa-fon__f {
+  position: absolute;
+  font-family: var(--font-serif);
+  font-style: italic;
+  white-space: nowrap;
+  color: var(--blue-600);
+  opacity: 0.07;
+}
+.oa-fon__f--1 {
+  left: -2%;
+  bottom: 2%;
+  font-size: clamp(64px, 11vw, 168px);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--blue-600);
+  opacity: 0.16;
+}
+.oa-fon__f--2 {
+  left: 34%;
+  top: 7%;
+  font-size: clamp(28px, 3.4vw, 52px);
+  transform: rotate(-6deg);
+}
+.oa-fon__f--3 {
+  right: 2%;
+  top: 9%;
+  font-size: clamp(22px, 2.4vw, 36px);
+  transform: rotate(5deg);
+  opacity: 0.1;
+}
+.oa-fon__f--4 {
+  left: 4%;
+  top: 12%;
+  font-size: clamp(18px, 1.9vw, 28px);
+  transform: rotate(-3deg);
+  opacity: 0.09;
+}
+.oa-fon__f--5 {
+  left: 42%;
+  bottom: 24%;
+  font-size: clamp(24px, 2.8vw, 44px);
+  transform: rotate(4deg);
+}
+
+/* ── Первый экран «Портрет» ──────────────────────────────────── */
+
+.oa-hero--portret {
+  padding-top: var(--space-10);
+}
+.oa-hero--portret .oa-hero__grid {
+  align-items: end;
+  box-shadow: inset 0 -1px 0 var(--oa-line);
+}
+.oa-hero--portret .oa-hero__text {
+  grid-column: 1 / 7;
+  align-self: center;
+  padding-bottom: var(--space-12);
+}
+.oa-hero--portret .oa-imya {
+  margin-top: var(--space-5);
+  font-size: clamp(38px, 4.5vw, 58px);
+  line-height: 1.06;
+}
+.oa-hero--portret .oa-kto {
+  margin-top: var(--space-6);
+  max-width: 27em;
+  font-size: clamp(18px, 1.7vw, 22px);
+  line-height: 1.5;
+}
+.oa-hero--portret .oa-stsena {
+  grid-column: 7 / 13;
+  justify-self: end;
+  width: min(100%, 74svh, 620px);
+  margin-top: 4%;
+}
+
+/* ── Первый экран «Журнальный разворот» ──────────────────────── */
+
+.oa-hero--razvorot {
+  padding-top: var(--space-8);
+}
+.oa-hero--razvorot .oa-hero__grid {
+  grid-template-rows: auto 1fr auto;
+  box-shadow: inset 0 -1px 0 var(--oa-line);
+}
+.oa-hero__rubrika {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--oa-line);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent-text);
+}
+.oa-hero--razvorot .oa-imya {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  position: relative;
+  z-index: 2;
+  margin-top: var(--space-10);
+  pointer-events: none;
+}
+.oa-imya__familiya {
+  font-size: clamp(64px, 13.4vw, 184px);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+.oa-imya__imya {
+  margin-top: var(--space-3);
+  font-size: clamp(22px, 3.1vw, 42px);
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--blue-700);
+}
+.oa-hero--razvorot .oa-kto {
+  grid-column: 1 / 6;
+  grid-row: 3;
+  align-self: end;
+  padding: var(--space-12) 0 var(--space-12);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(19px, 1.8vw, 23px);
+  line-height: 1.45;
+  color: var(--oa-ink);
+}
+/* Окружность построения заходит под последние буквы фамилии. */
+.oa-hero--razvorot .oa-stsena {
+  grid-column: 6 / 13;
+  grid-row: 2 / 4;
+  align-self: end;
+  justify-self: end;
+  width: min(100%, 76svh, 660px);
+  margin-top: var(--space-6);
+}
+.oa-hero--razvorot .oa-stsena__formula {
+  left: -8%;
+  top: 44%;
+}
+.oa-hero--razvorot .oa-fon__f--1 {
+  bottom: auto;
+  top: 30%;
+  left: 20%;
+  font-size: clamp(80px, 17vw, 260px);
+  opacity: 0.12;
+}
+.oa-hero--razvorot .oa-fon__f--2 {
+  left: 46%;
+  top: 9%;
+}
+.oa-hero--razvorot .oa-fon__f--4 {
+  top: auto;
+  bottom: 30%;
+  left: 3%;
+}
+
+/* ── Секции: общий ритм ──────────────────────────────────────── */
+
+.oa-sec {
+  padding-top: var(--oa-sec);
+}
+.oa-sec:last-of-type {
+  padding-bottom: var(--oa-sec);
+}
+.oa-sec__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
+  column-gap: var(--oa-gap);
+}
+.oa-sec__num {
+  display: none;
+}
+.oa-sec__wide {
+  grid-column: 1 / -1;
+  margin-top: var(--space-12);
+}
+.oa-sec__body--after {
+  margin-top: var(--space-12);
+}
+
+/* Рукописная пометка: стоит на поле рядом со своим блоком. */
+.oa-pometka {
+  display: block;
+  width: min(100%, 250px);
+  height: auto;
+  transform: rotate(-3deg);
+}
+.oa-sec__side {
+  align-self: start;
+  margin-top: var(--space-10);
+}
+
+/* Бюст: стоит свободно, под постаментом мягкая тень. */
+.oa-byust {
+  position: relative;
+  display: block;
+  width: min(100%, 280px);
+}
+.oa-byust img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  will-change: transform;
+}
+.oa-byust::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -3%;
+  width: 90%;
+  height: 9%;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgb(22 50 107 / 0.22), transparent);
+  filter: blur(6px);
+}
+
+/* ── «Портрет»: лента в две колонки ──────────────────────────── */
+
+@media (min-width: 900px) {
+  .oa--portret .oa-sec__head {
+    grid-column: 1 / 6;
+    grid-row: 1;
+  }
+  .oa--portret .oa-sec__side {
+    grid-column: 1 / 5;
+    grid-row: 2;
+  }
+  .oa--portret .oa-sec__body {
+    grid-column: 6 / 13;
+    grid-row: 1 / span 2;
+  }
+  .oa--portret .oa-sec__body--after {
+    grid-row: auto;
+  }
+  .oa--portret .oa-sec__side--byust {
+    display: grid;
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+    align-items: end;
+    gap: var(--space-5);
+  }
+  .oa--portret .oa-sec__side--byust .oa-pometka {
+    margin-bottom: 30%;
+  }
+}
+.oa--portret .oa-dvizhok__grafik {
+  display: none;
+}
+.oa--portret .oa-dvizhok__head {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ── «Журнальный разворот»: поля слева и справа ──────────────── */
+
+.oa--razvorot .oa-h2 {
+  font-size: clamp(30px, 4.2vw, 58px);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+.oa--razvorot .oa-lead {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(21px, 2.1vw, 27px);
+  line-height: 1.4;
+}
+@media (min-width: 900px) {
+  .oa--razvorot .oa-sec__head {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--oa-line);
+  }
+  .oa--razvorot .oa-sec__num {
+    display: block;
+    grid-column: 1 / 4;
+    grid-row: 1 / span 2;
+    font-size: clamp(56px, 7vw, 96px);
+    line-height: 0.9;
+    font-weight: 200;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--blue-300);
+  }
+  .oa--razvorot .oa-kicker,
+  .oa--razvorot .oa-h2 {
+    grid-column: 4 / 12;
+  }
+  .oa--razvorot .oa-sec__body {
+    grid-column: 4 / 10;
+    grid-row: 2;
+    margin-top: var(--space-10);
+  }
+  .oa--razvorot .oa-sec__body--after {
+    grid-row: auto;
+    margin-top: var(--space-12);
+  }
+  .oa--razvorot .oa-sec__side {
+    grid-column: 10 / 13;
+    grid-row: 2;
+    margin-top: var(--space-12);
+  }
+  .oa--razvorot .oa-sec__wide {
+    grid-column: 4 / -1;
+  }
+  .oa--razvorot .oa-sec__side--byust .oa-pometka {
+    margin-top: var(--space-8);
+    width: min(100%, 220px);
+  }
+}
+
+/* ── Принципы ────────────────────────────────────────────────── */
+
+.oa-printsipy {
+  list-style: none;
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8) var(--oa-gap);
+}
+.oa-printsipy li {
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--oa-line);
+}
+.oa-printsipy__num {
+  display: block;
+  margin-bottom: var(--space-3);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-text);
+}
+.oa-printsipy p {
+  margin-top: var(--space-2);
+  font-size: 16px;
+  line-height: 1.55;
+}
+/* Разворот: принципы строками, цифра — на своём поле слева. */
+.oa--razvorot .oa-printsipy {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.oa--razvorot .oa-printsipy li {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  padding: var(--space-5) 0;
+}
+.oa--razvorot .oa-printsipy__num {
+  grid-row: 1 / span 2;
+  margin: 0;
+  font-size: 28px;
+  line-height: 28px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+/* ── Линия времени ───────────────────────────────────────────── */
+
+.oa-put {
+  list-style: none;
+  margin: var(--space-8) 0 0;
+  padding: 0;
+}
+.oa-put li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 7.5em minmax(0, 1fr);
+  column-gap: var(--space-12);
+  padding-bottom: var(--space-8);
+}
+.oa-put li:last-child {
+  padding-bottom: 0;
+}
+/* Ось и точка — между годом и местом. */
+.oa-put li::before {
+  content: '';
+  position: absolute;
+  left: calc(7.5em + var(--space-6));
+  top: 20px;
+  bottom: -8px;
+  width: 1px;
+  background: var(--color-border-info);
+}
+.oa-put li:last-child::before {
+  display: none;
+}
+.oa-put li::after {
+  content: '';
+  position: absolute;
+  left: calc(7.5em + var(--space-6) - 5px);
+  top: 8px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  background: var(--color-bg);
+}
+.oa-put .oa-put__parallel::after {
+  border-style: dashed;
+}
+.oa-put__god {
+  grid-row: 1 / span 2;
+  font-size: 16px;
+  line-height: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary-hover);
+}
+.oa-put__mesto {
+  grid-column: 2;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--oa-ink);
+}
+.oa-put__chto {
+  grid-column: 2;
+  margin-top: var(--space-1);
+  max-width: 30em;
+  font-size: 16px;
+  line-height: 1.55;
+}
+/* Разворот: вместо оси — строки таблицы с крупными тонкими годами. */
+.oa--razvorot .oa-put li {
+  grid-template-columns: 11.5em minmax(0, 1fr);
+  column-gap: var(--space-5);
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--oa-line);
+}
+.oa--razvorot .oa-put li::before,
+.oa--razvorot .oa-put li::after {
+  display: none;
+}
+.oa--razvorot .oa-put__god {
+  font-size: clamp(22px, 2vw, 26px);
+  font-weight: 300;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+.oa--razvorot .oa-put__parallel .oa-put__god {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* ── «Один прототип»: единственная стеклянная плита секции ───── */
+
+.oa-dvizhok__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
+  gap: var(--space-2) var(--oa-gap);
+  align-items: center;
+}
+.oa-dvizhok__head .oa-text {
+  grid-column: 1;
+  margin-top: 0;
+}
+.oa-dvizhok__grafik {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 100%;
+}
+.oa-tsep {
+  list-style: none;
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  counter-reset: shag;
+}
+.oa-tsep li {
+  counter-increment: shag;
+  padding: 0 var(--space-5);
+  border-left: 1px solid var(--oa-line);
+}
+.oa-tsep li::before {
+  content: counter(shag) ' →';
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--color-accent-text);
+}
+.oa-tsep li:last-child::before {
+  content: counter(shag);
+}
+.oa-tsep b {
+  display: block;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--oa-ink);
+}
+.oa-tsep span {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 15px;
+  line-height: 22px;
+}
+
+/* ── Польза: две стеклянные карточки ─────────────────────────── */
+
+.oa-polza {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--oa-gap);
+}
+.oa-polza__karta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+.oa-polza__karta .oa-text,
+.oa-polza__karta .oa-todo {
+  margin-top: 0;
+  flex: 1;
+}
+.oa-polza__karta .btn {
+  margin-top: var(--space-2);
+}
+
+/* ── Связь ───────────────────────────────────────────────────── */
+
+.oa-svyaz__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+.oa-svyaz__link + .oa-todo {
+  margin-top: var(--space-5);
+}
+.oa-svyaz__link:hover {
+  color: var(--color-primary-active);
+}
+
+/* ── Оглавление черновиков ───────────────────────────────────── */
+
+.oa-oglavlenie {
+  min-height: 100svh;
+  padding: var(--space-16) 0;
+}
+.oa-oglavlenie .oa-polza {
+  margin-top: var(--space-10);
+}
+.oa-oglavlenie__link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ── Планшет и телефон: одна колонка ─────────────────────────── */
+
+@media (max-width: 899.98px) {
+  .oa-sec__grid,
+  .oa-hero__grid {
+    display: block;
+  }
+  .oa-sec__body,
+  .oa-sec__side {
+    margin-top: var(--space-8);
+  }
+  /* Пометка — у правого поля, под заголовком своего блока. */
+  .oa-sec__side .oa-pometka {
+    width: min(58%, 230px);
+    margin-left: auto;
+  }
+  .oa-sec__side--byust {
+    display: grid;
+    grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+    align-items: end;
+    gap: var(--space-5);
+  }
+  .oa-sec__side--byust .oa-byust {
+    max-width: 200px;
+  }
+  .oa-sec__side--byust .oa-pometka {
+    width: min(100%, 210px);
+    margin: 0 0 22%;
+  }
+  .oa--razvorot .oa-sec__head {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--oa-line);
+  }
+
+  /* Первый экран: имя, строка и сцена с фото — в один экран телефона. */
+  .oa-hero .oa-stsena {
+    width: min(100%, 46svh, 520px);
+    margin: var(--space-8) auto 0;
+  }
+  .oa-hero .oa-stsena__formula {
+    left: -2%;
+    right: auto;
+    top: 0;
+    padding: var(--space-2) var(--space-3);
+  }
+  .oa-stsena__chisla {
+    font-size: 15px;
+    line-height: 20px;
+  }
+  .oa-fon__f--2,
+  .oa-fon__f--4,
+  .oa-fon__f--5 {
+    display: none;
+  }
+  .oa-hero .oa-fon__f--1 {
+    left: -6%;
+    top: auto;
+    bottom: 36%;
+    font-size: clamp(64px, 22vw, 150px);
+  }
+  .oa-hero .oa-fon__f--3 {
+    top: auto;
+    bottom: 3%;
+    right: auto;
+    left: 5%;
+  }
+  .oa-hero--portret {
+    padding-top: var(--space-8);
+  }
+  .oa-hero--portret .oa-hero__text {
+    padding-bottom: 0;
+  }
+  .oa-hero--portret .oa-imya {
+    margin-top: var(--space-3);
+    font-size: clamp(38px, 11vw, 64px);
+  }
+  .oa-hero--portret .oa-kto {
+    margin-top: var(--space-4);
+  }
+  .oa-imya__io > span {
+    display: block;
+  }
+  .oa-hero--razvorot {
+    padding-top: var(--space-5);
+  }
+  .oa-hero--razvorot .oa-imya {
+    margin-top: var(--space-6);
+  }
+  .oa-imya__familiya {
+    font-size: clamp(64px, 20vw, 150px);
+  }
+  .oa-imya__imya {
+    font-size: clamp(22px, 6.2vw, 42px);
+  }
+  .oa-hero--razvorot .oa-kto {
+    padding: var(--space-5) 0 0;
+    max-width: 26em;
+  }
+  .oa-hero__grid {
+    box-shadow: inset 0 -1px 0 var(--oa-line);
+  }
+
+  .oa-tsep {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--space-6);
+  }
+}
+
+@media (max-width: 639.98px) {
+  .oa-wrap {
+    padding: 0 var(--space-5);
+  }
+  .oa-printsipy,
+  .oa-polza {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .oa-polza {
+    gap: var(--space-5);
+  }
+  .oa-polza__karta .btn {
+    align-self: stretch;
+  }
+  /* Линия времени: ось у левого края, год — над местом. */
+  .oa--portret .oa-put li {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: var(--space-8);
+  }
+  .oa--portret .oa-put li::before {
+    left: 5px;
+  }
+  .oa--portret .oa-put li::after {
+    left: 0;
+  }
+  .oa--portret .oa-put__god,
+  .oa--portret .oa-put__mesto,
+  .oa--portret .oa-put__chto {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .oa--razvorot .oa-put li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .oa--razvorot .oa-put__god,
+  .oa--razvorot .oa-put__mesto,
+  .oa--razvorot .oa-put__chto {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .oa-dvizhok__head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .oa-dvizhok__grafik {
+    grid-column: 1;
+    grid-row: auto;
+    width: min(70%, 220px);
+    margin: var(--space-2) 0 0 auto;
+  }
+  .oa-tsep {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+  .oa-tsep li {
+    padding: var(--space-4) 0;
+    border-left: 0;
+    border-top: 1px solid var(--oa-line);
+  }
+  .oa-tsep li::before {
+    content: counter(shag) ' ↓';
+  }
+}
+
+/* ── Движение: проявление блоков при прокрутке ───────────────── */
+
+.oa--js [data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 600ms var(--ease),
+    transform 600ms var(--ease);
+}
+.oa--js [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .oa-stsena * {
+    animation: none !important;
+  }
+  .oa--js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
