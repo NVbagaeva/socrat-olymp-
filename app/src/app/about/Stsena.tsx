@@ -3,15 +3,16 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { assetUrl } from '@/lib/assetUrl';
 
-/* Сцена первого экрана варианта «Портрет» по утверждённому макету:
+/* Сцена первого экрана «Об авторе» по утверждённому макету:
    окружность, равнобедренный треугольник ABC с вписанной окружностью и
    высотой, оси координат и оранжевая парабола. Портрет стоит левее
-   построения, стеклянная пирамида — перед ним справа внизу.
+   построения, справа внизу — стеклянная пирамида и мраморный бюст.
 
    Курсор двигает вершину параболы и меняет её раствор, слои слегка
    смещаются; на телефоне то же делает прокрутка. Плашка в покое
    показывает общий вид y = ax² + bx + c, при движении — коэффициенты
-   нарисованной кривой. При prefers-reduced-motion сцена неподвижна. */
+   нарисованной кривой. Бюст при прокрутке чуть отстаёт от страницы.
+   При prefers-reduced-motion сцена неподвижна. */
 
 /* Поле построения 600×600. Начало координат графика — O, единица — U. */
 const U = 40;
@@ -48,7 +49,7 @@ function podpis(a: number, m: number, n: number): string {
   return `y = ${chislo(a)}x² ${b < 0 ? '−' : '+'} ${chislo(b)}x ${c < 0 ? '−' : '+'} ${chislo(c)}`;
 }
 
-export function StsenaMaket({ children }: { children: ReactNode }) {
+export function Stsena({ children }: { children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
   const path = useRef<SVGPathElement>(null);
   const tekst = useRef<HTMLSpanElement>(null);
@@ -109,6 +110,11 @@ export function StsenaMaket({ children }: { children: ReactNode }) {
       Object.assign(cel, POKOY, { px: 0, py: 0 });
       zapusk();
     };
+    /* Прокрутка: бюст чуть отстаёт от страницы на любом устройстве. */
+    const onParallax = () => {
+      const t = Math.max(0, Math.min(1, window.scrollY / Math.max(1, hero.offsetHeight)));
+      el.style.setProperty('--sy', t.toFixed(3));
+    };
     /* Телефон: параболу раскрывает прокрутка первого экрана. */
     const onScroll = () => {
       const t = Math.max(0, Math.min(1, window.scrollY / Math.max(1, hero.offsetHeight)));
@@ -120,6 +126,7 @@ export function StsenaMaket({ children }: { children: ReactNode }) {
       zapusk();
     };
 
+    window.addEventListener('scroll', onParallax, { passive: true });
     if (myshka) {
       hero.addEventListener('pointermove', onMove);
       hero.addEventListener('pointerleave', onLeave);
@@ -131,6 +138,7 @@ export function StsenaMaket({ children }: { children: ReactNode }) {
       hero.removeEventListener('pointermove', onMove);
       hero.removeEventListener('pointerleave', onLeave);
       window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onParallax);
       if (frame !== 0) cancelAnimationFrame(frame);
       el.classList.remove('is-zhivaya');
     };
@@ -227,8 +235,10 @@ export function StsenaMaket({ children }: { children: ReactNode }) {
           тело. Бюст развёрнут лицом к построению. */}
       <span className="oa-sm__byust">
         <img
-          src={assetUrl('/images/author/bust-marble.png')}
-          alt="Мраморный бюст в античном стиле"
+          src={assetUrl('/images/author/bust-marble-400.webp')}
+          srcSet={`${assetUrl('/images/author/bust-marble-400.webp')} 400w, ${assetUrl('/images/author/bust-marble-675.webp')} 675w`}
+          sizes="(max-width: 899px) 31vw, 205px"
+          alt="Мраморный бюст в античном стиле: женская голова с волнистыми волосами"
           width="675"
           height="900"
           decoding="async"
@@ -240,7 +250,7 @@ export function StsenaMaket({ children }: { children: ReactNode }) {
         className="oa-sm__piramida"
         src={assetUrl('/images/glass/piramida-steklo.webp')}
         srcSet={`${assetUrl('/images/glass/piramida-steklo.webp')} 500w, ${assetUrl('/images/glass/piramida-steklo-large.webp')} 1000w`}
-        sizes="(max-width: 899px) 34vw, 230px"
+        sizes="(max-width: 899px) 27vw, 180px"
         alt=""
         aria-hidden="true"
         width="500"

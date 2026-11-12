@@ -1,232 +1,222 @@
 import type { Metadata } from 'next';
 import { SiteFooter, SiteHeader } from '@/components/layout';
-import { about } from '@/content/about';
+import { about, type Nadpis } from '@/content/about';
+import { Dvizhenie } from './Dvizhenie';
+import { Stsena } from './Stsena';
 import './about.css';
 
-import { assetUrl } from '@/lib/assetUrl';
 export const metadata: Metadata = {
   title: about.meta.title,
   description: about.meta.description,
 };
 
-const { hero, path, problem, engine, principles, personal, cta } = about;
+const { hero, imya, podhod, put, sajt, polza, svyaz } = about;
 
+/* Рукописная пометка на поле рядом со своим блоком. */
+function Pometka({ nadpis }: { nadpis: Nadpis }) {
+  return (
+    <img
+      className="oa-pometka"
+      src={nadpis.src}
+      alt={nadpis.alt}
+      width={nadpis.width}
+      height={nadpis.height}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+}
+
+function Shapka({ metka, title, id }: { metka: string; title: string; id: string }) {
+  return (
+    <header className="oa-sec__head">
+      <p className="oa-kicker">{metka}</p>
+      <h2 className="oa-h2" id={id}>
+        {title}
+      </h2>
+    </header>
+  );
+}
+
+/* Порядок блоков — как рассказ: кто я → как я учу → образование и опыт →
+   о сайте → чем могу быть полезна → как связаться. Сетка — 12 колонок в
+   том же контейнере, что шапка сайта. */
 export default function AboutPage() {
   return (
-    <>
+    <div className="oa">
       {/* Тот же SiteHeader, что и везде; currentHref подсвечивает пункт меню. */}
-      <SiteHeader currentHref="/about/" />
+      <SiteHeader className="site-head--steklo" currentHref="/about/" />
+      <Dvizhenie />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(about.person) }}
+      />
 
       <main>
-        <section className="about-hero" aria-labelledby="about-title">
-          {/* Текстовая колонка идёт первой и в обычном потоке: она задаёт
-              высоту первого экрана, от которой считается вся графика.
-              На узком экране в этом же потоке под ней встают пометка
-              и портрет — отдельной разметки для телефона не нужно. */}
-          <div className="about-hero__body">
-            <p className="about-eyebrow">{hero.eyebrow}</p>
-            <h1 className="about-hero__title" id="about-title">
-              {hero.title}
-            </h1>
-            <p className="about-hero__lead">{hero.lead}</p>
-
-            <div className="about-hero__actions">
-              <a className="btn btn--primary btn--lg" href={hero.actions.primary.href}>
-                {hero.actions.primary.label}
-              </a>
-              <a className="btn btn--secondary btn--lg" href={hero.actions.secondary.href}>
-                {hero.actions.secondary.label}
-              </a>
-            </div>
-
-            {/* Четыре равноправных пункта: ни карточек, ни теней —
-                иконка, подложка-кружок и две строки подписи. */}
-            <ul className="creds">
-              {hero.credibility.map((item) => (
-                <li className="cred" key={item.line1}>
-                  <span className="cred__icon">
-                    <img src={item.icon} alt="" width="40" height="40" decoding="async" />
-                  </span>
-                  <span className="cred__text">
-                    {item.line1}
-                    <br />
-                    {item.line2}
-                  </span>
-                </li>
-              ))}
-            </ul>
+        <section className="oa-hero" aria-labelledby="oa-imya">
+          <div className="oa-fon" aria-hidden="true">
+            {hero.formuly.map((formula) => (
+              <span className="oa-fon__f" key={formula}>
+                {formula}
+              </span>
+            ))}
           </div>
-
-          {/* Дальше — графика, снизу вверх по слоям. Порядок в разметке
-              совпадает с глубиной. Всё декоративное скрыто от
-              скринридера и не перехватывает курсор. */}
-          <img className="hero-layer hero-layer--net" src={assetUrl('/images/decor/network.png')} alt="" aria-hidden="true" />
-          <img className="hero-layer hero-layer--arcs" src={assetUrl('/images/decor/circles-1.png')} alt="" aria-hidden="true" />
-
-          {/* Обёртка нужна, чтобы тень-подложка считалась от самого бюста:
-              её ширина и высота заданы долями его размеров. */}
-          <span className="hero-bust" aria-hidden="true">
-            <img src={assetUrl('/images/author/bust-marble.png')} alt="" />
-          </span>
-
-          <img
-            className="hero-layer hero-layer--note"
-            src={assetUrl('/images/nadpisi/nadpis-opyt-vdohnovlyaet.png')}
-            alt=""
-            aria-hidden="true"
-          />
-          <img
-            className="hero-layer hero-layer--formula"
-            src={assetUrl('/images/formuly/formula-kvadratichnaya-funkciya.png')}
-            alt=""
-            aria-hidden="true"
-          />
-          <img
-            className="hero-layer hero-layer--crystal"
-            src={assetUrl('/images/glass/pyramid-truncated-wide.png')}
-            alt=""
-            aria-hidden="true"
-          />
-
-          <figure className="about-hero__figure">
-            <img
-              className="about-hero__photo"
-              src={hero.photo.src}
-              srcSet={hero.photo.srcSet}
-              sizes={hero.photo.sizes}
-              alt={hero.photo.alt}
-              width={hero.photo.width}
-              height={hero.photo.height}
-              fetchPriority="high"
-              decoding="async"
-            />
-          </figure>
+          <div className="oa-wrap oa-hero__grid">
+            <div className="oa-hero__text">
+              <p className="oa-kicker">{hero.eyebrow}</p>
+              {/* Единственный h1 страницы — имя. На телефоне оно встаёт в три строки. */}
+              <h1 className="oa-imya" id="oa-imya">
+                <span>{imya.familiya}</span>{' '}
+                <span className="oa-imya__io">
+                  <span>{imya.imya}</span> <span>{imya.otchestvo}</span>
+                </span>
+              </h1>
+              <p className="oa-kto">{hero.lead}</p>
+            </div>
+            <Stsena>
+              <img
+                className="oa-foto"
+                src={hero.photo.src}
+                srcSet={hero.photo.srcSet}
+                sizes={hero.photo.sizes}
+                alt={hero.photo.alt}
+                width={hero.photo.width}
+                height={hero.photo.height}
+                fetchPriority="high"
+                decoding="async"
+              />
+            </Stsena>
+          </div>
         </section>
 
-        <section className="about-band about-band--soft" aria-labelledby="path-title">
-          <div className="wrap">
-            <div className="about-head">
-              <h2 className="t-h2" id="path-title">
-                {path.title}
-              </h2>
-              <p>{path.lead}</p>
-            </div>
-
-            {/* Ось со точками: на широком экране горизонтальная, ниже — в столбик.
-                Точка «параллельно» уходит с оси и держится на пунктире. */}
-            <ol className="path">
-              {path.points.map((point) => (
-                <li
-                  className={`path__point${point.parallel ? ' path__point--parallel' : ''}`}
-                  key={point.place}
-                >
-                  <span className="path__dot" aria-hidden="true" />
-                  <span className="path__period">{point.period}</span>
-                  <span className="path__place">{point.place}</span>
-                  {point.note ? (
-                    <span
-                      className={`path__note${point.longNote ? ' path__note--long' : ''}`}
-                    >
-                      {point.note}
+        <section className="oa-sec" aria-labelledby="oa-podhod" data-reveal>
+          <div className="oa-wrap oa-sec__grid">
+            <Shapka metka={podhod.metka} title={podhod.title} id="oa-podhod" />
+            <aside className="oa-sec__side">
+              <Pometka nadpis={podhod.nadpis} />
+            </aside>
+            <div className="oa-sec__body">
+              <ol className="oa-printsipy">
+                {podhod.items.map((item) => (
+                  <li key={item.number}>
+                    <span className="oa-printsipy__num" aria-hidden="true">
+                      {item.number}
                     </span>
-                  ) : null}
-                </li>
-              ))}
-            </ol>
+                    <h3 className="oa-h3">{item.title}</h3>
+                    <p>{item.text}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
         </section>
 
-        <section className="about-band" aria-labelledby="problem-title">
-          <div className="wrap">
-            {/* Узкая колонка лежит внутри контейнера, а не на нём самом:
-                иначе её max-width перебил бы .wrap и блок поехал бы к центру. */}
-            <div className="about-narrow">
-              <h2 className="t-h2" id="problem-title">
-                {problem.title}
-              </h2>
-              {problem.paragraphs.map((text) => (
-                <p className="about-text" key={text}>
+        <section className="oa-sec" aria-labelledby="oa-put" data-reveal>
+          <div className="oa-wrap oa-sec__grid">
+            <Shapka metka={put.metka} title={put.title} id="oa-put" />
+            <aside className="oa-sec__side">
+              <Pometka nadpis={put.nadpis} />
+            </aside>
+            <div className="oa-sec__body">
+              <p className="oa-lead">{put.lead}</p>
+              <ul className="oa-fakty">
+                {put.fakty.map((fakt) => (
+                  <li key={fakt}>{fakt}</li>
+                ))}
+              </ul>
+              {/* Вертикальная линия времени; «параллельно» — пунктирная точка. */}
+              <ol className="oa-put">
+                {put.points.map((point) => (
+                  <li className={point.parallel ? 'oa-put__parallel' : undefined} key={point.place}>
+                    <span className="oa-put__god">{point.period}</span>
+                    <span className="oa-put__mesto">{point.place}</span>
+                    {point.note ? <span className="oa-put__chto">{point.note}</span> : null}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        <section className="oa-sec" aria-labelledby="oa-sajt" data-reveal>
+          <div className="oa-wrap oa-sec__grid">
+            <Shapka metka={sajt.metka} title={sajt.title} id="oa-sajt" />
+            <aside className="oa-sec__side">
+              <Pometka nadpis={sajt.nadpis} />
+            </aside>
+            <div className="oa-sec__body">
+              <p className="oa-lead">{sajt.lead}</p>
+              {sajt.paragraphs.map((text) => (
+                <p className="oa-text" key={text}>
                   {text}
                 </p>
               ))}
             </div>
+            {/* Единственная стеклянная плита секции. */}
+            <div className="oa-sec__wide oa-steklo">
+              <h3 className="oa-h3 oa-h3--big">{sajt.engine.title}</h3>
+              <p className="oa-text">{sajt.engine.lead}</p>
+              <ol className="oa-tsep">
+                {sajt.engine.steps.map((step) => (
+                  <li key={step.title}>
+                    <b>{step.title}</b>
+                    <span>{step.note}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className="oa-sec__body oa-sec__body--after">
+              <h3 className="oa-h3 oa-h3--big">{sajt.personal.title}</h3>
+              <p className="oa-text">{sajt.personal.text}</p>
+            </div>
           </div>
         </section>
 
-        <section className="about-band about-band--soft" aria-labelledby="engine-title">
-          <div className="wrap">
-            <div className="about-head">
-              <h2 className="t-h2" id="engine-title">
-                {engine.title}
-              </h2>
-              <p>{engine.lead}</p>
-            </div>
-
-            {/* Схема: тонкая линия сверху вниз, на ней — узлы по числу шагов. */}
-            <ol className="chain">
-              {engine.steps.map((step) => (
-                <li className="chain__step" key={step.title}>
-                  <span className="chain__dot" aria-hidden="true" />
-                  <span className="chain__title">{step.title}</span>
-                  <span className="chain__note">{step.note}</span>
-                </li>
+        <section className="oa-sec" aria-labelledby="oa-polza" data-reveal>
+          <div className="oa-wrap oa-sec__grid">
+            <Shapka metka={polza.metka} title={polza.title} id="oa-polza" />
+            <div className="oa-sec__wide oa-polza">
+              {polza.karty.map((karta) => (
+                <article
+                  className={`oa-steklo oa-polza__karta${karta.glavnaya ? 'oa-steklo--teplo' : ''}`}
+                  key={karta.komu}
+                >
+                  <h3 className="oa-h3 oa-h3--big">{karta.komu}</h3>
+                  <p className="oa-text">{karta.text}</p>
+                  <a
+                    className={`btn btn--lg ${karta.glavnaya ? 'btn--primary' : 'btn--secondary'}`}
+                    href={karta.action.href}
+                  >
+                    {karta.action.label}
+                  </a>
+                </article>
               ))}
-            </ol>
-          </div>
-        </section>
-
-        <section className="about-band" aria-labelledby="principles-title">
-          <div className="wrap">
-            <div className="about-head">
-              <h2 className="t-h2" id="principles-title">
-                {principles.title}
-              </h2>
-            </div>
-
-            <ul className="tenets">
-              {principles.items.map((item) => (
-                <li className="tenet" key={item.number}>
-                  <span className="tenet__num">{item.number}</span>
-                  <h3 className="tenet__title">{item.title}</h3>
-                  <p className="tenet__text">{item.text}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="about-band about-band--soft" aria-labelledby="personal-title">
-          <div className="wrap">
-            <div className="about-narrow">
-              <h2 className="t-h2" id="personal-title">
-                {personal.title}
-              </h2>
-              <p className="about-text about-text--lead">{personal.text}</p>
             </div>
           </div>
         </section>
 
-        <section className="about-band" aria-labelledby="about-cta-title">
-          <div className="wrap">
-            <div className="about-narrow">
-              <h2 className="t-h2" id="about-cta-title">
-                {cta.title}
-              </h2>
-              <p className="about-text">{cta.lead}</p>
-              <div className="about-cta__actions">
-                <a className="btn btn--primary btn--lg" href={cta.primaryAction.href}>
-                  {cta.primaryAction.label}
-                </a>
-                <a className="btn btn--secondary btn--lg" href={cta.secondaryAction.href}>
-                  {cta.secondaryAction.label}
-                </a>
-              </div>
+        <section className="oa-sec" aria-labelledby="oa-svyaz" data-reveal>
+          <div className="oa-wrap oa-sec__grid">
+            <Shapka metka={svyaz.metka} title={svyaz.title} id="oa-svyaz" />
+            <aside className="oa-sec__side">
+              <Pometka nadpis={svyaz.nadpis} />
+            </aside>
+            <div className="oa-sec__body">
+              <a
+                className="oa-svyaz__link"
+                href={svyaz.telegram.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>{svyaz.telegram.label}</span>
+                <span className="oa-svyaz__adres">{svyaz.telegram.adres}</span>
+              </a>
             </div>
           </div>
         </section>
       </main>
 
-      <SiteFooter />
-    </>
+      <SiteFooter className="site-foot--steklo" />
+    </div>
   );
 }

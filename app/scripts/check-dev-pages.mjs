@@ -26,7 +26,6 @@ const DEV_ROUTES = [
   'styleguide/zadanie-9',
   'styleguide/zadanie-10',
   'styleguide/soglasiya',
-  'styleguide/ob-avtore',
   'dev/intro',
   'styleguide/chertezhi-3',
   /* Пробный кабинет ролей и ДЗ (KABINET=1). Сам /kabinet/ — настоящая
@@ -53,8 +52,6 @@ const MARKERS = [
   'g10__stat',
   '/styleguide/soglasiya',
   'sgl__grid',
-  '/styleguide/ob-avtore',
-  'oa-stsena',
   '/dev/intro',
   'Прототип заставки',
   'dev-intro__panel',
