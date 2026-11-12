@@ -131,7 +131,6 @@ const ALL_PAGES = [
   '/zadaniya/7/opornye-zadachi/',
   '/zadaniya/7/trenazher/',
   '/zadaniya/7/generator/',
-  '/zadaniya/7/dlya-repetitorov/',
 ];
 const PAGES =
   ONLY.length === 0 ? ALL_PAGES : ALL_PAGES.filter((url) => ONLY.some((p) => url.startsWith(p)));

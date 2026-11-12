@@ -947,3 +947,196 @@
 .trn-uslovie--tekst .katex {
   font-size: 1.08em;
 }
+
+/* Подсказка-вопросы (PodskazkaVoprosy): вопросы с кнопками по шагам.
+   Плашка — та же тёплая, что у текстовой подсказки, но в столбик. */
+.trn-podskazka--voprosy {
+  display: block;
+  color: var(--color-text);
+}
+.trn-voprosy {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.trn-voprosy__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--amber-700);
+}
+.trn-voprosy__spisok {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: trn-vopros;
+}
+.trn-vopros {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  counter-increment: trn-vopros;
+}
+.trn-vopros__tekst {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.trn-vopros__tekst::before {
+  content: counter(trn-vopros) '. ';
+  color: var(--amber-700);
+}
+.trn-vopros__knopki {
+  display: grid;
+  gap: var(--space-2);
+}
+.trn-vopros__knopka {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--cream-200);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  /* Длинная формула в варианте прокручивается внутри кнопки. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.trn-vopros__knopka:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 2px var(--amber-600);
+}
+.trn-vopros__knopka:focus-visible {
+  outline: 2px solid var(--amber-600);
+  outline-offset: 2px;
+}
+.trn-vopros__knopka:disabled {
+  cursor: default;
+  color: var(--color-text-muted, #5b6b85);
+}
+.trn-vopros__knopka.is-verno {
+  background: var(--emerald-50);
+  box-shadow: inset 0 0 0 2px var(--emerald-600);
+  color: var(--color-text);
+  font-weight: 600;
+}
+.trn-vopros__knopka.is-mimo {
+  background: var(--terracotta-50);
+  box-shadow: inset 0 0 0 1px var(--terracotta-200);
+  text-decoration: line-through;
+}
+.trn-vopros__otklik {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--terracotta-700);
+}
+.trn-vopros__otklik.is-verno {
+  color: var(--color-text);
+}
+.trn-vopros__otklik.is-verno b {
+  color: #06704f;
+}
+.trn-voprosy__gotovo {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+@media (min-width: 640px) {
+  .trn-vopros__knopki {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Панель под шагами решения («Считаем с умом»): тот же вид, что у
+   признаков делимости. */
+.trn-posle > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--blue-700);
+  cursor: pointer;
+}
+.trn-posle ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-6);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.trn-posle__tex {
+  display: block;
+  margin-top: var(--space-1);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Метка источника у задачи: «Открытый банк ФИПИ» / «Не из банка». */
+.trn-istochnik {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted, #5b6b85);
+  text-align: center;
+}
+
+/* Задача ещё едет файлом (№3, №7): место под экран задачи. */
+.trn-zagruzka {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.trn-schet {
+  margin: 0;
+}
+
+/* Длинное название типа над условием («Корень равен x: отбор по
+   условию…») переносится, а не раздвигает экран задачи на телефоне. */
+.trn-zadacha__verh {
+  min-width: 0;
+}
+.trn-zadacha__verh > .stk-metka {
+  min-width: 0;
+  flex: 0 1 auto;
+  padding-block: 4px;
+  white-space: normal;
+  border-radius: 14px;
+}
+.trn-zadacha__nomer,
+.trn-zadacha__verh > .trn-zakladka {
+  flex: none;
+}
+
+/* Телефон, выбор тем: под закреплённой «Начать тренировку» странице не
+   нужен запас под кнопку «?» — «?» стоит над панелью (--fab-lift). С
+   запасом в конце страницы панель поднималась выше своего места и
+   попадала под «?». */
+@media (max-width: 767.98px) {
+  body:has(.trn-vybor__niz) .app-main {
+    padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-2));
+  }
+}
+
+/* Название типа в чипе выбора может содержать формулу: текст и формула
+   идут одной строкой, а не разъезжаются по краям чипа. */
+.trn-chip > span:first-child:not(.trn-chip__n) {
+  min-width: 0;
+  text-align: left;
+}
