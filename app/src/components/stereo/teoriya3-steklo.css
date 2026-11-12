@@ -1,0 +1,16 @@
+/* Вкладка «Теория» №3 в стеклянной сцене: стекло на карточках методики
+   (.o3-*) и на проверке теории. Всё под .o3-teoriya и .z3-teo — только
+   задание №3. */
+
+.o3-teoriya .o3-karta,
+.o3-teoriya .o3-panel,
+.o3-teoriya .o3-stepper__karta,
+.o3-teoriya .o3-primer,
+.z3-teo .kart-proverka {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
