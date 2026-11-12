@@ -20,8 +20,21 @@
  * (у №8 — прототип «8.A»).
  */
 
-/** Чем закрылась задача: верно сразу; с ошибкой; решение открыто до верного ответа. */
-export type LogOutcome = 'right' | 'wrong' | 'revealed';
+/**
+ * Чем закрылась задача:
+ *   right    — верно с первой попытки, без подсказки, решение не открывалось;
+ *              единственный исход, который идёт в освоение;
+ *   hinted   — верно с первой попытки, но с подсказкой: ни в освоение, ни в ошибки;
+ *   revealed — решение открыто до верного ответа: для «Стоит повторить» — ошибка;
+ *   wrong    — ошибка.
+ * Записи, сделанные до появления hinted, читаются как есть.
+ */
+export type LogOutcome = 'right' | 'hinted' | 'wrong' | 'revealed';
+
+/** Исход считается ошибкой: неверный ответ или открытое решение. */
+export function isMistake(outcome: LogOutcome): boolean {
+  return outcome === 'wrong' || outcome === 'revealed';
+}
 
 export interface LogAttempt {
   /** Идентификатор записи: по нему сливаются журналы устройств. */
@@ -46,6 +59,8 @@ export interface ArchiveTally {
   done: number;
   right: number;
   seconds: number;
+  /** Сколько из закрытых — «верно с подсказкой». В старых счётчиках поля нет. */
+  hinted?: number;
 }
 
 export interface ProgressLog {
@@ -66,6 +81,13 @@ export interface ProgressLog {
    * свёртка с более поздним upTo, а попытки до него из журналов уходят.
    */
   folded?: { upTo: number; kinds: Record<string, ArchiveTally> };
+  /**
+   * Исходы задач старого формата (lib/progressStore.ts, поле outcomes):
+   * задача → чем закрылась. Попытка в журнале по той же задаче главнее.
+   */
+  legacyOutcomes?: Record<string, LogOutcome>;
+  /** Решённые задачи старого формата (lib/trainerProgress.ts, поле solved). */
+  legacySolved?: string[];
 }
 
 export const EMPTY_LOG: ProgressLog = { v: 1, attempts: [], archive: {}, legacyMistakes: [] };
@@ -73,7 +95,7 @@ export const EMPTY_LOG: ProgressLog = { v: 1, attempts: [], archive: {}, legacyM
 /** Сколько попыток держать. Старые сворачиваются в счётчики архива. */
 export const LOG_LIMIT = 1500;
 
-const OUTCOMES: readonly LogOutcome[] = ['right', 'wrong', 'revealed'];
+const OUTCOMES: readonly LogOutcome[] = ['right', 'hinted', 'wrong', 'revealed'];
 
 function str(value: unknown, max = 120): string | null {
   return typeof value === 'string' && value.length > 0 && value.length <= max ? value : null;
@@ -117,13 +139,7 @@ export function parseLog(raw: unknown): ProgressLog {
   if (typeof v.archive === 'object' && v.archive !== null) {
     for (const [origin, kinds] of Object.entries(v.archive as Record<string, unknown>)) {
       if (typeof kinds !== 'object' || kinds === null) continue;
-      const out: Record<string, ArchiveTally> = {};
-      for (const [kind, tally] of Object.entries(kinds as Record<string, unknown>)) {
-        if (typeof tally !== 'object' || tally === null) continue;
-        const t = tally as Record<string, unknown>;
-        out[kind] = { done: num(t.done), right: num(t.right), seconds: num(t.seconds) };
-      }
-      archive[origin] = out;
+      archive[origin] = parseTallies(kinds);
     }
   }
   const legacyMistakes = Array.isArray(v.legacyMistakes)
@@ -134,6 +150,12 @@ export function parseLog(raw: unknown): ProgressLog {
     const f = v.folded as Record<string, unknown>;
     out.folded = { upTo: num(f.upTo), kinds: parseTallies(f.kinds) };
   }
+  return withLegacy(out, parseOutcomes(v.legacyOutcomes), strings(v.legacySolved));
+}
+
+function parseTally(t: Record<string, unknown>): ArchiveTally {
+  const out: ArchiveTally = { done: num(t.done), right: num(t.right), seconds: num(t.seconds) };
+  if (num(t.hinted) > 0) out.hinted = num(t.hinted);
   return out;
 }
 
@@ -142,9 +164,36 @@ function parseTallies(raw: unknown): Record<string, ArchiveTally> {
   if (typeof raw !== 'object' || raw === null) return out;
   for (const [kind, tally] of Object.entries(raw as Record<string, unknown>)) {
     if (typeof tally !== 'object' || tally === null) continue;
-    const t = tally as Record<string, unknown>;
-    out[kind] = { done: num(t.done), right: num(t.right), seconds: num(t.seconds) };
+    out[kind] = parseTally(tally as Record<string, unknown>);
   }
+  return out;
+}
+
+function parseOutcomes(raw: unknown): Record<string, LogOutcome> {
+  const out: Record<string, LogOutcome> = {};
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return out;
+  for (const [task, value] of Object.entries(raw as Record<string, unknown>)) {
+    const outcome = OUTCOMES.find((item) => item === value);
+    if (outcome !== undefined && task.length > 0 && task.length <= 120) out[task] = outcome;
+  }
+  return out;
+}
+
+function strings(raw: unknown): string[] {
+  return Array.isArray(raw)
+    ? raw.filter((item): item is string => typeof item === 'string' && item.length > 0)
+    : [];
+}
+
+/** Дописать поля старого формата, только если в них что-то есть. */
+function withLegacy(
+  log: ProgressLog,
+  outcomes: Record<string, LogOutcome>,
+  solved: string[],
+): ProgressLog {
+  const out = { ...log };
+  if (Object.keys(outcomes).length > 0) out.legacyOutcomes = outcomes;
+  if (solved.length > 0) out.legacySolved = solved;
   return out;
 }
 
@@ -160,11 +209,14 @@ function trim(log: ProgressLog): ProgressLog {
   const kinds: Record<string, ArchiveTally> = { ...(log.folded?.kinds ?? {}) };
   for (const item of old) {
     const tally = kinds[item.kind] ?? { done: 0, right: 0, seconds: 0 };
-    kinds[item.kind] = {
+    const next: ArchiveTally = {
       done: tally.done + 1,
       right: tally.right + (item.outcome === 'right' ? 1 : 0),
       seconds: tally.seconds + item.seconds,
     };
+    const hinted = (tally.hinted ?? 0) + (item.outcome === 'hinted' ? 1 : 0);
+    if (hinted > 0) next.hinted = hinted;
+    kinds[item.kind] = next;
   }
   const upTo = old[old.length - 1]?.at ?? log.folded?.upTo ?? 0;
   return { ...log, attempts: log.attempts.slice(cut), folded: { upTo, kinds } };
@@ -198,12 +250,17 @@ export function mergeLogs(a: ProgressLog, b: ProgressLog): ProgressLog {
     legacyMistakes: [...new Set([...a.legacyMistakes, ...b.legacyMistakes])],
   };
   if (folded !== undefined) out.folded = folded;
-  return trim(out);
+  return trim(
+    withLegacy(out, { ...(b.legacyOutcomes ?? {}), ...(a.legacyOutcomes ?? {}) }, [
+      ...new Set([...(a.legacySolved ?? []), ...(b.legacySolved ?? [])]),
+    ]),
+  );
 }
 
 /**
- * Свернуть хранилище старого формата (lib/progressStore.ts:
- * { kinds: {тип: {done, right, seconds}}, mistakes: [...] }) в журнал.
+ * Свернуть хранилище старого формата (lib/progressStore.ts и
+ * lib/trainerProgress.ts: { kinds: {тип: {done, right, seconds}},
+ * mistakes: [...], outcomes?: {задача: исход}, solved?: [...] }) в журнал.
  * origin — имя этого устройства в архиве.
  */
 export function fromLegacy(raw: unknown, origin: string): ProgressLog {
@@ -220,12 +277,28 @@ export function fromLegacy(raw: unknown, origin: string): ProgressLog {
   const mistakes = Array.isArray(v.mistakes)
     ? v.mistakes.filter((item): item is string => typeof item === 'string')
     : [];
-  return {
-    v: 1,
-    attempts: [],
-    archive: Object.keys(kinds).length === 0 ? {} : { [origin]: kinds },
-    legacyMistakes: mistakes,
-  };
+  return withLegacy(
+    {
+      v: 1,
+      attempts: [],
+      archive: Object.keys(kinds).length === 0 ? {} : { [origin]: kinds },
+      legacyMistakes: mistakes,
+    },
+    parseOutcomes(v.outcomes),
+    strings(v.solved),
+  );
+}
+
+/** В журнале нет ничего: ни попыток, ни данных старого формата. */
+export function isEmptyLog(log: ProgressLog): boolean {
+  return (
+    log.attempts.length === 0 &&
+    Object.keys(log.archive).length === 0 &&
+    log.legacyMistakes.length === 0 &&
+    log.folded === undefined &&
+    Object.keys(log.legacyOutcomes ?? {}).length === 0 &&
+    (log.legacySolved ?? []).length === 0
+  );
 }
 
 /* ── Что считается из журнала ─────────────────────────────────── */
@@ -238,7 +311,11 @@ export interface KindStats {
   right: number;
   /** С ошибкой или с открытым решением. */
   mistakes: number;
+  /** Верно, но с подсказкой: ни в «верно», ни в ошибки. */
+  hinted: number;
   seconds: number;
+  /** Когда тип решался в последний раз, мс от эпохи; 0 — попыток с датой нет. */
+  lastAt: number;
   /** Исходы последних пяти задач, от старых к новым. */
   recent: LogOutcome[];
   /** «Стоит повторить»: в последних пяти задачах типа две ошибки и больше. */
@@ -262,7 +339,17 @@ export function kindStats(
   const row = (kind: string): KindStats => {
     let found = out.get(kind);
     if (found === undefined) {
-      found = { kind, done: 0, right: 0, mistakes: 0, seconds: 0, recent: [], repeat: false };
+      found = {
+        kind,
+        done: 0,
+        right: 0,
+        mistakes: 0,
+        hinted: 0,
+        seconds: 0,
+        lastAt: 0,
+        recent: [],
+        repeat: false,
+      };
       out.set(kind, found);
     }
     return found;
@@ -270,9 +357,12 @@ export function kindStats(
   for (const kinds of [...Object.values(log.archive), log.folded?.kinds ?? {}]) {
     for (const [kind, tally] of Object.entries(kinds)) {
       const r = row(keyOf(kind));
+      const right = Math.min(tally.right, tally.done);
+      const hinted = Math.min(tally.hinted ?? 0, tally.done - right);
       r.done += tally.done;
-      r.right += Math.min(tally.right, tally.done);
-      r.mistakes += Math.max(0, tally.done - tally.right);
+      r.right += right;
+      r.hinted += hinted;
+      r.mistakes += tally.done - right - hinted;
       r.seconds += tally.seconds;
     }
   }
@@ -280,12 +370,14 @@ export function kindStats(
     const r = row(keyOf(item.kind));
     r.done += 1;
     if (item.outcome === 'right') r.right += 1;
+    else if (item.outcome === 'hinted') r.hinted += 1;
     else r.mistakes += 1;
     r.seconds += item.seconds;
+    r.lastAt = Math.max(r.lastAt, item.at);
     r.recent = [...r.recent, item.outcome].slice(-RECENT);
   }
   for (const r of out.values()) {
-    r.repeat = r.recent.filter((item) => item !== 'right').length >= REPEAT_AT;
+    r.repeat = r.recent.filter(isMistake).length >= REPEAT_AT;
   }
   return out;
 }
@@ -340,7 +432,7 @@ export const FIX_STREAK = 2;
 
 /**
  * «Мои ошибки». Задача попадает сюда, если закрыта с ошибкой или с
- * открытым решением. Аналоги, решённые в «Работе над ошибками», ведут
+ * открытым решением (верно с подсказкой — не ошибка). Аналоги, решённые в «Работе над ошибками», ведут
  * счёт подряд: верный — плюс один, неверный — счёт с нуля. Два верных
  * подряд — задача уходит. Ошибка в аналоге сама в список не попадает:
  * это та же ошибка, она уже в списке.
@@ -352,7 +444,7 @@ export function mistakes(log: ProgressLog, kindOfTask: (task: string) => string)
   }
   for (const item of log.attempts) {
     if (item.fixes !== undefined) continue;
-    if (item.outcome !== 'right' && !open.has(item.task)) {
+    if (isMistake(item.outcome) && !open.has(item.task)) {
       open.set(item.task, { task: item.task, kind: item.kind, at: item.at, streak: 0 });
     }
   }
@@ -361,6 +453,8 @@ export function mistakes(log: ProgressLog, kindOfTask: (task: string) => string)
     if (item.fixes === undefined) continue;
     const m = open.get(item.fixes);
     if (m === undefined || cleared.has(item.fixes)) continue;
+    /* Аналог с подсказкой счёт не продвигает и не обнуляет. */
+    if (item.outcome === 'hinted') continue;
     m.streak = item.outcome === 'right' ? m.streak + 1 : 0;
     if (m.streak >= FIX_STREAK) cleared.add(item.fixes);
   }

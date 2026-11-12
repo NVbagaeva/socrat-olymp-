@@ -11,9 +11,11 @@
  * букв, цифр, «:», «_» и «-» — то же правило стоит в базе (таблица
  * user_storage).
  *
- * Чтобы подключить ещё один раздел (№5, №7, №12): добавить запись с его
- * ключами прогресса, опорных задач и сессии тренажёра
+ * Чтобы подключить ещё один раздел: добавить запись с его ключами
+ * прогресса, опорных задач и сессии тренажёра
  * (budetege:trainer:<раздел>:session). Больше ничего менять не нужно.
+ * У разделов, переведённых на журнал попыток позже №8 и №3, пока
+ * подключён только журнал.
  */
 
 export interface ImportGroup {
@@ -50,6 +52,130 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
       'budetege:zadanie-3:log:v1',
       /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «3»). */
       'budetege:trainer:3:session',
+    ],
+  },
+  {
+    id: 'z1',
+    title: '№1 «Планиметрия»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/planimetriya/progress.ts). Прежний ключ
+         budetege:planimetriya-1:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:planimetriya-1:log:v1',
+    ],
+  },
+  {
+    id: 'z2',
+    title: '№2 «Векторы»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/vektory/progress.ts). Прежний ключ
+         budetege:vektory-2:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:vektory-2:log:v1',
+    ],
+  },
+  {
+    id: 'z4',
+    title: '№4 «Вероятность: простая»',
+    keys: [
+      /* Журнал попыток тренажёра (components/tasks/veroyatnost/Trenazher.tsx). Прежний ключ
+         budetege:veroyatnost-4:v2 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:veroyatnost-4:log:v1',
+    ],
+  },
+  {
+    id: 'z5',
+    title: '№5 «Вероятность: сложная»',
+    keys: [
+      /* Журнал попыток тренажёра (components/tasks/veroyatnost/Trenazher.tsx). Прежний ключ
+         budetege:veroyatnost-5:v2 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:veroyatnost-5:log:v1',
+    ],
+  },
+  {
+    id: 'z6',
+    title: '№6 «Случайные величины»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie6/progress.ts). Прежний ключ
+         budetege:zadanie-6:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:zadanie-6:log:v1',
+    ],
+  },
+  {
+    id: 'z7',
+    title: '№7 «Уравнения»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie7/progress.ts). Прежний ключ
+         budetege:zadanie-7:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:zadanie-7:log:v1',
+    ],
+  },
+  {
+    id: 'z9',
+    title: '№9 «Производная»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/proizvodnaya/progress.ts). Прежний ключ
+         budetege:proizvodnaya-9:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:proizvodnaya-9:log:v1',
+    ],
+  },
+  {
+    id: 'z10',
+    title: '№10 «Физический смысл»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts). */
+      'budetege:zadanie-10:log:v1',
+    ],
+  },
+  {
+    id: 'z11',
+    title: '№11 «Текстовые задачи»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie11/progress.ts). Прежний ключ
+         budetege:zadanie-11:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:zadanie-11:log:v1',
+    ],
+  },
+  {
+    id: 'z12',
+    title: '№12 «Графики функций»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/trainerProgress.ts). Прежний ключ
+         budetege:trainer:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:zadanie-12:log:v1',
+    ],
+  },
+  {
+    id: 'z13',
+    title: '№13 «Финансовая грамотность»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie13/progress.ts). Прежний ключ
+         budetege:zadanie-13:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:zadanie-13:log:v1',
+    ],
+  },
+  {
+    id: 'z14',
+    title: '№14 «Уравнение»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie14/progress.ts). Прежний ключ
+         budetege:zadanie-14:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:zadanie-14:log:v1',
+    ],
+  },
+  {
+    id: 'z18',
+    title: '№18 «Планиметрия»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie18/trenazher/progress.ts). Прежний ключ
+         budetege:zadanie-18:trenazher:v1 сворачивается в него на месте (LEGACY_LOGS). */
+      'budetege:zadanie-18:log:v1',
+    ],
+  },
+  {
+    id: 'z19',
+    title: '№19 «Параметр»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie19/progress.ts). */
+      'budetege:zadanie-19:log:v1',
     ],
   },
   {

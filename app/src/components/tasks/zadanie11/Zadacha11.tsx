@@ -294,6 +294,7 @@ export function kartochka11({
         right: itog.right,
         clean: itog.clean,
         seconds: itog.sek,
+        ishod: itog.ishod,
         itog: itog.right ? 'right' : 'wrong',
       }),
   };

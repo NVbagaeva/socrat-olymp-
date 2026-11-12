@@ -1,5 +1,6 @@
 'use client';
 
+import { ishodOf, type LogOutcome } from '@/lib/progressLog';
 import { clsx } from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
 import { Tex } from '@/components/ui/Tex';
@@ -122,7 +123,7 @@ export function Reshenie7({
     return null;
   }
 
-  function zapisat(right: boolean, clean: boolean) {
+  function zapisat(right: boolean, clean: boolean, ishod: LogOutcome) {
     if (z === undefined || marks[index] !== undefined) {
       return;
     }
@@ -132,6 +133,7 @@ export function Reshenie7({
       right,
       clean,
       seconds: (elapsed() - nachalo) / 1000,
+      ishod,
     });
     if (right) {
       setMarks((m) => ({ ...m, [index]: clean ? 'right' : 'hinted' }));
@@ -153,7 +155,16 @@ export function Reshenie7({
     setZamechanie(null);
     if (answerMatches(value, z.seal)) {
       setChecked('right');
-      zapisat(true, !oshibalsya && !hintOpen && !razborOtkryt);
+      zapisat(
+        true,
+        !oshibalsya && !hintOpen && !razborOtkryt,
+        ishodOf({
+          solved: true,
+          misses: oshibalsya ? 1 : 0,
+          hint: hintOpen,
+          revealed: razborOtkryt,
+        }),
+      );
     } else {
       setChecked('wrong');
       setOshibalsya(true);
@@ -252,7 +263,7 @@ export function Reshenie7({
               setRazborOtkryt(true);
               if (marks[index] === undefined) {
                 setTried((t) => ({ ...t, [index]: true }));
-                zapisat(false, false);
+                zapisat(false, false, 'revealed');
               }
             }}
           >

@@ -1,0 +1,262 @@
+{
+  "budetege:planimetriya-1:v1": {
+    "kinds": {
+      "p05": {
+        "done": 4,
+        "right": 3,
+        "seconds": 302
+      },
+      "p11": {
+        "done": 2,
+        "right": 1,
+        "seconds": 235
+      }
+    },
+    "mistakes": [
+      "p11|n7k2",
+      "p11|b4"
+    ],
+    "outcomes": {
+      "p05|b12": "right",
+      "p05|b3": "right",
+      "p05|a2": "right",
+      "p11|n7k2": "right",
+      "p11|b4": "wrong"
+    }
+  },
+  "budetege:vektory-2:v1": {
+    "kinds": {
+      "2.A": {
+        "done": 2,
+        "right": 2,
+        "seconds": 115
+      },
+      "2.C": {
+        "done": 2,
+        "right": 1,
+        "seconds": 194
+      }
+    },
+    "mistakes": [
+      "2.A|s42",
+      "2.C|s7"
+    ],
+    "outcomes": {}
+  },
+  "budetege:veroyatnost-4:v2": {
+    "kinds": {
+      "klassicheskaya": {
+        "done": 2,
+        "right": 1,
+        "seconds": 142
+      },
+      "protivopolozhnoe": {
+        "done": 1,
+        "right": 1,
+        "seconds": 61
+      }
+    },
+    "mistakes": [
+      "v4-021"
+    ],
+    "outcomes": {}
+  },
+  "budetege:veroyatnost-5:v2": {
+    "kinds": {
+      "derevo": {
+        "done": 2,
+        "right": 1,
+        "seconds": 300
+      },
+      "uslovnaya": {
+        "done": 1,
+        "right": 0,
+        "seconds": 200
+      }
+    },
+    "mistakes": [
+      "v5-031",
+      "v5-012"
+    ],
+    "outcomes": {}
+  },
+  "budetege:zadanie-6:v1": {
+    "kinds": {
+      "P6-02": {
+        "done": 2,
+        "right": 2,
+        "seconds": 185
+      },
+      "P6-05": {
+        "done": 1,
+        "right": 0,
+        "seconds": 160
+      }
+    },
+    "mistakes": [
+      "P6-02-a11",
+      "P6-05-f01"
+    ],
+    "outcomes": {}
+  },
+  "budetege:zadanie-7:v1": {
+    "kinds": {
+      "P7-01": {
+        "done": 1,
+        "right": 1,
+        "seconds": 40
+      },
+      "P7-04": {
+        "done": 2,
+        "right": 1,
+        "seconds": 161
+      },
+      "P7-09": {
+        "done": 1,
+        "right": 1,
+        "seconds": 88
+      }
+    },
+    "mistakes": [
+      "P7-04-f09",
+      "P7-09-f01"
+    ],
+    "outcomes": {}
+  },
+  "budetege:proizvodnaya-9:v1": {
+    "kinds": {
+      "9.A": {
+        "done": 2,
+        "right": 2,
+        "seconds": 99
+      },
+      "9.B": {
+        "done": 2,
+        "right": 1,
+        "seconds": 219
+      }
+    },
+    "mistakes": [
+      "9.B|s14",
+      "9.B|s15"
+    ],
+    "outcomes": {}
+  },
+  "budetege:zadanie-11:v1": {
+    "kinds": {
+      "dvizhenie": {
+        "done": 1,
+        "right": 1,
+        "seconds": 180
+      },
+      "rabota": {
+        "done": 2,
+        "right": 1,
+        "seconds": 390
+      }
+    },
+    "mistakes": [
+      "rabota|b2"
+    ],
+    "outcomes": {
+      "dvizhenie|b7": "right",
+      "rabota|b2": "wrong",
+      "rabota|n5q1": "right"
+    }
+  },
+  "budetege:zadanie-13:v1": {
+    "kinds": {
+      "vklad": {
+        "done": 1,
+        "right": 1,
+        "seconds": 90
+      },
+      "kredit": {
+        "done": 1,
+        "right": 0,
+        "seconds": 210
+      }
+    },
+    "mistakes": [
+      "kredit|b6"
+    ],
+    "outcomes": {
+      "vklad|b1": "right",
+      "kredit|b6": "wrong"
+    }
+  },
+  "budetege:zadanie-14:v1": {
+    "kinds": {
+      "prosteyshie": {
+        "done": 1,
+        "right": 1,
+        "seconds": 300
+      },
+      "zamena": {
+        "done": 1,
+        "right": 1,
+        "seconds": 420
+      },
+      "razlozhenie": {
+        "done": 1,
+        "right": 0,
+        "seconds": 500
+      }
+    },
+    "mistakes": [
+      "z14-021",
+      "z14-040"
+    ],
+    "outcomes": {}
+  },
+  "budetege:zadanie-18:trenazher:v1": {
+    "kinds": {
+      "podobie": {
+        "done": 1,
+        "right": 1,
+        "seconds": 600
+      },
+      "okruzhnost": {
+        "done": 1,
+        "right": 0,
+        "seconds": 700
+      }
+    },
+    "mistakes": [
+      "okruzhnost|2"
+    ],
+    "outcomes": {
+      "podobie|4": "right",
+      "okruzhnost|2": "wrong"
+    }
+  },
+  "budetege:trainer:v1": {
+    "kinds": {
+      "12.A": {
+        "done": 4,
+        "right": 3,
+        "seconds": 175
+      },
+      "12Q.A": {
+        "done": 1,
+        "right": 1,
+        "seconds": 90
+      },
+      "12Q.C": {
+        "done": 1,
+        "right": 1,
+        "seconds": 55
+      }
+    },
+    "mistakes": [
+      "12Q.A-02"
+    ],
+    "solved": [
+      "12.A-02",
+      "12.A-03",
+      "12Q.A-02",
+      "12Q.C-04",
+      "12.A-01"
+    ]
+  }
+}

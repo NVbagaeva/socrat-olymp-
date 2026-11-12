@@ -114,6 +114,10 @@ export function TrenazherEkran<T>({
         right: itog === 'right',
         clean: itog === 'right' && sost.oshibok === 0 && (extra.oshibok ?? 0) === 0,
         sek,
+        /* В журнал: верный ответ после неверного — ошибка, а не «верно»;
+           верный ответ после подсказки по шагам — «с подсказкой». */
+        ishod:
+          itog === 'wrong' || (extra.proverka === 'right' && sost.oshibok > 0) ? 'wrong' : itog,
       });
     }
   }

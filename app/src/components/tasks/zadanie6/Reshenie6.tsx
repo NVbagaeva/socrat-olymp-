@@ -1,5 +1,6 @@
 'use client';
 
+import { ishodOf, type LogOutcome } from '@/lib/progressLog';
 import { clsx } from 'clsx';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
@@ -253,7 +254,7 @@ export function Reshenie6({
     return tried[i] === true || razbory.includes(i) ? 'wrong' : null;
   }
 
-  function zapisat(right: boolean, clean: boolean) {
+  function zapisat(right: boolean, clean: boolean, ishod: LogOutcome) {
     if (z === undefined || marks[index] !== undefined) {
       return;
     }
@@ -263,6 +264,7 @@ export function Reshenie6({
       right,
       clean,
       seconds: (elapsed() - nachalo) / 1000,
+      ishod,
     });
     if (right) {
       setMarks((x) => ({ ...x, [index]: clean ? 'right' : 'hinted' }));
@@ -293,7 +295,16 @@ export function Reshenie6({
     }
     if (verno) {
       setChecked('right');
-      zapisat(true, !oshibalsya && !podskazki.includes(index) && !razborOtkryt);
+      zapisat(
+        true,
+        !oshibalsya && !podskazki.includes(index) && !razborOtkryt,
+        ishodOf({
+          solved: true,
+          misses: oshibalsya ? 1 : 0,
+          hint: podskazki.includes(index),
+          revealed: razborOtkryt,
+        }),
+      );
     } else {
       setChecked('wrong');
       kachnut(pole.current);
@@ -540,7 +551,7 @@ export function Reshenie6({
                 if (marks[index] === undefined && checked !== 'right') {
                   setTried((t) => ({ ...t, [index]: true }));
                   setRazbory((r) => [...r, index]);
-                  zapisat(false, false);
+                  zapisat(false, false, 'revealed');
                 }
               }}
             >

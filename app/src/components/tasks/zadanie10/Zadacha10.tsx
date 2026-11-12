@@ -1,9 +1,11 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Tex } from '@/components/ui/Tex';
 import type { ZadachaLite } from '@/lib/zadanie10/dannye';
+import type { LogOutcome } from '@/lib/progressLog';
+import { log10 } from '@/lib/zadanie10/progress';
 import { answerMatches } from '@/lib/zadanie10/secret';
 import type { Solved } from '@/lib/zadanie10/types';
 import { Most10 } from './Most10';
@@ -68,6 +70,28 @@ export function Zadacha10({
   const [podskazka, setPodskazka] = useState(false);
   const [pokazat, setPokazat] = useState(false);
   const otkryt = itog !== undefined || pokazat;
+  /* Журнал попыток: задача пишется один раз — первым ответом или
+     разбором, открытым до ответа. Подсказка, открытая до верного
+     ответа, делает его «верным с подсказкой». */
+  const nachalo = useRef<number | null>(null);
+  const bylaPodskazka = useRef(false);
+  const zapisano = useRef(itog !== undefined);
+  useEffect(() => {
+    nachalo.current = Date.now();
+  }, []);
+  const zapisat = (outcome: LogOutcome) => {
+    if (zapisano.current) {
+      return;
+    }
+    zapisano.current = true;
+    const sek = nachalo.current === null ? 0 : (Date.now() - nachalo.current) / 1000;
+    log10.record({
+      task: z.id,
+      kind: z.prototypeId,
+      outcome,
+      seconds: Math.round(Math.min(sek, 3600)),
+    });
+  };
   const s = useReshenie(z, podskazka || otkryt);
   return (
     <article className="z10-zadacha">
@@ -105,7 +129,9 @@ export function Zadacha10({
           if (vvod.trim() === '' || itog) {
             return;
           }
-          onOtvet({ vvod, verno: answerMatches(vvod, z.seal) });
+          const verno = answerMatches(vvod, z.seal);
+          zapisat(verno ? (bylaPodskazka.current ? 'hinted' : 'right') : 'wrong');
+          onOtvet({ vvod, verno });
         }}
       >
         <label htmlFor={`otvet-${z.id}`}>Ответ</label>
@@ -134,13 +160,23 @@ export function Zadacha10({
           <button
             type="button"
             className="btn btn--secondary"
-            onClick={() => setPodskazka(!podskazka)}
+            onClick={() => {
+              bylaPodskazka.current = true;
+              setPodskazka(!podskazka);
+            }}
           >
             {podskazka ? 'Скрыть подсказку' : 'Подсказка'}
           </button>
         ) : null}
         {!otkryt ? (
-          <button type="button" className="btn btn--ghost" onClick={() => setPokazat(true)}>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => {
+              zapisat('revealed');
+              setPokazat(true);
+            }}
+          >
             Показать разбор
           </button>
         ) : null}

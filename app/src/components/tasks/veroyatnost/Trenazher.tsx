@@ -114,8 +114,8 @@ function SRazborami({
  * лежали ключи методов рисунка, и складывать их некуда.
  */
 const STORES: Record<Zadanie, ProgressStore> = {
-  4: createProgressStore('budetege:veroyatnost-4:v2'),
-  5: createProgressStore('budetege:veroyatnost-5:v2'),
+  4: createProgressStore('budetege:veroyatnost-4:v2', 'budetege:veroyatnost-4:log:v1'),
+  5: createProgressStore('budetege:veroyatnost-5:v2', 'budetege:veroyatnost-5:log:v1'),
 };
 
 const UZNAY_STORES: Record<Zadanie, ProgressStore> = {

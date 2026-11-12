@@ -12,7 +12,10 @@ import { PROGRESS_11 } from '@/content/zadanie11';
 import { createProgressStore, type StoreProgress } from '../progressStore';
 
 /** Тренажёр: счётчики по подтипам и список ошибок. */
-export const trenazher11 = createProgressStore('budetege:zadanie-11:v1');
+export const trenazher11 = createProgressStore(
+  'budetege:zadanie-11:v1',
+  'budetege:zadanie-11:log:v1',
+);
 
 /** Опорные задачи: исход каждой микрозадачи. */
 export const opornye11 = createProgressStore('budetege:zadanie-11:opornye:v1');
