@@ -78,3 +78,143 @@
 .auth-widget__item[aria-busy='true'] {
   color: var(--color-text-tertiary);
 }
+
+/* ── «Войти» до входа ──
+   Стеклянная таблетка: значок человека в голубом кружке и слово
+   «Войти». Кружок — тот же, что после входа станет кружком с
+   инициалами (.avatar), поэтому кнопка и аккаунт читаются как одно
+   место в шапке. Наведение: кружок заливается синим. */
+.auth-login {
+  /* Размер кружка в узком виде: в шапке сайта — под палец (40px),
+     в шапке оболочки — как колокольчик рядом (36px). */
+  --auth-round: 40px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+  height: var(--h-control-sm);
+  padding: 0 var(--space-4) 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong);
+  box-shadow:
+    0 0 0 1px rgb(31 95 208 / 0.16),
+    var(--glass-hi),
+    0 1px 2px rgb(16 40 100 / 0.06);
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease),
+    transform var(--dur-hover) var(--ease);
+}
+.auth-login--app {
+  --auth-round: 36px;
+}
+.auth-login__ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  transition:
+    background-color var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
+}
+.auth-login__ico svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.auth-login:hover {
+  background: var(--color-surface);
+  box-shadow:
+    0 0 0 1px rgb(31 95 208 / 0.3),
+    var(--glass-hi),
+    0 8px 18px -8px rgb(31 95 208 / 0.4);
+}
+.auth-login:hover .auth-login__ico {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.auth-login:active {
+  transform: scale(0.97);
+}
+.auth-login:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Узкий вид: остаётся один кружок со значком. Слово «Войти» — для
+   скринридера, у ссылки то же имя. */
+@media (max-width: 459.98px) {
+  .auth-login--site {
+    width: var(--auth-round);
+    height: var(--auth-round);
+    padding: 0;
+    justify-content: center;
+  }
+  .auth-login--site .auth-login__ico {
+    width: 100%;
+    height: 100%;
+  }
+  .auth-login--site .auth-login__ico svg {
+    width: 20px;
+    height: 20px;
+  }
+  .auth-login--site .auth-login__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* Шапка оболочки от 1024px: в ней меню разделов, и таблетка его
+   теснит — остаётся кружок размером с колокольчик, а пункты меню
+   чуть плотнее. Так меню со входом занимает не больше места, чем без
+   него. Ниже 1024px меню прячется, и места хватает на таблетку. */
+@media (min-width: 1024px) {
+  .topbar:has(.auth-widget__login) .topnav a {
+    padding-inline: var(--space-2);
+  }
+  .auth-login--app {
+    width: var(--auth-round);
+    height: var(--auth-round);
+    padding: 0;
+    justify-content: center;
+  }
+  .auth-login--app .auth-login__ico {
+    width: 100%;
+    height: 100%;
+  }
+  .auth-login--app .auth-login__ico svg {
+    width: 20px;
+    height: 20px;
+  }
+  .auth-login--app .auth-login__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-login,
+  .auth-login__ico {
+    transition: none;
+  }
+  .auth-login:active {
+    transform: none;
+  }
+}
