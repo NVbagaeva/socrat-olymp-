@@ -116,7 +116,7 @@ export function Opornye7({
       return;
     }
     if (estPi(value)) {
-      setFormat(TRENAZHER7.ekran.pi);
+      setFormat(TRENAZHER7.ekran.piPodskazka);
       return;
     }
     /* Запись ответа — по общему правилу бланка ЕГЭ, как в тренажёре. */

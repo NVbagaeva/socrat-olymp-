@@ -243,7 +243,7 @@ export function Trenazher7Screen({
   function check() {
     if (estPi(value)) {
       /* Ответ через π: подсказка о записи, попытка не тратится. */
-      setFormat(TRENAZHER7.ekran.pi);
+      setFormat(TRENAZHER7.ekran.piPodskazka);
       return;
     }
     const reading = readSealed7(value, dannye.seal);
