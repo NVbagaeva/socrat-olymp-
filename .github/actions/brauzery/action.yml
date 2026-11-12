@@ -1,0 +1,23 @@
+name: Поставить Apache, Chromium и WebKit
+description: >-
+  Для проверок в браузере: Apache с нашим .htaccess поднимают сами
+  скрипты проверок над app/out, Chromium и WebKit — от Playwright,
+  poppler-utils — для проверок PDF.
+
+runs:
+  using: composite
+  steps:
+    # Служебные файлы роутера (…/index.txt) никогда не видны учеником
+    # как сырой текст. Проверка поднимает настоящий Apache с нашим
+    # .htaccess над сборкой и гоняет в Chromium сценарии: упавшая
+    # фоновая подгрузка, уход вкладки в фон, новая версия сайта,
+    # прямое открытие index.txt. Заодно проверяет, что исправление
+    # Next.js (patches/) не потерялось. Подробно — в самом скрипте.
+    - name: Поставить Apache, Chromium и WebKit для проверок в браузере
+      shell: bash
+      working-directory: app
+      run: |
+        bash "$GITHUB_WORKSPACE/.github/scripts/apt-mirror.sh" || true
+        sudo apt-get update -q
+        sudo apt-get install -y -q apache2 poppler-utils
+        pnpm exec playwright install --with-deps chromium webkit
