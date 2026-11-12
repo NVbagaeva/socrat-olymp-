@@ -15,17 +15,17 @@ import { assetUrl } from '@/lib/assetUrl';
 
 /* Поле построения 600×600. Начало координат графика — O, единица — U. */
 const U = 40;
-const OX = 310;
-const OY = 350;
-const POKOY = { a: 0.31, m: 1.4, n: -2.2 };
+const OX = 290;
+const OY = 320;
+const POKOY = { a: 0.31, m: 1.5, n: -2.1 };
 const OBSHCHIY_VID = 'y = ax² + bx + c';
 
 /* Треугольник: основание на оси x, вершина B — на окружности радиуса 250. */
-const A = { x: 250, y: OY };
-const B = { x: 370, y: 60 };
-const C = { x: 490, y: OY };
-/* Вписанная окружность: r = S / p для основания 240 и высоты 290. */
-const R_VPIS = 80.2;
+const A = { x: 230, y: OY };
+const B = { x: 340, y: 53 };
+const C = { x: 450, y: OY };
+/* Вписанная окружность: r = S / p для основания 220 и высоты 267. */
+const R_VPIS = 73.6;
 
 function krivaya(a: number, m: number, n: number): string {
   let d = '';
@@ -217,6 +217,9 @@ export function StsenaMaket({ children }: { children: ReactNode }) {
           y
         </text>
       </svg>
+
+      {/* Общий пол: портрет, пирамида и бюст стоят на одной площадке. */}
+      <span className="oa-sm__pol" aria-hidden="true" />
 
       <figure className="oa-sm__foto">{children}</figure>
 
