@@ -17,6 +17,10 @@
 #                        (из app/src/content/legal/operator.json): без
 #                        неё регистрация закрыта, с новой датой люди
 #                        заново отмечают галочки согласий;
+#   SIGNUP_EXTRA       — школьная и рабочая почта, добавленная вручную:
+#                        домены (school.ru) и отдельные адреса через
+#                        запятую; остальным регистрация — только с почтой
+#                        российских сервисов (необязательно);
 #   ADMIN_EMAIL        — почта аккаунта администратора (необязательно);
 #   DB_ADMIN_PASSWORD  — пароль роли budetege_admin для доступа к базе
 #                        через SSH-туннель (необязательно).
@@ -26,12 +30,14 @@ load_env
 cd "$LITE_DIR"
 
 ALLOWED_EMAILS=
+SIGNUP_EXTRA=
 DOCUMENTS_VERSION=
 ADMIN_EMAIL=
 DB_ADMIN_PASSWORD=
 while IFS= read -r line; do
   case "$line" in
     ALLOWED_EMAILS=*) ALLOWED_EMAILS=${line#ALLOWED_EMAILS=} ;;
+    SIGNUP_EXTRA=*) SIGNUP_EXTRA=${line#SIGNUP_EXTRA=} ;;
     DOCUMENTS_VERSION=*) DOCUMENTS_VERSION=${line#DOCUMENTS_VERSION=} ;;
     ADMIN_EMAIL=*) ADMIN_EMAIL=${line#ADMIN_EMAIL=} ;;
     DB_ADMIN_PASSWORD=*) DB_ADMIN_PASSWORD=${line#DB_ADMIN_PASSWORD=} ;;
@@ -93,6 +99,25 @@ on conflict (name) do update set secret = excluded.secret, updated_at = now();
 SQL
 count=$(printf '%s' "$ALLOWED_EMAILS" | tr ',' '\n' | grep -c '@' || true)
 log "Список приглашённых обновлён: адресов $count"
+
+# Почта, добавленная вручную (миграция 20261113120000_pochtovye_domeny.sql):
+# таблица переписывается целиком, одной транзакцией. Значение с ошибкой —
+# таблица остаётся прежней, кнопка останавливается с подсказкой.
+if ! psql_db -v extra="$SIGNUP_EXTRA" <<'SQL'
+begin;
+delete from auth_hooks.signup_extra;
+insert into auth_hooks.signup_extra (value, kind)
+select v, case when position('@' in v) > 0 then 'email' else 'domain' end
+  from (select distinct ltrim(lower(trim(item)), '@') as v
+          from unnest(string_to_array(:'extra', ',')) as item) as q
+ where v <> '';
+commit;
+SQL
+then
+  log "SIGNUP_EXTRA: не получилось записать. Нужны домены (school.ru) и адреса (name@school.ru) через запятую, без пробелов внутри."
+  exit 1
+fi
+log "Почта, добавленная вручную: $(psql_db -tAc "select 'доменов ' || count(*) filter (where kind = 'domain') || ', адресов ' || count(*) filter (where kind = 'email') from auth_hooks.signup_extra")"
 
 # Администратор — один на базу, назначается только здесь. Аккаунт должен
 # быть уже зарегистрирован; нет его — подскажем и пойдём дальше.
