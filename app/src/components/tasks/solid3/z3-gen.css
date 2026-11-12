@@ -1,0 +1,23 @@
+/* Вкладка «Генератор» №3 в стеклянной сцене: стекло на панелях общего
+   генератора. Всё в обёртке .z3-gen — другие номера не затрагиваются. */
+
+.z3-gen .gen-strip,
+.z3-gen .gen-pv,
+.z3-gen .gen-presets,
+.z3-gen .gen-trow-wrap,
+.z3-gen .gen-dop,
+.z3-gen .gen-sub {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.z3-gen .gen-strip {
+  border-radius: 22px;
+}
+.z3-gen .gen-pv__bar,
+.z3-gen .gen-pv__note {
+  background: transparent;
+}
