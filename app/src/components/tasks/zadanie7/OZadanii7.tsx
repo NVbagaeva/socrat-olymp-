@@ -169,7 +169,10 @@ export function OZadanii7({ base }: { base: string }) {
         <div className="z7-skhemy__setka">
           {skhemy.map((v) => (
             <article className="z7-skhemy__karta stk-glass" key={v.kartochka.id}>
-              <h4 className="stk-h4">{v.kartochka.title}</h4>
+              <h4
+                className="stk-h4"
+                dangerouslySetInnerHTML={{ __html: typeset(v.kartochka.title) }}
+              />
               <SkhemaIrr7 skhema={v.skhema} />
             </article>
           ))}
