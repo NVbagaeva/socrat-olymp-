@@ -6,13 +6,13 @@ import { useBeforeFinish } from '../session/useBeforeFinish';
 import { useSessionReport } from '../session/useSessionReport';
 import { EkranZadachi, PodskazkaVoprosy, type SostoyanieZadachi } from '../trening';
 import { TRENAZHER7 } from '@/content/uravneniya7';
+import { formatHint, fractionRightHint } from '@/lib/otvet';
 import type { LogOutcome } from '@/lib/progressLog';
 import { ZADANIYA } from '@/lib/paths';
 import { pickRound, useRound } from '@/lib/trainerRound';
 import type { TaskMark } from '@/lib/trainerSession/types';
 import type { ZadachaLite } from '@/lib/zadanie7/dannye';
-import { chisloIzVvoda, estPi } from '@/lib/zadanie7/otvet';
-import { answerMatches } from '@/lib/zadanie7/secret';
+import { estPi, readSealed7 } from '@/lib/zadanie7/trening/otvet7';
 import { log7 } from '@/lib/zadanie7/trening/progress';
 import {
   ZAMENY7,
@@ -103,6 +103,8 @@ export function Trenazher7Screen({
   const [pohozhie, setPohozhie] = useState<Record<string, string>>(restored?.pohozhie ?? {});
   /* Подсказка о записи ответа: не ошибка, попытка не тратится; не хранится. */
   const [format, setFormat] = useState<string | null>(null);
+  /* Неверный ответ был записан дробью: к вердикту — напоминание о записи. */
+  const [viaFraction, setViaFraction] = useState(false);
   /* Файлы прототипов: приехали — счётчик растёт, и экран читает кеш заново. */
   const [, setPriehalo] = useState(0);
   const [oshibkaZagruzki, setOshibkaZagruzki] = useState(false);
@@ -241,15 +243,23 @@ export function Trenazher7Screen({
   function check() {
     if (estPi(value)) {
       /* Ответ через π: подсказка о записи, попытка не тратится. */
-      setFormat(nabrat7(TRENAZHER7.ekran.pi));
+      setFormat(TRENAZHER7.ekran.pi);
       return;
     }
-    if (chisloIzVvoda(value) === null) {
-      setFormat(nabrat7(TRENAZHER7.ekran.nechislo));
+    const reading = readSealed7(value, dannye.seal);
+    if (reading.kind === 'format') {
+      /* Неверная запись: подсказка, попытка не тратится. */
+      setFormat(formatHint(reading.problem, reading.meant));
+      return;
+    }
+    if (reading.kind === 'fractionRight') {
+      /* Значение верное, но дробью: не засчитано и не ошибка. */
+      setFormat(fractionRightHint(reading.decimal));
       return;
     }
     setFormat(null);
-    const right = answerMatches(value, dannye.seal);
+    const right = reading.right;
+    setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       if (!zakryta) {
@@ -285,6 +295,7 @@ export function Trenazher7Screen({
     setShag(1);
     setMimo([]);
     setFormat(null);
+    setViaFraction(false);
   }
 
   function next() {
@@ -390,6 +401,7 @@ export function Trenazher7Screen({
       labels={{
         ...TRENAZHER7.ekran,
         vernoLead: TRENAZHER7.ekran.vernoLead(checked === 'right' ? taskSeconds() : null),
+        nevernoLead: viaFraction ? TRENAZHER7.ekran.nevernoDrob : TRENAZHER7.ekran.nevernoLead,
       }}
     />
   );

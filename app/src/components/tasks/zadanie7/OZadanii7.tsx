@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { IRRACIONALNYE_7 } from '@/content/teoriya7-irr';
-import { FORMULY7, GRUPPY7_VID, SHAPKA7 } from '@/content/uravneniya7';
+import { FORMULY7, GRUPPY7_VID, SHAPKA7, TIPY7_OPASNO } from '@/content/uravneniya7';
 import { assetUrl } from '@/lib/assetUrl';
 import { typeset } from '@/lib/tex';
 import { zadachiPrototipa } from '@/lib/zadanie7/bank/index';
@@ -116,7 +116,7 @@ export function OZadanii7({ base }: { base: string }) {
                       {ex === null ? (
                         <PrimerLazy7
                           prototype={p.id}
-                          opasnoHtml={typeset(vid.opasno)}
+                          opasnoHtml={typeset(TIPY7_OPASNO[p.id] ?? vid.opasno)}
                           trenirovatHref={trenirovatHref}
                           opornyeHref={opornyeHref(p.id)}
                         />
@@ -125,7 +125,7 @@ export function OZadanii7({ base }: { base: string }) {
                           uslovieHtml={ex.uslovieHtml}
                           shagi={ex.shagi}
                           otvet={ex.otvet}
-                          opasnoHtml={typeset(vid.opasno)}
+                          opasnoHtml={typeset(TIPY7_OPASNO[p.id] ?? vid.opasno)}
                           trenirovatHref={trenirovatHref}
                           opornyeHref={opornyeHref(p.id)}
                           labels={SHAPKA7}

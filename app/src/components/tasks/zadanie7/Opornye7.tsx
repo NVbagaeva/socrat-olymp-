@@ -6,9 +6,10 @@ import type { Shag } from '../steklo';
 import { OPORNYE7, TRENAZHER7 } from '@/content/uravneniya7';
 import { scrollTabTo } from '@/lib/tabScroll';
 import type { MikroDlyaBrauzera } from '@/lib/zadanie7/opornye';
-import { chisloIzVvoda, estPi } from '@/lib/zadanie7/otvet';
+import { formatHint, fractionRightHint } from '@/lib/otvet';
 import { opornye7 } from '@/lib/zadanie7/progress';
-import { answerMatches, openText } from '@/lib/zadanie7/secret';
+import { openText } from '@/lib/zadanie7/secret';
+import { estPi, readSealed7 } from '@/lib/zadanie7/trening/otvet7';
 import { typeset } from '@/lib/tex';
 
 /** Блок в списке: без прогресса — его добавляет браузер. */
@@ -115,15 +116,21 @@ export function Opornye7({
       return;
     }
     if (estPi(value)) {
-      setFormat(typeset(TRENAZHER7.ekran.pi));
+      setFormat(TRENAZHER7.ekran.pi);
       return;
     }
-    if (chisloIzVvoda(value) === null) {
-      setFormat(typeset(TRENAZHER7.ekran.nechislo));
+    /* Запись ответа — по общему правилу бланка ЕГЭ, как в тренажёре. */
+    const reading = readSealed7(value, zadacha.seal);
+    if (reading.kind === 'format') {
+      setFormat(formatHint(reading.problem, reading.meant));
+      return;
+    }
+    if (reading.kind === 'fractionRight') {
+      setFormat(fractionRightHint(reading.decimal));
       return;
     }
     setFormat(null);
-    const ok = answerMatches(value, zadacha.seal);
+    const ok = reading.right;
     setChecked(ok ? 'right' : 'wrong');
     opornye7.recordAttempt({
       kind: blok,

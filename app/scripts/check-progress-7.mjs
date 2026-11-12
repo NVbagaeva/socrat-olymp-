@@ -344,6 +344,21 @@ const vse = PROTOTYPES.map((p) => p.id);
   check(new Set(bezKonca.map((x) => x.id)).size === 40, '«Без конца»: повтор задачи');
 }
 
+/* Тексты карты: «Где теряют балл» — свой у каждого типа. */
+{
+  const { TIPY7_OPASNO } = requireSrc('content/uravneniya7.ts');
+  for (const p of PROTOTYPES) {
+    check(
+      typeof TIPY7_OPASNO[p.id] === 'string' && TIPY7_OPASNO[p.id].length > 20,
+      `у типа ${p.id} нет текста «Где теряют балл»`,
+    );
+  }
+  check(
+    Object.keys(TIPY7_OPASNO).every((id) => katalog[id] !== undefined),
+    'текст «Где теряют балл» у несуществующего типа',
+  );
+}
+
 /* ── 4. «Работа над ошибками» ─────────────────────────────────── */
 {
   const mistakes = [
