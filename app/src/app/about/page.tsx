@@ -1,3 +1,4 @@
+import { clsx } from 'clsx';
 import type { Metadata } from 'next';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { about, type Nadpis } from '@/content/about';
@@ -178,13 +179,21 @@ export default function AboutPage() {
             <div className="oa-sec__wide oa-polza">
               {polza.karty.map((karta) => (
                 <article
-                  className={`oa-steklo oa-polza__karta${karta.glavnaya ? 'oa-steklo--teplo' : ''}`}
+                  className={clsx(
+                    'oa-steklo',
+                    'oa-polza__karta',
+                    karta.glavnaya && 'oa-steklo--teplo',
+                  )}
                   key={karta.komu}
                 >
                   <h3 className="oa-h3 oa-h3--big">{karta.komu}</h3>
                   <p className="oa-text">{karta.text}</p>
                   <a
-                    className={`btn btn--lg ${karta.glavnaya ? 'btn--primary' : 'btn--secondary'}`}
+                    className={clsx(
+                      'btn',
+                      'btn--lg',
+                      karta.glavnaya ? 'btn--primary' : 'btn--secondary',
+                    )}
                     href={karta.action.href}
                   >
                     {karta.action.label}
