@@ -78,7 +78,15 @@ export function Voprosy() {
                 <path d="M12 5v14M5 12h14" />
               </svg>
             </summary>
-            <p>{punkt.otvet}</p>
+            <p>
+              {punkt.otvet}
+              {'ssylka' in punkt && punkt.ssylka ? (
+                <>
+                  {' '}
+                  <a href={punkt.ssylka.href}>{punkt.ssylka.tekst}</a>.
+                </>
+              ) : null}
+            </p>
           </details>
         ))}
       </div>

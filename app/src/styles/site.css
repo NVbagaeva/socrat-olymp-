@@ -356,6 +356,42 @@
   gap: var(--space-6);
   flex-wrap: wrap;
 }
+/* Реквизиты продавца и документы (флаг NEXT_PUBLIC_LEGAL_READY):
+   мелко, одной строкой через точку; на телефоне — столбиком. */
+.site-foot__rekvizity,
+.site-foot__pravo {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.site-foot__rekvizity span + span::before {
+  content: '·';
+  margin: 0 var(--space-2);
+}
+.site-foot__pravo {
+  gap: var(--space-1) var(--space-4);
+}
+.site-foot__pravo a {
+  /* Цель касания не меньше 24px по высоте (WCAG 2.5.8). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+@media (max-width: 767.98px) {
+  .site-foot__rekvizity,
+  .site-foot__pravo {
+    flex-direction: column;
+    gap: 0;
+  }
+  .site-foot__rekvizity span + span::before {
+    content: none;
+  }
+  .site-foot__pravo a {
+    min-height: 32px;
+  }
+}
 
 /* Шапка с меню требует ~1004px: логотип, пять пунктов (один из них —
    «Варианты» со списком) и «Начать бесплатно». Ниже меню прячется в

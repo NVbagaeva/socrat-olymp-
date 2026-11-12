@@ -14,7 +14,8 @@
        сайте нет ни одной активной кнопки оплаты: ни ссылки на
        регистрацию с тарифом, ни кнопки data-oplata="vklyuchena";
        кнопки оплаты на /tarify/ все неактивны (disabled);
-     — разметки Offer нет, страницы /oferta/ нет;
+     — разметки Offer нет (страницу /oferta/ и ссылки на неё проверяет
+       scripts/check-oferta.mjs);
      — «мягкой стены» нет нигде, кроме служебной витрины.
 
    Запуск: node scripts/check-tarify.mjs (после сборки — обе части). */
@@ -153,8 +154,6 @@ if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   const ssylok = (index.match(/href="\/tarify\/"/g) ?? []).length;
   if (ssylok < 2) fail(`главная: ссылок «Тарифы» ${ssylok}, ждали в шапке и подвале`);
   if (!index.includes('Начать бесплатно')) fail('главная: пропала кнопка «Начать бесплатно»');
-
-  if (fs.existsSync(path.join(OUT, 'oferta'))) fail('страница /oferta/ опубликована раньше текста');
 
   for (const file of htmlFiles(OUT)) {
     proverenoStranic++;
