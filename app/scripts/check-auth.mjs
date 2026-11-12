@@ -1031,6 +1031,15 @@ async function runEnabled() {
     check(errors.length === 0, `почтовые домены: ошибок в консоли нет (${errors.join(' | ')})`);
     await shot(page, 'registraciya-domen-1440');
     await context.close();
+    /* Дальше сценарий ждёт пустой почтовый ящик и одного нового
+       пользователя — убираем школьный аккаунт и его письмо. */
+    const shkola = mock.users.get('shkola@school.example');
+    mock.users.delete(shkola.email);
+    mock.profiles.delete(shkola.id);
+    for (let i = mock.consents.length - 1; i >= 0; i -= 1) {
+      if (mock.consents[i].user_id === shkola.id) mock.consents.splice(i, 1);
+    }
+    mock.mailbox.splice(0);
   }
   {
     const { context, page } = await newPage(mock, 390, errors);
