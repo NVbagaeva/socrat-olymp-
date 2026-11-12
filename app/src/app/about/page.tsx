@@ -55,7 +55,9 @@ export default function AboutPage() {
 
       <main>
         <section className="oa-hero" aria-labelledby="oa-imya">
-          <div className="oa-fon" aria-hidden="true">
+          {/* Декор: формулы набраны обычным текстом, без KaTeX, поэтому
+              поддерево помечено no-math-check (scripts/check-math-markup.mjs). */}
+          <div className="oa-fon no-math-check" aria-hidden="true">
             {hero.formuly.map((formula) => (
               <span className="oa-fon__f" key={formula}>
                 {formula}

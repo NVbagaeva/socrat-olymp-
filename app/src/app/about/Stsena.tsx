@@ -258,8 +258,10 @@ export function Stsena({ children }: { children: ReactNode }) {
         decoding="async"
       />
 
-      {/* Единственное стекло первого экрана: подпись к параболе. */}
-      <p className="oa-sm__formula" aria-hidden="true">
+      {/* Единственное стекло первого экрана: подпись к параболе. Текст
+          меняется из скрипта, поэтому набран не KaTeX, а обычными знаками;
+          no-math-check — для scripts/check-math-markup.mjs. */}
+      <p className="oa-sm__formula no-math-check" aria-hidden="true">
         <span ref={tekst}>{OBSHCHIY_VID}</span>
       </p>
     </div>
