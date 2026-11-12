@@ -92,8 +92,15 @@ export function Metka({
 export interface Shag {
   /** Что делаем и почему: HTML (формулы уже набраны). */
   chtoHtml: string;
-  /** Формула шага: HTML KaTeX. */
+  /** Формула шага: HTML KaTeX. Пустая строка — шаг без выкладки. */
   formulaHtml: string;
+  /** Короткое название шага над подписью: «ОДЗ», «Отбор корней» (уравнения). */
+  zagolovok?: string;
+  /**
+   * Шаг, который нельзя пропустить: 'odz' — область допустимых значений,
+   * 'otbor' — отбор корней. Выделяется цветом и на листе, и в тренажёре.
+   */
+  ton?: 'odz' | 'otbor';
 }
 
 /** Признак делимости под решением: «На 4» и правило с примером (HTML). */
@@ -112,18 +119,27 @@ export function ShagiResheniya({
   delimost = [],
   delimostTitle = 'Признаки делимости',
   className,
+  posle,
 }: {
   shagi: Shag[];
   delimost?: PriznakDelimosti[];
   delimostTitle?: string;
   className?: string;
+  /** Под шагами: своя сворачиваемая панель раздела («Считаем с умом» у №7). */
+  posle?: ReactNode;
 }) {
   return (
     <div className={clsx('stk-reshenie', className)}>
       <ol className="stk-shagi">
         {shagi.map((shag, i) => (
-          <li className="stk-shag" key={i}>
-            <p className="stk-shag__chto" dangerouslySetInnerHTML={{ __html: shag.chtoHtml }} />
+          <li
+            className={clsx('stk-shag', shag.ton !== undefined && `stk-shag--${shag.ton}`)}
+            key={i}
+          >
+            {shag.zagolovok === undefined ? null : (
+              <p className="stk-shag__zag">{shag.zagolovok}</p>
+            )}
+            <div className="stk-shag__chto" dangerouslySetInnerHTML={{ __html: shag.chtoHtml }} />
             <div
               className="stk-shag__formula"
               dangerouslySetInnerHTML={{ __html: shag.formulaHtml }}
@@ -146,6 +162,7 @@ export function ShagiResheniya({
           </ul>
         </details>
       )}
+      {posle}
     </div>
   );
 }
