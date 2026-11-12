@@ -107,6 +107,21 @@ async function tyanut(page, cdp, touch, x, y, dx, dy, shagov = 20) {
   }
 }
 
+/** После отпускания чертёж ещё крутится по инерции (useVrashchenie.ts)
+    и перерисовывается каждый кадр — разметка с целями касания
+    подменяется целиком. Ждём, пока два замера подряд совпадут. */
+async function zhdatPokoya(page, oblast, maxMs = 4000) {
+  let prev = await oblast.innerHTML();
+  const t0 = Date.now();
+  while (Date.now() - t0 < maxMs) {
+    await page.waitForTimeout(150);
+    const cur = await oblast.innerHTML();
+    if (cur === prev) return true;
+    prev = cur;
+  }
+  return false;
+}
+
 async function kadrHtml(oblast) {
   return oblast.evaluate((el) => el.querySelector('.vr__kholst')?.innerHTML ?? '');
 }
@@ -312,16 +327,25 @@ for (const size of SIZES) {
       const html1 = await nazhmi.innerHTML();
       check(html1 !== html0, where('перетаскивание не повернуло чертёж'));
       check((await vybrano()) === 0, where('перетаскивание выбрало цель'));
-      /* Касание — выбор. */
-      /* После поворота чертёж перерисован: цель берём заново, по её
-         текущей позиции на экране (старый элемент уже не виден). */
-      await nazhmi.locator('[data-cel]').first().waitFor({ state: 'visible' });
+      /* Касание — выбор. После поворота чертёж перерисован: цель берём
+         заново, когда он остановился, по её текущей позиции на экране.
+         Пока фигура крутится по инерции, элемент цели подменяется каждый
+         кадр, и замер мог попасть между кадрами (boundingBox — null). */
+      check(await zhdatPokoya(page, nazhmi), where('чертёж не остановился после поворота'));
       const cel2 = nazhmi.locator('[data-cel]').first();
-      const cb2 = await cel2.boundingBox();
-      if (size.touch) await page.touchscreen.tap(cb2.x + cb2.width / 2, cb2.y + cb2.height / 2);
-      else await page.mouse.click(cb2.x + cb2.width / 2, cb2.y + cb2.height / 2);
-      await page.waitForTimeout(400);
-      check((await vybrano()) > 0, where('касание по цели её не выбрало'));
+      let cb2 = null;
+      for (let i = 0; i < 10 && cb2 === null; i += 1) {
+        cb2 = await cel2.boundingBox();
+        if (cb2 === null) await page.waitForTimeout(100);
+      }
+      check(cb2 !== null, where('цель касания не видна после поворота'));
+      if (cb2 !== null) {
+        const [x2, y2] = [cb2.x + cb2.width / 2, cb2.y + cb2.height / 2];
+        if (size.touch) await page.touchscreen.tap(x2, y2);
+        else await page.mouse.click(x2, y2);
+        await page.waitForTimeout(400);
+        check((await vybrano()) > 0, where('касание по цели её не выбрало'));
+      }
     }
     await context.close();
   }
