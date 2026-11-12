@@ -8,7 +8,7 @@
  * раздела на журнал не трогает его экраны.
  */
 
-import { isMistake, type ArchiveTally, type LogOutcome, type ProgressLog } from './model';
+import type { ArchiveTally, LogOutcome, ProgressLog } from './model';
 
 /** Исход задачи, как его знали прежние хранилища: «с подсказкой» там не было. */
 export type LegacyOutcome = 'right' | 'wrong' | 'revealed';
