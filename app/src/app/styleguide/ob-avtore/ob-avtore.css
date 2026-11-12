@@ -412,11 +412,140 @@
   font-size: clamp(18px, 1.7vw, 22px);
   line-height: 1.5;
 }
-.oa-hero--portret .oa-stsena {
+/* Короткая оранжевая черта под строкой «кто я». */
+.oa-hero--portret .oa-kto::after {
+  content: '';
+  display: block;
+  width: 96px;
+  height: 3px;
+  margin-top: var(--space-8);
+  border-radius: 2px;
+  background: var(--terracotta);
+}
+
+/* Сцена по макету: портрет слева, построение справа, пирамида впереди. */
+.oa-sm {
+  --px: 0;
+  --py: 0;
   grid-column: 7 / 13;
   justify-self: end;
-  width: min(100%, 74svh, 620px);
-  margin-top: 4%;
+  position: relative;
+  width: min(100%, 82svh, 660px);
+  aspect-ratio: 1.12;
+  margin-top: var(--space-4);
+  touch-action: pan-y;
+}
+.oa-sm__geo {
+  position: absolute;
+  right: -3%;
+  top: 0;
+  height: 100%;
+  aspect-ratio: 1;
+  overflow: visible;
+  transform: translate3d(calc(var(--px) * -10px), calc(var(--py) * -8px), 0);
+}
+.oa-sm__krug {
+  fill: rgb(226 237 255 / 0.4);
+  stroke-opacity: 0.8;
+  stroke-width: 1.5;
+}
+.oa-sm__treugolnik {
+  fill: rgb(31 95 208 / 0.07);
+  stroke: var(--blue-700);
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.oa-sm__tochka,
+.oa-sm__centr {
+  fill: var(--blue-600);
+}
+.oa-sm__os {
+  fill: var(--color-text-secondary);
+}
+.oa-sm.is-zhivaya .oa-geo-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: oa-cherta 1400ms var(--ease) 150ms forwards;
+}
+.oa-sm.is-zhivaya .oa-geo-draw--2 {
+  animation-delay: 600ms;
+}
+.oa-sm__foto {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * 6px), 0, 0);
+}
+.oa-sm__foto .oa-foto {
+  position: absolute;
+  left: 21%;
+  bottom: 0;
+  height: 97%;
+  transform: translateX(-50%);
+}
+.oa-sm__piramida {
+  position: absolute;
+  right: -2%;
+  bottom: 1.5%;
+  width: 32%;
+  height: auto;
+  z-index: 2;
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * 16px), calc(var(--py) * 10px), 0);
+}
+.oa-sm__formula {
+  position: absolute;
+  right: 0;
+  top: 67.5%;
+  z-index: 3;
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 19px;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--oa-ink);
+  transform: translate3d(calc(var(--px) * 12px), calc(var(--py) * 8px), 0);
+}
+
+/* Фоновые формулы «Портрета» — три, как на макете. */
+.oa-hero--portret .oa-fon__f--4,
+.oa-hero--portret .oa-fon__f--5 {
+  display: none;
+}
+.oa-hero--portret .oa-fon__f {
+  color: var(--navy-700);
+  -webkit-text-stroke: 0;
+  opacity: 0.09;
+  transform: none;
+}
+.oa-hero--portret .oa-fon__f--1 {
+  left: 8%;
+  top: 9%;
+  bottom: auto;
+  font-size: clamp(30px, 4.2vw, 64px);
+}
+.oa-hero--portret .oa-fon__f--2 {
+  left: auto;
+  right: 2%;
+  top: 3%;
+  font-size: clamp(26px, 3.6vw, 56px);
+}
+.oa-hero--portret .oa-fon__f--3 {
+  left: 6%;
+  right: auto;
+  top: auto;
+  bottom: 6%;
+  font-size: clamp(30px, 4.2vw, 64px);
 }
 
 /* ── Первый экран «Журнальный разворот» ──────────────────────── */
@@ -977,6 +1106,29 @@
     right: auto;
     left: 5%;
   }
+  .oa-hero .oa-sm {
+    width: min(100%, 50svh, 560px);
+    margin: var(--space-6) auto 0;
+  }
+  .oa-sm__formula {
+    right: 0;
+    top: 68%;
+    padding: var(--space-2) var(--space-3);
+    font-size: 14px;
+    line-height: 18px;
+  }
+  .oa-hero--portret .oa-kto::after {
+    margin-top: var(--space-5);
+  }
+  .oa-hero--portret .oa-fon__f--1,
+  .oa-hero--portret .oa-fon__f--3 {
+    display: none;
+  }
+  .oa-hero--portret .oa-fon__f--2 {
+    top: auto;
+    bottom: 40%;
+    right: 4%;
+  }
   .oa-hero--portret {
     padding-top: var(--space-8);
   }
@@ -1096,7 +1248,8 @@
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .oa-stsena * {
+  .oa-stsena *,
+  .oa-sm * {
     animation: none !important;
   }
   .oa--js [data-reveal] {

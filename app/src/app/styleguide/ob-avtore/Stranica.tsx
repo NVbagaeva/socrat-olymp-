@@ -1,6 +1,7 @@
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { Dvizhenie } from './Dvizhenie';
 import { Stsena } from './Stsena';
+import { StsenaMaket } from './StsenaMaket';
 import { BLOKI, BYUST, FOTO, IMYA, KTO_YA, NADPISI, type Nadpis } from './teksty';
 import './ob-avtore.css';
 
@@ -105,9 +106,9 @@ function HeroPortret() {
           </h1>
           <p className="oa-kto">{KTO_YA}</p>
         </div>
-        <Stsena>
-          <Foto sizes="(max-width: 899px) 62vw, 400px" />
-        </Stsena>
+        <StsenaMaket>
+          <Foto sizes="(max-width: 899px) 56vw, 400px" />
+        </StsenaMaket>
       </div>
     </section>
   );
