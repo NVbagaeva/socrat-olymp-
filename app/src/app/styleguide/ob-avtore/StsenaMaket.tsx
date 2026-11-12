@@ -220,6 +220,18 @@ export function StsenaMaket({ children }: { children: ReactNode }) {
 
       <figure className="oa-sm__foto">{children}</figure>
 
+      {/* Бюст и пирамида — учебный натюрморт: гипсовая голова и геометрическое
+          тело. Бюст развёрнут лицом к построению. */}
+      <span className="oa-sm__byust">
+        <img
+          src={assetUrl('/images/author/bust-marble.png')}
+          alt="Мраморный бюст в античном стиле"
+          width="675"
+          height="900"
+          decoding="async"
+        />
+      </span>
+
       {/* Стеклянная пирамида: готовая картинка с прозрачным фоном. */}
       <img
         className="oa-sm__piramida"

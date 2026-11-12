@@ -485,11 +485,45 @@
   height: 97%;
   transform: translateX(-50%);
 }
+.oa-sm__byust {
+  position: absolute;
+  right: -7%;
+  bottom: 0;
+  width: 26%;
+  z-index: 1;
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * 10px), 0, 0);
+}
+.oa-sm__byust img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Лицом к построению и портрету; синева чуть приглушена, чтобы бюст
+     не спорил с портретом. */
+  transform: scaleX(-1);
+  filter: saturate(0.82);
+}
+.oa-sm__byust::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -2%;
+  width: 96%;
+  height: 9%;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgb(22 50 107 / 0.24), transparent);
+  filter: blur(5px);
+}
+/* В «Портрете» бюст стоит в первом экране; ниже остаётся только пометка. */
+.oa--portret .oa-sec__side--byust .oa-byust {
+  display: none;
+}
 .oa-sm__piramida {
   position: absolute;
-  right: -2%;
-  bottom: 1.5%;
-  width: 32%;
+  right: 21%;
+  bottom: 0.5%;
+  width: 27%;
   height: auto;
   z-index: 2;
   pointer-events: none;
@@ -497,8 +531,8 @@
 }
 .oa-sm__formula {
   position: absolute;
-  right: 0;
-  top: 67.5%;
+  right: -1%;
+  top: 21%;
   z-index: 3;
   padding: var(--space-3) var(--space-5);
   border: 1px solid var(--glass-edge);
@@ -711,15 +745,6 @@
   }
   .oa--portret .oa-sec__body--after {
     grid-row: auto;
-  }
-  .oa--portret .oa-sec__side--byust {
-    display: grid;
-    grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
-    align-items: end;
-    gap: var(--space-5);
-  }
-  .oa--portret .oa-sec__side--byust .oa-pometka {
-    margin-bottom: 30%;
   }
 }
 .oa--portret .oa-dvizhok__grafik {
@@ -1069,6 +1094,13 @@
     width: min(100%, 210px);
     margin: 0 0 22%;
   }
+  .oa--portret .oa-sec__side--byust {
+    display: block;
+  }
+  .oa--portret .oa-sec__side--byust .oa-pometka {
+    width: min(58%, 230px);
+    margin: 0 0 0 auto;
+  }
   .oa--razvorot .oa-sec__head {
     padding-top: var(--space-6);
     border-top: 1px solid var(--oa-line);
@@ -1112,7 +1144,7 @@
   }
   .oa-sm__formula {
     right: 0;
-    top: 68%;
+    top: 16%;
     padding: var(--space-2) var(--space-3);
     font-size: 14px;
     line-height: 18px;
