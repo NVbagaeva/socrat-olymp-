@@ -19,6 +19,7 @@ import { taskHasPage, taskHref, taskParts, tasks, type ExamTask } from '@/conten
 import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { SiteMenu } from './SiteMenu';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
@@ -111,7 +112,15 @@ export function AppShell({ active, search = false, children }: AppShellProps) {
           notificationsHref={notificationsPage.href}
           /* Аккаунт — настоящий: «Войти» или кружок с инициалами.
              Выдуманного пользователя в шапке больше нет. */
-          userSlot={<AuthWidget variant="app" />}
+          userSlot={
+            <>
+              <AuthWidget variant="app" />
+              {/* Три полоски — то же меню сайта, что в шапке главной: на
+                  узком экране (ниже 1024px) оно не пропадает при переходе
+                  в банк заданий и разделы. */}
+              <SiteMenu />
+            </>
+          }
         />
         {children}
       </div>

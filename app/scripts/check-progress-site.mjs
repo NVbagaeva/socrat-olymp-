@@ -36,8 +36,8 @@ const OUT = path.join(APP, 'out');
 const N = process.argv[2];
 /* №4 и №5 — вероятность: прежние ключи свои, задачи — «прототип:вариант». */
 const VEROYATNOST = N === '4' || N === '5';
-if (N !== '6' && N !== '7' && N !== '2' && !VEROYATNOST) {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 4, 5)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '13' && !VEROYATNOST) {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 4, 5)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -98,25 +98,37 @@ const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
 /* Блок опорных задач из образца и сколько в нём задач; прототип задачи по
-   ключу. У №2 банка нет: ключ задачи — «прототип|seed». У №4 и №5 в
-   хранилище опорных — сами задачи, ключ задачи тренажёра — «прототип:вариант». */
-const BLOKI_OPORNYH = VEROYATNOST
-  ? requireSrc('lib/veroyatnost/index.ts')[`PODGOTOVKA_${N}`]
-  : N === '2'
-    ? requireSrc('lib/vektory/prep/bloki.ts').BLOKI
-    : requireSrc(`lib/zadanie${N}/opornye.ts`).BLOKI_OPORNYH;
-const pervyyKlyuch = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
-const blokObrazca = VEROYATNOST
-  ? BLOKI_OPORNYH.find((b) => b.zadachi.some((z) => z.id === pervyyKlyuch))?.id
-  : pervyyKlyuch;
-const zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-const BANK = VEROYATNOST || N === '2' ? [] : requireSrc(`lib/zadanie${N}/bank/index.ts`).BANK;
-const prototipOf = (id) =>
-  VEROYATNOST
-    ? id?.slice(0, id.lastIndexOf(':'))
-    : N === '2'
-      ? id?.split('|')[0]
-      : BANK.find((z) => z.id === id)?.prototypeId;
+   ключу. У №2 и №13 банка задач нет: ключ задачи — «прототип|seed»; у №13
+   задача опорного блока — «блок:номер». У №4 и №5 в хранилище опорных —
+   сами задачи, ключ задачи тренажёра — «прототип:вариант». */
+let blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+let zadachVBloke;
+let prototipOf;
+/* Задачи блока образца (№4, №5): по ним считается «решено» на карточке. */
+let zadachiBloka = null;
+if (VEROYATNOST) {
+  const bloki = requireSrc('lib/veroyatnost/index.ts')[`PODGOTOVKA_${N}`];
+  const pervyy = blokObrazca;
+  const b = bloki.find((x) => x.zadachi.some((z) => z.id === pervyy));
+  blokObrazca = b?.id;
+  zadachVBloke = b?.zadachi.length;
+  zadachiBloka = new Set(b?.zadachi.map((z) => z.id) ?? []);
+  prototipOf = (id) => id?.slice(0, id.lastIndexOf(':'));
+} else if (N === '13') {
+  const { BLOKI_13, zadachiBloka: zadachi13 } = requireSrc('lib/zadanie13/opornye/bloki.ts');
+  const b = BLOKI_13.find((x) => x.id === blokObrazca);
+  zadachVBloke = b === undefined ? undefined : zadachi13(b).length;
+  prototipOf = (id) => id?.split('|')[0];
+} else if (N === '2') {
+  const { BLOKI } = requireSrc('lib/vektory/prep/bloki.ts');
+  zadachVBloke = BLOKI.find((b) => b.id === blokObrazca)?.zadachi.length;
+  prototipOf = (id) => id?.split('|')[0];
+} else {
+  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
+  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
+  zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
+  prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+}
 
 const browser = await chromium.launch();
 try {
@@ -198,11 +210,13 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-  const zadachiBloka = new Set(
-    BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.map((z) => z.id) ?? [],
-  );
+  /* У №13 в образце несколько блоков: считаем блок образца («блок:номер»);
+     у №4 и №5 — задачи блока образца. */
   const reshenoOp = Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
-    ([id, x]) => x === 'right' && (!VEROYATNOST || zadachiBloka.has(id)),
+    ([key, x]) =>
+      x === 'right' &&
+      (N !== '13' || key.startsWith(`${blokObrazca}:`)) &&
+      (zadachiBloka === null || zadachiBloka.has(key)),
   ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(

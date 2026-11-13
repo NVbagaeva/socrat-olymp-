@@ -17,7 +17,9 @@ export type IkonkaName =
   | 'nazad'
   | 'otlozheno'
   /** Лупа: «Узнай метод» (№4, №5). */
-  | 'uznay';
+  | 'uznay'
+  /** Узнать тип по условию: лупа (№13, «Определи тип»). */
+  | 'tip';
 
 const PATHS: Record<IkonkaName, string> = {
   mix: 'M4 7h3l8 10h5M4 17h3l2.5-3.1M14.5 10.1 15 9.5 15 7h5M17 4l3 3-3 3M17 14l3 3-3 3',
@@ -33,6 +35,7 @@ const PATHS: Record<IkonkaName, string> = {
   nazad: 'M19 12H5M11 6l-6 6 6 6',
   otlozheno: 'M7 4h10v16l-5-3.5L7 20V4ZM9 9h6',
   uznay: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM15.5 15.5 20 20',
+  tip: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM15.5 15.5 20 20M8 10.5h5',
 };
 
 export function Ikonka({ name, className }: { name: IkonkaName; className?: string }) {
