@@ -1,0 +1,76 @@
+/* Нарисованная обложка раздела (RisunokRazdela.tsx).
+
+   Рецептура линий одна на все мотивы: синяя основа, тёплая засечка и
+   тонкая вспомогательная — как рёбра стеклянного куба №3. Стеклянные
+   плоскости заливаются полупрозрачным голубым, свечение за обложкой
+   даёт сама карточка шапки (stsena.css). */
+
+.rsz {
+  display: block;
+  width: 100%;
+  height: var(--oblozhka-h, 300px);
+}
+
+.rsz__holst {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Стеклянная плоскость: заливка без обводки. */
+.rsz-stek {
+  fill: rgb(61 121 224 / 0.14);
+  stroke: none;
+}
+
+/* Синяя линия — основа мотива. */
+.rsz-sin {
+  fill: none;
+  stroke: var(--blue-600);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Тёплая засечка — там, где у куба №3 тёплая кромка. */
+.rsz-tepl {
+  fill: none;
+  stroke: var(--terracotta);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Тонкая вспомогательная: оси, пунктир высоты. */
+.rsz-tonk {
+  fill: none;
+  stroke: var(--blue-300);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Кружки-засечки заливаются своим цветом, а не только обводятся. */
+circle.rsz-tepl {
+  fill: var(--cream-50);
+}
+
+/* На телефоне и планшете обложка-куб делит место с кнопкой «Можно
+   вращать», и колонок у media две. У рисунка кнопки нет, поэтому он
+   занимает всю ширину и держит свои пропорции. */
+@media (max-width: 1023.98px) {
+  .rsz {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: auto;
+    height: var(--oblozhka-h, 180px);
+    aspect-ratio: 120 / 130;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .rsz {
+    height: var(--oblozhka-h, 108px);
+  }
+}
