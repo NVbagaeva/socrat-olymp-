@@ -42,6 +42,9 @@ import { activeBookmarks, bookmarks } from '@/lib/zakladki';
 import { EkranBanka } from './EkranBanka';
 import type { RazdelBanka, ZadachaBanka } from './types';
 import { readUiBanka, type UiBanka } from './ui';
+/* Компоненты тренажёра берутся из своих файлов, а стили лежат при
+   общем входе (trening/index.ts) — подключаем их здесь явно. */
+import '../trening.css';
 
 export interface TrenazherBankaProps<Z extends ZadachaBanka, S> {
   razdel: RazdelBanka<Z, S>;

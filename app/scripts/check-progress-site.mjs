@@ -155,6 +155,17 @@ try {
   const zadacha = page.locator('.trn-zadacha');
   await zadacha.waitFor({ timeout: 20000 });
   const id = await zadacha.getAttribute('data-task');
+  /* Стили тренажёра подключены: экран задачи — сетка с отступами, а не
+     голый текст (общие компоненты берутся из своих файлов, стили — из
+     trening.css). */
+  const vid = await zadacha.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { display: s.display, padding: parseFloat(s.paddingLeft) };
+  });
+  check(
+    vid.display === 'grid' && vid.padding > 0,
+    `экран задачи оформлен стилями тренажёра (display: ${vid.display}, отступ ${vid.padding}px)`,
+  );
   const tipyOshibok = new Set(staroe.mistakes.map(prototipOf));
   check(
     id !== null && !staroe.mistakes.includes(id) && tipyOshibok.has(prototipOf(id)),
