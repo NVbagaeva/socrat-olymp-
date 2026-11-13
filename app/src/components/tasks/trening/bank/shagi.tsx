@@ -54,6 +54,8 @@ export function shagiIzEtapov<E extends EtapRazbora>(
     const t = ton?.(zag);
     return {
       zagolovok: zag,
+      /* Название этапа с формулой («Находим точки, где $X=6$») — набрать. */
+      ...(zag.includes('$') ? { zagolovokHtml: typeset(zag) } : {}),
       chtoHtml: e.lines.map((line) => `<p>${typeset(line)}</p>`).join(''),
       formulaHtml: '',
       ...(t === undefined ? {} : { ton: t }),

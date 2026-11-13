@@ -96,6 +96,8 @@ export interface Shag {
   formulaHtml: string;
   /** Короткое название шага над подписью: «ОДЗ», «Отбор корней» (уравнения). */
   zagolovok?: string;
+  /** То же название, набранное KaTeX (у №6 в названии этапа бывает формула). */
+  zagolovokHtml?: string;
   /**
    * Шаг, который нельзя пропустить: 'odz' — область допустимых значений,
    * 'otbor' — отбор корней. Выделяется цветом и на листе, и в тренажёре.
@@ -138,7 +140,12 @@ export function ShagiResheniya({
             className={clsx('stk-shag', shag.ton !== undefined && `stk-shag--${shag.ton}`)}
             key={i}
           >
-            {shag.zagolovok === undefined ? null : (
+            {shag.zagolovokHtml !== undefined ? (
+              <p
+                className="stk-shag__zag"
+                dangerouslySetInnerHTML={{ __html: shag.zagolovokHtml }}
+              />
+            ) : shag.zagolovok === undefined ? null : (
               <p className="stk-shag__zag">{shag.zagolovok}</p>
             )}
             <div className="stk-shag__chto" dangerouslySetInnerHTML={{ __html: shag.chtoHtml }} />
