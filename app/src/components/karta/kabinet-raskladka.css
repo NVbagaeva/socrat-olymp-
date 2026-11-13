@@ -1,80 +1,20 @@
-/* Раскладка кабинета с картой: левое меню и содержимое. Префикс kab-. */
+/* Раскладка кабинета с картой: левое меню и содержимое под шапкой сайта. Префикс kab-. */
 
 .kab {
   display: grid;
   grid-template-columns: 232px minmax(0, 1fr);
   gap: var(--space-6);
-  min-height: 100vh;
-  padding: var(--space-5) var(--space-6) var(--space-8);
+  min-height: calc(100vh - var(--h-site-head));
+  padding: var(--space-6) var(--space-6) var(--space-10);
   background:
     radial-gradient(1200px 600px at 20% -10%, rgb(255 255 255 / 0.9), transparent 60%),
     linear-gradient(180deg, #eef5ff 0%, #e4effc 100%);
 }
 
 .kab-menu {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
   position: sticky;
-  top: var(--space-5);
+  top: calc(var(--h-site-head) + var(--space-4));
   align-self: start;
-  max-height: calc(100vh - var(--space-10));
-}
-.kab-menu__shapka {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-.kab-menu__brend {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 1.0625rem;
-  color: var(--navy-900);
-  text-decoration: none;
-  letter-spacing: -0.01em;
-}
-.kab-menu__brend i {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--gloss);
-  box-shadow: 0 6px 14px -6px rgb(31 95 208 / 0.6);
-  position: relative;
-}
-.kab-menu__brend i::after {
-  content: '';
-  position: absolute;
-  inset: 8px 7px;
-  border-left: 2.5px solid #fff;
-  border-bottom: 2.5px solid #fff;
-  transform: skewX(-12deg);
-}
-.kab-menu__dlya-telefona {
-  display: none;
-  align-items: center;
-  gap: var(--space-2);
-}
-.kab-menu__knopka {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: 1px solid var(--glass-edge);
-  background: var(--glass-bg-strong);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  color: var(--navy-800);
-}
-.kab-menu__knopka svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
 }
 .kab-menu__nav {
   display: flex;
@@ -98,6 +38,7 @@
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9375rem;
+  white-space: nowrap;
   transition: background var(--dur-hover) var(--ease);
 }
 .kab-menu__punkt svg {
@@ -169,85 +110,72 @@
   place-items: center;
   font-weight: 700;
 }
-.kab-menu__niz {
-  margin-top: auto;
-}
-.kab-menu__voyti {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-pill);
-  background: var(--glass-bg-strong);
-  border: 1px solid var(--glass-edge);
-  color: var(--blue-700);
-  font-weight: 700;
-  text-decoration: none;
-  font-size: var(--fs-caption);
-}
-.kab-menu__akkaunt {
-  display: inline-flex;
-  text-decoration: none;
-}
-.kab-menu__krug {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--blue-100);
-  color: var(--blue-700);
-  font-weight: 700;
-  font-size: 0.875rem;
-  display: grid;
-  place-items: center;
-  box-shadow: inset 0 0 0 1px var(--blue-200);
-}
 
 .kab-telo {
   min-width: 0;
 }
 
+/* Планшет и телефон: меню — полоска вкладок над содержимым. */
 @media (max-width: 1023.98px) {
   .kab {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);
     padding: var(--space-3) var(--space-4) var(--space-6);
+    min-height: 0;
   }
   .kab-menu {
     position: relative;
     top: auto;
-    max-height: none;
-    gap: var(--space-3);
-  }
-  .kab-menu__dlya-telefona {
-    display: flex;
-  }
-  .kab-menu__niz {
-    display: none;
   }
   .kab-menu__nav {
-    display: none;
-    padding: var(--space-3);
-    border-radius: 18px;
-    background: var(--glass-bg-strong);
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
-    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
   }
-  .kab--menu-otkryto .kab-menu__nav {
+  .kab-menu__nav::-webkit-scrollbar {
+    display: none;
+  }
+  .kab-menu__spisok {
     display: flex;
+    gap: var(--space-1);
+  }
+  .kab-menu__punkt {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    background: rgb(255 255 255 / 0.55);
+  }
+  .kab-menu__punkt svg {
+    width: 18px;
+    height: 18px;
   }
   .kab-skhemy {
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas: 'kartinka tekst strelka';
+    --stk-r-card: 14px;
+    grid-template-columns: auto auto;
+    grid-template-areas: 'kartinka tekst';
+    gap: var(--space-2);
+    padding: 6px 12px 6px 6px;
     align-items: center;
+    flex: none;
   }
   .kab-skhemy__kartinka {
-    width: 56px;
-    height: 56px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
   }
   .kab-skhemy__kartinka svg {
-    width: 44px;
-    height: 44px;
+    width: 26px;
+    height: 26px;
+  }
+  .kab-skhemy__tekst b {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  .kab-skhemy__tekst span,
+  .kab-skhemy__strelka {
+    display: none;
   }
 }
 @media (max-width: 767.98px) {

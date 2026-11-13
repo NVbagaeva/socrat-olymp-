@@ -24,11 +24,7 @@ import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
 import { KartaUchenika } from '@/components/karta/KartaUchenika';
-import {
-  JoinClassForm,
-  TutorClassesCard,
-  TutorHomeworkCard,
-} from '@/components/dz/KabinetDz';
+import { JoinClassForm, TutorClassesCard, TutorHomeworkCard } from '@/components/dz/KabinetDz';
 import { forgetCode, pendingCode } from '@/components/dz/JoinScreen';
 import {
   importedGroups,
@@ -232,7 +228,17 @@ export function KabinetScreen() {
       {tab === 'home' ? (
         <>
           <p className="kabinet__trial">{KABINET.trial}</p>
-          {profile.role === 'student' ? <StudentHome /> : null}
+          {profile.role === 'student' ? (
+            <StudentHome
+              klassy={klassy}
+              onJoined={() => {
+                forgetCode();
+                void import('@/lib/auth/klassy').then(async ({ loadKlassy }) =>
+                  setKlassy(await loadKlassy()),
+                );
+              }}
+            />
+          ) : null}
           {profile.role === 'tutor' ? <TutorHome kits={kits} /> : null}
           {profile.role === 'admin' ? (
             <Card className="kabinet__card" title={KABINET.admin.title}>
@@ -286,13 +292,26 @@ export function KabinetScreen() {
 
 /**
  * Главная ученика — «Карта ЕГЭ»: прогресс всех заданий из журналов,
- * под картой — текущее домашнее задание. Классы — на вкладке профиля.
+ * под картой — текущее домашнее задание. Список классов — на вкладке
+ * профиля; пока ученик ни в одном классе (или пришёл по ссылке с кодом),
+ * форма «Вступить» стоит и здесь, под картой.
  */
-function StudentHome() {
+function StudentHome({ klassy, onJoined }: { klassy: KlassView[] | null; onJoined: () => void }) {
+  const t = KABINET.student;
+  const [initialCode] = useState(pendingCode);
+  const pokazatVstuplenie = initialCode !== '' || (klassy !== null && klassy.length === 0);
   return (
-    <div className="kabinet__karta" data-section="karta">
-      <KartaUchenika />
-    </div>
+    <>
+      <div className="kabinet__karta" data-section="karta">
+        <KartaUchenika />
+      </div>
+      {pokazatVstuplenie ? (
+        <Card className="kabinet__card" title={t.classes.title} data-section="join">
+          <p className="auth-form__text">{t.classes.none}</p>
+          <JoinClassForm initial={initialCode} onJoined={onJoined} />
+        </Card>
+      ) : null}
+    </>
   );
 }
 
