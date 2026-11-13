@@ -222,6 +222,9 @@
   margin-top: var(--space-6);
   padding: var(--space-6);
   display: grid;
+  /* Колонка — строго по ширине панели: длинный список «Раздел» тогда
+     сжимается, а не растягивает лист за край экрана. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
 }
 .z3r-zaglushka {
@@ -246,8 +249,12 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
 }
 .z3t-print__field select {
+  min-width: 0;
+  max-width: 100%;
   min-height: 40px;
   padding: 0 var(--space-2);
   border: 1px solid var(--glass-edge);
