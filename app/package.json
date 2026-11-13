@@ -201,6 +201,7 @@
     "test:auth-no-header": "node scripts/check-auth.mjs --no-header",
     "test:progress-import": "node scripts/check-progress-import.mjs",
     "test:dz-print": "node scripts/check-dz-print.mjs",
+    "test:dz-sborka": "node scripts/check-dz-sborka.mjs",
     "test:otvet": "node scripts/check-otvet.mjs",
     "test:karta": "node scripts/check-karta.mjs",
     "test:karta-site": "node scripts/check-karta-site.mjs",

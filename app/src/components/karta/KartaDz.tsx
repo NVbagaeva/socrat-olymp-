@@ -8,7 +8,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { DZ, dueRu } from '@/content/dz';
+import { dueRu } from '@/content/dz';
 import { useSessionUser } from '@/lib/auth/session';
 import { homeworkHref } from '@/lib/dz/links';
 import { statusOf } from '@/lib/dz/results';
@@ -52,8 +52,8 @@ export function KartaDz() {
   }, [user]);
 
   if (item === null || item === undefined) return null;
-  const { hw, tasks, right } = item;
-  const dolya = tasks === 0 ? 0 : Math.round((100 * right) / tasks);
+  const { hw, tasks, done } = item;
+  const dolya = tasks === 0 ? 0 : Math.round((100 * done) / tasks);
   return (
     <Link className="karta-dz stk-glass" href={homeworkHref(hw.id)} aria-label={TEKST.otkryt}>
       <span className="karta-dz__znak" aria-hidden="true">
@@ -68,14 +68,14 @@ export function KartaDz() {
           {hw.dueAt === null ? '' : ` ${TEKST.do(dueRu(hw.dueAt))}`}
         </b>
         <span>
-          {hw.title} · {TEKST.sdelano(right, tasks)}
+          {hw.title} · {TEKST.sdelano(done, tasks)}
         </span>
       </span>
-      <span className="karta-dz__polosa" role="img" aria-label={DZ.list.solved(right, tasks)}>
+      <span className="karta-dz__polosa" role="img" aria-label={TEKST.sdelano(done, tasks)}>
         <span style={{ width: `${dolya}%` }} />
       </span>
       <span className="karta-dz__schet">
-        {right} / {tasks}
+        {done} / {tasks}
       </span>
       <span className="karta-dz__strelka" aria-hidden="true">
         →

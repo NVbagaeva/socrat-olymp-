@@ -65,6 +65,9 @@ export function createDzMock({ profiles, classes, members }) {
   const tasks = [];
   const keys = [];
   const answers = [];
+  const parts = [];
+  const drafts = [];
+  const templates = [];
 
   const newCode = () => {
     for (;;) {
@@ -86,6 +89,9 @@ export function createDzMock({ profiles, classes, members }) {
   const nameOf = (id) => profiles.get(id)?.display_name ?? '';
   const hwById = (id) => homework.find((h) => h.id === id);
   const taskById = (id) => tasks.find((t) => t.id === id);
+  const partById = (id) => parts.find((p) => p.id === id);
+  const isCard = (task) => partById(task.part_id)?.source === 'kartochki';
+  const expired = (hw) => hw.due_at !== null && Date.parse(hw.due_at) < Date.now();
   const recipientOf = (hwId, uid) =>
     recipients.find((r) => r.homework_id === hwId && r.user_id === uid);
   const answerOf = (taskId, uid) => answers.find((a) => a.task_id === taskId && a.user_id === uid);
@@ -104,12 +110,16 @@ export function createDzMock({ profiles, classes, members }) {
     if (hw.tutor_id === uid) return true;
     const rec = recipientOf(hw.id, uid);
     if (rec === undefined) return false;
+    if (isCard(task) && (answerOf(task.id, uid)?.state ?? 'open') !== 'open') return true;
     if (hw.solutions_when === 'instant') {
-      return ['right', 'wrong', 'revealed'].includes(answerOf(task.id, uid)?.state ?? 'open');
+      return (
+        ['right', 'wrong', 'revealed'].includes(answerOf(task.id, uid)?.state ?? 'open') ||
+        expired(hw)
+      );
     }
     if (hw.solutions_when === 'after_submit')
-      return rec.submitted_at !== null || hw.closed_at !== null;
-    return hw.due_at !== null && Date.parse(hw.due_at) < Date.now();
+      return rec.submitted_at !== null || hw.closed_at !== null || expired(hw);
+    return expired(hw);
   };
 
   const visibleHomework = (uid) =>
@@ -313,6 +323,8 @@ export function createDzMock({ profiles, classes, members }) {
         created_at: new Date().toISOString(),
         closed_at: null,
         task_no: p.task_no ?? 8,
+        sections: [p.task_no ?? 8],
+        no_hints: false,
         attempts_limit: p.attempts_limit ?? null,
         solutions_when: p.solutions_when ?? 'after_submit',
         show_memo: p.show_memo === true,
@@ -324,11 +336,31 @@ export function createDzMock({ profiles, classes, members }) {
       for (const s of students) {
         recipients.push({ homework_id: id, user_id: s, started_at: null, submitted_at: null });
       }
+      const partOf = new Map();
       for (const t of list) {
+        if (!partOf.has(t.position)) {
+          const partId = crypto.randomUUID();
+          partOf.set(t.position, partId);
+          parts.push({
+            id: partId,
+            homework_id: id,
+            position: t.position,
+            source: 'trenazher',
+            task_no: p.task_no ?? 8,
+            ref: `${p.task_no ?? 8}:${t.kind}`,
+            title_html: t.kind,
+            rule: {},
+            per_student: p.individual === true,
+            comment: null,
+          });
+        }
         const taskId = crypto.randomUUID();
         tasks.push({
           id: taskId,
           homework_id: id,
+          part_id: partOf.get(t.position),
+          answer_kind: 'number',
+          view: {},
           student_id: t.student_id ?? null,
           position: t.position,
           kind: t.kind,
@@ -345,6 +377,170 @@ export function createDzMock({ profiles, classes, members }) {
       }
       return { status: 200, body: id };
     }
+
+    if (table === 'homework_parts') {
+      const visible = parts.filter((pt) => {
+        const hw = hwById(pt.homework_id);
+        return hw?.tutor_id === me.id || recipientOf(pt.homework_id, me.id) !== undefined;
+      });
+      if (method === 'GET') return one(applyFilters(visible, params));
+      if (method === 'PATCH') {
+        if (Object.keys(body).some((k) => k !== 'comment'))
+          return pgErr(403, 'permission denied for table homework_parts');
+        for (const row of applyFilters(
+          visible.filter((pt) => hwById(pt.homework_id)?.tutor_id === me.id),
+          params,
+        ))
+          row.comment = body.comment;
+        return { status: 200, body: [] };
+      }
+    }
+    if (table === 'rpc/issue_homework_parts' && method === 'POST') {
+      const p = body.p ?? {};
+      if (roleOf(me.id) !== 'tutor') return pgErr(403, 'forbidden: ДЗ выдаёт репетитор');
+      if (p.due_at && Date.parse(p.due_at) <= Date.now()) return pgErr(400, 'bad_due: срок прошёл');
+      const list = Array.isArray(p.parts) ? p.parts : [];
+      if (list.length === 0) return pgErr(400, 'no_tasks: в ДЗ нет пунктов');
+      let students = Array.isArray(p.students) ? p.students : [];
+      if (students.length === 0 && p.class_id)
+        students = members.filter((m) => m.class_id === p.class_id).map((m) => m.user_id);
+      if (students.length === 0) return pgErr(400, 'no_recipients: некому выдать');
+      for (const s of students) {
+        const n = list.reduce(
+          (sum, pt) =>
+            sum +
+            (pt.source === 'kartochki'
+              ? 1
+              : pt.tasks.filter((t) => t.student_id === null || t.student_id === s).length),
+          0,
+        );
+        if (n > 60) return pgErr(400, 'too_many_tasks: не больше 60 задач на ученика');
+      }
+      for (const pt of list)
+        for (const t of pt.tasks) {
+          const ak = t.answer_kind ?? 'number';
+          if (ak === 'self' ? t.answer !== null : ak === 'verno' ? !['da', 'net'].includes(t.answer) : normalizeEge(t.answer) !== t.answer)
+            return pgErr(400, 'bad_answer');
+        }
+      const id = crypto.randomUUID();
+      const noHints = p.no_hints === true;
+      homework.push({
+        id,
+        tutor_id: me.id,
+        class_id: p.class_id ?? null,
+        title: String(p.title ?? '').trim(),
+        note: p.note ? String(p.note) : null,
+        due_at: p.due_at ?? null,
+        created_at: new Date().toISOString(),
+        closed_at: null,
+        task_no: list[0].task_no,
+        sections: [...new Set(list.map((pt) => pt.task_no))],
+        no_hints: noHints,
+        attempts_limit: p.attempts_limit ?? null,
+        solutions_when: p.solutions_when ?? 'after_submit',
+        show_memo: !noHints && p.show_memo === true,
+        show_example: !noHints && p.show_example === true,
+        individual: list.some((pt) => pt.per_student === true),
+        origin: p.origin ?? 'kabinet',
+        parent_id: p.parent_id ?? null,
+      });
+      for (const s of students)
+        recipients.push({ homework_id: id, user_id: s, started_at: null, submitted_at: null });
+      const pos = new Map();
+      list.forEach((pt, i) => {
+        const partId = crypto.randomUUID();
+        parts.push({
+          id: partId,
+          homework_id: id,
+          position: i + 1,
+          source: pt.source,
+          task_no: pt.task_no,
+          ref: pt.ref,
+          title_html: pt.title_html,
+          rule: pt.rule ?? {},
+          per_student: pt.per_student === true,
+          comment: pt.comment ?? null,
+        });
+        for (const t of pt.tasks) {
+          const k = t.student_id ?? '-';
+          pos.set(k, (pos.get(k) ?? 0) + 1);
+          let view = { ...(t.view ?? {}) };
+          if (noHints) for (const x of ['hints', 'podskazka', 'voprosy', 'zapomni', 'primer']) delete view[x];
+          if (p.show_memo !== true) delete view.zapomni;
+          if (p.show_example !== true) delete view.primer;
+          const taskId = crypto.randomUUID();
+          tasks.push({
+            id: taskId,
+            homework_id: id,
+            part_id: partId,
+            answer_kind: t.answer_kind ?? 'number',
+            view,
+            student_id: t.student_id ?? null,
+            position: pos.get(k),
+            kind: t.kind,
+            question_html: t.question_html,
+            comment: null,
+          });
+          if ((t.answer_kind ?? 'number') !== 'self')
+            keys.push({ task_id: taskId, ref: t.ref, answer: t.answer, razbor: t.razbor, source: t.source ?? null });
+        }
+      });
+      return { status: 200, body: id };
+    }
+    if (table === 'rpc/homework_mark' && method === 'POST') {
+      const task = taskById(body.p_task);
+      if (task === undefined || !canSeeTask(task, me.id) || hwById(task.homework_id).tutor_id === me.id)
+        return pgErr(403, 'not_your_task');
+      const hw = hwById(task.homework_id);
+      const rec = recipientOf(hw.id, me.id);
+      if (task.answer_kind !== 'self') return pgErr(400, 'not_self');
+      if (!['known', 'repeat'].includes(body.p_mark)) return pgErr(400, 'bad_mark');
+      if (hw.closed_at !== null) return pgErr(400, 'homework_closed');
+      if (rec.submitted_at !== null) return pgErr(400, 'already_submitted');
+      if (expired(hw)) return pgErr(400, 'due_passed');
+      rec.started_at ??= new Date().toISOString();
+      let row = answerOf(task.id, me.id);
+      if (row === undefined) {
+        row = { task_id: task.id, user_id: me.id, state: 'open', attempts: 0, entries: [], seconds: 0 };
+        answers.push(row);
+      }
+      row.state = body.p_mark;
+      row.attempts += 1;
+      row.seconds += Math.max(0, Math.min(3600, Number(body.p_seconds) || 0));
+      return { status: 200, body: body.p_mark };
+    }
+    if (table === 'homework_drafts') {
+      const mine = drafts.filter((d) => d.user_id === me.id);
+      if (method === 'GET') return one(applyFilters(mine, params));
+      if (method === 'POST') {
+        if (roleOf(me.id) !== 'tutor') return pgErr(403, 'new row violates row-level security policy');
+        const row = Array.isArray(body) ? body[0] : body;
+        const old = drafts.find((d) => d.user_id === me.id);
+        if (old) Object.assign(old, { body: row.body, updated_at: row.updated_at ?? new Date().toISOString() });
+        else drafts.push({ user_id: me.id, body: row.body, updated_at: new Date().toISOString() });
+        return { status: 201, body: [] };
+      }
+      if (method === 'DELETE') {
+        for (const d of mine) drafts.splice(drafts.indexOf(d), 1);
+        return { status: 204, body: null };
+      }
+    }
+    if (table === 'homework_templates') {
+      const mine = templates.filter((x) => x.user_id === me.id);
+      if (method === 'GET') return one(applyFilters(mine, params));
+      if (method === 'POST') {
+        if (roleOf(me.id) !== 'tutor') return pgErr(403, 'new row violates row-level security policy');
+        const row = Array.isArray(body) ? body[0] : body;
+        const now = new Date().toISOString();
+        const t = { id: crypto.randomUUID(), user_id: me.id, title: String(row.title).trim(), body: row.body, created_at: now, updated_at: now };
+        templates.push(t);
+        return prefersObject ? { status: 201, body: { id: t.id } } : { status: 201, body: [{ id: t.id }] };
+      }
+      if (method === 'DELETE') {
+        for (const x of applyFilters(mine, params)) templates.splice(templates.indexOf(x), 1);
+        return { status: 204, body: null };
+      }
+    }
     if (table === 'rpc/start_homework' && method === 'POST') {
       const rec = recipientOf(body.p_homework, me.id);
       if (rec !== undefined) rec.started_at ??= new Date().toISOString();
@@ -356,6 +552,7 @@ export function createDzMock({ profiles, classes, members }) {
       if (rec === undefined || rec.submitted_at !== null || hw?.closed_at !== null) {
         return pgErr(400, 'cannot_submit: ДЗ закрыто, уже сдано или не ваше');
       }
+      if (expired(hw)) return pgErr(400, 'due_passed');
       rec.started_at ??= new Date().toISOString();
       rec.submitted_at = new Date().toISOString();
       return { status: 204, body: null };
@@ -373,13 +570,8 @@ export function createDzMock({ profiles, classes, members }) {
       const rec = recipientOf(hw.id, me.id);
       if (hw.closed_at !== null) return pgErr(400, 'homework_closed');
       if (rec.submitted_at !== null) return pgErr(400, 'already_submitted');
-      if (
-        hw.solutions_when === 'after_due' &&
-        hw.due_at !== null &&
-        Date.parse(hw.due_at) < Date.now()
-      ) {
-        return pgErr(400, 'due_passed');
-      }
+      if (expired(hw)) return pgErr(400, 'due_passed');
+      if (task.answer_kind === 'self') return pgErr(400, 'not_checkable');
       rec.started_at ??= new Date().toISOString();
       let row = answerOf(task.id, me.id);
       if (row === undefined) {
@@ -396,17 +588,29 @@ export function createDzMock({ profiles, classes, members }) {
       if (row.state !== 'open') return { status: 200, body: { kind: 'closed', state: row.state } };
       const key = keys.find((k) => k.task_id === task.id).answer;
       const raw = String(body.p_answer ?? '').trim();
-      const res = proveritMock(body.p_answer, key);
-      if (res.kind === 'format' || res.kind === 'fractionRight') return { status: 200, body: res };
-      const normal = res.norm;
-      const ok = res.kind === 'right';
+      let normal = null;
+      let ok = false;
+      if (task.answer_kind === 'verno') {
+        if (!['da', 'net'].includes(raw)) return { status: 200, body: { kind: 'format' } };
+        normal = raw;
+        ok = raw === key;
+      } else if (task.answer_kind === 'choice') {
+        normal = normalizeEge(raw);
+        if (normal === null) return { status: 200, body: { kind: 'format' } };
+        ok = normal === key;
+      } else {
+        const res = proveritMock(body.p_answer, key);
+        if (res.kind === 'format' || res.kind === 'fractionRight') return { status: 200, body: res };
+        normal = res.norm;
+        ok = res.kind === 'right';
+      }
+      const limit = isCard(task) ? 1 : hw.attempts_limit;
       row.attempts += 1;
       row.seconds += Math.max(0, Math.min(3600, Number(body.p_seconds) || 0));
       row.entries.push({ a: raw.slice(0, 40), n: normal, ok, at: new Date().toISOString() });
       if (ok) row.state = 'right';
-      else if (hw.attempts_limit !== null && row.attempts >= hw.attempts_limit) row.state = 'wrong';
-      const left =
-        hw.attempts_limit === null ? null : Math.max(0, hw.attempts_limit - row.attempts);
+      else if (limit !== null && row.attempts >= limit) row.state = 'wrong';
+      const left = limit === null ? null : Math.max(0, limit - row.attempts);
       const solution = solutionReady(task, me.id)
         ? keys.find((k) => k.task_id === task.id).razbor
         : null;
@@ -426,6 +630,8 @@ export function createDzMock({ profiles, classes, members }) {
       if (task === undefined || !canSeeTask(task, me.id)) return pgErr(403, 'not_your_task');
       const hw = hwById(task.homework_id);
       const rec = recipientOf(hw.id, me.id);
+      if (isCard(task)) return pgErr(400, 'not_allowed');
+      if (expired(hw)) return pgErr(400, 'due_passed');
       if (hw.solutions_when !== 'instant' || hw.closed_at !== null || rec?.submitted_at) {
         return pgErr(400, 'not_allowed');
       }
@@ -448,6 +654,7 @@ export function createDzMock({ profiles, classes, members }) {
     if (table === 'rpc/homework_solution' && method === 'POST') {
       const task = taskById(body.p_task);
       if (task === undefined || !canSeeTask(task, me.id)) return pgErr(403, 'not_your_task');
+      if (task.answer_kind === 'self') return pgErr(400, 'not_checkable');
       if (!solutionReady(task, me.id)) return pgErr(400, 'not_yet: решение откроется позже');
       const key = keys.find((k) => k.task_id === task.id);
       return { status: 200, body: { razbor: key.razbor, answer: key.answer } };
@@ -455,5 +662,5 @@ export function createDzMock({ profiles, classes, members }) {
     return null;
   }
 
-  return { handle, links, homework, recipients, tasks, keys, answers, tries };
+  return { handle, links, homework, recipients, tasks, keys, answers, tries, parts, drafts, templates };
 }

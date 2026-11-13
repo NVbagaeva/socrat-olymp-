@@ -89,7 +89,7 @@ const PORT = 4181;
 const SUPABASE = 'http://127.0.0.1:54321';
 const DISABLED = process.argv.includes('--disabled');
 const NO_HEADER = process.argv.includes('--no-header');
-/* Снимки классов и ДЗ №8 для описания PR этапа 3. */
+/* Снимки и запись сценария ДЗ из трёх источников (ученик — WebKit, iPhone 13). */
 const GALLERY_DZ = process.argv.includes('--gallery-dz')
   ? (process.argv[process.argv.indexOf('--gallery-dz') + 1] ?? 'snimki-dz')
   : null;
@@ -1772,208 +1772,17 @@ async function runEnabled() {
     check(true, 'ДЗ: репетитор переименовал ученика для себя');
     await shot(tutor.page, 'dz-klass-1280');
 
-    /* Выдать ДЗ из формы: типы 8.A и 8.B по одной задаче, 2 попытки, решения сразу. */
-    await tutor.page.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`, {
-      waitUntil: 'networkidle',
-    });
-    await tutor.page.waitForSelector('[data-section="preview"] .dz-preview__item');
-    await tutor.page.waitForFunction(
-      () => document.querySelectorAll('[data-section="preview"] .dz-preview__item').length === 2,
-    );
-    check(true, 'ДЗ: форма выдачи из тренажёра — типы уже отмечены, в предпросмотре 2 задачи');
-    check(
-      (await tutor.page.locator('[data-list="students"] input:checked').count()) === 3,
-      'ДЗ: по умолчанию — всему классу (галочка «Всему классу» и оба ученика)',
-    );
-    check(
-      !(await tutor.page.getByRole('checkbox', { name: 'Показывать «Запомни»' }).isChecked()) &&
-        !(await tutor.page
-          .getByRole('checkbox', { name: 'Показывать разобранный пример' })
-          .isChecked()),
-      'ДЗ: «Запомни» и разобранный пример по умолчанию выключены',
-    );
-    await tutor.page.fill('input[name="title"]', 'ДЗ: степени и корни');
-    await tutor.page.getByRole('radio', { name: '2', exact: true }).check();
-    await tutor.page.getByRole('radio', { name: 'Сразу после ответа' }).check();
-    await shot(tutor.page, 'dz-vydat-1280');
-    await tutor.page.locator('button[type="submit"]:has-text("Выдать")').click();
-    await tutor.page.waitForSelector('text=Задание выдано');
-    const hw = mock.dz.homework.find((h) => h.title === 'ДЗ: степени и корни');
-    check(
-      hw !== undefined &&
-        hw.attempts_limit === 2 &&
-        hw.solutions_when === 'instant' &&
-        !hw.show_memo,
-      'ДЗ: в базе — 2 попытки, решения сразу, «Запомни» выключено',
-    );
-    const hwTasks = mock.dz.tasks
-      .filter((t) => t.homework_id === hw.id)
-      .sort((a, b) => a.position - b.position);
-    const keyOf = (task) => mock.dz.keys.find((k) => k.task_id === task.id).answer;
-    check(
-      hwTasks.length === 2 && hwTasks.every((t) => t.student_id === null),
-      'ДЗ: один набор на всех — 2 общие задачи',
-    );
-    check(
-      !hwTasks.some((t) => /банк|новая/.test(t.question_html)),
-      'ДЗ: в условии для ученика нет меток «банк/новая»',
-    );
-
-    /* Ученик 1 (телефон): ДЗ в кабинете, плашка в №8, решение. */
-    /* Карточка ДЗ под картой: название, срок, «сделано 0 из N». */
-    await st1.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
-    await st1.page.waitForSelector('.karta-dz');
-    check(
-      (await text(st1.page, '.karta-dz')).includes('ДЗ: степени и корни') &&
-        /сделано 0 из \d+/.test(await text(st1.page, '.karta-dz')),
-      'ДЗ: у ученика под картой — карточка задания, «сделано 0 из N»',
-    );
-    await st1.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
-    await st1.page.waitForSelector('[data-block="dz-plashka"]');
-    check(
-      (await text(st1.page, '[data-block="dz-plashka"]')).includes('У вас домашнее задание до'),
-      'ДЗ: в разделе №8 — плашка «У вас домашнее задание до …»',
-    );
-    await shot(st1.page, 'dz-plashka-390');
-    await st1.page.locator('[data-block="dz-plashka"] a').click();
-    await st1.page.waitForSelector('.dz-task');
-    const field = '.dz-answer .otvet-input__field';
-    const left = () => st1.page.locator('[data-left]').getAttribute('data-left');
-    const key1 = keyOf(hwTasks[0]);
-    const asFraction = (decimal) => {
-      const [int, frac = ''] = decimal.replace('-', '').split('.');
-      const den = 10 ** frac.length;
-      const num = Number(`${int}${frac}`);
-      const g = (a, b) => (b === 0 ? a : g(b, a % b));
-      const d = g(num, den) || 1;
-      return `${decimal.startsWith('-') ? '−' : ''}${(num / d) * (den / d === 1 ? 2 : 1)}/${den / d === 1 ? 2 : den / d}`;
-    };
-    await st1.page.fill(field, asFraction(key1));
-    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
-    await st1.page.waitForSelector('.dz-answer .otvet-hint');
-    check(
-      (await text(st1.page, '.dz-answer .otvet-hint')).startsWith('Значение верное') &&
-        (await left()) === '2',
-      `ДЗ: «${asFraction(key1)}» — «Значение верное…», попытка не потрачена`,
-    );
-    await st1.page.fill(field, '5 см');
-    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
-    await st1.page.waitForSelector('.dz-answer .otvet-hint');
-    check(
-      (await text(st1.page, '.dz-answer .otvet-hint')).includes('только число') &&
-        (await left()) === '2',
-      'ДЗ: «5 см» — подсказка о записи, попытка не потрачена',
-    );
-    const wrong1 = String(Number(key1) + 1).replace('.', ',');
-    await st1.page.fill(field, wrong1);
-    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
-    await st1.page.waitForSelector('.dz-verdict--wrong');
-    check((await left()) === '1', 'ДЗ: неверный ответ — осталась 1 попытка');
-    await st1.page.fill(field, key1.replace('.', ','));
-    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
-    await st1.page.waitForSelector('.dz-verdict--right');
-    await st1.page.waitForSelector('.z8-razbor');
-    check(true, 'ДЗ: верно — и сразу решение по шагам (решения «сразу после ответа»)');
-    check(await noHorizontalScroll(st1.page), 'ДЗ: решение ДЗ 390 — горизонтальной прокрутки нет');
-    await shot(st1.page, 'dz-reshenie-390');
-    await st1.page.locator('.dz-strip__btn').nth(1).click();
-    await st1.page.waitForSelector(`.dz-task[data-task="${hwTasks[1].id}"]`);
-    await st1.page.locator('.dz-answer button:has-text("Показать решение")').click();
-    await st1.page
-      .locator(
-        '.modal button:has-text("Показать решение"), [role="dialog"] button:has-text("Показать решение")',
-      )
-      .last()
-      .click();
-    await st1.page.waitForSelector('.z8-razbor');
-    check(
-      (await st1.page.locator('.dz-strip__btn.is-revealed').count()) === 1,
-      'ДЗ: «Показать решение» закрывает задачу — в ленте она отмечена',
-    );
-    await st1.page.locator('.dz-submit button:has-text("Сдать задание")').click();
-    await st1.page.locator('[role="dialog"] button:has-text("Сдать задание")').click();
-    await st1.page.waitForSelector('[data-state="submitted"]');
-    check(
-      (await text(st1.page, '[data-state="submitted"]')).includes('Верно 1 из 2'),
-      'ДЗ: после «Сдать» — «Сдано … · Верно 1 из 2»',
-    );
-
-    /* Ученику форма выдачи недоступна. */
+    /* Ученику конструктор недоступен. */
     await st2.page.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
     await st2.page.waitForSelector('text=Эта страница — для репетитора.');
-    check(true, 'ДЗ: ученику форма выдачи — «Эта страница — для репетитора»');
+    check(true, 'ДЗ: ученику конструктор — «Эта страница — для репетитора»');
 
-    /* Репетитор: таблица, что вводил ученик, комментарий, работа над ошибками. */
-    await tutor.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
-    await tutor.page.waitForSelector('.dz-table');
-    const row1 = tutor.page.locator(`tr[data-student="${s1.id}"]`);
-    const marks1 = await row1
-      .locator('.dz-cell')
-      .evaluateAll((els) => els.map((e) => e.dataset.mark));
-    check(
-      marks1.join(',') === 'right,revealed',
-      `ДЗ: в таблице у ученика 1 — верно, с решением (${marks1.join(',')})`,
-    );
-    const marks2 = await tutor.page
-      .locator('tr[data-student]')
-      .nth(1)
-      .locator('.dz-cell')
-      .evaluateAll((els) => els.map((e) => e.dataset.mark));
-    check(marks2.join(',') === 'none,none', 'ДЗ: у ученика 2 — не решал');
-    check(
-      (await text(tutor.page, '[data-section="kinds"]')).includes('1 из 2 ошиблись') ||
-        (await text(tutor.page, '[data-section="kinds"]')).includes('1 из 2 ошибся'),
-      'ДЗ: сводка по типам — «1 из 2 ошиблись»',
-    );
-    await row1.locator('.dz-cell').first().click();
-    await tutor.page.waitForSelector('[data-section="cell"]');
-    check(
-      (await text(tutor.page, '[data-section="cell"] [data-field="entered"]')).includes(wrong1),
-      `ДЗ: клик по клетке — что вводил ученик (${wrong1})`,
-    );
-    await shot(tutor.page, 'dz-rezultaty-1280');
-    await tutor.page
-      .locator('[data-section="task-comment"] textarea')
-      .fill('Посмотри, как сокращаются степени');
-    await tutor.page.locator('[data-section="task-comment"] button:has-text("Сохранить")').click();
-    await tutor.page.waitForSelector('[data-section="task-comment"] .dz-ok');
-    check(
-      hwTasks[0].comment === 'Посмотри, как сокращаются степени',
-      'ДЗ: комментарий к задаче сохранён',
-    );
-    await st1.page.reload({ waitUntil: 'networkidle' });
-    await st1.page.locator('.dz-strip__btn').first().click();
-    await st1.page.waitForSelector('[data-note="task"]');
-    check(true, 'ДЗ: ученик видит комментарий репетитора к задаче');
-
-    await tutor.page
-      .locator('[data-section="kinds"] a:has-text("Выдать работу над ошибками")')
-      .click();
-    await tutor.page.waitForSelector('[data-section="preview"] .dz-preview-people');
-    check(
-      (await tutor.page.locator('[data-list="students"] input').count()) === 1,
-      'ДЗ: работа над ошибками — только тому, кто ошибся',
-    );
-    await tutor.page.locator('button[type="submit"]:has-text("Выдать")').click();
-    await tutor.page.waitForSelector('text=Задание выдано');
-    const fix = mock.dz.homework.find((h) => h.parent_id === hw.id);
-    const fixTasks = fix === undefined ? [] : mock.dz.tasks.filter((t) => t.homework_id === fix.id);
-    check(
-      fix !== undefined &&
-        fix.origin === 'oshibki' &&
-        fixTasks.length === 1 &&
-        fixTasks[0].student_id === s1.id &&
-        fixTasks[0].kind === hwTasks[1].kind &&
-        fixTasks[0].question_html !== hwTasks[1].question_html,
-      'ДЗ: работа над ошибками — новый аналог задачи с ошибкой, тот же тип, ученику 1',
-    );
     /* Телефон: экраны репетитора без горизонтальной прокрутки. */
     await tutor.page.setViewportSize({ width: 390, height: 844 });
     for (const [what, url] of [
       ['кабинет', `${SITE}/kabinet/`],
       ['класс', classUrl],
-      ['выдача', `${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`],
-      ['результаты', `${SITE}/kabinet/domashka/?id=${hw.id}`],
+      ['выдача', `${SITE}/kabinet/dz-vydat/`],
     ]) {
       await tutor.page.goto(url, { waitUntil: 'networkidle' });
       await tutor.page.waitForTimeout(800);
@@ -1982,17 +1791,15 @@ async function runEnabled() {
         `ДЗ: репетитор, ${what} 390 — горизонтальной прокрутки нет`,
       );
     }
-    await st1.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
-    await st1.page.waitForSelector('.karta-dz');
-    check(
-      await noHorizontalScroll(st1.page),
-      'ДЗ: ученик, кабинет 390 — горизонтальной прокрутки нет',
-    );
     void tutorUser;
+    void s1;
     await st1.context.close();
     await st2.context.close();
     await tutor.context.close();
   }
+
+  /* 7г. ДЗ из трёх источников (docs/kabinet-dz-istochniki.md). */
+  await scenarijDz(mock, errors);
 
   /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */
   {
@@ -2229,145 +2036,304 @@ async function runNoHeader() {
  * через форму и решается учеником один раз (на первой ширине); дальше
  * те же экраны снимаются на остальных ширинах.
  */
-async function runGalleryDz(dir) {
-  fs.mkdirSync(dir, { recursive: true });
-  const mock = makeMock();
-  registerInMock(mock, 'dz-repetitor@yandex.ru', 'dz-repetitor-1', 'Ирина Петровна', 'tutor');
-  registerInMock(mock, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1', 'Аня Смирнова', 'student');
-  registerInMock(mock, 'dz-uchenik2@yandex.ru', 'dz-uchenik-2', 'Петя Иванов', 'student');
+/* ── ДЗ из трёх источников: сквозной сценарий ──────────────────────
+   Репетитор собирает ДЗ из двух наборов карточек №7, блока опорных
+   №7 и пяти задач тренажёра двух разделов (№8 — прежней ссылкой из
+   раздела, №7 — в конструкторе), выдаёт классу; ученик (телефон;
+   с --dz-istochniki — WebKit, эмуляция iPhone 13) делает часть,
+   уходит, возвращается, досдаёт; репетитор смотрит таблицу и выдаёт
+   работу над ошибками. dir — снимки 375/390/768/1280 и запись. */
+async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = {}) {
+  registerInMock(mock, 'dzi-repetitor@yandex.ru', 'dzi-repetitor-1', 'Ольга Николаевна', 'tutor');
+  registerInMock(mock, 'dzi-uchenik1@yandex.ru', 'dzi-uchenik-1', 'Маша Орлова', 'student');
+  registerInMock(mock, 'dzi-uchenik2@yandex.ru', 'dzi-uchenik-2', 'Коля Белов', 'student');
   mock.seedClass(
-    'dz-repetitor@yandex.ru',
-    ['dz-uchenik1@yandex.ru', 'dz-uchenik2@yandex.ru'],
-    'Группа по средам',
+    'dzi-repetitor@yandex.ru',
+    ['dzi-uchenik1@yandex.ru', 'dzi-uchenik2@yandex.ru'],
+    'Тестовый класс',
   );
-  const s1 = mock.users.get('dz-uchenik1@yandex.ru');
-  let hw = null;
-  const context = async (width) => {
-    const ctx = await browser.newContext({
-      viewport: { width, height: width < 500 ? 812 : 900 },
-      deviceScaleFactor: 2,
-      hasTouch: width < 500,
-    });
-    await welcomeSeen(ctx);
-    await installMock(ctx, mock);
-    return { ctx, page: await ctx.newPage() };
+  const s1 = mock.users.get('dzi-uchenik1@yandex.ru');
+  const s2 = mock.users.get('dzi-uchenik2@yandex.ru');
+  const dz = mock.dz;
+  const text = async (page, sel) =>
+    (await page.locator(sel).first().innerText()).replace(/\s+/g, ' ');
+  const snap = async (page, name) => {
+    if (dir === null) return;
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({ path: path.join(dir, `${name}.png`), fullPage: false });
   };
-  const ready = (page, sections) =>
-    page.waitForFunction(
-      (names) =>
-        names.every(
-          (n) =>
-            document.querySelector(`[data-section="${n}"]`) !== null &&
-            !document.querySelector(`[data-section="${n}"]`).textContent.includes('…'),
-        ),
-      sections,
-    );
+  if (dir !== null) fs.mkdirSync(dir, { recursive: true });
 
-  for (const width of [1280, 375, 390, 430, 768]) {
-    const snap = async (page, name, fullPage = true) => {
-      await page.evaluate(() => document.fonts.ready);
-      await page.screenshot({
-        path: path.join(dir, `${width}-${name}.png`),
-        fullPage,
-        /* Высокая страница снимается по частям: закреплённая шапка иначе
-           повторилась бы посреди снимка. */
-        style:
-          '.help-fab, .help-fab * { visibility: hidden !important; } .site-head { position: static !important; }',
-      });
-    };
+  /* Репетитор, компьютер. */
+  const tutorCtx = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+    deviceScaleFactor: dir === null ? 1 : 2,
+    ...(dir === null ? {} : { recordVideo: { dir: path.join(dir, 'zapis'), size: { width: 1280, height: 900 } } }),
+  });
+  await welcomeSeen(tutorCtx);
+  await installMock(tutorCtx, mock);
+  const tp = await tutorCtx.newPage();
+  watchConsole(tp, errors);
+  await login(tp, 'dzi-repetitor@yandex.ru', 'dzi-repetitor-1');
 
-    /* Репетитор: кабинет, класс, выдача. */
-    const t = await context(width);
-    await login(t.page, 'dz-repetitor@yandex.ru', 'dz-repetitor-1');
-    await ready(t.page, ['classes', 'homework']);
-    const klass = mock.classes.find((k) => k.name === 'Группа по средам');
-    await t.page.goto(`${SITE}/kabinet/klassy/?id=${klass.id}`, { waitUntil: 'networkidle' });
-    await t.page.waitForSelector('.dz-members__item');
-    await snap(t.page, '02-klass');
-    await t.page.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.C,8.H&n=1`, {
-      waitUntil: 'networkidle',
-    });
-    await t.page.waitForFunction(
-      () => document.querySelectorAll('[data-section="preview"] .dz-preview__item').length === 3,
-    );
-    await t.page.fill('input[name="title"]', 'ДЗ к среде: степени и логарифмы');
-    await t.page.getByRole('radio', { name: '2', exact: true }).check();
-    await t.page.getByRole('radio', { name: 'Сразу после ответа' }).check();
-    await t.page.fill(
-      '[data-section="settings"] textarea',
-      'Повтори свойства степеней перед решением.',
-    );
-    await snap(t.page, '03-vydat');
-    if (hw === null) {
-      await t.page.locator('button[type="submit"]:has-text("Выдать")').click();
-      await t.page.waitForSelector('text=Задание выдано');
-      hw = mock.dz.homework.find((h) => h.title === 'ДЗ к среде: степени и логарифмы');
-      /* Ученик 1 решает: ошибка и верно в первой, решение во второй. */
-      const st = await context(width);
-      await login(st.page, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1');
-      await st.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
-      await st.page.waitForSelector('.dz-task');
-      const hwTasks = mock.dz.tasks
-        .filter((x) => x.homework_id === hw.id)
-        .sort((a, b) => a.position - b.position);
-      const key = mock.dz.keys.find((k) => k.task_id === hwTasks[0].id).answer;
-      await st.page.fill(
-        '.dz-answer .otvet-input__field',
-        String(Number(key) + 1).replace('.', ','),
-      );
-      await st.page.locator('.dz-answer button:has-text("Проверить")').click();
-      await st.page.waitForSelector('.dz-verdict--wrong');
-      await st.page.fill('.dz-answer .otvet-input__field', key.replace('.', ','));
-      await st.page.locator('.dz-answer button:has-text("Проверить")').click();
-      await st.page.waitForSelector('.dz-verdict--right');
-      await st.page.locator('.dz-strip__btn').nth(1).click();
-      await st.page.locator('.dz-answer button:has-text("Показать решение")').click();
-      await st.page.locator('[role="dialog"] button:has-text("Показать решение")').click();
-      await st.page.waitForSelector('.z8-razbor');
-      await st.ctx.close();
-    }
-    await t.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
-    await ready(t.page, ['classes', 'homework']);
-    await snap(t.page, '01-kabinet-repetitora');
-    await t.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
-    await t.page.waitForSelector('.dz-table');
-    await t.page.locator(`tr[data-student="${s1.id}"] .dz-cell`).first().click();
-    await t.page.waitForSelector('[data-section="cell"]');
-    await snap(t.page, '05-rezultaty');
-    if (width === 1280) {
-      for (const list of ['uchenik', 'uchitel']) {
-        await t.page.goto(`${SITE}/kabinet/domashka/pechat/?id=${hw.id}&list=${list}`, {
-          waitUntil: 'networkidle',
-        });
-        await t.page.waitForTimeout(1500);
-        await snap(t.page, `09-pechat-${list}`, false);
+  /* 1. Два набора карточек №7 — кнопкой со страницы «Карточки». */
+  await tp.goto(`${SITE}/zadaniya/7/kartochki/`, { waitUntil: 'networkidle' });
+  await tp.locator('[data-block="dz-nabory"] > summary').click();
+  const nabory = tp.locator('[data-block="dz-nabory"] [data-block="dz-v-chernovik"]');
+  await nabory.nth(0).click();
+  await tp.waitForSelector('[data-block="dz-chernovik-plashka"]');
+  await nabory.nth(1).click();
+  await tp.waitForFunction(() =>
+    document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent?.includes(': 2'),
+  );
+  check(true, 'ДЗ-3: два набора карточек №7 — в черновике, плашка «В черновике ДЗ: 2»');
+  const fab = await tp.evaluate(() => {
+    const a = document.querySelector('[data-block="dz-chernovik-plashka"]')?.getBoundingClientRect();
+    const b = document.querySelector('.help-fab')?.getBoundingClientRect();
+    if (!a || !b) return true;
+    return a.right <= b.left || a.bottom <= b.top || a.left >= b.right || a.top >= b.bottom;
+  });
+  check(fab, 'ДЗ-3: плашка черновика не перекрывает кнопку «?»');
+  await snap(tp, '1280-01-kartochki-plashka');
+
+  /* 2. Блок опорных №7 целиком — кнопкой со страницы блока. */
+  await tp.goto(`${SITE}/zadaniya/7/opornye-zadachi/stepeni/`, { waitUntil: 'networkidle' });
+  await tp.locator('[data-block="dz-v-chernovik"]').first().click();
+  await tp.waitForFunction(() =>
+    document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent?.includes(': 3'),
+  );
+  check(true, 'ДЗ-3: блок опорных №7 — в черновике (3 пункта)');
+
+  /* 3. Прежняя ссылка «Выдать ДЗ» из №8: типы 8.A и 8.B — в черновик. */
+  await tp.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`, { waitUntil: 'networkidle' });
+  await tp.waitForSelector('[data-block="dz-sostav"] .dzk-punkt');
+  await tp.waitForFunction(() => document.querySelectorAll('.dzk-punkt').length === 4);
+  check(
+    new URL(tp.url()).search === '',
+    'ДЗ-3: прежняя ссылка из №8 работает — типы в составе, адрес без параметров',
+  );
+
+  /* 4. В конструкторе: №7 → Тренажёр → первый тип, 3 задачи. */
+  await tp.locator('.dzk-chip', { hasText: '№7' }).click();
+  await tp.getByRole('tab', { name: 'Тренажёр' }).click();
+  const tip = tp.locator('.dzk-tip').first();
+  await tip.waitFor();
+  await tip.getByRole('button', { name: 'Больше' }).click();
+  await tip.locator('.dzk-dobavit').click();
+  await tp.waitForFunction(() => document.querySelectorAll('.dzk-punkt').length === 5);
+  /* Пример задачи — тем же сборщиком, что при выдаче. */
+  await tip.getByRole('button', { name: 'Пример задачи' }).click();
+  await tp.waitForSelector('[data-block="dz-primer"] .dzk-primer__uslovie');
+  check(true, 'ДЗ-3: пример задачи тренажёра №7 собирается в конструкторе');
+  const schet = await text(tp, '[data-block="dz-schet"]');
+  check(
+    /15 задач/.test(schet) && /2 набора карточек/.test(schet) && /≈ \d+ минут/.test(schet),
+    `ДЗ-3: счётчик «… задач · 2 набора карточек · ≈ N минут» (${schet})`,
+  );
+  /* «Каждому свои» у правила №7, порядок: последний пункт — на шаг выше. */
+  await tp.locator('.dzk-punkt').nth(4).locator('.dzk-galka input').check();
+  await tp.locator('.dzk-punkt').nth(4).getByRole('button', { name: /^Выше/ }).click();
+  await tp.waitForFunction(
+    () => document.querySelectorAll('.dzk-punkt')[3]?.getAttribute('data-punkt') === 'trenazher',
+  );
+  check(
+    !(await tp.getByRole('checkbox', { name: 'Показывать «Запомни»' }).isChecked()) &&
+      !(await tp.getByRole('checkbox', { name: 'Показывать разобранный пример' }).isChecked()),
+    'ДЗ-3: «Запомни» и разобранный пример по умолчанию выключены',
+  );
+  check(
+    /^ДЗ от \d{2}\.\d{2}$/.test(await tp.inputValue('input[name="title"]')),
+    'ДЗ-3: название по умолчанию — «ДЗ от дд.мм»',
+  );
+  await tp.fill('input[name="title"]', 'ДЗ: уравнения и степени');
+  await tp.getByRole('radio', { name: '2', exact: true }).check();
+  await tp.getByRole('radio', { name: 'Сразу после ответа' }).check();
+  await tp.waitForTimeout(600);
+  const draft = dz.drafts.find((d) => d.user_id === mock.users.get('dzi-repetitor@yandex.ru').id);
+  check(draft !== undefined && draft.body.punkty.length === 5, 'ДЗ-3: черновик лежит в базе — 5 пунктов');
+  /* Шаблон. */
+  await tp.locator('[data-section="templates"] > summary').click();
+  await tp.locator('[data-section="templates"] input').fill('Уравнения и степени');
+  await tp.locator('[data-section="templates"] button:has-text("Сохранить как шаблон")').click();
+  await tp.waitForSelector('[data-section="templates"] li');
+  check(dz.templates.length === 1, 'ДЗ-3: шаблон сохранён');
+  await snap(tp, '1280-02-konstruktor');
+  check(await noHorizontalScroll(tp), 'ДЗ-3: конструктор 1280 — без горизонтальной прокрутки');
+
+  await tp.locator('[data-action="vydat"]').click();
+  await tp.waitForSelector('[data-page="vydano"]', { timeout: 60000 });
+  const hw = dz.homework.find((h) => h.title === 'ДЗ: уравнения и степени');
+  const hwParts = dz.parts.filter((p) => p.homework_id === hw.id).sort((a, b) => a.position - b.position);
+  const units = dz.tasks.filter((t) => t.homework_id === hw.id);
+  check(
+    hw !== undefined &&
+      hw.sections.join(',') === '7,8' &&
+      hw.attempts_limit === 2 &&
+      hw.solutions_when === 'instant' &&
+      !hw.show_memo &&
+      !hw.show_example,
+    'ДЗ-3: в базе — разделы 7 и 8, 2 попытки, решения сразу, «Запомни» и пример выключены',
+  );
+  check(
+    hwParts.map((p) => p.source).join(',') === 'kartochki,kartochki,opornye,trenazher,trenazher',
+    `ДЗ-3: пункты по порядку (${hwParts.map((p) => p.source).join(',')})`,
+  );
+  const trSvoi = hwParts.find((p) => p.per_student);
+  check(
+    trSvoi !== undefined &&
+      units.filter((u) => u.part_id === trSvoi.id && u.student_id === s1.id).length === 3 &&
+      units.filter((u) => u.part_id === trSvoi.id && u.student_id === s2.id).length === 3,
+    'ДЗ-3: «каждому свои» — по 3 задачи каждому ученику',
+  );
+  check(
+    units.some((u) => u.answer_kind === 'self') && units.every((u) => !JSON.stringify(u.view).includes('"answer"')),
+    'ДЗ-3: у карточек-самооценки нет ключа, ответов в том, что видит ученик, нет',
+  );
+  check(dz.drafts.length === 0 || dz.drafts.every((d) => d.body.punkty.length === 0), 'ДЗ-3: после выдачи черновик очищен');
+
+  /* Ученик: телефон (с --dz-istochniki — WebKit, iPhone 13). */
+  const engine = uchenikWebkit ? (await import('playwright')).webkit : null;
+  const wk = engine === null ? null : await engine.launch();
+  const { devices } = await import('playwright');
+  const stCtx = await (wk ?? browser).newContext({
+    ...(wk === null ? { viewport: { width: 390, height: 844 }, hasTouch: true } : devices['iPhone 13']),
+    ...(dir === null ? {} : { recordVideo: { dir: path.join(dir, 'zapis'), size: { width: 390, height: 844 } } }),
+  });
+  await welcomeSeen(stCtx);
+  await installMock(stCtx, mock);
+  const sp = await stCtx.newPage();
+  watchConsole(sp, errors);
+  await login(sp, 'dzi-uchenik1@yandex.ru', 'dzi-uchenik-1');
+  await sp.goto(`${SITE}/zadaniya/7/`, { waitUntil: 'networkidle' });
+  await sp.waitForSelector('[data-block="dz-plashka"]');
+  check(
+    /Домашнее задание до .* · сделано 0 из \d+/.test(await text(sp, '[data-block="dz-plashka"]')),
+    'ДЗ-3: в разделе №7 у ученика — «Домашнее задание до … · сделано 0 из N»',
+  );
+  await snap(sp, '390-03-plashka-uchenika');
+  await sp.locator('[data-block="dz-plashka"] a').click();
+  await sp.waitForSelector('.rdz-punkty .rdz-punkt');
+  check((await sp.locator('.rdz-punkt').count()) === 5, 'ДЗ-3: у ученика 5 пунктов с метками источника');
+  check(await noHorizontalScroll(sp), 'ДЗ-3: решение ДЗ на телефоне — без горизонтальной прокрутки');
+  await snap(sp, '390-04-dz-uchenika');
+
+  /* Набор карточек 1: пройти все. */
+  const keyOf = (id) => dz.keys.find((k) => k.task_id === id)?.answer;
+  const naborKartochek = async () => {
+    for (let guard = 0; guard < 40; guard += 1) {
+      const card = sp.locator('[data-block="kartochki"]');
+      if ((await card.count()) === 0) return;
+      const id = await card.getAttribute('data-task');
+      const task = dz.tasks.find((t) => t.id === id);
+      if (task.answer_kind === 'self') {
+        await sp.getByRole('button', { name: 'Показать ответ' }).click();
+        await sp.getByRole('button', { name: /Знаю|Повторить/ }).first().click();
+      } else if (task.answer_kind === 'verno') {
+        await sp.locator('.kart-card__vybor button', { hasText: keyOf(id) === 'da' ? 'Верно' : 'Неверно' }).click();
+        await sp.getByRole('button', { name: /Дальше/ }).first().click();
+      } else {
+        await sp.locator('.kart-card__forma input').fill(keyOf(id).replace('.', ','));
+        await sp.locator('.kart-card__forma button[type="submit"]').click();
+        await sp.getByRole('button', { name: /Дальше/ }).first().click();
       }
+      await sp.waitForTimeout(150);
     }
-    await t.ctx.close();
+  };
+  await naborKartochek();
+  await sp.waitForSelector('[data-block="kartochki-gotovo"]');
+  check(true, 'ДЗ-3: набор карточек пройден — «Все карточки пройдены»');
+  const marks = dz.answers.filter((a) => a.user_id === s1.id);
+  check(marks.some((a) => a.state === 'known' || a.state === 'repeat'), 'ДЗ-3: отметки «Знаю / Повторить» записаны в базу');
+  await snap(sp, '390-05-kartochki-gotovo');
 
-    /* Ученик: кабинет, плашка в №8, решение. */
-    const st = await context(width);
-    await login(st.page, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1');
-    await st.page.waitForSelector('.karta-dz');
-    await snap(st.page, '06-kabinet-uchenika');
-    await st.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
-    await st.page.waitForSelector('[data-block="dz-plashka"]');
-    await snap(st.page, '07-plashka-8', false);
-    await st.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
-    await st.page.waitForSelector('.dz-task');
-    await st.page.locator('.dz-strip__btn').first().click();
-    await st.page.waitForSelector('.z8-razbor');
-    await snap(st.page, '08-reshenie-dz');
-    await st.ctx.close();
+  /* Уйти и вернуться — сделанное на месте. */
+  await sp.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+  await sp.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+  await sp.waitForSelector('.rdz-punkt');
+  check(
+    (await sp.locator('.rdz-punkt').first().getAttribute('class')).includes('is-gotovo'),
+    'ДЗ-3: вернулся — первый пункт «Готово», открыт следующий незаконченный',
+  );
+
+  /* Задача тренажёра: дробь, неверно, верно. */
+  await sp.locator('.rdz-punkt[data-istochnik="trenazher"]').first().click();
+  await sp.waitForSelector('.rdz-zadacha .trn-input input, .rdz-zadacha .otvet-input__field');
+  const taskId = await sp.locator('.rdz-zadacha').first().getAttribute('data-task');
+  const key = keyOf(taskId);
+  const field = sp.locator('.rdz-zadacha .otvet-input__field').first();
+  await field.fill(String(Number(key) + 1).replace('.', ','));
+  await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
+  await sp.waitForSelector('.trn-verdikt--net');
+  check((await sp.locator('[data-left]').first().getAttribute('data-left')) === '1', 'ДЗ-3: неверно — осталась 1 попытка');
+  await field.fill(key.replace('.', ','));
+  await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
+  await sp.waitForSelector('.trn-verdikt--da');
+  check(true, 'ДЗ-3: тот же экран задачи, что в тренажёре — «Верно!»');
+  await snap(sp, '390-06-zadacha');
+
+  /* Сдать. */
+  await sp.locator('[data-action="sdat"]').click();
+  await sp.locator('[role="dialog"] button:has-text("Сдать")').click();
+  await sp.waitForSelector('[data-state="submitted"]');
+  check(true, 'ДЗ-3: ученик сдал — «Сдано … · Верно …»');
+  await snap(sp, '390-07-sdano');
+  await stCtx.close();
+  if (wk !== null) await wk.close();
+
+  /* Репетитор: таблица «ученик × пункт», клетка, работа над ошибками. */
+  await tp.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+  await tp.waitForSelector('.rez-tablica');
+  check(
+    (await tp.locator('.rez-gruppa').allInnerTexts()).join(',') === 'Карточки,Опорные задачи,Тренажёр',
+    'ДЗ-3: в таблице столбцы сгруппированы по источникам',
+  );
+  const row1 = tp.locator(`tr[data-student="${s1.id}"]`);
+  check(
+    (await row1.locator('.rez-kletka').first().getAttribute('data-ton')) !== 'nichego',
+    'ДЗ-3: у ученика 1 набор карточек — сделан',
+  );
+  await row1.locator('.rez-kletka').first().click();
+  await tp.waitForSelector('[data-section="cell"]');
+  check(/Знаю|Повторить|верно/.test(await text(tp, '[data-section="cell"]')), 'ДЗ-3: клик по клетке — «Знаю / Повторить» и ответы');
+  await snap(tp, '1280-08-rezultaty');
+  await tp.locator('[data-action="oshibki"]').click();
+  await tp.waitForSelector('[data-page="dz-oshibki"]', { timeout: 60000 });
+  await tp.waitForSelector('[data-section="mistakes"]', { timeout: 60000 });
+  await snap(tp, '1280-09-oshibki');
+  await tp.locator('.dzk-vydat').click();
+  await tp.waitForSelector('[data-page="vydano"]', { timeout: 60000 });
+  const fix = dz.homework.find((h) => h.parent_id === hw.id);
+  const fixUnits = fix === undefined ? [] : dz.tasks.filter((t) => t.homework_id === fix.id);
+  check(
+    fix !== undefined && fix.origin === 'oshibki' && fixUnits.length > 0 && fixUnits.every((u) => u.student_id !== null),
+    'ДЗ-3: работа над ошибками выдана — каждому его задачи',
+  );
+
+  /* Ширины: конструктор и результаты без горизонтальной прокрутки. */
+  for (const width of [375, 390, 768, 1280]) {
+    await tp.setViewportSize({ width, height: width < 500 ? 812 : 900 });
+    for (const [what, url] of [
+      ['konstruktor', `${SITE}/kabinet/dz-vydat/`],
+      ['rezultaty', `${SITE}/kabinet/domashka/?id=${hw.id}`],
+    ]) {
+      await tp.goto(url, { waitUntil: 'networkidle' });
+      await tp.waitForTimeout(500);
+      check(await noHorizontalScroll(tp), `ДЗ-3: ${what} ${width} — без горизонтальной прокрутки`);
+      await snap(tp, `${width}-${what}`);
+    }
   }
-  console.log(`Снимки: ${dir}`);
+  await tutorCtx.close();
 }
 
-/**
- * Кабинет ученика после тренировки №8: решено, ошибка, закладка, история.
- * Тренировка проходит один раз на компьютере; на остальных ширинах тот же
- * ученик входит заново, и прогресс приходит из аккаунта.
- */
+/* Снимки и запись сценария ДЗ из трёх источников: ученик — WebKit (iPhone 13). */
+async function runGalleryDz(dir) {
+  const mock = makeMock();
+  const errors = [];
+  await scenarijDz(mock, errors, { dir, uchenikWebkit: true });
+  for (const e of errors) check(false, `консоль: ${e}`);
+  console.log(`Снимки и запись: ${dir}`);
+}
+
 async function runGalleryZ8(dir) {
   fs.mkdirSync(dir, { recursive: true });
   const mock = makeMock();

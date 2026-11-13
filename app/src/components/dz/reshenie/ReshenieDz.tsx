@@ -709,7 +709,7 @@ function NaborKartochek({
       : undefined;
 
   return (
-    <div className="rdz-kartochki" data-block="kartochki">
+    <div className="rdz-kartochki" data-block="kartochki" data-task={u.id} data-state={state}>
       <p className="rdz-muted">
         <Metka>{ISTOCHNIK.kartochki}</Metka> {DZK.uchenik.kartochki.progress(Math.min(i + 1, units.length), units.length)}
         {u.answerKind === 'self' && zakryta ? ` · ${state === 'known' ? DZK.uchenik.kartochki.znayu : DZK.uchenik.kartochki.povtorit}` : ''}
