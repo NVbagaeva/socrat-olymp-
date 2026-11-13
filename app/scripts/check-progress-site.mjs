@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на общем тренажёре по банку (№7, №6, №1) в браузере, на собранном сайте.
+   на общем тренажёре (№7, №6, №2, №1) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -33,8 +33,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7' && N !== '1') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 1)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '1') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 1)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -92,6 +92,19 @@ function razdel() {
       zadachVBloke: (blok) => BLOKI.find((b) => b.id === blok)?.zadachi.length,
       /* Исход задачи блока — «P1-1:3». */
       vBloke: (blok, key) => key.startsWith(`${blok}:`),
+    };
+  }
+  if (N === '2') {
+    /* У №2 прежние ключи назывались по разделу «vektory-2»; банка нет:
+       ключ задачи — «прототип|seed». */
+    const { BLOKI } = requireSrc('lib/vektory/prep/bloki.ts');
+    return {
+      OLD: 'budetege:vektory-2:v1',
+      OLD_OPORNYE: 'budetege:vektory-2:opornye:v1',
+      NEW: 'budetege:vektory-2:log:v1',
+      prototipOf: (id) => id?.split('|')[0],
+      zadachVBloke: (blok) => BLOKI.find((b) => b.id === blok)?.zadachi.length,
+      vBloke: () => true,
     };
   }
   const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);

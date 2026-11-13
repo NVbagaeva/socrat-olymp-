@@ -1,0 +1,1514 @@
+{
+ "razdely": [
+  {
+   "no": 1,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Планиметрия",
+   "gruppy": [
+    {
+     "id": "I",
+     "nazvanie": "Углы в треугольнике",
+     "tipy": [
+      "p01",
+      "p02",
+      "p03",
+      "p04",
+      "p05",
+      "p06",
+      "p07",
+      "p08",
+      "p09"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=I"
+    },
+    {
+     "id": "II",
+     "nazvanie": "Четырёхугольники и точки пересечения",
+     "tipy": [
+      "p10",
+      "p11",
+      "p12",
+      "p13"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=II"
+    },
+    {
+     "id": "III",
+     "nazvanie": "Площадь, теорема Пифагора",
+     "tipy": [
+      "p14",
+      "p15",
+      "p16",
+      "p17",
+      "p18"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=III"
+    },
+    {
+     "id": "IV",
+     "nazvanie": "Подобие, средняя линия",
+     "tipy": [
+      "p19",
+      "p20",
+      "p21",
+      "p22"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=IV"
+    },
+    {
+     "id": "V",
+     "nazvanie": "Синус, косинус, тангенс",
+     "tipy": [
+      "p23",
+      "p24",
+      "p25",
+      "p26",
+      "p27",
+      "p28",
+      "p29",
+      "p30",
+      "p31",
+      "p32"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=V"
+    },
+    {
+     "id": "VI",
+     "nazvanie": "Центральные и вписанные углы",
+     "tipy": [
+      "p33",
+      "p34",
+      "p35",
+      "p36",
+      "p37",
+      "p38",
+      "p39",
+      "p40"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=VI"
+    },
+    {
+     "id": "VII",
+     "nazvanie": "Вписанная окружность",
+     "tipy": [
+      "p41",
+      "p42",
+      "p43",
+      "p44"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=VII"
+    },
+    {
+     "id": "VIII",
+     "nazvanie": "Описанная окружность",
+     "tipy": [
+      "p45",
+      "p46",
+      "p47",
+      "p48"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=VIII"
+    },
+    {
+     "id": "IX",
+     "nazvanie": "Расширенная теорема синусов",
+     "tipy": [
+      "p49"
+     ],
+     "trenazher": "/zadaniya/1/trenazher/?t=IX"
+    }
+   ]
+  },
+  {
+   "no": 2,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Векторы",
+   "gruppy": [
+    {
+     "id": "A",
+     "nazvanie": "Длина вектора",
+     "tipy": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A6",
+      "A7",
+      "A8"
+     ],
+     "trenazher": "/zadaniya/2/trenazher/?tip=A1"
+    },
+    {
+     "id": "B",
+     "nazvanie": "Скалярное произведение",
+     "tipy": [
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "B5",
+      "B6",
+      "B7",
+      "B8",
+      "B9"
+     ],
+     "trenazher": "/zadaniya/2/trenazher/?tip=B1"
+    },
+    {
+     "id": "C",
+     "nazvanie": "Косинус угла",
+     "tipy": [
+      "C1",
+      "C2"
+     ],
+     "trenazher": "/zadaniya/2/trenazher/?tip=C1"
+    }
+   ]
+  },
+  {
+   "no": 3,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Стереометрия",
+   "gruppy": [
+    {
+     "id": "kub",
+     "nazvanie": "Куб и прямоугольный параллелепипед",
+     "tipy": [
+      "P03-01",
+      "P03-02",
+      "P03-03",
+      "P03-04"
+     ],
+     "trenazher": "/zadaniya/3/trenazher/?tip=diagonali"
+    },
+    {
+     "id": "ugly",
+     "nazvanie": "Углы между прямыми",
+     "tipy": [
+      "P03-06",
+      "P03-07",
+      "P03-08",
+      "P03-09",
+      "P03-10",
+      "P03-22",
+      "P03-23",
+      "P03-35"
+     ],
+     "trenazher": "/zadaniya/3/trenazher/?tip=ugly"
+    },
+    {
+     "id": "prizma-piramida",
+     "nazvanie": "Призма и пирамида",
+     "tipy": [
+      "P03-20",
+      "P03-21",
+      "P03-41",
+      "P03-42",
+      "P03-43",
+      "P03-44",
+      "P03-49",
+      "P03-51",
+      "P03-45",
+      "P03-46",
+      "P03-47",
+      "P03-48",
+      "P03-50"
+     ],
+     "trenazher": "/zadaniya/3/trenazher/?tip=obem-prizmy"
+    },
+    {
+     "id": "sostavnye",
+     "nazvanie": "Составные многогранники и части тел",
+     "tipy": [
+      "P03-05",
+      "P03-11",
+      "P03-12",
+      "P03-13",
+      "P03-14",
+      "P03-15",
+      "P03-16",
+      "P03-24",
+      "P03-25",
+      "P03-26",
+      "P03-27",
+      "P03-31",
+      "P03-32",
+      "P03-36",
+      "P03-37",
+      "P03-17",
+      "P03-18",
+      "P03-19",
+      "P03-28",
+      "P03-29",
+      "P03-30",
+      "P03-33",
+      "P03-34",
+      "P03-38",
+      "P03-39",
+      "P03-40"
+     ],
+     "trenazher": "/zadaniya/3/trenazher/?tip=kubiki"
+    },
+    {
+     "id": "vrashcheniya",
+     "nazvanie": "Цилиндр, конус, шар",
+     "tipy": [
+      "P03-52",
+      "P03-53",
+      "P03-54",
+      "P03-55",
+      "P03-56",
+      "P03-57",
+      "P03-63",
+      "P03-64",
+      "P03-69",
+      "P03-70",
+      "P03-71",
+      "P03-92"
+     ],
+     "trenazher": "/zadaniya/3/trenazher/?tip=konus"
+    },
+    {
+     "id": "vo-skolko-raz",
+     "nazvanie": "Во сколько раз изменится",
+     "tipy": [
+      "P03-58",
+      "P03-59",
+      "P03-60",
+      "P03-62",
+      "P03-72",
+      "P03-73",
+      "P03-61",
+      "P03-65",
+      "P03-66",
+      "P03-67",
+      "P03-68"
+     ],
+     "trenazher": "/zadaniya/3/trenazher/?tip=vo-skolko-raz"
+    },
+    {
+     "id": "kombinacii",
+     "nazvanie": "Комбинации тел",
+     "tipy": [
+      "P03-74",
+      "P03-75",
+      "P03-76",
+      "P03-77",
+      "P03-78",
+      "P03-79",
+      "P03-80",
+      "P03-81",
+      "P03-82",
+      "P03-83",
+      "P03-84",
+      "P03-85",
+      "P03-86",
+      "P03-87",
+      "P03-88",
+      "P03-89",
+      "P03-90",
+      "P03-91"
+     ],
+     "trenazher": "/zadaniya/3/trenazher/?tip=cilindr-komb"
+    }
+   ]
+  },
+  {
+   "no": 4,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Вероятность: простая",
+   "gruppy": [
+    {
+     "id": "klassicheskaya",
+     "nazvanie": "Подсчёт исходов",
+     "tipy": [
+      "klassicheskaya"
+     ],
+     "trenazher": "/zadaniya/4/trenazher/klassicheskaya/"
+    },
+    {
+     "id": "kubiki",
+     "nazvanie": "Игральные кости",
+     "tipy": [
+      "kubiki"
+     ],
+     "trenazher": "/zadaniya/4/trenazher/kubiki/"
+    },
+    {
+     "id": "monety",
+     "nazvanie": "Броски монеты",
+     "tipy": [
+      "monety"
+     ],
+     "trenazher": "/zadaniya/4/trenazher/monety/"
+    },
+    {
+     "id": "kruglyy-stol",
+     "nazvanie": "Жеребьёвка и рассадка",
+     "tipy": [
+      "kruglyy-stol"
+     ],
+     "trenazher": "/zadaniya/4/trenazher/kruglyy-stol/"
+    },
+    {
+     "id": "protivopolozhnye",
+     "nazvanie": "Через противоположное событие",
+     "tipy": [
+      "protivopolozhnye"
+     ],
+     "trenazher": "/zadaniya/4/trenazher/protivopolozhnye/"
+    },
+    {
+     "id": "geometricheskoe",
+     "nazvanie": "Доля длины и площади",
+     "tipy": [
+      "geometricheskoe"
+     ],
+     "trenazher": "/zadaniya/4/trenazher/geometricheskoe/"
+    },
+    {
+     "id": "statisticheskoe",
+     "nazvanie": "Вероятность по частоте",
+     "tipy": [
+      "statisticheskoe"
+     ],
+     "trenazher": "/zadaniya/4/trenazher/statisticheskoe/"
+    }
+   ]
+  },
+  {
+   "no": 5,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Вероятность: сложная",
+   "gruppy": [
+    {
+     "id": "nesovmestnye",
+     "nazvanie": "Несовместные события: складываем",
+     "tipy": [
+      "nesovmestnye"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/nesovmestnye/"
+    },
+    {
+     "id": "protivopolozhnoe",
+     "nazvanie": "Через противоположное событие",
+     "tipy": [
+      "protivopolozhnoe"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/protivopolozhnoe/"
+    },
+    {
+     "id": "koordinatnaya",
+     "nazvanie": "Промежутки на числовой прямой",
+     "tipy": [
+      "koordinatnaya"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/koordinatnaya/"
+    },
+    {
+     "id": "sovmestnye",
+     "nazvanie": "Совместные события: общая часть",
+     "tipy": [
+      "sovmestnye"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/sovmestnye/"
+    },
+    {
+     "id": "uslovnaya",
+     "nazvanie": "Вероятность при условии",
+     "tipy": [
+      "uslovnaya"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/uslovnaya/"
+    },
+    {
+     "id": "nezavisimye",
+     "nazvanie": "Независимые события: перемножаем",
+     "tipy": [
+      "nezavisimye"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/nezavisimye/"
+    },
+    {
+     "id": "hotya-by",
+     "nazvanie": "«Хотя бы один»: через «ни одного»",
+     "tipy": [
+      "hotya-by"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/hotya-by/"
+    },
+    {
+     "id": "dva-predmeta",
+     "nazvanie": "Два предмета без возвращения",
+     "tipy": [
+      "dva-predmeta"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/dva-predmeta/"
+    },
+    {
+     "id": "polnaya",
+     "nazvanie": "Полная вероятность: несколько путей",
+     "tipy": [
+      "polnaya"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/polnaya/"
+    },
+    {
+     "id": "do-uspeha",
+     "nazvanie": "Пробуем до первой удачи",
+     "tipy": [
+      "do-uspeha"
+     ],
+     "trenazher": "/zadaniya/5/trenazher/do-uspeha/"
+    }
+   ]
+  },
+  {
+   "no": 6,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Случайные величины",
+   "gruppy": [
+    {
+     "id": "I",
+     "nazvanie": "Диаграмма Эйлера",
+     "tipy": [
+      "P01",
+      "P02"
+     ],
+     "trenazher": "/zadaniya/6/trenazher/?tipy=P01,P02"
+    },
+    {
+     "id": "II",
+     "nazvanie": "Условная вероятность",
+     "tipy": [
+      "P03"
+     ],
+     "trenazher": "/zadaniya/6/trenazher/?tipy=P03"
+    },
+    {
+     "id": "III",
+     "nazvanie": "Математическое ожидание",
+     "tipy": [
+      "P04",
+      "P05",
+      "P06",
+      "P07",
+      "P08",
+      "P09"
+     ],
+     "trenazher": "/zadaniya/6/trenazher/?tipy=P04,P05,P06,P07,P08,P09"
+    },
+    {
+     "id": "IV",
+     "nazvanie": "Оценка вероятности",
+     "tipy": [
+      "P10",
+      "P11"
+     ],
+     "trenazher": "/zadaniya/6/trenazher/?tipy=P10,P11"
+    },
+    {
+     "id": "V",
+     "nazvanie": "Дисперсия",
+     "tipy": [
+      "P12",
+      "P13",
+      "P14",
+      "P15"
+     ],
+     "trenazher": "/zadaniya/6/trenazher/?tipy=P12,P13,P14,P15"
+    }
+   ]
+  },
+  {
+   "no": 7,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Уравнения",
+   "gruppy": [
+    {
+     "id": "I",
+     "nazvanie": "Линейные, дробно-рациональные, степенные",
+     "tipy": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06",
+      "P07",
+      "P08",
+      "P09",
+      "P10"
+     ],
+     "trenazher": "/zadaniya/7/trenazher/?tipy=P01,P02,P03,P04,P05,P06,P07,P08,P09,P10"
+    },
+    {
+     "id": "II",
+     "nazvanie": "Иррациональные",
+     "tipy": [
+      "P11",
+      "P12",
+      "P13",
+      "P14"
+     ],
+     "trenazher": "/zadaniya/7/trenazher/?tipy=P11,P12,P13,P14"
+    },
+    {
+     "id": "III",
+     "nazvanie": "Показательные",
+     "tipy": [
+      "P15",
+      "P16",
+      "P17",
+      "P18",
+      "P19",
+      "P29",
+      "P31",
+      "P32"
+     ],
+     "trenazher": "/zadaniya/7/trenazher/?tipy=P15,P16,P17,P18,P19,P29,P31,P32"
+    },
+    {
+     "id": "IV",
+     "nazvanie": "Логарифмические",
+     "tipy": [
+      "P20",
+      "P21",
+      "P22",
+      "P23",
+      "P24",
+      "P25",
+      "P30",
+      "P33",
+      "P34",
+      "P35"
+     ],
+     "trenazher": "/zadaniya/7/trenazher/?tipy=P20,P21,P22,P23,P24,P25,P30,P33,P34,P35"
+    },
+    {
+     "id": "V",
+     "nazvanie": "Тригонометрические",
+     "tipy": [
+      "P26",
+      "P27",
+      "P28"
+     ],
+     "trenazher": "/zadaniya/7/trenazher/?tipy=P26,P27,P28"
+    }
+   ]
+  },
+  {
+   "no": 8,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Вычисления",
+   "gruppy": [
+    {
+     "id": "stepeni",
+     "nazvanie": "Степени",
+     "tipy": [
+      "8.A",
+      "8.C",
+      "8.D"
+     ],
+     "trenazher": "/zadaniya/8/trenazher/?tip=8.A"
+    },
+    {
+     "id": "korni",
+     "nazvanie": "Корни",
+     "tipy": [
+      "8.B",
+      "8.E",
+      "8.F",
+      "8.G"
+     ],
+     "trenazher": "/zadaniya/8/trenazher/?tip=8.B"
+    },
+    {
+     "id": "logarifmy",
+     "nazvanie": "Логарифмы",
+     "tipy": [
+      "8.H",
+      "8.J",
+      "8.I",
+      "8.K",
+      "8.L"
+     ],
+     "trenazher": "/zadaniya/8/trenazher/?tip=8.H"
+    },
+    {
+     "id": "trigonometriya",
+     "nazvanie": "Тригонометрия",
+     "tipy": [
+      "8.M",
+      "8.N",
+      "8.O",
+      "8.P",
+      "8.R",
+      "8.S",
+      "8.Q",
+      "8.T",
+      "8.U",
+      "8.V"
+     ],
+     "trenazher": "/zadaniya/8/trenazher/?tip=8.M"
+    },
+    {
+     "id": "bukvennye",
+     "nazvanie": "Буквенные выражения",
+     "tipy": [
+      "8.W",
+      "8.X",
+      "8.Y",
+      "8.Z"
+     ],
+     "trenazher": "/zadaniya/8/trenazher/?tip=8.W"
+    }
+   ]
+  },
+  {
+   "no": 9,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Производная",
+   "gruppy": [
+    {
+     "id": "I",
+     "nazvanie": "Физический смысл производной",
+     "tipy": [
+      "9.1.1",
+      "9.1.2"
+     ],
+     "trenazher": "/zadaniya/9/trenazher/?g=I"
+    },
+    {
+     "id": "II",
+     "nazvanie": "Касательная",
+     "tipy": [
+      "9.2.1",
+      "9.2.2",
+      "9.2.3",
+      "9.2.4",
+      "9.2.5",
+      "9.2.6",
+      "9.2.7"
+     ],
+     "trenazher": "/zadaniya/9/trenazher/?g=II"
+    },
+    {
+     "id": "III",
+     "nazvanie": "Исследование по графику функции",
+     "tipy": [
+      "9.3.1",
+      "9.3.2",
+      "9.3.3",
+      "9.3.4",
+      "9.3.5",
+      "9.3.6"
+     ],
+     "trenazher": "/zadaniya/9/trenazher/?g=III"
+    },
+    {
+     "id": "IV",
+     "nazvanie": "Исследование по графику производной",
+     "tipy": [
+      "9.4.1",
+      "9.4.2",
+      "9.4.3",
+      "9.4.4",
+      "9.4.5",
+      "9.4.6",
+      "9.4.7",
+      "9.4.8",
+      "9.4.9",
+      "9.4.10"
+     ],
+     "trenazher": "/zadaniya/9/trenazher/?g=IV"
+    },
+    {
+     "id": "V",
+     "nazvanie": "Первообразная",
+     "tipy": [
+      "9.5.1",
+      "9.5.2",
+      "9.5.3",
+      "9.5.4",
+      "9.5.5",
+      "9.5.6"
+     ],
+     "trenazher": "/zadaniya/9/trenazher/?g=V"
+    }
+   ]
+  },
+  {
+   "no": 10,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Физический смысл",
+   "gruppy": [
+    {
+     "id": "I",
+     "nazvanie": "Подстановка, линейные и дробные уравнения",
+     "tipy": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06",
+      "P07",
+      "P08",
+      "P09",
+      "P10"
+     ],
+     "trenazher": "/zadaniya/10/trenazher/?tipy=P01,P02,P03,P04,P05,P06,P07,P08,P09,P10"
+    },
+    {
+     "id": "II",
+     "nazvanie": "Квадратичные зависимости",
+     "tipy": [
+      "P11",
+      "P12",
+      "P13",
+      "P14",
+      "P15",
+      "P16",
+      "P17"
+     ],
+     "trenazher": "/zadaniya/10/trenazher/?tipy=P11,P12,P13,P14,P15,P16,P17"
+    },
+    {
+     "id": "III",
+     "nazvanie": "Степени и корни",
+     "tipy": [
+      "P18",
+      "P19",
+      "P20",
+      "P21",
+      "P30",
+      "P31",
+      "P32"
+     ],
+     "trenazher": "/zadaniya/10/trenazher/?tipy=P18,P19,P20,P21,P30,P31,P32"
+    },
+    {
+     "id": "IV",
+     "nazvanie": "Показательные и логарифмические",
+     "tipy": [
+      "P22",
+      "P23",
+      "P24",
+      "P25"
+     ],
+     "trenazher": "/zadaniya/10/trenazher/?tipy=P22,P23,P24,P25"
+    },
+    {
+     "id": "V",
+     "nazvanie": "Тригонометрические",
+     "tipy": [
+      "P26",
+      "P27",
+      "P28",
+      "P29",
+      "P33",
+      "P34"
+     ],
+     "trenazher": "/zadaniya/10/trenazher/?tipy=P26,P27,P28,P29,P33,P34"
+    }
+   ]
+  },
+  {
+   "no": 11,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Текстовые задачи",
+   "gruppy": [
+    {
+     "id": "PR",
+     "nazvanie": "Проценты",
+     "tipy": [
+      "PR-01",
+      "PR-02",
+      "PR-03",
+      "PR-04",
+      "PR-05",
+      "PR-06",
+      "PR-07"
+     ],
+     "trenazher": "/zadaniya/11/trenazher/?t=PR"
+    },
+    {
+     "id": "SM",
+     "nazvanie": "Смеси и сплавы",
+     "tipy": [
+      "SM-01",
+      "SM-02",
+      "SM-03",
+      "SM-04",
+      "SM-05",
+      "SM-06",
+      "SM-07",
+      "SM-08"
+     ],
+     "trenazher": "/zadaniya/11/trenazher/?t=SM"
+    },
+    {
+     "id": "DP",
+     "nazvanie": "Движение по прямой",
+     "tipy": [
+      "DP-01",
+      "DP-02",
+      "DP-03",
+      "DP-04",
+      "DP-05",
+      "DP-06",
+      "DP-07",
+      "DP-08",
+      "DP-09",
+      "DP-10",
+      "DP-11",
+      "DP-12",
+      "DP-13"
+     ],
+     "trenazher": "/zadaniya/11/trenazher/?t=DP"
+    },
+    {
+     "id": "PT",
+     "nazvanie": "Протяжённые тела",
+     "tipy": [
+      "PT-01",
+      "PT-02",
+      "PT-03",
+      "PT-04"
+     ],
+     "trenazher": "/zadaniya/11/trenazher/?t=PT"
+    },
+    {
+     "id": "VD",
+     "nazvanie": "Движение по воде",
+     "tipy": [
+      "VD-01",
+      "VD-02",
+      "VD-03",
+      "VD-04",
+      "VD-05",
+      "VD-06",
+      "VD-07"
+     ],
+     "trenazher": "/zadaniya/11/trenazher/?t=VD"
+    },
+    {
+     "id": "OK",
+     "nazvanie": "Движение по окружности",
+     "tipy": [
+      "OK-01",
+      "OK-02",
+      "OK-03"
+     ],
+     "trenazher": "/zadaniya/11/trenazher/?t=OK"
+    },
+    {
+     "id": "RB",
+     "nazvanie": "Работа",
+     "tipy": [
+      "RB-01",
+      "RB-02",
+      "RB-03",
+      "RB-04",
+      "RB-05",
+      "RB-06",
+      "RB-07"
+     ],
+     "trenazher": "/zadaniya/11/trenazher/?t=RB"
+    },
+    {
+     "id": "PG",
+     "nazvanie": "Прогрессии",
+     "tipy": [
+      "PG-01"
+     ],
+     "trenazher": "/zadaniya/11/trenazher/?t=PG"
+    }
+   ]
+  },
+  {
+   "no": 12,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Графики функций",
+   "gruppy": [
+    {
+     "id": "linear",
+     "nazvanie": "Линейная функция",
+     "tipy": [
+      "12.A",
+      "12.B",
+      "12.C",
+      "12.D"
+     ],
+     "trenazher": "/zadaniya/12/linear/trenazher/"
+    },
+    {
+     "id": "quadratic",
+     "nazvanie": "Квадратичная функция",
+     "tipy": [
+      "12Q.A",
+      "12Q.B",
+      "12Q.C",
+      "12Q.D",
+      "12Q.E",
+      "12Q.F",
+      "12Q.G",
+      "12Q.H",
+      "12Q.I"
+     ],
+     "trenazher": "/zadaniya/12/quadratic/trenazher/"
+    },
+    {
+     "id": "rational",
+     "nazvanie": "Дробно-линейная функция",
+     "tipy": [
+      "12R.A",
+      "12R.B",
+      "12R.C",
+      "12R.D",
+      "12R.E",
+      "12R.F",
+      "12R.G",
+      "12R.H",
+      "12R.I",
+      "12R.J"
+     ],
+     "trenazher": "/zadaniya/12/rational/trenazher/"
+    },
+    {
+     "id": "irrational",
+     "nazvanie": "Иррациональная функция",
+     "tipy": [
+      "12S.A",
+      "12S.B",
+      "12S.C",
+      "12S.D"
+     ],
+     "trenazher": "/zadaniya/12/irrational/trenazher/"
+    },
+    {
+     "id": "exponential",
+     "nazvanie": "Показательная функция",
+     "tipy": [
+      "12E.A",
+      "12E.B",
+      "12E.C",
+      "12E.D"
+     ],
+     "trenazher": "/zadaniya/12/exponential/trenazher/"
+    },
+    {
+     "id": "logarithmic",
+     "nazvanie": "Логарифмическая функция",
+     "tipy": [
+      "12L.A",
+      "12L.B",
+      "12L.C",
+      "12L.D",
+      "12L.E"
+     ],
+     "trenazher": "/zadaniya/12/logarithmic/trenazher/"
+    },
+    {
+     "id": "trigonometric",
+     "nazvanie": "Тригонометрические функции",
+     "tipy": [
+      "12T.A",
+      "12T.B",
+      "12T.C",
+      "12T.D",
+      "12T.E",
+      "12T.F"
+     ],
+     "trenazher": "/zadaniya/12/trigonometric/trenazher/"
+    }
+   ]
+  },
+  {
+   "no": 13,
+   "chast": 1,
+   "status": "gotov",
+   "nazvanie": "Финансовая грамотность",
+   "gruppy": [
+    {
+     "id": "A",
+     "nazvanie": "Дифференцированный платёж",
+     "tipy": [
+      "A-01",
+      "A-02",
+      "A-03",
+      "A-04",
+      "A-05",
+      "A-06",
+      "A-07",
+      "A-08",
+      "A-09",
+      "A-10",
+      "A-11",
+      "A-12",
+      "A-13",
+      "A-14",
+      "A-15",
+      "A-16",
+      "A-17",
+      "A-18",
+      "A-19"
+     ],
+     "trenazher": "/zadaniya/13/trenazher/?t=A"
+    },
+    {
+     "id": "B",
+     "nazvanie": "«Поломанный» дифференцированный платёж",
+     "tipy": [
+      "B-01",
+      "B-02",
+      "B-03",
+      "B-04",
+      "B-05",
+      "B-06",
+      "B-07",
+      "B-08",
+      "B-09",
+      "B-10",
+      "B-11",
+      "B-12",
+      "B-13",
+      "B-14",
+      "B-15",
+      "B-16",
+      "B-17",
+      "B-18",
+      "B-19"
+     ],
+     "trenazher": "/zadaniya/13/trenazher/?t=B"
+    },
+    {
+     "id": "C",
+     "nazvanie": "Аннуитет",
+     "tipy": [
+      "C-01",
+      "C-02",
+      "C-03",
+      "C-04",
+      "C-05",
+      "C-06",
+      "C-07",
+      "C-08",
+      "C-10",
+      "C-11",
+      "C-12",
+      "C-13",
+      "C-14",
+      "C-16",
+      "C-17"
+     ],
+     "trenazher": "/zadaniya/13/trenazher/?t=C"
+    },
+    {
+     "id": "D",
+     "nazvanie": "Вклад",
+     "tipy": [
+      "D-01",
+      "D-02",
+      "D-03",
+      "D-04",
+      "D-05",
+      "D-06",
+      "D-07",
+      "D-08",
+      "D-09",
+      "D-10",
+      "D-11",
+      "D-12",
+      "D-13"
+     ],
+     "trenazher": "/zadaniya/13/trenazher/?t=D"
+    }
+   ]
+  },
+  {
+   "no": 14,
+   "chast": 2,
+   "status": "gotov",
+   "nazvanie": "Уравнение",
+   "gruppy": [
+    {
+     "id": "prosteyshie",
+     "nazvanie": "Простейшие уравнения",
+     "tipy": [
+      "prosteyshie"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "argument",
+     "nazvanie": "Уравнения, сводящиеся к простейшим (с аргументом $kx+b$)",
+     "tipy": [
+      "argument"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "obedinenie",
+     "nazvanie": "Объединение серий",
+     "tipy": [
+      "obedinenie"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "otbor-krug",
+     "nazvanie": "Отбор корней по окружности",
+     "tipy": [
+      "otbor-krug"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "otbor-nerav",
+     "nazvanie": "Отбор двойным неравенством",
+     "tipy": [
+      "otbor-nerav"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "privedenie",
+     "nazvanie": "Формулы приведения",
+     "tipy": [
+      "privedenie"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "privedenie-kvadrat",
+     "nazvanie": "Приведение под квадратом",
+     "tipy": [
+      "privedenie-kvadrat"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "dvoynoy",
+     "nazvanie": "Двойной угол и общий множитель",
+     "tipy": [
+      "dvoynoy"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "slozhenie",
+     "nazvanie": "Формулы сложения",
+     "tipy": [
+      "slozhenie"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "zamena",
+     "nazvanie": "Замена сразу",
+     "tipy": [
+      "zamena"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "zamena-preobr",
+     "nazvanie": "Замена после преобразований",
+     "tipy": [
+      "zamena-preobr"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "odnorodnye-1",
+     "nazvanie": "Однородные первой степени",
+     "tipy": [
+      "odnorodnye-1"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "odnorodnye-2",
+     "nazvanie": "Однородные второй степени",
+     "tipy": [
+      "odnorodnye-2"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "vspomogatelnyy",
+     "nazvanie": "Вспомогательный угол",
+     "tipy": [
+      "vspomogatelnyy"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "abc",
+     "nazvanie": "Синус и косинус с числом справа: два способа",
+     "tipy": [
+      "abc"
+     ],
+     "trenazher": null
+    }
+   ]
+  },
+  {
+   "no": 15,
+   "chast": 2,
+   "status": "pozzhe",
+   "nazvanie": "Стереометрия",
+   "gruppy": []
+  },
+  {
+   "no": 16,
+   "chast": 2,
+   "status": "pozzhe",
+   "nazvanie": "Неравенство",
+   "gruppy": []
+  },
+  {
+   "no": 17,
+   "chast": 2,
+   "status": "skoro",
+   "nazvanie": "Оптимизация",
+   "gruppy": []
+  },
+  {
+   "no": 18,
+   "chast": 2,
+   "status": "gotov",
+   "nazvanie": "Планиметрия",
+   "gruppy": [
+    {
+     "id": "treugolnik",
+     "nazvanie": "Треугольник",
+     "tipy": [
+      "vysoty-cos",
+      "bis-par",
+      "mediana",
+      "tr-sredlin",
+      "tr-incentr",
+      "ot-mediany",
+      "kvadraty",
+      "vys-perp",
+      "biss-sred",
+      "ser-vys"
+     ],
+     "trenazher": "/zadaniya/18/trenazher/?t=treugolnik"
+    },
+    {
+     "id": "okruzhnost",
+     "nazvanie": "Окружность и вписанные углы",
+     "tipy": [
+      "vysoty-okr",
+      "trezubec-centr",
+      "vpis-hordy",
+      "hordy",
+      "ok-ortocentr",
+      "ok-sekushchie",
+      "ok-brahmagupta",
+      "dve-okr",
+      "cherez-centr",
+      "kv-gip",
+      "vpis-lmn"
+     ],
+     "trenazher": "/zadaniya/18/trenazher/?t=okruzhnost"
+    },
+    {
+     "id": "kasatelnye",
+     "nazvanie": "Касательные",
+     "tipy": [
+      "vpis-pryam",
+      "ks-otrezki",
+      "ks-dve-kasatelnye",
+      "ks-vnutr-kasanie",
+      "ks-pryam-trap",
+      "kas-ef",
+      "vpis-klm",
+      "vnevpis",
+      "kvadrat-per"
+     ],
+     "trenazher": "/zadaniya/18/trenazher/?t=kasatelnye"
+    },
+    {
+     "id": "trapeciya",
+     "nazvanie": "Трапеция",
+     "tipy": [
+      "sredlin-trap",
+      "ravnobok-perp",
+      "tp-ravnobokaya",
+      "tp-babochka",
+      "tp-ugol-90",
+      "ot-parallelogramm",
+      "diag-trap"
+     ],
+     "trenazher": "/zadaniya/18/trenazher/?t=trapeciya"
+    },
+    {
+     "id": "otnosheniya",
+     "nazvanie": "Отношения отрезков",
+     "tipy": [
+      "menelay-pl",
+      "ot-menelay",
+      "ot-cheva"
+     ],
+     "trenazher": "/zadaniya/18/trenazher/?t=otnosheniya"
+    },
+    {
+     "id": "ploshchadi",
+     "nazvanie": "Площади",
+     "tipy": [
+      "trap-seredina",
+      "obshchiy-ugol",
+      "pl-obshchaya-vysota",
+      "pl-bissektrisa"
+     ],
+     "trenazher": "/zadaniya/18/trenazher/?t=ploshchadi"
+    }
+   ]
+  },
+  {
+   "no": 19,
+   "chast": 2,
+   "status": "gotov",
+   "nazvanie": "Параметр",
+   "gruppy": [
+    {
+     "id": "m1",
+     "nazvanie": "Графический способ",
+     "tipy": [
+      "m1"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m2",
+     "nazvanie": "Геометрический способ",
+     "tipy": [
+      "m2"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m3",
+     "nazvanie": "Метод областей",
+     "tipy": [
+      "m3"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m4",
+     "nazvanie": "Условия касания",
+     "tipy": [
+      "m4"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m5",
+     "nazvanie": "Чётность функций",
+     "tipy": [
+      "m5"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m6",
+     "nazvanie": "Симметрия уравнений и систем",
+     "tipy": [
+      "m6"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m7",
+     "nazvanie": "Метод инварианта",
+     "tipy": [
+      "m7"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m8",
+     "nazvanie": "Метод оценки",
+     "tipy": [
+      "m8"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m9",
+     "nazvanie": "Аналитический способ",
+     "tipy": [
+      "m9"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m10",
+     "nazvanie": "Метод прямой параметра",
+     "tipy": [
+      "m10"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m11",
+     "nazvanie": "Квадратные неравенства с параметром",
+     "tipy": [
+      "m11"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m12",
+     "nazvanie": "Тригонометрические уравнения с параметром",
+     "tipy": [
+      "m12"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m13",
+     "nazvanie": "Свойства функций: непрерывность, монотонность, нечётность",
+     "tipy": [
+      "m13"
+     ],
+     "trenazher": null
+    },
+    {
+     "id": "m14",
+     "nazvanie": "Метод упрощающего значения",
+     "tipy": [
+      "m14"
+     ],
+     "trenazher": null
+    }
+   ]
+  },
+  {
+   "no": 20,
+   "chast": 2,
+   "status": "skoro",
+   "nazvanie": "Олимпиадная",
+   "gruppy": []
+  }
+ ]
+}

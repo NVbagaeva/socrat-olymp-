@@ -98,6 +98,13 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   zadachaHref: (id: string) => string;
   /** Переключатель формулировки в выборе тем (№6). */
   stil?: boolean;
+  /** Без переключателя источника задач (№2: все задачи строит генератор). */
+  bezIstochnika?: boolean;
+  /**
+   * Своя подсказка вместо вопросов (№2: шаги решения по одному). otkryto —
+   * сколько шагов открыто (с 1), dalshe — открыть следующий.
+   */
+  podskazka?: (s: S, ui: { otkryto: number; dalshe: () => void }) => ReactNode;
   /**
    * Запись незаконченной тренировки прежнего тренажёра раздела, которую
    * общий разбор (lib/trening/bank: razobratZapis) не понимает (№1 —

@@ -69,9 +69,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z2',
     title: '№2 «Векторы»',
     keys: [
-      /* Журнал попыток тренажёра (lib/vektory/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/vektory/trening/progress.ts). Прежний ключ
          budetege:vektory-2:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:vektory-2:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «2»). */
+      'budetege:trainer:2:session',
     ],
   },
   {

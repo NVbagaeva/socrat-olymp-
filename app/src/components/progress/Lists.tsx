@@ -86,7 +86,12 @@ export function BookmarksList({
         <li key={item.id} className="tp-row tp-row--action">
           <span className="tp-row__title">{renderTitle?.(item) ?? item.title}</span>
           <span className="tp-row__meta">
-            {item.place === 'opornye' ? 'Опорная задача' : 'Тренажёр'} · отложено{' '}
+            {item.place === 'opornye'
+              ? 'Опорная задача'
+              : item.place === 'razdel'
+                ? 'Раздел'
+                : 'Тренажёр'}
+            {' · отложено '}
             {dateTime(item.addedAt)}
           </span>
           <span className="tp-row__actions">
