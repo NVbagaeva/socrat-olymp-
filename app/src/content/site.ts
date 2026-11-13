@@ -6,6 +6,7 @@
 
 import { legalDocs, ofertaDoc } from '@/content/legal/documents';
 import { HOWTO_HREF } from '@/content/howto';
+import { KONTAKTY_HREF, TELEGRAM_KANAL } from '@/content/kontakty';
 import { tasksPage } from '@/content/tasks';
 import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
@@ -162,8 +163,8 @@ export const site = {
       { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
       { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
       { label: 'Тарифы', href: TARIFY_HREF },
-      { label: 'Контакты', href: '#' },
-      { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
+      { label: 'Контакты', href: KONTAKTY_HREF },
+      { label: 'Telegram', href: TELEGRAM_KANAL, external: true },
     ] satisfies (SiteLink | ExternalLink)[],
     /**
      * С флагом NEXT_PUBLIC_LEGAL_READY (lib/legal/prodavets.ts) подвал
