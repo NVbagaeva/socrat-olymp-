@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { LogStore } from '@/lib/progressLog';
 import type { Reading } from '@/lib/otvet';
 import type { SyncedStore } from '@/lib/syncedStore';
+import type { KatalogBanka, PayloadBanka } from '@/lib/trening/bank';
 import type { Zagruzka, ZadachaFayla } from '@/lib/trening/zagruzka';
 import type { VyborBanka } from '@/lib/trening/vybor';
 import type { Shag } from '../../steklo';
@@ -81,8 +82,11 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   vybor: SyncedStore<VyborBanka>;
   zagruzka: Zagruzka<Z, S, unknown>;
   T: TekstyBanka;
-  /** Ответ ученика по правилам бланка и отпечаток задачи; 'pi' — ответ записан через π. */
-  proverit: (vvod: string, seal: string) => Reading | { kind: 'pi' };
+  /**
+   * Ответ ученика по правилам бланка и отпечаток задачи; 'pi' — ответ
+   * записан через π. Третьим — сама задача (№11: ответ выбором сверяется иначе).
+   */
+  proverit: (vvod: string, seal: string, z: Z) => Reading | { kind: 'pi' };
   /** Под условием: рисунок, вопрос после рисунка, откуда задача. */
   pod: (z: Z) => ReactNode;
   /** Решение шагами сцены, панель под ними и подсказка-вопросы. */
@@ -93,4 +97,21 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   zadachaHref: (id: string) => string;
   /** Переключатель формулировки в выборе тем (№6). */
   stil?: boolean;
+  /** Без переключателя источника задач (№2: все задачи строит генератор). */
+  bezIstochnika?: boolean;
+  /**
+   * Своя подсказка вместо вопросов (№2: шаги решения по одному). otkryto —
+   * сколько шагов открыто (с 1), dalshe — открыть следующий.
+   */
+  podskazka?: (s: S, ui: { otkryto: number; dalshe: () => void }) => ReactNode;
+  /**
+   * Ответ выбором вместо числа (№11, РЗ-17): варианты задачи (готовый
+   * HTML), value — номер выбранного с единицы. undefined — ответ числом.
+   */
+  vybory?: (z: Z) => readonly { number: string; labelHtml: string }[] | undefined;
+  /**
+   * Своё чтение записи тренировки (№11: прежний формат тренажёра с
+   * панелью фильтров). Нет — общее (lib/trening/bank.ts, razobratZapis).
+   */
+  zapis?: (packed: unknown, katalog: KatalogBanka) => PayloadBanka | null;
 }

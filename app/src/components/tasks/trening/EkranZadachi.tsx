@@ -80,6 +80,11 @@ export interface EkranZadachiProps {
    * кеглем по левому краю (у №8 выражение стоит крупно по центру).
    */
   tekst?: boolean;
+  /**
+   * Ответ выбором (№11, РЗ-17): варианты вместо поля ответа, value —
+   * номер выбранного. Нет — поле ответа числом.
+   */
+  vybory?: readonly { number: string; labelHtml: string }[];
 }
 
 /**
@@ -112,6 +117,7 @@ export function EkranZadachi({
   pod,
   risunok,
   tekst = false,
+  vybory,
 }: EkranZadachiProps) {
   const pole = useRef<HTMLSpanElement>(null);
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
@@ -170,21 +176,68 @@ export function EkranZadachi({
       </article>
 
       <div className="trn-otvetnaya stk-glass">
-        <label className="trn-pole">
-          <span className="stk-podpis">{labels.otvet}</span>
-          <span className="trn-pole__ryad" ref={pole}>
-            <AnswerInput
-              className="trn-input"
-              placeholder={labels.placeholder}
-              value={value}
-              state={
-                sostoyanie === 'neverno' ? 'error' : sostoyanie === 'verno' ? 'success' : 'default'
-              }
-              readOnly={otvechen}
-              onChange={onValue}
-              onKeyDown={onKey}
-              onFocus={onFocus}
-            />
+        {vybory === undefined ? (
+          <label className="trn-pole">
+            <span className="stk-podpis">{labels.otvet}</span>
+            <span className="trn-pole__ryad" ref={pole}>
+              <AnswerInput
+                className="trn-input"
+                placeholder={labels.placeholder}
+                value={value}
+                state={
+                  sostoyanie === 'neverno'
+                    ? 'error'
+                    : sostoyanie === 'verno'
+                      ? 'success'
+                      : 'default'
+                }
+                readOnly={otvechen}
+                onChange={onValue}
+                onKeyDown={onKey}
+                onFocus={onFocus}
+              />
+              {otvechen ? null : (
+                <button
+                  type="button"
+                  className="stk-btn stk-btn--primary stk-btn--lg"
+                  onClick={onCheck}
+                  disabled={!ready}
+                >
+                  {labels.proverit}
+                </button>
+              )}
+            </span>
+          </label>
+        ) : (
+          <fieldset className="trn-pole trn-vybory">
+            <legend className="stk-podpis">{labels.otvet}</legend>
+            <ul>
+              {vybory.map((v) => {
+                const vybran = value === v.number;
+                return (
+                  <li key={v.number}>
+                    <button
+                      type="button"
+                      className={clsx(
+                        'trn-vybor',
+                        vybran && 'is-vybran',
+                        vybran && sostoyanie === 'verno' && 'is-verno',
+                        vybran && sostoyanie === 'neverno' && 'is-neverno',
+                      )}
+                      aria-pressed={vybran}
+                      disabled={otvechen}
+                      onClick={() => onValue(v.number)}
+                    >
+                      <span className="trn-vybor__no">{v.number}</span>
+                      <span
+                        className="trn-vybor__text"
+                        dangerouslySetInnerHTML={{ __html: v.labelHtml }}
+                      />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
             {otvechen ? null : (
               <button
                 type="button"
@@ -195,8 +248,8 @@ export function EkranZadachi({
                 {labels.proverit}
               </button>
             )}
-          </span>
-        </label>
+          </fieldset>
+        )}
         {formatHint === null ? null : <FormatHint text={formatHint} />}
 
         {sostoyanie === 'verno' || sostoyanie === 'neverno' || sostoyanie === 'razbor' ? (

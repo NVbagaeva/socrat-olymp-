@@ -1,0 +1,165 @@
+/* №11 в «Стеклянной сцене»: что своё у раздела поверх общих
+   компонентов (karta, trening, opornye). Всё под классами экранов №11
+   (.z11-karta, .z11-trening, .z11-opornye): zadanie11.css подключают
+   №1 и №13, их таблицы и подсказки здесь не меняются. */
+
+/* ── «Материалы к задаче» под условием: лайфхак, теория, опорный блок ── */
+.z11-materialy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.z11-materialy__ssylka {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: 999px;
+  background: var(--glass-bg-strong, rgba(255, 255, 255, 0.7));
+  box-shadow: var(--glass-ring, inset 0 0 0 1px rgba(31, 95, 208, 0.16));
+  color: var(--blue-700, #1f4fb0);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z11-materialy__ssylka:hover {
+  background: var(--blue-50, #eef4ff);
+}
+.z11-materialy__ssylka:focus-visible {
+  outline: 2px solid var(--blue-600, #1f5fd0);
+  outline-offset: 2px;
+}
+
+/* ── Таблица модели в стекле: на телефоне 375 px S | v | t влезают целиком ── */
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab table {
+  background: var(--glass-bg-strong, rgba(255, 255, 255, 0.85));
+  border-radius: 12px;
+}
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab th,
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab td {
+  /* Ячейка переносится между словами; сама формула KaTeX не рвётся. */
+  white-space: normal;
+}
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab thead th:first-child,
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab tbody th {
+  max-width: 9em;
+}
+@media (max-width: 480px) {
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab table {
+    font-size: var(--fs-caption);
+  }
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab th,
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab td {
+    padding: var(--space-1) 6px;
+  }
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab .z11-tab__vyn {
+    padding-left: 6px;
+  }
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab__vynoska {
+    max-width: 84px;
+  }
+}
+.z11-tablitsy {
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* Строки шага решения: пропорции и краткая запись процентов — блоками. */
+.z11-stroka + .z11-stroka {
+  margin-top: var(--space-1);
+}
+
+/* Таблица модели под подсказкой-вопросами. */
+.z11-podskazka-tab {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.z11-podskazka-tab__note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z11-trening .z11-tab__pusto {
+  min-height: 44px;
+}
+
+/* Картинка к задаче — как есть, во всю ширину колонки, без обрезки. */
+.z11-kartinka {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z11-materialy__ssylka {
+    transition: none;
+  }
+}
+
+/* ── Опорные задачи ── */
+.z11-opornye {
+  display: grid;
+  gap: var(--space-4);
+}
+.z11-opornye__nazad {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--blue-700, #1f4fb0);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z11-op__gde {
+  margin-top: var(--space-4);
+}
+.z11-op__gde-spisok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-op__tab {
+  margin-top: var(--space-2);
+}
+
+/* ── Теория: карточки №11 в стекле, в тонах ролей (как рамки .teor-steklo) ── */
+@media screen {
+  .teor-steklo .z11-card,
+  .teor-steklo .z11-tip {
+    border: 0;
+    border-radius: 18px;
+    background: linear-gradient(160deg, var(--white, #fff), var(--blue-50, #eef4ff));
+    box-shadow:
+      inset 0 0 0 1px var(--blue-200, #c7d8f7),
+      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8)),
+      0 8px 24px rgb(31 95 208 / 0.06);
+  }
+  /* Лайфхак — оранжевый тон, ловушка — терракотовый; роль видна и по значку. */
+  .teor-steklo .z11-card--layfhak {
+    background: linear-gradient(160deg, var(--white, #fff), var(--glass-tint-warm, #fff6e8));
+    box-shadow:
+      inset 0 0 0 1px var(--amber-200, #f3d6a4),
+      inset 4px 0 0 var(--amber-600, #c7781a),
+      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8));
+  }
+  .teor-steklo .z11-card--lovushka {
+    background: linear-gradient(160deg, var(--white, #fff), #fdf0ec);
+    box-shadow:
+      inset 0 0 0 1px #f0c9bd,
+      inset 4px 0 0 var(--terracotta, #c4553a),
+      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8));
+  }
+  .teor-steklo .z11-card__formula {
+    border-radius: 12px;
+  }
+  /* Кнопка «Решать» у типа — зона нажатия 44 px. */
+  .teor-steklo .z11-tip__btn {
+    min-height: 44px;
+  }
+}

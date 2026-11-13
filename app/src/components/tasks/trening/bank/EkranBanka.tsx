@@ -220,6 +220,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   const tekushchaya: TaskBanka = task;
   const dannye: Z = zadacha;
 
+  const vybory = razdel.vybory?.(dannye);
   const revealed = solutionOpen && checked !== 'right';
   const sostoyanie: SostoyanieZadachi =
     checked === 'right' ? 'verno' : revealed ? 'razbor' : checked === 'wrong' ? 'neverno' : 'vvod';
@@ -227,7 +228,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   const zakryta = marks[index] !== undefined;
 
   function check() {
-    const reading = razdel.proverit(value, dannye.seal);
+    const reading = razdel.proverit(value, dannye.seal, dannye);
     if (reading.kind === 'pi') {
       /* Ответ через π: подсказка о записи, попытка не тратится. */
       setFormat(T.ekran.piPodskazka);
@@ -325,6 +326,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       uslovieHtml={zagruzka.nabrat(dannye.text)}
       tekst
       pod={razdel.pod(dannye)}
+      {...(vybory === undefined ? {} : { vybory })}
       value={value}
       onValue={(nextValue) => {
         setValue(nextValue);
@@ -344,7 +346,12 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
               open: hintOpen,
               onOpen: () => setHintOpen(true),
               telo:
-                voprosy.length === 0 ? (
+                razbor !== null && razdel.podskazka !== undefined ? (
+                  razdel.podskazka(razbor, {
+                    otkryto: shag,
+                    dalshe: () => setShag(shag + 1),
+                  })
+                ) : voprosy.length === 0 ? (
                   <p>{T.ekran.zagruzka}</p>
                 ) : (
                   <PodskazkaVoprosy

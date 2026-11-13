@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   с банком задач (№7, №6) в браузере, на собранном сайте.
+   с банком задач (№7, №6, №11) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -31,8 +31,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6)');
+if (N !== '6' && N !== '7' && N !== '11') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 11)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -87,12 +87,18 @@ const staroe = obrazec[OLD];
 const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
-const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
-const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
-/* Блок опорных задач из образца и сколько в нём задач. */
+/* Блок опорных задач из образца и сколько в нём задач; прототип задачи
+   по ключу. У №11 банк — файлы подтипов, ключ задачи «подтип|откуда»,
+   исходы опорных — «блок:номер». */
 const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+const BLOKI_OPORNYH =
+  N === '11'
+    ? requireSrc('lib/zadanie11/prep/bloki.ts').BLOKI
+    : requireSrc(`lib/zadanie${N}/opornye.ts`).BLOKI_OPORNYH;
 const zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-const prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+const BANK = N === '11' ? [] : requireSrc(`lib/zadanie${N}/bank/index.ts`).BANK;
+const prototipOf = (id) =>
+  N === '11' ? id?.split('|')[0] : BANK.find((z) => z.id === id)?.prototypeId;
 
 const browser = await chromium.launch();
 try {
@@ -174,8 +180,8 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-  const reshenoOp = Object.values(obrazec[OLD_OPORNYE].outcomes).filter(
-    (x) => x === 'right',
+  const reshenoOp = Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
+    ([id, x]) => x === 'right' && (N !== '11' || id.startsWith(`${blokObrazca}:`)),
   ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(

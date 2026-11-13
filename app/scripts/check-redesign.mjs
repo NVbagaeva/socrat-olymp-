@@ -53,6 +53,31 @@ const SODERZHANIE = {
     'app/src/content/uroki6.ts',
     'app/src/content/kartochki/06-sluchaynye-velichiny.ts',
   ],
+  11: [
+    /* Банк, разминка и аналоги, движок подтипов (условия, ответы, разборы,
+       таблицы модели, подсказки), генераторы, опорные задачи, теория и
+       карточки. public/data/zadanie11 — новые файлы тренажёра, они
+       сверяются с банком отдельно (pnpm test:bank-11). */
+    'app/src/data/zadanie11',
+    'app/src/lib/zadanie11/prototypes',
+    'app/src/lib/zadanie11/bank.ts',
+    'app/src/lib/zadanie11/analogi.ts',
+    'app/src/lib/zadanie11/kit.ts',
+    'app/src/lib/zadanie11/num.ts',
+    'app/src/lib/zadanie11/sklonenie.ts',
+    'app/src/lib/zadanie11/secret.ts',
+    'app/src/lib/zadanie11/taxonomy.ts',
+    'app/src/lib/zadanie11/types.ts',
+    'app/src/lib/zadanie11/gen',
+    'app/src/lib/zadanie11/prep',
+    'app/src/lib/zadanie11/proporciya',
+    'app/src/lib/zadanie11/generator11.ts',
+    'app/src/lib/zadanie11/sheet11.ts',
+    'app/src/content/teoriya11.ts',
+    'app/src/content/teoriya-edinicy.ts',
+    'app/src/content/generator11.ts',
+    'app/src/content/kartochki/11-tekstovye.ts',
+  ],
   7: [
     'app/src/data/zadanie7',
     'app/public/data/zadanie7',
