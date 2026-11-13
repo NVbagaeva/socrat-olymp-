@@ -144,10 +144,32 @@ export const DZK = {
   },
 
   /* ── Ученик ── */
+  ekran: {
+    otvet: 'Ответ',
+    placeholder: 'Число',
+    proverit: 'Проверить',
+    podskazka: 'Подсказка',
+    reshenie: 'Решение',
+    skrytReshenie: 'Скрыть решение',
+    pohozhaya: 'Похожая задача',
+    dalshe: 'Дальше',
+    itogi: 'К пунктам',
+    verno: 'Верно!',
+    vernoLead: 'Ответ записан.',
+    neverno: 'Пока не так',
+    nevernoLead: 'Проверь вычисления и попробуй ещё раз.',
+    nevernoKonec: 'Попытки на эту задачу кончились.',
+    sRazborom: 'Решение открыто',
+    sRazboromLead: 'Задача закрыта — ответить на неё уже нельзя.',
+    shagi: 'Решение по шагам',
+    bezPodskazok: 'В этом задании без подсказок.',
+    iz: 'из',
+  },
   uchenik: {
     plashka: (due: string | null, sdelano: number, vsego: number) =>
       `Домашнее задание${due === null ? '' : ` до ${due}`} · сделано ${sdelano} из ${vsego}`,
     otkryt: 'Открыть',
+    sdelano: (sdelano: number, vsego: number) => `Сделано ${sdelano} из ${vsego}`,
     punkty: 'Пункты задания',
     status: {
       ne: 'Не начато',

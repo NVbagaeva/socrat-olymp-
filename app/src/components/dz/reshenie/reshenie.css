@@ -1,0 +1,228 @@
+/* Ученик решает ДЗ — «Стеклянная сцена». Префикс rdz-. Телефон в
+   приоритете: пункты — полосой с прокруткой, зоны нажатия ≥ 44 px,
+   внизу запас под кнопку «?» (--fab-reserve). */
+
+.rdz {
+  --stk-r-card: 20px;
+  display: grid;
+  gap: var(--space-4);
+  padding-bottom: var(--fab-reserve);
+}
+.rdz-head {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+.rdz-title {
+  margin: 0;
+  font-size: var(--fs-h2, 1.6rem);
+  line-height: 1.2;
+}
+.rdz-meta,
+.rdz-muted {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.rdz-note {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: var(--glass-tint-warm);
+}
+.rdz-banner {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+}
+.rdz-banner.is-ok {
+  background: rgb(31 122 77 / 0.12);
+}
+.rdz-banner.is-warn {
+  background: rgb(232 129 47 / 0.15);
+}
+
+/* Пункты: на телефоне — горизонтальная полоса, на широком — сетка. */
+.rdz-punkty ol {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--space-1);
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+.rdz-punkty li {
+  flex: 0 0 min(78%, 260px);
+  scroll-snap-align: start;
+}
+@media (min-width: 768px) {
+  .rdz-punkty ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    overflow: visible;
+  }
+}
+.rdz-punkt {
+  width: 100%;
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 16px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.rdz-punkt.is-current {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+.rdz-punkt:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.rdz-punkt__no {
+  grid-row: span 2;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--glass-tint-warm);
+  font-weight: 700;
+}
+.rdz-punkt.is-gotovo .rdz-punkt__no {
+  background: rgb(31 122 77 / 0.18);
+}
+.rdz-punkt.is-nachato .rdz-punkt__no {
+  background: rgb(232 129 47 / 0.2);
+}
+.rdz-punkt__telo {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.rdz-punkt__nazvanie {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rdz-punkt__status {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.rdz-metka {
+  justify-self: start;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: var(--fs-caption);
+  background: var(--glass-bg-strong);
+}
+.rdz-metka--kartochki {
+  background: rgb(31 122 77 / 0.12);
+}
+.rdz-metka--opornye {
+  background: rgb(232 129 47 / 0.15);
+}
+.rdz-metka--trenazher {
+  background: rgb(38 99 235 / 0.12);
+}
+
+.rdz-tekushchiy,
+.rdz-zadacha,
+.rdz-kartochki {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.rdz-poloska {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.rdz-nomer {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.rdz-nomer.is-current {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+.rdz-nomer.is-right {
+  background: rgb(31 122 77 / 0.18);
+}
+.rdz-nomer.is-wrong,
+.rdz-nomer.is-revealed {
+  background: rgb(200 40 40 / 0.12);
+}
+.rdz-vybor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.rdz-vybor .stk-btn {
+  min-height: 44px;
+}
+.rdz-pod-zadachey,
+.rdz-knopki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.rdz-pod-zadachey .stk-btn,
+.rdz-knopki .stk-btn {
+  min-height: 44px;
+}
+.rdz-primer {
+  padding: var(--space-3) var(--space-4);
+}
+.rdz-primer > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 600;
+}
+.rdz-primer__shagi {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+  overflow-x: auto;
+}
+.rdz-kartochki-gotovo {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+.rdz-kartochki-gotovo p {
+  margin: 0;
+  font-weight: 600;
+}
+.rdz-sdat {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+.rdz-sdat .stk-btn {
+  width: 100%;
+  min-height: 52px;
+}

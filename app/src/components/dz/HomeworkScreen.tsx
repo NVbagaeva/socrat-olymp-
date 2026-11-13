@@ -9,23 +9,20 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/ui';
-import type { Names8 } from '@/components/tasks/vychisleniya/Progress8';
 import { DZ } from '@/content/dz';
 import type { HwFull } from '@/lib/dz/api';
 import { DZ_HREF } from '@/lib/dz/links';
-import { HomeworkResults } from './HomeworkResults';
-import { HomeworkSolve } from './HomeworkSolve';
+import { RezultatyDz } from './rezultaty/RezultatyDz';
+import '@/components/dz/reshenie/reshenie.css';
+import { ReshenieDz } from './reshenie/ReshenieDz';
 import { NeedLogin, dzApi, queryParam, useUser } from './common';
 import './dz.css';
 
-export interface HomeworkTexts {
-  /** Названия прототипов, набранные KaTeX на сборке. */
-  names: Names8;
-  /** «Запомни»: формула навыка, набранная на сборке, по id навыка. */
-  memo: Readonly<Record<string, string>>;
-}
-
-export function HomeworkScreen({ names, memo }: HomeworkTexts) {
+/**
+ * Названия типов, «Запомни» и пример берутся из самого ДЗ (снимок при
+ * выдаче, homework_tasks.view), а не со страницы.
+ */
+export function HomeworkScreen() {
   const user = useUser();
   const [full, setFull] = useState<HwFull | null | undefined>(undefined);
 
@@ -67,8 +64,8 @@ export function HomeworkScreen({ names, memo }: HomeworkTexts) {
     );
   }
   return full.hw.tutorId === user.id ? (
-    <HomeworkResults full={full} names={names} reload={load} />
+    <RezultatyDz full={full} reload={load} />
   ) : (
-    <HomeworkSolve full={full} names={names} memo={memo} userId={user.id} reload={load} />
+    <ReshenieDz full={full} userId={user.id} reload={load} />
   );
 }
