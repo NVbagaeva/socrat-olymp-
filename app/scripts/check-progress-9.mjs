@@ -331,6 +331,10 @@ const vse = PROTOTYPES.map((p) => p.id);
     check(perenos.payload.control === true, 'образец: «Контроль» не стал «Без подсказок»');
     check(S.isTrenazher9Payload(perenos.payload), 'образец: перенесённая запись не проходит');
     check(perenos.ui.index === 1, 'образец: тренировка открылась не на той задаче');
+    check(
+      JSON.stringify(perenos.ui.order) === JSON.stringify(prezhnyaya.taskIds.map((_, i) => i)),
+      'образец: порядок задач не прежний (экран перемешал бы их заново)',
+    );
     check(perenos.ui.marks[0] === 'right', 'образец: решённая задача потеряла отметку');
     check(perenos.ui.tried[1] === true, 'образец: ошибка в текущей задаче потеряна');
     check(

@@ -115,7 +115,9 @@ export function prezhnyayaSessiya9(raw: string | null): PerenosSessii9 | null {
       index,
       marks,
       tried,
-      order: null,
+      /* Порядок показа — как в прежней тренировке; null дал бы новую
+         раскладку, и тренировка открылась бы на другой задаче. */
+      order: tasks.map((_, i) => i),
       value: typeof tek['value'] === 'string' ? tek['value'] : '',
       checked: tek['checked'] === 'right' || tek['checked'] === 'wrong' ? tek['checked'] : null,
       solutionOpen: tek['solution'] === true,
