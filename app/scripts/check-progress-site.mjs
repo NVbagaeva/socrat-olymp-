@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   с банком задач (№7, №6, №12) в браузере, на собранном сайте.
+   на общем тренажёре (№7, №6, №2, №12) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -34,8 +34,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7' && N !== '12') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 12)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '12') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 12)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -80,12 +80,14 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = `http://127.0.0.1:${server.address().port}`;
 
-/* №12: прежний ключ — счётчики самого первого тренажёра, опорных задач
-   у узла нет; в образце ещё и незаконченная тренировка прежнего тренажёра. */
+/* У №2 прежние ключи назывались по разделу «vektory-2». №12: прежний ключ —
+   счётчики самого первого тренажёра, опорных задач у узла нет; в образце
+   ещё и незаконченная тренировка прежнего тренажёра. */
 const Z12 = N === '12';
-const OLD = Z12 ? 'budetege:trainer:v1' : `budetege:zadanie-${N}:v1`;
-const OLD_OPORNYE = Z12 ? null : `budetege:zadanie-${N}:opornye:v1`;
-const NEW = `budetege:zadanie-${N}:log:v1`;
+const PREZHNIY = N === '2' ? 'vektory-2' : `zadanie-${N}`;
+const OLD = Z12 ? 'budetege:trainer:v1' : `budetege:${PREZHNIY}:v1`;
+const OLD_OPORNYE = Z12 ? null : `budetege:${PREZHNIY}:opornye:v1`;
+const NEW = `budetege:${PREZHNIY}:log:v1`;
 const SESSION = `budetege:trainer:${N}:session`;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
@@ -94,6 +96,9 @@ const staroe = obrazec[OLD];
 const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
+/* Блок опорных задач из образца и сколько в нём задач; прототип задачи по
+   ключу. У №2 банка нет: ключ задачи — «прототип|seed»; у №12 — каталог
+   шаблонов наборов движка. */
 let prototipOf;
 let zadachVBloke = 0;
 if (Z12) {
@@ -102,12 +107,14 @@ if (Z12) {
   const poZadache = prototipyZadach(katalog12());
   prototipOf = (id) => poZadache.get(id);
 } else {
-  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
-  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
-  /* Блок опорных задач из образца и сколько в нём задач. */
   const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+  const BLOKI_OPORNYH =
+    N === '2'
+      ? requireSrc('lib/vektory/prep/bloki.ts').BLOKI
+      : requireSrc(`lib/zadanie${N}/opornye.ts`).BLOKI_OPORNYH;
   zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-  prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+  const BANK = N === '2' ? [] : requireSrc(`lib/zadanie${N}/bank/index.ts`).BANK;
+  prototipOf = (id) => (N === '2' ? id?.split('|')[0] : BANK.find((z) => z.id === id)?.prototypeId);
 }
 
 const browser = await chromium.launch();

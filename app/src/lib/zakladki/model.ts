@@ -11,7 +11,8 @@
  * Из двух записей одной закладки побеждает более поздняя (updatedAt).
  */
 
-export type BookmarkPlace = 'trenazher' | 'opornye';
+/** Где лежит отложенное: задача тренажёра, опорная задача или целый раздел («Избранное» карты). */
+export type BookmarkPlace = 'trenazher' | 'opornye' | 'razdel';
 
 export interface Bookmark {
   /** «8:trenazher:8.A|seed|base», «8:opornye:stepeni#3». */
@@ -62,7 +63,8 @@ export function parseBookmarks(raw: unknown): Bookmarks {
     const v = value as Record<string, unknown>;
     const id = str(v.id, 200);
     const section = str(v.section, 8);
-    const place = v.place === 'trenazher' || v.place === 'opornye' ? v.place : null;
+    const place =
+      v.place === 'trenazher' || v.place === 'opornye' || v.place === 'razdel' ? v.place : null;
     const ref = str(v.ref, 160);
     const title = str(v.title, 200);
     const href = str(v.href, 400);

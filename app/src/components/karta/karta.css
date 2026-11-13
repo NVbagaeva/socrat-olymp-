@@ -1,0 +1,1315 @@
+/* «Карта ЕГЭ». Значения — токены сайта (styles/tokens.css). Префикс karta-.
+   Слой карты живёт в координатах фона 1586 × 992: вид задают переменные
+   --k (масштаб), --x, --y (сдвиг) на .karta-holst; подпись острова
+   противомасштабируется через --pk, чтобы читаться на любом виде. */
+
+.karta {
+  --karta-led: #f3f8ff;
+  --karta-stek: rgb(255 255 255 / 0.62);
+  --karta-tuman: rgb(228 238 250 / 0.55);
+  --karta-teplo: #f0a04a;
+  --karta-teplo-2: #e77f2e;
+  --karta-terra: var(--terracotta-600);
+  --karta-sinij: var(--blue-600);
+  --karta-navy: var(--navy-800);
+  --karta-panel: 380px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+/* ── Шапка: привет, итог, прогноз ─────────────────────────────── */
+
+.karta-shapka {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  position: relative;
+  z-index: 3;
+}
+.karta-shapka__privet {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--karta-navy);
+  margin: 0;
+}
+.karta-shapka__itog {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1.0625rem;
+}
+.karta-shapka__tochka {
+  color: var(--color-text-tertiary);
+}
+.karta-prognoz {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.karta-prognoz__ball {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+  border: 1px solid var(--terracotta-200);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.karta-prognoz--malo {
+  color: var(--color-text-tertiary);
+}
+.karta-prognoz__chto {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--blue-200);
+  background: var(--glass-bg-strong);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.karta-prognoz__chto:hover,
+.karta-prognoz__chto[aria-expanded='true'] {
+  background: var(--blue-100);
+}
+.karta-prognoz__podskazka {
+  margin-top: var(--space-2);
+  padding: var(--space-4);
+  max-width: 560px;
+  font-size: var(--fs-caption);
+  display: grid;
+  gap: var(--space-2);
+}
+.karta-prognoz__podskazka p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.karta-gost {
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  max-width: 760px;
+}
+
+/* ── Сцена: холст и панель ────────────────────────────────────── */
+
+.karta-scena {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.karta-holst {
+  --k: 1;
+  --x: 0px;
+  --y: 0px;
+  --pk: 1;
+  --faktura: 0;
+  position: relative;
+  overflow: hidden;
+  height: clamp(420px, calc(100vh - 290px), 760px);
+  border-radius: 24px;
+  background: #9ad3f6 var(--fon-zaglushka) center / cover no-repeat;
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  isolation: isolate;
+}
+.karta-holst[data-tyanut] {
+  cursor: grabbing;
+}
+.karta-holst:not([data-gotov]) .karta-sloy {
+  visibility: hidden;
+}
+.karta-sloy {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(var(--x), var(--y)) scale(var(--k));
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.karta-holst[data-plavno] .karta-sloy {
+  transition: transform 480ms var(--ease);
+}
+.karta-fon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.karta-svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: visible;
+}
+
+/* Фактура льда вместо фона при сильном приближении. */
+.karta-faktura path {
+  fill: url(#karta-led);
+  opacity: var(--faktura);
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-opacity: var(--faktura);
+}
+
+/* ── Остров ───────────────────────────────────────────────────── */
+
+.karta-ostrov__zalivka {
+  fill: transparent;
+  transition:
+    fill 320ms var(--ease),
+    opacity 320ms var(--ease);
+  pointer-events: none;
+}
+.karta-ostrov--ne-nachato .karta-ostrov__zalivka,
+.karta-ostrov--pozzhe .karta-ostrov__zalivka,
+.karta-ostrov--skoro .karta-ostrov__zalivka {
+  fill: var(--karta-tuman);
+}
+.karta-ostrov--skoro .karta-ostrov__zalivka {
+  fill: rgb(214 230 248 / 0.78);
+}
+.karta-ostrov--v-processe .karta-ostrov__zalivka {
+  fill: rgb(142 196 250 / 0.3);
+}
+.karta-ostrov--osvoeno .karta-ostrov__zalivka {
+  /* Тёплый свет поверх льда: фактура стекла просвечивает сквозь заливку. */
+  fill: rgb(247 168 84 / 0.66);
+}
+.karta-ostrov__svet {
+  fill: url(#karta-svet);
+  mix-blend-mode: screen;
+  animation: karta-svet 2.6s var(--ease) both;
+  pointer-events: none;
+}
+@keyframes karta-svet {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+}
+.karta-ostrov__kontur {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 3;
+  cursor: pointer;
+  transition: stroke 160ms var(--ease);
+  outline: none;
+}
+.karta-ostrov__kontur:hover {
+  stroke: rgb(255 255 255 / 0.9);
+}
+.karta-ostrov__kontur:focus-visible {
+  stroke: var(--blue-600);
+  stroke-width: 4;
+  stroke-dasharray: 10 6;
+}
+.karta-ostrov.is-vybran .karta-ostrov__kontur {
+  stroke: var(--karta-teplo-2);
+  stroke-width: 4;
+}
+.karta-ostrov.is-sleduyushchaya .karta-ostrov__kontur {
+  stroke: rgb(240 160 74 / 0.8);
+  stroke-width: 3;
+}
+.karta-ostrov--skoro .karta-ostrov__kontur {
+  cursor: default;
+}
+
+/* Подпись: масштаб --pk держит её читаемой при любом --k. */
+.karta-podpis {
+  transform: scale(var(--pk));
+  transform-box: fill-box;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+.karta-ostrov__podpis {
+  color: var(--karta-navy);
+  font-family: var(--font-sans);
+}
+.karta-podpis__nomer {
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  fill: currentColor;
+}
+.karta-podpis__nazvanie {
+  font-size: 11.5px;
+  font-weight: 600;
+  fill: currentColor;
+}
+.karta-podpis__znachok {
+  color: var(--navy-700);
+}
+.karta-ostrov--skoro .karta-ostrov__podpis,
+.karta-ostrov--pozzhe .karta-ostrov__podpis {
+  color: var(--navy-600);
+  opacity: 0.7;
+}
+.karta-ostrov--skoro .karta-podpis__nazvanie {
+  font-style: italic;
+  font-weight: 500;
+}
+.karta-podpis__kolco-fon {
+  fill: rgb(255 255 255 / 0.85);
+  stroke: var(--blue-100);
+  stroke-width: 3.5;
+}
+.karta-podpis__kolco-hod {
+  fill: none;
+  stroke: var(--karta-sinij);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke-dasharray 600ms var(--ease);
+}
+.karta-podpis__procent {
+  font-size: 8.5px;
+  font-weight: 700;
+  fill: var(--blue-700);
+}
+.karta-podpis__flag path {
+  fill: none;
+  stroke: var(--karta-terra);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.karta-podpis__flag-polotno {
+  fill: var(--karta-teplo) !important;
+}
+.karta-podpis__povtorit circle {
+  fill: var(--karta-terra);
+}
+.karta-podpis__povtorit path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Далеко: только номер и значок; средне — без названия. */
+.karta-holst[data-uroven='daleko'] .karta-podpis__nazvanie,
+.karta-holst[data-uroven='srednee'] .karta-podpis__nazvanie {
+  display: none;
+}
+.karta-holst[data-uroven='daleko'] .karta-podpis__nomer {
+  transform: translate(6px, 8px);
+  transform-box: fill-box;
+}
+.karta-holst[data-uroven='daleko'] .karta-podpis__znachok {
+  display: none;
+}
+
+/* Маячок рекомендованной области. */
+.karta-mayak {
+  cursor: pointer;
+}
+.karta-mayak__volna {
+  fill: rgb(240 160 74 / 0.35);
+  animation: karta-volna 2.2s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes karta-volna {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.karta-mayak__kaplya {
+  fill: var(--karta-teplo-2);
+  stroke: #fff;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 4px 6px rgb(160 80 20 / 0.35));
+}
+.karta-mayak__golova,
+.karta-mayak__plechi {
+  fill: #fff;
+}
+
+/* Путь. */
+.karta-put {
+  fill: none;
+  stroke: var(--karta-teplo-2);
+  stroke-width: 3;
+  stroke-dasharray: 9 8;
+  stroke-linecap: round;
+  opacity: 0.9;
+  pointer-events: none;
+  animation: karta-put 1.6s linear infinite;
+}
+@keyframes karta-put {
+  to {
+    stroke-dashoffset: -17;
+  }
+}
+
+/* Пролив. */
+.karta-proliv__polosa {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 44;
+  stroke-linecap: round;
+  cursor: pointer;
+}
+.karta-proliv__tekst {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  fill: rgb(17 60 140 / 0.62);
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* Таблички частей. */
+.karta-tablichka {
+  cursor: pointer;
+  outline: none;
+}
+.karta-tablichka .karta-podpis {
+  pointer-events: auto;
+}
+.karta-tablichka rect {
+  fill: rgb(255 255 255 / 0.72);
+  stroke: rgb(255 255 255 / 0.95);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 6px 14px rgb(31 95 208 / 0.22));
+}
+.karta-tablichka:focus-visible rect {
+  stroke: var(--blue-600);
+  stroke-width: 3;
+}
+.karta-tablichka text {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  fill: var(--karta-navy);
+}
+
+/* Отладка: контуры поверх картинки. */
+.karta-debug path {
+  fill: rgb(255 0 80 / 0.12);
+  stroke: #ff0050;
+  stroke-width: 1.5;
+}
+.karta-debug circle {
+  fill: #ff0050;
+}
+.karta-debug .karta-debug__radius {
+  fill: none;
+  stroke: #ff0050;
+  stroke-dasharray: 3 3;
+}
+.karta-debug text {
+  font-size: 14px;
+  font-weight: 700;
+  fill: #b00030;
+}
+.karta-debug .karta-debug__proliv {
+  fill: none;
+  stroke: #0070ff;
+  stroke-width: 44;
+  stroke-opacity: 0.25;
+  stroke-linecap: round;
+}
+
+/* ── Окошко над островом ──────────────────────────────────────── */
+
+.karta-okoshko-mesto {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.karta-okoshko {
+  --mx: 0;
+  --my: 0;
+  position: absolute;
+  left: calc(var(--x) + var(--mx) * var(--k) * 1px);
+  top: calc(var(--y) + var(--my) * var(--k) * 1px);
+  transform: translate(-50%, calc(-100% - 10px));
+  width: min(330px, calc(100vw - 48px));
+  pointer-events: auto;
+  animation: karta-okoshko 220ms var(--ease) both;
+}
+.karta-holst[data-plavno] .karta-okoshko {
+  transition:
+    left 480ms var(--ease),
+    top 480ms var(--ease);
+}
+@keyframes karta-okoshko {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 2px));
+  }
+}
+.karta-okoshko__telo {
+  --stk-r-card: 18px;
+  padding: var(--space-3) var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+.karta-okoshko__hvost {
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 14px;
+  height: 14px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--glass-bg-strong);
+  border-right: 1px solid var(--glass-edge);
+  border-bottom: 1px solid var(--glass-edge);
+}
+.karta-okoshko__shapka {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.karta-okoshko__nazvanie {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--karta-navy);
+  text-decoration: none;
+  min-width: 0;
+  flex: 1;
+}
+.karta-okoshko__nazvanie svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+  opacity: 0.7;
+}
+a.karta-okoshko__nazvanie:hover svg {
+  opacity: 1;
+  transform: translateX(2px);
+}
+.karta-okoshko__zakryt,
+.karta-panel__zakryt {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.karta-okoshko__zakryt:hover,
+.karta-panel__zakryt:hover {
+  background: var(--blue-100);
+  color: var(--blue-700);
+}
+.karta-okoshko__zakryt svg,
+.karta-panel__zakryt svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.karta-okoshko__zametka {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+
+/* Тропинка тем. */
+.karta-tropinka {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) 0;
+  position: relative;
+}
+.karta-gorod {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.karta-gorod__ssylka {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 10px;
+  text-align: center;
+  position: relative;
+}
+a.karta-gorod__ssylka:hover,
+a.karta-gorod__ssylka:focus-visible {
+  background: var(--blue-50);
+  color: var(--blue-700);
+}
+.karta-gorod__tochka {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--blue-200);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  position: relative;
+  z-index: 1;
+}
+.karta-gorod__tochka svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.karta-gorod--osvoeno .karta-gorod__tochka {
+  background: var(--karta-teplo-2);
+  border-color: var(--karta-teplo-2);
+}
+.karta-gorod--tekushchaya .karta-gorod__tochka {
+  border-color: var(--karta-teplo-2);
+  box-shadow: 0 0 0 4px rgb(231 127 46 / 0.2);
+}
+.karta-gorod--tekushchaya .karta-gorod__tochka::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--karta-teplo-2);
+}
+.karta-gorod.is-povtorit .karta-gorod__tochka {
+  border-color: var(--karta-terra);
+}
+/* Пунктир между городами. */
+.karta-gorod + .karta-gorod::before {
+  content: '';
+  position: absolute;
+  left: -50%;
+  right: 50%;
+  top: 11px;
+  border-top: 2px dashed var(--blue-200);
+}
+.karta-gorod--osvoeno + .karta-gorod--osvoeno::before,
+.karta-gorod--osvoeno + .karta-gorod--tekushchaya::before {
+  border-color: var(--karta-teplo-2);
+}
+.karta-gorod__imya {
+  max-width: 96px;
+  line-height: 1.15;
+}
+.karta-gorod--tekushchaya .karta-gorod__imya {
+  color: var(--karta-navy);
+}
+
+/* ── Кнопки на холсте ─────────────────────────────────────────── */
+
+.karta-upravlenie {
+  position: absolute;
+  left: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+.karta-masshtab {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.karta-masshtab button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--karta-navy);
+  cursor: pointer;
+}
+.karta-masshtab button + button {
+  border-top: 1px solid var(--blue-100);
+}
+.karta-masshtab button:hover {
+  background: var(--blue-50);
+}
+.karta-ves-mir {
+  --stk-r-card: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 14px;
+  font-weight: 600;
+  font-size: var(--fs-caption);
+  color: var(--karta-navy);
+  cursor: pointer;
+}
+.karta-ves-mir svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+
+/* ── Панель раздела ───────────────────────────────────────────── */
+
+.karta-panel {
+  --stk-r-card: 24px;
+  /* Плотнее обычного стекла: под панелью — подписи островов. */
+  background: rgb(247 251 255 / 0.9);
+  position: absolute;
+  right: var(--space-4);
+  top: var(--space-4);
+  bottom: var(--space-4);
+  width: var(--karta-panel);
+  z-index: 5;
+  overflow: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(16px);
+  transition:
+    opacity 220ms var(--ease),
+    transform 220ms var(--ease),
+    visibility 0s 220ms;
+}
+.karta-panel.is-otkryta {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 220ms var(--ease),
+    transform 220ms var(--ease);
+}
+.karta-panel__ruchka {
+  display: none;
+}
+.karta-panel__telo {
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+.karta-panel__shapka {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.karta-panel__znak {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #fff, var(--blue-100));
+  box-shadow: inset 0 0 0 1px var(--blue-200);
+  display: grid;
+  place-items: center;
+  color: var(--blue-700);
+}
+.karta-panel__znak svg {
+  width: 26px;
+  height: 26px;
+}
+.karta-panel__nazvanie {
+  flex: 1;
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 800;
+  color: var(--karta-navy);
+  letter-spacing: -0.01em;
+}
+.karta-panel__nazvanie span {
+  color: var(--blue-700);
+}
+.karta-panel__zakladka {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.karta-panel__zakladka svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.karta-panel__zakladka:hover {
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+}
+.karta-panel__zakladka.is-est {
+  color: var(--karta-terra);
+}
+.karta-panel__zakladka.is-est svg {
+  fill: currentColor;
+}
+.karta-panel__podzagolovok {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--karta-navy);
+}
+.karta-panel__zametka,
+.karta-panel__itog {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+}
+.karta-panel__itog {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 14px;
+  background: var(--terracotta-50);
+  border: 1px solid var(--terracotta-200);
+}
+.karta-panel__itog b {
+  color: var(--terracotta-700);
+}
+.karta-panel__itog.is-mozhno {
+  background: var(--emerald-50);
+  border-color: var(--emerald-200);
+}
+.karta-panel__itog.is-mozhno b {
+  color: #06704f;
+}
+
+.karta-polosy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.karta-polosa {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 3.6em;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+.karta-polosa__imya {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.karta-polosa__shkala {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  overflow: hidden;
+}
+.karta-polosa__shkala span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--karta-sinij);
+  transition: width 500ms var(--ease);
+}
+.karta-polosa.is-osvoeno .karta-polosa__shkala span {
+  background: linear-gradient(90deg, var(--karta-teplo), var(--karta-teplo-2));
+}
+.karta-polosa__procent {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--karta-navy);
+  font-weight: 600;
+}
+.karta-panel__povtorit {
+  margin: 0;
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 14px;
+  background: var(--terracotta-50);
+  border: 1px solid var(--terracotta-200);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.karta-panel__povtorit b {
+  color: var(--terracotta-700);
+}
+.karta-panel__povtorit svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: var(--karta-terra);
+  stroke-width: 1.6;
+}
+.karta-panel__knopki {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.karta-knopka {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border-radius: 14px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  transition:
+    transform var(--dur-hover) var(--ease),
+    box-shadow var(--dur-hover) var(--ease);
+}
+.karta-knopka:hover {
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transform: translateY(-1px);
+}
+.karta-knopka svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.karta-knopka--glavnaya {
+  background: var(--gloss);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 10px 24px -10px rgb(31 95 208 / 0.6);
+}
+.karta-knopka--malaya {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  font-size: var(--fs-caption);
+  justify-self: start;
+}
+
+/* Связки пролива. */
+.karta-svyazki,
+.karta-spisok {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.karta-svyazka {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.5);
+  font-size: 0.8125rem;
+}
+.karta-svyazka.is-gotovo {
+  background: var(--emerald-50);
+}
+.karta-svyazka__zadanie,
+.karta-svyazka__ssylka,
+.karta-spisok__oblast {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  color: var(--karta-navy);
+}
+.karta-svyazka__zadanie {
+  font-weight: 700;
+}
+.karta-svyazka__chto {
+  color: var(--color-text-secondary);
+}
+.karta-svyazka__ssylka {
+  color: var(--terracotta-700);
+  font-weight: 600;
+  text-decoration: underline dotted;
+}
+.karta-spisok__oblast {
+  display: grid;
+  grid-template-columns: 2.2em minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+}
+.karta-spisok__oblast:hover {
+  background: var(--blue-50);
+}
+.karta-spisok__nomer {
+  font-weight: 800;
+}
+.karta-spisok__status {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+.karta-spisok__oblast--osvoeno .karta-spisok__status {
+  color: var(--terracotta-700);
+  font-weight: 600;
+}
+.karta-spisok__oblast--v-processe .karta-spisok__status {
+  color: var(--blue-700);
+  font-weight: 600;
+}
+
+/* ── Легенда ──────────────────────────────────────────────────── */
+
+.karta-legenda {
+  --stk-r-card: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  align-self: center;
+}
+.karta-legenda__p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.karta-legenda__p::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex: none;
+  box-sizing: border-box;
+}
+.karta-legenda__p--osvoeno::before {
+  background: var(--karta-teplo);
+}
+.karta-legenda__p--v-processe::before {
+  border: 3px solid var(--karta-sinij);
+  border-right-color: var(--blue-100);
+  background: #fff;
+}
+.karta-legenda__p--ne-nachato::before {
+  background: var(--karta-tuman);
+  border: 1px solid var(--blue-200);
+}
+.karta-legenda__p--povtorit::before {
+  background: var(--karta-terra);
+}
+.karta-legenda__p--sleduyushchaya::before {
+  background: var(--karta-teplo-2);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+}
+.karta-legenda__p--put::before {
+  width: 22px;
+  height: 0;
+  border-radius: 0;
+  border-top: 2px dashed var(--karta-teplo-2);
+}
+
+/* ── Домашнее задание ─────────────────────────────────────────── */
+
+.karta-dz {
+  --stk-r-card: 20px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(120px, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  text-decoration: none;
+  color: inherit;
+}
+.karta-dz__znak {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #fff, var(--blue-100));
+  box-shadow: inset 0 0 0 1px var(--blue-200);
+  display: grid;
+  place-items: center;
+  color: var(--blue-700);
+}
+.karta-dz__znak svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.karta-dz__tekst {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.karta-dz__tekst b {
+  font-size: 1.125rem;
+  color: var(--karta-navy);
+}
+.karta-dz__tekst span {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.karta-dz__polosa {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  overflow: hidden;
+}
+.karta-dz__polosa span {
+  display: block;
+  height: 100%;
+  background: var(--gloss);
+  border-radius: inherit;
+}
+.karta-dz__schet {
+  font-weight: 700;
+  color: var(--karta-navy);
+  font-variant-numeric: tabular-nums;
+}
+.karta-dz__strelka {
+  font-size: 1.25rem;
+  color: var(--blue-700);
+}
+
+/* ── Телефон и планшет ────────────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  .karta {
+    gap: var(--space-3);
+  }
+  .karta-shapka__privet {
+    font-size: 1.75rem;
+    line-height: 2.1rem;
+  }
+  .karta-shapka__itog {
+    font-size: 0.9375rem;
+  }
+  .karta-holst {
+    height: calc(100dvh - 190px);
+    min-height: 420px;
+    border-radius: 20px;
+  }
+  .karta-podpis__nomer {
+    font-size: 24px;
+  }
+  .karta-podpis__nazvanie {
+    font-size: 12px;
+  }
+  /* Панель — шторка снизу, поверх карты, не модальная. */
+  .karta-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    max-height: 46%;
+    border-radius: 22px 22px 0 0;
+    transform: translateY(100%);
+  }
+  .karta-panel.is-otkryta {
+    transform: none;
+  }
+  .karta-panel__ruchka {
+    display: block;
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--blue-200);
+    margin: 8px auto 0;
+  }
+  .karta-panel__telo {
+    padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+    gap: var(--space-3);
+  }
+  .karta-panel__nazvanie {
+    font-size: 1.125rem;
+  }
+  .karta-upravlenie {
+    bottom: auto;
+    top: var(--space-3);
+    left: var(--space-3);
+    flex-direction: row;
+    align-items: center;
+  }
+  .karta-masshtab {
+    flex-direction: row;
+  }
+  .karta-masshtab button + button {
+    border-top: 0;
+    border-left: 1px solid var(--blue-100);
+  }
+  .karta-masshtab button,
+  .karta-ves-mir {
+    height: 36px;
+  }
+  .karta-masshtab button {
+    width: 36px;
+  }
+  .karta-okoshko {
+    width: min(300px, calc(100vw - 32px));
+  }
+  /* Пока открыто окошко темы, кнопки сверху прячутся: закрыть — касанием по воде. */
+  .karta--telefon.karta--s-vyborom .karta-upravlenie {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .karta-dz {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'znak tekst strelka'
+      'polosa polosa schet';
+    gap: var(--space-3);
+  }
+  .karta-dz__znak {
+    grid-area: znak;
+  }
+  .karta-dz__tekst {
+    grid-area: tekst;
+  }
+  .karta-dz__polosa {
+    grid-area: polosa;
+  }
+  .karta-dz__schet {
+    grid-area: schet;
+  }
+  .karta-dz__strelka {
+    grid-area: strelka;
+  }
+}
+@media (max-width: 767.98px) {
+  .karta-holst {
+    height: min(calc(100dvh - 164px), 600px);
+    border-radius: 16px;
+  }
+  .karta-legenda {
+    gap: var(--space-2) var(--space-3);
+    font-size: 0.6875rem;
+    padding: var(--space-2) var(--space-3);
+  }
+  .karta-shapka__itog {
+    font-size: 0.875rem;
+  }
+  .karta-gost {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Открыта шторка — кнопка «?» поднимается над ней. */
+body:has(.karta-panel.is-otkryta) {
+  --fab-lift: 0px;
+}
+@media (max-width: 1023.98px) {
+  body:has(.karta--telefon .karta-panel.is-otkryta) .help-fab {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Без анимаций по просьбе системы. */
+@media (prefers-reduced-motion: reduce) {
+  .karta-holst[data-plavno] .karta-sloy,
+  .karta-holst[data-plavno] .karta-okoshko,
+  .karta-panel,
+  .karta-ostrov__zalivka,
+  .karta-podpis__kolco-hod,
+  .karta-polosa__shkala span {
+    transition: none;
+  }
+  .karta-okoshko,
+  .karta-put,
+  .karta-mayak__volna,
+  .karta-ostrov__svet {
+    animation: none;
+  }
+  .karta-mayak__volna {
+    opacity: 0.5;
+    transform: scale(1.4);
+  }
+}
