@@ -164,7 +164,11 @@ function answer1(payload, at) {
   if (bank1 === null) {
     bank1 = requireSrc('lib/planimetriya/trenazher/dannye').dannyeTrenazhera1().bank;
   }
-  const plan = planPoKlyuchu1(payload.tasks[at].id, '');
+  /* Запись прежнего тренажёра (панель фильтров, {items}) — тем же
+     чтением, что у нового тренажёра (prezhnyayaZapis1). */
+  const tasks =
+    payload.tasks ?? requireSrc('lib/planimetriya/trening/klyuch').prezhnyayaZapis1(payload).tasks;
+  const plan = planPoKlyuchu1(tasks[at].id, '');
   return { text: numberText(sostavZadachi(razreshit(plan, bank1)).otvet) };
 }
 

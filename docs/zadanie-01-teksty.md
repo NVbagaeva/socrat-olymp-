@@ -193,8 +193,8 @@
 
 | Факт | Пример |
 |---|---|
-| $\text{вписанный угол}=\tfrac12\,\text{дуги}$ | $\smile AB=110^\circ\ \Rightarrow\ \angle ACB=55^\circ$ |
-| $\text{центральный угол}=\text{дуге}$ | $\smile AB=110^\circ\ \Rightarrow\ \angle AOB=110^\circ$ |
+| $\text{вписанный угол}=\tfrac12\,\text{дуги}$ | $\arc{AB}=110^\circ\ \Rightarrow\ \angle ACB=55^\circ$ |
+| $\text{центральный угол}=\text{дуге}$ | $\arc{AB}=110^\circ\ \Rightarrow\ \angle AOB=110^\circ$ |
 | $OA\perp CA\ \text{(касательная)}$ | $\angle ACO=30^\circ\ \Rightarrow\ \angle AOC=60^\circ$ |
 
 ### Вписанные и описанные

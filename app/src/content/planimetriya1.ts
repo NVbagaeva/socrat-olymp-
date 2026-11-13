@@ -25,6 +25,10 @@ export const SHAPKA1 = {
   ],
   opasnoTitle: 'Чем опасно',
   oblozhkaAlt: 'Стеклянная подставка с чертежами: треугольник, окружность, четырёхугольник',
+  /* Живая композиция в шапке раздела: лемма о трезубце. */
+  trezubets:
+    'Лемма о трезубце: треугольник ABC с вписанной и описанной окружностями; W — середина дуги BC, отрезки WB, WI и WC равны',
+  trezubetsPodpis: 'Лемма о трезубце: WB = WI = WC. Покрути чертёж',
   gruppyTitle: 'Типы задач по группам',
   gruppyLead:
     'Нажми на тип — откроется разобранный пример: чертёж закреплён рядом с решением, нажатие на шаг показывает на чертеже его построение.',
@@ -242,11 +246,11 @@ export const FORMULY1: FormulyGruppy1[] = [
     formuly: [
       {
         tex: '\\text{вписанный угол}=\\tfrac12\\,\\text{дуги}',
-        primer: '\\smile AB=110^\\circ\\ \\Rightarrow\\ \\angle ACB=55^\\circ',
+        primer: '\\arc{AB}=110^\\circ\\ \\Rightarrow\\ \\angle ACB=55^\\circ',
       },
       {
         tex: '\\text{центральный угол}=\\text{дуге}',
-        primer: '\\smile AB=110^\\circ\\ \\Rightarrow\\ \\angle AOB=110^\\circ',
+        primer: '\\arc{AB}=110^\\circ\\ \\Rightarrow\\ \\angle AOB=110^\\circ',
       },
       {
         tex: 'OA\\perp CA\\ \\text{(касательная)}',

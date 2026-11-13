@@ -197,6 +197,10 @@
 .z1-op__gde {
   max-width: 720px;
 }
+.z1-op__gde-spisok > li {
+  min-width: 0;
+  max-width: 100%;
+}
 .z1-op__gde-spisok {
   display: flex;
   flex-wrap: wrap;
@@ -206,10 +210,13 @@
   list-style: none;
 }
 .z1-gde__chip {
-  display: inline-flex;
-  align-items: center;
+  /* Блоком, а не flex: длинное название с формулами переносится по словам. */
+  display: inline-block;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   min-height: 44px;
-  padding: var(--space-1) var(--space-4);
+  padding: 10px var(--space-4);
   border-radius: 14px;
   background: var(--glass-bg-strong);
   box-shadow: var(--glass-ring), var(--glass-hi);
@@ -228,5 +235,90 @@
       inset 0 0 0 1px var(--blue-200),
       var(--glass-hi),
       0 8px 24px rgb(31 95 208 / 0.06);
+  }
+}
+
+/* ── Шапка раздела: живая композиция «лемма о трезубце» ───────── */
+.z1-trezubets {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 300px;
+  margin-inline: auto;
+}
+.z1-trezubets__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+  cursor: grab;
+  /* Вращение пальцем не должно прокручивать страницу. */
+  touch-action: none;
+  user-select: none;
+  filter: drop-shadow(0 18px 28px rgb(31 95 208 / 0.16));
+}
+.z1-trezubets__svg:active {
+  cursor: grabbing;
+}
+.z1-trezubets__svg:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 4px;
+}
+.z1-trz__opisannaya {
+  stroke: var(--blue-600);
+  stroke-width: 2;
+}
+.z1-trz__treugolnik {
+  fill: rgb(31 95 208 / 0.08);
+  stroke: var(--navy-800);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.z1-trz__vpisannaya {
+  fill: rgb(255 255 255 / 0.55);
+  stroke: var(--blue-600);
+  stroke-width: 1.5;
+}
+.z1-trz__bissektrisa {
+  stroke: var(--blue-600);
+  stroke-width: 1.25;
+  stroke-dasharray: 4 4;
+}
+.z1-trz__zub {
+  stroke: var(--terracotta);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.z1-trz__zasechka {
+  stroke: var(--terracotta);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+}
+.z1-trz__tochka {
+  fill: var(--blue-600);
+  stroke: var(--white);
+  stroke-width: 1.5;
+}
+.z1-trz__tochka.is-aktsent {
+  fill: var(--terracotta);
+}
+.z1-trz__bukva {
+  fill: var(--navy-800);
+  font: italic 600 15px/1 var(--font-serif, Georgia, 'Times New Roman', serif);
+  pointer-events: none;
+}
+.z1-trezubets__podpis {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+@media (max-width: 1023.98px) {
+  .z1-head .section-head__media {
+    max-width: none;
+  }
+  .z1-trezubets {
+    max-width: 220px;
   }
 }
