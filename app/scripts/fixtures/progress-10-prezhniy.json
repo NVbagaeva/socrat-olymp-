@@ -1,0 +1,110 @@
+{
+  "_chto": "Хранилище ученика, решавшего №10 до редизайна. localStorage: журнал тренажёра budetege:zadanie-10:log:v1 (записан прежним кодом lib/zadanie10/progress.ts теми же вызовами log10.record, что делал прежний экран задачи Zadacha10) и опорные задачи budetege:zadanie-10:opornye:v1 (форма прежнего Opornye10: ключ задачи → верно ли). sessionStorage: незаконченная тренировка прежнего тренажёра budetege:zadanie-10:trenazher:v1 (прежний lib/zadanie10/trenazher.ts, zapisatSessiyu). Нужен scripts/check-progress-10.mjs и браузерной проверке переноса.",
+  "localStorage": {
+    "budetege:zadanie-10:log:v1": {
+      "v": 1,
+      "attempts": [
+        {
+          "task": "F005",
+          "kind": "P11",
+          "outcome": "right",
+          "seconds": 64,
+          "at": 1794322860000,
+          "id": "mwextlbj-go25gqxo"
+        },
+        {
+          "task": "F006",
+          "kind": "P11",
+          "outcome": "wrong",
+          "seconds": 120,
+          "at": 1794322920000,
+          "id": "mwextlbj-cpzbudmh"
+        },
+        {
+          "task": "F017",
+          "kind": "P14",
+          "outcome": "hinted",
+          "seconds": 210,
+          "at": 1794322980000,
+          "id": "mwextlbj-1h8ogcgj"
+        },
+        {
+          "task": "P22-a04",
+          "kind": "P22",
+          "outcome": "revealed",
+          "seconds": 45,
+          "at": 1794323040000,
+          "id": "mwextlbj-06632xfe"
+        },
+        {
+          "task": "F001",
+          "kind": "P01",
+          "outcome": "right",
+          "seconds": 95,
+          "at": 1794323100000,
+          "id": "mwextlbj-x6jcnxey"
+        },
+        {
+          "task": "F141",
+          "kind": "P26",
+          "outcome": "wrong",
+          "seconds": 150,
+          "at": 1794323160000,
+          "id": "mwextlbj-7uywlibo"
+        },
+        {
+          "task": "P33-a01",
+          "kind": "P33",
+          "outcome": "right",
+          "seconds": 80,
+          "at": 1794323220000,
+          "id": "mwextlbj-e8epqw7q"
+        },
+        {
+          "task": "F079",
+          "kind": "P18",
+          "outcome": "wrong",
+          "seconds": 130,
+          "at": 1794323280000,
+          "id": "mwextlbj-6x8q03cj"
+        }
+      ],
+      "archive": {},
+      "legacyMistakes": []
+    },
+    "budetege:zadanie-10:opornye:v1": {
+      "pod-1": true,
+      "pod-2": false,
+      "kor-3": true,
+      "st-1": true,
+      "log-5": false,
+      "tr-9": true
+    }
+  },
+  "sessionStorage": {
+    "budetege:zadanie-10:trenazher:v1": {
+      "ekran": "reshenie",
+      "tipy": [
+        "P11",
+        "P12",
+        "P17",
+        "P30"
+      ],
+      "istochnik": "mix",
+      "skolko": 5,
+      "plan": [
+        "F007",
+        "P12-a01",
+        "F035",
+        "P30-a02"
+      ],
+      "tekushchaya": 1,
+      "otvety": {
+        "F007": {
+          "vvod": "12",
+          "verno": false
+        }
+      }
+    }
+  }
+}

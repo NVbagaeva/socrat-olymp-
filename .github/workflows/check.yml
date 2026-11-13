@@ -253,6 +253,13 @@ jobs:
         working-directory: app
         run: pnpm test:progress-6
 
+      # №10 на том же общем тренажёре: прежний журнал (тот же ключ) и опорные
+      # (прежняя форма записи) читаются как есть, тренировки собираются,
+      # дробь с верным значением — подсказка. Без браузера.
+      - name: Тренажёр №10 — прежний прогресс, сборка тренировок
+        working-directory: app
+        run: pnpm test:progress-10
+
       - name: Тексты №3 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-3-teksty
@@ -260,6 +267,10 @@ jobs:
       - name: Тексты №6 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-6-teksty
+
+      - name: Тексты №10 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-10-teksty
 
       # Выделенные фигуры №3 (сечения, треугольники, диагонали): видимость
       # каждой стороны — лучом, как у рёбер, при трёх ракурсах; одна линия
@@ -892,6 +903,14 @@ jobs:
       - name: Перенос прогресса №6 в браузере
         working-directory: app
         run: pnpm test:progress-6-site
+
+      - name: Редизайн №10 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 10 origin/main
+
+      - name: Перенос прогресса №10 в браузере
+        working-directory: app
+        run: pnpm test:progress-10-site
 
       # Иллюстрация в верхнем блоке «Задание 12»: разметка (picture, srcset,
       # размеры, высокий приоритет, без lazy), файлы и вес версии на телефон

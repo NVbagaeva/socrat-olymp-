@@ -38,6 +38,22 @@ if (!/^\d{1,2}$/.test(razdel ?? '')) {
 
 /** Файлы и папки содержания раздела (пути от корня репозитория). */
 const SODERZHANIE = {
+  10: [
+    'app/src/data/zadanie10',
+    'app/public/data/zadanie10',
+    'app/src/lib/zadanie10/prototypes',
+    'app/src/lib/zadanie10/bank',
+    'app/src/lib/zadanie10/chertezh',
+    'app/src/lib/zadanie10/kit.ts',
+    'app/src/lib/zadanie10/opornye.ts',
+    'app/src/lib/zadanie10/illyustracii.ts',
+    'app/src/lib/zadanie10/teoriya-kondensator.ts',
+    'app/src/lib/zadanie10/teoriya-stepeni.ts',
+    'app/src/lib/zadanie10/teoriya-yakorya.ts',
+    'app/src/content/teoriya10.ts',
+    'app/src/content/uroki10.ts',
+    'app/src/content/kartochki/10-prikladnye.ts',
+  ],
   6: [
     'app/src/data/zadanie6',
     'app/public/data/zadanie6',
