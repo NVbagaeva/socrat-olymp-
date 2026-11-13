@@ -175,8 +175,8 @@ export const FORMULY12: FormulyVida12[] = [
     vid: 'linear',
     formuly: [
       {
-        tex: 'k=\\dfrac{\\Delta y}{\\Delta x}',
-        primer: '\\text{вверх на }3,\\ \\text{вправо на }2:\\ k=1{,}5',
+        tex: 'k=\\pm\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}',
+        primer: '\\text{катеты }3\\text{ и }2,\\ \\text{прямая растёт}:\\ k=1{,}5',
       },
       { tex: 'b=f(0)', primer: '\\text{прямая пересекает }Oy\\text{ в }(0;-1):\\ b=-1' },
     ],
