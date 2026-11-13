@@ -252,7 +252,8 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
         /* Начисто — без ошибок и без подсказки; иначе «с разбором». */
         const chisto = !failed && !hintOpen;
         setMarks({ ...marks, [index]: chisto ? 'right' : 'hinted' });
-        remember(tekushchaya, failed ? 'wrong' : 'right');
+        /* Верно с первой попытки, но с открытой подсказкой — «с подсказкой». */
+        remember(tekushchaya, failed ? 'wrong' : hintOpen ? 'hinted' : 'right');
       }
     } else {
       setFailed(true);

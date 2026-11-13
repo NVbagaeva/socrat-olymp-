@@ -16,6 +16,7 @@ import {
   EMPTY_LOG,
   addAttempt,
   fromLegacy,
+  isEmptyLog,
   newAttemptId,
   parseLog,
   type LogAttempt,
@@ -23,18 +24,29 @@ import {
 } from './model';
 
 export * from './model';
+export * from './sovmestimost';
 
 /** Журнал → ключ прежнего формата. Синхронизация сворачивает их до слияния с аккаунтом. */
 export const LEGACY_LOGS: Record<string, string> = {
   'budetege:vychisleniya-8:log:v1': 'budetege:vychisleniya-8:v1',
   /* №3: счётчики по прототипам и список ошибок прежнего тренажёра. */
   'budetege:zadanie-3:log:v1': 'budetege:z3:trainer:v1',
-  /* №7: счётчики по прототипам и список ошибок прежнего тренажёра. */
-  'budetege:zadanie-7:log:v1': 'budetege:zadanie-7:v1',
-  /* №6: счётчики по прототипам и список ошибок прежнего тренажёра. */
+  /* Разделы, переведённые со счётчиков lib/progressStore.ts: счётчики по
+     типам, список ошибок и исходы задач. Прежние ключи не удаляются. */
+  'budetege:planimetriya-1:log:v1': 'budetege:planimetriya-1:v1',
+  'budetege:vektory-2:log:v1': 'budetege:vektory-2:v1',
+  'budetege:veroyatnost-4:log:v1': 'budetege:veroyatnost-4:v2',
+  'budetege:veroyatnost-5:log:v1': 'budetege:veroyatnost-5:v2',
   'budetege:zadanie-6:log:v1': 'budetege:zadanie-6:v1',
-  /* №2: счётчики по прототипам и список ошибок прежнего тренажёра. */
-  'budetege:zadanie-2:log:v1': 'budetege:vektory-2:v1',
+  'budetege:zadanie-7:log:v1': 'budetege:zadanie-7:v1',
+  'budetege:proizvodnaya-9:log:v1': 'budetege:proizvodnaya-9:v1',
+  'budetege:zadanie-11:log:v1': 'budetege:zadanie-11:v1',
+  'budetege:zadanie-13:log:v1': 'budetege:zadanie-13:v1',
+  'budetege:zadanie-14:log:v1': 'budetege:zadanie-14:v1',
+  'budetege:zadanie-18:log:v1': 'budetege:zadanie-18:trenazher:v1',
+  /* №12: общее хранилище lib/trainerProgress.ts (счётчики всех разделов
+     №12, ошибки, решённые задачи). */
+  'budetege:zadanie-12:log:v1': 'budetege:trainer:v1',
 };
 
 /**
@@ -50,11 +62,7 @@ export function migrateLegacyLog(key: string): void {
     const raw = target.getItem(legacy);
     if (raw === null) return;
     const log = fromLegacy(JSON.parse(raw), `ustroystvo-${newAttemptId()}`);
-    if (
-      log.attempts.length === 0 &&
-      Object.keys(log.archive).length === 0 &&
-      log.legacyMistakes.length === 0
-    ) {
+    if (isEmptyLog(log)) {
       return;
     }
     target.setItem(key, JSON.stringify(log));
@@ -94,8 +102,21 @@ export function createLogStore(key: string): LogStore {
     record(attempt) {
       ensure();
       base.update((log) =>
-        addAttempt(log, { ...attempt, id: newAttemptId(), at: attempt.at ?? Date.now() }),
+        addAttempt(log, {
+          ...attempt,
+          /* Длинные идентификаторы режутся, а не теряются при разборе. */
+          task: attempt.task.slice(0, 120),
+          kind: attempt.kind.slice(0, 40),
+          id: newAttemptId(),
+          at: attempt.at ?? Date.now(),
+        }),
       );
+    },
+    /* Сброс пишет пустой журнал, а не стирает ключ: иначе после
+       перезагрузки счётчики прежнего формата свернулись бы в журнал заново. */
+    reset() {
+      migrated = true;
+      base.set(EMPTY_LOG);
     },
   };
 }

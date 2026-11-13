@@ -201,6 +201,8 @@
     "test:dz-print": "node scripts/check-dz-print.mjs",
     "test:otvet": "node scripts/check-otvet.mjs",
     "test:progress-log": "node scripts/check-progress-log.mjs",
+    "test:progress-perevod": "node scripts/check-progress-perevod.mjs",
+    "test:progress-perevod-site": "node scripts/check-progress-perevod-site.mjs",
     "test:z8-uchenik": "node scripts/check-z8-uchenik.mjs",
     "build:kartochki": "node scripts/build-kartochki.mjs",
     "test:kartochki": "node scripts/verify_cards/index.mjs",

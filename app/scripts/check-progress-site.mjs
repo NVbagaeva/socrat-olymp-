@@ -81,7 +81,7 @@ const BASE = `http://127.0.0.1:${server.address().port}`;
 const PREZHNIY = N === '2' ? 'vektory-2' : `zadanie-${N}`;
 const OLD = `budetege:${PREZHNIY}:v1`;
 const OLD_OPORNYE = `budetege:${PREZHNIY}:opornye:v1`;
-const NEW = `budetege:zadanie-${N}:log:v1`;
+const NEW = `budetege:${PREZHNIY}:log:v1`;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
 );

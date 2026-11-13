@@ -16,7 +16,8 @@
 import { createLogStore } from '@/lib/progressLog';
 import { createVyborBanka } from '@/lib/trening/vybor';
 
-export const PROGRESS2_KEY = 'budetege:zadanie-2:log:v1';
+/* Ключ журнала — тот же, что уже пишет прежний тренажёр в main (budetege:vektory-2:log:v1). */
+export const PROGRESS2_KEY = 'budetege:vektory-2:log:v1';
 export const log2 = createLogStore(PROGRESS2_KEY);
 
 /** Последний выбор на вкладке «Тренажёр»: со входом — и в аккаунте. */

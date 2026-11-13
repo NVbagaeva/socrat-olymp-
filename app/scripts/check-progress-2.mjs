@@ -65,7 +65,7 @@ function podstavitStorage(storage) {
 }
 
 const OLD_KEY = 'budetege:vektory-2:v1';
-const NEW_KEY = 'budetege:zadanie-2:log:v1';
+const NEW_KEY = 'budetege:vektory-2:log:v1';
 
 const { PROTOTYPES } = requireSrc('lib/vektory/prototypes/index.ts');
 const { generate } = requireSrc('lib/vektory/generate.ts');

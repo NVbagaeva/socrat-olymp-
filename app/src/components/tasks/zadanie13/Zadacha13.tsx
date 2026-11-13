@@ -387,6 +387,7 @@ export function kartochka13(base: string): KartochkaRazdela<Zadacha13Tren> {
         right: itog.right,
         clean: itog.clean,
         seconds: itog.sek,
+        ishod: itog.ishod,
         itog: itog.right ? 'right' : 'wrong',
       }),
   };

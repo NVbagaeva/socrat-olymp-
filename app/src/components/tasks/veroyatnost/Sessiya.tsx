@@ -1,5 +1,6 @@
 'use client';
 
+import type { LogOutcome } from '@/lib/progressLog';
 import { useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui';
@@ -124,7 +125,7 @@ export function Sessiya({
   }
 
   /** Закрыть задачу тренажёра: верный ответ или открытое решение. */
-  function zapisat(right: boolean, clean: boolean) {
+  function zapisat(right: boolean, clean: boolean, ishod: LogOutcome) {
     if (task === undefined || zakryto.current === index || task.metod === '') {
       return;
     }
@@ -135,13 +136,14 @@ export function Sessiya({
       right,
       clean,
       seconds: sekundy(),
+      ishod,
     });
     setMarks((was) => ({ ...was, [index]: right ? 'right' : 'hinted' }));
   }
 
   function otvet(right: boolean) {
     if (right) {
-      zapisat(true, !oshibsya.current);
+      zapisat(true, !oshibsya.current, oshibsya.current ? 'wrong' : 'right');
       return;
     }
     oshibka();
@@ -320,10 +322,10 @@ export function Sessiya({
         initial={card}
         onChange={setCard}
         onResult={otvet}
-        onReveal={() => zapisat(false, false)}
+        onReveal={() => zapisat(false, false, 'revealed')}
         /* Подсказка учитывается так же, как открытое решение: задача
            закрыта и не засчитана, следующий ответ счётчиков не меняет. */
-        onHint={() => zapisat(false, false)}
+        onHint={() => zapisat(false, false, oshibsya.current ? 'wrong' : 'hinted')}
         onNext={dalshe}
         nextLabel={last ? REZULTAT : slova.dalshe}
       />

@@ -7,4 +7,7 @@
 
 import { createProgressStore } from '@/lib/progressStore';
 
-export const trenazher18 = createProgressStore('budetege:zadanie-18:trenazher:v1');
+export const trenazher18 = createProgressStore(
+  'budetege:zadanie-18:trenazher:v1',
+  'budetege:zadanie-18:log:v1',
+);

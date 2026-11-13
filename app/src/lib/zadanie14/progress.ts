@@ -9,4 +9,7 @@
 import { createProgressStore } from '../progressStore';
 
 export const opornye14 = createProgressStore('budetege:zadanie-14:opornye:v1');
-export const trenazher14 = createProgressStore('budetege:zadanie-14:v1');
+export const trenazher14 = createProgressStore(
+  'budetege:zadanie-14:v1',
+  'budetege:zadanie-14:log:v1',
+);
