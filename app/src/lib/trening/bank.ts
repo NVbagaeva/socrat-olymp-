@@ -47,10 +47,10 @@ export interface PayloadBanka {
 }
 
 /**
- * Прототип задачи: «P18» (№7, №6) или подтип «DP-07» (№11 — разделы
+ * Прототип: «P04» (№7, №6), «A6» (№2) или подтип «DP-07» (№11 — разделы
  * задачи двумя буквами латиницей).
  */
-const PROTOTIP = /^(P\d\d|[A-Z]{2}-\d\d)$/;
+const PROTOTIP = /^(P\d\d|[ABC]\d|[A-Z]{2}-\d\d)$/;
 
 type Random = () => number;
 
@@ -74,13 +74,13 @@ export function prototipyZadach(katalog: KatalogBanka): Map<string, string> {
 }
 
 /**
- * Прототип задачи: по каталогу, у аналога — из ключа «P18-a03», у
- * задачи №11 — из ключа «DP-07|b12» (так и у задач прежнего генератора
+ * Прототип задачи: по каталогу, иначе из ключа — «P18-a03» (аналог),
+ * «A6|k07» (№2), «DP-07|b12» (№11; так и у задач прежнего генератора №11
  * «DP-07|n…», которых в каталоге нет).
  */
 export function prototipZadachi(id: string, poKatalogu: ReadonlyMap<string, string>): string {
-  const poKlyuchu = /^([A-Z]{2}-\d\d)\|/.exec(id)?.[1];
-  return poKatalogu.get(id) ?? (/^P\d\d-/.test(id) ? id.slice(0, 3) : (poKlyuchu ?? id));
+  const poKlyuchu = /^P\d\d-/.test(id) ? id.slice(0, 3) : id.includes('|') ? id.split('|')[0] : id;
+  return poKatalogu.get(id) ?? poKlyuchu ?? id;
 }
 
 function podStil(katalog: KatalogBanka, p: string, ids: string[], stil: StilBanka): string[] {

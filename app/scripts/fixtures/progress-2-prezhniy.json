@@ -1,0 +1,68 @@
+{
+  "_chto": "localStorage ученика, решавшего №2 до редизайна: ключи тренажёра (budetege:vektory-2:v1) и опорных задач (budetege:vektory-2:opornye:v1), записаны прежним кодом lib/progressStore.ts теми же вызовами, что делали прежние экраны. Нужен scripts/check-progress-2.mjs и браузерной проверке переноса.",
+  "budetege:vektory-2:v1": {
+    "kinds": {
+      "A1": {
+        "done": 2,
+        "right": 2,
+        "seconds": 76
+      },
+      "A6": {
+        "done": 2,
+        "right": 1,
+        "seconds": 218
+      },
+      "B3": {
+        "done": 1,
+        "right": 1,
+        "seconds": 52
+      },
+      "B5": {
+        "done": 1,
+        "right": 0,
+        "seconds": 140
+      },
+      "B9": {
+        "done": 1,
+        "right": 1,
+        "seconds": 160
+      },
+      "C2": {
+        "done": 1,
+        "right": 1,
+        "seconds": 210
+      },
+      "C1": {
+        "done": 1,
+        "right": 0,
+        "seconds": 77
+      }
+    },
+    "mistakes": [
+      "A6|mh3k4c-5e6f7g8h",
+      "A6|mh3k5d-9i0j1k2l",
+      "B5|mh3k7f-7q8r9s0t",
+      "B9|mh3k8g-1u2v3w4x",
+      "C1|mh3kai-9c0d1e2f"
+    ],
+    "outcomes": {}
+  },
+  "budetege:vektory-2:opornye:v1": {
+    "kinds": {
+      "P2-1": {
+        "done": 6,
+        "right": 4,
+        "seconds": 0
+      }
+    },
+    "mistakes": ["P2-1:3", "P2-1:4"],
+    "outcomes": {
+      "P2-1:1": "right",
+      "P2-1:2": "right",
+      "P2-1:3": "wrong",
+      "P2-1:4": "revealed",
+      "P2-1:5": "right",
+      "P2-1:6": "right"
+    }
+  }
+}

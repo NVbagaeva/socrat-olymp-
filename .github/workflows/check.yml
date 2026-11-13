@@ -217,6 +217,12 @@ jobs:
         working-directory: app
         run: pnpm test:progress-log
 
+      # «Карта ЕГЭ»: состояния областей, рекомендация, прогноз, пролив и
+      # каталог на трёх тестовых учениках (lib/karta).
+      - name: Карта ЕГЭ — расчёт
+        working-directory: app
+        run: pnpm test:karta
+
       # Разделы, переведённые со счётчиков на журнал попыток: прежние данные
       # сворачиваются без потерь, прежние ключи целы, исход «с подсказкой».
       - name: Перевод разделов на журнал попыток
@@ -266,6 +272,11 @@ jobs:
       - name: Тексты №11 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-11-teksty
+      # №2 на том же общем тренажёре: прежний прогресс (budetege:vektory-2:v1),
+      # каталог из проверенных seed генератора, прежняя запись тренировки.
+      - name: Тренажёр №2 — перенос прежнего прогресса, каталог, тренировки
+        working-directory: app
+        run: pnpm test:progress-2
 
       - name: Тексты №3 для вычитки совпадают с исходниками
         working-directory: app
@@ -274,6 +285,10 @@ jobs:
       - name: Тексты №6 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-6-teksty
+
+      - name: Тексты №2 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-2-teksty
 
       # Выделенные фигуры №3 (сечения, треугольники, диагонали): видимость
       # каждой стороны — лучом, как у рёбер, при трёх ракурсах; одна линия
@@ -914,6 +929,13 @@ jobs:
       - name: Перенос прогресса №11 в браузере
         working-directory: app
         run: pnpm test:progress-11-site
+      - name: Редизайн №2 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 2 origin/main
+
+      - name: Перенос прогресса №2 в браузере
+        working-directory: app
+        run: pnpm test:progress-2-site
 
       # Иллюстрация в верхнем блоке «Задание 12»: разметка (picture, srcset,
       # размеры, высокий приоритет, без lazy), файлы и вес версии на телефон
@@ -1074,6 +1096,12 @@ jobs:
       - name: Проверить перевод разделов на журнал попыток
         working-directory: app
         run: pnpm test:progress-perevod-site
+
+      # «Карта ЕГЭ» на сайте: гость и «середина», окошко, панель, пролив,
+      # клавиатура; телефон в WebKit — касание, перетаскивание, щипок.
+      - name: Проверить карту ЕГЭ на сайте
+        working-directory: app
+        run: pnpm test:karta-site
 
       # Ошибка в одном блоке не роняет страницу, сбой загрузки кода лечится
       # одной перезагрузкой: сообщение по-русски вместо белого экрана.
