@@ -37,7 +37,9 @@ function Chertezh({
   const shirina = risunki.length > 1 ? Math.round(360 / Math.min(risunki.length, 2)) : 360;
   const v = risunki.length > 2 ? Math.round(vysota * 0.62) : vysota;
   return (
-    <figure className={clsx('spr1-chertezh', risunki.length > 1 && 'spr1-chertezh--neskolko', className)}>
+    <figure
+      className={clsx('spr1-chertezh', risunki.length > 1 && 'spr1-chertezh--neskolko', className)}
+    >
       {risunki.map((r, i) => (
         <span
           className="pl-wrap spr1-chertezh__ris"
@@ -98,7 +100,11 @@ function Razbor({ temaId, nomer, p }: { temaId: string; nomer: number; p: Primer
           <p className="spr1-razbor__tekst">
             <Tex text={z.uslovie} />
           </p>
-          <Chertezh risunki={[chertezhPrimera(temaId, nomer, p)]} vysota={170} className="spr1-razbor__ris" />
+          <Chertezh
+            risunki={[chertezhPrimera(temaId, nomer, p)]}
+            vysota={170}
+            className="spr1-razbor__ris"
+          />
         </div>
         <ol className="spr1-razbor__shagi">
           {p.shagi.map((s, i) => (
@@ -128,7 +134,11 @@ function Razbor({ temaId, nomer, p }: { temaId: string; nomer: number; p: Primer
   );
 }
 
-/** Строка «Где на ЕГЭ»: номер прототипа открывает тренажёр на нём. */
+/**
+ * Строка «Где на ЕГЭ»: типы задач, где пригодится тема. Ученику — только
+ * названия типов, без номеров прототипов; название открывает тренажёр
+ * на этом типе.
+ */
 function GdeNaEge({
   prototipy,
   trenazher,
@@ -141,14 +151,14 @@ function GdeNaEge({
     <p className="spr1-ege">
       <span className="spr1-ege__label">{BLOKI_SPRAVOCHNIKA.prototipy}:</span>
       {prototipy.map((n) => {
-        const title = SPRAVOCHNIK_1.gdeNaEgeTitle(n, prototip(n).nazvanie.replace(/\$/g, ''));
+        const nazvanie = <Tex text={prototip(n).nazvanie} />;
         return trenazher === undefined ? (
-          <span className="spr1-ege__chip" title={title} key={n}>
-            №{n}
+          <span className="spr1-ege__chip" key={n}>
+            {nazvanie}
           </span>
         ) : (
-          <a className="spr1-ege__chip" href={trenazher(n)} title={title} key={n}>
-            №{n}
+          <a className="spr1-ege__chip" href={trenazher(n)} key={n}>
+            {nazvanie}
           </a>
         );
       })}
