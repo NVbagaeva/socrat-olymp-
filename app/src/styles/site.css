@@ -131,7 +131,7 @@
   top: 100%;
   left: -16px;
   z-index: 31;
-  min-width: 260px;
+  min-width: 300px;
   margin: 0;
   padding: 12px 0 0;
   list-style: none;
@@ -156,22 +156,57 @@
   padding-bottom: 6px;
 }
 .site-nav .nav-drop__item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   margin: 0 6px;
-  padding: 10px 10px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2);
   border-radius: var(--radius-md);
-  font-size: 15px;
   color: var(--color-text);
   text-decoration: none;
 }
+.nav-drop__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+}
+.nav-drop__ico .nav-ico {
+  width: 20px;
+  height: 20px;
+}
+.nav-drop__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nav-drop__label {
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.nav-drop__hint {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+}
+/* Главное действие группы — первая ссылка: значок залит синим. */
+.nav-drop__list li:first-child .nav-drop__ico {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
 .site-nav .nav-drop__item:hover,
 .site-nav .nav-drop__item:focus-visible {
-  color: var(--color-primary);
   background: var(--color-bg);
 }
-.site-nav .nav-drop__item[aria-current='page'] {
+.site-nav .nav-drop__item:hover .nav-drop__label,
+.site-nav .nav-drop__item:focus-visible .nav-drop__label,
+.site-nav .nav-drop__item[aria-current='page'] .nav-drop__label {
   color: var(--color-primary);
-  font-weight: 600;
 }
 .site-head__cta {
   margin-left: auto;

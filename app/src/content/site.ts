@@ -25,7 +25,7 @@ export interface SiteLink {
  */
 export interface NavGroup {
   label: string;
-  items: SiteLink[];
+  items: MenuLink[];
 }
 
 export type NavItem = SiteLink | NavGroup;
@@ -51,108 +51,97 @@ export interface ExternalLink extends SiteLink {
   external: true;
 }
 
+/* Пункты меню заведены по одному разу: широкая шапка и бургер берут
+   их отсюда, поэтому названия и адреса в них не расходятся. Названия
+   вариантов короче заголовков страниц — длинные в бургере переносились
+   на две строки. Пояснения — из лидов самих страниц, без новых
+   обещаний. */
+const LINKS = {
+  bank: {
+    label: 'Банк заданий',
+    hint: 'Все задания по темам',
+    href: tasksPage.href,
+    icon: 'tasks',
+  },
+  sobrat: {
+    label: 'Собрать вариант',
+    hint: 'Для домашней и контрольной',
+    href: VARIANT_HREF,
+    icon: 'variant',
+  },
+  onlayn: {
+    label: ONLINE_TEXT.nachalo.menu,
+    hint: 'Задания 1–13 с автопроверкой',
+    href: VARIANT_ONLAYN_HREF,
+    icon: 'target',
+  },
+  mesyaca: {
+    label: 'Варианты месяца',
+    hint: 'По одному на месяц, части 1 и 2',
+    href: EZH_HREF,
+    icon: 'ezhemesyachnye',
+  },
+  slozhnye: {
+    label: 'Сложные варианты',
+    hint: '36 вариантов, по шесть версий',
+    href: POV_HREF,
+    icon: 'povyshennye',
+  },
+  howto: {
+    label: 'Как пользоваться',
+    hint: 'Короткий гид по сайту',
+    href: HOWTO_HREF,
+    icon: 'help',
+  },
+  /* «Учителям» ведёт на блок «Мы взяли на себя то, что обычно забирает
+     ваш вечер» — он про самостоятельные, домашние и проверку. */
+  uchitelyam: {
+    label: 'Учителям',
+    hint: 'Самостоятельные и домашние',
+    href: '/#how',
+    icon: 'homework',
+  },
+  avtor: { label: 'Об авторе', hint: 'Кто делает сайт', href: '/about/', icon: 'teacher' },
+  /* Страница с тарифами; оплата на ней пока выключена
+     (lib/tarify/config.ts, PAYMENTS_ENABLED). */
+  tarify: { label: 'Тарифы', hint: 'Что входит в доступ', href: TARIFY_HREF, icon: 'favourites' },
+} satisfies Record<string, MenuLink>;
+
 export const site = {
   brand: 'Будет на ЕГЭ',
 
   /**
-   * Пункты меню. Каждый ведёт на работающую страницу или блок.
-   * «Тарифы» — страница с тарифами; оплата на ней пока выключена
-   * (lib/tarify/config.ts, PAYMENTS_ENABLED). «Учителям» ведёт
-   * на блок «Мы взяли на себя то, что обычно забирает ваш вечер» —
-   * он про самостоятельные, домашние и проверку, то есть для учителя.
+   * Пункты широкой шапки. Каждый ведёт на работающую страницу или блок.
+   * Порядок — от дела к справке: сначала задания и варианты, потом
+   * разделы о проекте, «Тарифы» последними.
    */
   nav: [
-    { label: 'Об авторе', href: '/about/' },
-    { label: 'Банк заданий', href: tasksPage.href },
+    LINKS.bank,
     /* Всё про варианты — одной группой: семь пунктов в одну строку не
-       помещались даже на 1440 px, и шапка переносилась в две строки. */
+       помещались даже на 1440 px, и шапка переносилась в две строки.
+       Первым — главное действие, оно в списке выделено. */
     {
       label: 'Варианты',
-      items: [
-        { label: 'Собрать вариант', href: VARIANT_HREF },
-        { label: ONLINE_TEXT.nachalo.menu, href: VARIANT_ONLAYN_HREF },
-        { label: 'Варианты повышенной сложности', href: POV_HREF },
-        { label: 'Ежемесячные варианты', href: EZH_HREF },
-      ],
+      items: [LINKS.onlayn, LINKS.sobrat, LINKS.mesyaca, LINKS.slozhnye],
     },
-    { label: 'Как пользоваться', href: HOWTO_HREF },
-    { label: 'Учителям', href: '/#how' },
-    { label: 'Тарифы', href: TARIFY_HREF },
+    LINKS.uchitelyam,
+    LINKS.howto,
+    LINKS.avtor,
+    LINKS.tarify,
   ] as NavItem[],
 
   /**
-   * Бургер-меню: те же адреса, что в nav, но по смыслу — главное
-   * действие карточкой, дальше группы, «Тарифы» отдельной строкой.
-   * Названия короче, чем в широкой шапке: длинные переносились на две
-   * строки. Пояснения — из лидов самих страниц, без новых обещаний.
+   * Бургер-меню: те же пункты, но по смыслу — главное действие
+   * карточкой, дальше группы, «Тарифы» отдельной строкой.
    */
   menu: {
-    glavnoe: {
-      label: ONLINE_TEXT.nachalo.menu,
-      hint: 'Задания 1–13 с автопроверкой',
-      href: VARIANT_ONLAYN_HREF,
-      icon: 'target',
-    } as MenuLink,
+    glavnoe: LINKS.onlayn as MenuLink,
     groups: [
-      {
-        label: 'Практика',
-        items: [
-          {
-            label: 'Банк заданий',
-            hint: 'Все задания по темам',
-            href: tasksPage.href,
-            icon: 'tasks',
-          },
-          {
-            label: 'Собрать вариант',
-            hint: 'Для домашней и контрольной',
-            href: VARIANT_HREF,
-            icon: 'variant',
-          },
-        ],
-      },
-      {
-        label: 'Готовые варианты',
-        items: [
-          {
-            label: 'Варианты месяца',
-            hint: 'По одному на месяц, части 1 и 2',
-            href: EZH_HREF,
-            icon: 'ezhemesyachnye',
-          },
-          {
-            label: 'Сложные варианты',
-            hint: '36 вариантов, по шесть версий',
-            href: POV_HREF,
-            icon: 'povyshennye',
-          },
-        ],
-      },
-      {
-        label: 'О проекте',
-        items: [
-          {
-            label: 'Как пользоваться',
-            hint: 'Короткий гид по сайту',
-            href: HOWTO_HREF,
-            icon: 'help',
-          },
-          {
-            label: 'Учителям',
-            hint: 'Самостоятельные и домашние',
-            href: '/#how',
-            icon: 'homework',
-          },
-          { label: 'Об авторе', hint: 'Кто делает сайт', href: '/about/', icon: 'teacher' },
-        ],
-      },
+      { label: 'Практика', items: [LINKS.bank, LINKS.sobrat] },
+      { label: 'Готовые варианты', items: [LINKS.mesyaca, LINKS.slozhnye] },
+      { label: 'О проекте', items: [LINKS.howto, LINKS.uchitelyam, LINKS.avtor] },
     ] as MenuGroup[],
-    tarify: {
-      label: 'Тарифы',
-      hint: 'Что входит в доступ',
-      href: TARIFY_HREF,
-      icon: 'favourites',
-    } as MenuLink,
+    tarify: LINKS.tarify as MenuLink,
     akkaunt: 'Аккаунт',
   },
 
