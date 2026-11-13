@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   с банком задач (№7, №6) в браузере, на собранном сайте.
+   на тренажёре «Стеклянной сцены» (№7, №6, №4) в браузере, на собранном
+   сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -14,7 +15,9 @@
         нетронутыми (запасной вариант);
      5. опорные задачи показывают прежний прогресс блока;
      6. без входа ничего не уходит в сеть: гость остаётся в браузере;
-     7. на страницах нет ошибок.
+     7. на страницах нет ошибок;
+     8. (№4) незаконченная тренировка прежнего тренажёра открывается на
+        той же задаче с тем же введённым ответом.
 
    Запуск: node scripts/check-progress-site.mjs 7 (после pnpm build). */
 
@@ -31,8 +34,10 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6)');
+/* №4 и №5 — вероятность: прежние ключи свои, задачи — «прототип:вариант». */
+const VEROYATNOST = N === '4' || N === '5';
+if (N !== '6' && N !== '7' && !VEROYATNOST) {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 4, 5)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -77,9 +82,12 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = `http://127.0.0.1:${server.address().port}`;
 
-const OLD = `budetege:zadanie-${N}:v1`;
-const OLD_OPORNYE = `budetege:zadanie-${N}:opornye:v1`;
-const NEW = `budetege:zadanie-${N}:log:v1`;
+const OLD = VEROYATNOST ? `budetege:veroyatnost-${N}:v2` : `budetege:zadanie-${N}:v1`;
+const OLD_OPORNYE = VEROYATNOST
+  ? `budetege:veroyatnost-${N}:prep:v1`
+  : `budetege:zadanie-${N}:opornye:v1`;
+const NEW = VEROYATNOST ? `budetege:veroyatnost-${N}:log:v1` : `budetege:zadanie-${N}:log:v1`;
+const SESSION = `budetege:trainer:${N}:session`;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
 );
@@ -87,12 +95,20 @@ const staroe = obrazec[OLD];
 const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
-const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
-const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
-/* Блок опорных задач из образца и сколько в нём задач. */
-const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+/* Блок опорных задач из образца и сколько в нём задач; прототип задачи по
+   ключу. У №4 и №5 в хранилище опорных — сами задачи, ключ задачи
+   тренажёра — «прототип:вариант». */
+const BLOKI_OPORNYH = VEROYATNOST
+  ? requireSrc('lib/veroyatnost/index.ts')[`PODGOTOVKA_${N}`]
+  : requireSrc(`lib/zadanie${N}/opornye.ts`).BLOKI_OPORNYH;
+const pervyyKlyuch = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+const blokObrazca = VEROYATNOST
+  ? BLOKI_OPORNYH.find((b) => b.zadachi.some((z) => z.id === pervyyKlyuch))?.id
+  : pervyyKlyuch;
 const zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-const prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+const BANK = VEROYATNOST ? [] : requireSrc(`lib/zadanie${N}/bank/index.ts`).BANK;
+const prototipOf = (id) =>
+  VEROYATNOST ? id?.slice(0, id.lastIndexOf(':')) : BANK.find((z) => z.id === id)?.prototypeId;
 
 const browser = await chromium.launch();
 try {
@@ -174,14 +190,46 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-  const reshenoOp = Object.values(obrazec[OLD_OPORNYE].outcomes).filter(
-    (x) => x === 'right',
+  const zadachiBloka = new Set(
+    BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.map((z) => z.id) ?? [],
+  );
+  const reshenoOp = Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
+    ([id, x]) => x === 'right' && (!VEROYATNOST || zadachiBloka.has(id)),
   ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(
     new RegExp(`решено ${reshenoOp} из ${zadachVBloke}`).test(kartochki),
     `опорные задачи показывают прежний прогресс блока: решено ${reshenoOp} из ${zadachVBloke}`,
   );
+
+  /* 8. Незаконченная тренировка прежнего тренажёра (№4, №5): открывается
+     на той же задаче, с тем же введённым ответом. */
+  if (VEROYATNOST && obrazec[SESSION] !== undefined) {
+    await page.evaluate(
+      ([key, value]) => window.localStorage.setItem(key, value),
+      [SESSION, JSON.stringify(obrazec[SESSION])],
+    );
+    await page.goto(`${BASE}/zadaniya/${N}/trenazher/`, { waitUntil: 'networkidle' });
+    const ui = obrazec[SESSION].ui;
+    const [kind, n] = obrazec[SESSION].payload.tasks[ui.index];
+    const ekran = page.locator('.trn-zadacha');
+    await ekran.waitFor({ timeout: 20000 });
+    check(
+      (await ekran.getAttribute('data-task')) === `${kind}:${n}`,
+      `прежняя тренировка открылась на той же задаче (${kind}:${n})`,
+    );
+    const pole = page.locator('.trn-pole input').first();
+    check(
+      (await pole.inputValue()) === ui.card.value,
+      `введённый ответ на месте («${ui.card.value}»)`,
+    );
+    check(
+      (await page.locator('.trn-zadacha__nomer').first().innerText()).startsWith(
+        `${ui.index + 1} `,
+      ),
+      `номер задачи тот же: ${ui.index + 1}`,
+    );
+  }
 
   /* 6 и 7. */
   check(vSet.length === 0, `гость: запросов наружу нет (${vSet.slice(0, 2).join(', ')})`);

@@ -213,6 +213,11 @@
   min-width: 0;
   color: var(--color-text);
 }
+/* Подсказка-вопросы (№4, №5): вопросы с кнопками в столбик. */
+.op-podskazka--voprosy {
+  display: block;
+  color: var(--color-text);
+}
 .op-podskazka-knopka {
   display: inline-flex;
   align-items: center;

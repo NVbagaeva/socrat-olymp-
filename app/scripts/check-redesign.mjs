@@ -38,6 +38,31 @@ if (!/^\d{1,2}$/.test(razdel ?? '')) {
 
 /** Файлы и папки содержания раздела (пути от корня репозитория). */
 const SODERZHANIE = {
+  /* №4 и №5: общий банк вероятности — прототипы, варианты, ответы, разборы,
+     подсказки, модели рисунков, опорные задачи, методы; теория (тексты в
+     content и разметка разделов теории), «О задании», карточки. */
+  4: [
+    'app/src/lib/veroyatnost/bank4',
+    'app/src/lib/veroyatnost/index.ts',
+    'app/src/lib/veroyatnost/types.ts',
+    'app/src/lib/veroyatnost/model.ts',
+    'app/src/lib/veroyatnost/model-zadachi.ts',
+    'app/src/lib/veroyatnost/blocks.ts',
+    'app/src/lib/veroyatnost/metody4.ts',
+    'app/src/lib/veroyatnost/podgotovka4.ts',
+    'app/src/lib/veroyatnost/podskazka.ts',
+    'app/src/lib/veroyatnost/illyustratsii.ts',
+    'app/src/lib/veroyatnost/secret.ts',
+    'app/src/lib/veroyatnost/teoriya.ts',
+    'app/src/lib/veroyatnost/teoriya-ponimanie.ts',
+    'app/src/lib/veroyatnost/teoriya-yakorya.ts',
+    'app/src/content/veroyatnost-teoriya.ts',
+    'app/src/content/veroyatnost-o-zadanii.ts',
+    'app/src/content/veroyatnost-metody.ts',
+    'app/src/content/veroyatnost-syuzhety.ts',
+    'app/src/content/kartochki/04-veroyatnost.ts',
+    'app/src/components/tasks/veroyatnost/teoriya',
+  ],
   6: [
     'app/src/data/zadanie6',
     'app/public/data/zadanie6',

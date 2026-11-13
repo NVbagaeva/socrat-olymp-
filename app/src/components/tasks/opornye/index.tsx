@@ -152,10 +152,16 @@ export interface OpornayaZadachaProps {
   onCheck: () => void;
   /** Подсказка о записи ответа: попытка не тратится. */
   formatHint?: string | null;
-  /** Подсказка (HTML): открыта ли, открыть. null — подсказки нет. */
-  podskazka: { html: string; open: boolean; onOpen: () => void } | null;
-  /** Решение по шагам: доступно после ответа; открыто ли, переключить. */
-  reshenie: { shagi: Shag[]; open: boolean; onToggle: () => void } | null;
+  /**
+   * Подсказка (HTML): открыта ли, открыть. null — подсказки нет. `telo` —
+   * подсказка-вопросы с кнопками вместо текста (№4, №5).
+   */
+  podskazka: { html: string; telo?: ReactNode; open: boolean; onOpen: () => void } | null;
+  /**
+   * Решение по шагам: доступно после ответа; открыто ли, переключить.
+   * `posle` — под шагами (№4, №5: рисунок метода с подсветкой).
+   */
+  reshenie: { shagi: Shag[]; posle?: ReactNode; open: boolean; onToggle: () => void } | null;
   /** Плашка «Запомни» блока: над задачей. */
   zapomni?: ReactNode;
   labels: OpornayaZadachaLabels;
@@ -262,16 +268,22 @@ export function OpornayaZadacha({
         )}
 
         {podskazka !== null && podskazka.open && !solved ? (
-          <p className="op-podskazka" role="note">
-            <Ikonka name="lampa" />
-            <span dangerouslySetInnerHTML={{ __html: podskazka.html }} />
-          </p>
+          podskazka.telo === undefined ? (
+            <p className="op-podskazka" role="note">
+              <Ikonka name="lampa" />
+              <span dangerouslySetInnerHTML={{ __html: podskazka.html }} />
+            </p>
+          ) : (
+            <div className="op-podskazka op-podskazka--voprosy" role="note">
+              {podskazka.telo}
+            </div>
+          )
         ) : null}
 
         {reshenie !== null && reshenie.open ? (
           <div className="op-reshenie" role="region" aria-label={labels.shagi}>
             <p className="stk-podpis">{labels.shagi}</p>
-            <ShagiResheniya shagi={reshenie.shagi} />
+            <ShagiResheniya shagi={reshenie.shagi} posle={reshenie.posle} />
           </div>
         ) : null}
 

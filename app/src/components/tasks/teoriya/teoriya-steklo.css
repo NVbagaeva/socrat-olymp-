@@ -171,3 +171,55 @@
     scroll-behavior: auto;
   }
 }
+
+/* Теория №4 и №5 (components/tasks/veroyatnost/teoriya): свои карточки
+   разделов — в тех же ролях и тонах, что рамки выше. Разметка и тексты
+   теории не меняются: слой действует только внутри .teor-steklo.
+     карточка вида события, способа, примера — стекло;
+     «Запомни», итог — тёмно-синяя полоса (правило);
+     «Важно» — терракотовая; идея, факт — оранжевая. */
+@media screen {
+  .teor-steklo
+    :is(
+      .z4-karta,
+      .vvid,
+      .vklass,
+      .vsvyaz,
+      .vcheck-card,
+      .vteor-sluchay,
+      .vizo-sposob,
+      .vizo-eylerblok,
+      .vizo-primer
+    ) {
+    border: 0;
+    border-radius: var(--teor-r);
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  }
+
+  .teor-steklo :is(.vzapomni, .vteor-itog, .vteor-vazhno, .vteor-ideya, .vizo-fakt) {
+    --ton: var(--navy-700);
+    --ton-soft: var(--blue-50);
+    --ton-border: var(--blue-300);
+    border: 0;
+    border-radius: var(--teor-r);
+    background: linear-gradient(160deg, var(--white), var(--ton-soft));
+    box-shadow:
+      inset 0 0 0 1px var(--ton-border),
+      inset 4px 0 0 var(--ton),
+      var(--glass-hi),
+      0 8px 24px rgb(31 95 208 / 0.06);
+  }
+  .teor-steklo .vteor-vazhno {
+    --ton: var(--terracotta);
+    --ton-soft: var(--terracotta-50);
+    --ton-border: var(--terracotta-200);
+  }
+  .teor-steklo :is(.vteor-ideya, .vizo-fakt) {
+    --ton: var(--amber-600);
+    --ton-soft: var(--amber-50);
+    --ton-border: var(--cream-200);
+  }
+}
