@@ -25,6 +25,7 @@ const kartochek = (n: number) => `${n} ${plural(n, 'карточка', 'карт
 
 export const DZK = {
   zadach,
+  tipov: (n: number) => `${n} ${plural(n, 'тип', 'типа', 'типов')}`,
   naborov,
   kartochek,
 
@@ -76,6 +77,7 @@ export const DZK = {
     skolko: 'Сколько задач',
     dobavit: 'Добавить',
     konkretnye: 'Конкретные задачи',
+    konkretnaya: 'Конкретная задача',
     predprosmotr: 'Пример задачи',
     eshchePrimer: 'Другой пример',
     vzyatEtu: 'Добавить эту задачу',

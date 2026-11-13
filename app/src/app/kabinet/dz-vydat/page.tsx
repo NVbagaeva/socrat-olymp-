@@ -1,22 +1,25 @@
 import type { Metadata } from 'next';
 import { AuthDisabled } from '@/components/auth/AuthDisabled';
 import { AuthShell } from '@/components/auth/AuthShell';
-import { IssueScreen } from '@/components/dz/IssueScreen';
+import { Konstruktor } from '@/components/dz/konstruktor/Konstruktor';
 import { AUTH_ENABLED } from '@/lib/auth/config';
-import { names8Html } from '@/lib/vychisleniya/names';
+import 'katex/dist/katex.min.css';
 
 export const metadata: Metadata = {
   title: 'Выдать домашнее задание — Будет на ЕГЭ',
   robots: { index: false },
 };
 
-/** «Выдать домашнее задание»: что выдать — в параметрах адреса (lib/dz/links.ts). */
+/**
+ * «Выдать домашнее задание» — конструктор ДЗ из карточек, опорных задач
+ * и тренажёра (components/dz/konstruktor). Прежние ссылки с параметрами
+ * (lib/dz/links.ts → issueHref) кладут типы и задачи в черновик.
+ */
 export default function VydatPage() {
   if (!AUTH_ENABLED) return <AuthDisabled />;
   return (
     <AuthShell wide>
-      {/* Названия типов набраны KaTeX на сборке. */}
-      <IssueScreen names={names8Html()} />
+      <Konstruktor />
     </AuthShell>
   );
 }

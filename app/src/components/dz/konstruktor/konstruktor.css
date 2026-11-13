@@ -1,0 +1,434 @@
+/* Конструктор ДЗ — «Стеклянная сцена». Префикс dzk-. Телефон в
+   приоритете (375–430 px): зоны нажатия ≥ 44 px, «Состав ДЗ» —
+   панелью снизу, свёрнутой до счётчика; кнопка «?» поднимается над ней
+   (--fab-lift), ничего её не перекрывает. С 1024 px — две колонки,
+   «Состав» справа, липкий. */
+
+.dzk {
+  --stk-r-card: 20px;
+  display: grid;
+  gap: var(--space-5);
+  padding-bottom: calc(var(--fab-reserve) + 96px);
+}
+.dzk-head {
+  display: grid;
+  gap: var(--space-2);
+}
+.dzk-title {
+  margin: 0;
+  font-size: var(--fs-h2, 1.6rem);
+  line-height: 1.2;
+}
+.dzk-lead,
+.dzk-muted {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.dzk-setka {
+  display: grid;
+  gap: var(--space-5);
+}
+@media (min-width: 1024px) {
+  .dzk-setka {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: start;
+  }
+  .dzk-pravo {
+    position: sticky;
+    top: var(--space-6);
+  }
+}
+
+/* ── Источники ── */
+.dzk-istochniki {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.dzk-razdely,
+.dzk-vkladki {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.dzk-chip,
+.dzk-vkladka {
+  flex: none;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: 999px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dzk-chip.is-active,
+.dzk-vkladka.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.dzk-chip:focus-visible,
+.dzk-vkladka:focus-visible {
+  outline: 3px solid var(--color-focus, var(--color-primary));
+  outline-offset: 2px;
+}
+.dzk-spisok,
+.dzk-tipy,
+.dzk-vybor,
+.dzk-punkty,
+.dzk-shablony__spisok,
+.dzk-oshibki {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.dzk-item {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.dzk-item__verh {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.dzk-item__nazvanie,
+.dzk-tip__nazvanie {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.dzk-item__skolko,
+.dzk-item__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+}
+.dzk-item__lead {
+  white-space: normal;
+}
+.dzk-item__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dzk-item__knopki .stk-btn,
+.dzk-dobavit {
+  min-height: 44px;
+}
+.dzk-dobavit.is-est {
+  color: var(--color-success, #1f7a4d);
+}
+.dzk-tip {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--glass-edge);
+}
+.dzk-vybor__item {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.dzk-galka {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: 44px;
+  cursor: pointer;
+}
+.dzk-galka input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  accent-color: var(--color-primary);
+}
+.dzk-kartochka,
+.dzk-zadacha {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dzk-zadacha__tip {
+  color: var(--color-text-secondary);
+}
+.dzk-kartochka__oborot,
+.dzk-primer {
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: var(--glass-tint-warm);
+  overflow-x: auto;
+}
+.dzk-primer {
+  display: grid;
+  gap: var(--space-3);
+}
+.dzk-primer__uslovie {
+  text-align: center;
+  font-size: 1.1rem;
+  overflow-x: auto;
+}
+.dzk-primer__uslovie.is-tekst {
+  text-align: left;
+  font-size: inherit;
+}
+.dzk-metka {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--fs-caption);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+}
+.dzk-metka--kartochki {
+  background: rgb(31 122 77 / 0.12);
+}
+.dzk-metka--opornye {
+  background: rgb(232 129 47 / 0.15);
+}
+.dzk-metka--trenazher {
+  background: rgb(38 99 235 / 0.12);
+}
+.dzk-metka--no {
+  background: transparent;
+}
+
+/* ── Состав ── */
+.dzk-sostav {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+.dzk-sostav__verh {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+.dzk-sostav__title {
+  margin: 0;
+  font-size: var(--fs-h4, 1.1rem);
+}
+.dzk-schet {
+  margin: var(--space-1) 0 0;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.dzk-sostav__toggle {
+  min-height: 44px;
+  display: none;
+}
+.dzk-sostav__telo {
+  display: grid;
+  gap: var(--space-3);
+}
+.dzk-predel,
+.dzk-oshibka {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: 12px;
+  background: rgb(200 40 40 / 0.1);
+  color: var(--color-danger, #b42318);
+}
+.dzk-pusto {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.dzk-punkt {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: start;
+  padding: var(--space-2);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+}
+.dzk-punkt.is-tyanem {
+  box-shadow: var(--glass-shadow);
+  border-color: var(--color-primary);
+}
+.dzk-punkt__telo {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.dzk-punkt__metki,
+.dzk-punkt__nazvanie,
+.dzk-punkt__podrobno {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.dzk-punkt__metki .dzk-metka {
+  margin-left: 0;
+  margin-right: var(--space-1);
+}
+.dzk-punkt__nazvanie {
+  font-weight: 600;
+}
+.dzk-punkt__podrobno {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.dzk-punkt__knopki {
+  display: grid;
+  gap: 2px;
+}
+.dzk-ruchka,
+.dzk-ikon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.dzk-ruchka {
+  cursor: grab;
+  touch-action: none;
+}
+.dzk-ruchka:active {
+  cursor: grabbing;
+}
+.dzk-ikon:hover,
+.dzk-ruchka:hover {
+  background: var(--glass-tint-warm);
+}
+.dzk-ikon[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+.dzk-ikon--ubrat {
+  color: var(--color-danger, #b42318);
+}
+.dzk-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+}
+.dzk-stepper__ryad {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dzk-stepper__ryad .stk-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+.dzk-stepper__ryad output {
+  min-width: 2ch;
+  text-align: center;
+  font-weight: 600;
+}
+.dzk-ochistit {
+  justify-self: start;
+  min-height: 44px;
+}
+
+/* ── Форма ── */
+.dzk-forma {
+  display: grid;
+  gap: var(--space-4);
+}
+.dzk-pole {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--stk-r-card);
+  background: var(--glass-bg-strong);
+  min-width: 0;
+}
+.dzk-legend {
+  padding: 0;
+  font-weight: 700;
+  font-size: var(--fs-h4, 1.1rem);
+}
+.dzk-shablony > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.dzk-shablony__spisok li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dzk-ryad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.dzk-ryad > .input {
+  flex: 1 1 200px;
+}
+.dzk-checks label {
+  min-height: 44px;
+}
+.dzk-vydat {
+  width: 100%;
+  min-height: 52px;
+}
+.dzk-vydano {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+/* Телефон: «Состав» — панелью снизу экрана, свёрнутой до счётчика. */
+@media (max-width: 1023.98px) {
+  .dzk-sostav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    max-height: 75vh;
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    border-radius: 20px 20px 0 0;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .dzk-sostav__verh {
+    padding-right: calc(var(--fab-size) + var(--fab-gap));
+  }
+  .dzk-sostav__toggle {
+    display: inline-flex;
+  }
+  .dzk-sostav:not(.is-otkryto) .dzk-sostav__telo {
+    display: none;
+  }
+  .dzk-sostav.is-otkryto .dzk-sostav__telo {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* «?» стоит над свёрнутой панелью, справа от счётчика — в её ряду. */
+  body:has(.dzk-sostav) {
+    --fab-lift: 6px;
+  }
+  body:has(.dzk-sostav.is-otkryto) .help-fab {
+    visibility: hidden;
+    opacity: 0;
+  }
+}

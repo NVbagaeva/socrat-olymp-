@@ -16,7 +16,9 @@ import type { PunktSostava, Sostav } from '../sostav';
 import type { HwPartInput, HwUnitInput } from '../types';
 import { kartochkaVDz, kartochkiNabora } from './obshchee';
 
-export class SborkaError extends Error {}
+export class SborkaError extends Error {
+  override name = 'SborkaError';
+}
 
 export type Katalogi = ReadonlyMap<number, KatalogRazdela>;
 
@@ -48,7 +50,7 @@ export function titlePunkta(kat: KatalogRazdela, p: PunktSostava): string {
     case 'trenazher':
       return p.gruppa !== undefined
         ? escape(kat.trenazher.find((g) => g.id === p.gruppa)?.nazvanie ?? p.gruppa)
-        : nazvanieTipa(kat, p.tipy[0] ?? '');
+        : p.tipy.map((id) => nazvanieTipa(kat, id)).join('; ');
     case 'zadacha':
       return nazvanieTipa(kat, p.tip);
   }
