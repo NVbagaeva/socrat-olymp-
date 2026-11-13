@@ -20,8 +20,10 @@
      NEXT_PUBLIC_SUPABASE_ANON_KEY=mock-anon-key
 
    Сценарии (сборка со входом и кнопкой в шапке, NEXT_PUBLIC_AUTH_IN_HEADER=1):
-     • шапка на 1440 и 390: «Войти» есть, горизонтальной прокрутки нет,
-       в меню телефона тоже «Войти»;
+     • шапка на 1440: «Войти» таблеткой со словом, «Начать бесплатно»
+       ведёт в банк заданий (регистрация пока по приглашению); на 390,
+       375 и 320 «Войти» — кружок в шапке не меньше 40 px,
+       горизонтальной прокрутки нет, в меню телефона тоже «Войти»;
      • регистрация без галочек согласий → просьба отметить, запрос не уходит;
        ученику — год рождения, младше 18 — почта родителя;
      • регистрация чужой почтой → «Регистрация пока по приглашению»,
@@ -795,17 +797,44 @@ async function runEnabled() {
     await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
     check((await page.locator(LOGIN).count()) === 1, 'главная 1440: кнопка «Войти» есть');
     check(
-      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) ===
-        '/voyti/?vkladka=registraciya',
-      'главная: «Начать бесплатно» ведёт на регистрацию',
+      (await page.locator(LOGIN).innerText()).trim() === 'Войти',
+      'главная 1440: на кнопке видно слово «Войти»',
+    );
+    /* Регистрация пока по приглашению: «Начать бесплатно» ведёт туда
+       же, куда без входа, — в банк заданий, а не в закрытую форму. */
+    check(
+      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) === '/zadaniya/',
+      'главная: «Начать бесплатно» ведёт в банк заданий',
     );
     await shot(page, 'shapka-do-vhoda-1440');
+    await context.close();
+  }
+  /* Телефон: «Войти» — кружок со значком прямо в шапке, имя ссылки
+     «Войти» для скринридера; прокрутки вбок нет и на 320. */
+  for (const width of [320, 375]) {
+    const { context, page } = await newPage(mock, width, errors);
+    await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
+    check(await noHorizontalScroll(page), `главная ${width}: горизонтальной прокрутки нет`);
+    check(
+      await page.getByRole('link', { name: 'Войти', exact: true }).first().isVisible(),
+      `главная ${width}: кружок «Войти» виден в шапке`,
+    );
     await context.close();
   }
   {
     const { context, page } = await newPage(mock, 390, errors);
     await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
     check(await noHorizontalScroll(page), 'главная 390: горизонтальной прокрутки нет');
+    const login = page.locator(LOGIN);
+    const box = await login.boundingBox();
+    check(
+      box !== null && box.width >= 40 && box.height >= 40,
+      'главная 390: кружок «Войти» не меньше 40 px',
+    );
+    check(
+      (await login.getAttribute('href')) === '/voyti/',
+      'главная 390: кружок «Войти» ведёт на /voyti/',
+    );
     await shot(page, 'shapka-do-vhoda-390');
     await page.click('.burger');
     await page.waitForSelector('#site-menu');

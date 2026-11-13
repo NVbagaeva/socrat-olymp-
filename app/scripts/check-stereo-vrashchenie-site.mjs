@@ -38,6 +38,19 @@ function check(ok, what) {
   if (!ok) failures.push(what);
 }
 
+/* Рамка элемента на экране. Чертёж после поворота перерисовывается ещё
+   раз (подстройка под размер), и элемент на миг заменяется новым — тогда
+   boundingBox отдаёт null. Ждём, пока рамка появится. */
+async function ramka(locator, ms = 5000) {
+  const konec = Date.now() + ms;
+  for (;;) {
+    const box = await locator.boundingBox().catch(() => null);
+    if (box !== null) return box;
+    if (Date.now() > konec) return null;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
 const OUT = path.join(APP, 'out');
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -298,10 +311,11 @@ for (const size of SIZES) {
     }
     const nazhmi = page.locator('.o3-nazhmi').first();
     check((await nazhmi.count()) === 1, where('нет задачи «нажми» в блоке'));
-    if ((await nazhmi.count()) === 1) {
-      await nazhmi.scrollIntoViewIfNeeded();
-      const cel = nazhmi.locator('[data-cel]').first();
-      const cb = await cel.boundingBox();
+    await nazhmi.scrollIntoViewIfNeeded().catch(() => {});
+    const cb =
+      (await nazhmi.count()) === 1 ? await ramka(nazhmi.locator('[data-cel]').first()) : null;
+    check(cb !== null || (await nazhmi.count()) === 0, where('у цели нет рамки на экране'));
+    if (cb !== null) {
       /* Выбранная цель подсвечена слоем .solid-cel-on (lib/solid/render.ts). */
       const vybrano = () => nazhmi.locator('.solid-cel-on').count();
       const html0 = await nazhmi.innerHTML();
@@ -315,13 +329,15 @@ for (const size of SIZES) {
       /* Касание — выбор. */
       /* После поворота чертёж перерисован: цель берём заново, по её
          текущей позиции на экране (старый элемент уже не виден). */
-      await nazhmi.locator('[data-cel]').first().waitFor({ state: 'visible' });
-      const cel2 = nazhmi.locator('[data-cel]').first();
-      const cb2 = await cel2.boundingBox();
-      if (size.touch) await page.touchscreen.tap(cb2.x + cb2.width / 2, cb2.y + cb2.height / 2);
-      else await page.mouse.click(cb2.x + cb2.width / 2, cb2.y + cb2.height / 2);
-      await page.waitForTimeout(400);
-      check((await vybrano()) > 0, where('касание по цели её не выбрало'));
+      const cb2 = await ramka(nazhmi.locator('[data-cel]').first());
+      check(cb2 !== null, where('после поворота у цели нет рамки на экране'));
+      if (cb2 !== null) {
+        const [x, y] = [cb2.x + cb2.width / 2, cb2.y + cb2.height / 2];
+        if (size.touch) await page.touchscreen.tap(x, y);
+        else await page.mouse.click(x, y);
+        await page.waitForTimeout(400);
+        check((await vybrano()) > 0, where('касание по цели её не выбрало'));
+      }
     }
     await context.close();
   }

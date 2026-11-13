@@ -33,6 +33,8 @@ export interface RazdelTabsProps {
    * с меню разделов (RazdelyNav), как у №12.
    */
   before?: ReactNode;
+  /** Модификатор строки ленты, общий для обеих копий (TabsRow). */
+  className?: string;
 }
 
 /**
@@ -66,7 +68,14 @@ function sKartochkami(base: string, tabs: readonly RazdelTab[]): readonly Razdel
   return [...tabs.slice(0, kuda), VKLADKA_KARTOCHKI, ...tabs.slice(kuda)];
 }
 
-export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: RazdelTabsProps) {
+export function RazdelTabs({
+  base,
+  tabs: svoi,
+  tutors,
+  tutorsTail,
+  before,
+  className,
+}: RazdelTabsProps) {
   const tabs = sKartochkami(base, svoi);
   const pathname = usePathname();
   /* Узел ленты нужен меню материалов. Активную вкладку в видимую часть
@@ -127,7 +136,7 @@ export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: Raz
      пришлось бы описывать дважды. */
   if (tutors === undefined) {
     return (
-      <TabsRow>
+      <TabsRow {...(className === undefined ? {} : { className })}>
         {() => (
           <>
             {before}

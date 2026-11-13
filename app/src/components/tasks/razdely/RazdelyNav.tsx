@@ -53,6 +53,8 @@ export interface RazdelyNavProps extends RazdelyData {
   dop?: ReactNode;
   /** Последний пункт меню под карточками: у стереометрии — «Все задания части 1 и 2». */
   niz?: ReactNode;
+  /** Подпись плашки. Не задана — название текущего раздела. */
+  plashkaText?: string;
 }
 
 type Faza = 'closed' | 'open' | 'closing';
@@ -72,7 +74,16 @@ type Faza = 'closed' | 'open' | 'closing';
  * «Назад» из нового раздела ведёт прямо в прежний, на ту вкладку,
  * с которой ушли.
  */
-export function RazdelyNav({ no, chi, razdely, current, vkladka, dop, niz }: RazdelyNavProps) {
+export function RazdelyNav({
+  no,
+  chi,
+  razdely,
+  current,
+  vkladka,
+  dop,
+  niz,
+  plashkaText,
+}: RazdelyNavProps) {
   const chego = chi ?? `задания №${no}`;
   const router = useRouter();
   const [faza, setFaza] = useState<Faza>('closed');
@@ -374,7 +385,7 @@ export function RazdelyNav({ no, chi, razdely, current, vkladka, dop, niz }: Raz
         )}
         <span className="razdely-plashka__text">
           <span className="sr-only">Раздел {chego}: </span>
-          {tekushchiy?.title}
+          {plashkaText ?? tekushchiy?.title}
         </span>
         <svg
           className="razdely-plashka__arrow"

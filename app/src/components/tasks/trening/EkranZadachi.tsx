@@ -44,11 +44,22 @@ export interface EkranZadachiProps {
   /** Подсказка о записи ответа («1/4», «5 см»): попытка не тратится. */
   formatHint?: string | null;
   /** Подсказка: текст (HTML), открыта ли, открыть. null — подсказок нет. */
-  podskazka: { html: string; open: boolean; onOpen: () => void } | null;
+  podskazka: {
+    html: string;
+    /**
+     * Подсказка-вопросы с кнопками (PodskazkaVoprosy): показывается вместо
+     * текста. Ученик отвечает на вопросы и сам выходит на решение.
+     */
+    telo?: ReactNode;
+    open: boolean;
+    onOpen: () => void;
+  } | null;
   /** Решение по шагам: открыто ли, переключить. null — решения до итогов нет. */
   reshenie: {
     shagi: Shag[];
     delimost?: PriznakDelimosti[];
+    /** Под шагами: панель раздела («Считаем с умом»). */
+    posle?: ReactNode;
     open: boolean;
     onToggle: () => void;
   } | null;
@@ -230,10 +241,16 @@ export function EkranZadachi({
 
         {podskazka !== null && !otvechen ? (
           podskazka.open ? (
-            <p className="trn-podskazka" role="note">
-              <Ikonka name="lampa" />
-              <span dangerouslySetInnerHTML={{ __html: podskazka.html }} />
-            </p>
+            podskazka.telo === undefined ? (
+              <p className="trn-podskazka" role="note">
+                <Ikonka name="lampa" />
+                <span dangerouslySetInnerHTML={{ __html: podskazka.html }} />
+              </p>
+            ) : (
+              <div className="trn-podskazka trn-podskazka--voprosy" role="note">
+                {podskazka.telo}
+              </div>
+            )
           ) : (
             <button type="button" className="trn-podskazka-knopka" onClick={podskazka.onOpen}>
               <Ikonka name="lampa" /> {labels.podskazka}
@@ -244,7 +261,11 @@ export function EkranZadachi({
         {reshenie !== null && reshenie.open ? (
           <div className="trn-reshenie" role="region" aria-label={labels.shagi}>
             <p className="stk-podpis">{labels.shagi}</p>
-            <ShagiResheniya shagi={reshenie.shagi} delimost={reshenie.delimost} />
+            <ShagiResheniya
+              shagi={reshenie.shagi}
+              delimost={reshenie.delimost}
+              posle={reshenie.posle}
+            />
           </div>
         ) : null}
 
