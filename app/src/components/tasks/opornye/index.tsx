@@ -171,7 +171,7 @@ export interface OpornayaZadachaProps {
   vybory?: readonly { number: string; labelHtml: string }[];
   /** Свой вердикт вместо «Пока не так» (№13: «Число верное, единицы нет»). */
   verdiktNeverno?: { zag: string; lead: string };
-  /** Ещё кнопки в ряду действий (№2, №13: «Ещё вариант»). */
+  /** Ещё кнопки в ряду действий (№2, №13, №1: «Ещё вариант»). */
   dop?: ReactNode;
   labels: OpornayaZadachaLabels;
 }
