@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на общем тренажёре (№7, №6, №2, №10) в браузере, на собранном сайте.
+   на общем тренажёре (№7, №6, №2, №13, №10) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -36,8 +36,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7' && N !== '2' && N !== '10') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 10)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '13' && N !== '10') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 10)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -108,23 +108,37 @@ const prezhnieOshibki = ZHURNAL
   ? popytki.filter((a) => a.outcome === 'wrong' || a.outcome === 'revealed').map((a) => a.task)
   : staroe.mistakes;
 
-/* Блок опорных задач из образца, сколько в нём задач и сколько решено;
-   прототип задачи по ключу. У №2 банка нет: ключ задачи — «прототип|seed». */
-const BLOKI_OPORNYH =
-  N === '2'
-    ? requireSrc('lib/vektory/prep/bloki.ts').BLOKI
-    : requireSrc(`lib/zadanie${N}/opornye.ts`).BLOKI_OPORNYH;
+/* Блок опорных задач из образца и сколько в нём задач; прототип задачи по
+   ключу. У №2 и №13 банка задач нет: ключ задачи — «прототип|seed»; у №13
+   задача опорного блока — «блок:номер». У №10 опорные — запись
+   { задача: верно ли }, блок ищется по первой задаче образца. */
 const opornye = local[OLD_OPORNYE];
-const blok = ZHURNAL
-  ? BLOKI_OPORNYH.find((b) => b.zadachi.some((z) => z.id === Object.keys(opornye)[0]))
-  : BLOKI_OPORNYH.find((b) => b.id === Object.keys(opornye.kinds)[0]);
-const zadachVBloke = blok?.zadachi.length;
-const reshenoOp = ZHURNAL
-  ? blok.zadachi.filter((z) => opornye[z.id] === true).length
-  : Object.values(opornye.outcomes).filter((x) => x === 'right').length;
-const BANK = N === '2' ? [] : requireSrc(`lib/zadanie${N}/bank/index.ts`).BANK;
-const prototipOf = (id) =>
-  N === '2' ? id?.split('|')[0] : BANK.find((z) => z.id === id)?.prototypeId;
+const blokObrazca = ZHURNAL ? null : Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+let zadachVBloke;
+let prototipOf;
+let reshenoOp10 = null;
+if (ZHURNAL) {
+  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
+  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
+  const blok = BLOKI_OPORNYH.find((b) => b.zadachi.some((z) => z.id === Object.keys(opornye)[0]));
+  zadachVBloke = blok?.zadachi.length;
+  reshenoOp10 = blok?.zadachi.filter((z) => opornye[z.id] === true).length ?? 0;
+  prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+} else if (N === '13') {
+  const { BLOKI_13, zadachiBloka } = requireSrc('lib/zadanie13/opornye/bloki.ts');
+  const b = BLOKI_13.find((x) => x.id === blokObrazca);
+  zadachVBloke = b === undefined ? undefined : zadachiBloka(b).length;
+  prototipOf = (id) => id?.split('|')[0];
+} else if (N === '2') {
+  const { BLOKI } = requireSrc('lib/vektory/prep/bloki.ts');
+  zadachVBloke = BLOKI.find((b) => b.id === blokObrazca)?.zadachi.length;
+  prototipOf = (id) => id?.split('|')[0];
+} else {
+  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
+  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
+  zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
+  prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+}
 
 const browser = await chromium.launch();
 try {
@@ -217,6 +231,12 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
+  /* У №13 в образце несколько блоков: считаем блок образца («блок:номер»). */
+  const reshenoOp = ZHURNAL
+    ? reshenoOp10
+    : Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
+        ([key, x]) => x === 'right' && (N !== '13' || key.startsWith(`${blokObrazca}:`)),
+      ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(
     new RegExp(`решено ${reshenoOp} из ${zadachVBloke}`).test(kartochki),
