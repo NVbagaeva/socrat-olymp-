@@ -70,6 +70,7 @@ export function PrimerLazy6({
     <div ref={anchor}>
       <KartaPrimer
         uslovieHtml={primer.uslovieHtml}
+        {...(primer.risunok === undefined ? {} : { risunok: primer.risunok })}
         shagi={primer.shagi}
         otvet={primer.otvet}
         opasnoHtml={opasnoHtml}
