@@ -7,8 +7,10 @@
  * черновик, — виден с телефона и с компьютера.
  *
  * Одно хранилище на вкладку: кнопки в разделе, плашка «В черновике ДЗ» и
- * конструктор видят одно и то же. Запись в базу — с задержкой: несколько
- * нажатий подряд уходят одним запросом.
+ * конструктор видят одно и то же. Состав пишется в базу сразу (после
+ * нажатия репетитор может тут же уйти на другую страницу), настройки —
+ * с задержкой: набор текста не шлёт запрос на каждую букву. Отложенное
+ * дописывается и при уходе со страницы.
  */
 
 import { useSyncExternalStore } from 'react';
@@ -53,33 +55,51 @@ export function zagruzitChernovik(): Promise<void> {
   return zagruzka;
 }
 
-function zapisat(sostav: Sostav): void {
-  if (zapis !== null) clearTimeout(zapis);
-  zapis = setTimeout(() => {
-    zapis = null;
-    void api().then((m) =>
+/* Запросы записи — по очереди: поздний не обгоняет ранний. */
+let ochered: Promise<unknown> = Promise.resolve();
+
+function otpravit(sostav: Sostav): Promise<unknown> {
+  ochered = ochered
+    .catch(() => undefined)
+    .then(() => api())
+    .then((m) =>
       sostav.punkty.length === 0 && sostav.nastroyki.note === ''
         ? m.clearDraft()
         : m.saveDraft(sostav),
     );
+  return ochered;
+}
+
+function zapisat(sostav: Sostav, srazu: boolean): void {
+  if (zapis !== null) clearTimeout(zapis);
+  zapis = null;
+  if (srazu) {
+    void otpravit(sostav);
+    return;
+  }
+  zapis = setTimeout(() => {
+    zapis = null;
+    void otpravit(sostav);
   }, 400);
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', () => {
+    if (zapis !== null && state.status === 'gotovo') zapisat(state.sostav, true);
+  });
 }
 
 /** Сразу записать отложенное (перед уходом со страницы, перед выдачей). */
 export async function sohranitSeychas(): Promise<void> {
-  if (zapis === null || state.status !== 'gotovo') return;
-  clearTimeout(zapis);
-  zapis = null;
-  const m = await api();
-  const s = state.sostav;
-  await (s.punkty.length === 0 ? m.clearDraft() : m.saveDraft(s));
+  if (zapis !== null && state.status === 'gotovo') zapisat(state.sostav, true);
+  await ochered.catch(() => undefined);
 }
 
-function izmenit(f: (s: Sostav) => Sostav): void {
+function izmenit(f: (s: Sostav) => Sostav, srazu = true): void {
   if (state.status !== 'gotovo') return;
   const next = f(state.sostav);
   obnovit({ status: 'gotovo', sostav: next });
-  zapisat(next);
+  zapisat(next, srazu);
 }
 
 /** Пункт без id — для «уже в черновике?». */
@@ -122,7 +142,7 @@ export function perestavit(from: number, to: number): void {
 }
 
 export function zadatNastroyki(n: Partial<Sostav['nastroyki']>): void {
-  izmenit((s) => ({ ...s, nastroyki: { ...s.nastroyki, ...n } }));
+  izmenit((s) => ({ ...s, nastroyki: { ...s.nastroyki, ...n } }), false);
 }
 
 /** Заменить весь состав (из шаблона). */

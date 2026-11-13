@@ -7,6 +7,8 @@
 .dzk {
   --stk-r-card: 20px;
   display: grid;
+  /* Колонка не шире экрана: полоса пунктов и таблица прокручиваются внутри себя. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
   padding-bottom: calc(var(--fab-reserve) + 96px);
 }
@@ -431,4 +433,8 @@
     visibility: hidden;
     opacity: 0;
   }
+}
+
+.dzk > * {
+  min-width: 0;
 }

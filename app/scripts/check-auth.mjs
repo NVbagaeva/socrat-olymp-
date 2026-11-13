@@ -158,7 +158,8 @@ const server = http.createServer((req, res) => {
   fs.createReadStream(file).pipe(res);
 });
 await new Promise((done) => server.listen(PORT, '127.0.0.1', done));
-const SITE = `http://127.0.0.1:${PORT}`;
+/* SITE_DEV — адрес запущенного next dev (отладка сценария без пересборки). */
+const SITE = process.env.SITE_DEV ?? `http://127.0.0.1:${PORT}`;
 
 /* ── Мок службы входа ──────────────────────────────────────────── */
 
@@ -171,6 +172,10 @@ const ALLOWED = new Set([
   'dz-repetitor@yandex.ru',
   'dz-uchenik1@yandex.ru',
   'dz-uchenik2@yandex.ru',
+  /* ДЗ из трёх источников (scenarijDz). */
+  'dzi-repetitor@yandex.ru',
+  'dzi-uchenik1@yandex.ru',
+  'dzi-uchenik2@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -2063,6 +2068,15 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
     await page.screenshot({ path: path.join(dir, `${name}.png`), fullPage: false });
   };
   if (dir !== null) fs.mkdirSync(dir, { recursive: true });
+  /* Черновик дошёл до базы: n пунктов. */
+  const vChernovike = async (n) => {
+    const tutorId = mock.users.get('dzi-repetitor@yandex.ru').id;
+    for (let i = 0; i < 100; i += 1) {
+      if (dz.drafts.find((d) => d.user_id === tutorId)?.body?.punkty?.length === n) return true;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return false;
+  };
 
   /* Репетитор, компьютер. */
   const tutorCtx = await browser.newContext({
@@ -2086,7 +2100,7 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await tp.waitForFunction(() =>
     document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent?.includes(': 2'),
   );
-  check(true, 'ДЗ-3: два набора карточек №7 — в черновике, плашка «В черновике ДЗ: 2»');
+  check(await vChernovike(2), 'ДЗ-3: два набора карточек №7 — в черновике в базе, плашка «В черновике ДЗ: 2»');
   const fab = await tp.evaluate(() => {
     const a = document.querySelector('[data-block="dz-chernovik-plashka"]')?.getBoundingClientRect();
     const b = document.querySelector('.help-fab')?.getBoundingClientRect();
@@ -2099,10 +2113,18 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   /* 2. Блок опорных №7 целиком — кнопкой со страницы блока. */
   await tp.goto(`${SITE}/zadaniya/7/opornye-zadachi/stepeni/`, { waitUntil: 'networkidle' });
   await tp.locator('[data-block="dz-v-chernovik"]').first().click();
-  await tp.waitForFunction(() =>
-    document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent?.includes(': 3'),
-  );
-  check(true, 'ДЗ-3: блок опорных №7 — в черновике (3 пункта)');
+  await tp
+    .waitForFunction(() =>
+      document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent?.includes(': 3'),
+    )
+    .catch(async (e) => {
+      const kn = await tp.locator('[data-block="dz-v-chernovik"]').evaluateAll((els) =>
+        els.map((x) => `${x.getAttribute('aria-label')}|${x.getAttribute('aria-pressed')}`),
+      );
+      console.log('ОТЛАДКА', kn, await tp.locator('[data-block="dz-chernovik-plashka"]').allInnerTexts());
+      throw e;
+    });
+  check(await vChernovike(3), 'ДЗ-3: блок опорных №7 — в черновике (3 пункта)');
 
   /* 3. Прежняя ссылка «Выдать ДЗ» из №8: типы 8.A и 8.B — в черновик. */
   await tp.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`, { waitUntil: 'networkidle' });
@@ -2214,6 +2236,17 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await sp.locator('[data-block="dz-plashka"] a').click();
   await sp.waitForSelector('.rdz-punkty .rdz-punkt');
   check((await sp.locator('.rdz-punkt').count()) === 5, 'ДЗ-3: у ученика 5 пунктов с метками источника');
+  if (!(await noHorizontalScroll(sp))) {
+    console.log(
+      'ШИРЕ ЭКРАНА',
+      await sp.evaluate(() =>
+        [...document.querySelectorAll('body *')]
+          .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1)
+          .slice(0, 8)
+          .map((e) => `${e.tagName}.${e.className} ${Math.round(e.getBoundingClientRect().right)}`),
+      ),
+    );
+  }
   check(await noHorizontalScroll(sp), 'ДЗ-3: решение ДЗ на телефоне — без горизонтальной прокрутки');
   await snap(sp, '390-04-dz-uchenika');
 
@@ -2226,7 +2259,7 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
       const id = await card.getAttribute('data-task');
       const task = dz.tasks.find((t) => t.id === id);
       if (task.answer_kind === 'self') {
-        await sp.getByRole('button', { name: 'Показать ответ' }).click();
+        await sp.getByRole('button', { name: 'Показать ответ', exact: true }).click();
         await sp.getByRole('button', { name: /Знаю|Повторить/ }).first().click();
       } else if (task.answer_kind === 'verno') {
         await sp.locator('.kart-card__vybor button', { hasText: keyOf(id) === 'da' ? 'Верно' : 'Неверно' }).click();
@@ -2323,6 +2356,14 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
     }
   }
   await tutorCtx.close();
+}
+
+/* Только сценарий ДЗ — для отладки (--tolko-dz). */
+async function runTolkoDz() {
+  const mock = makeMock();
+  const errors = [];
+  await scenarijDz(mock, errors);
+  for (const e of errors) check(false, `консоль: ${e}`);
 }
 
 /* Снимки и запись сценария ДЗ из трёх источников: ученик — WebKit (iPhone 13). */
@@ -2477,6 +2518,7 @@ try {
   else if (GALLERY !== null) await runGallery(GALLERY);
   else if (GALLERY_Z8 !== null) await runGalleryZ8(GALLERY_Z8);
   else if (GALLERY_DZ !== null) await runGalleryDz(GALLERY_DZ);
+  else if (process.argv.includes('--tolko-dz')) await runTolkoDz();
   else if (NO_HEADER) await runNoHeader();
   else await runEnabled();
 } finally {
