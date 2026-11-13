@@ -68,9 +68,7 @@ export function PrimerLazy2({
     <div ref={anchor}>
       <KartaPrimer
         uslovieHtml={primer.uslovieHtml}
-        {...(primer.risunokSvg === null
-          ? {}
-          : { risunok: <RisunokSvg svg={primer.risunokSvg} /> })}
+        {...(primer.risunokSvg === null ? {} : { risunok: <RisunokSvg svg={primer.risunokSvg} /> })}
         shagi={primer.shagi}
         otvet={primer.otvet}
         opasnoHtml={opasnoHtml}

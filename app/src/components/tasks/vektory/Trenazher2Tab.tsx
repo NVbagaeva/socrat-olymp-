@@ -33,7 +33,12 @@ export function Trenazher2Tab({ base }: { base: string }) {
         {TRENAZHER2.title}
       </h2>
       <TabScrollOnMount />
-      <Trenazher2 base={base} gruppy={gruppy} nazvaniyaTekst={nazvaniyaTekst} katalog={katalog2()} />
+      <Trenazher2
+        base={base}
+        gruppy={gruppy}
+        nazvaniyaTekst={nazvaniyaTekst}
+        katalog={katalog2()}
+      />
     </section>
   );
 }

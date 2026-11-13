@@ -178,9 +178,7 @@ export function Opornye2({
       ishody={ishody}
       onOpen={open}
       uslovieHtml={zadacha.uslovieHtml}
-      {...(zadacha.risunokSvg === null
-        ? {}
-        : { risunok: <RisunokSvg svg={zadacha.risunokSvg} /> })}
+      {...(zadacha.risunokSvg === null ? {} : { risunok: <RisunokSvg svg={zadacha.risunokSvg} /> })}
       {...(zadacha.answerType === 'choice' && zadacha.vybory !== null
         ? { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) }
         : {})}
@@ -198,9 +196,7 @@ export function Opornye2({
       /* Подсказка — формула навыка, без ответа (как было). */
       podskazka={{ html: zadacha.formulaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }}
       /* Решение — после ответа: до проверки доступна только подсказка. */
-      reshenie={
-        checked === null ? null : { shagi, open: solutionOpen, onToggle: pokazatReshenie }
-      }
+      reshenie={checked === null ? null : { shagi, open: solutionOpen, onToggle: pokazatReshenie }}
       zapomni={zapomni}
       dop={
         <button type="button" className="stk-btn stk-btn--tihaya" onClick={eshcheVariant}>

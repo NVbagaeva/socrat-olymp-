@@ -48,7 +48,7 @@
      №12      — zadachaShablona(ключ, seed задания) из lib/trainerSession.ts
                 (тренажёр с фильтрами): answer (у задач с вариантами — номер
                 варианта);
-     №8, №2   — generate(прототип, seed[, уровень]).otvet
+     №8, №2   — generate(прототип, seed[, уровень]).otvet (у №2 ключ — «прототип|seed»)
                 (lib/vychisleniya/generate.ts, lib/vektory/generate.ts);
      №11      — reshitPlan(план, банк dannyeTrenazhera()): answer или
                 номер верного варианта (lib/zadanie11/trenazher/zadacha.ts);
@@ -127,10 +127,10 @@ function answer8(payload, at) {
   };
 }
 
-/** №2: [«прототип|seed», подпись] → generate(…).otvet. */
+/** №2: ключ задачи «прототип|seed» (общий тренажёр по банку) → generate(…).otvet. */
 function answer2(payload, at) {
   const { generate } = requireSrc('lib/vektory/generate');
-  const [prototype, seed] = payload.tasks[at][0].split('|');
+  const [prototype, seed] = payload.tasks[at].id.split('|');
   return { text: numberText(generate(prototype, seed).otvet) };
 }
 
@@ -335,18 +335,6 @@ async function chooseAll8(page) {
   await page.getByRole('button', { name: 'Без конца', exact: true }).click();
 }
 
-/** Самая большая тренировка №2: режим «Смешанная», количество «Все (N)». */
-async function chooseAll(page) {
-  await page
-    .getByRole('radio', { name: /^Смешанная/ })
-    .first()
-    .click();
-  await page
-    .getByRole('radio', { name: /^Все \(\d+\)/ })
-    .first()
-    .click();
-}
-
 /** Самая большая тренировка на панели фильтров: «Сколько задач — Без ограничения». */
 async function chooseAllFiltry(page) {
   await page
@@ -386,7 +374,16 @@ const TRAINERS = [
     all: chooseAll8,
     rep: true,
   },
-  { name: '№2', url: '/zadaniya/2/trenazher/', scope: '2', answer: answer2, all: chooseAll },
+  {
+    name: '№2',
+    url: '/zadaniya/2/trenazher/',
+    scope: '2',
+    answer: answer2,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
+  },
   {
     name: '№1',
     url: '/zadaniya/1/trenazher/',

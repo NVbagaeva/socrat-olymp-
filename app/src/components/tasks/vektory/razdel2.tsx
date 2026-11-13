@@ -34,15 +34,7 @@ function shagi2(s: Reshenie2): Shag[] {
  * рисунок с катетами. Шаг «Ответ» в подсказку не входит: его даёт
  * решение.
  */
-function Podskazka2({
-  s,
-  otkryto,
-  dalshe,
-}: {
-  s: Reshenie2;
-  otkryto: number;
-  dalshe: () => void;
-}) {
+function Podskazka2({ s, otkryto, dalshe }: { s: Reshenie2; otkryto: number; dalshe: () => void }) {
   const vse = sRisunkom(shagiIz2(s.shagi, { bezOtveta: true }), s.risunokSvg);
   const n = Math.min(Math.max(otkryto, 1), vse.length);
   return (
