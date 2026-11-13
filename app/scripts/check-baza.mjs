@@ -14,6 +14,10 @@
       номера утверждений (порядок не важен), любое из допустимых.
    6. Шкала перевода первичного балла базы в отметку.
 
+   7. Наполненные разделы: каждый ответ банка и опорных задач сходится с
+      независимым пересчётом, отпечаток принимает верный ответ, подсказки
+      и разбор целы.
+
    Ненулевой код возврата — расхождение, оно печатается. */
 
 import { requireSrc } from './lib/load-ts.mjs';
@@ -199,9 +203,121 @@ eq(
   'шкала покрывает 0…21 без дыр и наложений',
 );
 
+/* 7. Наполненные разделы: банк, опорные задачи, теория. */
+const { napolnennyeRazdely } = requireSrc('lib/baza/razdely.ts');
+const { bankRazdela, lite, KLYUCH_BAZY } = requireSrc('lib/baza/bank.ts');
+const { prochitat, tipOtpechatka } = requireSrc('lib/baza/secret.ts');
+const { normalizeAnswer } = requireSrc('lib/otvet/index.ts');
+const { tex: texZapisi } = requireSrc('lib/baza/chisla.ts');
+let zadachVsego = 0;
+for (const razdel of napolnennyeRazdely()) {
+  const N = `база №${razdel.slug}`;
+  const prototipy = razdel.prototipy ?? [];
+  const gruppy = new Set((razdel.gruppy ?? []).map((g) => g.id));
+  const bank = bankRazdela(razdel.slug, prototipy);
+  zadachVsego += bank.length;
+  eq(new Set(bank.map((z) => z.id)).size, bank.length, `${N}: ключи задач не повторяются`);
+  eq(new Set(bank.map((z) => z.text)).size, bank.length, `${N}: условия не повторяются`);
+  for (const proto of prototipy) {
+    eq(/^P\d\d$/.test(proto.id), true, `${N}: имя прототипа ${proto.id}`);
+    eq(gruppy.has(proto.gruppa), true, `${N}, ${proto.id}: группа ${proto.gruppa} есть`);
+  }
+  for (const z of bank) {
+    const proto = prototipy.find((p) => p.id === z.prototypeId);
+    const r = proto.solve(z.params);
+    const gde = `${N}, ${z.id}`;
+    eq(KLYUCH_BAZY.test(z.id), true, `${gde}: ключ`);
+    /* Ответ решения против независимого пересчёта. */
+    eq(r.otvet, proto.proverka(z.params), `${gde}: ответ сходится с пересчётом`);
+    if (z.tip === 'chislo') {
+      const n = normalizeAnswer(r.otvet);
+      eq(n.ok, true, `${gde}: ответ «${r.otvet}» — запись бланка`);
+      if (razdel.slug === '5') {
+        const x = Number(n.ok ? n.value : NaN);
+        eq(x > 0 && x < 1, true, `${gde}: вероятность ${r.otvet} строго между 0 и 1`);
+      }
+    }
+    /* Ответ есть в последнем шаге разбора. */
+    const posledniy = r.etapy[r.etapy.length - 1].lines.join(' ');
+    eq(posledniy.includes(texZapisi(r.otvet)), true, `${gde}: разбор заканчивается ответом`);
+    /* Отпечаток: верный ответ принят, соседний — нет. */
+    const seal = lite(z).seal;
+    eq(tipOtpechatka(seal), z.tip, `${gde}: тип в отпечатке`);
+    eq(seal.includes(r.otvet), false, `${gde}: ответа в отпечатке нет`);
+    eq(prochitat(r.otvet, seal).right, true, `${gde}: верный ответ засчитан`);
+    eq(prochitat(`${r.otvet}1`, seal).right, false, `${gde}: неверный ответ не засчитан`);
+    /* Подсказки: варианты разные, верный на месте. */
+    eq(r.hints.length >= 2, true, `${gde}: подсказок не меньше двух`);
+    for (const h of r.hints) {
+      eq(
+        new Set(h.options).size,
+        h.options.length,
+        `${gde}: варианты подсказки «${h.question}» разные`,
+      );
+      eq(
+        h.options.length >= 2 && h.correct >= 0 && h.correct < h.options.length,
+        true,
+        `${gde}: верный вариант подсказки на месте`,
+      );
+    }
+    /* Условие: без «undefined» и сырых шаблонов. */
+    eq(/undefined|NaN|\$\{/.test(z.text + JSON.stringify(r)), false, `${gde}: в тексте нет мусора`);
+  }
+  /* Опорные задачи. */
+  const mikro = (razdel.opornye ?? []).flatMap((n) => n.bloki.flatMap((b) => b.zadachi));
+  eq(
+    new Set(mikro.map((m) => m.id)).size,
+    mikro.length,
+    `${N}: ключи опорных задач не повторяются`,
+  );
+  for (const m of mikro) {
+    eq(m.otvet, m.proverka(), `${N}, опорная ${m.id}: ответ сходится с пересчётом`);
+    eq(
+      m.razbor.join(' ').includes(texZapisi(m.otvet)),
+      true,
+      `${N}, опорная ${m.id}: разбор заканчивается ответом`,
+    );
+  }
+  /* Карточки: ключи, подтемы, якоря теории, ответы вычислений. */
+  const koloda = razdel.kartochki;
+  if (koloda !== undefined) {
+    eq(koloda.level, 'base', `${N}: колода помечена уровнем базы`);
+    const ids = koloda.kartochki.map((k) => k.id);
+    eq(new Set(ids).size, ids.length, `${N}: ключи карточек не повторяются`);
+    const podtemy = new Set(koloda.podtemy.map((t) => t.id));
+    const yakorya = new Set((razdel.teoriya ?? []).map((r) => `teoriya-${r.id}`));
+    for (const k of koloda.kartochki) {
+      eq(podtemy.has(k.topic), true, `${N}, карточка ${k.id}: подтема есть`);
+      eq(yakorya.has(k.source), true, `${N}, карточка ${k.id}: раздел теории ${k.source} есть`);
+      if (k.type === 'vychislenie') {
+        const n = normalizeAnswer(k.otvet);
+        eq(n.ok, true, `${N}, карточка ${k.id}: ответ — запись бланка`);
+        eq(
+          Math.abs(Number(n.ok ? n.value : NaN) - k.proverka()) < 1e-9,
+          true,
+          `${N}, карточка ${k.id}: ответ ${k.otvet} сходится с пересчётом`,
+        );
+        eq(k.back.includes(texZapisi(k.otvet)), true, `${N}, карточка ${k.id}: ответ на обороте`);
+      }
+    }
+  }
+  /* Теория: ответ примера — в его последнем шаге. */
+  for (const r of razdel.teoriya ?? []) {
+    for (const b of r.bloki) {
+      if (b.vid !== 'primer') continue;
+      const shag = b.primer.shagi[b.primer.shagi.length - 1];
+      eq(
+        shag.includes(texZapisi(b.primer.otvet)),
+        true,
+        `${N}, теория «${r.title}»: пример заканчивается ответом ${b.primer.otvet}`,
+      );
+    }
+  }
+}
+
 if (failures.length > 0) {
   console.error(`База: расхождений ${failures.length} из ${checks}`);
   for (const f of failures) console.error(`  ✗ ${f}`);
   process.exit(1);
 }
-console.log(`База: проверок ${checks}, расхождений нет.`);
+console.log(`База: проверок ${checks}, задач в банках ${zadachVsego}, расхождений нет.`);

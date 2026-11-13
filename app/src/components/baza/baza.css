@@ -38,3 +38,85 @@
     gap: 2px;
   }
 }
+
+/* «О задании» наполненного раздела. */
+.baza-o {
+  display: grid;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.baza-o__text {
+  max-width: 70ch;
+  color: var(--color-text-secondary);
+}
+.baza-o__tipy {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.baza-o__tip {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.baza-o__tip p {
+  color: var(--color-text-secondary);
+}
+.baza-o__no {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.baza-o__dalshe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Теория: формула строкой, список, разобранный пример. */
+.baza-formula {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+  overflow-x: auto;
+}
+.baza-spisok {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+}
+.baza-primer {
+  min-width: 0;
+}
+.baza-primer__uslovie {
+  margin: 0 0 var(--space-3);
+  font-weight: 500;
+}
+.baza-primer__shagi {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+}
+.baza-primer__otvet {
+  margin-top: var(--space-3);
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+@media (max-width: 767.98px) {
+  .baza-o {
+    padding: var(--space-4);
+  }
+}

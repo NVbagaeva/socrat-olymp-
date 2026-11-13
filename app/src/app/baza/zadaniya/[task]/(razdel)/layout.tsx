@@ -3,6 +3,17 @@ import { bazaStaticParams, bazaTask, type BazaParams } from '@/components/baza/s
 import 'katex/dist/katex.min.css';
 import '@/app/zadaniya/zadaniya.css';
 import '@/app/zadaniya/[task]/section.css';
+/* Лента, тренажёр, опорные задачи, карточки — те же стили, что у
+   разделов профиля с тренажёром по банку (№6): своих копий нет. */
+import '@/app/zadaniya/[task]/[type]/topic.css';
+import '@/app/zadaniya/[task]/[type]/trainer.css';
+import '@/app/zadaniya/[task]/[type]/prep.css';
+import '@/app/zadaniya/veroyatnost.css';
+import '@/app/zadaniya/komplekt.css';
+import '@/components/probability/probability.css';
+import '@/components/tasks/zadanie6/zadanie6.css';
+import '@/app/zadaniya/6/zadanie6.css';
+import '@/components/kartochki/kartochki.css';
 import '@/components/baza/baza.css';
 
 export const generateStaticParams = bazaStaticParams;

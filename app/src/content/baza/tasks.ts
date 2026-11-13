@@ -52,7 +52,7 @@ const ROWS: readonly Row[] = [
 ];
 
 /** Номера открытых разделов базы. Остальные — «Скоро» с каркасом страницы. */
-const READY: readonly string[] = [];
+const READY: readonly string[] = ['05'];
 
 export const bazaTasks: readonly ExamTask[] = ROWS.map(([no, name, short, image, icon]) => ({
   no,
