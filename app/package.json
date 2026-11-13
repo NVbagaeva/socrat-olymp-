@@ -173,6 +173,7 @@
     "test:illyustracii-10": "node scripts/check-illyustracii-10.mjs",
     "test:seriya-10": "node scripts/check-seriya-10.mjs",
     "test:legal": "node scripts/check-legal.mjs",
+    "test:domeny": "node scripts/check-domeny.mjs",
     "test:soglasiya-sql": "node scripts/check-soglasiya-sql.mjs",
     "test:kabinet-sql": "node scripts/check-soglasiya-sql.mjs",
     "build:kabinet-catalog": "node scripts/build-kabinet-catalog.mjs",
