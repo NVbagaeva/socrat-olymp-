@@ -164,6 +164,39 @@ check(oborotSamoocenki === '' || !strU.includes(oborotSamoocenki), 'лист у�
 check(oborotSamoocenki === '' || strT.includes(oborotSamoocenki), 'лист учителя: оборот карточки есть');
 check(/Ответы/.test(strT), 'лист учителя: раздел «Ответы»');
 
+/* ── Шаг 2: №6 и №10 (банковые разделы, общий сборщик) ─────────── */
+for (const no of [6, 10]) {
+  const kat = katalog(no);
+  check(kat !== null && kat.kartochki !== null, `№${no}: каталог и карточки`);
+  check(kat.opornye.length > 0 && kat.opornye.every((b) => b.zadachi.every((z) => z.klyuch && z.razbor)), `№${no}: опорные с закрытыми ключами`);
+  const tipy = kat.trenazher[0].tipy.slice(0, 2).map((t) => t.id);
+  const sost = {
+    v: 1,
+    punkty: [
+      { id: 'k', ist: 'kartochki', no, podtema: kat.kartochki[0].id, kartochki: null },
+      { id: 'o', ist: 'opornye', no, blok: kat.opornye[0].slug, zadachi: null, kazhdomu: true },
+      { id: 't', ist: 'trenazher', no, tipy, skolko: 3, kazhdomu: true },
+    ],
+    nastroyki: {},
+  };
+  const ps = await sobratPunkty(sost, new Map([[no, kat]]), ['u1', 'u2'], `zerno-${no}`);
+  check(ps.length === 3, `№${no}: три пункта`);
+  check(!ps[1].perStudent && ps[1].units.length === kat.opornye[0].zadachi.length, `№${no}: опорные — сами задачи блока, «каждому свои» не применяется`);
+  check(ps[2].perStudent && ['u1', 'u2'].every((s) => ps[2].units.filter((u) => u.studentId === s).length === 3), `№${no}: тренажёр каждому — по 3`);
+  check(ps.flatMap((p) => p.units).filter((u) => u.answerKind !== 'self').every((u) => u.answerKind === 'verno' || normalizeEge(u.answer) === u.answer), `№${no}: ключи в записи ЕГЭ`);
+  check(ps[2].units.every((u) => u.razbor.shagi.length > 0), `№${no}: у задач тренажёра есть решение по шагам`);
+}
+/* Рисунки условия: №6 — диаграмма/дерево/таблица, №10 П-01 — мост. */
+{
+  const k6 = katalog(6);
+  const sRis = k6.trenazher.flatMap((g) => g.tipy).map((t) => t.id);
+  const ps = await sobratPunkty({ v: 1, punkty: [{ id: 'r', ist: 'trenazher', no: 6, tipy: sRis, skolko: sRis.length, kazhdomu: false }], nastroyki: {} }, new Map([[6, k6]]), ['u1'], 'ris');
+  check(ps[0].units.some((u) => /<svg|<table/.test(u.questionHtml)), '№6: рисунок условия (SVG или таблица) — в снимке условия');
+  const k10 = katalog(10);
+  const ps10 = await sobratPunkty({ v: 1, punkty: [{ id: 'm', ist: 'trenazher', no: 10, tipy: ['P01'], skolko: 1, kazhdomu: false }], nastroyki: {} }, new Map([[10, k10]]), ['u1'], 'most');
+  check(/<svg/.test(ps10[0].units[0].questionHtml), '№10: у задачи о мосте — чертёж моста в условии');
+}
+
 console.log(`Сборка ДЗ и печать: ${checks} проверок, не прошло ${failures.length}.`);
 if (failures.length > 0) {
   for (const f of failures) console.error(`  НЕТ ${f}`);

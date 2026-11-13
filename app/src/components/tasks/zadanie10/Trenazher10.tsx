@@ -12,6 +12,7 @@ import {
   type Sessiya10,
 } from '@/lib/zadanie10/trenazher';
 import { Zadacha10, type IllInfo } from './Zadacha10';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 
 export interface ProtoInfo10 {
   id: string;
@@ -221,6 +222,13 @@ export function Trenazher10({
           >
             Начать
           </button>
+          {/* Репетитору: выбранные прототипы — в черновик ДЗ. */}
+          {s.tipy.length === 0 ? null : (
+            <VDzKnopka
+              punkt={{ ist: 'trenazher', no: 10, tipy: s.tipy, skolko: Math.min(20, s.skolko), kazhdomu: false }}
+              chto={`${s.tipy.length} тип(ов) тренажёра`}
+            />
+          )}
           {oshibka ? <p role="alert">{oshibka}</p> : null}
         </div>
       </div>
@@ -283,6 +291,14 @@ export function Trenazher10({
         ))}
       </ol>
       {oshibka ? <p role="alert">{oshibka}</p> : null}
+      {z ? (
+        <VDzKnopka
+          malaya
+          punkt={{ ist: 'zadacha', no: 10, ref: z.id, tip: z.prototypeId }}
+          chto={`задача ${z.id}`}
+          label="В ДЗ"
+        />
+      ) : null}
       {z ? (
         <Zadacha10
           key={z.id}

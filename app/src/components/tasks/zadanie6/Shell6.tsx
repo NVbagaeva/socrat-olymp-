@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/layout/AppShell';
+import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
 import { tasksPage } from '@/content/tasks';
 import { ZADANIE6 } from '@/content/zadanie6';
 import { ZADANIYA } from '@/lib/paths';
@@ -30,7 +31,11 @@ export function Shell6({ children }: { children: React.ReactNode }) {
           {...(ZADANIE6.art ? { media: <IllyustratsiyaShapki art={ZADANIE6.art} /> } : {})}
         />
         <RazdelTabs base={base} tabs={ZADANIE6.tabs} />
-        <div className="section-panel">{children}</div>
+        <div className="section-panel">
+          {/* ДЗ: ученику — плашка с ДЗ, репетитору — черновик ДЗ. Гостю — ничего. */}
+          <DzVRazdele no={6} />
+          {children}
+        </div>
       </main>
     </AppShell>
   );
