@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { FormulyRamka, KartaGruppa, KartaPrimer, KartaShapka, KartaTip } from '../../karta';
+import { FormulyRamka, KartaGruppa, KartaShapka, KartaTip } from '../../karta';
 import { YakorTipa } from '../../karta/YakorTipa';
 import type { Ton } from '../../steklo';
-import { Kartinka45, primerIzRazbora } from './Primer45';
 import { GruppaProgress45 } from './GruppaProgress45';
 import { PrimerLazy45 } from './PrimerLazy45';
 import { MetodKartinka } from '../MetodKartinka';
@@ -14,7 +13,6 @@ import { assetUrl } from '@/lib/assetUrl';
 import { typeset, typesetText } from '@/lib/tex';
 import { BANK_4, BANK_5, PODGOTOVKA_4, PODGOTOVKA_5 } from '@/lib/veroyatnost/index';
 import { bank4Pool, bank5Pool, versiyaRazborov } from '@/lib/veroyatnost/pool';
-import { otkrytRazbor } from '@/lib/veroyatnost/razbor';
 import {
   blokHref45,
   metodyHref45,
@@ -137,12 +135,6 @@ export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: O
                   const kartinka = v?.model?.illustration;
                   const trenirovatHref = tipTrenazherHref45(zadanie, k.id);
                   const opHref = opornyeHref(zadanie, m.id);
-                  /* Раскрытый с самого начала пример набирается на сборке;
-                     остальные открываются в браузере по раскрытию. */
-                  const primer =
-                    open && v !== undefined
-                      ? primerIzRazbora(otkrytRazbor(v.steps, v.seal), shapka.metod, shapka.risunok)
-                      : null;
                   return (
                     <KartaTip
                       key={k.id}
@@ -151,21 +143,9 @@ export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: O
                       lead={typesetText(k.tip)}
                       open={open}
                     >
-                      {v === undefined ? null : primer !== null ? (
-                        <KartaPrimer
-                          uslovieHtml={v.uslovie}
-                          {...(kartinka === undefined
-                            ? {}
-                            : { risunok: <Kartinka45 {...kartinka} /> })}
-                          shagi={primer.shagi}
-                          posle={primer.posle}
-                          otvet={primer.otvet}
-                          {...(opasnoHtml === undefined ? {} : { opasnoHtml })}
-                          trenirovatHref={trenirovatHref}
-                          opornyeHref={opHref}
-                          labels={shapka}
-                        />
-                      ) : (
+                      {v === undefined ? null : (
+                        /* Пример открывается в браузере по раскрытию: закрытый
+                           разбор в разметку страницы не уезжает (test:secrets). */
                         <PrimerLazy45
                           zadanie={zadanie}
                           kind={k.id}
