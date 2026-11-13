@@ -20,6 +20,6 @@ export function Trenazher11({
   katalog: KatalogBanka;
   ssylki: Record<string, SsylkiTipa11>;
 }) {
-  const razdel = useMemo(() => razdel11(ssylki), [ssylki]);
+  const razdel = useMemo(() => razdel11(ssylki, props.katalog), [ssylki, props.katalog]);
   return <TrenazherBanka razdel={razdel} {...props} />;
 }

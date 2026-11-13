@@ -76,15 +76,15 @@ export interface EkranZadachiProps {
   /** Чертёж задачи: над условием (стереометрия, планиметрия). */
   risunok?: ReactNode;
   /**
+   * Своё поле ответа вместо числа: кнопки выбора (№13, «Определи тип»).
+   * Значение и «Проверить» — те же: value держит выбранный вариант.
+   */
+  pole?: ReactNode;
+  /**
    * Условие — текст задачи, а не одно выражение: набирается обычным
    * кеглем по левому краю (у №8 выражение стоит крупно по центру).
    */
   tekst?: boolean;
-  /**
-   * Ответ выбором (№11, РЗ-17): варианты вместо поля ответа, value —
-   * номер выбранного. Нет — поле ответа числом.
-   */
-  vybory?: readonly { number: string; labelHtml: string }[];
 }
 
 /**
@@ -117,7 +117,7 @@ export function EkranZadachi({
   pod,
   risunok,
   tekst = false,
-  vybory,
+  pole: svoePole,
 }: EkranZadachiProps) {
   const pole = useRef<HTMLSpanElement>(null);
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
@@ -176,7 +176,7 @@ export function EkranZadachi({
       </article>
 
       <div className="trn-otvetnaya stk-glass">
-        {vybory === undefined ? (
+        {svoePole === undefined ? (
           <label className="trn-pole">
             <span className="stk-podpis">{labels.otvet}</span>
             <span className="trn-pole__ryad" ref={pole}>
@@ -209,46 +209,22 @@ export function EkranZadachi({
             </span>
           </label>
         ) : (
-          <fieldset className="trn-pole trn-varianty">
-            <legend className="stk-podpis">{labels.otvet}</legend>
-            <ul>
-              {vybory.map((v) => {
-                const vybran = value === v.number;
-                return (
-                  <li key={v.number}>
-                    <button
-                      type="button"
-                      className={clsx(
-                        'trn-variant',
-                        vybran && 'is-vybran',
-                        vybran && sostoyanie === 'verno' && 'is-verno',
-                        vybran && sostoyanie === 'neverno' && 'is-neverno',
-                      )}
-                      aria-pressed={vybran}
-                      disabled={otvechen}
-                      onClick={() => onValue(v.number)}
-                    >
-                      <span className="trn-variant__no">{v.number}</span>
-                      <span
-                        className="trn-variant__text"
-                        dangerouslySetInnerHTML={{ __html: v.labelHtml }}
-                      />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            {otvechen ? null : (
-              <button
-                type="button"
-                className="stk-btn stk-btn--primary stk-btn--lg"
-                onClick={onCheck}
-                disabled={!ready}
-              >
-                {labels.proverit}
-              </button>
-            )}
-          </fieldset>
+          <div className="trn-pole trn-pole--svoe" role="group" aria-label={labels.otvet}>
+            <span className="stk-podpis">{labels.otvet}</span>
+            {svoePole}
+            <span className="trn-pole__ryad">
+              {otvechen ? null : (
+                <button
+                  type="button"
+                  className="stk-btn stk-btn--primary stk-btn--lg"
+                  onClick={onCheck}
+                  disabled={!ready}
+                >
+                  {labels.proverit}
+                </button>
+              )}
+            </span>
+          </div>
         )}
         {formatHint === null ? null : <FormatHint text={formatHint} />}
 

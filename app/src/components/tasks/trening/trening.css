@@ -1141,82 +1141,56 @@
   text-align: left;
 }
 
-/* Ответ выбором (№11, РЗ-17): варианты вместо поля ответа — как в опорных задачах. */
-.trn-varianty {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  min-width: 0;
-}
-.trn-varianty legend {
-  padding: 0;
-  margin-bottom: var(--space-2);
-}
-.trn-varianty ul {
+/* Ответ выбором вместо числа (№13, «Определи тип»): крупные кнопки в
+   столбик на телефоне, по две в ряд на широком экране. */
+.trn-pole--svoe {
   display: grid;
+  gap: var(--space-3);
+}
+.trn-vybor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 @media (min-width: 640px) {
-  .trn-varianty ul {
+  .trn-vybor {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-.trn-variant {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  min-height: 44px;
-  padding: var(--space-2) var(--space-3);
-  border: 0;
+.trn-vybor__knopka {
+  min-height: 48px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--blue-200, #c9d6ee);
   border-radius: 14px;
-  background: var(--glass-bg-strong);
-  box-shadow: var(--glass-ring), var(--glass-hi);
+  background: var(--white);
   color: var(--color-text);
   font: inherit;
+  font-weight: 550;
   text-align: left;
   cursor: pointer;
+  overflow-wrap: anywhere;
 }
-.trn-variant:disabled {
-  cursor: default;
-}
-.trn-variant__no {
-  display: inline-grid;
-  flex: none;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--blue-50);
-  color: var(--blue-700);
-  font-weight: 700;
-}
-.trn-variant__text {
-  min-width: 0;
-  overflow-x: auto;
-}
-.trn-variant.is-vybran {
-  box-shadow:
-    inset 0 0 0 2px var(--blue-600),
-    var(--glass-hi);
-}
-.trn-variant.is-verno {
-  box-shadow:
-    inset 0 0 0 2px var(--green-600),
-    var(--glass-hi);
-}
-.trn-variant.is-neverno {
-  box-shadow:
-    inset 0 0 0 2px var(--terracotta),
-    var(--glass-hi);
-}
-.trn-variant:focus-visible {
+.trn-vybor__knopka:focus-visible {
   outline: 2px solid var(--blue-600);
   outline-offset: 2px;
 }
-.trn-varianty > .stk-btn {
-  margin-top: var(--space-3);
+.trn-vybor__knopka.is-on {
+  border-color: var(--blue-600);
+  box-shadow: inset 0 0 0 1px var(--blue-600);
+}
+.trn-vybor__knopka.is-right {
+  border-color: var(--green-600, #2e8b57);
+  box-shadow: inset 0 0 0 1px var(--green-600, #2e8b57);
+}
+.trn-vybor__knopka.is-wrong {
+  border-color: var(--terracotta);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+.trn-vybor__knopka:disabled {
+  cursor: default;
+}
+
+/* Строка ответа под шагами решения (№13). */
+.trn-otvet-stroka {
+  margin: var(--space-3) 0 0;
 }

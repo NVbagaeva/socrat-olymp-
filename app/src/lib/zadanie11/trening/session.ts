@@ -47,6 +47,8 @@ export function razobratZapis11(packed: unknown, katalog: KatalogBanka): Payload
   const nov = razobratZapis(packed, KLYUCH11);
   if (nov !== null) return nov;
   if (!isRecord(packed)) return null;
+  /* Общий разбор (TrenazherBanka) уже отверг запись нового формата — здесь
+     только прежние форматы №11. */
 
   let syrye: { k: string }[] = [];
   let control = false;

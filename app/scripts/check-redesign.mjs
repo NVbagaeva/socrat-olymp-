@@ -38,6 +38,35 @@ if (!/^\d{1,2}$/.test(razdel ?? '')) {
 
 /** Файлы и папки содержания раздела (пути от корня репозитория). */
 const SODERZHANIE = {
+  1: [
+    /* Банк, аналоги, сцены чертежей, решения и подсказки, опорные задачи,
+       движок чертежей, генератор и листы, теория и карточки. */
+    'app/src/lib/planimetriya/bank',
+    'app/src/lib/planimetriya/stseny',
+    'app/src/lib/planimetriya/reshenie',
+    'app/src/lib/planimetriya/prep',
+    'app/src/lib/planimetriya/render.ts',
+    'app/src/lib/planimetriya/figury.ts',
+    'app/src/lib/planimetriya/geom.ts',
+    'app/src/lib/planimetriya/kollizii.ts',
+    'app/src/lib/planimetriya/stil.ts',
+    'app/src/lib/planimetriya/variant.ts',
+    'app/src/lib/planimetriya/secret.ts',
+    'app/src/lib/planimetriya/generator1.ts',
+    'app/src/lib/planimetriya/sheet1.ts',
+    'app/src/lib/planimetriya/uroki.ts',
+    'app/src/lib/planimetriya/teoriya.ts',
+    'app/src/lib/planimetriya/spravochnik.ts',
+    'app/src/lib/planimetriya/spravochnik-chertezhi.ts',
+    'app/src/lib/planimetriya/spravochnik-zadachi.ts',
+    'app/src/lib/planimetriya/trenazher/zadacha.ts',
+    'app/src/content/zadanie1.ts',
+    'app/src/content/teoriya1.ts',
+    'app/src/content/spravochnik1',
+    'app/src/content/generator1.ts',
+    'app/src/content/repetitory1.ts',
+    'app/src/content/kartochki/01-planimetriya.ts',
+  ],
   2: [
     /* Генератор и движок рисунков: задачи, ответы, разборы, рисунки. */
     'app/src/lib/vektory/prototypes',
@@ -109,6 +138,34 @@ const SODERZHANIE = {
     'app/src/content/teoriya7.ts',
     'app/src/content/teoriya7-irr.ts',
     'app/src/content/kartochki/07-uravneniya.ts',
+  ],
+  13: [
+    /* Движок задач, банк, генератор листов, опорные блоки: условия,
+       ответы, решения, подсказки. opornye/seal.ts и reshenieHtml.ts не в
+       списке: в них добавлены функции для шагов сцены (шаги «Определи
+       тип» вынесены), а то, что они дают, сверяет test:zadanie13. */
+    'app/src/lib/zadanie13/proto',
+    'app/src/lib/zadanie13/gen',
+    'app/src/lib/zadanie13/bank.ts',
+    'app/src/lib/zadanie13/generate.ts',
+    'app/src/lib/zadanie13/solver.ts',
+    'app/src/lib/zadanie13/drob.ts',
+    'app/src/lib/zadanie13/edinicy.ts',
+    'app/src/lib/zadanie13/html.ts',
+    'app/src/lib/zadanie13/tablica.ts',
+    'app/src/lib/zadanie13/bukvy.ts',
+    'app/src/lib/zadanie13/plots.ts',
+    'app/src/lib/zadanie13/text.ts',
+    'app/src/lib/zadanie13/types.ts',
+    'app/src/lib/zadanie13/vyrazhenie.ts',
+    'app/src/lib/zadanie13/zapolni.ts',
+    'app/src/lib/zadanie13/opornye/bloki.ts',
+    'app/src/lib/zadanie13/trenazher',
+    'app/src/content/zadanie13.ts',
+    'app/src/content/teoriya13.ts',
+    'app/src/content/generator13.ts',
+    'app/src/content/repetitory13.ts',
+    'app/src/content/kartochki/13-ekonomicheskie.ts',
   ],
 };
 
