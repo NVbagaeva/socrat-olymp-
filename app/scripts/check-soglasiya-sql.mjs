@@ -210,6 +210,20 @@ const SUITES = [
     ],
   },
   {
+    /* Открытая регистрация («*» в списке) и доступ по тарифу: пробный
+       доступ при подтверждении почты, кто видит и меняет срок
+       (supabase/tests/dostup.test.sql). */
+    name: 'Открытая регистрация и доступ',
+    db: 'dostup',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['dostup.test.sql', path.join(SUPA, 'tests', 'dostup.test.sql')],
+    ],
+  },
+  {
     /* Регистрация только с почтой российских почтовых сервисов: хук,
        триггер, смена почты, ручной список, старые пользователи
        (supabase/tests/domeny.test.sql). Без добавленного x.ru. */

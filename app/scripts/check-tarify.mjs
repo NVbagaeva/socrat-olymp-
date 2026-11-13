@@ -85,6 +85,18 @@ if (PROBNYY.dney !== 3 || PROBNYY.raz !== 1) fail('пробный доступ �
 if (config.PROBNYY_SROK !== '3 дня') fail(`срок пробного словами: «${config.PROBNYY_SROK}»`);
 if (KLASS_MAKS !== 30) fail('класс репетитора — до 30 учеников');
 
+/* Срок пробного доступа в базе (public.probnyy_dney) — то же число. */
+{
+  const sql = fs.readFileSync(
+    path.join(APP, '..', 'supabase', 'migrations', '20261114120000_otkrytaya_registraciya.sql'),
+    'utf8',
+  );
+  const vBaze = /function public\.probnyy_dney\(\)[\s\S]*?select (\d+)/.exec(sql)?.[1];
+  if (Number(vBaze) !== PROBNYY.dney) {
+    fail(`пробный доступ: в базе ${vBaze} дн., в конфиге ${PROBNYY.dney}`);
+  }
+}
+
 for (const rol of ['uchenik', 'repetitor']) {
   for (const plashka of config.plashki(rol)) {
     const kto = `${rol}/${plashka.id}`;

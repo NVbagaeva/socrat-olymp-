@@ -18,6 +18,9 @@ create table auth.users (
   -- их меняют смена почты и смена пароля (domeny.test.sql).
   email_change text default '',
   encrypted_password text,
+  -- Подтверждение почты: по нему включается пробный доступ
+  -- (миграция открытой регистрации, dostup.test.sql).
+  email_confirmed_at timestamptz,
   raw_user_meta_data jsonb,
   created_at timestamptz not null default now()
 );
