@@ -33,6 +33,8 @@ export const LEGACY_LOGS: Record<string, string> = {
   'budetege:zadanie-7:log:v1': 'budetege:zadanie-7:v1',
   /* №6: счётчики по прототипам и список ошибок прежнего тренажёра. */
   'budetege:zadanie-6:log:v1': 'budetege:zadanie-6:v1',
+  /* №2: счётчики по прототипам и список ошибок прежнего тренажёра. */
+  'budetege:zadanie-2:log:v1': 'budetege:vektory-2:v1',
 };
 
 /**

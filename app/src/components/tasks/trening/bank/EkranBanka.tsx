@@ -343,7 +343,12 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
               open: hintOpen,
               onOpen: () => setHintOpen(true),
               telo:
-                voprosy.length === 0 ? (
+                razbor !== null && razdel.podskazka !== undefined ? (
+                  razdel.podskazka(razbor, {
+                    otkryto: shag,
+                    dalshe: () => setShag(shag + 1),
+                  })
+                ) : voprosy.length === 0 ? (
                   <p>{T.ekran.zagruzka}</p>
                 ) : (
                   <PodskazkaVoprosy

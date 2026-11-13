@@ -404,7 +404,9 @@ function Konfigurator<Z extends ZadachaBanka, S>({
 
   if (ekran === 'temy') {
     const tipy = tipyVse.filter((id) => selected.has(id));
-    const est = skolkoZadach(katalog, tipy, vybor.istochnik, stil);
+    /* У раздела без источника (№2: все задачи — генератор) — всегда «все». */
+    const istochnik = razdel.bezIstochnika === true ? 'vse' : vybor.istochnik;
+    const est = skolkoZadach(katalog, tipy, istochnik, stil);
     const stili = T.vybor.stili;
     return (
       <div className="trn">
@@ -429,7 +431,7 @@ function Konfigurator<Z extends ZadachaBanka, S>({
                 tipy,
                 vybor.count ?? BEZ_KONCA,
                 closedTasks(log),
-                vybor.istochnik,
+                istochnik,
                 Math.random,
                 stil,
               ),
@@ -437,13 +439,15 @@ function Konfigurator<Z extends ZadachaBanka, S>({
           }
           dop={
             <>
-              <Segment
-                title={T.vybor.istochnik}
-                values={ISTOCHNIKI}
-                labels={T.vybor.istochniki}
-                value={vybor.istochnik}
-                onChange={(istochnik) => zapomnit({ ...vybor, istochnik })}
-              />
+              {razdel.bezIstochnika === true ? null : (
+                <Segment
+                  title={T.vybor.istochnik}
+                  values={ISTOCHNIKI}
+                  labels={T.vybor.istochniki}
+                  value={vybor.istochnik}
+                  onChange={(next) => zapomnit({ ...vybor, istochnik: next })}
+                />
+              )}
               {razdel.stil === true && stili !== undefined ? (
                 <Segment
                   title={T.vybor.stil ?? ''}
