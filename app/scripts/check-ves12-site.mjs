@@ -26,7 +26,9 @@ if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   console.error('Нет папки сборки out: сначала pnpm build');
   process.exit(1);
 }
-const SHOTS = process.argv.includes('--shots') ? process.argv[process.argv.indexOf('--shots') + 1] : null;
+const SHOTS = process.argv.includes('--shots')
+  ? process.argv[process.argv.indexOf('--shots') + 1]
+  : null;
 if (SHOTS) {
   fs.mkdirSync(SHOTS, { recursive: true });
 }
@@ -96,7 +98,10 @@ async function shot(page, name, full = false) {
 /** Тап (или клик) по карточке №12 в банке: сразу страница раздела. */
 async function openRazdel(page, mobile) {
   await page.goto(BASE + '/zadaniya/', { waitUntil: 'networkidle' });
-  const card = page.locator('.tasks-grid a').filter({ hasText: /Графики функций/ }).first();
+  const card = page
+    .locator('.tasks-grid a')
+    .filter({ hasText: /Графики функций/ })
+    .first();
   await card.scrollIntoViewIfNeeded();
   await (mobile ? card.tap() : card.click());
   await page.waitForURL('**/zadaniya/12/');
@@ -114,7 +119,10 @@ for (const [width, height, mobile] of [
   const where = (text) => `${width}: ${text}`;
 
   await openRazdel(page, mobile);
-  check((await page.locator('.modal, .subtopic-modal').count()) === 0, where('после тапа по №12 открылось окно'));
+  check(
+    (await page.locator('.modal, .subtopic-modal').count()) === 0,
+    where('после тапа по №12 открылось окно'),
+  );
   const vkladki = (await page.locator('.topic-tabs .tabs--lenta [role=tab]').allInnerTexts())
     .map((t) => t.trim())
     .filter(Boolean);
@@ -123,18 +131,24 @@ for (const [width, height, mobile] of [
     JSON.stringify(unique) === JSON.stringify(VKLADKI_12),
     where(`лента №12: ${unique.join(' | ')}`),
   );
+  /* Выбор типа функции — группы карты «О задании», у каждой ссылка на вид. */
   check(
-    (await page.locator('.subtopics-grid a.subtopic').count()) > 0 ||
-      (await page.locator('.subtopics-grid a').count()) > 0,
+    (await page.locator('.z12-karta .kz-gruppa').count()) === 7 &&
+      (await page.locator('.z12-karta a.z12-vid-ssylka').count()) === 7,
     where('«О задании» №12: нет выбора типа функции'),
   );
   await shot(page, `stranica-12-${width}`);
 
-  const zachyot = page.locator('.topic-tabs .tabs--lenta a', { hasText: 'Зачётная работа' }).first();
+  const zachyot = page
+    .locator('.topic-tabs .tabs--lenta a', { hasText: 'Зачётная работа' })
+    .first();
   await (mobile ? zachyot.tap() : zachyot.click());
   await page.waitForURL('**/zadaniya/12/zachyot/**');
   await page.waitForSelector('.steps');
-  check((await page.locator('.tabs--lenta').count()) > 0, where('зачётная работа — не во вкладке раздела'));
+  check(
+    (await page.locator('.tabs--lenta').count()) > 0,
+    where('зачётная работа — не во вкладке раздела'),
+  );
 
   if (!mobile) {
     await page.goto(BASE + '/zadaniya/12/linear/', { waitUntil: 'networkidle' });
@@ -142,9 +156,14 @@ for (const [width, height, mobile] of [
     if ((await plashka.count()) > 0) {
       await plashka.first().click();
       await page.waitForSelector('.razdely-menu');
-      const first = await page.$eval('.razdely-menu__list > li', (li) => li.classList.contains('razdely-menu__ves'));
+      const first = await page.$eval('.razdely-menu__list > li', (li) =>
+        li.classList.contains('razdely-menu__ves'),
+      );
       check(first, 'меню «Все разделы»: «Весь раздел» не первым пунктом');
-      check((await page.locator('.razdely-menu .ves-card').count()) === 3, 'меню: нет трёх карточек «Весь раздел»');
+      check(
+        (await page.locator('.razdely-menu .ves-card').count()) === 3,
+        'меню: нет трёх карточек «Весь раздел»',
+      );
       await page.waitForTimeout(400);
       await shot(page, 'menu-1440');
     }
@@ -166,7 +185,9 @@ async function counts(page) {
   );
 }
 const mainButton = (page, mobile) =>
-  page.locator(mobile ? '.zs-bar [data-testid=zachyot-main]' : '.zs-sum [data-testid=zachyot-main]');
+  page.locator(
+    mobile ? '.zs-bar [data-testid=zachyot-main]' : '.zs-sum [data-testid=zachyot-main]',
+  );
 
 for (const [width, height, mobile] of [
   [1440, 900, false],
@@ -185,7 +206,10 @@ for (const [width, height, mobile] of [
   await page.waitForSelector('[data-testid=zachyot-out]', { timeout: 60000 });
   check(clicks === 2, where(`«Весь №12» → «Собрать»: нажатий ${clicks}`));
   const main = await mainButton(page, mobile).getAttribute('data-main');
-  check(main === 'download', where(`после сборки главная кнопка не «Скачать для печати» (${main})`));
+  check(
+    main === 'download',
+    where(`после сборки главная кнопка не «Скачать для печати» (${main})`),
+  );
   check(
     (await page.locator('.zs-preview__task').count()) > 0,
     where('после сборки в превью нет задач первой страницы'),
@@ -196,47 +220,82 @@ for (const [width, height, mobile] of [
   await page.locator('.steps__item').nth(1).click();
   await page.getByRole('radio', { name: '2' }).first().click();
   await page.locator('.steps__item').nth(2).click();
-  check((await page.locator('[data-testid=zachyot-stale]').count()) === 1, where('после изменения код не помечен «устарел»'));
-  check((await mainButton(page, mobile).getAttribute('data-main')) === 'build', where('после изменения кнопка не «Собрать работу»'));
+  check(
+    (await page.locator('[data-testid=zachyot-stale]').count()) === 1,
+    where('после изменения код не помечен «устарел»'),
+  );
+  check(
+    (await mainButton(page, mobile).getAttribute('data-main')) === 'build',
+    where('после изменения кнопка не «Собрать работу»'),
+  );
 
   /* «Свой состав»: три типа с разным числом задач, у одного выключен прототип. */
   await page.locator('.steps__item').nth(0).click();
   await page.locator('[data-template=own]').click();
-  for (const [row, n] of [['linear', 1], ['quadratic', 2], ['exponential', 3]]) {
+  for (const [row, n] of [
+    ['linear', 1],
+    ['quadratic', 2],
+    ['exponential', 3],
+  ]) {
     for (let i = 0; i < n; i += 1) {
       await page.locator(`.sostav-counter[data-row=${row}] button[aria-label="Больше"]`).click();
     }
   }
-  const expRow = page.locator('.sostav-row').filter({ has: page.locator('.sostav-counter[data-row=exponential]') });
+  const expRow = page
+    .locator('.sostav-row')
+    .filter({ has: page.locator('.sostav-counter[data-row=exponential]') });
   await expRow.locator('.sostav-row__more').click();
   await expRow.locator('.sostav-set').nth(3).click();
   await shot(page, `zachyot-prototipy-${width}`, true);
   const own = await counts(page);
-  check(own.linear === 1 && own.quadratic === 2 && own.exponential === 3 && own.trigonometric === 0, where(`«Свой состав»: ${JSON.stringify(own)}`));
-  check(/3 из 4/.test((await expRow.locator('.sostav-row__sets').textContent()) ?? ''), where('нет «3 из 4 прототипов»'));
-  const total = await page.locator(mobile ? '.zs-bar__text b' : '[data-testid=zachyot-total]').first().textContent();
+  check(
+    own.linear === 1 && own.quadratic === 2 && own.exponential === 3 && own.trigonometric === 0,
+    where(`«Свой состав»: ${JSON.stringify(own)}`),
+  );
+  check(
+    /3 из 4/.test((await expRow.locator('.sostav-row__sets').textContent()) ?? ''),
+    where('нет «3 из 4 прототипов»'),
+  );
+  const total = await page
+    .locator(mobile ? '.zs-bar__text b' : '[data-testid=zachyot-total]')
+    .first()
+    .textContent();
   check(/6/.test(total ?? ''), where(`сводка: задач «${total}», а нужно 6`));
-  check(/off=12E\.D/.test(decodeURIComponent(page.url())), where('выключенный прототип не попал в адрес'));
+  check(
+    /off=12E\.D/.test(decodeURIComponent(page.url())),
+    where('выключенный прототип не попал в адрес'),
+  );
 
   /* Нехватка: тригонометрия 4 задачи × 2 варианта по ФИПИ. */
   await page.locator('[data-template=own]').click();
   for (let i = 0; i < 4; i += 1) {
-    await page.locator('.sostav-counter[data-row=trigonometric] button[aria-label="Больше"]').click();
+    await page
+      .locator('.sostav-counter[data-row=trigonometric] button[aria-label="Больше"]')
+      .click();
   }
   await page.locator('.steps__item').nth(1).click();
   await page.getByRole('radio', { name: 'Только ФИПИ' }).click();
-  check((await page.locator('[data-testid=zachyot-shortage]').count()) === 1, where('нет плашки нехватки задач ФИПИ'));
-  check((await mainButton(page, mobile).isDisabled()), where('при нехватке главная кнопка активна'));
+  check(
+    (await page.locator('[data-testid=zachyot-shortage]').count()) === 1,
+    where('нет плашки нехватки задач ФИПИ'),
+  );
+  check(await mainButton(page, mobile).isDisabled(), where('при нехватке главная кнопка активна'));
   await shot(page, `zachyot-shag2-${width}`, true);
   await page.click('[data-testid=zachyot-add-analogs]');
-  check((await page.locator('[data-testid=zachyot-shortage]').count()) === 0, where('после «Добавить аналоги» плашка осталась'));
+  check(
+    (await page.locator('[data-testid=zachyot-shortage]').count()) === 0,
+    where('после «Добавить аналоги» плашка осталась'),
+  );
 
   /* Ссылка на настройку открывает тот же набор. */
   const shared = page.url().replace(/&kod=[^&]*/, '');
   const other = await ctx.newPage();
   await other.goto(shared, { waitUntil: 'networkidle' });
   const again = await counts(other);
-  check(again.trigonometric === 4 && again.linear === 0, where(`ссылка с настройками: ${JSON.stringify(again)}`));
+  check(
+    again.trigonometric === 4 && again.linear === 0,
+    where(`ссылка с настройками: ${JSON.stringify(again)}`),
+  );
   await other.close();
 
   /* «Как в прошлый раз» — после сборки, на чистой странице. */
@@ -246,10 +305,16 @@ for (const [width, height, mobile] of [
   await page.waitForSelector('[data-testid=zachyot-out]', { timeout: 60000 });
   await page.goto(BASE + '/zadaniya/12/zachyot/', { waitUntil: 'networkidle' });
   await page.locator('[data-template=own]').click();
-  check((await page.locator('[data-template=last]').count()) === 1, where('нет плитки «Как в прошлый раз»'));
+  check(
+    (await page.locator('[data-template=last]').count()) === 1,
+    where('нет плитки «Как в прошлый раз»'),
+  );
   await page.locator('[data-template=last]').click();
   const restored = await counts(page);
-  check(Object.values(restored).every((n) => n === 2), where(`«Как в прошлый раз»: ${JSON.stringify(restored)}`));
+  check(
+    Object.values(restored).every((n) => n === 2),
+    where(`«Как в прошлый раз»: ${JSON.stringify(restored)}`),
+  );
   await ctx.close();
 }
 
@@ -269,7 +334,10 @@ for (const [width, height, mobile] of [
   const studentHref = await page.getAttribute('[data-testid=zachyot-print-student]', 'href');
   const teacherHref = await page.getAttribute('[data-testid=zachyot-print-teacher]', 'href');
   const runHref = await page.getAttribute('[data-testid=zachyot-link]', 'href');
-  check(studentHref !== null && teacherHref !== null && runHref !== null, where('нет ссылок на листы и онлайн'));
+  check(
+    studentHref !== null && teacherHref !== null && runHref !== null,
+    where('нет ссылок на листы и онлайн'),
+  );
 
   for (const [kind, url] of [
     ['uchenik', studentHref],
@@ -277,17 +345,24 @@ for (const [width, height, mobile] of [
   ]) {
     const sheet = await ctx.newPage();
     await sheet.goto(BASE + url, { waitUntil: 'networkidle' });
-    await sheet.waitForFunction(() => window.sheetPagination !== undefined, null, { timeout: 90000 });
+    await sheet.waitForFunction(() => window.sheetPagination !== undefined, null, {
+      timeout: 90000,
+    });
     const error = await sheet.evaluate(() => window.sheetPagination.error);
     check(error === undefined, where(`лист ${kind}: набор не удался — ${error}`));
     const info = await sheet.evaluate(() => ({
       tasks: document.querySelectorAll('#sheet-pages .sheet-task').length,
-      variants: Array.from(document.querySelectorAll('#sheet-pages .sheet-variant')).map((n) => n.textContent),
+      variants: Array.from(document.querySelectorAll('#sheet-pages .sheet-variant')).map(
+        (n) => n.textContent,
+      ),
       key: document.querySelectorAll('#sheet-pages .sheet-work-key').length,
       text: document.querySelector('#sheet-pages')?.textContent ?? '',
     }));
     check(info.tasks === 12, where(`лист ${kind}: задач ${info.tasks}, а в двух вариантах 12`));
-    check(info.variants.includes('Вариант 1') && info.variants.includes('Вариант 2'), where(`лист ${kind}: нет двух вариантов`));
+    check(
+      info.variants.includes('Вариант 1') && info.variants.includes('Вариант 2'),
+      where(`лист ${kind}: нет двух вариантов`),
+    );
     if (kind === 'uchitel') {
       check(info.key > 0, where('лист учителя: нет таблицы ответов вариантов'));
       check(/Шкала оценок/.test(info.text), where('лист учителя: нет шкалы оценок'));
@@ -337,7 +412,10 @@ for (const [width, height, mobile] of [
   await shot(page, 'generator-1440', true);
   /* Общий генератор: «Сгенерировать» по пресету «По задаче на тип», в
      «Дополнительно» — рамка «Запомни» и один пример, затем «Скачать PDF». */
-  await page.getByRole('button', { name: /Сгенерировать/ }).first().click();
+  await page
+    .getByRole('button', { name: /Сгенерировать/ })
+    .first()
+    .click();
   await page.waitForSelector('.gen-paper.is-live .gen-task', { timeout: 90000 });
   await page.locator('.gen-dop__head').first().click();
   /* Памятка и пример по умолчанию зависят от вида работы: включаем
@@ -346,7 +424,10 @@ for (const [width, height, mobile] of [
     const sw = page.getByRole('switch', { name });
     if ((await sw.getAttribute('aria-checked')) !== 'true') await sw.click();
   }
-  await page.getByRole('group', { name: 'Примеров на тип' }).getByRole('button', { name: '1' }).click();
+  await page
+    .getByRole('group', { name: 'Примеров на тип' })
+    .getByRole('button', { name: '1' })
+    .click();
   await page.waitForFunction(
     () => document.querySelectorAll('.gen-paper.is-live .gen-recap').length > 0,
     null,
@@ -357,7 +438,9 @@ for (const [width, height, mobile] of [
   if (href !== null) {
     const sheet = await ctx.newPage();
     await sheet.goto(new URL(href, BASE).href, { waitUntil: 'networkidle' });
-    await sheet.waitForFunction(() => window.sheetPagination !== undefined, null, { timeout: 90000 });
+    await sheet.waitForFunction(() => window.sheetPagination !== undefined, null, {
+      timeout: 90000,
+    });
     const info = await sheet.evaluate(() => ({
       tasks: document.querySelectorAll('#sheet-pages .sheet-task').length,
       recaps: document.querySelectorAll('#sheet-pages .sheet-recap').length,

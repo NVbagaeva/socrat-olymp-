@@ -100,7 +100,7 @@ export function OZadanii12() {
                   <RazdelIkonka
                     icon={ikonkaRazdela('12', vid.icon)}
                     sizes="(min-width: 768px) 132px, 104px"
-                    eager={gi < 2}
+                    eager
                   />
                 }
                 ton={VIDY12_TON[vid.id] ?? 'blue'}
