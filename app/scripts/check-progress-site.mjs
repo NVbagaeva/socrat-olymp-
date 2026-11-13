@@ -226,11 +226,15 @@ try {
       'прежняя незаконченная тренировка перенесена в запись общего тренажёра',
     );
     check(z?.payload?.control === true, '«Контроль» стал «Без подсказок и решений»');
-    const dalshe = p2.getByRole('button', { name: /Продолжить/ }).first();
-    await dalshe.waitFor({ state: 'visible', timeout: 15000 });
-    await dalshe.click();
+    /* Оболочка открывает незаконченную тренировку сразу; если спросит —
+       «Продолжить». */
     const ekran = p2.locator('.trn-zadacha');
-    await ekran.waitFor({ timeout: 20000 });
+    const dalshe = p2.getByRole('button', { name: /Продолжить/ }).first();
+    await ekran.or(dalshe).first().waitFor({ timeout: 20000 });
+    if (!(await ekran.isVisible())) {
+      await dalshe.click();
+      await ekran.waitFor({ timeout: 20000 });
+    }
     check(
       (await ekran.getAttribute('data-task')) === prezhnyaya.taskIds[prezhnyaya.index],
       'тренировка продолжена на той же задаче',

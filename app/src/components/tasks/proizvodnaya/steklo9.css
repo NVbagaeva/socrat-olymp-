@@ -175,6 +175,7 @@
   max-width: 720px;
 }
 .z9-op__gde-spisok {
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -182,7 +183,13 @@
   padding: 0;
   list-style: none;
 }
+.z9-op__gde-spisok li {
+  min-width: 0;
+  max-width: 100%;
+}
 .z9-gde__chip {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
