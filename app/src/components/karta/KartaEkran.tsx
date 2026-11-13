@@ -25,6 +25,7 @@ import FON from '@/content/karta/fon.json';
 import { PROLIV_TEKST } from '@/content/karta/proliv';
 import { KARTA_TEKST } from '@/content/karta/teksty';
 import { counted } from '@/lib/plural';
+import { assetUrl } from '@/lib/assetUrl';
 import { AUTH_HREF } from '@/lib/auth/config';
 import {
   CHAST_1,
@@ -73,7 +74,8 @@ const FAKTURA_OT = 0.95;
 const PANEL_SHIRINA = 380;
 
 const SIZES = `(max-width: 767px) 100vw, (max-width: 1279px) 90vw, 1200px`;
-const SRCSET = FON.shiriny.map((w) => `/images/karta/fon-${w}.webp ${w}w`).join(', ');
+const fonUrl = (w: number) => assetUrl(`/images/karta/fon-${w}.webp`);
+const SRCSET = FON.shiriny.map((w) => `${fonUrl(w)} ${w}w`).join(', ');
 
 function ramkaVybora(v: Vybor): Ramka {
   if (v === null) return { x: 0, y: 0, w: KARTA_W, h: KARTA_H };
@@ -326,7 +328,7 @@ export function KartaEkran({
           <div className="karta-sloy" style={{ width: KARTA_W, height: KARTA_H }}>
             <img
               className="karta-fon"
-              src={`/images/karta/fon-${FON.shiriny[FON.shiriny.length - 1]}.webp`}
+              src={fonUrl(FON.shiriny[FON.shiriny.length - 1] ?? KARTA_W)}
               srcSet={SRCSET}
               sizes={SIZES}
               width={KARTA_W}
