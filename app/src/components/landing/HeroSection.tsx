@@ -3,6 +3,7 @@ import { LevelTabs } from '@/components/level/LevelTabs';
 import { landingOf } from '@/content/landing';
 import type { Level } from '@/lib/level';
 import { Kristall } from './kristall/Kristall';
+import { Popugaj } from './Popugaj';
 
 
 /**
@@ -27,7 +28,9 @@ export function HeroSection({ level = 'profile' }: { level?: Level }) {
           {/* Вкладки уровня — над заголовком. */}
           <LevelTabs level={level} to="home" />
           <p className="hero__eyebrow">{hero.eyebrow}</p>
-          <h1 className="hero__title">{hero.title}</h1>
+          <h1 className="hero__title">
+            <TitleWithPerch title={hero.title} perch={hero.perch} />
+          </h1>
           <p className="hero__lead">{hero.lead}</p>
         </div>
 
@@ -58,5 +61,31 @@ export function HeroSection({ level = 'profile' }: { level?: Level }) {
         </dl>
       </div>
     </section>
+  );
+}
+
+/**
+ * Заголовок, где слово perch обёрнуто: на нём сидит попугайчик. Знак
+ * препинания сразу за словом держим с ним в одной неразрывной обёртке,
+ * иначе после inline-block точка может уехать на следующую строку.
+ */
+function TitleWithPerch({ title, perch }: { title: string; perch: string }) {
+  const at = title.indexOf(perch);
+  if (at < 0) return <>{title}</>;
+  const wordEnd = at + perch.length;
+  const tail = /^[.,!?:;…]*/.exec(title.slice(wordEnd))?.[0] ?? '';
+  const end = wordEnd + tail.length;
+  return (
+    <>
+      {title.slice(0, at)}
+      <span className="hero__perch-wrap">
+        <span className="hero__perch">
+          {perch}
+          <Popugaj />
+        </span>
+        {tail}
+      </span>
+      {title.slice(end)}
+    </>
   );
 }
