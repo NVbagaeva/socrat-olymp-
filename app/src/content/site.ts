@@ -4,7 +4,7 @@
  * Меняется здесь, в разметке текста нет.
  */
 
-import { legalDocs } from '@/content/legal/documents';
+import { legalDocs, ofertaDoc } from '@/content/legal/documents';
 import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 import { EZH_HREF } from '@/content/ezhemesyachnye';
@@ -77,8 +77,7 @@ export const site = {
 
   footer: {
     copyright: '© 2026 Будет на ЕГЭ',
-    /* Оферты здесь нет: её ссылка и реквизиты — content/legal/rekvizity.ts,
-       подвал покажет их, когда они будут готовы. Правовые документы — свои страницы сайта; связь — через
+    /* Правовые документы — свои страницы сайта; связь — через
        Telegram-канал платформы, тот же, что на печатных листах, он
        открывается в новой вкладке. */
     links: [
@@ -88,6 +87,18 @@ export const site = {
       { label: 'Контакты', href: '#' },
       { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
     ] satisfies (SiteLink | ExternalLink)[],
+    /**
+     * С флагом NEXT_PUBLIC_LEGAL_READY (lib/legal/prodavets.ts) подвал
+     * показывает реквизиты продавца и под ними — четыре документа; из
+     * общего ряда ссылок правовые тогда убираются.
+     */
+    pravovye: [
+      { label: ofertaDoc.linkLabel, href: ofertaDoc.href },
+      { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
+      { label: legalDocs.soglasie.linkLabel, href: legalDocs.soglasie.href },
+      { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
+    ] satisfies SiteLink[],
+    pravovyeLabel: 'Документы',
     /** Строка под копирайтом; ФИО — из src/content/legal/operator.json. */
     operatorLabel: 'Оператор персональных данных:',
   },

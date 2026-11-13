@@ -37,7 +37,7 @@ end $$;
 -- и чужой (у второго репетитора).
 insert into vault.secrets (name, secret) values ('allowed_emails', 'admin@x.ru');
 insert into auth.users (id, email, raw_user_meta_data)
-values ('a0000000-0000-0000-0000-000000000000', 'admin@x.ru', pg_temp.meta('{"name":"Наталья"}'));
+values ('a0000000-0000-0000-0000-000000000000', 'admin@x.ru', pg_temp.meta('{"name":"Наталия"}'));
 select public.grant_admin('admin@x.ru');
 set role authenticated;
 select set_config('request.jwt.claim.sub', 'a0000000-0000-0000-0000-000000000000', false);

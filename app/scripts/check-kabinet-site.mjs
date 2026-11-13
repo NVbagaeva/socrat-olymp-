@@ -151,7 +151,7 @@ try {
   console.log('1. Первый запуск');
   await go('/kabinet/proba/');
   await page.getByText('Первый запуск').waitFor();
-  await fillRegistration({ name: 'Наталья', email: 'admin@yandex.ru' });
+  await fillRegistration({ name: 'Наталия', email: 'admin@yandex.ru' });
   await page.getByRole('button', { name: 'Создать аккаунт администратора' }).click();
   await page.getByTestId('invite-tutor').waitFor();
   ok(true, 'администратор создан, открыт его кабинет');
@@ -355,7 +355,7 @@ try {
       await go('/kabinet/vydat-dz/');
       await page.getByLabel('Название').waitFor();
       await shot('vydat-dz');
-      await signInAs('Наталья');
+      await signInAs('Наталия');
       await shot('admin');
     }
     await page.setViewportSize({ width: 1280, height: 900 });
