@@ -310,11 +310,16 @@ function checkSite() {
     );
   }
 
-  /* Страница выбора разделов: все семь, в порядке таблицы. */
+  /* Страница выбора разделов (карта «О задании»): все семь видов группами,
+     в порядке таблицы; под названием вида — название графика. */
   const choose = decode(read('zadaniya/12') ?? '');
   let at = 0;
   for (const row of TABLE) {
-    const found = choose.indexOf(`"name":"${row.title}","caption":"${row.graphName}"`, at);
+    const nazvanie = choose.indexOf(`class="kz-gruppa__nazvanie">${row.title}<`, at);
+    const podpis = choose.indexOf(`class="kz-gruppa__tipov">${row.graphName} · `, nazvanie);
+    const sled = choose.indexOf('class="kz-gruppa__nazvanie"', nazvanie + 1);
+    const found =
+      nazvanie !== -1 && podpis !== -1 && (sled === -1 || podpis < sled) ? nazvanie : -1;
     check(
       found !== -1,
       `страница выбора разделов: нет «${row.title}» → «${row.graphName}» по порядку`,

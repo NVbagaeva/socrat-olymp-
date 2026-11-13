@@ -106,7 +106,10 @@ export function OZadanii12() {
                 ton={VIDY12_TON[vid.id] ?? 'blue'}
                 tipov={tipy.length}
                 progress={<GruppaProgress12 nabory={tipy} />}
-                labels={SHAPKA12}
+                labels={{
+                  /* Под названием вида — название графика и число типов. */
+                  tipov: (n) => SHAPKA12.vidPodpis(vid.graphName, n),
+                }}
                 open={gi === 0}
               >
                 <Link className="stk-ssylka z12-vid-ssylka" href={vidHref}>

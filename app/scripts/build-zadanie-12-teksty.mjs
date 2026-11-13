@@ -52,6 +52,7 @@ p(
     .map((f) => `**${f.znachenie}** ${f.podpis}`)
     .join(' · ')} |`,
   `| Типы задач | ${cell(S.gruppyTitle)}. ${cell(S.gruppyLead)} |`,
+  `| Подпись вида | ${cell(S.vidPodpis('График — парабола', 9))} |`,
   `| Ссылка на вид | ${cell(S.vidOtkryt('Квадратичная функция'))} |`,
   `| Что нужно знать | ${cell(S.znatTitle)}. ${cell(S.znatLead)} |`,
   '',
