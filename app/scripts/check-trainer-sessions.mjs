@@ -1073,10 +1073,17 @@ async function pauza1Scenario() {
     await open(page, trainer.url);
     const record = await waitRecord(page, trainer.scope, () => true);
     if (!check(record !== null, `${tag}: перенесена в запись сессии`)) return;
-    check(record.payload.items.length === 3, `${tag}: три задания`);
-    check(record.payload.items[2]?.seed === 'старый', `${tag}: у новой задачи прежний seed`);
+    /* Запись — прежнего формата ({items}) или уже общего ({tasks}). */
+    const zadaniya = record.payload.items ?? record.payload.tasks;
+    check(zadaniya.length === 3, `${tag}: три задания`);
     check(
-      record.ui?.index === 1 && record.ui?.z?.[0]?.itog === 'right',
+      zadaniya[2]?.seed === 'старый' || zadaniya[2]?.id === 'p05|nстарый',
+      `${tag}: у новой задачи прежний seed`,
+    );
+    check(
+      /* Отметка — в общем поле marks: оно есть и в записи прежней панели
+         фильтров, и в записи общего тренажёра по банку. */
+      record.ui?.index === 1 && record.ui?.marks?.[0] === 'right',
       `${tag}: та же задача и отметка`,
     );
     check(
