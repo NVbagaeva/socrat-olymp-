@@ -15,7 +15,9 @@ export type IkonkaName =
   | 'net'
   | 'strelka'
   | 'nazad'
-  | 'otlozheno';
+  | 'otlozheno'
+  | 'plus'
+  | 'ruchka';
 
 const PATHS: Record<IkonkaName, string> = {
   mix: 'M4 7h3l8 10h5M4 17h3l2.5-3.1M14.5 10.1 15 9.5 15 7h5M17 4l3 3-3 3M17 14l3 3-3 3',
@@ -30,6 +32,8 @@ const PATHS: Record<IkonkaName, string> = {
   strelka: 'M5 12h14M13 6l6 6-6 6',
   nazad: 'M19 12H5M11 6l-6 6 6 6',
   otlozheno: 'M7 4h10v16l-5-3.5L7 20V4ZM9 9h6',
+  plus: 'M12 5v14M5 12h14',
+  ruchka: 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',
 };
 
 export function Ikonka({ name, className }: { name: IkonkaName; className?: string }) {
