@@ -1,32 +1,72 @@
 'use client';
 
-import { clsx } from 'clsx';
-import { useState } from 'react';
-import { Tex } from '@/components/ui/Tex';
-import { TRENAZHER_7 } from '@/content/zadanie7';
+import { useMemo, useState, type ReactNode } from 'react';
+import { OpornayaZadacha, OpornyeSpisok, type OpornyyIshod, type OpornyyNavyk } from '../opornye';
+import type { Shag } from '../steklo';
+import { OPORNYE7, TRENAZHER7 } from '@/content/uravneniya7';
+import { scrollTabTo } from '@/lib/tabScroll';
 import type { MikroDlyaBrauzera } from '@/lib/zadanie7/opornye';
-import { estPi } from '@/lib/zadanie7/otvet';
+import { formatHint, fractionRightHint } from '@/lib/otvet';
 import { opornye7 } from '@/lib/zadanie7/progress';
-import { answerMatches, openText } from '@/lib/zadanie7/secret';
+import { openText } from '@/lib/zadanie7/secret';
+import { estPi, readSealed7 } from '@/lib/zadanie7/trening/otvet7';
+import { typeset } from '@/lib/tex';
 
-const T = TRENAZHER_7;
+/** Блок в списке: без прогресса — его добавляет браузер. */
+export interface Blok7Kartochka {
+  slug: string;
+  href: string;
+  nazvanie: string;
+  znakHtml: string;
+  /** Ключи задач блока: по ним считается «решено». */
+  zadachi: string[];
+}
 
-/** Сколько задач блока решено верно (для карточек списка). */
-export function ReshenoVBloke7({ ids }: { ids: string[] }) {
+export interface Navyk7Kartochki extends Omit<OpornyyNavyk, 'bloki'> {
+  bloki: Blok7Kartochka[];
+}
+
+/**
+ * Список опорных задач №7: навыки и их блоки по десять задач — на общих
+ * карточках (components/tasks/opornye). Прогресс — из хранилища опорных
+ * задач (lib/zadanie7/progress, ключ прежний).
+ */
+export function Opornye7Spisok({ navyki }: { navyki: Navyk7Kartochki[] }) {
   const progress = opornye7.useProgress();
-  const n = ids.filter((id) => progress.outcomes[id] === 'right').length;
   return (
-    <span className="z7-op__progress">
-      решено {n} из {ids.length}
-    </span>
+    <OpornyeSpisok
+      navyki={navyki.map((navyk) => ({
+        ...navyk,
+        bloki: navyk.bloki.map(({ zadachi, ...blok }) => ({
+          ...blok,
+          vsego: zadachi.length,
+          resheno: zadachi.filter((id) => progress.outcomes[id] === 'right').length,
+        })),
+      }))}
+      labels={OPORNYE7.spisok}
+    />
   );
+}
+
+/** Строки разбора задачи → шаги сцены (содержание не меняется). */
+function shagiRazbora(z: MikroDlyaBrauzera): Shag[] {
+  try {
+    const stroki = JSON.parse(openText(z.razbor, z.id)) as unknown;
+    return Array.isArray(stroki)
+      ? stroki
+          .filter((line): line is string => typeof line === 'string')
+          .map((line) => ({ chtoHtml: `<p>${typeset(line)}</p>`, formulaHtml: '' }))
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 /**
  * Экран блока опорных задач №7: по одной задаче, поле ответа (любая
- * верная запись числа), подсказка, короткий разбор после ответа. Сверху
- * — плашка «Запомни» с правилом блока: формулы здесь, а не на карточке
- * блока. Исход задачи — в общем хранилище прогресса (opornye7).
+ * верная запись числа), подсказка, решение по шагам. Сверху — плашка
+ * «Запомни» с правилом блока: формулы здесь, а не на карточке блока.
+ * Исход задачи — в хранилище прогресса опорных задач (opornye7).
  */
 export function Opornye7({
   blok,
@@ -34,131 +74,104 @@ export function Opornye7({
   zadachi,
 }: {
   blok: string;
-  zapomni: string;
+  /** Правило блока, уже набранное (серверный узел). */
+  zapomni: ReactNode;
   zadachi: MikroDlyaBrauzera[];
 }) {
-  const [i, setI] = useState(0);
   const progress = opornye7.useProgress();
-  const [vvod, setVvod] = useState('');
-  const [podskazka, setPodskazka] = useState(false);
-  const [otvet, setOtvet] = useState<boolean | null>(null);
-  const [zamechanie, setZamechanie] = useState<string | null>(null);
-  const z = zadachi[i];
+  const [index, setIndex] = useState(0);
+  const [value, setValue] = useState('');
+  const [checked, setChecked] = useState<'right' | 'wrong' | null>(null);
+  const [hintOpen, setHintOpen] = useState(false);
+  const [solutionOpen, setSolutionOpen] = useState(false);
+  const [format, setFormat] = useState<string | null>(null);
+
+  const z = zadachi[index];
+  const shagi = useMemo(() => (z === undefined ? [] : shagiRazbora(z)), [z]);
   if (z === undefined) {
     return null;
   }
-  const pereyti = (k: number) => {
-    setI(k);
-    setVvod('');
-    setPodskazka(false);
-    setOtvet(null);
-    setZamechanie(null);
-  };
+  const zadacha: MikroDlyaBrauzera = z;
+
+  const ishody: OpornyyIshod[] = zadachi.map((x) => {
+    const it = progress.outcomes[x.id];
+    return it === 'right' ? 'right' : it === undefined ? null : 'wrong';
+  });
+
+  function open(next: number) {
+    if (next < 0 || next >= zadachi.length) {
+      return;
+    }
+    setIndex(next);
+    setValue('');
+    setChecked(null);
+    setHintOpen(false);
+    setSolutionOpen(false);
+    setFormat(null);
+    scrollTabTo('.op-zad');
+  }
+
+  function check() {
+    if (value.trim() === '') {
+      return;
+    }
+    if (estPi(value)) {
+      setFormat(TRENAZHER7.ekran.piPodskazka);
+      return;
+    }
+    /* Запись ответа — по общему правилу бланка ЕГЭ, как в тренажёре. */
+    const reading = readSealed7(value, zadacha.seal);
+    if (reading.kind === 'format') {
+      setFormat(formatHint(reading.problem, reading.meant));
+      return;
+    }
+    if (reading.kind === 'fractionRight') {
+      setFormat(fractionRightHint(reading.decimal));
+      return;
+    }
+    setFormat(null);
+    const ok = reading.right;
+    setChecked(ok ? 'right' : 'wrong');
+    opornye7.recordAttempt({
+      kind: blok,
+      taskId: zadacha.id,
+      right: ok,
+      clean: ok && !hintOpen,
+      seconds: 0,
+      itog: ok ? 'right' : 'wrong',
+    });
+  }
+
   return (
-    <div className="z7-op">
-      <aside className="z7-op__zapomni">
-        <b>Запомни.</b> <Tex text={zapomni} />
-      </aside>
-      <ol className="z7-tochki" aria-label="Задачи блока">
-        {zadachi.map((x, k) => {
-          const it = progress.outcomes[x.id];
-          return (
-            <li key={x.id}>
-              <button
-                type="button"
-                aria-current={k === i}
-                aria-label={`Задача ${k + 1}`}
-                className={clsx(
-                  'z7-tochka',
-                  it === 'right' ? 'is-verno' : it === undefined ? '' : 'is-neverno',
-                )}
-                onClick={() => pereyti(k)}
-              >
-                {k + 1}
-              </button>
-            </li>
-          );
-        })}
-      </ol>
-      <article className="z7-zadacha">
-        <p className="z7-uslovie__text">
-          <Tex text={z.uslovie} />
-        </p>
-        <form
-          className="z7-otvet"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (vvod.trim() === '') {
-              return;
-            }
-            if (estPi(vvod)) {
-              setZamechanie(T.pi);
-              return;
-            }
-            setZamechanie(null);
-            const ok = answerMatches(vvod, z.seal);
-            setOtvet(ok);
-            opornye7.recordAttempt({
-              kind: blok,
-              taskId: z.id,
-              right: ok,
-              clean: ok && !podskazka,
-              seconds: 0,
-              itog: ok ? 'right' : 'wrong',
-            });
-          }}
-        >
-          <label htmlFor={`op-${z.id}`}>{T.otvet}</label>
-          <input
-            id={`op-${z.id}`}
-            inputMode="decimal"
-            autoComplete="off"
-            value={vvod}
-            onChange={(e) => setVvod(e.target.value)}
-          />
-          <button type="submit" className="btn btn--primary">
-            {T.proverit}
-          </button>
-        </form>
-        {zamechanie ? (
-          <p className="z7-otvet__itog" role="status">
-            <Tex text={zamechanie} />
-          </p>
-        ) : null}
-        {otvet !== null ? (
-          <p className={clsx('z7-otvet__itog', otvet ? 'is-verno' : 'is-neverno')} role="status">
-            {otvet ? T.verno : 'Пока неверно — загляните в разбор.'}
-          </p>
-        ) : null}
-        <div className="z7-zadacha__dop">
-          <button
-            type="button"
-            className="btn btn--secondary"
-            onClick={() => setPodskazka(!podskazka)}
-          >
-            {podskazka ? T.skrytPodskazku : T.podskazka}
-          </button>
-          {i + 1 < zadachi.length ? (
-            <button type="button" className="btn btn--ghost" onClick={() => pereyti(i + 1)}>
-              Следующая
-            </button>
-          ) : null}
-        </div>
-        {podskazka ? (
-          <p className="z7-op__podskazka">
-            <Tex text={z.podskazka} />
-          </p>
-        ) : null}
-        {otvet !== null ? (
-          <div className="z7-op__razbor">
-            {(JSON.parse(openText(z.razbor, z.id)) as string[]).map((l) => (
-              <p key={l}>
-                <Tex text={l} />
-              </p>
-            ))}
-          </div>
-        ) : null}
-      </article>
-    </div>
+    <OpornayaZadacha
+      index={index}
+      ishody={ishody}
+      onOpen={open}
+      uslovieHtml={typeset(zadacha.uslovie)}
+      value={value}
+      onValue={(next) => {
+        setValue(next);
+        setFormat(null);
+        if (checked === 'wrong') {
+          setChecked(null);
+        }
+      }}
+      checked={checked}
+      onCheck={check}
+      formatHint={format}
+      podskazka={{
+        html: typeset(zadacha.podskazka),
+        open: hintOpen,
+        onOpen: () => setHintOpen(true),
+      }}
+      /* Решение — после ответа: до проверки доступна только подсказка. */
+      reshenie={
+        checked === null
+          ? null
+          : { shagi, open: solutionOpen, onToggle: () => setSolutionOpen(!solutionOpen) }
+      }
+      zapomni={zapomni}
+      labels={OPORNYE7.zadacha}
+    />
   );
 }

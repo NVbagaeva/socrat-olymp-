@@ -29,6 +29,7 @@ export function KartaShapka({
   fakty,
   opasnoTitle,
   opasno,
+  oblozhka,
 }: {
   nadzagolovok: string;
   zagolovok: string;
@@ -37,9 +38,14 @@ export function KartaShapka({
   opasnoTitle: string;
   /** Пункты «чем опасно», HTML (формулы набраны). */
   opasno: string[];
+  /** Обложка раздела — крупно рядом с заголовком (готовая картинка). */
+  oblozhka?: ReactNode;
 }) {
   return (
-    <header className="kz-shapka stk-glass">
+    <header
+      className={clsx('kz-shapka stk-glass', oblozhka !== undefined && 'kz-shapka--oblozhka')}
+    >
+      {oblozhka === undefined ? null : <div className="kz-shapka__oblozhka">{oblozhka}</div>}
       <div className="kz-shapka__text">
         <p className="stk-nad">{nadzagolovok}</p>
         <h2 className="kz-h2">{zagolovok}</h2>

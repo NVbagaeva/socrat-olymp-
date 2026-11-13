@@ -8,7 +8,7 @@ import { CHERTEZHI_FORMUL, chertezhPodobiya } from './chertezhiFormul';
 import { Figurka } from './Figurka';
 import { GruppaProgress3 } from './GruppaProgress3';
 import { Primer3, Primer3Lazy } from './Primer3';
-import { YakorTipa } from './YakorTipa';
+import { YakorTipa } from '../karta/YakorTipa';
 import './zadanie3.css';
 
 /**

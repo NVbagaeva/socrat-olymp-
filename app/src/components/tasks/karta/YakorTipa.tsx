@@ -4,15 +4,16 @@ import { useEffect } from 'react';
 
 /**
  * Якорь типа на вкладке «О задании»: адрес …/zadaniya/3/#tip-konus
- * раскрывает карточку типа и её группу и подводит к ней страницу. Так
- * открываются прежние страницы разборов (с них стоит переадресация) и
- * ссылки «к типу» из тренажёра и опорных задач.
+ * (…/zadaniya/7/#tip-P11) раскрывает карточку типа и её группу и
+ * подводит к ней страницу. Так открываются прежние страницы разборов
+ * (с них стоит переадресация) и ссылки «к типу» из тренажёра и опорных
+ * задач. Общий для разделов на карте задания (components/tasks/karta).
  */
 export function YakorTipa() {
   useEffect(() => {
     const otkryt = () => {
       const id = decodeURIComponent(window.location.hash.slice(1));
-      if (!/^(tip|gruppa)-[a-z0-9-]+$/.test(id)) {
+      if (!/^(tip|gruppa)-[A-Za-z0-9-]+$/.test(id)) {
         return;
       }
       const cel = document.getElementById(id);
