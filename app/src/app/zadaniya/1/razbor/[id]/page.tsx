@@ -1,41 +1,26 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { AppShell } from '@/components/layout/AppShell';
-import { RazborTipa1 } from '@/components/tasks/planimetriya/RazborTipa1';
-import { O_ZADANII_1, ZADANIE1, zadanie1Title } from '@/content/zadanie1';
-import { ZADANIYA } from '@/lib/paths';
-import 'katex/dist/katex.min.css';
-import '../../../zadaniya.css';
-import '../../../[task]/section.css';
-import '../../../[task]/[type]/topic.css';
-import '@/lib/planimetriya/planimetriya.css';
-import '../../zadanie1.css';
+import { RedirectPage, REDIRECT_METADATA } from '@/components/layout';
+import { O_ZADANII_1 } from '@/content/zadanie1';
+import { gruppaHref1 } from '@/lib/planimetriya/trening/links';
+import { texPlain } from '@/lib/tex';
 
-/* Разбор типа задач со вкладки «О задании»: вкладка подгружает эту
-   страницу по клику на плашку и вставляет из неё блок разбора; без
-   скриптов на неё ведёт обычная ссылка с плашки. */
+/* Прежние страницы разборов №1 — по странице на группу типов (блок
+   I–X). Разобранные примеры теперь раскрываются на вкладке «О задании»,
+   в карточках типов: со старого адреса — переход на вкладку с якорем
+   группы (якорь раскрывает группу и её первый тип,
+   components/tasks/karta/YakorTipa.tsx). Сервер отвечает 301 раньше
+   (public/.htaccess). */
 export function generateStaticParams() {
   return O_ZADANII_1.tipy.map((t) => ({ id: t.id }));
 }
 export const dynamicParams = false;
 
+export const metadata = REDIRECT_METADATA;
+
 type Params = Promise<{ id: string }>;
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+/** Разбор группы → карточка группы на вкладке «О задании». */
+export default async function Page({ params }: { params: Params }) {
   const { id } = await params;
   const tip = O_ZADANII_1.tipy.find((t) => t.id === id);
-  return tip ? { title: zadanie1Title(tip.title.replace(/\$/g, '')) } : {};
-}
-
-export default async function Razbor1Page({ params }: { params: Params }) {
-  const { id } = await params;
-  const tip = O_ZADANII_1.tipy.find((t) => t.id === id);
-  if (tip === undefined) {
-    notFound();
-  }
-  return (
-    <AppShell active="tasks">
-      <RazborTipa1 tip={tip} base={`${ZADANIYA}/${ZADANIE1.slug}`} />
-    </AppShell>
-  );
+  return <RedirectPage href={gruppaHref1(tip?.blok ?? 'I')} title={texPlain(tip?.title ?? '')} />;
 }

@@ -70,16 +70,19 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   const rezhim = payload.rezhim;
   const kinds = useMemo(() => pool.map((item) => item.p), [pool]);
   const build = useCallback(() => pickRound(kinds, pool.length), [kinds, pool.length]);
-  /* Запись без раскладки (прежние тренажёры раздела) — задачи шли по
-     порядку пула: так и открываем, иначе номер задачи указал бы на другую. */
-  const prezhnyaya = useMemo(
+  /* Восстановленная тренировка без записанной раскладки (запись прежнего
+     тренажёра №1: задачи шли подряд) идёт в порядке записи — иначе номер
+     задачи и отметки указали бы на другие задачи. */
+  const poryadok = useMemo(
     () =>
-      restored !== null && (restored.order === null || restored.order === undefined)
-        ? pool.map((_, i) => i)
-        : restored?.order,
+      restored === null
+        ? undefined
+        : restored.order !== null && restored.order.length > 0
+          ? restored.order
+          : pool.map((_, i) => i),
     [restored, pool],
   );
-  const order = useRound(roundKey, build, prezhnyaya);
+  const order = useRound(roundKey, build, poryadok);
 
   const [index, setIndex] = useState(restored?.index ?? 0);
   const [value, setValue] = useState(restored?.value ?? '');
@@ -371,7 +374,12 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       tipHtml={nazvaniya[tekushchaya.p] ?? ''}
       uslovieHtml={zagruzka.nabrat(dannye.text)}
       tekst
-      pod={razdel.pod(dannye, rezhim)}
+      pod={razdel.pod(dannye, rezhim, {
+        podskazka: hintOpen && !control,
+        shag,
+        reshenie: solutionOpen && !control,
+        razbor,
+      })}
       {...(razdel.varianty === undefined ? {} : { varianty: razdel.varianty(dannye) })}
       {...(razdel.poyasnenie === undefined || (checked === null && !revealed)
         ? {}
