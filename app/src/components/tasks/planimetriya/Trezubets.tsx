@@ -54,7 +54,8 @@ function zasechka(p: [number, number], q: [number, number]) {
 
 const pts = (...ps: [number, number][]) => ps.map((p) => p.join(',')).join(' ');
 
-export function Trezubets({ label, hint }: { label: string; hint: string }) {
+/** hintHtml — подпись под чертежом, формулы уже набраны KaTeX на сборке. */
+export function Trezubets({ label, hintHtml }: { label: string; hintHtml: string }) {
   const [ugol, setUgol] = useState(0);
   const svg = useRef<SVGSVGElement>(null);
   const tashchim = useRef<{ ot: number; bylo: number } | null>(null);
@@ -173,7 +174,7 @@ export function Trezubets({ label, hint }: { label: string; hint: string }) {
           })}
         </g>
       </svg>
-      <p className="z1-trezubets__podpis">{hint}</p>
+      <p className="z1-trezubets__podpis" dangerouslySetInnerHTML={{ __html: hintHtml }} />
     </div>
   );
 }

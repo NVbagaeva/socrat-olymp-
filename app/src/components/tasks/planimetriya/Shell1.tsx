@@ -3,6 +3,7 @@ import { SHAPKA1 } from '@/content/planimetriya1';
 import { tasksPage } from '@/content/tasks';
 import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
+import { typeset } from '@/lib/tex';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
 import { Trezubets } from './Trezubets';
@@ -34,7 +35,9 @@ export function Shell1({ children }: { children: React.ReactNode }) {
           title={ZADANIE1.title}
           badge={ZADANIE1.badge}
           lead={ZADANIE1.lead}
-          media={<Trezubets label={SHAPKA1.trezubets} hint={SHAPKA1.trezubetsPodpis} />}
+          media={
+            <Trezubets label={SHAPKA1.ariaLabel} hintHtml={typeset(SHAPKA1.trezubetsPodpis)} />
+          }
         />
         <RazdelTabs base={base} tabs={ZADANIE1.tabs} />
         <div className="section-panel">{children}</div>

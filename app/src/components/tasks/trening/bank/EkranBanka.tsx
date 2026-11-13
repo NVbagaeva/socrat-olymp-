@@ -69,7 +69,19 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   const control = payload.control;
   const kinds = useMemo(() => pool.map((item) => item.p), [pool]);
   const build = useCallback(() => pickRound(kinds, pool.length), [kinds, pool.length]);
-  const order = useRound(roundKey, build, restored?.order);
+  /* Восстановленная тренировка без записанной раскладки (запись прежнего
+     тренажёра №1: задачи шли подряд) идёт в порядке записи — иначе номер
+     задачи и отметки указали бы на другие задачи. */
+  const poryadok = useMemo(
+    () =>
+      restored === null
+        ? undefined
+        : restored.order !== null && restored.order.length > 0
+          ? restored.order
+          : pool.map((_, i) => i),
+    [restored, pool],
+  );
+  const order = useRound(roundKey, build, poryadok);
 
   const [index, setIndex] = useState(restored?.index ?? 0);
   const [value, setValue] = useState(restored?.value ?? '');
