@@ -34,8 +34,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7' && N !== '2' && N !== '12') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 12)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '12' && N !== '13') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 12, 13)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -97,24 +97,31 @@ const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
 /* Блок опорных задач из образца и сколько в нём задач; прототип задачи по
-   ключу. У №2 банка нет: ключ задачи — «прототип|seed»; у №12 — каталог
-   шаблонов наборов движка. */
+   ключу. У №2 и №13 банка задач нет: ключ задачи — «прототип|seed»; у №13
+   задача опорного блока — «блок:номер»; у №12 — каталог шаблонов наборов
+   движка, опорных задач у узла нет. */
+const blokObrazca = OLD_OPORNYE === null ? null : Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+let zadachVBloke;
 let prototipOf;
-let zadachVBloke = 0;
 if (Z12) {
   const { katalog12 } = requireSrc('lib/ves12/trening/katalog.ts');
   const { prototipyZadach } = requireSrc('lib/trening/bank.ts');
   const poZadache = prototipyZadach(katalog12());
   prototipOf = (id) => poZadache.get(id);
+} else if (N === '13') {
+  const { BLOKI_13, zadachiBloka } = requireSrc('lib/zadanie13/opornye/bloki.ts');
+  const b = BLOKI_13.find((x) => x.id === blokObrazca);
+  zadachVBloke = b === undefined ? undefined : zadachiBloka(b).length;
+  prototipOf = (id) => id?.split('|')[0];
+} else if (N === '2') {
+  const { BLOKI } = requireSrc('lib/vektory/prep/bloki.ts');
+  zadachVBloke = BLOKI.find((b) => b.id === blokObrazca)?.zadachi.length;
+  prototipOf = (id) => id?.split('|')[0];
 } else {
-  const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
-  const BLOKI_OPORNYH =
-    N === '2'
-      ? requireSrc('lib/vektory/prep/bloki.ts').BLOKI
-      : requireSrc(`lib/zadanie${N}/opornye.ts`).BLOKI_OPORNYH;
+  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
+  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
   zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-  const BANK = N === '2' ? [] : requireSrc(`lib/zadanie${N}/bank/index.ts`).BANK;
-  prototipOf = (id) => (N === '2' ? id?.split('|')[0] : BANK.find((z) => z.id === id)?.prototypeId);
+  prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
 }
 
 const browser = await chromium.launch();
@@ -202,8 +209,9 @@ try {
   /* 5. Опорные задачи: прежний прогресс блока. */
   if (OLD_OPORNYE !== null) {
     await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-    const reshenoOp = Object.values(obrazec[OLD_OPORNYE].outcomes).filter(
-      (x) => x === 'right',
+    /* У №13 в образце несколько блоков: считаем блок образца («блок:номер»). */
+    const reshenoOp = Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
+      ([key, x]) => x === 'right' && (N !== '13' || key.startsWith(`${blokObrazca}:`)),
     ).length;
     const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
     check(

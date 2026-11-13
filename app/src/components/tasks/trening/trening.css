@@ -1204,3 +1204,57 @@
   min-width: 0;
   text-align: left;
 }
+
+/* Ответ выбором вместо числа (№13, «Определи тип»): крупные кнопки в
+   столбик на телефоне, по две в ряд на широком экране. */
+.trn-pole--svoe {
+  display: grid;
+  gap: var(--space-3);
+}
+.trn-vybor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+@media (min-width: 640px) {
+  .trn-vybor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.trn-vybor__knopka {
+  min-height: 48px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--blue-200, #c9d6ee);
+  border-radius: 14px;
+  background: var(--white);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.trn-vybor__knopka:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.trn-vybor__knopka.is-on {
+  border-color: var(--blue-600);
+  box-shadow: inset 0 0 0 1px var(--blue-600);
+}
+.trn-vybor__knopka.is-right {
+  border-color: var(--green-600, #2e8b57);
+  box-shadow: inset 0 0 0 1px var(--green-600, #2e8b57);
+}
+.trn-vybor__knopka.is-wrong {
+  border-color: var(--terracotta);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+.trn-vybor__knopka:disabled {
+  cursor: default;
+}
+
+/* Строка ответа под шагами решения (№13). */
+.trn-otvet-stroka {
+  margin: var(--space-3) 0 0;
+}

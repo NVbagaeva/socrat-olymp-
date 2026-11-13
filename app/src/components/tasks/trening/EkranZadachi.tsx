@@ -76,6 +76,11 @@ export interface EkranZadachiProps {
   /** Чертёж задачи: над условием (стереометрия, планиметрия). */
   risunok?: ReactNode;
   /**
+   * Своё поле ответа вместо числа: кнопки выбора (№13, «Определи тип»).
+   * Значение и «Проверить» — те же: value держит выбранный вариант.
+   */
+  pole?: ReactNode;
+  /**
    * Условие — текст задачи, а не одно выражение: набирается обычным
    * кеглем по левому краю (у №8 выражение стоит крупно по центру).
    */
@@ -121,6 +126,7 @@ export function EkranZadachi({
   tekst = false,
   varianty = null,
   poyasnenieHtml,
+  pole: svoePole,
 }: EkranZadachiProps) {
   const pole = useRef<HTMLSpanElement>(null);
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
@@ -216,7 +222,7 @@ export function EkranZadachi({
               </button>
             )}
           </div>
-        ) : (
+        ) : svoePole === undefined ? (
           <label className="trn-pole">
             <span className="stk-podpis">{labels.otvet}</span>
             <span className="trn-pole__ryad" ref={pole}>
@@ -248,6 +254,23 @@ export function EkranZadachi({
               )}
             </span>
           </label>
+        ) : (
+          <div className="trn-pole trn-pole--svoe" role="group" aria-label={labels.otvet}>
+            <span className="stk-podpis">{labels.otvet}</span>
+            {svoePole}
+            <span className="trn-pole__ryad">
+              {otvechen ? null : (
+                <button
+                  type="button"
+                  className="stk-btn stk-btn--primary stk-btn--lg"
+                  onClick={onCheck}
+                  disabled={!ready}
+                >
+                  {labels.proverit}
+                </button>
+              )}
+            </span>
+          </div>
         )}
         {formatHint === null ? null : <FormatHint text={formatHint} />}
 

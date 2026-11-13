@@ -21,7 +21,19 @@ import { isRecord } from '@/lib/trainerSession/restore';
  * Каталог банка: прототип → задачи открытого банка или исходные (`f`),
  * аналоги (`a`) и, у разделов с сюжетами, какие из них сюжетные (`s`).
  */
-export type KatalogBanka = Record<string, { f: string[]; a: string[]; s?: string[] }>;
+export type KatalogBanka = Record<
+  string,
+  {
+    f: string[];
+    a: string[];
+    s?: string[];
+    /**
+     * «Из банка ФИПИ» у прототипа без исходных задач — пусто, а не
+     * аналоги (№13: источник задан у прототипа целиком).
+     */
+    strogo?: boolean;
+  }
+>;
 
 /** Источник задач в выборе тем. */
 export type IstochnikBanka = 'vse' | 'fipi' | 'new';
@@ -44,10 +56,15 @@ export interface PayloadBanka {
   control: boolean;
   /** Часы на панели. */
   timer?: boolean;
+  /**
+   * Особый режим раздела — четвёртая карточка на старте (№13:
+   * «Определи тип» — назвать схему по условию). Нет — задачи решаются.
+   */
+  rezhim?: string;
 }
 
-/** Прототип: «P04» (№7, №6), «A6» (№2) или набор №12 («12.A», «12Q.B»). */
-const PROTOTIP = /^(P\d\d|[ABC]\d|12[A-Z]?\.[A-Z])$/;
+/** Прототип: «P04» (№7, №6), «A6» (№2), «A-01» (№13) или набор №12 («12.A», «12Q.B»). */
+const PROTOTIP = /^(P\d\d|[ABC]\d|[A-D]-\d\d|12[A-Z]?\.[A-Z])$/;
 
 type Random = () => number;
 
@@ -72,7 +89,7 @@ export function prototipyZadach(katalog: KatalogBanka): Map<string, string> {
 
 /**
  * Прототип задачи: по каталогу, иначе из ключа — «P18-a03» (аналог),
- * «A6|k07» (№2), «12Q.B-07» (№12: шаблон набора).
+ * «A6|k07» (№2), «A-01|b3» (№13), «12Q.B-07» (№12: шаблон набора).
  */
 export function prototipZadachi(id: string, poKatalogu: ReadonlyMap<string, string>): string {
   const poKlyuchu = /^P\d\d-/.test(id)
@@ -106,7 +123,7 @@ function zadachiPrototipa(
   if (z === undefined) return [];
   const f = podStil(katalog, p, z.f, stil);
   const a = podStil(katalog, p, z.a, stil);
-  if (istochnik === 'fipi') return f.length > 0 ? f : a;
+  if (istochnik === 'fipi') return f.length > 0 || z.strogo === true ? f : a;
   if (istochnik === 'new') return a;
   return [...f, ...a];
 }
@@ -218,6 +235,7 @@ export function isPayloadBanka(value: unknown, klyuch: RegExp): value is Payload
     isRecord(value) &&
     typeof value['control'] === 'boolean' &&
     (value['timer'] === undefined || typeof value['timer'] === 'boolean') &&
+    (value['rezhim'] === undefined || typeof value['rezhim'] === 'string') &&
     Array.isArray(value['tasks']) &&
     value['tasks'].length > 0 &&
     value['tasks'].every(

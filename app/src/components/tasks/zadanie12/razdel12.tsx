@@ -127,5 +127,5 @@ export const RAZDEL12: RazdelBanka<Zadacha12, Reshenie12> = {
     z.task.options === null ? null : z.task.options.map((o) => ({ id: o.number, html: o.html })),
   poyasnenie: (z, verno) => (verno ? z.task.rightHint : z.task.wrongHint),
   zadachaHref: (id) => `${ZADANIYA}/12/trenazher/?zadacha=${encodeURIComponent(id)}`,
-  perenos: perenos12,
+  prezhnyayaZapis: perenos12,
 };
