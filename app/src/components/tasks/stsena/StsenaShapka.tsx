@@ -28,6 +28,8 @@ export interface StsenaShapkaProps {
   tabletki?: readonly Tabletka[];
   /** Строка прогресса: «Решено 12 из 92» с полосой — клиентский островок. */
   progress?: ReactNode;
+  /** Под прогрессом: кнопка «Продолжить подготовку» у №12. */
+  actions?: ReactNode;
   /** Обложка справа: картинка, оживающая в 3D (ObjomnayaOblozhka). */
   media?: ReactNode;
   className?: string;
@@ -49,6 +51,7 @@ export function StsenaShapka({
   lead,
   tabletki,
   progress,
+  actions,
   media,
   className,
 }: StsenaShapkaProps) {
@@ -80,6 +83,7 @@ export function StsenaShapka({
             </ul>
           )}
           {progress === undefined ? null : <div className="stsena__progress">{progress}</div>}
+          {actions === undefined ? null : <div className="stsena__actions">{actions}</div>}
         </div>
         {media === undefined ? null : <div className="stsena__media">{media}</div>}
       </header>
