@@ -299,7 +299,11 @@ export function KabinetScreen() {
 function StudentHome({ klassy, onJoined }: { klassy: KlassView[] | null; onJoined: () => void }) {
   const t = KABINET.student;
   const [initialCode] = useState(pendingCode);
-  const pokazatVstuplenie = initialCode !== '' || (klassy !== null && klassy.length === 0);
+  /* Показанная форма остаётся до ухода со страницы: после вступления
+     ученик видит «Готово: ты в классе …», а не исчезнувшую карточку. */
+  const [vstupil, setVstupil] = useState(false);
+  const pokazatVstuplenie =
+    initialCode !== '' || vstupil || (klassy !== null && klassy.length === 0);
   return (
     <>
       <div className="kabinet__karta" data-section="karta">
@@ -308,7 +312,13 @@ function StudentHome({ klassy, onJoined }: { klassy: KlassView[] | null; onJoine
       {pokazatVstuplenie ? (
         <Card className="kabinet__card" title={t.classes.title} data-section="join">
           <p className="auth-form__text">{t.classes.none}</p>
-          <JoinClassForm initial={initialCode} onJoined={onJoined} />
+          <JoinClassForm
+            initial={initialCode}
+            onJoined={() => {
+              setVstupil(true);
+              onJoined();
+            }}
+          />
         </Card>
       ) : null}
     </>
