@@ -76,6 +76,11 @@ export interface EkranZadachiProps {
   /** Чертёж задачи: над условием (стереометрия, планиметрия). */
   risunok?: ReactNode;
   /**
+   * Своё поле ответа вместо числа: кнопки выбора (№13, «Определи тип»).
+   * Значение и «Проверить» — те же: value держит выбранный вариант.
+   */
+  pole?: ReactNode;
+  /**
    * Условие — текст задачи, а не одно выражение: набирается обычным
    * кеглем по левому краю (у №8 выражение стоит крупно по центру).
    */
@@ -112,6 +117,7 @@ export function EkranZadachi({
   pod,
   risunok,
   tekst = false,
+  pole: svoePole,
 }: EkranZadachiProps) {
   const pole = useRef<HTMLSpanElement>(null);
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
@@ -170,33 +176,56 @@ export function EkranZadachi({
       </article>
 
       <div className="trn-otvetnaya stk-glass">
-        <label className="trn-pole">
-          <span className="stk-podpis">{labels.otvet}</span>
-          <span className="trn-pole__ryad" ref={pole}>
-            <AnswerInput
-              className="trn-input"
-              placeholder={labels.placeholder}
-              value={value}
-              state={
-                sostoyanie === 'neverno' ? 'error' : sostoyanie === 'verno' ? 'success' : 'default'
-              }
-              readOnly={otvechen}
-              onChange={onValue}
-              onKeyDown={onKey}
-              onFocus={onFocus}
-            />
-            {otvechen ? null : (
-              <button
-                type="button"
-                className="stk-btn stk-btn--primary stk-btn--lg"
-                onClick={onCheck}
-                disabled={!ready}
-              >
-                {labels.proverit}
-              </button>
-            )}
-          </span>
-        </label>
+        {svoePole === undefined ? (
+          <label className="trn-pole">
+            <span className="stk-podpis">{labels.otvet}</span>
+            <span className="trn-pole__ryad" ref={pole}>
+              <AnswerInput
+                className="trn-input"
+                placeholder={labels.placeholder}
+                value={value}
+                state={
+                  sostoyanie === 'neverno'
+                    ? 'error'
+                    : sostoyanie === 'verno'
+                      ? 'success'
+                      : 'default'
+                }
+                readOnly={otvechen}
+                onChange={onValue}
+                onKeyDown={onKey}
+                onFocus={onFocus}
+              />
+              {otvechen ? null : (
+                <button
+                  type="button"
+                  className="stk-btn stk-btn--primary stk-btn--lg"
+                  onClick={onCheck}
+                  disabled={!ready}
+                >
+                  {labels.proverit}
+                </button>
+              )}
+            </span>
+          </label>
+        ) : (
+          <div className="trn-pole trn-pole--svoe" role="group" aria-label={labels.otvet}>
+            <span className="stk-podpis">{labels.otvet}</span>
+            {svoePole}
+            <span className="trn-pole__ryad">
+              {otvechen ? null : (
+                <button
+                  type="button"
+                  className="stk-btn stk-btn--primary stk-btn--lg"
+                  onClick={onCheck}
+                  disabled={!ready}
+                >
+                  {labels.proverit}
+                </button>
+              )}
+            </span>
+          </div>
+        )}
         {formatHint === null ? null : <FormatHint text={formatHint} />}
 
         {sostoyanie === 'verno' || sostoyanie === 'neverno' || sostoyanie === 'razbor' ? (

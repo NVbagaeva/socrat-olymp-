@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { landing } from '@/content/landing';
 import { Kristall } from './kristall/Kristall';
+import { Zherdochka } from './Zherdochka';
 
 const { hero, metrics } = landing;
 
@@ -23,7 +24,9 @@ export function HeroSection() {
       <div className="hero__in">
         <div className="hero__text">
           <p className="hero__eyebrow">{hero.eyebrow}</p>
-          <h1 className="hero__title">{hero.title}</h1>
+          <h1 className="hero__title">
+            <TitleWithPerch title={hero.title} perch={hero.perch} />
+          </h1>
           <p className="hero__lead">{hero.lead}</p>
         </div>
 
@@ -54,5 +57,29 @@ export function HeroSection() {
         </dl>
       </div>
     </section>
+  );
+}
+
+/**
+ * Заголовок, где сразу за словом perch висит жёрдочка с попугайчиком.
+ * Слово, знак препинания за ним и жёрдочка — в одной неразрывной
+ * обёртке: жёрдочка не отрывается от слова на другую строку.
+ */
+function TitleWithPerch({ title, perch }: { title: string; perch: string }) {
+  const at = title.lastIndexOf(perch);
+  if (at < 0) return <>{title}</>;
+  const wordEnd = at + perch.length;
+  const tail = /^[.,!?:;…]*/.exec(title.slice(wordEnd))?.[0] ?? '';
+  const end = wordEnd + tail.length;
+  return (
+    <>
+      {title.slice(0, at)}
+      <span className="hero__perch-wrap">
+        {perch}
+        {tail}
+        <Zherdochka />
+      </span>
+      {title.slice(end)}
+    </>
   );
 }

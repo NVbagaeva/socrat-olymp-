@@ -58,7 +58,9 @@
      №3       — prototype.otvet(параметры варианта) из lib/zadanie3;
      №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
      №6       — то же из lib/zadanie6 (общий тренажёр по банку, как у №7)
-                (в записи — ключи задач банка, без ответа).
+                (в записи — ключи задач банка, без ответа);
+     №1       — тот же общий тренажёр: ключ «p05|b12» → razreshit и
+                sostavZadachi движка планиметрии (lib/planimetriya).
 
    Новый тренажёр — один объект в TRAINERS ниже: адрес, раздел, как
    начать тренировку и как по записи получить верный ответ. Поле ответа,
@@ -150,24 +152,31 @@ function answer11(payload, at) {
     : { option: String(solved.vybor.correct + 1) };
 }
 
-/** №1 (тренажёр с фильтрами): задание {k, seed?} → план по ключу → ответ движка. */
+/**
+ * №1: общий тренажёр по банку, как у №7 и №6 — в записи ключи задач
+ * {id: «p05|b12», p: «p05»}; ответ — тот же движок, что собирает задачу
+ * в браузере (lib/planimetriya/trening/sborka.ts) по ключу.
+ */
 let bank1 = null;
 function answer1(payload, at) {
   const { razreshit, sostavZadachi } = requireSrc('lib/planimetriya/trenazher/zadacha');
   const { planPoKlyuchu1 } = requireSrc('lib/planimetriya/trenazher/filtry1');
-  const { osnovaSeed } = requireSrc('lib/trenazher/sessiya.ts');
   if (bank1 === null) {
     bank1 = requireSrc('lib/planimetriya/trenazher/dannye').dannyeTrenazhera1().bank;
   }
-  const plan = planPoKlyuchu1(payload.items[at].k, osnovaSeed(payload, at, 0));
+  /* Запись прежнего тренажёра (панель фильтров, {items}) — тем же
+     чтением, что у нового тренажёра (prezhnyayaZapis1). */
+  const tasks =
+    payload.tasks ?? requireSrc('lib/planimetriya/trening/klyuch').prezhnyayaZapis1(payload).tasks;
+  const plan = planPoKlyuchu1(tasks[at].id, '');
   return { text: numberText(sostavZadachi(razreshit(plan, bank1)).otvet) };
 }
 
-/** №13 (тренажёр с фильтрами): задание «A-01|b3» → generate(прототип, seed).answer. */
+/** №13 (общий тренажёр по банку): задача «A-01|b3» → generate(прототип, seed).answer. */
 function answer13(payload, at) {
   const { generate } = requireSrc('lib/zadanie13/generate');
-  const [prototype, seed] = payload.items[at].k.split('|');
-  return { text: numberText(generate(prototype, payload.items[at].seed ?? seed).answer) };
+  const [prototype, seed] = payload.tasks[at].id.split('|');
+  return { text: numberText(generate(prototype, seed).answer) };
 }
 
 /** №4, №5: [прототип, номер варианта, подпись] → ответ ученика или метод. */
@@ -389,14 +398,20 @@ const TRAINERS = [
     url: '/zadaniya/1/trenazher/',
     scope: '1',
     answer: answer1,
-    all: chooseAllFiltry,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№13',
     url: '/zadaniya/13/trenazher/',
     scope: '13',
     answer: answer13,
-    all: chooseAllFiltry,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№11',
@@ -1058,10 +1073,17 @@ async function pauza1Scenario() {
     await open(page, trainer.url);
     const record = await waitRecord(page, trainer.scope, () => true);
     if (!check(record !== null, `${tag}: перенесена в запись сессии`)) return;
-    check(record.payload.items.length === 3, `${tag}: три задания`);
-    check(record.payload.items[2]?.seed === 'старый', `${tag}: у новой задачи прежний seed`);
+    /* Запись — прежнего формата ({items}) или уже общего ({tasks}). */
+    const zadaniya = record.payload.items ?? record.payload.tasks;
+    check(zadaniya.length === 3, `${tag}: три задания`);
     check(
-      record.ui?.index === 1 && record.ui?.z?.[0]?.itog === 'right',
+      zadaniya[2]?.seed === 'старый' || zadaniya[2]?.id === 'p05|nстарый',
+      `${tag}: у новой задачи прежний seed`,
+    );
+    check(
+      /* Отметка — в общем поле marks: оно есть и в записи прежней панели
+         фильтров, и в записи общего тренажёра по банку. */
+      record.ui?.index === 1 && record.ui?.marks?.[0] === 'right',
       `${tag}: та же задача и отметка`,
     );
     check(
