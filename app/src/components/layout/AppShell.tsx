@@ -110,6 +110,10 @@ export function AppShell({ active, search = false, level = 'profile', children }
     <div className="shell shell--responsive app-shell">
       <Sidebar
         brand="Будет на ЕГЭ"
+        /* Уровень экзамена — сразу после логотипа. В узкой полосе
+           сайдбара (до 1024px) он уходит в верхнюю панель: там меню
+           разделов уже спрятано и место есть (components/level/level.css). */
+        afterBrand={<LevelSwitch className="sidebar__level" />}
         caption={{ title: 'Задания ЕГЭ', subtitle: levelInfo(level).name }}
         label="Задания ЕГЭ"
         items={tasks.map(taskItem)}

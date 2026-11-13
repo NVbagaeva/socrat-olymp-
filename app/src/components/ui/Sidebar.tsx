@@ -51,6 +51,8 @@ export interface SidebarProps {
   groups?: NavGroup[];
   /** Подпись над списком: чему посвящён этот столбец. */
   caption?: { title: string; subtitle: string };
+  /** Сразу под логотипом: переключатель уровня экзамена. */
+  afterBrand?: ReactNode;
   /** Нижняя группа: личные разделы. */
   secondaryItems?: NavItem[];
   user?: { initials: string; name: string };
@@ -196,6 +198,7 @@ export function Sidebar({
   items,
   groups,
   caption,
+  afterBrand,
   secondaryItems,
   user,
   footer,
@@ -208,6 +211,8 @@ export function Sidebar({
         <span className="sidebar__logo" aria-hidden="true" />
         <span>{brand}</span>
       </div>
+
+      {afterBrand}
 
       {caption !== undefined ? (
         <div className="sidebar__caption">

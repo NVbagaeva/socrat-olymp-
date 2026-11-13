@@ -287,3 +287,23 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ── Переключатель в оболочке кабинета ──
+   От 1024px — под логотипом в сайдбаре: в верхней панели рядом с меню
+   разделов ему места нет (на 1024–1365px панель вылезала за экран).
+   Уже 1024px сайдбар свёрнут, меню разделов из панели убрано — там
+   переключатель стоит в панели. */
+.sidebar__level {
+  margin: 0 var(--space-3) var(--space-5);
+  align-self: flex-start;
+}
+@media (min-width: 1024px) {
+  .topbar .topbar__level {
+    display: none;
+  }
+}
+@media (max-width: 1023.98px) {
+  .sidebar .sidebar__level {
+    display: none;
+  }
+}
