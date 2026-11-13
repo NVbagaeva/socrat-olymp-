@@ -11,14 +11,14 @@ import {
 import type { BaseUi } from '@/lib/trainerSession/types';
 
 /**
- * Состояние экрана задачи №7, как оно хранится в сессии.
+ * Состояние экрана задачи тренажёра по банку (№7, №6 …), как оно хранится в сессии.
  *
  * Кроме общих полей (номер, отметки, раскладка) — всё, что ученик успел
  * сделать на текущей задаче: ответ, его проверка, открытые подсказка и
  * решение, пройденные вопросы подсказки, замены «Похожая задача».
  * Решение не хранится: его строит решатель по параметрам задачи.
  */
-export interface Trenazher7Ui extends BaseUi {
+export interface UiBanka extends BaseUi {
   value: string;
   checked: 'right' | 'wrong' | null;
   /** Открыто ли решение у текущей задачи. */
@@ -40,10 +40,10 @@ export interface Trenazher7Ui extends BaseUi {
 
 /**
  * Достать из сохранённого состояния поля экрана; что не прочиталось —
- * по умолчанию. Понимает и запись прежнего экрана (до редизайна):
- * `oshibalsya` → была ошибка, `razborOtkryt` → открыто решение.
+ * по умолчанию. Понимает и запись прежних экранов №7 и №6 (до
+ * редизайна): `oshibalsya` → была ошибка, `razborOtkryt` → открыто решение.
  */
-export function readTrenazher7Ui(base: BaseUi): Trenazher7Ui {
+export function readUiBanka(base: BaseUi): UiBanka {
   const raw: Record<string, unknown> = isRecord(base) ? base : {};
   const misses = raw['misses'];
   return {

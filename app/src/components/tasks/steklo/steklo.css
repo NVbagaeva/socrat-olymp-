@@ -468,3 +468,11 @@ details[open] > summary .stk-shevron {
 .stk-shag--otbor .stk-shag__zag {
   color: var(--amber-700);
 }
+
+/* Таблица или рисунок в шаге решения: не шире шага, прокрутка — внутри. */
+.stk-shag__risunok {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

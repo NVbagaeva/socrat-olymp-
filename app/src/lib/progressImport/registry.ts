@@ -65,6 +65,18 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     ],
   },
   {
+    id: 'z6',
+    title: '№6 «Случайные величины»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie6/trening/progress.ts). Прежний
+         ключ budetege:zadanie-6:v1 сворачивается в него на месте
+         (lib/progressLog, LEGACY_LOGS) и сам не переносится. */
+      'budetege:zadanie-6:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «6»). */
+      'budetege:trainer:6:session',
+    ],
+  },
+  {
     id: 'obshchee',
     title: 'Отложенные задачи и история тренировок',
     keys: [

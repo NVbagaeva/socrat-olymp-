@@ -101,6 +101,8 @@ export interface Shag {
    * 'otbor' — отбор корней. Выделяется цветом и на листе, и в тренажёре.
    */
   ton?: 'odz' | 'otbor';
+  /** Таблица или рисунок шага (№6: таблица решения, дерево с выделением). */
+  risunok?: ReactNode;
 }
 
 /** Признак делимости под решением: «На 4» и правило с примером (HTML). */
@@ -144,6 +146,9 @@ export function ShagiResheniya({
               className="stk-shag__formula"
               dangerouslySetInnerHTML={{ __html: shag.formulaHtml }}
             />
+            {shag.risunok === undefined ? null : (
+              <div className="stk-shag__risunok">{shag.risunok}</div>
+            )}
           </li>
         ))}
       </ol>

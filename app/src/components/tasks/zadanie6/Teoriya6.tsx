@@ -23,12 +23,13 @@ import { zadachiIzShablonov } from '@/lib/teoriya/proverka-server';
 import { BANK } from '@/lib/zadanie6/bank/index';
 import { YAKOR_6 } from '@/lib/zadanie6/teoriya-yakorya';
 import { NABORY_PROVERKI_6 } from '@/lib/zadanie6/proverka';
-import { kodNaSayte, prototype } from '@/lib/zadanie6/prototypes';
+import { prototype } from '@/lib/zadanie6/prototypes';
 import type { BankItem } from '@/lib/zadanie6/types';
 import { KartochkaTelo6 } from './KartochkaTelo6';
 import { Razbor6 } from './Razbor6';
 import { Ris6 } from './Ris6';
 import { Uslovie6 } from './Uslovie6';
+import '../teoriya/teoriya-steklo.css';
 
 const T = TEORIYA_6_TEKSTY;
 
@@ -96,7 +97,7 @@ export function GdeNaEge6({ prototipy, trenazher }: { prototipy: string[]; trena
       <span className="z6-gde__label">{T.gdeNaEge}:</span>
       {prototipy.map((id) => (
         <Link className="z6-gde__chip" href={`${trenazher}?tipy=${id}`} key={id}>
-          {kodNaSayte(id)} <Tex text={prototype(id).title} />
+          <Tex text={prototype(id).title} />
         </Link>
       ))}
     </p>
@@ -276,7 +277,7 @@ export function Blok6({
 
 function Telo({ r, trenazher }: { r: RazdelTeorii6; trenazher: string }) {
   return (
-    <div className="z6-teoriya">
+    <div className="z6-teoriya teor-steklo">
       <p className="z6-teoriya__lead">
         <Tex text={r.lead} />
       </p>
