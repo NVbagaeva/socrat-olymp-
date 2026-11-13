@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { landing } from '@/content/landing';
 import { Kristall } from './kristall/Kristall';
-import { Popugaj } from './Popugaj';
+import { Zherdochka } from './Zherdochka';
 
 const { hero, metrics } = landing;
 
@@ -61,12 +61,12 @@ export function HeroSection() {
 }
 
 /**
- * Заголовок, где слово perch обёрнуто: на нём сидит попугайчик. Знак
- * препинания сразу за словом держим с ним в одной неразрывной обёртке,
- * иначе после inline-block точка может уехать на следующую строку.
+ * Заголовок, где сразу за словом perch висит жёрдочка с попугайчиком.
+ * Слово, знак препинания за ним и жёрдочка — в одной неразрывной
+ * обёртке: жёрдочка не отрывается от слова на другую строку.
  */
 function TitleWithPerch({ title, perch }: { title: string; perch: string }) {
-  const at = title.indexOf(perch);
+  const at = title.lastIndexOf(perch);
   if (at < 0) return <>{title}</>;
   const wordEnd = at + perch.length;
   const tail = /^[.,!?:;…]*/.exec(title.slice(wordEnd))?.[0] ?? '';
@@ -75,11 +75,9 @@ function TitleWithPerch({ title, perch }: { title: string; perch: string }) {
     <>
       {title.slice(0, at)}
       <span className="hero__perch-wrap">
-        <span className="hero__perch">
-          {perch}
-          <Popugaj />
-        </span>
+        {perch}
         {tail}
+        <Zherdochka />
       </span>
       {title.slice(end)}
     </>
