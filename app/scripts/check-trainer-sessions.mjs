@@ -163,11 +163,11 @@ function answer1(payload, at) {
   return { text: numberText(sostavZadachi(razreshit(plan, bank1)).otvet) };
 }
 
-/** №13 (тренажёр с фильтрами): задание «A-01|b3» → generate(прототип, seed).answer. */
+/** №13 (общий тренажёр по банку): задача «A-01|b3» → generate(прототип, seed).answer. */
 function answer13(payload, at) {
   const { generate } = requireSrc('lib/zadanie13/generate');
-  const [prototype, seed] = payload.items[at].k.split('|');
-  return { text: numberText(generate(prototype, payload.items[at].seed ?? seed).answer) };
+  const [prototype, seed] = payload.tasks[at].id.split('|');
+  return { text: numberText(generate(prototype, seed).answer) };
 }
 
 /** №4, №5: [прототип, номер варианта, подпись] → ответ ученика или метод. */
@@ -399,7 +399,10 @@ const TRAINERS = [
     url: '/zadaniya/13/trenazher/',
     scope: '13',
     answer: answer13,
-    all: chooseAllFiltry,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№11',
@@ -1272,7 +1275,12 @@ async function restoreTiming(trainer) {
     const page = await newPage(context);
     await open(page, trainer.url);
     await trainer.all(page);
-    const record = await startRun(page, trainer, 120_000);
+    /* После выбора тем (общий тренажёр) — «Начать тренировку», а не карточка режима. */
+    const record = await startRun(
+      page,
+      trainer.all === chooseAll8 ? { ...trainer, start: pressStart } : trainer,
+      120_000,
+    );
     if (!check(record !== null, `${trainer.name}, «Все»: тренировка начата`)) {
       return;
     }

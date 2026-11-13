@@ -153,11 +153,23 @@ export interface OpornayaZadachaProps {
   /** Подсказка о записи ответа: попытка не тратится. */
   formatHint?: string | null;
   /** Подсказка (HTML): открыта ли, открыть. null — подсказки нет. */
-  podskazka: { html: string; open: boolean; onOpen: () => void } | null;
+  podskazka: {
+    html: string;
+    open: boolean;
+    onOpen: () => void;
+    /** Подсказка-вопросы с кнопками (№13) вместо текста. */
+    telo?: ReactNode;
+  } | null;
   /** Решение по шагам: доступно после ответа; открыто ли, переключить. */
   reshenie: { shagi: Shag[]; open: boolean; onToggle: () => void } | null;
   /** Плашка «Запомни» блока: над задачей. */
   zapomni?: ReactNode;
+  /** Своё поле ответа вместо числа (№13: выбор схемы). value — выбранный вариант. */
+  pole?: ReactNode;
+  /** Свой вердикт вместо «Пока не так» (№13: «Число верное, единицы нет»). */
+  verdiktNeverno?: { zag: string; lead: string };
+  /** Ещё кнопки в ряду действий (№13: «Ещё вариант»). */
+  dop?: ReactNode;
   labels: OpornayaZadachaLabels;
 }
 
@@ -181,6 +193,9 @@ export function OpornayaZadacha({
   podskazka,
   reshenie,
   zapomni,
+  pole,
+  verdiktNeverno,
+  dop,
   labels,
 }: OpornayaZadachaProps) {
   const total = ishody.length;
@@ -232,18 +247,25 @@ export function OpornayaZadacha({
         <div className="op-zad__uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
         {risunok === undefined ? null : <div className="op-zad__ris">{risunok}</div>}
 
-        <label className="op-zad__pole">
-          <span className="stk-podpis">{labels.otvet}</span>
-          <AnswerInput
-            className="op-zad__input"
-            placeholder={labels.placeholder}
-            value={value}
-            state={checked === null ? 'default' : solved ? 'success' : 'error'}
-            readOnly={solved}
-            onChange={onValue}
-            onKeyDown={onKey}
-          />
-        </label>
+        {pole === undefined ? (
+          <label className="op-zad__pole">
+            <span className="stk-podpis">{labels.otvet}</span>
+            <AnswerInput
+              className="op-zad__input"
+              placeholder={labels.placeholder}
+              value={value}
+              state={checked === null ? 'default' : solved ? 'success' : 'error'}
+              readOnly={solved}
+              onChange={onValue}
+              onKeyDown={onKey}
+            />
+          </label>
+        ) : (
+          <div className="op-zad__pole op-zad__pole--svoe" role="group" aria-label={labels.otvet}>
+            <span className="stk-podpis">{labels.otvet}</span>
+            {pole}
+          </div>
+        )}
         {formatHint === null ? null : <FormatHint text={formatHint} />}
 
         {checked === null ? null : (
@@ -255,17 +277,25 @@ export function OpornayaZadacha({
               <Ikonka name={solved ? 'da' : 'net'} />
             </span>
             <span className="op-verdikt__text">
-              <b>{solved ? labels.verno : labels.neverno}</b>
-              <span>{solved ? labels.vernoLead : labels.nevernoLead}</span>
+              <b>{solved ? labels.verno : (verdiktNeverno?.zag ?? labels.neverno)}</b>
+              <span>
+                {solved ? labels.vernoLead : (verdiktNeverno?.lead ?? labels.nevernoLead)}
+              </span>
             </span>
           </div>
         )}
 
         {podskazka !== null && podskazka.open && !solved ? (
-          <p className="op-podskazka" role="note">
-            <Ikonka name="lampa" />
-            <span dangerouslySetInnerHTML={{ __html: podskazka.html }} />
-          </p>
+          podskazka.telo === undefined ? (
+            <p className="op-podskazka" role="note">
+              <Ikonka name="lampa" />
+              <span dangerouslySetInnerHTML={{ __html: podskazka.html }} />
+            </p>
+          ) : (
+            <div className="op-podskazka op-podskazka--voprosy" role="note">
+              {podskazka.telo}
+            </div>
+          )
         ) : null}
 
         {reshenie !== null && reshenie.open ? (
@@ -311,6 +341,7 @@ export function OpornayaZadacha({
               {reshenie.open ? labels.skrytReshenie : labels.reshenie}
             </button>
           )}
+          {dop}
           {!solved && !last ? (
             <button type="button" className="op-propustit" onClick={() => onOpen(index + 1)}>
               {labels.propustit}

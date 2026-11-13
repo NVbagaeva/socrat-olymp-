@@ -323,3 +323,15 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Подсказка-вопросы с кнопками (№13): блок во всю ширину, без значка строки. */
+.op-podskazka--voprosy {
+  display: block;
+}
+.op-zad__pole--svoe {
+  display: grid;
+  gap: var(--space-2);
+}
+.op-podskazka--voprosy {
+  color: var(--color-text);
+}
