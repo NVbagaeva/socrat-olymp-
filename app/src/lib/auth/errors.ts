@@ -10,11 +10,16 @@ export interface AuthFailure {
   code?: string;
 }
 
+import { DOMAIN_REJECTED_MARK } from './allowed-domains';
+
 /** Хук «перед созданием пользователя» отвечает этим словом, если адреса нет в списке. */
 export const INVITE_ONLY_MARK = 'invite_only';
 
 export const AUTH_ERRORS = {
   inviteOnly: 'Регистрация пока по приглашению.',
+  /* Форма показывает вместо этой строки подсказку со ссылкой (VoytiScreen). */
+  domainNotAllowed:
+    'Регистрация доступна с адресами российских почтовых сервисов: Яндекс, Mail.ru, Рамблер.',
   invalidCredentials: 'Неверная почта или пароль.',
   emailNotConfirmed: (email: string) => `Подтвердите почту: письмо отправлено на ${email}.`,
   emailExists: 'Такая почта уже зарегистрирована. Попробуйте войти.',
@@ -33,6 +38,11 @@ export const AUTH_ERRORS = {
   unknown: 'Что-то пошло не так. Попробуйте ещё раз через минуту.',
 } as const;
 
+/** База отказала: почта не российского сервиса и не добавлена вручную. */
+export function isDomainRejected(error: AuthFailure): boolean {
+  return error.message?.includes(DOMAIN_REJECTED_MARK) === true;
+}
+
 export function isInviteOnly(error: AuthFailure): boolean {
   return (
     error.message?.includes(INVITE_ONLY_MARK) === true ||
@@ -45,6 +55,8 @@ export function isInviteOnly(error: AuthFailure): boolean {
 
 /** Текст ошибки для экрана. email — для «Подтвердите почту». */
 export function describeAuthError(error: AuthFailure, email = ''): string {
+  /* Раньше приглашения: отказ по домену — тоже 403. */
+  if (isDomainRejected(error)) return AUTH_ERRORS.domainNotAllowed;
   if (isInviteOnly(error)) return AUTH_ERRORS.inviteOnly;
   switch (error.code) {
     case 'invalid_credentials':

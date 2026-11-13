@@ -14,6 +14,10 @@ grant usage on schema public to anon, authenticated, service_role;
 create table auth.users (
   id uuid primary key default gen_random_uuid(),
   email text not null,
+  -- Новая почта до подтверждения и хеш пароля — как у службы входа:
+  -- их меняют смена почты и смена пароля (domeny.test.sql).
+  email_change text default '',
+  encrypted_password text,
   raw_user_meta_data jsonb,
   created_at timestamptz not null default now()
 );
