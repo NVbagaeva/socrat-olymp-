@@ -176,6 +176,8 @@ const ALLOWED = new Set([
   'dzi-repetitor@yandex.ru',
   'dzi-uchenik1@yandex.ru',
   'dzi-uchenik2@yandex.ru',
+  'dz610-repetitor@yandex.ru',
+  'dz610-uchenik@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -1811,6 +1813,8 @@ async function runEnabled() {
 
   /* 7г. ДЗ из трёх источников (docs/kabinet-dz-istochniki.md). */
   await scenarijDz(mock, errors);
+  /* 7д. ДЗ, шаг 2: №6 и №10. */
+  await scenarijDz610(mock, errors);
 
   /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */
   {
@@ -2364,11 +2368,79 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await tutorCtx.close();
 }
 
+/* ── ДЗ, шаг 2: №6 и №10 ──────────────────────────────────────────
+   Блок опорных №10 — кнопкой со страницы блока; набор карточек №6 и тип
+   тренажёра №6 — в конструкторе; выдача; ученик видит рисунок условия
+   №6 и решает задачу. */
+async function scenarijDz610(mock, errors) {
+  registerInMock(mock, 'dz610-repetitor@yandex.ru', 'dz610-repetitor-1', 'Анна Сергеевна', 'tutor');
+  registerInMock(mock, 'dz610-uchenik@yandex.ru', 'dz610-uchenik-1', 'Лиза Котова', 'student');
+  mock.seedClass('dz610-repetitor@yandex.ru', ['dz610-uchenik@yandex.ru'], 'Класс 6–10');
+  const dz = mock.dz;
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await welcomeSeen(ctx);
+  await installMock(ctx, mock);
+  const tp = await ctx.newPage();
+  watchConsole(tp, errors);
+  await login(tp, 'dz610-repetitor@yandex.ru', 'dz610-repetitor-1');
+  const blok10 = fs
+    .readdirSync(path.join(OUT, 'zadaniya/10/opornye-zadachi'))
+    .find((d) => fs.statSync(path.join(OUT, 'zadaniya/10/opornye-zadachi', d)).isDirectory());
+  await tp.goto(`${SITE}/zadaniya/10/opornye-zadachi/${blok10}/`, { waitUntil: 'networkidle' });
+  await tp.locator('[data-block="dz-v-chernovik"]').first().click();
+  await tp.waitForSelector('[data-block="dz-chernovik-plashka"]');
+  check(true, 'ДЗ-6/10: блок опорных №10 — в черновике кнопкой со страницы блока');
+  await tp.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
+  await tp.waitForSelector('.dzk-punkt');
+  await tp.locator('.dzk-chip', { hasText: '№6' }).click();
+  await tp.locator('.dzk-item[data-nabor] .dzk-dobavit').first().click();
+  await tp.getByRole('tab', { name: 'Тренажёр' }).click();
+  const tip = tp.locator('.dzk-tip').first();
+  await tip.waitFor();
+  await tip.locator('.dzk-dobavit').click();
+  await tp.waitForFunction(() => document.querySelectorAll('.dzk-punkt').length === 3);
+  await tp.fill('input[name="title"]', 'ДЗ: №6 и №10');
+  await tp.locator('[data-action="vydat"]').click();
+  await tp.waitForSelector('[data-page="vydano"]', { timeout: 60000 });
+  const hw = dz.homework.find((h) => h.title === 'ДЗ: №6 и №10');
+  check(hw !== undefined && hw.sections.join(',') === '10,6', `ДЗ-6/10: выдано, разделы 10 и 6 (${hw?.sections})`);
+  const trUnits = dz.tasks.filter(
+    (t) => t.homework_id === hw.id && dz.parts.find((p) => p.id === t.part_id)?.source === 'trenazher',
+  );
+  check(trUnits.length === 2 && trUnits.every((u) => /<svg|<table/.test(u.question_html)), 'ДЗ-6/10: у задач №6 в снимке — рисунок условия');
+  await ctx.close();
+
+  const sctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await welcomeSeen(sctx);
+  await installMock(sctx, mock);
+  const sp = await sctx.newPage();
+  watchConsole(sp, errors);
+  await login(sp, 'dz610-uchenik@yandex.ru', 'dz610-uchenik-1');
+  await sp.goto(`${SITE}/zadaniya/6/`, { waitUntil: 'networkidle' });
+  await sp.waitForSelector('[data-block="dz-plashka"]');
+  check(true, 'ДЗ-6/10: у ученика плашка ДЗ в разделе №6');
+  await sp.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+  await sp.locator('.rdz-punkt[data-istochnik="trenazher"]').click();
+  await sp.waitForSelector('.rdz-zadacha .trn-uslovie svg, .rdz-zadacha .trn-uslovie table');
+  check(true, 'ДЗ-6/10: ученик видит рисунок условия №6');
+  const id = await sp.locator('.rdz-zadacha').first().getAttribute('data-task');
+  const key = dz.keys.find((k) => k.task_id === id).answer;
+  await sp.locator('.rdz-zadacha .otvet-input__field').fill(key.replace('.', ','));
+  await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
+  await sp.waitForSelector('.trn-verdikt--da');
+  check(await noHorizontalScroll(sp), 'ДЗ-6/10: задача №6 у ученика 390 — без горизонтальной прокрутки');
+  await sp.locator('.rdz-punkt[data-istochnik="opornye"]').click();
+  await sp.waitForSelector('.rdz-zadacha');
+  check(await noHorizontalScroll(sp), 'ДЗ-6/10: опорная №10 у ученика 390 — без горизонтальной прокрутки');
+  await sctx.close();
+}
+
 /* Только сценарий ДЗ — для отладки (--tolko-dz). */
 async function runTolkoDz() {
   const mock = makeMock();
   const errors = [];
   await scenarijDz(mock, errors);
+  await scenarijDz610(mock, errors);
   for (const e of errors) check(false, `консоль: ${e}`);
 }
 
