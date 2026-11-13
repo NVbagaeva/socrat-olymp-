@@ -38,6 +38,21 @@ if (!/^\d{1,2}$/.test(razdel ?? '')) {
 
 /** Файлы и папки содержания раздела (пути от корня репозитория). */
 const SODERZHANIE = {
+  6: [
+    'app/src/data/zadanie6',
+    'app/public/data/zadanie6',
+    'app/src/lib/zadanie6/prototypes',
+    'app/src/lib/zadanie6/bank',
+    'app/src/lib/zadanie6/kit.ts',
+    'app/src/lib/zadanie6/opornye.ts',
+    'app/src/lib/zadanie6/otvet.ts',
+    'app/src/lib/zadanie6/raspredelenie.ts',
+    'app/src/lib/zadanie6/velichiny.ts',
+    'app/src/lib/zadanie6/proverka.ts',
+    'app/src/content/teoriya6.ts',
+    'app/src/content/uroki6.ts',
+    'app/src/content/kartochki/06-sluchaynye-velichiny.ts',
+  ],
   7: [
     'app/src/data/zadanie7',
     'app/public/data/zadanie7',

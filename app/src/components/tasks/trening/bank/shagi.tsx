@@ -99,9 +99,7 @@ export function voprosyIzRazbora(hints: readonly VoprosRazbora[]): VoprosPodskaz
     voprosHtml: typeset(h.question),
     variantyHtml: h.options.map((o) => typeset(o)),
     verno: h.correct,
-    ...(h.comment === undefined || h.comment === ''
-      ? {}
-      : { kommentariyHtml: typeset(h.comment) }),
+    ...(h.comment === undefined || h.comment === '' ? {} : { kommentariyHtml: typeset(h.comment) }),
   }));
 }
 

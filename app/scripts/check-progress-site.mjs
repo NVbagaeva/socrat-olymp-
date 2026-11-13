@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-/* scripts/check-progress-7-site.mjs — перенос прежнего прогресса №7 в
-   браузере, на собранном сайте.
+/* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
+   с банком задач (№7, №6) в браузере, на собранном сайте.
 
-   Ученик решал №7 до редизайна: в localStorage лежат прежние ключи
-   (образец — scripts/fixtures/progress-7-prezhniy.json, записан прежним
+   Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
+   (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
    кодом хранилища). Он открывает новый тренажёр:
 
      1. «Мой прогресс» показывает прежние числа — решено и верно;
@@ -16,7 +16,7 @@
      6. без входа ничего не уходит в сеть: гость остаётся в браузере;
      7. на страницах нет ошибок.
 
-   Запуск: node scripts/check-progress-7-site.mjs (после pnpm build). */
+   Запуск: node scripts/check-progress-site.mjs 7 (после pnpm build). */
 
 import fs from 'node:fs';
 import http from 'node:http';
@@ -30,7 +30,12 @@ bezBanneraCookieVsyudu(chromium);
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
-if (!fs.existsSync(path.join(OUT, 'zadaniya', '7', 'index.html'))) {
+const N = process.argv[2];
+if (N !== '6' && N !== '7') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6)');
+  process.exit(2);
+}
+if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
   console.error('Нет сборки: сначала pnpm build (в app/).');
   process.exit(1);
 }
@@ -72,17 +77,21 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = `http://127.0.0.1:${server.address().port}`;
 
-const OLD = 'budetege:zadanie-7:v1';
-const OLD_OPORNYE = 'budetege:zadanie-7:opornye:v1';
-const NEW = 'budetege:zadanie-7:log:v1';
+const OLD = `budetege:zadanie-${N}:v1`;
+const OLD_OPORNYE = `budetege:zadanie-${N}:opornye:v1`;
+const NEW = `budetege:zadanie-${N}:log:v1`;
 const obrazec = JSON.parse(
-  fs.readFileSync(path.join(HERE, 'fixtures', 'progress-7-prezhniy.json'), 'utf8'),
+  fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
 );
 const staroe = obrazec[OLD];
 const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
-const { BANK } = requireSrc('lib/zadanie7/bank/index.ts');
+const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
+const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
+/* Блок опорных задач из образца и сколько в нём задач. */
+const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+const zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
 const prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
 
 const browser = await chromium.launch();
@@ -107,7 +116,7 @@ try {
     if (!request.url().startsWith(BASE)) vSet.push(request.url());
   });
 
-  await page.goto(`${BASE}/zadaniya/7/trenazher/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/${N}/trenazher/`, { waitUntil: 'networkidle' });
 
   /* 1. «Мой прогресс». */
   const progress = page.locator('.trn-progress').first();
@@ -153,14 +162,14 @@ try {
   );
 
   /* 5. Опорные задачи: прежний прогресс блока. */
-  await page.goto(`${BASE}/zadaniya/7/opornye-zadachi/`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
   const reshenoOp = Object.values(obrazec[OLD_OPORNYE].outcomes).filter(
     (x) => x === 'right',
   ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(
-    new RegExp(`решено ${reshenoOp} из 10`).test(kartochki),
-    `опорные задачи показывают прежний прогресс блока: решено ${reshenoOp} из 10`,
+    new RegExp(`решено ${reshenoOp} из ${zadachVBloke}`).test(kartochki),
+    `опорные задачи показывают прежний прогресс блока: решено ${reshenoOp} из ${zadachVBloke}`,
   );
 
   /* 6 и 7. */
@@ -172,7 +181,7 @@ try {
 }
 
 if (failures.length > 0) {
-  console.error(`\nПеренос прогресса №7: не прошло ${failures.length} из ${checks}.`);
+  console.error(`\nПеренос прогресса №${N}: не прошло ${failures.length} из ${checks}.`);
   process.exit(1);
 }
-console.log(`\nПеренос прогресса №7 на сайте: проверок ${checks}, не прошло 0.`);
+console.log(`\nПеренос прогресса №${N} на сайте: проверок ${checks}, не прошло 0.`);
