@@ -53,15 +53,7 @@
         "seconds": 101
       }
     },
-    "mistakes": [
-      "P01-a11",
-      "S02",
-      "P03-a20",
-      "P04-a07",
-      "S05",
-      "S13",
-      "S18"
-    ],
+    "mistakes": ["P01-a11", "S02", "P03-a20", "P04-a07", "S05", "S13", "S18"],
     "outcomes": {}
   },
   "budetege:zadanie-6:opornye:v1": {
@@ -72,10 +64,7 @@
         "seconds": 0
       }
     },
-    "mistakes": [
-      "sl-3",
-      "sl-4"
-    ],
+    "mistakes": ["sl-3", "sl-4"],
     "outcomes": {
       "sl-1": "right",
       "sl-2": "right",
