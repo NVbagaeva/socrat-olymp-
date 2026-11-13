@@ -524,7 +524,12 @@ function Konfigurator<Z extends ZadachaBanka, S>({
                 ? razdel.urovni.pusto
                 : tipy.length > 0 && est === 0
                   ? T.vybor.istochnikPusto
-                  : T.vybor.itog(n, tipyVse.length, skolko, taymer),
+                  : T.vybor.itog(
+                      uroven === 'vse' ? n : tipy.length,
+                      tipyVse.length,
+                      skolko,
+                      taymer,
+                    ),
           }}
         />
       </div>
