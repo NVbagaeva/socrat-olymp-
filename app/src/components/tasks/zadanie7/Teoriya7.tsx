@@ -25,7 +25,9 @@ import type { BankItem } from '@/lib/zadanie7/types';
 import { KartochkaTelo7 } from './KartochkaTelo7';
 import { GdeNaEge7 } from './GdeNaEge7';
 import { Irracionalnye7 } from './Irracionalnye7';
-import { Razbor7 } from './Razbor7';
+import { ShagiResheniya } from '../steklo';
+import '../teoriya/teoriya-steklo.css';
+import { schitaemSUmom, shagiIzResheniya } from './shagi7';
 import { ZhivoyKrug7 } from './ZhivoyKrug7';
 
 export { GdeNaEge7 };
@@ -109,7 +111,7 @@ function PrimerKartochki({ zadacha }: { zadacha: string }) {
   const z = zadachaBanka7(zadacha);
   const s = prototype(z.prototypeId).solve(z.params);
   return (
-    <details className="z7-primer">
+    <details className="z7-primer teor-primer">
       <summary className="z7-primer__summary">
         <span className="z7-primer__otkryt">{T.primerOtkryt}</span>
         <span className="z7-primer__zakryt">{T.primerZakryt}</span>
@@ -117,7 +119,7 @@ function PrimerKartochki({ zadacha }: { zadacha: string }) {
       <p className="z7-primer__uslovie">
         <Tex text={`${metka(z)} ${z.text}`} />
       </p>
-      <Razbor7 s={s} />
+      <ShagiResheniya shagi={shagiIzResheniya(s)} posle={schitaemSUmom(s)} />
     </details>
   );
 }
@@ -243,7 +245,7 @@ export function Blok7({
 
 function Telo({ r, trenazher }: { r: RazdelTeorii7; trenazher: string }) {
   return (
-    <div className="z7-teoriya">
+    <div className="z7-teoriya teor-steklo">
       <p className="z7-teoriya__lead">
         <Tex text={r.lead} />
       </p>

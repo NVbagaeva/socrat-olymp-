@@ -479,6 +479,18 @@
   margin: var(--space-4) 0 0;
 }
 
+/* Подсказка про почтовые сервисы под полем почты: спокойная, не ошибка. */
+.auth-form__domain {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+.auth-form__domain .auth-form__link {
+  min-height: 44px;
+  text-align: left;
+}
+
 /* Кабинет внутри раскладки с меню (components/karta/KabinetRaskladka):
    без внешних отступов страницы — их даёт раскладка; карта во всю ширину. */
 .auth-page--kabinet {

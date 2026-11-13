@@ -8,7 +8,8 @@
  * адреса страницы — ровно как на /voyti/podtverzhdenie/ и
  * /voyti/novyy-parol/.
  *
- * Шаги: регистрация не по списку (отказ) → по списку без галочек
+ * Шаги: регистрация не по списку (отказ) → почта не российского
+ * сервиса (отказ domain_not_allowed) → по списку без галочек
  * согласий (отказ) → регистрация по списку с согласиями → письмо →
  * повторное письмо раньше минуты (отказ) → вход до подтверждения
  * (отказ) → ссылка из письма → вход → кабинет → роль сама не меняется →
@@ -78,6 +79,8 @@ const ANNA = "anna@example.test";
 const BORIS = "boris@example.test";
 const VERA = "vera@example.test";
 const STRANGER = "stranger@example.test";
+/* В списке приглашённых, но почта не российского сервиса. */
+const FOREIGN = "gleb@gmail.com";
 const PASSWORD = "probe-Passw0rd-1"; // не секрет: проверочный аккаунт в CI
 const NEW_PASSWORD = "probe-Passw0rd-2"; // не секрет: проверочный аккаунт в CI
 
@@ -352,6 +355,52 @@ try {
     );
   }
 
+  /* 1а. Почта не российского сервиса — отказ domain_not_allowed, даже
+     если адрес в списке приглашённых (gleb@gmail.com там есть). */
+  {
+    const { tab, errors } = await freshPage("/voyti/");
+    const results = await run(
+      tab,
+      async ({ emails, password, meta }) => {
+        const out = [];
+        for (const email of emails) {
+          const { data, error } = await window.sb.auth.signUp({
+            email,
+            password,
+            options: { data: meta },
+          });
+          out.push({
+            email,
+            user: data?.user?.id ?? null,
+            message: error?.message ?? null,
+            status: error?.status ?? null,
+          });
+        }
+        return out;
+      },
+      {
+        emails: [FOREIGN, FOREIGN.toUpperCase(), "gleb@sub.mail.ru"],
+        password: PASSWORD,
+        meta: signUpData("Глеб", "tutor"),
+      },
+    );
+    check(
+      "Почта gmail.com (и ЗАГЛАВНЫМИ), поддомен mail.ru — отказ 403 domain_not_allowed, аккаунт не создан",
+      results.every(
+        (r) =>
+          r.user === null &&
+          r.status === 403 &&
+          r.message?.includes("domain_not_allowed"),
+      ),
+      JSON.stringify(results),
+    );
+    check(
+      "Отказ по домену — без ошибок CORS",
+      errors.length === 0,
+      errors.join(" | "),
+    );
+  }
+
   /* Путь регистрации один: без галочек согласий, со старой редакцией
      документов или с ролью «администратор» аккаунт не создаётся, даже
      если адрес в списке. */
@@ -549,6 +598,27 @@ try {
         changed.grantCode !== null &&
         !changed.renameError,
       JSON.stringify(changed),
+    );
+
+    /* Смена почты на иностранную: база отказывает, письмо не уходит,
+       почта аккаунта прежняя. */
+    const emailChange = await run(tab, async () => {
+      const { error } = await window.sb.auth.updateUser({
+        email: "anna.new@gmail.com",
+      });
+      const { data } = await window.sb.auth.getUser();
+      return {
+        status: error?.status ?? null,
+        email: data?.user?.email ?? null,
+        newEmail: data?.user?.new_email ?? null,
+      };
+    });
+    check(
+      "Смена почты на gmail.com — отказ, почта аккаунта прежняя",
+      emailChange.status >= 400 &&
+        emailChange.email === ANNA &&
+        !emailChange.newEmail,
+      JSON.stringify(emailChange),
     );
 
     const stored = await run(tab, async () => {
@@ -789,7 +859,43 @@ try {
     );
   }
 
-  /* 13–14. Сброс пароля и обновление токена. */
+  /* Старые пользователи. Убираем example.test из ручного списка —
+     Анна становится пользователем с почтой, на которую новый аккаунт
+     уже не создать. Сброс пароля, вход и обновление токена ниже
+     обязаны работать как прежде. Домен возвращается после шага 14. */
+  dc(
+    `exec -T db psql -U postgres -tAc "delete from auth_hooks.signup_extra where value = 'example.test'"`,
+  );
+  {
+    const { tab } = await freshPage("/voyti/");
+    const closed = await run(
+      tab,
+      async ({ email, password, meta }) => {
+        const { error } = await window.sb.auth.signUp({
+          email,
+          password,
+          options: { data: meta },
+        });
+        return {
+          status: error?.status ?? null,
+          message: error?.message ?? null,
+        };
+      },
+      {
+        email: "newcomer@example.test",
+        password: PASSWORD,
+        meta: signUpData("Новый", "tutor"),
+      },
+    );
+    check(
+      "Домен убран из ручного списка — новый аккаунт на нём не создаётся (domain_not_allowed)",
+      closed.status === 403 && closed.message?.includes("domain_not_allowed"),
+      JSON.stringify(closed),
+    );
+  }
+
+  /* 13–14. Сброс пароля и обновление токена — у Анны, чей домен уже
+     не в списке. */
   {
     const { tab } = await freshPage("/voyti/");
     const sent = Date.now() - 1000;
@@ -864,6 +970,9 @@ try {
       JSON.stringify(logins),
     );
   }
+  dc(
+    `exec -T db psql -U postgres -tAc "insert into auth_hooks.signup_extra (value, kind) values ('example.test', 'domain')"`,
+  );
 
   /* 15. Удаление аккаунта. */
   {

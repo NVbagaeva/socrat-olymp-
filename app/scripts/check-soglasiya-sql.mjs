@@ -161,6 +161,7 @@ const SUITES = [
       stub,
       ...migrations.map(migration),
       ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
       ['kabinet.test.sql', path.join(SUPA, 'tests', 'kabinet.test.sql')],
     ],
   },
@@ -175,6 +176,7 @@ const SUITES = [
       ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
       ...migrations.map(migration),
       ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
       ['rls.test.sql', path.join(SUPA, 'tests', 'rls.test.sql')],
     ],
   },
@@ -187,6 +189,7 @@ const SUITES = [
     files: [
       stub,
       ...migrations.map(migration),
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
       ['variant.test.sql', path.join(SUPA, 'tests', 'variant.test.sql'), normalizeCasesSql],
     ],
   },
@@ -202,7 +205,21 @@ const SUITES = [
       ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
       ...migrations.map(migration),
       ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
       ['dz.test.sql', path.join(SUPA, 'tests', 'dz.test.sql')],
+    ],
+  },
+  {
+    /* Регистрация только с почтой российских почтовых сервисов: хук,
+       триггер, смена почты, ручной список, старые пользователи
+       (supabase/tests/domeny.test.sql). Без добавленного x.ru. */
+    name: 'Почтовые домены',
+    db: 'domeny',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['domeny.test.sql', path.join(SUPA, 'tests', 'domeny.test.sql')],
     ],
   },
 ];
@@ -239,5 +256,5 @@ for (const suite of SUITES) {
 stop();
 if (failed) process.exit(1);
 console.log(
-  '\nСогласия, кабинет, правила доступа, онлайн-вариант и ДЗ №8 в базе: все проверки прошли.',
+  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8 и почтовые домены в базе: все проверки прошли.',
 );

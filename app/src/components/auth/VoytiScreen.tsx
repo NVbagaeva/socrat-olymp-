@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   Button,
@@ -25,9 +25,10 @@ import { ConsentChecks } from '@/components/account/ConsentChecks';
 import { legalDocs } from '@/content/legal/documents';
 import { birthYearValid, parentConsentNeeded } from '@/lib/account/consents';
 import { AUTH_HREF } from '@/lib/auth/config';
-import { AUTH_ERRORS, describeAuthError } from '@/lib/auth/errors';
+import { emailDomainAllowed } from '@/lib/auth/allowed-domains';
+import { AUTH_ERRORS, describeAuthError, isDomainRejected } from '@/lib/auth/errors';
 import { setRememberMe, useSessionUser, type UserRole } from '@/lib/auth/session';
-import { documentsVersion, operatorFilled } from '@/lib/legal/operator';
+import { documentsVersion, operator, operatorFilled } from '@/lib/legal/operator';
 import { PasswordField } from './PasswordField';
 import { RoleCards } from './RoleCards';
 
@@ -329,6 +330,16 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  /* Почта не российского сервиса — спокойная подсказка под полем. Адрес,
+     который человеку уже добавили вручную (форма о нём не знает),
+     отправляется после «Мой адрес уже добавили» — решает сервер. */
+  const [domainNote, setDomainNote] = useState(false);
+  const bypassFor = useRef<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const domainBlocked = (value: string) => {
+    const clean = value.trim().toLowerCase();
+    return emailLooksValid(clean) && !emailDomainAllowed(clean) && bypassFor.current !== clean;
+  };
 
   /* Ученик указывает год рождения; младше 18 — ещё и почту родителя
      (те же правила, что в базе: lib/account/consents.ts). */
@@ -402,6 +413,10 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
       setError(REGISTER_FORM.emailInvalid);
       return;
     }
+    if (domainBlocked(cleanEmail)) {
+      setDomainNote(true);
+      return;
+    }
     if (password.length < PASSWORD_MIN) {
       setError(AUTH_ERRORS.weakPassword);
       return;
@@ -459,6 +474,11 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
         },
       });
       if (failure) {
+        if (isDomainRejected(failure)) {
+          bypassFor.current = null;
+          setDomainNote(true);
+          return;
+        }
         setError(describeAuthError(failure, cleanEmail));
         return;
       }
@@ -477,7 +497,7 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <form className="auth-form" onSubmit={submit} noValidate>
+    <form ref={formRef} className="auth-form" onSubmit={submit} noValidate>
       <p className="auth-form__text">{REGISTER_FORM.intro}</p>
       <div className="field">
         <FieldLabel htmlFor={`${id}-name`}>{REGISTER_FORM.name}</FieldLabel>
@@ -504,10 +524,39 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
           autoComplete="username"
           placeholder={LOGIN_FORM.emailPlaceholder}
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            if (domainNote && !domainBlocked(event.target.value)) setDomainNote(false);
+          }}
+          onBlur={() => setDomainNote(domainBlocked(email))}
+          aria-describedby={domainNote ? `${id}-domain` : undefined}
           required
           disabled={busy}
         />
+        {domainNote ? (
+          <div className="auth-form__domain" id={`${id}-domain`} role="status">
+            <FieldMessage>
+              {REGISTER_FORM.domain.before}{' '}
+              <a
+                href={`mailto:${operator.pochta}?subject=${encodeURIComponent(REGISTER_FORM.domain.subject)}`}
+              >
+                {REGISTER_FORM.domain.link}
+              </a>
+              {REGISTER_FORM.domain.after}
+            </FieldMessage>
+            <button
+              type="button"
+              className="auth-form__link"
+              onClick={() => {
+                bypassFor.current = email.trim().toLowerCase();
+                setDomainNote(false);
+                formRef.current?.requestSubmit();
+              }}
+            >
+              {REGISTER_FORM.domain.added}
+            </button>
+          </div>
+        ) : null}
       </div>
       <PasswordField
         label={REGISTER_FORM.password}
