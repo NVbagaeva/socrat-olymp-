@@ -162,6 +162,82 @@
 .op-zad__input {
   max-width: 280px;
 }
+/* Ответ выбором (№2): четыре варианта — стеклянные строки, зона 44 px. */
+.op-vybory {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.op-vybory legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+}
+.op-vybory ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 640px) {
+  .op-vybory ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.op-vybor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.op-vybor:disabled {
+  cursor: default;
+}
+.op-vybor__no {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue-50);
+  color: var(--blue-700);
+  font-weight: 700;
+}
+.op-vybor__text {
+  min-width: 0;
+  overflow-x: auto;
+}
+.op-vybor.is-vybran {
+  box-shadow:
+    inset 0 0 0 2px var(--blue-600),
+    var(--glass-hi);
+}
+.op-vybor.is-verno {
+  box-shadow:
+    inset 0 0 0 2px var(--green-600),
+    var(--glass-hi);
+}
+.op-vybor.is-neverno {
+  box-shadow:
+    inset 0 0 0 2px var(--terracotta),
+    var(--glass-hi);
+}
+.op-vybor:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
 .op-verdikt {
   display: flex;
   gap: var(--space-3);
@@ -212,6 +288,15 @@
 .op-podskazka span {
   min-width: 0;
   color: var(--color-text);
+}
+/* Своя подсказка раздела (№9: вопросы с кнопками и чертёж) — блоком. */
+.op-podskazka--telo {
+  display: grid;
+  gap: var(--space-3);
+  color: var(--color-text);
+}
+.op-podskazka--telo span {
+  min-width: 0;
 }
 .op-podskazka-knopka {
   display: inline-flex;

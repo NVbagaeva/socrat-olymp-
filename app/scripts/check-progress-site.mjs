@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   с банком задач (№7, №6) в браузере, на собранном сайте.
+   на общем тренажёре (№7, №6, №9) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -14,7 +14,9 @@
         нетронутыми (запасной вариант);
      5. опорные задачи показывают прежний прогресс блока;
      6. без входа ничего не уходит в сеть: гость остаётся в браузере;
-     7. на страницах нет ошибок.
+     7. на страницах нет ошибок;
+     8. (№9) незаконченная тренировка прежнего тренажёра из sessionStorage
+        продолжается в новом на той же задаче.
 
    Запуск: node scripts/check-progress-site.mjs 7 (после pnpm build). */
 
@@ -31,8 +33,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6)');
+if (N !== '6' && N !== '7' && N !== '9') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 9)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -77,9 +79,12 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = `http://127.0.0.1:${server.address().port}`;
 
-const OLD = `budetege:zadanie-${N}:v1`;
-const OLD_OPORNYE = `budetege:zadanie-${N}:opornye:v1`;
-const NEW = `budetege:zadanie-${N}:log:v1`;
+/* У №9 прежние ключи названы по разделу «proizvodnaya-9», опорные — «prep»
+   (блок → номера решённых), задачи — «прототип|seed» без банка-файла. */
+const PREZHNIY = N === '9' ? 'proizvodnaya-9' : `zadanie-${N}`;
+const OLD = `budetege:${PREZHNIY}:v1`;
+const OLD_OPORNYE = `budetege:${PREZHNIY}:${N === '9' ? 'prep' : 'opornye'}:v1`;
+const NEW = `budetege:${PREZHNIY}:log:v1`;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
 );
@@ -87,12 +92,24 @@ const staroe = obrazec[OLD];
 const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
-const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
-const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
-/* Блок опорных задач из образца и сколько в нём задач. */
-const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
-const zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-const prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+/* Блок опорных задач из образца, сколько в нём задач и сколько решено. */
+let zadachVBloke;
+let reshenoOp;
+let prototipOf;
+if (N === '9') {
+  const { PREP_BLOCKS } = requireSrc('lib/proizvodnaya/prep/blocks.ts');
+  const [blok, nomera] = Object.entries(obrazec[OLD_OPORNYE])[0];
+  zadachVBloke = PREP_BLOCKS.find((b) => b.id === blok)?.zadachi.length;
+  reshenoOp = nomera.length;
+  prototipOf = (id) => id?.split('|')[0];
+} else {
+  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
+  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
+  const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+  zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
+  reshenoOp = Object.values(obrazec[OLD_OPORNYE].outcomes).filter((x) => x === 'right').length;
+  prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+}
 
 const browser = await chromium.launch();
 try {
@@ -174,9 +191,6 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-  const reshenoOp = Object.values(obrazec[OLD_OPORNYE].outcomes).filter(
-    (x) => x === 'right',
-  ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(
     new RegExp(`решено ${reshenoOp} из ${zadachVBloke}`).test(kartochki),
@@ -186,6 +200,49 @@ try {
   /* 6 и 7. */
   check(vSet.length === 0, `гость: запросов наружу нет (${vSet.slice(0, 2).join(', ')})`);
   check(oshibki.length === 0, `на страницах нет ошибок (${oshibki.slice(0, 2).join('; ')})`);
+
+  /* 8. №9: прежняя незаконченная тренировка (sessionStorage) продолжается. */
+  if (N === '9') {
+    const KLYUCH = 'budetege:proizvodnaya-9:session:v1';
+    const prezhnyaya = obrazec.sessionStorage[KLYUCH];
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await ctx.addInitScript(
+      ([key, value]) => {
+        if (window.sessionStorage.getItem('proverka:zalito') === null) {
+          window.sessionStorage.setItem(key, value);
+          window.sessionStorage.setItem('proverka:zalito', '1');
+        }
+      },
+      [KLYUCH, JSON.stringify(prezhnyaya)],
+    );
+    const p2 = await ctx.newPage();
+    const oshibki2 = [];
+    p2.on('pageerror', (error) => oshibki2.push(String(error)));
+    await p2.goto(`${BASE}/zadaniya/9/trenazher/`, { waitUntil: 'networkidle' });
+    const zapis = await p2.evaluate(() => localStorage.getItem('budetege:trainer:9:session'));
+    const z = zapis === null ? null : JSON.parse(zapis);
+    check(
+      z !== null && z.payload?.tasks?.map((t) => t.id).join() === prezhnyaya.taskIds.join(),
+      'прежняя незаконченная тренировка перенесена в запись общего тренажёра',
+    );
+    check(z?.payload?.control === true, '«Контроль» стал «Без подсказок и решений»');
+    const dalshe = p2.getByRole('button', { name: /Продолжить/ }).first();
+    await dalshe.waitFor({ state: 'visible', timeout: 15000 });
+    await dalshe.click();
+    const ekran = p2.locator('.trn-zadacha');
+    await ekran.waitFor({ timeout: 20000 });
+    check(
+      (await ekran.getAttribute('data-task')) === prezhnyaya.taskIds[prezhnyaya.index],
+      'тренировка продолжена на той же задаче',
+    );
+    check(
+      (await p2.evaluate((key) => sessionStorage.getItem(key), KLYUCH)) ===
+        JSON.stringify(prezhnyaya),
+      'прежняя запись тренировки на месте',
+    );
+    check(oshibki2.length === 0, `нет ошибок (${oshibki2.slice(0, 2).join('; ')})`);
+    await ctx.close();
+  }
 } finally {
   await browser.close();
   server.close();

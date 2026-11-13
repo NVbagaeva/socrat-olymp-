@@ -324,7 +324,12 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       tipHtml={nazvaniya[tekushchaya.p] ?? ''}
       uslovieHtml={zagruzka.nabrat(dannye.text)}
       tekst
-      pod={razdel.pod(dannye)}
+      pod={razdel.pod(dannye, {
+        podskazka: hintOpen && !control,
+        shag,
+        zakryta: zakryta || checked === 'right',
+        bezPodskazok: control,
+      })}
       value={value}
       onValue={(nextValue) => {
         setValue(nextValue);
@@ -344,7 +349,12 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
               open: hintOpen,
               onOpen: () => setHintOpen(true),
               telo:
-                voprosy.length === 0 ? (
+                razbor !== null && razdel.podskazka !== undefined ? (
+                  razdel.podskazka(razbor, {
+                    otkryto: shag,
+                    dalshe: () => setShag(shag + 1),
+                  })
+                ) : voprosy.length === 0 ? (
                   <p>{T.ekran.zagruzka}</p>
                 ) : (
                   <PodskazkaVoprosy

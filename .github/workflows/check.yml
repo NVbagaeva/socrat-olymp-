@@ -253,6 +253,13 @@ jobs:
         working-directory: app
         run: pnpm test:progress-6
 
+      # №9 на том же общем тренажёре: задачи строит генератор по ключам банка
+      # зафиксированных вариантов; прежний прогресс (budetege:proizvodnaya-9:v1)
+      # и прежняя незаконченная тренировка («Контроль» → «Без подсказок»). Без браузера.
+      - name: Тренажёр №9 — перенос прежнего прогресса, каталог, тренировки
+        working-directory: app
+        run: pnpm test:progress-9
+
       - name: Тексты №3 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-3-teksty
@@ -260,6 +267,10 @@ jobs:
       - name: Тексты №6 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-6-teksty
+
+      - name: Тексты №9 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-9-teksty
 
       # Выделенные фигуры №3 (сечения, треугольники, диагонали): видимость
       # каждой стороны — лучом, как у рёбер, при трёх ракурсах; одна линия
@@ -892,6 +903,14 @@ jobs:
       - name: Перенос прогресса №6 в браузере
         working-directory: app
         run: pnpm test:progress-6-site
+
+      - name: Редизайн №9 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 9 origin/main
+
+      - name: Перенос прогресса №9 в браузере
+        working-directory: app
+        run: pnpm test:progress-9-site
 
       # Иллюстрация в верхнем блоке «Задание 12»: разметка (picture, srcset,
       # размеры, высокий приоритет, без lazy), файлы и вес версии на телефон

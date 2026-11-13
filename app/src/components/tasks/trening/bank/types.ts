@@ -3,6 +3,7 @@ import type { LogStore } from '@/lib/progressLog';
 import type { Reading } from '@/lib/otvet';
 import type { SyncedStore } from '@/lib/syncedStore';
 import type { Zagruzka, ZadachaFayla } from '@/lib/trening/zagruzka';
+import type { PayloadBanka } from '@/lib/trening/bank';
 import type { VyborBanka } from '@/lib/trening/vybor';
 import type { Shag } from '../../steklo';
 import type { EkranZadachiLabels } from '../EkranZadachi';
@@ -84,7 +85,7 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   /** Ответ ученика по правилам бланка и отпечаток задачи; 'pi' — ответ записан через π. */
   proverit: (vvod: string, seal: string) => Reading | { kind: 'pi' };
   /** Под условием: рисунок, вопрос после рисунка, откуда задача. */
-  pod: (z: Z) => ReactNode;
+  pod: (z: Z, ui: SostoyaniePod) => ReactNode;
   /** Решение шагами сцены, панель под ними и подсказка-вопросы. */
   shagi: (s: S) => Shag[];
   posle?: (s: S) => ReactNode;
@@ -93,4 +94,32 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   zadachaHref: (id: string) => string;
   /** Переключатель формулировки в выборе тем (№6). */
   stil?: boolean;
+  /** Без переключателя источника задач (№2: все задачи строит генератор). */
+  bezIstochnika?: boolean;
+  /**
+   * Своя подсказка вместо вопросов (№2: шаги решения по одному). otkryto —
+   * сколько шагов открыто (с 1), dalshe — открыть следующий.
+   */
+  podskazka?: (s: S, ui: { otkryto: number; dalshe: () => void }) => ReactNode;
+  /**
+   * Своё чтение записи тренировки (№9: прежняя запись в другом формате).
+   * Нет — общее razobratZapis по ключам раздела.
+   */
+  razobrat?: (packed: unknown) => PayloadBanka | null;
+}
+
+/**
+ * Что сейчас на экране задачи — для того, что под условием (№9: чертёж
+ * достраивается по подсказке). Разделам, которым это не нужно, можно
+ * не читать.
+ */
+export interface SostoyaniePod {
+  /** Открыта подсказка (и режим не «без подсказок»). */
+  podskazka: boolean;
+  /** Сколько вопросов подсказки открыто (с единицы). */
+  shag: number;
+  /** Задача закрыта: решена или открыто решение. */
+  zakryta: boolean;
+  /** Режим «без подсказок и решений». */
+  bezPodskazok: boolean;
 }
