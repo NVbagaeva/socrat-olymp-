@@ -10,7 +10,7 @@ import { scrollTabTo } from '@/lib/tabScroll';
 import { mikroById } from '@/lib/vektory/prep/bloki';
 import { sluchaynyySeed } from '@/lib/vektory/prep/generate';
 import { sealMikro, type MikroRazbor, type MikroSealed } from '@/lib/vektory/prep/seal';
-import { mikroId, mikroItog, mikroZapisat, opornye2 } from '@/lib/vektory/progress';
+import { mikroItog, mikroZapisat, opornye2 } from '@/lib/vektory/progress';
 import { choiceMatches, openText } from '@/lib/vektory/secret';
 import { tipHref2 } from '@/lib/vektory/links';
 import { readSealed2 } from '@/lib/vektory/trening/otvet2';
@@ -208,4 +208,3 @@ export function Opornye2({
   );
 }
 
-export { mikroId };

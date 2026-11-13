@@ -1269,7 +1269,12 @@ async function restoreTiming(trainer) {
     const page = await newPage(context);
     await open(page, trainer.url);
     await trainer.all(page);
-    const record = await startRun(page, trainer, 120_000);
+    /* После выбора тем (общий тренажёр) — «Начать тренировку», а не карточка режима. */
+    const record = await startRun(
+      page,
+      trainer.all === chooseAll8 ? { ...trainer, start: pressStart } : trainer,
+      120_000,
+    );
     if (!check(record !== null, `${trainer.name}, «Все»: тренировка начата`)) {
       return;
     }

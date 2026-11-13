@@ -9,7 +9,6 @@ import { typeset } from '@/lib/tex';
 import { blokHref2 } from '@/lib/vektory/links';
 import { opornyePool } from '@/lib/vektory/opornye';
 import { BLOKI } from '@/lib/vektory/prep/bloki';
-import { mikroId } from '@/lib/vektory/progress';
 
 export const metadata: Metadata = {
   title: vektoryTitle(OPORNYE.title),
@@ -38,7 +37,8 @@ export default function Opornye2Tab() {
               href: blokHref2(slug),
               nazvanie: blok.nazvanie,
               znakHtml: typeset(`$${znak}$`),
-              zadachi: blok.zadachi.map((_, i) => mikroId(blok.id, i + 1)),
+              /* Ключ исхода микрозадачи — «блок:номер», как mikroId в lib/vektory/progress.ts. */
+              zadachi: blok.zadachi.map((_, i) => `${blok.id}:${i + 1}`),
             },
           ];
     }),
