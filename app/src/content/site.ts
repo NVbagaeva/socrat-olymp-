@@ -12,6 +12,7 @@ import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
 import { TARIFY_HREF } from '@/lib/tarify/config';
+import type { NavIconName } from '@/components/ui/NavIcons';
 
 export interface SiteLink {
   label: string;
@@ -19,8 +20,8 @@ export interface SiteLink {
 }
 
 /**
- * Группа пунктов меню: в широкой шапке — кнопка с выпадающим списком,
- * в бургер-меню — те же ссылки подряд, без заголовка.
+ * Группа пунктов меню: в широкой шапке — кнопка с выпадающим списком.
+ * Бургер-меню собрано отдельно — см. site.menu.
  */
 export interface NavGroup {
   label: string;
@@ -28,6 +29,18 @@ export interface NavGroup {
 }
 
 export type NavItem = SiteLink | NavGroup;
+
+/** Пункт бургер-меню: значок, название и строка-пояснение под ним. */
+export interface MenuLink extends SiteLink {
+  hint: string;
+  icon: NavIconName;
+}
+
+/** Группа бургер-меню с подписью над списком. */
+export interface MenuGroup {
+  label: string;
+  items: MenuLink[];
+}
 
 export function isNavGroup(item: NavItem): item is NavGroup {
   return 'items' in item;
@@ -67,6 +80,82 @@ export const site = {
     { label: 'Тарифы', href: TARIFY_HREF },
   ] as NavItem[],
 
+  /**
+   * Бургер-меню: те же адреса, что в nav, но по смыслу — главное
+   * действие карточкой, дальше группы, «Тарифы» отдельной строкой.
+   * Названия короче, чем в широкой шапке: длинные переносились на две
+   * строки. Пояснения — из лидов самих страниц, без новых обещаний.
+   */
+  menu: {
+    glavnoe: {
+      label: ONLINE_TEXT.nachalo.menu,
+      hint: 'Задания 1–13 с автопроверкой',
+      href: VARIANT_ONLAYN_HREF,
+      icon: 'target',
+    } as MenuLink,
+    groups: [
+      {
+        label: 'Практика',
+        items: [
+          {
+            label: 'Банк заданий',
+            hint: 'Все задания по темам',
+            href: tasksPage.href,
+            icon: 'tasks',
+          },
+          {
+            label: 'Собрать вариант',
+            hint: 'Для домашней и контрольной',
+            href: VARIANT_HREF,
+            icon: 'variant',
+          },
+        ],
+      },
+      {
+        label: 'Готовые варианты',
+        items: [
+          {
+            label: 'Варианты месяца',
+            hint: 'По одному на месяц, части 1 и 2',
+            href: EZH_HREF,
+            icon: 'ezhemesyachnye',
+          },
+          {
+            label: 'Сложные варианты',
+            hint: '36 вариантов, по шесть версий',
+            href: POV_HREF,
+            icon: 'povyshennye',
+          },
+        ],
+      },
+      {
+        label: 'О проекте',
+        items: [
+          {
+            label: 'Как пользоваться',
+            hint: 'Короткий гид по сайту',
+            href: HOWTO_HREF,
+            icon: 'help',
+          },
+          {
+            label: 'Учителям',
+            hint: 'Самостоятельные и домашние',
+            href: '/#how',
+            icon: 'homework',
+          },
+          { label: 'Об авторе', hint: 'Кто делает сайт', href: '/about/', icon: 'teacher' },
+        ],
+      },
+    ] as MenuGroup[],
+    tarify: {
+      label: 'Тарифы',
+      hint: 'Что входит в доступ',
+      href: TARIFY_HREF,
+      icon: 'favourites',
+    } as MenuLink,
+    akkaunt: 'Аккаунт',
+  },
+
   /* «Войти» здесь больше нет: вход живёт в components/auth/AuthWidget и
      появляется только при включённом флаге (lib/auth/config.ts).
      «Начать бесплатно» без входа ведёт в банк заданий — платного ничего
@@ -103,8 +192,3 @@ export const site = {
     operatorLabel: 'Оператор персональных данных:',
   },
 } as const;
-
-/** Все ссылки меню подряд, группы раскрыты — для бургер-меню. */
-export const navLinks: SiteLink[] = site.nav.flatMap((item) =>
-  isNavGroup(item) ? item.items : [item],
-);
