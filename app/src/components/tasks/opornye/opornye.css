@@ -289,15 +289,6 @@
   min-width: 0;
   color: var(--color-text);
 }
-/* Своя подсказка раздела (№9: вопросы с кнопками и чертёж) — блоком. */
-.op-podskazka--telo {
-  display: grid;
-  gap: var(--space-3);
-  color: var(--color-text);
-}
-.op-podskazka--telo span {
-  min-width: 0;
-}
 .op-podskazka-knopka {
   display: inline-flex;
   align-items: center;
@@ -407,4 +398,12 @@
   .op-bloki {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* Подсказка-вопросы с кнопками (№13): блок во всю ширину, без значка строки. */
+.op-podskazka--voprosy {
+  display: block;
+}
+.op-podskazka--voprosy {
+  color: var(--color-text);
 }

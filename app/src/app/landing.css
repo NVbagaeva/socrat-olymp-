@@ -191,6 +191,257 @@
   letter-spacing: -0.025em;
   color: var(--color-text);
 }
+/* Попугайчик на слове «математика» (Popugaj.tsx). Слово — inline-block
+   с отступом сверху: строка с птицей сама становится выше, и попугайчик
+   не налезает на строку над ним, как бы ни переносился заголовок. Лапки
+   стоят на верхушках строчных букв (≈ 0.38em от верха строки). Сидит на
+   последней букве и чуть свешивается за слово — голова оказывается над
+   точкой, правее текста. */
+.hero__perch-wrap {
+  white-space: nowrap;
+}
+.hero__perch {
+  --popugaj-mesto: 0.5em;
+  position: relative;
+  display: inline-block;
+  padding-top: var(--popugaj-mesto);
+}
+.popugaj {
+  position: absolute;
+  right: -0.42em;
+  bottom: calc(100% - var(--popugaj-mesto) - 0.38em);
+  width: 1.3em;
+  height: auto;
+  overflow: visible;
+  cursor: pointer;
+  filter: drop-shadow(0 0.04em 0.06em rgb(20 40 90 / 0.2));
+}
+.popugaj g {
+  transform-box: fill-box;
+}
+.popugaj__vsyo {
+  transform-origin: 50% 100%;
+}
+.popugaj__dyhanie {
+  transform-origin: 50% 100%;
+}
+.popugaj__golova {
+  transform-origin: 30% 90%;
+}
+.popugaj__hvost {
+  transform-origin: 100% 0%;
+}
+.popugaj__krylo {
+  transform-origin: 60% 10%;
+}
+.popugaj__glaz {
+  transform-origin: 50% 50%;
+}
+.popugaj__vstryaska {
+  transform-origin: 55% 100%;
+}
+.popugaj__hoholok {
+  transform-origin: 50% 100%;
+}
+/* Шея — в координатах рисунка, а не рамки группы: рамка «гуляет»,
+   когда голова внутри поворачивается. */
+.popugaj .popugaj__chistka {
+  transform-box: view-box;
+  transform-origin: 55px 40px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .popugaj__vsyo {
+    animation: popugaj-prilet 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.3s both;
+  }
+  .popugaj__dyhanie {
+    animation: popugaj-dyshit 2.6s ease-in-out infinite;
+  }
+  .popugaj__golova {
+    animation: popugaj-krutit 7s ease-in-out 1.2s infinite;
+  }
+  .popugaj__hvost {
+    animation: popugaj-hvost 3.2s ease-in-out infinite;
+  }
+  .popugaj__glaz {
+    animation: popugaj-morgaet 4.8s linear infinite;
+  }
+  /* Хохолок идёт в такт поворотам головы: те же 7s и та же задержка. */
+  .popugaj__hoholok {
+    animation: popugaj-hoholok 7s ease-in-out 1.2s infinite;
+  }
+  /* Раз в 11 секунд встряхивается; крыло в этот момент приподнимается. */
+  .popugaj__vstryaska {
+    animation: popugaj-vstryaska 11s ease-in-out 4s infinite;
+  }
+  /* Раз в 17 секунд наклоняется клювом к груди и перебирает пёрышки. */
+  .popugaj__chistka {
+    animation: popugaj-chistit 17s ease-in-out 8s infinite;
+  }
+  .popugaj__krylo {
+    animation: popugaj-eroshit 11s ease-in-out 4s infinite;
+  }
+  .popugaj:hover .popugaj__vsyo {
+    animation: popugaj-prygaet 0.7s ease-in-out;
+  }
+  .popugaj:hover .popugaj__krylo {
+    animation: popugaj-mashet 0.18s ease-in-out 4;
+  }
+}
+
+/* Прилетает сверху и плюхается на слово. */
+@keyframes popugaj-prilet {
+  0% {
+    opacity: 0;
+    transform: translate(0.6em, -0.8em) rotate(18deg) scale(0.7);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(-4deg) scale(1.04, 0.94);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes popugaj-dyshit {
+  50% {
+    transform: scale(1.03, 0.97);
+  }
+}
+@keyframes popugaj-krutit {
+  0%,
+  18%,
+  100% {
+    transform: none;
+  }
+  24%,
+  40% {
+    transform: rotate(-14deg);
+  }
+  48%,
+  62% {
+    transform: rotate(10deg) translateY(1px);
+  }
+  70% {
+    transform: none;
+  }
+}
+@keyframes popugaj-hvost {
+  50% {
+    transform: rotate(-7deg);
+  }
+}
+@keyframes popugaj-morgaet {
+  0%,
+  92%,
+  100% {
+    transform: none;
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes popugaj-hoholok {
+  0%,
+  18%,
+  30%,
+  40%,
+  52%,
+  62%,
+  74%,
+  100% {
+    transform: none;
+  }
+  22% {
+    transform: rotate(-20deg) scaleY(1.25);
+  }
+  26% {
+    transform: rotate(8deg);
+  }
+  45% {
+    transform: rotate(16deg) scaleY(1.2);
+  }
+  48% {
+    transform: rotate(-6deg);
+  }
+  67% {
+    transform: rotate(-12deg) scaleY(1.15);
+  }
+}
+@keyframes popugaj-vstryaska {
+  0%,
+  86%,
+  100% {
+    transform: none;
+  }
+  88% {
+    transform: rotate(-4deg) scale(1.05, 1.03);
+  }
+  90% {
+    transform: rotate(4deg) scale(1.06, 1.03);
+  }
+  92% {
+    transform: rotate(-3.5deg) scale(1.06, 1.03);
+  }
+  94% {
+    transform: rotate(3deg) scale(1.04, 1.02);
+  }
+  96% {
+    transform: rotate(-1.5deg) scale(1.02, 1.01);
+  }
+}
+@keyframes popugaj-chistit {
+  0%,
+  78%,
+  97%,
+  100% {
+    transform: none;
+  }
+  82%,
+  86%,
+  90% {
+    transform: translate(-7px, 4px) rotate(46deg);
+  }
+  84%,
+  88%,
+  92% {
+    transform: translate(-6px, 6px) rotate(54deg);
+  }
+}
+@keyframes popugaj-eroshit {
+  0%,
+  86%,
+  98%,
+  100% {
+    transform: none;
+  }
+  89%,
+  93% {
+    transform: rotate(-10deg);
+  }
+  91%,
+  95% {
+    transform: rotate(-5deg);
+  }
+}
+@keyframes popugaj-prygaet {
+  0%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-14%) rotate(-6deg);
+  }
+  55% {
+    transform: translateY(0) scale(1.06, 0.92);
+  }
+}
+@keyframes popugaj-mashet {
+  50% {
+    transform: rotate(-28deg);
+  }
+}
+
 .hero__lead {
   max-width: 56ch;
   margin-top: var(--space-6);
@@ -661,6 +912,14 @@ section.band {
   .hero__title {
     font-size: 2.375rem;
     line-height: 1.08;
+  }
+  /* На телефоне над словом — «Профильная»: птица чуть меньше, а места
+     над строкой больше. */
+  .hero__perch {
+    --popugaj-mesto: 0.62em;
+  }
+  .popugaj {
+    width: 1.15em;
   }
   .hero__lead {
     margin-top: var(--space-4);

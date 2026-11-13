@@ -6,7 +6,7 @@ import { TRENAZHER9 } from '@/content/proizvodnaya9';
 import { zadachaHref9 } from '@/lib/proizvodnaya/links';
 import { readSealed9 } from '@/lib/proizvodnaya/trening/otvet9';
 import { log9, vybor9 } from '@/lib/proizvodnaya/trening/progress';
-import { KLYUCH9, razobratZapis9 } from '@/lib/proizvodnaya/trening/session';
+import { KLYUCH9 } from '@/lib/proizvodnaya/trening/session';
 import {
   ZAGRUZKA9,
   risovat9,
@@ -65,10 +65,14 @@ export const RAZDEL9: RazdelBanka<Zadacha9, Reshenie9> = {
   zagruzka: ZAGRUZKA9,
   T,
   proverit: readSealed9,
-  pod: (z, ui) => <Chertezh9 z={z} ui={ui} />,
+  pod: (z, _rezhim, ui) => (
+    <Chertezh9
+      z={z}
+      ui={ui ?? { podskazka: false, shag: 1, zakryta: false, bezPodskazok: false }}
+    />
+  ),
   shagi: (s) => shagiIz9(s.shagi),
   voprosy: (s) => voprosy9(s.podskazka),
   zadachaHref: zadachaHref9,
   bezIstochnika: true,
-  razobrat: razobratZapis9,
 };
