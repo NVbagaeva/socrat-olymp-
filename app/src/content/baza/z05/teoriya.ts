@@ -45,7 +45,7 @@ export const TEORIYA_05: RazdelTeorii[] = [
   },
   {
     id: 'ishody',
-    title: 'Как найти m и n',
+    title: 'Как посчитать исходы',
     bloki: [
       {
         vid: 'tekst',
