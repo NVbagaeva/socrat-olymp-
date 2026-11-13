@@ -23,9 +23,23 @@ export const prodavets = {
   statusPolnostyu: raw.statusPolnostyu.trim(),
   inn: raw.inn.trim(),
   pochta: raw.pochta.trim(),
+  /** Личный Telegram для вопросов, без @. */
+  telegram: raw.telegram.trim(),
+  /** Ручная оплата: за сколько часов открывается доступ (строка-число). */
+  srokOtkrytiyaChasov: raw.srokOtkrytiyaChasov.trim(),
   /** Дата редакции оферты: ДД.ММ.ГГГГ. */
   dataOferty: raw.dataOferty.trim(),
 };
+
+/** Ссылка на личный Telegram. */
+export const TELEGRAM_LICHNYY = `https://t.me/${prodavets.telegram}`;
+
+/** «24 часов», «1 часа» — срок открытия доступа для «в течение …». */
+export function srokOtkrytiyaTekst(): string {
+  const n = Number(prodavets.srokOtkrytiyaChasov);
+  if (!Number.isInteger(n) || n < 1) return '[ЧАСОВ] часов';
+  return `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'часа' : 'часов'}`;
+}
 
 /** Реквизиты заполнены — нет квадратных скобок вместо ИНН и почты. */
 export const prodavetsFilled = prodavetsProblems(prodavets).length === 0;

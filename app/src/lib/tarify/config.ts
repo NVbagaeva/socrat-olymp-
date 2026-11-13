@@ -8,6 +8,8 @@
  */
 
 /** Флаг оплаты: «1» — кнопки ведут на регистрацию и оплату. */
+import { plural } from '@/lib/plural';
+
 export const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === '1';
 
 export const TARIFY_HREF = '/tarify/';
@@ -34,10 +36,13 @@ export const BESPLATNO = {
 
 /** Пробный доступ: полный, без карты. */
 export const PROBNYY = {
-  dney: 7,
+  dney: 3,
   /** Сколько раз на аккаунт. */
   raz: 1,
 } as const;
+
+/** «3 дня», «7 дней» — срок пробного доступа словами, для всех текстов. */
+export const PROBNYY_SROK = `${PROBNYY.dney} ${plural(PROBNYY.dney, 'день', 'дня', 'дней')}`;
 
 /** Учеников в одном классе репетитора. */
 export const KLASS_MAKS = 30;
@@ -178,31 +183,31 @@ const besplatno: Plashka = {
 const probnyy: Record<Rol, Plashka> = {
   uchenik: {
     id: 'probnyy',
-    nazvanie: `Пробный ${PROBNYY.dney} дней`,
+    nazvanie: `Пробный ${PROBNYY_SROK}`,
     dlyaKogo: 'Чтобы посмотреть всё, прежде чем платить',
     vhodit: [
-      `Всё из тарифа «Ученик» на ${PROBNYY.dney} дней`,
+      `Всё из тарифа «Ученик» на ${PROBNYY_SROK}`,
       PODSKAZKI.punkt,
       'Тренажёр без ограничений',
       'Все опорные задачи',
       'Работа над ошибками, прогресс и история',
       'Все варианты онлайн с баллами',
     ],
-    net: ['Один раз на аккаунт', `Через ${PROBNYY.dney} дней — снова бесплатный доступ`],
+    net: ['Один раз на аккаунт', `Через ${PROBNYY_SROK} — снова бесплатный доступ`],
   },
   repetitor: {
     id: 'probnyy',
-    nazvanie: `Пробный ${PROBNYY.dney} дней`,
+    nazvanie: `Пробный ${PROBNYY_SROK}`,
     dlyaKogo: 'Чтобы посмотреть всё, прежде чем платить',
     vhodit: [
-      `Всё из тарифа «Репетитор» на ${PROBNYY.dney} дней`,
+      `Всё из тарифа «Репетитор» на ${PROBNYY_SROK}`,
       PODSKAZKI.punkt,
       'Генератор и «Собрать вариант» без ограничений',
       'Листы учителя с решениями',
       `Классы до ${KLASS_MAKS} учеников`,
       'Домашние задания и таблица результатов',
     ],
-    net: ['Один раз на аккаунт', `Через ${PROBNYY.dney} дней — снова бесплатный доступ`],
+    net: ['Один раз на аккаунт', `Через ${PROBNYY_SROK} — снова бесплатный доступ`],
   },
 };
 

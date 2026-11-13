@@ -1,7 +1,9 @@
 {
   "status": "Плательщик НПД",
   "statusPolnostyu": "плательщик налога на профессиональный доход (самозанятая)",
-  "inn": "[ИНН]",
-  "pochta": "[ПОЧТА]",
-  "dataOferty": "12.11.2026"
+  "inn": "504812261695",
+  "pochta": "nvbagaeva@mail.ru",
+  "telegram": "nataliy_bagaeva",
+  "srokOtkrytiyaChasov": "[ЧАСОВ]",
+  "dataOferty": "13.11.2026"
 }

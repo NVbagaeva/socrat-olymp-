@@ -5,20 +5,17 @@
  */
 
 import { ofertaDoc } from '@/content/legal/documents';
-import { site } from '@/content/site';
-import { OFERTA_HREF, prodavets, rekvizityVidny } from '@/lib/legal/prodavets';
-import { BESPLATNO, PERIOD_DNEY, PROBNYY, TARIFY_HREF, DO_EGE } from '@/lib/tarify/config';
+import { OFERTA_HREF, prodavets, rekvizityVidny, TELEGRAM_LICHNYY } from '@/lib/legal/prodavets';
+import { BESPLATNO, PERIOD_DNEY, PROBNYY_SROK, TARIFY_HREF, DO_EGE } from '@/lib/tarify/config';
 
-/** Связь: тот же Telegram-канал, что в подвале. */
-const TELEGRAM =
-  site.footer.links.find((link) => link.label === 'Telegram')?.href ??
-  'https://t.me/budet_na_ege_math';
+/** Связь по тарифам и возврату — личный Telegram автора, не канал. */
+const TELEGRAM = TELEGRAM_LICHNYY;
 
 export const TARIFY = {
   meta: {
     title: 'Тарифы — Будет на ЕГЭ',
     description:
-      'Что бесплатно, что даёт пробная неделя и что входит в тарифы «Ученик» и «Репетитор». Без автопродления.',
+      'Что бесплатно, что даёт пробный доступ и что входит в тарифы «Ученик» и «Репетитор». Без автопродления.',
   },
 
   shapka: {
@@ -58,7 +55,7 @@ export const TARIFY = {
     },
     vhodit: 'Входит',
     neVhodit: 'Не входит',
-    snoska: `Пробный доступ на ${PROBNYY.dney} дней открывает всё, что входит в тариф выбранной роли.`,
+    snoska: `Пробный доступ на ${PROBNYY_SROK} открывает всё, что входит в тариф выбранной роли.`,
   },
 
   kak: {
@@ -69,8 +66,8 @@ export const TARIFY = {
         tekst: `Теория, первые опорные задачи и ${BESPLATNO.trenazherVDen} задач тренажёра в день — с подсказками, без карты.`,
       },
       {
-        nazvanie: `Включите пробные ${PROBNYY.dney} дней`,
-        tekst: 'Полный доступ на неделю, один раз на аккаунт. Карта не нужна, списаний не будет.',
+        nazvanie: `Включите пробный доступ на ${PROBNYY_SROK}`,
+        tekst: `Полный доступ на ${PROBNYY_SROK}, один раз на аккаунт. Карта не нужна, списаний не будет.`,
       },
       {
         nazvanie: 'Оплатите период',
@@ -118,8 +115,8 @@ export const TARIFY = {
           'Нет. Домашние задания, которые выдал репетитор, ученик решает бесплатно. Тариф «Ученик» нужен только для самостоятельных занятий без ограничений.',
       },
       {
-        vopros: `Что даёт пробный доступ на ${PROBNYY.dney} дней?`,
-        otvet: `Всё, что входит в тариф выбранной роли, на ${PROBNYY.dney} дней. Один раз на аккаунт, без карты. Потом аккаунт вернётся на бесплатный доступ.`,
+        vopros: `Что даёт пробный доступ на ${PROBNYY_SROK}?`,
+        otvet: `Всё, что входит в тариф выбранной роли, на ${PROBNYY_SROK}. Один раз на аккаунт, без карты. Потом аккаунт вернётся на бесплатный доступ.`,
       },
     ],
   },

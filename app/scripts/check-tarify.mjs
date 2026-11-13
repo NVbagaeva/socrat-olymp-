@@ -81,7 +81,8 @@ if (
 ) {
   fail('лимиты бесплатного доступа не совпадают с утверждёнными (10 / 1 / 1)');
 }
-if (PROBNYY.dney !== 7 || PROBNYY.raz !== 1) fail('пробный доступ — 7 дней, один раз');
+if (PROBNYY.dney !== 3 || PROBNYY.raz !== 1) fail('пробный доступ — 3 дня, один раз');
+if (config.PROBNYY_SROK !== '3 дня') fail(`срок пробного словами: «${config.PROBNYY_SROK}»`);
 if (KLASS_MAKS !== 30) fail('класс репетитора — до 30 учеников');
 
 for (const rol of ['uchenik', 'repetitor']) {
