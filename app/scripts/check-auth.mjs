@@ -688,7 +688,13 @@ function watchConsole(page, bucket) {
     if (fromService && /Failed to load resource/.test(m.text())) return;
     bucket.push(`console: ${m.text()}`);
   });
-  page.on('pageerror', (e) => bucket.push(`pageerror: ${e.message}`));
+  /* WebKit (эмуляция iPhone, --gallery-dz) так же пишет о запросе к службе
+     входа, оборванном переходом на другую страницу: «… due to access
+     control checks». Это не ошибка сайта — ответ просто не дождались. */
+  page.on('pageerror', (e) => {
+    if (e.message.includes(SUPABASE.replace('http://', '')) && /access control checks/.test(e.message)) return;
+    bucket.push(`pageerror: ${e.message}`);
+  });
 }
 
 async function noHorizontalScroll(page) {
