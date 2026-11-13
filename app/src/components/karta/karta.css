@@ -722,6 +722,8 @@ a.karta-gorod__ssylka:focus-visible {
 
 .karta-panel {
   --stk-r-card: 24px;
+  /* Плотнее обычного стекла: под панелью — подписи островов. */
+  background: rgb(247 251 255 / 0.9);
   position: absolute;
   right: var(--space-4);
   top: var(--space-4);
@@ -1233,6 +1235,11 @@ a.karta-gorod__ssylka:focus-visible {
   .karta-okoshko {
     width: min(300px, calc(100vw - 32px));
   }
+  /* Пока открыто окошко темы, кнопки сверху прячутся: закрыть — касанием по воде. */
+  .karta--telefon.karta--s-vyborom .karta-upravlenie {
+    opacity: 0;
+    pointer-events: none;
+  }
   .karta-dz {
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
@@ -1258,7 +1265,7 @@ a.karta-gorod__ssylka:focus-visible {
 }
 @media (max-width: 767.98px) {
   .karta-holst {
-    height: calc(100dvh - 164px);
+    height: min(calc(100dvh - 164px), 600px);
     border-radius: 16px;
   }
   .karta-legenda {

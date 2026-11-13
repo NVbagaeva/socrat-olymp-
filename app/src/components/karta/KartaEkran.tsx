@@ -123,14 +123,21 @@ export function KartaEkran({
   /* Поля, которые занимают панель и шторка: остров вписывается в остаток. */
   const polya = useCallback(
     (sVyborom: boolean) =>
+      /* Сверху — место под окошко тем, справа — под панель, снизу — под шторку. */
       telefon
         ? {
-            top: 72,
+            top: sVyborom ? 170 : 72,
             right: 16,
-            bottom: sVyborom ? Math.round(window.innerHeight * 0.42) : 24,
+            /* Шторка занимает до 46 % холста (karta.css). */
+            bottom: sVyborom ? Math.round((oknoRef.current?.clientHeight ?? 600) * 0.46) + 8 : 24,
             left: 16,
           }
-        : { top: 110, right: sVyborom ? PANEL_SHIRINA + 40 : 24, bottom: 24, left: 24 },
+        : {
+            top: sVyborom ? 170 : 24,
+            right: sVyborom ? PANEL_SHIRINA + 40 : 24,
+            bottom: 24,
+            left: 24,
+          },
     [telefon],
   );
 
@@ -153,6 +160,17 @@ export function KartaEkran({
     },
     onVid: (v, mir) => setVid({ k: v.k, mir }),
   });
+
+  /* На телефоне фон широкий, а экран узкий: стартуем чуть ближе, чем
+     «Весь мир», — так номера читаются, а карту можно двигать пальцем. */
+  const priblizhenTelefon = useRef(false);
+  useEffect(() => {
+    if (!telefon || priblizhenTelefon.current) return;
+    priblizhenTelefon.current = true;
+    holst.masshtab(1.35, undefined, false);
+    // holst стабилен
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [telefon]);
 
   /* Выбор → карта подъезжает; окошку и панели — фокус, если выбрали с клавиатуры. */
   const sKlaviatury = useRef(false);

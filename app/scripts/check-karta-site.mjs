@@ -39,6 +39,10 @@ const shotsAt = args.indexOf('--shots');
 const SHOTS = shotsAt >= 0 ? args[shotsAt + 1] : null;
 /* --tolko-telefon — только часть в WebKit (для отладки). */
 const TOLKO_TELEFON = args.includes('--tolko-telefon');
+/* --video <папка> — запись сценария «кабинет → карта → №8 → логарифмы → тренажёр → назад → пролив». */
+const videoAt = args.indexOf('--video');
+const VIDEO = videoAt >= 0 ? args[videoAt + 1] : null;
+if (VIDEO) fs.mkdirSync(VIDEO, { recursive: true });
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 
 const D = requireSrc('lib/karta/demo.ts');
@@ -95,7 +99,7 @@ const text = async (page, sel) =>
 
 async function otkryt(
   browser,
-  { width, height = 900, uchenik = 'pusto', mobile = false, url = '/karta/' },
+  { width, height = 900, uchenik = 'pusto', mobile = false, url = '/karta/', bezKarty = false },
 ) {
   const ctx = await browser.newContext({
     viewport: { width, height },
@@ -117,7 +121,7 @@ async function otkryt(
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto(BASE + url, { waitUntil: 'networkidle' });
   try {
-    await page.waitForSelector('.karta-holst[data-gotov]');
+    if (!bezKarty) await page.waitForSelector('.karta-holst[data-gotov]');
   } catch (e) {
     if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'oshibka-zagruzki.png') });
     console.error(
@@ -424,6 +428,7 @@ if (!TOLKO_TELEFON) {
     const { page, ctx } = await otkryt(browser, {
       width: 1280,
       url: '/zadaniya/8/trenazher/?tip=8.H',
+      bezKarty: true,
     });
     await page.waitForSelector('.trn-zadacha[data-task]');
     const { generate } = requireSrc('lib/vychisleniya/generate.ts');
@@ -457,6 +462,75 @@ if (!TOLKO_TELEFON) {
     await ctx.close();
   }
   await browser.close();
+}
+
+/* ── Запись сценария (Chromium, 1280) ─────────────────────────────── */
+if (VIDEO && !TOLKO_TELEFON) {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext({
+    viewport: { width: 1280, height: 800 },
+    recordVideo: { dir: VIDEO, size: { width: 1280, height: 800 } },
+  });
+  await welcomeSeen(ctx);
+  await ctx.addInitScript((list) => {
+    for (const [key, value] of list) localStorage.setItem(key, value);
+    localStorage.setItem('budetege:karta:videl:v1', JSON.stringify([1, 2, 3, 4]));
+  }, zapisi('seredina'));
+  const page = await ctx.newPage();
+  const pauza = (ms) => page.waitForTimeout(ms);
+  await page.goto(BASE + '/kabinet/', { waitUntil: 'networkidle' });
+  await pauza(1200);
+  await page.goto(BASE + '/karta/', { waitUntil: 'networkidle' });
+  await page.waitForSelector('.karta-holst[data-gotov]');
+  await pauza(1500);
+  await page.locator('.karta-ves-mir').click();
+  await pauza(900);
+  await nazhat(page, 'oblast:8');
+  await page.waitForSelector('.karta-okoshko');
+  await pauza(1600);
+  /* Переход по ссылке темы — полной загрузкой: как по касанию на телефоне. */
+  const tema = await page.locator('.karta-gorod--tekushchaya a').getAttribute('href');
+  await page.locator('.karta-gorod--tekushchaya a').hover();
+  await pauza(500);
+  await page.goto(BASE + tema, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.trn-zadacha[data-task]');
+  await pauza(800);
+  const { generate } = requireSrc('lib/vychisleniya/generate.ts');
+  const { parseTaskId } = requireSrc('lib/vychisleniya/ids.ts');
+  const { ru } = requireSrc('lib/vychisleniya/numbers.ts');
+  for (let i = 0; i < 3; i += 1) {
+    const id = await page.locator('.trn-zadacha[data-task]').first().getAttribute('data-task');
+    const p = parseTaskId(id);
+    await page.fill(
+      '.trn-ekran .otvet-input__field',
+      ru(generate(p.prototype, p.seed, p.level).otvet),
+    );
+    await pauza(400);
+    await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+    await pauza(700);
+    await page.locator('.trn-knopki button:has-text("Дальше")').click();
+    await page.waitForFunction(
+      (prev) =>
+        document.querySelector('.trn-zadacha[data-task]')?.getAttribute('data-task') !== prev,
+      id,
+    );
+  }
+  await pauza(600);
+  await page.goBack({ waitUntil: 'networkidle' });
+  await page.waitForSelector('.karta-holst[data-gotov]');
+  await pauza(800);
+  await nazhat(page, 'oblast:8');
+  await page.waitForSelector('.karta-okoshko');
+  await pauza(1800);
+  await page.locator('.karta-ves-mir').click();
+  await pauza(900);
+  await nazhat(page, 'proliv');
+  await pauza(1800);
+  await page.locator('.karta-panel button:has-text("Посмотреть часть 2")').click();
+  await pauza(1800);
+  await ctx.close();
+  await browser.close();
+  console.log(`Запись: ${VIDEO}`);
 }
 
 /* ── WebKit, телефон ─────────────────────────────────────────────── */
