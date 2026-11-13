@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на тренажёре «Стеклянной сцены» (№7, №6, №4) в браузере, на собранном
-   сайте.
+   на общем тренажёре «Стеклянной сцены» (№7, №6, №2, №4, №5) в браузере,
+   на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -36,8 +36,8 @@ const OUT = path.join(APP, 'out');
 const N = process.argv[2];
 /* №4 и №5 — вероятность: прежние ключи свои, задачи — «прототип:вариант». */
 const VEROYATNOST = N === '4' || N === '5';
-if (N !== '6' && N !== '7' && !VEROYATNOST) {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 4, 5)');
+if (N !== '6' && N !== '7' && N !== '2' && !VEROYATNOST) {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 4, 5)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -82,11 +82,13 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = `http://127.0.0.1:${server.address().port}`;
 
-const OLD = VEROYATNOST ? `budetege:veroyatnost-${N}:v2` : `budetege:zadanie-${N}:v1`;
+/* У №2 прежние ключи назывались по разделу «vektory-2», у №4 и №5 — «veroyatnost-N». */
+const PREZHNIY = N === '2' ? 'vektory-2' : `zadanie-${N}`;
+const OLD = VEROYATNOST ? `budetege:veroyatnost-${N}:v2` : `budetege:${PREZHNIY}:v1`;
 const OLD_OPORNYE = VEROYATNOST
   ? `budetege:veroyatnost-${N}:prep:v1`
-  : `budetege:zadanie-${N}:opornye:v1`;
-const NEW = VEROYATNOST ? `budetege:veroyatnost-${N}:log:v1` : `budetege:zadanie-${N}:log:v1`;
+  : `budetege:${PREZHNIY}:opornye:v1`;
+const NEW = VEROYATNOST ? `budetege:veroyatnost-${N}:log:v1` : `budetege:${PREZHNIY}:log:v1`;
 const SESSION = `budetege:trainer:${N}:session`;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
@@ -96,19 +98,25 @@ const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
 /* Блок опорных задач из образца и сколько в нём задач; прототип задачи по
-   ключу. У №4 и №5 в хранилище опорных — сами задачи, ключ задачи
-   тренажёра — «прототип:вариант». */
+   ключу. У №2 банка нет: ключ задачи — «прототип|seed». У №4 и №5 в
+   хранилище опорных — сами задачи, ключ задачи тренажёра — «прототип:вариант». */
 const BLOKI_OPORNYH = VEROYATNOST
   ? requireSrc('lib/veroyatnost/index.ts')[`PODGOTOVKA_${N}`]
-  : requireSrc(`lib/zadanie${N}/opornye.ts`).BLOKI_OPORNYH;
+  : N === '2'
+    ? requireSrc('lib/vektory/prep/bloki.ts').BLOKI
+    : requireSrc(`lib/zadanie${N}/opornye.ts`).BLOKI_OPORNYH;
 const pervyyKlyuch = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
 const blokObrazca = VEROYATNOST
   ? BLOKI_OPORNYH.find((b) => b.zadachi.some((z) => z.id === pervyyKlyuch))?.id
   : pervyyKlyuch;
 const zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-const BANK = VEROYATNOST ? [] : requireSrc(`lib/zadanie${N}/bank/index.ts`).BANK;
+const BANK = VEROYATNOST || N === '2' ? [] : requireSrc(`lib/zadanie${N}/bank/index.ts`).BANK;
 const prototipOf = (id) =>
-  VEROYATNOST ? id?.slice(0, id.lastIndexOf(':')) : BANK.find((z) => z.id === id)?.prototypeId;
+  VEROYATNOST
+    ? id?.slice(0, id.lastIndexOf(':'))
+    : N === '2'
+      ? id?.split('|')[0]
+      : BANK.find((z) => z.id === id)?.prototypeId;
 
 const browser = await chromium.launch();
 try {

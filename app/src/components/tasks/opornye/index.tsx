@@ -164,6 +164,10 @@ export interface OpornayaZadachaProps {
   reshenie: { shagi: Shag[]; posle?: ReactNode; open: boolean; onToggle: () => void } | null;
   /** Плашка «Запомни» блока: над задачей. */
   zapomni?: ReactNode;
+  /** Ответ выбором (№2): варианты вместо поля ответа, value — номер выбранного. */
+  vybory?: readonly { number: string; labelHtml: string }[];
+  /** Ещё кнопки в ряду действий (№2: «Ещё вариант»). */
+  dop?: ReactNode;
   labels: OpornayaZadachaLabels;
 }
 
@@ -187,6 +191,8 @@ export function OpornayaZadacha({
   podskazka,
   reshenie,
   zapomni,
+  vybory,
+  dop,
   labels,
 }: OpornayaZadachaProps) {
   const total = ishody.length;
@@ -238,18 +244,51 @@ export function OpornayaZadacha({
         <div className="op-zad__uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
         {risunok === undefined ? null : <div className="op-zad__ris">{risunok}</div>}
 
-        <label className="op-zad__pole">
-          <span className="stk-podpis">{labels.otvet}</span>
-          <AnswerInput
-            className="op-zad__input"
-            placeholder={labels.placeholder}
-            value={value}
-            state={checked === null ? 'default' : solved ? 'success' : 'error'}
-            readOnly={solved}
-            onChange={onValue}
-            onKeyDown={onKey}
-          />
-        </label>
+        {vybory === undefined ? (
+          <label className="op-zad__pole">
+            <span className="stk-podpis">{labels.otvet}</span>
+            <AnswerInput
+              className="op-zad__input"
+              placeholder={labels.placeholder}
+              value={value}
+              state={checked === null ? 'default' : solved ? 'success' : 'error'}
+              readOnly={solved}
+              onChange={onValue}
+              onKeyDown={onKey}
+            />
+          </label>
+        ) : (
+          <fieldset className="op-zad__pole op-vybory">
+            <legend className="stk-podpis">{labels.otvet}</legend>
+            <ul>
+              {vybory.map((v) => {
+                const vybran = value === v.number;
+                return (
+                  <li key={v.number}>
+                    <button
+                      type="button"
+                      className={clsx(
+                        'op-vybor',
+                        vybran && 'is-vybran',
+                        vybran && checked === 'right' && 'is-verno',
+                        vybran && checked === 'wrong' && 'is-neverno',
+                      )}
+                      aria-pressed={vybran}
+                      disabled={solved}
+                      onClick={() => onValue(v.number)}
+                    >
+                      <span className="op-vybor__no">{v.number}</span>
+                      <span
+                        className="op-vybor__text"
+                        dangerouslySetInnerHTML={{ __html: v.labelHtml }}
+                      />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </fieldset>
+        )}
         {formatHint === null ? null : <FormatHint text={formatHint} />}
 
         {checked === null ? null : (
@@ -323,6 +362,7 @@ export function OpornayaZadacha({
               {reshenie.open ? labels.skrytReshenie : labels.reshenie}
             </button>
           )}
+          {dop}
           {!solved && !last ? (
             <button type="button" className="op-propustit" onClick={() => onOpen(index + 1)}>
               {labels.propustit}

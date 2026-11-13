@@ -13,6 +13,7 @@ const KADR = '/images/zadaniya/3/kub-shar';
 /**
  * Обложка №3: картинка стеклянного куба с вписанным шаром, по первому
  * касанию — живая модель (kubShar3d.ts, three.js) в том же ракурсе.
+ * Куб можно вращать и перетаскивать по шапке (подержать и тянуть).
  */
 export function KubSharOblozhka() {
   return (
@@ -30,6 +31,7 @@ export function KubSharOblozhka() {
       el={KUB_SHAR_EL}
       label={STSENA_STEREO.oblozhka}
       knopka={STSENA_STEREO.vrashchat}
+      dvigat
     />
   );
 }
