@@ -30,6 +30,7 @@ export function KartaShapka({
   opasnoTitle,
   opasno,
   oblozhka,
+  oblozhkaShirokaya = false,
 }: {
   nadzagolovok: string;
   zagolovok: string;
@@ -40,10 +41,20 @@ export function KartaShapka({
   opasno: string[];
   /** Обложка раздела — крупно рядом с заголовком (готовая картинка). */
   oblozhka?: ReactNode;
+  /**
+   * Обложка — широкая картинка (шапка №1, 1567×1004), а не квадратная
+   * иконка: на телефоне и планшете она во всю ширину над текстом,
+   * целиком; на компьютере — справа, в половину шапки.
+   */
+  oblozhkaShirokaya?: boolean;
 }) {
   return (
     <header
-      className={clsx('kz-shapka stk-glass', oblozhka !== undefined && 'kz-shapka--oblozhka')}
+      className={clsx(
+        'kz-shapka stk-glass',
+        oblozhka !== undefined && 'kz-shapka--oblozhka',
+        oblozhka !== undefined && oblozhkaShirokaya && 'kz-shapka--shirokaya',
+      )}
     >
       {oblozhka === undefined ? null : <div className="kz-shapka__oblozhka">{oblozhka}</div>}
       <div className="kz-shapka__text">
