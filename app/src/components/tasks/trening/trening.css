@@ -1142,17 +1142,17 @@
 }
 
 /* Ответ выбором (№11, РЗ-17): варианты вместо поля ответа — как в опорных задачах. */
-.trn-vybory {
+.trn-varianty {
   margin: 0;
   padding: 0;
   border: 0;
   min-width: 0;
 }
-.trn-vybory legend {
+.trn-varianty legend {
   padding: 0;
   margin-bottom: var(--space-2);
 }
-.trn-vybory ul {
+.trn-varianty ul {
   display: grid;
   gap: var(--space-2);
   margin: 0;
@@ -1160,11 +1160,11 @@
   list-style: none;
 }
 @media (min-width: 640px) {
-  .trn-vybory ul {
+  .trn-varianty ul {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-.trn-vybor {
+.trn-variant {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -1180,10 +1180,10 @@
   text-align: left;
   cursor: pointer;
 }
-.trn-vybor:disabled {
+.trn-variant:disabled {
   cursor: default;
 }
-.trn-vybor__no {
+.trn-variant__no {
   display: inline-grid;
   flex: none;
   place-items: center;
@@ -1194,29 +1194,29 @@
   color: var(--blue-700);
   font-weight: 700;
 }
-.trn-vybor__text {
+.trn-variant__text {
   min-width: 0;
   overflow-x: auto;
 }
-.trn-vybor.is-vybran {
+.trn-variant.is-vybran {
   box-shadow:
     inset 0 0 0 2px var(--blue-600),
     var(--glass-hi);
 }
-.trn-vybor.is-verno {
+.trn-variant.is-verno {
   box-shadow:
     inset 0 0 0 2px var(--green-600),
     var(--glass-hi);
 }
-.trn-vybor.is-neverno {
+.trn-variant.is-neverno {
   box-shadow:
     inset 0 0 0 2px var(--terracotta),
     var(--glass-hi);
 }
-.trn-vybor:focus-visible {
+.trn-variant:focus-visible {
   outline: 2px solid var(--blue-600);
   outline-offset: 2px;
 }
-.trn-vybory > .stk-btn {
+.trn-varianty > .stk-btn {
   margin-top: var(--space-3);
 }

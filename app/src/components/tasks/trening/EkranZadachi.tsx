@@ -209,7 +209,7 @@ export function EkranZadachi({
             </span>
           </label>
         ) : (
-          <fieldset className="trn-pole trn-vybory">
+          <fieldset className="trn-pole trn-varianty">
             <legend className="stk-podpis">{labels.otvet}</legend>
             <ul>
               {vybory.map((v) => {
@@ -219,7 +219,7 @@ export function EkranZadachi({
                     <button
                       type="button"
                       className={clsx(
-                        'trn-vybor',
+                        'trn-variant',
                         vybran && 'is-vybran',
                         vybran && sostoyanie === 'verno' && 'is-verno',
                         vybran && sostoyanie === 'neverno' && 'is-neverno',
@@ -228,9 +228,9 @@ export function EkranZadachi({
                       disabled={otvechen}
                       onClick={() => onValue(v.number)}
                     >
-                      <span className="trn-vybor__no">{v.number}</span>
+                      <span className="trn-variant__no">{v.number}</span>
                       <span
-                        className="trn-vybor__text"
+                        className="trn-variant__text"
                         dangerouslySetInnerHTML={{ __html: v.labelHtml }}
                       />
                     </button>

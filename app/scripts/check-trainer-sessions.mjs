@@ -30,7 +30,7 @@
         что сделано во второй.
      6. №11, ответ выбором варианта (подтип RZ-17): выбранный вариант
         переживает перезагрузку (общий тренажёр по банку: варианты —
-        .trn-vybor, выбор — поле value состояния экрана).
+        .trn-variant, выбор — поле value состояния экрана).
      7. Хранилище почти полно (старая тренировка другого раздела и
         посторонний ключ): новая тренировка записывается, старая чужая
         вытеснена, посторонний ключ цел. Места нет совсем: страница
@@ -500,9 +500,9 @@ const browser = await chromium.launch(executablePath ? { executablePath } : {});
 
 /* ── Общие действия на странице ─────────────────────────────── */
 
-/** Вариант ответа и его номер: прежние экраны (.popt) и общий тренажёр по банку (.trn-vybor). */
-const VARIANT = ':is(.popt, .trn-vybor)';
-const VARIANT_NO = ':is(.popt__no, .trn-vybor__no)';
+/** Вариант ответа и его номер: прежние экраны (.popt) и общий тренажёр по банку (.trn-variant). */
+const VARIANT = ':is(.popt, .trn-variant)';
+const VARIANT_NO = ':is(.popt__no, .trn-variant__no)';
 
 const KEY = (scope) => `budetege:trainer:${scope}:session`;
 const BODY = '.tsess__body';
@@ -715,7 +715,9 @@ async function shownAnswer(page, like) {
     return { text: await page.locator(ANSWER_INPUT).first().inputValue() };
   }
   if (like.option !== undefined) {
-    const chosen = page.locator(`${BODY} :is(.popt.is-chosen, .trn-vybor.is-vybran) ${VARIANT_NO}`);
+    const chosen = page.locator(
+      `${BODY} :is(.popt.is-chosen, .trn-variant.is-vybran) ${VARIANT_NO}`,
+    );
     return {
       option: (await chosen.count()) === 0 ? null : (await chosen.first().textContent()).trim(),
     };
