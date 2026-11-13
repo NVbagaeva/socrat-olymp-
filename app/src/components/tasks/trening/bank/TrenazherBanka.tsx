@@ -166,7 +166,8 @@ export function TrenazherBanka<Z extends ZadachaBanka, S>({
          чтении понимается и запись прежнего тренажёра раздела. */
       pack={(payload) => payload}
       unpack={(packed) => {
-        const payload = razobratZapis(packed, razdel.klyuch);
+        const payload =
+          razobratZapis(packed, razdel.klyuch) ?? razdel.prezhnyayaZapis?.(packed) ?? null;
         if (payload !== null) {
           setClock(payload.timer !== false);
         }

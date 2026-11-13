@@ -4,7 +4,9 @@ import { kolodaNomera } from '@/content/kartochki';
 import { Spravochnik1 } from '@/components/tasks/planimetriya/spravochnik/Spravochnik1';
 import { ZADANIE1, zadanie1Title } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
+import { tipTrenazherHref1 } from '@/lib/planimetriya/trening/links';
 import { klyuchProto } from '@/lib/planimetriya/trenazher/sessiya';
+import '@/components/tasks/teoriya/teoriya-steklo.css';
 
 const VKLADKA = ZADANIE1.tabs.find((tab) => tab.id === 'teoriya')?.label ?? 'Теория';
 const BASE = `${ZADANIYA}/${ZADANIE1.slug}`;
@@ -13,9 +15,9 @@ export const metadata: Metadata = {
   title: zadanie1Title(VKLADKA),
 };
 
-/** Номер прототипа в «Где на ЕГЭ» открывает тренажёр на этом прототипе. */
+/** Тип в «Где на ЕГЭ» открывает тренажёр на этом типе. */
 function trenazher(proto: number): string {
-  return `${BASE}/trenazher/?tipy=${klyuchProto(proto)}`;
+  return tipTrenazherHref1(klyuchProto(proto));
 }
 
 /**
@@ -32,11 +34,15 @@ export default function Teoriya1Tab() {
         href={`${BASE}/kartochki/`}
         ids={kolodaNomera(1).kartochki.map((k) => k.id)}
       />
-      <Spravochnik1
-        trenazher={trenazher}
-        pdf={`${BASE}/pechat/spravochnik/`}
-        adresa={{ zadanie: `${BASE}/`, teoriya: `${BASE}/teoriya/` }}
-      />
+      {/* Общий слой теории «Стеклянной сцены» (.teor-steklo): карточки
+          справочника — на стекле, содержание не меняется. */}
+      <div className="z1-teoriya teor-steklo">
+        <Spravochnik1
+          trenazher={trenazher}
+          pdf={`${BASE}/pechat/spravochnik/`}
+          adresa={{ zadanie: `${BASE}/`, teoriya: `${BASE}/teoriya/` }}
+        />
+      </div>
     </>
   );
 }

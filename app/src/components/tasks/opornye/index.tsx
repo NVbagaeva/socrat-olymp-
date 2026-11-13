@@ -158,6 +158,8 @@ export interface OpornayaZadachaProps {
   reshenie: { shagi: Shag[]; open: boolean; onToggle: () => void } | null;
   /** Плашка «Запомни» блока: над задачей. */
   zapomni?: ReactNode;
+  /** Ещё кнопки в ряду действий (№1: «Ещё вариант»). */
+  dop?: ReactNode;
   labels: OpornayaZadachaLabels;
 }
 
@@ -181,6 +183,7 @@ export function OpornayaZadacha({
   podskazka,
   reshenie,
   zapomni,
+  dop,
   labels,
 }: OpornayaZadachaProps) {
   const total = ishody.length;
@@ -311,6 +314,7 @@ export function OpornayaZadacha({
               {reshenie.open ? labels.skrytReshenie : labels.reshenie}
             </button>
           )}
+          {dop}
           {!solved && !last ? (
             <button type="button" className="op-propustit" onClick={() => onOpen(index + 1)}>
               {labels.propustit}

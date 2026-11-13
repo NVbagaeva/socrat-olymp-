@@ -58,7 +58,9 @@
      №3       — prototype.otvet(параметры варианта) из lib/zadanie3;
      №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
      №6       — то же из lib/zadanie6 (общий тренажёр по банку, как у №7)
-                (в записи — ключи задач банка, без ответа).
+                (в записи — ключи задач банка, без ответа);
+     №1       — тот же общий тренажёр: ключ «p05|b12» → razreshit и
+                sostavZadachi движка планиметрии (lib/planimetriya).
 
    Новый тренажёр — один объект в TRAINERS ниже: адрес, раздел, как
    начать тренировку и как по записи получить верный ответ. Поле ответа,
@@ -150,16 +152,19 @@ function answer11(payload, at) {
     : { option: String(solved.vybor.correct + 1) };
 }
 
-/** №1 (тренажёр с фильтрами): задание {k, seed?} → план по ключу → ответ движка. */
+/**
+ * №1: общий тренажёр по банку, как у №7 и №6 — в записи ключи задач
+ * {id: «p05|b12», p: «p05»}; ответ — тот же движок, что собирает задачу
+ * в браузере (lib/planimetriya/trening/sborka.ts) по ключу.
+ */
 let bank1 = null;
 function answer1(payload, at) {
   const { razreshit, sostavZadachi } = requireSrc('lib/planimetriya/trenazher/zadacha');
   const { planPoKlyuchu1 } = requireSrc('lib/planimetriya/trenazher/filtry1');
-  const { osnovaSeed } = requireSrc('lib/trenazher/sessiya.ts');
   if (bank1 === null) {
     bank1 = requireSrc('lib/planimetriya/trenazher/dannye').dannyeTrenazhera1().bank;
   }
-  const plan = planPoKlyuchu1(payload.items[at].k, osnovaSeed(payload, at, 0));
+  const plan = planPoKlyuchu1(payload.tasks[at].id, '');
   return { text: numberText(sostavZadachi(razreshit(plan, bank1)).otvet) };
 }
 
@@ -392,7 +397,10 @@ const TRAINERS = [
     url: '/zadaniya/1/trenazher/',
     scope: '1',
     answer: answer1,
-    all: chooseAllFiltry,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№13',

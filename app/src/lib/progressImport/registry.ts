@@ -58,9 +58,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z1',
     title: '№1 «Планиметрия»',
     keys: [
-      /* Журнал попыток тренажёра (lib/planimetriya/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/planimetriya/trening/progress.ts). Прежний ключ
          budetege:planimetriya-1:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:planimetriya-1:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «1»). */
+      'budetege:trainer:1:session',
     ],
   },
   {

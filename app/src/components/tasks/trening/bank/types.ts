@@ -3,6 +3,7 @@ import type { LogStore } from '@/lib/progressLog';
 import type { Reading } from '@/lib/otvet';
 import type { SyncedStore } from '@/lib/syncedStore';
 import type { Zagruzka, ZadachaFayla } from '@/lib/trening/zagruzka';
+import type { PayloadBanka } from '@/lib/trening/bank';
 import type { VyborBanka } from '@/lib/trening/vybor';
 import type { Shag } from '../../steklo';
 import type { EkranZadachiLabels } from '../EkranZadachi';
@@ -83,8 +84,12 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   T: TekstyBanka;
   /** Ответ ученика по правилам бланка и отпечаток задачи; 'pi' — ответ записан через π. */
   proverit: (vvod: string, seal: string) => Reading | { kind: 'pi' };
-  /** Под условием: рисунок, вопрос после рисунка, откуда задача. */
-  pod: (z: Z) => ReactNode;
+  /**
+   * Под условием: рисунок, вопрос после рисунка, откуда задача. Второй
+   * аргумент — что открыто на экране (№1: на вопросе подсказки чертёж
+   * показывает слой этого шага, при открытом решении — все построения).
+   */
+  pod: (z: Z, sost: SostoyaniePod<S>) => ReactNode;
   /** Решение шагами сцены, панель под ними и подсказка-вопросы. */
   shagi: (s: S) => Shag[];
   posle?: (s: S) => ReactNode;
@@ -93,4 +98,22 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   zadachaHref: (id: string) => string;
   /** Переключатель формулировки в выборе тем (№6). */
   stil?: boolean;
+  /**
+   * Запись незаконченной тренировки прежнего тренажёра раздела, которую
+   * общий разбор (lib/trening/bank: razobratZapis) не понимает (№1 —
+   * запись общей панели фильтров). null — не своя запись.
+   */
+  prezhnyayaZapis?: (packed: unknown) => PayloadBanka | null;
+}
+
+/** Что открыто на экране задачи: для рисунка под условием. */
+export interface SostoyaniePod<S> {
+  /** Открыта подсказка (в режиме без подсказок — никогда). */
+  podskazka: boolean;
+  /** Номер текущего вопроса подсказки, с единицы. */
+  shag: number;
+  /** Открыто решение. */
+  reshenie: boolean;
+  /** Разбор задачи: есть, когда открыты подсказка или решение. */
+  razbor: S | null;
 }

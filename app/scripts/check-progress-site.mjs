@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   с банком задач (№7, №6) в браузере, на собранном сайте.
+   на общем тренажёре по банку (№7, №6, №1) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -14,7 +14,9 @@
         нетронутыми (запасной вариант);
      5. опорные задачи показывают прежний прогресс блока;
      6. без входа ничего не уходит в сеть: гость остаётся в браузере;
-     7. на страницах нет ошибок.
+     7. на страницах нет ошибок;
+     8. (№1) незаконченная тренировка прежнего тренажёра (панель
+        фильтров) открывается в новом на той же задаче.
 
    Запуск: node scripts/check-progress-site.mjs 7 (после pnpm build). */
 
@@ -31,8 +33,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6)');
+if (N !== '6' && N !== '7' && N !== '1') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 1)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -77,9 +79,34 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = `http://127.0.0.1:${server.address().port}`;
 
-const OLD = `budetege:zadanie-${N}:v1`;
-const OLD_OPORNYE = `budetege:zadanie-${N}:opornye:v1`;
-const NEW = `budetege:zadanie-${N}:log:v1`;
+/* Ключи раздела: №7 и №6 — budetege:zadanie-N:…, у №1 — прежние
+   ключи планиметрии. Прототип задачи и блоки опорных — у каждого свои. */
+function razdel() {
+  if (N === '1') {
+    const { BLOKI } = requireSrc('lib/planimetriya/prep/bloki.ts');
+    return {
+      OLD: 'budetege:planimetriya-1:v1',
+      OLD_OPORNYE: 'budetege:planimetriya-1:opornye:v1',
+      NEW: 'budetege:planimetriya-1:log:v1',
+      prototipOf: (id) => id.split('|')[0],
+      zadachVBloke: (blok) => BLOKI.find((b) => b.id === blok)?.zadachi.length,
+      /* Исход задачи блока — «P1-1:3». */
+      vBloke: (blok, key) => key.startsWith(`${blok}:`),
+    };
+  }
+  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
+  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
+  return {
+    OLD: `budetege:zadanie-${N}:v1`,
+    OLD_OPORNYE: `budetege:zadanie-${N}:opornye:v1`,
+    NEW: `budetege:zadanie-${N}:log:v1`,
+    prototipOf: (id) => BANK.find((z) => z.id === id)?.prototypeId,
+    zadachVBloke: (blok) => BLOKI_OPORNYH.find((b) => b.id === blok)?.zadachi.length,
+    vBloke: () => true,
+  };
+}
+const R = razdel();
+const { OLD, OLD_OPORNYE, NEW, prototipOf } = R;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
 );
@@ -87,12 +114,9 @@ const staroe = obrazec[OLD];
 const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
-const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
-const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
 /* Блок опорных задач из образца и сколько в нём задач. */
 const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
-const zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-const prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
+const zadachVBloke = R.zadachVBloke(blokObrazca);
 
 const browser = await chromium.launch();
 try {
@@ -174,14 +198,39 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-  const reshenoOp = Object.values(obrazec[OLD_OPORNYE].outcomes).filter(
-    (x) => x === 'right',
+  const reshenoOp = Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
+    ([key, x]) => x === 'right' && R.vBloke(blokObrazca, key),
   ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(
     new RegExp(`решено ${reshenoOp} из ${zadachVBloke}`).test(kartochki),
     `опорные задачи показывают прежний прогресс блока: решено ${reshenoOp} из ${zadachVBloke}`,
   );
+
+  /* 8. №1: незаконченная тренировка прежнего тренажёра. */
+  const SESSION = `budetege:trainer:${N}:session`;
+  if (obrazec[SESSION] !== undefined) {
+    const sPage = await context.newPage();
+    sPage.on('pageerror', (error) => oshibki.push(String(error)));
+    await sPage.goto(`${BASE}/zadaniya/${N}/`, { waitUntil: 'networkidle' });
+    await sPage.evaluate(
+      ([key, value]) => window.localStorage.setItem(key, value),
+      [SESSION, obrazec[SESSION]],
+    );
+    await sPage.goto(`${BASE}/zadaniya/${N}/trenazher/`, { waitUntil: 'networkidle' });
+    const dalshe = sPage.getByRole('button', { name: /^Продолжить/ }).first();
+    if (await dalshe.isVisible().catch(() => false)) await dalshe.click();
+    const z = sPage.locator('.trn-zadacha');
+    await z.waitFor({ timeout: 20000 }).catch(() => {});
+    const idS = await z.getAttribute('data-task').catch(() => null);
+    const ui = JSON.parse(obrazec[SESSION]).ui;
+    const prezhnyaya = JSON.parse(obrazec[SESSION]).payload.items[ui.index].k;
+    check(
+      idS === prezhnyaya,
+      `прежняя тренировка открылась на той же задаче (${idS}, ждали ${prezhnyaya})`,
+    );
+    await sPage.close();
+  }
 
   /* 6 и 7. */
   check(vSet.length === 0, `гость: запросов наружу нет (${vSet.slice(0, 2).join(', ')})`);
