@@ -1,397 +1,172 @@
-import type { CSSProperties } from 'react';
-import { Tex } from '@/components/ui/Tex';
-import {
-  DALSHE_2,
-  OSHIBKI_2,
-  PASPORT_2,
-  TIPY_2,
-  UMET_2,
-  type Shag2,
-  type Tip2,
-} from '@/content/oZadanii2';
-import { OPORNYE } from '@/content/opornye';
-import { VEKTORY } from '@/content/vektory';
-import { ZADANIYA } from '@/lib/paths';
+import { Abzacy, RamkaLovushka } from '@/components/teoriya/Ramki';
+import { OSHIBKI_2, UMET_2 } from '@/content/oZadanii2';
+import { O_ZADANII } from '@/content/vektory';
+import { GRUPPY2_VID, SHAPKA2, TIPY2_OPASNO, ZNAT2 } from '@/content/vektory2';
+import { assetUrl } from '@/lib/assetUrl';
+import { typeset } from '@/lib/tex';
+import { opornyeTipaHref2, tipTrenazherHref2 } from '@/lib/vektory/links';
 import { PROTOTYPES } from '@/lib/vektory/prototypes';
-import { katex } from '@/lib/graph/katex';
-import { Paras } from '../theory/rich/parts';
-import { Poyavlenie } from './Poyavlenie';
-import { Risunok } from './Risunok';
-import { TipyRaskrytie, type TipGruppa } from './TipyRaskrytie';
-
-const BASE = `${ZADANIYA}/${VEKTORY.slug}`;
-
-/**
- * Выкладка: KaTeX на сборке, дроби крупные (\dfrac остаётся \dfrac —
- * опция displayFrac, как в ключе учителя). В строчном режиме формула
- * переносится по знакам и не обрезается на телефоне.
- */
-function Display({ tex, className }: { tex: string; className?: string }) {
-  return (
-    <span
-      className={className === undefined ? 'z2o-math' : `z2o-math ${className}`}
-      dangerouslySetInnerHTML={{
-        __html: katex.renderToString('\\displaystyle ' + tex, {
-          throwOnError: false,
-          displayMode: false,
-          displayFrac: true,
-        }),
-      }}
-    />
-  );
-}
-const TIPY_ID = 'z2o-tipy';
+import { renderVectorPlane } from '@/lib/vektory/render';
+import { FormulyRamka, KartaGruppa, KartaPrimer, KartaShapka, KartaTip } from '../karta';
+import { YakorTipa } from '../karta/YakorTipa';
+import '../teoriya/teoriya-steklo.css';
+import { GruppaProgress2 } from './GruppaProgress2';
+import { primerTipa2 } from './primer2';
+import { PrimerLazy2 } from './PrimerLazy2';
+import { RisunokSvg } from './shagi2';
 
 /**
- * Пара формул «…,\qquad …» — две строки выкладки. На узком экране
- * KaTeX переносил бы пару посередине формулы, поэтому каждая идёт
- * своей строкой; на широком они стоят рядом (flex с переносом).
- */
-function razbit(tex: string): string[] {
-  return tex.split(/,\\qquad\s*/);
-}
-
-function Strelka() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  );
-}
-
-/* ── Паспорт ────────────────────────────────────────────────────── */
-
-/** Ответ в клетках бланка: каждый символ — своя клетка, минус — настоящий. */
-function Kletki({ value }: { value: string }) {
-  return (
-    <span className="z2o-blank" aria-label={value.replace('-', '−')} role="img">
-      {[...value].map((ch, i) => (
-        <span className="z2o-blank__cell" key={i} aria-hidden="true">
-          {ch === '-' ? '−' : ch}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function Pasport() {
-  return (
-    <section className="z2o-pasport z2o-glass" aria-labelledby="z2o-pasport-title" data-reveal="">
-      <div className="z2o-pasport__main">
-        <span className="z2o-pasport__no" aria-hidden="true">
-          {PASPORT_2.nomer}
-        </span>
-        <div className="z2o-pasport__text">
-          <ul className="z2o-chips" aria-label="Паспорт задания">
-            <li className="z2o-chip">Задание №{PASPORT_2.nomer}</li>
-            <li className="z2o-chip">{PASPORT_2.chast}</li>
-            <li className="z2o-chip">{PASPORT_2.ball}</li>
-            <li className="z2o-chip z2o-chip--warm">{PASPORT_2.tema}</li>
-          </ul>
-          <h2 className="z2o-pasport__title" id="z2o-pasport-title">
-            {PASPORT_2.title}
-          </h2>
-          <p className="z2o-pasport__desc">{PASPORT_2.proveryaet}</p>
-        </div>
-      </div>
-      <div className="z2o-pasport__otvet">
-        <p className="z2o-eyebrow">{PASPORT_2.otvetTitle}</p>
-        <p className="z2o-pasport__otvet-text">{PASPORT_2.otvet}</p>
-        <div className="z2o-pasport__blanks">
-          {PASPORT_2.obraztsy.map((value) => (
-            <Kletki value={value} key={value} />
-          ))}
-        </div>
-        <p className="z2o-pasport__note">
-          {PASPORT_2.otvetNote} · {PROTOTYPES.length} {PASPORT_2.prototipov}
-        </p>
-      </div>
-    </section>
-  );
-}
-
-/* ── Что нужно уметь ────────────────────────────────────────────── */
-
-function Umet() {
-  return (
-    <section className="z2o-umet" aria-labelledby="z2o-umet-title">
-      <header className="z2o-head" data-reveal="">
-        <h2 className="z2o-h2" id="z2o-umet-title">
-          {UMET_2.title}
-        </h2>
-        <p className="z2o-lead">{UMET_2.lead}</p>
-      </header>
-      <div className="z2o-umet__grid">
-        <figure className="z2o-umet__fig z2o-glass" data-reveal="">
-          <Risunok className="z2o-umet__pic" config={UMET_2.risunok} />
-          <figcaption className="z2o-umet__caption">{UMET_2.podpis}</figcaption>
-        </figure>
-        <ol className="z2o-chain">
-          {UMET_2.navyki.map((n, i) => (
-            <li
-              className="z2o-chain__item"
-              key={n.title}
-              data-reveal=""
-              style={{ '--i': i } as CSSProperties}
-            >
-              <span className="z2o-chain__no" aria-hidden="true">
-                {i + 1}
-              </span>
-              <div className="z2o-chain__body">
-                <h3 className="z2o-chain__title">{n.title}</h3>
-                <Display className="z2o-chain__formula" tex={n.formula} />
-                <span className="z2o-chain__value">
-                  {razbit(n.naRisunke).map((line) => (
-                    <Display tex={line} key={line} />
-                  ))}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-/* ── Типы задач ─────────────────────────────────────────────────── */
-
-function Kartochka({ tip }: { tip: Tip2 }) {
-  return (
-    <>
-      <span className="z2t-card__pic" aria-hidden="true">
-        <Risunok
-          config={{
-            vectors: tip.risunok.vectors,
-            window: 'tight',
-            ...(tip.risunok.grid === undefined ? {} : { grid: tip.risunok.grid }),
-          }}
-        />
-      </span>
-      <span className="z2t-card__text">
-        <span className="z2t-card__no">{tip.no}</span>
-        <h4 className="z2t-card__title">{tip.nazvanie}</h4>
-        <span className="z2t-card__nayti">{tip.nayti}</span>
-        <span className="z2t-card__meta">
-          <span className="z2t-card__protos">{tip.prototipy}</span>
-          <span className="z2t-card__go" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </span>
-        </span>
-      </span>
-    </>
-  );
-}
-
-function Shag({ shag, no }: { shag: Shag2; no: number }) {
-  return (
-    <li className={shag.check === true ? 'z2r-step is-check' : 'z2r-step'}>
-      <span className="z2r-step__no" aria-hidden="true">
-        {shag.check === true ? '✓' : no}
-      </span>
-      <div className="z2r-step__body">
-        <p className="z2r-step__label">{shag.label}</p>
-        <Paras paras={shag.paras} className="z2r-step__p" />
-        {shag.lines === undefined ? null : (
-          <div className="z2r-step__lines">
-            {shag.lines.flatMap(razbit).map((line) => (
-              <Display tex={line} key={line} />
-            ))}
-          </div>
-        )}
-      </div>
-    </li>
-  );
-}
-
-function Razbor({ tip }: { tip: Tip2 }) {
-  /* Номера шагов: проверка идёт без номера, с галочкой. */
-  const nomera = tip.shagi.map(
-    (_, i) => tip.shagi.slice(0, i + 1).filter((sh) => sh.check !== true).length,
-  );
-  return (
-    <article className="z2r" aria-labelledby={`${tip.id}-razbor-title`}>
-      <header className="z2r__head">
-        <p className="z2o-eyebrow">
-          {TIPY_2.razbor} · {tip.no}
-        </p>
-        <h3 className="z2r__title" id={`${tip.id}-razbor-title`}>
-          {tip.nazvanie}
-        </h3>
-      </header>
-      <div className="z2r__uslovie">
-        <p className="z2r__label">{TIPY_2.usloviye}</p>
-        <p className="z2r__uslovie-text">
-          <Tex text={tip.uslovie} />
-        </p>
-      </div>
-      <div className="z2r__grid">
-        <figure className="z2r__fig">
-          <Risunok config={tip.risunok} />
-        </figure>
-        <div className="z2r__reshenie">
-          <p className="z2r__label">{TIPY_2.reshenie}</p>
-          <ol className="z2r__steps">
-            {tip.shagi.map((shag, i) => (
-              <Shag shag={shag} no={nomera[i] ?? 0} key={shag.label} />
-            ))}
-          </ol>
-          <p className="z2r__otvet">
-            <span>{TIPY_2.otvet}:</span> <Tex text={tip.otvet} />
-          </p>
-        </div>
-      </div>
-      <div className="z2r__foot">
-        <a className="z2-btn z2-btn--primary" href={`${BASE}/${OPORNYE.tail}${tip.opornye}/`}>
-          {TIPY_2.opornye}
-          <Strelka />
-        </a>
-        <a className="z2-btn z2-btn--secondary" href={`${BASE}/trenazher/?tip=${tip.trenazher}`}>
-          {TIPY_2.trenazher}
-        </a>
-      </div>
-    </article>
-  );
-}
-
-function Tipy() {
-  const gruppy: TipGruppa[] = TIPY_2.gruppy.map((g) => ({
-    id: g.id,
-    head: (
-      <header className="z2t-gruppa__head" data-reveal="">
-        {/* Код группы банка, а не переменная: KaTeX здесь не нужен. */}
-        <span className="z2t-gruppa__code no-math-check" aria-hidden="true">
-          {g.id === 'baza' ? '0' : g.id}
-        </span>
-        <h3 className="z2t-gruppa__title" id={`z2t-${g.id}`}>
-          {g.title}
-        </h3>
-        <p className="z2t-gruppa__lead">{g.lead}</p>
-      </header>
-    ),
-    items: g.tipy.map((tip) => ({
-      id: tip.id,
-      label: tip.nazvanie,
-      wide: tip.wide === true,
-      card: <Kartochka tip={tip} />,
-      panel: <Razbor tip={tip} />,
-    })),
-  }));
-
-  return (
-    <section className="z2o-tipy" aria-labelledby={TIPY_ID}>
-      <header className="z2o-head" data-reveal="">
-        <h2 className="z2o-h2" id={TIPY_ID}>
-          {TIPY_2.title}
-        </h2>
-        <p className="z2o-lead">{TIPY_2.lead}</p>
-      </header>
-      <TipyRaskrytie
-        gruppy={gruppy}
-        headingId={TIPY_ID}
-        words={{ open: TIPY_2.otkryt, close: TIPY_2.zakryt, back: TIPY_2.nazad }}
-      />
-    </section>
-  );
-}
-
-/* ── Типичные ошибки ────────────────────────────────────────────── */
-
-function Oshibki() {
-  return (
-    <section className="z2o-oshibki" aria-labelledby="z2o-oshibki-title">
-      <header className="z2o-head" data-reveal="">
-        <h2 className="z2o-h2" id="z2o-oshibki-title">
-          {OSHIBKI_2.title}
-        </h2>
-        <p className="z2o-lead">{OSHIBKI_2.lead}</p>
-      </header>
-      <ol className="z2o-oshibki__list">
-        {OSHIBKI_2.spisok.map((o, i) => (
-          <li
-            className="z2o-oshibka"
-            key={o.id}
-            data-reveal=""
-            style={{ '--i': i } as CSSProperties}
-          >
-            <h3 className="z2o-oshibka__title">{o.title}</h3>
-            <p className="z2o-oshibka__text">
-              <Tex text={o.text} />
-            </p>
-            <div className="z2o-oshibka__primer">
-              <p className="z2o-oshibka__context">
-                <Tex text={o.primer} />
-              </p>
-              <dl className="z2o-sravn">
-                <div className="z2o-sravn__row z2o-sravn__row--ne">
-                  <dt>{OSHIBKI_2.neverno}</dt>
-                  <dd>
-                    <Display tex={o.neverno} />
-                  </dd>
-                </div>
-                <div className="z2o-sravn__row z2o-sravn__row--da">
-                  <dt>{OSHIBKI_2.verno}</dt>
-                  <dd>
-                    <Display tex={o.verno} />
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-
-/* ── Дальше ─────────────────────────────────────────────────────── */
-
-function Dalshe() {
-  const dveri = [
-    { key: 'teoriya', tone: 'blue', href: `${BASE}/teoriya/`, ...DALSHE_2.teoriya },
-    { key: 'trenazher', tone: 'warm', href: `${BASE}/trenazher/`, ...DALSHE_2.trenazher },
-  ] as const;
-  return (
-    <section className="z2o-dalshe" aria-labelledby="z2o-dalshe-title">
-      <h2 className="z2o-h2 z2o-dalshe__title" id="z2o-dalshe-title">
-        {DALSHE_2.title}
-      </h2>
-      <div className="z2o-dalshe__grid">
-        {dveri.map((d) => (
-          <a className={`z2o-dver z2o-dver--${d.tone}`} href={d.href} key={d.key} data-reveal="">
-            <span className="z2o-dver__title">{d.title}</span>
-            <span className="z2o-dver__text">{d.text}</span>
-            <span className="z2o-dver__action">
-              {d.action}
-              <Strelka />
-            </span>
-          </a>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/**
- * Вкладка «О задании» задания №2.
+ * Вкладка «О задании» №2: карта задания по типам («Стеклянная сцена»,
+ * общие компоненты components/tasks/karta — как у №8, №3, №7 и №6).
  *
- * Паспорт задания, «Что нужно уметь» с рисунком движка, восемь типов
- * задач с разбором по клику, типичные ошибки с примерами и переходы в
- * теорию и тренажёр. Тексты и данные — content/oZadanii2.ts, рисунки —
- * движок lib/vektory, формулы набирает KaTeX на сборке.
+ * Шапка (что проверяет, балл, минуты, чем опасно) с обложкой раздела,
+ * три группы с прогрессом ученика, 19 типов с разобранным примером
+ * (та же задача, что была разобрана на «Опорных задачах»: условие,
+ * рисунок с катетами, шаги), «Что нужно знать» — прежний блок «Что
+ * нужно уметь» и «Типичные ошибки» прежней вкладки, тексты без правок.
  */
+
+function tex(formula: string): string {
+  return typeset(`$${formula}$`);
+}
+
 export function OZadanii2() {
   return (
-    <div className="z2o">
-      <span className="z2o-aury" aria-hidden="true" />
-      <Poyavlenie root=".z2o" />
-      <Pasport />
-      <Umet />
-      <Tipy />
-      <Oshibki />
-      <Dalshe />
+    <div className="kz z2-karta">
+      <YakorTipa />
+      <KartaShapka
+        nadzagolovok={SHAPKA2.nadzagolovok}
+        zagolovok={SHAPKA2.zagolovok}
+        lead={SHAPKA2.lead}
+        fakty={SHAPKA2.fakty(PROTOTYPES.length)}
+        opasnoTitle={SHAPKA2.opasnoTitle}
+        opasno={SHAPKA2.opasno.map((line) => typeset(line))}
+        oblozhka={
+          /* Обложка раздела — готовая картинка, как есть: без обрезки и
+             пережатия, прозрачный фон на стекле шапки. */
+          <img
+            src={assetUrl('/images/task-02.webp')}
+            alt={SHAPKA2.oblozhkaAlt}
+            width={512}
+            height={512}
+            decoding="async"
+          />
+        }
+      />
+
+      <section className="kz-razdel" aria-labelledby="z2-gruppy-title">
+        <div className="kz-razdel__head">
+          <h3 className="stk-h3" id="z2-gruppy-title">
+            {SHAPKA2.gruppyTitle}
+          </h3>
+          <p className="stk-lead">{SHAPKA2.gruppyLead}</p>
+        </div>
+        <div className="kz-gruppy">
+          {O_ZADANII.gruppy.map((g, gi) => {
+            const vid = GRUPPY2_VID[g.id];
+            const tipy = PROTOTYPES.filter((p) => p.gruppa === g.id);
+            return (
+              <KartaGruppa
+                key={g.id}
+                id={g.id}
+                nazvanie={g.title}
+                znakHtml={tex(vid.znak)}
+                ton={vid.ton}
+                tipov={tipy.length}
+                progress={<GruppaProgress2 prototypes={tipy.map((p) => p.id)} />}
+                labels={SHAPKA2}
+                open={gi === 0}
+              >
+                {tipy.map((p, i) => {
+                  const open = gi === 0 && i === 0;
+                  const trenirovatHref = tipTrenazherHref2(p.id);
+                  const opornyeHref = opornyeTipaHref2(p.id);
+                  const opasnoHtml = typeset(TIPY2_OPASNO[p.id] ?? '');
+                  /* Раскрытый с самого начала пример набирается на сборке;
+                     остальные собираются в браузере по раскрытию. */
+                  const ex = open ? primerTipa2(p.id) : null;
+                  return (
+                    <KartaTip
+                      key={p.id}
+                      id={p.id}
+                      nazvanieHtml={typeset(p.nazvanie)}
+                      lead={tex(p.formula)}
+                      open={open}
+                    >
+                      {ex === null ? (
+                        <PrimerLazy2
+                          prototype={p.id}
+                          opasnoHtml={opasnoHtml}
+                          trenirovatHref={trenirovatHref}
+                          opornyeHref={opornyeHref}
+                        />
+                      ) : (
+                        <KartaPrimer
+                          uslovieHtml={ex.uslovieHtml}
+                          {...(ex.risunokSvg === null
+                            ? {}
+                            : { risunok: <RisunokSvg svg={ex.risunokSvg} /> })}
+                          shagi={ex.shagi}
+                          otvet={ex.otvet}
+                          opasnoHtml={opasnoHtml}
+                          trenirovatHref={trenirovatHref}
+                          opornyeHref={opornyeHref}
+                          labels={SHAPKA2}
+                        />
+                      )}
+                    </KartaTip>
+                  );
+                })}
+              </KartaGruppa>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="kz-razdel kz-znat" aria-labelledby="z2-znat-title">
+        <div className="kz-razdel__head">
+          <h3 className="stk-h3" id="z2-znat-title">
+            {SHAPKA2.znatTitle}
+          </h3>
+          <p className="stk-lead">{UMET_2.lead}</p>
+        </div>
+        <figure className="z2-znat__risunok stk-glass">
+          <RisunokSvg svg={renderVectorPlane(UMET_2.risunok)} />
+          <figcaption className="stk-lead">{UMET_2.podpis}</figcaption>
+        </figure>
+        <div className="kz-znat__setka">
+          {UMET_2.navyki.map((n, i) => (
+            <FormulyRamka
+              key={n.title}
+              nazvanie={n.title}
+              ton={ZNAT2.tony[i] ?? 'blue'}
+              primerLabel={ZNAT2.naRisunke}
+              formuly={[{ html: tex(n.formula), primerHtml: tex(n.naRisunke) }]}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="kz-razdel z2-oshibki teor-steklo" aria-labelledby="z2-oshibki-title">
+        <div className="kz-razdel__head">
+          <h3 className="stk-h3" id="z2-oshibki-title">
+            {OSHIBKI_2.title}
+          </h3>
+          <p className="stk-lead">{ZNAT2.oshibkiLead}</p>
+        </div>
+        <div className="z2-oshibki__setka">
+          {OSHIBKI_2.spisok.map((o) => (
+            <RamkaLovushka
+              key={o.id}
+              title={o.title}
+              neverno={[`$${o.neverno}$`]}
+              verno={[`$${o.verno}$`]}
+            >
+              <Abzacy paras={[o.text, o.primer]} />
+            </RamkaLovushka>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
