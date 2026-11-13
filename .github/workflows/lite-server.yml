@@ -176,11 +176,17 @@ jobs:
 
       - name: Миграции и список приглашённых
         env:
-          ALLOWED_EMAILS: anna@example.test, Boris@Example.test, vera@example.test, seed1@example.test, seed2@example.test, seed3@example.test
+          # gleb@gmail.com — в списке, но не российский сервис: сценарий
+          # ждёт отказ domain_not_allowed. example.test добавлен вручную,
+          # как добавляют школьную почту.
+          ALLOWED_EMAILS: anna@example.test, Boris@Example.test, vera@example.test, seed1@example.test, seed2@example.test, seed3@example.test, gleb@gmail.com
+          SIGNUP_EXTRA: example.test
         run: |
           infra/lite/actions/migrate.sh | tee "$RUNNER_TEMP/migrate.log"
           # Редакция документов — дата из operator.json.
           grep -E 'Редакция документов: [0-9]{4}-[0-9]{2}-[0-9]{2}' "$RUNNER_TEMP/migrate.log" >/dev/null
+          # Ручной список почты записан.
+          grep -F 'Почта, добавленная вручную: доменов 1, адресов 0' "$RUNNER_TEMP/migrate.log" >/dev/null
           # Повтор ничего не применяет.
           infra/lite/actions/migrate.sh | grep 'Новых миграций: 0' >/dev/null
 

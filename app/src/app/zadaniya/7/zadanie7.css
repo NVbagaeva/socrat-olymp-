@@ -862,3 +862,164 @@
     scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--h-topic-open) + var(--space-4));
   }
 }
+
+/* ── «Стеклянная сцена»: карта задания и тренажёр (общие компоненты
+   components/tasks/karta и trening). Здесь — только своё. ─────────── */
+
+/* Выбор тем: у №7 четыре настройки (с источником задач) — на широком
+   экране две колонки, переключатель «без подсказок» во всю ширину. */
+@media (min-width: 768px) {
+  .z7-trening .trn-nastroyki {
+    grid-template-columns: repeat(2, max-content);
+  }
+  .z7-trening .trn-nastroyki > .trn-pereklyuchatel {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Вид уравнения под названием типа: формула, а не текст. */
+.z7-karta .kz-tip__lead {
+  padding-top: 2px;
+  font-size: var(--fs-body);
+  color: var(--color-text);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Цветные схемы равносильных переходов — крупно, по карточке на вид. */
+.z7-skhemy__setka {
+  display: grid;
+  gap: var(--space-4);
+}
+.z7-skhemy__karta {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+}
+.z7-skhemy__karta .z7-sx {
+  font-size: var(--fs-lg);
+}
+.z7-skhemy__knopka {
+  justify-self: start;
+}
+@media (min-width: 1024px) {
+  .z7-skhemy__setka {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+  .z7-skhemy__karta {
+    padding: var(--space-5);
+  }
+}
+
+/* ── Теория в «Стеклянной сцене» (общий слой — components/tasks/teoriya/
+   teoriya-steklo.css). Карточки и блоки №7 берут те же тона ролей:
+   определение — синий, свойство и теорема — тёмно-синий, важно —
+   терракотовый. Печатные листы (рамки теории) остаются как были. ── */
+@media screen {
+  .teor-steklo .z7-k {
+    border: 0;
+    border-radius: 20px;
+    background: var(--glass-bg-strong);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  }
+  .teor-steklo .z7-blok {
+    --ton: var(--blue-600);
+    --ton-soft: var(--blue-50);
+    --ton-border: var(--blue-200);
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(160deg, var(--white), var(--ton-soft));
+    box-shadow:
+      inset 0 0 0 1px var(--ton-border),
+      inset 4px 0 0 var(--ton);
+  }
+  .teor-steklo .z7-blok--svoystvo,
+  .teor-steklo .z7-blok--teorema {
+    --ton: var(--navy-700);
+    --ton-soft: var(--blue-glass-2, var(--blue-50));
+    --ton-border: var(--blue-300);
+  }
+  .teor-steklo .z7-blok--vazhno {
+    --ton: var(--terracotta);
+    --ton-soft: var(--terracotta-50);
+    --ton-border: var(--terracotta-200);
+  }
+  .teor-steklo .z7-blok__plashka {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 var(--space-3);
+    background: var(--ton);
+    color: var(--white);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .teor-steklo .z7-blok__formula {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  /* «Где на ЕГЭ»: чипы типов — зона нажатия 44 px. */
+  .teor-steklo .z7-gde__chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--space-1) var(--space-4);
+    border-radius: 14px;
+    background: var(--glass-bg-strong);
+    box-shadow: var(--glass-ring), var(--glass-hi);
+    color: var(--blue-700);
+    text-decoration: none;
+  }
+  /* Схемы равносильных переходов в теории — крупнее. */
+  .teor-steklo .z7-sx {
+    font-size: var(--fs-lg);
+  }
+  .teor-steklo .z7-tablica {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+/* ── Опорные задачи в «Стеклянной сцене» (общие компоненты —
+   components/tasks/opornye). Здесь — только своё. ── */
+.z7-opornye {
+  display: grid;
+  gap: var(--space-4);
+}
+.z7-opornye__nazad {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--blue-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z7-opornye .z7-op__gde {
+  max-width: 720px;
+}
+.z7-opornye .z7-op__gde-spisok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z7-gde__chip--steklo {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-4);
+  border: 0;
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  line-height: 1.3;
+  text-decoration: none;
+}

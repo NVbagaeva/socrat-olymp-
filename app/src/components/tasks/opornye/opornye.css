@@ -1,0 +1,325 @@
+/* «Опорные задачи» в «Стеклянной сцене»: список блоков по навыкам и
+   экран блока. Вид — по образцу опорных задач №3. Значения — только
+   токены сайта; кирпичи — components/tasks/steklo. Префикс op-. */
+
+/* ── Список: навыки и блоки ──────────────────────────────────── */
+.op-navyki {
+  display: grid;
+  gap: var(--space-6);
+}
+.op-navyk {
+  display: grid;
+  gap: var(--space-3);
+}
+.op-navyk__head {
+  display: grid;
+  gap: 2px;
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--ton);
+}
+.op-navyk__zag {
+  margin: 0;
+}
+.op-navyk__lead {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.op-bloki {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.op-blok {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  min-height: 88px;
+  padding: var(--space-4);
+  color: inherit;
+  text-decoration: none;
+}
+.op-blok:hover {
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover, var(--glass-shadow));
+}
+.op-blok:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.op-blok__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.op-blok__text b {
+  font-size: 1.0625rem;
+  line-height: 1.25;
+}
+.op-blok__schet {
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.op-blok__polosa {
+  grid-column: 1 / -1;
+}
+
+/* ── Экран блока ─────────────────────────────────────────────── */
+.op-ekran {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 720px;
+}
+.op-zapomni {
+  padding: var(--space-4);
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi);
+  line-height: 1.5;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.op-zapomni b {
+  color: var(--amber-700);
+}
+.op-zad {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-4);
+}
+.op-zad__verh {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.op-plashka {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.op-zad__strelki {
+  display: inline-flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+.op-strelka {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  cursor: pointer;
+}
+.op-strelka:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.op-strelka:focus-visible,
+.op-tochka:focus-visible,
+.op-propustit:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+/* Условие — с оранжевой чертой слева, как у №3. */
+.op-zad__uslovie {
+  min-width: 0;
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--amber-600);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.op-zad__ris {
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+}
+.op-zad__ris img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.op-zad__pole {
+  display: grid;
+  gap: var(--space-2);
+}
+.op-zad__input {
+  max-width: 280px;
+}
+.op-verdikt {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 14px;
+}
+.op-verdikt--da {
+  background: var(--emerald-50);
+  box-shadow: inset 0 0 0 1px var(--emerald-200);
+}
+.op-verdikt--net {
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm);
+}
+.op-verdikt__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--white);
+}
+.op-verdikt--da .op-verdikt__ico {
+  background: var(--emerald-600);
+}
+.op-verdikt--net .op-verdikt__ico {
+  background: var(--terracotta);
+}
+.op-verdikt__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+.op-podskazka {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 14px;
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi);
+  color: var(--amber-700);
+  line-height: 1.45;
+}
+.op-podskazka span {
+  min-width: 0;
+  color: var(--color-text);
+}
+.op-podskazka-knopka {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--amber-50);
+  color: var(--amber-700);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.op-podskazka-knopka:focus-visible {
+  outline: 2px solid var(--amber-600);
+  outline-offset: 2px;
+}
+.op-reshenie {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.op-zad__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.op-zad__glavnaya {
+  flex: 1 1 100%;
+}
+.op-propustit {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: none;
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Точки-номера задач блока: зона нажатия 44 px. */
+.op-tochki ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.op-tochka {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.op-tochka[aria-current='step'] {
+  box-shadow:
+    0 0 0 2px var(--blue-600),
+    var(--glass-hi);
+  color: var(--blue-700);
+}
+.op-tochka.is-verno {
+  background: var(--emerald-50);
+  box-shadow: inset 0 0 0 1px var(--emerald-200);
+  color: #06704f;
+}
+.op-tochka.is-neverno {
+  background: var(--terracotta-50);
+  box-shadow: inset 0 0 0 1px var(--terracotta-200);
+  color: var(--terracotta-700);
+}
+.op-tochka.is-verno[aria-current='step'],
+.op-tochka.is-neverno[aria-current='step'] {
+  box-shadow: 0 0 0 2px var(--blue-600);
+}
+
+@media (min-width: 640px) {
+  .op-zad {
+    padding: var(--space-6);
+  }
+  .op-zad__glavnaya {
+    flex: 0 1 auto;
+    min-width: 220px;
+  }
+}
+@media (min-width: 768px) {
+  .op-bloki {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1100px) {
+  .op-bloki {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

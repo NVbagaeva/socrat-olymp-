@@ -233,6 +233,13 @@ jobs:
         working-directory: app
         run: pnpm test:zadanie3-trening
 
+      # №7 в «Стеклянной сцене»: прежний прогресс (ключ budetege:zadanie-7:v1)
+      # сворачивается в общий журнал без потерь и остаётся на месте, прежняя
+      # запись тренировки открывается, тренировки собираются. Без браузера.
+      - name: Тренажёр №7 — перенос прежнего прогресса, сборка тренировок
+        working-directory: app
+        run: pnpm test:progress-7
+
       - name: Тексты №3 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-3-teksty
@@ -582,6 +589,14 @@ jobs:
         working-directory: app
         run: pnpm test:legal
 
+      # Регистрация только с почтой российских почтовых сервисов: список
+      # доменов в форме и в базе один, сравнение без регистра и пробелов,
+      # поддомены не проходят; входа через Google, VK и т. п. нет.
+      # Сама база — в test:soglasiya-sql (supabase/tests/domeny.test.sql).
+      - name: Почтовые домены регистрации
+        working-directory: app
+        run: pnpm test:domeny
+
       # Печать ДЗ: лист ученика и лист учителя — из одних и тех же задач ДЗ,
       # на листе ученика нет ответов и меток «банк/новая», клетка — только у него.
       - name: Печать ДЗ — один набор задач на листе ученика и учителя
@@ -839,6 +854,19 @@ jobs:
       - name: Проверить сохранение тренировки в тренажёрах
         working-directory: app
         run: pnpm test:trainer-sessions
+
+      # Редизайн разделов первой части: картинки реестра (docs/redesign-kartinki.sha256)
+      # не изменены и по-прежнему стоят на страницах, банк и содержание раздела те же,
+      # что в main; прежний прогресс №7 виден в новом тренажёре (образец хранилища).
+      - name: Редизайн №7 — картинки и содержание не изменены
+        working-directory: app
+        run: |
+          git fetch --depth=1 origin main
+          pnpm test:redesign 7 origin/main
+
+      - name: Перенос прогресса №7 в браузере
+        working-directory: app
+        run: pnpm test:progress-7-site
 
       # Иллюстрация в верхнем блоке «Задание 12»: разметка (picture, srcset,
       # размеры, высокий приоритет, без lazy), файлы и вес версии на телефон

@@ -5,6 +5,7 @@ import '../../[task]/section.css';
 /* Оболочка теории с содержанием рядом (vteor, vtab, topic-*) — слои
    заданий №4 и №12, как у №10 и №11: подключаются без правок. */
 import '../../[task]/[type]/topic.css';
+import '../../[task]/[type]/trainer.css';
 import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '../../komplekt.css';

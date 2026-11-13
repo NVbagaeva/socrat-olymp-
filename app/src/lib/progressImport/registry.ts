@@ -53,6 +53,18 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     ],
   },
   {
+    id: 'z7',
+    title: '№7 «Уравнения»',
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie7/trening/progress.ts). Прежний
+         ключ budetege:zadanie-7:v1 сворачивается в него на месте
+         (lib/progressLog, LEGACY_LOGS) и сам не переносится. */
+      'budetege:zadanie-7:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «7»). */
+      'budetege:trainer:7:session',
+    ],
+  },
+  {
     id: 'obshchee',
     title: 'Отложенные задачи и история тренировок',
     keys: [

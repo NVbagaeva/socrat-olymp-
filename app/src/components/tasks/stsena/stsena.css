@@ -1,0 +1,489 @@
+/* Шапка раздела «Стеклянная сцена» (StsenaShapka, ObjomnayaOblozhka)
+   и модификатор ленты вкладок topic-tabs-row--stsena. Значения —
+   токены сайта (styles/tokens.css), стекло — рецептура steklo.css. */
+
+/* ── Крошки и переключатель ─────────────────────────────────── */
+
+.stsena-crumbs {
+  margin-bottom: var(--space-4);
+}
+/* Переключатель раздела — только на телефоне и планшете. */
+.stsena-pereklyuchatel {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .stsena-crumbs {
+    display: none;
+  }
+  .stsena-pereklyuchatel {
+    display: block;
+    margin-bottom: var(--space-3);
+  }
+  .stsena-pereklyuchatel .razdely-plashka {
+    margin-bottom: 0;
+    min-height: 48px;
+    background: var(--glass-bg-strong);
+    border-color: var(--glass-edge);
+    box-shadow: var(--glass-ring), var(--glass-hi);
+  }
+  .stsena-pereklyuchatel .razdely-plashka__ico {
+    display: none;
+  }
+}
+
+/* ── Карточка шапки ─────────────────────────────────────────── */
+
+.stsena {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 264px);
+  gap: var(--space-6);
+  align-items: center;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-5) var(--space-7);
+  border: 1px solid var(--glass-edge);
+  border-radius: 28px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow:
+    var(--glass-ring),
+    var(--glass-hi),
+    0 1px 2px rgb(16 40 100 / 0.06),
+    0 24px 48px -20px rgb(31 95 208 / 0.28);
+}
+.stsena--text {
+  grid-template-columns: minmax(0, 1fr);
+}
+/* Свечение за обложкой: мягкое голубое — и тёплый отсвет в углу. Оба
+   псевдоэлемента под содержимым и не ловят курсор. */
+.stsena::before,
+.stsena::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.stsena::before {
+  right: 4%;
+  top: 50%;
+  width: 46%;
+  max-width: 420px;
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  background: radial-gradient(closest-side, rgb(61 121 224 / 0.42), rgb(61 121 224 / 0));
+}
+.stsena::after {
+  right: -8%;
+  top: -40%;
+  width: 36%;
+  max-width: 360px;
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, rgb(255 176 112 / 0.5), rgb(255 176 112 / 0));
+}
+
+.stsena__text {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.stsena__title {
+  margin: 0;
+  font-size: clamp(28px, 2.6vw + 8px, 40px);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.stsena__lead {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--color-text-secondary);
+}
+.stsena__tabletki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.stsena__tabletka {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, var(--white), var(--blue-50));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
+  color: var(--blue-700);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.stsena__tabletka--warm {
+  color: var(--amber-700);
+  border-color: var(--cream-200, var(--amber-50));
+  background: linear-gradient(180deg, var(--white), var(--amber-50));
+}
+.stsena__tabletka-ik {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+}
+.stsena__tabletka-ik svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.stsena__tabletka--warm .stsena__tabletka-ik svg path {
+  fill: currentColor;
+}
+
+/* Прогресс: «Решено 12 из 92» и оранжевая полоса. */
+.stsena__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-1);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text);
+}
+.stsena__progress-text {
+  flex: none;
+  margin: 0;
+  font-weight: 500;
+}
+.stsena__progress .stk-polosa {
+  flex: 1 1 auto;
+  max-width: 320px;
+  height: 8px;
+}
+
+/* ── Обложка ────────────────────────────────────────────────── */
+
+.stsena__media {
+  position: relative;
+  min-width: 0;
+}
+.oblozhka {
+  position: relative;
+  width: 100%;
+}
+.oblozhka__oblast {
+  position: relative;
+  width: 100%;
+  cursor: grab;
+  /* Пальцем вбок — вращение, по вертикали — прокрутка страницы. */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: 16px;
+}
+.oblozhka__oblast:active {
+  cursor: grabbing;
+}
+.oblozhka__oblast:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+.oblozhka__poster {
+  display: block;
+}
+.oblozhka__poster img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.oblozhka__poster,
+.oblozhka__kholst {
+  transition: opacity 200ms ease;
+}
+.oblozhka__kholst {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.oblozhka__kholst canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.oblozhka.is-zhivoy .oblozhka__poster {
+  opacity: 0;
+}
+.oblozhka.is-zhivoy .oblozhka__kholst {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .oblozhka__poster,
+  .oblozhka__kholst {
+    transition: none;
+  }
+}
+/* Стеклянная кнопка у обложки. */
+.oblozhka__knopka {
+  position: absolute;
+  right: -4px;
+  bottom: 6%;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 72px;
+  padding: 10px 6px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--blue-700);
+  font: inherit;
+  font-size: 11px;
+  line-height: 13px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+}
+.oblozhka__knopka svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--blue-600);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.oblozhka__knopka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .oblozhka__knopka:hover {
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+  }
+}
+
+/* ── Телефон и планшет ──────────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  .stsena {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-4) var(--space-3);
+    border-radius: 24px;
+  }
+  .stsena__text {
+    gap: var(--space-2);
+  }
+  .stsena__tabletki {
+    gap: 6px;
+  }
+  .stsena__tabletka {
+    min-height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+  .stsena__progress {
+    gap: var(--space-3);
+    font-size: 13px;
+  }
+  .stsena::before {
+    right: 10%;
+    top: auto;
+    bottom: -10%;
+    width: 60%;
+    transform: none;
+  }
+  .stsena__title {
+    font-size: clamp(24px, 6vw, 30px);
+    line-height: 1.12;
+  }
+  .stsena__lead {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .stsena__progress .stk-polosa {
+    max-width: none;
+  }
+  .stsena__media {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 72px;
+    gap: var(--space-3);
+    align-items: center;
+  }
+  .oblozhka {
+    display: contents;
+  }
+  .oblozhka__oblast {
+    justify-self: center;
+    width: auto;
+    height: var(--oblozhka-h, 180px);
+    aspect-ratio: auto;
+  }
+  .oblozhka__oblast .oblozhka__poster img {
+    width: auto;
+    height: var(--oblozhka-h, 180px);
+  }
+  .oblozhka__oblast .oblozhka__poster {
+    height: 100%;
+  }
+  .oblozhka__knopka {
+    position: static;
+    width: 72px;
+  }
+}
+
+/* ── Лента вкладок «Стеклянной сцены» ───────────────────────── */
+/* Плитки: одинаковые стеклянные кнопки «значок над подписью», подписи
+   целиком. На компьютере и планшете — ровная сетка на всю ширину; на
+   телефоне — строка с прокруткой пальцем, край гасится градиентом
+   (data-ten-r, components.css). Прилипшая панель — общая компактная
+   строка, как у всех разделов. Селекторы с .app-main — чтобы быть
+   точнее общих правил плиток в components.css. */
+
+.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+}
+.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta {
+  display: contents;
+}
+.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab'] {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: 76px;
+  margin: 0;
+  padding: var(--space-2) var(--space-2);
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--color-text);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  text-align: center;
+}
+.app-main
+  .topic-tabs-row--stsena:not(.is-stuck)
+  .topic-tabs
+  .tabs--lenta
+  > a[role='tab']
+  .tabs__text {
+  max-width: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab']:hover {
+  background: var(--color-surface);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.app-main
+  .topic-tabs-row--stsena:not(.is-stuck)
+  .topic-tabs
+  .tabs--lenta
+  > a[role='tab'][aria-selected='true'] {
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
+  color: var(--color-text-inverse);
+  box-shadow:
+    inset 0 1px 0 var(--color-tab-sheen),
+    var(--glow-tab);
+}
+@media (max-width: 767.98px) {
+  /* Телефон: обложка справа от текста узкой колонкой, кнопка под ней —
+     так шапка, лента и начало вкладки умещаются в экран 375×667. */
+  .stsena {
+    grid-template-columns: minmax(0, 1fr) 108px;
+    column-gap: var(--space-3);
+    align-items: start;
+  }
+  .stsena--text {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stsena::before {
+    right: -12%;
+    top: 10%;
+    bottom: auto;
+    width: 60%;
+  }
+  .stsena__media {
+    --oblozhka-h: 108px;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--space-2);
+    padding-top: var(--space-1);
+  }
+  .stsena__title {
+    font-size: clamp(22px, 6vw, 28px);
+  }
+  .stsena__progress {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .stsena__progress .stk-polosa {
+    flex-basis: 100%;
+  }
+  .oblozhka__knopka {
+    width: 68px;
+    padding: 8px 4px;
+  }
+  .oblozhka__knopka svg {
+    width: 18px;
+    height: 18px;
+  }
+  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab'] {
+    min-height: 62px;
+  }
+  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    /* Поле под тень карточек и под край растушёвки. */
+    padding: 2px var(--space-1) var(--space-2);
+    margin: 0 calc(var(--space-1) * -1);
+  }
+  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab'] {
+    flex: 0 0 auto;
+    width: 92px;
+    min-height: 68px;
+    scroll-snap-align: start;
+  }
+}

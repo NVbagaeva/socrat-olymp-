@@ -6,13 +6,23 @@
 
 import type { Ton3 } from './gruppy';
 
+/** Факты о задании — один источник для «О задании» и для шапки раздела. */
+const BALL3 = '1';
+const MINUT3 = '≈ 3';
+
+/** Таблетки шапки раздела: «1 балл», «≈ 3 минуты». */
+export const TABLETKI3 = {
+  ball: `${BALL3} балл`,
+  vremya: `${MINUT3} минуты`,
+} as const;
+
 export const SHAPKA3 = {
   nadzagolovok: 'Задание №3 · первая часть',
   zagolovok: 'Стереометрия: одна фигура — одно число',
   lead: 'Проверяется, видите ли вы фигуру в пространстве и знаете ли формулы объёмов и площадей. Считать почти нечего: главное — найти нужный отрезок или нужную долю.',
   fakty: [
-    { znachenie: '1', podpis: 'первичный балл' },
-    { znachenie: '≈ 3', podpis: 'минуты на экзамене' },
+    { znachenie: BALL3, podpis: 'первичный балл' },
+    { znachenie: MINUT3, podpis: 'минуты на экзамене' },
     { znachenie: '15', podpis: 'типов в семи группах' },
   ],
   opasnoTitle: 'Чем опасно',

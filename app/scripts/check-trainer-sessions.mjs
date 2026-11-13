@@ -216,10 +216,15 @@ function answer3(payload, at) {
   return { text: numberText(prototype.otvet(variant.params)) };
 }
 
-/** №7: задача записи {prototypeId, params} → решатель прототипа. */
+/** №7: в записи — ключи задач банка {id, p}; ответ — решатель прототипа по параметрам задачи. */
 function answer7(payload, at) {
   const { prototype } = requireSrc('lib/zadanie7/prototypes/index');
-  const z = payload.zadachi[at];
+  const { BANK } = requireSrc('lib/zadanie7/bank/index');
+  const task = payload.tasks[at];
+  const z = BANK.find((item) => item.id === task.id);
+  if (z === undefined) {
+    throw new Error(`№7: нет задачи ${task.id}`);
+  }
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
 
@@ -404,17 +409,10 @@ const TRAINERS = [
     url: '/zadaniya/7/trenazher/',
     scope: '7',
     answer: answer7,
-    /* Прототипы по умолчанию не отмечены: вся группа I флажком группы. */
-    start: async (page) => {
-      await page
-        .getByRole('checkbox', { name: /^Группа I\./ })
-        .first()
-        .check();
-      await page
-        .getByRole('button', { name: /^Начать/ })
-        .first()
-        .click();
-    },
+    /* Стартовый экран — три режима, как у №8: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№6',
