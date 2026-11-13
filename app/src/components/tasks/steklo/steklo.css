@@ -176,6 +176,9 @@
   background: var(--blue-100);
 }
 .stk-shag__chto {
+  /* Элемент сетки шага: без min-width: 0 длинная формула в строке
+     распирает колонку, вместо того чтобы прокручиваться внутри строки. */
+  min-width: 0;
   margin: 0;
   padding-top: 3px;
   font-size: 0.9375rem;
@@ -411,6 +414,8 @@ details[open] > summary .stk-shevron {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--blue-700);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .stk-shag__zag + .stk-shag__chto {
   padding-top: 0;
@@ -467,4 +472,12 @@ details[open] > summary .stk-shevron {
 }
 .stk-shag--otbor .stk-shag__zag {
   color: var(--amber-700);
+}
+
+/* Таблица или рисунок в шаге решения: не шире шага, прокрутка — внутри. */
+.stk-shag__risunok {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
