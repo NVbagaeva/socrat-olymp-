@@ -152,11 +152,14 @@ export interface OpornayaZadachaProps {
   onCheck: () => void;
   /** Подсказка о записи ответа: попытка не тратится. */
   formatHint?: string | null;
-  /**
-   * Подсказка (HTML): открыта ли, открыть. null — подсказки нет. `telo` —
-   * подсказка-вопросы с кнопками вместо текста (№4, №5).
-   */
-  podskazka: { html: string; telo?: ReactNode; open: boolean; onOpen: () => void } | null;
+  /** Подсказка (HTML): открыта ли, открыть. null — подсказки нет. */
+  podskazka: {
+    html: string;
+    open: boolean;
+    onOpen: () => void;
+    /** Подсказка-вопросы с кнопками (№13, №4, №5) вместо текста. */
+    telo?: ReactNode;
+  } | null;
   /**
    * Решение по шагам: доступно после ответа; открыто ли, переключить.
    * `posle` — под шагами (№4, №5: рисунок метода с подсветкой).
@@ -164,9 +167,11 @@ export interface OpornayaZadachaProps {
   reshenie: { shagi: Shag[]; posle?: ReactNode; open: boolean; onToggle: () => void } | null;
   /** Плашка «Запомни» блока: над задачей. */
   zapomni?: ReactNode;
-  /** Ответ выбором (№2): варианты вместо поля ответа, value — номер выбранного. */
+  /** Ответ выбором (№2, №13 «Определи тип»): варианты вместо поля ответа, value — номер выбранного. */
   vybory?: readonly { number: string; labelHtml: string }[];
-  /** Ещё кнопки в ряду действий (№2: «Ещё вариант»). */
+  /** Свой вердикт вместо «Пока не так» (№13: «Число верное, единицы нет»). */
+  verdiktNeverno?: { zag: string; lead: string };
+  /** Ещё кнопки в ряду действий (№2, №13: «Ещё вариант»). */
   dop?: ReactNode;
   labels: OpornayaZadachaLabels;
 }
@@ -192,6 +197,7 @@ export function OpornayaZadacha({
   reshenie,
   zapomni,
   vybory,
+  verdiktNeverno,
   dop,
   labels,
 }: OpornayaZadachaProps) {
@@ -300,8 +306,10 @@ export function OpornayaZadacha({
               <Ikonka name={solved ? 'da' : 'net'} />
             </span>
             <span className="op-verdikt__text">
-              <b>{solved ? labels.verno : labels.neverno}</b>
-              <span>{solved ? labels.vernoLead : labels.nevernoLead}</span>
+              <b>{solved ? labels.verno : (verdiktNeverno?.zag ?? labels.neverno)}</b>
+              <span>
+                {solved ? labels.vernoLead : (verdiktNeverno?.lead ?? labels.nevernoLead)}
+              </span>
             </span>
           </div>
         )}

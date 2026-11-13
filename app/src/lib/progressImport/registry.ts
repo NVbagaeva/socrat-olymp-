@@ -155,9 +155,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z13',
     title: '№13 «Финансовая грамотность»',
     keys: [
-      /* Журнал попыток тренажёра (lib/zadanie13/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/zadanie13/trening/progress.ts). Прежний ключ
          budetege:zadanie-13:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:zadanie-13:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «13»). */
+      'budetege:trainer:13:session',
     ],
   },
   {
