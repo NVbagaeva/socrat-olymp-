@@ -24,7 +24,7 @@ import {
 import { ConsentChecks } from '@/components/account/ConsentChecks';
 import { legalDocs } from '@/content/legal/documents';
 import { birthYearValid, parentConsentNeeded } from '@/lib/account/consents';
-import { AUTH_HREF } from '@/lib/auth/config';
+import { AUTH_HREF, NESOVERSHENNOLETNIM_OTKRYTO } from '@/lib/auth/config';
 import { emailDomainAllowed } from '@/lib/auth/allowed-domains';
 import { AUTH_ERRORS, describeAuthError, isDomainRejected } from '@/lib/auth/errors';
 import { setRememberMe, useSessionUser, type UserRole } from '@/lib/auth/session';
@@ -431,6 +431,8 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
         setError(REGISTER_FORM.birthYearInvalid);
         return;
       }
+      /* Предупреждение уже стоит под годом рождения — второй раз не пишем. */
+      if (needsParent && !NESOVERSHENNOLETNIM_OTKRYTO) return;
       if (needsParent && !emailLooksValid(cleanParent)) {
         setError(REGISTER_FORM.parentEmailInvalid);
         return;
@@ -593,7 +595,10 @@ function RegisterForm({ onLogin }: { onLogin: () => void }) {
           <FieldMessage>{REGISTER_FORM.birthYearHint}</FieldMessage>
         </div>
       ) : null}
-      {needsParent ? (
+      {needsParent && !NESOVERSHENNOLETNIM_OTKRYTO ? (
+        <FieldMessage tone="error">{REGISTER_FORM.minorClosed}</FieldMessage>
+      ) : null}
+      {needsParent && NESOVERSHENNOLETNIM_OTKRYTO ? (
         <div className="field">
           <FieldLabel htmlFor={`${id}-parent`}>{REGISTER_FORM.parentEmail}</FieldLabel>
           <Input

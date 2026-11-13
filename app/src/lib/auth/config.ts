@@ -45,6 +45,15 @@ export const REMEMBER_KEY = 'budetege:auth:remember';
 /** Событие в окне: сессия изменилась (вход, выход, обновление имени). */
 export const SESSION_EVENT = 'budetege:auth';
 
+/**
+ * Регистрация учеников младше 18 через форму. Пока false: письма
+ * родителю нет (docs/AUTH.md), и база при открытой регистрации таким
+ * ученикам отказывает (minor_closed, миграция 20261114120000). Форма
+ * говорит об этом сразу, не дожидаясь ответа базы. Включать вместе с
+ * письмом родителю.
+ */
+export const NESOVERSHENNOLETNIM_OTKRYTO = false;
+
 /** Адреса страниц входа. */
 export const AUTH_HREF = {
   voyti: '/voyti/',

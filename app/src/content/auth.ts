@@ -8,6 +8,7 @@
 
 import type { UserRole } from '@/lib/auth/session';
 import { plural } from '@/lib/plural';
+import { PROBNYY_SROK } from '@/lib/tarify/config';
 
 export { AUTH_UI } from './auth-ui';
 
@@ -27,7 +28,7 @@ export const LOGIN_FORM = {
 } as const;
 
 export const REGISTER_FORM = {
-  intro: 'Регистрация пока по приглашению: аккаунт создаётся для адресов из списка.',
+  intro: `Пробный доступ на ${PROBNYY_SROK} включится сам, когда вы подтвердите почту. Карта не нужна.`,
   name: 'Имя',
   namePlaceholder: 'Как к вам обращаться',
   email: 'Почта',
@@ -56,6 +57,9 @@ export const REGISTER_FORM = {
     'Вам меньше 18 лет, поэтому нужно согласие родителя. В пробном режиме письмо родителю ещё не отправляется: войти можно, но прогресс в аккаунте не сохраняется.',
   parentEmailInvalid: 'Укажите почту родителя: без его согласия прогресс не сохранится.',
   parentEmailSame: 'Почта родителя должна отличаться от вашей.',
+  /* Младше 18, пока нет письма родителю (NESOVERSHENNOLETNIM_OTKRYTO). */
+  minorClosed:
+    'Ученикам младше 18 лет регистрация пока закрыта: нужно согласие родителя, эту часть сайта мы ещё делаем. Бесплатная часть сайта работает и без регистрации.',
   /* Галочки согласий: без обеих аккаунт не создаётся. */
   consentsRequired:
     'Отметьте обе галочки: без согласия с Пользовательским соглашением и на обработку персональных данных аккаунт не создаётся.',
@@ -156,6 +160,14 @@ export const KABINET = {
     tutor: 'Кабинет репетитора',
     admin: 'Кабинет администратора',
   } satisfies Record<Role, string>,
+  /* Доступ по тарифу (lib/auth/dostup.ts): строка над разделами кабинета. */
+  dostup: {
+    probnyy: (tarif: string, doKogda: string) =>
+      `Пробный доступ к тарифу «${tarif}» — до ${doKogda}.`,
+    oplata: (tarif: string, doKogda: string) => `Тариф «${tarif}» оплачен до ${doKogda}.`,
+    besplatno: 'Сейчас у вас бесплатный доступ.',
+    tarify: 'Тарифы',
+  },
   trial:
     'Кабинет работает в пробном режиме: разделы ниже появляются по одному, первым — задание №8 «Вычисления».',
 
@@ -315,6 +327,19 @@ export function editionRu(version: string): string {
 }
 
 /** «11 октября 2026» из ISO. */
+/** «16 ноября, 18:30» по Москве — до какого момента открыт доступ. */
+export function momentRu(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Moscow',
+  });
+}
+
 export function dateRu(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';

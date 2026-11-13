@@ -15,8 +15,13 @@ import { DOMAIN_REJECTED_MARK } from './allowed-domains';
 /** Хук «перед созданием пользователя» отвечает этим словом, если адреса нет в списке. */
 export const INVITE_ONLY_MARK = 'invite_only';
 
+/** Хук и триггер базы: ученик младше 18 при открытой регистрации. */
+export const MINOR_CLOSED_MARK = 'minor_closed';
+
 export const AUTH_ERRORS = {
   inviteOnly: 'Регистрация пока по приглашению.',
+  minorClosed:
+    'Ученикам младше 18 лет регистрация пока закрыта: нужно согласие родителя. Бесплатная часть сайта работает и без регистрации.',
   /* Форма показывает вместо этой строки подсказку со ссылкой (VoytiScreen). */
   domainNotAllowed:
     'Регистрация доступна с адресами российских почтовых сервисов: Яндекс, Mail.ru, Рамблер.',
@@ -57,6 +62,8 @@ export function isInviteOnly(error: AuthFailure): boolean {
 export function describeAuthError(error: AuthFailure, email = ''): string {
   /* Раньше приглашения: отказ по домену — тоже 403. */
   if (isDomainRejected(error)) return AUTH_ERRORS.domainNotAllowed;
+  /* Тоже 403 без кода — раньше проверки «по приглашению». */
+  if (error.message?.includes(MINOR_CLOSED_MARK) === true) return AUTH_ERRORS.minorClosed;
   if (isInviteOnly(error)) return AUTH_ERRORS.inviteOnly;
   switch (error.code) {
     case 'invalid_credentials':

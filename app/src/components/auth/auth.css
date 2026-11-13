@@ -240,6 +240,14 @@
 .kabinet__name {
   overflow-wrap: anywhere;
 }
+.kabinet__dostup {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+.kabinet__dostup a {
+  color: var(--color-text-brand);
+}
 .kabinet__trial {
   font-size: 14px;
   line-height: 1.5;

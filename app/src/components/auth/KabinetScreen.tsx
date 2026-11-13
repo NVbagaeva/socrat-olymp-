@@ -15,11 +15,13 @@ import {
   SuccessState,
   Tabs,
 } from '@/components/ui';
-import { KABINET, dateRu, editionRu } from '@/content/auth';
+import { KABINET, dateRu, editionRu, momentRu } from '@/content/auth';
 import { legalDocs } from '@/content/legal/documents';
 import { AUTH_HREF } from '@/lib/auth/config';
 import { AUTH_ERRORS, describeAuthError } from '@/lib/auth/errors';
+import type { Dostup } from '@/lib/auth/dostup';
 import type { SavedKit } from '@/lib/auth/kits';
+import { PLATNYE, TARIFY_HREF } from '@/lib/tarify/config';
 import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
@@ -56,6 +58,8 @@ export function KabinetScreen() {
   const [kits, setKits] = useState<SavedKit[] | null>(null);
   const [klassy, setKlassy] = useState<KlassView[] | null>(null);
   const [consents, setConsents] = useState<AccountConsents | null>(null);
+  /* undefined — ещё грузится; null — строки доступа нет. */
+  const [dostup, setDostup] = useState<Dostup | null | undefined>(undefined);
   const [imported, setImported] = useState<ImportedKey[]>([]);
   const [ask, setAsk] = useState<LocalGroup[] | null>(null);
   const [importNote, setImportNote] = useState<string | null>(null);
@@ -99,18 +103,22 @@ export function KabinetScreen() {
       }
       setView('ready');
 
-      const [{ loadImportedKeys }, { loadKlassy }, { hasStash }] = await Promise.all([
-        import('@/lib/progressImport'),
-        import('@/lib/auth/klassy'),
-        import('@/lib/accountSync'),
-      ]);
-      const [given, keys, classes] = await Promise.all([
+      const [{ loadImportedKeys }, { loadKlassy }, { hasStash }, { loadDostup }] =
+        await Promise.all([
+          import('@/lib/progressImport'),
+          import('@/lib/auth/klassy'),
+          import('@/lib/accountSync'),
+          import('@/lib/auth/dostup'),
+        ]);
+      const [given, keys, classes, access] = await Promise.all([
         loadConsents(),
         loadImportedKeys(),
         synced.role === 'admin' ? Promise.resolve([]) : loadKlassy(),
+        synced.role === 'admin' ? Promise.resolve(null) : loadDostup(),
       ]);
       if (cancelled) return;
       setConsents(given);
+      setDostup(access);
       setImported(keys);
       setKlassy(classes);
       /* Вопрос о переносе — один раз на аккаунт в этом браузере. Ученику
@@ -227,6 +235,7 @@ export function KabinetScreen() {
 
       {tab === 'home' ? (
         <>
+          {profile.role !== 'admin' && dostup !== undefined ? <DostupLine dostup={dostup} /> : null}
           <p className="kabinet__trial">{KABINET.trial}</p>
           {profile.role === 'student' ? (
             <StudentHome
@@ -296,6 +305,22 @@ export function KabinetScreen() {
  * профиля; пока ученик ни в одном классе (или пришёл по ссылке с кодом),
  * форма «Вступить» стоит и здесь, под картой.
  */
+/** Строка доступа: пробный или оплаченный срок, иначе — бесплатный. */
+function DostupLine({ dostup }: { dostup: Dostup | null }) {
+  const t = KABINET.dostup;
+  let text: string = t.besplatno;
+  if (dostup !== null && dostup.aktiven) {
+    const tarif = PLATNYE[dostup.tarif].nazvanie;
+    const doKogda = momentRu(dostup.doKogda);
+    text = dostup.istochnik === 'probnyy' ? t.probnyy(tarif, doKogda) : t.oplata(tarif, doKogda);
+  }
+  return (
+    <p className="kabinet__dostup" data-section="dostup">
+      <span>{text}</span> <Link href={TARIFY_HREF}>{t.tarify}</Link>
+    </p>
+  );
+}
+
 function StudentHome({ klassy, onJoined }: { klassy: KlassView[] | null; onJoined: () => void }) {
   const t = KABINET.student;
   const [initialCode] = useState(pendingCode);

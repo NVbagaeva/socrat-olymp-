@@ -21,12 +21,12 @@
 
    Сценарии (сборка со входом и кнопкой в шапке, NEXT_PUBLIC_AUTH_IN_HEADER=1):
      • шапка на 1440: «Войти» таблеткой со словом, «Начать бесплатно»
-       ведёт в банк заданий (регистрация пока по приглашению); на 390,
+       ведёт на регистрацию; на 390,
        375 и 320 «Войти» — кружок в шапке не меньше 40 px,
        горизонтальной прокрутки нет, в меню телефона тоже «Войти»;
      • регистрация без галочек согласий → просьба отметить, запрос не уходит;
-       ученику — год рождения, младше 18 — почта родителя;
-     • регистрация чужой почтой → «Регистрация пока по приглашению»,
+       ученику — год рождения, младше 18 — «регистрация пока закрыта»;
+     • регистрация не из списка (в моке «*» нет) → «Регистрация пока по приглашению»,
        ошибок в консоли нет;
      • почта не российского сервиса (gmail.com, заглавными, с пробелами,
        поддомен) → спокойная подсказка со ссылкой на почту, запрос не
@@ -495,6 +495,25 @@ function makeMock() {
           },
         };
       }
+      /* Доступ по тарифу: у подтверждённого ученика и репетитора — пробный
+         на 3 дня (как триггер базы zz_auth_user_probnyy). */
+      if (table === 'dostup' && method === 'GET') {
+        const role = profiles.get(me.id)?.role;
+        const row =
+          role === 'student' || role === 'tutor'
+            ? {
+                tarif: role === 'student' ? 'uchenik' : 'repetitor',
+                do_kogda: new Date(Date.now() + 3 * 86400000).toISOString(),
+                istochnik: 'probnyy',
+              }
+            : null;
+        if (prefersObject) {
+          return row === null
+            ? err(406, 'PGRST116', 'JSON object requested, multiple (or no) rows returned')
+            : { status: 200, body: row };
+        }
+        return { status: 200, body: row === null ? [] : [row] };
+      }
       if (table === 'consents' && method === 'GET') {
         const kind = (u.searchParams.get('kind') ?? '').replace(/^eq\./, '');
         const rows = consents
@@ -816,11 +835,12 @@ async function runEnabled() {
       (await page.locator(LOGIN).innerText()).trim() === 'Войти',
       'главная 1440: на кнопке видно слово «Войти»',
     );
-    /* Регистрация пока по приглашению: «Начать бесплатно» ведёт туда
-       же, куда без входа, — в банк заданий, а не в закрытую форму. */
+    /* Вход в шапке — регистрация открыта: «Начать бесплатно» ведёт на
+       вкладку регистрации, где включается пробный доступ. */
     check(
-      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) === '/zadaniya/',
-      'главная: «Начать бесплатно» ведёт в банк заданий',
+      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) ===
+        '/voyti/?vkladka=registraciya',
+      'главная: «Начать бесплатно» ведёт на регистрацию',
     );
     await shot(page, 'shapka-do-vhoda-1440');
     await context.close();
@@ -886,9 +906,17 @@ async function runEnabled() {
       'без года рождения почты родителя в форме нет',
     );
     await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 16));
+    /* Письма родителю ещё нет (NESOVERSHENNOLETNIM_OTKRYTO): вместо почты
+       родителя — объяснение, и запрос на сервер не уходит. */
     check(
-      (await page.locator('input[name="parent-email"]').count()) === 1,
-      'ученику младше 18 — поле «Почта родителя»',
+      (await page.locator('input[name="parent-email"]').count()) === 0,
+      'ученику младше 18 пока не предлагают почту родителя',
+    );
+    check(
+      (await page.locator('.field__msg--error').innerText()).startsWith(
+        'Ученикам младше 18 лет регистрация пока закрыта',
+      ),
+      'ученику младше 18: «регистрация пока закрыта»',
     );
     await shot(page, 'registraciya-uchenik-1440');
     await page.fill('input[name="birth-year"]', '2000');
@@ -1639,13 +1667,18 @@ async function runEnabled() {
     /* Журнал №8 с компьютера приехал: на карте №8 — «в процессе». */
     await phone.page
       .waitForFunction(
-        () => document.querySelector('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]') !== null,
+        () =>
+          document.querySelector(
+            '.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]',
+          ) !== null,
         null,
         { timeout: 10000 },
       )
       .catch(() => {});
     check(
-      (await phone.page.locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]').count()) === 1,
+      (await phone.page
+        .locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]')
+        .count()) === 1,
       'телефон: на карте №8 «в процессе» — решённое на компьютере приехало',
     );
     const laterRaw = await phone.page.evaluate(() => localStorage.getItem('budetege:zakladki:v1'));
@@ -2472,8 +2505,7 @@ async function runGallery(dir) {
     await page.fill('input[name="email"]', 'uchenik@yandex.ru');
     await page.fill('input[name="password"]', 'dlinnyy-parol-uchenika');
     await page.click('.role-card[data-role="student"]');
-    await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 16));
-    await page.fill('input[name="parent-email"]', 'mama@yandex.ru');
+    await page.fill('input[name="birth-year"]', '2000');
     await tickConsents(page);
     await snap('02-registraciya');
 
