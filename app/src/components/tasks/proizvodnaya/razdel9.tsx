@@ -25,7 +25,7 @@ const T = TRENAZHER9;
  * закрыта — все построения. В режиме без подсказок построений нет до
  * итогов.
  */
-function Chertezh9({ z, ui }: { z: Zadacha9; ui: SostoyaniePod }) {
+function Chertezh9({ z, ui }: { z: Zadacha9; ui: SostoyaniePod<Reshenie9> }) {
   const { risunok, shagiRisunka } = z;
   const rezhim =
     ui.bezPodskazok || (!ui.zakryta && !ui.podskazka) ? 'student' : ui.zakryta ? 'teacher' : 'hint';
@@ -65,12 +65,7 @@ export const RAZDEL9: RazdelBanka<Zadacha9, Reshenie9> = {
   zagruzka: ZAGRUZKA9,
   T,
   proverit: readSealed9,
-  pod: (z, _rezhim, ui) => (
-    <Chertezh9
-      z={z}
-      ui={ui ?? { podskazka: false, shag: 1, zakryta: false, bezPodskazok: false }}
-    />
-  ),
+  pod: (z, _rezhim, ui) => <Chertezh9 z={z} ui={ui} />,
   shagi: (s) => shagiIz9(s.shagi),
   voprosy: (s) => voprosy9(s.podskazka),
   zadachaHref: zadachaHref9,

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на общем тренажёре (№7, №6, №2, №9) в браузере, на собранном сайте.
+   на общем тренажёре (№7, №6, №2, №1, №9) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -15,7 +15,9 @@
      5. опорные задачи показывают прежний прогресс блока;
      6. без входа ничего не уходит в сеть: гость остаётся в браузере;
      7. на страницах нет ошибок;
-     8. (№9) незаконченная тренировка прежнего тренажёра из sessionStorage
+     8. (№1) незаконченная тренировка прежнего тренажёра (панель
+        фильтров) открывается в новом на той же задаче;
+     9. (№9) незаконченная тренировка прежнего тренажёра из sessionStorage
         продолжается в новом на той же задаче.
 
    Запуск: node scripts/check-progress-site.mjs 7 (после pnpm build). */
@@ -33,8 +35,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7' && N !== '2' && N !== '13' && N !== '9') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 9)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '13' && N !== '1' && N !== '9') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -79,12 +81,76 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = `http://127.0.0.1:${server.address().port}`;
 
-/* У №2 прежние ключи назывались по разделу «vektory-2», у №9 — «proizvodnaya-9»,
-   опорные №9 — «prep» (блок → номера решённых). */
-const PREZHNIY = N === '2' ? 'vektory-2' : N === '9' ? 'proizvodnaya-9' : `zadanie-${N}`;
-const OLD = `budetege:${PREZHNIY}:v1`;
-const OLD_OPORNYE = `budetege:${PREZHNIY}:${N === '9' ? 'prep' : 'opornye'}:v1`;
-const NEW = `budetege:${PREZHNIY}:log:v1`;
+/* Ключи раздела: №7 и №6 — budetege:zadanie-N:…, у №1 — прежние
+   ключи планиметрии. Прототип задачи и блоки опорных — у каждого свои. */
+function razdel() {
+  if (N === '1') {
+    const { BLOKI } = requireSrc('lib/planimetriya/prep/bloki.ts');
+    return {
+      OLD: 'budetege:planimetriya-1:v1',
+      OLD_OPORNYE: 'budetege:planimetriya-1:opornye:v1',
+      NEW: 'budetege:planimetriya-1:log:v1',
+      prototipOf: (id) => id.split('|')[0],
+      zadachVBloke: (blok) => BLOKI.find((b) => b.id === blok)?.zadachi.length,
+      /* Исход задачи блока — «P1-1:3». */
+      vBloke: (blok, key) => key.startsWith(`${blok}:`),
+    };
+  }
+  if (N === '9') {
+    /* У №9 прежние ключи — «proizvodnaya-9», опорные — «prep» (блок →
+       номера решённых), задачи — «прототип|seed». */
+    const { PREP_BLOCKS } = requireSrc('lib/proizvodnaya/prep/blocks.ts');
+    return {
+      OLD: 'budetege:proizvodnaya-9:v1',
+      OLD_OPORNYE: 'budetege:proizvodnaya-9:prep:v1',
+      NEW: 'budetege:proizvodnaya-9:log:v1',
+      prototipOf: (id) => id?.split('|')[0],
+      zadachVBloke: (blok) => PREP_BLOCKS.find((b) => b.id === blok)?.zadachi.length,
+      vBloke: () => true,
+    };
+  }
+  if (N === '2') {
+    /* У №2 прежние ключи назывались по разделу «vektory-2»; банка нет:
+       ключ задачи — «прототип|seed». */
+    const { BLOKI } = requireSrc('lib/vektory/prep/bloki.ts');
+    return {
+      OLD: 'budetege:vektory-2:v1',
+      OLD_OPORNYE: 'budetege:vektory-2:opornye:v1',
+      NEW: 'budetege:vektory-2:log:v1',
+      prototipOf: (id) => id?.split('|')[0],
+      zadachVBloke: (blok) => BLOKI.find((b) => b.id === blok)?.zadachi.length,
+      vBloke: () => true,
+    };
+  }
+  if (N === '13') {
+    /* У №13 банка задач нет: ключ задачи — «прототип|seed»; задача
+       опорного блока — «блок:номер», в образце несколько блоков. */
+    const { BLOKI_13, zadachiBloka } = requireSrc('lib/zadanie13/opornye/bloki.ts');
+    return {
+      OLD: 'budetege:zadanie-13:v1',
+      OLD_OPORNYE: 'budetege:zadanie-13:opornye:v1',
+      NEW: 'budetege:zadanie-13:log:v1',
+      prototipOf: (id) => id?.split('|')[0],
+      zadachVBloke: (blok) => {
+        const b = BLOKI_13.find((x) => x.id === blok);
+        return b === undefined ? undefined : zadachiBloka(b).length;
+      },
+      vBloke: (blok, key) => key.startsWith(`${blok}:`),
+    };
+  }
+  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
+  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
+  return {
+    OLD: `budetege:zadanie-${N}:v1`,
+    OLD_OPORNYE: `budetege:zadanie-${N}:opornye:v1`,
+    NEW: `budetege:zadanie-${N}:log:v1`,
+    prototipOf: (id) => BANK.find((z) => z.id === id)?.prototypeId,
+    zadachVBloke: (blok) => BLOKI_OPORNYH.find((b) => b.id === blok)?.zadachi.length,
+    vBloke: () => true,
+  };
+}
+const R = razdel();
+const { OLD, OLD_OPORNYE, NEW, prototipOf } = R;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
 );
@@ -92,39 +158,9 @@ const staroe = obrazec[OLD];
 const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
-/* Блок опорных задач из образца и сколько в нём задач; прототип задачи по
-   ключу. У №2, №13 и №9 банка задач нет: ключ задачи — «прототип|seed»; у №13
-   задача опорного блока — «блок:номер»; у №9 опорные — блок → номера решённых. */
-let blokObrazca;
-let zadachVBloke;
-let prototipOf;
-/* У №9 решённые в блоке образца — из прежнего хранилища опорных. */
-let reshenoOp9 = 0;
-if (N === '9') {
-  const { PREP_BLOCKS } = requireSrc('lib/proizvodnaya/prep/blocks.ts');
-  const [blok, nomera] = Object.entries(obrazec[OLD_OPORNYE])[0];
-  blokObrazca = blok;
-  zadachVBloke = PREP_BLOCKS.find((b) => b.id === blok)?.zadachi.length;
-  reshenoOp9 = nomera.length;
-  prototipOf = (id) => id?.split('|')[0];
-} else if (N === '13') {
-  blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
-  const { BLOKI_13, zadachiBloka } = requireSrc('lib/zadanie13/opornye/bloki.ts');
-  const b = BLOKI_13.find((x) => x.id === blokObrazca);
-  zadachVBloke = b === undefined ? undefined : zadachiBloka(b).length;
-  prototipOf = (id) => id?.split('|')[0];
-} else if (N === '2') {
-  blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
-  const { BLOKI } = requireSrc('lib/vektory/prep/bloki.ts');
-  zadachVBloke = BLOKI.find((b) => b.id === blokObrazca)?.zadachi.length;
-  prototipOf = (id) => id?.split('|')[0];
-} else {
-  blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
-  const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
-  const { BLOKI_OPORNYH } = requireSrc(`lib/zadanie${N}/opornye.ts`);
-  zadachVBloke = BLOKI_OPORNYH.find((b) => b.id === blokObrazca)?.zadachi.length;
-  prototipOf = (id) => BANK.find((z) => z.id === id)?.prototypeId;
-}
+/* Блок опорных задач из образца и сколько в нём задач. */
+const blokObrazca = Object.keys(N === '9' ? obrazec[OLD_OPORNYE] : obrazec[OLD_OPORNYE].kinds)[0];
+const zadachVBloke = R.zadachVBloke(blokObrazca);
 
 const browser = await chromium.launch();
 try {
@@ -206,12 +242,11 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-  /* У №13 в образце несколько блоков: считаем блок образца («блок:номер»). */
   const reshenoOp =
     N === '9'
-      ? reshenoOp9
+      ? obrazec[OLD_OPORNYE][blokObrazca].length
       : Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
-          ([key, x]) => x === 'right' && (N !== '13' || key.startsWith(`${blokObrazca}:`)),
+          ([key, x]) => x === 'right' && R.vBloke(blokObrazca, key),
         ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(
@@ -219,11 +254,32 @@ try {
     `опорные задачи показывают прежний прогресс блока: решено ${reshenoOp} из ${zadachVBloke}`,
   );
 
-  /* 6 и 7. */
-  check(vSet.length === 0, `гость: запросов наружу нет (${vSet.slice(0, 2).join(', ')})`);
-  check(oshibki.length === 0, `на страницах нет ошибок (${oshibki.slice(0, 2).join('; ')})`);
+  /* 8. №1: незаконченная тренировка прежнего тренажёра. */
+  const SESSION = `budetege:trainer:${N}:session`;
+  if (N === '1' && obrazec[SESSION] !== undefined) {
+    const sPage = await context.newPage();
+    sPage.on('pageerror', (error) => oshibki.push(String(error)));
+    await sPage.goto(`${BASE}/zadaniya/${N}/`, { waitUntil: 'networkidle' });
+    await sPage.evaluate(
+      ([key, value]) => window.localStorage.setItem(key, value),
+      [SESSION, obrazec[SESSION]],
+    );
+    await sPage.goto(`${BASE}/zadaniya/${N}/trenazher/`, { waitUntil: 'networkidle' });
+    const dalshe = sPage.getByRole('button', { name: /^Продолжить/ }).first();
+    if (await dalshe.isVisible().catch(() => false)) await dalshe.click();
+    const z = sPage.locator('.trn-zadacha');
+    await z.waitFor({ timeout: 20000 }).catch(() => {});
+    const idS = await z.getAttribute('data-task').catch(() => null);
+    const ui = JSON.parse(obrazec[SESSION]).ui;
+    const prezhnyaya = JSON.parse(obrazec[SESSION]).payload.items[ui.index].k;
+    check(
+      idS === prezhnyaya,
+      `прежняя тренировка открылась на той же задаче (${idS}, ждали ${prezhnyaya})`,
+    );
+    await sPage.close();
+  }
 
-  /* 8. №9: прежняя незаконченная тренировка (sessionStorage) продолжается. */
+  /* 9. №9: прежняя незаконченная тренировка (sessionStorage) продолжается. */
   if (N === '9') {
     const KLYUCH = 'budetege:proizvodnaya-9:session:v1';
     const prezhnyaya = obrazec.sessionStorage[KLYUCH];
@@ -278,6 +334,10 @@ try {
     check(oshibki2.length === 0, `нет ошибок (${oshibki2.slice(0, 2).join('; ')})`);
     await ctx.close();
   }
+
+  /* 6 и 7. */
+  check(vSet.length === 0, `гость: запросов наружу нет (${vSet.slice(0, 2).join(', ')})`);
+  check(oshibki.length === 0, `на страницах нет ошибок (${oshibki.slice(0, 2).join('; ')})`);
 } finally {
   await browser.close();
   server.close();
