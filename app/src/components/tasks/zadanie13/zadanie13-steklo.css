@@ -1,0 +1,204 @@
+/* Задание №13 в «Стеклянной сцене»: карта задания, таблица признаков,
+   таблицы решения в шагах. Таблицы решения и условия — прежняя разметка
+   (app/zadaniya/13/reshenie13.css), здесь — только как они стоят в стекле. */
+
+/* Таблица в шаге и под условием: не шире колонки, прокрутка — внутри. */
+.z13-karta .z13-reshenie,
+.z13-trening .z13-reshenie {
+  min-width: 0;
+  max-width: 100%;
+}
+.stk-shag__formula .z13-reshenie {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.z13-gruppa__lead {
+  margin: 0 0 var(--space-2);
+}
+
+.z13-vazhno {
+  min-width: 0;
+}
+
+/* «Как узнать схему за 10 секунд»: таблица в стекле; на телефоне строка —
+   карточка (схема, что видим, почему). */
+.z13-karta-priznaki {
+  padding: var(--space-3);
+  border-radius: 20px;
+  overflow-x: auto;
+}
+.z13-karta-priznaki table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.z13-karta-priznaki th,
+.z13-karta-priznaki td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--blue-100);
+  text-align: left;
+  vertical-align: top;
+}
+.z13-karta-priznaki thead th {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue-700);
+}
+.z13-karta-priznaki tbody th {
+  color: var(--color-text);
+  font-weight: 650;
+}
+.z13-karta-priznaki tbody tr:last-child > * {
+  border-bottom: 0;
+}
+@media (max-width: 40rem) {
+  .z13-karta-priznaki thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .z13-karta-priznaki tr {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--blue-100);
+  }
+  .z13-karta-priznaki tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .z13-karta-priznaki th,
+  .z13-karta-priznaki td {
+    padding: 0;
+    border: 0;
+  }
+  /* Схема — первой строкой карточки. */
+  .z13-karta-priznaki tbody th {
+    order: -1;
+  }
+}
+
+.z13-skoro {
+  margin: var(--space-4) 0 0;
+}
+
+/* Опорные задачи. */
+.z13-opornye {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z13-opornye__nazad {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--blue-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z13-op__metki {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.z13-op__tablitsa {
+  min-width: 0;
+  max-width: 100%;
+}
+.z13-op__gde {
+  max-width: 720px;
+}
+.z13-op__gde-spisok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z13-gde__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-4);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  line-height: 1.3;
+  text-decoration: none;
+}
+.z13-zapomni {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.2em;
+}
+.z13-zapomni li + li {
+  margin-top: var(--space-1);
+}
+
+/* ── Теория: карточки №13 в тонах ролей общего слоя .teor-steklo
+   (components/tasks/teoriya/teoriya-steklo.css). Содержание и разметка
+   карточек не меняются; печать этот слой не трогает. ───────────────── */
+@media screen {
+  .teor-steklo .z13-card {
+    --ton: var(--blue-600);
+    --ton-soft: var(--blue-50);
+    --ton-border: var(--blue-200);
+    --ton-text: var(--blue-700);
+    border: 0;
+    border-radius: 18px;
+    background: linear-gradient(160deg, var(--white), var(--ton-soft));
+    box-shadow:
+      inset 0 0 0 1px var(--ton-border),
+      inset 4px 0 0 var(--ton),
+      var(--glass-hi),
+      0 8px 24px rgb(31 95 208 / 0.06);
+  }
+  .teor-steklo .z13-card--slovami,
+  .teor-steklo .z13-card--priznak {
+    --ton: var(--navy-700);
+    --ton-soft: var(--blue-glass-2, var(--blue-50));
+    --ton-border: var(--blue-300);
+    --ton-text: var(--navy-800);
+  }
+  .teor-steklo .z13-card--vazhno,
+  .teor-steklo .z13-card--lovushka {
+    --ton: var(--terracotta);
+    --ton-soft: var(--terracotta-50);
+    --ton-border: var(--terracotta-200);
+    --ton-text: var(--terracotta-700);
+  }
+  .teor-steklo .z13-card--bystro {
+    --ton: var(--green-600);
+    --ton-soft: var(--green-50, #effaf3);
+    --ton-border: var(--green-200, #bfe8cf);
+    --ton-text: var(--green-700, #15803d);
+  }
+  .teor-steklo .z13-card__head {
+    background: none;
+    padding-bottom: 0;
+  }
+  /* Ярлык роли — плашка цвета тона: роль видна не только цветом. */
+  .teor-steklo .z13-card__yarlyk {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 var(--space-3);
+    border-radius: 999px;
+    background: var(--ton);
+    color: var(--white);
+    font-size: var(--fs-caption);
+    letter-spacing: 0.04em;
+  }
+  .teor-steklo .z13-card__pochemu {
+    background: rgb(255 255 255 / 0.7);
+    box-shadow: inset 0 0 0 1px var(--ton-border);
+  }
+  .teor-steklo .z13-primer {
+    border-radius: 14px;
+  }
+}

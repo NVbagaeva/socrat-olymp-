@@ -77,22 +77,31 @@ type Ekran = 'rezhimy' | 'temy';
 type Intent =
   { kind: 'zadacha'; id: string } | { kind: 'oshibki' } | { kind: 'tipy'; tipy: string[] } | null;
 
-function readIntent(izvestnye: ReadonlySet<string>, zadachi: ReadonlyMap<string, string>): Intent {
+function readIntent(
+  izvestnye: ReadonlySet<string>,
+  zadachi: ReadonlyMap<string, string>,
+  gruppy: readonly GruppaVybora[],
+): Intent {
   if (typeof window === 'undefined') return null;
   const params = new URLSearchParams(window.location.search);
   const id = params.get('zadacha');
   if (id !== null && zadachi.has(id)) return { kind: 'zadacha', id };
   if (params.get('rezhim') === 'oshibki') return { kind: 'oshibki' };
-  const tipy = [params.get('tip'), ...(params.get('tipy') ?? '').split(',')].filter(
-    (tip): tip is string => tip !== null && izvestnye.has(tip),
-  );
+  /* Группа в ссылке — все её типы: «?t=A» урока репетитора №13 (прежний
+     тренажёр с фильтрами звал так схему). */
+  const tipyGrupp = new Map(gruppy.map((g) => [g.id, g.tipy.map((t) => t.id)]));
+  const tipy = [
+    params.get('tip'),
+    ...(params.get('tipy') ?? '').split(','),
+    ...(params.get('t') ?? '').split(','),
+  ].flatMap((tip) => (tip === null ? [] : izvestnye.has(tip) ? [tip] : (tipyGrupp.get(tip) ?? [])));
   return tipy.length === 0 ? null : { kind: 'tipy', tipy: [...new Set(tipy)] };
 }
 
 /** Убрать параметры ссылки из адреса: вопрос о незавершённой тренировке не повторится. */
 function clearIntent() {
   const url = new URL(window.location.href);
-  ['zadacha', 'rezhim', 'tip', 'tipy'].forEach((key) => url.searchParams.delete(key));
+  ['zadacha', 'rezhim', 'tip', 'tipy', 't'].forEach((key) => url.searchParams.delete(key));
   window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
@@ -117,7 +126,7 @@ export function TrenazherBanka<Z extends ZadachaBanka, S>({
   const tipyVse = useMemo(() => gruppy.flatMap((g) => g.tipy.map((t) => t.id)), [gruppy]);
   const poZadache = useMemo(() => prototipyZadach(katalog), [katalog]);
   const [ekran, setEkran] = useState<Ekran>('rezhimy');
-  const [intent] = useState<Intent>(() => readIntent(new Set(tipyVse), poZadache));
+  const [intent] = useState<Intent>(() => readIntent(new Set(tipyVse), poZadache, gruppy));
   /* Часы на панели: по выбору ученика при старте или из записи. */
   const [clock, setClock] = useState(true);
 
@@ -151,8 +160,10 @@ export function TrenazherBanka<Z extends ZadachaBanka, S>({
                   const s = razdel.zagruzka.reshenie(zadacha);
                   return s === null ? null : (
                     <ShagiResheniya
-                      shagi={razdel.shagi(s)}
-                      posle={razdel.posle === undefined ? undefined : razdel.posle(s)}
+                      shagi={razdel.shagi(s, payload.rezhim)}
+                      posle={
+                        razdel.posle === undefined ? undefined : razdel.posle(s, payload.rezhim)
+                      }
                     />
                   );
                 },
@@ -338,9 +349,14 @@ function Konfigurator<Z extends ZadachaBanka, S>({
     vyborStore.set(next);
   }
 
-  function start(tasks: TaskBanka[], control = vybor.bezPodskazok, timer = vybor.timer) {
+  function start(
+    tasks: TaskBanka[],
+    control = vybor.bezPodskazok,
+    timer = vybor.timer,
+    rezhim?: string,
+  ) {
     if (tasks.length > 0) {
-      api.start({ tasks, control, timer });
+      api.start({ tasks, control, timer, ...(rezhim === undefined ? {} : { rezhim }) });
     }
   }
 
@@ -391,6 +407,16 @@ function Konfigurator<Z extends ZadachaBanka, S>({
       warm: true,
       disabled: mistakeList.length === 0,
     },
+    ...(razdel.dopRezhim === undefined
+      ? []
+      : [
+          {
+            id: razdel.dopRezhim.id,
+            ikonka: razdel.dopRezhim.ikonka,
+            zag: razdel.dopRezhim.zag,
+            lead: razdel.dopRezhim.lead(BYSTRO),
+          },
+        ]),
   ];
 
   function pick(id: string) {
@@ -400,6 +426,9 @@ function Konfigurator<Z extends ZadachaBanka, S>({
       setEkran('temy');
     } else if (id === 'oshibki') {
       startOshibki();
+    } else if (razdel.dopRezhim !== undefined && id === razdel.dopRezhim.id) {
+      /* Особый режим (№13 «Определи тип»): все типы вперемешку, с подсказками. */
+      start(buildByTipy(katalog, tipyVse, BYSTRO, new Set()), false, vybor.timer, id);
     }
   }
 
@@ -613,7 +642,12 @@ function Itogi<Z extends ZadachaBanka, S>({
     const tipy = [...new Set(payload.tasks.map((t) => t.p))];
     const tasks = buildByTipy(katalog, tipy, payload.tasks.length, closedTasks(razdel.log.get()));
     if (tasks.length > 0) {
-      actions.start({ tasks, control: payload.control, timer: payload.timer !== false });
+      actions.start({
+        tasks,
+        control: payload.control,
+        timer: payload.timer !== false,
+        ...(payload.rezhim === undefined ? {} : { rezhim: payload.rezhim }),
+      });
     }
   }
 

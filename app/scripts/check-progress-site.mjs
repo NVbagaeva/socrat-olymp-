@@ -33,8 +33,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7' && N !== '2' && N !== '1') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 1)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '13' && N !== '1') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -105,6 +105,22 @@ function razdel() {
       prototipOf: (id) => id?.split('|')[0],
       zadachVBloke: (blok) => BLOKI.find((b) => b.id === blok)?.zadachi.length,
       vBloke: () => true,
+    };
+  }
+  if (N === '13') {
+    /* У №13 банка задач нет: ключ задачи — «прототип|seed»; задача
+       опорного блока — «блок:номер», в образце несколько блоков. */
+    const { BLOKI_13, zadachiBloka } = requireSrc('lib/zadanie13/opornye/bloki.ts');
+    return {
+      OLD: 'budetege:zadanie-13:v1',
+      OLD_OPORNYE: 'budetege:zadanie-13:opornye:v1',
+      NEW: 'budetege:zadanie-13:log:v1',
+      prototipOf: (id) => id?.split('|')[0],
+      zadachVBloke: (blok) => {
+        const b = BLOKI_13.find((x) => x.id === blok);
+        return b === undefined ? undefined : zadachiBloka(b).length;
+      },
+      vBloke: (blok, key) => key.startsWith(`${blok}:`),
     };
   }
   const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);
@@ -222,7 +238,7 @@ try {
 
   /* 8. №1: незаконченная тренировка прежнего тренажёра. */
   const SESSION = `budetege:trainer:${N}:session`;
-  if (obrazec[SESSION] !== undefined) {
+  if (N === '1' && obrazec[SESSION] !== undefined) {
     const sPage = await context.newPage();
     sPage.on('pageerror', (error) => oshibki.push(String(error)));
     await sPage.goto(`${BASE}/zadaniya/${N}/`, { waitUntil: 'networkidle' });

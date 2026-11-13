@@ -112,7 +112,7 @@ export const RAZDEL1: RazdelBanka<Zadacha1T, Reshenie1T> = {
   zagruzka: ZAGRUZKA1,
   T: TRENAZHER1,
   proverit: (vvod, seal) => (estPi(vvod) ? { kind: 'pi' } : readSealed1(vvod, seal)),
-  pod: (z, sost) => <Pod1 z={z} sost={sost} />,
+  pod: (z, _rezhim, sost) => <Pod1 z={z} sost={sost} />,
   shagi: shagiIzResheniya1,
   posle: posle1,
   voprosy: (s) => s.voprosy,
