@@ -77,8 +77,13 @@ jobs:
           bash "$GITHUB_WORKSPACE/.github/scripts/apt-mirror.sh" || true
           pnpm exec playwright install --with-deps chromium
 
+      # OFERTA_PREVIEW=1 собирает черновик оферты /oferta/ (закрыт от
+      # поиска): его можно снять строкой «превью: /oferta/». В сборке
+      # для хостинга его нет, пока не включён NEXT_PUBLIC_LEGAL_READY.
       - name: Собрать статический экспорт
         working-directory: app
+        env:
+          OFERTA_PREVIEW: '1'
         run: pnpm build
 
       # Строка «превью: /адрес/» в описании pull request добавляет
