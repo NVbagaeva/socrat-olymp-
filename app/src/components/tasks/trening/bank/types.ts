@@ -96,8 +96,12 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
     z: Z,
     rezhim: string | undefined,
   ) => Reading | { kind: 'pi' } | { kind: 'edinicy' };
-  /** Под условием: рисунок, вопрос после рисунка, откуда задача. */
-  pod: (z: Z, rezhim?: string) => ReactNode;
+  /**
+   * Под условием: рисунок, вопрос после рисунка, откуда задача. Третий
+   * аргумент — что открыто на экране (№1: на вопросе подсказки чертёж
+   * показывает слой этого шага, при открытом решении — все построения).
+   */
+  pod: (z: Z, rezhim: string | undefined, sost: SostoyaniePod<S>) => ReactNode;
   /** Решение шагами сцены, панель под ними и подсказка-вопросы. */
   shagi: (s: S, rezhim?: string) => Shag[];
   posle?: (s: S, rezhim?: string) => ReactNode;
@@ -133,7 +137,7 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   urovni?: { title: string; labels: { vse: string; '1': string; '2': string }; pusto: string };
   /** Можно ли проверять ответ: своё поле с несколькими частями (№13, «С оформлением»). */
   gotov?: (z: Z, rezhim: string | undefined, value: string) => boolean;
-  /** Запись прежнего тренажёра раздела, которую не понимает общий разбор (№13: тренажёр с фильтрами). */
+  /** Запись прежнего тренажёра раздела, которую не понимает общий разбор (№13, №1: тренажёр с фильтрами). */
   prezhnyayaZapis?: (packed: unknown) => PayloadBanka | null;
   /** Ссылка на одну задачу: закладка. */
   zadachaHref: (id: string) => string;
@@ -146,4 +150,16 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
    * сколько шагов открыто (с 1), dalshe — открыть следующий.
    */
   podskazka?: (s: S, ui: { otkryto: number; dalshe: () => void }) => ReactNode;
+}
+
+/** Что открыто на экране задачи: для рисунка под условием. */
+export interface SostoyaniePod<S> {
+  /** Открыта подсказка (в режиме без подсказок — никогда). */
+  podskazka: boolean;
+  /** Номер текущего вопроса подсказки, с единицы. */
+  shag: number;
+  /** Открыто решение. */
+  reshenie: boolean;
+  /** Разбор задачи: есть, когда открыты подсказка или решение. */
+  razbor: S | null;
 }

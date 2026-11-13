@@ -479,3 +479,39 @@
     width: 280px;
   }
 }
+
+/* Широкая обложка (№1: стеклянная подставка с чертежами, 1567×1004).
+   Картинка целиком, без обрезки: на телефоне и планшете — во всю ширину
+   шапки над текстом, на компьютере — справа, в половину шапки. */
+.kz-shapka--shirokaya .kz-shapka__oblozhka {
+  width: 100%;
+}
+.kz-shapka--shirokaya .kz-shapka__oblozhka picture,
+.kz-shapka--shirokaya .kz-shapka__oblozhka img {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  margin-inline: auto;
+}
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .kz-shapka--shirokaya {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .kz-shapka--shirokaya .kz-shapka__oblozhka,
+  .kz-shapka--shirokaya .kz-shapka__text {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .kz-shapka--shirokaya .kz-shapka__oblozhka img {
+    width: 100%;
+  }
+}
+@media (min-width: 1024px) {
+  .kz-shapka--shirokaya {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .kz-shapka--shirokaya .kz-shapka__oblozhka img {
+    width: 100%;
+  }
+}
