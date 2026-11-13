@@ -1,0 +1,88 @@
+/* Витрина жёрдочек (/styleguide/zherdochka). Фон — как у первого экрана
+   главной: светлая сцена с синим и тёплым свечением. */
+.zh-demo {
+  min-height: 100vh;
+  padding: var(--space-12) var(--space-8) var(--space-16);
+  background:
+    radial-gradient(50% 40% at 80% 20%, rgb(31 95 208 / 0.14), transparent 70%),
+    radial-gradient(40% 35% at 15% 85%, rgb(245 160 74 / 0.12), transparent 70%), var(--color-bg);
+}
+.zh-demo > * {
+  width: min(100%, 1080px);
+  margin-inline: auto;
+}
+.zh-demo__h {
+  font-size: 2.25rem;
+  line-height: 1.1;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+}
+.zh-demo__h2 {
+  margin-top: var(--space-12);
+  font-size: 1.375rem;
+  font-weight: 620;
+}
+.zh-demo__p {
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+}
+.zh-demo__ryad {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+}
+.zh-demo__kartochka {
+  padding: var(--space-6);
+  border-radius: 24px;
+  background: var(--glass-tint-blue);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+/* Крупно: кегль строки задаёт размер всей сцены. */
+.zh-demo__scena {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 300px;
+  padding-bottom: 70px;
+  font-size: 150px;
+}
+.zh-demo__stroka {
+  display: block;
+  width: 1.95em;
+  line-height: 1;
+}
+.zh-demo__nazvanie {
+  font-size: 1.125rem;
+  font-weight: 620;
+}
+.zh-demo__opisanie {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.zh-demo__zagolovok {
+  font-size: 3.5rem;
+  line-height: 1.04;
+  font-weight: 640;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+}
+.zh-demo__nerazryv {
+  white-space: nowrap;
+}
+@media (max-width: 899.98px) {
+  .zh-demo {
+    padding-inline: var(--space-4);
+  }
+  .zh-demo__ryad {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .zh-demo__scena {
+    height: 230px;
+    padding-bottom: 54px;
+    font-size: 110px;
+  }
+  .zh-demo__zagolovok {
+    font-size: 2.375rem;
+  }
+}
