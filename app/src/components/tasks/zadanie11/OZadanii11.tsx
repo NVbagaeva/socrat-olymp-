@@ -15,6 +15,7 @@ import { otvetPrimera11 } from './otvetPrimera11';
 import { Piktogramma, ZNACHOK_RAZDELA } from './Piktogrammy';
 import { PrimerLazy11 } from './PrimerLazy11';
 import { shagi11 } from './shagi11';
+import { Vstrecha11 } from './Vstrecha11';
 
 /**
  * Вкладка «О задании» №11: карта задания по типам («Стеклянная сцена»,
@@ -83,6 +84,8 @@ export function OZadanii11() {
           />
         }
       />
+
+      <Vstrecha11 />
 
       <section className="kz-razdel" aria-labelledby="z11-gruppy-title">
         <div className="kz-razdel__head">
