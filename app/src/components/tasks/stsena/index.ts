@@ -4,3 +4,6 @@ export { ObjomnayaOblozhka } from './ObjomnayaOblozhka';
 export type { Model3d, Sozdat3d, Poster, ObjomnayaOblozhkaProps } from './ObjomnayaOblozhka';
 export { RisunokRazdela, estMotivRazdela } from './RisunokRazdela';
 export type { RisunokRazdelaProps } from './RisunokRazdela';
+export { StrokaProgressa } from './StrokaProgressa';
+export { tabletkiRazdela } from './tabletki';
+export type { Fakt, TabletkiRazdelaOpts } from './tabletki';

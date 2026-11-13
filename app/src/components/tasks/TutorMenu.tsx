@@ -29,6 +29,8 @@ export interface TutorMenuProps {
    * (components/tasks/razdely). Прилипает вместе с вкладками.
    */
   before?: ReactNode;
+  /** Модификатор строки ленты, общий для обеих копий (TabsRow). */
+  className?: string;
 }
 
 /** Ширина меню на широком экране: примерно две колонки содержимого. */
@@ -130,6 +132,7 @@ export function TutorMenu({
   children,
   stripRef,
   before,
+  className,
 }: TutorMenuProps) {
   const id = useId();
   const button = useRef<HTMLButtonElement>(null);
@@ -181,7 +184,7 @@ export function TutorMenu({
      и меню материалов, как и ссылка на ленту, — у той копии, что видна:
      меню всегда одно и раскрывается под видимой кнопкой. */
   return (
-    <TabsRow>
+    <TabsRow {...(className === undefined ? {} : { className })}>
       {(_copy, live) => (
         <>
           {before}
