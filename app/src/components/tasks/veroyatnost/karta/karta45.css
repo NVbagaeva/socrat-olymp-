@@ -77,3 +77,9 @@
     grid-column: 1 / -1;
   }
 }
+.z45-ob__metody {
+  margin: 0;
+  padding-left: 1.2em;
+  list-style: disc;
+  line-height: 1.5;
+}

@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
-import { navykiMetodov, yarlyki } from '@/components/tasks/veroyatnost/navyki';
+import { Trenazher45Tab } from '@/components/tasks/veroyatnost/trening/Trenazher45Tab';
+import { yarlyki } from '@/components/tasks/veroyatnost/navyki';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
-import { bank5Pool, bezRazborov, uznayMetodPool, versiyaRazborov } from '@/lib/veroyatnost/pool';
-import { ZADANIYA } from '@/lib/paths';
+import { bank5Pool } from '@/lib/veroyatnost/pool';
 
 /* Адреса перечислимы на сборке: методы с задачами и два режима. */
 export function generateStaticParams() {
@@ -17,33 +16,30 @@ type Params = Promise<{ mode: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { mode } = await params;
   const found = yarlyki(bank5Pool(), 5).find((item) => item.id === mode);
-  return found === undefined ? {} : { title: veroyatnostTitle('5', `${found.title} · Тренажёр`) };
+  return found === undefined
+    ? {}
+    : { title: veroyatnostTitle('5', `${found.title} · ${vkladka('5', 'trenazher')}`) };
 }
 
 /**
- * Ярлык к конфигуратору задания №5 — как у задания №12: адрес режима
- * открывает ту же вкладку с уже выбранным методом или режимом.
+ * Ярлык тренажёра — прежний адрес режима: метод открывает выбор тем с
+ * типами этого метода, «вперемешку» и «Узнай метод» — сразу тренировку.
+ * Своих задач у адреса нет — тренировка собирается там же, где и без него.
  */
 export default async function Page({ params }: { params: Params }) {
   const { mode } = await params;
-  const pool = bank5Pool();
-  const found = yarlyki(pool, 5).find((item) => item.id === mode);
+  const found = yarlyki(bank5Pool(), 5).find((item) => item.id === mode);
   if (found === undefined) {
     notFound();
   }
   return (
-    <>
-      {/* Название вкладки — H2 панели: конфигуратор и подход — общие с №12 экраны без своего заголовка. */}
-      <h2 className="t-h2 vtab__title">{vkladka('5', 'trenazher')}</h2>
-      <Trenazher
-        pool={bezRazborov(pool)}
-        versiyaRazborov={versiyaRazborov(pool)}
-        uznay={uznayMetodPool(5)}
-        zadanie={5}
-        base={`${ZADANIYA}/5/trenazher/`}
-        metody={navykiMetodov(pool, 5)}
-        preset={{ skill: found.skill, mode: found.mode }}
-      />
-    </>
+    <Trenazher45Tab
+      zadanie={5}
+      preset={
+        found.skill !== null
+          ? { metod: found.skill }
+          : { rezhim: found.mode === 'uznay' ? 'uznay' : 'mix' }
+      }
+    />
   );
 }

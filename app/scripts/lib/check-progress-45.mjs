@@ -372,9 +372,11 @@ export function proveritProgress45(Z) {
       const zapis = String(otvet).replace('.', ',');
       const r = readSealed45(zapis, seal, klyuch);
       check(r.kind === 'answer' && r.right, `${p.id}: верный ответ ${zapis} не засчитан`);
-      const drob = { 0.25: '1/4', 0.2: '1/5', 0.5: '1/2', 0.75: '3/4', 0.4: '2/5', 0.6: '3/5' }[
-        otvet
-      ];
+      /* Та же величина обыкновенной дробью: «0,55» → «11/20». */
+      const znam = [2, 4, 5, 8, 10, 20, 25, 40, 50, 100, 200, 250, 500, 1000].find(
+        (d) => otvet > 0 && otvet < 1 && Math.abs(otvet * d - Math.round(otvet * d)) < 1e-9,
+      );
+      const drob = znam === undefined ? undefined : `${Math.round(otvet * znam)}/${znam}`;
       if (drob !== undefined) {
         provereno += 1;
         const d = readSealed45(drob, seal, klyuch);
