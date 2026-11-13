@@ -32,6 +32,24 @@ function opornyeHref(id: string): string {
   return blok === undefined ? OPORNYE9_HREF : blokHref9(blok);
 }
 
+/**
+ * Первый раскрытый пример — собран на сборке. Ответ отдаётся текстом
+ * страницы, а не полем данных клиентского компонента: проверка утечек
+ * (check-bundle-secrets) ищет ответы банка в данных страницы.
+ */
+function PrimerServera9({
+  prototip,
+  ...props
+}: {
+  prototip: string;
+  opasnoHtml: string;
+  trenirovatHref: string;
+  opornyeHref: string;
+}) {
+  const { otvet, ...primer } = primer9(prototip);
+  return <PrimerKarta9 primer={primer} otvet={<span>{otvet}</span>} {...props} />;
+}
+
 export function OZadanii9() {
   return (
     <div className="kz z9-karta">
@@ -98,7 +116,7 @@ export function OZadanii9() {
                       {/* Раскрытый с самого начала пример собирается на сборке;
                           остальные — в браузере по раскрытию. */}
                       {open ? (
-                        <PrimerKarta9 primer={primer9(p.id)} {...props} />
+                        <PrimerServera9 prototip={p.id} {...props} />
                       ) : (
                         <PrimerKarta9Lazy prototip={p.id} {...props} />
                       )}

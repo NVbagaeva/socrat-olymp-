@@ -240,9 +240,18 @@ try {
       await dalshe.click();
       await ekran.waitFor({ timeout: 20000 });
     }
+    /* Экран может сначала показать первую задачу и затем встать на
+       сохранённую: ждём до 15 с. */
+    const nuzhna = prezhnyaya.taskIds[prezhnyaya.index];
+    let otkryta = null;
+    for (let i = 0; i < 30; i += 1) {
+      otkryta = await ekran.getAttribute('data-task');
+      if (otkryta === nuzhna) break;
+      await p2.waitForTimeout(500);
+    }
     check(
-      (await ekran.getAttribute('data-task')) === prezhnyaya.taskIds[prezhnyaya.index],
-      'тренировка продолжена на той же задаче',
+      otkryta === nuzhna,
+      `тренировка продолжена на той же задаче (${otkryta}, ждали ${nuzhna})`,
     );
     check(
       (await p2.evaluate((key) => sessionStorage.getItem(key), KLYUCH)) ===

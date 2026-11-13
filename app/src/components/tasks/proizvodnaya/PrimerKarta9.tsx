@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ShagiResheniya } from '../steklo';
 import { SHAPKA9 } from '@/content/proizvodnaya9';
 import { FiguraSvg9 } from './FiguraSvg9';
@@ -26,11 +26,18 @@ function podpisVida(v: VidChertezha9): string {
  */
 export function PrimerKarta9({
   primer,
+  otvet,
   opasnoHtml,
   trenirovatHref,
   opornyeHref,
 }: {
-  primer: Primer9Dannye;
+  /** Ответ — в `otvet`, если пример собран на сервере (см. ниже). */
+  primer: Omit<Primer9Dannye, 'otvet'> & { otvet?: string };
+  /**
+   * Ответ, набранный на сервере: в данные клиентского компонента поле
+   * ответа не уходит — на странице он только текстом, как у №6 и №7.
+   */
+  otvet?: ReactNode;
   opasnoHtml: string;
   trenirovatHref: string;
   opornyeHref: string;
@@ -84,7 +91,7 @@ export function PrimerKarta9({
         <b>{SHAPKA9.lovushka}.</b> <span dangerouslySetInnerHTML={{ __html: opasnoHtml }} />
       </p>
       <p className="kz-otvet">
-        {SHAPKA9.otvet}: <b>{primer.otvet}</b>
+        {SHAPKA9.otvet}: <b>{otvet ?? primer.otvet}</b>
       </p>
       <div className="kz-knopki">
         {/* Обычные ссылки: тренажёр читает тип из адреса при входе. */}
