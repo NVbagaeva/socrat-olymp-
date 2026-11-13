@@ -125,7 +125,7 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
    * Выбор в «Выбрать темы», как отвечать (№13: «Только число / С
    * оформлением»): '' — обычный ответ, иначе id особого режима.
    */
-  otvetVybora?: { title: string; varianty: { id: string; label: string }[] };
+  otvetVybora?: { title: string; sposoby: { id: string; label: string }[] };
   /**
    * Уровень в «Выбрать темы» (№13: ★ базовый, ★★ повышенный). Уровень
    * прототипа — поле `u` каталога.

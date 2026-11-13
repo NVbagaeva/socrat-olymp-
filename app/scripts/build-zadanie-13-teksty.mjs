@@ -132,7 +132,7 @@ p(
   '| Где | Текст |',
   '|---|---|',
   `| Пятая карточка режима | **${T.rezhimy.oformlenie.zag}** — ${T.rezhimy.oformlenie.lead(10)} |`,
-  `| Выбор тем: как отвечать | ${T.vybor.otvet.title}: ${T.vybor.otvet.varianty.map((v) => `**${v.label}**`).join(' · ')} |`,
+  `| Выбор тем: как отвечать | ${T.vybor.otvet.title}: ${T.vybor.otvet.sposoby.map((v) => `**${v.label}**`).join(' · ')} |`,
   `| Выбор тем: уровень | ${T.vybor.urovni.title}: ${['vse', '1', '2']
     .map((k) => T.vybor.urovni.labels[k])
     .map((x) => `**${x}**`)

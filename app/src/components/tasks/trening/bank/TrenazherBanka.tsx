@@ -438,7 +438,7 @@ function Konfigurator<Z extends ZadachaBanka, S>({
     /* Как отвечать (№13): числом или особым режимом. */
     const otvetVybora = razdel.otvetVybora;
     const rezhimVybora =
-      otvetVybora !== undefined && otvetVybora.varianty.some((v) => v.id === vybor.rezhim)
+      otvetVybora !== undefined && otvetVybora.sposoby.some((v) => v.id === vybor.rezhim)
         ? vybor.rezhim
         : '';
     /* У раздела без источника (№2: все задачи — генератор) — всегда «все». */
@@ -500,8 +500,8 @@ function Konfigurator<Z extends ZadachaBanka, S>({
               {otvetVybora === undefined ? null : (
                 <Segment
                   title={otvetVybora.title}
-                  values={otvetVybora.varianty.map((v) => v.id)}
-                  labels={Object.fromEntries(otvetVybora.varianty.map((v) => [v.id, v.label]))}
+                  values={otvetVybora.sposoby.map((v) => v.id)}
+                  labels={Object.fromEntries(otvetVybora.sposoby.map((v) => [v.id, v.label]))}
                   value={rezhimVybora}
                   onChange={(next) => zapomnit({ ...vybor, rezhim: next })}
                 />

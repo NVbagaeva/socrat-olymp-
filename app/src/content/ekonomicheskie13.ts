@@ -40,7 +40,7 @@ export const TRENAZHER13 = (() => {
       /* Как отвечать: прежнее поле «Ответ» тренажёра с фильтрами. */
       otvet: {
         title: 'Как отвечать',
-        varianty: [
+        sposoby: [
           { id: '', label: 'Только число' },
           { id: 'oformlenie', label: 'С оформлением' },
         ],
