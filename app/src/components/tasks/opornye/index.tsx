@@ -164,11 +164,11 @@ export interface OpornayaZadachaProps {
   reshenie: { shagi: Shag[]; open: boolean; onToggle: () => void } | null;
   /** Плашка «Запомни» блока: над задачей. */
   zapomni?: ReactNode;
-  /** Своё поле ответа вместо числа (№13: выбор схемы). value — выбранный вариант. */
-  pole?: ReactNode;
+  /** Ответ выбором (№2, №13 «Определи тип»): варианты вместо поля ответа, value — номер выбранного. */
+  vybory?: readonly { number: string; labelHtml: string }[];
   /** Свой вердикт вместо «Пока не так» (№13: «Число верное, единицы нет»). */
   verdiktNeverno?: { zag: string; lead: string };
-  /** Ещё кнопки в ряду действий (№13: «Ещё вариант»). */
+  /** Ещё кнопки в ряду действий (№2, №13: «Ещё вариант»). */
   dop?: ReactNode;
   labels: OpornayaZadachaLabels;
 }
@@ -193,7 +193,7 @@ export function OpornayaZadacha({
   podskazka,
   reshenie,
   zapomni,
-  pole,
+  vybory,
   verdiktNeverno,
   dop,
   labels,
@@ -247,7 +247,7 @@ export function OpornayaZadacha({
         <div className="op-zad__uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
         {risunok === undefined ? null : <div className="op-zad__ris">{risunok}</div>}
 
-        {pole === undefined ? (
+        {vybory === undefined ? (
           <label className="op-zad__pole">
             <span className="stk-podpis">{labels.otvet}</span>
             <AnswerInput
@@ -261,10 +261,36 @@ export function OpornayaZadacha({
             />
           </label>
         ) : (
-          <div className="op-zad__pole op-zad__pole--svoe" role="group" aria-label={labels.otvet}>
-            <span className="stk-podpis">{labels.otvet}</span>
-            {pole}
-          </div>
+          <fieldset className="op-zad__pole op-vybory">
+            <legend className="stk-podpis">{labels.otvet}</legend>
+            <ul>
+              {vybory.map((v) => {
+                const vybran = value === v.number;
+                return (
+                  <li key={v.number}>
+                    <button
+                      type="button"
+                      className={clsx(
+                        'op-vybor',
+                        vybran && 'is-vybran',
+                        vybran && checked === 'right' && 'is-verno',
+                        vybran && checked === 'wrong' && 'is-neverno',
+                      )}
+                      aria-pressed={vybran}
+                      disabled={solved}
+                      onClick={() => onValue(v.number)}
+                    >
+                      <span className="op-vybor__no">{v.number}</span>
+                      <span
+                        className="op-vybor__text"
+                        dangerouslySetInnerHTML={{ __html: v.labelHtml }}
+                      />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </fieldset>
         )}
         {formatHint === null ? null : <FormatHint text={formatHint} />}
 

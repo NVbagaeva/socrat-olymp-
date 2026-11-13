@@ -490,3 +490,18 @@
   min-height: 44px;
   text-align: left;
 }
+
+/* Кабинет внутри раскладки с меню (components/karta/KabinetRaskladka):
+   без внешних отступов страницы — их даёт раскладка; карта во всю ширину. */
+.auth-page--kabinet {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+.auth-page__in--kabinet {
+  max-width: none;
+  padding: 0;
+}
+.kabinet__karta {
+  margin-top: var(--space-2);
+}

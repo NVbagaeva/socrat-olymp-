@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   с банком задач (№7, №6) в браузере, на собранном сайте.
+   на общем тренажёре (№7, №6, №2) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -31,8 +31,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7' && N !== '13') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 13)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '13') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -77,9 +77,11 @@ const server = http.createServer((req, res) => {
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const BASE = `http://127.0.0.1:${server.address().port}`;
 
-const OLD = `budetege:zadanie-${N}:v1`;
-const OLD_OPORNYE = `budetege:zadanie-${N}:opornye:v1`;
-const NEW = `budetege:zadanie-${N}:log:v1`;
+/* У №2 прежние ключи назывались по разделу «vektory-2». */
+const PREZHNIY = N === '2' ? 'vektory-2' : `zadanie-${N}`;
+const OLD = `budetege:${PREZHNIY}:v1`;
+const OLD_OPORNYE = `budetege:${PREZHNIY}:opornye:v1`;
+const NEW = `budetege:${PREZHNIY}:log:v1`;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
 );
@@ -88,8 +90,8 @@ const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
 /* Блок опорных задач из образца и сколько в нём задач; прототип задачи по
-   ключу. У №13 банка задач нет: ключ задачи — «прототип|seed», задача
-   опорного блока — «блок:номер». */
+   ключу. У №2 и №13 банка задач нет: ключ задачи — «прототип|seed»; у №13
+   задача опорного блока — «блок:номер». */
 const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
 let zadachVBloke;
 let prototipOf;
@@ -97,6 +99,10 @@ if (N === '13') {
   const { BLOKI_13, zadachiBloka } = requireSrc('lib/zadanie13/opornye/bloki.ts');
   const b = BLOKI_13.find((x) => x.id === blokObrazca);
   zadachVBloke = b === undefined ? undefined : zadachiBloka(b).length;
+  prototipOf = (id) => id?.split('|')[0];
+} else if (N === '2') {
+  const { BLOKI } = requireSrc('lib/vektory/prep/bloki.ts');
+  zadachVBloke = BLOKI.find((b) => b.id === blokObrazca)?.zadachi.length;
   prototipOf = (id) => id?.split('|')[0];
 } else {
   const { BANK } = requireSrc(`lib/zadanie${N}/bank/index.ts`);

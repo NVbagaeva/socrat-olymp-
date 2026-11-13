@@ -1,6 +1,5 @@
 'use client';
 
-import { clsx } from 'clsx';
 import { useMemo, useState, type ReactNode } from 'react';
 import { OpornayaZadacha, type OpornyyIshod } from '../opornye';
 import { PodskazkaVoprosy } from '../trening/PodskazkaVoprosy';
@@ -42,45 +41,6 @@ function izJson<T>(json: string): T | null {
 /** Seed для кнопки «Ещё вариант»: время и случайный хвост. */
 function sluchaynyySeed(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-/** «Определи тип»: четыре схемы кнопками, value — номер схемы. */
-function VyborShemy({
-  task,
-  value,
-  onValue,
-  checked,
-}: {
-  task: Zadacha13Sealed;
-  value: string;
-  onValue: (value: string) => void;
-  checked: 'right' | 'wrong' | null;
-}) {
-  return (
-    <div className="trn-vybor" role="radiogroup" aria-label={TRENAZHER13.ekran.tipVopros}>
-      {(task.vybory ?? []).map((v) => {
-        const vybran = value === v.number;
-        return (
-          <button
-            key={v.number}
-            type="button"
-            role="radio"
-            aria-checked={vybran}
-            className={clsx(
-              'trn-vybor__knopka',
-              vybran && 'is-on',
-              vybran && checked === 'right' && 'is-right',
-              vybran && checked === 'wrong' && 'is-wrong',
-            )}
-            disabled={checked === 'right'}
-            onClick={() => onValue(v.number)}
-          >
-            {v.label}
-          </button>
-        );
-      })}
-    </div>
-  );
 }
 
 /**
@@ -249,19 +209,7 @@ export function Opornye13Screen({ blockId, vid, tasks, zapomni }: Opornye13Scree
       formatHint={format}
       {...(zadacha.vybory === null
         ? {}
-        : {
-            pole: (
-              <VyborShemy
-                task={zadacha}
-                value={value}
-                checked={checked}
-                onValue={(next) => {
-                  setValue(next);
-                  if (checked === 'wrong') setChecked(null);
-                }}
-              />
-            ),
-          })}
+        : { vybory: zadacha.vybory.map((v) => ({ number: v.number, labelHtml: v.label })) })}
       {...(edinicy && checked === 'wrong' ? { verdiktNeverno: TRENAZHER13.ekran.edinicy } : {})}
       podskazka={{
         html: '',
