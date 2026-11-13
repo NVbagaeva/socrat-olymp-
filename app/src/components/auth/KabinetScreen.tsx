@@ -23,15 +23,13 @@ import type { SavedKit } from '@/lib/auth/kits';
 import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
-import { Progress8, type Names8 } from '@/components/tasks/vychisleniya/Progress8';
+import { KartaUchenika } from '@/components/karta/KartaUchenika';
 import {
   JoinClassForm,
-  StudentHomeworkCard,
   TutorClassesCard,
   TutorHomeworkCard,
 } from '@/components/dz/KabinetDz';
 import { forgetCode, pendingCode } from '@/components/dz/JoinScreen';
-import { BANK_TOTAL } from '@/lib/vychisleniya/ids';
 import {
   importedGroups,
   localProgress,
@@ -46,8 +44,6 @@ type Tab = 'home' | 'profile';
 /** Вкладка в адресе: /kabinet/?vkladka=profil. */
 const PROFILE_QUERY = 'profil';
 
-const TRAINER_8 = '/zadaniya/8/trenazher/';
-
 /**
  * Страница /kabinet/ — одна на все роли: содержимое зависит от роли в
  * базе. Вкладка «Кабинет» — разделы ученика или репетитора (пока с
@@ -55,7 +51,7 @@ const TRAINER_8 = '/zadaniya/8/trenazher/';
  * сохранено, документы, выход и удаление аккаунта. Показывает только
  * то, что действительно лежит в базе.
  */
-export function KabinetScreen({ names8 }: { names8: Names8 }) {
+export function KabinetScreen() {
   const user = useSessionUser();
   const [view, setView] = useState<View>('loading');
   const [tab, setTab] = useState<Tab>('home');
@@ -236,18 +232,7 @@ export function KabinetScreen({ names8 }: { names8: Names8 }) {
       {tab === 'home' ? (
         <>
           <p className="kabinet__trial">{KABINET.trial}</p>
-          {profile.role === 'student' ? (
-            <StudentHome
-              klassy={klassy}
-              names8={names8}
-              onJoined={() => {
-                forgetCode();
-                void import('@/lib/auth/klassy').then(async ({ loadKlassy }) =>
-                  setKlassy(await loadKlassy()),
-                );
-              }}
-            />
-          ) : null}
+          {profile.role === 'student' ? <StudentHome /> : null}
           {profile.role === 'tutor' ? <TutorHome kits={kits} /> : null}
           {profile.role === 'admin' ? (
             <Card className="kabinet__card" title={KABINET.admin.title}>
@@ -264,6 +249,17 @@ export function KabinetScreen({ names8 }: { names8: Names8 }) {
             canImport={stash}
             onImport={() => void importLater()}
           />
+          {profile.role === 'student' ? (
+            <StudentClasses
+              klassy={klassy}
+              onJoined={() => {
+                forgetCode();
+                void import('@/lib/auth/klassy').then(async ({ loadKlassy }) =>
+                  setKlassy(await loadKlassy()),
+                );
+              }}
+            />
+          ) : null}
           <DocumentsCard consents={consents} />
           <DangerCard role={profile.role} onRemoved={() => setView('removed')} />
         </>
@@ -288,52 +284,50 @@ export function KabinetScreen({ names8 }: { names8: Names8 }) {
 /** Раздел, которого ещё нет: что здесь появится — простыми словами. */
 /* ── Кабинет ученика ──────────────────────────────────────────── */
 
-function StudentHome({
+/**
+ * Главная ученика — «Карта ЕГЭ»: прогресс всех заданий из журналов,
+ * под картой — текущее домашнее задание. Классы — на вкладке профиля.
+ */
+function StudentHome() {
+  return (
+    <div className="kabinet__karta" data-section="karta">
+      <KartaUchenika />
+    </div>
+  );
+}
+
+/** Классы ученика и вступление по коду от репетитора. */
+function StudentClasses({
   klassy,
-  names8,
   onJoined,
 }: {
   klassy: KlassView[] | null;
-  names8: Names8;
   onJoined: () => void;
 }) {
   const t = KABINET.student;
   /* Код из ссылки-приглашения, открытой до входа (/kabinet/vstupit/). */
   const [initialCode] = useState(pendingCode);
   return (
-    <>
-      <StudentHomeworkCard />
-      {/* Прогресс №8: журнал, «Мои ошибки», «Отложенные», история — то же,
-         что под тренажёром; со входом — с любого устройства. */}
-      <Card className="kabinet__card kabinet__progress" data-section="progress">
-        <Progress8 total={BANK_TOTAL} names={names8} showReset={false} />
-        <p className="kabinet__progress-go">
-          <Link className="btn btn--secondary btn--sm" href={TRAINER_8}>
-            {t.progress.go}
-          </Link>
-        </p>
-      </Card>
-      <Card className="kabinet__card" title={t.classes.title} data-section="classes">
-        {klassy === null ? (
-          <p className="auth-form__muted">…</p>
-        ) : klassy.length === 0 ? (
-          <p className="auth-form__text">{t.classes.none}</p>
-        ) : (
-          <ul className="klass-list">
-            {klassy.map((klass) => (
-              <li key={klass.id} className="klass-list__item">
-                <span className="klass-list__name">{klass.name}</span>
-                {klass.tutorName !== null ? (
-                  <span className="klass-list__meta">{t.classes.tutor(klass.tutorName)}</span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-        {/* Вступить в класс по коду от репетитора. */}
-        <JoinClassForm initial={initialCode} onJoined={onJoined} />
-      </Card>
-    </>
+    <Card className="kabinet__card" title={t.classes.title} data-section="classes">
+      {klassy === null ? (
+        <p className="auth-form__muted">…</p>
+      ) : klassy.length === 0 ? (
+        <p className="auth-form__text">{t.classes.none}</p>
+      ) : (
+        <ul className="klass-list">
+          {klassy.map((klass) => (
+            <li key={klass.id} className="klass-list__item">
+              <span className="klass-list__name">{klass.name}</span>
+              {klass.tutorName !== null ? (
+                <span className="klass-list__meta">{t.classes.tutor(klass.tutorName)}</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+      {/* Вступить в класс по коду от репетитора. */}
+      <JoinClassForm initial={initialCode} onJoined={onJoined} />
+    </Card>
   );
 }
 

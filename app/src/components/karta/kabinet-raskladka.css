@@ -1,0 +1,257 @@
+/* Раскладка кабинета с картой: левое меню и содержимое. Префикс kab-. */
+
+.kab {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: var(--space-6);
+  min-height: 100vh;
+  padding: var(--space-5) var(--space-6) var(--space-8);
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgb(255 255 255 / 0.9), transparent 60%),
+    linear-gradient(180deg, #eef5ff 0%, #e4effc 100%);
+}
+
+.kab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  position: sticky;
+  top: var(--space-5);
+  align-self: start;
+  max-height: calc(100vh - var(--space-10));
+}
+.kab-menu__shapka {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.kab-menu__brend {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  color: var(--navy-900);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.kab-menu__brend i {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--gloss);
+  box-shadow: 0 6px 14px -6px rgb(31 95 208 / 0.6);
+  position: relative;
+}
+.kab-menu__brend i::after {
+  content: '';
+  position: absolute;
+  inset: 8px 7px;
+  border-left: 2.5px solid #fff;
+  border-bottom: 2.5px solid #fff;
+  transform: skewX(-12deg);
+}
+.kab-menu__dlya-telefona {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+.kab-menu__knopka {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--navy-800);
+}
+.kab-menu__knopka svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.kab-menu__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.kab-menu__spisok {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.kab-menu__punkt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: var(--navy-800);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: background var(--dur-hover) var(--ease);
+}
+.kab-menu__punkt svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.kab-menu__punkt:hover {
+  background: rgb(255 255 255 / 0.6);
+}
+.kab-menu__punkt.is-tekushchiy {
+  background: var(--glass-bg-strong);
+  color: var(--blue-700);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+
+.kab-skhemy {
+  --stk-r-card: 20px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'kartinka kartinka'
+    'tekst strelka';
+  gap: var(--space-3);
+  padding: var(--space-4);
+  text-decoration: none;
+  color: inherit;
+  align-items: end;
+}
+.kab-skhemy__kartinka {
+  grid-area: kartinka;
+  height: 96px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #dbeafe, #f5f9ff 60%, #ffe9d6);
+  display: grid;
+  place-items: center;
+}
+.kab-skhemy__kartinka svg {
+  width: 84px;
+  height: 84px;
+}
+.kab-skhemy__tekst {
+  grid-area: tekst;
+  display: grid;
+  gap: 2px;
+}
+.kab-skhemy__tekst b {
+  font-size: 0.9375rem;
+  color: var(--navy-900);
+}
+.kab-skhemy__tekst span {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+.kab-skhemy__strelka {
+  grid-area: strelka;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+.kab-menu__niz {
+  margin-top: auto;
+}
+.kab-menu__voyti {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  color: var(--blue-700);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: var(--fs-caption);
+}
+.kab-menu__akkaunt {
+  display: inline-flex;
+  text-decoration: none;
+}
+.kab-menu__krug {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px var(--blue-200);
+}
+
+.kab-telo {
+  min-width: 0;
+}
+
+@media (max-width: 1023.98px) {
+  .kab {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4) var(--space-6);
+  }
+  .kab-menu {
+    position: relative;
+    top: auto;
+    max-height: none;
+    gap: var(--space-3);
+  }
+  .kab-menu__dlya-telefona {
+    display: flex;
+  }
+  .kab-menu__niz {
+    display: none;
+  }
+  .kab-menu__nav {
+    display: none;
+    padding: var(--space-3);
+    border-radius: 18px;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  }
+  .kab--menu-otkryto .kab-menu__nav {
+    display: flex;
+  }
+  .kab-skhemy {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'kartinka tekst strelka';
+    align-items: center;
+  }
+  .kab-skhemy__kartinka {
+    width: 56px;
+    height: 56px;
+  }
+  .kab-skhemy__kartinka svg {
+    width: 44px;
+    height: 44px;
+  }
+}
+@media (max-width: 767.98px) {
+  .kab {
+    padding: var(--space-3) var(--space-3) var(--space-5);
+  }
+}

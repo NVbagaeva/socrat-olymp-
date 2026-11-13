@@ -1322,25 +1322,25 @@ async function runEnabled() {
       (await page.locator('.kabinet__role').innerText()) === 'Кабинет ученика',
       'кабинет: «Кабинет ученика»',
     );
-    await page.waitForFunction(
-      () => !document.querySelector('[data-section="homework"]')?.textContent?.includes('…'),
-    );
-    for (const [section, title, empty] of [
-      ['progress', 'Мой прогресс в №8', 'Решено 0 из 260'],
-      ['mistakes8', 'Мои ошибки', 'Ошибок нет'],
-      ['later8', 'Отложенные', 'Ничего не отложено'],
-      ['history8', 'История тренировок', 'Завершённых тренировок пока нет'],
-      ['homework', 'Домашние задания', 'Заданий пока нет'],
-    ]) {
-      const text = (await page.locator(`[data-section="${section}"]`).innerText()).replace(
-        /\s+/g,
-        ' ',
-      );
-      check(text.includes(title) && text.includes(empty), `ученик: «${title}» — «${empty}»`);
-    }
+    /* Главная ученика — «Карта ЕГЭ»: без прогресса — 0 из 20 и без прогноза;
+       карточки ДЗ нет, пока ДЗ не выдано; плашки «Войдите…» у вошедшего нет. */
+    await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
+    const kartaItog = (await page.locator('.karta-shapka__itog').innerText()).replace(/\s+/g, ' ');
     check(
-      (await page.locator('[data-section="classes"]').innerText()).includes('пока не в классе'),
-      'ученик без класса: «Ты пока не в классе»',
+      kartaItog.includes('Освоено 0 из 20') && kartaItog.includes('Решите ещё немного'),
+      `ученик: карта — «Освоено 0 из 20», прогноза нет (${kartaItog})`,
+    );
+    check((await page.locator('.karta-gost').count()) === 0, 'ученик: плашки «Войдите…» нет');
+    check(
+      (await page.locator('[data-section="karta"] .karta-ostrov').count()) === 20,
+      'ученик: на карте 20 областей',
+    );
+    await page.waitForFunction(() => document.querySelector('.karta-dz') === null, null, {
+      timeout: 10000,
+    });
+    check(
+      (await page.locator('.karta-dz').count()) === 0,
+      'ученик без ДЗ: карточки ДЗ под картой нет',
     );
     check(
       (await page.locator('[data-section="kits"]').count()) === 0,
@@ -1348,13 +1348,19 @@ async function runEnabled() {
     );
     check(await noHorizontalScroll(page), 'кабинет ученика 390: горизонтальной прокрутки нет');
     await shot(page, 'kabinet-uchenik-390');
-
-    /* «Нет» запомнено: при следующем заходе вопроса нет. */
-    await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
-    await page.waitForSelector('[data-section="classes"]');
+    /* Классы — на вкладке профиля. */
+    await openProfile(page);
     await page.waitForFunction(
       () => !document.querySelector('[data-section="classes"]')?.textContent?.includes('…'),
     );
+    check(
+      (await page.locator('[data-section="classes"]').innerText()).includes('пока не в классе'),
+      'ученик без класса: «Ты пока не в классе» (в профиле)',
+    );
+
+    /* «Нет» запомнено: при следующем заходе вопроса нет. */
+    await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
     check(
       (await page.locator('[role="dialog"]').count()) === 0,
       '«Нет» запомнено: вопрос не повторяется',
@@ -1367,13 +1373,13 @@ async function runEnabled() {
     /* Тестовый класс, как после кнопки «Сервер: тестовые данные». */
     mock.seedClass('svoy@example.ru', ['uchenik@example.ru']);
     await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await openProfile(page);
     await page.waitForSelector('.klass-list');
     const klass = await page.locator('[data-section="classes"]').innerText();
     check(
       klass.includes('Тестовый класс') && klass.includes('Репетитор: Наталья В.'),
-      'ученик в классе: название класса и имя репетитора',
+      'ученик в классе: название класса и имя репетитора (в профиле)',
     );
-    await openProfile(page);
     check(await noHorizontalScroll(page), 'профиль 390: горизонтальной прокрутки нет');
     await shot(page, 'kabinet-profil-390');
     await context.close();
@@ -1466,29 +1472,22 @@ async function runEnabled() {
     const phone = await newPage(mock, 390, errors);
     await welcomeSeen(phone.context);
     await login(phone.page, 'dva@example.ru', 'dva-ustroystva-1');
+    /* Журнал №8 с компьютера приехал: на карте №8 — «в процессе». */
     await phone.page
       .waitForFunction(
-        () =>
-          /Решено\s*1\s*из\s*260/.test(
-            document.querySelector('[data-section="progress"]')?.textContent ?? '',
-          ),
+        () => document.querySelector('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]') !== null,
         null,
         { timeout: 10000 },
       )
       .catch(() => {});
-    const progress = (await phone.page.locator('[data-section="progress"]').innerText()).replace(
-      /\s+/g,
-      ' ',
-    );
     check(
-      progress.includes('Решено 1 из 260'),
-      `телефон: в кабинете решённое на компьютере — «Решено 1 из 260»`,
+      (await phone.page.locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]').count()) === 1,
+      'телефон: на карте №8 «в процессе» — решённое на компьютере приехало',
     );
-    const later = phone.page.locator('[data-section="later8"] a[href*="zadacha="]');
+    const laterRaw = await phone.page.evaluate(() => localStorage.getItem('budetege:zakladki:v1'));
     check(
-      (await later.count()) === 1 &&
-        decodeURIComponent((await later.getAttribute('href')) ?? '').includes(second),
-      'телефон: закладка с компьютера — в «Отложенных»',
+      typeof laterRaw === 'string' && laterRaw.includes(second),
+      'телефон: закладка с компьютера приехала в хранилище',
     );
     check(
       await noHorizontalScroll(phone.page),
@@ -1657,12 +1656,13 @@ async function runEnabled() {
     );
 
     /* Ученик 1 (телефон): ДЗ в кабинете, плашка в №8, решение. */
+    /* Карточка ДЗ под картой: название, срок, «сделано 0 из N». */
     await st1.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
-    await st1.page.waitForSelector('[data-section="homework"] .dz-list__item');
+    await st1.page.waitForSelector('.karta-dz');
     check(
-      (await text(st1.page, '[data-section="homework"]')).includes('ДЗ: степени и корни') &&
-        (await text(st1.page, '[data-section="homework"]')).includes('не начато'),
-      'ДЗ: у ученика в кабинете — задание «не начато»',
+      (await text(st1.page, '.karta-dz')).includes('ДЗ: степени и корни') &&
+        /сделано 0 из \d+/.test(await text(st1.page, '.karta-dz')),
+      'ДЗ: у ученика под картой — карточка задания, «сделано 0 из N»',
     );
     await st1.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
     await st1.page.waitForSelector('[data-block="dz-plashka"]');
@@ -1819,7 +1819,7 @@ async function runEnabled() {
       );
     }
     await st1.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
-    await st1.page.waitForSelector('[data-section="homework"] .dz-list__item');
+    await st1.page.waitForSelector('.karta-dz');
     check(
       await noHorizontalScroll(st1.page),
       'ДЗ: ученик, кабинет 390 — горизонтальной прокрутки нет',
@@ -2184,7 +2184,7 @@ async function runGalleryDz(dir) {
     /* Ученик: кабинет, плашка в №8, решение. */
     const st = await context(width);
     await login(st.page, 'dz-uchenik1@example.ru', 'dz-uchenik-1');
-    await ready(st.page, ['homework']);
+    await st.page.waitForSelector('.karta-dz');
     await snap(st.page, '06-kabinet-uchenika');
     await st.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
     await st.page.waitForSelector('[data-block="dz-plashka"]');
