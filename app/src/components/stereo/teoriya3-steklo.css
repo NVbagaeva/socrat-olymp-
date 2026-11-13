@@ -8,9 +8,18 @@
 .o3-teoriya .o3-primer,
 .z3-teo .kart-proverka {
   background: var(--glass-bg-strong);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-edge);
   border-radius: 20px;
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+
+/* Размытие фона — только у внешних карточек. Внутри примеров и панелей
+   живут чертежи, которые ученик вращает: вложенные слои размытия
+   пересчитываются на каждом кадре и роняют поворот ниже 60 кадров в
+   секунду (scripts/check-stereo-vrashchenie-site.mjs). Подложка, кромка
+   и тень остаются — стекло читается и без размытия. */
+.o3-teoriya .o3-karta,
+.z3-teo .kart-proverka {
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
