@@ -9,20 +9,23 @@
  * в первую загрузку страниц сайта SDK не попадает.
  */
 
-import type { RazborHtml } from '@/lib/vychisleniya/razbor';
 import { getClient } from '@/lib/auth/client';
 import { currentUser } from '@/lib/auth/session';
 import type {
+  AnswerKind,
   AttemptsLimit,
   HwAnswerView,
   HwCheck,
-  HwIssueInput,
+  HwIssuePartsInput,
   HwOrigin,
+  HwPartView,
   HwRecipientView,
   HwSolution,
   HwTaskView,
   HwView,
+  RazborDz,
   SolutionsWhen,
+  VidDz,
 } from './types';
 
 /** Ошибка базы: стабильный код из начала сообщения («bad_code: …»). */
@@ -238,18 +241,20 @@ interface HomeworkRow {
   created_at: string;
   closed_at: string | null;
   task_no: number | null;
+  sections: number[] | null;
   attempts_limit: number | null;
   solutions_when: SolutionsWhen;
   show_memo: boolean;
   show_example: boolean;
+  no_hints: boolean;
   individual: boolean;
   origin: HwOrigin;
   parent_id: string | null;
 }
 
 const HOMEWORK_COLUMNS =
-  'id, tutor_id, class_id, title, note, due_at, created_at, closed_at, task_no, attempts_limit, ' +
-  'solutions_when, show_memo, show_example, individual, origin, parent_id';
+  'id, tutor_id, class_id, title, note, due_at, created_at, closed_at, task_no, sections, ' +
+  'attempts_limit, solutions_when, show_memo, show_example, no_hints, individual, origin, parent_id';
 
 function hwView(row: HomeworkRow): HwView {
   return {
@@ -261,45 +266,56 @@ function hwView(row: HomeworkRow): HwView {
     dueAt: row.due_at,
     createdAt: row.created_at,
     closedAt: row.closed_at,
-    taskNo: row.task_no ?? 8,
+    taskNo: row.task_no ?? row.sections?.[0] ?? 8,
+    sections: row.sections ?? (row.task_no === null ? [] : [row.task_no]),
     attemptsLimit: (row.attempts_limit ?? null) as AttemptsLimit,
     solutionsWhen: row.solutions_when,
     showMemo: row.show_memo,
     showExample: row.show_example,
+    noHints: row.no_hints,
     individual: row.individual,
     origin: row.origin,
     parentId: row.parent_id,
   };
 }
 
-export async function issueHomework(input: HwIssueInput): Promise<string> {
+/** Выдать ДЗ из пунктов (issue_homework_parts). Возвращает id. */
+export async function issueHomeworkParts(input: HwIssuePartsInput): Promise<string> {
   const supabase = await getClient();
   const s = input.settings;
-  const result = await supabase.rpc('issue_homework_tasks', {
+  const result = await supabase.rpc('issue_homework_parts', {
     p: {
       title: s.title.trim(),
       note: s.note.trim(),
       due_at: s.dueAt,
       class_id: input.classId,
       students: input.students,
-      task_no: input.taskNo,
       attempts_limit: s.attemptsLimit,
       solutions_when: s.solutionsWhen,
       show_memo: s.showMemo,
       show_example: s.showExample,
-      individual: s.individual,
+      no_hints: s.noHints,
       origin: input.origin,
       parent_id: input.parentId,
-      tasks: input.tasks.map((t) => ({
-        student_id: t.studentId,
-        position: t.position,
-        kind: t.kind,
-        ref: t.ref,
-        question_html: t.questionHtml,
-        answer: t.answer,
-        razbor: t.razbor,
-        source: t.source,
-        comment: t.comment,
+      parts: input.parts.map((p) => ({
+        source: p.source,
+        task_no: p.taskNo,
+        ref: p.ref,
+        title_html: p.titleHtml,
+        rule: p.rule,
+        per_student: p.perStudent,
+        comment: p.comment,
+        tasks: p.units.map((u) => ({
+          student_id: u.studentId,
+          kind: u.kind,
+          ref: u.ref,
+          answer_kind: u.answerKind,
+          question_html: u.questionHtml,
+          view: u.view,
+          answer: u.answer,
+          razbor: u.razbor,
+          source: u.source,
+        })),
       })),
     },
   });
@@ -312,16 +328,55 @@ export interface HwListItem {
   hw: HwView;
   /** Ученику — его строка; репетитору — все получатели. */
   recipients: HwRecipientView[];
-  /** Сколько задач у ученика (для ученика) или в ДЗ на человека (для репетитора). */
+  /**
+   * Сколько дел у ученика: задача — одно, набор карточек — одно (как в
+   * пределе 60). Репетитору — у самого загруженного ученика.
+   */
   tasks: number;
+  /** Ученику: сколько дел сделано (задача закрыта, все карточки набора пройдены). */
+  done: number;
   /** Ученику: сколько задач закрыто верно. */
   right: number;
+}
+
+interface TaskRowLite {
+  id: string;
+  homework_id: string;
+  student_id: string | null;
+  part_id: string;
+}
+
+/** Дела ученика в ДЗ: задача — одно, набор карточек — одно. */
+export function delaUchenika(
+  tasks: readonly { id: string; partId: string; studentId: string | null }[],
+  cardParts: ReadonlySet<string>,
+  studentId: string,
+  closed: ReadonlySet<string>,
+): { vsego: number; sdelano: number } {
+  const mine = tasks.filter((t) => t.studentId === null || t.studentId === studentId);
+  const nabory = new Map<string, boolean>();
+  let vsego = 0;
+  let sdelano = 0;
+  for (const t of mine) {
+    if (cardParts.has(t.partId)) {
+      nabory.set(t.partId, (nabory.get(t.partId) ?? true) && closed.has(t.id));
+    } else {
+      vsego += 1;
+      if (closed.has(t.id)) sdelano += 1;
+    }
+  }
+  for (const done of nabory.values()) {
+    vsego += 1;
+    if (done) sdelano += 1;
+  }
+  return { vsego, sdelano };
 }
 
 export async function listHomework(role: 'tutor' | 'student'): Promise<HwListItem[]> {
   const supabase = await getClient();
   const uid = me();
-  const query = supabase.from('homework').select(HOMEWORK_COLUMNS).not('task_no', 'is', null);
+  /* Только ДЗ кабинета (у пробного кабинета разделов нет). */
+  const query = supabase.from('homework').select(HOMEWORK_COLUMNS).not('sections', 'is', null);
   const hw = await (role === 'tutor' ? query.eq('tutor_id', uid) : query).order('created_at', {
     ascending: false,
   });
@@ -329,76 +384,92 @@ export async function listHomework(role: 'tutor' | 'student'): Promise<HwListIte
   const rows = (hw.data ?? []) as unknown as HomeworkRow[];
   if (rows.length === 0) return [];
   const ids = rows.map((r) => r.id);
-  const [recipients, tasks, answers] = await Promise.all([
+  const [recipients, tasks, parts, answers] = await Promise.all([
     supabase
       .from('homework_recipients')
       .select('homework_id, user_id, started_at, submitted_at')
       .in('homework_id', ids),
-    supabase.from('homework_tasks').select('id, homework_id, student_id').in('homework_id', ids),
+    supabase
+      .from('homework_tasks')
+      .select('id, homework_id, student_id, part_id')
+      .in('homework_id', ids),
+    supabase.from('homework_parts').select('id, source').in('homework_id', ids),
     role === 'student'
       ? supabase.from('homework_answers').select('task_id, state').eq('user_id', uid)
       : Promise.resolve({ data: [], error: null }),
   ]);
   if (recipients.error) fail(recipients.error);
   if (tasks.error) fail(tasks.error);
+  if (parts.error) fail(parts.error);
   const recipientRows = (recipients.data ?? []) as {
     homework_id: string;
     user_id: string;
     started_at: string | null;
     submitted_at: string | null;
   }[];
-  const taskRows = (tasks.data ?? []) as {
-    id: string;
-    homework_id: string;
-    student_id: string | null;
-  }[];
-  const rightIds = new Set(
-    ((answers.data ?? []) as { task_id: string; state: string }[])
-      .filter((a) => a.state === 'right')
-      .map((a) => a.task_id),
+  const taskRows = (tasks.data ?? []) as TaskRowLite[];
+  const cardParts = new Set(
+    ((parts.data ?? []) as { id: string; source: string }[])
+      .filter((p) => p.source === 'kartochki')
+      .map((p) => p.id),
   );
+  const answerRows = (answers.data ?? []) as { task_id: string; state: string }[];
+  const closed = new Set(answerRows.filter((a) => a.state !== 'open').map((a) => a.task_id));
+  const rightIds = new Set(answerRows.filter((a) => a.state === 'right').map((a) => a.task_id));
   const names =
     role === 'tutor'
       ? await studentNames([...new Set(recipientRows.map((r) => r.user_id))])
       : new Map<string, { name: string; alias: string | null }>();
   return rows.map((row) => {
-    const mine = taskRows.filter(
-      (t) =>
-        t.homework_id === row.id &&
-        (role === 'tutor' || t.student_id === null || t.student_id === uid),
-    );
-    const perStudent = row.individual
-      ? Math.max(
-          0,
-          ...recipientRows
-            .filter((r) => r.homework_id === row.id)
-            .map((r) => mine.filter((t) => t.student_id === r.user_id).length),
-        )
-      : mine.length;
+    const own = taskRows
+      .filter((t) => t.homework_id === row.id)
+      .map((t) => ({ id: t.id, partId: t.part_id, studentId: t.student_id }));
+    const rec = recipientRows.filter((r) => r.homework_id === row.id);
+    const dela =
+      role === 'student'
+        ? delaUchenika(own, cardParts, uid, closed)
+        : {
+            vsego: Math.max(
+              0,
+              ...rec.map((r) => delaUchenika(own, cardParts, r.user_id, closed).vsego),
+            ),
+            sdelano: 0,
+          };
     return {
       hw: hwView(row),
-      recipients: recipientRows
-        .filter((r) => r.homework_id === row.id)
-        .map((r) => ({
-          userId: r.user_id,
-          name: names.get(r.user_id) ? memberName(names.get(r.user_id)!) : '',
-          startedAt: r.started_at,
-          submittedAt: r.submitted_at,
-        })),
-      tasks: role === 'tutor' ? perStudent : mine.length,
-      right: mine.filter((t) => rightIds.has(t.id)).length,
+      recipients: rec.map((r) => ({
+        userId: r.user_id,
+        name: names.get(r.user_id) ? memberName(names.get(r.user_id)!) : '',
+        startedAt: r.started_at,
+        submittedAt: r.submitted_at,
+      })),
+      tasks: dela.vsego,
+      done: dela.sdelano,
+      right: own.filter(
+        (t) => (t.studentId === null || t.studentId === uid) && rightIds.has(t.id),
+      ).length,
     };
   });
+}
+
+/** Ключ задачи — только репетитору ДЗ. */
+export interface HwKeyView {
+  taskId: string;
+  ref: string;
+  answer: string;
+  razbor: RazborDz;
+  source: string;
 }
 
 /** Всё о ДЗ, что разрешено вошедшему. Ключи — только у репетитора. */
 export interface HwFull {
   hw: HwView;
+  parts: HwPartView[];
   tasks: HwTaskView[];
   recipients: HwRecipientView[];
   answers: HwAnswerView[];
   /** Ключи по id задачи — только репетитору. */
-  keys: Map<string, { ref: string; answer: string; razbor: RazborHtml; source: string }>;
+  keys: Map<string, HwKeyView>;
   /** Когда загружено, мс: «срок прошёл» считается от него. */
   loadedAt: number;
 }
@@ -410,10 +481,15 @@ export async function loadHomework(id: string): Promise<HwFull | null> {
   if (hw.data === null) return null;
   const view = hwView(hw.data as unknown as HomeworkRow);
   const tutor = view.tutorId === me();
-  const [tasks, recipients] = await Promise.all([
+  const [parts, tasks, recipients] = await Promise.all([
+    supabase
+      .from('homework_parts')
+      .select('id, position, source, task_no, ref, title_html, rule, per_student, comment')
+      .eq('homework_id', id)
+      .order('position', { ascending: true }),
     supabase
       .from('homework_tasks')
-      .select('id, position, kind, question_html, comment, student_id')
+      .select('id, position, kind, question_html, comment, student_id, part_id, answer_kind, view')
       .eq('homework_id', id)
       .order('position', { ascending: true }),
     supabase
@@ -421,6 +497,7 @@ export async function loadHomework(id: string): Promise<HwFull | null> {
       .select('user_id, started_at, submitted_at')
       .eq('homework_id', id),
   ]);
+  if (parts.error) fail(parts.error);
   if (tasks.error) fail(tasks.error);
   if (recipients.error) fail(recipients.error);
   const taskIds = ((tasks.data ?? []) as { id: string }[]).map((t) => t.id);
@@ -451,6 +528,29 @@ export async function loadHomework(id: string): Promise<HwFull | null> {
   return {
     hw: view,
     loadedAt: Date.now(),
+    parts: (
+      (parts.data ?? []) as {
+        id: string;
+        position: number;
+        source: HwPartView['source'];
+        task_no: number;
+        ref: string;
+        title_html: string;
+        rule: Record<string, unknown> | null;
+        per_student: boolean;
+        comment: string | null;
+      }[]
+    ).map((p) => ({
+      id: p.id,
+      position: p.position,
+      source: p.source,
+      taskNo: p.task_no,
+      ref: p.ref,
+      titleHtml: p.title_html,
+      rule: p.rule ?? {},
+      perStudent: p.per_student,
+      comment: p.comment,
+    })),
     tasks: (
       (tasks.data ?? []) as {
         id: string;
@@ -459,6 +559,9 @@ export async function loadHomework(id: string): Promise<HwFull | null> {
         question_html: string;
         comment: string | null;
         student_id: string | null;
+        part_id: string;
+        answer_kind: AnswerKind | null;
+        view: VidDz | null;
       }[]
     ).map((t) => ({
       id: t.id,
@@ -467,6 +570,9 @@ export async function loadHomework(id: string): Promise<HwFull | null> {
       questionHtml: t.question_html,
       comment: t.comment,
       studentId: t.student_id,
+      partId: t.part_id,
+      answerKind: t.answer_kind ?? 'number',
+      view: t.view ?? {},
     })),
     recipients: recipientRows
       .map((r) => ({
@@ -499,12 +605,12 @@ export async function loadHomework(id: string): Promise<HwFull | null> {
           task_id: string;
           ref: string;
           answer: string;
-          razbor: RazborHtml;
+          razbor: RazborDz;
           source: string | null;
         }[]
       ).map((k) => [
         k.task_id,
-        { ref: k.ref, answer: k.answer, razbor: k.razbor, source: k.source ?? '' },
+        { taskId: k.task_id, ref: k.ref, answer: k.answer, razbor: k.razbor, source: k.source ?? '' },
       ]),
     ),
   };
@@ -537,11 +643,26 @@ export async function checkAnswer(
   return result.data as HwCheck;
 }
 
-export async function revealSolution(taskId: string): Promise<RazborHtml> {
+/** Отметка карточки-самооценки: «Знаю» (known) или «Повторить» (repeat). */
+export async function markCard(
+  taskId: string,
+  mark: 'known' | 'repeat',
+  seconds: number,
+): Promise<void> {
+  const supabase = await getClient();
+  const result = await supabase.rpc('homework_mark', {
+    p_task: taskId,
+    p_mark: mark,
+    p_seconds: Math.max(0, Math.round(seconds)),
+  });
+  if (result.error) fail(result.error);
+}
+
+export async function revealSolution(taskId: string): Promise<RazborDz> {
   const supabase = await getClient();
   const result = await supabase.rpc('homework_reveal', { p_task: taskId });
   if (result.error) fail(result.error);
-  return result.data as RazborHtml;
+  return result.data as RazborDz;
 }
 
 /** Решение, если его уже можно показать; иначе null. */
@@ -568,12 +689,79 @@ export async function updateHomework(
   if (result.error) fail(result.error);
 }
 
-export async function updateTaskComment(taskId: string, comment: string): Promise<void> {
+/** Комментарий репетитора к пункту ДЗ. */
+export async function updatePartComment(partId: string, comment: string): Promise<void> {
   const supabase = await getClient();
   const value = comment.trim();
   const result = await supabase
-    .from('homework_tasks')
+    .from('homework_parts')
     .update({ comment: value === '' ? null : value })
-    .eq('id', taskId);
+    .eq('id', partId);
+  if (result.error) fail(result.error);
+}
+
+/* ── Черновик и шаблоны ────────────────────────────────────────── */
+
+/** Черновик ДЗ репетитора; null — пусто. */
+export async function loadDraft(): Promise<{ body: unknown; updatedAt: string } | null> {
+  const supabase = await getClient();
+  const result = await supabase
+    .from('homework_drafts')
+    .select('body, updated_at')
+    .eq('user_id', me())
+    .maybeSingle();
+  if (result.error) fail(result.error);
+  const row = result.data as { body: unknown; updated_at: string } | null;
+  return row === null ? null : { body: row.body, updatedAt: row.updated_at };
+}
+
+export async function saveDraft(body: object): Promise<void> {
+  const supabase = await getClient();
+  const result = await supabase
+    .from('homework_drafts')
+    .upsert({ user_id: me(), body, updated_at: new Date().toISOString() });
+  if (result.error) fail(result.error);
+}
+
+export async function clearDraft(): Promise<void> {
+  const supabase = await getClient();
+  const result = await supabase.from('homework_drafts').delete().eq('user_id', me());
+  if (result.error) fail(result.error);
+}
+
+export interface HwTemplate {
+  id: string;
+  title: string;
+  body: unknown;
+  updatedAt: string;
+}
+
+export async function listTemplates(): Promise<HwTemplate[]> {
+  const supabase = await getClient();
+  const result = await supabase
+    .from('homework_templates')
+    .select('id, title, body, updated_at')
+    .eq('user_id', me())
+    .order('updated_at', { ascending: false });
+  if (result.error) fail(result.error);
+  return ((result.data ?? []) as { id: string; title: string; body: unknown; updated_at: string }[]).map(
+    (t) => ({ id: t.id, title: t.title, body: t.body, updatedAt: t.updated_at }),
+  );
+}
+
+export async function saveTemplate(title: string, body: object): Promise<string> {
+  const supabase = await getClient();
+  const result = await supabase
+    .from('homework_templates')
+    .insert({ user_id: me(), title: title.trim(), body })
+    .select('id')
+    .single();
+  if (result.error) fail(result.error);
+  return (result.data as { id: string }).id;
+}
+
+export async function deleteTemplate(id: string): Promise<void> {
+  const supabase = await getClient();
+  const result = await supabase.from('homework_templates').delete().eq('id', id);
   if (result.error) fail(result.error);
 }

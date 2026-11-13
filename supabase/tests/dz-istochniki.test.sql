@@ -96,8 +96,17 @@ select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_bu
   pg_temp.part('kartochki', 7, jsonb_build_array(pg_temp.t('7-a', 'self', '1')))))))$q$, 'bad_answer');
 select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('parts', jsonb_build_array(
   pg_temp.part('opornye', 7, jsonb_build_array(pg_temp.t('st-1', 'number', '1/2')))))))$q$, 'bad_answer');
+-- Работа над ошибками: карточки каждому свои; у ученика без ошибок в
+-- этом пункте карточек нет, но в ДЗ что-то есть.
+select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('parts', jsonb_build_array(
+  pg_temp.part('kartochki', 7, jsonb_build_array(pg_temp.t('7-a', 'self', null, current_setting('dz.s1'))), true),
+  pg_temp.part('opornye', 7, jsonb_build_array(pg_temp.t('st-1', 'number', '-5')))))))
+  as hw_kazhdomu \gset
+select pg_temp.ok((select count(*) = 1 from public.homework_tasks where homework_id = :'hw_kazhdomu' and student_id = :'s1'),
+  'карточка ученику 1 не выдана');
 select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('parts', jsonb_build_array(
-  pg_temp.part('kartochki', 7, jsonb_build_array(pg_temp.t('7-a', 'self', null)), true)))))$q$, 'bad_part');
+  pg_temp.part('kartochki', 7, jsonb_build_array(pg_temp.t('7-a', 'self', null, current_setting('dz.s1'))), true)))))$q$,
+  'no_tasks');
 select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('parts', jsonb_build_array(
   pg_temp.part('kartochki', 21, jsonb_build_array(pg_temp.t('7-a', 'self', null)))))))$q$, 'bad_task_no');
 select pg_temp.fails($q$select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('parts', jsonb_build_array(
@@ -138,6 +147,15 @@ select pg_temp.ok((select bool_and(not (view ? 'hints')) and bool_or(view ? 'cho
                      from public.homework_tasks where homework_id = :'hw_nh'), 'подсказки остались в ДЗ без подсказок');
 select pg_temp.ok((select count(*) = 2 from public.homework_tasks where homework_id = :'hw' and view ? 'hints'),
   'подсказки пропали из обычного ДЗ');
+-- Выключенные «Запомни» и пример не хранятся, включённые — хранятся.
+set role authenticated;
+select pg_temp.as_user(:'t1');
+select public.issue_homework_parts(pg_temp.smes(jsonb_build_object('show_memo', true, 'parts', jsonb_build_array(
+  pg_temp.part('opornye', 7, jsonb_build_array(pg_temp.t('st-1', 'number', '-5', null,
+    '{"zapomni":"<p>Правило</p>","primer":{"uslovieHtml":"x"}}'))))))) as hw_memo \gset
+select pg_temp.ok((select view ? 'zapomni' and not view ? 'primer' from public.homework_tasks where homework_id = :'hw_memo'),
+  '«Запомни» не сохранилось или пример сохранился выключенным');
+reset role;
 do $$ begin raise notice 'ok 2: выдача из трёх источников — состав, виды ответа, предел 60, «Без подсказок»'; end $$;
 
 /* ── 3. Кто что видит ──────────────────────────────────────────── */

@@ -105,7 +105,8 @@ create table public.homework_parts (
   -- зафиксировано при выдаче: ученик и печать видят один набор.
   rule jsonb not null default '{}'
     check (jsonb_typeof(rule) = 'object' and octet_length(rule::text) <= 20000),
-  -- У каждого ученика свои аналоги (homework_tasks.student_id).
+  -- У каждого ученика свои аналоги (homework_tasks.student_id). У
+  -- карточек — только в работе над ошибками: каждому его карточки.
   per_student boolean not null default false,
   -- Комментарий репетитора к пункту.
   comment text check (char_length(comment) <= 1000),
@@ -341,9 +342,6 @@ begin
     if v_task_no is null or not exists (select 1 from public.ege_tasks where no = v_task_no) then
       raise exception 'bad_task_no: нет такого задания ЕГЭ (пункт %)', v_part_pos using errcode = 'check_violation';
     end if;
-    if v_source = 'kartochki' and v_per then
-      raise exception 'bad_part: карточки — одни на всех (пункт %)', v_part_pos using errcode = 'check_violation';
-    end if;
     if jsonb_typeof(v_part -> 'tasks') is distinct from 'array' or jsonb_array_length(v_part -> 'tasks') = 0 then
       raise exception 'no_tasks: в пункте % нет задач', v_part_pos using errcode = 'check_violation';
     end if;
@@ -399,9 +397,17 @@ begin
       if v_ak <> 'self' and jsonb_typeof(v_task -> 'razbor') is distinct from 'object' then
         raise exception 'bad_razbor: нет решения (пункт %)', v_part_pos using errcode = 'check_violation';
       end if;
-      -- «Без подсказок»: подсказок в ДЗ нет совсем, и ученику их не прочесть.
+      -- «Без подсказок»: ни подсказок, ни «Запомни», ни примера — в ДЗ их
+      -- нет совсем, и ученику их не прочесть. Выключенные «Запомни» и
+      -- пример тоже не хранятся.
       if v_no_hints then
-        v_view := v_view - 'hints' - 'podskazka';
+        v_view := v_view - 'hints' - 'podskazka' - 'voprosy' - 'zapomni' - 'primer';
+      end if;
+      if not coalesce((p ->> 'show_memo')::boolean, false) then
+        v_view := v_view - 'zapomni';
+      end if;
+      if not coalesce((p ->> 'show_example')::boolean, false) then
+        v_view := v_view - 'primer';
       end if;
 
       v_key := coalesce(v_student::text, '-');
