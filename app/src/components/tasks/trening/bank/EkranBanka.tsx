@@ -2,42 +2,32 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
-import { useBeforeFinish } from '../session/useBeforeFinish';
-import { useSessionReport } from '../session/useSessionReport';
-import { EkranZadachi, PodskazkaVoprosy, type SostoyanieZadachi } from '../trening';
-import { TRENAZHER7 } from '@/content/uravneniya7';
+import { useBeforeFinish } from '../../session/useBeforeFinish';
+import { useSessionReport } from '../../session/useSessionReport';
+import { EkranZadachi, type SostoyanieZadachi } from '../EkranZadachi';
+import { PodskazkaVoprosy } from '../PodskazkaVoprosy';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
 import type { LogOutcome } from '@/lib/progressLog';
-import { ZADANIYA } from '@/lib/paths';
 import { pickRound, useRound } from '@/lib/trainerRound';
 import type { TaskMark } from '@/lib/trainerSession/types';
-import type { ZadachaLite } from '@/lib/zadanie7/dannye';
-import { estPi, readSealed7 } from '@/lib/zadanie7/trening/otvet7';
-import { log7 } from '@/lib/zadanie7/trening/progress';
 import {
-  ZAMENY7,
-  analogOf7,
-  etoKlyuch7,
-  type Katalog7,
-  type Task7,
-  type Trenazher7Payload,
-} from '@/lib/zadanie7/trening/session';
-import {
-  nabrat7,
-  reshenieZadachi7,
-  zadachaIzKesha7,
-  zagruzitPrototipy7,
-} from '@/lib/zadanie7/trening/zagruzka';
-import { schitaemSUmom, shagiIzResheniya, voprosyIzResheniya } from './shagi7';
-import type { Trenazher7Ui } from './trenazher7Ui';
+  ZAMENY,
+  analogOf,
+  type KatalogBanka,
+  type PayloadBanka,
+  type TaskBanka,
+} from '@/lib/trening/bank';
+import type { RazdelBanka, ZadachaBanka } from './types';
+import type { UiBanka } from './ui';
 
-export interface Trenazher7ScreenProps {
-  payload: Trenazher7Payload;
-  katalog: Katalog7;
+export interface EkranBankaProps<Z extends ZadachaBanka, S> {
+  razdel: RazdelBanka<Z, S>;
+  payload: PayloadBanka;
+  katalog: KatalogBanka;
   roundKey: string;
   /** Состояние экрана из сохранённой тренировки. null — тренировка новая. */
-  restored: Trenazher7Ui | null;
-  report: (ui: Trenazher7Ui) => void;
+  restored: UiBanka | null;
+  report: (ui: UiBanka) => void;
   /** Активное время тренировки, мс: пауза и скрытая вкладка не идут. */
   elapsed: () => number;
   onFinish: () => void;
@@ -48,27 +38,21 @@ export interface Trenazher7ScreenProps {
   nazvaniyaTekst: Record<string, string>;
 }
 
-/** Метка источника под условием: открытый банк ФИПИ или нет. */
-function istochnikZadachi(z: ZadachaLite): string {
-  return z.source === 'fipi' && z.no !== undefined
-    ? TRENAZHER7.ekran.fipi(z.no)
-    : TRENAZHER7.ekran.neIzBanka;
-}
-
 /**
- * Экран задачи тренажёра №7: условие и одно поле ответа — в одну
- * колонку, на общем экране задачи (components/tasks/trening).
+ * Экран задачи тренажёра по банку: условие и одно поле ответа — в одну
+ * колонку, на общем экране задачи (EkranZadachi). Под условием — что
+ * даёт раздел: рисунок, вопрос после рисунка, откуда задача.
  *
  * Данные задач приезжают файлами прототипов по ходу тренировки. Ответ
- * сверяется с отпечатком; принимается любая верная запись числа. Если
- * в ответе π или не число — подсказка о записи, попытка не тратится.
- * Подсказка — вопросы с кнопками: ученик сам выходит на решение.
- * Решение по шагам открывается по просьбе — тогда задача «решена с
- * разбором»; ОДЗ и отбор корней в нём выделены. «Похожая задача»
- * заменяет текущую другой задачей того же типа. В режиме без подсказок
- * ни того, ни другого нет до итогов.
+ * читается по правилам бланка ЕГЭ и сверяется с отпечатком; неверная
+ * запись (дробь, единицы, π) — подсказка о записи, попытка не тратится.
+ * Подсказка — вопросы с кнопками. Решение по шагам открывается по
+ * просьбе — тогда задача «решена с разбором». «Похожая задача» заменяет
+ * текущую другой задачей того же типа. В режиме без подсказок ни того,
+ * ни другого нет до итогов.
  */
-export function Trenazher7Screen({
+export function EkranBanka<Z extends ZadachaBanka, S>({
+  razdel,
   payload,
   katalog,
   roundKey,
@@ -79,7 +63,8 @@ export function Trenazher7Screen({
   setBeforeFinish,
   nazvaniya,
   nazvaniyaTekst,
-}: Trenazher7ScreenProps) {
+}: EkranBankaProps<Z, S>) {
+  const { T, zagruzka, log } = razdel;
   const pool = payload.tasks;
   const control = payload.control;
   const kinds = useMemo(() => pool.map((item) => item.p), [pool]);
@@ -114,10 +99,10 @@ export function Trenazher7Screen({
   const total = order.length === 0 ? pool.length : order.length;
 
   const zameny = useMemo(() => {
-    const out: Record<number, Task7> = {};
+    const out: Record<number, TaskBanka> = {};
     for (const [at, id] of Object.entries(pohozhie)) {
       const source = pool[Number(at)];
-      if (source !== undefined && etoKlyuch7(id)) {
+      if (source !== undefined && razdel.klyuch.test(id)) {
         out[Number(at)] = {
           id,
           p: source.p,
@@ -126,19 +111,20 @@ export function Trenazher7Screen({
       }
     }
     return out;
-  }, [pohozhie, pool]);
+  }, [pohozhie, pool, razdel.klyuch]);
   useEffect(() => {
-    ZAMENY7.set(payload, zameny);
+    ZAMENY.set(payload, zameny);
   }, [payload, zameny]);
 
   /* Данные всех задач тренировки: файлы прототипов, решатель и KaTeX. */
   useEffect(() => {
     let zhiv = true;
     const ids = [...pool.map((t) => t.id), ...Object.values(pohozhie)];
-    if (ids.every((id) => zadachaIzKesha7(id) !== undefined)) {
+    if (ids.every((id) => zagruzka.izKesha(id) !== undefined)) {
       return undefined;
     }
-    zagruzitPrototipy7(pool.map((t) => t.p))
+    zagruzka
+      .zagruzit(pool.map((t) => t.p))
       .then(() => {
         if (zhiv) setPriehalo((n) => n + 1);
       })
@@ -148,12 +134,12 @@ export function Trenazher7Screen({
     return () => {
       zhiv = false;
     };
-  }, [pool, pohozhie, popytka]);
+  }, [pool, pohozhie, popytka, zagruzka]);
 
   const task = zameny[poolIndex] ?? pool[poolIndex];
-  const zadacha = task === undefined ? undefined : zadachaIzKesha7(task.id);
+  const zadacha = task === undefined ? undefined : zagruzka.izKesha(task.id);
 
-  useSessionReport<Trenazher7Ui>(report, {
+  useSessionReport<UiBanka>(report, {
     index,
     marks,
     tried,
@@ -173,11 +159,11 @@ export function Trenazher7Screen({
   /* Разбор нужен подсказке и решению: строится, когда открыто одно из них. */
   const nuzhenRazbor = hintOpen || solutionOpen;
   const razbor = useMemo(
-    () => (zadacha === undefined || !nuzhenRazbor ? null : reshenieZadachi7(zadacha)),
-    [zadacha, nuzhenRazbor],
+    () => (zadacha === undefined || !nuzhenRazbor ? null : zagruzka.reshenie(zadacha)),
+    [zadacha, nuzhenRazbor, zagruzka],
   );
-  const shagi = useMemo(() => (razbor === null ? [] : shagiIzResheniya(razbor)), [razbor]);
-  const voprosy = useMemo(() => (razbor === null ? [] : voprosyIzResheniya(razbor)), [razbor]);
+  const shagi = useMemo(() => (razbor === null ? [] : razdel.shagi(razbor)), [razbor, razdel]);
+  const voprosy = useMemo(() => (razbor === null ? [] : razdel.voprosy(razbor)), [razbor, razdel]);
 
   function taskSeconds(): number {
     return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
@@ -187,8 +173,8 @@ export function Trenazher7Screen({
      группам, «Стоит повторить» и «Мои ошибки». Тип попытки — прототип
      банка. Аналог из «Работы над ошибками» записывается с задачей,
      ошибку в которой он закрывает. */
-  function remember(item: Task7, outcome: LogOutcome) {
-    log7.record({
+  function remember(item: TaskBanka, outcome: LogOutcome) {
+    log.record({
       task: item.id,
       kind: item.p,
       outcome,
@@ -213,7 +199,7 @@ export function Trenazher7Screen({
       <div className="trn-ekran trn-zagruzka" role="status" aria-live="polite">
         {oshibkaZagruzki ? (
           <>
-            <p>{TRENAZHER7.ekran.oshibkaZagruzki}</p>
+            <p>{T.ekran.oshibkaZagruzki}</p>
             <button
               type="button"
               className="stk-btn stk-btn--primary"
@@ -222,17 +208,17 @@ export function Trenazher7Screen({
                 setPopytka(popytka + 1);
               }}
             >
-              {TRENAZHER7.ekran.povtorit}
+              {T.ekran.povtorit}
             </button>
           </>
         ) : (
-          <p>{TRENAZHER7.ekran.zagruzka}</p>
+          <p>{T.ekran.zagruzka}</p>
         )}
       </div>
     );
   }
-  const tekushchaya: Task7 = task;
-  const dannye: ZadachaLite = zadacha;
+  const tekushchaya: TaskBanka = task;
+  const dannye: Z = zadacha;
 
   const revealed = solutionOpen && checked !== 'right';
   const sostoyanie: SostoyanieZadachi =
@@ -241,12 +227,12 @@ export function Trenazher7Screen({
   const zakryta = marks[index] !== undefined;
 
   function check() {
-    if (estPi(value)) {
+    const reading = razdel.proverit(value, dannye.seal);
+    if (reading.kind === 'pi') {
       /* Ответ через π: подсказка о записи, попытка не тратится. */
-      setFormat(TRENAZHER7.ekran.piPodskazka);
+      setFormat(T.ekran.piPodskazka);
       return;
     }
-    const reading = readSealed7(value, dannye.seal);
     if (reading.kind === 'format') {
       /* Неверная запись: подсказка, попытка не тратится. */
       setFormat(formatHint(reading.problem, reading.meant));
@@ -312,10 +298,10 @@ export function Trenazher7Screen({
   }
 
   const zanyato = new Set([...pool.map((item) => item.id), ...Object.values(pohozhie)]);
-  const estPohozhaya = analogOf7(katalog, tekushchaya.p, tekushchaya.id, zanyato) !== null;
+  const estPohozhaya = analogOf(katalog, tekushchaya.p, tekushchaya.id, zanyato) !== null;
 
   function pohozhaya() {
-    const fresh = analogOf7(katalog, tekushchaya.p, tekushchaya.id, zanyato);
+    const fresh = analogOf(katalog, tekushchaya.p, tekushchaya.id, zanyato);
     if (fresh === null) {
       return;
     }
@@ -336,9 +322,9 @@ export function Trenazher7Screen({
       nomer={index + 1}
       vsego={total}
       tipHtml={nazvaniya[tekushchaya.p] ?? ''}
-      uslovieHtml={nabrat7(dannye.text)}
+      uslovieHtml={zagruzka.nabrat(dannye.text)}
       tekst
-      pod={<p className="trn-istochnik">{istochnikZadachi(dannye)}</p>}
+      pod={razdel.pod(dannye)}
       value={value}
       onValue={(nextValue) => {
         setValue(nextValue);
@@ -359,7 +345,7 @@ export function Trenazher7Screen({
               onOpen: () => setHintOpen(true),
               telo:
                 voprosy.length === 0 ? (
-                  <p>{TRENAZHER7.ekran.zagruzka}</p>
+                  <p>{T.ekran.zagruzka}</p>
                 ) : (
                   <PodskazkaVoprosy
                     voprosy={voprosy}
@@ -370,7 +356,7 @@ export function Trenazher7Screen({
                       setMimo([]);
                     }}
                     onMimo={(j) => setMimo([...mimo, j])}
-                    labels={TRENAZHER7.ekran.voprosy}
+                    labels={T.ekran.voprosy}
                   />
                 ),
             }
@@ -380,7 +366,8 @@ export function Trenazher7Screen({
           ? null
           : {
               shagi,
-              posle: razbor === null ? undefined : schitaemSUmom(razbor),
+              posle:
+                razbor === null || razdel.posle === undefined ? undefined : razdel.posle(razbor),
               open: solutionOpen,
               onToggle: reveal,
             }
@@ -390,19 +377,19 @@ export function Trenazher7Screen({
       last={last}
       zakladka={
         <BookmarkButton
-          section="7"
+          section={razdel.razdel}
           place="trenazher"
           refId={dannye.id}
-          title={TRENAZHER7.ekran.zakladka(nazvaniyaTekst[tekushchaya.p] ?? '')}
-          href={`${ZADANIYA}/7/trenazher/?zadacha=${encodeURIComponent(dannye.id)}`}
+          title={T.ekran.zakladka(nazvaniyaTekst[tekushchaya.p] ?? '')}
+          href={razdel.zadachaHref(dannye.id)}
           className="trn-zakladka"
         />
       }
       bezPodskazok={control}
       labels={{
-        ...TRENAZHER7.ekran,
-        vernoLead: TRENAZHER7.ekran.vernoLead(checked === 'right' ? taskSeconds() : null),
-        nevernoLead: viaFraction ? TRENAZHER7.ekran.nevernoDrob : TRENAZHER7.ekran.nevernoLead,
+        ...T.ekran,
+        vernoLead: T.ekran.vernoLead(checked === 'right' ? taskSeconds() : null),
+        nevernoLead: viaFraction ? T.ekran.nevernoDrob : T.ekran.nevernoLead,
       }}
     />
   );

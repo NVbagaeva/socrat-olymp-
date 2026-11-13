@@ -1,0 +1,76 @@
+{
+  "_chto": "localStorage ученика, решавшего №6 до редизайна: ключи тренажёра (budetege:zadanie-6:v1) и опорных задач (budetege:zadanie-6:opornye:v1), записаны прежним кодом lib/progressStore.ts теми же вызовами, что делали прежние экраны. Нужен scripts/check-progress-6.mjs и браузерной проверке переноса.",
+  "budetege:zadanie-6:v1": {
+    "kinds": {
+      "P01": {
+        "done": 3,
+        "right": 2,
+        "seconds": 182
+      },
+      "P02": {
+        "done": 1,
+        "right": 1,
+        "seconds": 120
+      },
+      "P03": {
+        "done": 2,
+        "right": 1,
+        "seconds": 313
+      },
+      "P04": {
+        "done": 3,
+        "right": 3,
+        "seconds": 287
+      },
+      "P05": {
+        "done": 1,
+        "right": 0,
+        "seconds": 90
+      },
+      "P06": {
+        "done": 1,
+        "right": 1,
+        "seconds": 55
+      },
+      "P10": {
+        "done": 1,
+        "right": 0,
+        "seconds": 160
+      },
+      "P12": {
+        "done": 1,
+        "right": 1,
+        "seconds": 240
+      },
+      "P14": {
+        "done": 1,
+        "right": 1,
+        "seconds": 200
+      },
+      "P15": {
+        "done": 1,
+        "right": 1,
+        "seconds": 101
+      }
+    },
+    "mistakes": ["P01-a11", "S02", "P03-a20", "P04-a07", "S05", "S13", "S18"],
+    "outcomes": {}
+  },
+  "budetege:zadanie-6:opornye:v1": {
+    "kinds": {
+      "slozhit": {
+        "done": 5,
+        "right": 4,
+        "seconds": 0
+      }
+    },
+    "mistakes": ["sl-3", "sl-4"],
+    "outcomes": {
+      "sl-1": "right",
+      "sl-2": "right",
+      "sl-3": "wrong",
+      "sl-4": "right",
+      "sl-5": "right"
+    }
+  }
+}

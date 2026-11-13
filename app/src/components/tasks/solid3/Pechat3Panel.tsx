@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import '@/components/tasks/steklo/steklo.css';
 import { SpaceOption } from '@/components/tasks/space/SpaceOption';
 import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
 import { SHEET_3 } from '@/content/sheet3';
@@ -33,7 +34,7 @@ export function Pechat3Panel({ razdely }: { razdely: readonly RazdelPechati[] })
   const g = SHEET_3.generator;
   const base = razdely[vybor]?.base ?? razdely[0]?.base ?? '';
   return (
-    <section className="z3t-print" aria-labelledby="z3t-print-h">
+    <section className="z3t-print stk-glass" aria-labelledby="z3t-print-h">
       <h2 id="z3t-print-h" className="z3t-print__title">
         {g.title}
       </h2>

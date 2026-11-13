@@ -97,6 +97,8 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
       /* Журнал попыток тренажёра (lib/zadanie6/progress.ts). Прежний ключ
          budetege:zadanie-6:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:zadanie-6:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «6»). */
+      'budetege:trainer:6:session',
     ],
   },
   {

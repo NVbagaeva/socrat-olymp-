@@ -57,8 +57,8 @@
                 sealMetod совпал с отпечатком варианта uznayMetodPool();
      №3       — prototype.otvet(параметры варианта) из lib/zadanie3;
      №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
-     №6       — то же из lib/zadanie6
-                (в записи — условие и параметры задачи, без ответа).
+     №6       — то же из lib/zadanie6 (общий тренажёр по банку, как у №7)
+                (в записи — ключи задач банка, без ответа).
 
    Новый тренажёр — один объект в TRAINERS ниже: адрес, раздел, как
    начать тренировку и как по записи получить верный ответ. Поле ответа,
@@ -228,10 +228,15 @@ function answer7(payload, at) {
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
 
-/** №6: задача записи {prototypeId, params} → решатель прототипа. */
+/** №6: как у №7 — ключи задач банка {id, p}; ответ — решатель прототипа. */
 function answer6(payload, at) {
   const { prototype } = requireSrc('lib/zadanie6/prototypes/index');
-  const z = payload.zadachi[at];
+  const { BANK } = requireSrc('lib/zadanie6/bank/index');
+  const task = payload.tasks[at];
+  const z = BANK.find((item) => item.id === task.id);
+  if (z === undefined) {
+    throw new Error(`№6: нет задачи ${task.id}`);
+  }
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
 
@@ -419,17 +424,10 @@ const TRAINERS = [
     url: '/zadaniya/6/trenazher/',
     scope: '6',
     answer: answer6,
-    /* Прототипы по умолчанию не отмечены: шаблон «Диаграммы и деревья». */
-    start: async (page) => {
-      await page
-        .getByRole('button', { name: /^Диаграммы и деревья/ })
-        .first()
-        .click();
-      await page
-        .getByRole('button', { name: /^Начать/ })
-        .first()
-        .click();
-    },
+    /* Тот же общий тренажёр по банку, что у №7. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   { name: '№4', url: '/zadaniya/4/trenazher/', scope: '4', answer: answer45, rep: true },
   { name: '№5', url: '/zadaniya/5/trenazher/', scope: '5', answer: answer45 },

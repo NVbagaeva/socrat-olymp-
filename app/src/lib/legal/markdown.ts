@@ -12,8 +12,8 @@ export type LegalBlock =
   | { type: 'p'; inlines: Inline[] }
   | { type: 'ul'; items: Inline[][] };
 
-/* Адреса документов в тексте («budetege.ru/politika») становятся ссылками. */
-const DOC_LINK = /budetege\.ru\/(politika|soglasie|soglashenie)/g;
+/* Адреса документов и тарифов в тексте («budetege.ru/politika») становятся ссылками. */
+const DOC_LINK = /budetege\.ru\/(politika|soglasie|soglashenie|tarify)/g;
 
 function links(text: string): Inline[] {
   const out: Inline[] = [];

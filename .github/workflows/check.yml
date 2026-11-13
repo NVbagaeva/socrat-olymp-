@@ -23,7 +23,7 @@ concurrency:
 # переменную не ставит: там сборка падает, пока не заполнен
 # app/src/content/legal/operator.json (scripts/lib/legal-config.mjs).
 env:
-  LEGAL_DRAFT: '1'
+  LEGAL_DRAFT: "1"
 
 jobs:
   # Проверки идут параллельно на нескольких машинах GitHub, а не
@@ -252,9 +252,20 @@ jobs:
         working-directory: app
         run: pnpm test:progress-7
 
+      # №6 на том же общем тренажёре: прежний прогресс (budetege:zadanie-6:v1),
+      # прежняя запись тренировки (режим «Проверка» → «Без подсказок»),
+      # источники и формулировка. Без браузера.
+      - name: Тренажёр №6 — перенос прежнего прогресса, сборка тренировок
+        working-directory: app
+        run: pnpm test:progress-6
+
       - name: Тексты №3 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-3-teksty
+
+      - name: Тексты №6 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-6-teksty
 
       # Выделенные фигуры №3 (сечения, треугольники, диагонали): видимость
       # каждой стороны — лучом, как у рёбер, при трёх ракурсах; одна линия
@@ -880,6 +891,14 @@ jobs:
         working-directory: app
         run: pnpm test:progress-7-site
 
+      - name: Редизайн №6 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 6 origin/main
+
+      - name: Перенос прогресса №6 в браузере
+        working-directory: app
+        run: pnpm test:progress-6-site
+
       # Иллюстрация в верхнем блоке «Задание 12»: разметка (picture, srcset,
       # размеры, высокий приоритет, без lazy), файлы и вес версии на телефон
       # (≤60 КБ), на 390 первая карточка раздела на первом экране, на 1440
@@ -895,7 +914,7 @@ jobs:
       - name: Нет горизонтальной прокрутки на телефоне (320 и 375 px)
         working-directory: app
         env:
-          SHIRINY: '320,375'
+          SHIRINY: "320,375"
         run: pnpm test:mobile-overflow
 
       # Навигация между разделами №12: плашка над вкладками, меню «Все
@@ -987,11 +1006,18 @@ jobs:
         run: pnpm test:tour
 
       # Тарифы: цены и ступени «До ЕГЭ» — из единого конфига; оплата
-      # выключена — на сайте нет ни одной активной кнопки оплаты, нет
-      # разметки Offer и страницы оферты (scripts/check-tarify.mjs).
+      # выключена — на сайте нет ни одной активной кнопки оплаты и
+      # разметки Offer (scripts/check-tarify.mjs).
       - name: Тарифы и выключенная оплата
         working-directory: app
         run: pnpm test:tarify
+
+      # Оферта: 14 разделов, цены и сроки из конфига тарифов, docs/oferta.md
+      # не отстал от кода; без NEXT_PUBLIC_LEGAL_READY страницы /oferta/,
+      # ссылок на неё и реквизитов в подвале нет (scripts/check-oferta.mjs).
+      - name: Оферта и реквизиты не опубликованы раньше времени
+        working-directory: app
+        run: pnpm test:oferta
 
       # Онлайн-вариант в браузере: контрольная с перезагрузкой (ответы,
       # «вернусь позже», номер задания), подсказка о формате, результат и
