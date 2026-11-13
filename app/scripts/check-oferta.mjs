@@ -76,21 +76,31 @@ if (!vozvrat?.text.includes('Возврат')) {
 
 const skobki = new Set(tekst.match(/\[[^\]]+\]/g) ?? []);
 for (const s of skobki) {
-  if (s !== '[ИНН]' && s !== '[ПОЧТА]') fail(`после подстановки осталось ${s}`);
+  /* [ЧАСОВ] — срок открытия доступа, пока владелец его не назвал;
+     с флагом публикации такая сборка падает (prodavetsProblems). */
+  if (s !== '[ИНН]' && s !== '[ПОЧТА]' && s !== '[ЧАСОВ]') fail(`после подстановки осталось ${s}`);
 }
 
 const ploskiy = tekst.replace(/\*\*/g, '');
 const est = (frag, zachem) => {
   if (!ploskiy.includes(frag)) fail(`нет «${frag}» (${zachem})`);
 };
-est(`на ${c.PROBNYY.dney} дней`, 'срок пробного доступа из конфига');
+est(`на ${c.PROBNYY_SROK}`, 'срок пробного доступа из конфига');
 est(`${c.PERIOD_DNEY} дней`, 'оплаченный срок из конфига');
 for (const rol of ['uchenik', 'repetitor']) {
   const t = c.PLATNYE[rol];
   est(`«${t.nazvanie}» — ${c.rubli(t.tsena30)}`, `цена за 30 дней, ${t.nazvanie}`);
   for (const stupen of t.doEge) est(c.rubli(stupen.tsena), `ступень «До ЕГЭ», ${t.nazvanie}`);
 }
-est('Robokassa', 'способ оплаты');
+est('Систему быстрых платежей', 'способ оплаты');
+est('«Мой налог»', 'чек самозанятой');
+est('«Я оплатил(а)»', 'кнопка заявки об оплате');
+est('включается сам', 'пробный доступ после регистрации');
+if (/Robokassa|сразу после оплаты|чем ближе экзамен/.test(ploskiy)) {
+  fail(
+    'в оферте остались прежние условия: Robokassa, «сразу после оплаты» или «чем ближе экзамен»',
+  );
+}
 est('без НДС', 'цены без НДС');
 est('налог на профессиональный доход', 'статус исполнителя');
 est('один раз на аккаунт', 'пробный доступ');
@@ -105,15 +115,29 @@ for (const adres of ['budetege.ru/tarify', 'budetege.ru/politika', 'budetege.ru/
 }
 
 /* Реквизиты. */
-if (prodavetsProblems({ inn: '[ИНН]', pochta: '[ПОЧТА]', dataOferty: '12.11.2026' }).length !== 2) {
+const OK = { telegram: 'nataliy_bagaeva', srokOtkrytiyaChasov: '24', dataOferty: '12.11.2026' };
+if (prodavetsProblems({ ...OK, inn: '[ИНН]', pochta: '[ПОЧТА]' }).length !== 2) {
   fail('проверка реквизитов пропустила плейсхолдеры');
 }
-if (
-  prodavetsProblems({ inn: '1234567890', pochta: 'a@b.ru', dataOferty: '12.11.2026' }).length !== 1
-) {
+if (prodavetsProblems({ ...OK, inn: '1234567890', pochta: 'a@b.ru' }).length !== 1) {
   fail('ИНН из 10 цифр (организации) принят за ИНН самозанятой');
 }
-if (prodavetsProblems({ inn: '123456789012', pochta: 'a@b.ru', dataOferty: '12.11.2026' }).length) {
+if (
+  prodavetsProblems({
+    ...OK,
+    inn: '123456789012',
+    pochta: 'a@b.ru',
+    srokOtkrytiyaChasov: '[ЧАСОВ]',
+  }).length !== 1
+) {
+  fail('проверка реквизитов пропустила незаполненный срок открытия доступа');
+}
+if (
+  prodavetsProblems({ ...OK, inn: '123456789012', pochta: 'a@b.ru', telegram: '@x' }).length !== 1
+) {
+  fail('проверка реквизитов пропустила неверный Telegram');
+}
+if (prodavetsProblems({ ...OK, inn: '123456789012', pochta: 'a@b.ru' }).length) {
   fail('верные реквизиты не приняты');
 }
 

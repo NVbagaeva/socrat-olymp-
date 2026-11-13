@@ -30,7 +30,7 @@ export function sobratOfertu() {
     '',
     prodavetsFilled
       ? '> Файл собран из кода (`app/src/content/legal/oferta.md`); если код и файл разойдутся, верен код.'
-      : '> **Черновик на вычитку.** [ИНН] и [ПОЧТА] подставятся из `app/src/content/legal/prodavets.json`. Цены и сроки — из конфига тарифов. Файл собран из кода (`app/src/content/legal/oferta.md`); если код и файл разойдутся, верен код.',
+      : '> **Черновик на вычитку.** Незаполненное в квадратных скобках подставится из `app/src/content/legal/prodavets.json`. Цены и сроки — из конфига тарифов. Файл собран из кода (`app/src/content/legal/oferta.md`); если код и файл разойдутся, верен код.',
     '',
   ].join('\n');
   return `${shapka}\n${tekst.trimEnd()}\n`;

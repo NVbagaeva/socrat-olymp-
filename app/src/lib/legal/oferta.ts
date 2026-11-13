@@ -12,11 +12,11 @@ import {
   DO_EGE_KONETS_PRODAZH,
   PERIOD_DNEY,
   PLATNYE,
-  PROBNYY,
+  PROBNYY_SROK,
   rubli,
   type Rol,
 } from '@/lib/tarify/config';
-import { prodavets } from './prodavets';
+import { prodavets, srokOtkrytiyaTekst } from './prodavets';
 
 const MESYATSY = [
   'января',
@@ -96,7 +96,9 @@ export function zapolnitOfertu(md: string): string {
     .replaceAll('[СТАТУС]', prodavets.statusPolnostyu)
     .replaceAll('[ИНН]', prodavets.inn)
     .replaceAll('[ПОЧТА]', prodavets.pochta)
-    .replaceAll('[ПРОБНЫЙ_ДНЕЙ]', String(PROBNYY.dney))
+    .replaceAll('[ПРОБНЫЙ_СРОК]', PROBNYY_SROK)
+    .replaceAll('[СРОК_ОТКРЫТИЯ]', srokOtkrytiyaTekst())
+    .replaceAll('[TELEGRAM]', prodavets.telegram)
     .replaceAll('[ПЕРИОД_ДНЕЙ]', String(PERIOD_DNEY))
     .replaceAll('[ДО_ЕГЭ]', dataSlovami(DO_EGE.data));
 }
