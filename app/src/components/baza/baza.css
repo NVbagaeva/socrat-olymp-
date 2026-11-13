@@ -1,0 +1,40 @@
+/* Раздел задания базы. Только семантические токены. */
+
+/* Карточка «Материал готовится» без иллюстрации: одна колонка. */
+.task-stub--text {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Формат задания на вкладке «О задании». */
+.baza-format {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.baza-format__list {
+  display: grid;
+  gap: var(--space-3);
+}
+.baza-format__row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--space-4);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.baza-format__row dt {
+  color: var(--color-text-secondary);
+}
+@media (max-width: 767.98px) {
+  .baza-format {
+    padding: var(--space-4);
+  }
+  .baza-format__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}

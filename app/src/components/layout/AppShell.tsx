@@ -15,7 +15,9 @@ import {
   sidebarExtras,
   topNav,
 } from '@/content/appNav';
-import { taskHasPage, taskHref, taskParts, tasks, type ExamTask } from '@/content/tasks';
+import { taskHasPage, taskHref, taskParts, tasksOf, type ExamTask } from '@/content/tasks';
+import { LevelSwitch } from '@/components/level/LevelSwitch';
+import { levelInfo, type Level } from '@/lib/level';
 import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
@@ -28,6 +30,11 @@ export interface AppShellProps {
    * Поиск по заданиям есть на странице банка.
    */
   search?: boolean;
+  /**
+   * Уровень экзамена: чьи задания в сайдбаре и куда ведут «Задания» и
+   * «Собрать вариант». Не задан — профиль; страницы /baza/… передают 'base'.
+   */
+  level?: Level;
   children: React.ReactNode;
 }
 
@@ -57,11 +64,31 @@ function taskItem(task: ExamTask): NavItem {
 
 /* Список по частям экзамена: «ЧАСТЬ 1», под ней 01–13, разделитель,
    «ЧАСТЬ 2» и 14–20. */
-function taskGroups(): NavGroup[] {
-  return taskParts.map((part) => ({
-    label: part.title,
-    items: tasks.filter((task) => task.part === part.part).map(taskItem),
-  }));
+function taskGroups(level: Level): NavGroup[] {
+  const tasks = tasksOf(level);
+  return taskParts
+    .map((part) => ({
+      /* В базе частей нет: одна группа с номерами заданий. */
+      label: level === 'base' ? `Задания ${levelInfo(level).range}` : part.title,
+      items: tasks.filter((task) => task.part === part.part).map(taskItem),
+    }))
+    .filter((group) => group.items.length > 0);
+}
+
+/* Меню кабинета уровня. «Задания» знают оба адреса: на странице без
+   своего уровня (статистика, настройки) пункт ведёт в банк запомненного
+   уровня. На страницах базы в банк и сборщик базы ведут и остальные
+   раскладки меню — нижняя панель берёт пункты отсюда же. */
+function levelNav(items: NavItem[], level: Level): NavItem[] {
+  const base = levelInfo('base');
+  return items.map((item) => {
+    if (item.id === 'tasks') {
+      return { ...item, href: level === 'base' ? base.bank : item.href, hrefBase: base.bank };
+    }
+    if (item.id === 'variant' && level === 'base') return { ...item, href: base.variant };
+    if (item.id === 'home' && level === 'base') return { ...item, href: base.home };
+    return item;
+  });
 }
 
 /**
@@ -72,17 +99,21 @@ function taskGroups(): NavGroup[] {
  * каждой из них. Ниже 768px сайдбар прячется и его место занимает
  * нижняя панель — пункты у неё те же, что в шапке.
  */
-export function AppShell({ active, search = false, children }: AppShellProps) {
-  const bottomItems = withActive([...appNavPrimary, appNavMorePage], bottomNavActive(active));
+export function AppShell({ active, search = false, level = 'profile', children }: AppShellProps) {
+  const bottomItems = withActive(
+    levelNav([...appNavPrimary, appNavMorePage], level),
+    bottomNavActive(active),
+  );
+  const tasks = tasksOf(level);
 
   return (
     <div className="shell shell--responsive app-shell">
       <Sidebar
         brand="Будет на ЕГЭ"
-        caption={{ title: 'Задания ЕГЭ', subtitle: 'Профильная математика' }}
+        caption={{ title: 'Задания ЕГЭ', subtitle: levelInfo(level).name }}
         label="Задания ЕГЭ"
         items={tasks.map(taskItem)}
-        groups={taskGroups()}
+        groups={taskGroups(level)}
         secondaryItems={withActive(sidebarExtras, active)}
         footer={
           /* Декор подвала: горы во всю ширину столбца, поверх них
@@ -105,7 +136,8 @@ export function AppShell({ active, search = false, children }: AppShellProps) {
 
       <div className="app-col">
         <Topbar
-          nav={withActive(topNav, active)}
+          lead={<LevelSwitch className="topbar__level" />}
+          nav={withActive(levelNav(topNav, level), active)}
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}

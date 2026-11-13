@@ -169,6 +169,7 @@
     "build:tarify-teksty": "node scripts/build-tarify-teksty.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
     "test:links": "node scripts/check-links.mjs",
+    "test:baza": "node scripts/check-baza.mjs",
     "test:navigation": "node scripts/check-navigation.mjs",
     "build:bank-10": "node scripts/build-bank-10.mjs",
     "build:bank-7": "node scripts/build-bank-7.mjs",
