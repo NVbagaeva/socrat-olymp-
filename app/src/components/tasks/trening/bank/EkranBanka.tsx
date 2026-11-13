@@ -69,7 +69,16 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   const control = payload.control;
   const kinds = useMemo(() => pool.map((item) => item.p), [pool]);
   const build = useCallback(() => pickRound(kinds, pool.length), [kinds, pool.length]);
-  const order = useRound(roundKey, build, restored?.order);
+  /* Запись без раскладки (прежние тренажёры раздела) — задачи шли по
+     порядку пула: так и открываем, иначе номер задачи указал бы на другую. */
+  const prezhnyaya = useMemo(
+    () =>
+      restored !== null && (restored.order === null || restored.order === undefined)
+        ? pool.map((_, i) => i)
+        : restored?.order,
+    [restored, pool],
+  );
+  const order = useRound(roundKey, build, prezhnyaya);
 
   const [index, setIndex] = useState(restored?.index ?? 0);
   const [value, setValue] = useState(restored?.value ?? '');
@@ -325,6 +334,10 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       uslovieHtml={zagruzka.nabrat(dannye.text)}
       tekst
       pod={razdel.pod(dannye)}
+      {...(razdel.varianty === undefined ? {} : { varianty: razdel.varianty(dannye) })}
+      {...(razdel.poyasnenie === undefined || (checked === null && !revealed)
+        ? {}
+        : { poyasnenieHtml: razdel.poyasnenie(dannye, checked !== 'wrong') })}
       value={value}
       onValue={(nextValue) => {
         setValue(nextValue);
@@ -344,7 +357,12 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
               open: hintOpen,
               onOpen: () => setHintOpen(true),
               telo:
-                voprosy.length === 0 ? (
+                razbor !== null && razdel.podskazka !== undefined ? (
+                  razdel.podskazka(razbor, {
+                    otkryto: shag,
+                    dalshe: () => setShag(shag + 1),
+                  })
+                ) : voprosy.length === 0 ? (
                   <p>{T.ekran.zagruzka}</p>
                 ) : (
                   <PodskazkaVoprosy

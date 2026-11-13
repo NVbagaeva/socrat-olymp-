@@ -1,0 +1,131 @@
+{
+  "budetege:trainer:v1": {
+    "kinds": {
+      "12.A": {
+        "done": 4,
+        "right": 3,
+        "seconds": 175
+      },
+      "12Q.A": {
+        "done": 1,
+        "right": 1,
+        "seconds": 90
+      },
+      "12Q.C": {
+        "done": 1,
+        "right": 1,
+        "seconds": 55
+      }
+    },
+    "mistakes": [
+      "12Q.A-02"
+    ],
+    "solved": [
+      "12.A-02",
+      "12.A-03",
+      "12Q.A-02",
+      "12Q.C-04",
+      "12.A-01"
+    ]
+  },
+  "budetege:zadanie-12:log:v1": {
+    "v": 1,
+    "attempts": [
+      {
+        "task": "12Q.B-05",
+        "kind": "12Q.B",
+        "outcome": "wrong",
+        "seconds": 150,
+        "id": "mweyasol-ces1kubj",
+        "at": 1794572782005
+      },
+      {
+        "task": "12Q.B-03",
+        "kind": "12Q.B",
+        "outcome": "right",
+        "seconds": 64,
+        "id": "mweyasol-f98hyldw",
+        "at": 1794572782005
+      },
+      {
+        "task": "12R.G-02",
+        "kind": "12R.G",
+        "outcome": "revealed",
+        "seconds": 201,
+        "id": "mweyasol-i523xof1",
+        "at": 1794572782005
+      },
+      {
+        "task": "12.C-07",
+        "kind": "12.C",
+        "outcome": "right",
+        "seconds": 47,
+        "id": "mweyasol-pjga9w9q",
+        "at": 1794572782005
+      },
+      {
+        "task": "12T.E-04",
+        "kind": "12T.E",
+        "outcome": "wrong",
+        "seconds": 80,
+        "id": "mweyasol-pmh7lz3i",
+        "at": 1794572782005
+      },
+      {
+        "task": "12Q.G-02",
+        "kind": "12Q.G",
+        "outcome": "right",
+        "seconds": 40,
+        "id": "mweyasol-uz10s94l",
+        "at": 1794572782005
+      },
+      {
+        "task": "12E.A-F1",
+        "kind": "12E.A",
+        "outcome": "hinted",
+        "seconds": 95,
+        "id": "mweyasol-ztr88dfb",
+        "at": 1794572782005
+      }
+    ],
+    "archive": {},
+    "legacyMistakes": []
+  },
+  "budetege:trainer:12:session": {
+    "schemaVersion": 2,
+    "scope": "12",
+    "id": "s-prezhniy",
+    "createdAt": 1762900000000,
+    "updatedAt": 1762900300000,
+    "rev": 4,
+    "writer": "tab-old",
+    "paused": true,
+    "activeMs": 210000,
+    "total": 3,
+    "ui": {
+      "index": 1,
+      "marks": {
+        "0": "right"
+      },
+      "tried": {},
+      "order": null
+    },
+    "payload": {
+      "v": 1,
+      "filtr": "rezh=bez",
+      "rezhim": "bez",
+      "seed": "k3j9x2",
+      "items": [
+        {
+          "k": "12Q.B-03"
+        },
+        {
+          "k": "12R.A-05"
+        },
+        {
+          "k": "12.D-11"
+        }
+      ]
+    }
+  }
+}

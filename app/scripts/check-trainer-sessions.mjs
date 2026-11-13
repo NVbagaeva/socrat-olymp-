@@ -111,6 +111,21 @@ function answer12(payload, at) {
   return task.options === null ? { text: task.answer } : { option: String(task.answer) };
 }
 
+/**
+ * №12 на общем тренажёре по банку: ключи шаблонов {id, p}; задача
+ * собирается тем же кодом сайта с seed набора (lib/ves12/trening).
+ */
+function answer12bank(payload, at) {
+  const { zadachaShablona } = requireSrc('lib/trainerSession.ts');
+  const { seedNabora12 } = requireSrc('lib/ves12/trening/session.ts');
+  const item = payload.tasks[at];
+  const task = zadachaShablona(item.id, seedNabora12(item.p), new Map());
+  if (task === null) {
+    throw new Error(`№12: задача ${item.id} не собралась`);
+  }
+  return task.options === null ? { text: task.answer } : { option: String(task.answer) };
+}
+
 /** Число ответа так, как его ввёл бы ученик: девять знаков, запятая. */
 function numberText(value) {
   return String(Math.round(Number(value) * 1e9) / 1e9).replace('.', ',');
@@ -370,10 +385,11 @@ const TRAINERS = [
     name: '№12 все типы',
     url: '/zadaniya/12/trenazher/',
     scope: '12',
-    answer: answer12,
-    all: chooseAllFiltry,
-    /* Страница без ленты вкладок раздела. */
-    tabs: false,
+    answer: answer12bank,
+    /* Общий тренажёр по банку, как у №7 и №6: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№8',
@@ -643,9 +659,15 @@ async function give(page, answer) {
     await page.locator(ANSWER_INPUT).first().fill(answer.text);
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
   } else if (answer.option !== undefined) {
+    /* Вариант ответа: .popt — прежние тренажёры, .trn-variant — общий
+       тренажёр «Стеклянной сцены» (№12). */
     await body
-      .locator('.popt')
-      .filter({ has: page.locator('.popt__no', { hasText: new RegExp(`^${answer.option}$`) }) })
+      .locator('.popt, .trn-variant')
+      .filter({
+        has: page.locator('.popt__no, .trn-variant__no', {
+          hasText: new RegExp(`^${answer.option}$`),
+        }),
+      })
       .first()
       .click();
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
@@ -676,7 +698,9 @@ async function wrongOf(page, right) {
     return { text: right.text === '987654' ? '987653' : '987654' };
   }
   if (right.option !== undefined) {
-    const numbers = await page.locator(`${BODY} .popt .popt__no`).allTextContents();
+    const numbers = await page
+      .locator(`${BODY} .popt .popt__no, ${BODY} .trn-variant .trn-variant__no`)
+      .allTextContents();
     return { option: numbers.map((item) => item.trim()).find((item) => item !== right.option) };
   }
   const names = await page.locator(`${BODY} .z4-picker__name`).allTextContents();
@@ -705,7 +729,9 @@ async function shownAnswer(page, like) {
     return { text: await page.locator(ANSWER_INPUT).first().inputValue() };
   }
   if (like.option !== undefined) {
-    const chosen = page.locator(`${BODY} .popt.is-chosen .popt__no`);
+    const chosen = page.locator(
+      `${BODY} .popt.is-chosen .popt__no, ${BODY} .trn-variant.is-on .trn-variant__no`,
+    );
     return {
       option: (await chosen.count()) === 0 ? null : (await chosen.first().textContent()).trim(),
     };

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { LogStore } from '@/lib/progressLog';
 import type { Reading } from '@/lib/otvet';
+import type { PayloadBanka } from '@/lib/trening/bank';
 import type { SyncedStore } from '@/lib/syncedStore';
 import type { Zagruzka, ZadachaFayla } from '@/lib/trening/zagruzka';
 import type { VyborBanka } from '@/lib/trening/vybor';
@@ -93,4 +94,23 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   zadachaHref: (id: string) => string;
   /** Переключатель формулировки в выборе тем (№6). */
   stil?: boolean;
+  /** Без переключателя источника задач (№2: все задачи строит генератор). */
+  bezIstochnika?: boolean;
+  /**
+   * Своя подсказка вместо вопросов (№2: шаги решения по одному). otkryto —
+   * сколько шагов открыто (с 1), dalshe — открыть следующий.
+   */
+  podskazka?: (s: S, ui: { otkryto: number; dalshe: () => void }) => ReactNode;
+  /**
+   * Ответ выбором варианта (№12: «формула по графику»): номер и разметка
+   * варианта. null — ответ числом в поле.
+   */
+  varianty?: (z: Z) => { id: string; html: string }[] | null;
+  /** Пояснение к вердикту, HTML (№12: откуда ответ, что проверить). */
+  poyasnenie?: (z: Z, verno: boolean) => string;
+  /**
+   * Запись незаконченной тренировки прежнего тренажёра раздела (не
+   * формата PayloadBanka): перевести в тренировку по банку или null.
+   */
+  perenos?: (packed: unknown) => PayloadBanka | null;
 }

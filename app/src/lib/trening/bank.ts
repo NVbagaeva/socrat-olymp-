@@ -46,7 +46,8 @@ export interface PayloadBanka {
   timer?: boolean;
 }
 
-const PROTOTIP = /^P\d\d$/;
+/** Прототип: «P04» (№7, №6), «A6» (№2) или набор №12 («12.A», «12Q.B»). */
+const PROTOTIP = /^(P\d\d|[ABC]\d|12[A-Z]?\.[A-Z])$/;
 
 type Random = () => number;
 
@@ -69,9 +70,19 @@ export function prototipyZadach(katalog: KatalogBanka): Map<string, string> {
   return out;
 }
 
-/** Прототип задачи: по каталогу, у аналога — из ключа «P18-a03». */
+/**
+ * Прототип задачи: по каталогу, иначе из ключа — «P18-a03» (аналог),
+ * «A6|k07» (№2), «12Q.B-07» (№12: шаблон набора).
+ */
 export function prototipZadachi(id: string, poKatalogu: ReadonlyMap<string, string>): string {
-  return poKatalogu.get(id) ?? (/^P\d\d-/.test(id) ? id.slice(0, 3) : id);
+  const poKlyuchu = /^P\d\d-/.test(id)
+    ? id.slice(0, 3)
+    : id.includes('|')
+      ? id.split('|')[0]
+      : /^12[A-Z]?\.[A-Z]-/.test(id)
+        ? id.split('-')[0]
+        : id;
+  return poKatalogu.get(id) ?? poKlyuchu ?? id;
 }
 
 function podStil(katalog: KatalogBanka, p: string, ids: string[], stil: StilBanka): string[] {

@@ -253,6 +253,18 @@ jobs:
         working-directory: app
         run: pnpm test:progress-6
 
+      # №12 (узел) на том же общем тренажёре: тот же журнал
+      # (budetege:zadanie-12:log:v1) и прежний ключ budetege:trainer:v1,
+      # прежняя запись тренировки с фильтрами, 748 шаблонов собираются
+      # движком, ответ — по общему правилу записи, примеры карты. Без браузера.
+      - name: Тренажёр №12 — перенос прежнего прогресса, сборка тренировок
+        working-directory: app
+        run: pnpm test:progress-12
+
+      - name: Тексты №12 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-12-teksty
+
       - name: Тексты №3 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-3-teksty
@@ -892,6 +904,14 @@ jobs:
       - name: Перенос прогресса №6 в браузере
         working-directory: app
         run: pnpm test:progress-6-site
+
+      - name: Редизайн №12 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 12 origin/main
+
+      - name: Перенос прогресса №12 в браузере
+        working-directory: app
+        run: pnpm test:progress-12-site
 
       # Иллюстрация в верхнем блоке «Задание 12»: разметка (picture, srcset,
       # размеры, высокий приоритет, без lazy), файлы и вес версии на телефон
