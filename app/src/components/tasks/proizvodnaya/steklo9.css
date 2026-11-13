@@ -37,14 +37,23 @@
 }
 
 /* ── Пример типа: чертёж закреплён рядом с шагами (как у №3). ── */
-.z9-primer {
+/* Карточкам группы и типа — clip вместо hidden (обрезка по скруглению
+   остаётся, sticky работает). */
+.z9-karta .kz-gruppa,
+.z9-karta .kz-tip {
+  overflow: clip;
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z9-karta .z9-primer {
   max-width: none;
 }
 .z9-primer__telo {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 .z9-primer__chertezh {
+  min-width: 0;
   position: sticky;
   top: calc(var(--topic-sticky-top, 0px) + var(--space-2));
   z-index: 2;
@@ -57,6 +66,7 @@
   box-shadow: var(--glass-ring), var(--glass-shadow);
 }
 .z9-primer__panel {
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -69,6 +79,8 @@
   gap: var(--space-1);
 }
 .z9-vid {
+  flex: none;
+  white-space: nowrap;
   min-height: 44px;
   padding: 0 var(--space-3);
   border: 0;
@@ -96,9 +108,23 @@
   min-width: 0;
 }
 @media (max-width: 767.98px) {
+  /* На телефоне виды чертежа — одной строкой с прокруткой, рядом
+     «Свернуть»: закреплённая панель не выше трети экрана. */
+  .z9-primer__panel {
+    flex-wrap: nowrap;
+  }
+  .z9-primer__vidy {
+    flex-wrap: nowrap;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .z9-vid {
+    padding: 0 var(--space-2);
+  }
   /* На телефоне закреплённый чертёж — не выше трети экрана. */
   .z9-primer__holst .z9-fig__svg svg {
-    max-height: 30vh;
+    max-height: 24vh;
     width: auto;
     max-width: 100%;
     margin-inline: auto;

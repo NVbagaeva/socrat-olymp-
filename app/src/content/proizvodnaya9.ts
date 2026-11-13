@@ -52,7 +52,7 @@ export const SHAPKA9 = {
   vidUsloviya: 'Условие',
   vidShag: (k: number) => `Построение ${k}`,
   vidVse: 'Все построения',
-  svernut: 'Свернуть чертёж',
+  svernut: 'Свернуть',
   razvernut: 'Показать чертёж',
   risunok: 'Чертёж к задаче',
 };
@@ -61,8 +61,8 @@ export const SHAPKA9 = {
 export const GRUPPY9_VID: Record<Gruppa, { znak: string; ton: Ton }> = {
   I: { znak: "v=x'", ton: 'navy' },
   II: { znak: 'k=\\operatorname{tg}\\alpha', ton: 'blue' },
-  III: { znak: 'y=f(x)', ton: 'orange' },
-  IV: { znak: "y=f'(x)", ton: 'terra' },
+  III: { znak: 'f', ton: 'orange' },
+  IV: { znak: "f'", ton: 'terra' },
   V: { znak: "F'=f", ton: 'green' },
 };
 
