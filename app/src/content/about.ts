@@ -185,6 +185,14 @@ export const about = {
         { title: 'Каждому ученику — своё задание', note: 'Списать друг у друга не выйдет' },
       ],
     },
+    /** Иллюстрация к блоку «Инструмент…»: декор, в alt не нуждается. */
+    illyustraciya: {
+      webp400: assetUrl('/images/ob-avtore/instrument-400.webp'),
+      webp800: assetUrl('/images/ob-avtore/instrument-800.webp'),
+      png: assetUrl('/images/ob-avtore/instrument-400.png'),
+      width: 400,
+      height: 273,
+    },
     personal: {
       title: 'Инструмент, которым хотелось бы пользоваться самой',
       text: 'Мне хотелось создать не ещё один огромный банк задач, в котором легко потеряться, а понятную систему, которая помогает учителю быстро перейти от темы к конкретному варианту для ученика.',

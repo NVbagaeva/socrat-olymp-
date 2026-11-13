@@ -440,6 +440,18 @@
   transform: rotate(-3deg);
 }
 
+/* Иллюстрация в пустом левом поле: стоит вровень с текстом справа. */
+.oa-ill {
+  grid-column: 1 / 6;
+  align-self: center;
+  margin: var(--space-12) 0 0;
+}
+.oa-ill img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* ── Принципы ────────────────────────────────────────────────── */
 
 .oa-printsipy {
@@ -678,6 +690,13 @@
   .oa-sec__side {
     margin-top: var(--space-8);
   }
+  /* Иллюстрация встаёт над текстом; шире 300 px её края, собранные из
+     исходника с впечатанным фоном, выглядят грубовато. */
+  .oa-ill {
+    max-width: 300px;
+    margin-top: var(--space-10);
+  }
+
   /* Пометка — у правого поля, под заголовком своего блока. */
   .oa-sec__side .oa-pometka {
     width: min(58%, 230px);
