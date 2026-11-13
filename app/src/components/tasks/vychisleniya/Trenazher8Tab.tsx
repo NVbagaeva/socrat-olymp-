@@ -4,7 +4,6 @@ import { GRUPPY8, TIPY8, TRENAZHER8 } from '@/content/vychisleniya8';
 import { prototypeById } from '@/lib/vychisleniya/prototypes';
 import { typeset } from '@/lib/tex';
 import { Trenazher8 } from './Trenazher8';
-import { IssueHomeworkSkills8 } from '@/components/dz/Razdel8Dz';
 
 /**
  * Вкладка «Тренажёр» задания №8.
@@ -34,8 +33,6 @@ export function Trenazher8Tab({ base }: { base: string }) {
       </h2>
       <TabScrollOnMount />
       <Trenazher8 base={base} gruppy={gruppy} />
-      {/* Репетитору со входом: ДЗ по одному типу. */}
-      <IssueHomeworkSkills8 />
     </section>
   );
 }

@@ -28,6 +28,7 @@ import {
   zagruzitChernovik,
   type NovyyPunkt,
 } from '@/lib/dz/chernovik';
+import { RAZDELY_DZ_KLIENT } from '@/lib/dz/katalog/zagruzka';
 import { DZ_HREF, homeworkHref } from '@/lib/dz/links';
 import { statusOf } from '@/lib/dz/results';
 import './dz-razdel.css';
@@ -63,7 +64,8 @@ export function VDzKnopka({
   malaya?: boolean;
 }) {
   const { tutor, ch } = useChernovikRepetitora();
-  if (!tutor) return null;
+  /* Раздел ещё не подключён к ДЗ — кнопки нет. */
+  if (!tutor || !(RAZDELY_DZ_KLIENT as readonly number[]).includes(punkt.no)) return null;
   const est = ch.status === 'gotovo' && estVChernovike(punkt);
   return (
     <button
@@ -156,5 +158,41 @@ export function DzVRazdele({ no }: { no: number }) {
       <DzPlashkaUchenika no={no} />
       <ChernovikPlashka />
     </>
+  );
+}
+
+/**
+ * Карточки раздела: наборы (подтемы колоды) — каждый кнопкой в черновик
+ * ДЗ. Только репетитору и только в подключённых к ДЗ разделах.
+ */
+export function VDzNabory({
+  no,
+  nabory,
+}: {
+  no: number;
+  nabory: readonly { id: string; title: string; podpis: string }[];
+}) {
+  const tutor = useTutor();
+  if (!tutor || !(RAZDELY_DZ_KLIENT as readonly number[]).includes(no)) return null;
+  return (
+    <details className="dzr-nabory stk-glass" data-block="dz-nabory">
+      <summary className="stk-summary">
+        {DZK.knopka.dobavit}: наборы карточек
+        <span className="stk-shevron" aria-hidden="true" />
+      </summary>
+      <ul className="dzr-nabory__spisok">
+        {nabory.map((t) => (
+          <li key={t.id}>
+            <span dangerouslySetInnerHTML={{ __html: t.title }} />
+            <VDzKnopka
+              malaya
+              punkt={{ ist: 'kartochki', no, podtema: t.id, kartochki: null }}
+              chto={`набор «${t.podpis}»`}
+              label="В ДЗ"
+            />
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }

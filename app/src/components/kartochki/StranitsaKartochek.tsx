@@ -4,6 +4,7 @@ import { kolodaNomera } from '@/content/kartochki';
 import { podgotovit } from '@/lib/kartochki/podgotovka';
 import { ZADANIYA } from '@/lib/paths';
 import { Kartochki } from './Kartochki';
+import { VDzNabory } from '@/components/dz/razdel/DzVRazdele';
 /* Стеклянная сцена №3: стили только под обёрткой .z3-kart. */
 import '@/components/tasks/solid3/z3-kart.css';
 /* Чертежи ключевых схем (dvizhok: 'skhema') — классы skh-*. */
@@ -22,6 +23,13 @@ export function metadataKartochek(task: number): Metadata {
  */
 export function StranitsaKartochek({ task }: { task: number }) {
   const koloda = kolodaNomera(task);
-  const kolodaGotova = <Kartochki koloda={podgotovit(koloda, `${ZADANIYA}/${koloda.slug}`)} />;
+  const gotovaya = podgotovit(koloda, `${ZADANIYA}/${koloda.slug}`);
+  const kolodaGotova = (
+    <>
+      {/* Репетитору: наборы — в черновик ДЗ (только подключённые разделы). */}
+      <VDzNabory no={task} nabory={gotovaya.podtemy} />
+      <Kartochki koloda={gotovaya} />
+    </>
+  );
   return task === 3 ? <div className="z3-kart">{kolodaGotova}</div> : kolodaGotova;
 }

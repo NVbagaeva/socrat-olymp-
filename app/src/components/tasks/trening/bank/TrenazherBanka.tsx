@@ -10,6 +10,7 @@ import { ShagiResheniya } from '../../steklo';
 import { ItogiSessii, type ItogZadacha } from '../ItogiSessii';
 import { ProgressPanel } from '../ProgressPanel';
 import { StartRezhimy, type Rezhim } from '../StartRezhimy';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { VyborTem } from '../VyborTem';
 import type { GruppaVybora, StrokaGruppy } from '../types';
 import {
@@ -446,6 +447,19 @@ function Konfigurator<Z extends ZadachaBanka, S>({
                   labels={T.vybor.istochniki}
                   value={vybor.istochnik}
                   onChange={(next) => zapomnit({ ...vybor, istochnik: next })}
+                />
+              )}
+              {/* Репетитору: выбранные темы — в черновик ДЗ правилом «типы × сколько». */}
+              {tipy.length === 0 ? null : (
+                <VDzKnopka
+                  punkt={{
+                    ist: 'trenazher',
+                    no: Number(razdel.razdel),
+                    tipy,
+                    skolko: Math.min(20, vybor.count ?? Math.max(5, Math.min(10, tipy.length))),
+                    kazhdomu: false,
+                  }}
+                  chto={`${tipy.length} тип(ов) тренажёра`}
                 />
               )}
               {razdel.stil === true && stili !== undefined ? (

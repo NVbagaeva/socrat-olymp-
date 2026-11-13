@@ -84,6 +84,8 @@ export interface OpornyeBankaProps {
   raskryt: (razbor: string, id: string) => string;
   piPodskazka: string;
   labels: OpornayaZadachaLabels;
+  /** Ещё кнопки у задачи (репетитору: «В ДЗ»). */
+  dop?: (zadacha: MikroZadachaBrauzera) => ReactNode;
 }
 
 /** Строки разбора задачи → шаги сцены (содержание не меняется). */
@@ -115,6 +117,7 @@ export function OpornyeBanka({
   raskryt,
   piPodskazka,
   labels,
+  dop,
 }: OpornyeBankaProps) {
   const progress = store.useProgress();
   const [index, setIndex] = useState(0);
@@ -208,6 +211,7 @@ export function OpornyeBanka({
           : { shagi, open: solutionOpen, onToggle: () => setSolutionOpen(!solutionOpen) }
       }
       zapomni={zapomni}
+      {...(dop === undefined ? {} : { dop: dop(zadacha) })}
       labels={labels}
     />
   );
