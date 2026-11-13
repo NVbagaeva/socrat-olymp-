@@ -233,6 +233,22 @@
     transition: none;
   }
 }
+/* Фигуру можно перетаскивать по шапке (dvigat): подержать и тянуть.
+   Над текстом шапки, возвращается на место плавно. */
+.oblozhka--dvigat .oblozhka__oblast {
+  z-index: 2;
+  transition: translate 250ms ease;
+}
+.oblozhka.is-tyanu .oblozhka__oblast {
+  cursor: move;
+  transition: none;
+  filter: drop-shadow(0 12px 24px rgb(31 95 208 / 0.18));
+}
+@media (prefers-reduced-motion: reduce) {
+  .oblozhka--dvigat .oblozhka__oblast {
+    transition: none;
+  }
+}
 /* Стеклянная кнопка у обложки. */
 .oblozhka__knopka {
   position: absolute;
