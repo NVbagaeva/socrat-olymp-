@@ -46,9 +46,9 @@ select pg_temp.fails($q$insert into auth.users (email, raw_user_meta_data)
   values ('evil@x.ru', pg_temp.meta('{"role":"admin","bootstrap_admin":true}'))$q$, 'invite_required');
 insert into vault.secrets (name, secret) values ('allowed_emails', 'admin@x.ru, Second@X.ru');
 select pg_temp.fails($q$insert into auth.users (email, raw_user_meta_data)
-  values ('admin@x.ru', pg_temp.meta('{"role":"admin","name":"Наталья"}'))$q$, 'bad_role');
+  values ('admin@x.ru', pg_temp.meta('{"role":"admin","name":"Наталия"}'))$q$, 'bad_role');
 insert into auth.users (id, email, raw_user_meta_data)
-values ('a0000000-0000-0000-0000-000000000000', 'admin@x.ru', pg_temp.meta('{"name":"Наталья"}'));
+values ('a0000000-0000-0000-0000-000000000000', 'admin@x.ru', pg_temp.meta('{"name":"Наталия"}'));
 insert into auth.users (id, email, raw_user_meta_data)
 values ('a1000000-0000-0000-0000-000000000000', 'second@x.ru', pg_temp.meta('{"name":"Вторая"}'));
 select public.grant_admin('Admin@x.ru');

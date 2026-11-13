@@ -1096,7 +1096,7 @@ async function runEnabled() {
       ),
       '?vkladka=registraciya открывает вкладку регистрации',
     );
-    await page.fill('input[name="name"]', 'Наталья Багаева');
+    await page.fill('input[name="name"]', 'Наталия Багаева');
     await page.fill('input[name="email"]', 'svoy@yandex.ru');
     await page.fill('input[name="password"]', 'kor');
     check(
@@ -1217,7 +1217,7 @@ async function runEnabled() {
     await openProfile(page);
     check(page.url().endsWith('/kabinet/?vkladka=profil'), 'вкладка «Профиль» — в адресе');
     check(
-      (await page.locator('dd[data-field="name"]').innerText()) === 'Наталья Багаева',
+      (await page.locator('dd[data-field="name"]').innerText()) === 'Наталия Багаева',
       'профиль: имя',
     );
     check(
@@ -1252,11 +1252,11 @@ async function runEnabled() {
       (await page.locator('[data-section="profile"] .role-card').count()) === 0,
       'в профиле выбора роли нет',
     );
-    await page.fill('[data-section="profile"] input[autocomplete="name"]', 'Наталья В.');
+    await page.fill('[data-section="profile"] input[autocomplete="name"]', 'Наталия В.');
     await page.click('[data-section="profile"] button[type="submit"]');
-    await page.waitForSelector('dd[data-field="name"]:has-text("Наталья В.")');
+    await page.waitForSelector('dd[data-field="name"]:has-text("Наталия В.")');
     check(
-      mock.profiles.get(mock.users.get('svoy@yandex.ru').id).display_name === 'Наталья В.',
+      mock.profiles.get(mock.users.get('svoy@yandex.ru').id).display_name === 'Наталия В.',
       'имя записано в базу',
     );
     check(
@@ -1534,7 +1534,7 @@ async function runEnabled() {
     await page.waitForSelector('.klass-list');
     const klass = await page.locator('[data-section="classes"]').innerText();
     check(
-      klass.includes('Тестовый класс') && klass.includes('Репетитор: Наталья В.'),
+      klass.includes('Тестовый класс') && klass.includes('Репетитор: Наталия В.'),
       'ученик в классе: название класса и имя репетитора',
     );
     await openProfile(page);
@@ -2174,7 +2174,7 @@ async function runNoHeader() {
 
   /* Прямая ссылка: страница входа работает, после входа кружок на месте. */
   {
-    registerInMock(mock, 'svoy@yandex.ru', 'moy-dlinnyy-parol', 'Наталья Багаева', 'tutor');
+    registerInMock(mock, 'svoy@yandex.ru', 'moy-dlinnyy-parol', 'Наталия Багаева', 'tutor');
     const { context, page } = await newPage(mock, 390, errors);
     await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
     check(
@@ -2447,7 +2447,7 @@ async function runGalleryZ8(dir) {
 async function runGallery(dir) {
   fs.mkdirSync(dir, { recursive: true });
   const mock = makeMock();
-  registerInMock(mock, 'svoy@yandex.ru', 'moy-dlinnyy-parol', 'Наталья Багаева', 'tutor');
+  registerInMock(mock, 'svoy@yandex.ru', 'moy-dlinnyy-parol', 'Наталия Багаева', 'tutor');
   registerInMock(mock, 'uchenik@yandex.ru', 'uchenik-parol-1', 'Тестовый ученик 1', 'student');
   registerInMock(mock, 'vtoroy@yandex.ru', 'vtoroy-parol-123', 'Тестовый ученик 2', 'student');
   mock.seedClass('svoy@yandex.ru', ['uchenik@yandex.ru', 'vtoroy@yandex.ru']);
