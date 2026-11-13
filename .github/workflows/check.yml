@@ -266,6 +266,13 @@ jobs:
         working-directory: app
         run: pnpm test:progress-4
 
+      # №1 на том же общем тренажёре: прежний прогресс (budetege:planimetriya-1:v1
+      # и журнал после #340), прежняя запись тренировки панели фильтров, каждая
+      # из 1714 задач собирается движком с тем же ответом. Без браузера.
+      - name: Тренажёр №1 — перенос прежнего прогресса, сборка тренировок
+        working-directory: app
+        run: pnpm test:progress-1
+
       # №13 на том же общем тренажёре: прежний прогресс (budetege:zadanie-13:v1 и
       # журнал после PR #340), прежняя запись тренажёра с фильтрами, каталог
       # (660 задач собираются движком, ответ и «единицы» сходятся). Без браузера.
@@ -290,6 +297,10 @@ jobs:
       - name: Тексты №4 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-4-teksty
+
+      - name: Тексты №1 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-1-teksty
 
       - name: Тексты №13 для вычитки совпадают с исходниками
         working-directory: app
@@ -938,6 +949,14 @@ jobs:
       - name: Перенос прогресса №4 в браузере
         working-directory: app
         run: pnpm test:progress-4-site
+
+      - name: Редизайн №1 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 1 origin/main
+
+      - name: Перенос прогресса №1 в браузере
+        working-directory: app
+        run: pnpm test:progress-1-site
 
       - name: Редизайн №13 — картинки и содержание не изменены
         working-directory: app
