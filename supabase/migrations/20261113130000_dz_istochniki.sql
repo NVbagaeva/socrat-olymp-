@@ -542,8 +542,10 @@ begin
   if r.submitted_at is not null then
     raise exception 'already_submitted: ДЗ уже сдано' using errcode = 'check_violation';
   end if;
-  if h.solutions_when = 'after_due' and h.due_at < now() then
-    raise exception 'due_passed: срок прошёл, решения уже открыты' using errcode = 'check_violation';
+  -- После срока — только просмотр (решение владельца от 13.11): ни
+  -- ответа, ни отметки, ни сдачи, в любом режиме решений.
+  if h.due_at < now() then
+    raise exception 'due_passed: срок прошёл, задание можно только посмотреть' using errcode = 'check_violation';
   end if;
   update public.homework_recipients set started_at = now()
    where homework_id = t.homework_id and user_id = v_uid and started_at is null;
@@ -641,6 +643,9 @@ begin
   if r.submitted_at is not null then
     raise exception 'already_submitted: ДЗ уже сдано' using errcode = 'check_violation';
   end if;
+  if h.due_at < now() then
+    raise exception 'due_passed: срок прошёл, задание можно только посмотреть' using errcode = 'check_violation';
+  end if;
   update public.homework_recipients set started_at = now()
    where homework_id = t.homework_id and user_id = v_uid and started_at is null;
   insert into public.homework_answers (task_id, homework_id, user_id, state, attempts, seconds)
@@ -680,8 +685,10 @@ begin
     raise exception 'not_allowed: у карточки решение открывает ответ' using errcode = 'check_violation';
   end if;
   select * into h from public.homework where id = t.homework_id;
-  if h.solutions_when = 'after_due' and h.due_at < now() then
-    raise exception 'due_passed: срок прошёл, решения уже открыты' using errcode = 'check_violation';
+  -- После срока — только просмотр (решение владельца от 13.11): ни
+  -- ответа, ни отметки, ни сдачи, в любом режиме решений.
+  if h.due_at < now() then
+    raise exception 'due_passed: срок прошёл, задание можно только посмотреть' using errcode = 'check_violation';
   end if;
   if h.solutions_when <> 'instant' or h.closed_at is not null or r.submitted_at is not null then
     raise exception 'not_allowed: решение сейчас не показывается' using errcode = 'check_violation';
@@ -739,6 +746,42 @@ begin
   end if;
   return jsonb_build_object('razbor', k.razbor, 'answer', k.answer);
 end $$;
+
+/* ── После срока — только просмотр ──────────────────────────────── */
+
+-- Сдать — до срока; после срока ДЗ закрывается само (решение владельца
+-- от 13.11: «после срока — только просмотр»).
+create or replace function public.submit_homework(p_homework uuid)
+returns void
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  if exists (select 1 from public.homework where id = p_homework and due_at < now()) then
+    raise exception 'due_passed: срок прошёл, задание можно только посмотреть' using errcode = 'check_violation';
+  end if;
+  update public.homework_recipients
+     set started_at = coalesce(started_at, now()), submitted_at = now()
+   where homework_id = p_homework and user_id = auth.uid() and submitted_at is null
+     and exists (select 1 from public.homework where id = p_homework and closed_at is null);
+  if not found then raise exception 'cannot_submit: ДЗ закрыто, уже сдано или не ваше'; end if;
+end $$;
+
+-- Когда получатель видит решение: срок прошёл — как сдано (отвечать
+-- уже нельзя), значит, решения «после сдачи» открываются.
+create or replace function public.homework_solution_ready(
+  p_when text, p_due timestamptz, p_submitted timestamptz, p_closed timestamptz, p_state text)
+returns boolean
+language sql stable set search_path = ''
+as $$
+  select case p_when
+           when 'instant' then coalesce(p_state in ('right', 'wrong', 'revealed'), false)
+                               or (p_due is not null and p_due < now())
+           when 'after_submit' then p_submitted is not null or p_closed is not null
+                                    or (p_due is not null and p_due < now())
+           when 'after_due' then p_due is not null and p_due < now()
+           else false
+         end
+$$;
 
 /* ── Черновик и шаблоны ────────────────────────────────────────── */
 
@@ -802,6 +845,9 @@ revoke execute on function public.homework_check(uuid, text, int) from public, a
 revoke execute on function public.homework_mark(uuid, text, int) from public, anon;
 revoke execute on function public.homework_reveal(uuid) from public, anon;
 revoke execute on function public.homework_solution(uuid) from public, anon;
+revoke execute on function public.submit_homework(uuid) from public, anon;
+revoke execute on function public.homework_solution_ready(text, timestamptz, timestamptz, timestamptz, text)
+  from public, anon, authenticated;
 grant execute on function public.check_ege_answer(text, text) to authenticated;
 grant execute on function public.issue_homework_parts(jsonb) to authenticated;
 grant execute on function public.issue_homework_tasks(jsonb) to authenticated;
@@ -809,3 +855,4 @@ grant execute on function public.homework_check(uuid, text, int) to authenticate
 grant execute on function public.homework_mark(uuid, text, int) to authenticated;
 grant execute on function public.homework_reveal(uuid) to authenticated;
 grant execute on function public.homework_solution(uuid) to authenticated;
+grant execute on function public.submit_homework(uuid) to authenticated;
