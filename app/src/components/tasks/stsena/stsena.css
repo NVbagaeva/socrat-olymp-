@@ -551,6 +551,9 @@
   }
   .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs {
     display: flex;
+    /* Одна строка, которая листается: иначе кнопка «Для репетиторов»
+       переносится под ленту и занимает ещё 86 px первого экрана. */
+    flex-wrap: nowrap;
     gap: var(--space-2);
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -565,9 +568,19 @@
   }
   .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta {
     display: flex;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
     gap: var(--space-2);
   }
   .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab'] {
+    flex: 0 0 auto;
+    width: 92px;
+    min-height: 68px;
+    scroll-snap-align: start;
+  }
+  /* Кнопка «Для репетиторов» листается вместе с вкладками, а не
+     сваливается под ленту второй строкой. */
+  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .topic-tabs__more {
     flex: 0 0 auto;
     width: 92px;
     min-height: 68px;
