@@ -1,5 +1,6 @@
 'use client';
 
+import { ishodOf, type LogOutcome } from '@/lib/progressLog';
 import { useCallback, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, FigureZoom, Input } from '@/components/ui';
@@ -100,13 +101,14 @@ export function Trenazher2Screen({
     return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
   }
 
-  function remember(item: Task2, right: boolean, clean: boolean) {
+  function remember(item: Task2, right: boolean, clean: boolean, ishod: LogOutcome) {
     progress2.recordAttempt({
       kind: item.prototype,
       taskId: item.id,
       right,
       clean,
       seconds: taskSeconds(),
+      ishod,
     });
   }
 
@@ -155,7 +157,12 @@ export function Trenazher2Screen({
         ...marks,
         [index]: polnoe ? 'hinted' : clean ? 'right' : hinted ? 'hinted' : 'right',
       });
-      remember(task, !polnoe, clean);
+      remember(
+        task,
+        !polnoe,
+        clean,
+        ishodOf({ solved: true, misses: failed ? 1 : 0, hint: hinted, revealed: polnoe }),
+      );
     } else {
       setFailed(true);
       setMisses(misses + 1);
@@ -176,7 +183,7 @@ export function Trenazher2Screen({
     setPolnoe(true);
     if (checked !== 'right') {
       setMarks({ ...marks, [index]: 'hinted' });
-      remember(task, false, false);
+      remember(task, false, false, 'revealed');
     }
   }
 

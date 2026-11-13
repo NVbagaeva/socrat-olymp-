@@ -17,7 +17,7 @@ import { PROGRESS_2 } from '@/content/vektory';
 import { createProgressStore, type StoreProgress } from '../progressStore';
 
 /** Тренажёр: счётчики по прототипам и список ошибок. */
-export const progress2 = createProgressStore('budetege:vektory-2:v1');
+export const progress2 = createProgressStore('budetege:vektory-2:v1', 'budetege:vektory-2:log:v1');
 
 /** Тренировки навыков: исход каждой микрозадачи. */
 export const opornye2 = createProgressStore('budetege:vektory-2:opornye:v1');

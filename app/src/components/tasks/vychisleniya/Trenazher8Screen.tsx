@@ -219,7 +219,8 @@ export function Trenazher8Screen({
     setChecked(right ? 'right' : 'wrong');
     if (right) {
       setMarks({ ...marks, [index]: 'right' });
-      remember(zadacha, failed ? 'wrong' : 'right');
+      /* Верно с первой попытки, но с открытой подсказкой — «с подсказкой». */
+      remember(zadacha, failed ? 'wrong' : hintOpen ? 'hinted' : 'right');
     } else {
       setFailed(true);
       setMisses(misses + 1);

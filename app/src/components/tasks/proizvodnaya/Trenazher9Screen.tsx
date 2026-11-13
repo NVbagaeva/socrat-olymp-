@@ -1,5 +1,6 @@
 'use client';
 
+import { ishodOf } from '@/lib/progressLog';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
@@ -239,6 +240,12 @@ export function Trenazher9Screen({ session }: Trenazher9ScreenProps) {
           right: !cur.solution,
           clean,
           seconds: cur.sec,
+          ishod: ishodOf({
+            solved: true,
+            misses: cur.misses,
+            hint: cur.hintOn,
+            revealed: cur.solution,
+          }),
         });
       }
     } else {
@@ -262,6 +269,7 @@ export function Trenazher9Screen({ session }: Trenazher9ScreenProps) {
         right: false,
         clean: false,
         seconds: cur.sec,
+        ishod: 'revealed',
       });
     }
   }

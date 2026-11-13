@@ -540,7 +540,8 @@ for (const size of SIZES) {
   );
 
   /* Статистика тренажёра: иконка раздела и только свои наборы. Счётчики
-     всех разделов лежат в одной записи budetege:trainer:v1. */
+     всех разделов №12 лежат в одном журнале; здесь он собирается из
+     прежней записи budetege:trainer:v1. */
   await page.goto(BASE + '/zadaniya/12/quadratic/trenazher/', { waitUntil: 'networkidle' });
   await page.evaluate(() =>
     localStorage.setItem(
@@ -590,15 +591,28 @@ for (const size of SIZES) {
     where('в статистике нет иконки раздела с alt="", aria-hidden и размерами'),
   );
   await page.getByRole('button', { name: 'Сбросить' }).click();
-  const left = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('budetege:trainer:v1') ?? '{}'),
-  );
+  /* Счётчики теперь в журнале попыток №12 (budetege:zadanie-12:log:v1):
+     прежняя запись свернулась в него, а сама осталась как была. */
+  const left = await page.evaluate(() => {
+    const log = JSON.parse(localStorage.getItem('budetege:zadanie-12:log:v1') ?? '{}');
+    const kinds = Object.assign({}, ...Object.values(log.archive ?? {}));
+    return {
+      kinds,
+      mistakes: log.legacyMistakes ?? [],
+      prezhnyaya: JSON.parse(localStorage.getItem('budetege:trainer:v1') ?? '{}'),
+    };
+  });
   check(
-    left.kinds?.['12.A']?.done === 5 &&
-      left.kinds?.['12Q.A'] === undefined &&
-      left.mistakes?.join() === '12.A-01',
+    left.kinds['12.A']?.done === 5 &&
+      left.kinds['12Q.A'] === undefined &&
+      left.mistakes.join() === '12.A-01',
     where('«Сбросить» на параболе стёр счётчики линейной или оставил свои'),
   );
+  check(
+    left.prezhnyaya.kinds?.['12Q.A']?.done === 2,
+    where('перевод на журнал изменил прежнюю запись budetege:trainer:v1'),
+  );
+  await page.evaluate(() => localStorage.removeItem('budetege:zadanie-12:log:v1'));
   await page.evaluate(() => localStorage.removeItem('budetege:trainer:v1'));
 
   /* Закрытый раздел: страница «Скоро» с той же плашкой. */
