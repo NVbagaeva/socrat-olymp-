@@ -87,8 +87,18 @@
   color: var(--color-text-inverse);
 }
 @media (max-width: 767.98px) {
+  /* Длинные подписи («База, задания 1–21») на телефоне делят ширину
+     поровну и переносятся — страница вбок не едет. */
+  .level-tabs {
+    display: flex;
+  }
   .level-tabs__seg {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
     padding: var(--space-2) var(--space-3);
+    text-align: center;
+    white-space: normal;
   }
 }
 
@@ -164,4 +174,116 @@
 .site-menu__level {
   align-self: flex-start;
   margin-bottom: var(--space-3);
+}
+
+/* ── Сборщик варианта: шаг «Уровень экзамена» и экран базы ── */
+.var-uroven {
+  position: relative;
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-2);
+}
+.var-uroven__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.var-baza {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.var-baza .var-panel {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+.var-baza__sprava {
+  display: grid;
+  gap: var(--space-5);
+}
+.var-baza__gotovo {
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.var-baza__nomera {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.var-baza__nomera a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+  text-decoration: none;
+}
+.var-baza__nomera .is-ready a {
+  border-color: var(--color-border-info);
+  color: var(--color-text);
+}
+.var-baza__no {
+  flex: none;
+  min-width: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.var-baza__name {
+  flex: 1;
+  min-width: 0;
+}
+.var-baza__soon {
+  flex: none;
+  font-size: 12px;
+  line-height: 16px;
+}
+.var-baza__note {
+  max-width: 70ch;
+  color: var(--color-text-secondary);
+}
+.var-baza__format {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+}
+.var-baza__format > div {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.var-baza__format dt {
+  color: var(--color-text-secondary);
+}
+.var-baza__shkala {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.var-baza__shkala th,
+.var-baza__shkala td {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+.var-baza__shkala th {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+@media (max-width: 1023.98px) {
+  .var-baza {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

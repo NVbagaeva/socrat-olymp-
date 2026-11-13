@@ -10,6 +10,10 @@
    3. Пары «это же задание» профиль ↔ база ведут на существующие номера.
    4. Раздел тренажёра по адресу: у базы свой («baza-5»), не «5».
 
+   5. Проверка ответа четырёх типов: число, последовательность цифр,
+      номера утверждений (порядок не важен), любое из допустимых.
+   6. Шкала перевода первичного балла базы в отметку.
+
    Ненулевой код возврата — расхождение, оно печатается. */
 
 import { requireSrc } from './lib/load-ts.mjs';
@@ -107,6 +111,93 @@ eq(
 eq(scopeOfPath('/zadaniya/5/trenazher/'), '5', 'раздел тренажёра профиля');
 eq(scopeOfPath('/baza/zadaniya/5/trenazher/'), 'baza-5', 'раздел тренажёра базы');
 eq(scopeOfPath('/zadaniya/12/linear/trenazher/'), '12:linear', 'раздел подтемы профиля');
+
+/* 5. Проверка ответа по типу (lib/otvet/tipy.ts). */
+const { proverit, normalnyeNomera } = requireSrc('lib/otvet/tipy.ts');
+const kind = (input, klyuch, mode) => proverit(input, klyuch, mode).kind;
+const chislo = { tip: 'chislo', otvet: '0,25' };
+for (const [input, want] of [
+  ['0,25', 'right'],
+  ['0.25', 'right'],
+  [' 0,250 ', 'right'],
+  ['0,3', 'wrong'],
+  ['1/4', 'fractionRight'],
+  ['1/5', 'wrong'],
+  ['25%', 'format'],
+  ['', 'format'],
+  ['abc', 'format'],
+])
+  eq(kind(input, chislo), want, `число: «${input}»`);
+eq(kind('1/4', chislo, 'blank'), 'format', 'число в бланке: дробь — подсказка о формате');
+eq(kind('-3', { tip: 'chislo', otvet: '−3' }), 'right', 'число: минус любым знаком');
+const cifry = { tip: 'cifry', otvet: '4132' };
+for (const [input, want] of [
+  ['4132', 'right'],
+  [' 4132 ', 'right'],
+  ['4123', 'wrong'],
+  ['1234', 'wrong'],
+  ['413', 'wrong'],
+  ['41324', 'wrong'],
+  ['4 1 3 2', 'format'],
+  ['4,1,3,2', 'format'],
+  ['АБВГ', 'format'],
+  ['', 'format'],
+])
+  eq(kind(input, cifry), want, `цифры: «${input}»`);
+eq(kind('0132', { tip: 'cifry', otvet: '0132' }), 'right', 'цифры: ведущий ноль сохраняется');
+eq(
+  kind('132', { tip: 'cifry', otvet: '0132' }),
+  'wrong',
+  'цифры: без ведущего нуля — другой ответ',
+);
+const nomera = { tip: 'nomera', otvet: '14' };
+for (const [input, want] of [
+  ['14', 'right'],
+  ['41', 'right'],
+  ['1', 'wrong'],
+  ['134', 'wrong'],
+  ['23', 'wrong'],
+  ['114', 'format'],
+  ['1 4', 'format'],
+  ['1,4', 'format'],
+  ['1и4', 'format'],
+  ['', 'format'],
+])
+  eq(kind(input, nomera), want, `номера: «${input}»`);
+eq(kind('321', { tip: 'nomera', otvet: '123' }), 'right', 'номера: порядок не важен');
+eq(normalnyeNomera('431'), '134', 'номера: нормальная запись — по возрастанию');
+const lyuboe = { tip: 'lyuboe', otvet: '132', dopustimye: ['132', '264', '396'] };
+for (const [input, want] of [
+  ['132', 'right'],
+  ['264', 'right'],
+  ['396', 'right'],
+  ['0264', 'right'],
+  ['133', 'wrong'],
+  ['132 или 264', 'format'],
+  ['', 'format'],
+])
+  eq(kind(input, lyuboe), want, `любое из допустимых: «${input}»`);
+eq(
+  kind('132', { tip: 'lyuboe', otvet: '132' }),
+  'right',
+  'любое: без списка верен образцовый ответ',
+);
+
+/* 6. Шкала базы (content/baza/shkala.ts). */
+const { otmetkaZa, porog, OTMETKI, BAZA_FORMAT } = requireSrc('content/baza/shkala.ts');
+eq(BAZA_FORMAT, { zadaniy: 21, ball: 1, max: 21, minut: 180 }, 'формат экзамена базы');
+eq(
+  Array.from({ length: 22 }, (_, b) => otmetkaZa(b)).join(''),
+  '2222222' + '33333' + '44444' + '55555',
+  'шкала: 0–6 → 2, 7–11 → 3, 12–16 → 4, 17–21 → 5',
+);
+eq([otmetkaZa(-1), otmetkaZa(30)], [2, 5], 'шкала: балл вне диапазона прижат к границе');
+eq([porog(3), porog(4), porog(5)], [7, 12, 17], 'пороги отметок');
+eq(
+  OTMETKI.reduce((n, r) => n + r.do - r.ot + 1, 0),
+  22,
+  'шкала покрывает 0…21 без дыр и наложений',
+);
 
 if (failures.length > 0) {
   console.error(`База: расхождений ${failures.length} из ${checks}`);
