@@ -91,9 +91,8 @@ export function VDzKnopka({
  */
 export function ChernovikPlashka() {
   const { tutor, ch } = useChernovikRepetitora();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!tutor || !mounted || ch.status !== 'gotovo' || ch.sostav.punkty.length === 0) return null;
+  /* Репетитор известен только в браузере: на сборке здесь пусто. */
+  if (!tutor || typeof document === 'undefined' || ch.status !== 'gotovo' || ch.sostav.punkty.length === 0) return null;
   return createPortal(
     <aside className="dzr-plashka stk-glass" aria-label={DZK.plashka.aria} data-block="dz-chernovik-plashka">
       <span className="dzr-plashka__text">{DZK.plashka.text(ch.sostav.punkty.length)}</span>

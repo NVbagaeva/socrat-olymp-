@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useId, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Button, Card, FieldLabel, FieldMessage, Input } from '@/components/ui';
+import { DZK } from '@/content/dzIstochniki';
 import { DZ, dueRu, dzError } from '@/content/dz';
 import type { HwListItem, TutorClass } from '@/lib/dz/api';
 import { DZ_HREF, homeworkHref, issueHref, klassHref } from '@/lib/dz/links';
@@ -218,7 +219,7 @@ export function StudentHomeworkCard() {
         </div>
       ) : (
         <ul className="dz-list">
-          {items.map(({ hw, recipients, tasks, right }) => {
+          {items.map(({ hw, recipients, tasks, done }) => {
             const mine = recipients[0] ?? { startedAt: null, submittedAt: null };
             const status = statusOf(hw, mine);
             return (
@@ -231,7 +232,7 @@ export function StudentHomeworkCard() {
                   {' · '}
                   <span className={`dz-status dz-status--${status}`}>{DZ.status[status]}</span>
                   {' · '}
-                  {DZ.list.solved(right, tasks)}
+                  {DZK.uchenik.sdelano(done, tasks).toLowerCase()}
                 </span>
                 {hw.note === '' ? null : <p className="dz-list__note">{hw.note}</p>}
               </li>

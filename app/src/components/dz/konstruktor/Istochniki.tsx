@@ -194,32 +194,39 @@ function Blok({ no, b }: { no: number; b: BlokKat }) {
 
 /** Пример задачи типа: тот же сборщик, что при выдаче. */
 function Primer({ kat, tip }: { kat: KatalogRazdela; tip: string }) {
-  const [u, setU] = useState<HwUnitInput | null | 'oshibka'>(null);
   const [nomer, setNomer] = useState(0);
+  const klyuch = `${kat.no}:${tip}:${nomer}`;
+  /* Результат помнит, для какого запроса он: пока новый не пришёл — «собираем». */
+  const [rez, setRez] = useState<{ klyuch: string; u: HwUnitInput | 'oshibka' } | null>(null);
   useEffect(() => {
     let alive = true;
-    setU(null);
     void (async () => {
+      let u: HwUnitInput | 'oshibka' = 'oshibka';
       try {
         const zerno = `primer-${Date.now().toString(36)}-${nomer}`;
         const units =
           kat.no === 7
             ? await (await import('@/lib/dz/sborka/r7')).trenazher7(kat, [tip], 1, zerno, [null])
             : (await import('@/lib/dz/sborka/r8')).trenazher8(kat, [tip], 1, [null]);
-        if (alive) setU(units[0] ?? 'oshibka');
+        u = units[0] ?? 'oshibka';
       } catch {
-        if (alive) setU('oshibka');
+        u = 'oshibka';
       }
+      if (alive) setRez({ klyuch: `${kat.no}:${tip}:${nomer}`, u });
     })();
     return () => {
       alive = false;
     };
   }, [kat, tip, nomer]);
+  const u = rez !== null && rez.klyuch === klyuch ? rez.u : null;
   if (u === null) return <p className="dzk-muted">{DZK.trenazher.zagruzkaPrimera}</p>;
   if (u === 'oshibka') return <p className="dzk-muted">{DZK.oshibkaZagruzki}</p>;
   return (
     <div className="dzk-primer" data-block="dz-primer">
-      <div className={clsx('dzk-primer__uslovie', u.view.tekst === true && 'is-tekst')} dangerouslySetInnerHTML={{ __html: u.questionHtml }} />
+      <div
+        className={clsx('dzk-primer__uslovie', u.view.tekst === true && 'is-tekst')}
+        dangerouslySetInnerHTML={{ __html: u.questionHtml }}
+      />
       <div className="dzk-item__knopki">
         <DobavitKnopka punkt={{ ist: 'zadacha', no: kat.no, ref: u.ref, tip }} label={DZK.trenazher.vzyatEtu} />
         <button type="button" className="stk-btn stk-btn--sm stk-btn--tihaya" onClick={() => setNomer((n) => n + 1)}>
@@ -297,23 +304,25 @@ function Gruppa({ kat, g }: { kat: KatalogRazdela; g: GruppaKat }) {
 export function Istochniki() {
   const [no, setNo] = useState<number>(RAZDELY_DZ_KLIENT[0]);
   const [vkladka, setVkladka] = useState<Vkladka>('kartochki');
-  const [kat, setKat] = useState<KatalogRazdela | null | 'oshibka'>(null);
+  const [zagruzheno, setZagruzheno] = useState<{ klyuch: string; k: KatalogRazdela | 'oshibka' } | null>(null);
   const [popytka, setPopytka] = useState(0);
+  const klyuch = `${no}:${popytka}`;
 
   useEffect(() => {
     let alive = true;
-    setKat(null);
+    const k = `${no}:${popytka}`;
     zagruzitKatalog(no)
-      .then((k) => {
-        if (alive) setKat(k);
+      .then((x) => {
+        if (alive) setZagruzheno({ klyuch: k, k: x });
       })
       .catch(() => {
-        if (alive) setKat('oshibka');
+        if (alive) setZagruzheno({ klyuch: k, k: 'oshibka' });
       });
     return () => {
       alive = false;
     };
   }, [no, popytka]);
+  const kat = zagruzheno !== null && zagruzheno.klyuch === klyuch ? zagruzheno.k : null;
 
   const vkladki: Vkladka[] = ['kartochki', 'opornye', 'trenazher'];
 

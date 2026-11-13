@@ -652,7 +652,10 @@ function NaborKartochek({
     return open === -1 ? units.length : open;
   });
   const [oborot, setOborot] = useState<Map<string, { back: string; pochemu?: string }>>(new Map());
-  const shownAt = useRef(Date.now());
+  const shownAt = useRef(0);
+  useEffect(() => {
+    shownAt.current = Date.now();
+  }, []);
   const projdeno = units.filter((u) => stateOf(u.id) !== 'open').length;
   const u = units[i];
 
