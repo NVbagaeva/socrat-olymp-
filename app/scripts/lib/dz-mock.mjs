@@ -8,9 +8,14 @@
    здесь — экраны сайта. */
 
 import crypto from 'node:crypto';
+import { requireSrc } from './load-ts.mjs';
+
+/* Проверка ответа — та же, что у сайта и базы (lib/otvet/proverkaDz.ts,
+   таблица примеров proverkaDzCases.json). */
+const { proveritOtvetDz, normalizeEge: normalizeEgeTs } = requireSrc('lib/otvet/proverkaDz.ts');
+export const proveritMock = (input, answer) => proveritOtvetDz(String(input ?? ''), answer);
 
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-const MINUS = /[−‒–—‐‑﹣－]/g;
 
 /** Ошибка PostgREST: supabase-js кладёт message в error.message. */
 const pgErr = (status, message) => ({
@@ -19,25 +24,7 @@ const pgErr = (status, message) => ({
 });
 
 /** normalize_ege_answer: целое или конечная десятичная дробь, иначе null. */
-export function normalizeEge(raw) {
-  const v = String(raw ?? '')
-    .trim()
-    .replace(MINUS, '-');
-  const m = /^(-?)(\d+)(?:[.,](\d+))?$/.exec(v);
-  if (m === null) return null;
-  const whole = m[2].replace(/^0+(\d)/, '$1');
-  const frac = (m[3] ?? '').replace(/0+$/, '');
-  const body = frac === '' ? whole : `${whole}.${frac}`;
-  return m[1] === '-' && body !== '0' ? `-${body}` : body;
-}
-
-/** Десятичная запись → [числитель, знаменатель] точно, через BigInt. */
-function ratio(decimal) {
-  const [int, frac = ''] = decimal.replace('-', '').split('.');
-  const den = 10n ** BigInt(frac.length);
-  const num = BigInt(`${int}${frac}`) * (decimal.startsWith('-') ? -1n : 1n);
-  return [num, den];
-}
+export const normalizeEge = (raw) => normalizeEgeTs(String(raw ?? ''));
 
 /** Фильтры PostgREST из адреса: eq., in.(…), is.null, not.is.null; order. */
 export function applyFilters(rows, params) {
@@ -409,22 +396,10 @@ export function createDzMock({ profiles, classes, members }) {
       if (row.state !== 'open') return { status: 200, body: { kind: 'closed', state: row.state } };
       const key = keys.find((k) => k.task_id === task.id).answer;
       const raw = String(body.p_answer ?? '').trim();
-      const prepared = raw.replace(MINUS, '-').replace(/[∕÷]/g, '/');
-      const frac = /^(-?)(\d+)\s*\/\s*(\d+)$/.exec(prepared);
-      let normal = null;
-      let ok = false;
-      if (frac !== null) {
-        const q = BigInt(frac[3]);
-        if (q === 0n) return { status: 200, body: { kind: 'format' } };
-        const p = BigInt(frac[2]) * (frac[1] === '-' ? -1n : 1n);
-        const [num, den] = ratio(key);
-        if (p * den === num * q)
-          return { status: 200, body: { kind: 'fractionRight', decimal: key } };
-      } else {
-        normal = normalizeEge(raw);
-        if (normal === null) return { status: 200, body: { kind: 'format' } };
-        ok = normal === key;
-      }
+      const res = proveritMock(body.p_answer, key);
+      if (res.kind === 'format' || res.kind === 'fractionRight') return { status: 200, body: res };
+      const normal = res.norm;
+      const ok = res.kind === 'right';
       row.attempts += 1;
       row.seconds += Math.max(0, Math.min(3600, Number(body.p_seconds) || 0));
       row.entries.push({ a: raw.slice(0, 40), n: normal, ok, at: new Date().toISOString() });
