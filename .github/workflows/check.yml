@@ -982,6 +982,7 @@ jobs:
       - name: Перенос прогресса №11 в браузере
         working-directory: app
         run: pnpm test:progress-11-site
+
       - name: Редизайн №1 — картинки и содержание не изменены
         working-directory: app
         run: pnpm test:redesign 1 origin/main
