@@ -45,6 +45,9 @@
  * @property {string} prichina Подпись плашки для администратора.
  * @property {1 | 2} chast В какой части раздел был: для его собственных страниц.
  * @property {number} ball Балл за задачу раздела: для уже решённых работ.
+ * @property {boolean} [otkryt] true — страницы раздела открыты всем.
+ *   Без этого поля раздел вне экзамена скрыт: посетителю его адрес
+ *   отвечает 404, администратор видит раздел с плашкой prichina.
  */
 
 /**
@@ -59,7 +62,11 @@
  *   Раздел без своего номера, который идёт внутри другого: его задачи
  *   показываются под номером «хозяина».
  * @property {Readonly<Partial<Record<RazdelKod, VneEkzamena>>>} vne
- *   Разделы вне экзамена: в банке, меню и вариантах их нет.
+ *   Разделы вне экзамена: в банке, меню и вариантах их нет, страницы
+ *   скрыты (см. skryt). Раздел не удаляется: код, данные и прогресс
+ *   учеников остаются. Вернуть раздел — одна правка здесь: поставить
+ *   otkryt: true (страницы снова открыты всем) или перенести раздел
+ *   из vne в zadaniya на его номер (раздел снова в экзамене).
  */
 
 /**
@@ -267,6 +274,19 @@ export function vEkzamene(x, s = STRUKTURA) {
  */
 export function prichinaSkrytiya(x, s = STRUKTURA) {
   return s.vne[razdel(x).kod]?.prichina ?? null;
+}
+
+/**
+ * Раздел скрыт: его нет в экзамене, и его страницы закрыты от
+ * посетителей. Как именно закрыты — components/tasks/skrytye и
+ * scripts/build-skrytye.mjs; проверка — scripts/check-skrytye.mjs.
+ * @param {RazdelKod | number} x
+ * @param {Struktura} [s]
+ * @returns {boolean}
+ */
+export function skryt(x, s = STRUKTURA) {
+  const vne = s.vne[razdel(x).kod];
+  return vne !== undefined && vne.otkryt !== true;
 }
 
 /**
