@@ -4,7 +4,7 @@
  * сервере (generator10.ts); банк и решатели грузятся при сборке листа.
  */
 
-import type { IllInfo } from '@/components/tasks/zadanie10/Zadacha10';
+import type { IllInfo } from '@/components/tasks/zadanie10/Kartinka10';
 import { GENERATOR10_TEXTS } from '@/content/generator10';
 import { bankEngine, type SobratListHtml } from '@/lib/generator/obshchiy/bankEngine';
 import type { GenConfig, GenEngine } from '@/lib/generator/obshchiy/types';
