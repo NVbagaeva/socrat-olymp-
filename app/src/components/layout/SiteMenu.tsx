@@ -8,6 +8,8 @@ import { site } from '@/content/site';
 import type { MenuLink } from '@/content/site';
 import { AUTH_ENABLED, AUTH_HREF, AUTH_IN_HEADER } from '@/lib/auth/config';
 import { useSessionUser } from '@/lib/auth/session';
+import { useLevel } from '@/lib/levelStore';
+import { LevelSwitch } from '@/components/level/LevelSwitch';
 import { LogoutItem } from '@/components/auth/AuthLive';
 import { NavIcon } from '@/components/ui/NavIcons';
 
@@ -39,8 +41,11 @@ function Chevron() {
 
 /** Строка меню: значок в плашке, название, пояснение, шеврон. */
 function Row({ link, onClick }: { link: MenuLink; onClick: () => void }) {
+  /* В режиме базы «Банк заданий» ведёт в банк базы. */
+  const level = useLevel();
+  const to = level === 'base' && link.hrefBase !== undefined ? link.hrefBase : link.href;
   return (
-    <a href={link.href} className="site-menu__row" onClick={onClick}>
+    <a href={to} className="site-menu__row" onClick={onClick}>
       <span className="site-menu__ico">
         <NavIcon name={link.icon} />
       </span>
@@ -172,6 +177,8 @@ export function SiteMenu() {
                 aria-label="Меню сайта"
                 onMouseDown={(event) => event.stopPropagation()}
               >
+                {/* Уровень экзамена: в узкой шапке переключатель живёт здесь. */}
+                <LevelSwitch className="site-menu__level" />
                 <nav className="site-menu__nav" aria-label="Разделы сайта">
                   <a
                     href={glavnoe.href}
