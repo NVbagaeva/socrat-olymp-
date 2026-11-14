@@ -22,7 +22,7 @@
      4. Серия из 10 вариантов: страница серии, карточки и статусы,
         статистика серии после трёх завершённых вариантов.
      6. «Решить вариант онлайн» из меню «Варианты»: /variant/onlayn/,
-        режим → новый вариант 1–13 на странице решения, «Вернуться к
+        режим → новый вариант первой части на странице решения, «Вернуться к
         последнему варианту».
    --shots — снимки экрана в docs/variant-onlayn-snimki/ (телефон и
    компьютер): экран решения, клавиатура, результаты, статистика серии. */
@@ -76,7 +76,14 @@ for (let n = 1; n <= 13; n += 1) {
 }
 const subtypeIds = {};
 for (let n = 1; n <= 13; n += 1) subtypeIds[n] = adapters.get(n).info.subtypes.map((s) => s.id);
-const ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+/* Вариант — из заданий действующей структуры экзамена (lib/variant/struktura.ts):
+   1–13 в структуре из 20 заданий, 11 заданий в ЕГЭ-2027 (у №12 задач для
+   вариантов пока нет). Коды прежней структуры проверяет test:variant-struktura. */
+const V = requireSrc('lib/variant/struktura');
+const ALL = [...V.VARIANT_NUMBERS];
+const N = ALL.length;
+/** Номер задания на экране у задачи на позиции i. */
+const nomer = (i) => V.podpis1(ALL[i]);
 const config = { tasks: ALL, subtypes: {}, source: 'mix', stars: [], count: 10, parallel: false };
 const SEED = 'K7M2';
 /* Версия генератора — как у сборки: иначе страница предупредит, что
@@ -201,7 +208,7 @@ await page.waitForTimeout(400);
 await page.reload();
 await page.getByTestId('vo-card').waitFor({ timeout: 60_000 });
 ok(
-  (await page.locator('.vo-strip__no.is-current').textContent())?.trim() === '5',
+  (await page.locator('.vo-strip__no.is-current').textContent())?.trim() === nomer(4),
   'после перезагрузки — то же задание',
   'другое',
 );
@@ -225,21 +232,29 @@ ok(
 await page.getByTestId('vo-finish').click();
 const question = await page.locator('.modal').textContent();
 ok(
-  question?.includes('№3') === true && question.includes('№13') === true,
+  question?.includes(`№${nomer(2)}`) === true &&
+    question.includes(`№${nomer(N - 1)}`) === true &&
+    !question.includes('№—'),
   'в вопросе — пустые номера',
   question ?? '',
 );
 await page.getByTestId('vo-confirm').click();
 await page.getByTestId('vo-result').waitFor({ timeout: 60_000 });
 ok(
-  (await page.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true,
-  'первичный балл 1 из 13',
+  (await page.getByTestId('vo-primary').textContent())?.includes(`1 из ${N}`) === true,
+  `первичный балл 1 из ${N}`,
   (await page.getByTestId('vo-primary').textContent()) ?? '',
 );
 ok(
-  (await page.getByTestId('vo-test').textContent())?.includes(String(testScore(1))) === true,
-  'тестовый балл по шкале',
-  (await page.getByTestId('vo-test').textContent()) ?? '',
+  V.vsyaChast1(ALL)
+    ? (await page.getByTestId('vo-test').textContent())?.includes(String(testScore(1))) === true
+    : (await page.getByTestId('vo-test').count()) === 0,
+  V.vsyaChast1(ALL)
+    ? 'тестовый балл по шкале'
+    : 'тестового балла нет: вариант не покрывает первую часть (у №12 пока нет задач)',
+  (await page.getByTestId('vo-test').count()) === 0
+    ? 'нет'
+    : ((await page.getByTestId('vo-test').textContent()) ?? ''),
 );
 ok(
   (await page.locator('.vo-table tbody tr.is-right').count()) === 1,
@@ -273,7 +288,7 @@ await teacher.getByTestId('vo-proverka-input').fill(code);
 await teacher.getByTestId('vo-proverka-open').click();
 await teacher.getByTestId('vo-result').waitFor({ timeout: 60_000 });
 ok(
-  (await teacher.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true,
+  (await teacher.getByTestId('vo-primary').textContent())?.includes(`1 из ${N}`) === true,
   'у учителя тот же балл',
   'другой',
 );
@@ -303,8 +318,8 @@ ok(
   'системная клавиатура не открывается',
   'inputmode не none',
 );
-/* Задание с подсказками-вопросами: №6, 7, 9, 10, 11, 13 — берём №7. */
-const i7 = 6;
+/* Задание с подсказками-вопросами (уравнения, номер хранения 7). */
+const i7 = ALL.indexOf(7);
 await mob.locator('.vo-strip__no').nth(i7).click();
 await mob.locator('.keypad__key[data-key="-"]').click();
 await mob.locator('.keypad__key[data-key="9"]').click();
@@ -339,7 +354,7 @@ await mob.getByTestId('vo-finish').click();
 await mob.getByTestId('vo-confirm').click();
 await mob.getByTestId('vo-result').waitFor({ timeout: 60_000 });
 ok(
-  (await mob.getByTestId('vo-primary').textContent())?.includes('1 из 13') === true,
+  (await mob.getByTestId('vo-primary').textContent())?.includes(`1 из ${N}`) === true,
   'в баллы — только первая попытка',
   (await mob.getByTestId('vo-primary').textContent()) ?? '',
 );
@@ -351,7 +366,7 @@ console.log('4. Серия: карточки и статистика');
 /* Ещё два варианта контрольной: часть ответов верна. */
 for (const v of [1, 3]) {
   await begin(page, reshat(v, 'k'));
-  for (let i = 0; i < 13; i += 1) {
+  for (let i = 0; i < N; i += 1) {
     if ((i + v) % 3 !== 0) await type(page, i, answerOf(v, i));
     /* Для снимков статистики — немного времени на задание. */
     if (SHOTS) await page.waitForTimeout(300 + ((i * 7 + v * 3) % 10) * 150);
@@ -376,8 +391,8 @@ ok(
 );
 ok((await page.getByTestId('vo-stats').count()) === 1, 'статистика серии', 'нет');
 ok(
-  (await page.locator('.vo-heat__cell').count()) === 13,
-  'тепловая карта 1–13',
+  (await page.locator('.vo-heat__cell').count()) === N,
+  `тепловая карта: ${N} заданий`,
   String(await page.locator('.vo-heat__cell').count()),
 );
 await shot(page, 'seriya-kompyuter');
@@ -456,8 +471,8 @@ ok(
 await self.getByTestId('vo-begin').click({ timeout: 60_000 });
 await self.getByTestId('vo-card').waitFor();
 ok(
-  (await self.locator('.vo-strip__no').count()) === 13,
-  'в варианте 13 заданий',
+  (await self.locator('.vo-strip__no').count()) === N,
+  `в варианте ${N} заданий`,
   String(await self.locator('.vo-strip__no').count()),
 );
 const firstKod = selfUrl.searchParams.get('kod');
@@ -468,10 +483,14 @@ await self.goto(`${BASE}/variant/onlayn/`);
 const resume = self.getByTestId('vo-nachalo-resume');
 await resume.waitFor();
 const plashka = (await self.locator('.onl-plashka').textContent()) ?? '';
-ok(/решено 2 из 13/.test(plashka), 'плашка: «решено 2 из 13» — по ответам сессии', plashka);
+ok(
+  new RegExp(`решено 2 из ${N}`).test(plashka),
+  `плашка: «решено 2 из ${N}» — по ответам сессии`,
+  plashka,
+);
 ok(
   (await self.locator('.onl-plashka progress').getAttribute('value')) === '2',
-  'полоса прогресса — 2 из 13',
+  `полоса прогресса — 2 из ${N}`,
   String(await self.locator('.onl-plashka progress').getAttribute('value')),
 );
 ok(
