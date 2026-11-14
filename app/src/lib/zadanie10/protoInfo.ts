@@ -3,9 +3,19 @@
  * генератор, «Для репетиторов»): без решателей и данных банка.
  */
 
-import type { ProtoInfo10 } from '../../components/tasks/zadanie10/Trenazher10';
 import { YAKOR_TEORII_10 } from '../../content/teoriya10';
 import { GROUPS, kodNaSayte, PROTOTYPES } from './prototypes';
+
+/** Прототип для клиентских вкладок (генератор, «Для репетиторов»). */
+export interface ProtoInfo10 {
+  id: string;
+  kod: string;
+  title: string;
+  group: string;
+  /** Якорь теории для «Повторить теорию»: «teoriya-edinicy», «ed-stepeni». */
+  teoriya?: string;
+  izKursa: boolean;
+}
 
 export function protoInfo10(): ProtoInfo10[] {
   return PROTOTYPES.map((p) => {

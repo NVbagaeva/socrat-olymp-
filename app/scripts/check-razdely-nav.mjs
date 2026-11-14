@@ -475,16 +475,19 @@ for (const size of SIZES) {
   });
   check(!longName.cut, where(`название на плашке обрезано: ${longName.text}`));
 
-  /* Иконки разделов на странице «Подтемы»: одна на раздел, из общего
-     компонента, декоративные, с размерами и srcset; «Скоро» — бледные. */
+  /* Иконки разделов на странице «Подтемы» (карта «О задании»: вид функции —
+     группа): одна на раздел, из общего компонента, декоративные, с
+     размерами и srcset; «Скоро» — бледные; шеврон не налезает на иконку. */
   await page.goto(BASE + '/zadaniya/12/', { waitUntil: 'networkidle' });
   const podtemy = await page.evaluate(() => {
-    const cards = Array.from(document.querySelectorAll('.subtopic'));
+    const cards = Array.from(document.querySelectorAll('.z12-karta .kz-gruppa'));
     return {
       cards: cards.length,
       withIcon: cards.filter((c) => c.querySelector('picture.razdel-ico img') !== null).length,
       oldCharts: document.querySelectorAll('.subtopic-card__chart').length,
-      bad: Array.from(document.querySelectorAll('.subtopic picture.razdel-ico img')).filter(
+      bad: Array.from(
+        document.querySelectorAll('.z12-karta .kz-gruppa picture.razdel-ico img'),
+      ).filter(
         (img) =>
           img.getAttribute('alt') !== '' ||
           img.getAttribute('aria-hidden') !== 'true' ||
@@ -497,7 +500,7 @@ for (const size of SIZES) {
       soonDim: document.querySelectorAll('.subtopic--soon picture.razdel-ico--soon').length,
       soonCards: document.querySelectorAll('.subtopic--soon').length,
       overlap: cards.filter((c) => {
-        const go = c.querySelector('.subtopic__go')?.getBoundingClientRect();
+        const go = c.querySelector('.kz-gruppa__summary > .stk-shevron')?.getBoundingClientRect();
         const ico = c.querySelector('picture')?.getBoundingClientRect();
         return (
           go &&

@@ -1,5 +1,6 @@
 'use client';
 
+import { createContext, useContext } from 'react';
 import { FigureZoom } from '@/components/ui';
 import { TRENAZHER1 } from '@/content/planimetriya1';
 import { estPi } from '@/lib/zadanie7/otvet';
@@ -8,8 +9,10 @@ import { zadachaHref1 } from '@/lib/planimetriya/trening/links';
 import { readSealed1 } from '@/lib/planimetriya/trening/otvet1';
 import { log1, vybor1 } from '@/lib/planimetriya/trening/progress';
 import type { Reshenie1T, Zadacha1T } from '@/lib/planimetriya/trening/sborka';
+import type { SsylkiTipa1 } from '@/lib/planimetriya/trening/ssylki';
 import { ZAGRUZKA1 } from '@/lib/planimetriya/trening/zagruzka';
 import type { Shag } from '../steklo';
+import { Piktogramma } from '../zadanie11/Piktogrammy';
 import type { RazdelBanka, SostoyaniePod } from '../trening/bank/types';
 
 /** Чертёж движка в окне на весь экран по нажатию (мелкие подписи на телефоне). */
@@ -18,6 +21,35 @@ function Chertezh({ svg, label }: { svg: string; label: string }) {
     <FigureZoom className="z1-trn__chertezh" label={label}>
       <span className="pl-wrap" dangerouslySetInnerHTML={{ __html: svg }} />
     </FigureZoom>
+  );
+}
+
+/** Ссылки под условием по типу задачи — их даёт вкладка (Trenazher1Bank). */
+export const Ssylki1 = createContext<Record<string, SsylkiTipa1>>({});
+
+/** Материалы к задаче, как в прежнем тренажёре: теория, факт, опорный блок, разбор типа. */
+function Materialy1({ tip }: { tip: string }) {
+  const s = useContext(Ssylki1)[tip];
+  if (s === undefined) return null;
+  const T = TRENAZHER1.ekran;
+  const ssylki: [string | undefined, 'book' | 'bolt' | 'tools' | 'doc', string][] = [
+    [s.teoriya, 'book', T.povtoritTeoriyu],
+    [s.fakt, 'bolt', T.layfhak],
+    [s.opornye, 'tools', T.opornyy],
+    [s.razbor, 'doc', T.razborTipa],
+  ];
+  return (
+    <nav className="z1-trn__materialy" aria-label={T.materialy}>
+      {ssylki.map(([href, ikonka, podpis]) =>
+        href === undefined ? null : (
+          /* Обычная ссылка: тренировка сохранена, «Назад» вернёт к задаче. */
+          <a className="z1-trn__ssylka" href={href} key={ikonka}>
+            <Piktogramma name={ikonka} />
+            {podpis}
+          </a>
+        ),
+      )}
+    </nav>
   );
 }
 
@@ -47,6 +79,7 @@ function Pod1({ z, sost }: { z: Zadacha1T; sost: SostoyaniePod<Reshenie1T> }) {
       <p className="trn-istochnik">
         {z.fipi === null ? TRENAZHER1.ekran.neIzBanka : TRENAZHER1.ekran.bank(z.fipi)}
       </p>
+      <Materialy1 tip={z.prototypeId} />
     </>
   );
 }
