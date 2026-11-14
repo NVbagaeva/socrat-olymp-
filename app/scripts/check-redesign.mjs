@@ -43,6 +43,54 @@ if (!/^\d{1,2}$/.test(razdel ?? '')) {
 
 /** Файлы и папки содержания раздела (пути от корня репозитория). */
 const SODERZHANIE = {
+  /* №4 и №5: общий банк вероятности — прототипы, варианты, ответы, разборы,
+     подсказки, модели рисунков, опорные задачи, методы; теория (тексты в
+     content и разметка разделов теории), «О задании», карточки. */
+  4: [
+    'app/src/lib/veroyatnost/bank4',
+    'app/src/lib/veroyatnost/index.ts',
+    'app/src/lib/veroyatnost/types.ts',
+    'app/src/lib/veroyatnost/model.ts',
+    'app/src/lib/veroyatnost/model-zadachi.ts',
+    'app/src/lib/veroyatnost/blocks.ts',
+    'app/src/lib/veroyatnost/metody4.ts',
+    'app/src/lib/veroyatnost/podgotovka4.ts',
+    'app/src/lib/veroyatnost/podskazka.ts',
+    'app/src/lib/veroyatnost/illyustratsii.ts',
+    'app/src/lib/veroyatnost/secret.ts',
+    'app/src/lib/veroyatnost/teoriya.ts',
+    'app/src/lib/veroyatnost/teoriya-ponimanie.ts',
+    'app/src/lib/veroyatnost/teoriya-yakorya.ts',
+    'app/src/content/veroyatnost-teoriya.ts',
+    'app/src/content/veroyatnost-o-zadanii.ts',
+    'app/src/content/veroyatnost-metody.ts',
+    'app/src/content/veroyatnost-syuzhety.ts',
+    'app/src/content/kartochki/04-veroyatnost.ts',
+    'app/src/components/tasks/veroyatnost/teoriya',
+  ],
+  5: [
+    'app/src/lib/veroyatnost/bank5',
+    'app/src/lib/veroyatnost/index.ts',
+    'app/src/lib/veroyatnost/types.ts',
+    'app/src/lib/veroyatnost/model.ts',
+    'app/src/lib/veroyatnost/model-zadachi.ts',
+    'app/src/lib/veroyatnost/blocks.ts',
+    'app/src/lib/veroyatnost/metody5.ts',
+    'app/src/lib/veroyatnost/podgotovka5.ts',
+    'app/src/lib/veroyatnost/podgotovka5-podskazki.ts',
+    'app/src/lib/veroyatnost/labirint.ts',
+    'app/src/lib/veroyatnost/podskazka.ts',
+    'app/src/lib/veroyatnost/illyustratsii.ts',
+    'app/src/lib/veroyatnost/secret.ts',
+    'app/src/lib/veroyatnost/teoriya.ts',
+    'app/src/lib/veroyatnost/teoriya-ponimanie.ts',
+    'app/src/lib/veroyatnost/teoriya-yakorya.ts',
+    'app/src/content/veroyatnost-teoriya.ts',
+    'app/src/content/veroyatnost-o-zadanii.ts',
+    'app/src/content/veroyatnost-metody.ts',
+    'app/src/content/kartochki/05-veroyatnost.ts',
+    'app/src/components/tasks/veroyatnost/teoriya',
+  ],
   1: [
     /* Банк, аналоги, сцены чертежей, решения и подсказки, опорные задачи,
        движок чертежей, генератор и листы, теория и карточки. */
@@ -204,6 +252,21 @@ const SODERZHANIE = {
   ],
 };
 
+/**
+ * Правки содержания, одобренные владельцем: ошибка в тексте, о которой
+ * сказано в PR редизайна, исправлена отдельным PR. Файл пропускается,
+ * только пока он совпадает с одобренной версией (sha256): любая следующая
+ * правка снова видна проверке. После слияния в main запись не нужна —
+ * образец уже содержит эту версию.
+ */
+const ODOBRENO = {
+  /* №9: определение точки максимума без минимума; «нуль» при одном нуле. */
+  'app/src/lib/proizvodnaya/prototypes/po-grafiku-fprime.ts':
+    'cf6c9b6b7737e190cb0e7a7bc3adb1b3783f292af1aede97179ac35f9b0e01b9',
+  'app/src/lib/proizvodnaya/povyshennye.ts':
+    '690f2d8461884b393db2f655aeb20e8c570b4d2bf59355001d29f88f1875413a',
+};
+
 /** Какие картинки реестра принадлежат разделу. */
 function razdelKartinki(file) {
   const m = /^app\/public\/images\/task-(\d\d)\./.exec(file);
@@ -305,9 +368,23 @@ if (puti === undefined) {
   } catch (error) {
     check(false, `не удалось сравнить с ${obrazec}: ${String(error).slice(0, 200)}`);
   }
+  /* Правка, одобренная владельцем (ODOBRENO), проходит как есть. */
+  const neodobreno = izmeneno
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .filter((line) => {
+      const file = line.split('\t').at(-1);
+      const odobreno = ODOBRENO[file];
+      if (odobreno === undefined || !fs.existsSync(path.join(REPO, file))) return true;
+      const now = crypto
+        .createHash('sha256')
+        .update(fs.readFileSync(path.join(REPO, file)))
+        .digest('hex');
+      return now !== odobreno;
+    });
   /* Изменённый файл: другая запись того же содержания или другое содержание? */
   const plohie = [];
-  for (const stroka of izmeneno.split('\n').filter((line) => line !== '')) {
+  for (const stroka of neodobreno) {
     const [status, file] = stroka.split('\t');
     if (status !== 'M' || !/\.(ts|tsx|js|mjs)$/.test(file)) {
       plohie.push(stroka);

@@ -1,0 +1,85 @@
+/* «О задании» №4 и №5 в «Стеклянной сцене»: только своё — блок прежних
+   текстов с фотографией и картинки примеров. Префикс z45-. */
+
+/* Картинка к примеру — целиком, по центру, не шире колонки. */
+.z45-karta .kz-primer__risunok {
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+/* Значок группы — объёмная иллюстрация метода: крупнее формулы. */
+.z45-karta .kz-gruppa .stk-znak--figura {
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+}
+
+.z45-karta__metody {
+  margin: var(--space-4) 0 0;
+}
+
+/* Об этом задании: прежние тексты, статистика, фотография. */
+.z45-ob__setka {
+  display: grid;
+  gap: var(--space-5);
+}
+.z45-ob__blok {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.z45-ob__blok p {
+  margin: 0;
+  line-height: 1.55;
+}
+.z45-ob__stat b {
+  display: block;
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--blue-700);
+  font-variant-numeric: tabular-nums;
+}
+.z45-ob__istochnik {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+}
+.z45-ob__plashka {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: 14px;
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi);
+}
+/* Фотография — как есть, целиком: обычный снимок без прозрачности. */
+.z45-ob__foto {
+  margin: var(--space-2) 0 0;
+}
+.z45-ob__foto img {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  border-radius: 14px;
+}
+.z45-ob__foto figcaption {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+  line-height: 1.4;
+}
+
+@media (min-width: 1024px) {
+  .z45-ob__setka {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .z45-ob__istoriya {
+    grid-column: 1 / -1;
+  }
+}
+.z45-ob__metody {
+  margin: 0;
+  padding-left: 1.2em;
+  list-style: disc;
+  line-height: 1.5;
+}

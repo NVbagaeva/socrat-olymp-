@@ -228,9 +228,12 @@ export function KartaPrimer({
   trenirovatHref,
   opornyeHref,
   labels,
+  posle,
 }: {
   /** Чертёж к примеру: между условием и шагами (стереометрия). */
   risunok?: ReactNode;
+  /** Под шагами: например, рисунок метода с подсветкой (№4, №5). */
+  posle?: ReactNode;
   uslovieHtml: string;
   shagi: Shag[];
   otvet: string;
@@ -245,7 +248,7 @@ export function KartaPrimer({
       <p className="kz-primer__metka">{labels.primer}</p>
       <div className="kz-uslovie" dangerouslySetInnerHTML={{ __html: uslovieHtml }} />
       {risunok === undefined ? null : <div className="kz-primer__risunok">{risunok}</div>}
-      <ShagiResheniya shagi={shagi} />
+      <ShagiResheniya shagi={shagi} posle={posle} />
       {opasnoHtml === undefined ? null : (
         <p className="kz-lovushka">
           <b>{labels.lovushka}.</b> <span dangerouslySetInnerHTML={{ __html: opasnoHtml }} />

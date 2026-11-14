@@ -5,6 +5,7 @@ import { kolodaNomera } from '@/content/kartochki';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
 import { RAZDELY_5 } from '@/content/veroyatnost-teoriya';
 import { ZADANIYA } from '@/lib/paths';
+import '@/components/tasks/teoriya/teoriya-steklo.css';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('5', vkladka('5', 'teoriya')),
@@ -33,7 +34,11 @@ export default function Teoriya5Tab() {
         href={`${ZADANIYA}/5/kartochki/`}
         ids={kolodaNomera(5).kartochki.map((k) => k.id)}
       />
-      <TeoriyaShell vkladka={vkladka('5', 'teoriya')} razdely={RAZDELY_5} tela={telaRazdelov5} />
+      {/* «Стеклянная сцена»: общий слой рамок теории (teoriya-steklo.css),
+          содержание и разметка разделов не меняются. */}
+      <div className="teor-steklo z45-teoriya">
+        <TeoriyaShell vkladka={vkladka('5', 'teoriya')} razdely={RAZDELY_5} tela={telaRazdelov5} />
+      </div>
     </>
   );
 }
