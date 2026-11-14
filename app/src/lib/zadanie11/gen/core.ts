@@ -45,6 +45,14 @@ export function paramsKey(id: string, params: Params): string {
   return `${id}|${keys.map((k) => `${k}=${String(params[k])}`).join(';')}`;
 }
 
+/**
+ * Параметры без героя (geroy, geroy2): герой меняет только слова, а
+ * задача с числами банка и другим героем — всё та же задача банка.
+ */
+function bezGeroev(p: Params): Params {
+  return Object.fromEntries(Object.entries(p).filter(([k]) => k !== 'geroy' && k !== 'geroy2'));
+}
+
 /** Условие задачи банка без ответа: подтип и параметры. */
 export interface UslovieBanka {
   id: string;
@@ -59,12 +67,13 @@ export type Pohozha = (id: string, params: Params) => boolean;
  * «граница» в ДП-12 — всё та же задача банка).
  */
 export function pohozhaNa(items: readonly UslovieBanka[]): Pohozha {
-  const zanyato = new Set(items.map((item) => paramsKey(item.id, item.params)));
+  const zanyato = new Set(items.map((item) => paramsKey(item.id, bezGeroev(item.params))));
   const poPodtipam = new Map<string, Params[]>();
   for (const item of items) {
-    poPodtipam.set(item.id, [...(poPodtipam.get(item.id) ?? []), item.params]);
+    poPodtipam.set(item.id, [...(poPodtipam.get(item.id) ?? []), bezGeroev(item.params)]);
   }
-  return (id, params) => {
+  return (id, s) => {
+    const params = bezGeroev(s);
     if (zanyato.has(paramsKey(id, params))) {
       return true;
     }
