@@ -153,7 +153,6 @@ function Primer({ primer }: { primer: PrimerGlavy }) {
 function Tipy() {
   return (
     <KartochkiTipov
-      label="Типы задач №3"
       tipy={TIPY_3.map((tip) => {
         const glava = GLAVY_3.find((g) => g.id === tip.glava);
         const ssylki: SsylkaTipa[] = [];
