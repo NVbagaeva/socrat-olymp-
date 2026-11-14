@@ -440,6 +440,18 @@
   transform: rotate(-3deg);
 }
 
+/* Иллюстрация в пустом левом поле: стоит вровень с текстом справа. */
+.oa-ill {
+  grid-column: 1 / 6;
+  align-self: center;
+  margin: var(--space-12) 0 0;
+}
+.oa-ill img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* ── Принципы ────────────────────────────────────────────────── */
 
 .oa-printsipy {
@@ -629,6 +641,30 @@
   margin-top: var(--space-2);
 }
 
+/* Картинка в правом нижнем углу карточки, чуть выходит за край;
+   текст держится левее и под неё не заходит. */
+.oa-polza__karta {
+  position: relative;
+}
+.oa-polza__ill {
+  position: absolute;
+  right: -7%;
+  bottom: -9%;
+  width: 36%;
+  max-width: 220px;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 20px rgb(31 95 208 / 0.16));
+}
+.oa-polza__ill img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.oa-polza__karta .oa-h3,
+.oa-polza__karta .oa-text {
+  max-width: 62%;
+}
+
 /* ── Связь ───────────────────────────────────────────────────── */
 
 /* Две ссылки подряд: тот же шаг, что между абзацами. Ссылка остаётся
@@ -638,6 +674,9 @@
   display: grid;
   justify-items: start;
   align-items: start;
+  /* Колонка с пометкой и самолётиком выше списка; без этого строки
+     списка растягиваются на её высоту и ссылки разъезжаются. */
+  align-content: start;
   gap: var(--space-5);
 }
 .oa-svyaz__link {
@@ -667,6 +706,79 @@
   color: var(--color-primary-active);
 }
 
+/* Самолётик под пометкой: летит вправо, к ссылкам. */
+.oa-svyaz__samolyotik {
+  display: block;
+  width: min(100%, 320px);
+  margin-top: var(--space-6);
+  filter: drop-shadow(0 12px 16px rgb(31 95 208 / 0.14));
+}
+.oa-svyaz__samolyotik img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── Фигуры на фоне ──────────────────────────────────────────── */
+
+/* Фигура живёт в полосе верхнего отступа блока (--oa-sec), где текста
+   нет по построению; сетка блока поднята над ней. */
+.oa-sec {
+  position: relative;
+}
+.oa-sec > .oa-wrap {
+  position: relative;
+  z-index: 1;
+}
+.oa-figury__f {
+  position: absolute;
+  top: var(--space-4);
+  z-index: 0;
+  width: 84px;
+  opacity: 0.7;
+  pointer-events: none;
+  animation: oa-parenie 11s ease-in-out infinite alternate;
+}
+.oa-figury__f img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.oa-figury__f--oktaedr {
+  left: 6%;
+  width: 72px;
+  opacity: 0.65;
+}
+.oa-figury__f--sfera {
+  right: 8%;
+  width: 88px;
+  opacity: 0.6;
+  animation-delay: -4s;
+  animation-duration: 13s;
+}
+.oa-figury__f--kaplya {
+  left: 42%;
+  width: 52px;
+  opacity: 0.75;
+  animation-delay: -7s;
+  animation-duration: 10s;
+}
+.oa-figury__f--zvezda {
+  right: 12%;
+  width: 76px;
+  opacity: 0.8;
+  animation-delay: -2s;
+  animation-duration: 12s;
+}
+@keyframes oa-parenie {
+  from {
+    transform: translateY(0) rotate(-2deg);
+  }
+  to {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
 /* ── Планшет и телефон: одна колонка ─────────────────────────── */
 
 @media (max-width: 899.98px) {
@@ -678,6 +790,13 @@
   .oa-sec__side {
     margin-top: var(--space-8);
   }
+  /* Иллюстрация встаёт над текстом; шире 300 px её края, собранные из
+     исходника с впечатанным фоном, выглядят грубовато. */
+  .oa-ill {
+    max-width: 300px;
+    margin-top: var(--space-10);
+  }
+
   /* Пометка — у правого поля, под заголовком своего блока. */
   .oa-sec__side .oa-pometka {
     width: min(58%, 230px);
@@ -739,6 +858,35 @@
   .oa-polza__karta .btn {
     align-self: stretch;
   }
+  /* Картинка над текстом, у правого края карточки, текст во всю ширину. */
+  .oa-polza__ill {
+    position: static;
+    order: -1;
+    align-self: flex-end;
+    width: 150px;
+    margin: calc(var(--space-6) * -1) calc(var(--space-2) * -1) 0 0;
+  }
+  .oa-polza__karta .oa-h3,
+  .oa-polza__karta .oa-text {
+    max-width: none;
+  }
+  .oa-svyaz__samolyotik {
+    width: min(100%, 240px);
+    margin-left: auto;
+  }
+  .oa-figury__f {
+    top: var(--space-3);
+    width: 36px;
+  }
+  .oa-figury__f--sfera {
+    width: 40px;
+  }
+  .oa-figury__f--kaplya {
+    width: 26px;
+  }
+  .oa-figury__f--zvezda {
+    width: 34px;
+  }
   .oa-fakty {
     display: grid;
   }
@@ -787,7 +935,8 @@
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .oa-sm * {
+  .oa-sm *,
+  .oa-figury__f {
     animation: none !important;
   }
   .oa--js [data-reveal] {

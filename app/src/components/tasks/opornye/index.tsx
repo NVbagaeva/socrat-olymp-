@@ -157,7 +157,7 @@ export interface OpornayaZadachaProps {
     html: string;
     open: boolean;
     onOpen: () => void;
-    /** Подсказка-вопросы с кнопками (№13, №4, №5) вместо текста. */
+    /** Подсказка-вопросы с кнопками (№11, №13, №4, №5) вместо текста — как в тренажёре. */
     telo?: ReactNode;
   } | null;
   /**
