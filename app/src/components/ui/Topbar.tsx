@@ -1,11 +1,14 @@
 import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
+import { LevelLink } from '@/components/level/LevelSwitch';
 import { NavIcon } from './NavIcons';
 import type { NavItem } from './Sidebar';
 
 export interface TopbarProps {
   /** Разделы кабинета. Не переданы — шапка без меню, как была. */
   nav?: NavItem[];
+  /** В начале шапки, перед меню: переключатель уровня экзамена. */
+  lead?: ReactNode;
   /**
    * Поле поиска в шапке. Выключается там, где у страницы свой поиск:
    * два поля на одном экране — это два разных поиска, и человек не
@@ -33,6 +36,7 @@ export interface TopbarProps {
 
 export function Topbar({
   nav,
+  lead,
   navLabel = 'Разделы кабинета',
   search = true,
   searchPlaceholder = 'Поиск по заданиям, темам и номерам',
@@ -49,27 +53,42 @@ export function Topbar({
 
   return (
     <header className={clsx('topbar', className)}>
+      {lead}
       {nav !== undefined ? (
         <>
           <nav className="topnav" aria-label={navLabel}>
-            {nav.map((item) => (
-              <a
-                key={item.id}
-                href={item.href}
-                className={clsx(item.active === true && 'is-active')}
-                aria-current={item.active === true ? 'page' : undefined}
-                aria-label={item.short !== undefined ? item.label : undefined}
-              >
-                {item.short !== undefined ? (
+            {nav.map((item) => {
+              const body =
+                item.short !== undefined ? (
                   <>
                     <span className="topnav__full">{item.label}</span>
                     <span className="topnav__short">{item.short}</span>
                   </>
                 ) : (
                   item.label
-                )}
-              </a>
-            ))}
+                );
+              const props = {
+                className: clsx(item.active === true && 'is-active'),
+                'aria-current': item.active === true ? ('page' as const) : undefined,
+                'aria-label': item.short !== undefined ? item.label : undefined,
+              };
+              /* Пункт с адресом для базы: на странице без своего уровня
+                 ведёт туда, какой уровень запомнен. */
+              return item.hrefBase !== undefined ? (
+                <LevelLink
+                  key={item.id}
+                  plain
+                  hrefs={{ profile: item.href, base: item.hrefBase }}
+                  {...props}
+                >
+                  {body}
+                </LevelLink>
+              ) : (
+                <a key={item.id} href={item.href} {...props}>
+                  {body}
+                </a>
+              );
+            })}
           </nav>
           <div className="topbar__spacer" />
         </>
