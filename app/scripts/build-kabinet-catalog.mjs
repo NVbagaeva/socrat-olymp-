@@ -46,6 +46,8 @@ const SOURCES = {
   11: ['lib/zadanie11/prototypes/index', 'SUBTYPES'],
   /* №13: реестр прототипов — функция генератора. */
   13: ['lib/zadanie13/generate', 'prototypes'],
+  /* «Наибольшее и наименьшее значение» (ЕГЭ-2027, задание 12). */
+  21: ['lib/zadanie21/prototypes', 'PROTOTYPES'],
 };
 
 function listOf(no) {
