@@ -62,6 +62,7 @@
      №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
      №6       — то же из lib/zadanie6 (общий тренажёр по банку, как у №7)
                 (в записи — ключи задач банка, без ответа);
+     №10      — то же из lib/zadanie10 (общий тренажёр по банку);
      №1       — тот же общий тренажёр: ключ «p05|b12» → razreshit и
                 sostavZadachi движка планиметрии (lib/planimetriya);
      №9       — generate(прототип, seed).otvet из lib/proizvodnaya (тот же
@@ -114,6 +115,21 @@ function answer12(payload, at) {
   const task = zadachaShablona(item.k, seedZadaniya(payload, at, 0), new Map());
   if (task === null) {
     throw new Error(`№12: задача ${item.k} не собралась (seed ${payload.seed})`);
+  }
+  return task.options === null ? { text: task.answer } : { option: String(task.answer) };
+}
+
+/**
+ * №12 на общем тренажёре по банку: ключи шаблонов {id, p}; задача
+ * собирается тем же кодом сайта с seed набора (lib/ves12/trening).
+ */
+function answer12bank(payload, at) {
+  const { zadachaShablona } = requireSrc('lib/trainerSession.ts');
+  const { seedNabora12 } = requireSrc('lib/ves12/trening/session.ts');
+  const item = payload.tasks[at];
+  const task = zadachaShablona(item.id, seedNabora12(item.p), new Map());
+  if (task === null) {
+    throw new Error(`№12: задача ${item.id} не собралась`);
   }
   return task.options === null ? { text: task.answer } : { option: String(task.answer) };
 }
@@ -253,6 +269,18 @@ function answer6(payload, at) {
   const z = BANK.find((item) => item.id === task.id);
   if (z === undefined) {
     throw new Error(`№6: нет задачи ${task.id}`);
+  }
+  return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
+}
+
+/** №10: как у №7 и №6 — ключи задач банка {id, p}; ответ — решатель прототипа. */
+function answer10(payload, at) {
+  const { prototype } = requireSrc('lib/zadanie10/prototypes/index');
+  const { BANK } = requireSrc('lib/zadanie10/bank/index');
+  const task = payload.tasks[at];
+  const z = BANK.find((item) => item.id === task.id);
+  if (z === undefined) {
+    throw new Error(`№10: нет задачи ${task.id}`);
   }
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
@@ -409,10 +437,11 @@ const TRAINERS = [
     name: '№12 все типы',
     url: '/zadaniya/12/trenazher/',
     scope: '12',
-    answer: answer12,
-    all: chooseAllFiltry,
-    /* Страница без ленты вкладок раздела. */
-    tabs: false,
+    answer: answer12bank,
+    /* Общий тренажёр по банку, как у №7 и №6: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№8',
@@ -482,6 +511,16 @@ const TRAINERS = [
     scope: '6',
     answer: answer6,
     /* Тот же общий тренажёр по банку, что у №7. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
+  },
+  {
+    name: '№10',
+    url: '/zadaniya/10/trenazher/',
+    scope: '10',
+    answer: answer10,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
     start: start8,
     configButton: /^Все типы вперемешку/,
     all: chooseAll8,
@@ -591,8 +630,10 @@ const browser = await chromium.launch(executablePath ? { executablePath } : {});
 /* ── Общие действия на странице ─────────────────────────────── */
 
 /** Вариант ответа и его номер: прежние экраны (.popt) и общий тренажёр по банку (№11: .trn-vybor__knopka). */
-const VARIANT = ':is(.popt, .trn-vybor__knopka)';
-const VARIANT_NO = ':is(.popt__no, .z11-variant__no)';
+/* Варианты ответа: .popt — прежние тренажёры, .trn-vybor__knopka — №11,
+   .trn-variant — общий экран задачи (№12). */
+const VARIANT = ':is(.popt, .trn-vybor__knopka, .trn-variant)';
+const VARIANT_NO = ':is(.popt__no, .z11-variant__no, .trn-variant__no)';
 
 const KEY = (scope) => `budetege:trainer:${scope}:session`;
 const BODY = '.tsess__body';
@@ -743,6 +784,8 @@ async function give(page, answer) {
     await page.locator(ANSWER_INPUT).first().fill(answer.text);
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
   } else if (answer.option !== undefined) {
+    /* Вариант ответа: .popt — прежние тренажёры, .trn-variant — общий
+       тренажёр «Стеклянной сцены» (№12). */
     await body
       .locator(VARIANT)
       .filter({ has: page.locator(VARIANT_NO, { hasText: new RegExp(`^${answer.option}$`) }) })
@@ -813,7 +856,7 @@ async function shownAnswer(page, like) {
   }
   if (like.option !== undefined) {
     const chosen = page.locator(
-      `${BODY} :is(.popt.is-chosen, .trn-vybor__knopka.is-on) ${VARIANT_NO}`,
+      `${BODY} :is(.popt.is-chosen, .trn-vybor__knopka.is-on, .trn-variant.is-on) ${VARIANT_NO}`,
     );
     return {
       option: (await chosen.count()) === 0 ? null : (await chosen.first().textContent()).trim(),
