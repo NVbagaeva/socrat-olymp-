@@ -167,11 +167,17 @@ export function useStickyTabs(
       observer?.disconnect();
       observer = new IntersectionObserver(
         (entries) => {
-          /* Плитки снова пересекают зону под панелью — панель уходит;
-             иначе решаем по их месту. */
-          primenit(entries[entries.length - 1]!.isIntersecting ? false : poMestu());
-          /* Прямоугольник в уведомлении бывает отстающим на кадр
-             (WebKit у самой линии): сверяемся ещё и следующим кадром. */
+          if (entries[entries.length - 1]!.isIntersecting) {
+            /* Плитки снова в зоне под панелью — панель уходит. Это
+               однозначно, и перепроверять нечего: лишняя сверка у
+               самой линии возвращала бы панель обратно. */
+            primenit(false);
+            return;
+          }
+          /* Плитки ушли под панель — решаем по их месту, а не по
+             прямоугольнику из уведомления: в WebKit тот бывает
+             отстающим на кадр. Его же догоняем следующим кадром. */
+          primenit(poMestu());
           cancelAnimationFrame(kadr);
           kadr = requestAnimationFrame(() => primenit(poMestu()));
         },
