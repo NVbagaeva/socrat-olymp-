@@ -9,6 +9,7 @@ import type { Cell } from '@/lib/xlsx';
 import { displayAnswer } from './normalize';
 import { fullPartOne, testScore } from './proverka';
 import type { EgeNo } from '../types';
+import { podpis1 } from '../struktura';
 
 export interface ResultRow {
   student: Person;
@@ -76,7 +77,7 @@ export function excelRows(table: ClassTable): Cell[][] {
     'Тестовый (ориентир.)',
     'Время, мин',
     'Сдано',
-    ...table.numbers.map((n) => `№${n}`),
+    ...table.numbers.map((n) => `№${podpis1(n)}`),
   ];
   const body = table.rows.map((r): Cell[] => {
     const a = r.attempt;

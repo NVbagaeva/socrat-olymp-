@@ -4,10 +4,13 @@
  * статистика и выгрузка, функции базы (миграция переносит таблицу сюда
  * же, `pnpm test:chast2` сверяет).
  *
- * Часть 1 (1–13) — по 1 баллу; часть 2 (14–20) — по критериям.
- * Поменять вес задания — поменять число здесь.
+ * Таблица — по номерам хранения разделов (content/struktura.js): задача
+ * с кратким ответом (1–13) — 1 балл; задача с развёрнутым ответом
+ * (14–20) — по критериям. Вес задания по действующей структуре записан
+ * в struktura.js; `pnpm test:variant-struktura` сверяет с ним таблицу.
  */
 
+import { maxPervichnyy } from '@/content/struktura';
 import type { EgeNo } from '@/lib/variant/types';
 
 /** Номер задания ЕГЭ: часть 1 — 1…13, часть 2 — 14…20. */
@@ -42,12 +45,13 @@ export const MAX_BALL: Readonly<Record<EgeNo20, number>> = {
 /** Баллы первой части — для онлайн-варианта из заданий 1–13. */
 export const BALLY: Readonly<Record<EgeNo, number>> = MAX_BALL;
 
-const sum = (ns: readonly number[]) => ns.reduce((s, n) => s + MAX_BALL[n as EgeNo20], 0);
-
-/** Максимум части 1, части 2 и всей работы: 13, 20, 33. */
-export const MAX_PART1 = sum([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
-export const MAX_PART2 = sum(PART2_NUMBERS);
-export const MAX_TOTAL = MAX_PART1 + MAX_PART2;
+/**
+ * Максимум части 1, части 2 и всей работы — по действующей структуре
+ * экзамена (content/struktura.js): 13, 20, 33 в структуре из 20 заданий.
+ */
+export const MAX_PART1: number = maxPervichnyy(1);
+export const MAX_PART2: number = maxPervichnyy(2);
+export const MAX_TOTAL: number = maxPervichnyy();
 
 /** «1 балл», «2 балла», «4 балла» — плашка у номера задания. */
 export function ballText(n: number): string {

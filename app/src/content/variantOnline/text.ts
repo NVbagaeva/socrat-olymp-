@@ -6,6 +6,7 @@
 
 import { counted } from '@/lib/plural';
 import type { FormatProblem } from '@/lib/variant/online/normalize';
+import { nomeraChasti } from '@/content/struktura';
 
 export const ONLINE_TEXT = {
   /* ── Экран «Собрать вариант» ─────────────────────────────────── */
@@ -58,10 +59,10 @@ export const ONLINE_TEXT = {
     menu: 'Решить вариант онлайн',
     title: 'Решить вариант онлайн',
     lead:
-      'Новый вариант первой части ЕГЭ — задания 1–13. Ответы проверяются автоматически, ' +
+      `Новый вариант первой части ЕГЭ — задания ${nomeraChasti(1)}. Ответы проверяются автоматически, ` +
       'в конце — первичный и тестовый балл.',
     crumb: 'Решить онлайн',
-    chips: ['Задания 1–13', 'Банк ФИПИ', 'Автопроверка', 'Тестовый балл'],
+    chips: [`Задания ${nomeraChasti(1)}`, 'Банк ФИПИ', 'Автопроверка', 'Тестовый балл'],
     /* Подпись высоты: буква h набирается в разметке курсивом (page.tsx). */
     kristall: { bukva: 'h', podpis: '— высота', hint: 'Покрути фигуру' },
     nachatyy: {
@@ -148,8 +149,8 @@ export const ONLINE_TEXT = {
       right: 'верно',
       wrong: 'неверно',
     },
-    task: (no: number) => `Задание ${no}`,
-    figure: (no: number) => `Рисунок к заданию ${no}`,
+    task: (no: number | string) => `Задание ${no}`,
+    figure: (no: number | string) => `Рисунок к заданию ${no}`,
     answer: 'Ответ',
     placeholder: 'Введите число',
     check: 'Проверить',
@@ -303,7 +304,7 @@ export const ONLINE_TEXT = {
     time: 'Среднее время на номер',
     weak: 'Слабые номера',
     weakNone: 'Слабых номеров нет: каждый решается в 60% случаев и чаще.',
-    weakRow: (no: number, pct: number) => `№${no} — решено ${pct}%`,
+    weakRow: (no: number | string, pct: number) => `№${no} — решено ${pct}%`,
     seconds: (s: number) => (s < 60 ? `${s} с` : `${Math.floor(s / 60)} мин ${s % 60} с`),
     local: 'Статистика хранится только на этом устройстве.',
   },

@@ -6,11 +6,12 @@
  */
 
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR8_TEXTS = {
-  section: '№8 · Вычисления и преобразования',
+  section: `№${nomerRazdela('vychisleniya')} · Вычисления и преобразования`,
   sheet: {
-    chip: 'Задание 8',
+    chip: `Задание ${nomerRazdela('vychisleniya')}`,
     title: 'Вычисления и преобразования',
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',

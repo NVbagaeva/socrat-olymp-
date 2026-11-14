@@ -12,11 +12,12 @@
  */
 
 import type { Ton } from '@/components/tasks/steklo';
+import { nomerRazdela, slovoChasti } from './struktura';
 import { tekstyKarty45 } from './veroyatnost45';
 
 export const SHAPKA4 = {
   ...tekstyKarty45,
-  nadzagolovok: 'Задание №4 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('veroyatnost')} · ${slovoChasti('veroyatnost')}`,
   zagolovok: 'Посчитать вероятность одного события',
   lead: 'Случайный выбор, жребий, броски монеты или кости, точка на отрезке. Нужно понять, что здесь все исходы, какие из них подходят, и разделить одно на другое. Ответ — десятичная дробь.',
   fakty: (tipovVsego: number, grupp: number) => [

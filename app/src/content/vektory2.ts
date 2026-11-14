@@ -12,6 +12,7 @@
 import type { Ton } from '@/components/tasks/steklo';
 import type { Gruppa } from '@/lib/vektory/types';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov } from './treningBanka';
+import { nomerRazdela, slovoChasti } from './struktura';
 
 /** Модуль вектора в записи раздела: $|\vec{a}|$ с ровными палочками. */
 function mod(v: string): string {
@@ -23,7 +24,7 @@ const B = '\\vec{b}';
 const C = '\\vec{c}';
 
 export const SHAPKA2 = {
-  nadzagolovok: 'Задание №2 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('vektory')} · ${slovoChasti('vektory')}`,
   zagolovok: 'Найти длину, скалярное произведение или косинус',
   lead: 'Векторы даны координатами, длинами и углом или рисунком на клетчатой плоскости. Нужно найти длину вектора, скалярное произведение или косинус угла между векторами. Ответ — целое число или конечная десятичная дробь.',
   fakty: (tipovVsego: number) => [
@@ -107,7 +108,7 @@ export const ZNAT2 = {
 
 export const TRENAZHER2 = (() => {
   const t = tekstyTrenazheraBanka({
-    nomer: 2,
+    nomer: nomerRazdela('vektory'),
     grupp: 'трёх',
     /* Источника у №2 нет: все задачи собирает генератор. Подписи не показываются. */
     istochniki: { vse: 'Все', fipi: 'Все', new: 'Все' },
@@ -166,7 +167,7 @@ export const NAVYKI2: {
 
 export const OPORNYE2 = (() => {
   const t = tekstyOpornyh(
-    'Короткие задачи на один навык: из этих навыков складывается любая задача №2. В каждом блоке десять задач, у каждой есть ещё варианты.',
+    `Короткие задачи на один навык: из этих навыков складывается любая задача №${nomerRazdela('vektory')}. В каждом блоке десять задач, у каждой есть ещё варианты.`,
   );
   return {
     ...t,

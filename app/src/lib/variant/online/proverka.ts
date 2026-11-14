@@ -13,7 +13,8 @@
 
 import { BALLY } from '@/content/variantOnline/bally';
 import { TESTOVYJ } from '@/content/variantOnline/shkala';
-import { EGE_NUMBERS, type EgeNo, type HintStep } from '../types';
+import { vsyaChast1 } from '../struktura';
+import { type EgeNo, type HintStep } from '../types';
 import { normalizeAnswer, sameAnswer, type FormatProblem } from './normalize';
 
 /** Что ответить ученику на один ответ. */
@@ -92,9 +93,12 @@ export interface Score {
   test: number | null;
 }
 
-/** Все ли задания 1–13 в варианте, каждое по разу. */
+/**
+ * Вся ли первая часть экзамена в варианте: задача каждого её раздела,
+ * каждая по разу (по действующей структуре — lib/variant/struktura.ts).
+ */
 export function fullPartOne(numbers: readonly EgeNo[]): boolean {
-  return numbers.length === EGE_NUMBERS.length && EGE_NUMBERS.every((n) => numbers.includes(n));
+  return vsyaChast1(numbers);
 }
 
 /** Первичный балл → тестовый по шкале; за краем шкалы — 100. */

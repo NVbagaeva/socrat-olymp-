@@ -16,6 +16,7 @@ import '@/components/tasks/zadanie7/razbor7.css';
 import '../zadanie7.css';
 import '../irracionalnye7.css';
 import './shpargalka7.css';
+import { nomerRazdela } from '@/content/struktura';
 
 export const metadata: Metadata = {
   title: zadanie7Title('Шпаргалка'),
@@ -59,7 +60,9 @@ export default function Shpargalka7() {
   return (
     <main className="z7-shp">
       <header className="z7-shp__head">
-        <p className="z7-shp__eyebrow">Задание №7 · {SHPARGALKA_7.podzagolovok}</p>
+        <p className="z7-shp__eyebrow">
+          Задание №{nomerRazdela('uravneniya')} · {SHPARGALKA_7.podzagolovok}
+        </p>
         <h1>{SHPARGALKA_7.title}</h1>
         <PechatKnopka7 />
       </header>

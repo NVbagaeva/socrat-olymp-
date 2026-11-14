@@ -12,9 +12,10 @@
 
 import type { Ton } from '@/components/tasks/steklo';
 import { tekstyTrenazheraBanka, tipov } from './treningBanka';
+import { nomerRazdela, slovoChasti } from './struktura';
 
 export const SHAPKA12 = {
-  nadzagolovok: 'Задание №12 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('grafiki-funkciy')} · ${slovoChasti('grafiki-funkciy')}`,
   zagolovok: 'Снять с графика формулу и посчитать по ней',
   lead: 'Дан график функции — прямой, параболы, гиперболы, корня, показательной, логарифмической или тригонометрической. По клеткам и отмеченным точкам находишь коэффициенты формулы, а потом — значение функции, аргумент или точку пересечения графиков.',
   fakty: (tipovVsego: number, vidov: number) => [

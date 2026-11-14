@@ -14,6 +14,7 @@ import { ONLINE_TEXT } from '@/content/variantOnline/text';
 import { levelInfo } from '@/lib/level';
 import { TARIFY_HREF } from '@/lib/tarify/config';
 import type { NavIconName } from '@/components/ui/NavIcons';
+import { nomeraChasti } from '@/content/struktura';
 
 export interface SiteLink {
   label: string;
@@ -78,7 +79,7 @@ const LINKS = {
   },
   onlayn: {
     label: ONLINE_TEXT.nachalo.menu,
-    hint: 'Задания 1–13 с автопроверкой',
+    hint: `Задания ${nomeraChasti(1)} с автопроверкой`,
     href: VARIANT_ONLAYN_HREF,
     icon: 'target',
   },
