@@ -16,7 +16,10 @@ import { kletkiUsloviya, otvetText } from '@/lib/zadanie13/html';
 import { reshenieHtml } from '@/lib/zadanie13/reshenieHtml';
 import { TABLE_HEAD } from '@/lib/zadanie13/tablica';
 import { YAKOR_13 } from '@/lib/zadanie13/teoriya-yakorya';
+import { zadachaVarianta17 } from '@/lib/zadanie13/zadachaVarianta';
+import Link from 'next/link';
 import { DveShemy, LesenkaAnn, LesenkaDif } from './Risunki13';
+import { ZadachaVarianta13Telo } from './ZadachaVarianta13';
 import '../teoriya/teoriya-steklo.css';
 
 /** Формула крупно (display), набранная на сервере. */
@@ -166,6 +169,22 @@ export function Razbor({
   );
 }
 
+/**
+ * Задача прежнего №17 из варианта: условие, решение по этапам и ответ —
+ * из данных вариантов, набираются на сборке.
+ */
+async function Varianta({ title, k, v }: { title: string; k: number; v: number | null }) {
+  const z = await zadachaVarianta17({ k, v });
+  return (
+    <section className="z13-razbor z13-razbor--varianta">
+      <h4 className="z13-razbor__title">
+        <Tex text={title} />
+      </h4>
+      <ZadachaVarianta13Telo z={z} />
+    </section>
+  );
+}
+
 function Risunok({ risunok }: { risunok: 'dve-shemy' | 'lesenka-dif' | 'lesenka-ann' }) {
   if (risunok === 'dve-shemy') return <DveShemy />;
   if (risunok === 'lesenka-dif') return <LesenkaDif />;
@@ -281,6 +300,30 @@ function BlokView({ b }: { b: Blok }) {
               </li>
             ))}
           </ol>
+        </section>
+      );
+    case 'varianta':
+      return <Varianta title={b.title} k={b.k} v={b.v} />;
+    case 'ssylka':
+      return (
+        <section {...id} className="z13-card z13-card--slovami z13-ssylka">
+          <header className="z13-card__head">
+            <h4 className="z13-card__title">
+              <Tex text={b.title} zagolovok />
+            </h4>
+          </header>
+          <div className="z13-card__body">
+            <p>
+              <Tex text={b.text} />
+            </p>
+            <ul className="z13-ssylka__spisok">
+              {b.ssylki.map((s) => (
+                <li key={s.href}>
+                  <Link href={s.href}>{s.label} →</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
       );
     case 'delimost':

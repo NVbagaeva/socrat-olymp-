@@ -12,6 +12,7 @@ import type { Ton } from '@/components/tasks/steklo';
 import type { TypeCode, Units, Vopros13 } from '@/lib/zadanie13/types';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov, zadach } from './treningBanka';
 import { nomerRazdela, slovoChasti } from './struktura';
+import { ballText } from './variantOnline/bally';
 import { MESTO13 } from './zadanie13';
 
 /* ── Тренажёр ─────────────────────────────────────────────────── */
@@ -55,6 +56,10 @@ export const TRENAZHER13 = (() => {
       },
       istochnikPusto: 'В выбранных типах нет задач из банка ФИПИ — выбери «Все» или добавь типы.',
     },
+    /** Подпись над тренажёром: на экзамене — решение, здесь — проверка ответа. */
+    podpis: MESTO13.vtorayaChast
+      ? `На экзамене задание ${nomerRazdela('ekonomika')} решают полностью — с моделью, таблицей и уравнением. Здесь тренажёр проверяет ответ: число в тех единицах, что просит условие.`
+      : null,
     ekran: {
       ...t.ekran,
       /* Вердикт «число верное, единицы нет» — как в прежнем тренажёре. */
@@ -82,16 +87,21 @@ export const GRUPPY13_VID: Record<TypeCode, { znak: string; ton: Ton; lead: stri
 
 export const SHAPKA13 = {
   nadzagolovok: `Задание №${nomerRazdela('ekonomika')} · ${slovoChasti('ekonomika')}`,
-  zagolovok: 'Кредит или вклад: построить таблицу и найти одно число',
+  zagolovok: MESTO13.sOptimizaciey
+    ? 'Кредит, вклад или оптимизация: модель и обоснованный ответ'
+    : MESTO13.vtorayaChast
+      ? 'Кредит или вклад: модель и обоснованный ответ'
+      : 'Кредит или вклад: построить таблицу и найти одно число',
   lead: MESTO13.vtorayaChast
-    ? 'По условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. На экзамене записывают решение целиком; в тренажёре проверяем итоговое число — в тех единицах, что просит условие.'
+    ? 'По условию строим модель — таблицу по периодам и уравнение — и находим сумму, ставку, срок или платёж. На экзамене записывают решение целиком; в тренажёре проверяем итоговое число — в тех единицах, что просит условие.'
     : 'По условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. В ответ — одно число в тех единицах, что просит условие. До 2027 года эти задачи шли заданием 16 с развёрнутым ответом.',
   fakty: (tipovVsego: number) => [
     {
       znachenie: String(MESTO13.ball),
       podpis: MESTO13.ball === 1 ? 'первичный балл' : 'первичных балла',
     },
-    { znachenie: '≈ 12', podpis: 'минут на экзамене' },
+    /* Развёрнутое решение — дольше одного числа: оценка на вычитку. */
+    { znachenie: MESTO13.vtorayaChast ? '≈ 25' : '≈ 12', podpis: 'минут на экзамене' },
     { znachenie: String(tipovVsego), podpis: 'типов в четырёх схемах' },
   ],
   opasnoTitle: 'Чем опасно',
@@ -270,4 +280,223 @@ export const NAVYKI13: { id: string; ton: Ton }[] = [
   { id: 'annuitet', ton: 'orange' },
   { id: 'vklady', ton: 'green' },
   { id: 'vse', ton: 'blue' },
+];
+
+/* ── Вторая часть: критерии и два вида задач ─────────────────────
+   ЕГЭ-2027: задание во второй части, задачи на оптимизацию — внутри
+   него вторым видом. ЧЕРНОВИК НА ВЫЧИТКУ. */
+
+const N = nomerRazdela('ekonomika');
+
+/** Блок «Как оценивается» на «О задании»: строки — KRITERII13 (content/teoriya13-chast2.ts). */
+export const KRITERII_BLOK13 = {
+  title: 'Как оценивается',
+  head: ['Баллы', 'Что сделано'] as const,
+  note: `Критерии — по демонстрационному варианту ЕГЭ-2027 (ФИПИ). Максимум — ${ballText(MESTO13.ball)}. Верный ответ без решения оценивается в 0 баллов.`,
+  teoriya: 'Как записать решение на 2 балла',
+};
+
+/** Одна фраза о демоверсии: вид «На оптимизацию» может не встретиться. */
+const DEMO_OPTIMIZACIYA =
+  'В демоверсии 2027 года на этом месте кредит, поэтому вид «На оптимизацию» на экзамене может и не встретиться.';
+
+export type Vid13 = 'ekonomika' | 'optimizaciya';
+
+/** Блок «Два вида задач» на «О задании». */
+export const VIDY13 = {
+  title: 'Два вида задач',
+  lead: `В задании ${N} встречаются задачи двух видов. ${DEMO_OPTIMIZACIYA}`,
+  ekonomika: {
+    metka: 'Вид 1',
+    title: 'Экономические задачи',
+    text: (tipovVsego: number) =>
+      `Кредиты и вклады: четыре схемы, ${tipov(tipovVsego)} с разобранным примером. Ещё — цена и спрос, прибыль и расходы: такие задачи есть в вариантах.`,
+    tipy: 'Типы по схемам',
+    varianty: 'Решения из вариантов',
+  },
+  optimizaciya: {
+    metka: 'Вид 2',
+    title: 'Задачи на оптимизацию',
+    text: 'Наибольшее или наименьшее значение величины в задаче из физики или геометрии: составить функцию одной переменной и исследовать её производной.',
+    syuzhety: 'Сюжеты',
+    zadachi: 'Задачи с решениями',
+    teoriya: 'Теория',
+  },
+};
+
+/** Экономические задачи из вариантов на «О задании» (якорь #iz-variantov). */
+export const IZ_VARIANTOV13 = {
+  title: 'Экономические задачи из вариантов',
+  lead: 'Задачи второй части из вариантов повышенной сложности и ежемесячных: условие, решение по этапам и ответ. Так выглядит развёрнутое решение на экзамене.',
+};
+
+/** Вкладка «На оптимизацию». */
+export const OPTIMIZACIYA13 = {
+  title: 'Задачи на оптимизацию',
+  lead: `Второй вид задания ${N}: наибольшее или наименьшее значение величины. Все задачи на оптимизацию из вариантов повышенной сложности и ежемесячных — по сюжетам, у каждой условие, решение по этапам и ответ.`,
+  demo: DEMO_OPTIMIZACIYA,
+  teoriya: 'Теория: как решать',
+  teoriya12: `Теория задания ${nomerRazdela('naibolshee-naimenshee')}: наибольшее и наименьшее`,
+};
+
+/** Карточка задачи из варианта. */
+export const ZADACHA_VARIANTA13 = {
+  zhdyot: 'Открываем задачу…',
+  net: 'Задача не открылась — обнови страницу.',
+  reshenie: 'Решение и ответ',
+  zadach,
+};
+
+export type SyuzhetId13 =
+  | 'kredit'
+  | 'cena-spros'
+  | 'pribyl'
+  | 'sudno'
+  | 'drugie-ekonomika'
+  | 'korobka'
+  | 'uchastok'
+  | 'polukrug'
+  | 'lampa'
+  | 'marshrut'
+  | 'perekrestok'
+  | 'koncentraciya'
+  | 'moshchnost'
+  | 'fizika'
+  | 'drugie-optimizaciya';
+
+export interface Syuzhet13 {
+  id: SyuzhetId13;
+  vid: Vid13;
+  nazvanie: string;
+  /** Значок группы, TeX без долларов. */
+  znak: string;
+  ton: Ton;
+  lead: string;
+}
+
+/**
+ * Сюжеты задач из вариантов, по порядку показа. Какой шаблон в каком
+ * сюжете — lib/zadanie13/varianty17.ts.
+ */
+export const SYUZHETY13: readonly Syuzhet13[] = [
+  {
+    id: 'kredit',
+    vid: 'ekonomika',
+    nazvanie: 'Кредит на два года',
+    znak: 'Sk^2',
+    ton: 'orange',
+    lead: 'Два равных платежа: найти платёж или сумму кредита',
+  },
+  {
+    id: 'cena-spros',
+    vid: 'ekonomika',
+    nazvanie: 'Цена и спрос',
+    znak: 'N(p)',
+    ton: 'blue',
+    lead: 'Спрос падает с ростом цены: при какой цене выручка или прибыль наибольшая',
+  },
+  {
+    id: 'pribyl',
+    vid: 'ekonomika',
+    nazvanie: 'Прибыль фирмы',
+    znak: 'q(p)',
+    ton: 'green',
+    lead: 'Продажи зависят от цены: наибольшая прибыль и цена, при которой она получается',
+  },
+  {
+    id: 'sudno',
+    vid: 'ekonomika',
+    nazvanie: 'Расходы судна',
+    znak: 'v^2',
+    ton: 'navy',
+    lead: 'Топливо дорожает со скоростью: при какой скорости рейс дешевле всего',
+  },
+  {
+    id: 'drugie-ekonomika',
+    vid: 'ekonomika',
+    nazvanie: 'Другие экономические задачи',
+    znak: '\ldots',
+    ton: 'terra',
+    lead: 'Задачи, которым ещё не назначен сюжет',
+  },
+  {
+    id: 'korobka',
+    vid: 'optimizaciya',
+    nazvanie: 'Коробка из листа',
+    znak: 'V(x)',
+    ton: 'orange',
+    lead: 'По углам листа вырезают квадраты: при какой стороне объём наибольший',
+  },
+  {
+    id: 'uchastok',
+    vid: 'optimizaciya',
+    nazvanie: 'Участок и забор',
+    znak: 'S = xy',
+    ton: 'green',
+    lead: 'Участок у стены: наименьшая длина или стоимость забора, наибольшая площадь',
+  },
+  {
+    id: 'polukrug',
+    vid: 'optimizaciya',
+    nazvanie: 'Прямоугольник в полукруге',
+    znak: 'R',
+    ton: 'navy',
+    lead: 'Вписанный прямоугольник наибольшей площади',
+  },
+  {
+    id: 'lampa',
+    vid: 'optimizaciya',
+    nazvanie: 'Лампа над столом',
+    znak: 'E(h)',
+    ton: 'orange',
+    lead: 'На какой высоте повесить лампу, чтобы край стола был освещён сильнее всего',
+  },
+  {
+    id: 'marshrut',
+    vid: 'optimizaciya',
+    nazvanie: 'Спасатель и курьер',
+    znak: 't(x)',
+    ton: 'blue',
+    lead: 'Часть пути быстро, часть медленно: где свернуть, чтобы успеть быстрее',
+  },
+  {
+    id: 'perekrestok',
+    vid: 'optimizaciya',
+    nazvanie: 'Перекрёсток',
+    znak: 'd(t)',
+    ton: 'terra',
+    lead: 'Двое движутся к перекрёстку: когда расстояние между ними наименьшее',
+  },
+  {
+    id: 'koncentraciya',
+    vid: 'optimizaciya',
+    nazvanie: 'Концентрация лекарства',
+    znak: 'C(t)',
+    ton: 'green',
+    lead: 'Через сколько часов после приёма концентрация наибольшая',
+  },
+  {
+    id: 'moshchnost',
+    vid: 'optimizaciya',
+    nazvanie: 'Мощность в цепи',
+    znak: 'P(R)',
+    ton: 'navy',
+    lead: 'Какое сопротивление подключить, чтобы мощность была наибольшей',
+  },
+  {
+    id: 'fizika',
+    vid: 'optimizaciya',
+    nazvanie: 'Струя воды и сила тяги',
+    znak: 'F(\alpha)',
+    ton: 'blue',
+    lead: 'Где пробить отверстие в бочке и под каким углом тянуть ящик',
+  },
+  {
+    id: 'drugie-optimizaciya',
+    vid: 'optimizaciya',
+    nazvanie: 'Другие задачи на оптимизацию',
+    znak: '\ldots',
+    ton: 'terra',
+    lead: 'Задачи, которым ещё не назначен сюжет',
+  },
 ];

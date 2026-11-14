@@ -8,7 +8,8 @@ import { ballText } from './variantOnline/bally';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
-import { chastRazdela, maxBall, nomerDvumya, nomerRazdela } from '@/content/struktura';
+import { OPTIMIZACIYA13_TAIL } from '@/lib/zadanie13/links';
+import { STRUKTURA, chastRazdela, maxBall, nomerDvumya, nomerRazdela } from '@/content/struktura';
 
 /**
  * Место экономической задачи в действующей структуре экзамена
@@ -22,6 +23,8 @@ export const MESTO13 = {
   otvet: chastRazdela('ekonomika') === 1 ? 'краткий ответ' : 'развёрнутый ответ',
   ball: maxBall('ekonomika'),
   bally: ballText(maxBall('ekonomika')),
+  /** Задачи на оптимизацию идут внутри этого задания вторым видом (ЕГЭ-2027). */
+  sOptimizaciey: STRUKTURA.vnutri.optimizaciya === 'ekonomika',
 } as const;
 
 const s1 = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -30,13 +33,19 @@ export const ZADANIE13 = {
   no: nomerDvumya('ekonomika'),
   slug: '13',
   title: taskName('13'),
-  lead: `Кредиты и вклады: дифференцированный платёж, аннуитет, вклады. ${s1(MESTO13.chast)}, ${MESTO13.otvet}, ${MESTO13.bally}.`,
+  lead: MESTO13.sOptimizaciey
+    ? `Кредиты и вклады, задачи на оптимизацию. ${s1(MESTO13.chast)}, ${MESTO13.otvet}, ${MESTO13.bally}.`
+    : `Кредиты и вклады: дифференцированный платёж, аннуитет, вклады. ${s1(MESTO13.chast)}, ${MESTO13.otvet}, ${MESTO13.bally}.`,
   badge: 'Профильный уровень',
   tabs: [
     { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
     { id: 'teoriya', label: 'Теория', tail: 'teoriya/', icon: 'book' },
     { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
     { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
+    /* Вид «На оптимизацию» — только когда он идёт внутри этого задания. */
+    ...(MESTO13.sOptimizaciey
+      ? [{ id: 'optimizaciya', label: 'На оптимизацию', tail: OPTIMIZACIYA13_TAIL, icon: 'stats' }]
+      : []),
     { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
     { id: 'repetitory', label: 'Для репетиторов', tail: 'dlya-repetitorov/', icon: 'materials' },
   ] as readonly RazdelTab[],
@@ -100,7 +109,13 @@ export const TRENAZHER_13 = {
   ] as const,
   kak: 'Как проверять',
   rezhimy: [
-    { id: 'otvet', label: 'Ответ', note: 'Только число, как на ЕГЭ.' },
+    {
+      id: 'otvet',
+      label: 'Ответ',
+      note: MESTO13.vtorayaChast
+        ? 'Только число: на экзамене нужно решение, здесь проверяем ответ.'
+        : 'Только число, как на ЕГЭ.',
+    },
     {
       id: 'oformlenie',
       label: 'С оформлением',
@@ -157,7 +172,7 @@ export const TRENAZHER_13 = {
   oformlenie: {
     title: 'Ответ',
     otvet: 'Только число',
-    otvetHint: 'Как на ЕГЭ',
+    otvetHint: MESTO13.vtorayaChast ? 'Проверяем ответ' : 'Как на ЕГЭ',
     oformlenie: 'С оформлением',
     oformlenieHint: 'Схема, первая строка таблицы и число',
   },
@@ -199,7 +214,9 @@ export const O_ZADANII_13 = {
   demoHref: 'https://fipi.ru/ege/demoversii-specifikacii-kodifikatory',
   /* «Важно» — с примером (правило сайта: Callout tone="vazhno"). */
   edinicy: [
-    'Модель на экзамене не проверяют: **ответ в чужих единицах — 0 баллов**.',
+    MESTO13.vtorayaChast
+      ? 'Верный ответ — это число **в тех единицах, что просит условие**: ответ в чужих единицах — 0 баллов.'
+      : 'Модель на экзамене не проверяют: **ответ в чужих единицах — 0 баллов**.',
     'Считай в тысячах, если так короче, а в ответе переводи в то, что просит условие.',
   ],
   edinicyPrimer: [
@@ -277,9 +294,24 @@ export const O_ZADANII_13 = {
         text: 'По 10 задач на каждый подтип с подсказкой по шагам.',
         tail: 'opornye-zadachi/',
       },
-      { title: 'Тренажёр', text: 'Задачи подряд, ответ — как на ЕГЭ.', tail: 'trenazher/' },
+      {
+        title: 'Тренажёр',
+        text: MESTO13.vtorayaChast
+          ? 'Задачи подряд с проверкой ответа.'
+          : 'Задачи подряд, ответ — как на ЕГЭ.',
+        tail: 'trenazher/',
+      },
       { title: 'Генератор', text: 'Домашка, самостоятельная, зачёт.', tail: 'generator/' },
     ],
   },
-  optimizaciya: `Задачи на оптимизацию — отдельное задание №${nomerRazdela('optimizaciya')} во второй части. Раздел скоро.`,
+  /**
+   * Где задачи на оптимизацию. В ЕГЭ-2027 своего номера у них нет: это
+   * второй вид задач этого же задания — блок «Задачи на оптимизацию» выше
+   * (#optimizaciya). В структуре из 20 заданий — отдельный №17.
+   */
+  optimizaciya: MESTO13.sOptimizaciey
+    ? `Задачи на оптимизацию — второй вид задач задания ${nomerRazdela('ekonomika')}, своего номера у них нет.`
+    : `Задачи на оптимизацию — отдельное задание №${nomerRazdela('optimizaciya')} во второй части. Раздел скоро.`,
+  /** Ссылка после текста optimizaciya — на блок вида (якорь #optimizaciya). */
+  optimizaciyaSsylka: 'Блок «Задачи на оптимизацию» →',
 } as const;

@@ -57,7 +57,7 @@ p(
   `| Что нужно знать | ${cell(S.znatTitle)}. ${cell(S.znatLead)} |`,
   `| Метки типа | «${S.povyshennyy}», «${S.neIzBanka}» |`,
   '',
-  '«≈ 12 минут» — моя оценка. Поправьте, если даёте другое время.',
+  `«${S.fakty(0)[1].znachenie} минут» — моя оценка (для развёрнутого решения во второй части). Поправьте, если даёте другое время.`,
   '',
   `### ${S.opasnoTitle}`,
   '',
@@ -147,6 +147,88 @@ p(
   `| «Определи тип», подпись выбора | ${T.ekran.tipVopros} |`,
   '',
 );
+
+/* ── Вторая часть: критерии, два вида задач, задачи из вариантов ── */
+const { KRITERII13, GLAVY_13_CHAST2 } = requireSrc('content/teoriya13-chast2.ts');
+const KB = C.KRITERII_BLOK13;
+const V = C.VIDY13;
+p(
+  '## 7. Вторая часть: критерии и два вида задач',
+  '',
+  'Новые тексты: задание во второй части (ЕГЭ-2027), задачи на оптимизацию — внутри него вторым видом.',
+  '',
+  `### «${KB.title}» (вкладка «О задании»)`,
+  '',
+  `| ${KB.head.join(' | ')} |`,
+  '|---|---|',
+  ...KRITERII13.map((k) => `| ${k.ball} | ${cell(k.text)} |`),
+  '',
+  `Под таблицей: ${KB.note} Ссылка: «${KB.teoriya}».`,
+  '',
+  `### «${V.title}»`,
+  '',
+  `Вводка: ${V.lead}`,
+  '',
+  '| Вид | Текст | Кнопки |',
+  '|---|---|---|',
+  `| ${V.ekonomika.metka}. ${V.ekonomika.title} | ${cell(V.ekonomika.text(PROTOTIPY_TRENAZHERA_13.length))} | ${V.ekonomika.tipy} · ${V.ekonomika.varianty} |`,
+  `| ${V.optimizaciya.metka}. ${V.optimizaciya.title} | ${cell(V.optimizaciya.text)} | ${V.optimizaciya.zadachi} · ${V.optimizaciya.teoriya} |`,
+  '',
+  `Внизу «О задании»: ${O_ZADANII_13.optimizaciya} ${O_ZADANII_13.optimizaciyaSsylka}`,
+  '',
+  `### «${C.IZ_VARIANTOV13.title}» и вкладка «${C.OPTIMIZACIYA13.title}»`,
+  '',
+  `Экономические задачи из вариантов: ${C.IZ_VARIANTOV13.lead}`,
+  '',
+  `Вкладка: ${C.OPTIMIZACIYA13.lead} ${C.OPTIMIZACIYA13.demo}`,
+  '',
+  `Кнопки: «${C.OPTIMIZACIYA13.teoriya}», «${C.OPTIMIZACIYA13.teoriya12}».`,
+  '',
+  '| Сюжет | Вид | Пояснение |',
+  '|---|---|---|',
+  ...C.SYUZHETY13.map(
+    (x) =>
+      `| ${cell(x.nazvanie)} | ${x.vid === 'ekonomika' ? 'экономическая' : 'на оптимизацию'} | ${cell(x.lead)} |`,
+  ),
+  '',
+  '### Тренажёр',
+  '',
+  `Подпись над тренажёром: ${T.podpis ?? '—'}`,
+  '',
+  '### Новые главы теории',
+  '',
+  'Условия и решения задач из вариантов не повторяются: они берутся из данных вариантов без правок.',
+  '',
+);
+for (const g of GLAVY_13_CHAST2) {
+  p(`#### ${g.title}`, '', g.lead, '');
+  for (const pd of g.podrazdely) {
+    p(`**${pd.title}**`, '');
+    for (const b of pd.bloki) {
+      if (b.vid === 'kartochka') {
+        p(`- *${b.title}.* ${b.text}`);
+        for (const x of b.spisok ?? []) p(`  - ${x}`);
+        if (b.pochemu) p(`  - Почему это работает: ${b.pochemu}`);
+        if (b.primer) {
+          p(`  - Пример: ${b.primer.uslovie}`);
+          for (const st of b.primer.shagi)
+            p(`    - ${st.title}: ${st.text}${st.tex ? ` $${st.tex}$` : ''}`);
+          if (b.primer.otvet) p(`    - Ответ: ${b.primer.otvet}`);
+        }
+      } else if (b.vid === 'ssylka') {
+        p(`- *${b.title}.* ${b.text} Ссылки: ${b.ssylki.map((x) => `«${x.label}»`).join(', ')}.`);
+      } else if (b.vid === 'varianta') {
+        const gde = b.v === null ? `ежемесячный вариант ${b.k}` : `вариант ${b.k}.${b.v}`;
+        p(`- Задача из варианта: «${b.title}» (${gde}).`);
+      } else if (b.vid === 'razbor') {
+        p(`- Разбор движка: «${b.title}» (${b.prototypeId}).`);
+      } else if (b.vid === 'tablitsa') {
+        p(`- Таблица «${b.title}». ${b.tablitsa.podpis ?? ''}`);
+      }
+    }
+    p('');
+  }
+}
 
 const text = lines.join('\n');
 if (process.argv.includes('--check')) {
