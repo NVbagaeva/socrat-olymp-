@@ -13,6 +13,7 @@ import '../../[task]/[type]/prep.css';
 import '../../veroyatnost.css';
 import '../zadanie9.css';
 import '../site9.css';
+import '@/components/tasks/proizvodnaya/steklo9.css';
 
 /**
  * Оболочка задания №9: крошки, заголовок и лента вкладок. Группа

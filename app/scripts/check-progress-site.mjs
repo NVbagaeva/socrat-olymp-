@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на общем тренажёре (№7, №6, №2, №1) в браузере, на собранном сайте.
+   на общем тренажёре (№7, №6, №2, №1, №9) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -16,7 +16,9 @@
      6. без входа ничего не уходит в сеть: гость остаётся в браузере;
      7. на страницах нет ошибок;
      8. (№1) незаконченная тренировка прежнего тренажёра (панель
-        фильтров) открывается в новом на той же задаче.
+        фильтров) открывается в новом на той же задаче;
+     9. (№9) незаконченная тренировка прежнего тренажёра из sessionStorage
+        продолжается в новом на той же задаче.
 
    Запуск: node scripts/check-progress-site.mjs 7 (после pnpm build). */
 
@@ -33,8 +35,8 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (N !== '6' && N !== '7' && N !== '2' && N !== '13' && N !== '1') {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1)');
+if (N !== '6' && N !== '7' && N !== '2' && N !== '13' && N !== '1' && N !== '9') {
+  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9)');
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -94,6 +96,19 @@ function razdel() {
       vBloke: (blok, key) => key.startsWith(`${blok}:`),
     };
   }
+  if (N === '9') {
+    /* У №9 прежние ключи — «proizvodnaya-9», опорные — «prep» (блок →
+       номера решённых), задачи — «прототип|seed». */
+    const { PREP_BLOCKS } = requireSrc('lib/proizvodnaya/prep/blocks.ts');
+    return {
+      OLD: 'budetege:proizvodnaya-9:v1',
+      OLD_OPORNYE: 'budetege:proizvodnaya-9:prep:v1',
+      NEW: 'budetege:proizvodnaya-9:log:v1',
+      prototipOf: (id) => id?.split('|')[0],
+      zadachVBloke: (blok) => PREP_BLOCKS.find((b) => b.id === blok)?.zadachi.length,
+      vBloke: () => true,
+    };
+  }
   if (N === '2') {
     /* У №2 прежние ключи назывались по разделу «vektory-2»; банка нет:
        ключ задачи — «прототип|seed». */
@@ -144,7 +159,7 @@ const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
 const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
 
 /* Блок опорных задач из образца и сколько в нём задач. */
-const blokObrazca = Object.keys(obrazec[OLD_OPORNYE].kinds)[0];
+const blokObrazca = Object.keys(N === '9' ? obrazec[OLD_OPORNYE] : obrazec[OLD_OPORNYE].kinds)[0];
 const zadachVBloke = R.zadachVBloke(blokObrazca);
 
 const browser = await chromium.launch();
@@ -227,9 +242,12 @@ try {
 
   /* 5. Опорные задачи: прежний прогресс блока. */
   await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-  const reshenoOp = Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
-    ([key, x]) => x === 'right' && R.vBloke(blokObrazca, key),
-  ).length;
+  const reshenoOp =
+    N === '9'
+      ? obrazec[OLD_OPORNYE][blokObrazca].length
+      : Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
+          ([key, x]) => x === 'right' && R.vBloke(blokObrazca, key),
+        ).length;
   const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
   check(
     new RegExp(`решено ${reshenoOp} из ${zadachVBloke}`).test(kartochki),
@@ -259,6 +277,62 @@ try {
       `прежняя тренировка открылась на той же задаче (${idS}, ждали ${prezhnyaya})`,
     );
     await sPage.close();
+  }
+
+  /* 9. №9: прежняя незаконченная тренировка (sessionStorage) продолжается. */
+  if (N === '9') {
+    const KLYUCH = 'budetege:proizvodnaya-9:session:v1';
+    const prezhnyaya = obrazec.sessionStorage[KLYUCH];
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await ctx.addInitScript(
+      ([key, value]) => {
+        if (window.sessionStorage.getItem('proverka:zalito') === null) {
+          window.sessionStorage.setItem(key, value);
+          window.sessionStorage.setItem('proverka:zalito', '1');
+        }
+      },
+      [KLYUCH, JSON.stringify(prezhnyaya)],
+    );
+    const p2 = await ctx.newPage();
+    const oshibki2 = [];
+    p2.on('pageerror', (error) => oshibki2.push(String(error)));
+    await p2.goto(`${BASE}/zadaniya/9/trenazher/`, { waitUntil: 'networkidle' });
+    const zapis = await p2.evaluate(() => localStorage.getItem('budetege:trainer:9:session'));
+    const z = zapis === null ? null : JSON.parse(zapis);
+    check(
+      z !== null && z.payload?.tasks?.map((t) => t.id).join() === prezhnyaya.taskIds.join(),
+      'прежняя незаконченная тренировка перенесена в запись общего тренажёра',
+    );
+    check(z?.payload?.control === true, '«Контроль» стал «Без подсказок и решений»');
+    /* Оболочка открывает незаконченную тренировку сразу; если спросит —
+       «Продолжить». */
+    const ekran = p2.locator('.trn-zadacha');
+    const dalshe = p2.getByRole('button', { name: /Продолжить/ }).first();
+    await ekran.or(dalshe).first().waitFor({ timeout: 20000 });
+    if (!(await ekran.isVisible())) {
+      await dalshe.click();
+      await ekran.waitFor({ timeout: 20000 });
+    }
+    /* Экран может сначала показать первую задачу и затем встать на
+       сохранённую: ждём до 15 с. */
+    const nuzhna = prezhnyaya.taskIds[prezhnyaya.index];
+    let otkryta = null;
+    for (let i = 0; i < 30; i += 1) {
+      otkryta = await ekran.getAttribute('data-task');
+      if (otkryta === nuzhna) break;
+      await p2.waitForTimeout(500);
+    }
+    check(
+      otkryta === nuzhna,
+      `тренировка продолжена на той же задаче (${otkryta}, ждали ${nuzhna})`,
+    );
+    check(
+      (await p2.evaluate((key) => sessionStorage.getItem(key), KLYUCH)) ===
+        JSON.stringify(prezhnyaya),
+      'прежняя запись тренировки на месте',
+    );
+    check(oshibki2.length === 0, `нет ошибок (${oshibki2.slice(0, 2).join('; ')})`);
+    await ctx.close();
   }
 
   /* 6 и 7. */

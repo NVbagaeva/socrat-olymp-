@@ -379,6 +379,8 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
         shag,
         reshenie: solutionOpen && !control,
         razbor,
+        zakryta: zakryta || checked === 'right',
+        bezPodskazok: control,
       })}
       value={value}
       onValue={onValue}
