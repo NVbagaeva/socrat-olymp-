@@ -51,7 +51,8 @@ interface Kletka {
 
 function kletka(part: HwPartView, units: HwTaskView[], answers: (HwAnswerView | null)[]): Kletka {
   const seconds = answers.reduce((s, a) => s + (a?.seconds ?? 0), 0);
-  if (units.length === 0) return { part, units, answers, ton: 'nichego', tekst: '—', podpis: '', seconds };
+  if (units.length === 0)
+    return { part, units, answers, ton: 'nichego', tekst: '—', podpis: '', seconds };
   if (part.source === 'kartochki') {
     const znayu = answers.filter((a) => a?.state === 'known' || a?.state === 'right').length;
     const povt = answers.filter((a) => a?.state === 'repeat' || a?.state === 'wrong').length;
@@ -60,9 +61,19 @@ function kletka(part: HwPartView, units: HwTaskView[], answers: (HwAnswerView | 
       part,
       units,
       answers,
-      ton: sdelano === 0 ? 'nichego' : sdelano < units.length ? 'reshaet' : povt === 0 ? 'verno' : 'chast',
+      ton:
+        sdelano === 0
+          ? 'nichego'
+          : sdelano < units.length
+            ? 'reshaet'
+            : povt === 0
+              ? 'verno'
+              : 'chast',
       tekst: sdelano === 0 ? '' : `${znayu}/${units.length}`,
-      podpis: sdelano === 0 ? DZK.rezultaty.nichego : `${DZK.rezultaty.znayu(znayu)} · ${DZK.rezultaty.povtorit(povt)}`,
+      podpis:
+        sdelano === 0
+          ? DZK.rezultaty.nichego
+          : `${DZK.rezultaty.znayu(znayu)} · ${DZK.rezultaty.povtorit(povt)}`,
       seconds,
     };
   }
@@ -106,24 +117,34 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
   const parts = useMemo(
     () =>
       [...full.parts].sort(
-        (a, b) => PORYADOK.indexOf(a.source) - PORYADOK.indexOf(b.source) || a.position - b.position,
+        (a, b) =>
+          PORYADOK.indexOf(a.source) - PORYADOK.indexOf(b.source) || a.position - b.position,
       ),
     [full.parts],
   );
-  const byKey = useMemo(() => new Map(full.answers.map((a) => [`${a.taskId}|${a.userId}`, a])), [full.answers]);
+  const byKey = useMemo(
+    () => new Map(full.answers.map((a) => [`${a.taskId}|${a.userId}`, a])),
+    [full.answers],
+  );
   const rows = useMemo(
     () =>
       full.recipients.map((r) => {
         const mine = tasksOf(full.tasks, r.userId);
         const kletki = parts.map((p) => {
           const units = mine.filter((u) => u.partId === p.id);
-          return kletka(p, units, units.map((u) => byKey.get(`${u.id}|${r.userId}`) ?? null));
+          return kletka(
+            p,
+            units,
+            units.map((u) => byKey.get(`${u.id}|${r.userId}`) ?? null),
+          );
         });
         return { student: r, kletki, seconds: kletki.reduce((s, k) => s + k.seconds, 0) };
       }),
     [full, parts, byKey],
   );
-  const gruppy = PORYADOK.map((s) => ({ s, n: parts.filter((p) => p.source === s).length })).filter((g) => g.n > 0);
+  const gruppy = PORYADOK.map((s) => ({ s, n: parts.filter((p) => p.source === s).length })).filter(
+    (g) => g.n > 0,
+  );
   const [open, setOpen] = useState<{ name: string; k: Kletka } | null>(null);
   const [grid, setGrid] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -140,13 +161,21 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
       }
       return p.titleHtml;
     };
-    const map = new Map<string, { source: Istochnik; html: string; erred: Set<string>; assigned: Set<string> }>();
+    const map = new Map<
+      string,
+      { source: Istochnik; html: string; erred: Set<string>; assigned: Set<string> }
+    >();
     for (const row of rows) {
       for (const k of row.kletki) {
         k.units.forEach((u, i) => {
           const html = imya(k.part, u);
           const key = `${k.part.source}|${html}`;
-          const s = map.get(key) ?? { source: k.part.source, html, erred: new Set<string>(), assigned: new Set<string>() };
+          const s = map.get(key) ?? {
+            source: k.part.source,
+            html,
+            erred: new Set<string>(),
+            assigned: new Set<string>(),
+          };
           s.assigned.add(row.student.userId);
           if (oshibka(k.answers[i] ?? null)) s.erred.add(row.student.userId);
           map.set(key, s);
@@ -201,7 +230,12 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
                     {DZK.rezultaty.uchenik}
                   </th>
                   {gruppy.map((g) => (
-                    <th key={g.s} colSpan={g.n} scope="colgroup" className={`rez-gruppa rez-gruppa--${g.s}`}>
+                    <th
+                      key={g.s}
+                      colSpan={g.n}
+                      scope="colgroup"
+                      className={`rez-gruppa rez-gruppa--${g.s}`}
+                    >
                       {ISTOCHNIK_VKLADKA[g.s]}
                     </th>
                   ))}
@@ -211,7 +245,12 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
                 </tr>
                 <tr>
                   {parts.map((p) => (
-                    <th key={p.id} scope="col" className="rez-punkt" title={p.titleHtml.replace(/<[^>]+>/g, '')}>
+                    <th
+                      key={p.id}
+                      scope="col"
+                      className="rez-punkt"
+                      title={p.titleHtml.replace(/<[^>]+>/g, '')}
+                    >
                       {p.position}
                     </th>
                   ))}
@@ -222,7 +261,9 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
                   <tr key={row.student.userId} data-student={row.student.userId}>
                     <th scope="row" className="rez-tablica__imya">
                       {row.student.name}
-                      {row.student.submittedAt === null ? null : <span className="rez-sdano">{DZ.status.submitted}</span>}
+                      {row.student.submittedAt === null ? null : (
+                        <span className="rez-sdano">{DZ.status.submitted}</span>
+                      )}
                     </th>
                     {row.kletki.map((k) => (
                       <td key={k.part.id}>
@@ -259,7 +300,10 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
             ] as [Ton, string][]
           ).map(([ton, label]) => (
             <li key={ton}>
-              <span className={clsx('rez-kletka', 'rez-kletka--legenda', `rez-kletka--${ton}`)} aria-hidden="true" />
+              <span
+                className={clsx('rez-kletka', 'rez-kletka--legenda', `rez-kletka--${ton}`)}
+                aria-hidden="true"
+              />
               {label}
             </li>
           ))}
@@ -293,7 +337,10 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
         </h2>
         <ul className="rez-svodka">
           {svodka.map((s) => (
-            <li key={`${s.source}|${s.html}`} className={s.erred.size > 0 ? 'has-errors' : undefined}>
+            <li
+              key={`${s.source}|${s.html}`}
+              className={s.erred.size > 0 ? 'has-errors' : undefined}
+            >
               <span className={`rdz-metka rdz-metka--${s.source}`}>{ISTOCHNIK[s.source]}</span>{' '}
               <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(s.html) }} /> —{' '}
               {DZK.rezultaty.oshiblis(s.erred.size, s.assigned.size)}
@@ -301,7 +348,11 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
           ))}
         </ul>
         {estOshibki ? (
-          <Link className="stk-btn stk-btn--primary rez-oshibki" href={issueHref({ origin: 'oshibki', mistakesOf: hw.id })} data-action="oshibki">
+          <Link
+            className="stk-btn stk-btn--primary rez-oshibki"
+            href={issueHref({ origin: 'oshibki', mistakesOf: hw.id })}
+            data-action="oshibki"
+          >
             {DZK.rezultaty.vydatOshibki}
           </Link>
         ) : (
@@ -315,10 +366,20 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
           {t.grid}
         </Checkbox>
         <div className="rez-knopki">
-          <a className="stk-btn" href={printHref(hw.id, 'uchenik', grid)} target="_blank" rel="noreferrer">
+          <a
+            className="stk-btn"
+            href={printHref(hw.id, 'uchenik', grid)}
+            target="_blank"
+            rel="noreferrer"
+          >
             {DZK.rezultaty.pechatUchenik}
           </a>
-          <a className="stk-btn" href={printHref(hw.id, 'uchitel', grid)} target="_blank" rel="noreferrer">
+          <a
+            className="stk-btn"
+            href={printHref(hw.id, 'uchitel', grid)}
+            target="_blank"
+            rel="noreferrer"
+          >
             {DZK.rezultaty.pechatUchitel}
           </a>
         </div>
@@ -338,13 +399,25 @@ export function RezultatyDz({ full, reload }: { full: HwFull; reload: () => Prom
       )}
       <div className="rez-knopki">
         {hw.closedAt === null ? (
-          <button type="button" className="stk-btn stk-btn--tihaya" onClick={() => void act(async () => (await dzApi()).updateHomework(hw.id, { closed: true }))}>
+          <button
+            type="button"
+            className="stk-btn stk-btn--tihaya"
+            onClick={() =>
+              void act(async () => (await dzApi()).updateHomework(hw.id, { closed: true }))
+            }
+          >
             {t.close}
           </button>
         ) : (
           <>
             <span className="rez-muted">{t.closed}</span>
-            <button type="button" className="stk-btn stk-btn--tihaya" onClick={() => void act(async () => (await dzApi()).updateHomework(hw.id, { closed: false }))}>
+            <button
+              type="button"
+              className="stk-btn stk-btn--tihaya"
+              onClick={() =>
+                void act(async () => (await dzApi()).updateHomework(hw.id, { closed: false }))
+              }
+            >
               {t.reopen}
             </button>
           </>
@@ -368,7 +441,11 @@ function Podrobno({
   onComment: (c: string) => Promise<void>;
 }) {
   return (
-    <section className="rez-blok rez-podrobno stk-glass" data-section="cell" aria-label={`${name}, пункт ${k.part.position}`}>
+    <section
+      className="rez-blok rez-podrobno stk-glass"
+      data-section="cell"
+      aria-label={`${name}, пункт ${k.part.position}`}
+    >
       <div className="rez-podrobno__verh">
         <h2 className="rez-h2">
           {name} · <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(k.part.titleHtml) }} />
@@ -378,16 +455,21 @@ function Podrobno({
         </button>
       </div>
       <p className="rez-muted">
-        <span className={`rdz-metka rdz-metka--${k.part.source}`}>{ISTOCHNIK[k.part.source]}</span> {k.podpis} · {vremya(k.seconds)}
+        <span className={`rdz-metka rdz-metka--${k.part.source}`}>{ISTOCHNIK[k.part.source]}</span>{' '}
+        {k.podpis} · {vremya(k.seconds)}
       </p>
       <ol className="rez-edinitsy">
         {k.units.map((u, i) => {
           const a = k.answers[i] ?? null;
           const key = full.keys.get(u.id);
-          const mark = a?.state === 'known' ? 'known' : a?.state === 'repeat' ? 'repeat' : markOf(a);
+          const mark =
+            a?.state === 'known' ? 'known' : a?.state === 'repeat' ? 'repeat' : markOf(a);
           return (
             <li key={u.id} className={`rez-edinitsa is-${mark}`} data-task={u.id}>
-              <div className="rez-edinitsa__uslovie" dangerouslySetInnerHTML={{ __html: sanitizeHtml(u.questionHtml) }} />
+              <div
+                className="rez-edinitsa__uslovie"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(u.questionHtml) }}
+              />
               <dl className="rez-fakty">
                 <div>
                   <dt>{DZK.rezultaty.chtoVvel}</dt>
@@ -401,7 +483,10 @@ function Podrobno({
                       : a === null || a.entries.length === 0
                         ? t.noEntries
                         : a.entries.map((e, j) => (
-                            <span key={j} className={clsx('dz-entry', e.ok ? 'is-right' : 'is-wrong')}>
+                            <span
+                              key={j}
+                              className={clsx('dz-entry', e.ok ? 'is-right' : 'is-wrong')}
+                            >
                               {e.a === 'da' ? 'верно' : e.a === 'net' ? 'неверно' : e.a}
                             </span>
                           ))}
@@ -418,7 +503,11 @@ function Podrobno({
                     <div>
                       <dt>{DZK.rezultaty.otvetVernyy}</dt>
                       <dd data-field="correct">
-                        {key.answer === 'da' ? 'верно' : key.answer === 'net' ? 'неверно' : displayAnswer(key.answer)}
+                        {key.answer === 'da'
+                          ? 'верно'
+                          : key.answer === 'net'
+                            ? 'неверно'
+                            : displayAnswer(key.answer)}
                       </dd>
                     </div>
                     <div>
@@ -438,7 +527,13 @@ function Podrobno({
           );
         })}
       </ol>
-      <Zametka label={t.comment} hint={t.commentHint} value={k.part.comment ?? ''} onSave={onComment} section="task-comment" />
+      <Zametka
+        label={t.comment}
+        hint={t.commentHint}
+        value={k.part.comment ?? ''}
+        onSave={onComment}
+        section="task-comment"
+      />
     </section>
   );
 }

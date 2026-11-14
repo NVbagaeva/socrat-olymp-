@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/layout/AppShell';
+import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
 import { RAZDELY_TEORII } from '@/content/theoryVektory';
 import { tasksPage } from '@/content/tasks';
 import { VEKTORY } from '@/content/vektory';
@@ -51,7 +52,11 @@ export function VektoryShell({ children }: { children: React.ReactNode }) {
           {...(VEKTORY.tutors.items.length === 0 ? {} : { tutors: VEKTORY.tutors })}
         />
 
-        <div className="section-panel">{children}</div>
+        <div className="section-panel">
+          {/* ДЗ: ученику — плашка с ДЗ, репетитору — черновик ДЗ. Гостю — ничего. */}
+          <DzVRazdele no={2} />
+          {children}
+        </div>
       </main>
     </AppShell>
   );

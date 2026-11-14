@@ -449,7 +449,12 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
           {/* Репетитору: эту задачу — в черновик ДЗ. */}
           <VDzKnopka
             malaya
-            punkt={{ ist: 'zadacha', no: Number(razdel.razdel), ref: dannye.id, tip: tekushchaya.p }}
+            punkt={{
+              ist: 'zadacha',
+              no: Number(razdel.razdel),
+              ref: dannye.id,
+              tip: tekushchaya.p,
+            }}
             chto={nazvaniyaTekst[tekushchaya.p] ?? dannye.id}
             label="В ДЗ"
           />

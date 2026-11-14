@@ -53,7 +53,10 @@ function Nabor({ no, t }: { no: number; t: PodtemaKat }) {
         <span className="dzk-item__skolko">{DZK.kartochek(t.kartochki.length)}</span>
       </div>
       <div className="dzk-item__knopki">
-        <DobavitKnopka punkt={{ ist: 'kartochki', no, podtema: t.id, kartochki: null }} label={DZK.kartochki.nabor} />
+        <DobavitKnopka
+          punkt={{ ist: 'kartochki', no, podtema: t.id, kartochki: null }}
+          label={DZK.kartochki.nabor}
+        />
         <button
           type="button"
           className="stk-btn stk-btn--sm stk-btn--tihaya"
@@ -82,7 +85,10 @@ function Nabor({ no, t }: { no: number; t: PodtemaKat }) {
                     }
                   />
                   <span className="dzk-kartochka">
-                    <span className="dzk-kartochka__front" dangerouslySetInnerHTML={{ __html: k.front }} />
+                    <span
+                      className="dzk-kartochka__front"
+                      dangerouslySetInnerHTML={{ __html: k.front }}
+                    />
                     {k.type === 'verno' || k.type === 'vychislenie' ? (
                       <span className="dzk-metka">{DZK.kartochki.sProverkoy}</span>
                     ) : null}
@@ -99,7 +105,10 @@ function Nabor({ no, t }: { no: number; t: PodtemaKat }) {
                   </button>
                 )}
                 {oborot === k.id ? (
-                  <div className="dzk-kartochka__oborot" dangerouslySetInnerHTML={{ __html: k.back }} />
+                  <div
+                    className="dzk-kartochka__oborot"
+                    dangerouslySetInnerHTML={{ __html: k.back }}
+                  />
                 ) : null}
               </li>
             ))}
@@ -166,7 +175,9 @@ function Blok({ no, b }: { no: number; b: BlokKat }) {
                   />
                   <span className="dzk-zadacha">
                     <b>{i + 1}.</b>{' '}
-                    {z.nazvanie === undefined ? null : <span className="dzk-zadacha__tip">{z.nazvanie}: </span>}
+                    {z.nazvanie === undefined ? null : (
+                      <span className="dzk-zadacha__tip">{z.nazvanie}: </span>
+                    )}
                     <span dangerouslySetInnerHTML={{ __html: z.uslovieHtml }} />
                   </span>
                 </label>
@@ -205,7 +216,10 @@ function Primer({ kat, tip }: { kat: KatalogRazdela; tip: string }) {
       try {
         const zerno = `primer-${Date.now().toString(36)}-${nomer}`;
         const getter = (await import('@/lib/dz/sborka/razdely')).SBORSHCHIKI[kat.no];
-        const units = getter === undefined ? [] : await (await getter()).trenazher(kat, [tip], 1, zerno, [null]);
+        const units =
+          getter === undefined
+            ? []
+            : await (await getter()).trenazher(kat, [tip], 1, zerno, [null]);
         u = units[0] ?? 'oshibka';
       } catch {
         u = 'oshibka';
@@ -226,8 +240,15 @@ function Primer({ kat, tip }: { kat: KatalogRazdela; tip: string }) {
         dangerouslySetInnerHTML={{ __html: u.questionHtml }}
       />
       <div className="dzk-item__knopki">
-        <DobavitKnopka punkt={{ ist: 'zadacha', no: kat.no, ref: u.ref, tip }} label={DZK.trenazher.vzyatEtu} />
-        <button type="button" className="stk-btn stk-btn--sm stk-btn--tihaya" onClick={() => setNomer((n) => n + 1)}>
+        <DobavitKnopka
+          punkt={{ ist: 'zadacha', no: kat.no, ref: u.ref, tip }}
+          label={DZK.trenazher.vzyatEtu}
+        />
+        <button
+          type="button"
+          className="stk-btn stk-btn--sm stk-btn--tihaya"
+          onClick={() => setNomer((n) => n + 1)}
+        >
           {DZK.trenazher.eshchePrimer}
         </button>
       </div>
@@ -235,14 +256,34 @@ function Primer({ kat, tip }: { kat: KatalogRazdela; tip: string }) {
   );
 }
 
-function Stepper({ value, onChange, label }: { value: number; onChange: (n: number) => void; label: string }) {
+function Stepper({
+  value,
+  onChange,
+  label,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  label: string;
+}) {
   return (
     <span className="dzk-stepper__ryad" role="group" aria-label={label}>
-      <button type="button" className="stk-btn stk-btn--sm" aria-label="Меньше" disabled={value <= 1} onClick={() => onChange(value - 1)}>
+      <button
+        type="button"
+        className="stk-btn stk-btn--sm"
+        aria-label="Меньше"
+        disabled={value <= 1}
+        onClick={() => onChange(value - 1)}
+      >
         −
       </button>
       <output>{value}</output>
-      <button type="button" className="stk-btn stk-btn--sm" aria-label="Больше" disabled={value >= 20} onClick={() => onChange(value + 1)}>
+      <button
+        type="button"
+        className="stk-btn stk-btn--sm"
+        aria-label="Больше"
+        disabled={value >= 20}
+        onClick={() => onChange(value + 1)}
+      >
         +
       </button>
     </span>
@@ -262,7 +303,14 @@ function Gruppa({ kat, g }: { kat: KatalogRazdela; g: GruppaKat }) {
       <div className="dzk-item__knopki">
         <Stepper value={vsya} onChange={setVsya} label={`${DZK.trenazher.skolko}: ${g.nazvanie}`} />
         <DobavitKnopka
-          punkt={{ ist: 'trenazher', no: kat.no, tipy: g.tipy.map((t) => t.id), gruppa: g.id, skolko: vsya, kazhdomu: false }}
+          punkt={{
+            ist: 'trenazher',
+            no: kat.no,
+            tipy: g.tipy.map((t) => t.id),
+            gruppa: g.id,
+            skolko: vsya,
+            kazhdomu: false,
+          }}
           label={DZK.trenazher.gruppa}
         />
       </div>
@@ -277,7 +325,13 @@ function Gruppa({ kat, g }: { kat: KatalogRazdela; g: GruppaKat }) {
                 label={DZK.trenazher.skolko}
               />
               <DobavitKnopka
-                punkt={{ ist: 'trenazher', no: kat.no, tipy: [t.id], skolko: skolko[t.id] ?? 2, kazhdomu: false }}
+                punkt={{
+                  ist: 'trenazher',
+                  no: kat.no,
+                  tipy: [t.id],
+                  skolko: skolko[t.id] ?? 2,
+                  kazhdomu: false,
+                }}
                 label={DZK.trenazher.dobavit}
               />
               <button
@@ -302,7 +356,10 @@ function Gruppa({ kat, g }: { kat: KatalogRazdela; g: GruppaKat }) {
 export function Istochniki() {
   const [no, setNo] = useState<number>(RAZDELY_DZ_KLIENT[0]);
   const [vkladka, setVkladka] = useState<Vkladka>('kartochki');
-  const [zagruzheno, setZagruzheno] = useState<{ klyuch: string; k: KatalogRazdela | 'oshibka' } | null>(null);
+  const [zagruzheno, setZagruzheno] = useState<{
+    klyuch: string;
+    k: KatalogRazdela | 'oshibka';
+  } | null>(null);
   const [popytka, setPopytka] = useState(0);
   const klyuch = `${no}:${popytka}`;
 
@@ -356,13 +413,22 @@ export function Istochniki() {
           </button>
         ))}
       </div>
-      <div id="dzk-panel" role="tabpanel" aria-labelledby={`dzk-tab-${vkladka}`} className="dzk-panel">
+      <div
+        id="dzk-panel"
+        role="tabpanel"
+        aria-labelledby={`dzk-tab-${vkladka}`}
+        className="dzk-panel"
+      >
         {kat === null ? (
           <p className="dzk-muted">{DZK.zagruzka}</p>
         ) : kat === 'oshibka' ? (
           <p className="dzk-muted">
             {DZK.oshibkaZagruzki}{' '}
-            <button type="button" className="stk-btn stk-btn--sm" onClick={() => setPopytka((n) => n + 1)}>
+            <button
+              type="button"
+              className="stk-btn stk-btn--sm"
+              onClick={() => setPopytka((n) => n + 1)}
+            >
               {DZK.povtorit}
             </button>
           </p>

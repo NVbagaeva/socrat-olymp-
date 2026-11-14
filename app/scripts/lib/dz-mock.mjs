@@ -419,7 +419,13 @@ export function createDzMock({ profiles, classes, members }) {
       for (const pt of list)
         for (const t of pt.tasks) {
           const ak = t.answer_kind ?? 'number';
-          if (ak === 'self' ? t.answer !== null : ak === 'verno' ? !['da', 'net'].includes(t.answer) : normalizeEge(t.answer) !== t.answer)
+          if (
+            ak === 'self'
+              ? t.answer !== null
+              : ak === 'verno'
+                ? !['da', 'net'].includes(t.answer)
+                : normalizeEge(t.answer) !== t.answer
+          )
             return pgErr(400, 'bad_answer');
         }
       const id = crypto.randomUUID();
@@ -465,7 +471,8 @@ export function createDzMock({ profiles, classes, members }) {
           const k = t.student_id ?? '-';
           pos.set(k, (pos.get(k) ?? 0) + 1);
           let view = { ...(t.view ?? {}) };
-          if (noHints) for (const x of ['hints', 'podskazka', 'voprosy', 'zapomni', 'primer']) delete view[x];
+          if (noHints)
+            for (const x of ['hints', 'podskazka', 'voprosy', 'zapomni', 'primer']) delete view[x];
           if (p.show_memo !== true) delete view.zapomni;
           if (p.show_example !== true) delete view.primer;
           const taskId = crypto.randomUUID();
@@ -482,14 +489,24 @@ export function createDzMock({ profiles, classes, members }) {
             comment: null,
           });
           if ((t.answer_kind ?? 'number') !== 'self')
-            keys.push({ task_id: taskId, ref: t.ref, answer: t.answer, razbor: t.razbor, source: t.source ?? null });
+            keys.push({
+              task_id: taskId,
+              ref: t.ref,
+              answer: t.answer,
+              razbor: t.razbor,
+              source: t.source ?? null,
+            });
         }
       });
       return { status: 200, body: id };
     }
     if (table === 'rpc/homework_mark' && method === 'POST') {
       const task = taskById(body.p_task);
-      if (task === undefined || !canSeeTask(task, me.id) || hwById(task.homework_id).tutor_id === me.id)
+      if (
+        task === undefined ||
+        !canSeeTask(task, me.id) ||
+        hwById(task.homework_id).tutor_id === me.id
+      )
         return pgErr(403, 'not_your_task');
       const hw = hwById(task.homework_id);
       const rec = recipientOf(hw.id, me.id);
@@ -501,7 +518,14 @@ export function createDzMock({ profiles, classes, members }) {
       rec.started_at ??= new Date().toISOString();
       let row = answerOf(task.id, me.id);
       if (row === undefined) {
-        row = { task_id: task.id, user_id: me.id, state: 'open', attempts: 0, entries: [], seconds: 0 };
+        row = {
+          task_id: task.id,
+          user_id: me.id,
+          state: 'open',
+          attempts: 0,
+          entries: [],
+          seconds: 0,
+        };
         answers.push(row);
       }
       row.state = body.p_mark;
@@ -513,10 +537,15 @@ export function createDzMock({ profiles, classes, members }) {
       const mine = drafts.filter((d) => d.user_id === me.id);
       if (method === 'GET') return one(applyFilters(mine, params));
       if (method === 'POST') {
-        if (roleOf(me.id) !== 'tutor') return pgErr(403, 'new row violates row-level security policy');
+        if (roleOf(me.id) !== 'tutor')
+          return pgErr(403, 'new row violates row-level security policy');
         const row = Array.isArray(body) ? body[0] : body;
         const old = drafts.find((d) => d.user_id === me.id);
-        if (old) Object.assign(old, { body: row.body, updated_at: row.updated_at ?? new Date().toISOString() });
+        if (old)
+          Object.assign(old, {
+            body: row.body,
+            updated_at: row.updated_at ?? new Date().toISOString(),
+          });
         else drafts.push({ user_id: me.id, body: row.body, updated_at: new Date().toISOString() });
         return { status: 201, body: [] };
       }
@@ -529,12 +558,22 @@ export function createDzMock({ profiles, classes, members }) {
       const mine = templates.filter((x) => x.user_id === me.id);
       if (method === 'GET') return one(applyFilters(mine, params));
       if (method === 'POST') {
-        if (roleOf(me.id) !== 'tutor') return pgErr(403, 'new row violates row-level security policy');
+        if (roleOf(me.id) !== 'tutor')
+          return pgErr(403, 'new row violates row-level security policy');
         const row = Array.isArray(body) ? body[0] : body;
         const now = new Date().toISOString();
-        const t = { id: crypto.randomUUID(), user_id: me.id, title: String(row.title).trim(), body: row.body, created_at: now, updated_at: now };
+        const t = {
+          id: crypto.randomUUID(),
+          user_id: me.id,
+          title: String(row.title).trim(),
+          body: row.body,
+          created_at: now,
+          updated_at: now,
+        };
         templates.push(t);
-        return prefersObject ? { status: 201, body: { id: t.id } } : { status: 201, body: [{ id: t.id }] };
+        return prefersObject
+          ? { status: 201, body: { id: t.id } }
+          : { status: 201, body: [{ id: t.id }] };
       }
       if (method === 'DELETE') {
         for (const x of applyFilters(mine, params)) templates.splice(templates.indexOf(x), 1);
@@ -600,7 +639,8 @@ export function createDzMock({ profiles, classes, members }) {
         ok = normal === key;
       } else {
         const res = proveritMock(body.p_answer, key);
-        if (res.kind === 'format' || res.kind === 'fractionRight') return { status: 200, body: res };
+        if (res.kind === 'format' || res.kind === 'fractionRight')
+          return { status: 200, body: res };
         normal = res.norm;
         ok = res.kind === 'right';
       }
@@ -662,5 +702,17 @@ export function createDzMock({ profiles, classes, members }) {
     return null;
   }
 
-  return { handle, links, homework, recipients, tasks, keys, answers, tries, parts, drafts, templates };
+  return {
+    handle,
+    links,
+    homework,
+    recipients,
+    tasks,
+    keys,
+    answers,
+    tries,
+    parts,
+    drafts,
+    templates,
+  };
 }

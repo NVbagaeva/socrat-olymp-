@@ -223,9 +223,9 @@ export function chitatPunkt(raw: unknown): PunktSostava | null {
 
 export function chitatSostav(raw: unknown): Sostav {
   const o = (typeof raw === 'object' && raw !== null ? raw : {}) as Record<string, unknown>;
-  const n = (typeof o['nastroyki'] === 'object' && o['nastroyki'] !== null
-    ? o['nastroyki']
-    : {}) as Record<string, unknown>;
+  const n = (
+    typeof o['nastroyki'] === 'object' && o['nastroyki'] !== null ? o['nastroyki'] : {}
+  ) as Record<string, unknown>;
   const limit = n['attemptsLimit'];
   const when = n['solutionsWhen'];
   return {

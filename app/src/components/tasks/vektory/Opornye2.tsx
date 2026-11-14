@@ -1,5 +1,6 @@
 'use client';
 
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { OpornayaZadacha, OpornyeSpisok, type OpornyyIshod } from '../opornye';
 import type { NavykKartochki } from '../opornye/OpornyeBanka';
@@ -79,10 +80,13 @@ function shagiRazbora(task: MikroSealed): Shag[] {
  */
 export function Opornye2({
   blokId,
+  slug,
   zapomni,
   zadachi,
 }: {
   blokId: string;
+  /** Адрес блока: пункт ДЗ (lib/dz/sostav.ts). */
+  slug: string;
   zapomni: ReactNode;
   /** Десять задач блока в закрытом виде, собраны на сборке. */
   zadachi: (MikroSealed & { no: number })[];
@@ -199,9 +203,18 @@ export function Opornye2({
       reshenie={checked === null ? null : { shagi, open: solutionOpen, onToggle: pokazatReshenie }}
       zapomni={zapomni}
       dop={
-        <button type="button" className="stk-btn stk-btn--tihaya" onClick={eshcheVariant}>
-          {T.zadacha.eshcheVariant}
-        </button>
+        <>
+          <button type="button" className="stk-btn stk-btn--tihaya" onClick={eshcheVariant}>
+            {T.zadacha.eshcheVariant}
+          </button>
+          {/* Репетитору: эту задачу — в черновик ДЗ (при выдаче — аналог). */}
+          <VDzKnopka
+            malaya
+            punkt={{ ist: 'opornye', no: 2, blok: slug, zadachi: [zadacha.id], kazhdomu: false }}
+            chto={`опорная задача ${zadacha.id}`}
+            label="В ДЗ"
+          />
+        </>
       }
       labels={T.zadacha}
     />

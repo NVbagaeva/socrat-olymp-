@@ -146,8 +146,7 @@ function normalizeCasesSql() {
 
 /* Помощники проверок ДЗ — в начало каждого файла (функции pg_temp
    живут в одном сеансе psql). */
-const dzHelpers = () =>
-  fs.readFileSync(path.join(SUPA, 'tests', 'dz-pomoshchniki.sql'), 'utf8');
+const dzHelpers = () => fs.readFileSync(path.join(SUPA, 'tests', 'dz-pomoshchniki.sql'), 'utf8');
 const DZ_ISTOCHNIKI = '20261113130000_dz_istochniki.sql';
 
 /* Таблица примеров проверки ответа ДЗ — временной таблицей. */

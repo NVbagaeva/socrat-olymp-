@@ -45,7 +45,9 @@ function unit8(b: Built8, names: Record<string, string>, studentId: string | nul
 /** Разобранный пример типа: своя задача на постоянном зерне, у всех одна. */
 function primer8(kind: string): VidDz['primer'] | undefined {
   const b = build8(taskId(kind, `primer-${kind}`, null));
-  return b === null ? undefined : { uslovieHtml: b.questionHtml, razbor: b.razbor, otvet: b.answer };
+  return b === null
+    ? undefined
+    : { uslovieHtml: b.questionHtml, razbor: b.razbor, otvet: b.answer };
 }
 
 function imena(k: KatalogRazdela): Record<string, string> {
@@ -100,7 +102,12 @@ export function zadacha8(k: KatalogRazdela, ref: string): HwUnitInput[] {
 }
 
 /** Работа над ошибками: аналог задачи (тот же тип и уровень, новые числа). */
-export function analogZadachi8(k: KatalogRazdela, ref: string, studentId: string, avoid: Set<string>): HwUnitInput | null {
+export function analogZadachi8(
+  k: KatalogRazdela,
+  ref: string,
+  studentId: string,
+  avoid: Set<string>,
+): HwUnitInput | null {
   const b = analog8(ref, avoid);
   return b === null ? null : unit8(b, imena(k), studentId);
 }
@@ -153,7 +160,12 @@ export function opornye8(
 }
 
 /** Работа над ошибками в опорной №8: аналог с новым зерном. */
-export function analogOpornoy8(blok: BlokKat, ref: string, zerno: string, studentId: string): HwUnitInput | null {
+export function analogOpornoy8(
+  blok: BlokKat,
+  ref: string,
+  zerno: string,
+  studentId: string,
+): HwUnitInput | null {
   const microId = ref.split('|')[0] ?? '';
   return opornaya8(blok, microId, zerno, studentId);
 }

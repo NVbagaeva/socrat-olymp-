@@ -18,7 +18,9 @@ const bank10 = sozdatBank<Solved, unknown>({
   voprosy: (s) => voprosyIzRazbora(s.hints),
   schitaem: 'Считаем с умом',
   risunok: (z) =>
-    z.prototypeId === 'P01' ? createElement(Most10, { params: z.params as Params, rezhim: 'uchenik' }) : null,
+    z.prototypeId === 'P01'
+      ? createElement(Most10, { params: z.params as Params, rezhim: 'uchenik' })
+      : null,
   istochnik: (z: ZadachaBankaDz) =>
     z.source === 'fipi' && z.no !== undefined ? `ФИПИ № ${z.no}` : `аналог ${z.id}`,
 });

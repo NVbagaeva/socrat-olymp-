@@ -225,7 +225,13 @@ export function Trenazher10({
           {/* Репетитору: выбранные прототипы — в черновик ДЗ. */}
           {s.tipy.length === 0 ? null : (
             <VDzKnopka
-              punkt={{ ist: 'trenazher', no: 10, tipy: s.tipy, skolko: Math.min(20, s.skolko), kazhdomu: false }}
+              punkt={{
+                ist: 'trenazher',
+                no: 10,
+                tipy: s.tipy,
+                skolko: Math.min(20, s.skolko),
+                kazhdomu: false,
+              }}
               chto={`${s.tipy.length} тип(ов) тренажёра`}
             />
           )}

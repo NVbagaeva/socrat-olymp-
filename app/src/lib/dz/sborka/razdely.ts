@@ -23,7 +23,7 @@ export interface SborshchikRazdela {
     ids: readonly string[],
     zerno: string,
     komu: readonly (string | null)[],
-  ): HwUnitInput[];
+  ): Promise<HwUnitInput[]> | HwUnitInput[];
   /** Работа над ошибками в тренажёре: аналог задачи с ошибкой. */
   analogZadachi(
     kat: KatalogRazdela,
@@ -39,7 +39,35 @@ export interface SborshchikRazdela {
     ref: string,
     zerno: string,
     student: string,
-  ): HwUnitInput | null;
+  ): Promise<HwUnitInput | null> | HwUnitInput | null;
+}
+
+/** Раздел-генератор (lib/dz/sborka/generator.ts): опорные — аналоги с новым зерном. */
+function generatorRazdela(m: {
+  trenazher: SborshchikRazdela['trenazher'];
+  zadacha: SborshchikRazdela['zadacha'];
+  analogZadachi: (
+    kat: KatalogRazdela,
+    ref: string,
+    student: string,
+    zerno: string,
+  ) => Promise<HwUnitInput | null>;
+  opornye: (
+    blok: BlokKat,
+    ids: readonly string[],
+    zerno: string,
+    komu: readonly (string | null)[],
+  ) => Promise<HwUnitInput[]>;
+}): SborshchikRazdela {
+  return {
+    opornyeIzZerna: true,
+    trenazher: m.trenazher,
+    zadacha: m.zadacha,
+    analogZadachi: (kat, ref, student, zerno) => m.analogZadachi(kat, ref, student, zerno),
+    opornye: m.opornye,
+    analogOpornoy: async (blok, kind, _ref, zerno, student) =>
+      (await m.opornye(blok, [kind], zerno, [student]))[0] ?? null,
+  };
 }
 
 /** Банковый раздел: опорные без зерна — та же задача. */
@@ -61,6 +89,15 @@ function bankovyy(m: {
 }
 
 export const SBORSHCHIKI: Record<number, () => Promise<SborshchikRazdela>> = {
+  2: () =>
+    import('./r2').then((m) =>
+      generatorRazdela({
+        trenazher: m.trenazher2,
+        zadacha: m.zadacha2,
+        analogZadachi: m.analogZadachi2,
+        opornye: m.opornye2,
+      }),
+    ),
   6: () =>
     import('./r6').then((m) =>
       bankovyy({
@@ -82,14 +119,23 @@ export const SBORSHCHIKI: Record<number, () => Promise<SborshchikRazdela>> = {
       }),
     ),
   8: () =>
-    import('./r8').then(
-      (m): SborshchikRazdela => ({
-        opornyeIzZerna: true,
-        trenazher: (kat, tipy, skolko, _zerno, komu) => m.trenazher8(kat, tipy, skolko, komu),
-        zadacha: m.zadacha8,
-        analogZadachi: (kat, ref, student, _zerno, avoid) => m.analogZadachi8(kat, ref, student, avoid),
-        opornye: m.opornye8,
-        analogOpornoy: (blok, _kind, ref, zerno, student) => m.analogOpornoy8(blok, ref, zerno, student),
+    import('./r8').then((m): SborshchikRazdela => ({
+      opornyeIzZerna: true,
+      trenazher: (kat, tipy, skolko, _zerno, komu) => m.trenazher8(kat, tipy, skolko, komu),
+      zadacha: m.zadacha8,
+      analogZadachi: (kat, ref, student, _zerno, avoid) =>
+        m.analogZadachi8(kat, ref, student, avoid),
+      opornye: m.opornye8,
+      analogOpornoy: (blok, _kind, ref, zerno, student) =>
+        m.analogOpornoy8(blok, ref, zerno, student),
+    })),
+  9: () =>
+    import('./r9').then((m) =>
+      generatorRazdela({
+        trenazher: m.trenazher9,
+        zadacha: m.zadacha9,
+        analogZadachi: m.analogZadachi9,
+        opornye: m.opornye9,
       }),
     ),
   10: () =>
@@ -105,4 +151,4 @@ export const SBORSHCHIKI: Record<number, () => Promise<SborshchikRazdela>> = {
 };
 
 /** Разделы, где опорные строятся из зерна (для «Каждому свои» без загрузки модуля). */
-export const OPORNYE_IZ_ZERNA: ReadonlySet<number> = new Set([8]);
+export const OPORNYE_IZ_ZERNA: ReadonlySet<number> = new Set([2, 8, 9]);
