@@ -161,22 +161,29 @@ export function useStickyTabs(
       }
       line = bottom;
       observer?.disconnect();
-      observer = new IntersectionObserver(
-        (entries) => {
-          const box = entries[entries.length - 1]!;
-          const next = !box.isIntersecting && box.boundingClientRect.bottom <= bottom + 0.5;
-          if (next === current) {
-            return;
-          }
-          current = next;
-          const from = next ? tiles! : panel!;
-          const active = document.activeElement as HTMLElement | null;
-          focus.current = active && from.contains(active) ? focusables(from).indexOf(active) : -1;
-          setShown(next);
-        },
-        { rootMargin: `-${bottom}px 0px 0px 0px` },
-      );
+      observer = new IntersectionObserver(() => svesti(), {
+        rootMargin: `-${bottom}px 0px 0px 0px`,
+      });
       observer.observe(tiles!);
+      /* Пока наблюдателя не было (его только что пересоздали), плитки
+         могли уже уйти под линию: сверяем сразу, не дожидаясь
+         следующего уведомления. */
+      svesti();
+    }
+
+    /* Показывать ли панель прямо сейчас — по месту плиток, а не по
+       прямоугольнику из уведомления: в WebKit тот бывает отстающим на
+       кадр, и у самой линии панель оставалась не в том состоянии. */
+    function svesti(): void {
+      const next = tiles!.getBoundingClientRect().bottom <= line + 0.5;
+      if (next === current) {
+        return;
+      }
+      current = next;
+      const from = next ? tiles! : panel!;
+      const active = document.activeElement as HTMLElement | null;
+      focus.current = active && from.contains(active) ? focusables(from).indexOf(active) : -1;
+      setShown(next);
     }
 
     relayout();
