@@ -82,6 +82,8 @@ async function context(width, height, mobile) {
       localStorage.setItem('budetege:cookie-notice:v1', JSON.stringify({ seen: true }));
       /* И окно «Впервые здесь?»: иначе через 2,5 с оно закроет кнопки. */
       localStorage.setItem('budetege:onboarding:v1', JSON.stringify({ welcomeSeen: true }));
+      /* Генератор №12 без тарифа закрыт: ключ проверок (lib/tarify/dostup.ts). */
+      localStorage.setItem('budetege:dostup:proverka', 'true');
     } catch {
       /* без хранилища баннер просто покажется */
     }

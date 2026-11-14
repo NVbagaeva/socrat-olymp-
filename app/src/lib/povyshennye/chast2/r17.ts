@@ -172,6 +172,7 @@ function sobrat(p: PR17): Chast2Zadacha {
   return {
     no: 17,
     shablon: 'r17.ekstremum',
+    vid17: p.vid === 'pribyl' ? 'ekonomika' : 'optimizaciya',
     uslovie,
     risunok: null,
     punkty: [{ bukva: null, podpis: `Ответ, ${edinica}`, pole: { vid: 'chislo', verno: otvT } }],

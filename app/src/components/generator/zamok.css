@@ -1,0 +1,119 @@
+/* Генератор без тарифа (GenZamok.tsx): закрытый генератор и окно
+   «Пробная генерация использована». Стекло — как у плашек /tarify/. */
+
+.gen-zamok {
+  position: relative;
+  max-width: 600px;
+  margin: var(--space-8) auto;
+  padding: var(--space-8) var(--space-8) var(--space-6);
+  border: 1px solid var(--glass-edge);
+  border-radius: 28px;
+  background:
+    radial-gradient(90% 90% at 100% 0%, rgb(61 121 224 / 0.16), transparent 60%), var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.gen-zamok__kartinka {
+  position: absolute;
+  top: -28px;
+  right: 20px;
+  width: 88px;
+  height: auto;
+  filter: drop-shadow(0 12px 16px rgb(31 95 208 / 0.3));
+}
+.gen-zamok__zagolovok {
+  margin: 0;
+  max-width: calc(100% - 88px);
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 620;
+  text-wrap: balance;
+}
+.gen-zamok__tekst {
+  margin: var(--space-3) 0 var(--space-6);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+.gen-zamok__probnye {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.gen-zamok__probnye ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.gen-zamok__probnye a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--glass-edge);
+  border-radius: 999px;
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.gen-zamok__probnye a:hover {
+  background: var(--color-surface, #fff);
+}
+
+/* Окно */
+.gen-zamok__okno {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+.gen-zamok__okno img {
+  flex: none;
+  width: 64px;
+  height: auto;
+  filter: drop-shadow(0 8px 12px rgb(31 95 208 / 0.25));
+}
+.gen-zamok__okno p {
+  margin: 0;
+  line-height: 1.5;
+}
+.gen-zamok__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.gen-zamok__knopki > * {
+  flex: 1 1 200px;
+}
+
+/* Подпись про пробную генерацию у кнопки «Сгенерировать» */
+.gen-sum .gen-sum__probnaya {
+  color: var(--color-accent);
+}
+
+@media (max-width: 759.98px) {
+  .gen-zamok {
+    margin: var(--space-6) 0;
+    padding: var(--space-6) var(--space-5) var(--space-5);
+  }
+  .gen-zamok__kartinka {
+    width: 72px;
+    top: -22px;
+    right: 12px;
+  }
+  .gen-zamok__zagolovok {
+    max-width: calc(100% - 64px);
+    font-size: 19px;
+  }
+}

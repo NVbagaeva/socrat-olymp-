@@ -5,7 +5,8 @@
  */
 
 import { EZH_MESYACY } from '@/content/ezhemesyachnye';
-import { EGE_NUMBERS, type HintStep, type VariantSet, type VariantTask } from '@/lib/variant/types';
+import { VARIANT_NUMBERS, vChasti1 } from '@/lib/variant/struktura';
+import type { HintStep, VariantSet, VariantTask } from '@/lib/variant/types';
 import { SHABLONY, type Shablon } from '@/lib/povyshennye/shablony';
 import { zagruzitVariant } from './dannye';
 import { ezhKod } from './kod';
@@ -66,7 +67,8 @@ export function ezhSetIz(k: number, versii: Zapis[][]): VariantSet {
     seed: code,
     version: EZH_VERSION,
     config: {
-      tasks: [...EGE_NUMBERS],
+      /* Задания первой части по действующей структуре экзамена. */
+      tasks: [...VARIANT_NUMBERS],
       subtypes: {},
       source: 'own',
       stars: [],
@@ -76,7 +78,7 @@ export function ezhSetIz(k: number, versii: Zapis[][]): VariantSet {
     zameny: {},
     variants: versii.map((zapisi, i) => ({
       index: i + 1,
-      tasks: zapisi.map((z) => zadachaEV(k, z)),
+      tasks: vChasti1(zapisi.map((z) => zadachaEV(k, z))),
     })),
     createdAt: '2026-10-29T00:00:00.000Z',
   };
