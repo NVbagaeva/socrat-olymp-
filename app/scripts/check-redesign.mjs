@@ -263,6 +263,21 @@ const SODERZHANIE = {
   ],
 };
 
+/**
+ * Правки содержания, одобренные владельцем: ошибка в тексте, о которой
+ * сказано в PR редизайна, исправлена отдельным PR. Файл пропускается,
+ * только пока он совпадает с одобренной версией (sha256): любая следующая
+ * правка снова видна проверке. После слияния в main запись не нужна —
+ * образец уже содержит эту версию.
+ */
+const ODOBRENO = {
+  /* №9: определение точки максимума без минимума; «нуль» при одном нуле. */
+  'app/src/lib/proizvodnaya/prototypes/po-grafiku-fprime.ts':
+    'cf6c9b6b7737e190cb0e7a7bc3adb1b3783f292af1aede97179ac35f9b0e01b9',
+  'app/src/lib/proizvodnaya/povyshennye.ts':
+    '690f2d8461884b393db2f655aeb20e8c570b4d2bf59355001d29f88f1875413a',
+};
+
 /** Какие картинки реестра принадлежат разделу. */
 function razdelKartinki(file) {
   const m = /^app\/public\/images\/task-(\d\d)\./.exec(file);
@@ -362,7 +377,21 @@ if (puti === undefined) {
   } catch (error) {
     check(false, `не удалось сравнить с ${obrazec}: ${String(error).slice(0, 200)}`);
   }
-  check(izmeneno === '', `банк или содержание раздела №${razdel} изменены:\n${izmeneno}`);
+  const neodobreno = izmeneno
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .filter((line) => {
+      const file = line.split('\t').at(-1);
+      const odobreno = ODOBRENO[file];
+      if (odobreno === undefined || !fs.existsSync(path.join(REPO, file))) return true;
+      const now = crypto
+        .createHash('sha256')
+        .update(fs.readFileSync(path.join(REPO, file)))
+        .digest('hex');
+      return now !== odobreno;
+    })
+    .join('\n');
+  check(neodobreno === '', `банк или содержание раздела №${razdel} изменены:\n${neodobreno}`);
 }
 
 if (failures.length > 0) {
