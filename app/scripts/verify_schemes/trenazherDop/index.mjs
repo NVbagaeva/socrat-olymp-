@@ -63,7 +63,9 @@ export function proverit(N = 1000) {
   const { TIPY_18 } = requireSrc('content/zadanie18/trenazher');
   const { ZADACHI_DOP_18 } = requireSrc('content/zadanie18/trenazherDop/index');
   const { SOBRANNYE } = requireSrc('content/zadanie18/spisok');
-  const { scena18 } = requireSrc('lib/zadanie18/trenazher/sceny');
+  const { scena18Tochno: scena18, scena18: scenaVidimaya } = requireSrc(
+    'lib/zadanie18/trenazher/sceny',
+  );
   const { bank18 } = requireSrc('lib/zadanie18/trenazher/bank');
   const { otvetVeren18 } = requireSrc('lib/zadanie18/trenazher/otvet');
   const { typeset } = requireSrc('lib/tex');
@@ -143,6 +145,9 @@ export function proverit(N = 1000) {
         `по чертежу ${poChertezhu}`,
       );
       pr.scena(sc.nachalo, sch);
+      /* Чертёж на экране и листе — по видимым параметрам: свойства фигуры
+         (касание, «лежит между», перпендикулярность) — те же. */
+      pr.scena(scenaVidimaya(t.id, d).nachalo, sch);
       sch.fakt(
         `${nabor}: есть доказательство а) и решение б)`,
         t.reshenieA(d).length > 0 && t.reshenieB(d).length > 0,

@@ -17,6 +17,7 @@ import {
   countsByTopic,
   defaultState,
   extrasOn,
+  flagVklyuchen,
   filterBySource,
   indexOfPos,
   levelsText,
@@ -29,6 +30,7 @@ import {
   setSubtypeCount,
   setTopicCount,
   sPodskazkami,
+  sFlagom,
   stateFromPreset,
   subtypeById,
   summary,
@@ -840,6 +842,26 @@ function GeneratorEkran({
             />
           </div>
         )}
+        {(extras.flagi ?? []).map((f) => (
+          <div className="gen-opt" key={f.id}>
+            <span>
+              {f.title}
+              <small>{f.note}</small>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              className="gen-switch"
+              aria-checked={flagVklyuchen(st.extras, f.id)}
+              aria-label={f.title}
+              onClick={() =>
+                setExtras({
+                  flagi: sFlagom(st.extras, f.id, !flagVklyuchen(st.extras, f.id)).flagi,
+                })
+              }
+            />
+          </div>
+        ))}
         {extras.vybor === undefined ? null : (
           <label className="gen-opt">
             <span>{extras.vybor.title}</span>

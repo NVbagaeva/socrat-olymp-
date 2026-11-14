@@ -34,14 +34,43 @@
    отрисованы, ширина каждой подписи по шрифту браузера не выходит за
    прямоугольник раскладки (± 1 px) — значит, проверки выше по модели
    верны и для настоящего текста.
-   Пропорции:
-     • отрезки с числами (или с x, 2x, 3x) на чертеже соотносятся как
-       числа — на глаз, с допуском 25 % (подпись целого отрезка). */
+   Чертёж учителя (Sostoyanie.uchitel, с построениями решения) — те же
+   проверки подписей и линий на трёх наборах чисел листа.
+
+   Читаемость (чертёж условия на листе, 62 мм; пороги —
+   lib/skhemy/vidimye.ts, POROGI_CHERTEZHA; мерки —
+   scripts/lib/mery-chertezha.mjs) — у задач тренажёра, у опорных задач,
+   ключевых схем и теории:
+     • наименьший радиус — не меньше 9 % размера чертежа, радиусы — не
+       больше 2,5 : 1;
+     • подписанный отрезок — не короче 8 мм на листе, подписанные
+       отрезки — не больше 3 : 1;
+     • угол между линиями — не уже 14°; подписанные точки — не ближе
+       3,5 мм; фигура — не уже 30 % кадра ни по ширине, ни по
+       высоте (чертежи листа — примерно одного размера).
+   Смысл (чертёж строится по видимым параметрам — trenazher/vidimye.ts —
+   и сверяется с чертежом в точной пропорции):
+     • касание остаётся касанием, взаимное положение окружностей и какая
+       больше — те же;
+     • точки на окружностях, порядок точек на отрезках, перпендикулярные
+       и параллельные отрезки, тип углов треугольников, равные стороны,
+       выпуклость — те же;
+     • больший подписанный отрезок длиннее, равные — равны (± 3 %).
+   Варианты повышенной сложности, часть 2 (движок lib/planimetriya):
+   чертежи условий №18 — радиусы (9 %, 2,5 : 1; кроме вневписанной у
+   тупого угла — ae18), углы, расстояние между точками. Чертежи решений
+   №15 (движок lib/chertezh3) — правила вида lib/stereo/metriki.ts;
+   пока отчётом в конце, без падения.
+   Чертёж условия и текст (trenazher/uslovie.ts): подписанные точки
+   чертежа условия — только те, что названы в задаче (кроме условий ФИПИ
+   без букв — TEKST_FIPI_BEZ_BUKV_18). */
 
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { requireSrc } from './lib/load-ts.mjs';
+import { meryChertezha } from './lib/mery-chertezha.mjs';
+import { meryPlanSvg } from './lib/mery-svg-plan.mjs';
 
 const BRAUZER = process.argv.includes('--brauzer');
 /** Чертежи листа для проверки в браузере: svg и прямоугольники модели. */
@@ -51,9 +80,10 @@ const N = 20;
 const ZAZOR_PODPISEY = 2;
 const ZAZOR_LINIY = 1;
 const PUNKTIR_BLIZHE = 6;
-const DOPUSK_PROPORCIY = 1.25;
 
 let plokho = 0;
+/** Отчёт без падения: что ещё не дотянуто до правил (печатается в конце). */
+const preduprezhdeniya = [];
 const schet = new Map();
 function fakt(imya, ok, podrobno = '') {
   const s = schet.get(imya) ?? { ok: 0, vsego: 0, primery: [] };
@@ -81,7 +111,40 @@ const ekranLib = requireSrc('lib/skhemy/ekran');
 const podpisiLib = requireSrc('lib/skhemy/podpisi');
 const { svgSkhemy, STIL_SAM } = requireSrc('lib/skhemy/svg');
 const { cssTemy } = requireSrc('lib/skhemy/tema');
-const { scena18 } = requireSrc('lib/zadanie18/trenazher/sceny');
+const { scena18, scena18Tochno } = requireSrc('lib/zadanie18/trenazher/sceny');
+const { scenaOpornoy18, scenaOpornoyTochno18 } = requireSrc('lib/zadanie18/opornye/index');
+const { zhivayaSkhema18 } = requireSrc('lib/zadanie18/skhemy/index');
+const { risunokTeorii18, RISUNKI_TEORII_18 } = requireSrc('lib/zadanie18/teoriya');
+const { POROGI_CHERTEZHA: POR } = requireSrc('lib/skhemy/vidimye');
+const { TEKST_FIPI_BEZ_BUKV_18 } = requireSrc('lib/zadanie18/trenazher/uslovie');
+const { OPORNYE_18 } = requireSrc('content/zadanie18/opornye/index');
+const SCENY_OPORNYH = OPORNYE_18.filter((o) => scenaOpornoy18(o.id) !== undefined);
+const SKHEMY_18 = [
+  'vysoty',
+  'bissektrisa',
+  'udvoenie-mediany',
+  'dve-sekushchie',
+  'ravnye-ugly',
+  'pryamye-ugly',
+  'trezubec',
+  'ugly-i-dugi',
+  'chetyrekhugolniki',
+  'sredlin-treug',
+  'sredlin-trap',
+  'kasatelnaya-sekushchaya',
+  'otrezki-kasatelnyh',
+  'kasayushchiesya',
+  'obshchaya-kasatelnaya',
+  'babochka',
+  'chetyre-tochki',
+  'ravnobokaya',
+  'menelay-cheva',
+  'metod-ploshchadey',
+  'obshchaya-vysota',
+  'obshchiy-ugol',
+  'relsy-evklida',
+  'stepen-tochki',
+];
 const { TIPY_18 } = requireSrc('content/zadanie18/trenazher');
 const { SK, raskladka, ramkaKadra } = ekranLib;
 
@@ -279,13 +342,294 @@ function chisloPodpisi(tekst) {
   );
 }
 
+/* ── Читаемость: мерки и пороги (lib/skhemy/vidimye.ts) ────────── */
+
+const VID0 = { ugol: 0, otrazhenie: 1 };
+const procent = (x) => `${(x * 100).toFixed(1)} %`;
+
+/**
+ * Углы, острее которых чертёж не сделать: их задаёт сама задача.
+ * Остальные — не уже POR.ugol.
+ */
+const UGOL_IZ_ZADACHI = {
+  /* ∠C = 150° дан: углы A и B вместе — 30°, каждый — около 15°. */
+  kvadraty: 13,
+};
+
+function chitaemost(id, kadr, e, vidim, tip = '') {
+  const m = meryChertezha(kadr, vidim, e, 360, POR.shirinaMm);
+  if (m.minR !== null)
+    fakt(
+      `читаемость: наименьший радиус — не меньше ${procent(POR.radiusDolya)} размера чертежа`,
+      m.minR.dolya >= POR.radiusDolya,
+      `${id}: ${m.minR.id} — ${procent(m.minR.dolya)}`,
+    );
+  fakt(
+    `читаемость: радиусы — не больше ${POR.otnoshenieRadiusov} : 1`,
+    m.otnR <= POR.otnoshenieRadiusov + 0.01,
+    `${id}: ${m.otnR.toFixed(2)} : 1`,
+  );
+  if (m.minOtr !== null)
+    fakt(
+      `читаемость: подписанный отрезок — не короче ${POR.otrezokMm} мм на листе`,
+      m.minOtr.mm >= POR.otrezokMm,
+      `${id}: «${m.minOtr.tekst}» — ${m.minOtr.mm.toFixed(1)} мм`,
+    );
+  fakt(
+    `читаемость: подписанные отрезки — не больше ${POR.otnoshenieOtrezkov} : 1`,
+    m.otnOtr <= POR.otnoshenieOtrezkov + 0.01,
+    `${id}: ${m.otnOtr.toFixed(2)} : 1`,
+  );
+  if (m.minUgol !== null)
+    fakt(
+      `читаемость: угол между линиями — не уже ${POR.ugol}° (кроме заданных задачей)`,
+      m.minUgol.ugol >= (UGOL_IZ_ZADACHI[tip] ?? POR.ugol),
+      `${id}: ${m.minUgol.gde} — ${m.minUgol.ugol.toFixed(1)}°`,
+    );
+  if (m.minTochki !== null)
+    fakt(
+      `читаемость: подписанные точки — не ближе ${POR.tochkiMm} мм`,
+      m.minTochki.mm >= POR.tochkiMm,
+      `${id}: ${m.minTochki.gde} — ${m.minTochki.mm.toFixed(1)} мм`,
+    );
+  /* Чертежи листа — примерно одного размера: фигура не теряется в кадре. */
+  const pole = 360 < 420 ? SK.poleUzkoe : SK.pole;
+  fakt(
+    'размер: фигура — не уже 30 % кадра ни по ширине, ни по высоте',
+    m.zapolnenie >= 0.3,
+    `${id}: ${procent(m.zapolnenie)}`,
+  );
+  void pole;
+}
+
+/* ── Сохранность смысла: точный чертёж ↔ видимый ──────────────── */
+
+const dl = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+function masshtab(kadr) {
+  const xs = [];
+  const ys = [];
+  for (const el of kadr.elementy) {
+    const pts =
+      el.vid === 'otrezok'
+        ? [el.a, el.b]
+        : el.vid === 'tochka'
+          ? [el.p]
+          : el.vid === 'okruzhnost'
+            ? [el.c]
+            : [];
+    for (const p of pts) {
+      xs.push(p[0]);
+      ys.push(p[1]);
+    }
+  }
+  return Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) || 1;
+}
+
+/** Качественное описание кадра: что должно совпасть у точного и видимого чертежа. */
+function opisanie(kadr) {
+  const L = masshtab(kadr);
+  const eps = 1e-6 * L;
+  const okr = kadr.elementy.filter((el) => el.vid === 'okruzhnost');
+  const otr = kadr.elementy.filter((el) => el.vid === 'otrezok' && dl(el.a, el.b) > eps);
+  const tochki = kadr.elementy.filter((el) => el.vid === 'tochka' && el.imya);
+  const o = {
+    okr: new Map(),
+    naOkr: new Map(),
+    poryadok: new Map(),
+    ugly: new Map(),
+    fig: new Map(),
+  };
+  /* Окружности попарно: касание, пересечение, одна в другой. */
+  for (let i = 0; i < okr.length; i += 1)
+    for (let j = i + 1; j < okr.length; j += 1) {
+      const [a, b] = [okr[i], okr[j]];
+      const d = dl(a.c, b.c);
+      const vn = a.r + b.r;
+      const vt = Math.abs(a.r - b.r);
+      const k =
+        Math.abs(d - vn) < eps
+          ? 'касаются внешним образом'
+          : d < eps && vt < eps
+            ? 'совпадают'
+            : Math.abs(d - vt) < eps
+              ? 'касаются внутренним образом'
+              : d > vn
+                ? 'не пересекаются'
+                : d < vt
+                  ? 'одна внутри другой'
+                  : 'пересекаются';
+      o.okr.set(
+        `${a.id}/${b.id}`,
+        k + (vt < eps ? '' : a.r > b.r ? ', первая больше' : ', вторая больше'),
+      );
+    }
+  /* Точки на окружностях. */
+  for (const c of okr)
+    o.naOkr.set(
+      c.id,
+      tochki
+        .filter((t) => Math.abs(dl(t.p, c.c) - c.r) < eps)
+        .map((t) => t.imya)
+        .sort()
+        .join(' '),
+    );
+  /* Порядок точек на отрезках (внутри) и концы. */
+  for (const s of otr) {
+    const l = dl(s.a, s.b);
+    const na = tochki
+      .map((t) => {
+        const u =
+          ((t.p[0] - s.a[0]) * (s.b[0] - s.a[0]) + (t.p[1] - s.a[1]) * (s.b[1] - s.a[1])) / (l * l);
+        const q = [s.a[0] + (s.b[0] - s.a[0]) * u, s.a[1] + (s.b[1] - s.a[1]) * u];
+        return { imya: t.imya, u, d: dl(t.p, q) };
+      })
+      .filter((x) => x.d < eps && x.u > -1e-6 && x.u < 1 + 1e-6)
+      .sort((x, y) => x.u - y.u)
+      .map((x) => x.imya);
+    o.poryadok.set(s.id, na.join('-'));
+  }
+  /* Перпендикулярность и параллельность отрезков. */
+  for (let i = 0; i < otr.length; i += 1)
+    for (let j = i + 1; j < otr.length; j += 1) {
+      const u = [otr[i].b[0] - otr[i].a[0], otr[i].b[1] - otr[i].a[1]];
+      const w = [otr[j].b[0] - otr[j].a[0], otr[j].b[1] - otr[j].a[1]];
+      const n = Math.hypot(...u) * Math.hypot(...w);
+      const c = (u[0] * w[0] + u[1] * w[1]) / n;
+      const sn = (u[0] * w[1] - u[1] * w[0]) / n;
+      const k = Math.abs(c) < 1e-6 ? '⊥' : Math.abs(sn) < 1e-6 ? '∥' : '';
+      if (k) o.ugly.set(`${otr[i].id}/${otr[j].id}`, k);
+    }
+  /* Фигуры: тип углов треугольника, равные стороны, выпуклость. */
+  for (const m of kadr.elementy.filter((el) => el.vid === 'mnogougolnik')) {
+    const t = m.tochki;
+    const n = t.length;
+    const ugly = [];
+    const storony = [];
+    let znak = 0;
+    let vypuklyy = true;
+    for (let k = 0; k < n; k += 1) {
+      const a = t[(k + n - 1) % n];
+      const v = t[k];
+      const b = t[(k + 1) % n];
+      const u = [a[0] - v[0], a[1] - v[1]];
+      const w = [b[0] - v[0], b[1] - v[1]];
+      const c = (u[0] * w[0] + u[1] * w[1]) / (Math.hypot(...u) * Math.hypot(...w));
+      ugly.push(Math.abs(c) < 1e-6 ? 'прямой' : c > 0 ? 'острый' : 'тупой');
+      const cr = u[0] * w[1] - u[1] * w[0];
+      if (Math.abs(cr) > eps * L) {
+        const z = Math.sign(cr);
+        if (znak !== 0 && z !== znak) vypuklyy = false;
+        znak = z;
+      }
+      storony.push(dl(v, b));
+    }
+    const ravnye = [];
+    for (let a = 0; a < n; a += 1)
+      for (let b = a + 1; b < n; b += 1)
+        if (Math.abs(storony[a] - storony[b]) < eps) ravnye.push(`${a}=${b}`);
+    o.fig.set(
+      m.id,
+      `${n === 3 ? ugly.join(',') : vypuklyy ? 'выпуклый' : 'невыпуклый'}; ${ravnye.join(' ')}`,
+    );
+  }
+  return o;
+}
+
+function sohrannost(id, kadrTochno, kadrVid) {
+  const a = opisanie(kadrTochno);
+  const b = opisanie(kadrVid);
+  const sverit = (imya, ma, mb) => {
+    for (const [k, v] of ma)
+      fakt(imya, mb.get(k) === v, `${id}: ${k} — было «${v}», на чертеже «${mb.get(k) ?? '—'}»`);
+    for (const [k, v] of mb) if (!ma.has(k)) fakt(imya, false, `${id}: ${k} — лишнее «${v}»`);
+  };
+  sverit('смысл: касания и взаимное положение окружностей — как в задаче', a.okr, b.okr);
+  sverit('смысл: точки на окружностях — как в задаче', a.naOkr, b.naOkr);
+  sverit('смысл: порядок точек на отрезках — как в задаче', a.poryadok, b.poryadok);
+  sverit('смысл: перпендикулярные и параллельные — как в задаче', a.ugly, b.ugly);
+  sverit('смысл: тип фигур и равные стороны — как в задаче', a.fig, b.fig);
+  /* Подписанные отрезки: больший — длиннее, равные — равны (± 3 %). */
+  /* Все данные условия на чертеже: у видимого — те же подписи (тексты). */
+  const teksty = (k) =>
+    k.elementy
+      .filter((el) => el.vid === 'velichina')
+      .map((el) => `${el.id}=${el.tekst}`)
+      .sort()
+      .join(' | ');
+  fakt(
+    'смысл: подписи данных — те же, что у чертежа в точной пропорции',
+    teksty(kadrTochno) === teksty(kadrVid),
+    `${id}: было «${teksty(kadrTochno)}», на чертеже «${teksty(kadrVid)}»`,
+  );
+  /* Только подпись целого отрезка чертежа: у части (AO на диагонали AC)
+     число относится не к ней. */
+  const sovp = (x, y) => dl(x, y) < 1e-9;
+  const celyy = (a, b) =>
+    kadrVid.elementy.some(
+      (o) =>
+        o.vid === 'otrezok' && ((sovp(o.a, a) && sovp(o.b, b)) || (sovp(o.a, b) && sovp(o.b, a))),
+    );
+  const podp = kadrVid.elementy
+    .filter((el) => el.vid === 'velichina' && 'otrezok' in el.yakor && celyy(...el.yakor.otrezok))
+    .map((el) => ({
+      el,
+      ch: chisloPodpisi(el.tekst),
+      l: dl(el.yakor.otrezok[0], el.yakor.otrezok[1]),
+    }))
+    .filter((x) => x.ch !== null);
+  for (let i = 0; i < podp.length; i += 1)
+    for (let j = i + 1; j < podp.length; j += 1) {
+      const [x, y] = [podp[i], podp[j]];
+      if (x.ch.edinica !== y.ch.edinica) continue;
+      const ok =
+        x.ch.znachenie === y.ch.znachenie
+          ? Math.abs(x.l / y.l - 1) < 0.03
+          : x.ch.znachenie > y.ch.znachenie === x.l > y.l;
+      fakt(
+        'смысл: больший подписанный отрезок длиннее, равные — равны',
+        ok,
+        `${id}: «${x.el.tekst}» и «${y.el.tekst}» на чертеже ${(x.l / y.l).toFixed(2)} : 1`,
+      );
+    }
+}
+
+/* ── Чертёж условия и текст: на чертеже — только буквы из задачи ──── */
+
+function bukvyTeksta(t) {
+  const math = [...`${t.uslovie} ${t.a} ${t.b}`.matchAll(/\$([^$]*)\$/g)]
+    .map((m) => m[1])
+    .join(' ')
+    .replace(/\\(?:operatorname|text|mathrm)\{[^}]*\}/g, ' ')
+    .replace(/\\[a-zA-Z]+/g, ' ');
+  return (imya) => {
+    const [b, ind] = imya.split('_');
+    const re = ind === undefined ? new RegExp(`${b}(?!_)`) : new RegExp(`${b}_\\{?${ind}\\}?`);
+    return re.test(math);
+  };
+}
+
+function bukvyIzUsloviya(id, tekst, kadr, sost) {
+  const est = bukvyTeksta(tekst);
+  for (const el of kadr.elementy) {
+    if (el.vid !== 'tochka' || !el.imya || !ekranLib.vidimEl(el, sost)) continue;
+    fakt('чертёж условия: подписанные точки — из текста задачи', est(el.imya), `${id}: ${el.imya}`);
+  }
+}
+
 /* ── Чертежи ───────────────────────────────────────────────────── */
 
 const rnd = zerno(1818);
-const sost = { lit: new Set(), shag: null, podpisi: true };
+const SOST_USLOVIE = { lit: new Set(), shag: null, podpisi: true };
+const SOST_UCHITEL = { ...SOST_USLOVIE, uchitel: true };
 
 for (const tip of TIPY_18) {
-  for (let i = 0; i < N; i += 1) {
+  /* Чертёж условия — все 20 вариантов; чертёж учителя (с построениями) —
+     три набора чисел как на листе. */
+  for (let j = 0; j < N + 3; j += 1) {
+    const uchitel = j >= N;
+    const i = uchitel ? j - N : j;
+    const sost = uchitel ? SOST_UCHITEL : SOST_USLOVIE;
     const p = tip.varianty[i % tip.varianty.length];
     const sk = scena18(tip.id, p);
     const tt = sk.nachalo;
@@ -301,7 +645,7 @@ for (const tip of TIPY_18) {
             [640, 460],
           ][i % 3];
     const e = raskladka(kadr, vid, ramkaKadra(kadr, vid, sost), W, H, sost);
-    const id = `${tip.id} #${(i % tip.varianty.length) + 1}${i < 3 ? '' : ` (${i}: ${Math.round(vid.ugol)}°${vid.otrazhenie < 0 ? ' отр.' : ''} ${W}×${H})`}`;
+    const id = `${tip.id} #${(i % tip.varianty.length) + 1}${uchitel ? ' (учитель)' : ''}${i < 3 ? '' : ` (${i}: ${Math.round(vid.ugol)}°${vid.otrazhenie < 0 ? ' отр.' : ''} ${W}×${H})`}`;
     /* DUMP=«id из отчёта» — записать этот чертёж в файл (DUMP_FILE) для просмотра. */
     if (process.env.DUMP === id)
       fs.writeFileSync(
@@ -543,39 +887,112 @@ for (const tip of TIPY_18) {
         );
     }
 
-    /* Пропорции: по исходному положению (без поворота) достаточно. */
-    if (i < 3) {
-      const gruppy = new Map();
-      for (const el of kadr.elementy) {
-        if (el.vid !== 'velichina' || !el.yakor || !('otrezok' in el.yakor)) continue;
-        const ch = chisloPodpisi(el.tekst);
-        if (ch === null) continue;
-        const [a, b] = el.yakor.otrezok;
-        /* Только подпись целого отрезка чертежа: у части отрезка (AO на
-           диагонали AC) число относится не к ней. */
-        const sovp = (x, y) => Math.hypot(x[0] - y[0], x[1] - y[1]) < 1e-6;
-        const celyy = kadr.elementy.some(
-          (o) =>
-            o.vid === 'otrezok' &&
-            ((sovp(o.a, a) && sovp(o.b, b)) || (sovp(o.a, b) && sovp(o.b, a))),
+    /* Читаемость и смысл — по листу (без поворота): чертёж условия. */
+    if (i < 3 && !uchitel) {
+      chitaemost(id, kadr, e, (el) => ekranLib.vidimEl(el, sost), tip.id);
+      const tochnaya = scena18Tochno(tip.id, p);
+      sohrannost(id, tochnaya.postroit(tochnaya.nachalo), kadr);
+      if (!TEKST_FIPI_BEZ_BUKV_18.includes(tip.id)) bukvyIzUsloviya(id, tip.tekst(p), kadr, sost);
+    }
+  }
+}
+
+/* ── Опорные задачи, схемы и теория: читаемость начального чертежа ── */
+
+for (const s of SCENY_OPORNYH) {
+  const sk = scenaOpornoy18(s.id);
+  const kadr = sk.postroit(sk.nachalo);
+  const sost = SOST_USLOVIE;
+  const e = raskladka(kadr, VID0, ramkaKadra(kadr, VID0, sost), 360, 250, sost);
+  chitaemost(
+    `опорная ${s.id}`,
+    kadr,
+    e,
+    (el) => ekranLib.vidimEl(el, sost),
+    s.id === 'kvadraty-na-storonah' ? 'kvadraty' : '',
+  );
+  const t = scenaOpornoyTochno18(s.id);
+  sohrannost(`опорная ${s.id}`, t.postroit(t.nachalo), kadr);
+}
+for (const [kto, sk] of [
+  ...SKHEMY_18.map((id) => [`схема ${id}`, zhivayaSkhema18(id)]),
+  ...RISUNKI_TEORII_18.map((id) => [`теория ${id}`, risunokTeorii18(id)]),
+]) {
+  const kadr = sk.postroit(sk.nachalo);
+  const e = raskladka(kadr, VID0, ramkaKadra(kadr, VID0, SOST_USLOVIE), 360, 250, SOST_USLOVIE);
+  chitaemost(kto, kadr, e, (el) => ekranLib.vidimEl(el, SOST_USLOVIE));
+}
+
+/* ── Варианты повышенной сложности, часть 2: чертежи условий №18 ─── */
+
+{
+  const { zadacha2 } = requireSrc('lib/povyshennye/chast2/index');
+  const zapisi = new Map();
+  for (let k = 1; k <= 99; k += 1) {
+    const f = path.resolve(`src/lib/povyshennye/dannye/v${String(k).padStart(2, '0')}.ts`);
+    if (!fs.existsSync(f)) break;
+    const v = requireSrc(`lib/povyshennye/dannye/v${String(k).padStart(2, '0')}`).VARIANT;
+    for (const versiya of v.chast2 ?? [])
+      for (const z of versiya) if (/^[a-z]+1[58]\./.test(z.s)) zapisi.set(JSON.stringify(z), z);
+  }
+  for (const z of zapisi.values()) {
+    const zad = zadacha2(z);
+    if (zad.risunok === null || !/18\./.test(z.s)) continue;
+    const id = `повышенные ${z.s} ${JSON.stringify(z.p)}`;
+    /* Чертёж листа — 60 мм (lib/variant/sheets.ts, card2). */
+    const m = meryPlanSvg(zad.risunok, 60);
+    /* Вневписанная окружность у тупоугольного треугольника (ae18) в разы
+       больше вписанной: тип треугольника важнее пропорции (ae18.ts). */
+    const vnevp = z.s === 'ae18.vnevpisannaya';
+    if (m.minR !== null)
+      fakt(
+        `часть 2: наименьший радиус — не меньше ${procent(POR.radiusDolya)} размера чертежа (кроме вневписанной у тупого угла)`,
+        m.minR >= POR.radiusDolya || vnevp,
+        `${id}: ${procent(m.minR)}`,
+      );
+    fakt(
+      `часть 2: радиусы — не больше ${POR.otnoshenieRadiusov} : 1 (кроме вневписанной у тупого угла)`,
+      m.otnR <= POR.otnoshenieRadiusov + 0.01 || vnevp,
+      `${id}: ${m.otnR.toFixed(2)} : 1`,
+    );
+    if (m.minUgol !== null)
+      fakt(
+        `часть 2: угол между линиями — не уже ${POR.ugol}°`,
+        m.minUgol >= POR.ugol,
+        `${id}: ${m.minUgol.toFixed(1)}°`,
+      );
+    if (m.minTochki !== null)
+      fakt(
+        `часть 2: точки чертежа — не ближе ${POR.tochkiMm} мм`,
+        m.minTochki >= POR.tochkiMm,
+        `${id}: ${m.minTochki.toFixed(1)} мм`,
+      );
+  }
+
+  /* №15 (движок lib/chertezh3): чертежи этапов решения — правила вида
+     движка (lib/stereo/metriki.ts: вершины не слипаются, отрезки не
+     сливаются, основание не сплющено, пропорции 0,8–1,4) на том ракурсе,
+     что выбран для листа. Условия №15 — без чертежа. */
+  const { postroit } = requireSrc('lib/chertezh3/postroit');
+  const { metrikiVida } = requireSrc('lib/chertezh3/vid');
+  for (const z of zapisi.values()) {
+    const m = /^([a-z]+)15\./.exec(z.s);
+    if (m === null) continue;
+    const mod = requireSrc(`lib/povyshennye/chast2/${m[1]}15`);
+    const f = Object.entries(mod).find(([k]) => /^scenariy[A-Z]+15$/.test(k))?.[1];
+    fakt('№15 (часть 2): у шаблона есть сценарий чертежа', typeof f === 'function', z.s);
+    if (typeof f !== 'function') continue;
+    for (const punkt of ['a', 'b']) {
+      const sc = f(z.p, punkt);
+      if (sc.rakurs === undefined) continue;
+      const nar = metrikiVida(postroit(sc), sc.rakurs, sc.szhatie ?? 1).narusheniya;
+      /* Пока — отчётом: веер сторон сечения из общей вершины под малым
+         углом (отрезки «сливаются» на 0 мм) и сплющенные пирамиды — дело
+         выбора вида движка lib/chertezh3, его правят отдельно. */
+      if (nar.length > 0)
+        preduprezhdeniya.push(
+          `№15 (часть 2) ${z.s} ${JSON.stringify(z.p)} ${punkt}): ${nar.map((n) => `${n.pravilo}: ${n.chto}`).join('; ')}`,
         );
-        if (!celyy) continue;
-        const dl = Math.hypot(b[0] - a[0], b[1] - a[1]);
-        if (!(dl > 0)) continue;
-        gruppy.set(ch.edinica, [...(gruppy.get(ch.edinica) ?? []), { ...ch, dl, tekst: el.tekst }]);
-      }
-      for (const g of gruppy.values()) {
-        for (let a = 0; a < g.length; a += 1) {
-          for (let b = a + 1; b < g.length; b += 1) {
-            const k = g[a].dl / g[b].dl / (g[a].znachenie / g[b].znachenie);
-            fakt(
-              'пропорции: отрезки соотносятся как числа (± 25 %)',
-              k < DOPUSK_PROPORCIY && k > 1 / DOPUSK_PROPORCIY,
-              `${id}: «${g[a].tekst}» : «${g[b].tekst}» на чертеже ${(g[a].dl / g[b].dl).toFixed(2)}`,
-            );
-          }
-        }
-      }
     }
   }
 }
@@ -647,6 +1064,10 @@ console.log(`Чертежи №18: ${TIPY_18.length} прототипов × ${N
 for (const [imya, s] of schet) {
   console.log(`${s.ok === s.vsego ? '✓' : '✗'} ${imya}: ${s.ok}/${s.vsego}`);
   for (const p of s.primery) console.log(`    ${p}`);
+}
+if (preduprezhdeniya.length > 0) {
+  console.log(`\nОтчёт (не роняет проверку) — ${preduprezhdeniya.length}:`);
+  for (const p of preduprezhdeniya.slice(0, process.env.VSE ? 9999 : 8)) console.log(`    ${p}`);
 }
 if (plokho > 0) {
   console.log(`\nНарушений: ${plokho}`);

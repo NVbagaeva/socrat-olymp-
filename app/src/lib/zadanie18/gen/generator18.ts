@@ -16,7 +16,7 @@ import {
   SHEET_GEN_18,
 } from '@/content/generator18';
 import { slotySostava, sostavIzSlotov } from '@/lib/generator/obshchiy/klyuchi';
-import { defaultExtras, SVOY_VID } from '@/lib/generator/obshchiy/state';
+import { defaultExtras, flagVklyuchen, SVOY_VID } from '@/lib/generator/obshchiy/state';
 import type {
   GenConfig,
   GenEngine,
@@ -92,9 +92,13 @@ export function config18(
       theory: false,
       examples: false,
       flag: { title: GENERATOR18_TEXTS.cvetnye.title, note: GENERATOR18_TEXTS.cvetnye.note },
+      flagi: [{ id: FLAG_CHERTEZH, ...GENERATOR18_TEXTS.chertezh }],
     },
   };
 }
+
+/** Переключатель «Чертёж к условию» (GenConfig.extras.flagi). */
+export const FLAG_CHERTEZH = 'chertezh';
 
 /** «Дополнительно» → параметры листа. */
 function dopIzExtras(e: GenExtras): Dop18 {
@@ -105,6 +109,7 @@ function dopIzExtras(e: GenExtras): Dop18 {
     data: e.date,
     uchitel: e.teacher,
     ...(e.flag === true ? { cvetnye: true } : {}),
+    ...(flagVklyuchen(e, FLAG_CHERTEZH) ? { chertezh: true } : {}),
   };
 }
 
@@ -118,6 +123,7 @@ function extrasIzDop(dop: Dop18, config: GenConfig): GenExtras {
     teacher: dop.uchitel || DOP_18.uchitel,
     ...(svoy ? { svoy: dop.svoy } : {}),
     ...(dop.cvetnye === true ? { flag: true } : {}),
+    ...(dop.chertezh === true ? { flagi: [FLAG_CHERTEZH] } : {}),
   };
 }
 
@@ -149,8 +155,10 @@ export function engine18(config: GenConfig, bank: readonly Zadacha18[], base: st
             answerHtml: z.answer,
             solutionHtml: z.solutionHtml,
             fromBank: false,
-            figureSvg: z.figureSvg,
-            figureTeacherSvg: z.figureSvg,
+            /* Предпросмотр ученика — как на листе: чертёж только с
+               «Чертежом к условию»; у учителя — всегда, с построениями. */
+            figureSvg: state.extras.flagi?.includes(FLAG_CHERTEZH) === true ? z.figureSvg : null,
+            figureTeacherSvg: z.figureUchitelSvg,
           })),
         ),
         note: list.povtor > 0 ? GENERATOR18_TEXTS.povtor(list.povtor) : null,
