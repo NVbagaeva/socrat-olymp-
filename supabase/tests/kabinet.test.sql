@@ -241,7 +241,8 @@ do $$ begin raise notice 'ok 9: сессии тренажёра — только
 set role anon;
 do $$ begin
   if (select count(*) from public.bank_prototypes) < 100 then raise exception 'FAIL: каталог пуст'; end if;
-  if (select count(*) from public.ege_tasks) <> 20 then raise exception 'FAIL: заданий не 20'; end if;
+  -- Разделы по номерам хранения: 1–20 и новый №12 ЕГЭ-2027 (хранение 21).
+  if (select count(*) from public.ege_tasks) <> 21 then raise exception 'FAIL: разделов в каталоге не 21'; end if;
 end $$;
 select pg_temp.fails('select * from public.profiles', 'permission denied');
 select pg_temp.fails('select * from public.attempts', 'permission denied');
@@ -281,18 +282,22 @@ do $$ declare bad text; begin
   raise notice 'ok 11: выгрузка с попытками и ДЗ, удаление каскадом';
 end $$;
 
--- 12. Номер хранения (миграция 20261114120000_struktura_2027.sql): новому
--- разделу ЕГЭ-2027 — 21; номер — одна или две цифры. Каталог не меняется.
+-- 12. Номер хранения (миграция 20261114120000_struktura_2027.sql): номер
+-- раздела — одна или две цифры, больше 20 проходит (новому разделу
+-- ЕГЭ-2027 — 21, он уже в каталоге). Пробный раздел 22 — и обратно.
 select pg_temp.fails($q$insert into public.ege_tasks (no, name) values (0, 'Ноль')$q$, 'ege_tasks_no_check');
 select pg_temp.fails($q$insert into public.ege_tasks (no, name) values (100, 'Сто')$q$, 'ege_tasks_no_check');
 do $$ begin
-  insert into public.ege_tasks (no, name) values (21, 'Наибольшее и наименьшее значение функции');
-  insert into public.bank_prototypes (code, task_no, title) values ('21:A1', 21, 'Точка максимума многочлена');
-  if not exists (select 1 from public.bank_prototypes where task_no = 21) then
-    raise exception 'FAIL: прототип раздела 21 не записался';
+  if not exists (select 1 from public.ege_tasks where no = 21) then
+    raise exception 'FAIL: раздела 21 нет в каталоге';
   end if;
-  delete from public.bank_prototypes where task_no = 21;
-  delete from public.ege_tasks where no = 21;
-  if (select count(*) from public.ege_tasks) <> 20 then raise exception 'FAIL: каталог изменился'; end if;
-  raise notice 'ok 12: номер хранения 21 проходит, 0 и 100 — нет';
+  insert into public.ege_tasks (no, name) values (22, 'Пробный раздел');
+  insert into public.bank_prototypes (code, task_no, title) values ('22:A1', 22, 'Пробный прототип');
+  if not exists (select 1 from public.bank_prototypes where task_no = 22) then
+    raise exception 'FAIL: прототип раздела 22 не записался';
+  end if;
+  delete from public.bank_prototypes where task_no = 22;
+  delete from public.ege_tasks where no = 22;
+  if (select count(*) from public.ege_tasks) <> 21 then raise exception 'FAIL: каталог изменился'; end if;
+  raise notice 'ok 12: номера 21 и 22 проходят, 0 и 100 — нет';
 end $$;
