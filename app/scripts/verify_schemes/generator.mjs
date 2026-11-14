@@ -58,7 +58,7 @@ export function proverit(N = 200) {
       a.poVariantam.flat().every((z) => vybor.includes(z.klyuch.split('#')[0])),
     );
     /* Чисел хватает: каждому типу нужно не больше наборов, чем у него есть
-       (у перенесённых задач — один набор, у остальных — три). */
+       (у всех типов сейчас по три). */
     const naborov = new Map(TIPY_18.map((t) => [t.id, t.varianty.length]));
     const hvataet = p.sostav.every((x) => x.n * p.variants <= naborov.get(x.id));
     const kluchi = a.poVariantam.flat().map((z) => z.klyuch);
