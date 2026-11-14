@@ -80,6 +80,8 @@ export interface EkranZadachiProps {
    * Значение и «Проверить» — те же: value держит выбранный вариант.
    */
   pole?: ReactNode;
+  /** Можно ли проверять: у своего поля из нескольких частей (по умолчанию — значение не пустое). */
+  gotovo?: boolean;
   /**
    * Условие — текст задачи, а не одно выражение: набирается обычным
    * кеглем по левому краю (у №8 выражение стоит крупно по центру).
@@ -127,10 +129,11 @@ export function EkranZadachi({
   varianty = null,
   poyasnenieHtml,
   pole: svoePole,
+  gotovo,
 }: EkranZadachiProps) {
   const pole = useRef<HTMLSpanElement>(null);
   const otvechen = sostoyanie === 'verno' || sostoyanie === 'razbor';
-  const ready = value.trim() !== '';
+  const ready = gotovo ?? value.trim() !== '';
   const input = () => pole.current?.querySelector('input') ?? null;
 
   /* Новая задача — курсор в поле (на телефоне клавиатура сама не

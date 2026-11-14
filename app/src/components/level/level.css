@@ -1,0 +1,309 @@
+/* Уровень экзамена: переключатель в шапке, вкладки над заголовком и
+   списком заданий, метка у номера и плашка «Это же в базе».
+   Только семантические токены: новых цветов и размеров здесь нет —
+   вид повторяет переключатель частей банка (.part-switch). */
+
+/* ── Переключатель в шапке ── */
+.level-switch {
+  flex: none;
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+.level-switch__seg {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
+}
+.level-switch__seg:hover {
+  background: var(--color-surface-info);
+  color: var(--color-text);
+}
+.level-switch__seg.is-active {
+  background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
+  color: var(--color-text-inverse);
+}
+
+/* ── Вкладки над заголовком и над списком заданий ── */
+.level-tabs {
+  display: inline-flex;
+  max-width: 100%;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  margin-bottom: var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.level-tabs__seg {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
+}
+.level-tabs__seg:hover {
+  background: var(--color-surface-info);
+}
+.level-tabs__seg.is-active {
+  background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+.level-tabs__range {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.level-tabs__seg.is-active .level-tabs__range {
+  background: var(--color-tab-plate);
+  color: var(--color-text-inverse);
+}
+@media (max-width: 767.98px) {
+  /* Длинные подписи («База, задания 1–21») на телефоне делят ширину
+     поровну и переносятся — страница вбок не едет. */
+  .level-tabs {
+    display: flex;
+  }
+  .level-tabs__seg {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: var(--space-2) var(--space-3);
+    text-align: center;
+    white-space: normal;
+  }
+}
+
+/* ── Плашка «Это же в базе» над лентой вкладок ── */
+.eto-zhe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+  font-size: 15px;
+  line-height: 20px;
+}
+.eto-zhe__label {
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.eto-zhe__link {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* ── Переключатель уровня «Профиль | База» в публичной шапке ──
+   Правила стоят здесь, а не в styles/site.css: тот лежит в слое, а
+   стили переключателя — вне слоёв и перебили бы его.
+   Стоит после логотипа. На 1024–1279 px меню и так помещается впритык,
+   поэтому там переключатель компактный, промежутки уже, а на
+   1024–1139 px название рядом со знаком уходит (как у телефона с
+   кнопкой «Войти»): знак остаётся, название читает скринридер.
+   На планшете (768–1023 px) меню в бургере, и переключателю места
+   хватает; на телефоне он уходит в бургер-меню. С кнопкой «Войти»
+   в шапке места в строке на него нет до 1440 px — там он тоже в меню
+   уровня на главной и в бургере. */
+@media (max-width: 767.98px) {
+  .site-head__in .site-head__level {
+    display: none;
+  }
+}
+@media (min-width: 768px) {
+  .site-menu__panel .site-menu__level {
+    display: none;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .site-head__in {
+    gap: var(--space-4);
+  }
+  .site-head__level .level-switch__seg {
+    min-height: 28px;
+    padding: 0 var(--space-2);
+    font-size: 13px;
+  }
+  .site-head__in .site-nav {
+    gap: 14px;
+    margin-left: 0;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1139.98px) {
+  .site-head__in:has(.site-head__level) .logo {
+    gap: 0;
+    font-size: 0;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1439.98px) {
+  .site-head__in:has(.auth-widget__login) .site-head__level.level-switch {
+    display: none;
+  }
+}
+.site-menu__level {
+  align-self: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+/* ── Сборщик варианта: шаг «Уровень экзамена» и экран базы ── */
+.var-uroven {
+  position: relative;
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-2);
+}
+.var-uroven__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 600;
+}
+.var-baza {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.var-baza .var-panel {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+.var-baza__sprava {
+  display: grid;
+  gap: var(--space-5);
+}
+.var-baza__gotovo {
+  font-weight: 600;
+  color: var(--color-text-brand);
+}
+.var-baza__nomera {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.var-baza__nomera a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+  text-decoration: none;
+}
+.var-baza__nomera .is-ready a {
+  border-color: var(--color-border-info);
+  color: var(--color-text);
+}
+.var-baza__no {
+  flex: none;
+  min-width: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.var-baza__name {
+  flex: 1;
+  min-width: 0;
+}
+.var-baza__soon {
+  flex: none;
+  font-size: 12px;
+  line-height: 16px;
+}
+.var-baza__note {
+  max-width: 70ch;
+  color: var(--color-text-secondary);
+}
+.var-baza__format {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+}
+.var-baza__format > div {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.var-baza__format dt {
+  color: var(--color-text-secondary);
+}
+.var-baza__shkala {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.var-baza__shkala th,
+.var-baza__shkala td {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+.var-baza__shkala th {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+@media (max-width: 1023.98px) {
+  .var-baza {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Переключатель в оболочке кабинета ──
+   От 1024px — под логотипом в сайдбаре: в верхней панели рядом с меню
+   разделов ему места нет (на 1024–1365px панель вылезала за экран).
+   Уже 1024px сайдбар свёрнут, меню разделов из панели убрано — там
+   переключатель стоит в панели. */
+.sidebar__level {
+  margin: 0 var(--space-3) var(--space-5);
+  align-self: flex-start;
+}
+@media (min-width: 1024px) {
+  .topbar .topbar__level {
+    display: none;
+  }
+}
+@media (max-width: 1023.98px) {
+  .sidebar .sidebar__level {
+    display: none;
+  }
+}

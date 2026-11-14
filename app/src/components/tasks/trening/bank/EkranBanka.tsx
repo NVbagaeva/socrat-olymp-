@@ -379,6 +379,8 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
         shag,
         reshenie: solutionOpen && !control,
         razbor,
+        zakryta: zakryta || checked === 'right',
+        bezPodskazok: control,
       })}
       {...(razdel.varianty === undefined ? {} : { varianty: razdel.varianty(dannye) })}
       {...(razdel.poyasnenie === undefined || (checked === null && !revealed)
@@ -387,6 +389,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       value={value}
       onValue={onValue}
       {...(pole === null || pole === undefined ? {} : { pole })}
+      {...(razdel.gotov === undefined ? {} : { gotovo: razdel.gotov(dannye, rezhim, value) })}
       sostoyanie={sostoyanie}
       onCheck={check}
       formatHint={format}

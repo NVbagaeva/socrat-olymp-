@@ -202,3 +202,64 @@
     border-radius: 14px;
   }
 }
+
+/* Звёздочки уровня у типа в тренажёре: ★ базовый, ★★ повышенный. */
+.z13-zvezdy {
+  color: var(--amber-600);
+  white-space: nowrap;
+}
+
+/* «С оформлением»: схема, первая строка таблицы, число. */
+.z13-of {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z13-of__shag {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.z13-of__no {
+  margin: 0;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue-700);
+}
+.z13-of__label {
+  margin: 0;
+  font-weight: 650;
+}
+.z13-of__stroka {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--space-2);
+}
+.z13-of__kletka {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-width: 0;
+}
+.z13-of__title {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.z13-of__dano {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: 12px;
+  background: var(--blue-50);
+}
+.z13-of__vvod {
+  width: 100%;
+}
+.z13-of__oshibka {
+  margin: 0;
+  color: var(--terracotta-700);
+  font-size: var(--fs-caption);
+}

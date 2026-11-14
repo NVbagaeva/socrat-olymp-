@@ -1,16 +1,24 @@
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import { VARIANT_HREF, VARIANT_SCREEN } from '@/content/variant';
+import { levelInfo, type Level } from '@/lib/level';
 import './variant-entry.css';
 
 /**
  * Плашка-вход «Собрать вариант» в стиле «голубое стекло»: первый экран
  * главной и над сеткой заданий банка.
  */
-export function VariantEntry({ className }: { className?: string }) {
-  const T = VARIANT_SCREEN.entry;
+export function VariantEntry({
+  className,
+  level = 'profile',
+}: {
+  className?: string;
+  /** Уровень: у базы — плашка «Вариант базы» со своим адресом. */
+  level?: Level;
+}) {
+  const T = level === 'base' ? VARIANT_SCREEN.entryBaza : VARIANT_SCREEN.entry;
   return (
-    <Link className={clsx('var-entry', className)} href={VARIANT_HREF}>
+    <Link className={clsx('var-entry', className)} href={levelInfo(level).variant}>
       <span className="var-entry__ico" aria-hidden="true">
         <svg viewBox="0 0 24 24">
           <path d="M8.5 3.5h8.2l3.3 3.3v10.7a1 1 0 0 1-1 1h-10.5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z" />

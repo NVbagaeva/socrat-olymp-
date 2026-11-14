@@ -423,7 +423,10 @@ const vse = PROTOTIPY_TRENAZHERA_13.map((p) => p.id);
     'прежняя «Определить схему» не открылась',
   );
   const oform = S.prezhnyayaZapis13({ ...zapis.payload, dop: { oformlenie: 'oformlenie' } });
-  check(oform !== null && oform.rezhim === undefined, 'прежняя «С оформлением» не открылась');
+  check(
+    oform?.rezhim === S.REZHIM_OFORMLENIE && B.isPayloadBanka(oform, S.KLYUCH13),
+    'прежняя «С оформлением» не открылась в режиме «С оформлением»',
+  );
 
   /* Самый первый экран №13: { zadachi: [[прототип, seed, …, вид]] }. */
   const pervaya = S.prezhnyayaZapis13({
@@ -442,6 +445,78 @@ const vse = PROTOTIPY_TRENAZHERA_13.map((p) => p.id);
       S.prezhnyayaZapis13(null) === null,
     'мусор принят за прежнюю запись',
   );
+}
+
+/* ── 6. «С оформлением» и уровень ────────────────────────────── */
+{
+  const { sobratZadachu13 } = requireSrc('lib/zadanie13/trenazher/zadacha.ts');
+  const { openText } = requireSrc('lib/zadanie13/secret.ts');
+  const O = requireSrc('lib/zadanie13/trening/oformlenie13.ts');
+  const TIPY = ['A', 'B', 'C', 'D'];
+  let soStrokoy = 0;
+  for (const p of PROTOTIPY_TRENAZHERA_13) {
+    const id = katalog[p.id].f[0] ?? katalog[p.id].a[0];
+    const seed = id.slice(p.id.length + 1);
+    const t = generate(p.id, seed);
+    const zs = sobratZadachu13({ prototypeId: p.id, seed, istochnik: 'bank', vid: 'zadachi' }, 1);
+    const of = JSON.parse(openText(zs.oformlenie, zs.seal));
+    const z = {
+      seal: sealAnswer(t.answer),
+      wrongUnits: wrongUnitValues(t.answer, t.units).map((v) => sealAnswer(v)),
+      sealTip: sealChoice(String(TIPY.indexOf(t.type) + 1)),
+    };
+    /* Верное оформление: схема, клетки первой строки — их верные значения. */
+    const k = Object.fromEntries(
+      (of.stroka?.kletki ?? []).flatMap((kl, i) => {
+        if (kl.seal === null) return [];
+        const x = String(
+          t.tableModel.rows[0][
+            ['start', 'change', 'interest', 'end', 'afterInterest', 'payment'].find(
+              (f) => sealAnswer(t.tableModel.rows[0][f]) === kl.seal,
+            )
+          ] ?? '',
+        );
+        return [[String(i), x.replace('.', ',')]];
+      }),
+    );
+    if (of.stroka !== null) soStrokoy += 1;
+    const otvet = String(t.answer).replace('.', ',');
+    const verno = JSON.stringify({ s: of.shema.correct, k, o: otvet });
+    check(O.gotovOformlenie(of, verno), `${p.id}: верное оформление не готово к проверке`);
+    const r = O.proveritOformlenie(verno, z, of);
+    check(r.kind === 'answer' && r.right, `${p.id}: верное оформление не принято`);
+    const shema = JSON.stringify({ s: (of.shema.correct + 1) % 4, k, o: otvet });
+    const r2 = O.proveritOformlenie(shema, z, of);
+    check(r2.kind === 'answer' && !r2.right, `${p.id}: неверная схема принята`);
+    if (Object.keys(k).length > 0) {
+      const kk = Object.fromEntries(Object.keys(k).map((i) => [i, '1']));
+      const r3 = O.proveritOformlenie(
+        JSON.stringify({ s: of.shema.correct, k: kk, o: otvet }),
+        z,
+        of,
+      );
+      check(r3.kind === 'answer' && !r3.right, `${p.id}: неверные клетки приняты`);
+    }
+    check(
+      !O.gotovOformlenie(of, JSON.stringify({ s: null, k, o: otvet })),
+      `${p.id}: без схемы ответ готов к проверке`,
+    );
+  }
+  check(soStrokoy >= 20, `первая строка таблицы есть только у ${soStrokoy} типов`);
+
+  /* Уровень: у каждого прототипа в каталоге — 1 или 2, как его сложность. */
+  const kat = Object.fromEntries(
+    PROTOTIPY_TRENAZHERA_13.map((p) => [p.id, p.difficulty === 'hard' ? 2 : 1]),
+  );
+  check(Object.values(kat).includes(1) && Object.values(kat).includes(2), 'нет одного из уровней');
+  const { parseVyborBanka } = requireSrc('lib/trening/vybor.ts');
+  check(parseVyborBanka({ uroven: '2' }).uroven === '2', 'уровень не читается из выбора');
+  check(parseVyborBanka({ uroven: 'x' }).uroven === 'vse', 'мусорный уровень принят');
+  check(
+    parseVyborBanka({ rezhim: 'oformlenie' }).rezhim === 'oformlenie',
+    'режим ответа не читается',
+  );
+  check(parseVyborBanka({}).rezhim === '', 'режим ответа по умолчанию не «число»');
 }
 
 /* ── 7. Тексты карты ──────────────────────────────────────────── */
