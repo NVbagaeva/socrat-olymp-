@@ -643,6 +643,132 @@ for (const no of [3, 4, 5]) {
   );
 }
 
+/* ── Шаг 2: №12 (движок графиков) и №13 (генератор, опорные по постоянным id) ── */
+for (const no of [12, 13]) {
+  const kat = katalog(no);
+  check(
+    kat !== null && kat.opornye.length > 0 && kat.trenazher.length > 0,
+    `№${no}: каталог с опорными и тренажёром`,
+  );
+  const tipy = kat.trenazher[0].tipy.slice(0, 2).map((t) => t.id);
+  const blok = kat.opornye[0];
+  const sost = {
+    v: 1,
+    punkty: [
+      { id: 'o', ist: 'opornye', no, blok: blok.slug, zadachi: null, kazhdomu: true },
+      { id: 't', ist: 'trenazher', no, tipy, skolko: 3, kazhdomu: true },
+    ],
+    nastroyki: {},
+  };
+  const ps = await sobratPunkty(sost, new Map([[no, kat]]), ['u1', 'u2'], `zerno-${no}`);
+  /* У №13 опорные по зерну — «каждому свои»; у №12 зерна нет — блок один на всех. */
+  check(
+    no === 13
+      ? ['u1', 'u2'].every(
+          (s) => ps[0].units.filter((u) => u.studentId === s).length === blok.zadachi.length,
+        )
+      : ps[0].units.length === blok.zadachi.length &&
+          ps[0].units.every((u) => u.studentId === null),
+    `№${no}: опорные — полный блок (${ps[0].units.length})`,
+  );
+  check(
+    ['u1', 'u2'].every((s) => ps[1].units.filter((u) => u.studentId === s).length === 3),
+    `№${no}: тренажёр каждому — по 3 (${ps[1].units.length})`,
+  );
+  check(
+    ps
+      .flatMap((p) => p.units)
+      .every((u) =>
+        u.answerKind === 'choice'
+          ? u.view.varianty.some((c) => c.number === u.answer)
+          : normalizeEge(u.answer) === u.answer,
+      ),
+    `№${no}: ключи в записи ЕГЭ или номер варианта`,
+  );
+  check(
+    ps.flatMap((p) => p.units).every((u) => u.razbor.shagi.length > 0),
+    `№${no}: у каждой задачи есть решение`,
+  );
+  check(
+    ps[1].units.every((u) => /^[^|]+\|.+$/.test(u.ref)),
+    `№${no}: ключ задачи тренажёра «шаблон|seed»`,
+  );
+  const odna = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [{ id: 'z', ist: 'zadacha', no, ref: ps[1].units[0].ref, tip: ps[1].units[0].kind }],
+      nastroyki: {},
+    },
+    new Map([[no, kat]]),
+    ['u1'],
+    'odna',
+  );
+  check(
+    odna[0].units[0].questionHtml === ps[1].units[0].questionHtml,
+    `№${no}: конкретная задача по ключу — та же`,
+  );
+}
+{
+  const kat = katalog(12);
+  check(
+    kat.opornye.every((b) => /^[a-z]+\/[\w-]+$/.test(b.slug)),
+    '№12: блок опорных — «подтема/навык»',
+  );
+  const ids = kat.opornye.flatMap((b) => b.zadachi.map((z) => z.id));
+  check(
+    new Set(ids).size === ids.length && ids.every((id) => /^P12/.test(id)),
+    `№12: id опорных постоянные и уникальны (${ids.length})`,
+  );
+  /* С кнопки тренажёра приходит один шаблон, без зерна. */
+  const shablon = kat.bankTrenazhera[0];
+  const s1 = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [{ id: 'z', ist: 'zadacha', no: 12, ref: shablon.k, tip: shablon.p }],
+      nastroyki: {},
+    },
+    new Map([[12, kat]]),
+    ['u1'],
+    's1',
+  );
+  check(
+    s1[0].units.length === 1 && /<svg/.test(s1[0].units[0].questionHtml),
+    '№12: задача по шаблону с кнопки тренажёра — с чертежом',
+  );
+}
+{
+  const kat = katalog(13);
+  const ids = kat.opornye.flatMap((b) => b.zadachi.map((z) => z.id));
+  check(
+    new Set(ids).size === 170 && ids.every((id) => /^o13-\d{2}-\d{2}$/.test(id)),
+    '№13: 170 опорных с постоянными id',
+  );
+  const tip = kat.opornye.find((b) => b.zadachi.some((z) => z.varianty !== undefined));
+  const ps = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [
+        {
+          id: 'o',
+          ist: 'opornye',
+          no: 13,
+          blok: tip.slug,
+          zadachi: [tip.zadachi[0].id],
+          kazhdomu: false,
+        },
+      ],
+      nastroyki: {},
+    },
+    new Map([[13, kat]]),
+    ['u1'],
+    'tip13',
+  );
+  check(
+    ps[0].units.length === 1 && ps[0].units[0].answerKind === 'choice',
+    '№13: «Определи тип» — выбор схемы',
+  );
+}
+
 /* ── Каталог просмотра без ответов; файл ответов сливается обратно при выдаче ── */
 {
   const { katalogLegkiy, resheniyaKatalog, RAZDELY_DZ } = requireSrc('lib/dz/katalog/server.ts');

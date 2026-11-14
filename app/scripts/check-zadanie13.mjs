@@ -772,6 +772,46 @@ for (const [n, extra, want] of tables) {
     if (!ids.includes(id)) problems.push(`банк: прототипа ${id} нет в реестре`);
 }
 
+/* ── Опорные: постоянные id; прежний ключ «блок:номер» ведёт туда же ── */
+{
+  const { BLOKI_13, zadachiBloka, zadachaPoId13, idPoStaromuKlyuchu13 } = requireSrc(
+    'lib/zadanie13/opornye/bloki',
+  );
+  const { SOSTAV_13 } = requireSrc('lib/zadanie13/opornye/sostav');
+  const { zadachaId13, staryyKlyuch13, staryyKlyuchPoId13, itog13 } =
+    requireSrc('lib/zadanie13/progress');
+  const vse = new Set();
+  for (const b of BLOKI_13) {
+    checks += 1;
+    if (SOSTAV_13[b.id] === undefined) problems.push(`опорные ${b.id}: нет в составе (sostav.ts)`);
+    zadachiBloka(b).forEach((z, i) => {
+      const w = `опорные ${b.id}, задача ${i + 1}`;
+      if (!/^o13-\d{2}-\d{2}$/.test(z.id) || !z.id.startsWith(`${b.id}-`))
+        problems.push(`${w}: id «${z.id}»`);
+      if (vse.has(z.id)) problems.push(`${w}: id «${z.id}» повторяется`);
+      vse.add(z.id);
+      if (zadachaId13(b.id, z.no) !== z.id) problems.push(`${w}: id по номеру — не тот`);
+      if (idPoStaromuKlyuchu13(staryyKlyuch13(b.id, z.no)) !== z.id)
+        problems.push(`${w}: старый ключ ведёт не туда`);
+      if (staryyKlyuchPoId13(z.id) !== staryyKlyuch13(b.id, z.no))
+        problems.push(`${w}: старый ключ по id — не тот`);
+      if (zadachaPoId13(z.id)?.blok.id !== b.id) problems.push(`${w}: по id не находится`);
+    });
+  }
+  for (const k of Object.keys(SOSTAV_13)) {
+    if (!BLOKI_13.some((b) => b.id === k)) problems.push(`состав опорных: лишний блок ${k}`);
+  }
+  /* Прогресс: запись под прежним ключом читается, под id — важнее. */
+  checks += 1;
+  const b1 = BLOKI_13[0].id;
+  const staryy = { outcomes: { [staryyKlyuch13(b1, 3)]: 'right' } };
+  if (itog13(staryy, b1, 3) !== 'right')
+    problems.push('прогресс опорных: запись «блок:номер» не читается');
+  const oba = { outcomes: { [staryyKlyuch13(b1, 3)]: 'right', [zadachaId13(b1, 3)]: 'wrong' } };
+  if (itog13(oba, b1, 3) !== 'wrong')
+    problems.push('прогресс опорных: запись под id не главнее прежней');
+}
+
 /* ── Опорные задачи: 17 блоков по 10, ответы открываются ──────── */
 {
   const katex = require('katex');

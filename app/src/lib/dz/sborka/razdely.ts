@@ -94,6 +94,8 @@ export const SBORSHCHIKI: Record<number, () => Promise<SborshchikRazdela>> = {
   3: () => import('./r3').then((m) => m.SBORSHCHIK_3),
   4: () => import('./r4-5').then((m) => m.SBORSHCHIK_4),
   5: () => import('./r4-5').then((m) => m.SBORSHCHIK_5),
+  12: () => import('./r12').then((m) => m.SBORSHCHIK_12),
+  13: () => import('./r13').then((m) => m.SBORSHCHIK_13),
   2: () =>
     import('./r2').then((m) =>
       generatorRazdela({
@@ -156,4 +158,4 @@ export const SBORSHCHIKI: Record<number, () => Promise<SborshchikRazdela>> = {
 };
 
 /** Разделы, где опорные строятся из зерна (для «Каждому свои» без загрузки модуля). */
-export const OPORNYE_IZ_ZERNA: ReadonlySet<number> = new Set([1, 2, 8, 9, 11]);
+export const OPORNYE_IZ_ZERNA: ReadonlySet<number> = new Set([1, 2, 8, 9, 11, 13]);

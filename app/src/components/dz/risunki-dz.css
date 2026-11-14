@@ -33,3 +33,19 @@
   margin: var(--space-2) auto;
   border-radius: var(--radius-md, 12px);
 }
+
+/* №12: чертёж движка graph/ — SVG с размерами в пикселях тянется по месту. */
+.rdz-graf svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* №12: выноска в разборе («Если нужна вся формула» и т. п.). */
+.rdz-vynoska {
+  margin: var(--space-2) 0;
+  padding: var(--space-3);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--color-surface-warm);
+}
