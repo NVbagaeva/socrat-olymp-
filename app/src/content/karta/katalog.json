@@ -1501,17 +1501,23 @@
      "nazvanie": "Многочлены",
      "tipy": [
       "P01",
-      "P02"
+      "P02",
+      "P22",
+      "P23",
+      "P26",
+      "P27"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P01,P02"
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P01,P02,P22,P23,P26,P27"
     },
     {
      "id": "2",
      "nazvanie": "Функции с корнем",
      "tipy": [
-      "P03"
+      "P03",
+      "P24",
+      "P25"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P03"
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P03,P24,P25"
     },
     {
      "id": "3",
@@ -1524,12 +1530,15 @@
     },
     {
      "id": "4",
-     "nazvanie": "Произведение с экспонентой",
+     "nazvanie": "Функции с экспонентой",
      "tipy": [
       "P06",
-      "P07"
+      "P07",
+      "P28",
+      "P29",
+      "P33"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P06,P07"
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P06,P07,P28,P29,P33"
     },
     {
      "id": "5",
@@ -1539,9 +1548,12 @@
       "P09",
       "P10",
       "P11",
-      "P12"
+      "P12",
+      "P30",
+      "P31",
+      "P32"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P08,P09,P10,P11,P12"
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P08,P09,P10,P11,P12,P30,P31,P32"
     },
     {
      "id": "6",
@@ -1549,9 +1561,11 @@
      "tipy": [
       "P13",
       "P14",
-      "P15"
+      "P15",
+      "P34",
+      "P35"
      ],
-     "trenazher": "/zadaniya/21/trenazher/?tipy=P13,P14,P15"
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P13,P14,P15,P34,P35"
     },
     {
      "id": "7",
