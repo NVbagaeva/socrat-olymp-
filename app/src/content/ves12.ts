@@ -6,6 +6,7 @@
  */
 
 import type { FunctionTypeId } from '@/data/functionTypes';
+import { nomerRazdela } from '@/content/struktura';
 
 /** Карточки входа в меню «Все разделы» подтемы и подпись вкладки «Зачётная работа» №12. */
 export const vesRazdel = {
@@ -48,7 +49,7 @@ export const sostavText = {
 };
 
 export const zachyotText = {
-  pageTitle: 'Зачётная работа по заданию №12',
+  pageTitle: `Зачётная работа по заданию №${nomerRazdela('grafiki-funkciy')}`,
   lead: 'Контроль по всем типам функций. Подсказок и разборов в работе нет.',
   steps: ['Что включить', 'Формат', 'Оформление и выдача'],
   next: 'Далее',
@@ -166,14 +167,14 @@ export const examText = {
 export const trenazherAllText = {
   pageTitle: 'Тренажёр по всем типам функций',
   lead:
-    'Задачи №12 всех семи типов функций: выберите типы, сложность и источник — тренировка ' +
+    `Задачи №${nomerRazdela('grafiki-funkciy')} всех семи типов функций: выберите типы, сложность и источник — тренировка ` +
     'соберётся сразу. Ссылку с фильтрами можно отправить ученику.',
 };
 
 export const generatorAllText = {
   pageTitle: 'Генератор по всем типам функций',
   lead:
-    'Лист для отработки по нескольким типам №12: задачи выбранных прототипов, рамки теории ' +
+    `Лист для отработки по нескольким типам №${nomerRazdela('grafiki-funkciy')}: задачи выбранных прототипов, рамки теории ` +
     'и разобранные примеры по каждому типу. Лист ученика и лист учителя — из одного набора.',
   steps: {
     types: { no: '1', title: 'Типы функций', lead: 'Какие типы и прототипы войдут в лист' },
@@ -198,7 +199,7 @@ export const generatorAllText = {
   summaryTitle: 'Лист',
   note: 'Задачи открытого банка ФИПИ и аналоги тех же прототипов с новыми числами.',
   kind: 'Лист для отработки',
-  runner: 'Задание 12 · Графики функций',
+  runner: `Задание ${nomerRazdela('grafiki-funkciy')} · Графики функций`,
   sheetTitle: 'Графики функций',
   exampleLabel: 'Разобранный пример',
   recapTitle: (type: string) => `Запомни: ${type.toLowerCase()}`,

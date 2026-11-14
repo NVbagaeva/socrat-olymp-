@@ -5,11 +5,12 @@
  */
 
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
+import { nomerRazdela } from '@/content/struktura';
 
 export const GENERATOR9_TEXTS = {
-  section: '№9 · Производная и первообразная',
+  section: `№${nomerRazdela('proizvodnaya')} · Производная и первообразная`,
   sheet: {
-    chip: 'Задание 9',
+    chip: `Задание ${nomerRazdela('proizvodnaya')}`,
     title: 'Производная и первообразная',
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',

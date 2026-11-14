@@ -5,6 +5,7 @@
  */
 
 import katalog from '@/content/kabinet/katalog.json';
+import { estRazdel, nomerRazdela } from '@/content/struktura';
 
 export interface CatalogPrototype {
   /** «<номер>:<id в движке>»: «7:P01», «12:12Q.A». */
@@ -44,9 +45,13 @@ export function prototypeTitle(code: string | null): string | null {
   return catalogTask(no)?.prototypes.find((p) => p.code === code)?.title ?? code;
 }
 
-/** «№07»: номер так, как он написан в банке. */
+/**
+ * «№07»: номер так, как он написан в банке. no — номер хранения раздела
+ * (ключ каталога), на экран идёт номер ЕГЭ.
+ */
 export function taskLabel(no: number): string {
-  return `№${String(no).padStart(2, '0')}`;
+  const nomer = estRazdel(no) ? nomerRazdela(no) : no;
+  return `№${String(nomer).padStart(2, '0')}`;
 }
 
 export { taskHrefByNo, taskNoOfScope, trainerHref } from './scope';

@@ -11,9 +11,10 @@ import { OPORNYE } from './opornye';
 import type { TutorMaterial } from './sections';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from '@/content/struktura';
 
 export const PROIZVODNAYA = {
-  no: '09',
+  no: nomerDvumya('proizvodnaya'),
   slug: '9',
   title: taskName('9'),
   lead: 'Пять групп прототипов: физический смысл, касательная, график функции, график производной и первообразная. Числа и графики в каждой задаче свои.',
@@ -193,7 +194,7 @@ export const OPORNYE_9 = {
 
 export const REPETITORY_9 = {
   title: 'Для репетиторов',
-  lead: 'Методические заметки по заданию №9, порядок тренировки и таблица прототипов. Печатный лист с решениями собирает генератор.',
+  lead: `Методические заметки по заданию №${nomerRazdela('proizvodnaya')}, порядок тренировки и таблица прототипов. Печатный лист с решениями собирает генератор.`,
   metodika: {
     title: 'Как объяснять',
     items: [

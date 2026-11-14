@@ -18,6 +18,7 @@ import type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 import type { TheorySection } from './theoryQuadratic';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { nomerRazdela } from '@/content/struktura';
 type Section = TheorySection<RationalTheorySceneId>;
 
 /* ── 1. Откуда название ─────────────────────────────────────── */
@@ -157,7 +158,7 @@ const asymptotes: Section = {
 
 const shifts: Section = {
   id: 'hyperbola-shifts',
-  lead: 'Любая гипербола из задания №12 — это $y = \\dfrac{k}{x}$, сдвинутая вверх-вниз и влево-вправо. Сдвиг видно по асимптотам. Пунктирная кривая на чертежах — гипербола до сдвига.',
+  lead: `Любая гипербола из задания №${nomerRazdela('grafiki-funkciy')} — это $y = \\dfrac{k}{x}$, сдвинутая вверх-вниз и влево-вправо. Сдвиг видно по асимптотам. Пунктирная кривая на чертежах — гипербола до сдвига.`,
   cards: [
     {
       id: 'up',
@@ -305,7 +306,7 @@ const withLine: Section = {
 
 const examTypes: Section = {
   id: 'hyperbola-exam',
-  lead: 'В задании №12 с гиперболой встречаются четыре вопроса. Ответ всегда целый или конечная десятичная дробь.',
+  lead: `В задании №${nomerRazdela('grafiki-funkciy')} с гиперболой встречаются четыре вопроса. Ответ всегда целый или конечная десятичная дробь.`,
   cards: [
     {
       id: 'value',

@@ -7,9 +7,10 @@
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from '@/content/struktura';
 
 export const ZADANIE13 = {
-  no: '13',
+  no: nomerDvumya('ekonomika'),
   slug: '13',
   title: taskName('13'),
   lead: 'Кредиты и вклады: дифференцированный платёж, аннуитет, вклады. Часть 1, краткий ответ, 1 балл.',
@@ -70,7 +71,7 @@ export const OPORNYE_13 = {
 
 export const TRENAZHER_13 = {
   title: 'Тренажёр',
-  lead: 'Задачи №13 подряд, с паузой и итогами. Тренировка сохраняется: можно уйти в теорию и вернуться.',
+  lead: `Задачи №${nomerRazdela('ekonomika')} подряд, с паузой и итогами. Тренировка сохраняется: можно уйти в теорию и вернуться.`,
   chto: 'Что тренируем',
   karty: [
     { id: 'A', label: 'Дифференцированный платёж', note: 'долг уменьшается равномерно' },
@@ -167,7 +168,7 @@ export interface TipOZadanii13 {
 }
 
 export const O_ZADANII_13 = {
-  title: 'Задание 13. Экономическая задача',
+  title: `Задание ${nomerRazdela('ekonomika')}. Экономическая задача`,
   /** Чипы под заголовком: место в КИМ, формат ответа, балл. */
   chipy: ['часть 1', 'краткий ответ', '1 балл'],
   lead: 'Кредиты и вклады: по условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. В ответ — одно число в тех единицах, что просит условие.',
@@ -259,5 +260,5 @@ export const O_ZADANII_13 = {
       { title: 'Генератор', text: 'Домашка, самостоятельная, зачёт.', tail: 'generator/' },
     ],
   },
-  optimizaciya: 'Задачи на оптимизацию — отдельное задание №17 во второй части. Раздел скоро.',
+  optimizaciya: `Задачи на оптимизацию — отдельное задание №${nomerRazdela('optimizaciya')} во второй части. Раздел скоро.`,
 } as const;

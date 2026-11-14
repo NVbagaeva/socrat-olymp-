@@ -5,6 +5,7 @@
  */
 
 import type { Ton3 } from './gruppy';
+import { nomerRazdela, slovoChasti } from '../struktura';
 
 /** Факты о задании — один источник для «О задании» и для шапки раздела. */
 const BALL3 = '1';
@@ -17,7 +18,7 @@ export const TABLETKI3 = {
 } as const;
 
 export const SHAPKA3 = {
-  nadzagolovok: 'Задание №3 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('stereometriya')} · ${slovoChasti('stereometriya')}`,
   zagolovok: 'Стереометрия: одна фигура — одно число',
   lead: 'Проверяется, видите ли вы фигуру в пространстве и знаете ли формулы объёмов и площадей. Считать почти нечего: главное — найти нужный отрезок или нужную долю.',
   fakty: [
