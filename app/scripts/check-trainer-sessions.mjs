@@ -350,6 +350,32 @@ async function start8(page, timeout) {
     .click(timeout === undefined ? {} : { timeout });
 }
 
+/** №4 (и №5 после редизайна): карточка «Все методы вперемешку» — десять задач. */
+async function start45(page, timeout) {
+  await page
+    .getByRole('button', { name: /^Все методы вперемешку/ })
+    .first()
+    .click(timeout === undefined ? {} : { timeout });
+}
+
+/** «Узнай метод» — четвёртая карточка режима. */
+async function startUznay45(page, timeout) {
+  await page
+    .getByRole('button', { name: /^Узнай метод/ })
+    .first()
+    .click(timeout === undefined ? {} : { timeout });
+}
+
+/** Самая большая тренировка №4: «Выбрать методы» → все типы → «Без конца». */
+async function chooseAll45(page) {
+  await page
+    .getByRole('button', { name: /^Выбрать методы/ })
+    .first()
+    .click();
+  await page.getByRole('button', { name: 'Выбрать все', exact: true }).click();
+  await page.getByRole('button', { name: 'Без конца', exact: true }).click();
+}
+
 /** Самая большая тренировка №8: «Выбрать темы» → все типы → «Без конца»; дальше — «Начать тренировку». */
 async function chooseAll8(page) {
   await page
@@ -470,13 +496,26 @@ const TRAINERS = [
     configButton: /^Все типы вперемешку/,
     all: chooseAll8,
   },
-  { name: '№4', url: '/zadaniya/4/trenazher/', scope: '4', answer: answer45, rep: true },
+  {
+    name: '№4',
+    url: '/zadaniya/4/trenazher/',
+    scope: '4',
+    answer: answer45,
+    /* «Стеклянная сцена»: четыре режима карточками, как у №7 и №6. */
+    start: start45,
+    configButton: /^Все методы вперемешку/,
+    all: chooseAll45,
+    rep: true,
+  },
   { name: '№5', url: '/zadaniya/5/trenazher/', scope: '5', answer: answer45 },
   {
     name: '№4 «Узнай метод»',
-    url: '/zadaniya/4/trenazher/uznay-metod/',
+    url: '/zadaniya/4/trenazher/',
     scope: '4',
     answer: answer45,
+    /* Четвёртая карточка режима. */
+    start: startUznay45,
+    configButton: /^Узнай метод/,
   },
   /* №3: один тренажёр на всё задание — вкладка раздела стереометрии. */
   {
@@ -695,10 +734,15 @@ async function give(page, answer) {
       .click();
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
   } else {
-    /* «Узнай метод»: нажатие на метод — это и есть ответ. */
+    /* «Узнай метод»: нажатие на метод — это и есть ответ (прежний экран
+       .z4-picker, «Стеклянная сцена» — .z45-metod-knopka). */
     await body
-      .locator('.z4-picker__btn')
-      .filter({ has: page.locator('.z4-picker__name', { hasText: answer.method }) })
+      .locator('.z4-picker__btn, .z45-metod-knopka')
+      .filter({
+        has: page.locator('.z4-picker__name, .z45-metod-knopka__nazvanie', {
+          hasText: answer.method,
+        }),
+      })
       .first()
       .click();
   }
@@ -724,7 +768,9 @@ async function wrongOf(page, right) {
     const numbers = await page.locator(`${BODY} ${VARIANT_NO}`).allTextContents();
     return { option: numbers.map((item) => item.trim()).find((item) => item !== right.option) };
   }
-  const names = await page.locator(`${BODY} .z4-picker__name`).allTextContents();
+  const names = await page
+    .locator(`${BODY} .z4-picker__name, ${BODY} .z45-metod-knopka__nazvanie`)
+    .allTextContents();
   return { method: names.map((item) => item.trim()).find((item) => item !== right.method) };
 }
 
@@ -757,7 +803,9 @@ async function shownAnswer(page, like) {
       option: (await chosen.count()) === 0 ? null : (await chosen.first().textContent()).trim(),
     };
   }
-  const pressed = page.locator(`${BODY} .z4-picker__btn[aria-pressed="true"] .z4-picker__name`);
+  const pressed = page.locator(
+    `${BODY} .z4-picker__btn[aria-pressed="true"] .z4-picker__name, ${BODY} .z45-metod-knopka[aria-pressed="true"] .z45-metod-knopka__nazvanie`,
+  );
   return {
     method: (await pressed.count()) === 0 ? null : (await pressed.first().textContent()).trim(),
   };
