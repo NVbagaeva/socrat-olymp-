@@ -137,8 +137,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z10',
     title: '№10 «Физический смысл»',
     keys: [
-      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts). */
+      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts): тот же ключ
+         и в тренажёре «Стеклянной сцены» (lib/zadanie10/trening/progress.ts). */
       'budetege:zadanie-10:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «10»). */
+      'budetege:trainer:10:session',
     ],
   },
   {

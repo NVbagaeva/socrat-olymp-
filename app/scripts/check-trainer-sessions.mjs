@@ -62,6 +62,7 @@
      №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
      №6       — то же из lib/zadanie6 (общий тренажёр по банку, как у №7)
                 (в записи — ключи задач банка, без ответа);
+     №10      — то же из lib/zadanie10 (общий тренажёр по банку);
      №1       — тот же общий тренажёр: ключ «p05|b12» → razreshit и
                 sostavZadachi движка планиметрии (lib/planimetriya);
      №9       — generate(прототип, seed).otvet из lib/proizvodnaya (тот же
@@ -253,6 +254,18 @@ function answer6(payload, at) {
   const z = BANK.find((item) => item.id === task.id);
   if (z === undefined) {
     throw new Error(`№6: нет задачи ${task.id}`);
+  }
+  return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
+}
+
+/** №10: как у №7 и №6 — ключи задач банка {id, p}; ответ — решатель прототипа. */
+function answer10(payload, at) {
+  const { prototype } = requireSrc('lib/zadanie10/prototypes/index');
+  const { BANK } = requireSrc('lib/zadanie10/bank/index');
+  const task = payload.tasks[at];
+  const z = BANK.find((item) => item.id === task.id);
+  if (z === undefined) {
+    throw new Error(`№10: нет задачи ${task.id}`);
   }
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
@@ -482,6 +495,16 @@ const TRAINERS = [
     scope: '6',
     answer: answer6,
     /* Тот же общий тренажёр по банку, что у №7. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
+  },
+  {
+    name: '№10',
+    url: '/zadaniya/10/trenazher/',
+    scope: '10',
+    answer: answer10,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
     start: start8,
     configButton: /^Все типы вперемешку/,
     all: chooseAll8,

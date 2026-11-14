@@ -508,7 +508,22 @@ async function perehod(browser, engine, size) {
     const tab = page.locator('.topic-tabs-row--panel [role="tab"]', { hasText: item.tab });
     let clicked = false;
     for (let attempt = 0; attempt < 5 && !clicked; attempt += 1) {
-      await tab.click();
+      /* Переход уже пошёл (адрес сменился) — второй раз не жмём: страница
+         могла уехать, и панель на миг скрыта. У №12 вкладка меняется на
+         том же адресе — там только подсветка. */
+      if (
+        attempt > 0 &&
+        item.path !== item.url &&
+        (await page.evaluate(() => window.location.pathname)) === item.path
+      ) {
+        clicked = true;
+        break;
+      }
+      try {
+        await tab.click({ timeout: 3000 });
+      } catch {
+        /* панель на миг скрыта — проверим ещё раз */
+      }
       try {
         await page.waitForFunction(
           (name) =>
@@ -524,9 +539,20 @@ async function perehod(browser, engine, size) {
       }
     }
     check(clicked, `${where}: вкладка не открылась`);
-    await page.waitForTimeout(1200);
-    const z = await zamer(page);
-    const pathname = await page.evaluate(() => window.location.pathname);
+    /* Вкладка подсвечивается сразу, а новая страница приезжает позже:
+       тяжёлая теория (№11, №10) в WebKit рисуется 2–3 с, и лента подводит
+       к началу вкладки только после этого (useStickyTabs, PENDING_MS).
+       Ждём нужного положения до 8 с, проверяем — последнее. */
+    let z = await zamer(page);
+    let pathname = '';
+    for (let waited = 0; waited < 8000; waited += 200) {
+      await page.waitForTimeout(200);
+      z = await zamer(page);
+      pathname = await page.evaluate(() => window.location.pathname);
+      const naMeste =
+        z.contentTop !== null && z.contentTop >= z.line - 1 && z.contentTop <= z.line + 40;
+      if (pathname === item.path && z.shown && naMeste && waited >= 1000) break;
+    }
     check(pathname === item.path, `${where}: адрес ${pathname} вместо ${item.path}`);
     check(z.shown, `${where}: после перехода панели нет`);
     check(
