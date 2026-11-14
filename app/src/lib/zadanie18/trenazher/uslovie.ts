@@ -43,8 +43,11 @@ export const POSTROENIYA_18: Readonly<Record<string, Postroeniya18>> = {
   },
   /* Общий угол A — подсказка к методу. */
   'obshchiy-ugol': { skryt: ['uA'] },
-  /* В условии — угол OAC: радиус OC и равенство радиусов — решение. */
-  'ok-ortocentr': { skryt: ['OC'], vyvod: ['OA', 'OC'] },
+  /* O и концы высоты E, F в условии не названы: высота — данное, её точки — нет. */
+  'ravnobok-perp': { skryt: ['t-O', 't-E', 't-F'] },
+  /* В условии — угол OAC: радиус OC и равенство радиусов — решение;
+     основания высот A₁, B₁ вводит решение (высоты видны — без букв). */
+  'ok-ortocentr': { skryt: ['OC', 't-A_1', 't-B_1'], vyvod: ['OA', 'OC'] },
   /* Радиус в точку C, прямые углы касания, точка H — решение. */
   'ks-dve-kasatelnye': { skryt: ['OC', 'pB', 'pC', 't-H'], vyvod: ['AB', 'AC'] },
   /* KO = OL — то, что доказывается. */
@@ -66,6 +69,15 @@ export const POSTROENIYA_18: Readonly<Record<string, Postroeniya18>> = {
   /* Треугольник средних линий — построение решения. */
   'ser-vys': { skryt: ['A1B1', 'B1C1', 'C1A1'], vyvod: ['A1B1'] },
 };
+
+/**
+ * Условия в формулировке ФИПИ (опорные задачи 656–669), где точки
+ * чертежа названы не буквами: «основания трапеции равны 4 и 9», «квадрат
+ * с центром O». Тексты ФИПИ не меняются; буквы на чертеже — для решения,
+ * а на листе без «Чертежа к условию» чертежа нет. Проверка букв чертежа
+ * по тексту (scripts/check-chertezhi-18.mjs) их пропускает.
+ */
+export const TEKST_FIPI_BEZ_BUKV_18: readonly string[] = ['diag-trap', 'kvadraty', 'kv-gip'];
 
 /** Сцена с чертежом условия: построения решения скрыты, засечки-выводы помечены. */
 export function chertezhUsloviya18(tip: string, sk: ZhivayaSkhema): ZhivayaSkhema {

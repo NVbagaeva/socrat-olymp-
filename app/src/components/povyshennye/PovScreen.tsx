@@ -86,9 +86,11 @@ function printHref(
   v: number,
   list: (typeof LISTY)[number],
   mesto2 = true,
+  risunki2 = false,
 ): string {
   const q = new URLSearchParams({ kod: r.kod(k), v: String(v), list });
   if (!mesto2) q.set('m2', '0');
+  if (risunki2) q.set('ch2', '1');
   return `${PRINT_PATH}?${q.toString()}`;
 }
 
@@ -134,6 +136,8 @@ export function PovScreen({ razdel = 'pov' }: { razdel?: keyof typeof RAZDELY_EK
   const [otkryt, setOtkryt] = useState<number | null>(null);
   const [pechat, setPechat] = useState(false);
   const [mesto2, setMesto2] = useState(true);
+  /* «Чертёж к условию» части 2 на листе ученика: по умолчанию — без чертежа. */
+  const [risunki2, setRisunki2] = useState(false);
   const [info, setInfo] = useState(false);
 
   const nashi = useMemo(() => (works ?? []).filter((w) => r.nomer(w.code) !== null), [works, r]);
@@ -290,6 +294,25 @@ export function PovScreen({ razdel = 'pov' }: { razdel?: keyof typeof RAZDELY_EK
             ))}
           </div>
         ) : null}
+        {pechat && c.chast2 ? (
+          <div className="pov-seg pov-print__mesto">
+            <span className="pov-print__label" id={`pov-ch2-${c.k}`}>
+              {T.card.risunki2.label}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={risunki2}
+              aria-labelledby={`pov-ch2-${c.k}`}
+              title={T.card.risunki2.note}
+              className={clsx('pov-seg__btn', risunki2 && 'is-on')}
+              data-testid="pov-risunki2"
+              onClick={() => setRisunki2(!risunki2)}
+            >
+              {risunki2 ? T.card.risunki2.da : T.card.risunki2.net}
+            </button>
+          </div>
+        ) : null}
         {pechat ? (
           <table className="pov-print__table">
             <tbody>
@@ -299,7 +322,7 @@ export function PovScreen({ razdel = 'pov' }: { razdel?: keyof typeof RAZDELY_EK
                   {LISTY.map((l) => (
                     <td key={l}>
                       <a
-                        href={printHref(r, c.k, v, l, mesto2)}
+                        href={printHref(r, c.k, v, l, mesto2, risunki2)}
                         target="_blank"
                         rel="noopener"
                         aria-label={`${T.card.printFor(r.versiya(c.k, v))}: ${T.card.sheets[l]}`}

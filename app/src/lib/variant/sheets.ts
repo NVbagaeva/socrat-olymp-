@@ -435,15 +435,17 @@ function blocksRazbor(
 /** Часть 2 на листе ученика: по странице на задание или без места для решения. */
 export type Mesto2 = 'stranica' | 'net';
 
-function card2(z: Chast2Zadacha) {
+/** Карточка задания части 2; sRisunkom: false — условие без чертежа (лист ученика). */
+function card2(z: Chast2Zadacha, sRisunkom = true) {
+  const risunok = sRisunkom ? z.risunok : null;
   return {
     no: z.no,
     id: `c2-${z.no}`,
     badge: ballText(MAX_BALL[z.no]),
     questionHtml: uslovieHtml(z.uslovie),
     options: null,
-    figureSvg: z.risunok,
-    figureWidth: z.risunok === null ? undefined : 60,
+    figureSvg: risunok,
+    figureWidth: risunok === null ? undefined : 60,
     figureBelow: false,
     solutionHtml: null,
     answerLine: false,
@@ -469,7 +471,11 @@ function part2Head(): string {
  * стоит на одной странице с заголовком части. «Без места» — задания
  * подряд.
  */
-function blocksUchenik2(zadachi: readonly Chast2Zadacha[], mesto: Mesto2): unknown[] {
+function blocksUchenik2(
+  zadachi: readonly Chast2Zadacha[],
+  mesto: Mesto2,
+  risunki: boolean,
+): unknown[] {
   return [
     {
       head: false,
@@ -477,7 +483,9 @@ function blocksUchenik2(zadachi: readonly Chast2Zadacha[], mesto: Mesto2): unkno
       note: '',
       leadItems: [part2Head()],
       tasks: zadachi.map((z, i) =>
-        mesto === 'stranica' ? { ...card2(z), page: true, pageBreak: i > 0 } : card2(z),
+        mesto === 'stranica'
+          ? { ...card2(z, risunki), page: true, pageBreak: i > 0 }
+          : card2(z, risunki),
       ),
     },
   ];
@@ -613,6 +621,12 @@ export interface VariantSheetOptions {
   chast2?: (index: number) => readonly Chast2Zadacha[] | null;
   /** Часть 2 на листе ученика: по странице на задание (по умолчанию) или без места. */
   mesto2?: Mesto2;
+  /**
+   * «Чертёж к условию» части 2 (задания 15 и 18) на листе ученика. Нет —
+   * условия без чертежа: чертёж ученик делает сам, это часть решения.
+   * У учителя и в разборе чертёж есть всегда.
+   */
+  risunki2?: boolean;
 }
 
 /** Описание документа для `buildDocument` (lib/sheet/sheet.js). */
@@ -643,7 +657,9 @@ export function variantSheetSpec(
         kind === 'uchenik'
           ? [
               ...blocksUchenik(v.tasks, meta, opts.space, pl),
-              ...(c2 === null ? [] : blocksUchenik2(c2, opts.mesto2 ?? 'stranica')),
+              ...(c2 === null
+                ? []
+                : blocksUchenik2(c2, opts.mesto2 ?? 'stranica', opts.risunki2 === true)),
             ]
           : kind === 'uchitel'
             ? [

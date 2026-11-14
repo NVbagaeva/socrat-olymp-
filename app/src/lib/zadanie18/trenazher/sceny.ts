@@ -25,7 +25,7 @@ import * as N from '@/lib/zadanie18/opornye/novye';
 import { SCENY_DOP } from './dop';
 import { chertezhUsloviya18 } from './uslovie';
 import { vidimye18 } from './vidimye';
-import { sPodpisyamiIz } from '@/lib/skhemy/vidimye';
+import { sPodpisyamiIz, vidimyeSoSmyslom } from '@/lib/skhemy/vidimye';
 
 export type Parametry = Readonly<Record<string, number>>;
 
@@ -62,8 +62,18 @@ export function tochkiBisPar(p: Parametry) {
   const c = p.AB!;
   const b = p.AC!;
   const A: T2 = [0, 0];
-  const B: T2 = [c, 0];
-  const C: T2 = [b * Math.cos(70 * RAD), b * Math.sin(70 * RAD)];
+  /* Длинная из сторон AB, AC — основанием: при AC = 3·AB треугольник
+     на боку — узкая щель (∠A = 70° в обоих случаях). */
+  const [B, C]: [T2, T2] =
+    b > c
+      ? [
+          [c * Math.cos(70 * RAD), c * Math.sin(70 * RAD)],
+          [b, 0],
+        ]
+      : [
+          [c, 0],
+          [b * Math.cos(70 * RAD), b * Math.sin(70 * RAD)],
+        ];
   const L = lerp(B, C, c / (b + c));
   const M = lerp(C, A, dist(C, L) / dist(C, B));
   return { A, B, C, L, M };
@@ -176,14 +186,15 @@ export function tochkiRavnobokPerp(p: Parametry) {
 
 /* ── 11. Менелай в треугольнике ABL ──────────────────────────── */
 
-export function tochkiMenelayPl() {
+export function tochkiMenelayPl(p: Parametry = {}) {
   /* Форма — для читаемости: отношения частей от неё не зависят, а AL
-     не сливается с AC (∠LAC > 15°). */
+     не сливается с AC (∠LAC > 15°). dolyaL — где на чертеже стоит L
+     (видимые параметры: часть «y» при BL : LC = 3 : 1 иначе коротка). */
   const A: T2 = [0, 0];
-  const B: T2 = [3.5, 8];
+  const B: T2 = [2, 7];
   const C: T2 = [8, 0];
   const K = lerp(A, B, 1 / 3);
-  const L = lerp(B, C, 3 / 4);
+  const L = lerp(B, C, p.dolyaL ?? 3 / 4);
   return { A, B, C, K, L, P: intersect(A, L, C, K) ?? L };
 }
 
@@ -510,7 +521,7 @@ const SCENY: Readonly<Record<string, Postroenie>> = {
     ]);
   },
   'menelay-pl': (p) => {
-    const t0 = tochkiMenelayPl();
+    const t0 = tochkiMenelayPl(p);
     return nepodvizhnaya('tr-menelay-pl', t0, (t) => [
       /* Площадь ABC дана: вся фигура — region. */
       mnog('t-reg', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'region' }),
@@ -699,7 +710,7 @@ export function opornayaVidimaya18(
   tip: string,
   p: Parametry,
 ): ZhivayaSkhema {
-  const g = vidimye18(tip, p);
+  const g = vidimyeSoSmyslom(p, vidimye18(tip, p), (x) => scenaPoParametram(tip, x));
   if (g === p) return tochnaya;
   return sPodpisyamiIz(tochnaya, { ...tochnaya, nachalo: scenaPoParametram(tip, g).nachalo });
 }
@@ -715,13 +726,15 @@ export function scena18Tochno(tip: string, p: Parametry): ZhivayaSkhema {
 
 /**
  * Чертёж задачи тренажёра: тип и параметры варианта. Геометрия — по
- * видимым параметрам (vidimye.ts: крайние пропорции сглажены), числа
+ * видимым параметрам (vidimye.ts: крайние пропорции сглажены; если
+ * сжатие меняет смысл чертежа — тупой угол, касание, порядок точек, —
+ * сжатие мягче: vidimyeSoSmyslom), числа
  * подписей — настоящие. Без подсветки — чертёж условия (uslovie.ts:
  * построения решения скрыты); у учителя (Sostoyanie.uchitel) и при
  * подсветке — с построениями.
  */
 export function scena18(tip: string, p: Parametry): ZhivayaSkhema {
-  const g = vidimye18(tip, p);
+  const g = vidimyeSoSmyslom(p, vidimye18(tip, p), (x) => scenaPoParametram(tip, x));
   const tochnaya = scenaPoParametram(tip, p);
   const sk = g === p ? tochnaya : sPodpisyamiIz(tochnaya, scenaPoParametram(tip, g));
   return chertezhUsloviya18(tip, sk);

@@ -36,7 +36,7 @@ function ugolMezhdu(v, a, b) {
  * kadr — кадр схемy, vidim(el) — виден ли элемент, e — raskladka.
  * Отдаёт мерки и «где» — что именно наименьшее.
  */
-export function meryChertezha(kadr, vidim, e, W, shirinaMm) {
+export function meryChertezha(kadr, vidim, e, W, shirinaMm, H = 250, pole = 24) {
   const mm = shirinaMm / W;
   const v = (p) => e.preob.vEkran(p);
   const els = kadr.elementy.filter(vidim);
@@ -62,7 +62,13 @@ export function meryChertezha(kadr, vidim, e, W, shirinaMm) {
       krugi.push({ id: el.id, r });
     } else if (el.vid === 'tochka') vz(v(el.p));
   }
-  const razmer = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 1);
+  const bw = Math.max(...xs) - Math.min(...xs);
+  const bh = Math.max(...ys) - Math.min(...ys);
+  const razmer = Math.max(bw, bh, 1);
+  /* Заполнение кадра (без полей под подписи): меньшая из долей по ширине
+     и по высоте. Фигура вписана в кадр — по одной стороне она во всю
+     ширину; узкая высокая фигура на листе выходит мелкой. */
+  const zapolnenie = Math.min(bw / (W - 2 * pole), bh / (H - 2 * pole));
 
   /* Окружности. */
   let minR = null;
@@ -95,7 +101,8 @@ export function meryChertezha(kadr, vidim, e, W, shirinaMm) {
       const t = otrezki[j];
       const proby = [];
       for (const p of [s.a, s.b]) {
-        for (const q of [t.a, t.b]) if (blizko(p, q)) proby.push([p, s.a === p ? s.b : s.a, t.a === q ? t.b : t.a]);
+        for (const q of [t.a, t.b])
+          if (blizko(p, q)) proby.push([p, s.a === p ? s.b : s.a, t.a === q ? t.b : t.a]);
         if (naOtrezke(p, t.a, t.b) && !blizko(p, t.a) && !blizko(p, t.b)) {
           const dal = s.a === p ? s.b : s.a;
           proby.push([p, dal, t.a], [p, dal, t.b]);
@@ -117,7 +124,9 @@ export function meryChertezha(kadr, vidim, e, W, shirinaMm) {
   }
 
   /* Точки с подписями. */
-  const imennye = els.filter((el) => el.vid === 'tochka' && el.imya).map((el) => ({ imya: el.imya, p: v(el.p) }));
+  const imennye = els
+    .filter((el) => el.vid === 'tochka' && el.imya)
+    .map((el) => ({ imya: el.imya, p: v(el.p) }));
   let minTochki = null;
   for (let i = 0; i < imennye.length; i += 1)
     for (let j = i + 1; j < imennye.length; j += 1) {
@@ -126,5 +135,15 @@ export function meryChertezha(kadr, vidim, e, W, shirinaMm) {
         minTochki = { mm: d, gde: `${imennye[i].imya}–${imennye[j].imya}` };
     }
 
-  return { razmer, razmerMm: razmer * mm, minR, otnR, minOtr, otnOtr, minUgol, minTochki };
+  return {
+    razmer,
+    razmerMm: razmer * mm,
+    zapolnenie,
+    minR,
+    otnR,
+    minOtr,
+    otnOtr,
+    minUgol,
+    minTochki,
+  };
 }

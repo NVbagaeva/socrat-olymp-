@@ -56,10 +56,11 @@ const KAK_TRENAZHER: Readonly<Record<string, readonly [string, Parametry]>> = {
  * по числам задачи.
  */
 const NACHALO_VIDIMOE: Readonly<Record<string, Tochki>> = {
-  /* Диагональ AC почти вдоль AB (13°): B — левее. */
+  /* Диагональ AC почти вдоль AB (13°): B — левее, диагонали по-прежнему
+     перпендикулярны: h² = (x + BC)(AD − x). */
   'chetyre-tochki-trapecii': {
     A: [0, 0],
-    B: [3 + 4 * Math.cos((70 * Math.PI) / 180) - 2, 4 * Math.sin((70 * Math.PI) / 180)],
+    B: [2.4, Math.sqrt(4.4 * 3.6)],
     D: [6, 0],
     p: [1 / 3, 0],
   },
