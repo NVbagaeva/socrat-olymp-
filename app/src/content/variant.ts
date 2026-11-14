@@ -87,7 +87,7 @@ export const VARIANT_SHEET = {
   keySource: 'Источник',
   solutionsTitle: 'Решения',
   razborTitle: 'Разбор заданий',
-  task: (no: number) => `Задание ${no}`,
+  task: (no: number | string) => `Задание ${no}`,
   noSolution: 'Решения по шагам у этой задачи нет — только ответ.',
   answer: 'Ответ',
   foot: {
@@ -132,9 +132,11 @@ export const VARIANT_SCREEN = {
   } as Record<number, string>,
   sostavNote: 'Нажмите на плитку\u00a0— задание выключится; «⋯» в\u00a0углу\u00a0— подтипы.',
   all: 'Все',
+  /** Плитка раздела, для которого задач варианта ещё нет. */
+  skoro: 'скоро',
   none: 'Очистить',
   allSubtypes: 'Все подтипы',
-  subtypesOf: (n: number) => `Подтипы задания ${n}`,
+  subtypesOf: (n: number | string) => `Подтипы задания ${n}`,
   source: 'Источник',
   sources: [
     { id: 'mix', label: 'Вперемешку' },
@@ -216,7 +218,7 @@ export const VARIANT_SCREEN = {
   /* ── «Стеклянная сцена»: шапка, плитки, чипы, окна ───────────── */
   leadKratko: 'Один набор\u00a0— три листа: ученику, учителю и\u00a0разбор.',
   podtipovMetka: (k: number) => counted(k, 'подтип', 'подтипа', 'подтипов').replace(' ', '\u00a0'),
-  podtipyKnopka: (n: number, name: string) => `Подтипы задания ${n}: ${name}`,
+  podtipyKnopka: (n: number | string, name: string) => `Подтипы задания ${n}: ${name}`,
   bystro: {
     source: 'Источник',
     sourceValue: { mix: 'вперемешку', fipi: 'банк ФИПИ', own: 'свои' } as Record<string, string>,
@@ -231,7 +233,7 @@ export const VARIANT_SCREEN = {
   nastroyki: 'Настройки листов',
   gotovo: 'Готово',
   podtipy: {
-    title: (n: number, name: string) => `Задание №${n}. ${name}`,
+    title: (n: number | string, name: string) => `Задание №${n}. ${name}`,
     vybrano: (k: number, n: number) => `Выбрано ${k}\u00a0из\u00a0${n}`,
     vse: 'Выбрать все',
     poslednij: 'Хотя бы один подтип остаётся выбранным.',

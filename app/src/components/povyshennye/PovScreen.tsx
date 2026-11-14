@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useMemo, useState, useSyncExternalStore } from 'react';
 import { StatsView } from '@/components/variant/online/StatsView';
 import { useArchive } from '@/components/variant/online/useArchive';
-import { TESTOVYJ_33 } from '@/content/variantOnline/shkala';
+import { TESTOVYJ_RABOTY } from '@/content/variantOnline/shkala';
 import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
 import { PRINT_PATH } from '@/lib/variant/handoff';
 import type { ArchivedWork } from '@/lib/variant/online/archive';
@@ -72,7 +72,7 @@ function bally(
   if (c === undefined) return { primary: w.primary, test: null, proverka: false };
   if (c.oceneno < c.vsego) return { primary: w.primary, test: null, proverka: true };
   const vsego = w.primary + c.summa;
-  return { primary: vsego, test: TESTOVYJ_33[vsego] ?? null, proverka: false };
+  return { primary: vsego, test: TESTOVYJ_RABOTY[vsego] ?? null, proverka: false };
 }
 
 function ballyText(r: RazdelEkrana, k: number, w: ArchivedWork): string {

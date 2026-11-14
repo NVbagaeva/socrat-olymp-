@@ -3,7 +3,8 @@
  * Чистые функции над архивом (archive.ts) — их же гоняет автотест.
  */
 
-import { EGE_NUMBERS, type EgeNo } from '../types';
+import { VARIANT_NUMBERS } from '../struktura';
+import { type EgeNo } from '../types';
 import type { ArchivedWork } from './archive';
 
 export interface TrendPoint {
@@ -63,7 +64,8 @@ export function computeStats(
     primary: w.primary,
     max: w.max,
   }));
-  const numbers: NumberStat[] = EGE_NUMBERS.map((n) => {
+  /* Задания первой части по действующей структуре экзамена. */
+  const numbers: NumberStat[] = VARIANT_NUMBERS.map((n) => {
     let total = 0;
     let right = 0;
     let seconds = 0;
