@@ -6,7 +6,9 @@ import { useId, useMemo, useState, useSyncExternalStore } from 'react';
 import { TaskGrid } from '@/components/tasks';
 import { VariantEntry } from '@/components/variant/VariantEntry';
 import type { TaskPart } from '@/content/tasks';
-import { partRange, taskParts, tasks, tasksPage } from '@/content/tasks';
+import { bankPageOf, partRange, taskParts, tasksOf } from '@/content/tasks';
+import { LevelTabs } from '@/components/level/LevelTabs';
+import { levelInfo, type Level } from '@/lib/level';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { href } from '@/lib/paths';
@@ -64,7 +66,11 @@ function choosePart(next: TaskPart) {
   window.dispatchEvent(new Event(PART_EVENT));
 }
 
-export function TaskBank() {
+export function TaskBank({ level = 'profile' }: { level?: Level }) {
+  const tasks = tasksOf(level);
+  const tasksPage = bankPageOf(level);
+  /* В базе частей нет: все задания — с кратким ответом. */
+  const parts = level === 'profile';
   const [query, setQuery] = useState('');
   const searchId = useId();
   /* Открытая часть живёт в адресе (?part=2), чтобы ссылка открывала
@@ -81,8 +87,8 @@ export function TaskBank() {
     () =>
       searching
         ? tasks.filter((t) => matches(query, t.no, t.name))
-        : tasks.filter((t) => t.part === part),
-    [query, searching, part],
+        : tasks.filter((t) => t.part === (parts ? part : 1)),
+    [query, searching, part, parts, tasks],
   );
   const current = taskParts.find((item) => item.part === part) ?? taskParts[0];
 
@@ -125,42 +131,51 @@ export function TaskBank() {
       </div>
 
       {/* Вход в «Собрать вариант» — рядом с выбором заданий. */}
-      <VariantEntry className="bank-variant" />
+      <VariantEntry className="bank-variant" level={level} />
+
+      {/* Уровень экзамена — над списком заданий. */}
+      <LevelTabs level={level} to="bank" range />
 
       {/* Переключатель частей. Сегменты — ссылки: часть можно открыть
           в новой вкладке, а без скрипта они просто перезагрузят страницу
           с нужным ?part. */}
-      <nav className="part-switch" aria-label="Части экзамена">
-        {taskParts.map((item) => {
-          const active = !searching && item.part === part;
-          return (
-            <a
-              key={item.part}
-              className={active ? 'part-switch__seg is-active' : 'part-switch__seg'}
-              href={item.part === 1 ? tasksPage.href : href(tasksPage.href, `?part=${item.part}`)}
-              aria-current={active ? 'true' : undefined}
-              onClick={(event) => {
-                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-                  return;
-                }
-                event.preventDefault();
-                setQuery('');
-                choosePart(item.part);
-              }}
-            >
-              <span className="part-switch__range">{partRange(item.part)}</span>
-              <span className="part-switch__text">
-                <span className="part-switch__title">{item.title}</span>
-                <span className="part-switch__caption">{item.caption}</span>
-              </span>
-            </a>
-          );
-        })}
-      </nav>
+      {parts ? (
+        <nav className="part-switch" aria-label="Части экзамена">
+          {taskParts.map((item) => {
+            const active = !searching && item.part === part;
+            return (
+              <a
+                key={item.part}
+                className={active ? 'part-switch__seg is-active' : 'part-switch__seg'}
+                href={item.part === 1 ? tasksPage.href : href(tasksPage.href, `?part=${item.part}`)}
+                aria-current={active ? 'true' : undefined}
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                  }
+                  event.preventDefault();
+                  setQuery('');
+                  choosePart(item.part);
+                }}
+              >
+                <span className="part-switch__range">{partRange(item.part)}</span>
+                <span className="part-switch__text">
+                  <span className="part-switch__title">{item.title}</span>
+                  <span className="part-switch__caption">{item.caption}</span>
+                </span>
+              </a>
+            );
+          })}
+        </nav>
+      ) : null}
 
       <div className="bank-part-head">
         <h2 className="t-h4 bank-part-head__title">
-          {searching ? 'Результаты поиска' : `${current.title} · ${current.heading}`}
+          {searching
+            ? 'Результаты поиска'
+            : parts
+              ? `${current.title} · ${current.heading}`
+              : `Задания ${levelInfo(level).range} · ${current.heading}`}
         </h2>
         <span className="bank-part-head__count">{countLabel(shown.length)}</span>
       </div>

@@ -8,12 +8,12 @@ import { TeoriyaShell } from '@/components/tasks/teoriya/TeoriyaShell';
 import { LAYFHAKI, LOVUSHKI, RAZDELY_TEORII_11, type RazdelTeorii11 } from '@/content/teoriya11';
 import { PROGRESS_11 } from '@/content/zadanie11';
 import { katex } from '@/lib/graph/katex';
-import { kodNaSayte } from '@/lib/zadanie11/taxonomy';
 import { SUBTYPES } from '@/lib/zadanie11/prototypes';
 import { YAKOR_11, type ChastRazdela11 } from '@/lib/zadanie11/teoriya-yakorya';
 import type { LifehackId } from '@/lib/zadanie11/types';
 import { IkonkaRazdela, MiniKartinka, Piktogramma, tsvetRazdela, Zvezdy } from './Piktogrammy';
 import { Tablitsa11 } from './Tablitsa11';
+import '../teoriya/teoriya-steklo.css';
 
 /** Формула крупно (display), набранная на сервере. */
 function Krupno({ tex, className }: { tex: string; className?: string }) {
@@ -401,7 +401,6 @@ function Telo({ r, trenazher }: { r: RazdelTeorii11; trenazher: string }) {
               <li className="z11-tip" key={st.id}>
                 <MiniKartinka id={st.id} section={st.section} className="z11-tip__pic" />
                 <span className="z11-tip__body">
-                  <span className="z11-tip__code">{kodNaSayte(st.id)}</span>
                   <span className="z11-tip__title">{st.title}</span>
                   <span className="z11-tip__foot">
                     <Zvezdy level={st.level} />
@@ -435,20 +434,25 @@ export function Teoriya11({ vkladka, base }: { vkladka: string; base: string }) 
       <Telo r={r} trenazher={`${base}/trenazher/`} key={r.id} />,
     ]),
   );
+  /* .teor-steklo — общий слой рамок теории «Стеклянной сцены»
+     (components/tasks/teoriya/teoriya-steklo.css), карточки №11 —
+     в тонах ролей (z11-steklo.css). Содержание не меняется. */
   return (
-    <TeoriyaShell
-      vkladka={vkladka}
-      razdely={RAZDELY_TEORII_11.map((r) => ({
-        id: r.id,
-        title: r.title,
-        podpunkty: podpunkty(r),
-      }))}
-      tela={tela}
-      dekor={{
-        kartinka: <IkonkaRazdela section="DP" className="z11-dekor" />,
-        note: 'Таблица — половина решения',
-      }}
-      trackKey={PROGRESS_11.teoriyaKey}
-    />
+    <div className="z11-teoriya teor-steklo">
+      <TeoriyaShell
+        vkladka={vkladka}
+        razdely={RAZDELY_TEORII_11.map((r) => ({
+          id: r.id,
+          title: r.title,
+          podpunkty: podpunkty(r),
+        }))}
+        tela={tela}
+        dekor={{
+          kartinka: <IkonkaRazdela section="DP" className="z11-dekor" />,
+          note: 'Таблица — половина решения',
+        }}
+        trackKey={PROGRESS_11.teoriyaKey}
+      />
+    </div>
   );
 }

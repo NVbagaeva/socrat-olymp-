@@ -2,6 +2,7 @@ import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
 import { Badge, Breadcrumbs, type BadgeTone } from '@/components/ui';
 import type { Crumb } from '@/components/ui';
+import { LEVELS, levelInfo, type Level } from '@/lib/level';
 
 export interface ShapkaRazdelaProps {
   /** Крошки над заголовком. Последняя — без ссылки, это сама страница. */
@@ -46,6 +47,13 @@ export interface ShapkaRazdelaProps {
  * Крошки входят в шапку: во всех шести местах они стояли прямо над ней
  * и всегда вместе с ней.
  */
+/* Уровень экзамена — по крошке «Банк заданий»: она есть у каждой
+   страницы задания и ведёт в банк своего уровня. У страниц без неё
+   (сборщик варианта, статистика) метки уровня нет. */
+function levelOfCrumbs(crumbs: readonly Crumb[]): Level | undefined {
+  return LEVELS.find((level) => crumbs.some((crumb) => crumb.href === levelInfo(level).bank));
+}
+
 export function ShapkaRazdela({
   crumbs,
   title,
@@ -58,6 +66,7 @@ export function ShapkaRazdela({
   back,
   className,
 }: ShapkaRazdelaProps) {
+  const level = levelOfCrumbs(crumbs);
   return (
     <>
       <Breadcrumbs items={crumbs} className={back === undefined ? undefined : 'crumbs--wide'} />
@@ -68,6 +77,12 @@ export function ShapkaRazdela({
         <div className="section-head__text">
           <div className="section-head__title">
             <h1 className="t-h1">{title}</h1>
+            {/* Метка уровня экзамена рядом с названием задания. */}
+            {level === undefined ? null : (
+              <Badge tone="neutral" className="section-head__level">
+                {levelInfo(level).label}
+              </Badge>
+            )}
             {badge === undefined ? null : <Badge tone={badgeTone}>{badge}</Badge>}
           </div>
           {subtitle}

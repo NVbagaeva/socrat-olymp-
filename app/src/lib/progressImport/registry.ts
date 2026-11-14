@@ -58,9 +58,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z1',
     title: '№1 «Планиметрия»',
     keys: [
-      /* Журнал попыток тренажёра (lib/planimetriya/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/planimetriya/trening/progress.ts). Прежний ключ
          budetege:planimetriya-1:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:planimetriya-1:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «1»). */
+      'budetege:trainer:1:session',
     ],
   },
   {
@@ -118,9 +120,13 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z9',
     title: '№9 «Производная»',
     keys: [
-      /* Журнал попыток тренажёра (lib/proizvodnaya/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/proizvodnaya/trening/progress.ts). Прежний ключ
          budetege:proizvodnaya-9:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:proizvodnaya-9:log:v1',
+      /* Решённые опорные задачи (lib/proizvodnaya/progress.ts, PREP9_KEY). */
+      'budetege:proizvodnaya-9:prep:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «9»). */
+      'budetege:trainer:9:session',
     ],
   },
   {
@@ -135,9 +141,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z11',
     title: '№11 «Текстовые задачи»',
     keys: [
-      /* Журнал попыток тренажёра (lib/zadanie11/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/zadanie11/trening/progress.ts). Прежний ключ
          budetege:zadanie-11:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:zadanie-11:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «11»). */
+      'budetege:trainer:11:session',
     ],
   },
   {
@@ -153,9 +161,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z13',
     title: '№13 «Финансовая грамотность»',
     keys: [
-      /* Журнал попыток тренажёра (lib/zadanie13/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/zadanie13/trening/progress.ts). Прежний ключ
          budetege:zadanie-13:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:zadanie-13:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «13»). */
+      'budetege:trainer:13:session',
     ],
   },
   {

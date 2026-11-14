@@ -66,6 +66,7 @@ const BEZ_KONCA = 40;
 const BYSTRO = 10;
 const ISTOCHNIKI: IstochnikBanka[] = ['vse', 'fipi', 'new'];
 const STILI: StilBanka[] = ['vse', 'syuzhet', 'standart'];
+const URO: ('vse' | '1' | '2')[] = ['vse', '1', '2'];
 
 type Ekran = 'rezhimy' | 'temy';
 
@@ -78,22 +79,31 @@ type Ekran = 'rezhimy' | 'temy';
 type Intent =
   { kind: 'zadacha'; id: string } | { kind: 'oshibki' } | { kind: 'tipy'; tipy: string[] } | null;
 
-function readIntent(izvestnye: ReadonlySet<string>, zadachi: ReadonlyMap<string, string>): Intent {
+function readIntent(
+  izvestnye: ReadonlySet<string>,
+  zadachi: ReadonlyMap<string, string>,
+  gruppy: readonly GruppaVybora[],
+): Intent {
   if (typeof window === 'undefined') return null;
   const params = new URLSearchParams(window.location.search);
   const id = params.get('zadacha');
   if (id !== null && zadachi.has(id)) return { kind: 'zadacha', id };
   if (params.get('rezhim') === 'oshibki') return { kind: 'oshibki' };
-  const tipy = [params.get('tip'), ...(params.get('tipy') ?? '').split(',')].filter(
-    (tip): tip is string => tip !== null && izvestnye.has(tip),
-  );
+  /* Группа в ссылке — все её типы: «?t=A» урока репетитора №13 (прежний
+     тренажёр с фильтрами звал так схему). */
+  const tipyGrupp = new Map(gruppy.map((g) => [g.id, g.tipy.map((t) => t.id)]));
+  const tipy = [
+    params.get('tip'),
+    ...(params.get('tipy') ?? '').split(','),
+    ...(params.get('t') ?? '').split(','),
+  ].flatMap((tip) => (tip === null ? [] : izvestnye.has(tip) ? [tip] : (tipyGrupp.get(tip) ?? [])));
   return tipy.length === 0 ? null : { kind: 'tipy', tipy: [...new Set(tipy)] };
 }
 
 /** Убрать параметры ссылки из адреса: вопрос о незавершённой тренировке не повторится. */
 function clearIntent() {
   const url = new URL(window.location.href);
-  ['zadacha', 'rezhim', 'tip', 'tipy'].forEach((key) => url.searchParams.delete(key));
+  ['zadacha', 'rezhim', 'tip', 'tipy', 't'].forEach((key) => url.searchParams.delete(key));
   window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
@@ -118,7 +128,7 @@ export function TrenazherBanka<Z extends ZadachaBanka, S>({
   const tipyVse = useMemo(() => gruppy.flatMap((g) => g.tipy.map((t) => t.id)), [gruppy]);
   const poZadache = useMemo(() => prototipyZadach(katalog), [katalog]);
   const [ekran, setEkran] = useState<Ekran>('rezhimy');
-  const [intent] = useState<Intent>(() => readIntent(new Set(tipyVse), poZadache));
+  const [intent] = useState<Intent>(() => readIntent(new Set(tipyVse), poZadache, gruppy));
   /* Часы на панели: по выбору ученика при старте или из записи. */
   const [clock, setClock] = useState(true);
 
@@ -152,8 +162,10 @@ export function TrenazherBanka<Z extends ZadachaBanka, S>({
                   const s = razdel.zagruzka.reshenie(zadacha);
                   return s === null ? null : (
                     <ShagiResheniya
-                      shagi={razdel.shagi(s)}
-                      posle={razdel.posle === undefined ? undefined : razdel.posle(s)}
+                      shagi={razdel.shagi(s, payload.rezhim)}
+                      posle={
+                        razdel.posle === undefined ? undefined : razdel.posle(s, payload.rezhim)
+                      }
                     />
                   );
                 },
@@ -167,7 +179,8 @@ export function TrenazherBanka<Z extends ZadachaBanka, S>({
          чтении понимается и запись прежнего тренажёра раздела. */
       pack={(payload) => payload}
       unpack={(packed) => {
-        const payload = razobratZapis(packed, razdel.klyuch);
+        const payload =
+          razobratZapis(packed, razdel.klyuch) ?? razdel.prezhnyayaZapis?.(packed) ?? null;
         if (payload !== null) {
           setClock(payload.timer !== false);
         }
@@ -338,9 +351,14 @@ function Konfigurator<Z extends ZadachaBanka, S>({
     vyborStore.set(next);
   }
 
-  function start(tasks: TaskBanka[], control = vybor.bezPodskazok, timer = vybor.timer) {
+  function start(
+    tasks: TaskBanka[],
+    control = vybor.bezPodskazok,
+    timer = vybor.timer,
+    rezhim?: string,
+  ) {
     if (tasks.length > 0) {
-      api.start({ tasks, control, timer });
+      api.start({ tasks, control, timer, ...(rezhim === undefined ? {} : { rezhim }) });
     }
   }
 
@@ -391,6 +409,12 @@ function Konfigurator<Z extends ZadachaBanka, S>({
       warm: true,
       disabled: mistakeList.length === 0,
     },
+    ...(razdel.dopRezhimy ?? []).map((r) => ({
+      id: r.id,
+      ikonka: r.ikonka,
+      zag: r.zag,
+      lead: r.lead(BYSTRO),
+    })),
   ];
 
   function pick(id: string) {
@@ -400,11 +424,24 @@ function Konfigurator<Z extends ZadachaBanka, S>({
       setEkran('temy');
     } else if (id === 'oshibki') {
       startOshibki();
+    } else if (razdel.dopRezhimy?.some((r) => r.id === id) === true) {
+      /* Особый режим (№13 «Определи тип», «С оформлением»): все типы вперемешку, с подсказками. */
+      start(buildByTipy(katalog, tipyVse, BYSTRO, new Set()), false, vybor.timer, id);
     }
   }
 
   if (ekran === 'temy') {
-    const tipy = tipyVse.filter((id) => selected.has(id));
+    /* Уровень (№13): только прототипы выбранного уровня. */
+    const uroven = razdel.urovni === undefined ? 'vse' : vybor.uroven;
+    const tipy = tipyVse.filter(
+      (id) => selected.has(id) && (uroven === 'vse' || String(katalog[id]?.u ?? 1) === uroven),
+    );
+    /* Как отвечать (№13): числом или особым режимом. */
+    const otvetVybora = razdel.otvetVybora;
+    const rezhimVybora =
+      otvetVybora !== undefined && otvetVybora.sposoby.some((v) => v.id === vybor.rezhim)
+        ? vybor.rezhim
+        : '';
     /* У раздела без источника (№2: все задачи — генератор) — всегда «все». */
     const istochnik = razdel.bezIstochnika === true ? 'vse' : vybor.istochnik;
     const est = skolkoZadach(katalog, tipy, istochnik, stil);
@@ -436,6 +473,9 @@ function Konfigurator<Z extends ZadachaBanka, S>({
                 Math.random,
                 stil,
               ),
+              vybor.bezPodskazok,
+              vybor.timer,
+              rezhimVybora === '' ? undefined : rezhimVybora,
             )
           }
           dop={
@@ -447,6 +487,24 @@ function Konfigurator<Z extends ZadachaBanka, S>({
                   labels={T.vybor.istochniki}
                   value={vybor.istochnik}
                   onChange={(next) => zapomnit({ ...vybor, istochnik: next })}
+                />
+              )}
+              {razdel.urovni === undefined ? null : (
+                <Segment
+                  title={razdel.urovni.title}
+                  values={URO}
+                  labels={razdel.urovni.labels}
+                  value={vybor.uroven}
+                  onChange={(next) => zapomnit({ ...vybor, uroven: next })}
+                />
+              )}
+              {otvetVybora === undefined ? null : (
+                <Segment
+                  title={otvetVybora.title}
+                  values={otvetVybora.sposoby.map((v) => v.id)}
+                  labels={Object.fromEntries(otvetVybora.sposoby.map((v) => [v.id, v.label]))}
+                  value={rezhimVybora}
+                  onChange={(next) => zapomnit({ ...vybor, rezhim: next })}
                 />
               )}
               {/* Репетитору: выбранные темы — в черновик ДЗ правилом «типы × сколько». */}
@@ -476,9 +534,16 @@ function Konfigurator<Z extends ZadachaBanka, S>({
           labels={{
             ...T.vybor,
             itog: (n, skolko, taymer) =>
-              tipy.length > 0 && est === 0
-                ? T.vybor.istochnikPusto
-                : T.vybor.itog(n, tipyVse.length, skolko, taymer),
+              selected.size > 0 && tipy.length === 0 && razdel.urovni !== undefined
+                ? razdel.urovni.pusto
+                : tipy.length > 0 && est === 0
+                  ? T.vybor.istochnikPusto
+                  : T.vybor.itog(
+                      uroven === 'vse' ? n : tipy.length,
+                      tipyVse.length,
+                      skolko,
+                      taymer,
+                    ),
           }}
         />
       </div>
@@ -626,7 +691,12 @@ function Itogi<Z extends ZadachaBanka, S>({
     const tipy = [...new Set(payload.tasks.map((t) => t.p))];
     const tasks = buildByTipy(katalog, tipy, payload.tasks.length, closedTasks(razdel.log.get()));
     if (tasks.length > 0) {
-      actions.start({ tasks, control: payload.control, timer: payload.timer !== false });
+      actions.start({
+        tasks,
+        control: payload.control,
+        timer: payload.timer !== false,
+        ...(payload.rezhim === undefined ? {} : { rezhim: payload.rezhim }),
+      });
     }
   }
 

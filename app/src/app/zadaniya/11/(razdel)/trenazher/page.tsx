@@ -1,19 +1,18 @@
 import type { Metadata } from 'next';
-import { Trenazher11 } from '@/components/tasks/zadanie11/Trenazher11';
-import { TRENAZHER_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
-import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
-import { ZADANIYA } from '@/lib/paths';
+import { Trenazher11Tab } from '@/components/tasks/zadanie11/Trenazher11Tab';
+import { TRENAZHER11 } from '@/content/tekstovye11';
+import { zadanie11Title } from '@/content/zadanie11';
+import { TRENAZHER11_HREF } from '@/lib/zadanie11/links';
 
 export const metadata: Metadata = {
-  title: zadanie11Title(TRENAZHER_11.title),
+  title: zadanie11Title(TRENAZHER11.title),
 };
 
 /**
- * Вкладка «Тренажёр» задания №11 (макеты trenazher-vybor.png и
- * trenazher-reshenie-mobile.png). Разделы, счётчики и условия банка
- * без ответов собираются на сборке; задачи тренировки — в браузере,
- * ответ закрывается отпечатком сразу после решения движком.
+ * Вкладка «Тренажёр» №11. Сервер отдаёт названия типов и каталог ключей
+ * задач; условия тренажёр загружает сам (public/data/zadanie11, без
+ * ответов), разбор, таблицу модели и подсказки строит решатель в браузере.
  */
-export default function Trenazher11Tab() {
-  return <Trenazher11 dannye={dannyeTrenazhera()} base={`${ZADANIYA}/${ZADANIE11.slug}`} />;
+export default function Trenazher11Page() {
+  return <Trenazher11Tab base={TRENAZHER11_HREF} />;
 }
