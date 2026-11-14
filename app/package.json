@@ -223,6 +223,7 @@
     "test:nomera": "node scripts/check-nomera.mjs",
     "test:skrytye": "node scripts/check-skrytye.mjs",
     "test:variant-struktura": "node scripts/check-variant-struktura.mjs",
+    "test:naibolshee": "node scripts/check-naibolshee.mjs",
     "test:kabinet-site": "node scripts/check-kabinet-site.mjs",
     "test:soglasiya-site": "node scripts/check-soglasiya-site.mjs",
     "test:trainer-session": "node scripts/check-trainer-session.mjs",
