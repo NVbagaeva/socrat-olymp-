@@ -53,7 +53,7 @@
 |---|---|---|
 | [#360](https://github.com/NVbagaeva/socrat-olymp-/pull/360) | этот документ | открыт |
 | [#361](https://github.com/NVbagaeva/socrat-olymp-/pull/361) | PR 1, база: номер хранения 21 проходит проверки | открыт, проверки зелёные; выкладывать первым |
-| ветка `claude/ege-2027-sloy` | PR 2, слой соответствия | в работе |
+| [#370](https://github.com/NVbagaeva/socrat-olymp-/pull/370) | PR 2, слой соответствия: `content/struktura.js`, ~300 мест переведено на номер из структуры | открыт; 931 страница из 931 совпадает со сборкой main |
 
 Что уточнилось по ходу PR 2:
 
