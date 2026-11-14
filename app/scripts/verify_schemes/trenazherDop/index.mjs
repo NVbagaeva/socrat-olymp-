@@ -3,7 +3,7 @@
    тренажёра №18, проверка независимо от кода сайта.
 
    Для каждой задачи из content/zadanie18/trenazherDop (в банке TIPY_18 —
-   тип с одним вариантом):
+   тип с тремя наборами чисел) и каждого её набора:
      • ответ пункта б) otvet(p) совпадает с ответом, вычисленным по
        данным б) в координатах — фигура строится здесь заново, без кода
        сайта; где ответ не должен зависеть от остальных параметров
@@ -104,41 +104,54 @@ export function proverit(N = 1000) {
       plokho += sch.itog();
       continue;
     }
-    sch.fakt('один набор чисел', t.varianty.length === 1);
+    sch.fakt('три набора чисел', t.varianty.length === 3);
     const p = t.varianty[0];
-    const otvet = t.otvet(p);
+    const otvety = [];
+    t.varianty.forEach((d, i) => {
+      const otvet = t.otvet(d);
+      otvety.push(otvet);
+      const nabor = `набор ${i + 1}`;
 
-    const vychisleno = pr.b(sch, zerno(1880));
-    sch.fakt(
-      `б) ответ ${otvet} = ${vychisleno.toFixed(6)}`,
-      blizko(otvet, vychisleno, 1e-9),
-      `в задаче ${otvet}, вычислено ${vychisleno}`,
-    );
+      const vychisleno = pr.b(sch, zerno(1880), d);
+      sch.fakt(
+        `${nabor}: б) ответ ${otvet} = ${vychisleno.toFixed(6)}`,
+        blizko(otvet, vychisleno, 1e-9),
+        `в задаче ${otvet}, вычислено ${vychisleno}`,
+      );
 
-    const kartochka = bank.get(`${t.id}#1`);
-    const formy = zapisi(otvet);
-    sch.fakt(
-      `поле ответа принимает: ${formy.join(' | ')}`,
-      kartochka !== undefined &&
-        formy.length > 0 &&
-        formy.every((s) => otvetVeren18(kartochka.key, s, kartochka.seal)),
-    );
-    sch.fakt(
-      'поле ответа не принимает соседние числа',
-      kartochka !== undefined &&
-        [otvet + 1, otvet * 1.01, -otvet].every(
-          (x) => !otvetVeren18(kartochka.key, String(x).replace('.', ','), kartochka.seal),
-        ),
-    );
+      const kartochka = bank.get(`${t.id}#${i + 1}`);
+      const formy = zapisi(otvet);
+      sch.fakt(
+        `${nabor}: поле ответа принимает: ${formy.join(' | ')}`,
+        kartochka !== undefined &&
+          formy.length > 0 &&
+          formy.every((x) => otvetVeren18(kartochka.key, x, kartochka.seal)),
+      );
+      sch.fakt(
+        `${nabor}: поле ответа не принимает соседние числа`,
+        kartochka !== undefined &&
+          [otvet + 1, otvet * 1.01, -otvet].every(
+            (x) => !otvetVeren18(kartochka.key, String(x).replace('.', ','), kartochka.seal),
+          ),
+      );
 
-    const sc = scena18(t.id, p);
-    const poChertezhu = pr.nachalo(sc.nachalo, sch);
+      const sc = scena18(t.id, d);
+      const poChertezhu = pr.nachalo(sc.nachalo, sch, d);
+      sch.fakt(
+        `${nabor}: чертёж построен по данным б): ответ по его точкам тот же`,
+        blizko(otvet, poChertezhu, 1e-9),
+        `по чертежу ${poChertezhu}`,
+      );
+      pr.scena(sc.nachalo, sch);
+      sch.fakt(
+        `${nabor}: есть доказательство а) и решение б)`,
+        t.reshenieA(d).length > 0 && t.reshenieB(d).length > 0,
+      );
+    });
     sch.fakt(
-      'чертёж построен по данным б): ответ по его точкам тот же',
-      blizko(otvet, poChertezhu, 1e-9),
-      `по чертежу ${poChertezhu}`,
+      'ответы трёх наборов разные или фигуры разные',
+      new Set(t.varianty.map((d) => JSON.stringify(d))).size === 3,
     );
-    pr.scena(sc.nachalo, sch);
 
     const rnd = zerno(1880 + tipy.indexOf(t) + 1);
     for (let i = 0; i < N; i += 1) pr.a(rnd, sch);
@@ -158,13 +171,8 @@ export function proverit(N = 1000) {
             v.options.filter((o) => svoi.includes(o)).length === 1,
         ),
     );
-    sch.fakt(
-      'есть доказательство а) и решение б)',
-      t.reshenieA(p).length > 0 && t.reshenieB(p).length > 0,
-    );
-
     plokho += sch.itog();
-    svodka.push(`  ${t.id} [★${t.uroven}] ${z.nazvanie}: ${otvet}`);
+    svodka.push(`  ${t.id} [★${t.uroven}] ${z.nazvanie}: ${otvety.join('; ')}`);
   }
 
   console.log('\nОтветы пунктов б) перенесённых задач:');

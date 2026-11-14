@@ -4,16 +4,22 @@
  * scripts/verify_schemes/trenazherDop/trapeciya.mjs.
  */
 
-import type { ZadachaDop18 } from './tipy';
+import { ch, drob, type ZadachaDop18 } from './tipy';
 
 export const TP18_RAVNOBOKAYA: ZadachaDop18 = {
   id: 'tp-ravnobokaya',
   uroven: 2,
   nazvanie: 'Проекция диагонали равнобедренной трапеции',
+  /* AH = √(AC² − CH²) = (AD + BC) / 2; AD и BC — только для чертежа. */
+  varianty: [
+    { AC: 10, CH: 6, AH: 8, AD: 12, BC: 4 },
+    { AC: 13, CH: 5, AH: 12, AD: 16, BC: 8 },
+    { AC: 17, CH: 8, AH: 15, AD: 20, BC: 10 },
+  ],
   uslovie:
     'В равнобедренной трапеции $ABCD$ с основаниями $AD$ и $BC$ ($AD > BC$) проведена высота $CH$.',
   a: 'Докажите, что $AH = \\dfrac{AD + BC}{2}$.',
-  b: 'Найдите площадь трапеции, если $AC = 10$ и $CH = 6$.',
+  b: (p) => `Найдите площадь трапеции, если $AC = ${p.AC}$ и $CH = ${p.CH}$.`,
   skhemy: [
     {
       id: 'ravnobokaya',
@@ -33,29 +39,32 @@ export const TP18_RAVNOBOKAYA: ZadachaDop18 = {
       gruppy: ['ah'],
     },
   ],
-  reshenieB: [
+  reshenieB: (p) => [
     {
-      tekst:
-        'Из прямоугольного треугольника $ACH$: $AH = \\sqrt{AC^2 - CH^2} = \\sqrt{100 - 36} = 8$.',
+      tekst: `Из прямоугольного треугольника $ACH$: $AH = \\sqrt{AC^2 - CH^2} = \\sqrt{${p.AC! ** 2} - ${p.CH! ** 2}} = ${p.AH}$.`,
       gruppy: ['pl'],
     },
     {
-      tekst:
-        'По пункту а) $AH$ — полусумма оснований, поэтому $S = \\dfrac{AD + BC}{2}\\cdot CH = AH\\cdot CH = 8\\cdot 6 = 48$.',
+      tekst: `По пункту а) $AH$ — полусумма оснований, поэтому $S = \\dfrac{AD + BC}{2}\\cdot CH = AH\\cdot CH = ${p.AH}\\cdot ${p.CH} = ${p.AH! * p.CH!}$.`,
       gruppy: ['pl', 'ah'],
     },
   ],
-  otvet: 48,
+  otvet: (p) => p.AH! * p.CH!,
 };
 
 export const TP18_BABOCHKA: ZadachaDop18 = {
   id: 'tp-babochka',
   uroven: 2,
   nazvanie: 'Отрезок через точку пересечения диагоналей',
+  varianty: [
+    { BC: 3, AD: 6 },
+    { BC: 2, AD: 8 },
+    { BC: 4, AD: 12 },
+  ],
   uslovie:
     'Диагонали трапеции $ABCD$ с основаниями $AD$ и $BC$ пересекаются в точке $O$. Прямая, проходящая через $O$ параллельно основаниям, пересекает боковые стороны $AB$ и $CD$ в точках $K$ и $L$.',
   a: 'Докажите, что $KO = OL$.',
-  b: 'Найдите $KL$, если $BC = 3$ и $AD = 6$.',
+  b: (p) => `Найдите $KL$, если $BC = ${p.BC}$ и $AD = ${p.AD}$.`,
   skhemy: [
     {
       id: 'babochka',
@@ -80,25 +89,33 @@ export const TP18_BABOCHKA: ZadachaDop18 = {
       gruppy: ['otv'],
     },
   ],
-  reshenieB: [
-    {
-      tekst:
-        '$KO = BC\\cdot\\dfrac{AD}{AD + BC} = 3\\cdot\\dfrac{6}{9} = 2$, а по пункту а) $OL = KO$.',
-      gruppy: ['pod1'],
-    },
-    { tekst: '$KL = 2\\cdot 2 = 4$.', gruppy: ['otv'] },
-  ],
-  otvet: 4,
+  reshenieB: (p) => {
+    const KO = (p.BC! * p.AD!) / (p.AD! + p.BC!);
+    return [
+      {
+        tekst: `$KO = BC\\cdot\\dfrac{AD}{AD + BC} = ${p.BC}\\cdot\\dfrac{${p.AD}}{${p.AD! + p.BC!}} = ${ch(KO)}$, а по пункту а) $OL = KO$.`,
+        gruppy: ['pod1'],
+      },
+      { tekst: `$KL = 2\\cdot ${ch(KO)} = ${ch(2 * KO)}$.`, gruppy: ['otv'] },
+    ];
+  },
+  otvet: (p) => (2 * p.BC! * p.AD!) / (p.AD! + p.BC!),
 };
 
 export const TP18_UGOL_90: ZadachaDop18 = {
   id: 'tp-ugol-90',
   uroven: 3,
   nazvanie: 'Углы при основании дают в сумме прямой угол',
+  /* PA = AB·AD / (AD − BC); треугольник APD — египетский: ответы конечные. */
+  varianty: [
+    { AD: 14, BC: 4, AB: 6 },
+    { AD: 10, BC: 5, AB: 3 },
+    { AD: 20, BC: 5, AB: 12 },
+  ],
   uslovie:
     'В трапеции $ABCD$ с основаниями $AD$ и $BC$ ($AD > BC$) сумма углов при основании $AD$ равна $90^\\circ$. Точки $M$ и $N$ — середины оснований $BC$ и $AD$.',
   a: 'Докажите, что $MN = \\dfrac{AD - BC}{2}$.',
-  b: 'Найдите площадь трапеции, если $AD = 14$, $BC = 4$ и $AB = 6$.',
+  b: (p) => `Найдите площадь трапеции, если $AD = ${p.AD}$, $BC = ${p.BC}$ и $AB = ${p.AB}$.`,
   skhemy: [
     {
       id: 'chetyre-tochki',
@@ -128,22 +145,32 @@ export const TP18_UGOL_90: ZadachaDop18 = {
       gruppy: ['pryamaya'],
     },
   ],
-  reshenieB: [
-    {
-      tekst:
-        '$\\triangle PBC \\sim \\triangle PAD$ с коэффициентом $\\dfrac{BC}{AD} = \\dfrac27$, поэтому $PB = \\dfrac27 PA$ и $AB = \\dfrac57 PA = 6$, $PA = 8{,}4$.',
-      gruppy: ['p'],
-    },
-    {
-      tekst:
-        'В прямоугольном треугольнике $APD$: $PD = \\sqrt{14^2 - 8{,}4^2} = 11{,}2$, высота из вершины $P$ равна $\\dfrac{8{,}4\\cdot 11{,}2}{14} = 6{,}72$.',
-      gruppy: ['h'],
-    },
-    {
-      tekst:
-        'Высота трапеции составляет $\\dfrac57$ этой высоты: $h = 4{,}8$. Тогда $S = \\dfrac{14 + 4}{2}\\cdot 4{,}8 = 43{,}2$.',
-      gruppy: ['h'],
-    },
-  ],
-  otvet: 43.2,
+  reshenieB: (p) => {
+    const { AD, BC, AB } = p as Record<string, number>;
+    const PA = (AB! * AD!) / (AD! - BC!);
+    const PD = Math.sqrt(AD! ** 2 - PA ** 2);
+    const hP = (PA * PD) / AD!;
+    const h = (hP * (AD! - BC!)) / AD!;
+    return [
+      {
+        tekst: `$\\triangle PBC \\sim \\triangle PAD$ с коэффициентом $\\dfrac{BC}{AD} = ${drob(BC!, AD!)}$, поэтому $PB = ${drob(BC!, AD!)} PA$ и $AB = ${drob(AD! - BC!, AD!)} PA = ${AB}$, $PA = ${ch(PA)}$.`,
+        gruppy: ['p'],
+      },
+      {
+        tekst: `В прямоугольном треугольнике $APD$: $PD = \\sqrt{${AD}^2 - ${ch(PA)}^2} = ${ch(PD)}$, высота из вершины $P$ равна $\\dfrac{${ch(PA)}\\cdot ${ch(PD)}}{${AD}} = ${ch(hP)}$.`,
+        gruppy: ['h'],
+      },
+      {
+        tekst: `Высота трапеции составляет $${drob(AD! - BC!, AD!)}$ этой высоты: $h = ${ch(h)}$. Тогда $S = \\dfrac{${AD} + ${BC}}{2}\\cdot ${ch(h)} = ${ch(((AD! + BC!) / 2) * h)}$.`,
+        gruppy: ['h'],
+      },
+    ];
+  },
+  otvet: (p) => {
+    const { AD, BC, AB } = p as Record<string, number>;
+    const PA = (AB! * AD!) / (AD! - BC!);
+    const hP = (PA * Math.sqrt(AD! ** 2 - PA ** 2)) / AD!;
+    /* Ответ — конечная десятичная дробь: убираем погрешность корня. */
+    return Math.round(((AD! + BC!) / 2) * ((hP * (AD! - BC!)) / AD!) * 1e6) / 1e6;
+  },
 };

@@ -823,7 +823,7 @@ const TIPY_18_OSNOVNYE: readonly TipZadachi18[] = [
         ),
       ];
     },
-  } /* Перенесённые задачи с одним набором чисел — trenazherDop/. */,
+  } /* Перенесённые задачи — trenazherDop/. */,
   ...TIPY_DOP_18,
 ];
 

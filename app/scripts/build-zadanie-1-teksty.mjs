@@ -105,6 +105,7 @@ p(
     .join(' · ')} |`,
   `| Тренажёр: чертёж | «${T.ekran.risunok}» / «${T.ekran.risunokPodskazka(1)}» / «${T.ekran.risunokReshenie}» / «${T.ekran.risunokShaga}» |`,
   `| Тренажёр: под условием | «${T.ekran.bank(37)}» / «${T.ekran.neIzBanka}» |`,
+  `| Тренажёр: материалы под условием (подписи прежнего тренажёра) | «${T.ekran.povtoritTeoriyu}» · «${T.ekran.layfhak}» · «${T.ekran.opornyy}» · «${T.ekran.razborTipa}» |`,
   `| Опорные задачи | «${C.OPORNYE1.eshchyoVariant}» |`,
   '',
   'Подписи режимов, выбора тем, экрана задачи и итогов — общие с №7 и №6 (`content/treningBanka.ts`), на «ты».',

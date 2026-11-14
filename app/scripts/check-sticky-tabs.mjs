@@ -508,7 +508,22 @@ async function perehod(browser, engine, size) {
     const tab = page.locator('.topic-tabs-row--panel [role="tab"]', { hasText: item.tab });
     let clicked = false;
     for (let attempt = 0; attempt < 5 && !clicked; attempt += 1) {
-      await tab.click();
+      /* Переход уже пошёл (адрес сменился) — второй раз не жмём: страница
+         могла уехать, и панель на миг скрыта. У №12 вкладка меняется на
+         том же адресе — там только подсветка. */
+      if (
+        attempt > 0 &&
+        item.path !== item.url &&
+        (await page.evaluate(() => window.location.pathname)) === item.path
+      ) {
+        clicked = true;
+        break;
+      }
+      try {
+        await tab.click({ timeout: 3000 });
+      } catch {
+        /* панель на миг скрыта — проверим ещё раз */
+      }
       try {
         await page.waitForFunction(
           (name) =>
