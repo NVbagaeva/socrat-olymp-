@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Цилиндр с невидимой частью основания пунктиром">
+  <!-- Стереометрия: цилиндр, радиус и высота.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M78 76 V222 A72 22 0 0 0 222 222 V76" fill="url(#b-g)" stroke="none"/>
+    <ellipse cx="150" cy="76" rx="72" ry="22" fill="#c3dffa" fill-opacity="0.8" stroke-width="2.2"/>
+    <path d="M78 76 V222 M222 76 V222" stroke-width="2.2"/>
+    <path d="M78 222 A72 22 0 0 0 222 222" stroke-width="2.2"/>
+    <path d="M78 222 A72 22 0 0 1 222 222" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <path d="M150 76 H222 M150 76 V222" stroke-width="1.5" stroke-dasharray="6 5"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="150" cy="76" r="5"/>
+    <circle cx="150" cy="222" r="5"/>
+  </g>
+</svg>

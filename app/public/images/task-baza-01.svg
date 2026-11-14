@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Ценник и стопка монет">
+  <!-- Покупка: ценник на нитке и стопка монет — сколько можно купить.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M60 128 L120 68 H214 A10 10 0 0 1 224 78 V172 A10 10 0 0 1 214 182 H120 Z" fill="url(#b-g)" stroke-width="2"/>
+    <circle cx="96" cy="125" r="9" stroke-width="2"/>
+    <path d="M87 125 C70 125 52 150 40 168" stroke-width="1.5"/>
+    <path d="M136 106 H198 M136 128 H184 M136 150 H170" stroke-width="2.5"/>
+    <g stroke-width="2">
+      <ellipse cx="216" cy="246" rx="40" ry="11" fill="#c3dffa"/>
+      <path d="M176 246 V236 M256 246 V236"/>
+      <ellipse cx="216" cy="236" rx="40" ry="11" fill="#c3dffa"/>
+      <path d="M176 236 V226 M256 236 V226"/>
+      <ellipse cx="216" cy="226" rx="40" ry="11" fill="#fff"/>
+      <ellipse cx="216" cy="226" rx="24" ry="6" stroke-width="1.3"/>
+    </g>
+  </g>
+</svg>

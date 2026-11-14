@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Кольцевая диаграмма с выделенной долей и знак процента">
+  <!-- Проценты: 30 % кольца выделено.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="116" cy="150" r="72" stroke="#c3dffa" stroke-width="26"/>
+    <path d="M116 78 A72 72 0 0 1 184.5 172.2" stroke="#7FAEEA" stroke-width="26" stroke-linecap="butt"/>
+    <circle cx="116" cy="150" r="85.0" stroke-width="1.8"/>
+    <circle cx="116" cy="150" r="59.0" stroke-width="1.8"/>
+    <path d="M116 65.0 V91.0 M172.1 168.2 L196.8 176.3" stroke-width="2"/>
+    <circle cx="222" cy="104" r="14" fill="#c3dffa" stroke-width="2.5"/>
+    <circle cx="256" cy="192" r="14" fill="#c3dffa" stroke-width="2.5"/>
+    <path d="M262 92 L216 204" stroke-width="3"/>
+  </g>
+</svg>

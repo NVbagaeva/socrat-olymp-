@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Линейка и мерная стрелка над ней">
+  <!-- Размеры и единицы: линейка с делениями и отмеренный отрезок.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="36" y="150" width="228" height="54" rx="8" fill="url(#b-g)" stroke-width="2"/>
+    <path d="M48 151 V168 M58.2 151 V171 M68.5 151 V171 M78.8 151 V171 M89 151 V171 M99.2 151 V165 M109.5 151 V171 M119.8 151 V171 M130 151 V171 M140.2 151 V171 M150.5 151 V168 M160.8 151 V171 M171 151 V171 M181.2 151 V171 M191.5 151 V171 M201.8 151 V165 M212 151 V171 M222.2 151 V171 M232.5 151 V171 M242.8 151 V171 M253 151 V168" stroke-width="1.5"/>
+    <path d="M48 112 H151.5" stroke-width="2"/>
+    <path d="M55.9 107.7 L48 112 L55.9 116.3" stroke-width="2"/>
+    <path d="M143.6 116.3 L151.5 112 L143.6 107.7" stroke-width="2"/>
+    <path d="M48 98 V130 M151.5 98 V130" stroke-width="1.3" stroke-dasharray="4 4"/>
+    <path d="M172 112 H252" stroke-width="2" stroke-dasharray="6 5"/>
+    <path d="M244.1 116.3 L252 112 L244.1 107.7" stroke-width="2"/>
+  </g>
+</svg>

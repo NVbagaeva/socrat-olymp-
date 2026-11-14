@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Игральный кубик с пятью очками и монета">
+  <!-- Вероятность: кубик (передняя грань — 5) и монета.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M46 126 L90 92 L200 92 L156 126 Z" fill="#c3dffa" fill-opacity="0.6" stroke-width="2"/>
+    <path d="M156 126 L200 92 L200 202 L156 236 Z" fill="#7FAEEA" fill-opacity="0.35" stroke-width="2"/>
+    <path d="M46 126 L156 126 L156 236 L46 236 Z" fill="#fff" fill-opacity="0.85" stroke-width="2.2"/>
+    <circle cx="236" cy="70" r="32" fill="url(#b-g)" stroke-width="2"/>
+    <circle cx="236" cy="70" r="22" stroke-width="1.4"/>
+    <path d="M229 61 L237 55 V85 M228 85 H246" stroke-width="2"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="73.5" cy="208.5" r="8"/>
+    <circle cx="128.5" cy="208.5" r="8"/>
+    <circle cx="101" cy="181" r="8"/>
+    <circle cx="73.5" cy="153.5" r="8"/>
+    <circle cx="128.5" cy="153.5" r="8"/>
+    <circle cx="178" cy="164" r="5"/>
+    <circle cx="123" cy="109" r="5"/>
+  </g>
+</svg>
