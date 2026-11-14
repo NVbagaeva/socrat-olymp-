@@ -20,7 +20,9 @@ import {
   RAZDELY,
   chastRazdela,
   nomerDvumya,
+  prichinaSkrytiya,
   razdel,
+  skryt,
   zadaniyaEge,
   type RazdelKod,
 } from './struktura';
@@ -346,3 +348,17 @@ export const vseRazdely: readonly ProfilTask[] = RAZDELY.map((r) => sobrat(r.kod
 
 /** Задания экзамена по порядку номеров ЕГЭ: банк, меню, сайдбар. */
 export const tasks: readonly ProfilTask[] = zadaniyaEge().map((z) => sobrat(z.kod));
+
+/** Скрытый раздел: его страницы есть, но посетителям закрыты. */
+export type SkrytyyRazdel = ProfilTask & { prichina: string };
+
+/**
+ * Скрытые разделы со страницами (struktura.js, skryt): в действующей
+ * структуре экзамена их нет. Страницы собираются как обычно, но
+ * посетителю адрес отвечает 404; администратор открывает раздел из
+ * кабинета и видит его с плашкой prichina. В структуре из 20 заданий
+ * список пуст.
+ */
+export const skrytyeRazdely: readonly SkrytyyRazdel[] = vseRazdely
+  .filter((task) => skryt(task.kod) && taskHasPage(task))
+  .map((task) => ({ ...task, prichina: prichinaSkrytiya(task.kod) ?? '' }));

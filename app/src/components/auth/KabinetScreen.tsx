@@ -24,6 +24,7 @@ import type { KlassView } from '@/lib/auth/klassy';
 import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
 import { currentUser, useSessionUser } from '@/lib/auth/session';
 import { KartaUchenika } from '@/components/karta/KartaUchenika';
+import { SkrytyeRazdelyAdmin } from '@/components/tasks/skrytye/SkrytyeRazdelyAdmin';
 import { JoinClassForm, TutorClassesCard, TutorHomeworkCard } from '@/components/dz/KabinetDz';
 import { forgetCode, pendingCode } from '@/components/dz/JoinScreen';
 import {
@@ -241,9 +242,12 @@ export function KabinetScreen() {
           ) : null}
           {profile.role === 'tutor' ? <TutorHome kits={kits} /> : null}
           {profile.role === 'admin' ? (
-            <Card className="kabinet__card" title={KABINET.admin.title}>
-              <p className="auth-form__text">{KABINET.admin.text}</p>
-            </Card>
+            <>
+              <Card className="kabinet__card" title={KABINET.admin.title}>
+                <p className="auth-form__text">{KABINET.admin.text}</p>
+              </Card>
+              <SkrytyeRazdelyAdmin />
+            </>
           ) : null}
         </>
       ) : (

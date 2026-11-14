@@ -1100,6 +1100,14 @@ jobs:
       - name: Поставить Apache, Chromium и WebKit для проверок в браузере
         uses: ./.github/actions/brauzery
 
+      # Скрытые разделы в сборке для хостинга: в действующей структуре
+      # экзамена их нет — правил 404 в .htaccess нет, страницы разделов
+      # собраны как обычно. Сам механизм скрытия проверяет задание
+      # «Скрытые разделы» ниже — на пробной сборке по ЕГЭ-2027.
+      - name: Скрытые разделы — в сборке для хостинга их нет
+        working-directory: app
+        run: pnpm test:skrytye
+
       # Заставка первого визита на собранном сайте (Chromium, Apache):
       # первый визит → заставка → «Пропустить» → окно → тур; второй визит
       # без заставки; reduced-motion и слабое устройство — статичный
@@ -1206,6 +1214,64 @@ jobs:
         working-directory: app
         run: pnpm test:zadanie15-vitrina
 
+  # Скрытые разделы (app/src/content/struktura.js, skryt): раздел, которого
+  # нет в структуре экзамена, посетителю не виден, а администратору
+  # доступен. В действующей структуре из 20 заданий скрытых разделов нет,
+  # поэтому сайт собирается ещё раз — по структуре ЕГЭ-2027 из 19 заданий,
+  # где скрыт раздел «Случайные величины», и со входом (подмена сервера
+  # входа, как в auth.yml): так проверяется и кабинет администратора.
+  # Эта сборка никуда не выкладывается.
+  skrytye:
+    name: Скрытые разделы (пробная сборка по ЕГЭ-2027)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Забрать репозиторий
+        uses: actions/checkout@v5
+
+      # pnpm, Node.js 22 с кэшем и зависимости (.github/actions/podgotovka).
+      - name: Подготовить машину
+        uses: ./.github/actions/podgotovka
+
+      - name: Собрать сайт по структуре из 19 заданий, со входом
+        working-directory: app
+        env:
+          STRUKTURA_EGE: '2027-19'
+          NEXT_PUBLIC_AUTH_ENABLED: '1'
+          NEXT_PUBLIC_AUTH_IN_HEADER: '1'
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key # не секрет: ключ мока
+        run: pnpm build
+
+      # Apache, Chromium, WebKit, poppler (.github/actions/brauzery).
+      - name: Поставить Apache, Chromium и WebKit для проверок в браузере
+        uses: ./.github/actions/brauzery
+
+      # 1) правила в .htaccess сборки — по структуре; 2) на страницах
+      # раздела noindex, в собранной заранее разметке раздела нет;
+      # 3) ни одна публичная страница не ссылается на раздел и не называет
+      # его (что ещё не убрано — список POKA в скрипте, с номером PR);
+      # 4) настоящий Apache: без метки администратора любой адрес раздела —
+      # 404, не редирект, с меткой — 200, везде noindex, соседи не задеты;
+      # 5) Chromium (десктоп) и WebKit (iPhone): посетителю «Страница не
+      # найдена», администратору раздел с плашкой, поиск по банку раздел
+      # не находит; 6) кабинет администратора: «Скрытые разделы» →
+      # «Открыть» → раздел с плашкой; у репетитора карточки нет.
+      - name: Скрытый раздел не виден посетителю и доступен администратору
+        working-directory: app
+        env:
+          STRUKTURA_EGE: '2027-19'
+        run: pnpm test:skrytye --apache --webkit --kabinet --shots skrytye-snimki
+
+      - name: Сохранить снимки скрытого раздела
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skrytye-snimki
+          path: app/skrytye-snimki
+          if-no-files-found: ignore
+          retention-days: 7
+
   # Одна галочка на всё: зелёная, только если прошли все задания
   # выше. Красная — смотрите, какое из них упало.
   itog:
@@ -1221,6 +1287,7 @@ jobs:
       - brauzer-2
       - brauzer-3
       - brauzer-4
+      - skrytye
 
     steps:
       - name: Все задания прошли
