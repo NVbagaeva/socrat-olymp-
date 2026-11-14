@@ -206,6 +206,22 @@
   line-height: 1.55;
   color: var(--color-text-secondary);
 }
+/* «Начать бесплатно» первого экрана — только на телефоне (до 768px):
+   основная кнопка почти во всю ширину под лидом, над дверями. От 768px
+   она в шапке. */
+.hero__start {
+  display: none;
+}
+@media (max-width: 767.98px) {
+  .hero__start {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    margin-top: var(--space-5);
+    font-size: 17px;
+  }
+}
 
 /* Двери: синее стекло ученику, тёплое — учителю. */
 .hero__doors {
@@ -741,25 +757,6 @@ section.band {
   .cta h2 {
     font-size: 30px;
     line-height: 36px;
-  }
-}
-
-/* Телефон: логотип в одну строку — кнопка в шапке плотнее. */
-@media (max-width: 479.98px) {
-  .glavnaya .site-head--steklo .logo {
-    white-space: nowrap;
-  }
-  .glavnaya .site-head--steklo .site-head__cta .btn {
-    padding: 0 var(--space-3);
-    font-size: 14px;
-  }
-}
-/* Уже 380px знак, название, кнопка и бургер в строку не входят — остаётся
-   знак. Название по-прежнему в ссылке (кегль 0): его читает скринридер. */
-@media (max-width: 379.98px) {
-  .glavnaya .site-head--steklo .logo {
-    gap: 0;
-    font-size: 0;
   }
 }
 

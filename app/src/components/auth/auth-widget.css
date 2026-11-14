@@ -9,8 +9,9 @@
 .auth-widget__button {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  /* Цель касания 44×44, кружок с инициалами внутри — прежний. */
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   transition: background-color var(--dur-hover) var(--ease);
 }
@@ -152,32 +153,25 @@
   outline-offset: 2px;
 }
 
-/* Узкий вид: остаётся один кружок со значком. Слово «Войти» — для
-   скринридера, у ссылки то же имя. */
-@media (max-width: 459.98px) {
+/* Публичная шапка: «Войти» — вторичная стеклянная кнопка одним словом,
+   без значка. Не ярко-синяя: основная кнопка рядом (от 768px) —
+   «Начать бесплатно». Высота 40px, на телефоне 44px под палец. */
+.auth-login--site {
+  justify-content: center;
+  height: 40px;
+  padding: 0 var(--space-4);
+  font-size: 15px;
+}
+@media (max-width: 767.98px) {
   .auth-login--site {
-    width: var(--auth-round);
-    height: var(--auth-round);
-    padding: 0;
-    justify-content: center;
-  }
-  .auth-login--site .auth-login__ico {
-    width: 100%;
-    height: 100%;
-  }
-  .auth-login--site .auth-login__ico svg {
-    width: 20px;
-    height: 20px;
-  }
-  .auth-login--site .auth-login__text {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+    height: 44px;
+    padding: 0 18px;
   }
 }
+.auth-login--site:hover {
+  color: var(--color-primary-hover, var(--color-primary));
+}
+
 /* Шапка оболочки от 1024px: в ней меню разделов, и таблетка его
    теснит — остаётся кружок размером с колокольчик, а пункты меню
    чуть плотнее. Так меню со входом занимает не больше места, чем без

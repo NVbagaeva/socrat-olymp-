@@ -22,8 +22,9 @@
    Сценарии (сборка со входом и кнопкой в шапке, NEXT_PUBLIC_AUTH_IN_HEADER=1):
      • шапка на 1440: «Войти» таблеткой со словом, «Начать бесплатно»
        ведёт в банк заданий (регистрация пока по приглашению); на 390,
-       375 и 320 «Войти» — кружок в шапке не меньше 40 px,
-       горизонтальной прокрутки нет, в меню телефона тоже «Войти»;
+       375 и 320 «Войти» — словом, не меньше 44 px, «Начать бесплатно»
+       в шапке нет — она на первом экране главной; горизонтальной
+       прокрутки нет, в меню телефона тоже «Войти»;
      • регистрация без галочек согласий → просьба отметить, запрос не уходит;
        ученику — год рождения, младше 18 — почта родителя;
      • регистрация чужой почтой → «Регистрация пока по приглашению»,
@@ -827,15 +828,15 @@ async function runEnabled() {
     await shot(page, 'shapka-do-vhoda-1440');
     await context.close();
   }
-  /* Телефон: «Войти» — кружок со значком прямо в шапке, имя ссылки
-     «Войти» для скринридера; прокрутки вбок нет и на 320. */
+  /* Телефон: в шапке «Войти» словом и бургер; «Начать бесплатно» —
+     на первом экране главной, не в шапке. Прокрутки вбок нет и на 320. */
   for (const width of [320, 375]) {
     const { context, page } = await newPage(mock, width, errors);
     await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
     check(await noHorizontalScroll(page), `главная ${width}: горизонтальной прокрутки нет`);
     check(
       await page.getByRole('link', { name: 'Войти', exact: true }).first().isVisible(),
-      `главная ${width}: кружок «Войти» виден в шапке`,
+      `главная ${width}: «Войти» видна в шапке`,
     );
     await context.close();
   }
@@ -846,12 +847,22 @@ async function runEnabled() {
     const login = page.locator(LOGIN);
     const box = await login.boundingBox();
     check(
-      box !== null && box.width >= 40 && box.height >= 40,
-      'главная 390: кружок «Войти» не меньше 40 px',
+      box !== null && box.width >= 44 && box.height >= 44,
+      'главная 390: «Войти» не меньше 44×44 px',
     );
+    check((await login.innerText()).trim() === 'Войти', 'главная 390: на кнопке слово «Войти»');
     check(
       (await login.getAttribute('href')) === '/voyti/',
-      'главная 390: кружок «Войти» ведёт на /voyti/',
+      'главная 390: «Войти» ведёт на /voyti/',
+    );
+    check(
+      !(await page.locator('.site-head__start').isVisible()),
+      'главная 390: «Начать бесплатно» в шапке нет',
+    );
+    check(
+      (await page.locator('.hero__start').isVisible()) &&
+        (await page.locator('.hero__start').getAttribute('href')) === '/zadaniya/',
+      'главная 390: «Начать бесплатно» на первом экране ведёт в банк заданий',
     );
     await shot(page, 'shapka-do-vhoda-390');
     await page.click('.burger');
@@ -1493,7 +1504,8 @@ async function runEnabled() {
     await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
     const kartaItog = (await page.locator('.karta-shapka__itog').innerText()).replace(/\s+/g, ' ');
     check(
-      kartaItog.includes(`Освоено 0 из ${KARTA_OBLASTEY}`) && kartaItog.includes('Решите ещё немного'),
+      kartaItog.includes(`Освоено 0 из ${KARTA_OBLASTEY}`) &&
+        kartaItog.includes('Решите ещё немного'),
       `ученик: карта — «Освоено 0 из ${KARTA_OBLASTEY}», прогноза нет (${kartaItog})`,
     );
     check((await page.locator('.karta-gost').count()) === 0, 'ученик: плашки «Войдите…» нет');
@@ -1641,13 +1653,18 @@ async function runEnabled() {
     /* Журнал №8 с компьютера приехал: на карте №8 — «в процессе». */
     await phone.page
       .waitForFunction(
-        () => document.querySelector('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]') !== null,
+        () =>
+          document.querySelector(
+            '.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]',
+          ) !== null,
         null,
         { timeout: 10000 },
       )
       .catch(() => {});
     check(
-      (await phone.page.locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]').count()) === 1,
+      (await phone.page
+        .locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]')
+        .count()) === 1,
       'телефон: на карте №8 «в процессе» — решённое на компьютере приехало',
     );
     const laterRaw = await phone.page.evaluate(() => localStorage.getItem('budetege:zakladki:v1'));
