@@ -83,6 +83,12 @@ export interface Sostoyanie {
   podpisi: boolean;
   /** Выбранный режим схемы (ZhivayaSkhema.rezhimy); не задан — первый. */
   rezhim?: string;
+  /**
+   * Чертёж учителя (лист с решениями): видны и скрытые построения —
+   * вспомогательные окружности, продолжения, дуги равных углов, засечки
+   * выводов, — без подсветки. Заливки (подсветка фигур) — нет.
+   */
+  uchitel?: boolean;
 }
 
 /**
@@ -129,7 +135,23 @@ function cvetEl(el: Element, lit: ReadonlySet<string>): Cvet | null {
 
 export function vidimEl(el: Element, sost: Sostoyanie): boolean {
   if (sost.shag !== null && (el.shag ?? 0) > sost.shag) return false;
-  return el.skrytyy !== true || goritEl(el, sost.lit);
+  if (el.skrytyy !== true || goritEl(el, sost.lit)) return true;
+  /* У учителя — построения решения; не заливки и не ручки без имени. */
+  return (
+    sost.uchitel === true &&
+    el.vid !== 'mnogougolnik' &&
+    !(el.vid === 'tochka' && el.imya === undefined)
+  );
+}
+
+/**
+ * Засечки отрезка на чертеже: засечки-вывод (равенство, которое
+ * доказывается) — только при подсветке отрезка и у учителя.
+ */
+function shtrihiEl(el: Element & { vid: 'otrezok' }, sost: Sostoyanie): number {
+  if (el.shtrihi === undefined) return 0;
+  if (el.shtrihiVyvod === true && !goritEl(el, sost.lit) && sost.uchitel !== true) return 0;
+  return el.shtrihi;
 }
 
 /**
@@ -438,6 +460,23 @@ function ugolPut(a: T2, v: T2, b: T2, dugi: number, pryamoy: boolean): UgolGeom 
   return { d, sektor, lomanye };
 }
 
+/** Отрезок l лежит вдоль m: та же прямая (ближе 1 px) и общий кусок длиннее 3 px. */
+function vdolLinii(l: EkrLiniya, m: EkrLiniya): boolean {
+  const a: T2 = [l.x1, l.y1];
+  const b: T2 = [l.x2, l.y2];
+  const la = dist(a, b);
+  const lb = Math.hypot(m.x2 - m.x1, m.y2 - m.y1);
+  if (la < 1 || lb < 1) return false;
+  const u: T2 = [(b[0] - a[0]) / la, (b[1] - a[1]) / la];
+  const w: T2 = [(m.x2 - m.x1) / lb, (m.y2 - m.y1) / lb];
+  if (Math.abs(cross(u, w)) > Math.sin((4 * Math.PI) / 180)) return false;
+  const dpr = Math.abs((m.x1 - a[0]) * u[1] - (m.y1 - a[1]) * u[0]);
+  if (dpr >= 6) return false;
+  const t1 = (m.x1 - a[0]) * u[0] + (m.y1 - a[1]) * u[1];
+  const t2 = (m.x2 - a[0]) * u[0] + (m.y2 - a[1]) * u[1];
+  return Math.min(la, Math.max(t1, t2)) - Math.max(0, Math.min(t1, t2)) > 3;
+}
+
 function konechnyy(el: Element): boolean {
   const ok = (p: T2) => Number.isFinite(p[0]) && Number.isFinite(p[1]);
   switch (el.vid) {
@@ -587,6 +626,8 @@ function raskladka1(
   /* Величины ставятся последними: им мешают и линии, и буквы. Подписи
      площадей встают полосой под чертежом (podpisiPloshchadey). */
   const velichiny: { el: Element & { vid: 'velichina' }; obshchee: Obshchee }[] = [];
+  /* Отрезки, открытые только чертежом учителя (скрытые, не горят). */
+  const otkrytyeUchitelem = new Set<string>();
 
   for (const el of kadr.elementy) {
     /* Промежуточный кадр анимации может пройти через вырожденную
@@ -628,7 +669,9 @@ function raskladka1(
         const b = E(el.b);
         if (dist(a, b) < 0.5) break;
         /* Засечки — препятствие подписям: число не ложится на штрих. */
-        const shtrihi = el.shtrihi === undefined ? [] : shtrihiOtrezki(a, b, el.shtrihi);
+        if (sost.uchitel === true && el.skrytyy === true && !lit) otkrytyeUchitelem.add(el.id);
+        const n = shtrihiEl(el, sost);
+        const shtrihi = n === 0 ? [] : shtrihiOtrezki(a, b, n);
         prep.otrezki.push(...shtrihi);
         ekran.linii.push({
           ...obshchee,
@@ -694,6 +737,24 @@ function raskladka1(
         break;
       }
     }
+  }
+
+  /* Чертёж учителя: построение, которое легло бы на уже нарисованную
+     линию (продолжение вдоль стороны, отрезок той же прямой), не
+     рисуется — двойная линия читается хуже одной. */
+  if (otkrytyeUchitelem.size > 0) {
+    const vzyatye = ekran.linii.filter((l) => !otkrytyeUchitelem.has(l.id));
+    const out: EkrLiniya[] = [];
+    for (const l of ekran.linii) {
+      if (!otkrytyeUchitelem.has(l.id)) {
+        out.push(l);
+        continue;
+      }
+      if (vzyatye.some((m) => vdolLinii(l, m))) continue;
+      vzyatye.push(l);
+      out.push(l);
+    }
+    ekran.linii = out;
   }
 
   /* Заливки: одна область — одна заливка, непрозрачная. Большая — ниже,

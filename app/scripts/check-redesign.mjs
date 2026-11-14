@@ -337,6 +337,15 @@ const ODOBRENO = {
     '502525c35c46935369c31258f9a14636c7d729fc1670a939f13e052c4d1104ec',
   'app/src/content/zadanie13.ts':
     '64d36786dcf54fee9d97272104708136ae0c0bd29436d7bc90cc715d1b061b8a',
+  /* Общий генератор (№12 — один из разделов): у раздела может быть
+     несколько переключателей «Дополнительно» (GenConfig.extras.flagi,
+     GenExtras.flagi) — нужно №18 для «Чертежа к условию». Поле
+     необязательное: у №12 его нет, лист и задачи №12 не меняются.
+     Одобрено владельцем при слиянии PR №387. */
+  'app/src/lib/generator/obshchiy/state.ts':
+    'a2d0fe4008fa38fe57ec19bcff513467fb3d6529dcb3b53caf5338393633a343',
+  'app/src/lib/generator/obshchiy/types.ts':
+    '021fa4e1c05554b4a21c3b3a6fe86d07b79d2e95e48a254bf4fec5989420e461',
   /* №9: определение точки максимума без минимума; «нуль» при одном нуле. */
   'app/src/lib/proizvodnaya/prototypes/po-grafiku-fprime.ts':
     'cf6c9b6b7737e190cb0e7a7bc3adb1b3783f292af1aede97179ac35f9b0e01b9',
