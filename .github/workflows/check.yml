@@ -259,6 +259,19 @@ jobs:
         working-directory: app
         run: pnpm test:progress-6
 
+      # №4 в «Стеклянной сцене»: прежний прогресс (budetege:veroyatnost-4:v2 и журнал
+      # после PR #340), «Узнай метод», опорные, прежняя запись тренировки, запись
+      # ответа по общему правилу. Без браузера.
+      - name: Тренажёр №4 — перенос прежнего прогресса, сборка тренировок
+        working-directory: app
+        run: pnpm test:progress-4
+
+      # №5 на том же тренажёре: прежний прогресс (budetege:veroyatnost-5:v2 и журнал
+      # после PR #340), «Узнай метод», опорные, прежняя запись тренировки. Без браузера.
+      - name: Тренажёр №5 — перенос прежнего прогресса, сборка тренировок
+        working-directory: app
+        run: pnpm test:progress-5
+
       # №11 на том же общем тренажёре: прежний прогресс (budetege:zadanie-11:v1
       # и журнал после PR #340), задачи прежнего генератора, прежние записи
       # тренировки (панель фильтров), файлы задач public/data/zadanie11 свежие
@@ -306,6 +319,14 @@ jobs:
       - name: Тексты №6 для вычитки совпадают с исходниками
         working-directory: app
         run: pnpm test:zadanie-6-teksty
+
+      - name: Тексты №4 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-4-teksty
+
+      - name: Тексты №5 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-5-teksty
 
       - name: Тексты №1 для вычитки совпадают с исходниками
         working-directory: app
@@ -973,6 +994,22 @@ jobs:
       - name: Перенос прогресса №6 в браузере
         working-directory: app
         run: pnpm test:progress-6-site
+
+      - name: Редизайн №4 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 4 origin/main
+
+      - name: Перенос прогресса №4 в браузере
+        working-directory: app
+        run: pnpm test:progress-4-site
+
+      - name: Редизайн №5 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 5 origin/main
+
+      - name: Перенос прогресса №5 в браузере
+        working-directory: app
+        run: pnpm test:progress-5-site
 
       - name: Редизайн №11 — картинки и содержание не изменены
         working-directory: app
