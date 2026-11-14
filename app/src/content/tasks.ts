@@ -56,8 +56,8 @@ interface RazdelVid {
   badges?: readonly string[];
   /**
    * Иконка плашки: файл /images/task-{номер файла}.{icon} (taskIconNo).
-   * Не задана — растровый webp, как у большинства заданий; svg — у
-   * векторных чертежей.
+   * Не задана — растровый webp; svg — векторный чертёж (сейчас у всех
+   * разделов профиля).
    */
   icon?: 'webp' | 'svg';
   /**
@@ -223,16 +223,16 @@ const VID: Record<RazdelKod, RazdelVid> = {
   planimetriya: { name: 'Планиметрия', status: 'ready', icon: 'svg' },
   /* Раздел открыт: шесть вкладок, генераторы 19 прототипов и банк
      для репетиторов — в lib/vektory. */
-  vektory: { name: 'Векторы', status: 'ready' },
+  vektory: { name: 'Векторы', status: 'ready', icon: 'svg' },
   /* Раздел собран шаблоном стереометрии вместе с №15
      (components/stereo); банк из 92 прототипов — lib/zadanie3. */
-  stereometriya: { name: 'Стереометрия', status: 'ready' },
+  stereometriya: { name: 'Стереометрия', status: 'ready', icon: 'svg' },
   /* Названия разделов вероятности — те же слова, что в заголовке
      страницы задания: заголовок раздела собирается из этого же
      списка (content/veroyatnost.ts), и двух имён у одной темы быть
      не должно. */
-  veroyatnost: { name: 'Вероятность: простая', status: 'ready' },
-  'slozhnaya-veroyatnost': { name: 'Вероятность: сложная', status: 'ready' },
+  veroyatnost: { name: 'Вероятность: простая', status: 'ready', icon: 'svg' },
+  'slozhnaya-veroyatnost': { name: 'Вероятность: сложная', status: 'ready', icon: 'svg' },
   /* Раздел открыт: банк из 15 прототипов (исходные задачи и по 50
      аналогов) в lib/zadanie6, теория с «Проверь себя», опорные задачи,
      тренажёр и генератор. Вкладки «Для репетиторов» пока нет. */
@@ -241,10 +241,11 @@ const VID: Record<RazdelKod, RazdelVid> = {
     shortTitle: 'Случайные величины',
     status: 'ready',
     badges: ['структура 2027'],
+    icon: 'svg',
   },
   /* Раздел открыт: банк из 30 прототипов в lib/zadanie7, теория с живым
      тригонометрическим кругом, тренажёр, опорные задачи и генератор. */
-  uravneniya: { name: 'Уравнения', status: 'ready' },
+  uravneniya: { name: 'Уравнения', status: 'ready', icon: 'svg' },
   /* Раздел открыт: банк из 26 прототипов, тренажёр, опорные задачи,
      генератор и листы. Вкладка «Теория» пока с надписью «Материал
      готовится»: текст пишет автор отдельно. */
@@ -252,6 +253,7 @@ const VID: Record<RazdelKod, RazdelVid> = {
     name: 'Вычисления и преобразования',
     shortTitle: 'Вычисления',
     status: 'ready',
+    icon: 'svg',
   },
   /* Раздел открыт: 31 прототип в lib/proizvodnaya, движок графиков
      производной, тренажёр, опорные задачи, генератор и листы. */
@@ -259,6 +261,7 @@ const VID: Record<RazdelKod, RazdelVid> = {
     name: 'Производная и первообразная',
     shortTitle: 'Производная',
     status: 'ready',
+    icon: 'svg',
   },
   /* Раздел открыт: 34 прототипа (банк ФИПИ + 20 аналогов на каждый),
      теория, опорные задачи, тренажёр, генератор и уроки — lib/zadanie10. */
@@ -268,13 +271,14 @@ const VID: Record<RazdelKod, RazdelVid> = {
     status: 'ready',
     icon: 'svg',
   },
-  'tekstovye-zadachi': { name: 'Текстовые задачи', status: 'ready' },
-  'grafiki-funkciy': { name: 'Графики функций', status: 'ready' },
+  'tekstovye-zadachi': { name: 'Текстовые задачи', status: 'ready', icon: 'svg' },
+  'grafiki-funkciy': { name: 'Графики функций', status: 'ready', icon: 'svg' },
   ekonomika: {
     name: 'Финансовая грамотность и экономические задачи',
     shortTitle: 'Финансовая грамотность',
     status: 'ready',
     badges: ['структура 2027'],
+    icon: 'svg',
   },
   /* Раздел ЕГЭ-2027 из 19 заданий (там — задание 12): теория, опорные,
      тренажёр (lib/zadanie21). В структуре из 20 заданий он вне экзамена:
