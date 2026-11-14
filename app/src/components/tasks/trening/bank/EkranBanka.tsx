@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { useBeforeFinish } from '../../session/useBeforeFinish';
 import { useSessionReport } from '../../session/useSessionReport';
 import { EkranZadachi, type SostoyanieZadachi } from '../EkranZadachi';
@@ -436,14 +437,23 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       onNext={next}
       last={last}
       zakladka={
-        <BookmarkButton
-          section={razdel.razdel}
-          place="trenazher"
-          refId={dannye.id}
-          title={T.ekran.zakladka(nazvaniyaTekst[tekushchaya.p] ?? '')}
-          href={razdel.zadachaHref(dannye.id)}
-          className="trn-zakladka"
-        />
+        <>
+          <BookmarkButton
+            section={razdel.razdel}
+            place="trenazher"
+            refId={dannye.id}
+            title={T.ekran.zakladka(nazvaniyaTekst[tekushchaya.p] ?? '')}
+            href={razdel.zadachaHref(dannye.id)}
+            className="trn-zakladka"
+          />
+          {/* Репетитору: эту задачу — в черновик ДЗ. */}
+          <VDzKnopka
+            malaya
+            punkt={{ ist: 'zadacha', no: Number(razdel.razdel), ref: dannye.id, tip: tekushchaya.p }}
+            chto={nazvaniyaTekst[tekushchaya.p] ?? dannye.id}
+            label="В ДЗ"
+          />
+        </>
       }
       bezPodskazok={control}
       labels={{

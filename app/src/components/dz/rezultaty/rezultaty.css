@@ -1,0 +1,195 @@
+/* Результаты ДЗ для репетитора — «Стеклянная сцена». Префикс rez-.
+   Таблица прокручивается вбок внутри своей рамки, имя ученика
+   закреплено слева; клетки — кнопки 44 × 44. */
+
+.rez {
+  --stk-r-card: 20px;
+  display: grid;
+  /* Колонка не шире экрана: полоса пунктов и таблица прокручиваются внутри себя. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  padding-bottom: var(--fab-reserve);
+}
+.rez-head,
+.rez-blok {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.rez-title {
+  margin: 0;
+  font-size: var(--fs-h2, 1.6rem);
+  line-height: 1.2;
+}
+.rez-h2 {
+  margin: 0;
+  font-size: var(--fs-h4, 1.1rem);
+}
+.rez-muted {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.rez-tablica-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.rez-tablica {
+  border-collapse: separate;
+  border-spacing: 4px;
+}
+.rez-tablica th,
+.rez-tablica td {
+  text-align: center;
+  padding: 0;
+  font-size: var(--fs-caption);
+}
+.rez-tablica__imya {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 120px;
+  max-width: 180px;
+  padding: 0 var(--space-2) !important;
+  text-align: left !important;
+  background: var(--glass-bg-strong);
+  font-weight: 600;
+}
+.rez-sdano {
+  display: block;
+  font-weight: 400;
+  color: var(--color-success, #1f7a4d);
+}
+.rez-gruppa {
+  padding: var(--space-1) var(--space-2) !important;
+  border-radius: 10px;
+}
+.rez-gruppa--kartochki {
+  background: rgb(31 122 77 / 0.12);
+}
+.rez-gruppa--opornye {
+  background: rgb(232 129 47 / 0.15);
+}
+.rez-gruppa--trenazher {
+  background: rgb(38 99 235 / 0.12);
+}
+.rez-kletka {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-bg-strong);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.rez-kletka--verno {
+  background: rgb(31 122 77 / 0.25);
+}
+.rez-kletka--chast {
+  background: rgb(232 180 47 / 0.3);
+}
+.rez-kletka--neverno {
+  background: rgb(200 40 40 / 0.2);
+}
+.rez-kletka--reshaet {
+  background: rgb(38 99 235 / 0.15);
+}
+.rez-kletka--legenda {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: var(--space-2);
+  cursor: default;
+}
+.rez-kletka:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.rez-pusto {
+  color: var(--color-text-tertiary, #999);
+}
+.rez-itog {
+  white-space: nowrap;
+  padding: 0 var(--space-2) !important;
+}
+.rez-legenda,
+.rez-svodka,
+.rez-edinitsy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.rez-svodka,
+.rez-edinitsy {
+  display: grid;
+  gap: var(--space-2);
+}
+.rez-svodka li.has-errors {
+  font-weight: 600;
+}
+.rez-punkty-spisok {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--fs-caption);
+}
+.rez-podrobno__verh {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.rez-edinitsa {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  overflow-x: auto;
+}
+.rez-fakty {
+  margin: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+.rez-fakty > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.rez-fakty dt {
+  color: var(--color-text-secondary);
+}
+.rez-fakty dd {
+  margin: 0;
+}
+.rez-reshenie > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.rez-knopki {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.rez-knopki .stk-btn,
+.rez-oshibki {
+  min-height: 44px;
+}
+.rez-oshibki {
+  justify-self: start;
+}
+
+.rez > * {
+  min-width: 0;
+}

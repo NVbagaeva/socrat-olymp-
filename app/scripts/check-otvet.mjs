@@ -235,8 +235,21 @@ for (const [input, want] of cases) {
   check(got === want, `таблица варианта ${JSON.stringify(input)}: ждали ${want}, получили ${got}`);
 }
 
+/* ── Проверка ответа ДЗ: одна таблица для сайта, заглушки и базы ──── */
+const { proveritOtvetDz } = requireSrc('lib/otvet/proverkaDz.ts');
+const { proveritMock } = await import('./lib/dz-mock.mjs');
+const dzCases = JSON.parse(
+  fs.readFileSync(path.join(APP, 'src/lib/otvet/proverkaDzCases.json'), 'utf8'),
+).cases;
+for (const [input, answer, want] of dzCases) {
+  const got = proveritOtvetDz(input, answer).kind;
+  check(got === want, `ДЗ ${JSON.stringify(input)} при ответе ${answer}: ждали ${want}, получили ${got}`);
+  const mock = proveritMock(input, answer).kind;
+  check(mock === want, `заглушка ДЗ ${JSON.stringify(input)}: ждали ${want}, получили ${mock}`);
+}
+
 console.log(
-  `Модуль ответов: ${checks} проверок (запись ${NORMAL.length}, чтение ${READ.length}, число ${NUMBER.length}, таблица варианта ${cases.length}), не прошло ${failures.length}.`,
+  `Модуль ответов: ${checks} проверок (запись ${NORMAL.length}, чтение ${READ.length}, число ${NUMBER.length}, таблица варианта ${cases.length}, таблица ДЗ ${dzCases.length}), не прошло ${failures.length}.`,
 );
 if (failures.length > 0) {
   for (const f of failures) console.error(`  НЕТ ${f}`);

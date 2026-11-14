@@ -18,6 +18,20 @@ export interface KartochkaFlipProps {
   variant: number;
   /** Оценка: «Знаю» / «Не знаю» или итог автопроверки. */
   onOtvet: (znayu: boolean) => void;
+  /**
+   * Домашнее задание: ответ проверяет база (lib/dz/api → homework_check),
+   * оборот приходит вместе с итогом. format — неверная запись, попытка
+   * не тратится. Без этого — проверка по отпечатку в браузере.
+   */
+  proverka?: (
+    vvod: string,
+  ) => Promise<
+    { prav: boolean; oborot: { back: string; pochemu?: string } } | { format: string } | null
+  >;
+  /** Домашнее задание: карточка уже пройдена — итог и оборот сразу. */
+  gotovo?: { prav: boolean; vvod: string; oborot: { back: string; pochemu?: string } };
+  /** Подписи кнопок самооценки вместо «Знаю / Не знаю» (ДЗ: «Знаю / Повторить»). */
+  podpisi?: { znayu: string; neZnayu: string };
 }
 
 /** Свайп дальше этого — оценка, ближе — карточка возвращается. */
@@ -38,11 +52,27 @@ function vPole(e: KeyboardEvent): boolean {
  * кнопки, ← / → или свайп. Компонент живёт одну карточку: следующая
  * монтируется заново (key), состояние не переносится.
  */
-export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps) {
+export function KartochkaFlip({
+  k,
+  tema,
+  variant,
+  onOtvet,
+  proverka,
+  gotovo,
+  podpisi,
+}: KartochkaFlipProps) {
   const sama = SAMOOCENKA.includes(k.type);
-  const [perevernuta, setPerevernuta] = useState(false);
+  const [perevernuta, setPerevernuta] = useState(gotovo !== undefined);
   /* Итог автопроверки: верно ли и что ввёл ученик. */
-  const [avto, setAvto] = useState<{ prav: boolean; vvod: string } | null>(null);
+  const [avto, setAvto] = useState<{ prav: boolean; vvod: string } | null>(
+    gotovo === undefined ? null : { prav: gotovo.prav, vvod: gotovo.vvod },
+  );
+  /* ДЗ: оборот пришёл из базы вместе с итогом. */
+  const [oborotDz, setOborotDz] = useState<{ back: string; pochemu?: string } | null>(
+    gotovo?.oborot ?? null,
+  );
+  const [zhdem, setZhdem] = useState(false);
+  const [formatDz, setFormatDz] = useState<string | null>(null);
   const [vvod, setVvod] = useState('');
   const [oshibkaVvoda, setOshibkaVvoda] = useState(false);
   const [dx, setDx] = useState(0);
@@ -53,12 +83,35 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
   /* Оборот: открытый текст, а у автопроверки — расшифрованный после ответа. */
   const tekstOborota = useMemo<{ back: string; pochemu?: string }>(
     () =>
-      k.zakryto === undefined
-        ? { back: k.back, ...(k.pochemu === undefined ? {} : { pochemu: k.pochemu }) }
-        : (JSON.parse(otpechatok.openText(k.zakryto, k.id)) as { back: string; pochemu?: string }),
-    [k],
+      oborotDz !== null
+        ? oborotDz
+        : k.zakryto === undefined
+          ? { back: k.back, ...(k.pochemu === undefined ? {} : { pochemu: k.pochemu }) }
+          : (JSON.parse(otpechatok.openText(k.zakryto, k.id)) as {
+              back: string;
+              pochemu?: string;
+            }),
+    [k, oborotDz],
   );
-  const oborotVidno = k.zakryto === undefined || avto !== null;
+  const oborotVidno =
+    proverka !== undefined && !sama ? oborotDz !== null : k.zakryto === undefined || avto !== null;
+
+  /** ДЗ: ответ — в базу; итог и оборот — из её ответа. */
+  async function proveritVBaze(vvod: string, pokaz: string) {
+    if (proverka === undefined || zhdem) return;
+    setZhdem(true);
+    setFormatDz(null);
+    const itog = await proverka(vvod).catch(() => null);
+    setZhdem(false);
+    if (itog === null) return;
+    if ('format' in itog) {
+      setFormatDz(itog.format);
+      return;
+    }
+    setOborotDz(itog.oborot);
+    setAvto({ prav: itog.prav, vvod: pokaz });
+    setPerevernuta(true);
+  }
 
   const mozhnoOtsenit = sama && perevernuta;
   const otvecheno = avto !== null;
@@ -69,7 +122,12 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
   }
 
   function otvetitVerno(skazal: boolean) {
-    if (k.otpechatok === undefined || otvecheno) return;
+    if (otvecheno) return;
+    if (proverka !== undefined) {
+      void proveritVBaze(skazal ? VERNO : NEVERNO, skazal ? T.verno : T.neverno);
+      return;
+    }
+    if (k.otpechatok === undefined) return;
     const prav = otpechatok.choiceMatches(skazal ? VERNO : NEVERNO, k.otpechatok);
     setAvto({ prav, vvod: skazal ? T.verno : T.neverno });
     setPerevernuta(true);
@@ -77,12 +135,17 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
 
   function proverit(e?: FormEvent) {
     e?.preventDefault();
-    if (k.otpechatok === undefined || otvecheno) return;
-    if (parseAnswer(vvod) === null) {
+    if (otvecheno) return;
+    if (vvod.trim() === '' || (proverka === undefined && parseAnswer(vvod) === null)) {
       setOshibkaVvoda(true);
       pole.current?.focus();
       return;
     }
+    if (proverka !== undefined) {
+      void proveritVBaze(vvod, vvod.trim());
+      return;
+    }
+    if (k.otpechatok === undefined) return;
     setAvto({ prav: otpechatok.answerMatches(vvod, k.otpechatok), vvod: vvod.trim() });
     setPerevernuta(true);
   }
@@ -251,7 +314,14 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
                         }}
                       />
                     </label>
-                    <Button type="submit">{T.proverit}</Button>
+                    <Button type="submit" disabled={zhdem}>
+                      {T.proverit}
+                    </Button>
+                    {formatDz === null ? null : (
+                      <p className="field__msg" role="status">
+                        {formatDz}
+                      </p>
+                    )}
                     {oshibkaVvoda ? (
                       <p className="field__msg field__msg--error" role="alert">
                         {T.pustoyOtvet}
@@ -330,10 +400,10 @@ export function KartochkaFlip({ k, tema, variant, onOtvet }: KartochkaFlipProps)
                 className="kart-actions__ne"
                 onClick={() => onOtvet(false)}
               >
-                <span aria-hidden="true">←</span> {T.neZnayu}
+                <span aria-hidden="true">←</span> {podpisi?.neZnayu ?? T.neZnayu}
               </Button>
               <Button className="kart-actions__da" onClick={() => onOtvet(true)}>
-                {T.znayu} <span aria-hidden="true">→</span>
+                {podpisi?.znayu ?? T.znayu} <span aria-hidden="true">→</span>
               </Button>
             </>
           ) : (

@@ -42,7 +42,7 @@ import { razborSheetSteps, type RazborHtml } from '@/lib/vychisleniya/razbor';
 import type { HwFull } from './api';
 import type { PrintList } from './links';
 import { tasksOf } from './results';
-import type { HwRecipientView, HwTaskView, HwView } from './types';
+import type { HwPartView, HwRecipientView, HwTaskView, HwView } from './types';
 
 /** Очистка вёрстки из базы: в браузере — sanitizeHtml. */
 export type Sanitize = (html: string) => string;
@@ -57,6 +57,13 @@ export interface PrintSource {
   recipients: readonly Pick<HwRecipientView, 'userId' | 'name'>[];
   /** Ключи по id задачи; листу ученика не нужны. */
   keys: ReadonlyMap<string, HwKey>;
+  /** Пункты ДЗ: карточки печатаются отдельной страницей. Нет — всё задачи (ДЗ этапа 3). */
+  parts?: readonly Pick<HwPartView, 'id' | 'source'>[];
+}
+
+/** Задачи карточек — на свою страницу, остальные — в лист по порядку. */
+function kartochnye(source: Pick<PrintSource, 'parts'>): ReadonlySet<string> {
+  return new Set((source.parts ?? []).filter((p) => p.source === 'kartochki').map((p) => p.id));
 }
 
 export type SheetTheme = 'color' | 'print';
@@ -200,12 +207,14 @@ function sheet(
     subtitle,
     ...(group.student === null ? {} : { variant: group.student.name }),
   });
+  const karty = kartochnye(source);
+  const zadachi = (group: PrintGroup) => group.tasks.filter((t) => !karty.has(t.partId));
   const blockOf = (group: PrintGroup): PrintBlock => ({
     head: false,
     title: '',
     note: '',
     leadItems: lead,
-    tasks: group.tasks.map((task, i) => ({
+    tasks: zadachi(group).map((task, i) => ({
       no: i + 1,
       id: task.id,
       questionHtml: options.sanitize(task.questionHtml),
@@ -231,10 +240,67 @@ function sheet(
       ? { variants: groups.map((group) => ({ title: titleOf(group), blocks: [blockOf(group)] })) }
       : {}),
     withAnswerLine: !teacher,
-    extraItems: teacher ? keyItems(groups, source.keys) : [],
+    extraItems: [
+      ...kartochkiItems(groups, karty, teacher, source.keys, options.sanitize),
+      ...(teacher ? keyItems(groups.map((g) => ({ ...g, tasks: zadachi(g) })), source.keys) : []),
+    ],
     foot,
     kit: null,
   };
+}
+
+/**
+ * Карточки — отдельной страницей после задач: у ученика вопрос (и
+ * чертёж, если он часть вопроса) без ответов, у учителя — с ответом и
+ * пояснением. Общие карточки печатаются один раз.
+ */
+function kartochkiItems(
+  groups: readonly PrintGroup[],
+  karty: ReadonlySet<string>,
+  teacher: boolean,
+  keys: ReadonlyMap<string, HwKey>,
+  clean: Sanitize,
+): string[] {
+  const seen = new Set<string>();
+  const list = groups
+    .flatMap((g) => g.tasks)
+    .filter((t) => karty.has(t.partId) && !seen.has(t.id) && seen.add(t.id) !== undefined);
+  if (list.length === 0) return [];
+  return [
+    sectionHead(T.kartochki, teacher ? T.kartochkiNote.uchitel : T.kartochkiNote.uchenik),
+    ...list.map((t, i) => {
+      const k = t.view.kartochka;
+      const fig = k?.figuraNaLitse === true ? (k.figury[0] ?? null) : null;
+      const key = keys.get(t.id);
+      const oborot = key?.razbor?.oborot ?? (k?.back === undefined ? undefined : { back: k.back, ...(k.pochemu === undefined ? {} : { pochemu: k.pochemu }) });
+      const otvet =
+        key === undefined
+          ? ''
+          : `<p class="sheet-task-answer">${T.answer}: <b>${escape(
+              key.answer === 'da' || key.answer === 'net'
+                ? T.vernoOtvet(key.answer === 'da')
+                : displayAnswer(key.answer),
+            )}</b></p>`;
+      const solutionHtml = teacher
+        ? otvet +
+          (oborot === undefined
+            ? ''
+            : `<div>${clean(oborot.back)}</div>` +
+              (oborot.pochemu === undefined ? '' : `<p>${clean(oborot.pochemu)}</p>`))
+        : k?.tip === 'verno'
+          ? `<p class="sheet-task-answer">${escape(T.verno)} ______</p>`
+          : k?.tip === 'vychislenie'
+            ? `<p class="sheet-task-answer">${T.answer}: ______</p>`
+            : '';
+      return exampleItem({
+        label: T.kartochka(i + 1),
+        conditionHtml: clean(t.questionHtml),
+        figureSvg: fig === null ? null : clean(fig),
+        figureBelow: true,
+        solutionHtml,
+      });
+    }),
+  ];
 }
 
 /** Комментарий репетитора к заданию — рамкой перед задачами. */

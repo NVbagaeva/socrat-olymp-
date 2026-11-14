@@ -521,17 +521,19 @@ select pg_temp.fails(format($q$select public.homework_check(%L, '-3')$q$, :'c2')
 select pg_temp.fails(format($q$select public.homework_reveal(%L)$q$, :'c2'), 'due_passed');
 select pg_temp.ok((select attempts = 1 and state = 'open' from public.homework_answers where task_id = :'c2'),
   'ответ после срока записался');
--- Решения сразу и после сдачи: ответ после срока принимается (с опозданием).
+-- Решения сразу и после сдачи: после срока — только просмотр (с
+-- миграции 20261113130000_dz_istochniki.sql; прежде ответ принимался с
+-- опозданием). Решения открыты: срок прошёл — как сдано.
+select pg_temp.as_user(:'s1');
+select pg_temp.fails(format($q$select public.homework_solution(%L)$q$, :'p1'), 'not_yet');
 reset role;
 update public.homework set due_at = now() - interval '1 day' where id in (:'hw_a', :'hw_p');
 set role authenticated;
 select pg_temp.as_user(:'s1');
-select public.homework_check(:'a3', '12') as r \gset
-select pg_temp.ok(:'r'::jsonb @> '{"kind":"right","state":"right"}'
-  and jsonb_typeof(:'r'::jsonb -> 'solution') = 'object', 'instant: ответ после срока не принят: ' || :'r');
-select pg_temp.ok(public.homework_check(:'p1', '0.5') @> '{"kind":"right","state":"right","solution":null}',
-  'after_submit: ответ после срока не принят или решение до сдачи');
-select pg_temp.fails(format($q$select public.homework_solution(%L)$q$, :'p1'), 'not_yet');
+select pg_temp.fails(format($q$select public.homework_check(%L, '12')$q$, :'a3'), 'due_passed');
+select pg_temp.fails(format($q$select public.homework_check(%L, '0.5')$q$, :'p1'), 'due_passed');
+select pg_temp.fails(format($q$select public.submit_homework(%L)$q$, :'hw_p'), 'due_passed');
+select pg_temp.ok(public.homework_solution(:'p1') ->> 'answer' = '0.5', 'после срока решение «после сдачи» закрыто');
 
 -- Репетитор видит решения всегда, но сам не отвечает; чужой — ничего.
 select pg_temp.as_user(:'t1');

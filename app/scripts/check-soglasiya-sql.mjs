@@ -144,6 +144,24 @@ function normalizeCasesSql() {
   );
 }
 
+/* Помощники проверок ДЗ — в начало каждого файла (функции pg_temp
+   живут в одном сеансе psql). */
+const dzHelpers = () =>
+  fs.readFileSync(path.join(SUPA, 'tests', 'dz-pomoshchniki.sql'), 'utf8');
+const DZ_ISTOCHNIKI = '20261113130000_dz_istochniki.sql';
+
+/* Таблица примеров проверки ответа ДЗ — временной таблицей. */
+function proverkaCasesSql() {
+  const { cases } = JSON.parse(
+    fs.readFileSync(path.join(ROOT, 'app/src/lib/otvet/proverkaDzCases.json'), 'utf8'),
+  );
+  const lit = (v) => `'${String(v).replace(/'/g, "''")}'`;
+  return (
+    'create temp table proverka_cases (input text, answer text, expected text);\n' +
+    `insert into proverka_cases values\n${cases.map((c) => `(${c.map(lit).join(', ')})`).join(',\n')};\n`
+  );
+}
+
 const SUITES = [
   {
     name: 'Согласия',
@@ -210,6 +228,45 @@ const SUITES = [
     ],
   },
   {
+    /* ДЗ из трёх источников (docs/kabinet-dz-istochniki.md): карточки,
+       опорные, тренажёр; виды ответа и отметки самооценки; черновик и
+       шаблоны; права к новым таблицам. В начало теста — таблица
+       примеров проверки ответа, общая с сайтом и заглушкой
+       (app/src/lib/otvet/proverkaDzCases.json). */
+    name: 'ДЗ из трёх источников',
+    db: 'dz_istochniki',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['dz-lyudi.sql', path.join(SUPA, 'tests', 'dz-lyudi.sql'), dzHelpers],
+      [
+        'dz-istochniki.test.sql',
+        path.join(SUPA, 'tests', 'dz-istochniki.test.sql'),
+        () => dzHelpers() + proverkaCasesSql(),
+      ],
+    ],
+  },
+  {
+    /* Перенос ДЗ этапа 3: миграции до ДЗ-источников, ДЗ кодом этапа 3,
+       потом миграция и сверка — задачи, ключи, ход решения те же. */
+    name: 'Перенос ДЗ этапа 3',
+    db: 'dz_perenos',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.filter((f) => f < DZ_ISTOCHNIKI).map(migration),
+      ['kabinet_katalog.sql', path.join(SUPA, 'seed', 'kabinet_katalog.sql')],
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['dz-lyudi.sql', path.join(SUPA, 'tests', 'dz-lyudi.sql'), dzHelpers],
+      ['dz-perenos.setup.sql', path.join(SUPA, 'tests', 'dz-perenos.setup.sql'), dzHelpers],
+      ...migrations.filter((f) => f >= DZ_ISTOCHNIKI).map(migration),
+      ['dz-perenos.test.sql', path.join(SUPA, 'tests', 'dz-perenos.test.sql'), dzHelpers],
+    ],
+  },
+  {
     /* Регистрация только с почтой российских почтовых сервисов: хук,
        триггер, смена почты, ручной список, старые пользователи
        (supabase/tests/domeny.test.sql). Без добавленного x.ru. */
@@ -256,5 +313,5 @@ for (const suite of SUITES) {
 stop();
 if (failed) process.exit(1);
 console.log(
-  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8 и почтовые домены в базе: все проверки прошли.',
+  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, ДЗ из трёх источников, перенос ДЗ и почтовые домены в базе: все проверки прошли.',
 );

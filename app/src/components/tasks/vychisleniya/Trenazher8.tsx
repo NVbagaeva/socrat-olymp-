@@ -6,6 +6,7 @@ import { BookmarksList, HistoryList, MistakesList } from '@/components/progress/
 import { TrainerSessionHost, type ConfiguratorApi, type SummaryActions } from '../session';
 import type { SummaryData } from '../session/TrainerSummary';
 import { ShagiResheniya } from '../steklo';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import {
   ItogiSessii,
   ProgressPanel,
@@ -347,6 +348,22 @@ function Konfigurator8({
             const tipy = PROTOTYPES8_ORDER.filter((id) => selected.has(id));
             start(buildByPrototypes(tipy, vybor.count ?? BEZ_KONCA, closedTasks(log)));
           }}
+          dop={(() => {
+            /* Репетитору: выбранные темы — в черновик ДЗ правилом «типы × сколько». */
+            const tipy = PROTOTYPES8_ORDER.filter((id) => selected.has(id));
+            return tipy.length === 0 ? null : (
+              <VDzKnopka
+                punkt={{
+                  ist: 'trenazher',
+                  no: 8,
+                  tipy,
+                  skolko: Math.min(20, vybor.count ?? Math.max(5, Math.min(10, tipy.length))),
+                  kazhdomu: false,
+                }}
+                chto={tipy.join(', ')}
+              />
+            );
+          })()}
           labels={TRENAZHER8.vybor}
         />
       </div>

@@ -2,8 +2,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Podgotovka8Screen } from '@/components/tasks/vychisleniya/Podgotovka8Screen';
-import { IssueHomeworkBlock8 } from '@/components/dz/Razdel8Dz';
-import { prepBlockBySlug } from '@/lib/vychisleniya/prep/blocks';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { Podgotovka8Shell } from '@/components/tasks/vychisleniya/Podgotovka8Shell';
 import { OPORNYE } from '@/content/opornye';
 import { vychisleniyaTitle } from '@/content/vychisleniya';
@@ -48,8 +47,11 @@ export default async function Podgotovka8BlockPage({ params }: { params: Params 
           listHref={`${base}/${OPORNYE.tail}`}
         />
       </ErrorBoundary>
-      {/* Репетитору со входом: типы этого блока — домашним заданием. */}
-      <IssueHomeworkBlock8 group={prepBlockBySlug(block.slug)?.group ?? ''} />
+      {/* Репетитору: весь блок — в черновик ДЗ (при выдаче — аналоги). */}
+      <VDzKnopka
+        punkt={{ ist: 'opornye', no: 8, blok: block.slug, zadachi: null, kazhdomu: false }}
+        chto={`блок «${block.nazvanie}»`}
+      />
     </Podgotovka8Shell>
   );
 }

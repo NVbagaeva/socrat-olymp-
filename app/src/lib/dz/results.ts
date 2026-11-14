@@ -9,7 +9,7 @@
 import type { HwAnswerView, HwRecipientView, HwState, HwTaskView } from './types';
 
 /** Клетка таблицы. */
-export type CellMark = 'right' | 'wrong' | 'revealed' | 'trying' | 'none';
+export type CellMark = 'right' | 'wrong' | 'revealed' | 'trying' | 'none' | 'known' | 'repeat';
 
 export interface Cell {
   task: HwTaskView;
@@ -34,6 +34,8 @@ export function markOf(answer: HwAnswerView | null): CellMark {
     wrong: 'wrong',
     revealed: 'revealed',
     open: answer.attempts > 0 ? 'trying' : 'none',
+    known: 'known',
+    repeat: 'repeat',
   };
   return byState[answer.state];
 }

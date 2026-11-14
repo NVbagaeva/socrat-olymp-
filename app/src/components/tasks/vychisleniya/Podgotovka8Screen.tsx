@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button } from '@/components/ui';
 import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
 import { opornayaHref } from '@/lib/vychisleniya/links';
 import { prep8Page } from '@/content/vychisleniya';
@@ -227,6 +228,13 @@ export function Podgotovka8Screen({
             refId={`${slug}#${base.no}`}
             title={`№8 · Опорные задачи: ${title}, задача ${base.no}`}
             href={opornayaHref(slug, base.no)}
+          />
+          {/* Репетитору: эту задачу — в черновик ДЗ (при выдаче — аналог). */}
+          <VDzKnopka
+            malaya
+            punkt={{ ist: 'opornye', no: 8, blok: slug, zadachi: [base.id], kazhdomu: false }}
+            chto={`${title}, задача ${base.no}`}
+            label="В ДЗ"
           />
         </div>
         {/* Подсказка — точная формула свойства. Появляется после ошибки

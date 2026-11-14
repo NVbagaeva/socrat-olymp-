@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { useBeforeFinish } from '../session/useBeforeFinish';
 import { useSessionReport } from '../session/useSessionReport';
 import type { Shag } from '../steklo';
@@ -316,14 +317,23 @@ export function Trenazher8Screen({
       onNext={next}
       last={last}
       zakladka={
-        <BookmarkButton
-          section="8"
-          place="trenazher"
-          refId={zadacha.id}
-          title={`№8 · тренажёр, тип ${zadacha.prototype}`}
-          href={zadachaHref(zadacha.id)}
-          className="trn-zakladka"
-        />
+        <>
+          <BookmarkButton
+            section="8"
+            place="trenazher"
+            refId={zadacha.id}
+            title={`№8 · тренажёр, тип ${zadacha.prototype}`}
+            href={zadachaHref(zadacha.id)}
+            className="trn-zakladka"
+          />
+          {/* Репетитору: эту задачу — в черновик ДЗ. */}
+          <VDzKnopka
+            malaya
+            punkt={{ ist: 'zadacha', no: 8, ref: zadacha.id, tip: zadacha.prototype }}
+            chto={`тип ${zadacha.prototype}`}
+            label="В ДЗ"
+          />
+        </>
       }
       bezPodskazok={control}
       labels={{
