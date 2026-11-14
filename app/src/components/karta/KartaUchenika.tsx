@@ -15,6 +15,7 @@ import { bookmarkId, bookmarks, isBookmarked, toggleBookmark } from '@/lib/zakla
 import { KartaDz } from './KartaDz';
 import { KartaEkran } from './KartaEkran';
 import type { ZakladkiKarty } from './KartaPanel';
+import { nomerRazdela } from '@/content/struktura';
 
 export function KartaUchenika({ debug = false }: { debug?: boolean }) {
   const user = useSessionUser();
@@ -31,7 +32,7 @@ export function KartaUchenika({ debug = false }: { debug?: boolean }) {
             section: String(no),
             place: 'razdel',
             ref: 'karta',
-            title: `№${no} ${razdelInfo(no).nazvanie}`,
+            title: `№${nomerRazdela(no)} ${razdelInfo(no).nazvanie}`,
             href: `${KARTA_HREF}#${no}`,
           }),
         ),

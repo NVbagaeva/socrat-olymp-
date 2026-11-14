@@ -901,3 +901,16 @@
     justify-self: stretch;
   }
 }
+
+/* Пометка вида у задачи №16 в ЕГЭ-2027: экономическая или на оптимизацию. */
+.vo-vid {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  vertical-align: middle;
+}

@@ -5,6 +5,7 @@
  */
 
 import { vremya } from '../vychisleniya8/trenazher';
+import { nomerRazdela } from '../struktura';
 
 export { vremya };
 
@@ -81,7 +82,7 @@ export const TRENAZHER3 = {
     oshibkaZagruzki: 'Задача не открылась. Проверьте интернет и попробуйте ещё раз.',
     povtorit: 'Попробовать ещё раз',
     chertezh: 'Чертёж к задаче',
-    zakladka: (tip: string) => `№3 · тренажёр, ${tip}`,
+    zakladka: (tip: string) => `№${nomerRazdela('stereometriya')} · тренажёр, ${tip}`,
   },
   itogi: {
     title: (dolya: number) =>
@@ -121,7 +122,7 @@ export const TRENAZHER3 = {
     istoriya: 'История тренировок',
     istoriiNet: 'Завершённых тренировок пока нет.',
     sbros: 'Сбросить прогресс',
-    sbrosVopros: 'Сбросить прогресс по заданию №3? Счётчики и список ошибок будут удалены.',
+    sbrosVopros: `Сбросить прогресс по заданию №${nomerRazdela('stereometriya')}? Счётчики и список ошибок будут удалены.`,
     otmena: 'Отмена',
   },
 };

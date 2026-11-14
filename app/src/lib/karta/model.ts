@@ -21,7 +21,7 @@
  */
 
 import { MAX_BALL, type EgeNo20 } from '@/content/variantOnline/bally';
-import { TESTOVYJ_33 } from '@/content/variantOnline/shkala';
+import { TESTOVYJ_RABOTY } from '@/content/variantOnline/shkala';
 import { PROLIV_POROG, PROLIV_SVYAZKI } from '@/content/karta/proliv';
 import { isMistake, kindStats, type LogOutcome, type ProgressLog } from '@/lib/progressLog/model';
 
@@ -261,8 +261,8 @@ function sleduyushchaya(oblasti: readonly SostoyanieOblasti[]): number | null {
 
 /** Первичный балл → тестовый по шкале сайта (33 первичных). */
 export function testovyyBall(pervichnyy: number): number {
-  const k = Math.max(0, Math.min(TESTOVYJ_33.length - 1, Math.round(pervichnyy)));
-  return TESTOVYJ_33[k] ?? 0;
+  const k = Math.max(0, Math.min(TESTOVYJ_RABOTY.length - 1, Math.round(pervichnyy)));
+  return TESTOVYJ_RABOTY[k] ?? 0;
 }
 
 function prognoz(oblasti: readonly SostoyanieOblasti[]): Prognoz {

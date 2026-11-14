@@ -24,6 +24,9 @@ import {
   saveSpace,
 } from '@/lib/variant/handoff';
 import { SECTIONS, sectionInfo } from '@/lib/variant/sections';
+import { VARIANT_NUMBERS, VARIANT_SKORO, podpis1 } from '@/lib/variant/struktura';
+import { nomerEge } from '@/content/struktura';
+import { vseRazdely } from '@/content/tasks';
 import {
   buildSet,
   currentVersion,
@@ -87,6 +90,15 @@ function Segment<I extends string>({
       {note === undefined ? null : <p className="var-field__note">{note}</p>}
     </div>
   );
+}
+
+/** Плитки заданий: первая часть экзамена по действующей структуре. */
+const PLITKI = SECTIONS.filter((s) => VARIANT_NUMBERS.includes(s.egeNumber));
+
+/** Название раздела, для которого задач варианта ещё нет. */
+function nazvanieRazdela(hranenie: number): string {
+  const task = vseRazdely.find((t) => t.hranenie === hranenie);
+  return task?.shortTitle ?? task?.name ?? '';
 }
 
 function sameConfig(a: VariantConfig, b: VariantConfig): boolean {
@@ -157,9 +169,10 @@ export function VariantScreen() {
     try {
       const built = await buildSet(next, seed, zameny);
       setSet(built.set);
-      if (built.failed.length > 0) setError(T.failed(built.failed.map((n) => `№${n}`).join(', ')));
+      if (built.failed.length > 0)
+        setError(T.failed(built.failed.map((n) => `№${podpis1(n)}`).join(', ')));
     } catch {
-      setError(T.failed(next.tasks.map((n) => `№${n}`).join(', ')));
+      setError(T.failed(next.tasks.map((n) => `№${podpis1(n)}`).join(', ')));
     } finally {
       setBusy(false);
     }
@@ -234,6 +247,7 @@ export function VariantScreen() {
       const tasks = on
         ? c.tasks.filter((x) => x !== n)
         : EGE_NUMBERS.filter((x) => x === n || c.tasks.includes(x));
+      /* Порядок — по номерам хранения: он же порядок номеров ЕГЭ. */
       return { ...c, tasks };
     });
   }
@@ -264,7 +278,7 @@ export function VariantScreen() {
   const openInfo = open === null ? null : sectionInfo(open);
   const summary = T.summaryNbsp(config.tasks.length, config.count);
   const sectionsNoLevel = useMemo(
-    () => SECTIONS.filter((s) => !s.capabilities.difficulty).map((s) => s.egeNumber),
+    () => PLITKI.filter((s) => !s.capabilities.difficulty).map((s) => s.egeNumber),
     [],
   );
 
@@ -330,7 +344,7 @@ export function VariantScreen() {
               type="button"
               className="var-link"
               aria-label="Выбрать все задания"
-              onClick={() => setConfig((c) => ({ ...c, tasks: [...EGE_NUMBERS] }))}
+              onClick={() => setConfig((c) => ({ ...c, tasks: [...VARIANT_NUMBERS] }))}
             >
               {T.all}
             </button>
@@ -345,7 +359,7 @@ export function VariantScreen() {
         </div>
         <p className="var-sostav__note">{T.sostavNote}</p>
         <ul className="var-plitki">
-          {SECTIONS.map((s) => {
+          {PLITKI.map((s) => {
             const n = s.egeNumber;
             const on = config.tasks.includes(n);
             const chosen = config.subtypes[n];
@@ -373,7 +387,7 @@ export function VariantScreen() {
                     toggleTask(n);
                   }}
                 >
-                  <span className="var-plitka__no">{n}</span>
+                  <span className="var-plitka__no">{podpis1(n)}</span>
                   <span className="var-plitka__name">{name}</span>
                   {chosen === undefined ? null : (
                     <span className="var-plitka__metka">{T.podtipovMetka(chosen.length)}</span>
@@ -383,7 +397,7 @@ export function VariantScreen() {
                   <button
                     type="button"
                     className="var-plitka__more"
-                    aria-label={T.podtipyKnopka(n, s.title)}
+                    aria-label={T.podtipyKnopka(podpis1(n), s.title)}
                     aria-haspopup="dialog"
                     onClick={() => setOpen(n)}
                   >
@@ -397,6 +411,16 @@ export function VariantScreen() {
               </li>
             );
           })}
+          {/* Раздел первой части, для которого задач ещё нет: плитка без нажатия. */}
+          {VARIANT_SKORO.map((hranenie) => (
+            <li key={`skoro-${hranenie}`} className="var-plitka is-skoro">
+              <span className="var-plitka__main" aria-disabled="true">
+                <span className="var-plitka__no">{nomerEge(hranenie)}</span>
+                <span className="var-plitka__name">{nazvanieRazdela(hranenie)}</span>
+                <span className="var-plitka__metka">{T.skoro}</span>
+              </span>
+            </li>
+          ))}
         </ul>
       </section>
 
@@ -616,7 +640,7 @@ export function VariantScreen() {
               ))}
             </div>
             <p className="var-field__note">
-              {T.levelNote} ({sectionsNoLevel.map((n) => `№${n}`).join(', ')}).
+              {T.levelNote} ({sectionsNoLevel.map((n) => `№${podpis1(n)}`).join(', ')}).
             </p>
           </div>
           <div id="var-g-count" className="var-field">
@@ -811,7 +835,10 @@ export function VariantScreen() {
         title={
           openInfo === null
             ? ''
-            : T.podtipy.title(openInfo.egeNumber, T.short[openInfo.egeNumber] ?? openInfo.title)
+            : T.podtipy.title(
+                podpis1(openInfo.egeNumber),
+                T.short[openInfo.egeNumber] ?? openInfo.title,
+              )
         }
         subtitle={
           openInfo === null

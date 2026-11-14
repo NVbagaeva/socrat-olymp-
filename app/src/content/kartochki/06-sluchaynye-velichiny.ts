@@ -17,6 +17,7 @@
 import type { Kartochka, Koloda, ProverkaFormuly } from '@/lib/kartochki/tipy';
 import { YAKOR_6 } from '@/lib/zadanie6/teoriya-yakorya';
 import type { RisEilera } from '@/lib/zadanie6/risunkiKartochek';
+import { nomerRazdela } from '@/content/struktura';
 
 const B = 'база' as const;
 const E = 'важно для ЕГЭ' as const;
@@ -178,8 +179,7 @@ const kartochki: Kartochka[] = [
     task: 6,
     topic: 'diagrammy',
     type: 'svoystvo',
-    front:
-      'Диаграмма Эйлера в №6: что означают прямоугольник, точка, число над точкой и число справа снизу?',
+    front: `Диаграмма Эйлера в №${nomerRazdela('sluchainye-velichiny')}: что означают прямоугольник, точка, число над точкой и число справа снизу?`,
     back: 'Прямоугольник — весь опыт $S$, точка — элементарное событие. Над точкой — значение величины в этом исходе, справа снизу — вероятность исхода.',
     level: B,
     source: R('eiler-chtenie'),

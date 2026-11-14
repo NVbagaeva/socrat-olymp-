@@ -4,13 +4,14 @@
  */
 
 import { foot, head } from './sheet12.js';
+import { nomerRazdela } from './struktura';
 
 export const SHEET_3 = {
   head,
   foot,
-  chip: '№3',
+  chip: `№${nomerRazdela('stereometriya')}`,
   title: 'Стереометрия',
-  runner: 'Задание 3. Стереометрия',
+  runner: `Задание ${nomerRazdela('stereometriya')}. Стереометрия`,
   uchenik: 'Лист ученика',
   uchitel: 'Лист учителя: чертежи с построениями, решения и ответы',
   otvety: 'Ответы',
