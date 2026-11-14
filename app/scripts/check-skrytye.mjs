@@ -96,19 +96,24 @@ const propushcheno = [];
    Правило, которому в сборке ничего не соответствует, — ошибка: список
    не должен залёживаться.
 
+   kod — код скрытого раздела; правило действует, только когда в сборке
+     скрыт этот раздел;
    gde — адрес страницы (RegExp от пути в сборке без index.html);
    chto — 'ssylka' (ссылка на раздел) или 'nazvanie' (название на экране). */
 
-/** @type {{ gde: RegExp, chto: 'ssylka' | 'nazvanie', pochemu: string, kogda: string }[]} */
+/** @type {{ kod: string, gde: RegExp, chto: 'ssylka' | 'nazvanie', pochemu: string, kogda: string }[]} */
 const POKA = [];
 
 /* ── Скрытые разделы сборки ──────────────────────────────────────── */
 
 const { skrytyeRazdely, tasks } = requireSrc('content/tasks');
+/* Разделы, у которых короткое название — обычный оборот речи в теории
+   других разделов («Наибольшее и наименьшее значение на отрезке» в №9 и
+   №19): их ищут только по полному названию и по ссылкам. */
+const TOLKO_POLNOE_IMYA = new Set(['naibolshee-naimenshee']);
 function imenaRazdela(task) {
-  return [
-    ...new Set([task?.shortTitle, task?.name].filter((x) => typeof x === 'string' && x !== '')),
-  ];
+  const imena = TOLKO_POLNOE_IMYA.has(task?.kod) ? [task?.name] : [task?.shortTitle, task?.name];
+  return [...new Set(imena.filter((x) => typeof x === 'string' && x !== ''))];
 }
 /** Первое из названий раздела, которое есть в тексте: { imya, mesto } или null. */
 function nazvanieV(tekst, r) {
@@ -287,7 +292,7 @@ function proveritNahodki() {
   const plohie = [];
   const razresheno = new Map();
   for (const n of nahodki) {
-    const pravilo = POKA.find((p) => p.chto === n.chto && p.gde.test(n.adres));
+    const pravilo = POKA.find((p) => p.kod === n.kod && p.chto === n.chto && p.gde.test(n.adres));
     if (pravilo === undefined) {
       plohie.push(n);
     } else {
@@ -309,7 +314,8 @@ function proveritNahodki() {
     }
     if (poAdresu.size > 60) console.log(`      … и ещё ${poAdresu.size - 60}`);
   }
-  for (const p of POKA) {
+  /* Правило раздела, который в этой сборке не скрыт, не проверяется. */
+  for (const p of POKA.filter((x) => razdely.some((r) => r.kod === x.kod))) {
     ok(
       srabotalo.has(p),
       `список POKA: правилу ${p.gde} (${p.chto}) в сборке ничего не соответствует — уберите его`,
