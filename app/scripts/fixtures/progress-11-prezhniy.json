@@ -1,0 +1,96 @@
+{
+  "_chto": "localStorage ученика, решавшего №11 до редизайна: ключи тренажёра (budetege:zadanie-11:v1 — счётчики по подтипам, ошибки и исходы задач «DP-07|b87») и опорных задач (budetege:zadanie-11:opornye:v1), записаны прежним кодом lib/progressStore.ts теми же вызовами, что делали прежние экраны (карточка задачи тренажёра Zadacha11 и экран опорных Opornye11Screen). Среди задач — задача прежнего генератора «RB-04|n…», её в банке нет. Нужен scripts/check-progress-11.mjs и браузерной проверке переноса.",
+  "budetege:zadanie-11:v1": {
+    "kinds": {
+      "DP-07": {
+        "done": 2,
+        "right": 2,
+        "seconds": 400
+      },
+      "SM-06": {
+        "done": 1,
+        "right": 0,
+        "seconds": 300
+      },
+      "PR-02": {
+        "done": 1,
+        "right": 1,
+        "seconds": 90
+      },
+      "RZ-04": {
+        "done": 1,
+        "right": 1,
+        "seconds": 45
+      },
+      "RB-04": {
+        "done": 1,
+        "right": 0,
+        "seconds": 180
+      },
+      "VD-02": {
+        "done": 1,
+        "right": 1,
+        "seconds": 410
+      },
+      "OK-01": {
+        "done": 1,
+        "right": 0,
+        "seconds": 200
+      },
+      "PG-01": {
+        "done": 1,
+        "right": 1,
+        "seconds": 120
+      }
+    },
+    "mistakes": [
+      "DP-07|a2591",
+      "SM-06|b47",
+      "RB-04|nq7x2k",
+      "VD-02|b138",
+      "OK-01|a2001"
+    ],
+    "outcomes": {
+      "DP-07|b87": "right",
+      "DP-07|a2591": "right",
+      "SM-06|b47": "wrong",
+      "PR-02|b2": "right",
+      "RZ-04|r1004": "right",
+      "RB-04|nq7x2k": "wrong",
+      "VD-02|b138": "right",
+      "OK-01|a2001": "wrong",
+      "PG-01|b211": "right"
+    }
+  },
+  "budetege:zadanie-11:opornye:v1": {
+    "kinds": {
+      "P11-03": {
+        "done": 3,
+        "right": 2,
+        "seconds": 0
+      },
+      "P11-06": {
+        "done": 2,
+        "right": 1,
+        "seconds": 0
+      },
+      "P11-00": {
+        "done": 1,
+        "right": 1,
+        "seconds": 0
+      }
+    },
+    "mistakes": [
+      "P11-03:2",
+      "P11-06:1"
+    ],
+    "outcomes": {
+      "P11-03:1": "right",
+      "P11-03:2": "wrong",
+      "P11-03:3": "right",
+      "P11-06:1": "revealed",
+      "P11-06:4": "right",
+      "P11-00:2": "right"
+    }
+  }
+}

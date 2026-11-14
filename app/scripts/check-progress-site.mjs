@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на общем тренажёре (№7, №6, №2, №13, №1, №9, №10) в браузере, на собранном сайте.
+   на общем тренажёре (№7, №6, №2, №13, №1, №9, №11, №10) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -40,8 +40,10 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (!['6', '7', '2', '13', '1', '9', '10'].includes(N)) {
-  console.error('Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9, 10)');
+if (!['6', '7', '2', '13', '1', '9', '11', '10'].includes(N)) {
+  console.error(
+    'Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9, 11, 10)',
+  );
   process.exit(2);
 }
 if (!fs.existsSync(path.join(OUT, 'zadaniya', N, 'index.html'))) {
@@ -140,6 +142,19 @@ function razdel() {
         const b = BLOKI_13.find((x) => x.id === blok);
         return b === undefined ? undefined : zadachiBloka(b).length;
       },
+      vBloke: (blok, key) => key.startsWith(`${blok}:`),
+    };
+  }
+  if (N === '11') {
+    /* У №11 банк — файлы подтипов: ключ задачи «подтип|откуда»; задача
+       опорного блока — «блок:номер». */
+    const { BLOKI } = requireSrc('lib/zadanie11/prep/bloki.ts');
+    return {
+      OLD: 'budetege:zadanie-11:v1',
+      OLD_OPORNYE: 'budetege:zadanie-11:opornye:v1',
+      NEW: 'budetege:zadanie-11:log:v1',
+      prototipOf: (id) => id?.split('|')[0],
+      zadachVBloke: (blok) => BLOKI.find((b) => b.id === blok)?.zadachi.length,
       vBloke: (blok, key) => key.startsWith(`${blok}:`),
     };
   }

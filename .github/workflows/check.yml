@@ -266,6 +266,20 @@ jobs:
         working-directory: app
         run: pnpm test:progress-10
 
+      # №11 на том же общем тренажёре: прежний прогресс (budetege:zadanie-11:v1
+      # и журнал после PR #340), задачи прежнего генератора, прежние записи
+      # тренировки (панель фильтров), файлы задач public/data/zadanie11 свежие
+      # и без ответов, «Где теряют балл» у всех 68 типов. Без браузера.
+      - name: Тренажёр №11 — перенос прежнего прогресса, файлы задач, тренировки
+        working-directory: app
+        run: |
+          pnpm test:progress-11
+          pnpm test:bank-11
+
+      - name: Тексты №11 для вычитки совпадают с исходниками
+        working-directory: app
+        run: pnpm test:zadanie-11-teksty
+
       # №1 на том же общем тренажёре: прежний прогресс (budetege:planimetriya-1:v1
       # и журнал после #340), прежняя запись тренировки панели фильтров, каждая
       # из 1714 задач собирается движком с тем же ответом. Без браузера.
@@ -961,6 +975,13 @@ jobs:
         working-directory: app
         run: pnpm test:progress-10-site
 
+      - name: Редизайн №11 — картинки и содержание не изменены
+        working-directory: app
+        run: pnpm test:redesign 11 origin/main
+
+      - name: Перенос прогресса №11 в браузере
+        working-directory: app
+        run: pnpm test:progress-11-site
       - name: Редизайн №1 — картинки и содержание не изменены
         working-directory: app
         run: pnpm test:redesign 1 origin/main

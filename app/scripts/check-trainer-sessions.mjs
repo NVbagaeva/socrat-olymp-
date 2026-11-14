@@ -29,7 +29,8 @@
         продолжена в другой вкладке»; «Продолжить здесь» показывает то,
         что сделано во второй.
      6. №11, ответ выбором варианта (подтип RZ-17): выбранный вариант
-        переживает перезагрузку.
+        переживает перезагрузку (общий тренажёр по банку: варианты —
+        .trn-vybor__knopka, выбор — поле value состояния экрана).
      7. Хранилище почти полно (старая тренировка другого раздела и
         посторонний ключ): новая тренировка записывается, старая чужая
         вытеснена, посторонний ключ цел. Места нет совсем: страница
@@ -50,8 +51,10 @@
                 варианта);
      №8, №2   — generate(прототип, seed[, уровень]).otvet (у №2 ключ — «прототип|seed»)
                 (lib/vychisleniya/generate.ts, lib/vektory/generate.ts);
-     №11      — reshitPlan(план, банк dannyeTrenazhera()): answer или
-                номер верного варианта (lib/zadanie11/trenazher/zadacha.ts);
+     №11      — общий тренажёр по банку, как у №7 и №6: ключ задачи
+                «подтип|откуда» → параметры из файлов задач
+                (lib/zadanie11/trening/dannye-server.ts) → solve подтипа:
+                answer или номер верного варианта;
      №4, №5   — otvetUchenika(прототип, параметры варианта) из банка
                 lib/veroyatnost; «Узнай метод» — метод, чей отпечаток
                 sealMetod совпал с отпечатком варианта uznayMetodPool();
@@ -139,17 +142,20 @@ function answer2(payload, at) {
   return { text: numberText(generate(prototype, seed).otvet) };
 }
 
-/** №11 (тренажёр с фильтрами): задание {k, seed?} → план по ключу → reshitPlan. */
-let bank11 = null;
+/** №11: в записи — ключи задач {id, p} (общий тренажёр по банку); ответ — solve подтипа. */
+let zadachi11 = null;
 function answer11(payload, at) {
-  const { reshitPlan } = requireSrc('lib/zadanie11/trenazher/zadacha');
-  const { planPoKlyuchu } = requireSrc('lib/zadanie11/trenazher/filtry11');
-  const { osnovaSeed } = requireSrc('lib/trenazher/sessiya.ts');
-  if (bank11 === null) {
-    bank11 = requireSrc('lib/zadanie11/trenazher/dannye').dannyeTrenazhera().bank;
+  const { subtype } = requireSrc('lib/zadanie11/prototypes/index');
+  if (zadachi11 === null) {
+    const { zadachi11: vse } = requireSrc('lib/zadanie11/trening/dannye-server');
+    zadachi11 = new Map(vse().map((z) => [z.id, z]));
   }
-  const plan = planPoKlyuchu(payload.items[at].k, osnovaSeed(payload, at, 0));
-  const solved = reshitPlan(plan, bank11);
+  const task = payload.tasks[at];
+  const z = zadachi11.get(task.id);
+  if (z === undefined) {
+    throw new Error(`№11: нет задачи ${task.id}`);
+  }
+  const solved = subtype(z.prototypeId).solve(z.params);
   return solved.vybor === undefined
     ? { text: numberText(solved.answer) }
     : { option: String(solved.vybor.correct + 1) };
@@ -441,7 +447,10 @@ const TRAINERS = [
     url: '/zadaniya/11/trenazher/',
     scope: '11',
     answer: answer11,
-    all: chooseAllFiltry,
+    /* Общий тренажёр по банку, как у №7 и №6: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
     rep: true,
   },
   {
@@ -548,6 +557,10 @@ const executablePath = process.env.PW_CHROMIUM ?? process.env.CHROMIUM_PATH;
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 
 /* ── Общие действия на странице ─────────────────────────────── */
+
+/** Вариант ответа и его номер: прежние экраны (.popt) и общий тренажёр по банку (№11: .trn-vybor__knopka). */
+const VARIANT = ':is(.popt, .trn-vybor__knopka)';
+const VARIANT_NO = ':is(.popt__no, .z11-variant__no)';
 
 const KEY = (scope) => `budetege:trainer:${scope}:session`;
 const BODY = '.tsess__body';
@@ -699,8 +712,8 @@ async function give(page, answer) {
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
   } else if (answer.option !== undefined) {
     await body
-      .locator('.popt')
-      .filter({ has: page.locator('.popt__no', { hasText: new RegExp(`^${answer.option}$`) }) })
+      .locator(VARIANT)
+      .filter({ has: page.locator(VARIANT_NO, { hasText: new RegExp(`^${answer.option}$`) }) })
       .first()
       .click();
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
@@ -731,7 +744,7 @@ async function wrongOf(page, right) {
     return { text: right.text === '987654' ? '987653' : '987654' };
   }
   if (right.option !== undefined) {
-    const numbers = await page.locator(`${BODY} .popt .popt__no`).allTextContents();
+    const numbers = await page.locator(`${BODY} ${VARIANT_NO}`).allTextContents();
     return { option: numbers.map((item) => item.trim()).find((item) => item !== right.option) };
   }
   const names = await page.locator(`${BODY} .z4-picker__name`).allTextContents();
@@ -760,7 +773,9 @@ async function shownAnswer(page, like) {
     return { text: await page.locator(ANSWER_INPUT).first().inputValue() };
   }
   if (like.option !== undefined) {
-    const chosen = page.locator(`${BODY} .popt.is-chosen .popt__no`);
+    const chosen = page.locator(
+      `${BODY} :is(.popt.is-chosen, .trn-vybor__knopka.is-on) ${VARIANT_NO}`,
+    );
     return {
       option: (await chosen.count()) === 0 ? null : (await chosen.first().textContent()).trim(),
     };
@@ -1058,32 +1073,33 @@ async function choiceScenario() {
     const page = await newPage(context);
     /* ?tip= отмечает один подтип — как ссылка «Решать» из теории. */
     await open(page, `${trainer.url}?tip=RZ-17`);
-    const record = await startRun(page, { ...trainer, start: pressStart });
+    /* Общий тренажёр по банку: ссылка с одним типом сразу начинает тренировку. */
+    const record = await startRun(page, { ...trainer, start: async () => {} });
     if (!check(record !== null, `${tag}: тренировка начата`)) {
       return;
     }
-    const options = page.locator(`${BODY} .popt`);
-    if (!check((await options.count()) > 0, `${tag}: у задания 1 есть варианты .popt`)) {
+    const options = page.locator(`${BODY} ${VARIANT}`);
+    if (!check((await options.count()) > 0, `${tag}: у задания 1 есть варианты ответа`)) {
       return;
     }
     const right = await trainer.answer(record.payload, poolIndex(record, 0));
     const wrong = await wrongOf(page, right);
     await page
-      .locator(`${BODY} .popt`)
-      .filter({ has: page.locator('.popt__no', { hasText: new RegExp(`^${wrong.option}$`) }) })
+      .locator(`${BODY} ${VARIANT}`)
+      .filter({ has: page.locator(VARIANT_NO, { hasText: new RegExp(`^${wrong.option}$`) }) })
       .first()
       .click();
     check(
       (await waitRecord(
         page,
         trainer.scope,
-        (item) => item.ui?.z?.[item.ui.index ?? 0]?.v === wrong.option,
+        (item) => (item.ui?.z?.[item.ui.index ?? 0]?.v ?? item.ui?.value) === wrong.option,
       )) !== null,
       `${tag}: выбор варианта ${wrong.option} записан`,
     );
     await page.reload({ waitUntil: 'load' });
     await waitBar(page);
-    await page.locator(`${BODY} .popt`).first().waitFor({ state: 'visible' });
+    await page.locator(`${BODY} ${VARIANT}`).first().waitFor({ state: 'visible' });
     const shown = await shownAnswer(page, wrong);
     check(same(shown, wrong), `${tag}: после перезагрузки выбран тот же вариант (${shown.option})`);
   });
@@ -1278,7 +1294,7 @@ async function quotaScenario(trainer) {
       await give(page, { text: '987654' });
     } else {
       const like =
-        (await page.locator(`${BODY} .popt`).count()) > 0 ? { option: '' } : { method: '' };
+        (await page.locator(`${BODY} ${VARIANT}`).count()) > 0 ? { option: '' } : { method: '' };
       await give(page, await wrongOf(page, like));
     }
     await page.locator(`${BODY} [role="status"]`).first().waitFor({ state: 'visible' });
