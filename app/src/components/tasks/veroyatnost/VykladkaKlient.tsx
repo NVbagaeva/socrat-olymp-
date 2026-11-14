@@ -109,7 +109,10 @@ function shirinaStroki(
  * 1); не влезает даже до ближайшего «=» — берутся и «+», «−»
  * (уровень 2); не влезает и так — строка обрывается на ближайшей
  * допустимой границе, рвать атом негде. Граница уровня 0 (после
- * одного обозначения вроде «P =») не берётся никогда.
+ * одного обозначения вроде «P =») берётся только в крайнем случае —
+ * когда без неё строка выступила бы за край колонки: обозначение
+ * одно в строке лучше формулы, наехавшей на край плашки (теория
+ * №5 на телефоне 320–390px).
  */
 function razbitUtverzhdenie(
   atomy: readonly AtomVykladki[],
@@ -121,22 +124,28 @@ function razbitUtverzhdenie(
   const stroki: Stroka[] = [];
   let nachalo = 0;
   while (nachalo < n) {
-    const granitsy = (uroven: 1 | 2) => {
+    const granitsy = (uroven: 1 | 2, sNulevymi = false) => {
       const rez: number[] = [];
       for (let b = nachalo + 1; b < n; b += 1) {
         const ur = atomy[b]?.uroven ?? 1;
-        if (ur !== 0 && ur <= uroven) {
+        if ((ur !== 0 || sNulevymi) && ur <= uroven) {
           rez.push(b);
         }
       }
       rez.push(n);
       return rez;
     };
+    /* Ширины проб — целые пиксели (scrollWidth), и сумма по атомам
+       может недобрать пару пикселей: запас в 2px, чтобы строка не
+       выступала за край на эту погрешность. */
     const vlezaet = (b: number) =>
-      shirinaStroki(atomy, u, nachalo, b - nachalo, shiriny) <= shirina;
+      shirinaStroki(atomy, u, nachalo, b - nachalo, shiriny) <= shirina - 2;
     const po1 = granitsy(1).filter(vlezaet);
     const po2 = po1.length > 0 ? po1 : granitsy(2).filter(vlezaet);
-    const konets = po2.length > 0 ? (po2.at(-1) ?? n) : (granitsy(2)[0] ?? n);
+    /* Крайний случай: не влезает даже до ближайшей допустимой границы —
+       тогда можно рвать и после одного обозначения. */
+    const po0 = po2.length > 0 ? po2 : granitsy(2, true).filter(vlezaet);
+    const konets = po0.length > 0 ? (po0.at(-1) ?? n) : (granitsy(2)[0] ?? n);
     stroki.push([u, nachalo, konets - nachalo]);
     nachalo = konets;
   }
@@ -151,7 +160,8 @@ function razbitUtverzhdenie(
  * стоит одной строкой без повторных знаков; нет — рвётся по «=»,
  * а кусок между двумя «=», не влезающий целиком, — по «+» и «−»;
  * знак на разрыве стоит дважды: в конце строки и в начале
- * следующей. После одного обозначения («P =») строку не обрывают.
+ * следующей. После одного обозначения («P =») строку не обрывают,
+ * разве что иначе она выступила бы за край.
  * Самостоятельные выкладки шага (через «,\quad» в шаблоне) идут
  * каждая с новой строки, и знак между ними не дублируется.
  * Ничего не прокручивается.

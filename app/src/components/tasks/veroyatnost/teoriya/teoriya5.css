@@ -1,0 +1,627 @@
+/* Новые разделы теории №5: совместные, независимые события, условная
+   вероятность (Teoriya5Bloki.tsx и три раздела).
+
+   Определения, формулы, «Важно», «Вывод», «Лайфхак» — общие рамки
+   теории (styles/ramki.css, тона — teoriya-steklo.css). Здесь — свои
+   блоки: карточки задач (стекло, тон чередуется: белое / голубое),
+   шаги разбора, «Не путай!», пропорция, таблица 2 × 2, «Проверь себя».
+   Только токены палитры. Раскладка — от ширины раздела (контейнер
+   vteor-razdel), а не окна: рядом колонка содержания. */
+
+.t5-razdel {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+/* Рамки стоят в сетке раздела: свои поля сверху и снизу им не нужны. */
+.t5-razdel .ramka {
+  margin: 0;
+}
+.t5-p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+
+/* Две карточки рядом: два определения, два правила дерева. */
+.t5-para {
+  display: grid;
+  gap: var(--space-4);
+}
+@container vteor-razdel (min-width: 640px) {
+  .t5-para {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.t5-primer-zhizn__metka {
+  font-weight: 700;
+}
+
+/* «Как записывают „или“ и „и“» — короткая справка, не рамка. */
+.t5-oboznacheniya {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.t5-oboznacheniya__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.t5-oboznacheniya__p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Правило: заголовок, формула в рамке, пояснение, задача. */
+.t5-pravilo {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.t5-pravilo__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+
+/* Главная формула набрана выкладкой: по центру, крупнее текста. На
+   узкой колонке кегль текста — иначе длинная формула рвётся на
+   слишком много строк. */
+.t5-formula {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  text-align: center;
+}
+.t5-formula .vykladka {
+  justify-items: center;
+  width: 100%;
+  font-size: var(--fs-body);
+}
+@container vteor-razdel (min-width: 560px) {
+  .t5-formula .vykladka {
+    font-size: var(--fs-h4);
+  }
+}
+
+/* «Почему вычитаем P(AB)»: текст и круги, на широком — рядом. */
+.t5-pochemu-blok {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.t5-pochemu-blok__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-body);
+  font-weight: 700;
+}
+.t5-pochemu-blok__telo {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+}
+.t5-pochemu-blok__telo > div {
+  display: grid;
+  gap: var(--space-3);
+}
+@container vteor-razdel (min-width: 640px) {
+  .t5-pochemu-blok__telo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  }
+}
+
+.t5-risunok {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+}
+.t5-risunok__podpis {
+  max-width: 44ch;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  text-align: center;
+}
+
+/* ── Карточка задачи ─────────────────────────────────────────────
+   Стекло: белое или светло-голубое — тон чередуется, подряд двух
+   одинаковых белых карточек нет. */
+
+.t5-zadacha {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+.t5-zadacha--goluboy {
+  border-color: var(--color-border-info);
+  background: var(--color-surface-info);
+}
+@media screen {
+  .teor-steklo .t5-zadacha {
+    border: 0;
+    border-radius: var(--teor-r);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+  .teor-steklo .t5-zadacha--belyy {
+    background: var(--glass-bg-strong);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  }
+  .teor-steklo .t5-zadacha--goluboy {
+    background: linear-gradient(160deg, var(--blue-50), var(--blue-100));
+    box-shadow:
+      inset 0 0 0 1px var(--blue-200),
+      var(--glass-hi),
+      0 8px 24px rgb(31 95 208 / 0.08);
+  }
+}
+@container vteor-razdel (min-width: 560px) {
+  .t5-zadacha {
+    padding: var(--space-6) var(--space-8);
+  }
+}
+.t5-zadacha__plashka {
+  justify-self: start;
+  margin: 0;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-surface);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.t5-zadacha__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+.t5-zadacha__uslovie {
+  margin: 0;
+  color: var(--color-text);
+  line-height: var(--lh-body);
+}
+.t5-zadacha__reshenie {
+  margin: var(--space-2) 0 0;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.t5-zadacha__otvet {
+  margin: 0;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 700;
+}
+
+/* Шаги: «Шаг 1. Что делаем», объяснение, выкладка. */
+.t5-shagi {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.t5-shag {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--blue-300);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: rgb(255 255 255 / 0.6);
+}
+.t5-shag__title {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 700;
+  line-height: var(--lh-body);
+}
+.t5-shag__no {
+  color: var(--color-primary);
+}
+.t5-shag__text {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.t5-shag .vykladka {
+  font-size: var(--fs-body);
+}
+
+/* «Почему это работает» — после ответа. */
+.t5-pochemu {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--amber-50);
+  box-shadow: inset 0 0 0 1px var(--cream-200, var(--amber-50));
+}
+.t5-pochemu__title {
+  margin: 0;
+  color: var(--amber-700);
+  font-weight: 700;
+}
+.t5-pochemu__text {
+  margin: 0;
+  color: var(--color-text);
+  line-height: var(--lh-body);
+}
+
+/* ── «Не путай!» ─────────────────────────────────────────────────
+   Яркий оранжевый акцент — не терракота «Важно» и не зелень
+   «Вывода». Роль видна и без цвета: значок ⇄ и толстая рамка. */
+
+.t5-neputay {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 2px solid var(--amber-600);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, var(--white), var(--amber-50));
+}
+.t5-neputay__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--amber-700);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.t5-neputay__znak {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-pill);
+  background: var(--amber-600);
+  color: var(--white);
+  font-size: var(--fs-h4);
+}
+.t5-neputay__text {
+  margin: 0;
+  color: var(--color-text);
+  line-height: var(--lh-body);
+}
+.t5-neputay__primer {
+  display: grid;
+  gap: var(--space-2);
+}
+.t5-neputay__primer-title {
+  margin: 0;
+  color: var(--amber-700);
+  font-weight: 700;
+}
+.t5-shagi--plashka .t5-shag {
+  border-left-color: var(--amber-600);
+  background: rgb(255 255 255 / 0.75);
+}
+
+/* Вывод: пункты-правила. */
+.t5-vyvod {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding-left: var(--space-5);
+  line-height: var(--lh-body);
+}
+
+/* Пример из жизни к условной вероятности. */
+.t5-zhizn {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.t5-zhizn__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* ── Дерево ────────────────────────────────────────────────────── */
+
+.t5-derevo__kak {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.t5-kartochka {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-info);
+}
+.t5-kartochka:nth-child(2) {
+  background: var(--color-accent-soft-surface);
+}
+.t5-kartochka__title {
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.t5-kartochka:nth-child(2) .t5-kartochka__title {
+  color: var(--color-accent);
+}
+
+/* Дерево из тренажёра: поле рисунка ~420 единиц, на телефоне оно
+   сжимается до 0,6–0,7, и кегль тренажёра (13–16) выходил мельче
+   12px. Здесь кегль крупнее — на экране телефона 12–14px. Раскладка
+   дерева оставляет между листьями не меньше 88 единиц, этого хватает
+   и под крупный кегль (проверено автотестом наложений). */
+.t5-tree {
+  width: 100%;
+  max-width: 520px;
+  /* Подписи листьев и произведения крупнее, чем считала раскладка
+     тренажёра, и опускаются на несколько единиц ниже её поля: рисунок
+     их не обрезает, место под ними даёт отступ фигуры. */
+  overflow: visible;
+  margin-bottom: var(--space-3);
+}
+.t5-tree .pr-branch-label {
+  font-size: 18px;
+}
+.t5-tree .pr-branch-p {
+  fill: var(--color-text);
+  font-size: 18px;
+}
+.t5-tree .pr-leaf {
+  font-size: 17px;
+}
+.t5-tree .pr-total {
+  font-size: 19px;
+}
+.t5-tree .pr-math {
+  font-family: KaTeX_Main, var(--font-math);
+  font-style: normal;
+}
+
+/* ── Пропорция «100 % — 520 (чел.)» ────────────────────────────── */
+
+.t5-proportsiya {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border-info);
+}
+.t5-proportsiya__zapis {
+  display: grid;
+  gap: var(--space-1);
+}
+.t5-proportsiya__stroka {
+  display: grid;
+  grid-template-columns: 4.5em auto auto;
+  gap: var(--space-3);
+  align-items: baseline;
+}
+.t5-proportsiya__stroka > :first-child {
+  justify-self: end;
+}
+/* Выкладка решения — во всю ширину плашки: иначе она сжималась по
+   содержимому и рвалась на каждом «=». */
+.t5-proportsiya > .vykladka {
+  justify-self: stretch;
+}
+.t5-proportsiya__podpis {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+
+/* ── Таблица 2 × 2 ─────────────────────────────────────────────
+   На 320px помещается: подписи строк короткие, числа не длиннее
+   четырёх цифр, кегль --fs-caption на узкой колонке. */
+
+.t5-tablitsa {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+}
+.t5-tablitsa__title {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+.t5-tablitsa__lead,
+.t5-tablitsa__legenda,
+.t5-tablitsa__podpis {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-body);
+}
+.t5-tablitsa__t {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  table-layout: fixed;
+}
+.t5-tablitsa__t th,
+.t5-tablitsa__t td {
+  hyphens: manual;
+  padding: var(--space-2) 2px;
+  border-radius: var(--radius-sm, 6px);
+  text-align: center;
+}
+/* Ширины столбцов: под «Мужчины» и «Пенсионеры» без переноса по
+   слогам даже на 320px; «Всего» — четыре цифры, ему хватает меньше. */
+.t5-tablitsa__t col:nth-child(1) {
+  width: 27%;
+}
+.t5-tablitsa__t col:nth-child(2),
+.t5-tablitsa__t col:nth-child(3) {
+  width: 27%;
+}
+.t5-tablitsa__t col:nth-child(4) {
+  width: 19%;
+}
+.t5-tablitsa__t thead th {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.t5-tablitsa__t tbody th {
+  padding-left: 2px;
+  color: var(--color-text);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-align: left;
+}
+.t5-tablitsa__t tbody td {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--fs-body);
+}
+.t5-tablitsa__t tbody tr:last-child td,
+.t5-tablitsa__t tbody tr:last-child th {
+  color: var(--color-text-secondary);
+}
+/* Строка «Мужчины» — суженный мир: голубая. Нужные — оранжевые. */
+.t5-tablitsa__t .t5-tablitsa__mir td {
+  background: var(--blue-100);
+}
+.t5-tablitsa__t td.t5-tablitsa__vse {
+  background: var(--blue-600);
+  color: var(--white);
+  font-weight: 700;
+}
+.t5-tablitsa__t td.t5-tablitsa__nuzhnye {
+  background: var(--amber-600);
+  color: var(--white);
+  font-weight: 700;
+}
+/* Узкая колонка (320–390px): подписи строк кеглем заголовков. */
+@container vteor-razdel (max-width: 360px) {
+  .t5-tablitsa__t tbody th {
+    font-size: var(--fs-label);
+  }
+}
+@container vteor-razdel (min-width: 560px) {
+  .t5-tablitsa__t {
+    font-size: var(--fs-body);
+  }
+  .t5-tablitsa__t th,
+  .t5-tablitsa__t td {
+    padding: var(--space-3);
+  }
+  .t5-tablitsa__t thead th,
+  .t5-tablitsa__t tbody th {
+    font-size: var(--fs-body);
+  }
+}
+.t5-tablitsa__znak {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 2px;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+.t5-tablitsa__znak--nuzhnye {
+  background: var(--amber-600);
+}
+.t5-tablitsa__znak--vse {
+  margin-left: var(--space-2);
+  background: var(--blue-600);
+}
+
+/* «Проверь себя» после таблицы: зелёная галочка — сверка сошлась. */
+.t5-proverka {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 2px solid var(--emerald-600);
+  border-radius: var(--radius-lg);
+  background: var(--emerald-50);
+}
+.t5-proverka__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: #06704f;
+  font-weight: 700;
+}
+.t5-proverka__znak {
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--emerald-600);
+  color: var(--white);
+}
+.t5-proverka__spisok {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-text);
+  line-height: var(--lh-body);
+}
+
+/* Узкая карточка: поля задачи и шагов на ступень уже, чтобы выкладке
+   хватало ширины на 320px. */
+@container vteor-razdel (max-width: 400px) {
+  .t5-zadacha {
+    padding: var(--space-4) var(--space-3);
+  }
+  .t5-shag {
+    padding: var(--space-3);
+  }
+  .t5-neputay,
+  .t5-pochemu-blok {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+/* Главная формула на телефоне — на ступень мельче, чтобы формула
+   сложения совместных событий шла одной строкой с 375px. */
+@container vteor-razdel (max-width: 400px) {
+  .t5-formula .vykladka {
+    font-size: 0.9375rem;
+  }
+}
+@container vteor-razdel (max-width: 300px) {
+  .t5-formula .vykladka {
+    font-size: var(--fs-caption);
+  }
+}
