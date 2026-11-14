@@ -28,7 +28,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { toZheSoderzhanie } from './sverka-soderzhaniya.mjs';
+import { strukturaObrazca, toZheSoderzhanie } from './sverka-soderzhaniya.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = path.join(APP, '..');
@@ -36,6 +36,20 @@ const OUT = path.join(APP, 'out');
 
 const razdel = process.argv[2];
 const obrazec = process.argv[3] ?? 'origin/main';
+/* Номера в образце записаны в его нумерации: вызовы struktura.js при
+   сверке считаются по структуре, которая действует в образце. */
+const STRUKTURA_OBRAZCA = (() => {
+  try {
+    return strukturaObrazca(
+      execFileSync('git', ['show', `${obrazec}:app/src/content/struktura.js`], {
+        cwd: REPO,
+        encoding: 'utf8',
+      }),
+    );
+  } catch {
+    return strukturaObrazca(null);
+  }
+})();
 if (!/^\d{1,2}$/.test(razdel ?? '')) {
   console.error('Укажите номер раздела: node scripts/check-redesign.mjs 7');
   process.exit(2);
@@ -478,7 +492,7 @@ if (puti === undefined) {
         maxBuffer: 256 * 1024 * 1024,
       });
       const novyy = fs.readFileSync(path.join(REPO, file), 'utf8');
-      const { ravno, gde } = toZheSoderzhanie(staryy, novyy, file);
+      const { ravno, gde } = toZheSoderzhanie(staryy, novyy, file, STRUKTURA_OBRAZCA);
       if (ravno) inayaZapis.push(file);
       else plohie.push(`${stroka}\n      ${gde}`);
     } catch (error) {
