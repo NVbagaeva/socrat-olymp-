@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на общем тренажёре (№7, №6, №2, №13, №1, №9, №11, №10) в браузере, на собранном сайте.
+   на общем тренажёре «Стеклянной сцены» (№7, №6, №2, №13, №1, №9, №11, №10, №4, №5)
+   в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -19,6 +20,8 @@
         фильтров) открывается в новом на той же задаче;
      9. (№9) незаконченная тренировка прежнего тренажёра из sessionStorage
         продолжается в новом на той же задаче.
+     10. (№4, №5) незаконченная тренировка прежнего тренажёра открывается
+        на той же задаче с тем же введённым ответом.
 
    У №10 прежний тренажёр уже писал в журнал (тот же ключ): переносить
    нечего, проверяется, что прежний журнал читается как есть. Образец
@@ -40,9 +43,11 @@ bezBanneraCookieVsyudu(chromium);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(APP, 'out');
 const N = process.argv[2];
-if (!['6', '7', '2', '13', '1', '9', '11', '10'].includes(N)) {
+/* №4 и №5 — вероятность: прежние ключи свои, задачи — «прототип:вариант». */
+const VEROYATNOST = N === '4' || N === '5';
+if (!['6', '7', '2', '13', '1', '9', '11', '10'].includes(N) && !VEROYATNOST) {
   console.error(
-    'Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9, 11, 10)',
+    'Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9, 11, 10, 4, 5)',
   );
   process.exit(2);
 }
@@ -91,6 +96,20 @@ const BASE = `http://127.0.0.1:${server.address().port}`;
 /* Ключи раздела: №7 и №6 — budetege:zadanie-N:…, у №1 — прежние
    ключи планиметрии. Прототип задачи и блоки опорных — у каждого свои. */
 function razdel() {
+  if (VEROYATNOST) {
+    /* №4 и №5: в хранилище опорных — сами задачи; «блок» образца — по
+       первой задаче образца; ключ задачи тренажёра — «прототип:вариант». */
+    const bloki = requireSrc('lib/veroyatnost/index.ts')[`PODGOTOVKA_${N}`];
+    const blokZadachi = (id) => bloki.find((b) => b.zadachi.some((z) => z.id === id));
+    return {
+      OLD: `budetege:veroyatnost-${N}:v2`,
+      OLD_OPORNYE: `budetege:veroyatnost-${N}:prep:v1`,
+      NEW: `budetege:veroyatnost-${N}:log:v1`,
+      prototipOf: (id) => id?.slice(0, id.lastIndexOf(':')),
+      zadachVBloke: (zadacha) => blokZadachi(zadacha)?.zadachi.length,
+      vBloke: (zadacha, key) => blokZadachi(zadacha)?.zadachi.some((z) => z.id === key) === true,
+    };
+  }
   if (N === '1') {
     const { BLOKI } = requireSrc('lib/planimetriya/prep/bloki.ts');
     return {
@@ -336,6 +355,35 @@ try {
       `прежняя тренировка открылась на той же задаче (${idS}, ждали ${prezhnyaya})`,
     );
     await sPage.close();
+  }
+
+  /* 10. №4, №5: незаконченная тренировка прежнего тренажёра открывается
+     на той же задаче, с тем же введённым ответом. */
+  if (VEROYATNOST && obrazec[SESSION] !== undefined) {
+    await page.evaluate(
+      ([key, value]) => window.localStorage.setItem(key, value),
+      [SESSION, JSON.stringify(obrazec[SESSION])],
+    );
+    await page.goto(`${BASE}/zadaniya/${N}/trenazher/`, { waitUntil: 'networkidle' });
+    const ui = obrazec[SESSION].ui;
+    const [kind, n] = obrazec[SESSION].payload.tasks[ui.index];
+    const ekran = page.locator('.trn-zadacha');
+    await ekran.waitFor({ timeout: 20000 });
+    check(
+      (await ekran.getAttribute('data-task')) === `${kind}:${n}`,
+      `прежняя тренировка открылась на той же задаче (${kind}:${n})`,
+    );
+    const pole = page.locator('.trn-pole input').first();
+    check(
+      (await pole.inputValue()) === ui.card.value,
+      `введённый ответ на месте («${ui.card.value}»)`,
+    );
+    check(
+      (await page.locator('.trn-zadacha__nomer').first().innerText()).startsWith(
+        `${ui.index + 1} `,
+      ),
+      `номер задачи тот же: ${ui.index + 1}`,
+    );
   }
 
   /* 9. №9: прежняя незаконченная тренировка (sessionStorage) продолжается. */
