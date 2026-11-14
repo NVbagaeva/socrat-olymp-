@@ -65,6 +65,7 @@ const BEZ_KONCA = 40;
 const BYSTRO = 10;
 const ISTOCHNIKI: IstochnikBanka[] = ['vse', 'fipi', 'new'];
 const STILI: StilBanka[] = ['vse', 'syuzhet', 'standart'];
+const URO: ('vse' | '1' | '2')[] = ['vse', '1', '2'];
 
 type Ekran = 'rezhimy' | 'temy';
 
@@ -407,16 +408,12 @@ function Konfigurator<Z extends ZadachaBanka, S>({
       warm: true,
       disabled: mistakeList.length === 0,
     },
-    ...(razdel.dopRezhim === undefined
-      ? []
-      : [
-          {
-            id: razdel.dopRezhim.id,
-            ikonka: razdel.dopRezhim.ikonka,
-            zag: razdel.dopRezhim.zag,
-            lead: razdel.dopRezhim.lead(BYSTRO),
-          },
-        ]),
+    ...(razdel.dopRezhimy ?? []).map((r) => ({
+      id: r.id,
+      ikonka: r.ikonka,
+      zag: r.zag,
+      lead: r.lead(BYSTRO),
+    })),
   ];
 
   function pick(id: string) {
@@ -426,14 +423,24 @@ function Konfigurator<Z extends ZadachaBanka, S>({
       setEkran('temy');
     } else if (id === 'oshibki') {
       startOshibki();
-    } else if (razdel.dopRezhim !== undefined && id === razdel.dopRezhim.id) {
-      /* Особый режим (№13 «Определи тип»): все типы вперемешку, с подсказками. */
+    } else if (razdel.dopRezhimy?.some((r) => r.id === id) === true) {
+      /* Особый режим (№13 «Определи тип», «С оформлением»): все типы вперемешку, с подсказками. */
       start(buildByTipy(katalog, tipyVse, BYSTRO, new Set()), false, vybor.timer, id);
     }
   }
 
   if (ekran === 'temy') {
-    const tipy = tipyVse.filter((id) => selected.has(id));
+    /* Уровень (№13): только прототипы выбранного уровня. */
+    const uroven = razdel.urovni === undefined ? 'vse' : vybor.uroven;
+    const tipy = tipyVse.filter(
+      (id) => selected.has(id) && (uroven === 'vse' || String(katalog[id]?.u ?? 1) === uroven),
+    );
+    /* Как отвечать (№13): числом или особым режимом. */
+    const otvetVybora = razdel.otvetVybora;
+    const rezhimVybora =
+      otvetVybora !== undefined && otvetVybora.sposoby.some((v) => v.id === vybor.rezhim)
+        ? vybor.rezhim
+        : '';
     /* У раздела без источника (№2: все задачи — генератор) — всегда «все». */
     const istochnik = razdel.bezIstochnika === true ? 'vse' : vybor.istochnik;
     const est = skolkoZadach(katalog, tipy, istochnik, stil);
@@ -465,6 +472,9 @@ function Konfigurator<Z extends ZadachaBanka, S>({
                 Math.random,
                 stil,
               ),
+              vybor.bezPodskazok,
+              vybor.timer,
+              rezhimVybora === '' ? undefined : rezhimVybora,
             )
           }
           dop={
@@ -476,6 +486,24 @@ function Konfigurator<Z extends ZadachaBanka, S>({
                   labels={T.vybor.istochniki}
                   value={vybor.istochnik}
                   onChange={(next) => zapomnit({ ...vybor, istochnik: next })}
+                />
+              )}
+              {razdel.urovni === undefined ? null : (
+                <Segment
+                  title={razdel.urovni.title}
+                  values={URO}
+                  labels={razdel.urovni.labels}
+                  value={vybor.uroven}
+                  onChange={(next) => zapomnit({ ...vybor, uroven: next })}
+                />
+              )}
+              {otvetVybora === undefined ? null : (
+                <Segment
+                  title={otvetVybora.title}
+                  values={otvetVybora.sposoby.map((v) => v.id)}
+                  labels={Object.fromEntries(otvetVybora.sposoby.map((v) => [v.id, v.label]))}
+                  value={rezhimVybora}
+                  onChange={(next) => zapomnit({ ...vybor, rezhim: next })}
                 />
               )}
               {razdel.stil === true && stili !== undefined ? (
@@ -492,9 +520,16 @@ function Konfigurator<Z extends ZadachaBanka, S>({
           labels={{
             ...T.vybor,
             itog: (n, skolko, taymer) =>
-              tipy.length > 0 && est === 0
-                ? T.vybor.istochnikPusto
-                : T.vybor.itog(n, tipyVse.length, skolko, taymer),
+              selected.size > 0 && tipy.length === 0 && razdel.urovni !== undefined
+                ? razdel.urovni.pusto
+                : tipy.length > 0 && est === 0
+                  ? T.vybor.istochnikPusto
+                  : T.vybor.itog(
+                      uroven === 'vse' ? n : tipy.length,
+                      tipyVse.length,
+                      skolko,
+                      taymer,
+                    ),
           }}
         />
       </div>

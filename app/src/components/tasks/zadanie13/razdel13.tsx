@@ -7,9 +7,25 @@ import { zadachaHref13 } from '@/lib/zadanie13/links';
 import { TYPE_NAMES, type TypeCode } from '@/lib/zadanie13/types';
 import { proverit13 } from '@/lib/zadanie13/trening/otvet13';
 import { log13, vybor13 } from '@/lib/zadanie13/trening/progress';
-import { KLYUCH13, prezhnyayaZapis13, REZHIM_TIP } from '@/lib/zadanie13/trening/session';
-import { ZAGRUZKA13, type Reshenie13, type Zadacha13 } from '@/lib/zadanie13/trening/zagruzka';
+import {
+  gotovOformlenie,
+  proveritOformlenie,
+  razobratOformlenie,
+} from '@/lib/zadanie13/trening/oformlenie13';
+import {
+  KLYUCH13,
+  prezhnyayaZapis13,
+  REZHIM_OFORMLENIE,
+  REZHIM_TIP,
+} from '@/lib/zadanie13/trening/session';
+import {
+  oformlenie13,
+  ZAGRUZKA13,
+  type Reshenie13,
+  type Zadacha13,
+} from '@/lib/zadanie13/trening/zagruzka';
 import type { RazdelBanka } from '../trening/bank/types';
+import { Oformlenie13Pole } from './Oformlenie13';
 import { shagi13, voprosy13 } from './shagi13';
 
 const TIPY: TypeCode[] = ['A', 'B', 'C', 'D'];
@@ -73,6 +89,7 @@ function VyborShemy({
 }
 
 const tip = (rezhim: string | undefined) => rezhim === REZHIM_TIP;
+const oform = (rezhim: string | undefined) => rezhim === REZHIM_OFORMLENIE;
 
 /**
  * №13 для общего тренажёра по банку (components/tasks/trening/bank):
@@ -88,8 +105,14 @@ export const RAZDEL13: RazdelBanka<Zadacha13, Reshenie13> = {
   vybor: vybor13,
   zagruzka: ZAGRUZKA13,
   T: TRENAZHER13,
-  proverit: (vvod, _seal, z, rezhim) =>
-    !tip(rezhim) && estPi(vvod) ? { kind: 'pi' } : proverit13(vvod, z, tip(rezhim)),
+  proverit: (vvod, _seal, z, rezhim) => {
+    if (oform(rezhim)) {
+      return estPi(razobratOformlenie(vvod).o)
+        ? { kind: 'pi' }
+        : proveritOformlenie(vvod, z, oformlenie13(z));
+    }
+    return !tip(rezhim) && estPi(vvod) ? { kind: 'pi' } : proverit13(vvod, z, tip(rezhim));
+  },
   pod: (z) => <Pod13 z={z} />,
   shagi: (s, rezhim) => shagi13(tip(rezhim) ? s.tip.shagi : s.shagi),
   posle: (s, rezhim) => (
@@ -98,13 +121,30 @@ export const RAZDEL13: RazdelBanka<Zadacha13, Reshenie13> = {
     </p>
   ),
   voprosy: (s, rezhim) => voprosy13(tip(rezhim) ? s.tip.voprosy : s.voprosy),
-  pole: (_z, rezhim, ui) => (tip(rezhim) ? <VyborShemy {...ui} /> : null),
-  dopRezhim: {
-    id: REZHIM_TIP,
-    ikonka: 'tip',
-    zag: TRENAZHER13.rezhimy.tip.zag,
-    lead: TRENAZHER13.rezhimy.tip.lead,
-  },
+  pole: (z, rezhim, ui) =>
+    tip(rezhim) ? (
+      <VyborShemy {...ui} />
+    ) : oform(rezhim) ? (
+      <Oformlenie13Pole of={oformlenie13(z)} {...ui} />
+    ) : null,
+  gotov: (z, rezhim, value) =>
+    oform(rezhim) ? gotovOformlenie(oformlenie13(z), value) : value.trim() !== '',
+  dopRezhimy: [
+    {
+      id: REZHIM_TIP,
+      ikonka: 'tip',
+      zag: TRENAZHER13.rezhimy.tip.zag,
+      lead: TRENAZHER13.rezhimy.tip.lead,
+    },
+    {
+      id: REZHIM_OFORMLENIE,
+      ikonka: 'tablica',
+      zag: TRENAZHER13.rezhimy.oformlenie.zag,
+      lead: TRENAZHER13.rezhimy.oformlenie.lead,
+    },
+  ],
+  otvetVybora: TRENAZHER13.vybor.otvet,
+  urovni: TRENAZHER13.vybor.urovni,
   prezhnyayaZapis: prezhnyayaZapis13,
   zadachaHref: zadachaHref13,
 };

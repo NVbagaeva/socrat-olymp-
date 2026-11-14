@@ -383,6 +383,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       value={value}
       onValue={onValue}
       {...(pole === null || pole === undefined ? {} : { pole })}
+      {...(razdel.gotov === undefined ? {} : { gotovo: razdel.gotov(dannye, rezhim, value) })}
       sostoyanie={sostoyanie}
       onCheck={check}
       formatHint={format}
