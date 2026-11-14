@@ -8,7 +8,10 @@ import { useProgressKolody } from '@/lib/kartochki/progress';
 import './kartochki.css';
 
 export interface ProverkaTeoriiProps {
-  task: number;
+  /** Номер задания; у колоды базы — ключ прогресса «baza:5». */
+  task: number | string;
+  /** Номер для подписи, когда task — ключ. */
+  nomer?: number;
   /** Адрес вкладки «Карточки». */
   href: string;
   /** id карточек колоды: по ним считается «выучено». */
@@ -19,10 +22,10 @@ export interface ProverkaTeoriiProps {
  * Кнопка «Проверить теорию» во вкладке «Теория» и рядом счётчик
  * «Теория №N: выучено K из M». Ведёт во вкладку «Карточки».
  */
-export function ProverkaTeorii({ task, href, ids }: ProverkaTeoriiProps) {
+export function ProverkaTeorii({ task, nomer, href, ids }: ProverkaTeoriiProps) {
   const progress = useProgressKolody(task);
   const n = ids.filter((id) => vyuchena(progress, id)).length;
-  const text = T.vyucheno(task, n, ids.length);
+  const text = T.vyucheno(nomer ?? Number(task), n, ids.length);
   return (
     <div className="kart-proverka">
       <div className="kart-proverka__text">

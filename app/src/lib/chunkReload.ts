@@ -91,8 +91,25 @@ function sessionMemory(): Memory | null {
   }
 }
 
+/*
+ * Страница уже уходит: человек перешёл по ссылке или открыл другой адрес.
+ * Браузер обрывает загрузку недогруженных кусков кода, и Safari сообщает
+ * об этом как о сбое загрузки («Importing a module script failed»). Это не
+ * сбой: перезагрузка здесь вернула бы человека на старую страницу вместо
+ * той, куда он шёл. Пока страница уходит, автоперезагрузки нет.
+ */
+let uhodim = false;
+
+/** Отметить, что страница уходит (pagehide / beforeunload) или вернулась (pageshow). */
+export function otmetitUhod(da: boolean): void {
+  uhodim = da;
+}
+
 function reloadOnceIf(matches: (error: unknown) => boolean, error: unknown): boolean {
   if (!matches(error)) {
+    return false;
+  }
+  if (uhodim) {
     return false;
   }
   if (!takeReloadTurn(sessionMemory(), Date.now())) {

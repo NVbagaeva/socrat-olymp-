@@ -68,6 +68,18 @@ Options -Indexes
   RewriteRule ^zadaniya/3/(vpisannyy-cilindr|vpisannaya-sfera)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/teoriya/#teoriya-kombinacii [R=301,L,NE]
   # Задание №3: разбор типа раскрывается на вкладке «О задании».
   RewriteRule ^zadaniya/3/razbor/([a-z0-9-]+)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/#tip-$1 [R=301,L,NE]
+  # Задание №1: разбор группы типов раскрывается на вкладке «О задании»
+  # (карточка группы и её первый тип).
+  RewriteRule ^zadaniya/1/razbor/ugly-treugolnika(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-I [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/chetyrehugolniki(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-II [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/ploshchad(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-III [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/podobie(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-IV [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/trigonometriya(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-V [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/ugly-okruzhnosti(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-VI [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/vpisannaya(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-VII [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/opisannaya(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-VIII [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/sinusy(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-IX [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/dopolnitelnye(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-X [R=301,L,NE]
   # Задание №7: разбор прототипа раскрывается на вкладке «О задании»;
   # вкладки «Для репетиторов» нет — листы собирает «Генератор».
   RewriteRule ^zadaniya/7/razbor/(P[0-9][0-9])(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/7/#tip-$1 [R=301,L,NE]

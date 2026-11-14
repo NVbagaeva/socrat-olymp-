@@ -17,6 +17,7 @@ import { reshenieHtml } from '@/lib/zadanie13/reshenieHtml';
 import { TABLE_HEAD } from '@/lib/zadanie13/tablica';
 import { YAKOR_13 } from '@/lib/zadanie13/teoriya-yakorya';
 import { DveShemy, LesenkaAnn, LesenkaDif } from './Risunki13';
+import '../teoriya/teoriya-steklo.css';
 
 /** Формула крупно (display), набранная на сервере. */
 function Krupno({ tex, className }: { tex: string; className?: string }) {
@@ -324,16 +325,18 @@ export function Teoriya13({ vkladka }: { vkladka: string }) {
     ]),
   );
   return (
-    <TeoriyaShell
-      vkladka={vkladka}
-      razdely={GLAVY_13.map((g) => ({
-        id: g.id,
-        title: g.title.replace(/\$/g, ''),
-        podpunkty: g.podrazdely.map((p) => ({ id: p.id, title: p.title })),
-      }))}
-      tela={tela}
-      dekor={{ kartinka: <LesenkaDif />, note: TEORIYA_13.dekor }}
-      trackKey={TEORIYA_13.trackKey}
-    />
+    <div className="z13-teoriya teor-steklo">
+      <TeoriyaShell
+        vkladka={vkladka}
+        razdely={GLAVY_13.map((g) => ({
+          id: g.id,
+          title: g.title.replace(/\$/g, ''),
+          podpunkty: g.podrazdely.map((p) => ({ id: p.id, title: p.title })),
+        }))}
+        tela={tela}
+        dekor={{ kartinka: <LesenkaDif />, note: TEORIYA_13.dekor }}
+        trackKey={TEORIYA_13.trackKey}
+      />
+    </div>
   );
 }
