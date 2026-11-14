@@ -232,6 +232,7 @@ export function KartaPrimer({
   uslovieHtml,
   shagi,
   otvet,
+  otvetHtml,
   opasnoHtml,
   trenirovatHref,
   opornyeHref,
@@ -245,6 +246,8 @@ export function KartaPrimer({
   uslovieHtml: string;
   shagi: Shag[];
   otvet: string;
+  /** Ответ набранный (KaTeX): отрицательное число — с минусом формулы. Есть — вместо otvet. */
+  otvetHtml?: string;
   /** «Где теряют балл», HTML. */
   opasnoHtml?: string;
   trenirovatHref: string;
@@ -263,7 +266,12 @@ export function KartaPrimer({
         </p>
       )}
       <p className="kz-otvet">
-        {labels.otvet}: <b>{otvet}</b>
+        {labels.otvet}:{' '}
+        {otvetHtml === undefined ? (
+          <b>{otvet}</b>
+        ) : (
+          <b dangerouslySetInnerHTML={{ __html: otvetHtml }} />
+        )}
       </p>
       <div className="kz-knopki">
         {/* Обычная ссылка, а не переход внутри приложения: тренажёр

@@ -10,7 +10,10 @@
       наименьшее значение на отрезке); формула на экране вычислена прямо
       из TeX и совпадает с функцией расчёта; ответ годится для бланка;
       в TeX нет «+-», «1x», NaN.
-   2. Каталог тренажёра (по 20 задач на тип) и примеры «О задании».
+   2. Каталог тренажёра (по 20 задач на тип и фиксированные задачи) и
+      примеры «О задании». Фиксированные задачи (lib/zadanie21/sbornik.ts):
+      ответ разбора совпадает с записанным, в каждом задании пять
+      подобранных, их условия не повторяют другие задачи каталога.
    3. Опорные задачи: по десять в блоке, ответ сходится с независимым
       пересчётом.
    4. Классификация: у каждого вида функции есть прототипы, у каждого
@@ -33,6 +36,9 @@ const sluchaynye = S.selftest(n);
 oshibki.push(...sluchaynye.oshibki);
 const katalog = S.selftestKataloga();
 oshibki.push(...katalog);
+const fiks = S.selftestFiksirovannyh();
+oshibki.push(...fiks);
+const { FIKSIROVANNYE21 } = requireSrc('lib/zadanie21/zadacha');
 const opornye = S.selftestOpornyh();
 oshibki.push(...opornye);
 
@@ -63,6 +69,7 @@ if (oshibki.length > 0) {
 const zadachOp = BLOKI_OPORNYH21.reduce((s, b) => s + b.zadachi.length, 0);
 console.log(
   `Наибольшее и наименьшее значение: ${PROTOTYPES.length} прототипов × ${n} случайных задач, ` +
-    `каталог тренажёра и примеры, ${zadachOp} опорных задач — всё сходится ` +
-    `(проверок ${sluchaynye.proverok + PROTOTYPES.length * 21 + zadachOp}).`,
+    `каталог тренажёра и примеры, фиксированные задачи (${FIKSIROVANNYE21.length}), ` +
+    `${zadachOp} опорных задач — всё сходится ` +
+    `(проверок ${sluchaynye.proverok + PROTOTYPES.length * 21 + FIKSIROVANNYE21.length + zadachOp}).`,
 );
