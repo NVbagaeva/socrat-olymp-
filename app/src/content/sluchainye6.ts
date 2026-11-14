@@ -11,9 +11,10 @@
 import type { Ton } from '@/components/tasks/steklo';
 import type { GroupId } from '@/lib/zadanie6/types';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov } from './treningBanka';
+import { nomerRazdela, slovoChasti } from './struktura';
 
 export const SHAPKA6 = {
-  nadzagolovok: 'Задание №6 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('sluchainye-velichiny')} · ${slovoChasti('sluchainye-velichiny')}`,
   zagolovok: 'Прочитать распределение и посчитать одно число',
   lead: 'Случайный опыт дан рисунком (диаграмма Эйлера, дерево), таблицей или записью распределения. Нужно найти вероятность, условную вероятность, математическое ожидание, дисперсию или оценку по неравенству Чебышёва. Новое задание ЕГЭ с 2027 года.',
   fakty: (tipovVsego: number) => [
@@ -190,7 +191,7 @@ export const FORMULY6: FormulyGruppy6[] = [
 
 export const TRENAZHER6 = (() => {
   const t = tekstyTrenazheraBanka({
-    nomer: 6,
+    nomer: nomerRazdela('sluchainye-velichiny'),
     grupp: 'пяти',
     istochniki: { vse: 'Все', fipi: 'Исходные', new: 'Сгенерированные' },
   });
@@ -254,5 +255,5 @@ export const NAVYKI6: {
 ];
 
 export const OPORNYE6 = tekstyOpornyh(
-  'Короткие задачи на один навык: из этих навыков складывается любая задача №6. В каждом блоке десять задач.',
+  `Короткие задачи на один навык: из этих навыков складывается любая задача №${nomerRazdela('sluchainye-velichiny')}. В каждом блоке десять задач.`,
 );

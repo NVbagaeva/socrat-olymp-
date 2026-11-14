@@ -9,6 +9,7 @@
 import { GEN_UI } from '@/content/generatorUi';
 import { plural } from '@/lib/plural';
 import type { SectionId } from '@/lib/zadanie11/types';
+import { nomerRazdela } from '@/content/struktura';
 
 /* ── Печатный лист ──────────────────────────────────────────────── */
 
@@ -19,10 +20,10 @@ export const SHEET_11 = {
     motto: 'Больше, чем подготовка',
   },
   title: {
-    chip: 'Задание 11',
+    chip: `Задание ${nomerRazdela('tekstovye-zadachi')}`,
     text: 'Текстовые задачи',
   },
-  runner: 'Задание 11 · Текстовые задачи',
+  runner: `Задание ${nomerRazdela('tekstovye-zadachi')} · Текстовые задачи`,
   podpis: 'Учитель: Багаева Н.В.',
   subtitle: {
     otrabotka: 'Задания для отработки',

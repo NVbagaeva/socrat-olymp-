@@ -10,6 +10,7 @@
  */
 
 import type { Blok9 } from '@/lib/proizvodnaya/teoriya-yakorya';
+import { nomerRazdela } from '@/content/struktura';
 
 const TG = '\\operatorname{tg}';
 const LIM = (pod: string) => `\\lim\\limits_{${pod}}`;
@@ -220,7 +221,7 @@ export const PONYATIE_9 = {
 
   ege: {
     vvod: [
-      'На ЕГЭ определение производной напрямую не спрашивают, но обе задачи — скорость и касательная — стоят в задании №9. Нажмите, чтобы потренироваться.',
+      `На ЕГЭ определение производной напрямую не спрашивают, но обе задачи — скорость и касательная — стоят в задании №${nomerRazdela('proizvodnaya')}. Нажмите, чтобы потренироваться.`,
     ],
     ssylki: [
       {

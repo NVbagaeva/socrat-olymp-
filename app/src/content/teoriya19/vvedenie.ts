@@ -8,6 +8,7 @@
 import { kriteriiZadaniya } from '@/content/variantOnline/kriterii';
 import { grafik, pryamaya, scena, tochka } from '@/lib/zadanie19/risunok';
 import type { Glava19, Kartochka19 } from './tipy';
+import { nomerRazdela } from '@/content/struktura';
 
 const pusto = { razbory: [], opornye: [], zadachi: [] };
 
@@ -417,7 +418,7 @@ const BAZOVYE: Glava19 = {
 const KRITERII: Kartochka19 = {
   ton: 'ogranicheniya',
   metka: 'Критерии оценивания',
-  title: 'Как оценивают задание 19',
+  title: `Как оценивают задание ${nomerRazdela('parametr')}`,
   shirina: 6,
   punkty: kriteriiZadaniya(19).map(
     (k) =>

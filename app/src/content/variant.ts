@@ -4,6 +4,7 @@
  */
 
 import { counted } from '@/lib/plural';
+import { nomeraChasti } from '@/content/struktura';
 
 export const VARIANT_HREF = '/variant/';
 
@@ -250,7 +251,7 @@ export const VARIANT_SCREEN = {
   zakryt: 'Закрыть',
   entry: {
     title: 'Собрать вариант',
-    note: 'Задания 1–13 · три листа: ученик, учитель, разбор',
+    note: `Задания ${nomeraChasti(1)} · три листа: ученик, учитель, разбор`,
     fromSection: 'Собрать вариант из всех заданий →',
   },
   /* Первый шаг сборщика: уровень экзамена. */

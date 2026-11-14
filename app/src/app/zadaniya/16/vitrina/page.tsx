@@ -8,9 +8,10 @@ import { typeset } from '@/lib/tex';
 import { PRIMERY_CHERTEZHEY_16, PROBNAYA_RABOTA_16 } from '@/lib/zadanie16/primery';
 import 'katex/dist/katex.min.css';
 import '../zadanie16.css';
+import { nomerRazdela } from '@/content/struktura';
 
 export const metadata: Metadata = {
-  title: 'Витрина чертежей · Задание 16 — Будет на ЕГЭ',
+  title: `Витрина чертежей · Задание ${nomerRazdela('neravenstvo')} — Будет на ЕГЭ`,
   robots: { index: false, follow: false },
 };
 
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 export default function Vitrina16Page() {
   return (
     <main className="z16-vit">
-      <h1 className="z16-vit__title">Витрина чертежей · задание 16</h1>
+      <h1 className="z16-vit__title">Витрина чертежей · задание {nomerRazdela('neravenstvo')}</h1>
       <ul className="z16-vit__grid">
         {PRIMERY_CHERTEZHEY_16.map((p) => (
           <li className="z16-card" key={p.id}>

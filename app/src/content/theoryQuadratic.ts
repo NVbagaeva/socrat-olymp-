@@ -15,6 +15,7 @@
 import type { QuadraticTheorySceneId } from '@/lib/scenes';
 import type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 import { assetUrl } from '@/lib/assetUrl';
+import { nomerRazdela } from '@/content/struktura';
 
 /** Абсцисса вершины в записи TeX: подстрочный индекс — буква «в». */
 const XV = 'x_{\\text{в}}';
@@ -420,7 +421,7 @@ export const rootsForm: QuadraticSection = {
 
 export const whereItAppears: QuadraticSection = {
   id: 'where-it-appears',
-  lead: 'Парабола появляется далеко за пределами задания №12. Здесь — обзор без формул, где ещё пригодится умение её читать.',
+  lead: `Парабола появляется далеко за пределами задания №${nomerRazdela('grafiki-funkciy')}. Здесь — обзор без формул, где ещё пригодится умение её читать.`,
   cards: [
     {
       id: 'physics',
@@ -440,9 +441,9 @@ export const whereItAppears: QuadraticSection = {
     },
     {
       id: 'applied',
-      title: 'Задачи с физическим смыслом (№10)',
+      title: `Задачи с физическим смыслом (№${nomerRazdela('prikladnye-zadachi')})`,
       text: [
-        'В задании №10 формулы часто квадратичные: высота, расстояние, площадь. Вопрос там — при каком значении одной величины другая достигнет заданного уровня, а это и есть «дан $y$, найди $x$» из нашего задания.',
+        `В задании №${nomerRazdela('prikladnye-zadachi')} формулы часто квадратичные: высота, расстояние, площадь. Вопрос там — при каком значении одной величины другая достигнет заданного уровня, а это и есть «дан $y$, найди $x$» из нашего задания.`,
       ],
       scene: 'level-line',
     },
@@ -450,7 +451,7 @@ export const whereItAppears: QuadraticSection = {
       id: 'parameter',
       title: 'Задачи с параметром',
       text: [
-        'В задачах с параметром парабола двигается: параметр меняет вершину, ширину, положение нулей. Решают такие задачи те, кто уверенно видит, что сделает с графиком каждое из чисел $a$, $b$, $c$. Подробно этот мир разбирается в разделе задания №19.',
+        `В задачах с параметром парабола двигается: параметр меняет вершину, ширину, положение нулей. Решают такие задачи те, кто уверенно видит, что сделает с графиком каждое из чисел $a$, $b$, $c$. Подробно этот мир разбирается в разделе задания №${nomerRazdela('parametr')}.`,
       ],
       scene: 'family',
     },

@@ -18,6 +18,7 @@
  */
 
 import type { Kartochka7 } from './teoriya7';
+import { nomerRazdela } from '@/content/struktura';
 
 export type RolIrr7 = 'uravnenie' | 'uslovie' | 'samo';
 
@@ -440,7 +441,7 @@ export const IRRACIONALNYE_7: BlokIrr7 = {
           ],
         },
       ],
-      zametka: 'В задании №7 этот вид редкий — пригодится в №13 (уравнения второй части).',
+      zametka: `В задании №${nomerRazdela('uravneniya')} этот вид редкий — пригодится в №13 (уравнения второй части).`,
       primery: [
         {
           id: 'irr-v3',
