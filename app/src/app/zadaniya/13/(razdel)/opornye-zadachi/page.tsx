@@ -37,9 +37,9 @@ export default function Opornye13Tab() {
               href: blokHref13(b.slug),
               nazvanie: b.nazvanie,
               znakHtml: esc(b.no),
-              /* Ключ задачи блока — «блок:номер», как в хранилище опорных
-                 (lib/zadanie13/progress.ts, zadachaId13 — клиентский модуль). */
-              zadachi: zadachiBloka(b).map((z) => `${b.id}:${z.no}`),
+              /* Ключ задачи блока — постоянный id (opornye/sostav.ts); прежние
+                 записи «блок:номер» переводит opornye13Spisok. */
+              zadachi: zadachiBloka(b).map((z) => z.id),
             },
           ];
     }),

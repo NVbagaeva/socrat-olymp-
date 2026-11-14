@@ -1,3 +1,4 @@
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
@@ -63,8 +64,28 @@ export default async function Page({ params }: { params: Params }) {
         section={section}
         subtopic={subtopic}
         initialTab="prep"
-        trail={[{ label: prepPage.title, href: `${base}/${OPORNYE.tail}` }, { label: texPlain(found.title), labelHtml: typeset(found.title) }]}
-        prep={<PrepTasks type={subtopic.id} skill={found} base={base} />}
+        trail={[
+          { label: prepPage.title, href: `${base}/${OPORNYE.tail}` },
+          { label: texPlain(found.title), labelHtml: typeset(found.title) },
+        ]}
+        prep={
+          <>
+            {/* Репетитору: задачи навыка — в черновик ДЗ (№12: блок «подтема/навык»). */}
+            {section.no === '12' ? (
+              <VDzKnopka
+                punkt={{
+                  ist: 'opornye',
+                  no: 12,
+                  blok: `${subtopic.id}/${found.id}`,
+                  zadachi: null,
+                  kazhdomu: false,
+                }}
+                chto={`навык «${texPlain(found.title)}»`}
+              />
+            ) : null}
+            <PrepTasks type={subtopic.id} skill={found} base={base} />
+          </>
+        }
       />
     </AppShell>
   );

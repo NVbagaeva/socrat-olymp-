@@ -14,6 +14,7 @@
 
 import { BANK_13 } from '../bank';
 import { PROTOTYPE_BY_ID } from '../proto';
+import { SOSTAV_13 } from './sostav';
 
 export interface Blok13 {
   id: string;
@@ -30,6 +31,8 @@ export interface Blok13 {
 }
 
 export interface ZadachaBloka {
+  /** Постоянный id: «o13-04-07» (sostav.ts). */
+  id: string;
   no: number;
   prototypeId: string;
   seed: string;
@@ -286,7 +289,7 @@ function seedsOf(prototypeId: string): string[] {
  * следующий seed банка; повышенные задачи встают в конец. «Определи тип» —
  * по одной задаче на прототип, последний seed банка.
  */
-export function zadachiBloka(b: Blok13): ZadachaBloka[] {
+export function sobratSostav13(b: Blok13): Omit<ZadachaBloka, 'id'>[] {
   if (b.vid === 'tip') {
     return b.prototipy.map((prototypeId, i) => {
       const seeds = seedsOf(prototypeId);
@@ -296,7 +299,7 @@ export function zadachiBloka(b: Blok13): ZadachaBloka[] {
   const rank = (id: string) => (PROTOTYPE_BY_ID[id]?.difficulty === 'hard' ? 1 : 0);
   const order = b.prototipy;
   const seeds = order.map(seedsOf);
-  const out: ZadachaBloka[] = [];
+  const out: Omit<ZadachaBloka, 'id'>[] = [];
   for (let round = 0; out.length < ZADACH_V_BLOKE; round += 1) {
     let added = false;
     order.forEach((prototypeId, i) => {
@@ -311,4 +314,33 @@ export function zadachiBloka(b: Blok13): ZadachaBloka[] {
   return out
     .sort((x, y) => rank(x.prototypeId) - rank(y.prototypeId))
     .map((z, i) => ({ ...z, no: i + 1 }));
+}
+
+/**
+ * Задачи блока — зафиксированный состав (sostav.ts): у каждой
+ * постоянный id. sobratSostav13 — только для пополнения состава.
+ */
+export function zadachiBloka(b: Blok13): ZadachaBloka[] {
+  return (SOSTAV_13[b.id] ?? []).map(([id, prototypeId, seed], i) => ({
+    id,
+    no: i + 1,
+    prototypeId,
+    seed,
+  }));
+}
+
+/** Задача по постоянному id. */
+export function zadachaPoId13(id: string): (ZadachaBloka & { blok: Blok13 }) | undefined {
+  for (const blok of BLOKI_13) {
+    const z = zadachiBloka(blok).find((x) => x.id === id);
+    if (z !== undefined) return { ...z, blok };
+  }
+  return undefined;
+}
+
+/** Старый ключ задачи «блок:номер» → постоянный id; нет такой — undefined. */
+export function idPoStaromuKlyuchu13(klyuch: string): string | undefined {
+  const m = /^(o13-\d{2}):(\d+)$/.exec(klyuch);
+  if (m === null) return undefined;
+  return SOSTAV_13[m[1] as string]?.[Number(m[2]) - 1]?.[0];
 }

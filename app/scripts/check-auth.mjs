@@ -184,6 +184,8 @@ const ALLOWED = new Set([
   'dz111-uchenik@yandex.ru',
   'dz345-repetitor@yandex.ru',
   'dz345-uchenik@yandex.ru',
+  'dz1213-repetitor@yandex.ru',
+  'dz1213-uchenik@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -1836,6 +1838,8 @@ async function runEnabled() {
   await scenarijDz111(mock, errors);
   /* 7з. ДЗ, шаг 2: №3, №4 и №5. */
   await scenarijDz345(mock, errors);
+  /* 7и. ДЗ, шаг 2: №12 и №13. */
+  await scenarijDz1213(mock, errors);
 
   /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */
   {
@@ -2777,6 +2781,110 @@ async function scenarijDz345(mock, errors) {
   await sctx.close();
 }
 
+/* ── ДЗ, шаг 2: №12 и №13 ─────────────────────────────────────────
+   Навык опорных №12 и блок опорных №13 — кнопками со страниц; тип
+   тренажёра №13 — в конструкторе; выдача; ученик решает задачу №13,
+   видит чертёж опорной №12 и отвечает на неё. */
+async function scenarijDz1213(mock, errors) {
+  registerInMock(
+    mock,
+    'dz1213-repetitor@yandex.ru',
+    'dz1213-repetitor-1',
+    'Олег Сергеевич',
+    'tutor',
+  );
+  registerInMock(mock, 'dz1213-uchenik@yandex.ru', 'dz1213-uchenik-1', 'Даша Орлова', 'student');
+  mock.seedClass('dz1213-repetitor@yandex.ru', ['dz1213-uchenik@yandex.ru'], 'Класс 12–13');
+  const dz = mock.dz;
+  const pervaya = (dir) =>
+    fs
+      .readdirSync(path.join(OUT, dir))
+      .filter((d) => fs.statSync(path.join(OUT, dir, d)).isDirectory())
+      .sort()[0];
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await welcomeSeen(ctx);
+  await installMock(ctx, mock);
+  const tp = await ctx.newPage();
+  watchConsole(tp, errors);
+  await login(tp, 'dz1213-repetitor@yandex.ru', 'dz1213-repetitor-1');
+  await tp.goto(
+    `${SITE}/zadaniya/12/linear/opornye-zadachi/${pervaya('zadaniya/12/linear/opornye-zadachi')}/`,
+    {
+      waitUntil: 'networkidle',
+    },
+  );
+  await tp.locator('[data-block="dz-v-chernovik"]').first().click();
+  await tp.waitForSelector('[data-block="dz-chernovik-plashka"]');
+  check(true, 'ДЗ-12/13: навык опорных №12 — в черновике кнопкой со страницы навыка');
+  await tp.goto(`${SITE}/zadaniya/13/opornye-zadachi/${pervaya('zadaniya/13/opornye-zadachi')}/`, {
+    waitUntil: 'networkidle',
+  });
+  await tp.locator('[data-block="dz-v-chernovik"]').first().click();
+  await tp.waitForFunction(() =>
+    /2/.test(document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent ?? ''),
+  );
+  check(true, 'ДЗ-12/13: блок опорных №13 — в черновике');
+  await tp.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
+  await tp.waitForSelector('.dzk-punkt');
+  await tp.locator('.dzk-chip', { hasText: '№13' }).first().click();
+  await tp.getByRole('tab', { name: 'Тренажёр' }).click();
+  const tip = tp.locator('.dzk-tip').first();
+  await tip.waitFor();
+  await tip.locator('.dzk-dobavit').click();
+  await tp.waitForFunction(() => document.querySelectorAll('.dzk-punkt').length === 3);
+  await tp.fill('input[name="title"]', 'ДЗ: №12 и №13');
+  await tp.locator('[data-action="vydat"]').click();
+  await tp.waitForSelector('[data-page="vydano"]', { timeout: 90000 });
+  const hw = dz.homework.find((h) => h.title === 'ДЗ: №12 и №13');
+  check(
+    hw !== undefined && hw.sections.join(',') === '12,13',
+    `ДЗ-12/13: выдано, разделы 12 и 13 (${hw?.sections})`,
+  );
+  await ctx.close();
+
+  const sctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await welcomeSeen(sctx);
+  await installMock(sctx, mock);
+  const sp = await sctx.newPage();
+  watchConsole(sp, errors);
+  await login(sp, 'dz1213-uchenik@yandex.ru', 'dz1213-uchenik-1');
+  await sp.goto(`${SITE}/zadaniya/13/`, { waitUntil: 'networkidle' });
+  await sp.waitForSelector('[data-block="dz-plashka"]');
+  check(true, 'ДЗ-12/13: у ученика плашка ДЗ в разделе №13');
+  await sp.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+  const reshit = async (chto) => {
+    const id = await sp.locator('.rdz-zadacha').first().getAttribute('data-task');
+    const key = dz.keys.find((k) => k.task_id === id).answer;
+    const task = dz.tasks.find((t) => t.id === id);
+    if (task.answer_kind === 'choice') {
+      const nomera = await sp
+        .locator('.rdz-zadacha .rdz-vybor button > span:first-child')
+        .allTextContents();
+      await sp.locator('.rdz-zadacha .rdz-vybor button').nth(nomera.indexOf(key)).click();
+    } else {
+      await sp.locator('.rdz-zadacha .otvet-input__field').fill(key.replace('.', ','));
+    }
+    await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
+    await sp.waitForSelector('.trn-verdikt--da');
+    check(true, `ДЗ-12/13: ${chto} (${task.answer_kind}) решена верно`);
+    check(
+      await noHorizontalScroll(sp),
+      `ДЗ-12/13: ${chto} у ученика 390 — без горизонтальной прокрутки`,
+    );
+  };
+  await sp.locator('.rdz-punkt[data-istochnik="trenazher"]').click();
+  await sp.waitForSelector('.rdz-zadacha');
+  await reshit('задача тренажёра №13');
+  await sp.locator('.rdz-punkt[data-istochnik="opornye"][data-no="12"]').click();
+  await sp.waitForSelector('.rdz-zadacha .rdz-graf svg');
+  check(true, 'ДЗ-12/13: ученик видит чертёж опорной №12');
+  await reshit('опорная №12');
+  await sp.locator('.rdz-punkt[data-istochnik="opornye"][data-no="13"]').click();
+  await sp.waitForSelector('.rdz-zadacha');
+  await reshit('опорная №13');
+  await sctx.close();
+}
+
 /* Только сценарий ДЗ — для отладки (--tolko-dz). */
 async function runTolkoDz() {
   const mock = makeMock();
@@ -2786,6 +2894,7 @@ async function runTolkoDz() {
   await scenarijDz29(mock, errors);
   await scenarijDz111(mock, errors);
   await scenarijDz345(mock, errors);
+  await scenarijDz1213(mock, errors);
   for (const e of errors) check(false, `консоль: ${e}`);
 }
 

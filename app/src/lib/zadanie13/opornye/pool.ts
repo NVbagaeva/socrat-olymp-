@@ -18,7 +18,8 @@ export interface PoolBlok13 {
   lead: string;
   vid: Blok13['vid'];
   zapomniHtml: string[];
-  zadachi: (Zadacha13Sealed & { no: number })[];
+  /** id — постоянный (sostav.ts), no — номер в блоке. */
+  zadachi: (Zadacha13Sealed & { id: string; no: number })[];
 }
 
 export function prepPool13(): PoolBlok13[] {
@@ -35,6 +36,7 @@ export function prepPool13(): PoolBlok13[] {
     zapomniHtml: b.zapomni.map((z) => typeset(z)),
     zadachi: zadachiBloka(b).map((z) => ({
       ...sealZadacha13(z.prototypeId, z.seed, b.vid, z.no),
+      id: z.id,
       no: z.no,
     })),
   }));

@@ -12,6 +12,8 @@ import '@/components/tasks/zadanie10/razbor10.css';
 import '@/lib/planimetriya/planimetriya.css';
 /* №3–№5: чертежи стереометрии, плоские чертежи, иллюстрации. */
 import '@/components/dz/risunki-dz.css';
+/* №13: таблицы условия и решения. */
+import '@/app/zadaniya/13/reshenie13.css';
 
 export const metadata: Metadata = {
   title: 'Выдать домашнее задание — Будет на ЕГЭ',

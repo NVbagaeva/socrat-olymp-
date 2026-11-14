@@ -43,7 +43,7 @@ import { fixedSeed as fixedSeed2, generateMikro } from '@/lib/vektory/prep/gener
 import { PROTOTYPES as PROTOTYPES9 } from '@/lib/proizvodnaya/prototypes';
 import katex from 'katex';
 import '@/lib/graph/katex-makrosy.js';
-import { typesetText } from '@/lib/tex';
+import { texPlain, typesetText } from '@/lib/tex';
 import { BANK_4, BANK_5 } from '@/lib/veroyatnost/index';
 import { BLOKI_4, BLOKI_5 } from '@/lib/veroyatnost/blocks';
 import { prep4Pool, prep5Pool, type PrepPoolBlok } from '@/lib/veroyatnost/pool';
@@ -57,6 +57,17 @@ import { renderPloskiy } from '@/lib/stereo/ploskiy';
 import { renderSolid } from '@/lib/solid/render';
 import { BLOKI3_NAZVANIYA } from '@/content/zadanie3/navyki';
 import { otvetVeroyatnosti, razborVeroyatnosti } from '../sborka/r4-5';
+import { prepSubtopicParams } from '@/content/sections';
+import { buildPrepTasks, findPrepSkill, prepSkillIds } from '@/lib/prep';
+import { trenazherConfig12, zadachi12 } from '@/lib/ves12/trenazher12';
+import { functionTypes } from '@/data/functionTypes';
+import type { TrenazherConfig } from '@/lib/trenazher/types';
+import type { Shablon12 } from '../sborka/r12';
+import { prototypes as PROTOTYPES13 } from '@/lib/zadanie13/generate';
+import { trenazherConfig13 } from '@/lib/zadanie13/trenazher/filtry13';
+import { BLOKI_13, zadachiBloka as zadachiBloka13 } from '@/lib/zadanie13/opornye/bloki';
+import { sealZadacha13 } from '@/lib/zadanie13/opornye/seal';
+import { PROTOTYPE_BY_ID as PROTO13 } from '@/lib/zadanie13/proto';
 import { GRUPPY as GRUPPY9 } from '@/lib/proizvodnaya/skills';
 import { PREP_BLOCKS as BLOKI9 } from '@/lib/proizvodnaya/prep/blocks';
 import { fixedSeed as fixedSeed9, generatePrepById } from '@/lib/proizvodnaya/prep/generate';
@@ -72,7 +83,7 @@ import type {
 import { zamok } from './zamok';
 
 /** Разделы, из которых уже можно собирать ДЗ. */
-export const RAZDELY_DZ = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+export const RAZDELY_DZ = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const;
 
 /** «Банковые» разделы: банк задач с решателем прототипа и опорные без зерна. */
 const BANKOVYE: Record<
@@ -382,6 +393,67 @@ function trenazher3(): GruppaKat[] {
   }));
 }
 
+/* ── №12 и №13: типы тренажёра — из конфигурации общего тренажёра ── */
+
+function gruppyTrenazhera(c: TrenazherConfig): GruppaKat[] {
+  return c.temy
+    .map((t) => ({
+      id: t.id,
+      nazvanie: t.title,
+      tipy: t.podtipy.map((p) => ({ id: p.id, nazvanieHtml: p.titleHtml ?? typeset(p.title) })),
+    }))
+    .filter((g) => g.tipy.length > 0);
+}
+
+/**
+ * Опорные №12: навыки подтем — блоки «подтема/навык». Задачи движка
+ * без зерна, id постоянные (данные graph/). В каталоге — только условие
+ * для просмотра, без чертежа: с чертежами задач и шагов разбора это
+ * десятки мегабайт. Задачу с чертежом, ответом и разбором собирает при
+ * выдаче тот же движок в браузере (sborka/r12.ts).
+ */
+function opornye12(): BlokKat[] {
+  return prepSubtopicParams().flatMap(({ type }) => {
+    const podtema = functionTypes.find((t) => t.id === type)?.title ?? type;
+    return prepSkillIds(type).flatMap((skillId) => {
+      const skill = findPrepSkill(type, skillId);
+      if (skill === undefined) return [];
+      return [
+        {
+          slug: `${type}/${skillId}`,
+          nazvanie: `${podtema}: ${texPlain(skill.title)}`,
+          zapomniHtml: skill.tip === '' ? '' : typeset(skill.tip),
+          zadachi: buildPrepTasks(skill).map((t) => ({
+            id: t.id,
+            uslovieHtml: t.questionHtml,
+            podskazkaHtml: '',
+          })),
+        },
+      ];
+    });
+  });
+}
+
+/** Опорные №13: блоки по постоянным id задач; предпросмотр — задача состава, при выдаче — аналог. */
+function opornye13(): BlokKat[] {
+  return BLOKI_13.map((b) => ({
+    slug: b.slug,
+    nazvanie: b.nazvanie,
+    zapomniHtml: b.zapomni.map((z) => typeset(z)).join('<br>'),
+    zadachi: zadachiBloka13(b).map((z) => {
+      const s = sealZadacha13(z.prototypeId, z.seed, b.vid, z.no);
+      return {
+        id: z.id,
+        nazvanie: typeset(PROTO13[z.prototypeId]?.title ?? z.prototypeId),
+        uslovieHtml: s.uslovieHtml + (s.tablitsaHtml ?? ''),
+        podskazkaHtml: '',
+        ...(s.vybory === null ? {} : { varianty: s.vybory }),
+        izZerna: true,
+      };
+    }),
+  }));
+}
+
 function sobratKatalog(no: number): KatalogRazdela | null {
   if (no === 1) {
     const d = dannyeTrenazhera1();
@@ -466,6 +538,25 @@ function sobratKatalog(no: number): KatalogRazdela | null {
       kartochki: kartochki(no),
       opornye: opornye3(),
       trenazher: trenazher3(),
+    };
+  }
+  if (no === 12) {
+    return {
+      no,
+      nazvanie: nazvanieRazdela(no),
+      kartochki: kartochki(no),
+      opornye: opornye12(),
+      trenazher: gruppyTrenazhera(trenazherConfig12()),
+      bankTrenazhera: zadachi12().map((r): Shablon12 => ({ k: r.key, p: r.podtip })),
+    };
+  }
+  if (no === 13) {
+    return {
+      no,
+      nazvanie: nazvanieRazdela(no),
+      kartochki: kartochki(no),
+      opornye: opornye13(),
+      trenazher: gruppyTrenazhera(trenazherConfig13(PROTOTYPES13(), typeset)),
     };
   }
   if (no === 4 || no === 5) {

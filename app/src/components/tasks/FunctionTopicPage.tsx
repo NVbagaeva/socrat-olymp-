@@ -1,3 +1,4 @@
+import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { OPORNYE } from '@/content/opornye';
@@ -171,6 +172,9 @@ export function FunctionTopicPage({
         }
       />
 
+      {/* ДЗ: ученику — плашка с ДЗ, репетитору — черновик ДЗ. Гостю — ничего. */}
+      <DzVRazdele no={Number(section.no)} />
+
       <TopicTabs
         initial={initialTab}
         about={
@@ -179,7 +183,9 @@ export function FunctionTopicPage({
             about={about}
             scene={aboutScene(subtopic.id)}
             base={base}
-            {...(ABOUT_FIGURE[subtopic.id] === undefined ? {} : { figure: ABOUT_FIGURE[subtopic.id] })}
+            {...(ABOUT_FIGURE[subtopic.id] === undefined
+              ? {}
+              : { figure: ABOUT_FIGURE[subtopic.id] })}
           />
         }
         theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
@@ -214,7 +220,9 @@ export function FunctionTopicPage({
           ))
         }
         trainerHref={hasTrainer ? `${base}/trenazher/` : null}
-        generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} icon={icon} /> : undefined}
+        generator={
+          hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} icon={icon} /> : undefined
+        }
         tutors={tutors}
         tutorsEmpty={PODTEMA_SKORO.tutors}
         razdely={razdely}

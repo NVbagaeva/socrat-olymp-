@@ -8,7 +8,7 @@
 import type { KatalogRazdela, ResheniyaKatalog } from './types';
 
 /** Разделы, из которых уже можно собирать ДЗ (как RAZDELY_DZ на сервере). */
-export const RAZDELY_DZ_KLIENT = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+export const RAZDELY_DZ_KLIENT = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const;
 
 const kesh = new Map<number, Promise<KatalogRazdela>>();
 
