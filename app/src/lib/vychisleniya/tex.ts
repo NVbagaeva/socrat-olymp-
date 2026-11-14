@@ -70,7 +70,9 @@ export function rad(num: number, den: number): string {
   if (m === 1) {
     return top;
   }
-  return n < 0 ? `-\\frac{${-n === 1 ? '' : -n}\\pi}{${m}}` : `\\frac{${n === 1 ? '' : n}\\pi}{${m}}`;
+  return n < 0
+    ? `-\\frac{${-n === 1 ? '' : -n}\\pi}{${m}}`
+    : `\\frac{${n === 1 ? '' : n}\\pi}{${m}}`;
 }
 
 /** Открытый интервал четверти в радианах: \left(\pi; \frac{3\pi}{2}\right). */

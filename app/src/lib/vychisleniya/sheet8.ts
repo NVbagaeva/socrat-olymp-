@@ -40,6 +40,7 @@ import { ru } from './numbers';
 import { prototypeById } from './prototypes';
 import { skillById, skillOfPrototype } from './skills';
 import type { Generated, Level } from './types';
+import { razborSheetHtml } from './razbor';
 
 export interface SheetParams8 {
   /** Навыки: S1 … S11. */
@@ -146,7 +147,7 @@ function parseKlyuchi8(query: URLSearchParams): SheetParams8 {
   const zameny: Record<string, number> = {};
   for (const item of (query.get('z') ?? '').split(',')) {
     const [pos = '', k = ''] = item.split(':');
-    if (/^\d+\.8\.[A-Z]_\d{1,2}$/.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
+    if (/^\d+\.8\.[A-Z]_\d{1,3}$/.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
   }
   return {
     skills: [...new Set(sostav.map((x) => skillOfPrototype(x.id)?.id ?? ''))],
@@ -194,19 +195,7 @@ interface SheetBlock8 {
   tasks: SheetTask8[];
 }
 
-/**
- * Шаги разбора без строки ответа. Нужны и генератору вариантов
- * (lib/variant/adapters/z08): там ответ стоит своей строкой.
- */
-export function razborStepsHtml(lines: string[]): string {
-  const items = lines.map((line) => `<li class="sheet-step">${typeset(line)}</li>`).join('');
-  return `<ol class="sheet-steps">${items}</ol>`;
-}
-
-/** Разбор: список шагов и строка ответа, свёрстано под ту же CSS, что у №12. */
-function razborHtml(lines: string[], answerText: string): string {
-  return `${razborStepsHtml(lines)}<p class="sheet-task-answer">Ответ: <b>${answerText}</b></p>`;
-}
+export { razborStepsHtml } from './razbor';
 
 /** Прототипы навыка, подходящие уровню; нет ни одного — берутся все навыка. */
 function prototypesOf(skillId: string, level: Level | null): string[] {
@@ -259,7 +248,7 @@ function tasksForSkill(
         figureSvg: null,
         answer: answerText,
         answerHtml: null,
-        solutionHtml: withAnswers ? razborHtml(task.razbor, answerText) : null,
+        solutionHtml: withAnswers ? razborSheetHtml(task.razbor, answerText, task.delimost) : null,
       });
     } catch {
       /* Параметры не подобрались на этом seed — берём следующий. */
@@ -339,7 +328,7 @@ function blokiPoKlyucham(params: SheetParams8, withAnswers: boolean, variant: nu
       figureSvg: null,
       answer: answerText,
       answerHtml: null,
-      solutionHtml: withAnswers ? razborHtml(task.razbor, answerText) : null,
+      solutionHtml: withAnswers ? razborSheetHtml(task.razbor, answerText, task.delimost) : null,
     };
     const last = out[out.length - 1];
     if (last !== undefined && last.set === skill.id) last.tasks.push(t);

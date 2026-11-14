@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /* scripts/check-vychisleniya.mjs — автотест генераторов и банка №8.
 
-   Запуск: pnpm test:vychisleniya [seedsPerLevel]
+   Запуск: pnpm test:vychisleniya [seedsPerLevel] [--only 8.A,8.C]
+   (--only — только эти прототипы генератора; банк и подготовка — все)
 
    Каждый прототип гоняется на 1000 seed на каждом уровне: ответ
    всегда целое или конечная десятичная дробь, условие и разбор
@@ -19,12 +20,15 @@ const katex = require('katex');
 requireSrc('lib/graph/katex-makrosy.js').podklyuchitMakrosy(katex); // общие макросы KaTeX: \arc{…}
 const typeset = (tex) => katex.renderToString(tex, { throwOnError: true, strict: 'error' });
 
-const seeds = Number(process.argv[2] ?? 1000);
+const args = process.argv.slice(2);
+const onlyAt = args.indexOf('--only');
+const only = onlyAt === -1 ? null : (args[onlyAt + 1] ?? '').split(',').filter(Boolean);
+const seeds = Number(args.find((a, i) => /^\d+$/.test(a) && args[i - 1] !== '--only') ?? 1000);
 const { checkGenerators, checkBank, checkPrep } = requireSrc('lib/vychisleniya/selftest');
 
-const gen = checkGenerators(seeds, typeset);
-const bank = checkBank(typeset);
-const prep = checkPrep(Math.min(seeds, 300), typeset);
+const gen = checkGenerators(seeds, typeset, only);
+const bank = checkBank(typeset, only);
+const prep = only === null ? checkPrep(Math.min(seeds, 300), typeset) : { prototypes: 0, generated: 0, problems: [] };
 console.log(`генераторы: ${gen.prototypes} прототипов, ${gen.generated} задач, проблем ${gen.problems.length}`);
 console.log(`банк: ${bank.generated} вариантов, проблем ${bank.problems.length}`);
 console.log(`подготовка: ${prep.prototypes} микро-задач, ${prep.generated} вариантов, проблем ${prep.problems.length}`);

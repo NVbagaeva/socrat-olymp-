@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { AUTH_UI } from '@/content/auth-ui';
 import { site } from '@/content/site';
-import { AUTH_HREF } from '@/lib/auth/config';
+import { AUTH_HREF, AUTH_IN_HEADER } from '@/lib/auth/config';
 import { initialsOf, useSessionUser } from '@/lib/auth/session';
 import type { AuthWidgetProps } from './AuthWidget';
 import './auth-widget.css';
@@ -21,6 +21,23 @@ export function LiveWidget({ variant, className }: AuthWidgetProps) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const menuId = useId();
+
+  /* Вошёл — прогресс (журнал, закладки, история, тренировка) живёт и в
+     аккаунте и сливается между устройствами. Код синхронизации грузится
+     только сейчас. */
+  const userId = user?.id ?? null;
+  useEffect(() => {
+    if (userId === null) return undefined;
+    let stop: (() => void) | null = null;
+    let cancelled = false;
+    void import('@/lib/accountSync').then(({ startAccountSync }) => {
+      if (!cancelled) stop = startAccountSync();
+    });
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
+  }, [userId]);
 
   /* Репетитор вошёл — его комплекты уходят и в аккаунт. */
   useEffect(() => {
@@ -55,18 +72,40 @@ export function LiveWidget({ variant, className }: AuthWidgetProps) {
   }, [open, close]);
 
   if (user === null) {
+    /* Пробный режим: вход работает, но в шапке его не видно — она
+       выглядит как без входа. На /voyti/ попадают по прямой ссылке. */
+    if (!AUTH_IN_HEADER) {
+      return variant === 'site' ? (
+        <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
+          {site.headerActions.signup.label}
+        </a>
+      ) : null;
+    }
+    /* «Войти» — стеклянная таблетка со значком в голубом кружке: тот же
+       кружок, что станет кружком с инициалами после входа. На телефоне
+       и в тесной шапке оболочки остаётся один кружок, слово «Войти»
+       читает скринридер (auth-widget.css).
+       «Начать бесплатно» ведёт туда же, куда без входа, — в банк
+       заданий: регистрация пока по приглашению, и случайный посетитель
+       не должен упираться в закрытую форму. */
     return (
       <>
         <Link
-          className={clsx('btn btn--ghost btn--sm auth-widget__login', className)}
+          className={clsx('auth-login auth-widget__login', `auth-login--${variant}`, className)}
           href={AUTH_HREF.voyti}
         >
-          {AUTH_UI.login}
+          <span className="auth-login__ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
+              <circle cx="12" cy="8.5" r="3.75" />
+              <path d="M5 19.5c1.3-3.4 3.9-5.25 7-5.25s5.7 1.85 7 5.25" />
+            </svg>
+          </span>
+          <span className="auth-login__text">{AUTH_UI.login}</span>
         </Link>
         {variant === 'site' ? (
-          <Link className="btn btn--primary btn--sm" href={AUTH_HREF.registraciya}>
+          <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
             {site.headerActions.signup.label}
-          </Link>
+          </a>
         ) : null}
       </>
     );

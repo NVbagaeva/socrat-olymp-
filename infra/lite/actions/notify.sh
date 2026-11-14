@@ -22,7 +22,15 @@ body="$WORK/mail.txt"
   { [ -n "$text" ] && [ -f "$text" ] && cat "$text"; echo; echo "Запуск: ${GITHUB_SERVER_URL:-}/${GITHUB_REPOSITORY:-}/actions/runs/${GITHUB_RUN_ID:-}"; } | sed 's/$/\r/'
 } > "$body"
 
-printf 'user = "%s:%s"\n' "$SMTP_USER" "$SMTP_PASS" | curl --silent --show-error --config - \
+# Подробный вывод curl остаётся в переменной: в нём есть строка входа.
+# Наружу — только ответ почтового сервера с кодом ошибки (4xx/5xx),
+# по нему видно, почему Яндекс не принял письмо.
+if err=$(printf 'user = "%s:%s"\n' "$SMTP_USER" "$SMTP_PASS" | curl --verbose --silent --show-error --config - \
   --url "smtps://${SMTP_HOST:-smtp.yandex.ru}:${SMTP_PORT:-465}" \
-  --mail-from "${SMTP_FROM:-$SMTP_USER}" --mail-rcpt "$ALERT_EMAIL" --upload-file "$body"
-echo "Письмо ушло: $subject"
+  --mail-from "${SMTP_FROM:-$SMTP_USER}" --mail-rcpt "$ALERT_EMAIL" --upload-file "$body" 2>&1 >/dev/null); then
+  echo "Письмо ушло: $subject"
+else
+  rc=$?
+  smtp_reply "$err" >&2
+  exit "$rc"
+fi

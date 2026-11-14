@@ -81,11 +81,30 @@
   color: var(--color-border-strong);
   cursor: default;
 }
-.gen-step output {
+.gen-step output,
+.gen-step input {
   min-width: 26px;
   text-align: center;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+/* Число вписывается: поле без рамки и без стрелок браузера — как прежде
+   цифра между «−» и «+»; рамка фокуса — общая. */
+.gen-step input {
+  height: 100%;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: inherit;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.gen-step input::-webkit-outer-spin-button,
+.gen-step input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
 }
 .gen-lvcard[aria-pressed='true'] {
   border-color: color-mix(in srgb, var(--color-warning) 45%, transparent);
@@ -298,8 +317,11 @@
   border-top: 1px solid var(--color-surface-2);
 }
 .gen-trow {
+  /* Колонка управления одной ширины у «+ Добавить» и степпера: колонка
+     не скачет, кнопки выровнены по правому краю. */
+  --gen-ctl-w: 116px;
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) auto;
+  grid-template-columns: 36px minmax(0, 1fr) var(--gen-ctl-w);
   align-items: center;
   gap: var(--space-2);
   min-height: 52px;
@@ -309,7 +331,12 @@
 .gen-trow.is-pick {
   background: var(--color-surface-info);
 }
-.gen-trow.is-off .gen-trow__icon,
+/* Тема не в составе — обычный текст и чуть приглушённый значок: её
+   можно добавить. Серым — только то, чего в источнике нет. */
+.gen-trow.is-off .gen-trow__icon {
+  filter: saturate(0.6);
+  opacity: 0.75;
+}
 .gen-trow.is-disabled .gen-trow__icon {
   filter: grayscale(1);
   opacity: 0.45;
@@ -326,7 +353,6 @@
   font-size: var(--fs-label);
   font-weight: 700;
 }
-.gen-trow.is-off .gen-trow__name b,
 .gen-trow.is-disabled .gen-trow__name b {
   color: var(--color-text-secondary);
   font-weight: 500;
@@ -341,7 +367,7 @@
    телефоне, 56 px шире: столбец значка растёт под него, текст и
    степпер остаются в своих столбцах. */
 .gen-trow:has(.ikonka-tela) {
-  grid-template-columns: var(--ikonka-tela, 48px) minmax(0, 1fr) auto;
+  grid-template-columns: var(--ikonka-tela, 48px) minmax(0, 1fr) var(--gen-ctl-w);
   --ikonka-tela: 48px;
 }
 .gen-trow:has(.ikonka-tela) .gen-trow__icon {
@@ -355,6 +381,7 @@
 }
 .gen-trow__name {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   padding: 6px 0;
   border: 0;
@@ -364,22 +391,52 @@
 }
 .gen-trow__name b {
   font-size: var(--fs-caption);
+  line-height: 1.3;
   font-weight: 600;
-  overflow-wrap: anywhere;
+  /* Слова не рубятся посередине: перенос — только между словами. */
+  overflow-wrap: break-word;
+  hyphens: manual;
 }
-/* Подпись — обычный текст: переносится по словам внутри своего
-   столбца, «подтипы» со стрелкой — одним куском сразу после слова. */
-.gen-trow__name small {
-  display: block;
+/* Мета-строка — неразрывные куски: «в банке 16 ·» и «подтипы ⌄».
+   Не влезают в строку — «подтипы» целиком переносятся. */
+.gen-trow__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  margin-top: 2px;
   font-size: var(--fs-label);
+  line-height: var(--lh-label);
   color: var(--color-text-tertiary);
+}
+.gen-trow__metatext {
+  white-space: nowrap;
+}
+/* Своя подпись темы («разминка: 1000 рублей под 10 %») — описание,
+   а не счётчик: переносится по словам, чтобы не вылезать за экран. */
+.gen-trow__metatext.is-note {
+  min-width: 0;
+  white-space: normal;
 }
 .gen-trow__podtipy {
   display: inline-flex;
   align-items: center;
   gap: 2px;
   white-space: nowrap;
-  vertical-align: bottom;
+}
+/* Маленький бейдж-пометка: «нет в открытом банке». */
+.gen-tag {
+  display: inline-block;
+  max-width: 100%;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .gen-chev {
   width: 14px;
@@ -394,7 +451,7 @@
 }
 .gen-add {
   height: var(--h-control);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-md);
   background: none;
@@ -406,27 +463,68 @@
   color: var(--color-text-tertiary);
   cursor: default;
 }
+.gen-trow > .gen-add,
+.gen-trow > .gen-step,
+.gen-sub > .gen-step {
+  justify-self: end;
+  width: var(--gen-ctl-w);
+  height: var(--h-control);
+  box-sizing: border-box;
+}
+.gen-trow > .gen-step button,
+.gen-sub > .gen-step button {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  height: 100%;
+}
+.gen-trow > .gen-step input,
+.gen-sub > .gen-step input {
+  flex: 0 0 auto;
+  min-width: 2.2ch;
+}
 .gen-subs {
+  --gen-ctl-w: 104px;
   display: grid;
   margin: 0 var(--space-2) var(--space-2) 46px;
-  border-left: 2px solid var(--color-surface-2);
+  padding-left: var(--space-3);
+  border-left: 2px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
 }
 .gen-sub {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--gen-ctl-w);
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-2);
-  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  padding: var(--space-1) 0;
+}
+.gen-sub__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 .gen-sub__name {
   min-width: 0;
   font-size: var(--fs-label);
   line-height: 1.35;
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
+.gen-sub__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 11px;
+  line-height: 16px;
+}
+/* Номер прототипа — маленький бейдж «№49», не цифра, слитая с текстом. */
 .gen-sub__code {
-  color: var(--color-text-tertiary);
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-info);
+  color: var(--color-primary);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .gen-sub__lv {
   color: var(--color-warning);
@@ -1237,6 +1335,8 @@
     display: none;
   }
   .gen {
+    /* Высота нижней панели «Сгенерировать»: кнопка 48 px, поля, рамка. */
+    --gen-actbar-h: calc(48px + 2 * var(--space-2) + 1px);
     gap: var(--space-3);
   }
   /* Полоса на телефоне — сплошная, без стекла: карточки пресетов и
@@ -1345,47 +1445,152 @@
   .gen-task__ans span {
     width: 100px;
   }
-  .gen-actbar {
-    display: grid;
+  /* ── Состав на телефоне: от края до края, внутренние поля 16 px ── */
+  /* Нижний отступ состава — высота панели «Сгенерировать», нижней
+     навигации и safe-area: последняя тема и подсказка не уходят под
+     прилипшие панели при прокрутке. */
+  .gen-sostav {
+    margin: 0 calc(-1 * var(--space-4));
+    padding: var(--space-3) var(--space-4)
+      calc(var(--space-2) + var(--gen-actbar-h) + var(--h-bnav) + env(safe-area-inset-bottom));
+    border-width: 1px 0;
+    border-radius: 0;
+  }
+  .gen-sostav__head,
+  .gen-pick {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .gen-trow {
+    --gen-ctl-w: 104px;
+    grid-template-columns: 36px minmax(0, 1fr) var(--gen-ctl-w);
     gap: var(--space-2);
+    margin: 0 calc(-1 * var(--space-2));
+    padding: var(--space-1) var(--space-2);
+  }
+  .gen-trow:has(.ikonka-tela) {
+    --ikonka-tela: 44px;
+  }
+  .gen-trow .ikonka-tela {
+    --ikonka-tela: 44px;
+  }
+  .gen-trow__warn {
+    margin: -4px 0 var(--space-2) 52px;
+  }
+  /* Самые узкие телефоны (360 px): название чуть мельче, чтобы темы из
+     двух слов («Вписанная окружность») вставали в строку. */
+  @media (max-width: 389.98px) {
+    .gen-trow__name b {
+      font-size: 13px;
+    }
+  }
+  /* Подтипы: неглубокая вложенность — отступ 12 px и тонкая линия. */
+  .gen-subs {
+    --gen-ctl-w: 100px;
+    margin: 0 0 var(--space-2) var(--space-3);
+    padding-left: var(--space-3);
+  }
+  .gen-sostav__limit {
+    margin: var(--space-2) 0 var(--space-1);
+  }
+
+  /* ── Нижняя панель: одна строка — сводка и кнопка 48 px ────────── */
+  .gen-actbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     position: sticky;
     bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom));
     z-index: 18;
     margin: 0 calc(-1 * var(--space-4));
-    padding: var(--space-2) var(--space-4) var(--space-3);
+    /* Справа — ячейка под кнопку «?» сайта (40 px + отступ). */
+    padding: var(--space-2) calc(var(--space-4) + 40px + var(--space-3)) var(--space-2)
+      var(--space-4);
     border-top: 1px solid var(--color-border);
     background: var(--color-surface);
     box-shadow: 0 -6px 18px color-mix(in srgb, var(--color-text) 6%, transparent);
   }
-  .gen-actbar .gen-sum {
+  .gen-actbar__sum {
+    flex: 1 1 auto;
+    display: grid;
+    min-width: 96px;
+    padding: 0;
+    border: 0;
+    background: none;
     text-align: left;
+    font: inherit;
+    font-size: var(--fs-label);
+    line-height: 16px;
+    cursor: pointer;
+  }
+  .gen-actbar__sum b,
+  .gen-actbar__sum small {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .gen-actbar__sum b {
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .gen-actbar__sum small {
+    font-size: 11px;
   }
   .gen-actbar .gen-go {
-    width: 100%;
+    flex: 0 0 auto;
+    height: 48px;
+    min-height: 48px;
+    padding: 0 var(--space-3);
+    gap: 6px;
+    font-size: var(--fs-caption);
+  }
+  /* Телефоны до 430 px: кнопка без значка, сводка «8 задач · 4 варианта» — целиком. */
+  @media (max-width: 429.98px) {
+    .gen-actbar .gen-go .gen-ico {
+      display: none;
+    }
+    .gen-actbar {
+      gap: var(--space-2);
+      padding-right: calc(var(--space-4) + 40px + var(--space-2));
+    }
+    .gen-actbar__sum b {
+      font-size: 12.5px;
+    }
+    .gen-actbar .gen-go {
+      padding: 0 var(--space-3);
+      font-size: 13px;
+    }
   }
   .gen-toast {
-    bottom: calc(var(--h-bnav) + 120px + env(safe-area-inset-bottom));
+    bottom: calc(
+      var(--h-bnav) + var(--gen-actbar-h, 65px) + var(--space-3) + env(safe-area-inset-bottom)
+    );
   }
-  /* Кнопка «?» сайта — внутри панели «Сгенерировать», справа от сводки,
-     над самой кнопкой: висящая выше, она закрывала «+» степперов
-     состава. Сводка оставляет ей место справа. Место — токенами
-     кнопки (onboarding.css), не своим bottom. */
+  /* Кнопка «?» сайта — в своей ячейке у правого края панели, по центру
+     её высоты: ни на «Сгенерировать», ни на степперы состава она не
+     ложится. Место — токенами кнопки (onboarding.css), не своим bottom:
+     нижний край кнопки = навигация + (65 − 40) / 2 от низа панели. */
   body:has(.gen-actbar) {
     --fab-size: 40px;
-    --fab-gap: var(--space-3);
-    --fab-lift: calc(var(--h-bnav) + var(--h-control-lg) + var(--space-2) - 8px);
+    --fab-gap: var(--space-4);
+    --fab-lift: calc(var(--h-bnav) + 12px - var(--space-4));
   }
   body:has(.gen-actbar) .help-fab .help-fab__button {
     box-shadow: var(--shadow-sm);
   }
   /* Под панелью «Сгенерировать» — ровно нижняя навигация: в конце
-     страницы панель стоит там же, где прилипшая, и кнопка «?» над её
-     сводкой не наезжает на «Сгенерировать». */
+     страницы панель стоит там же, где прилипшая, и кнопка «?» остаётся
+     в своей ячейке. Прокрутка к полю (фокус, scrollIntoView) не прячет
+     его под панелью и навигацией. */
   .app-main:has(.gen-actbar) {
     padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom));
   }
-  .gen-actbar .gen-sum {
-    padding-right: 48px;
+  html:has(.gen-actbar) {
+    scroll-padding-bottom: calc(
+      var(--h-bnav) + 48px + 2 * var(--space-2) + var(--space-3) + env(safe-area-inset-bottom)
+    );
   }
 }
 

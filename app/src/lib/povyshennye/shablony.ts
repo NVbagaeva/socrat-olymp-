@@ -168,7 +168,7 @@ import {
 } from '@/lib/vychisleniya/povyshennye';
 import { fn as fnTex, rad as radTex } from '@/lib/vychisleniya/tex';
 import type { Draft } from '@/lib/vychisleniya/types';
-import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
+import { asStepLike, razborStepsHtml } from '@/lib/vychisleniya/razbor';
 import { PV03_PIRAMIDA_ABCA1B1, PV03_TETRAEDR_ABCB1 } from '@/lib/zadanie3/razdel1/povyshennye';
 import { P03_20S, P03_28S, PV03_SHEST } from '@/lib/zadanie3/razdel2/povyshennye';
 import {
@@ -1073,11 +1073,9 @@ export function z08(t: Draft, hints: HintLike[], klyuch: string): Gotovaya {
     figureTeacher: null,
     answer: answerText(t.otvet),
     answerHtml: otvet,
-    solutionTeacher: razborStepsHtml(t.razbor) + razborAnswer(otvet),
+    solutionTeacher: razborStepsHtml(t.razbor, t.delimost) + razborAnswer(otvet),
     hints: hintSteps(h),
-    solutionStudent:
-      studentFromHints(h, [{ title: 'Преобразуем и считаем', lines: t.razbor }]) +
-      razborAnswer(otvet),
+    solutionStudent: studentFromHints(h, asStepLike(t.razbor)) + razborAnswer(otvet),
     fallbacks: [],
   };
 }

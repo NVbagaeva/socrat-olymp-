@@ -1,6 +1,8 @@
 name: 'Сервер: проверить здоровье'
 
-# Снаружи: отвечает ли https://api.budetege.ru с настоящим сертификатом.
+# Снаружи: отвечает ли https://api.budetege.ru с настоящим сертификатом
+# и на месте ли записи почты в DNS (SPF и DKIM — иначе письма
+# подтверждения уходят в спам; про DMARC — замечание).
 # Изнутри (bin/health.sh): контейнеры, API, срок сертификата, диск,
 # память, свежесть ночной копии. Каждые 30 минут по расписанию и
 # кнопкой. Сбой — письмо на ALERT_EMAIL (и уведомление GitHub).
@@ -35,6 +37,10 @@ jobs:
           SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
           SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
           API_DOMAIN: ${{ vars.API_DOMAIN || 'api.budetege.ru' }}
+          # Домен отправителя писем и селектор DKIM — для проверки SPF,
+          # DKIM и DMARC в DNS.
+          SMTP_USER: ${{ vars.SMTP_USER || 'noreply@budetege.ru' }}
+          DKIM_SELECTOR: ${{ vars.DKIM_SELECTOR || 'mail' }}
         run: infra/lite/actions/health.sh
 
       - name: Письмо о сбое

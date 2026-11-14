@@ -1,18 +1,18 @@
 'use client';
 
 /**
- * Хранилища прогресса задания №11: тренажёр и опорные задачи — общая
- * фабрика lib/progressStore.ts со своими ключами. Тренажёр копит
- * счётчики по подтипам (DP-07 …), по ним считается «решено N%»
- * на карте разделов. Прочитанные разделы теории — lib/theoryRead,
+ * Хранилище опорных задач №11 — общая фабрика lib/progressStore.ts со
+ * своим ключом. Журнал тренажёра — trening/progress.ts. Прочитанные
+ * разделы теории — lib/theoryRead,
  * ключ PROGRESS_11.teoriyaKey.
  */
 
 import { PROGRESS_11 } from '@/content/zadanie11';
 import { createProgressStore, type StoreProgress } from '../progressStore';
 
-/** Тренажёр: счётчики по подтипам и список ошибок. */
-export const trenazher11 = createProgressStore('budetege:zadanie-11:v1');
+/* Тренажёр пишет в общий журнал попыток: lib/zadanie11/trening/progress.ts
+   (log11, ключ budetege:zadanie-11:log:v1; прежний budetege:zadanie-11:v1
+   сворачивается в него при первом чтении). */
 
 /** Опорные задачи: исход каждой микрозадачи. */
 export const opornye11 = createProgressStore('budetege:zadanie-11:opornye:v1');

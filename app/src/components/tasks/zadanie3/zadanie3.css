@@ -1,0 +1,504 @@
+/* Задание №3 в «Стеклянной сцене»: только то, чего нет в общих слоях
+   (steklo, karta, trening). Префикс z3-. */
+
+/* Значок-фигура: рисунок занимает весь стеклянный квадрат. */
+.z3-figurka {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.z3-figurka svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  filter: none;
+}
+
+/* Живой чертёж внутри стеклянной карточки: без второй рамки. */
+.z3-chertezh.z3d,
+.trn-risunok .z3d,
+.kz .z3d,
+.z3-opornye .z3d {
+  max-width: 100%;
+  padding: var(--space-2);
+  border: 0;
+  background: rgb(255 255 255 / 0.7);
+}
+/* Место под чертёж, пока движок едет: страница не прыгает. */
+.z3-chertezh--zhdyot {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  background: rgb(255 255 255 / 0.5);
+}
+/* Экран задачи на телефоне: чертёж не выше трети экрана — поле ответа
+   остаётся рядом. */
+@media (max-width: 767.98px) {
+  .trn-risunok svg.solid {
+    max-height: 34vh;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+  .z3-chertezh--zhdyot {
+    max-height: 34vh;
+    margin-inline: auto;
+  }
+}
+.z3-zagruzka {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.z3-schet {
+  margin: 0;
+}
+
+/* Выбор тем: у №3 четыре настройки (с источником задач) — на широком
+   экране две колонки, переключатель «без подсказок» во всю ширину. */
+@media (min-width: 768px) {
+  .z3-trening .trn-nastroyki {
+    grid-template-columns: repeat(2, max-content);
+  }
+  .z3-trening .trn-nastroyki > .trn-pereklyuchatel {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── «О задании» ───────────────────────────────────────────────── */
+
+/* Значок группы крупнее: фигуру должно быть видно. */
+.z3-karta .kz-gruppa .stk-znak {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+}
+/* Чертёж примера закреплён: карточкам группы и типа — clip вместо
+   hidden (обрезка по скруглению остаётся, sticky работает). */
+.z3-karta .kz-gruppa,
+.z3-karta .kz-tip {
+  overflow: clip;
+}
+.z3-karta .kz-gruppa,
+.z3-karta .kz-tip,
+.z3-karta .kz-razdel {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+@media (min-width: 1000px) {
+  .z3-karta .kz-gruppy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .z3-karta .kz-gruppa[open] {
+    grid-column: 1 / -1;
+  }
+  .z3-karta .kz-gruppa:not([open]) .kz-gruppa__summary {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .z3-karta .kz-gruppa:not([open]) .kz-gruppa__progress {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+/* Пример типа: чертёж рядом с шагами. */
+.z3-primer {
+  max-width: none;
+}
+.z3-primer__telo {
+  display: grid;
+  gap: var(--space-4);
+}
+.z3-primer__chertezh {
+  position: sticky;
+  top: calc(var(--topic-sticky-top, 0px) + var(--space-2));
+  z-index: 2;
+  align-self: start;
+  padding: var(--space-1);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+}
+.z3-primer__chertezh .z3d {
+  background: var(--white);
+  gap: var(--space-1);
+  padding: 0;
+}
+.z3-primer__panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+}
+.z3-primer__gde {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--terracotta-700);
+  font-weight: 600;
+}
+.z3-primer__svernut {
+  min-height: 44px;
+}
+.z3-primer__shagi {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z3-shag {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: 14px;
+  border: 1px solid transparent;
+}
+.z3-shag.is-on {
+  background: var(--terracotta-50);
+  border-color: var(--terracotta-200);
+}
+.z3-shag__knopka {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+  min-height: 44px;
+  padding: var(--space-1);
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.z3-shag__knopka:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z3-shag__no {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.z3-shag.is-on .z3-shag__no {
+  background: var(--terracotta);
+  color: var(--white);
+}
+.z3-shag .stk-shag__formula > div + div {
+  margin-top: var(--space-2);
+}
+@media (max-width: 767.98px) {
+  /* На телефоне закреплённый чертёж — не выше трети экрана. */
+  .z3-primer__chertezh svg.solid {
+    max-height: 26vh;
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+}
+@media (min-width: 768px) {
+  .z3-primer__telo {
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    align-items: start;
+  }
+  /* Рядом с шагами чертёж не мешает: сворачивать нечего. */
+  .z3-primer__svernut {
+    display: none;
+  }
+  .z3-primer__panel {
+    justify-content: center;
+  }
+}
+
+/* Чертёж у формулы: крупнее миниатюры, величины читаются. */
+.z3-karta .kz-ramka__s-risunkom {
+  grid-template-columns: minmax(0, 1fr);
+}
+.z3-karta .kz-ramka__risunok {
+  grid-row: auto;
+  width: 100%;
+  max-width: 260px;
+  margin-inline: auto;
+}
+@media (min-width: 560px) {
+  .z3-karta .kz-ramka__s-risunkom {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+  .z3-karta .kz-ramka__risunok {
+    grid-row: span 2;
+  }
+}
+
+/* Рамка «Подобные тела». */
+.z3-podobie {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+.z3-podobie__zag {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--terracotta-700);
+}
+.z3-podobie__telo {
+  display: grid;
+  gap: var(--space-4);
+}
+.z3-podobie__chertezh {
+  width: 100%;
+  max-width: 340px;
+  margin-inline: auto;
+}
+.z3-podobie__stroki {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  padding: 0;
+  list-style: none;
+}
+.z3-podobie__stroki li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--space-3);
+  padding: var(--space-3);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.85);
+}
+.z3-podobie__stroki b {
+  color: var(--terracotta-700);
+  white-space: nowrap;
+}
+.z3-podobie__stroki i {
+  grid-column: 1 / -1;
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+  font-style: normal;
+}
+.z3-podobie__primer {
+  margin: 0;
+  line-height: 1.55;
+}
+@media (min-width: 768px) {
+  .z3-podobie__telo {
+    grid-template-columns: 320px minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+/* Печать: закреплённый чертёж встаёт в поток, кнопок нет. */
+@media print {
+  .z3-primer__chertezh {
+    position: static;
+    box-shadow: none;
+  }
+  .z3-primer__svernut {
+    display: none;
+  }
+}
+
+/* Закреплённый чертёж примера на телефоне — не выше трети экрана:
+   подсказка «Крутите фигуру» уходит (она есть у чертежей задач),
+   кнопки вида остаются. */
+@media (max-width: 767.98px) {
+  .z3-primer__chertezh svg.solid {
+    max-height: 21vh;
+  }
+  .z3-primer__chertezh .vr__podskazka {
+    display: none;
+  }
+  .z3-primer__panel {
+    min-height: 40px;
+  }
+}
+
+.z3-primer__gde,
+.z3-primer__svernut {
+  white-space: nowrap;
+}
+
+/* ── «Опорные задачи» ──────────────────────────────────────────── */
+.z3-opornye {
+  display: grid;
+  gap: var(--space-5);
+}
+.z3-opornye .kz-razdel__head {
+  display: grid;
+  gap: var(--space-1);
+}
+.z3-navyki {
+  display: grid;
+  gap: var(--space-6);
+}
+.z3-navyk {
+  display: grid;
+  gap: var(--space-3);
+}
+.z3-navyk__head {
+  display: grid;
+  gap: 2px;
+  padding-left: var(--space-3);
+  border-left: 4px solid var(--ton);
+}
+.z3-navyk__zag {
+  margin: 0;
+}
+.z3-navyk__lead {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.z3-bloki {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 768px) {
+  .z3-bloki {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1100px) {
+  .z3-bloki {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.z3-blok {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  min-height: 88px;
+  padding: var(--space-4);
+  color: inherit;
+  text-decoration: none;
+}
+.z3-blok:hover {
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover, var(--glass-shadow));
+}
+.z3-blok:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z3-blok__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.z3-blok__text b {
+  font-size: 1.0625rem;
+  line-height: 1.25;
+}
+.z3-blok__schet {
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.z3-blok__polosa {
+  grid-column: 1 / -1;
+}
+
+/* Внутри блока: список задач от простой к сложной. */
+.z3-spisok {
+  margin-top: var(--space-5);
+}
+.z3-spisok__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 768px) {
+  .z3-spisok__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.z3-spisok__zadacha {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 14px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.z3-spisok__zadacha:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z3-spisok__zadacha.is-current {
+  box-shadow:
+    inset 0 0 0 2px var(--blue-600),
+    var(--glass-shadow);
+}
+.z3-spisok__no {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.z3-spisok__no svg {
+  width: 16px;
+  height: 16px;
+}
+.z3-spisok__zadacha.is-right .z3-spisok__no {
+  background: var(--emerald-600);
+  color: var(--white);
+}
+.z3-spisok__zadacha.is-wrong .z3-spisok__no {
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+}
+.z3-spisok__text {
+  min-width: 0;
+  line-height: 1.3;
+}
+.z3-spisok__zvezdy {
+  color: var(--amber-600);
+  font-size: 0.8125rem;
+  letter-spacing: 1px;
+}
+/* Карточка задачи блока — стеклянная поверхность сцены. */
+.z3-opornye-blok .o3-zad,
+.o3-prep .o3-zad {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+
+/* Живой чертёж внутри стеклянной карточки: размытие фона под карточкой
+   (backdrop-filter) пересчитывается на каждом кадре поворота — кадр
+   вырастал с 17 до 33 мс. У таких карточек размытия нет: фон стекла и
+   так почти непрозрачный. */
+.stk-glass:has(.vr__oblast),
+.o3-prep .o3-zad {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}

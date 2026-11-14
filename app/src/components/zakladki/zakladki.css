@@ -1,0 +1,39 @@
+/* «Отложить на потом» — тихая кнопка в углу карточки задачи. */
+.zakladka {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.zakladka:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+.zakladka:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+.zakladka__ico {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.zakladka.is-on {
+  border-color: var(--color-border-accent);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-accent-text);
+}
+.zakladka.is-on .zakladka__ico {
+  fill: currentColor;
+}

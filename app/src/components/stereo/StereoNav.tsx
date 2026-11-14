@@ -8,7 +8,7 @@ import {
   type RazdelKarta,
   type RazdelyData,
 } from '@/components/tasks/razdely';
-import { NAV_STEREO, STEREO, VKLADKI_STEREO, type StereoNo } from '@/content/stereo/zadaniya';
+import { NAV_STEREO, STEREO, vkladkiStereo, type StereoNo } from '@/content/stereo/zadaniya';
 import { ZADANIYA } from '@/lib/paths';
 
 /** Карточка задания в меню: все вкладки — по своим адресам. */
@@ -20,7 +20,7 @@ function karta(no: StereoNo): RazdelKarta {
     title: z.title,
     graphName: z.podpis,
     soon: false,
-    vkladki: Object.fromEntries(VKLADKI_STEREO.map((tab) => [tab.id, base + tab.tail])),
+    vkladki: Object.fromEntries(vkladkiStereo(no).map((tab) => [tab.id, base + tab.tail])),
     scope: z.slug,
   };
 }
@@ -39,9 +39,8 @@ function dannye(no: StereoNo): RazdelyData {
 function useVkladka(no: StereoNo): string {
   const pathname = usePathname();
   const tail = pathname.replace(`${ZADANIYA}/${STEREO[no].slug}`, '').replace(/^\/+/, '');
-  const tab =
-    VKLADKI_STEREO.find((item) => item.tail !== '' && tail.startsWith(item.tail)) ??
-    VKLADKI_STEREO[0];
+  const vkladki = vkladkiStereo(no);
+  const tab = vkladki.find((item) => item.tail !== '' && tail.startsWith(item.tail)) ?? vkladki[0];
   return tab?.id ?? 'o-zadanii';
 }
 
@@ -50,12 +49,13 @@ function useVkladka(no: StereoNo): string {
  * обеих частей. Внизу меню — к спискам заданий части 1 и части 2:
  * с телефона это одно касание.
  */
-export function StereoNav({ no }: { no: StereoNo }) {
+export function StereoNav({ no, kratko = false }: { no: StereoNo; kratko?: boolean }) {
   const vkladka = useVkladka(no);
   return (
     <RazdelyNav
       {...dannye(no)}
       vkladka={vkladka}
+      {...(kratko ? { plashkaText: STEREO[no].kratko } : {})}
       niz={
         <nav className="stereo-chasti" aria-label="Списки заданий">
           {NAV_STEREO.kChasti.map((item) => (

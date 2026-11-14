@@ -1,14 +1,17 @@
 'use client';
 
-import { clsx } from 'clsx';
 import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { AUTH_UI } from '@/content/auth-ui';
-import { navLinks } from '@/content/site';
-import { AUTH_ENABLED, AUTH_HREF } from '@/lib/auth/config';
+import { site } from '@/content/site';
+import type { MenuLink } from '@/content/site';
+import { AUTH_ENABLED, AUTH_HREF, AUTH_IN_HEADER } from '@/lib/auth/config';
 import { useSessionUser } from '@/lib/auth/session';
+import { useLevel } from '@/lib/levelStore';
+import { LevelSwitch } from '@/components/level/LevelSwitch';
 import { LogoutItem } from '@/components/auth/AuthLive';
+import { NavIcon } from '@/components/ui/NavIcons';
 
 type MenuState = 'open' | 'closing';
 
@@ -16,6 +19,44 @@ const FOCUSABLE = 'a[href], button:not([disabled])';
 
 /** Ширина, ниже которой меню уезжает в бургер. Совпадает с site.css. */
 const NARROW = '(max-width: 1023.98px)';
+
+/** Шеврон справа у строки: показывает, что строка ведёт дальше. */
+function Chevron() {
+  return (
+    <svg
+      className="site-menu__chev"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="m9 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+/** Строка меню: значок в плашке, название, пояснение, шеврон. */
+function Row({ link, onClick }: { link: MenuLink; onClick: () => void }) {
+  /* В режиме базы «Банк заданий» ведёт в банк базы. */
+  const level = useLevel();
+  const to = level === 'base' && link.hrefBase !== undefined ? link.hrefBase : link.href;
+  return (
+    <a href={to} className="site-menu__row" onClick={onClick}>
+      <span className="site-menu__ico">
+        <NavIcon name={link.icon} />
+      </span>
+      <span className="site-menu__text">
+        <span className="site-menu__label">{link.label}</span>
+        <span className="site-menu__hint">{link.hint}</span>
+      </span>
+      <Chevron />
+    </a>
+  );
+}
 
 /**
  * Бургер-меню узкой шапки: пункты навигации и «Войти» уезжают сюда,
@@ -93,15 +134,13 @@ export function SiteMenu() {
   /* Вход — только при включённом флаге: без него пункта нет вообще.
      Вошедшему вместо «Войти» — «Мой кабинет» и «Выйти». */
   const user = useSessionUser();
-  const items = [
-    ...navLinks.map((link) => ({ ...link, separated: false })),
-    ...(AUTH_ENABLED && user === null
-      ? [{ label: AUTH_UI.login, href: AUTH_HREF.voyti, separated: true }]
-      : []),
-    ...(AUTH_ENABLED && user !== null
-      ? [{ label: AUTH_UI.kabinet, href: AUTH_HREF.kabinet, separated: true }]
-      : []),
-  ];
+  const { glavnoe, groups, tarify, akkaunt } = site.menu;
+  const account =
+    AUTH_IN_HEADER && user === null
+      ? { label: AUTH_UI.login, href: AUTH_HREF.voyti }
+      : AUTH_ENABLED && user !== null
+        ? { label: AUTH_UI.kabinet, href: AUTH_HREF.kabinet }
+        : null;
   const withLogout = AUTH_ENABLED && user !== null;
 
   return (
@@ -138,23 +177,72 @@ export function SiteMenu() {
                 aria-label="Меню сайта"
                 onMouseDown={(event) => event.stopPropagation()}
               >
+                {/* Уровень экзамена: в узкой шапке переключатель живёт здесь. */}
+                <LevelSwitch className="site-menu__level" />
                 <nav className="site-menu__nav" aria-label="Разделы сайта">
-                  {items.map((item, index) => (
-                    <a
-                      key={item.href + item.label}
-                      href={item.href}
-                      className={clsx(
-                        't-h3 site-menu__item',
-                        item.separated && 'site-menu__item--apart',
-                      )}
-                      style={{ '--i': index } as CSSProperties}
-                      onClick={close}
+                  <a
+                    href={glavnoe.href}
+                    className="site-menu__hero"
+                    style={{ '--i': 0 } as CSSProperties}
+                    onClick={close}
+                  >
+                    <span className="site-menu__ico">
+                      <NavIcon name={glavnoe.icon} />
+                    </span>
+                    <span className="site-menu__text">
+                      <span className="site-menu__label">{glavnoe.label}</span>
+                      <span className="site-menu__hint">{glavnoe.hint}</span>
+                    </span>
+                    <Chevron />
+                  </a>
+
+                  {groups.map((group, index) => (
+                    <section
+                      key={group.label}
+                      className="site-menu__group"
+                      style={{ '--i': index + 1 } as CSSProperties}
                     >
-                      {item.label}
-                    </a>
+                      <h2 className="site-menu__title">{group.label}</h2>
+                      <div className="site-menu__list">
+                        {group.items.map((link) => (
+                          <Row key={link.href + link.label} link={link} onClick={close} />
+                        ))}
+                      </div>
+                    </section>
                   ))}
-                  {withLogout ? (
-                    <LogoutItem className="t-h3 site-menu__item" onDone={close} />
+
+                  <div
+                    className="site-menu__group site-menu__list site-menu__list--accent"
+                    style={{ '--i': groups.length + 1 } as CSSProperties}
+                  >
+                    <Row link={tarify} onClick={close} />
+                  </div>
+
+                  {account || withLogout ? (
+                    <section
+                      className="site-menu__group"
+                      style={{ '--i': groups.length + 2 } as CSSProperties}
+                    >
+                      <h2 className="site-menu__title">{akkaunt}</h2>
+                      <div className="site-menu__list">
+                        {account ? (
+                          <a
+                            href={account.href}
+                            className="site-menu__row site-menu__row--plain"
+                            onClick={close}
+                          >
+                            <span className="site-menu__label">{account.label}</span>
+                            <Chevron />
+                          </a>
+                        ) : null}
+                        {withLogout ? (
+                          <LogoutItem
+                            className="site-menu__row site-menu__row--plain site-menu__label"
+                            onDone={close}
+                          />
+                        ) : null}
+                      </div>
+                    </section>
                   ) : null}
                 </nav>
               </div>

@@ -1,0 +1,495 @@
+/* «Стеклянная сцена»: кирпичи карты задания и тренажёра.
+   Значения — только токены сайта (styles/tokens.css). Префикс stk-. */
+
+/* Тона групп: цвет, мягкая заливка, кромка, текст. */
+.stk-ton--blue {
+  --ton: var(--blue-600);
+  --ton-soft: var(--blue-100);
+  --ton-border: var(--blue-200);
+  --ton-text: var(--blue-700);
+}
+.stk-ton--navy {
+  --ton: var(--navy-700);
+  --ton-soft: var(--blue-glass-2);
+  --ton-border: var(--blue-300);
+  --ton-text: var(--navy-800);
+}
+.stk-ton--orange {
+  --ton: var(--amber-600);
+  --ton-soft: var(--amber-50);
+  --ton-border: var(--cream-200);
+  --ton-text: var(--amber-700);
+}
+.stk-ton--terra {
+  --ton: var(--terracotta);
+  --ton-soft: var(--terracotta-50);
+  --ton-border: var(--terracotta-200);
+  --ton-text: var(--terracotta-700);
+}
+.stk-ton--green {
+  --ton: var(--emerald-600);
+  --ton-soft: var(--emerald-50);
+  --ton-border: var(--emerald-200);
+  --ton-text: #06704f;
+}
+
+/* Одна рецептура стекла на все поверхности. */
+.stk-glass {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--stk-r-card, 20px);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.stk-glass--warm {
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow-warm);
+}
+
+/* Значок группы: формула в стеклянном квадрате. */
+.stk-znak {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--white), var(--ton-soft));
+  box-shadow:
+    inset 0 0 0 1px var(--ton-border),
+    var(--glass-hi),
+    0 8px 16px -10px var(--ton);
+  color: var(--ton-text);
+  font-size: 0.8125rem;
+}
+.stk-znak--sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  font-size: 0.5625rem;
+}
+.stk-znak .katex {
+  font-size: 1.15em;
+  white-space: nowrap;
+}
+
+/* Полоса доли. */
+.stk-polosa {
+  display: block;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  overflow: hidden;
+}
+.stk-polosa > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue-600);
+  transition: width var(--dur-switch, 200ms) var(--ease, ease);
+}
+.stk-polosa--terra > span {
+  background: var(--terracotta);
+}
+.stk-polosa--green > span {
+  background: var(--emerald-600);
+}
+
+/* Метка. */
+.stk-metka {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: var(--fs-label);
+  line-height: 1.2;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.stk-metka--terra {
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+}
+.stk-metka--green {
+  background: var(--emerald-50);
+  color: #06704f;
+}
+.stk-metka--grey {
+  background: var(--color-surface-2, var(--grey-100));
+  color: var(--color-text-secondary);
+}
+.stk-metka .katex {
+  font-size: 1em;
+}
+
+/* Значки. */
+.stk-ico {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+/* Шаги решения: номер в кружке, подпись, формула на подложке. */
+.stk-shagi {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: stk-shag;
+}
+.stk-shag {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-left: 40px;
+  counter-increment: stk-shag;
+}
+.stk-shag::before {
+  content: counter(stk-shag);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.stk-shag:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 32px;
+  bottom: calc(var(--space-3) * -1);
+  width: 2px;
+  border-radius: 2px;
+  background: var(--blue-100);
+}
+.stk-shag__chto {
+  /* Элемент сетки шага: без min-width: 0 длинная формула в строке
+     распирает колонку, вместо того чтобы прокручиваться внутри строки. */
+  min-width: 0;
+  margin: 0;
+  padding-top: 3px;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.stk-shag__formula {
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 12px;
+  background: var(--blue-50);
+  font-size: var(--fs-lg);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.stk-reshenie {
+  display: grid;
+  gap: var(--space-3);
+}
+.stk-delimost > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--blue-700);
+}
+.stk-delimost ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-6);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* Кнопки сцены: глянцевая, тёплая, тихая. Высота ≥ 44 px. */
+.stk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--dur-hover, 160ms) var(--ease, ease),
+    box-shadow var(--dur-hover, 160ms) var(--ease, ease);
+}
+.stk-btn--lg {
+  min-height: 52px;
+  padding: 0 var(--space-6);
+  font-size: 16px;
+}
+.stk-btn--sm {
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  font-size: 14px;
+}
+.stk-btn--primary {
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  color: var(--white);
+}
+.stk-btn--primary:hover {
+  box-shadow: var(--gloss-shadow-soft-hover);
+}
+.stk-btn--warm {
+  background: var(--gloss-warm);
+  box-shadow: var(--gloss-warm-shadow-soft);
+  color: var(--white);
+}
+.stk-btn--tihaya {
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+}
+.stk-btn--tihaya:hover {
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--shadow-sm);
+}
+.stk-btn:hover {
+  transform: translateY(-1px);
+}
+.stk-btn[disabled],
+.stk-btn[aria-disabled='true'] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.stk-btn:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.stk-ssylka {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--blue-700);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.stk-kruglaya {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  cursor: pointer;
+}
+.stk-kruglaya--tihaya {
+  background: none;
+  box-shadow: none;
+  color: var(--color-text-tertiary);
+}
+.stk-kruglaya.is-on {
+  color: var(--terracotta);
+}
+
+/* Шеврон раскрытия у <details>. */
+.stk-shevron {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin: 0 var(--space-1);
+  border-right: 2px solid var(--color-text-tertiary);
+  border-bottom: 2px solid var(--color-text-tertiary);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--dur-switch, 200ms) var(--ease, ease);
+}
+details[open] > summary .stk-shevron {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+.stk-summary {
+  list-style: none;
+  cursor: pointer;
+}
+.stk-summary::-webkit-details-marker {
+  display: none;
+}
+.stk-summary:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: -2px;
+  border-radius: inherit;
+}
+
+/* Подписи. */
+.stk-nad {
+  margin: 0;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-700);
+}
+.stk-podpis {
+  margin: 0;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.stk-h3 {
+  margin: 0;
+  font-size: 1.375rem;
+  line-height: 1.25;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.stk-h4 {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+  font-weight: 600;
+}
+.stk-lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stk-polosa > span,
+  .stk-btn,
+  .stk-shevron {
+    transition: none;
+  }
+  .stk-btn:hover {
+    transform: none;
+  }
+}
+
+/* Значок-фигура: рисунок тела вместо формулы (№3). */
+.stk-znak--figura {
+  padding: 5px;
+  overflow: hidden;
+}
+.stk-znak--figura.stk-znak--sm {
+  padding: 3px;
+}
+.stk-znak--figura svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Шаг решения без выкладки: пустой рамки формулы нет. */
+.stk-shag__formula:empty {
+  display: none;
+}
+
+/* Шаг с названием («ОДЗ», «Отбор корней») и несколькими строками
+   текста: уравнения №7, дальше — №6, №10, №11. */
+.stk-shag__zag {
+  margin: 0;
+  padding-top: 4px;
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue-700);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* Формула в названии шага — как набрана: заглавные буквы названия не
+   должны превращать $v(t)$ в $V(T)$ (№9, №6). */
+.stk-shag__zag .katex {
+  text-transform: none;
+  letter-spacing: normal;
+}
+.stk-shag__zag + .stk-shag__chto {
+  padding-top: 0;
+}
+.stk-shag__chto > p {
+  margin: 0;
+}
+.stk-shag__chto > p + p {
+  margin-top: var(--space-2);
+}
+/* Строка с длинной формулой прокручивается сама, а не толкает страницу. */
+.stk-shag__chto .katex-display,
+.stk-shag__chto > p {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+/* ОДЗ и отбор корней пропускать нельзя: тёплая плашка и свой цвет
+   номера. Цвет не единственный признак — у шага есть название. */
+.stk-shag--odz,
+.stk-shag--otbor,
+.stk-shag--vnimanie {
+  padding-top: var(--space-2);
+  padding-right: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-radius: 14px;
+}
+.stk-shag--odz {
+  background: var(--terracotta-50);
+  box-shadow: inset 0 0 0 1px var(--terracotta-200);
+}
+.stk-shag--otbor,
+.stk-shag--vnimanie {
+  background: var(--amber-50);
+  box-shadow: inset 0 0 0 1px var(--cream-200);
+}
+.stk-shag--odz::before,
+.stk-shag--otbor::before,
+.stk-shag--vnimanie::before {
+  left: 6px;
+  top: 6px;
+}
+.stk-shag--odz::before {
+  background: var(--terracotta);
+  color: var(--white);
+}
+.stk-shag--otbor::before,
+.stk-shag--vnimanie::before {
+  background: var(--amber-600);
+  color: var(--white);
+}
+.stk-shag--odz:not(:last-child)::after,
+.stk-shag--otbor:not(:last-child)::after,
+.stk-shag--vnimanie:not(:last-child)::after {
+  display: none;
+}
+.stk-shag--odz .stk-shag__zag {
+  color: var(--terracotta-700);
+}
+.stk-shag--otbor .stk-shag__zag,
+.stk-shag--vnimanie .stk-shag__zag {
+  color: var(--amber-700);
+}
+
+/* Таблица или рисунок в шаге решения: не шире шага, прокрутка — внутри. */
+.stk-shag__risunok {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

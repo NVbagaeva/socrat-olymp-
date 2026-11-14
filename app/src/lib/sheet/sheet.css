@@ -75,6 +75,51 @@ body {
 @media print {
   html, body { background: var(--sheet-paper); }
   #sheet-measure { display: none; }
+
+  /* Общий печатный стиль всех листов сайта (генераторы, «Собрать
+     вариант», справочники). На бумаге — только страницы листа: всё
+     остальное, что могло попасть на страницу печати (кнопка «Печать»,
+     окно cookie, онбординг, плавающие кнопки), убирается целиком через
+     display: none, а не прячется прозрачностью — иначе Safari оставляет
+     им место и тянет за ними лишние страницы. */
+  body:has(#sheet-pages) > :not(#sheet-pages):not(:has(#sheet-pages)) { display: none !important; }
+  html, body {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  /* Обёртка страниц — простой блок: flex и grid WebKit по страницам
+     разрывает плохо. Экранных отступов между страницами на бумаге нет. */
+  #sheet-pages {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .sheet-page {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Safari (macOS, iPhone, iPad — движок WebKit). Он печатает с полями
+     своего принтера или своей бумагой (на iOS нередко US Letter, 279 мм),
+     а лист уменьшает только по ширине, если документ шире бумаги. Страница
+     листа — 295 мм с подвалом у нижнего края; печатная область вышла ниже
+     — подвал уезжал на отдельную, почти пустую страницу, и пустая
+     печаталась после каждой страницы (проверено печатью движком WebKit:
+     Letter — 12 страниц вместо 6). Поэтому для WebKit документ при печати
+     шире листа: 240 мм против 210. Safari сам уменьшает его под ширину
+     бумаги, и страница листа по высоте помещается в печатную область при
+     любых обычных полях на A4 и Letter (не больше 87,5% высоты печатной
+     области по ширине — с запасом на колонтитулы Safari). Лист — по
+     центру. Отметку data-sheet-webkit ставит paginate.js. Остальные
+     браузеры слушают @page и печатают лист один к одному. */
+  :root[data-sheet-webkit] #sheet-pages { width: 240mm !important; }
+  :root[data-sheet-webkit] .sheet-page {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
 }
 
 /* Поток содержимого между шапкой и подвалом. */
@@ -1018,4 +1063,11 @@ foreignObject .katex svg {
    режет пример выше страницы по шагам разбора). */
 .sheet-example[data-cont='1'] .sheet-example-label::after {
   content: ' (продолжение)';
+}
+
+/* №8: признаки делимости под шагами решения учителя. */
+.sheet-step-note {
+  margin-top: calc(var(--sheet-step) * 1);
+  font-size: 0.92em;
+  color: var(--sheet-ink-3);
 }

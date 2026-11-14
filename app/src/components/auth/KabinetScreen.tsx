@@ -13,27 +13,54 @@ import {
   Input,
   Modal,
   SuccessState,
+  Tabs,
 } from '@/components/ui';
-import { KABINET, dateRu } from '@/content/auth';
+import { KABINET, dateRu, editionRu } from '@/content/auth';
+import { legalDocs } from '@/content/legal/documents';
 import { AUTH_HREF } from '@/lib/auth/config';
 import { AUTH_ERRORS, describeAuthError } from '@/lib/auth/errors';
 import type { SavedKit } from '@/lib/auth/kits';
-import type { Profile } from '@/lib/auth/profile';
-import { currentUser, useSessionUser, type UserRole } from '@/lib/auth/session';
-import { RoleCards } from './RoleCards';
+import type { KlassView } from '@/lib/auth/klassy';
+import type { AccountConsents, AccountRole, Profile } from '@/lib/auth/profile';
+import { currentUser, useSessionUser } from '@/lib/auth/session';
+import { KartaUchenika } from '@/components/karta/KartaUchenika';
+import { JoinClassForm, TutorClassesCard, TutorHomeworkCard } from '@/components/dz/KabinetDz';
+import { forgetCode, pendingCode } from '@/components/dz/JoinScreen';
+import {
+  importedGroups,
+  localProgress,
+  shouldAskImport,
+  type ImportedKey,
+  type LocalGroup,
+} from '@/lib/progressImport';
 
 type View = 'loading' | 'needLogin' | 'ready' | 'removed';
+type Tab = 'home' | 'profile';
+
+/** Вкладка в адресе: /kabinet/?vkladka=profil. */
+const PROFILE_QUERY = 'profil';
 
 /**
- * Страница /kabinet/: профиль, что сохранено в аккаунте, выход и
- * удаление. Показывает только то, что действительно лежит в базе.
+ * Страница /kabinet/ — одна на все роли: содержимое зависит от роли в
+ * базе. Вкладка «Кабинет» — разделы ученика или репетитора (пока с
+ * понятными пустыми состояниями), вкладка «Профиль» — имя, что
+ * сохранено, документы, выход и удаление аккаунта. Показывает только
+ * то, что действительно лежит в базе.
  */
 export function KabinetScreen() {
   const user = useSessionUser();
   const [view, setView] = useState<View>('loading');
+  const [tab, setTab] = useState<Tab>('home');
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState('');
   const [kits, setKits] = useState<SavedKit[] | null>(null);
+  const [klassy, setKlassy] = useState<KlassView[] | null>(null);
+  const [consents, setConsents] = useState<AccountConsents | null>(null);
+  const [imported, setImported] = useState<ImportedKey[]>([]);
+  const [ask, setAsk] = useState<LocalGroup[] | null>(null);
+  const [importNote, setImportNote] = useState<string | null>(null);
+  /* Отложенный прогресс гостя (ответ «Нет»): его можно перенести позже. */
+  const [stash, setStash] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,7 +71,7 @@ export function KabinetScreen() {
         setView('needLogin');
         return;
       }
-      const [{ getClient }, { loadProfile, syncOnboarding }] = await Promise.all([
+      const [{ getClient }, { loadProfile, loadConsents, syncOnboarding }] = await Promise.all([
         import('@/lib/auth/client'),
         import('@/lib/auth/profile'),
       ]);
@@ -66,7 +93,33 @@ export function KabinetScreen() {
       const synced = await syncOnboarding(loaded);
       if (cancelled) return;
       setProfile(synced);
+      /* Вкладка из адреса: /kabinet/?vkladka=profil. */
+      if (new URLSearchParams(window.location.search).get('vkladka') === PROFILE_QUERY) {
+        setTab('profile');
+      }
       setView('ready');
+
+      const [{ loadImportedKeys }, { loadKlassy }, { hasStash }] = await Promise.all([
+        import('@/lib/progressImport'),
+        import('@/lib/auth/klassy'),
+        import('@/lib/accountSync'),
+      ]);
+      const [given, keys, classes] = await Promise.all([
+        loadConsents(),
+        loadImportedKeys(),
+        synced.role === 'admin' ? Promise.resolve([]) : loadKlassy(),
+      ]);
+      if (cancelled) return;
+      setConsents(given);
+      setImported(keys);
+      setKlassy(classes);
+      /* Вопрос о переносе — один раз на аккаунт в этом браузере. Ученику
+         младше 18 до согласия родителя его не задаём: база такой перенос
+         всё равно не примет. */
+      const parentPending = given.parent !== null && given.parent.confirmedAt === null;
+      if (!parentPending && shouldAskImport(synced.id)) setAsk(localProgress());
+      setStash(!parentPending && hasStash());
+
       if (synced.role === 'tutor') {
         const { loadKits } = await import('@/lib/auth/kits');
         const list = await loadKits();
@@ -81,6 +134,12 @@ export function KabinetScreen() {
       cancelled = true;
     };
   }, []);
+
+  const openTab = (next: Tab) => {
+    setTab(next);
+    const query = next === 'profile' ? `?vkladka=${PROFILE_QUERY}` : '';
+    window.history.replaceState(null, '', `${window.location.pathname}${query}`);
+  };
 
   /* Вышли в другой вкладке — кабинет закрывается. */
   const shown: View = view === 'ready' && user === null ? 'needLogin' : view;
@@ -122,13 +181,299 @@ export function KabinetScreen() {
     return <EmptyState title={KABINET.title} description={loadError ?? AUTH_ERRORS.unknown} />;
   }
 
+  const parent = consents?.parent ?? null;
+  const parentPending = parent !== null && parent.confirmedAt === null;
+
+  /* «Перенести с этого устройства»: отложенный при «Нет» прогресс гостя. */
+  const importLater = async () => {
+    const { importStash } = await import('@/lib/accountSync');
+    const { loadImportedKeys } = await import('@/lib/progressImport');
+    const result = await importStash();
+    setStash(false);
+    setImported(await loadImportedKeys());
+    setImportNote(KABINET.importAsk.done(result.pushed.length));
+  };
+
   return (
-    <div className="kabinet">
-      <h1 className="auth-card__title">{KABINET.title}</h1>
-      <ProfileCard profile={profile} email={email} onSaved={setProfile} />
-      <SavedCard profile={profile} kits={kits} />
-      <DangerCard role={profile.role} onRemoved={() => setView('removed')} />
+    <div className="kabinet" data-role={profile.role}>
+      <header className="kabinet__head">
+        <h1 className="auth-card__title">{KABINET.title}</h1>
+        <p className="kabinet__who">
+          <span className="kabinet__role">{KABINET.roleLine[profile.role]}</span>
+          {profile.name !== '' ? <span className="kabinet__name">{profile.name}</span> : null}
+        </p>
+      </header>
+      <Tabs
+        className="kabinet__tabs"
+        label={KABINET.tabsLabel}
+        value={tab}
+        onValueChange={(id) => openTab(id as Tab)}
+        items={[
+          { id: 'home', label: KABINET.tabs.home },
+          { id: 'profile', label: KABINET.tabs.profile },
+        ]}
+      />
+      {parentPending ? (
+        <div className="kabinet__notice" role="status">
+          <strong>{KABINET.parentPending.title}</strong>
+          <span>{KABINET.parentPending.text(parent.email)}</span>
+        </div>
+      ) : null}
+      {importNote !== null ? (
+        <p className="kabinet__notice kabinet__notice--ok" role="status">
+          {importNote}
+        </p>
+      ) : null}
+
+      {tab === 'home' ? (
+        <>
+          <p className="kabinet__trial">{KABINET.trial}</p>
+          {profile.role === 'student' ? (
+            <StudentHome
+              klassy={klassy}
+              onJoined={() => {
+                forgetCode();
+                void import('@/lib/auth/klassy').then(async ({ loadKlassy }) =>
+                  setKlassy(await loadKlassy()),
+                );
+              }}
+            />
+          ) : null}
+          {profile.role === 'tutor' ? <TutorHome kits={kits} /> : null}
+          {profile.role === 'admin' ? (
+            <Card className="kabinet__card" title={KABINET.admin.title}>
+              <p className="auth-form__text">{KABINET.admin.text}</p>
+            </Card>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <ProfileCard profile={profile} email={email} onSaved={setProfile} />
+          <SavedCard
+            profile={profile}
+            imported={imported}
+            canImport={stash}
+            onImport={() => void importLater()}
+          />
+          {profile.role === 'student' ? (
+            <StudentClasses
+              klassy={klassy}
+              onJoined={() => {
+                forgetCode();
+                void import('@/lib/auth/klassy').then(async ({ loadKlassy }) =>
+                  setKlassy(await loadKlassy()),
+                );
+              }}
+            />
+          ) : null}
+          <DocumentsCard consents={consents} />
+          <DangerCard role={profile.role} onRemoved={() => setView('removed')} />
+        </>
+      )}
+
+      <ImportModal
+        groups={ask}
+        userId={profile.id}
+        onClose={() => setAsk(null)}
+        onDone={(count, keys) => {
+          setImported(keys);
+          setImportNote(KABINET.importAsk.done(count));
+          setAsk(null);
+        }}
+      />
     </div>
+  );
+}
+
+/* ── Пустое состояние раздела ─────────────────────────────────── */
+
+/** Раздел, которого ещё нет: что здесь появится — простыми словами. */
+/* ── Кабинет ученика ──────────────────────────────────────────── */
+
+/**
+ * Главная ученика — «Карта ЕГЭ»: прогресс всех заданий из журналов,
+ * под картой — текущее домашнее задание. Список классов — на вкладке
+ * профиля; пока ученик ни в одном классе (или пришёл по ссылке с кодом),
+ * форма «Вступить» стоит и здесь, под картой.
+ */
+function StudentHome({ klassy, onJoined }: { klassy: KlassView[] | null; onJoined: () => void }) {
+  const t = KABINET.student;
+  const [initialCode] = useState(pendingCode);
+  /* Показанная форма остаётся до ухода со страницы: после вступления
+     ученик видит «Готово: ты в классе …», а не исчезнувшую карточку. */
+  const [vstupil, setVstupil] = useState(false);
+  const pokazatVstuplenie =
+    initialCode !== '' || vstupil || (klassy !== null && klassy.length === 0);
+  return (
+    <>
+      <div className="kabinet__karta" data-section="karta">
+        <KartaUchenika />
+      </div>
+      {pokazatVstuplenie ? (
+        <Card className="kabinet__card" title={t.classes.title} data-section="join">
+          <p className="auth-form__text">{t.classes.none}</p>
+          <JoinClassForm
+            initial={initialCode}
+            onJoined={() => {
+              setVstupil(true);
+              onJoined();
+            }}
+          />
+        </Card>
+      ) : null}
+    </>
+  );
+}
+
+/** Классы ученика и вступление по коду от репетитора. */
+function StudentClasses({
+  klassy,
+  onJoined,
+}: {
+  klassy: KlassView[] | null;
+  onJoined: () => void;
+}) {
+  const t = KABINET.student;
+  /* Код из ссылки-приглашения, открытой до входа (/kabinet/vstupit/). */
+  const [initialCode] = useState(pendingCode);
+  return (
+    <Card className="kabinet__card" title={t.classes.title} data-section="classes">
+      {klassy === null ? (
+        <p className="auth-form__muted">…</p>
+      ) : klassy.length === 0 ? (
+        <p className="auth-form__text">{t.classes.none}</p>
+      ) : (
+        <ul className="klass-list">
+          {klassy.map((klass) => (
+            <li key={klass.id} className="klass-list__item">
+              <span className="klass-list__name">{klass.name}</span>
+              {klass.tutorName !== null ? (
+                <span className="klass-list__meta">{t.classes.tutor(klass.tutorName)}</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+      {/* Вступить в класс по коду от репетитора. */}
+      <JoinClassForm initial={initialCode} onJoined={onJoined} />
+    </Card>
+  );
+}
+
+/* ── Кабинет репетитора ───────────────────────────────────────── */
+
+function TutorHome({ kits }: { kits: SavedKit[] | null }) {
+  const t = KABINET.tutor;
+  return (
+    <>
+      <div className="kabinet__grid">
+        <TutorClassesCard />
+        <TutorHomeworkCard />
+      </div>
+      <Card className="kabinet__card" title={t.kits.title} data-section="kits">
+        {kits === null ? (
+          <p className="auth-form__muted">…</p>
+        ) : kits.length === 0 ? (
+          <p className="auth-form__text">{t.kits.none}</p>
+        ) : (
+          <ul className="kit-list">
+            {kits.map((kit) => (
+              <li key={kit.code} className="kit-list__item">
+                <span className="kit-list__code">{kit.code}</span>
+                <span className="kit-list__section">{kit.section}</span>
+                <span className="kit-list__date">
+                  {t.kits.from} {dateRu(kit.createdAt)}
+                </span>
+                <span className="kit-list__links">
+                  <a href={kit.studentHref} target="_blank" rel="noreferrer">
+                    {t.kits.sheetStudent}
+                  </a>
+                  <a href={kit.teacherHref} target="_blank" rel="noreferrer">
+                    {t.kits.sheetTeacher}
+                  </a>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </>
+  );
+}
+
+/* ── Перенос прогресса с устройства ───────────────────────────── */
+
+function ImportModal({
+  groups,
+  userId,
+  onClose,
+  onDone,
+}: {
+  groups: LocalGroup[] | null;
+  userId: string;
+  onClose: () => void;
+  onDone: (count: number, keys: ImportedKey[]) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const t = KABINET.importAsk;
+
+  const refuse = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const { refuseImport } = await import('@/lib/accountSync');
+      refuseImport(userId);
+    } finally {
+      setBusy(false);
+      onClose();
+    }
+  };
+
+  const accept = async () => {
+    if (busy || groups === null) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const [{ acceptImport }, { loadImportedKeys }] = await Promise.all([
+        import('@/lib/accountSync'),
+        import('@/lib/progressImport'),
+      ]);
+      const result = await acceptImport(userId);
+      if (result.readOnly) throw new Error('read only');
+      onDone(result.pushed.length, await loadImportedKeys());
+    } catch {
+      setError(t.failed);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal
+      open={groups !== null}
+      onClose={() => void refuse()}
+      title={t.title}
+      description={t.text}
+      footer={
+        <>
+          <Button variant="secondary" onClick={() => void refuse()} disabled={busy}>
+            {t.no}
+          </Button>
+          <Button onClick={accept} loading={busy}>
+            {t.yes}
+          </Button>
+        </>
+      }
+    >
+      <ul className="import-list">
+        {(groups ?? []).map((item) => (
+          <li key={item.group.id}>{item.group.title}</li>
+        ))}
+      </ul>
+      <p className="auth-form__hint">{t.note}</p>
+      {error !== null ? <FieldMessage tone="error">{error}</FieldMessage> : null}
+    </Modal>
   );
 }
 
@@ -146,7 +491,6 @@ function ProfileCard({
   const id = useId();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(profile.name);
-  const [role, setRole] = useState<UserRole>(profile.role);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -155,10 +499,14 @@ function ProfileCard({
     event.preventDefault();
     if (busy) return;
     setError(null);
+    if (name.trim() === '') {
+      setError(KABINET.profile.nameRequired);
+      return;
+    }
     setBusy(true);
     try {
       const { updateProfile } = await import('@/lib/auth/profile');
-      const next = await updateProfile({ name, role });
+      const next = await updateProfile({ name });
       onSaved(next);
       setEditing(false);
       setSaved(true);
@@ -173,6 +521,7 @@ function ProfileCard({
     <Card
       className="kabinet__card"
       title={KABINET.profile.title}
+      data-section="profile"
       action={
         editing ? null : (
           <button
@@ -180,7 +529,6 @@ function ProfileCard({
             className="btn btn--ghost btn--sm"
             onClick={() => {
               setName(profile.name);
-              setRole(profile.role);
               setSaved(false);
               setEditing(true);
             }}
@@ -203,15 +551,6 @@ function ProfileCard({
               disabled={busy}
             />
           </div>
-          <fieldset className="auth-form__roles">
-            <legend className="field__label">{KABINET.profile.role}</legend>
-            <RoleCards
-              value={role}
-              onChange={setRole}
-              label={KABINET.profile.role}
-              disabled={busy}
-            />
-          </fieldset>
           {error !== null ? <FieldMessage tone="error">{error}</FieldMessage> : null}
           <div className="auth-form__actions">
             <Button type="submit" loading={busy}>
@@ -234,7 +573,10 @@ function ProfileCard({
           </div>
           <div>
             <dt>{KABINET.profile.role}</dt>
-            <dd data-field="role">{KABINET.roleName[profile.role]}</dd>
+            <dd>
+              <span data-field="role">{KABINET.roleName[profile.role]}</span>
+              <span className="kabinet__hint">{KABINET.profile.roleHint}</span>
+            </dd>
           </div>
           {saved ? (
             <div>
@@ -252,11 +594,22 @@ function ProfileCard({
 
 /* ── Что сохранено ────────────────────────────────────────────── */
 
-function SavedCard({ profile, kits }: { profile: Profile; kits: SavedKit[] | null }) {
+function SavedCard({
+  profile,
+  imported,
+  canImport,
+  onImport,
+}: {
+  profile: Profile;
+  imported: ImportedKey[];
+  canImport: boolean;
+  onImport: () => void;
+}) {
   const t = KABINET.saved;
   const tourName = profile.tourId === null ? null : (t.tourNames[profile.tourId] ?? profile.tourId);
+  const groups = importedGroups(imported);
   return (
-    <Card className="kabinet__card" title={t.title}>
+    <Card className="kabinet__card" title={t.title} data-section="saved">
       <p className="auth-form__text">{t.intro[profile.role]}</p>
       <dl className="kabinet__facts">
         <div>
@@ -277,44 +630,89 @@ function SavedCard({ profile, kits }: { profile: Profile; kits: SavedKit[] | nul
                 : t.tourStarted(tourName)}
           </dd>
         </div>
-      </dl>
-      {profile.role === 'tutor' ? (
-        <div className="kabinet__kits">
-          <h3 className="kabinet__subtitle">{t.kits}</h3>
-          {kits === null ? (
-            <p className="auth-form__muted">…</p>
-          ) : kits.length === 0 ? (
-            <p className="auth-form__text">{t.kitsNone}</p>
-          ) : (
-            <ul className="kit-list">
-              {kits.map((kit) => (
-                <li key={kit.code} className="kit-list__item">
-                  <span className="kit-list__code">{kit.code}</span>
-                  <span className="kit-list__section">{kit.section}</span>
-                  <span className="kit-list__date">
-                    {t.kitsFrom} {dateRu(kit.createdAt)}
+        <div>
+          <dt>{t.imported}</dt>
+          <dd data-field="imported">
+            {groups.length === 0
+              ? t.importedNone
+              : groups.map((group) => (
+                  <span key={group.title} className="kabinet__line">
+                    {t.importedItem(group.title, dateRu(group.at))}
                   </span>
-                  <span className="kit-list__links">
-                    <a href={kit.studentHref} target="_blank" rel="noreferrer">
-                      {t.sheetStudent}
-                    </a>
-                    <a href={kit.teacherHref} target="_blank" rel="noreferrer">
-                      {t.sheetTeacher}
-                    </a>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+                ))}
+            {canImport ? (
+              <button type="button" className="auth-form__link kabinet__line" onClick={onImport}>
+                {t.importAgain}
+              </button>
+            ) : null}
+          </dd>
         </div>
+      </dl>
+    </Card>
+  );
+}
+
+/* ── Документы и данные ───────────────────────────────────────── */
+
+function DocumentsCard({ consents }: { consents: AccountConsents | null }) {
+  const t = KABINET.documents;
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const download = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const { exportMyData } = await import('@/lib/auth/profile');
+      const data = await exportMyData();
+      const url = URL.createObjectURL(
+        new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = t.exportFile;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError(t.exportFailed);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card className="kabinet__card" title={t.title} data-section="documents">
+      <ul className="kabinet__docs">
+        {Object.values(legalDocs).map((doc) => (
+          <li key={doc.id}>
+            <a href={doc.href} target="_blank" rel="noopener">
+              {doc.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+      {consents !== null ? (
+        <p className="auth-form__text" data-field="consent">
+          {consents.version !== null && consents.acceptedAt !== null
+            ? t.accepted(editionRu(consents.version), dateRu(consents.acceptedAt))
+            : t.acceptedUnknown}
+        </p>
       ) : null}
+      <div className="auth-form__actions">
+        <Button variant="secondary" onClick={download} loading={busy}>
+          {t.export}
+        </Button>
+      </div>
+      <p className="auth-form__hint">{t.exportHint}</p>
+      {error !== null ? <FieldMessage tone="error">{error}</FieldMessage> : null}
     </Card>
   );
 }
 
 /* ── Выход и удаление ─────────────────────────────────────────── */
 
-function DangerCard({ role, onRemoved }: { role: UserRole; onRemoved: () => void }) {
+function DangerCard({ role, onRemoved }: { role: AccountRole; onRemoved: () => void }) {
   const router = useRouter();
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -350,7 +748,7 @@ function DangerCard({ role, onRemoved }: { role: UserRole; onRemoved: () => void
   };
 
   return (
-    <Card className="kabinet__card" title={t.title}>
+    <Card className="kabinet__card" title={t.title} data-section="account">
       <div className="auth-form__actions">
         <Button variant="secondary" onClick={logout} loading={busy && !confirm}>
           {t.logout}

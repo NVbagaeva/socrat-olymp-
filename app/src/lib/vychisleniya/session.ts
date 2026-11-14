@@ -1,19 +1,29 @@
 'use client';
 
 /**
- * Сессия тренажёра №8: задачи со свежими числами, собранные в браузере.
+ * Сессия тренажёра №8: задачи собираются в браузере.
  *
- * Генератор детерминирован по seed, новый seed — новые числа. Ответ
- * считается здесь же и тут же закрывается: в состояние экрана уходит
- * отпечаток и зашифрованный разбор, число ответа нигде не хранится.
+ * Сначала — задачи банка (десять зафиксированных вариантов на
+ * прототип), которых ученик ещё не решал: по ним считается «решено X из
+ * 260». Когда задачи банка нужного типа кончились — свежие задачи
+ * генератора на новом seed. «Работа над ошибками» — всегда новые
+ * аналоги той же задачи (тот же прототип и уровень, другой seed), а не
+ * она сама.
+ *
+ * Ответ считается здесь же и тут же закрывается: в состояние экрана
+ * уходит отпечаток и зашифрованный разбор, число ответа нигде не хранится.
  */
 
+import { BANK } from './bank';
+import { PROTOTYPE_NAMES, isBankTask, parseTaskId, prototypeOfTask, taskId } from './ids';
+import { razborData } from './razbor';
 import { sealAnswer, sealText } from './secret';
 import { generate, hasLevel } from './generate';
 import { prototypeById } from './prototypes';
 import { SKILLS, skillById, skillOfPrototype } from './skills';
 import type { Level } from './types';
 import { typeset } from '../tex';
+import type { Mistake } from '../progressLog/model';
 import type { TrainerModeId } from '@/content/trainerModes';
 
 export interface Task8 {
@@ -23,11 +33,21 @@ export interface Task8 {
   /** Навык прототипа: S1 … S11. */
   skill: string;
   level: Level;
+  /**
+   * Подтип прототипа («1», «brackets»): по нему подбирается подсказка
+   * (content/vychisleniya8/tipy.ts). У записей до редизайна нет —
+   * генератор восстанавливает его при сборке задачи по рецепту.
+   */
+  podtip?: string;
   questionHtml: string;
   /** Отпечаток ответа. */
   seal: string;
-  /** Разбор строками HTML, закрытый отпечатком. */
+  /** Решение (RazborHtml, JSON), закрытое отпечатком. */
   razbor: string;
+  /** Задача банка (а не свежая из генератора). */
+  bank: boolean;
+  /** «Работа над ошибками»: задача из «Моих ошибок», аналог которой это. */
+  fixes?: string;
 }
 
 export interface Session8Request {
@@ -36,8 +56,10 @@ export interface Session8Request {
   level: Level | null;
   count: number;
   mode: TrainerModeId;
-  /** История ошибок: идентификаторы задач. */
-  mistakes: string[];
+  /** Открытые ошибки (lib/progressLog → mistakes). */
+  mistakes: Mistake[];
+  /** Задачи, которые ученик уже закрывал: банк их не повторяет. */
+  closed: ReadonlySet<string>;
 }
 
 /** Свежий seed: время и случайное число, как у сессии №12. */
@@ -45,24 +67,69 @@ export function randomSeed(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function taskId(prototype: string, seed: string, level: Level | null): string {
-  return `${prototype}|${seed}|${level ?? 'any'}`;
-}
+export { BANK_TOTAL, isBankTask, parseTaskId, prototypeOfTask, taskId } from './ids';
 
 /** Задача по прототипу и seed, сразу в закрытом виде. */
-export function makeTask(prototype: string, seed: string, level: Level | null): Task8 {
+export function makeTask(
+  prototype: string,
+  seed: string,
+  level: Level | null,
+  fixes?: string,
+): Task8 {
   const task = generate(prototype, seed, level);
   const seal = sealAnswer(task.otvet);
-  const razbor = sealText(JSON.stringify(task.razbor.map((line) => typeset(line))), seal);
+  /* Решение шагами вместе с признаками делимости — закрыто отпечатком ответа. */
+  const razbor = sealText(JSON.stringify(razborData(task.razbor, task.delimost)), seal);
+  const id = taskId(prototype, seed, level);
   return {
-    id: taskId(prototype, seed, level),
+    id,
     prototype,
     skill: skillOfPrototype(prototype)?.id ?? '',
     level: task.level,
+    podtip: task.podtip,
     questionHtml: typeset(task.uslovie),
     seal,
     razbor,
+    bank: isBankTask(id),
+    ...(fixes === undefined ? {} : { fixes }),
   };
+}
+
+/** Задача по идентификатору. null — идентификатор не читается или генератор не справился. */
+export function taskById(id: string, fixes?: string): Task8 | null {
+  const parsed = parseTaskId(id);
+  if (parsed === null) return null;
+  try {
+    return makeTask(parsed.prototype, parsed.seed, parsed.level, fixes);
+  } catch {
+    return null;
+  }
+}
+
+/** Сколько seed пробовать на аналог, если генератор не подобрал параметры. */
+const ATTEMPTS = 20;
+
+/**
+ * Аналог задачи: тот же прототип и уровень, свежий seed, условие другое.
+ * avoid — условия, которые уже есть в тренировке.
+ */
+export function analogOf(
+  id: string,
+  fixes?: string,
+  avoid: ReadonlySet<string> = new Set(),
+): Task8 | null {
+  const parsed = parseTaskId(id);
+  if (parsed === null) return null;
+  const source = taskById(id);
+  for (let i = 0; i < ATTEMPTS; i += 1) {
+    try {
+      const task = makeTask(parsed.prototype, randomSeed(), parsed.level, fixes);
+      if (task.questionHtml !== source?.questionHtml && !avoid.has(task.questionHtml)) return task;
+    } catch {
+      /* Генератор не подобрал параметры на этом seed — берём следующий. */
+    }
+  }
+  return null;
 }
 
 /** Прототипы навыков, у которых есть нужный уровень. */
@@ -85,48 +152,140 @@ function shuffled<T>(items: T[]): T[] {
   return out;
 }
 
-export function buildSession8(request: Session8Request): Task8[] {
-  if (request.mode === 'mistakes') {
-    const allowed = new Set(request.skills);
-    const own = request.mistakes.filter((id) => {
-      const prototype = id.split('|')[0] ?? '';
-      const skill = skillOfPrototype(prototype);
-      return skill !== undefined && allowed.has(skill.id);
-    });
-    return shuffled(own)
-      .slice(0, request.count)
-      .flatMap((id) => {
-        const [prototype, seed, level] = id.split('|');
-        if (prototype === undefined || seed === undefined) {
-          return [];
-        }
-        try {
-          return [makeTask(prototype, seed, level === 'base' || level === 'advanced' ? level : null)];
-        } catch {
-          return [];
-        }
-      });
-  }
-  const prototypes = shuffled(prototypesFor(request.skills, request.level));
-  if (prototypes.length === 0) {
-    return [];
-  }
+/** Нерешённые задачи банка прототипа под уровень, в случайном порядке. */
+function bankLeft(prototype: string, level: Level | null, closed: ReadonlySet<string>): string[] {
+  const entry = BANK.find((item) => item.prototype === prototype);
+  if (entry === undefined) return [];
+  return shuffled(
+    entry.variants
+      .filter((v) => level === null || v.level === null || v.level === level)
+      .map((v) => taskId(prototype, v.seed, v.level))
+      .filter((id) => !closed.has(id)),
+  );
+}
+
+/** Сколько аналогов одной ошибки в одной тренировке: столько нужно подряд, чтобы она ушла. */
+const ANALOGS_PER_MISTAKE = 2;
+
+/**
+ * «Работа над ошибками»: по каждой открытой ошибке — новые аналоги
+ * (до двух), вперемешку с аналогами других ошибок, чтобы два аналога
+ * одной задачи не шли рядом.
+ */
+export function buildMistakes8(mistakes: Mistake[], count: number): Task8[] {
+  const picked = shuffled(mistakes.filter((m) => parseTaskId(m.task) !== null)).slice(
+    0,
+    Math.max(1, Math.ceil(count / ANALOGS_PER_MISTAKE)),
+  );
   const tasks: Task8[] = [];
-  for (let i = 0; i < request.count; i += 1) {
-    const prototype = prototypes[i % prototypes.length] as string;
-    try {
-      tasks.push(makeTask(prototype, randomSeed(), request.level));
-    } catch {
-      /* Генератор не подобрал параметры на этом seed — берём следующий. */
-      i -= 1;
+  const seen = new Set<string>();
+  for (let round = 0; round < ANALOGS_PER_MISTAKE; round += 1) {
+    for (const mistake of picked) {
+      if (tasks.length >= count) break;
+      const task = analogOf(mistake.task, mistake.task, seen);
+      if (task !== null) {
+        tasks.push(task);
+        seen.add(task.questionHtml);
+      }
     }
   }
   return tasks;
 }
 
-/** Название типа задания для статистики: название навыка. */
+export function buildSession8(request: Session8Request): Task8[] {
+  if (request.mode === 'mistakes') {
+    const allowed = new Set(request.skills);
+    return buildMistakes8(
+      request.mistakes.filter((m) => {
+        const skill = skillOfPrototype(prototypeOfTask(m.task));
+        return skill !== undefined && allowed.has(skill.id);
+      }),
+      request.count,
+    );
+  }
+  const prototypes = shuffled(prototypesFor(request.skills, request.level));
+  if (prototypes.length === 0) {
+    return [];
+  }
+  /* По каждому прототипу — очередь нерешённых задач банка. */
+  const queues = new Map(prototypes.map((id) => [id, bankLeft(id, request.level, request.closed)]));
+  const tasks: Task8[] = [];
+  const seen = new Set<string>();
+  let misses = 0;
+  for (let i = 0; tasks.length < request.count && misses < 200; i += 1) {
+    const prototype = prototypes[i % prototypes.length] as string;
+    const fromBank = queues.get(prototype)?.shift();
+    let task: Task8 | null = null;
+    if (fromBank !== undefined) {
+      task = taskById(fromBank);
+    } else {
+      try {
+        task = makeTask(prototype, randomSeed(), request.level);
+      } catch {
+        task = null;
+      }
+    }
+    if (task === null || seen.has(task.questionHtml)) {
+      /* Генератор не подобрал параметры на этом seed — берём следующий. */
+      misses += 1;
+      continue;
+    }
+    seen.add(task.questionHtml);
+    tasks.push(task);
+  }
+  return tasks;
+}
+
+/**
+ * Тренировка по типам (прототипам) — выбор тем на вкладке «Тренажёр»:
+ * сначала нерешённые задачи банка каждого типа, когда они кончились —
+ * свежие задачи генератора; оба уровня вперемешку; условия в одной
+ * тренировке не повторяются.
+ */
+export function buildByPrototypes(
+  prototypes: readonly string[],
+  count: number,
+  closed: ReadonlySet<string> = new Set(),
+): Task8[] {
+  const order = shuffled(prototypes.filter((id) => prototypeById(id) !== undefined));
+  if (order.length === 0) {
+    return [];
+  }
+  const queues = new Map(order.map((id) => [id, bankLeft(id, null, closed)]));
+  const tasks: Task8[] = [];
+  const seen = new Set<string>();
+  let misses = 0;
+  for (let i = 0; tasks.length < count && misses < 200; i += 1) {
+    const prototype = order[i % order.length] as string;
+    const fromBank = queues.get(prototype)?.shift();
+    let task: Task8 | null = null;
+    if (fromBank !== undefined) {
+      task = taskById(fromBank);
+    } else {
+      try {
+        task = makeTask(prototype, randomSeed(), null);
+      } catch {
+        task = null;
+      }
+    }
+    if (task === null || seen.has(task.questionHtml)) {
+      misses += 1;
+      continue;
+    }
+    seen.add(task.questionHtml);
+    tasks.push(task);
+  }
+  return tasks;
+}
+
+/** Название типа задания для итогов и статистики по навыкам: название навыка. */
 export function kindTitle(prototype: string): string {
   return skillOfPrototype(prototype)?.nazvanie ?? prototype;
+}
+
+/** Название прототипа: «Степени с одним основанием» (формулы в $…$). */
+export function prototypeTitle(prototype: string): string {
+  return PROTOTYPE_NAMES[prototype] ?? prototype;
 }
 
 export { SKILLS };

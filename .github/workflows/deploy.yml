@@ -57,15 +57,23 @@ jobs:
       #
       # Вход в кабинет включается переменными репозитория (Settings →
       # Secrets and variables → Actions → вкладка Variables, не Secrets):
-      # NEXT_PUBLIC_AUTH_ENABLED=1, адрес проекта и его публичный ключ.
+      # NEXT_PUBLIC_AUTH_ENABLED=1, адрес сервера входа и его публичный
+      # ключ (их записывает кнопка «Сервер: ключ для сайта»).
+      # NEXT_PUBLIC_AUTH_IN_HEADER=1 показывает «Войти» в шапке; без неё
+      # страница входа открывается только по прямой ссылке (пробный режим).
       # Переменных нет — сайт собирается без входа, как раньше. Секретный
       # ключ сервиса сюда не передаётся никогда (docs/AUTH.md).
       - name: Собрать статический экспорт
         working-directory: app
         env:
           NEXT_PUBLIC_AUTH_ENABLED: ${{ vars.NEXT_PUBLIC_AUTH_ENABLED }}
+          NEXT_PUBLIC_AUTH_IN_HEADER: ${{ vars.NEXT_PUBLIC_AUTH_IN_HEADER }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          # Оферта /oferta/ и реквизиты продавца в подвале: «1» — опубликовать.
+          # С незаполненным app/src/content/legal/prodavets.json сборка
+          # остановится (next.config.ts). Нет переменной — не публикуются.
+          NEXT_PUBLIC_LEGAL_READY: ${{ vars.NEXT_PUBLIC_LEGAL_READY }}
         run: pnpm build
 
       - name: Проверить, что экспорт не пустой
@@ -109,6 +117,7 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           LFTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
+          bash "$GITHUB_WORKSPACE/.github/scripts/apt-mirror.sh" || true
           sudo apt-get update -q
           sudo apt-get install -y -q lftp
           lftp --env-password -u "$FTP_USERNAME" -p 21 "$FTP_SERVER" -e "

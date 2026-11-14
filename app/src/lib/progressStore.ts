@@ -18,9 +18,26 @@
  *
  * Правильных ответов здесь нет: только счётчики, идентификаторы
  * задач, в которых ученик ошибся, и чем каждая задача закрылась.
+ *
+ * Тренажёры разделов пишут в общий журнал попыток (lib/progressLog):
+ * хранилищу передаётся второй ключ — ключ журнала. Тогда счётчики,
+ * ошибки и исходы считаются из журнала (lib/progressLog/sovmestimost.ts),
+ * экраны раздела читают их как раньше, а первый ключ остаётся прежним
+ * хранилищем: при первом чтении оно сворачивается в журнал
+ * (LEGACY_LOGS) и больше не меняется. Без второго ключа хранилище
+ * работает по-старому — так живут опорные задачи и «Узнай метод».
  */
 
 import { useSyncExternalStore } from 'react';
+import {
+  EMPTY_LOG,
+  createLogStore,
+  legacyView,
+  outcomeOf,
+  type LogOutcome,
+  type LogStore,
+  type ProgressLog,
+} from './progressLog';
 import type { TrainerAttempt, TrainerKindTally, TrainerProgress } from './trainerProgress';
 
 /** Чем закрылась задача. Список ошибок этого не различает. */
@@ -33,6 +50,14 @@ export type TaskOutcome = 'right' | 'wrong' | 'revealed';
  */
 export interface StoreAttempt extends TrainerAttempt {
   itog?: TaskOutcome;
+  /**
+   * Точный исход для журнала попыток: тренажёр знает, была ли подсказка
+   * и открывалось ли решение (lib/progressLog, ishodOf). Без него исход
+   * выводится из right / clean / itog.
+   */
+  ishod?: LogOutcome;
+  /** Тренировка, в которой решалась задача. */
+  session?: string;
 }
 
 /** Прогресс хранилища: счётчики задания №12 плюс исходы задач. */
@@ -54,6 +79,8 @@ export interface ProgressStore {
   recordAttempt(attempt: StoreAttempt): void;
   /** Очистить это хранилище. Остальные не трогаются. */
   reset(): void;
+  /** Журнал попыток, если хранилище пишет в него. */
+  log?: LogStore;
 }
 
 /* Пустой снимок — одна и та же ссылка: иначе useSyncExternalStore
@@ -114,7 +141,47 @@ function parse(raw: string | null): StoreProgress {
   }
 }
 
-export function createProgressStore(key: string): ProgressStore {
+/** Хранилище поверх журнала попыток: экраны читают прежнюю форму. */
+function createJournalStore(key: string, logKey: string): ProgressStore {
+  const log = createLogStore(logKey);
+  let seen: ProgressLog = EMPTY_LOG;
+  let view: StoreProgress = EMPTY;
+  const viewOf = (current: ProgressLog): StoreProgress => {
+    if (current !== seen) {
+      seen = current;
+      view = legacyView(current);
+    }
+    return view;
+  };
+  return {
+    key,
+    log,
+    useProgress() {
+      return viewOf(log.use());
+    },
+    recordAttempt(attempt) {
+      log.record({
+        task: attempt.taskId,
+        kind: attempt.kind,
+        outcome: outcomeOf(attempt),
+        seconds: Math.max(0, Math.round(attempt.seconds)),
+        ...(attempt.session === undefined ? {} : { session: attempt.session }),
+      });
+    },
+    reset() {
+      log.reset();
+    },
+  };
+}
+
+/**
+ * Хранилище прогресса. logKey — ключ журнала попыток: с ним хранилище
+ * пишет в журнал, а key — прежний ключ, из которого журнал собран.
+ */
+export function createProgressStore(key: string, logKey?: string): ProgressStore {
+  if (logKey !== undefined) {
+    return createJournalStore(key, logKey);
+  }
   let cache: StoreProgress | null = null;
   const listeners = new Set<() => void>();
 

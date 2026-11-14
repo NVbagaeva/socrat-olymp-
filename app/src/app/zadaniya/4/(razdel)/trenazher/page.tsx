@@ -1,37 +1,20 @@
 import type { Metadata } from 'next';
-import { Trenazher } from '@/components/tasks/veroyatnost/Trenazher';
-import { navykiMetodov } from '@/components/tasks/veroyatnost/navyki';
+import { Trenazher45Tab } from '@/components/tasks/veroyatnost/trening/Trenazher45Tab';
 import { veroyatnostTitle, vkladka } from '@/content/veroyatnost';
-import { bank4Pool, uznayMetodPool } from '@/lib/veroyatnost/pool';
-import { ZADANIYA } from '@/lib/paths';
 
 export const metadata: Metadata = {
   title: veroyatnostTitle('4', vkladka('4', 'trenazher')),
 };
 
 /**
- * Вкладка «Тренажёр» задания №4 — по макету trenazher.png: методы,
- * режим, количество задач; «Узнай метод» — один из режимов.
+ * Вкладка «Тренажёр» задания №4 в «Стеклянной сцене»: четыре режима
+ * карточками (вперемешку, выбрать методы, работа над ошибками, «Узнай
+ * метод»), выбор тем строками методов, экран задачи, итоги.
  *
- * Банк собирается на сборке: 21 прототип, у каждого варианты
- * задачника и десять сгенерированных. Вниз уезжают условия, открытые
- * параметры рисунка, отпечатки ответов и закрытые разборы — формулы
- * ответа и перебор исходов остаются здесь. Карточки методов с
- * миниатюрами тоже собираются здесь, на сервере.
+ * Банк собирается на сборке: условия, отпечатки ответов и картинки
+ * уезжают со страницей, закрытые разборы и подсказки лежат файлами по
+ * прототипам (dannye/razbory/) и грузятся только для задач тренировки.
  */
 export default function Trenazher4Tab() {
-  const pool = bank4Pool();
-  return (
-    <>
-      {/* Название вкладки — H2 панели: конфигуратор и подход — общие с №12 экраны без своего заголовка. */}
-      <h2 className="t-h2 vtab__title">{vkladka('4', 'trenazher')}</h2>
-      <Trenazher
-        pool={pool}
-        uznay={uznayMetodPool(4)}
-        zadanie={4}
-        base={`${ZADANIYA}/4/trenazher/`}
-        metody={navykiMetodov(pool, 4)}
-      />
-    </>
-  );
+  return <Trenazher45Tab zadanie={4} />;
 }

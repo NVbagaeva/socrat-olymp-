@@ -142,7 +142,7 @@ export function config13(): GenConfig {
       /* «Один тип»: учитель выбирает тип, в нём столько задач. */
       ...(p.id === 'odin-tip' ? { pickTopic: Object.values(p.sostav)[0] ?? 1 } : {}),
     })),
-    limits: { maxPerTopic: 10, maxTasks: 40, variantsMax: 4 },
+    limits: { variantsMax: 4 },
     extras: {
       kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })),
       examples: false,

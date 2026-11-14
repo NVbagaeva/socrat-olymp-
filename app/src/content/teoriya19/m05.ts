@@ -608,7 +608,7 @@ const OPORNYE: Opornaya19[] = [
 /* ── Тренировочная работа ────────────────────────────────────────── */
 
 const RIS_T3 = scena(
-  { x: [-2.5, 2.5], y: [-0.5, 3] },
+  { x: [-2.5, 2.5], y: [-1, 3] },
   {
     curves: [grafik((x) => Math.abs(x), 'lineA'), grafik((x) => x * x, 'lineC', {}, 'dashed')],
     points: [tochka(-1, 1, null), tochka(0, 0, 'O'), tochka(1, 1, null)],

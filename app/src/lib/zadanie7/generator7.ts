@@ -14,7 +14,7 @@ import type { GenConfig } from '@/lib/generator/obshchiy/types';
 import { typeset } from '../tex';
 import type { ZadachaBanka } from '@/lib/generator/obshchiy/bank';
 import type { ProtoInfo7 } from './protoInfo';
-import { NA_TIP_MAX, VARIANTOV_MAX } from './sborka';
+import { VARIANTOV_MAX } from './sborka';
 
 const VIDY = GEN_UI.vidyRaboty as Record<string, string>;
 
@@ -51,7 +51,7 @@ export function config7(
     levels: [],
     sources: GENERATOR7_SOURCES,
     presets: GENERATOR7_PRESETS,
-    limits: { maxPerTopic: 2 * NA_TIP_MAX, maxTasks: 30, variantsMax: VARIANTOV_MAX },
+    limits: { variantsMax: VARIANTOV_MAX },
     extras: { kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })) },
   };
 }

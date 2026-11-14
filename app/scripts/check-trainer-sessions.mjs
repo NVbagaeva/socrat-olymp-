@@ -29,7 +29,8 @@
         продолжена в другой вкладке»; «Продолжить здесь» показывает то,
         что сделано во второй.
      6. №11, ответ выбором варианта (подтип RZ-17): выбранный вариант
-        переживает перезагрузку.
+        переживает перезагрузку (общий тренажёр по банку: варианты —
+        .trn-vybor__knopka, выбор — поле value состояния экрана).
      7. Хранилище почти полно (старая тренировка другого раздела и
         посторонний ключ): новая тренировка записывается, старая чужая
         вытеснена, посторонний ключ цел. Места нет совсем: страница
@@ -48,17 +49,23 @@
      №12      — zadachaShablona(ключ, seed задания) из lib/trainerSession.ts
                 (тренажёр с фильтрами): answer (у задач с вариантами — номер
                 варианта);
-     №8, №2   — generate(прототип, seed[, уровень]).otvet
+     №8, №2   — generate(прототип, seed[, уровень]).otvet (у №2 ключ — «прототип|seed»)
                 (lib/vychisleniya/generate.ts, lib/vektory/generate.ts);
-     №11      — reshitPlan(план, банк dannyeTrenazhera()): answer или
-                номер верного варианта (lib/zadanie11/trenazher/zadacha.ts);
+     №11      — общий тренажёр по банку, как у №7 и №6: ключ задачи
+                «подтип|откуда» → параметры из файлов задач
+                (lib/zadanie11/trening/dannye-server.ts) → solve подтипа:
+                answer или номер верного варианта;
      №4, №5   — otvetUchenika(прототип, параметры варианта) из банка
                 lib/veroyatnost; «Узнай метод» — метод, чей отпечаток
                 sealMetod совпал с отпечатком варианта uznayMetodPool();
      №3       — prototype.otvet(параметры варианта) из lib/zadanie3;
      №7       — prototype(прототип).solve(параметры).answer из lib/zadanie7
-     №6       — то же из lib/zadanie6
-                (в записи — условие и параметры задачи, без ответа).
+     №6       — то же из lib/zadanie6 (общий тренажёр по банку, как у №7)
+                (в записи — ключи задач банка, без ответа);
+     №1       — тот же общий тренажёр: ключ «p05|b12» → razreshit и
+                sostavZadachi движка планиметрии (lib/planimetriya);
+     №9       — generate(прототип, seed).otvet из lib/proizvodnaya (тот же
+                общий тренажёр; ключ задачи — «прототип|seed»).
 
    Новый тренажёр — один объект в TRAINERS ниже: адрес, раздел, как
    начать тренировку и как по записи получить верный ответ. Поле ответа,
@@ -127,47 +134,57 @@ function answer8(payload, at) {
   };
 }
 
-/** №2: [«прототип|seed», подпись] → generate(…).otvet. */
+/** №2: ключ задачи «прототип|seed» (общий тренажёр по банку) → generate(…).otvet. */
 function answer2(payload, at) {
   const { generate } = requireSrc('lib/vektory/generate');
-  const [prototype, seed] = payload.tasks[at][0].split('|');
+  const [prototype, seed] = payload.tasks[at].id.split('|');
   return { text: numberText(generate(prototype, seed).otvet) };
 }
 
-/** №11 (тренажёр с фильтрами): задание {k, seed?} → план по ключу → reshitPlan. */
-let bank11 = null;
+/** №11: в записи — ключи задач {id, p} (общий тренажёр по банку); ответ — solve подтипа. */
+let zadachi11 = null;
 function answer11(payload, at) {
-  const { reshitPlan } = requireSrc('lib/zadanie11/trenazher/zadacha');
-  const { planPoKlyuchu } = requireSrc('lib/zadanie11/trenazher/filtry11');
-  const { osnovaSeed } = requireSrc('lib/trenazher/sessiya.ts');
-  if (bank11 === null) {
-    bank11 = requireSrc('lib/zadanie11/trenazher/dannye').dannyeTrenazhera().bank;
+  const { subtype } = requireSrc('lib/zadanie11/prototypes/index');
+  if (zadachi11 === null) {
+    const { zadachi11: vse } = requireSrc('lib/zadanie11/trening/dannye-server');
+    zadachi11 = new Map(vse().map((z) => [z.id, z]));
   }
-  const plan = planPoKlyuchu(payload.items[at].k, osnovaSeed(payload, at, 0));
-  const solved = reshitPlan(plan, bank11);
+  const task = payload.tasks[at];
+  const z = zadachi11.get(task.id);
+  if (z === undefined) {
+    throw new Error(`№11: нет задачи ${task.id}`);
+  }
+  const solved = subtype(z.prototypeId).solve(z.params);
   return solved.vybor === undefined
     ? { text: numberText(solved.answer) }
     : { option: String(solved.vybor.correct + 1) };
 }
 
-/** №1 (тренажёр с фильтрами): задание {k, seed?} → план по ключу → ответ движка. */
+/**
+ * №1: общий тренажёр по банку, как у №7 и №6 — в записи ключи задач
+ * {id: «p05|b12», p: «p05»}; ответ — тот же движок, что собирает задачу
+ * в браузере (lib/planimetriya/trening/sborka.ts) по ключу.
+ */
 let bank1 = null;
 function answer1(payload, at) {
   const { razreshit, sostavZadachi } = requireSrc('lib/planimetriya/trenazher/zadacha');
   const { planPoKlyuchu1 } = requireSrc('lib/planimetriya/trenazher/filtry1');
-  const { osnovaSeed } = requireSrc('lib/trenazher/sessiya.ts');
   if (bank1 === null) {
     bank1 = requireSrc('lib/planimetriya/trenazher/dannye').dannyeTrenazhera1().bank;
   }
-  const plan = planPoKlyuchu1(payload.items[at].k, osnovaSeed(payload, at, 0));
+  /* Запись прежнего тренажёра (панель фильтров, {items}) — тем же
+     чтением, что у нового тренажёра (prezhnyayaZapis1). */
+  const tasks =
+    payload.tasks ?? requireSrc('lib/planimetriya/trening/klyuch').prezhnyayaZapis1(payload).tasks;
+  const plan = planPoKlyuchu1(tasks[at].id, '');
   return { text: numberText(sostavZadachi(razreshit(plan, bank1)).otvet) };
 }
 
-/** №13 (тренажёр с фильтрами): задание «A-01|b3» → generate(прототип, seed).answer. */
+/** №13 (общий тренажёр по банку): задача «A-01|b3» → generate(прототип, seed).answer. */
 function answer13(payload, at) {
   const { generate } = requireSrc('lib/zadanie13/generate');
-  const [prototype, seed] = payload.items[at].k.split('|');
-  return { text: numberText(generate(prototype, payload.items[at].seed ?? seed).answer) };
+  const [prototype, seed] = payload.tasks[at].id.split('|');
+  return { text: numberText(generate(prototype, seed).answer) };
 }
 
 /** №4, №5: [прототип, номер варианта, подпись] → ответ ученика или метод. */
@@ -204,30 +221,83 @@ function answer45(payload, at) {
   return { text: numberText(otvetUchenika(prototype, variant.params)) };
 }
 
-/** №3 (тренажёр с фильтрами): задание «P03-01#3» → prototype.otvet(параметры варианта). */
+/** №3: задание записи {id: «P03-01#3»} → prototype.otvet(параметры варианта). */
 function answer3(payload, at) {
   const { prototypeById } = requireSrc('lib/zadanie3/index');
-  const [id, n] = payload.items[at].k.split('#');
+  const [id, n] = payload.tasks[at].id.split('#');
   const prototype = prototypeById(id);
   const variant = prototype?.varianty.find((entry) => entry.n === Number(n));
   if (variant === undefined) {
-    throw new Error(`№3: нет варианта ${payload.items[at].k}`);
+    throw new Error(`№3: нет варианта ${payload.tasks[at].id}`);
   }
   return { text: numberText(prototype.otvet(variant.params)) };
 }
 
-/** №7: задача записи {prototypeId, params} → решатель прототипа. */
+/** №7: в записи — ключи задач банка {id, p}; ответ — решатель прототипа по параметрам задачи. */
 function answer7(payload, at) {
   const { prototype } = requireSrc('lib/zadanie7/prototypes/index');
-  const z = payload.zadachi[at];
+  const { BANK } = requireSrc('lib/zadanie7/bank/index');
+  const task = payload.tasks[at];
+  const z = BANK.find((item) => item.id === task.id);
+  if (z === undefined) {
+    throw new Error(`№7: нет задачи ${task.id}`);
+  }
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
 }
 
-/** №6: задача записи {prototypeId, params} → решатель прототипа. */
+/** №6: как у №7 — ключи задач банка {id, p}; ответ — решатель прототипа. */
 function answer6(payload, at) {
   const { prototype } = requireSrc('lib/zadanie6/prototypes/index');
-  const z = payload.zadachi[at];
+  const { BANK } = requireSrc('lib/zadanie6/bank/index');
+  const task = payload.tasks[at];
+  const z = BANK.find((item) => item.id === task.id);
+  if (z === undefined) {
+    throw new Error(`№6: нет задачи ${task.id}`);
+  }
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
+}
+
+/** №9: ключ задачи «прототип|seed» → generate(прототип, seed).otvet (lib/proizvodnaya). */
+function answer9(payload, at) {
+  const { generate } = requireSrc('lib/proizvodnaya/generate');
+  const id = payload.tasks[at].id;
+  const p = id.split('|')[0];
+  return { text: numberText(generate(p, id.slice(p.length + 1)).otvet) };
+}
+
+/**
+ * №14: в записи — id задач; ответ — серии пункта а (по полю на серию),
+ * корни пункта б или число разминки. Поля — формулы (MathLive), их
+ * значение ставит setPole.
+ */
+function answer14(payload, at) {
+  const { zadachaPoId14 } = requireSrc('lib/zadanie14/dannye');
+  const U = requireSrc('lib/zadanie14/ugol');
+  const z = zadachaPoId14(payload.ids[at]);
+  if (z === undefined) {
+    throw new Error(`№14: нет задачи ${payload.ids[at]}`);
+  }
+  if (z.vid === 'razminka') {
+    return { mf: { serii: [], korni: null, chislo: String(z.otvet) } };
+  }
+  return {
+    mf: {
+      serii: z.serii.map((sr) => U.seriyaTex(sr)),
+      korni:
+        z.promezhutok === undefined
+          ? null
+          : U.korniNaPromezhutke(z.serii, z.promezhutok)
+              .map((a) => U.ugolTex(a))
+              .join(';'),
+      chislo: null,
+    },
+  };
+}
+
+/** №14: самая большая тренировка — 15 задач вместе с опорными. */
+async function chooseAll14(page) {
+  await page.getByRole('button', { name: 'Вместе с опорными', exact: true }).click();
+  await page.getByRole('button', { name: '15', exact: true }).click();
 }
 
 /** №19: в записи — id задач банка; ответ — TeX-множество из контента, поле его принимает. */
@@ -258,6 +328,8 @@ async function chooseAll19(page) {
                { text } — ввести в поле, { option } — номер варианта
                (.popt), { method } — название метода (.z4-picker__btn);
      start   — как начать тренировку (по умолчанию «Начать тренировку»);
+     configButton — кнопка, по которой виден выбор тренировки (по
+               умолчанию «Начать тренировку»; у №8 — карточка режима);
      all     — как выбрать «Все» задания (для замера восстановления);
      rep     — представитель: на нём идут сценарии 4, 5, 7, 8;
      tabs    — false, если у страницы нет ленты вкладок (метку не искать). */
@@ -270,16 +342,48 @@ async function pressStart(page, timeout) {
     .click(timeout === undefined ? {} : { timeout });
 }
 
-/** Самая большая тренировка №8, №2: режим «Смешанная», количество «Все (N)». */
-async function chooseAll(page) {
+/** №8: карточка «Все типы вперемешку» — десять задач, без выбора. */
+async function start8(page, timeout) {
   await page
-    .getByRole('radio', { name: /^Смешанная/ })
+    .getByRole('button', { name: /^Все типы вперемешку/ })
+    .first()
+    .click(timeout === undefined ? {} : { timeout });
+}
+
+/** №4 и №5: карточка «Все методы вперемешку» — десять задач. */
+async function start45(page, timeout) {
+  await page
+    .getByRole('button', { name: /^Все методы вперемешку/ })
+    .first()
+    .click(timeout === undefined ? {} : { timeout });
+}
+
+/** «Узнай метод» — четвёртая карточка режима. */
+async function startUznay45(page, timeout) {
+  await page
+    .getByRole('button', { name: /^Узнай метод/ })
+    .first()
+    .click(timeout === undefined ? {} : { timeout });
+}
+
+/** Самая большая тренировка №4: «Выбрать методы» → все типы → «Без конца». */
+async function chooseAll45(page) {
+  await page
+    .getByRole('button', { name: /^Выбрать методы/ })
     .first()
     .click();
+  await page.getByRole('button', { name: 'Выбрать все', exact: true }).click();
+  await page.getByRole('button', { name: 'Без конца', exact: true }).click();
+}
+
+/** Самая большая тренировка №8: «Выбрать темы» → все типы → «Без конца»; дальше — «Начать тренировку». */
+async function chooseAll8(page) {
   await page
-    .getByRole('radio', { name: /^Все \(\d+\)/ })
+    .getByRole('button', { name: /^Выбрать темы/ })
     .first()
     .click();
+  await page.getByRole('button', { name: 'Выбрать все', exact: true }).click();
+  await page.getByRole('button', { name: 'Без конца', exact: true }).click();
 }
 
 /** Самая большая тренировка на панели фильтров: «Сколько задач — Без ограничения». */
@@ -291,6 +395,7 @@ async function chooseAllFiltry(page) {
 }
 
 const TRAINERS = [
+  { name: '№14', url: '/zadaniya/14/trenazher/', scope: '14', answer: answer14, all: chooseAll14 },
   { name: '№19', url: '/zadaniya/19/trenazher/', scope: '19', answer: answer19, all: chooseAll19 },
   ...['linear', 'quadratic', 'rational', 'irrational'].map((sub) => ({
     name: `№12 ${sub}`,
@@ -314,30 +419,51 @@ const TRAINERS = [
     url: '/zadaniya/8/trenazher/',
     scope: '8',
     answer: answer8,
-    all: chooseAll,
+    /* Стартовый экран — три режима: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
     rep: true,
   },
-  { name: '№2', url: '/zadaniya/2/trenazher/', scope: '2', answer: answer2, all: chooseAll },
+  {
+    name: '№2',
+    url: '/zadaniya/2/trenazher/',
+    scope: '2',
+    answer: answer2,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
+  },
   {
     name: '№1',
     url: '/zadaniya/1/trenazher/',
     scope: '1',
     answer: answer1,
-    all: chooseAllFiltry,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№13',
     url: '/zadaniya/13/trenazher/',
     scope: '13',
     answer: answer13,
-    all: chooseAllFiltry,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№11',
     url: '/zadaniya/11/trenazher/',
     scope: '11',
     answer: answer11,
-    all: chooseAllFiltry,
+    /* Общий тренажёр по банку, как у №7 и №6: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
     rep: true,
   },
   {
@@ -345,42 +471,67 @@ const TRAINERS = [
     url: '/zadaniya/7/trenazher/',
     scope: '7',
     answer: answer7,
-    /* Прототипы по умолчанию не отмечены: вся группа I флажком группы. */
-    start: async (page) => {
-      await page
-        .getByRole('checkbox', { name: /^Группа I\./ })
-        .first()
-        .check();
-      await page
-        .getByRole('button', { name: /^Начать/ })
-        .first()
-        .click();
-    },
+    /* Стартовый экран — три режима, как у №8: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
   {
     name: '№6',
     url: '/zadaniya/6/trenazher/',
     scope: '6',
     answer: answer6,
-    /* Прототипы по умолчанию не отмечены: шаблон «Диаграммы и деревья». */
-    start: async (page) => {
-      await page
-        .getByRole('button', { name: /^Диаграммы и деревья/ })
-        .first()
-        .click();
-      await page
-        .getByRole('button', { name: /^Начать/ })
-        .first()
-        .click();
-    },
+    /* Тот же общий тренажёр по банку, что у №7. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
   },
-  { name: '№4', url: '/zadaniya/4/trenazher/', scope: '4', answer: answer45, rep: true },
-  { name: '№5', url: '/zadaniya/5/trenazher/', scope: '5', answer: answer45 },
   {
-    name: '№4 «Узнай метод»',
-    url: '/zadaniya/4/trenazher/uznay-metod/',
+    name: '№9',
+    url: '/zadaniya/9/trenazher/',
+    scope: '9',
+    answer: answer9,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
+  },
+  {
+    name: '№4',
+    url: '/zadaniya/4/trenazher/',
     scope: '4',
     answer: answer45,
+    /* «Стеклянная сцена»: четыре режима карточками, как у №7 и №6. */
+    start: start45,
+    configButton: /^Все методы вперемешку/,
+    all: chooseAll45,
+    rep: true,
+  },
+  {
+    name: '№5',
+    url: '/zadaniya/5/trenazher/',
+    scope: '5',
+    answer: answer45,
+    start: start45,
+    configButton: /^Все методы вперемешку/,
+    all: chooseAll45,
+  },
+  {
+    name: '№5 «Узнай метод»',
+    url: '/zadaniya/5/trenazher/',
+    scope: '5',
+    answer: answer45,
+    start: startUznay45,
+    configButton: /^Узнай метод/,
+  },
+  {
+    name: '№4 «Узнай метод»',
+    url: '/zadaniya/4/trenazher/',
+    scope: '4',
+    answer: answer45,
+    /* Четвёртая карточка режима. */
+    start: startUznay45,
+    configButton: /^Узнай метод/,
   },
   /* №3: один тренажёр на всё задание — вкладка раздела стереометрии. */
   {
@@ -388,7 +539,10 @@ const TRAINERS = [
     url: '/zadaniya/3/trenazher/',
     scope: '3',
     answer: answer3,
-    all: chooseAllFiltry,
+    /* Стартовый экран — три режима, как у №8: тренировка начинается карточкой. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
     rep: true,
   },
 ];
@@ -436,16 +590,23 @@ const browser = await chromium.launch(executablePath ? { executablePath } : {});
 
 /* ── Общие действия на странице ─────────────────────────────── */
 
+/** Вариант ответа и его номер: прежние экраны (.popt) и общий тренажёр по банку (№11: .trn-vybor__knopka). */
+const VARIANT = ':is(.popt, .trn-vybor__knopka)';
+const VARIANT_NO = ':is(.popt__no, .z11-variant__no)';
+
 const KEY = (scope) => `budetege:trainer:${scope}:session`;
 const BODY = '.tsess__body';
 /** Поле ответа: у каждого экрана своё, но оно одно. */
 const ANSWER_INPUT = [
   'input.ttask__input',
+  /* Общее поле ответа бланка ЕГЭ (components/tasks/otvet/AnswerInput). */
+  'input.otvet-input__field',
   'input.z11-resh__input',
   'input.pc__input',
   'input.z3t__input',
   'input.z7-otvet__input',
   'input.z6-otvet__input',
+  'input.trn-input',
 ]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
@@ -457,6 +618,8 @@ const QUESTION = [
   '.z3t__question',
   '.z7-uslovie__text',
   '.z6-uslovie__text',
+  '.z14-uslovie',
+  '.trn-uslovie',
 ]
   .map((sel) => `${BODY} ${sel}`)
   .join(', ');
@@ -533,23 +696,69 @@ function totalOf(record) {
 }
 
 /** Ввести ответ (или выбрать вариант, метод) и проверить. */
+/** Поле формулы №14 по data-testid: MathLive или обычное поле (запасной вид). */
+async function setPole(page, id, value) {
+  const pole = page.locator(`${BODY} [data-testid="${id}"]`).first();
+  await pole.waitFor({ state: 'attached' });
+  if ((await pole.evaluate((el) => el.tagName)) === 'INPUT') {
+    await pole.fill(value);
+    return;
+  }
+  await pole.evaluate((el, v) => {
+    el.value = v;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, value);
+}
+
+async function readPole(page, id) {
+  const pole = page.locator(`${BODY} [data-testid="${id}"]`);
+  if ((await pole.count()) === 0) {
+    return null;
+  }
+  return pole.first().evaluate((el) => el.value ?? '');
+}
+
 async function give(page, answer) {
   const body = page.locator(BODY);
-  if (answer.text !== undefined) {
+  if (answer.mf !== undefined) {
+    const { serii, korni, chislo } = answer.mf;
+    if (chislo !== null) {
+      await setPole(page, 'z14-chislo', chislo);
+    } else {
+      for (let i = 0; i < serii.length; i += 1) {
+        if ((await page.locator(`${BODY} [data-testid="z14-seriya-${i}"]`).count()) === 0) {
+          await body.getByRole('button', { name: '+ Ещё серия', exact: true }).click();
+        }
+        await setPole(page, `z14-seriya-${i}`, serii[i]);
+      }
+      if (korni !== null) {
+        await setPole(page, 'z14-korni', korni);
+      }
+    }
+    /* Значение поля доходит до состояния экрана через событие input:
+       даём React отрисовать его до нажатия «Проверить». */
+    await page.waitForTimeout(300);
+    await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
+  } else if (answer.text !== undefined) {
     await page.locator(ANSWER_INPUT).first().fill(answer.text);
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
   } else if (answer.option !== undefined) {
     await body
-      .locator('.popt')
-      .filter({ has: page.locator('.popt__no', { hasText: new RegExp(`^${answer.option}$`) }) })
+      .locator(VARIANT)
+      .filter({ has: page.locator(VARIANT_NO, { hasText: new RegExp(`^${answer.option}$`) }) })
       .first()
       .click();
     await body.getByRole('button', { name: 'Проверить', exact: true }).first().click();
   } else {
-    /* «Узнай метод»: нажатие на метод — это и есть ответ. */
+    /* «Узнай метод»: нажатие на метод — это и есть ответ (прежний экран
+       .z4-picker, «Стеклянная сцена» — .z45-metod-knopka). */
     await body
-      .locator('.z4-picker__btn')
-      .filter({ has: page.locator('.z4-picker__name', { hasText: answer.method }) })
+      .locator('.z4-picker__btn, .z45-metod-knopka')
+      .filter({
+        has: page.locator('.z4-picker__name, .z45-metod-knopka__nazvanie', {
+          hasText: answer.method,
+        }),
+      })
       .first()
       .click();
   }
@@ -557,29 +766,62 @@ async function give(page, answer) {
 
 /** Неверный ответ того же вида, что верный. */
 async function wrongOf(page, right) {
+  if (right.mf !== undefined) {
+    return right.mf.chislo !== null
+      ? { mf: { serii: [], korni: null, chislo: '987654' } }
+      : {
+          mf: {
+            serii: ['\\frac{\\pi}{7}+2\\pi k'],
+            korni: right.mf.korni === null ? null : '\\frac{\\pi}{7}',
+            chislo: null,
+          },
+        };
+  }
   if (right.text !== undefined) {
     return { text: right.text === '987654' ? '987653' : '987654' };
   }
   if (right.option !== undefined) {
-    const numbers = await page.locator(`${BODY} .popt .popt__no`).allTextContents();
+    const numbers = await page.locator(`${BODY} ${VARIANT_NO}`).allTextContents();
     return { option: numbers.map((item) => item.trim()).find((item) => item !== right.option) };
   }
-  const names = await page.locator(`${BODY} .z4-picker__name`).allTextContents();
+  const names = await page
+    .locator(`${BODY} .z4-picker__name, ${BODY} .z45-metod-knopka__nazvanie`)
+    .allTextContents();
   return { method: names.map((item) => item.trim()).find((item) => item !== right.method) };
 }
 
 /** Что сейчас введено или выбрано на экране задания — в той же форме, что ответ. */
 async function shownAnswer(page, like) {
+  if (like.mf !== undefined) {
+    if (like.mf.chislo !== null) {
+      return { mf: { serii: [], korni: null, chislo: await readPole(page, 'z14-chislo') } };
+    }
+    const serii = [];
+    for (let i = 0; i < like.mf.serii.length; i += 1) {
+      serii.push((await readPole(page, `z14-seriya-${i}`)) ?? '');
+    }
+    return {
+      mf: {
+        serii,
+        korni: like.mf.korni === null ? null : await readPole(page, 'z14-korni'),
+        chislo: null,
+      },
+    };
+  }
   if (like.text !== undefined) {
     return { text: await page.locator(ANSWER_INPUT).first().inputValue() };
   }
   if (like.option !== undefined) {
-    const chosen = page.locator(`${BODY} .popt.is-chosen .popt__no`);
+    const chosen = page.locator(
+      `${BODY} :is(.popt.is-chosen, .trn-vybor__knopka.is-on) ${VARIANT_NO}`,
+    );
     return {
       option: (await chosen.count()) === 0 ? null : (await chosen.first().textContent()).trim(),
     };
   }
-  const pressed = page.locator(`${BODY} .z4-picker__btn[aria-pressed="true"] .z4-picker__name`);
+  const pressed = page.locator(
+    `${BODY} .z4-picker__btn[aria-pressed="true"] .z4-picker__name, ${BODY} .z45-metod-knopka[aria-pressed="true"] .z45-metod-knopka__nazvanie`,
+  );
   return {
     method: (await pressed.count()) === 0 ? null : (await pressed.first().textContent()).trim(),
   };
@@ -746,11 +988,13 @@ async function basicScenario(trainer) {
       rows['Верно'] === '1' && rows['Неверно'] === '1' && rows['Пропущено'] === String(total - 2),
       `${tag}: итоги — Верно 1, Неверно 1, Пропущено ${total - 2} (${JSON.stringify(rows)})`,
     );
-    const items = page.locator('.tsum__list .tsum__item');
+    /* Список задач итогов: общий экран (.tsum) или экран «Стеклянной
+       сцены» (.trn-itog-zadachi, №8); отметка — в классе строки. */
+    const items = page.locator('.tsum__list .tsum__item, .trn-itog-zadachi .trn-itog-zadacha');
     const first = await items.nth(0).getAttribute('class');
     const second = await items.nth(1).getAttribute('class');
     check(
-      /tsum__item--right/.test(first ?? '') && /tsum__item--wrong/.test(second ?? ''),
+      /--right/.test(first ?? '') && /--wrong/.test(second ?? ''),
       `${tag}: в списке итогов задание 1 «Верно», задание 2 «Неверно»`,
     );
     check(await waitNoRecord(page, trainer.scope), `${tag}: после итогов записи нет`);
@@ -870,32 +1114,33 @@ async function choiceScenario() {
     const page = await newPage(context);
     /* ?tip= отмечает один подтип — как ссылка «Решать» из теории. */
     await open(page, `${trainer.url}?tip=RZ-17`);
-    const record = await startRun(page, { ...trainer, start: pressStart });
+    /* Общий тренажёр по банку: ссылка с одним типом сразу начинает тренировку. */
+    const record = await startRun(page, { ...trainer, start: async () => {} });
     if (!check(record !== null, `${tag}: тренировка начата`)) {
       return;
     }
-    const options = page.locator(`${BODY} .popt`);
-    if (!check((await options.count()) > 0, `${tag}: у задания 1 есть варианты .popt`)) {
+    const options = page.locator(`${BODY} ${VARIANT}`);
+    if (!check((await options.count()) > 0, `${tag}: у задания 1 есть варианты ответа`)) {
       return;
     }
     const right = await trainer.answer(record.payload, poolIndex(record, 0));
     const wrong = await wrongOf(page, right);
     await page
-      .locator(`${BODY} .popt`)
-      .filter({ has: page.locator('.popt__no', { hasText: new RegExp(`^${wrong.option}$`) }) })
+      .locator(`${BODY} ${VARIANT}`)
+      .filter({ has: page.locator(VARIANT_NO, { hasText: new RegExp(`^${wrong.option}$`) }) })
       .first()
       .click();
     check(
       (await waitRecord(
         page,
         trainer.scope,
-        (item) => item.ui?.z?.[item.ui.index ?? 0]?.v === wrong.option,
+        (item) => (item.ui?.z?.[item.ui.index ?? 0]?.v ?? item.ui?.value) === wrong.option,
       )) !== null,
       `${tag}: выбор варианта ${wrong.option} записан`,
     );
     await page.reload({ waitUntil: 'load' });
     await waitBar(page);
-    await page.locator(`${BODY} .popt`).first().waitFor({ state: 'visible' });
+    await page.locator(`${BODY} ${VARIANT}`).first().waitFor({ state: 'visible' });
     const shown = await shownAnswer(page, wrong);
     check(same(shown, wrong), `${tag}: после перезагрузки выбран тот же вариант (${shown.option})`);
   });
@@ -928,10 +1173,17 @@ async function pauza1Scenario() {
     await open(page, trainer.url);
     const record = await waitRecord(page, trainer.scope, () => true);
     if (!check(record !== null, `${tag}: перенесена в запись сессии`)) return;
-    check(record.payload.items.length === 3, `${tag}: три задания`);
-    check(record.payload.items[2]?.seed === 'старый', `${tag}: у новой задачи прежний seed`);
+    /* Запись — прежнего формата ({items}) или уже общего ({tasks}). */
+    const zadaniya = record.payload.items ?? record.payload.tasks;
+    check(zadaniya.length === 3, `${tag}: три задания`);
     check(
-      record.ui?.index === 1 && record.ui?.z?.[0]?.itog === 'right',
+      zadaniya[2]?.seed === 'старый' || zadaniya[2]?.id === 'p05|nстарый',
+      `${tag}: у новой задачи прежний seed`,
+    );
+    check(
+      /* Отметка — в общем поле marks: оно есть и в записи прежней панели
+         фильтров, и в записи общего тренажёра по банку. */
+      record.ui?.index === 1 && record.ui?.marks?.[0] === 'right',
       `${tag}: та же задача и отметка`,
     );
     check(
@@ -1083,7 +1335,7 @@ async function quotaScenario(trainer) {
       await give(page, { text: '987654' });
     } else {
       const like =
-        (await page.locator(`${BODY} .popt`).count()) > 0 ? { option: '' } : { method: '' };
+        (await page.locator(`${BODY} ${VARIANT}`).count()) > 0 ? { option: '' } : { method: '' };
       await give(page, await wrongOf(page, like));
     }
     await page.locator(`${BODY} [role="status"]`).first().waitFor({ state: 'visible' });
@@ -1122,7 +1374,7 @@ async function staleScenario(trainer) {
       }
       check(
         await page
-          .getByRole('button', { name: /^Начать тренировку/ })
+          .getByRole('button', { name: trainer.configButton ?? /^Начать тренировку/ })
           .first()
           .isVisible(),
         `${tag}: выбор тренировки доступен`,
@@ -1139,7 +1391,12 @@ async function restoreTiming(trainer) {
     const page = await newPage(context);
     await open(page, trainer.url);
     await trainer.all(page);
-    const record = await startRun(page, trainer, 120_000);
+    /* После выбора тем (общий тренажёр) — «Начать тренировку», а не карточка режима. */
+    const record = await startRun(
+      page,
+      trainer.all === chooseAll8 ? { ...trainer, start: pressStart } : trainer,
+      120_000,
+    );
     if (!check(record !== null, `${trainer.name}, «Все»: тренировка начата`)) {
       return;
     }

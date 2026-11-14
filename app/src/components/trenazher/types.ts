@@ -1,3 +1,4 @@
+import type { LogOutcome } from '@/lib/progressLog/model';
 import type { ComponentType } from 'react';
 import type { TrenPayload } from '@/lib/trenazher/sessiya';
 
@@ -61,7 +62,11 @@ export interface KartochkaRazdela<T> {
   estRazbor: (task: T) => boolean;
   Razbor: ComponentType<{ task: T }>;
   /** Записать закрытую задачу в статистику раздела. */
-  zapisat: (key: string, itog: { right: boolean; clean: boolean; sek: number }) => void;
+  zapisat: (
+    key: string,
+    /* ishod — точный исход для журнала попыток (lib/progressLog). */
+    itog: { right: boolean; clean: boolean; sek: number; ishod: LogOutcome },
+  ) => void;
 }
 
 /** Ссылки на теорию и опорные задачи типа: для итогов. */

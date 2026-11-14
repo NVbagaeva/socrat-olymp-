@@ -1,0 +1,398 @@
+/**
+ * Блок 07 «Приведение под квадратом»: формула приведения внутри
+ * квадрата — знак не важен, $(-a)^2=a^2$. Первая задача — с полным
+ * разбором (промежуток б свой), остальные — свои аналоги.
+ */
+
+import { cos, ctg, otrezok, PI, promezhutok, s, sin, sqrt, tg, u, ur, v } from '../dsl';
+import type { Zadacha14 } from '../tipy';
+
+export const ZADACHI_07: Zadacha14[] = [
+  ur({
+    id: 'z07-01',
+    iz: 'сторонний задачник',
+    uravnenie: '2\\sin^2\\left(\\dfrac{3\\pi}{2}+x\\right)=\\sqrt{3}\\cos x',
+    f: (x) => 2 * sin((3 * PI) / 2 + x) ** 2 - sqrt(3) * cos(x),
+    serii: [s(u(1, 2), 1), s(u(1, 6)), s(u(-1, 6))],
+    promezhutok: otrezok(u(2), u(7, 2)),
+    otbor: 'krug',
+    metody: ['privedenie-kvadrat', 'dvoynoy'],
+    reshenie: [
+      'Упрощаем $\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)$. К $x$ прибавлено $\\dfrac{3\\pi}{2}$, поэтому синус меняется на косинус: $\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)=\\pm\\cos x$.',
+      '**Знак здесь можно не выяснять.** Выражение стоит под квадратом, а $(-a)^2=a^2$: какой бы знак ни получился, после возведения в квадрат он пропадёт. Значит, $\\sin^2\\left(\\dfrac{3\\pi}{2}+x\\right)=\\cos^2 x$. (Для проверки: угол в IV четверти, синус там отрицателен, $\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)=-\\cos x$, и $(-\\cos x)^2=\\cos^2 x$.)',
+      'Уравнение принимает вид $2\\cos^2 x=\\sqrt{3}\\cos x\\ \\Leftrightarrow\\ 2\\cos^2 x-\\sqrt{3}\\cos x=0$.',
+      '**Не сокращай на $\\cos x$** — он может быть равен нулю, и серия $\\cos x=0$ потеряется. Выносим общий множитель: $\\cos x\\,(2\\cos x-\\sqrt{3})=0$.',
+      'Произведение равно нулю, когда один из множителей равен нулю, а оба множителя имеют смысл при любом $x$: $\\left[\\begin{aligned}&\\cos x=0,\\\\&\\cos x=\\dfrac{\\sqrt{3}}{2}.\\end{aligned}\\right.$',
+      '$\\cos x=0$ в точках $\\pm\\dfrac{\\pi}{2}$ — они противоположны, серия $x=\\dfrac{\\pi}{2}+\\pi k$. $\\cos x=\\dfrac{\\sqrt{3}}{2}$ при $x=\\pm\\dfrac{\\pi}{6}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'На какую функцию меняется $\\sin\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['На косинус', 'Остаётся синусом', 'На тангенс'],
+        0,
+        'Есть $\\dfrac{3\\pi}{2}$ — функция меняется.',
+      ),
+      v(
+        'Чему равно $\\sin^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['$\\cos^2 x$', '$-\\cos^2 x$', '$\\sin^2 x$'],
+        0,
+        'Минус под квадратом исчезает: $(-\\cos x)^2=\\cos^2 x$.',
+      ),
+      v(
+        'Что делать с $\\cos x$ в уравнении $2\\cos^2 x=\\sqrt{3}\\cos x$?',
+        [
+          'Перенести влево и вынести $\\cos x$',
+          'Сократить на $\\cos x$',
+          'Заменить $\\cos^2 x=1-\\sin^2 x$',
+        ],
+        0,
+        'Сокращение потеряет серию $x=\\dfrac{\\pi}{2}+\\pi k$.',
+      ),
+      v(
+        'Решения $\\cos x=0$:',
+        ['$x=\\dfrac{\\pi}{2}+\\pi k$', '$x=\\pi k$', '$x=\\dfrac{\\pi}{2}+2\\pi k$'],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z07-02',
+    iz: 'сторонний задачник',
+    uravnenie: '\\cos^2(\\pi-x)=\\dfrac{1}{2}+\\cos^2\\left(\\dfrac{3\\pi}{2}+x\\right)',
+    f: (x) => cos(PI - x) ** 2 - 0.5 - cos((3 * PI) / 2 + x) ** 2,
+    serii: [s(u(1, 6), 1), s(u(-1, 6), 1)],
+    promezhutok: otrezok(u(-2), u(-1, 2)),
+    otbor: 'nerav',
+    metody: ['privedenie-kvadrat', 'argument'],
+    reshenie: [
+      'Под квадратом знак не важен. $\\cos^2(\\pi-x)$: функция не меняется — $\\cos^2 x$. $\\cos^2\\left(\\dfrac{3\\pi}{2}+x\\right)$: косинус меняется на синус — $\\sin^2 x$.',
+      '$\\cos^2 x-\\sin^2 x=\\dfrac{1}{2}\\ \\Leftrightarrow\\ \\cos 2x=\\dfrac{1}{2}$.',
+      '$2x=\\pm\\dfrac{\\pi}{3}+2\\pi k$, $x=\\pm\\dfrac{\\pi}{6}+\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\cos^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['$\\sin^2 x$', '$-\\sin^2 x$', '$\\cos^2 x$'],
+        0,
+      ),
+      v(
+        'Что получится после приведения?',
+        ['$\\cos 2x=\\dfrac{1}{2}$', '$\\cos 2x=-\\dfrac{1}{2}$', '$1=\\dfrac{1}{2}$'],
+        0,
+        '$\\cos^2 x-\\sin^2 x=\\cos 2x$.',
+      ),
+      v(
+        'Серии для $x$:',
+        [
+          '$\\pm\\dfrac{\\pi}{6}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+        ],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z07-03',
+    iz: 'авторская',
+    uravnenie: '2\\sin^2(\\pi+x)=\\sqrt{2}\\sin x',
+    f: (x) => 2 * sin(PI + x) ** 2 - sqrt(2) * sin(x),
+    serii: [s(u(0), 1), s(u(1, 4)), s(u(3, 4))],
+    promezhutok: otrezok(u(1), u(5, 2)),
+    otbor: 'krug',
+    metody: ['privedenie-kvadrat', 'dvoynoy'],
+    reshenie: [
+      '$\\sin(\\pi+x)=-\\sin x$, но под квадратом минус исчезает: $\\sin^2(\\pi+x)=\\sin^2 x$.',
+      '$2\\sin^2 x-\\sqrt{2}\\sin x=0\\ \\Leftrightarrow\\ \\sin x\\,(2\\sin x-\\sqrt{2})=0$ — выносим, а не сокращаем.',
+      '$\\left[\\begin{aligned}&\\sin x=0,\\\\&\\sin x=\\dfrac{\\sqrt{2}}{2};\\end{aligned}\\right.$ $x=\\pi k$, $x=\\dfrac{\\pi}{4}+2\\pi k$, $x=\\dfrac{3\\pi}{4}+2\\pi k$.',
+    ],
+    podskazki: [
+      v('Чему равно $\\sin^2(\\pi+x)$?', ['$\\sin^2 x$', '$-\\sin^2 x$', '$\\cos^2 x$'], 0),
+      v(
+        'Разложение на множители:',
+        [
+          '$\\sin x\\,(2\\sin x-\\sqrt{2})=0$',
+          '$\\sin x\\,(2\\sin x+\\sqrt{2})=0$',
+          '$2\\sin x=\\sqrt{2}$',
+        ],
+        0,
+      ),
+      v(
+        'Решения $\\sin x=\\dfrac{\\sqrt{2}}{2}$:',
+        [
+          '$\\dfrac{\\pi}{4}+2\\pi k$ и $\\dfrac{3\\pi}{4}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+          '$\\dfrac{\\pi}{4}+\\pi k$',
+        ],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z07-04',
+    iz: 'авторская',
+    uravnenie: '4\\cos^2\\left(\\dfrac{\\pi}{2}+x\\right)=4\\cos x+1',
+    f: (x) => 4 * cos(PI / 2 + x) ** 2 - 4 * cos(x) - 1,
+    serii: [s(u(1, 3)), s(u(-1, 3))],
+    promezhutok: otrezok(u(-3), u(-1)),
+    otbor: 'nerav',
+    metody: ['privedenie-kvadrat', 'zamena-preobr'],
+    reshenie: [
+      'Косинус меняется на синус, знак под квадратом не важен: $\\cos^2\\left(\\dfrac{\\pi}{2}+x\\right)=\\sin^2 x=1-\\cos^2 x$.',
+      '$4-4\\cos^2 x=4\\cos x+1\\ \\Leftrightarrow\\ 4\\cos^2 x+4\\cos x-3=0$.',
+      'Замена $t=\\cos x$: $D=16+48=64$, $t=\\dfrac{1}{2}$ или $t=-\\dfrac{3}{2}$ (не подходит).',
+      '$\\cos x=\\dfrac{1}{2}$: $x=\\pm\\dfrac{\\pi}{3}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\cos^2\\left(\\dfrac{\\pi}{2}+x\\right)$?',
+        ['$\\sin^2 x$', '$-\\sin^2 x$', '$\\cos^2 x$'],
+        0,
+      ),
+      v(
+        'Корни $4t^2+4t-3=0$:',
+        ['$\\dfrac{1}{2}$ и $-\\dfrac{3}{2}$', '$-\\dfrac{1}{2}$ и $\\dfrac{3}{2}$', '$1$ и $-3$'],
+        0,
+      ),
+      v(
+        'Решения $\\cos x=\\dfrac{1}{2}$:',
+        [
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\dfrac{\\pi}{3}+\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Сколько корней на $[-3\\pi;\\,-\\pi]$?',
+        ['Два', 'Один', 'Три'],
+        0,
+        '$-\\dfrac{7\\pi}{3}$ и $-\\dfrac{5\\pi}{3}$.',
+      ),
+    ],
+  }),
+  ur({
+    id: 'z07-05',
+    iz: 'авторская',
+    uravnenie: '\\operatorname{tg}^2(\\pi-x)=1',
+    f: (x) => tg(PI - x) ** 2 - 1,
+    odz: (x) => Math.abs(cos(x)) > 1e-6,
+    serii: [s(u(1, 4), 1, 2)],
+    promezhutok: otrezok(u(1, 2), u(2)),
+    otbor: 'nerav',
+    metody: ['privedenie-kvadrat', 'obedinenie'],
+    reshenie: [
+      '$\\operatorname{tg}(\\pi-x)=-\\operatorname{tg} x$, а под квадратом минус пропадает: $\\operatorname{tg}^2 x=1$. ОДЗ: $\\cos x\\ne0$.',
+      '$\\operatorname{tg} x=\\pm1$: $x=\\pm\\dfrac{\\pi}{4}+\\pi k$. Четыре точки идут через $\\dfrac{\\pi}{2}$: $x=\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{2}$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\operatorname{tg}^2(\\pi-x)$?',
+        ['$\\operatorname{tg}^2 x$', '$-\\operatorname{tg}^2 x$', '$\\operatorname{ctg}^2 x$'],
+        0,
+      ),
+      v(
+        'Решения $\\operatorname{tg}^2 x=1$ одной серией:',
+        [
+          '$\\dfrac{\\pi}{4}+\\dfrac{\\pi k}{2}$',
+          '$\\dfrac{\\pi}{4}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{4}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Неравенство $\\dfrac{1}{2}\\le\\dfrac{1}{4}+\\dfrac{k}{2}\\le2$ даёт',
+        ['$k=1,\\,2,\\,3$', '$k=0,\\,1,\\,2,\\,3$', '$k=1,\\,2$'],
+        0,
+        '$\\dfrac{1}{2}\\le k\\le\\dfrac{7}{2}$.',
+      ),
+    ],
+  }),
+  ur({
+    id: 'z07-06',
+    iz: 'авторская',
+    uravnenie: '2\\cos^2\\left(\\dfrac{3\\pi}{2}-x\\right)+\\cos(\\pi+x)=1',
+    f: (x) => 2 * cos((3 * PI) / 2 - x) ** 2 + cos(PI + x) - 1,
+    serii: [s(u(1)), s(u(1, 3)), s(u(-1, 3))],
+    promezhutok: otrezok(u(-5, 2), u(-1)),
+    otbor: 'krug',
+    metody: ['privedenie-kvadrat', 'privedenie', 'zamena-preobr'],
+    reshenie: [
+      'Под квадратом знак не важен: $\\cos^2\\left(\\dfrac{3\\pi}{2}-x\\right)=\\sin^2 x$. А $\\cos(\\pi+x)$ стоит **без** квадрата — тут знак нужен: III четверть, косинус отрицателен, $-\\cos x$.',
+      '$2(1-\\cos^2 x)-\\cos x-1=0\\ \\Leftrightarrow\\ 2\\cos^2 x+\\cos x-1=0$.',
+      'Замена $t=\\cos x$: корни $t=\\dfrac{1}{2}$ и $t=-1$.',
+      '$\\cos x=-1$: $x=\\pi+2\\pi k$; $\\cos x=\\dfrac{1}{2}$: $x=\\pm\\dfrac{\\pi}{3}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Где знак формулы приведения важен?',
+        [
+          'В $\\cos(\\pi+x)$ — он без квадрата',
+          'В $\\cos^2\\left(\\dfrac{3\\pi}{2}-x\\right)$',
+          'Нигде',
+        ],
+        0,
+      ),
+      v('Чему равно $\\cos(\\pi+x)$?', ['$-\\cos x$', '$\\cos x$', '$-\\sin x$'], 0),
+      v(
+        'Корни $2t^2+t-1=0$:',
+        ['$\\dfrac{1}{2}$ и $-1$', '$-\\dfrac{1}{2}$ и $1$', '$1$ и $-\\dfrac{1}{2}$'],
+        0,
+      ),
+      v(
+        'Решения $\\cos x=-1$:',
+        ['$x=\\pi+2\\pi k$', '$x=\\pi k$', '$x=-\\dfrac{\\pi}{2}+2\\pi k$'],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z07-07',
+    iz: 'авторская',
+    uravnenie: '\\sin^2\\left(\\dfrac{\\pi}{2}+x\\right)=3\\sin^2(\\pi-x)',
+    f: (x) => sin(PI / 2 + x) ** 2 - 3 * sin(PI - x) ** 2,
+    serii: [s(u(1, 6), 1), s(u(-1, 6), 1)],
+    promezhutok: otrezok(u(1), u(5, 2)),
+    otbor: 'nerav',
+    metody: ['privedenie-kvadrat'],
+    reshenie: [
+      '$\\sin^2\\left(\\dfrac{\\pi}{2}+x\\right)=\\cos^2 x$, $\\sin^2(\\pi-x)=\\sin^2 x$.',
+      '$\\cos^2 x=3(1-\\cos^2 x)\\ \\Leftrightarrow\\ \\cos^2 x=\\dfrac{3}{4}\\ \\Leftrightarrow\\ \\cos x=\\pm\\dfrac{\\sqrt{3}}{2}$.',
+      'Четыре точки $\\pm\\dfrac{\\pi}{6}$, $\\pm\\dfrac{5\\pi}{6}$; противоположные объединяем: $x=\\pm\\dfrac{\\pi}{6}+\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\sin^2\\left(\\dfrac{\\pi}{2}+x\\right)$?',
+        ['$\\cos^2 x$', '$\\sin^2 x$', '$-\\cos^2 x$'],
+        0,
+      ),
+      v(
+        'Чему равно $\\cos^2 x$?',
+        ['$\\dfrac{3}{4}$', '$\\dfrac{1}{4}$', '$\\dfrac{1}{3}$'],
+        0,
+        '$4\\cos^2 x=3$.',
+      ),
+      v(
+        'Серии:',
+        [
+          '$\\pm\\dfrac{\\pi}{6}+\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+\\pi k$',
+        ],
+        0,
+      ),
+    ],
+  }),
+  ur({
+    id: 'z07-08',
+    iz: 'авторская',
+    uravnenie:
+      '\\operatorname{ctg}^2\\left(\\dfrac{3\\pi}{2}+x\\right)=\\sqrt{3}\\operatorname{tg}(\\pi+x)',
+    f: (x) => ctg((3 * PI) / 2 + x) ** 2 - sqrt(3) * tg(PI + x),
+    odz: (x) => Math.abs(cos(x)) > 1e-6,
+    serii: [s(u(0), 1), s(u(1, 3), 1)],
+    promezhutok: promezhutok(otrezok(u(-3, 2), u(0)), [true, false]),
+    otbor: 'krug',
+    metody: ['privedenie-kvadrat', 'dvoynoy'],
+    reshenie: [
+      '$\\operatorname{ctg}\\left(\\dfrac{3\\pi}{2}+x\\right)$: котангенс меняется на тангенс, под квадратом знак не важен — $\\operatorname{tg}^2 x$. $\\operatorname{tg}(\\pi+x)=\\operatorname{tg} x$. ОДЗ: $\\cos x\\ne0$.',
+      '$\\operatorname{tg}^2 x-\\sqrt{3}\\operatorname{tg} x=0\\ \\Leftrightarrow\\ \\operatorname{tg} x\\,(\\operatorname{tg} x-\\sqrt{3})=0$. Оба множителя определены на ОДЗ.',
+      '$\\left[\\begin{aligned}&\\operatorname{tg} x=0,\\\\&\\operatorname{tg} x=\\sqrt{3};\\end{aligned}\\right.$ $x=\\pi k$, $x=\\dfrac{\\pi}{3}+\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\operatorname{ctg}^2\\left(\\dfrac{3\\pi}{2}+x\\right)$?',
+        ['$\\operatorname{tg}^2 x$', '$\\operatorname{ctg}^2 x$', '$-\\operatorname{tg}^2 x$'],
+        0,
+      ),
+      v(
+        'Что делать с $\\operatorname{tg} x$?',
+        [
+          'Вынести за скобки',
+          'Сократить на него',
+          'Заменить на $\\dfrac{1}{\\operatorname{ctg} x}$',
+        ],
+        0,
+        'Сократив, потеряем серию $x=\\pi k$.',
+      ),
+      v('Входит ли $x=0$ в ответ пункта б?', ['Нет, правый конец $0$ не входит', 'Да'], 0),
+    ],
+  }),
+  ur({
+    id: 'z07-09',
+    iz: 'авторская',
+    uravnenie: '\\cos^2(\\pi-x)=\\cos(\\pi-x)',
+    f: (x) => cos(PI - x) ** 2 - cos(PI - x),
+    serii: [s(u(1, 2), 1), s(u(1))],
+    promezhutok: otrezok(u(-5, 2), u(-1)),
+    otbor: 'nerav',
+    metody: ['privedenie-kvadrat', 'privedenie'],
+    reshenie: [
+      'Слева квадрат: $\\cos^2(\\pi-x)=\\cos^2 x$. Справа квадрата нет, знак важен: $\\cos(\\pi-x)=-\\cos x$.',
+      '$\\cos^2 x=-\\cos x\\ \\Leftrightarrow\\ \\cos x\\,(\\cos x+1)=0$.',
+      '$\\left[\\begin{aligned}&\\cos x=0,\\\\&\\cos x=-1;\\end{aligned}\\right.$ $x=\\dfrac{\\pi}{2}+\\pi k$, $x=\\pi+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Как упростить уравнение?',
+        ['$\\cos^2 x=-\\cos x$', '$\\cos^2 x=\\cos x$', '$-\\cos^2 x=-\\cos x$'],
+        0,
+        'Справа знак не пропадает.',
+      ),
+      v(
+        'Разложение:',
+        ['$\\cos x\\,(\\cos x+1)=0$', '$\\cos x\\,(\\cos x-1)=0$', '$\\cos x+1=0$'],
+        0,
+      ),
+      v(
+        'Сколько корней на $\\left[-\\dfrac{5\\pi}{2};\\,-\\pi\\right]$?',
+        ['Три', 'Два', 'Четыре'],
+        0,
+        '$-\\dfrac{5\\pi}{2}$, $-\\dfrac{3\\pi}{2}$, $-\\pi$.',
+      ),
+    ],
+  }),
+  ur({
+    id: 'z07-10',
+    iz: 'авторская',
+    uravnenie: '2\\sin^2\\left(\\dfrac{3\\pi}{2}-x\\right)=3\\sin(\\pi-x)',
+    f: (x) => 2 * sin((3 * PI) / 2 - x) ** 2 - 3 * sin(PI - x),
+    serii: [s(u(1, 6)), s(u(5, 6))],
+    promezhutok: otrezok(u(-4), u(-3, 2)),
+    otbor: 'nerav',
+    metody: ['privedenie-kvadrat', 'zamena-preobr'],
+    reshenie: [
+      '$\\sin^2\\left(\\dfrac{3\\pi}{2}-x\\right)=\\cos^2 x$ (под квадратом знак не важен); $\\sin(\\pi-x)=\\sin x$.',
+      '$2(1-\\sin^2 x)=3\\sin x\\ \\Leftrightarrow\\ 2\\sin^2 x+3\\sin x-2=0$.',
+      'Замена $t=\\sin x$: $t=\\dfrac{1}{2}$ или $t=-2$ (не подходит).',
+      '$\\sin x=\\dfrac{1}{2}$: $x=\\dfrac{\\pi}{6}+2\\pi k$, $x=\\dfrac{5\\pi}{6}+2\\pi k$.',
+    ],
+    podskazki: [
+      v(
+        'Чему равно $\\sin^2\\left(\\dfrac{3\\pi}{2}-x\\right)$?',
+        ['$\\cos^2 x$', '$-\\cos^2 x$', '$\\sin^2 x$'],
+        0,
+      ),
+      v(
+        'Какое квадратное уравнение получится для $t=\\sin x$?',
+        ['$2t^2+3t-2=0$', '$2t^2-3t-2=0$', '$2t^2+3t+2=0$'],
+        0,
+      ),
+      v(
+        'Решения $\\sin x=\\dfrac{1}{2}$:',
+        [
+          '$\\dfrac{\\pi}{6}+2\\pi k$ и $\\dfrac{5\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{6}+2\\pi k$',
+          '$\\pm\\dfrac{\\pi}{3}+2\\pi k$',
+        ],
+        0,
+      ),
+      v(
+        'Сколько корней на $\\left[-4\\pi;\\,-\\dfrac{3\\pi}{2}\\right]$?',
+        ['Три', 'Два', 'Четыре'],
+        0,
+        '$-\\dfrac{23\\pi}{6}$, $-\\dfrac{19\\pi}{6}$, $-\\dfrac{11\\pi}{6}$.',
+      ),
+    ],
+  }),
+];

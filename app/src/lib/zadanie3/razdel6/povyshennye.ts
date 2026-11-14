@@ -58,8 +58,7 @@ export const PV03_SHAR_POVERHNOST: Prototype = {
       ? `Сечение шара плоскостью, проходящей через его центр, имеет площадь ${ru(num(p, 'S'))}. Найдите площадь поверхности шара.`
       : `Радиус одного шара ${vRaz(num(p, 'k'))} больше радиуса другого. Во сколько раз площадь поверхности большего шара больше площади поверхности меньшего?`,
   dopustimo: (p) => (num(p, 'vid') === 0 ? num(p, 'S') > 0 : num(p, 'k') > 1),
-  otvet: (p) =>
-    Math.round((num(p, 'vid') === 0 ? 4 * num(p, 'S') : num(p, 'k') ** 2) * 1e9) / 1e9,
+  otvet: (p) => Math.round((num(p, 'vid') === 0 ? 4 * num(p, 'S') : num(p, 'k') ** 2) * 1e9) / 1e9,
   poModeli: (p) => {
     const q =
       num(p, 'vid') === 0

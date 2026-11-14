@@ -1,0 +1,1392 @@
+/* Демо оформления задания №8 (/styleguide/zadanie-8/) — «Стеклянная сцена».
+   Всё под .d8; значения — токены сайта (styles/tokens.css). Варианты:
+   .d8--a «Витрина» и .d8--b «Маршрут». */
+
+.d8 {
+  --d8-r-card: 20px;
+  --d8-r-control: 14px;
+  --d8-green: var(--emerald-600);
+  --d8-green-soft: var(--emerald-50);
+  --d8-green-border: var(--emerald-200);
+  display: grid;
+  gap: var(--space-6);
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-16);
+  color: var(--color-text);
+}
+.d8 *,
+.d8 *::before,
+.d8 *::after {
+  box-sizing: border-box;
+}
+.d8 ul,
+.d8 ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.d8 p {
+  margin: 0;
+}
+
+/* Одна рецептура стекла на все поверхности. */
+.d8-glass {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--d8-r-card);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+
+/* Тона групп: синий, тёмно-синий, оранжевый, терракотовый. */
+.d8-znak--blue,
+.d8-gruppa--blue,
+.d8-ramka--blue {
+  --ton: var(--blue-600);
+  --ton-soft: var(--blue-100);
+  --ton-border: var(--blue-200);
+  --ton-text: var(--blue-700);
+}
+.d8-znak--navy,
+.d8-gruppa--navy,
+.d8-ramka--navy {
+  --ton: var(--navy-700);
+  --ton-soft: var(--blue-glass-2);
+  --ton-border: var(--blue-300);
+  --ton-text: var(--navy-800);
+}
+.d8-znak--orange,
+.d8-gruppa--orange,
+.d8-ramka--orange {
+  --ton: var(--amber-600);
+  --ton-soft: var(--amber-50);
+  --ton-border: var(--cream-200);
+  --ton-text: var(--amber-700);
+}
+.d8-znak--terra,
+.d8-gruppa--terra,
+.d8-ramka--terra {
+  --ton: var(--terracotta);
+  --ton-soft: var(--terracotta-50);
+  --ton-border: var(--terracotta-200);
+  --ton-text: var(--terracotta-700);
+}
+
+/* ── Типографика ─────────────────────────────────────────────── */
+.d8-razdel {
+  margin: var(--space-8) 0 0;
+  font-size: var(--fs-h3);
+  line-height: 1.2;
+  font-weight: 620;
+  letter-spacing: -0.015em;
+}
+.d8-h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.125rem);
+  line-height: 1.15;
+  font-weight: 620;
+  letter-spacing: -0.018em;
+}
+.d8-h3 {
+  margin: 0;
+  font-size: 1.375rem;
+  line-height: 1.25;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.d8-h4 {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+  font-weight: 600;
+}
+.d8-nad {
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-700);
+}
+.d8-lead {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+.d8-podpis {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.d8-snoska {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Служебное: навигация демо и кадры ───────────────────────── */
+.d8-demo-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.d8-demo-nav__zag {
+  margin-right: auto;
+  font-weight: 600;
+}
+.d8-demo-nav__ssylka {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring);
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.d8-demo-nav__ssylka.is-on {
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  color: var(--white);
+}
+.d8-demo-lead {
+  max-width: 68ch;
+  color: var(--color-text-secondary);
+}
+.d8-kadr {
+  display: grid;
+  gap: var(--space-4);
+  scroll-margin-top: 96px;
+}
+.d8-kadr__metka {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+.d8-kadr__metka::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ── Кнопки, метки, чипы ─────────────────────────────────────── */
+.d8-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--d8-r-control);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+.d8-btn--lg {
+  min-height: 52px;
+  padding: 0 var(--space-6);
+  font-size: 16px;
+}
+.d8-btn--primary {
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  color: var(--white);
+}
+.d8-btn--warm {
+  background: var(--gloss-warm);
+  box-shadow: var(--gloss-warm-shadow-soft);
+  color: var(--white);
+}
+.d8-btn--tihaya {
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+}
+.d8-btn:hover {
+  transform: translateY(-1px);
+}
+.d8-btn .d8-ico {
+  width: 20px;
+  height: 20px;
+}
+.d8-ssylka {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--blue-700);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+}
+.d8-knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.d8-metka {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.d8-metka--terra {
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+}
+.d8-shevron {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin: 0 var(--space-1);
+  border-right: 2px solid var(--color-text-tertiary);
+  border-bottom: 2px solid var(--color-text-tertiary);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 200ms ease;
+}
+details[open] > summary .d8-shevron {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+.d8 summary {
+  list-style: none;
+  cursor: pointer;
+}
+.d8 summary::-webkit-details-marker {
+  display: none;
+}
+.d8-kruglaya {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  cursor: pointer;
+}
+.d8-kruglaya--tihaya {
+  background: none;
+  box-shadow: none;
+  color: var(--color-text-tertiary);
+}
+.d8-kruglaya .d8-ico {
+  width: 20px;
+  height: 20px;
+}
+
+/* Значок группы: формула в стеклянном круге. */
+.d8-znak {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--white), var(--ton-soft));
+  box-shadow:
+    inset 0 0 0 1px var(--ton-border),
+    var(--glass-hi),
+    0 8px 16px -10px var(--ton);
+  color: var(--ton-text);
+  font-size: 0.8125rem;
+}
+.d8-znak--sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  font-size: 0.5625rem;
+}
+.d8-znak .katex {
+  font-size: 1.15em;
+}
+
+/* Полоса доли верных. */
+.d8-polosa {
+  display: block;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  overflow: hidden;
+}
+.d8-polosa > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue-600);
+}
+.d8-polosa--terra > span {
+  background: var(--terracotta);
+}
+.d8-polosa--green > span {
+  background: var(--d8-green);
+}
+
+/* ── Шапка «О задании» ───────────────────────────────────────── */
+.d8-shapka {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  background: var(--glass-tint-blue);
+}
+.d8-shapka__text {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 60ch;
+}
+.d8-fakty {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.d8-fakt {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3);
+  border-radius: var(--d8-r-control);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.d8-fakt b {
+  font-size: 1.625rem;
+  line-height: 1.1;
+  font-weight: 640;
+  font-variant-numeric: tabular-nums;
+  color: var(--blue-700);
+}
+.d8-fakt span {
+  font-size: var(--fs-label);
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+}
+.d8-opasno {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--d8-r-control);
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi);
+}
+.d8-opasno__zag {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--terracotta-700);
+}
+.d8-opasno ul {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
+  line-height: 1.45;
+}
+.d8-opasno li {
+  position: relative;
+  padding-left: var(--space-4);
+}
+.d8-opasno li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--terracotta);
+}
+
+/* ── Группы и типы ───────────────────────────────────────────── */
+.d8-gruppy {
+  display: grid;
+  gap: var(--space-3);
+}
+.d8-gruppa {
+  overflow: hidden;
+}
+.d8-gruppa__summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: 72px;
+  padding: var(--space-4);
+}
+.d8-gruppa__text {
+  display: grid;
+  gap: 2px;
+}
+.d8-gruppa__nazvanie {
+  font-size: var(--fs-lg);
+  line-height: 1.25;
+  font-weight: 620;
+}
+.d8-gruppa__tipov {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.d8-gruppa__summary > .d8-shevron {
+  grid-column: 3;
+  grid-row: 1;
+}
+.d8-gruppa__progress {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+.d8-gruppa__schet {
+  grid-column: 1 / -1;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.d8-tipy {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+}
+.d8-tip {
+  border-radius: var(--d8-r-control);
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: var(--glass-ring);
+}
+.d8-tip[open] {
+  background: var(--white);
+  box-shadow:
+    inset 0 0 0 1.5px var(--ton-border),
+    var(--shadow-sm);
+}
+.d8-tip__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
+}
+.d8-tip__nazvanie {
+  flex: 1;
+  min-width: 0;
+  font-weight: 550;
+  line-height: 1.35;
+}
+.d8-tip__kod {
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Разобранный пример и шаги решения. */
+.d8-primer {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4) var(--space-4);
+}
+.d8-primer__metka {
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ton-text, var(--blue-700));
+}
+.d8-uslovie {
+  font-size: clamp(1.125rem, 0.95rem + 0.9vw, 1.5rem);
+  line-height: 1.6;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.d8-uslovie--sm {
+  font-size: var(--fs-lg);
+}
+.d8-uslovie .katex {
+  font-size: 1.12em;
+}
+.d8-shagi {
+  display: grid;
+  gap: var(--space-3);
+  counter-reset: shag;
+}
+.d8-shag {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  padding-left: 44px;
+  counter-increment: shag;
+}
+.d8-shag::before {
+  content: counter(shag);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.d8-shag:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 32px;
+  bottom: -8px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--blue-100);
+}
+.d8-shag__chto {
+  padding-top: 3px;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.d8-shag__formula {
+  padding: var(--space-3) var(--space-4);
+  border-radius: 12px;
+  background: var(--blue-50);
+  font-size: var(--fs-lg);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.d8-sovet {
+  padding: var(--space-3) var(--space-4);
+  border-radius: 12px;
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.d8-sovet b {
+  color: var(--terracotta-700);
+}
+.d8-otvet {
+  font-size: var(--fs-lg);
+}
+.d8-otvet b {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 2px var(--space-3);
+  border-radius: 10px;
+  background: var(--d8-green-soft);
+  box-shadow: inset 0 0 0 1px var(--d8-green-border);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── «Что нужно знать» ───────────────────────────────────────── */
+.d8-znat {
+  display: grid;
+  gap: var(--space-5);
+}
+.d8-znat__setka {
+  display: grid;
+  gap: var(--space-5);
+}
+.d8-ramka {
+  position: relative;
+  padding: var(--space-6) var(--space-4) var(--space-4);
+  border: 1.5px solid var(--ton-border);
+  border-radius: var(--d8-r-card);
+  background: linear-gradient(160deg, var(--white), var(--ton-soft));
+}
+.d8-ramka__plashka {
+  position: absolute;
+  top: -13px;
+  left: var(--space-4);
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--ton);
+  color: var(--white);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+}
+.d8-ramka__spisok {
+  display: grid;
+  gap: var(--space-3);
+}
+.d8-ramka__spisok li {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.85);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.d8-ramka__formula {
+  font-size: var(--fs-lg);
+}
+.d8-ramka__primer {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.d8-ramka__primer i {
+  font-style: normal;
+  color: var(--ton-text);
+  font-weight: 600;
+}
+.d8-svernut > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+}
+.d8-delimost {
+  display: grid;
+  gap: 1px;
+  padding: 0 var(--space-4) var(--space-4);
+}
+.d8-delimost li {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 2px var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.9375rem;
+}
+.d8-delimost i {
+  grid-column: 2;
+  font-style: normal;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Тренажёр: режимы ────────────────────────────────────────── */
+.d8-rezhimy {
+  display: grid;
+  gap: var(--space-3);
+}
+.d8-rezhim {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 88px;
+  padding: var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.d8-rezhim:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.d8-rezhim__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  color: var(--white);
+  font-weight: 700;
+}
+.d8-rezhim--terra {
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow-warm);
+}
+.d8-rezhim--terra .d8-rezhim__ico {
+  background: var(--gloss-warm);
+  box-shadow: var(--gloss-warm-shadow-soft);
+}
+.d8-rezhim__text {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.d8-rezhim__text b {
+  font-size: var(--fs-lg);
+  line-height: 1.25;
+  font-weight: 620;
+}
+.d8-rezhim__text span {
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+.d8-rezhim__strelka {
+  color: var(--color-text-tertiary);
+}
+
+/* ── Тренажёр: выбор тем ─────────────────────────────────────── */
+.d8-vybor {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+.d8-vybor__verh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.d8-chipy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.d8-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  cursor: pointer;
+}
+.d8-chip.is-on {
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  color: var(--white);
+}
+.d8-chip__n {
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: var(--fs-label);
+  font-weight: 700;
+}
+.d8-chip.is-on .d8-chip__n {
+  background: rgb(255 255 255 / 0.22);
+  color: var(--white);
+}
+.d8-chip--tip {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 14px;
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  text-align: left;
+}
+.d8-chip--tip.is-on {
+  background: var(--blue-100);
+  box-shadow: inset 0 0 0 1.5px var(--blue-500);
+  color: var(--blue-800);
+}
+.d8-stroki {
+  display: grid;
+  gap: var(--space-2);
+}
+.d8-stroka {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--d8-r-control);
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: var(--glass-ring);
+}
+.d8-stroka.is-on {
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--blue-300);
+}
+.d8-stroka__gruppa {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.d8-stroka__gruppa b {
+  flex: 1;
+  font-weight: 600;
+}
+.d8-galka {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1.5px var(--color-border-strong);
+}
+.d8-stroka.is-on .d8-galka {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5 10.5 17 18 8'/%3E%3C/svg%3E")
+      center / 16px no-repeat,
+    var(--gloss);
+  box-shadow: none;
+}
+.d8-stroka .d8-chipy {
+  padding: 0 var(--space-2) var(--space-2) 42px;
+}
+.d8-nastroyki {
+  display: grid;
+  gap: var(--space-4);
+}
+.d8-nastroyki > div {
+  display: grid;
+  gap: var(--space-2);
+}
+.d8-seg {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 4px;
+  border-radius: var(--d8-r-control);
+  background: var(--blue-100);
+}
+.d8-seg button {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.d8-seg button.is-on {
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+  font-weight: 650;
+}
+.d8-vybor__niz {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.d8-vybor__itog {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+.d8-vybor__itog b {
+  color: var(--color-text);
+}
+
+/* ── Экран задачи ────────────────────────────────────────────── */
+.d8-ekran {
+  display: grid;
+  gap: var(--space-3);
+}
+.d8-panel {
+  display: grid;
+  gap: var(--space-2);
+}
+.d8-panel__polosa {
+  display: block;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  overflow: hidden;
+}
+.d8-panel__polosa > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gloss);
+}
+.d8-panel__ryad {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 44px;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.d8-panel__schet b {
+  color: var(--color-text);
+  font-size: var(--fs-lg);
+}
+.d8-panel__vremya {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.d8-panel__vremya .d8-ico {
+  width: 18px;
+  height: 18px;
+}
+.d8-panel__knopki {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+.d8-ekran__telo {
+  display: grid;
+  gap: var(--space-3);
+}
+.d8-zadacha {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-6);
+}
+.d8-zadacha__verh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.d8-otvetnaya {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+.d8-pole {
+  display: grid;
+  gap: var(--space-2);
+}
+.d8-pole__ryad {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+}
+.d8-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--d8-r-control);
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--color-border-strong);
+  color: var(--color-text);
+  font: inherit;
+  /* 20px: iOS не приближает страницу при фокусе (порог — 16px). */
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.d8-input:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 2px var(--blue-600),
+    0 0 0 4px var(--blue-100);
+}
+.d8-ekran--verno .d8-input {
+  box-shadow: inset 0 0 0 2px var(--d8-green);
+}
+.d8-ekran--neverno .d8-input {
+  box-shadow: inset 0 0 0 2px var(--terracotta);
+}
+.d8-podskazka-knopka {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--amber-50);
+  color: var(--amber-700);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.d8-podskazka-knopka .d8-ico,
+.d8-podskazka .d8-ico {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.d8-podskazka {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--d8-r-control);
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi);
+  color: var(--amber-700);
+  line-height: 1.45;
+}
+.d8-podskazka span {
+  color: var(--color-text);
+}
+.d8-verdikt {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--d8-r-control);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  animation: d8-poyavlenie 260ms ease both;
+}
+.d8-verdikt--da {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(214 242 230 / 0.8));
+  box-shadow:
+    0 0 0 1px var(--d8-green-border),
+    var(--glass-hi);
+}
+.d8-verdikt--net {
+  background: var(--glass-tint-warm);
+  box-shadow:
+    0 0 0 1px var(--terracotta-200),
+    var(--glass-hi);
+}
+.d8-verdikt__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--white);
+}
+.d8-verdikt--da .d8-verdikt__ico {
+  background: var(--d8-green);
+}
+.d8-verdikt--net .d8-verdikt__ico {
+  background: var(--gloss-warm);
+}
+.d8-verdikt__ico .d8-ico {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.6;
+}
+.d8-verdikt__text {
+  display: grid;
+  gap: 2px;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.d8-verdikt__text > b {
+  font-size: var(--fs-lg);
+}
+.d8-verdikt--da .d8-verdikt__text > b {
+  color: #06704f;
+}
+.d8-verdikt--net .d8-verdikt__text > b {
+  color: var(--terracotta-700);
+}
+.d8-reshenie {
+  display: grid;
+  gap: var(--space-3);
+}
+.d8-knopki--posle .d8-btn--primary {
+  flex: 1 1 100%;
+}
+.d8-knopki--posle .d8-btn--tihaya {
+  flex: 1;
+}
+@keyframes d8-poyavlenie {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ── Итоги ───────────────────────────────────────────────────── */
+.d8-itogi {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-4);
+}
+.d8-itogi__glavnoe {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.d8-itogi__schet {
+  flex: none;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: conic-gradient(var(--blue-600) 70%, var(--blue-100) 0);
+  position: relative;
+  isolation: isolate;
+}
+.d8-itogi__schet::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  z-index: -1;
+  border-radius: 50%;
+  background: var(--white);
+}
+.d8-itogi__schet b {
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 650;
+}
+.d8-itogi__schet span {
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.d8-razbivka {
+  display: grid;
+  gap: var(--space-2);
+}
+.d8-razbivka li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--d8-r-control);
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: var(--glass-ring);
+}
+.d8-razbivka li.is-slabo {
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm);
+}
+.d8-razbivka__nazvanie {
+  font-weight: 600;
+}
+.d8-razbivka__schet {
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+.d8-razbivka .d8-polosa {
+  grid-column: 2 / -1;
+  grid-row: 2;
+}
+.d8-razbivka .d8-metka {
+  grid-column: 2 / -1;
+  justify-self: start;
+}
+.d8-razbivka--plotno {
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+/* ── Вариант Б «Маршрут»: плотный список с направляющей ──────── */
+.d8--b .d8-gruppa {
+  border-left: 5px solid var(--ton);
+  border-radius: 16px;
+}
+.d8--b .d8-gruppa .d8-znak {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 0.6875rem;
+}
+.d8--b .d8-tipy {
+  gap: 0;
+  padding: 0 var(--space-4) var(--space-2);
+}
+.d8--b .d8-tip {
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-top: 1px solid var(--color-border);
+}
+.d8--b .d8-tip[open] {
+  background: none;
+  box-shadow: none;
+}
+.d8--b .d8-tip__summary {
+  padding: var(--space-2) 0;
+}
+.d8--b .d8-tip__summary::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ton);
+}
+.d8--b .d8-primer {
+  padding: var(--space-2) 0 var(--space-4);
+}
+.d8--b .d8-shapka {
+  background: var(--glass-bg-strong);
+  border-top: 4px solid var(--blue-600);
+}
+.d8--b .d8-fakty {
+  display: flex;
+  flex-wrap: wrap;
+}
+.d8--b .d8-fakt {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+}
+.d8--b .d8-fakt b {
+  font-size: var(--fs-lg);
+}
+.d8--b .d8-ramka {
+  border-width: 0 0 0 5px;
+  border-color: var(--ton);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+  padding-top: var(--space-4);
+}
+.d8--b .d8-ramka__plashka {
+  position: static;
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  padding: 0;
+  background: none;
+  color: var(--ton-text);
+  font-size: var(--fs-body);
+}
+.d8--b .d8-ramka__spisok li {
+  padding: var(--space-2) 0;
+  border-radius: 0;
+  background: none;
+  border-top: 1px solid var(--color-border);
+}
+.d8--b .d8-rezhim__ico {
+  border-radius: 50%;
+}
+
+/* ── Широкие экраны ──────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .d8 {
+    padding: var(--space-8) var(--space-8) var(--space-16);
+  }
+  .d8-shapka {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    align-items: start;
+    padding: var(--space-8);
+  }
+  .d8-shapka__text {
+    grid-row: span 2;
+  }
+  .d8-gruppa__summary {
+    grid-template-columns: auto minmax(0, 1fr) minmax(200px, 260px) auto;
+    padding: var(--space-4) var(--space-5);
+  }
+  .d8-gruppa__summary > .d8-shevron {
+    grid-column: auto;
+  }
+  .d8-gruppa__progress {
+    grid-column: auto;
+  }
+  .d8-primer {
+    padding: var(--space-3) var(--space-6) var(--space-6);
+    max-width: 760px;
+  }
+  .d8-znat__setka {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .d8-vybor,
+  .d8-otvetnaya,
+  .d8-itogi {
+    padding: var(--space-6);
+  }
+  .d8-zadacha {
+    padding: var(--space-5) var(--space-6) var(--space-8);
+  }
+  .d8-nastroyki {
+    grid-template-columns: repeat(2, max-content);
+    gap: var(--space-8);
+  }
+  .d8-vybor__niz {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .d8-knopki--posle .d8-btn--primary,
+  .d8-knopki--posle .d8-btn--tihaya {
+    flex: 0 0 auto;
+  }
+  .d8-razbivka li {
+    grid-template-columns: auto minmax(120px, 220px) minmax(0, 1fr) auto auto;
+  }
+  .d8-razbivka .d8-polosa,
+  .d8-razbivka .d8-metka {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  /* А: режимы — три вертикальные карточки, задача — одна колонка по центру. */
+  .d8--a .d8-rezhimy {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .d8--a .d8-rezhim {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-6);
+  }
+  .d8--a .d8-rezhim__strelka {
+    display: none;
+  }
+  .d8--a .d8-tipy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    padding: 0 var(--space-5) var(--space-5);
+  }
+  .d8--a .d8-tip[open] {
+    grid-column: 1 / -1;
+  }
+  .d8--a .d8-ekran {
+    max-width: 760px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .d8--a .d8-zadacha {
+    text-align: center;
+  }
+  .d8--a .d8-uslovie {
+    padding: var(--space-4) 0;
+  }
+}
+@media (min-width: 1024px) {
+  /* Б: условие слева, панель ответа справа. */
+  .d8--b .d8-ekran__telo {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .d8--b .d8-rezhimy {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .d8--a .d8-znat__setka {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .d8 *,
+  .d8 *::before,
+  .d8 *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

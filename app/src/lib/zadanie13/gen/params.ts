@@ -9,7 +9,12 @@
 
 import { VIDY_13, type Vid13 } from '@/content/generator13';
 import { UROKI_13, type Urok13 } from '@/content/repetitory13';
-import { razobratSostav, slotySostava, sostavStroka } from '@/lib/generator/obshchiy/klyuchi';
+import {
+  razobratSostav,
+  slotySostava,
+  sostavStroka,
+  ZADACH_NA_LIST_MAX,
+} from '@/lib/generator/obshchiy/klyuchi';
 import { BANK_13 } from '../bank';
 
 /** Прототипы движка: у каждого задачи в банке — так модуль остаётся без движка. */
@@ -184,7 +189,7 @@ function queryPoKlyucham13(p: GenParams13, klyuchi: GenParams13['klyuchi'] & obj
   return q.toString();
 }
 
-const ZAMENA_PS2_RE = new RegExp(`^\\d\\.(?:${PODTIP_RE_13.source})_\\d{1,2}$`);
+const ZAMENA_PS2_RE = new RegExp(`^\\d\\.(?:${PODTIP_RE_13.source})_\\d{1,3}$`);
 
 /** Адрес → параметры. Непонятное — по умолчанию; лишнее отбрасывается. */
 export function parseGenQuery13(
@@ -196,7 +201,7 @@ export function parseGenQuery13(
     const [id, n] = part.split(':');
     const vid = VIDY_13.find((v) => v.id === id);
     const k = Number(n);
-    if (vid && Number.isInteger(k) && k > 0) sostav[vid.id] = Math.min(k, vid.max);
+    if (vid && Number.isInteger(k) && k > 0) sostav[vid.id] = Math.min(k, ZADACH_NA_LIST_MAX);
   }
   const zameny: Record<string, number> = {};
   for (const part of (q.get('z') ?? '').split(',')) {

@@ -2,14 +2,14 @@
  * Адаптер задания №8: банк тренажёра (BANK, 10 seed на прототип) и
  * новые задачи того же прототипа, когда банк в партии кончился.
  * Задачу считает движок раздела `generate(прототип, seed, уровень)`,
- * решение учителя — шаги листа №8 (`razborStepsHtml`, sheet8.ts).
+ * решение учителя — шаги листа №8 (`razborStepsHtml`, razbor.ts).
  */
 
 import { typeset } from '@/lib/tex';
 import { BANK } from '@/lib/vychisleniya/bank';
 import { generate, hasLevel } from '@/lib/vychisleniya/generate';
 import { prototypeById } from '@/lib/vychisleniya/prototypes';
-import { razborStepsHtml } from '@/lib/vychisleniya/sheet8';
+import { asStepLike, razborStepsHtml } from '@/lib/vychisleniya/razbor';
 import type { Level } from '@/lib/vychisleniya/types';
 import type { SectionAdapter, SectionModule, Stars, VariantTask } from '../../types';
 import {
@@ -84,7 +84,7 @@ function build(c: C8, isNew: boolean): VariantTask | null {
     return null;
   }
   const otvet = answerHtml(t.otvet);
-  const steps = razborStepsHtml(t.razbor);
+  const steps = razborStepsHtml(t.razbor, t.delimost);
   return {
     egeNumber: 8,
     taskId: c.taskId,
@@ -101,10 +101,8 @@ function build(c: C8, isNew: boolean): VariantTask | null {
     answer: answerText(t.otvet),
     answerHtml: otvet,
     solutionTeacher: steps + razborAnswer(otvet),
-    /* Ученику — те же строки разбора раздела: пояснений словами у
-       шагов №8 нет, есть только выкладки. */
-    solutionStudent:
-      studentFromSteps([{ title: 'Преобразуем и считаем', lines: t.razbor }]) + razborAnswer(otvet),
+    /* Ученику — те же шаги: подпись «что делаем и почему» и выкладка. */
+    solutionStudent: studentFromSteps(asStepLike(t.razbor)) + razborAnswer(otvet),
     fallbacks: [FALLBACK.studentFromTeacher],
     ref: { prototype: c.prototypeId, seed: c.seed, level: c.level ?? 'any' },
   };

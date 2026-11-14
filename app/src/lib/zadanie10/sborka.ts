@@ -29,6 +29,7 @@ import {
   type ShapkaBanka,
   type ZaprosBanka,
 } from '../generator/obshchiy/bank';
+import { ZADACH_NA_LIST_MAX } from '@/lib/generator/obshchiy/klyuchi';
 import type { IndeksZadachi } from './dannye';
 
 /* ── Общее ──────────────────────────────────────────────────────── */
@@ -117,7 +118,8 @@ export interface ZaprosLista {
 }
 
 export const VARIANTOV_MAX = 6;
-export const NA_TIP_MAX = 6;
+/** Задач одного прототипа в адресе — общая страховка генератора, не ограничение. */
+export const NA_TIP_MAX = ZADACH_NA_LIST_MAX;
 
 export interface ModelLista {
   vid: 'generator' | 'urok';

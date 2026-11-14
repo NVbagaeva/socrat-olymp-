@@ -4,6 +4,7 @@ import { Component, useCallback, useEffect, useLayoutEffect, useRef, useState } 
 import type { ErrorInfo, ReactNode } from 'react';
 import { Button, Modal } from '@/components/ui';
 import { ErrorFallback } from '@/components/ErrorFallback';
+import { recordHistory } from '@/lib/istoriya';
 import { reportTrainerFinished } from '@/lib/kabinet/trainerSync';
 import { isBaseUi, normalizeBase } from '@/lib/trainerSession/restore';
 import {
@@ -83,6 +84,8 @@ export interface SummaryOptions {
   hintedLabel?: string;
   /** Свой блок под общими строками итогов: рекомендации, ссылки на теорию. */
   extra?: (data: SummaryData) => ReactNode;
+  /** Строка «Просели: …» — типы с ошибками и подсказками. */
+  showWeak?: boolean;
 }
 
 export interface ConfiguratorApi<P> {
@@ -141,7 +144,7 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
    * Свой экран итогов вместо общего (онлайн-вариант: баллы, таблица
    * ответов, код результата). Не задан — общий экран итогов.
    */
-  summaryView?: (data: SummaryData, actions: { onNew: () => void }) => ReactNode;
+  summaryView?: (data: SummaryData, actions: SummaryActions<P>) => ReactNode;
   /**
    * Вход по ссылке на конкретный набор (ярлык режима, «Потренироваться»
    * с прототипа, ?tip=). Если в тренажёре есть незавершённая тренировка,
@@ -163,12 +166,43 @@ export interface TrainerSessionHostProps<P, U extends BaseUi> {
    * «тренировка», и спрашивает о завершении по-своему. Не заданы — общие.
    */
   labels?: HostLabels<U>;
+  /**
+   * Своя кнопка на панели тренировки, перед «Паузой». Получает паузу и
+   * продолжение: окно поверх тренажёра ставит таймер на паузу, пока
+   * открыто (окружность №14 — «Погладь котика»).
+   */
+  barExtra?: (api: BarExtraApi) => ReactNode;
   /** Экран выбора тренировки. */
   configurator: (api: ConfiguratorApi<P>) => ReactNode;
   /** Экран заданий. */
   screen: (context: ScreenContext<P, U>) => ReactNode;
   /** Что внутри, для сообщения об ошибке. */
   what?: string;
+}
+
+/** Что получает свой экран итогов. */
+export interface SummaryActions<P> {
+  /** К выбору тренировки. */
+  onNew: () => void;
+  /** Начать новую тренировку сразу, минуя выбор. */
+  start: (payload: P) => void;
+  /** «Похожие задачи» по ошибкам и подсказкам: есть, когда задан similar и есть что повторять. */
+  onRetrySimilar?: () => void;
+  /** «Те же задачи» по ошибкам: есть, когда задан subset и есть что повторять. */
+  onRetrySame?: () => void;
+  /** Сколько заданий пойдёт в повтор. */
+  retryCount: number;
+  /** Похожие собираются: кнопка ждёт. */
+  building: boolean;
+}
+
+/** Что получает своя кнопка панели тренировки. */
+export interface BarExtraApi {
+  paused: boolean;
+  pause: () => void;
+  resume: () => void;
+  /** Активное время тренировки, мс. */
+  elapsed: () => number;
 }
 
 /** Подписи и поведение оболочки, которые тренажёр может переопределить. */
@@ -252,6 +286,17 @@ function enteredHere(scope: string): boolean {
   }
 }
 
+/** Типы, в которых были ошибки или подсказка, — «какие просели», по порядку появления. */
+export function weakKinds(items: SummaryItem[]): string[] {
+  const out: string[] = [];
+  for (const item of items) {
+    if ((item.mark === 'wrong' || item.mark === 'hinted') && !out.includes(item.kind)) {
+      out.push(item.kind);
+    }
+  }
+  return out;
+}
+
 /* Вызов функции-«слота» внутри собственной отрисовки: так конфигуратор
    и экран, которым оболочка отдаёт колбэки, отрисовываются как обычные
    дочерние компоненты. */
@@ -313,6 +358,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   onEntryResolved,
   backHref,
   labels,
+  barExtra,
   configurator,
   screen,
   what = 'тренажёр',
@@ -661,6 +707,26 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     /* Ученик вошёл в кабинет — тренировка записывается ему (прогресс,
        ДЗ). Гостю — ничего: код кабинета даже не грузится. */
     reportTrainerFinished(scope, current.run.id, data.items, data.seconds);
+    /* История тренировок — одна на все тренажёры: её показывает кабинет,
+       а синхронизация по ней понимает, что эту тренировку на другом
+       устройстве продолжать не нужно. */
+    try {
+      const count = (mark: string) => data.items.filter((item) => item.mark === mark).length;
+      recordHistory({
+        id: current.run.id,
+        scope,
+        at: Date.now(),
+        total: data.items.length,
+        right: count('right'),
+        hinted: count('hinted'),
+        wrong: count('wrong'),
+        skipped: count('skipped'),
+        seconds: data.seconds,
+        weak: weakKinds(data.items),
+      });
+    } catch {
+      /* История — не повод не показать итоги. */
+    }
     if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -965,9 +1031,23 @@ export function TrainerSessionHost<P, U extends BaseUi>({
   );
 
   if (view.kind === 'summary' && summaryView !== undefined) {
+    const retryCount = mistakesOf(view.data).length;
     return (
       <Slot
-        render={(data: SummaryData) => summaryView(data, { onNew: toConfig })}
+        render={(data: SummaryData) =>
+          summaryView(data, {
+            onNew: toConfig,
+            start,
+            retryCount,
+            building,
+            ...(similar === undefined || retryCount === 0
+              ? {}
+              : { onRetrySimilar: () => void retrySimilar(data) }),
+            ...(subset === undefined || retryCount === 0
+              ? {}
+              : { onRetrySame: () => retrySame(data) }),
+          })
+        }
         arg={view.data}
       />
     );
@@ -981,6 +1061,7 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         hintedLabel={summary?.hintedLabel}
         texts={labels?.summary}
         extra={summary?.extra === undefined ? undefined : summary.extra(view.data)}
+        weak={summary?.showWeak === true ? weakKinds(view.data.items) : undefined}
         onNew={toConfig}
         onRetrySame={subset === undefined ? undefined : () => retrySame(view.data)}
         onRetrySimilar={similar === undefined ? undefined : () => void retrySimilar(view.data)}
@@ -1025,6 +1106,11 @@ export function TrainerSessionHost<P, U extends BaseUi>({
         {...(labels?.finish === undefined ? {} : { finishShortLabel: labels.finish })}
         pausable={labels?.pausable !== false}
         clock={labels?.clock !== false}
+        extra={
+          barExtra === undefined ? undefined : (
+            <Slot render={barExtra} arg={{ paused, pause, resume: unpause, elapsed }} />
+          )
+        }
       />
       {available && saveProblem === null ? null : (
         <p className="tsess__nosave" role="status">

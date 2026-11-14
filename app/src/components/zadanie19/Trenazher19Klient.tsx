@@ -14,6 +14,8 @@ import { counted } from '@/lib/plural';
 import { scopeOfPath } from '@/lib/trainerSession/scope';
 import type { TaskMark } from '@/lib/trainerSession/types';
 import { proverit16 } from '@/lib/zadanie16/otvet';
+import type { LogOutcome } from '@/lib/progressLog';
+import { kind19, log19 } from '@/lib/zadanie19/progress';
 import type { Zadanie19View } from './Rabota19';
 import { isPayload19, peremeshat, readUi19, type Payload19, type Ui19 } from './trenazher19Sessiya';
 
@@ -206,6 +208,7 @@ function Ekran19({
   zadaniya,
   restored,
   report,
+  elapsed,
   onFinish,
 }: {
   zadaniya: Zadanie19Bank[];
@@ -215,6 +218,8 @@ function Ekran19({
   onFinish: () => void;
 }) {
   const [index, setIndex] = useState(restored?.index ?? 0);
+  /* Когда открыта текущая задача (мс активного времени) — для журнала. */
+  const nachalo = useRef(elapsed());
   const [value, setValue] = useState(restored?.value ?? '');
   const [checked, setChecked] = useState<'right' | 'wrong' | null>(restored?.checked ?? null);
   const [marks, setMarks] = useState<Record<number, TaskMark>>(restored?.marks ?? {});
@@ -255,6 +260,18 @@ function Ekran19({
     });
   }
 
+  /* Журнал попыток (lib/progressLog): задача пишется один раз — верным
+     ответом или решением, открытым до него. Тип попытки — метод. */
+  function remember(outcome: LogOutcome) {
+    if (z === undefined) return;
+    log19.record({
+      task: z.id,
+      kind: kind19(z.metod),
+      outcome,
+      seconds: Math.round(Math.max(0, (elapsed() - nachalo.current) / 1000)),
+    });
+  }
+
   function check() {
     if (z === undefined) return;
     const r = proverit16(value, z.otvet);
@@ -266,6 +283,9 @@ function Ekran19({
     setOshibka(null);
     setChecked(r === 'verno' ? 'right' : 'wrong');
     if (r === 'verno') {
+      if (marks[index] === undefined) {
+        remember(failed ? 'wrong' : hintOpen ? 'hinted' : 'right');
+      }
       setMarks({ ...marks, [index]: solutionOpen ? 'hinted' : 'right' });
     } else {
       setFailed(true);
@@ -276,10 +296,12 @@ function Ekran19({
 
   function reveal() {
     setSolutionOpen(true);
+    if (checked !== 'right' && marks[index] === undefined) remember('revealed');
     if (checked !== 'right') setMarks({ ...marks, [index]: 'hinted' });
   }
 
   function next() {
+    nachalo.current = elapsed();
     setIndex(index + 1);
     setValue('');
     setChecked(null);
@@ -323,6 +345,7 @@ function Ekran19({
           >
             {UROVNI_19[z.uroven]}
           </Badge>
+          {z.tema === undefined ? null : <span className="z19-zad__tema">{z.tema}</span>}
         </div>
         <div className="z16-zad__uslovie ptask__question">{z.uslovie}</div>
       </article>

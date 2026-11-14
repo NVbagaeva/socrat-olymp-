@@ -15,7 +15,7 @@ export default function Podgotovka8Page() {
   const base = `${ZADANIYA}/8`;
   return (
     <Podgotovka8Shell base={base} active="all">
-      <Podgotovka8List blocks={prepPool()} listHref={`${base}/podgotovka/`} />
+      <Podgotovka8List blocks={prepPool()} listHref={`${base}/${OPORNYE.tail}`} />
     </Podgotovka8Shell>
   );
 }

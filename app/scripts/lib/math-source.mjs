@@ -27,8 +27,9 @@ const NOT_TEXT_KEYS = new Set([
   'prototip',
   /* pravka, sostavleno — служебные пометки об источнике задачи (teoriya19/tipy.ts),
      на сайт не выводится. polePodskazka — placeholder поля ввода: там только
-     обычный текст, KaTeX не набрать. */
-  'pravka', 'sostavleno', 'polePodskazka',
+     обычный текст, KaTeX не набрать. piPodskazka — подсказка о записи ответа
+     под полем (FormatHint, components/tasks/otvet): тоже только текст. */
+  'pravka', 'sostavleno', 'polePodskazka', 'piPodskazka',
 ]);
 
 /* Словари, значения которых — подписи для экранного диктора (aria-label):

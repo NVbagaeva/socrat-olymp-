@@ -15,6 +15,8 @@ import { sessionText } from './session/text';
 import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
 import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
 import { VkladkaIkonka } from './VkladkaIkonka';
+import { EtoZheV } from '@/components/level/EtoZheV';
+import { levelInfo, LEVELS } from '@/lib/level';
 
 export interface RazdelTabsProps {
   /** Адрес раздела без хвоста: /zadaniya/4, /zadaniya/3/konus. */
@@ -33,6 +35,8 @@ export interface RazdelTabsProps {
    * с меню разделов (RazdelyNav), как у №12.
    */
   before?: ReactNode;
+  /** Модификатор строки ленты, общий для обеих копий (TabsRow). */
+  className?: string;
 }
 
 /**
@@ -66,7 +70,28 @@ function sKartochkami(base: string, tabs: readonly RazdelTab[]): readonly Razdel
   return [...tabs.slice(0, kuda), VKLADKA_KARTOCHKI, ...tabs.slice(kuda)];
 }
 
-export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: RazdelTabsProps) {
+/**
+ * Плашка «Это же в базе / в профиле» встаёт над лентой сама — на
+ * адресе самого задания (/zadaniya/4, /baza/zadaniya/5), если у номера
+ * есть пара на другом уровне. Оболочки разделов о ней не знают.
+ */
+function paraUrovnya(base: string): ReactNode {
+  for (const level of LEVELS) {
+    const prefix = `${levelInfo(level).bankBase}/`;
+    const slug = base.startsWith(prefix) ? base.slice(prefix.length) : '';
+    if (/^\d+$/.test(slug)) return <EtoZheV level={level} slug={slug} />;
+  }
+  return null;
+}
+
+export function RazdelTabs({
+  base,
+  tabs: svoi,
+  tutors,
+  tutorsTail,
+  before,
+  className,
+}: RazdelTabsProps) {
   const tabs = sKartochkami(base, svoi);
   const pathname = usePathname();
   /* Узел ленты нужен меню материалов. Активную вкладку в видимую часть
@@ -83,9 +108,28 @@ export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: Raz
     tabs.find((tab) => tab.tail !== '' && tail.startsWith(tab.tail)) ??
     tabs.find((tab) => tab.tail === '');
 
-  /* Метка на «Тренажёре»: в нём осталась незавершённая тренировка. */
+  /* Метка на вкладке тренажёра: в нём осталась незавершённая
+     тренировка. У раздела бывает второй тренажёр со своим разделом
+     сессии (№14: …/okruzhnost/trenazher/ → «14:okruzhnost») — его
+     тренировка метит свою вкладку, а не общий «Тренажёр». */
   const sessions = useActiveTrainerScopes();
-  const trainerActive = hasActiveScope(sessions, scopeOfPath(base));
+  const tabScope = (tab: RazdelTab): string | null =>
+    tab.id === 'trenazher'
+      ? scopeOfPath(base)
+      : tab.tail.endsWith('trenazher/')
+        ? scopeOfPath(`${base}/${tab.tail}`)
+        : null;
+  const scopyVkladok = tabs.map(tabScope).filter((sc): sc is string => sc !== null);
+  const trainerActive = (tab: RazdelTab): boolean => {
+    const sc = tabScope(tab);
+    return (
+      sc !== null &&
+      hasActiveScope(
+        sessions.filter((s) => s === sc || !scopyVkladok.includes(s)),
+        sc,
+      )
+    );
+  };
 
   const lenta = (
     <Tabs
@@ -98,7 +142,7 @@ export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: Raz
         label: tab.label,
         icon: tab.icon === undefined ? undefined : <VkladkaIkonka name={tab.icon} />,
         href: `${base}/${tab.tail}`,
-        ...(tab.id === 'trenazher' && trainerActive ? { badge: sessionText.menuDot } : {}),
+        ...(trainerActive(tab) ? { badge: sessionText.menuDot } : {}),
       }))}
     />
   );
@@ -106,29 +150,36 @@ export function RazdelTabs({ base, tabs: svoi, tutors, tutorsTail, before }: Raz
   /* Плашка ленты — одна и та же обёртка в обоих случаях: и когда
      меню материалов есть, и когда его нет. Иначе оформление плашки
      пришлось бы описывать дважды. */
+  const para = paraUrovnya(base);
   if (tutors === undefined) {
     return (
-      <TabsRow>
-        {() => (
-          <>
-            {before}
-            <div className="topic-tabs">{lenta}</div>
-          </>
-        )}
-      </TabsRow>
+      <>
+        {para}
+        <TabsRow {...(className === undefined ? {} : { className })}>
+          {() => (
+            <>
+              {before}
+              <div className="topic-tabs">{lenta}</div>
+            </>
+          )}
+        </TabsRow>
+      </>
     );
   }
 
   return (
-    <TutorMenu
-      items={[...tutors.items]}
-      label={tutors.title}
-      open={menu}
-      onOpenChange={setMenu}
-      stripRef={strip}
-      before={before}
-    >
-      {lenta}
-    </TutorMenu>
+    <>
+      {para}
+      <TutorMenu
+        items={[...tutors.items]}
+        label={tutors.title}
+        open={menu}
+        onOpenChange={setMenu}
+        stripRef={strip}
+        before={before}
+      >
+        {lenta}
+      </TutorMenu>
+    </>
   );
 }

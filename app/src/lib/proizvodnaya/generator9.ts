@@ -68,7 +68,7 @@ export function config9(slot: string): GenConfig {
     levels: [],
     sources: GENERATOR9_SOURCES,
     presets: GENERATOR9_PRESETS,
-    limits: { maxPerTopic: 6, maxTasks: 20, variantsMax: 4 },
+    limits: { variantsMax: 4 },
     extras: {
       kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })),
       seriya: UROKOV,

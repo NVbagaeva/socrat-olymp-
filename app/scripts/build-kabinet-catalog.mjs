@@ -104,6 +104,8 @@ for (const family of requireSrc('lib/generator/manifest').manifest.families) {
 for (const razdel of requireSrc('lib/zadanie3/index').RAZDELY) {
   sections[`3:${razdel.slug}`] = razdel.nazvanie;
 }
+/* Тренажёры-вкладки со своим разделом сессии. */
+sections['14:okruzhnost'] = 'Тригонометрическая окружность';
 catalog.sections = sections;
 
 const json = `${JSON.stringify(catalog, null, 1)}\n`;

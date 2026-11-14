@@ -35,8 +35,8 @@ interface Nachataya {
   seed: number;
 }
 
-const sessii = new Map<number, PersistentStore<Nachataya | null>>();
-function sessiyaStore(task: number): PersistentStore<Nachataya | null> {
+const sessii = new Map<number | string, PersistentStore<Nachataya | null>>();
+function sessiyaStore(task: number | string): PersistentStore<Nachataya | null> {
   let s = sessii.get(task);
   if (s === undefined) {
     s = persistent<Nachataya | null>(`kartochki:${task}:sessiya:v1`, null);
@@ -73,7 +73,8 @@ const NABORY: readonly Rezhim[] = ['segodnya', 'neznakomye', 'vse', 'bystro'];
  * Один экран на все номера — всё своё у номера в колоде.
  */
 export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
-  const { task } = koloda;
+  /* Ключ прогресса: номер задания, у колоды базы — «baza:5». */
+  const task = koloda.klyuch ?? koloda.task;
   const progress = useProgressKolody(task);
   const store = sessiyaStore(task);
   const sohranennaya = useSyncExternalStore(store.subscribe, store.read, store.initial);
@@ -275,11 +276,11 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
           <p className="kart-start__lead">{T.lead}</p>
           <div className="kart-vyucheno">
             <p className="kart-vyucheno__text">
-              <strong>{T.vyucheno(task, vyucheno.vsego, vsego)}</strong>
+              <strong>{T.vyucheno(koloda.task, vyucheno.vsego, vsego)}</strong>
             </p>
             <ProgressBar
               value={(vyucheno.vsego / vsego) * 100}
-              label={T.vyucheno(task, vyucheno.vsego, vsego)}
+              label={T.vyucheno(koloda.task, vyucheno.vsego, vsego)}
             />
             <p className="t-caption kart-vyucheno__note">{T.vyuchenoPoyasnenie}</p>
           </div>

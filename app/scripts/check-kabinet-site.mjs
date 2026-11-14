@@ -151,7 +151,7 @@ try {
   console.log('1. Первый запуск');
   await go('/kabinet/proba/');
   await page.getByText('Первый запуск').waitFor();
-  await fillRegistration({ name: 'Наталья', email: 'admin@example.ru' });
+  await fillRegistration({ name: 'Наталия', email: 'admin@yandex.ru' });
   await page.getByRole('button', { name: 'Создать аккаунт администратора' }).click();
   await page.getByTestId('invite-tutor').waitFor();
   ok(true, 'администратор создан, открыт его кабинет');
@@ -165,7 +165,7 @@ try {
   await page.getByText('Вы регистрируетесь как репетитор').waitFor();
   ok((await page.getByText('Кто вы').count()) === 0, 'роль не выбирается — она из приглашения');
   await page.getByLabel('Имя', { exact: true }).fill('Репетитор Анна');
-  await page.getByLabel('Почта', { exact: true }).fill('tutor@example.ru');
+  await page.getByLabel('Почта', { exact: true }).fill('tutor@yandex.ru');
   await page.getByLabel('Пароль', { exact: true }).fill('пароль-12345');
   ok(
     await page.getByRole('button', { name: 'Зарегистрироваться' }).isDisabled(),
@@ -187,7 +187,7 @@ try {
   await page.getByRole('button', { name: 'Сменить аккаунт' }).click();
   await go(studentInvite);
   await page.getByText('Класс: 11 «А»').waitFor();
-  await fillRegistration({ name: 'Ученик Пётр', email: 'student@example.ru', birthYear: 2000 });
+  await fillRegistration({ name: 'Ученик Пётр', email: 'student@yandex.ru', birthYear: 2000 });
   await page.getByRole('button', { name: 'Зарегистрироваться' }).click();
   await page.getByText('Аккаунт создан').waitFor();
   await go(studentInvite);
@@ -217,14 +217,15 @@ try {
   await page.getByRole('link', { name: 'Решать' }).first().click();
   await page.waitForURL(/\/zadaniya\/8\/$/);
   await go('/zadaniya/8/trenazher/');
+  /* Тренажёр №8 начинается карточкой «Все типы вперемешку». */
   await page
-    .getByRole('button', { name: /^Начать тренировку/ })
+    .getByRole('button', { name: /^Все типы вперемешку/ })
     .first()
     .click();
   await page.locator('.tsess__bar').first().waitFor();
   for (let at = 0; at < 2; at += 1) {
     const record = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), KEY8);
-    await page.locator('input.ttask__input, input.pc__input').first().fill(answer8(record, at));
+    await page.locator('input.trn-input, input.pc__input').first().fill(answer8(record, at));
     await page
       .locator('.tsess__body')
       .getByRole('button', { name: 'Проверить', exact: true })
@@ -283,14 +284,15 @@ try {
 
   console.log('5б. «Завершить тренировку» в самом тренажёре');
   await go('/zadaniya/8/trenazher/');
+  /* Тренажёр №8 начинается карточкой «Все типы вперемешку». */
   await page
-    .getByRole('button', { name: /^Начать тренировку/ })
+    .getByRole('button', { name: /^Все типы вперемешку/ })
     .first()
     .click();
   await page.locator('.tsess__bar').first().waitFor();
   {
     const record = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) ?? 'null'), KEY8);
-    await page.locator('input.ttask__input, input.pc__input').first().fill(answer8(record, 0));
+    await page.locator('input.trn-input, input.pc__input').first().fill(answer8(record, 0));
     await page
       .locator('.tsess__body')
       .getByRole('button', { name: 'Проверить', exact: true })
@@ -353,7 +355,7 @@ try {
       await go('/kabinet/vydat-dz/');
       await page.getByLabel('Название').waitFor();
       await shot('vydat-dz');
-      await signInAs('Наталья');
+      await signInAs('Наталия');
       await shot('admin');
     }
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -365,7 +367,7 @@ try {
   const guest = await (await browser.newContext()).newPage();
   await guest.goto(`${BASE}/zadaniya/8/trenazher/`, { waitUntil: 'load' });
   await guest
-    .getByRole('button', { name: /^Начать тренировку/ })
+    .getByRole('button', { name: /^Все типы вперемешку/ })
     .first()
     .click();
   await guest.locator('.tsess__bar').first().waitFor();

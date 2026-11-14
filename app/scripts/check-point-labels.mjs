@@ -161,6 +161,81 @@ for (const id of THEORY_FIGURE_IDS) {
   }
 }
 
+/* ── 4. Выноска без NaN ──────────────────────────────────────── */
+/* Точка, у которой нет ни одного свободного места (в пересечении
+   кривых и пунктиров, в углу окна с нижним краем −0,5): подпись
+   достаётся запасному варианту перебора. Раньше у него не было
+   полуразмеров рамки, и выноска уходила в SVG с координатами NaN.
+   Выноска должна быть либо честной, либо её нет. */
+{
+  const L = (k, b, style = 'solid') => ({ type: 'line', k, b, color: 'lineA', style, label: null });
+  const tesno = (window, curves, point, shapes) => ({
+    window,
+    grid: { step: 1, show: true },
+    axes: { labelX: 'x', labelY: 'y', origin: '0' },
+    axisLabels: 'minimal',
+    curves,
+    points: [{ ...point, style: 'solid', color: 'cross', label: 'A' }],
+    shapes: shapes.map(([from, to]) => ({
+      type: 'segment',
+      from,
+      to,
+      color: 'aux',
+      style: 'dashed',
+    })),
+  });
+  const SCENES = {
+    'пересечение четырёх прямых и двух пунктиров': tesno(
+      { xmin: -3, xmax: 3, ymin: -3, ymax: 3 },
+      [L(-2, -2), L(1, 1, 'dashed'), L(-1, -1), L(0.5, 0.5, 'dashed')],
+      { x: -1, y: 0 },
+      [
+        [
+          [-1, -3],
+          [-1, 3],
+        ],
+        [
+          [-3, 0],
+          [3, 0],
+        ],
+      ],
+    ),
+    'угол окна с нижним краем −0,5': tesno(
+      { xmin: -3, xmax: 3, ymin: -0.5, ymax: 3 },
+      [L(1.5, 2.5), L(2.5, 5.5, 'dashed')],
+      { x: -3, y: -0.5 },
+      [
+        [
+          [-3, -0.5],
+          [-3, 3],
+        ],
+      ],
+    ),
+    'точка на нижнем крае окна −0,5 между прямыми': tesno(
+      { xmin: -3, xmax: 3, ymin: -0.5, ymax: 3 },
+      [L(-2, 0), L(-2.5, 0.5, 'dashed'), L(2, -4), L(2.5, -4.5, 'dashed')],
+      { x: 1, y: -0.5 },
+      [
+        [
+          [1, -0.5],
+          [1, 3],
+        ],
+      ],
+    ),
+  };
+  let leaders = 0;
+  for (const [name, scene] of Object.entries(SCENES)) {
+    const report = {};
+    const svg = String(renderer.renderGraph(scene, report));
+    if (/NaN|Infinity/.test(svg)) errors.push(`выноска: «${name}» — в SVG есть NaN`);
+    const box = (report.boxes || []).find((item) => item.kind === 'pointLabel');
+    if (!box) errors.push(`выноска: «${name}» — подпись точки не поставлена`);
+    else if (box.leader) leaders += 1;
+  }
+  /* Сама проверка не пустая: в этих сценах выноска есть. */
+  if (leaders === 0) errors.push('выноска: ни в одной тесной сцене нет выноски — сцены устарели');
+}
+
 console.log(
   `Подписи точек: чертежей ${checked} (с подписями точек ${withLabels}, с выноской ${moved}), ` +
     `рисунков теории ${theoryFigures} (подписей точек ${theoryPoints}), ошибок ${errors.length}.`,

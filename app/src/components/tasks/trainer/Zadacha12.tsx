@@ -589,5 +589,6 @@ export const KARTOCHKA_12: KartochkaRazdela<TrainerTask> = {
       right: itog.right,
       clean: itog.clean,
       seconds: itog.sek,
+      ishod: itog.ishod,
     }),
 };

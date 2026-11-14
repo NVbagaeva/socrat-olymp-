@@ -3,7 +3,9 @@
 
    Запуск после pnpm build:
      node scripts/check-auth.mjs [папка-для-снимков]      сборка со входом
+     node scripts/check-auth.mjs --no-header               вход есть, кнопки в шапке нет
      node scripts/check-auth.mjs --disabled                сборка без входа
+     node scripts/check-auth.mjs --gallery <папка>         только снимки ключевых экранов
 
    Служба входа (Supabase: GoTrue и PostgREST) здесь не настоящая, а
    мок внутри Playwright: все запросы к адресу проекта перехватываются
@@ -13,26 +15,57 @@
 
    Сборку со входом собирают с переменными:
      NEXT_PUBLIC_AUTH_ENABLED=1
+     NEXT_PUBLIC_AUTH_IN_HEADER=1   (для --no-header — без неё)
      NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
      NEXT_PUBLIC_SUPABASE_ANON_KEY=mock-anon-key
 
-   Сценарии (сборка со входом):
-     • шапка на 1440 и 390: «Войти» есть, горизонтальной прокрутки нет,
-       в меню телефона тоже «Войти»;
+   Сценарии (сборка со входом и кнопкой в шапке, NEXT_PUBLIC_AUTH_IN_HEADER=1):
+     • шапка на 1440: «Войти» таблеткой со словом, «Начать бесплатно»
+       ведёт в банк заданий (регистрация пока по приглашению); на 390,
+       375 и 320 «Войти» — кружок в шапке не меньше 40 px,
+       горизонтальной прокрутки нет, в меню телефона тоже «Войти»;
+     • регистрация без галочек согласий → просьба отметить, запрос не уходит;
+       ученику — год рождения, младше 18 — почта родителя;
      • регистрация чужой почтой → «Регистрация пока по приглашению»,
        ошибок в консоли нет;
+     • почта не российского сервиса (gmail.com, заглавными, с пробелами,
+       поддомен) → спокойная подсказка со ссылкой на почту, запрос не
+       уходит; «Мой адрес уже добавили» → решает сервер: отказ — та же
+       подсказка, школьная почта из ручного списка — аккаунт создан;
+     • старый пользователь с gmail.com входит как раньше;
      • регистрация разрешённой почтой → письмо → ссылка → подтверждение
        → кабинет; в шапке кружок с инициалами;
-     • кабинет: имя, почта, роль; смена имени и роли;
+     • кабинет репетитора: «Мои классы», «Домашние задания», коды
+       комплектов; вкладка «Профиль»: имя, почта, роль (не меняется),
+       согласие, выгрузка данных;
+     • «Перенести ваш прогресс с этого устройства в кабинет?»: «Да» →
+       ключи №8 в аккаунте, второй раз не спрашивает; «Нет» → ничего;
+     • кабинет ученика: «Прогресс», «Мои ошибки», «Отложенные»,
+       «Домашние задания» — пустые состояния; класс от репетитора;
      • выход из меню шапки; неверный пароль; вход без подтверждения
        почты → «Подтвердите почту…» и повторная отправка;
      • «Запомнить меня» выключено → сессия в sessionStorage;
      • сброс пароля: письмо → новый пароль → вход новым паролем;
+     • два устройства: тренировка №8, начатая на компьютере, продолжается
+       на телефоне с той же задачи; решённое и закладка видны в кабинете;
+     • классы и ДЗ №8 (этап 3): репетитор создаёт класс и получает код,
+       ученик вступает по ссылке (код помнится до входа) и по коду,
+       неверный код — понятный отказ; псевдоним ученика; выдача ДЗ из
+       формы с типами; ученик решает: дробь с верным значением и «5 см» —
+       подсказки без траты попытки, попытки считает база, решение сразу
+       после ответа, «Показать решение», «Сдать»; таблица результатов,
+       что вводил ученик, комментарий к задаче, сводка по типам, работа
+       над ошибками; ученику форма выдачи недоступна;
      • комплект репетитора записывается в аккаунт;
      • удаление аккаунта с подтверждением;
      • SDK не входит в первую загрузку главной и страницы задания;
-     • на 390 «Войти» не пересекает закреплённую панель генератора и
-       кнопку «?» (если она есть), горизонтальной прокрутки нет.
+     • на 390 блок аккаунта не пересекает закреплённую панель генератора
+       и кнопку «?» (если она есть), горизонтальной прокрутки нет.
+   Сценарии (--no-header: сборка со входом, но без кнопки в шапке —
+   так сайт живёт в пробном режиме): «Войти» нет ни в шапке, ни в меню
+   телефона, ни в оболочке заданий, шапка выглядит как без входа;
+   /voyti/ по прямой ссылке открывает форму; после входа кружок с
+   инициалами и «Мой кабинет» на месте.
    Сценарии (сборка без входа): кнопки «Войти» нет ни в шапке, ни в
    меню, ни в оболочке заданий; /voyti/ и /kabinet/ честно говорят,
    что вход не включён; адреса сервиса в сборке нет. */
@@ -42,18 +75,50 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { bezBanneraCookie } from './lib/cookie-notice.mjs';
-import { APP } from './lib/load-ts.mjs';
+import { APP, requireSrc } from './lib/load-ts.mjs';
+import { welcomeSeen } from './lib/onboarding.mjs';
+import { applyFilters, createDzMock } from './lib/dz-mock.mjs';
+
+const { generate } = requireSrc('lib/vychisleniya/generate.ts');
+const { emailDomainAllowed } = requireSrc('lib/auth/allowed-domains.ts');
+const { parseTaskId } = requireSrc('lib/vychisleniya/ids.ts');
+const { ru } = requireSrc('lib/vychisleniya/numbers.ts');
 
 const OUT = path.join(APP, 'out');
 const PORT = 4181;
 const SUPABASE = 'http://127.0.0.1:54321';
 const DISABLED = process.argv.includes('--disabled');
-const SHOTS = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null;
+const NO_HEADER = process.argv.includes('--no-header');
+/* Снимки классов и ДЗ №8 для описания PR этапа 3. */
+const GALLERY_DZ = process.argv.includes('--gallery-dz')
+  ? (process.argv[process.argv.indexOf('--gallery-dz') + 1] ?? 'snimki-dz')
+  : null;
+/* Снимки кабинета ученика с прогрессом №8 для описания PR этапа 2. */
+const GALLERY_Z8 = process.argv.includes('--gallery-z8')
+  ? (process.argv[process.argv.indexOf('--gallery-z8') + 1] ?? 'snimki-z8-kabinet')
+  : null;
+const GALLERY = process.argv.includes('--gallery')
+  ? (process.argv[process.argv.indexOf('--gallery') + 1] ?? 'snimki-pr')
+  : null;
+const SHOTS =
+  GALLERY !== null || GALLERY_Z8 !== null || GALLERY_DZ !== null
+    ? null
+    : (process.argv.slice(2).find((a) => !a.startsWith('--')) ?? null);
 
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
   console.error('Нет out/index.html — сначала pnpm build.');
   process.exit(1);
 }
+
+/* Редакция правовых документов — дата из operator.json, как её считает
+   сайт (lib/legal/operator.ts). */
+const DOCUMENTS_VERSION = (() => {
+  const { data } = JSON.parse(
+    fs.readFileSync(path.join(APP, 'src', 'content', 'legal', 'operator.json'), 'utf8'),
+  );
+  const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(data ?? '').trim());
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : 'chernovik';
+})();
 
 const failures = [];
 let checks = 0;
@@ -97,15 +162,50 @@ const SITE = `http://127.0.0.1:${PORT}`;
 
 /* ── Мок службы входа ──────────────────────────────────────────── */
 
-const ALLOWED = new Set(['svoy@example.ru', 'vtoroy@example.ru']);
+const ALLOWED = new Set([
+  'svoy@yandex.ru',
+  'vtoroy@yandex.ru',
+  'uchenik@yandex.ru',
+  'shkolnik@yandex.ru',
+  'dva@yandex.ru',
+  'dz-repetitor@yandex.ru',
+  'dz-uchenik1@yandex.ru',
+  'dz-uchenik2@yandex.ru',
+  /* Почта не российского сервиса: приглашена, но база откажет по домену. */
+  'zarubezh@gmail.com',
+  /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
+  'shkola@school.example',
+]);
+/** Добавленное вручную: домены и адреса (как auth_hooks.signup_extra). */
+const EXTRA = new Set(['school.example']);
+
+/** Данные формы регистрации, как их шлёт сайт. */
+function signupData(name, role, extra = {}) {
+  return {
+    name,
+    role,
+    documents_version: DOCUMENTS_VERSION,
+    accept_soglashenie: true,
+    accept_soglasie: true,
+    ...(role === 'student' ? { birth_year: 2000 } : {}),
+    ...extra,
+  };
+}
 
 function makeMock() {
   const users = new Map(); // email → user
   const sessions = new Map(); // access_token → email
   const refreshes = new Map(); // refresh_token → email
   const verifyTokens = new Map(); // token → { email, type }
-  const profiles = new Map(); // id → row
+  const profiles = new Map(); // user_id → row
   const kits = []; // rows
+  const consents = []; // { user_id, kind, version, accepted_at }
+  const parents = new Map(); // user_id → { parent_email, confirmed_at }
+  const storage = []; // { user_id, key, value, updated_at }
+  const classes = []; // { id, name, tutor_id, archived_at, created_at }
+  const members = []; // { class_id, user_id }
+  /* Текущая редакция документов в «базе». */
+  const edition = { version: DOCUMENTS_VERSION };
   const mailbox = []; // { to, type, link }
   let counter = 0;
 
@@ -177,7 +277,32 @@ function makeMock() {
     /* GoTrue */
     if (p === '/auth/v1/signup' && method === 'POST') {
       const email = String(body.email ?? '').toLowerCase();
+      /* Хук базы: сначала почтовый домен, потом приглашение. */
+      if (!emailDomainAllowed(email) && !EXTRA.has(email) && !EXTRA.has(email.split('@')[1])) {
+        return err(403, null, 'domain_not_allowed');
+      }
       if (!ALLOWED.has(email)) return err(403, null, 'invite_only');
+      /* Триггеры базы: без галочек согласий, со старой редакцией, без
+         года рождения ученика аккаунт не создаётся. Служба входа отдаёт
+         отказ базы как есть, с кодом 500. */
+      const data = body.data ?? {};
+      const reject = (reason) => ({ status: 500, body: { code: '23514', message: reason } });
+      if (data.accept_soglashenie !== true || data.accept_soglasie !== true) {
+        return reject('consents_required: без согласия регистрация невозможна');
+      }
+      if (data.documents_version !== edition.version) {
+        return reject('outdated_documents: редакция документов сменилась');
+      }
+      if (data.role !== 'student' && data.role !== 'tutor') {
+        return reject('bad_role: при регистрации выбирают «ученик» или «репетитор»');
+      }
+      if (data.role === 'student' && !/^\d{4}$/.test(String(data.birth_year ?? ''))) {
+        return reject('birth_year_required: ученик указывает год рождения');
+      }
+      const minor = data.role === 'student' && new Date().getFullYear() - data.birth_year <= 18;
+      if (minor && !data.parent_email) {
+        return reject('parent_email_required: ученику младше 18 нужна почта родителя');
+      }
       if (users.has(email)) {
         /* Существующий адрес: сервис отвечает «как будто создал», без письма. */
         const fake = publicUser({ ...users.get(email), confirmed: false });
@@ -193,14 +318,24 @@ function makeMock() {
       };
       users.set(email, user);
       profiles.set(user.id, {
-        id: user.id,
-        name: String(user.meta.name ?? '').slice(0, 80),
-        role: user.meta.role === 'tutor' ? 'tutor' : 'student',
+        user_id: user.id,
+        display_name: String(user.meta.name ?? '').slice(0, 80),
+        role: user.meta.role,
+        grade: null,
         welcome_seen_at: null,
         tour_id: null,
         tour_done: false,
         created_at: user.createdAt,
       });
+      for (const kind of ['soglashenie', 'soglasie']) {
+        consents.push({
+          user_id: user.id,
+          kind,
+          version: edition.version,
+          accepted_at: user.createdAt,
+        });
+      }
+      if (minor) parents.set(user.id, { parent_email: data.parent_email, confirmed_at: null });
       mail(user, 'signup', body.email_redirect_to ?? `${SITE}/voyti/podtverzhdenie/`);
       return { status: 200, body: publicUser(user) };
     }
@@ -294,10 +429,24 @@ function makeMock() {
     if (p.startsWith('/rest/v1/')) {
       if (!me) return err(401, 'PGRST301', 'JWT expired');
       const table = p.slice('/rest/v1/'.length);
-      const idEq = (u.searchParams.get('id') ?? '').replace(/^eq\./, '');
+      const idEq = (u.searchParams.get('user_id') ?? '').replace(/^eq\./, '');
+      /* Классы и ДЗ этапа 3 — отдельный мок (scripts/lib/dz-mock.mjs). */
+      const dzAnswer = dz.handle(table, method, u, body, me, prefersObject);
+      if (dzAnswer !== null) return dzAnswer;
       if (table === 'profiles' && method === 'GET') {
-        const row = profiles.get(me.id);
-        const rows = row && (idEq === '' || idEq === me.id) ? [row] : [];
+        /* RLS: свой профиль, свои ученики (репетитору), свой репетитор (ученику). */
+        const mine = profiles.get(me.id);
+        const visible = [...profiles.values()].filter((row) => {
+          if (row.user_id === me.id) return true;
+          const shared = (tutorId, studentId) =>
+            classes.some(
+              (c) =>
+                c.tutor_id === tutorId &&
+                members.some((m) => m.class_id === c.id && m.user_id === studentId),
+            );
+          return mine?.role === 'tutor' ? shared(me.id, row.user_id) : shared(row.user_id, me.id);
+        });
+        const rows = applyFilters(visible, u.searchParams);
         if (prefersObject) {
           return rows.length === 1
             ? { status: 200, body: rows[0] }
@@ -307,18 +456,107 @@ function makeMock() {
       }
       if (table === 'profiles' && method === 'PATCH') {
         const row = profiles.get(me.id);
+        /* Роль из браузера не меняется: права на колонку нет. */
+        if ('role' in body) return err(403, '42501', 'permission denied for table profiles');
         if (!row || (idEq !== '' && idEq !== me.id))
           return { status: 200, body: prefersObject ? null : [] };
-        const allowed = ['name', 'role', 'welcome_seen_at', 'tour_id', 'tour_done'];
+        const allowed = ['display_name', 'grade', 'welcome_seen_at', 'tour_id', 'tour_done'];
         for (const k of allowed) if (k in body) row[k] = body[k];
         return { status: 200, body: prefersObject ? row : [row] };
       }
-      if (table === 'rpc/delete_own_account' && method === 'POST') {
+      const wipe = () => {
         users.delete(me.email);
         profiles.delete(me.id);
-        for (let i = kits.length - 1; i >= 0; i -= 1)
-          if (kits[i].user_id === me.id) kits.splice(i, 1);
+        parents.delete(me.id);
+        for (const list of [kits, storage, members]) {
+          for (let i = list.length - 1; i >= 0; i -= 1)
+            if (list[i].user_id === me.id) list.splice(i, 1);
+        }
+        for (let i = classes.length - 1; i >= 0; i -= 1)
+          if (classes[i].tutor_id === me.id) classes.splice(i, 1);
+        /* Журнал согласий переживает аккаунт — с отметкой об удалении. */
+        for (const c of consents)
+          if (c.user_id === me.id) c.account_deleted_at = new Date().toISOString();
         for (const [t, e] of sessions) if (e === me.email) sessions.delete(t);
+      };
+      if (table === 'rpc/delete_my_account' && method === 'POST') {
+        wipe();
+        return { status: 204, body: null };
+      }
+      if (table === 'rpc/export_my_data' && method === 'POST') {
+        return {
+          status: 200,
+          body: {
+            account: { id: me.id, email: me.email },
+            consents: consents.filter((c) => c.user_id === me.id),
+            profiles: [profiles.get(me.id)],
+            kits: kits.filter((k) => k.user_id === me.id),
+            user_storage: storage.filter((r) => r.user_id === me.id),
+          },
+        };
+      }
+      if (table === 'consents' && method === 'GET') {
+        const kind = (u.searchParams.get('kind') ?? '').replace(/^eq\./, '');
+        const rows = consents
+          .filter((c) => c.user_id === me.id && (kind === '' || c.kind === kind))
+          .sort((a, b) => (a.accepted_at < b.accepted_at ? 1 : -1));
+        return { status: 200, body: rows };
+      }
+      if (table === 'parent_consents' && method === 'GET') {
+        const row = parents.get(me.id);
+        return { status: 200, body: row ? [{ user_id: me.id, ...row }] : [] };
+      }
+      if (table === 'classes' && method === 'GET') {
+        const rows = classes.filter(
+          (c) =>
+            c.tutor_id === me.id || members.some((m) => m.class_id === c.id && m.user_id === me.id),
+        );
+        return { status: 200, body: rows };
+      }
+      if (table === 'class_members' && method === 'GET') {
+        const rows = members.filter(
+          (m) =>
+            m.user_id === me.id || classes.some((c) => c.id === m.class_id && c.tutor_id === me.id),
+        );
+        return { status: 200, body: rows };
+      }
+      if (table === 'user_storage' && method === 'POST') {
+        /* Ученик младше 18 до согласия родителя прогресс не пишет. */
+        if (parents.get(me.id)?.confirmed_at === null) {
+          return err(403, '42501', 'new row violates row-level security policy');
+        }
+        const rows = Array.isArray(body) ? body : [body];
+        for (const r of rows) {
+          if (!/^budetege:[a-z0-9:_-]{1,80}$/.test(r.key)) {
+            return err(400, '23514', 'violates check constraint "user_storage_key_check"');
+          }
+          const row = {
+            user_id: me.id,
+            key: r.key,
+            value: r.value,
+            updated_at: new Date().toISOString(),
+          };
+          const i = storage.findIndex((x) => x.user_id === me.id && x.key === r.key);
+          if (i === -1) storage.push(row);
+          else storage[i] = row;
+        }
+        return { status: 201, body: null };
+      }
+      if (table === 'user_storage' && method === 'GET') {
+        return { status: 200, body: storage.filter((r) => r.user_id === me.id) };
+      }
+      if (table === 'user_storage' && method === 'DELETE') {
+        /* key=in.(a,b) — значения могут быть в кавычках. */
+        const list = /^in\.\((.*)\)$/.exec(u.searchParams.get('key') ?? '');
+        const keys = new Set(
+          (list?.[1] ?? '')
+            .split(',')
+            .map((k) => k.trim().replace(/^"(.*)"$/, '$1'))
+            .filter(Boolean),
+        );
+        for (let i = storage.length - 1; i >= 0; i -= 1) {
+          if (storage[i].user_id === me.id && keys.has(storage[i].key)) storage.splice(i, 1);
+        }
         return { status: 204, body: null };
       }
       if (table === 'kits' && method === 'POST') {
@@ -345,7 +583,38 @@ function makeMock() {
     return { status: 404, body: { msg: `мок: нет обработчика ${method} ${p}` } };
   }
 
-  return { handle, users, mailbox, kits, profiles };
+  /** Тестовые данные, как их кладёт кнопка «Сервер: тестовые данные». */
+  const dz = createDzMock({ profiles, classes, members });
+
+  function seedClass(tutorEmail, studentEmails, name = 'Тестовый класс') {
+    const id = `class-${classes.length + 1}`;
+    classes.push({
+      id,
+      name,
+      tutor_id: users.get(tutorEmail).id,
+      archived_at: null,
+      created_at: new Date().toISOString(),
+    });
+    for (const email of studentEmails) {
+      members.push({ class_id: id, user_id: users.get(email).id });
+    }
+  }
+
+  return {
+    handle,
+    dz,
+    users,
+    mailbox,
+    kits,
+    profiles,
+    consents,
+    parents,
+    storage,
+    classes,
+    members,
+    edition,
+    seedClass,
+  };
 }
 
 const CORS = {
@@ -496,6 +765,44 @@ function* walk(dir) {
 
 /* ── Сборка со входом ──────────────────────────────────────────── */
 
+/* Прогресс №8 прежнего формата: при входе он сворачивается в журнал LOG_8,
+   в аккаунт уходит журнал, а сам прежний ключ остаётся в браузере. */
+const PROGRESS_8 = 'budetege:vychisleniya-8:v1';
+const LOG_8 = 'budetege:vychisleniya-8:log:v1';
+const PREP_8 = 'budetege:vychisleniya-8:prep:v1';
+
+/** Отметить обе галочки согласий в форме регистрации. */
+async function tickConsents(page) {
+  await page.check('input[name="accept-soglashenie"]');
+  await page.check('input[name="accept-soglasie"]');
+}
+
+/** Вкладка кабинета «Профиль». */
+async function openProfile(page) {
+  await page.click('.kabinet__tabs [role="tab"]:has-text("Профиль")');
+  await page.waitForSelector('[data-section="profile"]');
+}
+
+async function login(page, email, password) {
+  await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
+  await page.fill('input[name="email"]', email);
+  await page.fill('input[name="password"]', password);
+  await page.click('button[type="submit"]');
+  await page.waitForURL(`${SITE}/kabinet/`);
+  await page.waitForSelector('.kabinet');
+}
+
+/** Зарегистрировать и подтвердить почту прямо в моке, без формы. */
+function registerInMock(mock, email, password, name, role, extra = {}) {
+  mock.handle(
+    'POST',
+    `${SUPABASE}/auth/v1/signup`,
+    {},
+    JSON.stringify({ email, password, data: signupData(name, role, extra) }),
+  );
+  mock.users.get(email).confirmed = true;
+}
+
 async function runEnabled() {
   const mock = makeMock();
   const errors = [];
@@ -506,17 +813,44 @@ async function runEnabled() {
     await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
     check((await page.locator(LOGIN).count()) === 1, 'главная 1440: кнопка «Войти» есть');
     check(
-      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) ===
-        '/voyti/?vkladka=registraciya',
-      'главная: «Начать бесплатно» ведёт на регистрацию',
+      (await page.locator(LOGIN).innerText()).trim() === 'Войти',
+      'главная 1440: на кнопке видно слово «Войти»',
+    );
+    /* Регистрация пока по приглашению: «Начать бесплатно» ведёт туда
+       же, куда без входа, — в банк заданий, а не в закрытую форму. */
+    check(
+      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) === '/zadaniya/',
+      'главная: «Начать бесплатно» ведёт в банк заданий',
     );
     await shot(page, 'shapka-do-vhoda-1440');
+    await context.close();
+  }
+  /* Телефон: «Войти» — кружок со значком прямо в шапке, имя ссылки
+     «Войти» для скринридера; прокрутки вбок нет и на 320. */
+  for (const width of [320, 375]) {
+    const { context, page } = await newPage(mock, width, errors);
+    await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
+    check(await noHorizontalScroll(page), `главная ${width}: горизонтальной прокрутки нет`);
+    check(
+      await page.getByRole('link', { name: 'Войти', exact: true }).first().isVisible(),
+      `главная ${width}: кружок «Войти» виден в шапке`,
+    );
     await context.close();
   }
   {
     const { context, page } = await newPage(mock, 390, errors);
     await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
     check(await noHorizontalScroll(page), 'главная 390: горизонтальной прокрутки нет');
+    const login = page.locator(LOGIN);
+    const box = await login.boundingBox();
+    check(
+      box !== null && box.width >= 40 && box.height >= 40,
+      'главная 390: кружок «Войти» не меньше 40 px',
+    );
+    check(
+      (await login.getAttribute('href')) === '/voyti/',
+      'главная 390: кружок «Войти» ведёт на /voyti/',
+    );
     await shot(page, 'shapka-do-vhoda-390');
     await page.click('.burger');
     await page.waitForSelector('#site-menu');
@@ -528,7 +862,7 @@ async function runEnabled() {
     await context.close();
   }
 
-  /* 2. Страница входа и регистрация чужой почтой. */
+  /* 2. Страница входа; галочки согласий; регистрация чужой почтой. */
   {
     const { context, page } = await newPage(mock, 1440, errors);
     await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
@@ -536,24 +870,187 @@ async function runEnabled() {
     await shot(page, 'vhod-1440');
     await page.click('[role="tab"]:has-text("Зарегистрироваться")');
     await page.fill('input[name="name"]', 'Чужой Человек');
-    await page.fill('input[name="email"]', 'chuzhoy@example.ru');
+    await page.fill('input[name="email"]', 'chuzhoy@yandex.ru');
     await page.fill('input[name="password"]', 'parol-dlinnyy-1');
+    check(
+      (await page.locator('input[name="birth-year"]').count()) === 0,
+      'пока роль не выбрана, года рождения в форме нет',
+    );
     await page.click('.role-card[data-role="student"]');
+    check(
+      (await page.locator('input[name="birth-year"]').count()) === 1,
+      'ученику — поле «Год рождения»',
+    );
+    check(
+      (await page.locator('input[name="parent-email"]').count()) === 0,
+      'без года рождения почты родителя в форме нет',
+    );
+    await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 16));
+    check(
+      (await page.locator('input[name="parent-email"]').count()) === 1,
+      'ученику младше 18 — поле «Почта родителя»',
+    );
     await shot(page, 'registraciya-uchenik-1440');
+    await page.fill('input[name="birth-year"]', '2000');
+    check(
+      (await page.locator('input[name="parent-email"]').count()) === 0,
+      'взрослому ученику почта родителя не нужна',
+    );
     await page.click('.role-card[data-role="tutor"]');
+    check(
+      (await page.locator('input[name="birth-year"]').count()) === 0,
+      'репетитору год рождения не нужен',
+    );
+    const docLinks = await page
+      .locator('.consent-checks a')
+      .evaluateAll((list) => list.map((a) => a.getAttribute('href')));
+    check(
+      docLinks.includes('/soglashenie/') && docLinks.includes('/soglasie/'),
+      'галочки согласий со ссылками на соглашение и согласие',
+    );
+    check(
+      (await page.locator('.auth-form a[href="/politika/"]').count()) >= 1,
+      'в форме есть ссылка на политику обработки данных',
+    );
     await shot(page, 'registraciya-repetitor-1440');
+
+    /* Без галочек запрос не уходит. */
+    const before = mock.users.size;
+    let asked = false;
+    page.on('request', (r) => {
+      if (r.url().includes('/auth/v1/signup')) asked = true;
+    });
     await page.click('button[type="submit"]');
     await page.waitForSelector('.field__msg--error');
+    check(
+      (await page.locator('.field__msg--error').innerText()).startsWith('Отметьте обе галочки'),
+      'без галочек: «Отметьте обе галочки…»',
+    );
+    check(!asked && mock.users.size === before, 'без галочек запрос на сервер не уходит');
+
+    await tickConsents(page);
+    await page.click('button[type="submit"]');
+    await page.waitForFunction(
+      () =>
+        document.querySelector('.field__msg--error')?.textContent ===
+        'Регистрация пока по приглашению.',
+    );
     check(
       (await page.locator('.field__msg--error').innerText()) === 'Регистрация пока по приглашению.',
       'чужая почта: «Регистрация пока по приглашению.»',
     );
     const html = await page.content();
     check(
-      !html.includes('svoy@example.ru') && !html.includes('invite_only'),
+      !html.includes('svoy@yandex.ru') && !html.includes('invite_only'),
       'чужая почта: ни разрешённых адресов, ни технических слов на экране',
     );
     check(errors.length === 0, 'чужая почта: ошибок в консоли нет');
+    await context.close();
+  }
+
+  /* 2а. Почта не российского сервиса: спокойная подсказка со ссылкой на
+        почту, запрос не уходит; «Мой адрес уже добавили» — решает сервер. */
+  {
+    const { context, page } = await newPage(mock, 1440, errors);
+    await page.goto(`${SITE}/voyti/?vkladka=registraciya`, { waitUntil: 'networkidle' });
+    const note = page.locator('.auth-form__domain');
+    const email = page.locator('input[name="email"]');
+    const blur = () => page.locator('input[name="name"]').click();
+    let asked = 0;
+    page.on('request', (r) => {
+      if (r.url().includes('/auth/v1/signup')) asked += 1;
+    });
+
+    for (const value of [
+      'zarubezh@gmail.com',
+      'ZARUBEZH@GMAIL.COM',
+      '  zarubezh@gmail.com  ',
+      'ivan@mail.yandex.ru',
+      'ivan@mail.ru.example.com',
+    ]) {
+      await email.fill(value);
+      await blur();
+      check((await note.count()) === 1, `«${value}»: подсказка о российских почтовых сервисах`);
+    }
+    const text = await note.innerText();
+    check(
+      text.startsWith(
+        'Регистрация доступна с адресами российских почтовых сервисов: Яндекс, Mail.ru, Рамблер. Если у вас школьная или рабочая почта — напишите нам, добавим вручную.',
+      ),
+      `текст подсказки: ${text.slice(0, 120)}`,
+    );
+    check(
+      ((await note.locator('a').getAttribute('href')) ?? '').startsWith('mailto:'),
+      '«напишите нам» — ссылка на почту',
+    );
+    check(
+      (await page.locator('.field__msg--error').count()) === 0,
+      'подсказка спокойная: не красная ошибка',
+    );
+
+    /* Российская почта — заглавными и с пробелами — подсказку убирает. */
+    await email.fill('  Novyy@Yandex.RU ');
+    check((await note.count()) === 0, 'Novyy@Yandex.RU с пробелами: подсказки нет');
+
+    /* Отправка с иностранной почтой: запрос не уходит. */
+    await email.fill('zarubezh@gmail.com');
+    await page.fill('input[name="name"]', 'Иван Зарубежный');
+    await page.fill('input[name="password"]', 'parol-dlinnyy-1');
+    await page.click('.role-card[data-role="tutor"]');
+    await tickConsents(page);
+    await page.click('button[type="submit"]');
+    check(
+      (await note.count()) === 1 && asked === 0,
+      'иностранная почта: запрос на сервер не уходит',
+    );
+
+    /* «Уже добавили», а на деле нет: сервер отказывает, снова подсказка. */
+    await page.click('.auth-form__domain button');
+    await page.waitForFunction(() => document.querySelector('.auth-form__domain') !== null);
+    check(asked === 1, '«Мой адрес уже добавили»: запрос уходит на сервер');
+    check(
+      (await note.count()) === 1 && (await page.locator('.field__msg--error').count()) === 0,
+      'сервер отказал по домену: та же спокойная подсказка, не ошибка',
+    );
+    check(
+      !(await page.content()).includes('domain_not_allowed'),
+      'технического слова domain_not_allowed на экране нет',
+    );
+    check(!mock.users.has('zarubezh@gmail.com'), 'иностранная почта: аккаунт не создан');
+
+    /* Школьная почта, добавленная вручную: аккаунт создаётся. */
+    await email.fill('shkola@school.example');
+    await page.click('button[type="submit"]');
+    await page.waitForSelector('.auth-form__domain');
+    await page.click('.auth-form__domain button');
+    await page.waitForSelector('.state');
+    check(
+      mock.users.has('shkola@school.example'),
+      'школьная почта из ручного списка: аккаунт создан',
+    );
+    check(errors.length === 0, `почтовые домены: ошибок в консоли нет (${errors.join(' | ')})`);
+    await shot(page, 'registraciya-domen-1440');
+    await context.close();
+    /* Дальше сценарий ждёт пустой почтовый ящик и одного нового
+       пользователя — убираем школьный аккаунт и его письмо. */
+    const shkola = mock.users.get('shkola@school.example');
+    mock.users.delete(shkola.email);
+    mock.profiles.delete(shkola.id);
+    for (let i = mock.consents.length - 1; i >= 0; i -= 1) {
+      if (mock.consents[i].user_id === shkola.id) mock.consents.splice(i, 1);
+    }
+    mock.mailbox.splice(0);
+  }
+  {
+    const { context, page } = await newPage(mock, 390, errors);
+    await page.goto(`${SITE}/voyti/?vkladka=registraciya`, { waitUntil: 'networkidle' });
+    await page.fill('input[name="email"]', 'zarubezh@gmail.com');
+    await page.locator('input[name="name"]').click();
+    await page.waitForSelector('.auth-form__domain');
+    check(await noHorizontalScroll(page), 'подсказка о почте 390: горизонтальной прокрутки нет');
+    const button = await page.locator('.auth-form__domain button').boundingBox();
+    check((button?.height ?? 0) >= 44, '«Мой адрес уже добавили» 390: высота кнопки не меньше 44');
+    await shot(page, 'registraciya-domen-390');
     await context.close();
   }
   {
@@ -563,34 +1060,44 @@ async function runEnabled() {
     await shot(page, 'vhod-390');
     await page.click('[role="tab"]:has-text("Зарегистрироваться")');
     await page.click('.role-card[data-role="student"]');
+    await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 16));
     check(await noHorizontalScroll(page), 'регистрация 390: горизонтальной прокрутки нет');
     await shot(page, 'registraciya-390');
     await context.close();
   }
 
-  /* 3. Регистрация разрешённой почтой → письмо → подтверждение → кабинет. */
+  /* 3. Регистрация разрешённой почтой → письмо → подтверждение → кабинет
+        репетитора; перенос прогресса «Да». */
   {
     const { context, page } = await newPage(mock, 1440, errors);
-    /* Онбординг уже прошёл в этом браузере — факт должен уехать в профиль. */
+    /* Онбординг уже прошёл в этом браузере, и в тренажёре №8 есть прогресс. */
     await page.goto(`${SITE}/voyti/?vkladka=registraciya`, { waitUntil: 'networkidle' });
-    await page.evaluate(() => {
-      localStorage.setItem(
-        'budetege:onboarding:v1',
-        JSON.stringify({
-          welcomeSeen: true,
-          active: null,
-          tours: { repetitor: { step: 0, done: true } },
-        }),
-      );
-    });
+    await page.evaluate(
+      ([progressKey, prepKey]) => {
+        localStorage.setItem(
+          'budetege:onboarding:v1',
+          JSON.stringify({
+            welcomeSeen: true,
+            active: null,
+            tours: { repetitor: { step: 0, done: true } },
+          }),
+        );
+        localStorage.setItem(
+          progressKey,
+          JSON.stringify({ kinds: { '8.A': { done: 3, right: 2, seconds: 90 } }, mistakes: [] }),
+        );
+        localStorage.setItem(prepKey, JSON.stringify({ 'P8-1': [1, 3] }));
+      },
+      [PROGRESS_8, PREP_8],
+    );
     check(
       (await page.locator('[role="tab"][aria-selected="true"]').innerText()).includes(
         'Зарегистрироваться',
       ),
       '?vkladka=registraciya открывает вкладку регистрации',
     );
-    await page.fill('input[name="name"]', 'Наталья Багаева');
-    await page.fill('input[name="email"]', 'svoy@example.ru');
+    await page.fill('input[name="name"]', 'Наталия Багаева');
+    await page.fill('input[name="email"]', 'svoy@yandex.ru');
     await page.fill('input[name="password"]', 'kor');
     check(
       (await page.locator('.password + .field__msg').innerText()).startsWith('Ещё 5'),
@@ -598,16 +1105,29 @@ async function runEnabled() {
     );
     await page.fill('input[name="password"]', 'moy-dlinnyy-parol');
     await page.click('.role-card[data-role="tutor"]');
+    await tickConsents(page);
     await page.click('button[type="submit"]');
     await page.waitForSelector('.state');
     check(
-      (await page.locator('.state').innerText()).includes('svoy@example.ru'),
+      (await page.locator('.state').innerText()).includes('svoy@yandex.ru'),
       'разрешённая почта: экран «Подтвердите почту» с адресом',
     );
     check(
       mock.mailbox.length === 1 && mock.mailbox[0].type === 'signup',
       'письмо подтверждения отправлено',
     );
+    {
+      const me = mock.users.get('svoy@yandex.ru');
+      const mine = mock.consents.filter((c) => c.user_id === me.id);
+      check(
+        mine.length === 2 && me.meta.documents_version === mock.edition.version,
+        'согласия записаны: два документа текущей редакции',
+      );
+      check(
+        !('signup_ip' in me.meta) && !('bootstrap_admin' in me.meta),
+        'форма не шлёт ни IP, ни отметок администратора',
+      );
+    }
     await shot(page, 'pismo-otpravleno-1440');
 
     await page.goto(mock.mailbox[0].link, { waitUntil: 'networkidle' });
@@ -626,52 +1146,137 @@ async function runEnabled() {
     await shot(page, 'podtverzhdenie-1440');
 
     await page.click('.state a[href="/kabinet/"]');
-    await page.waitForSelector('.kabinet');
+    await page.waitForSelector('.kabinet[data-role="tutor"]');
+
+    /* Первый вход: вопрос о переносе прогресса. */
+    await page.waitForSelector('[role="dialog"]');
     check(
-      (await page.locator('dd[data-field="name"]').innerText()) === 'Наталья Багаева',
-      'кабинет: имя',
+      (await page.locator('[role="dialog"]').innerText()).includes(
+        'Перенести ваш прогресс с этого устройства в кабинет?',
+      ),
+      'первый вход: «Перенести ваш прогресс с этого устройства в кабинет?»',
     );
     check(
-      (await page.locator('dd[data-field="email"]').innerText()) === 'svoy@example.ru',
-      'кабинет: почта',
+      (await page.locator('[role="dialog"] .import-list').innerText()).includes('№8'),
+      'в вопросе названо, что переносится: №8',
+    );
+    await shot(page, 'perenos-vopros-1440');
+    await page.click('[role="dialog"] button:has-text("Да, перенести")');
+    await page.waitForSelector('.kabinet__notice--ok');
+    {
+      const me = mock.users.get('svoy@yandex.ru');
+      const keys = mock.storage
+        .filter((r) => r.user_id === me.id)
+        .map((r) => r.key)
+        .sort();
+      check(
+        keys.length === 2 && keys.includes(LOG_8) && keys.includes(PREP_8),
+        `«Да»: журнал №8 и опорные записаны в аккаунт (${keys.join(', ')})`,
+      );
+      const archive = Object.values(
+        mock.storage.find((r) => r.user_id === me.id && r.key === LOG_8)?.value?.archive ?? {},
+      );
+      check(
+        archive.length === 1 && archive[0]?.['8.A']?.done === 3,
+        '«Да»: прежние счётчики перенесены в журнал',
+      );
+    }
+    check(
+      (await page.evaluate((k) => localStorage.getItem(k), PROGRESS_8)) !== null,
+      'прогресс в браузере после переноса остался',
+    );
+
+    /* Кабинет репетитора: разделы с пустыми состояниями. */
+    check(
+      (await page.locator('.kabinet__role').innerText()) === 'Кабинет репетитора',
+      'кабинет: «Кабинет репетитора»',
+    );
+    /* Классы и ДЗ грузятся каждый сам (components/dz/KabinetDz.tsx). */
+    await page.waitForFunction(() =>
+      ['classes', 'homework'].every(
+        (name) => !document.querySelector(`[data-section="${name}"]`)?.textContent?.includes('…'),
+      ),
+    );
+    const home = await page.locator('.kabinet').innerText();
+    check(
+      home.includes('Мои классы') && home.includes('У вас пока нет классов'),
+      'репетитор: «Мои классы» — «У вас пока нет классов»',
     );
     check(
-      (await page.locator('dd[data-field="role"]').innerText()) === 'Репетитор',
-      'кабинет: роль',
+      home.includes('Домашние задания') && home.includes('Заданий пока нет'),
+      'репетитор: «Домашние задания» — пустое состояние',
     );
-    const savedText = await page.locator('.kabinet__card').nth(1).innerText();
+    check(home.includes('Пока ни одного'), 'репетитор: кодов комплектов честно нет');
+    check(
+      (await page.locator('[data-section="progress"], [data-section="mistakes"]').count()) === 0,
+      'репетитор: разделов ученика нет',
+    );
+    await shot(page, 'kabinet-repetitor-1440');
+
+    /* Вкладка «Профиль». */
+    await openProfile(page);
+    check(page.url().endsWith('/kabinet/?vkladka=profil'), 'вкладка «Профиль» — в адресе');
+    check(
+      (await page.locator('dd[data-field="name"]').innerText()) === 'Наталия Багаева',
+      'профиль: имя',
+    );
+    check(
+      (await page.locator('dd[data-field="email"]').innerText()) === 'svoy@yandex.ru',
+      'профиль: почта',
+    );
+    check((await page.locator('[data-field="role"]').innerText()) === 'Репетитор', 'профиль: роль');
+    const savedText = await page.locator('[data-section="saved"]').innerText();
     check(
       savedText.includes('просмотрено'),
-      'кабинет: факт «приветствие просмотрено» перенесён из браузера',
+      'профиль: факт «приветствие просмотрено» перенесён из браузера',
     );
-    check(savedText.includes('Тур для репетитора — пройден'), 'кабинет: пройденный тур перенесён');
-    check(savedText.includes('Пока ни одного'), 'кабинет: кодов комплектов честно нет');
-    await shot(page, 'kabinet-1440');
-    await shot(page, 'shapka-posle-vhoda-1440');
+    check(savedText.includes('Тур для репетитора — пройден'), 'профиль: пройденный тур перенесён');
+    check(savedText.includes('№8 «Вычисления» — перенесён'), 'профиль: перенос №8 виден');
+    check(
+      (await page.locator('[data-field="consent"]').innerText()).includes('редакция документов от'),
+      'профиль: когда и на какую редакцию дано согласие',
+    );
+    await shot(page, 'kabinet-profil-1440');
 
-    /* Смена имени и роли. */
-    await page.click('.kabinet__card button:has-text("Изменить")');
-    await page.fill('.kabinet__card input[autocomplete="name"]', 'Наталья В.');
-    await page.click('.kabinet__card .role-card[data-role="student"]');
-    await page.click('.kabinet__card button[type="submit"]');
-    await page.waitForSelector('dd[data-field="role"]');
+    /* Выгрузка данных. */
+    const download = page.waitForEvent('download');
+    await page.click('[data-section="documents"] button:has-text("Выгрузить мои данные")');
     check(
-      (await page.locator('dd[data-field="role"]').innerText()) === 'Ученик',
-      'смена роли: «Ученик»',
+      (await download).suggestedFilename() === 'budetege-moi-dannye.json',
+      'выгрузка данных: файл budetege-moi-dannye.json',
+    );
+
+    /* Смена имени; роль в кабинете не меняется. */
+    await page.click('[data-section="profile"] button:has-text("Изменить имя")');
+    check(
+      (await page.locator('[data-section="profile"] .role-card').count()) === 0,
+      'в профиле выбора роли нет',
+    );
+    await page.fill('[data-section="profile"] input[autocomplete="name"]', 'Наталия В.');
+    await page.click('[data-section="profile"] button[type="submit"]');
+    await page.waitForSelector('dd[data-field="name"]:has-text("Наталия В.")');
+    check(
+      mock.profiles.get(mock.users.get('svoy@yandex.ru').id).display_name === 'Наталия В.',
+      'имя записано в базу',
     );
     check(
-      (await page.locator('dd[data-field="name"]').innerText()) === 'Наталья В.',
-      'смена имени',
+      mock.profiles.get(mock.users.get('svoy@yandex.ru').id).role === 'tutor',
+      'роль в базе не изменилась',
     );
-    check(
-      mock.profiles.get(mock.users.get('svoy@example.ru').id).role === 'student',
-      'роль записана в базу',
-    );
-    check(mock.users.get('svoy@example.ru').meta.role === 'student', 'роль записана и в сессию');
     check(
       (await page.locator(AVATAR).innerText()).trim() === 'НВ',
       'инициалы в шапке обновились: «НВ»',
     );
+
+    /* Второй заход в кабинет: вопроса о переносе больше нет. */
+    await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.kabinet');
+    await page.waitForSelector('[data-section="kits"]');
+    check(
+      (await page.locator('[role="dialog"]').count()) === 0,
+      'второй вход: вопрос о переносе не повторяется',
+    );
+    await shot(page, 'shapka-posle-vhoda-1440');
 
     /* Выход из меню шапки. */
     await page.click(AVATAR);
@@ -687,10 +1292,55 @@ async function runEnabled() {
       (await page.evaluate(() => localStorage.getItem('budetege-auth'))) === null,
       'выход: сессии в хранилище нет',
     );
-    check(mock.users.has('svoy@example.ru'), 'выход: пользователь остался');
+    check(mock.users.has('svoy@yandex.ru'), 'выход: пользователь остался');
     check(
       errors.length === 0,
       `регистрация и кабинет: ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`,
+    );
+    await context.close();
+  }
+
+  /* 3а. Старый пользователь с иностранной почтой: зарегистрирован до
+        правила о доменах — входит как раньше. */
+  {
+    const createdAt = new Date().toISOString();
+    const old = {
+      id: '00000000-0000-4000-8000-0000000000aa',
+      email: 'staryy@gmail.com',
+      password: 'staryy-parol-1',
+      confirmed: true,
+      meta: { name: 'Старый Пользователь', role: 'tutor', documents_version: mock.edition.version },
+      createdAt,
+    };
+    mock.users.set(old.email, old);
+    mock.profiles.set(old.id, {
+      user_id: old.id,
+      display_name: 'Старый Пользователь',
+      role: 'tutor',
+      grade: null,
+      welcome_seen_at: createdAt,
+      tour_id: null,
+      tour_done: true,
+      created_at: createdAt,
+    });
+    for (const kind of ['soglashenie', 'soglasie']) {
+      mock.consents.push({
+        user_id: old.id,
+        kind,
+        version: mock.edition.version,
+        accepted_at: createdAt,
+      });
+    }
+    const { context, page } = await newPage(mock, 1440, errors);
+    await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
+    await page.fill('input[name="email"]', 'Staryy@Gmail.com');
+    await page.fill('input[name="password"]', 'staryy-parol-1');
+    await page.click('button[type="submit"]');
+    await page.waitForURL(`${SITE}/kabinet/`);
+    await page.waitForSelector('.kabinet');
+    check(
+      (await page.locator('.auth-form__domain').count()) === 0,
+      'вход старого пользователя с gmail.com: подсказки о доменах нет, кабинет открылся',
     );
     await context.close();
   }
@@ -699,7 +1349,7 @@ async function runEnabled() {
   {
     const { context, page } = await newPage(mock, 1440, errors);
     await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
-    await page.fill('input[name="email"]', 'svoy@example.ru');
+    await page.fill('input[name="email"]', 'svoy@yandex.ru');
     await page.fill('input[name="password"]', 'ne-tot-parol');
     await page.click('button[type="submit"]');
     await page.waitForSelector('.field__msg--error');
@@ -715,18 +1365,18 @@ async function runEnabled() {
       `${SUPABASE}/auth/v1/signup`,
       {},
       JSON.stringify({
-        email: 'vtoroy@example.ru',
+        email: 'vtoroy@yandex.ru',
         password: 'vtoroy-parol-123',
-        data: { name: 'Второй', role: 'student' },
+        data: signupData('Второй', 'student'),
       }),
     );
-    await page.fill('input[name="email"]', 'vtoroy@example.ru');
+    await page.fill('input[name="email"]', 'vtoroy@yandex.ru');
     await page.fill('input[name="password"]', 'vtoroy-parol-123');
     await page.click('button[type="submit"]');
     await page.waitForSelector('.field__msg--error');
     check(
       (await page.locator('.field__msg--error').innerText()) ===
-        'Подтвердите почту: письмо отправлено на vtoroy@example.ru.',
+        'Подтвердите почту: письмо отправлено на vtoroy@yandex.ru.',
       'без подтверждения: «Подтвердите почту: письмо отправлено на …»',
     );
     const before = mock.mailbox.length;
@@ -739,9 +1389,9 @@ async function runEnabled() {
     );
 
     /* Вход без «Запомнить меня». */
-    await page.fill('input[name="email"]', 'svoy@example.ru');
+    await page.fill('input[name="email"]', 'svoy@yandex.ru');
     await page.fill('input[name="password"]', 'moy-dlinnyy-parol');
-    await page.click('.check--box input');
+    await page.click('.auth-form__row .check--box input');
     await page.click('button[type="submit"]');
     await page.waitForURL(`${SITE}/kabinet/`);
     await page.waitForSelector('.kabinet');
@@ -753,7 +1403,8 @@ async function runEnabled() {
       where.local === null && where.session !== null,
       '«Запомнить меня» выключено: сессия в sessionStorage',
     );
-    await page.click('.kabinet__card button:has-text("Выйти")');
+    await openProfile(page);
+    await page.click('[data-section="account"] button:has-text("Выйти")');
     await page.waitForURL(`${SITE}/`);
     check(errors.length === 0, 'вход: ошибок в консоли нет');
     await context.close();
@@ -764,7 +1415,7 @@ async function runEnabled() {
     const { context, page } = await newPage(mock, 1440, errors);
     await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
     await page.click('button:has-text("Забыли пароль?")');
-    await page.fill('input[name="email"]', 'svoy@example.ru');
+    await page.fill('input[name="email"]', 'svoy@yandex.ru');
     await page.click('button[type="submit"]');
     await page.waitForSelector('.state');
     check(
@@ -772,10 +1423,7 @@ async function runEnabled() {
       'сброс: «Проверьте почту»',
     );
     const letter = mock.mailbox.at(-1);
-    check(
-      letter.type === 'recovery' && letter.to === 'svoy@example.ru',
-      'письмо сброса отправлено',
-    );
+    check(letter.type === 'recovery' && letter.to === 'svoy@yandex.ru', 'письмо сброса отправлено');
     await shot(page, 'sbros-otpravlen-1440');
     await page.goto(letter.link, { waitUntil: 'networkidle' });
     await page.waitForSelector('input[name="password"]');
@@ -793,7 +1441,7 @@ async function runEnabled() {
       'новый пароль сохранён',
     );
     check(
-      mock.users.get('svoy@example.ru').password === 'sovsem-novyy-parol',
+      mock.users.get('svoy@yandex.ru').password === 'sovsem-novyy-parol',
       'пароль изменён на сервере',
     );
     await context.close();
@@ -814,22 +1462,559 @@ async function runEnabled() {
     await context.close();
   }
 
-  /* 7. Комплект репетитора уходит в аккаунт; телефон: «Войти» и панели. */
+  /* 7. Кабинет ученика: пустые состояния, «Нет» на вопрос о переносе,
+        класс от репетитора; репетитор видит свой класс. */
+  {
+    registerInMock(mock, 'uchenik@yandex.ru', 'uchenik-parol-1', 'Тестовый ученик 1', 'student');
+    const { context, page } = await newPage(mock, 390, errors);
+    await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
+    await page.evaluate(
+      (key) => localStorage.setItem(key, JSON.stringify({ kinds: { '8.B': { done: 1 } } })),
+      PROGRESS_8,
+    );
+    await login(page, 'uchenik@yandex.ru', 'uchenik-parol-1');
+    await page.waitForSelector('[role="dialog"]');
+    await shot(page, 'perenos-vopros-390');
+    await page.click('[role="dialog"] button:has-text("Нет")');
+    await page.waitForSelector('[role="dialog"]', { state: 'detached' });
+    const student = mock.users.get('uchenik@yandex.ru');
+    check(
+      mock.storage.filter((r) => r.user_id === student.id).length === 0,
+      '«Нет»: в аккаунт ничего не ушло',
+    );
+    check(
+      (await page.locator('.kabinet__role').innerText()) === 'Кабинет ученика',
+      'кабинет: «Кабинет ученика»',
+    );
+    /* Главная ученика — «Карта ЕГЭ»: без прогресса — 0 из 20 и без прогноза;
+       карточки ДЗ нет, пока ДЗ не выдано; плашки «Войдите…» у вошедшего нет. */
+    await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
+    const kartaItog = (await page.locator('.karta-shapka__itog').innerText()).replace(/\s+/g, ' ');
+    check(
+      kartaItog.includes('Освоено 0 из 20') && kartaItog.includes('Решите ещё немного'),
+      `ученик: карта — «Освоено 0 из 20», прогноза нет (${kartaItog})`,
+    );
+    check((await page.locator('.karta-gost').count()) === 0, 'ученик: плашки «Войдите…» нет');
+    check(
+      (await page.locator('[data-section="karta"] .karta-ostrov').count()) === 20,
+      'ученик: на карте 20 областей',
+    );
+    await page.waitForFunction(() => document.querySelector('.karta-dz') === null, null, {
+      timeout: 10000,
+    });
+    check(
+      (await page.locator('.karta-dz').count()) === 0,
+      'ученик без ДЗ: карточки ДЗ под картой нет',
+    );
+    check(
+      (await page.locator('[data-section="kits"]').count()) === 0,
+      'ученик: кодов комплектов репетитора нет',
+    );
+    check(await noHorizontalScroll(page), 'кабинет ученика 390: горизонтальной прокрутки нет');
+    await shot(page, 'kabinet-uchenik-390');
+    /* Классы — на вкладке профиля. */
+    await openProfile(page);
+    await page.waitForFunction(
+      () => !document.querySelector('[data-section="classes"]')?.textContent?.includes('…'),
+    );
+    check(
+      (await page.locator('[data-section="classes"]').innerText()).includes('пока не в классе'),
+      'ученик без класса: «Ты пока не в классе» (в профиле)',
+    );
+
+    /* «Нет» запомнено: при следующем заходе вопроса нет. */
+    await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
+    check(
+      (await page.locator('[role="dialog"]').count()) === 0,
+      '«Нет» запомнено: вопрос не повторяется',
+    );
+    check(
+      mock.storage.filter((r) => r.user_id === student.id).length === 0,
+      '«Нет»: и после следующего прохода синхронизации прогресс гостя не в аккаунте',
+    );
+
+    /* Тестовый класс, как после кнопки «Сервер: тестовые данные». */
+    mock.seedClass('svoy@yandex.ru', ['uchenik@yandex.ru']);
+    await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await openProfile(page);
+    await page.waitForSelector('.klass-list');
+    const klass = await page.locator('[data-section="classes"]').innerText();
+    check(
+      klass.includes('Тестовый класс') && klass.includes('Репетитор: Наталия В.'),
+      'ученик в классе: название класса и имя репетитора (в профиле)',
+    );
+    check(await noHorizontalScroll(page), 'профиль 390: горизонтальной прокрутки нет');
+    await shot(page, 'kabinet-profil-390');
+    await context.close();
+  }
+  {
+    /* Школьник: до согласия родителя вопроса о переносе нет, есть плашка. */
+    registerInMock(mock, 'shkolnik@yandex.ru', 'shkolnik-parol-1', 'Школьник', 'student', {
+      birth_year: new Date().getFullYear() - 15,
+      parent_email: 'mama@yandex.ru',
+    });
+    const { context, page } = await newPage(mock, 1440, errors);
+    await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
+    await page.evaluate(
+      (key) => localStorage.setItem(key, JSON.stringify({ kinds: { '8.B': { done: 1 } } })),
+      PROGRESS_8,
+    );
+    await login(page, 'shkolnik@yandex.ru', 'shkolnik-parol-1');
+    await page.waitForSelector('.kabinet__notice');
+    check(
+      (await page.locator('.kabinet__notice').innerText()).includes('Ждём согласия родителя'),
+      'школьник: плашка «Ждём согласия родителя»',
+    );
+    check(
+      (await page.locator('[role="dialog"]').count()) === 0,
+      'школьник до согласия родителя: вопроса о переносе нет',
+    );
+    await shot(page, 'kabinet-shkolnik-1440');
+    await context.close();
+  }
+
+  /* 7б. Два устройства: тренировка №8, начатая на компьютере, продолжается
+         на телефоне с той же задачи; решённое и закладка — в кабинете. */
+  {
+    registerInMock(mock, 'dva@yandex.ru', 'dva-ustroystva-1', 'Ученик Два', 'student');
+    const dva = mock.users.get('dva@yandex.ru');
+    const KEYS = [
+      'budetege:vychisleniya-8:log:v1',
+      'budetege:trainer:8:session',
+      'budetege:zakladki:v1',
+    ];
+    /* Записи браузера совпали с аккаунтом — синхронизация дошла. */
+    const pushed = async (page) => {
+      const until = Date.now() + 15000;
+      for (;;) {
+        const local = await page.evaluate((ks) => ks.map((k) => localStorage.getItem(k)), KEYS);
+        const same = KEYS.every((key, i) => {
+          const row = mock.storage.find((r) => r.user_id === dva.id && r.key === key);
+          return (
+            row !== undefined &&
+            local[i] !== null &&
+            JSON.stringify(row.value) === JSON.stringify(JSON.parse(local[i]))
+          );
+        });
+        if (same || Date.now() > until) return same;
+        await new Promise((done) => setTimeout(done, 250));
+      }
+    };
+    const TRAINER = `${SITE}/zadaniya/8/trenazher/`;
+    const CARD = '.trn-zadacha[data-task]';
+
+    const desk = await newPage(mock, 1280, errors);
+    await welcomeSeen(desk.context);
+    await login(desk.page, 'dva@yandex.ru', 'dva-ustroystva-1');
+    check(
+      (await desk.page.locator('[role="dialog"]').count()) === 0,
+      'два устройства: без прогресса гостя вопроса о переносе нет',
+    );
+    await desk.page.goto(TRAINER, { waitUntil: 'networkidle' });
+    /* Стартовый экран тренажёра: «Выбрать темы» → 5 задач → «Начать». */
+    await desk.page.waitForSelector('.trn-start');
+    await desk.page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+    await desk.page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
+    await desk.page.locator('.trn-vybor__start').click();
+    await desk.page.waitForSelector(CARD);
+    const first = await desk.page.locator(CARD).getAttribute('data-task');
+    const parsed = parseTaskId(first);
+    const right = ru(generate(parsed.prototype, parsed.seed, parsed.level).otvet);
+    await desk.page.fill('.trn-ekran .otvet-input__field', right);
+    await desk.page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+    await desk.page.locator('.trn-knopki button:has-text("Дальше")').click();
+    await desk.page.waitForFunction(
+      ([sel, id]) => document.querySelector(sel)?.getAttribute('data-task') !== id,
+      [CARD, first],
+    );
+    const second = await desk.page.locator(CARD).getAttribute('data-task');
+    await desk.page.locator('.trn-zadacha .zakladka').click();
+    check(await pushed(desk.page), 'компьютер: журнал, тренировка и закладка ушли в аккаунт');
+    await desk.context.close();
+
+    const phone = await newPage(mock, 390, errors);
+    await welcomeSeen(phone.context);
+    await login(phone.page, 'dva@yandex.ru', 'dva-ustroystva-1');
+    /* Журнал №8 с компьютера приехал: на карте №8 — «в процессе». */
+    await phone.page
+      .waitForFunction(
+        () => document.querySelector('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]') !== null,
+        null,
+        { timeout: 10000 },
+      )
+      .catch(() => {});
+    check(
+      (await phone.page.locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]').count()) === 1,
+      'телефон: на карте №8 «в процессе» — решённое на компьютере приехало',
+    );
+    const laterRaw = await phone.page.evaluate(() => localStorage.getItem('budetege:zakladki:v1'));
+    check(
+      typeof laterRaw === 'string' && laterRaw.includes(second),
+      'телефон: закладка с компьютера приехала в хранилище',
+    );
+    check(
+      await noHorizontalScroll(phone.page),
+      'кабинет с прогрессом 390: горизонтальной прокрутки нет',
+    );
+    await shot(phone.page, 'kabinet-uchenik-progress-390');
+    await phone.page.goto(TRAINER, { waitUntil: 'networkidle' });
+    await phone.page.waitForSelector(CARD);
+    check(
+      (await phone.page.locator(CARD).getAttribute('data-task')) === second,
+      'телефон: тренировка продолжается с той же задачи',
+    );
+    check(
+      (await phone.page.locator('.trn-zadacha .zakladka').getAttribute('aria-pressed')) === 'true',
+      'телефон: задача отмечена «Отложить на потом»',
+    );
+    await phone.context.close();
+  }
+
+  /* 7в. Классы и ДЗ №8: класс и код, вступление, выдача, решение,
+         результаты, работа над ошибками. */
+  {
+    registerInMock(mock, 'dz-repetitor@yandex.ru', 'dz-repetitor-1', 'Ирина Петровна', 'tutor');
+    registerInMock(mock, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1', 'Аня Смирнова', 'student');
+    registerInMock(mock, 'dz-uchenik2@yandex.ru', 'dz-uchenik-2', 'Петя Иванов', 'student');
+    const tutorUser = mock.users.get('dz-repetitor@yandex.ru');
+    const s1 = mock.users.get('dz-uchenik1@yandex.ru');
+    const text = async (page, sel) =>
+      (await page.locator(sel).first().innerText()).replace(/\s+/g, ' ');
+
+    /* Репетитор: пустые состояния, класс и код. */
+    const tutor = await newPage(mock, 1280, errors);
+    await welcomeSeen(tutor.context);
+    await login(tutor.page, 'dz-repetitor@yandex.ru', 'dz-repetitor-1');
+    await tutor.page.waitForFunction(
+      () => !document.querySelector('[data-section="classes"]')?.textContent?.includes('…'),
+    );
+    check(
+      (await text(tutor.page, '[data-section="classes"]')).includes(
+        'У вас пока нет классов — создайте первый',
+      ),
+      'ДЗ: репетитор без классов — «У вас пока нет классов — создайте первый»',
+    );
+    await tutor.page.waitForFunction(
+      () => !document.querySelector('[data-section="homework"]')?.textContent?.includes('…'),
+    );
+    check(
+      (await text(tutor.page, '[data-section="homework"]')).includes('Заданий пока нет'),
+      'ДЗ: репетитор без заданий — «Заданий пока нет»',
+    );
+    await tutor.page.fill('input[name="class-name"]', 'Группа по средам');
+    await tutor.page.locator('[data-section="classes"] button:has-text("Создать класс")').click();
+    await tutor.page.waitForSelector('.dz-klassy__item');
+    const code = (await tutor.page.locator('.dz-klassy__code').innerText()).trim();
+    check(/^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{6}$/.test(code), `ДЗ: у класса код из 6 знаков (${code})`);
+    await shot(tutor.page, 'dz-kabinet-repetitor-1280');
+    await tutor.page.locator('.dz-klassy__name').click();
+    await tutor.page.waitForSelector('.dz-code');
+    check(
+      (await tutor.page.locator('.dz-link').innerText()).includes(`/kabinet/vstupit/?kod=${code}`),
+      'ДЗ: на странице класса — ссылка-приглашение с кодом',
+    );
+    const classUrl = tutor.page.url();
+
+    /* Ученик 1: ссылка до входа — код помнится и подставляется после входа. */
+    const st1 = await newPage(mock, 390, errors);
+    await welcomeSeen(st1.context);
+    await st1.page.goto(`${SITE}/kabinet/vstupit/?kod=${code}`, { waitUntil: 'networkidle' });
+    await st1.page.waitForSelector('text=войди в кабинет ученика');
+    check(true, 'ДЗ: ссылка-приглашение без входа — «войди в кабинет ученика»');
+    await login(st1.page, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1');
+    await st1.page.waitForSelector('[data-form="join"] input[name="class-code"]');
+    check(
+      (await st1.page.inputValue('[data-form="join"] input[name="class-code"]')) === code,
+      'ДЗ: после входа код из ссылки уже в форме «Вступить»',
+    );
+    await st1.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st1.page.waitForSelector('[data-form="join"] .dz-ok');
+    check(
+      (await text(st1.page, '[data-form="join"] .dz-ok')).includes('Группа по средам'),
+      'ДЗ: ученик вступил по ссылке — «Готово: ты в классе …»',
+    );
+
+    /* Ученик 2: неверный код, потом код строчными и с дефисом. */
+    const st2 = await newPage(mock, 1280, errors);
+    await welcomeSeen(st2.context);
+    await login(st2.page, 'dz-uchenik2@yandex.ru', 'dz-uchenik-2');
+    await st2.page.waitForSelector('[data-form="join"] input[name="class-code"]');
+    await st2.page.fill('[data-form="join"] input[name="class-code"]', 'ZZZZZZ');
+    await st2.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st2.page.waitForFunction(() =>
+      document.querySelector('[data-form="join"]')?.textContent?.includes('Такого кода нет'),
+    );
+    check(
+      (await text(st2.page, '[data-form="join"]')).includes('Такого кода нет'),
+      'ДЗ: неверный код — «Такого кода нет или класс сейчас не принимает учеников»',
+    );
+    await st2.page.fill(
+      '[data-form="join"] input[name="class-code"]',
+      `${code.slice(0, 3).toLowerCase()}-${code.slice(3).toLowerCase()}`,
+    );
+    await st2.page.locator('[data-form="join"] button:has-text("Вступить")').click();
+    await st2.page.waitForSelector('[data-form="join"] .dz-ok');
+    check(true, 'ДЗ: код строчными и с дефисом тоже подходит');
+
+    /* Репетитор: двое в классе, псевдоним ученика. */
+    await tutor.page.goto(classUrl, { waitUntil: 'networkidle' });
+    await tutor.page.waitForSelector('.dz-members__item');
+    check(
+      (await tutor.page.locator('.dz-members__item').count()) === 2,
+      'ДЗ: в классе двое учеников',
+    );
+    const petya = tutor.page.locator('.dz-members__item', { hasText: 'Петя Иванов' });
+    await petya.locator('button:has-text("Переименовать")').click();
+    await tutor.page.locator('.dz-members__item input').fill('Петя (среда)');
+    await tutor.page.locator('.dz-members__item button:has-text("Сохранить")').click();
+    await tutor.page.waitForSelector('.dz-members__name:has-text("Петя (среда)")');
+    check(true, 'ДЗ: репетитор переименовал ученика для себя');
+    await shot(tutor.page, 'dz-klass-1280');
+
+    /* Выдать ДЗ из формы: типы 8.A и 8.B по одной задаче, 2 попытки, решения сразу. */
+    await tutor.page.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`, {
+      waitUntil: 'networkidle',
+    });
+    await tutor.page.waitForSelector('[data-section="preview"] .dz-preview__item');
+    await tutor.page.waitForFunction(
+      () => document.querySelectorAll('[data-section="preview"] .dz-preview__item').length === 2,
+    );
+    check(true, 'ДЗ: форма выдачи из тренажёра — типы уже отмечены, в предпросмотре 2 задачи');
+    check(
+      (await tutor.page.locator('[data-list="students"] input:checked').count()) === 3,
+      'ДЗ: по умолчанию — всему классу (галочка «Всему классу» и оба ученика)',
+    );
+    check(
+      !(await tutor.page.getByRole('checkbox', { name: 'Показывать «Запомни»' }).isChecked()) &&
+        !(await tutor.page
+          .getByRole('checkbox', { name: 'Показывать разобранный пример' })
+          .isChecked()),
+      'ДЗ: «Запомни» и разобранный пример по умолчанию выключены',
+    );
+    await tutor.page.fill('input[name="title"]', 'ДЗ: степени и корни');
+    await tutor.page.getByRole('radio', { name: '2', exact: true }).check();
+    await tutor.page.getByRole('radio', { name: 'Сразу после ответа' }).check();
+    await shot(tutor.page, 'dz-vydat-1280');
+    await tutor.page.locator('button[type="submit"]:has-text("Выдать")').click();
+    await tutor.page.waitForSelector('text=Задание выдано');
+    const hw = mock.dz.homework.find((h) => h.title === 'ДЗ: степени и корни');
+    check(
+      hw !== undefined &&
+        hw.attempts_limit === 2 &&
+        hw.solutions_when === 'instant' &&
+        !hw.show_memo,
+      'ДЗ: в базе — 2 попытки, решения сразу, «Запомни» выключено',
+    );
+    const hwTasks = mock.dz.tasks
+      .filter((t) => t.homework_id === hw.id)
+      .sort((a, b) => a.position - b.position);
+    const keyOf = (task) => mock.dz.keys.find((k) => k.task_id === task.id).answer;
+    check(
+      hwTasks.length === 2 && hwTasks.every((t) => t.student_id === null),
+      'ДЗ: один набор на всех — 2 общие задачи',
+    );
+    check(
+      !hwTasks.some((t) => /банк|новая/.test(t.question_html)),
+      'ДЗ: в условии для ученика нет меток «банк/новая»',
+    );
+
+    /* Ученик 1 (телефон): ДЗ в кабинете, плашка в №8, решение. */
+    /* Карточка ДЗ под картой: название, срок, «сделано 0 из N». */
+    await st1.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await st1.page.waitForSelector('.karta-dz');
+    check(
+      (await text(st1.page, '.karta-dz')).includes('ДЗ: степени и корни') &&
+        /сделано 0 из \d+/.test(await text(st1.page, '.karta-dz')),
+      'ДЗ: у ученика под картой — карточка задания, «сделано 0 из N»',
+    );
+    await st1.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
+    await st1.page.waitForSelector('[data-block="dz-plashka"]');
+    check(
+      (await text(st1.page, '[data-block="dz-plashka"]')).includes('У вас домашнее задание до'),
+      'ДЗ: в разделе №8 — плашка «У вас домашнее задание до …»',
+    );
+    await shot(st1.page, 'dz-plashka-390');
+    await st1.page.locator('[data-block="dz-plashka"] a').click();
+    await st1.page.waitForSelector('.dz-task');
+    const field = '.dz-answer .otvet-input__field';
+    const left = () => st1.page.locator('[data-left]').getAttribute('data-left');
+    const key1 = keyOf(hwTasks[0]);
+    const asFraction = (decimal) => {
+      const [int, frac = ''] = decimal.replace('-', '').split('.');
+      const den = 10 ** frac.length;
+      const num = Number(`${int}${frac}`);
+      const g = (a, b) => (b === 0 ? a : g(b, a % b));
+      const d = g(num, den) || 1;
+      return `${decimal.startsWith('-') ? '−' : ''}${(num / d) * (den / d === 1 ? 2 : 1)}/${den / d === 1 ? 2 : den / d}`;
+    };
+    await st1.page.fill(field, asFraction(key1));
+    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
+    await st1.page.waitForSelector('.dz-answer .otvet-hint');
+    check(
+      (await text(st1.page, '.dz-answer .otvet-hint')).startsWith('Значение верное') &&
+        (await left()) === '2',
+      `ДЗ: «${asFraction(key1)}» — «Значение верное…», попытка не потрачена`,
+    );
+    await st1.page.fill(field, '5 см');
+    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
+    await st1.page.waitForSelector('.dz-answer .otvet-hint');
+    check(
+      (await text(st1.page, '.dz-answer .otvet-hint')).includes('только число') &&
+        (await left()) === '2',
+      'ДЗ: «5 см» — подсказка о записи, попытка не потрачена',
+    );
+    const wrong1 = String(Number(key1) + 1).replace('.', ',');
+    await st1.page.fill(field, wrong1);
+    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
+    await st1.page.waitForSelector('.dz-verdict--wrong');
+    check((await left()) === '1', 'ДЗ: неверный ответ — осталась 1 попытка');
+    await st1.page.fill(field, key1.replace('.', ','));
+    await st1.page.locator('.dz-answer button:has-text("Проверить")').click();
+    await st1.page.waitForSelector('.dz-verdict--right');
+    await st1.page.waitForSelector('.z8-razbor');
+    check(true, 'ДЗ: верно — и сразу решение по шагам (решения «сразу после ответа»)');
+    check(await noHorizontalScroll(st1.page), 'ДЗ: решение ДЗ 390 — горизонтальной прокрутки нет');
+    await shot(st1.page, 'dz-reshenie-390');
+    await st1.page.locator('.dz-strip__btn').nth(1).click();
+    await st1.page.waitForSelector(`.dz-task[data-task="${hwTasks[1].id}"]`);
+    await st1.page.locator('.dz-answer button:has-text("Показать решение")').click();
+    await st1.page
+      .locator(
+        '.modal button:has-text("Показать решение"), [role="dialog"] button:has-text("Показать решение")',
+      )
+      .last()
+      .click();
+    await st1.page.waitForSelector('.z8-razbor');
+    check(
+      (await st1.page.locator('.dz-strip__btn.is-revealed').count()) === 1,
+      'ДЗ: «Показать решение» закрывает задачу — в ленте она отмечена',
+    );
+    await st1.page.locator('.dz-submit button:has-text("Сдать задание")').click();
+    await st1.page.locator('[role="dialog"] button:has-text("Сдать задание")').click();
+    await st1.page.waitForSelector('[data-state="submitted"]');
+    check(
+      (await text(st1.page, '[data-state="submitted"]')).includes('Верно 1 из 2'),
+      'ДЗ: после «Сдать» — «Сдано … · Верно 1 из 2»',
+    );
+
+    /* Ученику форма выдачи недоступна. */
+    await st2.page.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
+    await st2.page.waitForSelector('text=Эта страница — для репетитора.');
+    check(true, 'ДЗ: ученику форма выдачи — «Эта страница — для репетитора»');
+
+    /* Репетитор: таблица, что вводил ученик, комментарий, работа над ошибками. */
+    await tutor.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+    await tutor.page.waitForSelector('.dz-table');
+    const row1 = tutor.page.locator(`tr[data-student="${s1.id}"]`);
+    const marks1 = await row1
+      .locator('.dz-cell')
+      .evaluateAll((els) => els.map((e) => e.dataset.mark));
+    check(
+      marks1.join(',') === 'right,revealed',
+      `ДЗ: в таблице у ученика 1 — верно, с решением (${marks1.join(',')})`,
+    );
+    const marks2 = await tutor.page
+      .locator('tr[data-student]')
+      .nth(1)
+      .locator('.dz-cell')
+      .evaluateAll((els) => els.map((e) => e.dataset.mark));
+    check(marks2.join(',') === 'none,none', 'ДЗ: у ученика 2 — не решал');
+    check(
+      (await text(tutor.page, '[data-section="kinds"]')).includes('1 из 2 ошиблись') ||
+        (await text(tutor.page, '[data-section="kinds"]')).includes('1 из 2 ошибся'),
+      'ДЗ: сводка по типам — «1 из 2 ошиблись»',
+    );
+    await row1.locator('.dz-cell').first().click();
+    await tutor.page.waitForSelector('[data-section="cell"]');
+    check(
+      (await text(tutor.page, '[data-section="cell"] [data-field="entered"]')).includes(wrong1),
+      `ДЗ: клик по клетке — что вводил ученик (${wrong1})`,
+    );
+    await shot(tutor.page, 'dz-rezultaty-1280');
+    await tutor.page
+      .locator('[data-section="task-comment"] textarea')
+      .fill('Посмотри, как сокращаются степени');
+    await tutor.page.locator('[data-section="task-comment"] button:has-text("Сохранить")').click();
+    await tutor.page.waitForSelector('[data-section="task-comment"] .dz-ok');
+    check(
+      hwTasks[0].comment === 'Посмотри, как сокращаются степени',
+      'ДЗ: комментарий к задаче сохранён',
+    );
+    await st1.page.reload({ waitUntil: 'networkidle' });
+    await st1.page.locator('.dz-strip__btn').first().click();
+    await st1.page.waitForSelector('[data-note="task"]');
+    check(true, 'ДЗ: ученик видит комментарий репетитора к задаче');
+
+    await tutor.page
+      .locator('[data-section="kinds"] a:has-text("Выдать работу над ошибками")')
+      .click();
+    await tutor.page.waitForSelector('[data-section="preview"] .dz-preview-people');
+    check(
+      (await tutor.page.locator('[data-list="students"] input').count()) === 1,
+      'ДЗ: работа над ошибками — только тому, кто ошибся',
+    );
+    await tutor.page.locator('button[type="submit"]:has-text("Выдать")').click();
+    await tutor.page.waitForSelector('text=Задание выдано');
+    const fix = mock.dz.homework.find((h) => h.parent_id === hw.id);
+    const fixTasks = fix === undefined ? [] : mock.dz.tasks.filter((t) => t.homework_id === fix.id);
+    check(
+      fix !== undefined &&
+        fix.origin === 'oshibki' &&
+        fixTasks.length === 1 &&
+        fixTasks[0].student_id === s1.id &&
+        fixTasks[0].kind === hwTasks[1].kind &&
+        fixTasks[0].question_html !== hwTasks[1].question_html,
+      'ДЗ: работа над ошибками — новый аналог задачи с ошибкой, тот же тип, ученику 1',
+    );
+    /* Телефон: экраны репетитора без горизонтальной прокрутки. */
+    await tutor.page.setViewportSize({ width: 390, height: 844 });
+    for (const [what, url] of [
+      ['кабинет', `${SITE}/kabinet/`],
+      ['класс', classUrl],
+      ['выдача', `${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`],
+      ['результаты', `${SITE}/kabinet/domashka/?id=${hw.id}`],
+    ]) {
+      await tutor.page.goto(url, { waitUntil: 'networkidle' });
+      await tutor.page.waitForTimeout(800);
+      check(
+        await noHorizontalScroll(tutor.page),
+        `ДЗ: репетитор, ${what} 390 — горизонтальной прокрутки нет`,
+      );
+    }
+    await st1.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await st1.page.waitForSelector('.karta-dz');
+    check(
+      await noHorizontalScroll(st1.page),
+      'ДЗ: ученик, кабинет 390 — горизонтальной прокрутки нет',
+    );
+    void tutorUser;
+    await st1.context.close();
+    await st2.context.close();
+    await tutor.context.close();
+  }
+
+  /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */
   {
     const { context, page } = await newPage(mock, 390, errors);
-    /* Вход новым паролем, роль — репетитор. */
-    await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
-    await page.fill('input[name="email"]', 'svoy@example.ru');
-    await page.fill('input[name="password"]', 'sovsem-novyy-parol');
-    await page.click('button[type="submit"]');
-    await page.waitForURL(`${SITE}/kabinet/`);
-    await page.waitForSelector('.kabinet');
+    await login(page, 'svoy@yandex.ru', 'sovsem-novyy-parol');
+    await page.waitForSelector('.dz-klassy__item');
+    const klass = await page.locator('[data-section="classes"]').innerText();
+    check(
+      klass.includes('Тестовый класс') && klass.includes('1 ученик'),
+      'репетитор: свой класс и сколько в нём учеников',
+    );
+    /* Имена учеников — на странице класса. */
+    await page.locator('.dz-klassy__name', { hasText: 'Тестовый класс' }).click();
+    await page.waitForSelector('.dz-members__item');
+    check(
+      (await page.locator('.dz-members').innerText()).includes('Тестовый ученик 1'),
+      'репетитор: на странице класса — ученик',
+    );
+    await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.dz-klassy__item');
     check(await noHorizontalScroll(page), 'кабинет 390: горизонтальной прокрутки нет');
-    await shot(page, 'kabinet-390');
-    await page.click('.kabinet__card button:has-text("Изменить")');
-    await page.click('.kabinet__card .role-card[data-role="tutor"]');
-    await page.click('.kabinet__card button[type="submit"]');
-    await page.waitForSelector('dd[data-field="role"]:has-text("Репетитор")');
+    await shot(page, 'kabinet-repetitor-390');
 
     await page.goto(`${SITE}/zadaniya/8/generator/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.topbar ' + AVATAR);
@@ -893,16 +2078,13 @@ async function runEnabled() {
     await context.close();
   }
 
-  /* 8. Удаление аккаунта. */
+  /* 9. Удаление аккаунта. */
   {
     const { context, page } = await newPage(mock, 1440, errors);
-    await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
-    await page.fill('input[name="email"]', 'svoy@example.ru');
-    await page.fill('input[name="password"]', 'sovsem-novyy-parol');
-    await page.click('button[type="submit"]');
-    await page.waitForURL(`${SITE}/kabinet/`);
-    await page.waitForSelector('.kabinet');
-    await page.click('.kabinet__card button:has-text("Удалить аккаунт")');
+    await login(page, 'svoy@yandex.ru', 'sovsem-novyy-parol');
+    const id = mock.users.get('svoy@yandex.ru').id;
+    await openProfile(page);
+    await page.click('[data-section="account"] button:has-text("Удалить аккаунт")');
     await page.waitForSelector('[role="dialog"]');
     await shot(page, 'udalenie-1440');
     await page.click('[role="dialog"] button:has-text("Удалить")');
@@ -911,8 +2093,16 @@ async function runEnabled() {
       (await page.locator('.state h4').innerText()) === 'Аккаунт удалён',
       'удаление: «Аккаунт удалён»',
     );
-    check(!mock.users.has('svoy@example.ru'), 'пользователя на сервере нет');
+    check(!mock.users.has('svoy@yandex.ru'), 'пользователя на сервере нет');
     check(mock.kits.length === 0, 'комплекты удалены каскадом');
+    check(
+      mock.storage.filter((r) => r.user_id === id).length === 0,
+      'перенесённый прогресс удалён каскадом',
+    );
+    check(
+      mock.consents.filter((c) => c.user_id === id && c.account_deleted_at).length === 2,
+      'запись о согласии осталась с отметкой об удалении',
+    );
     await page.waitForSelector(LOGIN);
     check(
       (await page.evaluate(
@@ -927,7 +2117,11 @@ async function runEnabled() {
     await context.close();
   }
 
-  /* 9. SDK вне первой загрузки. */
+  sdkOutsideFirstLoad();
+}
+
+/** SDK входа не должен попадать в первую загрузку страниц. */
+function sdkOutsideFirstLoad() {
   for (const p of ['', 'zadaniya/12/linear']) {
     const html = fs.readFileSync(path.join(OUT, p, 'index.html'), 'utf8');
     const srcs = [...html.matchAll(/<script[^>]*\ssrc="([^"]+)"[^>]*>/g)].map((m) => m[1]);
@@ -940,8 +2134,384 @@ async function runEnabled() {
   }
 }
 
+/* ── Вход включён, кнопки в шапке нет (пробный режим) ──────────── */
+
+async function runNoHeader() {
+  const mock = makeMock();
+  const errors = [];
+
+  /* Гость: шапка как без входа. */
+  {
+    const { context, page } = await newPage(mock, 1440, errors);
+    await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.site-head__cta .btn--primary');
+    check((await page.locator(LOGIN).count()) === 0, 'главная 1440: кнопки «Войти» нет');
+    check(
+      (await page.locator('.site-head a[href^="/voyti/"]').count()) === 0,
+      'главная: в шапке нет ссылок на страницу входа',
+    );
+    check(
+      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) !==
+        '/voyti/?vkladka=registraciya',
+      'главная: «Начать бесплатно» ведёт туда же, куда без входа',
+    );
+    await shot(page, 'bez-knopki-shapka-1440');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.click('.burger');
+    await page.waitForSelector('#site-menu');
+    check(
+      !(await page.locator('#site-menu').innerText()).includes('Войти'),
+      'меню телефона: «Войти» нет',
+    );
+    await shot(page, 'bez-knopki-menyu-390');
+    await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+    check(
+      (await page.locator('.topbar .auth-widget, .topbar ' + LOGIN).count()) === 0,
+      'оболочка заданий: входа нет',
+    );
+    await context.close();
+  }
+
+  /* Прямая ссылка: страница входа работает, после входа кружок на месте. */
+  {
+    registerInMock(mock, 'svoy@yandex.ru', 'moy-dlinnyy-parol', 'Наталия Багаева', 'tutor');
+    const { context, page } = await newPage(mock, 390, errors);
+    await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
+    check(
+      (await page.locator('h1').innerText()) === 'Вход',
+      '/voyti/ по прямой ссылке: форма входа открывается',
+    );
+    check(
+      (await page.locator('[role="tab"]:has-text("Зарегистрироваться")').count()) === 1,
+      '/voyti/: вкладка регистрации на месте',
+    );
+    await shot(page, 'bez-knopki-vhod-390');
+    await login(page, 'svoy@yandex.ru', 'moy-dlinnyy-parol');
+    check(
+      (await page.locator('.kabinet__role').innerText()) === 'Кабинет репетитора',
+      'вход по прямой ссылке ведёт в кабинет',
+    );
+    await page.click('.burger');
+    await page.waitForSelector('#site-menu');
+    const menu = await page.locator('#site-menu').innerText();
+    check(
+      menu.includes('Мой кабинет') && menu.includes('Выйти'),
+      'после входа в меню телефона: «Мой кабинет» и «Выйти»',
+    );
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector(AVATAR);
+    check(
+      (await page.locator(AVATAR).innerText()).trim() === 'НБ',
+      'после входа в шапке кружок «НБ»',
+    );
+    await page.click(AVATAR);
+    await page.click('.auth-widget__menu button:has-text("Выйти")');
+    await page.waitForSelector('.site-head__cta .btn--primary');
+    await page.waitForFunction(() => !document.querySelector('.auth-widget__button'));
+    check((await page.locator(LOGIN).count()) === 0, 'после выхода «Войти» в шапке снова нет');
+    await context.close();
+  }
+  check(
+    errors.length === 0,
+    `ошибок в консоли нет${errors.length ? `: ${errors.join(' | ')}` : ''}`,
+  );
+  sdkOutsideFirstLoad();
+}
+
+/* ── Снимки для описания PR ────────────────────────────────────── */
+
+/** Ключевые экраны на четырёх ширинах, с плотностью 2 — их смотрит человек.
+    Запуск: node scripts/check-auth.mjs --gallery <папка>. Проверок здесь
+    нет: только снимки. Годится любая сборка со входом. */
+/**
+ * Классы и ДЗ №8 на пяти ширинах. Класс — тестовыми данными, ДЗ выдаётся
+ * через форму и решается учеником один раз (на первой ширине); дальше
+ * те же экраны снимаются на остальных ширинах.
+ */
+async function runGalleryDz(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const mock = makeMock();
+  registerInMock(mock, 'dz-repetitor@yandex.ru', 'dz-repetitor-1', 'Ирина Петровна', 'tutor');
+  registerInMock(mock, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1', 'Аня Смирнова', 'student');
+  registerInMock(mock, 'dz-uchenik2@yandex.ru', 'dz-uchenik-2', 'Петя Иванов', 'student');
+  mock.seedClass(
+    'dz-repetitor@yandex.ru',
+    ['dz-uchenik1@yandex.ru', 'dz-uchenik2@yandex.ru'],
+    'Группа по средам',
+  );
+  const s1 = mock.users.get('dz-uchenik1@yandex.ru');
+  let hw = null;
+  const context = async (width) => {
+    const ctx = await browser.newContext({
+      viewport: { width, height: width < 500 ? 812 : 900 },
+      deviceScaleFactor: 2,
+      hasTouch: width < 500,
+    });
+    await welcomeSeen(ctx);
+    await installMock(ctx, mock);
+    return { ctx, page: await ctx.newPage() };
+  };
+  const ready = (page, sections) =>
+    page.waitForFunction(
+      (names) =>
+        names.every(
+          (n) =>
+            document.querySelector(`[data-section="${n}"]`) !== null &&
+            !document.querySelector(`[data-section="${n}"]`).textContent.includes('…'),
+        ),
+      sections,
+    );
+
+  for (const width of [1280, 375, 390, 430, 768]) {
+    const snap = async (page, name, fullPage = true) => {
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({
+        path: path.join(dir, `${width}-${name}.png`),
+        fullPage,
+        /* Высокая страница снимается по частям: закреплённая шапка иначе
+           повторилась бы посреди снимка. */
+        style:
+          '.help-fab, .help-fab * { visibility: hidden !important; } .site-head { position: static !important; }',
+      });
+    };
+
+    /* Репетитор: кабинет, класс, выдача. */
+    const t = await context(width);
+    await login(t.page, 'dz-repetitor@yandex.ru', 'dz-repetitor-1');
+    await ready(t.page, ['classes', 'homework']);
+    const klass = mock.classes.find((k) => k.name === 'Группа по средам');
+    await t.page.goto(`${SITE}/kabinet/klassy/?id=${klass.id}`, { waitUntil: 'networkidle' });
+    await t.page.waitForSelector('.dz-members__item');
+    await snap(t.page, '02-klass');
+    await t.page.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.C,8.H&n=1`, {
+      waitUntil: 'networkidle',
+    });
+    await t.page.waitForFunction(
+      () => document.querySelectorAll('[data-section="preview"] .dz-preview__item').length === 3,
+    );
+    await t.page.fill('input[name="title"]', 'ДЗ к среде: степени и логарифмы');
+    await t.page.getByRole('radio', { name: '2', exact: true }).check();
+    await t.page.getByRole('radio', { name: 'Сразу после ответа' }).check();
+    await t.page.fill(
+      '[data-section="settings"] textarea',
+      'Повтори свойства степеней перед решением.',
+    );
+    await snap(t.page, '03-vydat');
+    if (hw === null) {
+      await t.page.locator('button[type="submit"]:has-text("Выдать")').click();
+      await t.page.waitForSelector('text=Задание выдано');
+      hw = mock.dz.homework.find((h) => h.title === 'ДЗ к среде: степени и логарифмы');
+      /* Ученик 1 решает: ошибка и верно в первой, решение во второй. */
+      const st = await context(width);
+      await login(st.page, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1');
+      await st.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+      await st.page.waitForSelector('.dz-task');
+      const hwTasks = mock.dz.tasks
+        .filter((x) => x.homework_id === hw.id)
+        .sort((a, b) => a.position - b.position);
+      const key = mock.dz.keys.find((k) => k.task_id === hwTasks[0].id).answer;
+      await st.page.fill(
+        '.dz-answer .otvet-input__field',
+        String(Number(key) + 1).replace('.', ','),
+      );
+      await st.page.locator('.dz-answer button:has-text("Проверить")').click();
+      await st.page.waitForSelector('.dz-verdict--wrong');
+      await st.page.fill('.dz-answer .otvet-input__field', key.replace('.', ','));
+      await st.page.locator('.dz-answer button:has-text("Проверить")').click();
+      await st.page.waitForSelector('.dz-verdict--right');
+      await st.page.locator('.dz-strip__btn').nth(1).click();
+      await st.page.locator('.dz-answer button:has-text("Показать решение")').click();
+      await st.page.locator('[role="dialog"] button:has-text("Показать решение")').click();
+      await st.page.waitForSelector('.z8-razbor');
+      await st.ctx.close();
+    }
+    await t.page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await ready(t.page, ['classes', 'homework']);
+    await snap(t.page, '01-kabinet-repetitora');
+    await t.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+    await t.page.waitForSelector('.dz-table');
+    await t.page.locator(`tr[data-student="${s1.id}"] .dz-cell`).first().click();
+    await t.page.waitForSelector('[data-section="cell"]');
+    await snap(t.page, '05-rezultaty');
+    if (width === 1280) {
+      for (const list of ['uchenik', 'uchitel']) {
+        await t.page.goto(`${SITE}/kabinet/domashka/pechat/?id=${hw.id}&list=${list}`, {
+          waitUntil: 'networkidle',
+        });
+        await t.page.waitForTimeout(1500);
+        await snap(t.page, `09-pechat-${list}`, false);
+      }
+    }
+    await t.ctx.close();
+
+    /* Ученик: кабинет, плашка в №8, решение. */
+    const st = await context(width);
+    await login(st.page, 'dz-uchenik1@yandex.ru', 'dz-uchenik-1');
+    await st.page.waitForSelector('.karta-dz');
+    await snap(st.page, '06-kabinet-uchenika');
+    await st.page.goto(`${SITE}/zadaniya/8/`, { waitUntil: 'networkidle' });
+    await st.page.waitForSelector('[data-block="dz-plashka"]');
+    await snap(st.page, '07-plashka-8', false);
+    await st.page.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+    await st.page.waitForSelector('.dz-task');
+    await st.page.locator('.dz-strip__btn').first().click();
+    await st.page.waitForSelector('.z8-razbor');
+    await snap(st.page, '08-reshenie-dz');
+    await st.ctx.close();
+  }
+  console.log(`Снимки: ${dir}`);
+}
+
+/**
+ * Кабинет ученика после тренировки №8: решено, ошибка, закладка, история.
+ * Тренировка проходит один раз на компьютере; на остальных ширинах тот же
+ * ученик входит заново, и прогресс приходит из аккаунта.
+ */
+async function runGalleryZ8(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const mock = makeMock();
+  registerInMock(mock, 'dva@yandex.ru', 'dva-ustroystva-1', 'Анна Смирнова', 'student');
+  const me = mock.users.get('dva@yandex.ru');
+  const CARD = '.trn-zadacha[data-task]';
+  const answerOf = (id) => {
+    const p = parseTaskId(id);
+    return generate(p.prototype, p.seed, p.level).otvet;
+  };
+  let trained = false;
+  for (const width of [1280, 375, 390, 430, 768]) {
+    const context = await browser.newContext({
+      viewport: { width, height: width < 500 ? 812 : 900 },
+      deviceScaleFactor: 2,
+      hasTouch: width < 500,
+    });
+    await welcomeSeen(context);
+    await installMock(context, mock);
+    const page = await context.newPage();
+    await login(page, 'dva@yandex.ru', 'dva-ustroystva-1');
+    if (!trained) {
+      await page.goto(`${SITE}/zadaniya/8/trenazher/`, { waitUntil: 'networkidle' });
+      /* Стартовый экран тренажёра: «Выбрать темы» → 5 задач → «Начать». */
+      await page.waitForSelector('.trn-start');
+      await page.locator('.trn-rezhim:has-text("Выбрать темы")').click();
+      await page.locator('.trn-seg button').filter({ hasText: /^5$/ }).first().click();
+      await page.locator('.trn-vybor__start').click();
+      for (let i = 0; i < 5; i += 1) {
+        await page.waitForSelector(CARD);
+        const id = await page.locator(CARD).getAttribute('data-task');
+        const right = answerOf(id);
+        await page.fill('.trn-ekran .otvet-input__field', ru(i === 1 ? right + 1 : right));
+        await page.locator('.trn-otvetnaya button:has-text("Проверить")').click();
+        if (i === 1) {
+          await page.waitForSelector('.trn-verdikt--net');
+          await page.locator('.trn-knopki button:has-text("Решение")').first().click();
+        }
+        if (i === 2) await page.locator('.trn-zadacha .zakladka').click();
+        const next = page.locator('.trn-knopki button:has-text("Дальше")');
+        if ((await next.count()) > 0) await next.click();
+        else await page.locator('.trn-knopki button:has-text("К итогам")').click();
+      }
+      await page.waitForSelector('.trn-itogi');
+      /* Записи — в аккаунт: после паузы синхронизации в моке есть журнал. */
+      const until = Date.now() + 15000;
+      while (
+        Date.now() < until &&
+        !mock.storage.some((r) => r.user_id === me.id && r.key === 'budetege:istoriya:v1')
+      ) {
+        await new Promise((done) => setTimeout(done, 250));
+      }
+      trained = true;
+      await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    }
+    await page.waitForFunction(
+      () =>
+        /Решено\s*5\s*из\s*260/.test(
+          document.querySelector('[data-section="progress"]')?.textContent ?? '',
+        ),
+      null,
+      { timeout: 15000 },
+    );
+    await page.evaluate(() => document.fonts.ready);
+    /* «?» закреплена в углу экрана: на склеенном снимке всей страницы
+       она висела бы посреди блока. */
+    await page.screenshot({
+      path: path.join(dir, `${width}-08-kabinet-progress.png`),
+      fullPage: true,
+      style: '.help-fab, .help-fab * { visibility: hidden !important; }',
+    });
+    await context.close();
+  }
+  console.log(`Снимки: ${dir}`);
+}
+
+async function runGallery(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const mock = makeMock();
+  registerInMock(mock, 'svoy@yandex.ru', 'moy-dlinnyy-parol', 'Наталия Багаева', 'tutor');
+  registerInMock(mock, 'uchenik@yandex.ru', 'uchenik-parol-1', 'Тестовый ученик 1', 'student');
+  registerInMock(mock, 'vtoroy@yandex.ru', 'vtoroy-parol-123', 'Тестовый ученик 2', 'student');
+  mock.seedClass('svoy@yandex.ru', ['uchenik@yandex.ru', 'vtoroy@yandex.ru']);
+
+  for (const width of [375, 390, 768, 1280]) {
+    const context = await browser.newContext({
+      viewport: { width, height: width < 500 ? 812 : 900 },
+      deviceScaleFactor: 2,
+      hasTouch: width < 500,
+    });
+    await installMock(context, mock);
+    const page = await context.newPage();
+    const snap = async (name, fullPage = true) => {
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: path.join(dir, `${width}-${name}.png`), fullPage });
+    };
+
+    await page.goto(`${SITE}/voyti/`, { waitUntil: 'networkidle' });
+    await snap('01-vhod');
+    await page.click('[role="tab"]:has-text("Зарегистрироваться")');
+    await page.fill('input[name="name"]', 'Тестовый ученик');
+    await page.fill('input[name="email"]', 'uchenik@yandex.ru');
+    await page.fill('input[name="password"]', 'dlinnyy-parol-uchenika');
+    await page.click('.role-card[data-role="student"]');
+    await page.fill('input[name="birth-year"]', String(new Date().getFullYear() - 16));
+    await page.fill('input[name="parent-email"]', 'mama@yandex.ru');
+    await tickConsents(page);
+    await snap('02-registraciya');
+
+    /* Ученик: в браузере есть прогресс №8 — вопрос о переносе. */
+    await page.evaluate(
+      (key) => localStorage.setItem(key, JSON.stringify({ kinds: { '8.A': { done: 3 } } })),
+      PROGRESS_8,
+    );
+    await login(page, 'uchenik@yandex.ru', 'uchenik-parol-1');
+    await page.waitForSelector('[role="dialog"]');
+    await snap('03-perenos-progressa', false);
+    await page.click('[role="dialog"] button:has-text("Нет")');
+    await page.waitForSelector('[role="dialog"]', { state: 'detached' });
+    await page.waitForSelector('.klass-list');
+    await snap('04-kabinet-uchenika');
+    await openProfile(page);
+    await snap('05-profil');
+    await page.click('[data-section="account"] button:has-text("Выйти")');
+    await page.waitForURL(`${SITE}/`);
+
+    /* Репетитор: свой класс с учениками. */
+    await login(page, 'svoy@yandex.ru', 'moy-dlinnyy-parol');
+    await page.waitForSelector('.dz-klassy__item');
+    await page.waitForSelector('[role="dialog"]');
+    await page.click('[role="dialog"] button:has-text("Нет")');
+    await page.waitForSelector('[role="dialog"]', { state: 'detached' });
+    await snap('06-kabinet-repetitora');
+    await context.close();
+  }
+  console.log(`Снимки: ${dir}`);
+}
+
 try {
   if (DISABLED) await runDisabled();
+  else if (GALLERY !== null) await runGallery(GALLERY);
+  else if (GALLERY_Z8 !== null) await runGalleryZ8(GALLERY_Z8);
+  else if (GALLERY_DZ !== null) await runGalleryDz(GALLERY_DZ);
+  else if (NO_HEADER) await runNoHeader();
   else await runEnabled();
 } finally {
   await browser.close();

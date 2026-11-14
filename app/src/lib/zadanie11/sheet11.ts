@@ -184,7 +184,7 @@ export function parseSheetQuery11(q: URLSearchParams): SheetParams11 {
   const zameny: Record<string, number> = {};
   for (const item of (q.get('z') ?? '').split(',')) {
     const [pos = '', k = ''] = item.split(':');
-    const fmt = poKlyucham ? /^\d+\.[A-Z]{2}-\d{2}_\d{1,2}$/ : /^\d+\.\d+$/;
+    const fmt = poKlyucham ? /^\d+\.[A-Z]{2}-\d{2}_\d{1,3}$/ : /^\d+\.\d+$/;
     if (fmt.test(pos) && Number(k) > 0) zameny[pos] = Math.min(50, Number(k));
   }
   return {
@@ -260,11 +260,17 @@ function posOf(p: SheetParams11, s: Shablon | undefined, v: number, i: number): 
 }
 
 export interface PlanLista {
-  /** Позиции по вариантам. */
-  poVariantam: Pozitsiya[][];
+  /**
+   * Позиции по вариантам. null — «только банк»: задач банка этого типа
+   * не хватило, место пустое и на лист не попадает.
+   */
+  poVariantam: (Pozitsiya | null)[][];
   /** Шаблоны позиций: блок листа у каждой. */
   bloki: string[];
-  /** Сколько позиций «из банка» пришлось заменить новыми: банк кончился. */
+  /**
+   * Сколько позиций «из банка» не нашли задачи банка: в «только банке»
+   * они пустые (на лист не попадают), в маршруте урока — новые задачи.
+   */
   nehvatka: number;
 }
 
@@ -316,23 +322,28 @@ export function planLista(p: SheetParams11, bank: readonly UslovieBanka[]): Plan
 function planPoKlyucham(p: SheetParams11, bank: readonly UslovieBanka[]): PlanLista {
   const sh = shablony(p);
   const pohozha = pohozhaNa(bank);
-  const { poVariantam, nehvatka } = planPoKlyuchamObshchiy<Shablon, UslovieBanka, Pozitsiya>({
-    sh,
-    variants: p.variants,
-    seed: p.seed,
-    zameny: p.zameny,
-    mixSol: 'z11-mix',
-    bank: (id) => bankPodtipa(p, bank, id),
-    analogi: (id) => analogiPodtipa(p, bank, id),
-    bankPoz: (b) => ({ vid: b.razminka ? 'razminka' : 'bank', id: b.id, no: b.no }),
-    analogPoz: (a) => ({ vid: 'analog', id: a.id, no: a.no }),
-    novaya: (c, seed, zanyato) => ({
-      vid: 'new',
-      id: c.s.id,
-      ...novayaZadacha(c.s.id, seed, pohozha, zanyato),
-    }),
-    seedNovoy: (x) => (x.vid === 'new' ? x.seed : undefined),
-  });
+  const { poVariantam, nehvatka } = planPoKlyuchamObshchiy<Shablon, UslovieBanka, Pozitsiya | null>(
+    {
+      sh,
+      variants: p.variants,
+      seed: p.seed,
+      zameny: p.zameny,
+      mixSol: 'z11-mix',
+      bank: (id) => bankPodtipa(p, bank, id),
+      analogi: (id) => analogiPodtipa(p, bank, id),
+      bankPoz: (b) => ({ vid: b.razminka ? 'razminka' : 'bank', id: b.id, no: b.no }),
+      analogPoz: (a) => ({ vid: 'analog', id: a.id, no: a.no }),
+      novaya: (c, seed, zanyato) => ({
+        vid: 'new',
+        id: c.s.id,
+        ...novayaZadacha(c.s.id, seed, pohozha, zanyato),
+      }),
+      seedNovoy: (x) => (x?.vid === 'new' ? x.seed : undefined),
+      /* «Только открытый банк» — без подмены новыми: учитель увидит, сколько
+       задач в банке, а на листе останутся только задачи ФИПИ. */
+      bezPodmeny: () => null,
+    },
+  );
   return { poVariantam, bloki: sh.map((s) => s.blok), nehvatka };
 }
 
@@ -482,6 +493,9 @@ export interface SobrannyyList {
   poVariantam: ListZadacha[][];
   bloki: string[];
   nehvatka: number;
+  /** Сколько задач выбрано на все варианты и сколько их в банке по этим типам. */
+  vybrano: number;
+  vBanke: number;
   /** Разобранные примеры: подтип → примеры («*» — на весь вариант). */
   primery?: Record<string, Primer11[]>;
 }
@@ -553,7 +567,14 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
     /* Правило пропорции и признаки делимости печатаются целиком один
        раз на вариант, дальше — строкой-ссылкой. */
     const k: Kontekst = { typeset, pechat: true, pokazano: { pravilo: false, priznaki: false } };
-    return row.map((poz, i): ListZadacha => {
+    /* Пустые места «только банка» выпадают, номера на листе — подряд. */
+    let no = 0;
+    return row.flatMap((poz, i): ListZadacha[] => {
+      if (poz === null) return [];
+      no += 1;
+      return [zadachaLista(poz, i, no, vi)];
+    });
+    function zadachaLista(poz: Pozitsiya, i: number, no: number, vi: number): ListZadacha {
       const pos = posOf(p, sh[i], vi + 1, i + 1);
       const blok = plan.bloki[i] ?? '';
       if (poz.vid === 'mikro') {
@@ -573,7 +594,7 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
                 )
                 .join('')}</ol>`;
         return {
-          no: i + 1,
+          no,
           pos,
           poz,
           blok,
@@ -601,7 +622,7 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
       const vybor = s.vybor;
       const otvetVybor = vybor === undefined ? null : (vybor.options[vybor.correct] ?? '');
       return {
-        no: i + 1,
+        no,
         pos,
         poz,
         blok,
@@ -615,13 +636,18 @@ export function sobratList(p: SheetParams11, bank: readonly UslovieBanka[]): Sob
         answerHtml: otvetVybor === null ? typeset(`$${d(s.answer)}$`) : typeset(otvetVybor),
         solutionHtml: reshenieHtml(s.etapy, s.tables ?? [], k),
       };
-    });
+    }
   });
   const primery = primeryLista(p, poVariantam, pohozha);
   return {
     poVariantam,
     bloki: plan.bloki,
     nehvatka: plan.nehvatka,
+    vybrano: sh.length * plan.poVariantam.length,
+    vBanke: [...new Set(sh.map((x) => x.id))].reduce(
+      (sum, id) => sum + bankPodtipa(p, bank, id).length,
+      0,
+    ),
     ...(Object.keys(primery).length > 0 ? { primery } : {}),
   };
 }

@@ -19,7 +19,7 @@
      7. Один набор кнопок вида у каждого чертежа страницы: «+», «−»,
         «Сбросить вид», «Сверху».
 
-   Страницы: теория №3, разбор №3, опорные задачи (блок «Читаю
+   Страницы: теория №3, пример типа №3 («О задании»), опорные задачи (блок «Читаю
    чертёж»), разбор №15. */
 
 import fs from 'node:fs';
@@ -36,6 +36,19 @@ let checks = 0;
 function check(ok, what) {
   checks += 1;
   if (!ok) failures.push(what);
+}
+
+/* Рамка элемента на экране. Чертёж после поворота перерисовывается ещё
+   раз (подстройка под размер), и элемент на миг заменяется новым — тогда
+   boundingBox отдаёт null. Ждём, пока рамка появится. */
+async function ramka(locator, ms = 5000) {
+  const konec = Date.now() + ms;
+  for (;;) {
+    const box = await locator.boundingBox().catch(() => null);
+    if (box !== null) return box;
+    if (Date.now() > konec) return null;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
 }
 
 const OUT = path.join(APP, 'out');
@@ -66,7 +79,8 @@ const BASE = 'http://127.0.0.1:' + server.address().port;
 
 const STRANICY = [
   ['теория №3', '/zadaniya/3/teoriya/'],
-  ['разбор №3', '/zadaniya/3/razbor/diagonali/'],
+  /* Разобранный пример №3 — в карточке типа на «О задании». */
+  ['пример №3', '/zadaniya/3/#tip-diagonali'],
   ['разбор №15', '/zadaniya/15/razbor/ploshchad-secheniya/'],
 ];
 
@@ -297,10 +311,11 @@ for (const size of SIZES) {
     }
     const nazhmi = page.locator('.o3-nazhmi').first();
     check((await nazhmi.count()) === 1, where('нет задачи «нажми» в блоке'));
-    if ((await nazhmi.count()) === 1) {
-      await nazhmi.scrollIntoViewIfNeeded();
-      const cel = nazhmi.locator('[data-cel]').first();
-      const cb = await cel.boundingBox();
+    await nazhmi.scrollIntoViewIfNeeded().catch(() => {});
+    const cb =
+      (await nazhmi.count()) === 1 ? await ramka(nazhmi.locator('[data-cel]').first()) : null;
+    check(cb !== null || (await nazhmi.count()) === 0, where('у цели нет рамки на экране'));
+    if (cb !== null) {
       /* Выбранная цель подсвечена слоем .solid-cel-on (lib/solid/render.ts). */
       const vybrano = () => nazhmi.locator('.solid-cel-on').count();
       const html0 = await nazhmi.innerHTML();
@@ -312,11 +327,17 @@ for (const size of SIZES) {
       check(html1 !== html0, where('перетаскивание не повернуло чертёж'));
       check((await vybrano()) === 0, where('перетаскивание выбрало цель'));
       /* Касание — выбор. */
-      const cel2 = nazhmi.locator('[data-cel]').first();
-      if (size.touch) await cel2.tap({ force: true });
-      else await cel2.click({ force: true });
-      await page.waitForTimeout(400);
-      check((await vybrano()) > 0, where('касание по цели её не выбрало'));
+      /* После поворота чертёж перерисован: цель берём заново, по её
+         текущей позиции на экране (старый элемент уже не виден). */
+      const cb2 = await ramka(nazhmi.locator('[data-cel]').first());
+      check(cb2 !== null, where('после поворота у цели нет рамки на экране'));
+      if (cb2 !== null) {
+        const [x, y] = [cb2.x + cb2.width / 2, cb2.y + cb2.height / 2];
+        if (size.touch) await page.touchscreen.tap(x, y);
+        else await page.mouse.click(x, y);
+        await page.waitForTimeout(400);
+        check((await vybrano()) > 0, where('касание по цели её не выбрало'));
+      }
     }
     await context.close();
   }

@@ -47,6 +47,52 @@ Options -Indexes
   RewriteRule ^ - [E=SITE_SCHEME:http]
 </IfModule>
 
+# ── Переехавшие страницы: сразу 301 на новый адрес ──────────────────
+#
+# По старым адресам в сборке лежат страницы-заглушки
+# (components/layout/Redirect.tsx), но до них браузер не доходит:
+# сервер отвечает 301 раньше, и ученик не видит промежуточной страницы.
+# ?… сохраняется сам, #… браузер переносит сам. Правила ловят адрес
+# с косой чертой и без, с index.html и без; служебные index.txt не
+# трогаем — переход внутри сайта уводит RedirectNow.tsx.
+#
+# Новый перенос страницы = новая строка здесь + заглушка в сборке +
+# обновлённые внутренние ссылки (CLAUDE.md, scripts/check-links.mjs).
+
+<IfModule mod_rewrite.c>
+  # Задание №3: прежние разделы по фигурам.
+  RewriteRule ^zadaniya/3/(parallelepiped|prizma|piramida|konus|cilindr|shar|vpisannyy-cilindr|vpisannaya-sfera)/(podgotovka|opornye-zadachi)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/opornye-zadachi/ [R=301,L]
+  RewriteRule ^zadaniya/3/(parallelepiped|prizma|piramida|konus|cilindr|shar|vpisannyy-cilindr|vpisannaya-sfera)/trenazher(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/trenazher/ [R=301,L]
+  RewriteRule ^zadaniya/3/(parallelepiped|prizma|piramida)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/teoriya/#teoriya-mnogogranniki [R=301,L,NE]
+  RewriteRule ^zadaniya/3/(konus|cilindr|shar)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/teoriya/#teoriya-vrashcheniya [R=301,L,NE]
+  RewriteRule ^zadaniya/3/(vpisannyy-cilindr|vpisannaya-sfera)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/teoriya/#teoriya-kombinacii [R=301,L,NE]
+  # Задание №3: разбор типа раскрывается на вкладке «О задании».
+  RewriteRule ^zadaniya/3/razbor/([a-z0-9-]+)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/3/#tip-$1 [R=301,L,NE]
+  # Задание №1: разбор группы типов раскрывается на вкладке «О задании»
+  # (карточка группы и её первый тип).
+  RewriteRule ^zadaniya/1/razbor/ugly-treugolnika(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-I [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/chetyrehugolniki(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-II [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/ploshchad(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-III [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/podobie(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-IV [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/trigonometriya(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-V [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/ugly-okruzhnosti(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-VI [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/vpisannaya(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-VII [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/opisannaya(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-VIII [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/sinusy(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-IX [R=301,L,NE]
+  RewriteRule ^zadaniya/1/razbor/dopolnitelnye(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/1/#gruppa-X [R=301,L,NE]
+  # Задание №7: разбор прототипа раскрывается на вкладке «О задании»;
+  # вкладки «Для репетиторов» нет — листы собирает «Генератор».
+  RewriteRule ^zadaniya/7/razbor/(P[0-9][0-9])(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/7/#tip-$1 [R=301,L,NE]
+  # Задание №6: разбор прототипа раскрывается на вкладке «О задании».
+  RewriteRule ^zadaniya/6/razbor/(P[0-9][0-9])(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/6/#tip-$1 [R=301,L,NE]
+  RewriteRule ^zadaniya/7/dlya-repetitorov(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/7/generator/ [R=301,L]
+  # Задание №18: «О задании» стало главной страницей раздела.
+  RewriteRule ^zadaniya/18/o-zadanii(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/18/ [R=301,L]
+  # «Подготовительные задачи» → «Опорные задачи» (content/opornye.ts):
+  # …/podgotovka/ и …/podgotovka/{блок}/ у заданий и подтем.
+  RewriteRule ^zadaniya/(.+)/podgotovka(/[^/.]+)?(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/$1/opornye-zadachi$2/ [R=301,L]
+</IfModule>
+
 # Без mod_rewrite DirectorySlash не выключаем: пусть лучше редирект
 # Apache, чем папка без страницы.
 <IfModule mod_rewrite.c>

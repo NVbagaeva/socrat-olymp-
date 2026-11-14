@@ -1,14 +1,23 @@
 /**
  * Задание №8 для раздела «Ежемесячные варианты»: свои выражения на
- * числах варианта. Разбор — строками с формулами (как черновики
- * прототипов раздела, `Draft`), второй счёт — численно функциями Math.
- * В банк и генератор №8 не входят.
+ * числах варианта. Решение — по шагам (`Shag`: что делаем и почему, и
+ * выкладка), как у прототипов раздела (`Draft`), второй счёт — численно
+ * функциями Math. В банк и генератор №8 не входят. Как писать шаги —
+ * docs/zadanie-8-razbory.md.
  */
 
-import { d } from './tex';
+import { gcd } from './numbers';
+import { shag } from './prototypes/common';
+import { d, frac } from './tex';
 import type { Draft } from './types';
 
 const r9 = (x: number) => Math.round(x * 1e9) / 1e9;
+
+/** Произведение множителей без единиц; пусто — 1. */
+const proizv = (xs: number[]) => {
+  const ys = xs.filter((x) => x !== 1);
+  return ys.length === 0 ? '1' : ys.join('\\cdot ');
+};
 
 /* ── Разность квадратов дробей ──────────────────────────────────── */
 
@@ -29,13 +38,39 @@ export function raznostKvadratov(p: RaznostKvadratov): Draft {
   const raz = (a - b) / z;
   const sum = (a + b) / z;
   const otvet = r9((raz * sum) / k);
+  /* (a − b)/z и (a + b)/z — несократимыми дробями. */
+  const g1 = gcd(a - b, z);
+  const [Xn, Xd] = [(a - b) / g1, z / g1];
+  const g2 = gcd(a + b, z);
+  const [Yn, Yd] = [(a + b) / g2, z / g2];
+  const drob = (n: number, m: number) => (m === 1 ? `${n}` : `\\dfrac{${n}}{${m}}`);
+  const dz = (n: number) => `\\dfrac{${n}}{${z}}`;
+  const skobki = `\\left(${dz(a)}-${dz(b)}\\right)\\left(${dz(a)}+${dz(b)}\\right)`;
+  const sokr = `${drob(Xn, Xd)}\\cdot ${drob(Yn, Yd)}`;
+  /* Знаменатель Xd·Yd·k сокращается с одним из множителей числителя целиком? */
+  const M = Xd * Yd * k;
+  const celikom = M > 1 && [Xn, Yn].find((x) => x % M === 0);
+  const vNize = proizv([Xd, Yd, k]);
   return {
     uslovie: `Найдите значение выражения $\\left(\\left(\\dfrac{${a}}{${z}}\\right)^2-\\left(\\dfrac{${b}}{${z}}\\right)^2\\right):${k}$.`,
     otvet,
     razbor: [
-      `Возводить большие дроби в квадрат не нужно: по формуле разности квадратов $x^2-y^2=(x-y)(x+y)$.`,
-      `$\\dfrac{${a}}{${z}}-\\dfrac{${b}}{${z}}=\\dfrac{${a - b}}{${z}}=${d(raz)}$, $\\dfrac{${a}}{${z}}+\\dfrac{${b}}{${z}}=\\dfrac{${a + b}}{${z}}=${d(sum)}$.`,
-      `$${d(raz)}\\cdot${d(sum)}=${d(r9(raz * sum))}$, и $${d(r9(raz * sum))}:${k}=${d(otvet)}$.`,
+      shag(
+        'Возводить большие дроби в квадрат не нужно — раскладываем по формуле разности квадратов $x^2-y^2=(x-y)(x+y)$',
+        `\\left(${dz(a)}\\right)^2-\\left(${dz(b)}\\right)^2 = ${skobki}`,
+      ),
+      shag(
+        'Знаменатели одинаковые — вычитаем и складываем числители, дроби сокращаем',
+        `${skobki} = ${dz(a - b)}\\cdot ${dz(a + b)}${g1 === 1 && g2 === 1 ? '' : ` = ${sokr}`}`,
+      ),
+      shag(
+        celikom
+          ? `Делим на $${k}$ и сокращаем, не перемножая: $${vNize} = ${M}$ сокращается с $${celikom}$ в числителе`
+          : `Делим на $${k}$ и сокращаем дробь, не перемножая большие числа`,
+        `${sokr} : ${k} = \\dfrac{${proizv([Xn, Yn])}}{${vNize}} = ${
+          celikom && celikom !== M ? `${proizv([celikom / M, celikom === Xn ? Yn : Xn])} = ` : ''
+        }${d(otvet)}`,
+      ),
     ],
     params: { ...p },
     proverka: ((a / z) ** 2 - (b / z) ** 2) / k,
@@ -67,9 +102,23 @@ export function trigSokrashchenie(p: TrigPrivedenieEV): Draft {
     uslovie: `Найдите значение выражения $\\dfrac{${k}\\sin\\dfrac{19\\pi}{6}\\cdot\\sin\\left(x+\\dfrac{\\pi}{3}\\right)\\cdot\\sin\\left(x-\\dfrac{3\\pi}{2}\\right)}{\\cos\\left(x-\\dfrac{\\pi}{6}\\right)\\cdot\\cos(x+2\\pi)}$.`,
     otvet,
     razbor: [
-      'По формулам приведения: $\\sin\\left(x-\\dfrac{3\\pi}{2}\\right)=\\cos x$ (сдвиг на $-\\dfrac{3\\pi}{2}$ меняет синус на косинус, знак — по четверти), $\\cos(x+2\\pi)=\\cos x$ (полный оборот).',
-      '$\\cos\\left(x-\\dfrac{\\pi}{6}\\right)=\\sin\\left(\\dfrac{\\pi}{2}+x-\\dfrac{\\pi}{6}\\right)=\\sin\\left(x+\\dfrac{\\pi}{3}\\right)$, так как $\\cos t=\\sin\\left(\\dfrac{\\pi}{2}+t\\right)$.',
-      `После сокращения остаётся $${k}\\sin\\dfrac{19\\pi}{6}=${k}\\sin\\left(2\\pi+\\dfrac{7\\pi}{6}\\right)=${k}\\sin\\dfrac{7\\pi}{6}=${k}\\cdot\\left(-\\dfrac12\\right)=${d(otvet)}$.`,
+      shag(
+        'Прибавляем к углу полный оборот $2\\pi$ — синус не меняется. Остаётся сдвиг на $\\dfrac{\\pi}{2}$: $\\sin\\left(t+\\dfrac{\\pi}{2}\\right)=\\cos t$',
+        '\\sin\\left(x-\\dfrac{3\\pi}{2}\\right)=\\sin\\left(x-\\dfrac{3\\pi}{2}+2\\pi\\right)=\\sin\\left(x+\\dfrac{\\pi}{2}\\right)=\\cos x',
+      ),
+      shag('Сдвиг на $2\\pi$ — полный оборот, косинус не меняется', '\\cos(x+2\\pi)=\\cos x'),
+      shag(
+        'Косинус переводим в синус той же формулой: $\\cos t=\\sin\\left(t+\\dfrac{\\pi}{2}\\right)$',
+        '\\cos\\left(x-\\dfrac{\\pi}{6}\\right)=\\sin\\left(x-\\dfrac{\\pi}{6}+\\dfrac{\\pi}{2}\\right)=\\sin\\left(x+\\dfrac{\\pi}{3}\\right)',
+      ),
+      shag(
+        'Подставляем: $\\sin\\left(x+\\dfrac{\\pi}{3}\\right)$ и $\\cos x$ стоят и в числителе, и в знаменателе — сокращаем их',
+        `\\dfrac{${k}\\sin\\dfrac{19\\pi}{6}\\cdot\\sin\\left(x+\\dfrac{\\pi}{3}\\right)\\cdot\\cos x}{\\sin\\left(x+\\dfrac{\\pi}{3}\\right)\\cdot\\cos x}=${k}\\sin\\dfrac{19\\pi}{6}`,
+      ),
+      shag(
+        'Отбрасываем полный оборот $2\\pi$, затем $\\sin(\\pi+\\alpha)=-\\sin\\alpha$, и остаётся табличное значение',
+        `${k}\\sin\\dfrac{19\\pi}{6}=${k}\\sin\\left(2\\pi+\\dfrac{7\\pi}{6}\\right)=${k}\\sin\\left(\\pi+\\dfrac{\\pi}{6}\\right)=-${k}\\sin\\dfrac{\\pi}{6}=-${k}\\cdot\\dfrac12=${d(otvet)}`,
+      ),
     ],
     params: { ...p },
     /* Второй счёт: выражение при нескольких x — значение одно и то же. */
@@ -101,9 +150,18 @@ export function logChastnye(p: LogChastnye): Draft {
     uslovie: `Найдите значение выражения $\\dfrac{\\log_{${c}}${A1}}{\\log_{${B1}}${c}}-\\dfrac{\\log_{${c}}${A2}}{\\log_{${B2}}${c}}$.`,
     otvet: 2,
     razbor: [
-      `Деление на $\\log_b ${c}$ — это умножение на $\\log_{${c}} b$: $\\dfrac{1}{\\log_b ${c}}=\\log_{${c}} b$.`,
-      `Выражение равно $\\log_{${c}}${A1}\\cdot\\log_{${c}}${B1}-\\log_{${c}}${A2}\\cdot\\log_{${c}}${B2}$. Обозначим $t=\\log_{${c}}2$: $\\log_{${c}}${A1}=2+t$, $\\log_{${c}}${B1}=3+t$, $\\log_{${c}}${A2}=4+t$, $\\log_{${c}}${B2}=1+t$.`,
-      '$(2+t)(3+t)-(4+t)(1+t)=6+5t+t^2-4-5t-t^2=2$.',
+      shag(
+        `Логарифмы в знаменателях «перевёрнуты»: $\\dfrac{1}{\\log_{b} ${c}}=\\log_{${c}} b$, поэтому деление заменяем умножением`,
+        `\\dfrac{\\log_{${c}}${A1}}{\\log_{${B1}}${c}}-\\dfrac{\\log_{${c}}${A2}}{\\log_{${B2}}${c}}=\\log_{${c}}${A1}\\cdot\\log_{${c}}${B1}-\\log_{${c}}${A2}\\cdot\\log_{${c}}${B2}`,
+      ),
+      shag(
+        `Каждое число — степень $${c}$, умноженная на $2$. Логарифм произведения — сумма логарифмов, обозначим $t=\\log_{${c}}2$`,
+        `\\log_{${c}}${A1}=\\log_{${c}}\\left(${c}^{2}\\cdot 2\\right)=2+t,\\quad \\log_{${c}}${B1}=3+t,\\quad \\log_{${c}}${A2}=4+t,\\quad \\log_{${c}}${B2}=1+t`,
+      ),
+      shag(
+        'Подставляем и раскрываем скобки: $t^2$ и $5t$ взаимно уничтожаются',
+        '(2+t)(3+t)-(4+t)(1+t)=6+5t+t^2-\\left(4+5t+t^2\\right)=2',
+      ),
     ],
     params: { ...p },
     proverka: L(A1) / (Math.log(c) / Math.log(B1)) - L(A2) / (Math.log(c) / Math.log(B2)),
@@ -129,14 +187,33 @@ export function otnosheniePoDrobi(x: OtnosheniePoDrobi): Draft {
   const otvet = r9((v * s - q) / (p - v * r));
   const lin = (k: number, m: number, a: string, b: string) =>
     `${k === 1 ? '' : k}${a}${m < 0 ? '-' : '+'}${Math.abs(m) === 1 && b !== '' ? '' : Math.abs(m)}${b}`;
-  const t = (k: number) => (k === 1 ? 't' : `${k}t`);
+  /* Коэффициент при t: 1 — t, −1 — −t. */
+  const kt = (k: number) => (k === 1 ? 't' : k === -1 ? '-t' : `${d(k)}t`);
+  const vr = r9(v * r);
+  const vs = r9(v * s);
+  const A = r9(p - vr);
+  const B = r9(vs - q);
+  const pr = (k: number) => (k < 0 ? `(${d(k)})` : d(k));
+  const tDrob =
+    Number.isInteger(A) && Number.isInteger(B) ? frac(B, A) : `\\dfrac{${d(B)}}{${d(A)}}`;
+  const reshenie = [`\\left(${p}-${pr(vr)}\\right)t=${d(vs)}-${q}`, `${kt(A)}=${d(B)}`];
+  if (A !== 1) reshenie.push(`t=${tDrob}${tDrob === d(otvet) ? '' : `=${d(otvet)}`}`);
   return {
     uslovie: `Найдите $\\dfrac{a}{b}$, если $\\dfrac{${lin(p, q, 'a', 'b')}}{${lin(r, s, 'a', 'b')}}=${d(v)}$.`,
     otvet,
     razbor: [
-      `Разделим числитель и знаменатель на $b$ и обозначим $t=\\dfrac{a}{b}$: $\\dfrac{${lin(p, q, 't', '')}}{${lin(r, s, 't', '')}}=${d(v)}$.`,
-      `По свойству пропорции: $${t(p)}+${q}=${d(v)}(${t(r)}+${s})$, $${t(p)}+${q}=${v * r === 1 ? '' : d(v * r)}t${v * s < 0 ? '' : '+'}${d(v * s)}$.`,
-      `$${d(p - v * r)}t=${d(v * s - q)}$, $t=\\dfrac{${d(v * s - q)}}{${d(p - v * r)}}=${d(otvet)}$.`,
+      shag(
+        'Делим числитель и знаменатель на $b$ — дробь от этого не меняется — и обозначаем $t=\\dfrac{a}{b}$',
+        `\\dfrac{${lin(p, q, 'a', 'b')}}{${lin(r, s, 'a', 'b')}}=\\dfrac{${lin(p, q, 't', '')}}{${lin(r, s, 't', '')}}=${d(v)}`,
+      ),
+      shag(
+        'По свойству пропорции умножаем обе части на знаменатель и раскрываем скобки',
+        `${lin(p, q, 't', '')}=${d(v)}\\left(${lin(r, s, 't', '')}\\right)=${kt(vr)}${vs < 0 ? '-' : '+'}${d(Math.abs(vs))}`,
+      ),
+      shag(
+        'Слагаемые с $t$ переносим влево, числа — вправо, и делим на коэффициент при $t$',
+        reshenie.join(',\\quad '),
+      ),
     ],
     params: { ...x },
     /* Второй счёт: подставим a = t, b = 1 в исходную дробь. */

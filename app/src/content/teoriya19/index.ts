@@ -2,8 +2,9 @@
  * Главы теории задания №19: четыре вводные и по главе на метод.
  *
  * Порядок методов утверждён планом раздела: инвариант стоит после
- * симметрии, метод прямой параметра — после аналитического. Главы
- * методов, которые ещё не написаны, стоят «Скоро»: в содержании
+ * симметрии, метод прямой параметра — после аналитического. Написаны
+ * все 14 глав. Запасной путь skoro() оставлен для новой главы, если
+ * список методов вырастет: такая глава стоит «Скоро» — в содержании
  * с замком, в «О задании» без ссылки.
  */
 
@@ -13,6 +14,14 @@ import { GLAVA_M03 } from './m03';
 import { GLAVA_M04 } from './m04';
 import { GLAVA_M05 } from './m05';
 import { GLAVA_M06 } from './m06';
+import { GLAVA_M07 } from './m07';
+import { GLAVA_M08 } from './m08';
+import { GLAVA_M09 } from './m09';
+import { GLAVA_M10 } from './m10';
+import { GLAVA_M11 } from './m11';
+import { GLAVA_M12 } from './m12';
+import { GLAVA_M13 } from './m13';
+import { GLAVA_M14 } from './m14';
 import type { Glava19, Opornaya19, Razbor19, Zadacha19 } from './tipy';
 import { VVEDENIE_19 } from './vvedenie';
 
@@ -28,13 +37,28 @@ export const METODY_19 = [
   'Метод оценки',
   'Аналитический способ',
   'Метод прямой параметра',
-  'Квадратные уравнения и неравенства с параметром',
+  'Квадратные неравенства с параметром',
   'Тригонометрические уравнения с параметром',
   'Свойства функций: непрерывность, монотонность, нечётность',
   'Метод упрощающего значения',
 ] as const;
 
-const GOTOVYE: Glava19[] = [GLAVA_M01, GLAVA_M02, GLAVA_M03, GLAVA_M04, GLAVA_M05, GLAVA_M06];
+const GOTOVYE: Glava19[] = [
+  GLAVA_M01,
+  GLAVA_M02,
+  GLAVA_M03,
+  GLAVA_M04,
+  GLAVA_M05,
+  GLAVA_M06,
+  GLAVA_M07,
+  GLAVA_M08,
+  GLAVA_M09,
+  GLAVA_M10,
+  GLAVA_M11,
+  GLAVA_M12,
+  GLAVA_M13,
+  GLAVA_M14,
+];
 
 function skoro(metod: number): Glava19 {
   return {

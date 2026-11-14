@@ -11,6 +11,7 @@
  */
 
 import { plural } from '@/lib/plural';
+import { ZADACH_NA_LIST_MAX } from './klyuchi';
 import type {
   GenConfig,
   GenExtras,
@@ -180,8 +181,7 @@ export function setTopicCount(
   const topic = config.topics.find((t) => t.id === topicId);
   if (topic === undefined) return plan.slice();
   const own = plan.filter((s) => topicOfSubtype(config, s.id) === topic);
-  const room = config.limits.maxTasks - (plan.length - own.length);
-  const want = Math.max(0, Math.min(n, config.limits.maxPerTopic, room));
+  const want = Math.max(0, Math.min(n, ZADACH_NA_LIST_MAX - (plan.length - own.length)));
   if (want <= own.length) {
     const drop = new Set(own.slice(want));
     return plan.filter((s) => !drop.has(s));
@@ -203,13 +203,8 @@ export function setSubtypeCount(
 ): GenSlot[] {
   const topic = topicOfSubtype(config, subtypeId);
   if (topic === undefined) return plan.slice();
-  const ofTopic = plan.filter((s) => topicOfSubtype(config, s.id) === topic);
   const own = plan.filter((s) => s.id === subtypeId);
-  const room = Math.min(
-    config.limits.maxPerTopic - (ofTopic.length - own.length),
-    config.limits.maxTasks - (plan.length - own.length),
-  );
-  const want = Math.max(0, Math.min(n, room));
+  const want = Math.max(0, Math.min(n, ZADACH_NA_LIST_MAX - (plan.length - own.length)));
   if (want <= own.length) {
     const drop = new Set(own.slice(want));
     return plan.filter((s) => !drop.has(s));
@@ -512,11 +507,7 @@ export function summary(
 export function problems(config: GenConfig, state: GenState): string[] {
   const out: string[] = [];
   if (state.plan.length === 0) out.push('нет задач');
-  if (state.plan.length > config.limits.maxTasks)
-    out.push(`больше ${config.limits.maxTasks} задач`);
-  for (const [t, n] of Object.entries(countsByTopic(config, state.plan))) {
-    if (n > config.limits.maxPerTopic) out.push(`${t}: больше ${config.limits.maxPerTopic}`);
-  }
+  if (state.plan.length > ZADACH_NA_LIST_MAX) out.push(`больше ${ZADACH_NA_LIST_MAX} задач`);
   if (state.variants < 1 || state.variants > config.limits.variantsMax) out.push('число вариантов');
   if (config.levels.length > 0 && state.levels.length === 0) out.push('нет уровней');
   if (new Set(state.plan.map(slotKey)).size !== state.plan.length) out.push('повтор позиции');

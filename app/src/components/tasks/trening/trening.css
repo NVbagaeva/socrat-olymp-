@@ -1,0 +1,1196 @@
+/* Тренажёр в «Стеклянной сцене». Префикс trn-. Значения — токены сайта;
+   тона — stk-ton-- из steklo.css. Телефон в приоритете: зоны нажатия
+   ≥ 44 px, поле ответа и кнопка в одном ряду, ничего не перекрывает
+   кнопку «?» и нижнюю навигацию. */
+
+.trn {
+  --stk-r-card: 20px;
+  display: grid;
+  gap: var(--space-4);
+}
+.trn-snoska {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.trn-knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ── Стартовые режимы ─────────────────────────────────────────── */
+.trn-start {
+  display: grid;
+  gap: var(--space-4);
+}
+.trn-rezhimy {
+  display: grid;
+  gap: var(--space-3);
+}
+.trn-rezhim {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 88px;
+  padding: var(--space-4);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--dur-hover, 180ms) var(--ease, ease),
+    box-shadow var(--dur-hover, 180ms) var(--ease, ease);
+}
+.trn-rezhim:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.trn-rezhim:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.trn-rezhim[disabled] {
+  cursor: default;
+  opacity: 0.6;
+  transform: none;
+}
+.trn-rezhim__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  color: var(--white);
+}
+.trn-rezhim__ico .stk-ico {
+  width: 24px;
+  height: 24px;
+}
+.trn-rezhim--warm .trn-rezhim__ico {
+  background: var(--gloss-warm);
+  box-shadow: var(--gloss-warm-shadow-soft);
+}
+.trn-rezhim[disabled] .trn-rezhim__ico {
+  background: var(--color-border);
+  box-shadow: none;
+  color: var(--color-text-tertiary);
+}
+.trn-rezhim__text {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.trn-rezhim__text b {
+  font-size: var(--fs-lg);
+  line-height: 1.25;
+  font-weight: 620;
+}
+.trn-rezhim__text span {
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+.trn-rezhim__strelka {
+  color: var(--color-text-tertiary);
+}
+.trn-otlozhennye {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: start;
+}
+
+/* ── Выбор тем ────────────────────────────────────────────────── */
+.trn-vybor {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+.trn-vybor__verh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.trn-vybor__verh .stk-h4 {
+  white-space: nowrap;
+}
+.trn-vybor__nazad {
+  margin-left: calc(var(--space-2) * -1);
+}
+.trn-vybor__verh .stk-h4 {
+  flex: 1;
+  min-width: 0;
+}
+.trn-vybor__vse {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+.trn-stroki {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trn-stroka {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.6);
+  box-shadow: var(--glass-ring);
+}
+.trn-stroka.is-on {
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--blue-300);
+}
+.trn-stroka__gruppa {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.trn-stroka__gruppa:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+.trn-stroka__gruppa b {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+.trn-galka {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1.5px var(--color-border-strong);
+}
+.trn-galka.is-on {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5 10.5 17 18 8'/%3E%3C/svg%3E")
+      center / 16px no-repeat,
+    var(--gloss);
+  box-shadow: none;
+}
+.trn-galka.is-part {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M7 12h10'/%3E%3C/svg%3E")
+      center / 16px no-repeat,
+    var(--gloss);
+  box-shadow: none;
+}
+.trn-chipy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0 var(--space-2) var(--space-2) 42px;
+}
+.trn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-caption);
+  line-height: 1.3;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+}
+.trn-chip.is-on {
+  background: var(--blue-100);
+  box-shadow: inset 0 0 0 1.5px var(--blue-500);
+  color: var(--blue-800);
+}
+.trn-chip:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.trn-chip .katex {
+  font-size: 1em;
+}
+.trn-chip__n {
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.trn-nastroyki {
+  display: grid;
+  gap: var(--space-4);
+}
+.trn-nastroyki > div {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.trn-seg {
+  display: inline-flex;
+  /* Длинные подписи (источник задач №3) на узком экране переносятся
+     на вторую строку, а не раздвигают страницу. */
+  flex-wrap: wrap;
+  max-width: 100%;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--blue-100);
+}
+.trn-seg button {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.trn-seg button.is-on {
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+  font-weight: 650;
+}
+.trn-seg button:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: -2px;
+}
+.trn-pereklyuchatel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  cursor: pointer;
+}
+.trn-pereklyuchatel input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.trn-pereklyuchatel__ruchka {
+  flex: none;
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border-strong);
+  transition: background var(--dur-switch, 200ms) var(--ease, ease);
+}
+.trn-pereklyuchatel__ruchka::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--dur-switch, 200ms) var(--ease, ease);
+}
+.trn-pereklyuchatel input:checked + .trn-pereklyuchatel__ruchka {
+  background: var(--gloss);
+}
+.trn-pereklyuchatel input:checked + .trn-pereklyuchatel__ruchka::after {
+  transform: translateX(18px);
+}
+.trn-pereklyuchatel input:focus-visible + .trn-pereklyuchatel__ruchka {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.trn-pereklyuchatel__text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.trn-pereklyuchatel__text b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.trn-pereklyuchatel__text span {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.trn-vybor__niz {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.trn-vybor__itog {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+/* ── Экран задачи ─────────────────────────────────────────────── */
+.trn-ekran {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.trn-polosa {
+  display: block;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--blue-100);
+  overflow: hidden;
+}
+.trn-polosa > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gloss);
+  transition: width var(--dur-switch, 200ms) var(--ease, ease);
+}
+.trn-zadacha {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-5);
+}
+.trn-zadacha__verh {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.trn-zadacha__nomer {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.trn-zakladka {
+  margin: -10px -10px -10px 0;
+}
+.trn-uslovie {
+  min-width: 0;
+  font-size: clamp(1.125rem, 0.95rem + 0.9vw, 1.5rem);
+  line-height: 1.6;
+  text-align: center;
+  padding: var(--space-2) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.trn-uslovie .katex {
+  font-size: 1.12em;
+}
+.trn-otvetnaya {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+.trn-pole {
+  display: grid;
+  gap: var(--space-2);
+}
+.trn-pole__ryad {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+}
+/* Общее поле ответа бланка (components/tasks/otvet): обёртка с кнопкой
+   «−» на сенсорном экране; само поле — в стиле сцены. */
+.trn-input {
+  min-width: 0;
+}
+.trn-input .otvet-input__minus {
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--color-border-strong);
+  color: var(--color-text);
+}
+.trn-input .otvet-input__field {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--color-border-strong);
+  color: var(--color-text);
+  font: inherit;
+  /* 20px: iOS не приближает страницу при фокусе (порог — 16px). */
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.trn-input .otvet-input__field::placeholder {
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+.trn-input .otvet-input__field:focus,
+.trn-input .otvet-input__field:focus-visible {
+  outline: none;
+  border-color: transparent;
+  box-shadow:
+    inset 0 0 0 2px var(--blue-600),
+    0 0 0 4px var(--blue-100);
+}
+.trn-ekran--verno .trn-input .otvet-input__field {
+  box-shadow: inset 0 0 0 2px var(--emerald-600);
+}
+.trn-ekran--neverno .trn-input .otvet-input__field {
+  box-shadow: inset 0 0 0 2px var(--terracotta);
+}
+.trn-ekran--razbor .trn-input .otvet-input__field {
+  box-shadow: inset 0 0 0 2px var(--amber-600);
+}
+.trn-otvetnaya .otvet-hint {
+  margin: 0;
+  border-radius: 14px;
+}
+
+/* Закладка «Отложить на потом» в шапке карточки — значком; подпись
+   остаётся читалкам. */
+.trn-zakladka {
+  flex: none;
+  width: 44px;
+  min-height: 44px;
+  margin: -10px -10px -10px 0;
+  padding: 0;
+  justify-content: center;
+  border-color: transparent;
+  background: none;
+  color: var(--color-text-tertiary);
+}
+.trn-zakladka.is-on {
+  color: var(--terracotta);
+}
+.trn-zakladka > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.trn-zakladka .zakladka__ico {
+  width: 22px;
+  height: 22px;
+}
+.trn-podskazka-knopka {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--amber-50);
+  color: var(--amber-700);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.trn-podskazka-knopka:focus-visible {
+  outline: 2px solid var(--amber-600);
+  outline-offset: 2px;
+}
+.trn-podskazka {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 14px;
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi);
+  color: var(--amber-700);
+  line-height: 1.45;
+  animation: trn-poyavlenie var(--dur-switch, 260ms) var(--ease, ease) both;
+}
+.trn-podskazka span {
+  min-width: 0;
+  color: var(--color-text);
+}
+.trn-verdikt {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 14px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  animation: trn-poyavlenie var(--dur-switch, 260ms) var(--ease, ease) both;
+}
+.trn-verdikt--da {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(214 242 230 / 0.8));
+  box-shadow:
+    0 0 0 1px var(--emerald-200),
+    var(--glass-hi);
+}
+.trn-verdikt--net {
+  background: var(--glass-tint-warm);
+  box-shadow:
+    0 0 0 1px var(--terracotta-200),
+    var(--glass-hi);
+}
+.trn-verdikt--razbor {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(254 244 227 / 0.8));
+  box-shadow:
+    0 0 0 1px var(--cream-200),
+    var(--glass-hi);
+}
+.trn-verdikt__ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--white);
+}
+.trn-verdikt--da .trn-verdikt__ico {
+  background: var(--emerald-600);
+}
+.trn-verdikt--net .trn-verdikt__ico {
+  background: var(--gloss-warm);
+}
+.trn-verdikt--razbor .trn-verdikt__ico {
+  background: var(--amber-600);
+}
+.trn-verdikt__ico .stk-ico {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.6;
+}
+.trn-verdikt__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.trn-verdikt__text > b {
+  font-size: var(--fs-lg);
+}
+.trn-verdikt--da .trn-verdikt__text > b {
+  color: #06704f;
+}
+.trn-verdikt--net .trn-verdikt__text > b {
+  color: var(--terracotta-700);
+}
+.trn-verdikt--razbor .trn-verdikt__text > b {
+  color: var(--amber-700);
+}
+.trn-reshenie {
+  display: grid;
+  gap: var(--space-3);
+  animation: trn-poyavlenie var(--dur-switch, 260ms) var(--ease, ease) both;
+}
+.trn-knopki__glavnaya {
+  flex: 1 1 100%;
+}
+.trn-knopki:empty {
+  display: none;
+}
+@keyframes trn-poyavlenie {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Панель оболочки сессии (components/tasks/session) внутри сцены —
+   компактная: счётчик, часы, две кнопки в одну строку. Класс trn-host
+   ставит страница на обёртку оболочки. */
+.trn-host .tsess__bar {
+  margin: 0 auto var(--space-3);
+  max-width: 760px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+
+/* ── Итоги ────────────────────────────────────────────────────── */
+.trn-itogi {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-4);
+}
+.trn-itogi__glavnoe {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.trn-itogi__schet {
+  --dolya: 0%;
+  position: relative;
+  isolation: isolate;
+  flex: none;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 96px;
+  height: 96px;
+  margin: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--blue-600) var(--dolya), var(--blue-100) 0);
+}
+.trn-itogi__schet::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  z-index: -1;
+  border-radius: 50%;
+  background: var(--white);
+}
+.trn-itogi__schet b {
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.trn-itogi__schet span {
+  font-size: var(--fs-label);
+  color: var(--color-text-secondary);
+}
+.trn-itogi__tipy {
+  display: grid;
+  gap: var(--space-2);
+}
+.trn-razbivka {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trn-razbivka li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: var(--glass-ring);
+}
+.trn-razbivka li.is-slabo {
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm);
+}
+.trn-razbivka__nazvanie {
+  min-width: 0;
+  font-weight: 600;
+}
+.trn-razbivka__schet {
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.trn-razbivka .stk-polosa {
+  grid-column: 2 / -1;
+  grid-row: 2;
+}
+.trn-razbivka .stk-metka {
+  grid-column: 2 / -1;
+  justify-self: start;
+}
+.trn-itogi__rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+.trn-itogi__rows .tdone__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.7);
+  font-size: var(--fs-caption);
+}
+.trn-itogi__rows dt {
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.trn-itogi__rows dd {
+  margin: 0;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.trn-itogi__spisok {
+  display: grid;
+  gap: var(--space-2);
+}
+.trn-itog-zadachi {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trn-itog-zadacha {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.7);
+  box-shadow: var(--glass-ring);
+}
+.trn-itog-zadacha--wrong {
+  box-shadow: var(--glass-ring-warm);
+  background: var(--glass-tint-warm);
+}
+.trn-itog-zadacha__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.trn-itog-zadacha__no {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: var(--fs-label);
+  font-weight: 700;
+}
+.trn-itog-zadacha__kind {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.trn-itog-zadacha__uslovie {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.trn-itog-zadacha__razbor {
+  padding-top: var(--space-2);
+}
+.trn-itog-zadacha .stk-ssylka {
+  justify-self: start;
+  padding: 0;
+}
+
+/* ── Панель прогресса ─────────────────────────────────────────── */
+.trn-progress__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+}
+.trn-progress__schet {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.trn-progress__telo {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-4);
+}
+.trn-progress__telo .stk-ssylka {
+  justify-self: start;
+  padding: 0;
+}
+.trn-progress__spisok {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+.trn-progress__spisok .tp-list,
+.trn-progress__spisok .tp-empty {
+  margin: 0;
+}
+
+/* ── Широкие экраны ───────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .trn-rezhimy {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .trn-rezhim {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-6);
+  }
+  .trn-rezhim__strelka {
+    display: none;
+  }
+  .trn-vybor,
+  .trn-otvetnaya,
+  .trn-itogi {
+    padding: var(--space-6);
+  }
+  .trn-zadacha {
+    padding: var(--space-5) var(--space-6) var(--space-8);
+  }
+  .trn-uslovie {
+    padding: var(--space-4) 0;
+  }
+  .trn-nastroyki {
+    grid-template-columns: repeat(2, max-content) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-6);
+  }
+  .trn-vybor__niz {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .trn-knopki__glavnaya {
+    flex: 0 0 auto;
+  }
+  .trn-razbivka li {
+    grid-template-columns: auto minmax(120px, 220px) minmax(0, 1fr) auto auto;
+  }
+  .trn-razbivka .stk-polosa,
+  .trn-razbivka .stk-metka {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .trn-itogi__rows {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Телефон: кнопка «Начать тренировку» всегда видна — липнет к низу
+   над нижней навигацией; кнопка «?» сайта поднимается над ней. */
+@media (max-width: 767.98px) {
+  .trn-vybor__vse {
+    flex-basis: 100%;
+    margin-left: calc(var(--space-2) * -1);
+  }
+  .trn-vybor__niz {
+    position: sticky;
+    bottom: calc(var(--h-bnav, 0px) + env(safe-area-inset-bottom) + var(--space-2));
+    z-index: 5;
+    margin: 0 calc(var(--space-4) * -1) calc(var(--space-4) * -1);
+    padding: var(--space-3) var(--space-4);
+    border-radius: 0 0 var(--stk-r-card) var(--stk-r-card);
+    background: var(--color-bg-translucent-strong);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -8px 20px -12px rgb(16 40 100 / 0.3);
+  }
+  body:has(.trn-vybor__niz) {
+    --fab-lift: calc(var(--h-bnav, 0px) + 88px - var(--fab-gap));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trn-rezhim,
+  .trn-polosa > span,
+  .trn-pereklyuchatel__ruchka,
+  .trn-pereklyuchatel__ruchka::after {
+    transition: none;
+  }
+  .trn-rezhim:hover {
+    transform: none;
+  }
+  .trn-verdikt,
+  .trn-podskazka,
+  .trn-reshenie {
+    animation: none;
+  }
+}
+
+/* Чертёж задачи над условием (стереометрия). */
+.trn-risunok {
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+}
+
+/* Условие-текст (стереометрия): обычный кегль, по левому краю. */
+.trn-uslovie--tekst {
+  text-align: left;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+.trn-uslovie--tekst .katex {
+  font-size: 1.08em;
+}
+
+/* Подсказка-вопросы (PodskazkaVoprosy): вопросы с кнопками по шагам.
+   Плашка — та же тёплая, что у текстовой подсказки, но в столбик. */
+.trn-podskazka--voprosy {
+  display: block;
+  color: var(--color-text);
+}
+.trn-voprosy {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.trn-voprosy__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--amber-700);
+}
+.trn-voprosy__spisok {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: trn-vopros;
+}
+.trn-vopros {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  counter-increment: trn-vopros;
+}
+.trn-vopros__tekst {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.trn-vopros__tekst::before {
+  content: counter(trn-vopros) '. ';
+  color: var(--amber-700);
+}
+.trn-vopros__knopki {
+  display: grid;
+  gap: var(--space-2);
+}
+.trn-vopros__knopka {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--cream-200);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  /* Длинная формула в варианте прокручивается внутри кнопки. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.trn-vopros__knopka:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 2px var(--amber-600);
+}
+.trn-vopros__knopka:focus-visible {
+  outline: 2px solid var(--amber-600);
+  outline-offset: 2px;
+}
+.trn-vopros__knopka:disabled {
+  cursor: default;
+  color: var(--color-text-muted, #5b6b85);
+}
+.trn-vopros__knopka.is-verno {
+  background: var(--emerald-50);
+  box-shadow: inset 0 0 0 2px var(--emerald-600);
+  color: var(--color-text);
+  font-weight: 600;
+}
+.trn-vopros__knopka.is-mimo {
+  background: var(--terracotta-50);
+  box-shadow: inset 0 0 0 1px var(--terracotta-200);
+  text-decoration: line-through;
+}
+.trn-vopros__otklik {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--terracotta-700);
+}
+.trn-vopros__otklik.is-verno {
+  color: var(--color-text);
+}
+.trn-vopros__otklik.is-verno b {
+  color: #06704f;
+}
+.trn-voprosy__gotovo {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+@media (min-width: 640px) {
+  .trn-vopros__knopki {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Панель под шагами решения («Считаем с умом»): тот же вид, что у
+   признаков делимости. */
+.trn-posle > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--blue-700);
+  cursor: pointer;
+}
+.trn-posle ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-6);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.trn-posle__tex {
+  display: block;
+  margin-top: var(--space-1);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Метка источника у задачи: «Открытый банк ФИПИ» / «Не из банка». */
+.trn-istochnik {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-muted, #5b6b85);
+  text-align: center;
+}
+
+/* Задача ещё едет файлом (№3, №7): место под экран задачи. */
+.trn-zagruzka {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.trn-schet {
+  margin: 0;
+}
+
+/* Длинное название типа над условием («Корень равен x: отбор по
+   условию…») переносится, а не раздвигает экран задачи на телефоне. */
+.trn-zadacha__verh {
+  min-width: 0;
+}
+.trn-zadacha__verh > .stk-metka {
+  min-width: 0;
+  flex: 0 1 auto;
+  padding-block: 4px;
+  white-space: normal;
+  border-radius: 14px;
+}
+.trn-zadacha__nomer,
+.trn-zadacha__verh > .trn-zakladka {
+  flex: none;
+}
+
+/* Телефон, выбор тем: под закреплённой «Начать тренировку» странице не
+   нужен запас под кнопку «?» — «?» стоит над панелью (--fab-lift). С
+   запасом в конце страницы панель поднималась выше своего места и
+   попадала под «?». */
+@media (max-width: 767.98px) {
+  body:has(.trn-vybor__niz) .app-main {
+    padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom) + var(--space-2));
+  }
+}
+
+/* Название типа в чипе выбора может содержать формулу: текст и формула
+   идут одной строкой, а не разъезжаются по краям чипа. */
+.trn-chip > span:first-child:not(.trn-chip__n) {
+  min-width: 0;
+  text-align: left;
+}
+
+/* Ответ выбором вместо числа (№13, «Определи тип»): крупные кнопки в
+   столбик на телефоне, по две в ряд на широком экране. */
+.trn-pole--svoe {
+  display: grid;
+  gap: var(--space-3);
+}
+.trn-vybor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+@media (min-width: 640px) {
+  .trn-vybor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.trn-vybor__knopka {
+  min-height: 48px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--blue-200, #c9d6ee);
+  border-radius: 14px;
+  background: var(--white);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.trn-vybor__knopka:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.trn-vybor__knopka.is-on {
+  border-color: var(--blue-600);
+  box-shadow: inset 0 0 0 1px var(--blue-600);
+}
+.trn-vybor__knopka.is-right {
+  border-color: var(--green-600, #2e8b57);
+  box-shadow: inset 0 0 0 1px var(--green-600, #2e8b57);
+}
+.trn-vybor__knopka.is-wrong {
+  border-color: var(--terracotta);
+  box-shadow: inset 0 0 0 1px var(--terracotta);
+}
+.trn-vybor__knopka:disabled {
+  cursor: default;
+}
+
+/* Строка ответа под шагами решения (№13). */
+.trn-otvet-stroka {
+  margin: var(--space-3) 0 0;
+}

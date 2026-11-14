@@ -1,41 +1,53 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { ReshenoVBloke6 } from '@/components/tasks/zadanie6/Opornye6';
-import { ZADANIE6, zadanie6Title } from '@/content/zadanie6';
+import { TabScrollOnMount } from '@/components/tasks/TabScroll';
+import { Opornye6Spisok } from '@/components/tasks/zadanie6/Opornye6';
+import { NAVYKI6, OPORNYE6 } from '@/content/sluchainye6';
+import { zadanie6Title } from '@/content/zadanie6';
+import { blokHref6 } from '@/lib/zadanie6/links';
 import { BLOKI_OPORNYH } from '@/lib/zadanie6/opornye';
-import { ZADANIYA } from '@/lib/paths';
+import { typeset } from '@/lib/tex';
 
 export const metadata: Metadata = {
   title: zadanie6Title('Опорные задачи'),
 };
 
 /**
- * Опорные задачи №6: семь блоков навыков по 10 задач. На карточке —
- * номер, название, описание, число задач, прогресс и «Начать»; формул
- * на карточках нет (docs/razdel-pravila.md, п. 3).
+ * Опорные задачи №6: три навыка, семь блоков по десять задач — на
+ * общих карточках «Стеклянной сцены» (components/tasks/opornye, образец
+ * — №3). На карточке блока — название, значок и прогресс; формул на
+ * карточках нет (docs/razdel-pravila.md, п. 3).
  */
 export default function Opornye6Tab() {
-  const base = `${ZADANIYA}/${ZADANIE6.slug}`;
+  const navyki = NAVYKI6.map((navyk) => ({
+    id: navyk.id,
+    nazvanie: navyk.nazvanie,
+    lead: navyk.lead,
+    ton: navyk.ton,
+    bloki: navyk.bloki.flatMap(({ slug, znak }) => {
+      const blok = BLOKI_OPORNYH.find((b) => b.slug === slug);
+      return blok === undefined
+        ? []
+        : [
+            {
+              slug,
+              href: blokHref6(slug),
+              nazvanie: blok.nazvanie,
+              znakHtml: typeset(`$${znak}$`),
+              zadachi: blok.zadachi.map((z) => z.id),
+            },
+          ];
+    }),
+  }));
   return (
-    <div className="z6-op-spisok">
-      <p className="z6-o__lead">
-        Короткие задачи на один навык. Из этих навыков складывается любая задача №6.
-      </p>
-      <ul className="z6-op-spisok__setka">
-        {BLOKI_OPORNYH.map((b) => (
-          <li key={b.id} className="z6-op-karta">
-            <span className="z6-op-karta__no">{b.no}</span>
-            <h3 className="z6-op-karta__title">{b.nazvanie}</h3>
-            <p className="z6-op-karta__opisanie">{b.opisanie}</p>
-            <p className="z6-op-karta__schet">
-              {b.zadachi.length} задач · <ReshenoVBloke6 ids={b.zadachi.map((z) => z.id)} />
-            </p>
-            <Link className="btn btn--primary" href={`${base}/opornye-zadachi/${b.slug}/`}>
-              Начать
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <section className="prep z6-opornye" aria-labelledby="z6-opornye-title">
+      <header className="kz-razdel__head">
+        <h2 className="stk-h3" id="z6-opornye-title">
+          {OPORNYE6.title}
+        </h2>
+        <p className="stk-lead">{OPORNYE6.lead}</p>
+      </header>
+      <TabScrollOnMount />
+      <Opornye6Spisok navyki={navyki} />
+    </section>
   );
 }

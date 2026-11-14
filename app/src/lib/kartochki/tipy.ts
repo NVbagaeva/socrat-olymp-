@@ -155,6 +155,12 @@ export interface Podtema {
 export interface Koloda {
   /** Номер задания ЕГЭ. */
   task: number;
+  /**
+   * Уровень экзамена. Не задан — профиль. У колод базы — 'base':
+   * прогресс хранится под своим ключом («kartochki:baza:5:v1»), а не
+   * вместе с тем же номером профиля.
+   */
+  level?: 'base';
   /** Часть адреса раздела: /zadaniya/{slug}/. */
   slug: string;
   /** «Планиметрия». */

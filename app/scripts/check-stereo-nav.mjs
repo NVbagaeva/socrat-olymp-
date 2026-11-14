@@ -11,12 +11,17 @@
      — тип ведёт в существующую главу.
 
    В собранном сайте (Chromium, телефон 390 с касаниями и компьютер 1440):
-     — у №3 и №15 одна и та же лента из шести вкладок, каждая открывается
-       по своему адресу и подсвечена, лента прилипает при прокрутке;
-     — плашка «Задание №… ▾» стоит в липкой строке, нажимается (≥ 44 px),
+     — у №3 и №15 лента из одних вкладок (у №3 ещё «Карточки» после
+       «Тренажёра»), каждая открывается по своему адресу и подсвечена,
+       лента прилипает при прокрутке;
+     — у №15 плашка «Задание №… ▾» стоит в липкой строке; у №3 (шапка
+       «Стеклянная сцена») переключатель «№3 Стереометрия ▾» стоит над
+       шапкой только на телефоне, на компьютере вместо него крошки, а
+       кнопки «Стереометрия: №3 и №15» нет. Плашка нажимается (≥ 44 px),
        открывает меню «Все разделы стереометрии»: два задания, текущее
        отмечено, внизу — ссылки к спискам заданий части 1 и части 2;
-     — переход из меню в другое задание сохраняет вкладку;
+     — переход в другое задание сохраняет вкладку: из меню плашки, а на
+       компьютере у №3 — из блока «Стереометрия в другой части»;
      — теория: все главы на странице, номера №3 — с нуля; на телефоне
        «Содержание» открывается шторкой, на компьютере — колонка;
      — прежние адреса фигур №3 уводят на новые места;
@@ -138,12 +143,17 @@ const VKLADKI_15 = [
   ['dlya-repetitorov/', 'Для репетиторов'],
 ];
 /* Есть колода карточек по теории (content/kartochki/spisok.ts) — вкладка
-   «Карточки» сразу за «Теорией». Сейчас она у №3; у №15 появится вместе
-   с колодой. */
+   «Карточки» сразу за «Тренажёром» (content/stereo/zadaniya.ts,
+   vkladkiStereo). Сейчас она у №3; у №15 появится вместе с колодой. */
 const vkladki = (no) =>
   NOMERA_S_KARTOCHKAMI.includes(no)
-    ? [...VKLADKI_15.slice(0, 2), ['kartochki/', 'Карточки'], ...VKLADKI_15.slice(2)]
+    ? [...VKLADKI_15.slice(0, 4), ['kartochki/', 'Карточки'], ...VKLADKI_15.slice(4)]
     : VKLADKI_15;
+/** Где у задания плашка «раздел ▾»: у №3 — над шапкой, у №15 — в ленте. */
+const PLASHKA = (no) =>
+  no === '3'
+    ? '.stsena-pereklyuchatel .razdely-plashka'
+    : '.topic-tabs-row:not([inert]) .razdely-plashka';
 const ZADANIYA = [
   { no: '3', glavy: GLAVY_3, vkladki: vkladki('3') },
   { no: '15', glavy: GLAVY_15, vkladki: vkladki('15') },
@@ -224,9 +234,55 @@ for (const size of SIZES) {
       check(stuck, where('лента вкладок не прилипла'));
       await page.evaluate(() => window.scrollTo(0, 0));
 
+      /* Шапка «Стеклянная сцена» №3: на компьютере крошки и ни плашки,
+         ни кнопки «Стереометрия: №3 и №15»; на телефоне — переключатель
+         над шапкой. Обложка — картинка с кнопкой «Можно вращать». */
+      if (no === '3') {
+        const stsena = await page.evaluate(() => {
+          const vid = (sel) => {
+            const node = document.querySelector(sel);
+            return node !== null && node.getBoundingClientRect().height > 0;
+          };
+          return {
+            shapka: vid('.stsena'),
+            crumbs: vid('.stsena-crumbs'),
+            vse: document.querySelector('.razdely-vse') !== null,
+            plashkaVLente: document.querySelector('.topic-tabs-row .razdely-plashka') !== null,
+            pereklyuchatel: vid('.stsena-pereklyuchatel .razdely-plashka'),
+            oblozhka: vid('.oblozhka__poster img'),
+            knopka: document.querySelector('.oblozhka__knopka')?.textContent?.trim() ?? '',
+            progress: document.querySelector('.stsena__progress-text')?.textContent ?? '',
+            tabletki: Array.from(document.querySelectorAll('.stsena__tabletka')).map(
+              (t) => t.textContent?.trim() ?? '',
+            ),
+          };
+        });
+        check(stsena.shapka, where('нет шапки «Стеклянная сцена»'));
+        check(!stsena.vse, where('осталась кнопка «Стереометрия: №3 и №15»'));
+        check(!stsena.plashkaVLente, where('плашка задания осталась в ленте'));
+        check(stsena.crumbs === !size.isMobile, where('крошки: видны не там'));
+        check(
+          stsena.pereklyuchatel === size.isMobile,
+          where('переключатель раздела: виден не там'),
+        );
+        check(stsena.oblozhka, where('нет обложки-куба'));
+        check(stsena.knopka === 'Можно вращать', where(`кнопка обложки «${stsena.knopka}»`));
+        check(
+          stsena.progress === 'Пока ничего не решено',
+          where(`прогресс гостя «${stsena.progress}»`),
+        );
+        check(
+          stsena.tabletki.join('|') === 'Часть 1|1 балл|≈ 3 минуты',
+          where(`таблетки: ${stsena.tabletki.join(', ')}`),
+        );
+        if (!size.isMobile) {
+          continue;
+        }
+      }
+
       /* Плашка и меню. */
-      const plate = await page.evaluate(() => {
-        const node = document.querySelector('.razdely-plashka');
+      const plate = await page.evaluate((sel) => {
+        const node = document.querySelector(sel);
         if (node === null) {
           return null;
         }
@@ -235,16 +291,40 @@ for (const size of SIZES) {
           height: node.getBoundingClientRect().height,
           text: node.textContent ?? '',
         };
-      });
+      }, PLASHKA(no));
       check(plate !== null, where('нет плашки задания'));
       if (plate === null) {
         continue;
       }
-      check(plate.inRow, where('плашка не в строке ленты'));
+      check(plate.inRow === (no !== '3'), where('плашка не на своём месте'));
       check(plate.height >= 44, where(`высота плашки ${plate.height} < 44`));
-      check(plate.text.includes(`Задание №${no}`), where('на плашке нет номера задания'));
+      check(
+        plate.text.includes(no === '3' ? '№3 Стереометрия' : `Задание №${no}`),
+        where('на плашке нет номера задания'),
+      );
 
-      await page.locator('.topic-tabs-row:not([inert]) .razdely-plashka').click();
+      /* Плашка в ленте есть в двух копиях: в самой ленте и в прилипшей
+         панели. Ждём, пока видимой станет именно плашка ленты, — и только
+         тогда жмём: в момент переключения копий клик попадал мимо. */
+      /* Прокрутка в самое начало: прилипшая панель скрыта, в ленте одна
+         плашка на месте. Переход между копиями при прокрутке — отдельная
+         тема (общий слой ленты), здесь он не проверяется. */
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(500);
+      const plashka = page.locator(PLASHKA(no));
+      await plashka.waitFor({ state: 'visible' });
+      await page.waitForFunction(
+        (sel) => {
+          const node = document.querySelector(sel);
+          if (node === null || node.getBoundingClientRect().height === 0) return false;
+          const b = node.getBoundingClientRect();
+          const top = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2);
+          return top !== null && node.contains(top);
+        },
+        PLASHKA(no),
+        { timeout: 15000 },
+      );
+      await plashka.click();
       await page.waitForSelector('.razdely-menu');
       await page.waitForTimeout(400);
       const menu = await page.evaluate(() => {
@@ -274,12 +354,19 @@ for (const size of SIZES) {
       check((await page.locator('.razdely-menu').count()) === 0, where('Escape не закрыл меню'));
     }
 
-    /* Переход в другое задание сохраняет вкладку. */
+    /* Переход в другое задание сохраняет вкладку: из меню плашки; у №3
+       на компьютере плашки нет — из блока «Стереометрия в другой части». */
     const drugoe = no === '3' ? '15' : '3';
     await page.goto(BASE + `/zadaniya/${no}/teoriya/`, { waitUntil: 'networkidle' });
-    await page.locator('.topic-tabs-row:not([inert]) .razdely-plashka').click();
-    await page.waitForSelector('.razdely-menu');
-    await page.locator('.razdely-menu a.razdel-karta').click();
+    if (no === '3' && !size.isMobile) {
+      const drugaya = page.locator('.drugie-razdely a.razdel-karta');
+      await drugaya.scrollIntoViewIfNeeded();
+      await drugaya.click();
+    } else {
+      await page.locator(PLASHKA(no)).click();
+      await page.waitForSelector('.razdely-menu');
+      await page.locator('.razdely-menu a.razdel-karta').click();
+    }
     await page.waitForURL(`**/zadaniya/${drugoe}/teoriya/`, { timeout: 5000 }).catch(() => {});
     check(
       new URL(page.url()).pathname === `/zadaniya/${drugoe}/teoriya/`,
@@ -420,7 +507,8 @@ for (const size of SIZES) {
   await context.close();
 }
 
-/* Разборы типов («О задании» → карточка): лента на «О задании»,
+/* Разборы типов. №3 — пример в карточке типа на «О задании» (прежний
+   адрес разбора — переадресация на якорь типа). №15 — страница разбора:
    чертёж на месте, «Начать решение» выделяет первый шаг в тексте и на
    чертеже, страница не уезжает вбок; карточки «О задании» ведут сюда. */
 for (const size of SIZES) {
@@ -432,10 +520,57 @@ for (const size of SIZES) {
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  for (const [no, razbory] of [
-    ['3', RAZBORY_3],
-    ['15', RAZBORY_15],
-  ]) {
+  /* №3: разобранный пример раскрывается на «О задании», в карточке
+     типа; прежний адрес разбора ведёт туда с якорем типа. */
+  for (const r of RAZBORY_3) {
+    const url = `/zadaniya/3/razbor/${r.tip}/`;
+    const where = (what) => `${size.name}, ${url}: ${what}`;
+    await page.goto(BASE + url, { waitUntil: 'networkidle' });
+    await page.waitForURL(`**/zadaniya/3/#tip-${r.tip}`, { timeout: 10000 }).catch(() => {});
+    check(
+      page.url().endsWith(`/zadaniya/3/#tip-${r.tip}`),
+      where(`переход не на карточку типа: ${page.url()}`),
+    );
+    const tip = page.locator(`#tip-${r.tip}`);
+    check(await tip.evaluate((el) => el.open === true), where('карточка типа не раскрыта'));
+    const ris = tip.locator('.z3-primer .z3d__kholst svg');
+    await ris
+      .first()
+      .waitFor({ timeout: 15000 })
+      .catch(() => {});
+    check((await ris.count()) === 1, where('нет чертежа примера'));
+    const active = await page.locator('[role=tab][aria-selected=true]').first().innerText();
+    check(active.trim() === 'О задании', where(`подсвечена вкладка «${active.trim()}»`));
+    const wide = await page.evaluate(
+      () => document.documentElement.scrollWidth - window.innerWidth,
+    );
+    check(wide <= 1, where(`страница шире окна на ${wide}px`));
+    if ((await ris.count()) !== 1) continue;
+    await tip.locator('.z3-shag__knopka').first().click();
+    await page.waitForTimeout(400);
+    check(
+      (await tip.locator('.z3-shag.is-on').count()) === 1,
+      where('после нажатия на шаг он не выделен'),
+    );
+    const svg = await tip.locator('.z3-primer .z3d__kholst').innerHTML();
+    const m = r.model();
+    const sShagami = [
+      ...(m.lines ?? []),
+      ...(m.sections ?? []),
+      ...(m.angles ?? []),
+      ...(m.marks ?? []),
+    ].some((x) => x.shag === 1);
+    check(
+      !sShagami ||
+        [HL, HL_HIDDEN, SOLID_THEME.width.hlMarker].some((x) =>
+          svg.includes(`stroke-width="${x}"`),
+        ) ||
+        svg.includes('data-hl="1"'),
+      where('на чертеже шаг 1 не выделен'),
+    );
+  }
+
+  for (const [no, razbory] of [['15', RAZBORY_15]]) {
     await page.goto(BASE + `/zadaniya/${no}/`, { waitUntil: 'networkidle' });
     const ssylki = await page
       .locator('.stereo-tip--razbor')

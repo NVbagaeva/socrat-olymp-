@@ -8,6 +8,7 @@
  */
 
 import type { Rng } from '../rng';
+import type { Shag } from '../types';
 
 export type PrepGroup = 'I' | 'II' | 'III' | 'IV' | 'V';
 
@@ -24,8 +25,12 @@ export interface PrepGenerated {
   uslovie: string;
   /** Ответ числом или номер верного варианта. */
   otvet: number | string;
-  /** Одна строка разбора с подставленными числами, с формулами в $…$. */
-  razbor: string;
+  /**
+   * Решение с подставленными числами: шаг с подписью «что делаем и
+   * почему» и выкладкой (как у задач тренажёра, types.ts → Shag). У
+   * микро-задачи свойство одно, поэтому шаг может быть и один.
+   */
+  razbor: Shag[];
   /** Независимый численный счёт для самотеста. Для выбора — null. */
   proverka: number | null;
 }

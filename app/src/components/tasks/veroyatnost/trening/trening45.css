@@ -1,0 +1,167 @@
+/* Тренажёр №4 и №5 в «Стеклянной сцене»: только то, чего нет в общем
+   тренажёре (trening.css). Префикс z45-. Значения — токены сайта. */
+
+/* Картинка к задаче — как есть: целиком, без обрезки, прозрачный фон
+   ложится на стекло карточки. Крупнее, чем чертёж стереометрии. */
+.z45-trn .trn-risunok {
+  max-width: 560px;
+}
+.z45-kartinka {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* Метка над условием «Прототип задания 4» — простым текстом. */
+.z45-trn .trn-zadacha__verh .stk-metka {
+  max-width: 100%;
+}
+
+/* Выкладка шага: строки рвутся по ширине колонки (VykladkaKlient). */
+.z45-vykladka {
+  font-size: 1.05rem;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* «Метод:» и рисунок метода с подсветкой благоприятного под шагами. */
+.z45-metod {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-secondary);
+}
+.z45-metod b {
+  color: var(--color-text);
+}
+.z45-risunok {
+  margin: var(--space-4) 0 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+/* Рисунок движка (плитки, таблица, дерево) не ужимается в узкую колонку
+   телефона: подписи в клетках остаются читаемыми, рисунок прокручивается
+   вбок внутри шага, страница не едет. */
+.z45-risunok > :not(figcaption) {
+  min-width: 480px;
+}
+.z45-risunok__podpis {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+}
+
+/* «Узнай метод»: кнопки методов с объёмными иллюстрациями. */
+.z45-metody {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.z45-metod-knopka {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-3);
+  border: 1px solid var(--glass-edge);
+  border-radius: 16px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-hi);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform var(--dur-switch, 200ms) var(--ease, ease),
+    box-shadow var(--dur-switch, 200ms) var(--ease, ease);
+}
+.z45-metod-knopka:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--glass-hi), var(--shadow-sm);
+}
+.z45-metod-knopka:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z45-metod-knopka:disabled {
+  cursor: default;
+}
+.z45-metod-knopka__ikonka {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+.z45-metod-knopka.is-verno,
+.z45-metod-knopka.is-pravilny {
+  border-color: var(--emerald-200);
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.74), rgb(214 242 230 / 0.8));
+}
+.z45-metod-knopka.is-neverno {
+  border-color: var(--terracotta-200);
+  background: var(--glass-tint-warm);
+}
+.z45-metod-knopka:disabled:not(.is-verno, .is-neverno, .is-pravilny) {
+  opacity: 0.6;
+}
+
+/* Признаки метода в условии — после ответа. */
+.z45-priznaki {
+  margin-top: var(--space-4);
+}
+.z45-priznaki ul {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.2em;
+  list-style: disc;
+}
+.z45-priznaki li + li {
+  margin-top: var(--space-1);
+}
+
+/* Прогресс «Узнай метод» в панели прогресса. */
+.z45-uznay-progress__spisok {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.z45-uznay-progress__spisok li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-1) var(--space-3);
+}
+.z45-uznay-progress__spisok .stk-polosa {
+  grid-column: 1 / -1;
+}
+.z45-uznay-progress__schet {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Значок группы — иллюстрация метода, как есть. */
+.z45-trn .stk-znak--figura img,
+.z45-karta .stk-znak--figura img,
+.z45-opornye .stk-znak--figura img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (min-width: 720px) {
+  .z45-metod-knopka__ikonka {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z45-metod-knopka {
+    transition: none;
+  }
+  .z45-metod-knopka:hover:not(:disabled) {
+    transform: none;
+  }
+}

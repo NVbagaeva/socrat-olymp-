@@ -10,19 +10,10 @@
  * в разметку, поиск по странице и исходник бандла.
  */
 
-import { parseAnswer } from '../answer';
+import { readAnswer, type AnswerMode, type Reading } from '../otvet';
 
 /** Соль отпечатка. Меняется вместе с форматом. */
 const SALT = 'z8:v1:';
-
-/** Число в единственную запись: «0,5», «0.5», «1/2» и «0,50» — одно. */
-export function canonical(value: string): string | null {
-  const parsed = parseAnswer(value);
-  if (parsed === null) {
-    return null;
-  }
-  return String(Math.round(parsed * 1e9) / 1e9);
-}
 
 /** Отпечаток строки: два независимых прохода FNV-1a, 16 hex-цифр. */
 export function fingerprint(value: string): string {
@@ -38,9 +29,19 @@ export function fingerprint(value: string): string {
   return a.toString(16).padStart(8, '0') + b.toString(16).padStart(8, '0');
 }
 
+/**
+ * Нормальная запись верного ответа — та же, что у разобранного ввода
+ * (lib/otvet): «0.25», «-12», «16.8». Ответы №8 — целые или конечные
+ * десятичные дроби; округление до 1e-9 снимает шум плавающей точки
+ * (0,1 + 0,2), а не допуск при сверке.
+ */
+export function answerRecord(answer: number): string {
+  return String(Math.round(answer * 1e9) / 1e9);
+}
+
 /** Отпечаток верного числового ответа. */
 export function sealAnswer(answer: number): string {
-  return fingerprint(String(Math.round(answer * 1e9) / 1e9));
+  return fingerprint(answerRecord(answer));
 }
 
 /** Отпечаток верного варианта выбора: у подготовительных задач на знак. */
@@ -48,10 +49,19 @@ export function sealChoice(choice: string): string {
   return fingerprint('choice:' + choice);
 }
 
-/** Сходится ли введённое число с отпечатком. */
+/**
+ * Прочитать ответ ученика и сверить с отпечатком — точно, по нормальной
+ * записи. Неверная запись (дробь с верным значением, «3 1/2», «5 см»…)
+ * приходит причиной: экран показывает подсказку и попытку не тратит.
+ */
+export function readSealed(input: string, sealed: string, mode: AnswerMode = 'trenazher'): Reading {
+  return readAnswer(input, mode, (value) => fingerprint(value) === sealed);
+}
+
+/** Сходится ли введённое число с отпечатком (только запись бланка). */
 export function answerMatches(input: string, sealed: string): boolean {
-  const value = canonical(input);
-  return value !== null && fingerprint(value) === sealed;
+  const reading = readSealed(input, sealed, 'blank');
+  return reading.kind === 'answer' && reading.right;
 }
 
 /** Сходится ли выбранный вариант с отпечатком. */

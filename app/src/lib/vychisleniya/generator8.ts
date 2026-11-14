@@ -80,7 +80,7 @@ export function config8(slot: string): GenConfig {
     taskLevel: false,
     sources: GENERATOR8_SOURCES,
     presets: GENERATOR8_PRESETS,
-    limits: { maxPerTopic: 8, maxTasks: 20, variantsMax: 4 },
+    limits: { variantsMax: 4 },
     /* Рамок теории и разобранных примеров у листа №8 нет. */
     extras: {
       kinds: Object.entries(VIDY).map(([id, title]) => ({ id, title })),

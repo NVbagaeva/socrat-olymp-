@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { RAZDEL3 } from '@/lib/zadanie3/links';
 import type { ReactNode } from 'react';
 import { Solid } from '@/components/solid/Solid';
 import { SheetBlock } from '@/components/tasks/SheetBlock';
@@ -20,6 +22,10 @@ import { Chertezh3d } from './Chertezh3d';
 import { GLAVY_DANNYE_3 } from '@/lib/stereo/glavy';
 import { GlavaMetodiki } from './glavy/GlavaMetodiki';
 import { Glava2Treugolnik, RAZDELY_GLAVY_2 } from './glavy/Glava2Treugolnik';
+
+/** Ссылка из шпаргалки №3 на блок формул вкладки «О задании». */
+const SSYLKA_ZNAT =
+  'Формулы с чертежами и примерами — в блоке «Что нужно знать» на вкладке «О задании»';
 
 const GLAVY: Record<StereoNo, readonly GlavaStereo[]> = { '3': GLAVY_3, '15': GLAVY_15 };
 
@@ -158,6 +164,13 @@ export function TeoriyaStereo({ no, vkladka }: { no: StereoNo; vkladka: string }
         ) : (
           <>
             {napisana()}
+            {/* Шпаргалка №3: те же формулы с чертежами и примерами — на
+                вкладке «О задании» (блок «Что нужно знать»). */}
+            {no === '3' && glava.id === 'formuly' ? (
+              <p className="stereo-about__p">
+                <Link href={`${RAZDEL3}#chto-nuzhno-znat`}>{SSYLKA_ZNAT}</Link>
+              </p>
+            ) : null}
             {glava.prototipy === undefined ? null : <Prototipy nomera={glava.prototipy} />}
           </>
         )}

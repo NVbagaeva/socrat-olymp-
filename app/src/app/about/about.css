@@ -1,602 +1,947 @@
-/* Страница «Об авторе». Опирается на общие слои: токены, .wrap, .btn, шкалу
-   .t-*. Свои классы описывают только то, чего в оболочке нет, — раскладку
-   героя, схему-цепочку и список принципов. Значения берутся из шкалы отступов,
-   промежуточных не вводится. */
+/* Страница «Об авторе» в «Стеклянной сцене». Всё под .oa. Стекло,
+   свечения и глянец — общие токены (styles/tokens.css), отступы — из
+   шкалы --space-*. Сетка — 12 колонок в том же контейнере, что шапка
+   сайта: левый край текста совпадает с логотипом на любой ширине.
+   Стекла на экран — не больше двух-трёх элементов; остальное держат
+   воздух, тонкие линии и типографика. */
 
-/* ── Первый экран ───────────────────────────────────────────── */
-
-.about-hero {
-  /* Холст первого экрана. Высоту задаёт текстовая колонка в потоке,
-     вся графика позиционируется от этой высоты в процентах. */
+.oa {
+  --oa-gap: var(--space-8);
+  /* Единый шаг между блоками. */
+  --oa-sec: clamp(72px, 9vw, 128px);
+  --oa-ink: var(--navy-900);
+  --oa-text: var(--grey-800);
+  --oa-line: rgb(31 95 208 / 0.14);
   position: relative;
-  z-index: 0;
-  overflow: hidden;
-  padding: var(--space-16) 0 var(--space-12);
-  background: var(--color-bg);
+  /* clip, а не hidden: липкая шапка остаётся липкой. */
+  overflow-x: clip;
+  color: var(--oa-text);
+  background:
+    radial-gradient(46% 30% at 88% 6%, rgb(245 160 74 / 0.12), transparent 70%),
+    radial-gradient(50% 30% at 6% 38%, rgb(31 95 208 / 0.07), transparent 70%),
+    radial-gradient(44% 26% at 92% 72%, rgb(31 95 208 / 0.06), transparent 70%), var(--color-bg);
+}
+.oa h1,
+.oa h2,
+.oa h3 {
+  text-wrap: balance;
+}
+.oa p {
+  text-wrap: pretty;
 }
 
-/* ── Слой 8: текстовая колонка ──────────────────────────────── */
-
-.about-hero__body {
-  position: relative;
-  z-index: 8;
-  width: 38%;
-  margin-left: 5%;
+/* Шапка, подвал и кнопки — как на главной (landing.css, .glavnaya). */
+.oa .site-head--steklo {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-bottom: 0;
+  box-shadow: 0 1px 0 rgb(31 95 208 / 0.08);
+}
+.oa .site-foot--steklo {
+  background: var(--glass-bg);
+  border-top: 1px solid var(--glass-edge);
+  /* На стекле третичный серый не дотягивает до 4,5:1. */
+  color: var(--color-text-secondary);
+}
+.oa .btn--primary {
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
+  border-radius: var(--radius-pill);
+}
+.oa .btn--primary:hover {
+  filter: brightness(1.06);
+  box-shadow: var(--gloss-shadow-soft-hover);
+}
+.oa .btn--secondary {
+  background: var(--glass-bg-strong);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+/* Зона нажатия не меньше 44 px. */
+.oa .btn--lg {
+  min-height: 48px;
 }
 
-.about-eyebrow {
+.oa-wrap {
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+/* ── Типографика: одна шкала на страницу ─────────────────────── */
+
+.oa-kicker {
   font-size: 13px;
   line-height: 16px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-primary);
-  margin-bottom: var(--space-5);
+  color: var(--color-accent-text);
 }
-
-.about-hero__title {
-  /* Гарнитура — общая, Inter: правило «только Inter» без исключений.
-     Прежняя системная серифная шкала снята. */
-  font-family: var(--font);
-  /* Осознанное исключение из типографической шкалы: 42px на ней нет
-     (h2 = 40), а мера строки ниже подобрана так, чтобы «Будет на ЕГЭ»
-     не разрывалось на две строки, — смена кегля сломает этот перенос.
-     К шкале привязывается вместе с правкой всей страницы. */
-  font-size: clamp(30px, 2.7vw, 42px);
-  line-height: 1.17;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  color: var(--navy-700);
-  /* Мера строки чуть уже колонки: так «Будет на ЕГЭ» остаётся на строке
-     одно, как на референсе, и вторая строка не заходит под рукописную
-     пометку. Колонка при этом остаётся ровно 30%. */
-  max-width: 86%;
-  margin-bottom: var(--space-6);
+.oa-h2 {
+  margin-top: var(--space-4);
+  font-size: clamp(28px, 3.1vw, 42px);
+  line-height: 1.14;
+  font-weight: 650;
+  letter-spacing: -0.022em;
+  color: var(--oa-ink);
 }
-
-.about-hero__lead {
-  font-size: 17px;
-  line-height: 26px;
-  color: var(--color-text-secondary);
-}
-
-.about-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-8);
-}
-
-/* ── Ряд доверия: четыре равноправных пункта ────────────────── */
-
-.creds {
-  list-style: none;
-  margin: var(--space-12) 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-4);
-  /* Колонки равной ширины, пункты прижаты к верху: иначе элемент
-     из трёх строк растягивал соседние и ряд читался рваным. */
-  align-items: start;
-}
-.cred {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--space-3);
-  align-content: start;
-}
-/* Подложка задана здесь, а не вшита в картинки: все четыре иконки
-   набора идут на прозрачном фоне, поэтому вес у пунктов одинаковый. */
-.cred__icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--blue-100);
-  display: grid;
-  place-items: center;
-  /* Иконки одного размера и не сжимаются, как бы ни лёг текст. */
-  flex: none;
-}
-.cred__icon img {
-  width: 24px;
-  height: 24px;
-  display: block;
-}
-.cred__text {
-  font-size: 12px;
-  line-height: 17px;
-  color: var(--color-text-secondary);
-  /* Место под три строки резервируется всегда: пункт, который
-     переносится длиннее соседей, не двигает ряд. */
-  min-height: 3lh;
-}
-
-/* ── Графика: всё в процентах от первого экрана ─────────────── */
-
-.hero-layer {
-  position: absolute;
-  display: block;
-  height: auto;
-  pointer-events: none;
-  object-fit: contain;
-}
-
-/* Слой 1 — фон и сетка. Растянута на весь экран и обрезается по нему,
-   а не показывает собственные края: прежде прямоугольная граница
-   картинки читалась в правой нижней части. */
-.hero-layer--net {
-  z-index: 1;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Площадь слоя выросла — он покрывает весь экран и заходит под
-     текст, поэтому плотность снижена. */
-  opacity: 0.1;
-}
-/* Дуги тоже выходят за все четыре стороны, чтобы край не проступал. */
-.hero-layer--arcs {
-  z-index: 1;
-  right: -8%;
-  top: -10%;
-  width: 54%;
-  opacity: 0.12;
-}
-
-/* Слои 2–3 — тень-подложка и бюст. Обёртка повторяет габариты бюста,
-   поэтому тень считается долями от него, а не от экрана. */
-.hero-bust {
-  position: absolute;
-  z-index: 3;
-  left: 44%;
-  bottom: 22%;
-  height: 38%;
-  pointer-events: none;
-}
-.hero-bust img {
-  position: relative;
-  z-index: 2;
-  display: block;
-  height: 100%;
-  width: auto;
-  opacity: 0.85;
-}
-/* Слой 2: мягкий эллипс под постаментом. Ширина 1.3 от ширины бюста,
-   высота 8% от его высоты, в центре синий на 8% плотности. */
-.hero-bust::before {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 130%;
-  height: 8%;
-  background: radial-gradient(
-    closest-side,
-    color-mix(in srgb, var(--color-primary) 8%, transparent),
-    transparent
-  );
-}
-
-/* Слой 4 — рукописная пометка, правее текстовой колонки. */
-.hero-layer--note {
-  z-index: 4;
-  left: 44%;
-  top: 12%;
-  width: 11%;
-  opacity: 0.9;
-}
-
-/* Слой 5 — формула. */
-.hero-layer--formula {
-  z-index: 5;
-  right: 12%;
-  top: 34%;
-  width: 8%;
-  opacity: 0.45;
-}
-
-/* Слой 6 — кристалл. Центр по вертикали на 58% высоты экрана. */
-.hero-layer--crystal {
-  z-index: 6;
-  right: 2%;
-  top: 58%;
-  width: 16%;
-  transform: translateY(-50%);
-  opacity: 0.5;
-}
-
-/* Слой 7 — портрет: во всю высоту экрана, поверх всей графики. */
-.about-hero__figure {
-  position: absolute;
-  z-index: 7;
-  bottom: 0;
-  left: 66%;
-  transform: translateX(-50%);
-  height: 87%;
-  margin: 0;
-}
-.about-hero__photo {
-  display: block;
-  height: 100%;
-  width: auto;
-}
-
-/* ── Общий каркас секций ────────────────────────────────────── */
-
-.about-band {
-  padding: var(--space-16) 0;
-  border-top: 1px solid var(--color-border);
-}
-.about-band--soft {
-  background: var(--color-surface);
-}
-
-.about-head {
-  max-width: 62ch;
-  margin-bottom: var(--space-12);
-}
-.about-head p {
-  font-size: 18px;
+.oa-h3 {
+  font-size: 20px;
   line-height: 28px;
-  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--oa-ink);
+}
+.oa-h3--big {
+  font-size: clamp(22px, 2vw, 26px);
+  line-height: 1.25;
+}
+.oa-lead {
+  max-width: 30em;
+  font-size: clamp(20px, 1.9vw, 24px);
+  line-height: 1.45;
+  color: var(--oa-ink);
+}
+/* Основной текст: 18 px, строка 60–75 знаков. */
+.oa-text {
+  max-width: 34em;
+  font-size: 18px;
+  line-height: 1.6;
+}
+.oa-lead + .oa-text,
+.oa-text + .oa-text,
+.oa-h3 + .oa-text {
   margin-top: var(--space-4);
 }
 
-/* Колонка для текстовых блоков: строка не длиннее комфортной. */
-.about-narrow {
-  max-width: 72ch;
+/* ── Стекло: одна рецептура, два оттенка ─────────────────────── */
+
+.oa-steklo {
+  padding: clamp(24px, 3vw, 40px);
+  border: 1px solid var(--glass-edge);
+  border-radius: 28px;
+  background: var(--glass-tint-blue);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
 }
-.about-text {
-  font-size: 18px;
-  line-height: 28px;
-  color: var(--color-text-secondary);
-  margin-top: var(--space-6);
-}
-.about-text--lead {
-  font-size: 20px;
-  line-height: 32px;
-  color: var(--color-text);
+.oa-steklo--teplo {
+  background: var(--glass-tint-warm);
+  box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow);
 }
 
-/* ── Профессиональный путь ──────────────────────────────────── */
+/* ── Первый экран: имя слева, сцена справа ───────────────────── */
 
-/* Широкий экран: ось лежит горизонтально, пять точек в строку. */
-.path {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.oa-hero {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-8);
+  overflow: clip;
+  padding-top: var(--space-10);
 }
-/* Одна линия через все точки. За последней она продолжается: работа идёт. */
-.path::before {
+.oa-hero__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--oa-gap);
+  align-items: end;
+  /* Линия пола: на ней стоят портрет, пирамида и бюст. */
+  box-shadow: inset 0 -1px 0 var(--oa-line);
+}
+.oa-hero__text {
+  grid-column: 1 / 7;
+  align-self: center;
+  padding-bottom: var(--space-12);
+}
+.oa-imya {
+  margin-top: var(--space-5);
+  font-size: clamp(38px, 4.5vw, 58px);
+  line-height: 1.06;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--oa-ink);
+}
+.oa-imya > span {
+  display: block;
+}
+.oa-kto {
+  margin-top: var(--space-6);
+  max-width: 27em;
+  font-size: clamp(18px, 1.7vw, 22px);
+  line-height: 1.5;
+}
+/* Короткая оранжевая черта под строкой «кто я». */
+.oa-kto::after {
+  content: '';
+  display: block;
+  width: 96px;
+  height: 3px;
+  margin-top: var(--space-8);
+  border-radius: 2px;
+  background: var(--terracotta);
+}
+
+/* Фоновые надписи: две школьные формулы за текстом, почти в тон фона. */
+.oa-fon {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.oa-fon__f {
+  position: absolute;
+  left: 8%;
+  top: 9%;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(30px, 4.2vw, 64px);
+  white-space: nowrap;
+  color: var(--navy-700);
+  opacity: 0.09;
+}
+.oa-fon__f + .oa-fon__f {
+  left: 6%;
+  top: auto;
+  bottom: 6%;
+}
+
+/* ── Сцена: портрет, построение, пирамида, бюст ──────────────── */
+
+.oa-sm {
+  /* --px, --py — сдвиг слоёв за курсором (−1…1), --sy — прокрутка (0…1). */
+  --px: 0;
+  --py: 0;
+  --sy: 0;
+  grid-column: 7 / 13;
+  justify-self: end;
+  position: relative;
+  width: min(100%, 82svh, 660px);
+  /* Пропорции заданы заранее: картинки при загрузке ничего не сдвигают. */
+  aspect-ratio: 1.12;
+  margin-top: var(--space-4);
+  /* Жест по горизонтали достаётся сцене, прокрутка — странице. */
+  touch-action: pan-y;
+}
+.oa-sm__geo {
+  position: absolute;
+  right: -3%;
+  top: 0;
+  height: 100%;
+  aspect-ratio: 1;
+  overflow: visible;
+  transform: translate3d(calc(var(--px) * -10px), calc(var(--py) * -8px), 0);
+}
+.oa-geo-line,
+.oa-geo-dash,
+.oa-geo-os,
+.oa-geo-tik {
+  fill: none;
+  stroke: var(--blue-600);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+.oa-geo-line {
+  stroke-opacity: 0.55;
+}
+.oa-geo-dash {
+  stroke-opacity: 0.38;
+  stroke-dasharray: 5 6;
+}
+.oa-geo-os,
+.oa-geo-tik {
+  stroke: var(--navy-700);
+  stroke-opacity: 0.4;
+}
+.oa-geo-parabola {
+  fill: none;
+  stroke: var(--terracotta);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.oa-geo-bukva {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 22px;
+  fill: var(--navy-700);
+}
+.oa-sm__krug {
+  fill: rgb(226 237 255 / 0.4);
+  stroke-opacity: 0.8;
+  stroke-width: 1.5;
+}
+.oa-sm__treugolnik {
+  fill: rgb(31 95 208 / 0.07);
+  stroke: var(--blue-700);
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.oa-sm__tochka,
+.oa-sm__centr {
+  fill: var(--blue-600);
+}
+.oa-sm__os {
+  fill: var(--color-text-secondary);
+}
+/* Линии построения прочерчиваются при загрузке. */
+.oa-sm.is-zhivaya .oa-geo-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: oa-cherta 1400ms var(--ease) 150ms forwards;
+}
+.oa-sm.is-zhivaya .oa-geo-draw--2 {
+  animation-delay: 600ms;
+}
+@keyframes oa-cherta {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Общий пол: мягкое пятно под тремя предметами собирает их в группу. */
+.oa-sm__pol {
+  position: absolute;
+  left: -4%;
+  right: -10%;
+  bottom: -5%;
+  height: 17%;
+  background: radial-gradient(closest-side, rgb(31 95 208 / 0.2), transparent);
+  filter: blur(10px);
+  pointer-events: none;
+}
+.oa-sm__foto {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * 6px), 0, 0);
+}
+.oa-foto {
+  position: absolute;
+  left: 21%;
+  bottom: 0;
+  display: block;
+  width: auto;
+  max-width: none;
+  height: 97%;
+  transform: translateX(-50%);
+}
+/* Бюст — акцент: стоит свободно на полу, лицом к построению, ничего не
+   перекрывает и сам перекрыт только краем пирамиды. При прокрутке едва
+   заметно отстаёт от страницы. */
+.oa-sm__byust {
+  position: absolute;
+  right: -5%;
+  bottom: 0;
+  width: 31%;
+  z-index: 1;
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * 10px), calc(var(--sy) * 14px), 0);
+}
+.oa-sm__byust img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Синева чуть приглушена, чтобы бюст не спорил с портретом. */
+  transform: scaleX(-1);
+  filter: saturate(0.82);
+}
+.oa-sm__byust::before {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 5px;
-  height: 1px;
-  background: var(--color-border-strong);
+  left: 50%;
+  bottom: -2%;
+  width: 96%;
+  height: 9%;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgb(22 50 107 / 0.24), transparent);
+  filter: blur(5px);
 }
-
-.path__point {
-  position: relative;
-  padding-top: var(--space-6);
-}
-.path__dot {
+.oa-sm__piramida {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 2px solid var(--color-primary);
-  background: var(--color-surface);
+  right: 20%;
+  bottom: 0;
+  width: 27%;
+  height: auto;
+  z-index: 2;
+  pointer-events: none;
+  transform: translate3d(calc(var(--px) * 16px), calc(var(--py) * 10px), 0);
+}
+/* Единственное стекло первого экрана: подпись к параболе. */
+.oa-sm__formula {
+  position: absolute;
+  right: -1%;
+  top: 17%;
+  z-index: 3;
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 19px;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--oa-ink);
+  transform: translate3d(calc(var(--px) * 12px), calc(var(--py) * 8px), 0);
 }
 
-/* «Параллельно» — работа шла одновременно с предыдущим местом, а не после
-   него. Точка опущена под ось и держится на пунктире, сама она тоже
-   пунктирная: последовательным шагом её не прочитать. */
-.path__point--parallel {
+/* ── Секции: заголовок слева, текст справа ───────────────────── */
+
+.oa-sec {
+  padding-top: var(--oa-sec);
+}
+.oa-sec:last-of-type {
+  padding-bottom: var(--oa-sec);
+}
+.oa-sec__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
+  column-gap: var(--oa-gap);
+}
+.oa-sec__head {
+  grid-column: 1 / 6;
+  grid-row: 1;
+}
+.oa-sec__side {
+  grid-column: 1 / 5;
+  grid-row: 2;
+  align-self: start;
   margin-top: var(--space-10);
 }
-.path__point--parallel .path__dot {
-  border-style: dashed;
+.oa-sec__body {
+  grid-column: 6 / 13;
+  grid-row: 1 / span 2;
 }
-.path__point--parallel::before {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: calc(var(--space-10) * -1 + 5px);
-  height: var(--space-10);
-  border-left: 1px dashed var(--color-primary);
+.oa-sec__wide {
+  grid-column: 1 / -1;
+  margin-top: var(--space-12);
 }
-
-/* Шкала: год — .t-caption, место — .t-h4, подпись — .t-body. */
-.path__period {
-  display: block;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  color: var(--color-primary);
-  font-variant-numeric: tabular-nums;
-}
-.path__place {
-  display: block;
-  margin-top: var(--space-1);
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-.path__note {
-  display: block;
-  margin-top: var(--space-2);
-  font-size: 16px;
-  line-height: 24px;
-  color: var(--color-text-secondary);
+.oa-sec__body--after {
+  grid-row: auto;
+  margin-top: var(--space-12);
 }
 
-/* ── Схема «один прототип → своё задание каждому» ───────────── */
-
-.chain {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--space-8);
-  max-width: 62ch;
-}
-.chain__step {
-  position: relative;
-  padding-left: var(--space-8);
-}
-/* Тонкая линия связывает узлы; у последнего шага её нет. */
-.chain__step::before {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: 14px;
-  bottom: calc(var(--space-8) * -1);
-  width: 1px;
-  background: var(--color-border-strong);
-}
-.chain__step:last-child::before {
-  display: none;
-}
-.chain__dot {
-  position: absolute;
-  left: 0;
-  top: 8px;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 2px solid var(--color-primary);
-  background: var(--color-surface);
-}
-.chain__title {
+/* Рукописная пометка: стоит на поле рядом со своим блоком, текст не
+   перекрывает. */
+.oa-pometka {
   display: block;
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  width: min(100%, 250px);
+  height: auto;
+  transform: rotate(-3deg);
 }
-.chain__note {
+
+/* Иллюстрация в пустом левом поле: стоит вровень с текстом справа. */
+.oa-ill {
+  grid-column: 1 / 6;
+  align-self: center;
+  margin: var(--space-12) 0 0;
+}
+.oa-ill img {
   display: block;
-  margin-top: var(--space-1);
-  font-size: 15px;
-  line-height: 24px;
-  color: var(--color-text-secondary);
+  width: 100%;
+  height: auto;
 }
 
-/* ── Принципы ───────────────────────────────────────────────── */
+/* ── Принципы ────────────────────────────────────────────────── */
 
-.tenets {
+.oa-printsipy {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-10) var(--space-12);
+  gap: var(--space-8) var(--oa-gap);
 }
-.tenet {
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
+.oa-printsipy li {
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--oa-line);
 }
-.tenet__num {
+.oa-printsipy__num {
   display: block;
+  margin-bottom: var(--space-3);
   font-size: 13px;
   line-height: 16px;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--color-primary);
+  letter-spacing: 0.1em;
   font-variant-numeric: tabular-nums;
-  margin-bottom: var(--space-4);
+  color: var(--color-accent-text);
 }
-.tenet__title {
+.oa-printsipy p {
+  margin-top: var(--space-2);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* ── Факты и линия времени ───────────────────────────────────── */
+
+.oa-fakty {
+  list-style: none;
+  margin: var(--space-8) 0 0;
+  padding: var(--space-4) 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  border-top: 1px solid var(--oa-line);
+  border-bottom: 1px solid var(--oa-line);
+  font-size: 15px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--oa-ink);
+}
+.oa-fakty li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.oa-fakty li::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--terracotta);
+}
+
+.oa-put {
+  list-style: none;
+  margin: var(--space-8) 0 0;
+  padding: 0;
+}
+.oa-put li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 7.5em minmax(0, 1fr);
+  column-gap: var(--space-12);
+  padding-bottom: var(--space-8);
+}
+.oa-put li:last-child {
+  padding-bottom: 0;
+}
+/* Ось и точка — между годом и местом. */
+.oa-put li::before {
+  content: '';
+  position: absolute;
+  left: calc(7.5em + var(--space-6));
+  top: 20px;
+  bottom: -8px;
+  width: 1px;
+  background: var(--color-border-info);
+}
+.oa-put li:last-child::before {
+  display: none;
+}
+.oa-put li::after {
+  content: '';
+  position: absolute;
+  left: calc(7.5em + var(--space-6) - 5px);
+  top: 8px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary);
+  background: var(--color-bg);
+}
+/* «Параллельно» — работа шла одновременно с предыдущим местом. */
+.oa-put .oa-put__parallel::after {
+  border-style: dashed;
+}
+.oa-put__god {
+  grid-row: 1 / span 2;
+  font-size: 16px;
+  line-height: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary-hover);
+}
+.oa-put__mesto {
+  grid-column: 2;
   font-size: 20px;
   line-height: 28px;
   font-weight: 600;
   letter-spacing: -0.01em;
+  color: var(--oa-ink);
 }
-.tenet__text {
-  margin-top: var(--space-3);
+.oa-put__chto {
+  grid-column: 2;
+  margin-top: var(--space-1);
+  max-width: 30em;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* ── «Один прототип»: цепочка из четырёх шагов ───────────────── */
+
+.oa-tsep {
+  list-style: none;
+  margin: var(--space-8) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  counter-reset: shag;
+}
+.oa-tsep li {
+  counter-increment: shag;
+  padding: 0 var(--space-5);
+  border-left: 1px solid var(--oa-line);
+}
+.oa-tsep li::before {
+  content: counter(shag) ' →';
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--color-accent-text);
+}
+.oa-tsep li:last-child::before {
+  content: counter(shag);
+}
+.oa-tsep b {
+  display: block;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--oa-ink);
+}
+.oa-tsep span {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 15px;
+  line-height: 22px;
+}
+
+/* ── Польза: две стеклянные карточки ─────────────────────────── */
+
+.oa-polza {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--oa-gap);
+}
+.oa-polza__karta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+.oa-polza__karta .oa-text {
+  margin-top: 0;
+  flex: 1;
+}
+.oa-polza__karta .btn {
+  margin-top: var(--space-2);
+}
+
+/* Картинка в правом нижнем углу карточки, чуть выходит за край;
+   текст держится левее и под неё не заходит. */
+.oa-polza__karta {
+  position: relative;
+}
+.oa-polza__ill {
+  position: absolute;
+  right: -7%;
+  bottom: -9%;
+  width: 36%;
+  max-width: 220px;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 20px rgb(31 95 208 / 0.16));
+}
+.oa-polza__ill img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.oa-polza__karta .oa-h3,
+.oa-polza__karta .oa-text {
+  max-width: 62%;
+}
+
+/* ── Связь ───────────────────────────────────────────────────── */
+
+/* Две ссылки подряд: тот же шаг, что между абзацами. Ссылка остаётся
+   по размеру своего текста: в гриде она иначе растягивается на всю
+   строку и зазор внутри неё удваивается. */
+.oa-svyaz {
+  display: grid;
+  justify-items: start;
+  align-items: start;
+  /* Колонка с пометкой и самолётиком выше списка; без этого строки
+     списка растягиваются на её высоту и ссылки разъезжаются. */
+  align-content: start;
+  gap: var(--space-5);
+}
+.oa-svyaz__link {
+  display: inline-grid;
+  gap: var(--space-1);
+  /* Зона нажатия не меньше 44 px. */
+  min-height: 44px;
+  padding: var(--space-2) 0;
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--color-primary-hover);
+  text-decoration: none;
+}
+.oa-svyaz__link > span:first-child {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+.oa-svyaz__adres {
   font-size: 16px;
   line-height: 24px;
-  color: var(--color-text-secondary);
+  font-weight: 400;
+  color: var(--oa-text);
+}
+.oa-svyaz__link:hover {
+  color: var(--color-primary-active);
 }
 
-/* ── Финальный призыв ───────────────────────────────────────── */
-
-.about-cta__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-8);
+/* Самолётик под пометкой: летит вправо, к ссылкам. */
+.oa-svyaz__samolyotik {
+  display: block;
+  width: min(100%, 320px);
+  margin-top: var(--space-6);
+  filter: drop-shadow(0 12px 16px rgb(31 95 208 / 0.14));
+}
+.oa-svyaz__samolyotik img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-/* ── Планшет ────────────────────────────────────────────────── */
+/* ── Фигуры на фоне ──────────────────────────────────────────── */
 
-@media (max-width: 1023.98px) {
-  /* Планшет: та же композиция, текстовая колонка чуть шире — в 30%
-     заголовок начинал сыпаться в столбик по два слова. */
-  .about-hero__body {
-    width: 38%;
+/* Фигура живёт в полосе верхнего отступа блока (--oa-sec), где текста
+   нет по построению; сетка блока поднята над ней. */
+.oa-sec {
+  position: relative;
+}
+.oa-sec > .oa-wrap {
+  position: relative;
+  z-index: 1;
+}
+.oa-figury__f {
+  position: absolute;
+  top: var(--space-4);
+  z-index: 0;
+  width: 84px;
+  opacity: 0.7;
+  pointer-events: none;
+  animation: oa-parenie 11s ease-in-out infinite alternate;
+}
+.oa-figury__f img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.oa-figury__f--oktaedr {
+  left: 6%;
+  width: 72px;
+  opacity: 0.65;
+}
+.oa-figury__f--sfera {
+  right: 8%;
+  width: 88px;
+  opacity: 0.6;
+  animation-delay: -4s;
+  animation-duration: 13s;
+}
+.oa-figury__f--kaplya {
+  left: 42%;
+  width: 52px;
+  opacity: 0.75;
+  animation-delay: -7s;
+  animation-duration: 10s;
+}
+.oa-figury__f--zvezda {
+  right: 12%;
+  width: 76px;
+  opacity: 0.8;
+  animation-delay: -2s;
+  animation-duration: 12s;
+}
+@keyframes oa-parenie {
+  from {
+    transform: translateY(0) rotate(-2deg);
   }
-  .creds {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-5) var(--space-4);
-  }
-  .hero-layer--note {
-    width: 16%;
-  }
-  /* Прежние планшетные переопределения ширины у кристалла и формулы
-     сняты: заданные доли одинаковы на всех экранах шире 768. */
-
-  /* Пять точек в строку тут уже не помещаются: ось встаёт вертикально.
-     Отрезки линии рисуют сами точки, поэтому у последней её нет и линия
-     не уходит под текст. */
-  .path {
-    grid-template-columns: minmax(0, 1fr);
-    max-width: 62ch;
-  }
-  .path::before {
-    display: none;
-  }
-  .path__point {
-    padding-top: 0;
-    padding-left: var(--space-8);
-  }
-  .path__point::before {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 21px;
-    bottom: calc(var(--space-8) * -1);
-    width: 1px;
-    height: auto;
-    border-left: 0;
-    background: var(--color-border-strong);
-  }
-  .path__point:last-child::before {
-    display: none;
-  }
-  .path__dot {
-    top: 5px;
-  }
-  /* Отступ сдвигает только текст: точка и отрезок оси заданы от края
-     блока, поэтому линия остаётся прямой, а точка уходит вбок на
-     пунктирной перемычке. */
-  .path__point--parallel {
-    margin-top: 0;
-    padding-left: calc(var(--space-8) + var(--space-6));
-  }
-  .path__point--parallel .path__dot {
-    left: var(--space-6);
-  }
-  .path__point--parallel::after {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 10px;
-    width: var(--space-6);
-    border-top: 1px dashed var(--color-primary);
+  to {
+    transform: translateY(-10px) rotate(3deg);
   }
 }
 
-/* ── Телефон ────────────────────────────────────────────────── */
+/* ── Планшет и телефон: одна колонка ─────────────────────────── */
 
-@media (max-width: 767.98px) {
-  .about-hero {
-    padding: var(--space-12) 0 var(--space-10);
+@media (max-width: 899.98px) {
+  .oa-sec__grid,
+  .oa-hero__grid {
+    display: block;
   }
-  /* Телефон: всё встаёт в поток — текст, под ним пометка, под ней
-     портрет. Порядок задан разметкой, отдельной вёрстки не нужно. */
-  .about-hero__body {
-    width: 90%;
-    margin-left: 5%;
+  .oa-sec__body,
+  .oa-sec__side {
+    margin-top: var(--space-8);
   }
-  .about-hero__title {
-    font-size: clamp(28px, 7.4vw, 36px);
-  }
-  .about-hero__actions .btn {
-    flex: 1 1 100%;
-    justify-content: center;
-  }
-  /* Телефон: один столбец, иконка слева, текст справа. Резерв под три
-     строки здесь не нужен — пункты стоят друг под другом. */
-  .creds {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-5);
+  /* Иллюстрация встаёт над текстом; шире 300 px её края, собранные из
+     исходника с впечатанным фоном, выглядят грубовато. */
+  .oa-ill {
+    max-width: 300px;
     margin-top: var(--space-10);
   }
-  .cred {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: auto;
-    align-items: center;
-    gap: var(--space-4);
+
+  /* Пометка — у правого поля, под заголовком своего блока. */
+  .oa-sec__side .oa-pometka {
+    width: min(58%, 230px);
+    margin-left: auto;
   }
-  .cred__text {
-    min-height: 0;
-    font-size: 13px;
+
+  /* Первый экран: имя, строка и сцена с фото — в один экран телефона. */
+  .oa-hero {
+    padding-top: var(--space-8);
+  }
+  .oa-hero__text {
+    padding-bottom: 0;
+  }
+  .oa-imya {
+    margin-top: var(--space-3);
+    font-size: clamp(38px, 11vw, 64px);
+  }
+  .oa-imya__io > span {
+    display: block;
+  }
+  .oa-kto {
+    margin-top: var(--space-4);
+  }
+  .oa-kto::after {
+    margin-top: var(--space-5);
+  }
+  .oa-fon {
+    display: none;
+  }
+  .oa-sm {
+    width: min(100%, 50svh, 560px);
+    margin: var(--space-6) auto 0;
+  }
+  .oa-sm__formula {
+    right: 0;
+    top: 12%;
+    padding: var(--space-2) var(--space-3);
+    font-size: 14px;
     line-height: 18px;
   }
 
-  /* Для бюста, формулы и кристалла здесь нет места — они полезли бы
-     на текст. Скрыты через display: скрытые картинки не грузятся. */
-  .hero-bust,
-  .hero-layer--formula,
-  .hero-layer--crystal,
-  .hero-layer--arcs {
-    display: none;
+  .oa-tsep {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--space-6);
   }
-  .hero-layer--net {
-    left: 0;
-    top: auto;
-    bottom: 0;
-    width: 120%;
-    opacity: 0.08;
-  }
+}
 
-  /* Пометка — над портретом, прижата вправо. */
-  .hero-layer--note {
-    position: static;
-    width: 40%;
-    margin: var(--space-10) 5% var(--space-4) auto;
+@media (max-width: 639.98px) {
+  .oa-wrap {
+    padding: 0 var(--space-5);
   }
-  /* Портрет уходит в поток и держит нижний край экрана. */
-  .about-hero__figure {
-    position: static;
-    transform: none;
-    height: auto;
-    width: 72%;
-    margin: 0 auto 0 5%;
-  }
-  .about-hero__photo {
-    height: auto;
-    width: 100%;
-  }
-
-  .about-band {
-    padding: var(--space-12) 0;
-  }
-  .tenets {
+  .oa-printsipy,
+  .oa-polza {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-8);
   }
-  .about-text--lead {
-    font-size: 18px;
-    line-height: 28px;
+  .oa-polza {
+    gap: var(--space-5);
   }
-  /* Длинные подписи на шаг ниже по шкале: .t-body → .t-caption.
-     Текст тот же, сокращений и скрытых строк нет. */
-  .path__note--long {
-    font-size: 14px;
-    line-height: 20px;
+  .oa-polza__karta .btn {
+    align-self: stretch;
+  }
+  /* Картинка над текстом, у правого края карточки, текст во всю ширину. */
+  .oa-polza__ill {
+    position: static;
+    order: -1;
+    align-self: flex-end;
+    width: 150px;
+    margin: calc(var(--space-6) * -1) calc(var(--space-2) * -1) 0 0;
+  }
+  .oa-polza__karta .oa-h3,
+  .oa-polza__karta .oa-text {
+    max-width: none;
+  }
+  .oa-svyaz__samolyotik {
+    width: min(100%, 240px);
+    margin-left: auto;
+  }
+  .oa-figury__f {
+    top: var(--space-3);
+    width: 36px;
+  }
+  .oa-figury__f--sfera {
+    width: 40px;
+  }
+  .oa-figury__f--kaplya {
+    width: 26px;
+  }
+  .oa-figury__f--zvezda {
+    width: 34px;
+  }
+  .oa-fakty {
+    display: grid;
+  }
+  /* Линия времени: ось у левого края, год — над местом. */
+  .oa-put li {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: var(--space-8);
+  }
+  .oa-put li::before {
+    left: 5px;
+  }
+  .oa-put li::after {
+    left: 0;
+  }
+  .oa-put__god,
+  .oa-put__mesto,
+  .oa-put__chto {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .oa-tsep {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+  .oa-tsep li {
+    padding: var(--space-4) 0;
+    border-left: 0;
+    border-top: 1px solid var(--oa-line);
+  }
+  .oa-tsep li::before {
+    content: counter(shag) ' ↓';
+  }
+}
+
+/* ── Движение: проявление блоков при прокрутке ───────────────── */
+
+.oa--js [data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 600ms var(--ease),
+    transform 600ms var(--ease);
+}
+.oa--js [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .oa-sm *,
+  .oa-figury__f {
+    animation: none !important;
+  }
+  .oa--js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

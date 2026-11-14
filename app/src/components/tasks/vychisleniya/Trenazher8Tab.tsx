@@ -1,37 +1,41 @@
-import type { SkillItem } from '../configurator';
 import { TabScrollOnMount } from '../TabScroll';
-import { trainerPage } from '@/content/trainerModes';
-import { SKILL_FORMULA } from '@/content/vychisleniya';
-import { BANK } from '@/lib/vychisleniya/bank';
-import { SKILLS } from '@/lib/vychisleniya/skills';
-import { Formula } from './Formula';
+import type { GruppaVybora } from '../trening';
+import { GRUPPY8, TIPY8, TRENAZHER8 } from '@/content/vychisleniya8';
+import { prototypeById } from '@/lib/vychisleniya/prototypes';
+import { typeset } from '@/lib/tex';
 import { Trenazher8 } from './Trenazher8';
+import { IssueHomeworkSkills8 } from '@/components/dz/Razdel8Dz';
 
 /**
- * Вкладка «Тренажёр» задания №8: заголовок и конфигуратор.
+ * Вкладка «Тренажёр» задания №8.
  *
- * Карточки навыков собираются на сервере: формулы набирает KaTeX
- * на сборке, число заданий — размер банка навыка (десять вариантов
- * на прототип), уровни у всех навыков оба.
+ * Названия групп и типов с формулами набираются KaTeX здесь, на
+ * сборке, и уходят в клиентский тренажёр готовой разметкой: самому
+ * тренажёру KaTeX нужен только для задач, которые он собирает в
+ * браузере.
  */
 export function Trenazher8Tab({ base }: { base: string }) {
-  const perPrototype = new Map(BANK.map((entry) => [entry.prototype, entry.variants.length]));
-  const skills: SkillItem[] = SKILLS.map((skill) => ({
-    id: skill.id,
-    title: skill.nazvanie,
-    count: skill.prototypes.reduce((sum, id) => sum + (perPrototype.get(id) ?? 0), 0),
-    levels: ['base', 'advanced'],
-    chart: <Formula className="z8-formula" tex={SKILL_FORMULA[skill.id] ?? ''} />,
+  const gruppy: GruppaVybora[] = GRUPPY8.map((g) => ({
+    id: g.id,
+    nazvanie: g.nazvanie,
+    znakHtml: typeset(`$${g.znak}$`),
+    ton: g.ton,
+    tipy: g.prototypes.map((id) => ({
+      id,
+      nazvanieHtml: typeset(TIPY8[id]?.nazvanie ?? prototypeById(id)?.nazvanie ?? id),
+    })),
   }));
-  const total = skills.reduce((sum, item) => sum + item.count, 0);
-
   return (
-    <section className="trainer">
-      <header className="trainer__head">
-        <h2 className="t-h2 trainer__title">{trainerPage.title}</h2>
-      </header>
+    <section className="trainer z8-trening trn-host" aria-labelledby="z8-trening-title">
+      {/* Заголовок вкладки — для порядка заголовков и читалок; на экране его
+          заменяет активная вкладка ленты. */}
+      <h2 className="sr-only" id="z8-trening-title">
+        {TRENAZHER8.title}
+      </h2>
       <TabScrollOnMount />
-      <Trenazher8 base={base} skills={skills} total={total} />
+      <Trenazher8 base={base} gruppy={gruppy} />
+      {/* Репетитору со входом: ДЗ по одному типу. */}
+      <IssueHomeworkSkills8 />
     </section>
   );
 }

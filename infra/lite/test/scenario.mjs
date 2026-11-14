@@ -8,11 +8,14 @@
  * адреса страницы — ровно как на /voyti/podtverzhdenie/ и
  * /voyti/novyy-parol/.
  *
- * Шаги: регистрация не по списку (отказ) → регистрация по списку →
- * письмо → повторное письмо раньше минуты (отказ) → вход до
- * подтверждения (отказ) → ссылка из письма → вход → кабинет → смена
- * роли → код комплекта → второй человек и правила RLS «не вижу чужое» →
- * сброс пароля → обновление токена → удаление аккаунта → нагрузка.
+ * Шаги: регистрация не по списку (отказ) → почта не российского
+ * сервиса (отказ domain_not_allowed) → по списку без галочек
+ * согласий (отказ) → регистрация по списку с согласиями → письмо →
+ * повторное письмо раньше минуты (отказ) → вход до подтверждения
+ * (отказ) → ссылка из письма → вход → кабинет → роль сама не меняется →
+ * перенос прогресса из браузера → репетитор и код комплекта → второй
+ * ученик и правила RLS «не вижу чужое» → аноним → сброс пароля →
+ * обновление токена → удаление аккаунта → нагрузка.
  *
  * Пока идёт сценарий, `docker stats` раз в секунду пишет память
  * контейнеров; пики уходят в out/probe-report.json и out/probe-summary.md.
@@ -74,7 +77,10 @@ mkdirSync(OUT, { recursive: true });
 
 const ANNA = "anna@example.test";
 const BORIS = "boris@example.test";
+const VERA = "vera@example.test";
 const STRANGER = "stranger@example.test";
+/* В списке приглашённых, но почта не российского сервиса. */
+const FOREIGN = "gleb@gmail.com";
 const PASSWORD = "probe-Passw0rd-1"; // не секрет: проверочный аккаунт в CI
 const NEW_PASSWORD = "probe-Passw0rd-2"; // не секрет: проверочный аккаунт в CI
 
@@ -247,16 +253,35 @@ async function freshPage(path = "/voyti/") {
 /** Выполнить код в странице: sb — клиент supabase-js. */
 const run = (tab, fn, arg) => tab.evaluate(fn, arg);
 
+/* Редакция документов в базе — её кладёт «Миграции» из operator.json;
+   сайт шлёт ту же дату вместе с галочками согласий. */
+const DOCUMENTS_VERSION = dc(
+  `exec -T db psql -U postgres -tAc "select public.current_documents_version()"`,
+).trim();
+
+/** Данные формы регистрации — как их шлёт сайт (VoytiScreen.tsx). */
+function signUpData(name, role, extra = {}) {
+  return {
+    name,
+    role,
+    documents_version: DOCUMENTS_VERSION,
+    accept_soglashenie: true,
+    accept_soglasie: true,
+    ...(role === "student" ? { birth_year: 2000 } : {}),
+    ...extra,
+  };
+}
+
 async function signUpAndConfirm(email, name, role) {
   const { tab, errors } = await freshPage("/voyti/");
   const sent = Date.now() - 1000;
   const signUp = await run(
     tab,
-    async ({ email, password, name, role, back }) => {
+    async ({ email, password, meta, back }) => {
       const { data, error } = await window.sb.auth.signUp({
         email,
         password,
-        options: { data: { name, role }, emailRedirectTo: back },
+        options: { data: meta, emailRedirectTo: back },
       });
       return {
         user: data?.user?.id ?? null,
@@ -267,8 +292,7 @@ async function signUpAndConfirm(email, name, role) {
     {
       email,
       password: PASSWORD,
-      name,
-      role,
+      meta: signUpData(name, role),
       back: `${SITE}/voyti/podtverzhdenie/`,
     },
   );
@@ -306,14 +330,18 @@ try {
     const { tab, errors } = await freshPage("/voyti/");
     const result = await run(
       tab,
-      async ({ email, password }) => {
-        const { error } = await window.sb.auth.signUp({ email, password });
+      async ({ email, password, meta }) => {
+        const { error } = await window.sb.auth.signUp({
+          email,
+          password,
+          options: { data: meta },
+        });
         return {
           message: error?.message ?? null,
           status: error?.status ?? null,
         };
       },
-      { email: STRANGER, password: PASSWORD },
+      { email: STRANGER, password: PASSWORD, meta: signUpData("Чужой", "tutor") },
     );
     check(
       "Адреса нет в списке — отказ invite_only (сайт пишет «Регистрация пока по приглашению»)",
@@ -327,8 +355,110 @@ try {
     );
   }
 
+  /* 1а. Почта не российского сервиса — отказ domain_not_allowed, даже
+     если адрес в списке приглашённых (gleb@gmail.com там есть). */
+  {
+    const { tab, errors } = await freshPage("/voyti/");
+    const results = await run(
+      tab,
+      async ({ emails, password, meta }) => {
+        const out = [];
+        for (const email of emails) {
+          const { data, error } = await window.sb.auth.signUp({
+            email,
+            password,
+            options: { data: meta },
+          });
+          out.push({
+            email,
+            user: data?.user?.id ?? null,
+            message: error?.message ?? null,
+            status: error?.status ?? null,
+          });
+        }
+        return out;
+      },
+      {
+        emails: [FOREIGN, FOREIGN.toUpperCase(), "gleb@sub.mail.ru"],
+        password: PASSWORD,
+        meta: signUpData("Глеб", "tutor"),
+      },
+    );
+    check(
+      "Почта gmail.com (и ЗАГЛАВНЫМИ), поддомен mail.ru — отказ 403 domain_not_allowed, аккаунт не создан",
+      results.every(
+        (r) =>
+          r.user === null &&
+          r.status === 403 &&
+          r.message?.includes("domain_not_allowed"),
+      ),
+      JSON.stringify(results),
+    );
+    check(
+      "Отказ по домену — без ошибок CORS",
+      errors.length === 0,
+      errors.join(" | "),
+    );
+  }
+
+  /* Путь регистрации один: без галочек согласий, со старой редакцией
+     документов или с ролью «администратор» аккаунт не создаётся, даже
+     если адрес в списке. */
+  {
+    const { tab } = await freshPage("/voyti/");
+    const tries = await run(
+      tab,
+      async ({ email, password, cases }) => {
+        const out = [];
+        for (const meta of cases) {
+          const { data, error } = await window.sb.auth.signUp({
+            email,
+            password,
+            options: { data: meta },
+          });
+          out.push({
+            user: data?.user?.id ?? null,
+            status: error?.status ?? null,
+          });
+        }
+        return out;
+      },
+      {
+        email: ANNA,
+        password: PASSWORD,
+        cases: [
+          { name: "Анна", role: "student", birth_year: 2000 },
+          signUpData("Анна", "student", { accept_soglasie: false }),
+          signUpData("Анна", "student", { documents_version: "2020-01-01" }),
+          signUpData("Анна", "admin"),
+          signUpData("Анна", "student", { birth_year: "" }),
+          signUpData("Анна", "tutor", { bootstrap_admin: true, role: "admin" }),
+        ],
+      },
+    );
+    const users = dc(
+      `exec -T db psql -U postgres -tAc "select count(*) from auth.users"`,
+    ).trim();
+    check(
+      "Без галочек согласий, со старой редакцией, без года рождения и с ролью «администратор» аккаунт не создаётся",
+      tries.every((item) => item.user === null && item.status >= 400) &&
+        users === "0",
+      JSON.stringify({ tries, users }),
+    );
+  }
+
   /* 2–6. Анна: регистрация, письмо, повтор, вход до подтверждения, ссылка. */
   const anna = await signUpAndConfirm(ANNA, "Анна", "student");
+  {
+    const journal = dc(
+      `exec -T db psql -U postgres -tAc "select count(*) || ' ' || count(ip) || ' ' || count(distinct version) from public.consents where user_id = '${anna.userId}'"`,
+    ).trim();
+    check(
+      "Журнал согласий: две записи текущей редакции, IP записан службой входа (не из формы)",
+      journal === "2 2 1",
+      journal,
+    );
+  }
   {
     const resend = await run(
       anna.tab,
@@ -415,14 +545,14 @@ try {
       } = await window.sb.auth.getUser();
       const { data, error } = await window.sb
         .from("profiles")
-        .select("name, role, tour_done")
-        .eq("id", user.id)
+        .select("display_name, role, tour_done")
+        .eq("user_id", user.id)
         .single();
       return { data, error: error?.message ?? null };
     });
     check(
       "Кабинет: профиль создан триггером, имя и роль из регистрации",
-      profile.data?.name === "Анна" && profile.data?.role === "student",
+      profile.data?.display_name === "Анна" && profile.data?.role === "student",
       JSON.stringify(profile),
     );
 
@@ -430,32 +560,103 @@ try {
       const {
         data: { user },
       } = await window.sb.auth.getUser();
-      const { error } = await window.sb
+      const role = await window.sb
         .from("profiles")
-        .update({ name: "Анна П.", role: "tutor" })
-        .eq("id", user.id);
-      const { error: metaError } = await window.sb.auth.updateUser({
-        data: { name: "Анна П.", role: "tutor" },
-      });
+        .update({ role: "tutor" })
+        .eq("user_id", user.id);
+      const admin = await window.sb
+        .from("profiles")
+        .update({ role: "admin" })
+        .eq("user_id", user.id);
+      const rename = await window.sb
+        .from("profiles")
+        .update({ display_name: "Анна П.", tour_done: true })
+        .eq("user_id", user.id);
+      /* Данные сессии человек может править сам — на права это не влияет. */
+      await window.sb.auth.updateUser({ data: { name: "Анна П.", role: "admin" } });
       const { data } = await window.sb
         .from("profiles")
-        .select("name, role")
-        .eq("id", user.id)
+        .select("display_name, role, tour_done")
+        .eq("user_id", user.id)
         .single();
-      const { data: fresh } = await window.sb.auth.getUser();
+      const grant = await window.sb.rpc("grant_admin", { p_email: user.email });
       return {
         data,
-        meta: fresh.user?.user_metadata?.role,
-        error: error?.message ?? metaError?.message ?? null,
+        roleCode: role.error?.code ?? null,
+        adminCode: admin.error?.code ?? null,
+        renameError: rename.error?.message ?? null,
+        grantCode: grant.error?.code ?? null,
       };
     });
     check(
-      "Смена роли ученик → репетитор (профиль и данные аккаунта)",
-      changed.data?.role === "tutor" && changed.meta === "tutor",
+      "Имя меняется, роль — нет: ни в репетитора, ни в администратора (42501), grant_admin закрыт",
+      changed.data?.role === "student" &&
+        changed.data?.display_name === "Анна П." &&
+        changed.data?.tour_done === true &&
+        changed.roleCode === "42501" &&
+        changed.adminCode === "42501" &&
+        changed.grantCode !== null &&
+        !changed.renameError,
       JSON.stringify(changed),
     );
 
-    const kit = await run(tab, async () => {
+    /* Смена почты на иностранную: база отказывает, письмо не уходит,
+       почта аккаунта прежняя. */
+    const emailChange = await run(tab, async () => {
+      const { error } = await window.sb.auth.updateUser({
+        email: "anna.new@gmail.com",
+      });
+      const { data } = await window.sb.auth.getUser();
+      return {
+        status: error?.status ?? null,
+        email: data?.user?.email ?? null,
+        newEmail: data?.user?.new_email ?? null,
+      };
+    });
+    check(
+      "Смена почты на gmail.com — отказ, почта аккаунта прежняя",
+      emailChange.status >= 400 &&
+        emailChange.email === ANNA &&
+        !emailChange.newEmail,
+      JSON.stringify(emailChange),
+    );
+
+    const stored = await run(tab, async () => {
+      const first = await window.sb.from("user_storage").upsert(
+        [
+          { key: "budetege:vychisleniya-8:v1", value: { kinds: { "8.A": { done: 3, right: 2 } } } },
+          { key: "budetege:trainer:8:session", value: { schemaVersion: 2 } },
+        ],
+        { onConflict: "user_id,key" },
+      );
+      const again = await window.sb
+        .from("user_storage")
+        .upsert(
+          { key: "budetege:vychisleniya-8:v1", value: { kinds: {} } },
+          { onConflict: "user_id,key" },
+        );
+      const bad = await window.sb
+        .from("user_storage")
+        .insert({ key: "чужой ключ", value: {} });
+      const { data } = await window.sb.from("user_storage").select("key");
+      return {
+        keys: (data ?? []).map((row) => row.key).sort(),
+        error: first.error?.message ?? again.error?.message ?? null,
+        badCode: bad.error?.code ?? null,
+      };
+    });
+    check(
+      "Перенос прогресса: ключи браузера записываются в аккаунт и перезаписываются, посторонний ключ — отказ",
+      stored.keys.length === 2 && !stored.error && stored.badCode === "23514",
+      JSON.stringify(stored),
+    );
+  }
+
+  /* Вера — репетитор: код комплекта. */
+  const vera = await signUpAndConfirm(VERA, "Вера", "tutor");
+  await vera.tab.goto(vera.mail.link);
+  {
+    const kit = await run(vera.tab, async () => {
       const row = {
         code: "AB12-CD",
         scope: "12",
@@ -470,14 +671,23 @@ try {
         .from("kits")
         .select("code")
         .order("created_at", { ascending: false });
+      const { data: people } = await window.sb.from("profiles").select("user_id");
+      const { data: classes } = await window.sb.from("classes").select("id");
       return {
         codes: (data ?? []).map((item) => item.code),
+        people: (people ?? []).length,
+        classes: (classes ?? []).length,
         error: error?.message ?? null,
       };
     });
     check(
-      "Код комплекта сохраняется и читается",
+      "Репетитор: код комплекта сохраняется и читается",
       kit.codes.includes("AB12-CD") && !kit.error,
+      JSON.stringify(kit),
+    );
+    check(
+      "Репетитор без класса видит только себя: ни учеников, ни классов",
+      kit.people === 1 && kit.classes === 0,
       JSON.stringify(kit),
     );
   }
@@ -489,46 +699,58 @@ try {
     const tab = boris.tab;
     const rls = await run(
       tab,
-      async ({ annaId }) => {
-        const profiles = await window.sb.from("profiles").select("id");
+      async ({ annaId, veraId }) => {
+        const profiles = await window.sb.from("profiles").select("user_id");
         const kits = await window.sb.from("kits").select("code");
+        const storage = await window.sb.from("user_storage").select("key");
+        const consents = await window.sb.from("consents").select("user_id");
         const update = await window.sb
           .from("profiles")
-          .update({ name: "взлом" })
-          .eq("id", annaId)
-          .select("id");
-        const insert = await window.sb
-          .from("kits")
-          .insert({
-            user_id: annaId,
-            code: "ZZ99-ZZ",
-            scope: "12",
-            student_href: "/x/",
-            teacher_href: "/y/",
-          });
+          .update({ display_name: "взлом" })
+          .eq("user_id", annaId)
+          .select("user_id");
+        const insert = await window.sb.from("kits").insert({
+          user_id: veraId,
+          code: "ZZ99-ZZ",
+          scope: "12",
+          student_href: "/x/",
+          teacher_href: "/y/",
+        });
         const del = await window.sb
           .from("kits")
           .delete()
-          .eq("user_id", annaId)
+          .eq("user_id", veraId)
           .select("id");
+        const foreign = await window.sb
+          .from("user_storage")
+          .insert({ user_id: annaId, key: "budetege:x", value: {} });
+        const wipe = await window.sb
+          .from("user_storage")
+          .delete()
+          .eq("user_id", annaId)
+          .select("key");
         return {
           profiles: (profiles.data ?? []).length,
           kits: (kits.data ?? []).length,
+          storage: (storage.data ?? []).length,
+          consents: new Set((consents.data ?? []).map((row) => row.user_id)).size,
           updated: (update.data ?? []).length,
           insertCode: insert.error?.code ?? null,
           deleted: (del.data ?? []).length,
+          foreignCode: foreign.error?.code ?? null,
+          wiped: (wipe.data ?? []).length,
         };
       },
-      { annaId: anna.userId },
+      { annaId: anna.userId, veraId: vera.userId },
     );
     check(
-      "RLS: второй человек видит только свой профиль",
-      rls.profiles === 1,
+      "RLS: второй человек видит только свой профиль и свои согласия",
+      rls.profiles === 1 && rls.consents === 1,
       JSON.stringify(rls),
     );
     check(
-      "RLS: чужие коды комплектов не видны",
-      rls.kits === 0,
+      "RLS: чужие коды комплектов и чужой перенесённый прогресс не видны",
+      rls.kits === 0 && rls.storage === 0,
       JSON.stringify(rls),
     );
     check(
@@ -537,49 +759,62 @@ try {
       JSON.stringify(rls),
     );
     check(
-      "RLS: нельзя записать комплект на чужой аккаунт (42501)",
-      rls.insertCode === "42501",
+      "RLS: нельзя записать комплект или прогресс на чужой аккаунт (42501)",
+      rls.insertCode === "42501" && rls.foreignCode === "42501",
       JSON.stringify(rls),
     );
     check(
-      "RLS: нельзя удалить чужие комплекты",
-      rls.deleted === 0,
+      "RLS: нельзя удалить чужие комплекты и чужой прогресс",
+      rls.deleted === 0 && rls.wiped === 0,
       JSON.stringify(rls),
     );
 
     const anonymous = await (
       await freshPage("/")
     ).tab.evaluate(async () => {
-      const profiles = await window.sb.from("profiles").select("id");
-      const kits = await window.sb
-        .from("kits")
-        .insert({
-          code: "QQ11-QQ",
-          scope: "12",
-          student_href: "/x/",
-          teacher_href: "/y/",
-        });
-      const rpc = await window.sb.rpc("delete_own_account");
+      const tables = ["profiles", "classes", "attempts", "user_storage", "consents", "homework"];
+      const reads = [];
+      for (const table of tables) {
+        const { data, error } = await window.sb.from(table).select("*").limit(1);
+        reads.push({ table, rows: (data ?? []).length, code: error?.code ?? null });
+      }
+      const catalog = await window.sb.from("ege_tasks").select("no");
+      const kits = await window.sb.from("kits").insert({
+        code: "QQ11-QQ",
+        scope: "12",
+        student_href: "/x/",
+        teacher_href: "/y/",
+      });
+      const rpc = await window.sb.rpc("delete_my_account");
+      const role = await window.sb.rpc("my_role");
       return {
-        profiles: (profiles.data ?? []).length,
+        reads,
+        catalog: (catalog.data ?? []).length,
         kitsError: kits.error?.code ?? null,
         rpcError: rpc.error?.code ?? null,
+        roleError: role.error?.code ?? null,
       };
     });
     check(
-      "Без входа: профили не видны, записать и удалить нельзя",
-      anonymous.profiles === 0 &&
+      "Без входа: люди, классы, попытки и прогресс закрыты (отказ, а не пустой ответ), записать и вызвать функции нельзя",
+      anonymous.reads.every((item) => item.rows === 0 && item.code === "42501") &&
         anonymous.kitsError !== null &&
-        anonymous.rpcError !== null,
+        anonymous.rpcError !== null &&
+        anonymous.roleError !== null,
       JSON.stringify(anonymous),
+    );
+    check(
+      "Без входа: справочник заданий открыт (20 номеров)",
+      anonymous.catalog === 20,
+      JSON.stringify(anonymous.catalog),
     );
 
     const annaStill = await asService(
-      `profiles?id=eq.${anna.userId}&select=name`,
+      `profiles?user_id=eq.${anna.userId}&select=display_name`,
     );
     check(
       "Профиль Анны после попыток Бориса не изменился",
-      annaStill[0]?.name === "Анна П.",
+      annaStill[0]?.display_name === "Анна П.",
       JSON.stringify(annaStill),
     );
   }
@@ -624,7 +859,43 @@ try {
     );
   }
 
-  /* 13–14. Сброс пароля и обновление токена. */
+  /* Старые пользователи. Убираем example.test из ручного списка —
+     Анна становится пользователем с почтой, на которую новый аккаунт
+     уже не создать. Сброс пароля, вход и обновление токена ниже
+     обязаны работать как прежде. Домен возвращается после шага 14. */
+  dc(
+    `exec -T db psql -U postgres -tAc "delete from auth_hooks.signup_extra where value = 'example.test'"`,
+  );
+  {
+    const { tab } = await freshPage("/voyti/");
+    const closed = await run(
+      tab,
+      async ({ email, password, meta }) => {
+        const { error } = await window.sb.auth.signUp({
+          email,
+          password,
+          options: { data: meta },
+        });
+        return {
+          status: error?.status ?? null,
+          message: error?.message ?? null,
+        };
+      },
+      {
+        email: "newcomer@example.test",
+        password: PASSWORD,
+        meta: signUpData("Новый", "tutor"),
+      },
+    );
+    check(
+      "Домен убран из ручного списка — новый аккаунт на нём не создаётся (domain_not_allowed)",
+      closed.status === 403 && closed.message?.includes("domain_not_allowed"),
+      JSON.stringify(closed),
+    );
+  }
+
+  /* 13–14. Сброс пароля и обновление токена — у Анны, чей домен уже
+     не в списке. */
   {
     const { tab } = await freshPage("/voyti/");
     const sent = Date.now() - 1000;
@@ -699,13 +970,16 @@ try {
       JSON.stringify(logins),
     );
   }
+  dc(
+    `exec -T db psql -U postgres -tAc "insert into auth_hooks.signup_extra (value, kind) values ('example.test', 'domain')"`,
+  );
 
   /* 15. Удаление аккаунта. */
   {
     const gone = await run(
       boris.tab,
       async ({ email, password }) => {
-        const { error } = await window.sb.rpc("delete_own_account");
+        const { error } = await window.sb.rpc("delete_my_account");
         await window.sb.auth.signOut({ scope: "local" });
         const again = await window.sb.auth.signInWithPassword({
           email,
@@ -718,11 +992,21 @@ try {
       },
       { email: BORIS, password: PASSWORD },
     );
-    const left = await asService(`profiles?id=eq.${boris.userId}&select=id`);
+    const left = await asService(
+      `profiles?user_id=eq.${boris.userId}&select=user_id`,
+    );
+    const journal = await asService(
+      `consents?user_id=eq.${boris.userId}&select=account_deleted_at`,
+    );
     check(
       "Удаление аккаунта: войти больше нельзя, профиль удалён каскадом",
       !gone.error && gone.again === "invalid_credentials" && left.length === 0,
       JSON.stringify({ gone, left }),
+    );
+    check(
+      "Удаление аккаунта: журнал согласий остаётся с отметкой об удалении",
+      journal.length === 2 && journal.every((row) => row.account_deleted_at),
+      JSON.stringify(journal),
     );
   }
 
@@ -758,7 +1042,7 @@ try {
       Array.from({ length: 300 }, async () => {
         const started = performance.now();
         const response = await fetch(
-          `${API}/rest/v1/profiles?select=name,role`,
+          `${API}/rest/v1/profiles?select=display_name,role`,
           {
             headers: { apikey: env.ANON_KEY, authorization: `Bearer ${token}` },
           },

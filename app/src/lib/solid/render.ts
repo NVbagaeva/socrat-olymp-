@@ -142,6 +142,11 @@ interface Stroke {
   owner?: number;
   /** Уровень жидкости в сосуде: стенки сосуда его не прячут (сосуд прозрачен). */
   liquid?: boolean;
+  /**
+   * Отрезок с величиной из условия (экранная тема): рисуется цветом
+   * величин и толще — тем же цветом, что и число у него.
+   */
+  velichina?: boolean;
 }
 
 type FillRole = 'face' | 'liquid' | 'section' | 'sphere';
@@ -171,6 +176,12 @@ interface LabelSpec {
   size?: number;
   /** Точка закрыта телом от зрителя: подпись видна, но бледнее. */
   skryt?: boolean;
+  /**
+   * Экранная тема: буква вершины — синяя и жирная, число-величина —
+   * цветом величин. Жирная буква шире: ширина подписи для расстановки
+   * считается с поправкой.
+   */
+  ekran?: boolean;
 }
 
 interface PlacedLabel extends LabelSpec {
@@ -365,7 +376,9 @@ function addPolyhedron(
     body.faces.forEach((face, f) => {
       if (dot(faceNormal(body.vertices, face), view.toward) <= 0) return;
       const kontur = face.map((i) => view.project(at(body.vertices, i)));
-      const klyuch = gladkie.has(f) ? 'gladko' : ploskost(at(normals, f), at(body.vertices, at(face, 0)));
+      const klyuch = gladkie.has(f)
+        ? 'gladko'
+        : ploskost(at(normals, f), at(body.vertices, at(face, 0)));
       const gruppa = gruppy.get(klyuch);
       if (gruppa === undefined) gruppy.set(klyuch, [kontur]);
       else gruppa.push(kontur);
@@ -659,7 +672,16 @@ const STEKLO = {
     glass1: 'var(--solid-steklo-1, #f2f7fe)',
     glass2: 'var(--solid-steklo-2, #d7e5fa)',
     vydel: 'var(--solid-vydel, #e07a2f)',
+    /* Буквы вершин и величины из условия — те же токены, что у чертежей
+       многогранников (lib/chertezh3): синий и терракота; на чёрно-белом
+       листе оба становятся чёрными (lib/sheet/theme.css). */
+    vershina: 'var(--chertezh-vershina, #1f5fd0)',
+    velichina: 'var(--chertezh-velichina, #e07a2f)',
   },
+  /* Жирная буква вершины: начертание и поправка ширины для расстановки. */
+  bukva: { ves: 700, shire: 1.08 },
+  /* Отрезок с величиной из условия — толще ребра. */
+  velichina: { width: 3.1, hidden: 2 },
   width: { edge: 2.3, hidden: 1.6, vertex: 2 },
   dash: { hidden: '6 5' },
   opacity: { face: 0.8, sphere: 0.55, hidden: 0.6, section: 0.32, sectionHl: 0.4 },
@@ -1067,6 +1089,9 @@ function labelSize(label: LabelSpec): { w: number; h: number } {
     }
   }
   w += shirinaIndeksa(sub, size);
+  if (label.ekran === true && label.kind === 'vertex') {
+    w *= STEKLO.bukva.shire;
+  }
   return { w, h: size };
 }
 
@@ -1244,6 +1269,11 @@ function esc(text: string): string {
 function strokeAttrs(s: Stroke, ekran = false): string {
   const c = THEME.colors;
   const w = THEME.width;
+  if (ekran && !s.hl && s.velichina === true) {
+    return s.visible
+      ? `class="solid-velichina" stroke="${STEKLO.colors.velichina}" stroke-width="${STEKLO.velichina.width}"`
+      : `class="solid-velichina" stroke="${STEKLO.colors.velichina}" stroke-width="${STEKLO.velichina.hidden}" stroke-opacity="${STEKLO.opacity.hidden}" stroke-dasharray="${STEKLO.dash.hidden}"`;
+  }
   if (ekran && !s.hl && s.role === 'edge') {
     return s.visible
       ? `class="solid-rebro" stroke="${STEKLO.colors.edge}" stroke-width="${STEKLO.width.edge}"`
@@ -1299,12 +1329,29 @@ function labelMarkup(label: PlacedLabel): string {
   const f = THEME.font;
   const { base, sub } = splitName(label.text);
   const size = label.size ?? (label.kind === 'measure' ? f.measure : f.size);
-  const fill = label.kind === 'aux' || label.hl ? THEME.colors.aux : THEME.colors.label;
+  /* Экранная тема: буква вершины — синяя и жирная, число-величина —
+     цветом величин. Выделенная шагом подпись остаётся цветом построений. */
+  const svoya = label.ekran === true && !label.hl;
+  const fill =
+    label.kind === 'aux' || label.hl
+      ? THEME.colors.aux
+      : svoya
+        ? label.kind === 'vertex'
+          ? STEKLO.colors.vershina
+          : STEKLO.colors.velichina
+        : THEME.colors.label;
   /* Шрифты подписей — общие для рисунков сайта (lib/risunki/shrifty):
      буквы-вершины — KaTeX_Math курсивом, числа — KaTeX_Main прямым. */
   const bukva = label.kind === 'vertex' || label.kind === 'aux';
   const family = bukva ? BUKVY : CHISLA;
-  const weight = VES;
+  const weight = svoya && label.kind === 'vertex' ? STEKLO.bukva.ves : VES;
+  const klass = label.hl
+    ? 'solid-hl'
+    : svoya
+      ? label.kind === 'vertex'
+        ? 'solid-bukva'
+        : 'solid-chislo'
+      : '';
   const style = bukva ? ' font-style="italic"' : '';
   const x = label.x;
   const y = label.y + label.h * 0.78;
@@ -1314,7 +1361,7 @@ function labelMarkup(label: PlacedLabel): string {
   return (
     /* Выделенная шагом подпись — цветом построений; class="solid-hl" и
        data-hl — метки для проверок (жирного начертания нет). */
-    `<text${label.hl ? ' class="solid-hl"' : ''} x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
+    `<text${klass === '' ? '' : ` class="${klass}"`} x="${px(x)}" y="${px(y)}" font-family="${family}" font-size="${size}" font-weight="${weight}"${style} ` +
     `fill="${fill}"${label.hl ? ' data-hl="1"' : ''}${blednee} paint-order="stroke" stroke="${THEME.colors.surface}" stroke-width="${THEME.width.halo}" stroke-linejoin="round">${inner}</text>`
   );
 }
@@ -1352,7 +1399,9 @@ export function renderSolid(model: Model, options: RenderOptions = {}): string {
   const ekran = options.tema === 'ekran';
   /* Id градиента — по самому рисунку: одинаковые рисунки делят
      одинаковое определение, разные не путаются. */
-  const gradient = ekran ? `sg${hashId(pathOf(scene.strokes.flatMap((s) => s.points)) + model.alt)}` : undefined;
+  const gradient = ekran
+    ? `sg${hashId(pathOf(scene.strokes.flatMap((s) => s.points)) + model.alt)}`
+    : undefined;
   const parts: string[] = [];
   if (gradient !== undefined) {
     parts.push(
@@ -1453,13 +1502,46 @@ export interface SolidDiagnostics {
  * Сцена для рисования — без повторов линий (bezPovtorov). Метрики вида
  * (solidKarkas) берут сцену как есть: выбор ракурса от этого не зависит.
  */
+/**
+ * Экранная тема: подписи вершин и величин получают свой цвет, а ребро,
+ * у которого стоит величина из условия, — цвет величин и толщину.
+ * Геометрия и видимость не меняются.
+ */
+function ekrannayaScena(model: Model, scene: Scene, shag?: number): Scene {
+  const eps = modelExtent(model) * 1e-6;
+  const ryadom = (p: Vec3, q: Vec3) =>
+    Math.abs(p[0] - q[0]) <= eps && Math.abs(p[1] - q[1]) <= eps && Math.abs(p[2] - q[2]) <= eps;
+  /* Величина, которой на этом шаге решения ещё нет, ребро не красит. */
+  const measures = (model.measures ?? []).filter(
+    (m) => shag === undefined || m.shag === undefined || m.shag <= shag,
+  );
+  const sVelichinoy = (seg: { a: Vec3; b: Vec3 }) =>
+    measures.some(
+      (m) =>
+        (ryadom(m.a, seg.a) && ryadom(m.b, seg.b)) || (ryadom(m.a, seg.b) && ryadom(m.b, seg.a)),
+    );
+  return {
+    ...scene,
+    labels: scene.labels.map((label) => (label.kind === 'aux' ? label : { ...label, ekran: true })),
+    strokes:
+      measures.length === 0
+        ? scene.strokes
+        : scene.strokes.map((s) =>
+            s.role === 'edge' && s.seg !== undefined && sVelichinoy(s.seg)
+              ? { ...s, velichina: true }
+              : s,
+          ),
+  };
+}
+
 function odnaLiniya(model: Model, scene: Scene): Scene {
   return { ...scene, strokes: bezPovtorov(scene.strokes, modelExtent(model) * 1e-4) };
 }
 
 function pixelScene(model: Model, options: RenderOptions, risovat = true): Scene {
   const sobrana = buildScene(model, options);
-  const scene = risovat ? odnaLiniya(model, sobrana) : sobrana;
+  const odna = risovat ? odnaLiniya(model, sobrana) : sobrana;
+  const scene = options.tema === 'ekran' ? ekrannayaScena(model, odna, options.shag) : odna;
   if (!options.ustoychivo) {
     return toPixels(scene);
   }
