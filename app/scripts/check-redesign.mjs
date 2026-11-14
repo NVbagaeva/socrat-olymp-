@@ -311,6 +311,9 @@ const ODOBRENO = {
     'cf6c9b6b7737e190cb0e7a7bc3adb1b3783f292af1aede97179ac35f9b0e01b9',
   'app/src/lib/proizvodnaya/povyshennye.ts':
     '690f2d8461884b393db2f655aeb20e8c570b4d2bf59355001d29f88f1875413a',
+  /* №10: П-33, порядок максимума по k — по решению владельца. */
+  'app/src/lib/zadanie10/prototypes/gruppa5.ts':
+    '11ec6178e5483661722a7b8f53f964cbde113bf5b029c7cc6fcd2c2637cb901e',
 };
 
 /** Какие картинки реестра принадлежат разделу. */
