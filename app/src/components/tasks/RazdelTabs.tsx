@@ -177,6 +177,7 @@ export function RazdelTabs({
         onOpenChange={setMenu}
         stripRef={strip}
         before={before}
+        {...(className === undefined ? {} : { className })}
       >
         {lenta}
       </TutorMenu>

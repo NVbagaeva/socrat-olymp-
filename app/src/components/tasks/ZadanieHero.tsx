@@ -25,9 +25,11 @@ export function ZadanieHero({ task }: ZadanieHeroProps) {
   const file = (width: number, ext: string) =>
     assetUrl(`/images/zadaniya/${task}/hero-${width}.${ext}`);
   const set = (ext: string) => WIDTHS.map((width) => `${file(width, ext)} ${width}w`).join(', ');
-  /* Компьютер: колонка до 460px; телефон: картинка высотой ≈180px, то
-     есть шириной ≈270px. Столько и просим у браузера. */
-  const sizes = '(min-width: 1024px) 460px, 270px';
+  /* Ширина колонки обложки в шапке «Стеклянная сцена»: 264px на
+     компьютере, столбик высотой 180px (≈270px шириной) на планшете,
+     108px на телефоне. Столько и просим у браузера — иначе он тянет
+     версию втрое тяжелее нужной. */
+  const sizes = '(min-width: 1024px) 264px, (min-width: 768px) 270px, 108px';
   return (
     <picture className="zadanie-hero">
       <source type="image/webp" srcSet={set('webp')} sizes={sizes} />
