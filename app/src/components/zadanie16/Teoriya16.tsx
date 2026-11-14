@@ -21,6 +21,7 @@ import { YAKOR_16 } from '@/lib/zadanie16/teoriya-yakorya';
 import { Chertezh16 } from './Chertezh16';
 import { Rabota16 } from './Rabota16';
 import { VkladkiGlavy16 } from './VkladkiGlavy16';
+import { PlashkaOtveta } from '@/components/ui/PlashkaOtveta';
 
 /** Формула крупно (display), набранная на сервере. */
 function Krupno({ tex }: { tex: string }) {
@@ -36,10 +37,13 @@ function otvetHtml(tex: string): string {
 /** «Ответ: x ∈ …» — плашкой под примером. */
 function Otvet({ tex, zacherknut }: { tex: string; zacherknut?: boolean }) {
   return (
-    <p className={zacherknut ? 'z16-otvet z16-otvet--neverno' : 'z16-otvet'}>
-      <span className="z16-otvet__label">{BLOKI_16.otvet}:</span>{' '}
+    <PlashkaOtveta
+      className={zacherknut ? 'z16-otvet z16-otvet--neverno' : 'z16-otvet'}
+      podpis={BLOKI_16.otvet}
+      podpisClassName="z16-otvet__label"
+    >
       <span dangerouslySetInnerHTML={{ __html: otvetHtml(`x\\in${tex}`) }} />
-    </p>
+    </PlashkaOtveta>
   );
 }
 

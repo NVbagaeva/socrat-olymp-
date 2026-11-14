@@ -2353,12 +2353,9 @@ a.tutor-card:hover {
 .rich-formula .katex-display {
   margin: 0;
 }
-/* Выкладка в строчном режиме KaTeX переносится по знакам «=» и «+»:
-   строка не обрывается у края экрана, а идёт дальше на следующей. */
-.rich-formula .katex,
-.rich-formula .katex .katex-html {
-  white-space: normal;
-}
+/* Выносная формула не рвётся посередине (в том числе после «=»): если
+   не помещается, FormulyPoShirine плавно уменьшает её (не меньше 80 %),
+   а дальше — прокрутка внутри рамки. */
 .rich-formula .katex {
   line-height: 1.7;
 }
@@ -2572,6 +2569,14 @@ a.tutor-card:hover {
   border-radius: var(--radius-md);
   background: var(--color-surface-warm);
   font-size: 1.25rem;
+}
+/* Самые узкие телефоны (320px): рамке шага — поля и кегль поменьше,
+   чтобы формула («tg α =» и дробь со словами) помещалась целиком. */
+@media (max-width: 359.98px) {
+  .rich-step__boxed {
+    padding-inline: var(--space-3);
+    font-size: 1.125rem;
+  }
 }
 .rich-fork {
   list-style: none;

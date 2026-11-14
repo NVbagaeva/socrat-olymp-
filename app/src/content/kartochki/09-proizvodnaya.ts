@@ -24,6 +24,7 @@ import { stsena } from '@/lib/proizvodnaya/stseny';
 import { YAKOR_9 } from '@/lib/proizvodnaya/teoriya-yakorya';
 import type { Figura, Uzel } from '@/lib/proizvodnaya/types';
 import { nomerRazdela } from '@/content/struktura';
+import { DROB_KATETOV } from '@/lib/drobSlov';
 
 const B = 'база' as const;
 const E = 'важно для ЕГЭ' as const;
@@ -399,7 +400,7 @@ const kartochki: Kartochka[] = [
     topic: 'geometriya',
     type: 'formula',
     front: "Касательная нарисована на клетчатой бумаге. Как найти $f'(x_0)$?",
-    back: `Берём два узла сетки на прямой, строим прямоугольный треугольник с катетами по линиям сетки.\n$${TG}\\,\\alpha=\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}$; прямая убывает — ставим минус.`,
+    back: `Берём два узла сетки на прямой, строим прямоугольный треугольник с катетами по линиям сетки.\n$${TG}\\,\\alpha=${DROB_KATETOV}$; прямая убывает — ставим минус.`,
     level: E,
     source: R('treugolnik'),
   },
@@ -410,7 +411,7 @@ const kartochki: Kartochka[] = [
     type: 'formula',
     front:
       'Касательная идёт вниз, угол $\\alpha$ тупой. Как выразить $\\operatorname{tg}\\alpha$ через треугольник?',
-    back: `$${TG}\\,\\alpha=-${TG}(180^\\circ-\\alpha)=-\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}$`,
+    back: `$${TG}\\,\\alpha=-${TG}(180^\\circ-\\alpha)=-${DROB_KATETOV}$`,
     pochemu:
       'Острый угол треугольника — смежный с $\\alpha$; тангенсы смежных углов отличаются знаком.',
     level: E,

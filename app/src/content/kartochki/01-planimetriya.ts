@@ -23,6 +23,7 @@ import {
   ugol,
   type P,
 } from '@/lib/kartochki/schet';
+import { drobSlov } from '@/lib/drobSlov';
 
 const B = 'база' as const;
 const E = 'важно для ЕГЭ' as const;
@@ -274,7 +275,7 @@ const kartochki: Kartochka[] = [
     topic: 'pryamougolnyy',
     type: 'formula',
     front: 'Синус, косинус и тангенс острого угла прямоугольного треугольника?',
-    back: '$\\sin A = \\dfrac{\\text{противолежащий катет}}{\\text{гипотенуза}}$, $\\cos A = \\dfrac{\\text{прилежащий катет}}{\\text{гипотенуза}}$, $\\operatorname{tg} A = \\dfrac{\\text{противолежащий}}{\\text{прилежащий}}$',
+    back: `$\\sin A = ${drobSlov('противолежащий катет', 'гипотенуза')}$, $\\cos A = ${drobSlov('прилежащий катет', 'гипотенуза')}$, $\\operatorname{tg} A = ${drobSlov('противолежащий', 'прилежащий')}$`,
     figure: { dvizhok: 'plan', tema: 'trig' },
     level: E,
     source: 'k-trig',

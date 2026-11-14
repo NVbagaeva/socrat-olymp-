@@ -190,3 +190,46 @@ foreignObject .katex svg {
 .nowrap {
   white-space: nowrap;
 }
+
+/* Плашка ответа (components/ui/PlashkaOtveta.tsx): «Ответ:» и значение
+   на одной базовой линии, плашка по ширине содержимого. Переносится
+   только само значение, подпись — всегда в начале первой строки. */
+.otvet-plashka {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  max-width: 100%;
+  min-width: 0;
+}
+.otvet-plashka__podpis {
+  flex: none;
+  white-space: nowrap;
+}
+.otvet-plashka__znach {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Печать и PDF (генератор, листы, теория): ответ не отрывается от
+   решения на другую страницу. Блок «решение + ответ» не рвётся, а
+   плашка ответа в разобранном примере держится за последним шагом. */
+@media print {
+  .gen-task__sol,
+  .sheet-solution,
+  .sheet-task-solution,
+  .rich-example__step:last-child {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .rich-example__step:last-child {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  .rich-example__answer,
+  .gen-task__ans-key {
+    break-before: avoid;
+    page-break-before: avoid;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

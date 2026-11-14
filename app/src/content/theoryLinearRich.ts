@@ -15,6 +15,7 @@
 import type { TheoryBlock } from '@/data/functionTypes';
 import { richTheoryBlocks, type RichSection } from './theoryRich';
 import { nomerRazdela } from '@/content/struktura';
+import { DROB_KATETOV } from '@/lib/drobSlov';
 
 const TG = '\\operatorname{tg}';
 
@@ -105,10 +106,7 @@ const rising: RichSection = {
             'Подписываем катеты **длинами** — числом клеток, без знаков: $4$ и $3$.',
             'Угол треугольника при левой вершине — это и есть $\\alpha$: горизонтальный катет идёт вдоль оси $Ox$.',
           ],
-          lines: [
-            `${TG} \\alpha = \\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}} = \\dfrac{3}{4}`,
-            'k = \\dfrac{3}{4} = 0{,}75',
-          ],
+          lines: [`${TG} \\alpha = ${DROB_KATETOV} = \\dfrac{3}{4}`, 'k = \\dfrac{3}{4} = 0{,}75'],
         },
       ],
     },

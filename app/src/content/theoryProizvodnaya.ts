@@ -18,6 +18,7 @@ import type { StsenaId } from '@/lib/proizvodnaya/stseny';
 import type { Blok9 } from '@/lib/proizvodnaya/teoriya-yakorya';
 import { PONYATIE_9 } from './theoryPonyatie9';
 import type { Gruppa } from '@/lib/proizvodnaya/types';
+import { DROB_KATETOV } from '@/lib/drobSlov';
 
 const TG = '\\operatorname{tg}';
 
@@ -220,7 +221,7 @@ const geometricheskiy: RazdelTeorii9 = {
               paras: [
                 'Тангенс острого угла — отношение противолежащего катета к прилежащему. Дробь сократите.',
               ],
-              boxed: `${TG}\\,\\alpha=\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}`,
+              boxed: `${TG}\\,\\alpha=${DROB_KATETOV}`,
             },
             {
               no: '4',
@@ -282,7 +283,7 @@ const geometricheskiy: RazdelTeorii9 = {
           type: 'main-formula',
           yakor: 'tupoy',
           chip: 'Тупой угол',
-          formula: `${TG}\\,\\alpha=-${TG}(180^\\circ-\\alpha)=-\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}`,
+          formula: `${TG}\\,\\alpha=-${TG}(180^\\circ-\\alpha)=-${DROB_KATETOV}`,
           note: 'Катеты считаются положительными длинами, знак «минус» ставится из-за того, что прямая убывает.',
         },
         {
