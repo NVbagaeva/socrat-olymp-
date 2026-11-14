@@ -87,6 +87,13 @@ export interface EkranZadachiProps {
    * кеглем по левому краю (у №8 выражение стоит крупно по центру).
    */
   tekst?: boolean;
+  /**
+   * Ответ выбором варианта вместо поля (№12): номер варианта и его
+   * разметка. Значение ответа — номер выбранного варианта.
+   */
+  varianty?: { id: string; html: string }[] | null;
+  /** Пояснение под вердиктом, HTML (№12: откуда ответ, что проверить). */
+  poyasnenieHtml?: string;
 }
 
 /**
@@ -119,6 +126,8 @@ export function EkranZadachi({
   pod,
   risunok,
   tekst = false,
+  varianty = null,
+  poyasnenieHtml,
   pole: svoePole,
   gotovo,
 }: EkranZadachiProps) {
@@ -179,7 +188,44 @@ export function EkranZadachi({
       </article>
 
       <div className="trn-otvetnaya stk-glass">
-        {svoePole === undefined ? (
+        {varianty !== null ? (
+          <div className="trn-pole">
+            <span className="stk-podpis">{labels.otvet}</span>
+            <div className="trn-varianty" role="group" aria-label={labels.otvet}>
+              {varianty.map((v) => (
+                <button
+                  type="button"
+                  key={v.id}
+                  className={clsx(
+                    'trn-variant',
+                    value === v.id && 'is-on',
+                    value === v.id && sostoyanie === 'verno' && 'is-da',
+                    value === v.id && sostoyanie === 'neverno' && 'is-net',
+                  )}
+                  aria-pressed={value === v.id}
+                  disabled={otvechen}
+                  onClick={() => onValue(v.id)}
+                >
+                  <span className="trn-variant__no">{v.id}</span>
+                  <span
+                    className="trn-variant__text"
+                    dangerouslySetInnerHTML={{ __html: v.html }}
+                  />
+                </button>
+              ))}
+            </div>
+            {otvechen ? null : (
+              <button
+                type="button"
+                className="stk-btn stk-btn--primary stk-btn--lg trn-varianty__proverit"
+                onClick={onCheck}
+                disabled={!ready}
+              >
+                {labels.proverit}
+              </button>
+            )}
+          </div>
+        ) : svoePole === undefined ? (
           <label className="trn-pole">
             <span className="stk-podpis">{labels.otvet}</span>
             <span className="trn-pole__ryad" ref={pole}>
@@ -263,6 +309,12 @@ export function EkranZadachi({
                     ? labels.nevernoLead
                     : labels.sRazboromLead}
               </span>
+              {poyasnenieHtml === undefined || poyasnenieHtml === '' ? null : (
+                <span
+                  className="trn-verdikt__poyasnenie"
+                  dangerouslySetInnerHTML={{ __html: poyasnenieHtml }}
+                />
+              )}
             </span>
           </div>
         ) : null}

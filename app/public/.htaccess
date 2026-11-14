@@ -85,6 +85,8 @@ Options -Indexes
   RewriteRule ^zadaniya/7/razbor/(P[0-9][0-9])(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/7/#tip-$1 [R=301,L,NE]
   # Задание №6: разбор прототипа раскрывается на вкладке «О задании».
   RewriteRule ^zadaniya/6/razbor/(P[0-9][0-9])(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/6/#tip-$1 [R=301,L,NE]
+  # Задание №12: пустые «Тетрадь» и «Ошибки» вида функции — на тренажёр вида.
+  RewriteRule ^zadaniya/12/(linear|quadratic|rational|irrational|exponential|logarithmic|trigonometric)/(tetrad|oshibki)(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/12/$1/trenazher/ [R=301,L]
   # Задание №10: разбор прототипа раскрывается на вкладке «О задании».
   RewriteRule ^zadaniya/10/razbor/(P[0-9][0-9])(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/10/#tip-$1 [R=301,L,NE]
   RewriteRule ^zadaniya/7/dlya-repetitorov(/|/index\.html)?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/zadaniya/7/generator/ [R=301,L]
