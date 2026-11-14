@@ -15,6 +15,8 @@ import { sessionText } from './session/text';
 import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
 import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
 import { VkladkaIkonka } from './VkladkaIkonka';
+import { EtoZheV } from '@/components/level/EtoZheV';
+import { levelInfo, LEVELS } from '@/lib/level';
 
 export interface RazdelTabsProps {
   /** Адрес раздела без хвоста: /zadaniya/4, /zadaniya/3/konus. */
@@ -66,6 +68,20 @@ function sKartochkami(base: string, tabs: readonly RazdelTab[]): readonly Razdel
   const teoriya = tabs.findIndex((tab) => tab.id === 'teoriya');
   const kuda = teoriya === -1 ? tabs.length : teoriya + 1;
   return [...tabs.slice(0, kuda), VKLADKA_KARTOCHKI, ...tabs.slice(kuda)];
+}
+
+/**
+ * Плашка «Это же в базе / в профиле» встаёт над лентой сама — на
+ * адресе самого задания (/zadaniya/4, /baza/zadaniya/5), если у номера
+ * есть пара на другом уровне. Оболочки разделов о ней не знают.
+ */
+function paraUrovnya(base: string): ReactNode {
+  for (const level of LEVELS) {
+    const prefix = `${levelInfo(level).bankBase}/`;
+    const slug = base.startsWith(prefix) ? base.slice(prefix.length) : '';
+    if (/^\d+$/.test(slug)) return <EtoZheV level={level} slug={slug} />;
+  }
+  return null;
 }
 
 export function RazdelTabs({
@@ -134,29 +150,36 @@ export function RazdelTabs({
   /* Плашка ленты — одна и та же обёртка в обоих случаях: и когда
      меню материалов есть, и когда его нет. Иначе оформление плашки
      пришлось бы описывать дважды. */
+  const para = paraUrovnya(base);
   if (tutors === undefined) {
     return (
-      <TabsRow {...(className === undefined ? {} : { className })}>
-        {() => (
-          <>
-            {before}
-            <div className="topic-tabs">{lenta}</div>
-          </>
-        )}
-      </TabsRow>
+      <>
+        {para}
+        <TabsRow {...(className === undefined ? {} : { className })}>
+          {() => (
+            <>
+              {before}
+              <div className="topic-tabs">{lenta}</div>
+            </>
+          )}
+        </TabsRow>
+      </>
     );
   }
 
   return (
-    <TutorMenu
-      items={[...tutors.items]}
-      label={tutors.title}
-      open={menu}
-      onOpenChange={setMenu}
-      stripRef={strip}
-      before={before}
-    >
-      {lenta}
-    </TutorMenu>
+    <>
+      {para}
+      <TutorMenu
+        items={[...tutors.items]}
+        label={tutors.title}
+        open={menu}
+        onOpenChange={setMenu}
+        stripRef={strip}
+        before={before}
+      >
+        {lenta}
+      </TutorMenu>
+    </>
   );
 }

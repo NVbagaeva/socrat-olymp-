@@ -63,7 +63,9 @@
      №6       — то же из lib/zadanie6 (общий тренажёр по банку, как у №7)
                 (в записи — ключи задач банка, без ответа);
      №1       — тот же общий тренажёр: ключ «p05|b12» → razreshit и
-                sostavZadachi движка планиметрии (lib/planimetriya).
+                sostavZadachi движка планиметрии (lib/planimetriya);
+     №9       — generate(прототип, seed).otvet из lib/proizvodnaya (тот же
+                общий тренажёр; ключ задачи — «прототип|seed»).
 
    Новый тренажёр — один объект в TRAINERS ниже: адрес, раздел, как
    начать тренировку и как по записи получить верный ответ. Поле ответа,
@@ -253,6 +255,14 @@ function answer6(payload, at) {
     throw new Error(`№6: нет задачи ${task.id}`);
   }
   return { text: numberText(prototype(z.prototypeId).solve(z.params).answer) };
+}
+
+/** №9: ключ задачи «прототип|seed» → generate(прототип, seed).otvet (lib/proizvodnaya). */
+function answer9(payload, at) {
+  const { generate } = requireSrc('lib/proizvodnaya/generate');
+  const id = payload.tasks[at].id;
+  const p = id.split('|')[0];
+  return { text: numberText(generate(p, id.slice(p.length + 1)).otvet) };
 }
 
 /**
@@ -446,6 +456,16 @@ const TRAINERS = [
     scope: '6',
     answer: answer6,
     /* Тот же общий тренажёр по банку, что у №7. */
+    start: start8,
+    configButton: /^Все типы вперемешку/,
+    all: chooseAll8,
+  },
+  {
+    name: '№9',
+    url: '/zadaniya/9/trenazher/',
+    scope: '9',
+    answer: answer9,
+    /* Тот же общий тренажёр по банку, что у №7 и №6. */
     start: start8,
     configButton: /^Все типы вперемешку/,
     all: chooseAll8,

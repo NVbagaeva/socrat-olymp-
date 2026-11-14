@@ -99,6 +99,7 @@ export default function AboutPage() {
               <Pometka nadpis={podhod.nadpis} />
             </aside>
             <div className="oa-sec__body">
+              <p className="oa-lead">{podhod.lead}</p>
               <ol className="oa-printsipy">
                 {podhod.items.map((item) => (
                   <li key={item.number}>
@@ -127,6 +128,7 @@ export default function AboutPage() {
                   <li key={fakt}>{fakt}</li>
                 ))}
               </ul>
+              <p className="oa-text">{put.obrazovanie}</p>
               {/* Вертикальная линия времени; «параллельно» — пунктирная точка. */}
               <ol className="oa-put">
                 {put.points.map((point) => (
@@ -212,16 +214,19 @@ export default function AboutPage() {
             <aside className="oa-sec__side">
               <Pometka nadpis={svyaz.nadpis} />
             </aside>
-            <div className="oa-sec__body">
-              <a
-                className="oa-svyaz__link"
-                href={svyaz.telegram.href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>{svyaz.telegram.label}</span>
-                <span className="oa-svyaz__adres">{svyaz.telegram.adres}</span>
-              </a>
+            <div className="oa-sec__body oa-svyaz">
+              {svyaz.kontakty.map((kontakt) => (
+                <a
+                  className="oa-svyaz__link"
+                  href={kontakt.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={kontakt.href}
+                >
+                  <span>{kontakt.label}</span>
+                  <span className="oa-svyaz__adres">{kontakt.adres}</span>
+                </a>
+              ))}
             </div>
           </div>
         </section>
