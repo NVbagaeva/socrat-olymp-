@@ -7,7 +7,7 @@ import type { Chast2Ui } from '@/lib/chast2/sostoyanie';
 import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import { Chast2Card } from './Chast2Card';
 import './chast2.css';
-import { podpis2 } from '@/lib/variant/struktura';
+import { metkaVida, podpis2 } from '@/lib/variant/struktura';
 
 /**
  * Часть 2 на экране итогов: ответы зафиксированы, у каждого задания —
@@ -35,6 +35,7 @@ export function Chast2Itog({
             <h4 className="vo-card__title">
               Задание {podpis2(z.no)}
               <BallPlashka n={MAX_BALL[z.no]} />
+              {metkaVida(z) === null ? null : <span className="vo-vid">{metkaVida(z)}</span>}
             </h4>
           </header>
           <Chast2Card z={z} st={st} update={update} samo readOnly />

@@ -25,7 +25,11 @@
       читается как раньше.
    6. По каждой структуре — её числа: 13 + 7 заданий и 33 балла; 12 + 7
       заданий и 32 балла, «Уравнения» — №6, экономика с кратким ответом
-      и «Случайные величины» без номера. */
+      и «Случайные величины» без номера.
+   7. Варианты повышенной сложности и ежемесячные: в каждой версии —
+      задания первой части по структуре, номера подряд; во второй части
+      номера по структуре, у задачи прежнего №17 в ЕГЭ-2027 — пометка
+      вида (экономическая или на оптимизацию). */
 
 import { requireSrc } from './lib/load-ts.mjs';
 
@@ -263,6 +267,70 @@ if (S.STRUKTURA.id === '2027-19') {
   ravno([MAX_PART1, MAX_PART2, MAX_TOTAL], [12, 20, 32], '19 заданий: 12 + 20 = 32 балла');
   ravno(TESTOVYJ_RABOTY, TESTOVYJ, '19 заданий: шкала на 32 балла — без растяжения');
   ravno(testScore(12), 70, '19 заданий: вся первая часть — 70 тестовых');
+}
+
+/* ── 7. Повышенные и ежемесячные ─────────────────────────────────── */
+
+{
+  const { povSetIz } = requireSrc('lib/povyshennye/set');
+  const { GOTOVY, S_CHAST2 } = requireSrc('lib/povyshennye/dannye/index');
+  const { zadacha2 } = requireSrc('lib/povyshennye/chast2/index');
+  const { ezhSetIz } = requireSrc('lib/ezhemesyachnye/set');
+  const { zagruzitVariant: zagruzitEV } = requireSrc('lib/ezhemesyachnye/dannye');
+  const { chast2EV } = requireSrc('lib/ezhemesyachnye/chast2/index');
+  const nadoNomera = V.CHAST1.filter((n) => EGE_NUMBERS.includes(n)).map((n) => V.podpis1(n));
+
+  const chast1 = (set, gde) => {
+    ravno(set.config.tasks, V.VARIANT_NUMBERS, `${gde}: задания набора — по структуре`);
+    for (const v of set.variants) {
+      ravno(
+        v.tasks.map((t) => V.podpis1(t.egeNumber)),
+        nadoNomera,
+        `${gde}, версия ${v.index}: номера первой части подряд`,
+      );
+    }
+  };
+  const proverit2 = (zadachi, gde) => {
+    const nomera = zadachi.map((z) => V.podpis2(z.no));
+    ravno(
+      nomera,
+      chast2.map((z) => String(z.nomer)),
+      `${gde}: номера второй части`,
+    );
+    for (const z of zadachi) {
+      const metka = V.metkaVida(z);
+      const nado = S.STRUKTURA.vnutri.optimizaciya !== undefined && z.no === 17;
+      ok(nado === (metka !== null), `${gde}, задача ${z.no}: пометка вида ${metka ?? 'нет'}`);
+    }
+  };
+
+  let versiy = 0;
+  for (const k of GOTOVY) {
+    const { VARIANT } = requireSrc(`lib/povyshennye/dannye/v${String(k).padStart(2, '0')}`);
+    chast1(povSetIz(k, VARIANT.versii), `повышенные, вариант ${k}`);
+    if (S_CHAST2.includes(k) && VARIANT.chast2 !== undefined) {
+      VARIANT.chast2.forEach((zapisi, i) =>
+        proverit2(zapisi.map(zadacha2), `повышенные ${k}.${i + 1}, часть 2`),
+      );
+    }
+    versiy += VARIANT.versii.length;
+  }
+  for (const k of [1, 2, 3, 4]) {
+    const d = await zagruzitEV(k);
+    chast1(ezhSetIz(k, d.versii), `ежемесячный ${k}`);
+    const c2 = await chast2EV(k);
+    if (c2 !== null) proverit2(c2, `ежемесячный ${k}, часть 2`);
+  }
+  /* Виды задач прежнего №17: в повышенных есть и экономические, и на оптимизацию. */
+  const vidy = new Set();
+  for (const k of S_CHAST2) {
+    const { VARIANT } = requireSrc(`lib/povyshennye/dannye/v${String(k).padStart(2, '0')}`);
+    for (const zapisi of VARIANT.chast2 ?? []) {
+      for (const z of zapisi.map(zadacha2)) if (z.no === 17) vidy.add(V.vidZadachi17(z));
+    }
+  }
+  ravno([...vidy].sort(), ['ekonomika', 'optimizaciya'], 'у прежнего №17 есть оба вида');
+  console.log(`  повышенные: ${GOTOVY.length} вариантов, ${versiy} версий; ежемесячные: 4`);
 }
 
 if (oshibki.length > 0) {

@@ -17,7 +17,15 @@
  * вариант собирается из всех тринадцати заданий — как было всегда.
  */
 
-import { chastRazdela, estRazdel, nomerEge, vEkzamene, zadaniyaEge } from '@/content/struktura';
+import {
+  STRUKTURA,
+  chastRazdela,
+  estRazdel,
+  nomerEge,
+  razdel,
+  vEkzamene,
+  zadaniyaEge,
+} from '@/content/struktura';
 import { EGE_NUMBERS, type EgeNo } from './types';
 
 const estSborshchik = (n: number): n is EgeNo => (EGE_NUMBERS as readonly number[]).includes(n);
@@ -76,4 +84,49 @@ export function podpis2(hranenie: number): string {
  */
 export function vsyaChast1(numbers: readonly number[]): boolean {
   return numbers.length === CHAST1.length && CHAST1.every((n) => numbers.includes(n));
+}
+
+/* ── Позиция прежнего №17: экономическая задача или на оптимизацию ─── */
+
+/** Шаблоны прежнего №17 с экономическим сюжетом: кредит, цена и спрос, расходы. */
+const EKONOMICHESKIE_17 = new Set([
+  'u17.kredit2',
+  'y17.kreditDvaGoda',
+  'q17.cenaSpros',
+  'm17.sudno',
+]);
+
+/** Вид задачи прежнего №17; у задач других номеров — null. */
+export function vidZadachi17(z: {
+  no: number;
+  shablon: string;
+  vid17?: 'ekonomika' | 'optimizaciya';
+}): 'ekonomika' | 'optimizaciya' | null {
+  if (z.no !== 17) return null;
+  return z.vid17 ?? (EKONOMICHESKIE_17.has(z.shablon) ? 'ekonomika' : 'optimizaciya');
+}
+
+const METKA_VIDA: Record<'ekonomika' | 'optimizaciya', string> = {
+  ekonomika: 'экономическая задача',
+  optimizaciya: 'задача на оптимизацию',
+};
+
+/**
+ * Пометка вида у задачи второй части: только когда раздел задачи идёт
+ * внутри другого (в ЕГЭ-2027 задачи на оптимизацию — внутри экономической,
+ * №16). В структуре из 20 заданий у №17 свой номер — пометки нет.
+ */
+export function metkaVida(z: {
+  no: number;
+  shablon: string;
+  vid17?: 'ekonomika' | 'optimizaciya';
+}): string | null {
+  if (!estRazdel(z.no) || STRUKTURA.vnutri[razdel(z.no).kod] === undefined) return null;
+  const vid = vidZadachi17(z);
+  return vid === null ? null : METKA_VIDA[vid];
+}
+
+/** Задачи версии с кратким ответом, которые входят в первую часть действующей структуры. */
+export function vChasti1<T extends { egeNumber: number }>(tasks: readonly T[]): T[] {
+  return tasks.filter((t) => nomerChasti1(t.egeNumber) !== null);
 }

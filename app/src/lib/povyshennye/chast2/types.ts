@@ -64,6 +64,11 @@ export interface Chast2Zadacha {
   no: Part2No;
   /** Шаблон и версия — для отчёта и автотеста. */
   shablon: string;
+  /**
+   * Вид задачи прежнего №17, если шаблон сам его знает (r17: три
+   * сюжета). Нет поля — по шаблону (lib/variant/struktura.ts, vidZadachi17).
+   */
+  vid17?: 'ekonomika' | 'optimizaciya';
   /** Условие с формулами в $…$; абзацы — через \n. */
   uslovie: string;
   /** Чертёж условия (SVG движка) — у 15 и 18. */
