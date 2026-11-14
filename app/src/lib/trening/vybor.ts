@@ -19,6 +19,10 @@ export interface VyborBanka {
   bezPodskazok: boolean;
   istochnik: IstochnikBanka;
   stil: StilBanka;
+  /** Уровень (№13): все, базовый, повышенный. */
+  uroven: 'vse' | '1' | '2';
+  /** Как отвечать (№13): '' — числом, иначе id особого режима («oformlenie»). */
+  rezhim: string;
 }
 
 export const VYBOR_BANKA_DEFAULT: VyborBanka = {
@@ -28,6 +32,8 @@ export const VYBOR_BANKA_DEFAULT: VyborBanka = {
   bezPodskazok: false,
   istochnik: 'vse',
   stil: 'vse',
+  uroven: 'vse',
+  rezhim: '',
 };
 
 export function parseVyborBanka(value: unknown): VyborBanka {
@@ -42,6 +48,8 @@ export function parseVyborBanka(value: unknown): VyborBanka {
     bezPodskazok: v.bezPodskazok === true,
     istochnik: v.istochnik === 'fipi' || v.istochnik === 'new' ? v.istochnik : 'vse',
     stil: v.stil === 'syuzhet' || v.stil === 'standart' ? v.stil : 'vse',
+    uroven: v.uroven === '1' || v.uroven === '2' ? v.uroven : 'vse',
+    rezhim: typeof v.rezhim === 'string' && /^[a-z]{0,20}$/.test(v.rezhim) ? v.rezhim : '',
   };
 }
 

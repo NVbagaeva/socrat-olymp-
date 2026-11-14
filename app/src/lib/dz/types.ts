@@ -33,7 +33,7 @@ export interface ShagDz {
   chto: string;
   tex: string;
   zag?: string;
-  ton?: 'odz' | 'otbor';
+  ton?: 'odz' | 'otbor' | 'vnimanie';
 }
 
 /**

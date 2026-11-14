@@ -36,6 +36,24 @@ function nadpis(file: string, height: number, alt: string): Nadpis {
   return { src: assetUrl(`/images/nadpisi/${file}.png`), width: 800, height, alt };
 }
 
+/** Декоративная иллюстрация: WebP в двух размерах и PNG-фолбэк. */
+export interface Illyustraciya {
+  webp: string;
+  webp2x: string;
+  png: string;
+  width: number;
+  height: number;
+}
+function ill(file: string, w1: number, w2: number, width: number, height: number): Illyustraciya {
+  return {
+    webp: assetUrl(`/images/ob-avtore/${file}-${w1}.webp`),
+    webp2x: assetUrl(`/images/ob-avtore/${file}-${w2}.webp`),
+    png: assetUrl(`/images/ob-avtore/${file}-${w1}.png`),
+    width,
+    height,
+  };
+}
+
 /** Адрес сайта для поисковой разметки. */
 const SITE_URL = 'https://budetege.ru';
 
@@ -83,6 +101,7 @@ export const about = {
   podhod: {
     metka: 'Как я учу',
     title: 'Что для меня важно',
+    lead: 'Для меня важно, чтобы ученик видел в математике не набор разрозненных тем, а целостную систему: понимал, зачем он её изучает и как она связана с другими предметами. Я учу точно формулировать определения и называть вещи своими именами: если не знаешь, какое уравнение перед тобой, невозможно понять, каким алгоритмом его решать. Сложить и вычесть — дело нехитрое; гораздо важнее научиться рассуждать, объяснять каждый свой шаг и задавать себе правильные вопросы по ходу решения.',
     items: [
       {
         number: '01',
@@ -117,13 +136,12 @@ export const about = {
     metka: 'Образование и опыт',
     title: 'Мой профессиональный путь',
     lead: 'Я прошла путь от обычной школы до работы с олимпиадниками и сейчас продолжаю развиваться, чтобы делать математику доступной для разных учеников.',
-    /* Четыре пункта прежнего ряда доверия, без иконок. */
-    fakty: [
-      'Учитель по призванию',
-      'Математическое образование',
-      'Реальный опыт школьной работы',
-      'Эксперт ЕГЭ',
-    ],
+    /** Образование: вуз, факультет, программа, год выпуска. */
+    obrazovanie:
+      'НИУ ВШЭ, факультет математики — магистратура, совместная программа с Центром педагогического мастерства, 2020 год.',
+    /* Пункты прежнего ряда доверия, без иконок. «Математическое
+       образование» снято: рядом стоит строка про НИУ ВШЭ. */
+    fakty: ['Учитель по призванию', 'Реальный опыт школьной работы', 'Эксперт ЕГЭ'],
     points: [
       { period: '2018–2020', place: 'Школа №1195', note: 'Начало работы в школе', parallel: false },
       {
@@ -181,6 +199,14 @@ export const about = {
         { title: 'Каждому ученику — своё задание', note: 'Списать друг у друга не выйдет' },
       ],
     },
+    /** Иллюстрация к блоку «Инструмент…»: декор, в alt не нуждается. */
+    illyustraciya: {
+      webp400: assetUrl('/images/ob-avtore/instrument-400.webp'),
+      webp800: assetUrl('/images/ob-avtore/instrument-800.webp'),
+      png: assetUrl('/images/ob-avtore/instrument-400.png'),
+      width: 400,
+      height: 273,
+    },
     personal: {
       title: 'Инструмент, которым хотелось бы пользоваться самой',
       text: 'Мне хотелось создать не ещё один огромный банк задач, в котором легко потеряться, а понятную систему, которая помогает учителю быстро перейти от темы к конкретному варианту для ученика.',
@@ -199,13 +225,14 @@ export const about = {
     karty: [
       {
         komu: 'Ученику',
-        /* Обе фразы уже были на странице: шаг схемы и третий принцип. */
-        text: 'Каждому ученику — своё задание. У каждого могут быть свои числа и параметры.',
+        illyustraciya: ill('ucheniku', 280, 560, 280, 282),
+        text: 'Верь в себя и не бойся спрашивать: сомневаешься — спроси. Работа над ошибками — не дополнительная рутина, а важная часть обучения. Помни: если прикладывать усилия, любая работа приносит результат. А если нет мотивации — улыбнись и начни: она придёт в процессе.',
         action: { label: 'Начать заниматься', href: site.headerActions.signup.href },
         glavnaya: true,
       },
       {
         komu: 'Учителю и репетитору',
+        illyustraciya: ill('uchitelyu', 280, 560, 280, 277),
         /* Прежний финальный призыв: заголовок и строка под ним. */
         text: 'Пусть время учителя остаётся для главного. Создайте первый вариант за несколько секунд.',
         action: {
@@ -217,17 +244,42 @@ export const about = {
     ],
   },
 
-  /** Как связаться: на сайте есть только Telegram-канал платформы. */
+  /** Как связаться: канал платформы и личный Telegram автора. */
   svyaz: {
     metka: 'Контакты',
     title: 'Как связаться',
-    telegram: {
-      label: 'Telegram-канал «Будет на ЕГЭ»',
-      adres: 't.me/budet_na_ege_math',
-      href: telegram?.href ?? 'https://t.me/budet_na_ege_math',
-    },
+    /* Обе ссылки открываются в новой вкладке: это внешние адреса. */
+    kontakty: [
+      {
+        label: 'Telegram-канал «Будет на ЕГЭ»',
+        adres: 't.me/budet_na_ege_math',
+        href: telegram?.href ?? 'https://t.me/budet_na_ege_math',
+      },
+      {
+        label: 'Личный Telegram',
+        adres: '@nataliy_bagaeva',
+        href: 'https://t.me/nataliy_bagaeva',
+      },
+    ],
     nadpis: nadpis('nadpis-vmeste-k-bolshemu', 560, 'Рукописная пометка: «Вместе к большему»'),
+    /* Бумажный самолётик летит от пометки к ссылкам. */
+    samolyotik: ill('samolyotik', 360, 720, 360, 160),
   },
+
+  /** Стеклянные фигуры на фоне между блоками: мелкие, полупрозрачные,
+      с медленным парением. Один размер — показываются до 96 px. */
+  fonFigury: [
+    { id: 'oktaedr', file: 'fon-oktaedr', width: 200, height: 203 },
+    { id: 'sfera', file: 'fon-sfera', width: 200, height: 203 },
+    { id: 'kaplya', file: 'fon-kaplya', width: 200, height: 281 },
+    { id: 'zvezda', file: 'fon-zvezda', width: 200, height: 183 },
+  ].map((f) => ({
+    id: f.id,
+    webp: assetUrl(`/images/ob-avtore/${f.file}-200.webp`),
+    png: assetUrl(`/images/ob-avtore/${f.file}-200.png`),
+    width: f.width,
+    height: f.height,
+  })),
 
   /** Разметка Person для поиска: только факты, которые есть на странице. */
   person: {
@@ -243,6 +295,8 @@ export const about = {
     url: `${SITE_URL}/`,
     mainEntityOfPage: `${SITE_URL}/about/`,
     image: `${SITE_URL}/images/author/nata-portrait-large.webp`,
+    /* Профиль автора — тот же, что в блоке «Как связаться». */
+    sameAs: ['https://t.me/nataliy_bagaeva'],
     worksFor: { '@type': 'EducationalOrganization', name: 'Гимназия «Сократ»' },
   },
 } as const;

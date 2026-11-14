@@ -142,7 +142,9 @@ const SIZES = [
 
 /* Переход по вкладке из панели: страница, вкладка, адрес после. */
 const PANEL_CLICKS = [
-  { url: '/zadaniya/11/generator/', tab: 'Тренажёр', path: '/zadaniya/11/trenazher/' },
+  /* Нужна длинная вкладка: стартовый экран общего тренажёра по банку (№11, №7, №6)
+     короткий — прокрутить его под ленту нельзя, и страница просто встаёт наверх. */
+  { url: '/zadaniya/11/generator/', tab: 'Теория', path: '/zadaniya/11/teoriya/' },
   { url: '/zadaniya/10/teoriya/', tab: 'Опорные задачи', path: '/zadaniya/10/opornye-zadachi/' },
   { url: '/zadaniya/12/irrational/', tab: 'Теория', path: '/zadaniya/12/irrational/' },
 ];

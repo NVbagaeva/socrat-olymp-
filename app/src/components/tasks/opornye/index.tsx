@@ -153,14 +153,22 @@ export interface OpornayaZadachaProps {
   /** Подсказка о записи ответа: попытка не тратится. */
   formatHint?: string | null;
   /** Подсказка (HTML): открыта ли, открыть. null — подсказки нет. */
-  podskazka: { html: string; open: boolean; onOpen: () => void } | null;
+  podskazka: {
+    html: string;
+    open: boolean;
+    onOpen: () => void;
+    /** Подсказка-вопросы с кнопками (№11, №13) вместо текста — как в тренажёре. */
+    telo?: ReactNode;
+  } | null;
   /** Решение по шагам: доступно после ответа; открыто ли, переключить. */
   reshenie: { shagi: Shag[]; open: boolean; onToggle: () => void } | null;
   /** Плашка «Запомни» блока: над задачей. */
   zapomni?: ReactNode;
-  /** Ответ выбором (№2): варианты вместо поля ответа, value — номер выбранного. */
+  /** Ответ выбором (№2, №13 «Определи тип»): варианты вместо поля ответа, value — номер выбранного. */
   vybory?: readonly { number: string; labelHtml: string }[];
-  /** Ещё кнопки в ряду действий (№2: «Ещё вариант»). */
+  /** Свой вердикт вместо «Пока не так» (№13: «Число верное, единицы нет»). */
+  verdiktNeverno?: { zag: string; lead: string };
+  /** Ещё кнопки в ряду действий (№2, №13, №1: «Ещё вариант»). */
   dop?: ReactNode;
   labels: OpornayaZadachaLabels;
 }
@@ -186,6 +194,7 @@ export function OpornayaZadacha({
   reshenie,
   zapomni,
   vybory,
+  verdiktNeverno,
   dop,
   labels,
 }: OpornayaZadachaProps) {
@@ -294,17 +303,25 @@ export function OpornayaZadacha({
               <Ikonka name={solved ? 'da' : 'net'} />
             </span>
             <span className="op-verdikt__text">
-              <b>{solved ? labels.verno : labels.neverno}</b>
-              <span>{solved ? labels.vernoLead : labels.nevernoLead}</span>
+              <b>{solved ? labels.verno : (verdiktNeverno?.zag ?? labels.neverno)}</b>
+              <span>
+                {solved ? labels.vernoLead : (verdiktNeverno?.lead ?? labels.nevernoLead)}
+              </span>
             </span>
           </div>
         )}
 
         {podskazka !== null && podskazka.open && !solved ? (
-          <p className="op-podskazka" role="note">
-            <Ikonka name="lampa" />
-            <span dangerouslySetInnerHTML={{ __html: podskazka.html }} />
-          </p>
+          podskazka.telo === undefined ? (
+            <p className="op-podskazka" role="note">
+              <Ikonka name="lampa" />
+              <span dangerouslySetInnerHTML={{ __html: podskazka.html }} />
+            </p>
+          ) : (
+            <div className="op-podskazka op-podskazka--voprosy" role="note">
+              {podskazka.telo}
+            </div>
+          )
         ) : null}
 
         {reshenie !== null && reshenie.open ? (

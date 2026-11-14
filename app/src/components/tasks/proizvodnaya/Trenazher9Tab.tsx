@@ -1,74 +1,44 @@
-import type { SkillItem } from '../configurator';
 import { TabScrollOnMount } from '../TabScroll';
-import { tasksPage } from '@/content/tasks';
-import { trainerPage } from '@/content/trainerModes';
-import { OPEN_BANK } from '@/lib/proizvodnaya/otkrytyj-bank';
-import { generate } from '@/lib/proizvodnaya/generate';
-import { renderFigura } from '@/lib/proizvodnaya/render';
-import { GRUPPY, gruppaOfPrototype, prototypesOfGroup } from '@/lib/proizvodnaya/skills';
-import { typeset } from '@/lib/tex';
+import type { GruppaVybora } from '../trening';
+import { O_ZADANII_9 } from '@/content/proizvodnaya';
+import { GRUPPY9_VID, TRENAZHER9 } from '@/content/proizvodnaya9';
+import { prototypesOfGroup } from '@/lib/proizvodnaya/skills';
+import { PROTOTYPES } from '@/lib/proizvodnaya/prototypes';
+import { katalog9 } from '@/lib/proizvodnaya/trening/katalog';
+import { texPlain, typeset } from '@/lib/tex';
 import { Trenazher9 } from './Trenazher9';
 
-/** Формула группы на карточке, если у группы нет рисунка. */
-const GROUP_FORMULA: Record<string, string> = {
-  I: "$v(t)=x'(t)$",
-  II: "$k=f'(x_0)$",
-  III: "$f'(x_0)\\ \\gtrless\\ 0$",
-  IV: "$f'(x)=0$",
-  V: "$F'(x)=f(x)$",
-};
-
-/** Миниатюра группы: рисунок первой задачи с графиком, иначе формула. */
-function chartOf(groupId: string): string {
-  const withPicture = prototypesOfGroup(groupId as 'I').find((p) => p.risunok);
-  if (withPicture !== undefined) {
-    try {
-      const task = generate(withPicture.id, `${withPicture.id}#1`);
-      if (task.risunok !== null) {
-        return renderFigura(task.risunok, { rezhim: 'student' });
-      }
-    } catch {
-      /* Прототип не собрал рисунок — на карточке будет формула. */
-    }
-  }
-  return `<span class="z9-formula">${typeset(GROUP_FORMULA[groupId] ?? '')}</span>`;
-}
-
 /**
- * Вкладка «Тренажёр» задания №9: заголовок и конфигуратор.
- *
- * Карточки групп собираются на сервере: рисунок рисует движок на
- * сборке, формулы набирает KaTeX. Число задач — по реестру
- * прототипов и открытому банку.
+ * Вкладка «Тренажёр» задания №9 в «Стеклянной сцене»: стартовые режимы,
+ * выбор тем (пять групп, 31 тип), экран задачи, итоги — общий тренажёр.
+ * Названия набраны KaTeX на сборке. Задачи строит генератор в браузере
+ * по ключам каталога (банк зафиксированных вариантов, по 20 на тип).
  */
-export function Trenazher9Tab() {
-  const prototypesOf: Record<string, number> = {};
-  const openOf: Record<string, number> = {};
-  const groups: SkillItem[] = GRUPPY.map((group) => {
-    prototypesOf[group.id] = prototypesOfGroup(group.id).length;
-    openOf[group.id] = OPEN_BANK.filter(
-      (item) => gruppaOfPrototype(item.prototype)?.id === group.id,
-    ).length;
-    return {
-      id: group.id,
-      title: group.nazvanie,
-      count: prototypesOf[group.id] ?? 0,
-      levels: [],
-      chart: <span className="z9-chart" dangerouslySetInnerHTML={{ __html: chartOf(group.id) }} />,
-    };
-  });
-
+export function Trenazher9Tab({ base }: { base: string }) {
+  const gruppy: GruppaVybora[] = O_ZADANII_9.gruppy.map((g) => ({
+    id: g.id,
+    nazvanie: g.title,
+    znakHtml: typeset(`$${GRUPPY9_VID[g.id].znak}$`),
+    ton: GRUPPY9_VID[g.id].ton,
+    tipy: prototypesOfGroup(g.id).map((p) => ({
+      id: p.id,
+      nazvanieHtml: `<span>${typeset(p.nazvanie)}</span>`,
+    })),
+  }));
+  const nazvaniyaTekst = Object.fromEntries(PROTOTYPES.map((p) => [p.id, texPlain(p.nazvanie)]));
   return (
-    <section className="trainer">
-      <header className="trainer__head">
-        <h2 className="t-h2 trainer__title">{trainerPage.title}</h2>
-      </header>
+    <section className="trainer z9-trening trn-host" aria-labelledby="z9-trening-title">
+      {/* Заголовок вкладки — для порядка заголовков и читалок; на экране его
+          заменяет активная вкладка ленты. */}
+      <h2 className="sr-only" id="z9-trening-title">
+        {TRENAZHER9.title}
+      </h2>
       <TabScrollOnMount />
       <Trenazher9
-        backHref={tasksPage.href}
-        groups={groups}
-        prototypesOf={prototypesOf}
-        openOf={openOf}
+        base={base}
+        gruppy={gruppy}
+        nazvaniyaTekst={nazvaniyaTekst}
+        katalog={katalog9()}
       />
     </section>
   );

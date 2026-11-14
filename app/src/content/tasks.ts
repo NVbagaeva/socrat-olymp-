@@ -9,7 +9,9 @@
  * и маршруты подхватят это сами.
  */
 
+import { levelInfo, type Level } from '@/lib/level';
 import { href, ZADANIYA } from '@/lib/paths';
+import { bazaTasks } from './baza/tasks';
 
 /**
  * ready — раздел открыт: плашка ведёт в него.
@@ -47,6 +49,16 @@ export interface ExamTask {
    * webp, как у большинства заданий; svg — у векторных чертежей.
    */
   icon?: 'webp' | 'svg';
+  /**
+   * Уровень экзамена. Не задан — профиль; у заданий базы — 'base':
+   * адрес раздела тогда /baza/zadaniya/{slug}/.
+   */
+  level?: Level;
+  /**
+   * Номер файла иконки, если он не свой: задание базы берёт картинку
+   * профильного задания той же темы. null — картинки нет.
+   */
+  image?: string | null;
 }
 
 export const tasksPage = {
@@ -74,6 +86,17 @@ export const tasksPage = {
   },
 } as const;
 
+/** Тексты и адрес страницы банка уровня. У базы свои заголовок и лид. */
+export function bankPageOf(level: Level) {
+  if (level === 'profile') return tasksPage;
+  return {
+    ...tasksPage,
+    title: 'Банк заданий ЕГЭ. Базовая математика',
+    lead: 'Все 21 задание базового ЕГЭ в одном месте. Выбирайте задание и переходите к изучению.',
+    href: levelInfo('base').bank,
+  };
+}
+
 /**
  * Части экзамена: подписи переключателя и заголовков над сеткой.
  * Задания попадают в часть по полю part.
@@ -100,12 +123,22 @@ export function taskHasPage(task: ExamTask): boolean {
 
 /** Начало адресов раздела задания без «/» на конце: к нему дописывают вкладку. */
 export function taskBase(task: ExamTask): string {
-  return `${ZADANIYA}/${task.slug}`;
+  return `${levelInfo(task.level ?? 'profile').bankBase}/${task.slug}`;
 }
 
 /** Адрес страницы задания (ссылка): /zadaniya/4/. */
 export function taskHref(task: ExamTask): string {
-  return href(ZADANIYA, task.slug);
+  return href(taskBase(task));
+}
+
+/** Все задания уровня в порядке номеров. */
+export function tasksOf(level: Level): readonly ExamTask[] {
+  return level === 'base' ? bazaTasks : tasks;
+}
+
+/** Задания уровня с кратким ответом: сетка на главной, счётчик «N из M». */
+export function shortTasksOf(level: Level): readonly ExamTask[] {
+  return tasksOf(level).filter((task) => task.part === 1);
 }
 
 /** Задания одной части в порядке номеров. */
