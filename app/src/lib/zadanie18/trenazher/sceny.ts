@@ -23,6 +23,9 @@ import {
 import type { Element, T2, Tochki, ZhivayaSkhema } from '@/lib/skhemy/tipy';
 import * as N from '@/lib/zadanie18/opornye/novye';
 import { SCENY_DOP } from './dop';
+import { chertezhUsloviya18 } from './uslovie';
+import { vidimye18 } from './vidimye';
+import { sPodpisyamiIz } from '@/lib/skhemy/vidimye';
 
 export type Parametry = Readonly<Record<string, number>>;
 
@@ -174,9 +177,11 @@ export function tochkiRavnobokPerp(p: Parametry) {
 /* ── 11. Менелай в треугольнике ABL ──────────────────────────── */
 
 export function tochkiMenelayPl() {
+  /* Форма — для читаемости: отношения частей от неё не зависят, а AL
+     не сливается с AC (∠LAC > 15°). */
   const A: T2 = [0, 0];
-  const B: T2 = [2, 6];
-  const C: T2 = [9, 0];
+  const B: T2 = [3.5, 8];
+  const C: T2 = [8, 0];
   const K = lerp(A, B, 1 / 3);
   const L = lerp(B, C, 3 / 4);
   return { A, B, C, K, L, P: intersect(A, L, C, K) ?? L };
@@ -634,7 +639,8 @@ const sNachalom = (z: ZhivayaSkhema, nachalo: Tochki): ZhivayaSkhema => ({ ...z,
 const SCENY_NOVYE: Readonly<Record<string, Postroenie>> = {
   'diag-trap': (p) => sNachalom(N.OP_DIAG_TRAP, { p: [p.a!, p.b!], q: [p.d1!, p.d2!] }),
   'kas-ef': (p) => sNachalom(N.OP_KAS_EF, { p: [p.R1!, p.R2!] }),
-  kvadraty: (p) => sNachalom(N.OP_KVADRATY, { A: [p.AC!, 0], B: polar(150, p.BC!), C: [0, 0] }),
+  kvadraty: (p) =>
+    sNachalom(N.OP_KVADRATY, { A: [p.AC!, 0], B: polar(p.uC ?? 150, p.BC!), C: [0, 0] }),
   'dve-okr': (p) => {
     /* cos α из 2cos²α + cos α / k − 1 = 0 (а): AE — диаметр, sin ∠AEB = cos α / k). */
     const k = p.k!;
@@ -670,17 +676,55 @@ const SCENY_NOVYE: Readonly<Record<string, Postroenie>> = {
   'kvadrat-per': (p) => sNachalom(N.OP_KVADRAT_PER, { p: [p.m!, p.s!] }),
   'ser-vys': (p) => sNachalom(N.OP_SER_VYS, { p: [60, 45], q: [p.k!, 0] }),
   'kv-gip': (p) => sNachalom(N.OP_KV_GIP_OTN, { p: [p.b!, p.a!] }),
-  'vpis-lmn': (p) => sNachalom(N.OP_VPIS_LMN, { p: [150, 0.35], q: [p.KM!, 0] }),
+  'vpis-lmn': (p) => sNachalom(N.OP_VPIS_LMN, { p: [p.uM ?? 150, 0.35], q: [p.KM!, 0] }),
 };
 
-/** Чертёж задачи тренажёра: тип и параметры варианта. */
-export function scena18(tip: string, p: Parametry): ZhivayaSkhema {
+/** Чертёж задачи тренажёра по параметрам — как есть, со всеми построениями. */
+function scenaPoParametram(tip: string, p: Parametry): ZhivayaSkhema {
   const f = SCENY[tip] ?? SCENY_NOVYE[tip];
   if (f !== undefined) return f(p);
   /* Перенесённые задачи — dop/. */
   const s = SCENY_DOP[tip];
   if (s === undefined) throw new Error(`Нет чертежа задачи тренажёра ${tip}`);
   return s(p);
+}
+
+/**
+ * Опорная задача (lib/zadanie18/opornye) с теми же числами, что у типа
+ * тренажёра tip: живая сцена опорной задачи в начальном положении по
+ * видимым параметрам, подписи — настоящие числа.
+ */
+export function opornayaVidimaya18(
+  tochnaya: ZhivayaSkhema,
+  tip: string,
+  p: Parametry,
+): ZhivayaSkhema {
+  const g = vidimye18(tip, p);
+  if (g === p) return tochnaya;
+  return sPodpisyamiIz(tochnaya, { ...tochnaya, nachalo: scenaPoParametram(tip, g).nachalo });
+}
+
+/**
+ * Чертёж в точной пропорции: геометрия — по числам задачи. Его точки
+ * берёт проверка scripts/verify_schemes/trenazher.mjs (условие и ответ
+ * пересчитываются по чертежу); на экран и лист идёт scena18.
+ */
+export function scena18Tochno(tip: string, p: Parametry): ZhivayaSkhema {
+  return chertezhUsloviya18(tip, scenaPoParametram(tip, p));
+}
+
+/**
+ * Чертёж задачи тренажёра: тип и параметры варианта. Геометрия — по
+ * видимым параметрам (vidimye.ts: крайние пропорции сглажены), числа
+ * подписей — настоящие. Без подсветки — чертёж условия (uslovie.ts:
+ * построения решения скрыты); у учителя (Sostoyanie.uchitel) и при
+ * подсветке — с построениями.
+ */
+export function scena18(tip: string, p: Parametry): ZhivayaSkhema {
+  const g = vidimye18(tip, p);
+  const tochnaya = scenaPoParametram(tip, p);
+  const sk = g === p ? tochnaya : sPodpisyamiIz(tochnaya, scenaPoParametram(tip, g));
+  return chertezhUsloviya18(tip, sk);
 }
 
 export const TIPY_SCEN_18: readonly string[] = [

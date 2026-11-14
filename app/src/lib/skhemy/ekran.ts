@@ -83,6 +83,12 @@ export interface Sostoyanie {
   podpisi: boolean;
   /** Выбранный режим схемы (ZhivayaSkhema.rezhimy); не задан — первый. */
   rezhim?: string;
+  /**
+   * Чертёж учителя (лист с решениями): видны и скрытые построения —
+   * вспомогательные окружности, продолжения, дуги равных углов, засечки
+   * выводов, — без подсветки. Заливки (подсветка фигур) — нет.
+   */
+  uchitel?: boolean;
 }
 
 /**
@@ -129,7 +135,23 @@ function cvetEl(el: Element, lit: ReadonlySet<string>): Cvet | null {
 
 export function vidimEl(el: Element, sost: Sostoyanie): boolean {
   if (sost.shag !== null && (el.shag ?? 0) > sost.shag) return false;
-  return el.skrytyy !== true || goritEl(el, sost.lit);
+  if (el.skrytyy !== true || goritEl(el, sost.lit)) return true;
+  /* У учителя — построения решения; не заливки и не ручки без имени. */
+  return (
+    sost.uchitel === true &&
+    el.vid !== 'mnogougolnik' &&
+    !(el.vid === 'tochka' && el.imya === undefined)
+  );
+}
+
+/**
+ * Засечки отрезка на чертеже: засечки-вывод (равенство, которое
+ * доказывается) — только при подсветке отрезка и у учителя.
+ */
+function shtrihiEl(el: Element & { vid: 'otrezok' }, sost: Sostoyanie): number {
+  if (el.shtrihi === undefined) return 0;
+  if (el.shtrihiVyvod === true && !goritEl(el, sost.lit) && sost.uchitel !== true) return 0;
+  return el.shtrihi;
 }
 
 /**
@@ -628,7 +650,8 @@ function raskladka1(
         const b = E(el.b);
         if (dist(a, b) < 0.5) break;
         /* Засечки — препятствие подписям: число не ложится на штрих. */
-        const shtrihi = el.shtrihi === undefined ? [] : shtrihiOtrezki(a, b, el.shtrihi);
+        const n = shtrihiEl(el, sost);
+        const shtrihi = n === 0 ? [] : shtrihiOtrezki(a, b, n);
         prep.otrezki.push(...shtrihi);
         ekran.linii.push({
           ...obshchee,

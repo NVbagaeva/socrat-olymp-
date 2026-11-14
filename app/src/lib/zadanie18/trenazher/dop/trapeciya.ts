@@ -196,12 +196,15 @@ export const TP_UGOL_90 = (p: Parametry) =>
         otr('BP', B, P, { rol: 'construction', stil: 'prodolzhenie' }),
         otr('CP', C, P, { rol: 'construction', stil: 'prodolzhenie' }),
         ug('pP', A, P, D, { pryamoy: true, gruppy: ['p'], cvet: 'b' }),
-        otr('PN', P, N, {
+        /* Прямая PN проходит через M: продолжение PM — построение решения,
+           MN — данное условия (а) о нём). */
+        otr('PM', P, M, {
           rol: 'construction',
           stil: 'punktir',
           gruppy: ['pryamaya', 'med'],
           cvet: 'c',
         }),
+        otr('MN', M, N, { rol: 'aux', gruppy: ['pryamaya', 'med'], cvet: 'c' }),
         otr('AN-r', A, N, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['med'], cvet: 'a' }),
         otr('ND-r', N, D, { rol: 'aux', skrytyy: true, shtrihi: 1, gruppy: ['med'], cvet: 'a' }),
         otr('BM-r', B, M, { rol: 'aux', skrytyy: true, shtrihi: 2, gruppy: ['med'], cvet: 'b' }),

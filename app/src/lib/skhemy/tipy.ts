@@ -77,6 +77,12 @@ export type Element =
       stil?: StilLinii;
       /** Засечки равных отрезков. */
       shtrihi?: 1 | 2 | 3;
+      /**
+       * Засечки — вывод решения, а не данное условия (AM = ML нужно
+       * доказать): на чертеже условия их нет, видны при подсветке
+       * отрезка и на чертеже учителя.
+       */
+      shtrihiVyvod?: boolean;
     })
   | (Obshchee & { vid: 'okruzhnost'; c: T2; r: number; stil?: StilLinii })
   | (Obshchee & { vid: 'mnogougolnik'; tochki: readonly T2[] })

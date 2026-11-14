@@ -3,7 +3,9 @@
  * lib/skhemy. Тексты задач — content/zadanie18/opornye/.
  */
 
-import type { ZhivayaSkhema } from '@/lib/skhemy/tipy';
+import type { Tochki, ZhivayaSkhema } from '@/lib/skhemy/tipy';
+import { sPodpisyamiIz } from '@/lib/skhemy/vidimye';
+import { opornayaVidimaya18, type Parametry } from '../trenazher/sceny';
 import { OP_KAS_OKR, OP_KAS_SEK, OP_OPIS_TRAP } from './kasatelnye';
 import { OP_DVE_VERSHINY, OP_KVADRAT, OP_TREZUBEC } from './okruzhnost';
 import { OP_BISS_MED, OP_MENELAY } from './otnosheniya';
@@ -32,9 +34,61 @@ const SCENY: readonly ZhivayaSkhema[] = [
   ...SCENY_NOVYE,
 ];
 
+/**
+ * Опорные задачи, у которых числа условия дают нечитаемый чертёж (радиусы
+ * 8 и 2, угол 150°): начальное положение — по видимым параметрам того
+ * же типа тренажёра (lib/zadanie18/trenazher/vidimye.ts), подписи —
+ * числа задачи. Потянули точку — чертёж и подписи снова живые.
+ */
+const KAK_TRENAZHER: Readonly<Record<string, readonly [string, Parametry]>> = {
+  'kasayushchiesya-ef': ['kas-ef', { R1: 8, R2: 2 }],
+  'dve-okruzhnosti-diametr': ['dve-okr', { k: 4, AB: 2 }],
+  'okruzhnost-cherez-centr': ['cherez-centr', { d: 4 }],
+  'vpisannyy-ravnye-hordy': ['vpis-lmn', { KM: 8 }],
+  'kvadraty-na-storonah': ['kvadraty', { AC: 14, BC: 16 }],
+  'diagonali-trapecii': ['diag-trap', { a: 9, b: 4, d1: 12, d2: 5 }],
+  'vysoty-perpendikulyary': ['vys-perp', { B: 30 }],
+};
+
+/**
+ * Опорные задачи без своего типа тренажёра: начальное положение —
+ * читаемое (угол между линиями не уже 15°), значения под чертежом —
+ * по числам задачи.
+ */
+const NACHALO_VIDIMOE: Readonly<Record<string, Tochki>> = {
+  /* Диагональ AC почти вдоль AB (13°): B — левее. */
+  'chetyre-tochki-trapecii': {
+    A: [0, 0],
+    B: [3 + 4 * Math.cos((70 * Math.PI) / 180) - 2, 4 * Math.sin((70 * Math.PI) / 180)],
+    D: [6, 0],
+    p: [1 / 3, 0],
+  },
+  /* PA почти вдоль AB (14°): P — выше. */
+  'rasstoyaniya-do-storon': { P: [3.6, 1.25], p: [4 * Math.sqrt(3), 0] },
+};
+
+function vidimaya(s: ZhivayaSkhema): ZhivayaSkhema {
+  const k = KAK_TRENAZHER[s.id];
+  if (k !== undefined) return opornayaVidimaya18(s, k[0], k[1]);
+  const n = NACHALO_VIDIMOE[s.id];
+  return n === undefined ? s : sPodpisyamiIz(s, { ...s, nachalo: n });
+}
+
 const REESTR: Readonly<Record<string, ZhivayaSkhema>> = Object.fromEntries(
+  SCENY.map((s) => [s.id, vidimaya(s)]),
+);
+
+const TOCHNYE: Readonly<Record<string, ZhivayaSkhema>> = Object.fromEntries(
   SCENY.map((s) => [s.id, s]),
 );
+
+/**
+ * Сцена в точной пропорции: начальное положение — числа задачи. По ней
+ * scripts/verify_opornye18 пересчитывает данные и ответ.
+ */
+export function scenaOpornoyTochno18(id: string): ZhivayaSkhema | undefined {
+  return TOCHNYE[id];
+}
 
 export function scenaOpornoy18(id: string): ZhivayaSkhema | undefined {
   return REESTR[id];
