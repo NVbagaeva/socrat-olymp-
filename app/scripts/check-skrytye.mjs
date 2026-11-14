@@ -403,9 +403,15 @@ async function apache({ vsem }) {
       let otdano = 0;
       for (const adres of stranitsy) {
         const res = await zapros(adres, vsem ? undefined : METKA);
-        if (ok(res.status === 200, `с меткой ${adres} → ${res.status}, нужно 200`)) otdano += 1;
+        /* Переехавшая страница (…/razbor/P01/) отвечает своим 301 на
+           новый адрес внутри раздела — как до скрытия; остальные отдаются. */
+        const kuda = res.headers.get('location') ?? '';
+        const pereehala =
+          res.status === 301 && r.adresa.some((slug) => kuda.includes(`/zadaniya/${slug}/`));
+        const mozhno = res.status === 200 || pereehala;
+        if (ok(mozhno, `с меткой ${adres} → ${res.status}, нужно 200`)) otdano += 1;
         ok(noindex(res), `с меткой ${adres}: в ответе нет X-Robots-Tag: noindex`);
-        if (!vsem) {
+        if (!vsem && res.status === 200) {
           ok(
             /cookie/i.test(res.headers.get('vary') ?? ''),
             `с меткой ${adres}: в Vary нет Cookie — промежуточный кеш отдаст страницу посетителю`,
@@ -838,7 +844,12 @@ async function kabinet(b, role, supabase) {
   });
   const page = await context.newPage();
   const sboi = [];
-  page.on('pageerror', (e) => sboi.push(e.message));
+  /* «Открыть» уводит со страницы кабинета, пока та ещё догружает свои
+     куски кода: WebKit сообщает о прерванной загрузке как об ошибке
+     ChunkLoadError. Это не сбой страницы — такие сообщения пропускаем. */
+  page.on('pageerror', (e) => {
+    if (!/ChunkLoadError|Loading chunk \d+ failed/.test(e.message)) sboi.push(e.message);
+  });
   await page.goto(`${BASE}/kabinet/`, { waitUntil: 'load' });
   const kartochka = page.locator('.skryt-admin');
   const kto = `${b.imya}, кабинет (${role})`;
