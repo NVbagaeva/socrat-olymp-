@@ -246,6 +246,13 @@
 .burger__bar:nth-child(3) {
   transform: translateY(6px);
 }
+/* Меню из верхней строки внутренних страниц (AppShell → Topbar): пока
+   оно открыто, строка над панелью меню (25), как шапка сайта (30), —
+   иначе крестик закрытия оказался бы под панелью. */
+.topbar:has(.burger[aria-expanded='true']) {
+  position: relative;
+  z-index: 30;
+}
 /* Крестик: крайние полоски сходятся и поворачиваются, средняя исчезает. */
 .burger[aria-expanded='true'] .burger__bar:nth-child(1) {
   transform: translateY(0) rotate(45deg);

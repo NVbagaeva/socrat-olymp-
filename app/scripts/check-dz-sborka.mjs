@@ -532,6 +532,63 @@ for (const no of [1, 11]) {
   );
 }
 
+/* ── №1 и №11: ключ из тренажёра («В ДЗ» у задачи) → в ДЗ та же задача, тот же ответ ── */
+{
+  const { sobrat1 } = requireSrc('lib/planimetriya/trening/sborka.ts');
+  const { readSealed1 } = requireSrc('lib/planimetriya/trening/otvet1.ts');
+  const { katalog1 } = requireSrc('lib/planimetriya/trening/katalog.ts');
+  const kat = katalog(1);
+  /* Каталог тренажёра: у типа задачи банка (f) и аналоги (a) — каждая 37-я. */
+  const kluchi1 = Object.values(katalog1())
+    .flatMap((v) => [...v.f, ...v.a])
+    .filter((_, i) => i % 37 === 0);
+  let sverok = 0;
+  for (const key of kluchi1) {
+    const tr = sobrat1(key);
+    if (tr === null) continue;
+    const ps = await sobratPunkty(
+      { v: 1, punkty: [{ id: 'z', ist: 'zadacha', no: 1, ref: key, tip: tr.z.prototypeId }], nastroyki: {} },
+      new Map([[1, kat]]),
+      ['u1'],
+      'sverka1',
+    );
+    const u = ps[0]?.units[0];
+    sverok += 1;
+    check(u !== undefined && u.ref === key, `№1 ${key}: задача по ключу тренажёра собрана`);
+    check(
+      u !== undefined && readSealed1(u.answer.replace('.', ','), tr.z.seal).right === true,
+      `№1 ${key}: ключ ДЗ сходится с ответом тренажёра`,
+    );
+  }
+  check(sverok >= 5, `№1: сверено задач тренажёра — ${sverok}`);
+
+  const { readSealed11, readChoice11 } = requireSrc('lib/zadanie11/trening/otvet11.ts');
+  const kat11 = katalog(11);
+  const papka = path.join(APP, 'public/data/zadanie11');
+  let sverok11 = 0;
+  for (const f of fs.readdirSync(papka).filter((x) => /^[A-Z]{2}-\d\d\.json$/.test(x)).filter((_, i) => i % 6 === 0)) {
+    for (const z of JSON.parse(fs.readFileSync(path.join(papka, f), 'utf8')).slice(0, 2)) {
+      const ps = await sobratPunkty(
+        { v: 1, punkty: [{ id: 'z', ist: 'zadacha', no: 11, ref: z.id, tip: z.prototypeId }], nastroyki: {} },
+        new Map([[11, kat11]]),
+        ['u1'],
+        'sverka11',
+      );
+      const u = ps[0]?.units[0];
+      sverok11 += 1;
+      check(u !== undefined && u.ref === z.id, `№11 ${z.id}: задача по ключу тренажёра собрана`);
+      const verno =
+        u === undefined
+          ? false
+          : u.answerKind === 'choice'
+            ? readChoice11(u.answer, z.seal).right
+            : readSealed11(u.answer.replace('.', ','), z.seal).right;
+      check(verno === true, `№11 ${z.id}: ключ ДЗ сходится с ответом тренажёра`);
+    }
+  }
+  check(sverok11 >= 5, `№11: сверено задач тренажёра — ${sverok11}`);
+}
+
 console.log(`Сборка ДЗ и печать: ${checks} проверок, не прошло ${failures.length}.`);
 if (failures.length > 0) {
   for (const f of failures) console.error(`  НЕТ ${f}`);

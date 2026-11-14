@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import type { ComponentPropsWithoutRef } from 'react';
 import { Input, type FieldState } from '@/components/ui';
 import { useCoarsePointer } from '@/components/ui';
+import { inputModeOf, sMinusom, type TipOtveta } from '@/lib/otvet/tipy';
 import './otvet.css';
 
 export interface AnswerInputProps extends Omit<
@@ -15,6 +16,12 @@ export interface AnswerInputProps extends Omit<
   state?: FieldState;
   /** Подпись кнопки смены знака для скринридера. */
   minusLabel?: string;
+  /**
+   * Тип ответа (lib/otvet/tipy.ts). Не задан — число, как было. У
+   * последовательности цифр и номеров утверждений клавиатура цифровая
+   * и кнопки «минус» нет.
+   */
+  tip?: TipOtveta;
 }
 
 /**
@@ -31,6 +38,7 @@ export function AnswerInput({
   onChange,
   state = 'default',
   minusLabel = 'Поставить или убрать минус',
+  tip = 'chislo',
   className,
   readOnly,
   disabled,
@@ -44,7 +52,7 @@ export function AnswerInput({
   };
   return (
     <span className={clsx('otvet-input', coarse && 'otvet-input--touch', className)}>
-      {coarse ? (
+      {coarse && sMinusom(tip) ? (
         <button
           type="button"
           className="otvet-input__minus"
@@ -61,7 +69,7 @@ export function AnswerInput({
         value={value}
         state={state}
         type="text"
-        inputMode="decimal"
+        inputMode={inputModeOf(tip)}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"

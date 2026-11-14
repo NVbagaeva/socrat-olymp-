@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { reloadOnceForChunkError } from '@/lib/chunkReload';
+import { otmetitUhod, reloadOnceForChunkError } from '@/lib/chunkReload';
 
 /**
  * Ловит сбой загрузки кода там, где граница ошибок React бессильна:
@@ -27,10 +27,20 @@ export function ChunkReloadGuard() {
         reloadOnceForChunkError('ChunkLoadError');
       }
     };
+    /* Уход со страницы обрывает загрузку кусков кода — это не сбой
+       (lib/chunkReload.ts). Возврат из кеша назад/вперёд — снова живая. */
+    const onLeave = () => otmetitUhod(true);
+    const onShow = () => otmetitUhod(false);
     window.addEventListener('unhandledrejection', onRejection);
     window.addEventListener('error', onError);
     window.addEventListener('error', onResource, true);
+    window.addEventListener('beforeunload', onLeave);
+    window.addEventListener('pagehide', onLeave);
+    window.addEventListener('pageshow', onShow);
     return () => {
+      window.removeEventListener('beforeunload', onLeave);
+      window.removeEventListener('pagehide', onLeave);
+      window.removeEventListener('pageshow', onShow);
       window.removeEventListener('unhandledrejection', onRejection);
       window.removeEventListener('error', onError);
       window.removeEventListener('error', onResource, true);
