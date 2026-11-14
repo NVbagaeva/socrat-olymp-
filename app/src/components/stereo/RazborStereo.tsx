@@ -7,6 +7,7 @@ import { renderSolid } from '@/lib/solid/render';
 import { typeset } from '@/lib/tex';
 import { RAZBOR_STEREO } from '@/content/stereo/tipy';
 import { RazborKlient, type ShagHtml } from './RazborKlient';
+import { PlashkaOtveta } from '@/components/ui/PlashkaOtveta';
 
 /** Наибольший шаг среди элементов чертежа. */
 function shagovNaChertezhe(razbor: Razbor): number {
@@ -72,10 +73,9 @@ export function RazborStereo({ razbor, title }: { razbor: Razbor; title: string 
         shagovChertezha={n}
         shagi={shagi}
       />
-      <p className="rich-example__answer">
-        {RAZBOR_STEREO.otvet}:{' '}
+      <PlashkaOtveta className="rich-example__answer" podpis={RAZBOR_STEREO.otvet}>
         <Tex text={razbor.otvetTex ?? `$${String(razbor.otvet).replace('.', '{,}')}$`} />
-      </p>
+      </PlashkaOtveta>
     </article>
   );
 }

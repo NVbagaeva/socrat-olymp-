@@ -12,6 +12,7 @@
 import { d } from '../tex';
 import type { Shag, Tochka } from '../types';
 import { shag } from './common';
+import { DROB_KATETOV } from '@/lib/drobSlov';
 
 export function nod(a: number, b: number): number {
   return b === 0 ? Math.abs(a) : nod(b, a % b);
@@ -63,7 +64,7 @@ export function shagiNaklon(A: Tochka, B: Tochka): Shag[] {
     shag(
       'Считаем тангенс',
       vozr
-        ? `$\\operatorname{tg}\\alpha=\\dfrac{\\text{противолежащий катет}}{\\text{прилежащий катет}}=\\dfrac{${dy}}{${dx}}$`
+        ? `$\\operatorname{tg}\\alpha=${DROB_KATETOV}=\\dfrac{${dy}}{${dx}}$`
         : `$\\operatorname{tg}\\alpha=-\\operatorname{tg}(180^\\circ-\\alpha)=-\\dfrac{${dy}}{${dx}}$`,
       ...drobSSokrascheniem(dy, dx, !vozr),
       `$k=${kText}$`,

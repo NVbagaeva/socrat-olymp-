@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { Chart } from '@/components/graph/Chart';
 import { Tex } from '@/components/ui/Tex';
+import { PlashkaOtveta } from '@/components/ui/PlashkaOtveta';
 import { Znachok16 } from '@/components/zadanie16/Teoriya16';
 import { BLOKI_16 } from '@/content/teoriya16';
 import { BLOKI_19 } from '@/content/zadanie19';
@@ -33,10 +34,9 @@ export function Krupno19({ tex }: { tex: string }) {
 export function Otvet19({ tex, bukva }: { tex: string; bukva: Bukva19 }) {
   const html = katex.renderToString(`${bukva}\\in${tex}`, { throwOnError: true });
   return (
-    <p className="z16-otvet">
-      <span className="z16-otvet__label">{BLOKI_19.otvet}:</span>{' '}
+    <PlashkaOtveta className="z16-otvet" podpis={BLOKI_19.otvet} podpisClassName="z16-otvet__label">
       <span dangerouslySetInnerHTML={{ __html: html }} />
-    </p>
+    </PlashkaOtveta>
   );
 }
 

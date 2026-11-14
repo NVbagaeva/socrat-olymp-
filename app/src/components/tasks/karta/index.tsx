@@ -1,8 +1,12 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
+import { PlashkaOtveta } from '@/components/ui/PlashkaOtveta';
 import { Metka, Polosa, ShagiResheniya, Znak, type Shag, type Ton } from '../steklo';
+import type { OpasnoPunkt } from './opasno';
 import './karta.css';
+
+export type { OpasnoPunkt } from './opasno';
 
 /**
  * Карта задания — вкладка «О задании» в «Стеклянной сцене».
@@ -37,8 +41,11 @@ export function KartaShapka({
   lead: string;
   fakty: Fakt[];
   opasnoTitle: string;
-  /** Пункты «чем опасно», HTML (формулы набраны). */
-  opasno: string[];
+  /**
+   * Пункты «чем опасно»: HTML строкой (формулы набраны) или пункт с
+   * формулой отдельной строкой и разбором (karta/opasno.ts).
+   */
+  opasno: (string | OpasnoPunkt)[];
   /** Обложка раздела — крупно рядом с заголовком (готовая картинка). */
   oblozhka?: ReactNode;
   /**
@@ -73,12 +80,77 @@ export function KartaShapka({
       <div className="kz-opasno">
         <p className="kz-opasno__zag">{opasnoTitle}</p>
         <ul>
-          {opasno.map((line, i) => (
-            <li key={i} dangerouslySetInnerHTML={{ __html: line }} />
-          ))}
+          {opasno.map((line, i) =>
+            typeof line === 'string' ? (
+              <li key={i} dangerouslySetInnerHTML={{ __html: line }} />
+            ) : (
+              <li key={i}>
+                <OpasnoRazbor punkt={line} />
+              </li>
+            ),
+          )}
         </ul>
       </div>
     </header>
+  );
+}
+
+/**
+ * Пункт «чем опасно» с примером: уравнение своей строкой по центру,
+ * под ним — разбор по шагам на светлой стеклянной подложке (каждый шаг:
+ * сначала словами, потом формула своей строкой) и акцентный вывод.
+ */
+function OpasnoRazbor({ punkt }: { punkt: OpasnoPunkt }) {
+  const { razbor } = punkt;
+  return (
+    <>
+      <span dangerouslySetInnerHTML={{ __html: punkt.html }} />
+      {punkt.formulaHtml === undefined ? null : (
+        <span
+          className="kz-opasno__formula formula-vynos"
+          dangerouslySetInnerHTML={{ __html: punkt.formulaHtml }}
+        />
+      )}
+      {razbor === undefined ? null : (
+        <div className="kz-opasno__razbor">
+          <ol className="kz-opasno__shagi">
+            {razbor.shagi.map((s, i) => (
+              <li key={i}>
+                <p dangerouslySetInnerHTML={{ __html: s.html }} />
+                {s.formuly.map((f, j) => (
+                  <span
+                    className="kz-opasno__formula formula-vynos"
+                    key={j}
+                    dangerouslySetInnerHTML={{ __html: f }}
+                  />
+                ))}
+              </li>
+            ))}
+          </ol>
+          {razbor.otvetHtml === undefined ? null : (
+            <PlashkaOtveta className="kz-opasno__otvet">
+              <span dangerouslySetInnerHTML={{ __html: razbor.otvetHtml }} />
+            </PlashkaOtveta>
+          )}
+          {razbor.vyvod === undefined ? null : (
+            <div className="kz-opasno__vyvod">
+              {razbor.vyvod.map((chast, i) => (
+                <Fragment key={i}>
+                  <p dangerouslySetInnerHTML={{ __html: chast.html }} />
+                  {chast.formuly.map((f, j) => (
+                    <span
+                      className="kz-opasno__formula formula-vynos"
+                      key={j}
+                      dangerouslySetInnerHTML={{ __html: f }}
+                    />
+                  ))}
+                </Fragment>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -310,8 +382,12 @@ export function FormulyRamka({
             {f.risunok === undefined ? null : (
               <span className="kz-ramka__risunok">{f.risunok}</span>
             )}
-            <span className="kz-ramka__formula" dangerouslySetInnerHTML={{ __html: f.html }} />
-            <span className="kz-ramka__primer">
+            <span
+              className="kz-ramka__formula formula-vynos"
+              dangerouslySetInnerHTML={{ __html: f.html }}
+            />
+            {/* Пример — тоже выделенная формула: целиком на строке, без разрыва. */}
+            <span className="kz-ramka__primer formula-vynos">
               <i>{primerLabel}</i> <span dangerouslySetInnerHTML={{ __html: f.primerHtml }} />
             </span>
           </li>

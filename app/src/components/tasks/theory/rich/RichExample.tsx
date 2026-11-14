@@ -4,6 +4,7 @@ import { Tex } from '@/components/ui/Tex';
 import type { RichExample } from '@/content/theoryRich';
 import { KatexFigure } from './KatexFigure';
 import { Lines, Paras } from './parts';
+import { PlashkaOtveta } from '@/components/ui/PlashkaOtveta';
 
 export interface RichExampleBlockProps {
   block: RichExample;
@@ -54,9 +55,9 @@ export function RichExampleBlock({ block, wide = false }: RichExampleBlockProps)
           ))}
         </ol>
       </div>
-      <p className="rich-example__answer">
-        Ответ: <Tex text={block.answer} />
-      </p>
+      <PlashkaOtveta className="rich-example__answer">
+        <Tex text={block.answer} />
+      </PlashkaOtveta>
     </article>
   );
 }
