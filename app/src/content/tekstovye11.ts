@@ -12,11 +12,12 @@
 
 import type { Ton } from '@/components/tasks/steklo';
 import type { SectionId } from '@/lib/zadanie11/types';
+import { nomerRazdela, slovoChasti } from './struktura';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov } from './treningBanka';
 
 export const TRENAZHER11 = (() => {
   const t = tekstyTrenazheraBanka({
-    nomer: 11,
+    nomer: nomerRazdela('tekstovye-zadachi'),
     grupp: 'девяти',
     istochniki: { vse: 'Все', fipi: 'Из банка', new: 'Аналоги' },
   });
@@ -49,7 +50,7 @@ export const OPORNYE11 = (() => {
     ...t,
     zadacha: { ...t.zadacha, placeholder: 'Число', eshcheVariant: 'Ещё вариант' },
     /* Ссылки «Где пригодится этот навык»: разделы задачи, где нужен блок. */
-    gdeLead: 'Разделы задачи №11, где нужен этот навык:',
+    gdeLead: `Разделы задачи №${nomerRazdela('tekstovye-zadachi')}, где нужен этот навык:`,
   };
 })();
 
@@ -130,7 +131,7 @@ export const GRUPPY11_TON: Record<SectionId, Ton> = {
 };
 
 export const SHAPKA11 = {
-  nadzagolovok: 'Задание №11 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('tekstovye-zadachi')} · ${slovoChasti('tekstovye-zadachi')}`,
   zagolovok: 'Перевести житейскую ситуацию на язык уравнения',
   lead: 'Проценты, смеси и сплавы, движение по прямой, по воде и по окружности, работа и прогрессии. Нужно выбрать неизвестную, заполнить таблицу модели, составить уравнение и ответить ровно на вопрос задачи. Ответ — целое число или конечная десятичная дробь.',
   fakty: (tipovVsego: number) => [

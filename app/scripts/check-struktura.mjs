@@ -16,9 +16,13 @@
    4. Структура из 19 заданий (ЕГЭ-2027): номера, части и баллы —
       по демоверсии; 32 первичных балла.
    5. Список заданий сайта (tasks.ts) собран по действующей структуре;
-      иконка и адрес раздела — по номеру хранения. */
+      иконка и адрес раздела — по номеру хранения.
+   6. Сверка содержания для проверки редизайна (sverka-soderzhaniya.mjs):
+      номер из структуры вместо цифры в тексте — то же содержание,
+      другая буква, цифра или строка кода — другое. */
 
 import { requireSrc } from './lib/load-ts.mjs';
+import { toZheSoderzhanie } from './sverka-soderzhaniya.mjs';
 
 const S = requireSrc('content/struktura.js');
 const { RAZDELY, STRUKTURY, STRUKTURA } = S;
@@ -266,6 +270,59 @@ if (STRUKTURA.id === '2027-20') {
     }),
     'tasks.ts: в структуре из 20 заданий номер, адрес и часть — прежние',
   );
+}
+
+/* ── 6. Сверка содержания: другая запись — не другое содержание ──── */
+
+{
+  const n = S.nomerRazdela('planimetriya');
+  const bylo = [
+    "import { plural } from '@/lib/plural';",
+    '/* Тексты раздела. */',
+    'export const TEKSTY = {',
+    `  no: '${S.nomerDvumya('planimetriya')}',`,
+    `  nomer: ${n},`,
+    `  title: 'Задание №${n}. Планиметрия',`,
+    `  chast: 'Задание №${n} · ${S.slovoChasti('planimetriya')}',`,
+    "  lead: 'Ответ — число, а не \\'слово\\'.',",
+    `  podpis: (k: number) => \`№${n} · задача \${k} из \${plural(k)}\`,`,
+    '};',
+  ].join('\n');
+  const stalo = [
+    "import { plural } from '@/lib/plural';",
+    "import { nomerDvumya, nomerRazdela, slovoChasti } from '@/content/struktura';",
+    '',
+    '/* Тексты раздела: номер — из структуры экзамена. */',
+    'export const TEKSTY = {',
+    "  no: nomerDvumya('planimetriya'),",
+    "  nomer: nomerRazdela('planimetriya'),",
+    "  title: `Задание №${nomerRazdela('planimetriya')}. Планиметрия`,",
+    '  chast:',
+    "    `Задание №${nomerRazdela('planimetriya')} · ${slovoChasti('planimetriya')}`,",
+    '  lead: "Ответ — число, а не \'слово\'.",',
+    '  podpis: (k: number) =>',
+    "    `№${nomerRazdela('planimetriya')} · задача ${k} из ${plural(k)}`",
+    '};',
+  ].join('\n');
+  const sverka = (novyy) => toZheSoderzhanie(bylo, novyy, 'primer.ts').ravno;
+  ok(sverka(bylo), 'сверка содержания: тот же текст');
+  ok(sverka(stalo), 'сверка содержания: номер из структуры вместо цифры — то же содержание');
+  const porchi = {
+    'другая буква в тексте': stalo.replace('Планиметрия', 'Планиметрии'),
+    'другой раздел в вызове': stalo.replace(
+      "nomerRazdela('planimetriya')",
+      "nomerRazdela('vektory')",
+    ),
+    'другое число': stalo.replace("nomer: nomerRazdela('planimetriya')", `nomer: ${n + 1}`),
+    'лишний пробел в строке': stalo.replace('. Планиметрия', '.  Планиметрия'),
+    'пропала строка': stalo.replace(/\n {2}lead: [^\n]+/, ''),
+    'новая строка кода': stalo.replace('};', "  novoe: 'текст',\n};"),
+    'другая вставка в шаблоне': stalo.replace('${plural(k)}', '${plural(k + 1)}'),
+    'функция не из структуры': stalo.replace(/nomerRazdela/g, 'drugayaFunkciya'),
+  };
+  for (const [chto, tekst] of Object.entries(porchi)) {
+    ok(tekst !== stalo && !sverka(tekst), `сверка содержания: не замечено — ${chto}`);
+  }
 }
 
 if (oshibki.length > 0) {

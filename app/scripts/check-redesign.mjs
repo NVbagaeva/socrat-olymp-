@@ -13,8 +13,12 @@
         семейство) встречается в собранных страницах раздела или в их
         скриптах: картинка не пропала из вёрстки.
      3. Банк и содержание раздела те же, что в ветке-образце: файлы
-        банка, прототипов, опорных задач и теории не изменились ни на
-        байт (git). Меняется подача, а не содержание.
+        банка, прототипов, опорных задач и теории не изменились (git).
+        Меняется подача, а не содержание. Если файл изменён, сверяется
+        содержание: тексты, числа и код — знак за знаком. Проходит
+        только другая запись того же самого: номер задания, который
+        подставляет struktura.js вместо цифры в тексте, комментарии,
+        отступы и переносы (scripts/sverka-soderzhaniya.mjs).
 
    Что считать содержанием раздела — таблица SODERZHANIE ниже: при
    редизайне следующего раздела в неё добавляется строка. */
@@ -24,6 +28,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { toZheSoderzhanie } from './sverka-soderzhaniya.mjs';
 
 const APP = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = path.join(APP, '..');
@@ -282,6 +287,8 @@ if (!fs.existsSync(path.join(OUT, 'zadaniya', razdel, 'index.html'))) {
 }
 
 /* ── 3. Банк и содержание ─────────────────────────────────────── */
+/** Файлы, записанные по-другому при том же содержании. */
+const inayaZapis = [];
 const puti = SODERZHANIE[razdel];
 if (puti === undefined) {
   check(false, `для раздела №${razdel} не описано содержание (таблица SODERZHANIE)`);
@@ -298,7 +305,32 @@ if (puti === undefined) {
   } catch (error) {
     check(false, `не удалось сравнить с ${obrazec}: ${String(error).slice(0, 200)}`);
   }
-  check(izmeneno === '', `банк или содержание раздела №${razdel} изменены:\n${izmeneno}`);
+  /* Изменённый файл: другая запись того же содержания или другое содержание? */
+  const plohie = [];
+  for (const stroka of izmeneno.split('\n').filter((line) => line !== '')) {
+    const [status, file] = stroka.split('\t');
+    if (status !== 'M' || !/\.(ts|tsx|js|mjs)$/.test(file)) {
+      plohie.push(stroka);
+      continue;
+    }
+    try {
+      const staryy = execFileSync('git', ['show', `${obrazec}:${file}`], {
+        cwd: REPO,
+        encoding: 'utf8',
+        maxBuffer: 256 * 1024 * 1024,
+      });
+      const novyy = fs.readFileSync(path.join(REPO, file), 'utf8');
+      const { ravno, gde } = toZheSoderzhanie(staryy, novyy, file);
+      if (ravno) inayaZapis.push(file);
+      else plohie.push(`${stroka}\n      ${gde}`);
+    } catch (error) {
+      plohie.push(`${stroka}\n      не удалось сравнить: ${String(error).slice(0, 200)}`);
+    }
+  }
+  check(
+    plohie.length === 0,
+    `банк или содержание раздела №${razdel} изменены:\n${plohie.join('\n')}`,
+  );
 }
 
 if (failures.length > 0) {
@@ -308,5 +340,8 @@ if (failures.length > 0) {
 }
 console.log(
   `Редизайн №${razdel}: ${checks} проверок — ${reestr.length} картинок не изменены, ` +
-    `картинки раздела (${svoi.length}) на страницах, банк и содержание те же, что в ${obrazec}.`,
+    `картинки раздела (${svoi.length}) на страницах, банк и содержание те же, что в ${obrazec}` +
+    (inayaZapis.length > 0
+      ? ` (файлов с другой записью того же содержания: ${inayaZapis.length}).`
+      : '.'),
 );
