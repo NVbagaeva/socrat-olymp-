@@ -337,29 +337,47 @@ for (const no of [6, 10]) {
 for (const no of [2, 9]) {
   const kat = katalog(no);
   check(kat !== null && kat.opornye.length > 0, `№${no}: каталог и опорные`);
-  check(kat.opornye.every((b) => b.zadachi.every((z) => z.izZerna === true)), `№${no}: опорные — из зерна`);
+  check(
+    kat.opornye.every((b) => b.zadachi.every((z) => z.izZerna === true)),
+    `№${no}: опорные — из зерна`,
+  );
   const tipy = kat.trenazher[0].tipy.slice(0, 2).map((t) => t.id);
   const sost = {
     v: 1,
     punkty: [
       { id: 'o', ist: 'opornye', no, blok: kat.opornye[0].slug, zadachi: null, kazhdomu: true },
       { id: 't', ist: 'trenazher', no, tipy, skolko: 4, kazhdomu: true },
-      ...(kat.kartochki === null ? [] : [{ id: 'k', ist: 'kartochki', no, podtema: kat.kartochki[0].id, kartochki: null }]),
+      ...(kat.kartochki === null
+        ? []
+        : [{ id: 'k', ist: 'kartochki', no, podtema: kat.kartochki[0].id, kartochki: null }]),
     ],
     nastroyki: {},
   };
   const ps = await sobratPunkty(sost, new Map([[no, kat]]), ['u1', 'u2'], `zerno-${no}`);
   const op = ps[0];
   check(
-    op.perStudent && ['u1', 'u2'].every((s) => op.units.filter((u) => u.studentId === s).length === kat.opornye[0].zadachi.length),
+    op.perStudent &&
+      ['u1', 'u2'].every(
+        (s) => op.units.filter((u) => u.studentId === s).length === kat.opornye[0].zadachi.length,
+      ),
     `№${no}: опорные каждому — полный блок у каждого`,
   );
   check(
-    new Set(['u1', 'u2'].map((s) => op.units.filter((u) => u.studentId === s).map((u) => u.questionHtml).join('|'))).size === 2,
+    new Set(
+      ['u1', 'u2'].map((s) =>
+        op.units
+          .filter((u) => u.studentId === s)
+          .map((u) => u.questionHtml)
+          .join('|'),
+      ),
+    ).size === 2,
     `№${no}: опорные каждому — аналоги разные`,
   );
   const tr = ps[1];
-  check(['u1', 'u2'].every((s) => tr.units.filter((u) => u.studentId === s).length === 4), `№${no}: тренажёр каждому — по 4`);
+  check(
+    ['u1', 'u2'].every((s) => tr.units.filter((u) => u.studentId === s).length === 4),
+    `№${no}: тренажёр каждому — по 4`,
+  );
   check(
     ['u1', 'u2'].every((s) => {
       const q = tr.units.filter((u) => u.studentId === s).map((u) => u.questionHtml);
@@ -368,27 +386,207 @@ for (const no of [2, 9]) {
     `№${no}: у ученика задачи тренажёра не повторяются`,
   );
   check(
-    ps.flatMap((p) => p.units).filter((u) => u.answerKind !== 'self').every((u) =>
-      u.answerKind === 'verno' || u.answerKind === 'choice' ? /^\d+$|^da$|^net$/.test(u.answer) : normalizeEge(u.answer) === u.answer,
-    ),
+    ps
+      .flatMap((p) => p.units)
+      .filter((u) => u.answerKind !== 'self')
+      .every((u) =>
+        u.answerKind === 'verno' || u.answerKind === 'choice'
+          ? /^\d+$|^da$|^net$/.test(u.answer)
+          : normalizeEge(u.answer) === u.answer,
+      ),
     `№${no}: ключи — в записи ЕГЭ или номер варианта`,
   );
-  check(tr.units.every((u) => u.razbor.shagi.length > 0), `№${no}: у задач тренажёра — решение по шагам`);
   check(
-    op.units.filter((u) => u.answerKind === 'choice').every((u) => (u.view.varianty ?? []).some((v) => v.number === u.answer)),
+    tr.units.every((u) => u.razbor.shagi.length > 0),
+    `№${no}: у задач тренажёра — решение по шагам`,
+  );
+  check(
+    op.units
+      .filter((u) => u.answerKind === 'choice')
+      .every((u) => (u.view.varianty ?? []).some((v) => v.number === u.answer)),
     `№${no}: у выбора ответ — один из номеров вариантов`,
   );
 }
 {
   const k9 = katalog(9);
   const vse = k9.trenazher.flatMap((g) => g.tipy.map((t) => t.id));
-  const ps = await sobratPunkty({ v: 1, punkty: [{ id: 'r', ist: 'trenazher', no: 9, tipy: vse, skolko: vse.length, kazhdomu: false }], nastroyki: {} }, new Map([[9, k9]]), ['u1'], 'ris9');
-  check(ps[0].units.some((u) => /<svg/.test(u.questionHtml)), '№9: график в условии — SVG в снимке');
-  check(ps[0].units.some((u) => (u.view.voprosy ?? []).length > 0), '№9: подсказка-лесенка — вопросами');
+  const ps = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [
+        { id: 'r', ist: 'trenazher', no: 9, tipy: vse, skolko: vse.length, kazhdomu: false },
+      ],
+      nastroyki: {},
+    },
+    new Map([[9, k9]]),
+    ['u1'],
+    'ris9',
+  );
+  check(
+    ps[0].units.some((u) => /<svg/.test(u.questionHtml)),
+    '№9: график в условии — SVG в снимке',
+  );
+  check(
+    ps[0].units.some((u) => (u.view.voprosy ?? []).length > 0),
+    '№9: подсказка-лесенка — вопросами',
+  );
   const k2 = katalog(2);
   const vse2 = k2.trenazher.flatMap((g) => g.tipy.map((t) => t.id));
-  const ps2 = await sobratPunkty({ v: 1, punkty: [{ id: 'r', ist: 'trenazher', no: 2, tipy: vse2, skolko: vse2.length, kazhdomu: false }], nastroyki: {} }, new Map([[2, k2]]), ['u1'], 'ris2');
-  check(ps2[0].units.some((u) => /<svg/.test(u.questionHtml)), '№2: координатная плоскость в условии — SVG в снимке');
+  const ps2 = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [
+        { id: 'r', ist: 'trenazher', no: 2, tipy: vse2, skolko: vse2.length, kazhdomu: false },
+      ],
+      nastroyki: {},
+    },
+    new Map([[2, k2]]),
+    ['u1'],
+    'ris2',
+  );
+  check(
+    ps2[0].units.some((u) => /<svg/.test(u.questionHtml)),
+    '№2: координатная плоскость в условии — SVG в снимке',
+  );
+}
+
+/* ── Шаг 2: №1 и №11 (общий тренажёр, опорные по зерну) ───────── */
+const { planKlyucha } = requireSrc('lib/dz/sborka/r1-11.ts');
+for (const no of [1, 11]) {
+  const kat = katalog(no);
+  check(kat !== null && kat.bankTrenazhera.length > 0, `№${no}: каталог с банком тренажёра`);
+  check(
+    kat.bankTrenazhera.every((b) => !('answer' in b) && !('otvet' in b)),
+    `№${no}: в банке каталога нет ответов`,
+  );
+  const tipy = kat.trenazher[0].tipy.slice(0, 2).map((t) => t.id);
+  const sost = {
+    v: 1,
+    punkty: [
+      { id: 'o', ist: 'opornye', no, blok: kat.opornye[0].slug, zadachi: null, kazhdomu: true },
+      { id: 't', ist: 'trenazher', no, tipy, skolko: 3, kazhdomu: true },
+    ],
+    nastroyki: {},
+  };
+  const ps = await sobratPunkty(sost, new Map([[no, kat]]), ['u1', 'u2'], `zerno-${no}`);
+  check(
+    ['u1', 'u2'].every(
+      (s) => ps[0].units.filter((u) => u.studentId === s).length === kat.opornye[0].zadachi.length,
+    ),
+    `№${no}: опорные каждому — полный блок у каждого`,
+  );
+  check(
+    ['u1', 'u2'].every((s) => ps[1].units.filter((u) => u.studentId === s).length === 3),
+    `№${no}: тренажёр каждому — по 3`,
+  );
+  check(
+    ps
+      .flatMap((p) => p.units)
+      .every((u) =>
+        u.answerKind === 'choice' ? /^\d+$/.test(u.answer) : normalizeEge(u.answer) === u.answer,
+      ),
+    `№${no}: ключи в записи ЕГЭ или номер варианта`,
+  );
+  check(
+    ps[1].units.every((u) => u.razbor.shagi.length > 0 && planKlyucha(u.ref) !== null),
+    `№${no}: решение по шагам, ключ задачи — как в тренажёре`,
+  );
+  const odna = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [{ id: 'z', ist: 'zadacha', no, ref: ps[1].units[0].ref, tip: ps[1].units[0].kind }],
+      nastroyki: {},
+    },
+    new Map([[no, kat]]),
+    ['u1'],
+    'odna',
+  );
+  check(
+    odna[0].units[0].questionHtml === ps[1].units[0].questionHtml,
+    `№${no}: конкретная задача по ключу тренажёра — та же`,
+  );
+}
+{
+  const ps = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [
+        {
+          id: 'r',
+          ist: 'trenazher',
+          no: 1,
+          tipy: katalog(1).trenazher[0].tipy.map((t) => t.id),
+          skolko: 4,
+          kazhdomu: false,
+        },
+      ],
+      nastroyki: {},
+    },
+    new Map([[1, katalog(1)]]),
+    ['u1'],
+    'ris1',
+  );
+  check(
+    ps[0].units.every((u) => /<svg/.test(u.questionHtml)),
+    '№1: чертёж в условии каждой задачи',
+  );
+}
+
+/* ── №1 и №11: ключ из тренажёра («В ДЗ» у задачи) → в ДЗ та же задача, тот же ответ ── */
+{
+  const { sobrat1 } = requireSrc('lib/planimetriya/trening/sborka.ts');
+  const { readSealed1 } = requireSrc('lib/planimetriya/trening/otvet1.ts');
+  const { katalog1 } = requireSrc('lib/planimetriya/trening/katalog.ts');
+  const kat = katalog(1);
+  /* Каталог тренажёра: у типа задачи банка (f) и аналоги (a) — каждая 37-я. */
+  const kluchi1 = Object.values(katalog1())
+    .flatMap((v) => [...v.f, ...v.a])
+    .filter((_, i) => i % 37 === 0);
+  let sverok = 0;
+  for (const key of kluchi1) {
+    const tr = sobrat1(key);
+    if (tr === null) continue;
+    const ps = await sobratPunkty(
+      { v: 1, punkty: [{ id: 'z', ist: 'zadacha', no: 1, ref: key, tip: tr.z.prototypeId }], nastroyki: {} },
+      new Map([[1, kat]]),
+      ['u1'],
+      'sverka1',
+    );
+    const u = ps[0]?.units[0];
+    sverok += 1;
+    check(u !== undefined && u.ref === key, `№1 ${key}: задача по ключу тренажёра собрана`);
+    check(
+      u !== undefined && readSealed1(u.answer.replace('.', ','), tr.z.seal).right === true,
+      `№1 ${key}: ключ ДЗ сходится с ответом тренажёра`,
+    );
+  }
+  check(sverok >= 5, `№1: сверено задач тренажёра — ${sverok}`);
+
+  const { readSealed11, readChoice11 } = requireSrc('lib/zadanie11/trening/otvet11.ts');
+  const kat11 = katalog(11);
+  const papka = path.join(APP, 'public/data/zadanie11');
+  let sverok11 = 0;
+  for (const f of fs.readdirSync(papka).filter((x) => /^[A-Z]{2}-\d\d\.json$/.test(x)).filter((_, i) => i % 6 === 0)) {
+    for (const z of JSON.parse(fs.readFileSync(path.join(papka, f), 'utf8')).slice(0, 2)) {
+      const ps = await sobratPunkty(
+        { v: 1, punkty: [{ id: 'z', ist: 'zadacha', no: 11, ref: z.id, tip: z.prototypeId }], nastroyki: {} },
+        new Map([[11, kat11]]),
+        ['u1'],
+        'sverka11',
+      );
+      const u = ps[0]?.units[0];
+      sverok11 += 1;
+      check(u !== undefined && u.ref === z.id, `№11 ${z.id}: задача по ключу тренажёра собрана`);
+      const verno =
+        u === undefined
+          ? false
+          : u.answerKind === 'choice'
+            ? readChoice11(u.answer, z.seal).right
+            : readSealed11(u.answer.replace('.', ','), z.seal).right;
+      check(verno === true, `№11 ${z.id}: ключ ДЗ сходится с ответом тренажёра`);
+    }
+  }
+  check(sverok11 >= 5, `№11: сверено задач тренажёра — ${sverok11}`);
 }
 
 console.log(`Сборка ДЗ и печать: ${checks} проверок, не прошло ${failures.length}.`);

@@ -78,4 +78,10 @@ export interface KatalogRazdela {
   kartochki: PodtemaKat[] | null;
   opornye: BlokKat[];
   trenazher: GruppaKat[];
+  /**
+   * Банк общего тренажёра (№1, №11): номера и числа задач без ответов —
+   * то же, что тренажёр получает на странице; по ним задача собирается
+   * при выдаче.
+   */
+  bankTrenazhera?: unknown[];
 }

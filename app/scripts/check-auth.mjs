@@ -180,6 +180,8 @@ const ALLOWED = new Set([
   'dz610-uchenik@yandex.ru',
   'dz29-repetitor@yandex.ru',
   'dz29-uchenik@yandex.ru',
+  'dz111-repetitor@yandex.ru',
+  'dz111-uchenik@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -1828,6 +1830,8 @@ async function runEnabled() {
   await scenarijDz610(mock, errors);
   /* 7е. ДЗ, шаг 2: №2 и №9. */
   await scenarijDz29(mock, errors);
+  /* 7ж. ДЗ, шаг 2: №1 и №11. */
+  await scenarijDz111(mock, errors);
 
   /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */
   {
@@ -2558,7 +2562,9 @@ async function scenarijDz29(mock, errors) {
   const hw = dz.homework.find((h) => h.title === 'ДЗ: №2 и №9');
   const parts = dz.parts.filter((p) => p.homework_id === hw?.id);
   check(
-    hw !== undefined && hw.sections.join(',') === '9,2' && parts.find((p) => p.source === 'opornye')?.per_student === true,
+    hw !== undefined &&
+      hw.sections.join(',') === '9,2' &&
+      parts.find((p) => p.source === 'opornye')?.per_student === true,
     'ДЗ-2/9: выдано — разделы 9 и 2, опорные №9 «каждому свои»',
   );
   await ctx.close();
@@ -2580,10 +2586,86 @@ async function scenarijDz29(mock, errors) {
   await sp.locator('.rdz-zadacha .otvet-input__field').fill(key.replace('.', ','));
   await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
   await sp.waitForSelector('.trn-verdikt--da');
-  check(await noHorizontalScroll(sp), 'ДЗ-2/9: задача №2 у ученика 390 — без горизонтальной прокрутки');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-2/9: задача №2 у ученика 390 — без горизонтальной прокрутки',
+  );
   await sp.locator('.rdz-punkt[data-istochnik="opornye"]').click();
   await sp.waitForSelector('.rdz-zadacha');
-  check(await noHorizontalScroll(sp), 'ДЗ-2/9: опорная №9 у ученика 390 — без горизонтальной прокрутки');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-2/9: опорная №9 у ученика 390 — без горизонтальной прокрутки',
+  );
+  await sctx.close();
+}
+
+/* ── ДЗ, шаг 2: №1 и №11 ──────────────────────────────────────────
+   Блок опорных №11 — кнопкой со страницы блока; тип тренажёра №1 — в
+   конструкторе; выдача; ученик видит чертёж №1 и решает задачу. */
+async function scenarijDz111(mock, errors) {
+  registerInMock(mock, 'dz111-repetitor@yandex.ru', 'dz111-repetitor-1', 'Вера Ильинична', 'tutor');
+  registerInMock(mock, 'dz111-uchenik@yandex.ru', 'dz111-uchenik-1', 'Петя Зуев', 'student');
+  mock.seedClass('dz111-repetitor@yandex.ru', ['dz111-uchenik@yandex.ru'], 'Класс 1–11');
+  const dz = mock.dz;
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await welcomeSeen(ctx);
+  await installMock(ctx, mock);
+  const tp = await ctx.newPage();
+  watchConsole(tp, errors);
+  await login(tp, 'dz111-repetitor@yandex.ru', 'dz111-repetitor-1');
+  const blok11 = fs
+    .readdirSync(path.join(OUT, 'zadaniya/11/opornye-zadachi'))
+    .find((d) => fs.statSync(path.join(OUT, 'zadaniya/11/opornye-zadachi', d)).isDirectory());
+  await tp.goto(`${SITE}/zadaniya/11/opornye-zadachi/${blok11}/`, { waitUntil: 'networkidle' });
+  await tp.locator('[data-block="dz-v-chernovik"]').first().click();
+  await tp.waitForSelector('[data-block="dz-chernovik-plashka"]');
+  check(true, 'ДЗ-1/11: блок опорных №11 — в черновике кнопкой со страницы блока');
+  await tp.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
+  await tp.waitForSelector('.dzk-punkt');
+  await tp.locator('.dzk-chip', { hasText: '№1' }).first().click();
+  await tp.getByRole('tab', { name: 'Тренажёр' }).click();
+  const tip = tp.locator('.dzk-tip').first();
+  await tip.waitFor();
+  await tip.locator('.dzk-dobavit').click();
+  await tp.waitForFunction(() => document.querySelectorAll('.dzk-punkt').length === 2);
+  await tp.fill('input[name="title"]', 'ДЗ: №1 и №11');
+  await tp.locator('[data-action="vydat"]').click();
+  await tp.waitForSelector('[data-page="vydano"]', { timeout: 90000 });
+  const hw = dz.homework.find((h) => h.title === 'ДЗ: №1 и №11');
+  check(
+    hw !== undefined && hw.sections.join(',') === '11,1',
+    `ДЗ-1/11: выдано, разделы 11 и 1 (${hw?.sections})`,
+  );
+  await ctx.close();
+
+  const sctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await welcomeSeen(sctx);
+  await installMock(sctx, mock);
+  const sp = await sctx.newPage();
+  watchConsole(sp, errors);
+  await login(sp, 'dz111-uchenik@yandex.ru', 'dz111-uchenik-1');
+  await sp.goto(`${SITE}/zadaniya/1/`, { waitUntil: 'networkidle' });
+  await sp.waitForSelector('[data-block="dz-plashka"]');
+  check(true, 'ДЗ-1/11: у ученика плашка ДЗ в разделе №1');
+  await sp.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+  await sp.locator('.rdz-punkt[data-istochnik="trenazher"]').click();
+  await sp.waitForSelector('.rdz-zadacha .trn-uslovie svg');
+  check(true, 'ДЗ-1/11: ученик видит чертёж задачи №1');
+  const id = await sp.locator('.rdz-zadacha').first().getAttribute('data-task');
+  const key = dz.keys.find((k) => k.task_id === id).answer;
+  await sp.locator('.rdz-zadacha .otvet-input__field').fill(key.replace('.', ','));
+  await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
+  await sp.waitForSelector('.trn-verdikt--da');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-1/11: задача №1 у ученика 390 — без горизонтальной прокрутки',
+  );
+  await sp.locator('.rdz-punkt[data-istochnik="opornye"]').click();
+  await sp.waitForSelector('.rdz-zadacha');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-1/11: опорная №11 у ученика 390 — без горизонтальной прокрутки',
+  );
   await sctx.close();
 }
 
@@ -2594,6 +2676,7 @@ async function runTolkoDz() {
   await scenarijDz(mock, errors);
   await scenarijDz610(mock, errors);
   await scenarijDz29(mock, errors);
+  await scenarijDz111(mock, errors);
   for (const e of errors) check(false, `консоль: ${e}`);
 }
 

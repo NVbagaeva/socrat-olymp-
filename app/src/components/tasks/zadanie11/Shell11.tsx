@@ -1,3 +1,4 @@
+import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
 import { AppShell } from '@/components/layout/AppShell';
 import { RAZDELY_TEORII_11 } from '@/content/teoriya11';
 import { tasksPage } from '@/content/tasks';
@@ -38,7 +39,11 @@ export function Shell11({ children }: { children: React.ReactNode }) {
           }
         />
         <RazdelTabs base={base} tabs={ZADANIE11.tabs} />
-        <div className="section-panel">{children}</div>
+        <div className="section-panel">
+          {/* ДЗ: ученику — плашка с ДЗ, репетитору — черновик ДЗ. Гостю — ничего. */}
+          <DzVRazdele no={11} />
+          {children}
+        </div>
       </main>
     </AppShell>
   );

@@ -1,5 +1,6 @@
 'use client';
 
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { clsx } from 'clsx';
 import { Button, Modal } from '@/components/ui';
@@ -294,6 +295,15 @@ export function TrenazherEkran<T>({
               </>
             )}
           </p>
+          {/* Репетитору: эту задачу — в черновик ДЗ (только в разделах, подключённых к ДЗ). */}
+          {item === undefined || ref === undefined ? null : (
+            <VDzKnopka
+              malaya
+              punkt={{ ist: 'zadacha', no: Number(config.razdel), ref: item.k, tip: ref.podtip }}
+              chto={`задача ${tipy.get(ref.podtip) ?? ref.podtip}`}
+              label="В ДЗ"
+            />
+          )}
           {payload.rezhim === 'vremya' ? (
             <p className="trz-card__time" aria-label={EKRAN.sekundomer}>
               ⏱ {ITOGI.sek(sekNow())}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { Opornye11 } from '@/components/tasks/zadanie11/Opornye11';
 import { OPORNYE11 } from '@/content/tekstovye11';
@@ -48,6 +49,11 @@ export default async function Opornye11BlokPage({ params }: { params: Params }) 
       <h2 className="stk-h3" id="z11-opornye-blok-title">
         {found.nazvanie}
       </h2>
+      {/* Репетитору: весь блок — в черновик ДЗ (при выдаче — аналоги). */}
+      <VDzKnopka
+        punkt={{ ist: 'opornye', no: 11, blok: found.slug, zadachi: null, kazhdomu: false }}
+        chto={`блок «${found.nazvanie}»`}
+      />
       <TabScrollOnMount />
       <Opornye11
         blokId={found.id}

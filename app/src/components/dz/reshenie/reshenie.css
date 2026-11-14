@@ -232,3 +232,30 @@
 .rdz > * {
   min-width: 0;
 }
+
+/* Таблицы модели №11 (условие опорной, решение): рамки и выравнивание. */
+.rdz .z11-sheet-tab,
+.rez .z11-sheet-tab {
+  border-collapse: collapse;
+  margin: var(--space-2) 0;
+  font-size: var(--fs-caption);
+}
+.rdz .z11-sheet-tab th,
+.rdz .z11-sheet-tab td,
+.rez .z11-sheet-tab th,
+.rez .z11-sheet-tab td {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--glass-edge);
+  text-align: center;
+}
+.rdz .z11-sheet-tab caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+}
+.rdz .trn-uslovie table,
+.rdz .trn-posle table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
