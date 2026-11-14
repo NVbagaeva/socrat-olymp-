@@ -20,6 +20,9 @@ export const KLYUCH13 = /^[A-D]-\d{2}\|[a-z]\w*$/;
 /** Особый режим «Определи тип»: назвать схему по условию. */
 export const REZHIM_TIP = 'tip';
 
+/** Особый режим «С оформлением»: схема, первая строка таблицы и число. */
+export const REZHIM_OFORMLENIE = 'oformlenie';
+
 export function prototipKlyucha13(id: string): string {
   return id.split('|')[0] ?? id;
 }
@@ -34,8 +37,7 @@ function zadachi(keys: string[]): TaskBanka[] | null {
 /**
  * Запись прежнего тренажёра №13 → запись общего тренажёра. Режим «Без
  * подсказок» остаётся без подсказок, «На время» — с таймером, «Определить
- * схему» — режим «Определи тип». «С оформлением» в новом тренажёре нет:
- * такая тренировка продолжается с ответом числом.
+ * схему» — режим «Определи тип», «С оформлением» — режим «С оформлением».
  */
 export function prezhnyayaZapis13(packed: unknown): PayloadBanka | null {
   if (!isRecord(packed)) return null;
@@ -51,7 +53,11 @@ export function prezhnyayaZapis13(packed: unknown): PayloadBanka | null {
       tasks,
       control: packed['rezhim'] === 'bez',
       timer: packed['rezhim'] === 'vremya',
-      ...(dop['zadanie'] === 'tip' ? { rezhim: REZHIM_TIP } : {}),
+      ...(dop['zadanie'] === 'tip'
+        ? { rezhim: REZHIM_TIP }
+        : dop['oformlenie'] === 'oformlenie'
+          ? { rezhim: REZHIM_OFORMLENIE }
+          : {}),
     };
   }
   /* Самый первый экран №13: { zadachi: [[прототип, seed, …, вид]], rezhim }. */
@@ -66,7 +72,11 @@ export function prezhnyayaZapis13(packed: unknown): PayloadBanka | null {
       tasks,
       control: false,
       timer: true,
-      ...(spisok.some((z) => z[3] === 'tip') ? { rezhim: REZHIM_TIP } : {}),
+      ...(spisok.some((z) => z[3] === 'tip')
+        ? { rezhim: REZHIM_TIP }
+        : packed['rezhim'] === 'oformlenie'
+          ? { rezhim: REZHIM_OFORMLENIE }
+          : {}),
     };
   }
   return null;
