@@ -43,9 +43,9 @@ function proveritMediany(sch, { A, B, C, M, N, G }, imya) {
 }
 const MEDIANY = {
   id: 'ot-mediany',
-  b(sch, rnd) {
+  b(sch, rnd, d) {
     const otvety = Array.from({ length: 5 }, () => {
-      const t = mediany(vPloshchad(sluchaynyyTreugolnik(rnd), (x) => [x.A, x.B, x.C], 24));
+      const t = mediany(vPloshchad(sluchaynyyTreugolnik(rnd), (x) => [x.A, x.B, x.C], d.S));
       return ploshchad([t.A, t.G, t.B]);
     });
     sch.fakt(
@@ -54,9 +54,9 @@ const MEDIANY = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiMedian(t);
-    sch.fakt('данные: S(ABC) = 24', blizko(ploshchad([p.A, p.B, p.C]), 24));
+    sch.fakt(`данные: S(ABC) = ${d.S}`, blizko(ploshchad([p.A, p.B, p.C]), d.S));
     return ploshchad([p.A, p.G, p.B]);
   },
   a(rnd, sch) {
@@ -87,10 +87,10 @@ function proveritMenelaya(sch, { A, B, C, M, K, P }, imya) {
 }
 const MENELAY = {
   id: 'ot-menelay',
-  b(sch, rnd) {
+  b(sch, rnd, d) {
     const otvety = Array.from({ length: 5 }, () => {
       const t = sluchaynyyTreugolnik(rnd);
-      const k = 8 / dist(t.A, t.C);
+      const k = d.AC / dist(t.A, t.C);
       const p = menelay({ A: mul(t.A, k), B: mul(t.B, k), C: mul(t.C, k) });
       return dist(p.C, p.P);
     });
@@ -100,9 +100,9 @@ const MENELAY = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiMenelaya(t);
-    sch.fakt('данные: AC = 8', blizko(dist(p.A, p.C), 8));
+    sch.fakt(`данные: AC = ${d.AC}`, blizko(dist(p.A, p.C), d.AC));
     return dist(p.C, p.P);
   },
   a(rnd, sch) {
@@ -114,17 +114,18 @@ const MENELAY = {
 };
 
 /* ot-cheva: BA₁ : A₁C = 1 : 2, CB₁ : B₁A = 2 : 1, P = AA₁ ∩ BB₁, C₁ = CP ∩ AB: C₁ — середина AB. */
-function cheva({ A, B, C }) {
-  const A1 = delit(B, C, 1, 2);
-  const B1 = delit(C, A, 2, 1);
+/** BA₁ : A₁C = m : n, CB₁ : B₁A = n : m. */
+function cheva({ A, B, C }, m, n) {
+  const A1 = delit(B, C, m, n);
+  const B1 = delit(C, A, n, m);
   const P = peresech(A, A1, B, B1);
   return { A, B, C, A1, B1, P, C1: peresech(C, P, A, B) };
 }
-function proveritChevu(sch, { A, B, C, A1, B1, P, C1 }, imya) {
+function proveritChevu(sch, { A, B, C, A1, B1, P, C1 }, imya, m, n) {
   sch.fakt(
     `${imya}: отношения на сторонах, P на AA₁ и BB₁, C₁ на CP и AB`,
-    blizko(2 * dist(B, A1), dist(A1, C)) &&
-      blizko(dist(C, B1), 2 * dist(B1, A)) &&
+    blizko(n * dist(B, A1), m * dist(A1, C)) &&
+      blizko(m * dist(C, B1), n * dist(B1, A)) &&
       naPryamoy(A, A1, P) &&
       naPryamoy(B, B1, P) &&
       naPryamoy(C, P, C1) &&
@@ -134,9 +135,9 @@ function proveritChevu(sch, { A, B, C, A1, B1, P, C1 }, imya) {
 }
 const CHEVA = {
   id: 'ot-cheva',
-  b(sch, rnd) {
+  b(sch, rnd, d) {
     const otvety = Array.from({ length: 5 }, () => {
-      const p = cheva(sluchaynyyTreugolnik(rnd));
+      const p = cheva(sluchaynyyTreugolnik(rnd), d.m, d.n);
       return dist(p.A, p.P) / dist(p.P, p.A1);
     });
     sch.fakt(
@@ -145,19 +146,24 @@ const CHEVA = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiChevy(t);
     sch.fakt(
-      'данные: BA₁ : A₁C = 1 : 2, CB₁ : B₁A = 2 : 1',
-      blizko(2 * dist(p.B, p.A1), dist(p.A1, p.C)) && blizko(dist(p.C, p.B1), 2 * dist(p.B1, p.A)),
+      `данные: BA₁ : A₁C = ${d.m} : ${d.n}, CB₁ : B₁A = ${d.n} : ${d.m}`,
+      blizko(d.n * dist(p.B, p.A1), d.m * dist(p.A1, p.C)) &&
+        blizko(d.m * dist(p.C, p.B1), d.n * dist(p.B1, p.A)),
     );
     return dist(p.A, p.P) / dist(p.P, p.A1);
   },
   a(rnd, sch) {
-    proveritChevu(sch, cheva(sluchaynyyTreugolnik(rnd)), 'а)');
+    /* Утверждение а) — при любых m : n (C₁ — середина AB по Чеве). */
+    const m = 1 + Math.floor(rnd() * 5);
+    const n = 1 + Math.floor(rnd() * 5);
+    proveritChevu(sch, cheva(sluchaynyyTreugolnik(rnd), m, n), 'а)', m, n);
   },
   scena(t, sch) {
-    proveritChevu(sch, L().tochkiChevy(t), 'чертёж');
+    const [m, n] = t.p;
+    proveritChevu(sch, L().tochkiChevy(t), 'чертёж', m, n);
   },
 };
 
@@ -184,12 +190,12 @@ function proveritParallelogramm(sch, { A, B, C, D, K, M, P, Q }, imya) {
 }
 const PARALLELOGRAMM = {
   id: 'ot-parallelogramm',
-  b(sch, rnd) {
+  b(sch, rnd, d) {
     const otvety = Array.from({ length: 5 }, () => {
       const { A, B, C } = sluchaynyyTreugolnik(rnd);
-      const t = vPloshchad({ A, B, D: C }, (x) => [x.A, x.B, x.D], 30);
+      const t = vPloshchad({ A, B, D: C }, (x) => [x.A, x.B, x.D], d.S / 2);
       const p = parallelogramm(t);
-      sch.fakt('б) S(ABCD) = 60', blizko(ploshchad([p.A, p.B, p.C, p.D]), 60));
+      sch.fakt(`б) S(ABCD) = ${d.S}`, blizko(ploshchad([p.A, p.B, p.C, p.D]), d.S));
       return ploshchad([p.A, p.P, p.Q]);
     });
     sch.fakt(
@@ -198,9 +204,9 @@ const PARALLELOGRAMM = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiParallelogramma(t);
-    sch.fakt('данные: S(ABCD) = 60', blizko(ploshchad([p.A, p.B, p.C, p.D]), 60));
+    sch.fakt(`данные: S(ABCD) = ${d.S}`, blizko(ploshchad([p.A, p.B, p.C, p.D]), d.S));
     return ploshchad([p.A, p.P, p.Q]);
   },
   a(rnd, sch) {

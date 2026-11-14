@@ -67,9 +67,11 @@ export interface PayloadBanka {
 
 /**
  * Прототип: «P04» (№7, №6), «A6» (№2), «A-01» (№13), «p05» (№1), «9.2.1» (№9)
- * или подтип «DP-07» (№11 — разделы задачи двумя буквами латиницей).
+ * подтип «DP-07» (№11 — разделы задачи двумя буквами латиницей)
+ * или набор №12 («12.A», «12Q.B»).
  */
-const PROTOTIP = /^(P\d\d|[ABC]\d|[A-D]-\d\d|p\d\d|9\.[1-5]\.\d{1,2}|[A-Z]{2}-\d\d)$/;
+const PROTOTIP =
+  /^(P\d\d|[ABC]\d|[A-D]-\d\d|p\d\d|9\.[1-5]\.\d{1,2}|[A-Z]{2}-\d\d|12[A-Z]?\.[A-Z])$/;
 
 type Random = () => number;
 
@@ -95,10 +97,17 @@ export function prototipyZadach(katalog: KatalogBanka): Map<string, string> {
 /**
  * Прототип задачи: по каталогу, иначе из ключа — «P18-a03» (аналог),
  * «A6|k07» (№2), «A-01|b3» (№13), «p05|b12» (№1), «DP-07|b12» (№11; так и
- * у задач прежнего генератора №11 «DP-07|n…», которых в каталоге нет).
+ * у задач прежнего генератора №11 «DP-07|n…», которых в каталоге нет),
+ * «12Q.B-07» (№12: шаблон набора).
  */
 export function prototipZadachi(id: string, poKatalogu: ReadonlyMap<string, string>): string {
-  const poKlyuchu = /^P\d\d-/.test(id) ? id.slice(0, 3) : id.includes('|') ? id.split('|')[0] : id;
+  const poKlyuchu = /^P\d\d-/.test(id)
+    ? id.slice(0, 3)
+    : id.includes('|')
+      ? id.split('|')[0]
+      : /^12[A-Z]?\.[A-Z]-/.test(id)
+        ? id.split('-')[0]
+        : id;
   return poKatalogu.get(id) ?? poKlyuchu ?? id;
 }
 

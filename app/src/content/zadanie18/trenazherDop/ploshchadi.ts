@@ -4,16 +4,17 @@
  * scripts/verify_schemes/trenazherDop/ploshchadi.mjs.
  */
 
-import type { ZadachaDop18 } from './tipy';
+import { ch, drob, type ZadachaDop18 } from './tipy';
 
 export const PL18_OBSHCHAYA_VYSOTA: ZadachaDop18 = {
   id: 'pl-obshchaya-vysota',
   uroven: 1,
   nazvanie: 'Чевиана и медиана внутри треугольника',
+  varianty: [{ S: 40 }, { S: 50 }, { S: 30 }],
   uslovie:
     'Точка $M$ лежит на стороне $BC$ треугольника $ABC$, причём $BM : MC = 2 : 3$. Точка $N$ — середина отрезка $AM$.',
   a: 'Докажите, что площади треугольников $ABM$ и $AMC$ относятся как $2 : 3$.',
-  b: 'Найдите площадь треугольника $ABN$, если площадь треугольника $ABC$ равна $40$.',
+  b: (p) => `Найдите площадь треугольника $ABN$, если площадь треугольника $ABC$ равна $${p.S}$.`,
   skhemy: [
     {
       id: 'obshchaya-vysota',
@@ -28,27 +29,31 @@ export const PL18_OBSHCHAYA_VYSOTA: ZadachaDop18 = {
       gruppy: ['h'],
     },
   ],
-  reshenieB: [
+  reshenieB: (p) => [
     {
-      tekst: 'По пункту а) $S_{ABM} = \\dfrac25 S_{ABC} = \\dfrac25\\cdot 40 = 16$.',
+      tekst: `По пункту а) $S_{ABM} = \\dfrac25 S_{ABC} = \\dfrac25\\cdot ${p.S} = ${ch((2 * p.S!) / 5)}$.`,
       gruppy: ['h'],
     },
     {
-      tekst:
-        '$BN$ — медиана треугольника $ABM$: она делит его площадь пополам, $S_{ABN} = \\dfrac12\\cdot 16 = 8$.',
+      tekst: `$BN$ — медиана треугольника $ABM$: она делит его площадь пополам, $S_{ABN} = \\dfrac12\\cdot ${ch((2 * p.S!) / 5)} = ${ch(p.S! / 5)}$.`,
       gruppy: ['n'],
     },
   ],
-  otvet: 8,
+  otvet: (p) => p.S! / 5,
 };
 
 export const PL18_BISSEKTRISA: ZadachaDop18 = {
   id: 'pl-bissektrisa',
   uroven: 3,
   nazvanie: 'Длина биссектрисы через площади',
+  varianty: [
+    { AB: 3, AC: 6 },
+    { AB: 4, AC: 12 },
+    { AB: 10, AC: 15 },
+  ],
   uslovie: 'В треугольнике $ABC$ проведена биссектриса $AL$.',
   a: 'Докажите, что $AL = \\dfrac{2\\,AB\\cdot AC\\cos\\frac{A}{2}}{AB + AC}$.',
-  b: 'Найдите $AL$, если $AB = 3$, $AC = 6$ и $\\angle BAC = 120^\\circ$.',
+  b: (p) => `Найдите $AL$, если $AB = ${p.AB}$, $AC = ${p.AC}$ и $\\angle BAC = 120^\\circ$.`,
   skhemy: [
     {
       id: 'metod-ploshchadey',
@@ -70,12 +75,11 @@ export const PL18_BISSEKTRISA: ZadachaDop18 = {
       gruppy: ['otv'],
     },
   ],
-  reshenieB: [
+  reshenieB: (p) => [
     {
-      tekst:
-        '$\\dfrac A2 = 60^\\circ$, $\\cos 60^\\circ = \\dfrac12$. По пункту а) $AL = \\dfrac{2\\cdot 3\\cdot 6\\cdot\\frac12}{3 + 6} = \\dfrac{18}{9} = 2$.',
+      tekst: `$\\dfrac A2 = 60^\\circ$, $\\cos 60^\\circ = \\dfrac12$. По пункту а) $AL = \\dfrac{2\\cdot ${p.AB}\\cdot ${p.AC}\\cdot\\frac12}{${p.AB} + ${p.AC}} = ${drob(p.AB! * p.AC!, p.AB! + p.AC!)}$.`,
       gruppy: ['otv'],
     },
   ],
-  otvet: 2,
+  otvet: (p) => (p.AB! * p.AC!) / (p.AB! + p.AC!),
 };
