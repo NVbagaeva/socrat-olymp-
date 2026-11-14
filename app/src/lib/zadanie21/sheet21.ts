@@ -22,6 +22,7 @@ import answers from '@/lib/sheet/answers.js';
 import { rngOf } from '@/lib/vychisleniya/rng';
 import { typeset } from '../tex';
 import { PROTOTYPES, prototype } from './prototypes';
+import { shemaSvg } from './shema';
 import { chislo } from './tex';
 import type { Solved } from './types';
 
@@ -147,7 +148,9 @@ export function shagiHtml21(solved: Solved): string {
     .filter((e) => e.title !== 'Ответ')
     .map(
       (e) =>
-        `<li class="sheet-step"><b>${typeset(e.title.replace(/^Шаг \d+\.\s*/, ''))}.</b> ${e.lines.map((l) => typeset(l)).join(' ')}</li>`,
+        `<li class="sheet-step"><b>${typeset(e.title.replace(/^Шаг \d+\.\s*/, ''))}.</b> ${e.lines.map((l) => typeset(l)).join(' ')}` +
+        (e.shema === undefined ? '' : `<div class="z21-shema-list">${shemaSvg(e.shema)}</div>`) +
+        '</li>',
     )
     .join('');
   return `<ol class="sheet-steps">${items}</ol>`;

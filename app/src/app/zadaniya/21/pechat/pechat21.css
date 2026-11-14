@@ -37,3 +37,15 @@
     display: none;
   }
 }
+
+/* Схема знаков производной на листе учителя. */
+.z21-shema-list {
+  max-width: 120mm;
+  margin: 2mm 0 1mm;
+  break-inside: avoid;
+}
+.z21-shema-list svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}

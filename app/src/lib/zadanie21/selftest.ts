@@ -17,6 +17,7 @@ import { BLOKI_OPORNYH21 } from './opornye';
 import { PROTOTYPES } from './prototypes';
 import { katalog21 } from './trening/katalog';
 import { prototipKlyucha, zadachaPoKlyuchu } from './zadacha';
+import { ekstremum, podpisChisla } from './shema';
 import { funkciyaIzTex } from './texCalc';
 import type { Params, Prototype } from './types';
 
@@ -70,7 +71,24 @@ export function proverit(proto: Prototype, p: Params, seed: string): Oshibka[] {
     ...s.etapy.flatMap((e) => e.lines),
   ];
   for (const t of teksty) if (MUSOR.test(t)) ploho(`мусор в TeX: «${t.slice(0, 120)}»`);
+  /* Схема знаков: промежутков столько же, сколько знаков; в точке ответа — нужный экстремум. */
+  for (const e of s.etapy) {
+    if (e.shema === undefined) continue;
+    const sh = e.shema;
+    const prom = sh.tochki.length - 1 + (sh.luchLevo ? 1 : 0) + (sh.luchPravo ? 1 : 0);
+    if (prom !== sh.znaki.length) ploho(`схема: промежутков ${prom}, знаков ${sh.znaki.length}`);
+  }
   const c = proto.chisla(p);
+  /* Сложная функция (вид 7) решается без производной — схемы знаков у неё нет. */
+  if (proto.vid !== 7) {
+    const sh = s.etapy.find((e) => e.shema !== undefined)?.shema;
+    if (sh === undefined) ploho('нет схемы знаков производной');
+    else if (proto.vopros === 'A') {
+      const i = sh.tochki.findIndex((t) => t.podpis === podpisChisla(s.answer));
+      if (i === -1 || ekstremum(sh, i) !== c.cel)
+        ploho(`схема: у точки ответа ${s.answer} нет подписи ${c.cel}`);
+    }
+  }
   const [a, b] = c.otrezok;
   /* Формула на экране — та же функция, что в расчёте. */
   try {

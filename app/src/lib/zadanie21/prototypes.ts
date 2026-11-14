@@ -11,6 +11,7 @@
 
 import type { Rng } from '@/lib/veroyatnost/generator';
 import { chislo, num, otrezokTex, summa, trehchlen, xMinus, znaki } from './tex';
+import { podpisChisla as pc, shemaPoZnakam, type Shema } from './shema';
 import type { Etap, HintStep, Params, Prototype, Solved } from './types';
 
 type Cel = 'max' | 'min';
@@ -80,6 +81,12 @@ interface TochkaOpts {
   znakiZ: ('+' | '-')[];
   /** Строка об области определения; нет — область вся прямая. */
   odz?: string;
+  /** Точки, выколотые из области определения (среди tochki). */
+  vykoloty?: number[];
+  /** Левая граница области определения (открытая); нет — область без края слева. */
+  granica?: number;
+  /** Своя схема знаков вместо построенной по точкам. */
+  shema?: Shema;
 }
 
 /** Точка экстремума по смене знака производной. */
@@ -100,6 +107,12 @@ function poZnakam(o: TochkaOpts): Solved {
         `${znaki(o.tochki, o.znakiZ)}.`,
         `В точке $x = ${num(answer)}$ производная меняет знак с «${iskat[0] === '+' ? '+' : '−'}» на «${iskat[1] === '+' ? '+' : '−'}» — это точка ${SLOVO_TOCHKI[o.cel]}.`,
       ],
+      shema:
+        o.shema ??
+        shemaPoZnakam(o.tochki, o.znakiZ, {
+          ...(o.vykoloty ? { vykoloty: o.vykoloty } : {}),
+          ...(o.granica !== undefined ? { granicaLevo: o.granica } : {}),
+        }),
     },
     { title: 'Ответ', lines: [`$${num(answer)}$`] },
   ];
@@ -147,6 +160,8 @@ interface OtrezokOpts {
   odz?: string;
   /** Варианты подсказки «в какой точке». */
   tochkiPodskazki: string[];
+  /** Схема знаков производной на отрезке. */
+  shema?: Shema;
 }
 
 function naOtrezke(o: OtrezokOpts): Solved {
@@ -156,7 +171,11 @@ function naOtrezke(o: OtrezokOpts): Solved {
       lines: [...(o.odz === undefined ? [] : [o.odz]), `$y' = ${o.d}$`],
     },
     { title: 'Шаг 2. Нули производной на отрезке', lines: o.nuli },
-    { title: `Шаг 3. Где ${SLOVO_ZNACH[o.cel]} значение`, lines: o.vybor },
+    {
+      title: `Шаг 3. Где ${SLOVO_ZNACH[o.cel]} значение`,
+      lines: o.vybor,
+      ...(o.shema === undefined ? {} : { shema: o.shema }),
+    },
     { title: 'Шаг 4. Значение', lines: o.schet },
     { title: 'Ответ', lines: [`$${num(o.answer)}$`] },
   ];
@@ -244,6 +263,23 @@ function bezProizvodnoy(o: {
   ];
   return { answer: o.answer, funkciya: o.fn, proizvodnaya: null, etapy, hints };
 }
+
+/** Схема знаков на отрезке: концы — скобки, внутри — критические точки. */
+function otr(lo: string, vnutri: string[], hi: string, znaki: ('+' | '-')[]): Shema {
+  return {
+    tochki: [
+      { podpis: lo, vid: 'konec' },
+      ...vnutri.map((podpis) => ({ podpis, vid: 'krit' as const })),
+      { podpis: hi, vid: 'konec' },
+    ],
+    znaki,
+    luchLevo: false,
+    luchPravo: false,
+  };
+}
+
+/** Знаки вокруг единственной точки экстремума. */
+const zn = (cel: Cel): ('+' | '-')[] => (cel === 'max' ? ['+', '-'] : ['-', '+']);
 
 /** «+5», «-3» или ничего: свободный член в конце формулы. */
 const plusC = (c: number): string => (c === 0 ? '' : c < 0 ? `-${num(-c)}` : `+${num(c)}`);
@@ -392,6 +428,10 @@ const P02: Prototype = {
       answer,
       schet: [`$y(${num(gde)}) = ${num(answer)}$.`],
       tochkiPodskazki: [num(-gde), num(konec), num(-konec)],
+      shema:
+        b === a
+          ? otr(pc(-b), [], pc(b), [k.z[1] as '+' | '-'])
+          : otr(pc(-b), [pc(-a), pc(a)], pc(b), k.z),
     });
   },
   chisla: (p) => ({
@@ -490,6 +530,7 @@ const P03: Prototype = {
         `$y(${num(k.x0)}) = ${num(answer)}$ ($x\\sqrt{x} = ${num(k.x0 * Math.sqrt(k.x0))}$).`,
       ],
       tochkiPodskazki: [num(a), num(b), num(Math.sqrt(k.x0))],
+      shema: otr(pc(a), [pc(k.x0)], pc(b), k.z),
     });
   },
   chisla: (p) => {
@@ -581,6 +622,7 @@ const P04: Prototype = {
       korni: [-a, a],
       tochki: d.t,
       znakiZ: d.z,
+      ...(d.t.length === 3 ? { vykoloty: [0] } : {}),
     });
   },
   chisla: (p) => {
@@ -640,6 +682,7 @@ const P05: Prototype = {
       answer,
       schet: [`$y(${num(x0)}) = ${num(answer)}$.`],
       tochkiPodskazki: [num(a), num(b), num(-x0)],
+      shema: otr(pc(a), [pc(x0)], pc(b), zn(ce)),
     });
   },
   chisla: (p) => {
@@ -896,6 +939,7 @@ const P07: Prototype = {
         `Показатель степени в этой точке равен нулю, $e^0 = 1$: $y(${num(e.x0)}) = ${num(answer)}$.`,
       ],
       tochkiPodskazki: [num(e.lo), num(e.hi), num(-e.x0)],
+      shema: otr(pc(e.lo), [pc(e.x0)], pc(e.hi), zn(e.cel)),
     });
   },
   chisla: (p) => {
@@ -950,6 +994,7 @@ const P08: Prototype = {
       answer,
       schet: [`$\\ln 1 = 0$: $y(${num(l.x0)}) = ${num(answer)}$.`],
       tochkiPodskazki: [num(l.lo), num(l.hi), num(-N(p, 'a'))],
+      shema: otr(pc(l.lo), [pc(l.x0)], pc(l.hi), zn(l.cel)),
     });
   },
   chisla: (p) => {
@@ -1029,6 +1074,7 @@ const P09: Prototype = {
       answer,
       schet: [`$${k}\\cdot\\frac{1}{${k}} = 1$, $\\ln 1 = 0$: $y = ${num(answer)}$.`],
       tochkiPodskazki: [`\\frac{1}{${2 * k}}`, `\\frac{5}{${2 * k}}`, `${k}`],
+      shema: otr(`1/${2 * k}`, [`1/${k}`], `5/${2 * k}`, zn(l.cel)),
     });
   },
   chisla: (p) => {
@@ -1086,6 +1132,7 @@ const P10: Prototype = {
       korni: [r1, r2],
       tochki: [r1, r2],
       znakiZ: ['+', '-', '+'],
+      granica: 0,
     });
   },
   chisla: (p) => {
@@ -1162,6 +1209,7 @@ const P11: Prototype = {
       korni: [l.x0],
       tochki: [l.x0],
       znakiZ: ['+', '-'],
+      granica: -l.a,
     });
   },
   chisla: (p) => {
@@ -1202,6 +1250,7 @@ const P12: Prototype = {
       answer,
       schet: [`$\\ln 1 = 0$: $y(${num(l.x0)}) = ${num(answer)}$.`],
       tochkiPodskazki: [num(lo), num(hi), num(-l.a)],
+      shema: otr(pc(lo), [pc(l.x0)], pc(hi), ['+', '-']),
     });
   },
   chisla: (p) => {
@@ -1249,6 +1298,7 @@ const P13: Prototype = {
       answer: t.answer,
       schet: t.schet,
       tochkiPodskazki: t.drugie,
+      shema: otr(t.podpisi[0], [], t.podpisi[1], [t.znak]),
     });
   },
   chisla: (p) => {
@@ -1270,6 +1320,8 @@ function trig13(p: Params) {
         [c, ''],
       ])}`,
       lo: '-\\frac{3\\pi}{2}',
+      podpisi: ['−3π/2', '0'] as [string, string],
+      znak: '+' as const,
       hi: '0',
       d: `${B}-${A}\\sin x`,
       nuli: [`$|${A}\\sin x| \\le ${A} < ${B}$, поэтому $y' > 0$ везде: нулей нет.`],
@@ -1293,6 +1345,8 @@ function trig13(p: Params) {
       [c, ''],
     ])}`,
     lo: '-\\frac{2\\pi}{3}',
+    podpisi: ['−2π/3', '0'] as [string, string],
+    znak: '-' as const,
     hi: '0',
     d: `-${A}\\sin x-\\frac{${K}}{\\pi}`,
     nuli: [
@@ -1349,6 +1403,7 @@ const P14: Prototype = {
       answer: t.answer,
       schet: t.schet,
       tochkiPodskazki: ['0', '-\\frac{\\pi}{4}', '\\frac{\\pi}{4}', '\\frac{\\pi}{2}'],
+      shema: otr('−π/4', [], S(p, 'forma').endsWith('Pi') ? 'π/4' : '0', [t.vozr ? '+' : '-']),
     });
   },
   chisla: (p) => {
@@ -1447,6 +1502,16 @@ const P15: Prototype = {
       korni: [x0],
       tochki: [x0],
       znakiZ: max ? ['+', '-'] : ['-', '+'],
+      shema: {
+        tochki: [
+          { podpis: '0', vid: 'granica' },
+          { podpis: pc(x0), vid: 'krit' },
+          { podpis: 'π/2', vid: 'granica' },
+        ],
+        znaki: max ? ['+', '-'] : ['-', '+'],
+        luchLevo: false,
+        luchPravo: false,
+      },
     });
     /* Интервалы — в пределах промежутка. */
     const st = s.etapy[2];

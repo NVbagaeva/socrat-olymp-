@@ -17,6 +17,7 @@
  */
 
 import type { Rng } from '@/lib/veroyatnost/generator';
+import type { Shema } from './shema';
 
 /** Вид функции — группа классификации. */
 export type VidId = 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -31,6 +32,8 @@ export type Params = Record<string, number | string>;
 export interface Etap {
   title: string;
   lines: string[];
+  /** Схема знаков производной (координатная прямая) — под строками этапа. */
+  shema?: Shema;
 }
 
 /** Шаг подсказки: вопрос и кнопки-ответы, одна верная. */
