@@ -7,6 +7,7 @@ import type { Chast2Ui } from '@/lib/chast2/sostoyanie';
 import type { Chast2Zadacha } from '@/lib/povyshennye/chast2/types';
 import { Chast2Card } from './Chast2Card';
 import './chast2.css';
+import { podpis2 } from '@/lib/variant/struktura';
 
 /**
  * Часть 2 на экране итогов: ответы зафиксированы, у каждого задания —
@@ -32,7 +33,7 @@ export function Chast2Itog({
         <article key={z.no} className="vo-card c2-itog__task">
           <header className="vo-card__head">
             <h4 className="vo-card__title">
-              Задание {z.no}
+              Задание {podpis2(z.no)}
               <BallPlashka n={MAX_BALL[z.no]} />
             </h4>
           </header>

@@ -22,6 +22,7 @@ import type { Check, WorkPayload, WorkUi } from '@/lib/variant/online/sessionUi'
 import type { HintStep, VariantTask } from '@/lib/variant/types';
 import { AnswerField } from './AnswerField';
 import { clockText } from './format';
+import { podpis1, podpis2 } from '@/lib/variant/struktura';
 
 export interface WorkScreenProps {
   payload: WorkPayload;
@@ -46,9 +47,12 @@ function razborSteps(html: string | null): string[] {
   return [...doc.querySelectorAll('li.var-razbor__step')].map((li) => li.innerHTML);
 }
 
-/** Номер задания на ленте: в «Работе над ошибками» — номер ЕГЭ. */
-function noOf(task: VariantTask): number {
-  return task.egeNumber;
+/**
+ * Номер задания на ленте: в «Работе над ошибками» — номер ЕГЭ. Номер —
+ * по действующей структуре экзамена (lib/variant/struktura.ts).
+ */
+function noOf(task: VariantTask): string {
+  return podpis1(task.egeNumber);
 }
 
 /**
@@ -402,11 +406,11 @@ export function WorkScreen({
                         type="button"
                         className={clsx('vo-strip__no', `is-${st}`, i === index && 'is-current')}
                         aria-current={i === index ? 'step' : undefined}
-                        aria-label={`${T.run.task(z.no)}: ${T.run.status[st]}`}
+                        aria-label={`${T.run.task(podpis2(z.no))}: ${T.run.status[st]}`}
                         data-status={st}
                         onClick={() => go(i)}
                       >
-                        {z.no}
+                        {podpis2(z.no)}
                       </button>
                     </li>
                   );
@@ -430,7 +434,7 @@ export function WorkScreen({
           ) : null}
           <header className="vo-card__head">
             <h2 className="vo-card__title">
-              {T.run.task(z2.no)}
+              {T.run.task(podpis2(z2.no))}
               <BallPlashka n={MAX_BALL[z2.no]} />
             </h2>
           </header>
