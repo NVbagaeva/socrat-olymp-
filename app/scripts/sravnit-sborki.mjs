@@ -26,13 +26,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const args = process.argv.slice(2);
-const dirs = args.filter((a) => !a.startsWith('--'));
+const gdePokazat = args.indexOf('--pokazat');
+const dirs = args.filter(
+  (a, i) => !a.startsWith('--') && (gdePokazat === -1 || i !== gdePokazat + 1),
+);
 if (dirs.length !== 2) {
   console.error('Нужны две папки: node scripts/sravnit-sborki.mjs <out «до»> <out «после»>');
   process.exit(2);
 }
 const [DO, POSLE] = dirs.map((d) => path.resolve(d));
-const POKAZAT = Number(args[args.indexOf('--pokazat') + 1]) || 20;
+const POKAZAT = (gdePokazat === -1 ? 0 : Number(args[gdePokazat + 1])) || 20;
 
 function stranitsy(root) {
   const out = [];
