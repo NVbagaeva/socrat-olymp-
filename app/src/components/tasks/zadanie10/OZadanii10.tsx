@@ -86,13 +86,14 @@ export function OZadanii10() {
         opasnoTitle={SHAPKA10.opasnoTitle}
         opasno={SHAPKA10.opasno.map((line) => typeset(line))}
         oblozhka={
-          /* Обложка раздела — готовая картинка, как есть: без обрезки и
-             пережатия, прозрачный фон на стекле шапки. */
+          /* Обложка раздела — векторный чертёж (public/images/task-10.svg),
+             та же картинка, что на плашке банка; прозрачный фон на стекле
+             шапки. */
           <img
-            src={assetUrl('/images/task-10.webp')}
+            src={assetUrl('/images/task-10.svg')}
             alt={SHAPKA10.oblozhkaAlt}
-            width={512}
-            height={512}
+            width={280}
+            height={280}
             decoding="async"
           />
         }

@@ -266,6 +266,7 @@ const VID: Record<RazdelKod, RazdelVid> = {
     name: 'Задачи с физическим смыслом',
     shortTitle: 'Физический смысл',
     status: 'ready',
+    icon: 'svg',
   },
   'tekstovye-zadachi': { name: 'Текстовые задачи', status: 'ready' },
   'grafiki-funkciy': { name: 'Графики функций', status: 'ready' },
@@ -278,12 +279,13 @@ const VID: Record<RazdelKod, RazdelVid> = {
   /* Раздел ЕГЭ-2027 из 19 заданий (там — задание 12): теория, опорные,
      тренажёр (lib/zadanie21). В структуре из 20 заданий он вне экзамена:
      в банк не попадает, страницы скрыты, администратору открыты
-     (content/struktura.js, skryt). Картинки пока нет. */
+     (content/struktura.js, skryt). Миниатюра — task-21.svg: отрезок
+     [a; b], на нём наибольшее и наименьшее значения. */
   'naibolshee-naimenshee': {
     name: 'Наибольшее и наименьшее значение функции',
     shortTitle: 'Наибольшее и наименьшее',
     status: 'ready',
-    image: null,
+    icon: 'svg',
   },
 
   /* ── Задания с развёрнутым ответом ──
