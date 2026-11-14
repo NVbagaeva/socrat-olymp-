@@ -804,8 +804,9 @@ try {
       JSON.stringify(anonymous),
     );
     check(
-      "Без входа: справочник заданий открыт (20 номеров)",
-      anonymous.catalog === 20,
+      /* Разделы по номерам хранения: 1–20 и новый №12 ЕГЭ-2027 (21). */
+      "Без входа: справочник разделов открыт (21 раздел)",
+      anonymous.catalog === 21,
       JSON.stringify(anonymous.catalog),
     );
 
