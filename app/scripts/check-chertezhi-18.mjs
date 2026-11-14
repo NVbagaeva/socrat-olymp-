@@ -56,6 +56,11 @@
        и параллельные отрезки, тип углов треугольников, равные стороны,
        выпуклость — те же;
      • больший подписанный отрезок длиннее, равные — равны (± 3 %).
+   Варианты повышенной сложности, часть 2 (движок lib/planimetriya):
+   чертежи условий №18 — радиусы (9 %, 2,5 : 1; кроме вневписанной у
+   тупого угла — ae18), углы, расстояние между точками. Чертежи решений
+   №15 (движок lib/chertezh3) — правила вида lib/stereo/metriki.ts;
+   пока отчётом в конце, без падения.
    Чертёж условия и текст (trenazher/uslovie.ts): подписанные точки
    чертежа условия — только те, что названы в задаче (кроме условий ФИПИ
    без букв — TEKST_FIPI_BEZ_BUKV_18). */
@@ -77,6 +82,8 @@ const ZAZOR_LINIY = 1;
 const PUNKTIR_BLIZHE = 6;
 
 let plokho = 0;
+/** Отчёт без падения: что ещё не дотянуто до правил (печатается в конце). */
+const preduprezhdeniya = [];
 const schet = new Map();
 function fakt(imya, ok, podrobno = '') {
   const s = schet.get(imya) ?? { ok: 0, vsego: 0, primery: [] };
@@ -923,11 +930,11 @@ for (const [kto, sk] of [
     if (!fs.existsSync(f)) break;
     const v = requireSrc(`lib/povyshennye/dannye/v${String(k).padStart(2, '0')}`).VARIANT;
     for (const versiya of v.chast2 ?? [])
-      for (const z of versiya) if (/^[a-z]+18\./.test(z.s)) zapisi.set(JSON.stringify(z), z);
+      for (const z of versiya) if (/^[a-z]+1[58]\./.test(z.s)) zapisi.set(JSON.stringify(z), z);
   }
   for (const z of zapisi.values()) {
     const zad = zadacha2(z);
-    if (zad.risunok === null) continue;
+    if (zad.risunok === null || !/18\./.test(z.s)) continue;
     const id = `повышенные ${z.s} ${JSON.stringify(z.p)}`;
     /* Чертёж листа — 60 мм (lib/variant/sheets.ts, card2). */
     const m = meryPlanSvg(zad.risunok, 60);
@@ -957,6 +964,33 @@ for (const [kto, sk] of [
         m.minTochki >= POR.tochkiMm,
         `${id}: ${m.minTochki.toFixed(1)} мм`,
       );
+  }
+
+  /* №15 (движок lib/chertezh3): чертежи этапов решения — правила вида
+     движка (lib/stereo/metriki.ts: вершины не слипаются, отрезки не
+     сливаются, основание не сплющено, пропорции 0,8–1,4) на том ракурсе,
+     что выбран для листа. Условия №15 — без чертежа. */
+  const { postroit } = requireSrc('lib/chertezh3/postroit');
+  const { metrikiVida } = requireSrc('lib/chertezh3/vid');
+  for (const z of zapisi.values()) {
+    const m = /^([a-z]+)15\./.exec(z.s);
+    if (m === null) continue;
+    const mod = requireSrc(`lib/povyshennye/chast2/${m[1]}15`);
+    const f = Object.entries(mod).find(([k]) => /^scenariy[A-Z]+15$/.test(k))?.[1];
+    fakt('№15 (часть 2): у шаблона есть сценарий чертежа', typeof f === 'function', z.s);
+    if (typeof f !== 'function') continue;
+    for (const punkt of ['a', 'b']) {
+      const sc = f(z.p, punkt);
+      if (sc.rakurs === undefined) continue;
+      const nar = metrikiVida(postroit(sc), sc.rakurs, sc.szhatie ?? 1).narusheniya;
+      /* Пока — отчётом: веер сторон сечения из общей вершины под малым
+         углом (отрезки «сливаются» на 0 мм) и сплющенные пирамиды — дело
+         выбора вида движка lib/chertezh3, его правят отдельно. */
+      if (nar.length > 0)
+        preduprezhdeniya.push(
+          `№15 (часть 2) ${z.s} ${JSON.stringify(z.p)} ${punkt}): ${nar.map((n) => `${n.pravilo}: ${n.chto}`).join('; ')}`,
+        );
+    }
   }
 }
 
@@ -1027,6 +1061,10 @@ console.log(`Чертежи №18: ${TIPY_18.length} прототипов × ${N
 for (const [imya, s] of schet) {
   console.log(`${s.ok === s.vsego ? '✓' : '✗'} ${imya}: ${s.ok}/${s.vsego}`);
   for (const p of s.primery) console.log(`    ${p}`);
+}
+if (preduprezhdeniya.length > 0) {
+  console.log(`\nОтчёт (не роняет проверку) — ${preduprezhdeniya.length}:`);
+  for (const p of preduprezhdeniya.slice(0, process.env.VSE ? 9999 : 8)) console.log(`    ${p}`);
 }
 if (plokho > 0) {
   console.log(`\nНарушений: ${plokho}`);
