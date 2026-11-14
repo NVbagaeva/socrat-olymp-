@@ -758,7 +758,7 @@ function GeneratorEkran({
   );
 
   const extras = config.extras;
-  const dopCount = extrasOn(st.extras) + (space.mode === 'none' ? 0 : 1);
+  const dopCount = extrasOn(st.extras, extras?.flag?.on === true) + (space.mode === 'none' ? 0 : 1);
   /* Памятка или пример включены там, где вид работы их не предполагает. */
   const podskazki = sPodskazkami(st.extras.kind, ege(st));
   const dopControls =

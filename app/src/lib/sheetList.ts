@@ -43,8 +43,15 @@ export interface ListSource<Z> {
   model: { zagolovok: string; bloki: readonly ListBlok[] };
   zadacha: (id: string) => Z | undefined;
   id: (z: Z) => string;
-  /** Условие (с меткой «аналог») и рисунок отдельно — или null. */
+  /** Условие и рисунок отдельно — или null. Пометок об источнике в условии нет. */
   uslovie: (z: Z) => { html: string; figure: ListFigure | null };
+  /**
+   * Строка источника варианта для листа учителя: «Задачи 1, 3 — открытый
+   * банк ФИПИ, остальные — авторские». Печатается под ключом ответов, как
+   * у остальных генераторов; у задач плашек нет, на листе ученика
+   * пометок об источнике не бывает.
+   */
+  istochnik?: (zadachi: readonly Z[]) => string;
   /** Ответ строкой: «2,5». */
   otvet: (z: Z) => string;
   /** Разбор учителя кусками (шагами), без строки ответа. */
@@ -106,7 +113,10 @@ export function listSheetSpec<Z>(src: ListSource<Z>, vid: ListVid) {
                 `${c}-sheet-klyuch sheet-list-klyuch`,
                 `<p><b>${typo.escape(LIST_TEXT.otvety)}:</b> ${zadachi
                   .map((z, k) => `${k + 1}) ${typo.escape(src.otvet(z))}`)
-                  .join('; ')}</p>`,
+                  .join('; ')}</p>` +
+                  (src.istochnik === undefined
+                    ? ''
+                    : `<p class="sheet-list-istochnik">${typo.escape(src.istochnik(zadachi))}</p>`),
               ),
             ]
           : [];

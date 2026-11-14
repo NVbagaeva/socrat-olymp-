@@ -349,7 +349,7 @@ export function Ekran45({
             risunok: (
               /* Картинка к задаче — как есть: без обрезки, прозрачный фон. */
               <img
-                className="z45-kartinka"
+                className="z45-kartinka zadacha-kartinka"
                 src={assetUrl(kartinka.path)}
                 alt={kartinka.alt}
                 decoding="async"

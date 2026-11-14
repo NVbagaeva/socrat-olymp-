@@ -2,12 +2,6 @@
    страницы, карточек и полей задаёт sheet.css, здесь — только своё:
    рамки теории, разобранные примеры, ключ и разбор учителя. */
 
-.z6-list__metka {
-  margin: var(--sheet-step) 0 0;
-  font-size: var(--sheet-fs-small);
-  color: var(--sheet-ink-2);
-}
-
 /* Рамки теории блока: карточки в две колонки, если помещаются. */
 .z6-sheet-teoriya .z6-k {
   margin: 0;

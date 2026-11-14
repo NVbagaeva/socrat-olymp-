@@ -6,11 +6,6 @@
   margin: 0;
 }
 
-.z7-list__metka {
-  font-size: var(--sheet-fs-small);
-  color: var(--sheet-ink-2);
-}
-
 .z7-sheet-teoriya .z7-k {
   margin: 0;
   font-size: var(--sheet-fs-small);

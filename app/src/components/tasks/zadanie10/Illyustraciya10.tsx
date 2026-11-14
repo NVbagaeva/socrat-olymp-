@@ -22,7 +22,7 @@ export function Illyustraciya10({
     return null;
   }
   const picture = (
-    <picture className={clsx('z10-ill', className)}>
+    <picture className={clsx('z10-ill', 'zadacha-kartinka', className)}>
       <source type="image/webp" srcSet={il.webp} />
       <img
         src={il.png}

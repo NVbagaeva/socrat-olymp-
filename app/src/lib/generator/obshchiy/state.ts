@@ -325,7 +325,14 @@ export function defaultExtras(config: GenConfig): GenExtras {
     date: '',
     teacher: config.sheet.teacher,
     urok: 0,
+    ...(config.extras?.flag?.on === true ? { flag: true } : {}),
   };
+}
+
+/** «Дополнительно» листа из адреса: переключатель раздела — как в адресе, а не по умолчанию. */
+export function extrasBezFlaga(config: GenConfig): GenExtras {
+  const { flag: _flag, ...rest } = defaultExtras(config);
+  return rest;
 }
 
 /** Вид работы «Свой заголовок»: текст — в GenExtras.svoy. */
@@ -453,12 +460,20 @@ export function sFlagom(extras: GenExtras, id: string, on: boolean): GenExtras {
   return flagi.length === 0 ? rest : { ...rest, flagi };
 }
 
-/** Сколько пунктов «Дополнительно» включено: для подписи кнопки. */
-export function extrasOn(extras: GenExtras): number {
+/**
+ * Сколько пунктов «Дополнительно» изменено: для подписи кнопки.
+ * flagOn — переключатель раздела включён по умолчанию (flag.on): тогда
+ * считается выключенный.
+ */
+export function extrasOn(extras: GenExtras, flagOn = false): number {
   return (
-    [extras.theory, extras.examples > 0, extras.qr, extras.urok > 0, extras.flag === true].filter(
-      Boolean,
-    ).length + (extras.flagi?.length ?? 0)
+    [
+      extras.theory,
+      extras.examples > 0,
+      extras.qr,
+      extras.urok > 0,
+      (extras.flag === true) !== flagOn,
+    ].filter(Boolean).length + (extras.flagi?.length ?? 0)
   );
 }
 

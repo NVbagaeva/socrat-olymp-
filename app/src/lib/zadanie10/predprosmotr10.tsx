@@ -21,9 +21,9 @@ export interface Dannye10 {
 
 const BRAUZER: Dannye10 = { indeks: zagruzitIndeks, zadachi: zagruzitZadachi };
 
-/** Условие ученика: текст, картинка сюжета и чертёж моста. */
-export function vopros10(o: Sborka10, z: ZadachaLite): string {
-  const u = uslovie10(o, z, 'uchenik');
+/** Условие ученика: текст, картинка сюжета и чертёж моста; у примера картинки нет. */
+export function vopros10(o: Sborka10, z: ZadachaLite, primer = false): string {
+  const u = uslovie10(o, z, 'uchenik', primer);
   return u.html + (u.figure === null ? '' : `<div class="z10-list__most">${u.figure.svg}</div>`);
 }
 
@@ -65,7 +65,7 @@ export function sobratList10(
         return (
           `<div class="gen-example"><span class="gen-example__label">${GEN_UI.primer}</span>` +
           `<p class="gen-example__title">${typeset(mod.prototype(x.prototypeId).title)}</p>` +
-          `<div class="gen-example__q">${vopros10(o, x)}</div>` +
+          `<div class="gen-example__q">${vopros10(o, x, true)}</div>` +
           `<div class="gen-example__sol">${razbor10(o, x).join('')}` +
           `<p>Ответ: <b>${otvet(x)}</b></p></div></div>`
         );

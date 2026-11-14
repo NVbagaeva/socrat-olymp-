@@ -129,7 +129,7 @@ export function Opornye45Blok({
         {kartinka === undefined ? null : (
           /* Картинка к условию — как есть: целиком, прозрачный фон. */
           <img
-            className="z45-kartinka"
+            className="z45-kartinka zadacha-kartinka"
             src={assetUrl(kartinka.path)}
             alt={kartinka.alt}
             decoding="async"

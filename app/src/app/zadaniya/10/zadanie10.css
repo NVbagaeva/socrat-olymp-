@@ -323,10 +323,6 @@
   margin: 0;
 }
 
-.z10-op__syuzhet img {
-  max-height: 180px;
-}
-
 .z10-op__syuzhet figcaption {
   margin-top: var(--space-1);
   color: var(--color-text-muted);
@@ -559,9 +555,6 @@
   gap: var(--space-2);
   max-width: 440px;
   margin: 0 auto;
-}
-.z10-opornye .z10-op__syuzhet img {
-  max-height: none;
 }
 .z10-opornye .z10-op__syuzhet figcaption a {
   display: inline-flex;

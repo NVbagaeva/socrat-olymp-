@@ -23,8 +23,7 @@ import { Ris6 } from '@/components/tasks/zadanie6/Ris6';
 import { Uslovie6 } from '@/components/tasks/zadanie6/Uslovie6';
 import { RamkaPrimer } from '@/components/teoriya/Ramki';
 import { TEORIYA_6_DLYA_PROTOTIPA, vseKartochki6, type Kartochka6 } from '@/content/teoriya6';
-import { GENERATOR_6 } from '@/content/zadanie6';
-import typo from '@/lib/sheet/typography.js';
+import { LIST_TEXT } from '@/content/sheetList';
 import { listSheetSpec, razborKuski, type ListVid } from '@/lib/sheetList';
 import type { ZadachaLite } from './dannye';
 import type { ModelLista } from './sborka';
@@ -125,11 +124,25 @@ function uslovie(o: Sborka6, z: ZadachaLite): { html: string; figure: Figure6 | 
     ...(ris !== undefined && figure === null ? { ris } : {}),
     ...(z.posle === undefined ? {} : { posle: z.posle }),
   };
-  const metka =
-    z.source === 'analog'
-      ? `<p class="z6-list__metka">${typo.escape(GENERATOR_6.analogMetka)}</p>`
-      : '';
-  return { html: renderToStaticMarkup(createElement(Uslovie6, { u })) + metka, figure };
+  return { html: renderToStaticMarkup(createElement(Uslovie6, { u })), figure };
+}
+
+/**
+ * Строка источника варианта №6 (лист учителя): у №6 исходные задачи —
+ * демоверсия ФИПИ и образцы сторонних банков, а не открытый банк.
+ */
+function istochnikStroka6(zs: readonly ZadachaLite[]): string {
+  const gruppy = new Map<string, number[]>();
+  zs.forEach((z, k) => {
+    const g = LIST_TEXT.istochnik6[z.source];
+    gruppy.set(g, [...(gruppy.get(g) ?? []), k + 1]);
+  });
+  if (gruppy.size === 1) return LIST_TEXT.vseZadachi([...gruppy.keys()][0] ?? '');
+  return [...gruppy.entries()]
+    .map(([g, nos]) => `${nos.length === 1 ? 'задача' : 'задачи'} ${nos.join(', ')} — ${g}`)
+    .join('; ')
+    .replace(/^з/, 'З')
+    .concat('.');
 }
 
 /** Описание листа №6 для buildDocument (lib/sheetList.ts). */
@@ -143,6 +156,7 @@ export function sheetSpec6(o: Sborka6, vid: Vid6) {
       id: (z) => z.id,
       uslovie: (z) => uslovie(o, z),
       otvet: (z) => otvetText6(o.reshit(z).answer),
+      istochnik: istochnikStroka6,
       razbor: (z) => razborKuski(razbor6Html(o.reshit(z)), 'z6'),
       teoriya: ramkiTeorii,
       primer: (z) => {

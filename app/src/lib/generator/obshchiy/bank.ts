@@ -13,6 +13,11 @@
  * меняет задачи листа. Исходных задач ФИПИ у прототипа одна-две — они
  * остаются задачам листа.
  *
+ * Источник «только исходные» — строгий: исходные задачи прототипа
+ * кончились — позиция остаётся пустой (лист короче), аналог на её
+ * место не встаёт. Примеры при нём — тоже исходные: те, что остались
+ * свободными после задач листа; не осталось — отложенный аналог.
+ *
  * Модуль чистый: на вход — индекс банка, на выход — id задач по
  * позициям. Тексты, рисунки и разборы подставляет лист раздела.
  */
@@ -152,7 +157,8 @@ function peremeshat<T>(r: Rng, items: readonly T[]): T[] {
  * Задачи листа по позициям. Пулы прототипа — исходные и аналоги,
  * каждый перемешан своим seed «соль|seed|прототип|f(a)». Позиция берёт
  * сначала своё место в пуле нужного источника (вариант × 12 + номер),
- * потом свободную задачу с конца пула, потом другой источник. Остаток
+ * потом свободную задачу с конца пула, потом другой источник (при
+ * «только исходных» другого источника нет — см. шапку модуля). Остаток
  * раздаётся по вариантам по порядку — ещё один вариант не меняет
  * прежние, а маленький банк исходных задач расходится целиком.
  * podhodit — фильтр раздела (формулировка у №6); примеры — любые.
@@ -199,10 +205,12 @@ export function sobratPoKlyucham(
     z.istochnik === 'fipi' ||
     (z.istochnik === 'mix' &&
       rngOf(`${sol}-mix|${z.seed}|${c.v + 1}|${klyuchSlota(c.s)}`).next() < 0.5);
-  const pulyDlya = (c: (typeof yacheyki)[number]) => {
+  /* «Только исходные» — без подмены аналогом. */
+  const strogo = z.istochnik === 'fipi';
+  const pulyDlya = (c: (typeof yacheyki)[number]): [Pul<string>, Pul<string> | undefined] => {
     const f = pulF.get(c.s.id) as Pul<string>;
     const a = pulA.get(c.s.id) as Pul<string>;
-    return izF(c) ? [f, a] : [a, f];
+    return izF(c) ? [f, strogo ? undefined : a] : [a, f];
   };
   const postavit = (c: (typeof yacheyki)[number], id: string | undefined) => {
     const p = poVariantam[c.v]?.[c.i];
@@ -211,13 +219,13 @@ export function sobratPoKlyucham(
   /* Свои места нужного источника, затем остаток с конца, затем другой источник. */
   const bezMesta = yacheyki.filter((c) => {
     const [nuzhnyy] = pulyDlya(c);
-    const id = nuzhnyy?.svoyo(c.v * MEST_NA_VARIANT + c.s.k);
+    const id = nuzhnyy.svoyo(c.v * MEST_NA_VARIANT + c.s.k);
     postavit(c, id);
     return id === undefined;
   });
   for (const c of bezMesta) {
     const [nuzhnyy, drugoy] = pulyDlya(c);
-    postavit(c, nuzhnyy?.sKontsa() ?? drugoy?.sKontsa());
+    postavit(c, nuzhnyy.sKontsa() ?? drugoy?.sKontsa());
   }
   /* Замены: k-я замена — k-я ещё свободная задача с конца пула. */
   for (const c of yacheyki) {
@@ -226,12 +234,22 @@ export function sobratPoKlyucham(
     const [nuzhnyy, drugoy] = pulyDlya(c);
     let id: string | undefined;
     while (n > 0) {
-      const next = nuzhnyy?.sKontsa() ?? drugoy?.sKontsa();
+      const next = nuzhnyy.sKontsa() ?? drugoy?.sKontsa();
       if (next === undefined) break;
       id = next;
       n -= 1;
     }
     postavit(c, id);
+  }
+  /* Примеры «только исходных»: свободные исходные с конца пула, потом отложенные аналоги. */
+  if (strogo && !bezPrimerov && z.primery > 0) {
+    for (const pr of primery) {
+      const svobodnye = (pulF.get(pr.proto) as Pul<string>).svobodnye().reverse();
+      pr.ids = [...svobodnye, ...pr.ids.filter((id) => !svobodnye.includes(id))].slice(
+        0,
+        z.primery,
+      );
+    }
   }
   const nehvatka = poVariantam.flat().filter((p) => p.id === null).length;
   return { sloty, poVariantam, primery, nehvatka };

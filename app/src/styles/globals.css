@@ -14,5 +14,7 @@
 @import './perehody.css' layer(components);
 @import './edinicy.css' layer(components);
 @import './callout.css' layer(components);
+/* Вне слоёв: раздельные стили картинок (zadanie10.css и др.) тоже вне слоёв. */
+@import './kartinka-zadachi.css';
 
 @source '../**/*.{ts,tsx}';
