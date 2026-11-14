@@ -1,3 +1,4 @@
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Chertezh3d } from '@/components/stereo/Chertezh3d';
@@ -51,6 +52,11 @@ export default async function Page({ params }: { params: Params }) {
       listHref={`${base}/opornye-zadachi/`}
       vBloke
     >
+      {/* Репетитору: весь блок — в черновик ДЗ (в ДЗ — сами задачи блока). */}
+      <VDzKnopka
+        punkt={{ ist: 'opornye', no: 3, blok: found.slug, zadachi: null, kazhdomu: false }}
+        chto={`блок «${BLOKI3_NAZVANIYA[found.slug] ?? found.nazvanie}»`}
+      />
       <OpornyeStereoScreen
         blokId={found.id}
         no={found.no}

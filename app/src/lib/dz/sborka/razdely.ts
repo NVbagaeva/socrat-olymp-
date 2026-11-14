@@ -91,6 +91,9 @@ function bankovyy(m: {
 export const SBORSHCHIKI: Record<number, () => Promise<SborshchikRazdela>> = {
   1: () => import('./r1-11').then((m) => m.SBORSHCHIK_1),
   11: () => import('./r1-11').then((m) => m.SBORSHCHIK_11),
+  3: () => import('./r3').then((m) => m.SBORSHCHIK_3),
+  4: () => import('./r4-5').then((m) => m.SBORSHCHIK_4),
+  5: () => import('./r4-5').then((m) => m.SBORSHCHIK_5),
   2: () =>
     import('./r2').then((m) =>
       generatorRazdela({

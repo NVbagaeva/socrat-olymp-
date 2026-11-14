@@ -49,6 +49,11 @@ export interface OpornayaKat {
   /** Ответ и разбор (JSON RazborDz), закрыты sealText(seed = id). Нет у izZerna. */
   klyuch?: string;
   razbor?: string;
+  /**
+   * Подсказка-вопросы с кнопками (JSON VoprosDz[]), закрыты так же:
+   * номер верной кнопки — уже половина решения (№3, №4, №5).
+   */
+  voprosy?: string;
 }
 
 export interface BlokKat {
@@ -85,3 +90,10 @@ export interface KatalogRazdela {
    */
   bankTrenazhera?: unknown[];
 }
+
+/**
+ * Закрытые поля опорных (zNN-r.json): ключ «блок:id» → ответ, разбор и
+ * подсказка-вопросы. Каталог просмотра их не несёт; при выдаче
+ * зливаются обратно (zagruzka.ts, zagruzitDlyaVydachi).
+ */
+export type ResheniyaKatalog = Record<string, Pick<OpornayaKat, 'klyuch' | 'razbor' | 'voprosy'>>;

@@ -182,6 +182,8 @@ const ALLOWED = new Set([
   'dz29-uchenik@yandex.ru',
   'dz111-repetitor@yandex.ru',
   'dz111-uchenik@yandex.ru',
+  'dz345-repetitor@yandex.ru',
+  'dz345-uchenik@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -1832,6 +1834,8 @@ async function runEnabled() {
   await scenarijDz29(mock, errors);
   /* 7ж. ДЗ, шаг 2: №1 и №11. */
   await scenarijDz111(mock, errors);
+  /* 7з. ДЗ, шаг 2: №3, №4 и №5. */
+  await scenarijDz345(mock, errors);
 
   /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */
   {
@@ -2669,6 +2673,110 @@ async function scenarijDz111(mock, errors) {
   await sctx.close();
 }
 
+/* ── ДЗ, шаг 2: №3, №4 и №5 ───────────────────────────────────────
+   Блоки опорных №4 и №3 — кнопками со страниц блоков; тип тренажёра №5 —
+   в конструкторе; выдача; ученик решает задачу №5, видит чертёж
+   опорной №3 и отвечает на неё (число или выбор). */
+async function scenarijDz345(mock, errors) {
+  registerInMock(mock, 'dz345-repetitor@yandex.ru', 'dz345-repetitor-1', 'Нина Петровна', 'tutor');
+  registerInMock(mock, 'dz345-uchenik@yandex.ru', 'dz345-uchenik-1', 'Коля Белов', 'student');
+  mock.seedClass('dz345-repetitor@yandex.ru', ['dz345-uchenik@yandex.ru'], 'Класс 3–5');
+  const dz = mock.dz;
+  const pervyyBlok = (no) =>
+    fs
+      .readdirSync(path.join(OUT, `zadaniya/${no}/opornye-zadachi`))
+      .filter((d) => fs.statSync(path.join(OUT, `zadaniya/${no}/opornye-zadachi`, d)).isDirectory())
+      .sort()[0];
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await welcomeSeen(ctx);
+  await installMock(ctx, mock);
+  const tp = await ctx.newPage();
+  watchConsole(tp, errors);
+  await login(tp, 'dz345-repetitor@yandex.ru', 'dz345-repetitor-1');
+  await tp.goto(`${SITE}/zadaniya/4/opornye-zadachi/${pervyyBlok(4)}/`, {
+    waitUntil: 'networkidle',
+  });
+  await tp.locator('[data-block="dz-v-chernovik"]').first().click();
+  await tp.waitForSelector('[data-block="dz-chernovik-plashka"]');
+  check(true, 'ДЗ-3/4/5: блок опорных №4 — в черновике кнопкой со страницы блока');
+  await tp.goto(`${SITE}/zadaniya/3/opornye-zadachi/${pervyyBlok(3)}/`, {
+    waitUntil: 'networkidle',
+  });
+  await tp.locator('[data-block="dz-v-chernovik"]').first().click();
+  await tp.waitForFunction(() =>
+    /2/.test(document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent ?? ''),
+  );
+  check(true, 'ДЗ-3/4/5: блок опорных №3 — в черновике');
+  await tp.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
+  await tp.waitForSelector('.dzk-punkt');
+  await tp.locator('.dzk-chip', { hasText: '№5' }).first().click();
+  await tp.getByRole('tab', { name: 'Тренажёр' }).click();
+  const tip = tp.locator('.dzk-tip').first();
+  await tip.waitFor();
+  await tip.locator('.dzk-dobavit').click();
+  await tp.waitForFunction(() => document.querySelectorAll('.dzk-punkt').length === 3);
+  await tp.fill('input[name="title"]', 'ДЗ: №3, №4 и №5');
+  await tp.locator('[data-action="vydat"]').click();
+  await tp.waitForSelector('[data-page="vydano"]', { timeout: 90000 });
+  const hw = dz.homework.find((h) => h.title === 'ДЗ: №3, №4 и №5');
+  check(
+    hw !== undefined && hw.sections.join(',') === '4,3,5',
+    `ДЗ-3/4/5: выдано, разделы 4, 3 и 5 (${hw?.sections})`,
+  );
+  await ctx.close();
+
+  const sctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await welcomeSeen(sctx);
+  await installMock(sctx, mock);
+  const sp = await sctx.newPage();
+  watchConsole(sp, errors);
+  await login(sp, 'dz345-uchenik@yandex.ru', 'dz345-uchenik-1');
+  await sp.goto(`${SITE}/zadaniya/4/`, { waitUntil: 'networkidle' });
+  await sp.waitForSelector('[data-block="dz-plashka"]');
+  check(true, 'ДЗ-3/4/5: у ученика плашка ДЗ в разделе №4');
+  await sp.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+  await sp.locator('.rdz-punkt[data-istochnik="trenazher"]').click();
+  await sp.waitForSelector('.rdz-zadacha .otvet-input__field');
+  const id = await sp.locator('.rdz-zadacha').first().getAttribute('data-task');
+  const key = dz.keys.find((k) => k.task_id === id).answer;
+  await sp.locator('.rdz-zadacha .otvet-input__field').fill(key.replace('.', ','));
+  await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
+  await sp.waitForSelector('.trn-verdikt--da');
+  check(true, 'ДЗ-3/4/5: задача №5 решена верно');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-3/4/5: задача №5 у ученика 390 — без горизонтальной прокрутки',
+  );
+  await sp.locator('.rdz-punkt[data-istochnik="opornye"][data-no="3"]').click();
+  await sp.waitForSelector('.rdz-zadacha .rdz-ch3 svg');
+  check(true, 'ДЗ-3/4/5: ученик видит чертёж опорной №3');
+  const id3 = await sp.locator('.rdz-zadacha').first().getAttribute('data-task');
+  const key3 = dz.keys.find((k) => k.task_id === id3).answer;
+  const task3 = dz.tasks.find((t) => t.id === id3);
+  if (task3.answer_kind === 'choice') {
+    await sp
+      .locator('.rdz-zadacha .rdz-vybor button')
+      .nth(Number(key3) - 1)
+      .click();
+  } else {
+    await sp.locator('.rdz-zadacha .otvet-input__field').fill(key3.replace('.', ','));
+  }
+  await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
+  await sp.waitForSelector('.trn-verdikt--da');
+  check(true, `ДЗ-3/4/5: опорная №3 (${task3.answer_kind}) решена верно`);
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-3/4/5: опорная №3 у ученика 390 — без горизонтальной прокрутки',
+  );
+  await sp.locator('.rdz-punkt[data-istochnik="opornye"][data-no="4"]').click();
+  await sp.waitForSelector('.rdz-zadacha');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-3/4/5: опорная №4 у ученика 390 — без горизонтальной прокрутки',
+  );
+  await sctx.close();
+}
+
 /* Только сценарий ДЗ — для отладки (--tolko-dz). */
 async function runTolkoDz() {
   const mock = makeMock();
@@ -2677,6 +2785,7 @@ async function runTolkoDz() {
   await scenarijDz610(mock, errors);
   await scenarijDz29(mock, errors);
   await scenarijDz111(mock, errors);
+  await scenarijDz345(mock, errors);
   for (const e of errors) check(false, `консоль: ${e}`);
 }
 

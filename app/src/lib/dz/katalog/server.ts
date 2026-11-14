@@ -41,15 +41,38 @@ import { PROTOTYPES as PROTOTYPES2 } from '@/lib/vektory/prototypes';
 import { BLOKI as BLOKI2 } from '@/lib/vektory/prep/bloki';
 import { fixedSeed as fixedSeed2, generateMikro } from '@/lib/vektory/prep/generate';
 import { PROTOTYPES as PROTOTYPES9 } from '@/lib/proizvodnaya/prototypes';
+import katex from 'katex';
+import '@/lib/graph/katex-makrosy.js';
+import { typesetText } from '@/lib/tex';
+import { BANK_4, BANK_5 } from '@/lib/veroyatnost/index';
+import { BLOKI_4, BLOKI_5 } from '@/lib/veroyatnost/blocks';
+import { prep4Pool, prep5Pool, type PrepPoolBlok } from '@/lib/veroyatnost/pool';
+import { otkrytRazbor, type PodskazkaShag } from '@/lib/veroyatnost/razbor';
+import { openText as openText45 } from '@/lib/veroyatnost/secret';
+import { RAZDELY as RAZDELY3 } from '@/lib/zadanie3';
+import { BLOKI_3, zadachiBloka } from '@/lib/stereo/opornye3/bloki';
+import { SHAGI as SHAGI3 } from '@/lib/stereo/opornye3/seal';
+import type { ZadachaOp3 } from '@/lib/stereo/opornye3/tipy';
+import { renderPloskiy } from '@/lib/stereo/ploskiy';
+import { renderSolid } from '@/lib/solid/render';
+import { BLOKI3_NAZVANIYA } from '@/content/zadanie3/navyki';
+import { otvetVeroyatnosti, razborVeroyatnosti } from '../sborka/r4-5';
 import { GRUPPY as GRUPPY9 } from '@/lib/proizvodnaya/skills';
 import { PREP_BLOCKS as BLOKI9 } from '@/lib/proizvodnaya/prep/blocks';
 import { fixedSeed as fixedSeed9, generatePrepById } from '@/lib/proizvodnaya/prep/generate';
-import type { RazborDz } from '../types';
-import type { BlokKat, GruppaKat, KartochkaKat, KatalogRazdela, PodtemaKat } from './types';
+import type { RazborDz, VoprosDz } from '../types';
+import type {
+  BlokKat,
+  GruppaKat,
+  KartochkaKat,
+  KatalogRazdela,
+  PodtemaKat,
+  ResheniyaKatalog,
+} from './types';
 import { zamok } from './zamok';
 
 /** Разделы, из которых уже можно собирать ДЗ. */
-export const RAZDELY_DZ = [1, 2, 6, 7, 8, 9, 10, 11] as const;
+export const RAZDELY_DZ = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
 
 /** «Банковые» разделы: банк задач с решателем прототипа и опорные без зерна. */
 const BANKOVYE: Record<
@@ -214,7 +237,152 @@ function trenazherObshchiy(
   }));
 }
 
-export function katalog(no: number): KatalogRazdela | null {
+/* ── №4 и №5: опорные — задачи конспекта, тренажёр — прототипы банка ── */
+
+/** Опорные №4/№5: условие с чертежом или картинкой, ответ, разбор и подсказка закрыты. */
+function opornye45(bloki: readonly PrepPoolBlok[]): BlokKat[] {
+  return bloki.map((b) => ({
+    slug: b.id,
+    nazvanie: b.nazvanie,
+    zapomniHtml: typesetText(b.tip),
+    zadachi: b.zadachi.map((z) => {
+      const r = otkrytRazbor(z.steps, z.seal);
+      const kartinka = z.illustration ?? z.model?.illustration;
+      const podskazka =
+        z.podskazka === undefined
+          ? undefined
+          : (JSON.parse(openText45(z.podskazka, z.seal)) as PodskazkaShag[]);
+      const voprosy: VoprosDz[] | undefined = podskazka?.map((h) => ({
+        voprosHtml: h.question,
+        variantyHtml: h.options,
+        verno: h.correct,
+        ...(h.comment === null ? {} : { kommentariyHtml: h.comment }),
+      }));
+      return {
+        id: z.id,
+        uslovieHtml:
+          `<p>${z.uslovie}</p>` +
+          (z.risunok === undefined ? '' : `<div class="trn-risunok">${z.risunok}</div>`) +
+          (kartinka === undefined
+            ? ''
+            : `<div class="trn-risunok rdz-kartinka"><img src="${kartinka.path}" alt="${kartinka.alt.replace(/"/g, '&quot;')}" loading="lazy" decoding="async"></div>`),
+        podskazkaHtml: '',
+        klyuch: zamok.sealText(otvetVeroyatnosti(r.otvet), z.id),
+        razbor: zamok.sealText(
+          JSON.stringify(
+            razborVeroyatnosti({
+              metod: r.metod,
+              shagi: r.shagi.map((s) => ({
+                etap: s.etap,
+                text: s.text,
+                ...(s.tex === undefined ? {} : { tex: s.tex }),
+              })),
+            }),
+          ),
+          z.id,
+        ),
+        ...(voprosy === undefined
+          ? {}
+          : { voprosy: zamok.sealText(JSON.stringify(voprosy), z.id) }),
+      };
+    }),
+  }));
+}
+
+/** Типы тренажёра №4/№5: блоки задачника и прототипы. */
+function trenazher45(
+  bloki: readonly { id: string; nazvanie: string }[],
+  bank: readonly { id: string; blok: string; nazvanie: string }[],
+): GruppaKat[] {
+  return bloki
+    .map((b) => ({
+      id: b.id,
+      nazvanie: b.nazvanie,
+      tipy: bank
+        .filter((p) => p.blok === b.id)
+        .map((p) => ({ id: p.id, nazvanieHtml: typesetText(p.nazvanie) })),
+    }))
+    .filter((g) => g.tipy.length > 0);
+}
+
+/* ── №3: опорные блоков, тренажёр — разделы задачника ────────────── */
+
+function formula3(tex: string): string {
+  return katex.renderToString(tex, { throwOnError: false, displayMode: true });
+}
+
+/** Варианты и ответ опорной №3: число — как есть; выбор, касание, плоский чертёж — номером. */
+function otvet3(z: ZadachaOp3): { klyuch: string; varianty?: { number: string; label: string }[] } {
+  const nomera = (labels: readonly string[]) =>
+    labels.map((label, i) => ({ number: String(i + 1), label }));
+  if (z.vid === 'vybor' && z.varianty !== undefined) {
+    return {
+      klyuch: String(Number(z.otvet) + 1),
+      varianty: nomera(z.varianty.map((v) => typeset(v))),
+    };
+  }
+  if (z.vid === 'ploskiy' && z.ploskie !== undefined) {
+    return {
+      klyuch: String(Number(z.otvet) + 1),
+      varianty: nomera(
+        z.ploskie.map((p) => `<span class="rdz-ploskiy">${renderPloskiy(p, 'ekran')}</span>`),
+      ),
+    };
+  }
+  if (z.vid === 'nazhmi' && z.celi !== undefined) {
+    const i = z.celi.findIndex((c) => c.id === z.otvet);
+    if (i < 0) throw new Error(`опорная ${z.id}: цели ${z.otvet} нет`);
+    return { klyuch: String(i + 1), varianty: nomera(z.celi.map((c) => typeset(c.label))) };
+  }
+  return { klyuch: chislo(Number(z.otvet.replace(',', '.'))) };
+}
+
+function opornye3(): BlokKat[] {
+  return BLOKI_3.filter((b) => b.gotov).map((b) => ({
+    slug: b.slug,
+    nazvanie: BLOKI3_NAZVANIYA[b.slug] ?? b.nazvanie,
+    zapomniHtml: '',
+    zadachi: zadachiBloka(b.id).map((z) => {
+      const o = otvet3(z);
+      const razbor: RazborDz = {
+        shagi: z.uchenik.map((s) => ({
+          zag: SHAGI3[s.n - 1] ?? '',
+          chto: typeset(s.chto),
+          tex: s.formula === undefined ? '' : formula3(s.formula),
+        })),
+        delimost: [],
+      };
+      const voprosy: VoprosDz[] = z.podskazka.map((s) => ({
+        voprosHtml: typeset(s.vopros),
+        variantyHtml: s.varianty.map((v) => typeset(v)),
+        verno: s.verno,
+        kommentariyHtml: typeset(s.vyvod),
+      }));
+      return {
+        id: z.id,
+        nazvanie: typeset(z.kratko),
+        uslovieHtml:
+          typeset(z.uslovie) +
+          `<div class="trn-risunok rdz-ch3">${renderSolid(z.model, { tema: 'ekran' })}</div>`,
+        podskazkaHtml: '',
+        ...(o.varianty === undefined ? {} : { varianty: o.varianty }),
+        klyuch: zamok.sealText(o.klyuch, z.id),
+        razbor: zamok.sealText(JSON.stringify(razbor), z.id),
+        ...(voprosy.length === 0 ? {} : { voprosy: zamok.sealText(JSON.stringify(voprosy), z.id) }),
+      };
+    }),
+  }));
+}
+
+function trenazher3(): GruppaKat[] {
+  return RAZDELY3.map((r) => ({
+    id: r.nomer,
+    nazvanie: `${r.nomer}. ${r.nazvanie}`,
+    tipy: r.prototipy.map((p) => ({ id: p.id, nazvanieHtml: typeset(p.nazvanie) })),
+  }));
+}
+
+function sobratKatalog(no: number): KatalogRazdela | null {
   if (no === 1) {
     const d = dannyeTrenazhera1();
     return {
@@ -291,6 +459,24 @@ export function katalog(no: number): KatalogRazdela | null {
       })),
     };
   }
+  if (no === 3) {
+    return {
+      no,
+      nazvanie: nazvanieRazdela(no),
+      kartochki: kartochki(no),
+      opornye: opornye3(),
+      trenazher: trenazher3(),
+    };
+  }
+  if (no === 4 || no === 5) {
+    return {
+      no,
+      nazvanie: nazvanieRazdela(no),
+      kartochki: kartochki(no),
+      opornye: opornye45(no === 4 ? prep4Pool() : prep5Pool()),
+      trenazher: no === 4 ? trenazher45(BLOKI_4, BANK_4) : trenazher45(BLOKI_5, BANK_5),
+    };
+  }
   if (no === 6 || no === 7 || no === 10) {
     const b = BANKOVYE[no];
     return {
@@ -318,4 +504,48 @@ export function katalog(no: number): KatalogRazdela | null {
     };
   }
   return null;
+}
+
+/* Каталог считается один раз на процесс: маршрут отдаёт из него два файла. */
+const KESH = new Map<number, KatalogRazdela | null>();
+
+export function katalog(no: number): KatalogRazdela | null {
+  if (!KESH.has(no)) KESH.set(no, sobratKatalog(no));
+  return KESH.get(no) ?? null;
+}
+
+/**
+ * Каталог для просмотра (zNN.json): без ответов, разборов и подсказок
+ * опорных — они нужны только при выдаче и лежат отдельным файлом
+ * (zNN-r.json, resheniyaKatalog): с набранными формулами это бо́льшая
+ * часть веса (у №3 — мегабайты).
+ */
+export function katalogLegkiy(no: number): KatalogRazdela | null {
+  const k = katalog(no);
+  if (k === null) return null;
+  return {
+    ...k,
+    opornye: k.opornye.map((b) => ({
+      ...b,
+      zadachi: b.zadachi.map(({ klyuch: _k, razbor: _r, voprosy: _v, ...z }) => z),
+    })),
+  };
+}
+
+/** Закрытые ответы, разборы и подсказки опорных: id задачи → поля каталога. */
+export function resheniyaKatalog(no: number): ResheniyaKatalog | null {
+  const k = katalog(no);
+  if (k === null) return null;
+  const out: ResheniyaKatalog = {};
+  for (const b of k.opornye) {
+    for (const z of b.zadachi) {
+      if (z.klyuch === undefined && z.razbor === undefined && z.voprosy === undefined) continue;
+      out[`${b.slug}:${z.id}`] = {
+        ...(z.klyuch === undefined ? {} : { klyuch: z.klyuch }),
+        ...(z.razbor === undefined ? {} : { razbor: z.razbor }),
+        ...(z.voprosy === undefined ? {} : { voprosy: z.voprosy }),
+      };
+    }
+  }
+  return out;
 }

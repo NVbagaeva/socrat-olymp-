@@ -1,3 +1,4 @@
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PodgotovkaBlok } from '@/components/tasks/veroyatnost/PodgotovkaBlok';
@@ -32,6 +33,11 @@ export default async function Podgotovka4BlokPage({ params }: { params: Params }
   }
   return (
     <PodgotovkaShell zadanie={4} base="/zadaniya/4" active={found.id} bloki={bloki}>
+      {/* Репетитору: весь блок — в черновик ДЗ (в ДЗ — сами задачи блока). */}
+      <VDzKnopka
+        punkt={{ ist: 'opornye', no: 4, blok: found.id, zadachi: null, kazhdomu: false }}
+        chto={`блок «${found.nazvanie}»`}
+      />
       <PodgotovkaBlok zadanie={4} blok={found} listHref={`/zadaniya/4/${OPORNYE.tail}`} />
     </PodgotovkaShell>
   );

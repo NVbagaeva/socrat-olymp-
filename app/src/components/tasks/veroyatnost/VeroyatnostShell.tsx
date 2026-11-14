@@ -1,3 +1,4 @@
+import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
 import { AppShell } from '@/components/layout/AppShell';
 import { tasksPage } from '@/content/tasks';
 import { type VeroyatnostSection } from '@/content/veroyatnost';
@@ -51,7 +52,11 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
             меню материалов в ленте больше нет. */}
         <RazdelTabs base={base} tabs={section.tabs} />
 
-        <div className="section-panel veroyatnost-panel">{children}</div>
+        <div className="section-panel veroyatnost-panel">
+          {/* ДЗ: ученику — плашка с ДЗ, репетитору — черновик ДЗ. Гостю — ничего. */}
+          <DzVRazdele no={Number(section.no)} />
+          {children}
+        </div>
       </main>
     </AppShell>
   );

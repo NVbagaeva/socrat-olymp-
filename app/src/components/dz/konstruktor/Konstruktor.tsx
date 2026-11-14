@@ -29,7 +29,7 @@ import {
   zadatSostav,
   zagruzitChernovik,
 } from '@/lib/dz/chernovik';
-import { zagruzitKatalogi } from '@/lib/dz/katalog/zagruzka';
+import { zagruzitDlyaVydachi, zagruzitKatalogi } from '@/lib/dz/katalog/zagruzka';
 import type { KatalogRazdela } from '@/lib/dz/katalog/types';
 import { DZ_HREF, homeworkHref, readIssuePreset } from '@/lib/dz/links';
 import { memberNameOf } from '@/lib/dz/names';
@@ -472,7 +472,7 @@ function Sborka({ classes, origin }: { classes: TutorClass[]; origin: HwOrigin }
     setSending(true);
     try {
       const [{ sobratPunkty }, api] = await Promise.all([import('@/lib/dz/sborka'), dzApi()]);
-      const kat = await zagruzitKatalogi(sostav.punkty.map((p) => p.no));
+      const kat = await zagruzitDlyaVydachi(sostav.punkty.map((p) => p.no));
       const parts: HwPartInput[] = await sobratPunkty(sostav, kat, recipients);
       const n = sostav.nastroyki;
       const id = await api.issueHomeworkParts({
@@ -602,7 +602,7 @@ function Oshibki({ hwId }: { hwId: string }) {
       setObshchee((o) => ({ ...o, title: DZ.issue.fromMistakes(full.hw.title) }));
       const [{ sobratOshibki }, kat] = await Promise.all([
         import('@/lib/dz/sborka/oshibki'),
-        zagruzitKatalogi(full.parts.map((p) => p.taskNo)),
+        zagruzitDlyaVydachi(full.parts.map((p) => p.taskNo)),
       ]);
       const p = await sobratOshibki(
         {

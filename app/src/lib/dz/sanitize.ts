@@ -80,6 +80,8 @@ const TAGS = new Set([
   'details',
   'summary',
   'figure',
+  // Иллюстрации условий №4 и №5: только картинки сайта (src — см. safeSrc).
+  'img',
 ]);
 
 const ATTRS = new Set([
@@ -159,7 +161,16 @@ const ATTRS = new Set([
   'open',
   'colspan',
   'rowspan',
+  'src',
+  'alt',
+  'loading',
+  'decoding',
 ]);
+
+/** Картинка — только файл сайта из /images/: без чужих адресов и data:. */
+function safeSrc(tag: string, value: string): boolean {
+  return tag === 'img' && /^\/images\/[\w\-/.]+$/.test(value) && !value.includes('..');
+}
 
 /** Стиль без url(), expression() и javascript:. */
 function safeStyle(value: string): boolean {
@@ -175,7 +186,11 @@ function clean(node: Element): void {
     }
     for (const attr of Array.from(child.attributes)) {
       const name = attr.name.toLowerCase();
-      if (!ATTRS.has(name) || (name === 'style' && !safeStyle(attr.value))) {
+      if (
+        !ATTRS.has(name) ||
+        (name === 'style' && !safeStyle(attr.value)) ||
+        (name === 'src' && !safeSrc(tag, attr.value))
+      ) {
         child.removeAttribute(attr.name);
       }
     }

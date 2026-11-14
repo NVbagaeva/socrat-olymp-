@@ -1,5 +1,6 @@
 'use client';
 
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BookmarkButton } from '@/components/zakladki/BookmarkButton';
 import { useBeforeFinish } from '../session/useBeforeFinish';
@@ -344,14 +345,25 @@ export function Trenazher3Screen({
       onNext={next}
       last={last}
       zakladka={
-        <BookmarkButton
-          section="3"
-          place="trenazher"
-          refId={dannye.id}
-          title={TRENAZHER3.ekran.zakladka(nazvaniyaTekst[tip] ?? '')}
-          href={zadachaHref3(dannye.id)}
-          className="trn-zakladka"
-        />
+        <>
+          <BookmarkButton
+            section="3"
+            place="trenazher"
+            refId={dannye.id}
+            title={TRENAZHER3.ekran.zakladka(nazvaniyaTekst[tip] ?? '')}
+            href={zadachaHref3(dannye.id)}
+            className="trn-zakladka"
+          />
+          {/* Репетитору: эту задачу — в черновик ДЗ. */}
+          {razobratKlyuch3(dannye.id) === null ? null : (
+            <VDzKnopka
+              malaya
+              punkt={{ ist: 'zadacha', no: 3, ref: dannye.id, tip: dannye.prototip }}
+              chto={nazvaniyaTekst[tip] ?? dannye.id}
+              label="В ДЗ"
+            />
+          )}
+        </>
       }
       bezPodskazok={control}
       labels={{
