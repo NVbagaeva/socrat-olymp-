@@ -18,6 +18,7 @@
 
 import type { Formulation, SectionAbout, TutorMaterial } from './sections';
 import type { RichExample } from './theoryRich';
+import { nomerRazdela } from '@/content/struktura';
 
 const CHECK = 'Проверка по графику';
 
@@ -293,7 +294,7 @@ export const LOGARITHMIC_ABOUT: Omit<SectionAbout, 'hint' | 'title'> = {
     'Разбираем графики функций $f(x) = \\log_a x$, $f(x) = b + \\log_a x$ и $f(x) = \\log_a(x + b)$ — все пять типов задач открытого банка ФИПИ. Параметры не угадываем по рисунку: берём две отмеченные точки, переходим к показательной записи и решаем систему.',
   formsTitle: 'Типы задач в этом разделе',
   forms: TYPES,
-  skillsTitle: 'Что нужно уметь для задания №12',
+  skillsTitle: `Что нужно уметь для задания №${nomerRazdela('grafiki-funkciy')}`,
   skills: [
     'Понимать логарифм как показатель: $\\log_a t = s \\iff a^s = t$',
     'Помнить: график $\\log_a x$ проходит через $(1;\\, 0)$, асимптота — $x = 0$',

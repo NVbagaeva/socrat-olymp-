@@ -8,6 +8,8 @@
 */
 
 /** Шапка листа — та же, что у сборников №4 и №12. */
+import { nomerRazdela } from './struktura.js';
+
 export const head = {
   course: 'Профильная математика',
   author: 'Багаева Н.В.',
@@ -16,13 +18,13 @@ export const head = {
 
 /** Блок названия. Даты на листе нет намеренно — она в подзаголовке. */
 export const title = {
-  chip: 'Задание 9',
+  chip: `Задание ${nomerRazdela('proizvodnaya')}`,
   text: 'Производная и первообразная',
   subtitle: 'Задания для отработки',
 };
 
 /** Строка компактной шапки следующих страниц. */
-export const runner = 'Задание 9 · Производная и первообразная';
+export const runner = `Задание ${nomerRazdela('proizvodnaya')} · Производная и первообразная`;
 
 /** Подвал — тот же, что у сборников №4 и №12. */
 export const foot = {

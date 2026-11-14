@@ -1,6 +1,6 @@
 import { TaskCard } from '@/components/ui';
 import type { ExamTask } from '@/content/tasks';
-import { taskHasPage, taskHref } from '@/content/tasks';
+import { taskHasPage, taskHref, taskIconNo } from '@/content/tasks';
 import { bentoAll, bentoAttrs } from '@/lib/bento';
 import { TaskImage } from './TaskImage';
 
@@ -41,9 +41,11 @@ export function TaskGrid({ tasks, bento = false }: TaskGridProps) {
               href={open ? taskHref(task) : undefined}
               comingSoon={task.status !== 'ready'}
               badges={task.badges?.map((label) => ({ label, tone: 'info' as const }))}
+              /* Файл картинки — по номеру хранения раздела, а не по номеру ЕГЭ
+                 (taskIconNo): номер задания может смениться. */
               illustration={
-                task.image === null ? undefined : (
-                  <TaskImage no={task.image ?? task.no} format={task.icon} />
+                taskIconNo(task) === null ? undefined : (
+                  <TaskImage no={taskIconNo(task) ?? task.no} format={task.icon} />
                 )
               }
             />

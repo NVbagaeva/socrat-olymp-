@@ -31,6 +31,7 @@ import {
 } from '../generator/obshchiy/bank';
 import { ZADACH_NA_LIST_MAX } from '@/lib/generator/obshchiy/klyuchi';
 import type { IndeksZadachi } from './dannye';
+import { nomerRazdela } from '@/content/struktura';
 
 /* ── Общее ──────────────────────────────────────────────────────── */
 
@@ -214,7 +215,7 @@ export function sobratList(z: ZaprosLista, indeks: readonly IndeksZadachi[]): Mo
   bloki.push({ id: 'zadachi', title: 'Задачи', spiski });
   return {
     vid: 'generator',
-    zagolovok: 'Задание №10. Прикладные задачи',
+    zagolovok: `Задание №${nomerRazdela('prikladnye-zadachi')}. Прикладные задачи`,
     kod: z.seed,
     kartinki: z.kartinki,
     bloki,
@@ -238,7 +239,7 @@ export function sobratListKlyuchi(z: ZaprosBanka, indeks: readonly IndeksZadachi
   const l = sobratPoKlyucham(z, indeks, 'z10-ps2');
   return {
     vid: 'generator',
-    zagolovok: 'Задание №10. Прикладные задачи',
+    zagolovok: `Задание №${nomerRazdela('prikladnye-zadachi')}. Прикладные задачи`,
     kod: z.seed,
     /* Картинки сюжетов — переключатель «Дополнительно». */
     kartinki: z.flag === true,
@@ -532,7 +533,7 @@ export function modelUroka(
   }
   return {
     vid: 'urok',
-    zagolovok: `Задание №10 · Урок ${no}. ${urok.title}`,
+    zagolovok: `Задание №${nomerRazdela('prikladnye-zadachi')} · Урок ${no}. ${urok.title}`,
     kod: kodSerii(kod, n.regen),
     kartinki: false,
     bloki,

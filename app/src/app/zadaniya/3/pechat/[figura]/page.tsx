@@ -10,6 +10,7 @@ import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
 import '../pechat3.css';
+import { nomerRazdela } from '@/content/struktura';
 
 /** Печать есть у разделов с многогранниками: их чертежи — сценарии. */
 export function generateStaticParams() {
@@ -18,7 +19,7 @@ export function generateStaticParams() {
 export const dynamicParams = false;
 
 export const metadata: Metadata = {
-  title: `${SHEET_3.uchenik} · Задание №3 — Будет на ЕГЭ`,
+  title: `${SHEET_3.uchenik} · Задание №${nomerRazdela('stereometriya')} — Будет на ЕГЭ`,
   robots: { index: false },
 };
 

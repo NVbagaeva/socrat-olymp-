@@ -12,9 +12,10 @@
 import type { Ton } from '@/components/tasks/steklo';
 import type { Gruppa } from '@/lib/proizvodnaya/types';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov } from './treningBanka';
+import { nomerRazdela, slovoChasti } from './struktura';
 
 export const SHAPKA9 = {
-  nadzagolovok: 'Задание №9 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('proizvodnaya')} · ${slovoChasti('proizvodnaya')}`,
   zagolovok: 'Прочитать график языком производной',
   lead: 'Дан график функции, её производной или первообразной — или закон движения формулой. Нужно найти значение производной, точку, число точек, скорость или площадь. Ответ — целое число или конечная десятичная дробь.',
   fakty: (tipovVsego: number) => [
@@ -233,7 +234,7 @@ export const ZNAT9: Ramka9[] = [
 
 export const TRENAZHER9 = (() => {
   const t = tekstyTrenazheraBanka({
-    nomer: 9,
+    nomer: nomerRazdela('proizvodnaya'),
     grupp: 'пяти',
     /* Источника у №9 нет: все задачи собирает генератор. Подписи не показываются. */
     istochniki: { vse: 'Все', fipi: 'Все', new: 'Все' },
@@ -316,7 +317,7 @@ export const TIPY_BLOKA9: Record<string, string[]> = {
 
 export const OPORNYE9 = (() => {
   const t = tekstyOpornyh(
-    'Короткие задачи на одно умение: из этих умений складывается любая задача №9. В каждом блоке десять задач, у каждой есть ещё варианты.',
+    `Короткие задачи на одно умение: из этих умений складывается любая задача №${nomerRazdela('proizvodnaya')}. В каждом блоке десять задач, у каждой есть ещё варианты.`,
   );
   return {
     ...t,

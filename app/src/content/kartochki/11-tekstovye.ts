@@ -21,6 +21,7 @@
 import type { Kartochka, Koloda, ProverkaFormuly } from '@/lib/kartochki/tipy';
 import { YAKOR_EDINIC } from '@/content/teoriya-edinicy';
 import { YAKOR_11 } from '@/lib/zadanie11/teoriya-yakorya';
+import { nomerRazdela } from '@/content/struktura';
 
 const B = 'база' as const;
 const E = 'важно для ЕГЭ' as const;
@@ -175,7 +176,7 @@ const kartochki: Kartochka[] = [
     task: 11,
     topic: 'obshchee',
     type: 'svoystvo',
-    front: 'Каким бывает ответ в задании №11? Что делать, если вышло иррациональное число?',
+    front: `Каким бывает ответ в задании №${nomerRazdela('tekstovye-zadachi')}? Что делать, если вышло иррациональное число?`,
     back: 'Целое число или конечная десятичная дробь. Иррациональное число или бесконечная дробь — ищите ошибку.',
     level: B,
     source: YAKOR_11.razdel('kak-ustroeno'),
