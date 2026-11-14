@@ -77,9 +77,12 @@ if (config.rubli(1990) !== '1 990 ₽') fail(`rubli(1990) = ${config.rubli(199
 if (
   BESPLATNO.trenazherVDen !== 10 ||
   BESPLATNO.variantovOnlayn !== 1 ||
-  BESPLATNO.generatorVDen !== 1
+  BESPLATNO.generatorProbnyh !== 1
 ) {
   fail('лимиты бесплатного доступа не совпадают с утверждёнными (10 / 1 / 1)');
+}
+if (JSON.stringify(BESPLATNO.generatorNomera) !== JSON.stringify(['1', '2', '10', '11'])) {
+  fail(`генераторы без тарифа: ${BESPLATNO.generatorNomera.join(', ')}, утверждено №1, 2, 10, 11`);
 }
 if (PROBNYY.dney !== 7 || PROBNYY.raz !== 1) fail('пробный доступ — 7 дней, один раз');
 if (KLASS_MAKS !== 30) fail('класс репетитора — до 30 учеников');

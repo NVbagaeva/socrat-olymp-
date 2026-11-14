@@ -1,10 +1,18 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Select } from '@/components/ui';
 import { VARIANT_SCREEN as T, WORK_KINDS, standardInstruction } from '@/content/variant';
 import { useSessionUser } from '@/lib/auth/session';
+import {
+  potratitProbnuyu,
+  SOBRAT_VARIANT,
+  usePolnyyDostup,
+  useProbnyhOstalos,
+} from '@/lib/tarify/dostup';
+import { ProbnayaPotrachena } from '@/components/generator/GenZamok';
+import { GEN_UI } from '@/content/generatorUi';
 import { newSeed } from '@/lib/variant/code';
 import { SpaceOption } from '@/components/tasks/space/SpaceOption';
 import {
@@ -114,6 +122,18 @@ export function VariantScreen() {
   const [dev, setDev] = useState(false);
   const restored = useRef(false);
   const user = useSessionUser();
+  /* Без тарифа — одна пробная генерация (lib/tarify/dostup.ts). */
+  const polnyy = usePolnyyDostup();
+  const ostalos = useProbnyhOstalos(SOBRAT_VARIANT);
+  const probnayaPotrachena = !polnyy && ostalos !== null && ostalos <= 0;
+  const [tarif, setTarif] = useState(false);
+  const zakrytTarif = useCallback(() => setTarif(false), []);
+  /** Новые задачи без тарифа: пробная генерация потрачена — окно тарифов. */
+  function nuzhenTarif(): boolean {
+    if (!probnayaPotrachena) return false;
+    setTarif(true);
+    return true;
+  }
 
   /* Настройки и шапка — из прошлого раза; режим разработчика — ?dev=1.
      Читаются после гидратации (разметка сборки — с настройками по
@@ -166,12 +186,14 @@ export function VariantScreen() {
   }
 
   function sformirovat() {
+    if (nuzhenTarif()) return;
+    if (!polnyy) potratitProbnuyu(SOBRAT_VARIANT);
     setNotice(null);
     void run(config, newSeed(), {});
   }
 
   function zamenit(variant: number, ege: EgeNo) {
-    if (set === null) return;
+    if (set === null || nuzhenTarif()) return;
     const key = zamenaKey(variant, ege);
     const zameny = { ...set.zameny, [key]: (set.zameny[key] ?? 0) + 1 };
     void run(set.config, set.seed, zameny);
@@ -199,6 +221,8 @@ export function VariantScreen() {
 
   /* Серия: N разных вариантов без повторов задач, фильтры — те же. */
   function seriya(n: number) {
+    if (nuzhenTarif()) return;
+    if (!polnyy) potratitProbnuyu(SOBRAT_VARIANT);
     setNotice(null);
     const next = { ...config, count: Math.min(MAX_VARIANTS, Math.max(2, n)), parallel: false };
     setConfig(next);
@@ -950,6 +974,9 @@ export function VariantScreen() {
           </button>
         </form>
       </Okno>
+      {tarif ? (
+        <ProbnayaPotrachena tekst={GEN_UI.dostup.potrachena.variant} onClose={zakrytTarif} />
+      ) : null}
     </div>
   );
 }

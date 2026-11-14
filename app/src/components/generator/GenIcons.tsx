@@ -57,6 +57,12 @@ const PATHS = {
   ),
   chevron: <path d="m6 9 6 6 6-6" />,
   pen: <path d="M5 18h14M7 15l9-9" />,
+  lock: (
+    <>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </>
+  ),
 } as const;
 
 export type GenIconName = keyof typeof PATHS;
