@@ -897,6 +897,14 @@ jobs:
         working-directory: app
         run: pnpm test:sticky-tabs
 
+      # Теория №3 и №15, «О задании» №3, №14, №15: в покое ни одна строка
+      # текста не закрыта и не обрезана (лид главы ниже заголовка), внизу
+      # страницы всё дочитывается из-под «?»; карточки типов — шахматкой,
+      # контраст AA, пилюли 44 px. Chromium и WebKit, 360–430 px и 1280.
+      - name: Проверить, что текст теории стереометрии не закрыт
+        working-directory: app
+        run: pnpm test:teoriya-perekrytie
+
   brauzer-2:
     name: Проверки в браузере (2)
     runs-on: ubuntu-24.04

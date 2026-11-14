@@ -573,7 +573,7 @@ for (const size of SIZES) {
   for (const [no, razbory] of [['15', RAZBORY_15]]) {
     await page.goto(BASE + `/zadaniya/${no}/`, { waitUntil: 'networkidle' });
     const ssylki = await page
-      .locator('.stereo-tip--razbor')
+      .locator('.tipk__ssylka--primer')
       .evaluateAll((list) => list.map((a) => a.getAttribute('href')));
     check(
       ssylki.length === razbory.length,
