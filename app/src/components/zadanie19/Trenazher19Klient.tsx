@@ -18,6 +18,7 @@ import type { LogOutcome } from '@/lib/progressLog';
 import { kind19, log19 } from '@/lib/zadanie19/progress';
 import type { Zadanie19View } from './Rabota19';
 import { isPayload19, peremeshat, readUi19, type Payload19, type Ui19 } from './trenazher19Sessiya';
+import { nomerRazdela } from '@/content/struktura';
 
 /** Задание банка с тем, что нужно тренажёру: метод и условие строкой для итогов. */
 export interface Zadanie19Bank extends Zadanie19View {
@@ -191,7 +192,8 @@ function Konfigurator19({ bank, api }: { bank: Zadanie19Bank[]; api: Configurato
           {trainerPage.start}
         </Button>
         <p className="cfg-bar__summary">
-          №19 · {metodTitle} · {uroven === '' ? TRENAZHER_19.vseUrovni : UROVNI_19[uroven]} ·{' '}
+          №{nomerRazdela('parametr')} · {metodTitle} ·{' '}
+          {uroven === '' ? TRENAZHER_19.vseUrovni : UROVNI_19[uroven]} ·{' '}
           {counted(skolko, 'задание', 'задания', 'заданий')}
         </p>
       </div>

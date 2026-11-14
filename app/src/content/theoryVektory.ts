@@ -15,6 +15,7 @@
 
 import type { TheorySection } from './theoryQuadratic';
 import type { StsenaId } from '@/lib/vektory/stseny';
+import { nomerRazdela } from '@/content/struktura';
 
 export type VektorySection = TheorySection<StsenaId>;
 
@@ -30,7 +31,7 @@ export interface VektoryRazdel {
 
 const koordinaty: VektorySection = {
   id: 'koordinaty',
-  lead: 'Вектор — это направленный отрезок: у него есть начало и конец. Всё задание №2 держится на одном правиле — как по точкам найти координаты вектора.',
+  lead: `Вектор — это направленный отрезок: у него есть начало и конец. Всё задание №${nomerRazdela('vektory')} держится на одном правиле — как по точкам найти координаты вектора.`,
   cards: [
     {
       id: 'opredelenie',

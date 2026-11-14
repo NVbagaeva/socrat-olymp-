@@ -5,12 +5,13 @@
  */
 
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
+import { nomerRazdela } from '@/content/struktura';
 
 export const GENERATOR12_TEXTS = {
   /** Раздел в «Моих комплектах» генератора по всем типам. */
-  sectionVse: '№12 · Все типы функций',
+  sectionVse: `№${nomerRazdela('grafiki-funkciy')} · Все типы функций`,
   sheet: {
-    chip: 'Задание 12',
+    chip: `Задание ${nomerRazdela('grafiki-funkciy')}`,
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',
   },

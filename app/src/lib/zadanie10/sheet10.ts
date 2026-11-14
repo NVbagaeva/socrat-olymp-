@@ -19,6 +19,7 @@ import { chertezhMosta } from './chertezh/most';
 import type { ZadachaLite } from './dannye';
 import type { ModelLista } from './sborka';
 import type { Prototype } from './types';
+import { nomerRazdela } from '@/content/struktura';
 
 export type Vid10 = ListVid;
 
@@ -158,7 +159,7 @@ export function primer10(o: Sborka10, z: ZadachaLite): string {
 export function sheetSpec10(o: Sborka10, vid: Vid10) {
   return listSheetSpec<ZadachaLite>(
     {
-      chip: 'Задание 10',
+      chip: `Задание ${nomerRazdela('prikladnye-zadachi')}`,
       cls: 'z10',
       model: o.model,
       zadacha: (id) => o.zadachi.get(id),

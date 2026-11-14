@@ -7,11 +7,12 @@
 import { GEN_UI } from '@/content/generatorUi';
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
 import { head, foot } from './sheet12.js';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR18_TEXTS = {
-  section: '№18 · Планиметрия',
+  section: `№${nomerRazdela('planimetriya-dokazatelstvo')} · Планиметрия`,
   sheet: {
-    chip: 'Задание 18',
+    chip: `Задание ${nomerRazdela('planimetriya-dokazatelstvo')}`,
     title: 'Планиметрия',
     course: head.course,
     teacher: head.author,
@@ -32,7 +33,7 @@ export const GENERATOR18_SOURCES = [
     id: 'new' as const,
     title: 'Наши задачи',
     short: 'наши',
-    note: 'Задачи в формате задания 18: пункт а) — доказать, пункт б) — найти. Составлены для сайта, у каждой три набора чисел.',
+    note: `Задачи в формате задания ${nomerRazdela('planimetriya-dokazatelstvo')}: пункт а) — доказать, пункт б) — найти. Составлены для сайта, у каждой три набора чисел.`,
   },
 ];
 
@@ -77,8 +78,8 @@ export const GENERATOR18_PRESETS: GenPreset[] = [
 export const SHEET_GEN_18 = {
   head,
   foot,
-  title: { chip: 'Задание 18', text: 'Планиметрия' },
-  runner: 'Задание 18 · Планиметрия',
+  title: { chip: `Задание ${nomerRazdela('planimetriya-dokazatelstvo')}`, text: 'Планиметрия' },
+  runner: `Задание ${nomerRazdela('planimetriya-dokazatelstvo')} · Планиметрия`,
   subtitle: 'Задания для отработки',
   vidy: GEN_UI.vidyRaboty,
   otvety: 'Ответы пункта б)',

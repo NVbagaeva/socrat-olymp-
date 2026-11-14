@@ -17,6 +17,7 @@ import { prepSkillsFor } from './prepSkills';
 import { taskName } from './tasks';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { nomerRazdela } from '@/content/struktura';
 export type { TheoryBlock, TheoryBlockType } from '@/data/functionTypes';
 
 export type SubtopicStatus = 'active' | 'soon';
@@ -161,9 +162,9 @@ export const PODTEMA_SKORO = {
 
 export const sections: ExamSection[] = [
   {
-    no: '12',
+    no: String(nomerRazdela('grafiki-funkciy')),
     slug: '12',
-    title: 'Задание 12',
+    title: `Задание ${nomerRazdela('grafiki-funkciy')}`,
     subtitle: taskName('12'),
     description:
       'Научитесь распознавать графики, читать свойства функций и использовать формулы для решения задач.',
@@ -171,8 +172,7 @@ export const sections: ExamSection[] = [
     hero: '12',
     about: {
       title: taskName('12'),
-      description:
-        'В задании №12 вам могут предложить найти значение функции, аргумент или координаты точки пересечения графиков. Ниже — самые типичные формулировки этого задания.',
+      description: `В задании №${nomerRazdela('grafiki-funkciy')} вам могут предложить найти значение функции, аргумент или координаты точки пересечения графиков. Ниже — самые типичные формулировки этого задания.`,
       hint: HINT_12,
       formsTitle: 'Возможные формулировки',
       forms: [
@@ -205,7 +205,7 @@ export const sections: ExamSection[] = [
           icon: 'ordinate',
         },
       ],
-      skillsTitle: 'Что нужно уметь для задания №12',
+      skillsTitle: `Что нужно уметь для задания №${nomerRazdela('grafiki-funkciy')}`,
       skills: [
         'Читать график функции',
         'Находить значение функции по графику',
@@ -216,8 +216,8 @@ export const sections: ExamSection[] = [
       ],
       later: {
         title: 'Это пригодится позже',
-        text: 'В дальнейшем, при подготовке к заданию №19 с параметрами, нам понадобится уметь работать с уравнениями различных геометрических фигур. Сейчас наша задача — уверенно работать с графиками функций. Подробнее разбирать эти темы будем в разделе задания №19.',
-        action: 'Подробнее о №19',
+        text: `В дальнейшем, при подготовке к заданию №${nomerRazdela('parametr')} с параметрами, нам понадобится уметь работать с уравнениями различных геометрических фигур. Сейчас наша задача — уверенно работать с графиками функций. Подробнее разбирать эти темы будем в разделе задания №${nomerRazdela('parametr')}.`,
+        action: `Подробнее о №${nomerRazdela('parametr')}`,
       },
     },
     tutors: {
@@ -248,7 +248,7 @@ export const sections: ExamSection[] = [
     },
     topic: {
       badge: 'Базовый и средний уровень',
-      lead: 'Теория, графики и приёмы, которые понадобятся для решения задания №12.',
+      lead: `Теория, графики и приёмы, которые понадобятся для решения задания №${nomerRazdela('grafiki-funkciy')}.`,
       note: 'Математика — это не про числа, а про понимание зависимостей.',
     },
     subtopics: functionTypes,

@@ -5,11 +5,12 @@
  */
 
 import type { GenPreset, Level } from '@/lib/generator/obshchiy/types';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR1_TEXTS = {
-  section: '№1 · Планиметрия',
+  section: `№${nomerRazdela('planimetriya')} · Планиметрия`,
   sheet: {
-    chip: 'Задание 1',
+    chip: `Задание ${nomerRazdela('planimetriya')}`,
     title: 'Планиметрия',
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',

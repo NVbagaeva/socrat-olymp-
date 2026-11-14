@@ -20,6 +20,7 @@
 import type { Kartochka, Koloda, ProverkaFormuly } from '@/lib/kartochki/tipy';
 import { YAKOR_EDINIC } from '@/content/teoriya-edinicy';
 import { YAKOR_10 } from '@/lib/zadanie10/teoriya-yakorya';
+import { nomerRazdela } from '@/content/struktura';
 
 const B = 'база' as const;
 const E = 'важно для ЕГЭ' as const;
@@ -190,7 +191,7 @@ const kartochki: Kartochka[] = [
     task: 10,
     topic: 'algoritm',
     type: 'verno',
-    front: 'Чтобы решить задачу №10, нужно знать физику: формулу придётся вспомнить самому.',
+    front: `Чтобы решить задачу №${nomerRazdela('prikladnye-zadachi')}, нужно знать физику: формулу придётся вспомнить самому.`,
     verno: false,
     back: 'Неверно: формула дана в условии, все буквы в нём объяснены. Нужно подставить числа и решить уравнение.',
     level: B,

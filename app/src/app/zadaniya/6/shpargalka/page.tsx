@@ -11,6 +11,7 @@ import { zadanie6Title } from '@/content/zadanie6';
 import 'katex/dist/katex.min.css';
 import '../zadanie6.css';
 import './shpargalka6.css';
+import { nomerRazdela } from '@/content/struktura';
 
 export const metadata: Metadata = {
   title: zadanie6Title('Шпаргалка'),
@@ -50,7 +51,9 @@ export default function Shpargalka6() {
   return (
     <main className="z6-shp">
       <header className="z6-shp__head">
-        <p className="z6-shp__eyebrow">Задание №6 · {SHPARGALKA_6.podzagolovok}</p>
+        <p className="z6-shp__eyebrow">
+          Задание №{nomerRazdela('sluchainye-velichiny')} · {SHPARGALKA_6.podzagolovok}
+        </p>
         <h1>{SHPARGALKA_6.title}</h1>
         <PechatKnopka6 />
       </header>

@@ -4,9 +4,10 @@
  */
 
 import type { Ton8 } from './gruppy';
+import { nomerRazdela, slovoChasti } from '../struktura';
 
 export const SHAPKA8 = {
-  nadzagolovok: 'Задание №8 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('vychisleniya')} · ${slovoChasti('vychisleniya')}`,
   zagolovok: 'Найти значение выражения',
   lead: 'Одно выражение — одно число в ответ. Проверяется, умеете ли вы упростить запись свойствами степеней, корней, логарифмов и тригонометрии, а не считать «в лоб».',
   fakty: [

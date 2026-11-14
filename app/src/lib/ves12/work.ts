@@ -13,6 +13,7 @@
 import { generatorVersion, kitCode, newKitId, parseKitCode } from '@/lib/komplekt';
 import { counted } from '@/lib/plural';
 import type { Ves12Catalog, Ves12Set, Ves12Type } from './types';
+import { nomerRazdela } from '@/content/struktura';
 
 export type WorkSource = 'fipi' | 'all';
 export type WorkOrder = 'types' | 'mix';
@@ -53,7 +54,7 @@ export const COUNT = { min: 0, max: 5 } as const;
 export const MAX_VARIANTS = 4;
 export const MINUTES_PER_TASK = 3;
 export const DEFAULT_GRADES: Grades = { five: 90, four: 70, three: 50 };
-export const DEFAULT_TITLE = 'Зачётная работа по заданию №12';
+export const DEFAULT_TITLE = `Зачётная работа по заданию №${nomerRazdela('grafiki-funkciy')}`;
 
 /** Новый код работы. random — для автотеста. */
 export function newWorkCode(random: () => number = Math.random): string {
@@ -126,7 +127,7 @@ function pairLead(n: number, types: number): string {
 export function templates(catalog: Ves12Catalog): Template[] {
   const open = new Set<string>(openTypes(catalog).map((type) => type.id));
   const out: Template[] = [
-    { id: 'ege', title: 'Весь №12, как на ЕГЭ', lead: 'все типы · по 2 задачи', counts: countsOf(catalog, null, 2) },
+    { id: 'ege', title: `Весь №${nomerRazdela('grafiki-funkciy')}, как на ЕГЭ`, lead: 'все типы · по 2 задачи', counts: countsOf(catalog, null, 2) },
     { id: 'short', title: 'Короткая проверка', lead: 'все типы · по 1 задаче', counts: countsOf(catalog, null, 1) },
   ];
   const pairs: [string, string, string[]][] = [

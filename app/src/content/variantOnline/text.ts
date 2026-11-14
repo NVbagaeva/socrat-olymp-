@@ -6,6 +6,7 @@
 
 import { counted } from '@/lib/plural';
 import type { FormatProblem } from '@/lib/variant/online/normalize';
+import { nomeraChasti } from '@/content/struktura';
 
 export const ONLINE_TEXT = {
   /* ── Экран «Собрать вариант» ─────────────────────────────────── */
@@ -58,10 +59,10 @@ export const ONLINE_TEXT = {
     menu: 'Решить вариант онлайн',
     title: 'Решить вариант онлайн',
     lead:
-      'Новый вариант первой части ЕГЭ — задания 1–13. Ответы проверяются автоматически, ' +
+      `Новый вариант первой части ЕГЭ — задания ${nomeraChasti(1)}. Ответы проверяются автоматически, ` +
       'в конце — первичный и тестовый балл.',
     crumb: 'Решить онлайн',
-    chips: ['Задания 1–13', 'Банк ФИПИ', 'Автопроверка', 'Тестовый балл'],
+    chips: [`Задания ${nomeraChasti(1)}`, 'Банк ФИПИ', 'Автопроверка', 'Тестовый балл'],
     /* Подпись высоты: буква h набирается в разметке курсивом (page.tsx). */
     kristall: { bukva: 'h', podpis: '— высота', hint: 'Покрути фигуру' },
     nachatyy: {

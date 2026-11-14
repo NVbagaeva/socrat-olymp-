@@ -19,6 +19,7 @@ import { assetUrl } from '@/lib/assetUrl';
 import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
 import { OPORNYE_4 } from '@/lib/veroyatnost/metody4';
 import { METODY_5 } from '@/lib/veroyatnost/metody5';
+import { nomerDvumya, nomerRazdela } from '@/content/struktura';
 /* Вкладка раздела описывается общим типом: лента у всех заданий одна
    (components/tasks/RazdelTabs). Имя оставлено прежним, чтобы
    не править импорты по всему разделу. */
@@ -89,11 +90,11 @@ export const KOROTKO_4 = taskName('4');
  * Заголовок раздела №4 — один на все вкладки: он живёт в шапке
  * раздела, а не в страницах, и по вкладкам не дублируется.
  */
-export const ZAGOLOVOK_4 = `Задание №4. ${KOROTKO_4}`;
+export const ZAGOLOVOK_4 = `Задание №${nomerRazdela('veroyatnost')}. ${KOROTKO_4}`;
 
 /** Короткое имя и заголовок темы №5 — устроены так же, как у №4. */
 export const KOROTKO_5 = taskName('5');
-export const ZAGOLOVOK_5 = `Задание №5. ${KOROTKO_5}`;
+export const ZAGOLOVOK_5 = `Задание №${nomerRazdela('slozhnaya-veroyatnost')}. ${KOROTKO_5}`;
 
 /**
  * Подзаголовок раздела: число методов — то, что ученик видит в
@@ -108,7 +109,7 @@ export const PODZAGOLOVOK_5 = podzagolovok(METODY_5.length);
 
 export const VEROYATNOST: readonly VeroyatnostSection[] = [
   {
-    no: '04',
+    no: nomerDvumya('veroyatnost'),
     slug: '4',
     title: ZAGOLOVOK_4,
     korotko: KOROTKO_4,
@@ -149,7 +150,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
            файл учителя с решениями — только архивом CI. */
         {
           id: 'baza',
-          title: 'Печатная база задания 4',
+          title: `Печатная база задания ${nomerRazdela('veroyatnost')}`,
           lead: 'Все прототипы тренажёра, по десять вариантов, без рисунков — со строкой для ответа',
           icon: 'pdf',
           file: assetUrl('/materials/zadanie-4/Zadanie_4_baza_uchenik.pdf'),
@@ -158,7 +159,7 @@ export const VEROYATNOST: readonly VeroyatnostSection[] = [
     },
   },
   {
-    no: '05',
+    no: nomerDvumya('slozhnaya-veroyatnost'),
     slug: '5',
     title: ZAGOLOVOK_5,
     korotko: KOROTKO_5,
@@ -437,15 +438,15 @@ const RESHENIYA = {
 };
 
 export const LIST_4: ListSlova = {
-  title: { chip: 'Задание 4', text: KOROTKO_4 },
-  runner: `Задание 4 · ${KOROTKO_4}`,
+  title: { chip: `Задание ${nomerRazdela('veroyatnost')}`, text: KOROTKO_4 },
+  runner: `Задание ${nomerRazdela('veroyatnost')} · ${KOROTKO_4}`,
   otvety: { title: 'Ответы', note: 'по блокам, сквозная нумерация' },
   resheniya: RESHENIYA,
 };
 
 export const LIST_5: ListSlova = {
-  title: { chip: 'Задание 5', text: KOROTKO_5 },
-  runner: `Задание 5 · ${KOROTKO_5}`,
+  title: { chip: `Задание ${nomerRazdela('slozhnaya-veroyatnost')}`, text: KOROTKO_5 },
+  runner: `Задание ${nomerRazdela('slozhnaya-veroyatnost')} · ${KOROTKO_5}`,
   otvety: { title: 'Ответы', note: 'по типам задач, сквозная нумерация' },
   resheniya: RESHENIYA,
 };
