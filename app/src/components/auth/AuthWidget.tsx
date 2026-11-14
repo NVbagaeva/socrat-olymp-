@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { site } from '@/content/site';
+import { StartButton } from './StartButton';
 
 export interface AuthWidgetProps {
   /**
@@ -33,16 +33,12 @@ const LiveWidget =
  * из хранилища (lib/auth/session.ts), SDK подтягивается только для
  * выхода и для записи комплектов репетитора.
  *
- * Вход выключен — блок пустой (в публичной шапке остаётся прежняя
- * кнопка «Начать бесплатно»), и сайт выглядит как раньше.
+ * Вход выключен — блок пустой (в публичной шапке на компьютере
+ * остаётся одна кнопка «Начать бесплатно»).
  */
 export function AuthWidget({ variant, className }: AuthWidgetProps) {
   if (LiveWidget === null) {
-    return variant === 'site' ? (
-      <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
-        {site.headerActions.signup.label}
-      </a>
-    ) : null;
+    return variant === 'site' ? <StartButton /> : null;
   }
   return <LiveWidget variant={variant} className={className} />;
 }

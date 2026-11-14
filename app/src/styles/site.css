@@ -26,6 +26,42 @@
   gap: var(--space-8);
 }
 
+/* Шапка на прокрутке (SiteHeadCompact.tsx ставит data-compact): ниже
+   на 12px, плотнее матовое стекло и мягкая тень снизу. Место под шапкой
+   в потоке не меняется: сколько шапка теряет в высоте, столько получает
+   нижнего поля — содержимое под ней не прыгает. Высота и поле меняются
+   одним переходом с одной кривой, поэтому их сумма постоянна и во время
+   перехода. При «уменьшить движение» — без перехода. */
+.site-head {
+  transition:
+    margin-bottom var(--dur-menu) var(--ease),
+    box-shadow var(--dur-menu) var(--ease),
+    background-color var(--dur-menu) var(--ease);
+}
+.site-head__in {
+  transition: height var(--dur-menu) var(--ease);
+}
+/* body — чтобы перебить стеклянные шапки страниц (.glavnaya
+   .site-head--steklo и соседи): у них свой фон и тень без прокрутки. */
+body .site-head[data-compact] {
+  margin-bottom: calc(var(--h-site-head) - var(--h-site-head-compact));
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow:
+    0 1px 0 rgb(31 95 208 / 0.08),
+    0 10px 24px -18px rgb(31 95 208 / 0.45);
+}
+.site-head[data-compact] .site-head__in {
+  height: var(--h-site-head-compact);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-head,
+  .site-head__in {
+    transition: none;
+  }
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -211,8 +247,30 @@
 .site-head__cta {
   margin-left: auto;
   display: flex;
+  flex: none;
   align-items: center;
   gap: var(--space-4);
+}
+/* Знак и название — одним блоком; ужимается он, а не кнопки справа. */
+.site-head__in > .logo {
+  min-width: 0;
+}
+/* «Начать бесплатно» — основная кнопка шапки только от 768px. На
+   телефоне в шапке одна кнопка («Войти» или кружок аккаунта) и бургер,
+   а «Начать бесплатно» — на первом экране главной (HeroSection). На
+   компьютере у кнопки тоже полоса касания 44px. */
+.site-head__start {
+  position: relative;
+}
+.site-head__start::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+}
+@media (max-width: 767.98px) {
+  .site-head__start {
+    display: none;
+  }
 }
 
 /* ── Бургер и полноэкранное меню узкой шапки ── */
@@ -483,25 +541,27 @@ body:has(.site-menu) .help-fab {
   }
 }
 
-/* Ниже 460px «Войти» — один кружок со значком (auth-widget.css), а
-   название рядом со знаком уходит: знак, кружок, «Начать бесплатно» и
-   бургер в строку с ним не входят. Название остаётся в ссылке (кегль
-   0) — его читает скринридер. «Начать бесплатно» не сокращается:
-   слово «бесплатно» работает на конверсию. Без кнопки «Войти» в шапке
-   название на месте. */
-@media (max-width: 459.98px) {
-  .site-head__in:has(.auth-widget__login) .logo {
-    gap: 0;
-    font-size: 0;
+/* Телефон: слева знак с названием в одну строку, справа «Войти» (или
+   кружок аккаунта) и бургер. Промежутки плотнее, чем на компьютере. */
+@media (max-width: 767.98px) {
+  .site-head__in > .logo {
+    white-space: nowrap;
   }
   .site-head__in {
-    gap: var(--space-4);
+    gap: var(--space-3);
+  }
+  .site-head__cta {
+    gap: var(--space-2);
   }
 }
-/* На 320 логотип, кнопка и бургер вместе шире экрана: поля шапки,
-   кнопки и зазор до бургера уже. Запас — под шрифт чуть шире Inter
-   (запасной, пока Inter грузится, или другой растеризатор). */
+/* 320–359px: знак, название, «Войти» и бургер входят в строку, если
+   поля шапки и промежутки плотнее, а название на кегль меньше (запас
+   ~20px — под шрифт чуть шире Inter, пока Inter грузится). */
 @media (max-width: 359.98px) {
+  .site-head__in > .logo {
+    gap: var(--space-2);
+    font-size: 15px;
+  }
   .site-head__in {
     gap: var(--space-2);
   }
@@ -509,11 +569,14 @@ body:has(.site-menu) .help-fab {
   .site-head .site-head__in {
     padding: 0 var(--space-4);
   }
-  .site-head__cta {
-    gap: var(--space-2);
-  }
-  .site-head__cta .btn {
-    padding: 0 10px;
+}
+
+/* Уже 300px (окно сбоку, складной телефон) название уходит — остаётся
+   знак; название читает скринридер (кегль 0). */
+@media (max-width: 299.98px) {
+  .site-head__in > .logo {
+    gap: 0;
+    font-size: 0;
   }
 }
 

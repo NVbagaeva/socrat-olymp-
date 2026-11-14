@@ -507,6 +507,9 @@
   --flow-section: var(--space-10);
 
   --h-site-head: 72px;
+  /* Шапка после начала прокрутки (site.css, .site-head[data-compact]):
+     ниже, место под ней в потоке остаётся --h-site-head. */
+  --h-site-head-compact: 60px;
   --h-control-sm: 36px;
   --h-control: 44px;
   --h-control-lg: 52px;

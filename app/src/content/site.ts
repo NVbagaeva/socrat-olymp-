@@ -11,7 +11,8 @@ import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
-import { levelInfo } from '@/lib/level';
+import { levelInfo, type Level } from '@/lib/level';
+import { AUTH_ENABLED, AUTH_HREF, REGISTRATION_OPEN } from '@/lib/auth/config';
 import { TARIFY_HREF } from '@/lib/tarify/config';
 import type { NavIconName } from '@/components/ui/NavIcons';
 import { nomeraChasti } from '@/content/struktura';
@@ -122,6 +123,17 @@ const LINKS = {
   tarify: { label: 'Тарифы', hint: 'Что входит в доступ', href: TARIFY_HREF, icon: 'favourites' },
 } satisfies Record<string, MenuLink>;
 
+/**
+ * Куда ведёт «Начать бесплатно». Регистрация открыта (REGISTRATION_OPEN
+ * в lib/auth/config.ts) и вход включён — на регистрацию. Иначе — в банк
+ * заданий уровня: там занимаются бесплатно и без аккаунта, и случайный
+ * посетитель не упирается в форму «только по приглашению».
+ */
+export function startHref(level: Level = 'profile'): string {
+  if (AUTH_ENABLED && REGISTRATION_OPEN) return AUTH_HREF.registraciya;
+  return level === 'base' ? levelInfo('base').bank : tasksPage.href;
+}
+
 export const site = {
   brand: 'Будет на ЕГЭ',
 
@@ -165,7 +177,7 @@ export const site = {
      «Начать бесплатно» без входа ведёт в банк заданий — платного ничего
      нет; со входом — на регистрацию. */
   headerActions: {
-    signup: { label: 'Начать бесплатно', href: tasksPage.href } satisfies SiteLink,
+    signup: { label: 'Начать бесплатно', href: startHref('profile') } satisfies SiteLink,
   },
 
   footer: {
