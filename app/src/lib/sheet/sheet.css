@@ -19,9 +19,12 @@
   margin: 0;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   background: var(--sheet-page);
@@ -73,8 +76,13 @@ body {
    умеет). Фон вокруг страниц на экране светлый; на бумаге он попал бы
    в запас под страницей, поэтому при печати он белый, как бумага. */
 @media print {
-  html, body { background: var(--sheet-paper); }
-  #sheet-measure { display: none; }
+  html,
+  body {
+    background: var(--sheet-paper);
+  }
+  #sheet-measure {
+    display: none;
+  }
 
   /* Общий печатный стиль всех листов сайта (генераторы, «Собрать
      вариант», справочники). На бумаге — только страницы листа: всё
@@ -82,8 +90,11 @@ body {
      окно cookie, онбординг, плавающие кнопки), убирается целиком через
      display: none, а не прячется прозрачностью — иначе Safari оставляет
      им место и тянет за ними лишние страницы. */
-  body:has(#sheet-pages) > :not(#sheet-pages):not(:has(#sheet-pages)) { display: none !important; }
-  html, body {
+  body:has(#sheet-pages) > :not(#sheet-pages):not(:has(#sheet-pages)) {
+    display: none !important;
+  }
+  html,
+  body {
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
@@ -115,7 +126,9 @@ body {
      области по ширине — с запасом на колонтитулы Safari). Лист — по
      центру. Отметку data-sheet-webkit ставит paginate.js. Остальные
      браузеры слушают @page и печатают лист один к одному. */
-  :root[data-sheet-webkit] #sheet-pages { width: 240mm !important; }
+  :root[data-sheet-webkit] #sheet-pages {
+    width: 240mm !important;
+  }
   :root[data-sheet-webkit] .sheet-page {
     margin-left: auto !important;
     margin-right: auto !important;
@@ -170,7 +183,10 @@ body {
   stroke-width: 1;
 }
 
-.sheet-page > *:not(.sheet-arcs) { position: relative; z-index: 1; }
+.sheet-page > *:not(.sheet-arcs) {
+  position: relative;
+  z-index: 1;
+}
 
 /* ══════════════════════════════════════════════════════════
    Шапка
@@ -191,7 +207,10 @@ body {
   flex: none;
 }
 
-.sheet-logo-mark { flex: none; display: block; }
+.sheet-logo-mark {
+  flex: none;
+  display: block;
+}
 
 .sheet-logo-word {
   font-size: var(--sheet-fs-badge);
@@ -209,7 +228,10 @@ body {
   background: var(--sheet-rule-strong);
 }
 
-.sheet-head-course { flex: 1 1 auto; min-width: 0; }
+.sheet-head-course {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 .sheet-course-name {
   font-size: var(--sheet-fs-lead);
@@ -288,7 +310,9 @@ body {
 /* ══════════════════════════════════════════════════════════
    Блок названия
    ══════════════════════════════════════════════════════════ */
-.sheet-title-block { margin-bottom: calc(var(--sheet-step) * 5); }
+.sheet-title-block {
+  margin-bottom: calc(var(--sheet-step) * 5);
+}
 
 .sheet-title-row {
   display: flex;
@@ -298,7 +322,10 @@ body {
 
 /* Подзаголовок выключен по названию, а не по плашке: на образце
    «Задания для отработки» начинается там же, где «Линейная функция». */
-.sheet-title-col { flex: 1 1 auto; min-width: 0; }
+.sheet-title-col {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 .sheet-chip {
   flex: none;
@@ -368,13 +395,17 @@ body {
   align-items: baseline;
   gap: calc(var(--sheet-step) * 2);
 }
-.sheet-field--wide { flex: 1 1 auto; }
+.sheet-field--wide {
+  flex: 1 1 auto;
+}
 .sheet-field-blank {
   flex: 1 1 auto;
   min-width: calc(var(--sheet-step) * 14);
   border-bottom: var(--sheet-rule-width) solid var(--sheet-blank);
 }
-.sheet-field-value { color: var(--sheet-ink); }
+.sheet-field-value {
+  color: var(--sheet-ink);
+}
 
 /* ══════════════════════════════════════════════════════════
    Рамка «Повторяем:»
@@ -390,7 +421,9 @@ body {
   border-radius: var(--sheet-radius-lg);
 }
 
-.sheet-recap-main { flex: 1 1 auto; }
+.sheet-recap-main {
+  flex: 1 1 auto;
+}
 
 .sheet-recap-title {
   margin: 0 0 calc(var(--sheet-step) * 3);
@@ -477,7 +510,9 @@ body {
   color: var(--sheet-ink);
 }
 
-.sheet-recap-aside .sheet-tail { align-self: flex-end; }
+.sheet-recap-aside .sheet-tail {
+  align-self: flex-end;
+}
 
 /* ══════════════════════════════════════════════════════════
    Заголовок блока — оформленная полоса, а не жирный текст
@@ -511,7 +546,9 @@ body {
 }
 
 /* Блок не прижимается к предыдущему. */
-.sheet-block + .sheet-block { margin-top: calc(var(--sheet-step) * 6); }
+.sheet-block + .sheet-block {
+  margin-top: calc(var(--sheet-step) * 6);
+}
 
 /* Идентификатор перед названием блока — плашкой в цвет номера задачи. */
 .sheet-block-id {
@@ -540,14 +577,20 @@ body {
   margin-bottom: calc(var(--sheet-step) * 2.5);
 }
 
-.sheet-block--sub .sheet-block-title { font-size: var(--sheet-fs-body); }
+.sheet-block--sub .sheet-block-title {
+  font-size: var(--sheet-fs-body);
+}
 
-.sheet-block + .sheet-block--sub { margin-top: calc(var(--sheet-step) * 3); }
+.sheet-block + .sheet-block--sub {
+  margin-top: calc(var(--sheet-step) * 3);
+}
 
 /* Между кусками потока тот же ритм, что между карточками внутри
    куска: страницу набирает paginate.js, и вертикальный отступ
    должен быть один и тот же в обе стороны. */
-.sheet-item + .sheet-item { margin-top: calc(var(--sheet-step) * 2.5); }
+.sheet-item + .sheet-item {
+  margin-top: calc(var(--sheet-step) * 2.5);
+}
 
 /* ══════════════════════════════════════════════════════════
    Задача
@@ -558,10 +601,14 @@ body {
 }
 
 /* Раскладка в одну колонку: чертёж справа от текста. */
-.sheet-tasks--single { grid-template-columns: 1fr; }
+.sheet-tasks--single {
+  grid-template-columns: 1fr;
+}
 
 /* Раскладка в две колонки карточек. */
-.sheet-tasks--double { grid-template-columns: 1fr 1fr; }
+.sheet-tasks--double {
+  grid-template-columns: 1fr 1fr;
+}
 
 .sheet-task {
   display: flex;
@@ -596,13 +643,22 @@ body {
   gap: calc(var(--sheet-step) * 4);
 }
 
-.sheet-task--single .sheet-task-body { flex-direction: row; align-items: stretch; }
+.sheet-task--single .sheet-task-body {
+  flex-direction: row;
+  align-items: stretch;
+}
 
 /* Чертёж выше текста условия: пустота делится между условием
    и строкой ответа, а не собирается в один провал. */
-.sheet-task--single .sheet-figure { align-self: center; }
-.sheet-task--double .sheet-task-body { flex-direction: column; }
-.sheet-task--double .sheet-task-text { justify-content: flex-start; }
+.sheet-task--single .sheet-figure {
+  align-self: center;
+}
+.sheet-task--double .sheet-task-body {
+  flex-direction: column;
+}
+.sheet-task--double .sheet-task-text {
+  justify-content: flex-start;
+}
 
 /* Условие идёт сверху, вровень с номером задачи. */
 .sheet-task-text {
@@ -612,9 +668,15 @@ body {
   flex-direction: column;
 }
 
-.sheet-task-question { margin: 0; }
-div.sheet-task-question > p { margin: 0; }
-div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
+.sheet-task-question {
+  margin: 0;
+}
+div.sheet-task-question > p {
+  margin: 0;
+}
+div.sheet-task-question > * + * {
+  margin-top: calc(var(--sheet-step) * 1.5);
+}
 
 /* Варианты ответа: у задач с выбором. */
 .sheet-options {
@@ -658,8 +720,15 @@ div.sheet-task-question > * + * { margin-top: calc(var(--sheet-step) * 1.5); }
 /* ── Чертёж ────────────────────────────────────────────────
    Ширина считается по клетке, а не по ширине карточки: клетка
    одинакова на всех задачах, и точки читаются одинаково. */
-.sheet-figure { flex: none; margin: 0; }
-.sheet-figure svg { display: block; width: 100%; height: auto; }
+.sheet-figure {
+  flex: none;
+  margin: 0;
+}
+.sheet-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 /* Формула KaTeX внутри чертежа (foreignObject): правило выше задевает
    и svg формулы — знак корня сплющивается, черта пропадает. Внутри
    формулы — размеры KaTeX (как styles/base.css на сайте). */
@@ -670,16 +739,24 @@ foreignObject .katex svg {
   max-height: none !important;
 }
 
-.sheet-task--double .sheet-figure { align-self: center; }
+.sheet-task--double .sheet-figure {
+  align-self: center;
+}
 
 /* В две колонки строка ответа — последняя в карточке, прижата к низу:
    у соседних карточек строки ответа оказываются на одной высоте. */
-.sheet-task--double .sheet-answer-line { margin-top: auto; }
+.sheet-task--double .sheet-answer-line {
+  margin-top: auto;
+}
 
 /* Толщина прямых. В цветной теме обе одинаковы — там различает цвет.
    В ч/б g(x) толще f(x): смысл не держится на цвете. */
-.graph-curve--lineA { stroke-width: var(--graph-curve-a-width); }
-.graph-curve--lineB { stroke-width: var(--graph-curve-b-width); }
+.graph-curve--lineA {
+  stroke-width: var(--graph-curve-a-width);
+}
+.graph-curve--lineB {
+  stroke-width: var(--graph-curve-b-width);
+}
 
 /* ══════════════════════════════════════════════════════════
    Подвал
@@ -696,9 +773,13 @@ foreignObject .katex svg {
   color: var(--sheet-ink-2);
 }
 
-.sheet-foot-brand { flex: none; }
+.sheet-foot-brand {
+  flex: none;
+}
 
-.sheet-foot-brand .sheet-logo-word { font-size: var(--sheet-fs-small); }
+.sheet-foot-brand .sheet-logo-word {
+  font-size: var(--sheet-fs-small);
+}
 
 .sheet-foot-course {
   margin-top: calc(var(--sheet-step) * 0.5);
@@ -726,7 +807,10 @@ foreignObject .katex svg {
   gap: calc(var(--sheet-step) * 1.5);
 }
 
-.sheet-social-item svg { flex: none; display: block; }
+.sheet-social-item svg {
+  flex: none;
+  display: block;
+}
 
 .sheet-social-item a {
   color: var(--sheet-brand);
@@ -794,7 +878,6 @@ foreignObject .katex svg {
   font-weight: 600;
   color: var(--sheet-ink-2);
 }
-
 
 /* Ключ генератора: номер, ответ, метод — две задачи в строке. */
 .sheet-key-table {
@@ -904,15 +987,30 @@ foreignObject .katex svg {
   align-items: center;
 }
 
-.sheet-arrow { display: block; }
+.sheet-arrow {
+  display: block;
+}
 
 /* Полное решение (гипербола): шаги списком, ответ справа сверху. */
-.sheet-solution--full { align-items: flex-start; }
-.sheet-solution--full .sheet-solution-no { align-self: flex-start; }
-.sheet-solution--full .sheet-solution-body { display: block; }
-.sheet-solution--full .sheet-steps { margin: 0; padding-left: calc(var(--sheet-step) * 5); }
-.sheet-solution--full .sheet-step + .sheet-step { margin-top: calc(var(--sheet-step) * 1); }
-.sheet-solution-sep { color: var(--sheet-ink-3); }
+.sheet-solution--full {
+  align-items: flex-start;
+}
+.sheet-solution--full .sheet-solution-no {
+  align-self: flex-start;
+}
+.sheet-solution--full .sheet-solution-body {
+  display: block;
+}
+.sheet-solution--full .sheet-steps {
+  margin: 0;
+  padding-left: calc(var(--sheet-step) * 5);
+}
+.sheet-solution--full .sheet-step + .sheet-step {
+  margin-top: calc(var(--sheet-step) * 1);
+}
+.sheet-solution-sep {
+  color: var(--sheet-ink-3);
+}
 
 .sheet-solution-answer {
   flex: none;
@@ -921,24 +1019,54 @@ foreignObject .katex svg {
 }
 
 /* Рисунок к разбору — справа от решения, на листе учителя. */
-.sheet-solution--figure { align-items: flex-start; }
-.sheet-solution--figure .sheet-solution-no { align-self: flex-start; }
+.sheet-solution--figure {
+  align-items: flex-start;
+}
+.sheet-solution--figure .sheet-solution-no {
+  align-self: flex-start;
+}
 .sheet-solution-figure {
   flex: none;
   margin: 0;
   max-width: min(34%, 44mm);
 }
-.sheet-solution-figure svg { display: block; width: 100%; height: auto; }
+.sheet-solution-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 /* В карточке задачи (№2): рисунок к разбору справа, текст обтекает. */
-.sheet-solution-figure--float { float: right; margin: 0 0 calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 3); }
-.sheet-task-solution::after { content: ''; display: block; clear: both; }
+.sheet-solution-figure--float {
+  float: right;
+  margin: 0 0 calc(var(--sheet-step) * 2) calc(var(--sheet-step) * 3);
+}
+.sheet-task-solution::after {
+  content: '';
+  display: block;
+  clear: both;
+}
 /* Крупный клетчатый рисунок к разбору (figureRules.js) — не сбоку, а
    отдельной строкой под решением, по центру, своим размером. */
-.sheet-solution:has(> .sheet-figure--grid) { flex-wrap: wrap; }
-.sheet-solution:has(> .sheet-figure--grid)::after { content: ''; order: 8; flex-basis: 100%; }
-.sheet-solution > .sheet-figure--grid { order: 9; margin: calc(var(--sheet-step) * 2) auto 0; }
-.sheet-solution-figure.sheet-figure--large { max-width: none; }
-.sheet-solution-figure.sheet-figure--grid { float: none; display: block; margin: calc(var(--sheet-step) * 2) auto; }
+.sheet-solution:has(> .sheet-figure--grid) {
+  flex-wrap: wrap;
+}
+.sheet-solution:has(> .sheet-figure--grid)::after {
+  content: '';
+  order: 8;
+  flex-basis: 100%;
+}
+.sheet-solution > .sheet-figure--grid {
+  order: 9;
+  margin: calc(var(--sheet-step) * 2) auto 0;
+}
+.sheet-solution-figure.sheet-figure--large {
+  max-width: none;
+}
+.sheet-solution-figure.sheet-figure--grid {
+  float: none;
+  display: block;
+  margin: calc(var(--sheet-step) * 2) auto;
+}
 
 /* ══════════════════════════════════════════════════════════
    Решение по шагам в карточке — файл «Для учителя»
@@ -959,16 +1087,36 @@ foreignObject .katex svg {
 
 /* Подсказка по шагам в конце файла учителя: вопрос, кнопки через
    точку (верная — жирным, чернилами), комментарий — мельче. */
-.sheet-hint { font-size: var(--sheet-fs-small); color: var(--sheet-ink-2); }
-.sheet-hint-q { color: var(--sheet-ink); }
-.sheet-hint-right { color: var(--sheet-ink); font-weight: 700; }
-.sheet-hint-sep { color: var(--sheet-ink-3); }
-.sheet-hint-comment { display: block; color: var(--sheet-ink-3); font-style: italic; }
+.sheet-hint {
+  font-size: var(--sheet-fs-small);
+  color: var(--sheet-ink-2);
+}
+.sheet-hint-q {
+  color: var(--sheet-ink);
+}
+.sheet-hint-right {
+  color: var(--sheet-ink);
+  font-weight: 700;
+}
+.sheet-hint-sep {
+  color: var(--sheet-ink-3);
+}
+.sheet-hint-comment {
+  display: block;
+  color: var(--sheet-ink-3);
+  font-style: italic;
+}
 
 /* Этап решения перед текстом шага — те же слова, что над шагом на сайте. */
-.sheet-step-etap { color: var(--sheet-ink); font-weight: 600; }
+.sheet-step-etap {
+  color: var(--sheet-ink);
+  font-weight: 600;
+}
 
-.sheet-step .math { margin-left: calc(var(--sheet-step) * 1); white-space: nowrap; }
+.sheet-step .math {
+  margin-left: calc(var(--sheet-step) * 1);
+  white-space: nowrap;
+}
 
 /* Строка ответа под решением — жирная, чернилами. */
 .sheet-task-answer {
@@ -980,19 +1128,37 @@ foreignObject .katex svg {
 /* ══════════════════════════════════════════════════════════
    Широкий рисунок под условием: ось, дерево
    ══════════════════════════════════════════════════════════ */
-.sheet-task--stack .sheet-task-body { flex-direction: column; align-items: stretch; }
-.sheet-task--stack .sheet-figure { align-self: flex-start; max-width: 100%; }
-.sheet-task--stack .sheet-answer-line { padding-top: calc(var(--sheet-step) * 2); }
+.sheet-task--stack .sheet-task-body {
+  flex-direction: column;
+  align-items: stretch;
+}
+.sheet-task--stack .sheet-figure {
+  align-self: flex-start;
+  max-width: 100%;
+}
+.sheet-task--stack .sheet-answer-line {
+  padding-top: calc(var(--sheet-step) * 2);
+}
 
 /* ══════════════════════════════════════════════════════════
    Крупные рисунки (spec.figures = 'large', figureRules.js)
    Ширина в мм задана самим рисунком и не сжимается: клетка
    клетчатого рисунка на печати ровно та, что посчитана.
    ══════════════════════════════════════════════════════════ */
-.sheet-figure--large { flex: none; max-width: none; }
-.sheet-figure--large svg { max-width: none !important; max-height: none !important; }
-.sheet-task--stack .sheet-figure--large { align-self: center; }
-.sheet-task--grid .sheet-figure { margin-top: calc(var(--sheet-step) * 2); }
+.sheet-figure--large {
+  flex: none;
+  max-width: none;
+}
+.sheet-figure--large svg {
+  max-width: none !important;
+  max-height: none !important;
+}
+.sheet-task--stack .sheet-figure--large {
+  align-self: center;
+}
+.sheet-task--grid .sheet-figure {
+  margin-top: calc(var(--sheet-step) * 2);
+}
 
 /* ══════════════════════════════════════════════════════════
    Разобранный пример — кусок потока в оформлении «Повторяем»
@@ -1022,23 +1188,63 @@ foreignObject .katex svg {
   font-weight: 700;
 }
 
-.sheet-example-text { flex: 1 1 0; min-width: 0; }
-.sheet-example-text .sheet-task-question { font-size: var(--sheet-fs-small); }
+.sheet-example-text {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.sheet-example-text .sheet-task-question {
+  font-size: var(--sheet-fs-small);
+}
 .sheet-example-title {
   margin: 0 0 calc(var(--sheet-step) * 1);
   font-size: var(--sheet-fs-body);
   font-weight: 700;
   color: var(--sheet-ink);
 }
-.sheet-example .sheet-task-solution { margin-top: calc(var(--sheet-step) * 1.5); }
-.sheet-example .sheet-figure { flex: none; }
+.sheet-example .sheet-task-solution {
+  margin-top: calc(var(--sheet-step) * 1.5);
+}
+.sheet-example .sheet-figure {
+  flex: none;
+}
 
 /* Широкий рисунок примера — под текстом, во всю ширину рамки. */
-.sheet-example--stack .sheet-figure { flex: 1 1 100%; display: flex; justify-content: center; }
-.sheet-example--stack .sheet-figure svg { width: auto; }
+.sheet-example--stack .sheet-figure {
+  flex: 1 1 100%;
+  display: flex;
+  justify-content: center;
+}
+.sheet-example--stack .sheet-figure svg {
+  width: auto;
+}
 
 /* Формула не рвётся переносом посередине — как на сайте (styles/base.css). */
-.katex .katex-html { white-space: nowrap; }
+.katex .katex-html {
+  white-space: nowrap;
+}
+
+/* Картинка к задаче (сюжет): справа от условия, не шире трети листа и
+   не выше 42 мм; пропорции файла, без обрезки. Карточка задачи не
+   рвётся между страницами — картинка вместе с ней. Экранный двойник
+   правила — styles/kartinka-zadachi.css. */
+.sheet-task-question picture.zadacha-kartinka {
+  float: right;
+  width: auto;
+  max-width: 33%;
+  margin: 0 0 calc(var(--sheet-step) * 1.5) calc(var(--sheet-step) * 3);
+}
+.sheet-task-question picture.zadacha-kartinka img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 42mm;
+  margin-inline: auto;
+  object-fit: contain;
+}
+div.sheet-task-question:has(.zadacha-kartinka) {
+  display: flow-root;
+}
 
 /* ══════════════════════════════════════════════════════════
    Листы по модели «блоки → варианты → задачи» (lib/sheetList.ts:
@@ -1049,7 +1255,14 @@ foreignObject .katex svg {
   font-size: var(--sheet-fs-small);
   color: var(--sheet-ink-2);
 }
-.sheet-list-otvet { margin: calc(var(--sheet-step) * 1.5) 0 0; }
+.sheet-list-otvet {
+  margin: calc(var(--sheet-step) * 1.5) 0 0;
+}
+/* Строка источника варианта — только на листе учителя, под ключом. */
+.sheet-list-klyuch .sheet-list-istochnik {
+  margin-top: var(--sheet-step);
+  font-style: italic;
+}
 /* Шаги разбора — кусками под карточкой задачи, на ширину её текста. */
 .sheet-list-razbor {
   padding: 0 calc(var(--sheet-step) * 3.5) 0 calc(var(--sheet-step) * 13.5);

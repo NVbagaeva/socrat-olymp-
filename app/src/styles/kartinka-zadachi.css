@@ -1,0 +1,75 @@
+/* ══════════════════════════════════════════════════════════════════
+   Картинка к задаче — общий слой для всего сайта: предпросмотр
+   генератора, тренажёр, опорные задачи, примеры в «О задании».
+
+   Правило одно: картинка сюжета — украшение условия, а не его замена.
+   На телефоне она не выше 150 px, на компьютере — не выше 200 px;
+   пропорции файла сохраняются, ничего не обрезается (width и height —
+   auto, ограничены только max-*). Размеры задаёт класс, а не файл:
+   вертикальная и квадратная картинка одинаково компактны.
+
+     .zadacha-kartinka          — по центру, отдельной строкой;
+     .zadacha-kartinka--sboku   — справа от условия, текст обтекает
+                                  (лист генератора): не шире трети
+                                  листа. Стоит в разметке ПЕРЕД текстом.
+
+   Печатные листы — те же классы в lib/sheet/sheet.css (миллиметры).
+   Селекторы с тегом (picture.…) — чтобы правило было сильнее
+   раздельных «.z10-kartinka img { width: 100% }».
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --kartinka-zadachi-h: 150px;
+  --kartinka-zadachi-w: 240px;
+}
+
+@media (min-width: 641px) {
+  :root {
+    --kartinka-zadachi-h: 200px;
+    --kartinka-zadachi-w: 320px;
+  }
+}
+
+picture.zadacha-kartinka,
+img.zadacha-kartinka {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+picture.zadacha-kartinka img,
+img.zadacha-kartinka {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, var(--kartinka-zadachi-w));
+  max-height: var(--kartinka-zadachi-h);
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+/* Справа от условия: на компьютере не шире трети листа, на узком
+   телефоне — до 45 % колонки, чтобы сюжет было видно; текст обтекает
+   слева. Высоту по-прежнему держит --kartinka-zadachi-h. */
+picture.zadacha-kartinka--sboku {
+  float: right;
+  width: auto;
+  max-width: min(45%, var(--kartinka-zadachi-w));
+  margin: 2px 0 var(--space-2) var(--space-3);
+}
+picture.zadacha-kartinka--sboku img {
+  max-width: 100%;
+}
+@media (min-width: 641px) {
+  picture.zadacha-kartinka--sboku {
+    max-width: min(34%, var(--kartinka-zadachi-w));
+  }
+}
+
+/* Условие с картинкой сбоку держит её внутри себя: решение, строка
+   ответа и следующая задача начинаются ниже картинки. */
+.gen-task__q:has(.zadacha-kartinka--sboku),
+.gen-example__q:has(.zadacha-kartinka--sboku) {
+  display: flow-root;
+}

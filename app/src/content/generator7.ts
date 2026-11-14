@@ -28,7 +28,7 @@ export const GENERATOR7_SOURCES = [
     id: 'bank' as const,
     title: 'Только ФИПИ',
     short: 'ФИПИ',
-    note: 'Открытый банк; кончились — аналоги.',
+    note: 'Только открытый банк. Не хватит задач — лист будет короче.',
   },
   {
     id: 'mix' as const,

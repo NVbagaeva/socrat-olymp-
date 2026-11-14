@@ -123,6 +123,10 @@ export class Pul<T> {
     }
     return undefined;
   }
+  /** Ещё не занятые задачи пула, по порядку. */
+  svobodnye(): T[] {
+    return this.items.filter((_, i) => this.zanyato[i] !== true);
+  }
 }
 
 /** Шаблон позиции: ключ и откуда брать задачу. */

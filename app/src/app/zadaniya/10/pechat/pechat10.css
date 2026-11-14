@@ -1,23 +1,12 @@
 /* Печатные листы №10 на общем шаблоне lib/sheet (sheet10.ts): вёрстку
    страницы, карточек, ключа и разбора задаёт sheet.css, здесь — только
-   своё: условие, иллюстрация, чертёж моста, шаги разбора, рамки. */
+   своё: условие, чертёж моста, шаги разбора, рамки. Картинка сюжета —
+   общий класс «картинка к задаче» (.zadacha-kartinka, sheet.css). */
 
 .z10-list__uslovie {
   margin: 0;
 }
 
-.z10-list__metka {
-  font-size: var(--sheet-fs-small);
-  color: var(--sheet-ink-2);
-}
-
-.z10-list__kartinka {
-  display: block;
-  max-width: 100%;
-  margin: calc(var(--sheet-step) * 2) 0 0;
-}
-
-.z10-list__kartinka img,
 .z10-list__most svg {
   display: block;
   width: 100%;

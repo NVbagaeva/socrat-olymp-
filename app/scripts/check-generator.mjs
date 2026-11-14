@@ -71,6 +71,14 @@ const okTop = ok;
 const { razdely, bank } = dannyeTrenazhera();
 const config = A.config11(razdely, '/zadaniya/11');
 const engine = A.engine11(config, razdely, bank, '/zadaniya/11');
+/** Объект строкой без учёта порядка ключей: «Дополнительно» сравниваются по содержанию. */
+function kanon(o) {
+  return JSON.stringify(
+    Object.fromEntries(Object.entries(o).sort(([a], [b]) => a.localeCompare(b))),
+  );
+}
+/** Разделы, где «только банк» строгий: без подмены аналогами и новыми задачами. */
+const STROGIY_BANK = new Set(['№11', '№7', '№10']);
 const SEEDS = ['7K3F', 'Q2M8', '0000', 'ZZZZ', 'A1B2'];
 
 /* Разделы на общем генераторе: адаптер, лист и что у них своё. */
@@ -572,15 +580,16 @@ async function proverit(R) {
           sheet.variants.length === state.variants,
           `${label}/${seed}: вариантов ${state.variants}`,
         );
-        /* №11, «только открытый банк»: банк кончился — задач меньше, чем
-           выбрано, без подмены новыми, и лист говорит об этом сообщением. */
+        /* №11, «только открытый банк», и №7, №10, «Только ФИПИ»: банк
+           кончился — задач меньше, чем выбрано, без подмены аналогами и
+           новыми, и лист говорит об этом сообщением. */
         const korotkiy = sheet.variants.some((v) => v.length < state.plan.length);
         ok(
           sheet.variants.every((v) => v.length === state.plan.length) ||
-            (R.name === '№11' &&
+            (STROGIY_BANK.has(R.name) &&
               source === 'bank' &&
               korotkiy &&
-              /^В банке по выбранным типам/.test(sheet.note ?? '') &&
+              /^В банке (по выбранным типам|не хватило задач)/.test(sheet.note ?? '') &&
               sheet.variants.every((v) => v.every((t) => t.fromBank))),
           `${label}/${seed}: задач в варианте ${state.plan.length}`,
         );
@@ -718,8 +727,11 @@ async function proverit(R) {
         const r1plus = byPos(await engine.build({ ...z1, plan: plus }));
         ok(r1plus[pos] === r1[pos], `${label}: замена остаётся после добавления темы`);
         const r2 = byPos(await engine.build({ ...base, zameny: { [pos]: 2 } }));
+        /* Строгий банк кончился — заменить не на что: задача остаётся. */
+        const nechem = STROGIY_BANK.has(R.name) && source === 'bank';
         ok(
-          r1[pos] !== byPos(a)[pos] && r2[pos] !== r1[pos] && r2[pos] !== byPos(a)[pos],
+          (r1[pos] !== byPos(a)[pos] && r2[pos] !== r1[pos] && r2[pos] !== byPos(a)[pos]) ||
+            (nechem && (r1[pos] === byPos(a)[pos] || r2[pos] === r1[pos])),
           `${label}: каждая замена даёт новую задачу`,
         );
 
@@ -806,11 +818,13 @@ async function proverit(R) {
           date: '2026-10-24',
           teacher: 'Иванова А.А.',
           urok: 0,
+          /* Переключатель раздела (у №10 — картинки, по умолчанию включены) — как у base. */
+          ...(base.extras.flag === undefined ? {} : { flag: base.extras.flag }),
         };
         const st = { ...base, extras };
         const back = engine.parse(new URLSearchParams(engine.hrefs(st).link.split('?')[1]));
         ok(
-          back !== null && JSON.stringify(back.extras) === JSON.stringify(extras),
+          back !== null && kanon(back.extras) === kanon(extras),
           `${label}: «Дополнительно» в ссылке на набор`,
         );
         /* Пресет может задать вид работы; без «Дополнительно» вовсе — прежний адрес. */
@@ -882,7 +896,7 @@ async function proverit(R) {
         const sv = { ...base, extras: svoy };
         const backS = engine.parse(new URLSearchParams(engine.hrefs(sv).link.split('?')[1]));
         ok(
-          backS !== null && JSON.stringify(backS.extras) === JSON.stringify(svoy),
+          backS !== null && kanon(backS.extras) === kanon(svoy),
           `${label}: свой заголовок в ссылке на набор`,
         );
         {
@@ -1036,13 +1050,20 @@ console.log('№8: уровень и повторы');
   okTop(dup === 0, `№8: условия одного прототипа в варианте не повторяются (повторов ${dup})`);
 }
 
-/* ── №10: «Картинки сюжетов» ──────────────────────────────────── */
-console.log('№10: картинки сюжетов');
+/* ── №10: «Картинки к задачам» ──────────────────────────────────── */
+console.log('№10: картинки к задачам');
 {
   const R = RAZDELY.find((x) => x.name === '№10');
   const preset = R.config.presets[0];
   for (const seed of SEEDS.slice(0, 3)) {
-    const base = { ...G.stateFromPreset(R.config, preset, 'mix'), seed };
+    /* По умолчанию картинки к задачам включены (flag.on), выключенный переключатель — без них. */
+    const poUmolchaniyu = { ...G.stateFromPreset(R.config, preset, 'mix'), seed };
+    okTop(
+      poUmolchaniyu.extras.flag === true,
+      `№10 ${seed}: картинки к задачам включены по умолчанию`,
+    );
+    const { flag: _flag, ...bezFlaga } = poUmolchaniyu.extras;
+    const base = { ...poUmolchaniyu, extras: bezFlaga };
     const on = { ...base, extras: { ...base.extras, flag: true } };
     const link = R.engine.hrefs(on).link.split('?')[1];
     const back = R.engine.parse(new URLSearchParams(link));

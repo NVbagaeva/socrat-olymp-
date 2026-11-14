@@ -138,7 +138,7 @@ export function EkranUznay45({
         {kartinka === undefined ? null : (
           <div className="trn-risunok">
             <img
-              className="z45-kartinka"
+              className="z45-kartinka zadacha-kartinka"
               src={assetUrl(kartinka.path)}
               alt={kartinka.alt}
               decoding="async"

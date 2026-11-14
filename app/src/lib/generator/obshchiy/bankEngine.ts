@@ -12,7 +12,7 @@
  */
 
 import { slotySostava, sostavIzSlotov } from './klyuchi';
-import { defaultExtras, vidRabotyIz, vidRabotyText } from './state';
+import { extrasBezFlaga, vidRabotyIz, vidRabotyText } from './state';
 import type { BlokBanka, IstochnikBanka, ZaprosBanka } from './bank';
 import { zaprosBankaQuery } from './bank';
 import type {
@@ -111,7 +111,7 @@ export function zaprosIzSostoyaniya(
 
 function extrasIzZaprosa(z: ZaprosBanka, config: GenConfig): GenExtras {
   return {
-    ...defaultExtras(config),
+    ...extrasBezFlaga(config),
     theory: z.pamyatka,
     examples: z.primery,
     ...vidRabotyIz(config, z.kind),
@@ -225,7 +225,7 @@ export function bankEngine(config: GenConfig, s: BankSection): GenEngine {
         zameny: {},
         /* У прежнего листа рамка теории шла вместе с примерами (e). */
         extras: {
-          ...defaultExtras(config),
+          ...extrasBezFlaga(config),
           theory: old.primery > 0,
           examples: old.primery,
           ...(old.flag === true ? { flag: true } : {}),

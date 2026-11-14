@@ -53,7 +53,7 @@ function risunokPrimera(id: string, ill: IllInfo | undefined, params: Params): R
   }
   return (
     <div className="z10-primer-risunok">
-      {ill === undefined ? null : <Kartinka10 ill={ill} />}
+      {ill === undefined ? null : <Kartinka10 ill={ill} zadacha />}
       {id === 'P01' ? <Most10 params={params} rezhim="uchenik" /> : null}
     </div>
   );
