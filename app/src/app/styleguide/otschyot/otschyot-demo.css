@@ -1,0 +1,56 @@
+/* /styleguide/otschyot/ — обвязка демо-страницы. Сама плашка —
+   components/landing/otschyot/otschyot.css. */
+.eo-demo {
+  min-height: 100vh;
+  padding: var(--space-12) 0 96px;
+}
+.eo-demo__nazad {
+  margin-bottom: var(--space-6);
+  font-size: 14px;
+}
+.eo-demo__h1 {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+}
+.eo-demo__lead {
+  max-width: 62ch;
+  margin-top: var(--space-4);
+  font-size: 17px;
+  line-height: 26px;
+  color: var(--color-text-secondary);
+}
+.eo-demo__h2 {
+  margin-top: 96px;
+  font-size: 2rem;
+  font-weight: 620;
+}
+.eo-demo__blok {
+  margin-top: var(--space-12);
+}
+.eo-demo__blok > h2,
+.eo-demo__blok > h3 {
+  font-size: 1.375rem;
+  font-weight: 620;
+}
+.eo-demo__blok > p {
+  max-width: 70ch;
+  margin: var(--space-2) 0 var(--space-5);
+  color: var(--color-text-secondary);
+}
+.eo-demo__blok > h3 {
+  margin-bottom: var(--space-4);
+}
+.eo-demo__ryad {
+  display: grid;
+  gap: var(--space-6);
+}
+@media (max-width: 767.98px) {
+  .eo-demo {
+    padding-top: var(--space-8);
+  }
+  .eo-demo__h1 {
+    font-size: 1.875rem;
+  }
+}

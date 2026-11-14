@@ -3,6 +3,7 @@ import type { Level } from '@/lib/level';
 import { BankSection } from './BankSection';
 import { HeroSection } from './HeroSection';
 import { HowSection } from './HowSection';
+import { OtschyotSection } from './otschyot/EgeOtschyot';
 
 /**
  * Главная уровня: одна разметка на профиль (/) и базу (/baza/).
@@ -17,6 +18,9 @@ export function Glavnaya({ level }: { level: Level }) {
       <SiteHeader className="site-head--steklo" />
       <main>
         <HeroSection level={level} />
+        {/* Обратный отсчёт до ЕГЭ — сразу после первого экрана. Даты —
+            config/ege-countdown.ts. */}
+        <OtschyotSection level={level} />
         <HowSection />
         {/* Сняты до появления самих функций — на главной только то, что
             работает. Компоненты и тексты на месте, вернуть — одна строка:
