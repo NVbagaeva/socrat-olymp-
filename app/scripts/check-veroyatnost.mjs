@@ -95,11 +95,31 @@ for (const file of [
   const js = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
     fileName: file,
-  }).outputText.replace(/require\("@\/lib\//g, `require("${out.replace(/\\/g, '/')}/`);
+  }).outputText
+    .replace(/require\("@\/lib\//g, `require("${out.replace(/\\/g, '/')}/`)
+    /* lib/level.ts берёт число заданий профиля из структуры экзамена. */
+    .replace(
+      /require\("@\/content\/struktura"\)/g,
+      `require("${out.replace(/\\/g, '/')}/struktura-ekzamena.js")`,
+    );
   const target = path.join(out, path.relative(src, file).replace(/\.ts$/, '.js'));
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, js);
 }
+
+/* Структура экзамена (content/struktura.js) — простой ES-модуль: во
+   временную папку кладётся его перевод в CommonJS. */
+fs.writeFileSync(
+  path.join(out, 'struktura-ekzamena.js'),
+  ts.transpileModule(fs.readFileSync(path.join(root, 'src', 'content', 'struktura.js'), 'utf8'), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2022,
+      allowJs: true,
+    },
+    fileName: 'struktura.js',
+  }).outputText,
+);
 
 const {
   bezPodskazki,

@@ -5,11 +5,12 @@
  */
 
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR7_TEXTS = {
-  section: '№7 · Простейшие уравнения',
+  section: `№${nomerRazdela('uravneniya')} · Простейшие уравнения`,
   sheet: {
-    chip: 'Задание 7',
+    chip: `Задание ${nomerRazdela('uravneniya')}`,
     title: 'Простейшие уравнения',
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',

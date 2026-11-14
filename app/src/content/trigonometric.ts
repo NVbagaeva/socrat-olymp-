@@ -18,6 +18,7 @@
 
 import type { Formulation, SectionAbout, TutorMaterial } from './sections';
 import type { RichExample } from './theoryRich';
+import { nomerRazdela } from '@/content/struktura';
 
 const CHECK = 'Проверка по графику';
 
@@ -302,7 +303,7 @@ export const TRIGONOMETRIC_ABOUT: Omit<SectionAbout, 'hint' | 'title'> = {
     'Разбираем графики функций $f(x) = a\\cos x + b$, $f(x) = a\\sin x + b$ и $f(x) = a\\operatorname{tg} x + b$ — все шесть типов задач открытого банка ФИПИ. Параметры не угадываем по рисунку: читаем цену клетки, берём две отмеченные точки и решаем систему.',
   formsTitle: 'Типы задач в этом разделе',
   forms: TYPES,
-  skillsTitle: 'Что нужно уметь для задания №12',
+  skillsTitle: `Что нужно уметь для задания №${nomerRazdela('grafiki-funkciy')}`,
   skills: [
     'Читать клетку: по оси $x$ — $\\dfrac{\\pi}{4}$, по оси $y$ — по подписанной единице',
     'Знать значения: $\\cos 0 = 1$, $\\sin \\dfrac{\\pi}{2} = 1$, $\\operatorname{tg} \\dfrac{\\pi}{4} = 1$ и где функция равна нулю',

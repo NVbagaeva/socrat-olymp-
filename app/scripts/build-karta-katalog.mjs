@@ -19,9 +19,13 @@ import { requireSrc } from './lib/load-ts.mjs';
 const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(APP, 'src', 'content', 'karta', 'katalog.json');
 
-const { tasks } = requireSrc('content/tasks.ts');
+/* Области карты записаны по номеру хранения раздела (content/struktura.js):
+   на нём ключи журналов попыток и адреса тренажёров. Номер ЕГЭ на острове
+   карта считает сама при показе. */
+const { vseRazdely } = requireSrc('content/tasks.ts');
+const { chastRazdela } = requireSrc('content/struktura.js');
 const nazvanie = (no) => {
-  const t = tasks.find((x) => Number(x.no) === no);
+  const t = vseRazdely.find((x) => x.hranenie === no);
   return t.shortTitle ?? t.name;
 };
 
@@ -32,7 +36,7 @@ const razdely = [];
 const dobavit = (no, gruppy, trenazher, status = 'gotov') => {
   razdely.push({
     no,
-    chast: no <= 13 ? 1 : 2,
+    chast: chastRazdela(no),
     status,
     nazvanie: nazvanie(no),
     gruppy: gruppy.map((g) => ({

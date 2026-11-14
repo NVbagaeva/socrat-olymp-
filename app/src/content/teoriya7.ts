@@ -20,6 +20,7 @@
 
 import type { Blok7 } from '@/lib/zadanie7/teoriya-yakorya';
 import { IRRACIONALNYE_7 } from './teoriya7-irr';
+import { nomerRazdela } from '@/content/struktura';
 
 /**
  * Блок раздела. `yakor` — имя рамки или таблицы для «Повторить теорию»
@@ -107,8 +108,8 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
   {
     id: 'kak-reshat',
     no: 1,
-    title: 'Как решать любое уравнение №7',
-    lead: 'В задании №7 одно уравнение и один ответ. Типы разные, но порядок действий у всех один: понять тип, записать ограничения, сделать равносильные переходы и проверить корень.',
+    title: `Как решать любое уравнение №${nomerRazdela('uravneniya')}`,
+    lead: `В задании №${nomerRazdela('uravneniya')} одно уравнение и один ответ. Типы разные, но порядок действий у всех один: понять тип, записать ограничения, сделать равносильные переходы и проверить корень.`,
     bloki: [
       {
         vid: 'opredelenie',
@@ -652,7 +653,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     id: 'logarifmy',
     no: 7,
     title: 'Логарифмы и логарифмические уравнения',
-    lead: 'Логарифм — это показатель степени. Почти каждое логарифмическое уравнение №7 решается одним определением.',
+    lead: `Логарифм — это показатель степени. Почти каждое логарифмическое уравнение №${nomerRazdela('uravneniya')} решается одним определением.`,
     bloki: [
       {
         vid: 'opredelenie',
@@ -1004,7 +1005,7 @@ export const RAZDELY_TEORII_7: RazdelTeorii7[] = [
     id: 'lovushki',
     no: 9,
     title: 'Ловушки',
-    lead: 'Шесть ошибок, на которых чаще всего теряют балл в №7.',
+    lead: `Шесть ошибок, на которых чаще всего теряют балл в №${nomerRazdela('uravneniya')}.`,
     bloki: [
       {
         vid: 'lovushka',
@@ -1088,7 +1089,7 @@ export function TEORIYA_7_DLYA_PROTOTIPA(
 /* ── Шпаргалка по №7 (A4, две страницы) ─────────────────────────── */
 
 export const SHPARGALKA_7 = {
-  title: 'Шпаргалка по заданию №7',
+  title: `Шпаргалка по заданию №${nomerRazdela('uravneniya')}`,
   podzagolovok: 'Простейшие уравнения',
   algoritm: [
     'Тип уравнения и план',

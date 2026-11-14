@@ -5,6 +5,7 @@
  */
 
 import { POV_SCREEN, type PovTexts } from '@/content/povyshennye';
+import { nomeraChasti } from '@/content/struktura';
 
 export const EZH_HREF = '/ezhemesyachnye/';
 
@@ -37,7 +38,7 @@ export const EZH_SCREEN: PovTexts = {
     chasti: {
       ...POV_SCREEN.info.chasti,
       chast2: () =>
-        'Часть 2 — задания 14–20 с развёрнутым решением: ответ сверяет автопроверка, баллы ставите вы сами по критериям. Есть во всех вариантах.',
+        `Часть 2 — задания ${nomeraChasti(2)} с развёрнутым решением: ответ сверяет автопроверка, баллы ставите вы сами по критериям. Есть во всех вариантах.`,
     },
     cveta: {
       ...POV_SCREEN.info.cveta,
@@ -48,7 +49,8 @@ export const EZH_SCREEN: PovTexts = {
     title: 'Ежемесячные варианты',
     note: 'Октябрь 2026 — январь 2027: решать онлайн или печатать',
   },
-  parts: () => 'Часть 1 (задания 1–13) и часть 2 (задания 14–20) — во всех вариантах',
+  parts: () =>
+    `Часть 1 (задания ${nomeraChasti(1)}) и часть 2 (задания ${nomeraChasti(2)}) — во всех вариантах`,
   card: {
     ...POV_SCREEN.card,
     title: (k: number) => EZH_VARIANT_LABEL(k),

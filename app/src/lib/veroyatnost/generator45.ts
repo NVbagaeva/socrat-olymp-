@@ -15,6 +15,7 @@ import { GENERATOR45_SOURCES, GENERATOR45_TEXTS, presets45 } from '@/content/gen
 import { GEN_UI } from '@/content/generatorUi';
 import { listSlova, veroyatnostBySlug, type Zadanie } from '@/content/veroyatnost';
 import type { GenConfig } from '@/lib/generator/obshchiy/types';
+import { nomerRazdela } from '@/content/struktura';
 
 const VIDY = GEN_UI.vidyRaboty as Record<string, string>;
 
@@ -42,7 +43,7 @@ export function config45(
     id: String(zadanie),
     scope: zadanie === 5 ? '5' : '4',
     slot,
-    section: `№${zadanie} · ${veroyatnostBySlug(String(zadanie))?.title ?? list.title.text}`,
+    section: `№${nomerRazdela(zadanie)} · ${veroyatnostBySlug(String(zadanie))?.title ?? list.title.text}`,
     sheet: {
       chip: list.title.chip,
       title: list.title.text,

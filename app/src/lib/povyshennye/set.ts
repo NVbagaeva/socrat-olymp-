@@ -5,7 +5,8 @@
  * без второго решателя: им нужен только набор.
  */
 
-import { EGE_NUMBERS, type VariantSet } from '@/lib/variant/types';
+import { VARIANT_NUMBERS, vChasti1 } from '@/lib/variant/struktura';
+import type { VariantSet } from '@/lib/variant/types';
 import { zagruzitVariant } from './dannye';
 import { povKod } from './kod';
 import { zadachaVersii } from './shablony';
@@ -28,7 +29,8 @@ export function povSetIz(k: number, versii: Zapis[][]): VariantSet {
     seed: code,
     version: POV_VERSION,
     config: {
-      tasks: [...EGE_NUMBERS],
+      /* Задания первой части по действующей структуре экзамена. */
+      tasks: [...VARIANT_NUMBERS],
       subtypes: {},
       source: 'own',
       stars: [],
@@ -38,7 +40,9 @@ export function povSetIz(k: number, versii: Zapis[][]): VariantSet {
     zameny: {},
     variants: versii.map((zapisi, i) => ({
       index: i + 1,
-      tasks: zapisi.map((z) => zadachaVersii(k, i + 1, z)),
+      /* Задачи разделов, которых в первой части нет (в ЕГЭ-2027 — №6 и
+         экономика с кратким ответом), в вариант не идут; данные остаются. */
+      tasks: vChasti1(zapisi.map((z) => zadachaVersii(k, i + 1, z))),
     })),
     createdAt: '2026-10-24T00:00:00.000Z',
   };

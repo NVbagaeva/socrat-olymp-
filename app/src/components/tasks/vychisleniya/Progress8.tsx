@@ -13,6 +13,7 @@ import { isBankTask, prototypeOfTask } from '@/lib/vychisleniya/ids';
 import { SKILLS } from '@/lib/vychisleniya/skills';
 import type { Bookmark } from '@/lib/zakladki';
 import '@/components/tasks/trainer/tstats.css';
+import { nomerRazdela } from '@/content/struktura';
 
 const perPrototype = new Map(BANK.map((entry) => [entry.prototype, entry.variants.length]));
 
@@ -41,7 +42,7 @@ export function bookmarkTitle8(names: Names8, item: Bookmark) {
   if (item.place !== 'trenazher') return item.title;
   return (
     <>
-      №8 · <Name names={names} prototype={prototypeOfTask(item.ref)} />
+      №{nomerRazdela('vychisleniya')} · <Name names={names} prototype={prototypeOfTask(item.ref)} />
     </>
   );
 }
@@ -99,7 +100,7 @@ export function Progress8({
   return (
     <section className="tstats z8-progress" aria-labelledby="z8-progress-title">
       <h3 className="tstats__title" id="z8-progress-title">
-        Мой прогресс в №8
+        Мой прогресс в №{nomerRazdela('vychisleniya')}
       </h3>
       <BankCounter8 total={total} />
       {sum.done === 0 ? (
@@ -134,7 +135,12 @@ export function Progress8({
 
       <section className="tstats__kinds">
         <h3 className="tstats__title">По навыкам</h3>
-        <TypeCards groups={groups8(names)} log={log} hideEmpty label="Прогресс по навыкам №8" />
+        <TypeCards
+          groups={groups8(names)}
+          log={log}
+          hideEmpty
+          label={`Прогресс по навыкам №${nomerRazdela('vychisleniya')}`}
+        />
       </section>
 
       <section className="tstats__kinds" data-section="mistakes8">
@@ -184,7 +190,12 @@ export function Progress8Compact({ total, names }: { total: number; names: Names
         </h2>
         <BankCounter8 total={total} />
       </div>
-      <TypeCards groups={groups8(names)} log={log} compact label="Прогресс по навыкам №8" />
+      <TypeCards
+        groups={groups8(names)}
+        log={log}
+        compact
+        label={`Прогресс по навыкам №${nomerRazdela('vychisleniya')}`}
+      />
       <p className="z8-about-progress__foot">
         <Link href={TRENAZHER8}>Тренироваться →</Link>
       </p>
