@@ -36,7 +36,7 @@ import { solutionLength, spaceFor, type SheetSpace } from '@/lib/sheet/space.js'
 import typo from '@/lib/sheet/typography.js';
 import { codeWithSpace } from './code';
 import type { Figure, FigureSize, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
-import { BEZ_NOMERA, nomerChasti1, podpis2 } from './struktura';
+import { BEZ_NOMERA, metkaVida, nomerChasti1, podpis2 } from './struktura';
 
 export type SheetKind = 'uchenik' | 'uchitel' | 'razbor';
 export type SheetChoice = SheetKind | 'vse';
@@ -445,7 +445,10 @@ function card2(z: Chast2Zadacha) {
     no: podpis2(z.no),
     id: `c2-${z.no}`,
     badge: ballText(MAX_BALL[z.no]),
-    questionHtml: uslovieHtml(z.uslovie),
+    /* Пометка вида у задачи прежнего №17 в ЕГЭ-2027 (№16: экономическая или на оптимизацию). */
+    questionHtml:
+      (metkaVida(z) === null ? '' : `<p class="sheet-vid"><i>${metkaVida(z)}</i></p>`) +
+      uslovieHtml(z.uslovie),
     options: null,
     figureSvg: z.risunok,
     figureWidth: z.risunok === null ? undefined : 60,

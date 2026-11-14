@@ -22,7 +22,7 @@ import type { Check, WorkPayload, WorkUi } from '@/lib/variant/online/sessionUi'
 import type { HintStep, VariantTask } from '@/lib/variant/types';
 import { AnswerField } from './AnswerField';
 import { clockText } from './format';
-import { podpis1, podpis2 } from '@/lib/variant/struktura';
+import { metkaVida, podpis1, podpis2 } from '@/lib/variant/struktura';
 
 export interface WorkScreenProps {
   payload: WorkPayload;
@@ -436,6 +436,7 @@ export function WorkScreen({
             <h2 className="vo-card__title">
               {T.run.task(podpis2(z2.no))}
               <BallPlashka n={MAX_BALL[z2.no]} />
+              {metkaVida(z2) === null ? null : <span className="vo-vid">{metkaVida(z2)}</span>}
             </h2>
           </header>
           <Chast2Card key={z2.no} z={z2} st={c2st} update={(fn) => setC2st(fn)} samo={trening} />
