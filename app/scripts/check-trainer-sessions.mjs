@@ -350,7 +350,7 @@ async function start8(page, timeout) {
     .click(timeout === undefined ? {} : { timeout });
 }
 
-/** №4 (и №5 после редизайна): карточка «Все методы вперемешку» — десять задач. */
+/** №4 и №5: карточка «Все методы вперемешку» — десять задач. */
 async function start45(page, timeout) {
   await page
     .getByRole('button', { name: /^Все методы вперемешку/ })
@@ -507,7 +507,23 @@ const TRAINERS = [
     all: chooseAll45,
     rep: true,
   },
-  { name: '№5', url: '/zadaniya/5/trenazher/', scope: '5', answer: answer45 },
+  {
+    name: '№5',
+    url: '/zadaniya/5/trenazher/',
+    scope: '5',
+    answer: answer45,
+    start: start45,
+    configButton: /^Все методы вперемешку/,
+    all: chooseAll45,
+  },
+  {
+    name: '№5 «Узнай метод»',
+    url: '/zadaniya/5/trenazher/',
+    scope: '5',
+    answer: answer45,
+    start: startUznay45,
+    configButton: /^Узнай метод/,
+  },
   {
     name: '№4 «Узнай метод»',
     url: '/zadaniya/4/trenazher/',

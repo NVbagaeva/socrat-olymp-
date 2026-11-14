@@ -91,9 +91,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z5',
     title: '№5 «Вероятность: сложная»',
     keys: [
-      /* Журнал попыток тренажёра (components/tasks/veroyatnost/Trenazher.tsx). Прежний ключ
+      /* Журнал попыток тренажёра (lib/veroyatnost/trening/progress.ts). Прежний ключ
          budetege:veroyatnost-5:v2 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:veroyatnost-5:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «5»). */
+      'budetege:trainer:5:session',
     ],
   },
   {
