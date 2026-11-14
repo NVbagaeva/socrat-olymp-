@@ -9,6 +9,7 @@
  * обычным текстом» — в скрипте (scripts/check-zadanie11.mjs).
  */
 
+import { oshibkiGlagolov } from './glagoly-dvizheniya';
 import { BANK, RAZMINKA } from './bank';
 import { d, nice } from './num';
 import { generate, GENERATORS, paramsKey, pohozhaNaBank, type Generated } from './gen';
@@ -509,6 +510,8 @@ export function checkGenerators(seeds: number, typeset: (tex: string) => string)
         ...checkSolved(w, g.solved, typeset),
         ...checkMetodika(w, st.id, g.solved),
         ...checkDrobnye(w, g.solved),
+        /* Едущий герой не «вышел» и не «прошёл»: глагол — у героя. */
+        ...oshibkiGlagolov(g.solved.uslovie).map((what) => ({ where: w, what })),
       );
       solved.push({ where: w, s: g.solved });
     }
