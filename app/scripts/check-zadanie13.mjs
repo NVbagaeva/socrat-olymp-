@@ -810,6 +810,12 @@ for (const [n, extra, want] of tables) {
   const oba = { outcomes: { [staryyKlyuch13(b1, 3)]: 'right', [zadachaId13(b1, 3)]: 'wrong' } };
   if (itog13(oba, b1, 3) !== 'wrong')
     problems.push('прогресс опорных: запись под id не главнее прежней');
+  /* Список блоков считает по id: прежняя запись переводится, запись под id главнее. */
+  const { sPostoyannymiId13 } = requireSrc('lib/zadanie13/progress');
+  if (sPostoyannymiId13(staryy).outcomes[zadachaId13(b1, 3)] !== 'right')
+    problems.push('прогресс опорных: прежняя запись не переводится в id для списка');
+  if (sPostoyannymiId13(oba).outcomes[zadachaId13(b1, 3)] !== 'wrong')
+    problems.push('прогресс опорных: в списке прежняя запись перебила запись под id');
 }
 
 /* ── Опорные задачи: 17 блоков по 10, ответы открываются ──────── */

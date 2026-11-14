@@ -8,7 +8,7 @@
  * тренажёра — под «прототип|seed».
  */
 
-import { createProgressStore, type StoreProgress } from '../progressStore';
+import { createProgressStore, type ProgressStore, type StoreProgress } from '../progressStore';
 import { SOSTAV_13 } from './opornye/sostav';
 
 /** Тренажёр: счётчики по прототипам и список ошибок («A-01|b3»). */
@@ -63,3 +63,24 @@ export function zapisat13(blok: string, no: number, itog: 'right' | 'wrong' | 'r
     itog,
   });
 }
+
+/**
+ * Прогресс опорных, где записи под прежним ключом «блок:номер» переведены
+ * в постоянные id (запись под id главнее): для списка блоков, который
+ * считает «решено» по id задач (OpornyeSpisokBanka).
+ */
+export function sPostoyannymiId13(progress: StoreProgress): StoreProgress {
+  const outcomes = { ...progress.outcomes };
+  for (const [klyuch, itog] of Object.entries(progress.outcomes)) {
+    const m = /^(o13-\d{2}):(\d+)$/.exec(klyuch);
+    const id = m === null ? undefined : SOSTAV_13[m[1] as string]?.[Number(m[2]) - 1]?.[0];
+    if (id !== undefined && outcomes[id] === undefined) outcomes[id] = itog;
+  }
+  return { ...progress, outcomes };
+}
+
+/** Хранилище опорных для списка блоков: тот же прогресс, ключи — постоянные id. */
+export const opornye13Spisok: ProgressStore = {
+  ...opornye13,
+  useProgress: () => sPostoyannymiId13(opornye13.useProgress()),
+};

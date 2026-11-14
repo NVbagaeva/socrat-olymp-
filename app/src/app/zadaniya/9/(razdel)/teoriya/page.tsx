@@ -4,6 +4,7 @@ import { Teoriya9 } from '@/components/tasks/proizvodnaya/Teoriya9';
 import { kolodaNomera } from '@/content/kartochki';
 import { PROIZVODNAYA, proizvodnayaTitle } from '@/content/proizvodnaya';
 import { ZADANIYA } from '@/lib/paths';
+import '@/components/tasks/teoriya/teoriya-steklo.css';
 
 const VKLADKA = PROIZVODNAYA.tabs.find((tab) => tab.id === 'teoriya')?.label ?? 'Теория';
 
@@ -15,6 +16,8 @@ export const metadata: Metadata = {
  * Вкладка «Теория» задания №9: семь разделов подряд (первый — «Понятие производной»), содержание
  * рядом. Страница серверная: формулы набираются KaTeX на сборке,
  * рисунки рисует движок графиков из сцен.
+ *
+ * Теория — в общем стеклянном слое (.teor-steklo, как у №7, №6, №2).
  *
  * Над теорией — «Проверить теорию»: карточки по теории №9
  * (content/kartochki/09-proizvodnaya.ts); их «Повторить теорию» ведёт к
@@ -28,7 +31,11 @@ export default function Teoriya9Tab() {
         href={`${ZADANIYA}/${PROIZVODNAYA.slug}/kartochki/`}
         ids={kolodaNomera(9).kartochki.map((k) => k.id)}
       />
-      <Teoriya9 vkladka={VKLADKA} />
+      {/* Слой «Стеклянной сцены» для теории (общий, .teor-steklo): содержание
+          и разметка не меняются, на экране — стеклянные рамки. */}
+      <div className="teor-steklo z9-teor-steklo">
+        <Teoriya9 vkladka={VKLADKA} />
+      </div>
     </>
   );
 }

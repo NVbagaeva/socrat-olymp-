@@ -1,26 +1,25 @@
 import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
 import { AppShell } from '@/components/layout/AppShell';
+import { SHAPKA1 } from '@/content/planimetriya1';
 import { tasksPage } from '@/content/tasks';
-import { RAZDELY_SPRAVOCHNIKA_1 } from '@/content/spravochnik1';
 import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
-import { BLOKI } from '@/lib/planimetriya/prep/bloki';
-import { PROTOTIPY } from '@/lib/planimetriya/stseny';
-import { klyuchProto } from '@/lib/planimetriya/trenazher/sessiya';
-import { IllyustratsiyaShapki } from '../IllyustratsiyaShapki';
+import { typeset } from '@/lib/tex';
 import { RazdelTabs } from '../RazdelTabs';
 import { ShapkaRazdela } from '../ShapkaRazdela';
-import { Progress1 } from './Progress1';
+import { Trezubets } from './Trezubets';
 
 /**
- * Оболочка задания №1: крошки, заголовок, кольцо прогресса и лента
- * вкладок — устройство то же, что у №2 и №11. Вызывается из layout
- * маршрута: при переходе между вкладками остаётся на месте.
+ * Оболочка задания №1: крошки, заголовок и липкая лента вкладок, как у
+ * №6 и №7. Вызывается из layout маршрута: при переходе между вкладками
+ * остаётся на месте.
  *
- * Справа в шапке — иллюстрация, как у №4 (общая метка
- * section-head--art), поэтому кольцо прогресса стоит в текстовой
- * колонке под подзаголовком — в слоте, где у №12 кнопка «Продолжить
- * подготовку».
+ * Справа в шапке (на телефоне — под текстом) — живая композиция «лемма
+ * о трезубце», её можно вращать (Trezubets). Широкая иллюстрация раздела
+ * (стеклянная подставка с чертежами) стоит обложкой в шапке вкладки
+ * «О задании» — там она видна целиком и на телефоне (OZadanii1). Кольца
+ * прогресса в шапке больше нет: прогресс — по группам на «О задании» и
+ * в тренажёре.
  */
 export function Shell1({ children }: { children: React.ReactNode }) {
   const base = `${ZADANIYA}/${ZADANIE1.slug}`;
@@ -28,7 +27,7 @@ export function Shell1({ children }: { children: React.ReactNode }) {
     <AppShell active="tasks">
       <main className="app-main">
         <ShapkaRazdela
-          className="z1-head section-head--art"
+          className="z1-head"
           crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
@@ -37,13 +36,8 @@ export function Shell1({ children }: { children: React.ReactNode }) {
           title={ZADANIE1.title}
           badge={ZADANIE1.badge}
           lead={ZADANIE1.lead}
-          media={<IllyustratsiyaShapki art={ZADANIE1.art} />}
-          actions={
-            <Progress1
-              razdely={RAZDELY_SPRAVOCHNIKA_1.map((r) => r.id)}
-              bloki={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
-              podtipy={PROTOTIPY.map((p) => klyuchProto(p.id))}
-            />
+          media={
+            <Trezubets label={SHAPKA1.ariaLabel} hintHtml={typeset(SHAPKA1.trezubetsPodpis)} />
           }
         />
         <RazdelTabs base={base} tabs={ZADANIE1.tabs} />

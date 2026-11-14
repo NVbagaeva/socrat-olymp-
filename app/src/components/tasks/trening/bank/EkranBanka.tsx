@@ -68,9 +68,22 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   const { T, zagruzka, log } = razdel;
   const pool = payload.tasks;
   const control = payload.control;
+  const rezhim = payload.rezhim;
   const kinds = useMemo(() => pool.map((item) => item.p), [pool]);
   const build = useCallback(() => pickRound(kinds, pool.length), [kinds, pool.length]);
-  const order = useRound(roundKey, build, restored?.order);
+  /* Восстановленная тренировка без записанной раскладки (запись прежнего
+     тренажёра №1: задачи шли подряд) идёт в порядке записи — иначе номер
+     задачи и отметки указали бы на другие задачи. */
+  const poryadok = useMemo(
+    () =>
+      restored === null
+        ? undefined
+        : restored.order !== null && restored.order.length > 0
+          ? restored.order
+          : pool.map((_, i) => i),
+    [restored, pool],
+  );
+  const order = useRound(roundKey, build, poryadok);
 
   const [index, setIndex] = useState(restored?.index ?? 0);
   const [value, setValue] = useState(restored?.value ?? '');
@@ -91,6 +104,8 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   const [format, setFormat] = useState<string | null>(null);
   /* Неверный ответ был записан дробью: к вердикту — напоминание о записи. */
   const [viaFraction, setViaFraction] = useState(false);
+  /* Неверный ответ — то же число в чужих единицах (№13): свой вердикт. */
+  const [edinicy, setEdinicy] = useState(false);
   /* Файлы прототипов: приехали — счётчик растёт, и экран читает кеш заново. */
   const [, setPriehalo] = useState(0);
   const [oshibkaZagruzki, setOshibkaZagruzki] = useState(false);
@@ -163,8 +178,14 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
     () => (zadacha === undefined || !nuzhenRazbor ? null : zagruzka.reshenie(zadacha)),
     [zadacha, nuzhenRazbor, zagruzka],
   );
-  const shagi = useMemo(() => (razbor === null ? [] : razdel.shagi(razbor)), [razbor, razdel]);
-  const voprosy = useMemo(() => (razbor === null ? [] : razdel.voprosy(razbor)), [razbor, razdel]);
+  const shagi = useMemo(
+    () => (razbor === null ? [] : razdel.shagi(razbor, rezhim)),
+    [razbor, razdel, rezhim],
+  );
+  const voprosy = useMemo(
+    () => (razbor === null ? [] : razdel.voprosy(razbor, rezhim)),
+    [razbor, razdel, rezhim],
+  );
 
   function taskSeconds(): number {
     return taskFrom === null ? 0 : (elapsed() - taskFrom) / 1000;
@@ -228,7 +249,18 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
   const zakryta = marks[index] !== undefined;
 
   function check() {
-    const reading = razdel.proverit(value, dannye.seal);
+    const reading = razdel.proverit(value, dannye.seal, dannye, rezhim);
+    if (reading.kind === 'edinicy') {
+      /* Число верное, а единицы нет: на ЕГЭ это 0 баллов — ошибка со своим вердиктом. */
+      setFormat(null);
+      setViaFraction(false);
+      setEdinicy(true);
+      setChecked('wrong');
+      setFailed(true);
+      setMisses(misses + 1);
+      setTried({ ...tried, [index]: true });
+      return;
+    }
     if (reading.kind === 'pi') {
       /* Ответ через π: подсказка о записи, попытка не тратится. */
       setFormat(T.ekran.piPodskazka);
@@ -245,6 +277,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       return;
     }
     setFormat(null);
+    setEdinicy(false);
     const right = reading.right;
     setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
@@ -284,6 +317,7 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
     setMimo([]);
     setFormat(null);
     setViaFraction(false);
+    setEdinicy(false);
   }
 
   function next() {
@@ -297,6 +331,22 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
     resetTask();
     setIndex(index + 1);
   }
+
+  function onValue(nextValue: string) {
+    setValue(nextValue);
+    setFormat(null);
+    if (checked === 'wrong') {
+      setChecked(null);
+      setEdinicy(false);
+    }
+  }
+
+  const pole = razdel.pole?.(dannye, rezhim, {
+    value,
+    onValue,
+    zakryto: checked === 'right' || revealed,
+    verno: checked === null ? null : checked === 'right',
+  });
 
   const zanyato = new Set([...pool.map((item) => item.id), ...Object.values(pohozhie)]);
   const estPohozhaya = analogOf(katalog, tekushchaya.p, tekushchaya.id, zanyato) !== null;
@@ -325,15 +375,18 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       tipHtml={nazvaniya[tekushchaya.p] ?? ''}
       uslovieHtml={zagruzka.nabrat(dannye.text)}
       tekst
-      pod={razdel.pod(dannye)}
+      pod={razdel.pod(dannye, rezhim, {
+        podskazka: hintOpen && !control,
+        shag,
+        reshenie: solutionOpen && !control,
+        razbor,
+        zakryta: zakryta || checked === 'right',
+        bezPodskazok: control,
+      })}
       value={value}
-      onValue={(nextValue) => {
-        setValue(nextValue);
-        setFormat(null);
-        if (checked === 'wrong') {
-          setChecked(null);
-        }
-      }}
+      onValue={onValue}
+      {...(pole === null || pole === undefined ? {} : { pole })}
+      {...(razdel.gotov === undefined ? {} : { gotovo: razdel.gotov(dannye, rezhim, value) })}
       sostoyanie={sostoyanie}
       onCheck={check}
       formatHint={format}
@@ -373,7 +426,9 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
           : {
               shagi,
               posle:
-                razbor === null || razdel.posle === undefined ? undefined : razdel.posle(razbor),
+                razbor === null || razdel.posle === undefined
+                  ? undefined
+                  : razdel.posle(razbor, rezhim),
               open: solutionOpen,
               onToggle: reveal,
             }
@@ -409,7 +464,9 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
       labels={{
         ...T.ekran,
         vernoLead: T.ekran.vernoLead(checked === 'right' ? taskSeconds() : null),
-        nevernoLead: viaFraction ? T.ekran.nevernoDrob : T.ekran.nevernoLead,
+        ...(edinicy && T.ekran.edinicy !== undefined
+          ? { neverno: T.ekran.edinicy.zag, nevernoLead: T.ekran.edinicy.lead }
+          : { nevernoLead: viaFraction ? T.ekran.nevernoDrob : T.ekran.nevernoLead }),
       }}
     />
   );
