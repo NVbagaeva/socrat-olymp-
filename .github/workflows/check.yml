@@ -1244,6 +1244,14 @@ jobs:
         working-directory: app
         run: pnpm test:tarify
 
+      # Генераторы без тарифа (lib/tarify/dostup.ts): закрытые задания —
+      # карточка тарифов вместо генератора; в №1, 2, 10, 11 и «Собрать
+      # вариант» одна пробная генерация, вторая — окно тарифов; ключ
+      # проверок открывает всё (scripts/check-dostup-generatorov.mjs).
+      - name: Генераторы без тарифа
+        working-directory: app
+        run: pnpm test:dostup-generatorov
+
       # Оферта: 14 разделов, цены и сроки из конфига тарифов, docs/oferta.md
       # не отстал от кода; без NEXT_PUBLIC_LEGAL_READY страницы /oferta/,
       # ссылок на неё и реквизитов в подвале нет (scripts/check-oferta.mjs).

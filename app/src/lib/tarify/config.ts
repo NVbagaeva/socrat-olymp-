@@ -28,9 +28,23 @@ export const BESPLATNO = {
   trenazherVDen: 10,
   /** Вариантов онлайн всего. */
   variantovOnlayn: 1,
-  /** Вариантов генератора в день (без листа учителя). */
-  generatorVDen: 1,
+  /**
+   * Пробных генераций в каждом открытом генераторе и в «Собрать
+   * вариант» — всего, а не в день. Правило на экране генератора —
+   * lib/tarify/dostup.ts.
+   */
+  generatorProbnyh: 1,
+  /**
+   * Задания (номера сайта), чей генератор открыт без тарифа. Генераторы
+   * остальных — в пробном доступе и на платных тарифах.
+   */
+  generatorNomera: ['1', '2', '10', '11'],
 } as const;
+
+/** «№1, 2, 10, 11» — номера открытых генераторов для подписей. */
+export function nomeraGeneratorov(): string {
+  return `№${BESPLATNO.generatorNomera.join(', ')}`;
+}
 
 /** Пробный доступ: полный, без карты. */
 export const PROBNYY = {
@@ -170,7 +184,7 @@ const besplatno: Plashka = {
     'Опорные задачи: первый блок каждого навыка',
     `Тренажёр: ${BESPLATNO.trenazherVDen} задач в день`,
     `${BESPLATNO.variantovOnlayn} вариант онлайн`,
-    `Генератор: ${BESPLATNO.generatorVDen} вариант в день`,
+    `Генератор: одна пробная генерация в ${nomeraGeneratorov()}`,
   ],
   net: ['Работа над ошибками, прогресс и история', 'Листы учителя с решениями'],
 };
@@ -287,9 +301,9 @@ export const SRAVNENIE: StrokaSravneniya[] = [
   },
   {
     vozmozhnost: 'Генератор и «Собрать вариант»',
-    besplatno: `${BESPLATNO.generatorVDen} вариант в день`,
+    besplatno: `одна пробная генерация: ${nomeraGeneratorov()} и «Собрать вариант»`,
     /* Платный не хуже бесплатного: у ученика тот же лимит генератора. */
-    uchenik: `${BESPLATNO.generatorVDen} вариант в день`,
+    uchenik: `одна пробная генерация: ${nomeraGeneratorov()} и «Собрать вариант»`,
     repetitor: 'без ограничений',
   },
   { vozmozhnost: 'Листы учителя с решениями', besplatno: false, uchenik: false, repetitor: true },
