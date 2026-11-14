@@ -338,6 +338,9 @@ const ODOBRENO = {
     'e285e8137bee4384392028adb08700ea2295af90e663e9733a6a23ecccaad4a9',
   'app/src/lib/graph/data/prototypes/12q/12Q-I.json':
     'e20f537914c09f5aa62bbf90ea91d07d1ebadc95c080ee386bbd1e7c37540954',
+  /* №10: П-33, порядок максимума по k — по решению владельца. */
+  'app/src/lib/zadanie10/prototypes/gruppa5.ts':
+    '11ec6178e5483661722a7b8f53f964cbde113bf5b029c7cc6fcd2c2637cb901e',
 };
 
 /** Какие картинки реестра принадлежат разделу. */
