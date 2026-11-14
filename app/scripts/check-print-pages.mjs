@@ -47,6 +47,7 @@ import { startApache } from './lib/apache.mjs';
 import { findRawTex } from './lib/math-markup.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 import { RULES } from '../src/lib/sheet/figureRules.js';
+import { METKA_SKRYTYH } from './lib/metka-skrytyh.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium, webkit);
@@ -254,7 +255,11 @@ function pdfPages(file) {
 }
 
 async function openSheet(browser, url) {
-  const page = await browser.newPage();
+  /* Листы скрытого раздела (№6 в ЕГЭ-2027) Apache отдаёт только с меткой
+     администратора — её cookie уходит с первым же запросом. */
+  const context = await browser.newContext();
+  await context.addCookies([{ name: METKA_SKRYTYH, value: '1', url }]);
+  const page = await context.newPage();
   await page.addInitScript(() => {
     window.print = () => {};
   });
