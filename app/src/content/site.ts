@@ -11,12 +11,18 @@ import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
+import { levelInfo } from '@/lib/level';
 import { TARIFY_HREF } from '@/lib/tarify/config';
 import type { NavIconName } from '@/components/ui/NavIcons';
 
 export interface SiteLink {
   label: string;
   href: string;
+  /**
+   * Адрес в режиме базы (lib/level.ts): «Банк заданий» тогда ведёт на
+   * /baza/zadaniya/. Не задан — адрес от уровня не зависит.
+   */
+  hrefBase?: string;
 }
 
 /**
@@ -61,6 +67,7 @@ const LINKS = {
     label: 'Банк заданий',
     hint: 'Все задания по темам',
     href: tasksPage.href,
+    hrefBase: levelInfo('base').bank,
     icon: 'tasks',
   },
   sobrat: {
@@ -74,6 +81,13 @@ const LINKS = {
     hint: 'Задания 1–13 с автопроверкой',
     href: VARIANT_ONLAYN_HREF,
     icon: 'target',
+  },
+  /* Вариант базовой математики: тот же сборщик, уровень — «База». */
+  baza: {
+    label: 'Вариант базы',
+    hint: '21 задание · отметка 2–5',
+    href: levelInfo('base').variant,
+    icon: 'variant',
   },
   mesyaca: {
     label: 'Варианты месяца',
@@ -122,7 +136,7 @@ export const site = {
        Первым — главное действие, оно в списке выделено. */
     {
       label: 'Варианты',
-      items: [LINKS.onlayn, LINKS.sobrat, LINKS.mesyaca, LINKS.slozhnye],
+      items: [LINKS.onlayn, LINKS.sobrat, LINKS.baza, LINKS.mesyaca, LINKS.slozhnye],
     },
     LINKS.uchitelyam,
     LINKS.howto,
@@ -137,7 +151,7 @@ export const site = {
   menu: {
     glavnoe: LINKS.onlayn as MenuLink,
     groups: [
-      { label: 'Практика', items: [LINKS.bank, LINKS.sobrat] },
+      { label: 'Практика', items: [LINKS.bank, LINKS.sobrat, LINKS.baza] },
       { label: 'Готовые варианты', items: [LINKS.mesyaca, LINKS.slozhnye] },
       { label: 'О проекте', items: [LINKS.howto, LINKS.uchitelyam, LINKS.avtor] },
     ] as MenuGroup[],
