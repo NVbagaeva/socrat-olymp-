@@ -200,6 +200,7 @@
     "test:seriya-9": "node scripts/check-seriya-9.mjs",
     "test:dev-pages": "node scripts/check-dev-pages.mjs",
     "test:tarify": "node scripts/check-tarify.mjs",
+    "test:dostup-generatorov": "node scripts/check-dostup-generatorov.mjs",
     "build:tarify-teksty": "node scripts/build-tarify-teksty.mjs",
     "test:trailing-slash": "node scripts/check-trailing-slash.mjs",
     "test:links": "node scripts/check-links.mjs",
