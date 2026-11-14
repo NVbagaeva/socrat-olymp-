@@ -72,7 +72,7 @@ export const TEORIYA_1_TEKSTY = {
   primer: 'Пример',
   zapomni: 'Запомни',
   fakt: 'Факт',
-  dlya17: 'Для задачи №17',
+  dlya17: `Для задачи №${nomerRazdela('planimetriya-dokazatelstvo')}`,
   dlya17Lead: `Эти факты в задании ${nomerRazdela('planimetriya')} почти не встречаются, зато сильно экономят время во второй части. Доказательства — в курсе планиметрии.`,
   zhivoyPodpis: 'Потяните за вершины — числа под чертежом пересчитаются.',
   skachat: 'Скачать справочник по планиметрии',

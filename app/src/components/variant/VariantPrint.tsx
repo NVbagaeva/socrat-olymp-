@@ -94,6 +94,8 @@ export function VariantPrint() {
   /* Часть 2 на листе ученика: по странице на задание (по умолчанию),
      m2=0 — без места для решения. */
   const mesto2: Mesto2 = query.get('m2') === '0' ? 'net' : 'stranica';
+  /* Чертежи к условиям части 2 у ученика — только с ch2=1. */
+  const risunki2 = query.get('ch2') === '1';
   const versiya = Number.isInteger(vRaw) && vRaw >= 1 ? vRaw : null;
   const [spec, setSpec] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -141,7 +143,7 @@ export function VariantPrint() {
           ...(got.variantLabel === undefined
             ? {}
             : { variantLabel: got.variantLabel, istochnik: false }),
-          ...(got.chast2 === undefined ? {} : { chast2: got.chast2, mesto2 }),
+          ...(got.chast2 === undefined ? {} : { chast2: got.chast2, mesto2, risunki2 }),
           space: decodeSpace(spaceToken),
           spaceToken: encodeSpace(decodeSpace(spaceToken)),
         });
@@ -161,7 +163,7 @@ export function VariantPrint() {
     return () => {
       alive = false;
     };
-  }, [code, choice, versiya, spaceToken, mesto2]);
+  }, [code, choice, versiya, spaceToken, mesto2, risunki2]);
 
   useEffect(() => {
     if (spec === null || done) return;

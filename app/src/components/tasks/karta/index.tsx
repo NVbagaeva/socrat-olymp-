@@ -266,9 +266,11 @@ export function KartaPrimer({
         </p>
       )}
       <p className="kz-otvet">
+        {/* Ответ — формулой (otvetHtml, KaTeX) или числом текстом с
+            типографским минусом («−7»): тогда он не формула для проверки. */}
         {labels.otvet}:{' '}
         {otvetHtml === undefined ? (
-          <b>{otvet}</b>
+          <b className="no-math-check">{otvet}</b>
         ) : (
           <b dangerouslySetInnerHTML={{ __html: otvetHtml }} />
         )}

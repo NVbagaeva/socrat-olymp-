@@ -83,6 +83,8 @@ const { generate } = requireSrc('lib/vychisleniya/generate.ts');
 const { emailDomainAllowed } = requireSrc('lib/auth/allowed-domains.ts');
 const { parseTaskId } = requireSrc('lib/vychisleniya/ids.ts');
 const { ru } = requireSrc('lib/vychisleniya/numbers.ts');
+/* Областей на «Карте ЕГЭ» — по действующей структуре экзамена. */
+const KARTA_OBLASTEY = requireSrc('lib/karta/katalog.ts').KARTA_RAZDELY.length;
 
 const OUT = path.join(APP, 'out');
 const PORT = 4181;
@@ -1486,18 +1488,18 @@ async function runEnabled() {
       (await page.locator('.kabinet__role').innerText()) === 'Кабинет ученика',
       'кабинет: «Кабинет ученика»',
     );
-    /* Главная ученика — «Карта ЕГЭ»: без прогресса — 0 из 20 и без прогноза;
+    /* Главная ученика — «Карта ЕГЭ»: без прогресса — 0 из всех областей и без прогноза;
        карточки ДЗ нет, пока ДЗ не выдано; плашки «Войдите…» у вошедшего нет. */
     await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
     const kartaItog = (await page.locator('.karta-shapka__itog').innerText()).replace(/\s+/g, ' ');
     check(
-      kartaItog.includes('Освоено 0 из 20') && kartaItog.includes('Решите ещё немного'),
-      `ученик: карта — «Освоено 0 из 20», прогноза нет (${kartaItog})`,
+      kartaItog.includes(`Освоено 0 из ${KARTA_OBLASTEY}`) && kartaItog.includes('Решите ещё немного'),
+      `ученик: карта — «Освоено 0 из ${KARTA_OBLASTEY}», прогноза нет (${kartaItog})`,
     );
     check((await page.locator('.karta-gost').count()) === 0, 'ученик: плашки «Войдите…» нет');
     check(
-      (await page.locator('[data-section="karta"] .karta-ostrov').count()) === 20,
-      'ученик: на карте 20 областей',
+      (await page.locator('[data-section="karta"] .karta-ostrov').count()) === KARTA_OBLASTEY,
+      `ученик: на карте ${KARTA_OBLASTEY} областей`,
     );
     await page.waitForFunction(() => document.querySelector('.karta-dz') === null, null, {
       timeout: 10000,

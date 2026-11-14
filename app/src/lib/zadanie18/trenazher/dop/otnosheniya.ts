@@ -93,8 +93,10 @@ export const OT_MENELAY = (p: Parametry) =>
     id: 'ot-menelay',
     /* AC = 8. */
     nachalo: (() => {
+      /* Высокий треугольник: KC = BC / 4 не короче трети AC — часть «x»
+         читается рядом с «8». */
       const k = p.AC! / 8;
-      return { A: [0, 0], C: [8 * k, 0], B: [3 * k, 6 * k] } as Tochki;
+      return { A: [0, 0], C: [8 * k, 0], B: [2 * k, 10 * k] } as Tochki;
     })(),
     postroit(t) {
       const { A, B, C, M, K, P } = tochkiMenelaya(t);
@@ -232,8 +234,9 @@ export const OT_PARALLELOGRAMM = (p: Parametry) =>
     /* S(ABCD) = 60: AD = 10, высота 6. */
     /* Параллелограмм площади 60, растянутый до площади S. */
     nachalo: (() => {
+      /* Площадь 8k · 7,5k = 60k²; сторона CD длиннее — часть CM = CD / 3 читается. */
       const k = Math.sqrt(p.S! / 60);
-      return { A: [0, 0], B: [3 * k, 6 * k], D: [10 * k, 0] } as Tochki;
+      return { A: [0, 0], B: [2 * k, 7.5 * k], D: [8 * k, 0] } as Tochki;
     })(),
     postroit(t) {
       const { A, B, C, D, K, M, P, Q } = tochkiParallelogramma(t);
