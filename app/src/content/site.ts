@@ -12,6 +12,7 @@ import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
 import { levelInfo } from '@/lib/level';
+import { AUTH_HREF, REGISTRACIYA_OTKRYTA } from '@/lib/auth/config';
 import { TARIFY_HREF } from '@/lib/tarify/config';
 import type { NavIconName } from '@/components/ui/NavIcons';
 import { nomeraChasti } from '@/content/struktura';
@@ -162,10 +163,14 @@ export const site = {
 
   /* «Войти» здесь больше нет: вход живёт в components/auth/AuthWidget и
      появляется только при включённом флаге (lib/auth/config.ts).
-     «Начать бесплатно» без входа ведёт в банк заданий — платного ничего
-     нет; со входом — на регистрацию. */
+     «Начать бесплатно» (шапка от 768px и первый экран главной) ведёт в
+     банк заданий, пока регистрация по приглашению, и на регистрацию,
+     когда её откроют: переключатель REGISTRACIYA_OTKRYTA там же. */
   headerActions: {
-    signup: { label: 'Начать бесплатно', href: tasksPage.href } satisfies SiteLink,
+    signup: {
+      label: 'Начать бесплатно',
+      href: REGISTRACIYA_OTKRYTA ? AUTH_HREF.registraciya : tasksPage.href,
+    } satisfies SiteLink,
   },
 
   footer: {

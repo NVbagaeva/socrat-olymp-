@@ -4,10 +4,10 @@ import { clsx } from 'clsx';
 import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { AUTH_UI } from '@/content/auth-ui';
-import { site } from '@/content/site';
 import { AUTH_HREF, AUTH_IN_HEADER } from '@/lib/auth/config';
 import { initialsOf, useSessionUser } from '@/lib/auth/session';
 import type { AuthWidgetProps } from './AuthWidget';
+import { KnopkaStart } from './KnopkaStart';
 import './auth-widget.css';
 
 /**
@@ -75,39 +75,40 @@ export function LiveWidget({ variant, className }: AuthWidgetProps) {
     /* Пробный режим: вход работает, но в шапке его не видно — она
        выглядит как без входа. На /voyti/ попадают по прямой ссылке. */
     if (!AUTH_IN_HEADER) {
-      return variant === 'site' ? (
-        <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
-          {site.headerActions.signup.label}
-        </a>
-      ) : null;
+      return variant === 'site' ? <KnopkaStart /> : null;
     }
-    /* «Войти» — стеклянная таблетка со значком в голубом кружке: тот же
-       кружок, что станет кружком с инициалами после входа. На телефоне
-       и в тесной шапке оболочки остаётся один кружок, слово «Войти»
-       читает скринридер (auth-widget.css).
-       «Начать бесплатно» ведёт туда же, куда без входа, — в банк
-       заданий: регистрация пока по приглашению, и случайный посетитель
-       не должен упираться в закрытую форму. */
+    /* Публичная шапка: «Войти» — вторичная стеклянная кнопка, одно
+       слово без значка (значок-человечек дублировал её). Рядом от 768px —
+       основная «Начать бесплатно»; на телефоне её нет, она на первом
+       экране главной. Шапка оболочки (app): прежняя таблетка со значком
+       в голубом кружке — на 1024px+ от неё остаётся один кружок
+       (auth-widget.css). */
+    if (variant === 'site') {
+      return (
+        <>
+          <Link
+            className={clsx('auth-login auth-widget__login auth-login--site', className)}
+            href={AUTH_HREF.voyti}
+          >
+            {AUTH_UI.login}
+          </Link>
+          <KnopkaStart />
+        </>
+      );
+    }
     return (
-      <>
-        <Link
-          className={clsx('auth-login auth-widget__login', `auth-login--${variant}`, className)}
-          href={AUTH_HREF.voyti}
-        >
-          <span className="auth-login__ico" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
-              <circle cx="12" cy="8.5" r="3.75" />
-              <path d="M5 19.5c1.3-3.4 3.9-5.25 7-5.25s5.7 1.85 7 5.25" />
-            </svg>
-          </span>
-          <span className="auth-login__text">{AUTH_UI.login}</span>
-        </Link>
-        {variant === 'site' ? (
-          <a className="btn btn--primary btn--sm" href={site.headerActions.signup.href}>
-            {site.headerActions.signup.label}
-          </a>
-        ) : null}
-      </>
+      <Link
+        className={clsx('auth-login auth-widget__login auth-login--app', className)}
+        href={AUTH_HREF.voyti}
+      >
+        <span className="auth-login__ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" focusable="false">
+            <circle cx="12" cy="8.5" r="3.75" />
+            <path d="M5 19.5c1.3-3.4 3.9-5.25 7-5.25s5.7 1.85 7 5.25" />
+          </svg>
+        </span>
+        <span className="auth-login__text">{AUTH_UI.login}</span>
+      </Link>
     );
   }
 

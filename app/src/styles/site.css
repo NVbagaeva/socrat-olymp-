@@ -15,6 +15,10 @@
   background: var(--color-bg-translucent-strong);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--color-border);
+  transition:
+    margin-bottom var(--dur-switch) var(--ease),
+    background-color var(--dur-switch) var(--ease),
+    box-shadow var(--dur-switch) var(--ease);
 }
 .site-head__in {
   max-width: var(--w-container);
@@ -24,14 +28,27 @@
   display: flex;
   align-items: center;
   gap: var(--space-8);
+  transition: height var(--dur-switch) var(--ease);
+}
+/* Компактная шапка при прокрутке — components/layout/shapka-kompakt.css
+   (вне слоёв: стеклянные шапки страниц задают фон вне слоёв). */
+@media (prefers-reduced-motion: reduce) {
+  .site-head,
+  .site-head__in {
+    transition: none;
+  }
 }
 
 .logo {
   display: flex;
   align-items: center;
   gap: 10px;
+  /* Цель касания — не ниже 44px. */
+  min-height: 44px;
+  flex: none;
   font-weight: 600;
   font-size: 16px;
+  white-space: nowrap;
   text-decoration: none;
   color: var(--color-text);
 }
@@ -213,6 +230,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-4);
+}
+/* Кнопки шапки — цель касания 44px и на компьютере. */
+.site-head__start,
+.site-head .auth-login--site {
+  min-height: 44px;
 }
 
 /* ── Бургер и полноэкранное меню узкой шапки ── */
@@ -483,37 +505,30 @@ body:has(.site-menu) .help-fab {
   }
 }
 
-/* Ниже 460px «Войти» — один кружок со значком (auth-widget.css), а
-   название рядом со знаком уходит: знак, кружок, «Начать бесплатно» и
-   бургер в строку с ним не входят. Название остаётся в ссылке (кегль
-   0) — его читает скринридер. «Начать бесплатно» не сокращается:
-   слово «бесплатно» работает на конверсию. Без кнопки «Войти» в шапке
-   название на месте. */
-@media (max-width: 459.98px) {
-  .site-head__in:has(.auth-widget__login) .logo {
-    gap: 0;
-    font-size: 0;
+/* Телефон: слева знак с названием, справа одна кнопка («Войти» или
+   кружок аккаунта) и бургер. «Начать бесплатно» на телефоне — на первом
+   экране главной (HeroSection), не в шапке. */
+@media (max-width: 767.98px) {
+  .site-head__start {
+    display: none;
   }
   .site-head__in {
-    gap: var(--space-4);
-  }
-}
-/* На 320 логотип, кнопка и бургер вместе шире экрана: поля шапки,
-   кнопки и зазор до бургера уже. Запас — под шрифт чуть шире Inter
-   (запасной, пока Inter грузится, или другой растеризатор). */
-@media (max-width: 359.98px) {
-  .site-head__in {
-    gap: var(--space-2);
-  }
-  /* Поле шапки — сильнее правила для 760px ниже по файлу. */
-  .site-head .site-head__in {
-    padding: 0 var(--space-4);
+    gap: var(--space-3);
   }
   .site-head__cta {
     gap: var(--space-2);
   }
-  .site-head__cta .btn {
-    padding: 0 10px;
+}
+/* Уже 360px название рядом с «Войти» и бургером не входит — остаётся
+   знак. Название по-прежнему в ссылке (кегль 0): его читает скринридер.
+   Поля шапки здесь уже. */
+@media (max-width: 359.98px) {
+  .logo {
+    gap: 0;
+    font-size: 0;
+  }
+  .site-head .site-head__in {
+    padding: 0 var(--space-4);
   }
 }
 

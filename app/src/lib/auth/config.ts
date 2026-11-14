@@ -53,3 +53,18 @@ export const AUTH_HREF = {
   novyyParol: '/voyti/novyy-parol/',
   kabinet: '/kabinet/',
 } as const;
+
+/**
+ * Переключатель: открыта ли регистрация для всех.
+ *
+ * false — регистрация только по приглашению. Кнопка «Начать бесплатно»
+ * (шапка, первый экран главной) ведёт в банк заданий: там всё бесплатно
+ * и без регистрации, и случайный посетитель не упирается в закрытую форму.
+ *
+ * true — кнопка ведёт на регистрацию (/voyti/?vkladka=registraciya).
+ * Срабатывает только при включённом входе (AUTH_ENABLED): без входа
+ * регистрироваться негде, и кнопка по-прежнему ведёт в банк.
+ */
+const REGISTRACIYA_DLYA_VSEH = false;
+
+export const REGISTRACIYA_OTKRYTA = AUTH_ENABLED && REGISTRACIYA_DLYA_VSEH;
