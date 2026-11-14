@@ -232,7 +232,8 @@ export function parseZaprosKlyuchi(q: URLSearchParams): ZaprosBanka | null {
 
 /** Лист общего генератора: задачи по ключам позиций, памятка и примеры отдельно. */
 export function sobratListKlyuchi(z: ZaprosBanka, indeks: readonly IndeksZadachi[]): ModelLista {
-  const l = sobratPoKlyucham(z, indeks, 'z7-ps2');
+  /* «Только ФИПИ» — строго: без подмены аналогами. */
+  const l = sobratPoKlyucham(z, indeks, 'z7-ps2', undefined, false, true);
   return {
     vid: 'generator',
     zagolovok: `Задание №${nomerRazdela('uravneniya')}. Простейшие уравнения`,

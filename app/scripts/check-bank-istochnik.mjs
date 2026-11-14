@@ -1,6 +1,8 @@
 /*
   Проверка источника «Только ФИПИ» в генераторах с банком готовых задач
-  (№6, №7, №10 — общий подбор lib/generator/obshchiy/bank.ts).
+  (№7, №10 — общий подбор lib/generator/obshchiy/bank.ts, strogo). У №6
+  источник «Только исходные» (демоверсия и образцы) нестрогий: нехватку
+  добирают аналоги — это тоже проверяется.
 
   При источнике «ФИПИ» (i=f) в задачи листа попадают только исходные
   задачи банка (s: 'f'); кончились — позиция пустая и лист короче, а не
@@ -65,6 +67,7 @@ const problems = [];
 let proverok = 0;
 
 for (const razdel of ['zadanie6', 'zadanie7', 'zadanie10']) {
+  const strogo = razdel !== 'zadanie6';
   const indeks = JSON.parse(
     fs.readFileSync(path.join(root, 'public', 'data', razdel, 'indeks.json'), 'utf8'),
   );
@@ -91,12 +94,12 @@ for (const razdel of ['zadanie6', 'zadanie7', 'zadanie10']) {
           date: '',
           qr: false,
         };
-        const l = sobratPoKlyucham(z, indeks, `check-${razdel}`);
+        const l = sobratPoKlyucham(z, indeks, `check-${razdel}`, undefined, false, strogo);
         proverok += 1;
         const ids = l.poVariantam.flat().flatMap((x) => (x.id === null ? [] : [x.id]));
         const gde = `${razdel} ${p} seed=${seed} i=${istochnik} v=${variants} n=${n}`;
         if (new Set(ids).size !== ids.length) problems.push(`${gde}: задачи повторяются`);
-        if (istochnik === 'fipi') {
+        if (istochnik === 'fipi' && strogo) {
           const chuzhie = ids.filter((id) => poId.get(id)?.s !== 'f');
           if (chuzhie.length > 0) {
             problems.push(`${gde}: при «ФИПИ» в листе аналоги ${chuzhie.join(', ')}`);
@@ -127,5 +130,5 @@ if (problems.length > 0) {
   process.exit(1);
 }
 console.log(
-  `Источник банка: ${proverok} листов №6, №7, №10 — при «ФИПИ» только задачи открытого банка.`,
+  `Источник банка: ${proverok} листов — у №7 и №10 при «ФИПИ» только задачи открытого банка, у №6 нехватку добирают аналоги.`,
 );
