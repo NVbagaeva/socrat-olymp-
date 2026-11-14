@@ -209,6 +209,7 @@ export function ReshenieDz({
                   className={clsx('rdz-punkt', `is-${st}`, i === current && 'is-current')}
                   aria-current={i === current ? 'step' : undefined}
                   data-istochnik={p.source}
+                  data-no={p.taskNo}
                   onClick={() => setCurrent(i)}
                 >
                   <span className="rdz-punkt__no">{i + 1}</span>

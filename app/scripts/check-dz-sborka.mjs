@@ -24,7 +24,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { APP, requireSrc } from './lib/load-ts.mjs';
 
+/* Данные «Собрать вариант» (№3, №4, №5) — маршруты, а не файлы: собираются здесь же. */
+const VARIANT = /^\/variant\/dannye\/z(\d\d)\.json/;
 globalThis.fetch = async (url) => {
+  const v = VARIANT.exec(String(url));
+  if (v !== null) {
+    const data = requireSrc(`lib/variant/data/z${v[1]}.ts`).dannye();
+    return { ok: true, status: 200, json: async () => JSON.parse(JSON.stringify(data)) };
+  }
   const p = path.join(APP, 'public', String(url).split('?')[0]);
   if (!fs.existsSync(p)) return { ok: false, status: 404, json: async () => null };
   return { ok: true, status: 200, json: async () => JSON.parse(fs.readFileSync(p, 'utf8')) };
@@ -532,6 +539,136 @@ for (const no of [1, 11]) {
   );
 }
 
+/* ── Шаг 2: №3, №4, №5 (тренажёр — данные «Собрать вариант», опорные без зерна) ── */
+for (const no of [3, 4, 5]) {
+  const kat = katalog(no);
+  check(
+    kat !== null && kat.opornye.length > 0 && kat.trenazher.length > 0,
+    `№${no}: каталог с опорными и тренажёром`,
+  );
+  const zadachi = kat.opornye.flatMap((b) => b.zadachi);
+  check(
+    zadachi.every((z) => z.klyuch !== undefined && z.razbor !== undefined && !z.izZerna),
+    `№${no}: опорные с закрытым ответом и разбором`,
+  );
+  const tipy = kat.trenazher[0].tipy.slice(0, 2).map((t) => t.id);
+  const blok = kat.opornye[0];
+  const sost = {
+    v: 1,
+    punkty: [
+      { id: 'o', ist: 'opornye', no, blok: blok.slug, zadachi: null, kazhdomu: false },
+      { id: 't', ist: 'trenazher', no, tipy, skolko: 3, kazhdomu: true },
+    ],
+    nastroyki: {},
+  };
+  const ps = await sobratPunkty(sost, new Map([[no, kat]]), ['u1', 'u2'], `zerno-${no}`);
+  check(
+    ps[0].units.length === blok.zadachi.length,
+    `№${no}: опорные — весь блок (${ps[0].units.length})`,
+  );
+  check(
+    ['u1', 'u2'].every((s) => ps[1].units.filter((u) => u.studentId === s).length === 3),
+    `№${no}: тренажёр каждому — по 3`,
+  );
+  check(
+    ps
+      .flatMap((p) => p.units)
+      .every((u) =>
+        u.answerKind === 'choice'
+          ? /^\d+$/.test(u.answer) && u.view.varianty.some((c) => c.number === u.answer)
+          : normalizeEge(u.answer) === u.answer,
+      ),
+    `№${no}: ключи в записи ЕГЭ или номер варианта`,
+  );
+  check(
+    ps[1].units.every((u) => /^[^#]+#\d+$/.test(u.ref) && u.razbor.shagi.length > 0),
+    `№${no}: ключ задачи как в тренажёре, решение по шагам`,
+  );
+  check(
+    ps[1].units.some((u) => u.view.primer !== undefined),
+    `№${no}: у первой задачи типа — пример`,
+  );
+  check(
+    new Set(ps[1].units.map((u) => u.ref)).size === ps[1].units.length,
+    `№${no}: задачи тренажёра не повторяются`,
+  );
+  const odna = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [{ id: 'z', ist: 'zadacha', no, ref: ps[1].units[0].ref, tip: ps[1].units[0].kind }],
+      nastroyki: {},
+    },
+    new Map([[no, kat]]),
+    ['u1'],
+    'odna',
+  );
+  check(
+    odna[0].units[0].questionHtml === ps[1].units[0].questionHtml,
+    `№${no}: конкретная задача по ключу тренажёра — та же`,
+  );
+}
+{
+  const kat = katalog(3);
+  const vse = kat.opornye.flatMap((b) => b.zadachi);
+  check(
+    vse.some((z) => z.varianty !== undefined),
+    '№3: в опорных есть выбор из вариантов',
+  );
+  check(
+    vse.every((z) => /<svg/.test(z.uslovieHtml)),
+    '№3: у каждой опорной — чертёж',
+  );
+  const ps = await sobratPunkty(
+    {
+      v: 1,
+      punkty: [
+        {
+          id: 't',
+          ist: 'trenazher',
+          no: 3,
+          tipy: kat.trenazher.map((g) => g.tipy[0].id),
+          skolko: 8,
+          kazhdomu: false,
+        },
+      ],
+      nastroyki: {},
+    },
+    new Map([[3, kat]]),
+    ['u1'],
+    'ris3',
+  );
+  check(
+    ps[0].units.length === 8 && ps[0].units.every((u) => /<svg/.test(u.questionHtml)),
+    '№3: чертёж в условии задачи каждого раздела I–VIII',
+  );
+}
+
+/* ── Каталог просмотра без ответов; файл ответов сливается обратно при выдаче ── */
+{
+  const { katalogLegkiy, resheniyaKatalog, RAZDELY_DZ } = requireSrc('lib/dz/katalog/server.ts');
+  for (const no of RAZDELY_DZ) {
+    const legkiy = katalogLegkiy(no);
+    const r = resheniyaKatalog(no);
+    const polnyy = katalog(no);
+    check(
+      legkiy.opornye.every((b) =>
+        b.zadachi.every(
+          (z) => z.klyuch === undefined && z.razbor === undefined && z.voprosy === undefined,
+        ),
+      ),
+      `№${no}: в каталоге просмотра нет ответов, разборов и подсказок опорных`,
+    );
+    const slit = legkiy.opornye.map((b) => ({
+      ...b,
+      zadachi: b.zadachi.map((z) => ({ ...z, ...r[`${b.slug}:${z.id}`] })),
+    }));
+    check(
+      JSON.stringify(slit) === JSON.stringify(polnyy.opornye),
+      `№${no}: каталог + файл ответов = полный каталог`,
+    );
+  }
+}
+
 /* ── №1 и №11: ключ из тренажёра («В ДЗ» у задачи) → в ДЗ та же задача, тот же ответ ── */
 {
   const { sobrat1 } = requireSrc('lib/planimetriya/trening/sborka.ts');
@@ -547,7 +684,11 @@ for (const no of [1, 11]) {
     const tr = sobrat1(key);
     if (tr === null) continue;
     const ps = await sobratPunkty(
-      { v: 1, punkty: [{ id: 'z', ist: 'zadacha', no: 1, ref: key, tip: tr.z.prototypeId }], nastroyki: {} },
+      {
+        v: 1,
+        punkty: [{ id: 'z', ist: 'zadacha', no: 1, ref: key, tip: tr.z.prototypeId }],
+        nastroyki: {},
+      },
       new Map([[1, kat]]),
       ['u1'],
       'sverka1',
@@ -566,10 +707,17 @@ for (const no of [1, 11]) {
   const kat11 = katalog(11);
   const papka = path.join(APP, 'public/data/zadanie11');
   let sverok11 = 0;
-  for (const f of fs.readdirSync(papka).filter((x) => /^[A-Z]{2}-\d\d\.json$/.test(x)).filter((_, i) => i % 6 === 0)) {
+  for (const f of fs
+    .readdirSync(papka)
+    .filter((x) => /^[A-Z]{2}-\d\d\.json$/.test(x))
+    .filter((_, i) => i % 6 === 0)) {
     for (const z of JSON.parse(fs.readFileSync(path.join(papka, f), 'utf8')).slice(0, 2)) {
       const ps = await sobratPunkty(
-        { v: 1, punkty: [{ id: 'z', ist: 'zadacha', no: 11, ref: z.id, tip: z.prototypeId }], nastroyki: {} },
+        {
+          v: 1,
+          punkty: [{ id: 'z', ist: 'zadacha', no: 11, ref: z.id, tip: z.prototypeId }],
+          nastroyki: {},
+        },
         new Map([[11, kat11]]),
         ['u1'],
         'sverka11',

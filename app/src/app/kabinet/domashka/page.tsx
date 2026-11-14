@@ -10,6 +10,8 @@ import '@/components/tasks/zadanie6/zadanie6.css';
 import '@/components/tasks/zadanie10/razbor10.css';
 /* №1: чертежи планиметрии. */
 import '@/lib/planimetriya/planimetriya.css';
+/* №3–№5: чертежи стереометрии, плоские чертежи, иллюстрации. */
+import '@/components/dz/risunki-dz.css';
 
 export const metadata: Metadata = {
   title: 'Домашнее задание — Будет на ЕГЭ',

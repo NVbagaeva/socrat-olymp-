@@ -1,5 +1,6 @@
 'use client';
 
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import type { LogOutcome } from '@/lib/progressLog';
 import { useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
@@ -299,6 +300,16 @@ export function Sessiya({
   return (
     <section className="ttask">
       {kruzhki}
+      {/* Репетитору: задачу банка — в черновик ДЗ. */}
+      {task.klyuch.startsWith(`p${zadanie}-`) ? (
+        <VDzKnopka
+          malaya
+          className="ttask__dz"
+          punkt={{ ist: 'zadacha', no: zadanie, ref: task.klyuch, tip: task.kind }}
+          chto={`задача ${task.klyuch}`}
+          label="В ДЗ"
+        />
+      ) : null}
       {/* Ключ — сама задача: следующая карточка начинается с чистого
           состояния, а не наследует введённый ответ. */}
       <ProblemCard

@@ -1,3 +1,4 @@
+import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
 import { AppShell } from '@/components/layout/AppShell';
 import { Solid } from '@/components/solid/Solid';
 import { RazdelTabs } from '@/components/tasks/RazdelTabs';
@@ -70,6 +71,8 @@ export function ShellStereo({ no, children }: { no: StereoNo; children: React.Re
           />
           <RazdelTabs base={base} tabs={vkladkiStereo(no)} className="topic-tabs-row--stsena" />
           <div className="section-panel">
+            {/* ДЗ: ученику — плашка с ДЗ, репетитору — черновик ДЗ. Гостю — ничего. */}
+            <DzVRazdele no={3} />
             {children}
             <StereoDrugie no={no} />
           </div>

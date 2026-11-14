@@ -1,0 +1,35 @@
+/* Рисунки условий №3, №4, №5 в ДЗ — у ученика, в предпросмотре
+   конструктора и в результатах. Цвета чертежей стоят в самих SVG
+   (токены с запасными значениями), здесь — только размеры. */
+
+/* №3: чертёж «стекло» (renderSolid) и чертёж листа печати (сценарий). */
+.rdz-ch3 svg {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  margin: var(--space-2) auto;
+  overflow: visible;
+}
+
+/* №3: плоский чертёж — вариант ответа. */
+.rdz-ploskiy {
+  display: inline-block;
+  vertical-align: middle;
+}
+.rdz-ploskiy svg {
+  display: block;
+  width: 96px;
+  max-width: 100%;
+  height: auto;
+}
+
+/* №4, №5: иллюстрация к условию опорной задачи. */
+.rdz-kartinka img {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin: var(--space-2) auto;
+  border-radius: var(--radius-md, 12px);
+}

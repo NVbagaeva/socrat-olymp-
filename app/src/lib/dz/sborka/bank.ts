@@ -12,7 +12,7 @@ import type { Shag } from '@/components/tasks/steklo';
 import type { VoprosPodskazki } from '@/components/tasks/trening/PodskazkaVoprosy';
 import { zamok } from '../katalog/zamok';
 import type { BlokKat, KatalogRazdela } from '../katalog/types';
-import type { HwUnitInput, RazborDz, ShagDz, VidDz } from '../types';
+import type { HwUnitInput, RazborDz, ShagDz, VidDz, VoprosDz } from '../types';
 import { chisloEge, peremeshat, poKrugu } from './obshchee';
 
 /** Задача файла прототипа (без ответа). */
@@ -249,17 +249,22 @@ export function opornayaBanka(
 ): HwUnitInput | null {
   const z = blok.zadachi.find((x) => x.id === id);
   if (z === undefined || z.klyuch === undefined || z.razbor === undefined) return null;
+  const voprosy =
+    z.voprosy === undefined ? undefined : (JSON.parse(zamok.openText(z.voprosy, id)) as VoprosDz[]);
   return {
     studentId,
     kind: id,
     ref: `${blok.slug}:${id}`,
-    answerKind: 'number',
+    /* С вариантами (№3: выбор, «нажми на чертеже», плоский чертёж) — ответ номером. */
+    answerKind: z.varianty === undefined ? 'number' : 'choice',
     questionHtml: z.uslovieHtml,
     view: {
       tipHtml: blok.nazvanie,
       tekst: true,
-      podskazka: z.podskazkaHtml,
-      zapomni: blok.zapomniHtml,
+      ...(z.podskazkaHtml === '' ? {} : { podskazka: z.podskazkaHtml }),
+      ...(voprosy === undefined ? {} : { voprosy }),
+      ...(blok.zapomniHtml === '' ? {} : { zapomni: blok.zapomniHtml }),
+      ...(z.varianty === undefined ? {} : { varianty: z.varianty }),
     },
     answer: zamok.openText(z.klyuch, id),
     razbor: JSON.parse(zamok.openText(z.razbor, id)) as RazborDz,

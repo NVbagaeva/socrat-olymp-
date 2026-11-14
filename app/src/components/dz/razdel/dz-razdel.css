@@ -85,3 +85,8 @@
   justify-content: space-between;
   gap: var(--space-3);
 }
+
+/* Тренажёр №4/№5: кнопка «В ДЗ» над карточкой задачи, справа. */
+.ttask__dz {
+  justify-self: end;
+}
