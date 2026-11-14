@@ -41,15 +41,16 @@ function proveritOrtocentr(sch, { A, B, C, H, O }, imya) {
 }
 const ORTOCENTR = {
   id: 'ok-ortocentr',
-  b(sch) {
-    const o = { c: [0, 0], r: 5 };
-    const B = [-4, -3];
-    const C = [4, -3];
-    const otvety = [50, 80, 100, 130].map((u) => {
+  b(sch, _rnd, d) {
+    const o = { c: [0, 0], r: d.R };
+    const h = Math.sqrt(d.R ** 2 - (d.BC / 2) ** 2);
+    const B = [-d.BC / 2, -h];
+    const C = [d.BC / 2, -h];
+    const otvety = [60, 80, 100, 120].map((u) => {
       const A = naOkr(o, u);
       sch.fakt(
-        'б) остроугольный, BC = 8, R = 5',
-        ostryy({ A, B, C }) && blizko(dist(B, C), 8) && blizko(opisannaya(A, B, C).r, 5),
+        `б) остроугольный, BC = ${d.BC}, R = ${d.R}`,
+        ostryy({ A, B, C }) && blizko(dist(B, C), d.BC) && blizko(opisannaya(A, B, C).r, d.R),
       );
       return dist(A, ortocentr(A, B, C));
     });
@@ -59,11 +60,11 @@ const ORTOCENTR = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiOrtocentra(t);
     sch.fakt(
-      'данные: BC = 8, R = 5, остроугольный',
-      blizko(dist(p.B, p.C), 8) && blizko(opisannaya(p.A, p.B, p.C).r, 5) && ostryy(p),
+      `данные: BC = ${d.BC}, R = ${d.R}, остроугольный`,
+      blizko(dist(p.B, p.C), d.BC) && blizko(opisannaya(p.A, p.B, p.C).r, d.R) && ostryy(p),
     );
     return dist(p.A, p.H);
   },
@@ -102,27 +103,29 @@ function proveritSekushchie(sch, { P, A, B, C, D }, imya) {
 }
 const SEKUSHCHIE = {
   id: 'ok-sekushchie',
-  b(sch) {
-    /* D — на расстоянии 12 и от P, и от B; C — на PD в 3 от P. */
+  b(sch, _rnd, d) {
+    /* PD из степени точки P; D — на расстоянии PD от P и BD от B, C — на PD в PC от P.
+       Проверка: A, B, C, D на одной окружности (иначе PD неверно). */
+    const PD = (d.PA * d.PB) / d.PC;
     const P = [0, 0];
-    const A = [4, 0];
-    const B = [9, 0];
-    const D = okrOkr({ c: P, r: 12 }, { c: B, r: 12 })[0];
-    const C = mul(D, 3 / 12);
+    const A = [d.PA, 0];
+    const B = [d.PB, 0];
+    const D = okrOkr({ c: P, r: PD }, { c: B, r: d.BD })[0];
+    const C = mul(D, d.PC / PD);
     sch.fakt(
       'б) по данным точки A, B, C, D на одной окружности',
       naOkruzhnosti(opisannaya(A, B, C), D),
     );
     return dist(A, C);
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiSekushchih(t);
     sch.fakt(
-      'данные: PA = 4, PB = 9, PC = 3, BD = 12',
-      blizko(dist(p.P, p.A), 4) &&
-        blizko(dist(p.P, p.B), 9) &&
-        blizko(dist(p.P, p.C), 3) &&
-        blizko(dist(p.B, p.D), 12),
+      `данные: PA = ${d.PA}, PB = ${d.PB}, PC = ${d.PC}, BD = ${d.BD}`,
+      blizko(dist(p.P, p.A), d.PA) &&
+        blizko(dist(p.P, p.B), d.PB) &&
+        blizko(dist(p.P, p.C), d.PC) &&
+        blizko(dist(p.B, p.D), d.BD),
     );
     return dist(p.A, p.C);
   },
@@ -177,30 +180,34 @@ function brahmaguptaSluchaynyy(rnd) {
 }
 const BRAHMAGUPTA = {
   id: 'ok-brahmagupta',
-  b(sch) {
-    /* Окружность радиуса 5, перпендикулярные хорды через P: подбираем P так, чтобы BC = 6, —
-       тогда AD = 8 сам собой (без тождества из а)). */
-    const o = { c: [0, 0], r: 5 };
-    for (const py of [-2, -0.5, 1, 2.5]) {
+  b(sch, _rnd, d) {
+    /* Окружность радиуса R = √(BC² + AD²) / 2, перпендикулярные хорды через P: подбираем P так,
+       чтобы BC совпало с данным, — тогда и AD совпадает (без тождества из а)). */
+    const R5 = Math.sqrt(d.BC ** 2 + d.AD ** 2) / 2;
+    const o = { c: [0, 0], r: R5 };
+    for (const py of [-0.3, -0.1, 0.1, 0.3].map((k) => k * R5)) {
       const tochki = (px) => {
         const P = [px, py];
         const ac = pryamayaOkr(P, add(P, [1, 0]), o);
         const bd = pryamayaOkr(P, add(P, [0, 1]), o);
         return { A: ac[0].p, C: ac[1].p, D: bd[0].p, B: bd[1].p };
       };
-      const xmax = Math.sqrt(25 - py * py) - 1e-6;
-      const px = koren((x) => dist(tochki(x).B, tochki(x).C) - 6, -xmax, xmax);
+      const xmax = Math.sqrt(R5 * R5 - py * py) - 1e-6;
+      const px = koren((x) => dist(tochki(x).B, tochki(x).C) - d.BC, -xmax, xmax);
       const t = tochki(px);
       sch.fakt(
-        'б) R = 5 и BC = 6 дают AD = 8',
-        blizko(dist(t.B, t.C), 6) && blizko(dist(t.A, t.D), 8),
+        `б) R = ${R5} и BC = ${d.BC} дают AD = ${d.AD}`,
+        blizko(dist(t.B, t.C), d.BC) && blizko(dist(t.A, t.D), d.AD),
       );
     }
-    return 5;
+    return R5;
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiBrahmagupty(t);
-    sch.fakt('данные: BC = 6, AD = 8', blizko(dist(p.B, p.C), 6) && blizko(dist(p.A, p.D), 8));
+    sch.fakt(
+      `данные: BC = ${d.BC}, AD = ${d.AD}`,
+      blizko(dist(p.B, p.C), d.BC) && blizko(dist(p.A, p.D), d.AD),
+    );
     return opisannaya(p.A, p.B, p.C).r;
   },
   a(rnd, sch) {
