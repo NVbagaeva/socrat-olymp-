@@ -48,9 +48,13 @@ function proveritSredlin(sch, { A, B, C, M, N, K }, imya) {
 }
 const SREDLIN = {
   id: 'tr-sredlin',
-  b(sch) {
-    const otvety = [6, 9, 12, 16, 20].map((bc) => {
-      const { A, B, C } = poStoronam(bc, 14, 10);
+  b(sch, _rnd, d) {
+    /* BC — любая сторона, при которой треугольник существует. */
+    const lo = Math.abs(d.AC - d.AB);
+    const hi = d.AB + d.AC;
+    const otvety = [0.2, 0.4, 0.6, 0.8].map((k) => {
+      const bc = lo + (hi - lo) * k;
+      const { A, B, C } = poStoronam(bc, d.AC, d.AB);
       return perimetr([A, mid(A, B), mid(B, C), mid(A, C)]);
     });
     sch.fakt(
@@ -59,9 +63,12 @@ const SREDLIN = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiSredlin(t);
-    sch.fakt('данные: AB = 10, AC = 14', blizko(dist(p.A, p.B), 10) && blizko(dist(p.A, p.C), 14));
+    sch.fakt(
+      `данные: AB = ${d.AB}, AC = ${d.AC}`,
+      blizko(dist(p.A, p.B), d.AB) && blizko(dist(p.A, p.C), d.AC),
+    );
     return perimetr([p.A, p.M, p.N, p.K]);
   },
   a(rnd, sch) {
@@ -94,17 +101,17 @@ function proveritIncentr(sch, { A, B, C, A1, B1, I }, imya) {
 }
 const INCENTR = {
   id: 'tr-incentr',
-  b() {
-    const { A, B, C } = poStoronam(10, 9, 6);
+  b(_sch, _rnd, d) {
+    const { A, B, C } = poStoronam(d.BC, d.AC, d.AB);
     const I = incentr(A, B, C);
     const A1 = peresech(A, I, B, C);
     return dist(A, I) / dist(I, A1);
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiIncentra(t);
     sch.fakt(
-      'данные: AB = 6, AC = 9, BC = 10',
-      blizko(dist(p.A, p.B), 6) && blizko(dist(p.A, p.C), 9) && blizko(dist(p.B, p.C), 10),
+      `данные: AB = ${d.AB}, AC = ${d.AC}, BC = ${d.BC}`,
+      blizko(dist(p.A, p.B), d.AB) && blizko(dist(p.A, p.C), d.AC) && blizko(dist(p.B, p.C), d.BC),
     );
     return dist(p.A, p.I) / dist(p.I, p.A1);
   },

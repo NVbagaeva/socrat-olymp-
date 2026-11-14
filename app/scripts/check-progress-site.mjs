@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на общем тренажёре «Стеклянной сцены» (№7, №6, №2, №13, №1, №9, №11, №4, №5) в
-   браузере, на собранном сайте.
+   на общем тренажёре «Стеклянной сцены» (№7, №6, №2, №13, №1, №9, №11, №10, №4, №5,
+   №12) в браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
    (образец — scripts/fixtures/progress-N-prezhniy.json, записан прежним
@@ -22,6 +22,13 @@
         продолжается в новом на той же задаче.
      10. (№4, №5) незаконченная тренировка прежнего тренажёра открывается
         на той же задаче с тем же введённым ответом.
+     11. (№12) то же для узла: прежняя запись тренажёра с фильтрами. Опорных
+        задач у узла №12 нет — они у видов функций, пункт 5 пропускается.
+
+   У №10 прежний тренажёр уже писал в журнал (тот же ключ): переносить
+   нечего, проверяется, что прежний журнал читается как есть. Образец
+   №10 — ещё и sessionStorage с прежней незаконченной тренировкой: она
+   не мешает открыть тренажёр.
 
    Запуск: node scripts/check-progress-site.mjs 7 (после pnpm build). */
 
@@ -40,9 +47,9 @@ const OUT = path.join(APP, 'out');
 const N = process.argv[2];
 /* №4 и №5 — вероятность: прежние ключи свои, задачи — «прототип:вариант». */
 const VEROYATNOST = N === '4' || N === '5';
-if (!['6', '7', '2', '13', '1', '9', '11'].includes(N) && !VEROYATNOST) {
+if (!['6', '7', '2', '13', '1', '9', '11', '10', '12'].includes(N) && !VEROYATNOST) {
   console.error(
-    'Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9, 11, 4, 5)',
+    'Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9, 11, 10, 4, 5, 12)',
   );
   process.exit(2);
 }
@@ -117,6 +124,21 @@ function razdel() {
       vBloke: (blok, key) => key.startsWith(`${blok}:`),
     };
   }
+  if (N === '12') {
+    /* №12: прежний ключ — счётчики самого первого тренажёра; журнал тот же,
+       что с #340; опорных задач у узла нет. Задача — шаблон набора движка. */
+    const { katalog12 } = requireSrc('lib/ves12/trening/katalog.ts');
+    const { prototipyZadach } = requireSrc('lib/trening/bank.ts');
+    const poZadache = prototipyZadach(katalog12());
+    return {
+      OLD: 'budetege:trainer:v1',
+      OLD_OPORNYE: null,
+      NEW: 'budetege:zadanie-12:log:v1',
+      prototipOf: (id) => poZadache.get(id),
+      zadachVBloke: () => undefined,
+      vBloke: () => true,
+    };
+  }
   if (N === '9') {
     /* У №9 прежние ключи — «proizvodnaya-9», опорные — «prep» (блок →
        номера решённых), задачи — «прототип|seed». */
@@ -188,27 +210,66 @@ const { OLD, OLD_OPORNYE, NEW, prototipOf } = R;
 const obrazec = JSON.parse(
   fs.readFileSync(path.join(HERE, 'fixtures', `progress-${N}-prezhniy.json`), 'utf8'),
 );
-const staroe = obrazec[OLD];
-const resheno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
-const verno = Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
+/* №10: образец — содержимое localStorage и sessionStorage целиком. */
+const ZHURNAL = N === '10';
+const local = ZHURNAL
+  ? obrazec.localStorage
+  : OLD_OPORNYE === null
+    ? { [OLD]: obrazec[OLD] }
+    : { [OLD]: obrazec[OLD], [OLD_OPORNYE]: obrazec[OLD_OPORNYE] };
+const session = ZHURNAL ? obrazec.sessionStorage : {};
+const staroe = ZHURNAL ? null : obrazec[OLD];
+const popytki = ZHURNAL ? local[NEW].attempts : [];
+const resheno = ZHURNAL
+  ? new Set(popytki.map((a) => a.task)).size
+  : Object.values(staroe.kinds).reduce((sum, t) => sum + t.done, 0);
+const verno = ZHURNAL
+  ? popytki.filter((a) => a.outcome === 'right').length
+  : Object.values(staroe.kinds).reduce((sum, t) => sum + t.right, 0);
+const prezhnieOshibki = ZHURNAL
+  ? popytki.filter((a) => a.outcome === 'wrong' || a.outcome === 'revealed').map((a) => a.task)
+  : staroe.mistakes;
 
-/* Блок опорных задач из образца и сколько в нём задач. */
-const blokObrazca = Object.keys(N === '9' ? obrazec[OLD_OPORNYE] : obrazec[OLD_OPORNYE].kinds)[0];
-const zadachVBloke = R.zadachVBloke(blokObrazca);
+/* Блок опорных задач из образца и сколько в нём задач. У №10 опорные —
+   запись { задача: верно ли }: блок ищется по первой задаче образца. */
+const opornye = local[OLD_OPORNYE];
+let blokObrazca;
+let zadachVBloke;
+let reshenoOp10 = null;
+if (ZHURNAL) {
+  const { BLOKI_OPORNYH } = requireSrc('lib/zadanie10/opornye.ts');
+  const blok = BLOKI_OPORNYH.find((b) => b.zadachi.some((z) => z.id === Object.keys(opornye)[0]));
+  blokObrazca = blok?.id;
+  zadachVBloke = blok?.zadachi.length;
+  reshenoOp10 = blok?.zadachi.filter((z) => opornye[z.id] === true).length ?? 0;
+} else if (OLD_OPORNYE === null) {
+  /* У узла №12 опорных задач нет. */
+  blokObrazca = null;
+} else {
+  blokObrazca = Object.keys(N === '9' ? obrazec[OLD_OPORNYE] : obrazec[OLD_OPORNYE].kinds)[0];
+  zadachVBloke = R.zadachVBloke(blokObrazca);
+}
 
 const browser = await chromium.launch();
 try {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await context.addInitScript(
-    ([oldKey, oldValue, opKey, opValue]) => {
+    ([localValues, sessionValues]) => {
       /* Только при первом заходе: дальше хранилище — как у ученика. */
       if (window.localStorage.getItem('proverka:zalito') === null) {
-        window.localStorage.setItem(oldKey, oldValue);
-        window.localStorage.setItem(opKey, opValue);
+        for (const [key, value] of Object.entries(localValues)) {
+          window.localStorage.setItem(key, value);
+        }
+        for (const [key, value] of Object.entries(sessionValues)) {
+          window.sessionStorage.setItem(key, value);
+        }
         window.localStorage.setItem('proverka:zalito', '1');
       }
     },
-    [OLD, JSON.stringify(staroe), OLD_OPORNYE, JSON.stringify(obrazec[OLD_OPORNYE])],
+    [
+      Object.fromEntries(Object.entries(local).map(([k, v]) => [k, JSON.stringify(v)])),
+      Object.fromEntries(Object.entries(session).map(([k, v]) => [k, JSON.stringify(v)])),
+    ],
   );
   const page = await context.newPage();
   const oshibki = [];
@@ -238,17 +299,26 @@ try {
     }),
     [OLD, OLD_OPORNYE, NEW],
   );
-  check(klyuchi.log !== null, 'журнал попыток создан под новым ключом');
-  check(klyuchi.old === JSON.stringify(staroe), 'прежний ключ тренажёра на месте и не изменён');
-  check(
-    klyuchi.op === JSON.stringify(obrazec[OLD_OPORNYE]),
-    'прежний ключ опорных задач на месте и не изменён',
-  );
-  const log = JSON.parse(klyuchi.log ?? '{}');
-  check(
-    Array.isArray(log.legacyMistakes) && log.legacyMistakes.length === staroe.mistakes.length,
-    `прежние ошибки перенесены: ${staroe.mistakes.length}`,
-  );
+  if (ZHURNAL) {
+    check(
+      klyuchi.log === JSON.stringify(local[NEW]),
+      'прежний журнал читается под тем же ключом и не изменён',
+    );
+  } else {
+    check(klyuchi.log !== null, 'журнал попыток создан под новым ключом');
+    check(klyuchi.old === JSON.stringify(staroe), 'прежний ключ тренажёра на месте и не изменён');
+    const log = JSON.parse(klyuchi.log ?? '{}');
+    check(
+      Array.isArray(log.legacyMistakes) && log.legacyMistakes.length === staroe.mistakes.length,
+      `прежние ошибки перенесены: ${staroe.mistakes.length}`,
+    );
+  }
+  if (OLD_OPORNYE !== null) {
+    check(
+      klyuchi.op === JSON.stringify(opornye),
+      'прежний ключ опорных задач на месте и не изменён',
+    );
+  }
 
   /* 2. «Работа над ошибками». */
   const rabota = page.getByRole('button', { name: /^Работа над ошибками/ }).first();
@@ -268,25 +338,68 @@ try {
     vid.display === 'grid' && vid.padding > 0,
     `экран задачи оформлен стилями тренажёра (display: ${vid.display}, отступ ${vid.padding}px)`,
   );
-  const tipyOshibok = new Set(staroe.mistakes.map(prototipOf));
+  const tipyOshibok = new Set(prezhnieOshibki.map(prototipOf));
   check(
-    id !== null && !staroe.mistakes.includes(id) && tipyOshibok.has(prototipOf(id)),
+    id !== null && !prezhnieOshibki.includes(id) && tipyOshibok.has(prototipOf(id)),
     `в «Работе над ошибками» — другая задача того же типа (${id}, тип ${prototipOf(id)})`,
   );
 
   /* 5. Опорные задачи: прежний прогресс блока. */
-  await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
-  const reshenoOp =
-    N === '9'
-      ? obrazec[OLD_OPORNYE][blokObrazca].length
-      : Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
-          ([key, x]) => x === 'right' && R.vBloke(blokObrazca, key),
-        ).length;
-  const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
-  check(
-    new RegExp(`решено ${reshenoOp} из ${zadachVBloke}`).test(kartochki),
-    `опорные задачи показывают прежний прогресс блока: решено ${reshenoOp} из ${zadachVBloke}`,
-  );
+  if (OLD_OPORNYE !== null) {
+    await page.goto(`${BASE}/zadaniya/${N}/opornye-zadachi/`, { waitUntil: 'networkidle' });
+    const reshenoOp = ZHURNAL
+      ? reshenoOp10
+      : N === '9'
+        ? obrazec[OLD_OPORNYE][blokObrazca].length
+        : Object.entries(obrazec[OLD_OPORNYE].outcomes).filter(
+            ([key, x]) => x === 'right' && R.vBloke(blokObrazca, key),
+          ).length;
+    const kartochki = (await page.locator('.op-blok').allInnerTexts()).join(' | ');
+    check(
+      new RegExp(`решено ${reshenoOp} из ${zadachVBloke}`).test(kartochki),
+      `опорные задачи показывают прежний прогресс блока: решено ${reshenoOp} из ${zadachVBloke}`,
+    );
+  }
+  /* 11. №12: незаконченная тренировка прежнего тренажёра. */
+  if (N === '12') {
+    const zapis = obrazec[`budetege:trainer:${N}:session`];
+    const sessiya = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await sessiya.addInitScript(
+      ([key, value]) => {
+        if (window.localStorage.getItem('proverka:zalito') === null) {
+          window.localStorage.setItem(key, value);
+          window.localStorage.setItem('proverka:zalito', '1');
+        }
+      },
+      [`budetege:trainer:${N}:session`, JSON.stringify(zapis)],
+    );
+    const p2 = await sessiya.newPage();
+    p2.on('pageerror', (error) => oshibki.push(String(error)));
+    await p2.goto(`${BASE}/zadaniya/12/trenazher/`, { waitUntil: 'networkidle' });
+    const prodolzhit = p2.getByRole('button', { name: /^Продолжить/ }).first();
+    try {
+      await prodolzhit.waitFor({ timeout: 15000 });
+      await prodolzhit.click();
+    } catch {
+      /* Тренировка могла открыться сразу. */
+    }
+    const ekran = p2.locator('.trn-zadacha');
+    let naZadache = null;
+    try {
+      await ekran.waitFor({ timeout: 30000 });
+      naZadache = await ekran.getAttribute('data-task');
+    } catch {
+      naZadache = null;
+    }
+    const nomer = zapis.ui.index;
+    check(
+      naZadache === zapis.payload.items[nomer].k,
+      `прежняя тренировка открылась на той же задаче: ${naZadache} (ждали ${zapis.payload.items[nomer].k})`,
+    );
+    const chertezh = await p2.locator('.trn-zadacha .z12-chertezh svg').count();
+    check(chertezh > 0, 'у задачи №12 есть чертёж движка');
+    await sessiya.close();
+  }
 
   /* 8. №1: незаконченная тренировка прежнего тренажёра. */
   const SESSION = `budetege:trainer:${N}:session`;
