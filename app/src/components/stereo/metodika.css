@@ -233,11 +233,15 @@
   content-visibility: auto;
   contain-intrinsic-size: auto 2400px;
 }
+/* Лид стоит в потоке, без отрицательного поля. Раньше он тянулся
+   вверх на --space-3, к заголовку главы, — а у .o3-glava выше
+   content-visibility: auto, то есть contain: paint: всё, что выходит
+   за верх главы, обрезается. На телефоне первая строка лида
+   пряталась наполовину. Отступ от заголовка — gap раздела теории. */
 .o3-glava__lead {
   display: flex;
   align-items: center;
   gap: var(--space-6);
-  margin-top: calc(var(--space-3) * -1);
 }
 .o3-glava__lead-t {
   flex: 1;
@@ -344,6 +348,17 @@ a.o3-schet__btn:focus-visible {
   color: var(--color-text);
 }
 @media (max-width: 767.98px) {
+  /* Счётчик «k / n» со стрелками — отдельной строкой под заголовком
+     раздела: лид раздела на всю ширину, а не узкой колонкой рядом со
+     стрелками. */
+  .o3-razdel__head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+  .o3-razdel__head .o3-schet {
+    align-self: flex-end;
+  }
   /* Цель касания стрелки — 44 px. */
   .o3-schet__btn {
     width: 44px;
@@ -2228,58 +2243,4 @@ button.o3-schet__btn:disabled {
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   text-align: center;
-}
-
-/* Типы задач (глава 0): номер, название, ссылки. */
-.o3-tipy {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.o3-tip {
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.o3-tip__no {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-pill);
-  background: var(--blue-50);
-  color: var(--color-primary);
-  font-weight: 800;
-  font-size: var(--fs-caption);
-}
-.o3-tip__telo {
-  display: grid;
-  gap: var(--space-1);
-  min-width: 0;
-}
-.o3-tip__title {
-  font-weight: 700;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
-  color: var(--color-text-brand);
-}
-.o3-tip__ssylki {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
-  font-size: var(--fs-caption);
-}
-.o3-tip__ssylki a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  color: var(--color-primary);
 }

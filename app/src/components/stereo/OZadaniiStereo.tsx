@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import Link from 'next/link';
+import { KartochkiTipov, type SsylkaTipa } from '@/components/ui/KartochkiTipov';
 import { Tex } from '@/components/ui/Tex';
 import { GLAVY_15, GLAVY_3 } from '@/content/stereo/glavy';
 import { O_ZADANII_15, O_ZADANII_STEREO, TIPY_15, TIPY_3 } from '@/content/stereo/tipy';
@@ -82,9 +82,9 @@ function Ustroystvo15() {
 
 /**
  * Вкладка «О задании» стереометрии: что проверяет задание, что нужно
- * уметь и карточки типов задач открытого банка. Карточка открывает
- * разобранную задачу с живым чертежом (razbor/<тип>/); у типа без
- * разбора — главу теории.
+ * уметь и карточки типов задач открытого банка (общие KartochkiTipov):
+ * у карточки две ссылки — разобранная задача с живым чертежом
+ * (razbor/<тип>/), если она есть, и глава теории.
  */
 export function OZadaniiStereo({ no, vkladka }: { no: StereoNo; vkladka: string }) {
   const t = O_ZADANII_STEREO;
@@ -127,38 +127,36 @@ export function OZadaniiStereo({ no, vkladka }: { no: StereoNo; vkladka: string 
           {t.tipy}
         </h3>
         <p className="stereo-tipy__lead">{t.tipyLead}</p>
-        <ul className="stereo-tipy__grid">
-          {tipy.map((tip) => {
+        <KartochkiTipov
+          label={t.tipy}
+          tipy={tipy.map((tip) => {
             const glava = glavy.find((item) => item.id === tip.glava);
             const n = tip.prototipy?.length;
-            const razbor = sRazborom.has(tip.id);
-            return (
-              <li key={tip.id}>
-                <Link
-                  className={razbor ? 'stereo-tip stereo-tip--razbor' : 'stereo-tip'}
-                  href={
-                    razbor ? `${base}/razbor/${tip.id}/` : `${base}/teoriya/#teoriya-${tip.glava}`
-                  }
-                >
-                  <span className="stereo-tip__title">{tip.title}</span>
-                  <span className="stereo-tip__meta">
-                    {razbor ? <span className="stereo-tip__razbor">{t.razbor}</span> : null}
-                    {n === undefined ? null : (
-                      <span>
+            const ssylki: SsylkaTipa[] = [];
+            if (sRazborom.has(tip.id)) {
+              ssylki.push({ href: `${base}/razbor/${tip.id}/`, label: t.razbor, vid: 'primer' });
+            }
+            ssylki.push({
+              href: `${base}/teoriya/#teoriya-${tip.glava}`,
+              label: glava === undefined ? t.kGlave : `${t.kGlave} ${glava.nomer}`,
+              vid: 'glava',
+            });
+            return {
+              id: tip.id,
+              title: tip.title,
+              ...(n === undefined
+                ? {}
+                : {
+                    telo: (
+                      <span className="tipk__tekst">
                         {n} {plural(n, ...t.prototipov)}
                       </span>
-                    )}
-                    {glava === undefined ? null : (
-                      <span>
-                        {t.kGlave} {glava.nomer}
-                      </span>
-                    )}
-                  </span>
-                </Link>
-              </li>
-            );
+                    ),
+                  }),
+              ssylki,
+            };
           })}
-        </ul>
+        />
       </section>
     </>
   );
