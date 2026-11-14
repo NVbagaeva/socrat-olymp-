@@ -23,6 +23,7 @@ import { lomanayaY, postroit, type Splayn } from '@/lib/proizvodnaya/spline';
 import { stsena } from '@/lib/proizvodnaya/stseny';
 import { YAKOR_9 } from '@/lib/proizvodnaya/teoriya-yakorya';
 import type { Figura, Uzel } from '@/lib/proizvodnaya/types';
+import { nomerRazdela } from '@/content/struktura';
 
 const B = 'база' as const;
 const E = 'важно для ЕГЭ' as const;
@@ -540,7 +541,7 @@ const kartochki: Kartochka[] = [
     task: 9,
     topic: 'monotonnost',
     type: 'svoystvo',
-    front: 'С чего начинать любую задачу №9 по рисунку?',
+    front: `С чего начинать любую задачу №${nomerRazdela('proizvodnaya')} по рисунку?`,
     back: "Найти подпись: нарисован $y=f(x)$, $y=f'(x)$ или $y=F(x)$ — и понять, о какой функции вопрос.",
     pochemu: 'Главная ловушка задания — спутать, чей график нарисован.',
     level: E,

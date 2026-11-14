@@ -11,6 +11,7 @@ import 'katex/dist/katex.min.css';
 import '@/components/tasks/zadanie10/razbor10.css';
 import '../../zadanie10.css';
 import './shpargalka.css';
+import { nomerRazdela } from '@/content/struktura';
 
 export function generateStaticParams() {
   return UROKI_10.map((u) => ({ urok: String(u.no) }));
@@ -54,7 +55,9 @@ export default async function Shpargalka10({ params }: { params: Promise<{ urok:
   return (
     <main className="z10-shp">
       <header className="z10-shp__head">
-        <p className="z10-shp__eyebrow">Задание №10 · Шпаргалка к уроку {u.no}</p>
+        <p className="z10-shp__eyebrow">
+          Задание №{nomerRazdela('prikladnye-zadachi')} · Шпаргалка к уроку {u.no}
+        </p>
         <h1>{u.title}</h1>
         <PechatKnopka10 />
       </header>

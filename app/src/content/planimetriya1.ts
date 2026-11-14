@@ -14,9 +14,10 @@
 import type { Ton } from '@/components/tasks/steklo';
 import type { Blok } from '@/lib/planimetriya/stseny/dsl';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov } from './treningBanka';
+import { nomerRazdela, slovoChasti } from './struktura';
 
 export const SHAPKA1 = {
-  nadzagolovok: 'Задание №1 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('planimetriya')} · ${slovoChasti('planimetriya')}`,
   zagolovok: 'Найти величину по готовому чертежу',
   fakty: (tipovVsego: number) => [
     { znachenie: '1', podpis: 'первичный балл' },
@@ -279,7 +280,7 @@ export const FORMULY1: FormulyGruppy1[] = [
 
 export const TRENAZHER1 = (() => {
   const t = tekstyTrenazheraBanka({
-    nomer: 1,
+    nomer: nomerRazdela('planimetriya'),
     grupp: 'десяти',
     istochniki: { vse: 'Все', fipi: 'Открытый банк', new: 'Аналоги' },
   });
@@ -347,7 +348,7 @@ export const NAVYKI1: {
 
 export const OPORNYE1 = {
   ...tekstyOpornyh(
-    'Короткие задачи на один навык: из этих навыков складывается любая задача №1. В каждом блоке десять задач, у каждой есть ещё варианты.',
+    `Короткие задачи на один навык: из этих навыков складывается любая задача №${nomerRazdela('planimetriya')}. В каждом блоке десять задач, у каждой есть ещё варианты.`,
   ),
   eshchyoVariant: 'Ещё вариант',
   risunok: 'Чертёж к задаче',

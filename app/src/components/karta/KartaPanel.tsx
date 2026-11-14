@@ -5,6 +5,7 @@ import { KARTA_TEKST } from '@/content/karta/teksty';
 import { oZadaniiHref, opornyeHref, razdelInfo, trenazherHref } from '@/lib/karta/katalog';
 import type { Karta, ProlivSvodka, SostoyanieOblasti } from '@/lib/karta/model';
 import { ZnachokZadaniya } from './znachki';
+import { nomerRazdela } from '@/content/struktura';
 
 export interface ZakladkiKarty {
   est: (no: number) => boolean;
@@ -60,7 +61,7 @@ export function PanelOblasti({
           </svg>
         </span>
         <h2 className="karta-panel__nazvanie" id="karta-panel-nazvanie">
-          <span>№{no}</span> {nazvanie}
+          <span>№{nomerRazdela(no)}</span> {nazvanie}
         </h2>
         {zakladki === null || net ? null : (
           <button
@@ -196,7 +197,7 @@ export function PanelProliva({
                 className="karta-svyazka__zadanie"
                 onClick={() => onOblast(z.no)}
               >
-                №{z.no} {razdelInfo(z.no).nazvanie}
+                №{nomerRazdela(z.no)} {razdelInfo(z.no).nazvanie}
               </button>
               <span className="karta-svyazka__chto">
                 {z.nuzhny.length === 0 ? (
@@ -214,7 +215,7 @@ export function PanelProliva({
                           className="karta-svyazka__ssylka"
                           onClick={() => onOblast(n.no)}
                         >
-                          №{n.no}
+                          №{nomerRazdela(n.no)}
                         </button>
                       </span>
                     ))}

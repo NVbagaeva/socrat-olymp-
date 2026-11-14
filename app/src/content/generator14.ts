@@ -5,11 +5,12 @@
 
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
 import { SHEET_13 } from './generator13';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR14_TEXTS = {
-  section: '№14 · Тригонометрические уравнения',
+  section: `№${nomerRazdela('uravnenie-s-otborom')} · Тригонометрические уравнения`,
   sheet: {
-    chip: 'Задание 14',
+    chip: `Задание ${nomerRazdela('uravnenie-s-otborom')}`,
     title: 'Тригонометрические уравнения',
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',
@@ -101,9 +102,9 @@ export const GENERATOR14_PRESETS: GenPreset[] = [
 
 export const SHEET_14 = {
   head: SHEET_13.head,
-  chip: 'Задание 14',
+  chip: `Задание ${nomerRazdela('uravnenie-s-otborom')}`,
   text: 'Тригонометрические уравнения',
-  runner: 'Задание 14 · Уравнение',
+  runner: `Задание ${nomerRazdela('uravnenie-s-otborom')} · Уравнение`,
   uchitel: 'Багаева Н.В.',
   resheniya: 'файл для учителя',
   svodka: 'Сводка ответов',

@@ -17,6 +17,7 @@
 
 import type { Formulation, SectionAbout, TutorMaterial } from './sections';
 import type { RichExample } from './theoryRich';
+import { nomerRazdela } from '@/content/struktura';
 
 const CHECK = 'Проверка по графику';
 
@@ -256,7 +257,7 @@ export const EXPONENTIAL_ABOUT: Omit<SectionAbout, 'hint' | 'title'> = {
     'Разбираем графики функций $f(x) = a^x$, $f(x) = a^x + b$ и $f(x) = a^{x+b}$ — все четыре типа задач открытого банка ФИПИ. Параметры не угадываем по рисунку: берём две отмеченные точки и решаем систему.',
   formsTitle: 'Типы задач в этом разделе',
   forms: TYPES,
-  skillsTitle: 'Что нужно уметь для задания №12',
+  skillsTitle: `Что нужно уметь для задания №${nomerRazdela('grafiki-funkciy')}`,
   skills: [
     'Знать, что $a > 0$, $a \\ne 1$ и $a^x > 0$ при любом $x$',
     'Помнить: график $a^x$ проходит через $(0;\\, 1)$, асимптота — $y = 0$',

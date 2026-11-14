@@ -4,6 +4,8 @@
  * счётчики можно поправить вручную.
  */
 
+import { nomerRazdela } from '@/content/struktura';
+
 export type Stil = 'vse' | 'syuzhet' | 'standart';
 
 export interface Shablon6 {
@@ -34,7 +36,13 @@ const VSE = [
 ];
 
 export const SHABLONY_6: Shablon6[] = [
-  { id: 'ves', title: 'Весь №6', opisanie: 'все 15 прототипов', tipy: VSE, stil: 'vse' },
+  {
+    id: 'ves',
+    title: `Весь №${nomerRazdela('sluchainye-velichiny')}`,
+    opisanie: 'все 15 прототипов',
+    tipy: VSE,
+    stil: 'vse',
+  },
   {
     id: 'ozhidanie-dispersiya',
     title: 'Ожидание и дисперсия',
