@@ -82,7 +82,7 @@ erDiagram
 | `tutor_students` | `tutor_id`, `user_id` (ученик), `linked_at`, `ended_at` | ученик ↔ репетитор (у ученика может быть несколько) |
 | `classes` | `id`, `tutor_id`, `name`, `created_at`, `archived_at` | классы и группы репетитора |
 | `class_members` | `class_id`, `user_id`, `joined_at` | ученик ↔ класс; триггер: только свой ученик репетитора |
-| `ege_tasks` | `no` 1–20, `name` | номера заданий ЕГЭ (сверяется с `content/tasks.ts`) |
+| `ege_tasks` | `no` 1–20 (номер хранения; после `…_struktura_2027.sql` — до 99, новому разделу ЕГЭ-2027 — 21), `name` | разделы банка (сверяется с `content/tasks.ts`); номер на экзамене считает сайт |
 | `bank_prototypes` | `code` PK, `task_no`, `title`, `order_index` | прототипы банка (заполняет `supabase/seed/bank_prototypes.sql`, его собирает `pnpm build:kabinet-catalog` из кода сайта) |
 | `homework` | `id`, `tutor_id`, `class_id` (если классу), `title`, `note`, `due_at`, `created_at`, `closed_at` | выданное ДЗ |
 | `homework_items` | `homework_id`, `position`, `task_no`, `prototype_code` (пусто — любой), `count` 1–50 | ДЗ ↔ задачи банка |

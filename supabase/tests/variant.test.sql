@@ -127,6 +127,27 @@ select pg_temp.ok((select set_variants = '{4,7}' from public.variant_works where
 select pg_temp.ok((select answer from public.variant_work_keys
                     where work_id = :'tw' and variant = 1 and position = 2) = '-3',
   'репетитор видит ключ своей работы, ответ в нормальной записи');
+-- Номер хранения задания (миграция 20261114120000_struktura_2027.sql): одна или
+-- две цифры. Новому разделу ЕГЭ-2027 — 21; работа с ним выдаётся (здесь — с откатом).
+select pg_temp.fails($q$select public.issue_variant_work(pg_temp.work('trening') ||
+  jsonb_build_object('variants', '[{"variant":1,"tasks":[{"position":1,"ege_no":0,"prototype_id":"p",
+    "task_ref":"t","statement":"x","answer":"1"}]}]'::jsonb, 'student_ids', '["c2000000-0000-0000-0000-000000000000"]'::jsonb))$q$,
+  'variant_work_tasks_ege_no_check');
+select pg_temp.fails($q$select public.issue_variant_work(pg_temp.work('trening') ||
+  jsonb_build_object('variants', '[{"variant":1,"tasks":[{"position":1,"ege_no":100,"prototype_id":"p",
+    "task_ref":"t","statement":"x","answer":"1"}]}]'::jsonb, 'student_ids', '["c2000000-0000-0000-0000-000000000000"]'::jsonb))$q$,
+  'variant_work_tasks_ege_no_check');
+do $$ begin
+  begin
+    perform public.issue_variant_work(pg_temp.work('trening') ||
+      jsonb_build_object('variants', '[{"variant":1,"tasks":[{"position":12,"ege_no":21,"prototype_id":"21.A1",
+        "task_ref":"21.A1-1","statement":"x","answer":"-6"}]}]'::jsonb,
+        'student_ids', '["c2000000-0000-0000-0000-000000000000"]'::jsonb));
+    raise exception 'otkat';
+  exception when others then
+    if sqlerrm <> 'otkat' then raise exception 'FAIL: номер хранения 21 не принят: %', sqlerrm; end if;
+  end;
+end $$;
 do $$ begin raise notice 'ok 2: выдаёт репетитор своим ученикам, ключ в формате ЕГЭ'; end $$;
 
 -- 3. Ученик видит условия, но не ключ; чужой не видит ничего.

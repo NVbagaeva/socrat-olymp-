@@ -19,3 +19,4 @@ supabase/migrations/20261025120000_variant_works.sql
 supabase/migrations/20261110120000_probnyy_vhod.sql
 supabase/migrations/20261111120000_dz.sql
 supabase/migrations/20261113120000_pochtovye_domeny.sql
+supabase/migrations/20261114120000_struktura_2027.sql
