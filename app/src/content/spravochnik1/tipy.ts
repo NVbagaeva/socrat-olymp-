@@ -12,6 +12,7 @@
  */
 
 import { plural } from '../../lib/plural';
+import { nomerRazdela } from '@/content/struktura';
 
 /** Одно утверждение блока: словами и, если есть, формулой. */
 export interface Utverzhdenie {
@@ -149,7 +150,7 @@ export const BLOKI_SPRAVOCHNIKA = {
 
 export const SPRAVOCHNIK_1 = {
   title: 'Справочник по планиметрии',
-  lead: 'Всё для задания №1 первой части ЕГЭ профильного уровня',
+  lead: `Всё для задания №${nomerRazdela('planimetriya')} первой части ЕГЭ профильного уровня`,
   /** Поиск по темам. */
   poisk: 'Найти тему…',
   poiskLabel: 'Поиск по темам справочника',
@@ -193,13 +194,13 @@ export const SPRAVOCHNIK_1 = {
     nazad: 'Назад',
     kroshki: {
       aria: 'Вы здесь',
-      zadanie: 'Задание №1',
+      zadanie: `Задание №${nomerRazdela('planimetriya')}`,
       teoriya: 'Теория',
       spravochnik: 'Справочник',
     },
     gotovim: 'Раскладываем страницы…',
-    shapka: 'Справочник по планиметрии · Задание №1 ЕГЭ',
-    zadanie: 'Задание №1 ЕГЭ',
+    shapka: `Справочник по планиметрии · Задание №${nomerRazdela('planimetriya')} ЕГЭ`,
+    zadanie: `Задание №${nomerRazdela('planimetriya')} ЕГЭ`,
     soderzhanie: 'Содержание',
     /** Разбор ушёл в следующую колонку: к какой теме он. */
     kTeme: 'К теме:',

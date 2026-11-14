@@ -7,6 +7,7 @@ import { plural } from '@/lib/plural';
 import type { Rezhim } from '@/lib/kartochki/leitner';
 import type { TipKartochki } from '@/lib/kartochki/tipy';
 import type { RazdelTab } from './vkladki';
+import { nomerRazdela } from '@/content/struktura';
 
 /** Вкладка в ленте раздела: встаёт после «Теории» сама, если у номера есть колода. */
 export const VKLADKA_KARTOCHKI: RazdelTab = {
@@ -21,7 +22,9 @@ const kartochek = (n: number) => `${n} ${plural(n, 'карточка', 'карт
 export const KARTOCHKI_UI = {
   title: 'Проверка теории по карточкам',
   lead: 'Честно отмечайте «Знаю» или «Не знаю». Незнакомые карточки будут возвращаться чаще, выученные — реже.',
-  vyucheno: (task: number, n: number, vsego: number) => `Теория №${task}: выучено ${n} из ${vsego}`,
+  /* task и n — номера хранения разделов (ключи колод); на экран — номер ЕГЭ. */
+  vyucheno: (task: number, n: number, vsego: number) =>
+    `Теория №${nomerRazdela(task)}: выучено ${n} из ${vsego}`,
   vyuchenoKorotko: (n: number, vsego: number) => `${n} из ${vsego}`,
   /** Подсказка к счётчику: что значит «выучено». */
   vyuchenoPoyasnenie:
@@ -95,7 +98,7 @@ export const KARTOCHKI_UI = {
   pochemu: 'Почему',
   povtoritTeoriyu: 'Повторить теорию',
   /** Фрагмент — в теории соседнего номера (теория вероятностей одна на №4 и №5). */
-  povtoritTeoriyuNomera: (n: number) => `Повторить теорию №${n}`,
+  povtoritTeoriyuNomera: (n: number) => `Повторить теорию №${nomerRazdela(n)}`,
   dobavleno: 'Этой темы пока нет во вкладке «Теория».',
   znayu: 'Знаю',
   neZnayu: 'Не знаю',

@@ -45,6 +45,7 @@ import {
 import type { VariantTask } from '@/lib/variant/types';
 import { WorkResult } from './WorkResult';
 import { WorkScreen } from './WorkScreen';
+import { podpis1, podpis2 } from '@/lib/variant/struktura';
 
 export interface WorkRunProps {
   link: WorkLink;
@@ -172,8 +173,11 @@ export function WorkRun({ link, initial, outdated, series, kabinet }: WorkRunPro
           describe={(p, i) => {
             const z = i >= p.tasks.length ? p.chast2?.[i - p.tasks.length] : undefined;
             return z === undefined
-              ? { kind: `№${p.tasks[i]?.egeNumber ?? ''}`, html: p.tasks[i]?.statement ?? '' }
-              : { kind: `№${z.no}`, html: '' };
+              ? {
+                  kind: `№${podpis1(p.tasks[i]?.egeNumber ?? 0)}`,
+                  html: p.tasks[i]?.statement ?? '',
+                }
+              : { kind: `№${podpis2(z.no)}`, html: '' };
           }}
           pack={kabinet === undefined ? packWork : packKabinet}
           unpack={
@@ -550,7 +554,7 @@ function OshibkiRun({
       isPayload={isWorkPayload}
       count={(p) => p.tasks.length}
       describe={(p, i) => ({
-        kind: `№${p.tasks[i]?.egeNumber ?? ''}`,
+        kind: `№${podpis1(p.tasks[i]?.egeNumber ?? 0)}`,
         html: p.tasks[i]?.statement ?? '',
       })}
       pack={packWork}

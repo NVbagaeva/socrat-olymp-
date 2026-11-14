@@ -3,6 +3,8 @@
  * итоги. Обращение к ученику — на «вы», без технического жаргона.
  */
 
+import { nomerRazdela } from '../struktura';
+
 export const TRENAZHER8 = {
   title: 'Тренажёр',
   rezhimy: {
@@ -101,7 +103,7 @@ export const TRENAZHER8 = {
     istoriya: 'История тренировок',
     istoriiNet: 'Завершённых тренировок пока нет.',
     sbros: 'Сбросить прогресс',
-    sbrosVopros: 'Сбросить прогресс по заданию №8? Счётчики и список ошибок будут удалены.',
+    sbrosVopros: `Сбросить прогресс по заданию №${nomerRazdela('vychisleniya')}? Счётчики и список ошибок будут удалены.`,
   },
 };
 

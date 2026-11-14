@@ -4,11 +4,12 @@
  */
 
 import type { GlavaDannye } from './tipy';
+import { nomerRazdela } from '@/content/struktura';
 
 export function glava10(): GlavaDannye {
   return {
     id: 'formuly',
-    lead: 'Всё, что нужно помнить для №3, — на одной странице. Откуда берётся каждая формула, разобрано в главах 2–8.',
+    lead: `Всё, что нужно помнить для №${nomerRazdela('stereometriya')}, — на одной странице. Откуда берётся каждая формула, разобрано в главах 2–8.`,
     razdely: [
       {
         id: 'g10-mnogogranniki',

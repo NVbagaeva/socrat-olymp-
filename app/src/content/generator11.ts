@@ -6,13 +6,14 @@
 
 import type { GenPreset, Level } from '@/lib/generator/obshchiy/types';
 import { plural } from '@/lib/plural';
+import { nomerRazdela } from '@/content/struktura';
 
 const skolkoZadach = (n: number) => `${n} ${plural(n, 'задача', 'задачи', 'задач')}`;
 
 export const GENERATOR11_TEXTS = {
-  section: '№11 · Текстовые задачи',
+  section: `№${nomerRazdela('tekstovye-zadachi')} · Текстовые задачи`,
   sheet: {
-    chip: 'Задание 11',
+    chip: `Задание ${nomerRazdela('tekstovye-zadachi')}`,
     title: 'Текстовые задачи',
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',

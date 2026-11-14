@@ -11,9 +11,10 @@
 import type { Ton } from '@/components/tasks/steklo';
 import type { GroupId } from '@/lib/zadanie10/types';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov } from './treningBanka';
+import { nomerRazdela, slovoChasti } from './struktura';
 
 export const SHAPKA10 = {
-  nadzagolovok: 'Задание №10 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('prikladnye-zadachi')} · ${slovoChasti('prikladnye-zadachi')}`,
   zagolovok: 'Подставить в формулу и выбрать ответ по смыслу',
   lead: 'В условии дана формула из физики или экономики: путь при торможении, закон Ома, распад изотопа, высота мяча. Подставь числа, реши уравнение или неравенство и выбери ответ, который имеет смысл. Знать физику не нужно — все буквы объяснены в условии.',
   fakty: (tipovVsego: number) => [
@@ -236,7 +237,7 @@ export const TRENAZHER10 = (() => {
 /** «Где на ЕГЭ» в конце раздела теории: типы задания, ссылка — тренажёр с ними. */
 export const GDE_NA_EGE10 = {
   title: 'Где на ЕГЭ',
-  lead: 'Типы задания №10 — нажми, чтобы потренироваться:',
+  lead: `Типы задания №${nomerRazdela('prikladnye-zadachi')} — нажми, чтобы потренироваться:`,
 };
 
 /* ── Опорные задачи ───────────────────────────────────────────── */
@@ -291,7 +292,7 @@ export const NAVYKI10: {
 
 export const OPORNYE10 = {
   ...tekstyOpornyh(
-    'Короткие задачи на один навык: из этих навыков складывается любая задача №10. В каждом блоке десять задач.',
+    `Короткие задачи на один навык: из этих навыков складывается любая задача №${nomerRazdela('prikladnye-zadachi')}. В каждом блоке десять задач.`,
   ),
   /** Подпись под картинкой сюжета у опорной задачи. */
   gdeVstrechaetsya: 'Где встречается:',

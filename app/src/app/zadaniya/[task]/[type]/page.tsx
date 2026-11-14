@@ -32,7 +32,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
      (data/functionTypes.ts), одни и те же в заголовке, описании и
      карточке при отправке ссылки. */
   const title = `${subtopic.title} — Будет на ЕГЭ`;
-  const description = `Задание №${task}. ${subtopic.title}. ${subtopic.graphName}.`;
+  /* task — часть адреса; номер задания ЕГЭ — у раздела. */
+  const description = `Задание №${findSection(task)?.no ?? task}. ${subtopic.title}. ${subtopic.graphName}.`;
   return { title, description, openGraph: { title, description } };
 }
 
