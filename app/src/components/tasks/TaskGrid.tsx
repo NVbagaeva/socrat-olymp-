@@ -33,17 +33,21 @@ export function TaskGrid({ tasks, bento = false }: TaskGridProps) {
         /* Ссылка есть у открытого раздела и у неоткрытого с заглушкой. */
         const open = taskHasPage(task);
         return (
-        <li key={task.no} {...(sizes === null ? {} : bentoAttrs(sizes, i))}>
-          <TaskCard
-            className="task-card--bank"
-            number={task.no}
-            title={task.name}
-            href={open ? taskHref(task) : undefined}
-            comingSoon={task.status !== 'ready'}
-            badges={task.badges?.map((label) => ({ label, tone: 'info' as const }))}
-            illustration={<TaskImage no={task.no} format={task.icon} />}
-          />
-        </li>
+          <li key={task.no} {...(sizes === null ? {} : bentoAttrs(sizes, i))}>
+            <TaskCard
+              className="task-card--bank"
+              number={task.no}
+              title={task.name}
+              href={open ? taskHref(task) : undefined}
+              comingSoon={task.status !== 'ready'}
+              badges={task.badges?.map((label) => ({ label, tone: 'info' as const }))}
+              illustration={
+                task.image === null ? undefined : (
+                  <TaskImage no={task.image ?? task.no} format={task.icon} />
+                )
+              }
+            />
+          </li>
         );
       })}
     </ul>

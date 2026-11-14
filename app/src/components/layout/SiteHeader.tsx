@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { AuthWidget } from '@/components/auth/AuthWidget';
+import { LevelLink, LevelSwitch } from '@/components/level/LevelSwitch';
 import { isNavGroup, site } from '@/content/site';
 import { NavDropdown } from './NavDropdown';
 import { SiteMenu } from './SiteMenu';
@@ -21,10 +22,21 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
           {site.brand}
         </Link>
 
+        {/* Уровень экзамена — сразу после логотипа, на всех страницах. */}
+        <LevelSwitch className="site-head__level" />
+
         <nav className="site-nav" aria-label="Разделы сайта">
           {site.nav.map((link) =>
             isNavGroup(link) ? (
               <NavDropdown key={link.label} group={link} currentHref={currentHref} />
+            ) : link.hrefBase !== undefined ? (
+              <LevelLink
+                key={link.href}
+                hrefs={{ profile: link.href, base: link.hrefBase }}
+                aria-current={link.href === currentHref ? 'page' : undefined}
+              >
+                {link.label}
+              </LevelLink>
             ) : (
               <Link
                 key={link.href}

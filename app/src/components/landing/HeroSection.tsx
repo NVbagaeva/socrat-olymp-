@@ -1,9 +1,10 @@
 import Link from 'next/link';
-import { landing } from '@/content/landing';
+import { LevelTabs } from '@/components/level/LevelTabs';
+import { landingOf } from '@/content/landing';
+import type { Level } from '@/lib/level';
 import { Kristall } from './kristall/Kristall';
-import { Popugaj } from './Popugaj';
+import { Zherdochka } from './Zherdochka';
 
-const { hero, metrics } = landing;
 
 /**
  * Первый экран в «Стеклянной сцене». Заголовок и лид — для обеих
@@ -12,7 +13,8 @@ const { hero, metrics } = landing;
  * стекла — три свечения: синее, оранжевое и терракотовое, без них
  * размывать было бы нечего. Полоса показателей строится по длине metrics.
  */
-export function HeroSection() {
+export function HeroSection({ level = 'profile' }: { level?: Level }) {
+  const { hero, metrics } = landingOf(level);
   return (
     <section className="hero">
       <div className="aura" aria-hidden="true">
@@ -23,6 +25,8 @@ export function HeroSection() {
 
       <div className="hero__in">
         <div className="hero__text">
+          {/* Вкладки уровня — над заголовком. */}
+          <LevelTabs level={level} to="home" />
           <p className="hero__eyebrow">{hero.eyebrow}</p>
           <h1 className="hero__title">
             <TitleWithPerch title={hero.title} perch={hero.perch} />
@@ -61,12 +65,12 @@ export function HeroSection() {
 }
 
 /**
- * Заголовок, где слово perch обёрнуто: на нём сидит попугайчик. Знак
- * препинания сразу за словом держим с ним в одной неразрывной обёртке,
- * иначе после inline-block точка может уехать на следующую строку.
+ * Заголовок, где сразу за словом perch висит жёрдочка с попугайчиком.
+ * Слово, знак препинания за ним и жёрдочка — в одной неразрывной
+ * обёртке: жёрдочка не отрывается от слова на другую строку.
  */
 function TitleWithPerch({ title, perch }: { title: string; perch: string }) {
-  const at = title.indexOf(perch);
+  const at = title.lastIndexOf(perch);
   if (at < 0) return <>{title}</>;
   const wordEnd = at + perch.length;
   const tail = /^[.,!?:;…]*/.exec(title.slice(wordEnd))?.[0] ?? '';
@@ -75,11 +79,9 @@ function TitleWithPerch({ title, perch }: { title: string; perch: string }) {
     <>
       {title.slice(0, at)}
       <span className="hero__perch-wrap">
-        <span className="hero__perch">
-          {perch}
-          <Popugaj />
-        </span>
+        {perch}
         {tail}
+        <Zherdochka />
       </span>
       {title.slice(end)}
     </>
