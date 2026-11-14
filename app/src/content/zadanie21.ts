@@ -20,6 +20,7 @@ export const ZADANIE21 = {
     { id: 'teoriya', label: 'Теория', tail: 'teoriya/', icon: 'book' },
     { id: 'opornye', label: OPORNYE.title, tail: OPORNYE.tail, icon: 'target' },
     { id: 'trenazher', label: 'Тренажёр', tail: 'trenazher/', icon: 'dumbbell' },
+    { id: 'generator', label: 'Генератор', tail: 'generator/', icon: 'settings' },
   ] as readonly RazdelTab[],
 } as const;
 
