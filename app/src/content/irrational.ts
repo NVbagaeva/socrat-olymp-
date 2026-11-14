@@ -9,6 +9,7 @@
  */
 
 import type { SectionAbout, TutorMaterial } from './sections';
+import { nomerRazdela } from '@/content/struktura';
 
 export const IRRATIONAL_ABOUT: Omit<SectionAbout, 'hint' | 'title'> = {
   description:
@@ -40,7 +41,7 @@ export const IRRATIONAL_ABOUT: Omit<SectionAbout, 'hint' | 'title'> = {
       trainer: 'peresechenie',
     },
   ],
-  skillsTitle: 'Что нужно уметь для задания №12',
+  skillsTitle: `Что нужно уметь для задания №${nomerRazdela('grafiki-funkciy')}`,
   skills: [
     'Знать, что $\\sqrt{x}$ определён при $x \\ge 0$ и сам не бывает отрицательным',
     'Находить начало графика $(x_0;\\, y_0)$',
@@ -51,8 +52,8 @@ export const IRRATIONAL_ABOUT: Omit<SectionAbout, 'hint' | 'title'> = {
   ],
   later: {
     title: 'Это пригодится позже',
-    text: 'График корня встречается в задачах с параметром, задании №19: сколько решений у уравнения с корнем, при каком параметре прямая касается графика. Всё это начинается с умения читать график по началу и целым точкам. Подробнее разбирать эти темы будем в разделе задания №19.',
-    action: 'Подробнее о №19',
+    text: `График корня встречается в задачах с параметром, задании №${nomerRazdela('parametr')}: сколько решений у уравнения с корнем, при каком параметре прямая касается графика. Всё это начинается с умения читать график по началу и целым точкам. Подробнее разбирать эти темы будем в разделе задания №${nomerRazdela('parametr')}.`,
+    action: `Подробнее о №${nomerRazdela('parametr')}`,
   },
 };
 

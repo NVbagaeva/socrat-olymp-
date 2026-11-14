@@ -9,6 +9,7 @@ import { upgrade } from '@/lib/graph/katex-upgrade.js';
 import { solutionLength, spaceFor, spaceHtml, type SheetSpace } from '@/lib/sheet/space.js';
 import '@/lib/sheet/space.css';
 import { dateRu, instructionFor, sheetNo, starsText } from '@/lib/variant/sheets';
+import { podpis1 } from '@/lib/variant/struktura';
 import type { EgeNo, VariantMeta, VariantSet } from '@/lib/variant/types';
 
 export interface VariantPreviewProps {
@@ -113,7 +114,7 @@ export function VariantPreview({
                 <li key={`${t.egeNumber}:${t.taskId}`} className="var-task">
                   <div className="var-task__bar">
                     <span className="var-task__meta">
-                      №{t.egeNumber} · {t.source.label}
+                      №{podpis1(t.egeNumber)} · {t.source.label}
                     </span>
                     {/* Сложность — только здесь, на экране: на листы она не печатается. */}
                     <span

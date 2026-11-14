@@ -8,9 +8,10 @@
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from '@/content/struktura';
 
 export const ZADANIE11 = {
-  no: '11',
+  no: nomerDvumya('tekstovye-zadachi'),
   slug: '11',
   title: taskName('11'),
   lead: 'Реальные ситуации, которые решаются математическими моделями.',
@@ -40,7 +41,7 @@ export const PROGRESS_11 = {
 /* ── Вкладка «О задании» ────────────────────────────────────────── */
 
 export const O_ZADANII_11 = {
-  title: 'Задание 11. Текстовые задачи',
+  title: `Задание ${nomerRazdela('tekstovye-zadachi')}. Текстовые задачи`,
   lead: 'Ответ — целое число или конечная десятичная дробь.',
   about:
     'В задании нужно перевести житейскую ситуацию на язык математики: выбрать неизвестную, заполнить таблицу, составить уравнение и ответить ровно на вопрос задачи. Разделы ниже идут в рекомендуемом порядке — от разминки к задачам на работу и прогрессии.',
@@ -54,7 +55,7 @@ export const O_ZADANII_11 = {
     shagi: [
       {
         title: 'Изучи краткую информацию о задании',
-        text: 'Какие типы задач входят в задание 11 и на что обратить внимание.',
+        text: `Какие типы задач входят в задание ${nomerRazdela('tekstovye-zadachi')} и на что обратить внимание.`,
       },
       {
         title: 'Пройди теорию по каждому разделу',

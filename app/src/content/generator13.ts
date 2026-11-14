@@ -5,6 +5,7 @@
  */
 
 import { plural } from '@/lib/plural';
+import { nomerRazdela } from '@/content/struktura';
 
 /** Строки шага «Что»: схемы, «Определи тип», «Таблица руками». */
 export type Vid13 = 'A' | 'B' | 'C' | 'D' | 'T' | 'P';
@@ -211,9 +212,9 @@ export const SHEET_13 = {
     author: 'Багаева Н.В.',
     motto: 'Больше, чем подготовка',
   },
-  chip: 'Задание 13',
+  chip: `Задание ${nomerRazdela('ekonomika')}`,
   text: 'Экономические задачи',
-  runner: 'Задание 13 · Экономические задачи',
+  runner: `Задание ${nomerRazdela('ekonomika')} · Экономические задачи`,
   uchitel: 'Багаева Н.В.',
   resheniya: 'файл для учителя',
   svodka: 'Сводка ответов',

@@ -36,6 +36,7 @@ import { solutionLength, spaceFor, type SheetSpace } from '@/lib/sheet/space.js'
 import typo from '@/lib/sheet/typography.js';
 import { codeWithSpace } from './code';
 import type { Figure, FigureSize, Numbering, VariantMeta, VariantSet, VariantTask } from './types';
+import { BEZ_NOMERA, metkaVida, nomerChasti1, podpis2 } from './struktura';
 
 export type SheetKind = 'uchenik' | 'uchitel' | 'razbor';
 export type SheetChoice = SheetKind | 'vse';
@@ -72,9 +73,13 @@ export function sheetFigure(
 
 /* ── Номера и подписи ───────────────────────────────────────────── */
 
-/** Номер задачи на листе: как в ЕГЭ или сквозной. */
-export function sheetNo(task: VariantTask, index: number, numbering: Numbering): number {
-  return numbering === 'ege' ? task.egeNumber : index + 1;
+/**
+ * Номер задачи на листе: как в ЕГЭ или сквозной. Номер ЕГЭ — по
+ * действующей структуре экзамена (struktura.ts); у задачи, раздела
+ * которой в первой части больше нет, вместо номера — «—».
+ */
+export function sheetNo(task: VariantTask, index: number, numbering: Numbering): number | string {
+  return numbering === 'ege' ? (nomerChasti1(task.egeNumber) ?? BEZ_NOMERA) : index + 1;
 }
 
 /**
@@ -230,7 +235,7 @@ function figureItem(f: Figure | null, cls: string, figures: FigureSize): string 
  */
 function card(
   task: VariantTask,
-  no: number,
+  no: number | string,
   figures: FigureSize,
   answerLine = false,
   plashka = false,
@@ -289,7 +294,7 @@ function keyItem(
   );
 }
 
-function solutionHead(task: VariantTask, no: number, withMeta: boolean): string {
+function solutionHead(task: VariantTask, no: number | string, withMeta: boolean): string {
   const meta = withMeta
     ? `<span class="var-sol__meta">${typo.escape(task.source.label)}</span>`
     : '';
@@ -437,10 +442,13 @@ export type Mesto2 = 'stranica' | 'net';
 
 function card2(z: Chast2Zadacha) {
   return {
-    no: z.no,
+    no: podpis2(z.no),
     id: `c2-${z.no}`,
     badge: ballText(MAX_BALL[z.no]),
-    questionHtml: uslovieHtml(z.uslovie),
+    /* Пометка вида у задачи прежнего №17 в ЕГЭ-2027 (№16: экономическая или на оптимизацию). */
+    questionHtml:
+      (metkaVida(z) === null ? '' : `<p class="sheet-vid"><i>${metkaVida(z)}</i></p>`) +
+      uslovieHtml(z.uslovie),
     options: null,
     figureSvg: z.risunok,
     figureWidth: z.risunok === null ? undefined : 60,
@@ -487,7 +495,7 @@ function key2Item(zadachi: readonly Chast2Zadacha[]): string {
   const rows = zadachi
     .map(
       (z) =>
-        `<tr><th scope="row">${z.no}</th><td class="var-key__answer">${strokaHtml(z.otvet, 'list')}</td>` +
+        `<tr><th scope="row">${podpis2(z.no)}</th><td class="var-key__answer">${strokaHtml(z.otvet, 'list')}</td>` +
         `<td>${MAX_BALL[z.no]}</td></tr>`,
     )
     .join('');
@@ -509,7 +517,7 @@ function blocksUchitel2(zadachi: readonly Chast2Zadacha[]): unknown[] {
         ...(i === 0 ? [part2Head()] : []),
         item(
           'var-sol var-sol--first',
-          `<p class="var-sol__head"><b>${typo.escape(T.task(z.no))}</b></p>`,
+          `<p class="var-sol__head"><b>${typo.escape(T.task(podpis2(z.no)))}</b></p>`,
           ' data-keep-with-next="1"',
         ),
       ],
@@ -565,7 +573,7 @@ function blocksRazbor2(zadachi: readonly Chast2Zadacha[]): unknown[] {
         ...(i === 0 ? [part2Head()] : []),
         item(
           'var-sol var-sol--first',
-          `<p class="var-sol__head"><b>${typo.escape(T.task(z.no))}</b></p>`,
+          `<p class="var-sol__head"><b>${typo.escape(T.task(podpis2(z.no)))}</b></p>`,
           ' data-keep-with-next="1"',
         ),
       ],

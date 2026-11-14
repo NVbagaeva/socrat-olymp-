@@ -27,7 +27,8 @@ const CHECK = process.argv.includes('--check');
 const JSON_FILE = path.join(APP, 'src/content/kabinet/katalog.json');
 const SQL_FILE = path.join(APP, '..', 'supabase/seed/kabinet_katalog.sql');
 
-const { tasks } = requireSrc('content/tasks');
+const { vseRazdely, taskHasPage } = requireSrc('content/tasks');
+const { vEkzamene } = requireSrc('content/struktura.js');
 const { texPlain } = requireSrc('lib/texPlain');
 
 /* Задание → модуль движка, имя списка и поле названия. */
@@ -45,6 +46,8 @@ const SOURCES = {
   11: ['lib/zadanie11/prototypes/index', 'SUBTYPES'],
   /* №13: реестр прототипов — функция генератора. */
   13: ['lib/zadanie13/generate', 'prototypes'],
+  /* «Наибольшее и наименьшее значение» (ЕГЭ-2027, задание 12). */
+  21: ['lib/zadanie21/prototypes', 'PROTOTYPES'],
 };
 
 function listOf(no) {
@@ -74,10 +77,17 @@ function listOf(no) {
   return list.map((p) => ({ id: String(p.id), title: texPlain(String(p.nazvanie ?? p.title)) }));
 }
 
+/* Номер в каталоге и в кодах прототипов («8:8.A») — номер хранения
+   раздела, а не номер ЕГЭ (content/struktura.js): по нему записаны ДЗ,
+   попытки и работы, и вместе со структурой экзамена он не меняется.
+   В каталоге — разделы, которые есть на сайте: стоят в экзамене или
+   имеют страницу. Раздел, скрытый из экзамена, остаётся: иначе его
+   прототипы погасли бы в базе. */
 const catalog = { tasks: [] };
 const seen = new Set();
-for (const task of tasks) {
-  const no = Number(task.no);
+for (const task of vseRazdely) {
+  if (!vEkzamene(task.kod) && !taskHasPage(task)) continue;
+  const no = task.hranenie;
   const ready = task.status === 'ready';
   const prototypes = ready
     ? listOf(no).map((p) => ({ code: `${no}:${p.id}`, title: p.title.trim() }))

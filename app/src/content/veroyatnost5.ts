@@ -12,11 +12,12 @@
  */
 
 import type { Ton } from '@/components/tasks/steklo';
+import { nomerRazdela, slovoChasti } from './struktura';
 import { tekstyKarty45 } from './veroyatnost45';
 
 export const SHAPKA5 = {
   ...tekstyKarty45,
-  nadzagolovok: 'Задание №5 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('slozhnaya-veroyatnost')} · ${slovoChasti('slozhnaya-veroyatnost')}`,
   zagolovok: 'Вероятность сложного события',
   lead: 'События складывают и умножают, считают через противоположное, при условии и по веткам дерева. Сначала назови, как связаны события в условии, — тогда метод находится сам. Ответ — десятичная дробь или число попыток.',
   fakty: (tipovVsego: number) => [

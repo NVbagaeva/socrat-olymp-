@@ -11,6 +11,7 @@
  */
 
 import type { Risunok } from '@/lib/vektory/types';
+import { nomerRazdela } from './struktura';
 
 /** Модуль одной высоты у всех векторов раздела (как modul в lib/vektory/tex). */
 const M = (inner: string) => `\\left|\\,\\vphantom{\\vec{b}}${inner}\\,\\right|`;
@@ -46,7 +47,7 @@ export interface Navyk2 {
 }
 
 export const UMET_2 = {
-  title: 'Что нужно уметь для №2',
+  title: `Что нужно уметь для №${nomerRazdela('vektory')}`,
   lead: 'Пять действий, из которых собирается любая задача. Каждое посчитано на векторах с рисунка.',
   podpis: `Катеты — это длины в клетках. Знак координаты даёт вычитание «конец минус начало».`,
   risunok: {

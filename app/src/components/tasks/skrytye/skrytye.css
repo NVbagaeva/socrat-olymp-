@@ -1,0 +1,76 @@
+/* Скрытый раздел (SkrytyyRazdel.tsx): плашка администратора над
+   страницей и экран «Страница не найдена» для посетителя. */
+
+/* Полоса во всю ширину правого столбца, над <main> раздела: её поля
+   повторяют поля .app-main. */
+.skryt-plashka {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-8);
+  border-bottom: 1px solid var(--color-border-accent);
+  background: var(--color-accent-soft-surface);
+  color: var(--color-text);
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+}
+.skryt-plashka__prichina {
+  font-weight: 700;
+}
+@media (max-width: 1023.98px) {
+  .skryt-plashka {
+    padding-inline: var(--space-5);
+  }
+}
+/* На печатном листе плашки нет. */
+@media print {
+  .skryt-plashka {
+    display: none;
+  }
+}
+
+.skryt-net {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+}
+.skryt-net__title {
+  margin: 0;
+}
+.skryt-net__text {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--color-text-secondary);
+}
+
+/* Кабинет администратора: список скрытых разделов. */
+.skryt-admin {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.skryt-admin__razdel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.skryt-admin__name {
+  flex: 1 1 14rem;
+  min-width: 0;
+  font-weight: 600;
+}
+.skryt-admin__note {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+.skryt-admin__zakryt {
+  margin-top: var(--space-3);
+}
