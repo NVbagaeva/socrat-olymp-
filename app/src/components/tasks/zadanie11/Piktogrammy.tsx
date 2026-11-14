@@ -286,6 +286,7 @@ const SCENY: Record<string, string[]> = {
   'SM-06': ['grapes', 'arrow', 'drop'],
   'SM-07': ['flask', 'flask'],
   'SM-08': ['flask', 'drop', 'flask'],
+  'SM-09': ['drop', 'flask', 'flask'],
   'DP-01': ['runner', 'gauge'],
   'DP-02': ['car', 'gauge'],
   'DP-03': ['car', 'gauge'],

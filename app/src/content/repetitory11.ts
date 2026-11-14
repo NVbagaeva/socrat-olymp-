@@ -102,7 +102,7 @@ export const MARSHRUTY_11: Marshrut11[] = [
     razdely: ['SM'],
     opornye: ['P11-08', 'P11-08', 'P11-08', 'P11-01'],
     bank: ['SM-01', 'SM-02', 'SM-03', 'SM-06', 'SM-04', 'SM-05', 'SM-07', 'SM-08'],
-    novye: ['SM-01', 'SM-06', 'SM-04', 'SM-05', 'SM-07', 'SM-08'],
+    novye: ['SM-01', 'SM-06', 'SM-04', 'SM-05', 'SM-07', 'SM-08', 'SM-09'],
   },
   {
     no: 3,
