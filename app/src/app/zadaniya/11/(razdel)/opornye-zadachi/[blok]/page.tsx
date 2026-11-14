@@ -1,3 +1,4 @@
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Opornye11Screen } from '@/components/tasks/zadanie11/Opornye11Screen';
@@ -40,6 +41,11 @@ export default async function Opornye11BlokPage({ params }: { params: Params }) 
       totals={BLOKI.map((b) => ({ id: b.id, total: b.zadachi.length }))}
       vBloke
     >
+      {/* Репетитору: весь блок — в черновик ДЗ (при выдаче — аналоги). */}
+      <VDzKnopka
+        punkt={{ ist: 'opornye', no: 11, blok: found.slug, zadachi: null, kazhdomu: false }}
+        chto={`блок «${found.nazvanie}»`}
+      />
       <Opornye11Screen
         blockId={found.id}
         razdel={found.razdel}

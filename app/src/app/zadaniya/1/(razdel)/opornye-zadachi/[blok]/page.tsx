@@ -1,3 +1,4 @@
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Opornye1Screen } from '@/components/tasks/planimetriya/Opornye1Screen';
@@ -31,6 +32,11 @@ export default async function Opornye1BlokPage({ params }: { params: Params }) {
   const base = `${ZADANIYA}/${ZADANIE1.slug}`;
   return (
     <Opornye1Shell base={base} active={found.slug}>
+      {/* Репетитору: весь блок — в черновик ДЗ (при выдаче — аналоги). */}
+      <VDzKnopka
+        punkt={{ ist: 'opornye', no: 1, blok: found.slug, zadachi: null, kazhdomu: false }}
+        chto={`блок «${found.nazvanie}»`}
+      />
       <Opornye1Screen
         blockId={found.id}
         title={found.nazvanie}

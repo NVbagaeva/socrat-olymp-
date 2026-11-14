@@ -89,6 +89,8 @@ function bankovyy(m: {
 }
 
 export const SBORSHCHIKI: Record<number, () => Promise<SborshchikRazdela>> = {
+  1: () => import('./r1-11').then((m) => m.SBORSHCHIK_1),
+  11: () => import('./r1-11').then((m) => m.SBORSHCHIK_11),
   2: () =>
     import('./r2').then((m) =>
       generatorRazdela({
@@ -151,4 +153,4 @@ export const SBORSHCHIKI: Record<number, () => Promise<SborshchikRazdela>> = {
 };
 
 /** Разделы, где опорные строятся из зерна (для «Каждому свои» без загрузки модуля). */
-export const OPORNYE_IZ_ZERNA: ReadonlySet<number> = new Set([2, 8, 9]);
+export const OPORNYE_IZ_ZERNA: ReadonlySet<number> = new Set([1, 2, 8, 9, 11]);

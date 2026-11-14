@@ -8,6 +8,8 @@ import 'katex/dist/katex.min.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/zadanie6/zadanie6.css';
 import '@/components/tasks/zadanie10/razbor10.css';
+/* №1: чертежи планиметрии. */
+import '@/lib/planimetriya/planimetriya.css';
 
 export const metadata: Metadata = {
   title: 'Домашнее задание — Будет на ЕГЭ',

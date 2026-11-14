@@ -24,6 +24,18 @@ import { fixedSeed, generatePrep } from '@/lib/vychisleniya/prep/generate';
 import { GROUPS as GROUPS8, SKILLS as SKILLS8 } from '@/lib/vychisleniya/skills';
 import { names8Html } from '@/lib/vychisleniya/names';
 import { tasks } from '@/content/tasks';
+import { dannyeTrenazhera1 } from '@/lib/planimetriya/trenazher/dannye';
+import { BLOKI as BLOKI1 } from '@/lib/planimetriya/prep/bloki';
+import {
+  fixedSeed as fixedSeed1,
+  generateMikro as generateMikro1,
+} from '@/lib/planimetriya/prep/generate';
+import { dannyeTrenazhera as dannyeTrenazhera11 } from '@/lib/zadanie11/trenazher/dannye';
+import { BLOKI as BLOKI11 } from '@/lib/zadanie11/prep/bloki';
+import {
+  fixedSeed as fixedSeed11,
+  generateMikro as generateMikro11,
+} from '@/lib/zadanie11/prep/generate';
 import { O_ZADANII as O_ZADANII_2 } from '@/content/vektory';
 import { PROTOTYPES as PROTOTYPES2 } from '@/lib/vektory/prototypes';
 import { BLOKI as BLOKI2 } from '@/lib/vektory/prep/bloki';
@@ -37,7 +49,7 @@ import type { BlokKat, GruppaKat, KartochkaKat, KatalogRazdela, PodtemaKat } fro
 import { zamok } from './zamok';
 
 /** Разделы, из которых уже можно собирать ДЗ. */
-export const RAZDELY_DZ = [2, 6, 7, 8, 9, 10] as const;
+export const RAZDELY_DZ = [1, 2, 6, 7, 8, 9, 10, 11] as const;
 
 /** «Банковые» разделы: банк задач с решателем прототипа и опорные без зерна. */
 const BANKOVYE: Record<
@@ -187,7 +199,66 @@ function opornye9(): BlokKat[] {
   }));
 }
 
+/** Типы общего тренажёра (№1, №11): разделы и подтипы. */
+function trenazherObshchiy(
+  razdely: readonly {
+    id: string;
+    nazvanie: string;
+    podtipy: readonly { id: string; title: string }[];
+  }[],
+): GruppaKat[] {
+  return razdely.map((r) => ({
+    id: r.id,
+    nazvanie: r.nazvanie,
+    tipy: r.podtipy.map((p) => ({ id: p.id, nazvanieHtml: typeset(p.title) })),
+  }));
+}
+
 export function katalog(no: number): KatalogRazdela | null {
+  if (no === 1) {
+    const d = dannyeTrenazhera1();
+    return {
+      no,
+      nazvanie: nazvanieRazdela(no),
+      kartochki: kartochki(no),
+      opornye: BLOKI1.map((b) => ({
+        slug: b.slug,
+        nazvanie: b.nazvanie,
+        zapomniHtml: b.formuly.map((f) => typeset(`$${f}$`)).join('<br>'),
+        zadachi: b.zadachi.map((m) => ({
+          id: m.id,
+          nazvanie: m.nazvanie,
+          uslovieHtml: typeset(generateMikro1(m.id, fixedSeed1(m.id)).uslovie),
+          podskazkaHtml: typeset(`$${m.formula}$`),
+          izZerna: true,
+        })),
+      })),
+      trenazher: trenazherObshchiy(d.razdely),
+      bankTrenazhera: d.bank.map((b) => ({ ...b })),
+    };
+  }
+  if (no === 11) {
+    const d = dannyeTrenazhera11();
+    return {
+      no,
+      nazvanie: nazvanieRazdela(no),
+      kartochki: kartochki(no),
+      opornye: BLOKI11.map((b) => ({
+        slug: b.slug,
+        nazvanie: b.nazvanie,
+        zapomniHtml: b.zapomni.map((f) => typeset(f)).join('<br>'),
+        zadachi: b.zadachi.map((m) => ({
+          id: m.id,
+          nazvanie: m.nazvanie,
+          uslovieHtml: typeset(generateMikro11(m.id, fixedSeed11(m)).uslovie),
+          podskazkaHtml: '',
+          izZerna: true,
+        })),
+      })),
+      trenazher: trenazherObshchiy(d.razdely),
+      bankTrenazhera: d.bank.map((b) => ({ ...b })),
+    };
+  }
   if (no === 2) {
     return {
       no,

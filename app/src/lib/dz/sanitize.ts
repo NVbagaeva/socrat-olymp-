@@ -76,6 +76,7 @@ const TAGS = new Set([
   'tr',
   'td',
   'th',
+  'caption',
   'details',
   'summary',
   'figure',
