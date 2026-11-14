@@ -63,8 +63,8 @@ function taskItem(task: ExamTask): NavItem {
   };
 }
 
-/* Список по частям экзамена: «ЧАСТЬ 1», под ней 01–13, разделитель,
-   «ЧАСТЬ 2» и 14–20. */
+/* Список по частям экзамена: «ЧАСТЬ 1» с её номерами, разделитель,
+   «ЧАСТЬ 2» (номера и части — content/struktura.js). */
 function taskGroups(level: Level): NavGroup[] {
   const tasks = tasksOf(level);
   return taskParts

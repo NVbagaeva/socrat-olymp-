@@ -3,7 +3,8 @@
 
    Запуск: pnpm test:chast2
 
-     1. Баллы: максимумы 1–20 из одного конфига, сумма 13 + 20 = 33.
+     1. Баллы: максимумы 1–20 из одного конфига, части по структуре
+        (13 + 20 = 33; в ЕГЭ-2027 — 12 + 20 = 32).
      2. Шкала: значения для 0…33, не убывает, 0 → 0, 33 → 100.
      3. Автопроверка: для каждого типа поля — таблица эквивалентных
         записей (должны совпасть), неэквивалентных (не совпасть) и
@@ -17,6 +18,9 @@ import { requireSrc } from './lib/load-ts.mjs';
 const { MAX_BALL, MAX_PART1, MAX_PART2, MAX_TOTAL } = requireSrc('content/variantOnline/bally');
 const { TESTOVYJ_33: TESTOVYJ } = requireSrc('content/variantOnline/shkala');
 const { proverit } = requireSrc('lib/chast2/sravnenie');
+const { STRUKTURA } = requireSrc('content/struktura.js');
+/* Максимумы частей по структуре экзамена: 13 + 20 = 33 или 12 + 20 = 32. */
+const CHASTI = STRUKTURA.id === '2027-19' ? [12, 20, 32] : [13, 20, 33];
 
 let failures = 0;
 let checks = 0;
@@ -33,8 +37,8 @@ const ozhid = { 14: 2, 15: 3, 16: 2, 17: 2, 18: 3, 19: 4, 20: 4 };
 for (let n = 1; n <= 13; n += 1) ok(MAX_BALL[n] === 1, `№${n}: 1 балл`);
 for (const [n, b] of Object.entries(ozhid)) ok(MAX_BALL[n] === b, `№${n}: ${b} балла`);
 ok(
-  MAX_PART1 === 13 && MAX_PART2 === 20 && MAX_TOTAL === 33,
-  `части 13 + 20 = 33 (${MAX_PART1} + ${MAX_PART2} = ${MAX_TOTAL})`,
+  MAX_PART1 === CHASTI[0] && MAX_PART2 === CHASTI[1] && MAX_TOTAL === CHASTI[2],
+  `части ${CHASTI[0]} + ${CHASTI[1]} = ${CHASTI[2]} (${MAX_PART1} + ${MAX_PART2} = ${MAX_TOTAL})`,
 );
 ok(Object.values(MAX_BALL).reduce((s, x) => s + x, 0) === 33, 'сумма максимумов 33');
 

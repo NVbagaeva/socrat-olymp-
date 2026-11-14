@@ -263,7 +263,8 @@ export function KartaPrimer({
         </p>
       )}
       <p className="kz-otvet">
-        {labels.otvet}: <b>{otvet}</b>
+        {/* Ответ — число текстом с типографским минусом («−7»), не формула. */}
+        {labels.otvet}: <b className="no-math-check">{otvet}</b>
       </p>
       <div className="kz-knopki">
         {/* Обычная ссылка, а не переход внутри приложения: тренажёр

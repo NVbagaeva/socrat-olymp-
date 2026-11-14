@@ -229,10 +229,18 @@ ok(
   table.average.every((x) => x === 1),
   'средние по номерам: 100%',
 );
-ok(
-  table.rows.find((r) => r.student.id === s2)?.test === 72,
-  'тестовый балл ученицы: 13 первичных → 72 по шкале',
-);
+{
+  /* Вариант теста — из 13 заданий прежней структуры. Тестовый балл
+     ставится, только если вариант покрывает всю первую часть
+     действующей структуры; в ЕГЭ-2027 у №12 пока нет задач для
+     вариантов — балла нет. */
+  const { fullPartOne, testScore } = requireSrc('lib/variant/online/proverka');
+  const zhdu = fullPartOne(ALL) ? testScore(13) : null;
+  ok(
+    table.rows.find((r) => r.student.id === s2)?.test === zhdu,
+    `тестовый балл ученицы: 13 первичных → ${zhdu ?? 'нет (вариант не покрывает часть 1)'}`,
+  );
+}
 const tv = await api.variantWork(trening);
 const tt = classTable(tv);
 ok(

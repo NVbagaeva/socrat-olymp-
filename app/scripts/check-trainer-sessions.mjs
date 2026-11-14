@@ -79,6 +79,7 @@ import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { metkaAdministratora } from './lib/metka-skrytyh.mjs';
 
 /* Баннер cookie и окно «Впервые здесь?» в этой проверке не нужны: окно
    закрывает страницу целиком. */
@@ -955,6 +956,8 @@ async function finishRun(page) {
 async function inContext(what, run) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   await welcomeSeen(context);
+  /* Скрытый раздел (№6 в ЕГЭ-2027) — как у администратора. */
+  await metkaAdministratora(context);
   try {
     await run(context);
   } catch (error) {
