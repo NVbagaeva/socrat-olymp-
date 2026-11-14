@@ -123,5 +123,5 @@ export const OPORNYE_18_UI = {
   reshenoIz: (n: number) => `из ${n} задач решено`,
   reshenoLabel: (r: number, n: number) => `Опорные задачи: решено ${r} из ${n}`,
   sbros: 'Сбросить отметки',
-  sbrosVopros: 'Сбросить отметки всех опорных задач №18?',
+  sbrosVopros: `Сбросить отметки всех опорных задач №${nomerRazdela('planimetriya-dokazatelstvo')}?`,
 } as const;
