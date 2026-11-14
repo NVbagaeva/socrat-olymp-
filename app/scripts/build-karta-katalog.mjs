@@ -4,7 +4,7 @@
    Запуск: pnpm build:karta-katalog → src/content/karta/katalog.json.
    Что файл не устарел, проверяет pnpm test:karta.
 
-   Для каждого из 20 заданий — группы тем с вкладки «О задании» и типы
+   Для каждого раздела — группы тем с вкладки «О задании» и типы
    журнала попыток (kind), которые в них входят. Списки собираются из
    реестров прототипов разделов: многие из них серверные (генераторы,
    у №18 и №19 — открытые ответы), поэтому в браузер уходит только этот
@@ -20,10 +20,10 @@ const APP = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(APP, 'src', 'content', 'karta', 'katalog.json');
 
 /* Области карты записаны по номеру хранения раздела (content/struktura.js):
-   на нём ключи журналов попыток и адреса тренажёров. Номер ЕГЭ на острове
-   карта считает сама при показе. */
+   на нём ключи журналов попыток и адреса тренажёров. Номер ЕГЭ на острове,
+   часть экзамена и сам остров карта берёт из действующей структуры при
+   показе (lib/karta/mesta.ts) — каталог от структуры не зависит. */
 const { vseRazdely } = requireSrc('content/tasks.ts');
-const { chastRazdela } = requireSrc('content/struktura.js');
 const nazvanie = (no) => {
   const t = vseRazdely.find((x) => x.hranenie === no);
   return t.shortTitle ?? t.name;
@@ -36,7 +36,6 @@ const razdely = [];
 const dobavit = (no, gruppy, trenazher, status = 'gotov') => {
   razdely.push({
     no,
-    chast: chastRazdela(no),
     status,
     nazvanie: nazvanie(no),
     gruppy: gruppy.map((g) => ({
@@ -242,6 +241,21 @@ dobavit(17, [], null, 'skoro');
 }
 
 dobavit(20, [], null, 'skoro');
+
+/* Новый №12 ЕГЭ-2027 (номер хранения 21): прототипы P01… по видам функций;
+   kind — прототип. Ссылкой — список прототипов вида. */
+{
+  const { GRUPPY21, prototypesOfGruppa } = requireSrc('lib/zadanie21/gruppy.ts');
+  dobavit(
+    21,
+    GRUPPY21.map((g) => ({
+      id: String(g.id),
+      nazvanie: g.title,
+      tipy: prototypesOfGruppa(g.id).map((p) => p.id),
+    })),
+    (g) => `/zadaniya/21/trenazher/?tipy=${g.tipy.join(',')}`,
+  );
+}
 
 razdely.sort((a, b) => a.no - b.no);
 for (const r of razdely) {

@@ -2,7 +2,7 @@
 /* scripts/check-variant-struktura.mjs — варианты и структура экзамена.
 
    Запуск: pnpm test:variant-struktura
-           STRUKTURA_EGE=2027-19 pnpm test:variant-struktura
+           STRUKTURA_EGE=2027-20 pnpm test:variant-struktura
 
    Задача варианта помнит номер хранения своего раздела: на нём держатся
    сборщики задач, зерно, код варианта, сохранённые работы и база. А из

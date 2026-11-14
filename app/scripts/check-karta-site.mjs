@@ -47,6 +47,12 @@ if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 
 const D = requireSrc('lib/karta/demo.ts');
 const C = requireSrc('lib/karta/katalog.ts');
+/* Числа на экране — по действующей структуре экзамена (content/struktura.js). */
+const S = requireSrc('content/struktura.js');
+const N = (hranenie) => S.nomerRazdela(hranenie);
+const VSEGO = C.KARTA_RAZDELY.length;
+const CHAST1 = S.STRUKTURA.chast1;
+const SKORO = C.KARTA_RAZDELY.filter((r) => r.status === 'skoro').length;
 
 /** Журналы тестового ученика → записи localStorage. */
 function zapisi(uchenik) {
@@ -113,7 +119,7 @@ async function otkryt(
     /* Освоенное уже видели: без анимации «света», чтобы снимки были одинаковыми. */
     localStorage.setItem(
       'budetege:karta:videl:v1',
-      JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18]),
+      JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 21]),
     );
   }, zapisi(uchenik));
   const page = await ctx.newPage();
@@ -159,10 +165,10 @@ if (!TOLKO_TELEFON) {
   {
     const { page, errors, ctx } = await otkryt(browser, { width: 1280 });
     check(errors.length === 0, `гость: без ошибок сценариев ${errors.join(' | ')}`);
-    check((await page.locator('.karta-ostrov').count()) === 20, 'гость: 20 областей');
+    check((await page.locator('.karta-ostrov').count()) === VSEGO, `гость: ${VSEGO} областей`);
     check(
-      (await text(page, '.karta-shapka__itog')).includes('Освоено 0 из 20'),
-      'гость: «Освоено 0 из 20»',
+      (await text(page, '.karta-shapka__itog')).includes(`Освоено 0 из ${VSEGO}`),
+      `гость: «Освоено 0 из ${VSEGO}»`,
     );
     check(
       (await text(page, '.karta-shapka__itog')).includes('Решите ещё немного'),
@@ -179,8 +185,8 @@ if (!TOLKO_TELEFON) {
       'гость: рекомендуем №1',
     );
     check(
-      (await page.locator('.karta-ostrov--skoro').count()) === 2,
-      'гость: две неоткрытые земли (№17, №20)',
+      (await page.locator('.karta-ostrov--skoro').count()) === SKORO,
+      `гость: неоткрытых земель — ${SKORO}`,
     );
     check(
       (await page.locator('.karta-ostrov--pozzhe').count()) === 2,
@@ -194,8 +200,8 @@ if (!TOLKO_TELEFON) {
       `гость: у каждой области текстовый статус (${podpisi[0]})`,
     );
     check(
-      podpisi.some((p) => p.includes('Задание 18, Планиметрия')),
-      'гость: №18 «Планиметрия» на карте',
+      podpisi.some((p) => p.includes(`Задание ${N(18)}, Планиметрия`)),
+      `гость: №${N(18)} «Планиметрия» на карте`,
     );
     /* Клавиатура: Tab до области, Enter — окошко, Esc — закрыть. */
     await page.locator('.karta-ostrov__kontur[data-cel="oblast:1"]').focus();
@@ -226,8 +232,8 @@ if (!TOLKO_TELEFON) {
     });
     check(errors.length === 0, `середина: без ошибок сценариев ${errors.join(' | ')}`);
     check(
-      (await text(page, '.karta-shapka__itog')).includes('Освоено 4 из 20'),
-      'середина: «Освоено 4 из 20»',
+      (await text(page, '.karta-shapka__itog')).includes(`Освоено 4 из ${VSEGO}`),
+      `середина: «Освоено 4 из ${VSEGO}»`,
     );
     check(
       /≈ \d+ балл/.test(await text(page, '.karta-shapka__itog')),
@@ -282,7 +288,7 @@ if (!TOLKO_TELEFON) {
     await page.waitForSelector('.karta-okoshko');
     await dozhdatsya();
     const okoshko = await text(page, '.karta-okoshko');
-    check(okoshko.includes('№8 Вычисления'), 'окошко: название раздела');
+    check(okoshko.includes(`№${N(8)} Вычисления`), 'окошко: название раздела');
     const goroda = await page
       .locator('.karta-gorod')
       .evaluateAll((els) => els.map((e) => e.className.replace(/\s+/g, ' ')));
@@ -372,9 +378,12 @@ if (!TOLKO_TELEFON) {
         proliv.includes('Что подтянуть перед второй частью'),
       'пролив: карточка «Что подтянуть…»',
     );
-    check(proliv.includes('Освоено 4 из 13'), 'пролив: «Освоено 4 из 13»');
-    check(/№14 Уравнение подтянуть: №7, №8/.test(proliv), `пролив: №14 — подтянуть №7, №8`);
-    check(/№15 Стереометрия готово/.test(proliv), 'пролив: №15 — готово');
+    check(proliv.includes(`Освоено 4 из ${CHAST1}`), `пролив: «Освоено 4 из ${CHAST1}»`);
+    check(
+      new RegExp(`№${N(14)} Уравнение подтянуть: №${N(7)}, №${N(8)}`).test(proliv),
+      `пролив: №${N(14)} — подтянуть №${N(7)}, №${N(8)}`,
+    );
+    check(new RegExp(`№${N(15)} Стереометрия готово`).test(proliv), `пролив: №${N(15)} — готово`);
     check(proliv.includes('Для тех, кто уверенно решает всё остальное'), 'пролив: №20 без связок');
     const kBefore = await page.locator('.karta-holst').evaluate((e) => ({
       k: e.style.getPropertyValue('--k'),
@@ -398,8 +407,8 @@ if (!TOLKO_TELEFON) {
     await nazhat(page, 'chast:1');
     await dozhdatsya();
     check(
-      (await text(page, '.karta-panel')).includes('Освоено 4 из 13'),
-      'табличка «Часть 1»: сводка «Освоено 4 из 13»',
+      (await text(page, '.karta-panel')).includes(`Освоено 4 из ${CHAST1}`),
+      `табличка «Часть 1»: сводка «Освоено 4 из ${CHAST1}»`,
     );
     await page.keyboard.press('Escape');
     await ctx.close();

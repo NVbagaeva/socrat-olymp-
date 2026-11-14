@@ -268,7 +268,7 @@ export function PanelMaterika({
               className={clsx('karta-spisok__oblast', `karta-spisok__oblast--${o.sostoyanie}`)}
               onClick={() => onOblast(o.no)}
             >
-              <span className="karta-spisok__nomer">{o.no}</span>
+              <span className="karta-spisok__nomer">{nomerRazdela(o.no)}</span>
               <span className="karta-spisok__imya">{razdelInfo(o.no).nazvanie}</span>
               <span className="karta-spisok__status">
                 {o.sostoyanie === 'v-processe'

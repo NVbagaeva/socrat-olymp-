@@ -4,16 +4,33 @@
  * Раздел собирается по плану docs/13-economics/02-design.md.
  */
 
+import { ballText } from './variantOnline/bally';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
-import { nomerDvumya, nomerRazdela } from '@/content/struktura';
+import { chastRazdela, maxBall, nomerDvumya, nomerRazdela } from '@/content/struktura';
+
+/**
+ * Место экономической задачи в действующей структуре экзамена
+ * (content/struktura.js): в проекте из 20 заданий — №13, часть 1,
+ * краткий ответ, 1 балл; в ЕГЭ-2027 — №16, часть 2, развёрнутый ответ,
+ * 2 балла, задачи на оптимизацию — внутри неё.
+ */
+export const MESTO13 = {
+  vtorayaChast: chastRazdela('ekonomika') === 2,
+  chast: `часть ${chastRazdela('ekonomika')}`,
+  otvet: chastRazdela('ekonomika') === 1 ? 'краткий ответ' : 'развёрнутый ответ',
+  ball: maxBall('ekonomika'),
+  bally: ballText(maxBall('ekonomika')),
+} as const;
+
+const s1 = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export const ZADANIE13 = {
   no: nomerDvumya('ekonomika'),
   slug: '13',
   title: taskName('13'),
-  lead: 'Кредиты и вклады: дифференцированный платёж, аннуитет, вклады. Часть 1, краткий ответ, 1 балл.',
+  lead: `Кредиты и вклады: дифференцированный платёж, аннуитет, вклады. ${s1(MESTO13.chast)}, ${MESTO13.otvet}, ${MESTO13.bally}.`,
   badge: 'Профильный уровень',
   tabs: [
     { id: 'o-zadanii', label: 'О задании', tail: '', icon: 'sheet' },
@@ -170,9 +187,13 @@ export interface TipOZadanii13 {
 export const O_ZADANII_13 = {
   title: `Задание ${nomerRazdela('ekonomika')}. Экономическая задача`,
   /** Чипы под заголовком: место в КИМ, формат ответа, балл. */
-  chipy: ['часть 1', 'краткий ответ', '1 балл'],
-  lead: 'Кредиты и вклады: по условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. В ответ — одно число в тех единицах, что просит условие.',
-  kim: 'Нумерация — по проекту КИМ ЕГЭ-2027 (ФИПИ). До 2027 года эти задачи шли заданием 16 с развёрнутым ответом за 2 балла.',
+  chipy: [MESTO13.chast, MESTO13.otvet, MESTO13.bally],
+  lead: MESTO13.vtorayaChast
+    ? 'Кредиты и вклады: по условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. На экзамене записывают решение целиком; в тренажёре проверяем итоговое число — в тех единицах, что просит условие.'
+    : 'Кредиты и вклады: по условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. В ответ — одно число в тех единицах, что просит условие.',
+  kim: MESTO13.vtorayaChast
+    ? `Нумерация — по демоверсии ЕГЭ-2027 (ФИПИ): экономическая задача — задание ${nomerRazdela('ekonomika')} с развёрнутым ответом за ${MESTO13.bally}; задачи на оптимизацию идут внутри него.`
+    : 'Нумерация — по проекту КИМ ЕГЭ-2027 (ФИПИ). До 2027 года эти задачи шли заданием 16 с развёрнутым ответом за 2 балла.',
   demo: 'В демоверсии 2027 — кредит, который гасят тремя равными платежами: это наш тип «Аннуитет».',
   demoSsylka: 'Демоверсии ФИПИ',
   demoHref: 'https://fipi.ru/ege/demoversii-specifikacii-kodifikatory',

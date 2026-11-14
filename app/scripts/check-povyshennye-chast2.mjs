@@ -67,7 +67,11 @@ const close = (a, b, tol = 1e-6) => Math.abs(a - b) <= tol * Math.max(1, Math.ab
 
 /* ── Баллы и плашки ──────────────────────────────────────────── */
 console.log('Баллы и плашки');
-ok(MAX_PART1 === 13 && MAX_PART2 === 20 && MAX_TOTAL === 33, 'максимумы 13 + 20 = 33');
+{
+  const { STRUKTURA } = requireSrc('content/struktura.js');
+  const [a, b, c] = STRUKTURA.id === '2027-19' ? [12, 20, 32] : [13, 20, 33];
+  ok(MAX_PART1 === a && MAX_PART2 === b && MAX_TOTAL === c, `максимумы ${a} + ${b} = ${c}`);
+}
 const max2 = { 14: 2, 15: 3, 16: 2, 17: 2, 18: 3, 19: 4, 20: 4 };
 for (const [no, b] of Object.entries(max2)) ok(MAX_BALL[no] === b, `максимум №${no} = ${b}`);
 const sklon = {

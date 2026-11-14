@@ -12,6 +12,7 @@ import type { Ton } from '@/components/tasks/steklo';
 import type { TypeCode, Units, Vopros13 } from '@/lib/zadanie13/types';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov, zadach } from './treningBanka';
 import { nomerRazdela, slovoChasti } from './struktura';
+import { MESTO13 } from './zadanie13';
 
 /* ── Тренажёр ─────────────────────────────────────────────────── */
 
@@ -82,9 +83,14 @@ export const GRUPPY13_VID: Record<TypeCode, { znak: string; ton: Ton; lead: stri
 export const SHAPKA13 = {
   nadzagolovok: `Задание №${nomerRazdela('ekonomika')} · ${slovoChasti('ekonomika')}`,
   zagolovok: 'Кредит или вклад: построить таблицу и найти одно число',
-  lead: 'По условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. В ответ — одно число в тех единицах, что просит условие. До 2027 года эти задачи шли заданием 16 с развёрнутым ответом.',
+  lead: MESTO13.vtorayaChast
+    ? 'По условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. На экзамене записывают решение целиком; в тренажёре проверяем итоговое число — в тех единицах, что просит условие.'
+    : 'По условию строим таблицу по периодам и находим сумму, ставку, срок или платёж. В ответ — одно число в тех единицах, что просит условие. До 2027 года эти задачи шли заданием 16 с развёрнутым ответом.',
   fakty: (tipovVsego: number) => [
-    { znachenie: '1', podpis: 'первичный балл' },
+    {
+      znachenie: String(MESTO13.ball),
+      podpis: MESTO13.ball === 1 ? 'первичный балл' : 'первичных балла',
+    },
     { znachenie: '≈ 12', podpis: 'минут на экзамене' },
     { znachenie: String(tipovVsego), podpis: 'типов в четырёх схемах' },
   ],
