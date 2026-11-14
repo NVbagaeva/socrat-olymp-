@@ -59,8 +59,9 @@
    Варианты повышенной сложности, часть 2 (движок lib/planimetriya):
    чертежи условий №18 — радиусы (9 %, 2,5 : 1; кроме вневписанной у
    тупого угла — ae18), углы, расстояние между точками. Чертежи решений
-   №15 (движок lib/chertezh3) — правила вида lib/stereo/metriki.ts;
-   пока отчётом в конце, без падения.
+   №15 (движок lib/chertezh3) — правила вида lib/stereo/metriki.ts:
+   вершины не слипаются, отрезки не сливаются, основание не сплющено,
+   пропорции 0,8–1,4.
    Чертёж условия и текст (trenazher/uslovie.ts): подписанные точки
    чертежа условия — только те, что названы в задаче (кроме условий ФИПИ
    без букв — TEKST_FIPI_BEZ_BUKV_18). */
@@ -82,8 +83,6 @@ const ZAZOR_LINIY = 1;
 const PUNKTIR_BLIZHE = 6;
 
 let plokho = 0;
-/** Отчёт без падения: что ещё не дотянуто до правил (печатается в конце). */
-const preduprezhdeniya = [];
 const schet = new Map();
 function fakt(imya, ok, podrobno = '') {
   const s = schet.get(imya) ?? { ok: 0, vsego: 0, primery: [] };
@@ -972,7 +971,8 @@ for (const [kto, sk] of [
   /* №15 (движок lib/chertezh3): чертежи этапов решения — правила вида
      движка (lib/stereo/metriki.ts: вершины не слипаются, отрезки не
      сливаются, основание не сплющено, пропорции 0,8–1,4) на том ракурсе,
-     что выбран для листа. Условия №15 — без чертежа. */
+     что выбран для листа (общий для этапов а) и б), vybratObshchiyVid).
+     Условия №15 — без чертежа. */
   const { postroit } = requireSrc('lib/chertezh3/postroit');
   const { metrikiVida } = requireSrc('lib/chertezh3/vid');
   for (const z of zapisi.values()) {
@@ -986,13 +986,11 @@ for (const [kto, sk] of [
       const sc = f(z.p, punkt);
       if (sc.rakurs === undefined) continue;
       const nar = metrikiVida(postroit(sc), sc.rakurs, sc.szhatie ?? 1).narusheniya;
-      /* Пока — отчётом: веер сторон сечения из общей вершины под малым
-         углом (отрезки «сливаются» на 0 мм) и сплющенные пирамиды — дело
-         выбора вида движка lib/chertezh3, его правят отдельно. */
-      if (nar.length > 0)
-        preduprezhdeniya.push(
-          `№15 (часть 2) ${z.s} ${JSON.stringify(z.p)} ${punkt}): ${nar.map((n) => `${n.pravilo}: ${n.chto}`).join('; ')}`,
-        );
+      fakt(
+        '№15 (часть 2): чертёж решения читается (правила вида lib/stereo/metriki.ts)',
+        nar.length === 0,
+        `${z.s} ${JSON.stringify(z.p)} ${punkt}): ${nar.map((n) => `${n.pravilo}: ${n.chto}`).join('; ')}`,
+      );
     }
   }
 }
@@ -1064,10 +1062,6 @@ console.log(`Чертежи №18: ${TIPY_18.length} прототипов × ${N
 for (const [imya, s] of schet) {
   console.log(`${s.ok === s.vsego ? '✓' : '✗'} ${imya}: ${s.ok}/${s.vsego}`);
   for (const p of s.primery) console.log(`    ${p}`);
-}
-if (preduprezhdeniya.length > 0) {
-  console.log(`\nОтчёт (не роняет проверку) — ${preduprezhdeniya.length}:`);
-  for (const p of preduprezhdeniya.slice(0, process.env.VSE ? 9999 : 8)) console.log(`    ${p}`);
 }
 if (plokho > 0) {
   console.log(`\nНарушений: ${plokho}`);

@@ -6,7 +6,7 @@
  *    sin∠BSP = BP/SB = a√3/(2l).
  */
 
-import { chertezhSvg, postroit, sVidom, vybratVid, type Scenariy } from '@/lib/chertezh3';
+import { chertezhSvg, postroit, sVidom, vybratObshchiyVid, type Scenariy } from '@/lib/chertezh3';
 import { div, mul, rat, ratTex, toNumber } from '@/lib/zadanie15/core/rational';
 import { sqrtRat, surdTex } from '@/lib/zadanie15/core/surd';
 import type { Chast2Zadacha, Shablon2 } from './types';
@@ -24,7 +24,7 @@ export function chislaAE15(p: PAE15) {
   return { bp2, sin2, h, ugol: Math.asin(Math.sqrt(toNumber(sin2))) };
 }
 
-function scenariy(p: PAE15, punkt: 'a' | 'b'): Scenariy {
+function scenariy(p: PAE15, punkt: 'a' | 'b', bezVida = false): Scenariy {
   const c = chislaAE15(p);
   const sc: Scenariy = {
     id: `PV-AE15-${punkt}`,
@@ -51,11 +51,13 @@ function scenariy(p: PAE15, punkt: 'a' | 'b'): Scenariy {
             { id: 'sp', vid: 'otrezok', tochki: ['S', 'P'] },
           ],
   };
-  if (punkt === 'b') {
-    const s = scenariy(p, 'a');
-    return { ...sc, rakurs: s.rakurs, szhatie: s.szhatie };
-  }
-  return sVidom(sc, vybratVid(postroit(sc)));
+  if (bezVida) return sc;
+  /* Этапы а) и б) — с одного ракурса, годного для обоих чертежей. */
+  const vid = vybratObshchiyVid([
+    postroit(scenariy(p, 'a', true)),
+    postroit(scenariy(p, 'b', true)),
+  ]);
+  return sVidom(sc, vid);
 }
 
 export function scenariyAE15(p: PAE15, punkt: 'a' | 'b'): Scenariy {
