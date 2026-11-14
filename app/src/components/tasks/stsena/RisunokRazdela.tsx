@@ -229,8 +229,12 @@ const MOTIVY: Record<string, Motiv> = {
 };
 
 export interface RisunokRazdelaProps {
-  /** Номер задания без ведущего нуля: '2', '11', '19'. */
-  no: string;
+  /**
+   * Номер задания профиля без ведущего нуля: '2', '11', '19'. Не задан
+   * или без своего мотива — общая стеклянная плитка. Номера базовой
+   * математики сюда не подходят: за ними другие темы.
+   */
+  no?: string;
   /** Описание для скринридера: чем занят раздел. */
   label: string;
   className?: string;
@@ -246,7 +250,7 @@ export function estMotivRazdela(no: string): boolean {
  * «Стеклянная сцена» вместо фотографии.
  */
 export function RisunokRazdela({ no, label, className }: RisunokRazdelaProps) {
-  const motiv = MOTIVY[no] ?? plitka;
+  const motiv = (no === undefined ? undefined : MOTIVY[no]) ?? plitka;
   return (
     <div className={clsx('rsz', className)}>
       <svg
@@ -256,7 +260,7 @@ export function RisunokRazdela({ no, label, className }: RisunokRazdelaProps) {
         aria-label={label}
         focusable="false"
       >
-        {motiv(no)}
+        {motiv(no ?? '')}
       </svg>
     </div>
   );
