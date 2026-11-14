@@ -124,9 +124,13 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z9',
     title: '№9 «Производная»',
     keys: [
-      /* Журнал попыток тренажёра (lib/proizvodnaya/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/proizvodnaya/trening/progress.ts). Прежний ключ
          budetege:proizvodnaya-9:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:proizvodnaya-9:log:v1',
+      /* Решённые опорные задачи (lib/proizvodnaya/progress.ts, PREP9_KEY). */
+      'budetege:proizvodnaya-9:prep:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «9»). */
+      'budetege:trainer:9:session',
     ],
   },
   {
