@@ -418,7 +418,10 @@ function masshtab(kadr) {
           : el.vid === 'okruzhnost'
             ? [el.c]
             : [];
-    for (const p of pts) (xs.push(p[0]), ys.push(p[1]));
+    for (const p of pts) {
+      xs.push(p[0]);
+      ys.push(p[1]);
+    }
   }
   return Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) || 1;
 }
