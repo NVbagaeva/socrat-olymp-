@@ -131,7 +131,9 @@ function ekstremumNaOtrezke(par: MaxNaOtrezke, tip: Tip): Generated | null {
       ),
       shag(
         'Выбираем точку на отрезке',
-        `На отрезке $${otrezok(p, q)}$ лежат нули ${xRavno(vnutri.map((z) => z.x))}.`,
+        vnutri.length === 1
+          ? `На отрезке $${otrezok(p, q)}$ лежит нуль ${xRavno(vnutri.map((z) => z.x))}.`
+          : `На отрезке $${otrezok(p, q)}$ лежат нули ${xRavno(vnutri.map((z) => z.x))}.`,
         `${xRavno(minX)} — точк${minX.length === 1 ? 'а' : 'и'} ${w.drugoeR} (знак меняется ${w.drugoyZnak}), ${minX.length === 1 ? 'она' : 'они'} не подходит.`.replace(
           'не подходит',
           minX.length === 1 ? 'не подходит' : 'не подходят',
