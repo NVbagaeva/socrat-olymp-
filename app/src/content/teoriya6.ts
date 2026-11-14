@@ -19,6 +19,7 @@
 
 import type { Blok6 } from '@/lib/zadanie6/teoriya-yakorya';
 import type { Ris } from '@/lib/zadanie6/types';
+import { nomerRazdela } from '@/content/struktura';
 
 /**
  * Блок раздела. `yakor` — имя рамки для «Повторить теорию» из карточек
@@ -90,7 +91,7 @@ export const TEORIYA_6_TEKSTY = {
   fipi: 'Открытый банк ФИПИ.',
   demo: 'Демоверсия ФИПИ.',
   analog: 'Не из открытого банка.',
-  shpargalka: 'Шпаргалка по №6',
+  shpargalka: `Шпаргалка по №${nomerRazdela('sluchainye-velichiny')}`,
 } as const;
 
 /* ── Рисунки теории ─────────────────────────────────────────────── */
@@ -812,7 +813,7 @@ export const RAZDELY_TEORII_6: RazdelTeorii6[] = [
     id: 'lovushki',
     no: 9,
     title: 'Ловушки',
-    lead: 'Пять ошибок, на которых чаще всего теряют балл в задании №6.',
+    lead: `Пять ошибок, на которых чаще всего теряют балл в задании №${nomerRazdela('sluchainye-velichiny')}.`,
     bloki: [
       {
         vid: 'lovushka',
@@ -880,7 +881,7 @@ export function TEORIYA_6_DLYA_PROTOTIPA(
 /* ── Шпаргалка ──────────────────────────────────────────────────── */
 
 export const SHPARGALKA_6 = {
-  title: 'Шпаргалка по заданию №6',
+  title: `Шпаргалка по заданию №${nomerRazdela('sluchainye-velichiny')}`,
   podzagolovok: 'Случайные величины и распределения',
   glavnoe: [
     'Сумма вероятностей распределения равна $1$ — первая проверка любого условия',

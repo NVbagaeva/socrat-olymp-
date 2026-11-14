@@ -13,11 +13,12 @@ import { taskName } from './tasks';
 import type { TutorMaterial } from './sections';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { nomerDvumya } from './struktura';
 /* Вкладка описывается общим типом: лента у всех заданий одна. */
 export type VychisleniyaTab = RazdelTab;
 
 export const VYCHISLENIYA = {
-  no: '08',
+  no: nomerDvumya('vychisleniya'),
   slug: '8',
   title: taskName('8'),
   lead: 'Пять групп прототипов: степени и корни, логарифмы, тригонометрия по четверти, тригонометрические преобразования и буквенные выражения. Числа в каждой задаче свои.',

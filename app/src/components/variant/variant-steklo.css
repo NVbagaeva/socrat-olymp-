@@ -245,6 +245,19 @@
     var(--glass-hi),
     0 6px 16px -10px rgb(31 95 208 / 0.45);
 }
+/* Раздел, для которого задач ещё нет: плитка не нажимается. */
+.var-plitka.is-skoro .var-plitka__main {
+  cursor: default;
+  opacity: 0.6;
+}
+.var-plitka.is-skoro .var-plitka__main:active {
+  transform: none;
+}
+.var-plitka.is-skoro .var-plitka__metka {
+  color: var(--color-text-secondary);
+  background: rgb(255 255 255 / 0.85);
+  box-shadow: 0 0 0 1px var(--glass-edge);
+}
 .var-plitka__no {
   font-size: 22px;
   line-height: 26px;

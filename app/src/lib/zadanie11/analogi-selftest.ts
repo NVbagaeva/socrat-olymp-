@@ -14,6 +14,7 @@
 import { BANK, RAZMINKA } from './bank';
 import { POOL_ANALOGOV, type Analog } from './analogi';
 import { paramsKey, pohozhaNa } from './gen/core';
+import { oshibkiGlagolov } from './glagoly-dvizheniya';
 import { kodNaSayte } from './kod';
 import { METALL } from './prototypes/sm';
 import { nice, txt } from './num';
@@ -119,7 +120,6 @@ const SYUZHET = new Set([
   'bysRod',
   'medl',
   'medlRod',
-  'ehal',
   'avto',
   'avtoRod',
   'avtoKr',
@@ -132,12 +132,6 @@ const SYUZHET = new Set([
   'poezdARod',
   'poezdB',
   'poezdBRod',
-  /* Вода: «лодка шла» / «катер шёл». */
-  'shla',
-  /* Окружность: как движется догоняющий. */
-  'ehalDog',
-  'proehal',
-  'proehat',
   /* Работа: изделия, имена, дело. */
   'edMn',
   'edKr',
@@ -442,6 +436,52 @@ const PRAVILA: Record<string, Pravilo> = {
         a,
         ['a', 'b', 'c', 'd'].map((k) => num(a.params, k)),
       ),
+  },
+  /* Свой подтип: воды w кг и раствора m кг — разное количество. */
+  'SM-09': {
+    chisla: ['p1', 'p2', 'p3', 'c', 'd', 'w', 'm'],
+    vopros: (a) => {
+      const q = poslednee(a.text);
+      const s1 = q.includes(`${num(a.params, 'p1')}-процентного`);
+      const s2 = q.includes(`${num(a.params, 'p2')}-процентного`);
+      if (!/^Сколько (всего )?килограммов/.test(q)) return false;
+      if (a.ask === 'vse') return s1 && s2 && /всего/.test(q);
+      return a.ask === 'I' ? s1 && !s2 : s2 && !s1;
+    },
+    pravdopodobie: (a) => {
+      const g = (k: string) => num(a.params, k);
+      const [p1, p2, p3, c, dd, w, m] = ['p1', 'p2', 'p3', 'c', 'd', 'w', 'm'].map(g) as [
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+      ];
+      const S = (m * (p3 - dd) + c * w) / (dd - c);
+      const x = (c * (S + w) - p2 * S) / (p1 - p2);
+      const out = [
+        ...vVeshchestve(a, [p1, p2, p3, c, dd]),
+        ...vne('масса раствора I, кг', x, 3, 100),
+        ...vne('масса раствора II, кг', S - x, 3, 100),
+        ...vne('масса воды, кг', w, 2, 40),
+        ...vne('масса добавленного раствора, кг', m, 2, 40),
+      ];
+      if (Math.abs(m - w) < 3) out.push(`воды ${w} кг и раствора ${m} кг — почти поровну`);
+      if (new Set([p1, p2, p3, c, dd, w, m]).size < 7) out.push('числа условия совпадают');
+      if (c === dd || c >= Math.max(p1, p2))
+        out.push('концентрации опытов совпадают или выше обоих растворов');
+      /* Порядок опытов в тексте — как в por: сначала вода или сначала раствор. */
+      const t = prostye(a.text);
+      const iVoda = t.indexOf(`${w} кг`);
+      const iRastvor = t.indexOf(`${m} кг`);
+      if (iVoda < 0 || iRastvor < 0 || (a.params.por === 'vr') !== iVoda < iRastvor) {
+        out.push('порядок опытов в тексте не совпадает с por');
+      }
+      if (!/воды/.test(a.text)) out.push('в тексте нет воды');
+      return out;
+    },
   },
   'SM-07': {
     chisla: ['m1', 'm2', 'c', 'e'],
@@ -1156,6 +1196,8 @@ export function checkAnalogi(typeset: (tex: string) => string) {
         for (const w of pravilo.pravdopodobie(a)) add(where, w);
       }
       for (const w of sklonenia(a.text)) add(where, `склонение: ${w}`);
+      /* Автобус «выехал», а не «вышел»: глаголы движения по герою. */
+      for (const w of oshibkiGlagolov(a.text)) add(where, `глагол движения: ${w}`);
     });
     /* Варианты вопроса — почти поровну. */
     const po = new Map<string, number>();

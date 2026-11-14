@@ -705,6 +705,11 @@
   font-weight: 600;
   line-height: var(--lh-caption);
 }
+/* Свой подтип (СМ-09): метка «не из открытого банка». */
+.z11-tip__metka {
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
 .z11-tip__foot {
   display: flex;
   align-items: center;

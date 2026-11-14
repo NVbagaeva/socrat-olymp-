@@ -16,6 +16,7 @@ import { readSession } from '@/lib/trainerSession/store';
 import { listWorks } from './archive';
 import { parseReshat, workScope } from './link';
 import { readCode } from '../session';
+import { VARIANT_NUMBERS } from '../struktura';
 
 export interface NachatyyVariant {
   href: string;
@@ -45,7 +46,7 @@ export function nachatyyVariant(href: string): NachatyyVariant | null {
   const read = readSession(workScope(link.code, link.variant, link.mode));
   if (read.status !== 'ok') return null;
   const code = readCode(link.code);
-  const vsego = code === null ? 13 : code.config.tasks.length;
+  const vsego = code === null ? VARIANT_NUMBERS.length : code.config.tasks.length;
   return {
     href,
     resheno: Math.min(vsego, otvetov(read.session.ui)),

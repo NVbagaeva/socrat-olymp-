@@ -10,9 +10,10 @@ import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from './struktura';
 
 export const ZADANIE6 = {
-  no: '06',
+  no: nomerDvumya('sluchainye-velichiny'),
   slug: '6',
   title: taskName('6'),
   lead: 'Диаграммы Эйлера и деревья, условная вероятность, математическое ожидание, дисперсия, неравенство Чебышёва: прочитать распределение и посчитать одно число.',
@@ -52,8 +53,8 @@ export const GENERATOR_6 = {
   primery: 'Рамки теории: разобранных примеров на тип',
   primeryBez: '0 — без теории',
   vsego: 'В варианте задач:',
-  section: '№6 · Случайные величины',
-  zagolovok: 'Задание №6. Случайные величины и распределения',
+  section: `№${nomerRazdela('sluchainye-velichiny')} · Случайные величины`,
+  zagolovok: `Задание №${nomerRazdela('sluchainye-velichiny')}. Случайные величины и распределения`,
   teoriya: 'Повторяем теорию',
   zadachi: 'Задачи',
   uchenik: 'лист ученика',

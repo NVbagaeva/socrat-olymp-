@@ -22,6 +22,7 @@ import { listSheetSpec, razborKuski, type ListVid } from '@/lib/sheetList';
 import type { ZadachaLite } from './dannye';
 import type { ModelLista } from './sborka';
 import type { Solved } from './types';
+import { nomerRazdela } from '@/content/struktura';
 
 export type Vid7 = ListVid;
 
@@ -56,7 +57,7 @@ function uslovie(z: ZadachaLite): string {
 export function sheetSpec7(o: Sborka7, vid: Vid7) {
   return listSheetSpec<ZadachaLite>(
     {
-      chip: 'Задание 7',
+      chip: `Задание ${nomerRazdela('uravneniya')}`,
       cls: 'z7',
       model: o.model,
       zadacha: (id) => o.zadachi.get(id),

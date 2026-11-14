@@ -5,11 +5,12 @@
  */
 
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR2_TEXTS = {
-  section: '№2 · Векторы',
+  section: `№${nomerRazdela('vektory')} · Векторы`,
   sheet: {
-    chip: 'Задание 2',
+    chip: `Задание ${nomerRazdela('vektory')}`,
     title: 'Векторы',
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',
