@@ -24,15 +24,30 @@ import { fixedSeed, generatePrep } from '@/lib/vychisleniya/prep/generate';
 import { GROUPS as GROUPS8, SKILLS as SKILLS8 } from '@/lib/vychisleniya/skills';
 import { names8Html } from '@/lib/vychisleniya/names';
 import { tasks } from '@/content/tasks';
+import { O_ZADANII as O_ZADANII_2 } from '@/content/vektory';
+import { PROTOTYPES as PROTOTYPES2 } from '@/lib/vektory/prototypes';
+import { BLOKI as BLOKI2 } from '@/lib/vektory/prep/bloki';
+import { fixedSeed as fixedSeed2, generateMikro } from '@/lib/vektory/prep/generate';
+import { PROTOTYPES as PROTOTYPES9 } from '@/lib/proizvodnaya/prototypes';
+import { GRUPPY as GRUPPY9 } from '@/lib/proizvodnaya/skills';
+import { PREP_BLOCKS as BLOKI9 } from '@/lib/proizvodnaya/prep/blocks';
+import { fixedSeed as fixedSeed9, generatePrepById } from '@/lib/proizvodnaya/prep/generate';
 import type { RazborDz } from '../types';
 import type { BlokKat, GruppaKat, KartochkaKat, KatalogRazdela, PodtemaKat } from './types';
 import { zamok } from './zamok';
 
 /** Разделы, из которых уже можно собирать ДЗ. */
-export const RAZDELY_DZ = [6, 7, 8, 10] as const;
+export const RAZDELY_DZ = [2, 6, 7, 8, 9, 10] as const;
 
 /** «Банковые» разделы: банк задач с решателем прототипа и опорные без зерна. */
-const BANKOVYE: Record<6 | 7 | 10, { bloki: readonly BlokBanka[]; groups: readonly { id: string; title: string }[]; prototypes: readonly { id: string; group: string; title: string }[] }> = {
+const BANKOVYE: Record<
+  6 | 7 | 10,
+  {
+    bloki: readonly BlokBanka[];
+    groups: readonly { id: string; title: string }[];
+    prototypes: readonly { id: string; group: string; title: string }[];
+  }
+> = {
   6: { bloki: BLOKI6, groups: GROUPS6, prototypes: PROTOTYPES6 },
   7: { bloki: BLOKI7, groups: GROUPS7, prototypes: PROTOTYPES7 },
   10: { bloki: BLOKI10, groups: GROUPS10, prototypes: PROTOTYPES10 },
@@ -55,11 +70,16 @@ function kartochki(no: number): PodtemaKat[] | null {
       .map((k): KartochkaKat => {
         const src = koloda.kartochki.find((s) => s.id === k.id);
         if (src?.type === 'verno') {
-          return { ...k, klyuch: otpechatok.sealText(src.verno ? 'da' : 'net', k.id), oborot: k.zakryto };
+          return {
+            ...k,
+            klyuch: otpechatok.sealText(src.verno ? 'da' : 'net', k.id),
+            oborot: k.zakryto,
+          };
         }
         if (src?.type === 'vychislenie') {
           const norm = normalizeEge(src.otvet);
-          if (norm === null) throw new Error(`Карточка ${k.id}: ответ «${src.otvet}» не в записи ЕГЭ`);
+          if (norm === null)
+            throw new Error(`Карточка ${k.id}: ответ «${src.otvet}» не в записи ЕГЭ`);
           return { ...k, klyuch: otpechatok.sealText(norm, k.id), oborot: k.zakryto };
         }
         return k;
@@ -135,7 +155,71 @@ function opornye8(): BlokKat[] {
   }));
 }
 
+/** Опорные №2: микро-задачи с зерном, в каталоге — зафиксированный вариант для предпросмотра. */
+function opornye2(): BlokKat[] {
+  return BLOKI2.map((b) => ({
+    slug: b.slug,
+    nazvanie: b.nazvanie,
+    zapomniHtml: b.formuly.map((f) => typeset(`$${f}$`)).join('<br>'),
+    zadachi: b.zadachi.map((m) => ({
+      id: m.id,
+      nazvanie: m.nazvanie,
+      uslovieHtml: typeset(generateMikro(m.id, fixedSeed2(m)).uslovie),
+      podskazkaHtml: typeset(`$${m.formula}$`),
+      izZerna: true,
+    })),
+  }));
+}
+
+/** Опорные №9: микро-задачи с зерном. */
+function opornye9(): BlokKat[] {
+  return BLOKI9.map((b) => ({
+    slug: b.slug,
+    nazvanie: b.nazvanie,
+    zapomniHtml: b.zapomni.map((f) => typeset(f)).join('<br>'),
+    zadachi: b.zadachi.map((m) => ({
+      id: m.id,
+      nazvanie: m.nazvanie,
+      uslovieHtml: typeset(generatePrepById(m.id, fixedSeed9(m)).uslovie),
+      podskazkaHtml: '',
+      izZerna: true,
+    })),
+  }));
+}
+
 export function katalog(no: number): KatalogRazdela | null {
+  if (no === 2) {
+    return {
+      no,
+      nazvanie: nazvanieRazdela(no),
+      kartochki: kartochki(no),
+      opornye: opornye2(),
+      trenazher: O_ZADANII_2.gruppy.map((g) => ({
+        id: g.id,
+        nazvanie: g.title,
+        tipy: PROTOTYPES2.filter((p) => p.gruppa === g.id).map((p) => ({
+          id: p.id,
+          nazvanieHtml: typeset(p.nazvanie),
+        })),
+      })),
+    };
+  }
+  if (no === 9) {
+    return {
+      no,
+      nazvanie: nazvanieRazdela(no),
+      kartochki: kartochki(no),
+      opornye: opornye9(),
+      trenazher: GRUPPY9.map((g) => ({
+        id: g.id,
+        nazvanie: g.nazvanie,
+        tipy: PROTOTYPES9.filter((p) => p.gruppa === g.id).map((p) => ({
+          id: p.id,
+          nazvanieHtml: typeset(p.nazvanie),
+        })),
+      })),
+    };
+  }
   if (no === 6 || no === 7 || no === 10) {
     const b = BANKOVYE[no];
     return {

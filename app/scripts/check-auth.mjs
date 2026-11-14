@@ -178,6 +178,8 @@ const ALLOWED = new Set([
   'dzi-uchenik2@yandex.ru',
   'dz610-repetitor@yandex.ru',
   'dz610-uchenik@yandex.ru',
+  'dz29-repetitor@yandex.ru',
+  'dz29-uchenik@yandex.ru',
   /* Почта не российского сервиса: приглашена, но база откажет по домену. */
   'zarubezh@gmail.com',
   /* Школьная почта, добавленная владельцем вручную (SIGNUP_EXTRA). */
@@ -694,7 +696,11 @@ function watchConsole(page, bucket) {
      входа, оборванном переходом на другую страницу: «… due to access
      control checks». Это не ошибка сайта — ответ просто не дождались. */
   page.on('pageerror', (e) => {
-    if (e.message.includes(SUPABASE.replace('http://', '')) && /access control checks/.test(e.message)) return;
+    if (
+      e.message.includes(SUPABASE.replace('http://', '')) &&
+      /access control checks/.test(e.message)
+    )
+      return;
     bucket.push(`pageerror: ${e.message}`);
   });
 }
@@ -1652,13 +1658,18 @@ async function runEnabled() {
     /* Журнал №8 с компьютера приехал: на карте №8 — «в процессе». */
     await phone.page
       .waitForFunction(
-        () => document.querySelector('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]') !== null,
+        () =>
+          document.querySelector(
+            '.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]',
+          ) !== null,
         null,
         { timeout: 10000 },
       )
       .catch(() => {});
     check(
-      (await phone.page.locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]').count()) === 1,
+      (await phone.page
+        .locator('.karta-ostrov--v-processe .karta-ostrov__kontur[data-cel="oblast:8"]')
+        .count()) === 1,
       'телефон: на карте №8 «в процессе» — решённое на компьютере приехало',
     );
     const laterRaw = await phone.page.evaluate(() => localStorage.getItem('budetege:zakladki:v1'));
@@ -1815,6 +1826,8 @@ async function runEnabled() {
   await scenarijDz(mock, errors);
   /* 7д. ДЗ, шаг 2: №6 и №10. */
   await scenarijDz610(mock, errors);
+  /* 7е. ДЗ, шаг 2: №2 и №9. */
+  await scenarijDz29(mock, errors);
 
   /* 8. Комплект репетитора уходит в аккаунт; телефон: блок аккаунта и панели. */
   {
@@ -2092,7 +2105,9 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   const tutorCtx = await browser.newContext({
     viewport: { width: 1280, height: 900 },
     deviceScaleFactor: dir === null ? 1 : 2,
-    ...(dir === null ? {} : { recordVideo: { dir: path.join(dir, 'zapis'), size: { width: 1280, height: 900 } } }),
+    ...(dir === null
+      ? {}
+      : { recordVideo: { dir: path.join(dir, 'zapis'), size: { width: 1280, height: 900 } } }),
   });
   await welcomeSeen(tutorCtx);
   await installMock(tutorCtx, mock);
@@ -2110,9 +2125,14 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await tp.waitForFunction(() =>
     document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent?.includes(': 2'),
   );
-  check(await vChernovike(2), 'ДЗ-3: два набора карточек №7 — в черновике в базе, плашка «В черновике ДЗ: 2»');
+  check(
+    await vChernovike(2),
+    'ДЗ-3: два набора карточек №7 — в черновике в базе, плашка «В черновике ДЗ: 2»',
+  );
   const fab = await tp.evaluate(() => {
-    const a = document.querySelector('[data-block="dz-chernovik-plashka"]')?.getBoundingClientRect();
+    const a = document
+      .querySelector('[data-block="dz-chernovik-plashka"]')
+      ?.getBoundingClientRect();
     const b = document.querySelector('.help-fab')?.getBoundingClientRect();
     if (!a || !b) return true;
     return a.right <= b.left || a.bottom <= b.top || a.left >= b.right || a.top >= b.bottom;
@@ -2128,16 +2148,24 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
       document.querySelector('[data-block="dz-chernovik-plashka"]')?.textContent?.includes(': 3'),
     )
     .catch(async (e) => {
-      const kn = await tp.locator('[data-block="dz-v-chernovik"]').evaluateAll((els) =>
-        els.map((x) => `${x.getAttribute('aria-label')}|${x.getAttribute('aria-pressed')}`),
+      const kn = await tp
+        .locator('[data-block="dz-v-chernovik"]')
+        .evaluateAll((els) =>
+          els.map((x) => `${x.getAttribute('aria-label')}|${x.getAttribute('aria-pressed')}`),
+        );
+      console.log(
+        'ОТЛАДКА',
+        kn,
+        await tp.locator('[data-block="dz-chernovik-plashka"]').allInnerTexts(),
       );
-      console.log('ОТЛАДКА', kn, await tp.locator('[data-block="dz-chernovik-plashka"]').allInnerTexts());
       throw e;
     });
   check(await vChernovike(3), 'ДЗ-3: блок опорных №7 — в черновике (3 пункта)');
 
   /* 3. Прежняя ссылка «Выдать ДЗ» из №8: типы 8.A и 8.B — в черновик. */
-  await tp.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`, { waitUntil: 'networkidle' });
+  await tp.goto(`${SITE}/kabinet/dz-vydat/?ot=trenazher&tipy=8.A,8.B&n=1`, {
+    waitUntil: 'networkidle',
+  });
   await tp.waitForSelector('[data-block="dz-sostav"] .dzk-punkt');
   await tp.waitForFunction(() => document.querySelectorAll('.dzk-punkt').length === 4);
   check(
@@ -2182,7 +2210,10 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await tp.getByRole('radio', { name: 'Сразу после ответа' }).check();
   await tp.waitForTimeout(600);
   const draft = dz.drafts.find((d) => d.user_id === mock.users.get('dzi-repetitor@yandex.ru').id);
-  check(draft !== undefined && draft.body.punkty.length === 5, 'ДЗ-3: черновик лежит в базе — 5 пунктов');
+  check(
+    draft !== undefined && draft.body.punkty.length === 5,
+    'ДЗ-3: черновик лежит в базе — 5 пунктов',
+  );
   /* Шаблон. */
   await tp.locator('[data-section="templates"] > summary').click();
   await tp.locator('[data-section="templates"] input').fill('Уравнения и степени');
@@ -2195,7 +2226,9 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await tp.locator('[data-action="vydat"]').click();
   await tp.waitForSelector('[data-page="vydano"]', { timeout: 60000 });
   const hw = dz.homework.find((h) => h.title === 'ДЗ: уравнения и степени');
-  const hwParts = dz.parts.filter((p) => p.homework_id === hw.id).sort((a, b) => a.position - b.position);
+  const hwParts = dz.parts
+    .filter((p) => p.homework_id === hw.id)
+    .sort((a, b) => a.position - b.position);
   const units = dz.tasks.filter((t) => t.homework_id === hw.id);
   check(
     hw !== undefined &&
@@ -2218,18 +2251,26 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
     'ДЗ-3: «каждому свои» — по 3 задачи каждому ученику',
   );
   check(
-    units.some((u) => u.answer_kind === 'self') && units.every((u) => !JSON.stringify(u.view).includes('"answer"')),
+    units.some((u) => u.answer_kind === 'self') &&
+      units.every((u) => !JSON.stringify(u.view).includes('"answer"')),
     'ДЗ-3: у карточек-самооценки нет ключа, ответов в том, что видит ученик, нет',
   );
-  check(dz.drafts.length === 0 || dz.drafts.every((d) => d.body.punkty.length === 0), 'ДЗ-3: после выдачи черновик очищен');
+  check(
+    dz.drafts.length === 0 || dz.drafts.every((d) => d.body.punkty.length === 0),
+    'ДЗ-3: после выдачи черновик очищен',
+  );
 
   /* Ученик: телефон (с --dz-istochniki — WebKit, iPhone 13). */
   const engine = uchenikWebkit ? (await import('playwright')).webkit : null;
   const wk = engine === null ? null : await engine.launch();
   const { devices } = await import('playwright');
   const stCtx = await (wk ?? browser).newContext({
-    ...(wk === null ? { viewport: { width: 390, height: 844 }, hasTouch: true } : devices['iPhone 13']),
-    ...(dir === null ? {} : { recordVideo: { dir: path.join(dir, 'zapis'), size: { width: 390, height: 844 } } }),
+    ...(wk === null
+      ? { viewport: { width: 390, height: 844 }, hasTouch: true }
+      : devices['iPhone 13']),
+    ...(dir === null
+      ? {}
+      : { recordVideo: { dir: path.join(dir, 'zapis'), size: { width: 390, height: 844 } } }),
   });
   await welcomeSeen(stCtx);
   await installMock(stCtx, mock);
@@ -2245,7 +2286,10 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await snap(sp, '390-03-plashka-uchenika');
   await sp.locator('[data-block="dz-plashka"] a').click();
   await sp.waitForSelector('.rdz-punkty .rdz-punkt');
-  check((await sp.locator('.rdz-punkt').count()) === 5, 'ДЗ-3: у ученика 5 пунктов с метками источника');
+  check(
+    (await sp.locator('.rdz-punkt').count()) === 5,
+    'ДЗ-3: у ученика 5 пунктов с метками источника',
+  );
   if (!(await noHorizontalScroll(sp))) {
     console.log(
       'ШИРЕ ЭКРАНА',
@@ -2257,7 +2301,10 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
       ),
     );
   }
-  check(await noHorizontalScroll(sp), 'ДЗ-3: решение ДЗ на телефоне — без горизонтальной прокрутки');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-3: решение ДЗ на телефоне — без горизонтальной прокрутки',
+  );
   await snap(sp, '390-04-dz-uchenika');
 
   /* Набор карточек 1: пройти все. */
@@ -2270,14 +2317,27 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
       const task = dz.tasks.find((t) => t.id === id);
       if (task.answer_kind === 'self') {
         await sp.getByRole('button', { name: 'Показать ответ', exact: true }).click();
-        await sp.getByRole('button', { name: /Знаю|Повторить/ }).first().click();
+        await sp
+          .getByRole('button', { name: /Знаю|Повторить/ })
+          .first()
+          .click();
       } else if (task.answer_kind === 'verno') {
-        await sp.locator('.kart-card__vybor button', { hasText: keyOf(id) === 'da' ? 'Верно' : 'Неверно' }).click();
-        await sp.getByRole('button', { name: /Дальше/ }).first().click();
+        await sp
+          .locator('.kart-card__vybor button', {
+            hasText: keyOf(id) === 'da' ? 'Верно' : 'Неверно',
+          })
+          .click();
+        await sp
+          .getByRole('button', { name: /Дальше/ })
+          .first()
+          .click();
       } else {
         await sp.locator('.kart-card__forma input').fill(keyOf(id).replace('.', ','));
         await sp.locator('.kart-card__forma button[type="submit"]').click();
-        await sp.getByRole('button', { name: /Дальше/ }).first().click();
+        await sp
+          .getByRole('button', { name: /Дальше/ })
+          .first()
+          .click();
       }
       await sp.waitForTimeout(150);
     }
@@ -2286,7 +2346,10 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await sp.waitForSelector('[data-block="kartochki-gotovo"]');
   check(true, 'ДЗ-3: набор карточек пройден — «Все карточки пройдены»');
   const marks = dz.answers.filter((a) => a.user_id === s1.id);
-  check(marks.some((a) => a.state === 'known' || a.state === 'repeat'), 'ДЗ-3: отметки «Знаю / Повторить» записаны в базу');
+  check(
+    marks.some((a) => a.state === 'known' || a.state === 'repeat'),
+    'ДЗ-3: отметки «Знаю / Повторить» записаны в базу',
+  );
   await snap(sp, '390-05-kartochki-gotovo');
 
   /* Уйти и вернуться — сделанное на месте. */
@@ -2307,7 +2370,10 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await field.fill(String(Number(key) + 1).replace('.', ','));
   await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
   await sp.waitForSelector('.trn-verdikt--net');
-  check((await sp.locator('[data-left]').first().getAttribute('data-left')) === '1', 'ДЗ-3: неверно — осталась 1 попытка');
+  check(
+    (await sp.locator('[data-left]').first().getAttribute('data-left')) === '1',
+    'ДЗ-3: неверно — осталась 1 попытка',
+  );
   await field.fill(key.replace('.', ','));
   await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
   await sp.waitForSelector('.trn-verdikt--da');
@@ -2327,7 +2393,8 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   await tp.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
   await tp.waitForSelector('.rez-tablica');
   check(
-    (await tp.locator('.rez-gruppa').allInnerTexts()).join(',') === 'Карточки,Опорные задачи,Тренажёр',
+    (await tp.locator('.rez-gruppa').allInnerTexts()).join(',') ===
+      'Карточки,Опорные задачи,Тренажёр',
     'ДЗ-3: в таблице столбцы сгруппированы по источникам',
   );
   const row1 = tp.locator(`tr[data-student="${s1.id}"]`);
@@ -2337,7 +2404,10 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   );
   await row1.locator('.rez-kletka').first().click();
   await tp.waitForSelector('[data-section="cell"]');
-  check(/Знаю|Повторить|верно/.test(await text(tp, '[data-section="cell"]')), 'ДЗ-3: клик по клетке — «Знаю / Повторить» и ответы');
+  check(
+    /Знаю|Повторить|верно/.test(await text(tp, '[data-section="cell"]')),
+    'ДЗ-3: клик по клетке — «Знаю / Повторить» и ответы',
+  );
   await snap(tp, '1280-08-rezultaty');
   await tp.locator('[data-action="oshibki"]').click();
   await tp.waitForSelector('[data-page="dz-oshibki"]', { timeout: 60000 });
@@ -2348,7 +2418,10 @@ async function scenarijDz(mock, errors, { dir = null, uchenikWebkit = false } = 
   const fix = dz.homework.find((h) => h.parent_id === hw.id);
   const fixUnits = fix === undefined ? [] : dz.tasks.filter((t) => t.homework_id === fix.id);
   check(
-    fix !== undefined && fix.origin === 'oshibki' && fixUnits.length > 0 && fixUnits.every((u) => u.student_id !== null),
+    fix !== undefined &&
+      fix.origin === 'oshibki' &&
+      fixUnits.length > 0 &&
+      fixUnits.every((u) => u.student_id !== null),
     'ДЗ-3: работа над ошибками выдана — каждому его задачи',
   );
 
@@ -2403,11 +2476,18 @@ async function scenarijDz610(mock, errors) {
   await tp.locator('[data-action="vydat"]').click();
   await tp.waitForSelector('[data-page="vydano"]', { timeout: 60000 });
   const hw = dz.homework.find((h) => h.title === 'ДЗ: №6 и №10');
-  check(hw !== undefined && hw.sections.join(',') === '10,6', `ДЗ-6/10: выдано, разделы 10 и 6 (${hw?.sections})`);
-  const trUnits = dz.tasks.filter(
-    (t) => t.homework_id === hw.id && dz.parts.find((p) => p.id === t.part_id)?.source === 'trenazher',
+  check(
+    hw !== undefined && hw.sections.join(',') === '10,6',
+    `ДЗ-6/10: выдано, разделы 10 и 6 (${hw?.sections})`,
   );
-  check(trUnits.length === 2 && trUnits.every((u) => /<svg|<table/.test(u.question_html)), 'ДЗ-6/10: у задач №6 в снимке — рисунок условия');
+  const trUnits = dz.tasks.filter(
+    (t) =>
+      t.homework_id === hw.id && dz.parts.find((p) => p.id === t.part_id)?.source === 'trenazher',
+  );
+  check(
+    trUnits.length === 2 && trUnits.every((u) => /<svg|<table/.test(u.question_html)),
+    'ДЗ-6/10: у задач №6 в снимке — рисунок условия',
+  );
   await ctx.close();
 
   const sctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
@@ -2428,10 +2508,82 @@ async function scenarijDz610(mock, errors) {
   await sp.locator('.rdz-zadacha .otvet-input__field').fill(key.replace('.', ','));
   await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
   await sp.waitForSelector('.trn-verdikt--da');
-  check(await noHorizontalScroll(sp), 'ДЗ-6/10: задача №6 у ученика 390 — без горизонтальной прокрутки');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-6/10: задача №6 у ученика 390 — без горизонтальной прокрутки',
+  );
   await sp.locator('.rdz-punkt[data-istochnik="opornye"]').click();
   await sp.waitForSelector('.rdz-zadacha');
-  check(await noHorizontalScroll(sp), 'ДЗ-6/10: опорная №10 у ученика 390 — без горизонтальной прокрутки');
+  check(
+    await noHorizontalScroll(sp),
+    'ДЗ-6/10: опорная №10 у ученика 390 — без горизонтальной прокрутки',
+  );
+  await sctx.close();
+}
+
+/* ── ДЗ, шаг 2: №2 и №9 ───────────────────────────────────────────
+   Блок опорных №9 — кнопкой со страницы блока («каждому свои»
+   в составе); тип тренажёра №2 — в конструкторе; выдача; ученик видит
+   рисунок условия и решает задачу №2. */
+async function scenarijDz29(mock, errors) {
+  registerInMock(mock, 'dz29-repetitor@yandex.ru', 'dz29-repetitor-1', 'Олег Петрович', 'tutor');
+  registerInMock(mock, 'dz29-uchenik@yandex.ru', 'dz29-uchenik-1', 'Дима Ершов', 'student');
+  mock.seedClass('dz29-repetitor@yandex.ru', ['dz29-uchenik@yandex.ru'], 'Класс 2–9');
+  const dz = mock.dz;
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await welcomeSeen(ctx);
+  await installMock(ctx, mock);
+  const tp = await ctx.newPage();
+  watchConsole(tp, errors);
+  await login(tp, 'dz29-repetitor@yandex.ru', 'dz29-repetitor-1');
+  const blok9 = fs
+    .readdirSync(path.join(OUT, 'zadaniya/9/opornye-zadachi'))
+    .find((d) => fs.statSync(path.join(OUT, 'zadaniya/9/opornye-zadachi', d)).isDirectory());
+  await tp.goto(`${SITE}/zadaniya/9/opornye-zadachi/${blok9}/`, { waitUntil: 'networkidle' });
+  await tp.locator('[data-block="dz-v-chernovik"]').first().click();
+  await tp.waitForSelector('[data-block="dz-chernovik-plashka"]');
+  check(true, 'ДЗ-2/9: блок опорных №9 — в черновике кнопкой со страницы блока');
+  await tp.goto(`${SITE}/kabinet/dz-vydat/`, { waitUntil: 'networkidle' });
+  await tp.waitForSelector('.dzk-punkt');
+  await tp.locator('.dzk-punkt').first().locator('.dzk-galka input').check();
+  await tp.locator('.dzk-chip', { hasText: '№2' }).click();
+  await tp.getByRole('tab', { name: 'Тренажёр' }).click();
+  const tip = tp.locator('.dzk-tip').first();
+  await tip.waitFor();
+  await tip.locator('.dzk-dobavit').click();
+  await tp.waitForFunction(() => document.querySelectorAll('.dzk-punkt').length === 2);
+  await tp.fill('input[name="title"]', 'ДЗ: №2 и №9');
+  await tp.locator('[data-action="vydat"]').click();
+  await tp.waitForSelector('[data-page="vydano"]', { timeout: 60000 });
+  const hw = dz.homework.find((h) => h.title === 'ДЗ: №2 и №9');
+  const parts = dz.parts.filter((p) => p.homework_id === hw?.id);
+  check(
+    hw !== undefined && hw.sections.join(',') === '9,2' && parts.find((p) => p.source === 'opornye')?.per_student === true,
+    'ДЗ-2/9: выдано — разделы 9 и 2, опорные №9 «каждому свои»',
+  );
+  await ctx.close();
+
+  const sctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  await welcomeSeen(sctx);
+  await installMock(sctx, mock);
+  const sp = await sctx.newPage();
+  watchConsole(sp, errors);
+  await login(sp, 'dz29-uchenik@yandex.ru', 'dz29-uchenik-1');
+  await sp.goto(`${SITE}/zadaniya/2/`, { waitUntil: 'networkidle' });
+  await sp.waitForSelector('[data-block="dz-plashka"]');
+  check(true, 'ДЗ-2/9: у ученика плашка ДЗ в разделе №2');
+  await sp.goto(`${SITE}/kabinet/domashka/?id=${hw.id}`, { waitUntil: 'networkidle' });
+  await sp.locator('.rdz-punkt[data-istochnik="trenazher"]').click();
+  await sp.waitForSelector('.rdz-zadacha .trn-uslovie');
+  const id = await sp.locator('.rdz-zadacha').first().getAttribute('data-task');
+  const key = dz.keys.find((k) => k.task_id === id).answer;
+  await sp.locator('.rdz-zadacha .otvet-input__field').fill(key.replace('.', ','));
+  await sp.locator('.rdz-zadacha .trn-otvetnaya button:has-text("Проверить")').click();
+  await sp.waitForSelector('.trn-verdikt--da');
+  check(await noHorizontalScroll(sp), 'ДЗ-2/9: задача №2 у ученика 390 — без горизонтальной прокрутки');
+  await sp.locator('.rdz-punkt[data-istochnik="opornye"]').click();
+  await sp.waitForSelector('.rdz-zadacha');
+  check(await noHorizontalScroll(sp), 'ДЗ-2/9: опорная №9 у ученика 390 — без горизонтальной прокрутки');
   await sctx.close();
 }
 
@@ -2441,6 +2593,7 @@ async function runTolkoDz() {
   const errors = [];
   await scenarijDz(mock, errors);
   await scenarijDz610(mock, errors);
+  await scenarijDz29(mock, errors);
   for (const e of errors) check(false, `консоль: ${e}`);
 }
 

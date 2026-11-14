@@ -1,5 +1,6 @@
 'use client';
 
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import Link from 'next/link';
 import { useState } from 'react';
 import { clsx } from 'clsx';
@@ -19,6 +20,8 @@ type Attempt = 'wrong' | 'skipped';
 
 export interface Opornye9ScreenProps {
   blockId: string;
+  /** Адрес блока: пункт ДЗ (lib/dz/sostav.ts). */
+  slug: string;
   title: string;
   /** Десять задач блока в закрытом виде, собраны на сборке. */
   tasks: (PrepSealed & { no: number })[];
@@ -60,6 +63,7 @@ interface Lesenka {
  */
 export function Opornye9Screen({
   blockId,
+  slug,
   title,
   tasks,
   zapomniHtml,
@@ -178,6 +182,13 @@ export function Opornye9Screen({
     <section className="ptask z9-ptask">
       <header className="ptask__head">
         <h2 className="ptask__title">{title}</h2>
+        {/* Репетитору: эту задачу — в черновик ДЗ (при выдаче — аналог). */}
+        <VDzKnopka
+          malaya
+          punkt={{ ist: 'opornye', no: 9, blok: slug, zadachi: [base.id], kazhdomu: false }}
+          chto={`${title}, задача ${base.no}`}
+          label="В ДЗ"
+        />
         <p className="ptask__score">
           <span className="ptask__score-item ptask__score-item--right">
             <RightIcon />

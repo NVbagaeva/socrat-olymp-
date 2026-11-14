@@ -52,7 +52,13 @@ export default async function Opornye10Blok({ params }: { params: Promise<{ blok
         punkt={{ ist: 'opornye', no: 10, blok: b.slug, zadachi: null, kazhdomu: false }}
         chto={`блок «${b.nazvanie}»`}
       />
-      <Opornye10 slug={b.slug} zapomni={b.zapomni} zadachi={zadachi} kartinki={kartinki} syuzhety={syuzhety} />
+      <Opornye10
+        slug={b.slug}
+        zapomni={b.zapomni}
+        zadachi={zadachi}
+        kartinki={kartinki}
+        syuzhety={syuzhety}
+      />
       <section className="z10-op__gde" aria-labelledby="z10-op-gde">
         <h3 id="z10-op-gde" className="t-h4">
           Где пригодится этот навык

@@ -50,7 +50,11 @@ export const DZK = {
   povtorit: 'Повторить',
 
   schet: (z: number, n: number, minut: number) =>
-    [z > 0 ? zadach(z) : null, n > 0 ? naborov(n) : null, `≈ ${minut} ${plural(minut, 'минута', 'минуты', 'минут')}`]
+    [
+      z > 0 ? zadach(z) : null,
+      n > 0 ? naborov(n) : null,
+      `≈ ${minut} ${plural(minut, 'минута', 'минуты', 'минут')}`,
+    ]
       .filter((x) => x !== null)
       .join(' · '),
 
@@ -109,7 +113,8 @@ export const DZK = {
     kommentariy: 'Комментарий ученикам',
     kommentariyPlaceholder: 'Например: сначала карточки, потом задачи',
     bezPodskazok: 'Без подсказок',
-    bezPodskazokLead: 'Выключает пошаговые подсказки, «Запомни» и пример. Решение после ответа — по настройке ниже.',
+    bezPodskazokLead:
+      'Выключает пошаговые подсказки, «Запомни» и пример. Решение после ответа — по настройке ниже.',
     zapomni: 'Показывать «Запомни»',
     primer: 'Показывать разобранный пример',
   },
@@ -131,7 +136,8 @@ export const DZK = {
   vydaem: 'Собираем задачи…',
   predel: (n: number) => `${n} из 60 на ученика — уберите лишнее.`,
   vydano: 'Задание выдано',
-  vydanoText: (n: number) => `Ученики увидят его в кабинете и в разделах: ${n} ${plural(n, 'ученик', 'ученика', 'учеников')}.`,
+  vydanoText: (n: number) =>
+    `Ученики увидят его в кабинете и в разделах: ${n} ${plural(n, 'ученик', 'ученика', 'учеников')}.`,
   kRezultatam: 'К результатам',
   eshche: 'Собрать ещё одно',
 

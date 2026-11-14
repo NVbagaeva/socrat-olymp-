@@ -242,7 +242,12 @@ function sheet(
     withAnswerLine: !teacher,
     extraItems: [
       ...kartochkiItems(groups, karty, teacher, source.keys, options.sanitize),
-      ...(teacher ? keyItems(groups.map((g) => ({ ...g, tasks: zadachi(g) })), source.keys) : []),
+      ...(teacher
+        ? keyItems(
+            groups.map((g) => ({ ...g, tasks: zadachi(g) })),
+            source.keys,
+          )
+        : []),
     ],
     foot,
     kit: null,
@@ -272,7 +277,11 @@ function kartochkiItems(
       const k = t.view.kartochka;
       const fig = k?.figuraNaLitse === true ? (k.figury[0] ?? null) : null;
       const key = keys.get(t.id);
-      const oborot = key?.razbor?.oborot ?? (k?.back === undefined ? undefined : { back: k.back, ...(k.pochemu === undefined ? {} : { pochemu: k.pochemu }) });
+      const oborot =
+        key?.razbor?.oborot ??
+        (k?.back === undefined
+          ? undefined
+          : { back: k.back, ...(k.pochemu === undefined ? {} : { pochemu: k.pochemu }) });
       const otvet =
         key === undefined
           ? ''

@@ -99,7 +99,9 @@ export function sozdatBank<S extends Reshenie, P>(k: KonfigBanka<S, P>) {
   }
 
   function imena(kat: KatalogRazdela): Record<string, string> {
-    return Object.fromEntries(kat.trenazher.flatMap((g) => g.tipy.map((t) => [t.id, t.nazvanieHtml])));
+    return Object.fromEntries(
+      kat.trenazher.flatMap((g) => g.tipy.map((t) => [t.id, t.nazvanieHtml])),
+    );
   }
 
   async function edinitsa(
@@ -151,7 +153,11 @@ export function sozdatBank<S extends Reshenie, P>(k: KonfigBanka<S, P>) {
         ...u,
         view: {
           ...u.view,
-          primer: { uslovieHtml: await uslovie(z, proto), razbor: await razbor(s), otvet: chisloEge(s.answer) },
+          primer: {
+            uslovieHtml: await uslovie(z, proto),
+            razbor: await razbor(s),
+            otvet: chisloEge(s.answer),
+          },
         },
       });
     }
@@ -194,7 +200,9 @@ export function sozdatBank<S extends Reshenie, P>(k: KonfigBanka<S, P>) {
     return sPrimerami(units, vse);
   }
 
-  async function poId(id: string): Promise<{ z: ZadachaBankaDz; vse: Map<string, ZadachaBankaDz> } | null> {
+  async function poId(
+    id: string,
+  ): Promise<{ z: ZadachaBankaDz; vse: Map<string, ZadachaBankaDz> } | null> {
     const d = await k.dannye();
     const stroka = (await d.zagruzitIndeks()).find((z) => z.id === id);
     if (stroka === undefined) return null;
@@ -234,7 +242,11 @@ export function sozdatBank<S extends Reshenie, P>(k: KonfigBanka<S, P>) {
 }
 
 /** Опорная задача блока (без зерна): ответ и разбор открыты из каталога. */
-export function opornayaBanka(blok: BlokKat, id: string, studentId: string | null): HwUnitInput | null {
+export function opornayaBanka(
+  blok: BlokKat,
+  id: string,
+  studentId: string | null,
+): HwUnitInput | null {
   const z = blok.zadachi.find((x) => x.id === id);
   if (z === undefined || z.klyuch === undefined || z.razbor === undefined) return null;
   return {
@@ -256,5 +268,7 @@ export function opornayaBanka(blok: BlokKat, id: string, studentId: string | nul
 }
 
 export function opornyeBanka(blok: BlokKat, zadachi: readonly string[]): HwUnitInput[] {
-  return zadachi.map((id) => opornayaBanka(blok, id, null)).filter((u): u is HwUnitInput => u !== null);
+  return zadachi
+    .map((id) => opornayaBanka(blok, id, null))
+    .filter((u): u is HwUnitInput => u !== null);
 }

@@ -70,7 +70,12 @@ export function VDzKnopka({
   return (
     <button
       type="button"
-      className={clsx('dzr-knopka stk-btn', malaya ? 'stk-btn--sm' : 'stk-btn--tihaya', est && 'is-est', className)}
+      className={clsx(
+        'dzr-knopka stk-btn',
+        malaya ? 'stk-btn--sm' : 'stk-btn--tihaya',
+        est && 'is-est',
+        className,
+      )}
       data-block="dz-v-chernovik"
       aria-label={est ? `${DZK.knopka.dobavleno}: ${chto}` : DZK.knopka.aria(chto)}
       aria-pressed={est}
@@ -92,9 +97,19 @@ export function VDzKnopka({
 export function ChernovikPlashka() {
   const { tutor, ch } = useChernovikRepetitora();
   /* Репетитор известен только в браузере: на сборке здесь пусто. */
-  if (!tutor || typeof document === 'undefined' || ch.status !== 'gotovo' || ch.sostav.punkty.length === 0) return null;
+  if (
+    !tutor ||
+    typeof document === 'undefined' ||
+    ch.status !== 'gotovo' ||
+    ch.sostav.punkty.length === 0
+  )
+    return null;
   return createPortal(
-    <aside className="dzr-plashka stk-glass" aria-label={DZK.plashka.aria} data-block="dz-chernovik-plashka">
+    <aside
+      className="dzr-plashka stk-glass"
+      aria-label={DZK.plashka.aria}
+      data-block="dz-chernovik-plashka"
+    >
       <span className="dzr-plashka__text">{DZK.plashka.text(ch.sostav.punkty.length)}</span>
       <Link className="stk-btn stk-btn--primary stk-btn--sm dzr-plashka__go" href={DZ_HREF.vydat}>
         {DZK.plashka.otkryt}

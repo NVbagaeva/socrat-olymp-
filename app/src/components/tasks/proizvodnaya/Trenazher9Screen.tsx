@@ -1,5 +1,6 @@
 'use client';
 
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { ishodOf } from '@/lib/progressLog';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -380,6 +381,15 @@ export function Trenazher9Screen({ session }: Trenazher9ScreenProps) {
       </ol>
 
       <article className="ptask__card">
+        {/* Репетитору: эту задачу — в черновик ДЗ (задачи открытого банка — нет: их строит не генератор). */}
+        {task.id.includes('|ob:') ? null : (
+          <VDzKnopka
+            malaya
+            punkt={{ ist: 'zadacha', no: 9, ref: task.id, tip: task.prototype }}
+            chto={`задача ${task.prototype}`}
+            label="В ДЗ"
+          />
+        )}
         <div className="ptask__text">
           <div
             className="ptask__question"

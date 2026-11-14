@@ -113,7 +113,8 @@ export function Konstruktor() {
     );
   }
   if (classes === null) return <p className="dzk-muted">{DZK.zagruzka}</p>;
-  if (classes.length === 0) return <EmptyState title={DZK.title} description={DZ.issue.noClasses} />;
+  if (classes.length === 0)
+    return <EmptyState title={DZK.title} description={DZ.issue.noClasses} />;
   if (oshibki !== null) return <Oshibki hwId={oshibki} />;
   return <Sborka classes={classes} origin={origin} />;
 }
@@ -144,7 +145,12 @@ function Komu({
     <fieldset className="dzk-pole" data-section="who">
       <legend className="dzk-legend">{DZ.issue.who}</legend>
       <FieldLabel htmlFor={id}>{DZ.issue.klass}</FieldLabel>
-      <Select id={id} value={classId} disabled={tolko !== undefined} onChange={(e) => onClass(e.target.value)}>
+      <Select
+        id={id}
+        value={classId}
+        disabled={tolko !== undefined}
+        onChange={(e) => onClass(e.target.value)}
+      >
         {classes.map((k) => (
           <option key={k.id} value={k.id}>
             {k.name}
@@ -158,7 +164,9 @@ function Komu({
           <Checkbox
             checked={vybrano === members.length}
             indeterminate={vybrano > 0 && vybrano < members.length}
-            onChange={(e) => onStudents(new Set(e.target.checked ? members.map((m) => m.userId) : []))}
+            onChange={(e) =>
+              onStudents(new Set(e.target.checked ? members.map((m) => m.userId) : []))
+            }
           >
             {DZ.issue.allStudents}
           </Checkbox>
@@ -222,14 +230,22 @@ function Nastroyki({
           disabled={obshchee.noDue}
           onChange={(e) => onObshchee({ ...obshchee, due: e.target.value })}
         />
-        <Checkbox checked={obshchee.noDue} onChange={(e) => onObshchee({ ...obshchee, noDue: e.target.checked })}>
+        <Checkbox
+          checked={obshchee.noDue}
+          onChange={(e) => onObshchee({ ...obshchee, noDue: e.target.checked })}
+        >
           {DZ.issue.noDue}
         </Checkbox>
       </div>
       <p className="dz-field-title">{DZ.issue.attempts}</p>
       <div className="dz-seg" role="radiogroup" aria-label={DZ.issue.attempts}>
         {([1, 2, null] as AttemptsLimit[]).map((v) => (
-          <Radio key={String(v)} name="attempts" checked={n.attemptsLimit === v} onChange={() => zadatNastroyki({ attemptsLimit: v })}>
+          <Radio
+            key={String(v)}
+            name="attempts"
+            checked={n.attemptsLimit === v}
+            onChange={() => zadatNastroyki({ attemptsLimit: v })}
+          >
             {DZ.issue.attemptsOptions[String(v)]}
           </Radio>
         ))}
@@ -237,7 +253,12 @@ function Nastroyki({
       <p className="dz-field-title">{DZ.issue.solutions}</p>
       <div className="dz-seg" role="radiogroup" aria-label={DZ.issue.solutions}>
         {(['instant', 'after_submit', 'after_due'] as SolutionsWhen[]).map((w) => (
-          <Radio key={w} name="when" checked={n.solutionsWhen === w} onChange={() => zadatNastroyki({ solutionsWhen: w })}>
+          <Radio
+            key={w}
+            name="when"
+            checked={n.solutionsWhen === w}
+            onChange={() => zadatNastroyki({ solutionsWhen: w })}
+          >
             {SOLUTIONS_WHEN[w]}
           </Radio>
         ))}
@@ -246,10 +267,18 @@ function Nastroyki({
         {DZK.nastroyki.bezPodskazok}
       </Checkbox>
       <p className="dzk-muted">{DZK.nastroyki.bezPodskazokLead}</p>
-      <Checkbox checked={n.showMemo && !n.noHints} disabled={n.noHints} onChange={(e) => zadatNastroyki({ showMemo: e.target.checked })}>
+      <Checkbox
+        checked={n.showMemo && !n.noHints}
+        disabled={n.noHints}
+        onChange={(e) => zadatNastroyki({ showMemo: e.target.checked })}
+      >
         {DZK.nastroyki.zapomni}
       </Checkbox>
-      <Checkbox checked={n.showExample && !n.noHints} disabled={n.noHints} onChange={(e) => zadatNastroyki({ showExample: e.target.checked })}>
+      <Checkbox
+        checked={n.showExample && !n.noHints}
+        disabled={n.noHints}
+        onChange={(e) => zadatNastroyki({ showExample: e.target.checked })}
+      >
         {DZK.nastroyki.primer}
       </Checkbox>
       <FieldLabel htmlFor={ids.note}>{DZK.nastroyki.kommentariy}</FieldLabel>
@@ -292,13 +321,21 @@ function Shablony({ sostav }: { sostav: SostavT }) {
             <li key={t.id}>
               <span>{t.title}</span>
               <span className="dzk-item__knopki">
-                <button type="button" className="stk-btn stk-btn--sm stk-btn--primary" onClick={() => setVzyat(t)}>
+                <button
+                  type="button"
+                  className="stk-btn stk-btn--sm stk-btn--primary"
+                  onClick={() => setVzyat(t)}
+                >
                   {DZK.shablony.vzyat}
                 </button>
                 <button
                   type="button"
                   className="stk-btn stk-btn--sm stk-btn--tihaya"
-                  onClick={() => void dzApi().then((api) => api.deleteTemplate(t.id)).then(obnovit)}
+                  onClick={() =>
+                    void dzApi()
+                      .then((api) => api.deleteTemplate(t.id))
+                      .then(obnovit)
+                  }
                 >
                   {DZK.shablony.udalit}
                 </button>
@@ -328,7 +365,11 @@ function Shablony({ sostav }: { sostav: SostavT }) {
           {DZK.shablony.sohranit}
         </button>
       </div>
-      {msg === null ? null : <p className="dzk-muted" role="status">{msg}</p>}
+      {msg === null ? null : (
+        <p className="dzk-muted" role="status">
+          {msg}
+        </p>
+      )}
       <Confirm
         open={vzyat !== null}
         title={DZK.shablony.vzyatVopros}
@@ -373,7 +414,11 @@ function Vydano({ id, n }: { id: string; n: number }) {
         <Link className="stk-btn stk-btn--primary" href={homeworkHref(id)}>
           {DZK.kRezultatam}
         </Link>
-        <Link className="stk-btn stk-btn--tihaya" href={DZ_HREF.vydat} onClick={() => window.location.reload()}>
+        <Link
+          className="stk-btn stk-btn--tihaya"
+          href={DZ_HREF.vydat}
+          onClick={() => window.location.reload()}
+        >
           {DZK.eshche}
         </Link>
       </div>
@@ -409,7 +454,9 @@ function Sborka({ classes, origin }: { classes: TutorClass[]; origin: HwOrigin }
   if (sostav === null || s === null) return <p className="dzk-muted">{DZK.zagruzka}</p>;
 
   const klass = classes.find((k) => k.id === classId);
-  const recipients = (klass?.members ?? []).filter((m) => students.has(m.userId)).map((m) => m.userId);
+  const recipients = (klass?.members ?? [])
+    .filter((m) => students.has(m.userId))
+    .map((m) => m.userId);
 
   async function vydat() {
     if (sostav === null) return;
@@ -491,7 +538,9 @@ function Sborka({ classes, origin }: { classes: TutorClass[]; origin: HwOrigin }
           classId={classId}
           onClass={(id) => {
             setClassId(id);
-            setStudents(new Set((classes.find((k) => k.id === id)?.members ?? []).map((m) => m.userId)));
+            setStudents(
+              new Set((classes.find((k) => k.id === id)?.members ?? []).map((m) => m.userId)),
+            );
           }}
           students={students}
           onStudents={setStudents}
@@ -503,7 +552,12 @@ function Sborka({ classes, origin }: { classes: TutorClass[]; origin: HwOrigin }
             {error}
           </p>
         )}
-        <button type="submit" className="stk-btn stk-btn--primary stk-btn--lg dzk-vydat" disabled={sending} data-action="vydat">
+        <button
+          type="submit"
+          className="stk-btn stk-btn--primary stk-btn--lg dzk-vydat"
+          disabled={sending}
+          data-action="vydat"
+        >
           {sending ? DZK.vydaem : `${DZK.vydat} · ${DZK.schet(s.zadach, s.naborov, s.minut)}`}
         </button>
       </form>
@@ -529,7 +583,11 @@ function Oshibki({ hwId }: { hwId: string }) {
   const [hw, setHw] = useState<HwFull | null | 'net'>(null);
   const [plan, setPlan] = useState<{ parts: HwPartInput[]; students: string[] } | null>(null);
   const [students, setStudents] = useState<Set<string>>(new Set());
-  const [obshchee, setObshchee] = useState<Obshchee>(() => ({ title: '', due: defaultDue(), noDue: false }));
+  const [obshchee, setObshchee] = useState<Obshchee>(() => ({
+    title: '',
+    due: defaultDue(),
+    noDue: false,
+  }));
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [issued, setIssued] = useState<{ id: string; n: number } | null>(null);
@@ -562,8 +620,10 @@ function Oshibki({ hwId }: { hwId: string }) {
   }, [hwId]);
 
   if (issued !== null) return <Vydano id={issued.id} n={issued.n} />;
-  if (hw === 'net') return <EmptyState title={DZK.oshibki.title} description={dzError('bad_parent')} />;
-  if (hw === null || plan === null || ch.status !== 'gotovo') return <p className="dzk-muted">{DZK.oshibki.sobiraem}</p>;
+  if (hw === 'net')
+    return <EmptyState title={DZK.oshibki.title} description={dzError('bad_parent')} />;
+  if (hw === null || plan === null || ch.status !== 'gotovo')
+    return <p className="dzk-muted">{DZK.oshibki.sobiraem}</p>;
   const sostav = ch.sostav;
   const komu = plan.students.filter((s) => students.has(s));
 
@@ -574,10 +634,15 @@ function Oshibki({ hwId }: { hwId: string }) {
     setSending(true);
     try {
       const parts = plan.parts
-        .map((p) => ({ ...p, units: p.units.filter((u) => u.studentId === null || komu.includes(u.studentId)) }))
+        .map((p) => ({
+          ...p,
+          units: p.units.filter((u) => u.studentId === null || komu.includes(u.studentId)),
+        }))
         .filter((p) => p.units.length > 0);
       const n = sostav.nastroyki;
-      const id = await (await dzApi()).issueHomeworkParts({
+      const id = await (
+        await dzApi()
+      ).issueHomeworkParts({
         classId: hw.hw.classId,
         students: komu,
         origin: 'oshibki',
@@ -662,7 +727,11 @@ function Oshibki({ hwId }: { hwId: string }) {
               {error}
             </p>
           )}
-          <button type="submit" className="stk-btn stk-btn--primary stk-btn--lg dzk-vydat" disabled={sending}>
+          <button
+            type="submit"
+            className="stk-btn stk-btn--primary stk-btn--lg dzk-vydat"
+            disabled={sending}
+          >
             {sending ? DZK.vydaem : DZK.vydat}
           </button>
         </form>

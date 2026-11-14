@@ -1,3 +1,4 @@
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -46,8 +47,14 @@ export default async function Opornye2BlokPage({ params }: { params: Params }) {
         {found.nazvanie}
       </h2>
       <TabScrollOnMount />
+      {/* Репетитору: весь блок — в черновик ДЗ (при выдаче — аналоги). */}
+      <VDzKnopka
+        punkt={{ ist: 'opornye', no: 2, blok: found.slug, zadachi: null, kazhdomu: false }}
+        chto={`блок «${found.nazvanie}»`}
+      />
       <Opornye2
         blokId={found.id}
+        slug={found.slug}
         zapomni={
           <>
             <b>{OPORNYE2.zapomni}</b>

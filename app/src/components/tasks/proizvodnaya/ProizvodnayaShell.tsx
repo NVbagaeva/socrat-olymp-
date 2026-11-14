@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/layout/AppShell';
+import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
 import { tasksPage } from '@/content/tasks';
 import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { ZADANIYA } from '@/lib/paths';
@@ -35,7 +36,11 @@ export function ProizvodnayaShell({ children }: { children: React.ReactNode }) {
           {...(PROIZVODNAYA.tutors.items.length === 0 ? {} : { tutors: PROIZVODNAYA.tutors })}
         />
 
-        <div className="section-panel">{children}</div>
+        <div className="section-panel">
+          {/* ДЗ: ученику — плашка с ДЗ, репетитору — черновик ДЗ. Гостю — ничего. */}
+          <DzVRazdele no={9} />
+          {children}
+        </div>
       </main>
     </AppShell>
   );

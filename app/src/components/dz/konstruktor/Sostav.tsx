@@ -21,8 +21,11 @@ import { istochnikPunkta, type PunktSostava, type Schet } from '@/lib/dz/sostav'
 
 function podrobnosti(p: PunktSostava, kat: KatalogRazdela | undefined): string {
   if (p.ist === 'kartochki') {
-    const n = p.kartochki?.length ?? kat?.kartochki?.find((t) => t.id === p.podtema)?.kartochki.length ?? 0;
-    return p.kartochki === null ? `${DZK.kartochek(n)}, ${DZK.sostav.vsehKartochek}` : DZK.kartochek(n);
+    const n =
+      p.kartochki?.length ?? kat?.kartochki?.find((t) => t.id === p.podtema)?.kartochki.length ?? 0;
+    return p.kartochki === null
+      ? `${DZK.kartochek(n)}, ${DZK.sostav.vsehKartochek}`
+      : DZK.kartochek(n);
   }
   if (p.ist === 'opornye') {
     const n = p.zadachi?.length ?? kat?.opornye.find((b) => b.slug === p.blok)?.zadachi.length ?? 0;
@@ -148,7 +151,9 @@ export function Sostav({
                     </p>
                     <p
                       className="dzk-punkt__nazvanie"
-                      dangerouslySetInnerHTML={{ __html: kat === undefined ? '…' : titlePunkta(kat, p) }}
+                      dangerouslySetInnerHTML={{
+                        __html: kat === undefined ? '…' : titlePunkta(kat, p),
+                      }}
                     />
                     <p className="dzk-punkt__podrobno">{podrobnosti(p, kat)}</p>
                     {p.ist === 'trenazher' ? (
@@ -223,7 +228,11 @@ export function Sostav({
           </ol>
         )}
         {punkty.length === 0 ? null : (
-          <button type="button" className="stk-btn stk-btn--tihaya dzk-ochistit" onClick={onOchistit}>
+          <button
+            type="button"
+            className="stk-btn stk-btn--tihaya dzk-ochistit"
+            onClick={onOchistit}
+          >
             {DZK.sostav.ochistit}
           </button>
         )}

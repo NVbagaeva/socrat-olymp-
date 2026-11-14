@@ -65,7 +65,11 @@ export function shagiDz(r: RazborDz): Shag[] {
 
 type StatusPunkta = 'ne' | 'nachato' | 'gotovo';
 
-function statusPunkta(units: readonly HwTaskView[], stateOf: (id: string) => HwState, tried: (id: string) => boolean): StatusPunkta {
+function statusPunkta(
+  units: readonly HwTaskView[],
+  stateOf: (id: string) => HwState,
+  tried: (id: string) => boolean,
+): StatusPunkta {
   const closed = units.filter((u) => stateOf(u.id) !== 'open').length;
   if (closed === units.length && units.length > 0) return 'gotovo';
   return closed > 0 || units.some((u) => tried(u.id)) ? 'nachato' : 'ne';
@@ -97,7 +101,9 @@ export function ReshenieDz({
   const stateOf = useCallback((id: string): HwState => answers.get(id)?.state ?? 'open', [answers]);
   const tried = useCallback((id: string) => (answers.get(id)?.attempts ?? 0) > 0, [answers]);
   const [current, setCurrent] = useState(() => {
-    const i = parts.findIndex((p) => units.some((u) => u.partId === p.id && (answers.get(u.id)?.state ?? 'open') === 'open'));
+    const i = parts.findIndex((p) =>
+      units.some((u) => u.partId === p.id && (answers.get(u.id)?.state ?? 'open') === 'open'),
+    );
     return i === -1 ? 0 : i;
   });
   const [error, setError] = useState<string | null>(null);
@@ -113,15 +119,28 @@ export function ReshenieDz({
     }
   }, [hw.id, mine, readOnly]);
 
-  const cardParts = useMemo(() => new Set(full.parts.filter((p) => p.source === 'kartochki').map((p) => p.id)), [full.parts]);
-  const closed = useMemo(() => new Set([...answers.values()].filter((a) => a.state !== 'open').map((a) => a.taskId)), [answers]);
+  const cardParts = useMemo(
+    () => new Set(full.parts.filter((p) => p.source === 'kartochki').map((p) => p.id)),
+    [full.parts],
+  );
+  const closed = useMemo(
+    () => new Set([...answers.values()].filter((a) => a.state !== 'open').map((a) => a.taskId)),
+    [answers],
+  );
   const dela = delaUchenika(units, cardParts, userId, closed);
   const verno = units.filter((u) => stateOf(u.id) === 'right').length;
 
   const zapisat = useCallback(
     (taskId: string, patch: Partial<HwAnswerView> & { entry?: HwAnswerView['entries'][number] }) =>
       setAnswers((m) => {
-        const prev = m.get(taskId) ?? { taskId, userId, state: 'open' as HwState, attempts: 0, entries: [], seconds: 0 };
+        const prev = m.get(taskId) ?? {
+          taskId,
+          userId,
+          state: 'open' as HwState,
+          attempts: 0,
+          entries: [],
+          seconds: 0,
+        };
         const { entry, ...rest } = patch;
         return new Map(m).set(taskId, {
           ...prev,
@@ -178,7 +197,11 @@ export function ReshenieDz({
       <nav className="rdz-punkty" aria-label={DZK.uchenik.punkty}>
         <ol>
           {parts.map((p, i) => {
-            const st = statusPunkta(units.filter((u) => u.partId === p.id), stateOf, tried);
+            const st = statusPunkta(
+              units.filter((u) => u.partId === p.id),
+              stateOf,
+              tried,
+            );
             return (
               <li key={p.id}>
                 <button
@@ -190,8 +213,13 @@ export function ReshenieDz({
                 >
                   <span className="rdz-punkt__no">{i + 1}</span>
                   <span className="rdz-punkt__telo">
-                    <span className={`rdz-metka rdz-metka--${p.source}`}>{ISTOCHNIK[p.source]}</span>
-                    <span className="rdz-punkt__nazvanie" dangerouslySetInnerHTML={{ __html: sanitizeHtml(p.titleHtml) }} />
+                    <span className={`rdz-metka rdz-metka--${p.source}`}>
+                      {ISTOCHNIK[p.source]}
+                    </span>
+                    <span
+                      className="rdz-punkt__nazvanie"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(p.titleHtml) }}
+                    />
                   </span>
                   <span className="rdz-punkt__status">{DZK.uchenik.status[st]}</span>
                 </button>
@@ -202,7 +230,12 @@ export function ReshenieDz({
       </nav>
 
       {part === undefined ? null : (
-        <section className="rdz-tekushchiy" aria-label={`Пункт ${current + 1}`} data-part={part.id} data-istochnik={part.source}>
+        <section
+          className="rdz-tekushchiy"
+          aria-label={`Пункт ${current + 1}`}
+          data-part={part.id}
+          data-istochnik={part.source}
+        >
           {part.comment === null ? null : (
             <aside className="rdz-note" data-note="part">
               <b>{DZ.solve.taskNote}:</b> {part.comment}
@@ -246,7 +279,12 @@ export function ReshenieDz({
       {readOnly ? null : (
         <div className="rdz-sdat stk-glass">
           <p className="rdz-muted">{DZ.solve.saved}</p>
-          <button type="button" className="stk-btn stk-btn--primary stk-btn--lg" data-action="sdat" onClick={() => setAsk(true)}>
+          <button
+            type="button"
+            className="stk-btn stk-btn--primary stk-btn--lg"
+            data-action="sdat"
+            onClick={() => setAsk(true)}
+          >
             {DZK.uchenik.sdat}
           </button>
         </div>
@@ -266,7 +304,10 @@ export function ReshenieDz({
 
 /* ── Задачи пункта (тренажёр, опорные) ────────────────────────── */
 
-type Zapis = (taskId: string, patch: Partial<HwAnswerView> & { entry?: HwAnswerView['entries'][number] }) => void;
+type Zapis = (
+  taskId: string,
+  patch: Partial<HwAnswerView> & { entry?: HwAnswerView['entries'][number] },
+) => void;
 
 function Zadachi({
   full,
@@ -372,7 +413,9 @@ function Zadacha({
   const hw = full.hw;
   const state = answer?.state ?? 'open';
   const lastEntry = answer?.entries[answer.entries.length - 1];
-  const [value, setValue] = useState(() => (state === 'open' ? readDraft(u.id) : (lastEntry?.a ?? '')));
+  const [value, setValue] = useState(() =>
+    state === 'open' ? readDraft(u.id) : (lastEntry?.a ?? ''),
+  );
   const [hint, setHint] = useState<string | null>(null);
   const [wrongNow, setWrongNow] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -388,7 +431,8 @@ function Zadacha({
   }, []);
 
   const canAnswer = !readOnly && state === 'open';
-  const left = hw.attemptsLimit === null ? null : Math.max(0, hw.attemptsLimit - (answer?.attempts ?? 0));
+  const left =
+    hw.attemptsLimit === null ? null : Math.max(0, hw.attemptsLimit - (answer?.attempts ?? 0));
 
   /* Решение: закрыта задача, сдано, срок прошёл — если база его отдаёт. */
   useEffect(() => {
@@ -453,7 +497,13 @@ function Zadacha({
   }
 
   const sost: SostoyanieZadachi =
-    state === 'right' ? 'verno' : state === 'revealed' ? 'razbor' : state === 'wrong' || wrongNow ? 'neverno' : 'vvod';
+    state === 'right'
+      ? 'verno'
+      : state === 'revealed'
+        ? 'razbor'
+        : state === 'wrong' || wrongNow
+          ? 'neverno'
+          : 'vvod';
   const v = u.view;
   const podskazka =
     noHints || readOnly
@@ -467,7 +517,9 @@ function Zadacha({
                   ...q,
                   voprosHtml: sanitizeHtml(q.voprosHtml),
                   variantyHtml: q.variantyHtml.map(sanitizeHtml),
-                  ...(q.kommentariyHtml === undefined ? {} : { kommentariyHtml: sanitizeHtml(q.kommentariyHtml) }),
+                  ...(q.kommentariyHtml === undefined
+                    ? {}
+                    : { kommentariyHtml: sanitizeHtml(q.kommentariyHtml) }),
                 }))}
                 otkryto={voprosOtkryto}
                 mimo={mimo}
@@ -491,7 +543,8 @@ function Zadacha({
     <div className="rdz-zadacha" data-task={u.id} data-state={state}>
       {hw.showMemo && v.zapomni !== undefined ? (
         <aside className="op-zapomni stk-glass rdz-zapomni" data-block="memo">
-          <b>{DZK.uchenik.zapomni}:</b> <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(v.zapomni) }} />
+          <b>{DZK.uchenik.zapomni}:</b>{' '}
+          <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(v.zapomni) }} />
         </aside>
       ) : null}
       {hw.showExample && v.primer !== undefined ? (
@@ -500,7 +553,10 @@ function Zadacha({
             {DZK.uchenik.primer}
             <span className="stk-shevron" aria-hidden="true" />
           </summary>
-          <div className={clsx('trn-uslovie', v.tekst === true && 'trn-uslovie--tekst')} dangerouslySetInnerHTML={{ __html: sanitizeHtml(v.primer.uslovieHtml) }} />
+          <div
+            className={clsx('trn-uslovie', v.tekst === true && 'trn-uslovie--tekst')}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(v.primer.uslovieHtml) }}
+          />
           <ShagiPrimera razbor={v.primer.razbor} />
         </details>
       ) : null}
@@ -528,7 +584,13 @@ function Zadacha({
             ? null
             : {
                 shagi,
-                ...(solution?.posle === undefined ? {} : { posle: <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(solution.posle) }} /> }),
+                ...(solution?.posle === undefined
+                  ? {}
+                  : {
+                      posle: (
+                        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(solution.posle) }} />
+                      ),
+                    }),
                 open: solutionOpen,
                 onToggle: () => setSolutionOpen((o) => !o),
               }
@@ -553,7 +615,8 @@ function Zadacha({
                       setWrongNow(false);
                     }}
                   >
-                    {c.number} — {c.label}
+                    <span>{c.number}</span>{' '}
+                    <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(c.label) }} />
                   </button>
                 ))}
               </div>
@@ -571,15 +634,25 @@ function Zadacha({
         }}
       />
       <div className="rdz-pod-zadachey">
-        {canAnswer ? <p className="rdz-muted" data-left={left ?? 'inf'}>{left === null ? DZ.solve.unlimited : DZK.uchenik.popytki(left)}</p> : null}
+        {canAnswer ? (
+          <p className="rdz-muted" data-left={left ?? 'inf'}>
+            {left === null ? DZ.solve.unlimited : DZK.uchenik.popytki(left)}
+          </p>
+        ) : null}
         {canAnswer && hw.solutionsWhen === 'instant' ? (
-          <button type="button" className="stk-btn stk-btn--tihaya" onClick={() => setRevealAsk(true)}>
+          <button
+            type="button"
+            className="stk-btn stk-btn--tihaya"
+            onClick={() => setRevealAsk(true)}
+          >
             <Ikonka name="lampa" /> {DZK.uchenik.pokazatReshenie}
           </button>
         ) : null}
         {state !== 'open' && solution === null && hw.solutionsWhen !== 'instant' && !readOnly ? (
           <p className="rdz-muted">
-            {hw.solutionsWhen === 'after_due' ? DZK.uchenik.reshenieOtkroetsyaSrok : DZK.uchenik.reshenieOtkroetsya}
+            {hw.solutionsWhen === 'after_due'
+              ? DZK.uchenik.reshenieOtkroetsyaSrok
+              : DZK.uchenik.reshenieOtkroetsya}
           </p>
         ) : null}
       </div>
@@ -600,9 +673,13 @@ function ShagiPrimera({ razbor }: { razbor: RazborDz }) {
     <ol className="rdz-primer__shagi">
       {shagiDz(razbor).map((s, i) => (
         <li key={i}>
-          {s.zagolovokHtml === undefined ? null : <b dangerouslySetInnerHTML={{ __html: s.zagolovokHtml }} />}
+          {s.zagolovokHtml === undefined ? null : (
+            <b dangerouslySetInnerHTML={{ __html: s.zagolovokHtml }} />
+          )}
           <div dangerouslySetInnerHTML={{ __html: s.chtoHtml }} />
-          {s.formulaHtml === '' ? null : <div dangerouslySetInnerHTML={{ __html: s.formulaHtml }} />}
+          {s.formulaHtml === '' ? null : (
+            <div dangerouslySetInnerHTML={{ __html: s.formulaHtml }} />
+          )}
         </li>
       ))}
     </ol>
@@ -661,12 +738,14 @@ function NaborKartochek({
 
   /* Пройденная карточка с проверкой: оборот — из базы. */
   useEffect(() => {
-    if (u === undefined || u.answerKind === 'self' || stateOf(u.id) === 'open' || oborot.has(u.id)) return;
+    if (u === undefined || u.answerKind === 'self' || stateOf(u.id) === 'open' || oborot.has(u.id))
+      return;
     let alive = true;
     void dzApi()
       .then((api) => api.loadSolution(u.id))
       .then((s) => {
-        if (alive && s?.razbor.oborot !== undefined) setOborot((m) => new Map(m).set(u.id, s.razbor.oborot!));
+        if (alive && s?.razbor.oborot !== undefined)
+          setOborot((m) => new Map(m).set(u.id, s.razbor.oborot!));
       })
       .catch(() => undefined);
     return () => {
@@ -683,7 +762,8 @@ function NaborKartochek({
     return (
       <div className="rdz-kartochki-gotovo stk-glass" data-block="kartochki-gotovo">
         <p>
-          <Ikonka name="da" /> {DZK.uchenik.kartochki.gotovo} · {DZK.uchenik.kartochki.progress(projdeno, units.length)}
+          <Ikonka name="da" /> {DZK.uchenik.kartochki.gotovo} ·{' '}
+          {DZK.uchenik.kartochki.progress(projdeno, units.length)}
         </p>
         <div className="rdz-knopki">
           <button type="button" className="stk-btn stk-btn--tihaya" onClick={() => setI(0)}>
@@ -705,14 +785,21 @@ function NaborKartochek({
   const zakryta = state !== 'open';
   const gotovo =
     u.answerKind !== 'self' && zakryta && oborot.has(u.id)
-      ? { prav: state === 'right', vvod: a?.entries[a.entries.length - 1]?.a ?? '', oborot: oborot.get(u.id)! }
+      ? {
+          prav: state === 'right',
+          vvod: a?.entries[a.entries.length - 1]?.a ?? '',
+          oborot: oborot.get(u.id)!,
+        }
       : undefined;
 
   return (
     <div className="rdz-kartochki" data-block="kartochki" data-task={u.id} data-state={state}>
       <p className="rdz-muted">
-        <Metka>{ISTOCHNIK.kartochki}</Metka> {DZK.uchenik.kartochki.progress(Math.min(i + 1, units.length), units.length)}
-        {u.answerKind === 'self' && zakryta ? ` · ${state === 'known' ? DZK.uchenik.kartochki.znayu : DZK.uchenik.kartochki.povtorit}` : ''}
+        <Metka>{ISTOCHNIK.kartochki}</Metka>{' '}
+        {DZK.uchenik.kartochki.progress(Math.min(i + 1, units.length), units.length)}
+        {u.answerKind === 'self' && zakryta
+          ? ` · ${state === 'known' ? DZK.uchenik.kartochki.znayu : DZK.uchenik.kartochki.povtorit}`
+          : ''}
       </p>
       {u.answerKind !== 'self' && zakryta && gotovo === undefined ? (
         <p className="rdz-muted">…</p>
@@ -737,10 +824,18 @@ function NaborKartochek({
                     onZapis(u.id, {
                       state: r.state,
                       attempts: r.attempts,
-                      entry: { a: vvod, n: null, ok: r.kind === 'right', at: new Date().toISOString() },
+                      entry: {
+                        a: vvod,
+                        n: null,
+                        ok: r.kind === 'right',
+                        at: new Date().toISOString(),
+                      },
                     });
                     const ob = r.solution?.oborot ?? { back: '' };
-                    const chisto = { back: sanitizeHtml(ob.back), ...(ob.pochemu === undefined ? {} : { pochemu: sanitizeHtml(ob.pochemu) }) };
+                    const chisto = {
+                      back: sanitizeHtml(ob.back),
+                      ...(ob.pochemu === undefined ? {} : { pochemu: sanitizeHtml(ob.pochemu) }),
+                    };
                     setOborot((m) => new Map(m).set(u.id, chisto));
                     return { prav: r.kind === 'right', oborot: chisto };
                   } catch (e) {

@@ -8,7 +8,7 @@
 import type { KatalogRazdela } from './types';
 
 /** Разделы, из которых уже можно собирать ДЗ (как RAZDELY_DZ на сервере). */
-export const RAZDELY_DZ_KLIENT = [6, 7, 8, 10] as const;
+export const RAZDELY_DZ_KLIENT = [2, 6, 7, 8, 9, 10] as const;
 
 const kesh = new Map<number, Promise<KatalogRazdela>>();
 
@@ -31,7 +31,9 @@ export function zagruzitKatalog(no: number): Promise<KatalogRazdela> {
   return p;
 }
 
-export async function zagruzitKatalogi(nomera: readonly number[]): Promise<Map<number, KatalogRazdela>> {
+export async function zagruzitKatalogi(
+  nomera: readonly number[],
+): Promise<Map<number, KatalogRazdela>> {
   const uniq = [...new Set(nomera)];
   const list = await Promise.all(uniq.map(zagruzitKatalog));
   return new Map(list.map((k) => [k.no, k]));

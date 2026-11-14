@@ -64,7 +64,10 @@ export async function sobratOshibki(
           const r = getter === undefined ? null : await getter();
           if (r !== null && part.source === 'opornye') {
             const blok = kat.opornye.find((b) => b.slug === String(part.rule['blok'] ?? ''));
-            u = blok === undefined ? null : r.analogOpornoy(blok, t.kind, key?.ref ?? '', zerno, student);
+            u =
+              blok === undefined
+                ? null
+                : await r.analogOpornoy(blok, t.kind, key?.ref ?? '', zerno, student);
           } else if (r !== null && key !== undefined) {
             u = await r.analogZadachi(kat, key.ref, student, zerno, avoid);
           }

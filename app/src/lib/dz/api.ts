@@ -445,9 +445,8 @@ export async function listHomework(role: 'tutor' | 'student'): Promise<HwListIte
       })),
       tasks: dela.vsego,
       done: dela.sdelano,
-      right: own.filter(
-        (t) => (t.studentId === null || t.studentId === uid) && rightIds.has(t.id),
-      ).length,
+      right: own.filter((t) => (t.studentId === null || t.studentId === uid) && rightIds.has(t.id))
+        .length,
     };
   });
 }
@@ -610,7 +609,13 @@ export async function loadHomework(id: string): Promise<HwFull | null> {
         }[]
       ).map((k) => [
         k.task_id,
-        { taskId: k.task_id, ref: k.ref, answer: k.answer, razbor: k.razbor, source: k.source ?? '' },
+        {
+          taskId: k.task_id,
+          ref: k.ref,
+          answer: k.answer,
+          razbor: k.razbor,
+          source: k.source ?? '',
+        },
       ]),
     ),
   };
@@ -744,9 +749,9 @@ export async function listTemplates(): Promise<HwTemplate[]> {
     .eq('user_id', me())
     .order('updated_at', { ascending: false });
   if (result.error) fail(result.error);
-  return ((result.data ?? []) as { id: string; title: string; body: unknown; updated_at: string }[]).map(
-    (t) => ({ id: t.id, title: t.title, body: t.body, updatedAt: t.updated_at }),
-  );
+  return (
+    (result.data ?? []) as { id: string; title: string; body: unknown; updated_at: string }[]
+  ).map((t) => ({ id: t.id, title: t.title, body: t.body, updatedAt: t.updated_at }));
 }
 
 export async function saveTemplate(title: string, body: object): Promise<string> {

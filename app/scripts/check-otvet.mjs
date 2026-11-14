@@ -243,7 +243,10 @@ const dzCases = JSON.parse(
 ).cases;
 for (const [input, answer, want] of dzCases) {
   const got = proveritOtvetDz(input, answer).kind;
-  check(got === want, `ДЗ ${JSON.stringify(input)} при ответе ${answer}: ждали ${want}, получили ${got}`);
+  check(
+    got === want,
+    `ДЗ ${JSON.stringify(input)} при ответе ${answer}: ждали ${want}, получили ${got}`,
+  );
   const mock = proveritMock(input, answer).kind;
   check(mock === want, `заглушка ДЗ ${JSON.stringify(input)}: ждали ${want}, получили ${mock}`);
 }

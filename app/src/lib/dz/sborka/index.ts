@@ -94,7 +94,12 @@ function pravilo(p: PunktSostava, zerno: string): Record<string, unknown> {
     case 'opornye':
       return { blok: p.blok, zadachi: p.zadachi, zerno };
     case 'trenazher':
-      return { tipy: p.tipy, skolko: p.skolko, ...(p.gruppa === undefined ? {} : { gruppa: p.gruppa }), zerno };
+      return {
+        tipy: p.tipy,
+        skolko: p.skolko,
+        ...(p.gruppa === undefined ? {} : { gruppa: p.gruppa }),
+        zerno,
+      };
     case 'zadacha':
       return { zadacha: p.ref, tip: p.tip };
   }

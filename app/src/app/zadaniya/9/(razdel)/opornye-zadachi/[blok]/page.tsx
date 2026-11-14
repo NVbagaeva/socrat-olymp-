@@ -1,3 +1,4 @@
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -34,8 +35,14 @@ export default async function Opornye9BlockPage({ params }: { params: Params }) 
   return (
     <Opornye9Shell base={base} active={block.slug}>
       <ErrorBoundary what="задачи">
+        {/* Репетитору: весь блок — в черновик ДЗ (при выдаче — аналоги). */}
+        <VDzKnopka
+          punkt={{ ist: 'opornye', no: 9, blok: block.slug, zadachi: null, kazhdomu: false }}
+          chto={`блок «${block.nazvanie}»`}
+        />
         <Opornye9Screen
           blockId={block.id}
+          slug={block.slug}
           title={block.nazvanie}
           tasks={block.zadachi}
           zapomniHtml={block.zapomniHtml}
