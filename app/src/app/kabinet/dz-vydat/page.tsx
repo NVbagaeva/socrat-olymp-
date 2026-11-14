@@ -4,6 +4,10 @@ import { AuthShell } from '@/components/auth/AuthShell';
 import { Konstruktor } from '@/components/dz/konstruktor/Konstruktor';
 import { AUTH_ENABLED } from '@/lib/auth/config';
 import 'katex/dist/katex.min.css';
+/* Рисунки условий разделов в ДЗ: №6 (диаграммы, деревья, таблицы), №10 (мост). */
+import '@/components/probability/probability.css';
+import '@/components/tasks/zadanie6/zadanie6.css';
+import '@/components/tasks/zadanie10/razbor10.css';
 
 export const metadata: Metadata = {
   title: 'Выдать домашнее задание — Будет на ЕГЭ',

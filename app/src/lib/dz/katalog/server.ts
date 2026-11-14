@@ -13,19 +13,30 @@ import { podgotovit } from '@/lib/kartochki/podgotovka';
 import { otpechatok } from '@/lib/kartochki/otvet';
 import { typeset } from '@/lib/tex';
 import { normalizeEge } from '@/lib/otvet/proverkaDz';
-import { BLOKI_OPORNYH } from '@/lib/zadanie7/opornye';
+import { BLOKI_OPORNYH as BLOKI6 } from '@/lib/zadanie6/opornye';
+import { GROUPS as GROUPS6, PROTOTYPES as PROTOTYPES6 } from '@/lib/zadanie6/prototypes';
+import { BLOKI_OPORNYH as BLOKI7 } from '@/lib/zadanie7/opornye';
 import { GROUPS as GROUPS7, PROTOTYPES as PROTOTYPES7 } from '@/lib/zadanie7/prototypes';
-import { sealText as sealText7 } from '@/lib/zadanie7/secret';
+import { BLOKI_OPORNYH as BLOKI10 } from '@/lib/zadanie10/opornye';
+import { GROUPS as GROUPS10, PROTOTYPES as PROTOTYPES10 } from '@/lib/zadanie10/prototypes';
 import { PREP_BLOCKS } from '@/lib/vychisleniya/prep/blocks';
 import { fixedSeed, generatePrep } from '@/lib/vychisleniya/prep/generate';
 import { GROUPS as GROUPS8, SKILLS as SKILLS8 } from '@/lib/vychisleniya/skills';
 import { names8Html } from '@/lib/vychisleniya/names';
 import { tasks } from '@/content/tasks';
 import type { RazborDz } from '../types';
-import type { BlokKat, KartochkaKat, KatalogRazdela, PodtemaKat } from './types';
+import type { BlokKat, GruppaKat, KartochkaKat, KatalogRazdela, PodtemaKat } from './types';
+import { zamok } from './zamok';
 
 /** Разделы, из которых уже можно собирать ДЗ. */
-export const RAZDELY_DZ = [7, 8] as const;
+export const RAZDELY_DZ = [6, 7, 8, 10] as const;
+
+/** «Банковые» разделы: банк задач с решателем прототипа и опорные без зерна. */
+const BANKOVYE: Record<6 | 7 | 10, { bloki: readonly BlokBanka[]; groups: readonly { id: string; title: string }[]; prototypes: readonly { id: string; group: string; title: string }[] }> = {
+  6: { bloki: BLOKI6, groups: GROUPS6, prototypes: PROTOTYPES6 },
+  7: { bloki: BLOKI7, groups: GROUPS7, prototypes: PROTOTYPES7 },
+  10: { bloki: BLOKI10, groups: GROUPS10, prototypes: PROTOTYPES10 },
+};
 
 function nazvanieRazdela(no: number): string {
   return tasks.find((t) => Number(t.no) === no)?.name ?? `Задание ${no}`;
@@ -62,8 +73,16 @@ function chislo(x: number): string {
   return norm;
 }
 
-function opornye7(): BlokKat[] {
-  return BLOKI_OPORNYH.map((b) => ({
+/** Блок опорных «как в банковых разделах» (№6, 7, 10): свои задачи без зерна. */
+interface BlokBanka {
+  slug: string;
+  nazvanie: string;
+  zapomni: string;
+  zadachi: { id: string; uslovie: string; answer: number; podskazka: string; razbor: string[] }[];
+}
+
+function opornyeBanka(bloki: readonly BlokBanka[]): BlokKat[] {
+  return bloki.map((b) => ({
     slug: b.slug,
     nazvanie: b.nazvanie,
     zapomniHtml: typeset(b.zapomni),
@@ -76,10 +95,24 @@ function opornye7(): BlokKat[] {
         id: z.id,
         uslovieHtml: typeset(z.uslovie),
         podskazkaHtml: typeset(z.podskazka),
-        klyuch: sealText7(chislo(z.answer), z.id),
-        razbor: sealText7(JSON.stringify(razbor), z.id),
+        klyuch: zamok.sealText(chislo(z.answer), z.id),
+        razbor: zamok.sealText(JSON.stringify(razbor), z.id),
       };
     }),
+  }));
+}
+
+/** Типы тренажёра «банкового» раздела: группы и прототипы. */
+function trenazherBanka(
+  groups: readonly { id: string; title: string }[],
+  prototypes: readonly { id: string; group: string; title: string }[],
+): GruppaKat[] {
+  return groups.map((g) => ({
+    id: g.id,
+    nazvanie: g.title,
+    tipy: prototypes
+      .filter((p) => p.group === g.id)
+      .map((p) => ({ id: p.id, nazvanieHtml: typeset(p.title) })),
   }));
 }
 
@@ -103,20 +136,14 @@ function opornye8(): BlokKat[] {
 }
 
 export function katalog(no: number): KatalogRazdela | null {
-  if (no === 7) {
+  if (no === 6 || no === 7 || no === 10) {
+    const b = BANKOVYE[no];
     return {
       no,
       nazvanie: nazvanieRazdela(no),
       kartochki: kartochki(no),
-      opornye: opornye7(),
-      trenazher: GROUPS7.map((g) => ({
-        id: g.id,
-        nazvanie: g.title,
-        tipy: PROTOTYPES7.filter((p) => p.group === g.id).map((p) => ({
-          id: p.id,
-          nazvanieHtml: typeset(p.title),
-        })),
-      })),
+      opornye: opornyeBanka(b.bloki),
+      trenazher: trenazherBanka(b.groups, b.prototypes),
     };
   }
   if (no === 8) {

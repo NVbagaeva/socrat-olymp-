@@ -15,6 +15,7 @@ import type { KatalogRazdela } from '../katalog/types';
 import type { PunktSostava, Sostav } from '../sostav';
 import type { HwPartInput, HwUnitInput } from '../types';
 import { kartochkaVDz, kartochkiNabora } from './obshchee';
+import { OPORNYE_IZ_ZERNA, SBORSHCHIKI } from './razdely';
 
 export class SborkaError extends Error {
   override name = 'SborkaError';
@@ -68,27 +69,21 @@ async function edinitsy(
     if (t === undefined) throw new SborkaError(`Нет набора карточек «${p.podtema}» в №${no}.`);
     return kartochkiNabora(t, p.kartochki).map(kartochkaVDz);
   }
+  const getter = SBORSHCHIKI[no];
+  if (getter === undefined) throw new SborkaError(`Раздел №${no} пока нельзя выдать в ДЗ.`);
+  const r = await getter();
   if (p.ist === 'opornye') {
     const blok = kat.opornye.find((b) => b.slug === p.blok);
     if (blok === undefined) throw new SborkaError(`Нет блока «${p.blok}» в №${no}.`);
-    const ids = p.zadachi ?? blok.zadachi.map((z) => z.id);
-    if (no === 7) return (await import('./r7')).opornye7(blok, ids);
-    if (no === 8) return (await import('./r8')).opornye8(blok, ids, zerno, komu);
+    return r.opornye(blok, p.zadachi ?? blok.zadachi.map((z) => z.id), zerno, komu);
   }
-  if (p.ist === 'trenazher') {
-    if (no === 7) return (await import('./r7')).trenazher7(kat, p.tipy, p.skolko, zerno, komu);
-    if (no === 8) return (await import('./r8')).trenazher8(kat, p.tipy, p.skolko, komu);
-  }
-  if (p.ist === 'zadacha') {
-    if (no === 7) return (await import('./r7')).zadacha7(kat, p.ref);
-    if (no === 8) return (await import('./r8')).zadacha8(kat, p.ref);
-  }
-  throw new SborkaError(`Раздел №${no} пока нельзя выдать в ДЗ.`);
+  if (p.ist === 'trenazher') return r.trenazher(kat, p.tipy, p.skolko, zerno, komu);
+  return r.zadacha(kat, p.ref);
 }
 
-/** «Каждому свои» имеет смысл, только где задачи строятся заново (у №7 опорных зерна нет). */
+/** «Каждому свои» имеет смысл, только где задачи строятся заново (у опорных без зерна — нет). */
 export function kazhdomuMozhno(p: PunktSostava): boolean {
-  if (p.ist === 'opornye') return p.no !== 7;
+  if (p.ist === 'opornye') return OPORNYE_IZ_ZERNA.has(p.no);
   return p.ist === 'trenazher';
 }
 

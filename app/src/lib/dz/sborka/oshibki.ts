@@ -17,6 +17,7 @@ import { markOf, tasksOf } from '../results';
 import type { HwAnswerView, HwPartInput, HwPartView, HwTaskView, HwUnitInput } from '../types';
 import { kartochkaVDz } from './obshchee';
 import type { Katalogi } from './index';
+import { SBORSHCHIKI } from './razdely';
 
 export interface OshibkiVhod {
   parts: readonly HwPartView[];
@@ -58,18 +59,14 @@ export async function sobratOshibki(
         if (part.source === 'kartochki') {
           const k = kat.kartochki?.flatMap((p) => p.kartochki).find((x) => x.id === t.kind);
           u = k === undefined ? null : { ...kartochkaVDz(k), studentId: student };
-        } else if (part.source === 'opornye') {
-          const blok = kat.opornye.find((b) => b.slug === String(part.rule['blok'] ?? ''));
-          if (blok !== undefined && part.taskNo === 7) {
-            u = (await import('./r7')).opornaya7(blok, t.kind, student);
-          } else if (blok !== undefined && part.taskNo === 8 && key !== undefined) {
-            u = (await import('./r8')).analogOpornoy8(blok, key.ref, zerno, student);
-          }
-        } else if (key !== undefined) {
-          if (part.taskNo === 7) {
-            u = await (await import('./r7')).analogZadachi7(kat, key.ref, student, zerno, avoid);
-          } else if (part.taskNo === 8) {
-            u = (await import('./r8')).analogZadachi8(kat, key.ref, student, avoid);
+        } else {
+          const getter = SBORSHCHIKI[part.taskNo];
+          const r = getter === undefined ? null : await getter();
+          if (r !== null && part.source === 'opornye') {
+            const blok = kat.opornye.find((b) => b.slug === String(part.rule['blok'] ?? ''));
+            u = blok === undefined ? null : r.analogOpornoy(blok, t.kind, key?.ref ?? '', zerno, student);
+          } else if (r !== null && key !== undefined) {
+            u = await r.analogZadachi(kat, key.ref, student, zerno, avoid);
           }
         }
         if (u !== null) {

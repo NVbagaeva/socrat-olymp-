@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { Opornye6 } from '@/components/tasks/zadanie6/Opornye6';
 import { Tex } from '@/components/ui/Tex';
 import { OPORNYE6 } from '@/content/sluchainye6';
@@ -36,8 +37,14 @@ export default async function Opornye6Blok({ params }: { params: Promise<{ blok:
         {b.nazvanie}
       </h2>
       <TabScrollOnMount />
+      {/* Репетитору: весь блок — в черновик ДЗ. */}
+      <VDzKnopka
+        punkt={{ ist: 'opornye', no: 6, blok: b.slug, zadachi: null, kazhdomu: false }}
+        chto={`блок «${b.nazvanie}»`}
+      />
       <Opornye6
         blok={b.id}
+        slug={b.slug}
         zapomni={
           <>
             <b>{OPORNYE6.zapomni}</b> <Tex text={b.zapomni} />

@@ -1,5 +1,6 @@
 'use client';
 
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { clsx } from 'clsx';
 import { useState, useSyncExternalStore } from 'react';
 import { Tex } from '@/components/ui/Tex';
@@ -79,11 +80,14 @@ export function ReshenoVBloke({ ids }: { ids: string[] }) {
  * формула встречается.
  */
 export function Opornye10({
+  slug,
   zapomni,
   zadachi,
   kartinki,
   syuzhety,
 }: {
+  /** Адрес блока: пункт ДЗ (lib/dz/sostav.ts). */
+  slug: string;
   zapomni: string;
   zadachi: MikroDlyaBrauzera[];
   kartinki: Record<string, IllInfo>;
@@ -131,6 +135,13 @@ export function Opornye10({
         ))}
       </ol>
       <article className="z10-zadacha">
+        {/* Репетитору: эту задачу — в черновик ДЗ. */}
+        <VDzKnopka
+          malaya
+          punkt={{ ist: 'opornye', no: 10, blok: slug, zadachi: [z.id], kazhdomu: false }}
+          chto={`опорная задача ${z.id}`}
+          label="В ДЗ"
+        />
         <div className={clsx('z10-op__uslovie', ill ? 'is-s-kartinkoy' : '')}>
           <p className="z10-uslovie__text">
             <Tex text={z.uslovie} />

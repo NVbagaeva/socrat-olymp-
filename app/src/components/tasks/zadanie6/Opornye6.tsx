@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import {
   OpornyeBanka,
   OpornyeSpisokBanka,
@@ -25,10 +26,13 @@ function proverit6(vvod: string, seal: string) {
 /** Экран блока опорных задач №6: общий экран блока с проверкой ответа №6. */
 export function Opornye6({
   blok,
+  slug,
   zapomni,
   zadachi,
 }: {
   blok: string;
+  /** Адрес блока: пункт ДЗ (lib/dz/sostav.ts). */
+  slug: string;
   zapomni: ReactNode;
   zadachi: MikroZadachaBrauzera[];
 }) {
@@ -42,6 +46,14 @@ export function Opornye6({
       raskryt={openText}
       piPodskazka={TRENAZHER6.ekran.piPodskazka}
       labels={OPORNYE6.zadacha}
+      dop={(z) => (
+        <VDzKnopka
+          malaya
+          punkt={{ ist: 'opornye', no: 6, blok: slug, zadachi: [z.id], kazhdomu: false }}
+          chto={`опорная задача ${z.id}`}
+          label="В ДЗ"
+        />
+      )}
     />
   );
 }

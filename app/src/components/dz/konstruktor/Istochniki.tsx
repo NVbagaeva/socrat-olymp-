@@ -204,10 +204,8 @@ function Primer({ kat, tip }: { kat: KatalogRazdela; tip: string }) {
       let u: HwUnitInput | 'oshibka' = 'oshibka';
       try {
         const zerno = `primer-${Date.now().toString(36)}-${nomer}`;
-        const units =
-          kat.no === 7
-            ? await (await import('@/lib/dz/sborka/r7')).trenazher7(kat, [tip], 1, zerno, [null])
-            : (await import('@/lib/dz/sborka/r8')).trenazher8(kat, [tip], 1, [null]);
+        const getter = (await import('@/lib/dz/sborka/razdely')).SBORSHCHIKI[kat.no];
+        const units = getter === undefined ? [] : await (await getter()).trenazher(kat, [tip], 1, zerno, [null]);
         u = units[0] ?? 'oshibka';
       } catch {
         u = 'oshibka';
