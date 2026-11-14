@@ -142,6 +142,8 @@ export function useStickyTabs(
     let current = false;
     let line = -1;
     let observer: IntersectionObserver | undefined;
+    /* Сверка следующим кадром после уведомления наблюдателя. */
+    let kadr = 0;
 
     /* Место и высота панели. Нижний край панели — линия, под которую
        уходят плитки: за ней следит IntersectionObserver с отступом
@@ -161,21 +163,31 @@ export function useStickyTabs(
       }
       line = bottom;
       observer?.disconnect();
-      observer = new IntersectionObserver(() => svesti(), {
-        rootMargin: `-${bottom}px 0px 0px 0px`,
-      });
+      observer = new IntersectionObserver(
+        (entries) => {
+          /* Плитки снова пересекают зону под панелью — панель уходит;
+             иначе решаем по их месту. */
+          primenit(entries[entries.length - 1]!.isIntersecting ? false : poMestu());
+          /* Прямоугольник в уведомлении бывает отстающим на кадр
+             (WebKit у самой линии): сверяемся ещё и следующим кадром. */
+          cancelAnimationFrame(kadr);
+          kadr = requestAnimationFrame(() => primenit(poMestu()));
+        },
+        { rootMargin: `-${bottom}px 0px 0px 0px` },
+      );
       observer.observe(tiles!);
       /* Пока наблюдателя не было (его только что пересоздали), плитки
          могли уже уйти под линию: сверяем сразу, не дожидаясь
-         следующего уведомления. */
-      svesti();
+         первого уведомления. */
+      primenit(poMestu());
     }
 
-    /* Показывать ли панель прямо сейчас — по месту плиток, а не по
-       прямоугольнику из уведомления: в WebKit тот бывает отстающим на
-       кадр, и у самой линии панель оставалась не в том состоянии. */
-    function svesti(): void {
-      const next = tiles!.getBoundingClientRect().bottom <= line + 0.5;
+    /* Ушли ли плитки под панель прямо сейчас — по их месту. */
+    function poMestu(): boolean {
+      return tiles!.getBoundingClientRect().bottom <= line + 0.5;
+    }
+
+    function primenit(next: boolean): void {
       if (next === current) {
         return;
       }
@@ -192,6 +204,7 @@ export function useStickyTabs(
     sizes.observe(panel);
     window.addEventListener('resize', relayout);
     return () => {
+      cancelAnimationFrame(kadr);
       observer?.disconnect();
       sizes.disconnect();
       window.removeEventListener('resize', relayout);
