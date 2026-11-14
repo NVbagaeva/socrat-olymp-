@@ -1,122 +1,154 @@
-import Link from 'next/link';
-import { Tex } from '@/components/ui/Tex';
-import { O_ZADANII_9, PROIZVODNAYA } from '@/content/proizvodnaya';
+import { O_ZADANII_9 } from '@/content/proizvodnaya';
+import { GRUPPY9_VID, SHAPKA9, TIPY9_OPASNO, TIPY_BLOKA9, ZNAT9 } from '@/content/proizvodnaya9';
+import { assetUrl } from '@/lib/assetUrl';
+import { OPORNYE9_HREF, blokHref9, tipTrenazherHref9, tipYakor9 } from '@/lib/proizvodnaya/links';
+import { PROTOTYPES } from '@/lib/proizvodnaya/prototypes';
 import { prototypesOfGroup } from '@/lib/proizvodnaya/skills';
 import { typeset } from '@/lib/tex';
-import { ZADANIYA } from '@/lib/paths';
-import { ProtoKarta9 } from './ProtoKarta9';
+import { FormulyRamka, KartaGruppa, KartaShapka, KartaTip } from '../karta';
+import { YakorTipa } from '../karta/YakorTipa';
+import { GruppaProgress9 } from './GruppaProgress9';
+import { primer9 } from './primer9';
+import { PrimerKarta9, PrimerKarta9Lazy } from './PrimerKarta9';
 
 /**
- * Вкладка «О задании» задания №9: что в ответе, два вопроса перед
- * решением, пять групп с карточками типов (клик раскрывает
- * разобранный пример) и типичные ошибки. На карточке формул нет —
- * они внутри раскрытого примера. Страница серверная: примеры
- * собираются на сборке.
+ * Вкладка «О задании» №9: карта задания по типам («Стеклянная сцена»,
+ * общие компоненты components/tasks/karta — как у №8, №3, №7, №6, №2).
+ *
+ * Шапка (что проверяет, балл, минуты, чем опасно) с обложкой раздела,
+ * пять групп с прогрессом ученика, 31 тип с разобранным примером
+ * (условие, чертёж — закреплён рядом с шагами, решение по шагам) и
+ * блок «Что нужно знать». Условия, чертежи и решения — из генератора,
+ * без правок.
  */
+
+function tex(formula: string): string {
+  return typeset(`$${formula}$`);
+}
+
+/** Блок опорных задач, где отрабатывается навык прототипа. */
+function opornyeHref(id: string): string {
+  const blok = Object.entries(TIPY_BLOKA9).find(([, tipy]) => tipy.includes(id))?.[0];
+  return blok === undefined ? OPORNYE9_HREF : blokHref9(blok);
+}
+
+/**
+ * Первый раскрытый пример — собран на сборке. Ответ отдаётся текстом
+ * страницы, а не полем данных клиентского компонента: проверка утечек
+ * (check-bundle-secrets) ищет ответы банка в данных страницы.
+ */
+function PrimerServera9({
+  prototip,
+  ...props
+}: {
+  prototip: string;
+  opasnoHtml: string;
+  trenirovatHref: string;
+  opornyeHref: string;
+}) {
+  const { otvet, ...primer } = primer9(prototip);
+  return <PrimerKarta9 primer={primer} otvet={<span>{otvet}</span>} {...props} />;
+}
+
 export function OZadanii9() {
-  const base = `${ZADANIYA}/${PROIZVODNAYA.slug}`;
   return (
-    <div className="z9-about">
-      <section className="z9-about__lead">
-        <h2 className="t-h2">{O_ZADANII_9.title}</h2>
-        <p className="z9-about__text">{O_ZADANII_9.lead}</p>
-      </section>
+    <div className="kz z9-karta">
+      <YakorTipa />
+      <KartaShapka
+        nadzagolovok={SHAPKA9.nadzagolovok}
+        zagolovok={SHAPKA9.zagolovok}
+        lead={SHAPKA9.lead}
+        fakty={SHAPKA9.fakty(PROTOTYPES.length)}
+        opasnoTitle={SHAPKA9.opasnoTitle}
+        opasno={SHAPKA9.opasno.map((line) => typeset(line))}
+        oblozhka={
+          /* Обложка раздела — готовая картинка, как есть: без обрезки и
+             пережатия, прозрачный фон на стекле шапки. */
+          <img
+            src={assetUrl('/images/task-09.webp')}
+            alt={SHAPKA9.oblozhkaAlt}
+            width={512}
+            height={512}
+            decoding="async"
+          />
+        }
+      />
 
-      <section className="z9-format" aria-labelledby="z9-format-title">
-        <h3 className="t-h4 z9-about__sub" id="z9-format-title">
-          {O_ZADANII_9.format.title}
-        </h3>
-        <p className="z9-format__text">
-          <Tex text={O_ZADANII_9.format.text} />
-        </p>
-      </section>
-
-      <section aria-labelledby="z9-dva-title">
-        <h3 className="t-h4 z9-about__sub" id="z9-dva-title">
-          {O_ZADANII_9.dvaVoprosa.title}
-        </h3>
-        <ul className="z9-dva">
-          {O_ZADANII_9.dvaVoprosa.items.map((item, i) => (
-            <li className="z9-dva__item" key={item.id}>
-              <span className="z9-dva__no" aria-hidden="true">
-                {i + 1}
-              </span>
-              <span>
-                <span className="z9-dva__title">{item.title}</span>
-                <span className="z9-dva__text">
-                  <Tex text={item.text} />
-                </span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="z9-about__groups" aria-labelledby="z9-gruppy-title">
-        <h3 className="t-h4 z9-about__sub" id="z9-gruppy-title">
-          {O_ZADANII_9.gruppyTitle}
-        </h3>
-        <p className="z9-about__hint">{O_ZADANII_9.gruppyLead}</p>
-        {O_ZADANII_9.gruppy.map((gruppa) => {
-          const protos = prototypesOfGroup(gruppa.id);
-          return (
-            <div className="z9-group" key={gruppa.id}>
-              <h4 className="z9-group__title">
-                <span className="z9-group__code" aria-hidden="true">
-                  {gruppa.id}
-                </span>
-                {gruppa.title}
-              </h4>
-              <p className="z9-group__lead">{gruppa.lead}</p>
-              {protos.length === 0 ? null : (
-                <ul className="z9-protos">
-                  {protos.map((p) => (
-                    <ProtoKarta9
+      <section className="kz-razdel" aria-labelledby="z9-gruppy-title">
+        <div className="kz-razdel__head">
+          <h3 className="stk-h3" id="z9-gruppy-title">
+            {SHAPKA9.gruppyTitle}
+          </h3>
+          <p className="stk-lead">{SHAPKA9.gruppyLead}</p>
+        </div>
+        <div className="kz-gruppy">
+          {O_ZADANII_9.gruppy.map((g, gi) => {
+            const vid = GRUPPY9_VID[g.id];
+            const tipy = prototypesOfGroup(g.id);
+            return (
+              <KartaGruppa
+                key={g.id}
+                id={g.id}
+                nazvanie={g.title}
+                znakHtml={tex(vid.znak)}
+                ton={vid.ton}
+                tipov={tipy.length}
+                progress={<GruppaProgress9 prototypes={tipy.map((p) => p.id)} />}
+                labels={SHAPKA9}
+                open={gi === 0}
+              >
+                {tipy.map((p, i) => {
+                  const open = gi === 0 && i === 0;
+                  const opasnoHtml = typeset(TIPY9_OPASNO[p.id] ?? '');
+                  const props = {
+                    opasnoHtml,
+                    trenirovatHref: tipTrenazherHref9(p.id),
+                    opornyeHref: opornyeHref(p.id),
+                  };
+                  return (
+                    <KartaTip
                       key={p.id}
-                      code={p.id}
-                      titleHtml={typeset(p.nazvanie)}
-                      primerTitle={`Разобранный пример ${p.id}`}
-                    />
-                  ))}
-                </ul>
-              )}
-            </div>
-          );
-        })}
+                      id={tipYakor9(p.id)}
+                      nazvanieHtml={typeset(p.nazvanie)}
+                      lead={typeset(p.kratko)}
+                      open={open}
+                    >
+                      {/* Раскрытый с самого начала пример собирается на сборке;
+                          остальные — в браузере по раскрытию. */}
+                      {open ? (
+                        <PrimerServera9 prototip={p.id} {...props} />
+                      ) : (
+                        <PrimerKarta9Lazy prototip={p.id} {...props} />
+                      )}
+                    </KartaTip>
+                  );
+                })}
+              </KartaGruppa>
+            );
+          })}
+        </div>
       </section>
 
-      <section aria-labelledby="z9-oshibki-title">
-        <h3 className="t-h4 z9-about__sub" id="z9-oshibki-title">
-          {O_ZADANII_9.oshibkiTitle}
-        </h3>
-        <ul className="z9-oshibki">
-          {O_ZADANII_9.oshibki.map((o) => (
-            <li className="z9-oshibka" key={o.id}>
-              <h4 className="z9-oshibka__title">
-                <Tex text={o.title} />
-              </h4>
-              <p className="z9-oshibka__text">
-                <Tex text={o.text} />
-              </p>
-            </li>
+      <section className="kz-razdel kz-znat" aria-labelledby="z9-znat-title">
+        <div className="kz-razdel__head">
+          <h3 className="stk-h3" id="z9-znat-title">
+            {SHAPKA9.znatTitle}
+          </h3>
+          <p className="stk-lead">{SHAPKA9.znatLead}</p>
+        </div>
+        <div className="kz-znat__setka">
+          {ZNAT9.map((blok) => (
+            <FormulyRamka
+              key={blok.id}
+              nazvanie={blok.nazvanie}
+              ton={blok.ton}
+              formuly={blok.formuly.map((f) => ({
+                html: tex(f.tex),
+                primerHtml: typeset(f.primer),
+              }))}
+            />
           ))}
-        </ul>
-      </section>
-
-      <section aria-labelledby="z9-dalshe-title">
-        <h3 className="t-h4 z9-about__sub" id="z9-dalshe-title">
-          {O_ZADANII_9.dalshe.title}
-        </h3>
-        <ul className="z9-dalshe">
-          {O_ZADANII_9.dalshe.items.map((item) => (
-            <li key={item.id}>
-              <Link className="z9-dalshe__link" href={`${base}/${item.tail}`}>
-                <span className="z9-dalshe__label">{item.label} →</span>
-                <span className="z9-dalshe__text">{item.text}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        </div>
       </section>
     </div>
   );

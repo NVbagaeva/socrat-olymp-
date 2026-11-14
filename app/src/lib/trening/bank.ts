@@ -32,6 +32,8 @@ export type KatalogBanka = Record<
      * аналоги (№13: источник задан у прототипа целиком).
      */
     strogo?: boolean;
+    /** Уровень прототипа (№13): 1 — базовый, 2 — повышенный. */
+    u?: 1 | 2;
   }
 >;
 
@@ -63,8 +65,8 @@ export interface PayloadBanka {
   rezhim?: string;
 }
 
-/** Прототип: «P04» (№7, №6), «A6» (№2), «A-01» (№13) или «p05» (№1). */
-const PROTOTIP = /^(P\d\d|[ABC]\d|[A-D]-\d\d|p\d\d)$/;
+/** Прототип: «P04» (№7, №6), «A6» (№2), «A-01» (№13), «p05» (№1) или «9.2.1» (№9). */
+const PROTOTIP = /^(P\d\d|[ABC]\d|[A-D]-\d\d|p\d\d|9\.[1-5]\.\d{1,2})$/;
 
 type Random = () => number;
 

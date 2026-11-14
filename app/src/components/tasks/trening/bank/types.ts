@@ -124,7 +124,19 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
    * Особый режим — четвёртая карточка на старте (№13: «Определи тип»):
    * все типы вперемешку, задачи решаются по-своему (payload.rezhim).
    */
-  dopRezhim?: { id: string; ikonka: IkonkaName; zag: string; lead: (n: number) => string };
+  dopRezhimy?: { id: string; ikonka: IkonkaName; zag: string; lead: (n: number) => string }[];
+  /**
+   * Выбор в «Выбрать темы», как отвечать (№13: «Только число / С
+   * оформлением»): '' — обычный ответ, иначе id особого режима.
+   */
+  otvetVybora?: { title: string; sposoby: { id: string; label: string }[] };
+  /**
+   * Уровень в «Выбрать темы» (№13: ★ базовый, ★★ повышенный). Уровень
+   * прототипа — поле `u` каталога.
+   */
+  urovni?: { title: string; labels: { vse: string; '1': string; '2': string }; pusto: string };
+  /** Можно ли проверять ответ: своё поле с несколькими частями (№13, «С оформлением»). */
+  gotov?: (z: Z, rezhim: string | undefined, value: string) => boolean;
   /** Запись прежнего тренажёра раздела, которую не понимает общий разбор (№13, №1: тренажёр с фильтрами). */
   prezhnyayaZapis?: (packed: unknown) => PayloadBanka | null;
   /** Ссылка на одну задачу: закладка. */
@@ -140,7 +152,12 @@ export interface RazdelBanka<Z extends ZadachaBanka, S> {
   podskazka?: (s: S, ui: { otkryto: number; dalshe: () => void }) => ReactNode;
 }
 
-/** Что открыто на экране задачи: для рисунка под условием. */
+/**
+ * Что открыто на экране задачи: для рисунка под условием (№1: на вопросе
+ * подсказки чертёж показывает слой этого шага, при открытом решении — все
+ * построения; №9: чертёж достраивается по подсказке, у закрытой задачи —
+ * все построения).
+ */
 export interface SostoyaniePod<S> {
   /** Открыта подсказка (в режиме без подсказок — никогда). */
   podskazka: boolean;
@@ -150,4 +167,8 @@ export interface SostoyaniePod<S> {
   reshenie: boolean;
   /** Разбор задачи: есть, когда открыты подсказка или решение. */
   razbor: S | null;
+  /** Задача закрыта: решена или открыто решение. */
+  zakryta: boolean;
+  /** Режим «без подсказок и решений». */
+  bezPodskazok: boolean;
 }

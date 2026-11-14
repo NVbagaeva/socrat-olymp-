@@ -153,7 +153,7 @@ export function PrimerIzZadachi({
       title={title}
       uslovie={task.uslovie}
       svg={svg}
-      alt={`Рисунок к задаче ${task.prototype}`}
+      alt="Рисунок к задаче"
       shagi={shagi}
       answer={answer}
       {...(className === undefined ? {} : { className })}
