@@ -30,6 +30,7 @@ import {
 } from '../generator/obshchiy/bank';
 import { ZADACH_NA_LIST_MAX } from '@/lib/generator/obshchiy/klyuchi';
 import type { IndeksZadachi } from './dannye';
+import { nomerRazdela } from '@/content/struktura';
 
 /* ── Общее ──────────────────────────────────────────────────────── */
 
@@ -212,7 +213,7 @@ export function sobratList(z: ZaprosLista, indeks: readonly IndeksZadachi[]): Mo
   bloki.push({ id: 'zadachi', title: 'Задачи', spiski });
   return {
     vid: 'generator',
-    zagolovok: 'Задание №7. Простейшие уравнения',
+    zagolovok: `Задание №${nomerRazdela('uravneniya')}. Простейшие уравнения`,
     kod: z.seed,
     bloki,
   };
@@ -234,7 +235,7 @@ export function sobratListKlyuchi(z: ZaprosBanka, indeks: readonly IndeksZadachi
   const l = sobratPoKlyucham(z, indeks, 'z7-ps2');
   return {
     vid: 'generator',
-    zagolovok: 'Задание №7. Простейшие уравнения',
+    zagolovok: `Задание №${nomerRazdela('uravneniya')}. Простейшие уравнения`,
     kod: z.seed,
     bloki: blokiBanka(z, l),
     shapka: shapkaBanka(z),
@@ -526,7 +527,7 @@ export function modelUroka(
   }
   return {
     vid: 'urok',
-    zagolovok: `Задание №7 · Урок ${no}. ${urok.title}`,
+    zagolovok: `Задание №${nomerRazdela('uravneniya')} · Урок ${no}. ${urok.title}`,
     kod: kodSerii(kod, n.regen),
     bloki,
   };

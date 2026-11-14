@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { metkaAdministratora } from './lib/metka-skrytyh.mjs';
 
 bezBanneraCookieVsyudu(chromium);
 
@@ -253,6 +254,8 @@ if (ZHURNAL) {
 const browser = await chromium.launch();
 try {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  /* Скрытый раздел (№6 в ЕГЭ-2027) — как у администратора. */
+  await metkaAdministratora(context);
   await context.addInitScript(
     ([localValues, sessionValues]) => {
       /* Только при первом заходе: дальше хранилище — как у ученика. */
@@ -460,6 +463,7 @@ try {
     const KLYUCH = 'budetege:proizvodnaya-9:session:v1';
     const prezhnyaya = obrazec.sessionStorage[KLYUCH];
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await metkaAdministratora(ctx);
     await ctx.addInitScript(
       ([key, value]) => {
         if (window.sessionStorage.getItem('proverka:zalito') === null) {

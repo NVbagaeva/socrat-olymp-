@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { KARTA_TEKST } from '@/content/karta/teksty';
 import { oZadaniiHref, trenazherHref } from '@/lib/karta/katalog';
 import type { SostoyanieOblasti } from '@/lib/karta/model';
+import { nomerRazdela } from '@/content/struktura';
 
 /**
  * Окошко над областью: название раздела и «тропинка» тем-городов.
@@ -23,6 +24,8 @@ export function KartaOkoshko({
   onZakryt: () => void;
 }) {
   const { no } = oblast;
+  /* no — номер хранения раздела (ключ области); на экран — номер ЕГЭ. */
+  const nomer = nomerRazdela(no);
   const net = oblast.sostoyanie === 'skoro';
   return (
     <div
@@ -30,18 +33,18 @@ export function KartaOkoshko({
       style={{ '--mx': mesto.x, '--my': mesto.y } as React.CSSProperties}
       data-karta-ne-holst=""
       role="dialog"
-      aria-label={`№${no} ${nazvanie}`}
+      aria-label={`№${nomer} ${nazvanie}`}
     >
       <div className="karta-okoshko__telo stk-glass">
         <div className="karta-okoshko__shapka">
           {net ? (
             <span className="karta-okoshko__nazvanie">
-              №{no} {nazvanie}
+              №{nomer} {nazvanie}
             </span>
           ) : (
             <Link className="karta-okoshko__nazvanie" href={oZadaniiHref(no)} data-okoshko-fokus="">
               <span>
-                №{no} {nazvanie}
+                №{nomer} {nazvanie}
               </span>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M9 5l7 7-7 7" />

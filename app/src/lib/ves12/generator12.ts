@@ -22,6 +22,7 @@ import { functionTypes } from '@/data/functionTypes';
 import { manifest } from '@/lib/generator/manifest';
 import type { GenConfig, GenTopic, Level } from '@/lib/generator/obshchiy/types';
 import { typeset } from '@/lib/tex';
+import { nomerRazdela } from '@/content/struktura';
 
 const VIDY = GEN_UI.vidyRaboty as Record<string, string>;
 const ZVEZDY: Record<string, Level> = { lucky: 1, unlucky: 2 };
@@ -65,7 +66,10 @@ export function config12(slot: string, podtema?: { tip: string; title: string })
     id: '12',
     scope: '12',
     slot,
-    section: podtema === undefined ? GENERATOR12_TEXTS.sectionVse : `№12 · ${podtema.title}`,
+    section:
+      podtema === undefined
+        ? GENERATOR12_TEXTS.sectionVse
+        : `№${nomerRazdela('grafiki-funkciy')} · ${podtema.title}`,
     sheet: {
       ...GENERATOR12_TEXTS.sheet,
       title: podtema === undefined ? generatorAllText.sheetTitle : podtema.title,

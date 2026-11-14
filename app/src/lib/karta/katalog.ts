@@ -1,12 +1,15 @@
 /**
- * Каталог областей «Карты ЕГЭ» — для браузера: 20 заданий, их группы
- * тем и типы журнала (из content/karta/katalog.json, который собирает
+ * Каталог областей «Карты ЕГЭ» — для браузера: задания действующей
+ * структуры экзамена, их группы тем и типы журнала (из
+ * content/karta/katalog.json, который собирает
  * scripts/build-karta-katalog.mjs), ключи журналов и адреса.
  */
 
 import KATALOG from '@/content/karta/katalog.json';
+import { chastRazdela } from '@/content/struktura';
 import { OPORNYE } from '@/content/opornye';
 import { href, ZADANIYA } from '@/lib/paths';
+import { ostrovRazdela } from './mesta';
 import type { KartaRazdel, StatusRazdela } from './model';
 
 export interface KartaRazdelInfo extends KartaRazdel {
@@ -19,18 +22,31 @@ export interface KartaRazdelInfo extends KartaRazdel {
   }[];
 }
 
-export const KARTA_RAZDELY: readonly KartaRazdelInfo[] = KATALOG.razdely.map((r) => ({
-  no: r.no,
-  chast: r.chast as 1 | 2,
-  status: r.status as StatusRazdela,
-  nazvanie: r.nazvanie,
-  gruppy: r.gruppy,
-}));
+/**
+ * Области карты — разделы, у которых в действующей структуре есть свой
+ * остров (скрытый раздел и раздел внутри другого его не получают), по
+ * порядку островов: часть 1, потом часть 2, по номерам ЕГЭ.
+ */
+export const KARTA_RAZDELY: readonly KartaRazdelInfo[] = KATALOG.razdely
+  .flatMap((r) => {
+    const mesto = ostrovRazdela(r.no);
+    if (mesto === null) return [];
+    const info: KartaRazdelInfo = {
+      no: r.no,
+      chast: chastRazdela(r.no) as 1 | 2,
+      poryadok: mesto,
+      status: r.status as StatusRazdela,
+      nazvanie: r.nazvanie,
+      gruppy: r.gruppy,
+    };
+    return [info];
+  })
+  .sort((a, b) => (a.poryadok ?? a.no) - (b.poryadok ?? b.no));
 
 /**
  * Ключи журналов попыток разделов (lib/progressLog). У разделов,
  * переведённых со счётчиков, ключ собран по одному правилу
- * (lib/progressStore.ts + LEGACY_LOGS); у №3, №8, №10, №12, №19 — свои.
+ * (lib/progressStore.ts + LEGACY_LOGS); у №3, №8, №10, №12, №19, №21 — свои.
  * Строки, а не импорты: модули разделов — 'use client', а каталог нужен
  * и проверкам. Что ключи не разошлись, проверяет pnpm test:karta.
  */
@@ -51,6 +67,7 @@ export const KARTA_ZHURNALY: Readonly<Record<number, string>> = {
   14: 'budetege:zadanie-14:log:v1',
   18: 'budetege:zadanie-18:log:v1',
   19: 'budetege:zadanie-19:log:v1',
+  21: 'budetege:zadanie-21:log:v1',
 };
 
 export function razdelInfo(no: number): KartaRazdelInfo {

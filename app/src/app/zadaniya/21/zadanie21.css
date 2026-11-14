@@ -1,0 +1,80 @@
+/* Раздел «Наибольшее и наименьшее значение функции»: теория и опорные.
+   Карта задания, тренажёр и опорные — на общих стилях «Стеклянной
+   сцены»; здесь только своё. Цвета — токены сайта. */
+
+.z21-teoriya__lead {
+  max-width: 72ch;
+  font-size: var(--fs-lg);
+  color: var(--color-text-secondary);
+}
+
+.z21-spisok {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-6);
+  line-height: 1.7;
+}
+
+.z21-spisok li + li {
+  margin-top: var(--space-1);
+}
+
+.z21-dekor {
+  display: block;
+  padding: var(--space-4);
+  font-size: 18px;
+  text-align: center;
+}
+
+.z21-opornye {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.z21-opornye__nazad {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--blue-700);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.z21-op__gde {
+  max-width: 720px;
+  margin-top: var(--space-6);
+}
+
+.z21-op__gde-spisok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.z21-gde__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-4);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+/* Схема знаков производной в решении (lib/zadanie21/shema.ts). */
+.z21-shema-ramka {
+  margin-top: var(--space-2);
+  max-width: 640px;
+}
+.z21-shema-ramka svg,
+.z21-shema-list svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}

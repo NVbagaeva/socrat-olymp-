@@ -20,6 +20,7 @@
 
 import type { Kartochka, Koloda, ProverkaFormuly } from '@/lib/kartochki/tipy';
 import { YAKOR_13 } from '@/lib/zadanie13/teoriya-yakorya';
+import { nomerRazdela } from '@/content/struktura';
 
 const B = 'база' as const;
 const E = 'важно для ЕГЭ' as const;
@@ -202,7 +203,7 @@ const kartochki: Kartochka[] = [
     task: 13,
     topic: 'procenty',
     type: 'svoystvo',
-    front: 'Что в разборах №13 обозначают $x$ и $X$?',
+    front: `Что в разборах №${nomerRazdela('ekonomika')} обозначают $x$ и $X$?`,
     back: '$x$ — **платёж** (у вклада — снятие). $X$ — **на сколько уменьшается долг**, если эта сумма неизвестна. Это разные числа.',
     pochemu:
       'Остальные буквы тоже одни на все разборы: $S$ — кредит, $n$ — срок, $r\\,\\%$ — ставка.',

@@ -12,6 +12,7 @@
  */
 
 import type { TeoriyaRazdel } from '../veroyatnost-teoriya';
+import { nomerRazdela } from '@/content/struktura';
 
 /** mozhno — теорема школьного курса, можно ссылаться; dokazhi — лучше коротко доказать в решении. */
 export type Ssylka18 = 'mozhno' | 'dokazhi';
@@ -51,7 +52,7 @@ export const GLAVY_18: readonly Glava18[] = [
   {
     id: 'oformlenie',
     title: 'Как записать решение',
-    lead: 'Задачу №18 проверяет эксперт по критериям. Верная идея без аккуратной записи может не принести баллов — поэтому начнём с того, как решение должно выглядеть.',
+    lead: `Задачу №${nomerRazdela('planimetriya-dokazatelstvo')} проверяет эксперт по критериям. Верная идея без аккуратной записи может не принести баллов — поэтому начнём с того, как решение должно выглядеть.`,
     fakty: [
       {
         id: 'struktura',
@@ -84,7 +85,7 @@ export const GLAVY_18: readonly Glava18[] = [
   {
     id: 'podobie',
     title: 'Равенство и подобие',
-    lead: 'Подобные треугольники — главный инструмент №18: почти каждая ключевая схема заканчивается парой подобных треугольников.',
+    lead: `Подобные треугольники — главный инструмент №${nomerRazdela('planimetriya-dokazatelstvo')}: почти каждая ключевая схема заканчивается парой подобных треугольников.`,
     fakty: [
       {
         id: 'priznaki-podobiya',

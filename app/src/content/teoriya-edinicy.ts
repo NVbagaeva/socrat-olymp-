@@ -24,6 +24,8 @@
  */
 
 /** Вид рамки: цвет как в справочнике по планиметрии. */
+import { nomerRazdela } from '@/content/struktura';
+
 export type TipRamki =
   /** «Определение» — синий. */
   | 'def'
@@ -561,16 +563,14 @@ const STEPENI: ChastEdinic = {
             'Перевод приставок: $3{,}5\\text{ МГц}=3{,}5\\cdot10^6\\text{ Гц}$, $20\\text{ мкФ}=20\\cdot10^{-6}\\text{ Ф}$.',
         },
         {
-          tekst:
-            'Задача про конденсатор в №10: сопротивление в мегаомах, ёмкость в микрофарадах, и $10^6\\cdot10^{-6}=1$ — степени сокращаются.',
+          tekst: `Задача про конденсатор в №${nomerRazdela('prikladnye-zadachi')}: сопротивление в мегаомах, ёмкость в микрофарадах, и $10^6\\cdot10^{-6}=1$ — степени сокращаются.`,
           href: '/zadaniya/10/teoriya/#teoriya-pokazatelnye',
-          ssylka: 'Теория №10: показательные зависимости',
+          ssylka: `Теория №${nomerRazdela('prikladnye-zadachi')}: показательные зависимости`,
         },
         {
-          tekst:
-            'Показательные уравнения №7: $\\left(\\dfrac1a\\right)^x=a^{-x}$ — так обе части приводят к одному основанию.',
+          tekst: `Показательные уравнения №${nomerRazdela('uravneniya')}: $\\left(\\dfrac1a\\right)^x=a^{-x}$ — так обе части приводят к одному основанию.`,
           href: '/zadaniya/7/teoriya/#teoriya-pokazatelnye',
-          ssylka: 'Теория №7: показательные уравнения',
+          ssylka: `Теория №${nomerRazdela('uravneniya')}: показательные уравнения`,
         },
       ],
     },

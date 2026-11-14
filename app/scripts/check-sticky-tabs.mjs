@@ -43,6 +43,7 @@ import { chromium, devices, webkit } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { metkaAdministratora } from './lib/metka-skrytyh.mjs';
 
 /* Баннер cookie в этой проверке не нужен: он перекрывает кнопки снизу. */
 bezBanneraCookieVsyudu(chromium, webkit);
@@ -380,6 +381,8 @@ async function newContext(browser, size, engine, extra = {}) {
   const context = await browser.newContext(options);
   await welcomeSeen(context);
   await layoutShifts(context);
+  /* Скрытый раздел (№6 в ЕГЭ-2027) — как у администратора. */
+  await metkaAdministratora(context);
   return context;
 }
 

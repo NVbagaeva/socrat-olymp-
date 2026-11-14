@@ -16,6 +16,8 @@ const KRUG = 2 * Math.PI * 13;
  */
 export function KartaOstrov({
   ostrov,
+  razdel,
+  nomer,
   oblast,
   nazvanie,
   vybran,
@@ -23,7 +25,12 @@ export function KartaOstrov({
   novaya,
   onVybor,
 }: {
+  /** Место на рисунке: контур, центр подписи. */
   ostrov: Ostrov;
+  /** Номер хранения раздела: по нему выбирают область и рисуют значок. */
+  razdel: number;
+  /** Номер ЕГЭ на подписи острова. */
+  nomer: number;
   oblast: SostoyanieOblasti;
   nazvanie: string;
   vybran: boolean;
@@ -32,7 +39,8 @@ export function KartaOstrov({
   novaya: boolean;
   onVybor: (no: number, sKlaviatury: boolean) => void;
 }) {
-  const { no } = ostrov;
+  const no = razdel;
+  const mesto = ostrov.no;
   const s = oblast.sostoyanie;
   const stroki = vDveStroki(nazvanie);
   const onKey = (e: KeyboardEvent) => {
@@ -52,14 +60,14 @@ export function KartaOstrov({
       )}
     >
       {/* Заливка состояния: туман, голубое стекло или тёплый свет. */}
-      <path className="karta-ostrov__zalivka" d={ostrov.d} clipPath={`url(#karta-kontur-${no})`} />
+      <path className="karta-ostrov__zalivka" d={ostrov.d} clipPath={`url(#karta-kontur-${mesto})`} />
       {novaya ? (
         <circle
           className="karta-ostrov__svet"
           cx={ostrov.cx}
           cy={ostrov.cy}
           r={Math.max(ostrov.ramka.w, ostrov.ramka.h)}
-          clipPath={`url(#karta-kontur-${no})`}
+          clipPath={`url(#karta-kontur-${mesto})`}
         />
       ) : null}
       {/* Контур: по нему нажимают и на нём стоит фокус клавиатуры. */}
@@ -87,7 +95,7 @@ export function KartaOstrov({
       >
         <g className="karta-podpis">
           <text className="karta-podpis__nomer" x={-6} y={-2} textAnchor="end">
-            {no}
+            {nomer}
           </text>
           {s === 'v-processe' ? (
             <g className="karta-podpis__kolco" transform="translate(17 -13)">
@@ -154,6 +162,27 @@ export function KartaOstrov({
           </g>
         </g>
       ) : null}
+    </g>
+  );
+}
+
+/**
+ * Свободный остров: заданий в структуре экзамена меньше, чем островов на
+ * рисунке. Только туман и надпись «Будет на ЕГЭ» — нажимать не на что.
+ */
+export function KartaSvobodnyyOstrov({ ostrov }: { ostrov: Ostrov }) {
+  return (
+    <g className="karta-svobodnyy" aria-hidden="true">
+      <path className="karta-ostrov__zalivka" d={ostrov.d} clipPath={`url(#karta-kontur-${ostrov.no})`} />
+      <g className="karta-ostrov__podpis" transform={`translate(${ostrov.cx} ${ostrov.cy})`}>
+        <g className="karta-podpis">
+          <text className="karta-podpis__nazvanie" textAnchor="middle">
+            <tspan x={0} y={4}>
+              {KARTA_TEKST.budetNaEge}
+            </tspan>
+          </text>
+        </g>
+      </g>
     </g>
   );
 }

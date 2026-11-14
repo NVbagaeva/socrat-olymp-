@@ -2,7 +2,6 @@
  "razdely": [
   {
    "no": 1,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Планиметрия",
    "gruppy": [
@@ -122,7 +121,6 @@
   },
   {
    "no": 2,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Векторы",
    "gruppy": [
@@ -170,7 +168,6 @@
   },
   {
    "no": 3,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Стереометрия",
    "gruppy": [
@@ -319,7 +316,6 @@
   },
   {
    "no": 4,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Вероятность: простая",
    "gruppy": [
@@ -383,7 +379,6 @@
   },
   {
    "no": 5,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Вероятность: сложная",
    "gruppy": [
@@ -471,7 +466,6 @@
   },
   {
    "no": 6,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Случайные величины",
    "gruppy": [
@@ -529,7 +523,6 @@
   },
   {
    "no": 7,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Уравнения",
    "gruppy": [
@@ -607,7 +600,6 @@
   },
   {
    "no": 8,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Вычисления",
    "gruppy": [
@@ -676,7 +668,6 @@
   },
   {
    "no": 9,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Производная",
    "gruppy": [
@@ -750,7 +741,6 @@
   },
   {
    "no": 10,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Физический смысл",
    "gruppy": [
@@ -827,7 +817,6 @@
   },
   {
    "no": 11,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Текстовые задачи",
    "gruppy": [
@@ -941,7 +930,6 @@
   },
   {
    "no": 12,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Графики функций",
    "gruppy": [
@@ -1040,7 +1028,6 @@
   },
   {
    "no": 13,
-   "chast": 1,
    "status": "gotov",
    "nazvanie": "Финансовая грамотность",
    "gruppy": [
@@ -1142,7 +1129,6 @@
   },
   {
    "no": 14,
-   "chast": 2,
    "status": "gotov",
    "nazvanie": "Уравнение",
    "gruppy": [
@@ -1270,28 +1256,24 @@
   },
   {
    "no": 15,
-   "chast": 2,
    "status": "pozzhe",
    "nazvanie": "Стереометрия",
    "gruppy": []
   },
   {
    "no": 16,
-   "chast": 2,
    "status": "pozzhe",
    "nazvanie": "Неравенство",
    "gruppy": []
   },
   {
    "no": 17,
-   "chast": 2,
    "status": "skoro",
    "nazvanie": "Оптимизация",
    "gruppy": []
   },
   {
    "no": 18,
-   "chast": 2,
    "status": "gotov",
    "nazvanie": "Планиметрия",
    "gruppy": [
@@ -1385,7 +1367,6 @@
   },
   {
    "no": 19,
-   "chast": 2,
    "status": "gotov",
    "nazvanie": "Параметр",
    "gruppy": [
@@ -1505,10 +1486,86 @@
   },
   {
    "no": 20,
-   "chast": 2,
    "status": "skoro",
    "nazvanie": "Олимпиадная",
    "gruppy": []
+  },
+  {
+   "no": 21,
+   "status": "gotov",
+   "nazvanie": "Наибольшее и наименьшее",
+   "gruppy": [
+    {
+     "id": "1",
+     "nazvanie": "Многочлены",
+     "tipy": [
+      "P01",
+      "P02"
+     ],
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P01,P02"
+    },
+    {
+     "id": "2",
+     "nazvanie": "Функции с корнем",
+     "tipy": [
+      "P03"
+     ],
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P03"
+    },
+    {
+     "id": "3",
+     "nazvanie": "Дробные функции",
+     "tipy": [
+      "P04",
+      "P05"
+     ],
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P04,P05"
+    },
+    {
+     "id": "4",
+     "nazvanie": "Произведение с экспонентой",
+     "tipy": [
+      "P06",
+      "P07"
+     ],
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P06,P07"
+    },
+    {
+     "id": "5",
+     "nazvanie": "Функции с логарифмом",
+     "tipy": [
+      "P08",
+      "P09",
+      "P10",
+      "P11",
+      "P12"
+     ],
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P08,P09,P10,P11,P12"
+    },
+    {
+     "id": "6",
+     "nazvanie": "Тригонометрические функции",
+     "tipy": [
+      "P13",
+      "P14",
+      "P15"
+     ],
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P13,P14,P15"
+    },
+    {
+     "id": "7",
+     "nazvanie": "Сложные функции",
+     "tipy": [
+      "P16",
+      "P17",
+      "P18",
+      "P19",
+      "P20",
+      "P21"
+     ],
+     "trenazher": "/zadaniya/21/trenazher/?tipy=P16,P17,P18,P19,P20,P21"
+    }
+   ]
   }
  ]
 }

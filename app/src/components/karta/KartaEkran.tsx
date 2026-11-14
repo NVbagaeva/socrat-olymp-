@@ -41,10 +41,11 @@ import {
   type Ramka,
 } from '@/lib/karta/geometriya';
 import { KARTA_RAZDELY, razdelInfo } from '@/lib/karta/katalog';
+import { nomerNaOstrove, ostrovRazdela, SVOBODNYE_OSTROVA } from '@/lib/karta/mesta';
 import { postroitKartu, prolivSvodka, type Karta, type Zhurnaly } from '@/lib/karta/model';
 import { prochitatVidel, zapomnitVidel } from '@/lib/karta/zhurnaly';
 import { KartaOkoshko } from './KartaOkoshko';
-import { KartaOstrov } from './KartaOstrov';
+import { KartaOstrov, KartaSvobodnyyOstrov } from './KartaOstrov';
 import { PanelMaterika, PanelOblasti, PanelProliva, type ZakladkiKarty } from './KartaPanel';
 import { useHolst } from './useHolst';
 import './karta.css';
@@ -77,9 +78,19 @@ const SIZES = `(max-width: 767px) 100vw, (max-width: 1279px) 90vw, 1200px`;
 const fonUrl = (w: number) => assetUrl(`/images/karta/fon-${w}.webp`);
 const SRCSET = FON.shiriny.map((w) => `${fonUrl(w)} ${w}w`).join(', ');
 
+/** Остров области: раздел записан номером хранения, остров — местом на рисунке. */
+function ostrovOblasti(no: number) {
+  const mesto = ostrovRazdela(no);
+  return mesto === null ? undefined : ostrov(mesto);
+}
+
+/** Места на рисунке по номерам хранения: для рамки и пути. */
+const mestaOblastey = (nomera: readonly number[]) =>
+  nomera.flatMap((no) => ostrovRazdela(no) ?? []);
+
 function ramkaVybora(v: Vybor): Ramka {
   if (v === null) return { x: 0, y: 0, w: KARTA_W, h: KARTA_H };
-  if (v.vid === 'oblast') return ramkaOstrovov([v.no], 36);
+  if (v.vid === 'oblast') return ramkaOstrovov(mestaOblastey([v.no]), 36);
   if (v.vid === 'chast') return ramkaMaterika(v.chast);
   return ramkaOstrovov([7, 9, 14, 15, 16], 10);
 }
@@ -234,7 +245,7 @@ export function KartaEkran({
   }, [osvoennyeKlyuch]);
 
   const vybrannayaOblast = vybor?.vid === 'oblast' ? oblastPo(vybor.no) : undefined;
-  const vybrannyyOstrov = vybor?.vid === 'oblast' ? ostrov(vybor.no) : undefined;
+  const vybrannyyOstrov = vybor?.vid === 'oblast' ? ostrovOblasti(vybor.no) : undefined;
 
   /* Подпись острова на экране: не мельче, чем на виде «Весь мир», и
      растёт мягче, чем карта. */
@@ -374,16 +385,23 @@ export function KartaEkran({
 
               {/* Рекомендуемый путь. */}
               {karta.put.length > 1 ? (
-                <path className="karta-put" d={putD(karta.put)} aria-hidden="true" />
+                <path className="karta-put" d={putD(mestaOblastey(karta.put))} aria-hidden="true" />
               ) : null}
 
+              {SVOBODNYE_OSTROVA.map((mesto) => {
+                const os = ostrov(mesto);
+                return os === undefined ? null : <KartaSvobodnyyOstrov key={`m${mesto}`} ostrov={os} />;
+              })}
+
               {karta.oblasti.map((o) => {
-                const os = ostrov(o.no);
+                const os = ostrovOblasti(o.no);
                 if (os === undefined) return null;
                 return (
                   <KartaOstrov
                     key={o.no}
                     ostrov={os}
+                    razdel={o.no}
+                    nomer={nomerNaOstrove(o.no)}
                     oblast={o}
                     nazvanie={razdelInfo(o.no).nazvanie}
                     vybran={vybor?.vid === 'oblast' && vybor.no === o.no}

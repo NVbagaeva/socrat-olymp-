@@ -49,6 +49,7 @@ import {
   sostavIzKlyuchey13,
   type GenParams13,
 } from './params';
+import { nomerRazdela } from '@/content/struktura';
 
 const VIDY = GEN_UI.vidyRaboty as Record<string, string>;
 
@@ -88,7 +89,7 @@ export function config13(): GenConfig {
     id: '13',
     scope: '13',
     slot: `${BASE_13}/generator/`,
-    section: `№13 · ${SHEET_13.text}`,
+    section: `№${nomerRazdela('ekonomika')} · ${SHEET_13.text}`,
     sheet: {
       chip: SHEET_13.chip,
       title: SHEET_13.text,

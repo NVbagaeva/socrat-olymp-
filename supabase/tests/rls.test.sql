@@ -201,7 +201,7 @@ begin
   loop
     perform pg_temp.fails(format('select 1 from public.%I limit 1', t), 'permission denied');
   end loop;
-  perform pg_temp.ok((select count(*) from public.ege_tasks) = 20, 'каталог заданий анониму не виден');
+  perform pg_temp.ok((select count(*) from public.ege_tasks) = 21, 'каталог разделов (21) анониму виден');
   perform pg_temp.fails($q$insert into public.kits (user_id, code, scope, student_href, teacher_href)
     values ('b1000000-0000-0000-0000-000000000000', 'ZZ99-ZZ', '8', '/a/', '/b/')$q$, 'permission denied');
   perform pg_temp.fails($q$insert into public.user_storage (user_id, key, value)

@@ -13,7 +13,9 @@
        не решалось больше 21 дня;
      • рекомендация и путь; прогноз и порог его показа;
      • карточка пролива по связкам из content/karta/proliv.ts;
-     • каталог разделов: 20 областей, 13 + 7, контур у каждой. */
+     • каталог разделов по действующей структуре экзамена (content/struktura.js):
+       область у каждого задания ЕГЭ, остров у каждой области, свободные
+       острова — «Будет на ЕГЭ». Запускается и со STRUKTURA_EGE=2027-20. */
 
 import { requireSrc } from './lib/load-ts.mjs';
 
@@ -23,6 +25,11 @@ const D = requireSrc('lib/karta/demo.ts');
 const C = requireSrc('lib/karta/katalog.ts');
 const P = requireSrc('content/karta/proliv.ts');
 const KONTURY = requireSrc('content/karta/kontury.json');
+const M = requireSrc('lib/karta/mesta.ts');
+const S = requireSrc('content/struktura.js');
+const ZADANIYA = S.zadaniyaEge();
+const CHAST1 = S.STRUKTURA.chast1;
+const S19 = S.STRUKTURA.id === '2027-19';
 
 let checks = 0;
 const failures = [];
@@ -143,15 +150,31 @@ const karta1 = (log, now = NOW) => K.postroitKartu([RAZDEL], { 8: log }, now).ob
 /* ── Каталог и контуры ──────────────────────────────────────────── */
 {
   const razdely = C.KARTA_RAZDELY;
-  check(razdely.length === 20, `в каталоге 20 областей: ${razdely.length}`);
-  check(
-    razdely.filter((r) => r.chast === 1).length === 13 && razdely.filter((r) => r.chast === 2).length === 7,
-    'часть 1 — 13 областей, часть 2 — 7',
-  );
   check(KONTURY.ostrova.length === 20, 'контуров островов — 20');
+  check(
+    razdely.length === ZADANIYA.length,
+    `в каталоге ${ZADANIYA.length} областей — по заданиям ЕГЭ: ${razdely.length}`,
+  );
+  check(
+    razdely.map((r) => r.no).join() === ZADANIYA.map((z) => z.hranenie).join(),
+    'области по порядку номеров ЕГЭ',
+  );
+  check(
+    razdely.filter((r) => r.chast === 1).length === CHAST1 &&
+      razdely.filter((r) => r.chast === 2).length === ZADANIYA.length - CHAST1,
+    `часть 1 — ${CHAST1} областей, часть 2 — ${ZADANIYA.length - CHAST1}`,
+  );
+  const mesta = razdely.map((r) => M.ostrovRazdela(r.no));
+  check(new Set(mesta).size === mesta.length, 'у каждой области свой остров');
   for (const r of razdely) {
-    const o = KONTURY.ostrova.find((x) => x.no === r.no);
+    const mesto = M.ostrovRazdela(r.no);
+    const o = KONTURY.ostrova.find((x) => x.no === mesto);
     check(o !== undefined && /^M[\d. L-]+Z$/.test(o.d), `№${r.no}: есть контур`);
+    check(
+      (mesto <= 13) === (r.chast === 1),
+      `№${r.no}: остров на материке своей части (место ${mesto})`,
+    );
+    check(M.nomerNaOstrove(r.no) === S.nomerEge(r.no), `№${r.no}: на острове — номер ЕГЭ`);
     check(typeof r.nazvanie === 'string' && r.nazvanie.length > 0, `№${r.no}: есть название`);
     if (r.status === 'gotov') {
       const tipy = r.gruppy.flatMap((g) => g.tipy);
@@ -161,11 +184,21 @@ const karta1 = (log, now = NOW) => K.postroitKartu([RAZDEL], { 8: log }, now).ob
       check(r.gruppy.every((g) => typeof C.trenazherHref(r.no, g.id) === 'string'), `№${r.no}: у групп есть ссылка в тренажёр`);
     }
   }
+  check(
+    M.SVOBODNYE_OSTROVA.join() === (S19 ? '13' : ''),
+    `свободные острова («Будет на ЕГЭ»): ${S19 ? '№13' : 'нет'} (вышло ${M.SVOBODNYE_OSTROVA.join() || 'нет'})`,
+  );
   check(razdely.find((r) => r.no === 18)?.nazvanie === 'Планиметрия', '№18 «Планиметрия» на месте');
   check(
-    razdely.filter((r) => r.status === 'skoro').map((r) => r.no).join() === '17,20',
-    'неоткрытые земли — №17 и №20',
+    razdely.filter((r) => r.status === 'skoro').map((r) => r.no).join() === (S19 ? '20' : '17,20'),
+    'неоткрытые земли — по структуре',
   );
+  if (S19) {
+    check(!razdely.some((r) => r.no === 6), 'скрытый раздел «Случайные величины» — без острова');
+    check(!razdely.some((r) => r.no === 17), 'оптимизация (внутри №16) — без своего острова');
+    check(M.ostrovRazdela(21) === 12 && M.nomerNaOstrove(21) === 12, 'новый №12 — на двенадцатом острове');
+    check(M.ostrovRazdela(14) === 14 && M.nomerNaOstrove(14) === 13, 'часть 2 начинается с острова 14, на нём №13');
+  }
 }
 
 /* ── Три тестовых ученика ───────────────────────────────────────── */
@@ -173,7 +206,7 @@ const karta1 = (log, now = NOW) => K.postroitKartu([RAZDEL], { 8: log }, now).ob
   const karta = (uchenik) => K.postroitKartu(C.KARTA_RAZDELY, D.demoZhurnaly(uchenik), NOW);
 
   const pusto = karta('pusto');
-  check(pusto.osvoeno === 0 && pusto.sleduyushchaya === 1, 'пусто: 0 из 20, начать с №1');
+  check(pusto.osvoeno === 0 && pusto.sleduyushchaya === 1, 'пусто: 0 освоено, начать с №1');
   check(pusto.prognoz.gotov === false, 'пусто: прогноза нет — «Решите ещё немного»');
   check(
     pusto.oblasti.every((o) => ['ne-nachato', 'pozzhe', 'skoro'].includes(o.sostoyanie)),
@@ -186,7 +219,7 @@ const karta1 = (log, now = NOW) => K.postroitKartu([RAZDEL], { 8: log }, now).ob
     [1, 2, 3, 4].every((no) => seredina.oblasti.find((o) => o.no === no).sostoyanie === 'osvoeno'),
     'середина: №1–4 освоены',
   );
-  check(seredina.osvoeno === 4, `середина: освоено 4 из 20 (вышло ${seredina.osvoeno})`);
+  check(seredina.osvoeno === 4, `середина: освоено 4 (вышло ${seredina.osvoeno})`);
   check(
     o8.sostoyanie === 'v-processe' && o8.osvoeno === 10 && o8.vsego === 26 && o8.procent === 38,
     `середина: №8 в процессе, 10 из 26 = 38 % (вышло ${o8.osvoeno} из ${o8.vsego}, ${o8.procent} %)`,
@@ -210,12 +243,12 @@ const karta1 = (log, now = NOW) => K.postroitKartu([RAZDEL], { 8: log }, now).ob
   );
 
   const pochti = karta('pochti-vsyo');
-  check(pochti.osvoenoChast[1] === 13, `почти всё: часть 1 освоена целиком (вышло ${pochti.osvoenoChast[1]})`);
-  check(pochti.osvoeno >= 15 && pochti.osvoeno < 18, `почти всё: освоено ${pochti.osvoeno} из 20`);
+  check(pochti.osvoenoChast[1] === CHAST1, `почти всё: часть 1 освоена целиком (вышло ${pochti.osvoenoChast[1]})`);
+  check(pochti.osvoeno >= 15 && pochti.osvoeno < 18, `почти всё: освоено ${pochti.osvoeno} из ${ZADANIYA.length}`);
   check(pochti.prognoz.gotov && pochti.prognoz.ball >= 70, `почти всё: прогноз ${pochti.prognoz.ball}`);
   check(
-    pochti.oblasti.filter((o) => o.sostoyanie === 'skoro').length === 2,
-    'почти всё: №17 и №20 остаются «Скоро»',
+    pochti.oblasti.filter((o) => o.sostoyanie === 'skoro').length === (S19 ? 1 : 2),
+    'почти всё: неоткрытые остаются «Скоро»',
   );
 
   /* Флажок и кольцо не показываются вместе: состояние у области одно. */
@@ -229,7 +262,7 @@ const karta1 = (log, now = NOW) => K.postroitKartu([RAZDEL], { 8: log }, now).ob
 
   /* Пролив. */
   let p = K.prolivSvodka(seredina);
-  check(p.mozhno === false && p.osvoeno === 4 && p.vsego === 13 && p.porog === P.PROLIV_POROG, 'пролив (середина): 4 из 13, рано');
+  check(p.mozhno === false && p.osvoeno === 4 && p.vsego === CHAST1 && p.porog === P.PROLIV_POROG, `пролив (середина): 4 из ${CHAST1}, рано`);
   const z = (no) => p.zadaniya.find((x) => x.no === no);
   check(z(15).gotovo === true && z(18).gotovo === true, 'пролив: №15 (нужен №3) и №18 (нужен №1) — готово');
   check(
@@ -243,7 +276,8 @@ const karta1 = (log, now = NOW) => K.postroitKartu([RAZDEL], { 8: log }, now).ob
 
 /* ── Прогноз ────────────────────────────────────────────────────── */
 {
-  check(K.testovyyBall(0) === 0 && K.testovyyBall(33) === 100, 'шкала: 0 → 0, 33 → 100');
+  const max = S.maxPervichnyy();
+  check(K.testovyyBall(0) === 0 && K.testovyyBall(max) === 100, `шкала: 0 → 0, ${max} → 100`);
   check(K.testovyyBall(4.4) === K.testovyyBall(4), 'первичный балл округляется');
   const r = (no) => ({ no, chast: 1, status: 'gotov', gruppy: [{ id: 'g', nazvanie: 'Г', tipy: ['t'] }] });
   const malo = K.postroitKartu([r(1), r(2), r(3)], { 1: zhurnal({ t: 'rrrrr' }) }, NOW);

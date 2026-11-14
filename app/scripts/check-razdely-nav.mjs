@@ -28,7 +28,10 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { APP } from './lib/load-ts.mjs';
+import { APP, requireSrc } from './lib/load-ts.mjs';
+
+/* Номер ЕГЭ графиков (номер хранения 12) — по структуре экзамена. */
+const NOMER_GRAFIKOV = requireSrc('content/struktura.js').nomerRazdela(12);
 import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
@@ -416,8 +419,8 @@ for (const size of SIZES) {
         };
   });
   check(
-    drugie !== null && drugie.title === 'Другие разделы №12',
-    where('нет блока «Другие разделы №12»'),
+    drugie !== null && drugie.title === `Другие разделы №${NOMER_GRAFIKOV}`,
+    where(`нет блока «Другие разделы №${NOMER_GRAFIKOV}»`),
   );
   if (drugie !== null) {
     check(

@@ -9,9 +9,10 @@ import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
+import { nomerDvumya, nomerRazdela } from './struktura';
 
 export const ZADANIE1 = {
-  no: '01',
+  no: nomerDvumya('planimetriya'),
   slug: '1',
   title: taskName('1'),
   lead: 'Углы, площади, тригонометрия острого угла и окружности — задачи по готовому чертежу. Справочник с чертежами, все 214 задач открытого банка и по двадцать аналогов на каждый тип.',
@@ -69,7 +70,7 @@ export interface Tip1 {
 }
 
 export const O_ZADANII_1 = {
-  title: 'Задание 1. Планиметрия',
+  title: `Задание ${nomerRazdela('planimetriya')}. Планиметрия`,
   lead: 'В задании дан чертёж и одна-две величины: угол, сторона, площадь, дуга. Нужно найти ещё одну — обычно в одно-два действия по известному факту.',
   format: {
     title: 'Что в ответе',

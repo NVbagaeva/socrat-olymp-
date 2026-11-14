@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import { useSyncExternalStore } from 'react';
 import type { RazdelNaProverku } from '@/lib/zadanie11/proverka';
+import { nomerRazdela } from '@/content/struktura';
 
 type Otmetka = { status: 'ok' | 'fix'; comment: string };
 type Otmetki = Record<string, Otmetka>;
@@ -68,7 +69,7 @@ export function ProverkaAnalogov({ razdely }: { razdely: RazdelNaProverku[] }) {
 
   function skachat() {
     const lines: string[] = [
-      '# Задание 11 — проверка аналогов',
+      `# Задание ${nomerRazdela('tekstovye-zadachi')} — проверка аналогов`,
       '',
       `Всего ${vse.length}, ок — ${ok}, на исправление — ${fix}, не просмотрено — ${vse.length - ok - fix}.`,
       '',
@@ -101,7 +102,7 @@ export function ProverkaAnalogov({ razdely }: { razdely: RazdelNaProverku[] }) {
   return (
     <main className="z11-pr">
       <header className="z11-pr__head">
-        <h1 className="t-h2">Задание 11 · проверка аналогов</h1>
+        <h1 className="t-h2">Задание {nomerRazdela('tekstovye-zadachi')} · проверка аналогов</h1>
         <p className="z11-pr__lead">
           Служебная страница для преподавателя. Отметки сохраняются в этом браузере.
         </p>

@@ -19,6 +19,7 @@
 
 import { BANK_FIPI } from '../lib/planimetriya/bank/fipi';
 import type { TeoriyaRazdel } from './veroyatnost-teoriya';
+import { nomerRazdela } from '@/content/struktura';
 
 export interface Kartochka1 {
   id: string;
@@ -71,9 +72,8 @@ export const TEORIYA_1_TEKSTY = {
   primer: 'Пример',
   zapomni: 'Запомни',
   fakt: 'Факт',
-  dlya17: 'Для задачи №17',
-  dlya17Lead:
-    'Эти факты в задании 1 почти не встречаются, зато сильно экономят время во второй части. Доказательства — в курсе планиметрии.',
+  dlya17: `Для задачи №${nomerRazdela('planimetriya-dokazatelstvo')}`,
+  dlya17Lead: `Эти факты в задании ${nomerRazdela('planimetriya')} почти не встречаются, зато сильно экономят время во второй части. Доказательства — в курсе планиметрии.`,
   zhivoyPodpis: 'Потяните за вершины — числа под чертежом пересчитаются.',
   skachat: 'Скачать справочник по планиметрии',
 } as const;
@@ -506,7 +506,7 @@ const elementy: Razdel1 = {
   id: 'elementy',
   title: 'Медиана, биссектриса, высота',
   stranicy: '45–46',
-  lead: 'Три главных отрезка треугольника и точки их пересечения. В задании 1 чаще всего спрашивают углы между ними.',
+  lead: `Три главных отрезка треугольника и точки их пересечения. В задании ${nomerRazdela('planimetriya')} чаще всего спрашивают углы между ними.`,
   kartochki: [
     {
       id: 'mediany',
@@ -1086,12 +1086,12 @@ const vpisannye: Razdel1 = {
 
 const layfhaki: Razdel1 = {
   id: 'layfhaki',
-  title: 'Лайфхаки для №1',
+  title: `Лайфхаки для №${nomerRazdela('planimetriya')}`,
   stranicy: '57–58',
   lead: 'Полезные факты, которые сокращают решение до одного шага. Каждый привязан к типу задачи, где он срабатывает.',
   kartochki: [],
   zapomni: [
-    'Если задача кажется длинной — проверьте, не подходит ли один из этих фактов: обычно задание 1 решается в одно-два действия.',
+    `Если задача кажется длинной — проверьте, не подходит ли один из этих фактов: обычно задание ${nomerRazdela('planimetriya')} решается в одно-два действия.`,
   ],
   fakty: [
     {

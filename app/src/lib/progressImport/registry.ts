@@ -18,6 +18,8 @@
  * подключён только журнал.
  */
 
+import { nomerRazdela } from '@/content/struktura';
+
 export interface ImportGroup {
   /** Короткое имя для данных и проверок. */
   id: string;
@@ -193,6 +195,19 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
       /* Журнал попыток тренажёра (lib/zadanie18/trenazher/progress.ts). Прежний ключ
          budetege:zadanie-18:trenazher:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:zadanie-18:log:v1',
+    ],
+  },
+  {
+    id: 'z21',
+    /* Номер задания — из структуры экзамена: в ЕГЭ-2027 это задание 12. */
+    title: `№${nomerRazdela('naibolshee-naimenshee')} «Наибольшее и наименьшее»`,
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie21/trening/progress.ts). */
+      'budetege:zadanie-21:log:v1',
+      /* Решённые опорные задачи (lib/zadanie21/progress.ts). */
+      'budetege:zadanie-21:opornye:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «21»). */
+      'budetege:trainer:21:session',
     ],
   },
   {

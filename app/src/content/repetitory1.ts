@@ -10,6 +10,7 @@
 import { GEN_UI } from '@/content/generatorUi';
 import { plural } from '@/lib/plural';
 import type { Blok } from '@/lib/planimetriya/stseny/dsl';
+import { nomerRazdela } from './struktura';
 
 /* ── Печатный лист ──────────────────────────────────────────────── */
 
@@ -20,10 +21,10 @@ export const SHEET_1 = {
     motto: 'Больше, чем подготовка',
   },
   title: {
-    chip: 'Задание 1',
+    chip: `Задание ${nomerRazdela('planimetriya')}`,
     text: 'Планиметрия',
   },
-  runner: 'Задание 1 · Планиметрия',
+  runner: `Задание ${nomerRazdela('planimetriya')} · Планиметрия`,
   podpis: 'Учитель: Багаева Н.В.',
   subtitle: {
     otrabotka: 'Задания для отработки',
@@ -348,7 +349,7 @@ export const ZAMETKI_1: Record<Blok, Zametki1> = {
 
 export const REPETITORY_1 = {
   title: 'Для репетиторов',
-  lead: 'Шестнадцать уроков по заданию 1: готовые листы ученика и учителя, методика по блокам',
+  lead: `Шестнадцать уроков по заданию ${nomerRazdela('planimetriya')}: готовые листы ученика и учителя, методика по блокам`,
   kod: 'Код комплекта',
   kodLead:
     'Код восстанавливает всю серию из 16 уроков на любом устройстве: введите его — и листы будут те же, задача в задачу.',
