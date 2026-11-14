@@ -9,7 +9,15 @@
  * б) Менелай в SAB: AT/TB = (n1·m2)/(m1·n2); в ABC: AN/NC = AT/TB·BM/MC.
  */
 
-import { chertezhSvg, postroit, sVidom, vybratVid, type Scenariy } from '@/lib/chertezh3';
+import { vPredelah } from '@/lib/skhemy/vidimye';
+import {
+  chertezhSvg,
+  postroit,
+  sVidom,
+  metrikiVida,
+  vybratObshchiyVid,
+  type Scenariy,
+} from '@/lib/chertezh3';
 import { mul, rat, ratTex, toNumber } from '@/lib/zadanie15/core/rational';
 import type { Chast2Zadacha, Shablon2 } from './types';
 
@@ -29,7 +37,71 @@ export function chislaL15(p: PL15) {
   return { ro, sg };
 }
 
-function scenariy(p: PL15, punkt: 'a' | 'b'): Scenariy {
+/**
+ * Видимые отношения (lib/skhemy/vidimye.ts): точка, делящая ребро как
+ * 1 : 3, жмётся к вершине. Кандидаты: K, L, M — не ближе 0,3 (0,25,
+ * 0,35, 0,2) ребра к его концам (отношения — целые до 20), они же со
+ * сдвигом K на 1–2 двадцатых ребра, затем настоящие. Годен кандидат, у которого KL не параллельна AB и T по ту
+ * же сторону, что в задаче; из годных — с наименьшим числом нарушений
+ * правил вида (lib/chertezh3/vid.ts). Чисел на чертеже нет.
+ */
+function kandidaty(p: PL15): PL15[] {
+  const r = (x: PL15) => (x.n1 * x.m2) / (x.m1 * x.n2);
+  const out: PL15[] = [];
+  for (const g of [0.3, 0.25, 0.35, 0.2]) {
+    const k = (m: number, n: number): [number, number] => {
+      const t = Math.round(vPredelah(m / (m + n), g, 1 - g) * 20);
+      return [t, 20 - t];
+    };
+    const [m1, n1] = k(p.m1, p.n1);
+    const [m2, n2] = k(p.m2, p.n2);
+    const [m3, n3] = k(p.m3, p.n3);
+    const q = { ...p, m1, n1, m2, n2, m3, n3 };
+    if (r(q) !== 1 && r(q) > 1 === r(p) > 1) out.push(q);
+  }
+  /* Прямая KT может лечь на чужую вершину при любом ракурсе: K сдвигается
+     на 1/20 ребра в обе стороны (точка остаётся внутри ребра). */
+  const sdvig = [...out]
+    .flatMap((q) => [-1, 1, -2, 2].map((d) => ({ ...q, m1: q.m1 + d, n1: q.n1 - d })))
+    .filter((q) => q.m1 > 0 && q.n1 > 0 && r(q) !== 1 && r(q) > 1 === r(p) > 1);
+  return [...out, ...sdvig, p];
+}
+
+const VIDIMYE = new Map<string, PL15>();
+
+function vidimye(p: PL15): PL15 {
+  const kl = JSON.stringify(p);
+  const est = VIDIMYE.get(kl);
+  if (est !== undefined) return est;
+  let luchshiy = p;
+  let min = Infinity;
+  for (const q of kandidaty(p)) {
+    const sceny = (['a', 'b'] as const).map((k) => postroit(scenariyPo(q, k)));
+    const v = vybratObshchiyVid(sceny);
+    const n = sceny.reduce(
+      (s, sc) => s + metrikiVida(sc, v.rakurs, v.szhatie).narusheniya.length,
+      0,
+    );
+    if (n < min) {
+      min = n;
+      luchshiy = q;
+    }
+    if (n === 0) break;
+  }
+  VIDIMYE.set(kl, luchshiy);
+  return luchshiy;
+}
+
+function scenariy(p0: PL15, punkt: 'a' | 'b', bezVida = false): Scenariy {
+  const p = bezVida ? p0 : vidimye(p0);
+  return scenariyPo(p, punkt, bezVida);
+}
+
+/**
+ * Сценарий по отношениям p (уже видимым). bezVida — без ракурса; иначе
+ * ракурс общий для этапов а) и б).
+ */
+function scenariyPo(p: PL15, punkt: 'a' | 'b', bezVida = true): Scenariy {
   const c = chislaL15(p);
   const r = toNumber(c.ro);
   const s = toNumber(c.sg);
@@ -59,11 +131,10 @@ function scenariy(p: PL15, punkt: 'a' | 'b'): Scenariy {
           ]
         : [{ id: 'sech', vid: 'mnogougolnik', tochki: ['K', 'L', 'M', 'N'], rol: 'uslovie' }],
   };
-  if (punkt === 'b') {
-    const s0 = scenariy(p, 'a');
-    return { ...sc, rakurs: s0.rakurs, szhatie: s0.szhatie };
-  }
-  return sVidom(sc, vybratVid(postroit(sc)));
+  if (bezVida) return sc;
+  /* Этапы а) и б) — с одного ракурса, годного для обоих чертежей. */
+  const vid = vybratObshchiyVid([postroit(scenariyPo(p, 'a')), postroit(scenariyPo(p, 'b'))]);
+  return sVidom(sc, vid);
 }
 
 export function scenariyL15(p: PL15, punkt: 'a' | 'b'): Scenariy {
