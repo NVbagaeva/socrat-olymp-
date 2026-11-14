@@ -2016,7 +2016,9 @@ async function runEnabled() {
     check(await noHorizontalScroll(page), 'кабинет 390: горизонтальной прокрутки нет');
     await shot(page, 'kabinet-repetitor-390');
 
-    await page.goto(`${SITE}/zadaniya/8/generator/`, { waitUntil: 'networkidle' });
+    /* Генератор, открытый без тарифа (lib/tarify/dostup.ts): репетитор
+       тратит на лист свою пробную генерацию. */
+    await page.goto(`${SITE}/zadaniya/10/generator/`, { waitUntil: 'networkidle' });
     await page.waitForSelector('.topbar ' + AVATAR);
     check(await noHorizontalScroll(page), 'генератор 390: горизонтальной прокрутки нет');
     await shot(page, 'shapka-posle-vhoda-390');
@@ -2073,7 +2075,7 @@ async function runEnabled() {
       );
       await shot(page, 'kabinet-komplekty-390');
     } else {
-      check(false, 'генератор №8: кнопка скачивания листа не найдена');
+      check(false, 'генератор №10: кнопка скачивания листа не найдена');
     }
     await context.close();
   }

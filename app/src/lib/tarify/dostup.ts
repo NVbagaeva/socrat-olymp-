@@ -14,6 +14,10 @@
  * Счётчик живёт в браузере (localStorage), сайт статический: это мягкое
  * ограничение витрины, а не защита. Настоящие лимиты появятся вместе
  * с тарифами в аккаунте — проверять их будет сервер.
+ *
+ * Проверки сайта (scripts/check-*.mjs) гоняют закрытые генераторы на
+ * своём сервере 127.0.0.1: им всё открывает ключ PROVERKA_KEY в
+ * хранилище. На budetege.ru ключ не действует.
  */
 
 import { useEffect, useState, useSyncExternalStore } from 'react';
@@ -44,6 +48,20 @@ export function generatorOtkryt(scope: string): boolean {
 
 /* ── Полный доступ ─────────────────────────────────────────────── */
 
+/** Ключ проверок: localStorage['budetege:dostup:proverka'] = 'true'. */
+export const PROVERKA_KEY = 'dostup:proverka';
+
+function proverka(): boolean {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname;
+  return (
+    (host === '127.0.0.1' || host === 'localhost') &&
+    storage.get<boolean>(PROVERKA_KEY, false) === true
+  );
+}
+
+const bezPodpiski = () => () => {};
+
 const proveneno = new Map<string, boolean>();
 
 async function sha256(text: string): Promise<string> {
@@ -57,6 +75,7 @@ async function sha256(text: string): Promise<string> {
  * считается отпечаток почты — false.
  */
 export function usePolnyyDostup(): boolean {
+  const naProverke = useSyncExternalStore(bezPodpiski, proverka, () => false);
   const user = useSessionUser();
   const email = user?.email.trim().toLowerCase() ?? '';
   const [otvet, setOtvet] = useState<{ email: string; ok: boolean } | null>(null);
@@ -77,6 +96,7 @@ export function usePolnyyDostup(): boolean {
       alive = false;
     };
   }, [email]);
+  if (naProverke) return true;
   if (email === '') return false;
   return proveneno.get(email) ?? (otvet?.email === email && otvet.ok);
 }

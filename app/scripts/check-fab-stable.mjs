@@ -116,11 +116,20 @@ function check(ok, what) {
 
 async function newContext(browser, engine, size) {
   /* isMobile в WebKit Playwright недоступен; сенсорный экран — hasTouch. */
-  return browser.newContext({
+  const context = await browser.newContext({
     viewport: { width: size.w, height: size.h },
     hasTouch: size.touch,
     ...(engine === 'Chromium' ? { isMobile: size.touch } : {}),
   });
+  /* Генератор №13 без тарифа закрыт: ключ проверок (lib/tarify/dostup.ts). */
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem('budetege:dostup:proverka', 'true');
+    } catch {
+      /* без хранилища */
+    }
+  });
+  return context;
 }
 
 /** Положение кнопки относительно экрана; null — кнопки нет. */

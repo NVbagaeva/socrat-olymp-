@@ -380,6 +380,14 @@ async function newContext(browser, size, engine, extra = {}) {
   const context = await browser.newContext(options);
   await welcomeSeen(context);
   await layoutShifts(context);
+  /* Генераторы №6, 7 без тарифа закрыты: ключ проверок (lib/tarify/dostup.ts). */
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem('budetege:dostup:proverka', 'true');
+    } catch {
+      /* без хранилища */
+    }
+  });
   return context;
 }
 
