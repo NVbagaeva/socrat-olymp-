@@ -60,6 +60,17 @@ export interface Band {
   /** Что в скобках после условия: «(0,96)». */
   note?: string;
   /**
+   * Подпись уровня целиком вместо «x > c (note)»: «P = 0,96».
+   * Так подписан чертёж теории, где условие видно по самому лучу.
+   */
+  podpis?: string;
+  /**
+   * От какого числа на оси идёт подпись уровня, если не от его
+   * границы: так подпись нижнего уровня уходит от чужого отвеса,
+   * который иначе пересекал бы её.
+   */
+  podpisOt?: number;
+  /**
    * Граница условия: строгая даёт знак «>» или «<», нестрогая — «≥»
    * или «≤». По умолчанию строгая. У уровней, взятых из границ
    * промежутка, — та же граница, что закрашивает кружок.
@@ -78,6 +89,8 @@ export interface Brace {
   from: number;
   to: number;
   label: string;
+  /** Вторая строка под подписью скобы — итог: «P = 0,96 − 0,85 = 0,11». */
+  itog?: string;
 }
 
 /**
@@ -151,17 +164,90 @@ export interface CoordinateLineProps {
   state?: RisunokState;
   alt?: string;
   className?: string;
+  /**
+   * Компактный рисунок для узкой колонки теории: поле рисунка
+   * вдвое уже (360 вместо 760), поэтому на телефоне он идёт почти
+   * один к одному и подписи остаются читаемыми без подгонки кегля
+   * в CSS. Места между уровнями, делениями и скобой хватает под
+   * самый крупный кегль, который ставит теория (22 единицы), — при
+   * любом кегле не крупнее этого подписи не налегают друг на друга.
+   * Только для рисунка с границами c и d, не для рисунка событий.
+   */
+  kompaktnyy?: boolean;
 }
 
 /* Геометрия в единицах viewBox. */
-const X0 = 62;
-const X1 = 662;
-const OVERHANG = 22;
-const UPPER_Y = 18;
-const LOWER_Y = 62;
-const AXIS_Y = 120;
-const VB_W = 760;
-const VB_H = 186;
+interface Geometriya {
+  x0: number;
+  x1: number;
+  overhang: number;
+  upperY: number;
+  lowerY: number;
+  axisY: number;
+  vbW: number;
+  vbH: number;
+  /** Стрелка оси и её имя — от правого конца отрезка x1. */
+  strelka: number;
+  imya: number;
+  /** Базовая линия подписи деления — под осью. */
+  delenieY: number;
+  /** Скоба: верх концов, глубина, базовые линии строк подписи. */
+  skobaY: number;
+  skobaH: number;
+  skobaTextY: number;
+  skobaItogY: number;
+  /** Подпись уровня: над его верхним краем и от отвеса. */
+  podpisDy: number;
+  podpisDx: number;
+}
+
+/* Тренажёр, лист и прежние рисунки теории. */
+const OBYCHNAYA: Geometriya = {
+  x0: 62,
+  x1: 662,
+  overhang: 22,
+  upperY: 18,
+  lowerY: 62,
+  axisY: 120,
+  vbW: 760,
+  vbH: 186,
+  strelka: 46,
+  imya: 62,
+  delenieY: 26,
+  skobaY: 34,
+  skobaH: 10,
+  skobaTextY: 72,
+  skobaItogY: 104,
+  podpisDy: 8,
+  podpisDx: 10,
+};
+
+/*
+ * Компактный рисунок теории. Запас по высоте посчитан под кегль 22:
+ * подпись верхнего уровня (высота строки ≈ 0,9 кегля) стоит над его
+ * краем, подпись нижнего — в полосе между краями (36 единиц: 20
+ * на строку и по 8 сверху и снизу), подписи делений — под кружками
+ * (радиус 10), скоба — под ними, две строки подписи скобы — ниже.
+ */
+const KOMPAKTNAYA: Geometriya = {
+  x0: 30,
+  x1: 284,
+  overhang: 18,
+  upperY: 32,
+  lowerY: 68,
+  axisY: 102,
+  vbW: 360,
+  vbH: 0,
+  strelka: 40,
+  imya: 48,
+  delenieY: 32,
+  skobaY: 40,
+  skobaH: 10,
+  skobaTextY: 74,
+  skobaItogY: 104,
+  podpisDy: 9,
+  podpisDx: 8,
+};
 
 /** Число с запятой вместо точки — как принято в русской записи. */
 function chislo(value: number): string {
@@ -209,7 +295,12 @@ export function CoordinateLine({
   promezhutki,
   vydelit,
   tochki,
+  kompaktnyy = false,
 }: CoordinateLineProps) {
+  const g = kompaktnyy ? KOMPAKTNAYA : OBYCHNAYA;
+  const { x0: X0, x1: X1, overhang: OVERHANG, upperY: UPPER_Y, lowerY: LOWER_Y, axisY: AXIS_Y } = g;
+  const VB_W = g.vbW;
+  const VB_H = g.vbH;
   /* Значение на оси → координата рисунка. */
   const px = (value: number): number => X0 + ((value - min) / (max - min)) * (X1 - X0);
 
@@ -247,7 +338,8 @@ export function CoordinateLine({
      ей нужно место над верхним уровнем: в теории рисунок сжат в узкую
      колонку, а кегль задан в единицах рисунка. Там, где скобок нет
      (тренажёр, лист), поля нет и рисунок прежний. */
-  const verhneePole = verhniy?.note === undefined && nizhniy?.note === undefined ? 0 : 34;
+  const verhneePole =
+    kompaktnyy || (verhniy?.note === undefined && nizhniy?.note === undefined) ? 0 : 34;
   /* У рисунка событий верхнего уровня и подписей делений нет: он
      сдвигается вверх и укорачивается, чтобы не нести пустые поля.
      Над именами событий остаётся место под черту противоположного
@@ -256,7 +348,13 @@ export function CoordinateLine({
   /* Под точками стоят их подписи — рисунок с точками ниже. */
   const vysota = sobytiya
     ? AXIS_Y - sdvigSobytiy + (tochki === undefined ? 22 : 44)
-    : VB_H + verhneePole + nizhneePole;
+    : kompaktnyy
+      ? /* Под последней строкой — место на нижние выносные. */
+        AXIS_Y +
+        (brace === undefined
+          ? g.delenieY + 8
+          : (brace.itog === undefined ? g.skobaTextY : g.skobaItogY) + 8)
+      : VB_H + verhneePole + nizhneePole;
   const vidnoPeresechenie = highlightMode !== 'condition' && !tolkoOtrezok;
   const videnOtvet = (highlightMode === 'answer' || tolkoOtrezok) && !sobytiya;
 
@@ -336,7 +434,7 @@ export function CoordinateLine({
     return (
       <g key={key} className="pr-tick">
         <line x1={px(value)} y1={AXIS_Y - 7} x2={px(value)} y2={AXIS_Y + 7} />
-        <text x={px(value)} y={AXIS_Y + 26} textAnchor="middle">
+        <text x={px(value)} y={AXIS_Y + g.delenieY} textAnchor="middle">
           {podpisDeleniya}
         </text>
       </g>
@@ -348,8 +446,9 @@ export function CoordinateLine({
    * сторону, её верхний край, отвес к оси и подпись условия.
    */
   const uroven = (band: Band, y: number) => {
-    const { value, side, note, boundary = 'strict' } = band;
+    const { value, side, note, podpis: svoya, podpisOt, boundary = 'strict' } = band;
     const x = px(value);
+    const xPodpisi = px(podpisOt ?? value);
     const kray = side === 'right' ? X1 + OVERHANG : X0 - OVERHANG;
     /* Знак — по виду границы: нестрогая даёт ≥ и ≤. */
     const znak =
@@ -360,7 +459,8 @@ export function CoordinateLine({
         : boundary === 'inclusive'
           ? '≤'
           : '<';
-    const text = `${axisLabel} ${znak} ${chislo(value)}${note === undefined ? '' : ` (${note})`}`;
+    const text =
+      svoya ?? `${axisLabel} ${znak} ${chislo(value)}${note === undefined ? '' : ` (${note})`}`;
     /* Вправо — выравнивание по умолчанию, и атрибут не пишется:
        разметка уровня совпадает с прежней до знака. */
     const vyravnivanie = side === 'right' ? {} : { textAnchor: 'end' as const };
@@ -383,8 +483,8 @@ export function CoordinateLine({
         <line className="pr-band-rule" x1={x} y1={y} x2={x} y2={AXIS_Y} />
         <text
           className="pr-math pr-band-label"
-          x={side === 'right' ? x + 10 : x - 10}
-          y={y - 8}
+          x={side === 'right' ? xPodpisi + g.podpisDx : xPodpisi - g.podpisDx}
+          y={y - g.podpisDy}
           {...vyravnivanie}
         >
           {podpisMat(text)}
@@ -408,9 +508,15 @@ export function CoordinateLine({
       {nizhniy === null || !vidnoPeresechenie ? null : uroven(nizhniy, LOWER_Y)}
 
       {/* Ось со стрелкой и её имя. */}
-      <line className="pr-axis-line" x1={X0 - 34} y1={AXIS_Y} x2={X1 + 46} y2={AXIS_Y} />
-      <path className="pr-axis-arrow" d={`M${X1 + 46} ${AXIS_Y} l-10 -5 v10 z`} />
-      <text className="pr-math pr-axis-name" x={X1 + 62} y={AXIS_Y + 5}>
+      <line
+        className="pr-axis-line"
+        x1={X0 - (kompaktnyy ? 22 : 34)}
+        y1={AXIS_Y}
+        x2={X1 + g.strelka}
+        y2={AXIS_Y}
+      />
+      <path className="pr-axis-arrow" d={`M${X1 + g.strelka} ${AXIS_Y} l-10 -5 v10 z`} />
+      <text className="pr-math pr-axis-name" x={X1 + g.imya} y={AXIS_Y + 5}>
         {podpisMat(axisLabel)}
       </text>
 
@@ -446,15 +552,27 @@ export function CoordinateLine({
         <g className="pr-brace">
           {/* «П» под отрезком: концы вниз, перекладина под подписями
               делений. */}
-          <path d={`M${px(brace.from)} ${AXIS_Y + 34} v10 H${px(brace.to)} v-10`} />
+          <path
+            d={`M${px(brace.from)} ${AXIS_Y + g.skobaY} v${g.skobaH} H${px(brace.to)} v-${g.skobaH}`}
+          />
           <text
             className="pr-math"
             x={(px(brace.from) + px(brace.to)) / 2}
-            y={AXIS_Y + 72}
+            y={AXIS_Y + g.skobaTextY}
             textAnchor="middle"
           >
             {podpisMat(brace.label)}
           </text>
+          {brace.itog === undefined ? null : (
+            <text
+              className="pr-math pr-brace__itog"
+              x={(px(brace.from) + px(brace.to)) / 2}
+              y={AXIS_Y + g.skobaItogY}
+              textAnchor="middle"
+            >
+              {podpisMat(brace.itog)}
+            </text>
+          )}
         </g>
       )}
 
@@ -485,7 +603,7 @@ export function CoordinateLine({
 
   return (
     <svg
-      className={clsx('pr-line', `pr-is-${state}`, className)}
+      className={clsx('pr-line', kompaktnyy && 'pr-line--kompakt', `pr-is-${state}`, className)}
       viewBox={`0 0 ${VB_W} ${vysota}`}
       width={VB_W}
       height={vysota}
