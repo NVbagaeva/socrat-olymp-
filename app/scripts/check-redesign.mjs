@@ -325,6 +325,18 @@ const SODERZHANIE = {
  * образец уже содержит эту версию.
  */
 const ODOBRENO = {
+  /* PR 6 перестройки под ЕГЭ-2027, одобрено владельцем 14.11.2026: номера,
+     записанные в нумерации 2026 года («Для задачи №17», «пригодится в
+     №13»), и место экономической задачи (часть, вид ответа, балл) теперь
+     берутся из структуры — в ЕГЭ-2027 на экране те же числа. */
+  'app/src/content/teoriya1.ts':
+    '553044aeca37afc3ee0531e4e1a4eccef3219f50e269da256a8246524858636c',
+  'app/src/content/teoriya7-irr.ts':
+    '454b16a168891b91460da08fd106a5a6e152950f404a873d5ab309e6bd743cc8',
+  'app/src/content/teoriya13.ts':
+    '502525c35c46935369c31258f9a14636c7d729fc1670a939f13e052c4d1104ec',
+  'app/src/content/zadanie13.ts':
+    '64d36786dcf54fee9d97272104708136ae0c0bd29436d7bc90cc715d1b061b8a',
   /* №9: определение точки максимума без минимума; «нуль» при одном нуле. */
   'app/src/lib/proizvodnaya/prototypes/po-grafiku-fprime.ts':
     'cf6c9b6b7737e190cb0e7a7bc3adb1b3783f292af1aede97179ac35f9b0e01b9',
