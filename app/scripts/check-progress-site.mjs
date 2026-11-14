@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* scripts/check-progress-site.mjs — перенос прежнего прогресса раздела
-   на общем тренажёре «Стеклянной сцены» (№7, №6, №2, №1, №9, №4, №5) в
+   на общем тренажёре «Стеклянной сцены» (№7, №6, №2, №13, №1, №9, №11, №4, №5) в
    браузере, на собранном сайте.
 
    Ученик решал раздел до редизайна: в localStorage лежат прежние ключи
@@ -40,9 +40,9 @@ const OUT = path.join(APP, 'out');
 const N = process.argv[2];
 /* №4 и №5 — вероятность: прежние ключи свои, задачи — «прототип:вариант». */
 const VEROYATNOST = N === '4' || N === '5';
-if (N !== '6' && N !== '7' && N !== '2' && N !== '13' && N !== '1' && N !== '9' && !VEROYATNOST) {
+if (!['6', '7', '2', '13', '1', '9', '11'].includes(N) && !VEROYATNOST) {
   console.error(
-    'Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9, 4, 5)',
+    'Укажите раздел: node scripts/check-progress-site.mjs 7 (или 6, 2, 13, 1, 9, 11, 4, 5)',
   );
   process.exit(2);
 }
@@ -156,6 +156,19 @@ function razdel() {
         const b = BLOKI_13.find((x) => x.id === blok);
         return b === undefined ? undefined : zadachiBloka(b).length;
       },
+      vBloke: (blok, key) => key.startsWith(`${blok}:`),
+    };
+  }
+  if (N === '11') {
+    /* У №11 банк — файлы подтипов: ключ задачи «подтип|откуда»; задача
+       опорного блока — «блок:номер». */
+    const { BLOKI } = requireSrc('lib/zadanie11/prep/bloki.ts');
+    return {
+      OLD: 'budetege:zadanie-11:v1',
+      OLD_OPORNYE: 'budetege:zadanie-11:opornye:v1',
+      NEW: 'budetege:zadanie-11:log:v1',
+      prototipOf: (id) => id?.split('|')[0],
+      zadachVBloke: (blok) => BLOKI.find((b) => b.id === blok)?.zadachi.length,
       vBloke: (blok, key) => key.startsWith(`${blok}:`),
     };
   }

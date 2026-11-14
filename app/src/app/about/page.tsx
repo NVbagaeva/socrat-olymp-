@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
 import type { Metadata } from 'next';
 import { SiteFooter, SiteHeader } from '@/components/layout';
-import { about, type Nadpis } from '@/content/about';
+import { about, type Illyustraciya, type Nadpis } from '@/content/about';
 import { Dvizhenie } from './Dvizhenie';
 import { Stsena } from './Stsena';
 import './about.css';
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: about.meta.description,
 };
 
-const { hero, imya, podhod, put, sajt, polza, svyaz } = about;
+const { hero, imya, podhod, put, sajt, polza, svyaz, fonFigury } = about;
 
 /* Рукописная пометка на поле рядом со своим блоком. */
 function Pometka({ nadpis }: { nadpis: Nadpis }) {
@@ -25,6 +25,56 @@ function Pometka({ nadpis }: { nadpis: Nadpis }) {
       loading="lazy"
       decoding="async"
     />
+  );
+}
+
+/* Декоративная картинка: WebP с PNG-фолбэком, размеры заданы заранее. */
+function Kartinka({
+  ill,
+  className,
+  sizes,
+}: {
+  ill: Illyustraciya;
+  className: string;
+  sizes: string;
+}) {
+  return (
+    <picture className={className}>
+      <source
+        type="image/webp"
+        srcSet={`${ill.webp} ${ill.width}w, ${ill.webp2x} ${ill.width * 2}w`}
+        sizes={sizes}
+      />
+      <img
+        src={ill.png}
+        alt=""
+        aria-hidden="true"
+        width={ill.width}
+        height={ill.height}
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
+  );
+}
+
+/* Стеклянная фигура в полосе отступа над блоком: там текста нет. */
+function Figura({ id }: { id: (typeof fonFigury)[number]['id'] }) {
+  const f = fonFigury.find((x) => x.id === id);
+  if (!f) return null;
+  return (
+    <picture className={`oa-figury__f oa-figury__f--${id}`}>
+      <source type="image/webp" srcSet={f.webp} />
+      <img
+        src={f.png}
+        alt=""
+        aria-hidden="true"
+        width={f.width}
+        height={f.height}
+        loading="lazy"
+        decoding="async"
+      />
+    </picture>
   );
 }
 
@@ -93,6 +143,7 @@ export default function AboutPage() {
         </section>
 
         <section className="oa-sec" aria-labelledby="oa-podhod" data-reveal>
+          <Figura id="oktaedr" />
           <div className="oa-wrap oa-sec__grid">
             <Shapka metka={podhod.metka} title={podhod.title} id="oa-podhod" />
             <aside className="oa-sec__side">
@@ -116,6 +167,7 @@ export default function AboutPage() {
         </section>
 
         <section className="oa-sec" aria-labelledby="oa-put" data-reveal>
+          <Figura id="sfera" />
           <div className="oa-wrap oa-sec__grid">
             <Shapka metka={put.metka} title={put.title} id="oa-put" />
             <aside className="oa-sec__side">
@@ -144,6 +196,7 @@ export default function AboutPage() {
         </section>
 
         <section className="oa-sec" aria-labelledby="oa-sajt" data-reveal>
+          <Figura id="kaplya" />
           <div className="oa-wrap oa-sec__grid">
             <Shapka metka={sajt.metka} title={sajt.title} id="oa-sajt" />
             <aside className="oa-sec__side">
@@ -170,6 +223,26 @@ export default function AboutPage() {
                 ))}
               </ol>
             </div>
+            {/* Иллюстрация занимает пустое левое поле и стоит вровень с
+                текстом; на телефоне сетка распадается, и она встаёт над ним. */}
+            <figure className="oa-ill">
+              <picture>
+                <source
+                  type="image/webp"
+                  srcSet={`${sajt.illyustraciya.webp400} 400w, ${sajt.illyustraciya.webp800} 800w`}
+                  sizes="(max-width: 899px) 300px, 400px"
+                />
+                <img
+                  src={sajt.illyustraciya.png}
+                  alt=""
+                  aria-hidden="true"
+                  width={sajt.illyustraciya.width}
+                  height={sajt.illyustraciya.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+            </figure>
             <div className="oa-sec__body oa-sec__body--after">
               <h3 className="oa-h3 oa-h3--big">{sajt.personal.title}</h3>
               <p className="oa-text">{sajt.personal.text}</p>
@@ -178,6 +251,7 @@ export default function AboutPage() {
         </section>
 
         <section className="oa-sec" aria-labelledby="oa-polza" data-reveal>
+          <Figura id="zvezda" />
           <div className="oa-wrap oa-sec__grid">
             <Shapka metka={polza.metka} title={polza.title} id="oa-polza" />
             <div className="oa-sec__wide oa-polza">
@@ -190,6 +264,11 @@ export default function AboutPage() {
                   )}
                   key={karta.komu}
                 >
+                  <Kartinka
+                    ill={karta.illyustraciya}
+                    className="oa-polza__ill"
+                    sizes="(max-width: 639px) 150px, 220px"
+                  />
                   <h3 className="oa-h3 oa-h3--big">{karta.komu}</h3>
                   <p className="oa-text">{karta.text}</p>
                   <a
@@ -213,6 +292,12 @@ export default function AboutPage() {
             <Shapka metka={svyaz.metka} title={svyaz.title} id="oa-svyaz" />
             <aside className="oa-sec__side">
               <Pometka nadpis={svyaz.nadpis} />
+              {/* Самолётик летит от пометки в сторону ссылок. */}
+              <Kartinka
+                ill={svyaz.samolyotik}
+                className="oa-svyaz__samolyotik"
+                sizes="(max-width: 899px) 240px, 320px"
+              />
             </aside>
             <div className="oa-sec__body oa-svyaz">
               {svyaz.kontakty.map((kontakt) => (
