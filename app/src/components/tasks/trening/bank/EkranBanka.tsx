@@ -382,6 +382,10 @@ export function EkranBanka<Z extends ZadachaBanka, S>({
         zakryta: zakryta || checked === 'right',
         bezPodskazok: control,
       })}
+      {...(razdel.varianty === undefined ? {} : { varianty: razdel.varianty(dannye) })}
+      {...(razdel.poyasnenie === undefined || (checked === null && !revealed)
+        ? {}
+        : { poyasnenieHtml: razdel.poyasnenie(dannye, checked !== 'wrong') })}
       value={value}
       onValue={onValue}
       {...(pole === null || pole === undefined ? {} : { pole })}

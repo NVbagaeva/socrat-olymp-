@@ -139,8 +139,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z10',
     title: '№10 «Физический смысл»',
     keys: [
-      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts). */
+      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts): тот же ключ
+         и в тренажёре «Стеклянной сцены» (lib/zadanie10/trening/progress.ts). */
       'budetege:zadanie-10:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «10»). */
+      'budetege:trainer:10:session',
     ],
   },
   {
@@ -161,6 +164,8 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
       /* Журнал попыток тренажёра (lib/trainerProgress.ts). Прежний ключ
          budetege:trainer:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:zadanie-12:log:v1',
+      /* Незаконченная тренировка узла (lib/trainerSession/store.ts, раздел «12»). */
+      'budetege:trainer:12:session',
     ],
   },
   {

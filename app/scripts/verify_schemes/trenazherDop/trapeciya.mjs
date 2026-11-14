@@ -42,12 +42,14 @@ function proveritRavnobokuyu(sch, { A, B, C, D, H }, imya) {
 const ravnob = (ad, bc, h) => trap(ad, bc, (ad - bc) / 2, h);
 const RAVNOBOKAYA = {
   id: 'tp-ravnobokaya',
-  b(sch) {
-    /* AC = 10, CH = 6: AH = 8 = (AD + BC)/2 — но здесь трапеции строятся по основаниям
-       с суммой 16 и проверяется AC = 10. */
-    const otvety = [1, 3, 5, 7].map((bc) => {
-      const t = ravnob(16 - bc, bc, 6);
-      sch.fakt('б) AC = 10, CH = 6', blizko(dist(t.A, t.C), 10));
+  b(sch, _rnd, d) {
+    /* Трапеции строятся по основаниям с суммой 2√(AC² − CH²) и высотой CH;
+       проверяется, что диагональ равна данной AC. */
+    const summa = 2 * Math.sqrt(d.AC ** 2 - d.CH ** 2);
+    const otvety = [0.05, 0.2, 0.35, 0.45].map((k) => {
+      const bc = summa * k;
+      const t = ravnob(summa - bc, bc, d.CH);
+      sch.fakt(`б) AC = ${d.AC}, CH = ${d.CH}`, blizko(dist(t.A, t.C), d.AC));
       return ploshchad([t.A, t.B, t.C, t.D]);
     });
     sch.fakt(
@@ -56,12 +58,12 @@ const RAVNOBOKAYA = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiRavnobokoy(t);
     sch.fakt(
-      'данные: AC = 10, CH = 6, трапеция равнобедренная',
-      blizko(dist(p.A, p.C), 10) &&
-        blizko(dist(p.C, p.H), 6) &&
+      `данные: AC = ${d.AC}, CH = ${d.CH}, трапеция равнобедренная`,
+      blizko(dist(p.A, p.C), d.AC) &&
+        blizko(dist(p.C, p.H), d.CH) &&
         blizko(dist(p.A, p.B), dist(p.C, p.D)),
     );
     return ploshchad([p.A, p.B, p.C, p.D]);
@@ -96,14 +98,14 @@ function proveritBabochku(sch, { A, B, C, D, O, K, L: Lt }, imya) {
 }
 const BABOCHKA = {
   id: 'tp-babochka',
-  b(sch) {
+  b(sch, _rnd, d) {
     const otvety = [
       [0, 2],
       [1, 4],
       [-2, 3],
       [4, 6],
     ].map(([x, h]) => {
-      const p = babochkaPoTrap(trap(6, 3, x, h));
+      const p = babochkaPoTrap(trap(d.AD, d.BC, x, h));
       return dist(p.K, p.L);
     });
     sch.fakt(
@@ -112,9 +114,12 @@ const BABOCHKA = {
     );
     return otvety[0];
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiBabochki(t);
-    sch.fakt('данные: BC = 3, AD = 6', blizko(dist(p.B, p.C), 3) && blizko(dist(p.A, p.D), 6));
+    sch.fakt(
+      `данные: BC = ${d.BC}, AD = ${d.AD}`,
+      blizko(dist(p.B, p.C), d.BC) && blizko(dist(p.A, p.D), d.AD),
+    );
     return dist(p.K, p.L);
   },
   a(rnd, sch) {
@@ -146,31 +151,31 @@ function proveritUgol90(sch, { A, B, C, D, M, N }, imya) {
 }
 const UGOL_90 = {
   id: 'tp-ugol-90',
-  b(sch) {
-    /* AD = 14, AB = 6: угол A подбираем так, чтобы BC = 4. */
+  b(sch, _rnd, d) {
+    /* По AD и AB угол A подбираем так, чтобы BC совпало с данным. */
     const uA = koren(
       (u) => {
-        const t = ugol90(14, 6, u);
-        return t.C[0] - t.B[0] - 4;
+        const t = ugol90(d.AD, d.AB, u);
+        return t.C[0] - t.B[0] - d.BC;
       },
       10,
       80,
     );
-    const t = ugol90(14, 6, uA);
+    const t = ugol90(d.AD, d.AB, uA);
     sch.fakt(
-      'б) AD = 14, BC = 4, AB = 6, ∠A + ∠D = 90°',
-      blizko(dist(t.A, t.D), 14) &&
-        blizko(dist(t.B, t.C), 4) &&
-        blizko(dist(t.A, t.B), 6) &&
+      `б) AD = ${d.AD}, BC = ${d.BC}, AB = ${d.AB}, ∠A + ∠D = 90°`,
+      blizko(dist(t.A, t.D), d.AD) &&
+        blizko(dist(t.B, t.C), d.BC) &&
+        blizko(dist(t.A, t.B), d.AB) &&
         blizko(ugol(t.B, t.A, t.D) + ugol(t.C, t.D, t.A), 90, 1e-6),
     );
     return ploshchad([t.A, t.B, t.C, t.D]);
   },
-  nachalo(t, sch) {
+  nachalo(t, sch, d) {
     const p = L().tochkiUgol90(t);
     sch.fakt(
-      'данные: AD = 14, BC = 4, AB = 6',
-      blizko(dist(p.A, p.D), 14) && blizko(dist(p.B, p.C), 4) && blizko(dist(p.A, p.B), 6),
+      `данные: AD = ${d.AD}, BC = ${d.BC}, AB = ${d.AB}`,
+      blizko(dist(p.A, p.D), d.AD) && blizko(dist(p.B, p.C), d.BC) && blizko(dist(p.A, p.B), d.AB),
     );
     return ploshchad([p.A, p.B, p.C, p.D]);
   },

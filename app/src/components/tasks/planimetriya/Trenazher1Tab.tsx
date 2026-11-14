@@ -4,6 +4,7 @@ import { GRUPPY1_TON, TRENAZHER1 } from '@/content/planimetriya1';
 import { O_ZADANII_1 } from '@/content/zadanie1';
 import { texPlain, typeset } from '@/lib/tex';
 import { katalog1 } from '@/lib/planimetriya/trening/katalog';
+import { ssylki1 } from '@/lib/planimetriya/trening/ssylki';
 import { PROTOTIPY } from '@/lib/planimetriya/stseny';
 import type { Blok } from '@/lib/planimetriya/stseny/dsl';
 import { klyuchProto } from '@/lib/planimetriya/trenazher/sessiya';
@@ -50,6 +51,7 @@ export function Trenazher1Tab({ base }: { base: string }) {
         gruppy={gruppy1()}
         nazvaniyaTekst={nazvaniyaTekst}
         katalog={katalog1()}
+        ssylki={ssylki1()}
       />
     </section>
   );
