@@ -428,6 +428,20 @@ export const BLOK_TIPA21: Record<string, string> = {
   P19: 'vershina-parabol',
   P20: 'vershina-parabol',
   P21: 'vershina-parabol',
+  P22: 'znak-proizvodnoy',
+  P23: 'znachenie-v-tochke',
+  P24: 'proizvodnaya-mnogochlena',
+  P25: 'proizvodnaya-mnogochlena',
+  P26: 'proizvodnaya-proizvedeniya',
+  P27: 'znachenie-v-tochke',
+  P28: 'proizvodnaya-proizvedeniya',
+  P29: 'proizvodnaya-proizvedeniya',
+  P30: 'proizvodnaya-logarifma',
+  P31: 'proizvodnaya-logarifma',
+  P32: 'proizvodnaya-logarifma',
+  P33: 'nuli-proizvodnoy',
+  P34: 'znachenie-v-tochke',
+  P35: 'znak-proizvodnoy',
 };
 
 export function blokPoSlugu21(slug: string): BlokOpornyh | undefined {

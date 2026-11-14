@@ -3,6 +3,7 @@ import { GRUPPY21, prototypesOfGruppa } from '@/lib/zadanie21/gruppy';
 import { OPORNYE21_HREF, blokHref21, tipTrenazherHref21 } from '@/lib/zadanie21/links';
 import { BLOK_TIPA21 } from '@/lib/zadanie21/opornye';
 import { PROTOTYPES } from '@/lib/zadanie21/prototypes';
+import { num } from '@/lib/zadanie21/tex';
 import { zadachaPoKlyuchu } from '@/lib/zadanie21/zadacha';
 import { typeset } from '@/lib/tex';
 import { FormulyRamka, KartaGruppa, KartaPrimer, KartaShapka, KartaTip } from '../karta';
@@ -14,7 +15,7 @@ import { otvetTekstom, shagi21 } from './shagi21';
  * Вкладка «О задании»: карта задания по типам («Стеклянная сцена»,
  * общие компоненты components/tasks/karta — как у №9, №7, №2). Шапка
  * (что проверяет, балл, минуты, чем опасно), семь групп с прогрессом
- * ученика, 21 тип с разобранным примером и блок «Что нужно знать».
+ * ученика, все типы с разобранным примером и блок «Что нужно знать».
  *
  * Пример типа — задача с ключом «P01|primer»: в каталог тренажёра она
  * не входит, ответы тренажёра на странице не лежат. Все примеры
@@ -78,6 +79,7 @@ export function OZadanii21() {
                         uslovieHtml={typeset(z.uslovie)}
                         shagi={shagi21(z.solved)}
                         otvet={otvetTekstom(z.solved.answer)}
+                        otvetHtml={tex(num(z.solved.answer))}
                         opasnoHtml={typeset(TIPY21_OPASNO[p.id] ?? '')}
                         trenirovatHref={tipTrenazherHref21(p.id)}
                         opornyeHref={opornyeHref(p.id)}

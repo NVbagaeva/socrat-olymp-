@@ -9,62 +9,29 @@
  * (selftest.ts) проверяет ответ численно — по графику функции.
  */
 
-import type { Rng } from '@/lib/veroyatnost/generator';
-import { chislo, num, otrezokTex, summa, trehchlen, xMinus, znaki } from './tex';
+import { num, otrezokTex, summa, trehchlen, xMinus, znaki } from './tex';
 import { podpisChisla as pc, shemaPoZnakam, type Shema } from './shema';
+import { PROTOTYPES22 } from './prototypes22';
 import type { Etap, HintStep, Params, Prototype, Solved } from './types';
-
-type Cel = 'max' | 'min';
-
-const N = (p: Params, k: string): number => Number(p[k]);
-const S = (p: Params, k: string): string => String(p[k]);
-
-/* ── Тексты ──────────────────────────────────────────────────────── */
-
-const SLOVO_TOCHKI: Record<Cel, string> = { max: 'максимума', min: 'минимума' };
-const SLOVO_ZNACH: Record<Cel, string> = { max: 'наибольшее', min: 'наименьшее' };
-
-function uslovieTochki(cel: Cel, fn: string, promezhutok?: string): string {
-  const prom = promezhutok === undefined ? '' : `, принадлежащую промежутку $${promezhutok}$`;
-  return `Найдите точку ${SLOVO_TOCHKI[cel]} функции $${fn}$${prom}.`;
-}
-
-function uslovieOtrezka(cel: Cel, fn: string, a: string, b: string, slovo = 'отрезке'): string {
-  return `Найдите ${SLOVO_ZNACH[cel]} значение функции $${fn}$ на ${slovo} $${otrezokTex(a, b)}$.`;
-}
-
-function uslovieBezOtrezka(cel: Cel, fn: string): string {
-  return `Найдите ${SLOVO_ZNACH[cel]} значение функции $${fn}$.`;
-}
-
-/** Варианты ответа подсказки: верный и три других, без повторов. */
-function varianty(
-  verno: number,
-  drugie: readonly number[],
-): { options: string[]; correct: number } {
-  const set: number[] = [verno];
-  for (const d of drugie) if (!set.some((x) => Math.abs(x - d) < 1e-9)) set.push(d);
-  const options = set.slice(0, 4).map(chislo);
-  /* Верный — не всегда первый: место от самого ответа, без случайности. */
-  const mesto = Math.abs(Math.round(verno * 7)) % options.length;
-  const [v] = options.splice(0, 1);
-  options.splice(mesto, 0, v as string);
-  return { options, correct: mesto };
-}
-
-const HINT_CHTO_TOCHKA: HintStep = {
-  question: 'Что нужно записать в ответ?',
-  options: ['Точку — значение $x$', 'Значение функции $y$'],
-  correct: 0,
-  comment: 'Спрашивают точку, поэтому в ответе $x$, а не $y$.',
-};
-
-const HINT_CHTO_ZNACH: HintStep = {
-  question: 'Что нужно записать в ответ?',
-  options: ['Точку — значение $x$', 'Значение функции $y$'],
-  correct: 1,
-  comment: 'Спрашивают значение, поэтому в ответе $y$, а не $x$.',
-};
+import {
+  type Cel,
+  HINT_CHTO_TOCHKA,
+  HINT_CHTO_ZNACH,
+  N,
+  S,
+  SLOVO_TOCHKI,
+  SLOVO_ZNACH,
+  cel,
+  oblastDvuh,
+  otr,
+  plusC,
+  uslovieBezOtrezka,
+  uslovieOtrezka,
+  uslovieTochki,
+  varianty,
+  zn,
+  znakOt,
+} from './razbor';
 
 /* ── Общие схемы разбора ─────────────────────────────────────────── */
 
@@ -132,17 +99,6 @@ function poZnakam(o: TochkaOpts): Solved {
     },
   ];
   return { answer, funkciya: o.fn, proizvodnaya: o.d, etapy, hints };
-}
-
-/** Область поиска для самотеста у двух точек экстремума: искомая — внутри. */
-function oblastDvuh(
-  p1: number,
-  p2: number,
-  answer: number,
-  levaya = p1 - 3 * (p2 - p1),
-  pravaya = p2 + 3 * (p2 - p1),
-): [number, number] {
-  return answer === p1 ? [levaya, p2] : [p1, pravaya];
 }
 
 interface OtrezokOpts {
@@ -263,29 +219,6 @@ function bezProizvodnoy(o: {
   ];
   return { answer: o.answer, funkciya: o.fn, proizvodnaya: null, etapy, hints };
 }
-
-/** Схема знаков на отрезке: концы — скобки, внутри — критические точки. */
-function otr(lo: string, vnutri: string[], hi: string, znaki: ('+' | '-')[]): Shema {
-  return {
-    tochki: [
-      { podpis: lo, vid: 'konec' },
-      ...vnutri.map((podpis) => ({ podpis, vid: 'krit' as const })),
-      { podpis: hi, vid: 'konec' },
-    ],
-    znaki,
-    luchLevo: false,
-    luchPravo: false,
-  };
-}
-
-/** Знаки вокруг единственной точки экстремума. */
-const zn = (cel: Cel): ('+' | '-')[] => (cel === 'max' ? ['+', '-'] : ['-', '+']);
-
-/** «+5», «-3» или ничего: свободный член в конце формулы. */
-const plusC = (c: number): string => (c === 0 ? '' : c < 0 ? `-${num(-c)}` : `+${num(c)}`);
-
-const cel = (r: Rng): Cel => r.pick(['max', 'min'] as const);
-const znakOt = (r: Rng, a: number, b: number): number => r.pick([-1, 1]) * r.int(a, b);
 
 /* ── 1. Многочлен ────────────────────────────────────────────────── */
 
@@ -1764,6 +1697,7 @@ export const PROTOTYPES: readonly Prototype[] = [
   P19,
   P20,
   P21,
+  ...PROTOTYPES22,
 ];
 
 export function prototype(id: string): Prototype {
