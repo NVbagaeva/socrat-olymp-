@@ -12,6 +12,7 @@
 
 import type { Zagruzka } from '@/lib/trening/zagruzka';
 import type { ShagChasti13 } from '../reshenieHtml';
+import type { Oformlenie13 } from '../trenazher/zadacha';
 import type { HintStep, Task13, TypeCode } from '../types';
 import { prototipKlyucha13 } from './session';
 
@@ -62,6 +63,8 @@ interface Moduli {
   otvetText: (t: Task13) => string;
   podskazkaTipa: (type: TypeCode, shift: number) => HintStep;
   nazvanie: (type: TypeCode) => string;
+  /** Оформление задачи (схема, первая строка таблицы) — прежним кодом тренажёра №13. */
+  oformlenie: (prototip: string, seed: string) => Oformlenie13 | null;
 }
 
 const TIPY: TypeCode[] = ['A', 'B', 'C', 'D'];
@@ -81,7 +84,8 @@ function zagruzitModuli(): Promise<void> {
     import('../reshenieHtml'),
     import('../opornye/seal'),
     import('../types'),
-  ]).then(([g, tex, secret, ed, html, resh, seal, types]) => {
+    import('../trenazher/zadacha'),
+  ]).then(([g, tex, secret, ed, html, resh, seal, types, prezhniy]) => {
     moduli = {
       generate: g.generate,
       typeset: tex.typeset,
@@ -94,6 +98,15 @@ function zagruzitModuli(): Promise<void> {
       otvetText: (t) => html.otvetText(t.answer, t.units),
       podskazkaTipa: seal.podskazkaTipa,
       nazvanie: (type) => types.TYPE_NAMES[type],
+      oformlenie: (prototip, seed) => {
+        const z = prezhniy.sobratZadachu13(
+          { prototypeId: prototip, seed, istochnik: 'bank', vid: 'zadachi' },
+          1,
+        );
+        return z.oformlenie === null
+          ? null
+          : (JSON.parse(secret.openText(z.oformlenie, z.seal)) as Oformlenie13);
+      },
     };
   });
   zhdyot.catch(() => {
@@ -163,6 +176,27 @@ function nabrat(text: string): string {
     .filter((line) => line.trim() !== '')
     .map((line) => `<p>${typeset(line)}</p>`)
     .join('');
+}
+
+const oformleniya = new Map<string, Oformlenie13 | null>();
+
+/**
+ * Оформление задачи для режима «С оформлением»: схема (вопрос с
+ * вариантами), первая строка таблицы (что дано, что считает ученик) и
+ * шаги. Собирается прежним кодом тренажёра №13 (trenazher/zadacha.ts) по
+ * первому запросу; null — модули ещё не приехали или строки нет.
+ */
+export function oformlenie13(z: Zadacha13): Oformlenie13 | null {
+  if (oformleniya.has(z.id)) return oformleniya.get(z.id) ?? null;
+  if (moduli === null) return null;
+  let of: Oformlenie13 | null = null;
+  try {
+    of = moduli.oformlenie(z.prototypeId, z.id.slice(z.prototypeId.length + 1));
+  } catch {
+    of = null;
+  }
+  oformleniya.set(z.id, of);
+  return of;
 }
 
 export const ZAGRUZKA13: Zagruzka<Zadacha13, Reshenie13, null> = {

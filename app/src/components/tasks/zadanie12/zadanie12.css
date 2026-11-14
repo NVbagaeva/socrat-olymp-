@@ -1,0 +1,232 @@
+/* Задание №12 в «Стеклянной сцене»: карта «О задании» узла и тренажёр
+   узла. Общие правила карты, тренажёра и стекла — в components/tasks/
+   karta, trening, steklo; здесь только то, что у №12 своё: крупная
+   плитка вида функции, закреплённый чертёж примера, шаги разбора движка
+   (тексты, выкладки, чертежи шагов), подсказка по шагам. Чертежи движка
+   не меняются: ширину держит обёртка (движок ставит SVG max-width). */
+
+/* ── Карта: группы — виды функций с крупной плиткой ─────────────── */
+.z12-karta .kz-gruppa .stk-znak--figura {
+  width: 104px;
+  height: auto;
+  aspect-ratio: 1024 / 923;
+  padding: 4px;
+  border-radius: 22px;
+}
+.z12-karta .kz-gruppa .stk-znak--figura picture,
+.z12-karta .kz-gruppa .stk-znak--figura img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+@media (min-width: 768px) {
+  .z12-karta .kz-gruppa .stk-znak--figura {
+    width: 132px;
+  }
+}
+/* Чертёж примера закреплён: карточкам группы и типа — clip вместо
+   hidden (обрезка по скруглению остаётся, sticky работает). */
+.z12-karta .kz-gruppa,
+.z12-karta .kz-tip {
+  overflow: clip;
+}
+.z12-karta .kz-gruppa,
+.z12-karta .kz-tip,
+.z12-karta .kz-razdel {
+  scroll-margin-top: calc(var(--topic-sticky-top, 0px) + var(--space-4));
+}
+.z12-vid-ssylka {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-self: start;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  font-weight: 600;
+}
+.z12-karta .kz-tipy > .z12-vid-ssylka {
+  grid-column: 1 / -1;
+}
+
+/* ── Пример типа: чертёж рядом с шагами ─────────────────────────── */
+.z12-primer {
+  max-width: none;
+}
+.z12-primer__telo {
+  display: grid;
+  gap: var(--space-4);
+}
+.z12-primer__chertezh {
+  position: sticky;
+  top: calc(var(--topic-sticky-top, 0px) + var(--space-2));
+  z-index: 2;
+  align-self: start;
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+}
+.z12-primer__chertezh .z12-chertezh {
+  max-width: 420px;
+  margin-inline: auto;
+}
+.z12-primer__svernut {
+  justify-self: end;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+}
+.z12-primer__reshenie {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.z12-otvet-variant .katex {
+  font-size: 1em;
+}
+@media (max-width: 767.98px) {
+  /* На телефоне закреплённый чертёж — не выше трети экрана. */
+  .z12-primer__chertezh svg {
+    max-height: 30vh;
+    width: auto !important;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+}
+@media (min-width: 768px) {
+  .z12-primer__telo {
+    grid-template-columns: minmax(260px, 380px) minmax(0, 1fr);
+    align-items: start;
+  }
+  .z12-primer__telo.bez-chertezha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .z12-primer__svernut {
+    display: none;
+  }
+}
+
+/* ── Шаги разбора движка в ShagiResheniya ───────────────────────── */
+.z12-shag__tekst {
+  margin: 0;
+}
+.z12-shag__tekst + .z12-shag__tekst,
+.z12-shag__formula + .z12-shag__tekst,
+.z12-shag__chertezh + .z12-shag__tekst,
+.z12-shag__tekst + .z12-shag__formula,
+.z12-shag__formula + .z12-shag__formula,
+.z12-shag__tekst + .z12-shag__chertezh,
+.z12-shag__formula + .z12-shag__chertezh,
+.z12-shag__otvet,
+.z12-shag__vrezka,
+.z12-shag__podrobno {
+  margin-top: var(--space-2);
+}
+.z12-shag__formula {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: var(--space-1) 0;
+  font-size: 1.05em;
+}
+.z12-shag__formula.is-glavnaya {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 12px;
+  background: var(--blue-50);
+}
+.z12-shag__chertezh {
+  max-width: 360px;
+}
+.z12-shag__otvet {
+  margin-bottom: 0;
+  font-weight: 650;
+}
+.z12-shag__vrezka {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 12px;
+  background: var(--amber-50);
+  box-shadow: inset 3px 0 0 var(--amber-600);
+}
+.z12-shag__vrezka-zag {
+  margin: 0;
+  font-weight: 650;
+}
+.z12-shag__podrobno > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--blue-700);
+}
+
+/* ── Тренажёр: чертёж условия, подсказка, метод ────────────────── */
+.z12-risunok .z12-chertezh,
+.z12-podskazka__chertezh .z12-chertezh {
+  max-width: 420px;
+  margin-inline: auto;
+}
+.z12-podskazka {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z12-podskazka .thint {
+  min-width: 0;
+}
+.z12-metod {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: var(--glass-ring);
+}
+.z12-metod__chertezh svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.z12-metod__text {
+  display: grid;
+  gap: 2px;
+}
+.z12-metod__nazvanie {
+  font-weight: 620;
+}
+
+/* ── «Зачётная работа»: только оформление ──────────────────────────
+   Экран учителя (components/tasks/ves12/ZachyotSetup) общий с
+   «Генератором», поэтому стекло — только под обёрткой вкладки. */
+.z12-zachyot .zs-panel,
+.z12-zachyot .zs-sum {
+  border: 0;
+  border-radius: 22px;
+  background: linear-gradient(160deg, var(--white), var(--blue-50));
+  box-shadow: var(--glass-ring), var(--glass-shadow);
+}
+.z12-zachyot .sostav-row,
+.z12-zachyot .sostav-tile {
+  border-color: transparent;
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: var(--glass-ring);
+}
+.z12-zachyot .sostav-row.is-open {
+  box-shadow: inset 0 0 0 1.5px var(--blue-300);
+  background: var(--white);
+}
+/* Название вида функции не обрезается: колонке названия — не меньше
+   девяти знаков, строка переносится. */
+@media (min-width: 768px) {
+  .z12-zachyot .sostav-row__main {
+    grid-template-columns: minmax(44px, auto) minmax(9em, 1fr) auto minmax(0, 150px) auto;
+  }
+}
+.z12-zachyot .sostav-row__title {
+  overflow-wrap: anywhere;
+}

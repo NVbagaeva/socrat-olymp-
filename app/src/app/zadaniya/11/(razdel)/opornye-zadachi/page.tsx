@@ -1,55 +1,56 @@
 import type { Metadata } from 'next';
-import {
-  Opornye11List,
-  type BlokKartochka,
-  type FiltrKnopka,
-} from '@/components/tasks/zadanie11/Opornye11List';
-import { Opornye11Shell } from '@/components/tasks/zadanie11/Opornye11Shell';
-import { OPORNYE } from '@/content/opornye';
-import { OPORNYE_11, O_ZADANII_11, ZADANIE11, zadanie11Title } from '@/content/zadanie11';
+import { TabScrollOnMount } from '@/components/tasks/TabScroll';
+import { Opornye11Spisok } from '@/components/tasks/zadanie11/Opornye11';
+import { NAVYKI11, OPORNYE11 } from '@/content/tekstovye11';
+import { zadanie11Title } from '@/content/zadanie11';
+import { blokHref11 } from '@/lib/zadanie11/links';
 import { BLOKI } from '@/lib/zadanie11/prep/bloki';
-import type { RazdelBloka } from '@/lib/zadanie11/prep/types';
-import { SECTIONS } from '@/lib/zadanie11/taxonomy';
-import { ZADANIYA } from '@/lib/paths';
+import { typeset } from '@/lib/tex';
 
 export const metadata: Metadata = {
-  title: zadanie11Title(OPORNYE.title),
+  title: zadanie11Title(OPORNYE11.title),
 };
 
 /**
- * Вкладка «Опорные задачи» №11: разминка и блоки навыков. Список
- * лёгкий — без задач: они собираются на странице блока. Фильтр
- * раздела показывает блоки раздела и те, что нужны перед ним
- * (O_ZADANII_11.pered).
+ * Опорные задачи №11: пять навыков, двенадцать блоков по десять задач —
+ * на общих карточках «Стеклянной сцены» (components/tasks/opornye,
+ * образец — №3, №7, №6). На карточке блока — название, значок и
+ * прогресс; формул и служебных меток на карточках нет
+ * (docs/razdel-pravila.md, п. 3).
  */
 export default function Opornye11Tab() {
-  const listHref = `${ZADANIYA}/${ZADANIE11.slug}/${OPORNYE.tail}`;
-  const bloki: BlokKartochka[] = BLOKI.map((b) => {
-    const filtry: RazdelBloka[] = [b.razdel];
-    for (const s of SECTIONS) {
-      if ((O_ZADANII_11.pered[s.id] ?? []).includes(b.nazvanie) && !filtry.includes(s.id)) {
-        filtry.push(s.id);
-      }
-    }
-    return {
-      id: b.id,
-      slug: b.slug,
-      razdel: b.razdel,
-      nazvanie: b.nazvanie,
-      total: b.zadachi.length,
-      filtry,
-    };
-  });
-  const filtry: FiltrKnopka[] = [
-    ...SECTIONS.filter((s) => bloki.some((b) => b.filtry.includes(s.id))).map((s) => ({
-      id: s.id,
-      label: OPORNYE_11.filtr[s.id] ?? s.nazvanie,
-    })),
-    { id: 'OB', label: OPORNYE_11.obshchie },
-  ];
+  const navyki = NAVYKI11.map((navyk) => ({
+    id: navyk.id,
+    nazvanie: navyk.nazvanie,
+    lead: navyk.lead,
+    ton: navyk.ton,
+    bloki: navyk.bloki.flatMap(({ slug, znak }) => {
+      const blok = BLOKI.find((b) => b.slug === slug);
+      return blok === undefined
+        ? []
+        : [
+            {
+              slug,
+              href: blokHref11(slug),
+              nazvanie: blok.nazvanie,
+              znakHtml: typeset(`$${znak}$`),
+              /* Ключи исходов микрозадач — те же, что у прежнего экрана
+                 (lib/zadanie11/progress.ts, mikroId11): «P11-03:7». */
+              zadachi: blok.zadachi.map((_, i) => `${blok.id}:${i + 1}`),
+            },
+          ];
+    }),
+  }));
   return (
-    <Opornye11Shell listHref={listHref} totals={bloki.map((b) => ({ id: b.id, total: b.total }))}>
-      <Opornye11List bloki={bloki} filtry={filtry} listHref={listHref} />
-    </Opornye11Shell>
+    <section className="prep z11-opornye" aria-labelledby="z11-opornye-title">
+      <header className="kz-razdel__head">
+        <h2 className="stk-h3" id="z11-opornye-title">
+          {OPORNYE11.title}
+        </h2>
+        <p className="stk-lead">{OPORNYE11.lead}</p>
+      </header>
+      <TabScrollOnMount />
+      <Opornye11Spisok navyki={navyki} />
+    </section>
   );
 }

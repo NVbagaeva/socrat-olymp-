@@ -139,16 +139,18 @@ for (const [url, old, logKey] of RAZDELY) {
 /* №10: прогресса раньше не было — первая попытка заводит журнал. */
 {
   errors.length = 0;
-  /* Тип задач выбран адресом — как по ссылке из «О задании». */
+  /* Тип задач выбран адресом — как по прежней ссылке из теории: общий
+     тренажёр по банку сразу начинает тренировку этого типа. Неверный
+     ответ уходит в журнал, когда ученик идёт дальше. */
   await page.goto(BASE + '/zadaniya/10/trenazher/?tipy=P22', { waitUntil: 'networkidle' });
-  await page
-    .getByRole('button', { name: /Начать/ })
-    .first()
-    .click();
-  const pole = page.locator('.z10-otvet input');
+  const pole = page.locator('.trn-otvetnaya input').first();
   await pole.waitFor({ timeout: 20000 });
   await pole.fill('123456');
   await page.getByRole('button', { name: 'Проверить' }).click();
+  await page
+    .getByRole('button', { name: /^(Дальше|К итогам)/ })
+    .first()
+    .click();
   await page.waitForFunction(() => localStorage.getItem('budetege:zadanie-10:log:v1') !== null);
   const log = L.parseLog(
     JSON.parse(await page.evaluate(() => localStorage.getItem('budetege:zadanie-10:log:v1'))),

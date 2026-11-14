@@ -12,7 +12,7 @@ import { GENERATOR10_PRESETS, GENERATOR10_SOURCES, GENERATOR10_TEXTS } from '@/c
 import { GEN_UI } from '@/content/generatorUi';
 import type { ZadachaBanka } from '@/lib/generator/obshchiy/bank';
 import type { GenConfig } from '@/lib/generator/obshchiy/types';
-import type { ProtoInfo10 } from '../../components/tasks/zadanie10/Trenazher10';
+import type { ProtoInfo10 } from './protoInfo';
 import { typeset } from '../tex';
 import { VARIANTOV_MAX } from './sborka';
 

@@ -10,6 +10,11 @@ export interface VoprosPodskazki {
   verno: number;
   /** Что сказать после верного ответа. */
   kommentariyHtml?: string;
+  /**
+   * Почему кнопка неверна — по номеру кнопки (№9). Пусто или нет —
+   * общее «Подумай ещё».
+   */
+  pochemuHtml?: string[];
 }
 
 export interface PodskazkaVoprosyLabels {
@@ -94,9 +99,7 @@ export function PodskazkaVoprosy({
                   )}
                 </p>
               ) : mimo.length > 0 ? (
-                <p className="trn-vopros__otklik" role="status">
-                  {labels.podumayte}
-                </p>
+                <Pochemu html={v.pochemuHtml?.[mimo[mimo.length - 1] ?? -1]} labels={labels} />
               ) : null}
             </li>
           );
@@ -104,5 +107,16 @@ export function PodskazkaVoprosy({
       </ol>
       {vsePoydeno ? <p className="trn-voprosy__gotovo">{labels.gotovo}</p> : null}
     </div>
+  );
+}
+
+/** Отклик на неверную кнопку: пояснение раздела или «Подумай ещё». */
+function Pochemu({ html, labels }: { html: string | undefined; labels: PodskazkaVoprosyLabels }) {
+  return html === undefined || html === '' ? (
+    <p className="trn-vopros__otklik" role="status">
+      {labels.podumayte}
+    </p>
+  ) : (
+    <p className="trn-vopros__otklik" role="status" dangerouslySetInnerHTML={{ __html: html }} />
   );
 }

@@ -127,7 +127,11 @@ export type Element =
 
 /** Привязка величины на чертеже. */
 export type Yakor =
-  { otrezok: readonly [T2, T2] } | { ugol: readonly [T2, T2, T2] } | { vnutri: T2 };
+  | { otrezok: readonly [T2, T2] }
+  | { ugol: readonly [T2, T2, T2] }
+  | { vnutri: T2 }
+  /** Строкой под чертежом (как площади): у угла на чертеже нет места. */
+  | { podChertezhom: true };
 
 export type VidElementa = Element['vid'];
 

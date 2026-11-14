@@ -289,6 +289,11 @@
   min-width: 0;
   color: var(--color-text);
 }
+/* Подсказка-вопросы с кнопками (№11): блоком, как в тренажёре. */
+.op-podskazka--voprosy {
+  display: block;
+  color: var(--color-text);
+}
 .op-podskazka-knopka {
   display: inline-flex;
   align-items: center;
@@ -400,7 +405,7 @@
   }
 }
 
-/* Подсказка-вопросы с кнопками (№13): блок во всю ширину, без значка строки. */
+/* Подсказка-вопросы с кнопками (№13, №4, №5): блок во всю ширину, без значка строки. */
 .op-podskazka--voprosy {
   display: block;
 }

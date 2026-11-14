@@ -1,0 +1,134 @@
+{
+  "_chto": "localStorage и sessionStorage ученика, решавшего №9 до редизайна: счётчики тренажёра до PR #340 (budetege:proizvodnaya-9:v1, lib/progressStore.ts), решённые опорные задачи (budetege:proizvodnaya-9:prep:v1, lib/proizvodnaya/prepProgress.ts) и незаконченная тренировка в режиме «Контроль» (sessionStorage, lib/proizvodnaya/sessionStore.ts). Записаны прежним кодом (origin/main до редизайна) теми же вызовами, что делали прежние экраны. Нужен scripts/check-progress-9.mjs и браузерной проверке переноса.",
+  "budetege:proizvodnaya-9:v1": {
+    "kinds": {
+      "9.1.1": {
+        "done": 2,
+        "right": 2,
+        "seconds": 88
+      },
+      "9.1.2": {
+        "done": 1,
+        "right": 1,
+        "seconds": 150
+      },
+      "9.2.1": {
+        "done": 2,
+        "right": 1,
+        "seconds": 215
+      },
+      "9.2.3": {
+        "done": 1,
+        "right": 1,
+        "seconds": 70
+      },
+      "9.3.3": {
+        "done": 1,
+        "right": 0,
+        "seconds": 210
+      },
+      "9.3.5": {
+        "done": 1,
+        "right": 1,
+        "seconds": 60
+      },
+      "9.4.3": {
+        "done": 1,
+        "right": 1,
+        "seconds": 130
+      },
+      "9.4.7": {
+        "done": 1,
+        "right": 0,
+        "seconds": 180
+      },
+      "9.5.4": {
+        "done": 1,
+        "right": 1,
+        "seconds": 140
+      },
+      "9.5.6": {
+        "done": 1,
+        "right": 1,
+        "seconds": 200
+      }
+    },
+    "mistakes": [
+      "9.1.2|9.1.2#13",
+      "9.2.1|9.2.1#11",
+      "9.3.3|9.3.3#16",
+      "9.4.3|9.4.3#22",
+      "9.4.7|9.4.7#3"
+    ],
+    "outcomes": {}
+  },
+  "budetege:proizvodnaya-9:prep:v1": {
+    "P9-1": [
+      1,
+      2,
+      4
+    ],
+    "P9-3": [
+      1
+    ]
+  },
+  "sessionStorage": {
+    "budetege:proizvodnaya-9:session:v1": {
+      "v": 1,
+      "id": "s9:mwey95mh:1",
+      "settings": {
+        "groups": [
+          "II",
+          "III",
+          "IV"
+        ],
+        "mode": "control",
+        "count": 3,
+        "istochnik": "ne-iz-otkrytogo-banka"
+      },
+      "taskIds": [
+        "9.2.1|9.2.1#26",
+        "9.4.4|9.4.4#38",
+        "9.3.1|9.3.1#2"
+      ],
+      "items": [
+        {
+          "value": "",
+          "checked": "right",
+          "mark": "right",
+          "hintOn": false,
+          "hintStep": 0,
+          "hintWrong": [],
+          "solution": false,
+          "misses": 0,
+          "sec": 60
+        },
+        {
+          "value": "3",
+          "checked": "wrong",
+          "mark": null,
+          "hintOn": false,
+          "hintStep": 0,
+          "hintWrong": [],
+          "solution": false,
+          "misses": 1,
+          "sec": 35
+        },
+        {
+          "value": "",
+          "checked": null,
+          "mark": null,
+          "hintOn": false,
+          "hintStep": 0,
+          "hintWrong": [],
+          "solution": false,
+          "misses": 0,
+          "sec": 0
+        }
+      ],
+      "index": 1,
+      "seconds": 95,
+      "paused": false
+    }
+  }
+}

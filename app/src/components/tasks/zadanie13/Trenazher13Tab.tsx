@@ -12,15 +12,19 @@ import { Trenazher13 } from './Trenazher13';
  * Каталог банка для браузера: только ключи задач «A-01|b3», без условий
  * и ответов. Источник у №13 задан прототипом целиком: задачи прототипа
  * из открытого банка ФИПИ — `f`, свои — `a`; «Из банка ФИПИ» не
- * подставляет вместо них свои (strogo).
+ * подставляет вместо них свои (strogo). Уровень прототипа — `u`: 1 —
+ * базовый (★), 2 — повышенный (★★), для фильтра уровня.
  */
 export function katalog13(): KatalogBanka {
   return Object.fromEntries(
     PROTOTIPY_TRENAZHERA_13.map((p) => {
       const ids = BANK_13.filter(([id]) => id === p.id).map(([id, seed]) => `${id}|${seed}`);
+      const u = p.difficulty === 'hard' ? 2 : 1;
       return [
         p.id,
-        p.source === 'fipi' ? { f: ids, a: [], strogo: true } : { f: [], a: ids, strogo: true },
+        p.source === 'fipi'
+          ? { f: ids, a: [], strogo: true, u }
+          : { f: [], a: ids, strogo: true, u },
       ];
     }),
   );
@@ -35,15 +39,18 @@ export function gruppy13(): GruppaVybora[] {
     ton: GRUPPY13_VID[type].ton,
     tipy: PROTOTIPY_TRENAZHERA_13.filter((p) => p.type === type).map((p) => ({
       id: p.id,
-      nazvanieHtml: `<span>${typeset(p.title)}</span>`,
+      /* Звёздочки уровня — как в прежнем тренажёре: ★ базовый, ★★ повышенный. */
+      nazvanieHtml: `<span>${typeset(p.title)}</span> <span class="z13-zvezdy" aria-label="${
+        p.difficulty === 'hard' ? 'повышенный уровень' : 'базовый уровень'
+      }">${p.difficulty === 'hard' ? '★★' : '★'}</span>`,
     })),
   }));
 }
 
 /**
  * Вкладка «Тренажёр» задания №13 в «Стеклянной сцене»: стартовые режимы
- * (с четвёртой карточкой «Определи тип»), выбор тем (четыре схемы, 66
- * типов), экран задачи, итоги. Задачи на странице не лежат: тренировка
+ * (четвёртая карточка «Определи тип», пятая — «С оформлением»), выбор тем
+ * (четыре схемы, 66 типов, уровень ★ / ★★), экран задачи, итоги. Задачи на странице не лежат: тренировка
  * собирается в браузере из каталога ключей, задачу строит движок по
  * ключу «прототип|seed».
  */

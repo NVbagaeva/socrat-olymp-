@@ -111,4 +111,17 @@ export const OPORNYE_18_UI = {
   podskazkiPodskazka: 'Ответь на вопрос сам, потом сверься.',
   podskazkaOtvet: 'Ответ на вопрос',
   oshibki: 'Типичные ошибки',
+  otmetka: 'Получилось?',
+  otmetkaPodskazka:
+    'Отметь честно — отметка появится на плитке задачи, и нерешённые будет легко найти.',
+  reshil: 'Решил',
+  neReshil: 'Не решил',
+  otmechenoReshil: 'Отмечено: решил.',
+  otmechenoNe: 'Отмечено: не решил — вернись к задаче позже.',
+  statusReshena: 'Решена',
+  statusNe: 'Не решена',
+  reshenoIz: (n: number) => `из ${n} задач решено`,
+  reshenoLabel: (r: number, n: number) => `Опорные задачи: решено ${r} из ${n}`,
+  sbros: 'Сбросить отметки',
+  sbrosVopros: 'Сбросить отметки всех опорных задач №18?',
 } as const;

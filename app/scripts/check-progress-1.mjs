@@ -456,6 +456,27 @@ const vse = Object.keys(katalog);
     'текст «Где теряют балл» у несуществующего типа',
   );
   check(FORMULY1.length > 0, 'нет блока «Что нужно знать»');
+  /* Ссылки под условием: у каждого типа — теория, опорный блок и разбор;
+     якорь теории — карточка справочника, которая есть на странице. */
+  const { ssylki1 } = requireSrc('lib/planimetriya/trening/ssylki.ts');
+  const { RAZDELY_SPRAVOCHNIKA_1 } = requireSrc('content/spravochnik1/index.ts');
+  const yakorya = new Set(RAZDELY_SPRAVOCHNIKA_1.flatMap((r) => r.temy.map((t) => `k-${t.id}`)));
+  const ss = ssylki1();
+  for (const p of PROTOTIPY) {
+    const s1 = ss[kp(p.id)];
+    check(s1?.teoriya !== undefined, `у типа ${kp(p.id)} нет ссылки «Повторить теорию»`);
+    for (const href of [s1?.teoriya, s1?.fakt].filter(Boolean)) {
+      check(yakorya.has(href.split('#')[1]), `тип ${kp(p.id)}: якоря ${href} нет в справочнике`);
+    }
+    check(
+      /opornye-zadachi\/[a-z-]+\/$/.test(s1?.opornye ?? ''),
+      `тип ${kp(p.id)}: нет опорного блока`,
+    );
+    check(
+      s1?.razbor === `/zadaniya/1/#tip-${kp(p.id)}`,
+      `тип ${kp(p.id)}: разбор не на карточку типа`,
+    );
+  }
   const { primer1 } = requireSrc('lib/planimetriya/trening/primer.ts');
   for (const p of PROTOTIPY) {
     const ex = primer1(kp(p.id));

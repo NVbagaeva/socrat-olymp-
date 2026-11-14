@@ -84,6 +84,11 @@ export interface OpornyeBankaProps {
   raskryt: (razbor: string, id: string) => string;
   piPodskazka: string;
   labels: OpornayaZadachaLabels;
+  /**
+   * Рисунок под условием по ключу задачи — готовая серверная разметка
+   * (картинка сюжета №10). Необязателен: у задач без рисунка — ничего.
+   */
+  risunki?: Record<string, ReactNode>;
 }
 
 /** Строки разбора задачи → шаги сцены (содержание не меняется). */
@@ -115,6 +120,7 @@ export function OpornyeBanka({
   raskryt,
   piPodskazka,
   labels,
+  risunki,
 }: OpornyeBankaProps) {
   const progress = store.useProgress();
   const [index, setIndex] = useState(0);
@@ -185,6 +191,7 @@ export function OpornyeBanka({
       ishody={ishody}
       onOpen={open}
       uslovieHtml={typeset(zadacha.uslovie)}
+      {...(risunki?.[zadacha.id] === undefined ? {} : { risunok: risunki[zadacha.id] })}
       value={value}
       onValue={(next) => {
         setValue(next);

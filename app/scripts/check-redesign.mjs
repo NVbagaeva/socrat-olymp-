@@ -38,6 +38,70 @@ if (!/^\d{1,2}$/.test(razdel ?? '')) {
 
 /** Файлы и папки содержания раздела (пути от корня репозитория). */
 const SODERZHANIE = {
+  10: [
+    'app/src/data/zadanie10',
+    'app/public/data/zadanie10',
+    'app/src/lib/zadanie10/prototypes',
+    'app/src/lib/zadanie10/bank',
+    'app/src/lib/zadanie10/chertezh',
+    'app/src/lib/zadanie10/kit.ts',
+    'app/src/lib/zadanie10/opornye.ts',
+    'app/src/lib/zadanie10/illyustracii.ts',
+    'app/src/lib/zadanie10/teoriya-kondensator.ts',
+    'app/src/lib/zadanie10/teoriya-stepeni.ts',
+    'app/src/lib/zadanie10/teoriya-yakorya.ts',
+    'app/src/content/teoriya10.ts',
+    'app/src/content/uroki10.ts',
+    'app/src/content/kartochki/10-prikladnye.ts',
+  ],
+  /* №4 и №5: общий банк вероятности — прототипы, варианты, ответы, разборы,
+     подсказки, модели рисунков, опорные задачи, методы; теория (тексты в
+     content и разметка разделов теории), «О задании», карточки. */
+  4: [
+    'app/src/lib/veroyatnost/bank4',
+    'app/src/lib/veroyatnost/index.ts',
+    'app/src/lib/veroyatnost/types.ts',
+    'app/src/lib/veroyatnost/model.ts',
+    'app/src/lib/veroyatnost/model-zadachi.ts',
+    'app/src/lib/veroyatnost/blocks.ts',
+    'app/src/lib/veroyatnost/metody4.ts',
+    'app/src/lib/veroyatnost/podgotovka4.ts',
+    'app/src/lib/veroyatnost/podskazka.ts',
+    'app/src/lib/veroyatnost/illyustratsii.ts',
+    'app/src/lib/veroyatnost/secret.ts',
+    'app/src/lib/veroyatnost/teoriya.ts',
+    'app/src/lib/veroyatnost/teoriya-ponimanie.ts',
+    'app/src/lib/veroyatnost/teoriya-yakorya.ts',
+    'app/src/content/veroyatnost-teoriya.ts',
+    'app/src/content/veroyatnost-o-zadanii.ts',
+    'app/src/content/veroyatnost-metody.ts',
+    'app/src/content/veroyatnost-syuzhety.ts',
+    'app/src/content/kartochki/04-veroyatnost.ts',
+    'app/src/components/tasks/veroyatnost/teoriya',
+  ],
+  5: [
+    'app/src/lib/veroyatnost/bank5',
+    'app/src/lib/veroyatnost/index.ts',
+    'app/src/lib/veroyatnost/types.ts',
+    'app/src/lib/veroyatnost/model.ts',
+    'app/src/lib/veroyatnost/model-zadachi.ts',
+    'app/src/lib/veroyatnost/blocks.ts',
+    'app/src/lib/veroyatnost/metody5.ts',
+    'app/src/lib/veroyatnost/podgotovka5.ts',
+    'app/src/lib/veroyatnost/podgotovka5-podskazki.ts',
+    'app/src/lib/veroyatnost/labirint.ts',
+    'app/src/lib/veroyatnost/podskazka.ts',
+    'app/src/lib/veroyatnost/illyustratsii.ts',
+    'app/src/lib/veroyatnost/secret.ts',
+    'app/src/lib/veroyatnost/teoriya.ts',
+    'app/src/lib/veroyatnost/teoriya-ponimanie.ts',
+    'app/src/lib/veroyatnost/teoriya-yakorya.ts',
+    'app/src/content/veroyatnost-teoriya.ts',
+    'app/src/content/veroyatnost-o-zadanii.ts',
+    'app/src/content/veroyatnost-metody.ts',
+    'app/src/content/kartochki/05-veroyatnost.ts',
+    'app/src/components/tasks/veroyatnost/teoriya',
+  ],
   1: [
     /* Банк, аналоги, сцены чертежей, решения и подсказки, опорные задачи,
        движок чертежей, генератор и листы, теория и карточки. */
@@ -101,6 +165,96 @@ const SODERZHANIE = {
     'app/src/content/uroki6.ts',
     'app/src/content/kartochki/06-sluchaynye-velichiny.ts',
   ],
+  11: [
+    /* Банк, разминка и аналоги, движок подтипов (условия, ответы, разборы,
+       таблицы модели, подсказки), генераторы, опорные задачи, теория и
+       карточки. public/data/zadanie11 — новые файлы тренажёра, они
+       сверяются с банком отдельно (pnpm test:bank-11). */
+    'app/src/data/zadanie11',
+    'app/src/lib/zadanie11/prototypes',
+    'app/src/lib/zadanie11/bank.ts',
+    'app/src/lib/zadanie11/analogi.ts',
+    'app/src/lib/zadanie11/kit.ts',
+    'app/src/lib/zadanie11/num.ts',
+    'app/src/lib/zadanie11/sklonenie.ts',
+    'app/src/lib/zadanie11/secret.ts',
+    'app/src/lib/zadanie11/taxonomy.ts',
+    'app/src/lib/zadanie11/types.ts',
+    'app/src/lib/zadanie11/gen',
+    'app/src/lib/zadanie11/prep',
+    'app/src/lib/zadanie11/proporciya',
+    'app/src/lib/zadanie11/generator11.ts',
+    'app/src/lib/zadanie11/sheet11.ts',
+    'app/src/content/teoriya11.ts',
+    'app/src/content/teoriya-edinicy.ts',
+    'app/src/content/generator11.ts',
+    'app/src/content/kartochki/11-tekstovye.ts',
+  ],
+  9: [
+    /* Генератор, банк вариантов, движок чертежей, опорные: задачи, ответы,
+       разборы, подсказки, рисунки. Тексты прежней «О задании» и «Для
+       репетиторов» (content/proizvodnaya.ts), теория, карточки. */
+    'app/src/lib/proizvodnaya/prototypes',
+    'app/src/lib/proizvodnaya/prep',
+    'app/src/lib/proizvodnaya/generate.ts',
+    'app/src/lib/proizvodnaya/bank.ts',
+    'app/src/lib/proizvodnaya/bankPravila.ts',
+    'app/src/lib/proizvodnaya/otkrytyj-bank.ts',
+    'app/src/lib/proizvodnaya/render.ts',
+    'app/src/lib/proizvodnaya/krivye.ts',
+    'app/src/lib/proizvodnaya/spline.ts',
+    'app/src/lib/proizvodnaya/chtenie.ts',
+    'app/src/lib/proizvodnaya/osDvizheniya.ts',
+    'app/src/lib/proizvodnaya/reshit.ts',
+    'app/src/lib/proizvodnaya/stseny.ts',
+    'app/src/lib/proizvodnaya/stsenyPonyatiya.ts',
+    'app/src/lib/proizvodnaya/tex.ts',
+    'app/src/lib/proizvodnaya/secret.ts',
+    'app/src/lib/proizvodnaya/rng.ts',
+    'app/src/lib/proizvodnaya/povyshennye.ts',
+    'app/src/lib/proizvodnaya/ezhemesyachnye.ts',
+    'app/src/lib/proizvodnaya/generator9.ts',
+    'app/src/lib/proizvodnaya/sheet9.ts',
+    'app/src/content/proizvodnaya.ts',
+    'app/src/content/theoryProizvodnaya.ts',
+    'app/src/content/theoryPonyatie9.ts',
+    'app/src/content/kartochki/09-proizvodnaya.ts',
+  ],
+  12: [
+    /* Движок графиков: наборы задач (банк), генераторы, подсказки, разборы. */
+    'app/src/lib/graph',
+    'app/src/data/functionTypes.ts',
+    'app/src/content/skills12.ts',
+    'app/src/content/prepSkills.ts',
+    /* Генератор и зачётная работа. */
+    'app/src/lib/ves12/build.ts',
+    'app/src/lib/ves12/engine12.ts',
+    'app/src/lib/ves12/generator12.ts',
+    'app/src/lib/ves12/work.ts',
+    'app/src/lib/ves12/fipi.ts',
+    'app/src/lib/generator',
+    /* Теория и методы видов функций. */
+    'app/src/content/theoryLinear.ts',
+    'app/src/content/theoryLinearRich.ts',
+    'app/src/content/theoryQuadratic.ts',
+    'app/src/content/theoryRational.ts',
+    'app/src/content/theoryIrrational.ts',
+    'app/src/content/theoryExponential.ts',
+    'app/src/content/theoryLogarithmic.ts',
+    'app/src/content/theoryTrigonometric.ts',
+    'app/src/content/quadratic.ts',
+    'app/src/content/quadraticBasics.ts',
+    'app/src/content/quadraticMetody.ts',
+    'app/src/content/quadraticTypes.ts',
+    'app/src/content/rational.ts',
+    'app/src/content/rationalMetody.ts',
+    'app/src/content/irrational.ts',
+    'app/src/content/exponential.ts',
+    'app/src/content/logarithmic.ts',
+    'app/src/content/trigonometric.ts',
+    'app/src/content/metody.ts',
+    'app/src/components/tasks/theory',
+  ],
   7: [
     'app/src/data/zadanie7',
     'app/public/data/zadanie7',
@@ -142,6 +296,51 @@ const SODERZHANIE = {
     'app/src/content/repetitory13.ts',
     'app/src/content/kartochki/13-ekonomicheskie.ts',
   ],
+};
+
+/**
+ * Правки содержания, одобренные владельцем: ошибка в тексте, о которой
+ * сказано в PR редизайна, исправлена отдельным PR. Файл пропускается,
+ * только пока он совпадает с одобренной версией (sha256): любая следующая
+ * правка снова видна проверке. После слияния в main запись не нужна —
+ * образец уже содержит эту версию.
+ */
+const ODOBRENO = {
+  /* №9: определение точки максимума без минимума; «нуль» при одном нуле. */
+  'app/src/lib/proizvodnaya/prototypes/po-grafiku-fprime.ts':
+    'cf6c9b6b7737e190cb0e7a7bc3adb1b3783f292af1aede97179ac35f9b0e01b9',
+  'app/src/lib/proizvodnaya/povyshennye.ts':
+    '690f2d8461884b393db2f655aeb20e8c570b4d2bf59355001d29f88f1875413a',
+  /* №12: обращение на ты, по решению владельца (подписи наборов). */
+  'app/src/lib/graph/data/prototypes/12/12-A.json':
+    '67b48eee7e87f8d655050d5ddda7bd38f52f5699089c4499b67eff65a24ad244',
+  'app/src/lib/graph/data/prototypes/12/12-B.json':
+    '14cd060e2a9bfcd60dd1f2eaefed12007ff765de41a2eee61f563efad6356880',
+  'app/src/lib/graph/data/prototypes/12/12-C.json':
+    '09f5edf6f48aeb17aebe3e903c59087ee20f9c5f409d2a83938ac3f76593e95e',
+  'app/src/lib/graph/data/prototypes/12/12-D.json':
+    'f160582c1674d85ed5c37ea3477b8488c960c0ff97ae9a4d8dda0ec309d8fb20',
+  'app/src/lib/graph/data/prototypes/12q/12Q-A.json':
+    'e1ad4e902222b965c6c6d7b9461f9107817d58e46180964a15e7947f1caf1437',
+  'app/src/lib/graph/data/prototypes/12q/12Q-B.json':
+    '08fa7582852c4b5bc9aa1c92e3b54e0dcf7202023a77610c6207746fe86b5a8d',
+  'app/src/lib/graph/data/prototypes/12q/12Q-C.json':
+    '664fb1aa20f7685d853442bad5dc156091ca10c2c9b296f3c93758e493cfca43',
+  'app/src/lib/graph/data/prototypes/12q/12Q-D.json':
+    'eef958ca9bfb85dd5626286d3402506c40cba4588a61c32a451dd6f9aa17f97f',
+  'app/src/lib/graph/data/prototypes/12q/12Q-E.json':
+    '3d1f195ee4721c94a106ce8f7398ce7258b480c044a2e81e36fd5771eeeea48f',
+  'app/src/lib/graph/data/prototypes/12q/12Q-F.json':
+    '48b444ee52953f1b94f123558f25fa0be2942a468431a751906015c9ea909188',
+  'app/src/lib/graph/data/prototypes/12q/12Q-G.json':
+    '861ef83de7e7625e1811d4403fa80784945a884c8ed5a677880ed51db429e59f',
+  'app/src/lib/graph/data/prototypes/12q/12Q-H.json':
+    'e285e8137bee4384392028adb08700ea2295af90e663e9733a6a23ecccaad4a9',
+  'app/src/lib/graph/data/prototypes/12q/12Q-I.json':
+    'e20f537914c09f5aa62bbf90ea91d07d1ebadc95c080ee386bbd1e7c37540954',
+  /* №10: П-33, порядок максимума по k — по решению владельца. */
+  'app/src/lib/zadanie10/prototypes/gruppa5.ts':
+    '11ec6178e5483661722a7b8f53f964cbde113bf5b029c7cc6fcd2c2637cb901e',
 };
 
 /** Какие картинки реестра принадлежат разделу. */
@@ -243,7 +442,21 @@ if (puti === undefined) {
   } catch (error) {
     check(false, `не удалось сравнить с ${obrazec}: ${String(error).slice(0, 200)}`);
   }
-  check(izmeneno === '', `банк или содержание раздела №${razdel} изменены:\n${izmeneno}`);
+  const neodobreno = izmeneno
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .filter((line) => {
+      const file = line.split('\t').at(-1);
+      const odobreno = ODOBRENO[file];
+      if (odobreno === undefined || !fs.existsSync(path.join(REPO, file))) return true;
+      const now = crypto
+        .createHash('sha256')
+        .update(fs.readFileSync(path.join(REPO, file)))
+        .digest('hex');
+      return now !== odobreno;
+    })
+    .join('\n');
+  check(neodobreno === '', `банк или содержание раздела №${razdel} изменены:\n${neodobreno}`);
 }
 
 if (failures.length > 0) {

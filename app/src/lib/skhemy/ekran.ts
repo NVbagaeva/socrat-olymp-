@@ -26,6 +26,7 @@ import type {
   Yakor,
   ZhivayaSkhema,
 } from './tipy';
+import { KEGL_VELICHINY, KEGL_VERSHINY } from './tema';
 
 /* ── Стиль ─────────────────────────────────────────────────────── */
 
@@ -37,9 +38,12 @@ export const SK = {
   shtrih: { pol: 4, shag: 3.5 },
   tochkaR: 2.6,
   /** Кегль подписи точки, px: полужирный курсив темы (lib/skhemy/tema.ts, KEGL_VERSHINY). */
-  kegl: 19,
-  /** Кегль величины (данные условия на чертеже), px. */
-  keglVel: 15,
+  kegl: KEGL_VERSHINY,
+  /**
+   * Кегль величины (данные условия на чертеже), px: не меньше букв
+   * вершин — на листе A4 в две колонки числа и подписи S читаются так же.
+   */
+  keglVel: KEGL_VELICHINY,
 } as const;
 
 /** Радиус точки в теме чертежа, px. */
@@ -178,7 +182,8 @@ export function ramkaKadra(kadr: Kadr, vid: Vid, sost: Sostoyanie): Ramka {
 function tochkiYakorya(y: Yakor): readonly T2[] {
   if ('otrezok' in y) return y.otrezok;
   if ('ugol' in y) return [y.ugol[1]];
-  return [y.vnutri];
+  if ('vnutri' in y) return [y.vnutri];
+  return [];
 }
 
 /** Плавный переход рамки: доля t ∈ [0; 1] пути от a к b. */
@@ -247,6 +252,8 @@ export interface EkrOkr extends Obshchee {
   cy: number;
   r: number;
   stil: StilLinii;
+  /** Залит круг: на чертеже нет многоугольника — основная фигура круг. */
+  zalivka: boolean;
 }
 
 export interface EkrDuga extends Obshchee {
@@ -257,55 +264,23 @@ export interface EkrDuga extends Obshchee {
 export interface EkrMnog extends Obshchee {
   points: string;
   /**
-   * Пунктирный контур искомой площади (роль region-sought): многоугольник,
-   * сдвинутый внутрь фигуры, — не сливается со сторонами. Иначе — ''.
+   * Контур искомой площади (роль region-sought): та же фигура, толстой
+   * сплошной линией поверх линий чертежа — без двойных линий. Иначе — ''.
    */
   kontur: string;
+  /** Площадь на экране, px² — порядок слоёв: большая заливка ниже. */
+  s: number;
 }
 
-/** Отступ контура искомой площади внутрь фигуры, px. */
-const OTSTUP_ISKOMOY = 5;
-
-/**
- * Многоугольник, сдвинутый внутрь на d px: каждая сторона — параллельно
- * себе, вершины — пересечения соседних сдвинутых сторон. Для выпуклых
- * фигур (искомые площади задач). Вырождается — [].
- */
-function vnutrenniyKontur(pts: readonly T2[], d: number): T2[] {
-  const n = pts.length;
-  if (n < 3) return [];
-  let pl = 0;
-  for (let i = 0; i < n; i += 1) {
+/** Площадь многоугольника на экране, px². */
+function ploshchadEkr(pts: readonly T2[]): number {
+  let s = 0;
+  for (let i = 0; i < pts.length; i += 1) {
     const a = pts[i]!;
-    const b = pts[(i + 1) % n]!;
-    pl += a[0] * b[1] - b[0] * a[1];
+    const b = pts[(i + 1) % pts.length]!;
+    s += a[0] * b[1] - b[0] * a[1];
   }
-  const zn = pl > 0 ? 1 : -1;
-  const linii = pts.map((a, i) => {
-    const b = pts[(i + 1) % n]!;
-    const dx = b[0] - a[0];
-    const dy = b[1] - a[1];
-    const l = Math.hypot(dx, dy) || 1;
-    /* Внутренняя нормаль: при обходе против часовой (pl > 0) — слева. */
-    const nx = (-dy / l) * zn * d;
-    const ny = (dx / l) * zn * d;
-    return [
-      [a[0] + nx, a[1] + ny],
-      [b[0] + nx, b[1] + ny],
-    ] as const;
-  });
-  const out: T2[] = [];
-  for (let i = 0; i < n; i += 1) {
-    const [p1, p2] = linii[(i + n - 1) % n]!;
-    const [q1, q2] = linii[i]!;
-    const r: T2 = [p2[0] - p1[0], p2[1] - p1[1]];
-    const s: T2 = [q2[0] - q1[0], q2[1] - q1[1]];
-    const den = r[0] * s[1] - r[1] * s[0];
-    if (Math.abs(den) < 1e-9) return [];
-    const t = ((q1[0] - p1[0]) * s[1] - (q1[1] - p1[1]) * s[0]) / den;
-    out.push([p1[0] + r[0] * t, p1[1] + r[1] * t]);
-  }
-  return out;
+  return Math.abs(s) / 2;
 }
 
 export interface EkrUgol extends Obshchee {
@@ -329,6 +304,8 @@ export interface EkrPodpis extends Obshchee {
   y: number;
   bukva: string;
   indeks: string;
+  /** Свес курсива: текст рисуется в x − sdvig, x — центр рамки буквы. */
+  sdvig: number;
   /** Выноска от точки к отнесённой букве: путь SVG или пустая строка. */
   vynoska: string;
 }
@@ -361,6 +338,8 @@ export interface EkrVelichina extends Obshchee {
   korni: string[];
   /** Толщина линии знака корня, px. */
   tolshchinaKornya: number;
+  /** Строка в полосе под чертежом (площади, угол без места у дуги). */
+  vPolose: boolean;
 }
 
 export interface Ekran {
@@ -493,16 +472,87 @@ export function raskladka(
   /** Точки с ручками перетаскивания: кольцо ручки — препятствие подписи. */
   ruchki: readonly string[] = [],
 ): Ekran {
-  /* Величина или буква не уместилась в поле — фигура чуть мельчает,
-     чтобы подпись не обрезалась краем чертежа. */
+  /* Подписи угла или отрезка не нашлось чистого места у дуги (отрезка) —
+     она уходит строкой под чертёж: «∠ACB = 150°», «AB = 2» (буквы — точек
+     чертежа); дуга и отрезок остаются. После переноса раскладка другая —
+     проход повторяется (до трёх раз), берётся лучший. */
+  const imena = kadr.elementy.filter(
+    (el): el is Element & { vid: 'tochka' } =>
+      el.vid === 'tochka' && el.imya !== undefined && vidimEl(el, sost),
+  );
+  const imya = (p: T2) => imena.find((t) => dist(t.p, p) < 1e-9)?.imya;
+  let tek = kadr;
+  let luchshiy = razlozhit(tek, vid, ramka, W, H, sost, ruchki);
+  let posledniy = luchshiy;
+  for (let prohod = 0; prohod < 3 && posledniy.nechistyeUgly.length > 0; prohod += 1) {
+    const nechistye = posledniy.nechistyeUgly;
+    let zameneno = false;
+    const elementy = tek.elementy.map((el) => {
+      if (el.vid !== 'velichina' || !nechistye.includes(el.id)) return el;
+      const y = el.yakor;
+      if (!('ugol' in y) && !('otrezok' in y)) return el;
+      /* «cos C = 0,6», «AB = 2» уже с именем — строкой как есть; «120°» и
+         «4» — с именем угла или отрезка. */
+      let tekst = el.tekst;
+      if (!tekst.includes('=')) {
+        const bukvy = ('ugol' in y ? y.ugol : y.otrezok).map(imya);
+        if (bukvy.some((x) => x === undefined)) return el;
+        tekst = `${'ugol' in y ? '∠' : ''}${bukvy.join('')} = ${tekst}`;
+      }
+      zameneno = true;
+      return { ...el, tekst, yakor: { podChertezhom: true } } as Element;
+    });
+    if (!zameneno) break;
+    tek = { ...tek, elementy };
+    posledniy = razlozhit(tek, vid, ramka, W, H, sost, ruchki);
+    if (posledniy.plokho <= luchshiy.plokho) luchshiy = posledniy;
+  }
+  return luchshiy.ekran;
+}
+
+function razlozhit(
+  kadr: Kadr,
+  vid: Vid,
+  ramka: Ramka,
+  W: number,
+  H: number,
+  sost: Sostoyanie,
+  ruchki: readonly string[],
+): { ekran: Ekran; plokho: number; nechistyeUgly: string[] } {
+  /* Подписи площадей («S… = ?», «S… = 24») — не на чертеже, а полосой
+     под ним, друг под другом: фигура раскладывается в высоту без полосы. */
+  const nPl = kadr.elementy.filter(
+    (el) => el.vid === 'velichina' && vidimEl(el, sost) && etoPloshchad(el),
+  ).length;
+  const polosa =
+    nPl === 0
+      ? 0
+      : POLOSA_PLOSHCHADEY.otstup + nPl * POLOSA_PLOSHCHADEY.stroka + POLOSA_PLOSHCHADEY.niz;
+  /* Величина или буква не уместилась в поле или ей нет чистого места —
+     фигура чуть мельчает (до трёх раз). Из попыток берётся лучшая, при
+     равенстве — крупнейшая: мельчание не всегда помогает (подписи того
+     же размера, а фигура меньше). */
   let r = ramka;
-  for (let i = 0; ; i += 1) {
-    const [ekran, vne] = raskladka1(kadr, vid, r, W, H, sost, ruchki);
-    if (!vne || i === 3) return ekran;
+  let luchshiy: Raskladka1 | null = null;
+  for (let i = 0; i <= 3; i += 1) {
+    const popytka = raskladka1(kadr, vid, r, W, H - polosa, sost, ruchki);
+    if (luchshiy === null || popytka.plokho < luchshiy.plokho) luchshiy = popytka;
+    if (popytka.plokho === 0) break;
     const dx = (r[2] - r[0]) * 0.1;
     const dy = (r[3] - r[1]) * 0.1;
     r = [r[0] - dx, r[1] - dy, r[2] + dx, r[3] + dy];
   }
+  const l = luchshiy!;
+  if (polosa > 0) podpisiPloshchadey(l.ekran, kadr, sost, W, H, H - polosa);
+  return l;
+}
+
+interface Raskladka1 {
+  ekran: Ekran;
+  /** Сколько подписей плохо: за краем (×3), без чистого места. */
+  plokho: number;
+  /** Подписи углов и отрезков без чистого места у дуги (отрезка). */
+  nechistyeUgly: string[];
 }
 
 function raskladka1(
@@ -513,7 +563,7 @@ function raskladka1(
   H: number,
   sost: Sostoyanie,
   ruchki: readonly string[],
-): [Ekran, boolean] {
+): Raskladka1 {
   const preob = preobrazovanie(ramka, vid, W, H);
   const E = preob.vEkran;
   const ekran: Ekran = {
@@ -534,7 +584,8 @@ function raskladka1(
     preob,
   };
   const prep: Prepyatstviya = { otrezki: [], okruzhnosti: [], tochki: [] };
-  /* Величины ставятся последними: им мешают и линии, и буквы. */
+  /* Величины ставятся последними: им мешают и линии, и буквы. Подписи
+     площадей встают полосой под чертежом (podpisiPloshchadey). */
   const velichiny: { el: Element & { vid: 'velichina' }; obshchee: Obshchee }[] = [];
 
   for (const el of kadr.elementy) {
@@ -568,7 +619,7 @@ function raskladka1(
     }
     if (!vidim) continue;
     if (el.vid === 'velichina') {
-      velichiny.push({ el, obshchee });
+      if (!etoPloshchad(el)) velichiny.push({ el, obshchee });
       continue;
     }
     switch (el.vid) {
@@ -600,6 +651,7 @@ function raskladka1(
           cy: f2(c[1]),
           r: f2(r),
           stil: el.stil ?? 'linia',
+          zalivka: false,
         });
         prep.okruzhnosti.push([c, r]);
         break;
@@ -616,14 +668,14 @@ function raskladka1(
       }
       case 'mnogougolnik': {
         const pts = el.tochki.map(E);
-        const k = el.rol === 'region-sought' ? vnutrenniyKontur(pts, OTSTUP_ISKOMOY) : [];
+        const points = pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join(' ');
         ekran.mnog.push({
           ...obshchee,
-          points: pts.map((p) => `${f1(p[0])},${f1(p[1])}`).join(' '),
-          kontur: k.length === 0 ? '' : `M${k.map((p) => `${f1(p[0])} ${f1(p[1])}`).join('L')}Z`,
+          points,
+          kontur:
+            el.rol === 'region-sought' ? `M${points.replace(/ /g, 'L').replace(/,/g, ' ')}Z` : '',
+          s: ploshchadEkr(pts),
         });
-        /* Пунктир искомой площади — препятствие подписям. */
-        k.forEach((p, i) => prep.otrezki.push([p, k[(i + 1) % k.length]!]));
         break;
       }
       case 'ugol': {
@@ -644,6 +696,16 @@ function raskladka1(
     }
   }
 
+  /* Заливки: одна область — одна заливка, непрозрачная. Большая — ниже,
+     меньшая поверх неё: искомая часть внутри данной фигуры лежит сверху,
+     а данная часть внутри искомой — «вычитается» из неё своим тоном. */
+  ekran.mnog.sort((a, b) => b.s - a.s);
+  /* Нет многоугольника — основная фигура круг: заливается он. */
+  if (ekran.mnog.length === 0)
+    ekran.okr.forEach((o) => {
+      if (o.stil === 'linia' && o.rol !== 'construction') o.zalivka = true;
+    });
+
   for (const imya of ruchki) {
     const p = ekran.poImeni[imya];
     if (p !== undefined) prep.okruzhnosti.push([p, RUCHKA_R]);
@@ -651,6 +713,9 @@ function raskladka1(
 
   const zanyato: Pryam[] = [];
   let vneBukv = false;
+  /* Букве не нашлось чистого места даже с выноской — фигура мельчает,
+     по краям появляется поле (как при выходе подписи за край). */
+  let tesnoBukv = false;
   if (sost.podpisi) {
     const imennye = ekran.tochki.filter((t) => t.imya !== null);
     const mesta = razmestitSVynoskami(
@@ -661,7 +726,8 @@ function raskladka1(
       SK.kegl,
     );
     imennye.forEach((t, i) => {
-      const { c: m, vynoska: v } = mesta[i]!;
+      const { c: m, vynoska: v, tesno } = mesta[i]!;
+      if (tesno === true) tesnoBukv = true;
       const [bukva, indeks] = (t.imya ?? '').split('_');
       const g = gabaritBukvy(t.imya ?? '', SK.kegl);
       /* Буква за краем чертежа (раскладка ставит её туда, когда рядом с
@@ -691,16 +757,25 @@ function raskladka1(
         y: f2(m[1]),
         bukva: bukva ?? '',
         indeks: indeks ?? '',
+        sdvig: f2(g.sdvig),
         vynoska: v === null ? '' : `M${f2(v[0][0])} ${f2(v[0][1])}L${f2(v[1][0])} ${f2(v[1][1])}`,
       });
     });
   }
-  let vne = vneBukv;
+  /* Сколько подписей плохо: за краем — втрое хуже, чем тесно. */
+  let plokho = (vneBukv ? 3 : 0) + (tesnoBukv ? 1 : 0);
+  const nechistyeUgly: string[] = [];
   for (const { el, obshchee } of velichiny) {
     const chasti = chastiVelichiny(el.tekst);
     const { hw, hh, base } = gabaritVelichiny(chasti);
-    const c = mestoVelichiny(el.yakor, hw, hh, E, prep, zanyato, W, H);
-    if (c[0] - hw < 1 || c[1] - hh < 1 || c[0] + hw > W - 1 || c[1] + hh > H - 1) vne = true;
+    const [c, chisto] = mestoVelichiny(el.yakor, hw, hh, E, prep, zanyato, W, H);
+    /* Чистого места нет — фигура мельчает, как для букв. */
+    if (!chisto) {
+      plokho += 1;
+      if ('ugol' in el.yakor || 'otrezok' in el.yakor) nechistyeUgly.push(el.id);
+    }
+    if (c[0] - hw < 1 || c[1] - hh < 1 || c[0] + hw > W - 1 || c[1] + hh + SPUSK_VELICHINY > H - 1)
+      plokho += 3;
     zanyato.push([c[0] - hw, c[1] - hh, c[0] + hw, c[1] + hh]);
     const levo = c[0] - hw + 1;
     const b = c[1] + base;
@@ -715,6 +790,7 @@ function raskladka1(
         .filter((ch) => ch.koren)
         .map((ch) => putKornya(levo + ch.dx - KOREN.znak * SK.keglVel, b, ch.w, SK.keglVel)),
       tolshchinaKornya: f2(KOREN.tolshchina * SK.keglVel * 1.25),
+      vPolose: false,
     });
   }
   /* Слои линий темы; сортировка устойчивая, без темы порядок прежний. */
@@ -722,7 +798,78 @@ function raskladka1(
     const sloy = (l: EkrLiniya) => (l.rol === null ? 1 : SLOY_ROLI[l.rol]);
     ekran.linii.sort((a, b) => sloy(a) - sloy(b));
   }
-  return [ekran, vne];
+  return { ekran, plokho, nechistyeUgly };
+}
+
+/* ── Подписи площадей ──────────────────────────────────────────── */
+
+/** Полоса подписей площадей под чертежом, px. */
+const POLOSA_PLOSHCHADEY = { otstup: 8, stroka: 26, niz: 6 } as const;
+
+/**
+ * Спуск шрифта величины, px: рамка текста в браузере опускается ниже
+ * прямоугольника раскладки (индекс S_ABC, нижние выносные) — у нижнего
+ * края чертежа нужен этот запас, иначе подпись обрезается.
+ */
+const SPUSK_VELICHINY = 4;
+
+/**
+ * Запись в полосе под чертежом: площадь, данная или искомая
+ * («S_ABC = 24», «S_APC = ?»), или величина с привязкой podChertezhom.
+ */
+function etoPloshchad(el: Element): boolean {
+  return (
+    el.vid === 'velichina' &&
+    (el.rol === 'region' ||
+      el.rol === 'region-sought' ||
+      /^S_/.test(el.tekst) ||
+      'podChertezhom' in el.yakor)
+  );
+}
+
+/**
+ * Подписи площадей — строками под чертежом, по центру, друг под другом:
+ * сначала данные, потом искомые. Внутрь фигуры и на стороны — никогда.
+ */
+function podpisiPloshchadey(
+  ekran: Ekran,
+  kadr: Kadr,
+  sost: Sostoyanie,
+  W: number,
+  H: number,
+  verh: number,
+): void {
+  ekran.H = H;
+  const pl = kadr.elementy
+    .filter((el): el is Element & { vid: 'velichina' } => el.vid === 'velichina')
+    .filter((el) => vidimEl(el, sost) && etoPloshchad(el))
+    .sort((a, b) => Number(a.rol === 'region-sought') - Number(b.rol === 'region-sought'));
+  pl.forEach((el, i) => {
+    const chasti = chastiVelichiny(el.tekst);
+    const { hw, base } = gabaritVelichiny(chasti);
+    const c: T2 = [W / 2, verh + POLOSA_PLOSHCHADEY.otstup + (i + 0.5) * POLOSA_PLOSHCHADEY.stroka];
+    const levo = c[0] - hw + 1;
+    const b = c[1] + base;
+    const lit = goritEl(el, sost.lit);
+    ekran.velichiny.push({
+      id: el.id,
+      lit,
+      dim: sost.lit.size > 0 && !lit,
+      cvet: cvetEl(el, sost.lit),
+      novyy: sost.shag !== null && sost.shag > 0 && (el.shag ?? 0) === sost.shag,
+      rol: el.rol ?? null,
+      x: f2(c[0]),
+      y: f2(c[1]),
+      levo: f2(levo),
+      base: f2(b),
+      chasti,
+      korni: chasti
+        .filter((ch) => ch.koren)
+        .map((ch) => putKornya(levo + ch.dx - KOREN.znak * SK.keglVel, b, ch.w, SK.keglVel)),
+      tolshchinaKornya: f2(KOREN.tolshchina * SK.keglVel * 1.25),
+      vPolose: true,
+    });
+  });
 }
 
 /* ── Величины ──────────────────────────────────────────────────── */
@@ -759,17 +906,33 @@ const PROPISNYE: Readonly<Record<string, number>> = {
   Z: 0.68,
 };
 
+/** Прямые строчные KaTeX_Main, доли кегля (метрики KaTeX). */
+const STROCHNYE: Readonly<Record<string, number>> = {
+  c: 0.444,
+  o: 0.5,
+  s: 0.394,
+  i: 0.278,
+  n: 0.556,
+  t: 0.389,
+  g: 0.5,
+};
+
 /** Ширина знака в долях кегля (KaTeX_Main / KaTeX_Math). */
 function shirinaZnaka(ch: string, kursiv: boolean): number {
   if (/[0-9]/.test(ch)) return 0.5;
   /* Курсив KaTeX_Math: ширины прописных — по замеру, как у движка №1
      (lib/planimetriya/render.ts). */
   if (/[A-Z]/.test(ch)) return kursiv ? (PROPISNYE[ch] ?? 0.75) : 0.7;
-  if (/[a-z]/.test(ch)) return kursiv ? 0.57 : 0.5;
+  /* Прямые строчные KaTeX_Main — имена функций cos, sin, tg, ctg. */
+  if (/[a-z]/.test(ch)) return kursiv ? 0.57 : (STROCHNYE[ch] ?? 0.5);
   if (ch === ' ' || ch === '\u00a0') return 0.25;
   if (ch === '=' || ch === '+' || ch === '−') return 0.78;
   /* KaTeX_Main: «°» — 0,5 кегля по замеру в Chromium и WebKit (было 0,4 — запись угла ложилась вплотную к линии). */
   if (ch === '°') return 0.5;
+  /* KaTeX_Main: «?» — 0,47 кегля, «/» — 0,5, «∠» — 0,72. */
+  if (ch === '?') return 0.47;
+  if (ch === '/') return 0.5;
+  if (ch === '∠') return 0.72;
   return 0.3;
 }
 
@@ -790,8 +953,10 @@ export function chastiVelichiny(tekst: string): ChastVelichiny[] {
     const posl = out[out.length - 1];
     if (
       !koren &&
+      t !== '∠' &&
       posl !== undefined &&
       !posl.koren &&
+      posl.t !== '∠' &&
       posl.kursiv === kursiv &&
       posl.indeks === indeks
     ) {
@@ -810,7 +975,10 @@ export function chastiVelichiny(tekst: string): ChastVelichiny[] {
     /* Пробелы — неразрывные: SVG схлопывает пробел в начале куска («S_ABC = 60»). */ else if (
       m[5] !== undefined
     )
-      dobavit(m[5].replace(/ /g, '\u00a0'), false, false);
+      /* «∠» — отдельным куском заданной ширины (zadannaya): глифа нет в
+         части шрифтов, и браузер подставляет другой — запись шире раскладки. */
+      for (const kusok of m[5].replace(/ /g, '\u00a0').split(/(∠)/))
+        if (kusok !== '') dobavit(kusok, false, false);
   }
   return out;
 }
@@ -836,7 +1004,8 @@ export function gabaritVelichiny(chasti: readonly ChastVelichiny[]): {
 }
 
 /**
- * Место величины: первый кандидат, который ничего не задевает.
+ * Место величины: первый кандидат, который ничего не задевает, и
+ * нашлось ли такое (иначе — наименее плохой, false).
  * У отрезка — снаружи фигуры по нормали к середине, потом ближе к
  * концам и с другой стороны; у угла — по биссектрисе за дугой угла;
  * внутри — около точки по спирали.
@@ -850,7 +1019,7 @@ function mestoVelichiny(
   zanyato: readonly Pryam[],
   W: number,
   H: number,
-): T2 {
+): [T2, boolean] {
   const centr: T2 = [W / 2, H / 2];
   const kand: { c: T2; cena: number }[] = [];
   const vynos = (d: T2) => Math.abs(d[0]) * hw + Math.abs(d[1]) * hh;
@@ -862,14 +1031,16 @@ function mestoVelichiny(
     const m: T2 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
     const naruzhu = dot(sub(m, centr), nr) >= 0 ? 1 : -1;
     const l = dist(a, b);
-    for (const ots of [4, 7, 11, 16]) {
+    for (const ots of [4, 7, 11, 16, 23, 31]) {
       for (const t of [0, 0.15, -0.15, 0.3, -0.3]) {
         for (const storona of [naruzhu, -naruzhu]) {
           const d: T2 = [nr[0] * storona, nr[1] * storona];
           const k = ots + vynos(d);
           kand.push({
             c: [m[0] + u[0] * t * l + d[0] * k, m[1] + u[1] * t * l + d[1] * k],
-            cena: ots + Math.abs(t) * 30 + (storona === naruzhu ? 0 : 12),
+            /* Дальше 16 px от отрезка запись уже не «его» — не чистое место:
+               если ближе тесно, запись уходит строкой под чертёж. */
+            cena: (ots > 16 ? 1500 : 0) + ots + Math.abs(t) * 30 + (storona === naruzhu ? 0 : 12),
           });
         }
       }
@@ -886,23 +1057,35 @@ function mestoVelichiny(
       SK.ugol.min,
       Math.min(SK.ugol.r, SK.ugol.dolya * Math.min(dist(a, v), dist(b, v))),
     );
-    for (const ots of [4, 8, 13, 19, 26, 34, 44]) {
-      for (const da of [0, 12, -12, 24, -24, 40, -40, 60, -60]) {
+    /* Половина угла, градусы: дальше от биссектрисы — уже за лучом. */
+    const polUgla = (Math.acos(Math.max(-1, Math.min(1, dot(ua, ub)))) * 90) / Math.PI;
+    /* Подпись угла — у его дуги: дальше 19 px от дуги внутри угла не
+       уходит (иначе она встаёт у чужой точки на биссектрисе). */
+    for (const ots of [4, 8, 13, 19]) {
+      for (const da of [0, 6, -6, 12, -12, 18, -18, 24, -24, 32, -32, 40, -40, 50, -50, 60, -60]) {
         const d = rotate(bis, [0, 0], da);
         const k = r0 + ots + vynos(d);
-        kand.push({ c: [v[0] + d[0] * k, v[1] + d[1] * k], cena: ots + Math.abs(da) * 0.4 });
+        /* Центр записи за лучом угла — запись снаружи стороны, не у
+           своей дуги: такое место не «чистое» (см. ниже). */
+        const zaLuchom = Math.abs(da) >= polUgla ? 1500 : 0;
+        kand.push({
+          c: [v[0] + d[0] * k, v[1] + d[1] * k],
+          cena: zaLuchom + ots + Math.abs(da) * 0.4,
+        });
       }
     }
-    /* Узкий угол: длинная запись не помещается внутри — встаёт снаружи
-       вершины, на продолжении биссектрисы. */
+    /* Снаружи вершины, на продолжении биссектрисы, запись читается как
+       внешний угол — это не «чистое» место: если внутри у дуги тесно,
+       запись уходит строкой под чертёж («∠BAC = 120°», raskladka).
+       Снаружи она остаётся, только если и так не лучше. */
     for (const ots of [5, 9, 14, 20]) {
       for (const da of [0, 25, -25, 50, -50, 75, -75]) {
         const d = rotate([-bis[0], -bis[1]], [0, 0], da);
         const k = ots + vynos(d);
-        kand.push({ c: [v[0] + d[0] * k, v[1] + d[1] * k], cena: 60 + ots + Math.abs(da) * 0.4 });
+        kand.push({ c: [v[0] + d[0] * k, v[1] + d[1] * k], cena: 1500 + ots + Math.abs(da) * 0.4 });
       }
     }
-  } else {
+  } else if ('vnutri' in y) {
     const p = E(y.vnutri);
     kand.push({ c: p, cena: 0 });
     /* Внутри фигуры, а если там тесно — рядом снаружи (дальние кольца
@@ -914,20 +1097,33 @@ function mestoVelichiny(
       }
     }
   }
+  /* Подпись угла дальше 22 px от дуги — не у своего угла: такое место
+     годится, только если ближе всё занято (и тогда фигура мельчает). */
+  const dalshe = (pr: Pryam): number => {
+    if (!('ugol' in y)) return 0;
+    const v = E(y.ugol[1]);
+    const r0 = Math.max(
+      SK.ugol.min,
+      Math.min(SK.ugol.r, SK.ugol.dolya * Math.min(dist(E(y.ugol[0]), v), dist(E(y.ugol[2]), v))),
+    );
+    const nx = Math.max(pr[0], Math.min(v[0], pr[2]));
+    const ny = Math.max(pr[1], Math.min(v[1], pr[3]));
+    return Math.hypot(v[0] - nx, v[1] - ny) > r0 + 21 ? 1 : 0;
+  };
   kand.sort((x, z) => x.cena - z.cena);
   let luchshee: T2 = kand[0]?.c ?? centr;
   let luchshiy = Infinity;
   for (const { c, cena } of kand) {
     const pr: Pryam = [c[0] - hw, c[1] - hh, c[0] + hw, c[1] + hh];
-    const vne = pr[0] < 1 || pr[1] < 1 || pr[2] > W - 1 || pr[3] > H - 1 ? 1 : 0;
-    const shtraf = 1e4 * kasaniya(pr, prep, zanyato, null) + 3e3 * vne + cena;
+    const vne = pr[0] < 1 || pr[1] < 1 || pr[2] > W - 1 || pr[3] + SPUSK_VELICHINY > H - 1 ? 1 : 0;
+    const shtraf = 1e4 * kasaniya(pr, prep, zanyato, null) + 3e3 * vne + 1.5e3 * dalshe(pr) + cena;
     if (shtraf < luchshiy) {
       luchshiy = shtraf;
       luchshee = c;
     }
     if (shtraf < 1e3) break;
   }
-  return luchshee;
+  return [luchshee, luchshiy < 1e3];
 }
 
 /** Длина экранного вектора — для проверок. */

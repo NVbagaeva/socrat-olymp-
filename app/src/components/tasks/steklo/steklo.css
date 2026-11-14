@@ -417,6 +417,12 @@ details[open] > summary .stk-shevron {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+/* Формула в названии шага — как набрана: заглавные буквы названия не
+   должны превращать $v(t)$ в $V(T)$ (№9, №6). */
+.stk-shag__zag .katex {
+  text-transform: none;
+  letter-spacing: normal;
+}
 .stk-shag__zag + .stk-shag__chto {
   padding-top: 0;
 }

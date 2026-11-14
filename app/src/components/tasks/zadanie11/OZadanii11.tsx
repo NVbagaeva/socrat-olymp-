@@ -1,96 +1,176 @@
-import { Tex } from '@/components/ui/Tex';
-import { RAZDELY_TEORII_11 } from '@/content/teoriya11';
-import { O_ZADANII_11 } from '@/content/zadanie11';
-import { sectionsInfo } from '@/lib/zadanie11/taxonomy';
-import { IkonkaRazdela, Piktogramma } from './Piktogrammy';
-import { KartaRazdelov11, type KartaPunkt } from './KartaRazdelov11';
+import { FORMULY11, GRUPPY11_TON, SHAPKA11, TIPY11_OPASNO } from '@/content/tekstovye11';
+import { assetUrl } from '@/lib/assetUrl';
+import { typeset, typesetKrupno } from '@/lib/tex';
+import { OPORNYE11_HREF, blokHref11, tipTrenazherHref11 } from '@/lib/zadanie11/links';
+import { SUBTYPES, subtype } from '@/lib/zadanie11/prototypes';
+import { SECTIONS } from '@/lib/zadanie11/taxonomy';
+import { dannyeTrenazhera } from '@/lib/zadanie11/trenazher/dannye';
+import { lite11 } from '@/lib/zadanie11/trening/dannye-server';
+import { razobrat11 } from '@/lib/zadanie11/trening/reshatel';
+import { FormulyRamka, KartaGruppa, KartaPrimer, KartaShapka, KartaTip } from '../karta';
+import { YakorTipa } from '../karta/YakorTipa';
+import { GruppaProgress11 } from './GruppaProgress11';
+import { Kartinka11, estKartinka11 } from './Kartinka11';
+import { otvetPrimera11 } from './otvetPrimera11';
+import { Piktogramma, ZNACHOK_RAZDELA } from './Piktogrammy';
+import { PrimerLazy11 } from './PrimerLazy11';
+import { shagi11 } from './shagi11';
+import { Vstrecha11 } from './Vstrecha11';
 
 /**
- * Вкладка «О задании» задания №11 (макет docs/mockups/zadanie-11/
- * o-zadanii.png): карта разделов в порядке изучения, колонка «С чего
- * начать» с советом и порядок изучения с опорными блоками перед
- * каждым разделом. Числа — из данных: подтипы и наибольшая
- * сложность — taxonomy.ts, прогресс — хранилище тренажёра.
+ * Вкладка «О задании» №11: карта задания по типам («Стеклянная сцена»,
+ * общие компоненты components/tasks/karta — как у №8, №3, №7 и №6).
+ *
+ * Шапка (что проверяет, балл, минуты, чем опасно) с обложкой раздела,
+ * девять групп-разделов с прогрессом ученика, 68 типов с разобранным
+ * примером (условие, решение этапами с таблицей модели, «Где теряют
+ * балл») и блок «Что нужно знать». Чертежей у №11 нет — пример в одну
+ * колонку; место под картинку к задаче есть (lib/zadanie11/kartinki.ts),
+ * пустых рамок нет. Условия и решения — из банка и функций подтипов,
+ * без правок.
  */
-export function OZadanii11({ base }: { base: string }) {
-  const info = sectionsInfo();
-  const teoriya = new Map(RAZDELY_TEORII_11.filter((r) => r.section).map((r) => [r.section, r.id]));
-  const punkty: KartaPunkt[] = info.map((s) => ({
-    id: s.id,
-    nazvanie: s.nazvanie,
-    tipov: s.subtypes.length,
-    subtypes: s.subtypes.map((st) => st.id),
-    maxLevel: s.maxLevel,
-    href: `${base}/teoriya/#teoriya-${teoriya.get(s.id) ?? ''}`,
-    razminka: s.razminka === true,
-  }));
-  const { start } = O_ZADANII_11;
 
+function tex(formula: string): string {
+  return typeset(`$${formula}$`);
+}
+
+/** Опорный блок подтипа: свой блок раздела или нужный перед ним. */
+function opornyeHref(podtip: string): string {
+  const s = dannyeTrenazhera().ssylki[subtype(podtip).section];
+  return s.opornyy === null ? OPORNYE11_HREF : blokHref11(s.opornyy.slug);
+}
+
+/** Задача-пример подтипа: первая задача открытого банка или разминки, нет — первый аналог. */
+function zadachaPrimera(podtip: string) {
+  const bank = dannyeTrenazhera().bank.filter((b) => b.id === podtip);
+  const b = bank.find((x) => x.analog === undefined) ?? bank[0];
+  return b === undefined ? undefined : lite11(b);
+}
+
+/** Разобранный пример подтипа на сборке (первая раскрытая карточка). */
+function primer(podtip: string) {
+  const z = zadachaPrimera(podtip);
+  if (z === undefined) {
+    return null;
+  }
+  const r = razobrat11(subtype(podtip).solve(z.params));
+  return {
+    uslovieHtml: typesetKrupno(z.text),
+    shagi: shagi11(r),
+    otvet: otvetPrimera11(r, z.vybory),
+  };
+}
+
+export function OZadanii11() {
   return (
-    <div className="z11-about">
-      <div className="z11-about__main">
-        <section className="z11-about__lead">
-          <h2 className="t-h2 z11-about__title">{O_ZADANII_11.title}</h2>
-          <p className="z11-about__answer">{O_ZADANII_11.lead}</p>
-          <p className="z11-about__text">{O_ZADANII_11.about}</p>
-        </section>
+    <div className="kz z11-karta">
+      <YakorTipa />
+      <KartaShapka
+        nadzagolovok={SHAPKA11.nadzagolovok}
+        zagolovok={SHAPKA11.zagolovok}
+        lead={SHAPKA11.lead}
+        fakty={SHAPKA11.fakty(SUBTYPES.length)}
+        opasnoTitle={SHAPKA11.opasnoTitle}
+        opasno={SHAPKA11.opasno.map((line) => typeset(line))}
+        oblozhka={
+          /* Обложка раздела — готовая картинка, как есть: без обрезки и
+             пережатия, прозрачный фон на стекле шапки. */
+          <img
+            src={assetUrl('/images/task-11.webp')}
+            alt={SHAPKA11.oblozhkaAlt}
+            width={512}
+            height={512}
+            decoding="async"
+          />
+        }
+      />
 
-        <section aria-label={O_ZADANII_11.kartaTitle}>
-          <KartaRazdelov11 punkty={punkty} />
-        </section>
+      <Vstrecha11 />
 
-        <section className="z11-order" aria-labelledby="z11-order-title">
-          <h3 className="t-h4 z11-about__sub" id="z11-order-title">
-            Порядок изучения
+      <section className="kz-razdel" aria-labelledby="z11-gruppy-title">
+        <div className="kz-razdel__head">
+          <h3 className="stk-h3" id="z11-gruppy-title">
+            {SHAPKA11.gruppyTitle}
           </h3>
-          <ol className="z11-order__list">
-            {info.map((s) => {
-              const pered = O_ZADANII_11.pered[s.id] ?? [];
-              return (
-                <li className="z11-order__item" key={s.id}>
-                  <IkonkaRazdela section={s.id} className="z11-order__icon" />
-                  <span className="z11-order__body">
-                    <span className="z11-order__name">{s.nazvanie}</span>
-                    <span className="z11-order__desc">
-                      <Tex text={s.opisanie} />
-                    </span>
-                    {pered.length === 0 ? null : (
-                      <span className="z11-order__pered">Перед разделом: {pered.join(', ')}</span>
-                    )}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-        </section>
-      </div>
-
-      <aside className="z11-start" aria-labelledby="z11-start-title">
-        <h3 className="z11-start__title" id="z11-start-title">
-          <Piktogramma name="flag" className="z11-start__flag" />
-          {start.title}
-        </h3>
-        <ol className="z11-start__list">
-          {start.shagi.map((shag, i) => (
-            <li className="z11-start__step" key={shag.title}>
-              <span className="z11-start__no" aria-hidden="true">
-                {i + 1}
-              </span>
-              <span>
-                <span className="z11-start__step-title">{shag.title}</span>
-                <span className="z11-start__step-text">{shag.text}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
-        <div className="z11-sovet">
-          <Piktogramma name="bulb" className="z11-sovet__icon" />
-          <div>
-            <p className="z11-sovet__title">{start.sovetTitle}</p>
-            <p className="z11-sovet__text">{start.sovet}</p>
-          </div>
+          <p className="stk-lead">{SHAPKA11.gruppyLead}</p>
         </div>
-      </aside>
+        <div className="kz-gruppy">
+          {SECTIONS.map((s, gi) => {
+            const tipy = SUBTYPES.filter((st) => st.section === s.id);
+            return (
+              <KartaGruppa
+                key={s.id}
+                id={s.id}
+                nazvanie={s.razminka === true ? `${s.nazvanie} · ${SHAPKA11.razminka}` : s.nazvanie}
+                znakHtml=""
+                znak={<Piktogramma name={ZNACHOK_RAZDELA[s.id]} />}
+                ton={GRUPPY11_TON[s.id]}
+                tipov={tipy.length}
+                progress={<GruppaProgress11 podtipy={tipy.map((st) => st.id)} />}
+                labels={SHAPKA11}
+                open={gi === 0}
+              >
+                {tipy.map((st, i) => {
+                  const open = gi === 0 && i === 0;
+                  const trenirovatHref = tipTrenazherHref11(st.id);
+                  const opasno = TIPY11_OPASNO[st.id];
+                  const opasnoHtml = opasno === undefined ? undefined : typeset(opasno);
+                  const z = zadachaPrimera(st.id);
+                  /* Раскрытый с самого начала пример набирается на сборке;
+                     остальные собираются в браузере по раскрытию. */
+                  const ex = open ? primer(st.id) : null;
+                  /* Картинка к задаче — только если она есть (сейчас нет ни одной). */
+                  const kartinka = estKartinka11(st.id) ? <Kartinka11 podtip={st.id} /> : undefined;
+                  return (
+                    <KartaTip key={st.id} id={st.id} nazvanieHtml={typeset(st.title)} open={open}>
+                      {ex !== null ? (
+                        <KartaPrimer
+                          uslovieHtml={ex.uslovieHtml}
+                          {...(kartinka === undefined ? {} : { risunok: kartinka })}
+                          shagi={ex.shagi}
+                          otvet={ex.otvet}
+                          {...(opasnoHtml === undefined ? {} : { opasnoHtml })}
+                          trenirovatHref={trenirovatHref}
+                          opornyeHref={opornyeHref(st.id)}
+                          labels={SHAPKA11}
+                        />
+                      ) : z === undefined ? null : (
+                        <PrimerLazy11
+                          prototype={st.id}
+                          klyuch={z.id}
+                          opasnoHtml={opasnoHtml ?? ''}
+                          trenirovatHref={trenirovatHref}
+                          opornyeHref={opornyeHref(st.id)}
+                          {...(kartinka === undefined ? {} : { risunok: kartinka })}
+                        />
+                      )}
+                    </KartaTip>
+                  );
+                })}
+              </KartaGruppa>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="kz-razdel kz-znat" aria-labelledby="z11-znat-title">
+        <div className="kz-razdel__head">
+          <h3 className="stk-h3" id="z11-znat-title">
+            {SHAPKA11.znatTitle}
+          </h3>
+          <p className="stk-lead">{SHAPKA11.znatLead}</p>
+        </div>
+        <div className="kz-znat__setka">
+          {FORMULY11.map((blok) => (
+            <FormulyRamka
+              key={blok.id}
+              nazvanie={blok.nazvanie}
+              ton={blok.ton}
+              formuly={blok.formuly.map((f) => ({ html: tex(f.tex), primerHtml: tex(f.primer) }))}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

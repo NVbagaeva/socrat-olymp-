@@ -532,18 +532,14 @@ export function proverit() {
   const rnd = zerno(1818);
   let tesno = 0;
 
-  /* Перенесённые задачи (один набор чисел) проверяет trenazherDop/:
+  /* Перенесённые задачи проверяет trenazherDop/:
      ответ по данным без кода сайта, утверждение а) на случайных фигурах. */
   const dop = new Set(PROVERKI_DOP.map((x) => x.id));
   for (const t of TIPY_18) {
     const pr = PROVERKI[t.id];
     sch.fakt('у типа задачи есть проверка по чертежу', pr !== undefined || dop.has(t.id), t.id);
     sch.fakt('схема типа существует', ids.has(t.skhema), t.skhema);
-    sch.fakt(
-      'три варианта (у перенесённой задачи — один)',
-      t.varianty.length === (dop.has(t.id) ? 1 : 3),
-      t.id,
-    );
+    sch.fakt('три набора чисел', t.varianty.length === 3, t.id);
     for (const p of t.varianty) {
       const otv = t.otvet(p);
       if (pr !== undefined)

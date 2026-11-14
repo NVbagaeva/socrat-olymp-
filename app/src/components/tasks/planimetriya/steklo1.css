@@ -333,3 +333,52 @@
   width: auto;
   max-height: 320px;
 }
+
+/* Материалы к задаче под условием: теория, факт, опорный блок, разбор. */
+.z1-trn__materialy {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 480px;
+  margin-inline: auto;
+}
+@media (min-width: 640px) {
+  .z1-trn__materialy {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: none;
+  }
+}
+.z1-trn__ssylka {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.25;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--blue-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.z1-trn__ssylka:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.z1-trn__ssylka .z11-pic {
+  /* Значок линией, как в прежнем тренажёре: слой №11 на странице не
+     подключён, поэтому вид задан здесь. */
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--terracotta);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
