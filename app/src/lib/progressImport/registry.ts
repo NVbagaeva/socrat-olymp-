@@ -80,18 +80,22 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z4',
     title: '№4 «Вероятность: простая»',
     keys: [
-      /* Журнал попыток тренажёра (components/tasks/veroyatnost/Trenazher.tsx). Прежний ключ
+      /* Журнал попыток тренажёра (lib/veroyatnost/trening/progress.ts). Прежний ключ
          budetege:veroyatnost-4:v2 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:veroyatnost-4:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «4»). */
+      'budetege:trainer:4:session',
     ],
   },
   {
     id: 'z5',
     title: '№5 «Вероятность: сложная»',
     keys: [
-      /* Журнал попыток тренажёра (components/tasks/veroyatnost/Trenazher.tsx). Прежний ключ
+      /* Журнал попыток тренажёра (lib/veroyatnost/trening/progress.ts). Прежний ключ
          budetege:veroyatnost-5:v2 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:veroyatnost-5:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «5»). */
+      'budetege:trainer:5:session',
     ],
   },
   {
@@ -133,17 +137,22 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z10',
     title: '№10 «Физический смысл»',
     keys: [
-      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts). */
+      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts): тот же ключ
+         и в тренажёре «Стеклянной сцены» (lib/zadanie10/trening/progress.ts). */
       'budetege:zadanie-10:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «10»). */
+      'budetege:trainer:10:session',
     ],
   },
   {
     id: 'z11',
     title: '№11 «Текстовые задачи»',
     keys: [
-      /* Журнал попыток тренажёра (lib/zadanie11/progress.ts). Прежний ключ
+      /* Журнал попыток тренажёра (lib/zadanie11/trening/progress.ts). Прежний ключ
          budetege:zadanie-11:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:zadanie-11:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «11»). */
+      'budetege:trainer:11:session',
     ],
   },
   {

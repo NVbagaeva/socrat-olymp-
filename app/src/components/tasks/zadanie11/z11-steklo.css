@@ -1,0 +1,441 @@
+/* №11 в «Стеклянной сцене»: что своё у раздела поверх общих
+   компонентов (karta, trening, opornye). Всё под классами экранов №11
+   (.z11-karta, .z11-trening, .z11-opornye): zadanie11.css подключают
+   №1 и №13, их таблицы и подсказки здесь не меняются. */
+
+/* ── «Материалы к задаче» под условием: лайфхак, теория, опорный блок ── */
+.z11-materialy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.z11-materialy__ssylka {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: 999px;
+  background: var(--glass-bg-strong, rgba(255, 255, 255, 0.7));
+  box-shadow: var(--glass-ring, inset 0 0 0 1px rgba(31, 95, 208, 0.16));
+  color: var(--blue-700, #1f4fb0);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z11-materialy__ssylka:hover {
+  background: var(--blue-50, #eef4ff);
+}
+.z11-materialy__ssylka:focus-visible {
+  outline: 2px solid var(--blue-600, #1f5fd0);
+  outline-offset: 2px;
+}
+
+/* ── Таблица модели в стекле: на телефоне 375 px S | v | t влезают целиком ── */
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab table {
+  background: var(--glass-bg-strong, rgba(255, 255, 255, 0.85));
+  border-radius: 12px;
+}
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab th,
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab td {
+  /* Ячейка переносится между словами; сама формула KaTeX не рвётся. */
+  white-space: normal;
+}
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab thead th:first-child,
+:is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab tbody th {
+  max-width: 9em;
+}
+@media (max-width: 480px) {
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab table {
+    font-size: var(--fs-caption);
+  }
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab th,
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab td {
+    padding: var(--space-1) 6px;
+  }
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab .z11-tab__vyn {
+    padding-left: 6px;
+  }
+  :is(.z11-karta, .z11-trening, .z11-opornye) .z11-tab__vynoska {
+    max-width: 84px;
+  }
+}
+.z11-tablitsy {
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* Строки шага решения: пропорции и краткая запись процентов — блоками. */
+.z11-stroka + .z11-stroka {
+  margin-top: var(--space-1);
+}
+
+/* Таблица модели под подсказкой-вопросами. */
+.z11-podskazka-tab {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.z11-podskazka-tab__note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.z11-trening .z11-tab__pusto {
+  min-height: 44px;
+}
+
+/* Картинка к задаче — как есть, во всю ширину колонки, без обрезки. */
+.z11-kartinka {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z11-materialy__ssylka {
+    transition: none;
+  }
+}
+
+/* ── Опорные задачи ── */
+.z11-opornye {
+  display: grid;
+  gap: var(--space-4);
+}
+.z11-opornye__nazad {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--blue-700, #1f4fb0);
+  font-weight: 600;
+  text-decoration: none;
+}
+.z11-op__gde {
+  margin-top: var(--space-4);
+}
+.z11-op__gde-spisok {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z11-op__tab {
+  margin-top: var(--space-2);
+}
+
+/* ── Теория: карточки №11 в стекле, в тонах ролей (как рамки .teor-steklo) ── */
+@media screen {
+  .teor-steklo .z11-card,
+  .teor-steklo .z11-tip {
+    border: 0;
+    border-radius: 18px;
+    background: linear-gradient(160deg, var(--white, #fff), var(--blue-50, #eef4ff));
+    box-shadow:
+      inset 0 0 0 1px var(--blue-200, #c7d8f7),
+      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8)),
+      0 8px 24px rgb(31 95 208 / 0.06);
+  }
+  /* Лайфхак — оранжевый тон, ловушка — терракотовый; роль видна и по значку. */
+  .teor-steklo .z11-card--layfhak {
+    background: linear-gradient(160deg, var(--white, #fff), var(--glass-tint-warm, #fff6e8));
+    box-shadow:
+      inset 0 0 0 1px var(--amber-200, #f3d6a4),
+      inset 4px 0 0 var(--amber-600, #c7781a),
+      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8));
+  }
+  .teor-steklo .z11-card--lovushka {
+    background: linear-gradient(160deg, var(--white, #fff), #fdf0ec);
+    box-shadow:
+      inset 0 0 0 1px #f0c9bd,
+      inset 4px 0 0 var(--terracotta, #c4553a),
+      var(--glass-hi, inset 0 1px 0 rgba(255, 255, 255, 0.8));
+  }
+  .teor-steklo .z11-card__formula {
+    border-radius: 12px;
+  }
+  /* Кнопка «Решать» у типа — зона нажатия 44 px. */
+  .teor-steklo .z11-tip__btn {
+    min-height: 44px;
+  }
+}
+
+/* ── «Встречное движение»: живая иллюстрация на «О задании» ── */
+.z11-vst {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: 22px;
+  overflow: hidden;
+}
+.z11-vst__text {
+  display: grid;
+  gap: var(--space-1);
+}
+.z11-vst__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+.z11-vst__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(234, 241, 255, 0.9), rgba(255, 255, 255, 0.4));
+  box-shadow: var(--glass-ring, inset 0 0 0 1px rgba(31, 95, 208, 0.12));
+  overflow: visible;
+}
+.z11-vst__zemlya {
+  stroke: rgba(31, 95, 208, 0.14);
+  stroke-width: 2;
+}
+.z11-vst__doroga {
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.22;
+}
+/* Пройденная часть дороги: закрашивается в обе стороны к точке встречи. */
+.z11-vst__proyden {
+  stroke: #1f5fd0;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 0 1000;
+  opacity: 0.55;
+}
+.z11-vst__svg.is-idyot .z11-vst__proyden {
+  animation: z11-vst-proyden var(--sek) linear forwards;
+}
+@keyframes z11-vst-proyden {
+  to {
+    stroke-dasharray: 1000 0;
+  }
+}
+
+/* Города: стекло в тоне стороны, лёгкая тень. */
+.z11-vst__gorod rect {
+  fill: rgba(255, 255, 255, 0.85);
+  stroke: #1f5fd0;
+  stroke-width: 1.5;
+}
+.z11-vst__gorod--terra rect {
+  stroke: #c4553a;
+}
+.z11-vst__gorod .z11-vst__okna rect {
+  fill: rgba(31, 95, 208, 0.28);
+  stroke: none;
+}
+.z11-vst__gorod--terra .z11-vst__okna rect {
+  fill: rgba(196, 85, 58, 0.28);
+}
+.z11-vst__gorod .z11-vst__shpil {
+  fill: #1f5fd0;
+  stroke: none;
+}
+.z11-vst__gorod--terra .z11-vst__shpil {
+  fill: #c4553a;
+}
+.z11-vst__bukva {
+  fill: #1f4fb0;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: inherit;
+}
+.z11-vst__gorod--terra .z11-vst__bukva {
+  fill: #a8452c;
+}
+
+/* Путники: силуэт линиями, тень под ногами, шаг — качание ног и рук. */
+.z11-vst__putnik {
+  --ton: #1f5fd0;
+  --ton-soft: rgba(31, 95, 208, 0.18);
+  transform: translateX(var(--x));
+  transition: transform var(--sek) linear;
+}
+.z11-vst__putnik--terra {
+  --ton: #c4553a;
+  --ton-soft: rgba(196, 85, 58, 0.18);
+  transform: translateX(var(--x)) scale(-1, 1);
+}
+.z11-vst__putnik--sin.is-idyot {
+  transform: translateX(var(--cel));
+}
+.z11-vst__putnik--terra.is-idyot {
+  transform: translateX(var(--cel)) scale(-1, 1);
+}
+.z11-vst__golova {
+  fill: var(--ton);
+}
+.z11-vst__telo,
+.z11-vst__noga,
+.z11-vst__ruka {
+  fill: none;
+  stroke: var(--ton);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.z11-vst__ryukzak {
+  fill: var(--ton-soft);
+  stroke: var(--ton);
+  stroke-width: 1.5;
+}
+.z11-vst__ten {
+  fill: rgba(20, 40, 90, 0.12);
+  transform: scaleY(0.28);
+  transform-origin: 0 166px;
+}
+.z11-vst__noga,
+.z11-vst__ruka {
+  transform-box: fill-box;
+}
+.z11-vst__noga {
+  transform-origin: 50% 0;
+}
+.z11-vst__ruka {
+  transform-origin: 50% 0;
+}
+.z11-vst__putnik.is-idyot .z11-vst__noga--l,
+.z11-vst__putnik.is-idyot .z11-vst__ruka--r {
+  animation: z11-vst-shag 0.55s ease-in-out infinite;
+}
+.z11-vst__putnik.is-idyot .z11-vst__noga--r,
+.z11-vst__putnik.is-idyot .z11-vst__ruka--l {
+  animation: z11-vst-shag 0.55s ease-in-out infinite reverse;
+}
+.z11-vst__putnik.is-idyot .z11-vst__telo,
+.z11-vst__putnik.is-idyot .z11-vst__golova,
+.z11-vst__putnik.is-idyot .z11-vst__ryukzak {
+  animation: z11-vst-kach 0.55s ease-in-out infinite;
+}
+@keyframes z11-vst-shag {
+  0%,
+  100% {
+    transform: rotate(-24deg);
+  }
+  50% {
+    transform: rotate(24deg);
+  }
+}
+@keyframes z11-vst-kach {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+/* Пришли: стоят, руки опущены. */
+.z11-vst__svg.is-vstretilis .z11-vst__noga,
+.z11-vst__svg.is-vstretilis .z11-vst__ruka,
+.z11-vst__svg.is-vstretilis .z11-vst__telo,
+.z11-vst__svg.is-vstretilis .z11-vst__golova,
+.z11-vst__svg.is-vstretilis .z11-vst__ryukzak {
+  animation: none;
+}
+
+/* Подписи пройденных отрезков — после встречи. */
+.z11-vst__otrezki {
+  opacity: 0;
+  transition: opacity 0.5s ease 0.3s;
+}
+.z11-vst__svg.is-vstretilis .z11-vst__otrezki {
+  opacity: 1;
+}
+.z11-vst__otrezok {
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  fill: #1f4fb0;
+}
+.z11-vst__otrezok--terra {
+  fill: #a8452c;
+}
+
+/* Точка встречи: флажок и вспышка появляются, когда путники дошли. */
+.z11-vst__flazhok {
+  fill: #ffb547;
+}
+.z11-vst__flazhok-drevko {
+  fill: #ffb547;
+  stroke: #c7781a;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.z11-vst__tochka {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.z11-vst__vspyshka {
+  transform: scale(0.2);
+  transform-origin: center;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.z11-vst__svg.is-vstretilis .z11-vst__tochka {
+  opacity: 1;
+}
+.z11-vst__svg.is-vstretilis .z11-vst__vspyshka {
+  transform: scale(1);
+}
+
+.z11-vst__niz {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+.z11-vst__niz .stk-btn {
+  min-height: 44px;
+}
+.z11-vst__itog {
+  flex: 1 1 240px;
+  margin: 0;
+  min-height: 1.5em;
+  color: var(--color-text);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.z11-vst__itog.is-vidno {
+  opacity: 1;
+}
+
+@media (max-width: 480px) {
+  .z11-vst {
+    padding: var(--space-4);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .z11-vst__putnik,
+  .z11-vst__tochka,
+  .z11-vst__vspyshka,
+  .z11-vst__otrezki,
+  .z11-vst__itog {
+    transition: none;
+  }
+  .z11-vst__putnik.is-idyot *,
+  .z11-vst__svg.is-idyot .z11-vst__proyden {
+    animation: none;
+  }
+  .z11-vst__svg.is-idyot .z11-vst__proyden {
+    stroke-dasharray: 1000 0;
+  }
+}
+
+/* Номер варианта в кнопке ответа выбором (РЗ-17). */
+.z11-variant__no {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-right: var(--space-1);
+  border-radius: 50%;
+  background: var(--blue-50, #eef4ff);
+  color: var(--blue-700, #1f4fb0);
+  font-weight: 700;
+  vertical-align: middle;
+}

@@ -5,7 +5,7 @@ import { Generator } from '@/components/generator/Generator';
 import { ikonkiTem } from '@/components/generator/IkonkiTem';
 import type { GenConfig } from '@/lib/generator/obshchiy/types';
 import { engine10 } from '@/lib/zadanie10/engine10';
-import type { IllInfo } from './Zadacha10';
+import type { IllInfo } from './Kartinka10';
 
 /**
  * Генератор листов №10 на общем компоненте (components/generator/).

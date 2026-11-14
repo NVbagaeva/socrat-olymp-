@@ -39,20 +39,29 @@ export function createZagruzka<
 >({
   url,
   reshatel,
+  nabor,
 }: {
   url: (prototip: string) => string;
   reshatel: () => Promise<(id: string) => P>;
+  /**
+   * Набор формул раздела, если не обычный typeset (№11: крупные дроби в
+   * условии, как в прежнем тренажёре). Нет — lib/tex, typeset.
+   */
+  nabor?: () => Promise<(text: string) => string>;
 }): Zagruzka<Z, S, P> {
   const fayly = new Map<string, Promise<void>>();
   const zadachi = new Map<string, Z>();
   const resheniya = new Map<string, S>();
-  let nabor: ((text: string) => string) | null = null;
+  let nabran: ((text: string) => string) | null = null;
   let prototip: ((id: string) => P) | null = null;
   let obshcheeZhdyot: Promise<void> | null = null;
 
   function zagruzitObshchee(): Promise<void> {
-    obshcheeZhdyot ??= Promise.all([import('@/lib/tex'), reshatel()]).then(([tex, r]) => {
-      nabor = tex.typeset;
+    obshcheeZhdyot ??= Promise.all([
+      nabor === undefined ? import('@/lib/tex').then((tex) => tex.typeset) : nabor(),
+      reshatel(),
+    ]).then(([t, r]) => {
+      nabran = t;
       prototip = r;
     });
     obshcheeZhdyot.catch(() => {
@@ -98,7 +107,7 @@ export function createZagruzka<
       }
     },
     nabrat(text) {
-      return nabor === null ? text : nabor(text);
+      return nabran === null ? text : nabran(text);
     },
     prototip(id) {
       if (prototip === null) return null;

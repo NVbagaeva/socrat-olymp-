@@ -157,11 +157,14 @@ export interface OpornayaZadachaProps {
     html: string;
     open: boolean;
     onOpen: () => void;
-    /** Подсказка-вопросы с кнопками (№13) вместо текста. */
+    /** Подсказка-вопросы с кнопками (№11, №13, №4, №5) вместо текста — как в тренажёре. */
     telo?: ReactNode;
   } | null;
-  /** Решение по шагам: доступно после ответа; открыто ли, переключить. */
-  reshenie: { shagi: Shag[]; open: boolean; onToggle: () => void } | null;
+  /**
+   * Решение по шагам: доступно после ответа; открыто ли, переключить.
+   * `posle` — под шагами (№4, №5: рисунок метода с подсветкой).
+   */
+  reshenie: { shagi: Shag[]; posle?: ReactNode; open: boolean; onToggle: () => void } | null;
   /** Плашка «Запомни» блока: над задачей. */
   zapomni?: ReactNode;
   /** Ответ выбором (№2, №13 «Определи тип»): варианты вместо поля ответа, value — номер выбранного. */
@@ -327,7 +330,7 @@ export function OpornayaZadacha({
         {reshenie !== null && reshenie.open ? (
           <div className="op-reshenie" role="region" aria-label={labels.shagi}>
             <p className="stk-podpis">{labels.shagi}</p>
-            <ShagiResheniya shagi={reshenie.shagi} />
+            <ShagiResheniya shagi={reshenie.shagi} posle={reshenie.posle} />
           </div>
         ) : null}
 
