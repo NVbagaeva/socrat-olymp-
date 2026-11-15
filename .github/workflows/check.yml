@@ -65,6 +65,12 @@ jobs:
         working-directory: app
         run: pnpm test:infra-secrets
 
+      # Safari до iOS 18 размывает стекло только с префиксом -webkit-, а
+      # сборка его не добавляет: у каждого backdrop-filter должна быть пара.
+      - name: Проверить префикс -webkit- у стекла
+        working-directory: app
+        run: pnpm test:webkit-steklo
+
       # Банк задания №3: 190 вариантов, у каждого ответ считается
       # дважды — по формуле прототипа и по трёхмерной модели.
       - name: Проверить банк задания №3
