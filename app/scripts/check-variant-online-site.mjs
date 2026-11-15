@@ -66,8 +66,9 @@ const { buildVariantSet } = requireSrc('lib/variant/build');
 const { encodeCode } = requireSrc('lib/variant/code');
 const { normalizeAnswer } = requireSrc('lib/variant/online/normalize');
 const { testScore } = requireSrc('lib/variant/online/proverka');
+const { EGE_NUMBERS } = requireSrc('lib/variant/types');
 const adapters = new Map();
-for (let n = 1; n <= 13; n += 1) {
+for (const n of EGE_NUMBERS) {
   const p = String(n).padStart(2, '0');
   const { section } = requireSrc(`lib/variant/adapters/z${p}/index`);
   const df = `lib/variant/data/z${p}`;
@@ -75,10 +76,11 @@ for (let n = 1; n <= 13; n += 1) {
   adapters.set(n, section.init(data == null ? null : JSON.parse(JSON.stringify(data))));
 }
 const subtypeIds = {};
-for (let n = 1; n <= 13; n += 1) subtypeIds[n] = adapters.get(n).info.subtypes.map((s) => s.id);
+for (const n of EGE_NUMBERS) subtypeIds[n] = adapters.get(n).info.subtypes.map((s) => s.id);
 /* Вариант — из заданий действующей структуры экзамена (lib/variant/struktura.ts):
-   1–13 в структуре из 20 заданий, 11 заданий в ЕГЭ-2027 (у №12 задач для
-   вариантов пока нет). Коды прежней структуры проверяет test:variant-struktura. */
+   1–13 в структуре из 20 заданий, 12 заданий в ЕГЭ-2027 (последнее —
+   «Наибольшее и наименьшее», номер хранения 21). Коды прежней структуры
+   проверяют test:variant-struktura и test:variant-kody. */
 const V = requireSrc('lib/variant/struktura');
 const ALL = [...V.VARIANT_NUMBERS];
 const N = ALL.length;
@@ -251,7 +253,7 @@ ok(
     : (await page.getByTestId('vo-test').count()) === 0,
   V.vsyaChast1(ALL)
     ? 'тестовый балл по шкале'
-    : 'тестового балла нет: вариант не покрывает первую часть (у №12 пока нет задач)',
+    : 'тестового балла нет: вариант не покрывает первую часть',
   (await page.getByTestId('vo-test').count()) === 0
     ? 'нет'
     : ((await page.getByTestId('vo-test').textContent()) ?? ''),
