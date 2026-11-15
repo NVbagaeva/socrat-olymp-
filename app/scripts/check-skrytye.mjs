@@ -925,10 +925,15 @@ async function kabinet(b, role, supabase) {
   }
   /* «Закрыть доступ»: метка снимается, раздел снова закрыт. */
   await page.locator('.skryt-admin__zakryt').click();
-  ok(
-    (await context.cookies(BASE)).every((c) => c.name !== METKA_SKRYTYH),
-    `${kto}: «Закрыть доступ в этом браузере» не сняло метку`,
-  );
+  /* Метку снимает обработчик клика через document.cookie, а хранилище
+     cookie браузера WebKit обновляет не мгновенно: читаем с ожиданием,
+     а не сразу после клика. */
+  let snyata = false;
+  for (let t = Date.now(); !snyata && Date.now() - t < 5000;) {
+    snyata = (await context.cookies(BASE)).every((c) => c.name !== METKA_SKRYTYH);
+    if (!snyata) await page.waitForTimeout(100);
+  }
+  ok(snyata, `${kto}: «Закрыть доступ в этом браузере» не сняло метку`);
   if (!VSEM && razdely.length > 0) {
     await page.goto(`${BASE}/zadaniya/${razdely[0].adresa[0]}/`, { waitUntil: 'load' });
     const net = await page
