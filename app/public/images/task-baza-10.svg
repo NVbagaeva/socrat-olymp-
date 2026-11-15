@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Лестница, приставленная к стене: прямоугольный треугольник">
+  <!-- Прикладная планиметрия: лестница, стена и земля дают прямоугольный треугольник.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M86 238 L220 64 L220 238 Z" fill="url(#b-g)" stroke="none"/>
+    <path d="M220 40 V238 M40 238 H266" stroke-width="2.5"/>
+    <path d="M220 40 h10 M220 60 h10 M220 80 h10 M220 100 h10 M220 120 h10 M220 140 h10 M220 160 h10 M220 180 h10 M220 200 h10 M220 220 h10" stroke-width="1.2" stroke-opacity="0.6"/>
+    <path d="M204 238 V222 H220" stroke-width="1.5"/>
+    <path d="M86 238 L220 64" stroke-width="5" stroke="#c3dffa"/>
+    <path d="M86 238 L220 64" stroke-width="2.5"/>
+    <path d=" M103.8 196.2 l18 14 M130.6 161.4 l18 14 M157.4 126.6 l18 14 M184.2 91.8 l18 14" stroke-width="2"/>
+    <path d="M120 238 A34 34 0 0 0 106.7 211.1" stroke-width="1.5"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="86" cy="238" r="6"/>
+    <circle cx="220" cy="64" r="6"/>
+  </g>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Лампочка с лучами — догадка">
+  <!-- Задачи на смекалку: лампочка с мягким свечением.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+    <radialGradient id="b-glow">
+      <stop offset="0" stop-color="#ff9a3c" stop-opacity="0.35"/>
+      <stop offset="0.45" stop-color="#ff9a3c" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="150" cy="124" r="92" fill="url(#b-glow)"/>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 54 C110 54 88 84 88 114 C88 140 106 154 116 172 C120 180 120 188 120 196 H180 C180 188 180 180 184 172 C194 154 212 140 212 114 C212 84 190 54 150 54 Z" fill="url(#b-g)" stroke-width="2.5"/>
+    <path d="M136 196 V160 L128 140 M164 196 V160 L172 140 M128 140 Q150 128 172 140" stroke-width="1.6"/>
+    <rect x="122" y="204" width="56" height="14" rx="5" fill="#c3dffa" stroke-width="2"/>
+    <rect x="128" y="222" width="44" height="14" rx="5" fill="#c3dffa" stroke-width="2"/>
+    <path d="M140 244 H160" stroke-width="3"/>
+    <path d="M150 22 V36 M76 48 L86 58 M224 48 L214 58 M48 118 H62 M238 118 H252" stroke-width="2.5"/>
+  </g>
+</svg>
