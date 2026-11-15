@@ -6,7 +6,7 @@ import { useId, useMemo, useState, useSyncExternalStore } from 'react';
 import { TaskGrid } from '@/components/tasks';
 import { VariantEntry } from '@/components/variant/VariantEntry';
 import type { TaskPart } from '@/content/tasks';
-import { bankPageOf, partRange, taskParts, tasksOf } from '@/content/tasks';
+import { bankPageOf, partRange, taskHref, taskParts, tasksOf } from '@/content/tasks';
 import { LevelTabs } from '@/components/level/LevelTabs';
 import { levelInfo, type Level } from '@/lib/level';
 
@@ -91,6 +91,8 @@ export function TaskBank({ level = 'profile' }: { level?: Level }) {
     [query, searching, part, parts, tasks],
   );
   const current = taskParts.find((item) => item.part === part) ?? taskParts[0];
+  /* «С чего начать» — первое открытое задание уровня. */
+  const pervoe = tasks.find((task) => task.status === 'ready') ?? tasks[0];
 
   return (
     <main className="app-main">
@@ -200,12 +202,14 @@ export function TaskBank({ level = 'profile' }: { level?: Level }) {
             <h2 className="t-h4">{tasksPage.start.title}</h2>
             <p className="bank-start__lead">{tasksPage.start.lead}</p>
           </div>
-          <Link className="btn btn--primary bank-start__cta" href={tasksPage.start.href}>
-            {tasksPage.start.action}
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M5 12h13M12 6l6 6-6 6" />
-            </svg>
-          </Link>
+          {pervoe !== undefined ? (
+            <Link className="btn btn--primary bank-start__cta" href={taskHref(pervoe)}>
+              {tasksPage.start.action(String(Number(pervoe.no)))}
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M5 12h13M12 6l6 6-6 6" />
+              </svg>
+            </Link>
+          ) : null}
         </div>
 
         <div className="bank-start__decor" aria-hidden="true">
