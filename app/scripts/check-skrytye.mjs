@@ -64,6 +64,20 @@ import { STRUKTURA } from '../src/content/struktura.js';
 
 bezBanneraCookieVsyudu(chromium, webkit);
 
+/**
+ * Дождаться, пока страница перестанет грузить данные, — перед следующим
+ * переходом. После события load Next.js ещё подгружает данные ссылок
+ * (предзагрузка: «Войти», «Банк заданий»). Переход в этот момент обрывает
+ * запрос, и WebKit бросает необработанную ошибку «… due to access control
+ * checks» — её ловил page.on('pageerror'), хотя посетитель ничего не
+ * видит: это гонка проверки, а не сбой сайта (Chromium обрыв молча
+ * глотает). Не дождались за 5 с — идём дальше: проверки от этого не
+ * слабеют, ошибки самой страницы ловятся по-прежнему.
+ */
+async function doTishiny(page) {
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+}
+
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
 const argOf = (name) => (flag(name) ? args[args.indexOf(name) + 1] : null);
@@ -553,6 +567,7 @@ for (const b of spisok) {
       page.on('pageerror', (e) => sboi.push(e.message));
       for (const adres of proba) {
         await page.goto(`${BASE}/${adres}`, { waitUntil: 'load' });
+        await doTishiny(page);
         const net = page.locator('[data-skrytyy-razdel="net"]');
         const viden = await net
           .waitFor({ state: 'visible', timeout: 15000 })
@@ -589,6 +604,7 @@ for (const b of spisok) {
       page.on('pageerror', (e) => sboi.push(e.message));
       for (const adres of proba) {
         await page.goto(`${BASE}/${adres}`, { waitUntil: 'load' });
+        await doTishiny(page);
         const plashka = page.locator('[data-skrytyy-razdel="est"]');
         const vidna = await plashka
           .waitFor({ state: adres.includes('/pechat/') ? 'attached' : 'visible', timeout: 15000 })
