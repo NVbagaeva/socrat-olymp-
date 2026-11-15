@@ -22,9 +22,10 @@ const kartochek = (n: number) => `${n} ${plural(n, 'карточка', 'карт
 export const KARTOCHKI_UI = {
   title: 'Проверка теории по карточкам',
   lead: 'Честно отмечайте «Знаю» или «Не знаю». Незнакомые карточки будут возвращаться чаще, выученные — реже.',
-  /* task и n — номера хранения разделов (ключи колод); на экран — номер ЕГЭ. */
-  vyucheno: (task: number, n: number, vsego: number) =>
-    `Теория №${nomerRazdela(task)}: выучено ${n} из ${vsego}`,
+  /* task — номер хранения раздела профиля (ключ колоды); на экран — номер ЕГЭ.
+     У колоды базы номер уже экзаменационный: baza = true. */
+  vyucheno: (task: number, n: number, vsego: number, baza = false) =>
+    `Теория №${baza ? task : nomerRazdela(task)}: выучено ${n} из ${vsego}`,
   vyuchenoKorotko: (n: number, vsego: number) => `${n} из ${vsego}`,
   /** Подсказка к счётчику: что значит «выучено». */
   vyuchenoPoyasnenie:

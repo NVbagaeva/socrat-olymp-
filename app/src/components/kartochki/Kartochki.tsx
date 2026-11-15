@@ -276,11 +276,13 @@ export function Kartochki({ koloda }: { koloda: KolodaGotovaya }) {
           <p className="kart-start__lead">{T.lead}</p>
           <div className="kart-vyucheno">
             <p className="kart-vyucheno__text">
-              <strong>{T.vyucheno(koloda.task, vyucheno.vsego, vsego)}</strong>
+              <strong>
+                {T.vyucheno(koloda.task, vyucheno.vsego, vsego, koloda.klyuch !== undefined)}
+              </strong>
             </p>
             <ProgressBar
               value={(vyucheno.vsego / vsego) * 100}
-              label={T.vyucheno(koloda.task, vyucheno.vsego, vsego)}
+              label={T.vyucheno(koloda.task, vyucheno.vsego, vsego, koloda.klyuch !== undefined)}
             />
             <p className="t-caption kart-vyucheno__note">{T.vyuchenoPoyasnenie}</p>
           </div>
