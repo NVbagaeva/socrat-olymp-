@@ -594,7 +594,9 @@
    предыдущей: второго места, где правятся кегли, в проекте нет. */
 @media (max-width: 767.98px) {
   :root {
-    --fab-size: 48px;
+    /* 40 px: меньше закрывает содержимое; зона нажатия — 44 px за счёт
+       невидимого поля (onboarding.css, .help-fab__button::before). */
+    --fab-size: 40px;
     --fab-gap: var(--space-4);
     --fs-h1: 1.875rem;
     --lh-h1: 2.25rem;
