@@ -47,3 +47,13 @@ export const TESTOVYJ_33: readonly number[] = rastyanut(TESTOVYJ, 33);
  */
 export const TESTOVYJ_RABOTY: readonly number[] =
   maxPervichnyy() === TESTOVYJ.length - 1 ? TESTOVYJ : rastyanut(TESTOVYJ, maxPervichnyy());
+
+/** Тексты блока «Перевод в стобалльную шкалу» (вариант и повышенные). */
+export const SHKALA_TEXT = {
+  title: 'Перевод баллов в стобалльную шкалу',
+  pervichnyy: 'Первичный балл',
+  testovyj: 'Тестовый балл',
+  /* Таблица — последняя официальная (ЕГЭ-2026): под формат 2027 года
+     она предварительная, поэтому пометка обязательна. */
+  note: (istochnik: string) => `${istochnik}.`,
+} as const;

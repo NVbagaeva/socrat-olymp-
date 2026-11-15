@@ -56,6 +56,7 @@ import {
   type VariantSet,
 } from '@/lib/variant/types';
 import { BlankiVybor } from '@/components/blanki/BlankiVybor';
+import { ShkalaTestovaya } from '@/components/variant/ShkalaTestovaya';
 import { BLANKI_TEXT } from '@/content/blanki';
 import { Okno } from './okno/Okno';
 import { Piktogramma } from './okno/Piktogramma';
@@ -507,6 +508,9 @@ export function VariantScreen() {
           ›
         </span>
       </button>
+
+      {/* ── Шкала перевода в тестовые баллы, как в варианте базы ── */}
+      <ShkalaTestovaya className="var-panel" id="var-shkala" />
 
       {/* ── Статус ────────────────────────────────────────────── */}
       {busy ? (

@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { useMemo, useState, useSyncExternalStore } from 'react';
+import { ShkalaTestovaya } from '@/components/variant/ShkalaTestovaya';
 import { StatsView } from '@/components/variant/online/StatsView';
 import { useArchive } from '@/components/variant/online/useArchive';
 import { TESTOVYJ_RABOTY } from '@/content/variantOnline/shkala';
@@ -492,6 +493,8 @@ export function PovScreen({ razdel = 'pov' }: { razdel?: keyof typeof RAZDELY_EK
           })}
         </ul>
       )}
+
+      <ShkalaTestovaya className="pov-glass pov-shkala" id="pov-shkala" />
 
       <section className="pov-stats" aria-labelledby="pov-stats-title">
         <h2 id="pov-stats-title" className="pov-stats__title">

@@ -1,0 +1,69 @@
+/* Шкала первичный → тестовый: строки таблицы раскладываются плиткой
+   (33 пары в столбик слишком длинные), заголовок таблицы — для
+   скринридера, глазу — легенда под плиткой. */
+.shkala-t {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+.shkala-t__title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+.shkala-t__skryto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.shkala-t__tablitsa {
+  display: block;
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.shkala-t__tablitsa tbody {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+  gap: 6px;
+}
+.shkala-t__tablitsa tr {
+  display: grid;
+  justify-items: center;
+  padding: var(--space-1) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-surface);
+}
+.shkala-t__tablitsa td {
+  padding: 0;
+  line-height: 18px;
+}
+.shkala-t__tablitsa td:first-child,
+.shkala-t__p {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.shkala-t__tablitsa td:last-child,
+.shkala-t__t {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.shkala-t__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: 0;
+}
+.shkala-t__note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-text-secondary);
+}

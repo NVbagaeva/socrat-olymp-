@@ -813,3 +813,8 @@
     white-space: nowrap;
   }
 }
+
+/* Шкала перевода — после списка вариантов, перед статистикой. */
+.pov-shkala {
+  margin-top: var(--space-5);
+}
