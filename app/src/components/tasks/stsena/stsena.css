@@ -172,6 +172,42 @@
   height: 8px;
 }
 
+/* Кольцо прогресса раздела (№1, №2, №11) внутри шапки: кружок слева,
+   подпись справа от него и по ширине своей колонки. Отдельным блоком
+   во всю высоту, как было в прежней шапке, оно вылезало за край
+   карточки и раздувало её. */
+.stsena__media .topic-progress,
+.stsena__actions .topic-progress {
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 100%;
+}
+.stsena__media .topic-progress__text,
+.stsena__actions .topic-progress__text {
+  max-width: 100%;
+  text-align: left;
+}
+/* Кружок рисуется с запасом в 160 px; в шапке он меньше, поэтому
+   чертёж тянется за рамкой, а не остаётся в своём размере. */
+.stsena__media .progress-ring,
+.stsena__actions .progress-ring {
+  width: 92px;
+  height: 92px;
+}
+.stsena__media .progress-ring svg,
+.stsena__actions .progress-ring svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Кнопка под прогрессом: «Продолжить подготовку» у №12. */
+.stsena__actions {
+  margin-top: var(--space-4);
+}
+
 /* ── Обложка ────────────────────────────────────────────────── */
 
 .stsena__media {
@@ -433,6 +469,41 @@
     inset 0 1px 0 var(--color-tab-sheen),
     var(--glow-tab);
 }
+/* Кнопка «Для репетиторов» стоит в той же ленте и должна выглядеть
+   такой же плиткой, как вкладки: она их соседка по сетке. */
+.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .topic-tabs__more {
+  flex: none;
+  min-width: 0;
+  min-height: 76px;
+  margin: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--color-text);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+}
+.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .topic-tabs__more-in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  text-align: center;
+}
+.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .topic-tabs__more .tabs__text {
+  max-width: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .topic-tabs__more:hover {
+  background: var(--color-surface);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+
 @media (max-width: 767.98px) {
   /* Телефон: обложка справа от текста узкой колонкой, кнопка под ней —
      так шапка, лента и начало вкладки умещаются в экран 375×667. */
@@ -480,6 +551,9 @@
   }
   .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs {
     display: flex;
+    /* Одна строка, которая листается: иначе кнопка «Для репетиторов»
+       переносится под ленту и занимает ещё 86 px первого экрана. */
+    flex-wrap: nowrap;
     gap: var(--space-2);
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -494,9 +568,19 @@
   }
   .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta {
     display: flex;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
     gap: var(--space-2);
   }
   .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab'] {
+    flex: 0 0 auto;
+    width: 92px;
+    min-height: 68px;
+    scroll-snap-align: start;
+  }
+  /* Кнопка «Для репетиторов» листается вместе с вкладками, а не
+     сваливается под ленту второй строкой. */
+  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .topic-tabs__more {
     flex: 0 0 auto;
     width: 92px;
     min-height: 68px;

@@ -20,6 +20,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  /* То же, что color-scheme в base.css, но до загрузки CSS. */
+  colorScheme: 'only light',
+  /* Цвет панели браузера на телефоне — фон сайта (--ice). */
+  themeColor: '#f5f9ff',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

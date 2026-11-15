@@ -88,6 +88,16 @@ function ok(uslovie, chto) {
 }
 const propushcheno = [];
 
+/**
+ * Оборванная предзагрузка данных соседней страницы: Next.js заранее
+ * запрашивает «…/index.txt?_rsc=…», а при переходе на другую страницу
+ * WebKit обрывает запрос и сообщает «… due to access control checks».
+ * На страницу это не влияет; любые другие ошибки страницы — ошибки.
+ */
+function obryvPredzagruzki(soobshchenie) {
+  return /index\.txt\?_rsc=/.test(soobshchenie) && /access control checks/.test(soobshchenie);
+}
+
 /* ── Что ещё не убрано ───────────────────────────────────────────────
 
    Места, где скрытый раздел пока виден посетителю в сборке по
@@ -550,7 +560,9 @@ for (const b of spisok) {
       const context = await b.browser.newContext(b.ctx);
       const page = await context.newPage();
       const sboi = [];
-      page.on('pageerror', (e) => sboi.push(e.message));
+      page.on('pageerror', (e) => {
+        if (!obryvPredzagruzki(e.message)) sboi.push(e.message);
+      });
       for (const adres of proba) {
         await page.goto(`${BASE}/${adres}`, { waitUntil: 'load' });
         const net = page.locator('[data-skrytyy-razdel="net"]');
@@ -586,7 +598,9 @@ for (const b of spisok) {
       }
       const page = await context.newPage();
       const sboi = [];
-      page.on('pageerror', (e) => sboi.push(e.message));
+      page.on('pageerror', (e) => {
+        if (!obryvPredzagruzki(e.message)) sboi.push(e.message);
+      });
       for (const adres of proba) {
         await page.goto(`${BASE}/${adres}`, { waitUntil: 'load' });
         const plashka = page.locator('[data-skrytyy-razdel="est"]');
@@ -842,7 +856,12 @@ async function kabinet(b, role, supabase) {
      куски кода: WebKit сообщает о прерванной загрузке как об ошибке
      ChunkLoadError. Это не сбой страницы — такие сообщения пропускаем. */
   page.on('pageerror', (e) => {
-    if (!/ChunkLoadError|Loading chunk \d+ failed/.test(e.message)) sboi.push(e.message);
+    if (
+      !/ChunkLoadError|Loading chunk \d+ failed/.test(e.message) &&
+      !obryvPredzagruzki(e.message)
+    ) {
+      sboi.push(e.message);
+    }
   });
   await page.goto(`${BASE}/kabinet/`, { waitUntil: 'load' });
   const kartochka = page.locator('.skryt-admin');

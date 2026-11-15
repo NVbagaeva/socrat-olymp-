@@ -30,3 +30,10 @@ export function tipHref21(prototip: string): string {
 export function blokHref21(slug: string): string {
   return `${OPORNYE21_HREF}${slug}/`;
 }
+
+export const TEORIYA21_HREF = href(ZADANIYA, 21, 'teoriya');
+
+/** Глава теории: …/teoriya/#teoriya-{glava}. */
+export function glavaHref21(glava: string): string {
+  return `${TEORIYA21_HREF}#teoriya-${glava}`;
+}

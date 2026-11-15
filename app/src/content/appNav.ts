@@ -18,7 +18,7 @@ import { VARIANT_HREF } from '@/content/variant';
    «Прогресс» и «Статистика» → «Статистика», «Материалы» →
    «Мои материалы», «Учитель» и «Домашние работы» → «Для учителя»,
    «Уведомления» → колокольчик в шапке. */
-export const topNav: NavItem[] = [
+const vseRazdely: NavItem[] = [
   { id: 'home', label: 'Главная', href: '/', icon: 'home' },
   /* В нижней панели пункт называется полным именем страницы —
      «Банк заданий»: он ведёт на список всех заданий, а не в раздел. */
@@ -74,6 +74,30 @@ export const topNav: NavItem[] = [
   },
 ];
 
+/**
+ * Разделы, которых ещё нет: их страницы — заглушки «Раздел в разработке»
+ * (components/layout/StubPage.tsx). В меню, нижнюю панель, экран «Ещё»,
+ * сайдбар и колокольчик они не попадают — ни одна кнопка навигации не
+ * ведёт в тупик (docs/design-audit.md, п. 13.1). Страницы по прямому
+ * адресу остаются. Раздел готов — убрать его id отсюда, и он вернётся
+ * на своё место во всех раскладках.
+ */
+const NE_GOTOVY = new Set([
+  'stats',
+  'materials',
+  'teacher',
+  'notifications',
+  'my-tasks',
+  'favourites',
+  'history',
+  'settings',
+]);
+
+const gotovye = (items: NavItem[]): NavItem[] => items.filter((item) => !NE_GOTOVY.has(item.id));
+
+/** Верхнее меню кабинета: только готовые разделы. */
+export const topNav: NavItem[] = gotovye(vseRazdely);
+
 /** Уведомления живут за колокольчиком, в списке меню их нет. */
 export const notificationsPage: NavItem = {
   id: 'notifications',
@@ -83,22 +107,28 @@ export const notificationsPage: NavItem = {
 };
 
 /** Личные разделы под списком заданий в сайдбаре. */
-export const sidebarExtras: NavItem[] = [
+const lichnye: NavItem[] = [
   { id: 'my-tasks', label: 'Мои задания', href: '/moi-zadaniya/', icon: 'assignments' },
   { id: 'favourites', label: 'Избранное', href: '/izbrannoe/', icon: 'favourites' },
   { id: 'history', label: 'История решений', href: '/istoriya-resheniy/', icon: 'history' },
   { id: 'settings', label: 'Настройки', href: '/nastroyki/', icon: 'settings' },
 ];
 
+/** Готовые личные разделы; пусто — блока в сайдбаре нет. */
+export const sidebarExtras: NavItem[] = gotovye(lichnye);
+
+/** Колокольчик в шапке — только когда страница уведомлений готова. */
+export const notificationsReady = !NE_GOTOVY.has(notificationsPage.id);
+
 /* «Мои конспекты» из этого списка убраны по макету. Маршрут
    /moi-konspekty остался: страница есть, ссылки в меню нет. */
 
 /* ── Мобильная панель ─────────────────────────────────────────────
    Пунктов помещается пять: три раздела из верхнего меню и вход в
-   остальные. Здесь перечислены только идентификаторы — названия и
+   остальные. Пока статистики нет, третья ячейка — «Вариант». Здесь перечислены только идентификаторы — названия и
    адреса те же, что наверху. */
 
-const PRIMARY_IDS = ['home', 'tasks', 'stats'];
+const PRIMARY_IDS = ['home', 'tasks', 'variant'];
 
 /** Экран со списком разделов, не поместившихся в панель. */
 export const appNavMorePage: NavItem = {
@@ -115,10 +145,10 @@ export const appNavPrimary: NavItem[] = PRIMARY_IDS.flatMap((id) => {
 });
 
 /** Экран «Ещё»: всё, что не попало в панель. Считается, не задаётся. */
-export const appNavMore: NavItem[] = [
+export const appNavMore: NavItem[] = gotovye([
   ...topNav.filter((item) => !PRIMARY_IDS.includes(item.id)),
   notificationsPage,
-];
+]);
 
 /** id пункта панели, который подсвечивается на странице раздела active. */
 export function bottomNavActive(active: string | undefined): string | undefined {
