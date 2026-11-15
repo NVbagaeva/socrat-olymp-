@@ -148,6 +148,14 @@ export function useStickyTabs(
     let observer: IntersectionObserver | undefined;
     /* Сверка следующим кадром после уведомления наблюдателя. */
     let kadr = 0;
+    /* ДИАГНОСТИКА (временная ветка): журнал решений панели. */
+    const dbg = ((window as unknown as { __stDbg?: string[] }).__stDbg ??= []);
+    const log = (m: string): void => {
+      dbg.push(
+        `${Math.round(performance.now())} ${m} sy=${Math.round(window.scrollY)} niz=${Math.round(nizDoc)} line=${line} cur=${current}`,
+      );
+      if (dbg.length > 400) dbg.splice(0, dbg.length - 400);
+    };
 
     /* Место и высота панели. Нижний край панели — линия, под которую
        уходят плитки: за ней следит IntersectionObserver с отступом
@@ -167,9 +175,13 @@ export function useStickyTabs(
       }
       line = bottom;
       zapomnit();
+      log('relayout');
       observer?.disconnect();
       observer = new IntersectionObserver(
-        () => {
+        (entries) => {
+          log(
+            `io inter=${entries.map((e) => e.isIntersecting).join(',')} bcr=${Math.round(tiles!.getBoundingClientRect().bottom)}`,
+          );
           /* Решаем по месту плиток, а не по прямоугольнику из
              уведомления: в WebKit тот бывает отстающим на кадр. */
           sverit();
@@ -200,10 +212,12 @@ export function useStickyTabs(
        низу плиток, а кадром позже перезапоминаем низ и сверяемся
        снова — на случай, если вёрстка выше плиток переехала. */
     function sverit(): void {
+      log(`sverit po=${poMestu()}`);
       primenit(poMestu());
       cancelAnimationFrame(kadr);
       kadr = requestAnimationFrame(() => {
         zapomnit();
+        log(`raf po=${poMestu()}`);
         primenit(poMestu());
       });
     }
@@ -213,6 +227,7 @@ export function useStickyTabs(
         return;
       }
       current = next;
+      log(`primenit ${next}`);
       const from = next ? tiles! : panel!;
       const active = document.activeElement as HTMLElement | null;
       focus.current = active && from.contains(active) ? focusables(from).indexOf(active) : -1;

@@ -406,6 +406,28 @@ async function prokrutka(context, engine, size, url) {
     const { problem } = await dozhdatsya(page, y, base);
     if (problem !== null) {
       bad.push(problem);
+      /* ДИАГНОСТИКА (временная ветка): дождётся ли панель ещё 10 с и
+         что видел хук. */
+      let pozzhe = 'нет';
+      for (let i = 0; i < 100; i += 1) {
+        await page.waitForTimeout(100);
+        if (oshibka(await zamer(page), y, base) === null) {
+          pozzhe = `да, через ${1500 + i * 100} мс`;
+          break;
+        }
+      }
+      const info = await page.evaluate(() => ({
+        dbg: (window.__stDbg ?? []).slice(-40),
+        vis: document.visibilityState,
+        tn: (() => {
+          const t = document.querySelector('.topnav');
+          return t ? [t.scrollWidth, t.clientWidth, t.getBoundingClientRect().height] : null;
+        })(),
+        hdr: document.querySelector('header')?.getBoundingClientRect().height,
+      }));
+      console.log(`DIAG ${engine} ${size.name} ${url} y=${y}: позже исправилось — ${pozzhe}`);
+      console.log(`DIAG vis=${info.vis} topnav=${JSON.stringify(info.tn)} header=${info.hdr}`);
+      for (const l of info.dbg) console.log(`DIAG   ${l}`);
     }
   }
   check(bad.length === 0, `${where}: ${bad.slice(0, 3).join('; ')}`);
