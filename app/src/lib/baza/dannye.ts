@@ -20,6 +20,11 @@ import type { Prototip, Resheno, ZadachaLite } from './types';
    знал адреса кусков. Новый раздел базы добавляет сюда строку. */
 const PROTOTIPY: Readonly<Record<string, () => Promise<{ prototipy: readonly Prototip[] }>>> = {
   '5': () => import('./z05/prototipy').then((m) => ({ prototipy: m.PROTOTIPY_05 })),
+  '12': () => import('./z12/prototipy').then((m) => ({ prototipy: m.PROTOTIPY_12 })),
+  '14': () => import('./z14/prototipy').then((m) => ({ prototipy: m.PROTOTIPY_14 })),
+  '15': () => import('./z15/prototipy').then((m) => ({ prototipy: m.PROTOTIPY_15 })),
+  '16': () => import('./z16/prototipy').then((m) => ({ prototipy: m.PROTOTIPY_16 })),
+  '17': () => import('./z17/prototipy').then((m) => ({ prototipy: m.PROTOTIPY_17 })),
 };
 
 export interface BrauzerRazdela {

@@ -184,9 +184,19 @@ export function useStickyTabs(
     }
 
     /* Низ плиток в координатах страницы: с прокруткой он не меняется,
-       поэтому при прокрутке хватает арифметики, без чтения вёрстки. */
+       поэтому при прокрутке хватает арифметики, без чтения вёрстки.
+       Считается по вёрстке (offsetTop вверх по цепочке), а не из
+       прямоугольника плюс прокрутка: в WebKit прямоугольник бывает
+       отстающим на кадр, и вместе со свежей прокруткой он давал низ,
+       уехавший ровно на шаг прокрутки, — панель застревала скрытой. */
     function zapomnit(): void {
-      nizDoc = tiles!.getBoundingClientRect().bottom + window.scrollY;
+      let node: HTMLElement | null = tiles!;
+      let verh = 0;
+      while (node !== null) {
+        verh += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+      nizDoc = verh + tiles!.offsetHeight;
     }
 
     /* Ушли ли плитки под панель прямо сейчас. */
