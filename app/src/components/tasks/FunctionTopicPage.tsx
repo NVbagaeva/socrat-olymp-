@@ -19,7 +19,11 @@ import { TopicAbout } from './TopicAbout';
 import type { TheoryFigureId } from '@/lib/theoryFigures';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
-import { StsenaShapka, tabletkiRazdela } from './stsena';
+/* Из своих файлов, а не из общего ./stsena: в том наборе лежат
+   клиентские «Объёмная обложка» и «Строка прогресса», и через него
+   они попадали в первую загрузку страниц подтем. */
+import { StsenaShapka } from './stsena/StsenaShapka';
+import { tabletkiRazdela } from './stsena/tabletki';
 import { VseRazdelyKnopka } from './razdely';
 import { podtemaVkladki, razdelyZadaniya } from './razdely/razdely12';
 import { TopicTabs } from './TopicTabs';
