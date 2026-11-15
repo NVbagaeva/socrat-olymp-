@@ -1,10 +1,13 @@
 /**
  * База, задание №17 «Уравнения»: наполнение раздела. Прототипы
- * тренажёра — lib/baza/z17; теории, карточек и опорных задач пока нет.
+ * тренажёра — lib/baza/z17; теория, опорные задачи и карточки — здесь.
  */
 
 import { GRUPPY_17, PROTOTIPY_17 } from '@/lib/baza/z17/prototipy';
 import type { RazdelBazy } from '@/lib/baza/types';
+import { KOLODA_17 } from './kartochki';
+import { OPORNYE_17 } from './opornye';
+import { TEORIYA_17 } from './teoriya';
 
 export const RAZDEL_17: RazdelBazy = {
   slug: '17',
@@ -30,6 +33,9 @@ export const RAZDEL_17: RazdelBazy = {
       },
     ],
   },
+  teoriya: TEORIYA_17,
   gruppy: GRUPPY_17,
   prototipy: PROTOTIPY_17,
+  opornye: OPORNYE_17,
+  kartochki: KOLODA_17,
 };
