@@ -25,6 +25,7 @@
   top: 0;
   z-index: 20;
   background: var(--color-bg-translucent);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--color-border);
   margin-bottom: var(--space-12);

@@ -9,6 +9,11 @@
 }
 
 html {
+  /* Сайт только светлый. «only» — запрет браузеру затемнять страницу
+     самому (тёмная тема для сайтов в Яндекс Браузере, Samsung Internet,
+     Chrome на Android): стекло, свечения и чертежи после такой инверсии
+     становятся грязными (docs/launch-audit.md, B12). */
+  color-scheme: only light;
   -webkit-text-size-adjust: 100%;
   /* Шрифт-база: от неё считается вся шкала в rem. */
   font-size: var(--font-size-base);

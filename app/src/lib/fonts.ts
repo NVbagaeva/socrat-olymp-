@@ -65,6 +65,11 @@ export const interGreek = localFont({
  *
  * В подмножестве cyrillic нет латиницы и цифр: символы вне кириллицы
  * браузер отрисует запасным cursive из токена --font-hand.
+ *
+ * Не предзагружается: рукопись — украшение («Об авторе», подпись в
+ * сайдбаре, пометки на листах), а preload ставил 45 КБ в очередь первой
+ * загрузки каждой страницы, в том числе на телефоне, где сайдбара нет.
+ * Браузер заберёт файл сам, когда встретит текст этим шрифтом.
  */
 export const caveat = localFont({
   src: [
@@ -72,6 +77,7 @@ export const caveat = localFont({
   ],
   variable: '--font-caveat',
   display: 'swap',
+  preload: false,
   fallback: ['cursive'],
 });
 

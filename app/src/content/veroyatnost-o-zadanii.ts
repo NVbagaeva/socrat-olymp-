@@ -57,10 +57,11 @@ export const V_ZADANII_5 = {
 /** Фотография к блоку «Немного истории». */
 export const FOTO_4 = {
   /** Путь от корня public. Нет файла — вкладка покажет пустое место. */
-  src: assetUrl('/images/zadanie-04/pamyatnik-porokam.jpg'),
+  /* WebP 1200 px вместо JPG 584 КБ; исходник лежит рядом. */
+  src: assetUrl('/images/zadanie-04/pamyatnik-porokam.webp'),
   /** Свои размеры файла: по ним считается место до загрузки. */
-  width: 1672,
-  height: 941,
+  width: 1200,
+  height: 675,
   alt: 'Памятник «Дети — жертвы пороков взрослых» на Болотной площади в Москве',
   /** Что показать вместо фотографии, если файла нет. */
   pusto: {

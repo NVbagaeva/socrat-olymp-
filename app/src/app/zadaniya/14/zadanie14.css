@@ -570,6 +570,7 @@
   padding: var(--space-6);
   border-radius: var(--radius-xl);
   background: var(--glass-tint-warm);
+  -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-ring-warm), var(--glass-hi), var(--glass-shadow-warm);
 }
@@ -662,24 +663,6 @@
     font-size: clamp(21px, 6.6vw, 28px);
     hyphens: auto;
     overflow-wrap: break-word;
-  }
-}
-/* Тёмная схема: стекло темнее, подпись светлая, свечение сильнее. */
-@media (prefers-color-scheme: dark) {
-  .z14-kotik {
-    background: linear-gradient(160deg, rgb(28 34 52 / 0.86), rgb(42 30 28 / 0.8));
-    box-shadow:
-      0 0 0 1px rgb(224 122 47 / 0.25),
-      0 18px 40px -16px rgb(224 122 47 / 0.35);
-  }
-  .z14-kotik__podpis {
-    color: #f3ede8;
-  }
-  .z14-kotik__akcent {
-    background-image: linear-gradient(100deg, #f0a27a, #ffb37a 55%, #e88a5a);
-  }
-  .z14-kotik__kartinka::before {
-    background: radial-gradient(closest-side, rgb(255 160 100 / 0.38), transparent);
   }
 }
 #makety-okruzhnosti {
@@ -853,6 +836,7 @@
   border-radius: 10px;
   background: rgb(255 255 255 / 0.55);
   box-shadow: inset 0 0 0 1.5px rgb(31 95 208 / 0.28);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   transition:
     box-shadow 0.15s,
@@ -1005,6 +989,7 @@
   padding: var(--space-4);
   border-radius: var(--radius-xl);
   background: var(--glass-tint-blue);
+  -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
   min-height: 120px;
@@ -1445,19 +1430,6 @@
 }
 .kotik-okno__schet .is-da {
   color: #e3877d;
-}
-@media (prefers-color-scheme: dark) {
-  .kotik-okno {
-    background: rgb(43 35 33 / 0.6);
-  }
-  .kotik-okno__panel {
-    background: linear-gradient(160deg, rgb(58 44 42 / 0.92), rgb(46 35 36 / 0.9));
-    color: #f2e6df;
-  }
-  .kotik-knopka__podskazka {
-    background: linear-gradient(160deg, rgb(58 44 42 / 0.96), rgb(46 35 36 / 0.96));
-    color: #f2e6df;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .kotik3d__serdce,

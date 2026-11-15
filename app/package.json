@@ -200,6 +200,7 @@
     "test:razdely-names": "node scripts/check-razdely-names.mjs",
     "test:first-load": "node scripts/check-first-load.mjs",
     "test:repo-files": "node scripts/check-repo-files.mjs",
+    "test:webkit-steklo": "node scripts/check-webkit-steklo.mjs",
     "test:seriya-9": "node scripts/check-seriya-9.mjs",
     "test:dev-pages": "node scripts/check-dev-pages.mjs",
     "test:tarify": "node scripts/check-tarify.mjs",
