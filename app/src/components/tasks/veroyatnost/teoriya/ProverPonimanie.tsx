@@ -129,6 +129,8 @@ export function ProverPonimanie({ voprosy }: ProverPonimaniyaProps) {
             )}
             disabled={otvechen}
             label={vopros.text}
+            /* Варианты — дроби формулой: кнопке нужно название текстом. */
+            nazvanie={(variant) => variant}
           />
 
           {/* Разбор: раскрывается отпечатком, когда ученик ответил. */}

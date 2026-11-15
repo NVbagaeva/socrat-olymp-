@@ -24,6 +24,11 @@ export interface VariantyOtvetaProps {
    */
   itog?: (variant: string) => VariantSostoyanie;
   /**
+   * Название кнопки для скринридера, когда вид варианта — картинка или
+   * формула без текста (vid). Не задано — название из содержимого.
+   */
+  nazvanie?: (variant: string) => string;
+  /**
    * Чем нарисовать вариант, если подпись — не просто строка. Пусто —
    * на кнопке стоит само значение. Так блок с дробями отдаёт готовую
    * вёрстку формулы, а блок с одним словом ничего не передаёт.
@@ -69,6 +74,7 @@ export function VariantyOtveta({
   className,
   radio = false,
   onEnter,
+  nazvanie,
 }: VariantyOtvetaProps) {
   const knopki = useRef<(HTMLButtonElement | null)[]>([]);
   const dostupny = (variant: string): boolean => !disabled && !(zakryt?.(variant) ?? false);
@@ -133,6 +139,7 @@ export function VariantyOtveta({
                 }
               : { 'aria-pressed': vybran })}
             disabled={!dostupny(variant)}
+            {...(nazvanie === undefined ? {} : { 'aria-label': nazvanie(variant) })}
             onClick={() => onPick(variant)}
           >
             {vid === undefined ? variant : vid(variant)}
