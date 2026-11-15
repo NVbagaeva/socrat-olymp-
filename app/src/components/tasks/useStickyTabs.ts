@@ -166,20 +166,11 @@ export function useStickyTabs(
       line = bottom;
       observer?.disconnect();
       observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[entries.length - 1]!.isIntersecting) {
-            /* Плитки снова в зоне под панелью — панель уходит. Это
-               однозначно, и перепроверять нечего: лишняя сверка у
-               самой линии возвращала бы панель обратно. */
-            primenit(false);
-            return;
-          }
-          /* Плитки ушли под панель — решаем по их месту, а не по
-             прямоугольнику из уведомления: в WebKit тот бывает
-             отстающим на кадр. Его же догоняем следующим кадром. */
-          primenit(poMestu());
-          cancelAnimationFrame(kadr);
-          kadr = requestAnimationFrame(() => primenit(poMestu()));
+        () => {
+          /* Решаем по месту плиток, а не по прямоугольнику из
+             уведомления: в WebKit тот бывает отстающим на кадр. Его же
+             догоняем следующим кадром. */
+          sverit();
         },
         { rootMargin: `-${bottom}px 0px 0px 0px` },
       );
@@ -193,6 +184,15 @@ export function useStickyTabs(
     /* Ушли ли плитки под панель прямо сейчас — по их месту. */
     function poMestu(): boolean {
       return tiles!.getBoundingClientRect().bottom <= line + 0.5;
+    }
+
+    /* Сверка состояния с местом плиток — сейчас и ещё раз следующим
+       кадром. Второй раз нужен, когда прямоугольник приходит
+       отстающим. */
+    function sverit(): void {
+      primenit(poMestu());
+      cancelAnimationFrame(kadr);
+      kadr = requestAnimationFrame(() => primenit(poMestu()));
     }
 
     function primenit(next: boolean): void {
@@ -211,11 +211,19 @@ export function useStickyTabs(
     sizes.observe(tiles);
     sizes.observe(panel);
     window.addEventListener('resize', relayout);
+    /* Наблюдатель уведомляет не о каждом переходе: когда низ плиток
+       совпадает с линией, пересечение «касанием» и его отсутствие дают
+       одну и ту же долю (ноль), и WebKit следующего уведомления уже не
+       присылает — панель застревала. Поэтому при прокрутке сверяемся
+       сами: чтение одного прямоугольника за кадр, состояние меняется
+       только когда оно действительно другое. */
+    window.addEventListener('scroll', sverit, { passive: true });
     return () => {
       cancelAnimationFrame(kadr);
       observer?.disconnect();
       sizes.disconnect();
       window.removeEventListener('resize', relayout);
+      window.removeEventListener('scroll', sverit);
       page.style.removeProperty('--topic-sticky-top');
     };
   }, [tilesRef, panelRef]);
