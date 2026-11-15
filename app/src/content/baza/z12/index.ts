@@ -1,10 +1,14 @@
 /**
- * База, задание №12 «Планиметрия»: наполнение раздела. Прототипы
- * тренажёра с чертежами условия — lib/baza/z12.
+ * База, задание №12 «Планиметрия»: наполнение раздела. Теория, опорные
+ * задачи и карточки — здесь; прототипы тренажёра с чертежами условия —
+ * lib/baza/z12.
  */
 
 import { GRUPPY_12, PROTOTIPY_12 } from '@/lib/baza/z12/prototipy';
 import type { RazdelBazy } from '@/lib/baza/types';
+import { KOLODA_12 } from './kartochki';
+import { OPORNYE_12 } from './opornye';
+import { TEORIYA_12 } from './teoriya';
 
 export const RAZDEL_12: RazdelBazy = {
   slug: '12',
@@ -32,6 +36,9 @@ export const RAZDEL_12: RazdelBazy = {
       },
     ],
   },
+  teoriya: TEORIYA_12,
   gruppy: GRUPPY_12,
   prototipy: PROTOTIPY_12,
+  opornye: OPORNYE_12,
+  kartochki: KOLODA_12,
 };
