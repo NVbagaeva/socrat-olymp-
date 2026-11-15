@@ -79,6 +79,7 @@
     "test:kotik": "node scripts/check-kotik.mjs",
     "test:veroyatnost": "node scripts/check-veroyatnost.mjs",
     "test:prep-order": "node scripts/check-prep-order.mjs",
+    "test:ege-countdown": "node scripts/check-ege-countdown.mjs",
     "test:opornye-5": "node scripts/check-opornye-5.mjs",
     "test:z3-round": "node scripts/check-z3-round.mjs",
     "test:imports": "node scripts/check-imports.mjs",
