@@ -165,8 +165,10 @@ function check(ok, what) {
    на странице. До этого панель ещё не следит за плитками — замерять
    нечего. На медленной машине (CI, WebKit) гидратация тяжёлой страницы
    занимает секунды, и без этого ожидания она съедала бы время на
-   появление панели. */
-async function dozhdatsyaLenty(page, timeout = 15_000) {
+   появление панели. Запас — 30 с: теория №13 в безголовом WebKit на
+   четырёх ядрах оживает за 16 с, и прежние 15 с роняли проверку не на
+   панели, а на ожидании гидратации. */
+async function dozhdatsyaLenty(page, timeout = 30_000) {
   await page.waitForFunction(
     () => {
       const tiles = document.querySelector('.topic-tabs-row:not(.topic-tabs-row--panel)');
