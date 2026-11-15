@@ -64,19 +64,6 @@ import { STRUKTURA } from '../src/content/struktura.js';
 
 bezBanneraCookieVsyudu(chromium, webkit);
 
-/**
- * Оборванная предзагрузка данных ссылки, а не сбой страницы. После
- * события load Next.js ещё подгружает данные ссылок в виду («Войти»,
- * «Банк заданий»: …/index.txt?_rsc=…), в том числе в простое браузера —
- * уже после тишины в сети. Переход проверки на следующий адрес обрывает
- * такой запрос, и WebKit бросает необработанную ошибку «… due to access
- * control checks»; Chromium обрыв молча глотает, посетитель ничего не
- * видит. Такие сообщения пропускаем — как ChunkLoadError в кабинете.
- */
-function oborvannayaPredzagruzka(message) {
-  return /\?_rsc=\S* due to access control checks/.test(message);
-}
-
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
 const argOf = (name) => (flag(name) ? args[args.indexOf(name) + 1] : null);
@@ -100,6 +87,16 @@ function ok(uslovie, chto) {
   return uslovie;
 }
 const propushcheno = [];
+
+/**
+ * Оборванная предзагрузка данных соседней страницы: Next.js заранее
+ * запрашивает «…/index.txt?_rsc=…», а при переходе на другую страницу
+ * WebKit обрывает запрос и сообщает «… due to access control checks».
+ * На страницу это не влияет; любые другие ошибки страницы — ошибки.
+ */
+function obryvPredzagruzki(soobshchenie) {
+  return /index\.txt\?_rsc=/.test(soobshchenie) && /access control checks/.test(soobshchenie);
+}
 
 /* ── Что ещё не убрано ───────────────────────────────────────────────
 
@@ -564,7 +561,7 @@ for (const b of spisok) {
       const page = await context.newPage();
       const sboi = [];
       page.on('pageerror', (e) => {
-        if (!oborvannayaPredzagruzka(e.message)) sboi.push(e.message);
+        if (!obryvPredzagruzki(e.message)) sboi.push(e.message);
       });
       for (const adres of proba) {
         await page.goto(`${BASE}/${adres}`, { waitUntil: 'load' });
@@ -602,7 +599,7 @@ for (const b of spisok) {
       const page = await context.newPage();
       const sboi = [];
       page.on('pageerror', (e) => {
-        if (!oborvannayaPredzagruzka(e.message)) sboi.push(e.message);
+        if (!obryvPredzagruzki(e.message)) sboi.push(e.message);
       });
       for (const adres of proba) {
         await page.goto(`${BASE}/${adres}`, { waitUntil: 'load' });
@@ -859,7 +856,12 @@ async function kabinet(b, role, supabase) {
      куски кода: WebKit сообщает о прерванной загрузке как об ошибке
      ChunkLoadError. Это не сбой страницы — такие сообщения пропускаем. */
   page.on('pageerror', (e) => {
-    if (!/ChunkLoadError|Loading chunk \d+ failed/.test(e.message)) sboi.push(e.message);
+    if (
+      !/ChunkLoadError|Loading chunk \d+ failed/.test(e.message) &&
+      !obryvPredzagruzki(e.message)
+    ) {
+      sboi.push(e.message);
+    }
   });
   await page.goto(`${BASE}/kabinet/`, { waitUntil: 'load' });
   const kartochka = page.locator('.skryt-admin');
