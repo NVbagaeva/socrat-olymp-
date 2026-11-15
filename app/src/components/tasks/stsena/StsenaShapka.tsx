@@ -23,6 +23,11 @@ export interface StsenaShapkaProps {
    */
   pereklyuchatel?: ReactNode;
   title: ReactNode;
+  /**
+   * Строки под заголовком: у подтем №12 — название подтемы, когда H1
+   * занят названием задания, и название графика. Не задан — строк нет.
+   */
+  podzagolovok?: ReactNode;
   lead?: ReactNode;
   /** Таблетки под описанием: «Часть 1», «1 балл», «≈ 3 минуты». */
   tabletki?: readonly Tabletka[];
@@ -48,6 +53,7 @@ export function StsenaShapka({
   crumbs,
   pereklyuchatel,
   title,
+  podzagolovok,
   lead,
   tabletki,
   progress,
@@ -64,6 +70,9 @@ export function StsenaShapka({
       <header className={clsx('stsena', media === undefined && 'stsena--text', className)}>
         <div className="stsena__text">
           <h1 className="t-h1 stsena__title">{title}</h1>
+          {podzagolovok === undefined ? null : (
+            <div className="stsena__podzagolovok">{podzagolovok}</div>
+          )}
           {lead === undefined ? null : <p className="stsena__lead">{lead}</p>}
           {tabletki === undefined || tabletki.length === 0 ? null : (
             <ul className="stsena__tabletki">

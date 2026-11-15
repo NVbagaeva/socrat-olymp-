@@ -19,7 +19,11 @@ import { TopicAbout } from './TopicAbout';
 import type { TheoryFigureId } from '@/lib/theoryFigures';
 import { TopicProgress } from './TopicProgress';
 import { theoryBodies } from './theory';
-import { ShapkaRazdela } from './ShapkaRazdela';
+/* Из своих файлов, а не из общего ./stsena: в том наборе лежат
+   клиентские «Объёмная обложка» и «Строка прогресса», и через него
+   они попадали в первую загрузку страниц подтем. */
+import { StsenaShapka } from './stsena/StsenaShapka';
+import { tabletkiRazdela } from './stsena/tabletki';
 import { VseRazdelyKnopka } from './razdely';
 import { podtemaVkladki, razdelyZadaniya } from './razdely/razdely12';
 import { TopicTabs } from './TopicTabs';
@@ -132,9 +136,11 @@ export function FunctionTopicPage({
 
   return (
     <main className="app-main">
-      <ShapkaRazdela
+      <StsenaShapka
         className="topic-head"
-        back={<VseRazdelyKnopka no={section.no} href={href(ZADANIYA, section.slug)} />}
+        /* На телефоне и планшете крошек нет: их место занимает кнопка
+           «‹ Все разделы №12» — она ведёт туда же, куда вторая крошка. */
+        pereklyuchatel={<VseRazdelyKnopka no={section.no} href={href(ZADANIYA, section.slug)} />}
         crumbs={[
           { label: 'Задания', href: tasksPage.href },
           {
@@ -152,18 +158,16 @@ export function FunctionTopicPage({
             ? subtopic.title
             : `Задание №${section.no}. ${section.subtitle}`
         }
-        subtitle={
+        podzagolovok={
           <>
             {subtopic.head === undefined ? null : (
-              <p className="t-h3 topic-head__subtitle topic-head__subtitle--wide">
-                {subtopic.title}
-              </p>
+              <span className="t-h3 stsena__podtema">{subtopic.title}</span>
             )}
-            <p className="topic-head__graph">{subtopic.graphName}</p>
+            <span className="stsena__grafik">{subtopic.graphName}</span>
           </>
         }
-        badge={topic.badge}
         lead={topic.lead}
+        tabletki={tabletkiRazdela({ chast: topic.badge })}
         media={
           /* Прогресс подтемы: пункты — её вкладки с содержанием,
              изучено — то, что ученик сделал, а не открыл. */
@@ -179,7 +183,9 @@ export function FunctionTopicPage({
             about={about}
             scene={aboutScene(subtopic.id)}
             base={base}
-            {...(ABOUT_FIGURE[subtopic.id] === undefined ? {} : { figure: ABOUT_FIGURE[subtopic.id] })}
+            {...(ABOUT_FIGURE[subtopic.id] === undefined
+              ? {}
+              : { figure: ABOUT_FIGURE[subtopic.id] })}
           />
         }
         theory={subtopic.theory.map((block) => ({ ...block, titleHtml: typeset(block.title) }))}
@@ -214,7 +220,9 @@ export function FunctionTopicPage({
           ))
         }
         trainerHref={hasTrainer ? `${base}/trenazher/` : null}
-        generator={hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} icon={icon} /> : undefined}
+        generator={
+          hasTrainer ? <GeneratorTab subtopic={subtopic} base={base} icon={icon} /> : undefined
+        }
         tutors={tutors}
         tutorsEmpty={PODTEMA_SKORO.tutors}
         razdely={razdely}

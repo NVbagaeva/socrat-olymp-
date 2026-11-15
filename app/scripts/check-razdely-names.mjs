@@ -304,7 +304,7 @@ function checkSite() {
     );
     /* Шапка: название раздела и под ним название графика. */
     check(
-      html.includes(`class="topic-head__graph">${row.graphName}<`),
+      html.includes(`class="stsena__grafik">${row.graphName}<`),
       `/zadaniya/12/${row.id}/: в шапке нет подписи «${row.graphName}»`,
     );
     /* Крошки: последняя — название раздела. */
