@@ -181,6 +181,38 @@ async function dozhdatsyaLenty(page, timeout = 30_000) {
     undefined,
     { timeout },
   );
+  await dozhdatsyaPokoya(page);
+}
+
+/* Страница успокоилась. Лента оживает посреди гидратации, а следом
+   Next.js предзагружает ссылки в виду: на «О задании» №11 это около
+   70 запросов и их разбор, и в WebKit главный поток занят паузами по
+   0,3–0,4 с (в CI — по 2–3 с). Прокрутка в это время доходит до
+   страницы с опозданием, и проверка видела «панель скрыта», хотя хук
+   был ни при чём: событие прокрутки приходило через 2,4 с, панель
+   появлялась за 33 мс после него. Поэтому перед замерами ждём тишины
+   в сети и пяти кадров подряд без пауз дольше 100 мс (не больше 15 с —
+   дальше меряем как есть, и медленная страница проявится ошибкой). */
+async function dozhdatsyaPokoya(page) {
+  await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {});
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        const start = performance.now();
+        let last = start;
+        let podryad = 0;
+        const tick = (t) => {
+          podryad = t - last < 100 ? podryad + 1 : 0;
+          last = t;
+          if (podryad >= 5 || t - start > 15_000) {
+            resolve();
+          } else {
+            requestAnimationFrame(tick);
+          }
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
 }
 
 /** Замер меню и страницы в браузере. */
