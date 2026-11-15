@@ -296,6 +296,14 @@ async function proverkaStranicy(page, where, phone) {
         const y2 = top + (bottom - top) * 0.7;
         const own = line.node.parentElement;
         let proveryeno = false;
+        /* Строка внутри главы, которую браузер сейчас не рисует
+           (content-visibility: auto пропускает её содержимое): WebKit
+           отдаёт для неё прежние координаты, а на их месте уже соседняя
+           глава — хит-тест попадает в чужой текст. Проверить её можно
+           только когда глава отрисована, на другом шаге прокрутки. */
+        if (own.checkVisibility?.({ contentVisibilityAuto: true }) === false) {
+          return { proveryeno, zakryto: null };
+        }
         for (const [x, cy] of [
           [lx, y1],
           [mx, y1],

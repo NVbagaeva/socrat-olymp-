@@ -13,7 +13,28 @@ import type { Resheno, ZadachaLite } from '@/lib/baza/types';
 import { levelInfo } from '@/lib/level';
 import type { KatalogBanka } from '@/lib/trening/bank';
 
-const GRUPP: Record<number, string> = { 1: 'одной', 2: 'двух', 3: 'трёх', 4: 'четырёх', 5: 'пяти' };
+const GRUPP: Record<number, string> = {
+  1: 'одной',
+  2: 'двух',
+  3: 'трёх',
+  4: 'четырёх',
+  5: 'пяти',
+  6: 'шести',
+  7: 'семи',
+  8: 'восьми',
+  9: 'девяти',
+  10: 'десяти',
+  11: 'одиннадцати',
+  12: 'двенадцати',
+  13: 'тринадцати',
+  14: 'четырнадцати',
+  15: 'пятнадцати',
+  16: 'шестнадцати',
+  17: 'семнадцати',
+  18: 'восемнадцати',
+  19: 'девятнадцати',
+  20: 'двадцати',
+};
 
 /**
  * Тренажёр задания базы — общий тренажёр по банку (как у №6, №7, №10
@@ -49,7 +70,11 @@ export function TrenazherBazy({
         istochniki: { vse: 'Все', fipi: 'Исходные', new: 'Сгенерированные' },
       }),
       proverit: prochitat,
-      pod: () => null,
+      /* Чертёж условия (№12): SVG строит прототип на сборке. */
+      pod: (z) =>
+        z.risunok === undefined ? null : (
+          <div className="trn-risunok" dangerouslySetInnerHTML={{ __html: z.risunok }} />
+        ),
       shagi: (s) => shagiIzEtapov(s.etapy),
       voprosy: (s) => voprosyIzRazbora(s.hints),
       zadachaHref: (id) =>

@@ -126,6 +126,20 @@ export function metkaVida(z: {
   return vid === null ? null : METKA_VIDA[vid];
 }
 
+/**
+ * Задания готового набора (повышенные, ежемесячные): задания варианта,
+ * задачи которых в наборе есть. У готовых наборов состав свой — раздела,
+ * которого в их данных нет (в ЕГЭ-2027 — «Наибольшее и наименьшее»), в
+ * составе нет и в итоге он не считается.
+ */
+export function sostavNabora(
+  variants: readonly { tasks: readonly { egeNumber: number }[] }[],
+): EgeNo[] {
+  return VARIANT_NUMBERS.filter((n) =>
+    variants.some((v) => v.tasks.some((t) => t.egeNumber === n)),
+  );
+}
+
 /** Задачи версии с кратким ответом, которые входят в первую часть действующей структуры. */
 export function vChasti1<T extends { egeNumber: number }>(tasks: readonly T[]): T[] {
   return tasks.filter((t) => nomerChasti1(t.egeNumber) !== null);
