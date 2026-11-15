@@ -454,7 +454,7 @@ const P65 = sobrat({
       otvet,
       etapy: [
         {
-          title: 'Угол BCH равен углу A',
+          title: 'Угол $BCH$ равен углу $A$',
           lines: [
             'В треугольниках $ABC$ и $CBH$ угол $B$ общий, а углы $C$ и $H$ прямые. Значит,',
             '$\\angle BCH=90^\\circ-\\angle B=\\angle A$.',
@@ -554,7 +554,7 @@ const P66 = sobrat({
           ],
         },
         {
-          title: 'Тангенс угла B',
+          title: 'Тангенс угла $B$',
           lines: [
             'Против угла $B$ лежит катет $AC$, прилежит — катет $BC$:',
             `$\\mathrm{tg}\\,B=\\dfrac{AC}{BC}=\\dfrac{${qTex(ac)}}{${bc}}=${tex(otvet)}$.`,
@@ -812,7 +812,7 @@ const P68 = sobrat({
             lines: [`$BM^2=AB^2-AM^2=${b * b}-${qTex(am2)}=${qTex(bm2)}$, $BM=${qTex(bm)}$.`],
           },
           {
-            title: 'Синус угла A',
+            title: 'Синус угла $A$',
             lines: [
               'В прямоугольном треугольнике $ABM$:',
               `$\\sin\\angle BAC=\\dfrac{BM}{AB}=\\dfrac{${qTex(bm)}}{${b}}=${tex(otvet)}$.`,
@@ -854,7 +854,7 @@ const P68 = sobrat({
           lines: [`$AM^2=AB^2-BM^2=${b}^2-${korKv(k, m)}=${qTex(am2)}$, $AM=${qTex(am)}$.`],
         },
         {
-          title: 'Косинус угла A',
+          title: 'Косинус угла $A$',
           lines: [`$\\cos\\angle BAC=\\dfrac{AM}{AB}=\\dfrac{${qTex(am)}}{${b}}=${tex(otvet)}$.`],
         },
       ],
@@ -1167,7 +1167,7 @@ const P71 = sobrat({
       otvet,
       etapy: [
         {
-          title: 'Угол C треугольника',
+          title: 'Угол $C$ треугольника',
           lines: [
             'Внутренний и внешний углы при вершине $C$ смежные:',
             '$\\angle C=180^\\circ-150^\\circ=30^\\circ$, $\\sin C=\\dfrac{1}{2}$.',
@@ -1249,7 +1249,7 @@ const P72 = sobrat({
       otvet,
       etapy: [
         {
-          title: 'Угол C треугольника',
+          title: 'Угол $C$ треугольника',
           lines: ['$\\angle C=180^\\circ-120^\\circ=60^\\circ$, $\\cos 60^\\circ=\\dfrac{1}{2}$.'],
         },
         {

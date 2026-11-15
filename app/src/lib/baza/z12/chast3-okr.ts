@@ -291,7 +291,7 @@ const P79 = sobrat({
           ],
         },
         {
-          title: 'Угол B из двух частей',
+          title: 'Угол $B$ из двух частей',
           lines: [
             'Диагональ $BD$ делит угол $ABC$ на углы $ABD$ и $DBC$:',
             v0
@@ -598,8 +598,8 @@ const P82 = sobrat({
       hints: [
         vopros(
           'Чему равен угол между хордами?',
-          '$\\dfrac{\\smile AK+\\smile BM}{2}$',
-          ['$\\smile AK+\\smile BM$', '$\\dfrac{\\smile BM-\\smile AK}{2}$'],
+          '$\\dfrac{\\arc{AK}+\\arc{BM}}{2}$',
+          ['$\\arc{AK}+\\arc{BM}$', '$\\dfrac{\\arc{BM}-\\arc{AK}}{2}$'],
           ak,
           'Угол между пересекающимися хордами — полусумма дуг, заключённых между его сторонами и их продолжениями.',
         ),

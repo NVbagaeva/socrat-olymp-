@@ -160,7 +160,7 @@ export function risBissektrisaNaPryamoy(
       v !== polovina,
     ),
     ['A', 'B', 'C', 'D', 'M'],
-    'Прямая AB, точка M на ней, лучи MC и MD',
+    'Прямая, точка на ней и два луча из этой точки',
   );
 }
 
@@ -198,7 +198,7 @@ export function risParallelnye(u1: number, u2: number): string {
       podpisi: ['m', 'n'],
     },
     ['m', 'n'],
-    'Параллельные прямые m и n и две пересекающиеся секущие',
+    'Две параллельные прямые и две пересекающиеся секущие',
   );
 }
 
@@ -226,7 +226,7 @@ export function risVneshniyRavnobedrennyy(vneshniy: number): string {
       vA !== pri,
     ),
     ['A', 'B', 'C'],
-    'Равнобедренный треугольник ABC с внешним углом при вершине B',
+    'Равнобедренный треугольник с внешним углом при вершине',
   );
 }
 
@@ -425,7 +425,7 @@ export function risDeltoid(uB: number, uD: number): string {
       ],
     },
     ['A', 'B', 'C', 'D'],
-    'Выпуклый четырёхугольник ABCD, у которого AB = BC и AD = CD',
+    'Выпуклый четырёхугольник с двумя парами равных соседних сторон',
   );
 }
 
@@ -490,7 +490,7 @@ export function risBissektrisaParallelogramma(ab: number, bc: number): string {
       ],
     },
     ['A', 'B', 'C', 'D', 'K'],
-    'Параллелограмм ABCD и биссектриса AK угла A',
+    'Параллелограмм и биссектриса его угла',
   );
 }
 
