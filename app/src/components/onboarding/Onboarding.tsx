@@ -36,19 +36,28 @@ function useFramed(): boolean {
 }
 
 /**
+ * Где заставка первого визита идёт: только главные страницы уровней —
+ * профиля (/) и базы (/baza/). Человек, пришедший по ссылке сразу в
+ * раздел, теорию или тарифы, попадает в то, за чем пришёл; заставку он
+ * увидит, когда в первый раз откроет главную («уже видел» на других
+ * страницах не записывается). Повтор по кнопке «?» работает везде.
+ */
+const STRANITSY_ZASTAVKI = /^\/(baza\/?)?$/;
+
+/**
  * Где заставку первого визита не показывать, хотя человек здесь впервые:
- * пришёл по ссылке с кодом комплекта или на конкретную тренировку —
- * ему нужна она, а не приветствие; поисковый робот — ему нужна страница.
- * Считается один раз при загрузке: адрес на тот момент и есть «как пришёл».
+ * любая страница, кроме главных; ссылка с кодом комплекта; поисковый
+ * робот — ему нужна страница. Считается один раз при загрузке: адрес на
+ * тот момент и есть «как пришёл».
  */
 function useIntroBlocked(): boolean {
   return useSyncExternalStore(
     noSubscribe,
     () => {
       const { pathname, search } = window.location;
+      if (!STRANITSY_ZASTAVKI.test(pathname)) return true;
       const params = new URLSearchParams(search);
       if (params.has('kit') || params.has('seed')) return true;
-      if (pathname.includes('/trenazher')) return true;
       return /bot|crawl|spider|slurp|yandex|google|bing|baidu|duckduck|lighthouse/i.test(
         navigator.userAgent,
       );
