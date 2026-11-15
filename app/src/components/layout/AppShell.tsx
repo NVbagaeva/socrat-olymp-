@@ -12,6 +12,7 @@ import {
   appNavPrimary,
   bottomNavActive,
   notificationsPage,
+  notificationsReady,
   sidebarExtras,
   topNav,
 } from '@/content/appNav';
@@ -119,7 +120,7 @@ export function AppShell({ active, search = false, level = 'profile', children }
         label="Задания ЕГЭ"
         items={tasks.map(taskItem)}
         groups={taskGroups(level)}
-        secondaryItems={withActive(sidebarExtras, active)}
+        secondaryItems={sidebarExtras.length > 0 ? withActive(sidebarExtras, active) : undefined}
         footer={
           /* Декор подвала: горы во всю ширину столбца, поверх них
              рукописная подпись. Картинка — фон, поэтому alt пустой.
@@ -146,6 +147,7 @@ export function AppShell({ active, search = false, level = 'profile', children }
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
+          bell={notificationsReady}
           /* Аккаунт — настоящий: «Войти» или кружок с инициалами.
              Выдуманного пользователя в шапке больше нет. */
           userSlot={
