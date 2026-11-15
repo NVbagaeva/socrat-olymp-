@@ -162,7 +162,9 @@ export type BlokTeorii =
   | { vid: 'vazhno'; text: string; primer: string }
   | { vid: 'layfhak'; text: string }
   | { vid: 'spisok'; punkty: string[] }
-  | { vid: 'primer'; primer: PrimerTeorii };
+  | { vid: 'primer'; primer: PrimerTeorii }
+  /** Чертёж темы справочника планиметрии (lib/planimetriya/spravochnik-chertezhi). */
+  | { vid: 'chertezh'; tema: string; podpis?: string };
 
 export interface RazdelTeorii {
   id: string;
