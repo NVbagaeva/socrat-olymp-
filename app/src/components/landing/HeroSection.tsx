@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { LevelTabs } from '@/components/level/LevelTabs';
 import { landingOf } from '@/content/landing';
+import { site, startHref } from '@/content/site';
 import type { Level } from '@/lib/level';
 import { Kristall } from './kristall/Kristall';
 import { Zherdochka } from './Zherdochka';
-
 
 /**
  * Первый экран в «Стеклянной сцене». Заголовок и лид — для обеих
@@ -32,6 +32,14 @@ export function HeroSection({ level = 'profile' }: { level?: Level }) {
             <TitleWithPerch title={hero.title} perch={hero.perch} />
           </h1>
           <p className="hero__lead">{hero.lead}</p>
+          {/* «Начать бесплатно» — основная кнопка первого экрана на
+              телефоне (в мобильной шапке её нет). От 768px она в шапке,
+              здесь не повторяется (landing.css). Пока регистрация по
+              приглашению — ведёт в банк заданий уровня; откроют
+              (REGISTRATION_OPEN) — на регистрацию. */}
+          <Link className="btn btn--primary btn--lg hero__start" href={startHref(level)}>
+            {site.headerActions.signup.label}
+          </Link>
         </div>
 
         <Kristall className="hero__kristall" />

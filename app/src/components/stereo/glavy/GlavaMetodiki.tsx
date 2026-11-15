@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Tex } from '@/components/ui/Tex';
+import { KartochkiTipov, type SsylkaTipa } from '@/components/ui/KartochkiTipov';
 import { TIPY_3 } from '@/content/stereo/tipy';
 import { GLAVY_3 } from '@/content/stereo/glavy';
 import { razbor3 } from '@/lib/stereo/razbory3';
@@ -152,30 +152,23 @@ function Primer({ primer }: { primer: PrimerGlavy }) {
 /** Типы задач №3 со ссылками на разборы и на главу. */
 function Tipy() {
   return (
-    <ul className="o3-tipy">
-      {TIPY_3.map((tip, i) => {
+    <KartochkiTipov
+      tipy={TIPY_3.map((tip) => {
         const glava = GLAVY_3.find((g) => g.id === tip.glava);
-        const estRazbor = razbor3(tip.id) !== undefined;
-        return (
-          <li key={tip.id} className="o3-tip">
-            <span className="o3-tip__no" aria-hidden="true">
-              {i + 1}
-            </span>
-            <span className="o3-tip__telo">
-              <span className="o3-tip__title">
-                <Tex text={tip.title} />
-              </span>
-              <span className="o3-tip__ssylki">
-                {estRazbor ? <Link href={tipHref3(tip.id)}>Разобранный пример</Link> : null}
-                {glava === undefined ? null : (
-                  <a href={`#teoriya-${glava.id}`}>Глава {glava.nomer}</a>
-                )}
-              </span>
-            </span>
-          </li>
-        );
+        const ssylki: SsylkaTipa[] = [];
+        if (razbor3(tip.id) !== undefined) {
+          ssylki.push({ href: tipHref3(tip.id), label: 'Разобранный пример', vid: 'primer' });
+        }
+        if (glava !== undefined) {
+          ssylki.push({
+            href: `#teoriya-${glava.id}`,
+            label: `Глава ${glava.nomer}`,
+            vid: 'glava',
+          });
+        }
+        return { id: tip.id, title: <Tex text={tip.title} />, ssylki };
       })}
-    </ul>
+    />
   );
 }
 

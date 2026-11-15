@@ -94,7 +94,7 @@ export function OZadanii45Karta({ zadanie, shapka, opasnoTipov, formuly, ob }: O
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
              пережатия, прозрачный фон на стекле шапки. */
           <img
-            src={assetUrl(`/images/task-0${zadanie}.webp`)}
+            src={assetUrl(`/images/task-0${zadanie}.svg`)}
             alt={shapka.oblozhkaAlt}
             width={512}
             height={512}

@@ -49,69 +49,6 @@
   font-weight: 700;
   color: var(--color-primary);
 }
-.z14-tipy {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--space-4);
-  padding: 0;
-  list-style: none;
-}
-.z14-tip__link {
-  display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  height: 100%;
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-xl);
-  background: var(--glass-tint-blue);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
-  color: var(--color-text);
-  text-decoration: none;
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-.z14-tip__link:hover {
-  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
-  transform: translateY(-1px);
-}
-.z14-tip--skoro .z14-tip__link {
-  background: var(--glass-bg);
-}
-.z14-tip__head {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  justify-content: space-between;
-}
-.z14-tip__title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-text-brand);
-}
-.z14-tip__primer {
-  overflow-x: auto;
-  color: var(--color-primary);
-}
-.z14-tip__text {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-}
-.z14-tip__podtipy {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-.z14-tip__podtip {
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface-warm);
-  border: 1px solid var(--color-border-warm);
-  font-size: 12px;
-  color: var(--color-accent-text);
-}
-
 /* ── Общее: разбор, ответ, подсказки ─────────────────────────── */
 
 .z14-shagi {

@@ -21,7 +21,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-02.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 44 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-02.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 1 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 
 ## №3
 
@@ -29,7 +29,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-03.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 32 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-03.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 1 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 
 ## №4
 
@@ -37,7 +37,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-04.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 29 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-04.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 1 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 | <img src="../app/public/images/veroyatnost-4/chasha.webp" width="72" alt=""> | `veroyatnost-4/chasha` | картинка к задаче | 800×800 | webp · 78 КБ | да | 88 / 132 | №4/opornye-zadachi | `lib/veroyatnost/podgotovka4.ts` | ⚠ мелко: 88 px при исходнике 800 |
 | <img src="../app/public/images/veroyatnost-4/kruglyj-stol.webp" width="72" alt=""> | `veroyatnost-4/kruglyj-stol` | картинка к задаче | 800×800 | webp · 73 КБ | да | 88 / 132 | №4/opornye-zadachi | `lib/veroyatnost/podgotovka4.ts` | ⚠ мелко: 88 px при исходнике 800 |
 | <img src="../app/public/images/veroyatnost-4/metody/geometricheskoe.webp" width="72" alt=""> | `veroyatnost-4/metody/geometricheskoe` | иконка метода | 192×192 | webp · 3 КБ | да | 72 / 96 | №4/trenazher | `components/tasks/veroyatnost/MetodKartinka.tsx` |  |
@@ -68,7 +68,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-05.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 49 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-05.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 2 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 | <img src="../app/public/images/veroyatnost-5/metody/do-uspeha.webp" width="72" alt=""> | `veroyatnost-5/metody/do-uspeha` | иконка метода | 192×192 | webp · 11 КБ | да | 72 / 96 | №5/trenazher | `components/tasks/veroyatnost/MetodKartinka.tsx` |  |
 | <img src="../app/public/images/veroyatnost-5/metody/dva-predmeta.webp" width="72" alt=""> | `veroyatnost-5/metody/dva-predmeta` | иконка метода | 192×192 | webp · 17 КБ | да | 72 / 96 | №5/trenazher | `components/tasks/veroyatnost/MetodKartinka.tsx` |  |
 | <img src="../app/public/images/veroyatnost-5/metody/hotya-by.webp" width="72" alt=""> | `veroyatnost-5/metody/hotya-by` | иконка метода | 192×192 | webp · 11 КБ | да | 72 / 96 | №5/trenazher | `components/tasks/veroyatnost/MetodKartinka.tsx` |  |
@@ -91,7 +91,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-06.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 25 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-06.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 3 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 
 ## №7
 
@@ -99,7 +99,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-07.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 57 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-07.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 3 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 
 ## №8
 
@@ -107,7 +107,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-08.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 40 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-08.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 2 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 
 ## №9
 
@@ -115,7 +115,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-09.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 47 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-09.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 3 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 
 ## №10
 
@@ -153,7 +153,7 @@
 | <img src="../app/public/illustrations/zadanie-10/P28.png" width="72" alt=""> | `zadanie-10/P28` | картинка к задаче | 960×640 | 960·webp, 640·png · 175 КБ | да | 301 / 336 | №10, №10/teoriya | `lib/zadanie10/illyustracii.ts` |  |
 | <img src="../app/public/illustrations/zadanie-10/P29.png" width="72" alt=""> | `zadanie-10/P29` | картинка к задаче | 960×640 | 960·webp, 640·png · 196 КБ | да | 301 / 336 | №10, №10/teoriya | `lib/zadanie10/illyustracii.ts` |  |
 | <img src="../app/public/illustrations/zadanie-10/P33.png" width="72" alt=""> | `zadanie-10/P33` | картинка к задаче | 960×640 | 960·webp, 640·png · 179 КБ | да | 301 / 336 | №10, №10/teoriya | `lib/zadanie10/illyustracii.ts` |  |
-| <img src="../app/public/images/task-10.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 21 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-10.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 3 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 
 ## №11
 
@@ -161,7 +161,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-11.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 12 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-11.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 2 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 | <img src="../app/public/images/zadanie-11/smesi/gel.webp" width="72" alt=""> | `zadanie-11/smesi/gel` | иллюстрация теории (смеси) | 480×480 | webp · 62 КБ | да | 180 / 146 | №11/teoriya | `content/teoriya11.ts` |  |
 | <img src="../app/public/images/zadanie-11/smesi/kokteyl.webp" width="72" alt=""> | `zadanie-11/smesi/kokteyl` | иллюстрация теории (смеси) | 480×480 | webp · 45 КБ | да | 180 / 146 | №11/teoriya | `content/teoriya11.ts` |  |
 | <img src="../app/public/images/zadanie-11/smesi/sahar.webp" width="72" alt=""> | `zadanie-11/smesi/sahar` | иллюстрация теории (смеси) | 480×480 | webp · 56 КБ | да | 180 / 146 | №11/teoriya | `content/teoriya11.ts` |  |
@@ -184,7 +184,7 @@
 | <img src="../app/public/images/razdely/12/trig-96.webp" width="72" alt=""> | `razdely/12/trig` | обложка-плитка вида функции | 384×346 | 384·png, 384·webp, 192·png, 192·webp, 96·png, 96·webp · 141 КБ | да | 104 / 176 | №12, №12/quadratic, №12/quadratic/opornye-zadachi, №12/quadratic/trenazher | — |  |
 | <img src="../app/public/images/sloth-dependencies.webp" width="72" alt=""> | `sloth-dependencies` | иллюстрация («О задании» / теория вида) | 1517×1024 | webp · 293 КБ | да | — / — | — | `content/theoryLinear.ts` |  |
 | <img src="../app/public/images/sloth-pointer-mistake.webp" width="72" alt=""> | `sloth-pointer-mistake` | иллюстрация («О задании» / теория вида) | 1472×999 | webp · 342 КБ | да | — / — | — | `content/theoryLinear.ts` |  |
-| <img src="../app/public/images/task-12.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 36 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-12.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 2 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 | <img src="../app/public/images/theory/12/apollonius-antique.webp" width="72" alt=""> | `theory/12/apollonius-antique` | иллюстрация теории | 1254×1254 | 1254·png, 800·webp · 2410 КБ | да | — / — | — | `content/theoryQuadratic.ts` |  |
 | <img src="../app/public/images/theory/12/apollonius-modern.webp" width="72" alt=""> | `theory/12/apollonius-modern` | иллюстрация теории | 1254×1254 | 1254·png, 800·webp · 2198 КБ | да | — / — | — | `content/theoryQuadratic.ts` |  |
 | <img src="../app/public/images/theory/12/cone-parabola.webp" width="72" alt=""> | `theory/12/cone-parabola` | иллюстрация теории | 1254×1254 | 1254·png, 1000·webp · 1106 КБ | да | — / — | — | `content/theoryQuadratic.ts` |  |
@@ -198,7 +198,7 @@
 
 | | Картинка | Роль | Размер | Варианты · вес | Прозрачность | Показ сейчас, px (375 / 1280) | Где видна на снимках | Где подключена | Замечание |
 |---|---|---|---|---|---|---|---|---|---|
-| <img src="../app/public/images/task-13.webp" width="72" alt=""> | `task` | обложка-иконка раздела | 512×512 | webp · 32 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
+| <img src="../app/public/images/task-13.svg" width="72" alt=""> | `task` | обложка-иконка раздела | 270×270 | svg · 2 КБ | да | — / — | — | `app/about/page.tsx`, `app/zadaniya/TaskBank.tsx`, `components/layout/AppShell.tsx` |  |
 
 ## Общие картинки разделов
 

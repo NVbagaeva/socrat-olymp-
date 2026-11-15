@@ -61,6 +61,7 @@ export const O_ZADANII_14 = {
   tipyTitle: 'Типы уравнений',
   tipyLead: `Уравнение №${nomerRazdela('uravnenie-s-otborom')} бывает разных типов. Начни с тригонометрии — она встречается чаще всего.`,
   kTeorii: 'Открыть теорию',
+  kGlave: 'Глава в теории',
 } as const;
 
 export type TipId14 = 'trig' | 'pokaz' | 'log' | 'irr' | 'komb';

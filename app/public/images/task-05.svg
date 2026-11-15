@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Дерево исходов: три ветви по два исхода, благоприятные закрашены">
+  <!-- Дерево: корень, три ветви первого шага, шесть исходов.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M58.6 143.9 L132 75.5" stroke-width="1.5"/>
+    <path d="M129.4 83.1 L132 75.5 L124.2 77.5" stroke-width="1.5"/>
+    <path d="M61 150 L129 150" stroke-width="1.5"/>
+    <path d="M122 153.8 L129 150 L122 146.2" stroke-width="1.5"/>
+    <path d="M58.6 156.1 L132 224.5" stroke-width="1.5"/>
+    <path d="M124.2 222.5 L132 224.5 L129.4 216.9" stroke-width="1.5"/>
+    <path d="M148.8 65.9 L226.4 47.3" stroke-width="1.5"/>
+    <path d="M220.5 52.6 L226.4 47.3 L218.7 45.2" stroke-width="1.5"/>
+    <path d="M148.9 69.6 L226.2 83.9" stroke-width="1.5"/>
+    <path d="M218.6 86.4 L226.2 83.9 L220 78.8" stroke-width="1.5"/>
+    <path d="M148.8 148.1 L226.3 131.7" stroke-width="1.5"/>
+    <path d="M220.2 136.9 L226.3 131.7 L218.6 129.4" stroke-width="1.5"/>
+    <path d="M148.8 151.9 L226.3 168.3" stroke-width="1.5"/>
+    <path d="M218.6 170.6 L226.3 168.3 L220.2 163.1" stroke-width="1.5"/>
+    <path d="M148.9 230.4 L226.2 216.1" stroke-width="1.5"/>
+    <path d="M220 221.2 L226.2 216.1 L218.6 213.6" stroke-width="1.5"/>
+    <path d="M148.8 234.1 L226.4 252.7" stroke-width="1.5"/>
+    <path d="M218.7 254.8 L226.4 252.7 L220.5 247.4" stroke-width="1.5"/>
+    <circle cx="240" cy="44" r="10" fill="#c3dffa" fill-opacity="0.75" stroke-width="2"/>
+    <circle cx="240" cy="86.4" r="10" fill="#7FAEEA" fill-opacity="0.85" stroke-width="2"/>
+    <circle cx="240" cy="128.8" r="10" fill="#c3dffa" fill-opacity="0.75" stroke-width="2"/>
+    <circle cx="240" cy="171.2" r="10" fill="#7FAEEA" fill-opacity="0.85" stroke-width="2"/>
+    <circle cx="240" cy="213.6" r="10" fill="#c3dffa" fill-opacity="0.75" stroke-width="2"/>
+    <circle cx="240" cy="256" r="10" fill="#c3dffa" fill-opacity="0.75" stroke-width="2"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="52" cy="150" r="7"/>
+    <circle cx="140" cy="68" r="6.5"/>
+    <circle cx="140" cy="150" r="6.5"/>
+    <circle cx="140" cy="232" r="6.5"/>
+  </g>
+</svg>
