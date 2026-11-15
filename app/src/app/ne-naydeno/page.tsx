@@ -4,8 +4,8 @@ import { SiteFooter, SiteHeader } from '@/components/layout';
 import { Zherdochka } from '@/components/landing/Zherdochka';
 import { taskHref, tasks, tasksPage } from '@/content/tasks';
 import { VARIANT_HREF } from '@/content/variant';
-import './landing.css';
-import './not-found.css';
+import '../landing.css';
+import './ne-naydeno.css';
 
 export const metadata: Metadata = {
   title: 'Страница не найдена — Будет на ЕГЭ',
@@ -13,8 +13,14 @@ export const metadata: Metadata = {
 };
 
 /**
- * Страница 404. Сборка кладёт её в out/404.html, хостинг отдаёт её на
- * любой неизвестный адрес (ErrorDocument в public/.htaccess).
+ * Страница 404. Хостинг отдаёт её на любой неизвестный адрес с кодом 404
+ * (ErrorDocument в public/.htaccess); по своему адресу она тоже открывается,
+ * но закрыта от поиска.
+ *
+ * Это обычная страница, а не корневой not-found.tsx: содержимое корневого
+ * not-found Next встраивает в данные каждой страницы сайта, и первая
+ * загрузка всех страниц росла (pnpm test:first-load: +18 КБ скриптов и
+ * +1 КБ HTML у тем №12).
  *
  * Оформление — «Стеклянная сцена» главной (landing.css, класс .glavnaya):
  * стеклянные шапка и подвал, свечения, глянцевая кнопка. Попугай с
@@ -25,7 +31,7 @@ export const metadata: Metadata = {
  * Основа — страница 404 из PR #296 (SEO, этап 2); оформление — по
  * docs/design-audit.md, п. 14.1.
  */
-export default function NotFound() {
+export default function NeNaydeno() {
   const gotovye = tasks.filter((task) => task.status === 'ready');
   return (
     <div className="glavnaya">

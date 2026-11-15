@@ -60,10 +60,10 @@
 
 Options -Indexes
 
-# Своя страница «Такой страницы нет» (src/app/not-found.tsx, сборка кладёт
-# её в 404.html). Путь локальный, а не полный адрес: с полным адресом Apache
-# ответил бы редиректом вместо кода 404.
-ErrorDocument 404 /404.html
+# Своя страница «Такой страницы нет» (src/app/ne-naydeno/page.tsx). Путь
+# локальный, а не полный адрес: с полным адресом Apache ответил бы
+# редиректом вместо кода 404.
+ErrorDocument 404 /ne-naydeno/index.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
