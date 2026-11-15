@@ -143,6 +143,8 @@ export function useStickyTabs(
     }
     let current = false;
     let line = -1;
+    /* Низ плиток в координатах страницы (см. zapomnit). */
+    let nizDoc = 0;
     let observer: IntersectionObserver | undefined;
     /* Сверка следующим кадром после уведомления наблюдателя. */
     let kadr = 0;
@@ -164,12 +166,12 @@ export function useStickyTabs(
         return;
       }
       line = bottom;
+      zapomnit();
       observer?.disconnect();
       observer = new IntersectionObserver(
         () => {
           /* Решаем по месту плиток, а не по прямоугольнику из
-             уведомления: в WebKit тот бывает отстающим на кадр. Его же
-             догоняем следующим кадром. */
+             уведомления: в WebKit тот бывает отстающим на кадр. */
           sverit();
         },
         { rootMargin: `-${bottom}px 0px 0px 0px` },
@@ -181,18 +183,29 @@ export function useStickyTabs(
       primenit(poMestu());
     }
 
-    /* Ушли ли плитки под панель прямо сейчас — по их месту. */
+    /* Низ плиток в координатах страницы: с прокруткой он не меняется,
+       поэтому при прокрутке хватает арифметики, без чтения вёрстки. */
+    function zapomnit(): void {
+      nizDoc = tiles!.getBoundingClientRect().bottom + window.scrollY;
+    }
+
+    /* Ушли ли плитки под панель прямо сейчас. */
     function poMestu(): boolean {
-      return tiles!.getBoundingClientRect().bottom <= line + 0.5;
+      return nizDoc - window.scrollY <= line + 0.5;
     }
 
     /* Сверка состояния с местом плиток — сейчас и ещё раз следующим
-       кадром. Второй раз нужен, когда прямоугольник приходит
-       отстающим. */
+       кадром. Прямоугольник в WebKit приходит отстающим на кадр, а
+       прокрутка известна точно: сейчас решаем по ней и запомненному
+       низу плиток, а кадром позже перезапоминаем низ и сверяемся
+       снова — на случай, если вёрстка выше плиток переехала. */
     function sverit(): void {
       primenit(poMestu());
       cancelAnimationFrame(kadr);
-      kadr = requestAnimationFrame(() => primenit(poMestu()));
+      kadr = requestAnimationFrame(() => {
+        zapomnit();
+        primenit(poMestu());
+      });
     }
 
     function primenit(next: boolean): void {
@@ -215,8 +228,8 @@ export function useStickyTabs(
        совпадает с линией, пересечение «касанием» и его отсутствие дают
        одну и ту же долю (ноль), и WebKit следующего уведомления уже не
        присылает — панель застревала. Поэтому при прокрутке сверяемся
-       сами: чтение одного прямоугольника за кадр, состояние меняется
-       только когда оно действительно другое. */
+       сами, по известной прокрутке: вёрстку это не читает, а состояние
+       меняется только когда оно действительно другое. */
     window.addEventListener('scroll', sverit, { passive: true });
     return () => {
       cancelAnimationFrame(kadr);
