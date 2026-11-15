@@ -1,0 +1,43 @@
+{
+  "_": "Таблица сверки рейтинговых форматов: тип, лимит, диапазон чисел примера (операнды и ответ), число цифр ответа и приёмы, которыми решаются примеры. По ней проверяются генератор на TypeScript (scripts/check-ustnyy-schet.mjs) и генератор сервера (supabase/tests).",
+  "tablica-1m": {
+    "tip": "vremya",
+    "sek": 60,
+    "min": 2,
+    "max": 81,
+    "cifrOtveta": 2,
+    "priyomy": ["tablica"]
+  },
+  "slozh-vych-100-1m": {
+    "tip": "vremya",
+    "sek": 60,
+    "min": 1,
+    "max": 100,
+    "cifrOtveta": 3,
+    "priyomy": ["po-razryadam"]
+  },
+  "umn-del-2x1-2m": {
+    "tip": "vremya",
+    "sek": 120,
+    "min": 2,
+    "max": 891,
+    "cifrOtveta": 3,
+    "priyomy": ["razlozhenie", "delenie-po-chastyam"]
+  },
+  "kvadraty-20": {
+    "tip": "seriya",
+    "n": 20,
+    "min": -9,
+    "max": 11881,
+    "cifrOtveta": 5,
+    "priyomy": ["kvadraty-11-30", "kvadrat-na-5", "kvadrat-okolo-50", "kvadrat-okolo-kruglyh"]
+  },
+  "miks-ege-3m": {
+    "tip": "vremya",
+    "sek": 180,
+    "min": -100,
+    "max": 1000,
+    "cifrOtveta": 4,
+    "priyomy": ["doli-procenty", "procent-ot-chisla", "otricatelnye", "desyatichnye-umnozhenie"]
+  }
+}

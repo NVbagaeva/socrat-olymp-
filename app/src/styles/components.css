@@ -1153,6 +1153,16 @@ a.task-card--soon:hover {
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
+  /* Пунктов больше, чем места (1024–1599 px с «Устным счётом»): полоса
+     меню прокручивается вбок сама, а не заезжает на колокольчик и
+     аккаунт справа. Полосы прокрутки не видно, колесо и палец работают. */
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Рамка фокуса пункта не обрезается краем прокрутки. */
+  padding: 3px;
+}
+.topnav::-webkit-scrollbar {
+  display: none;
 }
 .topnav a {
   padding: var(--space-2) var(--space-3);

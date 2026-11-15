@@ -219,6 +219,16 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     ],
   },
   {
+    id: 'ustnyy',
+    title: '«Устный счёт»',
+    keys: [
+      /* Тренировки, рекорды и клетки таблицы умножения
+         (lib/ustnyySchet/statistika/model.ts, USTNYY_KEY). Сливается своим
+         правилом (lib/accountSync/merge.ts). */
+      'budetege:ustnyy-schet:v1',
+    ],
+  },
+  {
     id: 'obshchee',
     title: 'Отложенные задачи и история тренировок',
     keys: [

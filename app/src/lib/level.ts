@@ -11,7 +11,7 @@
  */
 
 import { nomeraChasti, zadaniyaEge } from '@/content/struktura';
-import { href, ZADANIYA } from './paths';
+import { href, USTNYY, ZADANIYA } from './paths';
 
 export type Level = 'profile' | 'base';
 
@@ -107,6 +107,8 @@ export function levelOfPath(pathname: string): Level | null {
  */
 export function levelTwin(pathname: string, to: Level): string {
   const path = pathname.split(/[?#]/)[0] ?? '';
+  /* Общий для обоих уровней раздел: переключатель оставляет на месте. */
+  if (under(path, USTNYY)) return path;
   const from = levelOfPath(path);
   const rest = from === 'base' ? path.slice(BAZA.length) || '/' : path;
   if (under(rest, ZADANIYA)) return INFO[to].bank;

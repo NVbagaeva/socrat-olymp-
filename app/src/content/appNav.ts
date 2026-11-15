@@ -12,6 +12,7 @@ import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
+import { href, USTNYY } from '@/lib/paths';
 import { VARIANT_HREF } from '@/content/variant';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
@@ -23,6 +24,9 @@ export const topNav: NavItem[] = [
   /* В нижней панели пункт называется полным именем страницы —
      «Банк заданий»: он ведёт на список всех заданий, а не в раздел. */
   { id: 'tasks', label: 'Задания', panel: 'Банк заданий', href: tasksPage.href, icon: 'tasks' },
+  /* Устный счёт — общий для профиля и базы (lib/paths.ts, USTNYY). В
+     нижнюю панель не входит: попадает на экран «Ещё». */
+  { id: 'ustnyy', label: 'Устный счёт', short: 'Счёт', href: href(USTNYY), icon: 'schet' },
   /* Генератор варианта из всех заданий первой части (/variant/). */
   {
     id: 'variant',
