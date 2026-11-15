@@ -22,12 +22,16 @@
    4. Шкала: таблица из структуры; шкала всей работы — на её максимум.
    5. Настройки и код варианта: «Все» — задания действующей структуры;
       код, собранный по прежней структуре (все тринадцать заданий),
-      читается как раньше.
+      читается как раньше и той же строкой; код с разделом 21
+      «Наибольшее и наименьшее» читается обратно. Полный вариант — вся
+      первая часть: тестовый балл есть.
    6. По каждой структуре — её числа: 13 + 7 заданий и 33 балла; 12 + 7
       заданий и 32 балла, «Уравнения» — №6, экономика с кратким ответом
       и «Случайные величины» без номера.
    7. Варианты повышенной сложности и ежемесячные: в каждой версии —
-      задания первой части по структуре, номера подряд; во второй части
+      задания первой части по структуре, кроме раздела 21 (у готовых
+      наборов свой состав, задач «Наибольшего и наименьшего» в них нет),
+      номера подряд; во второй части
       номера по структуре, у задачи прежнего №17 в ЕГЭ-2027 — пометка
       вида (экономическая или на оптимизацию). */
 
@@ -204,13 +208,43 @@ ravno(
   V.VARIANT_SKORO.length === 0,
   'вариант из всех доступных заданий полный, только если задачи есть у каждого раздела первой части',
 );
+ravno(V.VARIANT_SKORO, [], 'у каждого раздела первой части есть сборщик задач: плиток «скоро» нет');
+ok(fullPartOne([...V.VARIANT_NUMBERS]), 'вариант из всех заданий — вся первая часть');
+ok(!fullPartOne(V.VARIANT_NUMBERS.slice(1)), 'без одного задания — не вся первая часть');
 {
-  /* Код, собранный по прежней структуре: все тринадцать заданий. */
-  const config = { ...defaultConfig(), tasks: [...EGE_NUMBERS] };
+  /* Код, собранный по прежней структуре: все тринадцать заданий. Строка
+     кода — та же, что выдавал сайт до раздела 21 (бит 23 маски — 0). */
+  const PREZHNIE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+  const config = { ...defaultConfig(), tasks: PREZHNIE };
   const kod = encodeCode({ seed: 'K7M2', config, zameny: {}, version: '4F' }, SUBTYPE_IDS);
+  ravno(kod, 'K7M2-407ZZ-4F', 'код прежней структуры — та же строка');
   const prochitan = readCode(kod);
   ok(prochitan !== null, 'код прежней структуры не читается');
-  ravno(prochitan?.config.tasks, EGE_NUMBERS, 'код прежней структуры: набор заданий тот же');
+  ravno(prochitan?.config.tasks, PREZHNIE, 'код прежней структуры: набор заданий тот же');
+  /* Раздел 21 в коде: бит 23, подтипы и замены — знак номера «N». */
+  const s21 = {
+    ...defaultConfig(),
+    tasks: [1, 7, 21],
+    subtypes: { 21: ['G1', 'G4'] },
+    count: 3,
+  };
+  const kod21 = encodeCode(
+    { seed: 'K7M2', config: s21, zameny: { 2.21: 1 }, version: '4F' },
+    SUBTYPE_IDS,
+  );
+  const p21 = readCode(kod21);
+  ravno(p21?.config, s21, 'код с разделом 21: настройки читаются обратно');
+  ravno(p21?.zameny, { 2.21: 1 }, 'код с разделом 21: замена читается обратно');
+  ravno(
+    readCode(
+      encodeCode(
+        { seed: 'K7M2', config: { ...config, tasks: [...EGE_NUMBERS] }, zameny: {}, version: '4F' },
+        SUBTYPE_IDS,
+      ),
+    )?.config.tasks,
+    EGE_NUMBERS,
+    'код со всеми разделами читается обратно',
+  );
   /* Код по действующей структуре. */
   const novyy = readCode(
     encodeCode({ seed: 'K7M2', config: defaultConfig(), zameny: {}, version: '4F' }, SUBTYPE_IDS),
@@ -238,8 +272,8 @@ if (S.STRUKTURA.id === '2027-20') {
   ravno(V.VARIANT_SKORO, [], '20 заданий: плиток «скоро» нет');
   ravno(
     EGE_NUMBERS.map((n) => V.podpis1(n)),
-    EGE_NUMBERS.map(String),
-    '20 заданий: номер на экране равен номеру хранения',
+    EGE_NUMBERS.map((n) => (n === 21 ? '—' : String(n))),
+    '20 заданий: номер на экране равен номеру хранения, «Наибольшего и наименьшего» в экзамене нет',
   );
   ravno(
     PART2_NUMBERS.map((n) => V.podpis2(n)),
@@ -252,12 +286,12 @@ if (S.STRUKTURA.id === '2027-20') {
   ravno(testScore(13), 72, '20 заданий: 13 первичных — 72 тестовых');
 }
 if (S.STRUKTURA.id === '2027-19') {
-  ravno(V.VARIANT_NUMBERS, [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12], '19 заданий: вариант');
-  ravno(V.VARIANT_SKORO, [21], '19 заданий: новое задание №12 — «скоро»');
+  ravno(V.VARIANT_NUMBERS, [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 21], '19 заданий: вариант');
+  ravno(V.VARIANT_SKORO, [], '19 заданий: плиток «скоро» нет, №12 собирается');
   ravno(
     EGE_NUMBERS.map((n) => V.podpis1(n)),
-    ['1', '2', '3', '4', '5', '—', '6', '7', '8', '9', '10', '11', '—'],
-    '19 заданий: «Уравнения» — №6, «Случайные величины» и экономика с кратким ответом — без номера',
+    ['1', '2', '3', '4', '5', '—', '6', '7', '8', '9', '10', '11', '—', '12'],
+    '19 заданий: «Уравнения» — №6, «Наибольшее и наименьшее» — №12, «Случайные величины» и экономика с кратким ответом — без номера',
   );
   ravno(
     PART2_NUMBERS.map((n) => V.podpis2(n)),
@@ -267,6 +301,23 @@ if (S.STRUKTURA.id === '2027-19') {
   ravno([MAX_PART1, MAX_PART2, MAX_TOTAL], [12, 20, 32], '19 заданий: 12 + 20 = 32 балла');
   ravno(TESTOVYJ_RABOTY, TESTOVYJ, '19 заданий: шкала на 32 балла — без растяжения');
   ravno(testScore(12), 70, '19 заданий: вся первая часть — 70 тестовых');
+  {
+    const n = [...V.VARIANT_NUMBERS];
+    const vse = scoreWork(
+      n,
+      n.map(() => true),
+    );
+    ravno(
+      [vse.primary, vse.max, vse.test],
+      [12, 12, 70],
+      '19 заданий: полный вариант верно — 12 из 12, 70 тестовых',
+    );
+    const pol = scoreWork(
+      n,
+      n.map((_, i) => i % 2 === 0),
+    );
+    ravno([pol.primary, pol.test], [6, 34], '19 заданий: 6 верных — 34 тестовых');
+  }
 }
 
 /* ── 7. Повышенные и ежемесячные ─────────────────────────────────── */
@@ -278,10 +329,16 @@ if (S.STRUKTURA.id === '2027-19') {
   const { ezhSetIz } = requireSrc('lib/ezhemesyachnye/set');
   const { zagruzitVariant: zagruzitEV } = requireSrc('lib/ezhemesyachnye/dannye');
   const { chast2EV } = requireSrc('lib/ezhemesyachnye/chast2/index');
-  const nadoNomera = V.CHAST1.filter((n) => EGE_NUMBERS.includes(n)).map((n) => V.podpis1(n));
+  /* Готовые наборы составлены без раздела 21: у них свой состав. */
+  const sostav = V.VARIANT_NUMBERS.filter((n) => n !== 21);
+  const nadoNomera = sostav.map((n) => V.podpis1(n));
 
   const chast1 = (set, gde) => {
-    ravno(set.config.tasks, V.VARIANT_NUMBERS, `${gde}: задания набора — по структуре`);
+    ravno(set.config.tasks, sostav, `${gde}: задания набора — по структуре`);
+    ok(
+      !fullPartOne(set.config.tasks) || !V.CHAST1.includes(21),
+      `${gde}: тестового балла по первой части нет — её набор неполный`,
+    );
     for (const v of set.variants) {
       ravno(
         v.tasks.map((t) => V.podpis1(t.egeNumber)),

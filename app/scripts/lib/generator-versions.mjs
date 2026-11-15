@@ -92,6 +92,7 @@ export const GENERATOR_SOURCES = {
     'lib/graph',
     'lib/ves12',
     'lib/zadanie13',
+    'lib/zadanie21',
     'data/zadanie6',
     'data/zadanie7',
     'data/zadanie10',

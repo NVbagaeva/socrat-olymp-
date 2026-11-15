@@ -244,6 +244,10 @@ html[data-sheet-dense] .var-instruction {
 .var-razbor__line {
   margin: var(--sheet-step) 0 0 7mm;
 }
+/* Схема знаков производной (раздел 21) в разборе — под строками шага. */
+.var-razbor .z21-shema-list {
+  margin-left: 7mm;
+}
 .var-razbor__why {
   color: var(--sheet-ink-2);
 }
