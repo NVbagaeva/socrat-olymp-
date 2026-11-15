@@ -143,7 +143,10 @@ export function ReytingStranica() {
   const user = useSessionUser();
   const [format, setFormat] = useState<ReytingFormatId>('vyzov-dnya');
   const [period, setPeriod] = useState<Period>('den');
-  const [klass, setKlass] = useState<string | null>(null);
+  /* «Мой класс» можно открыть ссылкой со страницы класса: ?klass=… */
+  const [klass, setKlass] = useState<string | null>(() =>
+    typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('klass'),
+  );
   const [klassy, setKlassy] = useState<{ id: string; name: string }[]>([]);
   const [data, setData] = useState<Reyting | null>(null);
   const [oshibka, setOshibka] = useState(false);

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { Razminka } from '@/components/ustnyySchet/Razminka';
+import { razminkaBazy } from '@/lib/ustnyySchet/razminka';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Kartochki } from '@/components/kartochki/Kartochki';
@@ -193,6 +195,9 @@ export async function VkladkaBazyPage({ params, tab }: { params: BazaParams; tab
             <OZadaniiBaza task={task} oZadanii={razdel.oZadanii} />
           )}
           <FormatZadaniya task={task} />
+          {razminkaBazy(task.slug) === null ? null : (
+            <Razminka id={razminkaBazy(task.slug) ?? 'baza-4'} />
+          )}
           {razdel?.oZadanii === undefined ? pusto : null}
         </>
       );
