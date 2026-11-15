@@ -4,6 +4,7 @@ import { AuthWidget } from '@/components/auth/AuthWidget';
 import { LevelLink, LevelSwitch } from '@/components/level/LevelSwitch';
 import { isNavGroup, site } from '@/content/site';
 import { NavDropdown } from './NavDropdown';
+import { SiteHeadCompact } from './SiteHeadCompact';
 import { SiteMenu } from './SiteMenu';
 
 export interface SiteHeaderProps {
@@ -12,7 +13,15 @@ export interface SiteHeaderProps {
   className?: string;
 }
 
-/** Шапка публичных страниц: логотип, меню, вход и регистрация. */
+/**
+ * Шапка публичных страниц: логотип с названием, меню, вход.
+ *
+ * Телефон (до 768px): знак и название слева, справа одна кнопка —
+ * «Войти» или кружок аккаунта — и бургер. «Начать бесплатно» — на
+ * первом экране главной. Компьютер: ещё меню разделов и основная
+ * «Начать бесплатно» рядом со вторичной «Войти». На прокрутке шапка
+ * становится ниже (SiteHeadCompact, site.css).
+ */
 export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
   return (
     <header className={clsx('site-head', className)}>
@@ -50,12 +59,14 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
         </nav>
 
         <div className="site-head__cta">
-          {/* «Войти» или кружок аккаунта и «Начать бесплатно». Вход
-              выключен — остаётся одна прежняя кнопка. */}
+          {/* «Войти» или кружок аккаунта и «Начать бесплатно» (её на
+              телефоне нет). Вход выключен — остаётся одна «Начать
+              бесплатно». */}
           <AuthWidget variant="site" />
           <SiteMenu />
         </div>
       </div>
+      <SiteHeadCompact />
     </header>
   );
 }

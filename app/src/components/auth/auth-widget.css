@@ -6,6 +6,17 @@
   position: relative;
   flex: none;
 }
+/* Место под «Войти», пока грузится живой блок (AuthWidget.tsx). */
+.auth-widget__wait {
+  display: inline-block;
+  flex: none;
+  min-width: 5.5rem;
+}
+@media (max-width: 767.98px) {
+  .auth-widget__wait {
+    min-width: 70px;
+  }
+}
 .auth-widget__button {
   display: grid;
   place-items: center;
@@ -17,6 +28,24 @@
 .auth-widget__button:hover,
 .auth-widget__button[aria-expanded='true'] {
   background: var(--color-surface-2);
+}
+/* Кружок с инициалами — в цвет «Войти»: голубая подложка, синие буквы,
+   тонкое кольцо. Касание — вся кнопка, не меньше 44×44 в публичной
+   шапке. */
+.auth-widget__avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+  box-shadow: 0 0 0 1px rgb(31 95 208 / 0.16);
+}
+.auth-widget--site .auth-widget__button {
+  width: 44px;
+  height: 44px;
+}
+.auth-widget--site .auth-widget__avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
 }
 .auth-widget__button:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -80,21 +109,23 @@
 }
 
 /* ── «Войти» до входа ──
-   Стеклянная таблетка: значок человека в голубом кружке и слово
-   «Войти». Кружок — тот же, что после входа станет кружком с
-   инициалами (.avatar), поэтому кнопка и аккаунт читаются как одно
-   место в шапке. Наведение: кружок заливается синим. */
+   Вторичная стеклянная таблетка: белое стекло, тонкое синее кольцо,
+   синее слово. Основная кнопка рядом (на компьютере) — глянцевая
+   «Начать бесплатно», поэтому «Войти» тише неё. В публичной шапке
+   значка нет — слово «Войти» говорит само. В шапке оболочки заданий
+   (--app) слева кружок со значком: от 1024px таблетка сворачивается в
+   него (ниже по файлу). Наведение: подложка светлеет, кольцо темнеет. */
 .auth-login {
-  /* Размер кружка в узком виде: в шапке сайта — под палец (40px),
-     в шапке оболочки — как колокольчик рядом (36px). */
-  --auth-round: 40px;
+  /* Размер кружка в узком виде шапки оболочки — как колокольчик рядом. */
+  --auth-round: 36px;
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
   flex: none;
   height: var(--h-control-sm);
-  padding: 0 var(--space-4) 0 4px;
+  padding: 0 var(--space-4);
   border-radius: var(--radius-pill);
   background: var(--glass-bg-strong);
   box-shadow:
@@ -111,8 +142,22 @@
     box-shadow var(--dur-hover) var(--ease),
     transform var(--dur-hover) var(--ease);
 }
+/* Касание: на компьютере таблетка 36px, а принимает нажатие полоса
+   44px (невидимое поле сверху и снизу). На телефоне таблетка сама 44px. */
+.auth-login--site::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+}
+@media (max-width: 767.98px) {
+  .auth-login--site {
+    height: var(--h-control);
+    padding: 0 18px;
+    font-size: 15px;
+  }
+}
 .auth-login--app {
-  --auth-round: 36px;
+  padding-left: 4px;
 }
 .auth-login__ico {
   display: grid;
@@ -152,32 +197,6 @@
   outline-offset: 2px;
 }
 
-/* Узкий вид: остаётся один кружок со значком. Слово «Войти» — для
-   скринридера, у ссылки то же имя. */
-@media (max-width: 459.98px) {
-  .auth-login--site {
-    width: var(--auth-round);
-    height: var(--auth-round);
-    padding: 0;
-    justify-content: center;
-  }
-  .auth-login--site .auth-login__ico {
-    width: 100%;
-    height: 100%;
-  }
-  .auth-login--site .auth-login__ico svg {
-    width: 20px;
-    height: 20px;
-  }
-  .auth-login--site .auth-login__text {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
 /* Шапка оболочки от 1024px: в ней меню разделов, и таблетка его
    теснит — остаётся кружок размером с колокольчик, а пункты меню
    чуть плотнее. Так меню со входом занимает не больше места, чем без
@@ -207,6 +226,42 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+}
+/* Шапка оболочки заданий на телефоне — как публичная: «Войти» словом,
+   без значка, высотой 44px; кружок аккаунта — полоса касания 44×44.
+   Со входом в строке не помещались уровень, колокольчик, «Войти» и
+   бургер (на 375 шапка была шире экрана на 54px): колокольчик уходит —
+   «Уведомления» есть на экране «Ещё» нижней панели, — промежутки
+   плотнее, второго пустого распорного блока нет. Без входа шапка
+   прежняя. */
+@media (max-width: 767.98px) {
+  .auth-login--app {
+    height: var(--h-control);
+    padding: 0 14px;
+  }
+  .auth-login--app .auth-login__ico {
+    display: none;
+  }
+  .auth-widget--app .auth-widget__button {
+    width: 44px;
+    height: 44px;
+  }
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) {
+    gap: var(--space-2);
+  }
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) .bell,
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) .topnav + .topbar__spacer {
+    display: none;
+  }
+}
+/* 320–359px: переключатель уровня в шапке оболочки компактнее. */
+@media (max-width: 359.98px) {
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait)
+    .topbar__level
+    .level-switch__seg {
+    padding: 0 var(--space-2);
+    font-size: 13px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
