@@ -49,7 +49,11 @@ export function TrenazherBazy({
         istochniki: { vse: 'Все', fipi: 'Исходные', new: 'Сгенерированные' },
       }),
       proverit: prochitat,
-      pod: () => null,
+      /* Чертёж условия (№12): SVG строит прототип на сборке. */
+      pod: (z) =>
+        z.risunok === undefined ? null : (
+          <div className="trn-risunok" dangerouslySetInnerHTML={{ __html: z.risunok }} />
+        ),
       shagi: (s) => shagiIzEtapov(s.etapy),
       voprosy: (s) => voprosyIzRazbora(s.hints),
       zadachaHref: (id) =>
