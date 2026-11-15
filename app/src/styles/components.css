@@ -1147,12 +1147,29 @@ a.task-card--soon:hover {
   color: var(--color-text-inverse);
 }
 
-/* Меню разделов в шапке. ДИАГНОСТИКА: как до #406 (без прокрутки и маски). */
+/* Меню разделов в шапке. Пункты не переносятся, поэтому строка может
+   оказаться шире своего места (1024–1159 px: iPad альбомно, окно в
+   пол-экрана) — тогда она прокручивается внутри себя, а не распирает
+   страницу вбок (docs/launch-audit.md, A3). Полоса прокрутки скрыта,
+   у правого края — затухание: видно, что пункты есть дальше. Поля
+   сверху и снизу — место для кольца фокуса: overflow его не обрезает. */
 .topnav {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-block: var(--space-1);
+  /* Затухание ложится на это поле: когда пункты помещаются, гаснет
+     пустое место, а не последний пункт. */
+  padding-inline-end: 24px;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+}
+.topnav::-webkit-scrollbar {
+  display: none;
 }
 .topnav a {
   padding: var(--space-2) var(--space-3);

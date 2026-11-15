@@ -400,6 +400,20 @@ async function prokrutka(context, engine, size, url) {
     await page.close();
     return;
   }
+  /* ДИАГНОСТИКА: свои наблюдатели, хук не трогаем. */
+  await page.evaluate(() => {
+    const t0 = performance.now();
+    const log = (window.__probe = []);
+    const ms = () => Math.round(performance.now() - t0);
+    const panel = document.querySelector('.topic-tabs-row--panel');
+    new MutationObserver(() =>
+      log.push(`${ms()} class shown=${panel.classList.contains('is-shown')} sy=${scrollY}`),
+    ).observe(panel, { attributes: true, attributeFilter: ['class'] });
+    window.addEventListener('scroll', () => log.push(`${ms()} scroll sy=${scrollY}`));
+    new ResizeObserver(() =>
+      log.push(`${ms()} resize body h=${document.body.scrollHeight}`),
+    ).observe(document.body);
+  });
   const bad = [];
   for (const y of shagi(base, size.context.viewport.height)) {
     await page.evaluate((to) => window.scrollTo(0, to), y);
@@ -417,7 +431,7 @@ async function prokrutka(context, engine, size, url) {
         }
       }
       const info = await page.evaluate(() => ({
-        dbg: (window.__stDbg ?? []).slice(-40),
+        dbg: (window.__probe ?? []).slice(-40),
         vis: document.visibilityState,
         tn: (() => {
           const t = document.querySelector('.topnav');
