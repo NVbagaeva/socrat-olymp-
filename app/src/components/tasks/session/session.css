@@ -457,9 +457,9 @@
    разделов: на каждом уровне от main до тренировки прячется всё, что
    тренировку не содержит (у подтем №12 вкладки и панель лежат в общей
    обёртке, у остальных — прямо в main). Окна подтверждения рисуются в
-   body и под правило не попадают. Нижняя панель и кнопка «?» на
+   body и под правило не попадают; сама тренировка (.tsess) исключена — у зачёта №12 она лежит прямо в main. Нижняя панель и кнопка «?» на
    телефоне тоже уходят: они закрывали «Дальше» и «Завершить». */
-html[data-trenirovka] .app-main:has(.tsess) > :not(:has(.tsess)),
+html[data-trenirovka] .app-main:has(.tsess) > :not(:has(.tsess)):not(.tsess),
 html[data-trenirovka] .app-main :has(.tsess) > :not(:has(.tsess)):not(.tsess),
 html[data-trenirovka] .bnav--shell,
 html[data-trenirovka] .help-fab {
