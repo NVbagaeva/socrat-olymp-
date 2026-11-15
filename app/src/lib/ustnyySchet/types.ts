@@ -42,6 +42,7 @@ export const PRIYOM_IDS = [
   'razlozhenie',
   'gruppirovka-mnozhiteley',
   'desyatichnye-umnozhenie',
+  'delenie-na-5',
   'delenie-na-5-25',
   'delenie-po-chastyam',
   'obratnaya-tablica',

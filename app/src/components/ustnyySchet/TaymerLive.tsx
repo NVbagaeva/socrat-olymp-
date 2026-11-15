@@ -30,6 +30,7 @@ export function TaymerLive({ chasy, limitMs, naPauze, onVyshlo, vid }: TaymerLiv
     let raf = 0;
     let done = false;
     const tick = () => {
+      raf = 0;
       const t = chasy.proshlo();
       setMs(t);
       if (limitMs !== null && t >= limitMs && !done) {
@@ -37,9 +38,14 @@ export function TaymerLive({ chasy, limitMs, naPauze, onVyshlo, vid }: TaymerLiv
         vyshlo.current();
         return;
       }
-      raf = window.requestAnimationFrame(tick);
+      /* Скрытая вкладка — кадров не просим, рендер стоит. */
+      if (!document.hidden) raf = window.requestAnimationFrame(tick);
     };
     raf = window.requestAnimationFrame(tick);
+    const onVis = () => {
+      if (!document.hidden && raf === 0 && !done) raf = window.requestAnimationFrame(tick);
+    };
+    document.addEventListener('visibilitychange', onVis);
     /* Подстраховка без кадров: проверка лимита раз в 250 мс. */
     const iv = window.setInterval(() => {
       if (limitMs !== null && chasy.proshlo() >= limitMs && !done) {
@@ -49,6 +55,7 @@ export function TaymerLive({ chasy, limitMs, naPauze, onVyshlo, vid }: TaymerLiv
       }
     }, 250);
     return () => {
+      document.removeEventListener('visibilitychange', onVis);
       window.cancelAnimationFrame(raf);
       window.clearInterval(iv);
     };

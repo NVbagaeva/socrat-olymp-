@@ -49,6 +49,74 @@ const DEL: Record<string, { kak: 'umn' | 'dom'; k: number; up?: number; tekst: s
   },
 };
 
+/* ── На 5 ──────────────────────────────────────────────────── */
+
+/**
+ * Деление на 5 — отдельным приёмом: самое частое из «удобных»
+ * делений. Делимое умножаем на 2, результат делим на 10 (переносим
+ * запятую на знак влево).
+ */
+export const delenieNa5: Priyom = {
+  id: 'delenie-na-5',
+  gruppa: 'delenie',
+  deystvie: 'delenie',
+  deystviya: ['delenie'],
+  desyatichnye: [2, 3],
+  sozdat(rng, o) {
+    let n: string;
+    if (o.uroven === 1) {
+      n = String(5 * rng.int(3, 40));
+    } else if (o.uroven === 2) {
+      if (o.desyatichnye && rng.chance(0.4)) {
+        /* Не делится нацело — ответ десятичная дробь: 37 : 5 = 7,4. */
+        let x = rng.int(11, 99);
+        while (x % 5 === 0) x = rng.int(11, 99);
+        n = String(x);
+      } else {
+        n = String(5 * rng.int(41, 199));
+      }
+    } else if (o.desyatichnye && rng.chance(0.5)) {
+      /* Десятичное делимое или трёхзначное не на 5: 4,5 : 5; 123 : 5. */
+      if (rng.chance(0.5)) {
+        let a = rng.int(11, 99);
+        while (a % 10 === 0) a = rng.int(11, 99);
+        n = znach(`${a}/10`);
+      } else {
+        let x = rng.int(101, 999);
+        while (x % 5 === 0) x = rng.int(101, 999);
+        n = String(x);
+      }
+    } else {
+      n = String(5 * rng.int(200, 1999));
+    }
+    return this.iz([n], o.uroven);
+  },
+  iz(d, uroven) {
+    return sdelat({
+      priyom: 'delenie-na-5',
+      uroven,
+      deystvie: 'delenie',
+      d,
+      expr: `${d[0]}/5`,
+    });
+  },
+  razbor(p) {
+    const n = p.d[0] as string;
+    const dvazhdy = znach(`${n}*2`);
+    const ans = znach(p.expr);
+    return [
+      {
+        tekst: `Умножаем делимое и делитель на $2$: делить на $5$ — то же, что делить вдвое большее число на $10$.`,
+        cep: [p.expr, `(${n}*2)/(5*2)`, `${dvazhdy}/10`],
+      },
+      {
+        tekst: `Разделить на $10$ — перенести запятую на один знак влево.`,
+        cep: [`${dvazhdy}/10`, ans],
+      },
+    ];
+  },
+};
+
 export const delenieNa525: Priyom = {
   id: 'delenie-na-5-25',
   gruppa: 'delenie',
@@ -188,4 +256,9 @@ export const obratnayaTablica: Priyom = {
   },
 };
 
-export const DELENIE: readonly Priyom[] = [delenieNa525, deleniePoChastyam, obratnayaTablica];
+export const DELENIE: readonly Priyom[] = [
+  delenieNa5,
+  delenieNa525,
+  deleniePoChastyam,
+  obratnayaTablica,
+];

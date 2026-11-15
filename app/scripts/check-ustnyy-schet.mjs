@@ -313,6 +313,19 @@ const PODHODIT = {
     );
   },
   'desyatichnye-umnozhenie': (p) => p.d.some(isDec),
+  'delenie-na-5': (p, u) => {
+    const n = N(p.d[0]);
+    if (p.expr !== `${p.d[0]}/5`) return false;
+    const naCelo = Number.isInteger(n) && n % 5 === 0;
+    if (u === 1) return naCelo && between(n, 15, 200);
+    if (u === 2)
+      return (naCelo && between(n, 205, 995)) || (Number.isInteger(n) && between(n, 11, 99));
+    return (
+      (naCelo && between(n, 1000, 9995)) ||
+      isDec(p.d[0]) ||
+      (Number.isInteger(n) && between(n, 101, 999) && !naCelo)
+    );
+  },
   'delenie-na-5-25': (p, u) => {
     const m = p.d[1];
     const ms = { 1: ['5', '25'], 2: ['0.5', '0.25', '25', '50'], 3: ['0.2', '0.125', '125'] }[u];
@@ -720,6 +733,62 @@ const varianty = (otvet) => {
   );
   check(!novyyRekord('seriya', r(15, 20, 1000), null), 'рекорд: ниже 80 % не рекорд');
   check(novyyRekord('vremya', r(31, 33, 0), r(30, 30, 0)), 'рекорд: больше верных — рекорд');
+}
+
+/* ── Таймер: что показывать (общее для 3D и SVG) ────────────── */
+{
+  const { taymerKadr, vspyshka, VSPYSHKA_MS } = requireSrc('lib/ustnyySchet/taymer.ts');
+  const k0 = taymerKadr(0, 60_000);
+  check(
+    k0.dolya === 1 && k0.cifry === '1:00' && !k0.poslednie && k0.otmetka === null,
+    'таймер: старт — полное кольцо, 1:00, без объявления',
+  );
+  const k1 = taymerKadr(30_000, 60_000);
+  check(
+    Math.abs(k1.dolya - 0.5) < 1e-12 && k1.otmetka === 30,
+    `таймер: середина — половина кольца, отметка 30 (${k1.otmetka})`,
+  );
+  const k2 = taymerKadr(50_500, 60_000);
+  check(
+    k2.poslednie && k2.teplo > 0 && k2.puls >= 0 && k2.puls <= 1 && k2.otmetka === 10,
+    'таймер: последние 10 с — тепло, пульс, отметка 10',
+  );
+  const k3 = taymerKadr(60_000, 60_000);
+  check(
+    k3.nol && k3.dolya === 0 && k3.teplo === 1 && k3.otmetka === 0 && k3.cifry === '0:00',
+    'таймер: ноль — пусто, вспышка, «время вышло»',
+  );
+  check(taymerKadr(70_000, 120_000).otmetka === 60, 'таймер 2 мин: отметка 60 с');
+  check(
+    taymerKadr(49_999, 60_000).puls === 0 && !taymerKadr(49_999, 60_000).poslednie,
+    'таймер: до последних 10 с пульса нет',
+  );
+  /* Пульс — функция времени, а не кадров: одно время — один пульс. */
+  check(
+    taymerKadr(55_250, 60_000).puls === taymerKadr(55_250, 60_000).puls,
+    'таймер: пульс зависит только от времени',
+  );
+  const pulsy = Array.from({ length: 41 }, (_, i) => taymerKadr(50_000 + i * 250, 60_000).puls);
+  check(
+    Math.max(...pulsy) > 0.95 && Math.min(...pulsy.slice(1, -1)) < 0.05,
+    'таймер: пульс мягко ходит от 0 до 1 раз в секунду',
+  );
+  const s0 = taymerKadr(15_000, null);
+  check(
+    !s0.vniz && Math.abs(s0.dolya - 0.25) < 1e-12 && s0.cifry === '0:15' && s0.otmetka === null,
+    'секундомер: за 15 с — четверть круга',
+  );
+  check(
+    taymerKadr(60_000, null).dolya === 0 && Math.abs(taymerKadr(300_000, null).oborot - 180) < 1e-9,
+    'секундомер: круг за минуту, оборот за 10 минут',
+  );
+  check(
+    vspyshka(0) === 1 &&
+      vspyshka(VSPYSHKA_MS) === 0 &&
+      vspyshka(VSPYSHKA_MS / 2) === 0.5 &&
+      vspyshka(-1) === 0,
+    'вспышка гаснет за свою длительность',
+  );
 }
 
 /* ── Статистика: запись и слияние двух устройств ────────────── */

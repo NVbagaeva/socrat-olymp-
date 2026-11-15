@@ -31,6 +31,7 @@ import {
   type Sostoyanie,
 } from '@/lib/ustnyySchet/sessiya';
 import { shagHtml, tekstHtml, voprosHtml } from '@/lib/ustnyySchet/vyvod';
+import { VSPYSHKA_MS } from '@/lib/ustnyySchet/taymer';
 import { randomSeed } from '@/lib/randomSeed';
 import { USTNYY } from '@/content/ustnyySchet';
 import { RazborShagi } from './RazborShagi';
@@ -95,6 +96,7 @@ export function Igra({
   const [live, setLive] = useState('');
   const [podskazka, setPodskazka] = useState(false);
   const [naPauze, setNaPauze] = useState(false);
+  const [vyshlo, setVyshlo] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const ponyatno = useRef<HTMLButtonElement>(null);
   const timer = useRef<number | null>(null);
@@ -112,11 +114,18 @@ export function Igra({
   );
 
   const zavershit = useCallback(
-    (st: Sostoyanie, ms: number) => {
+    (st: Sostoyanie, ms: number, zaderzhka = 0) => {
       if (konchilos.current) return;
       konchilos.current = true;
       if (timer.current !== null) window.clearTimeout(timer.current);
-      onKonec(zakonchit(st), ms);
+      if (zaderzhka === 0) {
+        onKonec(zakonchit(st), ms);
+        return;
+      }
+      /* Время вышло: ответы уже не принимаются, а итоги — после
+         короткой вспышки таймера на нуле. */
+      setVyshlo(true);
+      timer.current = window.setTimeout(() => onKonec(zakonchit(st), ms), zaderzhka);
     },
     [onKonec],
   );
@@ -208,7 +217,7 @@ export function Igra({
   );
 
   const onVyshlo = useCallback(() => {
-    if (lim !== null) zavershit(s, lim);
+    if (lim !== null) zavershit(s, lim, VSPYSHKA_MS);
   }, [s, lim, zavershit]);
 
   const primer = s.tekushiy;
@@ -306,7 +315,7 @@ export function Igra({
               value={
                 faza === 'vvod' ? vvod : posledniy !== null ? displayAnswer(posledniy.vvod) : vvod
               }
-              readOnly={faza !== 'vvod'}
+              readOnly={faza !== 'vvod' || vyshlo}
               aria-invalid={formatErr}
               aria-describedby={formatErr ? 'us-format' : undefined}
               onChange={(e) => onChange(e.target.value)}
@@ -317,7 +326,7 @@ export function Igra({
             <button
               type="submit"
               className="btn btn--primary us-igra__ok"
-              disabled={faza !== 'vvod'}
+              disabled={faza !== 'vvod' || vyshlo}
             >
               {T.proverit}
             </button>
@@ -375,7 +384,7 @@ export function Igra({
             label={T.klaviatura}
             names={T.klavishi}
             onKey={onKey}
-            disabled={faza !== 'vvod'}
+            disabled={faza !== 'vvod' || vyshlo}
             ok={{ label: T.klavishi.ok, onOk: () => otvet(vvod) }}
           />
         </div>

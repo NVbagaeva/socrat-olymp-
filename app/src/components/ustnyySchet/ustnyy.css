@@ -1113,3 +1113,18 @@
 .us-itogi__oshibki > li {
   min-width: 0;
 }
+
+/* 3D-таймер: холст чуть больше блока — под свечение; цифры поверх. */
+.us-taymer__3d {
+  position: absolute;
+  inset: -12%;
+  pointer-events: none;
+}
+.us-taymer__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.us-taymer--3d.is-pauza .us-taymer__3d {
+  opacity: 0.55;
+}

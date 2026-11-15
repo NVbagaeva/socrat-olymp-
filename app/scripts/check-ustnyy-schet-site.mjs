@@ -8,9 +8,14 @@
       ответы набираются и отправляются Enter; ошибка объявляется
       aria-live («Неверно, ответ …»), через 1,5 с — следующий пример;
       итоги: 9 верно из 10, фокус на заголовке итогов.
-   2. На время, с подменённым временем (page.clock): за 30 с таймер
-      уходит на 30 с ± 100 мс, тренировка кончается не раньше чем за
-      100 мс до минуты и не позже чем через 100 мс после.
+   2. На время, с подменённым временем (page.clock), для 3D- и
+      SVG-таймера: за 30 с таймер уходит на 30 с ± 100 мс, тренировка
+      кончается не раньше чем за 100 мс до минуты и не позже чем через
+      100 мс после; на нуле — вспышка, потом итоги.
+   2а. 3D-таймер: сцена three.js грузится отдельным файлом только на
+      экране тренировки (на витрине и странице приёма её нет); кадры
+      рисуются, на скрытой вкладке встают и снова идут, когда вкладка
+      видна; на слабом устройстве и при reduced-motion — SVG-кольцо.
    3. Свободный режим: после ошибки — разбор и «Понятно».
    4. Без WebGL (Chromium с --disable-webgl): таймер — SVG, ошибок нет.
    5. Телефон (палец): своя клавиатура, «OK» отвечает, системная
@@ -208,9 +213,9 @@ console.log('1. Серия с клавиатуры');
 }
 
 /* ── 2. Таймер на время с подменённым временем ───────────────── */
-console.log('2. Таймер: ±100 мс за минуту');
-{
-  const ctx = await context();
+console.log('2. Таймер: ±100 мс за минуту (3D и SVG)');
+async function proverkaTaymera(b, nazv) {
+  const ctx = await context({}, b);
   const p = await ctx.newPage();
   p.errors = [];
   p.on('pageerror', (e) => p.errors.push(e.message));
@@ -223,31 +228,151 @@ console.log('2. Таймер: ±100 мс за минуту');
     await p.keyboard.press('Enter');
     await p.waitForTimeout(50);
   }
+  /* 3D-сцена грузится лениво — дождаться, если она будет. */
+  await p.waitForTimeout(800);
   await p.clock.pauseAt(Date.now() + 2000);
-  const ostalos = () =>
-    p.evaluate(() => {
-      const ring = document.querySelector('.us-taymer__ring');
-      const [a] = (ring?.getAttribute('stroke-dasharray') ?? '0 1').split(' ').map(Number);
-      return (a / (2 * Math.PI * 52)) * 60_000;
-    });
+  const vid = await p.locator('.us-taymer').getAttribute('data-taymer');
+  const ostalos = async () => Number(await p.locator('.us-taymer').getAttribute('data-ms'));
   const o0 = await ostalos();
   await p.clock.runFor(30_000);
   const o1 = await ostalos();
-  check(Math.abs(o0 - o1 - 30_000) <= 100, `за 30 с таймер ушёл на ${Math.round(o0 - o1)} мс`);
-  await p.clock.runFor(Math.max(0, Math.floor(o1) - 100));
-  check((await p.locator('.us-itogi').count()) === 0, 'за 100 мс до конца тренировка ещё идёт');
-  await p.clock.runFor(300);
+  check(
+    Math.abs(o0 - o1 - 30_000) <= 100,
+    `${nazv} (${vid}): за 30 с таймер ушёл на ${o0 - o1} мс`,
+  );
+  await p.clock.runFor(Math.max(0, o1 - 100));
+  check(
+    (await p.locator('.us-taymer.is-nol').count()) === 0 &&
+      (await p.locator('.us-itogi').count()) === 0,
+    `${nazv}: за 100 мс до конца тренировка ещё идёт`,
+  );
+  await p.clock.runFor(200);
+  check(
+    (await p.locator('.us-taymer.is-nol').count()) === 1,
+    `${nazv}: через 100 мс после конца — ноль и вспышка`,
+  );
+  check(
+    await p.locator('#us-otvet').evaluate((e) => e.readOnly),
+    `${nazv}: после конца ответы не принимаются`,
+  );
+  await p.clock.runFor(600);
   await p.locator('.us-itogi').waitFor({ timeout: 5000 });
-  check(true, 'через 100–300 мс после конца — итоги');
+  check(true, `${nazv}: после вспышки — итоги`);
   const stat = await p.evaluate(() =>
     JSON.parse(localStorage.getItem('budetege:ustnyy-schet:v1') ?? 'null'),
   );
   check(
     Math.abs((stat?.sessii?.[0]?.ms ?? 0) - 60_000) <= 100,
-    `записанное время ${stat?.sessii?.[0]?.ms} мс`,
+    `${nazv}: записанное время ${stat?.sessii?.[0]?.ms} мс`,
   );
-  check(p.errors.length === 0, `ошибок на странице нет ${p.errors.join('; ')}`);
+  check(p.errors.length === 0, `${nazv}: ошибок на странице нет ${p.errors.join('; ')}`);
   await ctx.close();
+  return vid;
+}
+const vidObychnyy = await proverkaTaymera(browser, 'обычный Chromium');
+await proverkaTaymera(bezWebgl, 'без WebGL');
+
+/* ── 2а. 3D-таймер: ленивая загрузка, кадры, скрытая вкладка ──── */
+console.log('2а. 3D-таймер');
+{
+  const ctx = await context();
+  const skripty = new Map();
+  ctx.on('response', async (r) => {
+    if (r.url().endsWith('.js')) skripty.set(r.url(), r);
+  });
+  const est3d = vidObychnyy === '3d';
+  check(
+    true,
+    `WebGL в этом Chromium ${est3d ? 'есть — проверяем 3D' : 'недоступен — 3D-часть пропущена'}`,
+  );
+  if (est3d) {
+    /* Витрина и страница приёма: сцены three.js в загрузке нет. */
+    const v = await open(ctx, '/ustnyy-schet/', '.us-hero');
+    await v.waitForTimeout(500);
+    const naVitrine = new Set(skripty.keys());
+    const pr = await open(ctx, '/ustnyy-schet/kvadrat-na-5/', '.us-pravilo');
+    await pr.waitForTimeout(500);
+    const doTrenirovki = new Set(skripty.keys());
+    const p = await open(ctx, '/ustnyy-schet/trenirovka/?t=7&r=v120&go=1', '.us-igra__vopros');
+    await p.locator('.us-taymer[data-taymer="3d"]').waitFor({ timeout: 15_000 });
+    check(true, 'на экране тренировки — 3D-таймер');
+    const novye = [...skripty.keys()].filter((u) => !doTrenirovki.has(u));
+    let sScenoy = null;
+    for (const u of novye) {
+      const body = await skripty
+        .get(u)
+        .text()
+        .catch(() => '');
+      if (body.includes('WebGLRenderer')) sScenoy = u;
+    }
+    check(sScenoy !== null, 'сцена three.js пришла отдельным файлом при старте тренировки');
+    check(sScenoy !== null && !naVitrine.has(sScenoy), 'на витрине сцены three.js нет');
+    check((await p.locator('.us-taymer__canvas').count()) === 1, 'холст WebGL на месте');
+    check(
+      /^\d:\d\d$/.test((await p.locator('.us-taymer__cifry').textContent())?.trim() ?? ''),
+      'цифры — текстом поверх холста',
+    );
+    check(
+      (await p.locator('.us-taymer [role="timer"]').count()) === 1,
+      'у таймера role=timer для скринридера',
+    );
+    const kadrov = () =>
+      p.locator('.us-taymer__canvas').evaluate((c) => Number(c.dataset.kadrov ?? 0));
+    const k0 = await kadrov();
+    await p.waitForTimeout(400);
+    const k1 = await kadrov();
+    check(k1 > k0, `кадры рисуются (${k0} → ${k1})`);
+    /* Скрытая вкладка: кадры встают. */
+    await p.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        get: () => 'hidden',
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await p.waitForTimeout(100);
+    const k2 = await kadrov();
+    await p.waitForTimeout(600);
+    const k3 = await kadrov();
+    check(k3 === k2, `на скрытой вкладке рендер стоит (${k2} → ${k3})`);
+    await p.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+      Object.defineProperty(document, 'visibilityState', {
+        configurable: true,
+        get: () => 'visible',
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await p.waitForTimeout(400);
+    check((await kadrov()) > k3, 'вкладка снова видна — кадры пошли');
+    await snimok(p, 'kompyuter-1280-taymer-3d', false);
+    check(
+      p.errors.length === 0 && v.errors.length === 0,
+      `ошибок на странице нет ${p.errors.join('; ')}`,
+    );
+  }
+  await ctx.close();
+
+  /* Слабое устройство: два ядра — SVG-кольцо, сцена не грузится. */
+  const slab = await context();
+  await slab.addInitScript(() => {
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 });
+  });
+  const ps = await open(slab, '/ustnyy-schet/trenirovka/?t=7&r=v60&go=1', '.us-igra__vopros');
+  await ps.waitForTimeout(800);
+  check(
+    (await ps.locator('[data-taymer="2d"]').count()) === 1,
+    'слабое устройство (2 ядра) — SVG-кольцо',
+  );
+  await slab.close();
+
+  /* prefers-reduced-motion — SVG-кольцо. */
+  const tiho = await context({ reducedMotion: 'reduce' });
+  const pt = await open(tiho, '/ustnyy-schet/trenirovka/?t=7&r=v60&go=1', '.us-igra__vopros');
+  await pt.waitForTimeout(800);
+  check((await pt.locator('[data-taymer="2d"]').count()) === 1, 'reduced-motion — SVG-кольцо');
+  await tiho.close();
 }
 
 /* ── 3. Свободный режим: разбор и «Понятно» ──────────────────── */
