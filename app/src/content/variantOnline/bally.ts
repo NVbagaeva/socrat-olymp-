@@ -5,7 +5,7 @@
  * же, `pnpm test:chast2` сверяет).
  *
  * Таблица — по номерам хранения разделов (content/struktura.js): задача
- * с кратким ответом (1–13) — 1 балл; задача с развёрнутым ответом
+ * с кратким ответом (1–13 и 21) — 1 балл; задача с развёрнутым ответом
  * (14–20) — по критериям. Вес задания по действующей структуре записан
  * в struktura.js; `pnpm test:variant-struktura` сверяет с ним таблицу.
  */
@@ -13,7 +13,7 @@
 import { maxPervichnyy } from '@/content/struktura';
 import type { EgeNo } from '@/lib/variant/types';
 
-/** Номер задания ЕГЭ: часть 1 — 1…13, часть 2 — 14…20. */
+/** Номер хранения задачи: краткий ответ — 1…13 и 21, развёрнутый — 14…20. */
 export type EgeNo20 = EgeNo | 14 | 15 | 16 | 17 | 18 | 19 | 20;
 
 export const PART2_NUMBERS = [14, 15, 16, 17, 18, 19, 20] as const;
@@ -40,9 +40,10 @@ export const MAX_BALL: Readonly<Record<EgeNo20, number>> = {
   18: 3,
   19: 4,
   20: 4,
+  21: 1,
 };
 
-/** Баллы первой части — для онлайн-варианта из заданий 1–13. */
+/** Баллы задач с кратким ответом — для онлайн-варианта. */
 export const BALLY: Readonly<Record<EgeNo, number>> = MAX_BALL;
 
 /**
