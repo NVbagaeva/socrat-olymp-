@@ -243,7 +243,16 @@ for (const razdel of napolnennyeRazdely()) {
     /* Отпечаток: верный ответ принят, соседний — нет. */
     const seal = lite(z).seal;
     eq(tipOtpechatka(seal), z.tip, `${gde}: тип в отпечатке`);
-    eq(seal.includes(r.otvet), false, `${gde}: ответа в отпечатке нет`);
+    /* Отпечаток — хеш: короткий ответ («7») может случайно встретиться
+       среди его цифр, поэтому сверяется каждая часть целиком. */
+    eq(
+      seal
+        .slice(seal.indexOf(':') + 1)
+        .split('|')
+        .includes(r.otvet),
+      false,
+      `${gde}: ответа в отпечатке нет`,
+    );
     eq(prochitat(r.otvet, seal).right, true, `${gde}: верный ответ засчитан`);
     eq(prochitat(`${r.otvet}1`, seal).right, false, `${gde}: неверный ответ не засчитан`);
     /* Подсказки: варианты разные, верный на месте. */
