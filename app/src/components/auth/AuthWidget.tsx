@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { AUTH_IN_HEADER } from '@/lib/auth/config';
 import { StartButton } from './StartButton';
 
 export interface AuthWidgetProps {
@@ -21,9 +22,13 @@ const LiveWidget =
   process.env.AUTH_ON === '1'
     ? dynamic(() => import('./AuthLive').then((m) => m.LiveWidget), {
         ssr: false,
-        loading: () => (
-          <span aria-hidden="true" style={{ display: 'inline-block', minWidth: '5.5rem' }} />
-        ),
+        /* Пока кусок грузится — пустое место под «Войти». Класс нужен
+           шапке оболочки на телефоне (auth-widget.css): она сразу
+           раскладывается так, как будет со входом, и колокольчик не
+           мелькает. Без кнопки в шапке места не держим: гостю там
+           ничего не покажут. */
+        loading: () =>
+          AUTH_IN_HEADER ? <span className="auth-widget__wait" aria-hidden="true" /> : null,
       })
     : null;
 

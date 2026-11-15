@@ -6,6 +6,17 @@
   position: relative;
   flex: none;
 }
+/* Место под «Войти», пока грузится живой блок (AuthWidget.tsx). */
+.auth-widget__wait {
+  display: inline-block;
+  flex: none;
+  min-width: 5.5rem;
+}
+@media (max-width: 767.98px) {
+  .auth-widget__wait {
+    min-width: 70px;
+  }
+}
 .auth-widget__button {
   display: grid;
   place-items: center;
@@ -215,6 +226,42 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+}
+/* Шапка оболочки заданий на телефоне — как публичная: «Войти» словом,
+   без значка, высотой 44px; кружок аккаунта — полоса касания 44×44.
+   Со входом в строке не помещались уровень, колокольчик, «Войти» и
+   бургер (на 375 шапка была шире экрана на 54px): колокольчик уходит —
+   «Уведомления» есть на экране «Ещё» нижней панели, — промежутки
+   плотнее, второго пустого распорного блока нет. Без входа шапка
+   прежняя. */
+@media (max-width: 767.98px) {
+  .auth-login--app {
+    height: var(--h-control);
+    padding: 0 14px;
+  }
+  .auth-login--app .auth-login__ico {
+    display: none;
+  }
+  .auth-widget--app .auth-widget__button {
+    width: 44px;
+    height: 44px;
+  }
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) {
+    gap: var(--space-2);
+  }
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) .bell,
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait) .topnav + .topbar__spacer {
+    display: none;
+  }
+}
+/* 320–359px: переключатель уровня в шапке оболочки компактнее. */
+@media (max-width: 359.98px) {
+  .topbar:has(.auth-widget__login, .auth-widget, .auth-widget__wait)
+    .topbar__level
+    .level-switch__seg {
+    padding: 0 var(--space-2);
+    font-size: 13px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
