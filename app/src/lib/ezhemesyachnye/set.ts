@@ -5,7 +5,7 @@
  */
 
 import { EZH_MESYACY } from '@/content/ezhemesyachnye';
-import { VARIANT_NUMBERS, vChasti1 } from '@/lib/variant/struktura';
+import { sostavNabora, vChasti1 } from '@/lib/variant/struktura';
 import type { HintStep, VariantSet, VariantTask } from '@/lib/variant/types';
 import { SHABLONY, type Shablon } from '@/lib/povyshennye/shablony';
 import { zagruzitVariant } from './dannye';
@@ -62,13 +62,18 @@ export async function ezhSet(k: number): Promise<VariantSet | null> {
 /** То же без загрузки — для автотеста на Node. */
 export function ezhSetIz(k: number, versii: Zapis[][]): VariantSet {
   const code = ezhKod(k);
+  const variants = versii.map((zapisi, i) => ({
+    index: i + 1,
+    tasks: vChasti1(zapisi.map((z) => zadachaEV(k, z))),
+  }));
   return {
     code,
     seed: code,
     version: EZH_VERSION,
     config: {
-      /* Задания первой части по действующей структуре экзамена. */
-      tasks: [...VARIANT_NUMBERS],
+      /* Задания первой части по действующей структуре экзамена, задачи
+         которых в наборе есть (lib/variant/struktura.ts, sostavNabora). */
+      tasks: sostavNabora(variants),
       subtypes: {},
       source: 'own',
       stars: [],
@@ -76,10 +81,7 @@ export function ezhSetIz(k: number, versii: Zapis[][]): VariantSet {
       parallel: false,
     },
     zameny: {},
-    variants: versii.map((zapisi, i) => ({
-      index: i + 1,
-      tasks: vChasti1(zapisi.map((z) => zadachaEV(k, z))),
-    })),
+    variants,
     createdAt: '2026-10-29T00:00:00.000Z',
   };
 }
