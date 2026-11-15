@@ -1,11 +1,14 @@
 /**
  * База, задание №16 «Вычисления и преобразования»: наполнение раздела.
- * Прототипы тренажёра — lib/baza/z16. Теория, карточки и опорные
- * задачи пока не сделаны — эти вкладки показывают «Материал готовится».
+ * Теория, опорные задачи и карточки — здесь; прототипы тренажёра —
+ * lib/baza/z16.
  */
 
 import { GRUPPY_16, PROTOTIPY_16 } from '@/lib/baza/z16/prototipy';
 import type { RazdelBazy } from '@/lib/baza/types';
+import { KOLODA_16 } from './kartochki';
+import { OPORNYE_16 } from './opornye';
+import { TEORIYA_16 } from './teoriya';
 
 export const RAZDEL_16: RazdelBazy = {
   slug: '16',
@@ -31,6 +34,9 @@ export const RAZDEL_16: RazdelBazy = {
       },
     ],
   },
+  teoriya: TEORIYA_16,
   gruppy: GRUPPY_16,
   prototipy: PROTOTIPY_16,
+  opornye: OPORNYE_16,
+  kartochki: KOLODA_16,
 };

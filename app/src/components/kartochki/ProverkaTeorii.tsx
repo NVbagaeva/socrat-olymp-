@@ -25,7 +25,7 @@ export interface ProverkaTeoriiProps {
 export function ProverkaTeorii({ task, nomer, href, ids }: ProverkaTeoriiProps) {
   const progress = useProgressKolody(task);
   const n = ids.filter((id) => vyuchena(progress, id)).length;
-  const text = T.vyucheno(nomer ?? Number(task), n, ids.length);
+  const text = T.vyucheno(nomer ?? Number(task), n, ids.length, String(task).startsWith('baza:'));
   return (
     <div className="kart-proverka">
       <div className="kart-proverka__text">

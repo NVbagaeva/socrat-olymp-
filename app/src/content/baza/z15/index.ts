@@ -1,11 +1,14 @@
 /**
  * База, задание №15 «Текстовые задачи на проценты»: наполнение раздела.
- * Прототипы тренажёра — lib/baza/z15; теории, карточек и опорных задач
- * пока нет — эти вкладки показывают «Материал готовится».
+ * Теория, опорные задачи и карточки — здесь; прототипы тренажёра —
+ * lib/baza/z15.
  */
 
 import type { RazdelBazy } from '@/lib/baza/types';
 import { GRUPPY_15, PROTOTIPY_15 } from '@/lib/baza/z15/prototipy';
+import { KOLODA_15 } from './kartochki';
+import { OPORNYE_15 } from './opornye';
+import { TEORIYA_15 } from './teoriya';
 
 export const RAZDEL_15: RazdelBazy = {
   slug: '15',
@@ -32,6 +35,9 @@ export const RAZDEL_15: RazdelBazy = {
       },
     ],
   },
+  teoriya: TEORIYA_15,
   gruppy: GRUPPY_15,
   prototipy: PROTOTIPY_15,
+  opornye: OPORNYE_15,
+  kartochki: KOLODA_15,
 };
