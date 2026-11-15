@@ -106,7 +106,7 @@ function build(c: Candidate, isNew: boolean): VariantTask | null {
     subtype: c.subtype,
     source: {
       kind: 'own',
-      label: `Своя: тип ${c.prototypeId}${isNew ? ', новые числа' : ''}`,
+      label: `Своя: прототип ${c.prototypeId}${isNew ? ', новые числа' : ''}`,
     },
     difficulty: null,
     statement: `<p>${typeset(z.uslovie)}</p>`,
