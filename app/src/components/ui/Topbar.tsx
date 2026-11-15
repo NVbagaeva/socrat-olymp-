@@ -24,6 +24,8 @@ export interface TopbarProps {
   unread?: boolean;
   /** Адрес страницы уведомлений. Не задан — колокольчик кнопкой. */
   notificationsHref?: string;
+  /** Показывать ли колокольчик. false — раздела уведомлений ещё нет. */
+  bell?: boolean;
   user?: { initials: string; name: string; role?: string };
   /**
    * Блок аккаунта справа: кнопка входа или кружок с меню. Задан —
@@ -44,6 +46,7 @@ export function Topbar({
   /* Уведомлений пока нет — точку «есть новые» по умолчанию не рисуем. */
   unread = false,
   notificationsHref,
+  bell = true,
   user,
   userSlot,
   actions,
@@ -107,7 +110,7 @@ export function Topbar({
 
       {/* Колокольчик: ссылка, когда страница уведомлений есть, и кнопка,
           когда её нет, — чтобы не обещать переход в никуда. */}
-      {notificationsHref !== undefined ? (
+      {!bell ? null : notificationsHref !== undefined ? (
         <a
           className={clsx('bell', unread && 'bell--unread')}
           href={notificationsHref}

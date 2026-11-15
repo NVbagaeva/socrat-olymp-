@@ -1,6 +1,7 @@
 import { AppShell } from '@/components/layout/AppShell';
+import { RisunokRazdela, StsenaShapka, tabletkiRazdela } from '@/components/tasks/stsena';
+import { STSENA } from '@/content/stsena';
 import { RazdelTabs } from '@/components/tasks/RazdelTabs';
-import { ShapkaRazdela } from '@/components/tasks/ShapkaRazdela';
 import { tasksPage } from '@/content/tasks';
 import { ZADANIE16 } from '@/content/zadanie16';
 import { ZADANIYA } from '@/lib/paths';
@@ -11,21 +12,22 @@ import { ZADANIYA } from '@/lib/paths';
  */
 export function Shell16({ children }: { children: React.ReactNode }) {
   const base = `${ZADANIYA}/${ZADANIE16.slug}`;
+  const no = String(Number(ZADANIE16.no));
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <ShapkaRazdela
-          className="z16-head"
+        <StsenaShapka
           crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
-            { label: `№${Number(ZADANIE16.no)}` },
+            { label: `№${no}` },
           ]}
           title={ZADANIE16.title}
-          badge={ZADANIE16.badge}
           lead={ZADANIE16.lead}
+          tabletki={tabletkiRazdela({ chast: ZADANIE16.badge })}
+          media={<RisunokRazdela no={no} label={`${STSENA.oblozhka}: ${ZADANIE16.title}`} />}
         />
-        <RazdelTabs base={base} tabs={ZADANIE16.tabs} />
+        <RazdelTabs base={base} tabs={ZADANIE16.tabs} className="topic-tabs-row--stsena" />
         <div className="section-panel">{children}</div>
       </main>
     </AppShell>
