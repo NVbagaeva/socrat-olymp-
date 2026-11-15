@@ -19,7 +19,7 @@
 
 import type { Glava } from './teoriya13';
 import { maxBall, nomerRazdela } from './struktura';
-import { MESTO13 } from './zadanie13';
+import { EDINICY_POTERYA, MESTO13 } from './zadanie13';
 import { ballText } from './variantOnline/bally';
 import { OPTIMIZACIYA13_HREF, RAZDEL13 } from '@/lib/zadanie13/links';
 import { glavaHref21 } from '@/lib/zadanie21/links';
@@ -148,7 +148,7 @@ const GLAVA_RESHENIE: Glava = {
           vid: 'kartochka',
           rol: 'lovushka',
           title: 'Ответ не в тех единицах',
-          text: 'Модель верная, уравнение решено, а в ответе тысячи вместо рублей — ответ неверный, и за задачу 0 баллов. Перед словом «Ответ» перечитай, в чём его просят.',
+          text: `Модель верная, уравнение решено, а в ответе тысячи вместо рублей — ответ неверный, и за задачу ${EDINICY_POTERYA}. Перед словом «Ответ» перечитай, в чём его просят.`,
         },
       ],
     },

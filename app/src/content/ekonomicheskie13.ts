@@ -13,7 +13,7 @@ import type { TypeCode, Units, Vopros13 } from '@/lib/zadanie13/types';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov, zadach } from './treningBanka';
 import { nomerRazdela, slovoChasti } from './struktura';
 import { ballText } from './variantOnline/bally';
-import { MESTO13 } from './zadanie13';
+import { EDINICY_POTERYA, MESTO13 } from './zadanie13';
 
 /* ── Тренажёр ─────────────────────────────────────────────────── */
 
@@ -65,7 +65,7 @@ export const TRENAZHER13 = (() => {
       /* Вердикт «число верное, единицы нет» — как в прежнем тренажёре. */
       edinicy: {
         zag: 'Число верное, единицы нет',
-        lead: 'Посмотри, в чём просят ответ в условии, и переведи. На ЕГЭ такой ответ — 0 баллов.',
+        lead: `Посмотри, в чём просят ответ в условии, и переведи. На ЕГЭ такой ответ — ${EDINICY_POTERYA}.`,
       },
       tipVopros: 'Какая это схема?',
       tipOtvet: 'Схема',
@@ -106,7 +106,7 @@ export const SHAPKA13 = {
   ],
   opasnoTitle: 'Чем опасно',
   opasno: [
-    'Пишут ответ не в тех единицах: считали в тысячах, а условие просит рубли, — это 0 баллов.',
+    `Пишут ответ не в тех единицах: считали в тысячах, а условие просит рубли, — это ${EDINICY_POTERYA}.`,
     'Считают проценты от суммы кредита, а не от долга на начало периода.',
     'Путают сумму изменения долга и платёж: платёж = сумма изменения долга + переплата.',
     'В «на сколько процентов больше» берут за $100\\,\\%$ не ту величину.',

@@ -15,7 +15,7 @@
 import type { Blok13 } from '@/lib/zadanie13/teoriya-yakorya';
 import type { TableScheme } from '@/lib/zadanie13/types';
 import { nomerRazdela } from '@/content/struktura';
-import { MESTO13 } from '@/content/zadanie13';
+import { EDINICY_POTERYA, MESTO13 } from '@/content/zadanie13';
 import { GLAVY_13_CHAST2 } from '@/content/teoriya13-chast2';
 
 /** Роль карточки: цвет рамки и ярлык (02-design.md, § 2.1). */
@@ -1013,7 +1013,7 @@ export const GLAVY_13: Glava[] = [
             yakor: 'lov-edinicy',
             title: 'Единицы ответа',
             text: MESTO13.vtorayaChast
-              ? `«Ответ выразите в рублях» — значит, 1 200 000, а не 1200 (тысяч). Задание ${nomerRazdela('ekonomika')} оценивается в ${MESTO13.bally}, а ответ не в тех единицах — 0 баллов.`
+              ? `«Ответ выразите в рублях» — значит, 1 200 000, а не 1200 (тысяч). Задание ${nomerRazdela('ekonomika')} оценивается в ${MESTO13.bally}, а ответ не в тех единицах — ${EDINICY_POTERYA}.`
               : `«Ответ выразите в рублях» — значит, 1 200 000, а не 1200 (тысяч). Задание ${nomerRazdela('ekonomika')} оценивается в ${MESTO13.bally}, и ответ не в тех единицах — потерянный балл.`,
           },
           {
