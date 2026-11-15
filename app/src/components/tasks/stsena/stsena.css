@@ -96,6 +96,31 @@
   line-height: 1.1;
   text-wrap: balance;
 }
+/* Строки под заголовком у подтем №12: название подтемы (когда H1
+   занят названием задания) и название графика — «График — парабола».
+   Слова, которые не помещаются на узком экране, переносятся, а не
+   растягивают страницу вбок: «Тригонометрические» на 320 px встаёт
+   впритык. */
+.stsena__podzagolovok {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.stsena__podtema {
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.stsena__grafik {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-lg);
+  color: var(--color-text-secondary);
+}
+@media (max-width: 359.98px) {
+  .stsena__podtema {
+    font-size: var(--fs-h4);
+  }
+}
 .stsena__lead {
   margin: 0;
   max-width: 60ch;

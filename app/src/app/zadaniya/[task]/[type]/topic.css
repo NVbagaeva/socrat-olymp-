@@ -5,54 +5,33 @@
 
 /* ── Шапка темы ─────────────────────────────────────────────── */
 
-/* Разметку шапки даёт общий компонент (components/tasks/ShapkaRazdela),
-   здесь — только то, чем шапка темы отличается: портрет и кольцо
-   прогресса стоят в правой колонке рядом, а не под друг другом,
-   и по центру по вертикали. */
-.topic-head {
-  align-items: center;
-}
-.topic-head .section-head__media {
+/* Разметку шапки даёт общий компонент «Стеклянная сцена»
+   (components/tasks/stsena), здесь — только то, чем шапка темы
+   отличается: в колонке обложки стоит кольцо прогресса, а описание
+   раздела набрано на ступень крупнее. Название подтемы и название
+   графика — слоты podzagolovok той же шапки (stsena.css). */
+.topic-head .stsena__media {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-6);
+  justify-content: center;
 }
-.topic-head .section-head__lead {
+.topic-head .stsena__lead {
   font-size: var(--fs-lg);
   line-height: var(--lh-lg);
   max-width: 54ch;
 }
-/* Подзаголовок подтемы под общим H1 задания: название подтемы.
-   Есть только у подтем с признаком head в конфиге. */
-.topic-head__subtitle {
-  margin: 0 0 var(--space-3);
-  color: var(--color-text);
-}
-/* Название подтемы кеглем h3 — в шапке и в «О задании».
+/* Название подтемы кеглем h3 стоит и в «О задании».
    «Тригонометрические» на 320 px занимает строку впритык: на самых
    узких экранах заголовок на ступень мельче, а слово, которое всё же
    не помещается, переносится, а не растягивает страницу вбок. */
-.topic-head__subtitle,
 .about-lead__title {
   overflow-wrap: anywhere;
   hyphens: auto;
 }
 @media (max-width: 359.98px) {
-  .topic-head__subtitle,
   .about-lead__title {
     font-size: var(--fs-h4);
   }
-}
-/* Название графика под ним: «График — парабола». */
-.topic-head__subtitle--wide {
-  margin-bottom: var(--space-1);
-}
-.topic-head__graph {
-  margin: 0 0 var(--space-4);
-  font-size: var(--fs-lg);
-  line-height: var(--lh-lg);
-  color: var(--color-text-secondary);
 }
 
 /* ── Прогресс по разделам ───────────────────────────────────── */
@@ -1291,15 +1270,9 @@ a.tutor-card:hover {
     padding: var(--space-4);
   }
 
-  /* На телефоне шапка идёт столбиком: заголовок, подзаголовок
-     и прогресс — по строке на каждое. */
-  .topic-head {
-    align-items: flex-start;
-    margin-bottom: var(--space-6);
-  }
-  /* В одну колонку портрет и кольцо встают под текстом — и от левого
-     края, как он: прижатые вправо, они висели бы сами по себе. */
-  .topic-head .section-head__media {
+  /* В одну колонку кольцо встаёт под текстом — и от левого края, как
+     он: прижатое вправо, оно висело бы само по себе. */
+  .topic-head .stsena__media {
     justify-content: flex-start;
   }
   /* Пирамида — декор: на телефоне его нет, как и на остальных
