@@ -22,7 +22,33 @@ export type BlokTeorii21 =
       shagi: { label: string; formuly?: string[]; paras?: string[] }[];
       otvet: string;
     }
-  | { vid: 'lovushka'; title: string; oshibka: string; pravilno: string };
+  | { vid: 'lovushka'; title: string; oshibka: string; pravilno: string }
+  | { vid: 'kartinka'; kartinka: Kartinka21; legenda: string[]; podpis: string }
+  | {
+      vid: 'matreshka';
+      title: string;
+      /** Слои снаружи внутрь: функция и её производная, TeX без $. */
+      sloi: { tex: string; proizv: string }[];
+      /** Производная целиком, TeX без $. */
+      itog: string;
+      poyasnenie?: string;
+      /** Картинка рядом со слоями и подписи цветов к ней. */
+      kartinka?: Kartinka21;
+      legenda?: string[];
+    };
+
+/**
+ * Картинка теории: файлы public/images/zadanie-21/<imya>-<ширина>.webp
+ * и запасной <imya>-<меньшая ширина>.jpg. Фон у картинок белый.
+ */
+export interface Kartinka21 {
+  imya: string;
+  /** Ширины WebP по возрастанию; размеры — у меньшей. */
+  shiriny: number[];
+  w: number;
+  h: number;
+  alt: string;
+}
 
 export interface RazdelTeorii21 {
   id: string;
@@ -93,6 +119,137 @@ export const RAZDELY_TEORII_21: RazdelTeorii21[] = [
           { label: 'Собираем', formuly: ["y' = 30 - 4\\cdot\\frac32\\sqrt{x} = 30 - 6\\sqrt{x}"] },
         ],
         otvet: "$y' = 30 - 6\\sqrt{x}$",
+      },
+    ],
+  },
+  {
+    id: 'matreshka',
+    title: 'Сложная функция — матрёшка',
+    lead: 'Сложная функция — это функция от функции: одна спрятана внутри другой, как кукла в матрёшке. Производную такой функции берут по слоям — снаружи внутрь.',
+    bloki: [
+      {
+        vid: 'kartinka',
+        kartinka: {
+          imya: 'matreshki-raskryty',
+          shiriny: [600, 1200],
+          w: 600,
+          h: 439,
+          alt: 'Три матрёшки: большая синяя и средняя голубая раскрыты, маленькая оранжевая стоит рядом целая',
+        },
+        legenda: [
+          'синяя кукла — внешняя функция',
+          'голубая — средняя',
+          'оранжевая — самая внутренняя',
+        ],
+        podpis: 'Раскрываем матрёшку снаружи внутрь — по одной кукле за раз.',
+      },
+      {
+        vid: 'opredelenie',
+        title: 'Внешняя и внутренняя функция',
+        paras: [
+          'В записи $y = e^{2 - x}$ сначала считают $2 - x$, а потом возводят $e$ в эту степень. **Внутренняя** функция — маленькая кукла: $t = 2 - x$. **Внешняя** — большая кукла, в которой она спрятана: $y = e^{t}$.',
+          'Как найти внешнюю: представь, что считаешь значение по шагам. Действие, которое делаешь **последним**, — это и есть самая большая кукла.',
+        ],
+      },
+      {
+        vid: 'formula',
+        formula: "\\bigl(f(g(x))\\bigr)' = f'\\bigl(g(x)\\bigr)\\cdot g'(x)",
+        podpis:
+          'производная внешней функции в точке внутренней, умноженная на производную внутренней',
+      },
+      {
+        vid: 'spisok',
+        title: 'Как раскрывать матрёшку',
+        punkty: [
+          'Назови внешнюю функцию — самую большую куклу — и возьми её производную. То, что внутри, пока не трогай: перепиши как есть.',
+          'Открой куклу: умножь на производную того, что было внутри.',
+          'Если внутри ещё матрёшка — повтори. По одной кукле за раз, пока не дойдёшь до $x$.',
+        ],
+      },
+      {
+        vid: 'matreshka',
+        title: '$y = e^{2 - x}$: две куклы',
+        sloi: [
+          { tex: 'e^{t}', proizv: "(e^{t})' = e^{t}" },
+          { tex: 't = 2 - x', proizv: "t' = -1" },
+        ],
+        itog: "y' = e^{2 - x}\\cdot(-1) = -e^{2 - x}",
+      },
+      {
+        vid: 'matreshka',
+        title: '$y = \\ln(8x)$: две куклы',
+        sloi: [
+          { tex: '\\ln t', proizv: "(\\ln t)' = \\frac{1}{t}" },
+          { tex: 't = 8x', proizv: "t' = 8" },
+        ],
+        itog: "y' = \\frac{1}{8x}\\cdot 8 = \\frac{1}{x}",
+        poyasnenie: 'Восьмёрка сократилась: у $\\ln(kx)$ производная всегда $\\frac1x$.',
+      },
+      {
+        vid: 'matreshka',
+        title: '$y = \\ln(x + 3)^7$: три куклы',
+        sloi: [
+          { tex: '\\ln t', proizv: "(\\ln t)' = \\frac{1}{t}" },
+          { tex: 't = u^7', proizv: "t' = 7u^6" },
+          { tex: 'u = x + 3', proizv: "u' = 1" },
+        ],
+        itog: "y' = \\frac{1}{(x + 3)^7}\\cdot 7(x + 3)^6\\cdot 1 = \\frac{7}{x + 3}",
+        poyasnenie:
+          "Короче — сначала упростить: $\\ln(x + 3)^7 = 7\\ln(x + 3)$ при $x > -3$, и сразу $y' = \\frac{7}{x + 3}$. Ответ тот же.",
+        kartinka: {
+          imya: 'matreshka-razrez',
+          shiriny: [360, 720],
+          w: 360,
+          h: 495,
+          alt: 'Матрёшка в разрезе: внутри синей куклы голубая, внутри голубой — оранжевая',
+        },
+        legenda: ['синяя — $\\ln t$', 'голубая — $u^7$', 'оранжевая — $x + 3$'],
+      },
+      {
+        vid: 'matreshka',
+        title: '$y = x^{3/2}$: куб корня',
+        sloi: [
+          { tex: 't^3', proizv: "(t^3)' = 3t^2" },
+          { tex: 't = \\sqrt{x}', proizv: "t' = \\frac{1}{2\\sqrt{x}}" },
+        ],
+        itog: "y' = 3(\\sqrt{x})^2\\cdot\\frac{1}{2\\sqrt{x}} = \\frac{3x}{2\\sqrt{x}} = \\frac32\\sqrt{x}",
+        poyasnenie:
+          "$x^{3/2} = x\\sqrt{x} = (\\sqrt{x})^3$. По формуле степени выходит то же: $(x^{3/2})' = \\frac32x^{1/2}$.",
+      },
+      {
+        vid: 'matreshka',
+        title: '$y = e^{2x} - 2e^{x}$: замена $t = e^x$',
+        sloi: [
+          { tex: 't^2 - 2t', proizv: "(t^2 - 2t)' = 2t - 2" },
+          { tex: 't = e^{x}', proizv: "t' = e^{x}" },
+        ],
+        itog: "y' = (2e^{x} - 2)\\cdot e^{x} = 2e^{x}(e^{x} - 1)",
+        poyasnenie:
+          "$e^{2x} = (e^x)^2$: внутри — $e^x$, снаружи — квадрат. Множитель $e^x > 0$, поэтому $y' = 0$ только при $e^x = 1$, то есть при $x = 0$.",
+      },
+      {
+        vid: 'primer',
+        title: 'Точка максимума с матрёшкой',
+        uslovie: 'Найдите точку максимума функции $y = \\ln(x + 3)^7 - 7x - 9$.',
+        shagi: [
+          { label: 'Производная по слоям', formuly: ["y' = \\frac{7}{x + 3} - 7"] },
+          { label: 'Нули', formuly: ['\\frac{7}{x + 3} = 7,\\quad x + 3 = 1,\\quad x = -2'] },
+          {
+            label: 'Знаки',
+            paras: [
+              "Функция определена при $x > -3$. На $(-3;\\,-2)$ $y' > 0$, на $(-2;\\,+\\infty)$ $y' < 0$: в $x = -2$ максимум.",
+            ],
+          },
+        ],
+        otvet: '$-2$',
+      },
+      {
+        vid: 'lovushka',
+        title: 'Забыли открыть куклу',
+        oshibka:
+          "$(e^{2 - x})' = e^{2 - x}$, $(\\ln(8x))' = \\frac{1}{8x}$ — взята производная только внешней функции.",
+        pravilno:
+          "Умножь на производную внутренней: $(e^{2 - x})' = -e^{2 - x}$, $(\\ln(8x))' = \\frac{1}{8x}\\cdot 8 = \\frac1x$.",
       },
     ],
   },

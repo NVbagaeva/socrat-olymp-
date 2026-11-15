@@ -78,3 +78,181 @@
   width: 100%;
   height: auto;
 }
+
+/* ── Теория: «Сложная функция — матрёшка» ─────────────────────────
+   Цвета кукол — как на картинках матрёшек: синяя (внешняя функция),
+   голубая (средняя), оранжевая (внутренняя). Картинки на белом фоне —
+   на белой карточке со скруглением, чтобы край не резал фон страницы. */
+
+.z21-cvet--siniy {
+  --kukla: #1f5fd0;
+  --kukla-fon: #eef4fd;
+  --kukla-tekst: #1a4fb0;
+}
+
+.z21-cvet--goluboy {
+  --kukla: #3ea6e6;
+  --kukla-fon: #eaf6fd;
+  --kukla-tekst: #0e6496;
+}
+
+.z21-cvet--oranzh {
+  --kukla: #f08a24;
+  --kukla-fon: #fef3e7;
+  --kukla-tekst: #a85f06;
+}
+
+.z21-kart {
+  margin: var(--space-6) 0;
+  max-width: 640px;
+}
+
+.z21-kart__ramka {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: 0 6px 24px rgb(16 23 40 / 6%);
+}
+
+.z21-kart__ramka img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.z21-kart__podpis {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+.z21-kart__tekst {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.z21-legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.z21-legenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.z21-legenda__krug {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--kukla);
+}
+
+.z21-mat {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.z21-mat__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+
+.z21-mat__telo {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.z21-mat--s-kartinkoy .z21-mat__telo {
+  grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
+}
+
+.z21-mat__kart {
+  margin: 0;
+}
+
+.z21-mat__kart .z21-legenda {
+  flex-direction: column;
+  margin-top: var(--space-2);
+  font-size: var(--fs-caption);
+}
+
+.z21-mat__sloy {
+  min-width: 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border: 2px solid var(--kukla);
+  border-radius: 20px;
+  background: var(--kukla-fon);
+}
+
+.z21-mat__sloy .z21-mat__sloy {
+  margin-top: var(--space-2);
+  background: #fff;
+}
+
+.z21-mat__sloy .z21-mat__sloy .z21-mat__sloy {
+  background: var(--kukla-fon);
+}
+
+.z21-mat__shapka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+}
+
+.z21-mat__rol {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--kukla-tekst);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Производная слоя — плашкой с обводкой цвета куклы. */
+.z21-mat__d {
+  padding: 2px var(--space-3);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--kukla);
+}
+
+.z21-mat__itog {
+  margin: var(--space-4) 0 0;
+  overflow-x: auto;
+  font-size: var(--fs-lg);
+}
+
+.z21-mat__poyasnenie {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 767px) {
+  .z21-mat--s-kartinkoy .z21-mat__telo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .z21-mat__kart {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  .z21-mat__kart .z21-legenda {
+    margin-top: 0;
+  }
+}

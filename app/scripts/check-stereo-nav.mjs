@@ -35,6 +35,9 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP, requireSrc } from './lib/load-ts.mjs';
+
+/* Номер ЕГЭ раздела на экране — по структуре экзамена; no в адресах — номер хранения. */
+const { nomerRazdela } = requireSrc('content/struktura.js');
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
 
 /* Баннер cookie и окно «Впервые здесь?» в этой проверке не нужны: окно
@@ -307,7 +310,10 @@ for (const size of SIZES) {
       }
       check(!plate.inRow, where('плашка не на своём месте'));
       check(plate.height >= 44, where(`высота плашки ${plate.height} < 44`));
-      check(plate.text.includes(`№${no} Стереометрия`), where('на плашке нет номера задания'));
+      check(
+        plate.text.includes(`№${nomerRazdela(Number(no))} Стереометрия`),
+        where('на плашке нет номера задания'),
+      );
 
       /* Плашка в ленте есть в двух копиях: в самой ленте и в прилипшей
          панели. Ждём, пока видимой станет именно плашка ленты, — и только
@@ -349,7 +355,10 @@ for (const size of SIZES) {
       check(menu.dialog, where('меню не диалог'));
       check(menu.title.includes('стереометрии'), where(`заголовок меню «${menu.title}»`));
       check(menu.cards === 2, where(`в меню ${menu.cards} карточек, а не 2`));
-      check(menu.current.includes(`Задание №${no}`), where('текущее задание не отмечено'));
+      check(
+        menu.current.includes(`Задание №${nomerRazdela(Number(no))}`),
+        where('текущее задание не отмечено'),
+      );
       check(
         menu.chasti.join(' ') === '/zadaniya/ /zadaniya/?part=2',
         where(`ссылки к частям: ${menu.chasti.join(' ')}`),
@@ -580,7 +589,7 @@ for (const size of SIZES) {
   for (const [no, razbory] of [['15', RAZBORY_15]]) {
     await page.goto(BASE + `/zadaniya/${no}/`, { waitUntil: 'networkidle' });
     const ssylki = await page
-      .locator('.stereo-tip--razbor')
+      .locator('.tipk__ssylka--primer')
       .evaluateAll((list) => list.map((a) => a.getAttribute('href')));
     check(
       ssylki.length === razbory.length,

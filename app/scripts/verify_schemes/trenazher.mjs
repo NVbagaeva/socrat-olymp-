@@ -262,7 +262,7 @@ const PROVERKI = {
   },
   /* ── Типы по новым опорным задачам: точки — сцена опорной задачи ── */
   'diag-trap': (sc, p, otv) => {
-    const t = N().tochkiDiagTrap(sc.scena18('diag-trap', p).nachalo);
+    const t = N().tochkiDiagTrap(sc.scena18Tochno('diag-trap', p).nachalo);
     const O = t.O;
     return [
       [
@@ -278,7 +278,7 @@ const PROVERKI = {
     ];
   },
   'kas-ef': (sc, p, otv) => {
-    const t = N().tochkiKasEF(sc.scena18('kas-ef', p).nachalo);
+    const t = N().tochkiKasEF(sc.scena18Tochno('kas-ef', p).nachalo);
     return [
       [
         'условие: касание в K, AB касается обеих',
@@ -293,7 +293,7 @@ const PROVERKI = {
     ];
   },
   kvadraty: (sc, p, otv) => {
-    const t = N().tochkiKvadraty(sc.scena18('kvadraty', p).nachalo);
+    const t = N().tochkiKvadraty(sc.scena18Tochno('kvadraty', p).nachalo);
     return [
       [
         'условие: AC, BC, ∠C = 150°',
@@ -306,7 +306,7 @@ const PROVERKI = {
     ];
   },
   'dve-okr': (sc, p, otv) => {
-    const t = N().tochkiDveOkr(sc.scena18('dve-okr', p).nachalo);
+    const t = N().tochkiDveOkr(sc.scena18Tochno('dve-okr', p).nachalo);
     const s1 = [dist(t.C, t.B), dist(t.B, t.D), dist(t.C, t.D)];
     const s2 = [dist(t.O1, t.A), dist(t.A, t.O2), dist(t.O1, t.O2)];
     return [
@@ -324,7 +324,7 @@ const PROVERKI = {
     ];
   },
   'cherez-centr': (sc, p, otv) => {
-    const t = N().tochkiCherezCentr(sc.scena18('cherez-centr', p).nachalo);
+    const t = N().tochkiCherezCentr(sc.scena18Tochno('cherez-centr', p).nachalo);
     return [
       [
         'условие: cos ∠AOC = 1/d, C на дуге AQ без P',
@@ -336,7 +336,7 @@ const PROVERKI = {
     ];
   },
   'vpis-klm': (sc, p, otv) => {
-    const t = N().tochkiVpisKLM(sc.scena18('vpis-klm', p).nachalo);
+    const t = N().tochkiVpisKLM(sc.scena18Tochno('vpis-klm', p).nachalo);
     return [
       [
         'условие: KC : CM, ∠K = 60°',
@@ -350,7 +350,7 @@ const PROVERKI = {
     ];
   },
   'vys-perp': (sc, p, otv) => {
-    const t = N().tochkiVysPerp(sc.scena18('vys-perp', p).nachalo);
+    const t = N().tochkiVysPerp(sc.scena18Tochno('vys-perp', p).nachalo);
     return [
       [
         'условие: ∠B, остроугольный',
@@ -361,7 +361,7 @@ const PROVERKI = {
     ];
   },
   'biss-sred': (sc, p, otv) => {
-    const t = N().tochkiBissSred(sc.scena18('biss-sred', p).nachalo);
+    const t = N().tochkiBissSred(sc.scena18Tochno('biss-sred', p).nachalo);
     const s1 = [dist(t.B, t.L), dist(t.L, t.C), dist(t.B, t.C)];
     const s2 = [dist(t.A, t.M), dist(t.M, t.L), dist(t.A, t.L)];
     return [
@@ -381,7 +381,7 @@ const PROVERKI = {
     ];
   },
   vnevpis: (sc, p, otv) => {
-    const t = N().tochkiVnevpis(sc.scena18('vnevpis', p).nachalo);
+    const t = N().tochkiVnevpis(sc.scena18Tochno('vnevpis', p).nachalo);
     return [
       [
         'условие: радиусы r₁, r₂, прямой угол C',
@@ -393,7 +393,7 @@ const PROVERKI = {
     ];
   },
   'kvadrat-per': (sc, p, otv) => {
-    const t = N().tochkiKvadratPer(sc.scena18('kvadrat-per', p).nachalo);
+    const t = N().tochkiKvadratPer(sc.scena18Tochno('kvadrat-per', p).nachalo);
     return [
       [
         'условие: сторона, периметр CMN = 2·сторона',
@@ -408,7 +408,7 @@ const PROVERKI = {
     ];
   },
   'ser-vys': (sc, p, otv) => {
-    const t = N().tochkiSerVys(sc.scena18('ser-vys', p).nachalo);
+    const t = N().tochkiSerVys(sc.scena18Tochno('ser-vys', p).nachalo);
     return [
       [
         'условие: ∠A = 60°, ∠C = 45°, BC = 2√3·k',
@@ -424,7 +424,7 @@ const PROVERKI = {
     ];
   },
   'kv-gip': (sc, p, otv) => {
-    const t = N().tochkiKvGipOtn(sc.scena18('kv-gip', p).nachalo);
+    const t = N().tochkiKvGipOtn(sc.scena18Tochno('kv-gip', p).nachalo);
     return [
       [
         'условие: прямой угол C, sin A',
@@ -439,7 +439,7 @@ const PROVERKI = {
     ];
   },
   'vpis-lmn': (sc, p, otv) => {
-    const t = N().tochkiVpisLMN(sc.scena18('vpis-lmn', p).nachalo);
+    const t = N().tochkiVpisLMN(sc.scena18Tochno('vpis-lmn', p).nachalo);
     return [
       [
         'условие: KM, ∠LMN = 150°, LM = MN',
@@ -545,7 +545,7 @@ export function proverit() {
       if (pr !== undefined)
         for (const [imya, ok] of pr(sc, p, otv))
           sch.fakt(`${t.id} — ${imya}`, ok, JSON.stringify(p));
-      const scena = sc.scena18(t.id, p);
+      const scena = sc.scena18Tochno(t.id, p);
       const est = new Set(scena.postroit(scena.nachalo).elementy.flatMap((el) => el.gruppy ?? []));
       const shagi = [...t.reshenieA(p), ...t.reshenieB(p)];
       const net = [...new Set(shagi.flatMap((s) => s.gruppy))].filter((g) => !est.has(g));

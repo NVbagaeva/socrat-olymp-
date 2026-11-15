@@ -12,9 +12,11 @@
    TypeScript'ом и приводятся к одной записи:
 
      — вызов функции из struktura.js с постоянными аргументами заменяется
-       значением, которое она возвращает при действующей структуре
-       экзамена (nomerRazdela('uravneniya') → 7, nomerDvumya → '07',
-       slovoChasti → 'первая часть');
+       значением, которое она возвращает при структуре экзамена образца:
+       той, что действует в ветке, с которой сравнивают (до переключения
+       сайта на 19 заданий — из 20: nomerRazdela('uravneniya') → 7,
+       nomerDvumya → '07', slovoChasti → 'первая часть'). Номер, записанный
+       в образце руками, написан в его нумерации;
      — шаблонная строка, в которой после этого не осталось вставок,
        становится обычной строкой; оставшиеся вставки сравниваются как код;
      — строка сравнивается по значению: кавычки и переносы записи не важны;
@@ -39,8 +41,20 @@ function vidFayla(file) {
   return ts.ScriptKind.TS;
 }
 
+/**
+ * Действующая структура в тексте struktura.js образца: та, что выбирается
+ * без переменной STRUKTURA_EGE (последняя ветка выбора). Нет файла или
+ * выбора — структура из 20 заданий: с неё сайт начинался.
+ * @param {string | null} tekst
+ */
+export function strukturaObrazca(tekst) {
+  const m = tekst === null ? null : /STRUKTURA\s*=[^;]*:\s*STRUKTURA_(\d{4})_(\d{2})\s*;/.exec(tekst);
+  const id = m === null ? '2027-20' : `${m[1]}-${m[2]}`;
+  return struktura.STRUKTURY[id] ?? struktura.STRUKTURY['2027-20'];
+}
+
 /** Текст файла как ряд знаков в единой записи. */
-function znaki(tekst, file) {
+function znaki(tekst, file, s) {
   const sf = ts.createSourceFile(file, tekst, ts.ScriptTarget.ES2022, true, vidFayla(file));
 
   /* Имена, подключённые из struktura.js: имя в файле → имя в структуре. */
@@ -80,7 +94,9 @@ function znaki(tekst, file) {
       if (typeof fn !== 'function' || args.some((a) => a === undefined)) return undefined;
       let v;
       try {
-        v = fn(...args.map((a) => a.v));
+        /* Структура — последним аргументом (у функций struktura.js он
+           необязательный): значения — в нумерации образца. */
+        v = fn(...args.map((a) => a.v), s);
       } catch {
         return undefined;
       }
@@ -144,11 +160,13 @@ function znaki(tekst, file) {
  * @param {string} staryy  текст из ветки-образца
  * @param {string} novyy   текст в рабочей папке
  * @param {string} file    имя файла (по расширению выбирается разбор)
+ * @param {object} [s]     структура, в которой считать вызовы struktura.js
+ *                         (strukturaObrazca); по умолчанию — действующая
  * @returns {{ ravno: boolean, gde?: string }} gde — первое расхождение
  */
-export function toZheSoderzhanie(staryy, novyy, file) {
-  const a = znaki(staryy, file);
-  const b = znaki(novyy, file);
+export function toZheSoderzhanie(staryy, novyy, file, s = struktura.STRUKTURA) {
+  const a = znaki(staryy, file, s);
+  const b = znaki(novyy, file, s);
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) i += 1;
   if (i === a.length && i === b.length) return { ravno: true };

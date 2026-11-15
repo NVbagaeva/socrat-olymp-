@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: zadanie21Title(VKLADKA),
 };
 
-/** Вкладка «Теория»: шесть разделов подряд, содержание рядом. Формулы набираются на сборке. */
+/** Вкладка «Теория»: разделы подряд, содержание рядом. Формулы набираются на сборке. */
 export default function Teoriya21Tab() {
   return <Teoriya21 vkladka={VKLADKA} />;
 }

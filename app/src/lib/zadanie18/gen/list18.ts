@@ -33,7 +33,10 @@ export interface ListZadacha18 {
   no: number;
   klyuch: string;
   questionHtml: string;
+  /** Чертёж условия: только данные задачи, без построений решения. */
   figureSvg: string;
+  /** Чертёж учителя: со всеми построениями решения. */
+  figureUchitelSvg: string;
   solutionHtml: string;
   /** Ответ пункта б): «3,6». */
   answer: string;
@@ -123,19 +126,21 @@ function zadachaLista(z: Zadacha18, pos: string, no: number, tema: VersiyaTemy):
     b: ShagRazbora18[];
   };
   const sk = scena18(z.tip, z.p);
-  const figure = svgSkhemy(
-    sk,
-    sk.nachalo,
-    VID_ISHODNYY,
-    { lit: new Set(), shag: null, podpisi: true },
-    { W: 360, H: 250, opisanie: '', samodostatochnyy: true, tema },
-  );
+  const risunok = (uchitel: boolean) =>
+    svgSkhemy(
+      sk,
+      sk.nachalo,
+      VID_ISHODNYY,
+      { lit: new Set(), shag: null, podpisi: true, ...(uchitel ? { uchitel: true } : {}) },
+      { W: 360, H: 250, opisanie: '', samodostatochnyy: true, tema },
+    );
   return {
     pos,
     no,
     klyuch: z.key,
     questionHtml: uslovieHtml(z),
-    figureSvg: `<span class="skh">${figure}</span>`,
+    figureSvg: `<span class="skh">${risunok(false)}</span>`,
+    figureUchitelSvg: `<span class="skh">${risunok(true)}</span>`,
     solutionHtml:
       `<p class="sheet-step-head"><b>${SHEET_GEN_18.dokA}</b></p>${shagiHtml(r.a)}` +
       `<p class="sheet-step-head"><b>${SHEET_GEN_18.reshB}</b></p>${shagiHtml(r.b)}`,
@@ -192,8 +197,9 @@ interface SheetTask {
 }
 
 /**
- * Описание листа. Ученику — условие с пунктами а) и б), чертёж и строка
- * «Ответ б): ____»; учителю — те же задачи с доказательством а),
+ * Описание листа. Ученику — условие с пунктами а) и б), строка
+ * «Ответ б): ____» и, если включён «Чертёж к условию», чертёж с данными
+ * задачи; учителю — те же задачи с чертежом построений, доказательством а),
  * решением б) и ответом, в конце — таблица ответов б). «Всё одним
  * файлом» — листы учеников всех вариантов, затем листы учителя.
  */
@@ -219,7 +225,8 @@ export function sheetSpec18(
       id: z.pos,
       questionHtml: z.questionHtml,
       options: null,
-      figureSvg: z.figureSvg,
+      /* Чертёж ученику — только с «Чертежом к условию»: иначе его делает сам. */
+      figureSvg: dop.chertezh === true ? z.figureSvg : '',
       figureWidth: SHIRINA,
       solutionHtml: sStrokoy ? STROKA_OTVETA : null,
     });
@@ -228,7 +235,8 @@ export function sheetSpec18(
     id: z.pos,
     questionHtml: z.questionHtml,
     options: null,
-    figureSvg: z.figureSvg,
+    /* У учителя чертёж есть всегда — с построениями решения. */
+    figureSvg: z.figureUchitelSvg,
     figureWidth: SHIRINA,
     solutionHtml: `${z.solutionHtml}<p class="sheet-task-answer">${SHEET_GEN_18.otvet} б): <b>${escapeHtml(z.answer)}</b></p>`,
   });

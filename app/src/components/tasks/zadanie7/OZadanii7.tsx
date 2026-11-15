@@ -67,7 +67,7 @@ export function OZadanii7({ base }: { base: string }) {
           /* Обложка раздела — готовая картинка, как есть: без обрезки и
              пережатия, прозрачный фон на стекле шапки. */
           <img
-            src={assetUrl('/images/task-07.webp')}
+            src={assetUrl('/images/task-07.svg')}
             alt={SHAPKA7.oblozhkaAlt}
             width={512}
             height={512}

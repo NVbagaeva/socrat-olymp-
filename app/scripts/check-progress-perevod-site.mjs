@@ -19,6 +19,7 @@ import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { metkaAdministratora } from './lib/metka-skrytyh.mjs';
 
 bezBanneraCookieVsyudu(chromium);
 
@@ -96,6 +97,8 @@ const executablePath = process.env.PW_CHROMIUM ?? process.env.CHROMIUM_PATH;
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 await welcomeSeen(ctx);
+/* Скрытый раздел (№6 в ЕГЭ-2027) — как у администратора. */
+await metkaAdministratora(ctx);
 /* Прежние записи — как у ученика, который решал до перевода. */
 await ctx.addInitScript(
   (fixtures) => {

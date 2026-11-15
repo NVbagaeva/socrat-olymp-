@@ -16,7 +16,7 @@ import { rngOf } from '@/lib/vychisleniya/rng';
 import { BLOKI_OPORNYH21 } from './opornye';
 import { PROTOTYPES } from './prototypes';
 import { katalog21 } from './trening/katalog';
-import { prototipKlyucha, zadachaPoKlyuchu } from './zadacha';
+import { FIKSIROVANNYE21, prototipKlyucha, zadachaPoKlyuchu } from './zadacha';
 import { ekstremum, podpisChisla } from './shema';
 import { funkciyaIzTex } from './texCalc';
 import type { Params, Prototype } from './types';
@@ -165,7 +165,7 @@ export function selftest(n = 300): {
 /** Каждая задача каталога тренажёра и пример «О задании» строятся и сходятся. */
 export function selftestKataloga(): Oshibka[] {
   const out: Oshibka[] = [];
-  const klyuchi = Object.values(katalog21()).flatMap((k) => k.a);
+  const klyuchi = Object.values(katalog21()).flatMap((k) => [...k.f, ...k.a]);
   for (const id of [...klyuchi, ...PROTOTYPES.map((p) => `${p.id}|primer`)]) {
     try {
       const z = zadachaPoKlyuchu(id);
@@ -173,6 +173,40 @@ export function selftestKataloga(): Oshibka[] {
     } catch (e) {
       out.push({ proto: prototipKlyucha(id), seed: id, chto: `не строится: ${String(e)}` });
     }
+  }
+  return out;
+}
+
+/**
+ * Фиксированные задачи: ответ разбора совпадает с записанным (у задач с
+ * заданными числами он найден независимо — перебором по исходной
+ * записи функции), ключи не повторяются, в каждом задании пять
+ * подобранных, условия подобранных не повторяют другие задачи каталога.
+ */
+export function selftestFiksirovannyh(): Oshibka[] {
+  const out: Oshibka[] = [];
+  const klyuchi = new Set<string>();
+  const usloviya = new Map<string, string>();
+  for (const id of Object.values(katalog21()).flatMap((k) => k.a)) {
+    if (!id.includes('|s')) usloviya.set(zadachaPoKlyuchu(id).uslovie, id);
+  }
+  const zadaniy = new Set<number>();
+  for (const z of FIKSIROVANNYE21) {
+    const ploho = (chto: string) => out.push({ proto: z.p, seed: z.klyuch, chto });
+    zadaniy.add(Number(/\|s(\d+)-/.exec(z.klyuch)?.[1]));
+    if (klyuchi.has(z.klyuch)) ploho('повтор ключа');
+    klyuchi.add(z.klyuch);
+    const p = zadachaPoKlyuchu(z.klyuch);
+    if (Math.abs(p.solved.answer - z.otvet) > 1e-9)
+      ploho(`ответ разбора ${p.solved.answer}, записан ${z.otvet}`);
+    const byl = usloviya.get(p.uslovie);
+    if (byl !== undefined && z.podobrannaya) ploho(`условие повторяет ${byl}`);
+    usloviya.set(p.uslovie, z.klyuch);
+  }
+  for (const n of zadaniy) {
+    const g = FIKSIROVANNYE21.filter((z) => z.podobrannaya && z.klyuch.includes(`|s${n}-g`));
+    if (g.length !== 5)
+      out.push({ proto: '—', seed: `s${n}`, chto: `подобранных ${g.length}, нужно 5` });
   }
   return out;
 }

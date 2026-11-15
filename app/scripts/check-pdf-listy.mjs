@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium, devices, webkit } from 'playwright';
 import { startApache } from './lib/apache.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { METKA_SKRYTYH } from './lib/metka-skrytyh.mjs';
 
 bezBanneraCookieVsyudu(chromium, webkit);
 
@@ -217,7 +218,12 @@ async function raskladka(page) {
 
 /** Открыть лист и дождаться набора; печать браузера — заглушка. */
 async function otkryt(context, url) {
+  /* Листы скрытого раздела (№6 в ЕГЭ-2027) Apache отдаёт только с меткой
+     администратора — её cookie уходит с первым же запросом. */
   const page = await context.newPage();
+  /* Браузер (Chromium) даёт каждой странице свой контекст, а WebKit
+     сюда приходит контекстом: метка — в контекст самой страницы. */
+  await page.context().addCookies([{ name: METKA_SKRYTYH, value: '1', url: new URL(url).origin }]);
   await page.addInitScript(() => {
     window.print = () => {};
   });
