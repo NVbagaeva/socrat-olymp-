@@ -1,0 +1,172 @@
+/* Страница 404 (not-found.tsx) в «Стеклянной сцене» главной. Общие
+   стекло, свечения и кнопки — из landing.css (.glavnaya); здесь только
+   раскладка: карточка по центру и список разделов под ней. */
+
+.nf {
+  position: relative;
+  isolation: isolate;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-4) var(--space-16);
+}
+
+.nf .aura__spot--blue {
+  top: -200px;
+  right: -260px;
+}
+
+.nf .aura__spot--orange {
+  right: auto;
+  left: -180px;
+  bottom: 10%;
+}
+
+.nf__karta {
+  display: grid;
+  justify-items: center;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-6);
+  border: 1px solid var(--glass-edge);
+  border-radius: 24px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  text-align: center;
+}
+
+/* Жёрдочка рассчитана на кегль заголовка главной: размер птицы — от
+   font-size обёртки. Строка без текста, высота — под птицу. */
+.nf__ptica {
+  font-size: 3.5rem;
+  line-height: 1;
+  height: 1.3em;
+  margin-bottom: var(--space-4);
+}
+
+.nf__kod {
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.nf__title {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.nf__lead {
+  max-width: 46ch;
+  margin-top: var(--space-4);
+  font-size: var(--fs-lg);
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+.nf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.nf__actions .btn {
+  height: var(--h-control-lg);
+  padding: 0 var(--space-6);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.nf__razdely {
+  margin-top: var(--space-12);
+}
+
+.nf__razdely h2 {
+  margin-bottom: var(--space-4);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
+  font-weight: 620;
+  text-align: center;
+}
+
+.nf__razdely ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nf__razdely a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--glass-edge);
+  border-radius: 14px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.3;
+  text-decoration: none;
+  transition: transform var(--dur-hover) var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nf__razdely a:hover {
+    transform: translateY(-2px);
+    color: var(--color-primary);
+  }
+}
+
+.nf__razdely a:active {
+  transform: scale(0.98);
+}
+
+.nf__no {
+  flex: none;
+  min-width: 2ch;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+
+@media (max-width: 767.98px) {
+  .nf {
+    padding: var(--space-6) var(--space-4) var(--space-12);
+  }
+
+  .nf__karta {
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .nf__ptica {
+    font-size: 2.75rem;
+  }
+
+  .nf__title {
+    font-size: 2rem;
+  }
+
+  .nf__lead {
+    font-size: var(--fs-body);
+  }
+
+  /* Кнопки на телефоне — столбиком во всю ширину: попасть пальцем легче. */
+  .nf__actions {
+    display: grid;
+    width: 100%;
+  }
+}
