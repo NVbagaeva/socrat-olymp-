@@ -1,10 +1,13 @@
 /**
- * База, задание №14 «Действия с дробями»: наполнение раздела. Пока —
- * «О задании» и тренажёр; прототипы — lib/baza/z14.
+ * База, задание №14 «Действия с дробями»: наполнение раздела. Теория,
+ * опорные задачи и карточки — здесь; прототипы тренажёра — lib/baza/z14.
  */
 
 import { GRUPPY_14, PROTOTIPY_14 } from '@/lib/baza/z14/prototipy';
 import type { RazdelBazy } from '@/lib/baza/types';
+import { KOLODA_14 } from './kartochki';
+import { OPORNYE_14 } from './opornye';
+import { TEORIYA_14 } from './teoriya';
 
 export const RAZDEL_14: RazdelBazy = {
   slug: '14',
@@ -31,6 +34,9 @@ export const RAZDEL_14: RazdelBazy = {
       },
     ],
   },
+  teoriya: TEORIYA_14,
   gruppy: GRUPPY_14,
   prototipy: PROTOTIPY_14,
+  opornye: OPORNYE_14,
+  kartochki: KOLODA_14,
 };
