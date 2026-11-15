@@ -802,9 +802,27 @@ export function TrainerSessionHost<P, U extends BaseUi>({
     [count, scheduleFlush],
   );
 
-  /* ── Видимость вкладки и закрытие страницы ──────────────────── */
+  /* ── Режим тренировки ───────────────────────────────────────── */
 
   const running = view.kind === 'run';
+  /* Пока идёт тренировка, на странице только она: шапка раздела,
+     крошки, «Это же в базе», ленты вкладок, нижняя панель и кнопка «?»
+     скрыты (session.css, html[data-trenirovka]). Иначе на телефоне
+     условие начиналось ниже первого экрана (docs/design-audit.md,
+     п. 9.1). Выход — «Завершить» на панели; после итогов всё
+     возвращается. На старте экран встаёт к началу — к панели и задаче. */
+  useLayoutEffect(() => {
+    if (!running) return;
+    const root = document.documentElement;
+    root.dataset.trenirovka = '';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    return () => {
+      delete root.dataset.trenirovka;
+    };
+  }, [running]);
+
+  /* ── Видимость вкладки и закрытие страницы ──────────────────── */
+
   useEffect(() => {
     if (!running) {
       return;
