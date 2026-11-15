@@ -8,7 +8,7 @@
  * пример собирается через priyom(...).iz(...).
  */
 
-import { priyom } from './registry';
+import { estPriyom, priyom } from './registry';
 import type { Rng } from './rng';
 import type { Primer } from './types';
 import type { Istochnik } from './nabor';
@@ -123,4 +123,44 @@ export const FORMATY: readonly Format[] = [
 
 export function format(id: string): Format | undefined {
   return FORMATY.find((f) => f.id === id);
+}
+
+/* ── Рейтинг ───────────────────────────────────────────────────── */
+
+/** Форматы рейтинга: пять зачётных и «Вызов дня» (его примеры — только с сервера). */
+export type ReytingFormatId = FormatId | 'vyzov-dnya';
+
+export interface ReytingFormat {
+  id: ReytingFormatId;
+  tip: 'vremya' | 'seriya';
+  sek?: number;
+  n?: number;
+}
+
+export const REYTING_FORMATY: readonly ReytingFormat[] = [
+  { id: 'vyzov-dnya', tip: 'seriya', n: 20 },
+  ...FORMATY.map(({ id, tip, sek, n }) => ({
+    id,
+    tip,
+    ...(sek === undefined ? {} : { sek }),
+    ...(n === undefined ? {} : { n }),
+  })),
+];
+
+export function reytingFormat(id: string): ReytingFormat | undefined {
+  return REYTING_FORMATY.find((f) => f.id === id);
+}
+
+/**
+ * Пример, выданный сервером (priyom, d, v), — в пример приёма: запись
+ * для экрана и разбор считает сайт. null — сервер прислал незнакомый
+ * приём.
+ */
+export function primerIzServera(s: {
+  priyom: string;
+  d: readonly string[];
+  v: string | null;
+}): Primer | null {
+  if (!estPriyom(s.priyom)) return null;
+  return priyom(s.priyom).iz(s.d, 2, s.v ?? undefined);
 }

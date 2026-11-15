@@ -250,6 +250,7 @@
     "test:otvet": "node scripts/check-otvet.mjs",
     "test:ustnyy-schet": "node scripts/check-ustnyy-schet.mjs",
     "test:ustnyy-schet-site": "node scripts/check-ustnyy-schet-site.mjs",
+    "test:ustnyy-reyting-site": "node scripts/check-ustnyy-reyting-site.mjs",
     "test:karta": "node scripts/check-karta.mjs",
     "test:karta-site": "node scripts/check-karta-site.mjs",
     "test:progress-log": "node scripts/check-progress-log.mjs",

@@ -14,7 +14,7 @@ import { FORMATY } from '@/lib/ustnyySchet/formaty';
 import { href, USTNYY as USTNYY_HREF, USTNYY_TAIL } from '@/lib/paths';
 import { GRUPPY, priyomyGruppy } from '@/lib/ustnyySchet/registry';
 import { tipograf } from '@/lib/tipograf';
-import { trenirovkaHref } from '@/lib/ustnyySchet/zapros';
+import { reytingHref, trenirovkaHref } from '@/lib/ustnyySchet/zapros';
 
 export const metadata: Metadata = {
   title: USTNYY.meta.title,
@@ -100,6 +100,15 @@ export default function UstnyySchetPage() {
           </h2>
           <p className="us-blok__lead">{tipograf(T.formatyLead)}</p>
           <ul className="us-formaty">
+            <li className="us-format us-format--vyzov">
+              <p className="us-format__zag">{T.formaty['vyzov-dnya'].nazvanie}</p>
+              <p className="us-format__lead">{T.formaty['vyzov-dnya'].kratko}</p>
+              <div className="us-format__niz">
+                <Link className="btn btn--primary btn--sm" href={reytingHref('vyzov-dnya')}>
+                  {T.vReyting}
+                </Link>
+              </div>
+            </li>
             {FORMATY.map((f) => (
               <li key={f.id} className="us-format">
                 <p className="us-format__zag">{T.formaty[f.id].nazvanie}</p>
@@ -112,11 +121,16 @@ export default function UstnyySchetPage() {
                   >
                     {T.trenirovatsya}
                   </Link>
-                  <span className="us-format__skoro">{T.reytingSkoro}</span>
+                  <Link className="btn btn--ghost btn--sm" href={reytingHref(f.id)}>
+                    {T.vReyting}
+                  </Link>
                 </div>
               </li>
             ))}
           </ul>
+          <Link className="us-karta__strelka" href={href(USTNYY_HREF, USTNYY_TAIL.reyting)}>
+            {T.reytingSsylka} →
+          </Link>
         </section>
       </main>
     </AppShell>
