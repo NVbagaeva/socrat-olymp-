@@ -115,7 +115,8 @@ body .site-head[data-compact] {
 }
 .site-nav > a,
 .nav-drop__button {
-  font-size: 16px;
+  /* Пункты меню — подписи навигации: 14 по шкале (15 → 14). */
+  font-size: 14px;
   color: var(--color-text-secondary);
   text-decoration: none;
 }
@@ -143,7 +144,7 @@ body .site-head[data-compact] {
   gap: 4px;
   padding: 0;
   font: inherit;
-  font-size: 16px;
+  font-size: 14px;
   background: none;
   border: 0;
   cursor: pointer;
