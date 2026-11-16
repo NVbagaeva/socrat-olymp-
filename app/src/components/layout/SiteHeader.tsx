@@ -50,6 +50,7 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
               <Link
                 key={link.href}
                 href={link.href}
+                className={link.akcent === true ? 'is-akcent' : undefined}
                 aria-current={link.href === currentHref ? 'page' : undefined}
               >
                 {link.label}

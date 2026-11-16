@@ -45,7 +45,11 @@ function Row({ link, onClick }: { link: MenuLink; onClick: () => void }) {
   const level = useLevel();
   const to = level === 'base' && link.hrefBase !== undefined ? link.hrefBase : link.href;
   return (
-    <a href={to} className="site-menu__row" onClick={onClick}>
+    <a
+      href={to}
+      className={link.akcent === true ? 'site-menu__row site-menu__row--akcent' : 'site-menu__row'}
+      onClick={onClick}
+    >
       <span className="site-menu__ico">
         <NavIcon name={link.icon} />
       </span>

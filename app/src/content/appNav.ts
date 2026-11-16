@@ -12,6 +12,7 @@ import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
+import { href, USTNYY } from '@/lib/paths';
 import { VARIANT_HREF } from '@/content/variant';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
@@ -23,6 +24,18 @@ const vseRazdely: NavItem[] = [
   /* В нижней панели пункт называется полным именем страницы —
      «Банк заданий»: он ведёт на список всех заданий, а не в раздел. */
   { id: 'tasks', label: 'Задания', panel: 'Банк заданий', href: tasksPage.href, icon: 'tasks' },
+  /* Устный счёт — общий для профиля и базы (lib/paths.ts, USTNYY). В
+     нижнюю панель не входит: попадает на экран «Ещё». */
+  /* Устный счёт — общий для профиля и базы (lib/paths.ts, USTNYY).
+     Выделен тёплым акцентом и стоит в нижней панели среди главных. */
+  {
+    id: 'ustnyy',
+    label: 'Устный счёт',
+    short: 'Счёт',
+    href: href(USTNYY),
+    icon: 'schet',
+    akcent: true,
+  },
   /* Генератор варианта из всех заданий первой части (/variant/). */
   {
     id: 'variant',
@@ -124,11 +137,12 @@ export const notificationsReady = !NE_GOTOVY.has(notificationsPage.id);
    /moi-konspekty остался: страница есть, ссылки в меню нет. */
 
 /* ── Мобильная панель ─────────────────────────────────────────────
-   Пунктов помещается пять: три раздела из верхнего меню и вход в
-   остальные. Пока статистики нет, третья ячейка — «Вариант». Здесь перечислены только идентификаторы — названия и
-   адреса те же, что наверху. */
+   Пунктов помещается пять: четыре раздела из верхнего меню и вход в
+   остальные. «Устный счёт» — среди главных и выделен акцентом; пока
+   статистики нет, четвёртая ячейка — «Вариант». Здесь перечислены
+   только идентификаторы — названия и адреса те же, что наверху. */
 
-const PRIMARY_IDS = ['home', 'tasks', 'variant'];
+const PRIMARY_IDS = ['home', 'tasks', 'ustnyy', 'variant'];
 
 /** Экран со списком разделов, не поместившихся в панель. */
 export const appNavMorePage: NavItem = {
