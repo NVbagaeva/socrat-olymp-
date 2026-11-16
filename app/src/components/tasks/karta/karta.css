@@ -562,16 +562,26 @@
   .kz-primer {
     padding: var(--space-2) var(--space-3) var(--space-4);
   }
-  .kz-primer .stk-shag {
+  /* Номер шага — в строке с его заголовком, текст и формулы шага —
+     во всю ширину. Шаг без заголовка остаётся с полем слева. */
+  .kz-primer .stk-shag:has(> .stk-shag__zag) {
     padding-left: 0;
-    padding-top: 36px;
   }
-  .kz-primer .stk-shag:not(:last-child)::after {
+  .kz-primer .stk-shag:has(> .stk-shag__zag)::after {
     display: none;
   }
+  .kz-primer .stk-shag > .stk-shag__zag {
+    display: flex;
+    align-items: center;
+    min-height: 28px;
+    padding-top: 0;
+    padding-left: 40px;
+  }
   /* Шаги-плашки (ОДЗ, отбор): номер в углу плашки, текст с полем. */
-  .kz-primer :is(.stk-shag--odz, .stk-shag--otbor, .stk-shag--vnimanie) {
+  .kz-primer :is(.stk-shag--odz, .stk-shag--otbor, .stk-shag--vnimanie):has(> .stk-shag__zag) {
     padding-left: var(--space-3);
-    padding-top: 40px;
+  }
+  .kz-primer :is(.stk-shag--odz, .stk-shag--otbor, .stk-shag--vnimanie) > .stk-shag__zag {
+    padding-left: 30px;
   }
 }
