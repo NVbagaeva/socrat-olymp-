@@ -3,24 +3,24 @@ import type { Level } from '@/lib/level';
 import { BankSection } from '../BankSection';
 import { OtschyotSection } from '../otschyot/EgeOtschyot';
 import { SumerkiHero } from './SumerkiHero';
-import { VecherKartochki } from './VecherKartochki';
+import { Vitrina } from './Vitrina';
 
 /**
  * Главная с синей сценой в первом экране. Ниже — те же блоки, что у
- * нынешней главной (Glavnaya.tsx); блок «вечер» — новыми карточками
- * (VecherKartochki), секции — в ровном ритме (sumerki.css).
+ * нынешней главной (Glavnaya.tsx); вместо блока «вечер» — витрина
+ * возможностей (Vitrina), секции — в ровном ритме (sumerki.css).
  * Пока — только служебные страницы /styleguide/glavnaya-sumerki/.
  */
 export function GlavnayaSumerki({
   vid,
   oreol = 'silnyy',
-  tekstVechera = 'a',
+  zagolovok = 'a',
   level = 'profile',
 }: {
   vid: 'vitrina';
   oreol?: 'silnyy' | 'myagkiy';
-  /** Вариант текстов блока «вечер» (content/vecher.ts). */
-  tekstVechera?: 'a' | 'b';
+  /** Вариант заголовка витрины (content/vitrina.ts). */
+  zagolovok?: 'a' | 'b';
   level?: Level;
 }) {
   return (
@@ -29,7 +29,7 @@ export function GlavnayaSumerki({
       <main>
         <SumerkiHero vid={vid} oreol={oreol} level={level} />
         <OtschyotSection level={level} />
-        <VecherKartochki tekst={tekstVechera} />
+        <Vitrina zagolovok={zagolovok} />
         <BankSection level={level} />
       </main>
       <SiteFooter className="site-foot--steklo" />

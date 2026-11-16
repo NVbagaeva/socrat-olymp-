@@ -478,6 +478,30 @@
   --sumerki-svechenie-teploe: #f08a3c;
 }
 
+/* ── Витрина возможностей на главной (components/landing/sumerki/
+   Vitrina.tsx): два голоса сайта. Тёплый — учитель и генератор,
+   синий — ученик и тренажёр. Яркие #f08a3c/#e07a2f — только заливки,
+   ореолы и кромки: белый текст на них 2,5 и 3,0 : 1. Текст оранжевым —
+   --vit-teplyy-text (5,0 : 1 на белом); заливка под белым текстом —
+   --vit-teplyy-zaliv-* (4,6 и 5,0 : 1). Синий — 5,8 : 1 и выше. */
+:root {
+  --vit-teplyy-1: #f08a3c;
+  --vit-teplyy-2: #e07a2f;
+  --vit-teplyy-text: #a8500f;
+  --vit-teplyy-zaliv-1: #b85a1e;
+  --vit-teplyy-zaliv-2: #a8500f;
+  --vit-teplyy-ton: #fff4ea;
+  --vit-teplyy-ton-2: #fde6d3;
+  --vit-teplyy-oreol: rgb(240 138 60 / 0.34);
+  --vit-teplyy-kromka: rgb(240 138 60 / 0.55);
+  --vit-siniy-1: #1f5fd0;
+  --vit-siniy-2: #0c3ebc;
+  --vit-siniy-ton: #eef4ff;
+  --vit-siniy-ton-2: #dde9fd;
+  --vit-siniy-oreol: rgb(61 121 224 / 0.32);
+  --vit-siniy-kromka: rgb(61 121 224 / 0.55);
+}
+
 :root {
   --font: var(--font-sans);
 
