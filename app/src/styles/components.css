@@ -1267,6 +1267,30 @@ a.task-card--soon:hover {
 .topnav .nav-drop__list {
   left: 0;
 }
+/* Список без JavaScript (NavSpisok): виден, пока указатель или фокус
+   внутри группы. Скрыт прозрачностью, а не display/visibility: так
+   ссылки остаются в порядке табуляции сразу за кнопкой, и фокус,
+   войдя в них, сам держит список открытым. */
+.nav-drop--css .nav-drop__list {
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition:
+    opacity var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
+}
+.nav-drop--css:is(:hover, :focus-within) .nav-drop__list {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.nav-drop--css:is(:hover, :focus-within) .nav-drop__button svg {
+  transform: rotate(180deg);
+}
+.topnav .nav-drop--css:is(:hover, :focus-within) .nav-drop__button {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
 
 /* Полные названия пунктов помещаются в шапку от 1600px; уже — короткие
    (те же, что в нижней панели и на экране «Ещё»). */

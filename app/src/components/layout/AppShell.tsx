@@ -23,7 +23,7 @@ import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { SiteMenu } from './SiteMenu';
-import { NavDropdown } from './NavDropdown';
+import { NavSpisok } from './NavSpisok';
 import { isNavGroup, site } from '@/content/site';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
@@ -164,7 +164,7 @@ export function AppShell({ active, search = false, level = 'profile', children }
                 navSlot: {
                   id: 'variant',
                   node: (
-                    <NavDropdown
+                    <NavSpisok
                       group={VARIANTY}
                       {...(tekushchiy === undefined ? {} : { currentHref: tekushchiy })}
                     />
