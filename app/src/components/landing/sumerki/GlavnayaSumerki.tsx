@@ -14,10 +14,13 @@ import { VecherKartochki } from './VecherKartochki';
 export function GlavnayaSumerki({
   vid,
   oreol = 'silnyy',
+  tekstVechera = 'a',
   level = 'profile',
 }: {
   vid: 'vitrina';
   oreol?: 'silnyy' | 'myagkiy';
+  /** Вариант текстов блока «вечер» (content/vecher.ts). */
+  tekstVechera?: 'a' | 'b';
   level?: Level;
 }) {
   return (
@@ -26,7 +29,7 @@ export function GlavnayaSumerki({
       <main>
         <SumerkiHero vid={vid} oreol={oreol} level={level} />
         <OtschyotSection level={level} />
-        <VecherKartochki />
+        <VecherKartochki tekst={tekstVechera} />
         <BankSection level={level} />
       </main>
       <SiteFooter className="site-foot--steklo" />
