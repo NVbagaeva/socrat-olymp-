@@ -2930,145 +2930,142 @@ html[data-tabs-pending] .topic-panel,
   }
 }
 
-/* ── Меню раздела плитками (Bento) ─────────────────────────────
-   Пока лента стоит на месте, вкладки раздела — плитки разного
-   размера: первая («О задании», «Подтемы») крупнее, остальные
-   делят ряды поровну, ряды заполнены без дыр (flex-wrap с ростом).
-   Телефон — по 3 в ряд, все плитки одного размера (первая во всю
-   ширину, только если иначе последняя осталась бы в ряду одна),
-   планшет — по 3, широкий экран — по 4. Ничего не прокручивается
-   вбок, подписи не обрезаются.
+/* ── Меню раздела одной строкой ─────────────────────────────────
+   Пока лента стоит на месте, вкладки раздела — одна строка стеклянных
+   плиток «значок над подписью» у всех разделов (docs/design-audit.md,
+   6.2; раньше так было только в «Стеклянной сцене», остальные стояли
+   плитками в три ряда). Компьютер и планшет — ровная сетка на всю
+   ширину; телефон — строка, которая листается пальцем, край гасится
+   градиентом (data-ten-r выше), активную вкладку в видимую часть
+   подводит TabsRow. Подписи целиком, без переносов посреди слова.
 
    Липкая панель (is-stuck, components/tasks/TabsRow.tsx) — та же
-   лента компактной строкой со своими правилами выше и ниже. Плитки
-   при этом остаются на своём месте в потоке: панель лежит поверх
-   страницы, и под плитками ничего не прыгает.
+   лента компактной строкой со своими правилами выше. Плитки при этом
+   остаются на своём месте в потоке: панель лежит поверх страницы, и
+   под плитками ничего не прыгает.
 
-   Лента с модификатором --stroka — всегда строкой, без плиток: так
-   на странице выбора типа функции №12, где под крупной картинкой
-   первая карточка подтем должна остаться на первом экране
-   (scripts/check-zadanie-hero.mjs). */
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs {
-  flex-wrap: wrap;
+   Лента с модификатором --stroka — всегда компактной строкой: так на
+   странице выбора типа функции №12, где под крупной картинкой первая
+   карточка подтем должна остаться на первом экране
+   (scripts/check-zadanie-hero.mjs). Селекторы с .app-main — чтобы
+   быть точнее правил разделов. */
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: var(--space-2);
-  padding: var(--space-2);
-  border-radius: var(--radius-xl);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   overflow: visible;
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta {
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta {
   display: contents;
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
-  flex: 1 1 calc(50% - var(--space-2));
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  :is(.tabs--lenta > a[role='tab'], .tabs--lenta > button, .topic-tabs__more) {
+  flex: none;
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
   min-width: 0;
-  min-height: 72px;
+  min-height: 76px;
   margin: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--color-border-info);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  padding: var(--space-2);
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--color-text);
   font-size: var(--fs-label);
   line-height: var(--lh-label);
+  text-align: center;
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more):hover {
-  background: var(--color-surface-info);
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  :is(.tabs--lenta > a[role='tab'], .tabs--lenta > button, .topic-tabs__more)
+  .tabs__text {
+  max-width: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-align: center;
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  :is(.tabs--lenta > a[role='tab'], .tabs--lenta > button, .topic-tabs__more):hover {
+  background: var(--color-surface);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
   .tabs--lenta
-  :is(button, a[role='tab'])[aria-selected='true'] {
+  > :is(a[role='tab'], button)[aria-selected='true'] {
   border-color: transparent;
   background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
+  color: var(--color-text-inverse);
+  box-shadow:
+    inset 0 1px 0 var(--color-tab-sheen),
+    var(--glow-tab);
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta .tabs__text,
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more .tabs__text {
-  max-width: none;
-}
-/* Кнопка материалов — такая же плитка, черта-разделитель не нужна. */
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more::before {
+/* «Для репетиторов» — соседка вкладок по сетке, но тише: ученику она
+   не нужна. Черта-разделитель у плитки не нужна. */
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more::before {
   display: none;
 }
-/* Первая плитка крупнее: во всю ширину на телефоне, значок и подпись
-   в строку. */
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-  .tabs--lenta
-  > :is(button, a[role='tab']):first-child {
-  flex-basis: 100%;
-  flex-direction: row;
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more {
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring);
+}
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  .topic-tabs__more
+  :is(.tabs__text, .tabs__ico) {
+  color: var(--color-text-secondary);
+}
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more-in {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  min-height: 56px;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  justify-content: center;
+  gap: var(--space-1);
+  text-align: center;
 }
-/* Телефон: по 3 в ряд, значок над подписью, поля меньше. Обычные
-   шесть плиток — два ровных ряда, меню вдвое ниже. Первая плитка —
-   такая же, как остальные; во всю ширину, со значком и подписью в
-   строку, она становится, только когда иначе в последнем ряду
-   осталась бы одна плитка: 4, 7 плиток (вкладки + кнопка материалов).
-   Без :has (старые браузеры) — просто по 3 в ряд. */
+/* Телефон: одна строка, которая листается; плитки по 92 px. */
 @media (max-width: 767.98px) {
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
-    flex-basis: calc(33.333% - var(--space-2));
-    gap: var(--space-1);
-    min-height: 64px;
-    padding: var(--space-2);
+  .app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    /* Поле под тень плиток и под край растушёвки. */
+    padding: 2px var(--space-1) var(--space-2);
+    margin: 0 calc(var(--space-1) * -1);
   }
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child {
-    flex-basis: calc(33.333% - var(--space-2));
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: space-between;
-    min-height: 64px;
-    font-size: var(--fs-label);
-    line-height: var(--lh-label);
+  .app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs::-webkit-scrollbar {
+    display: none;
   }
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .topic-tabs:not(:has(.topic-tabs__more)):has(.tabs--lenta > :nth-child(3n + 1):last-child)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child,
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .topic-tabs:has(.topic-tabs__more):has(.tabs--lenta > :nth-child(3n):last-child)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child {
-    flex-basis: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 56px;
-    font-size: var(--fs-body);
-    line-height: var(--lh-body);
+  .app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
   }
-}
-@media (min-width: 768px) {
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
-    flex-basis: calc(33.333% - var(--space-2));
-  }
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child {
-    flex-basis: calc(66.666% - var(--space-2));
-    min-height: 72px;
-  }
-}
-@media (min-width: 1280px) {
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
-    flex-basis: calc(25% - var(--space-2));
-  }
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child {
-    flex-basis: calc(50% - var(--space-2));
+  .app-main
+    .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    :is(.tabs--lenta > a[role='tab'], .tabs--lenta > button, .topic-tabs__more) {
+    flex: 0 0 auto;
+    width: 92px;
+    min-height: 68px;
+    scroll-snap-align: start;
   }
 }
 
