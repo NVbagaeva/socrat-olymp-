@@ -1,6 +1,5 @@
 import { clsx } from 'clsx';
 import type { NavGroup } from '@/content/site';
-import { NavIcon } from '@/components/ui/NavIcons';
 
 export interface NavSpisokProps {
   group: NavGroup;
@@ -18,7 +17,10 @@ export interface NavSpisokProps {
  * наведением мыши, касанием или фокусом с клавиатуры (:focus-within) и
  * закрывается, когда указатель или фокус уходят из группы. Ссылки
  * остаются в порядке табуляции сразу за кнопкой. Разметка пунктов —
- * та же, что у NavDropdown, поэтому и оформление общее.
+ * та же, что у NavDropdown, поэтому и оформление общее. Значков и
+ * пояснений нет — только названия: список стоит в HTML каждой страницы
+ * кабинета дважды (разметка и данные RSC), и с ними страница №12 не
+ * помещалась в бюджет первой загрузки.
  */
 export function NavSpisok({ group, currentHref }: NavSpisokProps) {
   const current = group.items.some((item) => item.href === currentHref);
@@ -42,13 +44,7 @@ export function NavSpisok({ group, currentHref }: NavSpisokProps) {
               href={item.href}
               aria-current={item.href === currentHref ? 'page' : undefined}
             >
-              <span className="nav-drop__ico">
-                <NavIcon name={item.icon} />
-              </span>
-              <span className="nav-drop__text">
-                <span className="nav-drop__label">{item.label}</span>
-                <span className="nav-drop__hint">{item.hint}</span>
-              </span>
+              <span className="nav-drop__label">{item.label}</span>
             </a>
           </li>
         ))}
