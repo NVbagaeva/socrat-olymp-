@@ -118,7 +118,7 @@
   min-height: 48px;
   padding: 0 var(--space-6);
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-pill);
   font: inherit;
   font-size: 17px;
   font-weight: 600;
@@ -126,12 +126,12 @@
   white-space: nowrap;
   cursor: pointer;
   transition:
-    box-shadow var(--dur-hover) var(--ease),
-    filter var(--dur-hover) var(--ease),
-    transform var(--dur-hover) var(--ease);
+    box-shadow var(--motion-fast) var(--ease-out),
+    filter var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
 }
 .var-btn:active {
-  transform: scale(0.98);
+  transform: scale(var(--motion-press-btn));
 }
 .var-btn:focus-visible {
   outline: 2px solid var(--color-primary);

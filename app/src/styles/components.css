@@ -6,6 +6,12 @@
 /* ══════════════════════════════════════════════════════════
    4. КОМПОНЕНТЫ · базовые
    ══════════════════════════════════════════════════════════ */
+/* Кнопка — одна на весь сайт (docs/design-audit.md, 1.2): главная —
+   глянцевая «таблетка», вторичная — стекло, третья — текст. Раньше
+   видов было пять: плоский прямоугольник, глянец радиусом 14, оранжевый
+   глянец, «таблетка» главной, свои у фильтров. Движение — по
+   docs/motion-system.md: наведение — светлый слой поверх (opacity),
+   нажатие — scale(0.97); фон и высота не анимируются. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -13,40 +19,61 @@
   gap: var(--space-2);
   height: var(--h-control);
   padding: 0 var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   /* Кнопка-ссылка не подчёркивается: либо кнопка, либо ссылка. */
   text-decoration: none;
   position: relative;
+  isolation: isolate;
   transition:
-    background var(--dur-hover) var(--ease),
-    box-shadow var(--dur-hover) var(--ease),
-    color var(--dur-hover) var(--ease);
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+/* Светлый слой наведения: проявляется opacity, а не сменой фона. */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgb(255 255 255 / 0.14);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .btn:hover::before {
+    opacity: 1;
+  }
+}
+.btn:active {
+  transform: scale(var(--motion-press-btn));
 }
 .btn--primary {
-  background: var(--color-primary);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
   color: var(--color-text-inverse);
 }
-.btn--primary:hover {
-  background: var(--color-primary-hover);
-}
-.btn--primary:active {
-  background: var(--color-primary-active);
+@media (hover: hover) {
+  .btn--primary:hover {
+    box-shadow: var(--gloss-shadow-soft-hover);
+  }
 }
 .btn--secondary {
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  background: var(--glass-bg-strong);
+  color: var(--color-primary);
+  box-shadow: var(--glass-ring), var(--glass-hi);
 }
-.btn--secondary:hover {
-  background: var(--color-surface-2);
+.btn--secondary::before {
+  background: var(--color-surface-soft);
 }
 .btn--ghost {
   color: var(--color-primary);
 }
-.btn--ghost:hover {
+.btn--ghost::before {
   background: var(--color-surface-soft);
 }
 .btn--danger {
@@ -3535,6 +3562,10 @@ html[data-tabs-pending] .topic-panel,
 .bnav a.is-akcent .nav-ico {
   padding: 2px;
   border-radius: 50%;
-  background: radial-gradient(circle at 70% 25%, var(--color-accent-soft-surface), var(--color-surface-soft));
+  background: radial-gradient(
+    circle at 70% 25%,
+    var(--color-accent-soft-surface),
+    var(--color-surface-soft)
+  );
   box-shadow: 0 0 0 1px var(--color-border-accent);
 }
