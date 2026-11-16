@@ -1,0 +1,487 @@
+/* Теория базы в рамках сайта (components/baza/RamkiBazy.tsx).
+
+   Раздел с рамками стоит в «стеклянном» слое .teor-steklo
+   (components/tasks/teoriya/teoriya-steklo.css). Здесь — только своё:
+   тона веток и случаев, подпункты, кнопка «Пример», задача внутри
+   «Важно», схема-развилка, таблица. Остальные разделы базы не
+   затронуты: классы есть только у новых блоков. */
+
+.baza-ton--zel,
+.teor-steklo .ramka.baza-ton--zel {
+  --ton: var(--emerald-600);
+  --ton-soft: var(--emerald-50);
+  --ton-border: var(--emerald-200);
+  --ton-text: #06704f;
+}
+.baza-ton--sin,
+.teor-steklo .ramka.baza-ton--sin {
+  --ton: var(--blue-600);
+  --ton-soft: var(--blue-50);
+  --ton-border: var(--blue-200);
+  --ton-text: var(--blue-700);
+}
+.baza-ton--terra,
+.teor-steklo .ramka.baza-ton--terra {
+  --ton: var(--terracotta);
+  --ton-soft: var(--terracotta-50);
+  --ton-border: var(--terracotta-200);
+  --ton-text: var(--terracotta-700);
+}
+.baza-ton--oranzh,
+.teor-steklo .ramka.baza-ton--oranzh {
+  --ton: var(--amber-600);
+  --ton-soft: var(--amber-50);
+  --ton-border: var(--cream-200);
+  --ton-text: var(--amber-700);
+}
+.baza-ton--navy,
+.teor-steklo .ramka.baza-ton--navy {
+  --ton: var(--navy-700);
+  --ton-soft: var(--blue-50);
+  --ton-border: var(--blue-300);
+  --ton-text: var(--navy-800);
+}
+
+.baza-teoriya--ramki {
+  min-width: 0;
+}
+/* Рамки стоят в потоке .flow: отступ между блоками задаёт он. */
+.flow.baza-teoriya--ramki > * {
+  margin-block: 0;
+}
+.flow.baza-teoriya--ramki > * + * {
+  margin-top: var(--flow-block, var(--space-5));
+}
+.flow.baza-teoriya--ramki > * + .baza-podpunkt {
+  margin-top: var(--flow-section, var(--space-8));
+}
+
+/* Подпункт раздела: якорь «Содержания»; липкая полоса его не закрывает. */
+.baza-podpunkt {
+  margin: var(--space-6) 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--fs-h4);
+  line-height: 1.3;
+  color: var(--color-text-brand);
+  scroll-margin-top: 140px;
+}
+.baza-teoriya--ramki > .baza-podpunkt:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Тема рамки «Важно!» / «Вывод» / «Лайфхак» — под её подписью. */
+.baza-podtitul {
+  margin-top: 0;
+  font-weight: 700;
+  color: var(--ton-text, var(--color-text));
+}
+
+/* Ссылка внутри рамки на другой раздел страницы. */
+.baza-ssylka {
+  color: var(--color-text-brand);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Рамка «Случай» вне слоя стекла (печать): полоса тона слева. */
+.baza-sluchay {
+  border-left: 6px solid var(--ton);
+  background: var(--ton-soft);
+}
+.teor-steklo .baza-sluchay {
+  border-left: 0;
+}
+.baza-sluchay__vyvod {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--white, #fff);
+  box-shadow: inset 0 0 0 1px var(--ton-border);
+  font-weight: 600;
+}
+.baza-sluchay__vyvod > span:last-child {
+  min-width: 0;
+}
+.baza-sluchay__strelka {
+  flex: none;
+  color: var(--ton);
+  font-weight: 800;
+}
+.baza-sluchay__primery {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+.baza-sluchay__zapis {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--ton-border);
+}
+
+/* Кнопка «Пример»: «Пример ▸ тема»; раскрыт — «Свернуть ▴ тема». */
+.baza-razbor {
+  min-width: 0;
+}
+.baza-razbor > summary {
+  flex-wrap: wrap;
+  max-width: 100%;
+  text-align: left;
+  line-height: 1.35;
+  padding-block: var(--space-2);
+}
+.baza-razbor__otkryt,
+.baza-razbor__zakryt {
+  flex: none;
+  font-weight: 700;
+}
+.baza-razbor__zakryt,
+.baza-razbor[open] .baza-razbor__otkryt {
+  display: none;
+}
+.baza-razbor[open] .baza-razbor__zakryt {
+  display: inline;
+}
+.baza-razbor__title {
+  min-width: 0;
+  font-weight: 500;
+}
+.baza-razbor > .ramka {
+  margin: 0;
+}
+
+/* Задача внутри «Важно», «Вывода», «Лайфхака». */
+.baza-rz {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--white, #fff);
+  box-shadow: inset 0 0 0 1px var(--ton-border, var(--color-border));
+}
+.baza-rz__metka {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+  color: var(--ton-text, var(--color-text-brand));
+}
+.baza-rz .ramka__shagi {
+  margin-top: var(--space-3);
+}
+
+/* Схема-развилка: вопрос, линии, ветки. */
+.baza-rv {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: 18px;
+  background: var(--glass-bg-strong, var(--color-surface));
+  box-shadow: var(--glass-ring, 0 0 0 1px var(--color-border));
+  min-width: 0;
+}
+.baza-rv__title {
+  margin: 0 0 var(--space-3);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.baza-rv__uzel {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+}
+.baza-rv__vopros {
+  position: relative;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--navy-700);
+  color: var(--white, #fff);
+  font-weight: 600;
+  text-align: center;
+  max-width: 100%;
+}
+.baza-rv__vopros::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: calc(50% - 1px);
+  height: 14px;
+  border-left: 2px solid var(--blue-300);
+}
+.baza-rv__vetki {
+  --zazor: var(--space-3);
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: var(--zazor);
+  width: 100%;
+  margin: 0;
+  padding: 26px 0 0;
+  list-style: none;
+}
+.baza-rv__vetka {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: linear-gradient(160deg, var(--white, #fff), var(--ton-soft));
+  box-shadow:
+    inset 0 0 0 1px var(--ton-border),
+    inset 0 3px 0 var(--ton);
+  text-align: center;
+}
+/* Линии: горизонталь над ветками и отвод к каждой ветке. */
+.baza-rv__vetka::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: calc(var(--zazor) / -2);
+  right: calc(var(--zazor) / -2);
+  border-top: 2px solid var(--blue-300);
+}
+.baza-rv__vetka:first-child::before {
+  left: 50%;
+}
+.baza-rv__vetka:last-child::before {
+  right: 50%;
+}
+.baza-rv__vetka::after {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: calc(50% - 1px);
+  height: 14px;
+  border-left: 2px solid var(--blue-300);
+}
+.baza-rv__esli {
+  display: inline-block;
+  max-width: 100%;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--ton);
+  color: var(--white, #fff);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.baza-rv__itog {
+  margin: 0;
+  color: var(--ton-text);
+}
+.baza-rv__formula {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.baza-rv__formula .katex-display {
+  margin: 0;
+}
+.baza-rv__punkty {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-caption);
+}
+/* Вложенная развилка внутри ветки. */
+.baza-rv__vetka > .baza-rv__uzel {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+.baza-rv__vetka .baza-rv__vopros {
+  background: var(--ton);
+  font-size: var(--fs-caption);
+}
+
+/* Столбиком (много веток; на телефоне — всегда): линия слева, отводы вправо. */
+.baza-rv__vetki.is-stolbik {
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  margin-left: 14px;
+  padding: var(--space-4) 0 0 var(--space-4);
+  border-left: 2px solid var(--blue-300);
+  width: calc(100% - 14px);
+}
+.baza-rv__uzel:has(> .is-stolbik) {
+  justify-items: start;
+}
+.baza-rv__uzel:has(> .is-stolbik) > .baza-rv__vopros {
+  border-radius: 14px;
+  text-align: left;
+}
+.baza-rv__uzel:has(> .is-stolbik) > .baza-rv__vopros::after {
+  left: 13px;
+}
+.is-stolbik > .baza-rv__vetka {
+  justify-items: start;
+  text-align: left;
+}
+.is-stolbik > .baza-rv__vetka::before,
+.is-stolbik > .baza-rv__vetka:first-child::before,
+.is-stolbik > .baza-rv__vetka:last-child::before {
+  top: 22px;
+  left: calc(-1 * var(--space-4) - 2px);
+  right: auto;
+  width: var(--space-4);
+}
+.is-stolbik > .baza-rv__vetka::after {
+  display: none;
+}
+
+@media (max-width: 639.98px) {
+  .baza-rv {
+    padding: var(--space-3);
+  }
+  .baza-rv__vetki,
+  .baza-rv__vetki.is-stolbik {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    margin-left: 13px;
+    padding: var(--space-4) 0 0 var(--space-3);
+    border-left: 2px solid var(--blue-300);
+    width: calc(100% - 13px);
+  }
+  .baza-rv__uzel {
+    justify-items: start;
+  }
+  .baza-rv__vopros {
+    text-align: left;
+    border-radius: 14px;
+  }
+  .baza-rv__vopros::after {
+    left: 12px;
+  }
+  .baza-rv__vetka {
+    justify-items: start;
+    text-align: left;
+  }
+  .baza-rv__vetka::before,
+  .baza-rv__vetka:first-child::before,
+  .baza-rv__vetka:last-child::before,
+  .is-stolbik > .baza-rv__vetka::before {
+    top: 22px;
+    left: calc(-1 * var(--space-3) - 2px);
+    right: auto;
+    width: var(--space-3);
+  }
+  .baza-rv__vetka::after {
+    display: none;
+  }
+}
+
+/* Таблица: на телефоне строка — карточка с подписями ячеек. */
+.baza-tablica {
+  min-width: 0;
+}
+.baza-tablica__title {
+  margin: 0 0 var(--space-2);
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.baza-tablica table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px var(--blue-200);
+  background: var(--white, #fff);
+}
+.baza-tablica th,
+.baza-tablica td {
+  padding: var(--space-3);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--blue-100);
+}
+.baza-tablica th {
+  background: var(--blue-50);
+  color: var(--navy-800);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.baza-tablica tr:last-child td {
+  border-bottom: 0;
+}
+@media (max-width: 639.98px) {
+  .baza-tablica table,
+  .baza-tablica tbody,
+  .baza-tablica tr,
+  .baza-tablica td {
+    display: block;
+  }
+  .baza-tablica thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .baza-tablica tr {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--blue-200);
+  }
+  .baza-tablica tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .baza-tablica td {
+    padding: var(--space-1) var(--space-3);
+    border-bottom: 0;
+  }
+  .baza-tablica td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--color-text-secondary);
+  }
+}
+
+/* Телефон: рамки вложены друг в друга (случай → пример, «Важно» →
+   задача), и каждая отъедает поля. Значок «!» / «⇒» встаёт над
+   текстом, внутренние поля уже — выкладкам остаётся почти вся ширина. */
+@media (max-width: 639.98px) {
+  .baza-teoriya--ramki :is(.ramka--vazhno, .ramka--vyvod, .ramka--layfhak) {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .baza-teoriya--ramki .ramka__znak {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.15rem;
+  }
+  .baza-teoriya--ramki .ramka .ramka {
+    padding-inline: var(--space-3);
+  }
+  .baza-rz {
+    margin-inline: calc(-1 * var(--space-2));
+    padding: var(--space-3) var(--space-2);
+  }
+  .baza-teoriya--ramki .ramka__shag {
+    padding-left: 2.35rem;
+  }
+  .baza-sluchay__vyvod {
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+@media print {
+  .baza-razbor:not([open]) {
+    display: none;
+  }
+  .baza-rv,
+  .baza-rv__vetka,
+  .baza-tablica table {
+    background: none;
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}
