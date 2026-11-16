@@ -690,7 +690,7 @@ export const KVADRATNYE_17: RazdelTeorii = {
         shagi: [
           {
             label: 'Складываем коэффициенты',
-            formuly: ['a+b+c=5+(-3)+(-2)=0'],
+            formuly: ['a=5,\\ b=-3,\\ c=-2', 'a+b+c=5-3-2=0'],
             paras: ['Сумма равна нулю — значит, $x_1=1$.'],
           },
           {
