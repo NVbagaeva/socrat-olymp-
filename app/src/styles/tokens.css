@@ -448,6 +448,36 @@
 
 /* Имена из эталона, которыми пользуется компонентный слой.
    @theme их не создаёт: шкала отступов там задана через --spacing. */
+/* ── «Сумеречная сцена»: синий первый экран главной ──────────────
+   Только для первого экрана (components/landing/sumerki). Остальной
+   сайт светлый. Тон — насыщенный синий, а не ночь: на нём рендер
+   кристалла стоит на светлом ореоле. Контраст на --sumerki-centr:
+   белый — 5,1 : 1, лид (--sumerki-text-2) — 4,6 : 1 (AA). Оранжевая кнопка — фирменный терракотовый, а не
+   #f08a3c: белый текст на нём 2,5 : 1. */
+:root {
+  --sumerki-0: #24478f;
+  --sumerki-1: #3463b8;
+  --sumerki-2: #4a78c8;
+  /* Фон сцены: середина и края (виньетка). */
+  --sumerki-centr: #3a68cc;
+  --sumerki-kraj: #2a55b8;
+  --sumerki-glow: #1f5fd0;
+  --sumerki-text: #f3f7ff;
+  --sumerki-text-2: #f0f5ff;
+  --sumerki-akcent-1: #bcd6ff;
+  --sumerki-akcent-2: #e2eeff;
+  --sumerki-liniya: rgb(170 200 255 / 0.1);
+  --sumerki-steklo: rgb(255 255 255 / 0.07);
+  --sumerki-steklo-kromka: rgb(255 255 255 / 0.16);
+  --sumerki-knopka-siniy-1: #2f6fe8;
+  --sumerki-knopka-siniy-2: #1f5fd0;
+  --sumerki-knopka-teplyy-1: #cc6322;
+  --sumerki-knopka-teplyy-2: #a8500f;
+  --sumerki-svechenie-teploe: #f08a3c;
+  /* Высота перехода сцены в светлый фон сайта. */
+  --sumerki-perehod: 260px;
+}
+
 :root {
   --font: var(--font-sans);
 

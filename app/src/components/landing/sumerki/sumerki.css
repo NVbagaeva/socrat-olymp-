@@ -1,0 +1,736 @@
+/* «Сумеречная сцена» — тёмный первый экран главной (SumerkiHero.tsx).
+   Цвета — токены --sumerki-* (styles/tokens.css). Двигаются только
+   transform и opacity; свечение и чертёж — CSS и SVG, без картинок.
+
+   Вариант А (.sm--a): сцена на весь первый экран, уходит под шапку и
+   к низу светлеет в фон сайта. Вариант Б (.sm--b): светлая страница,
+   сцена — скруглённое окно-витрина. */
+
+.sm {
+  position: relative;
+  isolation: isolate;
+  color: var(--sumerki-text);
+}
+
+/* ── Окно сцены ─────────────────────────────────────────────────── */
+
+.sm__okno {
+  position: relative;
+  overflow: hidden;
+  /* Неровный фон: середина и левая часть с текстом — ровный синий,
+     края и углы — на тон глубже (мягкая виньетка). */
+  background: radial-gradient(
+    125% 115% at 42% 42%,
+    var(--sumerki-centr) 0%,
+    var(--sumerki-centr) 42%,
+    var(--sumerki-kraj) 100%
+  );
+}
+/* А: сцена заходит под шапку и к низу плавно светлеет. */
+.sm--a {
+  margin-top: calc(-1 * var(--h-site-head));
+}
+.sm--a .sm__okno {
+  padding-top: var(--h-site-head);
+  background:
+    linear-gradient(
+      180deg,
+      transparent calc(100% - var(--sumerki-perehod)),
+      color-mix(in srgb, var(--sumerki-centr) 55%, var(--ice))
+        calc(100% - var(--sumerki-perehod) * 0.45),
+      var(--ice) 100%
+    ),
+    radial-gradient(
+      125% 115% at 42% 42%,
+      var(--sumerki-centr) 0%,
+      var(--sumerki-centr) 42%,
+      var(--sumerki-kraj) 100%
+    );
+}
+/* Б: окно-витрина на светлой странице. */
+.sm--b {
+  padding: var(--space-6) var(--space-6) 0;
+}
+.sm--b .sm__okno {
+  max-width: calc(var(--w-container) + 2 * var(--space-6));
+  margin: 0 auto;
+  border-radius: 36px;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.5),
+    0 40px 80px -40px rgb(11 31 77 / 0.6),
+    0 18px 40px -24px rgb(31 95 208 / 0.45);
+}
+
+/* Фон: свечение за кристаллом и чертёж. Гаснет до перехода в светлое. */
+.sm__fon {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.sm--a .sm__fon {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--sumerki-perehod) * 1.1),
+    transparent calc(100% - var(--sumerki-perehod) * 0.35)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--sumerki-perehod) * 1.1),
+    transparent calc(100% - var(--sumerki-perehod) * 0.35)
+  );
+}
+.sm__svet {
+  position: absolute;
+  right: 4%;
+  top: 6%;
+  width: min(62vw, 900px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      closest-side,
+      rgb(170 205 255 / 0.32),
+      rgb(120 170 255 / 0.12) 55%,
+      transparent
+    ),
+    radial-gradient(30% 30% at 78% 62%, rgb(240 138 60 / 0.16), transparent 70%);
+  filter: blur(8px);
+}
+.sm-chertezh {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sm-chertezh * {
+  fill: none;
+  stroke: #b9d2ff;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.sm-chertezh__osi {
+  opacity: 0.2;
+}
+.sm-chertezh__setka {
+  opacity: 0.05;
+}
+.sm-chertezh__krivaya {
+  opacity: 0.16;
+}
+.sm-chertezh__kasatelnaya {
+  stroke: #ffc08a;
+  opacity: 0.18;
+}
+.sm-chertezh__proekciya,
+.sm-chertezh__orbita {
+  stroke-dasharray: 4 6;
+  opacity: 0.1;
+}
+.sm-chertezh__tochka {
+  fill: #ffc08a;
+  stroke: none;
+  opacity: 0.35;
+}
+
+/* ── Сетка ──────────────────────────────────────────────────────── */
+
+.sm__in {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  grid-template-areas:
+    'nad kr'
+    'lid kr'
+    'kn kr'
+    'pol pol';
+  column-gap: var(--space-10);
+  max-width: var(--w-container);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-8) var(--space-12);
+}
+.sm--a .sm__in {
+  padding-bottom: calc(var(--sumerki-perehod) * 0.75);
+}
+.sm__nad {
+  grid-area: nad;
+  align-self: end;
+}
+.sm__kristall {
+  grid-area: kr;
+  align-self: center;
+}
+.sm__lid {
+  grid-area: lid;
+}
+.sm__knopki {
+  grid-area: kn;
+}
+.sm-polosa {
+  grid-area: pol;
+}
+
+/* ── Текст ──────────────────────────────────────────────────────── */
+
+.sm__eyebrow {
+  margin: 0 0 var(--space-4);
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e9f1ff;
+}
+.sm-h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 1.3rem + 2.8vw, 3.75rem);
+  line-height: 1.03;
+  font-weight: 680;
+  letter-spacing: -0.032em;
+  color: #fff;
+  text-wrap: balance;
+}
+.sm-h1__fraza {
+  display: block;
+}
+/* На широком экране светящийся хвост — своей строкой: заголовок
+   ровно в четыре строки, как в наброске. */
+@media (min-width: 1024px) {
+  .sm-h1__akcent {
+    display: block;
+  }
+}
+.sm-h1__akcent {
+  background: linear-gradient(
+    100deg,
+    var(--sumerki-akcent-1) 0%,
+    var(--sumerki-akcent-2) 60%,
+    #fff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.sm__lid {
+  max-width: 52ch;
+  margin: var(--space-6) 0 0;
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--sumerki-text-2);
+}
+
+/* ── Кнопки-двери ───────────────────────────────────────────────── */
+
+.sm__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+.sm-dver {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-height: 78px;
+  padding: 14px 26px 14px 30px;
+  border-radius: 22px;
+  color: #fff;
+  text-decoration: none;
+  transition:
+    transform 220ms var(--ease),
+    box-shadow 220ms var(--ease);
+}
+.sm-dver--uchenik {
+  background: linear-gradient(180deg, var(--sumerki-knopka-siniy-1), var(--sumerki-knopka-siniy-2));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.32),
+    inset 0 -1px 0 rgb(0 0 0 / 0.14),
+    0 0 28px -4px rgb(140 185 255 / 0.7),
+    0 16px 36px -12px rgb(16 40 110 / 0.7);
+}
+.sm-dver--uchitel {
+  background: linear-gradient(
+    180deg,
+    var(--sumerki-knopka-teplyy-1),
+    var(--sumerki-knopka-teplyy-2)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.26),
+    inset 0 -1px 0 rgb(0 0 0 / 0.16),
+    0 0 30px -4px rgb(240 138 60 / 0.75),
+    0 16px 36px -12px rgb(120 50 10 / 0.6);
+}
+.sm-dver__tekst {
+  display: grid;
+  gap: 2px;
+}
+.sm-dver__z {
+  font-size: 21px;
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.sm-dver__p {
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.94);
+}
+.sm-dver svg,
+.sm-strelka {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .sm-dver:hover {
+    transform: translateY(-3px);
+  }
+  .sm-dver--uchenik:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      inset 0 -1px 0 rgb(0 0 0 / 0.14),
+      0 0 40px -2px rgb(160 200 255 / 0.9),
+      0 22px 44px -12px rgb(16 40 110 / 0.75);
+  }
+  .sm-dver--uchitel:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.26),
+      inset 0 -1px 0 rgb(0 0 0 / 0.16),
+      0 0 42px -2px rgb(240 138 60 / 0.95),
+      0 22px 44px -12px rgb(120 50 10 / 0.65);
+  }
+  .sm-dver:hover svg,
+  .sm-polosa__tarify:hover .sm-strelka {
+    transform: translateX(3px);
+  }
+}
+.sm a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+/* «Начать бесплатно» в сцене — только на телефоне (в широкой шапке
+   она уже есть). */
+.sm-start {
+  display: none;
+}
+
+/* ── Стеклянная полоса ──────────────────────────────────────────── */
+
+.sm-polosa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: var(--space-10);
+  padding: 10px 12px;
+  border: 1px solid var(--sumerki-steklo-kromka);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.04));
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 24px 48px -28px rgb(0 0 0 / 0.6);
+}
+.sm-polosa__punkt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  margin: 0;
+  padding: 0 var(--space-6);
+  color: var(--sumerki-text);
+  font-size: 15px;
+  line-height: 1.3;
+}
+.sm-polosa__punkt + .sm-polosa__punkt {
+  border-left: 1px solid var(--sumerki-steklo-kromka);
+}
+/* Пункты делят полосу поровну — ровный ритм на всю ширину. */
+@media (min-width: 768px) {
+  .sm-polosa__punkt {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+.sm-polosa__tarify {
+  font-weight: 600;
+  text-decoration: none;
+}
+.sm-polosa__chislo svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--sumerki-akcent-1);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sm-polosa__chislo b {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.sm-polosa__chislo span {
+  color: var(--sumerki-text-2);
+}
+.sm-polosa__chislo b {
+  color: #fff;
+}
+/* Плашка автора на тёмном: фото в тонком светлом кольце. */
+.sm .avtor-pl__imya {
+  color: #fff;
+}
+.sm .avtor-pl__kto {
+  color: var(--sumerki-text-2);
+}
+.sm .avtor-pl__strelka {
+  stroke: var(--sumerki-akcent-1);
+}
+.sm .avtor-pl__foto {
+  width: 44px;
+  height: 44px;
+  box-shadow:
+    0 0 0 1.5px rgb(255 255 255 / 0.75),
+    0 6px 16px -6px rgb(0 0 0 / 0.6);
+}
+@media (hover: hover) and (pointer: fine) {
+  .sm .avtor-pl:hover .avtor-pl__imya {
+    color: var(--sumerki-akcent-2);
+  }
+}
+
+/* ── Кристалл и пол ─────────────────────────────────────────────── */
+
+.sm-kr {
+  position: relative;
+  container-type: inline-size;
+  width: 100%;
+  max-width: 600px;
+  justify-self: center;
+  --kristall-hint: #e9f1ff;
+}
+/* Светлый ореол прямо за фигурой — кристалл стоит на нём, как предмет
+   на витрине под лампой. Диаметр ~1,3 ширины фигуры, середина — чуть
+   выше центра кадра. Сила — data-oreol на сцене. */
+.sm-kr__oreol {
+  --oreol: 0.82;
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 104%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    closest-side,
+    rgb(234 242 255 / var(--oreol)) 0%,
+    rgb(234 242 255 / calc(var(--oreol) * 0.92)) 40%,
+    rgb(226 238 255 / calc(var(--oreol) * 0.55)) 60%,
+    rgb(210 228 255 / calc(var(--oreol) * 0.22)) 78%,
+    rgb(200 222 255 / calc(var(--oreol) * 0.06)) 92%,
+    rgb(200 222 255 / 0) 100%
+  );
+  filter: blur(6px);
+  pointer-events: none;
+}
+.sm[data-oreol='myagkiy'] .sm-kr__oreol {
+  --oreol: 0.5;
+}
+/* ── Попугай ────────────────────────────────────────────────────── */
+
+/* Место птицы — в долях ширины кристалла (cqi): кадр рендера держит
+   пропорцию 1122 × 946, поэтому и высота в тех же долях. Точка — где
+   стоят лапки: середина верхней грани или жёрдочка на полу. */
+.sm-ptica {
+  --pt-x: 54.2cqi;
+  --pt-y: 14.8cqi;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  font-size: 20cqi;
+  line-height: 0;
+  pointer-events: none;
+  transform: translate(var(--pt-x), var(--pt-y));
+  transition: transform 980ms cubic-bezier(0.5, 0, 0.25, 1);
+}
+.sm-ptica[data-mesto='pol'] {
+  --pt-x: 9cqi;
+  --pt-y: 70cqi;
+}
+.sm-ptica .zherdochka {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+}
+/* Сдвиг сцены жёрдочки так, чтобы лапки встали в точку --pt-x/--pt-y
+   (подобрано по Zherdochka: лапки — 0,87 em правее и 0,18 em ниже
+   точки привязки). */
+.sm-ptica .zherdochka__mesto {
+  left: -0.87em;
+  bottom: auto;
+  top: 0.18em;
+}
+/* На грани жёрдочки нет; на полу она проявляется — птица на неё садится. */
+.sm-ptica .zherdochka__palka {
+  opacity: 0;
+  transition: opacity 400ms ease 500ms;
+}
+.sm-ptica[data-mesto='pol'] .zherdochka__palka {
+  opacity: 1;
+}
+.sm-ptica[data-mesto='kristall'] .zherdochka__palka {
+  transition-delay: 0ms;
+}
+/* Тень от лапок на грани: лапки — 0,21 em левее и 0,23 em ниже точки
+   сцены. На полу у птицы жёрдочка, тени там нет. */
+.sm-ptica::after {
+  content: '';
+  position: absolute;
+  left: calc(-0.21em - 0.3em);
+  top: calc(0.23em - 0.05em);
+  width: 0.6em;
+  height: 0.11em;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(8 26 80 / 0.55), rgb(8 26 80 / 0));
+  transition: opacity 300ms ease;
+}
+.sm-ptica[data-mesto='pol']::after {
+  opacity: 0;
+}
+/* Отсвет стекла на перьях. */
+.sm-ptica .popugaj {
+  filter: drop-shadow(0 0.04em 0.05em rgb(0 10 40 / 0.55))
+    drop-shadow(0 0 0.12em rgb(110 160 255 / 0.35));
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Перелёт: дуга вверх и мах крыльями, пока сцена едет по прямой. */
+  .sm-ptica[data-letit] .sm-ptica__kryl {
+    animation: sm-duga 980ms cubic-bezier(0.4, 0, 0.3, 1);
+  }
+  .sm-ptica[data-letit] .popugaj__krylo {
+    animation: sm-mah 140ms ease-in-out 6 alternate;
+    transform-origin: 40% 30%;
+  }
+}
+.sm-ptica__kryl {
+  display: block;
+}
+@keyframes sm-duga {
+  0% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-1.1em) rotate(-6deg);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes sm-mah {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-38deg) scaleY(0.85);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Без полёта: птица гаснет и проявляется на новом месте. */
+  .sm-ptica {
+    transition: none;
+  }
+  .sm-ptica[data-letit] {
+    animation: sm-poyavlenie 600ms ease;
+  }
+}
+@keyframes sm-poyavlenie {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ── Шапка над сценой (вариант А) ───────────────────────────────── */
+
+body .site-head--sumerki:not([data-svet]),
+body .site-head--sumerki:not([data-svet])[data-compact] {
+  background: rgb(36 71 143 / 0.62);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.08);
+}
+.site-head--sumerki {
+  transition:
+    background-color 360ms ease,
+    box-shadow 360ms ease;
+}
+.site-head--sumerki:not([data-svet]) .logo,
+.site-head--sumerki:not([data-svet]) .site-nav > a,
+.site-head--sumerki:not([data-svet]) .nav-drop__button,
+.site-head--sumerki:not([data-svet]) .burger {
+  color: #e6eefc;
+}
+.site-head--sumerki:not([data-svet]) .burger__bar {
+  background: #e6eefc;
+}
+.site-head--sumerki:not([data-svet]) .burger:hover {
+  background: rgb(255 255 255 / 0.08);
+}
+.site-head--sumerki:not([data-svet]) .site-nav > a:hover,
+.site-head--sumerki:not([data-svet]) .nav-drop__button:hover {
+  color: #fff;
+}
+.site-head--sumerki:not([data-svet]) .site-nav > a.is-akcent {
+  background: linear-gradient(120deg, rgb(240 138 60 / 0.32), rgb(204 99 34 / 0.24));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 190 140 / 0.45),
+    0 6px 18px -10px rgb(240 138 60 / 0.9);
+  color: #ffd9b8;
+}
+.site-head--sumerki:not([data-svet]) .level-switch {
+  border-color: rgb(255 255 255 / 0.16);
+  background: rgb(255 255 255 / 0.06);
+}
+.site-head--sumerki:not([data-svet]) .level-switch__seg:not(.is-active) {
+  color: #d5e1f7;
+}
+.site-head--sumerki:not([data-svet]) .level-switch__seg:not(.is-active):hover {
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+}
+.site-head--sumerki:not([data-svet]) .auth-widget__login {
+  border-color: rgb(255 255 255 / 0.28);
+  background: rgb(255 255 255 / 0.06);
+  color: #fff;
+}
+.site-head--sumerki .logo,
+.site-head--sumerki .site-nav > a,
+.site-head--sumerki .nav-drop__button {
+  transition: color 360ms ease;
+}
+
+/* ── Планшет ────────────────────────────────────────────────────── */
+
+@media (max-width: 1023.98px) {
+  .sm__in {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'nad'
+      'kr'
+      'lid'
+      'kn'
+      'pol';
+    padding-inline: var(--space-6);
+  }
+  .sm-kr {
+    max-width: 440px;
+    margin-top: var(--space-6);
+  }
+}
+
+/* ── Телефон ────────────────────────────────────────────────────── */
+
+@media (max-width: 767.98px) {
+  :root {
+    --sumerki-perehod: 200px;
+  }
+  .sm__in {
+    padding: var(--space-6) var(--space-4) var(--space-8);
+  }
+  .sm--a .sm__in {
+    padding-bottom: calc(var(--sumerki-perehod) * 0.7);
+  }
+  .sm--b {
+    padding: var(--space-3) var(--space-3) 0;
+  }
+  .sm--b .sm__okno {
+    border-radius: 28px;
+  }
+  .sm__eyebrow {
+    font-size: 12px;
+    margin-bottom: var(--space-3);
+  }
+  .sm-h1 {
+    font-size: clamp(2rem, 1.2rem + 4.4vw, 2.5rem);
+    line-height: 1.06;
+  }
+  .sm-kr {
+    max-width: 300px;
+    margin-top: var(--space-10);
+  }
+  .sm__lid {
+    margin-top: var(--space-2);
+    font-size: 18px;
+  }
+  .sm__knopki {
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+  .sm-dver {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .sm-start {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    border: 1px solid rgb(255 255 255 / 0.28);
+    border-radius: 16px;
+    background: rgb(255 255 255 / 0.06);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .sm-polosa {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: var(--space-6);
+    padding: 6px 4px;
+  }
+  .sm-polosa__punkt {
+    padding: 0 var(--space-4);
+    font-size: 14px;
+  }
+  .sm-polosa__chislo {
+    padding-inline: var(--space-3);
+  }
+  .sm-polosa__tarify,
+  .sm-polosa__avtor {
+    grid-column: 1 / -1;
+  }
+  .sm-polosa__punkt + .sm-polosa__punkt {
+    border-left: 0;
+    border-top: 1px solid var(--sumerki-steklo-kromka);
+  }
+  .sm-polosa__chislo + .sm-polosa__chislo {
+    border-left: 1px solid var(--sumerki-steklo-kromka);
+  }
+  .sm__svet {
+    right: -30%;
+    top: 14%;
+    width: 130vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-dver,
+  .sm-dver svg,
+  .sm-strelka,
+  .site-head--sumerki,
+  .site-head--sumerki .logo {
+    transition: none;
+  }
+}
