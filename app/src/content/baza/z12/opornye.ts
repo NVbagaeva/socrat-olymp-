@@ -88,7 +88,7 @@ const blokDo180: BlokOpornyh = {
   opisanie: 'Смежные углы, односторонние углы, соседние углы параллелограмма и трапеции',
   zapomni:
     'Смежные углы, односторонние углы при параллельных прямых, соседние углы параллелограмма и углы при боковой стороне трапеции в сумме дают $180^\\circ$.',
-  znak: '180^\\circ - \\alpha',
+  znak: '180^\\circ',
   zadachi: zadachi(
     'do180',
     DO_180.map(([shablon, a]) => ({
@@ -237,7 +237,7 @@ const blokMediana: BlokOpornyh = {
   nazvanie: 'Медиана к гипотенузе',
   opisanie: 'Медиана, проведённая к гипотенузе, равна её половине',
   zapomni: 'Медиана прямоугольного треугольника, проведённая к гипотенузе, равна $\\dfrac{c}{2}$.',
-  znak: 'CM = \\tfrac{c}{2}',
+  znak: '\\tfrac{c}{2}',
   zadachi: zadachi(
     'mediana',
     MEDIANA.map(([a, b]) => {
@@ -272,7 +272,7 @@ const blokGipotenuza: BlokOpornyh = {
   nazvanie: 'Гипотенуза по катетам',
   opisanie: 'Теорема Пифагора: сложить квадраты катетов и извлечь корень',
   zapomni: 'Теорема Пифагора: $c^2 = a^2 + b^2$, $c = \\sqrt{a^2 + b^2}$.',
-  znak: 'c^2 = a^2 + b^2',
+  znak: 'c^2',
   zadachi: zadachi(
     'gipotenuza',
     GIPOTENUZA.map(([a, b]) => {
@@ -303,7 +303,7 @@ const blokKatet: BlokOpornyh = {
   nazvanie: 'Катет по гипотенузе',
   opisanie: 'Теорема Пифагора: из квадрата гипотенузы вычесть квадрат катета',
   zapomni: 'Катет: $a = \\sqrt{c^2 - b^2}$ — квадраты вычитают.',
-  znak: '\\sqrt{c^2 - b^2}',
+  znak: 'a^2',
   zadachi: zadachi(
     'katet',
     KATET.map(([c, b]) => {
@@ -443,7 +443,7 @@ const blokSrTreug: BlokOpornyh = {
   nazvanie: 'Средняя линия треугольника',
   opisanie: 'Отрезок между серединами двух сторон — половина третьей стороны',
   zapomni: 'Средняя линия треугольника параллельна третьей стороне и равна её половине.',
-  znak: 'MN = \\tfrac{AC}{2}',
+  znak: '\\tfrac{a}{2}',
   zadachi: zadachi(
     'sr-treug',
     SR_TREUG.map((ac) => ({
@@ -599,7 +599,7 @@ const blokKatetTrig: BlokOpornyh = {
   nazvanie: 'Катет через синус или косинус',
   opisanie: 'Гипотенузу умножить на синус или косинус острого угла',
   zapomni: 'Противолежащий катет $BC = AB \\cdot \\sin A$, прилежащий $AC = AB \\cdot \\cos A$.',
-  znak: 'AB \\cos A',
+  znak: '\\cos',
   zadachi: zadachi(
     'katet-trig',
     KATET_TRIG.map(([f, ab, v]) => {
@@ -644,7 +644,7 @@ const blokKatetTg: BlokOpornyh = {
   opisanie: 'Прилежащий катет умножить на тангенс острого угла',
   zapomni:
     'Противолежащий катет равен прилежащему, умноженному на тангенс: $BC = AC \\cdot \\mathrm{tg}\\,A$.',
-  znak: 'AC\\,\\mathrm{tg}\\,A',
+  znak: '\\mathrm{tg}',
   zadachi: zadachi(
     'katet-tg',
     KATET_TG.map(([ac, v]) => {

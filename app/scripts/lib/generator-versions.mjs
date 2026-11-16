@@ -15,6 +15,17 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/* Разделы базы с банком: папки lib/baza/zNN с прототипами («05», «12»…). */
+function razdelyBazy() {
+  const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../src/lib/baza');
+  return fs
+    .readdirSync(dir)
+    .filter((d) => /^z\d\d$/.test(d) && fs.existsSync(path.join(dir, d, 'prototipy.ts')))
+    .map((d) => d.slice(1))
+    .sort();
+}
 
 /* Область комплекта → исходники генератора, от папки app/src. Папка
    берётся целиком. №4 и №5 — один движок вероятностей. */
@@ -73,6 +84,23 @@ export const GENERATOR_SOURCES = {
     'content/uroki6.ts',
   ],
   1: ['lib/planimetriya', 'lib/sheet/sheet.js', 'content/repetitory1.ts', 'content/teoriya1.ts'],
+  /* Задания базы с банком (lib/baza/generatorBazy.ts): общий генератор
+     базы и прототипы своего раздела. */
+  ...Object.fromEntries(
+    razdelyBazy().map((no) => [
+      `baza-${Number(no)}`,
+      [
+        `lib/baza/z${no}`,
+        `content/baza/z${no}`,
+        'lib/baza/bank.ts',
+        'lib/baza/generatorBazy.ts',
+        'lib/baza/listBazy.ts',
+        'lib/baza/sheetBazy.ts',
+        'lib/generator/obshchiy/bank.ts',
+        'content/baza/generator.ts',
+      ],
+    ]),
+  ),
   /* «Собрать вариант»: сборщик и адаптеры плюс движки всех разделов
      первой части — любая их правка может поменять задачи по коду. */
   variant: [

@@ -37,7 +37,7 @@ export const GRUPPY_12_1: GruppaBazy[] = [
   { id: '1B', nazvanie: 'Углы треугольника', znak: '180^\\circ', ton: 'orange' },
   { id: '1C', nazvanie: 'Катет против угла 30°', znak: '\\tfrac{c}{2}', ton: 'green' },
   { id: '1D', nazvanie: 'Медиана, высота, биссектриса', znak: 'BM', ton: 'navy' },
-  { id: '1E', nazvanie: 'Четырёхугольники', znak: 'ABCD', ton: 'terra' },
+  { id: '1E', nazvanie: 'Четырёхугольники', znak: '\\square', ton: 'terra' },
 ];
 
 /* ── Общее ─────────────────────────────────────────────────────── */

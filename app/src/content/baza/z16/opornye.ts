@@ -331,7 +331,7 @@ const blokSkobka: BlokOpornyh = {
   nazvanie: 'Скобка на корень',
   opisanie: 'Раскрыть скобки: каждый корень умножить на корень',
   zapomni: '$\\left(\\sqrt{a} - \\sqrt{b}\\right)\\sqrt{b} = \\sqrt{ab} - b$.',
-  znak: '(\\sqrt{a}-\\sqrt{b})\\sqrt{b}',
+  znak: '(\\,)\\sqrt{b}',
   zadachi: zadachi(
     'skobka',
     SKOBKA.map(([a, b]) => {
@@ -433,7 +433,7 @@ const blokLogLoga: BlokOpornyh = {
   nazvanie: 'Логарифм логарифма',
   opisanie: 'Сначала внутренний логарифм, потом внешний',
   zapomni: 'Считаем изнутри наружу: внутренний логарифм — обычное число.',
-  znak: '\\log(\\log)',
+  znak: '\\log\\log',
   zadachi: zadachi(
     'log-loga',
     LOG_LOGA.map(([a, b, c]) => {
@@ -475,7 +475,7 @@ const blokSumma: BlokOpornyh = {
   opisanie: 'Объединить в один логарифм произведения или частного',
   zapomni:
     '$\\log_{a} x + \\log_{a} y = \\log_{a}(xy)$, $\\log_{a} x - \\log_{a} y = \\log_{a}\\dfrac{x}{y}$.',
-  znak: '\\log_{a}(xy)',
+  znak: '\\log xy',
   zadachi: zadachi(
     'summa',
     SUMMA.map(([a, x, xT, z, y, yT]) => {
@@ -641,7 +641,7 @@ const blokTozhdestvo: BlokOpornyh = {
   opisanie: 'Найти модуль из тождества, знак — по четверти',
   zapomni:
     '$\\sin^{2}\\alpha + \\cos^{2}\\alpha = 1$. Синус отрицателен в III и IV четвертях, косинус — во II и III.',
-  znak: '\\sin^{2}+\\cos^{2}',
+  znak: '\\sin^{2}',
   zadachi: zadachi(
     'osnovnoe',
     TOZHDESTVO.map(([fn, vTex, v, ch, modul, kvTex]) => {

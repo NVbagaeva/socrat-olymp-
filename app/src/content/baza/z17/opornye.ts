@@ -118,7 +118,7 @@ const blokSkobki: BlokOpornyh = {
   nazvanie: 'Раскрыть скобки',
   opisanie: 'Умножить число перед скобкой на каждое слагаемое в ней',
   zapomni: '$q(x + r) = qx + qr$. Потом числа — в одну часть, $x$ — в другую.',
-  znak: 'q(x+r)',
+  znak: 'q(x)',
   zadachi: zadachi(
     'skobki',
     SKOBKI.map(([p, q, r, s]) => ({
@@ -153,7 +153,7 @@ const blokKvadraty: BlokOpornyh = {
   nazvanie: 'Квадраты сокращаются',
   opisanie: 'Раскрыть квадрат разности, и уравнение станет линейным',
   zapomni: '$(x - a)^2 = x^2 - 2ax + a^2$. Слагаемое $x^2$ есть в обеих частях — оно уходит.',
-  znak: '(x-a)^2',
+  znak: '(x)^2',
   zadachi: zadachi(
     'kvadraty',
     KVADRATY.map(([a, c]) => ({
@@ -190,7 +190,7 @@ const blokNepolnye: BlokOpornyh = {
   nazvanie: 'Вынести за скобку',
   opisanie: 'Нет свободного члена — выносим переменную, один корень равен нулю',
   zapomni: '$x(ax + b) = 0$: $x = 0$ или $x = -\\dfrac{b}{a}$. На $x$ не делим.',
-  znak: 'x(x+b)',
+  znak: 'x(\\,)',
   zadachi: zadachi(
     'nepolnye',
     NEPOLNYE.map(([a, b, v]) => {
@@ -438,7 +438,7 @@ const blokMnozhitel: BlokOpornyh = {
   nazvanie: 'Подобные степени',
   opisanie: 'Сложить одинаковые степени, как подобные слагаемые',
   zapomni: '$a^x + k \\cdot a^x = (1 + k) \\cdot a^x$. Потом делим и приводим к одному основанию.',
-  znak: '(1+k)a^x',
+  znak: 'ka^x',
   zadachi: zadachi(
     'mnozhitel',
     MNOZHITEL.map(([a, k, n]) => {
@@ -557,7 +557,7 @@ const blokSumma: BlokOpornyh = {
   opisanie: 'Собрать сумму логарифмов в один и приравнять аргументы',
   zapomni:
     '$\\log_a m + \\log_a n = \\log_a(mn)$. Из $\\log_a f(x) = \\log_a b$ следует $f(x) = b$.',
-  znak: '\\log(mn)',
+  znak: '\\log mn',
   zadachi: zadachi(
     'summa',
     SUMMA.map(([a, p, q, k, m]) => ({

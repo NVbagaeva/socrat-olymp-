@@ -24,7 +24,7 @@ import { VIDY_TRIG } from './razbory-trig';
 import { poschitat, poschitatUslovie, vZapis } from './vychislitel';
 
 export const GRUPPY_16: GruppaBazy[] = [
-  { id: 'I', nazvanie: 'Степени', znak: 'a^{m} \\cdot a^{n}', ton: 'blue' },
+  { id: 'I', nazvanie: 'Степени', znak: 'a^{n}', ton: 'blue' },
   { id: 'II', nazvanie: 'Корни', znak: '\\sqrt{ab}', ton: 'orange' },
   { id: 'III', nazvanie: 'Логарифмы', znak: '\\log_{a}b', ton: 'green' },
   { id: 'IV', nazvanie: 'Тригонометрия', znak: '\\sin\\alpha', ton: 'navy' },

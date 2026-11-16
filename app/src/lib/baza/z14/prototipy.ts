@@ -20,7 +20,7 @@ export const GRUPPY_14: GruppaBazy[] = [
   {
     id: 'E',
     nazvanie: 'Обыкновенные и десятичные вместе',
-    znak: '\\tfrac{1}{2}+0{,}5',
+    znak: '\\tfrac{1}{2}',
     ton: 'terra',
   },
 ];
