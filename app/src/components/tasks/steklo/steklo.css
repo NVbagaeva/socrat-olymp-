@@ -227,15 +227,16 @@
   min-height: 44px;
   padding: 0 var(--space-5);
   border: 0;
-  border-radius: 14px;
+  /* Та же «таблетка», что .btn (styles/components.css). */
+  border-radius: var(--radius-pill);
   font: inherit;
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
   transition:
-    transform var(--dur-hover, 160ms) var(--ease, ease),
-    box-shadow var(--dur-hover, 160ms) var(--ease, ease);
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out);
 }
 .stk-btn--lg {
   min-height: 52px;
@@ -268,8 +269,8 @@
 .stk-btn--tihaya:hover {
   box-shadow: var(--glass-ring), var(--glass-hi), var(--shadow-sm);
 }
-.stk-btn:hover {
-  transform: translateY(-1px);
+.stk-btn:active {
+  transform: scale(var(--motion-press-btn));
 }
 .stk-btn[disabled],
 .stk-btn[aria-disabled='true'] {
