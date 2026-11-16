@@ -571,12 +571,14 @@ export const KVADRATNYE_17: RazdelTeorii = {
         shagi: [
           {
             label: 'Берём половину $b$',
-            formuly: ['b=-14,\\qquad k=-7'],
+            formuly: ['b=-14', 'k=\\dfrac{b}{2}=-7'],
           },
           {
             label: 'Считаем $\\dfrac{D}{4}$',
             formuly: [
-              '\\begin{aligned}\\dfrac{D}{4}&=(-7)^2-1\\cdot40=\\\\&=49-40=9\\end{aligned}',
+              'k^2=(-7)^2=49',
+              'ac=1\\cdot40=40',
+              '\\dfrac{D}{4}=k^2-ac=49-40=9',
               '\\sqrt{9}=3',
             ],
           },
