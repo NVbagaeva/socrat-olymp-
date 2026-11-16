@@ -199,7 +199,7 @@ export const KVADRATNYE_17: RazdelTeorii = {
       metka: 'Вид 1',
       ton: 'oranzh',
       title: '$ax^2+bx=0$ — нет свободного члена',
-      formula: `x(ax+b)=0\\iff${sov('x=0,', 'ax+b=0.')}`,
+      formula: `x(ax+b)=0\\;\\Leftrightarrow\\;${sov('x=0,', 'ax+b=0.')}`,
       vyvod: 'Выносим $x$ за скобку. Корней два: $x=0$ и $x=-\\dfrac{b}{a}$.',
       paras: [
         '**Почему так.** Произведение равно нулю, когда **хотя бы один** множитель равен нулю. Поэтому уравнение $x(ax+b)=0$ распадается на два: $x=0$ **или** $ax+b=0$.',
@@ -824,7 +824,7 @@ export const KVADRATNYE_17: RazdelTeorii = {
           },
           {
             label: 'Проверяем $a\\pm b+c$',
-            formuly: ['a+b+c=2+5+3=10\\ne0', 'a-b+c=2-5+3=0'],
+            formuly: ['a+b+c=10\\ne0', 'a-b+c=2-5+3=0'],
             paras: ['Значит, $x_1=-1$, а $x_2=-\\dfrac{c}{a}=-\\dfrac32=-1{,}5$.'],
           },
           { label: 'Выбираем ответ', paras: ['Больший из корней $-1{,}5$ и $-1$ — это $-1$.'] },
