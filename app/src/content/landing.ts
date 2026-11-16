@@ -5,7 +5,7 @@
  * призыв сняты с главной (см. app/page.tsx): этих функций пока нет.
  */
 
-import { shortTasksOf, tasksOfPart, tasksPage } from '@/content/tasks';
+import { tasksOfPart, tasksPage } from '@/content/tasks';
 import { levelInfo, type Level } from '@/lib/level';
 import { VARIANT_HREF } from '@/content/variant';
 
@@ -261,12 +261,9 @@ export const landing = {
 
 /* ── Главная базы (/baza/) ───────────────────────────────────────
    Те же секции, что у профиля; отличаются тексты первого экрана,
-   показатели и блок банка. Счётчик «N из 21» считается по
-   content/baza/tasks.ts — отдельно от профиля. */
+   показатели и блок банка. */
 
 const BAZA = levelInfo('base');
-const bazaTasks = shortTasksOf('base');
-const bazaReady = bazaTasks.filter((t) => t.status === 'ready').length;
 
 const landingBaza = {
   meta: {
@@ -297,13 +294,15 @@ const landingBaza = {
       },
     ] satisfies Door[],
   },
-  /* Только то, что верно для базы сегодня: готовые задания — по конфигу,
-     формат экзамена — из спецификации ФИПИ. */
+  /* Формат экзамена — из спецификации ФИПИ. Счётчик готовых заданий
+     («1 из 21») с первого экрана снят: первым числом сайта он говорил
+     «здесь пусто»; готовность видна в банке, на карточках разделов
+     (docs/design-audit.md, п. 2.4). «180 минут» — числом и подписью:
+     целиком строка не помещалась в ячейку на 375 px. */
   metrics: [
-    { value: `${bazaReady}\u00A0из\u00A0${bazaTasks.length}`, label: 'заданий готовы' },
     { value: '21', label: 'задание в варианте' },
-    /* Крупно — только число: «180 минут» не помещается в треть ширины телефона. */
     { value: '180', label: 'минут на экзамен' },
+    { value: '2–5', label: 'отметка' },
   ] satisfies Fact[],
   bank: {
     title: landing.bank.title,
