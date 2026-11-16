@@ -3045,6 +3045,9 @@ html[data-tabs-pending] .topic-panel,
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
+    /* Прилипание считает край с полем ленты: без этого лента стояла
+       на 4 px прокрученной, и у первой вкладки гас левый край. */
+    scroll-padding-inline: var(--space-1);
     scrollbar-width: none;
     /* Поле под тень плиток и под край растушёвки. */
     padding: 2px var(--space-1) var(--space-2);
