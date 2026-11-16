@@ -346,13 +346,33 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  box-shadow: var(--shadow-lg);
+  /* Стекло, а не сплошной синий круг: кнопка лежит поверх содержимого
+     на каждом экране, и тёмное пятно перетягивало взгляд с задачи
+     (docs/design-audit.md, п. 1.5). Размытия нет — кнопка закреплена,
+     и пересчитывать blur на каждом кадре прокрутки телефону дорого;
+     фон почти непрозрачный, текст под ним не читается. */
+  background: var(--glass-bg-strong);
+  color: var(--color-primary);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
   transition: background var(--dur-hover) var(--ease);
 }
 .help-fab__button:hover {
-  background: var(--color-primary-hover);
+  background: var(--color-surface);
+}
+/* Зона нажатия не меньше 44 px, даже когда сама кнопка 40 px. */
+.help-fab__button {
+  position: relative;
+}
+.help-fab__button::before {
+  content: '';
+  position: absolute;
+  inset: min(0px, calc((var(--fab-size) - 44px) / 2));
+  border-radius: 50%;
+}
+.help-fab__button[aria-expanded='true'] {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 .help-fab__button svg {
   width: calc(var(--fab-size) / 2);

@@ -26,6 +26,8 @@ export interface SiteLink {
    * /baza/zadaniya/. Не задан — адрес от уровня не зависит.
    */
   hrefBase?: string;
+  /** Пункт выделен тёплым акцентом (новый раздел, на который зовём). */
+  akcent?: boolean;
 }
 
 /**
@@ -79,6 +81,7 @@ const LINKS = {
     hint: 'Приёмы, таймер и рейтинг',
     href: href(USTNYY),
     icon: 'schet',
+    akcent: true,
   },
   sobrat: {
     label: 'Собрать вариант',

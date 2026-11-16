@@ -1281,6 +1281,12 @@ a.task-card--soon:hover {
   place-items: center;
   flex: none;
 }
+.bell::before {
+  /* Зона нажатия 44 px при видимых 36. */
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
 .bell--unread::after {
   content: '';
   position: absolute;
@@ -1331,8 +1337,10 @@ a.task-card--soon:hover {
   gap: 4px;
   padding: var(--space-2) 0;
   text-decoration: none;
-  color: var(--color-text-tertiary);
-  font-size: 11px;
+  /* Вторичный серый, не третичный: третичный на белом — 2,6 : 1, для
+     подписи мало (WCAG AA — 4,5 : 1). */
+  color: var(--color-text-secondary);
+  font-size: 12px;
 }
 .bnav a.is-active {
   color: var(--color-primary);
@@ -1382,7 +1390,7 @@ a.task-card--soon:hover {
        на всю панель и с запасом его перекрывает. */
     min-height: 44px;
     text-align: center;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 14px;
     /* Подписи однострочные: перенос ломает ряд, а сокращение
        многоточием — читаемость. Все пять в ячейку помещаются. */
@@ -2158,6 +2166,11 @@ html[data-tabs-pending] .topic-panel,
   color: var(--color-text-tertiary);
 }
 .crumbs a {
+  /* Зона нажатия выше строки (было 20 px): поле сверху и снизу, место
+     в раскладке не меняется. */
+  display: inline-block;
+  padding-block: 12px;
+  margin-block: -12px;
   color: var(--color-text-secondary);
   text-decoration: none;
 }
@@ -2226,8 +2239,9 @@ html[data-tabs-pending] .topic-panel,
    положение задаёт страница: сам себя компонент не позиционирует. */
 .hand-note {
   font-family: var(--font-hand);
-  color: var(--color-primary);
-  opacity: 0.8;
+  /* Без прозрачности и на тон темнее: синий с opacity 0,8 давал на
+     светлом фоне 3,9 : 1. */
+  color: var(--blue-700);
 }
 
 /* ── адаптив компонентов ── */
@@ -3500,4 +3514,27 @@ html[data-tabs-pending] .topic-panel,
     width: 16px;
     height: 16px;
   }
+}
+
+/* ── Пункт с тёплым акцентом в меню кабинета и нижней панели ── */
+.topnav a.is-akcent {
+  background: linear-gradient(120deg, var(--color-accent-soft-surface), var(--color-surface-info));
+  box-shadow: inset 0 0 0 1px var(--color-border-accent);
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.topnav a.is-akcent:hover,
+.topnav a.is-akcent.is-active {
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent-text);
+}
+.bnav a.is-akcent {
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.bnav a.is-akcent .nav-ico {
+  padding: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 70% 25%, var(--color-accent-soft-surface), var(--color-surface-soft));
+  box-shadow: 0 0 0 1px var(--color-border-accent);
 }

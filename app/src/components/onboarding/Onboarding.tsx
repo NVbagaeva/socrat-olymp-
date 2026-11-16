@@ -6,6 +6,7 @@ import { useSyncExternalStore } from 'react';
 import { HOWTO_HREF } from '@/content/onboarding';
 import { useIntroRequest, useOnboarding, useWelcomeAtLoad } from '@/lib/onboarding';
 import { POV_HREF } from '@/content/povyshennye';
+import { ONLINE_PATHS } from '@/lib/variant/online/link';
 import { HelpFab } from './HelpFab';
 import { IntroWelcome } from './IntroWelcome';
 import './onboarding.css';
@@ -87,8 +88,14 @@ export function Onboarding() {
     <>
       {first || replay > 0 ? <IntroWelcome first={first} replay={replay} /> : null}
       {/* На экране «Вариантов повышенной сложности» помощь — в шторке «i»
-          у заголовка: вторая кнопка в углу закрывала бы карточки. */}
-      {path.startsWith(POV_HREF.replace(/\/$/, '')) ? null : <HelpFab />}
+          у заголовка: вторая кнопка в углу закрывала бы карточки. Пока
+          ученик решает вариант онлайн, кнопки тоже нет: она лежала на
+          поле ответа и «Дальше» (docs/design-audit.md, п. 1.5). Во время
+          тренировки её прячет session.css. */}
+      {path.startsWith(POV_HREF.replace(/\/$/, '')) ||
+      path.startsWith(ONLINE_PATHS.reshat) ? null : (
+        <HelpFab />
+      )}
       {state.active !== null ? <Tour /> : null}
     </>
   );
