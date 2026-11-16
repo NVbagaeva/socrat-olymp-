@@ -7,6 +7,8 @@
  * и ничего не включает сам.
  */
 
+import { nomerRazdela } from '@/content/struktura';
+
 /** Флаг оплаты: «1» — кнопки ведут на регистрацию и оплату. */
 export const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === '1';
 
@@ -46,9 +48,20 @@ export const BESPLATNO = {
   generatorBazy: true,
 } as const;
 
-/** «№1, 2, 10, 11» — номера открытых генераторов для подписей. */
+/**
+ * Номер задания ЕГЭ для подписи по номеру хранения. В правиле
+ * (generatorNomera, адреса страниц) — номера хранения, а человек на
+ * странице видит номер ЕГЭ (content/struktura.js): подписи — только им.
+ */
+export function nomerDlyaPodpisi(nomerHraneniya: string): string {
+  return /^\d+$/.test(nomerHraneniya)
+    ? String(nomerRazdela(Number(nomerHraneniya)))
+    : nomerHraneniya;
+}
+
+/** «№1, 2, 9, 10» — номера ЕГЭ открытых генераторов для подписей. */
 export function nomeraGeneratorov(): string {
-  return `№${BESPLATNO.generatorNomera.join(', ')}`;
+  return `№${BESPLATNO.generatorNomera.map(nomerDlyaPodpisi).join(', ')}`;
 }
 
 /** Пробный доступ: полный, без карты. */
@@ -329,12 +342,22 @@ export const SRAVNENIE: StrokaSravneniya[] = [
 /** Общие подписи. */
 export const TARIFY_TEXT = {
   metkaGlavnoy: 'Полный доступ',
+  /** Метка платной плашки на сроке «До ЕГЭ»: рядом всегда виден якорь. */
+  metkaVygodno: 'Выгоднее всего',
+  /** Якорь под ценой «До ЕГЭ»: «помесячно вышло бы 3 120 ₽ (8 × 390 ₽)». */
+  yakor: (pomesyachno: string, oplat: number, tsena30: string) =>
+    `помесячно вышло бы ${pomesyachno} (${oplat} × ${tsena30})`,
+  vygoda: (summa: string) => `выгоднее на ${summa}`,
   bezKarty: 'без карты',
   bezAvtoprodleniya: 'Без автопродления: доступ заканчивается сам',
+  /** Подпись под «Узнать об открытии», пока оплата выключена. */
+  skoroSnoska: 'Оплата скоро откроется — сообщим в Telegram-канале. Пока занимайтесь бесплатно.',
   za30: `за ${PERIOD_DNEY} дней`,
   knopki: {
     nachat: 'Начать заниматься',
     skoro: 'Оплата скоро откроется',
+    /** Пока оплата выключена: ссылка на Telegram-канал, почту не собираем. */
+    uznat: 'Узнать об открытии',
     probnyy: 'Попробовать бесплатно',
     oplatit: 'Оформить доступ',
   },

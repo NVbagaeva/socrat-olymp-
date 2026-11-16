@@ -1,3 +1,4 @@
+import { ogStranicy } from '@/lib/og';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const title = `${subtopic.title} — Будет на ЕГЭ`;
   /* task — часть адреса; номер задания ЕГЭ — у раздела. */
   const description = `Задание №${findSection(task)?.no ?? task}. ${subtopic.title}. ${subtopic.graphName}.`;
-  return { title, description, openGraph: { title, description } };
+  return { title, description, openGraph: ogStranicy(title, description) };
 }
 
 export default async function SubtopicPage({ params }: { params: Params }) {

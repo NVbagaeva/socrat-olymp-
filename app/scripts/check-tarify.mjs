@@ -142,13 +142,17 @@ if (!fs.existsSync(path.join(OUT, 'index.html'))) {
     const html = fs.readFileSync(tarify, 'utf8');
     const knopki = [...html.matchAll(/<(button|a|span)\b[^>]*data-oplata="([a-z]+)"[^>]*>/g)];
     if (knopki.length === 0) fail('/tarify/: не найдено ни одной кнопки оплаты');
+    /* Оплата выключена: кнопка — ссылка «Узнать об открытии» на
+       Telegram-канал (или старая неактивная кнопка). Ни одной ссылки на
+       оплату и ни одного поля почты. */
     for (const [tag, el, sostoyanie] of knopki) {
-      if (sostoyanie !== 'vyklyuchena' || el !== 'button' || !/\sdisabled(=""|\s|>)/.test(tag)) {
+      const neaktivnaya = el === 'button' && /\sdisabled(=""|\s|>)/.test(tag);
+      const vKanal = el === 'a' && /\shref="https:\/\/t\.me\/[^"]+"/.test(tag);
+      if (sostoyanie !== 'vyklyuchena' || !(neaktivnaya || vKanal)) {
         fail(`/tarify/: активная кнопка оплаты: ${tag.slice(0, 120)}`);
       }
     }
-    if (!html.includes('Оплата скоро откроется'))
-      fail('/tarify/: нет подписи «Оплата скоро откроется»');
+    if (!html.includes('Узнать об открытии')) fail('/tarify/: нет кнопки «Узнать об открытии»');
     if (!html.includes('Начать заниматься')) fail('/tarify/: нет кнопки «Начать заниматься»');
     if (/<input[^>]+type="email"/.test(html)) fail('/tarify/: на странице есть поле почты');
   }

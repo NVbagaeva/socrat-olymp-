@@ -10,6 +10,7 @@ import { taskName } from './tasks';
 import type { Uroven19 } from './teoriya19/tipy';
 import type { RazdelTab } from './vkladki';
 import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE19 = {
   no: nomerDvumya('parametr'),
@@ -28,7 +29,7 @@ export const ZADANIE19 = {
 
 /** Заголовок окна браузера: «Вкладка · Задача с параметром — Будет на ЕГЭ». */
 export function zadanie19Title(tab: string): string {
-  return `${tab} · ${ZADANIE19.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(19, ZADANIE19.title, tab);
 }
 
 export const PROGRESS_19 = {

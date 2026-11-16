@@ -26,7 +26,9 @@ export function Shell10({ children }: { children: React.ReactNode }) {
           title={ZADANIE10.title}
           lead={ZADANIE10.lead}
           tabletki={tabletkiRazdela({ chast: ZADANIE10.badge })}
-          media={<RisunokRazdela no={no} label={`${STSENA.oblozhka}: ${ZADANIE10.title}`} />}
+          media={
+            <RisunokRazdela no={ZADANIE10.slug} label={`${STSENA.oblozhka}: ${ZADANIE10.title}`} />
+          }
         />
         <RazdelTabs base={base} tabs={ZADANIE10.tabs} className="topic-tabs-row--stsena" />
         <div className="section-panel">{children}</div>

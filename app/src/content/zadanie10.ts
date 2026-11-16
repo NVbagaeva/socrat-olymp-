@@ -8,9 +8,12 @@
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { zagolovokRazdela } from '@/lib/seo';
+import { nomerDvumya } from '@/content/struktura';
 
 export const ZADANIE10 = {
-  no: '10',
+  /* Номер ЕГЭ для показа: в структуре 2027 года раздел — задание 9. */
+  no: nomerDvumya('prikladnye-zadachi'),
   slug: '10',
   title: taskName('10'),
   lead: 'Формула из физики или экономики дана в условии: подставить числа, решить уравнение и выбрать ответ по смыслу.',
@@ -27,7 +30,7 @@ export const ZADANIE10 = {
 
 /** Заголовок окна браузера: «Вкладка · Задачи с физическим смыслом — Будет на ЕГЭ». */
 export function zadanie10Title(tab: string): string {
-  return `${tab} · ${ZADANIE10.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(10, ZADANIE10.title, tab);
 }
 
 export const PROGRESS_10 = {

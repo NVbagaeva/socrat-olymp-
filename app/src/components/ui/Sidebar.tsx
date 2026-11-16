@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { NavIcon, type NavIconName } from './NavIcons';
@@ -209,10 +210,12 @@ export function Sidebar({
 }: SidebarProps): ReactNode {
   return (
     <aside className={clsx('sidebar', className)}>
-      <div className="sidebar__mark">
+      {/* Знак — тот же, что в шапке сайта, и ведёт на главную
+          (docs/audit-prodazhi.md, E2). */}
+      <Link className="sidebar__mark" href="/">
         <span className="sidebar__logo" aria-hidden="true" />
         <span>{brand}</span>
-      </div>
+      </Link>
 
       {afterBrand}
 

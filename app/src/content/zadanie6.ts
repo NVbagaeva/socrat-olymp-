@@ -11,6 +11,7 @@ import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE6 = {
   no: nomerDvumya('sluchainye-velichiny'),
@@ -36,7 +37,7 @@ export const ZADANIE6 = {
 
 /** Заголовок окна браузера: «Вкладка · Случайные величины — Будет на ЕГЭ». */
 export function zadanie6Title(tab: string): string {
-  return `${tab} · ${ZADANIE6.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(6, ZADANIE6.title, tab);
 }
 
 export const PROGRESS_6 = {

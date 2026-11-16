@@ -794,3 +794,31 @@
     width: 72px;
   }
 }
+
+/* Ссылки на варианты главной. */
+.pz-ssylki {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.pz-ssylka-karta {
+  display: grid;
+  gap: 8px;
+  padding: 24px;
+  border: 1px solid rgb(255 255 255 / 0.85);
+  border-radius: 20px;
+  background: var(--pz-glass);
+  box-shadow: var(--pz-shadow);
+  color: var(--pz-text);
+  text-decoration: none;
+  line-height: 1.5;
+}
+.pz-ssylka-karta span:not(.pz-ssylka) {
+  color: var(--pz-text-2);
+}
+@media (max-width: 860px) {
+  .pz-ssylki {
+    grid-template-columns: 1fr;
+  }
+}

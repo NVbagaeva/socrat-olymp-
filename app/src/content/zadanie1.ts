@@ -10,6 +10,7 @@ import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
 import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE1 = {
   no: nomerDvumya('planimetriya'),
@@ -41,7 +42,7 @@ export const ZADANIE1 = {
 
 /** Заголовок окна браузера: «Вкладка · Планиметрия — Будет на ЕГЭ». */
 export function zadanie1Title(tab: string): string {
-  return `${tab} · ${ZADANIE1.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(1, ZADANIE1.title, tab);
 }
 
 export const PROGRESS_1 = {

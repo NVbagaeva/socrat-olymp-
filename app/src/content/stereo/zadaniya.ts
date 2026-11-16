@@ -14,6 +14,7 @@ import { OPORNYE } from '../opornye';
 import { taskName } from '../tasks';
 import type { RazdelTab } from '../vkladki';
 import { nomerRazdela } from '../struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export type StereoNo = '3' | '15';
 
@@ -91,7 +92,7 @@ export const STEREO: Readonly<Record<StereoNo, StereoZadanie>> = {
 
 /** Заголовок окна браузера: «Теория · Задание №3. Стереометрия — Будет на ЕГЭ». */
 export function stereoTitle(no: StereoNo, tab: string): string {
-  return `${tab} · ${STEREO[no].title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(Number(no), STEREO[no].title, tab);
 }
 
 /** Подпись вкладки по id: заголовок панели и окна. */

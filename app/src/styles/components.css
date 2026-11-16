@@ -943,11 +943,20 @@ a.task-card--soon:hover {
   gap: 10px;
   align-items: center;
 }
+.sidebar__mark {
+  text-decoration: none;
+}
+.sidebar__mark:focus-visible {
+  outline: 2px solid var(--color-text-inverse);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+/* Знак сайта (как .logo i в site.css): путь относительный, чтобы сборка
+   положила файл с хешем в имени. */
 .sidebar__logo {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  background: var(--color-primary);
+  width: 22px;
+  height: 22px;
+  background: url('../../public/icons/logo.svg') center / 22px 22px no-repeat;
   display: block;
   flex: none;
 }
@@ -3535,6 +3544,10 @@ html[data-tabs-pending] .topic-panel,
 .bnav a.is-akcent .nav-ico {
   padding: 2px;
   border-radius: 50%;
-  background: radial-gradient(circle at 70% 25%, var(--color-accent-soft-surface), var(--color-surface-soft));
+  background: radial-gradient(
+    circle at 70% 25%,
+    var(--color-accent-soft-surface),
+    var(--color-surface-soft)
+  );
   box-shadow: 0 0 0 1px var(--color-border-accent);
 }

@@ -14,6 +14,7 @@ import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { href, USTNYY } from '@/lib/paths';
 import { VARIANT_HREF } from '@/content/variant';
+import { TARIFY_HREF } from '@/lib/tarify/config';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
    «Прогресс» и «Статистика» → «Статистика», «Материалы» →
@@ -85,6 +86,10 @@ const vseRazdely: NavItem[] = [
     href: HOWTO_HREF,
     icon: 'help',
   },
+  /* Тарифы — последними, как в шапке главной: из задания, тренажёра и
+     генератора к цене один клик (docs/audit-prodazhi.md, C1). В нижнюю
+     панель не входит — на экране «Ещё». */
+  { id: 'tarify', label: 'Тарифы', href: TARIFY_HREF, icon: 'favourites' },
 ];
 
 /**

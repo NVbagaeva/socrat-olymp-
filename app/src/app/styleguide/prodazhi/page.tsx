@@ -74,294 +74,6 @@ function Avtor({ kompakt = false }: { kompakt?: boolean }) {
   );
 }
 
-/* Макет шага тренажёра: как выглядит подсказка-вопрос. Задача — схема
-   в духе №8 «Производная» (физический смысл); в работе — снимок экрана. */
-function DemoPodskazka() {
-  return (
-    <div className="pz-demo" aria-label="Пример подсказки в тренажёре">
-      <div className="pz-demo__bar">
-        <span>Тренажёр · №8</span>
-        <span>Задача 3 из 10</span>
-      </div>
-      <p className="pz-demo__usl">
-        Точка движется по закону x(t) = t² − 4t + 7. Найдите её скорость в момент t = 5.
-      </p>
-      <div className="pz-demo__otvet pz-demo__otvet--oshibka">
-        Ваш ответ: 12 <span>не сходится</span>
-      </div>
-      <div className="pz-demo__hint">
-        <p className="pz-demo__hint-z">Подсказка учителя</p>
-        <p>Что такое скорость точки, если известен закон движения x(t)?</p>
-        <ul>
-          <li>Значение x(5)</li>
-          <li className="is-vybran">Производная x′(t) в момент t = 5</li>
-          <li>Отношение x(5) к 5</li>
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-function Otzyv() {
-  return (
-    <div className="pz-otzyv">
-      <p>Место под отзыв</p>
-      <span>
-        Собрать: фото или скрин сообщения, имя и класс, письменное разрешение на публикацию
-      </span>
-    </div>
-  );
-}
-
-/* ── Главная ─────────────────────────────────────────────────────── */
-
-function GlavnayaA() {
-  return (
-    <div className="pz-ekran">
-      <header className="pz-shapka">
-        <span className="pz-logo">Будет на ЕГЭ</span>
-        <nav>
-          <span>Задания</span>
-          <span>Варианты</span>
-          <span>Репетиторам</span>
-          <span>Об авторе</span>
-          <span>Тарифы</span>
-        </nav>
-        <span className="pz-knopka pz-knopka--mal">Начать бесплатно</span>
-      </header>
-
-      <section className="pz-hero">
-        <div className="pz-hero__text">
-          <Metka>ЕГЭ · профильная математика</Metka>
-          <h3 className="pz-h1">Подготовка, где подсказывает учитель, а не ответ в конце</h3>
-          <p className="pz-lid">
-            Все 12 заданий первой части и задачи второй: теория, опорные задачи и тренажёр. Ошибся —
-            подсказка задаёт вопрос к следующему шагу, как на занятии.
-          </p>
-          <div className="pz-ryad">
-            <span className="pz-knopka">Начать бесплатно</span>
-            <span className="pz-ssylka">
-              Тарифы — от {rubli(PLATNYE.uchenik.tsena30)} в месяц →
-            </span>
-          </div>
-          <Avtor kompakt />
-        </div>
-        <DemoPodskazka />
-      </section>
-
-      <div className="pz-fakty">
-        <div>
-          <b>3 800+</b>
-          <span>задач с ответами</span>
-        </div>
-        <div>
-          <b>12</b>
-          <span>заданий первой части — полностью</span>
-        </div>
-        <div>
-          <b>6</b>
-          <span>генераторов вариантов</span>
-        </div>
-        <div>
-          <b>{rubli(0)}</b>
-          <span>чтобы начать, без карты</span>
-        </div>
-      </div>
-
-      <section className="pz-sek">
-        <h4 className="pz-h2">Каждое задание — один путь от «не понимаю» до «решаю сам»</h4>
-        <ol className="pz-put">
-          <li>
-            <b>О задании</b>
-            <span>Что спрашивают, сколько баллов, где теряют</span>
-          </li>
-          <li>
-            <b>Теория</b>
-            <span>Только то, что нужно для этого номера</span>
-          </li>
-          <li>
-            <b>Опорные задачи</b>
-            <span>Главные приёмы с разбором</span>
-          </li>
-          <li>
-            <b>Тренажёр</b>
-            <span>Свои числа у каждой задачи, подсказки-вопросы</span>
-          </li>
-          <li>
-            <b>Вариант</b>
-            <span>Проверить себя как на экзамене</span>
-          </li>
-        </ol>
-      </section>
-
-      <section className="pz-sek pz-tri">
-        <article>
-          <Metka>Ученику</Metka>
-          <h5>Понять, а не запомнить</h5>
-          <p>Тренажёр с подсказками, работа над ошибками и варианты с баллами.</p>
-          <span className="pz-ssylka">Выбрать задание →</span>
-        </article>
-        <article>
-          <Metka>Родителю</Metka>
-          <h5>Видно, что ребёнок занимается</h5>
-          <p>Прогресс по каждому заданию и история решений. Без автопродления и привязки карты.</p>
-          <span className="pz-ssylka">Что входит в доступ →</span>
-        </article>
-        <article>
-          <Metka>Репетитору</Metka>
-          <h5>Вариант с разными числами за минуту</h5>
-          <p>Лист ученика, лист учителя с ответами и разбор. Каждому своё — списать не у кого.</p>
-          <span className="pz-ssylka">Собрать вариант →</span>
-        </article>
-      </section>
-
-      <section className="pz-sek pz-sravn">
-        <h4 className="pz-h2">Чем это не похоже на сборник задач</h4>
-        <table>
-          <thead>
-            <tr>
-              <th />
-              <th>Обычный банк задач</th>
-              <th>Будет на ЕГЭ</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Застрял</td>
-              <td>Смотришь ответ или решение целиком</td>
-              <td>Вопрос к следующему шагу и вторая попытка</td>
-            </tr>
-            <tr>
-              <td>Задачи</td>
-              <td>Одни и те же у всех, ответы гуглятся</td>
-              <td>Те же прототипы ФИПИ, свои числа</td>
-            </tr>
-            <tr>
-              <td>Порядок</td>
-              <td>Тысячи задач без маршрута</td>
-              <td>Теория → опорные → тренажёр → вариант</td>
-            </tr>
-            <tr>
-              <td>Кто составил</td>
-              <td>Не указано</td>
-              <td>Учитель и эксперт ГИА, имя на каждом листе</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section className="pz-sek pz-dva">
-        <div>
-          <Metka>Отзывы</Metka>
-          <h4 className="pz-h2">Что говорят ученики и коллеги</h4>
-          <div className="pz-otzyvy">
-            <Otzyv />
-            <Otzyv />
-          </div>
-        </div>
-        <div className="pz-cena">
-          <Metka>Тарифы</Metka>
-          <p className="pz-cena__z">Начните бесплатно. Полный доступ — когда понадобится.</p>
-          <p className="pz-cena__ch">
-            {rubli(PLATNYE.uchenik.tsena30)} <span>за {PERIOD_DNEY} дней</span>
-          </p>
-          <p className="pz-cena__p">
-            Или {rubli(tsenaDoEge('uchenik') ?? 0)} сразу {DO_EGE.podpis}. Пробные {PROBNYY.dney}{' '}
-            дней — без карты. Без автопродления.
-          </p>
-          <span className="pz-knopka">Посмотреть тарифы</span>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function GlavnayaB() {
-  return (
-    <div className="pz-ekran pz-ekran--b">
-      <section className="pz-hero pz-hero--b">
-        <div className="pz-hero__text">
-          <Metka>ЕГЭ · профильная математика</Metka>
-          <h3 className="pz-h1">Каждое задание ЕГЭ — так, как его объясняет учитель</h3>
-          <p className="pz-lid">
-            Теория, опорные задачи и тренажёр с подсказками. Составила Наталия Багаева — учитель
-            математики и эксперт ГИА.
-          </p>
-        </div>
-        <img className="pz-hero__kristall" src={KRISTALL} alt="" width={600} height={600} />
-        <div className="pz-dveri">
-          <article>
-            <h5>Я готовлюсь к ЕГЭ</h5>
-            <p>
-              Начните с любого задания бесплатно: теория, опорные задачи и {BESPLATNO.trenazherVDen}{' '}
-              задач тренажёра в день.
-            </p>
-            <span className="pz-knopka">Начать бесплатно</span>
-            <small>
-              Полный доступ — {rubli(PLATNYE.uchenik.tsena30)} за {PERIOD_DNEY} дней
-            </small>
-          </article>
-          <article>
-            <h5>Я репетитор или учитель</h5>
-            <p>Варианты с разными числами, лист ответов и разбор — за минуту. Классы и домашние.</p>
-            <span className="pz-knopka pz-knopka--teplaya">Собрать вариант</span>
-            <small>
-              Тариф «Репетитор» — {rubli(PLATNYE.repetitor.tsena30)} за {PERIOD_DNEY} дней
-            </small>
-          </article>
-        </div>
-      </section>
-
-      <section className="pz-sek">
-        <Metka>Как это выглядит внутри</Metka>
-        <h4 className="pz-h2">Три экрана, ради которых сюда возвращаются</h4>
-        <div className="pz-vnutri">
-          <figure>
-            <DemoPodskazka />
-            <figcaption>Тренажёр: подсказка — вопрос, а не ответ</figcaption>
-          </figure>
-          <figure>
-            <div className="pz-list">
-              <p className="pz-list__z">Вариант 2 · лист ученика</p>
-              <p>1. Найдите значение выражения …</p>
-              <p>2. Имеется два сплава …</p>
-              <p>3. Точка движется по закону …</p>
-              <p className="pz-list__s">у соседа — другие числа</p>
-            </div>
-            <figcaption>Генератор: у каждого ученика свои числа</figcaption>
-          </figure>
-          <figure>
-            <div className="pz-list pz-list--uchitel">
-              <p className="pz-list__z">Лист учителя</p>
-              <p>В1: 6 · 14 · −2 · 0,25</p>
-              <p>В2: 9 · 18 · −1 · 0,75</p>
-              <p>Разбор каждого номера</p>
-            </div>
-            <figcaption>Один лист ответов на весь класс</figcaption>
-          </figure>
-        </div>
-        <p className="pz-primechanie">
-          В макете — схемы. В работе — настоящие снимки экранов сайта (их можно снять скриптом, без
-          новых картинок).
-        </p>
-      </section>
-
-      <section className="pz-sek pz-dva">
-        <Avtor />
-        <div>
-          <Metka>Почему мне можно доверить подготовку</Metka>
-          <ul className="pz-galki">
-            <li>Проверяю работы ЕГЭ как эксперт ГИА — знаю, за что снимают баллы</li>
-            <li>Все задачи — прототипы открытого банка ФИПИ, без «авторских» сюрпризов</li>
-            <li>Подсказки написаны так, как я веду занятие</li>
-          </ul>
-          <span className="pz-ssylka">Об авторе →</span>
-        </div>
-      </section>
-    </div>
-  );
-}
-
 /* ── Тарифы ──────────────────────────────────────────────────────── */
 
 function TarifyA() {
@@ -514,40 +226,50 @@ function TarifyB() {
   );
 }
 
+const VARIANTY_GLAVNOY = [
+  {
+    href: '/styleguide/prodazhi/glavnaya-1/',
+    nazvanie: 'Главная · вариант 1 «В первом экране»',
+    tekst:
+      'Под лидом — тихая ссылка «Тарифы — от 390 ₽ в месяц» и плашка автора: фото, имя, одна строка. На телефоне — под кнопкой «Начать бесплатно». Короткий блок цен — в конце страницы, после банка заданий.',
+  },
+  {
+    href: '/styleguide/prodazhi/glavnaya-2/',
+    nazvanie: 'Главная · вариант 2 «Отдельными блоками»',
+    tekst:
+      'Первый экран почти не меняется: ссылка на тарифы — строкой под дверями. Плашка автора — отдельной узкой полосой после блока «вечер». Блок цен — перед банком заданий.',
+  },
+];
+
 export default function Page() {
   return (
     <main className="pz">
       <header className="pz-vvod">
         <p className="pz-metka">Служебная страница · аудит продаж</p>
-        <h1>Макеты главной и тарифов</h1>
+        <h1>Добавки главной и макеты тарифов</h1>
         <p>
-          По два варианта на страницу, чтобы выбрать направление. Это схемы, не боевые страницы:
-          цены и лимиты — из lib/tarify/config.ts, отзывов и цифр учеников нет, на их месте рамки
-          «собрать». Подробности и обоснование — docs/audit-prodazhi.md.
+          Главная остаётся как есть: первый экран, кристалл, двери, показатели, блок «вечер», банк
+          заданий, переключатель уровня, заставка и попугай на месте. Добавляются только плашка
+          автора и цены. Два варианта размещения открываются на настоящей главной — выберите один.
+          Ниже — макеты страницы тарифов (для волны 3). Подробности — docs/audit-prodazhi.md.
         </p>
       </header>
 
       <section className="pz-variant">
-        <h2>Главная · вариант А «Учитель рядом»</h2>
-        <p className="pz-pochemu">
-          Оффер — о выгоде ученика (подсказка учителя вместо ответа). Справа — живой кусок продукта
-          вместо абстрактной фигуры. Автор и цена видны на первом экране. Ниже — маршрут задания,
-          три аудитории, сравнение со «сборником задач», место под отзывы и цена.
-        </p>
-        <GlavnayaA />
+        <h2>Главная: где поставить автора и цены</h2>
+        <div className="pz-ssylki">
+          {VARIANTY_GLAVNOY.map((v) => (
+            <a key={v.href} className="pz-ssylka-karta" href={v.href}>
+              <b>{v.nazvanie}</b>
+              <span>{v.tekst}</span>
+              <span className="pz-ssylka">Открыть →</span>
+            </a>
+          ))}
+        </div>
       </section>
 
       <section className="pz-variant">
-        <h2>Главная · вариант Б «Две двери с ценой»</h2>
-        <p className="pz-pochemu">
-          Ближе к нынешней главной: кристалл и «двери» остаются, но в каждой двери — кнопка и цена
-          своей аудитории. Второй экран — «как это выглядит внутри», третий — автор и экспертиза.
-        </p>
-        <GlavnayaB />
-      </section>
-
-      <section className="pz-variant">
-        <h2>Тарифы · вариант А «Сначала выгодный»</h2>
+        <h2>Тарифы · вариант А «Сначала выгодный» — выбран для волны 3</h2>
         <p className="pz-pochemu">
           Первая плашка — «до ЕГЭ» с честным якорем (помесячно вышло бы дороже). Бесплатный —
           последним и тише. Состояние «оплата скоро» — не серая мёртвая кнопка, а понятный следующий

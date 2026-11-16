@@ -12,6 +12,7 @@ import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE14 = {
   no: nomerDvumya('uravnenie-s-otborom'),
@@ -31,7 +32,7 @@ export const ZADANIE14 = {
 
 /** Заголовок окна: «Вкладка · Уравнение — Будет на ЕГЭ». */
 export function zadanie14Title(tab: string): string {
-  return `${tab} · ${ZADANIE14.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(14, ZADANIE14.title, tab);
 }
 
 export const PROGRESS_14 = {

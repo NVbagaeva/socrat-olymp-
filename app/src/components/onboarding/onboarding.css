@@ -435,6 +435,15 @@
       visibility 0s linear var(--dur-switch);
   }
 }
+/* Телефон, прокрутка вниз (HelpFab.tsx): кнопка уходит, чтобы не лежать
+   поверх карточек; при прокрутке вверх возвращается. */
+.help-fab[data-skryta]:not(:focus-within) {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur-switch) var(--ease),
+    visibility 0s linear var(--dur-switch);
+}
 @media (prefers-reduced-motion: reduce) {
   .tour__veil,
   .tour__hole,

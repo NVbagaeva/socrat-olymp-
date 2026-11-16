@@ -1,9 +1,10 @@
 'use client';
 
 import { GEN_UI } from '@/content/generatorUi';
+import { VARIANT_HREF } from '@/content/variant';
 import { assetUrl } from '@/lib/assetUrl';
 import { href, ZADANIYA } from '@/lib/paths';
-import { BESPLATNO, TARIFY_HREF } from '@/lib/tarify/config';
+import { BESPLATNO, nomerDlyaPodpisi, TARIFY_HREF } from '@/lib/tarify/config';
 import { GenSheet } from './GenOverlay';
 import './zamok.css';
 
@@ -38,9 +39,12 @@ export function GenZakryt({ nomer }: { nomer: string }) {
         <ul>
           {BESPLATNO.generatorNomera.map((n) => (
             <li key={n}>
-              <a href={href(ZADANIYA, n, 'generator')}>№{n}</a>
+              <a href={href(ZADANIYA, n, 'generator')}>№{nomerDlyaPodpisi(n)}</a>
             </li>
           ))}
+          <li>
+            <a href={VARIANT_HREF}>{T.zakryt.sobrat}</a>
+          </li>
         </ul>
       </div>
     </section>

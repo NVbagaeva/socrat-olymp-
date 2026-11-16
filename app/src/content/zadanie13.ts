@@ -10,6 +10,7 @@ import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import { OPTIMIZACIYA13_TAIL } from '@/lib/zadanie13/links';
 import { STRUKTURA, chastRazdela, maxBall, nomerDvumya, nomerRazdela } from '@/content/struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 /**
  * Место экономической задачи в действующей структуре экзамена
@@ -60,7 +61,7 @@ export const ZADANIE13 = {
 
 /** Заголовок окна браузера: «Вкладка · Экономические задачи — Будет на ЕГЭ». */
 export function zadanie13Title(tab: string): string {
-  return `${tab} · ${ZADANIE13.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(13, ZADANIE13.title, tab);
 }
 
 /* ── Вкладка «Опорные задачи» ───────────────────────────────────── */

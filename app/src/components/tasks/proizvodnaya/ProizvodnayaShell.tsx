@@ -28,7 +28,12 @@ export function ProizvodnayaShell({ children }: { children: React.ReactNode }) {
           title={PROIZVODNAYA.title}
           lead={PROIZVODNAYA.lead}
           tabletki={tabletkiRazdela({ chast: PROIZVODNAYA.badge })}
-          media={<RisunokRazdela no={no} label={`${STSENA.oblozhka}: ${PROIZVODNAYA.title}`} />}
+          media={
+            <RisunokRazdela
+              no={PROIZVODNAYA.slug}
+              label={`${STSENA.oblozhka}: ${PROIZVODNAYA.title}`}
+            />
+          }
         />
 
         <RazdelTabs
