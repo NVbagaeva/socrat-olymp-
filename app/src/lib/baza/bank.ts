@@ -14,6 +14,11 @@ import type { Prototip, ZadachaBazy, ZadachaLite } from './types';
 /** Ключ задачи банка базы: «P01-03», в большом прототипе — «P02-117». */
 export const KLYUCH_BAZY = /^P\d\d-\d{2,3}$/;
 
+/** Ключ n-й задачи прототипа (с 1): «P01-03», в большом прототипе — «P02-117». */
+export function klyuchZadachi(prototip: string, n: number, zadach: number): string {
+  return `${prototip}-${String(n).padStart(zadach > 99 ? 3 : 2, '0')}`;
+}
+
 /** Задачи одного прототипа. Бросает, если разных задач меньше заявленного. */
 export function zadachiPrototipa(slug: string, proto: Prototip): ZadachaBazy[] {
   const out: ZadachaBazy[] = [];
@@ -29,7 +34,7 @@ export function zadachiPrototipa(slug: string, proto: Prototip): ZadachaBazy[] {
     vidennye.add(text);
     const r = proto.solve(params);
     out.push({
-      id: `${proto.id}-${String(out.length + 1).padStart(proto.zadach > 99 ? 3 : 2, '0')}`,
+      id: klyuchZadachi(proto.id, out.length + 1, proto.zadach),
       prototypeId: proto.id,
       params,
       text,

@@ -218,7 +218,7 @@ function Podpis({ text, html }: { text: string; html?: string }) {
 export function Generator(props: GeneratorProps) {
   const polnyy = usePolnyyDostup();
   if (!polnyy && !generatorOtkryt(props.config.scope)) {
-    return <GenZakryt nomer={props.config.scope} />;
+    return <GenZakryt nomer={props.config.nomer ?? props.config.scope} />;
   }
   return <GeneratorEkran {...props} polnyy={polnyy} />;
 }
@@ -1531,7 +1531,7 @@ function GeneratorEkran({
 
       {overlay?.kind === 'tarif' ? (
         <ProbnayaPotrachena
-          tekst={GEN_UI.dostup.potrachena.generator(config.scope)}
+          tekst={GEN_UI.dostup.potrachena.generator(config.nomer ?? config.scope)}
           onClose={closeOverlay}
         />
       ) : null}

@@ -9,6 +9,7 @@
        «Пробная генерация использована», лист остаётся. У каждого
        задания свой счётчик.
      • «Собрать вариант»: то же — одна пробная генерация.
+     • Генераторы базы (№5, №12) закрыты так же; ключ открывает их.
      • Ключ проверок budetege:dostup:proverka открывает всё.
 
    Браузер здесь — посетитель без ключа проверок: общий помощник
@@ -104,6 +105,24 @@ const okno = async (page) =>
       );
     }
   }
+  /* Генераторы базы (lib/baza/generatorBazy.ts) — тоже закрыты без тарифа,
+     в карточке — номер задания базы, а не область комплекта. */
+  for (const no of ['5', '12']) {
+    await page.goto(`${BASE}/baza/zadaniya/${no}/generator/`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    check(
+      (await page.locator('.gen-zamok').count()) === 1,
+      `база №${no}: нет карточки закрытого генератора`,
+    );
+    check(
+      (await page.locator('section.gen').count()) === 0,
+      `база №${no}: генератор открыт без тарифа`,
+    );
+    check(
+      (await page.locator('#gen-zamok-z').innerText()).startsWith(`Генератор №${no} базы`),
+      `база №${no}: в карточке не номер задания базы`,
+    );
+  }
   await ctx.close();
 }
 
@@ -163,6 +182,12 @@ const okno = async (page) =>
   await go.click();
   await page.waitForTimeout(400);
   check((await okno(page)) === null, 'ключ проверок: вторая генерация с окном тарифов');
+  await page.goto(`${BASE}/baza/zadaniya/12/generator/`, { waitUntil: 'networkidle' });
+  await page.locator('section.gen').waitFor();
+  check((await page.locator('.gen-zamok').count()) === 0, 'ключ проверок: база №12 закрыта');
+  await page.locator('.gen-strip .gen-go').click();
+  await page.waitForSelector('.gen-paper.is-live .gen-task', { timeout: 60000 });
+  check(true, 'ключ проверок: база №12 собирает лист');
   await ctx.close();
 }
 
