@@ -541,7 +541,6 @@
    текстом шага, а не слева: формулам возвращаются 40 px. */
 @media (max-width: 767.98px) {
   .kz-gruppa.stk-glass {
-    overflow: visible;
     border: 0;
     border-radius: 0;
     background: none;
