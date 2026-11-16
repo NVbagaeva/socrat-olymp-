@@ -1218,6 +1218,56 @@ a.task-card--soon:hover {
   color: var(--color-primary);
   font-weight: 500;
 }
+/* Меню с выпадающим списком «Варианты» (Topbar, navSlot): листается
+   вбок только лента пунктов до списка, сам список и пункты после него
+   стоят вне прокрутки — иначе выпавший список обрезался бы краем
+   прокручиваемой ленты. */
+.topnav--so-spiskom {
+  overflow: visible;
+  padding-inline-end: 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.topnav__lenta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.topnav__lenta::-webkit-scrollbar {
+  display: none;
+}
+.topnav .nav-drop {
+  flex: none;
+}
+/* Кнопка списка — как соседние пункты меню кабинета. */
+.topnav .nav-drop__button {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition:
+    background var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
+}
+.topnav .nav-drop__button:hover,
+.topnav .nav-drop[data-open] .nav-drop__button {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.topnav .nav-drop__button.is-current {
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.topnav .nav-drop__list {
+  left: 0;
+}
+
 /* Полные названия пунктов помещаются в шапку от 1600px; уже — короткие
    (те же, что в нижней панели и на экране «Ещё»). */
 .topnav__short {

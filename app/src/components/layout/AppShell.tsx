@@ -23,6 +23,8 @@ import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { SiteMenu } from './SiteMenu';
+import { NavDropdown } from './NavDropdown';
+import { isNavGroup, site } from '@/content/site';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
@@ -101,12 +103,24 @@ function levelNav(items: NavItem[], level: Level): NavItem[] {
  * каждой из них. Ниже 768px сайдбар прячется и его место занимает
  * нижняя панель — пункты у неё те же, что в шапке.
  */
+/* «Варианты» в шапке кабинета — тот же выпадающий список, что в шапке
+   сайта (content/site.ts): «Собрать вариант», «Повышенные» и
+   «Ежемесячные» не стоят тремя отдельными пунктами. */
+const VARIANTY = site.nav.find(isNavGroup);
+const V_SPISKE = new Set(['variant', 'povyshennye', 'ezhemesyachnye']);
+
 export function AppShell({ active, search = false, level = 'profile', children }: AppShellProps) {
   const bottomItems = withActive(
     levelNav([...appNavPrimary, appNavMorePage], level),
     bottomNavActive(active),
   );
   const tasks = tasksOf(level);
+  const vse = withActive(levelNav(topNav, level), active);
+  const verhnee =
+    VARIANTY === undefined
+      ? vse
+      : vse.filter((item) => item.id === 'variant' || !V_SPISKE.has(item.id));
+  const tekushchiy = vse.find((item) => item.active === true && V_SPISKE.has(item.id))?.href;
 
   return (
     <div className="shell shell--responsive app-shell">
@@ -143,7 +157,20 @@ export function AppShell({ active, search = false, level = 'profile', children }
       <div className="app-col">
         <Topbar
           lead={<LevelSwitch className="topbar__level" />}
-          nav={withActive(levelNav(topNav, level), active)}
+          nav={verhnee}
+          {...(VARIANTY === undefined
+            ? {}
+            : {
+                navSlot: {
+                  id: 'variant',
+                  node: (
+                    <NavDropdown
+                      group={VARIANTY}
+                      {...(tekushchiy === undefined ? {} : { currentHref: tekushchiy })}
+                    />
+                  ),
+                },
+              })}
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
