@@ -34,6 +34,23 @@ function Chertezh({ tema, podpis }: { tema: string; podpis?: string }) {
   );
 }
 
+/** Готовый чертёж (SVG собран на сборке): та же рамка и подпись, что у чертежа темы. */
+function Risunok({ svg, podpis }: { svg: string; podpis?: string }) {
+  return (
+    <figure className="baza-chertezh">
+      <div
+        className="baza-chertezh__ris"
+        dangerouslySetInnerHTML={{ __html: `<span class="pl-wrap">${svg}</span>` }}
+      />
+      {podpis === undefined ? null : (
+        <figcaption>
+          <Tex text={podpis} />
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
 function Blok({ blok }: { blok: BlokTeorii }) {
   switch (blok.vid) {
     case 'tekst':
@@ -50,6 +67,10 @@ function Blok({ blok }: { blok: BlokTeorii }) {
           tema={blok.tema}
           {...(blok.podpis === undefined ? {} : { podpis: blok.podpis })}
         />
+      );
+    case 'risunok':
+      return (
+        <Risunok svg={blok.svg} {...(blok.podpis === undefined ? {} : { podpis: blok.podpis })} />
       );
     case 'spisok':
       return (
