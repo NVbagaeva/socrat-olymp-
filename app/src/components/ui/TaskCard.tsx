@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import Link from 'next/link';
+import { LinkPoNamereniyu } from './LinkPoNamereniyu';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { Badge, type BadgeTone } from './Badge';
 
@@ -101,9 +101,9 @@ export function TaskCard({
      неоткрытого раздела, а сама карточка — ссылка на заглушку. */
   if (comingSoon && href !== undefined) {
     return (
-      <Link className={clsx('task-card', 'task-card--soon', className)} href={href}>
+      <LinkPoNamereniyu className={clsx('task-card', 'task-card--soon', className)} href={href}>
         {body}
-      </Link>
+      </LinkPoNamereniyu>
     );
   }
 
@@ -121,9 +121,9 @@ export function TaskCard({
   /* Раздел открыт: ссылка целиком, а не только заголовок. */
   if (href !== undefined) {
     return (
-      <Link className={clsx('task-card', className)} href={href}>
+      <LinkPoNamereniyu className={clsx('task-card', className)} href={href}>
         {body}
-      </Link>
+      </LinkPoNamereniyu>
     );
   }
 
