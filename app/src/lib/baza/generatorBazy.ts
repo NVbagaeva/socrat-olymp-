@@ -128,7 +128,6 @@ export function configBazy(task: ZadanieBazy, razdel: RazdelBazy, slot: string):
   return {
     id: task.slug,
     scope: scopeBazy(task.slug),
-    nomer: T.nomer(no),
     slot,
     section: T.section(no, task.name),
     sheet: {

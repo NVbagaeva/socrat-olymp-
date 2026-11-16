@@ -11,6 +11,7 @@ import {
   type AktivnyyFiltr,
 } from '@/components/filtry/chasti';
 import { GEN_UI } from '@/content/generatorUi';
+import { GENERATOR_BAZY } from '@/content/baza/generator';
 import { typesetText } from '@/lib/tex';
 import {
   changeLevelAt,
@@ -81,6 +82,11 @@ import { GenToast, GenSheet as GenWindow } from './GenOverlay';
 import { GenSheetView, type TaskAction } from './GenSheetView';
 import { GenZakryt, ProbnayaPotrachena } from './GenZamok';
 import './generator.css';
+
+/** Номер генератора в окнах доступа: «12», у базы — «12 базы» (область «baza-12»). */
+function nomerGeneratora(scope: string): string {
+  return scope.startsWith('baza-') ? GENERATOR_BAZY.nomer(Number(scope.slice(5))) : scope;
+}
 
 type Overlay =
   | null
@@ -218,7 +224,7 @@ function Podpis({ text, html }: { text: string; html?: string }) {
 export function Generator(props: GeneratorProps) {
   const polnyy = usePolnyyDostup();
   if (!polnyy && !generatorOtkryt(props.config.scope)) {
-    return <GenZakryt nomer={props.config.nomer ?? props.config.scope} />;
+    return <GenZakryt nomer={nomerGeneratora(props.config.scope)} />;
   }
   return <GeneratorEkran {...props} polnyy={polnyy} />;
 }
@@ -1531,7 +1537,7 @@ function GeneratorEkran({
 
       {overlay?.kind === 'tarif' ? (
         <ProbnayaPotrachena
-          tekst={GEN_UI.dostup.potrachena.generator(config.nomer ?? config.scope)}
+          tekst={GEN_UI.dostup.potrachena.generator(nomerGeneratora(config.scope))}
           onClose={closeOverlay}
         />
       ) : null}
