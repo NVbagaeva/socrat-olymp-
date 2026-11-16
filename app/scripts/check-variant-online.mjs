@@ -8,13 +8,18 @@
      1. Нормализация ответа ЕГЭ — таблица случаев: запятая и точка,
         лишние нули, «−0», неверная запись (дробь, буквы, пробелы).
      2. Баллы и шкала: первичный балл по конфигу, тестовый — только при
-        всех заданиях 1–13, шкала не убывает и кончается на 100.
+        всей первой части (задания варианта по действующей структуре),
+        шкала не убывает и кончается на 100.
      3. Детерминизм серии: тот же код → те же варианты, задача в задачу.
      4. Нет повторов в серии из 10 вариантов (N случайных серий).
      5. Код результата раскодируется без потерь (случайные ответы,
         время, режимы, таймеры) и не принимает испорченный код.
      6. Статистика по архиву: решаемость, среднее время, слабые номера.
      7. «Работа над ошибками»: аналог того же прототипа, не из партии.
+
+   Серии — из всех заданий варианта по действующей структуре: в ЕГЭ-2027
+   (по умолчанию) — двенадцать, с разделом 21 «Наибольшее и наименьшее»;
+   STRUKTURA_EGE=2027-20 — прежние тринадцать (так гоняет CI).
 
    Восстановление прогресса после перезагрузки проверяет браузерный
    тест scripts/check-variant-online-site.mjs (после pnpm build).
@@ -80,7 +85,10 @@ ok(verdictOf('0,6', '0,5').kind === 'wrong', 'verdictOf', 'неверно');
 /* ── 2. Баллы и шкала ───────────────────────────────────────────── */
 
 console.log('2. Баллы и шкала');
-const ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+/* Все задания варианта — первая часть действующей структуры. */
+const { VARIANT_NUMBERS } = requireSrc('lib/variant/struktura');
+const { EGE_NUMBERS } = requireSrc('lib/variant/types');
+const ALL = [...VARIANT_NUMBERS];
 ok(
   TESTOVYJ.length === 33 && TESTOVYJ[0] === 0 && TESTOVYJ[32] === 100,
   'шкала',
@@ -98,9 +106,13 @@ ok(
 );
 const full = scoreWork(
   ALL,
-  ALL.map((n) => n % 2 === 0),
+  ALL.map((_, i) => i % 2 === 1),
 );
-ok(full.primary === 6 && full.max === 13 && full.test === 34, 'scoreWork', JSON.stringify(full));
+ok(
+  full.primary === 6 && full.max === ALL.length && full.test === 34,
+  'scoreWork',
+  JSON.stringify(full),
+);
 const part = scoreWork([1, 2, 3], [true, false, true]);
 ok(
   part.test === null && part.primary === 2 && part.percent === 67,
@@ -111,7 +123,7 @@ ok(
 /* ── Разделы ────────────────────────────────────────────────────── */
 
 const adapters = new Map();
-for (let n = 1; n <= 13; n += 1) {
+for (const n of EGE_NUMBERS) {
   const p = String(n).padStart(2, '0');
   const { section } = requireSrc(`lib/variant/adapters/z${p}/index`);
   const df = `lib/variant/data/z${p}`;
@@ -122,7 +134,7 @@ for (let n = 1; n <= 13; n += 1) {
   );
 }
 const subtypeIds = {};
-for (let n = 1; n <= 13; n += 1) subtypeIds[n] = adapters.get(n).info.subtypes.map((s) => s.id);
+for (const n of EGE_NUMBERS) subtypeIds[n] = adapters.get(n).info.subtypes.map((s) => s.id);
 
 function series(seed, source = 'mix', count = 10) {
   const config = { tasks: ALL, subtypes: {}, source, stars: [], count, parallel: false };
@@ -160,7 +172,7 @@ for (let k = 0; k < SETS; k += 1) {
     ok(
       v.tasks.map((t) => t.egeNumber).join() === ALL.join(),
       `серия ${seed} В${v.index}`,
-      'не все задания 1–13',
+      'не все задания варианта',
     );
     for (const t of v.tasks) {
       ok(
@@ -271,10 +283,15 @@ const works = [1, 2, 3].map((v) => ({
   finishedAt: v * 1000,
   resultCode: '',
   primary: v,
-  max: 13,
+  max: ALL.length,
   test: testScore(v),
   seconds: 100,
-  tasks: ALL.map((n) => ({ egeNumber: n, right: n <= v * 3, empty: false, seconds: n * 10 + v })),
+  tasks: ALL.map((n, i) => ({
+    egeNumber: n,
+    right: i + 1 <= v * 3,
+    empty: false,
+    seconds: (i + 1) * 10 + v,
+  })),
 }));
 works.push({ ...works[0], id: 'other', code: 'T', finishedAt: 5000 });
 const st = computeStats(works, 'S');
@@ -285,15 +302,18 @@ ok(
 );
 ok(st.trend[2].value === testScore(3), 'тренд', 'тестовый балл');
 const n1 = st.numbers[0];
-const n13 = st.numbers[12];
+const nLast = st.numbers[ALL.length - 1];
 ok(
-  n1.rate === 1 && n13.rate === 0 && st.numbers[3].rate === 2 / 3,
+  st.numbers.map((x) => x.egeNumber).join() === ALL.join() &&
+    n1.rate === 1 &&
+    nLast.rate === 0 &&
+    st.numbers[3].rate === 2 / 3,
   'решаемость',
   JSON.stringify(st.numbers.slice(0, 4)),
 );
 ok(n1.avgSeconds === 12, 'среднее время', String(n1.avgSeconds));
 ok(
-  st.weak[0].egeNumber === 10 && st.weak.every((w) => w.rate < 0.6),
+  st.weak[0].egeNumber === ALL[9] && st.weak.every((w) => w.rate < 0.6),
   'слабые номера',
   JSON.stringify(st.weak.map((w) => w.egeNumber)),
 );
@@ -317,8 +337,8 @@ for (const t of set.variants[0].tasks) {
   ok(!used.has(a.taskId), `аналог №${t.egeNumber}`, 'задача из партии');
   ok(b !== null && a.taskId === b.taskId, `аналог №${t.egeNumber}`, 'не детерминирован');
 }
-console.log(`   аналогов нашлось: ${analogs} из 13`);
-ok(analogs >= 10, 'аналоги', `только ${analogs} из 13`);
+console.log(`   аналогов нашлось: ${analogs} из ${ALL.length}`);
+ok(analogs >= 10, 'аналоги', `только ${analogs} из ${ALL.length}`);
 
 /* ── Ссылки ─────────────────────────────────────────────────────── */
 

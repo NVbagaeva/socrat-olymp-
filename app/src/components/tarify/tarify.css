@@ -245,12 +245,20 @@
 .tf-knopka:active {
   transform: scale(0.98);
 }
-/* Неактивная: читается, но не зовёт нажать. Текст 4,5:1 на своём фоне. */
+/* Неактивная («Оплата скоро откроется») — не кнопка, а тихая плашка-
+   статус: ниже, мельче, пунктирная рамка. Выключенная главная кнопка на
+   самом заметном месте читалась как сломанная (docs/design-audit.md,
+   п. 4.3). Текст 4,5:1 на своём фоне. */
 .tf-knopka[disabled] {
+  min-height: 44px;
   cursor: default;
   color: var(--color-text-secondary);
-  background: rgb(255 255 255 / 0.5);
-  box-shadow: inset 0 0 0 1px rgb(16 23 40 / 0.14);
+  background: transparent;
+  box-shadow: none;
+  outline: 1px dashed rgb(16 23 40 / 0.22);
+  outline-offset: -1px;
+  font-size: 14px;
+  font-weight: 500;
   filter: none;
   transform: none;
 }
@@ -328,8 +336,9 @@
 }
 .tf--b .tf-plashka--platnyy .tf-knopka[disabled] {
   color: #dbe4f5;
-  background: rgb(255 255 255 / 0.1);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.28);
+  background: transparent;
+  box-shadow: none;
+  outline-color: rgb(255 255 255 / 0.36);
 }
 /* Соседние плашки в варианте Б — чистое светлое стекло без оттенка. */
 .tf--b .tf-plashka:not(.tf-plashka--platnyy) {
@@ -387,8 +396,8 @@
   }
 }
 
-/* Платная в разметке первая (так её первой видит телефон и читалка
-   экрана); на широком экране она встаёт справа. */
+/* Платная в разметке вторая (телефон первой показывает бесплатную);
+   на широком экране она встаёт справа. */
 @media (min-width: 1024px) {
   .tf-plashka--platnyy {
     order: 1;
@@ -406,10 +415,11 @@
   }
   .tf-plashka--platnyy {
     grid-column: 1 / -1;
+    order: -1;
   }
 }
 
-/* ── Телефон: свайп с прилипанием, платная первой ────────────── */
+/* ── Телефон: свайп с прилипанием, бесплатная первой ─────────── */
 
 @media (max-width: 599.98px) {
   .tf-ryad {
@@ -726,8 +736,14 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+  /* Колонки значений — равной ширины, первая (возможность) — шире:
+     иначе «Бесплатно» и «Ученик» делили место по длине текста. */
+  table-layout: fixed;
   font-size: 15px;
   line-height: 1.4;
+}
+.tf-sr__tablica thead th:first-child {
+  width: 34%;
 }
 .tf-sr__tablica th,
 .tf-sr__tablica td {
@@ -759,6 +775,11 @@
   font-weight: 650;
 }
 .tf-sr__znak {
+  /* SVG по умолчанию блочный (сброс стилей), и text-align ячейки его
+     не центрировал: галочки стояли у левого края, а текст соседних
+     ячеек — по центру (docs/design-audit.md, п. 4.2). */
+  display: block;
+  margin: 0 auto;
   width: 24px;
   height: 24px;
   padding: 4px;

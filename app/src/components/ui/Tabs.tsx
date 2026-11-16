@@ -96,7 +96,10 @@ export function Tabs({
         const common = {
           role: 'tab' as const,
           id: `${autoId}-tab-${item.id}`,
-          'aria-controls': `${autoId}-panel-${item.id}`,
+          /* aria-controls нет: панели с таким id в разметке нет (у
+             вкладок-ссылок содержимое — другая страница), а ссылка на
+             несуществующий id — ошибка для скринридера (axe:
+             aria-valid-attr-value, docs/launch-audit.md, B9). */
           'aria-selected': selected,
           ...(busyId === item.id ? { 'data-busy': 'true', 'aria-busy': true } : {}),
           tabIndex: selected ? 0 : -1,

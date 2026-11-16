@@ -49,7 +49,9 @@ export type KitScope =
   /** «Наибольшее и наименьшее значение» (номер хранения 21). */
   | '21'
   /** «Собрать вариант» (lib/variant): все задания первой части. */
-  | 'variant';
+  | 'variant'
+  /** Задания базы с банком (lib/baza/generatorBazy.ts): «baza-12». */
+  | `baza-${string}`;
 
 export type SheetWhich = 'student' | 'teacher';
 

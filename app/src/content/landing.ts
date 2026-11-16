@@ -302,7 +302,8 @@ const landingBaza = {
   metrics: [
     { value: `${bazaReady}\u00A0из\u00A0${bazaTasks.length}`, label: 'заданий готовы' },
     { value: '21', label: 'задание в варианте' },
-    { value: '180\u00A0минут', label: 'на экзамен' },
+    /* Крупно — только число: «180 минут» не помещается в треть ширины телефона. */
+    { value: '180', label: 'минут на экзамен' },
   ] satisfies Fact[],
   bank: {
     title: landing.bank.title,

@@ -121,6 +121,9 @@
   color: var(--color-text-brand);
 }
 .eto-zhe__link {
+  display: inline-block;
+  padding-block: 12px;
+  margin-block: -12px;
   color: var(--color-primary);
   font-weight: 500;
 }
