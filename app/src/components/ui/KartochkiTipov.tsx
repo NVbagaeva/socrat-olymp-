@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { LinkPoNamereniyu } from './LinkPoNamereniyu';
 import type { ReactNode } from 'react';
 import './kartochki-tipov.css';
 
@@ -57,9 +57,9 @@ function Ssylka({ ssylka }: { ssylka: SsylkaTipa }) {
       {telo}
     </a>
   ) : (
-    <Link className={className} href={ssylka.href}>
+    <LinkPoNamereniyu className={className} href={ssylka.href}>
       {telo}
-    </Link>
+    </LinkPoNamereniyu>
   );
 }
 
