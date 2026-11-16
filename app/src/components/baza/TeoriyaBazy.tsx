@@ -4,10 +4,34 @@ import { Tex } from '@/components/ui/Tex';
 import { tex } from '@/lib/baza/chisla';
 import type { BlokTeorii, RazdelTeorii } from '@/lib/baza/types';
 import { katex } from '@/lib/graph/katex';
+import { renderPlan } from '@/lib/planimetriya/render';
+import { chertezhTemy } from '@/lib/planimetriya/spravochnik-chertezhi';
 
 function Krupno({ formula }: { formula: string }) {
   const html = katex.renderToString(formula, { throwOnError: true, displayMode: true });
   return <div className="baza-formula" dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+/** Чертёж темы: тот же, что у карточки с этой темой, — строится на сборке. */
+function Chertezh({ tema, podpis }: { tema: string; podpis?: string }) {
+  const ch = chertezhTemy(tema);
+  const risunki = Array.isArray(ch) ? ch : [ch];
+  const svg = risunki
+    .map(
+      (r) =>
+        `<span class="pl-wrap">${renderPlan(r.scena, { ...r.optsii, shirina: 260, vysota: 170 })}</span>`,
+    )
+    .join('');
+  return (
+    <figure className="baza-chertezh">
+      <div className="baza-chertezh__ris" dangerouslySetInnerHTML={{ __html: svg }} />
+      {podpis === undefined ? null : (
+        <figcaption>
+          <Tex text={podpis} />
+        </figcaption>
+      )}
+    </figure>
+  );
 }
 
 function Blok({ blok }: { blok: BlokTeorii }) {
@@ -20,6 +44,13 @@ function Blok({ blok }: { blok: BlokTeorii }) {
       );
     case 'formula':
       return <Krupno formula={blok.tex} />;
+    case 'chertezh':
+      return (
+        <Chertezh
+          tema={blok.tema}
+          {...(blok.podpis === undefined ? {} : { podpis: blok.podpis })}
+        />
+      );
     case 'spisok':
       return (
         <ul className="baza-spisok">

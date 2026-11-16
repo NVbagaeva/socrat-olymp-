@@ -21,6 +21,8 @@ export const TEORIYA_12: RazdelTeorii[] = [
         vid: 'tekst',
         text: 'Почти любая задача на угол сводится к трём фактам: развёрнутый угол — $180^\\circ$, вертикальные углы равны, при параллельных прямых углы либо равны, либо дают в сумме $180^\\circ$.',
       },
+      { vid: 'chertezh', tema: 'smezhnye', podpis: 'Смежные углы в сумме дают $180^\\circ$' },
+      { vid: 'chertezh', tema: 'parallelnye', podpis: 'Углы при параллельных прямых и секущей' },
       {
         vid: 'spisok',
         punkty: [
@@ -62,6 +64,8 @@ export const TEORIYA_12: RazdelTeorii[] = [
     title: 'Углы треугольника',
     bloki: [
       { vid: 'formula', tex: '\\angle A + \\angle B + \\angle C = 180^\\circ' },
+      { vid: 'chertezh', tema: 'summa-uglov' },
+      { vid: 'chertezh', tema: 'vneshniy-ugol' },
       {
         vid: 'tekst',
         text: '**Внешний угол** треугольника — угол, смежный с внутренним. Он равен сумме двух внутренних углов, **не смежных** с ним, а с «своим» внутренним углом даёт $180^\\circ$.',
@@ -102,6 +106,8 @@ export const TEORIYA_12: RazdelTeorii[] = [
         vid: 'tekst',
         text: 'В прямоугольном треугольнике острые углы в сумме дают $90^\\circ$. Сторона против прямого угла — **гипотенуза** $c$, две другие — **катеты**.',
       },
+      { vid: 'chertezh', tema: 'ugol-30' },
+      { vid: 'chertezh', tema: 'mediana-k-gipotenuze' },
       {
         vid: 'zapomni',
         text: 'Катет, лежащий **против угла** $30^\\circ$, равен **половине гипотенузы**: $a = \\dfrac{c}{2}$, $c = 2a$.',
@@ -146,6 +152,7 @@ export const TEORIYA_12: RazdelTeorii[] = [
           '**биссектриса** делит угол треугольника **пополам**.',
         ],
       },
+      { vid: 'chertezh', tema: 'ravnobedrennyy' },
       {
         vid: 'zapomni',
         text: 'В **равнобедренном** треугольнике медиана, высота и биссектриса, проведённые к **основанию**, совпадают. Знаешь одно — получаешь все три.',
@@ -183,6 +190,9 @@ export const TEORIYA_12: RazdelTeorii[] = [
         vid: 'tekst',
         text: 'Сумма углов любого выпуклого четырёхугольника — $360^\\circ$.',
       },
+      { vid: 'chertezh', tema: 'parallelogramm' },
+      { vid: 'chertezh', tema: 'romb' },
+      { vid: 'chertezh', tema: 'trapeciya' },
       {
         vid: 'spisok',
         punkty: [
@@ -234,6 +244,7 @@ export const TEORIYA_12: RazdelTeorii[] = [
     title: 'Теорема Пифагора',
     bloki: [
       { vid: 'formula', tex: 'c^2 = a^2 + b^2' },
+      { vid: 'chertezh', tema: 'pifagor' },
       {
         vid: 'tekst',
         text: 'Квадрат гипотенузы равен сумме квадратов катетов. Катет: $a = \\sqrt{c^2 - b^2}$.',
@@ -296,6 +307,8 @@ export const TEORIYA_12: RazdelTeorii[] = [
           '**трапеция**: $S = \\dfrac{a + b}{2} \\cdot h$ — полусумма оснований на высоту.',
         ],
       },
+      { vid: 'chertezh', tema: 'ploshchad-treugolnika' },
+      { vid: 'chertezh', tema: 'ploshchad-trapecii' },
       {
         vid: 'vazhno',
         text: 'Высоту берут к той стороне, на которую умножают. Сторона одна, высота к другой — ошибка.',
@@ -337,6 +350,8 @@ export const TEORIYA_12: RazdelTeorii[] = [
         vid: 'tekst',
         text: 'Треугольники **подобны**, если два угла одного равны двум углам другого. Тогда все стороны одного в $k$ раз больше соответствующих сторон другого, $k$ — коэффициент подобия.',
       },
+      { vid: 'chertezh', tema: 'podobie' },
+      { vid: 'chertezh', tema: 'srednyaya-liniya-treugolnika' },
       {
         vid: 'zapomni',
         text: 'Стороны подобных фигур отличаются в $k$ раз, а площади — в $k^2$ раз.',
@@ -382,6 +397,7 @@ export const TEORIYA_12: RazdelTeorii[] = [
         vid: 'tekst',
         text: 'Всё — в прямоугольном треугольнике. Для острого угла $A$ катет $BC$ — **противолежащий**, катет $AC$ — **прилежащий**, $AB$ — гипотенуза.',
       },
+      { vid: 'chertezh', tema: 'trig' },
       {
         vid: 'formula',
         tex: '\\sin A = \\dfrac{BC}{AB}, \\quad \\cos A = \\dfrac{AC}{AB}, \\quad \\mathrm{tg}\\,A = \\dfrac{BC}{AC}',
@@ -434,6 +450,8 @@ export const TEORIYA_12: RazdelTeorii[] = [
         vid: 'tekst',
         text: '**Центральный** угол — с вершиной в центре окружности, он равен своей дуге. **Вписанный** угол — с вершиной на окружности, стороны пересекают окружность.',
       },
+      { vid: 'chertezh', tema: 'centralnyy-vpisannyy' },
+      { vid: 'chertezh', tema: 'vpisannye-ugly' },
       {
         vid: 'zapomni',
         text: 'Вписанный угол равен **половине** дуги, на которую опирается, и половине центрального угла на ту же дугу.',
@@ -491,6 +509,8 @@ export const TEORIYA_12: RazdelTeorii[] = [
         vid: 'tekst',
         text: 'У **правильного** многоугольника все стороны и все углы равны. Около него можно описать окружность, и его вершины делят её на $n$ равных дуг.',
       },
+      { vid: 'chertezh', tema: 'pravilnye-mnogougolniki' },
+      { vid: 'chertezh', tema: 'dlina-okruzhnosti' },
       {
         vid: 'formula',
         tex: '\\text{дуга одной стороны} = \\dfrac{360^\\circ}{n}, \\qquad \\text{угол} = \\dfrac{180^\\circ (n - 2)}{n}',
