@@ -2012,10 +2012,16 @@ html[data-tabs-pending] .topic-panel,
   transform-origin: left center;
   transition: transform var(--motion-slow) var(--ease-out);
 }
+/* Нижнее поле карточки банка чуть выше обычного у всех карточек
+   сразу: подпись прогресса встаёт в него, не касаясь названия, а
+   высота карточки от появления прогресса не меняется. */
+.tasks-grid--bank .task-card--bank {
+  padding-bottom: calc(var(--card-pad) + var(--space-2));
+}
 .task-card__progress-text {
   position: absolute;
   left: var(--card-pad, var(--space-5));
-  bottom: 5px;
+  bottom: 7px;
   font-size: 12px;
   line-height: 14px;
   font-weight: 500;
