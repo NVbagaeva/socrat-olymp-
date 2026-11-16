@@ -319,7 +319,7 @@ const blokSmeshSlozh: BlokOpornyh = {
   opisanie: 'Отдельно целые части, отдельно дробные',
   zapomni:
     'Складывай и вычитай целые части отдельно, дробные — отдельно, потом объедини: $a\\dfrac{b}{c} + d\\dfrac{e}{c} = (a + d) + \\dfrac{b + e}{c}$.',
-  znak: '2\\tfrac{1}{4}+1\\tfrac{1}{2}',
+  znak: '2\\tfrac{1}{4}',
   zadachi: zadachi(
     'smesh-slozh',
     S_SLOZH.map(([s1, z, s2]) => {
@@ -416,7 +416,7 @@ const blokDecDel: BlokOpornyh = {
   opisanie: 'Перенести запятую, чтобы делитель стал целым',
   zapomni:
     'Перенеси запятую в делимом и делителе на одинаковое число знаков вправо, пока делитель не станет целым: $4{,}2 : 0{,}06 = 420 : 6$.',
-  znak: '4{,}2:0{,}06',
+  znak: ':0{,}1',
   zadachi: zadachi(
     'dec-del',
     D_DEL.map(([a, b]) => {
@@ -456,7 +456,7 @@ const blokPerevod: BlokOpornyh = {
   opisanie: 'Домножить знаменатель до 10, 100, 1000',
   zapomni:
     'Подбери множитель, чтобы знаменатель стал $10$, $100$, $1000$: $\\dfrac{7}{20} = \\dfrac{35}{100} = 0{,}35$.',
-  znak: '\\tfrac{3}{8}=0{,}375',
+  znak: '\\tfrac{3}{8}',
   zadachi: zadachi(
     'perevod',
     PEREVOD.map(([m, n]) => {
@@ -603,7 +603,7 @@ const blokZnaki: BlokOpornyh = {
   nazvanie: 'Отрицательные числа',
   opisanie: 'Вычитание и знак произведения или частного',
   zapomni: '$a - (-b) = a + b$. При умножении и делении: знаки одинаковые — плюс, разные — минус.',
-  znak: 'a-(-b)',
+  znak: '-(-b)',
   zadachi: zadachi(
     'znaki',
     ZNAKI.map(([a, z, b]) => {

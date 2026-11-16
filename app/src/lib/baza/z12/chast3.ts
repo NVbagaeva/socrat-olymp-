@@ -24,14 +24,19 @@ export const GRUPPY_12_3: GruppaBazy[] = [
     znak: '\\sin A',
     ton: 'blue',
   },
-  { id: '3B', nazvanie: 'Равнобедренный треугольник и внешний угол', znak: 'AB=BC', ton: 'navy' },
+  {
+    id: '3B',
+    nazvanie: 'Равнобедренный треугольник и внешний угол',
+    znak: '\\triangle',
+    ton: 'navy',
+  },
   {
     id: '3C',
     nazvanie: 'Трапеция, прямоугольник, ромб: тригонометрия',
     znak: '\\mathrm{tg}\\,\\alpha',
     ton: 'orange',
   },
-  { id: '3D', nazvanie: 'Центральные и вписанные углы', znak: '\\angle ACB', ton: 'terra' },
+  { id: '3D', nazvanie: 'Центральные и вписанные углы', znak: '\\angle', ton: 'terra' },
   { id: '3E', nazvanie: 'Диаметр и точка на окружности', znak: '2R', ton: 'green' },
   {
     id: '3F',

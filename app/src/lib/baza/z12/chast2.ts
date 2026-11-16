@@ -12,20 +12,20 @@ import { PLOSHCHAD_12_2 } from './chast2-ploshchad';
 import { PODOBIE_12_2 } from './chast2-podobie';
 
 export const GRUPPY_12_2: GruppaBazy[] = [
-  { id: '2A', nazvanie: 'Площадь параллелограмма и ромба', znak: 'S = ah', ton: 'blue' },
+  { id: '2A', nazvanie: 'Площадь параллелограмма и ромба', znak: 'ah', ton: 'blue' },
   { id: '2B', nazvanie: 'Трапеция', znak: '\\dfrac{a+b}{2}\\,h', ton: 'orange' },
-  { id: '2C', nazvanie: 'Равнобедренный треугольник', znak: 'AB = BC', ton: 'green' },
-  { id: '2D', nazvanie: 'Прямоугольный треугольник', znak: 'c^2 = a^2 + b^2', ton: 'navy' },
+  { id: '2C', nazvanie: 'Равнобедренный треугольник', znak: '\\triangle', ton: 'green' },
+  { id: '2D', nazvanie: 'Прямоугольный треугольник', znak: 'c^2', ton: 'navy' },
   {
     id: '2E',
     nazvanie: 'Пифагор в ромбе и прямоугольнике',
-    znak: 'd^2 = a^2 + b^2',
+    znak: 'd^2',
     ton: 'terra',
   },
   {
     id: '2F',
     nazvanie: 'Подобие и средняя линия',
-    znak: '\\triangle \\sim \\triangle',
+    znak: '\\sim',
     ton: 'blue',
   },
 ];
