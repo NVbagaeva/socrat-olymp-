@@ -38,14 +38,14 @@ const KADROV = 30;
  * Встроенный скрипт для <head>. Правила те же, что в `podskazkiLite`;
  * дублируются строкой, потому что скрипт выполняется до загрузки
  * бандла. Ошибка (например, закрытое хранилище) оставляет `full`.
+ *
+ * Одна строка без подстановок `${…}`: минификатор Next.js (SWC),
+ * склеивая шаблонные строки с подстановками, терял кусок между ними, и
+ * скрипт в сборке не разбирался. Имена ключа и атрибута записаны прямо;
+ * совпадение с константами проверяет `scripts/check-motion.mjs`.
  */
 export const MOTION_LEVEL_SCRIPT =
-  `(function(){try{var d=document.documentElement,n=navigator,l='full';` +
-  `if(matchMedia('(prefers-reduced-motion: reduce)').matches)l='reduce';else{` +
-  `var m=n.deviceMemory,c=n.hardwareConcurrency,s=null;` +
-  `try{s=sessionStorage.getItem('${MOTION_KADRY_KEY}')}catch(e){}` +
-  `if((m&&m<=3)||(c&&c<=2)||(c&&c<=4&&m&&m<=4)||(n.connection&&n.connection.saveData)||s==='lite')l='lite'}` +
-  `d.setAttribute('${MOTION_LEVEL_ATTR}',l)}catch(e){}})()`;
+  "(function(){try{var d=document.documentElement,n=navigator,l='full';if(matchMedia('(prefers-reduced-motion: reduce)').matches)l='reduce';else{var m=n.deviceMemory,c=n.hardwareConcurrency,s=null;try{s=sessionStorage.getItem('budetege:motion-kadry')}catch(e){}if((m&&m<=3)||(c&&c<=2)||(c&&c<=4&&m&&m<=4)||(n.connection&&n.connection.saveData)||s==='lite')l='lite'}d.setAttribute('data-motion-level',l)}catch(e){}})()";
 
 interface NavigatorHints {
   deviceMemory?: number;

@@ -199,6 +199,7 @@
     "test:zachyot-12": "node scripts/check-zachyot-12.mjs",
     "test:razdely-names": "node scripts/check-razdely-names.mjs",
     "test:first-load": "node scripts/check-first-load.mjs",
+    "test:motion": "node scripts/check-motion.mjs",
     "test:repo-files": "node scripts/check-repo-files.mjs",
     "test:webkit-steklo": "node scripts/check-webkit-steklo.mjs",
     "test:seriya-9": "node scripts/check-seriya-9.mjs",
