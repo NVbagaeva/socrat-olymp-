@@ -958,9 +958,21 @@ a.task-card--soon:hover {
   display: none;
 }
 
-/* Правый столбец: шапка разделов и под ней содержимое. */
+/* Правый столбец: шапка разделов и под ней содержимое.
+
+   Фон — тот же, что у главной (.glavnaya, app/landing.css): синее и
+   оранжевое свечения на светлом фоне, неподвижные — без анимации.
+   Свечения заданы в пикселях от верха столбца, а не в процентах: на
+   длинной странице теории процентный градиент растянулся бы на весь
+   её рост. Это первый экран — переход «главная → банк» остаётся в
+   одном материале (docs/design-audit.md, 1.1). */
 .app-col {
   min-width: 0;
+  background:
+    radial-gradient(900px 560px at 88% 420px, rgb(31 95 208 / 0.07), transparent 70%),
+    radial-gradient(760px 520px at 6% 980px, rgb(245 160 74 / 0.08), transparent 70%),
+    var(--color-bg);
+  background-repeat: no-repeat;
 }
 .app-main {
   /* Своя система координат: декор страницы позиционируется от неё. */
@@ -975,7 +987,14 @@ a.task-card--soon:hover {
   margin-inline: auto;
 }
 .sidebar {
-  background: var(--color-surface-brand);
+  /* Сайдбар остаётся тёмно-синим (решение владельца 15.11) и связан со
+     стеклом приёмом «свет за стеклом»: лёгкий спуск --navy-800 → 900
+     и синее свечение в нижнем углу (docs/design-audit.md, 1.1). Фон не
+     прокручивается вместе со списком: свечение стоит у низа экрана. */
+  background:
+    radial-gradient(120% 40% at 0% 100%, rgb(59 130 246 / 0.12), transparent 70%),
+    linear-gradient(180deg, var(--navy-800), var(--navy-900));
+  background-color: var(--color-surface-brand);
   padding: var(--space-5) var(--space-3);
   min-height: 340px;
   display: flex;
@@ -990,11 +1009,12 @@ a.task-card--soon:hover {
   gap: 10px;
   align-items: center;
 }
+/* Знак — тот же, что в шапке главной (.logo i, styles/site.css):
+   подложка и скругление внутри logo.svg. */
 .sidebar__logo {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  background: var(--color-primary);
+  width: 22px;
+  height: 22px;
+  background: url('../../public/icons/logo.svg') center / 22px 22px no-repeat;
   display: block;
   flex: none;
 }
@@ -1022,7 +1042,7 @@ a.task-card--soon:hover {
   gap: var(--space-3);
   height: 40px;
   padding: 0 var(--space-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   color: var(--color-on-brand);
   text-decoration: none;
   font-size: 14px;
@@ -1034,8 +1054,11 @@ a.task-card--soon:hover {
   background: var(--color-on-brand-hover);
   color: var(--color-text-inverse);
 }
+/* Активный пункт — глянцевая «таблетка», как главная кнопка сайта,
+   а не плоская синяя плашка. */
 .snav a.is-active {
-  background: var(--color-primary);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
   color: var(--color-text-inverse);
   font-weight: 500;
 }
@@ -1850,6 +1873,33 @@ html[data-tabs-pending] .topic-panel,
   min-height: 150px;
   padding: var(--card-pad);
   overflow: hidden;
+  /* Стекло главной (docs/design-audit.md, 1.1): радиус 20, светлая
+     кромка, мягкая синяя тень. Без backdrop-filter: за карточкой —
+     гладкий фон со свечениями, размывать нечего, а два десятка
+     размытий на слабом телефоне стоили бы кадров при прокрутке. */
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transition:
+    transform var(--motion-base) var(--ease-out),
+    box-shadow var(--motion-base) var(--ease-out);
+}
+/* Наведение: тень глубже; подъём — токеном, в зоне «Учёба» он 0. */
+a.task-card--bank:hover,
+a.task-card--bank:focus-visible {
+  transform: translateY(var(--motion-lift));
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+/* Неоткрытый раздел — то же стекло, приглушённое. */
+.task-card--bank.task-card--soon {
+  background: rgb(255 255 255 / 0.4);
+  box-shadow: var(--glass-ring);
+}
+.task-card--bank.task-card--soon:hover {
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-ring);
 }
 
 /* Номер крупно вместо плашки. */
