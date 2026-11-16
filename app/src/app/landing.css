@@ -400,11 +400,9 @@ section.band {
   color: var(--color-text-secondary);
 }
 
-/* Банк. Четыре колонки по 300px с зазорами 16 требуют 1248px под
-   сетку, общий контейнер даёт 1216 — блок расширяется на 32px. */
-#bank .wrap {
-  max-width: calc(var(--w-container) + var(--space-8));
-}
+/* Банк — в общем контейнере, как герой и «Мы взяли на себя…»: прежнее
+   расширение на 32 px (под четыре колонки, которых на деле три)
+   сдвигало его левый край на 16 px от остальной страницы. */
 #bank .aura__spot--blue {
   top: 30%;
   right: -260px;
@@ -674,14 +672,17 @@ section.band {
       'kristall'
       'facts';
     row-gap: var(--space-5);
-    padding: var(--space-8) var(--space-4) var(--space-10);
+    /* Поля 20 px — как у .wrap остальных блоков: край не скачет. */
+    padding: var(--space-8) var(--space-5) var(--space-10);
   }
   .hero__eyebrow {
     margin-bottom: var(--space-3);
   }
+  /* 32 px вместо 38: заголовок в три строки, а не в четыре по два
+     слова, — двери поднимаются на первый экран. */
   .hero__title {
-    font-size: 2.375rem;
-    line-height: 1.08;
+    font-size: 2rem;
+    line-height: 1.12;
   }
   .hero__lead {
     margin-top: var(--space-4);
@@ -704,12 +705,15 @@ section.band {
   .hero__fact {
     padding: var(--space-4) var(--space-3);
   }
+  /* Число не переносится и не вылезает из ячейки: кегль от ширины
+     экрана, на 320 — 20 px. */
   .hero__fact dd {
-    font-size: 24px;
+    font-size: clamp(20px, 6vw, 24px);
+    white-space: nowrap;
   }
   .hero__fact dt {
-    font-size: 12px;
-    line-height: 16px;
+    font-size: 13px;
+    line-height: 17px;
   }
   .aura__spot--blue {
     width: 520px;
@@ -729,20 +733,33 @@ section.band {
     font-size: 1.625rem;
     line-height: 1.2;
   }
+  /* Телефон: обещания — строками в одну колонку. В две колонки на
+     карточку оставалось 128 px: «Самостоятельные» вылезало за край, а
+     текст шёл по два слова в строке. Номер — слева, текст — справа. */
   .steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);
   }
   .step {
-    padding: var(--space-4);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-4);
+    align-items: start;
+    padding: var(--space-4) var(--space-5);
     border-radius: 16px;
   }
+  .step b {
+    grid-row: 1 / 3;
+    margin-bottom: 0;
+  }
   .step h3 {
-    font-size: 16px;
+    margin-bottom: var(--space-1);
+    font-size: 17px;
+    line-height: 1.3;
   }
   .step p {
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 15px;
+    line-height: 22px;
   }
   .split h3 {
     font-size: 24px;
