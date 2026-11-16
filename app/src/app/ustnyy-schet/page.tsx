@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { Breadcrumbs } from '@/components/ui';
+import { Tex } from '@/components/ui/Tex';
 import { Steklo } from '@/components/ustnyySchet/Steklo';
 import {
   MoyaStatistika,
@@ -73,7 +74,7 @@ export default function UstnyySchetPage() {
                   <li key={p.id}>
                     <Link className="us-karta" href={href(USTNYY_HREF, p.id)}>
                       <span className="us-karta__zag">{T.priyomy[p.id].nazvanie}</span>
-                      <span className="us-karta__lead">{tipograf(T.priyomy[p.id].kratko)}</span>
+                      <Tex className="us-karta__lead" text={tipograf(T.priyomy[p.id].kratko)} />
                       <SvodkaPriyoma id={p.id} />
                     </Link>
                   </li>

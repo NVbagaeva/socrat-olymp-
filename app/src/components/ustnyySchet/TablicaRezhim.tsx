@@ -147,7 +147,7 @@ export function TablicaRezhim() {
           {T.setka}
         </h2>
         <div className="us-setka-wrap">
-          <table className="us-setka">
+          <table className="us-setka no-math-check">
             <thead>
               <tr>
                 <th scope="col">

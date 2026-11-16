@@ -71,7 +71,10 @@ export function Topbar({
                   item.label
                 );
               const props = {
-                className: clsx(item.active === true && 'is-active'),
+                className: clsx(
+                  item.active === true && 'is-active',
+                  item.akcent === true && 'is-akcent',
+                ),
                 'aria-current': item.active === true ? ('page' as const) : undefined,
                 'aria-label': item.short !== undefined ? item.label : undefined,
               };

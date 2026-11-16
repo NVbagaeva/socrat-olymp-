@@ -64,7 +64,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
   },
   'kvadrat-okolo-kruglyh': {
     nazvanie: 'Квадрат числа около круглого',
-    kratko: '99², 102², 49² — через квадрат суммы или разности',
+    kratko: '$99^2$, $102^2$, $49^2$ — через квадрат суммы или разности',
     pravilo: '$(a \\pm b)^2 = a^2 \\pm 2ab + b^2$',
     pochemu:
       'Квадрат круглого и удвоенное произведение считаются сразу, а $b^2$ — маленькое число.',
@@ -119,7 +119,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
   },
   'desyatki-edinicy-10': {
     nazvanie: 'Десятки одинаковые, единицы дают 10',
-    kratko: '43 · 47: начало на следующее, единицы перемножить',
+    kratko: '$43\\cdot 47$: начало на следующее, единицы перемножить',
     pravilo: '$\\overline{ta}\\cdot\\overline{tb} = 100\\,t(t+1) + ab$, если $a + b = 10$',
     pochemu:
       '$(10t+a)(10t+b) = 100t^2 + 10t(a+b) + ab$, а при $a + b = 10$ это $100\\,t(t+1) + ab$.',
@@ -169,7 +169,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
   },
   'okruglenie-umnozhenie': {
     nazvanie: 'Умножение с округлением',
-    kratko: '39 · 7 = 40 · 7 − 7; так же на 9 и 99',
+    kratko: '$39\\cdot 7 = 40\\cdot 7 - 7$; так же на $9$ и на $99$',
     pravilo: '$(R-d)\\cdot k = R\\cdot k - d\\cdot k$',
     pochemu:
       'Распределительный закон: умножить разность — то же, что умножить каждое число и вычесть.',
@@ -198,7 +198,11 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
     pravilo: '$a\\cdot b\\cdot c = (a\\cdot c)\\cdot b$',
     pochemu:
       'От перестановки множителей произведение не меняется — вместе ставим пару, которая даёт круглое число.',
-    urovni: ['пары 25 · 4, 5 · 2, 2 · 50', 'пары 125 · 8, 25 · 8, 4 · 250', 'четыре множителя'],
+    urovni: [
+      'пары $25\\cdot 4$, $5\\cdot 2$, $2\\cdot 50$',
+      'пары $125\\cdot 8$, $25\\cdot 8$, $4\\cdot 250$',
+      'четыре множителя',
+    ],
     primery: [
       { d: ['25', '17', '4'], v: '25,4', uroven: 1, otvet: '1700' },
       { d: ['5', '43', '2'], v: '5,2', uroven: 1, otvet: '430' },
@@ -276,7 +280,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
     kratko: '56 : 8 — какое число на 8 даёт 56',
     pravilo: '$n : b = a \\iff a\\cdot b = n$',
     pochemu: 'Деление — действие, обратное умножению: ответ ищем в строке таблицы на делитель.',
-    urovni: ['делитель от 2 до 5', 'делитель от 6 до 9', 'до 12 · 12'],
+    urovni: ['делитель от 2 до 5', 'делитель от 6 до 9', 'до $12\\cdot 12$'],
     primery: [
       { d: ['36', '4'], uroven: 1, otvet: '9' },
       { d: ['56', '8'], v: 'kv', uroven: 2, otvet: '7' },
@@ -311,11 +315,11 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
   },
   'dopolnenie-do-kruglogo': {
     nazvanie: 'Дополнение до круглого',
-    kratko: '1000 − 387: цифры до 9, последнюю до 10',
+    kratko: '$1000 - 387$: цифры до $9$, последнюю до $10$',
     pravilo: '$1000 - x = (999 - x) + 1$',
     pochemu:
       'Из девяток вычитать без переходов через разряд: каждая цифра дополняется до $9$, последняя — до $10$.',
-    urovni: ['100 − x', '1000 − x', '10 000 − x и 1 − 0,xx'],
+    urovni: ['$100 - x$', '$1000 - x$', '$10\\,000 - x$ и $1 - 0{,}xy$'],
     primery: [
       { d: ['100', '64'], uroven: 1, otvet: '36' },
       { d: ['1000', '387'], uroven: 2, otvet: '613' },
@@ -336,7 +340,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
   },
   otricatelnye: {
     nazvanie: 'Отрицательные числа',
-    kratko: '−17 + 35, −8 − 15, знаки при умножении',
+    kratko: '$-17 + 35$, $-8 - 15$, знаки при умножении',
     pravilo: '$-a + b = b - a,\\ \\ -a - b = -(a + b)$',
     pochemu:
       'На числовой прямой прибавить — шаг вправо, вычесть — влево; при разных знаках модули вычитаются.',
@@ -381,7 +385,7 @@ const priyomy: Record<PriyomId, TeoriyaPriyoma> = {
   },
   'stepeni-kuby-korni': {
     nazvanie: 'Степени, кубы и корни',
-    kratko: 'Степени двойки до 2¹⁰, кубы до 10³, корни до 30²',
+    kratko: 'Степени двойки до $2^{10}$, кубы до $10^3$, корни до $30^2$',
     pravilo: '$2^{10} = 1024,\\ \\ 7^3 = 343,\\ \\ \\sqrt{729} = 27$',
     pochemu:
       'Степень — повторное умножение: $2^{10} = 2^5\\cdot2^5$; корень — обратное к квадрату.',
@@ -503,7 +507,7 @@ export const USTNYY = {
     svobodnyy: 'Свободный',
     svobodnyyLead: 'Без лимита, с подсказкой приёма',
     seriya: 'Серия',
-    seriyaLead: 'N примеров, время идёт вверх',
+    seriyaLead: 'Заданное число примеров, время идёт вверх',
     vremya: 'На время',
     vremyaLead: 'Успеть как можно больше',
     primerov: 'примеров',
@@ -583,8 +587,8 @@ export const USTNYY = {
     vrazbros: 'Вразброс',
     poPoryadku: 'По порядку',
     forma: 'Форма',
-    pryamaya: 'Прямая: 7 · 8',
-    obratnaya: 'Обратная: 56 = □ · 8',
+    pryamaya: 'Прямая',
+    obratnaya: 'Обратная',
     smes: 'Вперемешку',
     setka: 'Сетка освоенности',
     legenda: ['Не решал', 'Трудно', 'Неуверенно', 'Почти', 'Освоено'] as const,

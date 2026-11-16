@@ -12,6 +12,7 @@ import { USTNYY } from '@/content/ustnyySchet';
 import { href, USTNYY as USTNYY_HREF } from '@/lib/paths';
 import { estPriyom, PRIYOMY, priyom as priyomPo, priyomyGruppy } from '@/lib/ustnyySchet/registry';
 import { tipograf } from '@/lib/tipograf';
+import { plain } from '@/lib/tex';
 import { UROVNI, type PriyomId } from '@/lib/ustnyySchet/types';
 import { shagHtml, voprosHtml } from '@/lib/ustnyySchet/vyvod';
 import { trenirovkaHref } from '@/lib/ustnyySchet/zapros';
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const t = USTNYY.priyomy[priyom];
   return {
     title: `${t.nazvanie} — устный счёт — Будет на ЕГЭ`,
-    description: `${t.kratko}. Правило, почему оно работает, разбор примеров и тренировка.`,
+    description: `${plain(t.kratko)}. Правило, почему оно работает, разбор примеров и тренировка.`,
   };
 }
 
