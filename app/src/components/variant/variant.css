@@ -317,7 +317,7 @@
   background: var(--color-surface);
   color: var(--color-text);
   box-shadow: var(--shadow-md);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
 }
 @media (max-width: 767px) {
@@ -409,7 +409,7 @@
   flex: none;
   margin-left: auto;
   color: var(--color-star);
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 1px;
   white-space: nowrap;
 }

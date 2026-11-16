@@ -85,30 +85,41 @@ foreignObject .katex svg {
 }
 
 /* ── типографика ──
-   Кегли и интерлиньяж — из токенов шкалы, здесь только начертание. */
+   Кегли и интерлиньяж — из токенов шкалы, здесь только начертание.
+   Заголовки — один вес 640 и трекинг -0.02em (docs/design-audit.md,
+   1.3); переносы — ровные строки у заголовков, без висячего слова у
+   абзацев, на всём сайте, а не только на главной. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
 .t-display {
   font-size: var(--fs-display);
   line-height: var(--lh-display);
-  font-weight: 700;
+  font-weight: 640;
   letter-spacing: -0.03em;
 }
 .t-h1 {
   font-size: var(--fs-h1);
   line-height: var(--lh-h1);
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-weight: 640;
+  letter-spacing: -0.02em;
 }
 .t-h2 {
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
-  font-weight: 600;
+  font-weight: 640;
   letter-spacing: -0.02em;
 }
 .t-h3 {
   font-size: var(--fs-h3);
   line-height: var(--lh-h3);
-  font-weight: 500;
-  letter-spacing: -0.015em;
+  font-weight: 640;
+  letter-spacing: -0.02em;
 }
 .t-h4 {
   font-size: var(--fs-h4);
