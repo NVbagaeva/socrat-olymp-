@@ -192,7 +192,7 @@ body .site-head[data-compact] {
 .nav-drop__list li:last-child {
   padding-bottom: 6px;
 }
-.site-nav .nav-drop__item {
+:is(.site-nav, .topnav) .nav-drop__item {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -236,13 +236,13 @@ body .site-head[data-compact] {
   background: var(--color-primary);
   color: var(--color-text-inverse);
 }
-.site-nav .nav-drop__item:hover,
-.site-nav .nav-drop__item:focus-visible {
+:is(.site-nav, .topnav) .nav-drop__item:hover,
+:is(.site-nav, .topnav) .nav-drop__item:focus-visible {
   background: var(--color-bg);
 }
-.site-nav .nav-drop__item:hover .nav-drop__label,
-.site-nav .nav-drop__item:focus-visible .nav-drop__label,
-.site-nav .nav-drop__item[aria-current='page'] .nav-drop__label {
+:is(.site-nav, .topnav) .nav-drop__item:hover .nav-drop__label,
+:is(.site-nav, .topnav) .nav-drop__item:focus-visible .nav-drop__label,
+:is(.site-nav, .topnav) .nav-drop__item[aria-current='page'] .nav-drop__label {
   color: var(--color-primary);
 }
 .site-head__cta {
