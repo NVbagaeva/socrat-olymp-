@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { Opornye1 } from '@/components/tasks/planimetriya/Opornye1';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { OPORNYE1 } from '@/content/planimetriya1';
-import { zadanie1Title } from '@/content/zadanie1';
 import { typeset } from '@/lib/tex';
 import { BLOKI, blokBySlug } from '@/lib/planimetriya/prep/bloki';
 import { prepPool1 } from '@/lib/planimetriya/prep/pool';
@@ -12,6 +11,7 @@ import { PROTOTIPY } from '@/lib/planimetriya/stseny';
 import { OPORNYE1_HREF, tipHref1 } from '@/lib/planimetriya/trening/links';
 import { opornyyDlya } from '@/lib/planimetriya/trenazher/dannye';
 import { klyuchProto } from '@/lib/planimetriya/trenazher/sessiya';
+import { zadanie1Zagolovok } from '@/lib/seo-razdely';
 
 export function generateStaticParams() {
   return BLOKI.map((b) => ({ blok: b.slug }));
@@ -23,7 +23,7 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const found = blokBySlug(blok);
-  return { title: zadanie1Title(found === undefined ? OPORNYE1.title : found.nazvanie) };
+  return { title: zadanie1Zagolovok(found === undefined ? OPORNYE1.title : found.nazvanie) };
 }
 
 /** Блок опорных задач №1: десять задач на общем экране блока, собраны на сборке. */

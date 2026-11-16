@@ -167,7 +167,7 @@ export function Plashka({
         </span>
       </p>
       {yakor ? (
-        <p className="tf-plashka__yakor">
+        <p className="tf-plashka__yakor no-math-check">
           {TARIFY_TEXT.yakor} <s>{rubli(yakor.pomesyachno)}</s>{' '}
           {TARIFY_TEXT.yakorRaschet(yakor.oplat, rubli(yakor.tsena30))}
           <br />

@@ -210,6 +210,7 @@
   border-radius: 20px;
   background: var(--pz-glass);
   box-shadow: var(--pz-shadow);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
   backdrop-filter: blur(16px) saturate(140%);
 }
 .pz-dveri h5,

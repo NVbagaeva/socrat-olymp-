@@ -12,7 +12,6 @@ import type { TutorMaterial } from './sections';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import { nomerDvumya, nomerRazdela } from '@/content/struktura';
-import { zagolovokRazdela } from '@/lib/seo';
 
 export const PROIZVODNAYA = {
   no: nomerDvumya('proizvodnaya'),
@@ -39,7 +38,7 @@ export const PROIZVODNAYA = {
 
 /** Заголовок окна браузера: «Вкладка · Производная и первообразная — Будет на ЕГЭ». */
 export function proizvodnayaTitle(tab: string): string {
-  return zagolovokRazdela(9, PROIZVODNAYA.title, tab);
+  return `${tab} · ${PROIZVODNAYA.title} — Будет на ЕГЭ`;
 }
 
 /* ── Вкладка «О задании» ───────────────────────────────────────── */
