@@ -7,6 +7,8 @@
  *     вариант» открыты: в каждом одна пробная генерация
  *     (BESPLATNO.generatorProbnyh). Потом — окно «в пробном доступе и на
  *     платных тарифах». Собранный лист остаётся: его можно печатать.
+ *   — Генераторы базы (BESPLATNO.generatorBazy) открыты целиком, без
+ *     счётчика.
  *   — Генераторы остальных заданий закрыты целиком.
  *   — Полный доступ — у аккаунтов из POLNYY_DOSTUP_SHA256: всё открыто,
  *     без счётчика.
@@ -44,6 +46,14 @@ export function generatorOtkryt(scope: string): boolean {
   return (
     scope === SOBRAT_VARIANT || (BESPLATNO.generatorNomera as readonly string[]).includes(scope)
   );
+}
+
+/**
+ * Генератор открыт целиком, без счётчика пробных генераций: генераторы
+ * базы (BESPLATNO.generatorBazy).
+ */
+export function generatorBezLimita(scope: string): boolean {
+  return BESPLATNO.generatorBazy && scope.startsWith('baza-');
 }
 
 /* ── Полный доступ ─────────────────────────────────────────────── */
