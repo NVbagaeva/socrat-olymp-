@@ -71,6 +71,7 @@ import { withSpace } from '@/lib/sheet/space.js';
 import { SpaceOption } from '@/components/tasks/space/SpaceOption';
 import { useSheetSpace } from '@/components/tasks/space/useSheetSpace';
 import {
+  generatorBezLimita,
   generatorOtkryt,
   potratitProbnuyu,
   usePolnyyDostup,
@@ -222,7 +223,7 @@ function Podpis({ text, html }: { text: string; html?: string }) {
  * пробной генерацией; аккаунт с полным доступом — всё без ограничений.
  */
 export function Generator(props: GeneratorProps) {
-  const polnyy = usePolnyyDostup();
+  const polnyy = usePolnyyDostup() || generatorBezLimita(props.config.scope);
   if (!polnyy && !generatorOtkryt(props.config.scope)) {
     return <GenZakryt nomer={nomerGeneratora(props.config.scope)} />;
   }
