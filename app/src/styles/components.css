@@ -90,6 +90,26 @@
   padding: 0 var(--space-6);
   font-size: 16px;
 }
+/* Узкий телефон: длинная подпись кнопки переносится на вторую строку,
+   а не раздвигает карточку и страницу вбок (check-mobile-overflow,
+   320 px). Однострочная кнопка остаётся прежней высоты. */
+@media (max-width: 479.98px) {
+  .btn {
+    max-width: 100%;
+    height: auto;
+    min-height: var(--h-control);
+    padding-block: var(--space-2);
+    white-space: normal;
+    text-align: center;
+  }
+  .btn--sm {
+    min-height: var(--h-control-sm);
+    padding-block: var(--space-1);
+  }
+  .btn--lg {
+    min-height: var(--h-control-lg);
+  }
+}
 .btn[disabled] {
   opacity: 0.45;
   pointer-events: none;
