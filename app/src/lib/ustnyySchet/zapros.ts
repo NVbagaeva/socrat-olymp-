@@ -13,7 +13,7 @@
  */
 
 import { href, USTNYY, USTNYY_TAIL } from '@/lib/paths';
-import { format, type FormatId } from './formaty';
+import { format, reytingFormat, type FormatId, type ReytingFormatId } from './formaty';
 import { NASTROYKI_PO_UMOLCHANIYU, type Nabor, type Nastroyki } from './nabor';
 import { estPriyom, priyom } from './registry';
 import { LIMITY_SEK, SERII, type Rezhim } from './sessiya';
@@ -26,6 +26,8 @@ export interface Zapros {
   go: boolean;
   /** Неверные примеры возвращаются в эту же тренировку (работа над ошибками). */
   vozvrat?: boolean;
+  /** Рейтинговая тренировка этого формата (rt=1): примеры и время — с сервера. */
+  reyting?: ReytingFormatId;
 }
 
 export const ZAPROS_PO_UMOLCHANIYU: Zapros = {
@@ -74,6 +76,11 @@ export function zaprosStr(z: Partial<Zapros>): string {
   return q.toString();
 }
 
+/** Ссылка на рейтинговую тренировку формата. */
+export function reytingHref(id: ReytingFormatId, go = false): string {
+  return href(USTNYY, USTNYY_TAIL.trenirovka, `?f=${id}&rt=1${go ? '&go=1' : ''}`);
+}
+
 /** Ссылка на тренировку. */
 export function trenirovkaHref(z: Partial<Zapros>): string {
   const q = zaprosStr(z);
@@ -95,6 +102,17 @@ export function rezhimFormata(id: FormatId): Rezhim {
 export function prochitat(q: URLSearchParams): Zapros {
   const go = q.get('go') === '1';
   const f = q.get('f');
+  const rt = q.get('rt') === '1' && f !== null ? reytingFormat(f) : undefined;
+  if (rt !== undefined) {
+    const prakt = format(rt.id);
+    return {
+      nabor: prakt === undefined ? ZAPROS_PO_UMOLCHANIYU.nabor : { tip: 'format', id: prakt.id },
+      rezhim: prakt === undefined ? { tip: 'seriya', n: rt.n ?? 20 } : rezhimFormata(prakt.id),
+      nast: nastroykiFormata(),
+      go,
+      reyting: rt.id,
+    };
+  }
   if (f !== null && format(f) !== undefined) {
     const id = f as FormatId;
     return {

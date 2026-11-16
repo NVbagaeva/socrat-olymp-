@@ -15,6 +15,9 @@ import { naborKey, prochitat, ZAPROS_PO_UMOLCHANIYU, type Zapros } from '@/lib/u
 import { randomSeed } from '@/lib/randomSeed';
 import { browserStorage } from '@/lib/storage';
 import { Igra } from './Igra';
+import { IgraReyting } from './IgraReyting';
+import { ReytingVstuplenie } from './ReytingVstuplenie';
+import type { Final } from '@/lib/ustnyySchet/api';
 import { Itogi } from './Itogi';
 import { Nastroyki, type Lichnye } from './Nastroyki';
 
@@ -35,6 +38,7 @@ function prochitatLichnye(): Lichnye {
 
 type Ekran =
   | { tip: 'nastroyki' }
+  | { tip: 'reyting'; n: number }
   | { tip: 'igra'; nabor: Nabor; rezhim: Rezhim; vozvrashchat: boolean; n: number }
   | {
       tip: 'itogi';
@@ -45,6 +49,8 @@ type Ekran =
       s: Sostoyanie;
       nabor: Nabor;
       vozvrashchat: boolean;
+      /** Рейтинговая: итог сервера. */
+      final?: Final | null;
     };
 
 /**
@@ -59,15 +65,19 @@ export function Trenirovka({ zapros }: { zapros: Zapros }) {
      настройку можно прочесть сразу. */
   const [lichnye, setLichnyeState] = useState<Lichnye>(prochitatLichnye);
   const [ekran, setEkran] = useState<Ekran>(
-    zapros.go
-      ? {
-          tip: 'igra',
-          nabor: zapros.nabor,
-          rezhim: zapros.rezhim,
-          vozvrashchat: zapros.vozvrat === true,
-          n: 0,
-        }
-      : { tip: 'nastroyki' },
+    zapros.reyting !== undefined
+      ? zapros.go
+        ? { tip: 'reyting', n: 0 }
+        : { tip: 'nastroyki' }
+      : zapros.go
+        ? {
+            tip: 'igra',
+            nabor: zapros.nabor,
+            rezhim: zapros.rezhim,
+            vozvrashchat: zapros.vozvrat === true,
+            n: 0,
+          }
+        : { tip: 'nastroyki' },
   );
 
   const setLichnye = (l: Lichnye) => {
@@ -117,6 +127,52 @@ export function Trenirovka({ zapros }: { zapros: Zapros }) {
     [ekran, nast.uroven],
   );
 
+  const onKonecReyting = useCallback(
+    (s: Sostoyanie, ms: number, final: Final | null) => {
+      const it = poschitat(s, ms);
+      const nb: Nabor = zapros.nabor;
+      const z = zapisatTrenirovku({
+        id: randomSeed(),
+        at: Date.now(),
+        nabor: `f:${zapros.reyting ?? ''}`,
+        rezhim: s.rezhim,
+        uroven: 2,
+        hody: s.hody,
+        ms,
+        seriya: it.luchshayaSeriya,
+      });
+      setEkran({
+        tip: 'itogi',
+        it,
+        rezhim: s.rezhim,
+        rekord: z.rekord !== null,
+        prezhniy: z.prezhniy,
+        s,
+        nabor: nb,
+        vozvrashchat: false,
+        final,
+      });
+      window.scrollTo({ top: 0 });
+    },
+    [zapros.nabor, zapros.reyting],
+  );
+
+  const startReyting = () =>
+    setEkran((e) => ({ tip: 'reyting', n: (e.tip === 'reyting' ? e.n : 0) + 1 }));
+
+  if (ekran.tip === 'reyting' && zapros.reyting !== undefined) {
+    return (
+      <IgraReyting
+        key={ekran.n}
+        format={zapros.reyting}
+        zvuk={lichnye.zvuk}
+        avto={lichnye.avto}
+        onKonec={onKonecReyting}
+        onPraktika={() => setEkran({ tip: 'nastroyki' })}
+      />
+    );
+  }
+
   if (ekran.tip === 'igra') {
     return (
       <Igra
@@ -151,8 +207,27 @@ export function Trenirovka({ zapros }: { zapros: Zapros }) {
                   true,
                 )
         }
-        onEshche={() => start(ekran.nabor, ekran.rezhim, ekran.vozvrashchat)}
+        onEshche={() =>
+          ekran.final !== undefined
+            ? startReyting()
+            : start(ekran.nabor, ekran.rezhim, ekran.vozvrashchat)
+        }
         onNastroyki={() => setEkran({ tip: 'nastroyki' })}
+        {...(ekran.final !== undefined ? { reyting: { final: ekran.final } } : {})}
+      />
+    );
+  }
+
+  if (zapros.reyting !== undefined) {
+    return (
+      <ReytingVstuplenie
+        format={zapros.reyting}
+        lichnye={lichnye}
+        onLichnye={setLichnye}
+        onStart={startReyting}
+        onPraktika={
+          zapros.nabor.tip === 'format' ? () => start(zapros.nabor, zapros.rezhim, false) : null
+        }
       />
     );
   }

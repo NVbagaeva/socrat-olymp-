@@ -33,7 +33,7 @@ const { sozdatGenerator } = requireSrc('lib/ustnyySchet/nabor.ts');
 const { tex: texOf } = requireSrc('lib/ustnyySchet/chislo.ts');
 const sessiya = requireSrc('lib/ustnyySchet/sessiya.ts');
 const ochki = requireSrc('lib/ustnyySchet/ochki.ts');
-const { FORMATY, KVADRATY_PUL } = requireSrc('lib/ustnyySchet/formaty.ts');
+const { FORMATY, KVADRATY_PUL, primerIzServera } = requireSrc('lib/ustnyySchet/formaty.ts');
 const model = requireSrc('lib/ustnyySchet/statistika/model.ts');
 
 let checks = 0;
@@ -861,6 +861,12 @@ const varianty = (otvet) => {
       if (p === null) break;
       priyomy.add(p.priyom);
       proverkaPrimera(p, `${f.id} «${p.text}»`);
+      /* Пример целиком задаётся (priyom, d, v) — так его присылает сервер. */
+      const s = primerIzServera({ priyom: p.priyom, d: p.d, v: p.v ?? null });
+      check(
+        s !== null && s.otvet === p.otvet && s.tex === p.tex,
+        `${f.id}: из (приём, d, v) не тот пример «${p.text}»`,
+      );
       const nums = [...p.d, p.otvet].map(N);
       check(
         nums.every((x) => x >= c.min && x <= c.max),
