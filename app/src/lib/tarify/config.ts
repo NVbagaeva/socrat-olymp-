@@ -344,9 +344,9 @@ export const TARIFY_TEXT = {
   metkaGlavnoy: 'Полный доступ',
   /** Метка платной плашки на сроке «До ЕГЭ»: рядом всегда виден якорь. */
   metkaVygodno: 'Выгоднее всего',
-  /** Якорь под ценой «До ЕГЭ»: «помесячно вышло бы 3 120 ₽ (8 × 390 ₽)». */
-  yakor: (pomesyachno: string, oplat: number, tsena30: string) =>
-    `помесячно вышло бы ${pomesyachno} (${oplat} × ${tsena30})`,
+  /** Якорь под ценой «До ЕГЭ»: «помесячно вышло бы ~~3 120 ₽~~ (8 × 390 ₽)». */
+  yakor: 'помесячно вышло бы',
+  yakorRaschet: (oplat: number, tsena30: string) => `(${oplat} × ${tsena30})`,
   vygoda: (summa: string) => `выгоднее на ${summa}`,
   bezKarty: 'без карты',
   bezAvtoprodleniya: 'Без автопродления: доступ заканчивается сам',

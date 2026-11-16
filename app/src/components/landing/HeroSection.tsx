@@ -72,8 +72,12 @@ export function HeroSection({
           <Link className="btn btn--primary btn--lg hero__start" href={startHref(level)}>
             {site.headerActions.signup.label}
           </Link>
-          {dobavki.tarify === 'ryadom' ? <TarifySsylka className="hero-tarify--ryadom" /> : null}
-          {dobavki.avtor ? <AvtorPlashka className="hero__avtor" lenivo={false} /> : null}
+          {dobavki.tarify === 'ryadom' || dobavki.avtor ? (
+            <div className="hero__dop">
+              {dobavki.tarify === 'ryadom' ? <TarifySsylka className="hero-tarify--ryadom" /> : null}
+              {dobavki.avtor ? <AvtorPlashka lenivo={false} /> : null}
+            </div>
+          ) : null}
         </div>
 
         <Kristall className="hero__kristall" />

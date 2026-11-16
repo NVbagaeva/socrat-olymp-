@@ -117,12 +117,13 @@ try {
 
     /* Окно после пробной генерации: №10 (адрес /zadaniya/11/). */
     await page.goto(`${BASE}/zadaniya/11/generator/`, { waitUntil: 'load' });
-    const go = page.locator('.gen-strip .gen-go');
+    /* На телефоне кнопка в другой полосе — ищем по названию. */
+    const go = page.getByRole('button', { name: /Сгенерировать|Перегенерировать/ }).first();
     try {
       await go.waitFor({ timeout: 15000 });
       await go.click();
       await page.waitForSelector('.gen-paper.is-live .gen-task', { timeout: 60000 });
-      await go.click();
+      await page.getByRole('button', { name: /Сгенерировать|Перегенерировать/ }).first().click();
       await page.waitForTimeout(900);
       await page.screenshot({
         path: path.join(DIR, `z10-okno-generacii-${sh.id}.jpg`),
