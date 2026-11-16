@@ -6,6 +6,7 @@
 
 import { RAZDEL_05 } from '@/content/baza/z05';
 import { RAZDEL_12 } from '@/content/baza/z12';
+import { RAZDEL_13 } from '@/content/baza/z13';
 import { RAZDEL_14 } from '@/content/baza/z14';
 import { RAZDEL_15 } from '@/content/baza/z15';
 import { RAZDEL_16 } from '@/content/baza/z16';
@@ -15,6 +16,7 @@ import type { RazdelBazy } from './types';
 const RAZDELY: Readonly<Record<string, RazdelBazy>> = {
   '5': RAZDEL_05,
   '12': RAZDEL_12,
+  '13': RAZDEL_13,
   '14': RAZDEL_14,
   '15': RAZDEL_15,
   '16': RAZDEL_16,

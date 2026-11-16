@@ -257,7 +257,12 @@ export type BlokTeorii =
   | { vid: 'spisok'; punkty: string[] }
   | { vid: 'primer'; primer: PrimerTeorii }
   /** Чертёж темы справочника планиметрии (lib/planimetriya/spravochnik-chertezhi). */
-  | { vid: 'chertezh'; tema: string; podpis?: string };
+  | { vid: 'chertezh'; tema: string; podpis?: string }
+  /**
+   * Готовый чертёж — SVG-разметка, построенная на сборке (тела №13
+   * «Стереометрия» — движком lib/solid, см. lib/baza/z13/ris.ts).
+   */
+  | { vid: 'risunok'; svg: string; podpis?: string };
 
 export interface RazdelTeorii {
   id: string;
