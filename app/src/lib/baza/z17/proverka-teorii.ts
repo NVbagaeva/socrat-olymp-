@@ -703,8 +703,884 @@ const KVADRATNYE: ShablonProverki17[] = [
   },
 ];
 
+/* ── Уравнение с корнем ───────────────────────────────────────── */
+
+/** «kx» без единицы: 1 → «x», 3 → «3x». */
+const kx = (k: number): string => (k === 1 ? 'x' : `${k}x`);
+
+const KOREN: ShablonProverki17[] = [
+  {
+    id: 'b17-r-odin',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [k, m, c, x0] = poka(() => {
+        if (nomer === 0) return [3, 10, 4, -2] as const;
+        const kk = r.int(1, 7);
+        const cc = r.int(2, 9);
+        const x = r.pick(TSELYE);
+        const mm = cc * cc + kk * x;
+        if (mm <= 0 || mm > 99) return null;
+        return [kk, mm, cc, x] as const;
+      });
+      const ur = `\\sqrt{${m}-${kx(k)}}=${c}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            lch(
+              (m - c) / k,
+              `Возвести в квадрат нужно и правую часть: под корнем должно получиться $${c}^2=${c * c}$, а не $${c}$.`,
+            ),
+            lch(
+              (m - 2 * c) / k,
+              `Квадрат числа — не удвоение: $${c}^2=${c * c}$, а не $${2 * c}$.`,
+            ),
+            lch(-x0, `Проверь знак: перед $x$ стоит минус. ${PROVERKA}`),
+            {
+              tekst: NET,
+              podskazka: `Корней нет, только когда справа отрицательное число. Здесь $${c}>0$ — возводим в квадрат.`,
+            },
+          ],
+          x0,
+        ),
+        razbor: [
+          `Справа $${c}\\ge0$ — случай 2, возводим в квадрат: $${m}-${kx(k)}=${c * c}$.`,
+          `$${mn([[-k, 'x']])}=${t(c * c - m)}$, $x=${t(x0)}$. Проверка: под корнем $${m}-${k}\\cdot${ts(x0)}=${c * c}=${c}^2$.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-r-drob',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, b, c, x0] = poka(() => {
+        if (nomer === 0) return [4, 3, 5, 5.5] as const;
+        const aa = r.pick([2, 4, 5, 8]);
+        const cc = r.int(2, 9);
+        const bb = r.int(-20, 20);
+        const x = (cc * cc - bb) / aa;
+        if (bb === 0 || Number.isInteger(x) || !konechnoe(x)) return null;
+        return [aa, bb, cc, okr(x)] as const;
+      });
+      const ur = `\\sqrt{${lin(a, b)}}=${c}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            lch(
+              (c - b) / a,
+              `Правую часть тоже возводят в квадрат: $${lin(a, b)}=${c * c}$, а не $${c}$.`,
+            ),
+            lch(
+              (c * c + b) / a,
+              'Число, перенесённое в другую часть, меняет знак на противоположный.',
+            ),
+            lch(a / (c * c - b), `Делят правую часть на $${a}$, а не $${a}$ на правую часть.`),
+            lch(-x0, `Проверь знак ответа. ${PROVERKA}`),
+          ],
+          x0,
+        ),
+        razbor: [
+          `Справа $${c}\\ge0$ — возводим в квадрат: $${lin(a, b)}=${c * c}$, $${a}x=${t(c * c - b)}$.`,
+          `$x=\\dfrac{${t(c * c - b)}}{${a}}=${t(x0)}$ — в бланк пишем десятичную дробь.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-r-nol',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [k, m, x0] = poka(() => {
+        if (nomer === 0) return [5, 10, 2] as const;
+        const kk = r.int(2, 9);
+        const x = r.pick(TSELYE) + r.pick([0, 0, 0.5]);
+        const mm = okr(kk * x);
+        if (!Number.isInteger(mm) || mm === 0) return null;
+        return [kk, mm, x] as const;
+      });
+      const ur = `\\sqrt{${lin(k, -m)}}=0`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            {
+              tekst: NET,
+              podskazka:
+                'Ноль не отрицателен — это случай $c\\ge0$. Корень равен нулю, когда под ним ноль.',
+            },
+            lch(m, `Получилось $${k}x=${m}$ — осталось разделить на $${k}$.`),
+            lch(-x0, `Проверь знак: подставь число под корень — должен получиться $0$.`),
+          ],
+          x0,
+        ),
+        razbor: [
+          `Справа $0$ — случай $c\\ge0$: $${lin(k, -m)}=0^2=0$.`,
+          `$${k}x=${m}$, $x=${t(x0)}$.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-r-net',
+    tip: 'deystvie',
+    sozdat(r, nomer) {
+      const [a, b, c, x1] = poka(() => {
+        if (nomer === 0) return [2, 3, 5, 11] as const;
+        const aa = r.int(1, 5);
+        const cc = r.int(2, 9);
+        const x = r.pick(TSELYE);
+        const bb = cc * cc - aa * x;
+        if (bb === 0 || Math.abs(bb) > 60) return null;
+        return [aa, bb, cc, x] as const;
+      });
+      const ur = `\\sqrt{${lin(a, b)}}=-${c}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          NET,
+          [
+            lch(
+              x1,
+              `Это посторонний корень: подставь — слева $\\sqrt{${c * c}}=${c}$, а справа $-${c}$. Возводить в квадрат при отрицательной правой части нельзя.`,
+            ),
+            {
+              tekst: '$0$',
+              podskazka: `Корень не бывает отрицательным: слева число $\\ge0$ при любом $x$, справа $-${c}$.`,
+            },
+            {
+              tekst: LYUBOE,
+              podskazka: `Подставь любое число: слева неотрицательное число, справа $-${c}$ — равенства нет.`,
+            },
+          ],
+          x1,
+        ),
+        razbor: [
+          `Справа $-${c}<0$ — случай 1. Арифметический корень не бывает отрицательным.`,
+          `Корней нет. Возведение в квадрат дало бы посторонний корень $x=${t(x1)}$.`,
+        ],
+      };
+    },
+  },
+];
+
+/* ── Показательные ────────────────────────────────────────────── */
+
+/** Наибольший показатель степени основания, который встречается в №17. */
+const STEPENI: Record<number, number> = { 2: 8, 3: 5, 5: 4, 7: 3 };
+const OSNOVANIYA = [2, 3, 5, 7] as const;
+
+/** Число a^k записью условия: целое, 1 или \frac{1}{a^{|k|}}. */
+const stepenChislo = (a: number, k: number): string =>
+  k >= 0 ? String(a ** k) : `\\frac{1}{${a ** -k}}`;
+/** «x+3», «x-5». */
+const xm = (m: number): string => lin(1, m);
+
+const POKAZATELNYE: ShablonProverki17[] = [
+  {
+    id: 'b17-p-chislo',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, m, k] = poka(() => {
+        if (nomer === 0) return [3, -1, -3] as const;
+        const aa = r.pick(OSNOVANIYA);
+        const kk = r.int(1, STEPENI[aa] ?? 3) * r.pick([1, -1]);
+        const mm = r.int(-9, 9);
+        if (mm === 0) return null;
+        return [aa, mm, kk] as const;
+      });
+      const x0 = k - m;
+      const N = stepenChislo(a, k);
+      const ur = `${a}^{${xm(m)}}=${N}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            k < 0
+              ? lch(
+                  -k - m,
+                  `Дробь $\\dfrac{1}{a^n}$ — степень с отрицательным показателем: $${N.replace('\\frac', '\\dfrac')}=${a}^{${k}}$.`,
+                )
+              : lch(-k - m, `Число $${N}$ — степень $${a}^{${k}}$ с положительным показателем.`),
+            lch(k + m, 'Число из левой части переносят вправо с противоположным знаком.'),
+            lch(
+              a ** Math.abs(k) - m,
+              `Справа число, а не показатель: сначала запиши его степенью числа $${a}$.`,
+            ),
+            {
+              tekst: NET,
+              podskazka:
+                'Корней нет, только когда справа ноль или отрицательное число. Здесь справа положительное число.',
+            },
+          ],
+          x0,
+        ),
+        razbor: [
+          `$${N.replace('\\frac', '\\dfrac')}=${a}^{${k}}$, значит, $${xm(m)}=${k}$.`,
+          `$x=${t(x0)}$.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-p-drob-osn',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, m, k] = poka(() => {
+        if (nomer === 0) return [2, 3, 4] as const;
+        const aa = r.pick(OSNOVANIYA);
+        const kk = r.int(1, STEPENI[aa] ?? 3);
+        const mm = r.int(1, 15);
+        if (mm === kk) return null;
+        return [aa, mm, kk] as const;
+      });
+      const x0 = m - k;
+      const ur = `\\left(\\frac{1}{${a}}\\right)^{x-${m}}=${a ** k}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            lch(
+              m + k,
+              `Основание $\\dfrac{1}{${a}}$, а справа степень числа $${a}$: переверни основание, $\\left(\\dfrac{1}{${a}}\\right)^{t}=${a}^{-t}$.`,
+            ),
+            lch(-m - k, `Минус относится ко всему показателю: $-(x-${m})=-x+${m}$.`),
+            lch(-x0, `Проверь знак ответа. ${PROVERKA}`),
+            {
+              tekst: NET,
+              podskazka: 'Справа положительное число — корень есть.',
+            },
+          ],
+          x0,
+        ),
+        razbor: [
+          `$\\left(\\dfrac{1}{${a}}\\right)^{x-${m}}=${a}^{-(x-${m})}$, $${a ** k}=${a}^{${k}}$.`,
+          `$-(x-${m})=${k}$, $-x+${m}=${k}$, $x=${t(x0)}$.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-p-proizv',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, p, m, q, n, x0, K] = poka(() => {
+        if (nomer === 0) return [2, 3, -1, -1, 4, -3, -3] as const;
+        const aa = r.pick(OSNOVANIYA);
+        const pp = r.int(-7, 7);
+        const qq = r.int(-7, 7);
+        const d = pp + qq;
+        const mm = r.int(-12, 12);
+        const nn = r.int(-12, 12);
+        const x = r.pick(TSELYE);
+        const kk = d * x + mm + nn;
+        const L = STEPENI[aa] ?? 3;
+        if (pp === 0 || qq === 0 || d === 0 || Math.abs(d) > 3 || mm === 0 || nn === 0) return null;
+        if (Math.abs(kk) > L) return null;
+        return [aa, pp, mm, qq, nn, x, kk] as const;
+      });
+      const d = p + q;
+      const N = stepenChislo(a, K);
+      const ur = `${a}^{${lin(p, m)}}\\cdot ${a}^{${lin(q, n)}}=${N}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            p === q
+              ? null
+              : lch(
+                  (K - m + n) / (p - q),
+                  'При умножении степеней с одинаковым основанием показатели складываются, а не вычитаются.',
+                ),
+            K === 0
+              ? lch(-m - n, `$1=${a}^0$: показатель справа равен нулю.`)
+              : lch(
+                  (-K - m - n) / d,
+                  `Проверь показатель справа: $${N.replace('\\frac', '\\dfrac')}=${a}^{${K}}$.`,
+                ),
+            lch(-x0, `Проверь знак ответа. ${PROVERKA}`),
+          ],
+          x0,
+        ),
+        razbor: [
+          `Складываем показатели: $(${lin(p, m)})+(${lin(q, n)})=${lin(d, m + n)}$; справа $${a}^{${K}}$.`,
+          `$${lin(d, m + n)}=${K}$, $x=${t(x0)}$.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-p-net',
+    tip: 'deystvie',
+    sozdat(r, nomer) {
+      const [a, m, k, nol] = poka(() => {
+        if (nomer === 0) return [5, -2, 2, false] as const;
+        const aa = r.pick(OSNOVANIYA);
+        const kk = r.int(1, STEPENI[aa] ?? 3);
+        const mm = r.int(-9, 9);
+        if (mm === 0 || kk === mm) return null;
+        return [aa, mm, kk, r.int(0, 3) === 0] as const;
+      });
+      const prav = nol ? '0' : `-${a ** k}`;
+      const ur = `${a}^{${xm(m)}}=${prav}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          NET,
+          [
+            nol
+              ? lch(-m, `$${a}^0=1$, а не $0$. Степень положительного числа нулём не бывает.`)
+              : lch(
+                  k - m,
+                  `$-${a ** k}$ — не степень числа $${a}$: это $-(${a}^{${k}})$. Степень положительного основания всегда положительна.`,
+                ),
+            {
+              tekst: '$0$',
+              podskazka: `Подставь $x=0$: слева $${a}^{${m}}>0$, справа $${prav}$.`,
+            },
+            {
+              tekst: LYUBOE,
+              podskazka: `Слева при любом $x$ положительное число, справа $${prav}$ — равенства нет ни при каком $x$.`,
+            },
+          ],
+          nol ? -m : k - m,
+        ),
+        razbor: [
+          `Степень $${a}^{t}$ положительна при любом $t$, а справа $${prav}${nol ? '' : '<0'}$.`,
+          'Корней нет.',
+        ],
+      };
+    },
+  },
+  {
+    id: 'b17-p-mnozhitel',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, k, e] = poka(() => {
+        if (nomer === 0) return [2, 7, 3] as const;
+        const aa = r.pick(OSNOVANIYA);
+        const kk = r.int(2, 9);
+        const ee = r.int(1, (STEPENI[aa] ?? 3) - 1);
+        if ((1 + kk) * aa ** ee > 1000) return null;
+        return [aa, kk, ee] as const;
+      });
+      const N = (1 + k) * a ** e;
+      const ur = `${a}^x+${k}\\cdot ${a}^x=${N}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(e),
+          [
+            lch(
+              a ** e,
+              `Это значение $${a}^x$, а нужен показатель: запиши $${a ** e}$ степенью числа $${a}$.`,
+            ),
+            lch(N / k, `$${a}^x=1\\cdot${a}^x$: в скобке $1+${k}=${1 + k}$, а не $${k}$.`),
+            {
+              tekst: NET,
+              podskazka: 'Справа положительное число — корень есть. Вынеси $a^x$ за скобку.',
+            },
+          ],
+          e,
+        ),
+        razbor: [
+          `Выносим $${a}^x$: $${1 + k}\\cdot${a}^x=${N}$, $${a}^x=${a ** e}=${a}^{${e}}$.`,
+          `$x=${e}$.`,
+        ],
+        znachenie: e,
+      };
+    },
+  },
+];
+
+/* ── Логарифмические ──────────────────────────────────────────── */
+
+/** «\log_{5}», «\lg». */
+const logT = (a: number): string => (a === 10 ? '\\lg' : `\\log_{${a}}`);
+
+const LOGARIFMY: ShablonProverki17[] = [
+  {
+    id: 'b17-g-opr',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, n, k, m, x0] = poka(() => {
+        if (nomer === 0) return [5, 2, 2, -1, 13] as const;
+        const aa = r.pick([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        const nn = aa === 10 ? 2 : r.int(1, aa <= 3 ? 4 : 2);
+        const kk = r.int(1, 9);
+        const x = r.pick(TSELYE);
+        const mm = aa ** nn - kk * x;
+        if (mm === 0 || Math.abs(mm) > 99 || aa * nn === aa ** nn) return null;
+        return [aa, nn, kk, mm, x] as const;
+      });
+      const ur = `${logT(a)}(${lin(k, m)})=${n}`;
+      const st = a ** n;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            lch(
+              (a * n - m) / k,
+              `Число справа — показатель степени, а не множитель: $${a}^{${n}}=${st}$, а не $${a}\\cdot${n}$.`,
+            ),
+            lch((n - m) / k, `Логарифм не «снимают»: по определению $${lin(k, m)}=${a}^{${n}}$.`),
+            lch(-x0, `Проверь знак ответа. ${PROVERKA}`),
+            {
+              tekst: NET,
+              podskazka: `По определению $${lin(k, m)}=${a}^{${n}}>0$ — корень есть и сразу входит в ОДЗ.`,
+            },
+          ],
+          x0,
+        ),
+        razbor: [
+          `По определению логарифма: $${lin(k, m)}=${a}^{${n}}=${st}$.`,
+          `$${kx(k)}=${t(st - m)}$, $x=${t(x0)}$. ОДЗ выполнена: $${st}>0$.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-g-ravn',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, k, m, b, x0] = poka(() => {
+        if (nomer === 0) return [3, 4, 5, 17, 3] as const;
+        const aa = r.pick([2, 3, 5, 6, 7, 11, 13]);
+        const kk = r.int(1, 7);
+        const x = r.pick(TSELYE);
+        const bb = r.int(1, 40);
+        const mm = bb - kk * x;
+        if (mm === 0 || bb === aa) return null;
+        return [aa, kk, mm, bb, x] as const;
+      });
+      const ur = `\\log_{${a}}(${lin(k, m)})=\\log_{${a}}${b}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            lch((b + m) / k, 'Число, перенесённое в другую часть, меняет знак.'),
+            k === 1 ? null : lch(b - m, `Осталось разделить обе части на $${k}$.`),
+            lch(-x0, `Проверь знак ответа. ${PROVERKA}`),
+            {
+              tekst: NET,
+              podskazka: `Проверь ОДЗ: при найденном $x$ под логарифмом $${b}>0$ — корень подходит.`,
+            },
+          ],
+          x0,
+        ),
+        razbor: [
+          `Логарифмы с одним основанием равны — равны выражения: $${lin(k, m)}=${b}$.`,
+          `$x=${t(x0)}$; ОДЗ: $${b}>0$.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-g-odz',
+    tip: 'deystvie',
+    sozdat(r, nomer) {
+      const [a, p, m, q, n, x0, v] = poka(() => {
+        if (nomer === 0) return [2, 3, 4, 1, -2, -3, -5] as const;
+        const aa = r.pick([2, 3, 5, 7]);
+        const pp = r.int(1, 5);
+        const qq = r.int(1, 5);
+        const x = r.pick(TSELYE);
+        const vv = r.int(-15, 0);
+        const mm = vv - pp * x;
+        const nn = vv - qq * x;
+        if (pp === qq || mm === 0 || nn === 0) return null;
+        return [aa, pp, mm, qq, nn, x, vv] as const;
+      });
+      const ur = `\\log_{${a}}(${lin(p, m)})=\\log_{${a}}(${lin(q, n)})`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          NET,
+          [
+            lch(
+              x0,
+              `Подставь это число под логарифмы: получится $${v}$, а логарифм определён только для положительных чисел. Это посторонний корень.`,
+            ),
+            lch(-x0, `Приравняй выражения под логарифмами и проверь корень по ОДЗ.`),
+            {
+              tekst: LYUBOE,
+              podskazka: `Выражения $${lin(p, m)}$ и $${lin(q, n)}$ равны только при одном $x$ — и он не входит в ОДЗ.`,
+            },
+          ],
+          x0,
+        ),
+        razbor: [
+          `$${lin(p, m)}=${lin(q, n)}$, $x=${t(x0)}$.`,
+          `ОДЗ: под логарифмами $${t(v)}${v === 0 ? '' : '<0'}$ — логарифм не определён. Корней нет.`,
+        ],
+      };
+    },
+  },
+  {
+    id: 'b17-g-summa',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, m, k, w, summa] = poka(() => {
+        if (nomer === 0) return [2, 3, 4, 5, true] as const;
+        const aa = r.pick([2, 3, 5, 7]);
+        const mm = r.int(1, 15);
+        const kk = r.int(2, 6);
+        const ww = r.int(1, 12);
+        if (kk === aa) return null;
+        return [aa, mm, kk, ww, r.int(0, 1) === 0] as const;
+      });
+      const lg = `\\log_{${a}}`;
+      if (summa) {
+        const M = k * w;
+        const x0 = m + w;
+        const ur = `${lg}(x-${m})+${lg}${k}=${lg}${M}`;
+        return {
+          ur,
+          vopros: 'koren',
+          uslovie: uslovie(ur, 'koren'),
+          varianty: varianty(
+            r,
+            ch(x0),
+            [
+              lch(
+                m + M - k,
+                'Сумма логарифмов — логарифм произведения, а не разности: $\\log_a m+\\log_a n=\\log_a(mn)$.',
+              ),
+              lch(m + M * k, `Из $${k}(x-${m})=${M}$ делят на $${k}$, а не умножают.`),
+              lch(w - m, `Из $x-${m}=${w}$ число $${m}$ переносят со знаком «плюс».`),
+            ],
+            x0,
+          ),
+          razbor: [
+            `ОДЗ: $x-${m}>0$. Сумма — логарифм произведения: $${k}(x-${m})=${M}$.`,
+            `$x-${m}=${w}$, $x=${x0}$; $${w}>0$ — входит в ОДЗ.`,
+          ],
+          znachenie: x0,
+        };
+      }
+      const x0 = k * w - m;
+      const ur = `${lg}(x+${m})-${lg}${k}=${lg}${w}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            lch(
+              w + k - m,
+              'Разность логарифмов — логарифм частного: $\\log_a m-\\log_a n=\\log_a\\dfrac{m}{n}$.',
+            ),
+            lch(w / k - m, `Из $\\dfrac{x+${m}}{${k}}=${w}$ обе части умножают на $${k}$.`),
+            lch(k * w + m, `Из $x+${m}=${k * w}$ число $${m}$ переносят со знаком «минус».`),
+          ],
+          x0,
+        ),
+        razbor: [
+          `ОДЗ: $x+${m}>0$. Разность — логарифм частного: $\\dfrac{x+${m}}{${k}}=${w}$.`,
+          `$x+${m}=${k * w}$, $x=${t(x0)}$; $${k * w}>0$ — входит в ОДЗ.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-g-drob',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [p, q, k, m, x0] = poka(() => {
+        if (nomer === 0) return [2, 5, 2, 1, 0.75] as const;
+        const pp = r.pick([2, 4, 5, 8]);
+        const qq = r.int(1, 19);
+        const kk = r.pick([1, 2]);
+        const mm = r.int(1, 15);
+        const x = (qq / pp - mm) / kk;
+        const nod = (u: number, w: number): number => (w === 0 ? u : nod(w, u % w));
+        if (qq === pp || nod(pp, qq) !== 1 || !konechnoe(x)) return null;
+        return [pp, qq, kk, mm, okr(x)] as const;
+      });
+      const ur = `\\log_{\\frac{${p}}{${q}}}(${lin(k, m)})=-1`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            lch(
+              (p / q - m) / k,
+              `Степень $-1$ переворачивает дробь: $\\left(\\dfrac{${p}}{${q}}\\right)^{-1}=\\dfrac{${q}}{${p}}$.`,
+            ),
+            lch(
+              (-p / q - m) / k,
+              'Степень $-1$ — не минус перед числом: она переворачивает дробь, а знак не меняет.',
+            ),
+            lch(-x0, `Проверь знак ответа. ${PROVERKA}`),
+          ],
+          x0,
+        ),
+        razbor: [
+          `По определению: $${lin(k, m)}=\\left(\\dfrac{${p}}{${q}}\\right)^{-1}=\\dfrac{${q}}{${p}}=${t(q / p)}$.`,
+          `$x=${t(x0)}$; ОДЗ: $${t(q / p)}>0$.`,
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+];
+
+/* ── Запись ответа ────────────────────────────────────────────── */
+
+const nodT = (u: number, w: number): number => (w === 0 ? Math.abs(u) : nodT(w, u % w));
+/** Обыкновенная дробь u/w сокращённой записью: «-\dfrac{3}{4}». */
+function drobTex(u: number, w: number): string {
+  const g = nodT(u, w);
+  const [a, b] = [Math.abs(u) / g, Math.abs(w) / g];
+  return `${u * w < 0 ? '-' : ''}\\dfrac{${a}}{${b}}`;
+}
+
+const OTVET: ShablonProverki17[] = [
+  {
+    id: 'b17-o-otric',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [x1, x2] = poka(() => {
+        if (nomer === 0) return [-6, -2] as const;
+        const u = r.int(-9, -1);
+        const w = r.int(-9, -1);
+        if (u === w) return null;
+        return [Math.min(u, w), Math.max(u, w)] as const;
+      });
+      const v = vopr(r, nomer);
+      const ur = `${kv(1, -(x1 + x2), x1 * x2)}=0`;
+      const otvet = vybrat(v, x1, x2);
+      return {
+        ur,
+        vopros: v,
+        uslovie: uslovie(ur, v),
+        varianty: varianty(
+          r,
+          ch(otvet),
+          [
+            lch(
+              drugoy(v, x1, x2),
+              `Среди отрицательных чисел ${v === 'menshiy' ? 'меньше' : 'больше'} то, что ${v === 'menshiy' ? 'левее' : 'правее'} на прямой: $${x1}<${x2}$, хотя $${-x1}>${-x2}$.`,
+            ),
+            lch(-otvet, 'Корни отрицательные — минус в ответе не теряем.'),
+            lch(
+              -drugoy(v, x1, x2),
+              'Корни отрицательные: подставь это число — равенства не будет.',
+            ),
+          ],
+          otvet,
+        ),
+        razbor: [
+          `Корни: $${x1}$ и $${x2}$ (по Виете: сумма $${x1 + x2}$, произведение $${x1 * x2}$).`,
+          `$${x1}<${x2}$: ${v === 'menshiy' ? 'меньший' : 'больший'} — $${t(otvet)}$.`,
+        ],
+        znachenie: otvet,
+      };
+    },
+  },
+  {
+    id: 'b17-o-drob',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, b] = poka(() => {
+        if (nomer === 0) return [4, -3] as const;
+        const aa = r.pick([2, 4, 5, 8, 20, 25]);
+        const bb = r.int(-30, 30);
+        if (bb === 0 || nodT(aa, bb) !== 1 || Math.abs(bb) === 1) return null;
+        return [aa, bb] as const;
+      });
+      const x0 = okr(b / a);
+      const ur = `${a}x=${b}`;
+      return {
+        ur,
+        vopros: 'koren',
+        uslovie: uslovie(ur, 'koren'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            {
+              tekst: `$${drobTex(b, a)}$`,
+              podskazka:
+                'Число верное, но в бланк пишут конечную десятичную дробь: переведи обыкновенную дробь.',
+            },
+            lch(
+              a / b,
+              `Делят правую часть на коэффициент: $x=\\dfrac{${b}}{${a}}$, а не наоборот.`,
+            ),
+            lch(-x0, `Проверь знак ответа. ${PROVERKA}`),
+          ],
+          x0,
+        ),
+        razbor: [`$x=\\dfrac{${b}}{${a}}=${drobTex(b, a)}$.`, `В десятичной записи: $x=${t(x0)}$.`],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-o-odin',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [k1, m, n, p, x0] = poka(() => {
+        if (nomer === 0) return [5, 9, 2, -3, -4] as const;
+        const x = r.pick(TSELYE);
+        const d = r.int(2, 6) * r.pick([1, -1]);
+        const nn = r.int(1, 6);
+        const kk = nn + d;
+        const mm = r.int(-9, 9);
+        if (kk === 0 || kk === 1 || mm === 0) return null;
+        return [kk, mm, nn, mm + d * x, x] as const;
+      });
+      const d = k1 - n;
+      const ur = `${lin(k1, m)}=${lin(n, p)}`;
+      return {
+        ur,
+        vopros: 'menshiy',
+        uslovie: uslovie(ur, 'menshiy'),
+        varianty: varianty(
+          r,
+          ch(x0),
+          [
+            {
+              tekst: NET,
+              podskazka:
+                'Слова «если корней больше одного» — не повод писать «корней нет». Корень один — его и пишем.',
+            },
+            lch((p + m) / d, 'Число, перенесённое в другую часть, меняет знак на противоположный.'),
+            lch(-x0, `Проверь знак ответа. ${PROVERKA}`),
+          ],
+          x0,
+        ),
+        razbor: [
+          `$${mn([[d, 'x']])}=${t(p - m)}$, корень один: $x=${t(x0)}$.`,
+          'Корень один — его и пишем, хотя в условии сказано про меньший.',
+        ],
+        znachenie: x0,
+      };
+    },
+  },
+  {
+    id: 'b17-o-dvadrob',
+    tip: 'skolko',
+    sozdat(r, nomer) {
+      const [a, x1, rr] = poka(() => {
+        if (nomer === 0) return [2, 1, -3] as const;
+        const aa = r.pick([2, 4, 5]);
+        const x = r.pick(TSELYE);
+        const rv = r.int(-19, 19);
+        if (rv % aa === 0 || nodT(aa, rv) !== 1) return null;
+        if (Math.abs(a0(aa, x, rv).b) > 40 || Math.abs(x * rv) > 60) return null;
+        return [aa, x, rv] as const;
+      });
+      const x2 = okr(rr / a);
+      const { b, c } = a0(a, x1, rr);
+      const ur = `${kv(a, b, c)}=0`;
+      const v = vopr(r, nomer);
+      const otvet = vybrat(v, x1, x2);
+      const drobnyy = otvet === x2;
+      return {
+        ur,
+        vopros: v,
+        uslovie: uslovie(ur, v),
+        varianty: varianty(
+          r,
+          ch(otvet),
+          [
+            drobnyy
+              ? {
+                  tekst: `$${drobTex(rr, a)}$`,
+                  podskazka:
+                    'Число верное, но в бланк пишут десятичную дробь: переведи обыкновенную дробь.',
+                }
+              : null,
+            lch(drugoy(v, x1, x2), DRUGOY_KOREN(v)),
+            lch(-otvet, `Проверь знак. ${PROVERKA}`),
+          ],
+          otvet,
+        ),
+        razbor: [
+          `Корни: $${t(x1)}$ и $${drobTex(rr, a)}=${t(x2)}$.`,
+          `${v === 'bolshiy' ? 'Больший' : 'Меньший'} — $${t(otvet)}$, в бланк — десятичной записью.`,
+        ],
+        znachenie: otvet,
+      };
+    },
+  },
+];
+
+/** Коэффициенты $ax^2+bx+c$ с корнями $x_1$ и $\frac{r}{a}$: $(x-x_1)(ax-r)$. */
+function a0(a: number, x1: number, r: number): { b: number; c: number } {
+  return { b: -(a * x1 + r), c: x1 * r };
+}
+
 /** Наборы «Проверь себя» теории №17 по разделам. */
-export const PROVERKA_17: Record<'lineynye' | 'kvadratnye', ShablonProverki17[]> = {
+export const PROVERKA_17: Record<
+  'lineynye' | 'kvadratnye' | 'koren' | 'pokazatelnye' | 'logarifmy' | 'otvet',
+  ShablonProverki17[]
+> = {
   lineynye: LINEYNYE,
   kvadratnye: KVADRATNYE,
+  koren: KOREN,
+  pokazatelnye: POKAZATELNYE,
+  logarifmy: LOGARIFMY,
+  otvet: OTVET,
 };

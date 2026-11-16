@@ -587,7 +587,7 @@ function reshitIrratsionalnoe(ur: Uravnenie, sdvig: number): Chast {
   etapy.push({
     title: 'Возведём в квадрат',
     lines: [
-      `Правая часть $${texQ(c)}$ положительна, поэтому обе части можно возвести в квадрат:`,
+      `Справа $${texQ(c)}\\ge0$ — обе части неотрицательны, поэтому возводим их в квадрат (переход равносильный, посторонних корней не будет):`,
       `$${pod.s}=${texQ(c)}^2=${texQ(c2)}$`,
     ],
   });
@@ -824,7 +824,7 @@ function reshitPokazatelnoe(
     title: 'Приравняем показатели',
     lines: [
       `$${stepenTex(c, mnTex(U))}=${stepenTex(c, mnTex(V))}$`,
-      `Основания одинаковые, значит, равны и показатели: $${mnTex(U)}=${mnTex(V)}$.`,
+      `Основание одно и то же, положительное и не равное $1$, — значит, равны и показатели: $${mnTex(U)}=${mnTex(V)}$.`,
     ],
   });
   const lin = lineynoe(izMn(U), izMn(V), sdvig + 3);
@@ -929,7 +929,7 @@ function reshitLogarifmicheskoe(ur: Uravnenie, sdvig: number): Chast {
   const etapy: Etap[] = [
     {
       title: 'Область допустимых значений',
-      lines: [`Под логарифмом должно стоять положительное число: $${As}>0$.`],
+      lines: [`ОДЗ: под логарифмом должно стоять положительное число, $${As}>0$.`],
     },
   ];
   const hints: HintStep[] = [];
@@ -1042,7 +1042,7 @@ function reshitLogarifmicheskoe(ur: Uravnenie, sdvig: number): Chast {
   etapy.push({
     title: 'Проверка',
     lines: [
-      `При $x=${texQ(lin.x)}$ под логарифмом $${As}=${texQ(v)}>0$ — корень подходит.`,
+      `При $x=${texQ(lin.x)}$ под логарифмом $${As}=${texQ(v)}>0$ — корень входит в ОДЗ.`,
       `Ответ: $${texQ(lin.x)}$.`,
     ],
   });
