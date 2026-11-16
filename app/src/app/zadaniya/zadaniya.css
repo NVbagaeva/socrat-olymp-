@@ -17,7 +17,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-4);
 }
 .bank-head__title {
@@ -154,7 +154,7 @@
   flex: none;
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 

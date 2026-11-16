@@ -10,6 +10,7 @@ import '@/lib/graph/graph.css';
 import '@/app/zadaniya/11/pechat/pechat11.css';
 import '@/app/zadaniya/11/procenty.css';
 import '@/app/zadaniya/13/reshenie13.css';
+import '@/app/zadaniya/21/pechat/pechat21.css';
 import '@/components/tasks/zadanie10/razbor10.css';
 import '@/components/probability/probability.css';
 import '@/components/tasks/zadanie6/zadanie6.css';

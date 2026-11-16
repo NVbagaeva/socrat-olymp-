@@ -73,6 +73,11 @@ export interface Prototip {
    * задача с расхождением в банк не попадает.
    */
   proverka(params: Params): string;
+  /**
+   * Чертёж условия — SVG-разметка по числам задачи (№12 «Планиметрия»).
+   * Строится на сборке и уходит в браузер вместе с условием.
+   */
+  risunok?(params: Params): string;
 }
 
 /** Группа прототипов в выборе тем тренажёра. */
@@ -94,6 +99,8 @@ export interface ZadachaBazy {
   otvet: string;
   dopustimye?: string[];
   tip: TipOtveta;
+  /** SVG чертежа условия, если он есть у прототипа. */
+  risunok?: string;
 }
 
 /** Задача для браузера: ответ — отпечатком. */
@@ -102,6 +109,8 @@ export interface ZadachaLite {
   prototypeId: string;
   params: Params;
   text: string;
+  /** SVG чертежа условия. */
+  risunok?: string;
   seal: string;
 }
 
@@ -153,7 +162,9 @@ export type BlokTeorii =
   | { vid: 'vazhno'; text: string; primer: string }
   | { vid: 'layfhak'; text: string }
   | { vid: 'spisok'; punkty: string[] }
-  | { vid: 'primer'; primer: PrimerTeorii };
+  | { vid: 'primer'; primer: PrimerTeorii }
+  /** Чертёж темы справочника планиметрии (lib/planimetriya/spravochnik-chertezhi). */
+  | { vid: 'chertezh'; tema: string; podpis?: string };
 
 export interface RazdelTeorii {
   id: string;

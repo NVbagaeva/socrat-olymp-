@@ -915,7 +915,7 @@ const varianty = (otvet) => {
         );
         proverkaPrimera(p, `теория ${id} «${p.text}»`);
       }
-      for (const s of [t.pravilo, t.pochemu]) {
+      for (const s of [t.pravilo, t.pochemu, t.kratko, ...t.urovni]) {
         const r = tekstOk(s);
         check(r === true, `теория ${id}: формула в «${s}»: ${r}`);
       }

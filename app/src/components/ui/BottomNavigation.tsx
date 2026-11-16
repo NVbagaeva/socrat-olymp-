@@ -27,7 +27,7 @@ export function BottomNavigation({
           <a
             key={item.id}
             href={item.href}
-            className={clsx(item.active && 'is-active')}
+            className={clsx(item.active && 'is-active', item.akcent === true && 'is-akcent')}
             aria-current={item.active ? 'page' : undefined}
             aria-label={podpis !== item.label ? item.label : undefined}
           >

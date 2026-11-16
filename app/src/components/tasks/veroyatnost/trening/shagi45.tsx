@@ -38,8 +38,10 @@ export function risunok45(razbor: Razbor, verno: boolean, podpis: string): React
   if (razbor.parametry === undefined) {
     return null;
   }
+  // tabIndex: рисунок прокручивается вбок — пусть и с клавиатуры
+  // (axe: scrollable-region-focusable).
   return (
-    <figure className="z45-risunok" aria-label={podpis}>
+    <figure className="z45-risunok" aria-label={podpis} tabIndex={0}>
       <figcaption className="z45-risunok__podpis">
         {podpisRisunka(razbor.parametry, razbor.podsvetka)}
       </figcaption>

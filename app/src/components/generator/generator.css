@@ -138,7 +138,7 @@
   padding: 4px 8px;
   border-radius: var(--radius-pill);
   background: var(--color-warning-soft);
-  color: var(--color-warning);
+  color: var(--amber-700);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -277,7 +277,8 @@
 }
 .gen-preset span {
   font-size: var(--fs-label);
-  color: var(--color-text-secondary);
+  /* На голубой заливке выбранного пресета вторичный серый — 4,45 : 1. */
+  color: var(--color-text-lead);
 }
 .gen-preset[aria-pressed='true'] {
   border-color: var(--color-primary);
@@ -408,7 +409,7 @@
   margin-top: 2px;
   font-size: var(--fs-label);
   line-height: var(--lh-label);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 .gen-trow__metatext {
   white-space: nowrap;

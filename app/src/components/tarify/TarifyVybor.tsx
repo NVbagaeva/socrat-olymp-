@@ -10,12 +10,15 @@ import { Plashka } from './Plashka';
 const KLYUCH_ROLI = 'tarify:rol';
 
 /**
- * Плашки в порядке разметки: платная первой. На телефоне она первой и
- * видна, на широком экране CSS ставит её справа (tarify.css).
+ * Плашки в порядке разметки: бесплатная, платная, пробная. На телефоне
+ * первой видна бесплатная — та, о которой заголовок страницы
+ * («Занимайтесь бесплатно»), платная — следующим свайпом
+ * (docs/design-audit.md, п. 4.1). На широком экране CSS ставит платную
+ * справа, на планшете — сверху во всю ширину (tarify.css).
  */
 function poryadok(rol: Rol) {
   const [besplatno, probnyy, platnyy] = plashki(rol);
-  return [platnyy, besplatno, probnyy];
+  return [besplatno, platnyy, probnyy];
 }
 
 /** Сохранённая роль: читается из браузера, меняется в другой вкладке. */
