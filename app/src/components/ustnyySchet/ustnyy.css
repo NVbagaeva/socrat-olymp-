@@ -1270,3 +1270,23 @@
   margin: 0;
   color: var(--color-text-secondary);
 }
+
+/* Статистика в кабинете */
+.us-stat--kabinet {
+  gap: var(--space-4);
+}
+.us-stat__spisok {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.us-stat__spisok a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.us-reyting--klass {
+  max-width: none;
+}

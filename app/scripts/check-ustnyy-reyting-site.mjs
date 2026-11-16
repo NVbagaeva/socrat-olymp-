@@ -24,7 +24,10 @@
    4. Ошибки старта (too_many_starts, vyzov_uzhe) — понятный текст.
    5. Страница рейтинга: ники, своё место, вне таблицы — отдельной
       строкой; смена ника (ошибка и успех), случайный ник, показ в
-      рейтинге выключается; 320 px без прокрутки вбок. */
+      рейтинге выключается; 320 px без прокрутки вбок.    6. Репетитор: на странице класса — рейтинг класса с именами
+      учеников, ссылка на рейтинг с выбранным классом; сам репетитор в
+      рейтинг не идёт.
+   7. Статистика ученика: лучшие результаты в рейтинге с сервера. */
 
 import fs from 'node:fs';
 import http from 'node:http';
@@ -86,27 +89,29 @@ const USER = {
 function b64url(o) {
   return Buffer.from(JSON.stringify(o)).toString('base64url');
 }
-const TOKEN = `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({
-  sub: USER.id,
-  email: USER.email,
-  role: 'authenticated',
-  exp: Math.floor(Date.now() / 1000) + 24 * 3600,
-})}.mock`;
-const SESSION = {
-  access_token: TOKEN,
-  token_type: 'bearer',
-  expires_in: 24 * 3600,
-  expires_at: Math.floor(Date.now() / 1000) + 24 * 3600,
-  refresh_token: 'r-1',
-  user: {
-    id: USER.id,
-    aud: 'authenticated',
-    role: 'authenticated',
+function sessiya(rol) {
+  const token = `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({
+    sub: USER.id,
     email: USER.email,
-    user_metadata: { name: USER.name, role: 'student' },
-    app_metadata: { provider: 'email' },
-  },
-};
+    role: 'authenticated',
+    exp: Math.floor(Date.now() / 1000) + 24 * 3600,
+  })}.mock`;
+  return {
+    access_token: token,
+    token_type: 'bearer',
+    expires_in: 24 * 3600,
+    expires_at: Math.floor(Date.now() / 1000) + 24 * 3600,
+    refresh_token: 'r-1',
+    user: {
+      id: USER.id,
+      aud: 'authenticated',
+      role: 'authenticated',
+      email: USER.email,
+      user_metadata: { name: USER.name, role: rol },
+      app_metadata: { provider: 'email' },
+    },
+  };
+}
 
 function createMock(o = {}) {
   const st = {
@@ -119,6 +124,8 @@ function createMock(o = {}) {
     startError: o.startError ?? null,
     answerDelay: o.answerDelay ?? 0,
     now: o.now ?? (() => Date.now()),
+    rol: o.rol ?? 'student',
+    reytingKlass: undefined,
     vernulos: 0,
   };
   const genFor = (format) =>
@@ -221,7 +228,8 @@ function createMock(o = {}) {
         },
       };
     },
-    ustnyy_reyting({ p_format }) {
+    ustnyy_reyting({ p_format, p_class }) {
+      st.reytingKlass = p_class ?? null;
       const tip = p_format === 'vyzov-dnya' || p_format === 'kvadraty-20' ? 'seriya' : 'vremya';
       const rows = Array.from({ length: 12 }, (_, i) => ({
         mesto: i + 1,
@@ -232,6 +240,7 @@ function createMock(o = {}) {
         score_ms: 30_000 + i * 1500,
         at: Date.now(),
         ya: false,
+        ...(p_class && st.rol === 'tutor' ? { imya: `Ученик ${i + 1}` } : {}),
       }));
       return {
         status: 200,
@@ -255,7 +264,20 @@ function createMock(o = {}) {
     ustnyy_moy_profil() {
       return {
         status: 200,
-        body: { nick: st.nick, auto: true, pokazyvat: st.pokazyvat, mozhno: true },
+        body: { nick: st.nick, auto: true, pokazyvat: st.pokazyvat, mozhno: st.rol === 'student' },
+      };
+    },
+    ustnyy_moi_rezultaty() {
+      return {
+        status: 200,
+        body: [
+          {
+            format: 'tablica-1m',
+            popytok: 4,
+            luchshiy: { verno: 31, vsego: 33, net_ms: 60_000, score_ms: 70_000, at: Date.now() },
+          },
+          { format: 'kvadraty-20', popytok: 0, luchshiy: null },
+        ],
       };
     },
     ustnyy_set_nick({ p_nick }) {
@@ -276,8 +298,23 @@ function createMock(o = {}) {
   function handle(method, url, body) {
     const u = new URL(url);
     const p = u.pathname;
-    if (p === '/auth/v1/user') return { status: 200, body: SESSION.user };
-    if (p === '/auth/v1/token') return { status: 200, body: SESSION };
+    if (p === '/auth/v1/user') return { status: 200, body: sessiya(st.rol).user };
+    if (p === '/auth/v1/token') return { status: 200, body: sessiya(st.rol) };
+    if (p === '/rest/v1/classes') {
+      return {
+        status: 200,
+        body: [
+          {
+            id: 'k1',
+            name: 'Класс А',
+            join_code: 'K7MP2Q',
+            join_open: true,
+            created_at: '2026-11-01T10:00:00Z',
+            tutor_id: USER.id,
+          },
+        ],
+      };
+    }
     if (p.startsWith('/rest/v1/rpc/')) {
       const name = p.slice('/rest/v1/rpc/'.length);
       const f = rpc[name];
@@ -358,14 +395,17 @@ async function context(mock, { voshel = true, ...opts } = {}) {
   });
   await welcomeSeen(ctx);
   if (voshel) {
-    await ctx.addInitScript((s) => {
-      try {
-        localStorage.setItem('budetege-auth', s);
-        localStorage.setItem('budetege:auth:remember', '1');
-      } catch {
-        /* нет хранилища */
-      }
-    }, JSON.stringify(SESSION));
+    await ctx.addInitScript(
+      (s) => {
+        try {
+          localStorage.setItem('budetege-auth', s);
+          localStorage.setItem('budetege:auth:remember', '1');
+        } catch {
+          /* нет хранилища */
+        }
+      },
+      JSON.stringify(sessiya(mock.st.rol)),
+    );
   }
   await installMock(ctx, mock);
   return ctx;
@@ -593,6 +633,62 @@ for (const [ekran, opts] of [
     );
   }
   check(p.errors.length === 0, `${ekran}: ошибок нет ${p.errors.join('; ')}`);
+  await ctx.close();
+}
+
+/* ── 6. Репетитор: рейтинг класса ───────────────────────────── */
+console.log('6. Рейтинг класса у репетитора');
+{
+  const mock = createMock({ rol: 'tutor' });
+  const ctx = await context(mock);
+  const p = await open(ctx, '/kabinet/klassy/?id=k1', '[data-section="ustnyy-schet"]');
+  await p.locator('[data-section="ustnyy-schet"] .us-reyting__tablica').waitFor();
+  check(mock.st.reytingKlass === 'k1', 'на странице класса — рейтинг этого класса');
+  check(
+    (await p.locator('[data-section="ustnyy-schet"]').innerText()).includes('Ученик 1'),
+    'репетитор видит имена учеников',
+  );
+  const a = p.locator('[data-section="ustnyy-schet"] a', { hasText: 'Открыть рейтинг' });
+  check(
+    (await a.getAttribute('href')) === '/ustnyy-schet/reyting/?klass=k1',
+    'ссылка на рейтинг с классом',
+  );
+  await snimok(p, 'kompyuter-1280-klass');
+  const r = await open(ctx, '/ustnyy-schet/reyting/?klass=k1', '.us-reyting');
+  await r.locator('.us-reyting__tablica').waitFor();
+  check(
+    (await r.locator('.us-reyting__klass select').inputValue()) === 'k1',
+    'по ссылке выбран класс',
+  );
+  check(
+    (await r.locator('.us-reyting__tablica thead').innerText()).includes('Ученик'),
+    'колонка «Ученик» у репетитора',
+  );
+  check(
+    (await r.getByText('В рейтинге участвуют ученики').count()) === 1,
+    'репетитор сам в рейтинг не идёт',
+  );
+  check(
+    p.errors.length === 0 && r.errors.length === 0,
+    `ошибок нет ${[...p.errors, ...r.errors].join('; ')}`,
+  );
+  await ctx.close();
+}
+
+/* ── 7. Статистика ученика: результаты в рейтинге ───────────── */
+console.log('7. Статистика ученика');
+{
+  const mock = createMock();
+  const ctx = await context(mock);
+  const p = await open(ctx, '/statistika/', '.us-stat--kabinet');
+  await p.getByRole('heading', { name: 'В рейтинге' }).waitFor();
+  const t = await p.locator('.us-stat--kabinet').innerText();
+  check(
+    t.includes('31 из 33') && t.includes('попыток: 4'),
+    'статистика: лучший результат в рейтинге с сервера',
+  );
+  check(!t.includes('Квадраты:'), 'форматы без результата не показываются');
+  check(p.errors.length === 0, `ошибок нет ${p.errors.join('; ')}`);
   await ctx.close();
 }
 

@@ -120,6 +120,21 @@ export const api = {
   randomNick: () => rpc<{ nick: string }>('ustnyy_random_nick'),
   setPokazyvat: (on: boolean) =>
     rpc<{ pokazyvat: boolean }>('ustnyy_set_pokazyvat', { p_pokazyvat: on }),
+  /** Свои рейтинговые результаты: лучший по каждому формату и число попыток. */
+  moiRezultaty: () =>
+    rpc<
+      {
+        format: ReytingFormatId;
+        popytok: number;
+        luchshiy: {
+          verno: number;
+          vsego: number;
+          net_ms: number;
+          score_ms: number;
+          at: number;
+        } | null;
+      }[]
+    >('ustnyy_moi_rezultaty'),
   /** Классы вошедшего: репетитору — свои, ученику — те, где он состоит (RLS). */
   async klassy(): Promise<{ id: string; name: string }[]> {
     const supabase = await getClient();

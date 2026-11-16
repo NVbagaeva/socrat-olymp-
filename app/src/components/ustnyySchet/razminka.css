@@ -1,0 +1,58 @@
+/* Карточка «Разминка: устный счёт» на страницах заданий. Отдельный файл:
+   страницам заданий не нужны стили всего раздела. */
+.us-razminka {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  margin: var(--flow-block) 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-info);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-surface) 55%, var(--color-glass-mid));
+}
+.us-razminka__metka {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 70% 25%,
+    var(--color-accent-soft-surface),
+    var(--color-surface-soft)
+  );
+  box-shadow: inset 0 0 0 6px var(--color-accent-soft);
+  color: var(--color-text-brand);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.us-razminka__tekst {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.us-razminka__zag {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+.us-razminka__lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.us-razminka__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.us-razminka__knopki .btn {
+  min-height: 44px;
+}
+@media (max-width: 400px) {
+  .us-razminka__metka {
+    display: none;
+  }
+}

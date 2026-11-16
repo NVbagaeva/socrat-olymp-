@@ -886,6 +886,36 @@ const varianty = (otvet) => {
   check(KVADRATY_PUL.length === new Set(KVADRATY_PUL).size, 'пул квадратов без повторов');
 }
 
+/* ── Разминки на страницах заданий ──────────────────────────── */
+{
+  const { RAZMINKI, razminkaHref, razminkaBazy } = requireSrc('lib/ustnyySchet/razminka.ts');
+  const { prochitat } = requireSrc('lib/ustnyySchet/zapros.ts');
+  for (const [id, r] of Object.entries(RAZMINKI)) {
+    check(
+      r.ids.length > 0 && r.ids.every((x) => PRIYOMY.some((p) => p.id === x)),
+      `разминка ${id}: приёмы существуют`,
+    );
+    const url = razminkaHref(id);
+    check(
+      url.startsWith('/ustnyy-schet/trenirovka/?'),
+      `разминка ${id}: адрес тренировки (${url})`,
+    );
+    const z = prochitat(new URLSearchParams(url.split('?')[1]));
+    check(
+      z.go &&
+        z.nabor.tip === 'priyomy' &&
+        z.nabor.ids.join() === r.ids.join() &&
+        z.rezhim.tip === 'seriya' &&
+        z.rezhim.n === 10,
+      `разминка ${id}: ссылка открывает серию из 10 этих приёмов`,
+    );
+  }
+  check(
+    razminkaBazy('14') === 'baza-14' && razminkaBazy('5') === null,
+    'разминка базы — по номеру задания',
+  );
+}
+
 /* ── Примеры из теории ──────────────────────────────────────── */
 {
   const file = path.join(SRC, 'content/ustnyySchet.ts');
