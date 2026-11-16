@@ -2,16 +2,14 @@
    Цвета — токены --sumerki-* (styles/tokens.css). Двигаются только
    transform и opacity; свечение и чертёж — CSS и SVG, без картинок.
 
-   «Витрина» (.sm--vitrina): большая скруглённая карточка на светлом
-   фоне сайта под обычной шапкой. «На всю ширину» (.sm--shirina): синий
-   до краёв экрана, низ — чёткий край с лёгкой дугой. Длинного перехода
-   в белое нет: у сцены всегда чёткая граница. */
+   «Витрина» (.sm--vitrina): большая карточка на светлом фоне сайта под
+   обычной шапкой — верх скруглён, низ — мягкая дуга с чётким краем. */
 
 .sm {
   position: relative;
   isolation: isolate;
   /* Воздух до следующего блока: у него сверху своего отступа почти нет. */
-  margin-bottom: 56px;
+  margin-bottom: 64px;
   color: var(--sumerki-text);
 }
 
@@ -23,10 +21,11 @@
   /* Неровный фон: середина и левая часть с текстом — ровный синий,
      края и углы — на тон глубже (мягкая виньетка). */
   background: radial-gradient(
-    125% 115% at 42% 42%,
+    105% 100% at 42% 44%,
     var(--sumerki-centr) 0%,
-    var(--sumerki-centr) 42%,
-    var(--sumerki-kraj) 100%
+    var(--sumerki-centr) 45%,
+    var(--sumerki-kraj) 82%,
+    var(--sumerki-ugol) 100%
   );
 }
 /* Витрина: карточка с отступом 16–24 px от краёв экрана. Низ чёткий —
@@ -34,19 +33,16 @@
 .sm--vitrina {
   padding: var(--space-4) var(--space-6) 0;
 }
+.sm--vitrina {
+  --sm-duga: 40px;
+}
 .sm--vitrina .sm__okno {
   max-width: calc(var(--w-container) + 2 * var(--space-6));
   margin: 0 auto;
-  border-radius: 36px;
+  /* Верх — скругление 36 px, низ — мягкая дуга. */
+  border-radius: 36px 36px 50% 50% / 36px 36px 56px 56px;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.25),
-    inset 0 -1px 0 rgb(255 255 255 / 0.25),
-    0 30px 60px rgb(31 95 208 / 0.25);
-}
-/* На всю ширину: синий до краёв, низ — лёгкая дуга (36 px), тень та же. */
-.sm--shirina .sm__okno {
-  border-radius: 0 0 50% 50% / 0 0 36px 36px;
-  box-shadow:
     inset 0 -1px 0 rgb(255 255 255 / 0.25),
     0 30px 60px rgb(31 95 208 / 0.25);
 }
@@ -124,11 +120,8 @@
   column-gap: var(--space-10);
   max-width: var(--w-container);
   margin: 0 auto;
-  /* Снизу — 28 px: стеклянная полоса у нижнего края карточки. */
-  padding: var(--space-10) var(--space-8) 28px;
-}
-.sm--shirina .sm__in {
-  padding-bottom: var(--space-10);
+  /* Снизу — 28 px до края у полосы плюс глубина дуги низа карточки. */
+  padding: var(--space-10) var(--space-8) calc(28px + var(--sm-duga, 0px));
 }
 .sm__nad {
   grid-area: nad;
@@ -192,8 +185,8 @@
 .sm__lid {
   max-width: 52ch;
   margin: var(--space-6) 0 0;
-  font-size: 21px;
-  line-height: 1.5;
+  font-size: 23px;
+  line-height: 1.48;
   color: var(--sumerki-text-2);
 }
 
@@ -563,22 +556,17 @@
 
 @media (max-width: 767.98px) {
   .sm__in {
-    padding: var(--space-8) var(--space-4) var(--space-6);
+    padding: var(--space-8) var(--space-4) calc(var(--space-6) + var(--sm-duga, 0px));
   }
   .sm {
-    margin-bottom: 36px;
+    margin-bottom: 32px;
   }
   .sm--vitrina {
+    --sm-duga: 20px;
     padding: var(--space-3) var(--space-4) 0;
   }
   .sm--vitrina .sm__okno {
-    border-radius: 24px;
-  }
-  .sm--shirina .sm__okno {
-    border-radius: 0 0 50% 50% / 0 0 24px 24px;
-  }
-  .sm--shirina .sm__in {
-    padding-bottom: var(--space-8);
+    border-radius: 24px 24px 50% 50% / 24px 24px 32px 32px;
   }
   .sm__eyebrow {
     font-size: 12px;
@@ -594,7 +582,7 @@
   }
   .sm__lid {
     margin-top: var(--space-2);
-    font-size: 18px;
+    font-size: 20px;
   }
   .sm__knopki {
     flex-direction: column;
@@ -653,5 +641,24 @@
   .sm-dver svg,
   .sm-strelka {
     transition: none;
+  }
+}
+
+/* ── Ритм секций главной с синей сценой ─────────────────────────────
+   Ровные промежутки между всеми блоками: 72 px на компьютере, 40 px на
+   телефоне. У секций — по половине сверху и снизу, у отсчёта — снизу
+   (сверху его отделяет отступ сцены). */
+.glavnaya--scena section.band {
+  padding: 36px 0;
+}
+.glavnaya--scena .otschyot-band {
+  padding-bottom: 36px;
+}
+@media (max-width: 767.98px) {
+  .glavnaya--scena section.band {
+    padding: 20px 0;
+  }
+  .glavnaya--scena .otschyot-band {
+    padding-bottom: 20px;
   }
 }

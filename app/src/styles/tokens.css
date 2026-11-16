@@ -461,9 +461,11 @@
   /* Фон сцены: середина и края (виньетка). */
   --sumerki-centr: #3a68cc;
   --sumerki-kraj: #2a55b8;
+  /* Углы сцены — ещё на тон глубже. */
+  --sumerki-ugol: #224aa6;
   --sumerki-glow: #1f5fd0;
   --sumerki-text: #f3f7ff;
-  --sumerki-text-2: #f0f5ff;
+  --sumerki-text-2: #f7faff;
   --sumerki-akcent-1: #bcd6ff;
   --sumerki-akcent-2: #e2eeff;
   --sumerki-liniya: rgb(170 200 255 / 0.1);

@@ -1,0 +1,268 @@
+/* Блок «вечер» для главной с синей сценой (VecherKartochki.tsx):
+   крупные стеклянные карточки, у каждой — мини-фрагмент листа. Стекло —
+   общая рецептура сайта (--glass-*), как у полосы и дверей сцены. */
+
+.vk__spisok {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vk-karta {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  border: 1px solid var(--glass-edge);
+  border-radius: 24px;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgb(61 121 224 / 0.12), transparent 70%), var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transition:
+    transform 220ms var(--ease),
+    box-shadow 220ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .vk-karta:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+  }
+}
+.vk-karta__tekst {
+  padding: var(--space-5) var(--space-6) var(--space-6);
+}
+.vk-karta__no {
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 28px;
+  margin-bottom: var(--space-3);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow);
+  color: var(--color-text-inverse);
+  font-size: 13px;
+  font-weight: 650;
+}
+.vk-karta h3 {
+  margin-bottom: var(--space-2);
+  font-size: 21px;
+  line-height: 1.25;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.vk-karta__tekst p {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+/* ── Иллюстрация: полоса сверху карточки, листы на ней ─────────── */
+
+.vk-ill {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 168px;
+  padding: var(--space-5);
+  background:
+    radial-gradient(70% 80% at 50% 100%, rgb(61 121 224 / 0.14), transparent 70%),
+    linear-gradient(180deg, var(--blue-50), rgb(242 247 254 / 0.4));
+  border-bottom: 1px solid rgb(31 95 208 / 0.08);
+}
+.vk-list {
+  width: 100%;
+  max-width: 170px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(31 95 208 / 0.1),
+    0 10px 22px -12px rgb(16 40 100 / 0.35);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+.vk-list p {
+  margin: 0;
+}
+.vk-list__shapka {
+  margin-bottom: 6px !important;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--color-primary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* В стопке подпись — только у верхнего листа, задние — строки. */
+.vk-list--0 .vk-list__shapka,
+.vk-list--1 .vk-list__shapka {
+  visibility: hidden;
+}
+.vk-list__zadacha {
+  font-family: var(--font-serif);
+  font-size: 14px;
+}
+.vk-list__zadacha span {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  border-radius: 4px;
+  background: var(--color-primary);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 650;
+  vertical-align: 1px;
+}
+.vk-list__otvet {
+  margin-top: 6px !important;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+.vk-list__stroka {
+  height: 6px;
+  margin-top: 7px !important;
+  border-radius: 3px;
+  background: var(--grey-200);
+}
+.vk-list__stroka--korotkaya {
+  width: 60%;
+}
+
+/* Самостоятельные: два варианта рядом, второй чуть ниже. */
+.vk-ill--dva {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.vk-ill--dva .vk-list {
+  max-width: none;
+  padding: 8px 9px;
+}
+.vk-ill--dva .vk-list__zadacha {
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.vk-list--sdvig {
+  transform: translateY(14px);
+}
+
+/* Домашние: стопка листов, у каждого — своё имя. */
+.vk-ill--stopka .vk-list--stopka {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70%;
+  max-width: 180px;
+}
+.vk-list--0 {
+  transform: translate(-58%, -66%) rotate(-5deg);
+  opacity: 0.85;
+}
+.vk-list--1 {
+  transform: translate(-46%, -50%) rotate(2deg);
+  opacity: 0.93;
+}
+.vk-list--2 {
+  transform: translate(-50%, -30%) rotate(-1deg);
+}
+
+/* Проверка: таблица ответов по вариантам. */
+.vk-list--tablica {
+  max-width: 190px;
+}
+.vk-list--tablica table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.vk-list--tablica th,
+.vk-list--tablica td {
+  padding: 3px 4px;
+  border-bottom: 1px solid var(--grey-200);
+  text-align: center;
+  font-size: 11.5px;
+}
+.vk-list--tablica thead th {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+.vk-list--tablica tbody th {
+  color: var(--color-primary);
+  font-weight: 650;
+}
+.vk-list--tablica td {
+  font-weight: 600;
+}
+
+/* Материалы: лист для печати с шапкой сайта и меткой PDF. */
+.vk-list--pechat {
+  position: relative;
+  max-width: 150px;
+  padding-bottom: 16px;
+}
+.vk-list__logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px !important;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid var(--color-primary);
+  font-size: 11px;
+  font-weight: 650;
+}
+.vk-list__logo i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: url('../../../../public/icons/logo.svg') center / 12px 12px no-repeat;
+}
+.vk-list__pdf {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--terracotta), var(--terracotta-700));
+  box-shadow: 0 6px 14px -6px rgb(224 122 47 / 0.8);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 1199.98px) {
+  .vk__spisok {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767.98px) {
+  .vk__spisok {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+  .vk-karta {
+    border-radius: 20px;
+  }
+  .vk-ill {
+    height: 150px;
+  }
+  .vk-karta__tekst {
+    padding: var(--space-4) var(--space-5) var(--space-5);
+  }
+  .vk-karta h3 {
+    font-size: 19px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vk-karta {
+    transition: none;
+  }
+}
