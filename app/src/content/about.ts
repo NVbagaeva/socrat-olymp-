@@ -205,7 +205,7 @@ export const about = {
       webp800: assetUrl('/images/ob-avtore/instrument-800.webp'),
       png: assetUrl('/images/ob-avtore/instrument-400.png'),
       width: 400,
-      height: 273,
+      height: 280,
     },
     personal: {
       title: 'Инструмент, которым хотелось бы пользоваться самой',
