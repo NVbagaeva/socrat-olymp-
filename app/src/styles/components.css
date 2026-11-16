@@ -3515,3 +3515,26 @@ html[data-tabs-pending] .topic-panel,
     height: 16px;
   }
 }
+
+/* ── Пункт с тёплым акцентом в меню кабинета и нижней панели ── */
+.topnav a.is-akcent {
+  background: linear-gradient(120deg, var(--color-accent-soft-surface), var(--color-surface-info));
+  box-shadow: inset 0 0 0 1px var(--color-border-accent);
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.topnav a.is-akcent:hover,
+.topnav a.is-akcent.is-active {
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent-text);
+}
+.bnav a.is-akcent {
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.bnav a.is-akcent .nav-ico {
+  padding: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 70% 25%, var(--color-accent-soft-surface), var(--color-surface-soft));
+  box-shadow: 0 0 0 1px var(--color-border-accent);
+}
