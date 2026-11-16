@@ -63,7 +63,7 @@
 .var-geroy__lead {
   max-width: 48ch;
   margin: var(--space-3) 0 0;
-  font-size: 17px;
+  font-size: 18px;
   line-height: 26px;
   color: var(--color-text-secondary);
 }
@@ -120,7 +120,7 @@
   border: 0;
   border-radius: var(--radius-pill);
   font: inherit;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
@@ -171,12 +171,12 @@
 }
 .var-sostav__title {
   margin: 0;
-  font-size: 22px;
-  line-height: 28px;
+  font-size: 24px;
+  line-height: 32px;
   font-weight: 650;
 }
 .var-sostav__count {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 500;
   color: var(--color-text-secondary);
 }
@@ -259,8 +259,8 @@
   box-shadow: 0 0 0 1px var(--glass-edge);
 }
 .var-plitka__no {
-  font-size: 22px;
-  line-height: 26px;
+  font-size: 24px;
+  line-height: 32px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -279,7 +279,7 @@
   left: 42px;
   padding: 2px 7px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 16px;
   font-weight: 600;
   color: #fff;
@@ -363,12 +363,12 @@
   outline-offset: 2px;
 }
 .var-bystro__label {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 18px;
   color: var(--color-text-secondary);
 }
 .var-bystro__value {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 20px;
   font-weight: 600;
 }
@@ -392,7 +392,7 @@
   border: 1px solid var(--glass-edge);
   border-radius: 16px;
   font: inherit;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   text-align: left;
   color: var(--terracotta-700);
@@ -415,7 +415,7 @@
 }
 .var-blanki__strelka {
   margin-left: auto;
-  font-size: 22px;
+  font-size: 24px;
 }
 
 /* ── «Призрачный» лист до первого набора ───────────────────────── */
@@ -470,7 +470,7 @@
 }
 .var-prizrak__text {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--color-text-secondary);
 }
 
@@ -503,7 +503,7 @@
 }
 .var-bar__summary {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -565,7 +565,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
 .okno .var-field__note,
 .okno .sp-opt__note {
   margin: var(--space-2) 0 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 18px;
   color: var(--color-text-secondary);
 }
@@ -586,7 +586,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   min-height: 40px;
   border: 0;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--color-text-secondary);
   background: transparent;
@@ -809,7 +809,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   font-weight: 600;
 }
 .bv__note {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-secondary);
 }
 .bv__galka {
@@ -839,7 +839,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  font-size: 15px;
+  font-size: 16px;
 }
 .bv__copies-input {
   width: 96px;
@@ -885,7 +885,7 @@ body:has(.var-stranica .var-bar) .cookie-notice {
     line-height: 34px;
   }
   .var-geroy__lead {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 21px;
   }
   .var-plitki {
@@ -897,18 +897,18 @@ body:has(.var-stranica .var-bar) .cookie-notice {
     padding: 8px 10px;
   }
   .var-plitka__no {
-    font-size: 19px;
+    font-size: 18px;
     line-height: 22px;
   }
   .var-plitka__name {
-    font-size: 12.5px;
+    font-size: 12px;
     line-height: 16px;
   }
   /* На телефоне в строке номера места нет — метка под названием. */
   .var-plitka__metka {
     position: static;
     justify-self: start;
-    font-size: 10.5px;
+    font-size: 12px;
     padding: 1px 6px;
   }
   .var-bystro__chipy {

@@ -205,8 +205,8 @@
   font-size: var(--eo-dni, 88px);
 }
 .eo__dney {
-  font-size: 15px;
-  line-height: 18px;
+  font-size: 16px;
+  line-height: 21px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -227,8 +227,8 @@
     var(--glass-ring-warm),
     var(--glass-hi),
     0 6px 18px -6px rgb(245 160 74 / 0.6);
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 19px;
   font-weight: 650;
   color: var(--color-accent-text);
   white-space: nowrap;
@@ -238,13 +238,13 @@
   max-width: 46ch;
   /* Две строки всегда: фраза дня короче или длиннее — плашка не прыгает. */
   min-height: 52px;
-  font-size: 17px;
+  font-size: 18px;
   line-height: 26px;
   color: var(--color-text-secondary);
 }
 .eo__fraza--udachi {
   min-height: 0;
-  font-size: 22px;
+  font-size: 24px;
   line-height: 30px;
   font-weight: 560;
   color: var(--color-accent-text);
@@ -276,13 +276,13 @@
   opacity: 0.86;
 }
 .eo__nachalo {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 22px;
   font-weight: 560;
   color: var(--color-text);
 }
 .eo__god {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 18px;
   color: var(--color-text-secondary);
 }
@@ -402,7 +402,7 @@
   gap: 4px;
 }
 .eo--koltso .eo__kolco .eo__slovo {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -497,7 +497,7 @@
   letter-spacing: -0.03em;
 }
 .eo--karty .eo__slovo {
-  font-size: 13px;
+  font-size: 14px;
 }
 .eo--karty .eo__fraza {
   max-width: 52ch;
@@ -562,7 +562,7 @@
 }
 .eo--lenta .eo__fraza {
   min-height: 0;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 22px;
 }
 .eo__l-schyot {
@@ -584,7 +584,7 @@
   gap: 4px;
 }
 .eo--lenta .eo__slovo {
-  font-size: 11px;
+  font-size: 12px;
 }
 .eo--lenta .eo__deystviya {
   flex-direction: column;
@@ -779,16 +779,16 @@
     border-radius: 16px;
   }
   .eo__k-steklo .eo-ch {
-    font-size: 34px;
+    font-size: 30px;
   }
   .eo__karta--glavnaya .eo__k-steklo {
     min-width: 86px;
   }
   .eo__karta--glavnaya .eo-ch {
-    font-size: 38px;
+    font-size: 40px;
   }
   .eo--karty .eo__slovo {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .eo--lenta {
