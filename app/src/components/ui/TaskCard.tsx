@@ -27,6 +27,13 @@ interface TaskCardOwnProps {
   badges?: readonly { label: ReactNode; tone?: BadgeTone }[];
   /** Миниатюра раздела. Оформление — за страницей, здесь только место. */
   illustration?: ReactNode;
+  /**
+   * Прогресс ученика по разделу (банк, docs/design-audit.md, 5.2):
+   * тонкая полоса по нижнему краю и подпись «начато · 20 %» / «готово».
+   * Стоит в нижнем поле карточки поверх отступа — появляется после
+   * чтения журналов в браузере и вёрстку не сдвигает.
+   */
+  progress?: { dolya: number; podpis: string; gotovo?: boolean };
 }
 
 export type TaskCardProps = TaskCardOwnProps &
@@ -49,6 +56,7 @@ export function TaskCard({
   comingSoon = false,
   badges,
   illustration,
+  progress,
   className,
   ...rest
 }: TaskCardProps) {
@@ -87,6 +95,18 @@ export function TaskCard({
       {/* Стрелка открытого раздела. Это span, а не кнопка: карточка уже
           ссылка или кнопка, вложенный элемент управления сделал бы
           разметку невалидной и сломал бы обход с клавиатуры. */}
+      {progress === undefined ? null : (
+        <>
+          <span className="task-card__progress" aria-hidden="true">
+            <span style={{ transform: `scaleX(${Math.min(1, Math.max(0, progress.dolya))})` }} />
+          </span>
+          <span
+            className={clsx('task-card__progress-text', progress.gotovo === true && 'is-gotovo')}
+          >
+            {progress.podpis}
+          </span>
+        </>
+      )}
       {href !== undefined || rest.onClick !== undefined ? (
         <span className="task-card__go" aria-hidden="true">
           <svg viewBox="0 0 24 24" focusable="false">

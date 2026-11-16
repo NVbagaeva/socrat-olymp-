@@ -1991,6 +1991,42 @@ html[data-tabs-pending] .topic-panel,
     transform var(--dur-hover) var(--ease);
 }
 
+/* Прогресс ученика по разделу (docs/design-audit.md, 5.2): полоса
+   3px по нижнему краю и подпись в нижнем поле карточки. Оба слоя
+   поставлены поверх отступа абсолютно: журналы читаются в браузере
+   уже после загрузки, и карточка от их появления не меняет высоты.
+   Полоса растёт через scaleX — только transform. */
+.task-card__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  pointer-events: none;
+}
+.task-card__progress > span {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  transform-origin: left center;
+  transition: transform var(--motion-slow) var(--ease-out);
+}
+.task-card__progress-text {
+  position: absolute;
+  left: var(--card-pad, var(--space-5));
+  bottom: 5px;
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.task-card__progress-text.is-gotovo {
+  color: var(--color-success, var(--color-primary));
+}
+
 /* Наведение и фокус с клавиатуры. Правило живёт под (hover: hover):
    на тач-устройствах наведения нет, показывать стрелку там нечему и
    незачем — карточка и без неё нажимается целиком.
@@ -2027,14 +2063,14 @@ html[data-tabs-pending] .topic-panel,
   }
 }
 
-/* ── Банк заданий: раскладка Bento ─────────────────────────────
-   Карточки разного размера: размер каждой посчитан заранее
-   (lib/bento.ts) под 2, 3 и 4 колонки и лежит в data-b2/-b3/-b4,
-   поэтому ряды заполнены ровно и порядок номеров не меняется.
-   Телефон — 2 колонки, планшет и узкий компьютер — 3, широкий — 4.
-   Ряды одной высоты (grid-auto-rows от .tasks-grid): крупная
-   карточка 2×2 ровно в два ряда. */
-.tasks-grid--bento {
+/* ── Банк заданий: ровная сетка ───────────────────────────────
+   docs/design-audit.md, 5.1: раньше здесь было «бенто» — крупные
+   плитки №01 и №06 с той же иллюстрацией и тремя четвертями пустоты,
+   что выглядело как сломанная сетка. Теперь все карточки одного
+   размера: телефон — 2 колонки, планшет и узкий компьютер — 3,
+   широкий — 4. Ряды по самой высокой карточке (grid-auto-rows от
+   .tasks-grid), на телефоне — по своему содержимому. */
+.tasks-grid--bank {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   /* На телефоне ряд по своему содержимому: равные ряды по самой
      высокой карточке (13 — с двумя бейджами) оставляли в остальных
@@ -2042,64 +2078,19 @@ html[data-tabs-pending] .topic-panel,
   grid-auto-rows: auto;
   gap: var(--space-3);
 }
-.tasks-grid--bento > [data-b2='2'] {
-  grid-column: span 2;
-}
 @media (min-width: 768px) {
-  .tasks-grid--bento {
+  .tasks-grid--bank {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-rows: 1fr;
     gap: var(--space-4);
   }
-  .tasks-grid--bento > [data-b2='2'] {
-    grid-column: auto;
-  }
-  .tasks-grid--bento > [data-b3='2'] {
-    grid-column: span 2;
-  }
-  .tasks-grid--bento > [data-b3='3'] {
-    grid-column: span 3;
-  }
-  .tasks-grid--bento > [data-b3='big'] {
-    grid-column: span 2;
-    grid-row: span 2;
+  .tasks-grid--bank .task-card--bank {
+    min-height: 168px;
   }
 }
 @media (min-width: 1280px) {
-  .tasks-grid--bento {
+  .tasks-grid--bank {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .tasks-grid--bento > :is([data-b3='2'], [data-b3='3'], [data-b3='big']) {
-    grid-column: auto;
-    grid-row: auto;
-  }
-  .tasks-grid--bento > [data-b4='2'] {
-    grid-column: span 2;
-  }
-  .tasks-grid--bento > [data-b4='3'] {
-    grid-column: span 3;
-  }
-  .tasks-grid--bento > [data-b4='4'] {
-    grid-column: span 4;
-  }
-  .tasks-grid--bento > [data-b4='big'] {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-}
-/* Крупная карточка: иллюстрация растёт вместе с плиткой. */
-@media (min-width: 768px) and (max-width: 1279.98px) {
-  .tasks-grid--bento > [data-b3='big'] .task-card--bank {
-    --card-ill: clamp(96px, 34cqw, 180px);
-    --card-no: 40px;
-    --card-no-lh: 46px;
-  }
-}
-@media (min-width: 1280px) {
-  .tasks-grid--bento > [data-b4='big'] .task-card--bank {
-    --card-ill: clamp(96px, 34cqw, 200px);
-    --card-no: 44px;
-    --card-no-lh: 50px;
   }
 }
 /* Узкая плитка (половина телефона, треть планшета): иллюстрации
@@ -2107,7 +2098,7 @@ html[data-tabs-pending] .topic-panel,
    название под ними во всю ширину плитки; стрелка наведения не нужна
    — на таких экранах наведения нет. */
 @container (max-width: 239.98px) {
-  .tasks-grid--bento .task-card--bank {
+  .tasks-grid--bank .task-card--bank {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto 1fr;
     column-gap: var(--space-2);
@@ -2121,17 +2112,17 @@ html[data-tabs-pending] .topic-panel,
     --card-title-lh: 20px;
     --card-title-lines: 4;
   }
-  .tasks-grid--bento .task-card--bank .task-card__no {
+  .tasks-grid--bank .task-card--bank .task-card__no {
     grid-area: 1 / 1;
     align-self: center;
   }
-  .tasks-grid--bento .task-card--bank .task-card__ill {
+  .tasks-grid--bank .task-card--bank .task-card__ill {
     grid-area: 1 / 2;
   }
-  .tasks-grid--bento .task-card--bank .task-card__body {
+  .tasks-grid--bank .task-card--bank .task-card__body {
     grid-area: 2 / 1 / 3 / 3;
   }
-  .tasks-grid--bento .task-card--bank .task-card__go {
+  .tasks-grid--bank .task-card--bank .task-card__go {
     display: none;
   }
 }
@@ -3535,6 +3526,10 @@ html[data-tabs-pending] .topic-panel,
 .bnav a.is-akcent .nav-ico {
   padding: 2px;
   border-radius: 50%;
-  background: radial-gradient(circle at 70% 25%, var(--color-accent-soft-surface), var(--color-surface-soft));
+  background: radial-gradient(
+    circle at 70% 25%,
+    var(--color-accent-soft-surface),
+    var(--color-surface-soft)
+  );
   box-shadow: 0 0 0 1px var(--color-border-accent);
 }
