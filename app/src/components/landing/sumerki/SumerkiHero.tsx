@@ -7,17 +7,15 @@ import type { Level } from '@/lib/level';
 import { PLATNYE, rubli, TARIFY_HREF } from '@/lib/tarify/config';
 import { Chertezh } from './Chertezh';
 import { KristallSPtitsey } from './KristallSPtitsey';
-import { SumerkiShapka } from './SumerkiShapka';
 import './sumerki.css';
 
 /**
- * Первый экран главной — «Сумеречная сцена». Тёмный только он: к низу
- * фон светлеет и переходит в обычный светлый сайт.
+ * Первый экран главной — синяя сцена. Синий только он, с чётким краем;
+ * ниже — обычный светлый сайт.
  *
- *   vid="a" — сумерки на весь первый экран, шапка над ним тёмная и на
- *             прокрутке становится обычной светлой;
- *   vid="b" — страница светлая, тёмная сцена — в большом скруглённом
- *             «окне-витрине».
+ *   vid="vitrina" — синяя сцена в большой скруглённой карточке на светлом
+ *                   фоне, под обычной светлой шапкой;
+ *   vid="shirina" — синий до краёв экрана, низ — чёткий край с дугой.
  *
  * Тексты — те же, что у первого экрана (content/landing.ts); цена — из
  * lib/tarify/config.ts, числа показателей — из landing.metrics.
@@ -25,11 +23,11 @@ import './sumerki.css';
  * кнопки → полоса. Сетка — sumerki.css.
  */
 export function SumerkiHero({
-  vid = 'a',
+  vid = 'vitrina',
   oreol = 'silnyy',
   level = 'profile',
 }: {
-  vid?: 'a' | 'b';
+  vid?: 'vitrina' | 'shirina';
   /** Сила светлого ореола за кристаллом: на выбор владельцу. */
   oreol?: 'silnyy' | 'myagkiy';
   level?: Level;
@@ -62,7 +60,6 @@ export function SumerkiHero({
 
   return (
     <section className={clsx('sm', `sm--${vid}`)} data-oreol={oreol} aria-labelledby="sm-z">
-      {vid === 'a' ? <SumerkiShapka /> : null}
       <div className="sm__okno">
         <div className="sm__fon" aria-hidden="true">
           <span className="sm__svet" />

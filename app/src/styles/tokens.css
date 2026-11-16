@@ -474,8 +474,6 @@
   --sumerki-knopka-teplyy-1: #cc6322;
   --sumerki-knopka-teplyy-2: #a8500f;
   --sumerki-svechenie-teploe: #f08a3c;
-  /* Высота перехода сцены в светлый фон сайта. */
-  --sumerki-perehod: 260px;
 }
 
 :root {

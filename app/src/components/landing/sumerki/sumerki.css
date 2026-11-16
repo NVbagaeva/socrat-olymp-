@@ -2,13 +2,16 @@
    Цвета — токены --sumerki-* (styles/tokens.css). Двигаются только
    transform и opacity; свечение и чертёж — CSS и SVG, без картинок.
 
-   Вариант А (.sm--a): сцена на весь первый экран, уходит под шапку и
-   к низу светлеет в фон сайта. Вариант Б (.sm--b): светлая страница,
-   сцена — скруглённое окно-витрина. */
+   «Витрина» (.sm--vitrina): большая скруглённая карточка на светлом
+   фоне сайта под обычной шапкой. «На всю ширину» (.sm--shirina): синий
+   до краёв экрана, низ — чёткий край с лёгкой дугой. Длинного перехода
+   в белое нет: у сцены всегда чёткая граница. */
 
 .sm {
   position: relative;
   isolation: isolate;
+  /* Воздух до следующего блока: у него сверху своего отступа почти нет. */
+  margin-bottom: 56px;
   color: var(--sumerki-text);
 }
 
@@ -26,39 +29,26 @@
     var(--sumerki-kraj) 100%
   );
 }
-/* А: сцена заходит под шапку и к низу плавно светлеет. */
-.sm--a {
-  margin-top: calc(-1 * var(--h-site-head));
+/* Витрина: карточка с отступом 16–24 px от краёв экрана. Низ чёткий —
+   светлая кромка внутри и мягкая синяя тень наружу. */
+.sm--vitrina {
+  padding: var(--space-4) var(--space-6) 0;
 }
-.sm--a .sm__okno {
-  padding-top: var(--h-site-head);
-  background:
-    linear-gradient(
-      180deg,
-      transparent calc(100% - var(--sumerki-perehod)),
-      color-mix(in srgb, var(--sumerki-centr) 55%, var(--ice))
-        calc(100% - var(--sumerki-perehod) * 0.45),
-      var(--ice) 100%
-    ),
-    radial-gradient(
-      125% 115% at 42% 42%,
-      var(--sumerki-centr) 0%,
-      var(--sumerki-centr) 42%,
-      var(--sumerki-kraj) 100%
-    );
-}
-/* Б: окно-витрина на светлой странице. */
-.sm--b {
-  padding: var(--space-6) var(--space-6) 0;
-}
-.sm--b .sm__okno {
+.sm--vitrina .sm__okno {
   max-width: calc(var(--w-container) + 2 * var(--space-6));
   margin: 0 auto;
   border-radius: 36px;
   box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.5),
-    0 40px 80px -40px rgb(11 31 77 / 0.6),
-    0 18px 40px -24px rgb(31 95 208 / 0.45);
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    inset 0 -1px 0 rgb(255 255 255 / 0.25),
+    0 30px 60px rgb(31 95 208 / 0.25);
+}
+/* На всю ширину: синий до краёв, низ — лёгкая дуга (36 px), тень та же. */
+.sm--shirina .sm__okno {
+  border-radius: 0 0 50% 50% / 0 0 36px 36px;
+  box-shadow:
+    inset 0 -1px 0 rgb(255 255 255 / 0.25),
+    0 30px 60px rgb(31 95 208 / 0.25);
 }
 
 /* Фон: свечение за кристаллом и чертёж. Гаснет до перехода в светлое. */
@@ -67,18 +57,6 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-}
-.sm--a .sm__fon {
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    #000 calc(100% - var(--sumerki-perehod) * 1.1),
-    transparent calc(100% - var(--sumerki-perehod) * 0.35)
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    #000 calc(100% - var(--sumerki-perehod) * 1.1),
-    transparent calc(100% - var(--sumerki-perehod) * 0.35)
-  );
 }
 .sm__svet {
   position: absolute;
@@ -146,10 +124,11 @@
   column-gap: var(--space-10);
   max-width: var(--w-container);
   margin: 0 auto;
-  padding: var(--space-8) var(--space-8) var(--space-12);
+  /* Снизу — 28 px: стеклянная полоса у нижнего края карточки. */
+  padding: var(--space-10) var(--space-8) 28px;
 }
-.sm--a .sm__in {
-  padding-bottom: calc(var(--sumerki-perehod) * 0.75);
+.sm--shirina .sm__in {
+  padding-bottom: var(--space-10);
 }
 .sm__nad {
   grid-area: nad;
@@ -561,65 +540,6 @@
   }
 }
 
-/* ── Шапка над сценой (вариант А) ───────────────────────────────── */
-
-body .site-head--sumerki:not([data-svet]),
-body .site-head--sumerki:not([data-svet])[data-compact] {
-  background: rgb(36 71 143 / 0.62);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  backdrop-filter: blur(16px) saturate(140%);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.08);
-}
-.site-head--sumerki {
-  transition:
-    background-color 360ms ease,
-    box-shadow 360ms ease;
-}
-.site-head--sumerki:not([data-svet]) .logo,
-.site-head--sumerki:not([data-svet]) .site-nav > a,
-.site-head--sumerki:not([data-svet]) .nav-drop__button,
-.site-head--sumerki:not([data-svet]) .burger {
-  color: #e6eefc;
-}
-.site-head--sumerki:not([data-svet]) .burger__bar {
-  background: #e6eefc;
-}
-.site-head--sumerki:not([data-svet]) .burger:hover {
-  background: rgb(255 255 255 / 0.08);
-}
-.site-head--sumerki:not([data-svet]) .site-nav > a:hover,
-.site-head--sumerki:not([data-svet]) .nav-drop__button:hover {
-  color: #fff;
-}
-.site-head--sumerki:not([data-svet]) .site-nav > a.is-akcent {
-  background: linear-gradient(120deg, rgb(240 138 60 / 0.32), rgb(204 99 34 / 0.24));
-  box-shadow:
-    inset 0 0 0 1px rgb(255 190 140 / 0.45),
-    0 6px 18px -10px rgb(240 138 60 / 0.9);
-  color: #ffd9b8;
-}
-.site-head--sumerki:not([data-svet]) .level-switch {
-  border-color: rgb(255 255 255 / 0.16);
-  background: rgb(255 255 255 / 0.06);
-}
-.site-head--sumerki:not([data-svet]) .level-switch__seg:not(.is-active) {
-  color: #d5e1f7;
-}
-.site-head--sumerki:not([data-svet]) .level-switch__seg:not(.is-active):hover {
-  background: rgb(255 255 255 / 0.1);
-  color: #fff;
-}
-.site-head--sumerki:not([data-svet]) .auth-widget__login {
-  border-color: rgb(255 255 255 / 0.28);
-  background: rgb(255 255 255 / 0.06);
-  color: #fff;
-}
-.site-head--sumerki .logo,
-.site-head--sumerki .site-nav > a,
-.site-head--sumerki .nav-drop__button {
-  transition: color 360ms ease;
-}
-
 /* ── Планшет ────────────────────────────────────────────────────── */
 
 @media (max-width: 1023.98px) {
@@ -642,20 +562,23 @@ body .site-head--sumerki:not([data-svet])[data-compact] {
 /* ── Телефон ────────────────────────────────────────────────────── */
 
 @media (max-width: 767.98px) {
-  :root {
-    --sumerki-perehod: 200px;
-  }
   .sm__in {
-    padding: var(--space-6) var(--space-4) var(--space-8);
+    padding: var(--space-8) var(--space-4) var(--space-6);
   }
-  .sm--a .sm__in {
-    padding-bottom: calc(var(--sumerki-perehod) * 0.7);
+  .sm {
+    margin-bottom: 36px;
   }
-  .sm--b {
-    padding: var(--space-3) var(--space-3) 0;
+  .sm--vitrina {
+    padding: var(--space-3) var(--space-4) 0;
   }
-  .sm--b .sm__okno {
-    border-radius: 28px;
+  .sm--vitrina .sm__okno {
+    border-radius: 24px;
+  }
+  .sm--shirina .sm__okno {
+    border-radius: 0 0 50% 50% / 0 0 24px 24px;
+  }
+  .sm--shirina .sm__in {
+    padding-bottom: var(--space-8);
   }
   .sm__eyebrow {
     font-size: 12px;
@@ -728,9 +651,7 @@ body .site-head--sumerki:not([data-svet])[data-compact] {
 @media (prefers-reduced-motion: reduce) {
   .sm-dver,
   .sm-dver svg,
-  .sm-strelka,
-  .site-head--sumerki,
-  .site-head--sumerki .logo {
+  .sm-strelka {
     transition: none;
   }
 }

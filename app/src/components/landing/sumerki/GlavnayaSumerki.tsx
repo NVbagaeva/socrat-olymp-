@@ -15,15 +15,13 @@ export function GlavnayaSumerki({
   oreol = 'silnyy',
   level = 'profile',
 }: {
-  vid: 'a' | 'b';
+  vid: 'vitrina' | 'shirina';
   oreol?: 'silnyy' | 'myagkiy';
   level?: Level;
 }) {
   return (
     <div className="glavnaya">
-      <SiteHeader
-        className={vid === 'a' ? 'site-head--steklo site-head--sumerki' : 'site-head--steklo'}
-      />
+      <SiteHeader className="site-head--steklo" />
       <main>
         <SumerkiHero vid={vid} oreol={oreol} level={level} />
         <OtschyotSection level={level} />
