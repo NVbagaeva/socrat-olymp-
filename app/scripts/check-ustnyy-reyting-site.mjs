@@ -16,7 +16,7 @@
    1. Гость: на рейтинговой тренировке и странице рейтинга — приглашение
       войти, тренировка формата без рейтинга доступна.
    2. Ученик, серия «Квадраты» с клавиатуры: ответы уходят на сервер по
-      порядку, каждый один раз; сеть медленная (300 мс на ответ), а
+      порядку, каждый один раз; сеть медленная (800 мс на ответ), а
       следующий пример показывается сразу из буфера; на скрытой вкладке
       время идёт (паузы нет); итоги — место в рейтинге от сервера.
    3. На время с подменённым временем: срок — по времени сервера, финиш
@@ -126,6 +126,7 @@ function createMock(o = {}) {
     now: o.now ?? (() => Date.now()),
     rol: o.rol ?? 'student',
     reytingKlass: undefined,
+    vernulos: 0,
   };
   const genFor = (format) =>
     FORMATY.find((f) => f.id === (format === 'vyzov-dnya' ? 'kvadraty-20' : format));
@@ -352,6 +353,8 @@ async function installMock(ctx, mock) {
       headers: { ...CORS, 'content-type': 'application/json' },
       body: out.body === null || out.body === undefined ? 'null' : JSON.stringify(out.body),
     });
+    /* Сколько ответов на «ответ» уже вернулось в браузер. */
+    if (req.url().includes('/rpc/ustnyy_answer')) mock.st.vernulos += 1;
   });
 }
 
@@ -462,7 +465,8 @@ console.log('1. Гость');
 /* ── 2. Серия: буфер, очередь, без паузы ────────────────────── */
 console.log('2. Рейтинговая серия');
 {
-  const mock = createMock({ answerDelay: 300 });
+  /* Сеть медленная: ответ сервера на каждый ответ — через 800 мс. */
+  const mock = createMock({ answerDelay: 800 });
   const ctx = await context(mock);
   const p = await open(ctx, '/ustnyy-schet/trenirovka/?f=kvadraty-20&rt=1', '.us-nastroyki');
   await p.getByRole('button', { name: 'Начать' }).click();
@@ -484,13 +488,17 @@ console.log('2. Рейтинговая серия');
   check(t1 - t0 >= 800, `на скрытой вкладке время идёт (${t1 - t0} мс)`);
   check((await p.locator('.us-igra__pauza').count()) === 0, 'плашки «пауза» нет');
 
+  /* Следующий пример должен появиться, пока ответ сервера на прошлый
+     ещё в пути: так видно, что он взят из буфера, а не ждёт сеть. Темп —
+     как у человека: следующий ответ — когда прошлый вернулся с сервера
+     (тогда буфер успевает пополниться). От скорости машины не зависит. */
   let bezOzhidaniya = 0;
   for (let i = 0; i < 20; i += 1) {
+    for (let k = 0; k < 100 && mock.st.vernulos < i; k += 1) await p.waitForTimeout(50);
     const ans = await otvetNaTekushiy(p);
     const before = await p.locator('.us-igra__vopros').getAttribute('data-expr');
     await p.locator('#us-otvet').focus();
     await p.keyboard.type(ans);
-    const tAns = Date.now();
     await p.keyboard.press('Enter');
     if (i < 19) {
       await p
@@ -503,15 +511,14 @@ console.log('2. Рейтинговая серия');
           { timeout: 5000 },
         )
         .catch(() => {});
-      /* Ответ на сервер идёт 300 мс, а следующий пример уже на экране. */
-      if (Date.now() - tAns < 250) bezOzhidaniya += 1;
+      if (mock.st.vernulos <= i) bezOzhidaniya += 1;
     }
   }
   check(
-    bezOzhidaniya >= 15,
-    `следующий пример — сразу из буфера (${bezOzhidaniya} из 19 без ожидания сети)`,
+    bezOzhidaniya >= 18,
+    `следующий пример — сразу из буфера, пока ответ сервера ещё в пути (${bezOzhidaniya} из 19)`,
   );
-  await p.locator('.us-itogi').waitFor({ timeout: 20_000 });
+  await p.locator('.us-itogi').waitFor({ timeout: 30_000 });
   const posy = mock.st.answers.map((a) => a.pos);
   check(
     posy.length === 20 && posy.every((x, i) => x === i + 1),
