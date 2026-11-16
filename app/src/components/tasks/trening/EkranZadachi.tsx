@@ -166,10 +166,13 @@ export function EkranZadachi({
   return (
     <div className={clsx('trn-ekran', `trn-ekran--${sostoyanie}`)}>
       <div className="trn-polosa" aria-hidden="true">
-        <span style={{ width: `${(nomer / Math.max(1, vsego)) * 100}%` }} />
+        {/* scaleX, а не width: переход без пересчёта вёрстки. */}
+        <span style={{ transform: `scaleX(${nomer / Math.max(1, vsego)})` }} />
       </div>
 
-      <article className="trn-zadacha stk-glass" data-task={taskId}>
+      {/* key: новая задача — новый блок, и он входит заново
+          (trn-vhod в trening.css), как перелистнутая страница. */}
+      <article key={`${taskId}:${nomer}`} className="trn-zadacha stk-glass" data-task={taskId}>
         <div className="trn-zadacha__verh">
           <Metka>
             <span dangerouslySetInnerHTML={{ __html: tipHtml }} />

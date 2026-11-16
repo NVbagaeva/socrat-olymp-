@@ -2,10 +2,12 @@ import type { Metadata, Viewport } from 'next';
 import { ChunkReloadGuard } from '@/components/ChunkReloadGuard';
 import { CookieNotice } from '@/components/CookieNotice';
 import { FormulyPoShirine } from '@/components/FormulyPoShirine';
+import { MotionLevel } from '@/components/MotionLevel';
 import { NavigationGuard } from '@/components/NavigationGuard';
 import { OnboardingLazy } from '@/components/onboarding/OnboardingLazy';
 import { PodpisiChertezhey } from '@/components/PodpisiChertezhey';
 import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
+import { MOTION_LEVEL_SCRIPT } from '@/lib/motion';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -31,9 +33,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="ru"
       className={`${inter.variable} ${interGreek.variable} ${caveat.variable} ${ptSerif.variable}`}
+      /* Атрибут data-motion-level ставит скрипт в <head> до гидратации —
+         React о нём не знает. */
+      suppressHydrationWarning
     >
+      <head>
+        {/* Уровень движения до первой отрисовки (lib/motion.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: MOTION_LEVEL_SCRIPT }} />
+      </head>
       <body>
         <ChunkReloadGuard />
+        <MotionLevel />
         <NavigationGuard />
         <FormulyPoShirine />
         <PodpisiChertezhey />
