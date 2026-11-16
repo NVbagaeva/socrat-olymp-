@@ -569,13 +569,16 @@
 
   /* Бургер-меню: превращение иконки, выезд панели и каскад пунктов. */
   /* Старые имена — псевдонимы motion-токенов ниже
-     (docs/motion-system.md, раздел 3): 180, 200 и 240 мс на глаз
-     неразличимы и сливаются в 220. Каскад меню — свой, пока меню не
-     переведено на появление без каскада (шаг 4 порядка внедрения). */
+     (docs/motion-system.md, раздел 3): 200 и 240 мс на глаз
+     неразличимы и сливаются в 220. Свои значения остаются у двух:
+     --dur-switch (180 мс) — у переключателей и липкой панели вкладок
+     скорость закреплена проверкой (check-sticky-tabs: 150–200 мс);
+     каскад меню — пока меню не переведено на появление без каскада
+     (шаг 4 порядка внедрения). */
   --dur-menu: var(--motion-base);
   --dur-menu-stagger: 35ms;
   --dur-hover: var(--motion-fast);
-  --dur-switch: var(--motion-base);
+  --dur-switch: 180ms;
   --dur-state: var(--motion-base);
   --dur-reveal: var(--motion-slow);
   --ease: var(--ease-out);
@@ -637,10 +640,12 @@
   --motion-lift: 0px;
   --motion-press: 1;
   --motion-press-btn: 1;
+  --dur-switch: 1ms;
 }
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-fast: 1ms;
+    --dur-switch: 1ms;
     --motion-base: 1ms;
     --motion-slow: 1ms;
     --motion-scene: 1ms;
