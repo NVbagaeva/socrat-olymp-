@@ -6,7 +6,7 @@ import { Button } from '@/components/ui';
 import { mistakes, type LogOutcome } from '@/lib/progressLog/model';
 import { ishodyZadach, logSbornika } from '@/lib/sbornik/progress';
 import { zagruzitZadachu } from '@/lib/sbornik/zagruzka';
-import type { Uroven, ZadachaHtml } from '@/lib/sbornik/types';
+import type { Uroven, ZadachaKlient } from '@/lib/sbornik/types';
 import { ZadachaSbornika } from './ZadachaSbornika';
 
 export interface TipTrenazhera {
@@ -246,7 +246,7 @@ function Sessiya({
   onKonec: () => void;
 }) {
   const [i, setI] = useState(0);
-  const [z, setZ] = useState<ZadachaHtml | null>(null);
+  const [z, setZ] = useState<ZadachaKlient | null>(null);
   const [itogi, setItogi] = useState<(LogOutcome | null)[]>(() => punkty.map(() => null));
   const konec = i >= punkty.length;
   const tek = punkty[i];

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui';
 import { zagruzitZadachu } from '@/lib/sbornik/zagruzka';
-import type { ZadachaHtml } from '@/lib/sbornik/types';
+import type { ZadachaKlient } from '@/lib/sbornik/types';
 import { useIshody } from './Progress';
 import { ZadachaSbornika } from './ZadachaSbornika';
 
@@ -13,7 +13,7 @@ import { ZadachaSbornika } from './ZadachaSbornika';
  * страница списка решений не несёт.
  */
 export function OtkrytZadachu({ id, nomer }: { id: string; nomer: string }) {
-  const [z, setZ] = useState<ZadachaHtml | null>(null);
+  const [z, setZ] = useState<ZadachaKlient | null>(null);
   const [otkryta, setOtkryta] = useState(false);
   const [oshibka, setOshibka] = useState(false);
 

@@ -1,6 +1,6 @@
 import { TIPY } from '@/content/sbornik';
 import { tipSlug } from '@/lib/paths';
-import { vHtml, zadachiTipa } from '@/lib/sbornik/bank';
+import { vKlient, zadachiTipa } from '@/lib/sbornik/bank';
 import { nomerGlavy, staticGlavy } from '@/lib/sbornik/marshrut';
 
 export const dynamic = 'force-static';
@@ -15,7 +15,8 @@ export function generateStaticParams(): { glava: string; fail: string }[] {
 
 /**
  * Задачи типа, набранные KaTeX, — для открытой задачи в списке, тренажёра
- * и генератора листов. Страницы не несут решений: их грузят по запросу.
+ * и генератора листов. Ответ — отпечатками, решение — закрытым текстом
+ * (lib/sbornik/zamok.ts): в файле нет ни верных значений, ни разбора.
  */
 export async function GET(
   _request: Request,
@@ -24,5 +25,5 @@ export async function GET(
   const { glava, fail } = await params;
   const n = nomerGlavy(glava);
   const tip = (TIPY[n] ?? []).find((t) => `${tipSlug(t.id)}.json` === fail);
-  return Response.json(tip === undefined ? [] : zadachiTipa(tip.id).map(vHtml));
+  return Response.json(tip === undefined ? [] : zadachiTipa(tip.id).map(vKlient));
 }

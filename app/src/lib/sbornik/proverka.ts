@@ -1,36 +1,29 @@
 /**
  * Проверка ответа сборника для вузов. Без браузера и KaTeX: её берут
- * экран задачи, тренажёр и проверка банка на сборке.
+ * экран задачи, тренажёр и проверка банка (scripts/check-sbornik.mjs).
+ *
+ * Верных значений у браузера нет — только отпечатки (zamok.ts):
+ *
+ *   число      — значение ответа ученика, округлённое до 8 значащих
+ *                цифр, сравнивается с отпечатком; если верный ответ
+ *                иррациональный, десятичная дробь — подсказка о записи;
+ *   выражение  — ответ ученика вычисляется в точках проверки (там
+ *                выражение условия определено), каждое значение — с
+ *                отпечатком верного;
+ *   по случаям — ученик задаёт промежутки сам: отпечаток их объединения
+ *                должен совпасть с отпечатком области определения
+ *                (выколотые внутри точки не различаются), в каждой точке —
+ *                значение выражения той строки, куда точка попала;
+ *   несколько чисел — по полям.
  *
  * Запись ответа разбирает общий модуль части 2 (lib/chast2/vyrazhenie):
  * TeX из математической клавиатуры или обычный текст («3sqrt(2)/2»).
- *
- *   число      — по значению; если нужна точная запись, приближённая
- *                десятичная дробь вместо корня не засчитывается;
- *   выражение  — по значениям в точках из банка: там выражение условия
- *                определено, и в каждой точке уже записано верное значение;
- *   по случаям — ученик сам задаёт промежутки: их объединение должно
- *                совпасть с верным, а на каждом куске — выражение;
- *   несколько чисел — по полям.
- *
- * Форма ответа («без корня в знаменателе», «произведением») проверяется
- * по дереву записи, когда значение уже верно.
- *
- * Не разобралась запись — это не ошибка в решении: подсказка о записи,
- * попытка не тратится.
+ * Не разобралась запись — подсказка о записи, попытка не тратится.
  */
 
 import { normalizovat, peremennye, razobrat, vychislit, type Uzel } from '@/lib/chast2/vyrazhenie';
-import type {
-  Forma,
-  Oblast,
-  Otvet,
-  OtvetChislo,
-  OtvetKusochnyi,
-  OtvetVyrazhenie,
-  Tochka,
-  VvodSbornika,
-} from './types';
+import type { Forma, ProverkaKlient, TochkaKlient, VvodSbornika } from './types';
+import { kanon, otpechatokStroki, sovpadaetZnachenie } from './zamok';
 
 export type Itog =
   | { kind: 'verno' }
@@ -38,18 +31,19 @@ export type Itog =
   /** Запись не разобралась или ответ не в той форме: попытка не тратится. */
   | { kind: 'format'; hint: string };
 
-const TOL = 1e-7;
-
-function blizko(a: number, b: number): boolean {
-  return (
-    Number.isFinite(a) &&
-    Number.isFinite(b) &&
-    Math.abs(a - b) <= TOL * Math.max(1, Math.abs(a), Math.abs(b))
-  );
-}
-
 function pusto(s: string): boolean {
   return s.replace(/\\[,;: ]|\s/g, '').length === 0;
+}
+
+/** Переменные точки и отпечаток её значения. */
+function razdelit(pt: TochkaKlient): { vars: Record<string, number>; o: string } {
+  const vars: Record<string, number> = {};
+  let o = '';
+  for (const [k, v] of Object.entries(pt)) {
+    if (k === '#') o = String(v);
+    else vars[k] = Number(v);
+  }
+  return { vars, o };
 }
 
 /* ── Число ──────────────────────────────────────────────────────── */
@@ -59,52 +53,46 @@ function estDesyatichnaya(src: string): boolean {
   return /\d(?:[.,]|\{,\})\d/.test(src);
 }
 
-function proveritChislo(tex: string, ot: { znachenie: number; tochno: boolean; zapis: string }): Itog {
+function proveritChislo(tex: string, o: string, irr: boolean): Itog {
   if (pusto(tex)) return { kind: 'format', hint: 'Впишите ответ.' };
   const u = razobrat(tex);
   if (u === null) return { kind: 'format', hint: 'Запись не разобралась — проверьте скобки и знаки.' };
   if (peremennye(u).size > 0) return { kind: 'format', hint: 'В ответе должно быть число, без букв.' };
-  const val = vychislit(u);
-  if (!blizko(val, ot.znachenie)) return { kind: 'neverno' };
-  /* Точный ответ — иррациональный, а введена десятичная дробь: значение
-     сошлось лишь приближённо (допуск 1e-7 такое пропустит редко, но
-     «1,4142136» вместо √2 — всё равно не ответ). */
-  const tochnyyIrracionalnyy = /sqrt|root|pi|\^\(?\d+\/\d+/.test(ot.zapis);
-  if (ot.tochno && tochnyyIrracionalnyy && estDesyatichnaya(tex)) {
+  if (irr && estDesyatichnaya(tex)) {
     return { kind: 'format', hint: 'Нужно точное значение — с корнем, а не десятичное приближение.' };
   }
-  return { kind: 'verno' };
+  return sovpadaetZnachenie(vychislit(u), o) ? { kind: 'verno' } : { kind: 'neverno' };
 }
 
 /* ── Выражение ──────────────────────────────────────────────────── */
 
+function lishnieBukvy(u: Uzel, mozhno: readonly string[]): string[] {
+  return [...peremennye(u)].filter((v) => !mozhno.includes(v));
+}
+
 function proveritVyrazhenie(
   tex: string,
-  ot: Pick<OtvetVyrazhenie, 'peremennye' | 'tochki' | 'forma'>,
+  pr: { peremennye: readonly string[]; tochki: readonly TochkaKlient[]; forma?: readonly Forma[] },
 ): Itog {
   if (pusto(tex)) return { kind: 'format', hint: 'Впишите ответ.' };
   const u = razobrat(tex);
   if (u === null) return { kind: 'format', hint: 'Запись не разобралась — проверьте скобки и знаки.' };
-  const lishnie = [...peremennye(u)].filter((v) => !ot.peremennye.includes(v));
-  if (lishnie.length > 0) {
-    const est = ot.peremennye.map((v) => `$${v}$`).join(', ');
+  if (lishnieBukvy(u, pr.peremennye).length > 0) {
+    const est = pr.peremennye.map((v) => `$${v}$`).join(', ');
     return {
       kind: 'format',
       hint:
-        ot.peremennye.length === 0
+        pr.peremennye.length === 0
           ? 'В ответе должно быть число, без букв.'
           : `В ответе могут быть только буквы условия: ${est}.`,
     };
   }
-  if (!sovpadaetVTochkah(u, ot.tochki)) return { kind: 'neverno' };
-  return proveritFormu(u, ot.forma ?? []);
-}
-
-function sovpadaetVTochkah(u: Uzel, tochki: readonly Tochka[]): boolean {
-  return tochki.every((pt) => {
-    const { '=': verno, ...vars } = pt;
-    return blizko(vychislit(u, vars), verno!);
+  const vse = pr.tochki.every((pt) => {
+    const { vars, o } = razdelit(pt);
+    return sovpadaetZnachenie(vychislit(u, vars), o);
   });
+  if (!vse) return { kind: 'neverno' };
+  return proveritFormu(u, pr.forma ?? []);
 }
 
 /* ── Форма ответа ───────────────────────────────────────────────── */
@@ -119,7 +107,6 @@ function estKoren(u: Uzel): boolean {
     case 'bin':
       if (u.op === '^' && u.b.t !== 'num') return true;
       if (u.op === '^' && u.b.t === 'num' && !Number.isInteger(u.b.v)) return true;
-      if (u.op === '^' && u.b.t === 'bin' && u.b.op === '/') return true;
       return estKoren(u.a) || estKoren(u.b);
     case 'fn':
       return u.name === 'sqrt' || u.name === 'root' || u.args.some(estKoren);
@@ -170,7 +157,7 @@ function proveritFormu(u: Uzel, forma: readonly Forma[]): Itog {
 
 /* ── По случаям ─────────────────────────────────────────────────── */
 
-interface Promezhutok {
+export interface Promezhutok {
   lo: number;
   hi: number;
   loZakr: boolean;
@@ -234,15 +221,6 @@ export function razobratPromezhutok(src: string, v = 'x'): Promezhutok | null {
   return null;
 }
 
-function izOblasti(o: Oblast): Promezhutok {
-  return {
-    lo: o.lo ?? -Infinity,
-    hi: o.hi ?? Infinity,
-    loZakr: o.loZakr,
-    hiZakr: o.hiZakr,
-  };
-}
-
 /** Объединение промежутков → непересекающиеся куски по возрастанию. */
 function obedinit(list: readonly Promezhutok[]): Promezhutok[] {
   const s = [...list].sort((a, b) => a.lo - b.lo || Number(b.loZakr) - Number(a.loZakr));
@@ -251,8 +229,8 @@ function obedinit(list: readonly Promezhutok[]): Promezhutok[] {
     const last = out[out.length - 1];
     if (last !== undefined && (p.lo < last.hi || (p.lo === last.hi && (p.loZakr || last.hiZakr)))) {
       if (p.hi > last.hi || (p.hi === last.hi && p.hiZakr)) {
+        last.hiZakr = p.hi > last.hi ? p.hiZakr : last.hiZakr || p.hiZakr;
         last.hi = p.hi;
-        last.hiZakr = p.hiZakr || (p.hi === last.hi && last.hiZakr);
       }
     } else {
       out.push({ ...p });
@@ -272,7 +250,7 @@ function bezVykolotyh(list: readonly Promezhutok[]): Promezhutok[] {
   const out: Promezhutok[] = [];
   for (const p of s) {
     const last = out[out.length - 1];
-    if (last !== undefined && last.hi === p.lo && !last.hiZakr && !p.loZakr) {
+    if (last !== undefined && kanon(last.hi) === kanon(p.lo) && !last.hiZakr && !p.loZakr) {
       last.hi = p.hi;
       last.hiZakr = p.hiZakr;
     } else {
@@ -282,20 +260,15 @@ function bezVykolotyh(list: readonly Promezhutok[]): Promezhutok[] {
   return out;
 }
 
-function ravnyObedineniya(a: readonly Promezhutok[], b: readonly Promezhutok[]): boolean {
-  const x = bezVykolotyh(a);
-  const y = bezVykolotyh(b);
-  const eq = (p: number, q: number) => p === q || blizko(p, q);
-  return (
-    x.length === y.length &&
-    x.every(
-      (p, i) =>
-        eq(p.lo, y[i]!.lo) &&
-        eq(p.hi, y[i]!.hi) &&
-        p.loZakr === y[i]!.loZakr &&
-        p.hiZakr === y[i]!.hiZakr,
-    )
-  );
+/**
+ * Каноническая строка объединения промежутков — по ней строится и
+ * сравнивается отпечаток области: «(-inf;30000000e-7]U(…)».
+ */
+export function strokaObedineniya(list: readonly Promezhutok[]): string {
+  const konec = (x: number) => (x === -Infinity ? '-inf' : x === Infinity ? 'inf' : kanon(x));
+  return bezVykolotyh(list)
+    .map((p) => `${p.loZakr ? '[' : '('}${konec(p.lo)};${konec(p.hi)}${p.hiZakr ? ']' : ')'}`)
+    .join('U');
 }
 
 function vnutri(x: number, p: Promezhutok): boolean {
@@ -304,11 +277,11 @@ function vnutri(x: number, p: Promezhutok): boolean {
 
 function proveritKuski(
   kuski: readonly { oblast: string; tex: string }[],
-  ot: OtvetKusochnyi,
+  pr: Extract<ProverkaKlient, { vid: 'kusochnyi' }>,
 ): Itog {
   const zapolneny = kuski.filter((k) => !pusto(k.oblast) || !pusto(k.tex));
   if (zapolneny.length === 0) return { kind: 'format', hint: 'Впишите ответ.' };
-  const v = ot.peremennaya;
+  const v = pr.peremennaya;
   const razobrannye: { p: Promezhutok; u: Uzel }[] = [];
   for (const [i, k] of zapolneny.entries()) {
     /* В строке может быть объединение: «(-\infty;-2)\cup(-2;0)». */
@@ -323,24 +296,21 @@ function proveritKuski(
     if (u === null || pusto(k.tex)) {
       return { kind: 'format', hint: `Выражение в строке ${i + 1} не разобралось.` };
     }
-    const lishnie = [...peremennye(u)].filter((name) => name !== v && !ot.kuski[0]!.peremennye.includes(name));
+    const lishnie = lishnieBukvy(u, [v, ...pr.bukvy]);
     if (lishnie.length > 0) {
       return { kind: 'format', hint: `В строке ${i + 1} лишняя буква: $${lishnie[0]}$.` };
     }
     for (const p of chasti) razobrannye.push({ p: p!, u });
   }
-  if (!ravnyObedineniya(razobrannye.map((r) => r.p), ot.kuski.map((k) => izOblasti(k.oblast)))) {
+  if (otpechatokStroki(strokaObedineniya(razobrannye.map((r) => r.p))) !== pr.oblast) {
     return { kind: 'neverno', zametka: 'Промежутки вместе не совпадают с областью, где выражение определено.' };
   }
-  for (const k of ot.kuski) {
-    for (const pt of k.tochki) {
-      const x = pt[v]!;
-      const r = razobrannye.find((item) => vnutri(x, item.p));
-      if (r === undefined) return { kind: 'neverno' };
-      const { '=': verno, ...vars } = pt;
-      if (!blizko(vychislit(r.u, vars), verno!)) {
-        return { kind: 'neverno', zametka: 'На одном из промежутков выражение неверное.' };
-      }
+  for (const pt of pr.tochki) {
+    const { vars, o } = razdelit(pt);
+    const x = vars[v]!;
+    const r = razobrannye.find((item) => vnutri(x, item.p));
+    if (r === undefined || !sovpadaetZnachenie(vychislit(r.u, vars), o)) {
+      return { kind: 'neverno', zametka: 'На одном из промежутков выражение неверное.' };
     }
   }
   return { kind: 'verno' };
@@ -348,24 +318,26 @@ function proveritKuski(
 
 /* ── Общая точка входа ──────────────────────────────────────────── */
 
-export function proverit(vvod: VvodSbornika, otvet: Otvet): Itog {
-  switch (otvet.vid) {
-    case 'chislo':
+export function proverit(vvod: VvodSbornika, pr: ProverkaKlient): Itog {
+  switch (pr.vid) {
+    case 'chislo': {
       if (vvod.vid !== 'odno') return { kind: 'format', hint: 'Впишите ответ.' };
-      return withForma(proveritChislo(vvod.tex, otvet), vvod.tex, otvet);
+      const itog = proveritChislo(vvod.tex, pr.o, pr.irr);
+      if (itog.kind !== 'verno' || pr.forma === undefined) return itog;
+      const u = razobrat(vvod.tex);
+      return u === null ? itog : proveritFormu(u, pr.forma);
+    }
     case 'vyrazhenie':
       if (vvod.vid !== 'odno') return { kind: 'format', hint: 'Впишите ответ.' };
-      return proveritVyrazhenie(vvod.tex, otvet);
+      return proveritVyrazhenie(vvod.tex, pr);
     case 'kusochnyi':
       if (vvod.vid !== 'kuski') return { kind: 'format', hint: 'Впишите ответ.' };
-      return proveritKuski(vvod.kuski, otvet);
+      return proveritKuski(vvod.kuski, pr);
     case 'chisla': {
       if (vvod.vid !== 'polya') return { kind: 'format', hint: 'Впишите ответ.' };
-      for (const [i, pole] of otvet.polya.entries()) {
-        const itog = proveritChislo(vvod.polya[i] ?? '', pole);
-        if (itog.kind === 'format') {
-          return { kind: 'format', hint: `$${pole.podpis}$: ${itog.hint}` };
-        }
+      for (const [i, pole] of pr.polya.entries()) {
+        const itog = proveritChislo(vvod.polya[i] ?? '', pole.o, pole.irr);
+        if (itog.kind === 'format') return { kind: 'format', hint: `$${pole.podpis}$: ${itog.hint}` };
         if (itog.kind === 'neverno') return itog;
       }
       return { kind: 'verno' };
@@ -373,21 +345,15 @@ export function proverit(vvod: VvodSbornika, otvet: Otvet): Itog {
   }
 }
 
-function withForma(itog: Itog, tex: string, ot: OtvetChislo): Itog {
-  if (itog.kind !== 'verno' || ot.forma === undefined) return itog;
-  const u = razobrat(tex);
-  return u === null ? itog : proveritFormu(u, ot.forma);
-}
-
 /** Пустой ввод под вид ответа. */
-export function pustoyVvod(otvet: Otvet): VvodSbornika {
-  switch (otvet.vid) {
+export function pustoyVvod(pr: ProverkaKlient): VvodSbornika {
+  switch (pr.vid) {
     case 'kusochnyi':
       /* Две строки, а не по числу кусков ответа: число случаев ученик
          находит сам, строки добавляются кнопкой. */
       return { vid: 'kuski', kuski: [{ oblast: '', tex: '' }, { oblast: '', tex: '' }] };
     case 'chisla':
-      return { vid: 'polya', polya: otvet.polya.map(() => '') };
+      return { vid: 'polya', polya: pr.polya.map(() => '') };
     default:
       return { vid: 'odno', tex: '' };
   }

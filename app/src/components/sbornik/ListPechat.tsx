@@ -8,7 +8,7 @@ import { buildDocument } from '@/lib/sheet/sheet.js';
 import { sheetWithSpace, spaceOfQuery } from '@/lib/sheetSpace';
 import { razobratZapros, sobratVarianty, specLista } from '@/lib/sbornik/list';
 import { zagruzitTip } from '@/lib/sbornik/zagruzka';
-import type { ZadachaHtml } from '@/lib/sbornik/types';
+import type { ZadachaKlient } from '@/lib/sbornik/types';
 
 declare global {
   interface Window {
@@ -56,7 +56,7 @@ export function ListPechat({ glava }: { glava: number }) {
     Promise.all(p.tipy.map((t) => zagruzitTip(t.tip).then((list) => [t.tip, list] as const)))
       .then((pary) => {
         if (!alive) return;
-        const poTipam = new Map<string, readonly ZadachaHtml[]>(pary);
+        const poTipam = new Map<string, readonly ZadachaKlient[]>(pary);
         const varianty = sobratVarianty(p, poTipam);
         const built = specLista(p, varianty, sOtvetami);
         const space = spaceOfQuery(query);

@@ -91,21 +91,57 @@ export interface ZadachaDannye {
   proverka: { iskhod: string; usloviya: readonly string[] };
 }
 
+/* ── Что уходит в браузер ─────────────────────────────────────────
+
+   Верных значений и записи ответа здесь нет: только отпечатки
+   (lib/sbornik/zamok.ts). Решение и ответ — закрытым текстом. */
+
+/** Точка проверки: значения переменных и отпечаток верного значения «#». */
+export type TochkaKlient = Readonly<Record<string, number | string>>;
+
+export type ProverkaKlient =
+  | {
+      vid: 'chislo';
+      /** Отпечаток значения. */
+      o: string;
+      /** Верный ответ иррациональный: десятичное приближение — не ответ. */
+      irr: boolean;
+      forma?: readonly Forma[];
+    }
+  | { vid: 'vyrazhenie'; peremennye: readonly string[]; tochki: readonly TochkaKlient[]; forma?: readonly Forma[] }
+  | {
+      vid: 'kusochnyi';
+      peremennaya: string;
+      /** Другие буквы ответа (параметры), кроме переменной. */
+      bukvy: readonly string[];
+      /** Отпечаток объединения промежутков — области определения. */
+      oblast: string;
+      tochki: readonly TochkaKlient[];
+    }
+  | { vid: 'chisla'; polya: readonly { podpis: string; o: string; irr: boolean }[] };
+
+/** Открытая часть после «Показать решение» или верного ответа. */
+export interface Otkrytoe {
+  otvetHtml: string;
+  /** Ответ строкой TeX — для таблицы ответов листа. */
+  otvetTex: string;
+  shagi: readonly { chtoHtml: string; formulaHtml: string }[];
+}
+
 /**
- * Задача, готовая к показу: тексты набраны KaTeX на сборке, ответ — для
- * проверки в браузере. Служебная часть (proverka) на сайт не уходит.
+ * Задача для браузера: тексты набраны KaTeX на сборке, проверка — по
+ * отпечаткам, решение закрыто (zakryto — JSON Otkrytoe, ключ — id).
  */
-export interface ZadachaHtml {
+export interface ZadachaKlient {
   id: string;
   tip: string;
   uroven: Uroven;
   uslovieHtml: string;
   formulaHtml?: string;
   dopolnenieHtml?: string;
-  otvet: Otvet;
-  otvetHtml: string;
-  shagi: readonly { chtoHtml: string; formulaHtml: string }[];
   podskazkiHtml: readonly string[];
+  proverka: ProverkaKlient;
+  zakryto: string;
 }
 
 /** Ввод ученика. */

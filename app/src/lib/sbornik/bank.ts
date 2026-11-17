@@ -1,14 +1,16 @@
 /**
  * Банк сборника на сборке: читает data/sbornik/glava-N/tip-*.json и
  * набирает тексты KaTeX. Только для серверных страниц и файлов данных —
- * в браузер уходит ZadachaHtml без служебной части.
+ * в браузер уходит ZadachaKlient: ответ отпечатками, решение закрыто.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { typeset, typesetKrupno } from '@/lib/tex';
 import { TIPY } from '@/content/sbornik';
-import type { Otvet, ZadachaDannye, ZadachaHtml } from './types';
+import { strokaObedineniya } from './proverka';
+import type { Otkrytoe, Otvet, ProverkaKlient, Tochka, TochkaKlient, ZadachaDannye, ZadachaKlient } from './types';
+import { otpechatokStroki, otpechatokZnacheniya, ustoychivo, zakryt } from './zamok';
 
 const DATA = path.join(process.cwd(), 'src', 'data', 'sbornik');
 
@@ -80,8 +82,85 @@ export function otvetHtml(otvet: Otvet): string {
   return krupno(`$${otvet.tex}$`);
 }
 
-/** Задача для показа: тексты набраны, служебная проверка отрезана. */
-export function vHtml(z: ZadachaDannye): ZadachaHtml {
+/** Иррациональна ли запись верного числа: тогда десятичная дробь — не ответ. */
+function irracionalnoe(zapis: string): boolean {
+  return /sqrt|root|pi|\^\(?-?\d+\/\d+/.test(zapis);
+}
+
+/** Точки проверки: значение — отпечатком; точки на границе округления — прочь. */
+function tochkiKlient(id: string, tochki: readonly Tochka[]): TochkaKlient[] {
+  const out: TochkaKlient[] = [];
+  for (const pt of tochki) {
+    const { '=': v, ...vars } = pt;
+    if (v === undefined || !ustoychivo(v)) continue;
+    out.push({ ...vars, '#': otpechatokZnacheniya(v)! });
+  }
+  if (out.length < 4) throw new Error(`сборник ${id}: устойчивых точек проверки ${out.length} < 4`);
+  return out;
+}
+
+/** Проверка ответа для браузера: только отпечатки. */
+export function proverkaKlient(id: string, otvet: Otvet): ProverkaKlient {
+  switch (otvet.vid) {
+    case 'chislo':
+      if (!ustoychivo(otvet.znachenie)) throw new Error(`сборник ${id}: ответ на границе округления`);
+      return {
+        vid: 'chislo',
+        o: otpechatokZnacheniya(otvet.znachenie)!,
+        irr: irracionalnoe(otvet.zapis),
+        ...(otvet.forma === undefined ? {} : { forma: otvet.forma }),
+      };
+    case 'vyrazhenie':
+      return {
+        vid: 'vyrazhenie',
+        peremennye: otvet.peremennye,
+        tochki: tochkiKlient(id, otvet.tochki),
+        ...(otvet.forma === undefined ? {} : { forma: otvet.forma }),
+      };
+    case 'kusochnyi': {
+      const v = otvet.peremennaya;
+      return {
+        vid: 'kusochnyi',
+        peremennaya: v,
+        bukvy: [...new Set(otvet.kuski.flatMap((k) => k.peremennye))].filter((b) => b !== v),
+        oblast: otpechatokStroki(
+          strokaObedineniya(
+            otvet.kuski.map((k) => ({
+              lo: k.oblast.lo ?? -Infinity,
+              hi: k.oblast.hi ?? Infinity,
+              loZakr: k.oblast.loZakr,
+              hiZakr: k.oblast.hiZakr,
+            })),
+          ),
+        ),
+        tochki: otvet.kuski.flatMap((k) => tochkiKlient(id, k.tochki)),
+      };
+    }
+    case 'chisla':
+      return {
+        vid: 'chisla',
+        polya: otvet.polya.map((p) => {
+          if (!ustoychivo(p.znachenie)) throw new Error(`сборник ${id}: ответ на границе округления`);
+          return { podpis: p.podpis, o: otpechatokZnacheniya(p.znachenie)!, irr: irracionalnoe(p.zapis) };
+        }),
+      };
+  }
+}
+
+/** Решение и ответ задачи, набранные KaTeX, — то, что закрывается. */
+export function otkrytoe(z: ZadachaDannye): Otkrytoe {
+  return {
+    otvetHtml: otvetHtml(z.otvet),
+    otvetTex: z.otvet.tex,
+    shagi: z.razbor.map((s) => ({
+      chtoHtml: typeset(s.chto),
+      formulaHtml: s.tex === undefined || s.tex === '' ? '' : formulaHtml(s.tex),
+    })),
+  };
+}
+
+/** Задача для браузера: тексты набраны, ответ — отпечатками, решение закрыто. */
+export function vKlient(z: ZadachaDannye): ZadachaKlient {
   return {
     id: z.id,
     tip: z.tip,
@@ -89,13 +168,9 @@ export function vHtml(z: ZadachaDannye): ZadachaHtml {
     uslovieHtml: typeset(z.uslovie),
     ...(z.formula === undefined ? {} : { formulaHtml: formulaUsloviyaHtml(z.formula) }),
     ...(z.dopolnenie === undefined ? {} : { dopolnenieHtml: typeset(z.dopolnenie) }),
-    otvet: z.otvet,
-    otvetHtml: otvetHtml(z.otvet),
-    shagi: z.razbor.map((s) => ({
-      chtoHtml: typeset(s.chto),
-      formulaHtml: s.tex === undefined || s.tex === '' ? '' : formulaHtml(s.tex),
-    })),
     podskazkiHtml: z.podskazki.map((p) => typeset(p)),
+    proverka: proverkaKlient(z.id, z.otvet),
+    zakryto: zakryt(JSON.stringify(otkrytoe(z)), z.id),
   };
 }
 

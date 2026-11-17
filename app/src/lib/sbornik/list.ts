@@ -14,7 +14,16 @@
 
 import answers from '@/lib/sheet/answers.js';
 import { TIPY } from '@/content/sbornik';
-import type { Uroven, ZadachaHtml } from './types';
+import type { Otkrytoe, Uroven, ZadachaKlient } from './types';
+import { otkryt } from './zamok';
+
+/** Задача листа: условие и открытое решение. */
+export type ZadachaLista = ZadachaKlient & Otkrytoe;
+
+/** Решение закрыто в файле данных — лист открывает его сам. */
+export function otkrytDlyaLista(z: ZadachaKlient): ZadachaLista {
+  return { ...z, ...(JSON.parse(otkryt(z.zakryto, z.id)) as Otkrytoe) };
+}
 
 export interface ParametryLista {
   glava: number;
@@ -81,11 +90,11 @@ function rng(seed: string): () => number {
 
 export interface BlokLista {
   title: string;
-  tasks: ZadachaHtml[];
+  tasks: ZadachaLista[];
 }
 
 /** Варианты: по каждому типу — k разных задач на вариант, без повторов между вариантами. */
-export function sobratVarianty(p: ParametryLista, poTipam: Map<string, readonly ZadachaHtml[]>): BlokLista[][] {
+export function sobratVarianty(p: ParametryLista, poTipam: Map<string, readonly ZadachaKlient[]>): BlokLista[][] {
   const rand = rng(`${p.zerno}:${p.glava}`);
   const varianty: BlokLista[][] = Array.from({ length: p.varianty }, () => []);
   for (const { tip, k } of p.tipy) {
@@ -97,7 +106,10 @@ export function sobratVarianty(p: ParametryLista, poTipam: Map<string, readonly 
     }
     const nazvanie = (TIPY[p.glava] ?? []).find((t) => t.id === tip)?.nazvanie ?? tip;
     varianty.forEach((blocks, vi) => {
-      const tasks = perem.slice(vi * k, vi * k + k).sort((a, b) => a.uroven - b.uroven);
+      const tasks = perem
+        .slice(vi * k, vi * k + k)
+        .sort((a, b) => a.uroven - b.uroven)
+        .map(otkrytDlyaLista);
       if (tasks.length > 0) blocks.push({ title: `${tip}. ${nazvanie}`, tasks });
     });
   }
@@ -106,7 +118,7 @@ export function sobratVarianty(p: ParametryLista, poTipam: Map<string, readonly 
 
 const STROKA_OTVETA = '<p class="sheet-answer-line">Ответ:<span class="sheet-answer-blank"></span></p>';
 
-function uslovieHtml(z: ZadachaHtml): string {
+function uslovieHtml(z: ZadachaKlient): string {
   return (
     `<p>${z.uslovieHtml}${z.formulaHtml === undefined ? '' : ':'}</p>` +
     (z.formulaHtml === undefined ? '' : `<div class="sb-list-formula">${z.formulaHtml}</div>`) +
@@ -114,7 +126,7 @@ function uslovieHtml(z: ZadachaHtml): string {
   );
 }
 
-function reshenieHtml(z: ZadachaHtml): string {
+function reshenieHtml(z: ZadachaLista): string {
   const shagi = z.shagi
     .map(
       (s) =>
@@ -145,7 +157,7 @@ export function specLista(p: ParametryLista, varianty: BlokLista[][], sOtvetami:
           questionHtml: uslovieHtml(z),
           options: null,
           figureSvg: null,
-          answer: z.otvet.tex,
+          answer: z.otvetTex,
           answerHtml: z.otvetHtml,
           solutionHtml: sOtvetami ? reshenieHtml(z) : STROKA_OTVETA,
         };

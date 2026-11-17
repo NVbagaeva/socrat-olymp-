@@ -6,11 +6,11 @@
  */
 
 import { glavaSlug, href, SBORNIK, SBORNIK_TAIL, tipSlug } from '@/lib/paths';
-import type { ZadachaHtml } from './types';
+import type { ZadachaKlient } from './types';
 
-const cache = new Map<string, Promise<readonly ZadachaHtml[]>>();
+const cache = new Map<string, Promise<readonly ZadachaKlient[]>>();
 
-export function zagruzitTip(tip: string): Promise<readonly ZadachaHtml[]> {
+export function zagruzitTip(tip: string): Promise<readonly ZadachaKlient[]> {
   const got = cache.get(tip);
   if (got !== undefined) return got;
   const glava = Number(tip.split('.')[0]);
@@ -18,7 +18,7 @@ export function zagruzitTip(tip: string): Promise<readonly ZadachaHtml[]> {
   const p = fetch(url)
     .then((r) => {
       if (!r.ok) throw new Error(`${url}: ${r.status}`);
-      return r.json() as Promise<ZadachaHtml[]>;
+      return r.json() as Promise<ZadachaKlient[]>;
     })
     .catch((e: unknown) => {
       cache.delete(tip);
@@ -28,7 +28,7 @@ export function zagruzitTip(tip: string): Promise<readonly ZadachaHtml[]> {
   return p;
 }
 
-export async function zagruzitZadachu(id: string): Promise<ZadachaHtml | undefined> {
+export async function zagruzitZadachu(id: string): Promise<ZadachaKlient | undefined> {
   const [g, t] = id.split('.');
   const list = await zagruzitTip(`${g}.${t}`);
   return list.find((z) => z.id === id);

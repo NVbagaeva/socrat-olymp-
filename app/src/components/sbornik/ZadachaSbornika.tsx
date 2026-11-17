@@ -1,14 +1,15 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui';
 import { ShagiResheniya } from '@/components/tasks/steklo';
 import { typeset } from '@/lib/tex';
 import { proverit, pustoyVvod, type Itog } from '@/lib/sbornik/proverka';
 import { logSbornika } from '@/lib/sbornik/progress';
 import type { LogOutcome } from '@/lib/progressLog/model';
-import type { VvodSbornika, ZadachaHtml } from '@/lib/sbornik/types';
+import type { Otkrytoe, VvodSbornika, ZadachaKlient } from '@/lib/sbornik/types';
+import { otkryt } from '@/lib/sbornik/zamok';
 import { SbornikPole } from './SbornikPole';
 
 const ZVEZDY = ['', '★', '★★', '★★★'] as const;
@@ -34,7 +35,7 @@ export function ZadachaSbornika({
   onZakryta,
   className,
 }: {
-  z: ZadachaHtml;
+  z: ZadachaKlient;
   nomer: string;
   /** Условие уже на странице (список задач типа): карточка — только решение. */
   bezUsloviya?: boolean;
@@ -47,7 +48,7 @@ export function ZadachaSbornika({
   onZakryta?: (outcome: LogOutcome) => void;
   className?: string;
 }) {
-  const [vvod, setVvod] = useState<VvodSbornika>(() => pustoyVvod(z.otvet));
+  const [vvod, setVvod] = useState<VvodSbornika>(() => pustoyVvod(z.proverka));
   const [sost, setSost] = useState<Sost>('vvod');
   const [hint, setHint] = useState<string | null>(null);
   const [zametka, setZametka] = useState<string | null>(null);
@@ -78,7 +79,7 @@ export function ZadachaSbornika({
   }
 
   function check() {
-    const itog: Itog = proverit(vvod, z.otvet);
+    const itog: Itog = proverit(vvod, z.proverka);
     if (itog.kind === 'format') {
       setHint(itog.hint);
       return;
@@ -102,7 +103,13 @@ export function ZadachaSbornika({
   }
 
   const gotovo = sost === 'verno' || reshenie;
-  const vsegoShagov = z.shagi.length;
+  /* Решение закрыто (lib/sbornik/zamok.ts): открывается, только когда
+     ученик его просит или ищет шаг с ошибкой. */
+  const nuzhnoReshenie = reshenie || poisk !== null;
+  const otkr = useMemo<Otkrytoe | null>(
+    () => (nuzhnoReshenie ? (JSON.parse(otkryt(z.zakryto, z.id)) as Otkrytoe) : null),
+    [nuzhnoReshenie, z],
+  );
 
   return (
     <article
@@ -178,9 +185,9 @@ export function ZadachaSbornika({
         </ol>
       )}
 
-      {poisk === null || reshenie ? null : (
+      {poisk === null || reshenie || otkr === null ? null : (
         <PoiskOshibki
-          z={z}
+          shagi={otkr.shagi}
           shag={poisk.shag}
           najden={poisk.najden}
           onTakZhe={() =>
@@ -191,16 +198,15 @@ export function ZadachaSbornika({
             setPoisk(null);
             setSost('vvod');
           }}
-          vsego={vsegoShagov}
         />
       )}
 
-      {reshenie ? (
+      {reshenie && otkr !== null ? (
         <div className="sb-reshenie">
           <h3 className="sb-reshenie__zag">Решение</h3>
-          <ShagiResheniya shagi={z.shagi.map((s) => ({ chtoHtml: s.chtoHtml, formulaHtml: s.formulaHtml }))} />
+          <ShagiResheniya shagi={otkr.shagi.map((s) => ({ chtoHtml: s.chtoHtml, formulaHtml: s.formulaHtml }))} />
           <p className="sb-reshenie__otvet">
-            Ответ: <span dangerouslySetInnerHTML={{ __html: z.otvetHtml }} />
+            Ответ: <span dangerouslySetInnerHTML={{ __html: otkr.otvetHtml }} />
           </p>
         </div>
       ) : null}
@@ -212,7 +218,7 @@ export function ZadachaSbornika({
 export function UslovieZadachi({
   z,
 }: {
-  z: Pick<ZadachaHtml, 'uslovieHtml' | 'formulaHtml' | 'dopolnenieHtml'>;
+  z: Pick<ZadachaKlient, 'uslovieHtml' | 'formulaHtml' | 'dopolnenieHtml'>;
 }) {
   return (
     <div className="sb-zadacha__uslovie">
@@ -227,22 +233,21 @@ export function UslovieZadachi({
 
 /** «Где я ошибся?»: шаги по одному, ученик сверяет со своим решением. */
 function PoiskOshibki({
-  z,
+  shagi,
   shag,
   najden,
-  vsego,
   onTakZhe,
   onInache,
   onZanovo,
 }: {
-  z: ZadachaHtml;
+  shagi: Otkrytoe['shagi'];
   shag: number;
   najden: boolean;
-  vsego: number;
   onTakZhe: () => void;
   onInache: () => void;
   onZanovo: () => void;
 }) {
+  const vsego = shagi.length;
   if (shag >= vsego) {
     return (
       <div className="sb-poisk" role="status">
@@ -256,7 +261,7 @@ function PoiskOshibki({
       </div>
     );
   }
-  const s = z.shagi[shag]!;
+  const s = shagi[shag]!;
   return (
     <div className="sb-poisk">
       <p className="sb-poisk__zag">
@@ -297,12 +302,12 @@ function PoleVvoda({
   onVvod,
   readOnly,
 }: {
-  z: ZadachaHtml;
+  z: ZadachaKlient;
   vvod: VvodSbornika;
   onVvod: (v: VvodSbornika) => void;
   readOnly: boolean;
 }) {
-  const ot = z.otvet;
+  const ot = z.proverka;
   if (vvod.vid === 'odno') {
     const chislo = ot.vid === 'chislo';
     return (

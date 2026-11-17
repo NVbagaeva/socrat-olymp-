@@ -7,9 +7,12 @@
    здесь — то, что видит ученик:
      1. каждая формула набирается KaTeX без ошибки: условие и текст в $…$,
         формула условия, шаги решения, подсказки, ответ;
-     2. движок проверки сайта (lib/sbornik/proverka.ts) принимает верный
-        ответ банка в записи для разбора и в TeX-записи ответа,
+     2. движок проверки сайта (lib/sbornik/proverka.ts) по закрытым
+        данным, которые уходят в браузер (bank.ts → vKlient), принимает
+        верный ответ банка в записи для разбора и в TeX-записи ответа,
         а заведомо неверный (ответ + 1) — отклоняет;
+     2а. в данных для браузера нет ни записи ответа, ни верных значений,
+        ни текста решения: решение открывается ключом задачи;
      3. у каждого типа главы (content/sbornik.ts) есть файл банка.
 
    Ненулевой код возврата — расхождение, оно печатается. */
@@ -20,6 +23,8 @@ import katex from 'katex';
 import { APP, requireSrc } from './lib/load-ts.mjs';
 
 const { proverit } = requireSrc('lib/sbornik/proverka.ts');
+const { vKlient } = requireSrc('lib/sbornik/bank.ts');
+const { otkryt } = requireSrc('lib/sbornik/zamok.ts');
 const { TIPY } = requireSrc('content/sbornik.ts');
 
 const DATA = path.join(APP, 'src', 'data', 'sbornik');
@@ -97,8 +102,26 @@ for (const [glava, tipy] of Object.entries(TIPY)) {
       if (z.otvet.vid === 'kusochnyi') z.otvet.kuski.forEach((k) => tex(k.oblast.tex, `${w} промежуток`));
 
       otvetov += 1;
+      let k;
+      try {
+        k = vKlient(z);
+      } catch (e) {
+        failures.push(`${w}: ${e.message}`);
+        continue;
+      }
+      /* Условие и подсказки открыты и так; смотрим проверку и закрытое. */
+      const json = JSON.stringify({ proverka: k.proverka, zakryto: k.zakryto });
+      const utechki = [];
+      if (/"(zapis|znachenie|tex|razbor|otvet)"/.test(json)) utechki.push('служебное поле');
+      for (const s of z.razbor) if (s.tex && s.tex.length > 8 && json.includes(JSON.stringify(s.tex).slice(1, -1))) utechki.push('выкладка решения');
+      if (z.otvet.zapis && z.otvet.zapis.length > 3 && json.includes(z.otvet.zapis)) utechki.push('запись ответа');
+      if (utechki.length > 0) failures.push(`${w}: в данных для браузера видно: ${utechki.join(', ')}`);
+      const otkr = JSON.parse(otkryt(k.zakryto, k.id));
+      if (otkr.shagi.length !== z.razbor.length || otkr.otvetTex !== z.otvet.tex) {
+        failures.push(`${w}: закрытое решение не открывается`);
+      }
       for (const pole of ['zapis', 'tex']) {
-        const itog = proverit(vvod(z.otvet, pole), z.otvet);
+        const itog = proverit(vvod(z.otvet, pole), k.proverka);
         if (itog.kind !== 'verno') {
           failures.push(`${w}: верный ответ (${pole}) не принят: ${JSON.stringify(itog)}`);
         }
@@ -111,10 +134,10 @@ for (const [glava, tipy] of Object.entries(TIPY)) {
           if (last && last.zapis === k.zapis) last.oblast += `\\cup${k.oblast.tex}`;
           else slito.push({ zapis: k.zapis, oblast: k.oblast.tex });
         }
-        const itog = proverit({ vid: 'kuski', kuski: slito.map((k) => ({ oblast: k.oblast, tex: k.zapis })) }, z.otvet);
+        const itog = proverit({ vid: 'kuski', kuski: slito.map((x) => ({ oblast: x.oblast, tex: x.zapis })) }, k.proverka);
         if (itog.kind !== 'verno') failures.push(`${w}: ответ объединением не принят: ${JSON.stringify(itog)}`);
       }
-      const plohoy = proverit(isporchennyy(z.otvet), z.otvet);
+      const plohoy = proverit(isporchennyy(z.otvet), k.proverka);
       if (plohoy.kind === 'verno') failures.push(`${w}: неверный ответ принят`);
     }
   }
@@ -138,8 +161,7 @@ for (const [src, want] of PROMEZHUTKI) {
 }
 
 /* Лист генератора собирается шаблоном печати: два варианта, лист учителя.
-   Задачи — как их отдаёт файл данных (тексты здесь не набраны: шаблону
-   важна структура, а не HTML). */
+   Задачи — как их отдаёт файл данных: решение лист открывает сам. */
 {
   const { razobratZapros, sobratVarianty, specLista } = requireSrc('lib/sbornik/list.ts');
   const { buildDocument } = requireSrc('lib/sheet/sheet.js');
@@ -149,16 +171,7 @@ for (const [src, want] of PROMEZHUTKI) {
     const list = JSON.parse(fs.readFileSync(path.join(DATA, 'glava-1', `tip-${tip}.json`), 'utf8'));
     poTipam.set(
       tip,
-      list.map((z) => ({
-        id: z.id,
-        tip: z.tip,
-        uroven: z.uroven,
-        uslovieHtml: z.uslovie,
-        otvet: z.otvet,
-        otvetHtml: z.otvet.tex,
-        shagi: z.razbor.map((s) => ({ chtoHtml: s.chto, formulaHtml: s.tex ?? '' })),
-        podskazkiHtml: z.podskazki,
-      })),
+      list.map((z) => vKlient(z)),
     );
   }
   const varianty = sobratVarianty(p, poTipam);
