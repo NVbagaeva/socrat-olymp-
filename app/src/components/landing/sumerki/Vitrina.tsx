@@ -2,7 +2,7 @@
 
 import { clsx } from 'clsx';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { VITRINA, type PunktVitriny, type Snimok } from '@/content/vitrina';
 import { assetUrl } from '@/lib/assetUrl';
 import { Prosmotr, type SlaydProsmotra } from './Prosmotr';
@@ -201,7 +201,14 @@ function Chast({
  * снимки страниц сайта — scripts/glavnaya/snimki-vecher.mjs; тексты —
  * content/vitrina.ts, заголовок блока — вариант zagolovok.
  */
-export function Vitrina({ zagolovok = 'a' }: { zagolovok?: 'a' | 'b' }) {
+export function Vitrina({
+  zagolovok = 'a',
+  posle,
+}: {
+  zagolovok?: 'a' | 'b';
+  /** Часть после тренажёра — серверная (StereoChast: чертёж рисуется на сборке). */
+  posle?: ReactNode;
+}) {
   const z = VITRINA.zagolovki[zagolovok];
   const g = VITRINA.generator;
   const t = VITRINA.trenazher;
@@ -230,6 +237,7 @@ export function Vitrina({ zagolovok = 'a' }: { zagolovok?: 'a' | 'b' }) {
           punkty={t.punkty}
           knopki={[{ ...t.knopka, glavnaya: true }]}
         />
+        {posle}
       </div>
     </section>
   );
