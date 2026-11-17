@@ -24,7 +24,7 @@ export function GlavnayaSumerki({
   /** Вариант заголовка витрины (content/vitrina.ts). */
   zagolovok?: 'a' | 'b';
   level?: Level;
-  /** Часть витрины после тренажёра (прототип: StereoChast — /styleguide/glavnaya-stereo/). */
+  /** Часть витрины после тренажёра: на главной профиля — StereoChast (живая стереометрия). */
   vitrinaPosle?: ReactNode;
 }) {
   return (
