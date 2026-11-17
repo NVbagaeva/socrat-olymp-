@@ -22,6 +22,7 @@ import { typesetText } from '@/lib/tex';
 import { texPlain } from '@/lib/veroyatnost/model';
 import { openText } from '@/lib/veroyatnost/secret';
 import type { SectionAdapter, SectionInfo, VariantTask } from '../../types';
+import { vidVoprosa } from '@/lib/veroyatnost/bank5/voprosy-nomera';
 import {
   FALLBACK,
   answerHtml,
@@ -160,7 +161,13 @@ function build(egeNumber: 4 | 5, c: C45): VariantTask {
 export function adapter45(egeNumber: 4 | 5, info: SectionInfo, data: unknown): SectionAdapter {
   const dannye = data as Dannye45;
   const bloki = new Set(info.subtypes.map((s) => s.id));
-  const pool: C45[] = dannye.kinds.flatMap((kind) => {
+  /* Новые вопросы к историям №5 (bank5/derevo-voprosy.ts) в «Собрать
+     вариант» не идут: задача варианта выбирается по коду из всего пула,
+     и выросший пул пересобрал бы варианты по кодам, выданным раньше
+     (scripts/check-variant-kody.mjs). Генератор листов берёт те же данные
+     целиком — там они есть. */
+  const kinds = dannye.kinds.filter((kind) => vidVoprosa(kind.id) === null);
+  const pool: C45[] = kinds.flatMap((kind) => {
     if (!bloki.has(kind.blok)) {
       throw new Error(`№${egeNumber}: блока ${kind.blok} (прототип ${kind.id}) нет в info.ts`);
     }

@@ -260,7 +260,8 @@ export function indeks45(kinds: readonly Kind45[]): ZadachaBanka[] {
 /** Адрес общего генератора; null — адрес прежней схемы или чужой. */
 export function parseZapros45(query: URLSearchParams, zadanie: 4 | 5): ZaprosBanka | null {
   return parseZaprosBanka(query, {
-    idRe: zadanie === 4 ? /p4-\d\d/ : /p5-\d\d/,
+    /* Номер прототипа — две или три цифры: у №5 есть p5-100 и дальше. */
+    idRe: zadanie === 4 ? /p4-\d{2,3}/ : /p5-\d{2,3}/,
     est: () => true,
     variantsMax: MAX_VARIANTS,
   });

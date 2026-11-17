@@ -25,12 +25,12 @@ import { derevo, type Vetv } from './vizual5';
 import { shtuk, tex, tochnee, tochno } from './obshchee';
 
 /** Сколько объектов берём, когда считаем штуками. */
-const BAZA = 10000;
+export const BAZA = 10000;
 
 /** Диапазон параметра для генератора: нижняя и верхняя граница, знаки. */
-type Diapazon = readonly [number, number, number];
+export type Diapazon = readonly [number, number, number];
 
-function sluchayno(r: Rng, d: Diapazon): number {
+export function sluchayno(r: Rng, d: Diapazon): number {
   return r.dec(d[0], d[1], d[2]);
 }
 
@@ -39,13 +39,13 @@ function sluchayno(r: Rng, d: Diapazon): number {
  * подсказке (доля, вероятность или её дополнение): иначе подсказка
  * называет ответ. Такой набор чисел генератор отбрасывает.
  */
-function sovpadaet(otvet: number, chisla: readonly number[]): boolean {
+export function sovpadaet(otvet: number, chisla: readonly number[]): boolean {
   return chisla.some((x) => Math.abs(x - otvet) < 1e-9);
 }
 
 /* ── Полная вероятность: две группы ──────────────────────────────── */
 
-interface Dvuh {
+export interface Dvuh {
   id: string;
   nazvanie: string;
   uslovie: (p: Params) => string;
@@ -204,7 +204,7 @@ function dvuhgruppy(o: Dvuh): Prototype {
 
 /* ── Полная вероятность: три группы ──────────────────────────────── */
 
-interface Trigruppy {
+export interface Trigruppy {
   id: string;
   nazvanie: string;
   uslovie: (p: Params) => string;
@@ -577,7 +577,7 @@ function ispytaniya(o: Ispytaniya): Prototype {
 /* ── Состав банка ────────────────────────────────────────────────── */
 
 /** Полная вероятность, две группы: двадцать задач. */
-const DVUH: readonly Dvuh[] = [
+export const DVUH: readonly Dvuh[] = [
   {
     id: 'p5-14',
     nazvanie: 'Интернет-магазин: ошибка при сборке заказа',
@@ -801,7 +801,7 @@ const DVUH: readonly Dvuh[] = [
 ];
 
 /** Полная вероятность, три группы: семь задач. */
-const TRI: readonly Trigruppy[] = [
+export const TRI: readonly Trigruppy[] = [
   {
     id: 'p5-24',
     nazvanie: 'Конфетная фабрика: бракованная конфета',

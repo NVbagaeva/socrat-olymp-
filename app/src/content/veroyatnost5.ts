@@ -14,6 +14,7 @@
 import type { Ton } from '@/components/tasks/steklo';
 import { nomerRazdela, slovoChasti } from './struktura';
 import { tekstyKarty45 } from './veroyatnost45';
+import { ISTORIY_S_VOPROSAMI, PERVYY_NOMER_VOPROSOV } from '@/lib/veroyatnost/bank5/voprosy-nomera';
 
 export const SHAPKA5 = {
   ...tekstyKarty45,
@@ -54,7 +55,21 @@ function polnaya(chto: string): string {
  * «Где теряют балл» — свой текст у каждого типа: под разобранным
  * примером. Ключ — прототип банка (код ученику не показывается).
  */
+/* Ловушки других вопросов к историям полной вероятности (derevo-voprosy.ts):
+   противоположное событие и один путь — по номерам подряд. */
+const LOVUSHKA_NE =
+  'Складывают пути с самим событием, а спрашивают о противоположном. Ветка противоположного исхода — единица минус вероятность события; подходят все пути с ней, их складывают.';
+const LOVUSHKA_PUT =
+  'Складывают все пути, а нужен один: и группа, и исход внутри неё. Вдоль пути вероятности перемножаются — доля группы на вероятность ветки.';
+const LOVUSHKI_VOPROSOV: Record<string, string> = Object.fromEntries(
+  Array.from({ length: ISTORIY_S_VOPROSAMI * 2 }, (_, k) => [
+    `p5-${PERVYY_NOMER_VOPROSOV + k}`,
+    k % 2 === 0 ? LOVUSHKA_NE : LOVUSHKA_PUT,
+  ]),
+);
+
 export const TIPY5_OPASNO: Record<string, string> = {
+  ...LOVUSHKI_VOPROSOV,
   'p5-01':
     'Перемножают вероятности тем. Темы не пересекаются — события несовместны, «по одной из двух» — сумма $p_1+p_2$.',
   'p5-02':
