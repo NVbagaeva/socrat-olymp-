@@ -593,7 +593,9 @@
     justify-content: space-between;
     width: 100%;
   }
+  /* Под лидом, над дверями — первой в колонке кнопок. */
   .sm-start {
+    order: -1;
     display: flex;
     align-items: center;
     justify-content: center;

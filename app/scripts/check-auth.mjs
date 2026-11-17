@@ -711,9 +711,10 @@ async function phoneHead(page) {
     const q = (sel) => document.querySelector(sel);
     const login = q('.site-head a.auth-widget__login');
     const logo = q('.site-head .logo');
-    const hero = q('.hero__start');
-    const lead = q('.hero__lead');
-    const door = q('.hero__doors');
+    /* Прежний первый экран (HeroSection, база) и синяя сцена (SumerkiHero). */
+    const hero = q('.hero__start, .sm-start');
+    const lead = q('.hero__lead, .sm__lid');
+    const door = q('.hero__doors, .sm-dver');
     const heroBox = box(hero);
     return {
       login: box(login),
@@ -876,7 +877,7 @@ async function runEnabled() {
       'главная 1440: «Начать бесплатно» — основная кнопка в шапке',
     );
     check(
-      !(await page.locator('.hero__start').isVisible()),
+      !(await page.locator('.hero__start, .sm-start').isVisible()),
       'главная 1440: на первом экране «Начать бесплатно» не повторяется',
     );
     await shot(page, 'shapka-do-vhoda-1440');

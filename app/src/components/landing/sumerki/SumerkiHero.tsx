@@ -89,7 +89,8 @@ export function SumerkiHero({
                 </svg>
               </Link>
             ))}
-            {/* «Начать бесплатно» — на телефоне здесь: в узкой шапке её нет. */}
+            {/* «Начать бесплатно» — на телефоне под лидом, над дверями (order
+                в sumerki.css): в узкой шапке её нет. */}
             <Link className="sm-start" href={startHref(level)}>
               {site.headerActions.signup.label}
             </Link>
