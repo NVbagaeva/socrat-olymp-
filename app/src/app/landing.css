@@ -245,18 +245,57 @@
     transform 220ms var(--ease),
     box-shadow 220ms var(--ease);
 }
+.door--uchenik,
+.door--uchitel {
+  border-color: transparent;
+  color: #fff;
+}
+/* Двери залиты так же, как на главной профиля (sumerki.css, .sm-dver):
+   ученику — синяя, учителю — терракотовая, тот же блик и свечение. */
 .door--uchenik {
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.18), transparent 60%), var(--glass-bg);
+  background: linear-gradient(180deg, var(--sumerki-knopka-siniy-1), var(--sumerki-knopka-siniy-2));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.32),
+    inset 0 -1px 0 rgb(0 0 0 / 0.14),
+    0 0 28px -4px rgb(140 185 255 / 0.7),
+    0 16px 36px -12px rgb(16 40 110 / 0.7);
 }
 .door--uchitel {
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.22), transparent 60%), var(--glass-bg);
+  background: linear-gradient(
+    180deg,
+    var(--sumerki-knopka-teplyy-1),
+    var(--sumerki-knopka-teplyy-2)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.26),
+    inset 0 -1px 0 rgb(0 0 0 / 0.16),
+    0 0 30px -4px rgb(240 138 60 / 0.75),
+    0 16px 36px -12px rgb(120 50 10 / 0.6);
 }
 .door:hover,
 .door:focus-visible {
   transform: translateY(-3px);
-  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.door--uchenik:hover,
+.door--uchenik:focus-visible {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -1px 0 rgb(0 0 0 / 0.14),
+    0 0 40px -2px rgb(160 200 255 / 0.9),
+    0 22px 44px -12px rgb(16 40 110 / 0.75);
+}
+.door--uchitel:hover,
+.door--uchitel:focus-visible {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.26),
+    inset 0 -1px 0 rgb(0 0 0 / 0.16),
+    0 0 42px -2px rgb(240 138 60 / 0.95),
+    0 22px 44px -12px rgb(120 50 10 / 0.65);
+}
+.door:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
 }
 .door__title {
   font-size: 24px;
@@ -267,7 +306,7 @@
 .door__text {
   font-size: 14px;
   line-height: 1.45;
-  color: var(--color-text-secondary);
+  color: rgb(255 255 255 / 0.94);
 }
 .door__action {
   display: inline-flex;
@@ -276,10 +315,7 @@
   margin-top: var(--space-2);
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-primary);
-}
-.door--uchitel .door__action {
-  color: var(--color-accent-text);
+  color: #fff;
 }
 .door__action svg {
   width: 18px;

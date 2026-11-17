@@ -23,6 +23,7 @@ import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { SiteMenu } from './SiteMenu';
+import { levelNav, withActive } from './navUrovnya';
 import { NavSpisok } from './NavSpisok';
 import { isNavGroup, site } from '@/content/site';
 export interface AppShellProps {
@@ -40,10 +41,6 @@ export interface AppShellProps {
    */
   level?: Level;
   children: React.ReactNode;
-}
-
-function withActive(items: NavItem[], active: string | undefined): NavItem[] {
-  return items.map((item) => (item.id === active ? { ...item, active: true } : item));
 }
 
 /* Список заданий в сайдбаре целиком считается из конфига: номера,
@@ -77,22 +74,6 @@ function taskGroups(level: Level): NavGroup[] {
       items: tasks.filter((task) => task.part === part.part).map(taskItem),
     }))
     .filter((group) => group.items.length > 0);
-}
-
-/* Меню кабинета уровня. «Задания» знают оба адреса: на странице без
-   своего уровня (статистика, настройки) пункт ведёт в банк запомненного
-   уровня. На страницах базы в банк и сборщик базы ведут и остальные
-   раскладки меню — нижняя панель берёт пункты отсюда же. */
-function levelNav(items: NavItem[], level: Level): NavItem[] {
-  const base = levelInfo('base');
-  return items.map((item) => {
-    if (item.id === 'tasks') {
-      return { ...item, href: level === 'base' ? base.bank : item.href, hrefBase: base.bank };
-    }
-    if (item.id === 'variant' && level === 'base') return { ...item, href: base.variant };
-    if (item.id === 'home' && level === 'base') return { ...item, href: base.home };
-    return item;
-  });
 }
 
 /**
