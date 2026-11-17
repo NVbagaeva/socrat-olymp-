@@ -21,6 +21,7 @@
  */
 
 import { VARIANT_HREF } from '@/content/variant';
+import { nomerRazdela } from '@/content/struktura';
 import { MAX_VARIANTS as LIST_MAX } from '@/lib/generatorQuery';
 import { href, ZADANIYA } from '@/lib/paths';
 import { MAX_VARIANTS } from '@/lib/variant/types';
@@ -42,6 +43,10 @@ export interface PunktVitriny {
   /** Снимки пункта: первый — главный на сцене. */
   snimki: Snimok[];
 }
+
+/* Номера заданий ЕГЭ — из content/struktura.js по номеру хранения
+   (адресу), с которого сняты снимки. */
+const Z = (hranenie: number) => `Задание ${nomerRazdela(hranenie)}`;
 
 const S = (imya: string, podpis: string, w: number, h: number): Snimok => ({ imya, podpis, w, h });
 
@@ -119,18 +124,17 @@ export const VITRINA = {
         tekst:
           'Прототипы открытого банка ФИПИ и мои задачи того же типа. Графики, сюжеты, чертежи, и у каждой свои числа.',
         snimki: [
-          S('zadacha-grafik', 'Задание 11 · график функции', 520, 351),
-          S('zadacha-chertezh', 'Задание 1 · планиметрия с чертежом', 520, 97),
-          S('zadacha-stereo', 'Задание 3 · стереометрия с чертежом', 520, 173),
-          S('zadacha-syuzhet', 'Задание 10 · сюжетная задача', 520, 125),
+          S('zadacha-grafik', `${Z(12)} · график функции`, 520, 351),
+          S('zadacha-chertezh', `${Z(1)} · планиметрия с чертежом`, 520, 97),
+          S('zadacha-stereo', `${Z(3)} · стереометрия с чертежом`, 520, 173),
+          S('zadacha-syuzhet', `${Z(11)} · сюжетная задача`, 520, 125),
         ],
       },
       {
         id: 'parametr',
         zagolovok: 'Параметр — по 14 методам',
-        tekst:
-          'Задание 18 я разложила на 14 методов. У каждого: когда применять, алгоритм, ловушки и образец оформления.',
-        snimki: [S('parametr', 'Задание 18 · метод 1: суть, когда применять, алгоритм', 520, 757)],
+        tekst: `${Z(19)} я разложила на 14 методов. У каждого: когда применять, алгоритм, ловушки и образец оформления.`,
+        snimki: [S('parametr', `${Z(19)} · метод 1: суть, когда применять, алгоритм`, 520, 757)],
       },
     ] satisfies PunktVitriny[],
     knopki: [
