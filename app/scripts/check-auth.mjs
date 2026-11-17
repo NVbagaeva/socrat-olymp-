@@ -725,6 +725,9 @@ async function phoneHead(page) {
       logo: box(logo),
       nameVisible: logo !== null && parseFloat(getComputedStyle(logo).fontSize) >= 14,
       heroStart: heroBox,
+      /* Ширина содержимого первого экрана — по дверям (у прежнего
+         первого экрана это ряд дверей, у синей сцены — сама дверь). */
+      doorW: door?.getBoundingClientRect().width ?? null,
       heroStartHref: hero?.getAttribute('href') ?? null,
       heroOrder:
         heroBox !== null &&
@@ -915,8 +918,12 @@ async function runEnabled() {
     );
     check(head.burger !== null && head.burger.right <= width, `главная ${width}: бургер в экране`);
     check(
-      head.heroStart !== null && head.heroStart.w >= width - 48 && head.heroStart.h >= 44,
-      `главная ${width}: «Начать бесплатно» на первом экране почти во всю ширину`,
+      head.heroStart !== null &&
+        head.doorW !== null &&
+        head.heroStart.w >= head.doorW - 1 &&
+        head.heroStart.w >= width - 64 &&
+        head.heroStart.h >= 44,
+      `главная ${width}: «Начать бесплатно» на первом экране во всю ширину содержимого`,
     );
     check(
       head.heroStartHref === '/zadaniya/',
