@@ -19,6 +19,7 @@ import {
   veroyatnostVyhodaVolnoy,
 } from './labirint';
 import { tex } from './bank5/obshchee';
+import { DEREVYA_OPORNYH_5 } from './podgotovka5-derevya';
 import type { PrepBlok, PrepZadacha } from './types';
 
 /* ── Перечисления для второй проверки ────────────────────────────── */
@@ -2079,7 +2080,9 @@ function zadachiBloka(ids: readonly string[]): readonly PrepZadacha[] {
     if (zadacha === undefined) {
       throw new Error(`Опорные задачи №5: нет задачи ${id}`);
     }
-    return zadacha;
+    /* Задачам на дерево — метод и рисунок (podgotovka5-derevya.ts). */
+    const metodika = DEREVYA_OPORNYH_5[id];
+    return metodika === undefined ? zadacha : { ...zadacha, metodika };
   });
 }
 

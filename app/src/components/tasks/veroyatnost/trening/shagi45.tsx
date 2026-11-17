@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Razbor } from '@/lib/veroyatnost/razbor';
+import { ProbabilityTree } from '@/components/probability';
 import { Vizualizatsiya, podpisRisunka } from '../../card/Vizualizatsiya';
 import type { Shag } from '../../steklo';
 import type { VoprosPodskazki } from '../../trening';
@@ -62,4 +63,75 @@ export function voprosy45(podskazka: readonly PodskazkaShag[]): VoprosPodskazki[
     verno: h.correct,
     ...(h.comment === null ? {} : { kommentariyHtml: h.comment }),
   }));
+}
+
+/** Подписи дерева в подсказке (content/veroyatnost45.ts). */
+export interface DerevoPodskazkiLabels {
+  /** Пока дерево растёт. */
+  rastyot: string;
+  /** Когда подходящие пути подсвечены. */
+  gotovo: string;
+}
+
+/**
+ * Дерево в подсказке-вопросах: растёт по мере ответов. До первого
+ * ответа — ветви первого уровня без вероятностей, каждый верный ответ
+ * открывает следующую ступень (вероятности уровня, следующий уровень),
+ * а когда пройдены все содержательные вопросы — подсвечены подходящие
+ * пути. Произведений и суммы нет: число ответа подсказка не называет.
+ *
+ * Только у задач, которые решаются деревом (рисунок метода — дерево);
+ * у остальных ничего не рисуется.
+ */
+export function DerevoPodskazki({
+  razbor,
+  otvecheno,
+  voprosov,
+  labels,
+}: {
+  razbor: Razbor | null;
+  /** Сколько вопросов подсказки пройдено верно. */
+  otvecheno: number;
+  /** Сколько вопросов в подсказке; последний — как записать ответ. */
+  voprosov: number;
+  labels: DerevoPodskazkiLabels;
+}): ReactNode {
+  const parametry = razbor?.parametry;
+  const podsvetka = razbor?.podsvetka;
+  if (parametry?.method !== 'probability-tree' || voprosov === 0) {
+    return null;
+  }
+  const roditel = new Map(parametry.branches.map((b) => [b.id, b.parent]));
+  const glubina = (id: string): number => {
+    let n = 1;
+    let tek = roditel.get(id) ?? null;
+    while (tek !== null) {
+      n += 1;
+      tek = roditel.get(tek) ?? null;
+    }
+    return n;
+  };
+  const urovney = Math.max(1, ...parametry.branches.map((b) => glubina(b.id)));
+  /* Ступени: 0 — первый уровень без вероятностей, 1…urovney — уровни
+     с вероятностями, urovney + 1 — подсвеченные пути. */
+  const posledniy = urovney + 1;
+  const soderzhatelnyh = Math.max(1, voprosov - 1);
+  const stupen = otvecheno >= soderzhatelnyh ? posledniy : Math.min(otvecheno, posledniy);
+  const gotovo = stupen === posledniy;
+  return (
+    <figure className="z45-derevo-podskazki" aria-live="polite" tabIndex={0}>
+      <figcaption className="z45-derevo-podskazki__podpis">
+        {gotovo ? labels.gotovo : labels.rastyot}
+      </figcaption>
+      <ProbabilityTree
+        className="pr-tree--po-shagam"
+        levels={parametry.levels}
+        branches={parametry.branches}
+        {...(gotovo ? {} : { urovney: Math.max(1, stupen), sVeroyatnostyami: stupen })}
+        {...(gotovo && podsvetka?.method === 'probability-tree'
+          ? { highlightedPaths: podsvetka.highlightedPaths }
+          : {})}
+      />
+    </figure>
+  );
 }

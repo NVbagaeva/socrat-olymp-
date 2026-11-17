@@ -30,6 +30,12 @@ export const tekstyKarty45 = {
   risunok: 'Рисунок к решению',
 };
 
+/** Дерево в подсказке-вопросах: растёт с каждым верным ответом. */
+const DEREVO_PODSKAZKI = {
+  rastyot: 'Дерево растёт с каждым верным ответом',
+  gotovo: 'Подходящие пути подсвечены — посчитай их',
+};
+
 const GRUPP: Record<4 | 5, string> = { 4: 'семи', 5: 'десяти' };
 
 /** Подписи тренажёра №4 и №5. */
@@ -73,6 +79,7 @@ export function tekstyTrenazhera45(nomer: 4 | 5) {
       zadacha: `Задание №${nomer}`,
       risunok: 'Рисунок к решению',
       metod: 'Метод',
+      derevo: DEREVO_PODSKAZKI,
     },
     itogi: { ...T.itogi, otvet: 'Ответ' },
     uznay: {
@@ -99,6 +106,7 @@ export function tekstyOpornyh45(lead: string) {
   return {
     ...tekstyOpornyh(lead),
     risunok: 'Рисунок к решению',
+    derevo: DEREVO_PODSKAZKI,
     voprosy: {
       title: 'Подсказка — вопросами',
       verno: 'Верно.',

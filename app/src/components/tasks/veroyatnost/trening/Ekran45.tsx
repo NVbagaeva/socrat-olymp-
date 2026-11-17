@@ -18,7 +18,7 @@ import { log45 } from '@/lib/veroyatnost/trening/progress';
 import { sRazborami } from '../razboryKlient';
 import { zadachaBanka, type SessiyaPayload, type SessiyaZadacha } from '../sessiyaPayload';
 import type { TekstyTrenazhera45 } from '@/content/veroyatnost45';
-import { risunok45, shagi45, voprosy45 } from './shagi45';
+import { DerevoPodskazki, risunok45, shagi45, voprosy45 } from './shagi45';
 import type { Ui45 } from './ui45';
 
 /**
@@ -378,17 +378,25 @@ export function Ekran45({
                 voprosy.length === 0 ? (
                   <p>{T.ekran.zagruzka}</p>
                 ) : (
-                  <PodskazkaVoprosy
-                    voprosy={voprosy}
-                    otkryto={shag}
-                    mimo={mimo}
-                    onVerno={() => {
-                      setShag(shag + 1);
-                      setMimo([]);
-                    }}
-                    onMimo={(j) => setMimo([...mimo, j])}
-                    labels={T.ekran.voprosy}
-                  />
+                  <>
+                    <PodskazkaVoprosy
+                      voprosy={voprosy}
+                      otkryto={shag}
+                      mimo={mimo}
+                      onVerno={() => {
+                        setShag(shag + 1);
+                        setMimo([]);
+                      }}
+                      onMimo={(j) => setMimo([...mimo, j])}
+                      labels={T.ekran.voprosy}
+                    />
+                    <DerevoPodskazki
+                      razbor={razbor}
+                      otvecheno={shag - 1}
+                      voprosov={voprosy.length}
+                      labels={T.ekran.derevo}
+                    />
+                  </>
                 ),
             }
       }

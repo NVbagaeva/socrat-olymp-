@@ -50,6 +50,40 @@
   font-size: var(--fs-label);
 }
 
+/* Дерево в подсказке-вопросах (DerevoPodskazki): растёт по ответам.
+   Как и рисунок решения, не ужимается — прокручивается вбок. Новые
+   ветви и подписи проявляются: двигается только opacity. */
+.z45-derevo-podskazki {
+  margin: var(--space-4) 0 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.z45-derevo-podskazki > :not(figcaption) {
+  min-width: 480px;
+}
+.z45-derevo-podskazki__podpis {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-label);
+}
+.pr-tree--po-shagam .pr-branch,
+.pr-tree--po-shagam .pr-branch-p,
+.pr-tree--po-shagam .pr-level {
+  animation: z45-derevo-poyavlenie 420ms var(--ease) both;
+}
+@keyframes z45-derevo-poyavlenie {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pr-tree--po-shagam .pr-branch,
+  .pr-tree--po-shagam .pr-branch-p,
+  .pr-tree--po-shagam .pr-level {
+    animation: none;
+  }
+}
+
 /* «Узнай метод»: кнопки методов с объёмными иллюстрациями. */
 .z45-metody {
   display: grid;
