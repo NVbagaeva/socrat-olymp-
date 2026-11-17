@@ -3710,3 +3710,22 @@ a.task-card--bank:focus-visible {
   );
   box-shadow: 0 0 0 1px var(--color-border-accent);
 }
+
+/* ── Отклик на ответ в тренажёрах ─────────────────────────────────
+   Общие ключевые кадры для плашек «Верно / Пока не так» тренажёров
+   разделов (№14, №18, №19 и фильтр-тренажёров): плашка проявляется,
+   значок в кружке «пружинит» (docs/motion-system.md, шаг 3 — тот же
+   язык, что у тренировки в trening.css). Только opacity и transform;
+   длительности — токены движения, при «Уменьшить движение» они
+   сжимаются до 1ms, а правила ниже выключают анимацию совсем. */
+@keyframes otklik-vhod {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-rise-sm, 6px));
+  }
+}
+@keyframes otklik-znachok {
+  from {
+    transform: scale(0.5);
+  }
+}
