@@ -324,6 +324,103 @@ for (const razdel of napolnennyeRazdely()) {
   }
 }
 
+/* 8. Теория в рамках (№17: линейные и квадратные). Уравнения разборов
+   решает перебор (lib/baza/z17/sverka.ts) — корни сходятся с данными и
+   стоят в ответе. «Проверь себя»: 300 экземпляров на шаблон — четыре
+   разных варианта, один верный, у ошибок подсказки, верный вариант
+   сходится с перебором, KaTeX набирает все тексты. */
+{
+  const { sverit, normMinus } = requireSrc('lib/baza/z17/sverka.ts');
+  const { NABORY_PROVERKI_BAZY } = requireSrc('lib/baza/proverka-teorii.ts');
+  const { rngOf } = requireSrc('lib/vychisleniya/rng');
+  const katex = requireSrc('lib/graph/katex.js').katex;
+  const formuly = (s) => [...s.matchAll(/\$([^$]+)\$/g)].map((m) => m[1]);
+  const nabor = (s, gde) => {
+    for (const f of formuly(s)) {
+      try {
+        katex.renderToString(f, { throwOnError: true });
+      } catch (e) {
+        failures.push(`${gde}: KaTeX «${f}»: ${String(e.message).split('\n')[0]}`);
+      }
+    }
+  };
+  const NET = 'корней нет';
+  const LYUBOE = '$x$ — любое число';
+  const chisloTex = (blank) => `$${texZapisi(blank)}$`;
+  const razbory = (b) =>
+    b.vid === 'razbor' ||
+    b.vid === 'vazhnoZadacha' ||
+    b.vid === 'vyvodZadacha' ||
+    b.vid === 'layfhakZadacha'
+      ? [b.razbor]
+      : b.vid === 'sluchay'
+        ? b.razbory
+        : [];
+  for (const razdel of napolnennyeRazdely()) {
+    for (const r of razdel.teoriya ?? []) {
+      for (const b of r.bloki) {
+        for (const z of razbory(b)) {
+          const gde = `${razdel.slug}, теория «${r.title}», «${z.title}»`;
+          if (z.sverka === undefined) continue;
+          const est = sverit(z.sverka.ur);
+          const nado =
+            typeof z.sverka.korni === 'string' ? z.sverka.korni : z.sverka.korni.map(normMinus);
+          eq(est, nado, `${gde}: корни уравнения ${z.sverka.ur}`);
+          if (nado === 'net') eq(z.otvet.includes(NET), true, `${gde}: в ответе «${NET}»`);
+          else if (nado === 'lyuboe')
+            eq(z.otvet.includes('любое число'), true, `${gde}: в ответе «любое число»`);
+          else
+            eq(
+              nado.some((k) => z.otvet.includes(texZapisi(k))),
+              true,
+              `${gde}: ответ — один из корней ${nado.join('; ')}`,
+            );
+        }
+        if (b.vid !== 'proverka') continue;
+        const shablony = NABORY_PROVERKI_BAZY[b.nabor];
+        eq(shablony !== undefined, true, `${razdel.slug}: набор «Проверь себя» ${b.nabor} есть`);
+        for (const sh of shablony ?? []) {
+          const mesta = new Set();
+          for (let n = 0; n < 300; n += 1) {
+            const gde = `${razdel.slug}, «Проверь себя» ${sh.id} #${n}`;
+            const z = sh.sozdat(rngOf(`test|${sh.id}|${n}`), n);
+            const verny = z.varianty.filter((v) => v.verno);
+            eq(z.varianty.length, 4, `${gde}: четыре варианта`);
+            eq(verny.length, 1, `${gde}: один верный`);
+            eq(new Set(z.varianty.map((v) => v.tekst)).size, 4, `${gde}: варианты разные`);
+            mesta.add(z.varianty.findIndex((v) => v.verno));
+            for (const v of z.varianty) {
+              nabor(v.tekst, gde);
+              if (!v.verno) {
+                eq(Boolean(v.podskazka), true, `${gde}: подсказка к «${v.tekst}»`);
+                nabor(v.podskazka ?? '', gde);
+              }
+            }
+            nabor(z.uslovie, gde);
+            z.razbor.forEach((s) => nabor(s, gde));
+            /* Независимый пересчёт: перебор корней уравнения условия. */
+            const k = sverit(z.ur);
+            let nadoTekst;
+            if (k === 'net') nadoTekst = NET;
+            else if (k === 'lyuboe') nadoTekst = LYUBOE;
+            else if (z.vopros === 'koren') nadoTekst = k.length === 1 ? chisloTex(k[0]) : '?';
+            else nadoTekst = chisloTex(z.vopros === 'bolshiy' ? k[k.length - 1] : k[0]);
+            eq(verny[0]?.tekst, nadoTekst, `${gde}: верный вариант сходится с перебором (${z.ur})`);
+            eq(
+              z.razbor.join(' ').includes(nadoTekst.replace(/^\$|\$$/g, '')) ||
+                nadoTekst === NET ||
+                nadoTekst === LYUBOE,
+              true,
+              `${gde}: разбор приходит к ответу`,
+            );
+          }
+          eq(mesta.size >= 3, true, `${razdel.slug}, ${sh.id}: верный вариант на разных местах`);
+        }
+      }
+    }
+  }
+}
+
 if (failures.length > 0) {
   console.error(`База: расхождений ${failures.length} из ${checks}`);
   for (const f of failures) console.error(`  ✗ ${f}`);
