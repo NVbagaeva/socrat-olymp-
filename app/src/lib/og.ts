@@ -12,12 +12,10 @@ import type { Metadata } from 'next';
 export const SITE_URL = 'https://budetege.ru';
 export const SITE_NAME = 'Будет на ЕГЭ';
 
-export const OG_KARTINKA = {
-  url: '/og/og-budetege.jpg',
-  width: 1200,
-  height: 630,
-  alt: 'Будет на ЕГЭ — подготовка к ЕГЭ по профильной математике',
-} as const;
+/* Только адрес: размеры и подпись мессенджеры берут из самого файла,
+   а каждый мета-тег <head> идёт в первую загрузку всех страниц дважды
+   (в HTML и в данных RSC) — test:first-load. */
+export const OG_KARTINKA = { url: '/og/og-budetege.jpg' } as const;
 
 type Og = NonNullable<Metadata['openGraph']>;
 

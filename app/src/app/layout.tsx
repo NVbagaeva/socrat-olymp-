@@ -19,7 +19,9 @@ export const metadata: Metadata = {
   /* Превью ссылки на всех страницах. Заголовка здесь нет: без него
      мессенджер берёт <title> и описание самой страницы. */
   openGraph: ogStranicy(),
-  twitter: { card: 'summary_large_image' },
+  /* Картинку для X не повторяем (images: []): иначе Next.js
+     продублирует её тегами twitter:image, а X берёт og:image. */
+  twitter: { card: 'summary_large_image', images: [] },
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
