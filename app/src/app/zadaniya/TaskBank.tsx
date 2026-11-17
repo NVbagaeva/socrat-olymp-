@@ -11,6 +11,7 @@ import { LevelTabs } from '@/components/level/LevelTabs';
 import { levelInfo, type Level } from '@/lib/level';
 
 import { assetUrl } from '@/lib/assetUrl';
+import { useProgressBanka } from '@/lib/karta/progressBanka';
 import { href } from '@/lib/paths';
 /** Номер без ведущего нуля: чтобы «7» находило задание «07». */
 function matches(query: string, no: string, name: string): boolean {
@@ -90,6 +91,8 @@ export function TaskBank({ level = 'profile' }: { level?: Level }) {
         : tasks.filter((t) => t.part === (parts ? part : 1)),
     [query, searching, part, parts, tasks],
   );
+  /* Прогресс по разделам — из журналов браузера, как на «Карте ЕГЭ». */
+  const progress = useProgressBanka();
   const current = taskParts.find((item) => item.part === part) ?? taskParts[0];
   /* «С чего начать» — первое открытое задание уровня. */
   const pervoe = tasks.find((task) => task.status === 'ready') ?? tasks[0];
@@ -185,7 +188,7 @@ export function TaskBank({ level = 'profile' }: { level?: Level }) {
       {shown.length === 0 ? (
         <p className="bank-empty">Ничего не найдено</p>
       ) : (
-        <TaskGrid bento tasks={shown} />
+        <TaskGrid bank tasks={shown} progress={progress} />
       )}
 
       <section className="bank-start">

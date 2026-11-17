@@ -1223,6 +1223,12 @@ jobs:
         working-directory: app
         run: pnpm test:first-load
 
+      # Уровень движения (lib/motion.ts): скрипт в <head> цел после
+      # минификатора, full / lite / reduce ставятся в Chromium и WebKit.
+      - name: Проверить уровень движения устройства
+        working-directory: app
+        run: pnpm test:motion
+
       # №8 глазами ученика: поле ответа и подсказки о формате, банк и
       # «решено X из 260», «Мои ошибки» и аналоги, закладки, итоги,
       # «О задании»; без горизонтальной прокрутки на 375–1280.

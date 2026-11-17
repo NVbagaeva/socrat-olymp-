@@ -21,6 +21,9 @@
    5. Телефон (палец): своя клавиатура, «OK» отвечает, системная
       клавиатура не открывается (inputmode=none).
    6. prefers-reduced-motion: встряски и вспышки выключены.
+   6а. Карточка «Разминка: устный счёт» на №8 профиля и №4, 14, 15, 16
+      базы ведёт в тренировку; /statistika/ — пусто до первой
+      тренировки, после — тренировки, примеры, точность.
    7. 320 px: прокрутки вбок нет на витрине, странице приёма, таблице,
       настройках, экране тренировки и итогах.
    --snimki — снимки в docs/ustnyy-schet-snimki/ (телефон 320 и 390,
@@ -501,6 +504,70 @@ console.log('6. prefers-reduced-motion');
   });
   check(b1 === 'us-neverno', `без reduced-motion встряска есть (${b1})`);
   await ctx2.close();
+}
+
+/* ── 6а. Разминка на страницах заданий и статистика ─────────── */
+console.log('6а. Разминка и статистика');
+{
+  const ctx = await context();
+  for (const url of [
+    '/zadaniya/8/',
+    '/baza/zadaniya/4/',
+    '/baza/zadaniya/14/',
+    '/baza/zadaniya/15/',
+    '/baza/zadaniya/16/',
+  ]) {
+    const p = await open(ctx, url, 'main');
+    const n = await p.locator('.us-razminka').count();
+    check(n === 1, `${url}: карточка «Разминка: устный счёт»`);
+    if (n === 1) {
+      const a = p.locator('.us-razminka a', { hasText: '10 примеров' });
+      check(
+        ((await a.getAttribute('href')) ?? '').startsWith('/ustnyy-schet/trenirovka/?'),
+        `${url}: ссылка на тренировку`,
+      );
+    }
+    await p.close();
+  }
+  const pz = await open(ctx, '/baza/zadaniya/5/', 'main');
+  check((await pz.locator('.us-razminka').count()) === 0, 'на задании без вычислений разминки нет');
+  await pz.close();
+
+  /* Пусто, потом — после тренировки — цифры. */
+  const st0 = await open(ctx, '/statistika/', '.us-stat--kabinet');
+  check(
+    (await st0.getByText('Здесь появятся твои результаты').count()) === 1,
+    'статистика: пусто до первой тренировки',
+  );
+  await st0.close();
+  const p = await open(ctx, '/zadaniya/8/', '.us-razminka');
+  await p.locator('.us-razminka a', { hasText: '10 примеров' }).click();
+  await p.locator('.us-igra__vopros').waitFor();
+  for (let i = 0; i < 10; i += 1) {
+    const before = await p.locator('.us-igra__vopros').getAttribute('data-expr');
+    await p.locator('#us-otvet').focus();
+    await p.keyboard.type(i === 0 ? '999999' : await otvetNaTekushiy(p));
+    await p.keyboard.press('Enter');
+    if (i < 9) {
+      await p.waitForFunction(
+        (b) => document.querySelector('.us-igra__vopros')?.getAttribute('data-expr') !== b,
+        before,
+        { timeout: 5000 },
+      );
+    }
+  }
+  await p.locator('.us-itogi').waitFor();
+  await p.goto(`${BASE}/statistika/`, { waitUntil: 'load' });
+  await p.locator('.us-stat__plitki').waitFor();
+  const plitki = (await p.locator('.us-stat__plitki').innerText()).replace(/\s+/g, ' ');
+  check(
+    /Тренировок 1/.test(plitki) && /Примеров 10/.test(plitki) && /90 %/.test(plitki),
+    `статистика: ${plitki}`,
+  );
+  check(await bezProkrutki(p), 'статистика: прокрутки вбок нет');
+  await snimok(p, 'kompyuter-1280-statistika');
+  check(p.errors.length === 0, `ошибок нет ${p.errors.join('; ')}`);
+  await ctx.close();
 }
 
 /* ── 7. 320 px и снимки ──────────────────────────────────────── */

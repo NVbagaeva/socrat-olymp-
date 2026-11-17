@@ -33,7 +33,7 @@ const { sozdatGenerator } = requireSrc('lib/ustnyySchet/nabor.ts');
 const { tex: texOf } = requireSrc('lib/ustnyySchet/chislo.ts');
 const sessiya = requireSrc('lib/ustnyySchet/sessiya.ts');
 const ochki = requireSrc('lib/ustnyySchet/ochki.ts');
-const { FORMATY, KVADRATY_PUL } = requireSrc('lib/ustnyySchet/formaty.ts');
+const { FORMATY, KVADRATY_PUL, primerIzServera } = requireSrc('lib/ustnyySchet/formaty.ts');
 const model = requireSrc('lib/ustnyySchet/statistika/model.ts');
 
 let checks = 0;
@@ -861,6 +861,12 @@ const varianty = (otvet) => {
       if (p === null) break;
       priyomy.add(p.priyom);
       proverkaPrimera(p, `${f.id} «${p.text}»`);
+      /* Пример целиком задаётся (priyom, d, v) — так его присылает сервер. */
+      const s = primerIzServera({ priyom: p.priyom, d: p.d, v: p.v ?? null });
+      check(
+        s !== null && s.otvet === p.otvet && s.tex === p.tex,
+        `${f.id}: из (приём, d, v) не тот пример «${p.text}»`,
+      );
       const nums = [...p.d, p.otvet].map(N);
       check(
         nums.every((x) => x >= c.min && x <= c.max),
@@ -878,6 +884,36 @@ const varianty = (otvet) => {
     );
   }
   check(KVADRATY_PUL.length === new Set(KVADRATY_PUL).size, 'пул квадратов без повторов');
+}
+
+/* ── Разминки на страницах заданий ──────────────────────────── */
+{
+  const { RAZMINKI, razminkaHref, razminkaBazy } = requireSrc('lib/ustnyySchet/razminka.ts');
+  const { prochitat } = requireSrc('lib/ustnyySchet/zapros.ts');
+  for (const [id, r] of Object.entries(RAZMINKI)) {
+    check(
+      r.ids.length > 0 && r.ids.every((x) => PRIYOMY.some((p) => p.id === x)),
+      `разминка ${id}: приёмы существуют`,
+    );
+    const url = razminkaHref(id);
+    check(
+      url.startsWith('/ustnyy-schet/trenirovka/?'),
+      `разминка ${id}: адрес тренировки (${url})`,
+    );
+    const z = prochitat(new URLSearchParams(url.split('?')[1]));
+    check(
+      z.go &&
+        z.nabor.tip === 'priyomy' &&
+        z.nabor.ids.join() === r.ids.join() &&
+        z.rezhim.tip === 'seriya' &&
+        z.rezhim.n === 10,
+      `разминка ${id}: ссылка открывает серию из 10 этих приёмов`,
+    );
+  }
+  check(
+    razminkaBazy('14') === 'baza-14' && razminkaBazy('5') === null,
+    'разминка базы — по номеру задания',
+  );
 }
 
 /* ── Примеры из теории ──────────────────────────────────────── */
