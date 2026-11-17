@@ -4,6 +4,7 @@ import { AuthWidget } from '@/components/auth/AuthWidget';
 import { LevelLink, LevelSwitch } from '@/components/level/LevelSwitch';
 import { isNavGroup, site } from '@/content/site';
 import { NavDropdown } from './NavDropdown';
+import { SaytPanel } from './SaytPanel';
 import { SiteHeadCompact } from './SiteHeadCompact';
 import { SiteMenu } from './SiteMenu';
 
@@ -24,50 +25,54 @@ export interface SiteHeaderProps {
  */
 export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
   return (
-    <header className={clsx('site-head', className)}>
-      <div className="site-head__in">
-        <Link className="logo" href="/">
-          <i aria-hidden="true" />
-          {site.brand}
-        </Link>
+    <>
+      <header className={clsx('site-head', className)}>
+        <div className="site-head__in">
+          <Link className="logo" href="/">
+            <i aria-hidden="true" />
+            {site.brand}
+          </Link>
 
-        {/* Уровень экзамена — сразу после логотипа, на всех страницах. */}
-        <LevelSwitch className="site-head__level" />
+          {/* Уровень экзамена — сразу после логотипа, на всех страницах. */}
+          <LevelSwitch className="site-head__level" />
 
-        <nav className="site-nav" aria-label="Разделы сайта">
-          {site.nav.map((link) =>
-            isNavGroup(link) ? (
-              <NavDropdown key={link.label} group={link} currentHref={currentHref} />
-            ) : link.hrefBase !== undefined ? (
-              <LevelLink
-                key={link.href}
-                hrefs={{ profile: link.href, base: link.hrefBase }}
-                aria-current={link.href === currentHref ? 'page' : undefined}
-              >
-                {link.label}
-              </LevelLink>
-            ) : (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={link.akcent === true ? 'is-akcent' : undefined}
-                aria-current={link.href === currentHref ? 'page' : undefined}
-              >
-                {link.label}
-              </Link>
-            ),
-          )}
-        </nav>
+          <nav className="site-nav" aria-label="Разделы сайта">
+            {site.nav.map((link) =>
+              isNavGroup(link) ? (
+                <NavDropdown key={link.label} group={link} currentHref={currentHref} />
+              ) : link.hrefBase !== undefined ? (
+                <LevelLink
+                  key={link.href}
+                  hrefs={{ profile: link.href, base: link.hrefBase }}
+                  aria-current={link.href === currentHref ? 'page' : undefined}
+                >
+                  {link.label}
+                </LevelLink>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={link.akcent === true ? 'is-akcent' : undefined}
+                  aria-current={link.href === currentHref ? 'page' : undefined}
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
+          </nav>
 
-        <div className="site-head__cta">
-          {/* «Войти» или кружок аккаунта и «Начать бесплатно» (её на
+          <div className="site-head__cta">
+            {/* «Войти» или кружок аккаунта и «Начать бесплатно» (её на
               телефоне нет). Вход выключен — остаётся одна «Начать
               бесплатно». */}
-          <AuthWidget variant="site" />
-          <SiteMenu />
+            <AuthWidget variant="site" />
+            <SiteMenu />
+          </div>
         </div>
-      </div>
-      <SiteHeadCompact />
-    </header>
+        <SiteHeadCompact />
+      </header>
+      {/* Нижняя панель телефона — как в приложении; на главных её нет. */}
+      <SaytPanel />
+    </>
   );
 }
