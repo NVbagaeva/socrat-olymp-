@@ -711,9 +711,10 @@ async function phoneHead(page) {
     const q = (sel) => document.querySelector(sel);
     const login = q('.site-head a.auth-widget__login');
     const logo = q('.site-head .logo');
-    const hero = q('.hero__start');
-    const lead = q('.hero__lead');
-    const door = q('.hero__doors');
+    /* Прежний первый экран (HeroSection, база) и синяя сцена (SumerkiHero). */
+    const hero = q('.hero__start, .sm-start');
+    const lead = q('.hero__lead, .sm__lid');
+    const door = q('.hero__doors, .sm-dver');
     const heroBox = box(hero);
     return {
       login: box(login),
@@ -724,6 +725,9 @@ async function phoneHead(page) {
       logo: box(logo),
       nameVisible: logo !== null && parseFloat(getComputedStyle(logo).fontSize) >= 14,
       heroStart: heroBox,
+      /* Ширина содержимого первого экрана — по дверям (у прежнего
+         первого экрана это ряд дверей, у синей сцены — сама дверь). */
+      doorW: door?.getBoundingClientRect().width ?? null,
       heroStartHref: hero?.getAttribute('href') ?? null,
       heroOrder:
         heroBox !== null &&
@@ -876,7 +880,7 @@ async function runEnabled() {
       'главная 1440: «Начать бесплатно» — основная кнопка в шапке',
     );
     check(
-      !(await page.locator('.hero__start').isVisible()),
+      !(await page.locator('.hero__start, .sm-start').isVisible()),
       'главная 1440: на первом экране «Начать бесплатно» не повторяется',
     );
     await shot(page, 'shapka-do-vhoda-1440');
@@ -914,8 +918,12 @@ async function runEnabled() {
     );
     check(head.burger !== null && head.burger.right <= width, `главная ${width}: бургер в экране`);
     check(
-      head.heroStart !== null && head.heroStart.w >= width - 48 && head.heroStart.h >= 44,
-      `главная ${width}: «Начать бесплатно» на первом экране почти во всю ширину`,
+      head.heroStart !== null &&
+        head.doorW !== null &&
+        head.heroStart.w >= head.doorW - 1 &&
+        head.heroStart.w >= width - 64 &&
+        head.heroStart.h >= 44,
+      `главная ${width}: «Начать бесплатно» на первом экране во всю ширину содержимого`,
     );
     check(
       head.heroStartHref === '/zadaniya/',

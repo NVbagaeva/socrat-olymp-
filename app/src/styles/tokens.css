@@ -448,6 +448,60 @@
 
 /* Имена из эталона, которыми пользуется компонентный слой.
    @theme их не создаёт: шкала отступов там задана через --spacing. */
+/* ── «Сумеречная сцена»: синий первый экран главной ──────────────
+   Только для первого экрана (components/landing/sumerki). Остальной
+   сайт светлый. Тон — насыщенный синий, а не ночь: на нём рендер
+   кристалла стоит на светлом ореоле. Контраст на --sumerki-centr:
+   белый — 5,1 : 1, лид (--sumerki-text-2) — 4,6 : 1 (AA). Оранжевая кнопка — фирменный терракотовый, а не
+   #f08a3c: белый текст на нём 2,5 : 1. */
+:root {
+  --sumerki-0: #24478f;
+  --sumerki-1: #3463b8;
+  --sumerki-2: #4a78c8;
+  /* Фон сцены: середина и края (виньетка). */
+  --sumerki-centr: #3a68cc;
+  --sumerki-kraj: #2a55b8;
+  /* Углы сцены — ещё на тон глубже. */
+  --sumerki-ugol: #224aa6;
+  --sumerki-glow: #1f5fd0;
+  --sumerki-text: #f3f7ff;
+  --sumerki-text-2: #f7faff;
+  --sumerki-akcent-1: #bcd6ff;
+  --sumerki-akcent-2: #e2eeff;
+  --sumerki-liniya: rgb(170 200 255 / 0.1);
+  --sumerki-steklo: rgb(255 255 255 / 0.07);
+  --sumerki-steklo-kromka: rgb(255 255 255 / 0.16);
+  --sumerki-knopka-siniy-1: #2f6fe8;
+  --sumerki-knopka-siniy-2: #1f5fd0;
+  --sumerki-knopka-teplyy-1: #cc6322;
+  --sumerki-knopka-teplyy-2: #a8500f;
+  --sumerki-svechenie-teploe: #f08a3c;
+}
+
+/* ── Витрина возможностей на главной (components/landing/sumerki/
+   Vitrina.tsx): два голоса сайта. Тёплый — учитель и генератор,
+   синий — ученик и тренажёр. Яркие #f08a3c/#e07a2f — только заливки,
+   ореолы и кромки: белый текст на них 2,5 и 3,0 : 1. Текст оранжевым —
+   --vit-teplyy-text (5,0 : 1 на белом); заливка под белым текстом —
+   --vit-teplyy-zaliv-* (4,6 и 5,0 : 1). Синий — 5,8 : 1 и выше. */
+:root {
+  --vit-teplyy-1: #f08a3c;
+  --vit-teplyy-2: #e07a2f;
+  --vit-teplyy-text: #a8500f;
+  --vit-teplyy-zaliv-1: #b85a1e;
+  --vit-teplyy-zaliv-2: #a8500f;
+  --vit-teplyy-ton: #fff4ea;
+  --vit-teplyy-ton-2: #fde6d3;
+  --vit-teplyy-oreol: rgb(240 138 60 / 0.34);
+  --vit-teplyy-kromka: rgb(240 138 60 / 0.55);
+  --vit-siniy-1: #1f5fd0;
+  --vit-siniy-2: #0c3ebc;
+  --vit-siniy-ton: #eef4ff;
+  --vit-siniy-ton-2: #dde9fd;
+  --vit-siniy-oreol: rgb(61 121 224 / 0.32);
+  --vit-siniy-kromka: rgb(61 121 224 / 0.55);
+}
+
 :root {
   --font: var(--font-sans);
 
