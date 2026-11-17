@@ -245,18 +245,56 @@
     transform 220ms var(--ease),
     box-shadow 220ms var(--ease);
 }
+.door--uchenik,
+.door--uchitel {
+  border-color: transparent;
+  color: #fff;
+}
+/* Двери залиты так же, как на главной профиля (sumerki.css, .sm-dver):
+   ученику — синяя, учителю — чистая оранжевая, тот же блик и свечение. */
 .door--uchenik {
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.18), transparent 60%), var(--glass-bg);
+  background: linear-gradient(180deg, var(--sumerki-knopka-siniy-1), var(--sumerki-knopka-siniy-2));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.32),
+    inset 0 -1px 0 rgb(0 0 0 / 0.14),
+    0 0 28px -4px rgb(140 185 255 / 0.7),
+    0 16px 36px -12px rgb(16 40 110 / 0.7);
 }
 .door--uchitel {
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgb(244 116 32 / 0.24), transparent 60%), var(--glass-bg);
+  /* Чистый оранжевый, как «Я преподаю» на главной профиля и полоса
+     «Банк заданий»: насыщеннее слева, под текстом, светлее к стрелке. */
+  background: linear-gradient(105deg, #ea5c0a 0%, #f2701c 50%, #fb9442 100%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.22),
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 0 30px -6px rgb(251 140 60 / 0.65),
+    0 16px 36px -14px rgb(234 92 10 / 0.55);
+  text-shadow: 0 1px 2px rgb(150 50 0 / 0.35);
 }
 .door:hover,
 .door:focus-visible {
   transform: translateY(-3px);
-  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.door--uchenik:hover,
+.door--uchenik:focus-visible {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -1px 0 rgb(0 0 0 / 0.14),
+    0 0 40px -2px rgb(160 200 255 / 0.9),
+    0 22px 44px -12px rgb(16 40 110 / 0.75);
+}
+.door--uchitel:hover,
+.door--uchitel:focus-visible {
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.26),
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    0 0 42px -4px rgb(251 140 60 / 0.85),
+    0 22px 44px -14px rgb(234 92 10 / 0.6);
+}
+.door:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
 }
 .door__title {
   font-size: 24px;
@@ -267,7 +305,7 @@
 .door__text {
   font-size: 14px;
   line-height: 1.45;
-  color: var(--color-text-secondary);
+  color: rgb(255 255 255 / 0.94);
 }
 .door__action {
   display: inline-flex;
@@ -276,10 +314,7 @@
   margin-top: var(--space-2);
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-primary);
-}
-.door--uchitel .door__action {
-  color: var(--color-accent-text);
+  color: #fff;
 }
 .door__action svg {
   width: 18px;
