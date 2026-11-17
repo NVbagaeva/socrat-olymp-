@@ -13,7 +13,7 @@ import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
 import { levelInfo, type Level } from '@/lib/level';
 import { AUTH_ENABLED, AUTH_HREF, REGISTRATION_OPEN } from '@/lib/auth/config';
-import { TARIFY_HREF } from '@/lib/tarify/config';
+import { TARIFY_HREF } from '@/lib/tarify/href';
 import type { NavIconName } from '@/components/ui/NavIcons';
 import { nomeraChasti } from '@/content/struktura';
 import { href, USTNYY } from '@/lib/paths';

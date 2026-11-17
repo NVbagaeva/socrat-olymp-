@@ -12,7 +12,7 @@ import { nomerRazdela } from '@/content/struktura';
 /** Флаг оплаты: «1» — кнопки ведут на регистрацию и оплату. */
 export const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === '1';
 
-export const TARIFY_HREF = '/tarify/';
+export { TARIFY_HREF } from './href';
 
 export type Rol = 'uchenik' | 'repetitor';
 export type Srok = 'd30' | 'ege';

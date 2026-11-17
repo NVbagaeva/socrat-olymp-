@@ -1442,3 +1442,15 @@
     transform: none !important;
   }
 }
+
+/* Отметка проверки у ответа появляется с лёгкой «пружиной»
+   (ключевые кадры — styles/components.css). */
+.z14-otmetka {
+  display: inline-block;
+  animation: otklik-znachok var(--motion-slow) var(--ease-spring) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .z14-otmetka {
+    animation: none;
+  }
+}

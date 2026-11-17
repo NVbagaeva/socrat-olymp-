@@ -14,7 +14,7 @@ import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { href, USTNYY } from '@/lib/paths';
 import { VARIANT_HREF } from '@/content/variant';
-import { TARIFY_HREF } from '@/lib/tarify/config';
+import { TARIFY_HREF } from '@/lib/tarify/href';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
    «Прогресс» и «Статистика» → «Статистика», «Материалы» →
