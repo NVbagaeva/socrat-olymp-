@@ -11,6 +11,7 @@
  */
 
 import { BANK_4, BANK_5, otvetUchenika } from '@/lib/veroyatnost/index';
+import { vidVoprosa } from '@/lib/veroyatnost/bank5/voprosy-nomera';
 import { vydelitOtvet } from '@/lib/veroyatnost/pool';
 import { klyuchZadachi, sealAnswer, sealText } from '@/lib/veroyatnost/secret';
 import { dec, type Prototype, type Variant } from '@/lib/veroyatnost/types';
@@ -45,7 +46,12 @@ function variant45(prototype: Prototype, variant: Variant): Variant45 {
 }
 
 export function dannyeVeroyatnosti(zadanie: 4 | 5): Dannye45 {
-  const bank = zadanie === 4 ? BANK_4 : BANK_5;
+  /* Новые вопросы к историям №5 (bank5/derevo-voprosy.ts) в «Собрать
+     вариант» не идут: задача варианта выбирается по коду из всего пула,
+     и выросший пул пересобрал бы варианты по кодам, выданным раньше
+     (scripts/check-variant-kody.mjs). В тренажёре и генераторе листов
+     они есть. */
+  const bank = zadanie === 4 ? BANK_4 : BANK_5.filter((p) => vidVoprosa(p.id) === null);
   return {
     kinds: bank.map((prototype) => ({
       id: prototype.id,

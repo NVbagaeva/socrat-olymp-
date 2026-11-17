@@ -2,7 +2,8 @@
  * Банк задания №5: тринадцать прототипов по десяти методам,
  * утверждённым автором (metody5.ts), — исходные задачи 1–58
  * внутренней нумерации банка, и сорок новых задач на дерево
- * вероятностей (derevo-novye.ts), составленных по опорным задачам.
+ * вероятностей (derevo-novye.ts), составленных по опорным задачам, и
+ * 54 других вопроса к их историям (derevo-voprosy.ts).
  * У совместных событий два прототипа (хлеб и кофейные автоматы), у
  * умножения независимых событий три (две партии, четыре выстрела,
  * футбол).
@@ -14,12 +15,16 @@
 import { type Prototype } from '../types';
 import { DEREVO } from './derevo';
 import { DEREVO_NOVYE } from './derevo-novye';
+import { DEREVO_VOPROSY } from './derevo-voprosy';
 import { FORMULY } from './formuly';
 import { TABLITSA } from './tablitsa';
 import { UDOBNOE } from './udobnoe';
 
 const PO_ID = new Map(
-  [...FORMULY, ...UDOBNOE, ...TABLITSA, ...DEREVO, ...DEREVO_NOVYE].map((p) => [p.id, p]),
+  [...FORMULY, ...UDOBNOE, ...TABLITSA, ...DEREVO, ...DEREVO_NOVYE, ...DEREVO_VOPROSY].map((p) => [
+    p.id,
+    p,
+  ]),
 );
 
 function po(id: string): Prototype {
@@ -87,4 +92,8 @@ export const BANK_5: readonly Prototype[] = [
   'p5-49',
   'p5-50',
   'p5-12',
+  /* Другие вопросы к историям полной вероятности (derevo-voprosy.ts):
+     противоположное событие и один путь. В конце банка — номера и коды
+     прежних задач не сдвигаются. */
+  ...DEREVO_VOPROSY.map((p) => p.id),
 ].map(po);
