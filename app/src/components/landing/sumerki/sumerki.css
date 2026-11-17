@@ -664,3 +664,113 @@
     padding-bottom: 20px;
   }
 }
+
+/* ── Светлая сцена (решение владельца 17.11) ────────────────────────
+   Первый экран снова светлый, как весь сайт: белое стекло на фоне со
+   свечениями главной, тёмный текст, синие акценты. Двери «Я готовлюсь
+   к ЕГЭ» и «Я преподаю» — прежних цветов: синяя и терракотовая,
+   их правила выше не меняются. Правила ниже перекрывают тёмные цвета
+   сцены; токены --sumerki-* переопределены только внутри сцены. */
+.sm {
+  --sumerki-text: var(--color-text);
+  --sumerki-text-2: var(--color-text-secondary);
+  --sumerki-akcent-1: var(--blue-600);
+  --sumerki-akcent-2: var(--blue-400);
+  --sumerki-steklo-kromka: var(--color-border);
+}
+.sm__okno {
+  background:
+    radial-gradient(55% 60% at 78% 42%, rgb(31 95 208 / 0.1), transparent 70%),
+    radial-gradient(40% 45% at 8% 92%, rgb(245 160 74 / 0.1), transparent 70%),
+    rgb(255 255 255 / 0.62);
+}
+.sm--vitrina .sm__okno {
+  /* Кромка — внутренней тенью, а не border: рамка сужала содержимое
+     сцены на 2 px, и «Начать бесплатно» на телефоне переставала быть
+     во всю ширину (check-auth). */
+  box-shadow:
+    inset 0 0 0 1px var(--glass-edge),
+    var(--glass-ring),
+    var(--glass-hi),
+    var(--glass-shadow);
+}
+.sm__svet {
+  background:
+    radial-gradient(
+      closest-side,
+      rgb(120 170 255 / 0.18),
+      rgb(120 170 255 / 0.06) 55%,
+      transparent
+    ),
+    radial-gradient(30% 30% at 78% 62%, rgb(240 138 60 / 0.12), transparent 70%);
+}
+.sm-chertezh * {
+  stroke: var(--blue-600);
+}
+.sm-chertezh__osi {
+  opacity: 0.14;
+}
+.sm-chertezh__krivaya {
+  opacity: 0.12;
+}
+.sm-chertezh__kasatelnaya {
+  stroke: var(--color-accent);
+  opacity: 0.16;
+}
+.sm-chertezh__tochka {
+  fill: var(--color-accent);
+}
+.sm__eyebrow {
+  color: var(--color-primary);
+}
+.sm-h1 {
+  color: var(--color-text);
+}
+.sm-h1__akcent {
+  background: linear-gradient(
+    100deg,
+    var(--blue-700) 0%,
+    var(--blue-600) 55%,
+    var(--blue-400) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.sm a:focus-visible {
+  outline-color: var(--color-primary);
+}
+.sm-polosa {
+  border-color: var(--glass-edge);
+  background: rgb(255 255 255 / 0.55);
+  box-shadow: var(--glass-ring), var(--glass-hi);
+}
+.sm-polosa__tarify {
+  color: var(--color-primary);
+}
+.sm-polosa__chislo b,
+.sm .avtor-pl__imya {
+  color: var(--color-text);
+}
+.sm .avtor-pl__foto {
+  box-shadow:
+    0 0 0 1.5px var(--white),
+    0 6px 16px -6px rgb(16 40 100 / 0.3);
+}
+.sm-kr {
+  --kristall-hint: var(--color-text-secondary);
+}
+@media (hover: hover) and (pointer: fine) {
+  .sm .avtor-pl:hover .avtor-pl__imya {
+    color: var(--color-primary);
+  }
+}
+@media (max-width: 767.98px) {
+  /* «Начать бесплатно» на телефоне — стекло с синей подписью: рядом
+     и так стоят две яркие двери. */
+  .sm-start {
+    border-color: var(--glass-edge);
+    background: var(--glass-bg-strong);
+    box-shadow: var(--glass-ring), var(--glass-hi);
+    color: var(--color-primary);
+  }
+}
