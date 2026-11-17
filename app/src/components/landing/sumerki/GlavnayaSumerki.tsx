@@ -1,4 +1,5 @@
 import { SiteFooter, SiteHeader } from '@/components/layout';
+import type { ReactNode } from 'react';
 import type { Level } from '@/lib/level';
 import { BankSection } from '../BankSection';
 import { OtschyotSection } from '../otschyot/EgeOtschyot';
@@ -16,12 +17,15 @@ export function GlavnayaSumerki({
   oreol = 'silnyy',
   zagolovok = 'a',
   level = 'profile',
+  vitrinaPosle,
 }: {
   vid: 'vitrina';
   oreol?: 'silnyy' | 'myagkiy';
   /** Вариант заголовка витрины (content/vitrina.ts). */
   zagolovok?: 'a' | 'b';
   level?: Level;
+  /** Часть витрины после тренажёра: на главной профиля — StereoChast (живая стереометрия). */
+  vitrinaPosle?: ReactNode;
 }) {
   return (
     <div className="glavnaya glavnaya--scena">
@@ -29,7 +33,7 @@ export function GlavnayaSumerki({
       <main>
         <SumerkiHero vid={vid} oreol={oreol} level={level} />
         <OtschyotSection level={level} />
-        <Vitrina zagolovok={zagolovok} />
+        <Vitrina zagolovok={zagolovok} posle={vitrinaPosle} />
         <BankSection level={level} />
       </main>
       <SiteFooter className="site-foot--steklo" />
