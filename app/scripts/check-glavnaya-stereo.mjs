@@ -128,12 +128,24 @@ try {
     await page.locator('.vit-chast--stereo').evaluate((e) => e.scrollIntoView({ block: 'start' }));
     await page.mouse.wheel(0, -100);
     await page.waitForSelector('[data-zhivaya="1"]', { timeout: 10000 });
-    await zhdat(page, 500);
-    check((await kadr(page)) !== k0, 'компьютер: нет автоповорота при появлении');
-    await zhdat(page, 2000);
-    const kStop = await kadr(page);
-    await zhdat(page, 400);
-    check((await kadr(page)) === kStop, 'компьютер: автоповорот не остановился');
+    /* Автоповорот начинается, когда движок приехал и фигура видна
+       наполовину: ждём первого нового кадра не дольше 3 с. */
+    let povernulas = false;
+    for (let t = 0; t < 3000 && !povernulas; t += 100) {
+      await zhdat(page, 100);
+      povernulas = (await kadr(page)) !== k0;
+    }
+    check(povernulas, 'компьютер: нет автоповорота при появлении');
+    /* И останавливается сам: кадр замирает не позже чем через 4 с. */
+    let kStop = await kadr(page);
+    let stoit = false;
+    for (let t = 0; t < 4000 && !stoit; t += 400) {
+      await zhdat(page, 400);
+      const k = await kadr(page);
+      stoit = k === kStop;
+      kStop = k;
+    }
+    check(stoit, 'компьютер: автоповорот не остановился');
 
     const c = await centr(page);
     await page.mouse.move(c.x, c.y);

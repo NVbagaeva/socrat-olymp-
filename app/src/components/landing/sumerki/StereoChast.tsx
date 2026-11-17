@@ -7,7 +7,7 @@ import { ORTHO_AZIMUTH, ORTHO_ELEVATION, orthoAt } from '@/lib/solid/project';
 import { renderSolid } from '@/lib/solid/render';
 import { razbor3 } from '@/lib/stereo/razbory3';
 import { razbor15 } from '@/lib/stereo/razbory15';
-import { texPlain } from '@/lib/texPlain';
+import { typeset } from '@/lib/tex';
 import { BANK } from '@/lib/zadanie3';
 import { RAZDEL3, tipHref3 } from '@/lib/zadanie3/links';
 import { StereoOzhivit } from './StereoOzhivit';
@@ -15,12 +15,6 @@ import './stereo-vitrina.css';
 
 /** Разбор, который живёт на главной: тот же, что на вкладке «О задании». */
 const TIP_GLAVNOY = 'diagonali';
-
-/** Индексы вершин знаками Юникода: A_1, A_{1} → A₁ (texPlain их не трогает). */
-const INDEKS = '₀₁₂₃₄₅₆₇₈₉';
-function sIndeksami(tex: string): string {
-  return texPlain(tex.replace(/_\{?(\d)\}?/g, (_m, d: string) => INDEKS[Number(d)] ?? d));
-}
 
 /** Неподвижная миниатюра: тот же движок, финальный шаг разбора, без подписей. */
 function miniSvg(model: Model, shag: number): string {
@@ -60,6 +54,7 @@ export function StereoChast() {
     tema: 'ekran',
     shag: nachalo,
   });
+  const nomer = nomerRazdela(3);
   const zadach = BANK.reduce((sum, p) => sum + p.varianty.length, 0);
 
   const mini = [
@@ -93,7 +88,7 @@ export function StereoChast() {
           <span className="vit-akcent">{T.akcent}</span>
           {T.zagolovok.slice(i + T.akcent.length)}
         </h3>
-        <p className="vit-chast__lid">{T.lid(zadach)}</p>
+        <p className="vit-chast__lid">{T.lid(zadach, nomer)}</p>
       </div>
 
       <div className="vit-chast__scena">
@@ -118,13 +113,13 @@ export function StereoChast() {
             {T.sbrosit}
           </button>
         </div>
-        <p className="vst-podpis">{T.podpis}</p>
+        <p className="vst-podpis">{T.podpis(nomer)}</p>
       </div>
 
       <div className="vst-razbor">
         <p className="vst-zadacha">
           <span className="vst-zadacha__m">{T.zadacha}</span>
-          {sIndeksami(razbor.uslovie)}
+          <span dangerouslySetInnerHTML={{ __html: typeset(razbor.uslovie) }} />
         </p>
         <p className="vst-shagi-z">{T.shagiZ}</p>
         <ol className="vit-punkty vst-shagi">
@@ -138,8 +133,14 @@ export function StereoChast() {
               >
                 <span className="vit-punkt__no">{String(k + 1).padStart(2, '0')}</span>
                 <span className="vit-punkt__tekst">
-                  <span className="vit-punkt__z">{s.z}</span>
-                  <span className="vst-formula">{s.f}</span>
+                  <span
+                    className="vit-punkt__z"
+                    dangerouslySetInnerHTML={{ __html: typeset(s.z) }}
+                  />
+                  <span
+                    className="vst-formula"
+                    dangerouslySetInnerHTML={{ __html: typeset(s.f) }}
+                  />
                 </span>
               </button>
             </li>
@@ -149,7 +150,7 @@ export function StereoChast() {
 
       <div className="vit-knopki">
         <Link className="vit-knopka vit-knopka--zalitaya" href={RAZDEL3}>
-          {T.knopka}
+          {T.knopka(nomer)}
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M5 12h13M12 6l6 6-6 6" />
           </svg>
