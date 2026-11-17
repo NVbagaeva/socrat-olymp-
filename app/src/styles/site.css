@@ -115,7 +115,8 @@ body .site-head[data-compact] {
 }
 .site-nav > a,
 .nav-drop__button {
-  font-size: 15px;
+  /* Пункты меню — подписи навигации: 14 по шкале (15 → 14). */
+  font-size: 14px;
   color: var(--color-text-secondary);
   text-decoration: none;
 }
@@ -143,7 +144,7 @@ body .site-head[data-compact] {
   gap: 4px;
   padding: 0;
   font: inherit;
-  font-size: 15px;
+  font-size: 14px;
   background: none;
   border: 0;
   cursor: pointer;
@@ -192,7 +193,7 @@ body .site-head[data-compact] {
 .nav-drop__list li:last-child {
   padding-bottom: 6px;
 }
-.site-nav .nav-drop__item {
+:is(.site-nav, .topnav) .nav-drop__item {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -222,12 +223,12 @@ body .site-head[data-compact] {
   gap: 1px;
 }
 .nav-drop__label {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.3;
   font-weight: 600;
 }
 .nav-drop__hint {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.3;
   color: var(--color-text-secondary);
 }
@@ -236,13 +237,13 @@ body .site-head[data-compact] {
   background: var(--color-primary);
   color: var(--color-text-inverse);
 }
-.site-nav .nav-drop__item:hover,
-.site-nav .nav-drop__item:focus-visible {
+:is(.site-nav, .topnav) .nav-drop__item:hover,
+:is(.site-nav, .topnav) .nav-drop__item:focus-visible {
   background: var(--color-bg);
 }
-.site-nav .nav-drop__item:hover .nav-drop__label,
-.site-nav .nav-drop__item:focus-visible .nav-drop__label,
-.site-nav .nav-drop__item[aria-current='page'] .nav-drop__label {
+:is(.site-nav, .topnav) .nav-drop__item:hover .nav-drop__label,
+:is(.site-nav, .topnav) .nav-drop__item:focus-visible .nav-drop__label,
+:is(.site-nav, .topnav) .nav-drop__item[aria-current='page'] .nav-drop__label {
   color: var(--color-primary);
 }
 .site-head__cta {
@@ -561,7 +562,7 @@ body:has(.site-menu) .help-fab {
 @media (max-width: 359.98px) {
   .site-head__in > .logo {
     gap: var(--space-2);
-    font-size: 15px;
+    font-size: 16px;
   }
   .site-head__in {
     gap: var(--space-2);
@@ -624,7 +625,7 @@ body:has(.site-menu) .help-fab {
   display: flex;
   flex-wrap: wrap;
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 .site-foot__rekvizity span + span::before {

@@ -2,14 +2,14 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { KartochkiPage13 } from '@/components/tasks/zadanie13/KartochkiPage13';
 import { KARTOCHKI_13 } from '@/content/repetitory13';
-import { zadanie13Title } from '@/content/zadanie13';
 import 'katex/dist/katex.min.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
 import '../pechat13.css';
+import { zadanie13Zagolovok } from '@/lib/seo-razdely';
 
 export const metadata: Metadata = {
-  title: zadanie13Title(KARTOCHKI_13.title),
+  title: zadanie13Zagolovok(KARTOCHKI_13.title),
   robots: { index: false },
 };
 

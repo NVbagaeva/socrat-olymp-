@@ -177,8 +177,8 @@
 
 .hero__eyebrow {
   margin-bottom: var(--space-5);
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 19px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -202,7 +202,7 @@
 .hero__lead {
   max-width: 56ch;
   margin-top: var(--space-6);
-  font-size: 19px;
+  font-size: 18px;
   line-height: 1.55;
   color: var(--color-text-secondary);
 }
@@ -259,7 +259,7 @@
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
 }
 .door__title {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.25;
   font-weight: 620;
   letter-spacing: -0.01em;
@@ -274,7 +274,7 @@
   align-items: center;
   gap: 6px;
   margin-top: var(--space-2);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-primary);
 }
@@ -320,7 +320,7 @@
 }
 .hero__fact dd {
   margin: 0;
-  font-size: 32px;
+  font-size: 30px;
   line-height: 1.15;
   font-weight: 640;
   letter-spacing: -0.02em;
@@ -384,18 +384,18 @@ section.band {
   background: var(--gloss);
   box-shadow: var(--gloss-shadow);
   color: var(--color-text-inverse);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
 .step h3 {
   margin-bottom: var(--space-2);
-  font-size: 19px;
+  font-size: 18px;
   line-height: 1.3;
   font-weight: 620;
 }
 .step p {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 23px;
   color: var(--color-text-secondary);
 }
@@ -478,7 +478,7 @@ section.band {
 /* Ключевая мысль блока — под сеткой, обычным вторичным текстом. */
 .bank-note {
   margin-top: var(--space-8);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 24px;
   color: var(--color-text-secondary);
   max-width: 72ch;
@@ -514,7 +514,7 @@ section.band {
   margin-bottom: var(--space-4);
 }
 .split p {
-  font-size: 17px;
+  font-size: 18px;
   line-height: 27px;
   color: var(--color-text-secondary);
   max-width: 46ch;
@@ -534,7 +534,7 @@ section.band {
 .checklist li {
   display: flex;
   gap: var(--space-3);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 23px;
 }
 .checklist svg {
@@ -686,7 +686,7 @@ section.band {
   }
   .hero__lead {
     margin-top: var(--space-4);
-    font-size: 17px;
+    font-size: 18px;
   }
   .hero__kristall {
     max-width: 285px;
@@ -700,7 +700,7 @@ section.band {
     border-radius: 18px;
   }
   .door__title {
-    font-size: 19px;
+    font-size: 18px;
   }
   .hero__fact {
     padding: var(--space-4) var(--space-3);
@@ -712,7 +712,7 @@ section.band {
     white-space: nowrap;
   }
   .hero__fact dt {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 17px;
   }
   .aura__spot--blue {
@@ -754,11 +754,11 @@ section.band {
   }
   .step h3 {
     margin-bottom: var(--space-1);
-    font-size: 17px;
+    font-size: 18px;
     line-height: 1.3;
   }
   .step p {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 22px;
   }
   .split h3 {
@@ -822,5 +822,173 @@ section.band {
   .glavnaya .step,
   .glavnaya .task-card--bank:not(.task-card--soon) {
     background: var(--glass-bg-strong);
+  }
+}
+
+/* ══ Добавки главной (docs/audit-prodazhi.md, волна 2) ══════════════
+   На боевой главной пока выключены (Glavnaya, dobavki). Варианты
+   размещения — /styleguide/prodazhi/. */
+
+/* Тихая ссылка на тарифы в первом экране: текст, не кнопка. */
+.hero-tarify {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.hero-tarify svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms var(--ease);
+}
+.hero-tarify:hover svg {
+  transform: translateX(3px);
+}
+.hero-tarify--pod-dveryami {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: var(--space-1);
+}
+/* Ссылка на тарифы и плашка автора под лидом — одним рядом по центру
+   высоты; на телефоне — столбиком под кнопкой «Начать бесплатно». */
+.hero__dop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  margin-top: var(--space-6);
+}
+@media (max-width: 767.98px) {
+  .hero__dop {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .hero__dop .hero-tarify {
+    justify-content: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-tarify svg {
+    transition: none;
+  }
+}
+
+/* Плашка автора отдельной полосой. */
+.avtor-polosa {
+  padding: var(--space-6) 0 var(--space-2);
+}
+.avtor-polosa .wrap {
+  display: flex;
+  justify-content: center;
+}
+
+/* Короткий блок цен. */
+.tk__karty {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tk__karta {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: 24px 24px 22px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+}
+.tk__karta--uchenik {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(61 121 224 / 0.16), transparent 60%), var(--glass-bg);
+}
+.tk__karta--repetitor {
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.2), transparent 60%), var(--glass-bg);
+}
+.tk__nazvanie {
+  font-size: 19px;
+  line-height: 1.25;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.tk__tsena {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.tk__tsena b {
+  font-size: 34px;
+  line-height: 1.1;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.tk__tsena span {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+.tk__punkty {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px solid rgb(31 95 208 / 0.1);
+  list-style: none;
+}
+.tk__punkty li {
+  display: flex;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.tk__punkty svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tk__karta--repetitor .tk__punkty svg {
+  stroke: var(--color-accent-text);
+}
+.tk__niz {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-8);
+}
+.tk__ege {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+@media (max-width: 899.98px) {
+  .tk__karty {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .tk__karta {
+    padding: var(--space-5);
+    border-radius: 18px;
   }
 }

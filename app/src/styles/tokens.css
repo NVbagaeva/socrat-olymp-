@@ -448,6 +448,60 @@
 
 /* Имена из эталона, которыми пользуется компонентный слой.
    @theme их не создаёт: шкала отступов там задана через --spacing. */
+/* ── «Сумеречная сцена»: синий первый экран главной ──────────────
+   Только для первого экрана (components/landing/sumerki). Остальной
+   сайт светлый. Тон — насыщенный синий, а не ночь: на нём рендер
+   кристалла стоит на светлом ореоле. Контраст на --sumerki-centr:
+   белый — 5,1 : 1, лид (--sumerki-text-2) — 4,6 : 1 (AA). Оранжевая кнопка — фирменный терракотовый, а не
+   #f08a3c: белый текст на нём 2,5 : 1. */
+:root {
+  --sumerki-0: #24478f;
+  --sumerki-1: #3463b8;
+  --sumerki-2: #4a78c8;
+  /* Фон сцены: середина и края (виньетка). */
+  --sumerki-centr: #3a68cc;
+  --sumerki-kraj: #2a55b8;
+  /* Углы сцены — ещё на тон глубже. */
+  --sumerki-ugol: #224aa6;
+  --sumerki-glow: #1f5fd0;
+  --sumerki-text: #f3f7ff;
+  --sumerki-text-2: #f7faff;
+  --sumerki-akcent-1: #bcd6ff;
+  --sumerki-akcent-2: #e2eeff;
+  --sumerki-liniya: rgb(170 200 255 / 0.1);
+  --sumerki-steklo: rgb(255 255 255 / 0.07);
+  --sumerki-steklo-kromka: rgb(255 255 255 / 0.16);
+  --sumerki-knopka-siniy-1: #2f6fe8;
+  --sumerki-knopka-siniy-2: #1f5fd0;
+  --sumerki-knopka-teplyy-1: #cc6322;
+  --sumerki-knopka-teplyy-2: #a8500f;
+  --sumerki-svechenie-teploe: #f08a3c;
+}
+
+/* ── Витрина возможностей на главной (components/landing/sumerki/
+   Vitrina.tsx): два голоса сайта. Тёплый — учитель и генератор,
+   синий — ученик и тренажёр. Яркие #f08a3c/#e07a2f — только заливки,
+   ореолы и кромки: белый текст на них 2,5 и 3,0 : 1. Текст оранжевым —
+   --vit-teplyy-text (5,0 : 1 на белом); заливка под белым текстом —
+   --vit-teplyy-zaliv-* (4,6 и 5,0 : 1). Синий — 5,8 : 1 и выше. */
+:root {
+  --vit-teplyy-1: #f08a3c;
+  --vit-teplyy-2: #e07a2f;
+  --vit-teplyy-text: #a8500f;
+  --vit-teplyy-zaliv-1: #b85a1e;
+  --vit-teplyy-zaliv-2: #a8500f;
+  --vit-teplyy-ton: #fff4ea;
+  --vit-teplyy-ton-2: #fde6d3;
+  --vit-teplyy-oreol: rgb(240 138 60 / 0.34);
+  --vit-teplyy-kromka: rgb(240 138 60 / 0.55);
+  --vit-siniy-1: #1f5fd0;
+  --vit-siniy-2: #0c3ebc;
+  --vit-siniy-ton: #eef4ff;
+  --vit-siniy-ton-2: #dde9fd;
+  --vit-siniy-oreol: rgb(61 121 224 / 0.32);
+  --vit-siniy-kromka: rgb(61 121 224 / 0.55);
+}
+
 :root {
   --font: var(--font-sans);
 
@@ -460,13 +514,15 @@
 
   /* ── Типографическая шкала ────────────────────────────────────
      Единственное место, где заданы кегли заголовков и текста. На базе
-     16px значения совпадают с прежними пикселями (64/56/40/28/20/18/
-     16/14/12), на широких экранах растут вместе с базой. Компоненты
+     16px значения в пикселях — 64/44/40/28/20/18/
+     16/14/12; на широких экранах растут вместе с базой. Компоненты
      берут кегль отсюда, свой не задают. */
   --fs-display: 4rem;
   --lh-display: 4.5rem;
-  --fs-h1: 3.5rem;
-  --lh-h1: 4rem;
+  /* h1 страницы кабинета — 44; 56 и больше — только герой главной
+     (docs/design-audit.md, 1.3). */
+  --fs-h1: 2.75rem;
+  --lh-h1: 3.25rem;
   --fs-h2: 2.5rem;
   --lh-h2: 3rem;
   --fs-h3: 1.75rem;
@@ -568,22 +624,103 @@
   --w-container: 1280px;
 
   /* Бургер-меню: превращение иконки, выезд панели и каскад пунктов. */
-  --dur-menu: 200ms;
+  /* Старые имена — псевдонимы motion-токенов ниже
+     (docs/motion-system.md, раздел 3): 200 и 240 мс на глаз
+     неразличимы и сливаются в 220. Свои значения остаются у двух:
+     --dur-switch (180 мс) — у переключателей и липкой панели вкладок
+     скорость закреплена проверкой (check-sticky-tabs: 150–200 мс);
+     каскад меню — пока меню не переведено на появление без каскада
+     (шаг 4 порядка внедрения). */
+  --dur-menu: var(--motion-base);
   --dur-menu-stagger: 35ms;
-  --dur-hover: 120ms;
+  --dur-hover: var(--motion-fast);
   --dur-switch: 180ms;
-  --dur-state: 240ms;
-  --dur-reveal: 320ms;
-  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur-state: var(--motion-base);
+  --dur-reveal: var(--motion-slow);
+  --ease: var(--ease-out);
+
+  /* Motion-система (docs/motion-system.md, раздел 3). Новые анимации
+     берут только эти токены; старые --dur-* выше — их псевдонимы.
+     Длительности: три рабочих и одна витринная. */
+  --motion-fast: 120ms;
+  --motion-base: 220ms;
+  --motion-slow: 420ms;
+  --motion-scene: 700ms;
+  /* Шаг каскада; не больше 5 шагов (300 мс). */
+  --motion-stagger: 60ms;
+  /* Кривые. out — всё, что появляется и откликается (это --ease);
+     in-out — перемещение из точки в точку; in — уход с экрана;
+     spring — только «верно» и итог тренировки, перелёт на 15 %. */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.2, 0.9, 0.3, 1.15);
+  /* Расстояния: появление блока, плашка ответа, подъём карточки,
+     масштаб при нажатии (кнопке — 0,97). */
+  --motion-rise: 12px;
+  --motion-rise-sm: 6px;
+  --motion-lift: -3px;
+  --motion-press: 0.98;
+  --motion-press-btn: 0.97;
+}
+
+/* Зона «Учёба» (docs/motion-system.md, раздел 2): все учебные экраны —
+   внутри .app-main, на витрине (главная, «Об авторе», тарифы, 404) его
+   нет. Текст и формулы здесь не сдвигаются при появлении и карточки
+   не поднимаются — случайно принесённая «витринная» анимация не
+   сдвинет условие задачи. Плашка ответа (--motion-rise-sm) остаётся. */
+.app-main {
+  --motion-rise: 0px;
+  --motion-lift: 0px;
+}
+
+/* Уровни движения (lib/motion.ts, атрибут на <html>). Слабое
+   устройство: без сдвигов при появлении и подъёма карточек — остаётся
+   проявление opacity и отклик на нажатие. */
+:root[data-motion-level='lite'] {
+  --motion-rise: 0px;
+  --motion-rise-sm: 0px;
+  --motion-lift: 0px;
+  --motion-stagger: 0ms;
+}
+/* «Уменьшить движение»: состояния меняются сразу. Атрибут ставит
+   скрипт; медиазапрос — на случай, если скрипт не выполнился. */
+:root[data-motion-level='reduce'] {
+  --motion-fast: 1ms;
+  --motion-base: 1ms;
+  --motion-slow: 1ms;
+  --motion-scene: 1ms;
+  --motion-stagger: 0ms;
+  --motion-rise: 0px;
+  --motion-rise-sm: 0px;
+  --motion-lift: 0px;
+  --motion-press: 1;
+  --motion-press-btn: 1;
+  --dur-switch: 1ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 1ms;
+    --dur-switch: 1ms;
+    --motion-base: 1ms;
+    --motion-slow: 1ms;
+    --motion-scene: 1ms;
+    --motion-stagger: 0ms;
+    --motion-rise: 0px;
+    --motion-rise-sm: 0px;
+    --motion-lift: 0px;
+    --motion-press: 1;
+    --motion-press-btn: 1;
+  }
 }
 
 /* Узкий экран: заголовки убавляются. Значения те же, что были в
    base.css, — теперь они часть шкалы, а не правило рядом с классом.
-   База здесь 16px, поэтому rem равен прежним пикселям: 38/30/44. */
+   База здесь 16px, поэтому rem равен пикселям: 36/30/44. */
 @media (max-width: 900px) {
   :root {
-    --fs-h1: 2.375rem;
-    --lh-h1: 2.75rem;
+    --fs-h1: 2.25rem;
+    --lh-h1: 2.625rem;
     --fs-h2: 1.875rem;
     --lh-h2: 2.375rem;
     --fs-display: 2.75rem;
@@ -602,7 +739,7 @@
     --fab-size: 40px;
     --fab-gap: var(--space-4);
     --fs-h1: 1.875rem;
-    --lh-h1: 2.25rem;
+    --lh-h1: 2.125rem;
     --fs-lg: 1rem;
     --lh-lg: 1.5rem;
     /* На телефоне размытие слабее: оно пересчитывается каждый кадр. */

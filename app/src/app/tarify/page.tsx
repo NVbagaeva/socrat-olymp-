@@ -1,6 +1,13 @@
 import type { Metadata } from 'next';
+import { ogStranicy } from '@/lib/og';
 import { SiteFooter, SiteHeader } from '@/components/layout';
-import { KakEtoRabotaet, PodskazkiBlok, Shkoly, Voprosy } from '@/components/tarify/Bloki';
+import {
+  Garantii,
+  KakEtoRabotaet,
+  PodskazkiBlok,
+  Shkoly,
+  Voprosy,
+} from '@/components/tarify/Bloki';
 import { Sravnenie } from '@/components/tarify/Sravnenie';
 import { TarifyVybor } from '@/components/tarify/TarifyVybor';
 import { TARIFY } from '@/content/tarify';
@@ -18,6 +25,7 @@ import './stranica.css';
 export const metadata: Metadata = {
   title: TARIFY.meta.title,
   description: TARIFY.meta.description,
+  openGraph: ogStranicy(TARIFY.meta.title, TARIFY.meta.description),
 };
 
 /**
@@ -80,6 +88,7 @@ export default function TarifyPage() {
         </header>
 
         <TarifyVybor />
+        <Garantii />
         <PodskazkiBlok />
         <Sravnenie />
         <KakEtoRabotaet />

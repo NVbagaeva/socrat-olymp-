@@ -674,13 +674,13 @@
 }
 .vo-trend__val {
   fill: var(--color-text);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 /* На телефоне график в полтора раза уже: подписи крупнее в единицах рисунка. */
 @media (max-width: 599px) {
   .vo-trend__axis {
-    font-size: 22px;
+    font-size: 24px;
   }
   .vo-trend__val {
     font-size: 24px;

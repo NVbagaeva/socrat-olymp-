@@ -3,12 +3,12 @@ import { Opornye1Spisok } from '@/components/tasks/planimetriya/Opornye1';
 import { IkonkaBloka1 } from '@/components/tasks/planimetriya/IkonkaBloka1';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { NAVYKI1, OPORNYE1 } from '@/content/planimetriya1';
-import { zadanie1Title } from '@/content/zadanie1';
 import { prepPool1 } from '@/lib/planimetriya/prep/pool';
 import { blokHref1 } from '@/lib/planimetriya/trening/links';
+import { zadanie1Zagolovok } from '@/lib/seo-razdely';
 
 export const metadata: Metadata = {
-  title: zadanie1Title(OPORNYE1.title),
+  title: zadanie1Zagolovok(OPORNYE1.title),
 };
 
 /**

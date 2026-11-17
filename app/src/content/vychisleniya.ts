@@ -14,6 +14,7 @@ import type { TutorMaterial } from './sections';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { nomerDvumya } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 /* Вкладка описывается общим типом: лента у всех заданий одна. */
 export type VychisleniyaTab = RazdelTab;
 
@@ -73,7 +74,7 @@ export const SKILL_FORMULA: Record<string, string> = {
 
 /** Заголовок окна браузера: «Вкладка · Вычисления и преобразования — Будет на ЕГЭ». */
 export function vychisleniyaTitle(tab: string): string {
-  return `${tab} · ${VYCHISLENIYA.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(8, VYCHISLENIYA.title, tab);
 }
 
 /** Подписи вкладки опорных задач. */

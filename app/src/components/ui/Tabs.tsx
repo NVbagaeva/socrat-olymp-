@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import Link from 'next/link';
+import { LinkPoNamereniyu } from './LinkPoNamereniyu';
 import { useId, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
@@ -132,7 +132,7 @@ export function Tabs({
         if (item.href !== undefined && !item.disabled) {
           const href = item.href;
           return (
-            <Link
+            <LinkPoNamereniyu
               key={item.id}
               href={item.href}
               {...common}
@@ -141,7 +141,7 @@ export function Tabs({
                 : { onClick: (e: MouseEvent<HTMLAnchorElement>) => onLinkClick(e, href) })}
             >
               {inside}
-            </Link>
+            </LinkPoNamereniyu>
           );
         }
 

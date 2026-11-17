@@ -201,11 +201,21 @@ export function SiteMenu() {
                     <Chevron />
                   </a>
 
+                  {/* «Тарифы» — сразу под главной карточкой, в первом экране
+                     меню: раньше до них нужно было листать мимо всех групп
+                     (docs/audit-prodazhi.md, C1). */}
+                  <div
+                    className="site-menu__group site-menu__list site-menu__list--accent"
+                    style={{ '--i': 1 } as CSSProperties}
+                  >
+                    <Row link={tarify} onClick={close} />
+                  </div>
+
                   {groups.map((group, index) => (
                     <section
                       key={group.label}
                       className="site-menu__group"
-                      style={{ '--i': index + 1 } as CSSProperties}
+                      style={{ '--i': index + 2 } as CSSProperties}
                     >
                       <h2 className="site-menu__title">{group.label}</h2>
                       <div className="site-menu__list">
@@ -215,13 +225,6 @@ export function SiteMenu() {
                       </div>
                     </section>
                   ))}
-
-                  <div
-                    className="site-menu__group site-menu__list site-menu__list--accent"
-                    style={{ '--i': groups.length + 1 } as CSSProperties}
-                  >
-                    <Row link={tarify} onClick={close} />
-                  </div>
 
                   {account || withLogout ? (
                     <section

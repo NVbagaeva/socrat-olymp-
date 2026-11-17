@@ -8,6 +8,7 @@ import { OPORNYE } from './opornye';
 import { nomerDvumya } from './struktura';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE21 = {
   no: nomerDvumya('naibolshee-naimenshee'),
@@ -25,5 +26,5 @@ export const ZADANIE21 = {
 } as const;
 
 export function zadanie21Title(tab: string): string {
-  return `${tab} · ${ZADANIE21.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(21, ZADANIE21.title, tab);
 }

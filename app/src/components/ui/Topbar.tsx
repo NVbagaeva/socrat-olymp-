@@ -33,6 +33,13 @@ export interface TopbarProps {
    */
   userSlot?: ReactNode;
   actions?: ReactNode;
+  /**
+   * Пункт меню, вместо которого встаёт свой узел — выпадающий список
+   * («Варианты», components/layout/NavDropdown.tsx). Пункты до него
+   * листаются вбок, как всё меню; список и пункты после него стоят
+   * вне прокрутки: внутри неё выпавший список обрезался бы.
+   */
+  navSlot?: { id: string; node: ReactNode };
   className?: string;
 }
 
@@ -50,51 +57,62 @@ export function Topbar({
   user,
   userSlot,
   actions,
+  navSlot,
   className,
 }: TopbarProps) {
   const bellLabel = unread ? 'Уведомления, есть новые' : 'Уведомления';
+  const punkt = (item: NavItem) => {
+    const body =
+      item.short !== undefined ? (
+        <>
+          <span className="topnav__full">{item.label}</span>
+          <span className="topnav__short">{item.short}</span>
+        </>
+      ) : (
+        item.label
+      );
+    const props = {
+      className: clsx(item.active === true && 'is-active', item.akcent === true && 'is-akcent'),
+      'aria-current': item.active === true ? ('page' as const) : undefined,
+      'aria-label': item.short !== undefined ? item.label : undefined,
+    };
+    /* Пункт с адресом для базы: на странице без своего уровня
+       ведёт туда, какой уровень запомнен. */
+    return item.hrefBase !== undefined ? (
+      <LevelLink key={item.id} plain hrefs={{ profile: item.href, base: item.hrefBase }} {...props}>
+        {body}
+      </LevelLink>
+    ) : (
+      <a key={item.id} href={item.href} {...props}>
+        {body}
+      </a>
+    );
+  };
+  const slot =
+    navSlot === undefined || nav === undefined
+      ? -1
+      : nav.findIndex((item) => item.id === navSlot.id);
+  const doSlota = nav === undefined ? [] : slot === -1 ? nav : nav.slice(0, slot);
+  const posleSlota = nav === undefined || slot === -1 ? [] : nav.slice(slot + 1);
 
   return (
     <header className={clsx('topbar', className)}>
       {lead}
       {nav !== undefined ? (
         <>
-          <nav className="topnav" aria-label={navLabel}>
-            {nav.map((item) => {
-              const body =
-                item.short !== undefined ? (
-                  <>
-                    <span className="topnav__full">{item.label}</span>
-                    <span className="topnav__short">{item.short}</span>
-                  </>
-                ) : (
-                  item.label
-                );
-              const props = {
-                className: clsx(
-                  item.active === true && 'is-active',
-                  item.akcent === true && 'is-akcent',
-                ),
-                'aria-current': item.active === true ? ('page' as const) : undefined,
-                'aria-label': item.short !== undefined ? item.label : undefined,
-              };
-              /* Пункт с адресом для базы: на странице без своего уровня
-                 ведёт туда, какой уровень запомнен. */
-              return item.hrefBase !== undefined ? (
-                <LevelLink
-                  key={item.id}
-                  plain
-                  hrefs={{ profile: item.href, base: item.hrefBase }}
-                  {...props}
-                >
-                  {body}
-                </LevelLink>
-              ) : (
-                <a key={item.id} href={item.href} {...props}>
-                  {body}
-                </a>
-              );
-            })}
+          <nav
+            className={clsx('topnav', navSlot !== undefined && 'topnav--so-spiskom')}
+            aria-label={navLabel}
+          >
+            {navSlot === undefined ? (
+              nav.map(punkt)
+            ) : (
+              <>
+                <div className="topnav__lenta">{doSlota.map(punkt)}</div>
+                {navSlot.node}
+                {posleSlota.map(punkt)}
+              </>
+            )}
           </nav>
           <div className="topbar__spacer" />
         </>

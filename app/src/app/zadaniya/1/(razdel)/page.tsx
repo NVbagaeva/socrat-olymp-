@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { OZadanii1 } from '@/components/tasks/planimetriya/OZadanii1';
-import { zadanie1Title } from '@/content/zadanie1';
+import { zadanie1Zagolovok } from '@/lib/seo-razdely';
 
 export const metadata: Metadata = {
-  title: zadanie1Title('О задании'),
+  title: zadanie1Zagolovok('О задании'),
 };
 
 /** Вкладка «О задании» живёт на адресе самого раздела. */
