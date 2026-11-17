@@ -9,7 +9,7 @@ import { Vitrina } from './Vitrina';
  * Главная с синей сценой в первом экране. Ниже — те же блоки, что у
  * нынешней главной (Glavnaya.tsx); вместо блока «вечер» — витрина
  * возможностей (Vitrina), секции — в ровном ритме (sumerki.css).
- * Пока — только служебные страницы /styleguide/glavnaya-sumerki/.
+ * Боевая главная профиля (app/page.tsx) и /styleguide/glavnaya-sumerki/.
  */
 export function GlavnayaSumerki({
   vid,
