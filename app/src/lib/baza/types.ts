@@ -155,7 +155,100 @@ export interface PrimerTeorii {
   otvet: string;
 }
 
+/**
+ * Сверка уравнения перебором (pnpm test:baza): запись в синтаксисе
+ * разборщика №17 (lib/baza/z17/razbor.ts) и все корни по возрастанию
+ * записью бланка; «net» — корней нет, «lyuboe» — подходит любое число.
+ */
+export interface SverkaUravneniya {
+  ur: string;
+  korni: readonly string[] | 'net' | 'lyuboe';
+}
+
+/** Шаг разбора в рамке «Пример»: подпись (что делаем и почему), выкладки, пояснение. */
+export interface ShagRazbora {
+  label: string;
+  formuly?: string[];
+  paras?: string[];
+}
+
+/** Разбор по шагам в рамке «Пример» (components/teoriya/Ramki.tsx). */
+export interface RazborTeorii {
+  title: string;
+  uslovie?: string;
+  shagi: ShagRazbora[];
+  /** Итог: «Ответ: $-2{,}5$.» */
+  otvet: string;
+  sverka?: SverkaUravneniya;
+}
+
+/** Тон ветки схемы и рамки случая: зелёный — корни есть, синий, терракотовый — корней нет… */
+export type TonTeorii = 'zel' | 'sin' | 'terra' | 'oranzh' | 'navy';
+
+/** Ветка схемы-развилки: условие, итог, формула, вложенная развилка. */
+export interface VetkaRazvilki {
+  esli: string;
+  ton: TonTeorii;
+  itog?: string;
+  /** TeX без $. */
+  formula?: string;
+  punkty?: string[];
+  dalshe?: Razvilka;
+}
+
+export interface Razvilka {
+  vopros: string;
+  vetki: VetkaRazvilki[];
+}
+
 export type BlokTeorii =
+  /* Рамки теории сайта (components/teoriya/Ramki.tsx): разделы, где они
+     есть, рисуются в «стеклянном» слое .teor-steklo. */
+  /** Подпункт раздела: заголовок с якорем — он же пункт «Содержания». */
+  | { vid: 'podpunkt'; id: string; title: string }
+  | {
+      vid: 'opredelenie';
+      title?: string;
+      paras: string[];
+      /** TeX без $. */
+      formula?: string;
+      spisok?: string[];
+      /** Шаги алгоритма с номерами в кружках. */
+      algoritm?: string[];
+      /** Ссылка внутри страницы: «к разделу о линейных». */
+      ssylka?: { href: string; text: string };
+    }
+  | { vid: 'glavnaya'; formula: string; podpis?: string }
+  | { vid: 'razvilka'; title?: string; razvilka: Razvilka }
+  /** Рамка «Случай»: условие → вывод → объяснение → разборы → запись ответа. */
+  | {
+      vid: 'sluchay';
+      /** Подпись-плашка: «Случай 1», «Вид 2». */
+      metka: string;
+      ton: TonTeorii;
+      title: string;
+      /** TeX без $: выкладка случая. */
+      formula?: string;
+      vyvod: string;
+      paras: string[];
+      razbory: RazborTeorii[];
+      zapis: string;
+    }
+  /** Раскрывающийся «Пример»: кнопка открывает разбор по шагам. */
+  | { vid: 'razbor'; razbor: RazborTeorii }
+  /** «Важно», «Вывод», «Лайфхак» — всегда с задачей-обоснованием. */
+  | { vid: 'vazhnoZadacha'; title?: string; paras: string[]; razbor: RazborTeorii }
+  | { vid: 'vyvodZadacha'; title?: string; paras: string[]; razbor: RazborTeorii }
+  | {
+      vid: 'layfhakZadacha';
+      title?: string;
+      paras: string[];
+      formula?: string;
+      razbor: RazborTeorii;
+    }
+  | { vid: 'tablica'; title?: string; head: string[]; rows: string[][] }
+  /** «Проверь себя»: набор задач lib/baza/proverka-teorii.ts. */
+  | { vid: 'proverka'; nabor: string }
   | { vid: 'tekst'; text: string }
   | { vid: 'formula'; tex: string }
   | { vid: 'zapomni'; text: string }

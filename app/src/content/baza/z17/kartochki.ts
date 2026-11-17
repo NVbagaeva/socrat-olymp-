@@ -124,7 +124,7 @@ const kartochki: Kartochka[] = [
     back: 'Вынести $x$: $x(x + b) = 0$, корни $0$ и $-b$',
     pochemu: 'Произведение равно нулю, когда один из множителей равен нулю.',
     level: B,
-    source: T('nepolnye'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-delit-na-x',
@@ -136,7 +136,7 @@ const kartochki: Kartochka[] = [
     back: 'Неверно',
     pochemu: '$x(x - 6) = 0$: корни $0$ и $6$. Делить на $x$ нельзя — теряется $x = 0$.',
     level: E,
-    source: T('nepolnye'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-nepolnoe-menshiy',
@@ -154,7 +154,7 @@ const kartochki: Kartochka[] = [
       ),
     back: '$x(x + 11) = 0$, корни $0$ и $-11$; меньший $-11$',
     level: B,
-    source: T('nepolnye'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-diskriminant',
@@ -164,7 +164,7 @@ const kartochki: Kartochka[] = [
     front: 'Дискриминант уравнения $ax^2 + bx + c = 0$',
     back: '$D = b^2 - 4ac$',
     level: B,
-    source: T('diskriminant'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-korni',
@@ -174,7 +174,7 @@ const kartochki: Kartochka[] = [
     front: 'Корни квадратного уравнения через дискриминант',
     back: '$x_{1,2} = \\dfrac{-b \\pm \\sqrt{D}}{2a}$',
     level: B,
-    source: T('diskriminant'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-d-znak',
@@ -184,7 +184,7 @@ const kartochki: Kartochka[] = [
     front: 'Сколько корней у квадратного уравнения при $D > 0$, $D = 0$, $D < 0$?',
     back: 'Два, один, ни одного',
     level: B,
-    source: T('diskriminant'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-d-vych',
@@ -203,7 +203,7 @@ const kartochki: Kartochka[] = [
     },
     back: '$D = (-4)^2 - 4 \\cdot 1 \\cdot (-12) = 16 + 48 = 64$',
     level: B,
-    source: T('diskriminant'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-vieta',
@@ -214,7 +214,7 @@ const kartochki: Kartochka[] = [
     back: '$x_1 + x_2 = -b$, $x_1 \\cdot x_2 = c$',
     pochemu: 'Помогает угадать целые корни без дискриминанта.',
     level: E,
-    source: T('diskriminant'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-bolshiy',
@@ -232,7 +232,7 @@ const kartochki: Kartochka[] = [
       ),
     back: '$D = 9 + 40 = 49$, корни $\\dfrac{-3 \\pm 7}{2}$: $2$ и $-5$; больший $2$',
     level: B,
-    source: T('diskriminant'),
+    source: T('kvadratnye'),
   },
   {
     id: 'b17-menshiy-verno',

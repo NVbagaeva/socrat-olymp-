@@ -248,6 +248,9 @@ function lineynoe(L: readonly Chlen[], R: readonly Chlen[], sdvig: number): Chas
   }
   const lines: string[] = [];
   if (gotovo) lines.push(`$${kx(k)}=${texQ(m)}$`);
+  lines.push(
+    `Уравнение имеет вид $ax=b$, где $a=${texQ(k)}$, $b=${texQ(m)}$. Коэффициент $a\\ne0$ — корень один: делим обе части на $a$ (на ненулевое число делить можно).`,
+  );
   if (ravny(k, ODIN)) lines.push(`$x=${texQ(x)}$`);
   else if (ravny(k, q(-1))) lines.push(`$x=${texQ(x)}$ (меняем знак у обеих частей).`);
   else if (tseloe(k) && tseloe(m) && znak(k) > 0) {
@@ -403,8 +406,9 @@ function reshitKvadratnoe(ur: Uravnenie, vopr: Vopros, sdvig: number): Resheno {
     etapy.push({
       title: 'Найдём корни',
       lines: [
-        `Квадрат равен $${texQ(k)}$ у двух чисел — $${texQ(r)}$ и $${texQ(prot(r))}$, ведь $${texQ(r)}^2=${texQ(k)}$.`,
-        `$x=\\pm\\sqrt{${texQ(k)}}=\\pm ${texQ(r)}$`,
+        `Справа положительное число, поэтому корней два — противоположные числа: $${texQ(r)}^2=${texQ(k)}$ и $(${texQ(prot(r))})^2=${texQ(k)}$.`,
+        `$x^2=${texQ(k)}\\iff\\left[\\begin{aligned}&x=${texQ(prot(r))},\\\\&x=${texQ(r)}.\\end{aligned}\\right.$`,
+        `Короче: $x=\\pm\\sqrt{${texQ(k)}}=\\pm ${texQ(r)}$.`,
       ],
     });
     hints.push(
@@ -448,8 +452,9 @@ function reshitKvadratnoe(ur: Uravnenie, vopr: Vopros, sdvig: number): Resheno {
       title: 'Вынесем $x$ за скобки',
       lines: [
         `$x(${skob(b)})=0$`,
-        'Произведение равно нулю, когда хотя бы один множитель равен нулю:',
-        `$x=0$ или $${skob(b)}=0$, то есть $x=${texQ(prot(b))}$.`,
+        'Произведение равно нулю, когда хотя бы один множитель равен нулю, — переходим к совокупности («или»):',
+        `$\\left[\\begin{aligned}&x=0,\\\\&${skob(b)}=0\\end{aligned}\\right.\\iff\\left[\\begin{aligned}&x=0,\\\\&x=${texQ(prot(b))}.\\end{aligned}\\right.$`,
+        'Делить обе части на $x$ нельзя: так потерялся бы корень $x=0$.',
       ],
     });
     hints.push(
@@ -496,7 +501,8 @@ function reshitKvadratnoe(ur: Uravnenie, vopr: Vopros, sdvig: number): Resheno {
       title: 'Дискриминант',
       lines: [
         `$a=1$, $b=${texQ(b)}$, $c=${texQ(c)}$.`,
-        `$D=b^2-4ac=${texQs(b)}^2-4\\cdot 1\\cdot ${texQs(c)}=${texQ(D)}$, $\\sqrt{D}=${texQ(s)}$.`,
+        `$D=b^2-4ac=${texQs(b)}^2-4\\cdot 1\\cdot ${texQs(c)}=${texQ(D)}$.`,
+        `$D>0$ — корней два, $\\sqrt{D}=${texQ(s)}$.`,
       ],
     });
     hints.push(
@@ -515,6 +521,7 @@ function reshitKvadratnoe(ur: Uravnenie, vopr: Vopros, sdvig: number): Resheno {
       lines: [
         `$x_{1,2}=\\dfrac{-b\\pm\\sqrt{D}}{2a}=\\dfrac{${texQ(prot(b))}\\pm ${texQ(s)}}{2}$`,
         `$x_1=\\dfrac{${texQ(prot(b))}-${texQ(s)}}{2}=${texQ(x1)}$, $x_2=\\dfrac{${texQ(prot(b))}+${texQ(s)}}{2}=${texQ(x2)}$.`,
+        `Проверка по теореме Виета: $x_1+x_2=${texQ(plus(x1, x2))}=-b$, $x_1\\cdot x_2=${texQ(umn(x1, x2))}=c$.`,
       ],
     });
     korni = [x1, x2];
