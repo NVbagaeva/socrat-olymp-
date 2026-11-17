@@ -8,12 +8,16 @@
  * Числа — из условия задачи. Автотест (selftest.ts, risunokVret)
  * складывает произведения подсвеченных путей и сверяет с ответом.
  *
+ * Подмешиваются там, где задачи уходят на экран и в автотест (pool.ts,
+ * selftest.ts, sDerevom): сами задачи (podgotovka5.ts — содержание
+ * раздела, его сторожит check-redesign) не меняются, дерево — подача.
+ *
  * Задачи k5-47 (яйца двух хозяйств) здесь нет: доля хозяйства в ней
  * неизвестна и находится из уравнения, а не обходом дерева.
  */
 
 import { derevo, type Vetv } from './bank5/vizual5';
-import type { Metodika } from './types';
+import type { Metodika, PrepZadacha } from './types';
 
 const FRAZA_GRUPPY =
   'дерево вероятностей — случаи делятся на группы, событие подходит по нескольким путям: умножаем вдоль каждого и складываем.';
@@ -192,3 +196,11 @@ export const DEREVYA_OPORNYH_5: Readonly<Record<string, Metodika>> = {
   'k5-48': FUTBOL,
   'k5-49': POGODA,
 };
+
+/** Опорная задача с деревом, если оно у неё есть; иначе — как есть. */
+export function sDerevom(zadacha: PrepZadacha): PrepZadacha {
+  const metodika = DEREVYA_OPORNYH_5[zadacha.id];
+  return metodika === undefined || zadacha.metodika !== undefined
+    ? zadacha
+    : { ...zadacha, metodika };
+}
