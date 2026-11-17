@@ -6,7 +6,7 @@ import { LevelTabs } from '@/components/level/LevelTabs';
 import { landingOf } from '@/content/landing';
 import { shortTasksOf } from '@/content/tasks';
 import { levelInfo, type Level } from '@/lib/level';
-
+import { BankRazdelitel } from './BankRazdelitel';
 
 /**
  * Банк заданий на главной.
@@ -17,8 +17,9 @@ import { levelInfo, type Level } from '@/lib/level';
  */
 export function BankSection({ level = 'profile' }: { level?: Level }) {
   const { bank } = landingOf(level);
+  const tabs = <LevelTabs level={level} to="home-bank" range />;
   return (
-    <section className="band" id="bank">
+    <section className="band band--bank">
       {/* Свечения позади стеклянных карточек: без цвета за стеклом
           размывать нечего. */}
       <div className="aura" aria-hidden="true">
@@ -41,8 +42,9 @@ export function BankSection({ level = 'profile' }: { level?: Level }) {
         ) : null}
         {/* Вариант базы — на главной обоих уровней. */}
         <VariantEntry className="bank-variant" level="base" />
-        {/* Над списком заданий — вкладки уровня с номерами. */}
-        <LevelTabs level={level} to="home-bank" range />
+        {/* Разделитель «Банк заданий» с якорем #bank: сетка начинается
+            с представления; переключатель уровня — внутри полосы. */}
+        <BankRazdelitel tabs={tabs} />
         <TaskGrid tasks={shortTasksOf(level)} />
 
         <p className="bank-note">{bank.note}</p>

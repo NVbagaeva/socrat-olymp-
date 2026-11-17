@@ -251,7 +251,7 @@
 }
 .door--uchitel {
   background:
-    radial-gradient(120% 90% at 100% 0%, rgb(245 160 74 / 0.22), transparent 60%), var(--glass-bg);
+    radial-gradient(120% 90% at 100% 0%, rgb(244 116 32 / 0.24), transparent 60%), var(--glass-bg);
 }
 .door:hover,
 .door:focus-visible {
@@ -403,11 +403,11 @@ section.band {
 /* Банк — в общем контейнере, как герой и «Мы взяли на себя…»: прежнее
    расширение на 32 px (под четыре колонки, которых на деле три)
    сдвигало его левый край на 16 px от остальной страницы. */
-#bank .aura__spot--blue {
+.band--bank .aura__spot--blue {
   top: 30%;
   right: -260px;
 }
-#bank .aura__spot--orange {
+.band--bank .aura__spot--orange {
   right: auto;
   left: -200px;
   bottom: 10%;
@@ -990,5 +990,120 @@ section.band {
   .tk__karta {
     padding: var(--space-5);
     border-radius: 18px;
+  }
+}
+
+/* ── Разделитель «Банк заданий» (components/landing/BankRazdelitel.tsx)
+   Между карточками вариантов и сеткой заданий. Сверху — заметно больше
+   воздуха, чем между карточками (16 px): читается «новый раздел»;
+   снизу до сетки — меньше. Чистый яркий оранжевый без коричневого:
+   от мандаринового слева к абрикосовому справа; сверху справа — мягкий
+   блик, по кромке — светлая линия стекла. Крупный белый заголовок — на
+   левом, самом насыщенном краю (контраст 3,5 : 1, крупный текст);
+   мелкий счётчик — на светлой плашке оранжевыми буквами (5 : 1). Якорь
+   не уходит под липкую шапку. */
+.bank-razd {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  scroll-margin-top: 96px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-6);
+  margin: 64px 0 var(--space-6);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-8);
+  border-radius: 24px;
+  /* Стекло: оранжевая заливка полупрозрачная — сквозь неё видны
+     свечения фона, размытые backdrop-filter; сверху — глянцевый
+     отсвет, по кромке — светлая линия. Слева, под заголовком, заливка
+     плотнее: белый текст читается. */
+  background:
+    radial-gradient(130% 80% at 60% -30%, rgb(255 255 255 / 0.34), transparent 62%),
+    linear-gradient(
+      105deg,
+      rgb(234 92 10 / 0.92) 0%,
+      rgb(244 116 32 / 0.82) 40%,
+      rgb(251 148 66 / 0.68) 75%,
+      rgb(255 180 107 / 0.56) 100%
+    );
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    inset 0 -1px 0 rgb(200 70 0 / 0.18),
+    0 0 36px -10px rgb(251 140 60 / 0.55),
+    0 18px 36px -18px rgb(234 92 10 / 0.45);
+  color: var(--white);
+}
+.bank-razd__blik {
+  position: absolute;
+  z-index: -1;
+  right: -60px;
+  top: -140px;
+  width: 420px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 236 214 / 0.55),
+    rgb(255 220 180 / 0.18) 60%,
+    transparent
+  );
+  pointer-events: none;
+}
+.bank-razd__z {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+.bank-razd__schet {
+  display: inline-block;
+  margin: var(--space-1) 0 0;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 0.92);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #b9460a;
+  font-variant-numeric: tabular-nums;
+}
+.bank-razd__tabs .level-tabs {
+  margin-bottom: 0;
+  border-color: rgb(255 255 255 / 0.7);
+  box-shadow: 0 8px 20px -12px rgb(180 70 10 / 0.45);
+}
+.bank-razd__tabs .level-tabs__range {
+  white-space: nowrap;
+}
+.bank-razd :focus-visible {
+  outline-color: var(--white);
+}
+
+@media (max-width: 760px) {
+  .bank-razd {
+    margin-top: 48px;
+    padding: var(--space-3);
+    padding-left: var(--space-5);
+  }
+  .bank-razd__z {
+    font-size: 1.5rem;
+  }
+  /* Блик — в самом углу: на узкой полосе он иначе ложится под счётчик. */
+  .bank-razd__blik {
+    right: -220px;
+    top: -240px;
+  }
+  .bank-razd__tabs {
+    flex: 1 1 100%;
+  }
+  .bank-razd__tabs .level-tabs__seg {
+    padding-inline: var(--space-2);
   }
 }
