@@ -21,9 +21,9 @@ type Og = NonNullable<Metadata['openGraph']>;
 
 /** openGraph для страницы: свой заголовок и описание, общая картинка. */
 export function ogStranicy(title?: string, description?: string): Og {
+  /* Без og:type и og:locale: «website» — значение по умолчанию, язык
+     мессенджеры берут из страницы; байты <head> — test:first-load. */
   return {
-    type: 'website',
-    locale: 'ru_RU',
     siteName: SITE_NAME,
     images: [OG_KARTINKA],
     ...(title === undefined ? {} : { title }),
