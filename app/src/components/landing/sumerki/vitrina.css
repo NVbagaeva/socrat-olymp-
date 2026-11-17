@@ -589,6 +589,8 @@
     padding: 4px var(--space-8) 8px;
     overflow-x: auto;
     scroll-snap-type: x proximity;
+    /* Без него привязка прижимает первую вкладку к краю карточки. */
+    scroll-padding-inline: var(--space-8);
     scrollbar-width: none;
   }
   .vit-punkty::-webkit-scrollbar {
@@ -654,6 +656,7 @@
   .vit-punkty {
     margin-inline: calc(-1 * var(--space-5));
     padding-inline: var(--space-5);
+    scroll-padding-inline: var(--space-5);
   }
   .vit-punkt {
     max-width: 210px;
