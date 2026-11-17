@@ -1,0 +1,5246 @@
+[
+ {
+  "id": "1.9.001",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{64+8\\sqrt{64-a^2}}\\,\\bigl(\\sqrt{(8+a)^3}-\\sqrt{(8-a)^3}\\bigr)}{16+\\sqrt{64-a^2}}",
+  "dopolnenie": "при $0<a<8$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "4 a",
+   "zapis": "4*a",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 2.5454545454545454,
+     "=": 10.181818181818182
+    },
+    {
+     "a": 2.909090909090909,
+     "=": 11.636363636363637
+    },
+    {
+     "a": 0.5,
+     "=": 2.0
+    },
+    {
+     "a": 1.2857142857142858,
+     "=": 5.142857142857143
+    },
+    {
+     "a": 3.1538461538461537,
+     "=": 12.615384615384615
+    },
+    {
+     "a": 2.8461538461538463,
+     "=": 11.384615384615385
+    },
+    {
+     "a": 1.3333333333333333,
+     "=": 5.333333333333333
+    },
+    {
+     "a": 4.285714285714286,
+     "=": 17.142857142857142
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{8+a}$, $v=\\sqrt{8-a}$; при $0<a<8$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=16,\\quad uv=\\sqrt{64-a^2},\\quad u^2-v^2=2a"
+   },
+   {
+    "chto": "В скобке — разность кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3-v^3=(u-v)(u^2+uv+v^2)=(u-v)(16+\\sqrt{64-a^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $8=\\frac{u^2+v^2}{2}$",
+    "tex": "8(8+uv)=\\frac{8}{2}(u+v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=2(u+v)"
+   },
+   {
+    "chto": "Сокращаем на $16+\\sqrt{64-a^2}\\ne0$ и перемножаем",
+    "tex": "2(u+v)(u-v)=2(u^2-v^2)=4 a"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{8+a}$ и $\\sqrt{8-a}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Pow(Add(Integer(8), Mul(Integer(-1), Symbol('a'))), Rational(3, 2))), Pow(Add(Symbol('a'), Integer(8)), Rational(3, 2))), Pow(Add(Pow(Add(Integer(64), Mul(Integer(-1), Pow(Symbol('a'), Integer(2)))), Rational(1, 2)), Integer(16)), Integer(-1)), Pow(Add(Mul(Integer(8), Pow(Add(Integer(64), Mul(Integer(-1), Pow(Symbol('a'), Integer(2)))), Rational(1, 2))), Integer(64)), Rational(1, 2)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))",
+    "StrictLessThan(Symbol('a'), Integer(8))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.002",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "drobnye-kuby-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{a-27}{a^{2/3}+3a^{1/3}+9}+\\frac{a+125}{a^{2/3}-5a^{1/3}+25}\\right):\\left(4a^{2/3}-4\\right)",
+  "dopolnenie": "и найдите его значение при $a=7 \\sqrt{7}$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "\\frac{1 + \\sqrt{7}}{12}",
+   "zapis": "(1 + sqrt(7))/12",
+   "znachenie": 0.30381260925538256,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $t=a^{1/3}$ ($a>0$, $t>0$). Числитель первой дроби — разность кубов",
+    "tex": "a-27=t^3-27=(t-3)(t^2+3t+9)"
+   },
+   {
+    "chto": "Числитель второй дроби — сумма кубов",
+    "tex": "a+125=t^3+125=(t+5)(t^2-5t+25)"
+   },
+   {
+    "chto": "Сокращаем каждую дробь на неполный квадрат и складываем",
+    "tex": "(t-3)+(t+5)=2t+2"
+   },
+   {
+    "chto": "Делитель раскладываем как разность квадратов и сокращаем",
+    "tex": "\\frac{2t+2}{4t^2-4}=\\frac{1}{2t-2}=\\frac{1}{2 \\sqrt[3]{a} - 2}"
+   },
+   {
+    "chto": "При $a=7 \\sqrt{7}=(\\sqrt{7})^3$ получаем $a^{1/3}=\\sqrt{7}$; избавляемся от иррациональности в знаменателе",
+    "tex": "\\frac{1}{2\\sqrt{7}-2}=\\frac{1 + \\sqrt{7}}{12}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $a$ через $t=a^{1/3}$?",
+   "Какие формулы сокращённого умножения видны в числителях $a-27$ и $a+125$?",
+   "На какие множители раскладывается $4a^{2/3}-4$?",
+   "Чему равен $a^{1/3}$ при данном $a$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Rational(1, 24), Add(Integer(-27), Mul(Integer(7), Pow(Integer(7), Rational(1, 2)))), Pow(Add(Mul(Integer(3), Pow(Integer(7), Rational(1, 2))), Integer(16)), Integer(-1))), Mul(Rational(1, 24), Pow(Add(Integer(32), Mul(Integer(-1), Integer(5), Pow(Integer(7), Rational(1, 2)))), Integer(-1)), Add(Mul(Integer(7), Pow(Integer(7), Rational(1, 2))), Integer(125))))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.003",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{c+8}+\\sqrt{c-8}}{\\sqrt{c+8}-\\sqrt{c-8}}-\\frac{\\sqrt{c+8}-\\sqrt{c-8}}{\\sqrt{c+8}+\\sqrt{c-8}}",
+  "dopolnenie": "при $c>8$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{\\sqrt{c^{2} - 64}}{4}",
+   "zapis": "sqrt(c^2 - 64)/4",
+   "peremennye": [
+    "c"
+   ],
+   "tochki": [
+    {
+     "c": 24.46153846153846,
+     "=": 5.779094132654602
+    },
+    {
+     "c": 12.363636363636363,
+     "=": 2.3566329812392217
+    },
+    {
+     "c": 24.875,
+     "=": 5.888365780290827
+    },
+    {
+     "c": 16.307692307692307,
+     "=": 3.552647150386304
+    },
+    {
+     "c": 27.25,
+     "=": 6.512308058591823
+    },
+    {
+     "c": 11.333333333333334,
+     "=": 2.006932429798716
+    },
+    {
+     "c": 13.625,
+     "=": 2.7572702193473893
+    },
+    {
+     "c": 24.125,
+     "=": 5.6899891531091695
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{c+8}-\\sqrt{c-8})(\\sqrt{c+8}+\\sqrt{c-8})=(c+8)-(c-8)=16"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{c+8}+\\sqrt{c-8})^2-(\\sqrt{c+8}-\\sqrt{c-8})^2=4\\sqrt{c+8}\\cdot\\sqrt{c-8}=4\\sqrt{c^2-64}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $c>8$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{c^2-64}}{16}=\\frac{\\sqrt{c^{2} - 64}}{4}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Pow(Add(Symbol('c'), Integer(-8)), Rational(1, 2)), Mul(Integer(-1), Pow(Add(Symbol('c'), Integer(8)), Rational(1, 2)))), Pow(Add(Pow(Add(Symbol('c'), Integer(-8)), Rational(1, 2)), Pow(Add(Symbol('c'), Integer(8)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('c'), Integer(-8)), Rational(1, 2))), Pow(Add(Symbol('c'), Integer(8)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('c'), Integer(-8)), Rational(1, 2)), Pow(Add(Symbol('c'), Integer(8)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('c'), Integer(8))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.004",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadratnye-stepeni",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{(x^{2}+8x+15)^{1/2}+(x^{2}-8x+15)^{1/2}}{(x^{2}+8x+15)^{1/2}-(x^{2}-8x+15)^{1/2}}+\\frac{(x^{2}+8x+15)^{1/2}-(x^{2}-8x+15)^{1/2}}{(x^{2}+8x+15)^{1/2}+(x^{2}-8x+15)^{1/2}}",
+  "dopolnenie": "при $x>5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{x^{2} + 15}{4 x}",
+   "zapis": "(x^2 + 15)/(4*x)",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 7.125,
+     "=": 2.307565789473684
+    },
+    {
+     "x": 13.714285714285714,
+     "=": 3.7020089285714284
+    },
+    {
+     "x": 17.25,
+     "=": 4.529891304347826
+    },
+    {
+     "x": 10.181818181818182,
+     "=": 2.913758116883117
+    },
+    {
+     "x": 14.2,
+     "=": 3.8140845070422533
+    },
+    {
+     "x": 15.545454545454545,
+     "=": 4.127591706539075
+    },
+    {
+     "x": 19.714285714285715,
+     "=": 5.1187888198757765
+    },
+    {
+     "x": 17.75,
+     "=": 4.648767605633803
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $A=x^{2}+8x+15$, $B=x^{2}-8x+15$; при $x>5$ оба трёхчлена положительны",
+    "tex": "A=(x+3)(x+5),\\quad B=(x-3)(x-5)"
+   },
+   {
+    "chto": "Приводим к общему знаменателю — разности квадратов",
+    "tex": "(\\sqrt{A}-\\sqrt{B})(\\sqrt{A}+\\sqrt{B})=A-B=16x"
+   },
+   {
+    "chto": "Числитель: сумма квадратов суммы и разности",
+    "tex": "(\\sqrt{A}+\\sqrt{B})^2+(\\sqrt{A}-\\sqrt{B})^2=2(A+B)=4(x^2+15)"
+   },
+   {
+    "chto": "Делим",
+    "tex": "\\frac{4(x^2+15)}{16x}=\\frac{x^{2} + 15}{4 x}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $1/2$-ю степень через корень?",
+   "Какой общий знаменатель у двух дробей?",
+   "Чему равна сумма $(X+Y)^2+(X-Y)^2$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Mul(Integer(-1), Pow(Add(Pow(Symbol('x'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('x')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Symbol('x'), Integer(2)), Mul(Integer(8), Symbol('x')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Add(Pow(Symbol('x'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('x')), Integer(15)), Rational(1, 2)), Pow(Add(Pow(Symbol('x'), Integer(2)), Mul(Integer(8), Symbol('x')), Integer(15)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Pow(Symbol('x'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('x')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Symbol('x'), Integer(2)), Mul(Integer(8), Symbol('x')), Integer(15)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Pow(Symbol('x'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('x')), Integer(15)), Rational(1, 2)), Pow(Add(Pow(Symbol('x'), Integer(2)), Mul(Integer(8), Symbol('x')), Integer(15)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.005",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{c+1}+\\sqrt{c-1}}{\\sqrt{c+1}-\\sqrt{c-1}}-\\frac{\\sqrt{c+1}-\\sqrt{c-1}}{\\sqrt{c+1}+\\sqrt{c-1}}",
+  "dopolnenie": "при $c>1$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "2 \\sqrt{c^{2} - 1}",
+   "zapis": "2*sqrt(c^2 - 1)",
+   "peremennye": [
+    "c"
+   ],
+   "tochki": [
+    {
+     "c": 18.77777777777778,
+     "=": 37.502263306184865
+    },
+    {
+     "c": 3.5,
+     "=": 6.708203932499369
+    },
+    {
+     "c": 16.75,
+     "=": 33.44024521441193
+    },
+    {
+     "c": 18.363636363636363,
+     "=": 36.67277685127581
+    },
+    {
+     "c": 20.428571428571427,
+     "=": 40.80816244881628
+    },
+    {
+     "c": 7.888888888888889,
+     "=": 15.65050387703023
+    },
+    {
+     "c": 18.571428571428573,
+     "=": 37.088971901829446
+    },
+    {
+     "c": 20.142857142857142,
+     "=": 40.236038268077586
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{c+1}-\\sqrt{c-1})(\\sqrt{c+1}+\\sqrt{c-1})=(c+1)-(c-1)=2"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{c+1}+\\sqrt{c-1})^2-(\\sqrt{c+1}-\\sqrt{c-1})^2=4\\sqrt{c+1}\\cdot\\sqrt{c-1}=4\\sqrt{c^2-1}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $c>1$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{c^2-1}}{2}=2 \\sqrt{c^{2} - 1}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Pow(Add(Symbol('c'), Integer(-1)), Rational(1, 2)), Mul(Integer(-1), Pow(Add(Symbol('c'), Integer(1)), Rational(1, 2)))), Pow(Add(Pow(Add(Symbol('c'), Integer(-1)), Rational(1, 2)), Pow(Add(Symbol('c'), Integer(1)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('c'), Integer(-1)), Rational(1, 2))), Pow(Add(Symbol('c'), Integer(1)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('c'), Integer(-1)), Rational(1, 2)), Pow(Add(Symbol('c'), Integer(1)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('c'), Integer(1))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.006",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{p^{2}-11p+28+(p-7)\\sqrt{p^2-16}}{p^{2}+10p+24+(p+6)\\sqrt{p^2-16}}",
+  "dopolnenie": "при $p>4$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{(p - 7) \\sqrt{p - 4}}{\\sqrt{p + 4} (p + 6)}",
+   "zapis": "(p - 7)*sqrt(p - 4)/(sqrt(p + 4)*(p + 6))",
+   "peremennye": [
+    "p"
+   ],
+   "tochki": [
+    {
+     "p": 9.875,
+     "=": 0.11784510688348446
+    },
+    {
+     "p": 12.75,
+     "=": 0.2216476818264476
+    },
+    {
+     "p": 4.8,
+     "=": -0.06141897759917407
+    },
+    {
+     "p": 9.333333333333334,
+     "=": 0.09624323313555937
+    },
+    {
+     "p": 18.666666666666668,
+     "=": 0.38045930174181797
+    },
+    {
+     "p": 4.25,
+     "=": -0.04670376135396771
+    },
+    {
+     "p": 15.5,
+     "=": 0.303607209590725
+    },
+    {
+     "p": 7.555555555555555,
+     "=": 0.022733614599394637
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "p^{2}-11p+28=(p-4)(p-7),\\quad p^{2}+10p+24=(p+4)(p+6)"
+   },
+   {
+    "chto": "При $p>4$ записываем $p-4=(\\sqrt{p-4})^2$ и $\\sqrt{p^2-16}=\\sqrt{p-4}\\cdot\\sqrt{p+4}$; в числителе выносим $(p-7)\\sqrt{p-4}$",
+    "tex": "(p-7)\\sqrt{p-4}\\,(\\sqrt{p-4}+\\sqrt{p+4})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(p+6)\\sqrt{p+4}$",
+    "tex": "(p+6)\\sqrt{p+4}\\,(\\sqrt{p+4}+\\sqrt{p-4})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{p-4}+\\sqrt{p+4}>0$",
+    "tex": "\\frac{(p-7)\\sqrt{p-4}}{(p+6)\\sqrt{p+4}}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{p^2-16}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('p'), Integer(2)), Mul(Integer(-1), Integer(11), Symbol('p')), Mul(Add(Symbol('p'), Integer(-7)), Pow(Add(Pow(Symbol('p'), Integer(2)), Integer(-16)), Rational(1, 2))), Integer(28)), Pow(Add(Pow(Symbol('p'), Integer(2)), Mul(Integer(10), Symbol('p')), Mul(Add(Symbol('p'), Integer(6)), Pow(Add(Pow(Symbol('p'), Integer(2)), Integer(-16)), Rational(1, 2))), Integer(24)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('p'), Integer(4))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.007",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "podstanovka",
+  "uroven": 2,
+  "uslovie": "Подставьте в выражение",
+  "formula": "\\frac{t-\\sqrt{t^2-1}}{t+\\sqrt{t^2-1}}",
+  "dopolnenie": "значение $t=\\frac{1}{2}\\left(\\sqrt{\\frac{a}{b}}+\\sqrt{\\frac{b}{a}}\\right)$ и упростите результат при $a>b>0$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{b}{a}",
+   "zapis": "b/a",
+   "peremennye": [
+    "a",
+    "b"
+   ],
+   "tochki": [
+    {
+     "a": 14.666666666666666,
+     "b": 11.333333333333334,
+     "=": 0.7727272727272727
+    },
+    {
+     "a": 4.8,
+     "b": 0.25,
+     "=": 0.052083333333333336
+    },
+    {
+     "a": 19.77777777777778,
+     "b": 13.777777777777779,
+     "=": 0.6966292134831461
+    },
+    {
+     "a": 17.428571428571427,
+     "b": 4.75,
+     "=": 0.2725409836065574
+    },
+    {
+     "a": 15.375,
+     "b": 11.363636363636363,
+     "=": 0.7390983000739099
+    },
+    {
+     "a": 13.625,
+     "b": 9.153846153846153,
+     "=": 0.6718419195483416
+    },
+    {
+     "a": 8.666666666666666,
+     "b": 1.125,
+     "=": 0.12980769230769232
+    },
+    {
+     "a": 14.75,
+     "b": 9.909090909090908,
+     "=": 0.6718027734976888
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Приводим $t$ к одной дроби",
+    "tex": "t=\\frac{a+b}{2\\sqrt{ab}}"
+   },
+   {
+    "chto": "Находим $t^2-1$ — получается полный квадрат",
+    "tex": "t^2-1=\\frac{(a+b)^2-4ab}{4ab}=\\frac{(a-b)^2}{4ab}"
+   },
+   {
+    "chto": "Извлекаем корень: $\\sqrt{A^2}=|A|$, а при $a>b>0$ модуль раскрывается так",
+    "tex": "\\sqrt{t^2-1}=\\frac{|a-b|}{2\\sqrt{ab}}=\\frac{a-b}{2\\sqrt{ab}}"
+   },
+   {
+    "chto": "Сумма и разность",
+    "tex": "t+\\sqrt{t^2-1}=\\frac{a}{\\sqrt{ab}},\\quad t-\\sqrt{t^2-1}=\\frac{b}{\\sqrt{ab}}"
+   },
+   {
+    "chto": "Подставляем и сокращаем на $\\sqrt{ab}$",
+    "tex": "\\frac{b}{a}"
+   }
+  ],
+  "podskazki": [
+   "Чему равно $t^2-1$? Не полный ли это квадрат?",
+   "Как раскрыть модуль при $a>b>0$?",
+   "Чему равны $t+\\sqrt{t^2-1}$ и $t-\\sqrt{t^2-1}$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Rational(1, 2), Pow(Mul(Pow(Symbol('a'), Integer(-1)), Symbol('b')), Rational(1, 2))), Mul(Rational(1, 2), Pow(Mul(Symbol('a'), Pow(Symbol('b'), Integer(-1))), Rational(1, 2))), Mul(Integer(-1), Pow(Add(Pow(Add(Mul(Rational(1, 2), Pow(Mul(Pow(Symbol('a'), Integer(-1)), Symbol('b')), Rational(1, 2))), Mul(Rational(1, 2), Pow(Mul(Symbol('a'), Pow(Symbol('b'), Integer(-1))), Rational(1, 2)))), Integer(2)), Integer(-1)), Rational(1, 2)))), Pow(Add(Mul(Rational(1, 2), Pow(Mul(Pow(Symbol('a'), Integer(-1)), Symbol('b')), Rational(1, 2))), Mul(Rational(1, 2), Pow(Mul(Symbol('a'), Pow(Symbol('b'), Integer(-1))), Rational(1, 2))), Pow(Add(Pow(Add(Mul(Rational(1, 2), Pow(Mul(Pow(Symbol('a'), Integer(-1)), Symbol('b')), Rational(1, 2))), Mul(Rational(1, 2), Pow(Mul(Symbol('a'), Pow(Symbol('b'), Integer(-1))), Rational(1, 2)))), Integer(2)), Integer(-1)), Rational(1, 2))), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Symbol('b'))",
+    "StrictGreaterThan(Symbol('b'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.008",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chislovoe-proizvedenie",
+  "uroven": 2,
+  "uslovie": "Вычислите без приближённых вычислений",
+  "formula": "\\sqrt{18+\\sqrt{155}}\\cdot\\sqrt{6+\\sqrt{18+\\sqrt{155}}}\\cdot\\sqrt{6-\\sqrt{18+\\sqrt{155}}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "13",
+   "zapis": "13",
+   "znachenie": 13.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Перемножаем два последних корня — под корнем разность квадратов",
+    "tex": "\\sqrt{6+\\sqrt{18+\\sqrt{155}}}\\cdot\\sqrt{6-\\sqrt{18+\\sqrt{155}}}=\\sqrt{36-(18+\\sqrt{155})}=\\sqrt{18-\\sqrt{155}}"
+   },
+   {
+    "chto": "Ещё раз разность квадратов",
+    "tex": "\\sqrt{18+\\sqrt{155}}\\cdot\\sqrt{18-\\sqrt{155}}=\\sqrt{324-155}"
+   },
+   {
+    "chto": "Извлекаем корень",
+    "tex": "\\sqrt{169}=13"
+   }
+  ],
+  "podskazki": [
+   "Какие два множителя удобно перемножить первыми?",
+   "Какая формула получается под корнем при умножении $\\sqrt{c+d}\\cdot\\sqrt{c-d}$?",
+   "Чему равно $6^2-18$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(6), Mul(Integer(-1), Pow(Add(Pow(Integer(155), Rational(1, 2)), Integer(18)), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Pow(Integer(155), Rational(1, 2)), Integer(18)), Rational(1, 2)), Pow(Add(Pow(Add(Pow(Integer(155), Rational(1, 2)), Integer(18)), Rational(1, 2)), Integer(6)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.009",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{x\\sqrt{x}+27}{\\sqrt{x}+3}-3\\sqrt{x}\\right)\\cdot\\frac{\\sqrt{x}+3}{x-9}",
+  "dopolnenie": "при $x>0$, $x\\ne9$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\sqrt{x} - 3",
+   "zapis": "sqrt(x) - 3",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 28.375,
+     "=": 2.326818938165629
+    },
+    {
+     "x": 12.545454545454545,
+     "=": 0.5419563161414831
+    },
+    {
+     "x": 4.25,
+     "=": -0.9384471871911697
+    },
+    {
+     "x": 15.75,
+     "=": 0.9686269665968859
+    },
+    {
+     "x": 0.3333333333333333,
+     "=": -2.4226497308103743
+    },
+    {
+     "x": 4.714285714285714,
+     "=": -0.8287594066327624
+    },
+    {
+     "x": 15.333333333333334,
+     "=": 0.9157800414902435
+    },
+    {
+     "x": 6.5,
+     "=": -0.4504902432036076
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — сумма кубов $\\sqrt{x}$ и $3$",
+    "tex": "x\\sqrt{x}+27=(\\sqrt{x}+3)(x-3\\sqrt{x}+9)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{x}+3\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "x-3\\sqrt{x}+9-3\\sqrt{x}=x-6\\sqrt{x}+9=(\\sqrt{x}-3)^2"
+   },
+   {
+    "chto": "Раскладываем $x-9$ как разность квадратов и сокращаем",
+    "tex": "\\frac{(\\sqrt{x}-3)^2(\\sqrt{x}+3)}{(\\sqrt{x}-3)(\\sqrt{x}+3)}=\\sqrt{x} - 3"
+   }
+  ],
+  "podskazki": [
+   "Как записать $x\\sqrt{x}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $x-9$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Integer(3), Pow(Symbol('x'), Rational(1, 2))), Mul(Pow(Add(Pow(Symbol('x'), Rational(1, 2)), Integer(3)), Integer(-1)), Add(Pow(Symbol('x'), Rational(3, 2)), Integer(27)))), Add(Pow(Symbol('x'), Rational(1, 2)), Integer(3)), Pow(Add(Symbol('x'), Integer(-9)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(0))",
+    "Unequality(Symbol('x'), Integer(9))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.010",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{y^{2}-12y+35+(y-7)\\sqrt{y^2-25}}{y^{2}+11y+30+(y+6)\\sqrt{y^2-25}}",
+  "dopolnenie": "при $y>5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{(y - 7) \\sqrt{y - 5}}{\\sqrt{y + 5} (y + 6)}",
+   "zapis": "(y - 7)*sqrt(y - 5)/(sqrt(y + 5)*(y + 6))",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 5.4,
+     "=": -0.027525071598341617
+    },
+    {
+     "y": 9.285714285714286,
+     "=": 0.0819024385054454
+    },
+    {
+     "y": 12.25,
+     "=": 0.18649658692604562
+    },
+    {
+     "y": 6.3076923076923075,
+     "=": -0.019128826147882635
+    },
+    {
+     "y": 17.25,
+     "=": 0.32711762533529604
+    },
+    {
+     "y": 17.285714285714285,
+     "=": 0.3279682620610535
+    },
+    {
+     "y": 10.818181818181818,
+     "=": 0.1376869960229792
+    },
+    {
+     "y": 10.8,
+     "=": 0.137043918584516
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "y^{2}-12y+35=(y-5)(y-7),\\quad y^{2}+11y+30=(y+5)(y+6)"
+   },
+   {
+    "chto": "При $y>5$ записываем $y-5=(\\sqrt{y-5})^2$ и $\\sqrt{y^2-25}=\\sqrt{y-5}\\cdot\\sqrt{y+5}$; в числителе выносим $(y-7)\\sqrt{y-5}$",
+    "tex": "(y-7)\\sqrt{y-5}\\,(\\sqrt{y-5}+\\sqrt{y+5})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(y+6)\\sqrt{y+5}$",
+    "tex": "(y+6)\\sqrt{y+5}\\,(\\sqrt{y+5}+\\sqrt{y-5})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{y-5}+\\sqrt{y+5}>0$",
+    "tex": "\\frac{(y-7)\\sqrt{y-5}}{(y+6)\\sqrt{y+5}}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{y^2-25}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(12), Symbol('y')), Mul(Add(Symbol('y'), Integer(-7)), Pow(Add(Pow(Symbol('y'), Integer(2)), Integer(-25)), Rational(1, 2))), Integer(35)), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(11), Symbol('y')), Mul(Add(Symbol('y'), Integer(6)), Pow(Add(Pow(Symbol('y'), Integer(2)), Integer(-25)), Rational(1, 2))), Integer(30)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.011",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chislovoe-proizvedenie",
+  "uroven": 2,
+  "uslovie": "Вычислите без приближённых вычислений",
+  "formula": "\\sqrt{8+4 \\sqrt{3}}\\cdot\\sqrt{4+\\sqrt{8+4 \\sqrt{3}}}\\cdot\\sqrt{4-\\sqrt{8+4 \\sqrt{3}}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "4",
+   "zapis": "4",
+   "znachenie": 4.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Перемножаем два последних корня — под корнем разность квадратов",
+    "tex": "\\sqrt{4+\\sqrt{8+4 \\sqrt{3}}}\\cdot\\sqrt{4-\\sqrt{8+4 \\sqrt{3}}}=\\sqrt{16-(8+4 \\sqrt{3})}=\\sqrt{8-4 \\sqrt{3}}"
+   },
+   {
+    "chto": "Ещё раз разность квадратов",
+    "tex": "\\sqrt{8+4 \\sqrt{3}}\\cdot\\sqrt{8-4 \\sqrt{3}}=\\sqrt{64-48}"
+   },
+   {
+    "chto": "Извлекаем корень",
+    "tex": "\\sqrt{16}=4"
+   }
+  ],
+  "podskazki": [
+   "Какие два множителя удобно перемножить первыми?",
+   "Какая формула получается под корнем при умножении $\\sqrt{c+d}\\cdot\\sqrt{c-d}$?",
+   "Чему равно $4^2-8$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(4), Mul(Integer(-1), Pow(Add(Mul(Integer(4), Pow(Integer(3), Rational(1, 2))), Integer(8)), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(4), Pow(Integer(3), Rational(1, 2))), Integer(8)), Rational(1, 2)), Pow(Add(Pow(Add(Mul(Integer(4), Pow(Integer(3), Rational(1, 2))), Integer(8)), Rational(1, 2)), Integer(4)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.012",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{t+4}+\\sqrt{t-4}}{\\sqrt{t+4}-\\sqrt{t-4}}+\\frac{\\sqrt{t+4}-\\sqrt{t-4}}{\\sqrt{t+4}+\\sqrt{t-4}}",
+  "dopolnenie": "при $t>4$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{t}{2}",
+   "zapis": "t/2",
+   "peremennye": [
+    "t"
+   ],
+   "tochki": [
+    {
+     "t": 8.923076923076923,
+     "=": 4.461538461538462
+    },
+    {
+     "t": 12.125,
+     "=": 6.0625
+    },
+    {
+     "t": 14.923076923076923,
+     "=": 7.461538461538462
+    },
+    {
+     "t": 6.5,
+     "=": 3.25
+    },
+    {
+     "t": 10.666666666666666,
+     "=": 5.333333333333333
+    },
+    {
+     "t": 12.2,
+     "=": 6.1
+    },
+    {
+     "t": 13.142857142857142,
+     "=": 6.571428571428571
+    },
+    {
+     "t": 20.285714285714285,
+     "=": 10.142857142857142
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{t+4}-\\sqrt{t-4})(\\sqrt{t+4}+\\sqrt{t-4})=(t+4)-(t-4)=8"
+   },
+   {
+    "chto": "В числителе сумма квадратов суммы и разности — удвоенная сумма квадратов слагаемых",
+    "tex": "(\\sqrt{t+4}+\\sqrt{t-4})^2+(\\sqrt{t+4}-\\sqrt{t-4})^2=2\\bigl((t+4)+(t-4)\\bigr)=4t"
+   },
+   {
+    "chto": "Делим на общий знаменатель",
+    "tex": "\\frac{4t}{8}=\\frac{t}{2}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2+(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Mul(Integer(-1), Pow(Add(Symbol('t'), Integer(-4)), Rational(1, 2))), Pow(Add(Symbol('t'), Integer(4)), Rational(1, 2))), Pow(Add(Pow(Add(Symbol('t'), Integer(-4)), Rational(1, 2)), Pow(Add(Symbol('t'), Integer(4)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('t'), Integer(-4)), Rational(1, 2))), Pow(Add(Symbol('t'), Integer(4)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('t'), Integer(-4)), Rational(1, 2)), Pow(Add(Symbol('t'), Integer(4)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('t'), Integer(4))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.013",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{c^{2}-5c+4+(c-1)\\sqrt{c^2-16}}{c^{2}+10c+24+(c+6)\\sqrt{c^2-16}}",
+  "dopolnenie": "и найдите его значение при $c=\\frac{13}{3}$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "\\frac{2}{31}",
+   "zapis": "2/31",
+   "znachenie": 0.06451612903225806,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "c^{2}-5c+4=(c-4)(c-1),\\quad c^{2}+10c+24=(c+4)(c+6)"
+   },
+   {
+    "chto": "При $c>4$ записываем $c-4=(\\sqrt{c-4})^2$ и $\\sqrt{c^2-16}=\\sqrt{c-4}\\cdot\\sqrt{c+4}$; в числителе выносим $(c-1)\\sqrt{c-4}$",
+    "tex": "(c-1)\\sqrt{c-4}\\,(\\sqrt{c-4}+\\sqrt{c+4})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(c+6)\\sqrt{c+4}$",
+    "tex": "(c+6)\\sqrt{c+4}\\,(\\sqrt{c+4}+\\sqrt{c-4})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{c-4}+\\sqrt{c+4}>0$",
+    "tex": "\\frac{(c-1)\\sqrt{c-4}}{(c+6)\\sqrt{c+4}}"
+   },
+   {
+    "chto": "Подставляем $c=\\frac{13}{3}$: под корнем получается квадрат",
+    "tex": "\\sqrt{\\frac{c-4}{c+4}}=\\sqrt{0{,}04}=0{,}2,\\quad \\frac{\\frac{10}{3}}{\\frac{31}{3}}\\cdot0{,}2=\\frac{2}{31}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{c^2-16}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?",
+   "Чему равно $\\frac{c-4}{c+4}$ при данном значении?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(2, 31)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.014",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadratnye-stepeni",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{(t^{2}+8t+15)^{1/2}+(t^{2}-8t+15)^{1/2}}{(t^{2}+8t+15)^{1/2}-(t^{2}-8t+15)^{1/2}}+\\frac{(t^{2}+8t+15)^{1/2}-(t^{2}-8t+15)^{1/2}}{(t^{2}+8t+15)^{1/2}+(t^{2}-8t+15)^{1/2}}",
+  "dopolnenie": "при $t>5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{t^{2} + 15}{4 t}",
+   "zapis": "(t^2 + 15)/(4*t)",
+   "peremennye": [
+    "t"
+   ],
+   "tochki": [
+    {
+     "t": 14.75,
+     "=": 3.9417372881355934
+    },
+    {
+     "t": 11.727272727272727,
+     "=": 3.251585623678647
+    },
+    {
+     "t": 13.923076923076923,
+     "=": 3.7501062473438163
+    },
+    {
+     "t": 14.692307692307692,
+     "=": 3.928312525171164
+    },
+    {
+     "t": 5.714285714285714,
+     "=": 2.0848214285714284
+    },
+    {
+     "t": 18.76923076923077,
+     "=": 4.892102774274905
+    },
+    {
+     "t": 8.76923076923077,
+     "=": 2.6199392712550607
+    },
+    {
+     "t": 6.571428571428571,
+     "=": 2.2135093167701863
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $A=t^{2}+8t+15$, $B=t^{2}-8t+15$; при $t>5$ оба трёхчлена положительны",
+    "tex": "A=(t+3)(t+5),\\quad B=(t-3)(t-5)"
+   },
+   {
+    "chto": "Приводим к общему знаменателю — разности квадратов",
+    "tex": "(\\sqrt{A}-\\sqrt{B})(\\sqrt{A}+\\sqrt{B})=A-B=16t"
+   },
+   {
+    "chto": "Числитель: сумма квадратов суммы и разности",
+    "tex": "(\\sqrt{A}+\\sqrt{B})^2+(\\sqrt{A}-\\sqrt{B})^2=2(A+B)=4(t^2+15)"
+   },
+   {
+    "chto": "Делим",
+    "tex": "\\frac{4(t^2+15)}{16t}=\\frac{t^{2} + 15}{4 t}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $1/2$-ю степень через корень?",
+   "Какой общий знаменатель у двух дробей?",
+   "Чему равна сумма $(X+Y)^2+(X-Y)^2$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Mul(Integer(-1), Pow(Add(Pow(Symbol('t'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('t')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Symbol('t'), Integer(2)), Mul(Integer(8), Symbol('t')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Add(Pow(Symbol('t'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('t')), Integer(15)), Rational(1, 2)), Pow(Add(Pow(Symbol('t'), Integer(2)), Mul(Integer(8), Symbol('t')), Integer(15)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Pow(Symbol('t'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('t')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Symbol('t'), Integer(2)), Mul(Integer(8), Symbol('t')), Integer(15)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Pow(Symbol('t'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('t')), Integer(15)), Rational(1, 2)), Pow(Add(Pow(Symbol('t'), Integer(2)), Mul(Integer(8), Symbol('t')), Integer(15)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('t'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.015",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadratnye-stepeni",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{(y^{2}+11y+30)^{-1/2}+(y^{2}-11y+30)^{-1/2}}{(y^{2}+11y+30)^{-1/2}-(y^{2}-11y+30)^{-1/2}}+\\frac{(y^{2}+11y+30)^{-1/2}-(y^{2}-11y+30)^{-1/2}}{(y^{2}+11y+30)^{-1/2}+(y^{2}-11y+30)^{-1/2}}",
+  "dopolnenie": "при $y>6$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{- 2 y^{2} - 60}{11 y}",
+   "zapis": "(-2*y^2 - 60)/(11*y)",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 16.428571428571427,
+     "=": -3.319028797289667
+    },
+    {
+     "y": 6.2,
+     "=": -2.0070381231671552
+    },
+    {
+     "y": 11.727272727272727,
+     "=": -2.597347684028445
+    },
+    {
+     "y": 11.692307692307692,
+     "=": -2.5923813029076186
+    },
+    {
+     "y": 7.545454545454546,
+     "=": -2.094792392711341
+    },
+    {
+     "y": 9.272727272727273,
+     "=": -2.2741857073407874
+    },
+    {
+     "y": 20.333333333333332,
+     "=": -3.9652260307998013
+    },
+    {
+     "y": 13.076923076923077,
+     "=": -2.7947346770876185
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $A=y^{2}+11y+30$, $B=y^{2}-11y+30$; при $y>6$ оба трёхчлена положительны",
+    "tex": "A=(y+5)(y+6),\\quad B=(y-5)(y-6)"
+   },
+   {
+    "chto": "Умножаем числитель и знаменатель каждой дроби на $\\sqrt{A}\\sqrt{B}$",
+    "tex": "\\frac{\\sqrt{B}+\\sqrt{A}}{\\sqrt{B}-\\sqrt{A}}+\\frac{\\sqrt{B}-\\sqrt{A}}{\\sqrt{B}+\\sqrt{A}}"
+   },
+   {
+    "chto": "Приводим к общему знаменателю — разности квадратов",
+    "tex": "(\\sqrt{B}-\\sqrt{A})(\\sqrt{B}+\\sqrt{A})=B-A=-22y"
+   },
+   {
+    "chto": "Числитель: сумма квадратов суммы и разности",
+    "tex": "(\\sqrt{B}+\\sqrt{A})^2+(\\sqrt{B}-\\sqrt{A})^2=2(A+B)=4(y^2+30)"
+   },
+   {
+    "chto": "Делим",
+    "tex": "\\frac{4(y^2+30)}{-22y}=\\frac{- 2 y^{2} - 60}{11 y}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $-1/2$-ю степень через корень?",
+   "Какой общий знаменатель у двух дробей?",
+   "Чему равна сумма $(X+Y)^2+(X-Y)^2$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(11), Symbol('y')), Integer(30)), Rational(-1, 2)), Mul(Integer(-1), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(11), Symbol('y')), Integer(30)), Rational(-1, 2)))), Pow(Add(Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(11), Symbol('y')), Integer(30)), Rational(-1, 2)), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(11), Symbol('y')), Integer(30)), Rational(-1, 2))), Integer(-1))), Mul(Pow(Add(Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(11), Symbol('y')), Integer(30)), Rational(-1, 2)), Mul(Integer(-1), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(11), Symbol('y')), Integer(30)), Rational(-1, 2)))), Integer(-1)), Add(Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(11), Symbol('y')), Integer(30)), Rational(-1, 2)), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(11), Symbol('y')), Integer(30)), Rational(-1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(6))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.016",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{c+1}+\\sqrt{c-1}}{\\sqrt{c+1}-\\sqrt{c-1}}-\\frac{\\sqrt{c+1}-\\sqrt{c-1}}{\\sqrt{c+1}+\\sqrt{c-1}}",
+  "dopolnenie": "и найдите его значение при $c=\\frac{25}{24}$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "\\frac{7}{12}",
+   "zapis": "7/12",
+   "znachenie": 0.5833333333333334,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{c+1}-\\sqrt{c-1})(\\sqrt{c+1}+\\sqrt{c-1})=(c+1)-(c-1)=2"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{c+1}+\\sqrt{c-1})^2-(\\sqrt{c+1}-\\sqrt{c-1})^2=4\\sqrt{c+1}\\cdot\\sqrt{c-1}=4\\sqrt{c^2-1}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $c>1$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{c^2-1}}{2}=2 \\sqrt{c^{2} - 1}"
+   },
+   {
+    "chto": "Подставляем $c=\\frac{25}{24}$",
+    "tex": "c^2-1=\\frac{49}{576},\\quad 2\\cdot\\sqrt{\\frac{49}{576}}=\\frac{7}{12}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?",
+   "Удобнее подставлять число до упрощения или после?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(7, 12)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.017",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "podstanovka",
+  "uroven": 2,
+  "uslovie": "Подставьте в выражение",
+  "formula": "\\frac{z-\\sqrt{z^2-1}}{z+\\sqrt{z^2-1}}",
+  "dopolnenie": "значение $z=\\frac{m+n}{2\\sqrt{mn}}$ и упростите результат при $m>n>0$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{n}{m}",
+   "zapis": "n/m",
+   "peremennye": [
+    "m",
+    "n"
+   ],
+   "tochki": [
+    {
+     "m": 15.923076923076923,
+     "n": 12.666666666666666,
+     "=": 0.7954911433172303
+    },
+    {
+     "m": 10.428571428571429,
+     "n": 0.3076923076923077,
+     "=": 0.029504741833508957
+    },
+    {
+     "m": 16.666666666666668,
+     "n": 7.75,
+     "=": 0.465
+    },
+    {
+     "m": 12.5,
+     "n": 11.142857142857142,
+     "=": 0.8914285714285715
+    },
+    {
+     "m": 6.153846153846154,
+     "n": 4.125,
+     "=": 0.6703125
+    },
+    {
+     "m": 17.454545454545453,
+     "n": 12.5,
+     "=": 0.7161458333333334
+    },
+    {
+     "m": 14.333333333333334,
+     "n": 1.6363636363636365,
+     "=": 0.11416490486257928
+    },
+    {
+     "m": 14.25,
+     "n": 13.76923076923077,
+     "=": 0.9662618083670715
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Возводим $z$ в квадрат",
+    "tex": "z^2=\\frac{(m+n)^2}{4mn}"
+   },
+   {
+    "chto": "Находим $z^2-1$ — получается полный квадрат",
+    "tex": "z^2-1=\\frac{(m+n)^2-4mn}{4mn}=\\frac{(m-n)^2}{4mn}"
+   },
+   {
+    "chto": "Извлекаем корень: $\\sqrt{A^2}=|A|$, а при $m>n>0$ модуль раскрывается так",
+    "tex": "\\sqrt{z^2-1}=\\frac{|m-n|}{2\\sqrt{mn}}=\\frac{m-n}{2\\sqrt{mn}}"
+   },
+   {
+    "chto": "Сумма и разность",
+    "tex": "z+\\sqrt{z^2-1}=\\frac{m}{\\sqrt{mn}},\\quad z-\\sqrt{z^2-1}=\\frac{n}{\\sqrt{mn}}"
+   },
+   {
+    "chto": "Подставляем и сокращаем на $\\sqrt{mn}$",
+    "tex": "\\frac{n}{m}"
+   }
+  ],
+  "podskazki": [
+   "Чему равно $z^2-1$? Не полный ли это квадрат?",
+   "Как раскрыть модуль при $m>n>0$?",
+   "Чему равны $z+\\sqrt{z^2-1}$ и $z-\\sqrt{z^2-1}$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Pow(Add(Integer(-1), Mul(Rational(1, 4), Pow(Symbol('m'), Integer(-1)), Pow(Symbol('n'), Integer(-1)), Pow(Add(Symbol('m'), Symbol('n')), Integer(2)))), Rational(1, 2))), Mul(Rational(1, 2), Pow(Mul(Symbol('m'), Symbol('n')), Rational(-1, 2)), Add(Symbol('m'), Symbol('n')))), Pow(Add(Pow(Add(Integer(-1), Mul(Rational(1, 4), Pow(Symbol('m'), Integer(-1)), Pow(Symbol('n'), Integer(-1)), Pow(Add(Symbol('m'), Symbol('n')), Integer(2)))), Rational(1, 2)), Mul(Rational(1, 2), Pow(Mul(Symbol('m'), Symbol('n')), Rational(-1, 2)), Add(Symbol('m'), Symbol('n')))), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('m'), Symbol('n'))",
+    "StrictGreaterThan(Symbol('n'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.018",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chetvertye-stepeni-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{m-n}{m^{3/4}+m^{1/2}n^{1/4}}-\\frac{\\sqrt{m}-\\sqrt{n}}{m^{1/4}+n^{1/4}}",
+  "dopolnenie": "и найдите его значение при $m=256$, $n=625$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "-1{,}5625",
+   "zapis": "-25/16",
+   "znachenie": -1.5625,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $\\alpha=m^{1/4}$, $\\beta=n^{1/4}$ (при $m>0$, $n>0$). Тогда разность в числителе раскладывается до конца",
+    "tex": "m-n=\\alpha^4-\\beta^4=(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)"
+   },
+   {
+    "chto": "Дробь с числителем $m-n$: в знаменателе выносим общий множитель и сокращаем",
+    "tex": "\\frac{(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)}{\\alpha^2(\\alpha+\\beta)}=\\frac{(\\alpha-\\beta)(\\alpha^2+\\beta^2)}{\\alpha^2}"
+   },
+   {
+    "chto": "Дробь с корнями: числитель — разность квадратов $\\alpha^2-\\beta^2$",
+    "tex": "\\frac{\\alpha^2-\\beta^2}{\\alpha+\\beta}=\\alpha-\\beta"
+   },
+   {
+    "chto": "Вычитаем, вынося общий множитель",
+    "tex": "\\frac{(\\alpha-\\beta)\\beta^2}{\\alpha^2}"
+   },
+   {
+    "chto": "Подставляем $\\alpha=4$, $\\beta=5$ в упрощённое выражение",
+    "tex": "-1{,}5625"
+   }
+  ],
+  "podskazki": [
+   "Как записать $m$, $\\sqrt{m}$ и $m^{3/4}$ через $\\alpha=m^{1/4}$?",
+   "На сколько множителей раскладывается $m-n$?",
+   "Какой общий множитель удобно вынести после сокращения обеих дробей?",
+   "Чему равны $m^{1/4}$ и $n^{1/4}$ при данных значениях?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(-25, 16)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.019",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "drobnye-kuby-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{a-1}{a^{2/3}+a^{1/3}+1}+\\frac{a+27}{a^{2/3}-3a^{1/3}+9}\\right):\\left(4a^{2/3}-4\\right)",
+  "dopolnenie": "и найдите его значение при $a=6 \\sqrt{6}$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "\\frac{1 + \\sqrt{6}}{10}",
+   "zapis": "(1 + sqrt(6))/10",
+   "znachenie": 0.34494897427831783,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $t=a^{1/3}$ ($a>0$, $t>0$). Числитель первой дроби — разность кубов",
+    "tex": "a-1=t^3-1=(t-1)(t^2+t+1)"
+   },
+   {
+    "chto": "Числитель второй дроби — сумма кубов",
+    "tex": "a+27=t^3+27=(t+3)(t^2-3t+9)"
+   },
+   {
+    "chto": "Сокращаем каждую дробь на неполный квадрат и складываем",
+    "tex": "(t-1)+(t+3)=2t+2"
+   },
+   {
+    "chto": "Делитель раскладываем как разность квадратов и сокращаем",
+    "tex": "\\frac{2t+2}{4t^2-4}=\\frac{1}{2t-2}=\\frac{1}{2 \\sqrt[3]{a} - 2}"
+   },
+   {
+    "chto": "При $a=6 \\sqrt{6}=(\\sqrt{6})^3$ получаем $a^{1/3}=\\sqrt{6}$; избавляемся от иррациональности в знаменателе",
+    "tex": "\\frac{1}{2\\sqrt{6}-2}=\\frac{1 + \\sqrt{6}}{10}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $a$ через $t=a^{1/3}$?",
+   "Какие формулы сокращённого умножения видны в числителях $a-1$ и $a+27$?",
+   "На какие множители раскладывается $4a^{2/3}-4$?",
+   "Чему равен $a^{1/3}$ при данном $a$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Rational(1, 20), Add(Integer(-1), Mul(Integer(6), Pow(Integer(6), Rational(1, 2)))), Pow(Add(Pow(Integer(6), Rational(1, 2)), Integer(7)), Integer(-1))), Mul(Rational(1, 20), Pow(Add(Integer(15), Mul(Integer(-1), Integer(3), Pow(Integer(6), Rational(1, 2)))), Integer(-1)), Add(Mul(Integer(6), Pow(Integer(6), Rational(1, 2))), Integer(27))))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.020",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{y^{2}-8y+12+(y-6)\\sqrt{y^2-4}}{y^{2}+3y+2+(y+1)\\sqrt{y^2-4}}",
+  "dopolnenie": "при $y>2$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{(y - 6) \\sqrt{y - 2}}{(y + 1) \\sqrt{y + 2}}",
+   "zapis": "(y - 6)*sqrt(y - 2)/((y + 1)*sqrt(y + 2))",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 12.307692307692308,
+     "=": 0.40231263881981544
+    },
+    {
+     "y": 10.857142857142858,
+     "=": 0.3399972580976843
+    },
+    {
+     "y": 10.75,
+     "=": 0.3348919260002291
+    },
+    {
+     "y": 9.666666666666666,
+     "=": 0.27865869741111104
+    },
+    {
+     "y": 4.153846153846154,
+     "=": -0.21191927581252357
+    },
+    {
+     "y": 13.25,
+     "=": 0.43698293934479415
+    },
+    {
+     "y": 10.222222222222221,
+     "=": 0.30858992303029237
+    },
+    {
+     "y": 12.142857142857142,
+     "=": 0.39581496069613387
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "y^{2}-8y+12=(y-2)(y-6),\\quad y^{2}+3y+2=(y+2)(y+1)"
+   },
+   {
+    "chto": "При $y>2$ записываем $y-2=(\\sqrt{y-2})^2$ и $\\sqrt{y^2-4}=\\sqrt{y-2}\\cdot\\sqrt{y+2}$; в числителе выносим $(y-6)\\sqrt{y-2}$",
+    "tex": "(y-6)\\sqrt{y-2}\\,(\\sqrt{y-2}+\\sqrt{y+2})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(y+1)\\sqrt{y+2}$",
+    "tex": "(y+1)\\sqrt{y+2}\\,(\\sqrt{y+2}+\\sqrt{y-2})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{y-2}+\\sqrt{y+2}>0$",
+    "tex": "\\frac{(y-6)\\sqrt{y-2}}{(y+1)\\sqrt{y+2}}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{y^2-4}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('y')), Mul(Add(Symbol('y'), Integer(-6)), Pow(Add(Pow(Symbol('y'), Integer(2)), Integer(-4)), Rational(1, 2))), Integer(12)), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(3), Symbol('y')), Mul(Add(Symbol('y'), Integer(1)), Pow(Add(Pow(Symbol('y'), Integer(2)), Integer(-4)), Rational(1, 2))), Integer(2)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(2))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.021",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "drobnye-kuby",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{a-1}{a^{2/3}+a^{1/3}+1}+\\frac{a+8}{a^{2/3}-2a^{1/3}+4}\\right):\\left(4a^{2/3}-1\\right)",
+  "dopolnenie": "при $a>0$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{1}{2 \\sqrt[3]{a} - 1}",
+   "zapis": "1/(2*a^(1/3) - 1)",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 25.5,
+     "=": 0.2046343409504626
+    },
+    {
+     "a": 10.5,
+     "=": 0.29590008477749696
+    },
+    {
+     "a": 28.333333333333332,
+     "=": 0.19618680153111712
+    },
+    {
+     "a": 8.181818181818182,
+     "=": 0.33002469089503855
+    },
+    {
+     "a": 27.076923076923077,
+     "=": 0.19977255482961198
+    },
+    {
+     "a": 10.555555555555555,
+     "=": 0.2952265198795819
+    },
+    {
+     "a": 15.8,
+     "=": 0.24884304109760316
+    },
+    {
+     "a": 37.22222222222222,
+     "=": 0.1761258174762033
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $t=a^{1/3}$ ($a>0$, $t>0$). Числитель первой дроби — разность кубов",
+    "tex": "a-1=t^3-1=(t-1)(t^2+t+1)"
+   },
+   {
+    "chto": "Числитель второй дроби — сумма кубов",
+    "tex": "a+8=t^3+8=(t+2)(t^2-2t+4)"
+   },
+   {
+    "chto": "Сокращаем каждую дробь на неполный квадрат и складываем",
+    "tex": "(t-1)+(t+2)=2t+1"
+   },
+   {
+    "chto": "Делитель раскладываем как разность квадратов и сокращаем",
+    "tex": "\\frac{2t+1}{4t^2-1}=\\frac{1}{2t-1}=\\frac{1}{2 \\sqrt[3]{a} - 1}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $a$ через $t=a^{1/3}$?",
+   "Какие формулы сокращённого умножения видны в числителях $a-1$ и $a+8$?",
+   "На какие множители раскладывается $4a^{2/3}-1$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Mul(Integer(4), Pow(Symbol('a'), Rational(2, 3))), Integer(-1)), Integer(-1)), Add(Mul(Add(Symbol('a'), Integer(-1)), Pow(Add(Pow(Symbol('a'), Rational(2, 3)), Pow(Symbol('a'), Rational(1, 3)), Integer(1)), Integer(-1))), Mul(Add(Symbol('a'), Integer(8)), Pow(Add(Pow(Symbol('a'), Rational(2, 3)), Mul(Integer(-1), Integer(2), Pow(Symbol('a'), Rational(1, 3))), Integer(4)), Integer(-1)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.022",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{y+3}+\\sqrt{y-3}}{\\sqrt{y+3}-\\sqrt{y-3}}-\\frac{\\sqrt{y+3}-\\sqrt{y-3}}{\\sqrt{y+3}+\\sqrt{y-3}}",
+  "dopolnenie": "и найдите его значение при $y=4{,}35$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2{,}1",
+   "zapis": "21/10",
+   "znachenie": 2.1,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{y+3}-\\sqrt{y-3})(\\sqrt{y+3}+\\sqrt{y-3})=(y+3)-(y-3)=6"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{y+3}+\\sqrt{y-3})^2-(\\sqrt{y+3}-\\sqrt{y-3})^2=4\\sqrt{y+3}\\cdot\\sqrt{y-3}=4\\sqrt{y^2-9}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $y>3$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{y^2-9}}{6}=\\frac{2 \\sqrt{y^{2} - 9}}{3}"
+   },
+   {
+    "chto": "Подставляем $y=4{,}35$",
+    "tex": "y^2-9=9{,}9225,\\quad \\frac{2}{3}\\cdot\\sqrt{9{,}9225}=2{,}1"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?",
+   "Удобнее подставлять число до упрощения или после?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(21, 10)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.023",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{18+6\\sqrt{9-x^2}}\\,\\bigl(\\sqrt{(3+x)^3}-\\sqrt{(3-x)^3}\\bigr)}{6+\\sqrt{9-x^2}}",
+  "dopolnenie": "при $0<x<3$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "2 \\sqrt{3} x",
+   "zapis": "2*sqrt(3)*x",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 1.1428571428571428,
+     "=": 3.958973274443148
+    },
+    {
+     "x": 0.3333333333333333,
+     "=": 1.1547005383792515
+    },
+    {
+     "x": 1.6923076923076923,
+     "=": 5.8623258102331235
+    },
+    {
+     "x": 2.3636363636363638,
+     "=": 8.187876544871056
+    },
+    {
+     "x": 0.75,
+     "=": 2.598076211353316
+    },
+    {
+     "x": 2.4285714285714284,
+     "=": 8.41281820819169
+    },
+    {
+     "x": 1.6666666666666667,
+     "=": 5.773502691896257
+    },
+    {
+     "x": 0.6363636363636364,
+     "=": 2.2044283005422076
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{3+x}$, $v=\\sqrt{3-x}$; при $0<x<3$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=6,\\quad uv=\\sqrt{9-x^2},\\quad u^2-v^2=2x"
+   },
+   {
+    "chto": "В скобке — разность кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3-v^3=(u-v)(u^2+uv+v^2)=(u-v)(6+\\sqrt{9-x^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $3=\\frac{u^2+v^2}{2}$",
+    "tex": "6(3+uv)=\\frac{6}{2}(u+v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=\\sqrt{3}(u+v)"
+   },
+   {
+    "chto": "Сокращаем на $6+\\sqrt{9-x^2}\\ne0$ и перемножаем",
+    "tex": "\\sqrt{3}(u+v)(u-v)=\\sqrt{3}(u^2-v^2)=2 \\sqrt{3} x"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{3+x}$ и $\\sqrt{3-x}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Pow(Add(Integer(3), Mul(Integer(-1), Symbol('x'))), Rational(3, 2))), Pow(Add(Symbol('x'), Integer(3)), Rational(3, 2))), Pow(Add(Pow(Add(Integer(9), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2)), Integer(6)), Integer(-1)), Pow(Add(Mul(Integer(6), Pow(Add(Integer(9), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2))), Integer(18)), Rational(1, 2)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(0))",
+    "StrictLessThan(Symbol('x'), Integer(3))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.024",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{15-3\\sqrt{25-a^2}}\\,\\bigl(\\sqrt{(5+a)^3}+\\sqrt{(5-a)^3}\\bigr)}{10-\\sqrt{25-a^2}}",
+  "dopolnenie": "при $0<a<5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\sqrt{6} a",
+   "zapis": "sqrt(6)*a",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 0.6666666666666666,
+     "=": 1.632993161855452
+    },
+    {
+     "a": 2.076923076923077,
+     "=": 5.087401773472754
+    },
+    {
+     "a": 0.75,
+     "=": 1.8371173070873836
+    },
+    {
+     "a": 2.5454545454545454,
+     "=": 6.235064799811726
+    },
+    {
+     "a": 0.7142857142857143,
+     "=": 1.749635530559413
+    },
+    {
+     "a": 4.75,
+     "=": 11.635076278220096
+    },
+    {
+     "a": 3.3333333333333335,
+     "=": 8.16496580927726
+    },
+    {
+     "a": 4.25,
+     "=": 10.410331406828506
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{5+a}$, $v=\\sqrt{5-a}$; при $0<a<5$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=10,\\quad uv=\\sqrt{25-a^2},\\quad u^2-v^2=2a"
+   },
+   {
+    "chto": "В скобке — сумма кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3+v^3=(u+v)(u^2-uv+v^2)=(u+v)(10-\\sqrt{25-a^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $5=\\frac{u^2+v^2}{2}$",
+    "tex": "3(5-uv)=\\frac{3}{2}(u-v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=\\frac{\\sqrt{6}}{2}(u-v)"
+   },
+   {
+    "chto": "Сокращаем на $10-\\sqrt{25-a^2}\\ne0$ и перемножаем",
+    "tex": "\\frac{\\sqrt{6}}{2}(u+v)(u-v)=\\frac{\\sqrt{6}}{2}(u^2-v^2)=\\sqrt{6} a"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{5+a}$ и $\\sqrt{5-a}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(10), Mul(Integer(-1), Pow(Add(Integer(25), Mul(Integer(-1), Pow(Symbol('a'), Integer(2)))), Rational(1, 2)))), Integer(-1)), Pow(Add(Integer(15), Mul(Integer(-1), Integer(3), Pow(Add(Integer(25), Mul(Integer(-1), Pow(Symbol('a'), Integer(2)))), Rational(1, 2)))), Rational(1, 2)), Add(Pow(Add(Integer(5), Mul(Integer(-1), Symbol('a'))), Rational(3, 2)), Pow(Add(Symbol('a'), Integer(5)), Rational(3, 2))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))",
+    "StrictLessThan(Symbol('a'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.025",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{a\\sqrt{a}-3\\sqrt{3}}{\\sqrt{a}-\\sqrt{3}}+\\sqrt{3a}\\right)\\cdot\\frac{\\sqrt{a}-\\sqrt{3}}{a-3}",
+  "dopolnenie": "при $a>0$, $a\\ne3$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\sqrt{a} + \\sqrt{3}",
+   "zapis": "sqrt(a) + sqrt(3)",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 3.5714285714285716,
+     "=": 3.6218731726150133
+    },
+    {
+     "a": 26.285714285714285,
+     "=": 6.859010363262123
+    },
+    {
+     "a": 26.285714285714285,
+     "=": 6.859010363262123
+    },
+    {
+     "a": 27.25,
+     "=": 6.952204062024152
+    },
+    {
+     "a": 26.09090909090909,
+     "=": 6.839976912252567
+    },
+    {
+     "a": 21.666666666666668,
+     "=": 6.386797488825191
+    },
+    {
+     "a": 4.5,
+     "=": 3.85337115112852
+    },
+    {
+     "a": 8.777777777777779,
+     "=": 4.694782280007407
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — разность кубов $\\sqrt{a}$ и $\\sqrt{3}$",
+    "tex": "a\\sqrt{a}-3\\sqrt{3}=(\\sqrt{a}-\\sqrt{3})(a+\\sqrt{3a}+3)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{a}-\\sqrt{3}\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "a+\\sqrt{3a}+3+\\sqrt{3a}=a+2\\sqrt{3a}+3=(\\sqrt{a}+\\sqrt{3})^2"
+   },
+   {
+    "chto": "Раскладываем $a-3$ как разность квадратов и сокращаем",
+    "tex": "\\frac{(\\sqrt{a}+\\sqrt{3})^2(\\sqrt{a}-\\sqrt{3})}{(\\sqrt{a}-\\sqrt{3})(\\sqrt{a}+\\sqrt{3})}=\\sqrt{a} + \\sqrt{3}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $a\\sqrt{a}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $a-3$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('a'), Rational(1, 2)), Mul(Integer(-1), Pow(Integer(3), Rational(1, 2)))), Pow(Add(Symbol('a'), Integer(-3)), Integer(-1)), Add(Mul(Pow(Integer(3), Rational(1, 2)), Pow(Symbol('a'), Rational(1, 2))), Mul(Pow(Add(Pow(Symbol('a'), Rational(1, 2)), Mul(Integer(-1), Pow(Integer(3), Rational(1, 2)))), Integer(-1)), Add(Pow(Symbol('a'), Rational(3, 2)), Mul(Integer(-1), Integer(3), Pow(Integer(3), Rational(1, 2)))))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))",
+    "Unequality(Symbol('a'), Integer(3))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.026",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{x+3}+\\sqrt{x-3}}{\\sqrt{x+3}-\\sqrt{x-3}}-\\frac{\\sqrt{x+3}-\\sqrt{x-3}}{\\sqrt{x+3}+\\sqrt{x-3}}",
+  "dopolnenie": "при $x>3$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{2 \\sqrt{x^{2} - 9}}{3}",
+   "zapis": "2*sqrt(x^2 - 9)/3",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 15.25,
+     "=": 9.96800436953712
+    },
+    {
+     "x": 17.428571428571427,
+     "=": 11.445622201247783
+    },
+    {
+     "x": 15.4,
+     "=": 10.06997738053291
+    },
+    {
+     "x": 21.8,
+     "=": 14.395060881350165
+    },
+    {
+     "x": 14.333333333333334,
+     "=": 9.34390935183495
+    },
+    {
+     "x": 20.818181818181817,
+     "=": 13.733927078020669
+    },
+    {
+     "x": 14.25,
+     "=": 9.287087810503355
+    },
+    {
+     "x": 16.25,
+     "=": 10.647117502456291
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{x+3}-\\sqrt{x-3})(\\sqrt{x+3}+\\sqrt{x-3})=(x+3)-(x-3)=6"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{x+3}+\\sqrt{x-3})^2-(\\sqrt{x+3}-\\sqrt{x-3})^2=4\\sqrt{x+3}\\cdot\\sqrt{x-3}=4\\sqrt{x^2-9}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $x>3$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{x^2-9}}{6}=\\frac{2 \\sqrt{x^{2} - 9}}{3}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Pow(Add(Symbol('x'), Integer(-3)), Rational(1, 2)), Mul(Integer(-1), Pow(Add(Symbol('x'), Integer(3)), Rational(1, 2)))), Pow(Add(Pow(Add(Symbol('x'), Integer(-3)), Rational(1, 2)), Pow(Add(Symbol('x'), Integer(3)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('x'), Integer(-3)), Rational(1, 2))), Pow(Add(Symbol('x'), Integer(3)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('x'), Integer(-3)), Rational(1, 2)), Pow(Add(Symbol('x'), Integer(3)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(3))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.027",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{y^{2}-3y+2+(y-1)\\sqrt{y^2-4}}{y^{2}+7y+10+(y+5)\\sqrt{y^2-4}}",
+  "dopolnenie": "и найдите его значение при $y=2{,}5$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "\\frac{1}{15}",
+   "zapis": "1/15",
+   "znachenie": 0.06666666666666667,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "y^{2}-3y+2=(y-2)(y-1),\\quad y^{2}+7y+10=(y+2)(y+5)"
+   },
+   {
+    "chto": "При $y>2$ записываем $y-2=(\\sqrt{y-2})^2$ и $\\sqrt{y^2-4}=\\sqrt{y-2}\\cdot\\sqrt{y+2}$; в числителе выносим $(y-1)\\sqrt{y-2}$",
+    "tex": "(y-1)\\sqrt{y-2}\\,(\\sqrt{y-2}+\\sqrt{y+2})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(y+5)\\sqrt{y+2}$",
+    "tex": "(y+5)\\sqrt{y+2}\\,(\\sqrt{y+2}+\\sqrt{y-2})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{y-2}+\\sqrt{y+2}>0$",
+    "tex": "\\frac{(y-1)\\sqrt{y-2}}{(y+5)\\sqrt{y+2}}"
+   },
+   {
+    "chto": "Подставляем $y=2{,}5$: под корнем получается квадрат",
+    "tex": "\\sqrt{\\frac{y-2}{y+2}}=\\sqrt{\\frac{1}{9}}=\\frac{1}{3},\\quad \\frac{1{,}5}{7{,}5}\\cdot\\frac{1}{3}=\\frac{1}{15}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{y^2-4}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?",
+   "Чему равно $\\frac{y-2}{y+2}$ при данном значении?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(1, 15)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.028",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{8-\\sqrt{64-a^2}}\\,\\bigl(\\sqrt{(8+a)^3}+\\sqrt{(8-a)^3}\\bigr)}{16-\\sqrt{64-a^2}}",
+  "dopolnenie": "при $0<a<8$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\sqrt{2} a",
+   "zapis": "sqrt(2)*a",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 0.6923076923076923,
+     "=": 0.9790709277967581
+    },
+    {
+     "a": 6.333333333333333,
+     "=": 8.956685895029603
+    },
+    {
+     "a": 5.5,
+     "=": 7.7781745930520225
+    },
+    {
+     "a": 2.5,
+     "=": 3.5355339059327378
+    },
+    {
+     "a": 6.181818181818182,
+     "=": 8.74241111285186
+    },
+    {
+     "a": 2.6923076923076925,
+     "=": 3.807498052542948
+    },
+    {
+     "a": 2.5555555555555554,
+     "=": 3.614101326064576
+    },
+    {
+     "a": 7.153846153846154,
+     "=": 10.117066253899834
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{8+a}$, $v=\\sqrt{8-a}$; при $0<a<8$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=16,\\quad uv=\\sqrt{64-a^2},\\quad u^2-v^2=2a"
+   },
+   {
+    "chto": "В скобке — сумма кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3+v^3=(u+v)(u^2-uv+v^2)=(u+v)(16-\\sqrt{64-a^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $8=\\frac{u^2+v^2}{2}$",
+    "tex": "(8-uv)=\\frac{1}{2}(u-v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=\\frac{\\sqrt{2}}{2}(u-v)"
+   },
+   {
+    "chto": "Сокращаем на $16-\\sqrt{64-a^2}\\ne0$ и перемножаем",
+    "tex": "\\frac{\\sqrt{2}}{2}(u+v)(u-v)=\\frac{\\sqrt{2}}{2}(u^2-v^2)=\\sqrt{2} a"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{8+a}$ и $\\sqrt{8-a}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(8), Mul(Integer(-1), Pow(Add(Integer(64), Mul(Integer(-1), Pow(Symbol('a'), Integer(2)))), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Integer(16), Mul(Integer(-1), Pow(Add(Integer(64), Mul(Integer(-1), Pow(Symbol('a'), Integer(2)))), Rational(1, 2)))), Integer(-1)), Add(Pow(Add(Integer(8), Mul(Integer(-1), Symbol('a'))), Rational(3, 2)), Pow(Add(Symbol('a'), Integer(8)), Rational(3, 2))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))",
+    "StrictLessThan(Symbol('a'), Integer(8))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.029",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{1-\\sqrt{1-y^2}}\\,\\bigl(\\sqrt{(1+y)^3}+\\sqrt{(1-y)^3}\\bigr)}{2-\\sqrt{1-y^2}}",
+  "dopolnenie": "при $0<y<1$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\sqrt{2} y",
+   "zapis": "sqrt(2)*y",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 0.2727272727272727,
+     "=": 0.38569460791993504
+    },
+    {
+     "y": 0.75,
+     "=": 1.0606601717798212
+    },
+    {
+     "y": 0.75,
+     "=": 1.0606601717798212
+    },
+    {
+     "y": 0.375,
+     "=": 0.5303300858899106
+    },
+    {
+     "y": 0.45454545454545453,
+     "=": 0.6428243465332251
+    },
+    {
+     "y": 0.75,
+     "=": 1.0606601717798212
+    },
+    {
+     "y": 0.5714285714285714,
+     "=": 0.8081220356417687
+    },
+    {
+     "y": 0.7142857142857143,
+     "=": 1.0101525445522108
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{1+y}$, $v=\\sqrt{1-y}$; при $0<y<1$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=2,\\quad uv=\\sqrt{1-y^2},\\quad u^2-v^2=2y"
+   },
+   {
+    "chto": "В скобке — сумма кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3+v^3=(u+v)(u^2-uv+v^2)=(u+v)(2-\\sqrt{1-y^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $1=\\frac{u^2+v^2}{2}$",
+    "tex": "(1-uv)=\\frac{1}{2}(u-v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=\\frac{\\sqrt{2}}{2}(u-v)"
+   },
+   {
+    "chto": "Сокращаем на $2-\\sqrt{1-y^2}\\ne0$ и перемножаем",
+    "tex": "\\frac{\\sqrt{2}}{2}(u+v)(u-v)=\\frac{\\sqrt{2}}{2}(u^2-v^2)=\\sqrt{2} y"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{1+y}$ и $\\sqrt{1-y}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(1), Mul(Integer(-1), Pow(Add(Integer(1), Mul(Integer(-1), Pow(Symbol('y'), Integer(2)))), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Integer(2), Mul(Integer(-1), Pow(Add(Integer(1), Mul(Integer(-1), Pow(Symbol('y'), Integer(2)))), Rational(1, 2)))), Integer(-1)), Add(Pow(Add(Integer(1), Mul(Integer(-1), Symbol('y'))), Rational(3, 2)), Pow(Add(Symbol('y'), Integer(1)), Rational(3, 2))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(0))",
+    "StrictLessThan(Symbol('y'), Integer(1))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.030",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{162-18\\sqrt{81-y^2}}\\,\\bigl(\\sqrt{(9+y)^3}+\\sqrt{(9-y)^3}\\bigr)}{18-\\sqrt{81-y^2}}",
+  "dopolnenie": "при $0<y<9$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "6 y",
+   "zapis": "6*y",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 2.4545454545454546,
+     "=": 14.727272727272727
+    },
+    {
+     "y": 5.363636363636363,
+     "=": 32.18181818181818
+    },
+    {
+     "y": 6.25,
+     "=": 37.5
+    },
+    {
+     "y": 4.75,
+     "=": 28.5
+    },
+    {
+     "y": 6.666666666666667,
+     "=": 40.0
+    },
+    {
+     "y": 1.25,
+     "=": 7.5
+    },
+    {
+     "y": 4.333333333333333,
+     "=": 26.0
+    },
+    {
+     "y": 1.125,
+     "=": 6.75
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{9+y}$, $v=\\sqrt{9-y}$; при $0<y<9$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=18,\\quad uv=\\sqrt{81-y^2},\\quad u^2-v^2=2y"
+   },
+   {
+    "chto": "В скобке — сумма кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3+v^3=(u+v)(u^2-uv+v^2)=(u+v)(18-\\sqrt{81-y^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $9=\\frac{u^2+v^2}{2}$",
+    "tex": "18(9-uv)=\\frac{18}{2}(u-v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=3(u-v)"
+   },
+   {
+    "chto": "Сокращаем на $18-\\sqrt{81-y^2}\\ne0$ и перемножаем",
+    "tex": "3(u+v)(u-v)=3(u^2-v^2)=6 y"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{9+y}$ и $\\sqrt{9-y}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(18), Mul(Integer(-1), Pow(Add(Integer(81), Mul(Integer(-1), Pow(Symbol('y'), Integer(2)))), Rational(1, 2)))), Integer(-1)), Pow(Add(Integer(162), Mul(Integer(-1), Integer(18), Pow(Add(Integer(81), Mul(Integer(-1), Pow(Symbol('y'), Integer(2)))), Rational(1, 2)))), Rational(1, 2)), Add(Pow(Add(Integer(9), Mul(Integer(-1), Symbol('y'))), Rational(3, 2)), Pow(Add(Symbol('y'), Integer(9)), Rational(3, 2))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(0))",
+    "StrictLessThan(Symbol('y'), Integer(9))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.031",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{40+8\\sqrt{25-x^2}}\\,\\bigl(\\sqrt{(5+x)^3}-\\sqrt{(5-x)^3}\\bigr)}{10+\\sqrt{25-x^2}}",
+  "dopolnenie": "при $0<x<5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "4 x",
+   "zapis": "4*x",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 1.375,
+     "=": 5.5
+    },
+    {
+     "x": 1.2727272727272727,
+     "=": 5.090909090909091
+    },
+    {
+     "x": 4.125,
+     "=": 16.5
+    },
+    {
+     "x": 3.8,
+     "=": 15.2
+    },
+    {
+     "x": 0.8461538461538461,
+     "=": 3.3846153846153846
+    },
+    {
+     "x": 4.636363636363637,
+     "=": 18.545454545454547
+    },
+    {
+     "x": 4.333333333333333,
+     "=": 17.333333333333332
+    },
+    {
+     "x": 0.7692307692307693,
+     "=": 3.076923076923077
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{5+x}$, $v=\\sqrt{5-x}$; при $0<x<5$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=10,\\quad uv=\\sqrt{25-x^2},\\quad u^2-v^2=2x"
+   },
+   {
+    "chto": "В скобке — разность кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3-v^3=(u-v)(u^2+uv+v^2)=(u-v)(10+\\sqrt{25-x^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $5=\\frac{u^2+v^2}{2}$",
+    "tex": "8(5+uv)=\\frac{8}{2}(u+v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=2(u+v)"
+   },
+   {
+    "chto": "Сокращаем на $10+\\sqrt{25-x^2}\\ne0$ и перемножаем",
+    "tex": "2(u+v)(u-v)=2(u^2-v^2)=4 x"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{5+x}$ и $\\sqrt{5-x}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Pow(Add(Integer(5), Mul(Integer(-1), Symbol('x'))), Rational(3, 2))), Pow(Add(Symbol('x'), Integer(5)), Rational(3, 2))), Pow(Add(Pow(Add(Integer(25), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2)), Integer(10)), Integer(-1)), Pow(Add(Mul(Integer(8), Pow(Add(Integer(25), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2))), Integer(40)), Rational(1, 2)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(0))",
+    "StrictLessThan(Symbol('x'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.032",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{p^{2}-5p+6+(p-3)\\sqrt{p^2-4}}{p^{2}+9p+14+(p+7)\\sqrt{p^2-4}}",
+  "dopolnenie": "при $p>2$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{(p - 3) \\sqrt{p - 2}}{\\sqrt{p + 2} (p + 7)}",
+   "zapis": "(p - 3)*sqrt(p - 2)/(sqrt(p + 2)*(p + 7))",
+   "peremennye": [
+    "p"
+   ],
+   "tochki": [
+    {
+     "p": 6.5,
+     "=": 0.18863881947270342
+    },
+    {
+     "p": 7.25,
+     "=": 0.22468953788622856
+    },
+    {
+     "p": 8.222222222222221,
+     "=": 0.2676562510033446
+    },
+    {
+     "p": 8.875,
+     "=": 0.29424958257199724
+    },
+    {
+     "p": 4.75,
+     "=": 0.09506368445807613
+    },
+    {
+     "p": 7.857142857142857,
+     "=": 0.25200720679880423
+    },
+    {
+     "p": 9.692307692307692,
+     "=": 0.3251904064142014
+    },
+    {
+     "p": 5.6,
+     "=": 0.14201926382463348
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "p^{2}-5p+6=(p-2)(p-3),\\quad p^{2}+9p+14=(p+2)(p+7)"
+   },
+   {
+    "chto": "При $p>2$ записываем $p-2=(\\sqrt{p-2})^2$ и $\\sqrt{p^2-4}=\\sqrt{p-2}\\cdot\\sqrt{p+2}$; в числителе выносим $(p-3)\\sqrt{p-2}$",
+    "tex": "(p-3)\\sqrt{p-2}\\,(\\sqrt{p-2}+\\sqrt{p+2})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(p+7)\\sqrt{p+2}$",
+    "tex": "(p+7)\\sqrt{p+2}\\,(\\sqrt{p+2}+\\sqrt{p-2})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{p-2}+\\sqrt{p+2}>0$",
+    "tex": "\\frac{(p-3)\\sqrt{p-2}}{(p+7)\\sqrt{p+2}}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{p^2-4}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('p'), Integer(2)), Mul(Integer(-1), Integer(5), Symbol('p')), Mul(Add(Symbol('p'), Integer(-3)), Pow(Add(Pow(Symbol('p'), Integer(2)), Integer(-4)), Rational(1, 2))), Integer(6)), Pow(Add(Pow(Symbol('p'), Integer(2)), Mul(Integer(9), Symbol('p')), Mul(Add(Symbol('p'), Integer(7)), Pow(Add(Pow(Symbol('p'), Integer(2)), Integer(-4)), Rational(1, 2))), Integer(14)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('p'), Integer(2))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.033",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{t\\sqrt{t}+2\\sqrt{2}}{\\sqrt{t}+\\sqrt{2}}-\\sqrt{2t}\\right):(t-2)",
+  "dopolnenie": "и найдите его значение при $t=\\frac{2}{81}$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "-0{,}8",
+   "zapis": "-4/5",
+   "znachenie": -0.8,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — сумма кубов $\\sqrt{t}$ и $\\sqrt{2}$",
+    "tex": "t\\sqrt{t}+2\\sqrt{2}=(\\sqrt{t}+\\sqrt{2})(t-\\sqrt{2t}+2)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{t}+\\sqrt{2}\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "t-\\sqrt{2t}+2-\\sqrt{2t}=t-2\\sqrt{2t}+2=(\\sqrt{t}-\\sqrt{2})^2"
+   },
+   {
+    "chto": "Раскладываем $t-2$ как разность квадратов и сокращаем на $\\sqrt{t}-\\sqrt{2}\\ne0$",
+    "tex": "\\frac{(\\sqrt{t}-\\sqrt{2})^2}{(\\sqrt{t}-\\sqrt{2})(\\sqrt{t}+\\sqrt{2})}=\\frac{\\sqrt{t} - \\sqrt{2}}{\\sqrt{t} + \\sqrt{2}}"
+   },
+   {
+    "chto": "Подставляем $t=\\frac{2}{81}$, тогда $\\sqrt{t}=\\frac{\\sqrt{2}}{9}$",
+    "tex": "\\frac{\\frac{\\sqrt{2}}{9} - \\sqrt{2}}{\\frac{\\sqrt{2}}{9} + \\sqrt{2}}=- \\frac{4}{5}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $t\\sqrt{t}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $t-2$?",
+   "Чему равен $\\sqrt{t}$ при данном значении?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(-4, 5)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.034",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chislovoe-summa",
+  "uroven": 2,
+  "uslovie": "Вычислите без приближённых вычислений",
+  "formula": "\\sqrt{9+4 \\sqrt{5}}-\\sqrt{9-4 \\sqrt{5}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "4",
+   "zapis": "4",
+   "znachenie": 4.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим значение через $N$; оно положительно. Возведём в квадрат",
+    "tex": "N^2=(9+4 \\sqrt{5})+(9-4 \\sqrt{5})-2\\sqrt{9^2-80}"
+   },
+   {
+    "chto": "Под корнем — разность квадратов",
+    "tex": "9^2-80=1=1^2"
+   },
+   {
+    "chto": "Получаем квадрат значения и извлекаем корень",
+    "tex": "N^2=18-2=16,\\quad N=4"
+   }
+  ],
+  "podskazki": [
+   "Что получится, если возвести выражение в квадрат?",
+   "Чему равно произведение $\\sqrt{c+d}\\cdot\\sqrt{c-d}$?",
+   "Какой знак у исходного выражения?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(9), Mul(Integer(-1), Integer(4), Pow(Integer(5), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(4), Pow(Integer(5), Rational(1, 2))), Integer(9)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.035",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "drobnye-kuby",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{a-8}{a^{2/3}+2a^{1/3}+4}+\\frac{a+125}{a^{2/3}-5a^{1/3}+25}\\right):\\left(4a^{2/3}-9\\right)",
+  "dopolnenie": "при $a>0$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{1}{2 \\sqrt[3]{a} - 3}",
+   "zapis": "1/(2*a^(1/3) - 3)",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 19.22222222222222,
+     "=": 0.42417294507734915
+    },
+    {
+     "a": 4.5,
+     "=": 3.312056144852969
+    },
+    {
+     "a": 24.6,
+     "=": 0.35502814276391886
+    },
+    {
+     "a": 19.363636363636363,
+     "=": 0.42182791279446824
+    },
+    {
+     "a": 24.571428571428573,
+     "=": 0.35531232170122096
+    },
+    {
+     "a": 5.333333333333333,
+     "=": 2.0229734572811355
+    },
+    {
+     "a": 1.75,
+     "=": -1.695324040468415
+    },
+    {
+     "a": 36.92307692307692,
+     "=": 0.2732373297028464
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $t=a^{1/3}$ ($a>0$, $t>0$). Числитель первой дроби — разность кубов",
+    "tex": "a-8=t^3-8=(t-2)(t^2+2t+4)"
+   },
+   {
+    "chto": "Числитель второй дроби — сумма кубов",
+    "tex": "a+125=t^3+125=(t+5)(t^2-5t+25)"
+   },
+   {
+    "chto": "Сокращаем каждую дробь на неполный квадрат и складываем",
+    "tex": "(t-2)+(t+5)=2t+3"
+   },
+   {
+    "chto": "Делитель раскладываем как разность квадратов и сокращаем",
+    "tex": "\\frac{2t+3}{4t^2-9}=\\frac{1}{2t-3}=\\frac{1}{2 \\sqrt[3]{a} - 3}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $a$ через $t=a^{1/3}$?",
+   "Какие формулы сокращённого умножения видны в числителях $a-8$ и $a+125$?",
+   "На какие множители раскладывается $4a^{2/3}-9$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Mul(Integer(4), Pow(Symbol('a'), Rational(2, 3))), Integer(-9)), Integer(-1)), Add(Mul(Add(Symbol('a'), Integer(-8)), Pow(Add(Pow(Symbol('a'), Rational(2, 3)), Mul(Integer(2), Pow(Symbol('a'), Rational(1, 3))), Integer(4)), Integer(-1))), Mul(Add(Symbol('a'), Integer(125)), Pow(Add(Pow(Symbol('a'), Rational(2, 3)), Mul(Integer(-1), Integer(5), Pow(Symbol('a'), Rational(1, 3))), Integer(25)), Integer(-1)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.036",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "podstanovka",
+  "uroven": 2,
+  "uslovie": "Подставьте в выражение",
+  "formula": "\\frac{\\sqrt{t^2-1}}{t}",
+  "dopolnenie": "значение $t=\\frac{p+q}{2\\sqrt{pq}}$ и упростите результат при $p>q>0$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{p - q}{p + q}",
+   "zapis": "(p - q)/(p + q)",
+   "peremennye": [
+    "p",
+    "q"
+   ],
+   "tochki": [
+    {
+     "p": 17.75,
+     "q": 12.6,
+     "=": 0.1696869851729819
+    },
+    {
+     "p": 14.75,
+     "q": 1.1818181818181819,
+     "=": 0.8516405135520685
+    },
+    {
+     "p": 2.5,
+     "q": 0.625,
+     "=": 0.6
+    },
+    {
+     "p": 16.545454545454547,
+     "q": 8.76923076923077,
+     "=": 0.30718232044198895
+    },
+    {
+     "p": 12.777777777777779,
+     "q": 3.5,
+     "=": 0.5699658703071673
+    },
+    {
+     "p": 5.666666666666667,
+     "q": 2.6,
+     "=": 0.3709677419354839
+    },
+    {
+     "p": 17.88888888888889,
+     "q": 6.428571428571429,
+     "=": 0.47127937336814624
+    },
+    {
+     "p": 11.666666666666666,
+     "q": 4.2,
+     "=": 0.47058823529411764
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Возводим $t$ в квадрат",
+    "tex": "t^2=\\frac{(p+q)^2}{4pq}"
+   },
+   {
+    "chto": "Находим $t^2-1$ — получается полный квадрат",
+    "tex": "t^2-1=\\frac{(p+q)^2-4pq}{4pq}=\\frac{(p-q)^2}{4pq}"
+   },
+   {
+    "chto": "Извлекаем корень: $\\sqrt{A^2}=|A|$, а при $p>q>0$ модуль раскрывается так",
+    "tex": "\\sqrt{t^2-1}=\\frac{|p-q|}{2\\sqrt{pq}}=\\frac{p-q}{2\\sqrt{pq}}"
+   },
+   {
+    "chto": "Подставляем и сокращаем на $\\sqrt{pq}$",
+    "tex": "\\frac{p - q}{p + q}"
+   }
+  ],
+  "podskazki": [
+   "Чему равно $t^2-1$? Не полный ли это квадрат?",
+   "Как раскрыть модуль при $p>q>0$?",
+   "Чему равны $t+\\sqrt{t^2-1}$ и $t-\\sqrt{t^2-1}$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Integer(2), Pow(Mul(Symbol('p'), Symbol('q')), Rational(1, 2)), Pow(Add(Integer(-1), Mul(Rational(1, 4), Pow(Symbol('p'), Integer(-1)), Pow(Symbol('q'), Integer(-1)), Pow(Add(Symbol('p'), Symbol('q')), Integer(2)))), Rational(1, 2)), Pow(Add(Symbol('p'), Symbol('q')), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('p'), Symbol('q'))",
+    "StrictGreaterThan(Symbol('q'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.037",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{t+7}+\\sqrt{t-7}}{\\sqrt{t+7}-\\sqrt{t-7}}-\\frac{\\sqrt{t+7}-\\sqrt{t-7}}{\\sqrt{t+7}+\\sqrt{t-7}}",
+  "dopolnenie": "при $t>7$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{2 \\sqrt{t^{2} - 49}}{7}",
+   "zapis": "2*sqrt(t^2 - 49)/7",
+   "peremennye": [
+    "t"
+   ],
+   "tochki": [
+    {
+     "t": 23.88888888888889,
+     "=": 6.525798175253128
+    },
+    {
+     "t": 21.5,
+     "=": 5.808157528644606
+    },
+    {
+     "t": 18.8,
+     "=": 4.985202593471922
+    },
+    {
+     "t": 26.428571428571427,
+     "=": 7.281339794604983
+    },
+    {
+     "t": 7.285714285714286,
+     "=": 0.5772300254584062
+    },
+    {
+     "t": 24.571428571428573,
+     "=": 6.729497067303184
+    },
+    {
+     "t": 13.88888888888889,
+     "=": 3.4273954479405155
+    },
+    {
+     "t": 22.571428571428573,
+     "=": 6.131014416548594
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{t+7}-\\sqrt{t-7})(\\sqrt{t+7}+\\sqrt{t-7})=(t+7)-(t-7)=14"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{t+7}+\\sqrt{t-7})^2-(\\sqrt{t+7}-\\sqrt{t-7})^2=4\\sqrt{t+7}\\cdot\\sqrt{t-7}=4\\sqrt{t^2-49}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $t>7$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{t^2-49}}{14}=\\frac{2 \\sqrt{t^{2} - 49}}{7}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Pow(Add(Symbol('t'), Integer(-7)), Rational(1, 2)), Mul(Integer(-1), Pow(Add(Symbol('t'), Integer(7)), Rational(1, 2)))), Pow(Add(Pow(Add(Symbol('t'), Integer(-7)), Rational(1, 2)), Pow(Add(Symbol('t'), Integer(7)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('t'), Integer(-7)), Rational(1, 2))), Pow(Add(Symbol('t'), Integer(7)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('t'), Integer(-7)), Rational(1, 2)), Pow(Add(Symbol('t'), Integer(7)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('t'), Integer(7))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.038",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{p^{2}-8p+12+(p-2)\\sqrt{p^2-36}}{p^{2}+11p+30+(p+5)\\sqrt{p^2-36}}",
+  "dopolnenie": "при $p>6$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{\\sqrt{p - 6} (p - 2)}{(p + 5) \\sqrt{p + 6}}",
+   "zapis": "sqrt(p - 6)*(p - 2)/((p + 5)*sqrt(p + 6))",
+   "peremennye": [
+    "p"
+   ],
+   "tochki": [
+    {
+     "p": 12.5,
+     "=": 0.3556493870182915
+    },
+    {
+     "p": 16.5,
+     "=": 0.4607156158338424
+    },
+    {
+     "p": 13.857142857142858,
+     "=": 0.3955287946487143
+    },
+    {
+     "p": 17.714285714285715,
+     "=": 0.4862374923888388
+    },
+    {
+     "p": 9.75,
+     "=": 0.2563805276390214
+    },
+    {
+     "p": 13.846153846153847,
+     "=": 0.39522541974897946
+    },
+    {
+     "p": 8.222222222222221,
+     "=": 0.18601633295108114
+    },
+    {
+     "p": 14.846153846153847,
+     "=": 0.42165867519999717
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "p^{2}-8p+12=(p-6)(p-2),\\quad p^{2}+11p+30=(p+6)(p+5)"
+   },
+   {
+    "chto": "При $p>6$ записываем $p-6=(\\sqrt{p-6})^2$ и $\\sqrt{p^2-36}=\\sqrt{p-6}\\cdot\\sqrt{p+6}$; в числителе выносим $(p-2)\\sqrt{p-6}$",
+    "tex": "(p-2)\\sqrt{p-6}\\,(\\sqrt{p-6}+\\sqrt{p+6})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(p+5)\\sqrt{p+6}$",
+    "tex": "(p+5)\\sqrt{p+6}\\,(\\sqrt{p+6}+\\sqrt{p-6})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{p-6}+\\sqrt{p+6}>0$",
+    "tex": "\\frac{(p-2)\\sqrt{p-6}}{(p+5)\\sqrt{p+6}}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{p^2-36}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('p'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('p')), Mul(Add(Symbol('p'), Integer(-2)), Pow(Add(Pow(Symbol('p'), Integer(2)), Integer(-36)), Rational(1, 2))), Integer(12)), Pow(Add(Pow(Symbol('p'), Integer(2)), Mul(Integer(11), Symbol('p')), Mul(Add(Symbol('p'), Integer(5)), Pow(Add(Pow(Symbol('p'), Integer(2)), Integer(-36)), Rational(1, 2))), Integer(30)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('p'), Integer(6))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.039",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadratnye-stepeni",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{(y^{2}+5y+4)^{1/2}+(y^{2}-5y+4)^{1/2}}{(y^{2}+5y+4)^{1/2}-(y^{2}-5y+4)^{1/2}}+\\frac{(y^{2}+5y+4)^{1/2}-(y^{2}-5y+4)^{1/2}}{(y^{2}+5y+4)^{1/2}+(y^{2}-5y+4)^{1/2}}",
+  "dopolnenie": "при $y>4$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{2 y^{2} + 8}{5 y}",
+   "zapis": "(2*y^2 + 8)/(5*y)",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 8.4,
+     "=": 3.5504761904761906
+    },
+    {
+     "y": 16.22222222222222,
+     "=": 6.58751902587519
+    },
+    {
+     "y": 11.875,
+     "=": 4.884736842105263
+    },
+    {
+     "y": 6.375,
+     "=": 2.8009803921568626
+    },
+    {
+     "y": 10.333333333333334,
+     "=": 4.288172043010753
+    },
+    {
+     "y": 16.22222222222222,
+     "=": 6.58751902587519
+    },
+    {
+     "y": 14.571428571428571,
+     "=": 5.938375350140056
+    },
+    {
+     "y": 5.666666666666667,
+     "=": 2.549019607843137
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $A=y^{2}+5y+4$, $B=y^{2}-5y+4$; при $y>4$ оба трёхчлена положительны",
+    "tex": "A=(y+1)(y+4),\\quad B=(y-1)(y-4)"
+   },
+   {
+    "chto": "Приводим к общему знаменателю — разности квадратов",
+    "tex": "(\\sqrt{A}-\\sqrt{B})(\\sqrt{A}+\\sqrt{B})=A-B=10y"
+   },
+   {
+    "chto": "Числитель: сумма квадратов суммы и разности",
+    "tex": "(\\sqrt{A}+\\sqrt{B})^2+(\\sqrt{A}-\\sqrt{B})^2=2(A+B)=4(y^2+4)"
+   },
+   {
+    "chto": "Делим",
+    "tex": "\\frac{4(y^2+4)}{10y}=\\frac{2 y^{2} + 8}{5 y}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $1/2$-ю степень через корень?",
+   "Какой общий знаменатель у двух дробей?",
+   "Чему равна сумма $(X+Y)^2+(X-Y)^2$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Mul(Integer(-1), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(5), Symbol('y')), Integer(4)), Rational(1, 2))), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(5), Symbol('y')), Integer(4)), Rational(1, 2))), Pow(Add(Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(5), Symbol('y')), Integer(4)), Rational(1, 2)), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(5), Symbol('y')), Integer(4)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(5), Symbol('y')), Integer(4)), Rational(1, 2))), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(5), Symbol('y')), Integer(4)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(5), Symbol('y')), Integer(4)), Rational(1, 2)), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(5), Symbol('y')), Integer(4)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(4))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.040",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{t\\sqrt{t}+5\\sqrt{5}}{\\sqrt{t}+\\sqrt{5}}-\\sqrt{5t}\\right)\\cdot\\frac{\\sqrt{t}+\\sqrt{5}}{t-5}",
+  "dopolnenie": "при $t>0$, $t\\ne5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\sqrt{t} - \\sqrt{5}",
+   "zapis": "sqrt(t) - sqrt(5)",
+   "peremennye": [
+    "t"
+   ],
+   "tochki": [
+    {
+     "t": 15.692307692307692,
+     "=": 1.7252837731413588
+    },
+    {
+     "t": 0.6666666666666666,
+     "=": -1.4195713965720638
+    },
+    {
+     "t": 17.714285714285715,
+     "=": 1.9727662689734204
+    },
+    {
+     "t": 21.666666666666668,
+     "=": 2.418678703756524
+    },
+    {
+     "t": 23.666666666666668,
+     "=": 2.628771862275685
+    },
+    {
+     "t": 3.272727272727273,
+     "=": -0.426999910033208
+    },
+    {
+     "t": 12.88888888888889,
+     "=": 1.354041893923213
+    },
+    {
+     "t": 20.25,
+     "=": 2.26393202250021
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — сумма кубов $\\sqrt{t}$ и $\\sqrt{5}$",
+    "tex": "t\\sqrt{t}+5\\sqrt{5}=(\\sqrt{t}+\\sqrt{5})(t-\\sqrt{5t}+5)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{t}+\\sqrt{5}\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "t-\\sqrt{5t}+5-\\sqrt{5t}=t-2\\sqrt{5t}+5=(\\sqrt{t}-\\sqrt{5})^2"
+   },
+   {
+    "chto": "Раскладываем $t-5$ как разность квадратов и сокращаем",
+    "tex": "\\frac{(\\sqrt{t}-\\sqrt{5})^2(\\sqrt{t}+\\sqrt{5})}{(\\sqrt{t}-\\sqrt{5})(\\sqrt{t}+\\sqrt{5})}=\\sqrt{t} - \\sqrt{5}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $t\\sqrt{t}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $t-5$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('t'), Rational(1, 2)), Pow(Integer(5), Rational(1, 2))), Pow(Add(Symbol('t'), Integer(-5)), Integer(-1)), Add(Mul(Integer(-1), Pow(Integer(5), Rational(1, 2)), Pow(Symbol('t'), Rational(1, 2))), Mul(Pow(Add(Pow(Symbol('t'), Rational(1, 2)), Pow(Integer(5), Rational(1, 2))), Integer(-1)), Add(Pow(Symbol('t'), Rational(3, 2)), Mul(Integer(5), Pow(Integer(5), Rational(1, 2)))))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('t'), Integer(0))",
+    "Unequality(Symbol('t'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.041",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chetvertye-stepeni-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{m-n}{m^{3/4}+m^{1/4}n^{1/2}}-\\frac{\\sqrt{m}-\\sqrt{n}}{m^{1/4}-n^{1/4}}",
+  "dopolnenie": "и найдите его значение при $m=256$, $n=625$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "-11{,}25",
+   "zapis": "-45/4",
+   "znachenie": -11.25,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $\\alpha=m^{1/4}$, $\\beta=n^{1/4}$ (при $m>0$, $n>0$). Тогда разность в числителе раскладывается до конца",
+    "tex": "m-n=\\alpha^4-\\beta^4=(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)"
+   },
+   {
+    "chto": "Дробь с числителем $m-n$: в знаменателе выносим общий множитель и сокращаем",
+    "tex": "\\frac{(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)}{\\alpha(\\alpha^2+\\beta^2)}=\\frac{(\\alpha-\\beta)(\\alpha+\\beta)}{\\alpha}"
+   },
+   {
+    "chto": "Дробь с корнями: числитель — разность квадратов $\\alpha^2-\\beta^2$",
+    "tex": "\\frac{\\alpha^2-\\beta^2}{\\alpha-\\beta}=\\alpha+\\beta"
+   },
+   {
+    "chto": "Вычитаем, вынося общий множитель",
+    "tex": "-\\frac{(\\alpha+\\beta)\\beta}{\\alpha}"
+   },
+   {
+    "chto": "Подставляем $\\alpha=4$, $\\beta=5$ в упрощённое выражение",
+    "tex": "-11{,}25"
+   }
+  ],
+  "podskazki": [
+   "Как записать $m$, $\\sqrt{m}$ и $m^{3/4}$ через $\\alpha=m^{1/4}$?",
+   "На сколько множителей раскладывается $m-n$?",
+   "Какой общий множитель удобно вынести после сокращения обеих дробей?",
+   "Чему равны $m^{1/4}$ и $n^{1/4}$ при данных значениях?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(-45, 4)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.042",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "podstanovka-kusochno",
+  "uroven": 2,
+  "uslovie": "Подставьте в выражение",
+  "formula": "a\\left(x-\\sqrt{x^2-1}\\right)",
+  "dopolnenie": "значение $x=\\frac{1}{2}\\left(a+\\frac{1}{a}\\right)$, где $a>0$, и упростите результат.",
+  "otvet": {
+   "vid": "kusochnyi",
+   "peremennaya": "a",
+   "kuski": [
+    {
+     "vid": "vyrazhenie",
+     "tex": "a^{2}",
+     "zapis": "a^2",
+     "peremennye": [
+      "a"
+     ],
+     "tochki": [
+      {
+       "a": 0.6923076923076923,
+       "=": 0.47928994082840237
+      },
+      {
+       "a": 0.75,
+       "=": 0.5625
+      },
+      {
+       "a": 0.09090909090909091,
+       "=": 0.008264462809917356
+      },
+      {
+       "a": 0.75,
+       "=": 0.5625
+      },
+      {
+       "a": 0.7272727272727273,
+       "=": 0.5289256198347108
+      },
+      {
+       "a": 0.6666666666666666,
+       "=": 0.4444444444444444
+      }
+     ],
+     "oblast": {
+      "lo": 0.0,
+      "hi": 1.0,
+      "loZakr": false,
+      "hiZakr": false,
+      "tex": "(0;\\,1)"
+     }
+    },
+    {
+     "vid": "vyrazhenie",
+     "tex": "1",
+     "zapis": "1",
+     "peremennye": [
+      "a"
+     ],
+     "tochki": [
+      {
+       "a": 17.09090909090909,
+       "=": 1.0
+      },
+      {
+       "a": 30.142857142857142,
+       "=": 1.0
+      },
+      {
+       "a": 10.181818181818182,
+       "=": 1.0
+      },
+      {
+       "a": 13.25,
+       "=": 1.0
+      },
+      {
+       "a": 19.181818181818183,
+       "=": 1.0
+      },
+      {
+       "a": 19.333333333333332,
+       "=": 1.0
+      }
+     ],
+     "oblast": {
+      "lo": 1.0,
+      "hi": null,
+      "loZakr": true,
+      "hiZakr": false,
+      "tex": "[1;\\,+\\infty)"
+     }
+    }
+   ],
+   "tex": "a^{2}\\ \\text{при}\\ a\\in(0;\\,1);\\ 1\\ \\text{при}\\ a\\in[1;\\,+\\infty)"
+  },
+  "razbor": [
+   {
+    "chto": "Находим $x^2-1$ — это полный квадрат",
+    "tex": "x^2-1=\\frac{(a^2+1)^2}{4a^2}-1=\\frac{(a^2-1)^2}{4a^2}"
+   },
+   {
+    "chto": "При $a>0$ корень равен модулю",
+    "tex": "\\sqrt{x^2-1}=\\frac{|a^2-1|}{2a}"
+   },
+   {
+    "chto": "При $a\\ge1$: $x+\\sqrt{x^2-1}=a$, $x-\\sqrt{x^2-1}=\\frac{1}{a}$; подставляем",
+    "tex": "1"
+   },
+   {
+    "chto": "При $0<a<1$ модуль меняет знак: $x+\\sqrt{x^2-1}=\\frac{1}{a}$, $x-\\sqrt{x^2-1}=a$",
+    "tex": "a^{2}"
+   },
+   {
+    "chto": "Записываем ответ по промежуткам",
+    "tex": "a^{2}\\ \\text{при}\\ a\\in(0;\\,1);\\ 1\\ \\text{при}\\ a\\in[1;\\,+\\infty)"
+   }
+  ],
+  "podskazki": [
+   "Чему равно $x^2-1$ после приведения к общему знаменателю?",
+   "Чему равен $\\sqrt{A^2}$? При каких $a$ меняется знак выражения $a^2-1$?",
+   "Сколько промежутков получится в ответе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Symbol('a'), Add(Mul(Rational(1, 2), Symbol('a')), Mul(Integer(-1), Pow(Add(Pow(Add(Mul(Rational(1, 2), Symbol('a')), Mul(Rational(1, 2), Pow(Symbol('a'), Integer(-1)))), Integer(2)), Integer(-1)), Rational(1, 2))), Mul(Rational(1, 2), Pow(Symbol('a'), Integer(-1)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.043",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{y+5}+\\sqrt{y-5}}{\\sqrt{y+5}-\\sqrt{y-5}}+\\frac{\\sqrt{y+5}-\\sqrt{y-5}}{\\sqrt{y+5}+\\sqrt{y-5}}",
+  "dopolnenie": "при $y>5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{2 y}{5}",
+   "zapis": "2*y/5",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 11.875,
+     "=": 4.75
+    },
+    {
+     "y": 9.4,
+     "=": 3.76
+    },
+    {
+     "y": 21.25,
+     "=": 8.5
+    },
+    {
+     "y": 9.714285714285714,
+     "=": 3.8857142857142857
+    },
+    {
+     "y": 21.5,
+     "=": 8.6
+    },
+    {
+     "y": 20.8,
+     "=": 8.32
+    },
+    {
+     "y": 15.461538461538462,
+     "=": 6.184615384615385
+    },
+    {
+     "y": 6.571428571428571,
+     "=": 2.6285714285714286
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{y+5}-\\sqrt{y-5})(\\sqrt{y+5}+\\sqrt{y-5})=(y+5)-(y-5)=10"
+   },
+   {
+    "chto": "В числителе сумма квадратов суммы и разности — удвоенная сумма квадратов слагаемых",
+    "tex": "(\\sqrt{y+5}+\\sqrt{y-5})^2+(\\sqrt{y+5}-\\sqrt{y-5})^2=2\\bigl((y+5)+(y-5)\\bigr)=4y"
+   },
+   {
+    "chto": "Делим на общий знаменатель",
+    "tex": "\\frac{4y}{10}=\\frac{2 y}{5}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2+(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Mul(Integer(-1), Pow(Add(Symbol('y'), Integer(-5)), Rational(1, 2))), Pow(Add(Symbol('y'), Integer(5)), Rational(1, 2))), Pow(Add(Pow(Add(Symbol('y'), Integer(-5)), Rational(1, 2)), Pow(Add(Symbol('y'), Integer(5)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('y'), Integer(-5)), Rational(1, 2))), Pow(Add(Symbol('y'), Integer(5)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('y'), Integer(-5)), Rational(1, 2)), Pow(Add(Symbol('y'), Integer(5)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.044",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{x+1}+\\sqrt{x-1}}{\\sqrt{x+1}-\\sqrt{x-1}}-\\frac{\\sqrt{x+1}-\\sqrt{x-1}}{\\sqrt{x+1}+\\sqrt{x-1}}",
+  "dopolnenie": "при $x>1$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "2 \\sqrt{x^{2} - 1}",
+   "zapis": "2*sqrt(x^2 - 1)",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 12.666666666666666,
+     "=": 25.25426256650108
+    },
+    {
+     "x": 12.222222222222221,
+     "=": 24.362488875267463
+    },
+    {
+     "x": 19.857142857142858,
+     "=": 39.663894032178916
+    },
+    {
+     "x": 9.272727272727273,
+     "=": 18.4372960137196
+    },
+    {
+     "x": 12.181818181818182,
+     "=": 24.281408049359577
+    },
+    {
+     "x": 20.666666666666668,
+     "=": 41.284917881042766
+    },
+    {
+     "x": 9.88888888888889,
+     "=": 19.67639432993658
+    },
+    {
+     "x": 8.181818181818182,
+     "=": 16.240954252793223
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{x+1}-\\sqrt{x-1})(\\sqrt{x+1}+\\sqrt{x-1})=(x+1)-(x-1)=2"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{x+1}+\\sqrt{x-1})^2-(\\sqrt{x+1}-\\sqrt{x-1})^2=4\\sqrt{x+1}\\cdot\\sqrt{x-1}=4\\sqrt{x^2-1}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $x>1$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{x^2-1}}{2}=2 \\sqrt{x^{2} - 1}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Pow(Add(Symbol('x'), Integer(-1)), Rational(1, 2)), Mul(Integer(-1), Pow(Add(Symbol('x'), Integer(1)), Rational(1, 2)))), Pow(Add(Pow(Add(Symbol('x'), Integer(-1)), Rational(1, 2)), Pow(Add(Symbol('x'), Integer(1)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('x'), Integer(-1)), Rational(1, 2))), Pow(Add(Symbol('x'), Integer(1)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('x'), Integer(-1)), Rational(1, 2)), Pow(Add(Symbol('x'), Integer(1)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(1))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.045",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{72+8\\sqrt{81-y^2}}\\,\\bigl(\\sqrt{(9+y)^3}-\\sqrt{(9-y)^3}\\bigr)}{18+\\sqrt{81-y^2}}",
+  "dopolnenie": "при $0<y<9$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "4 y",
+   "zapis": "4*y",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 8.25,
+     "=": 33.0
+    },
+    {
+     "y": 7.222222222222222,
+     "=": 28.88888888888889
+    },
+    {
+     "y": 4.25,
+     "=": 17.0
+    },
+    {
+     "y": 3.25,
+     "=": 13.0
+    },
+    {
+     "y": 5.125,
+     "=": 20.5
+    },
+    {
+     "y": 7.333333333333333,
+     "=": 29.333333333333332
+    },
+    {
+     "y": 5.75,
+     "=": 23.0
+    },
+    {
+     "y": 4.222222222222222,
+     "=": 16.88888888888889
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{9+y}$, $v=\\sqrt{9-y}$; при $0<y<9$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=18,\\quad uv=\\sqrt{81-y^2},\\quad u^2-v^2=2y"
+   },
+   {
+    "chto": "В скобке — разность кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3-v^3=(u-v)(u^2+uv+v^2)=(u-v)(18+\\sqrt{81-y^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $9=\\frac{u^2+v^2}{2}$",
+    "tex": "8(9+uv)=\\frac{8}{2}(u+v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=2(u+v)"
+   },
+   {
+    "chto": "Сокращаем на $18+\\sqrt{81-y^2}\\ne0$ и перемножаем",
+    "tex": "2(u+v)(u-v)=2(u^2-v^2)=4 y"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{9+y}$ и $\\sqrt{9-y}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Pow(Add(Integer(9), Mul(Integer(-1), Symbol('y'))), Rational(3, 2))), Pow(Add(Symbol('y'), Integer(9)), Rational(3, 2))), Pow(Add(Pow(Add(Integer(81), Mul(Integer(-1), Pow(Symbol('y'), Integer(2)))), Rational(1, 2)), Integer(18)), Integer(-1)), Pow(Add(Mul(Integer(8), Pow(Add(Integer(81), Mul(Integer(-1), Pow(Symbol('y'), Integer(2)))), Rational(1, 2))), Integer(72)), Rational(1, 2)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(0))",
+    "StrictLessThan(Symbol('y'), Integer(9))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.046",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadratnye-stepeni",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{(y^{2}+8y+15)^{1/2}+(y^{2}-8y+15)^{1/2}}{(y^{2}+8y+15)^{1/2}-(y^{2}-8y+15)^{1/2}}+\\frac{(y^{2}+8y+15)^{1/2}-(y^{2}-8y+15)^{1/2}}{(y^{2}+8y+15)^{1/2}+(y^{2}-8y+15)^{1/2}}",
+  "dopolnenie": "при $y>5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{y^{2} + 15}{4 y}",
+   "zapis": "(y^2 + 15)/(4*y)",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 14.615384615384615,
+     "=": 3.910425101214575
+    },
+    {
+     "y": 17.2,
+     "=": 4.5180232558139535
+    },
+    {
+     "y": 11.857142857142858,
+     "=": 3.280550774526678
+    },
+    {
+     "y": 9.11111111111111,
+     "=": 2.6893631436314362
+    },
+    {
+     "y": 6.888888888888889,
+     "=": 2.2665770609319
+    },
+    {
+     "y": 9.076923076923077,
+     "=": 2.6823663624511083
+    },
+    {
+     "y": 14.818181818181818,
+     "=": 3.957612939208031
+    },
+    {
+     "y": 8.875,
+     "=": 2.6412852112676055
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $A=y^{2}+8y+15$, $B=y^{2}-8y+15$; при $y>5$ оба трёхчлена положительны",
+    "tex": "A=(y+3)(y+5),\\quad B=(y-3)(y-5)"
+   },
+   {
+    "chto": "Приводим к общему знаменателю — разности квадратов",
+    "tex": "(\\sqrt{A}-\\sqrt{B})(\\sqrt{A}+\\sqrt{B})=A-B=16y"
+   },
+   {
+    "chto": "Числитель: сумма квадратов суммы и разности",
+    "tex": "(\\sqrt{A}+\\sqrt{B})^2+(\\sqrt{A}-\\sqrt{B})^2=2(A+B)=4(y^2+15)"
+   },
+   {
+    "chto": "Делим",
+    "tex": "\\frac{4(y^2+15)}{16y}=\\frac{y^{2} + 15}{4 y}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $1/2$-ю степень через корень?",
+   "Какой общий знаменатель у двух дробей?",
+   "Чему равна сумма $(X+Y)^2+(X-Y)^2$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Mul(Integer(-1), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('y')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(8), Symbol('y')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('y')), Integer(15)), Rational(1, 2)), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(8), Symbol('y')), Integer(15)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('y')), Integer(15)), Rational(1, 2))), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(8), Symbol('y')), Integer(15)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(-1), Integer(8), Symbol('y')), Integer(15)), Rational(1, 2)), Pow(Add(Pow(Symbol('y'), Integer(2)), Mul(Integer(8), Symbol('y')), Integer(15)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.047",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chislovoe-summa",
+  "uroven": 2,
+  "uslovie": "Вычислите без приближённых вычислений",
+  "formula": "\\sqrt{26+8 \\sqrt{10}}+\\sqrt{26-8 \\sqrt{10}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "8",
+   "zapis": "8",
+   "znachenie": 8.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим значение через $N$; оно положительно. Возведём в квадрат",
+    "tex": "N^2=(26+8 \\sqrt{10})+(26-8 \\sqrt{10})+2\\sqrt{26^2-640}"
+   },
+   {
+    "chto": "Под корнем — разность квадратов",
+    "tex": "26^2-640=36=6^2"
+   },
+   {
+    "chto": "Получаем квадрат значения и извлекаем корень",
+    "tex": "N^2=52+12=64,\\quad N=8"
+   }
+  ],
+  "podskazki": [
+   "Что получится, если возвести выражение в квадрат?",
+   "Чему равно произведение $\\sqrt{c+d}\\cdot\\sqrt{c-d}$?",
+   "Какой знак у исходного выражения?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Pow(Add(Integer(26), Mul(Integer(-1), Integer(8), Pow(Integer(10), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(8), Pow(Integer(10), Rational(1, 2))), Integer(26)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.048",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{c^{2}-9c+20+(c-5)\\sqrt{c^2-16}}{c^{2}+5c+4+(c+1)\\sqrt{c^2-16}}",
+  "dopolnenie": "при $c>4$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{(c - 5) \\sqrt{c - 4}}{(c + 1) \\sqrt{c + 4}}",
+   "zapis": "(c - 5)*sqrt(c - 4)/((c + 1)*sqrt(c + 4))",
+   "peremennye": [
+    "c"
+   ],
+   "tochki": [
+    {
+     "c": 18.75,
+     "=": 0.5605842707440425
+    },
+    {
+     "c": 6.75,
+     "=": 0.11420850877458426
+    },
+    {
+     "c": 6.090909090909091,
+     "=": 0.07003079748667931
+    },
+    {
+     "c": 9.375,
+     "=": 0.2673205161012979
+    },
+    {
+     "c": 11.142857142857142,
+     "=": 0.3474414264584487
+    },
+    {
+     "c": 17.454545454545453,
+     "=": 0.5344405293187416
+    },
+    {
+     "c": 10.363636363636363,
+     "=": 0.31416838184626206
+    },
+    {
+     "c": 12.777777777777779,
+     "=": 0.4083207278458043
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "c^{2}-9c+20=(c-4)(c-5),\\quad c^{2}+5c+4=(c+4)(c+1)"
+   },
+   {
+    "chto": "При $c>4$ записываем $c-4=(\\sqrt{c-4})^2$ и $\\sqrt{c^2-16}=\\sqrt{c-4}\\cdot\\sqrt{c+4}$; в числителе выносим $(c-5)\\sqrt{c-4}$",
+    "tex": "(c-5)\\sqrt{c-4}\\,(\\sqrt{c-4}+\\sqrt{c+4})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(c+1)\\sqrt{c+4}$",
+    "tex": "(c+1)\\sqrt{c+4}\\,(\\sqrt{c+4}+\\sqrt{c-4})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{c-4}+\\sqrt{c+4}>0$",
+    "tex": "\\frac{(c-5)\\sqrt{c-4}}{(c+1)\\sqrt{c+4}}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{c^2-16}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('c'), Integer(2)), Mul(Integer(-1), Integer(9), Symbol('c')), Mul(Add(Symbol('c'), Integer(-5)), Pow(Add(Pow(Symbol('c'), Integer(2)), Integer(-16)), Rational(1, 2))), Integer(20)), Pow(Add(Pow(Symbol('c'), Integer(2)), Mul(Integer(5), Symbol('c')), Mul(Add(Symbol('c'), Integer(1)), Pow(Add(Pow(Symbol('c'), Integer(2)), Integer(-16)), Rational(1, 2))), Integer(4)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('c'), Integer(4))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.049",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{t\\sqrt{t}-3\\sqrt{3}}{\\sqrt{t}-\\sqrt{3}}+\\sqrt{3t}\\right):(t-3)",
+  "dopolnenie": "при $t>0$, $t\\ne3$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{\\sqrt{t} + \\sqrt{3}}{\\sqrt{t} - \\sqrt{3}}",
+   "zapis": "(sqrt(t) + sqrt(3))/(sqrt(t) - sqrt(3))",
+   "peremennye": [
+    "t"
+   ],
+   "tochki": [
+    {
+     "t": 14.4,
+     "=": 2.679415910537192
+    },
+    {
+     "t": 20.09090909090909,
+     "=": 2.2595645024118327
+    },
+    {
+     "t": 13.454545454545455,
+     "=": 2.7893151450195584
+    },
+    {
+     "t": 28.2,
+     "=": 1.968081415083614
+    },
+    {
+     "t": 6.625,
+     "=": 5.114835103465794
+    },
+    {
+     "t": 11.555555555555555,
+     "=": 3.077677018129015
+    },
+    {
+     "t": 5.142857142857143,
+     "=": 7.466060555964672
+    },
+    {
+     "t": 28.285714285714285,
+     "=": 1.9659045850916839
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — разность кубов $\\sqrt{t}$ и $\\sqrt{3}$",
+    "tex": "t\\sqrt{t}-3\\sqrt{3}=(\\sqrt{t}-\\sqrt{3})(t+\\sqrt{3t}+3)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{t}-\\sqrt{3}\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "t+\\sqrt{3t}+3+\\sqrt{3t}=t+2\\sqrt{3t}+3=(\\sqrt{t}+\\sqrt{3})^2"
+   },
+   {
+    "chto": "Раскладываем $t-3$ как разность квадратов и сокращаем на $\\sqrt{t}+\\sqrt{3}\\ne0$",
+    "tex": "\\frac{(\\sqrt{t}+\\sqrt{3})^2}{(\\sqrt{t}-\\sqrt{3})(\\sqrt{t}+\\sqrt{3})}=\\frac{\\sqrt{t} + \\sqrt{3}}{\\sqrt{t} - \\sqrt{3}}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $t\\sqrt{t}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $t-3$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Symbol('t'), Integer(-3)), Integer(-1)), Add(Mul(Pow(Integer(3), Rational(1, 2)), Pow(Symbol('t'), Rational(1, 2))), Mul(Pow(Add(Pow(Symbol('t'), Rational(1, 2)), Mul(Integer(-1), Pow(Integer(3), Rational(1, 2)))), Integer(-1)), Add(Pow(Symbol('t'), Rational(3, 2)), Mul(Integer(-1), Integer(3), Pow(Integer(3), Rational(1, 2)))))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('t'), Integer(0))",
+    "Unequality(Symbol('t'), Integer(3))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.050",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{x+6}+\\sqrt{x-6}}{\\sqrt{x+6}-\\sqrt{x-6}}-\\frac{\\sqrt{x+6}-\\sqrt{x-6}}{\\sqrt{x+6}+\\sqrt{x-6}}",
+  "dopolnenie": "и найдите его значение при $x=15{,}6$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "4{,}8",
+   "zapis": "24/5",
+   "znachenie": 4.8,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{x+6}-\\sqrt{x-6})(\\sqrt{x+6}+\\sqrt{x-6})=(x+6)-(x-6)=12"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{x+6}+\\sqrt{x-6})^2-(\\sqrt{x+6}-\\sqrt{x-6})^2=4\\sqrt{x+6}\\cdot\\sqrt{x-6}=4\\sqrt{x^2-36}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $x>6$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{x^2-36}}{12}=\\frac{\\sqrt{x^{2} - 36}}{3}"
+   },
+   {
+    "chto": "Подставляем $x=15{,}6$",
+    "tex": "x^2-36=207{,}36,\\quad \\frac{1}{3}\\cdot\\sqrt{207{,}36}=4{,}8"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?",
+   "Удобнее подставлять число до упрощения или после?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(24, 5)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.051",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chislovoe-proizvedenie",
+  "uroven": 2,
+  "uslovie": "Вычислите без приближённых вычислений",
+  "formula": "\\sqrt{32+8 \\sqrt{15}}\\cdot\\sqrt{8+\\sqrt{32+8 \\sqrt{15}}}\\cdot\\sqrt{8-\\sqrt{32+8 \\sqrt{15}}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "8",
+   "zapis": "8",
+   "znachenie": 8.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Перемножаем два последних корня — под корнем разность квадратов",
+    "tex": "\\sqrt{8+\\sqrt{32+8 \\sqrt{15}}}\\cdot\\sqrt{8-\\sqrt{32+8 \\sqrt{15}}}=\\sqrt{64-(32+8 \\sqrt{15})}=\\sqrt{32-8 \\sqrt{15}}"
+   },
+   {
+    "chto": "Ещё раз разность квадратов",
+    "tex": "\\sqrt{32+8 \\sqrt{15}}\\cdot\\sqrt{32-8 \\sqrt{15}}=\\sqrt{1024-960}"
+   },
+   {
+    "chto": "Извлекаем корень",
+    "tex": "\\sqrt{64}=8"
+   }
+  ],
+  "podskazki": [
+   "Какие два множителя удобно перемножить первыми?",
+   "Какая формула получается под корнем при умножении $\\sqrt{c+d}\\cdot\\sqrt{c-d}$?",
+   "Чему равно $8^2-32$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(8), Mul(Integer(-1), Pow(Add(Mul(Integer(8), Pow(Integer(15), Rational(1, 2))), Integer(32)), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(8), Pow(Integer(15), Rational(1, 2))), Integer(32)), Rational(1, 2)), Pow(Add(Pow(Add(Mul(Integer(8), Pow(Integer(15), Rational(1, 2))), Integer(32)), Rational(1, 2)), Integer(8)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.052",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{14-2\\sqrt{49-x^2}}\\,\\bigl(\\sqrt{(7+x)^3}+\\sqrt{(7-x)^3}\\bigr)}{14-\\sqrt{49-x^2}}",
+  "dopolnenie": "при $0<x<7$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "2 x",
+   "zapis": "2*x",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 2.3333333333333335,
+     "=": 4.666666666666667
+    },
+    {
+     "x": 2.4615384615384617,
+     "=": 4.923076923076923
+    },
+    {
+     "x": 6.222222222222222,
+     "=": 12.444444444444445
+    },
+    {
+     "x": 1.2222222222222223,
+     "=": 2.4444444444444446
+    },
+    {
+     "x": 0.2222222222222222,
+     "=": 0.4444444444444444
+    },
+    {
+     "x": 6.875,
+     "=": 13.75
+    },
+    {
+     "x": 5.285714285714286,
+     "=": 10.571428571428571
+    },
+    {
+     "x": 4.923076923076923,
+     "=": 9.846153846153847
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{7+x}$, $v=\\sqrt{7-x}$; при $0<x<7$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=14,\\quad uv=\\sqrt{49-x^2},\\quad u^2-v^2=2x"
+   },
+   {
+    "chto": "В скобке — сумма кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3+v^3=(u+v)(u^2-uv+v^2)=(u+v)(14-\\sqrt{49-x^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $7=\\frac{u^2+v^2}{2}$",
+    "tex": "2(7-uv)=\\frac{2}{2}(u-v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=(u-v)"
+   },
+   {
+    "chto": "Сокращаем на $14-\\sqrt{49-x^2}\\ne0$ и перемножаем",
+    "tex": "(u+v)(u-v)=(u^2-v^2)=2 x"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{7+x}$ и $\\sqrt{7-x}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(14), Mul(Integer(-1), Integer(2), Pow(Add(Integer(49), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Integer(14), Mul(Integer(-1), Pow(Add(Integer(49), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2)))), Integer(-1)), Add(Pow(Add(Integer(7), Mul(Integer(-1), Symbol('x'))), Rational(3, 2)), Pow(Add(Symbol('x'), Integer(7)), Rational(3, 2))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(0))",
+    "StrictLessThan(Symbol('x'), Integer(7))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.053",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chislovoe-proizvedenie",
+  "uroven": 2,
+  "uslovie": "Вычислите без приближённых вычислений",
+  "formula": "\\sqrt{32+\\sqrt{295}}\\cdot\\sqrt{8+\\sqrt{32+\\sqrt{295}}}\\cdot\\sqrt{8-\\sqrt{32+\\sqrt{295}}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "27",
+   "zapis": "27",
+   "znachenie": 27.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Перемножаем два последних корня — под корнем разность квадратов",
+    "tex": "\\sqrt{8+\\sqrt{32+\\sqrt{295}}}\\cdot\\sqrt{8-\\sqrt{32+\\sqrt{295}}}=\\sqrt{64-(32+\\sqrt{295})}=\\sqrt{32-\\sqrt{295}}"
+   },
+   {
+    "chto": "Ещё раз разность квадратов",
+    "tex": "\\sqrt{32+\\sqrt{295}}\\cdot\\sqrt{32-\\sqrt{295}}=\\sqrt{1024-295}"
+   },
+   {
+    "chto": "Извлекаем корень",
+    "tex": "\\sqrt{729}=27"
+   }
+  ],
+  "podskazki": [
+   "Какие два множителя удобно перемножить первыми?",
+   "Какая формула получается под корнем при умножении $\\sqrt{c+d}\\cdot\\sqrt{c-d}$?",
+   "Чему равно $8^2-32$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(8), Mul(Integer(-1), Pow(Add(Pow(Integer(295), Rational(1, 2)), Integer(32)), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Pow(Integer(295), Rational(1, 2)), Integer(32)), Rational(1, 2)), Pow(Add(Pow(Add(Pow(Integer(295), Rational(1, 2)), Integer(32)), Rational(1, 2)), Integer(8)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.054",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{t\\sqrt{t}-27}{\\sqrt{t}-3}+3\\sqrt{t}\\right):(t-9)",
+  "dopolnenie": "при $t>0$, $t\\ne9$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{\\sqrt{t} + 3}{\\sqrt{t} - 3}",
+   "zapis": "(sqrt(t) + 3)/(sqrt(t) - 3)",
+   "peremennye": [
+    "t"
+   ],
+   "tochki": [
+    {
+     "t": 14.5,
+     "=": 8.426785330471223
+    },
+    {
+     "t": 15.333333333333334,
+     "=": 7.551791618253915
+    },
+    {
+     "t": 28.5,
+     "=": 3.5657043464663554
+    },
+    {
+     "t": 9.8,
+     "=": 46.97871376374779
+    },
+    {
+     "t": 16.857142857142858,
+     "=": 6.42620535197089
+    },
+    {
+     "t": 22.666666666666668,
+     "=": 4.40724734493937
+    },
+    {
+     "t": 28.76923076923077,
+     "=": 3.538397894296683
+    },
+    {
+     "t": 2.3333333333333335,
+     "=": -3.074772708486752
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — разность кубов $\\sqrt{t}$ и $3$",
+    "tex": "t\\sqrt{t}-27=(\\sqrt{t}-3)(t+3\\sqrt{t}+9)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{t}-3\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "t+3\\sqrt{t}+9+3\\sqrt{t}=t+6\\sqrt{t}+9=(\\sqrt{t}+3)^2"
+   },
+   {
+    "chto": "Раскладываем $t-9$ как разность квадратов и сокращаем на $\\sqrt{t}+3\\ne0$",
+    "tex": "\\frac{(\\sqrt{t}+3)^2}{(\\sqrt{t}-3)(\\sqrt{t}+3)}=\\frac{\\sqrt{t} + 3}{\\sqrt{t} - 3}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $t\\sqrt{t}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $t-9$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(3), Pow(Symbol('t'), Rational(1, 2))), Mul(Pow(Add(Pow(Symbol('t'), Rational(1, 2)), Integer(-3)), Integer(-1)), Add(Pow(Symbol('t'), Rational(3, 2)), Integer(-27)))), Pow(Add(Symbol('t'), Integer(-9)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('t'), Integer(0))",
+    "Unequality(Symbol('t'), Integer(9))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.055",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{x\\sqrt{x}-7\\sqrt{7}}{\\sqrt{x}-\\sqrt{7}}+\\sqrt{7x}\\right):(x-7)",
+  "dopolnenie": "и найдите его значение при $x=112$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "\\frac{5}{3}",
+   "zapis": "5/3",
+   "znachenie": 1.6666666666666667,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — разность кубов $\\sqrt{x}$ и $\\sqrt{7}$",
+    "tex": "x\\sqrt{x}-7\\sqrt{7}=(\\sqrt{x}-\\sqrt{7})(x+\\sqrt{7x}+7)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{x}-\\sqrt{7}\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "x+\\sqrt{7x}+7+\\sqrt{7x}=x+2\\sqrt{7x}+7=(\\sqrt{x}+\\sqrt{7})^2"
+   },
+   {
+    "chto": "Раскладываем $x-7$ как разность квадратов и сокращаем на $\\sqrt{x}+\\sqrt{7}\\ne0$",
+    "tex": "\\frac{(\\sqrt{x}+\\sqrt{7})^2}{(\\sqrt{x}-\\sqrt{7})(\\sqrt{x}+\\sqrt{7})}=\\frac{\\sqrt{x} + \\sqrt{7}}{\\sqrt{x} - \\sqrt{7}}"
+   },
+   {
+    "chto": "Подставляем $x=112$, тогда $\\sqrt{x}=4 \\sqrt{7}$",
+    "tex": "\\frac{4 \\sqrt{7} + \\sqrt{7}}{4 \\sqrt{7} - \\sqrt{7}}=\\frac{5}{3}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $x\\sqrt{x}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $x-7$?",
+   "Чему равен $\\sqrt{x}$ при данном значении?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(5, 3)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.056",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chetvertye-stepeni-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{m}-\\sqrt{n}}{m^{1/4}+n^{1/4}}-\\frac{m-n}{m^{3/4}+m^{1/4}n^{1/2}}",
+  "dopolnenie": "и найдите его значение при $m=256$, $n=625$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "1{,}25",
+   "zapis": "5/4",
+   "znachenie": 1.25,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $\\alpha=m^{1/4}$, $\\beta=n^{1/4}$ (при $m>0$, $n>0$). Тогда разность в числителе раскладывается до конца",
+    "tex": "m-n=\\alpha^4-\\beta^4=(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)"
+   },
+   {
+    "chto": "Дробь с числителем $m-n$: в знаменателе выносим общий множитель и сокращаем",
+    "tex": "\\frac{(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)}{\\alpha(\\alpha^2+\\beta^2)}=\\frac{(\\alpha-\\beta)(\\alpha+\\beta)}{\\alpha}"
+   },
+   {
+    "chto": "Дробь с корнями: числитель — разность квадратов $\\alpha^2-\\beta^2$",
+    "tex": "\\frac{\\alpha^2-\\beta^2}{\\alpha+\\beta}=\\alpha-\\beta"
+   },
+   {
+    "chto": "Вычитаем, вынося общий множитель",
+    "tex": "-\\frac{(\\alpha-\\beta)\\beta}{\\alpha}"
+   },
+   {
+    "chto": "Подставляем $\\alpha=4$, $\\beta=5$ в упрощённое выражение",
+    "tex": "1{,}25"
+   }
+  ],
+  "podskazki": [
+   "Как записать $m$, $\\sqrt{m}$ и $m^{3/4}$ через $\\alpha=m^{1/4}$?",
+   "На сколько множителей раскладывается $m-n$?",
+   "Какой общий множитель удобно вынести после сокращения обеих дробей?",
+   "Чему равны $m^{1/4}$ и $n^{1/4}$ при данных значениях?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(5, 4)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.057",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{p^{2}-12p+35+(p-7)\\sqrt{p^2-25}}{p^{2}+8p+15+(p+3)\\sqrt{p^2-25}}",
+  "dopolnenie": "при $p>5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{(p - 7) \\sqrt{p - 5}}{(p + 3) \\sqrt{p + 5}}",
+   "zapis": "(p - 7)*sqrt(p - 5)/((p + 3)*sqrt(p + 5))",
+   "peremennye": [
+    "p"
+   ],
+   "tochki": [
+    {
+     "p": 9.384615384615385,
+     "=": 0.10630469416547003
+    },
+    {
+     "p": 8.25,
+     "=": 0.05502895072707206
+    },
+    {
+     "p": 12.625,
+     "=": 0.23678700366866207
+    },
+    {
+     "p": 13.8,
+     "=": 0.2769249222328571
+    },
+    {
+     "p": 17.25,
+     "=": 0.3755794957553399
+    },
+    {
+     "p": 11.4,
+     "=": 0.1908790423082963
+    },
+    {
+     "p": 18.875,
+     "=": 0.4138379960246937
+    },
+    {
+     "p": 14.8,
+     "=": 0.3082868804109718
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "p^{2}-12p+35=(p-5)(p-7),\\quad p^{2}+8p+15=(p+5)(p+3)"
+   },
+   {
+    "chto": "При $p>5$ записываем $p-5=(\\sqrt{p-5})^2$ и $\\sqrt{p^2-25}=\\sqrt{p-5}\\cdot\\sqrt{p+5}$; в числителе выносим $(p-7)\\sqrt{p-5}$",
+    "tex": "(p-7)\\sqrt{p-5}\\,(\\sqrt{p-5}+\\sqrt{p+5})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(p+3)\\sqrt{p+5}$",
+    "tex": "(p+3)\\sqrt{p+5}\\,(\\sqrt{p+5}+\\sqrt{p-5})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{p-5}+\\sqrt{p+5}>0$",
+    "tex": "\\frac{(p-7)\\sqrt{p-5}}{(p+3)\\sqrt{p+5}}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{p^2-25}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Pow(Symbol('p'), Integer(2)), Mul(Integer(-1), Integer(12), Symbol('p')), Mul(Add(Symbol('p'), Integer(-7)), Pow(Add(Pow(Symbol('p'), Integer(2)), Integer(-25)), Rational(1, 2))), Integer(35)), Pow(Add(Pow(Symbol('p'), Integer(2)), Mul(Integer(8), Symbol('p')), Mul(Add(Symbol('p'), Integer(3)), Pow(Add(Pow(Symbol('p'), Integer(2)), Integer(-25)), Rational(1, 2))), Integer(15)), Integer(-1)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('p'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.058",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{c+7}+\\sqrt{c-7}}{\\sqrt{c+7}-\\sqrt{c-7}}-\\frac{\\sqrt{c+7}-\\sqrt{c-7}}{\\sqrt{c+7}+\\sqrt{c-7}}",
+  "dopolnenie": "при $c>7$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{2 \\sqrt{c^{2} - 49}}{7}",
+   "zapis": "2*sqrt(c^2 - 49)/7",
+   "peremennye": [
+    "c"
+   ],
+   "tochki": [
+    {
+     "c": 25.666666666666668,
+     "=": 7.055336829505575
+    },
+    {
+     "c": 22.11111111111111,
+     "=": 5.992520743617481
+    },
+    {
+     "c": 16.555555555555557,
+     "=": 4.286537251966539
+    },
+    {
+     "c": 21.636363636363637,
+     "=": 5.849348342598332
+    },
+    {
+     "c": 19.75,
+     "=": 5.2765364335607385
+    },
+    {
+     "c": 14.222222222222221,
+     "=": 3.537225996464318
+    },
+    {
+     "c": 17.285714285714285,
+     "=": 4.515695244388353
+    },
+    {
+     "c": 10.272727272727273,
+     "=": 2.1481634418841904
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{c+7}-\\sqrt{c-7})(\\sqrt{c+7}+\\sqrt{c-7})=(c+7)-(c-7)=14"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{c+7}+\\sqrt{c-7})^2-(\\sqrt{c+7}-\\sqrt{c-7})^2=4\\sqrt{c+7}\\cdot\\sqrt{c-7}=4\\sqrt{c^2-49}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $c>7$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{c^2-49}}{14}=\\frac{2 \\sqrt{c^{2} - 49}}{7}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Pow(Add(Symbol('c'), Integer(-7)), Rational(1, 2)), Mul(Integer(-1), Pow(Add(Symbol('c'), Integer(7)), Rational(1, 2)))), Pow(Add(Pow(Add(Symbol('c'), Integer(-7)), Rational(1, 2)), Pow(Add(Symbol('c'), Integer(7)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('c'), Integer(-7)), Rational(1, 2))), Pow(Add(Symbol('c'), Integer(7)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('c'), Integer(-7)), Rational(1, 2)), Pow(Add(Symbol('c'), Integer(7)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('c'), Integer(7))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.059",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{m\\sqrt{m}-5\\sqrt{5}}{\\sqrt{m}-\\sqrt{5}}+\\sqrt{5m}\\right):(m-5)",
+  "dopolnenie": "при $m>0$, $m\\ne5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{\\sqrt{m} + \\sqrt{5}}{\\sqrt{m} - \\sqrt{5}}",
+   "zapis": "(sqrt(m) + sqrt(5))/(sqrt(m) - sqrt(5))",
+   "peremennye": [
+    "m"
+   ],
+   "tochki": [
+    {
+     "m": 6.25,
+     "=": 17.94427190999916
+    },
+    {
+     "m": 29.818181818181817,
+     "=": 2.3869089166523554
+    },
+    {
+     "m": 25.875,
+     "=": 2.5687964710014204
+    },
+    {
+     "m": 25.384615384615383,
+     "=": 2.595910831386929
+    },
+    {
+     "m": 21.666666666666668,
+     "=": 2.8489995996796798
+    },
+    {
+     "m": 10.444444444444445,
+     "=": 5.491365312899445
+    },
+    {
+     "m": 24.53846153846154,
+     "=": 2.645641950676492
+    },
+    {
+     "m": 3.888888888888889,
+     "=": -15.937253933193771
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — разность кубов $\\sqrt{m}$ и $\\sqrt{5}$",
+    "tex": "m\\sqrt{m}-5\\sqrt{5}=(\\sqrt{m}-\\sqrt{5})(m+\\sqrt{5m}+5)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{m}-\\sqrt{5}\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "m+\\sqrt{5m}+5+\\sqrt{5m}=m+2\\sqrt{5m}+5=(\\sqrt{m}+\\sqrt{5})^2"
+   },
+   {
+    "chto": "Раскладываем $m-5$ как разность квадратов и сокращаем на $\\sqrt{m}+\\sqrt{5}\\ne0$",
+    "tex": "\\frac{(\\sqrt{m}+\\sqrt{5})^2}{(\\sqrt{m}-\\sqrt{5})(\\sqrt{m}+\\sqrt{5})}=\\frac{\\sqrt{m} + \\sqrt{5}}{\\sqrt{m} - \\sqrt{5}}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $m\\sqrt{m}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $m-5$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Symbol('m'), Integer(-5)), Integer(-1)), Add(Mul(Pow(Integer(5), Rational(1, 2)), Pow(Symbol('m'), Rational(1, 2))), Mul(Pow(Add(Pow(Symbol('m'), Rational(1, 2)), Mul(Integer(-1), Pow(Integer(5), Rational(1, 2)))), Integer(-1)), Add(Pow(Symbol('m'), Rational(3, 2)), Mul(Integer(-1), Integer(5), Pow(Integer(5), Rational(1, 2)))))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('m'), Integer(0))",
+    "Unequality(Symbol('m'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.060",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chetvertye-stepeni-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{x}-\\sqrt{y}}{x^{1/4}+y^{1/4}}-\\frac{x-y}{x^{3/4}+x^{1/4}y^{1/2}}",
+  "dopolnenie": "и найдите его значение при $x=16$, $y=625$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "7{,}5",
+   "zapis": "15/2",
+   "znachenie": 7.5,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $\\alpha=x^{1/4}$, $\\beta=y^{1/4}$ (при $x>0$, $y>0$). Тогда разность в числителе раскладывается до конца",
+    "tex": "x-y=\\alpha^4-\\beta^4=(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)"
+   },
+   {
+    "chto": "Дробь с числителем $x-y$: в знаменателе выносим общий множитель и сокращаем",
+    "tex": "\\frac{(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)}{\\alpha(\\alpha^2+\\beta^2)}=\\frac{(\\alpha-\\beta)(\\alpha+\\beta)}{\\alpha}"
+   },
+   {
+    "chto": "Дробь с корнями: числитель — разность квадратов $\\alpha^2-\\beta^2$",
+    "tex": "\\frac{\\alpha^2-\\beta^2}{\\alpha+\\beta}=\\alpha-\\beta"
+   },
+   {
+    "chto": "Вычитаем, вынося общий множитель",
+    "tex": "-\\frac{(\\alpha-\\beta)\\beta}{\\alpha}"
+   },
+   {
+    "chto": "Подставляем $\\alpha=2$, $\\beta=5$ в упрощённое выражение",
+    "tex": "7{,}5"
+   }
+  ],
+  "podskazki": [
+   "Как записать $x$, $\\sqrt{x}$ и $x^{3/4}$ через $\\alpha=x^{1/4}$?",
+   "На сколько множителей раскладывается $x-y$?",
+   "Какой общий множитель удобно вынести после сокращения обеих дробей?",
+   "Чему равны $x^{1/4}$ и $y^{1/4}$ при данных значениях?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(15, 2)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.061",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{3+3\\sqrt{1-x^2}}\\,\\bigl(\\sqrt{(1+x)^3}-\\sqrt{(1-x)^3}\\bigr)}{2+\\sqrt{1-x^2}}",
+  "dopolnenie": "при $0<x<1$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\sqrt{6} x",
+   "zapis": "sqrt(6)*x",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 0.5555555555555556,
+     "=": 1.3608276348795434
+    },
+    {
+     "x": 0.6,
+     "=": 1.469693845669907
+    },
+    {
+     "x": 0.125,
+     "=": 0.30618621784789724
+    },
+    {
+     "x": 0.8888888888888888,
+     "=": 2.1773242158072694
+    },
+    {
+     "x": 0.4444444444444444,
+     "=": 1.0886621079036347
+    },
+    {
+     "x": 0.1111111111111111,
+     "=": 0.2721655269759087
+    },
+    {
+     "x": 0.42857142857142855,
+     "=": 1.0497813183356477
+    },
+    {
+     "x": 0.4444444444444444,
+     "=": 1.0886621079036347
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{1+x}$, $v=\\sqrt{1-x}$; при $0<x<1$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=2,\\quad uv=\\sqrt{1-x^2},\\quad u^2-v^2=2x"
+   },
+   {
+    "chto": "В скобке — разность кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3-v^3=(u-v)(u^2+uv+v^2)=(u-v)(2+\\sqrt{1-x^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $1=\\frac{u^2+v^2}{2}$",
+    "tex": "3(1+uv)=\\frac{3}{2}(u+v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=\\frac{\\sqrt{6}}{2}(u+v)"
+   },
+   {
+    "chto": "Сокращаем на $2+\\sqrt{1-x^2}\\ne0$ и перемножаем",
+    "tex": "\\frac{\\sqrt{6}}{2}(u+v)(u-v)=\\frac{\\sqrt{6}}{2}(u^2-v^2)=\\sqrt{6} x"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{1+x}$ и $\\sqrt{1-x}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Pow(Add(Integer(1), Mul(Integer(-1), Symbol('x'))), Rational(3, 2))), Pow(Add(Symbol('x'), Integer(1)), Rational(3, 2))), Pow(Add(Pow(Add(Integer(1), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2)), Integer(2)), Integer(-1)), Pow(Add(Mul(Integer(3), Pow(Add(Integer(1), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2))), Integer(3)), Rational(1, 2)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(0))",
+    "StrictLessThan(Symbol('x'), Integer(1))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.062",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{18-3\\sqrt{36-x^2}}\\,\\bigl(\\sqrt{(6+x)^3}+\\sqrt{(6-x)^3}\\bigr)}{12-\\sqrt{36-x^2}}",
+  "dopolnenie": "при $0<x<6$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\sqrt{6} x",
+   "zapis": "sqrt(6)*x",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 1.625,
+     "=": 3.9804208320226646
+    },
+    {
+     "x": 2.3333333333333335,
+     "=": 5.715476066494082
+    },
+    {
+     "x": 1.1818181818181819,
+     "=": 2.8948515141983013
+    },
+    {
+     "x": 4.333333333333333,
+     "=": 10.614455552060438
+    },
+    {
+     "x": 4.3076923076923075,
+     "=": 10.551648122758305
+    },
+    {
+     "x": 2.111111111111111,
+     "=": 5.171145012542265
+    },
+    {
+     "x": 3.4,
+     "=": 8.328265125462806
+    },
+    {
+     "x": 3.875,
+     "=": 9.491772753284815
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{6+x}$, $v=\\sqrt{6-x}$; при $0<x<6$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=12,\\quad uv=\\sqrt{36-x^2},\\quad u^2-v^2=2x"
+   },
+   {
+    "chto": "В скобке — сумма кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3+v^3=(u+v)(u^2-uv+v^2)=(u+v)(12-\\sqrt{36-x^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $6=\\frac{u^2+v^2}{2}$",
+    "tex": "3(6-uv)=\\frac{3}{2}(u-v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=\\frac{\\sqrt{6}}{2}(u-v)"
+   },
+   {
+    "chto": "Сокращаем на $12-\\sqrt{36-x^2}\\ne0$ и перемножаем",
+    "tex": "\\frac{\\sqrt{6}}{2}(u+v)(u-v)=\\frac{\\sqrt{6}}{2}(u^2-v^2)=\\sqrt{6} x"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{6+x}$ и $\\sqrt{6-x}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(12), Mul(Integer(-1), Pow(Add(Integer(36), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2)))), Integer(-1)), Pow(Add(Integer(18), Mul(Integer(-1), Integer(3), Pow(Add(Integer(36), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2)))), Rational(1, 2)), Add(Pow(Add(Integer(6), Mul(Integer(-1), Symbol('x'))), Rational(3, 2)), Pow(Add(Symbol('x'), Integer(6)), Rational(3, 2))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(0))",
+    "StrictLessThan(Symbol('x'), Integer(6))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.063",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "drobnye-kuby",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{a-64}{a^{2/3}+4a^{1/3}+16}+\\frac{a+27}{a^{2/3}-3a^{1/3}+9}\\right):\\left(4a^{2/3}-1\\right)",
+  "dopolnenie": "при $a>0$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{1}{2 \\sqrt[3]{a} + 1}",
+   "zapis": "1/(2*a^(1/3) + 1)",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 17.88888888888889,
+     "=": 0.16049623956214265
+    },
+    {
+     "a": 11.333333333333334,
+     "=": 0.18206835254436146
+    },
+    {
+     "a": 30.333333333333332,
+     "=": 0.13817122705768237
+    },
+    {
+     "a": 3.4,
+     "=": 0.249539027028873
+    },
+    {
+     "a": 23.6,
+     "=": 0.14843912031354103
+    },
+    {
+     "a": 26.75,
+     "=": 0.1432372529934956
+    },
+    {
+     "a": 28.153846153846153,
+     "=": 0.14115759193192498
+    },
+    {
+     "a": 38.714285714285715,
+     "=": 0.12876940927378264
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $t=a^{1/3}$ ($a>0$, $t>0$). Числитель первой дроби — разность кубов",
+    "tex": "a-64=t^3-64=(t-4)(t^2+4t+16)"
+   },
+   {
+    "chto": "Числитель второй дроби — сумма кубов",
+    "tex": "a+27=t^3+27=(t+3)(t^2-3t+9)"
+   },
+   {
+    "chto": "Сокращаем каждую дробь на неполный квадрат и складываем",
+    "tex": "(t-4)+(t+3)=2t-1"
+   },
+   {
+    "chto": "Делитель раскладываем как разность квадратов и сокращаем",
+    "tex": "\\frac{2t-1}{4t^2-1}=\\frac{1}{2t+1}=\\frac{1}{2 \\sqrt[3]{a} + 1}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $a$ через $t=a^{1/3}$?",
+   "Какие формулы сокращённого умножения видны в числителях $a-64$ и $a+27$?",
+   "На какие множители раскладывается $4a^{2/3}-1$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Mul(Integer(4), Pow(Symbol('a'), Rational(2, 3))), Integer(-1)), Integer(-1)), Add(Mul(Add(Symbol('a'), Integer(-64)), Pow(Add(Pow(Symbol('a'), Rational(2, 3)), Mul(Integer(4), Pow(Symbol('a'), Rational(1, 3))), Integer(16)), Integer(-1))), Mul(Add(Symbol('a'), Integer(27)), Pow(Add(Pow(Symbol('a'), Rational(2, 3)), Mul(Integer(-1), Integer(3), Pow(Symbol('a'), Rational(1, 3))), Integer(9)), Integer(-1)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.064",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "vlozhennyi-koren",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{24+6\\sqrt{16-x^2}}\\,\\bigl(\\sqrt{(4+x)^3}-\\sqrt{(4-x)^3}\\bigr)}{8+\\sqrt{16-x^2}}",
+  "dopolnenie": "при $0<x<4$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "2 \\sqrt{3} x",
+   "zapis": "2*sqrt(3)*x",
+   "peremennye": [
+    "x"
+   ],
+   "tochki": [
+    {
+     "x": 1.375,
+     "=": 4.763139720814412
+    },
+    {
+     "x": 0.25,
+     "=": 0.8660254037844386
+    },
+    {
+     "x": 2.5,
+     "=": 8.660254037844387
+    },
+    {
+     "x": 0.3333333333333333,
+     "=": 1.1547005383792515
+    },
+    {
+     "x": 2.5,
+     "=": 8.660254037844387
+    },
+    {
+     "x": 0.6666666666666666,
+     "=": 2.309401076758503
+    },
+    {
+     "x": 3.5,
+     "=": 12.12435565298214
+    },
+    {
+     "x": 0.25,
+     "=": 0.8660254037844386
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $u=\\sqrt{4+x}$, $v=\\sqrt{4-x}$; при $0<x<4$ оба положительны и $u>v$",
+    "tex": "u^2+v^2=8,\\quad uv=\\sqrt{16-x^2},\\quad u^2-v^2=2x"
+   },
+   {
+    "chto": "В скобке — разность кубов; второй множитель совпадает со знаменателем",
+    "tex": "u^3-v^3=(u-v)(u^2+uv+v^2)=(u-v)(8+\\sqrt{16-x^2})"
+   },
+   {
+    "chto": "Подкоренное выражение — полный квадрат: $4=\\frac{u^2+v^2}{2}$",
+    "tex": "6(4+uv)=\\frac{6}{2}(u+v)^2\\ \\Rightarrow\\ \\sqrt{\\ldots}=\\sqrt{3}(u+v)"
+   },
+   {
+    "chto": "Сокращаем на $8+\\sqrt{16-x^2}\\ne0$ и перемножаем",
+    "tex": "\\sqrt{3}(u+v)(u-v)=\\sqrt{3}(u^2-v^2)=2 \\sqrt{3} x"
+   }
+  ],
+  "podskazki": [
+   "Как обозначить $\\sqrt{4+x}$ и $\\sqrt{4-x}$, чтобы выражение стало короче?",
+   "По какой формуле раскладывается выражение в скобке? С чем совпадает его второй множитель?",
+   "Не является ли выражение под внешним корнем полным квадратом?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Pow(Add(Integer(4), Mul(Integer(-1), Symbol('x'))), Rational(3, 2))), Pow(Add(Symbol('x'), Integer(4)), Rational(3, 2))), Pow(Add(Pow(Add(Integer(16), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2)), Integer(8)), Integer(-1)), Pow(Add(Mul(Integer(6), Pow(Add(Integer(16), Mul(Integer(-1), Pow(Symbol('x'), Integer(2)))), Rational(1, 2))), Integer(24)), Rational(1, 2)))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(0))",
+    "StrictLessThan(Symbol('x'), Integer(4))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.065",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "drobnye-kuby",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{a-27}{a^{2/3}+3a^{1/3}+9}+\\frac{a+8}{a^{2/3}-2a^{1/3}+4}\\right):\\left(4a^{2/3}-1\\right)",
+  "dopolnenie": "при $a>0$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{1}{2 \\sqrt[3]{a} + 1}",
+   "zapis": "1/(2*a^(1/3) + 1)",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 1.25,
+     "=": 0.31701401305280863
+    },
+    {
+     "a": 3.875,
+     "=": 0.2414653672133619
+    },
+    {
+     "a": 22.142857142857142,
+     "=": 0.15114456015635025
+    },
+    {
+     "a": 4.666666666666667,
+     "=": 0.23029807863505267
+    },
+    {
+     "a": 32.38461538461539,
+     "=": 0.1355942851835481
+    },
+    {
+     "a": 11.2,
+     "=": 0.18265654986575638
+    },
+    {
+     "a": 11.142857142857142,
+     "=": 0.18291123741491727
+    },
+    {
+     "a": 2.6666666666666665,
+     "=": 0.26500981839867044
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $t=a^{1/3}$ ($a>0$, $t>0$). Числитель первой дроби — разность кубов",
+    "tex": "a-27=t^3-27=(t-3)(t^2+3t+9)"
+   },
+   {
+    "chto": "Числитель второй дроби — сумма кубов",
+    "tex": "a+8=t^3+8=(t+2)(t^2-2t+4)"
+   },
+   {
+    "chto": "Сокращаем каждую дробь на неполный квадрат и складываем",
+    "tex": "(t-3)+(t+2)=2t-1"
+   },
+   {
+    "chto": "Делитель раскладываем как разность квадратов и сокращаем",
+    "tex": "\\frac{2t-1}{4t^2-1}=\\frac{1}{2t+1}=\\frac{1}{2 \\sqrt[3]{a} + 1}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $a$ через $t=a^{1/3}$?",
+   "Какие формулы сокращённого умножения видны в числителях $a-27$ и $a+8$?",
+   "На какие множители раскладывается $4a^{2/3}-1$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Mul(Integer(4), Pow(Symbol('a'), Rational(2, 3))), Integer(-1)), Integer(-1)), Add(Mul(Add(Symbol('a'), Integer(-27)), Pow(Add(Pow(Symbol('a'), Rational(2, 3)), Mul(Integer(3), Pow(Symbol('a'), Rational(1, 3))), Integer(9)), Integer(-1))), Mul(Add(Symbol('a'), Integer(8)), Pow(Add(Pow(Symbol('a'), Rational(2, 3)), Mul(Integer(-1), Integer(2), Pow(Symbol('a'), Rational(1, 3))), Integer(4)), Integer(-1)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.066",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chislovoe-proizvedenie",
+  "uroven": 2,
+  "uslovie": "Вычислите без приближённых вычислений",
+  "formula": "\\sqrt{18+12 \\sqrt{2}}\\cdot\\sqrt{6+\\sqrt{18+12 \\sqrt{2}}}\\cdot\\sqrt{6-\\sqrt{18+12 \\sqrt{2}}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "6",
+   "zapis": "6",
+   "znachenie": 6.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Перемножаем два последних корня — под корнем разность квадратов",
+    "tex": "\\sqrt{6+\\sqrt{18+12 \\sqrt{2}}}\\cdot\\sqrt{6-\\sqrt{18+12 \\sqrt{2}}}=\\sqrt{36-(18+12 \\sqrt{2})}=\\sqrt{18-12 \\sqrt{2}}"
+   },
+   {
+    "chto": "Ещё раз разность квадратов",
+    "tex": "\\sqrt{18+12 \\sqrt{2}}\\cdot\\sqrt{18-12 \\sqrt{2}}=\\sqrt{324-288}"
+   },
+   {
+    "chto": "Извлекаем корень",
+    "tex": "\\sqrt{36}=6"
+   }
+  ],
+  "podskazki": [
+   "Какие два множителя удобно перемножить первыми?",
+   "Какая формула получается под корнем при умножении $\\sqrt{c+d}\\cdot\\sqrt{c-d}$?",
+   "Чему равно $6^2-18$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(6), Mul(Integer(-1), Pow(Add(Mul(Integer(12), Pow(Integer(2), Rational(1, 2))), Integer(18)), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(12), Pow(Integer(2), Rational(1, 2))), Integer(18)), Rational(1, 2)), Pow(Add(Pow(Add(Mul(Integer(12), Pow(Integer(2), Rational(1, 2))), Integer(18)), Rational(1, 2)), Integer(6)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.067",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chetvertye-stepeni",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{x}-\\sqrt{y}}{x^{1/4}-y^{1/4}}-\\frac{x-y}{x^{3/4}+x^{1/4}y^{1/2}}",
+  "dopolnenie": "при $x>0$, $y>0$, $x\\ne y$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{(\\sqrt[4]{x}+\\sqrt[4]{y})\\sqrt[4]{y}}{\\sqrt[4]{x}}",
+   "zapis": "-y^(1/4)*(-x^(1/4) - y^(1/4))/x^(1/4)",
+   "peremennye": [
+    "x",
+    "y"
+   ],
+   "tochki": [
+    {
+     "x": 20.384615384615383,
+     "y": 12.285714285714286,
+     "=": 3.5217753133229195
+    },
+    {
+     "x": 23.428571428571427,
+     "y": 9.555555555555555,
+     "=": 3.163231788913406
+    },
+    {
+     "x": 14.076923076923077,
+     "y": 19.333333333333332,
+     "=": 4.366898023263612
+    },
+    {
+     "x": 15.545454545454545,
+     "y": 6.25,
+     "=": 2.8401777411957916
+    },
+    {
+     "x": 5.888888888888889,
+     "y": 22.88888888888889,
+     "=": 5.258460166184739
+    },
+    {
+     "x": 20.285714285714285,
+     "y": 3.3333333333333335,
+     "=": 2.2114840573520853
+    },
+    {
+     "x": 24.307692307692307,
+     "y": 22.846153846153847,
+     "=": 4.338903460237139
+    },
+    {
+     "x": 28.25,
+     "y": 21.22222222222222,
+     "=": 4.144544585824058
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $\\alpha=x^{1/4}$, $\\beta=y^{1/4}$ (при $x>0$, $y>0$). Тогда разность в числителе раскладывается до конца",
+    "tex": "x-y=\\alpha^4-\\beta^4=(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)"
+   },
+   {
+    "chto": "Дробь с числителем $x-y$: в знаменателе выносим общий множитель и сокращаем",
+    "tex": "\\frac{(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)}{\\alpha(\\alpha^2+\\beta^2)}=\\frac{(\\alpha-\\beta)(\\alpha+\\beta)}{\\alpha}"
+   },
+   {
+    "chto": "Дробь с корнями: числитель — разность квадратов $\\alpha^2-\\beta^2$",
+    "tex": "\\frac{\\alpha^2-\\beta^2}{\\alpha-\\beta}=\\alpha+\\beta"
+   },
+   {
+    "chto": "Вычитаем, вынося общий множитель",
+    "tex": "\\frac{(\\alpha+\\beta)\\beta}{\\alpha}"
+   },
+   {
+    "chto": "Возвращаемся к исходным буквам",
+    "tex": "\\frac{(\\sqrt[4]{x}+\\sqrt[4]{y})\\sqrt[4]{y}}{\\sqrt[4]{x}}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $x$, $\\sqrt{x}$ и $x^{3/4}$ через $\\alpha=x^{1/4}$?",
+   "На сколько множителей раскладывается $x-y$?",
+   "Какой общий множитель удобно вынести после сокращения обеих дробей?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Pow(Add(Pow(Symbol('x'), Rational(1, 4)), Mul(Integer(-1), Pow(Symbol('y'), Rational(1, 4)))), Integer(-1)), Add(Pow(Symbol('x'), Rational(1, 2)), Mul(Integer(-1), Pow(Symbol('y'), Rational(1, 2))))), Mul(Integer(-1), Pow(Symbol('x'), Rational(-1, 4)), Pow(Add(Pow(Symbol('x'), Rational(1, 2)), Pow(Symbol('y'), Rational(1, 2))), Integer(-1)), Add(Symbol('x'), Mul(Integer(-1), Symbol('y')))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('x'), Integer(0))",
+    "StrictGreaterThan(Symbol('y'), Integer(0))",
+    "Unequality(Symbol('x'), Symbol('y'))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.068",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "chetvertye-stepeni",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{p}-\\sqrt{q}}{p^{1/4}-q^{1/4}}-\\frac{p-q}{p^{3/4}+p^{1/4}q^{1/2}}",
+  "dopolnenie": "при $p>0$, $q>0$, $p\\ne q$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{(\\sqrt[4]{p}+\\sqrt[4]{q})\\sqrt[4]{q}}{\\sqrt[4]{p}}",
+   "zapis": "-q^(1/4)*(-p^(1/4) - q^(1/4))/p^(1/4)",
+   "peremennye": [
+    "p",
+    "q"
+   ],
+   "tochki": [
+    {
+     "p": 4.5,
+     "q": 9.875,
+     "=": 3.930268673750107
+    },
+    {
+     "p": 25.75,
+     "q": 6.461538461538462,
+     "=": 2.7227786573703283
+    },
+    {
+     "p": 20.571428571428573,
+     "q": 27.923076923076923,
+     "=": 4.779966538233153
+    },
+    {
+     "p": 15.2,
+     "q": 25.75,
+     "=": 4.822621077637372
+    },
+    {
+     "p": 7.875,
+     "q": 29.90909090909091,
+     "=": 5.603239885472633
+    },
+    {
+     "p": 5.769230769230769,
+     "q": 26.6,
+     "=": 5.598848719144792
+    },
+    {
+     "p": 27.53846153846154,
+     "q": 26.5,
+     "=": 4.516060509531467
+    },
+    {
+     "p": 14.75,
+     "q": 23.625,
+     "=": 4.6848736153137915
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим $\\alpha=p^{1/4}$, $\\beta=q^{1/4}$ (при $p>0$, $q>0$). Тогда разность в числителе раскладывается до конца",
+    "tex": "p-q=\\alpha^4-\\beta^4=(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)"
+   },
+   {
+    "chto": "Дробь с числителем $p-q$: в знаменателе выносим общий множитель и сокращаем",
+    "tex": "\\frac{(\\alpha-\\beta)(\\alpha+\\beta)(\\alpha^2+\\beta^2)}{\\alpha(\\alpha^2+\\beta^2)}=\\frac{(\\alpha-\\beta)(\\alpha+\\beta)}{\\alpha}"
+   },
+   {
+    "chto": "Дробь с корнями: числитель — разность квадратов $\\alpha^2-\\beta^2$",
+    "tex": "\\frac{\\alpha^2-\\beta^2}{\\alpha-\\beta}=\\alpha+\\beta"
+   },
+   {
+    "chto": "Вычитаем, вынося общий множитель",
+    "tex": "\\frac{(\\alpha+\\beta)\\beta}{\\alpha}"
+   },
+   {
+    "chto": "Возвращаемся к исходным буквам",
+    "tex": "\\frac{(\\sqrt[4]{p}+\\sqrt[4]{q})\\sqrt[4]{q}}{\\sqrt[4]{p}}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $p$, $\\sqrt{p}$ и $p^{3/4}$ через $\\alpha=p^{1/4}$?",
+   "На сколько множителей раскладывается $p-q$?",
+   "Какой общий множитель удобно вынести после сокращения обеих дробей?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Pow(Add(Pow(Symbol('p'), Rational(1, 4)), Mul(Integer(-1), Pow(Symbol('q'), Rational(1, 4)))), Integer(-1)), Add(Pow(Symbol('p'), Rational(1, 2)), Mul(Integer(-1), Pow(Symbol('q'), Rational(1, 2))))), Mul(Integer(-1), Pow(Symbol('p'), Rational(-1, 4)), Pow(Add(Pow(Symbol('p'), Rational(1, 2)), Pow(Symbol('q'), Rational(1, 2))), Integer(-1)), Add(Symbol('p'), Mul(Integer(-1), Symbol('q')))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('p'), Integer(0))",
+    "StrictGreaterThan(Symbol('q'), Integer(0))",
+    "Unequality(Symbol('p'), Symbol('q'))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.069",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{a\\sqrt{a}+5\\sqrt{5}}{\\sqrt{a}+\\sqrt{5}}-\\sqrt{5a}\\right):(a-5)",
+  "dopolnenie": "при $a>0$, $a\\ne5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{\\sqrt{a} - \\sqrt{5}}{\\sqrt{a} + \\sqrt{5}}",
+   "zapis": "(sqrt(a) - sqrt(5))/(sqrt(a) + sqrt(5))",
+   "peremennye": [
+    "a"
+   ],
+   "tochki": [
+    {
+     "a": 19.285714285714285,
+     "=": 0.325227291513248
+    },
+    {
+     "a": 25.181818181818183,
+     "=": 0.3835122325606087
+    },
+    {
+     "a": 2.3636363636363638,
+     "=": -0.18514891018082247
+    },
+    {
+     "a": 18.2,
+     "=": 0.312213331186446
+    },
+    {
+     "a": 29.8,
+     "=": 0.41882616002147555
+    },
+    {
+     "a": 29.88888888888889,
+     "=": 0.41943995602362955
+    },
+    {
+     "a": 12.875,
+     "=": 0.23215155099921111
+    },
+    {
+     "a": 28.285714285714285,
+     "=": 0.4080169134592681
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — сумма кубов $\\sqrt{a}$ и $\\sqrt{5}$",
+    "tex": "a\\sqrt{a}+5\\sqrt{5}=(\\sqrt{a}+\\sqrt{5})(a-\\sqrt{5a}+5)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{a}+\\sqrt{5}\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "a-\\sqrt{5a}+5-\\sqrt{5a}=a-2\\sqrt{5a}+5=(\\sqrt{a}-\\sqrt{5})^2"
+   },
+   {
+    "chto": "Раскладываем $a-5$ как разность квадратов и сокращаем на $\\sqrt{a}-\\sqrt{5}\\ne0$",
+    "tex": "\\frac{(\\sqrt{a}-\\sqrt{5})^2}{(\\sqrt{a}-\\sqrt{5})(\\sqrt{a}+\\sqrt{5})}=\\frac{\\sqrt{a} - \\sqrt{5}}{\\sqrt{a} + \\sqrt{5}}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $a\\sqrt{a}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $a-5$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Symbol('a'), Integer(-5)), Integer(-1)), Add(Mul(Integer(-1), Pow(Integer(5), Rational(1, 2)), Pow(Symbol('a'), Rational(1, 2))), Mul(Pow(Add(Pow(Symbol('a'), Rational(1, 2)), Pow(Integer(5), Rational(1, 2))), Integer(-1)), Add(Pow(Symbol('a'), Rational(3, 2)), Mul(Integer(5), Pow(Integer(5), Rational(1, 2)))))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))",
+    "Unequality(Symbol('a'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.070",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "sopryazh-summa",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{\\sqrt{y+5}+\\sqrt{y-5}}{\\sqrt{y+5}-\\sqrt{y-5}}-\\frac{\\sqrt{y+5}-\\sqrt{y-5}}{\\sqrt{y+5}+\\sqrt{y-5}}",
+  "dopolnenie": "при $y>5$.",
+  "otvet": {
+   "vid": "vyrazhenie",
+   "tex": "\\frac{2 \\sqrt{y^{2} - 25}}{5}",
+   "zapis": "2*sqrt(y^2 - 25)/5",
+   "peremennye": [
+    "y"
+   ],
+   "tochki": [
+    {
+     "y": 12.142857142857142,
+     "=": 4.426266681379905
+    },
+    {
+     "y": 9.333333333333334,
+     "=": 3.1524241113431706
+    },
+    {
+     "y": 18.181818181818183,
+     "=": 6.9923216447379675
+    },
+    {
+     "y": 6.571428571428571,
+     "=": 1.7056927493256342
+    },
+    {
+     "y": 5.4,
+     "=": 0.8158431221748456
+    },
+    {
+     "y": 21.333333333333332,
+     "=": 8.295648122827883
+    },
+    {
+     "y": 23.8,
+     "=": 9.307545326239351
+    },
+    {
+     "y": 20.23076923076923,
+     "=": 7.841265445512112
+    }
+   ]
+  },
+  "razbor": [
+   {
+    "chto": "Общий знаменатель — произведение сопряжённых выражений, это разность квадратов",
+    "tex": "(\\sqrt{y+5}-\\sqrt{y-5})(\\sqrt{y+5}+\\sqrt{y-5})=(y+5)-(y-5)=10"
+   },
+   {
+    "chto": "В числителе разность квадратов суммы и разности — учетверённое произведение",
+    "tex": "(\\sqrt{y+5}+\\sqrt{y-5})^2-(\\sqrt{y+5}-\\sqrt{y-5})^2=4\\sqrt{y+5}\\cdot\\sqrt{y-5}=4\\sqrt{y^2-25}"
+   },
+   {
+    "chto": "Делим на общий знаменатель (при $y>5$ все корни определены)",
+    "tex": "\\frac{4\\sqrt{y^2-25}}{10}=\\frac{2 \\sqrt{y^{2} - 25}}{5}"
+   }
+  ],
+  "podskazki": [
+   "Какой общий знаменатель у двух дробей и чему он равен?",
+   "По какой формуле упрощается $(A+B)^2-(A-B)^2$?",
+   "Что останется после деления на общий знаменатель?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Add(Pow(Add(Symbol('y'), Integer(-5)), Rational(1, 2)), Mul(Integer(-1), Pow(Add(Symbol('y'), Integer(5)), Rational(1, 2)))), Pow(Add(Pow(Add(Symbol('y'), Integer(-5)), Rational(1, 2)), Pow(Add(Symbol('y'), Integer(5)), Rational(1, 2))), Integer(-1))), Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Symbol('y'), Integer(-5)), Rational(1, 2))), Pow(Add(Symbol('y'), Integer(5)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Symbol('y'), Integer(-5)), Rational(1, 2)), Pow(Add(Symbol('y'), Integer(5)), Rational(1, 2)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('y'), Integer(5))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.071",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "kvadrat-pod-kornem-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\frac{y^{2}-4y+3+(y-1)\\sqrt{y^2-9}}{y^{2}+7y+12+(y+4)\\sqrt{y^2-9}}",
+  "dopolnenie": "и найдите его значение при $y=5$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "\\frac{2}{9}",
+   "zapis": "2/9",
+   "znachenie": 0.2222222222222222,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Раскладываем квадратные трёхчлены на множители",
+    "tex": "y^{2}-4y+3=(y-3)(y-1),\\quad y^{2}+7y+12=(y+3)(y+4)"
+   },
+   {
+    "chto": "При $y>3$ записываем $y-3=(\\sqrt{y-3})^2$ и $\\sqrt{y^2-9}=\\sqrt{y-3}\\cdot\\sqrt{y+3}$; в числителе выносим $(y-1)\\sqrt{y-3}$",
+    "tex": "(y-1)\\sqrt{y-3}\\,(\\sqrt{y-3}+\\sqrt{y+3})"
+   },
+   {
+    "chto": "Так же в знаменателе выносим $(y+4)\\sqrt{y+3}$",
+    "tex": "(y+4)\\sqrt{y+3}\\,(\\sqrt{y+3}+\\sqrt{y-3})"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{y-3}+\\sqrt{y+3}>0$",
+    "tex": "\\frac{(y-1)\\sqrt{y-3}}{(y+4)\\sqrt{y+3}}"
+   },
+   {
+    "chto": "Подставляем $y=5$: под корнем получается квадрат",
+    "tex": "\\sqrt{\\frac{y-3}{y+3}}=\\sqrt{0{,}25}=0{,}5,\\quad \\frac{4}{9}\\cdot0{,}5=\\frac{2}{9}"
+   }
+  ],
+  "podskazki": [
+   "На какие множители раскладываются трёхчлены без корня?",
+   "Как представить $\\sqrt{y^2-9}$ в виде произведения двух корней?",
+   "Какая одинаковая скобка с корнями появляется в числителе и знаменателе?",
+   "Чему равно $\\frac{y-3}{y+3}$ при данном значении?"
+  ],
+  "proverka": {
+   "iskhod": "Rational(2, 9)",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.9.072",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "podstanovka-kusochno",
+  "uroven": 2,
+  "uslovie": "Подставьте в выражение",
+  "formula": "a\\left(x-\\sqrt{x^2-1}\\right)",
+  "dopolnenie": "значение $x=\\frac{1}{2}\\left(\\frac{a}{3}+\\frac{3}{a}\\right)$, где $a>0$, и упростите результат.",
+  "otvet": {
+   "vid": "kusochnyi",
+   "peremennaya": "a",
+   "kuski": [
+    {
+     "vid": "vyrazhenie",
+     "tex": "\\frac{a^{2}}{3}",
+     "zapis": "a^2/3",
+     "peremennye": [
+      "a"
+     ],
+     "tochki": [
+      {
+       "a": 0.07692307692307693,
+       "=": 0.0019723865877712033
+      },
+      {
+       "a": 2.875,
+       "=": 2.7552083333333335
+      },
+      {
+       "a": 2.888888888888889,
+       "=": 2.7818930041152266
+      },
+      {
+       "a": 2.625,
+       "=": 2.296875
+      },
+      {
+       "a": 1.125,
+       "=": 0.421875
+      },
+      {
+       "a": 0.3333333333333333,
+       "=": 0.037037037037037035
+      }
+     ],
+     "oblast": {
+      "lo": 0.0,
+      "hi": 3.0,
+      "loZakr": false,
+      "hiZakr": false,
+      "tex": "(0;\\,3)"
+     }
+    },
+    {
+     "vid": "vyrazhenie",
+     "tex": "3",
+     "zapis": "3",
+     "peremennye": [
+      "a"
+     ],
+     "tochki": [
+      {
+       "a": 26.5,
+       "=": 3.0
+      },
+      {
+       "a": 43.53846153846154,
+       "=": 3.0
+      },
+      {
+       "a": 42.625,
+       "=": 3.0
+      },
+      {
+       "a": 13.375,
+       "=": 3.0
+      },
+      {
+       "a": 9.5,
+       "=": 3.0
+      },
+      {
+       "a": 7.666666666666667,
+       "=": 3.0
+      }
+     ],
+     "oblast": {
+      "lo": 3.0,
+      "hi": null,
+      "loZakr": true,
+      "hiZakr": false,
+      "tex": "[3;\\,+\\infty)"
+     }
+    }
+   ],
+   "tex": "\\frac{a^{2}}{3}\\ \\text{при}\\ a\\in(0;\\,3);\\ 3\\ \\text{при}\\ a\\in[3;\\,+\\infty)"
+  },
+  "razbor": [
+   {
+    "chto": "Находим $x^2-1$ — это полный квадрат",
+    "tex": "x^2-1=\\frac{(a^2+9)^2}{36a^2}-1=\\frac{(a^2-9)^2}{36a^2}"
+   },
+   {
+    "chto": "При $a>0$ корень равен модулю",
+    "tex": "\\sqrt{x^2-1}=\\frac{|a^2-9|}{6a}"
+   },
+   {
+    "chto": "При $a\\ge3$: $x+\\sqrt{x^2-1}=\\frac{a}{3}$, $x-\\sqrt{x^2-1}=\\frac{3}{a}$; подставляем",
+    "tex": "3"
+   },
+   {
+    "chto": "При $0<a<3$ модуль меняет знак: $x+\\sqrt{x^2-1}=\\frac{3}{a}$, $x-\\sqrt{x^2-1}=\\frac{a}{3}$",
+    "tex": "\\frac{a^{2}}{3}"
+   },
+   {
+    "chto": "Записываем ответ по промежуткам",
+    "tex": "\\frac{a^{2}}{3}\\ \\text{при}\\ a\\in(0;\\,3);\\ 3\\ \\text{при}\\ a\\in[3;\\,+\\infty)"
+   }
+  ],
+  "podskazki": [
+   "Чему равно $x^2-1$ после приведения к общему знаменателю?",
+   "Чему равен $\\sqrt{A^2}$? При каких $a$ меняется знак выражения $a^2-9$?",
+   "Сколько промежутков получится в ответе?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Symbol('a'), Add(Mul(Rational(1, 6), Symbol('a')), Mul(Integer(-1), Pow(Add(Pow(Add(Mul(Rational(1, 6), Symbol('a')), Mul(Rational(3, 2), Pow(Symbol('a'), Integer(-1)))), Integer(2)), Integer(-1)), Rational(1, 2))), Mul(Rational(3, 2), Pow(Symbol('a'), Integer(-1)))))",
+   "usloviya": [
+    "StrictGreaterThan(Symbol('a'), Integer(0))"
+   ]
+  }
+ },
+ {
+  "id": "1.9.073",
+  "glava": 1,
+  "tip": "1.9",
+  "podtip": "summa-kubov-kornei-znachenie",
+  "uroven": 2,
+  "uslovie": "Упростите выражение",
+  "formula": "\\left(\\frac{x\\sqrt{x}-5\\sqrt{5}}{\\sqrt{x}-\\sqrt{5}}+\\sqrt{5x}\\right)\\cdot\\frac{\\sqrt{x}-\\sqrt{5}}{x-5}",
+  "dopolnenie": "и найдите его значение при $x=80$.",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "5 \\sqrt{5}",
+   "zapis": "5*sqrt(5)",
+   "znachenie": 11.180339887498949,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Числитель дроби — разность кубов $\\sqrt{x}$ и $\\sqrt{5}$",
+    "tex": "x\\sqrt{x}-5\\sqrt{5}=(\\sqrt{x}-\\sqrt{5})(x+\\sqrt{5x}+5)"
+   },
+   {
+    "chto": "Сокращаем на $\\sqrt{x}-\\sqrt{5}\\ne0$ и приводим подобные — получается полный квадрат",
+    "tex": "x+\\sqrt{5x}+5+\\sqrt{5x}=x+2\\sqrt{5x}+5=(\\sqrt{x}+\\sqrt{5})^2"
+   },
+   {
+    "chto": "Раскладываем $x-5$ как разность квадратов и сокращаем",
+    "tex": "\\frac{(\\sqrt{x}+\\sqrt{5})^2(\\sqrt{x}-\\sqrt{5})}{(\\sqrt{x}-\\sqrt{5})(\\sqrt{x}+\\sqrt{5})}=\\sqrt{x} + \\sqrt{5}"
+   },
+   {
+    "chto": "Подставляем $x=80$, тогда $\\sqrt{x}=4 \\sqrt{5}$",
+    "tex": "4 \\sqrt{5} + \\sqrt{5}=5 \\sqrt{5}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $x\\sqrt{x}$ в виде куба?",
+   "Какую формулу сокращённого умножения напоминает выражение после сокращения?",
+   "На какие множители раскладывается $x-5$?",
+   "Чему равен $\\sqrt{x}$ при данном значении?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Integer(5), Pow(Integer(5), Rational(1, 2)))",
+   "usloviya": []
+  }
+ }
+]

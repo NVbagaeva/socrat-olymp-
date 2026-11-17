@@ -32,9 +32,19 @@ export type NavIconName =
   | 'povyshennye'
   | 'ezhemesyachnye'
   | 'cards'
-  | 'schet';
+  | 'schet'
+  | 'sbornik';
 
 const PATHS: Record<NavIconName, React.ReactNode> = {
+  /* Сборник для вузов: академическая шапочка над раскрытой книгой. */
+  sbornik: (
+    <>
+      <path d="m3 7.5 9-4 9 4-9 4z" />
+      <path d="M7 9.3v3.4c0 1.2 2.2 2.3 5 2.3s5-1.1 5-2.3V9.3" />
+      <path d="M21 7.5v4.5" />
+      <path d="M4 18.5c2.6-1 5.4-1 8 .7 2.6-1.7 5.4-1.7 8-.7" />
+    </>
+  ),
   /* Устный счёт: секундомер со знаком умножения внутри. */
   schet: (
     <>

@@ -12,7 +12,7 @@ import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
-import { href, USTNYY } from '@/lib/paths';
+import { href, SBORNIK, USTNYY } from '@/lib/paths';
 import { VARIANT_HREF } from '@/content/variant';
 import { TARIFY_HREF } from '@/lib/tarify/href';
 
@@ -60,6 +60,16 @@ const vseRazdely: NavItem[] = [
     short: 'Ежемесячные',
     href: EZH_HREF,
     icon: 'ezhemesyachnye',
+  },
+  /* Интерактивный сборник для поступающих в вузы (/sbornik/): главы,
+     задачи по типам, тренажёр, генератор листов. В нижнюю панель не
+     входит — на телефоне живёт на экране «Ещё». */
+  {
+    id: 'sbornik',
+    label: 'Сборник для вузов',
+    short: 'Для вузов',
+    href: href(SBORNIK),
+    icon: 'sbornik',
   },
   { id: 'stats', label: 'Статистика', href: '/statistika/', icon: 'stats' },
   /* Короткая подпись — для нижней панели и экрана «Ещё»: полное

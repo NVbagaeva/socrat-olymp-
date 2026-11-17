@@ -225,6 +225,23 @@ jobs:
         working-directory: app
         run: pnpm test:otvet
 
+      # Сборник для вузов: каждый ответ банка заново пересчитан sympy и
+      # сверен с условием подстановкой в точках области определения,
+      # нет дублей и «плохих» чисел (tools/sbornik/check.py); формулы
+      # набираются KaTeX, движок проверки сайта принимает верный ответ и
+      # отклоняет неверный (scripts/check-sbornik.mjs).
+      - name: Сборник для вузов — Python и sympy
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Сборник для вузов — самопроверка банка
+        run: |
+          pip install --quiet 'sympy==1.14.0' 'jsonschema==4.26.0'
+          python3 -m tools.sbornik.check
+      - name: Сборник для вузов — формулы и проверка ответов
+        working-directory: app
+        run: pnpm test:sbornik
+
       # Устный счёт: каждый генератор и уровень — 1000 примеров с
       # независимым пересчётом ответа, проверкой «подходит под приём»,
       # без повторов, шагами разбора к ответу; ввод ответа, очки рейтинга,

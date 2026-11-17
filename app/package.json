@@ -250,6 +250,7 @@
     "test:progress-import": "node scripts/check-progress-import.mjs",
     "test:dz-print": "node scripts/check-dz-print.mjs",
     "test:otvet": "node scripts/check-otvet.mjs",
+    "test:sbornik": "node scripts/check-sbornik.mjs",
     "test:ustnyy-schet": "node scripts/check-ustnyy-schet.mjs",
     "test:ustnyy-schet-site": "node scripts/check-ustnyy-schet-site.mjs",
     "test:ustnyy-reyting-site": "node scripts/check-ustnyy-reyting-site.mjs",

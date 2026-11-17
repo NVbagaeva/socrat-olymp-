@@ -1,0 +1,724 @@
+/* «Интерактивный сборник для поступающих в вузы». Префикс sb-.
+   Только токены сайта (styles/tokens.css); стекло — .stk-glass. */
+
+.sb-vitrina,
+.sb-tipy-stranica,
+.sb-tip-stranica,
+.sb-trenazher,
+.sb-generator,
+.sb-sessiya {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.sb-vitrina__zag {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-h4);
+  color: var(--color-text);
+}
+
+.sb-vvodnaya {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  max-width: 72ch;
+}
+.sb-vvodnaya p,
+.sb-vvodnaya ul {
+  margin: 0 0 var(--space-2);
+}
+.sb-vvodnaya ul {
+  padding-left: 1.2em;
+}
+.sb-vvodnaya li + li {
+  margin-top: var(--space-1);
+}
+.sb-vvodnaya a {
+  color: var(--color-text-brand);
+}
+
+/* ── Главы на витрине и типы в главе ───────────────────────────── */
+
+.sb-glavy,
+.sb-tipy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+.sb-glava,
+.sb-tip {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  height: 100%;
+  padding: var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: transform var(--dur-hover) var(--ease), box-shadow var(--dur-hover) var(--ease);
+}
+a.sb-glava:hover,
+a.sb-tip:hover {
+  transform: translateY(-2px);
+}
+a.sb-glava:focus-visible,
+a.sb-tip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.sb-glava--skoro {
+  opacity: 0.72;
+}
+
+.sb-glava__znak,
+.sb-tip__znak {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--white), var(--blue-100));
+  box-shadow: inset 0 0 0 1px var(--blue-200);
+  color: var(--blue-700);
+  font-size: 0.95rem;
+  overflow: hidden;
+}
+.sb-glava--skoro .sb-glava__znak {
+  background: linear-gradient(160deg, var(--white), var(--color-surface-soft));
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  color: var(--color-text-tertiary);
+}
+.sb-tip__znak {
+  background: linear-gradient(160deg, var(--white), var(--amber-50));
+  box-shadow: inset 0 0 0 1px var(--cream-200);
+  color: var(--amber-700);
+}
+
+.sb-glava__telo,
+.sb-tip__telo {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+.sb-glava__nomer,
+.sb-tip__nomer {
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.sb-glava__nazvanie,
+.sb-tip__nazvanie {
+  font-weight: 700;
+  line-height: 1.3;
+}
+.sb-glava__kratko,
+.sb-tip__opisanie {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-caption);
+}
+.sb-glava__skoro {
+  font-size: var(--fs-caption);
+  color: var(--color-text-tertiary);
+}
+.sb-tip__urovni {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.sb-tip__uroven {
+  font-size: var(--fs-caption);
+  color: var(--amber-700);
+  background: var(--amber-50);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+}
+
+/* ── Прогресс ──────────────────────────────────────────────────── */
+
+.sb-schyot {
+  display: grid;
+  gap: 4px;
+  margin-top: var(--space-1);
+}
+.sb-schyot__polosa {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+.sb-schyot__polosa span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue-600), var(--amber-600));
+  border-radius: inherit;
+  transition: width var(--dur-switch) var(--ease);
+}
+.sb-schyot__tekst {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+
+/* ── Поиск ─────────────────────────────────────────────────────── */
+
+.sb-poisk-sbornika {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 640px;
+}
+.sb-poisk-sbornika__label {
+  font-weight: 600;
+}
+.sb-poisk-sbornika__pole {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: inherit;
+  color: var(--color-text);
+}
+.sb-poisk-sbornika__pole:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+.sb-poisk-sbornika__spisok {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.sb-poisk-sbornika__spisok a {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  text-decoration: none;
+}
+.sb-poisk-sbornika__spisok a:hover,
+.sb-poisk-sbornika__spisok a:focus-visible {
+  background: var(--color-surface-info);
+}
+.sb-poisk-sbornika__spisok span,
+.sb-poisk-sbornika__pusto {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+
+/* ── Страница типа ─────────────────────────────────────────────── */
+
+.sb-nazad a {
+  color: var(--color-text-brand);
+  text-decoration: none;
+  font-size: var(--fs-caption);
+}
+.sb-tip-shapka {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding: var(--space-4);
+}
+.sb-tip-shapka__zag {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-h4);
+}
+.sb-tip-shapka__opisanie {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.sb-tip-shapka__ssylki {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-caption);
+}
+.sb-tip-shapka__ssylki a {
+  color: var(--color-text-brand);
+}
+
+.sb-filtr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+.sb-filtr__gruppa {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.sb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+.sb-chip[aria-pressed='true'] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.sb-chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.sb-chip__n {
+  opacity: 0.7;
+}
+
+.sb-spisok {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.sb-punkt {
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  scroll-margin-top: 96px;
+}
+/* Фильтры (SpisokKlient → FiltrSpiska): атрибуты контейнера. */
+.sb-spisok[data-uroven='1'] > [data-uroven]:not([data-uroven='1']),
+.sb-spisok[data-uroven='2'] > [data-uroven]:not([data-uroven='2']),
+.sb-spisok[data-uroven='3'] > [data-uroven]:not([data-uroven='3']),
+.sb-spisok[data-ishod='novye'] > [data-status]:not([data-status='novaya']),
+.sb-spisok[data-ishod='oshibki'] > [data-status]:not([data-status='oshibka']) {
+  display: none;
+}
+
+/* ── Задача ────────────────────────────────────────────────────── */
+
+.sb-zadacha {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  min-width: 0;
+}
+.sb-zadacha--vstroennaya {
+  padding: 0;
+}
+.sb-zadacha__shapka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.sb-zadacha__nomer {
+  font-weight: 700;
+  color: var(--color-text-brand);
+}
+.sb-zadacha__uroven {
+  color: var(--amber-600);
+  letter-spacing: 1px;
+}
+.sb-zadacha__tip {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.sb-zadacha__uslovie {
+  min-width: 0;
+}
+.sb-zadacha__uslovie p {
+  margin: 0;
+  line-height: var(--lh-body);
+}
+.sb-formula {
+  margin: var(--space-2) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+  padding: var(--space-1) 0;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+.sb-zadacha__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.sb-metka {
+  font-size: var(--fs-caption);
+  border-radius: var(--radius-pill);
+  padding: 1px 10px;
+  font-weight: 600;
+}
+.sb-metka--verno {
+  background: var(--emerald-50);
+  color: #06704f;
+}
+.sb-metka--podskazka {
+  background: var(--amber-50);
+  color: var(--amber-700);
+}
+.sb-metka--oshibka {
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+}
+
+/* Поле ответа */
+.sb-vvod {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.sb-vvod__podpis {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.sb-pole {
+  display: block;
+  min-width: 0;
+  max-width: 520px;
+}
+.sb-pole .c2-math,
+.sb-pole .c2-math-host {
+  display: block;
+  width: 100%;
+}
+.sb-pole math-field {
+  min-height: 44px;
+  width: 100%;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  background: var(--color-surface);
+  font-size: 1.1rem;
+}
+.sb-vvod--polya {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.sb-vvod__pole {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.sb-vvod__pole .sb-pole {
+  width: 160px;
+}
+.sb-kusok {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+.sb-kusok__pri {
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.sb-kusok__ubrat,
+.sb-kusok__dobavit {
+  border: none;
+  background: none;
+  color: var(--color-text-brand);
+  font: inherit;
+  cursor: pointer;
+  min-height: 36px;
+  min-width: 36px;
+}
+.sb-kusok__dobavit {
+  justify-self: start;
+  font-size: var(--fs-caption);
+  padding: 0;
+}
+
+.sb-format {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--amber-700);
+}
+.sb-itog {
+  margin: 0;
+  font-weight: 600;
+}
+.sb-itog--verno {
+  color: #06704f;
+}
+.sb-itog--neverno {
+  color: var(--terracotta-700);
+}
+.sb-zagruzka {
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--fs-caption);
+}
+
+.sb-podskazki {
+  margin: 0;
+  padding: var(--space-3) var(--space-3) var(--space-3) calc(var(--space-3) + 1.2em);
+  background: var(--color-surface-info);
+  border-radius: var(--radius-md);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.sb-poisk {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  border: 1px dashed var(--color-border-strong);
+}
+.sb-poisk__zag,
+.sb-poisk__itog {
+  margin: 0;
+}
+.sb-poisk__zag {
+  font-weight: 600;
+}
+.sb-poisk__shag {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  overflow-x: auto;
+}
+.sb-poisk__shag--oshibka {
+  box-shadow: inset 3px 0 0 var(--terracotta);
+  background: var(--terracotta-50);
+}
+
+.sb-reshenie {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.sb-reshenie__zag {
+  margin: 0;
+  font-size: var(--fs-body);
+}
+.sb-reshenie .stk-shag__formula {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.sb-reshenie__otvet {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ── Тренажёр и генератор ──────────────────────────────────────── */
+
+.sb-nastroyka {
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.sb-nastroyka__zag {
+  margin: 0;
+  font-size: var(--fs-h4);
+}
+.sb-nastroyka__poyasnenie,
+.sb-nastroyka__dostupno {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+}
+.sb-nastroyka__gruppa {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.sb-nastroyka__gruppa legend {
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+  padding: 0;
+}
+.sb-nastroyka__kontrol {
+  display: flex;
+  gap: var(--space-3);
+}
+.sb-svyaz {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-text-brand);
+  font: inherit;
+  font-size: var(--fs-caption);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 32px;
+}
+.sb-galki {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+.sb-galka {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  cursor: pointer;
+  line-height: 1.35;
+  min-height: 32px;
+}
+.sb-galka input {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--color-primary);
+}
+.sb-oshibki {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-caption);
+  columns: 2 220px;
+}
+
+.sb-sessiya__shapka {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.sb-sessiya__dalshe {
+  justify-content: flex-end;
+}
+.sb-itogi {
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.sb-itogi__chisla {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+}
+.sb-itogi__chisla b {
+  font-size: 1.6rem;
+  color: var(--color-text-brand);
+  margin-right: 4px;
+}
+
+.sb-gen-tipy {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-1) var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+}
+.sb-gen-tip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.sb-gen-tip__imya {
+  min-width: 0;
+  line-height: 1.3;
+}
+.sb-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+}
+.sb-stepper button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.sb-stepper button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.sb-stepper output {
+  min-width: 2ch;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ── Телефон ───────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .sb-glava,
+  .sb-tip,
+  .sb-punkt,
+  .sb-zadacha:not(.sb-zadacha--vstroennaya),
+  .sb-nastroyka,
+  .sb-tip-shapka {
+    padding: var(--space-3);
+  }
+  .sb-glava__znak,
+  .sb-tip__znak {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+  .sb-kusok {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .sb-kusok > .sb-pole:nth-of-type(2) {
+    grid-column: 1 / -1;
+  }
+  .sb-kusok > .sb-kusok__pri:nth-of-type(2) {
+    display: none;
+  }
+  .sb-sessiya__shapka {
+    grid-template-columns: 1fr auto;
+  }
+  .sb-sessiya__shapka .sb-schyot__polosa {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .sb-formula {
+    font-size: 0.92rem;
+  }
+}
+
+/* Тренажёр по ссылке «Работа над ошибками»: этот блок — первым. */
+.sb-trenazher--oshibki > :last-child {
+  order: -1;
+}
+
+/* Формула значка не шире квадрата. */
+.sb-glava__znak .katex,
+.sb-tip__znak .katex {
+  font-size: 0.92em;
+  max-width: 56px;
+}

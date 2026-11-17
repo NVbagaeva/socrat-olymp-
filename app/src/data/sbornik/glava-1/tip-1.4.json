@@ -1,0 +1,1077 @@
+[
+ {
+  "id": "1.4.001",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kvadrat-para",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{16+6\\sqrt{7}}+\\sqrt{16-6\\sqrt{7}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "6",
+   "zapis": "6",
+   "znachenie": 6.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $16+6\\sqrt{7}$ в виде полного квадрата $(x+y\\sqrt{7})^2=x^2+7y^2+2xy\\sqrt{7}$: подходят $x=3$, $y=1$",
+    "tex": "16+6\\sqrt{7}=9+7+2\\cdot3\\cdot\\sqrt{7}=(3+\\sqrt{7})^2"
+   },
+   {
+    "chto": "Так же второе подкоренное выражение",
+    "tex": "16-6\\sqrt{7}=(3-\\sqrt{7})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$. Определяем знак второго числа",
+    "tex": "3^2=9>7=(\\sqrt{7})^2,\\ \\text{значит}\\ 3-\\sqrt{7}>0"
+   },
+   {
+    "chto": "Раскрываем модуль и считаем",
+    "tex": "\\sqrt{(3+\\sqrt{7})^2}+\\sqrt{(3-\\sqrt{7})^2}=(3+\\sqrt{7})+(3-\\sqrt{7})=6"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x+y\\sqrt{7}$ может быть $16+6\\sqrt{7}$?",
+   "Чему равен $\\sqrt{X^2}$, если знак $X$ неизвестен?",
+   "Что больше: $3$ или $\\sqrt{7}$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Pow(Add(Integer(16), Mul(Integer(-1), Integer(6), Pow(Integer(7), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(6), Pow(Integer(7), Rational(1, 2))), Integer(16)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.002",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "dva-kornya",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{12+2\\sqrt{35}}-\\sqrt{12-2\\sqrt{35}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2 \\sqrt{5}",
+   "zapis": "2*sqrt(5)",
+   "znachenie": 4.47213595499958,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем числа с суммой $12$ и произведением $35$: это $7$ и $5$, тогда подкоренные выражения — полные квадраты",
+    "tex": "12\\pm2\\sqrt{35}=(\\sqrt{7})^2+(\\sqrt{5})^2\\pm2\\sqrt{7}\\sqrt{5}=(\\sqrt{7}\\pm\\sqrt{5})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$, а $\\sqrt{7}-\\sqrt{5}>0$, потому что $7>5$",
+    "tex": "\\sqrt{12+2\\sqrt{35}}=\\sqrt{7}+\\sqrt{5},\\quad \\sqrt{12-2\\sqrt{35}}=\\sqrt{7}-\\sqrt{5}"
+   },
+   {
+    "chto": "Вычитаем",
+    "tex": "(\\sqrt{7}+\\sqrt{5})-(\\sqrt{7}-\\sqrt{5})=2\\sqrt{5}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $12+2\\sqrt{35}$ в виде $(\\sqrt{u}+\\sqrt{v})^2$? Чему равны $u+v$ и $uv$?",
+   "Какое из чисел больше: $\\sqrt{7}$ или $\\sqrt{5}$?",
+   "Что останется после сложения (вычитания)?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(12), Mul(Integer(-1), Integer(2), Pow(Integer(35), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(2), Pow(Integer(35), Rational(1, 2))), Integer(12)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.003",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "sokrashchenie",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{67-42\\sqrt{2}}+\\sqrt{54+36\\sqrt{2}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "13",
+   "zapis": "13",
+   "znachenie": 13.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $54+36\\sqrt{2}$ в виде полного квадрата $(x+y\\sqrt{2})^2=x^2+2y^2+2xy\\sqrt{2}$: подходят $x=6$, $y=3$",
+    "tex": "54+36\\sqrt{2}=36+18+2\\cdot6\\cdot3\\sqrt{2}=(6+3\\sqrt{2})^2"
+   },
+   {
+    "chto": "Так же второе подкоренное выражение",
+    "tex": "67-42\\sqrt{2}=(7-3\\sqrt{2})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$. Знак числа под модулем",
+    "tex": "7^2=49>18=(3\\sqrt{2})^2,\\ \\text{значит}\\ 7-3\\sqrt{2}>0"
+   },
+   {
+    "chto": "Раскрываем модуль, $\\sqrt{2}$ взаимно уничтожаются",
+    "tex": "(7-3\\sqrt{2})+(6+3\\sqrt{2})=13"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x\\pm y\\sqrt{2}$ является каждое подкоренное выражение?",
+   "Положительно ли число $7-3\\sqrt{2}$?",
+   "Как раскрыть $\\sqrt{X^2}$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Pow(Add(Integer(67), Mul(Integer(-1), Integer(42), Pow(Integer(2), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(36), Pow(Integer(2), Rational(1, 2))), Integer(54)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.004",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "proizvedenie",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "(7+2\\sqrt{6})\\cdot\\sqrt{73-28\\sqrt{6}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "25",
+   "zapis": "25",
+   "znachenie": 25.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $73-28\\sqrt{6}$ в виде полного квадрата $(x-y\\sqrt{6})^2=x^2+6y^2-2xy\\sqrt{6}$: подходят $x=7$, $y=2$",
+    "tex": "73-28\\sqrt{6}=49+24-2\\cdot7\\cdot2\\sqrt{6}=(7-2\\sqrt{6})^2"
+   },
+   {
+    "chto": "Извлекаем корень: $\\sqrt{X^2}=|X|$. Знак числа под модулем",
+    "tex": "7^2=49>24=(2\\sqrt{6})^2,\\ \\text{значит}\\ 7-2\\sqrt{6}>0"
+   },
+   {
+    "chto": "Раскрываем модуль",
+    "tex": "\\sqrt{73-28\\sqrt{6}}=7-2\\sqrt{6}"
+   },
+   {
+    "chto": "Перемножаем по формуле разности квадратов",
+    "tex": "(7+2\\sqrt{6})(7-2\\sqrt{6})=49-24=25"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x-y\\sqrt{6}$ является $73-28\\sqrt{6}$?",
+   "Что больше: $7$ или $2\\sqrt{6}$?",
+   "Какая формула сокращённого умножения получится при перемножении?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(73), Mul(Integer(-1), Integer(28), Pow(Integer(6), Rational(1, 2)))), Rational(1, 2)), Add(Mul(Integer(2), Pow(Integer(6), Rational(1, 2))), Integer(7)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.005",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kvadrat-para",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{53+12\\sqrt{11}}+\\sqrt{53-12\\sqrt{11}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "4 \\sqrt{11}",
+   "zapis": "4*sqrt(11)",
+   "znachenie": 13.2664991614216,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $53+12\\sqrt{11}$ в виде полного квадрата $(x+y\\sqrt{11})^2=x^2+11y^2+2xy\\sqrt{11}$: подходят $x=3$, $y=2$",
+    "tex": "53+12\\sqrt{11}=9+44+2\\cdot3\\cdot2\\sqrt{11}=(3+2\\sqrt{11})^2"
+   },
+   {
+    "chto": "Так же второе подкоренное выражение",
+    "tex": "53-12\\sqrt{11}=(3-2\\sqrt{11})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$. Определяем знак второго числа",
+    "tex": "3^2=9<44=(2\\sqrt{11})^2,\\ \\text{значит}\\ 3-2\\sqrt{11}<0"
+   },
+   {
+    "chto": "Раскрываем модуль и считаем",
+    "tex": "\\sqrt{(3+2\\sqrt{11})^2}+\\sqrt{(3-2\\sqrt{11})^2}=(3+2\\sqrt{11})+(2\\sqrt{11}-3)=4 \\sqrt{11}"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x+y\\sqrt{11}$ может быть $53+12\\sqrt{11}$?",
+   "Чему равен $\\sqrt{X^2}$, если знак $X$ неизвестен?",
+   "Что больше: $3$ или $2\\sqrt{11}$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Pow(Add(Integer(53), Mul(Integer(-1), Integer(12), Pow(Integer(11), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(12), Pow(Integer(11), Rational(1, 2))), Integer(53)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.006",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "dva-kornya",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{26+2\\sqrt{165}}-\\sqrt{26-2\\sqrt{165}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2 \\sqrt{11}",
+   "zapis": "2*sqrt(11)",
+   "znachenie": 6.6332495807108,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем числа с суммой $26$ и произведением $165$: это $15$ и $11$, тогда подкоренные выражения — полные квадраты",
+    "tex": "26\\pm2\\sqrt{165}=(\\sqrt{15})^2+(\\sqrt{11})^2\\pm2\\sqrt{15}\\sqrt{11}=(\\sqrt{15}\\pm\\sqrt{11})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$, а $\\sqrt{15}-\\sqrt{11}>0$, потому что $15>11$",
+    "tex": "\\sqrt{26+2\\sqrt{165}}=\\sqrt{15}+\\sqrt{11},\\quad \\sqrt{26-2\\sqrt{165}}=\\sqrt{15}-\\sqrt{11}"
+   },
+   {
+    "chto": "Вычитаем",
+    "tex": "(\\sqrt{15}+\\sqrt{11})-(\\sqrt{15}-\\sqrt{11})=2\\sqrt{11}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $26+2\\sqrt{165}$ в виде $(\\sqrt{u}+\\sqrt{v})^2$? Чему равны $u+v$ и $uv$?",
+   "Какое из чисел больше: $\\sqrt{15}$ или $\\sqrt{11}$?",
+   "Что останется после сложения (вычитания)?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(26), Mul(Integer(-1), Integer(2), Pow(Integer(165), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(2), Pow(Integer(165), Rational(1, 2))), Integer(26)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.007",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "sokrashchenie",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{75+16\\sqrt{11}}-\\sqrt{12-2\\sqrt{11}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "9",
+   "zapis": "9",
+   "znachenie": 9.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $75+16\\sqrt{11}$ в виде полного квадрата $(x+y\\sqrt{11})^2=x^2+11y^2+2xy\\sqrt{11}$: подходят $x=8$, $y=1$",
+    "tex": "75+16\\sqrt{11}=64+11+2\\cdot8\\cdot\\sqrt{11}=(8+\\sqrt{11})^2"
+   },
+   {
+    "chto": "Так же второе подкоренное выражение",
+    "tex": "12-2\\sqrt{11}=(1-\\sqrt{11})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$. Знак числа под модулем",
+    "tex": "1^2=1<11=(\\sqrt{11})^2,\\ \\text{значит}\\ 1-\\sqrt{11}<0"
+   },
+   {
+    "chto": "Раскрываем модуль, $\\sqrt{11}$ взаимно уничтожаются",
+    "tex": "(8+\\sqrt{11})-(\\sqrt{11}-1)=9"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x\\pm y\\sqrt{11}$ является каждое подкоренное выражение?",
+   "Положительно ли число $1-\\sqrt{11}$?",
+   "Как раскрыть $\\sqrt{X^2}$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(12), Mul(Integer(-1), Integer(2), Pow(Integer(11), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(16), Pow(Integer(11), Rational(1, 2))), Integer(75)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.008",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "proizvedenie",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "(3+\\sqrt{5})\\cdot\\sqrt{14-6\\sqrt{5}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "4",
+   "zapis": "4",
+   "znachenie": 4.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $14-6\\sqrt{5}$ в виде полного квадрата $(x-y\\sqrt{5})^2=x^2+5y^2-2xy\\sqrt{5}$: подходят $x=3$, $y=1$",
+    "tex": "14-6\\sqrt{5}=9+5-2\\cdot3\\cdot\\sqrt{5}=(3-\\sqrt{5})^2"
+   },
+   {
+    "chto": "Извлекаем корень: $\\sqrt{X^2}=|X|$. Знак числа под модулем",
+    "tex": "3^2=9>5=(\\sqrt{5})^2,\\ \\text{значит}\\ 3-\\sqrt{5}>0"
+   },
+   {
+    "chto": "Раскрываем модуль",
+    "tex": "\\sqrt{14-6\\sqrt{5}}=3-\\sqrt{5}"
+   },
+   {
+    "chto": "Перемножаем по формуле разности квадратов",
+    "tex": "(3+\\sqrt{5})(3-\\sqrt{5})=9-5=4"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x-y\\sqrt{5}$ является $14-6\\sqrt{5}$?",
+   "Что больше: $3$ или $\\sqrt{5}$?",
+   "Какая формула сокращённого умножения получится при перемножении?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Integer(14), Mul(Integer(-1), Integer(6), Pow(Integer(5), Rational(1, 2)))), Rational(1, 2)), Add(Pow(Integer(5), Rational(1, 2)), Integer(3)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.009",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kvadrat-para",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{72+18\\sqrt{7}}-\\sqrt{72-18\\sqrt{7}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "6",
+   "zapis": "6",
+   "znachenie": 6.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $72+18\\sqrt{7}$ в виде полного квадрата $(x+y\\sqrt{7})^2=x^2+7y^2+2xy\\sqrt{7}$: подходят $x=3$, $y=3$",
+    "tex": "72+18\\sqrt{7}=9+63+2\\cdot3\\cdot3\\sqrt{7}=(3+3\\sqrt{7})^2"
+   },
+   {
+    "chto": "Так же второе подкоренное выражение",
+    "tex": "72-18\\sqrt{7}=(3-3\\sqrt{7})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$. Определяем знак второго числа",
+    "tex": "3^2=9<63=(3\\sqrt{7})^2,\\ \\text{значит}\\ 3-3\\sqrt{7}<0"
+   },
+   {
+    "chto": "Раскрываем модуль и считаем",
+    "tex": "\\sqrt{(3+3\\sqrt{7})^2}-\\sqrt{(3-3\\sqrt{7})^2}=(3+3\\sqrt{7})-(3\\sqrt{7}-3)=6"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x+y\\sqrt{7}$ может быть $72+18\\sqrt{7}$?",
+   "Чему равен $\\sqrt{X^2}$, если знак $X$ неизвестен?",
+   "Что больше: $3$ или $3\\sqrt{7}$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(72), Mul(Integer(-1), Integer(18), Pow(Integer(7), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(18), Pow(Integer(7), Rational(1, 2))), Integer(72)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.010",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "dva-kornya",
+  "uroven": 1,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{13+2\\sqrt{30}}-\\sqrt{13-2\\sqrt{30}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2 \\sqrt{3}",
+   "zapis": "2*sqrt(3)",
+   "znachenie": 3.4641016151377544,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем числа с суммой $13$ и произведением $30$: это $10$ и $3$, тогда подкоренные выражения — полные квадраты",
+    "tex": "13\\pm2\\sqrt{30}=(\\sqrt{10})^2+(\\sqrt{3})^2\\pm2\\sqrt{10}\\sqrt{3}=(\\sqrt{10}\\pm\\sqrt{3})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$, а $\\sqrt{10}-\\sqrt{3}>0$, потому что $10>3$",
+    "tex": "\\sqrt{13+2\\sqrt{30}}=\\sqrt{10}+\\sqrt{3},\\quad \\sqrt{13-2\\sqrt{30}}=\\sqrt{10}-\\sqrt{3}"
+   },
+   {
+    "chto": "Вычитаем",
+    "tex": "(\\sqrt{10}+\\sqrt{3})-(\\sqrt{10}-\\sqrt{3})=2\\sqrt{3}"
+   }
+  ],
+  "podskazki": [
+   "Как записать $13+2\\sqrt{30}$ в виде $(\\sqrt{u}+\\sqrt{v})^2$? Чему равны $u+v$ и $uv$?",
+   "Какое из чисел больше: $\\sqrt{10}$ или $\\sqrt{3}$?",
+   "Что останется после сложения (вычитания)?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(13), Mul(Integer(-1), Integer(2), Pow(Integer(30), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(2), Pow(Integer(30), Rational(1, 2))), Integer(13)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.011",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-summa",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[3]{44+18\\sqrt{6}}+\\sqrt[3]{44-18\\sqrt{6}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "4",
+   "zapis": "4",
+   "znachenie": 4.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим сумму через $s$ и возведём в куб: $(u+v)^3=u^3+v^3+3uv(u+v)$",
+    "tex": "s^3=88+3\\sqrt[3]{(44+18\\sqrt{6})(44-18\\sqrt{6})}\\cdot s"
+   },
+   {
+    "chto": "Под корнем — разность квадратов",
+    "tex": "\\sqrt[3]{44^2-18^2\\cdot6}=\\sqrt[3]{-8}=-2"
+   },
+   {
+    "chto": "Получаем кубическое уравнение для $s$; подбором находим корень $s=4$",
+    "tex": "s^3+6s-88=0\\ \\Rightarrow\\ (s-4)(s^2+4s+22)=0"
+   },
+   {
+    "chto": "У квадратного множителя дискриминант отрицателен, значит других корней нет",
+    "tex": "D=16-4\\cdot22<0\\ \\Rightarrow\\ s=4"
+   }
+  ],
+  "podskazki": [
+   "Что получится, если обозначить сумму через $s$ и возвести её в куб?",
+   "Чему равно произведение подкоренных выражений?",
+   "Какой целый корень у получившегося кубического уравнения?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(-44), Mul(Integer(18), Pow(Integer(6), Rational(1, 2)))), Rational(1, 3))), Pow(Add(Integer(44), Mul(Integer(18), Pow(Integer(6), Rational(1, 2)))), Rational(1, 3)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.012",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-raznost",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[3]{61+46\\sqrt{5}}-\\sqrt[3]{61-46\\sqrt{5}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "4 \\sqrt{5}",
+   "zapis": "4*sqrt(5)",
+   "znachenie": 8.94427190999916,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $61+46\\sqrt{5}$ в виде куба $(x+y\\sqrt{5})^3=x^3+15xy^2+(3x^2y+5y^3)\\sqrt{5}$: подходят $x=1$, $y=2$",
+    "tex": "(1+2\\sqrt{5})^3=1+60+(6+40)\\sqrt{5}=61+46\\sqrt{5}"
+   },
+   {
+    "chto": "Меняя знак у $\\sqrt{5}$, получаем второй куб",
+    "tex": "(1-2\\sqrt{5})^3=61-46\\sqrt{5}"
+   },
+   {
+    "chto": "Кубический корень из куба числа равен самому числу, даже отрицательному",
+    "tex": "\\sqrt[3]{61+46\\sqrt{5}}=1+2\\sqrt{5},\\quad \\sqrt[3]{61-46\\sqrt{5}}=1-2\\sqrt{5}"
+   },
+   {
+    "chto": "Вычитаем",
+    "tex": "(1+2\\sqrt{5})-(1-2\\sqrt{5})=4 \\sqrt{5}"
+   }
+  ],
+  "podskazki": [
+   "Кубом какого числа вида $x+y\\sqrt{5}$ может быть $61+46\\sqrt{5}$?",
+   "Как получить второй куб из первого?",
+   "Нужно ли следить за знаком при извлечении кубического корня?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Pow(Add(Integer(-61), Mul(Integer(46), Pow(Integer(5), Rational(1, 2)))), Rational(1, 3)), Pow(Add(Integer(61), Mul(Integer(46), Pow(Integer(5), Rational(1, 2)))), Rational(1, 3)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.013",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-drob",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\frac{\\sqrt[3]{72+32\\sqrt{5}}+\\sqrt[3]{72-32\\sqrt{5}}}{\\sqrt{19+8\\sqrt{3}}+\\sqrt{19-8\\sqrt{3}}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "0{,}75",
+   "zapis": "3/4",
+   "znachenie": 0.75,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $72+32\\sqrt{5}$ в виде куба $(x+y\\sqrt{5})^3=x^3+15xy^2+(3x^2y+5y^3)\\sqrt{5}$: подходят $x=3$, $y=1$",
+    "tex": "(3+\\sqrt{5})^3=27+45+(27+5)\\sqrt{5}=72+32\\sqrt{5}"
+   },
+   {
+    "chto": "Второй куб — с другим знаком; числитель равен",
+    "tex": "(3+\\sqrt{5})+(3-\\sqrt{5})=6"
+   },
+   {
+    "chto": "Ищем $19+8\\sqrt{3}$ в виде полного квадрата $(x+y\\sqrt{3})^2=x^2+3y^2+2xy\\sqrt{3}$: подходят $x=4$, $y=1$",
+    "tex": "19+8\\sqrt{3}=16+3+2\\cdot4\\cdot\\sqrt{3}=(4+\\sqrt{3})^2"
+   },
+   {
+    "chto": "Второе подкоренное выражение знаменателя — $(4-\\sqrt{3})^2$; $\\sqrt{X^2}=|X|$, знак числа под модулем",
+    "tex": "4^2=16>3=(\\sqrt{3})^2,\\ \\text{значит}\\ 4-\\sqrt{3}>0"
+   },
+   {
+    "chto": "Знаменатель и ответ",
+    "tex": "(4+\\sqrt{3})+(4-\\sqrt{3})=8,\\quad \\frac{6}{8}=\\frac{3}{4}"
+   }
+  ],
+  "podskazki": [
+   "Кубом какого числа вида $x+y\\sqrt{5}$ является $72+32\\sqrt{5}$?",
+   "Квадратом какого числа является $19+8\\sqrt{3}$?",
+   "Какой знак у числа $4-\\sqrt{3}$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Pow(Add(Integer(19), Mul(Integer(-1), Integer(8), Pow(Integer(3), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(8), Pow(Integer(3), Rational(1, 2))), Integer(19)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Integer(72), Mul(Integer(-1), Integer(32), Pow(Integer(5), Rational(1, 2)))), Rational(1, 3)), Pow(Add(Mul(Integer(32), Pow(Integer(5), Rational(1, 2))), Integer(72)), Rational(1, 3))))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.014",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "tri-radikala",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{8+2\\sqrt{7}}-\\sqrt{56-14\\sqrt{7}}-\\sqrt{44+16\\sqrt{7}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "-10",
+   "zapis": "-10",
+   "znachenie": -10.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Каждое подкоренное выражение — полный квадрат вида $(x\\pm y\\sqrt{7})^2=x^2+7y^2\\pm2xy\\sqrt{7}$",
+    "tex": "8+2\\sqrt{7}=(1+\\sqrt{7})^2,\\quad 56-14\\sqrt{7}=(7-\\sqrt{7})^2,\\quad 44+16\\sqrt{7}=(4+2\\sqrt{7})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$. Определяем знаки чисел с минусом",
+    "tex": "7^2=49>7=(\\sqrt{7})^2,\\ \\text{значит}\\ 7-\\sqrt{7}>0"
+   },
+   {
+    "chto": "Раскрываем модули и складываем: радикалы взаимно уничтожаются",
+    "tex": "(1+\\sqrt{7})-(7-\\sqrt{7})-(4+2\\sqrt{7})=-10"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x\\pm y\\sqrt{7}$ является каждое подкоренное выражение?",
+   "Чему равен $\\sqrt{X^2}$, если $X<0$?",
+   "Что происходит со слагаемыми, содержащими $\\sqrt{7}$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Mul(Integer(16), Pow(Integer(7), Rational(1, 2))), Integer(44)), Rational(1, 2))), Mul(Integer(-1), Pow(Add(Integer(56), Mul(Integer(-1), Integer(14), Pow(Integer(7), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(2), Pow(Integer(7), Rational(1, 2))), Integer(8)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.015",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "chetvertaya-stepen",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[4]{68+48\\sqrt{2}}-\\sqrt[4]{68-48\\sqrt{2}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2 \\sqrt{2}",
+   "zapis": "2*sqrt(2)",
+   "znachenie": 2.8284271247461903,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "$\\sqrt[4]{X}=\\sqrt{\\sqrt{X}}$. Сначала ищем $68+48\\sqrt{2}$ в виде полного квадрата",
+    "tex": "68+48\\sqrt{2}=36+32+2\\cdot6\\cdot4\\sqrt{2}=(6+4\\sqrt{2})^2"
+   },
+   {
+    "chto": "Число $6+4\\sqrt{2}$ — тоже полный квадрат",
+    "tex": "6+4\\sqrt{2}=4+2+2\\cdot2\\cdot\\sqrt{2}=(2+\\sqrt{2})^2"
+   },
+   {
+    "chto": "Значит, оба подкоренных выражения — четвёртые степени",
+    "tex": "68+48\\sqrt{2}=(2+\\sqrt{2})^4,\\quad 68-48\\sqrt{2}=(2-\\sqrt{2})^4"
+   },
+   {
+    "chto": "Корень чётной степени: $\\sqrt[4]{X^4}=|X|$. Знак второго числа",
+    "tex": "2^2=4>2=(\\sqrt{2})^2,\\ \\text{значит}\\ 2-\\sqrt{2}>0"
+   },
+   {
+    "chto": "Раскрываем модуль и считаем",
+    "tex": "(2+\\sqrt{2})-(2-\\sqrt{2})=2 \\sqrt{2}"
+   }
+  ],
+  "podskazki": [
+   "Как записать корень четвёртой степени через квадратные корни?",
+   "Квадратом какого числа вида $x+y\\sqrt{2}$ является $68+48\\sqrt{2}$?",
+   "Чему равен $\\sqrt[4]{X^4}$ при отрицательном $X$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(68), Mul(Integer(-1), Integer(48), Pow(Integer(2), Rational(1, 2)))), Rational(1, 4))), Pow(Add(Mul(Integer(48), Pow(Integer(2), Rational(1, 2))), Integer(68)), Rational(1, 4)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.016",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-summa",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[3]{148+55\\sqrt{7}}+\\sqrt[3]{148-55\\sqrt{7}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "8",
+   "zapis": "8",
+   "znachenie": 8.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим сумму через $s$ и возведём в куб: $(u+v)^3=u^3+v^3+3uv(u+v)$",
+    "tex": "s^3=296+3\\sqrt[3]{(148+55\\sqrt{7})(148-55\\sqrt{7})}\\cdot s"
+   },
+   {
+    "chto": "Под корнем — разность квадратов",
+    "tex": "\\sqrt[3]{148^2-55^2\\cdot7}=\\sqrt[3]{729}=9"
+   },
+   {
+    "chto": "Получаем кубическое уравнение для $s$; подбором находим корень $s=8$",
+    "tex": "s^3-27s-296=0\\ \\Rightarrow\\ (s-8)(s^2+8s+37)=0"
+   },
+   {
+    "chto": "У квадратного множителя дискриминант отрицателен, значит других корней нет",
+    "tex": "D=64-4\\cdot37<0\\ \\Rightarrow\\ s=8"
+   }
+  ],
+  "podskazki": [
+   "Что получится, если обозначить сумму через $s$ и возвести её в куб?",
+   "Чему равно произведение подкоренных выражений?",
+   "Какой целый корень у получившегося кубического уравнения?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Pow(Add(Integer(148), Mul(Integer(-1), Integer(55), Pow(Integer(7), Rational(1, 2)))), Rational(1, 3)), Pow(Add(Mul(Integer(55), Pow(Integer(7), Rational(1, 2))), Integer(148)), Rational(1, 3)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.017",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-raznost",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[3]{72+32\\sqrt{5}}-\\sqrt[3]{72-32\\sqrt{5}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2 \\sqrt{5}",
+   "zapis": "2*sqrt(5)",
+   "znachenie": 4.47213595499958,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $72+32\\sqrt{5}$ в виде куба $(x+y\\sqrt{5})^3=x^3+15xy^2+(3x^2y+5y^3)\\sqrt{5}$: подходят $x=3$, $y=1$",
+    "tex": "(3+\\sqrt{5})^3=27+45+(27+5)\\sqrt{5}=72+32\\sqrt{5}"
+   },
+   {
+    "chto": "Меняя знак у $\\sqrt{5}$, получаем второй куб",
+    "tex": "(3-\\sqrt{5})^3=72-32\\sqrt{5}"
+   },
+   {
+    "chto": "Кубический корень из куба числа равен самому числу, даже отрицательному",
+    "tex": "\\sqrt[3]{72+32\\sqrt{5}}=3+\\sqrt{5},\\quad \\sqrt[3]{72-32\\sqrt{5}}=3-\\sqrt{5}"
+   },
+   {
+    "chto": "Вычитаем",
+    "tex": "(3+\\sqrt{5})-(3-\\sqrt{5})=2 \\sqrt{5}"
+   }
+  ],
+  "podskazki": [
+   "Кубом какого числа вида $x+y\\sqrt{5}$ может быть $72+32\\sqrt{5}$?",
+   "Как получить второй куб из первого?",
+   "Нужно ли следить за знаком при извлечении кубического корня?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(72), Mul(Integer(-1), Integer(32), Pow(Integer(5), Rational(1, 2)))), Rational(1, 3))), Pow(Add(Mul(Integer(32), Pow(Integer(5), Rational(1, 2))), Integer(72)), Rational(1, 3)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.018",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-drob",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\frac{\\sqrt[3]{152+72\\sqrt{6}}+\\sqrt[3]{152-72\\sqrt{6}}}{\\sqrt{21+8\\sqrt{5}}+\\sqrt{21-8\\sqrt{5}}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "0{,}5",
+   "zapis": "1/2",
+   "znachenie": 0.5,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $152+72\\sqrt{6}$ в виде куба $(x+y\\sqrt{6})^3=x^3+18xy^2+(3x^2y+6y^3)\\sqrt{6}$: подходят $x=2$, $y=2$",
+    "tex": "(2+2\\sqrt{6})^3=8+144+(24+48)\\sqrt{6}=152+72\\sqrt{6}"
+   },
+   {
+    "chto": "Второй куб — с другим знаком; числитель равен",
+    "tex": "(2+2\\sqrt{6})+(2-2\\sqrt{6})=4"
+   },
+   {
+    "chto": "Ищем $21+8\\sqrt{5}$ в виде полного квадрата $(x+y\\sqrt{5})^2=x^2+5y^2+2xy\\sqrt{5}$: подходят $x=4$, $y=1$",
+    "tex": "21+8\\sqrt{5}=16+5+2\\cdot4\\cdot\\sqrt{5}=(4+\\sqrt{5})^2"
+   },
+   {
+    "chto": "Второе подкоренное выражение знаменателя — $(4-\\sqrt{5})^2$; $\\sqrt{X^2}=|X|$, знак числа под модулем",
+    "tex": "4^2=16>5=(\\sqrt{5})^2,\\ \\text{значит}\\ 4-\\sqrt{5}>0"
+   },
+   {
+    "chto": "Знаменатель и ответ",
+    "tex": "(4+\\sqrt{5})+(4-\\sqrt{5})=8,\\quad \\frac{4}{8}=\\frac{1}{2}"
+   }
+  ],
+  "podskazki": [
+   "Кубом какого числа вида $x+y\\sqrt{6}$ является $152+72\\sqrt{6}$?",
+   "Квадратом какого числа является $21+8\\sqrt{5}$?",
+   "Какой знак у числа $4-\\sqrt{5}$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Add(Mul(Integer(-1), Pow(Add(Integer(-152), Mul(Integer(72), Pow(Integer(6), Rational(1, 2)))), Rational(1, 3))), Pow(Add(Integer(152), Mul(Integer(72), Pow(Integer(6), Rational(1, 2)))), Rational(1, 3))), Pow(Add(Pow(Add(Integer(21), Mul(Integer(-1), Integer(8), Pow(Integer(5), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(8), Pow(Integer(5), Rational(1, 2))), Integer(21)), Rational(1, 2))), Integer(-1)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.019",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "tri-radikala",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{44+24\\sqrt{2}}+\\sqrt{18+8\\sqrt{2}}-\\sqrt{19-6\\sqrt{2}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "11",
+   "zapis": "11",
+   "znachenie": 11.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Каждое подкоренное выражение — полный квадрат вида $(x\\pm y\\sqrt{2})^2=x^2+2y^2\\pm2xy\\sqrt{2}$",
+    "tex": "44+24\\sqrt{2}=(6+2\\sqrt{2})^2,\\quad 18+8\\sqrt{2}=(4+\\sqrt{2})^2,\\quad 19-6\\sqrt{2}=(1-3\\sqrt{2})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$. Определяем знаки чисел с минусом",
+    "tex": "1^2=1<18=(3\\sqrt{2})^2,\\ \\text{значит}\\ 1-3\\sqrt{2}<0"
+   },
+   {
+    "chto": "Раскрываем модули и складываем: радикалы взаимно уничтожаются",
+    "tex": "(6+2\\sqrt{2})+(4+\\sqrt{2})-(3\\sqrt{2}-1)=11"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x\\pm y\\sqrt{2}$ является каждое подкоренное выражение?",
+   "Чему равен $\\sqrt{X^2}$, если $X<0$?",
+   "Что происходит со слагаемыми, содержащими $\\sqrt{2}$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(19), Mul(Integer(-1), Integer(6), Pow(Integer(2), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(8), Pow(Integer(2), Rational(1, 2))), Integer(18)), Rational(1, 2)), Pow(Add(Mul(Integer(24), Pow(Integer(2), Rational(1, 2))), Integer(44)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.020",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "chetvertaya-stepen",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[4]{113+72\\sqrt{2}}-\\sqrt[4]{113-72\\sqrt{2}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2",
+   "zapis": "2",
+   "znachenie": 2.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "$\\sqrt[4]{X}=\\sqrt{\\sqrt{X}}$. Сначала ищем $113+72\\sqrt{2}$ в виде полного квадрата",
+    "tex": "113+72\\sqrt{2}=81+32+2\\cdot9\\cdot4\\sqrt{2}=(9+4\\sqrt{2})^2"
+   },
+   {
+    "chto": "Число $9+4\\sqrt{2}$ — тоже полный квадрат",
+    "tex": "9+4\\sqrt{2}=1+8+2\\cdot1\\cdot2\\sqrt{2}=(1+2\\sqrt{2})^2"
+   },
+   {
+    "chto": "Значит, оба подкоренных выражения — четвёртые степени",
+    "tex": "113+72\\sqrt{2}=(1+2\\sqrt{2})^4,\\quad 113-72\\sqrt{2}=(1-2\\sqrt{2})^4"
+   },
+   {
+    "chto": "Корень чётной степени: $\\sqrt[4]{X^4}=|X|$. Знак второго числа",
+    "tex": "1^2=1<8=(2\\sqrt{2})^2,\\ \\text{значит}\\ 1-2\\sqrt{2}<0"
+   },
+   {
+    "chto": "Раскрываем модуль и считаем",
+    "tex": "(1+2\\sqrt{2})-(2\\sqrt{2}-1)=2"
+   }
+  ],
+  "podskazki": [
+   "Как записать корень четвёртой степени через квадратные корни?",
+   "Квадратом какого числа вида $x+y\\sqrt{2}$ является $113+72\\sqrt{2}$?",
+   "Чему равен $\\sqrt[4]{X^4}$ при отрицательном $X$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(113), Mul(Integer(-1), Integer(72), Pow(Integer(2), Rational(1, 2)))), Rational(1, 4))), Pow(Add(Mul(Integer(72), Pow(Integer(2), Rational(1, 2))), Integer(113)), Rational(1, 4)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.021",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-summa",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[3]{22+10\\sqrt{7}}+\\sqrt[3]{22-10\\sqrt{7}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2",
+   "zapis": "2",
+   "znachenie": 2.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Обозначим сумму через $s$ и возведём в куб: $(u+v)^3=u^3+v^3+3uv(u+v)$",
+    "tex": "s^3=44+3\\sqrt[3]{(22+10\\sqrt{7})(22-10\\sqrt{7})}\\cdot s"
+   },
+   {
+    "chto": "Под корнем — разность квадратов",
+    "tex": "\\sqrt[3]{22^2-10^2\\cdot7}=\\sqrt[3]{-216}=-6"
+   },
+   {
+    "chto": "Получаем кубическое уравнение для $s$; подбором находим корень $s=2$",
+    "tex": "s^3+18s-44=0\\ \\Rightarrow\\ (s-2)(s^2+2s+22)=0"
+   },
+   {
+    "chto": "У квадратного множителя дискриминант отрицателен, значит других корней нет",
+    "tex": "D=4-4\\cdot22<0\\ \\Rightarrow\\ s=2"
+   }
+  ],
+  "podskazki": [
+   "Что получится, если обозначить сумму через $s$ и возвести её в куб?",
+   "Чему равно произведение подкоренных выражений?",
+   "Какой целый корень у получившегося кубического уравнения?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(-22), Mul(Integer(10), Pow(Integer(7), Rational(1, 2)))), Rational(1, 3))), Pow(Add(Integer(22), Mul(Integer(10), Pow(Integer(7), Rational(1, 2)))), Rational(1, 3)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.022",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-raznost",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[3]{135+78\\sqrt{3}}-\\sqrt[3]{135-78\\sqrt{3}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "4 \\sqrt{3}",
+   "zapis": "4*sqrt(3)",
+   "znachenie": 6.928203230275509,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $135+78\\sqrt{3}$ в виде куба $(x+y\\sqrt{3})^3=x^3+9xy^2+(3x^2y+3y^3)\\sqrt{3}$: подходят $x=3$, $y=2$",
+    "tex": "(3+2\\sqrt{3})^3=27+108+(54+24)\\sqrt{3}=135+78\\sqrt{3}"
+   },
+   {
+    "chto": "Меняя знак у $\\sqrt{3}$, получаем второй куб",
+    "tex": "(3-2\\sqrt{3})^3=135-78\\sqrt{3}"
+   },
+   {
+    "chto": "Кубический корень из куба числа равен самому числу, даже отрицательному",
+    "tex": "\\sqrt[3]{135+78\\sqrt{3}}=3+2\\sqrt{3},\\quad \\sqrt[3]{135-78\\sqrt{3}}=3-2\\sqrt{3}"
+   },
+   {
+    "chto": "Вычитаем",
+    "tex": "(3+2\\sqrt{3})-(3-2\\sqrt{3})=4 \\sqrt{3}"
+   }
+  ],
+  "podskazki": [
+   "Кубом какого числа вида $x+y\\sqrt{3}$ может быть $135+78\\sqrt{3}$?",
+   "Как получить второй куб из первого?",
+   "Нужно ли следить за знаком при извлечении кубического корня?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Pow(Add(Integer(-135), Mul(Integer(78), Pow(Integer(3), Rational(1, 2)))), Rational(1, 3)), Pow(Add(Integer(135), Mul(Integer(78), Pow(Integer(3), Rational(1, 2)))), Rational(1, 3)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.023",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "kub-drob",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\frac{\\sqrt[3]{100+51\\sqrt{3}}+\\sqrt[3]{100-51\\sqrt{3}}}{\\sqrt{9+4\\sqrt{5}}-\\sqrt{9-4\\sqrt{5}}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2",
+   "zapis": "2",
+   "znachenie": 2.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Ищем $100+51\\sqrt{3}$ в виде куба $(x+y\\sqrt{3})^3=x^3+9xy^2+(3x^2y+3y^3)\\sqrt{3}$: подходят $x=4$, $y=1$",
+    "tex": "(4+\\sqrt{3})^3=64+36+(48+3)\\sqrt{3}=100+51\\sqrt{3}"
+   },
+   {
+    "chto": "Второй куб — с другим знаком; числитель равен",
+    "tex": "(4+\\sqrt{3})+(4-\\sqrt{3})=8"
+   },
+   {
+    "chto": "Ищем $9+4\\sqrt{5}$ в виде полного квадрата $(x+y\\sqrt{5})^2=x^2+5y^2+2xy\\sqrt{5}$: подходят $x=2$, $y=1$",
+    "tex": "9+4\\sqrt{5}=4+5+2\\cdot2\\cdot\\sqrt{5}=(2+\\sqrt{5})^2"
+   },
+   {
+    "chto": "Второе подкоренное выражение знаменателя — $(2-\\sqrt{5})^2$; $\\sqrt{X^2}=|X|$, знак числа под модулем",
+    "tex": "2^2=4<5=(\\sqrt{5})^2,\\ \\text{значит}\\ 2-\\sqrt{5}<0"
+   },
+   {
+    "chto": "Знаменатель и ответ",
+    "tex": "(2+\\sqrt{5})-(\\sqrt{5}-2)=4,\\quad \\frac{8}{4}=2"
+   }
+  ],
+  "podskazki": [
+   "Кубом какого числа вида $x+y\\sqrt{3}$ является $100+51\\sqrt{3}$?",
+   "Квадратом какого числа является $9+4\\sqrt{5}$?",
+   "Какой знак у числа $2-\\sqrt{5}$?"
+  ],
+  "proverka": {
+   "iskhod": "Mul(Pow(Add(Mul(Integer(-1), Pow(Add(Integer(9), Mul(Integer(-1), Integer(4), Pow(Integer(5), Rational(1, 2)))), Rational(1, 2))), Pow(Add(Mul(Integer(4), Pow(Integer(5), Rational(1, 2))), Integer(9)), Rational(1, 2))), Integer(-1)), Add(Pow(Add(Integer(100), Mul(Integer(-1), Integer(51), Pow(Integer(3), Rational(1, 2)))), Rational(1, 3)), Pow(Add(Mul(Integer(51), Pow(Integer(3), Rational(1, 2))), Integer(100)), Rational(1, 3))))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.024",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "tri-radikala",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt{18+8\\sqrt{2}}+\\sqrt{44-24\\sqrt{2}}+\\sqrt{11+6\\sqrt{2}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "13",
+   "zapis": "13",
+   "znachenie": 13.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "Каждое подкоренное выражение — полный квадрат вида $(x\\pm y\\sqrt{2})^2=x^2+2y^2\\pm2xy\\sqrt{2}$",
+    "tex": "18+8\\sqrt{2}=(4+\\sqrt{2})^2,\\quad 44-24\\sqrt{2}=(6-2\\sqrt{2})^2,\\quad 11+6\\sqrt{2}=(3+\\sqrt{2})^2"
+   },
+   {
+    "chto": "Извлекаем корни: $\\sqrt{X^2}=|X|$. Определяем знаки чисел с минусом",
+    "tex": "6^2=36>8=(2\\sqrt{2})^2,\\ \\text{значит}\\ 6-2\\sqrt{2}>0"
+   },
+   {
+    "chto": "Раскрываем модули и складываем: радикалы взаимно уничтожаются",
+    "tex": "(4+\\sqrt{2})+(6-2\\sqrt{2})+(3+\\sqrt{2})=13"
+   }
+  ],
+  "podskazki": [
+   "Квадратом какого числа вида $x\\pm y\\sqrt{2}$ является каждое подкоренное выражение?",
+   "Чему равен $\\sqrt{X^2}$, если $X<0$?",
+   "Что происходит со слагаемыми, содержащими $\\sqrt{2}$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Pow(Add(Integer(44), Mul(Integer(-1), Integer(24), Pow(Integer(2), Rational(1, 2)))), Rational(1, 2)), Pow(Add(Mul(Integer(6), Pow(Integer(2), Rational(1, 2))), Integer(11)), Rational(1, 2)), Pow(Add(Mul(Integer(8), Pow(Integer(2), Rational(1, 2))), Integer(18)), Rational(1, 2)))",
+   "usloviya": []
+  }
+ },
+ {
+  "id": "1.4.025",
+  "glava": 1,
+  "tip": "1.4",
+  "podtip": "chetvertaya-stepen",
+  "uroven": 2,
+  "uslovie": "Вычислите",
+  "formula": "\\sqrt[4]{73+28\\sqrt{6}}-\\sqrt[4]{73-28\\sqrt{6}}",
+  "otvet": {
+   "vid": "chislo",
+   "tex": "2",
+   "zapis": "2",
+   "znachenie": 2.0,
+   "tochno": true
+  },
+  "razbor": [
+   {
+    "chto": "$\\sqrt[4]{X}=\\sqrt{\\sqrt{X}}$. Сначала ищем $73+28\\sqrt{6}$ в виде полного квадрата",
+    "tex": "73+28\\sqrt{6}=49+24+2\\cdot7\\cdot2\\sqrt{6}=(7+2\\sqrt{6})^2"
+   },
+   {
+    "chto": "Число $7+2\\sqrt{6}$ — тоже полный квадрат",
+    "tex": "7+2\\sqrt{6}=1+6+2\\cdot1\\cdot\\sqrt{6}=(1+\\sqrt{6})^2"
+   },
+   {
+    "chto": "Значит, оба подкоренных выражения — четвёртые степени",
+    "tex": "73+28\\sqrt{6}=(1+\\sqrt{6})^4,\\quad 73-28\\sqrt{6}=(1-\\sqrt{6})^4"
+   },
+   {
+    "chto": "Корень чётной степени: $\\sqrt[4]{X^4}=|X|$. Знак второго числа",
+    "tex": "1^2=1<6=(\\sqrt{6})^2,\\ \\text{значит}\\ 1-\\sqrt{6}<0"
+   },
+   {
+    "chto": "Раскрываем модуль и считаем",
+    "tex": "(1+\\sqrt{6})-(\\sqrt{6}-1)=2"
+   }
+  ],
+  "podskazki": [
+   "Как записать корень четвёртой степени через квадратные корни?",
+   "Квадратом какого числа вида $x+y\\sqrt{6}$ является $73+28\\sqrt{6}$?",
+   "Чему равен $\\sqrt[4]{X^4}$ при отрицательном $X$?"
+  ],
+  "proverka": {
+   "iskhod": "Add(Mul(Integer(-1), Pow(Add(Integer(73), Mul(Integer(-1), Integer(28), Pow(Integer(6), Rational(1, 2)))), Rational(1, 4))), Pow(Add(Mul(Integer(28), Pow(Integer(6), Rational(1, 2))), Integer(73)), Rational(1, 4)))",
+   "usloviya": []
+  }
+ }
+]

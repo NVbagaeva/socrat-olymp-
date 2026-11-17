@@ -42,6 +42,33 @@ export function href(...parts: readonly (string | number)[]): string {
 }
 
 /**
+ * «Интерактивный сборник для поступающих в вузы». Начало адреса без «/»
+ * на конце: href(SBORNIK) → /sbornik/, глава — href(SBORNIK, glavaSlug(1))
+ * → /sbornik/glava-1/, вкладки главы — хвосты SBORNIK_TAIL.
+ */
+export const SBORNIK = '/sbornik';
+
+export const SBORNIK_TAIL = {
+  teoriya: 'teoriya',
+  trenazher: 'trenazher',
+  generator: 'generator',
+  /** Печать листа генератора: ученик, учитель (с решениями), всё сразу. */
+  pechat: 'pechat',
+  /** Файлы задач типа для тренажёра: dannye/tip-1-2.json. */
+  dannye: 'dannye',
+} as const;
+
+/** Часть адреса главы: glava-1. */
+export function glavaSlug(glava: number): string {
+  return `glava-${glava}`;
+}
+
+/** Часть адреса типа задач: тип «1.12» → tip-1-12. */
+export function tipSlug(tip: string): string {
+  return `tip-${tip.replace(/\./g, '-')}`;
+}
+
+/**
  * Раздел «Устный счёт» — один для профиля и базы. Начало адреса без
  * «/» на конце, ссылки собираются через href(): href(USTNYY) →
  * /ustnyy-schet/, href(USTNYY, USTNYY_TAIL.tablica) →

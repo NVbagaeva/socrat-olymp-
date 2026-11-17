@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sbornik-zadachi",
+  "title": "Файл банка сборника для вузов: задачи одного типа",
+  "type": "array",
+  "items": { "$ref": "#/$defs/zadacha" },
+  "$defs": {
+    "zadacha": {
+      "type": "object",
+      "required": ["id", "glava", "tip", "podtip", "uroven", "uslovie", "otvet", "razbor", "podskazki", "proverka"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d{3}$" },
+        "glava": { "type": "integer", "minimum": 1, "maximum": 11 },
+        "tip": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+        "podtip": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "uroven": { "enum": [1, 2, 3] },
+        "uslovie": { "type": "string", "minLength": 1 },
+        "formula": { "type": "string" },
+        "dopolnenie": { "type": "string" },
+        "otvet": {
+          "oneOf": [
+            { "$ref": "#/$defs/chislo" },
+            { "$ref": "#/$defs/vyrazhenie" },
+            { "$ref": "#/$defs/kusochnyi" },
+            { "$ref": "#/$defs/chisla" }
+          ]
+        },
+        "razbor": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["chto"],
+            "additionalProperties": false,
+            "properties": { "chto": { "type": "string" }, "tex": { "type": "string" } }
+          }
+        },
+        "podskazki": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "proverka": {
+          "type": "object",
+          "required": ["iskhod", "usloviya"],
+          "properties": {
+            "iskhod": { "type": "string" },
+            "usloviya": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "forma": {
+      "type": "array",
+      "items": { "enum": ["bez-kornya-v-znamenatele", "proizvedenie", "summa-kvadratov"] }
+    },
+    "tochka": {
+      "type": "object",
+      "required": ["="],
+      "additionalProperties": { "type": "number" }
+    },
+    "chislo": {
+      "type": "object",
+      "required": ["vid", "tex", "zapis", "znachenie", "tochno"],
+      "properties": {
+        "vid": { "const": "chislo" },
+        "tex": { "type": "string" },
+        "zapis": { "type": "string" },
+        "znachenie": { "type": "number" },
+        "tochno": { "type": "boolean" },
+        "forma": { "$ref": "#/$defs/forma" }
+      }
+    },
+    "vyrazhenie": {
+      "type": "object",
+      "required": ["vid", "tex", "zapis", "peremennye", "tochki"],
+      "properties": {
+        "vid": { "const": "vyrazhenie" },
+        "tex": { "type": "string" },
+        "zapis": { "type": "string" },
+        "peremennye": { "type": "array", "items": { "type": "string", "pattern": "^[a-z]$" } },
+        "tochki": { "type": "array", "minItems": 4, "items": { "$ref": "#/$defs/tochka" } },
+        "forma": { "$ref": "#/$defs/forma" }
+      }
+    },
+    "kusochnyi": {
+      "type": "object",
+      "required": ["vid", "peremennaya", "kuski", "tex"],
+      "properties": {
+        "vid": { "const": "kusochnyi" },
+        "peremennaya": { "type": "string", "pattern": "^[a-z]$" },
+        "tex": { "type": "string" },
+        "kuski": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "allOf": [
+              { "$ref": "#/$defs/vyrazhenie" },
+              {
+                "type": "object",
+                "required": ["oblast"],
+                "properties": {
+                  "oblast": {
+                    "type": "object",
+                    "required": ["lo", "hi", "loZakr", "hiZakr", "tex"],
+                    "properties": {
+                      "lo": { "type": ["number", "null"] },
+                      "hi": { "type": ["number", "null"] },
+                      "loZakr": { "type": "boolean" },
+                      "hiZakr": { "type": "boolean" },
+                      "tex": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "chisla": {
+      "type": "object",
+      "required": ["vid", "polya", "tex"],
+      "properties": {
+        "vid": { "const": "chisla" },
+        "tex": { "type": "string" },
+        "polya": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["podpis", "tex", "zapis", "znachenie", "tochno"],
+            "properties": {
+              "podpis": { "type": "string" },
+              "tex": { "type": "string" },
+              "zapis": { "type": "string" },
+              "znachenie": { "type": "number" },
+              "tochno": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

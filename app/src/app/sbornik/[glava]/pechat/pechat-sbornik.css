@@ -1,0 +1,33 @@
+/* Страница печати задания №8: только лист, без оболочки сайта.
+   Копия pechat.css задания №12 — тот же приём для тех же нужд. */
+:root {
+  --sheet-font-sans: var(--font-sans);
+  --sheet-font-hand: var(--font-hand);
+  --font-math: 'KaTeX_Math', 'KaTeX_Main', var(--font-sans), serif;
+}
+
+@media screen {
+  .sheet-page {
+    margin: 0 auto;
+  }
+  .sheet-page + .sheet-page {
+    margin-top: var(--space-4);
+  }
+  #sheet-pages {
+    padding: var(--space-4) 0;
+  }
+}
+
+/* Сборник: выражение условия отдельной строкой — по центру карточки. */
+.sb-list-formula {
+  margin: 1.5mm 0;
+  text-align: center;
+}
+.sb-list-shag {
+  display: block;
+  margin: 0.8mm 0 0 3mm;
+}
+.sb-list-oshibka {
+  padding: 24px;
+  font-family: var(--font-sans);
+}

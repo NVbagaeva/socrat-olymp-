@@ -219,6 +219,14 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     ],
   },
   {
+    id: 'sbornik',
+    title: '«Сборник для вузов»',
+    keys: [
+      /* Журнал попыток всех глав (lib/sbornik/progress.ts, SBORNIK_LOG_KEY). */
+      'budetege:sbornik:log:v1',
+    ],
+  },
+  {
     id: 'ustnyy',
     title: '«Устный счёт»',
     keys: [

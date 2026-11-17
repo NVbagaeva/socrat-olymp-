@@ -30,6 +30,11 @@ const NOT_TEXT_KEYS = new Set([
      обычный текст, KaTeX не набрать. piPodskazka — подсказка о записи ответа
      под полем (FormatHint, components/tasks/otvet): тоже только текст. */
   'pravka', 'sostavleno', 'polePodskazka', 'piPodskazka',
+  /* Банк сборника для вузов (data/sbornik): zapis — ответ в записи для
+     разбора движком проверки (sqrt(a)/b), iskhod и usloviya — выражения
+     sympy для повторной проверки банка, podtip и peremennaya —
+     служебные имена. На сайт как текст не выводятся. */
+  'zapis', 'iskhod', 'usloviya', 'podtip', 'peremennaya',
 ]);
 
 /* Словари, значения которых — подписи для экранного диктора (aria-label):
