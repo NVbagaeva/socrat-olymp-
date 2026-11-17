@@ -8,6 +8,7 @@ import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE7 = {
   no: nomerDvumya('uravneniya'),
@@ -33,7 +34,7 @@ export const ZADANIE7 = {
 
 /** Заголовок окна браузера: «Вкладка · Уравнения — Будет на ЕГЭ». */
 export function zadanie7Title(tab: string): string {
-  return `${tab} · ${ZADANIE7.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(7, ZADANIE7.title, tab);
 }
 
 export const PROGRESS_7 = {

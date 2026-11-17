@@ -14,6 +14,7 @@ import type { TutorMaterial } from './sections';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const VEKTORY = {
   no: nomerDvumya('vektory'),
@@ -40,7 +41,7 @@ export const VEKTORY = {
 
 /** Заголовок окна браузера: «Вкладка · Векторы — Будет на ЕГЭ». */
 export function vektoryTitle(tab: string): string {
-  return `${tab} · ${VEKTORY.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(2, VEKTORY.title, tab);
 }
 
 /* ── Вкладка «О задании» ────────────────────────────────────────── */

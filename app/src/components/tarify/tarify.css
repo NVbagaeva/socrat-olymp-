@@ -115,6 +115,25 @@
   background: rgb(224 122 47 / 0.14);
   box-shadow: inset 0 0 0 1px rgb(224 122 47 / 0.28);
 }
+.tf-plashka__yakor {
+  margin: var(--space-2) 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+.tf-plashka__yakor s {
+  text-decoration-thickness: 1px;
+}
+.tf-plashka__yakor b {
+  font-weight: 650;
+  color: var(--color-accent-text);
+}
+.tf--b .tf-plashka--platnyy .tf-plashka__yakor {
+  color: rgb(232 240 252 / 0.75);
+}
+.tf--b .tf-plashka--platnyy .tf-plashka__yakor b {
+  color: #ffc28a;
+}
 .tf-plashka__nazvanie {
   margin: 0;
   max-width: calc(100% - 96px);
@@ -396,7 +415,7 @@
   }
 }
 
-/* Платная в разметке вторая (телефон первой показывает бесплатную);
+/* Платная в разметке первая (телефон первой показывает её);
    на широком экране она встаёт справа. */
 @media (min-width: 1024px) {
   .tf-plashka--platnyy {
@@ -419,7 +438,7 @@
   }
 }
 
-/* ── Телефон: свайп с прилипанием, бесплатная первой ─────────── */
+/* ── Телефон: свайп с прилипанием, платная первой ─────────────── */
 
 @media (max-width: 599.98px) {
   .tf-ryad {
@@ -1057,5 +1076,67 @@
   .tf-vopros summary svg,
   .tf-sr__knopka svg {
     transition: none;
+  }
+}
+
+/* ── Автор и гарантии под плашками ─────────────────────────────── */
+
+.tf-garantii {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-6);
+  max-width: 1120px;
+  margin: calc(-1 * var(--space-6)) auto 0;
+  padding: 0 var(--space-8) var(--space-6);
+}
+.tf-garantii__spisok {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tf-garantii__punkt {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+.tf-garantii__punkt b {
+  font-weight: 620;
+  color: var(--color-text);
+}
+.tf-garantii__punkt svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  padding: 3px;
+  border-radius: 50%;
+  background: rgb(31 95 208 / 0.1);
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 1023.98px) {
+  .tf-garantii {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    padding-inline: var(--space-6);
+  }
+}
+@media (max-width: 599.98px) {
+  .tf-garantii {
+    margin-top: 0;
+    padding-inline: var(--space-4);
+  }
+  .tf-garantii__spisok {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
   }
 }

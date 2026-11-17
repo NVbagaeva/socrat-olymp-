@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { generatorPage } from '@/content/generator';
-import { proizvodnayaTitle } from '@/content/proizvodnaya';
 import { SheetPage9 } from '@/components/tasks/proizvodnaya/SheetPage9';
 import 'katex/dist/katex.min.css';
 import '@/lib/graph/graph.css';
 import '@/lib/sheet/theme.css';
 import '@/lib/sheet/sheet.css';
 import './pechat9.css';
+import { proizvodnayaZagolovok } from '@/lib/seo-razdely';
 
 export const metadata: Metadata = {
-  title: `${generatorPage.student} · ${proizvodnayaTitle('Генератор')}`,
+  title: `${generatorPage.student} · ${proizvodnayaZagolovok('Генератор')}`,
   robots: { index: false },
 };
 

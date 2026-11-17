@@ -1009,6 +1009,14 @@ a.task-card--soon:hover {
   gap: 10px;
   align-items: center;
 }
+.sidebar__mark {
+  text-decoration: none;
+}
+.sidebar__mark:focus-visible {
+  outline: 2px solid var(--color-text-inverse);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
 /* Знак — тот же, что в шапке главной (.logo i, styles/site.css):
    подложка и скругление внутри logo.svg. */
 .sidebar__logo {

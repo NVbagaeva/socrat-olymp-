@@ -40,7 +40,7 @@ export function Shell6({ children }: { children: React.ReactNode }) {
             ZADANIE6.art ? (
               <IllyustratsiyaShapki art={ZADANIE6.art} />
             ) : (
-              <RisunokRazdela no={no} label={`${STSENA.oblozhka}: ${ZADANIE6.title}`} />
+              <RisunokRazdela no={ZADANIE6.slug} label={`${STSENA.oblozhka}: ${ZADANIE6.title}`} />
             )
           }
         />

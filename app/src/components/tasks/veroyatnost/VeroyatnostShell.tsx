@@ -47,7 +47,7 @@ export function VeroyatnostShell({ section, children }: VeroyatnostShellProps) {
           })}
           media={
             section.art === undefined ? (
-              <RisunokRazdela no={no} label={`${STSENA.oblozhka}: ${section.title}`} />
+              <RisunokRazdela no={section.slug} label={`${STSENA.oblozhka}: ${section.title}`} />
             ) : (
               <IllyustratsiyaShapki art={section.art} />
             )

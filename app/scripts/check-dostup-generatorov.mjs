@@ -6,7 +6,7 @@
        пробном доступе и на платных тарифах», ссылка на тарифы и на
        открытые генераторы.
      • Открытое (№1, №10): первая генерация проходит, вторая — окно
-       «Пробная генерация использована», лист остаётся. У каждого
+       «Лист готов…» (раньше — «Пробная генерация использована»), лист остаётся. У каждого
        задания свой счётчик.
      • «Собрать вариант»: то же — одна пробная генерация.
      • Генераторы базы (№5, №12) открыты без тарифа и без счётчика:
@@ -22,6 +22,12 @@ import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { APP } from './lib/load-ts.mjs';
+import { nomerRazdela } from '../src/content/struktura.js';
+
+/* Заголовок окна после пробной генерации (content/generatorUi.ts). */
+const OKNO_TEKST = 'Лист готов — его можно скачать и распечатать';
+/* Номер для показа: в адресе — номер хранения, на экране — номер ЕГЭ. */
+const ege = (no) => String(nomerRazdela(Number(no)));
 
 const OUT = path.join(APP, 'out');
 if (!fs.existsSync(path.join(OUT, 'index.html'))) {
@@ -99,11 +105,21 @@ const okno = async (page) =>
       (await page.locator('.gen-zamok a[href="/tarify/"]').count()) === 1,
       `№${no}: нет ссылки на тарифы`,
     );
+    const zagolovok = await page.locator('.gen-zamok__zagolovok').innerText();
+    check(
+      zagolovok.includes(`№${ege(no)} `),
+      `№${no}: в заголовке карточки не номер ЕГЭ №${ege(no)}: «${zagolovok}»`,
+    );
     for (const otkr of ['1', '2', '10', '11']) {
-      check(
-        (await page.locator(`.gen-zamok a[href="/zadaniya/${otkr}/generator/"]`).count()) === 1,
-        `№${no}: нет ссылки на открытый генератор №${otkr}`,
-      );
+      const ssylka = page.locator(`.gen-zamok a[href="/zadaniya/${otkr}/generator/"]`);
+      check((await ssylka.count()) === 1, `№${no}: нет ссылки на открытый генератор №${otkr}`);
+      if ((await ssylka.count()) === 1) {
+        const tekst = (await ssylka.innerText()).trim();
+        check(
+          tekst === `№${ege(otkr)}`,
+          `№${no}: ссылка на генератор ${otkr} подписана «${tekst}»`,
+        );
+      }
     }
   }
   await ctx.close();
@@ -121,9 +137,11 @@ const okno = async (page) =>
     check((await okno(page)) === null, `№${no}: первая генерация не прошла`);
     await go.click();
     await page.waitForTimeout(400);
+    check((await okno(page)) === OKNO_TEKST, `№${no}: вторая генерация без окна тарифов`);
+    const tekstOkna = await page.locator('.gen-zamok__okno p').innerText();
     check(
-      (await okno(page)) === 'Пробная генерация использована',
-      `№${no}: вторая генерация без окна тарифов`,
+      tekstOkna.includes(`№${ege(no)} `),
+      `№${no}: в окне не номер ЕГЭ №${ege(no)}: «${tekstOkna}»`,
     );
     await page.keyboard.press('Escape');
     await page.reload({ waitUntil: 'networkidle' });
@@ -163,10 +181,7 @@ const okno = async (page) =>
   check((await okno(page)) === null, '«Собрать вариант»: первая генерация не прошла');
   await go.first().click();
   await page.waitForTimeout(400);
-  check(
-    (await okno(page)) === 'Пробная генерация использована',
-    '«Собрать вариант»: вторая генерация без окна тарифов',
-  );
+  check((await okno(page)) === OKNO_TEKST, '«Собрать вариант»: вторая генерация без окна тарифов');
   await ctx.close();
 }
 

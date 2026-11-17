@@ -77,6 +77,7 @@ import {
   usePolnyyDostup,
   useProbnyhOstalos,
 } from '@/lib/tarify/dostup';
+import { nomerDlyaPodpisi } from '@/lib/tarify/config';
 import { GenIcon } from './GenIcons';
 import { GenKits } from './GenKits';
 import { GenToast, GenSheet as GenWindow } from './GenOverlay';
@@ -85,8 +86,11 @@ import { GenZakryt, ProbnayaPotrachena } from './GenZamok';
 import './generator.css';
 
 /** Номер генератора в окнах доступа: «12», у базы — «12 базы» (область «baza-12»). */
+/** Номер для подписи: у базы — свой, у профиля — номер ЕГЭ, не хранения. */
 function nomerGeneratora(scope: string): string {
-  return scope.startsWith('baza-') ? GENERATOR_BAZY.nomer(Number(scope.slice(5))) : scope;
+  return scope.startsWith('baza-')
+    ? GENERATOR_BAZY.nomer(Number(scope.slice(5)))
+    : nomerDlyaPodpisi(scope);
 }
 
 type Overlay =

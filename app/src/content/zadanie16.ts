@@ -11,6 +11,7 @@ import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
 import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE16 = {
   no: nomerDvumya('neravenstvo'),
@@ -29,7 +30,7 @@ export const ZADANIE16 = {
 
 /** Заголовок окна браузера: «Вкладка · Неравенство — Будет на ЕГЭ». */
 export function zadanie16Title(tab: string): string {
-  return `${tab} · ${ZADANIE16.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(16, ZADANIE16.title, tab);
 }
 
 export const PROGRESS_16 = {

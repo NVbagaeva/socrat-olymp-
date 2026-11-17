@@ -42,7 +42,10 @@
   gap: var(--space-6);
   align-items: center;
   margin: 0 0 var(--space-4);
-  padding: var(--space-5) var(--space-7);
+  /* 28 px по бокам — как радиус. Токена --space-7 в шкале нет: с ним
+     браузер отбрасывал весь padding, и заголовок прилипал к краю
+     стекла (docs/audit-prodazhi.md, E4). */
+  padding: var(--space-5) calc(var(--space-6) + var(--space-1));
   border: 1px solid var(--glass-edge);
   border-radius: 28px;
   background: var(--glass-bg-strong);

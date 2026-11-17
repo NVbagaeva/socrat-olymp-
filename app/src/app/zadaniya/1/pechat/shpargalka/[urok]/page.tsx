@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { PechatKnopka1 } from '@/components/tasks/planimetriya/PechatKnopka1';
 import { SHPARGALKI_1 } from '@/content/teoriya1';
-import { zadanie1Title } from '@/content/zadanie1';
 import { shpargalkaHtml } from '@/lib/planimetriya/spravochnik';
 import 'katex/dist/katex.min.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '../../pechat1.css';
 import '../../spravochnik1.css';
+import { zadanie1Zagolovok } from '@/lib/seo-razdely';
 
 export function generateStaticParams() {
   return Object.keys(SHPARGALKI_1).map((urok) => ({ urok }));
@@ -17,7 +17,7 @@ type Params = Promise<{ urok: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { urok } = await params;
-  return { title: zadanie1Title(`Шпаргалка к уроку ${urok}`), robots: { index: false } };
+  return { title: zadanie1Zagolovok(`Шпаргалка к уроку ${urok}`), robots: { index: false } };
 }
 
 /**

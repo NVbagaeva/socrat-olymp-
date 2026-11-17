@@ -35,7 +35,12 @@ export function VychisleniyaShell({ children }: { children: React.ReactNode }) {
           lead={VYCHISLENIYA.lead}
           tabletki={tabletkiRazdela({ chast: VYCHISLENIYA.badge, fakty: SHAPKA8.fakty })}
           progress={<ProgressStseny8 iz={BANK_TOTAL} />}
-          media={<RisunokRazdela no={no} label={`${STSENA.oblozhka}: ${VYCHISLENIYA.title}`} />}
+          media={
+            <RisunokRazdela
+              no={VYCHISLENIYA.slug}
+              label={`${STSENA.oblozhka}: ${VYCHISLENIYA.title}`}
+            />
+          }
         />
 
         <RazdelTabs

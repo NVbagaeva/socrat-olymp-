@@ -8,11 +8,20 @@ import { OnboardingLazy } from '@/components/onboarding/OnboardingLazy';
 import { PodpisiChertezhey } from '@/components/PodpisiChertezhey';
 import { caveat, inter, interGreek, ptSerif } from '@/lib/fonts';
 import { MOTION_LEVEL_SCRIPT } from '@/lib/motion';
+import { ogStranicy, SITE_URL } from '@/lib/og';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
+  /* Абсолютные адреса картинок превью: мессенджеры относительные не берут. */
+  metadataBase: new URL(SITE_URL),
   title: 'Будет на ЕГЭ',
   description: 'Подготовка к ЕГЭ по профильной математике.',
+  /* Превью ссылки на всех страницах. Заголовка здесь нет: без него
+     мессенджер берёт <title> и описание самой страницы. */
+  openGraph: ogStranicy(),
+  /* Картинку для X не повторяем (images: []): иначе Next.js
+     продублирует её тегами twitter:image, а X берёт og:image. */
+  twitter: { card: 'summary_large_image', images: [] },
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
