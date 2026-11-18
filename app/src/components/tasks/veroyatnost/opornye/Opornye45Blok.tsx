@@ -14,7 +14,7 @@ import { otkrytPodskazku, otkrytRazbor } from '@/lib/veroyatnost/razbor';
 import { klyuchZadachi } from '@/lib/veroyatnost/secret';
 import type { Zadanie45 } from '@/lib/veroyatnost/trening/links';
 import { readSealed45 } from '@/lib/veroyatnost/trening/otvet45';
-import { risunok45, shagi45, voprosy45 } from '../trening/shagi45';
+import { DerevoPodskazki, risunok45, shagi45, voprosy45 } from '../trening/shagi45';
 import '../../trening/trening.css';
 import '../trening/trening45.css';
 
@@ -58,8 +58,10 @@ export function Opornye45Blok({
   const z = zadachi[index];
 
   const razbor = useMemo(
-    () => (z === undefined || checked === null ? null : otkrytRazbor(z.steps, z.seal)),
-    [z, checked],
+    /* Разбор нужен и подсказке: из него дерево, которое растёт по шагам. */
+    () =>
+      z === undefined || (checked === null && !hintOpen) ? null : otkrytRazbor(z.steps, z.seal),
+    [z, checked, hintOpen],
   );
   const voprosy = useMemo(
     () =>
@@ -170,17 +172,25 @@ export function Opornye45Blok({
                 razborOtkryt();
               },
               telo: (
-                <PodskazkaVoprosy
-                  voprosy={voprosy}
-                  otkryto={shag}
-                  mimo={mimo}
-                  onVerno={() => {
-                    setShag(shag + 1);
-                    setMimo([]);
-                  }}
-                  onMimo={(j) => setMimo([...mimo, j])}
-                  labels={T.voprosy}
-                />
+                <>
+                  <PodskazkaVoprosy
+                    voprosy={voprosy}
+                    otkryto={shag}
+                    mimo={mimo}
+                    onVerno={() => {
+                      setShag(shag + 1);
+                      setMimo([]);
+                    }}
+                    onMimo={(j) => setMimo([...mimo, j])}
+                    labels={T.voprosy}
+                  />
+                  <DerevoPodskazki
+                    razbor={razbor}
+                    otvecheno={shag - 1}
+                    voprosov={voprosy.length}
+                    labels={T.derevo}
+                  />
+                </>
               ),
             }
       }

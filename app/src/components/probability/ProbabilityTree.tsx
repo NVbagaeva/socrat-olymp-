@@ -65,6 +65,14 @@ export interface ProbabilityTreeProps {
    * овалом: «Событию A благоприятствуют исходы a, b, c» (задание №6).
    */
   events?: readonly SobytieRaskladki[];
+  /**
+   * Дерево по шагам (подсказка-вопросы): видны только первые `urovney`
+   * уровней. Раскладка считается по всему дереву — ветви не прыгают,
+   * когда появляются следующие. Нет — дерево целиком.
+   */
+  urovney?: number;
+  /** Подписи вероятностей — только у первых `sVeroyatnostyami` уровней. */
+  sVeroyatnostyami?: number;
   state?: RisunokState;
   alt?: string;
   className?: string;
@@ -93,14 +101,32 @@ export function ProbabilityTree({
   rootLabel,
   leafLabelsMath = false,
   events,
+  urovney,
+  sVeroyatnostyami,
   state = 'default',
   alt,
   className,
 }: ProbabilityTreeProps) {
   void direction;
 
+  /* Уровень ветви (с нуля): число её предков. */
+  const roditeli = new Map(branches.map((b) => [b.id, b.parent]));
+  const uroven = (id: string): number => {
+    let n = 0;
+    let tek = roditeli.get(id) ?? null;
+    while (tek !== null) {
+      n += 1;
+      tek = roditeli.get(tek) ?? null;
+    }
+    return n;
+  };
+  const vidnaVetv = (id: string): boolean => urovney === undefined || uroven(id) < urovney;
+  const sP = (id: string): boolean =>
+    sVeroyatnostyami === undefined || uroven(id) < sVeroyatnostyami;
+
   const r = raskladkaDereva({ branches, levels, showProducts, showSum, events });
-  const { listya, glubina, proizvedenie, x, y, koren, urovney, width, height } = r;
+  const { listya, glubina, proizvedenie, x, y, koren, width, height } = r;
+  const vsegoUrovney = r.urovney;
   const detiEst = new Set(branches.map((b) => b.parent));
 
   const podhodit = new Set(highlightedPaths ?? []);
@@ -130,14 +156,14 @@ export function ProbabilityTree({
       role="img"
       aria-label={
         alt ??
-        `Дерево вероятностей: ${urovney} ${urovney === 1 ? 'уровень' : 'уровня'}, ` +
+        `Дерево вероятностей: ${vsegoUrovney} ${vsegoUrovney === 1 ? 'уровень' : 'уровня'}, ` +
           `${listya.length} путей`
       }
     >
       {/* Подписи уровней слева */}
       {levels === undefined
         ? null
-        : levels.slice(0, urovney).map((label, i) => (
+        : levels.slice(0, Math.min(vsegoUrovney, urovney ?? vsegoUrovney)).map((label, i) => (
             <text key={i} className="pr-level" x={PAD_X} y={y(i) - LEVEL_H / 2}>
               {label}
             </text>
@@ -145,6 +171,9 @@ export function ProbabilityTree({
 
       {/* Ветки. Рисуются до узлов, чтобы точки легли поверх линий. */}
       {branches.map((b, i) => {
+        if (!vidnaVetv(b.id)) {
+          return null;
+        }
         const otr = r.otrezki[i] as (typeof r.otrezki)[number];
         const metka = r.metki[i] as (typeof r.metki)[number];
         const { x1: px, y1: py, x2: bx, y2: by } = otr;
@@ -164,7 +193,7 @@ export function ProbabilityTree({
             <line x1={px} y1={py} x2={bx} y2={by} />
             {/* Вероятность стоит сбоку от ветки, со стороны её наклона:
                 поверх линии она читалась бы хуже. В заготовке её нет. */}
-            {blank ? null : (
+            {blank || !sP(b.id) ? null : (
               <text
                 className="pr-math pr-branch-p"
                 x={metka.x}
@@ -217,7 +246,7 @@ export function ProbabilityTree({
                 highlightedPaths !== undefined && !podhodit.has(b.id) && 'pr-leaf--dimmed',
               )}
               x={x.get(b.id) ?? 0}
-              y={y(glubina.get(b.id) ?? urovney - 1) + 44}
+              y={y(glubina.get(b.id) ?? vsegoUrovney - 1) + 44}
               textAnchor="middle"
             >
               <Znaki text={proizv(proizvedenie.get(b.id) ?? 0)} />
