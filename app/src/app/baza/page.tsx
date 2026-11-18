@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: meta.title,
   description: meta.description,
   openGraph: ogStranicy(meta.title, meta.description),
+  alternates: { canonical: '/baza/' },
 };
 
 /** Главная базовой математики: та же разметка, что у профиля. */

@@ -145,6 +145,9 @@ export function startHref(level: Level = 'profile'): string {
   return level === 'base' ? levelInfo('base').bank : tasksPage.href;
 }
 
+/** Telegram-канал платформы: подвал и разметка для поисковиков (lib/jsonLd.ts). */
+export const TELEGRAM_HREF = 'https://t.me/budet_na_ege_math';
+
 export const site = {
   brand: 'Будет на ЕГЭ',
 
@@ -204,7 +207,7 @@ export const site = {
       { label: 'Тарифы', href: TARIFY_HREF },
       { label: LINKS.avtor.label, href: LINKS.avtor.href },
       { label: 'Контакты', href: '#' },
-      { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
+      { label: 'Telegram', href: TELEGRAM_HREF, external: true },
     ] satisfies (SiteLink | ExternalLink)[],
     /**
      * С флагом NEXT_PUBLIC_LEGAL_READY (lib/legal/prodavets.ts) подвал

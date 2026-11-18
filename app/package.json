@@ -12,7 +12,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/build-kartochki.mjs",
     "build": "NODE_OPTIONS=--max-old-space-size=6144 next build",
-    "postbuild": "node scripts/build-skrytye.mjs",
+    "postbuild": "node scripts/build-skrytye.mjs && node scripts/build-sitemap.mjs",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
