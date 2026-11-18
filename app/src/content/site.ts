@@ -206,7 +206,7 @@ export const site = {
       { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
       { label: 'Тарифы', href: TARIFY_HREF },
       { label: LINKS.avtor.label, href: LINKS.avtor.href },
-      { label: 'Контакты', href: '#' },
+      { label: 'Контакты', href: `${LINKS.avtor.href}#oa-svyaz` },
       { label: 'Telegram', href: TELEGRAM_HREF, external: true },
     ] satisfies (SiteLink | ExternalLink)[],
     /**

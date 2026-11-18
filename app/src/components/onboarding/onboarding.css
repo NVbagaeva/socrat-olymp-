@@ -436,8 +436,11 @@
   }
 }
 /* Телефон, прокрутка вниз (HelpFab.tsx): кнопка уходит, чтобы не лежать
-   поверх карточек; при прокрутке вверх возвращается. */
-.help-fab[data-skryta]:not(:focus-within) {
+   поверх карточек; при прокрутке вверх возвращается. Пока открыта
+   плашка cookie (CookieNotice.tsx), кнопки тоже нет: на телефоне обе
+   стоят у нижнего края, и «?» ложилась на кнопку «Понятно». */
+.help-fab[data-skryta]:not(:focus-within),
+body:has(.cookie-notice) .help-fab:not(:focus-within) {
   opacity: 0;
   visibility: hidden;
   transition:

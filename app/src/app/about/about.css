@@ -399,6 +399,12 @@
 .oa-sec {
   padding-top: var(--oa-sec);
 }
+/* «Контакты» в подвале ведут на #oa-svyaz (заголовок раздела): якорь
+   открывается с меткой над ним и не под липкой шапкой (96 px — как
+   у #bank на главной, landing.css). */
+.oa-h2 {
+  scroll-margin-top: calc(96px + var(--space-6));
+}
 .oa-sec:last-of-type {
   padding-bottom: var(--oa-sec);
 }
