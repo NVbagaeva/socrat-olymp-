@@ -216,7 +216,9 @@ export function Vitrina({
     <section className="band vit" id="how" aria-labelledby="vit-z">
       <div className="wrap">
         <h2 id="vit-z" className="vit__z">
-          <SAkcentom tekst={z.tekst} akcent={z.akcent} klass="vit-akcent vit-akcent--teplyy" />
+          {/* Акцент синий: заголовок общий для всех частей, тёплый цвет —
+              только у учительской (vitrina.css). */}
+          <SAkcentom tekst={z.tekst} akcent={z.akcent} klass="vit-akcent" />
         </h2>
         <Chast
           vid="gen"
