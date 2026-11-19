@@ -1,0 +1,3363 @@
+{
+ "zadachTrenazhera": 1939,
+ "zadachOpornyh": 360,
+ "nahodki": [
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 1,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п1·ФИПИ 1"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 1,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п1·ФИПИ 1"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 1,
+   "shag": "подсказка 3",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п1·ФИПИ 1"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 2,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п2·ФИПИ 5"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 2,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п2·ФИПИ 5"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 3,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п3·ФИПИ 9"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 3,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п3·ФИПИ 9"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 4,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п4·ФИПИ 13"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 4,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п4·ФИПИ 13"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 4,
+   "shag": "подсказка 3",
+   "kod": "otvet",
+   "podrobno": "верная кнопка — число ответа",
+   "zadach": 27,
+   "primer": "п4·ФИПИ 13"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 4,
+   "shag": "подсказка 3",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п4·ФИПИ 13"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 5,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п5·ФИПИ 17"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 5,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п5·ФИПИ 17"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 6,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п6·ФИПИ 21"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 6,
+   "shag": "подсказка 2",
+   "kod": "bukva",
+   "podrobno": "A, B, C, H",
+   "zadach": 27,
+   "primer": "п6·ФИПИ 21"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 6,
+   "shag": "подсказка 2",
+   "kod": "novaya",
+   "podrobno": "A, B, C, H",
+   "zadach": 27,
+   "primer": "п6·ФИПИ 21"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 6,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п6·ФИПИ 21"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 6,
+   "shag": "решение 2",
+   "kod": "bukva",
+   "podrobno": "A, B, C, H",
+   "zadach": 27,
+   "primer": "п6·ФИПИ 21"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 6,
+   "shag": "решение 3",
+   "kod": "bukva",
+   "podrobno": "A",
+   "zadach": 27,
+   "primer": "п6·ФИПИ 21"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "подсказка 1",
+   "kod": "bukva",
+   "podrobno": "A, B, C, M",
+   "zadach": 27,
+   "primer": "п7·ФИПИ 25"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "подсказка 1",
+   "kod": "novaya",
+   "podrobno": "A, B, C, M",
+   "zadach": 27,
+   "primer": "п7·ФИПИ 25"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п7·ФИПИ 25"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п7·ФИПИ 25"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "решение 1",
+   "kod": "bukva",
+   "podrobno": "A, C, M",
+   "zadach": 27,
+   "primer": "п7·ФИПИ 25"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "решение 2",
+   "kod": "bukva",
+   "podrobno": "A, C",
+   "zadach": 27,
+   "primer": "п7·ФИПИ 25"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "решение 3",
+   "kod": "bukva",
+   "podrobno": "A, C, M",
+   "zadach": 27,
+   "primer": "п7·ФИПИ 25"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "решение 3",
+   "kod": "bukva",
+   "podrobno": "A",
+   "zadach": 27,
+   "primer": "п7·ФИПИ 25"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "подсказка 1",
+   "kod": "bukva",
+   "podrobno": "M",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "подсказка 1",
+   "kod": "novaya",
+   "podrobno": "A, C, M",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "подсказка 2",
+   "kod": "bukva",
+   "podrobno": "H",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "подсказка 2",
+   "kod": "novaya",
+   "podrobno": "H",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "решение 1",
+   "kod": "bukva",
+   "podrobno": "M",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "решение 2",
+   "kod": "bukva",
+   "podrobno": "H",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 8,
+   "shag": "решение 3",
+   "kod": "bukva",
+   "podrobno": "H, M",
+   "zadach": 27,
+   "primer": "п8·ФИПИ 29"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 9,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п9·ФИПИ 33"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 9,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п9·ФИПИ 33"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 10,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 27,
+   "primer": "п10·ФИПИ 37"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 10,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п10·ФИПИ 37"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 10,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п10·ФИПИ 37"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 11,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 26,
+   "primer": "п11·ФИПИ 41"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 11,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п11·ФИПИ 41"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 11,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п11·ФИПИ 41"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 12,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п12·ФИПИ 45"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 13,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п13·ФИПИ 49"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 13,
+   "shag": "подсказка 2",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 27,
+   "primer": "п13·ФИПИ 49"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 13,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п13·ФИПИ 49"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 14,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "a, b, h",
+   "zadach": 27,
+   "primer": "п14·ФИПИ 53"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 14,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п14·ФИПИ 53"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 14,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "h",
+   "zadach": 27,
+   "primer": "п14·ФИПИ 53"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 15,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п15·ФИПИ 57"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 15,
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "a, h",
+   "zadach": 27,
+   "primer": "п15·ФИПИ 57"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 16,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п16·ФИПИ 61"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 16,
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "h",
+   "zadach": 27,
+   "primer": "п16·ФИПИ 61"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 16,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "h",
+   "zadach": 27,
+   "primer": "п16·ФИПИ 61"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 17,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п17·ФИПИ 65"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 27,
+   "primer": "п18·ФИПИ 69"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п18·ФИПИ 69"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п18·ФИПИ 69"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "подсказка 2",
+   "kod": "velichina",
+   "podrobno": "a, h",
+   "zadach": 27,
+   "primer": "п18·ФИПИ 69"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "подсказка 2",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 27,
+   "primer": "п18·ФИПИ 69"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п18·ФИПИ 69"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 27,
+   "primer": "п18·ФИПИ 69"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 19,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 25,
+   "primer": "п19·ФИПИ 73"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 20,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 25,
+   "primer": "п20·ФИПИ 75"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 21,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п21·ФИПИ 77"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 22,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п22·ФИПИ 81"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 23,
+   "shag": "подсказка 1",
+   "kod": "novaya",
+   "podrobno": "H",
+   "zadach": 27,
+   "primer": "п23·ФИПИ 85"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 23,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 27,
+   "primer": "п23·ФИПИ 85"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 23,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п23·ФИПИ 85"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 23,
+   "shag": "подсказка 2",
+   "kod": "vneKatex",
+   "podrobno": "cos",
+   "zadach": 27,
+   "primer": "п23·ФИПИ 85"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 23,
+   "shag": "подсказка 2",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 27,
+   "primer": "п23·ФИПИ 85"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 23,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п23·ФИПИ 85"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 23,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 27,
+   "primer": "п23·ФИПИ 85"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 24,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п24·ФИПИ 89"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 24,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п24·ФИПИ 89"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 25,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п25·ФИПИ 93"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 25,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п25·ФИПИ 93"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 26,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п26·ФИПИ 97"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 27,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п27·ФИПИ 101"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 28,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 25,
+   "primer": "п28·ФИПИ 105"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 29,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п29·ФИПИ 107"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 30,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 29,
+   "primer": "п30·ФИПИ 111"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 30,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 29,
+   "primer": "п30·ФИПИ 111"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 30,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 29,
+   "primer": "п30·ФИПИ 111"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 30,
+   "shag": "решение 1",
+   "kod": "chislo",
+   "podrobno": "0,979796",
+   "zadach": 1,
+   "primer": "п30·ФИПИ 116"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 30,
+   "shag": "решение 2",
+   "kod": "chislo",
+   "podrobno": "0,979796",
+   "zadach": 1,
+   "primer": "п30·ФИПИ 116"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 31,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 31,
+   "primer": "п31·ФИПИ 117"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 32,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 25,
+   "primer": "п32·ФИПИ 121"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 33,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 31,
+   "primer": "п33·ФИПИ 127"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 33,
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "x",
+   "zadach": 31,
+   "primer": "п33·ФИПИ 127"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 33,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "x",
+   "zadach": 31,
+   "primer": "п33·ФИПИ 127"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 34,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 31,
+   "primer": "п34·ФИПИ 135"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 35,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п35·ФИПИ 143"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 35,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п35·ФИПИ 143"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 36,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п36·ФИПИ 147"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 37,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 31,
+   "primer": "п37·ФИПИ 151"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 37,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 31,
+   "primer": "п37·ФИПИ 151"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 38,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п38·ФИПИ 159"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 39,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п39·ФИПИ 163"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 40,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п40·ФИПИ 167"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 40,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п40·ФИПИ 167"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 41,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п41·ФИПИ 171"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 42,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 27,
+   "primer": "п42·ФИПИ 175"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 42,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п42·ФИПИ 175"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 43,
+   "shag": "подсказка 1",
+   "kod": "pryamoy",
+   "podrobno": "OT ⟂ AD",
+   "zadach": 27,
+   "primer": "п43·ФИПИ 179"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 43,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п43·ФИПИ 179"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 43,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "h",
+   "zadach": 27,
+   "primer": "п43·ФИПИ 179"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 43,
+   "shag": "решение",
+   "kod": "pryamoy",
+   "podrobno": "OT ⟂ AD",
+   "zadach": 27,
+   "primer": "п43·ФИПИ 179"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 44,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "a, b, m",
+   "zadach": 27,
+   "primer": "п44·ФИПИ 183"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 44,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 27,
+   "primer": "п44·ФИПИ 183"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 44,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "N — середина DC",
+   "zadach": 27,
+   "primer": "п44·ФИПИ 183"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 44,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п44·ФИПИ 183"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 44,
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "a, b",
+   "zadach": 27,
+   "primer": "п44·ФИПИ 183"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 44,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "m",
+   "zadach": 27,
+   "primer": "п44·ФИПИ 183"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 44,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 27,
+   "primer": "п44·ФИПИ 183"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 44,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "N — середина DC",
+   "zadach": 27,
+   "primer": "п44·ФИПИ 183"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 45,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 31,
+   "primer": "п45·ФИПИ 187"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 46,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п46·ФИПИ 195"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 47,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п47·ФИПИ 199"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 48,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 31,
+   "primer": "п48·ФИПИ 203"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 49,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "x",
+   "zadach": 27,
+   "primer": "п49·ФИПИ 211"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 49,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п49·ФИПИ 211"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 49,
+   "shag": "подсказка 2",
+   "kod": "velichina",
+   "podrobno": "a",
+   "zadach": 27,
+   "primer": "п49·ФИПИ 211"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 49,
+   "shag": "подсказка 2",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 27,
+   "primer": "п49·ФИПИ 211"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 49,
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "x",
+   "zadach": 27,
+   "primer": "п49·ФИПИ 211"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 1,
+   "shag": "подсказка 3",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п1·аналог 1112"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 5,
+   "shag": "подсказка 2",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п5·аналог 1504"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 7,
+   "shag": "подсказка 2",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п7·аналог 1718"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 11,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "верная кнопка — число ответа",
+   "zadach": 1,
+   "primer": "п11·аналог 2113"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 19,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п19·аналог 2901"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 20,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п20·аналог 3009"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 21,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п21·аналог 3117"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 50,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п50·аналог 6000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 50,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п50·аналог 6017"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 51,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п51·аналог 6100"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 52,
+   "shag": "подсказка 1",
+   "kod": "bukva",
+   "podrobno": "A, C",
+   "zadach": 23,
+   "primer": "п52·аналог 6200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 52,
+   "shag": "подсказка 1",
+   "kod": "novaya",
+   "podrobno": "A, C",
+   "zadach": 23,
+   "primer": "п52·аналог 6200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 52,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п52·аналог 6200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 52,
+   "shag": "решение 1",
+   "kod": "bukva",
+   "podrobno": "C",
+   "zadach": 23,
+   "primer": "п52·аналог 6200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 52,
+   "shag": "решение 2",
+   "kod": "bukva",
+   "podrobno": "C",
+   "zadach": 23,
+   "primer": "п52·аналог 6200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 52,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "\\varphi",
+   "zadach": 23,
+   "primer": "п52·аналог 6200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 53,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п53·аналог 6300"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 54,
+   "shag": "подсказка 1",
+   "kod": "novaya",
+   "podrobno": "A, B, O",
+   "zadach": 23,
+   "primer": "п54·аналог 6400"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 54,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п54·аналог 6400"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 55,
+   "shag": "подсказка 1",
+   "kod": "novaya",
+   "podrobno": "A, B, H",
+   "zadach": 23,
+   "primer": "п55·аналог 6500"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 55,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п55·аналог 6500"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 55,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 2,
+   "primer": "п55·аналог 6504"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 56,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "a, b, c, h",
+   "zadach": 23,
+   "primer": "п56·аналог 6600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 56,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п56·аналог 6600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 56,
+   "shag": "решение 1",
+   "kod": "bukva",
+   "podrobno": "A, B",
+   "zadach": 23,
+   "primer": "п56·аналог 6600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 56,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "h",
+   "zadach": 23,
+   "primer": "п56·аналог 6600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 57,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п57·аналог 6700"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 57,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "x",
+   "zadach": 12,
+   "primer": "п57·аналог 6701"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 58,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п58·аналог 6800"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 58,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п58·аналог 6813"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 59,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п59·аналог 6900"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 59,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 3,
+   "primer": "п59·аналог 6902"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 60,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п60·аналог 7000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 61,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п61·аналог 7100"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 61,
+   "shag": "решение 1",
+   "kod": "chislo",
+   "podrobno": "17,142857",
+   "zadach": 1,
+   "primer": "п61·аналог 7103"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 61,
+   "shag": "решение 2",
+   "kod": "chislo",
+   "podrobno": "17,142857",
+   "zadach": 1,
+   "primer": "п61·аналог 7103"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 62,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п62·аналог 7200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 63,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п63·аналог 7300"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 63,
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "a",
+   "zadach": 23,
+   "primer": "п63·аналог 7300"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 63,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "a, d",
+   "zadach": 23,
+   "primer": "п63·аналог 7300"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 64,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 23,
+   "primer": "п64·аналог 7400"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 64,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п64·аналог 7400"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 64,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "h, r",
+   "zadach": 23,
+   "primer": "п64·аналог 7400"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 64,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 23,
+   "primer": "п64·аналог 7400"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 64,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "верная кнопка — число ответа",
+   "zadach": 1,
+   "primer": "п64·аналог 7414"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 65,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "a, b",
+   "zadach": 23,
+   "primer": "п65·аналог 7500"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 65,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п65·аналог 7500"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 65,
+   "shag": "сверка",
+   "kod": "velichina",
+   "podrobno": "a, b",
+   "zadach": 23,
+   "primer": "п65·аналог 7500"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 66,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "p, r",
+   "zadach": 23,
+   "primer": "п66·аналог 7600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 66,
+   "shag": "подсказка 1",
+   "kod": "pryamoy",
+   "podrobno": "OT ⟂ AB",
+   "zadach": 23,
+   "primer": "п66·аналог 7600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 66,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п66·аналог 7600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 66,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "a, b, c, r",
+   "zadach": 23,
+   "primer": "п66·аналог 7600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 66,
+   "shag": "решение",
+   "kod": "pryamoy",
+   "podrobno": "OT ⟂ AB",
+   "zadach": 23,
+   "primer": "п66·аналог 7600"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 67,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п67·аналог 7700"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 67,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "d",
+   "zadach": 23,
+   "primer": "п67·аналог 7700"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 68,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п68·аналог 7800"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 69,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п69·аналог 7900"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 69,
+   "shag": "решение 1",
+   "kod": "bukva",
+   "podrobno": "A, B",
+   "zadach": 23,
+   "primer": "п69·аналог 7900"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 69,
+   "shag": "решение 2",
+   "kod": "bukva",
+   "podrobno": "C, M",
+   "zadach": 23,
+   "primer": "п69·аналог 7900"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 70,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "a, b",
+   "zadach": 23,
+   "primer": "п70·аналог 8000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 70,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 23,
+   "primer": "п70·аналог 8000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 70,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "N — середина DC",
+   "zadach": 23,
+   "primer": "п70·аналог 8000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 70,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п70·аналог 8000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 70,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "a, b, h, m",
+   "zadach": 23,
+   "primer": "п70·аналог 8000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 70,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 23,
+   "primer": "п70·аналог 8000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 70,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "N — середина DC",
+   "zadach": 23,
+   "primer": "п70·аналог 8000"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 71,
+   "shag": "подсказка 1",
+   "kod": "velichina",
+   "podrobno": "a, b",
+   "zadach": 23,
+   "primer": "п71·аналог 8100"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 71,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п71·аналог 8100"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 71,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п71·аналог 8100"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 71,
+   "shag": "решение 2",
+   "kod": "bukva",
+   "podrobno": "P, Q",
+   "zadach": 23,
+   "primer": "п71·аналог 8100"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "подсказка 1",
+   "kod": "seredina",
+   "podrobno": "O — середина AC",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "подсказка 1",
+   "kod": "pryamoy",
+   "podrobno": "OT ⟂ AD",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "h, r",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "решение 2",
+   "kod": "bukva",
+   "podrobno": "B",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "решение 2",
+   "kod": "vneKatex",
+   "podrobno": "30°",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "решение 2",
+   "kod": "bukva",
+   "podrobno": "A, B",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "h",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "O — середина AC",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 72,
+   "shag": "решение",
+   "kod": "pryamoy",
+   "podrobno": "OT ⟂ AD",
+   "zadach": 23,
+   "primer": "п72·аналог 8200"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 73,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п73·аналог 8300"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 74,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п74·аналог 8400"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 75,
+   "shag": "подсказка 1",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 23,
+   "primer": "п75·аналог 8500"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 75,
+   "shag": "решение 1",
+   "kod": "chislo",
+   "podrobno": "7,333333",
+   "zadach": 1,
+   "primer": "п75·аналог 8500"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 75,
+   "shag": "решение 2",
+   "kod": "chislo",
+   "podrobno": "7,333333",
+   "zadach": 1,
+   "primer": "п75·аналог 8500"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 75,
+   "shag": "решение 1",
+   "kod": "chislo",
+   "podrobno": "3,428571",
+   "zadach": 1,
+   "primer": "п75·аналог 8507"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 75,
+   "shag": "решение 2",
+   "kod": "chislo",
+   "podrobno": "3,428571",
+   "zadach": 1,
+   "primer": "п75·аналог 8507"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 75,
+   "shag": "решение 1",
+   "kod": "chislo",
+   "podrobno": "8,714286",
+   "zadach": 1,
+   "primer": "п75·аналог 8508"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 75,
+   "shag": "решение 2",
+   "kod": "chislo",
+   "podrobno": "8,714286",
+   "zadach": 1,
+   "primer": "п75·аналог 8508"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "верная кнопка — число ответа",
+   "zadach": 1,
+   "primer": "п18·новая·audit-1"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 18,
+   "shag": "подсказка 2",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п18·новая·audit-1"
+  },
+  {
+   "razdel": "Тренажёр",
+   "gruppa": 64,
+   "shag": "подсказка 1",
+   "kod": "otvet",
+   "podrobno": "число ответа среди кнопок или в пояснении",
+   "zadach": 1,
+   "primer": "п64·новая·audit-2"
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-1-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-1-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-01",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\alpha, \\beta",
+   "zadach": 4,
+   "primer": "P1-2-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-02",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\alpha, \\beta",
+   "zadach": 4,
+   "primer": "P1-2-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-02",
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "x",
+   "zadach": 4,
+   "primer": "P1-2-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-03",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\alpha, \\beta",
+   "zadach": 4,
+   "primer": "P1-2-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-03",
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "x",
+   "zadach": 4,
+   "primer": "P1-2-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-05",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\alpha, \\beta",
+   "zadach": 4,
+   "primer": "P1-2-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-07",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\alpha, \\beta",
+   "zadach": 4,
+   "primer": "P1-2-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-09",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\alpha",
+   "zadach": 4,
+   "primer": "P1-2-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-09",
+   "shag": "подсказка",
+   "kod": "otvet",
+   "podrobno": "число ответа в подсказке",
+   "zadach": 4,
+   "primer": "P1-2-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-2-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-2-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-01",
+   "shag": "подсказка",
+   "kod": "bukva",
+   "podrobno": "A, B, C, M",
+   "zadach": 4,
+   "primer": "P1-3-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-01",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 4,
+   "primer": "P1-3-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-02",
+   "shag": "подсказка",
+   "kod": "bukva",
+   "podrobno": "A, B, C, M",
+   "zadach": 4,
+   "primer": "P1-3-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-02",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 4,
+   "primer": "P1-3-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-03",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, c",
+   "zadach": 4,
+   "primer": "P1-3-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-04",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, c",
+   "zadach": 4,
+   "primer": "P1-3-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-05",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 4,
+   "primer": "P1-3-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-09",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 4,
+   "primer": "P1-3-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-10",
+   "shag": "подсказка",
+   "kod": "bukva",
+   "podrobno": "A, B",
+   "zadach": 4,
+   "primer": "P1-3-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-3-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-3-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-02",
+   "shag": "подсказка",
+   "kod": "bukva",
+   "podrobno": "A, C",
+   "zadach": 4,
+   "primer": "P1-4-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-06",
+   "shag": "подсказка",
+   "kod": "bukva",
+   "podrobno": "A, B",
+   "zadach": 4,
+   "primer": "P1-4-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-07",
+   "shag": "подсказка",
+   "kod": "netChertezha",
+   "podrobno": "A, B, C, D",
+   "zadach": 4,
+   "primer": "P1-4-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-10",
+   "shag": "подсказка",
+   "kod": "bukva",
+   "podrobno": "A, B",
+   "zadach": 4,
+   "primer": "P1-4-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-4-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-4-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-01",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b",
+   "zadach": 4,
+   "primer": "P1-5-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-02",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, h",
+   "zadach": 4,
+   "primer": "P1-5-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-03",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, h",
+   "zadach": 4,
+   "primer": "P1-5-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-04",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b, h",
+   "zadach": 4,
+   "primer": "P1-5-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-05",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "d",
+   "zadach": 4,
+   "primer": "P1-5-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-06",
+   "shag": "подсказка",
+   "kod": "bukva",
+   "podrobno": "C",
+   "zadach": 4,
+   "primer": "P1-5-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-06",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b",
+   "zadach": 4,
+   "primer": "P1-5-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-07",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\alpha, a, b",
+   "zadach": 4,
+   "primer": "P1-5-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-07",
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "a, b",
+   "zadach": 4,
+   "primer": "P1-5-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-08",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b, m",
+   "zadach": 4,
+   "primer": "P1-5-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-08",
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "m",
+   "zadach": 4,
+   "primer": "P1-5-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-08",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 4,
+   "primer": "P1-5-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-08",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "N — середина DC",
+   "zadach": 4,
+   "primer": "P1-5-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-5-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-5-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-01",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b, c",
+   "zadach": 4,
+   "primer": "P1-6-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-01",
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "c",
+   "zadach": 4,
+   "primer": "P1-6-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-02",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b, c",
+   "zadach": 4,
+   "primer": "P1-6-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-02",
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "a",
+   "zadach": 4,
+   "primer": "P1-6-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-03",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b, d",
+   "zadach": 4,
+   "primer": "P1-6-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-03",
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "d",
+   "zadach": 4,
+   "primer": "P1-6-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-04",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, d",
+   "zadach": 4,
+   "primer": "P1-6-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-05",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b, h",
+   "zadach": 4,
+   "primer": "P1-6-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-05",
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "h",
+   "zadach": 4,
+   "primer": "P1-6-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-06",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, c",
+   "zadach": 4,
+   "primer": "P1-6-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-06",
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "a",
+   "zadach": 4,
+   "primer": "P1-6-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-07",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, d",
+   "zadach": 4,
+   "primer": "P1-6-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-08",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, h",
+   "zadach": 4,
+   "primer": "P1-6-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-08",
+   "shag": "решение 1",
+   "kod": "velichina",
+   "podrobno": "a, h",
+   "zadach": 4,
+   "primer": "P1-6-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-08",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "H — середина AB",
+   "zadach": 4,
+   "primer": "P1-6-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-09",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "a, b, c, h",
+   "zadach": 4,
+   "primer": "P1-6-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-09",
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "h",
+   "zadach": 4,
+   "primer": "P1-6-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-10",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "c, m",
+   "zadach": 4,
+   "primer": "P1-6-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-6-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-6-10",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 4,
+   "primer": "P1-6-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-07",
+   "shag": "подсказка",
+   "kod": "netChertezha",
+   "podrobno": "A",
+   "zadach": 4,
+   "primer": "P1-7-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-07",
+   "shag": "решение 1",
+   "kod": "netChertezha",
+   "podrobno": "A",
+   "zadach": 4,
+   "primer": "P1-7-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-7-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-7-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-8-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-8-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-01",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-01·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-02",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-02·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-03",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-03·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-04",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\varphi",
+   "zadach": 4,
+   "primer": "P1-9-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-04",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-04·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-05",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-05·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-06",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-06·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-07",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-07·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-08",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "c, d, m",
+   "zadach": 4,
+   "primer": "P1-9-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-08",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-08",
+   "shag": "решение 2",
+   "kod": "velichina",
+   "podrobno": "m",
+   "zadach": 4,
+   "primer": "P1-9-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-08",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "M — середина AB",
+   "zadach": 4,
+   "primer": "P1-9-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-08",
+   "shag": "решение",
+   "kod": "seredina",
+   "podrobno": "N — середина DC",
+   "zadach": 4,
+   "primer": "P1-9-08·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-09",
+   "shag": "подсказка",
+   "kod": "velichina",
+   "podrobno": "\\alpha",
+   "zadach": 4,
+   "primer": "P1-9-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-09",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-09·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-10",
+   "shag": "подсказка",
+   "kod": "netChertezha",
+   "podrobno": "A, B, C, K",
+   "zadach": 4,
+   "primer": "P1-9-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-10",
+   "shag": "подсказка",
+   "kod": "fakt",
+   "podrobno": "",
+   "zadach": 4,
+   "primer": "P1-9-10·осн."
+  },
+  {
+   "razdel": "Опорные задачи",
+   "gruppa": "P1-9-10",
+   "shag": "решение 1",
+   "kod": "netChertezha",
+   "podrobno": "A, K",
+   "zadach": 4,
+   "primer": "P1-9-10·осн."
+  }
+ ]
+}

@@ -14,8 +14,25 @@
 import { plural } from '../../lib/plural';
 import { nomerRazdela } from '@/content/struktura';
 
+/**
+ * Метка факта: утверждение справочника, на которое ссылаются подсказки
+ * тренажёра, опорные задачи и решения (кнопка «Показать свойство»).
+ * Текст факта — само утверждение: копии формулировки нигде нет
+ * (реестр — ./fakty.ts).
+ */
+export interface MetkaFakta {
+  /** Идентификатор в реестре: «mediana-k-gipotenuze». */
+  id: string;
+  /** Название на кнопке: «Свойство медианы, проведённой к гипотенузе». */
+  nazvanie: string;
+  /** Номер разбора темы для кнопки «Пример» (по умолчанию — первый). */
+  primer?: number;
+}
+
 /** Одно утверждение блока: словами и, если есть, формулой. */
 export interface Utverzhdenie {
+  /** Факт реестра: утверждение открывается кнопкой «Показать свойство». */
+  fakt?: MetkaFakta;
   /** Полное предложение. Может содержать $…$ и **жирное**. */
   tekst: string;
   /** Формула отдельной строкой (TeX без $). */
@@ -30,6 +47,8 @@ export interface Utverzhdenie {
 
 /** Теорема или формула: название, формулировка словами, формула. */
 export interface Teorema {
+  /** Факт реестра — см. Utverzhdenie.fakt. */
+  fakt?: MetkaFakta;
   nazvanie?: string;
   slovami: string;
   formula: string;
