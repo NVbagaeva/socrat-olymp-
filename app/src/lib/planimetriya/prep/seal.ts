@@ -6,6 +6,7 @@
  * он закрыт вместе с разбором.
  */
 
+import { nazvanieFakta1 } from '../../../content/spravochnik1/fakty';
 import { typeset } from '../../tex';
 import { renderPlan } from '../render';
 import { sealAnswer, sealText } from '../secret';
@@ -20,6 +21,8 @@ export interface MikroSealed {
   risunokSvg: string | null;
   seal: string;
   formulaHtml: string;
+  /** Факт навыка: кнопка «Показать свойство» в подсказке. */
+  fakt: { id: string; nazvanieHtml: string; vNasheyHtml: string } | null;
   /** Разбор: JSON строк HTML и рисунок учителя, закрытые отпечатком. */
   razbor: string;
 }
@@ -50,7 +53,16 @@ export function sealMikro(m: Mikro, seed: string): MikroSealed {
     risunokSvg:
       task.risunok === null ? null : renderPlan(task.risunok, { chisla: true, alt: m.nazvanie }),
     seal,
-    formulaHtml: typeset(`$${m.formula}$`),
+    /* Подсказка: словами, если формула навыка записана общими буквами. */
+    formulaHtml: typeset(m.podskazka ?? `$${m.formula}$`),
+    fakt:
+      typeof m.fakt === 'string'
+        ? {
+            id: m.fakt,
+            nazvanieHtml: typeset(nazvanieFakta1(m.fakt)),
+            vNasheyHtml: m.vNashey === undefined ? '' : typeset(m.vNashey),
+          }
+        : null,
     razbor: sealText(JSON.stringify(razbor), seal),
   };
 }

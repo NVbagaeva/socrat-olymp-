@@ -12,7 +12,9 @@ import { requireSrc } from './load-ts.mjs';
 const { PROTOTIPY, prototip } = requireSrc('lib/planimetriya/stseny/index');
 const { reshenie } = requireSrc('lib/planimetriya/reshenie/index');
 const { dannyeTrenazhera1 } = requireSrc('lib/planimetriya/trenazher/dannye');
-const { razreshit } = requireSrc('lib/planimetriya/trenazher/zadacha');
+const { razreshit, rezhimVoprosa, bezOtvetaSrediKnopok, idFaktovShaga } = requireSrc(
+  'lib/planimetriya/trenazher/zadacha',
+);
 const { klyuchProto } = requireSrc('lib/planimetriya/trenazher/sessiya');
 const { renderPlan, pustoyOtchet, shagovPodskazki } = requireSrc('lib/planimetriya/render');
 const { pereimenovat } = requireSrc('lib/planimetriya/variant');
@@ -68,11 +70,18 @@ export function oboznacheniya(tekst, { tex = false, tochkiSceny = [] } = {}) {
   return { tochki: [...tochki], velichiny: [...velichiny], vneFormul };
 }
 
-/** Числа, записанные в тексте: «$28^\circ$», «$4{,}5$» → 28, 4.5. */
-export function chislaTeksta(tekst) {
+/**
+ * Числа, записанные в тексте: «$28^\\circ$», «$4{,}5$» → 28, 4.5.
+ * gradusy: true — только числа со знаком градуса, false — только без
+ * него, не задано — все.
+ */
+export function chislaTeksta(tekst, gradusy) {
   const out = new Set();
   for (const f of kuski(tekst).tex) {
-    for (const m of f.matchAll(/\d+(?:\{,\}\d+)?/g)) out.add(m[0].replace('{,}', ','));
+    for (const m of f.matchAll(/(\d+(?:\{,\}\d+)?)(\^\\circ)?/g)) {
+      if (gradusy !== undefined && gradusy !== (m[2] !== undefined)) continue;
+      out.add(m[1].replace('{,}', ','));
+    }
   }
   return out;
 }
@@ -131,10 +140,7 @@ export function zadachaTrenazhera(plan) {
   const r = reshenie(z.proto, z.params);
   const nShagov = shagovPodskazki(scena);
   const tochkiSceny = Object.keys(scena.tochki).map((n) => b[n] ?? n);
-  const rezhimVoprosa = (v) =>
-    v.sloy === undefined || v.sloy > nShagov
-      ? { rezhim: 'uchenik' }
-      : { rezhim: 'podskazka', shag: v.sloy, vopros: true };
+  const voprosy = r.voprosy.map((v) => bezOtvetaSrediKnopok(v, p.otvet(z.params)));
   return {
     kod:
       plan.vid === 'new'
@@ -150,22 +156,23 @@ export function zadachaTrenazhera(plan) {
     otvetTekst: chislo(p.otvet(z.params)),
     uslovie: ren(p.uslovie(z.params)),
     risunokUsloviya: { rezhim: { rezhim: 'uchenik' }, variant: z.variant, chisla: false },
-    voprosy: r.voprosy.map((v) => ({
+    voprosy: voprosy.map((v, i) => ({
       vopros: ren(v.vopros),
       knopki: v.knopki.map(ren),
       verno: v.verno,
       poyasnenie: ren(v.poyasnenie),
       sloy: v.sloy,
       fakt: v.fakt,
+      vvod: v.vvod === undefined ? undefined : ren(v.vvod),
       vNashey: v.vNashey === undefined ? undefined : ren(v.vNashey),
-      optsii: { rezhim: rezhimVoprosa(v), variant: z.variant, chisla: true },
+      optsii: { rezhim: rezhimVoprosa(voprosy, i, nShagov), variant: z.variant, chisla: true },
     })),
     shagi: r.shagi.map((s) => ({
       zagolovok: ren(s.zagolovok),
       tekst: s.tekst.map(ren),
       formuly: (s.formuly ?? []).map(ren),
       sloy: s.sloy,
-      fakt: s.fakt,
+      fakty: idFaktovShaga(s, voprosy),
     })),
     risunokResheniya: { rezhim: { rezhim: 'uchitel' }, variant: z.variant, chisla: true },
     sverka: ren(r.sverka),

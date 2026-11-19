@@ -28,6 +28,8 @@ export interface ShagResheniya {
   sokrashchenie?: Sokr[];
   /** Какой слой подсказки чертежа показать на этом шаге. */
   sloy?: number;
+  /** Факты реестра (content/spravochnik1/fakty.ts): кнопки «Показать свойство» под шагом. */
+  fakty?: readonly string[];
 }
 
 export interface VoprosPodskazki {
@@ -39,6 +41,23 @@ export interface VoprosPodskazki {
   poyasnenie: string;
   /** Слой чертежа, который подсвечивается на этом вопросе. */
   sloy?: number;
+  /**
+   * Перед вопросом: новая точка вводится словами — «Обозначим основание
+   * высоты буквой $H$». В этом же шаге она появляется на чертеже.
+   */
+  vvod?: string;
+  /**
+   * Факт реестра (content/spravochnik1/fakty.ts), на который опирается
+   * шаг: под вопросом — кнопка «Показать свойство». null — шаг без факта
+   * (арифметика, чтение условия). Не задано — автопроверка падает.
+   */
+  fakt?: string | null;
+  /**
+   * «В нашей задаче»: общая формулировка на буквах этой задачи —
+   * «медиана к гипотенузе — это $CM$, гипотенуза — $AB$». Ответа шага
+   * здесь нет.
+   */
+  vNashey?: string;
 }
 
 export interface Reshenie {

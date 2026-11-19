@@ -247,7 +247,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   const zadaniyaZnach: ZadanieZnach[] = [];
   const problems = R.problems;
   const rezhim: Rezhim = optsii.rezhim ?? { rezhim: 'uchenik' };
-  const shag = rezhim.rezhim === 'podskazka' ? rezhim.shag : -1;
+  const shag = rezhim.rezhim === 'podskazka' && rezhim.tiho !== true ? rezhim.shag : -1;
   const variant = optsii.variant;
   const imya = (n: string) => variant?.bukvy[n] ?? n;
 
@@ -350,7 +350,17 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const n = novoe(e);
     const iz = e.vydelit === 'iskomoe';
     const vsp = sloyOf(e) !== 'uslovie';
-    const color = n ? PL.podskazka : iz ? PL.iskomoe : vsp ? PL.podskazka : PL.ink;
+    /* Подсказка: новый элемент шага — оранжевый и толще, построения
+       прежних шагов — спокойным цветом линий. */
+    const color = n
+      ? PL.novoe
+      : iz
+        ? PL.iskomoe
+        : vsp
+          ? rezhim.rezhim === 'podskazka'
+            ? PL.ink
+            : PL.podskazka
+          : PL.ink;
     const w = n ? PL.width.novoe : iz ? PL.width.iskomoe : PL.width.line;
     const sl = sloyOf(e);
     const cls = [
@@ -448,7 +458,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     if (e.tip === 'mnogougolnik') {
       const pts = e.tochki.map(E);
       sloyLinii.push(
-        `<path class="${st.cls}"${st.data} d="${pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p[0])} ${px(p[1])}`).join('')}Z" fill="none" stroke="${st.color}" stroke-width="${st.w}" stroke-linejoin="round"/>`,
+        `<path class="${st.cls}"${st.data} d="${pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p[0])} ${px(p[1])}`).join('')}Z" fill="${rezhim.rezhim === 'podskazka' && sloyOf(e) === 'uslovie' ? PL.zalivka : 'none'}" stroke="${st.color}" stroke-width="${st.w}" stroke-linejoin="round"/>`,
       );
       for (let i = 0; i < pts.length; i += 1) {
         const a = pts[i]!;
@@ -513,7 +523,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
           });
         }
         sloyOtmetki.push(
-          `<path class="pl-shtrih${novoe(e) ? ' pl-novoe' : ''}" d="${d.join('')}" stroke="${novoe(e) ? PL.podskazka : PL.ink}" stroke-width="${PL.width.tick}" stroke-linecap="round"/>`,
+          `<path class="pl-shtrih${novoe(e) ? ' pl-novoe' : ''}" d="${d.join('')}" stroke="${novoe(e) ? PL.novoe : PL.ink}" stroke-width="${PL.width.tick}" stroke-linecap="round"/>`,
         );
       }
       if (e.znachenie !== undefined) {
@@ -667,7 +677,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const st = stil(e);
     const iz = e.vydelit === 'iskomoe';
     const color = novoe(e)
-      ? PL.podskazka
+      ? PL.novoe
       : iz
         ? PL.iskomoe
         : sloyOf(e) !== 'uslovie'
@@ -751,7 +761,7 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     const c = E(e.t);
     const st = stil(e);
     sloyTochki.push(
-      `<circle class="${st.cls}"${st.data} cx="${px(c[0])}" cy="${px(c[1])}" r="${PL.tochkaR}" fill="${novoe(e) ? PL.podskazka : PL.vershina}"/>`,
+      `<circle class="${st.cls}"${st.data} cx="${px(c[0])}" cy="${px(c[1])}" r="${PL.tochkaR}" fill="${novoe(e) ? PL.novoe : PL.vershina}"/>`,
     );
     prep.push({ tip: 'tochka', c, r: PL.tochkaR, chto: `точка ${e.t}` });
   }
@@ -766,8 +776,13 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
   /* 6. Подписи точек. */
   const podpisi = scena.podpisi ?? true;
   const bez = new Set(scena.bezPodpisi ?? []);
+  /* В подсказке и у учителя подписаны и буквы, которыми их тексты
+     называют точки чертежа без букв (podpisiPodskazki). */
+  const dop = rezhim.rezhim === 'uchenik' ? [] : (scena.podpisiPodskazki ?? []);
   const kPodpisi = imena.filter(
-    (n) => !bez.has(n) && (podpisi === true || (Array.isArray(podpisi) && podpisi.includes(n))),
+    (n) =>
+      !bez.has(n) &&
+      (podpisi === true || (Array.isArray(podpisi) && podpisi.includes(n)) || dop.includes(n)),
   );
   /* Близкие точки: подписанные — не ближе minMezhduTochkami (иначе
      буквы не различить), неподписанные — просто не слипаются. */

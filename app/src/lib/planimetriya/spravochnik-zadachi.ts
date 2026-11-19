@@ -56,4 +56,3 @@ export function chisloOtveta(tex: string): number | null {
   if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
   return Number(s);
 }
-

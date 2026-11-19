@@ -15,9 +15,10 @@ import {
   BLOK_SUMMA,
   BLOK_TRIG,
 } from './mikro';
+import { FAKTY_MIKRO } from './fakty';
 import type { Blok, Mikro } from './types';
 
-export const BLOKI: Blok[] = [
+const BLOKI_BEZ_FAKTOV: Blok[] = [
   {
     id: 'P1-1',
     slug: 'summa-uglov',
@@ -126,6 +127,12 @@ export const BLOKI: Blok[] = [
     zadachi: BLOK_KASATELNYE,
   },
 ];
+
+/** Блоки с фактами задач (prep/fakty.ts): подсказка словами, кнопка свойства. */
+export const BLOKI: Blok[] = BLOKI_BEZ_FAKTOV.map((b) => ({
+  ...b,
+  zadachi: b.zadachi.map((m) => ({ ...m, ...FAKTY_MIKRO[m.id] })),
+}));
 
 export function blokBySlug(slug: string): Blok | undefined {
   return BLOKI.find((b) => b.slug === slug);

@@ -125,6 +125,9 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
             ...vysota('C', 'A', 'B', 'H', null, { sloy: 1 }),
             storona('A', 'H', chislo(p.c / 2), { sloy: 2, vydelit: undefined }),
+            /* Высота к основанию — медиана: половины основания равны. */
+            shtrih('A', 'H', 2, { sloy: 2 }),
+            shtrih('H', 'B', 2, { sloy: 2 }),
           ],
           proverki: [
             {
@@ -893,6 +896,7 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             pryam('A', 'B', 'C'),
             storona('C', 'D', chislo(p.c)),
             otr('O', 'T', { sloy: 1, vydelit: 'iskomoe', znachenie: 'r' }),
+            pryam('O', 'T', 'A', { sloy: 1 }),
             storona('A', 'B', '2r', { sloy: 1, vydelit: undefined }),
           ],
           podpisi: false,
@@ -942,6 +946,11 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             storona('A', 'B', chislo(p.c)),
             storona('D', 'C', chislo(p.d)),
             otr('M', 'N', { vydelit: 'iskomoe', znachenie: chislo((p.c + p.d) / 2), otvet: true }),
+            /* Средняя линия соединяет середины боковых сторон. */
+            shtrih('A', 'M', 1),
+            shtrih('M', 'B', 1),
+            shtrih('D', 'N', 2),
+            shtrih('N', 'C', 2),
           ],
           podpisi: false,
           otvet: chislo((p.c + p.d) / 2),

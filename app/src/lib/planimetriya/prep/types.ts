@@ -28,6 +28,15 @@ export interface Mikro {
   nazvanie: string;
   /** Формула-подсказка, TeX без долларов. Ответа в ней нет. */
   formula: string;
+  /**
+   * Подсказка словами вместо формулы: когда формула записана общими
+   * буквами, которых нет на чертеже задачи (prep/fakty.ts).
+   */
+  podskazka?: string;
+  /** Факт реестра справочника: кнопка «Показать свойство». null — без факта. */
+  fakt?: string | null;
+  /** «В нашей задаче»: факт на буквах этой задачи, без ответа. */
+  vNashey?: string;
   generate(r: Rng): MikroGenerated | null;
 }
 

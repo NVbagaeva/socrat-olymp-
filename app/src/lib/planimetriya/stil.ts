@@ -23,12 +23,15 @@ export const PL = {
   velichina: 'var(--chertezh-velichina, #E07A2F)',
   iskomoe: 'var(--chertezh-velichina, #E07A2F)',
   podskazka: 'var(--chertezh-velichina-2, #A85F06)',
+  /* Новый элемент шага подсказки — оранжевый; заливка фигуры в подсказке. */
+  novoe: 'var(--chertezh-novoe, #E8730C)',
+  zalivka: 'var(--chertezh-zalivka, rgba(31, 95, 208, 0.07))',
   bg: THEME.colors.bg,
   /* Толщины: основные линии и окружность < выделенный элемент. */
   width: {
     line: 1.75,
     iskomoe: 2.25,
-    novoe: 2.25,
+    novoe: 2.75,
     /* Дуга угла и значок прямого угла; искомого угла — markIskomoe. */
     mark: 1.25,
     markIskomoe: 1.75,

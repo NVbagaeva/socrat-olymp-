@@ -294,6 +294,7 @@ export const BLOK_I: PrototipChertezha[] = [
             ug('C', 'A', 'H', { sloy: 2, dugi: 2 }),
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C', 'H', 'L'],
           proverki: [
             { ugol: ['A', 'C', 'B'], vid: 'pryamoy' },
             { ugol: ['L', 'C', 'H'], gradusy: p.f },
@@ -340,6 +341,7 @@ export const BLOK_I: PrototipChertezha[] = [
             ug('A', 'C', 'L', { sloy: 3, znachenie: '45°' }),
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C', 'M', 'L'],
           proverki: [
             { ugol: ['A', 'C', 'B'], vid: 'pryamoy' },
             { ugol: ['M', 'C', 'L'], gradusy: p.f },
@@ -394,6 +396,7 @@ export const BLOK_I: PrototipChertezha[] = [
             ug('H', 'C', 'B', { sloy: 2, dugi: 2, znachenie: gr(menshiy) }),
           ],
           podpisi: ['A', 'B', 'C'],
+          podpisiPodskazki: ['H', 'M'],
           proverki: [{ ugol: ['A', 'C', 'B'], vid: 'pryamoy' }],
           otvet: gr(ans),
         },

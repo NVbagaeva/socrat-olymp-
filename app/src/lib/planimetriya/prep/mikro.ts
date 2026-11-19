@@ -410,7 +410,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
       risunok: smezhnye(180 - b, {}, { isk: true }),
       otvet: b,
       razbor: [
-        `$x + (x + ${g(d)}) = 180^\\circ$, $x = ${g((180 - d) / 2)}$.`,
+        `Обозначим меньший угол $x$: $x + (x + ${g(d)}) = 180^\\circ$, $x = ${g((180 - d) / 2)}$.`,
         `Больший: $${g(b)}$.`,
       ],
     };
@@ -425,7 +425,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
       risunok: smezhnye(mal, { isk: true }, {}),
       otvet: mal,
       razbor: [
-        `$${k}x + ${m}x = 180^\\circ$, $x = ${g(180 / (k + m))}$.`,
+        `Обозначим одну часть $x$: $${k}x + ${m}x = 180^\\circ$, $x = ${g(180 / (k + m))}$.`,
         `Меньший: $${k}\\cdot ${g(180 / (k + m))} = ${g(mal)}$.`,
       ],
     };
@@ -596,6 +596,9 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           tri('A', 'B', 'C'),
           pryam('A', 'C', 'B'),
           otr('C', 'M', { vydelit: 'iskomoe' }),
+          /* Медиана: половины гипотенузы равны. */
+          shtrih('A', 'M', 1),
+          shtrih('M', 'B', 1),
           zn('A', 'B', t(c).replace('{,}', ',')),
         ],
         podpisi: false,
@@ -614,6 +617,9 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           tri('A', 'B', 'C'),
           pryam('A', 'C', 'B'),
           otr('C', 'M', { vydelit: 'dano', znachenie: chislo(m) }),
+          /* Медиана: половины гипотенузы равны. */
+          shtrih('A', 'M', 1),
+          shtrih('M', 'B', 1),
           otr('A', 'B', { vydelit: 'iskomoe' }),
         ],
         podpisi: false,
@@ -674,6 +680,9 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           tri('A', 'B', 'C'),
           pryam('A', 'C', 'B'),
           otr('C', 'M'),
+          /* Медиана: половины гипотенузы равны. */
+          shtrih('A', 'M', 1),
+          shtrih('M', 'B', 1),
           ug('A', 'B', 'C', { vydelit: 'dano', znachenie: gr(b) }),
           ug('M', 'C', 'B', { vydelit: 'iskomoe' }),
         ],
@@ -763,6 +772,9 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           tri('A', 'B', 'C'),
           pryam('A', 'C', 'B'),
           otr('C', 'M'),
+          /* Медиана: половины гипотенузы равны. */
+          shtrih('A', 'M', 1),
+          shtrih('M', 'B', 1),
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('A', 'M', 'C', { vydelit: 'iskomoe' }),
         ],
@@ -1199,7 +1211,7 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
       },
       otvet: (a * b) / 2,
       razbor: [
-        'Высота к стороне $a$ — катет против $30^\\circ$: $\\dfrac{b}{2}$.',
+        `Высота, проведённая к стороне $${a}$, — катет против угла $30^\\circ$: она равна половине другой стороны, $\\dfrac{${b}}{2}$.`,
         `$S = ${a}\\cdot \\dfrac{${b}}{2} = ${t((a * b) / 2)}$.`,
       ],
     };
@@ -1218,13 +1230,18 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
         elementy: [
           mn(['A', 'B', 'C', 'D']),
           otr('M', 'N', { vydelit: 'iskomoe' }),
+          /* Средняя линия соединяет середины боковых сторон. */
+          shtrih('A', 'M', 1),
+          shtrih('M', 'B', 1),
+          shtrih('D', 'N', 2),
+          shtrih('N', 'C', 2),
           zn('A', 'D', String(a)),
           zn('B', 'C', String(b)),
         ],
         podpisi: false,
       },
       otvet: (a + b) / 2,
-      razbor: [`$m = \\dfrac{${a} + ${b}}{2} = ${t((a + b) / 2)}$.`],
+      razbor: [`Средняя линия: $\\dfrac{${a} + ${b}}{2} = ${t((a + b) / 2)}$.`],
     };
   }),
   mikro('P1-5-09', 'Площадь подобного треугольника', 'S_2 = k^2 S_1', (r) => {
@@ -1298,7 +1315,7 @@ export const BLOK_PIFAGOR: Mikro[] = [
         podpisi: false,
       },
       otvet: c,
-      razbor: [`$c = \\sqrt{${a * a} + ${b * b}} = \\sqrt{${c * c}} = ${c}$.`],
+      razbor: [`Гипотенуза: $\\sqrt{${a * a} + ${b * b}} = \\sqrt{${c * c}} = ${c}$.`],
     };
   }),
   mikro('P1-6-02', 'Катет', 'a = \\sqrt{c^2 - b^2}', (r) => {
@@ -1317,7 +1334,7 @@ export const BLOK_PIFAGOR: Mikro[] = [
         podpisi: false,
       },
       otvet: a,
-      razbor: [`$a = \\sqrt{${c * c} - ${b * b}} = \\sqrt{${a * a}} = ${a}$.`],
+      razbor: [`Катет: $\\sqrt{${c * c} - ${b * b}} = \\sqrt{${a * a}} = ${a}$.`],
     };
   }),
   mikro('P1-6-03', 'Диагональ прямоугольника', 'd = \\sqrt{a^2 + b^2}', (r) => {
@@ -1337,7 +1354,7 @@ export const BLOK_PIFAGOR: Mikro[] = [
       otvet: c,
       razbor: [
         'Диагональ — гипотенуза прямоугольного треугольника со сторонами-катетами.',
-        `$d = \\sqrt{${a * a} + ${b * b}} = ${c}$.`,
+        `Диагональ: $\\sqrt{${a * a} + ${b * b}} = ${c}$.`,
       ],
     };
   }),
@@ -1390,7 +1407,7 @@ export const BLOK_PIFAGOR: Mikro[] = [
         otvet: b,
         razbor: [
           'Высота к основанию делит его пополам.',
-          `$h = \\sqrt{${c * c} - ${a * a}} = ${b}$.`,
+          `Высота: $\\sqrt{${c * c} - ${a * a}} = ${b}$.`,
         ],
       };
     },
@@ -1414,7 +1431,7 @@ export const BLOK_PIFAGOR: Mikro[] = [
       otvet: a,
       razbor: [
         'Гипотенуза в $\\sqrt2$ раз больше катета.',
-        `$a = \\dfrac{${a}\\sqrt2}{\\sqrt2} = ${a}$.`,
+        `Катет: $\\dfrac{${a}\\sqrt2}{\\sqrt2} = ${a}$.`,
       ],
     };
   }),
@@ -1453,7 +1470,9 @@ export const BLOK_PIFAGOR: Mikro[] = [
         podpisi: false,
       },
       otvet: 2 * k,
-      razbor: [`$a = \\dfrac{2h}{\\sqrt3} = \\dfrac{2\\cdot ${k}\\sqrt3}{\\sqrt3} = ${2 * k}$.`],
+      razbor: [
+        `Сторона — удвоенная высота, делённая на $\\sqrt3$: $\\dfrac{2\\cdot ${k}\\sqrt3}{\\sqrt3} = ${2 * k}$.`,
+      ],
     };
   }),
   mikro('P1-6-09', 'Высота к гипотенузе', 'h = \\dfrac{ab}{c}', (r) => {
@@ -1477,7 +1496,7 @@ export const BLOK_PIFAGOR: Mikro[] = [
       otvet: h,
       razbor: [
         `Гипотенуза: $\\sqrt{${a * a} + ${b * b}} = ${c}$.`,
-        `$h = \\dfrac{${a}\\cdot ${b}}{${c}} = ${t(h)}$.`,
+        `Высота: $\\dfrac{${a}\\cdot ${b}}{${c}} = ${t(h)}$.`,
       ],
     };
   }),
@@ -1491,6 +1510,9 @@ export const BLOK_PIFAGOR: Mikro[] = [
           tri('A', 'B', 'C'),
           pryam('A', 'C', 'B'),
           otr('C', 'M', { vydelit: 'iskomoe' }),
+          /* Медиана: половины гипотенузы равны. */
+          shtrih('A', 'M', 1),
+          shtrih('M', 'B', 1),
           zn('A', 'C', String(a)),
           zn('C', 'B', String(b)),
         ],
@@ -2083,13 +2105,18 @@ export const BLOK_KASATELNYE: Mikro[] = [
           zn('A', 'B', String(c)),
           zn('D', 'C', String(d)),
           otr('M', 'N', { vydelit: 'iskomoe' }),
+          /* Средняя линия соединяет середины боковых сторон. */
+          shtrih('A', 'M', 1),
+          shtrih('M', 'B', 1),
+          shtrih('D', 'N', 2),
+          shtrih('N', 'C', 2),
         ],
         podpisi: false,
       },
       otvet: (c + d) / 2,
       razbor: [
         'Сумма оснований описанной трапеции равна сумме боковых сторон.',
-        `$m = \\dfrac{${c} + ${d}}{2} = ${t((c + d) / 2)}$.`,
+        `Средняя линия: $\\dfrac{${c} + ${d}}{2} = ${t((c + d) / 2)}$.`,
       ],
     };
   }),
