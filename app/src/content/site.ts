@@ -149,24 +149,37 @@ export const site = {
   brand: 'Будет на ЕГЭ',
 
   /**
-   * Пункты широкой шапки. Каждый ведёт на работающую страницу или блок.
-   * Порядок — от дела к справке: сначала задания, устный счёт и
-   * варианты, потом разделы о проекте, «Тарифы» последними. «Об авторе»
-   * живёт в подвале и в бургере: с «Устным счётом» шапка в одну строку
-   * на 1024 px иначе не помещалась.
+   * «Задания» — первый пункт широкой шапки: панель со всем каталогом
+   * (components/layout/NavZadaniya). В ней плитка заданий уровня, а в
+   * нижнем ряду — банк целиком и «Устный счёт». Отдельными пунктами
+   * шапки их больше нет: верхний ряд короткий.
+   */
+  zadaniya: {
+    label: 'Задания',
+    skoro: 'скоро',
+    nizhnie: [
+      {
+        label: 'Весь банк заданий',
+        hrefs: { profile: LINKS.bank.href, base: LINKS.bank.hrefBase },
+      },
+      { label: LINKS.ustnyy.label, hrefs: { profile: LINKS.ustnyy.href, base: LINKS.ustnyy.href } },
+    ],
+  },
+
+  /**
+   * Остальные пункты широкой шапки — после «Заданий». Каждый ведёт на
+   * работающую страницу или блок. Порядок — от дела к справке:
+   * варианты, учителям, «Тарифы» последними. «Как пользоваться» и
+   * «Об авторе» живут в подвале и в бургере.
    */
   nav: [
-    LINKS.bank,
-    LINKS.ustnyy,
-    /* Всё про варианты — одной группой: семь пунктов в одну строку не
-       помещались даже на 1440 px, и шапка переносилась в две строки.
-       Первым — главное действие, оно в списке выделено. */
+    /* Всё про варианты — одной группой. Первым — главное действие,
+       оно в списке выделено. */
     {
       label: 'Варианты',
       items: [LINKS.onlayn, LINKS.sobrat, LINKS.baza, LINKS.mesyaca, LINKS.slozhnye],
     },
     LINKS.uchitelyam,
-    LINKS.howto,
     LINKS.tarify,
   ] as NavItem[],
 
@@ -203,6 +216,7 @@ export const site = {
       { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
       { label: 'Тарифы', href: TARIFY_HREF },
       { label: LINKS.avtor.label, href: LINKS.avtor.href },
+      { label: LINKS.howto.label, href: LINKS.howto.href },
       { label: 'Контакты', href: '#' },
       { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
     ] satisfies (SiteLink | ExternalLink)[],

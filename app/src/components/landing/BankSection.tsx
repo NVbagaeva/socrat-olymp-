@@ -15,9 +15,32 @@ import { BankRazdelitel } from './BankRazdelitel';
  * заданий в проекте нет. Отличий от страницы два — здесь нет поиска,
  * а под сеткой стоит переход в сам раздел.
  */
-export function BankSection({ level = 'profile' }: { level?: Level }) {
+export function BankSection({
+  level = 'profile',
+  plitkaSnachala = false,
+}: {
+  level?: Level;
+  /**
+   * Плитка заданий — сразу под заголовком, плашки вариантов — после
+   * неё (главная профиля: до задания один щелчок). Без флага — прежний
+   * порядок: варианты, разделитель, плитка.
+   */
+  plitkaSnachala?: boolean;
+}) {
   const { bank } = landingOf(level);
   const tabs = <LevelTabs level={level} to="home-bank" range />;
+  const varianty = (
+    <>
+      {level === 'profile' ? (
+        <>
+          <VariantEntry className="bank-variant" />
+          <PovEntry className="bank-variant" />
+        </>
+      ) : null}
+      {/* Вариант базы — на главной обоих уровней. */}
+      <VariantEntry className="bank-variant" level="base" />
+    </>
+  );
   return (
     <section className="band band--bank">
       {/* Свечения позади стеклянных карточек: без цвета за стеклом
@@ -34,14 +57,7 @@ export function BankSection({ level = 'profile' }: { level?: Level }) {
 
         {/* На главной — первая часть, как и раньше; вторая часть
             и переключатель живут на странице банка. */}
-        {level === 'profile' ? (
-          <>
-            <VariantEntry className="bank-variant" />
-            <PovEntry className="bank-variant" />
-          </>
-        ) : null}
-        {/* Вариант базы — на главной обоих уровней. */}
-        <VariantEntry className="bank-variant" level="base" />
+        {plitkaSnachala ? null : varianty}
         {/* Разделитель «Банк заданий» с якорем #bank: сетка начинается
             с представления; переключатель уровня — внутри полосы. */}
         <BankRazdelitel tabs={tabs} />
@@ -52,6 +68,8 @@ export function BankSection({ level = 'profile' }: { level?: Level }) {
         <Link className="btn btn--primary bank-more" href={levelInfo(level).bank}>
           Открыть банк заданий
         </Link>
+
+        {plitkaSnachala ? <div className="bank-posle">{varianty}</div> : null}
       </div>
     </section>
   );

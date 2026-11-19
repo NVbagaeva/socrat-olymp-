@@ -3,7 +3,10 @@ import Link from 'next/link';
 import { AuthWidget } from '@/components/auth/AuthWidget';
 import { LevelLink, LevelSwitch } from '@/components/level/LevelSwitch';
 import { isNavGroup, site } from '@/content/site';
+import { taskHasPage, taskHref, tasksOf } from '@/content/tasks';
+import { LEVELS, type Level } from '@/lib/level';
 import { NavDropdown } from './NavDropdown';
+import { NavZadaniya, type PunktZadaniya } from './NavZadaniya';
 import { SaytPanel } from './SaytPanel';
 import { SiteHeadCompact } from './SiteHeadCompact';
 import { SiteMenu } from './SiteMenu';
@@ -14,13 +17,28 @@ export interface SiteHeaderProps {
   className?: string;
 }
 
+/* Плитка панели «Задания»: все задания каждого уровня — из того же
+   списка, что и банк (content/tasks.ts). */
+const ZADANIYA = Object.fromEntries(
+  LEVELS.map((level) => [
+    level,
+    tasksOf(level).map((task): PunktZadaniya => ({
+      no: task.no,
+      name: task.name,
+      href: taskHasPage(task) ? taskHref(task) : null,
+    })),
+  ]),
+) as Record<Level, PunktZadaniya[]>;
+
 /**
  * Шапка публичных страниц: логотип с названием, меню, вход.
  *
  * Телефон (до 768px): знак и название слева, справа одна кнопка —
  * «Войти» или кружок аккаунта — и бургер. «Начать бесплатно» — на
- * первом экране главной. Компьютер: ещё меню разделов и основная
- * «Начать бесплатно» рядом со вторичной «Войти». На прокрутке шапка
+ * первом экране главной. Компьютер: ещё меню — «Задания» с панелью
+ * всего каталога (NavZadaniya), «Варианты» со списком и два-три
+ * пункта словами — и основная «Начать бесплатно» рядом со вторичной
+ * «Войти». На прокрутке шапка
  * становится ниже (SiteHeadCompact, site.css).
  */
 export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
@@ -37,6 +55,14 @@ export function SiteHeader({ currentHref, className }: SiteHeaderProps) {
           <LevelSwitch className="site-head__level" />
 
           <nav className="site-nav" aria-label="Разделы сайта">
+            {/* Весь каталог — одним пунктом с панелью. */}
+            <NavZadaniya
+              label={site.zadaniya.label}
+              zadaniya={ZADANIYA}
+              nizhnie={site.zadaniya.nizhnie}
+              skoro={site.zadaniya.skoro}
+              currentHref={currentHref}
+            />
             {site.nav.map((link) =>
               isNavGroup(link) ? (
                 <NavDropdown key={link.label} group={link} currentHref={currentHref} />

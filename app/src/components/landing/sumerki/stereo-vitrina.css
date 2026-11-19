@@ -3,7 +3,11 @@
    (vitrina.css); сцена — стекло с ореолом за фигурой и «полом» с мягкой
    тенью, как экспонат. Двигаются только transform и opacity. */
 
-.vit-chast--stereo {
+/* Два класса в селекторе — нарочно: общая сетка частей витрины
+   (vitrina.css, .vit-chast) задана одним классом, и какой из двух
+   файлов подключится позже, сборка не обещает. С двумя классами сетка
+   стереометрии выигрывает при любом порядке. */
+.vit-chast.vit-chast--stereo {
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   grid-template-areas:
     'tekst scena'
@@ -290,7 +294,7 @@
 /* ── Планшет и телефон ─────────────────────────────────────────── */
 
 @media (max-width: 1023.98px) {
-  .vit-chast--stereo {
+  .vit-chast.vit-chast--stereo {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       'tekst'

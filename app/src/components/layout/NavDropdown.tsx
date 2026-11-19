@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import type { NavGroup } from '@/content/site';
 import { NavIcon } from '@/components/ui/NavIcons';
 
@@ -23,6 +24,52 @@ export interface NavDropdownProps {
  * выделена. В бургер-меню те же пункты собраны иначе (site.menu).
  */
 export function NavDropdown({ group, currentHref }: NavDropdownProps) {
+  return (
+    <NavDrop label={group.label} current={group.items.some((item) => item.href === currentHref)}>
+      {(close) =>
+        group.items.map((item) => (
+          <li key={item.href}>
+            <Link
+              className="nav-drop__item"
+              href={item.href}
+              aria-current={item.href === currentHref ? 'page' : undefined}
+              onClick={close}
+            >
+              <span className="nav-drop__ico">
+                <NavIcon name={item.icon} />
+              </span>
+              <span className="nav-drop__text">
+                <span className="nav-drop__label">{item.label}</span>
+                <span className="nav-drop__hint">{item.hint}</span>
+              </span>
+            </Link>
+          </li>
+        ))
+      }
+    </NavDrop>
+  );
+}
+
+export interface NavDropProps {
+  /** Подпись кнопки. */
+  label: string;
+  /** Текущая страница — внутри: кнопка отмечена как текущая. */
+  current?: boolean;
+  /**
+   * Широкая панель вместо списка (NavZadaniya): содержимое — любая
+   * разметка, а не строки <li>. Ссылки с классом nav-drop__item
+   * обходятся стрелками так же, как в списке.
+   */
+  panel?: boolean;
+  /** Содержимое; close закрывает список после выбора ссылки. */
+  children: (close: () => void) => ReactNode;
+}
+
+/**
+ * Кнопка шапки с выпадающим содержимым: общее поведение списка
+ * «Варианты» (NavDropdown) и панели «Задания» (NavZadaniya).
+ */
+export function NavDrop({ label, current = false, panel = false, children }: NavDropProps) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
@@ -31,7 +78,8 @@ export function NavDropdown({ group, currentHref }: NavDropdownProps) {
      и щелчок не должен тут же его закрыть. Второй щелчок — закрывает. */
   const openedByHover = useRef(false);
   const listId = useId();
-  const current = group.items.some((item) => item.href === currentHref);
+  const close = useCallback(() => setOpen(false), []);
+  const List = panel ? 'div' : 'ul';
 
   const cancelHoverClose = () => window.clearTimeout(hoverTimer.current);
 
@@ -119,31 +167,18 @@ export function NavDropdown({ group, currentHref }: NavDropdownProps) {
           }
         }}
       >
-        {group.label}
+        {label}
         <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
           <path d="M3 4.5 6 7.5l3-3" />
         </svg>
       </button>
-      <ul className="nav-drop__list" id={listId} hidden={!open}>
-        {group.items.map((item) => (
-          <li key={item.href}>
-            <Link
-              className="nav-drop__item"
-              href={item.href}
-              aria-current={item.href === currentHref ? 'page' : undefined}
-              onClick={() => setOpen(false)}
-            >
-              <span className="nav-drop__ico">
-                <NavIcon name={item.icon} />
-              </span>
-              <span className="nav-drop__text">
-                <span className="nav-drop__label">{item.label}</span>
-                <span className="nav-drop__hint">{item.hint}</span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <List
+        className={clsx('nav-drop__list', panel && 'nav-drop__list--panel')}
+        id={listId}
+        hidden={!open}
+      >
+        {children(close)}
+      </List>
     </div>
   );
 }

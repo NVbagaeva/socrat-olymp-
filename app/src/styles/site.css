@@ -246,6 +246,85 @@ body .site-head[data-compact] {
 :is(.site-nav, .topnav) .nav-drop__item[aria-current='page'] .nav-drop__label {
   color: var(--color-primary);
 }
+/* ── Панель «Задания» (NavZadaniya): весь каталог одной панелью ──
+   Та же подложка и мостик, что у списка «Варианты»; внутри — плитка
+   заданий в три колонки и нижний ряд ссылок. */
+.nav-drop__list--panel {
+  width: min(760px, calc(100vw - 2 * var(--space-8)));
+  padding: calc(12px + var(--space-3)) var(--space-3) var(--space-3);
+}
+/* Отступы первой и последней строки — только у списка «Варианты». */
+.nav-drop__list--panel li:first-child,
+.nav-drop__list--panel li:last-child {
+  padding: 0;
+}
+.nav-zad__setka {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+:is(.site-nav, .topnav) .nav-zad__punkt,
+.nav-zad__punkt {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  line-height: 1.35;
+  white-space: normal;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.nav-zad__no {
+  flex: none;
+  min-width: 1.5em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+.nav-zad__punkt--skoro,
+.nav-zad__punkt--skoro .nav-zad__no {
+  color: var(--color-text-secondary);
+}
+.nav-zad__skoro {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.nav-zad__punkt:hover .nav-zad__imya,
+.nav-zad__punkt:focus-visible .nav-zad__imya {
+  color: var(--color-primary);
+}
+.nav-zad__niz {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+:is(.site-nav, .topnav) .nav-zad__nizhniy {
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.nav-zad__nizhniy svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .site-head__cta {
   margin-left: auto;
   display: flex;
@@ -764,7 +843,11 @@ body:has(.site-menu) .help-fab {
   }
 }
 .site-menu__row--akcent .site-menu__ico {
-  background: radial-gradient(circle at 70% 25%, var(--color-accent-soft-surface), var(--color-surface-soft));
+  background: radial-gradient(
+    circle at 70% 25%,
+    var(--color-accent-soft-surface),
+    var(--color-surface-soft)
+  );
   box-shadow: inset 0 0 0 1px var(--color-border-accent);
   color: var(--color-accent-text);
 }

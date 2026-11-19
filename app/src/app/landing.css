@@ -1142,3 +1142,136 @@ section.band {
     padding-inline: var(--space-2);
   }
 }
+
+/* Плашки вариантов после плитки заданий (BankSection, plitkaSnachala). */
+.bank-posle {
+  margin-top: var(--space-10);
+}
+
+/* ── «Живая задача» (components/landing/proba/Proba.tsx) ──
+   Спокойная белая карточка: слева — что это, справа — сама задача с
+   полем ответа. Стили здесь, а не в своём файле рядом с компонентом:
+   отдельный файл стилей клиентского компонента менял порядок
+   подключения стилей главной, и сетка живой стереометрии
+   (stereo-vitrina.css) проигрывала общей сетке витрины. */
+
+.proba {
+  padding: 0 0 var(--space-10);
+}
+.proba__karta {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--space-10);
+  align-items: start;
+  padding: 44px 56px;
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  background: var(--color-surface);
+}
+.proba__metka {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+.proba__z {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-h3);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.proba__lid {
+  margin: 0;
+  max-width: 38ch;
+  color: var(--color-text-secondary);
+}
+.proba__istochnik {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-caption);
+  color: var(--color-text-secondary);
+}
+.proba__uslovie {
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-serif);
+  font-size: var(--fs-lg);
+  line-height: 1.5;
+}
+.proba__forma {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+.proba__pole {
+  flex: 0 1 200px;
+  min-width: 0;
+}
+.proba__pole-p {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-caption);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.proba__proverit {
+  flex: none;
+}
+.proba__itog {
+  min-height: 1.5em;
+  margin: var(--space-3) 0 0;
+  font-weight: 600;
+}
+.proba__itog--verno {
+  color: var(--color-success);
+}
+.proba__itog--neverno,
+.proba__itog--pusto {
+  color: var(--color-error);
+}
+.proba__dalshe {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.proba__shagi {
+  margin: var(--space-3) 0 0;
+  padding-left: 1.4em;
+  color: var(--color-text-secondary);
+}
+.proba__eshche {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-2);
+}
+.proba__ssylka {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+@media (max-width: 899.98px) {
+  .proba__karta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    padding: 28px 20px 20px;
+    border-radius: 24px;
+  }
+}
+@media (max-width: 459.98px) {
+  .proba__forma {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .proba__pole {
+    flex: none;
+  }
+}

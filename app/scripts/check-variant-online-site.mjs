@@ -451,7 +451,8 @@ console.log('6. «Решить вариант онлайн» из меню «В�
 const self = await desk.newPage();
 self.on('pageerror', (e) => errors.push(String(e)));
 await self.goto(`${BASE}/about/`);
-await self.locator('.nav-drop__button').click();
+/* В шапке две кнопки со списком: «Задания» и «Варианты». */
+await self.getByRole('button', { name: 'Варианты' }).click();
 await self.getByRole('link', { name: 'Решить вариант онлайн' }).click();
 await self.waitForURL(/\/variant\/onlayn\/$/);
 ok(true, 'пункт меню ведёт на /variant/onlayn/');

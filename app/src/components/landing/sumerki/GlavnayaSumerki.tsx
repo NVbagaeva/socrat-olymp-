@@ -3,13 +3,14 @@ import type { ReactNode } from 'react';
 import type { Level } from '@/lib/level';
 import { BankSection } from '../BankSection';
 import { OtschyotSection } from '../otschyot/EgeOtschyot';
+import { Proba } from '../proba/Proba';
 import { SumerkiHero } from './SumerkiHero';
 import { Vitrina } from './Vitrina';
 
 /**
- * Главная с синей сценой в первом экране. Ниже — те же блоки, что у
- * нынешней главной (Glavnaya.tsx); вместо блока «вечер» — витрина
- * возможностей (Vitrina), секции — в ровном ритме (sumerki.css).
+ * Главная со сценой в первом экране. Ниже — живая задача (Proba), банк
+ * заданий плиткой вперёд, обратный отсчёт и витрина возможностей
+ * (Vitrina); секции — в ровном ритме (sumerki.css).
  * Боевая главная профиля (app/page.tsx) и /styleguide/glavnaya-sumerki/.
  */
 export function GlavnayaSumerki({
@@ -32,9 +33,12 @@ export function GlavnayaSumerki({
       <SiteHeader className="site-head--steklo" />
       <main>
         <SumerkiHero vid={vid} oreol={oreol} level={level} />
+        {/* Сразу под первым экраном — дело: задача, которую решают на
+            месте без входа, и плитка заданий — до любого один щелчок. */}
+        <Proba />
+        <BankSection level={level} plitkaSnachala />
         <OtschyotSection level={level} />
         <Vitrina zagolovok={zagolovok} posle={vitrinaPosle} />
-        <BankSection level={level} />
       </main>
       <SiteFooter className="site-foot--steklo" />
     </div>
