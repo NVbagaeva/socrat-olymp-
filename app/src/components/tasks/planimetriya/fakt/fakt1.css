@@ -1,0 +1,263 @@
+/* Кнопка «Показать свойство» и карточка факта (задание №1).
+   Блоки карточки — классы справочника (app/zadaniya/1/spravochnik1-web.css):
+   карточка та же, что на странице справочника. */
+
+/* ── Кнопка под шагом ───────────────────────────────────────────── */
+.fakt1-knopka {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: start;
+  max-width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    box-shadow 0.15s;
+}
+.fakt1-knopka .stk-ico {
+  flex: none;
+}
+.fakt1-knopka:hover {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+}
+.fakt1-knopka:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+/* После неверного ответа: «загляни в свойство». */
+.fakt1-knopka.is-podsvechena {
+  border-color: var(--amber-600);
+  background: color-mix(in srgb, var(--amber-600) 14%, var(--color-surface));
+  color: var(--amber-700);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber-600) 22%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fakt1-knopka.is-podsvechena {
+    animation: fakt1-puls 1.2s ease-out 2;
+  }
+}
+@keyframes fakt1-puls {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber-600) 45%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+.fakt1-knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* ── Окно: на компьютере — по центру, на телефоне — шторка снизу ── */
+.modal.fakt1-okno {
+  max-width: 720px;
+  max-height: min(88vh, 860px);
+  display: flex;
+  flex-direction: column;
+}
+.fakt1-okno .modal__b {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-5) var(--space-6) var(--space-6);
+}
+.fakt1-okno .modal__t {
+  padding-right: var(--space-8, 40px);
+  font-size: 1.125rem;
+  line-height: 1.35;
+  margin-bottom: var(--space-4);
+}
+@media (max-width: 640px) {
+  .modal-backdrop:has(.fakt1-okno) {
+    place-items: end stretch;
+    padding: 0;
+  }
+  .modal.fakt1-okno {
+    max-width: none;
+    max-height: 88dvh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* «Ручка» шторки. */
+  .modal.fakt1-okno::before {
+    content: '';
+    flex: none;
+    width: 40px;
+    height: 4px;
+    margin: var(--space-2) auto 0;
+    border-radius: 2px;
+    background: var(--color-border);
+  }
+  .fakt1-okno .modal__b {
+    padding: var(--space-3) var(--space-4) var(--space-5);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .modal.fakt1-okno {
+      animation: fakt1-shtorka 0.22s ease-out;
+    }
+  }
+}
+@keyframes fakt1-shtorka {
+  from {
+    transform: translateY(24%);
+    opacity: 0.6;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* ── Карточка ───────────────────────────────────────────────────── */
+.fakt1 {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.fakt1__glavnoe {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 260px);
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .fakt1__glavnoe {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.fakt1__blok {
+  margin: 0;
+}
+.fakt1__tekst {
+  margin: 0;
+  line-height: 1.5;
+}
+.fakt1__ris {
+  margin: 0;
+}
+.fakt1__ris svg {
+  max-height: 200px;
+}
+.fakt1__primer {
+  margin: 0;
+}
+.fakt1 .spr1-razbor__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+.fakt1__nasha {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 14px;
+  border-left: 4px solid var(--chertezh-novoe, #e8730c);
+  background: color-mix(in srgb, var(--chertezh-novoe, #e8730c) 8%, var(--color-surface));
+}
+.fakt1__nasha-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--amber-700);
+}
+.fakt1__nasha-tekst {
+  margin: 0;
+  line-height: 1.5;
+}
+.fakt1__nasha-tekst::first-letter {
+  text-transform: uppercase;
+}
+.fakt1__vse {
+  justify-self: start;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.fakt1__vse:hover {
+  text-decoration: underline;
+}
+.fakt1__sluzhebnoe {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+.fakt1__povtor {
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ── Чертёж шага подсказки ──────────────────────────────────────── */
+/* Телефон: чертёж над текстом шага; компьютер — справа от него. */
+.trn-vopros--s-risunkom {
+  grid-template-columns: minmax(0, 1fr);
+}
+.trn-vopros__risunok {
+  max-width: 300px;
+  margin-inline: auto;
+  padding: var(--space-2);
+  border-radius: 14px;
+  background: var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+.trn-vopros__risunok .figzoom {
+  display: block;
+  width: 100%;
+}
+.trn-vopros__risunok svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 240px;
+  margin-inline: auto;
+}
+.trn-vopros__vvod {
+  margin: 0;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+@media (min-width: 720px) {
+  .trn-vopros--s-risunkom {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    column-gap: var(--space-5);
+    align-items: start;
+  }
+  .trn-vopros--s-risunkom > * {
+    grid-column: 1;
+  }
+  .trn-vopros--s-risunkom > .trn-vopros__risunok {
+    grid-column: 2;
+    grid-row: 1 / span 6;
+    margin: 0;
+  }
+}
+/* Опорная задача: подсказка с чертежом и кнопкой свойства. */
+.z1-op__podskazka {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.z1-op__podskazka-tekst {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--amber-700);
+}
+.z1-op__podskazka-tekst span {
+  min-width: 0;
+  color: var(--color-text);
+}

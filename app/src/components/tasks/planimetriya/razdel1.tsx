@@ -12,6 +12,8 @@ import type { Reshenie1T, Zadacha1T } from '@/lib/planimetriya/trening/sborka';
 import type { SsylkiTipa1 } from '@/lib/planimetriya/trening/ssylki';
 import { ZAGRUZKA1 } from '@/lib/planimetriya/trening/zagruzka';
 import type { Shag } from '../steklo';
+import type { VoprosPodskazki } from '../trening/PodskazkaVoprosy';
+import { FaktKnopka1, type FaktShaga1 } from './fakt/FaktKnopka1';
 import { Piktogramma } from '../zadanie11/Piktogrammy';
 import type { RazdelBanka, SostoyaniePod } from '../trening/bank/types';
 
@@ -54,10 +56,10 @@ function Materialy1({ tip }: { tip: string }) {
 }
 
 /**
- * Под условием задачи №1 — чертёж, как в прежнем тренажёре: на вопросе
- * подсказки он показывает слой этого шага (нужный элемент подсвечен),
- * при открытом решении — все построения, иначе — чертёж условия, как в
- * ФИПИ. Ниже — откуда задача.
+ * Под условием задачи №1 — чертёж условия, как в ФИПИ; при открытом
+ * решении — все построения. У шагов подсказки чертёж свой, внутри шага
+ * (voprosy1): он растёт по шагам и подписан всеми буквами шага. Ниже —
+ * откуда задача.
  */
 function Pod1({ z, sost }: { z: Zadacha1T; sost: SostoyaniePod<Reshenie1T> }) {
   const r = sost.razbor;
@@ -66,10 +68,6 @@ function Pod1({ z, sost }: { z: Zadacha1T; sost: SostoyaniePod<Reshenie1T> }) {
   if (r !== null && sost.reshenie) {
     svg = r.uchitelSvg;
     label = TRENAZHER1.ekran.risunokReshenie;
-  } else if (r !== null && sost.podskazka && r.voprosy.length > 0) {
-    const i = Math.min(sost.shag, r.voprosy.length) - 1;
-    svg = r.voprosy[i]?.risunokSvg ?? svg;
-    label = TRENAZHER1.ekran.risunokPodskazka(i + 1);
   }
   return (
     <>
@@ -93,6 +91,40 @@ export function shagiIzResheniya1(s: Reshenie1T): Shag[] {
     ...(shag.risunokSvg === null
       ? {}
       : { risunok: <Chertezh svg={shag.risunokSvg} label={TRENAZHER1.ekran.risunokShaga} /> }),
+    ...(shag.fakty.length === 0
+      ? {}
+      : {
+          posle: (
+            <div className="fakt1-knopki">
+              {shag.fakty.map((f) => (
+                <FaktKnopka1 fakt={f} key={f.id} />
+              ))}
+            </div>
+          ),
+        }),
+  }));
+}
+
+/**
+ * Вопросы подсказки №1: у каждого шага свой чертёж (движок планиметрии
+ * по данным этой же задачи, растёт по шагам) и кнопка «Показать
+ * свойство» с фактом шага — она подсвечивается после неверного ответа.
+ */
+export function voprosy1(s: Reshenie1T): VoprosPodskazki[] {
+  return s.voprosy.map((v, i) => ({
+    voprosHtml: v.voprosHtml,
+    variantyHtml: v.variantyHtml,
+    verno: v.verno,
+    ...(v.kommentariyHtml === undefined ? {} : { kommentariyHtml: v.kommentariyHtml }),
+    ...(v.vvodHtml === undefined ? {} : { vvodHtml: v.vvodHtml }),
+    risunok: <Chertezh svg={v.risunokSvg} label={TRENAZHER1.ekran.risunokPodskazka(i + 1)} />,
+    ...(v.fakt === null
+      ? {}
+      : {
+          posle: (oshibka: boolean) => (
+            <FaktKnopka1 fakt={v.fakt as FaktShaga1} podsvetit={oshibka} />
+          ),
+        }),
   }));
 }
 
@@ -148,7 +180,7 @@ export const RAZDEL1: RazdelBanka<Zadacha1T, Reshenie1T> = {
   pod: (z, _rezhim, sost) => <Pod1 z={z} sost={sost} />,
   shagi: shagiIzResheniya1,
   posle: posle1,
-  voprosy: (s) => s.voprosy,
+  voprosy: voprosy1,
   zadachaHref: zadachaHref1,
   prezhnyayaZapis: prezhnyayaZapis1,
 };

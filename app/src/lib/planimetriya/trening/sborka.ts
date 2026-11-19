@@ -24,6 +24,7 @@ import { klyuchProto, nomerAnaloga, type UslovieBanka } from '../trenazher/sessi
 import {
   razreshit,
   sostavZadachi,
+  type FaktShaga,
   type RazreshennayaZadacha,
   type ShagHtml,
 } from '../trenazher/zadacha';
@@ -52,6 +53,8 @@ export interface Shag1T extends ShagHtml {
 export interface Vopros1T extends VoprosPodskazki {
   /** Чертёж вопроса: слой этого шага подсвечен. */
   risunokSvg: string;
+  /** Факт шага: кнопка «Показать свойство». null — шаг без факта. */
+  fakt: FaktShaga | null;
 }
 
 /** Разбор задачи: шаги с чертежами, сверка, ответ, все построения, вопросы. */
@@ -131,7 +134,9 @@ export function razborZadachi(r: RazreshennayaZadacha) {
       variantyHtml: v.knopki,
       verno: v.verno,
       ...(v.poyasnenie === '' ? {} : { kommentariyHtml: v.poyasnenie }),
+      ...(v.vvod === '' ? {} : { vvodHtml: v.vvod }),
       risunokSvg: v.risunokSvg,
+      fakt: v.fakt,
     })),
   };
   return { sostav, s };

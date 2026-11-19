@@ -4,7 +4,8 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { FigureZoom } from '@/components/ui';
 import { OpornyeSpisokBanka, type NavykKartochki } from '../opornye/OpornyeBanka';
 import { OpornayaZadacha, type OpornyyIshod } from '../opornye';
-import type { Shag } from '../steklo';
+import { Ikonka, type Shag } from '../steklo';
+import { FaktKnopka1 } from './fakt/FaktKnopka1';
 import { OPORNYE1, TRENAZHER1 } from '@/content/planimetriya1';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
 import { mikroById } from '@/lib/planimetriya/prep/bloki';
@@ -50,6 +51,8 @@ function shagiRazbora(z: MikroSealed): Shag[] {
     ...(i === r.stroki.length - 1 && r.risunokSvg !== null
       ? { risunok: <Chertezh svg={r.risunokSvg} label={OPORNYE1.risunokRazbora} /> }
       : {}),
+    /* Факт навыка — под первой строкой разбора: там он и назван. */
+    ...(i === 0 && z.fakt !== null ? { posle: <FaktKnopka1 fakt={z.fakt} /> } : {}),
   }));
 }
 
@@ -154,8 +157,29 @@ export function Opornye1({
       checked={checked}
       onCheck={check}
       formatHint={format}
-      /* Подсказка — формула навыка: ответа в ней нет. */
-      podskazka={{ html: zadacha.formulaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }}
+      /* Подсказка — формула навыка (ответа в ней нет) рядом с чертежом
+         задачи и кнопка «Показать свойство» с фактом навыка. */
+      podskazka={{
+        html: zadacha.formulaHtml,
+        open: hintOpen,
+        onOpen: () => setHintOpen(true),
+        telo: (
+          <div className="z1-op__podskazka">
+            {zadacha.risunokSvg === null ? null : (
+              <div className="trn-vopros__risunok">
+                <Chertezh svg={zadacha.risunokSvg} label={OPORNYE1.risunok} />
+              </div>
+            )}
+            <p className="z1-op__podskazka-tekst">
+              <Ikonka name="lampa" />
+              <span dangerouslySetInnerHTML={{ __html: zadacha.formulaHtml }} />
+            </p>
+            {zadacha.fakt === null ? null : (
+              <FaktKnopka1 fakt={zadacha.fakt} podsvetit={checked === 'wrong'} />
+            )}
+          </div>
+        ),
+      }}
       /* Решение — после ответа; открытое до верного ответа — «с разбором». */
       reshenie={
         checked === null
