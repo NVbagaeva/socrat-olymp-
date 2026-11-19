@@ -309,7 +309,7 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
       podpisi: ['A', 'B', 'C', 'H'],
     }),
     r({
-      tochki: { A: [0, 0], C: [8, 0], B: [-3, 4.2], H: { osnovanie: ['B', 'C', 'A'] } },
+      tochki: { A: [0, 0], C: [7, 0], B: [-2.2, 5.2], H: { osnovanie: ['B', 'C', 'A'] } },
       elementy: [
         tri('A', 'B', 'C'),
         { tip: 'prodolzhenie', a: 'C', b: 'A', doTochki: 'H' },
@@ -960,7 +960,7 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
     r({
       tochki: {
         O: [0, 0],
-        C: [9, 0],
+        C: [6.4, 0],
         A: { kasanie: { iz: 'C', okr: 'w', storona: 1 } },
         B: { kasanie: { iz: 'C', okr: 'w', storona: -1 } },
       },
@@ -1127,8 +1127,8 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
       tochki: {
         O: [0, 0],
         C: [9, 0],
-        P1: [0, 1.5],
-        P2: [0, -1.5],
+        P1: [0, 2.6],
+        P2: [0, -2.6],
         D: { pryamayaOkruzhnost: { pryamaya: ['C', 'P1'], okr: 'w', vybor: 'blizhnyaya' } },
         B: { pryamayaOkruzhnost: { pryamaya: ['C', 'P1'], okr: 'w', vybor: 'dalnyaya' } },
         E: { pryamayaOkruzhnost: { pryamaya: ['C', 'P2'], okr: 'w', vybor: 'blizhnyaya' } },
@@ -1252,7 +1252,10 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         otr('O', 'A'),
         otr('O', 'B'),
         ug('A', 'O', 'B', ISK),
-        ug('A', 'B', 'C', { dugi: 2 }),
+        /* Двойная дуга — внутри вписанной окружности: та проходит в 0,13
+           стороны от B, и в карточке свойства (300 × 190) дуга обычного
+           радиуса её задевает. */
+        ug('A', 'B', 'C', { dugi: 2, radiusPx: 6 }),
         tochka('O'),
       ],
       podpisi: ['O', 'A', 'B', 'C'],
@@ -1287,7 +1290,8 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
   'iz-pryamogo-ugla': () =>
     r({
       tochki: {
-        ...poUglam(34, 56),
+        /* Острый угол подобран так, чтобы основания медианы, биссектрисы и высоты не слипались. */
+        ...poUglam(27, 63),
         H: { osnovanie: ['C', 'A', 'B'] },
         D: { bissektrisa: ['C', 'A', 'B'] },
         M: { seredina: ['A', 'B'] },
@@ -1375,7 +1379,8 @@ function tochkaK(A: T2, B: T2, C: T2): T2 {
 const PRIMERY: Record<string, () => RisunokSpravochnika> = {
   'vidy-uglov:0': () =>
     r({
-      tochki: { A: [-5, 0], O: [0, 0], B: [5, 0], C: polar(36, 5) },
+      /* Схема: α и 4α в масштабе (36° и 144°) дают плоский рисунок. */
+      tochki: { A: [-5, 0], O: [0, 0], B: [5, 0], C: polar(50, 5) },
       elementy: [
         otr('A', 'B'),
         otr('O', 'C'),
@@ -1386,7 +1391,9 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
     }),
   'vertikalnye:0': () =>
     r({
-      tochki: { O: [0, 0], A: polar(161, 5), B: polar(-19, 5), C: polar(19, 5), D: polar(199, 5) },
+      /* Схема: углы 38° и 142° нарисованы как 48° и 132° — рисунок не плоский. */
+      skhematichno: true,
+      tochki: { O: [0, 0], A: polar(156, 5), B: polar(-24, 5), C: polar(24, 5), D: polar(204, 5) },
       elementy: [
         otr('A', 'B'),
         otr('C', 'D'),
@@ -1421,7 +1428,8 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
     }),
   'neravenstvo:0': () =>
     r({
-      tochki: poStoronam(9, 4, 11),
+      /* Схема: стороны 9, 4 и c в масштабе дают плоский треугольник. */
+      tochki: poStoronam(8, 5.5, 10),
       elementy: [tri('A', 'B', 'C'), bk('B', 'C', '9'), bk('A', 'C', '4'), bk('A', 'B', 'c', ISK)],
       podpisi: false,
     }),
@@ -1570,7 +1578,8 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
     }),
   'teorema-kosinusov:1': () =>
     r({
-      tochki: poStoronam(7, 5, 3),
+      /* Схема: в масштабе (угол α = 120°) угол C острее 22°. */
+      tochki: poStoronam(7, 5, 4.2),
       elementy: [
         tri('A', 'B', 'C'),
         bk('A', 'B', '3'),

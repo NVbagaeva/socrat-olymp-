@@ -325,6 +325,59 @@ const SODERZHANIE = {
  * образец уже содержит эту версию.
  */
 const ODOBRENO = {
+  /* №1, одобрено владельцем 19.11.2026: подсказки (PR #451 — чертёж в
+     шаге, буквы, реестр фактов «Показать свойство», тексты вопросов и
+     решений) и «чертёж — схема, а не масштабный рисунок» (PR #452 —
+     подбор формы skhema.ts, правила разметки, подписи величин). Условия,
+     числа и ответы задач те же. */
+  'app/src/content/spravochnik1/fakty.ts':
+    '056b31f1e57a3474831492a29b9c0ef0b34b21d1b7099c3e1b9feeb036f358f5',
+  'app/src/lib/planimetriya/bank/analogi.ts':
+    '2116265a8aec03ecc7e25a8be8827e3061927e4f350ce1b16772ea2e43ff35b7',
+  'app/src/lib/planimetriya/figury.ts':
+    '4e79a42395825e6e0c68d758100b59940ee15c05d2f47dc2fc625208acde200e',
+  'app/src/lib/planimetriya/prep/bloki.ts':
+    '51b75886407f1a7e211e8d8aaa69668ff6faa513e59a57d1204b6b33d2b8c2e8',
+  'app/src/lib/planimetriya/prep/fakty.ts':
+    'a85ca2cbffe9ca0a00b46099aa6c3deb2bd6459cd23d01d4fbbb08631baa0af1',
+  'app/src/lib/planimetriya/prep/generate.ts':
+    '5bc7b49d7b659bacdca9767cc7d17480224b4732751ce885dfd811005a1c3c55',
+  'app/src/lib/planimetriya/prep/mikro.ts':
+    'bc833afd13237b751c91a372626ab32e259327d4d7abd2fe83f2642c462a1934',
+  'app/src/lib/planimetriya/prep/seal.ts':
+    'b91b7d13ad1ce34deac9c2ace94ee9790e5dd43bc390ff0dc6099a075daefa25',
+  'app/src/lib/planimetriya/prep/types.ts':
+    '08a3232ff1526209b6af4465de4175cb25fe075e690daee38d76cf38f5b47d14',
+  'app/src/lib/planimetriya/render.ts':
+    'e2bfa436e8e47b47f85af27c26c60a569b08b57f918b7e0491c89f34f756de3e',
+  'app/src/lib/planimetriya/reshenie/blok1.ts':
+    '3e93fd07833e8a6e8ad2656dabab1aca6b6c6033279a16e93f91d1770acaec2a',
+  'app/src/lib/planimetriya/reshenie/blok2.ts':
+    '1a8c17c916cd010ce7282a663e88b4e6a37d5f7ca5074183f3c789f039029d4d',
+  'app/src/lib/planimetriya/reshenie/blok3.ts':
+    'f2e4297e9a748410543fc617fbe543fddfdf2c37ce05f563709c5c51583ca655',
+  'app/src/lib/planimetriya/reshenie/obshchee.ts':
+    'ae0d693c12e8cd9a6dd273b99a8ba2ebad8a70525b65de10aa76f0d2f334ad52',
+  'app/src/lib/planimetriya/reshenie/types.ts':
+    'd03986cf914b8412b40b8f3b55d28c8d3dee0d885191fe6c31db6b2bba1796f4',
+  'app/src/lib/planimetriya/spravochnik-chertezhi.ts':
+    '5c1e72d6ef51276b7311c9fc17acf07ff639a72c15d85af9d930333c99b75cb3',
+  'app/src/lib/planimetriya/stil.ts':
+    'dd23a094251f9d004571671b192f1b7b9ba3a4b39d0bb0a221526dba1efc0903',
+  'app/src/lib/planimetriya/stseny/blok1.ts':
+    '60a4e9dab3e72454d00c4b1f93ed082d370fd309647920a0598431e12da31421',
+  'app/src/lib/planimetriya/stseny/blok10.ts':
+    '13b2b8022b5fa56175ee36d4d97c7fd0554dcb25a285ff73037b2785064f900d',
+  'app/src/lib/planimetriya/stseny/blok2.ts':
+    '143929d19b58d47ecd50e223fb98d673f8df7fec1a2c06c637d243b416868f66',
+  'app/src/lib/planimetriya/stseny/blok3.ts':
+    'b59a3c6d4a63f06ffce75ec0ee9656226d9be1dac12033d75c3806d849a7de37',
+  'app/src/lib/planimetriya/stseny/dsl.ts':
+    '6100716a6d6b41b5a27ba61fa0fb64e203eb8b9ccd2102ce23f79f6110cbfae7',
+  'app/src/lib/planimetriya/teoriya.ts':
+    '8f050ec8d238907581aca75f6ae788025ef625fdf1477badceb7800e148991cc',
+  'app/src/lib/planimetriya/trenazher/zadacha.ts':
+    '65fe73bd5f064e8d146297f08849692a6ef4c1c4f4b338a971b3e54ff4e4263a',
   /* №16 (экономика) во второй части, одобрено владельцем 15.11.2026: часть,
      вид ответа и баллы из структуры, оптимизация — второй вид задания,
      ответ не в тех единицах — «уже не 2 балла». Банк задач не менялся. */
@@ -337,8 +390,7 @@ const ODOBRENO = {
      №13»), и место экономической задачи (часть, вид ответа, балл) теперь
      берутся из структуры — в ЕГЭ-2027 на экране те же числа. Файлы раздела
      №13 (teoriya13, zadanie13) с тех пор одобрены заново — выше, №16. */
-  'app/src/content/teoriya1.ts':
-    '553044aeca37afc3ee0531e4e1a4eccef3219f50e269da256a8246524858636c',
+  'app/src/content/teoriya1.ts': '553044aeca37afc3ee0531e4e1a4eccef3219f50e269da256a8246524858636c',
   'app/src/content/teoriya7-irr.ts':
     '454b16a168891b91460da08fd106a5a6e152950f404a873d5ab309e6bd743cc8',
   /* Общий генератор (№12 — один из разделов): у раздела может быть

@@ -19,10 +19,10 @@ import {
   ravnobedrennyy,
   romb,
   trapeciya,
-  uglyTreugolnika,
   vpisannyyPoDugam,
 } from '../figury';
 import { polar } from '../geom';
+import { podobrat } from '../skhema';
 import {
   chislo,
   clamp,
@@ -61,14 +61,27 @@ const UGOL: Record<'A' | 'B' | 'C', [string, string, string]> = {
   C: ['A', 'C', 'B'],
 };
 
+/**
+ * Чертёж — схема, а не масштабный рисунок (skhema.ts): форма рисунка
+ * подбирается по одному отображаемому параметру. Числа на чертеже
+ * настоящие. Жёсткая конфигурация — угол не меньше 20°.
+ */
+const ZHESTKO = { minUgol: 20 } as const;
+const forma = (x: number, lo: number, hi: number, postroit: (v: number) => Scena): Scena =>
+  podobrat(null, { v: x }, { v: [lo, hi] }, ({ v }) => postroit(v), ZHESTKO);
+/** Настоящая величина угла без подписи — для подбора формы и автотеста. */
+const ist = (a: string, v: string, b: string, gradusy: number) =>
+  ({ ugol: [a, v, b], gradusy }) as const;
+
 /** Треугольник по углам A и B (основание AB) с отметками углов. */
 function treugolnik(
   ugly: [number, number, number],
   metki: Partial<Record<'A' | 'B' | 'C', Metka>>,
   extra: Element[] = [],
   tochki: Scena['tochki'] = {},
+  /* false — углы треугольника условны (в задаче их нет): порядок не важен. */
+  nastoyashchie = true,
 ): Scena {
-  const v = uglyTreugolnika(ugly, POROG);
   const el: Element[] = [tri('A', 'B', 'C')];
   for (const [k, m] of Object.entries(metki) as ['A' | 'B' | 'C', Metka][]) {
     const [a, b, c] = UGOL[k];
@@ -83,7 +96,29 @@ function treugolnik(
       }),
     );
   }
-  return { tochki: { ...poUglam(v[0], v[1]), ...tochki }, elementy: [...el, ...extra] };
+  const [a0, b0, c0] = ugly;
+  const stsena = (a: number, b: number): Scena => ({
+    tochki: { ...poUglam(a, b), ...tochki },
+    elementy: [...el, ...extra],
+    ...(nastoyashchie
+      ? { proverki: (['A', 'B', 'C'] as const).map((k, i) => ist(...UGOL[k], ugly[i]!)) }
+      : {}),
+  });
+  /* Прямой угол остаётся ровно прямым, равные углы — равными: тогда
+     у формы один параметр, иначе два. */
+  if (c0 === 90) return forma(a0, 15, 75, (a) => stsena(a, 90 - a));
+  if (a0 === 90) return forma(b0, 15, 75, (b) => stsena(90, b));
+  if (b0 === 90) return forma(a0, 15, 75, (a) => stsena(a, 90));
+  if (a0 === b0) return forma(a0, 22, 80, (a) => stsena(a, a));
+  if (a0 === c0) return forma(a0, 22, 80, (a) => stsena(a, 180 - 2 * a));
+  if (b0 === c0) return forma(b0, 22, 80, (b) => stsena(180 - 2 * b, b));
+  return podobrat(
+    null,
+    { a: a0, b: b0 },
+    { a: [22, 125], b: [22, 125] },
+    ({ a, b }) => stsena(a, b),
+    ZHESTKO,
+  );
 }
 
 /** Окружность радиуса 5 с центром O. */
@@ -144,8 +179,8 @@ export const BLOK_SUMMA: Mikro[] = [
       const c = 180 - 2 * a;
       return {
         uslovie: `В треугольнике $ABC$ $AC = BC$, $\\angle A = ${g(a)}$. Найдите угол $C$.`,
-        risunok: {
-          tochki: ravnobedrennyy(clamp(c, POROG, 180 - 2 * POROG)),
+        risunok: forma(c, 22, 150, (v) => ({
+          tochki: ravnobedrennyy(v),
           elementy: [
             tri('A', 'B', 'C'),
             shtrih('A', 'C', 1),
@@ -153,7 +188,8 @@ export const BLOK_SUMMA: Mikro[] = [
             ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
             ug('A', 'C', 'B', { vydelit: 'iskomoe' }),
           ],
-        },
+          proverki: [ist('A', 'C', 'B', c)],
+        })),
         otvet: c,
         razbor: [
           'Углы при основании $AB$ равны: $\\angle B = \\angle A$.',
@@ -171,8 +207,8 @@ export const BLOK_SUMMA: Mikro[] = [
       const a = (180 - c) / 2;
       return {
         uslovie: `В треугольнике $ABC$ $AC = BC$, $\\angle C = ${g(c)}$. Найдите угол $A$.`,
-        risunok: {
-          tochki: ravnobedrennyy(clamp(c, POROG, 180 - 2 * POROG)),
+        risunok: forma(c, 22, 150, (v) => ({
+          tochki: ravnobedrennyy(v),
           elementy: [
             tri('A', 'B', 'C'),
             shtrih('A', 'C', 1),
@@ -180,7 +216,8 @@ export const BLOK_SUMMA: Mikro[] = [
             ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(c) }),
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
           ],
-        },
+          proverki: [ist('C', 'A', 'B', a)],
+        })),
         otvet: a,
         razbor: [
           'Углы при основании равны и вместе дают $180^\\circ - \\angle C$.',
@@ -231,7 +268,8 @@ export const BLOK_SUMMA: Mikro[] = [
             prod('A', 'B', { doTochki: 'D', sploshnoe: true }),
             ug('C', 'B', 'D', { vydelit: 'dano', znachenie: gr(e) }),
           ],
-          { D: { naPryamoy: ['A', 'B', 1.35] } },
+          { D: { naPryamoy: ['A', 'B', 1.3] } },
+          false,
         ),
         otvet: 180 - e,
         razbor: [
@@ -290,8 +328,8 @@ export const BLOK_SUMMA: Mikro[] = [
     const a = (180 - c) / 2;
     return {
       uslovie: `Один из углов равнобедренного треугольника равен $${g(c)}$. Найдите один из других его углов.`,
-      risunok: {
-        tochki: ravnobedrennyy(clamp(c, POROG, 180 - 2 * POROG)),
+      risunok: forma(c, 22, 150, (v) => ({
+        tochki: ravnobedrennyy(v),
         elementy: [
           tri('A', 'B', 'C'),
           shtrih('A', 'C', 1),
@@ -300,7 +338,8 @@ export const BLOK_SUMMA: Mikro[] = [
           ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
         ],
         podpisi: false,
-      },
+        proverki: [ist('C', 'A', 'B', a)],
+      })),
       otvet: a,
       razbor: [
         'Тупой угол не может быть при основании — два тупых угла дали бы больше $180^\\circ$. Значит, он при вершине.',
@@ -317,8 +356,8 @@ export const BLOK_SUMMA: Mikro[] = [
       const e = 2 * a;
       return {
         uslovie: `В треугольнике $ABC$ $AC = BC$, внешний угол при вершине $C$ равен $${g(e)}$. Найдите угол $A$.`,
-        risunok: {
-          tochki: { ...ravnobedrennyy(180 - e), D: { naPryamoy: ['A', 'C', 1.4] } },
+        risunok: forma(180 - e, 22, 150, (v) => ({
+          tochki: { ...ravnobedrennyy(v), D: { naPryamoy: ['A', 'C', 1.4] } },
           elementy: [
             tri('A', 'B', 'C'),
             shtrih('A', 'C', 1),
@@ -327,7 +366,8 @@ export const BLOK_SUMMA: Mikro[] = [
             ug('B', 'C', 'D', { vydelit: 'dano', znachenie: gr(e) }),
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
           ],
-        },
+          proverki: [ist('C', 'A', 'B', a)],
+        })),
         otvet: a,
         razbor: [
           'Внешний угол при $C$ равен $\\angle A + \\angle B = 2\\angle A$.',
@@ -341,9 +381,9 @@ export const BLOK_SUMMA: Mikro[] = [
 /* ── 2. Смежные, вертикальные углы, параллельные прямые ──────────── */
 
 function smezhnye(u: number, metkaCOB: Metka, metkaAOC: Metka): Scena {
-  const v = clamp(u, POROG + 3, 180 - POROG - 3);
-  return {
+  return forma(u, 28, 152, (v) => ({
     tochki: { A: [-5, 0], O: [0, 0], B: [5, 0], C: polar(v, 5) },
+    proverki: [ist('C', 'O', 'B', u), ist('A', 'O', 'C', 180 - u)],
     elementy: [
       otr('A', 'B'),
       otr('O', 'C'),
@@ -366,7 +406,7 @@ function smezhnye(u: number, metkaCOB: Metka, metkaAOC: Metka): Scena {
             : {}),
       }),
     ],
-  };
+  }));
 }
 
 function parallel(u: number, el: (m: string, n: string) => Element[]): Scena {
@@ -434,14 +474,15 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     const s = 2 * r.int(20, 80);
     return {
       uslovie: `Сумма двух вертикальных углов равна $${g(s)}$. Найдите каждый из них.`,
-      risunok: {
+      risunok: forma(s / 2, 14, 76, (h) => ({
         tochki: {
-          A: polar(180 + s / 2, 5),
-          B: polar(s / 2, 5),
-          C: polar(180 - s / 2, 5),
-          D: polar(-s / 2, 5),
+          A: polar(180 + h, 5),
+          B: polar(h, 5),
+          C: polar(180 - h, 5),
+          D: polar(-h, 5),
           O: [0, 0],
         },
+        proverki: [ist('D', 'O', 'B', s), ist('C', 'O', 'A', s)],
         elementy: [
           otr('A', 'B'),
           otr('C', 'D'),
@@ -449,7 +490,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
           ug('C', 'O', 'A', { vydelit: 'iskomoe' }),
         ],
         podpisi: false,
-      },
+      })),
       otvet: s / 2,
       razbor: ['Вертикальные углы равны — делим сумму пополам.', `$${g(s)} : 2 = ${g(s / 2)}$.`],
     };
@@ -458,14 +499,15 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     const u = r.int(25, 85);
     return {
       uslovie: `При пересечении двух прямых один из углов равен $${g(u)}$. Найдите больший из оставшихся углов.`,
-      risunok: {
+      risunok: forma(u, 28, 88, (v) => ({
         tochki: {
           A: polar(180, 5),
           B: polar(0, 5),
-          C: polar(u, 5),
-          D: polar(180 + u, 5),
+          C: polar(v, 5),
+          D: polar(180 + v, 5),
           O: [0, 0],
         },
+        proverki: [ist('C', 'O', 'A', 180 - u)],
         elementy: [
           otr('A', 'B'),
           otr('C', 'D'),
@@ -473,7 +515,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
           ug('C', 'O', 'A', { vydelit: 'iskomoe' }),
         ],
         podpisi: false,
-      },
+      })),
       otvet: 180 - u,
       razbor: [
         'Соседние углы при пересечении — смежные, противоположные — вертикальные.',
@@ -512,8 +554,8 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     const u = 2 * r.int(15, 75);
     return {
       uslovie: `Луч $OK$ — биссектриса угла $AOB$, равного $${g(u)}$. Найдите угол $AOK$.`,
-      risunok: {
-        tochki: { O: [0, 0], A: polar(0, 6), B: polar(u, 6), K: polar(u / 2, 6) },
+      risunok: forma(u / 2, 26, 75, (h) => ({
+        tochki: { O: [0, 0], A: polar(0, 6), B: polar(2 * h, 6), K: polar(h, 6) },
         elementy: [
           otr('O', 'A'),
           otr('O', 'B'),
@@ -521,7 +563,8 @@ export const BLOK_SMEZHNYE: Mikro[] = [
           ug('A', 'O', 'K', { vydelit: 'iskomoe' }),
           ug('K', 'O', 'B'),
         ],
-      },
+        proverki: [ist('A', 'O', 'K', u / 2)],
+      })),
       otvet: u / 2,
       razbor: ['Биссектриса делит угол на две равные части.', `$${g(u)} : 2 = ${g(u / 2)}$.`],
     };
@@ -743,8 +786,8 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
     const ans = 180 - 45 - a;
     return {
       uslovie: `В прямоугольном треугольнике $ABC$ $\\angle C = 90^\\circ$, $CL$ — биссектриса, $\\angle A = ${g(a)}$. Найдите угол $ALC$.`,
-      risunok: {
-        tochki: { ...pryamoyGip(90 - a), L: { bissektrisa: ['C', 'A', 'B'] } },
+      risunok: forma(a, 20, 70, (v) => ({
+        tochki: { ...poUglam(v, 90 - v), L: { bissektrisa: ['C', 'A', 'B'] } },
         elementy: [
           tri('A', 'B', 'C'),
           pryam('A', 'C', 'B'),
@@ -752,7 +795,8 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('A', 'L', 'C', { vydelit: 'iskomoe' }),
         ],
-      },
+        proverki: [ist('A', 'L', 'C', ans)],
+      })),
       otvet: ans,
       razbor: [
         'Биссектриса делит прямой угол: $\\angle ACL = 45^\\circ$.',
@@ -814,14 +858,15 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
     const a = r.int(30, 85);
     return {
       uslovie: `В параллелограмме $ABCD$ $\\angle A = ${g(a)}$. Найдите угол $B$.`,
-      risunok: {
-        tochki: parallelogramm(a),
+      risunok: forma(a, 30, 88, (v) => ({
+        tochki: parallelogramm(v),
         elementy: [
           mn(['A', 'B', 'C', 'D']),
           ug('D', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
         ],
-      },
+        proverki: [ist('A', 'B', 'C', 180 - a)],
+      })),
       otvet: 180 - a,
       razbor: [
         'Соседние углы параллелограмма дают $180^\\circ$.',
@@ -833,11 +878,12 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
     const a = r.int(30, 85);
     return {
       uslovie: `Сумма двух углов параллелограмма равна $${g(2 * a)}$. Найдите больший угол параллелограмма.`,
-      risunok: {
-        tochki: parallelogramm(a),
+      risunok: forma(a, 30, 88, (v) => ({
+        tochki: parallelogramm(v),
         elementy: [mn(['A', 'B', 'C', 'D']), ug('A', 'B', 'C', { vydelit: 'iskomoe' })],
         podpisi: false,
-      },
+        proverki: [ist('A', 'B', 'C', 180 - a)],
+      })),
       otvet: 180 - a,
       razbor: [
         `Сумма меньше $180^\\circ$ — это противолежащие углы, каждый $${g(a)}$.`,
@@ -849,8 +895,8 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
     const a = 2 * r.int(20, 70);
     return {
       uslovie: `В ромбе $ABCD$ $\\angle A = ${g(a)}$. Найдите угол $CAB$.`,
-      risunok: {
-        tochki: romb(a),
+      risunok: forma(a, 56, 124, (v) => ({
+        tochki: romb(v),
         elementy: [
           mn(['A', 'B', 'C', 'D']),
           otr('A', 'C'),
@@ -858,7 +904,7 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
           ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
           ug('D', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
         ],
-      },
+      })),
       otvet: a / 2,
       razbor: ['Диагональ ромба — биссектриса его угла.', `$${g(a)} : 2 = ${g(a / 2)}$.`],
     };
@@ -867,15 +913,16 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
     const x = r.int(15, 40);
     return {
       uslovie: `Диагональ $AC$ ромба $ABCD$ образует со стороной $AB$ угол $${g(x)}$. Найдите угол $B$.`,
-      risunok: {
-        tochki: romb(2 * x),
+      risunok: forma(2 * x, 30, 88, (v) => ({
+        tochki: romb(v),
         elementy: [
           mn(['A', 'B', 'C', 'D']),
           otr('A', 'C'),
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(x) }),
           ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
         ],
-      },
+        proverki: [ist('A', 'B', 'C', 180 - 2 * x)],
+      })),
       otvet: 180 - 2 * x,
       razbor: [
         `$\\angle A = 2\\cdot ${g(x)} = ${g(2 * x)}$.`,
@@ -890,14 +937,13 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
     (r) => {
       const x = r.int(20, 70);
       if (x === 45) return null;
-      const w = 1 / Math.tan((x * Math.PI) / 180);
       return {
         uslovie: `Диагональ $AC$ прямоугольника $ABCD$ образует со стороной $AD$ угол $${g(x)}$. Найдите угол $AOD$, где $O$ — точка пересечения диагоналей.`,
-        risunok: {
+        risunok: forma(x, 28, 62, (v) => ({
           tochki: {
             A: [0, 0],
-            D: [w * 4, 0],
-            C: [w * 4, 4],
+            D: [4 / Math.tan((v * Math.PI) / 180), 0],
+            C: [4 / Math.tan((v * Math.PI) / 180), 4],
             B: [0, 4],
             O: { seredina: ['A', 'C'] },
           },
@@ -908,7 +954,8 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
             ug('D', 'A', 'C', { vydelit: 'dano', znachenie: gr(x) }),
             ug('A', 'O', 'D', { vydelit: 'iskomoe' }),
           ],
-        },
+          proverki: [ist('A', 'O', 'D', 180 - 2 * x)],
+        })),
         otvet: 180 - 2 * x,
         razbor: [
           '$OA = OD$ — половины равных диагоналей, треугольник $AOD$ равнобедренный.',
@@ -919,21 +966,25 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
   ),
   mikro('P1-4-06', 'Равнобедренная трапеция', '\\angle A + \\angle B = 180^\\circ', (r) => {
     const a = r.int(40, 80);
-    const h = 3;
-    const dx = h / Math.tan((a * Math.PI) / 180);
+    const h = 4.4;
     return {
       uslovie: `Угол при большем основании равнобедренной трапеции равен $${g(a)}$. Найдите тупой угол трапеции.`,
-      risunok: {
-        tochki: trapeciya(10, 10 - 2 * dx, h, dx),
-        elementy: [
-          mn(['A', 'B', 'C', 'D']),
-          shtrih('A', 'B', 1),
-          shtrih('C', 'D', 1),
-          ug('D', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
-          ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
-        ],
-        podpisi: false,
-      },
+      risunok: forma(a, 40, 86, (v) => {
+        const dx = h / Math.tan((v * Math.PI) / 180);
+        if (10 - 2 * dx < 3) throw new Error('верхнее основание мало');
+        return {
+          tochki: trapeciya(10, 10 - 2 * dx, h, dx),
+          proverki: [ist('A', 'B', 'C', 180 - a)],
+          elementy: [
+            mn(['A', 'B', 'C', 'D']),
+            shtrih('A', 'B', 1),
+            shtrih('C', 'D', 1),
+            ug('D', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
+            ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
+          ],
+          podpisi: false,
+        };
+      }),
       otvet: 180 - a,
       razbor: [
         'Углы, прилежащие к боковой стороне, — односторонние при параллельных основаниях.',
@@ -967,34 +1018,40 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
     const b = r.int(Math.max(92 - a, 40), 80);
     return {
       uslovie: `В остроугольном треугольнике $ABC$ $\\angle A = ${g(a)}$, $BD$ и $CE$ — высоты, $O$ — их точка пересечения. Найдите угол $DOE$.`,
-      risunok: (() => {
-        const v = uglyTreugolnika([b, 180 - a - b, a], POROG, 78);
-        const tt = poUglam(v[0], v[1]);
-        return {
-          tochki: {
-            B: tt.A,
-            C: tt.B,
-            A: tt.C,
-            D: { osnovanie: ['B', 'A', 'C'] },
-            E: { osnovanie: ['C', 'A', 'B'] },
-            O: {
-              peresechenie: [
-                ['B', 'D'],
-                ['C', 'E'],
-              ],
+      risunok: podobrat(
+        null,
+        { b, c: 180 - a - b },
+        { b: [35, 82], c: [35, 82] },
+        ({ b: bV, c: cV }) => {
+          const tt = poUglam(bV, cV);
+          return {
+            tochki: {
+              B: tt.A,
+              C: tt.B,
+              A: tt.C,
+              D: { osnovanie: ['B', 'A', 'C'] },
+              E: { osnovanie: ['C', 'A', 'B'] },
+              O: {
+                peresechenie: [
+                  ['B', 'D'],
+                  ['C', 'E'],
+                ],
+              },
             },
-          },
-          elementy: [
-            tri('A', 'B', 'C'),
-            otr('B', 'D'),
-            otr('C', 'E'),
-            pryam('A', 'D', 'B'),
-            pryam('A', 'E', 'C'),
-            ug('B', 'A', 'C', { vydelit: 'dano', znachenie: gr(a) }),
-            ug('D', 'O', 'E', { vydelit: 'iskomoe' }),
-          ],
-        } as Scena;
-      })(),
+            elementy: [
+              tri('A', 'B', 'C'),
+              otr('B', 'D'),
+              otr('C', 'E'),
+              pryam('A', 'D', 'B'),
+              pryam('A', 'E', 'C'),
+              ug('B', 'A', 'C', { vydelit: 'dano', znachenie: gr(a) }),
+              ug('D', 'O', 'E', { vydelit: 'iskomoe' }),
+            ],
+            proverki: [ist('D', 'O', 'E', 180 - a)],
+          } as Scena;
+        },
+        ZHESTKO,
+      ),
       otvet: 180 - a,
       razbor: [
         'В четырёхугольнике $ADOE$ два прямых угла.',
@@ -1010,9 +1067,9 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
       const c = 2 * r.int(15, 60);
       return {
         uslovie: `В треугольнике $ABC$ $\\angle C = ${g(c)}$, $O$ — точка пересечения биссектрис углов $A$ и $B$. Найдите угол $AOB$.`,
-        risunok: {
+        risunok: forma(c, 40, 110, (v) => ({
           tochki: {
-            ...poUglam((180 - c) / 2 + 5, (180 - c) / 2 - 5),
+            ...poUglam((180 - v) / 2 + 5, (180 - v) / 2 - 5),
             D: { bissektrisa: ['A', 'B', 'C'] },
             E: { bissektrisa: ['B', 'A', 'C'] },
             O: {
@@ -1030,7 +1087,8 @@ export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
             ug('A', 'O', 'B', { vydelit: 'iskomoe' }),
           ],
           bezPodpisi: ['D', 'E'],
-        },
+          proverki: [ist('A', 'O', 'B', 90 + c / 2)],
+        })),
         otvet: 90 + c / 2,
         razbor: [
           `$\\angle OAB + \\angle OBA = \\dfrac{180^\\circ - ${g(c)}}{2} = ${g((180 - c) / 2)}$.`,
@@ -1072,8 +1130,8 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
     const b = r.int(3, 20);
     return {
       uslovie: `Катеты прямоугольного треугольника равны $${a}$ и $${b}$. Найдите его площадь.`,
-      risunok: {
-        tochki: pryamougolnyy((Math.atan(a / b) * 180) / Math.PI, 'katety'),
+      risunok: forma((Math.atan(a / b) * 180) / Math.PI, 30, 60, (v) => ({
+        tochki: pryamougolnyy(v, 'katety'),
         elementy: [
           tri('A', 'B', 'C'),
           pryam('A', 'C', 'B'),
@@ -1081,7 +1139,7 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
           zn('C', 'B', String(b)),
         ],
         podpisi: false,
-      },
+      })),
       otvet: (a * b) / 2,
       razbor: [
         'Площадь прямоугольного треугольника — половина произведения катетов.',
@@ -1133,9 +1191,9 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
     const h = r.int(2, 12);
     return {
       uslovie: `Основания трапеции равны $${a}$ и $${b}$, высота равна $${h}$. Найдите площадь трапеции.`,
-      risunok: {
+      risunok: forma(b / a, 0.4, 0.75, (k) => ({
         tochki: {
-          ...trapeciya(10, (10 * b) / a, 4, (10 - (10 * b) / a) * 0.4),
+          ...trapeciya(10, 10 * k, 4.4, (10 - 10 * k) * 0.4),
           H: { osnovanie: ['B', 'A', 'D'] },
         },
         elementy: [
@@ -1146,7 +1204,7 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
           zn('B', 'C', String(b)),
         ],
         podpisi: false,
-      },
+      })),
       otvet: ((a + b) * h) / 2,
       razbor: [`$S = \\dfrac{${a} + ${b}}{2}\\cdot ${h} = ${t(((a + b) * h) / 2)}$.`],
     };
@@ -1156,15 +1214,15 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
     const d2 = r.int(4, 20);
     return {
       uslovie: `Диагонали ромба равны $${d1}$ и $${d2}$. Найдите его площадь.`,
-      risunok: {
-        tochki: { A: [-d1 / 2, 0], C: [d1 / 2, 0], B: [0, d2 / 2], D: [0, -d2 / 2] },
+      risunok: forma(d1 / d2, 0.45, 2.2, (k) => ({
+        tochki: { A: [-k, 0], C: [k, 0], B: [0, 1], D: [0, -1] },
         elementy: [
           mn(['A', 'B', 'C', 'D']),
           otr('A', 'C', { vydelit: 'dano', znachenie: String(d1) }),
           otr('B', 'D', { vydelit: 'dano', znachenie: String(d2) }),
         ],
         podpisi: false,
-      },
+      })),
       otvet: (d1 * d2) / 2,
       razbor: [
         'Площадь ромба — половина произведения диагоналей.',
@@ -1177,16 +1235,22 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
     const b = r.int(2, 20);
     return {
       uslovie: `Две стороны треугольника равны $${a}$ и $${b}$, угол между ними $30^\\circ$. Найдите площадь.`,
-      risunok: {
-        tochki: { C: [0, 0], A: polar(0, 10), B: polar(30, 10 * clamp(b / a, 0.5, 2)) },
-        elementy: [
-          tri('A', 'B', 'C'),
-          ug('A', 'C', 'B', { vydelit: 'dano', znachenie: '30°' }),
-          zn('C', 'A', String(a)),
-          zn('C', 'B', String(b)),
-        ],
-        podpisi: false,
-      },
+      risunok: podobrat(
+        null,
+        { u: 30, k: b / a },
+        { u: [28, 60], k: [0.6, 1.7] },
+        ({ u, k }) => ({
+          tochki: { C: [0, 0], A: polar(0, 10), B: polar(u, 10 * k) },
+          elementy: [
+            tri('A', 'B', 'C'),
+            ug('A', 'C', 'B', { vydelit: 'dano', znachenie: '30°' }),
+            zn('C', 'A', String(a)),
+            zn('C', 'B', String(b)),
+          ],
+          podpisi: false,
+        }),
+        ZHESTKO,
+      ),
       otvet: (a * b) / 4,
       razbor: [
         '$\\sin 30^\\circ = \\dfrac12$.',
@@ -1199,16 +1263,22 @@ export const BLOK_PLOSHCHADI: Mikro[] = [
     const b = r.int(2, 12);
     return {
       uslovie: `Стороны параллелограмма равны $${a}$ и $${b}$, острый угол $30^\\circ$. Найдите площадь.`,
-      risunok: {
-        tochki: parallelogramm(30, 10, 10 * clamp(b / a, 0.35, 1)),
-        elementy: [
-          mn(['A', 'B', 'C', 'D']),
-          ug('D', 'A', 'B', { vydelit: 'dano', znachenie: '30°' }),
-          zn('A', 'D', String(a)),
-          zn('A', 'B', String(b)),
-        ],
-        podpisi: false,
-      },
+      risunok: podobrat(
+        null,
+        { u: 30, k: b / a },
+        { u: [28, 65], k: [0.5, 1] },
+        ({ u, k }) => ({
+          tochki: parallelogramm(u, 10, 10 * k),
+          elementy: [
+            mn(['A', 'B', 'C', 'D']),
+            ug('D', 'A', 'B', { vydelit: 'dano', znachenie: '30°' }),
+            zn('A', 'D', String(a)),
+            zn('A', 'B', String(b)),
+          ],
+          podpisi: false,
+        }),
+        ZHESTKO,
+      ),
       otvet: (a * b) / 2,
       razbor: [
         `Высота, проведённая к стороне $${a}$, — катет против угла $30^\\circ$: она равна половине другой стороны, $\\dfrac{${b}}{2}$.`,
@@ -1341,8 +1411,8 @@ export const BLOK_PIFAGOR: Mikro[] = [
     const [a, b, c] = r.pick(TROYKI);
     return {
       uslovie: `Стороны прямоугольника равны $${a}$ и $${b}$. Найдите его диагональ.`,
-      risunok: {
-        tochki: { A: [0, 0], B: [0, a], C: [b, a], D: [b, 0] },
+      risunok: forma(a / b, 0.45, 2.2, (k) => ({
+        tochki: { A: [0, 0], B: [0, k], C: [1, k], D: [1, 0] },
         elementy: [
           mn(['A', 'B', 'C', 'D']),
           otr('A', 'C', { vydelit: 'iskomoe' }),
@@ -1350,7 +1420,7 @@ export const BLOK_PIFAGOR: Mikro[] = [
           zn('A', 'D', String(b)),
         ],
         podpisi: false,
-      },
+      })),
       otvet: c,
       razbor: [
         'Диагональ — гипотенуза прямоугольного треугольника со сторонами-катетами.',
@@ -1366,15 +1436,15 @@ export const BLOK_PIFAGOR: Mikro[] = [
       const [a, b, c] = r.pick(TROYKI);
       return {
         uslovie: `Диагонали ромба равны $${2 * a}$ и $${2 * b}$. Найдите сторону ромба.`,
-        risunok: {
-          tochki: { A: [-a, 0], C: [a, 0], B: [0, b], D: [0, -b] },
+        risunok: forma(a / b, 0.45, 2.2, (k) => ({
+          tochki: { A: [-k, 0], C: [k, 0], B: [0, 1], D: [0, -1] },
           elementy: [
             mn(['A', 'B', 'C', 'D']),
             otr('A', 'C', { vydelit: 'dano', znachenie: String(2 * a) }),
             otr('B', 'D', { vydelit: 'dano', znachenie: String(2 * b) }),
           ],
           podpisi: false,
-        },
+        })),
         otvet: c,
         razbor: [
           'Диагонали ромба перпендикулярны и делятся пополам: катеты $' + a + '$ и $' + b + '$.',
@@ -1685,9 +1755,9 @@ export const BLOK_TRIG: Mikro[] = (() => {
       if (!Number.isInteger(c)) return null;
       return {
         uslovie: `В треугольнике $ABC$ $AC = BC = ${l}$, $AB = ${c}$. Найдите $\\cos A$.`,
-        risunok: {
+        risunok: forma((Math.acos(c / (2 * l)) * 180) / Math.PI, 30, 76, (v) => ({
           tochki: {
-            ...ravnobedrennyy(180 - (2 * Math.acos(c / (2 * l)) * 180) / Math.PI),
+            ...ravnobedrennyy(180 - 2 * v),
             H: { seredina: ['A', 'B'] },
           },
           elementy: [
@@ -1698,7 +1768,7 @@ export const BLOK_TRIG: Mikro[] = (() => {
             zn('A', 'B', String(c)),
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
           ],
-        },
+        })),
         otvet: c / (2 * l),
         razbor: [
           'Высота к основанию делит его пополам.',
@@ -1712,13 +1782,12 @@ export const BLOK_TRIG: Mikro[] = (() => {
 /* ── 8. Центральные и вписанные углы ─────────────────────────────── */
 
 function vpisannyy(dugaAB: number, el: Element[], extra: Scena['tochki'] = {}): Scena {
-  const d = clamp(dugaAB, 2 * POROG + 6, 300);
-  return {
+  return forma(dugaAB, 56, 300, (d) => ({
     tochki: { O: [0, 0], A: naDuge(270 - d / 2), B: naDuge(270 + d / 2), C: naDuge(100), ...extra },
     okruzhnosti: OKR,
     elementy: [okr('w'), ...el],
     bezPodpisi: [],
-  };
+  }));
 }
 
 export const BLOK_OKRUZHNOST: Mikro[] = [
@@ -1793,8 +1862,9 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
     const a = r.int(15, 75);
     return {
       uslovie: `$AB$ — диаметр окружности, $C$ — точка на окружности, $\\angle CAB = ${g(a)}$. Найдите угол $CBA$.`,
-      risunok: {
-        tochki: { O: [0, 0], A: naDuge(180), B: naDuge(0), C: naDuge(180 - 2 * a) },
+      /* ∠CAB опирается на дугу CB: она равна 2·∠CAB. */
+      risunok: forma(a, 20, 70, (v) => ({
+        tochki: { O: [0, 0], A: naDuge(180), B: naDuge(0), C: naDuge(2 * v) },
         okruzhnosti: OKR,
         elementy: [
           okr('w'),
@@ -1803,7 +1873,8 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
           ug('C', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
           ug('C', 'B', 'A', { vydelit: 'iskomoe' }),
         ],
-      },
+        proverki: [ist('C', 'B', 'A', 90 - a)],
+      })),
       otvet: 90 - a,
       razbor: [
         'Угол $ACB$ опирается на диаметр — он прямой.',
@@ -1893,8 +1964,8 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
     const x = r.int(20, 70);
     return {
       uslovie: `$O$ — центр окружности, $A$ и $B$ — точки на ней, $\\angle OAB = ${g(x)}$. Найдите угол $AOB$.`,
-      risunok: {
-        tochki: { O: [0, 0], A: naDuge(270 - (90 - x)), B: naDuge(270 + (90 - x)) },
+      risunok: forma(x, 28, 76, (v) => ({
+        tochki: { O: [0, 0], A: naDuge(270 - (90 - v)), B: naDuge(270 + (90 - v)) },
         okruzhnosti: OKR,
         elementy: [
           okr('w'),
@@ -1902,7 +1973,8 @@ export const BLOK_OKRUZHNOST: Mikro[] = [
           ug('O', 'A', 'B', { vydelit: 'dano', znachenie: gr(x) }),
           ug('A', 'O', 'B', { vydelit: 'iskomoe' }),
         ],
-      },
+        proverki: [ist('A', 'O', 'B', 180 - 2 * x)],
+      })),
       otvet: 180 - 2 * x,
       razbor: [
         '$OA = OB$ — радиусы, углы при $AB$ равны.',
@@ -1919,10 +1991,10 @@ export const BLOK_KASATELNYE: Mikro[] = [
     const u = r.int(20, 58);
     return {
       uslovie: `$CA$ — касательная к окружности с центром $O$ ($A$ — точка касания), $\\angle ACO = ${g(u)}$. Найдите угол $AOC$.`,
-      risunok: {
+      risunok: forma(u, 20, 62, (v) => ({
         tochki: {
           O: [0, 0],
-          C: [5 / Math.sin((u * Math.PI) / 180), 0],
+          C: [5 / Math.sin((v * Math.PI) / 180), 0],
           A: { kasanie: { iz: 'C', okr: 'w', storona: 1 } },
         },
         okruzhnosti: OKR,
@@ -1934,7 +2006,8 @@ export const BLOK_KASATELNYE: Mikro[] = [
           ug('A', 'C', 'O', { vydelit: 'dano', znachenie: gr(u) }),
           ug('A', 'O', 'C', { vydelit: 'iskomoe' }),
         ],
-      },
+        proverki: [ist('A', 'O', 'C', 90 - u)],
+      })),
       otvet: 90 - u,
       razbor: [
         'Радиус в точку касания перпендикулярен касательной: $\\angle OAC = 90^\\circ$.',
@@ -1998,8 +2071,8 @@ export const BLOK_KASATELNYE: Mikro[] = [
     const f = r.int(15, 80);
     return {
       uslovie: `Угол между хордой $AB$ и касательной $BC$ равен $${g(f)}$. Найдите меньшую дугу $AB$.`,
-      risunok: {
-        tochki: { O: [0, 0], B: naDuge(270), A: naDuge(270 + 2 * f), C: [7, -5] },
+      risunok: forma(f, 28, 75, (v) => ({
+        tochki: { O: [0, 0], B: naDuge(270), A: naDuge(270 + 2 * v), C: [7, -5] },
         okruzhnosti: OKR,
         elementy: [
           okr('w'),
@@ -2009,7 +2082,7 @@ export const BLOK_KASATELNYE: Mikro[] = [
           duga('w', 'B', 'A', { vydelit: 'iskomoe' }),
         ],
         bezPodpisi: ['O'],
-      },
+      })),
       otvet: 2 * f,
       razbor: [
         'Угол между касательной и хордой равен половине дуги между ними.',
@@ -2126,14 +2199,18 @@ export const BLOK_KASATELNYE: Mikro[] = [
     '\\alpha = 180^\\circ - \\dfrac{360^\\circ}{n}',
     (r) => {
       const n = r.pick([5, 6, 8, 9, 10, 12, 15, 18, 20, 24, 30, 36]);
-      const v = pravilnyy(n);
+      /* Сторон на рисунке не больше двенадцати: дальше угол тупее 150°
+         и многоугольник не отличить от окружности. */
+      const nV = Math.min(n, 12);
+      const v = pravilnyy(nV);
       const im = v.map((_, i) => `P${i + 1}`);
       return {
         uslovie: `Найдите угол правильного $${n}$-угольника.`,
         risunok: {
           tochki: Object.fromEntries(im.map((x, i) => [x, v[i]!])) as Record<string, T2>,
-          elementy: [mn(im), ug(im[n - 1]!, im[0]!, im[1]!, { vydelit: 'iskomoe' })],
+          elementy: [mn(im), ug(im[nV - 1]!, im[0]!, im[1]!, { vydelit: 'iskomoe' })],
           podpisi: false,
+          ...(nV === n ? {} : { skhematichno: true }),
         },
         otvet: 180 - 360 / n,
         razbor: [

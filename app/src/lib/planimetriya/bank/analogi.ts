@@ -17,7 +17,7 @@
 import { rngOf } from '../../vychisleniya/rng';
 import type { Rng } from '../../veroyatnost/generator';
 import { POROG } from '../figury';
-import { pustoyOtchet, renderPlan, shagovPodskazki } from '../render';
+import { bezNablyudeniya, pustoyOtchet, renderPlan, shagovPodskazki } from '../render';
 import { PROTOTIPY, prototip } from '../stseny';
 import type { Nabor, Params } from '../stseny/dsl';
 import type { Rezhim } from '../types';
@@ -393,11 +393,13 @@ export function chertezhChist(id: number, p: Params): boolean {
     ...Array.from({ length: n }, (_, i) => ({ rezhim: 'podskazka' as const, shag: i + 1 })),
     { rezhim: 'uchitel' },
   ];
-  return rezhimy.every((rezhim) => {
-    const o = pustoyOtchet();
-    renderPlan(scena, { rezhim }, o);
-    return o.problems.length === 0;
-  });
+  return bezNablyudeniya(() =>
+    rezhimy.every((rezhim) => {
+      const o = pustoyOtchet();
+      renderPlan(scena, { rezhim }, o);
+      return o.problems.length === 0;
+    }),
+  );
 }
 
 export interface Analog {
