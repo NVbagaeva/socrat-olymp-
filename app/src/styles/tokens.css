@@ -243,6 +243,9 @@
      (y, b) — янтарь из палитры (4,9 : 1 на белом). */
   --chertezh-vershina: var(--blue-600);
   --chertezh-velichina: var(--terracotta);
+  /* Подписи величин на чертежах планиметрии: тот же тёплый тон, но
+     темнее (5,6 : 1 на белом) — числа читаются на телефоне. */
+  --chertezh-velichina-tekst: var(--terracotta-700);
   --chertezh-velichina-2: var(--amber-700);
   --graph-aux-axis: var(--graph-accent);
   /* Асимптота: значимая линия чертежа, а не фон. Цвет оси с
