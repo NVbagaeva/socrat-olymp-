@@ -329,29 +329,32 @@ const ODOBRENO = {
      шаге, буквы, реестр фактов «Показать свойство», тексты вопросов и
      решений) и «чертёж — схема, а не масштабный рисунок» (PR #452 —
      подбор формы skhema.ts, правила разметки, подписи величин). Условия,
-     числа и ответы задач те же. */
+     числа и ответы задач те же. Второе одобрение того же дня: подсказки-
+     сценарии вопросами, новые карточки справочника и приёмы, новый тип 76
+     «три части стороны» с аналогами, опорные P1-2-03/09/10 и P1-4-01,
+     генераторы углов без 80°–100°, прототип 68 (A и D не слипаются). */
   'app/src/content/spravochnik1/fakty.ts':
-    '056b31f1e57a3474831492a29b9c0ef0b34b21d1b7099c3e1b9feeb036f358f5',
+    'b9feb54143b5c7ccb56f2ca8ecdef625bbfb86ad35e6322de4a623ff0ade0adc',
   'app/src/lib/planimetriya/bank/analogi.ts':
-    '2116265a8aec03ecc7e25a8be8827e3061927e4f350ce1b16772ea2e43ff35b7',
+    '4e431aaffc657de2d6bfc04ebd0bed45f9433f072b2e4bbedcabe74fa6e45579',
   'app/src/lib/planimetriya/figury.ts':
     '4e79a42395825e6e0c68d758100b59940ee15c05d2f47dc2fc625208acde200e',
   'app/src/lib/planimetriya/prep/bloki.ts':
-    '51b75886407f1a7e211e8d8aaa69668ff6faa513e59a57d1204b6b33d2b8c2e8',
+    'f24d545595075d5f6a0dcd96bdee501f07a15871c91c2c28dad0941fdba6c30a',
   'app/src/lib/planimetriya/prep/fakty.ts':
     'a85ca2cbffe9ca0a00b46099aa6c3deb2bd6459cd23d01d4fbbb08631baa0af1',
   'app/src/lib/planimetriya/prep/generate.ts':
     '5bc7b49d7b659bacdca9767cc7d17480224b4732751ce885dfd811005a1c3c55',
   'app/src/lib/planimetriya/prep/mikro.ts':
-    'bc833afd13237b751c91a372626ab32e259327d4d7abd2fe83f2642c462a1934',
+    'e67defa6fcc3f6306dadf43f2c95db3a71d5e86afd2cc9bf7607f1e864ff5942',
   'app/src/lib/planimetriya/prep/seal.ts':
-    'b91b7d13ad1ce34deac9c2ace94ee9790e5dd43bc390ff0dc6099a075daefa25',
+    'cea9bd3de6ae3de1be3bbf627686b4cd55146b1c5fe3b81583bed76011569d2a',
   'app/src/lib/planimetriya/prep/types.ts':
-    '08a3232ff1526209b6af4465de4175cb25fe075e690daee38d76cf38f5b47d14',
+    '840fb0160c88ec517f776ce2d0c405264fd9d76b73d5a26c8c1a626ffdcfd823',
   'app/src/lib/planimetriya/render.ts':
-    'e2bfa436e8e47b47f85af27c26c60a569b08b57f918b7e0491c89f34f756de3e',
+    'd97366863836bc13c390aa41fe010d89a70ce81ac05a832a941073c3106f0d9e',
   'app/src/lib/planimetriya/reshenie/blok1.ts':
-    '3e93fd07833e8a6e8ad2656dabab1aca6b6c6033279a16e93f91d1770acaec2a',
+    '1cd8425e4d74066d978bae78458c8fc968cdf5718fa8a9b67a329984f6644e5b',
   'app/src/lib/planimetriya/reshenie/blok2.ts':
     '1a8c17c916cd010ce7282a663e88b4e6a37d5f7ca5074183f3c789f039029d4d',
   'app/src/lib/planimetriya/reshenie/blok3.ts':
@@ -359,17 +362,17 @@ const ODOBRENO = {
   'app/src/lib/planimetriya/reshenie/obshchee.ts':
     'ae0d693c12e8cd9a6dd273b99a8ba2ebad8a70525b65de10aa76f0d2f334ad52',
   'app/src/lib/planimetriya/reshenie/types.ts':
-    'd03986cf914b8412b40b8f3b55d28c8d3dee0d885191fe6c31db6b2bba1796f4',
+    '9be10a150f35ba938859f15ebe112e022790f535e5dd4764763e11d9f66e084f',
   'app/src/lib/planimetriya/spravochnik-chertezhi.ts':
-    '5c1e72d6ef51276b7311c9fc17acf07ff639a72c15d85af9d930333c99b75cb3',
+    '3a5cb147888ceb2f835466e9d41ae07c7381225b6e690cba9d620f161ee5a35c',
   'app/src/lib/planimetriya/stil.ts':
-    'dd23a094251f9d004571671b192f1b7b9ba3a4b39d0bb0a221526dba1efc0903',
+    '7eaa8f60ccb158f6f6a3fc868f55d3ae240e530cef89b7901363d8fbceefdbf7',
   'app/src/lib/planimetriya/stseny/blok1.ts':
     '60a4e9dab3e72454d00c4b1f93ed082d370fd309647920a0598431e12da31421',
   'app/src/lib/planimetriya/stseny/blok10.ts':
-    '13b2b8022b5fa56175ee36d4d97c7fd0554dcb25a285ff73037b2785064f900d',
+    'd99011292025b099b311012378ef4512fd013ec5243d2c473bc69ba877253d46',
   'app/src/lib/planimetriya/stseny/blok2.ts':
-    '143929d19b58d47ecd50e223fb98d673f8df7fec1a2c06c637d243b416868f66',
+    'd0a52fb204ddbd35588e29fdca698298bdfbc4b0dbf923330bb6b37aaba4ac2b',
   'app/src/lib/planimetriya/stseny/blok3.ts':
     'b59a3c6d4a63f06ffce75ec0ee9656226d9be1dac12033d75c3806d849a7de37',
   'app/src/lib/planimetriya/stseny/dsl.ts':
@@ -377,7 +380,7 @@ const ODOBRENO = {
   'app/src/lib/planimetriya/teoriya.ts':
     '8f050ec8d238907581aca75f6ae788025ef625fdf1477badceb7800e148991cc',
   'app/src/lib/planimetriya/trenazher/zadacha.ts':
-    '65fe73bd5f064e8d146297f08849692a6ef4c1c4f4b338a971b3e54ff4e4263a',
+    'd3d9ffc9c8563c412af99d4deb1778cc8c024bb15c6b79ae66ab666c9626ebac',
   /* №16 (экономика) во второй части, одобрено владельцем 15.11.2026: часть,
      вид ответа и баллы из структуры, оптимизация — второй вид задания,
      ответ не в тех единицах — «уже не 2 балла». Банк задач не менялся. */
@@ -390,7 +393,7 @@ const ODOBRENO = {
      №13»), и место экономической задачи (часть, вид ответа, балл) теперь
      берутся из структуры — в ЕГЭ-2027 на экране те же числа. Файлы раздела
      №13 (teoriya13, zadanie13) с тех пор одобрены заново — выше, №16. */
-  'app/src/content/teoriya1.ts': '553044aeca37afc3ee0531e4e1a4eccef3219f50e269da256a8246524858636c',
+  'app/src/content/teoriya1.ts': 'c990431c17d9a5206057da180bfa257d6728b7a1eee798cc02e6182a8a84172c',
   'app/src/content/teoriya7-irr.ts':
     '454b16a168891b91460da08fd106a5a6e152950f404a873d5ab309e6bd743cc8',
   /* Общий генератор (№12 — один из разделов): у раздела может быть
@@ -437,6 +440,32 @@ const ODOBRENO = {
   /* №10: П-33, порядок максимума по k — по решению владельца. */
   'app/src/lib/zadanie10/prototypes/gruppa5.ts':
     '11ec6178e5483661722a7b8f53f964cbde113bf5b029c7cc6fcd2c2637cb901e',
+  'app/src/content/spravochnik1/index.ts':
+    '4d79902c8d391d5a5dda2061773c740a9eaa080ecd34b1161d8bdd8789aef14f',
+  'app/src/content/spravochnik1/novye-temy.ts':
+    'ee30827d7f4e2be4a067931a80ea65457ada23a24efb1ab99c3fac9276f61ad1',
+  'app/src/content/spravochnik1/r01-ugly.ts':
+    '165a6719391f98c884f4f5e31ea8752dc8739fe9b232fed69840284152791ca9',
+  'app/src/content/spravochnik1/r06-ploshchadi.ts':
+    'fc337cc0ecbb2a56c1e2caf5b7ee89b7bd3ffb46842f3a221610527fe51e55d0',
+  'app/src/content/spravochnik1/r08-chetyrehugolniki.ts':
+    'f4e5555c270441857ae220adc5b9c9fab7e2d34487e3918b30271e85923262b6',
+  'app/src/content/spravochnik1/r11-fakty.ts':
+    'b492ea349439db43669d26c5904a79f1580a1bdf529835958e8718b938f1ecd3',
+  'app/src/content/spravochnik1/r12-priemy.ts':
+    '7cd6e12254b1983e80ae19dd3b47ab51e5ed3a1766bbc8f5b849bc2510745681',
+  'app/src/content/spravochnik1/tipy.ts':
+    '3c5b1ba379da8041075eb50faa0d2513afa3fef099a51a43100042e76ef9d7bb',
+  'app/src/lib/planimetriya/bank/analogi-dannye.ts':
+    '9ee3f59041f3918ea504f6d14331b37004e753cec64dfdcb86f76de10f5c9c6f',
+  'app/src/lib/planimetriya/bank/proverka.ts':
+    '89b73f65b3aa1bd3c9daee0aa27952043904aca9fe92a7e454f948cf50d95380',
+  'app/src/lib/planimetriya/prep/pool.ts':
+    '3c519358fd3e2f040978f63c14355f5cabe8a6867977fd690c58ea32b7df145c',
+  'app/src/lib/planimetriya/prep/scenarii.ts':
+    '68fcc6f4f25d5d3615efbfb15a3c075a731cef58cc9b91d5ebc8e40b6806d1b3',
+  'app/src/lib/planimetriya/stseny/chasti.ts':
+    'b2db181af3ddde18f99d009f9e323ede50f0f7681bd870af5fd31cad007231c9',
 };
 
 /** Какие картинки реестра принадлежат разделу. */
