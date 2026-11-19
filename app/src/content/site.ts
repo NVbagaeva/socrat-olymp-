@@ -12,7 +12,7 @@ import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
 import { levelInfo, type Level } from '@/lib/level';
-import { AUTH_ENABLED, AUTH_HREF, REGISTRATION_OPEN } from '@/lib/auth/config';
+import { AUTH_HREF, AUTH_IN_HEADER, REGISTRATION_OPEN } from '@/lib/auth/config';
 import { TARIFY_HREF } from '@/lib/tarify/href';
 import type { NavIconName } from '@/components/ui/NavIcons';
 import { nomeraChasti } from '@/content/struktura';
@@ -136,12 +136,13 @@ const LINKS = {
 
 /**
  * Куда ведёт «Начать бесплатно». Регистрация открыта (REGISTRATION_OPEN
- * в lib/auth/config.ts) и вход включён — на регистрацию. Иначе — в банк
- * заданий уровня: там занимаются бесплатно и без аккаунта, и случайный
- * посетитель не упирается в форму «только по приглашению».
+ * в lib/auth/config.ts) и вход показан всем — кнопка «Войти» в шапке
+ * (AUTH_IN_HEADER, он же включает и сам вход) — на регистрацию. Иначе —
+ * в банк заданий уровня: там занимаются бесплатно и без аккаунта, а
+ * страница входа без кнопки в шапке остаётся только по прямой ссылке.
  */
 export function startHref(level: Level = 'profile'): string {
-  if (AUTH_ENABLED && REGISTRATION_OPEN) return AUTH_HREF.registraciya;
+  if (AUTH_IN_HEADER && REGISTRATION_OPEN) return AUTH_HREF.registraciya;
   return level === 'base' ? levelInfo('base').bank : tasksPage.href;
 }
 
