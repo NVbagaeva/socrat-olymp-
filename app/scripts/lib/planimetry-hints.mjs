@@ -58,7 +58,10 @@ export function oboznacheniya(tekst, { tex = false, tochkiSceny = [] } = {}) {
       }
       const b = m[2];
       if (b >= 'A' && b <= 'Z') {
-        if (VELICHINY.has(b) && !tochkiSceny.includes(b)) continue;
+        if (VELICHINY.has(b) && !tochkiSceny.includes(b)) {
+          velichiny.add(b);
+          continue;
+        }
         tochki.add(b);
       } else velichiny.add(b);
     }

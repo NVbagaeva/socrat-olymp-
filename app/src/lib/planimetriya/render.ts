@@ -996,7 +996,14 @@ export function renderPlan(scena: Scena, optsii: Optsii = {}, otchet?: Otchet): 
     if (e.znachenie === undefined) continue;
     /* Вопрос подсказки: элемент шага подсвечен, его число — ответ на
        вопрос и появится только на следующем шаге. */
-    if (rezhim.rezhim === 'podskazka' && rezhim.vopros === true && sloyOf(e) === shag) continue;
+    if (
+      rezhim.rezhim === 'podskazka' &&
+      rezhim.vopros === true &&
+      sloyOf(e) === shag &&
+      /* Буква величины («R», «x», «2r») ответа не выдаёт: её подсказка и называет. */
+      ZNACHENIE_CHISLO.test(e.znachenie)
+    )
+      continue;
     if (e.otvet && !naUchitel) continue;
     /* Слой условия: на листе ученика числа — только по настройке chisla;
        в подсказке подписаны данные, у учителя — данные и ответ. */

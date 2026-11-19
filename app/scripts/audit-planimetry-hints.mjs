@@ -153,7 +153,10 @@ function proverkaTeksta(ctx, shag, tekst, p, { tex = false, kontekst = '' } = {}
     (b) =>
       !NE_RISUYUT.has(b) &&
       !p.znacheniya.some((z) => z.includes(b.replace('\\', ''))) &&
-      !vvedena(b, `${kontekst} ${tex ? '' : tekst}`),
+      !vvedena(b, `${kontekst} ${tex ? '' : tekst}`) &&
+      /* Площадь и периметр — величины всей фигуры: их называют словами. */
+      !(b === 'S' && /площад/i.test(`${ctx.uslovie ?? ''} ${kontekst} ${tekst}`)) &&
+      !(b === 'P' && /периметр/i.test(`${ctx.uslovie ?? ''} ${kontekst} ${tekst}`)),
   );
   if (vel.length > 0) ctx.n(shag, 'velichina', vel.sort().join(', '));
   if (!tex && o.vneFormul.length > 0) ctx.n(shag, 'vneKatex', o.vneFormul.join(' '));
@@ -178,6 +181,7 @@ function auditTrenazhera() {
     );
     const ctx = {
       tochkiSceny: z.tochkiSceny,
+      uslovie: z.uslovie,
       inv: obratno(z.variant),
       n: (shag, kod, podrobno) => nahodka('Тренажёр', z.proto, z.kod, shag, kod, podrobno),
     };
@@ -275,7 +279,7 @@ function auditOpornyh() {
       continue;
     }
     const tochkiSceny = t.g.risunok === null ? [] : Object.keys(t.g.risunok.tochki);
-    const ctx = { tochkiSceny, inv: (b) => b, n };
+    const ctx = { tochkiSceny, inv: (b) => b, n, uslovie: t.g.uslovie };
     /* Задача без чертежа: буквы условия не с чем сверять — они «свои». */
     const pusto = {
       bukvy: oboznacheniya(t.g.uslovie).tochki,
