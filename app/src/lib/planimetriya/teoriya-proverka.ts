@@ -972,10 +972,7 @@ export function proveritFormuly(n = 200, eps = 1e-9): ItogFormul {
     }
     for (const f of razdel.dlya17 ?? []) {
       if (f.formula === undefined) continue;
-      zadachi.push({
-        metka: `факт ${f.no} (для №${nomerRazdela('planimetriya-dokazatelstvo')})`,
-        klyuch: `d17-${f.no}`,
-      });
+      zadachi.push({ metka: `факт ${f.no} (для №${nomerRazdela('planimetriya-dokazatelstvo')})`, klyuch: `d17-${f.no}` });
     }
   }
   for (const z of zadachi) {
