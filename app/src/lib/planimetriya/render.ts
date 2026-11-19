@@ -345,7 +345,14 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
   };
 
   /* 3. Видимые элементы. */
-  const vidimye = scena.elementy.filter((e) => vidim(sloyOf(e), rezhim));
+  const sposob = optsii.sposob ?? 1;
+  const vidimye = scena.elementy.filter(
+    (e) =>
+      vidim(sloyOf(e), rezhim) &&
+      (e.sposob === undefined || e.sposob === sposob) &&
+      /* Только на чертеже условия: искомая фигура со знаком «?». */
+      (e.tolkoUslovie !== true || rezhim.rezhim === 'uchenik'),
+  );
   R.vidimye = vidimye.length;
   const novoe = (e: Element) =>
     shag > 0 && (sloyOf(e) === shag || (e.podsvetka ?? []).includes(shag));
@@ -356,7 +363,14 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
         `вспомогательное построение (пунктир) в слое условия: ${tochkiElementa(e).join('') || e.tip}`,
       );
     }
-    if (e.tip === 'oblast' && e.vydelit !== 'dano' && e.vydelit !== 'iskomoe') {
+    if (
+      e.tip === 'oblast' &&
+      e.vydelit !== 'dano' &&
+      e.vydelit !== 'iskomoe' &&
+      /* Сплошная заливка равных частей и подпись S — не штриховка. */
+      e.cvet === undefined &&
+      e.tolkoZnachenie !== true
+    ) {
       problems.push('штриховка в условии без роли (данное или искомое)');
     }
   }
@@ -408,6 +422,8 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
   const naUchitel = rezhim.rezhim === 'uchitel';
   const znachenieVidno = (e: Element): boolean => {
     if (e.znachenie === undefined) return false;
+    /* Знак «?» у искомого — не число: он стоит и на листе ученика. */
+    if (e.znachenie === '?') return true;
     /* Вопрос подсказки: элемент шага подсвечен, его число — ответ на
        вопрос и появится только на следующем шаге. */
     if (
@@ -600,6 +616,36 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
       }
       if (dist(a, b) < PL.minOtrezok)
         problems.push(`отрезок ${e.a}${e.b} короче ${PL.minOtrezok} px`);
+      if (e.strelki) {
+        /* Значок параллельности: «>» (или «>>») посередине, по направлению отрезка. */
+        const m: T2 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+        const u = unit(sub(b, a));
+        const nrm: T2 = [-u[1], u[0]];
+        const d: string[] = [];
+        for (let i = 0; i < e.strelki; i += 1) {
+          const c = add(m, mul(u, (i - (e.strelki - 1) / 2) * 5));
+          const k1 = add(sub(c, mul(u, 4)), mul(nrm, 4));
+          const k2 = add(sub(c, mul(u, 4)), mul(nrm, -4));
+          d.push(`M${px(k1[0])} ${px(k1[1])}L${px(c[0])} ${px(c[1])}L${px(k2[0])} ${px(k2[1])}`);
+          prep.push({
+            tip: 'otrezok',
+            a: k1,
+            b: c,
+            r: PL.width.tick / 2,
+            chto: `значок ${e.a}${e.b}`,
+          });
+          prep.push({
+            tip: 'otrezok',
+            a: c,
+            b: k2,
+            r: PL.width.tick / 2,
+            chto: `значок ${e.a}${e.b}`,
+          });
+        }
+        sloyOtmetki.push(
+          `<path class="pl-strelka${novoe(e) ? ' pl-novoe' : ''}" d="${d.join('')}" fill="none" stroke="${novoe(e) ? PL.podskazka : PL.ink}" stroke-width="${PL.width.tick}" stroke-linecap="round" stroke-linejoin="round"/>`,
+        );
+      }
       if (e.shtrihi) {
         /* Штрихи — посередине свободной части отрезка: если на нём лежит
            чужая точка (основание высоты на половине гипотенузы), штрих
@@ -688,12 +734,26 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
   /* Области со штриховкой. */
   for (const e of vidimye) {
     if (e.tip !== 'oblast') continue;
-    nuzhenUzor = true;
     const pts = e.tochki.map(E);
     const st = stil(e);
-    sloyOblast.push(
-      `<path class="${st.cls}"${st.data} d="${pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p[0])} ${px(p[1])}`).join('')}Z" fill="url(#${patternId})" stroke="none"/>`,
-    );
+    const d = `${pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p[0])} ${px(p[1])}`).join('')}Z`;
+    if (e.tolkoZnachenie === true) {
+      /* Только подпись. */
+    } else if (e.cvet !== undefined) {
+      /* Равные площади — одним цветом: светлая сплошная заливка. В ч/б
+         печати заливок нет (sheet/theme.css), остаются подписи S, 2S. */
+      sloyOblast.push(
+        `<path class="${st.cls} pl-zaliv pl-zaliv-${e.cvet}"${st.data} d="${d}" fill="${PL.zaliv[e.cvet - 1]}" fill-opacity="${PL.zalivProzrachnost}" stroke="none"/>`,
+      );
+    } else {
+      nuzhenUzor = true;
+      sloyOblast.push(
+        `<path class="${st.cls}"${st.data} d="${d}" fill="url(#${patternId})" stroke="none"/>`,
+      );
+    }
+    if (e.znachenie !== undefined) {
+      zadaniyaZnach.push({ e, yakor: centroid(pts), napr: null, vdol: null, vnutri: pts });
+    }
   }
 
   /* Углы: дуги (1–3) и значки прямого угла. */
@@ -839,14 +899,16 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
     const iz = e.vydelit === 'iskomoe';
     const color = novoe(e)
       ? PL.novoe
-      : iz
-        ? PL.iskomoe
-        : sloyOf(e) !== 'uslovie'
-          ? PL.podskazka
-          : /* Угол с подписью — дуга цветом своей величины. */
-            e.znachenie !== undefined
-            ? PL.velichina
-            : PL.ink;
+      : e.cvet !== undefined
+        ? PL.zaliv[e.cvet - 1]!
+        : iz
+          ? PL.iskomoe
+          : sloyOf(e) !== 'uslovie'
+            ? PL.podskazka
+            : /* Угол с подписью — дуга цветом своей величины. */
+              e.znachenie !== undefined
+              ? PL.velichina
+              : PL.ink;
     const wid = iz || novoe(e) ? PL.width.markIskomoe : PL.width.mark;
     const th = angleAt(E(e.a), vtx, E(e.b));
     if (e.pryamoy) {
@@ -1157,9 +1219,11 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
     if (e.znachenie === undefined || !znachenieVidno(e)) continue;
     const tekst = e.znachenie;
     const chislo = ZNACHENIE_CHISLO.test(tekst);
+    /* Знак «?» у искомого — крупный, жирный, шрифтом сайта. */
+    const vopros = tekst === '?';
     /* Слова («гипотенуза») — шрифтом сайта: в KaTeX_Math нет кириллицы. */
-    const slovo = /[а-яё]/i.test(tekst);
-    const zs = PL.font.razmerZnach;
+    const slovo = /[а-яё]/i.test(tekst) || vopros;
+    const zs = vopros ? PL.font.razmerZnach * 1.35 : PL.font.razmerZnach;
     const w = shirinaTeksta(tekst, zs) + 3;
     /* С корнем запись выше: черта знака над цифрами. */
     const sKornem = tekst.includes('√');
@@ -1189,6 +1253,28 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
           }
         }
       }
+    } else if (z.vnutri) {
+      /* Площадь части (S, 2S, «?») — внутри своей области, у её центра. */
+      const poly = z.vnutri;
+      const s: { r: Ramka; cena: number }[] = [];
+      for (const rr of [0, 6, 12, 18, 26, 34]) {
+        for (let k = 0; k < (rr === 0 ? 1 : 12); k += 1) {
+          const t = (k * 30 * Math.PI) / 180;
+          const c: T2 = [z.yakor[0] + Math.cos(t) * rr, z.yakor[1] + Math.sin(t) * rr];
+          const ugly4: T2[] = [
+            [c[0] - w / 2, c[1] - h / 2],
+            [c[0] + w / 2, c[1] - h / 2],
+            [c[0] + w / 2, c[1] + h / 2],
+            [c[0] - w / 2, c[1] + h / 2],
+          ];
+          if (!ugly4.every((q) => vnutriMnogougolnika(q, poly))) continue;
+          s.push({
+            r: { kind: 'znachenie', id: tekst, x: c[0] - w / 2, y: c[1] - h / 2, w, h },
+            cena: rr,
+          });
+        }
+      }
+      kandidaty.push(...s.map((x) => x.r));
     } else if (z.napr && z.ugol) {
       /* Величина угла — внутри угла сразу за своей дугой: на биссектрисе
          и чуть в стороны от неё, не дальше podpisOtDugi от дуги. Нет
@@ -1271,7 +1357,12 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
     ramki.push(vybran);
     if (e.vydelit !== 'dano') proverochnye.push(tekst);
     zanyato.push({ tip: 'pryam', p: stroka(vybran), chto: `значение ${tekst}` });
-    const color = novoe(e) || sloyOf(e) !== 'uslovie' ? PL.podskazka : PL.velichinaTekst;
+    const color =
+      e.tip === 'ugol' && e.cvet !== undefined && !novoe(e)
+        ? PL.zaliv[e.cvet - 1]!
+        : novoe(e) || sloyOf(e) !== 'uslovie'
+          ? PL.podskazka
+          : PL.velichinaTekst;
     if (sKornem) {
       const k = znachenieSKornem(tekst, vybran.x + vybran.w / 2, vybran.y + nizBazy, zs, color);
       sloyPodpisi.push(k.text, ...k.znaki);
@@ -1288,7 +1379,7 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
       );
     } else
       sloyPodpisi.push(
-        `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + nizBazy)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'} font-size="${zs}" fill="${color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${esc(tekst)}</text>`,
+        `<text class="pl-znachenie" x="${px(vybran.x + vybran.w / 2)}" y="${px(vybran.y + nizBazy)}" text-anchor="middle" font-family="${slovo ? PL.font.slovo : chislo ? PL.font.chislo : PL.font.bukva}"${chislo || slovo ? '' : ' font-style="italic"'}${vopros ? ' font-weight="700"' : ''} font-size="${zs}" fill="${vopros ? PL.iskomoe : color}" stroke="${PL.bg}" stroke-width="${PL.width.halo}" paint-order="stroke" stroke-linejoin="round">${esc(tekst)}</text>`,
       );
     R.teksty.push(tekst);
   }
@@ -1361,6 +1452,29 @@ function narisovat(scena: Scena, optsii: Optsii, R: Otchet): string {
 }
 
 /* Значения ставятся после подписей точек; список заполняется по ходу рисования. */
+/** Центр тяжести вершин многоугольника. */
+function centroid(pts: readonly T2[]): T2 {
+  return [
+    pts.reduce((a, p) => a + p[0], 0) / pts.length,
+    pts.reduce((a, p) => a + p[1], 0) / pts.length,
+  ];
+}
+
+/** Точка внутри многоугольника (луч вправо). */
+function vnutriMnogougolnika(q: T2, poly: readonly T2[]): boolean {
+  let vnutri = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i, i += 1) {
+    const a = poly[i]!;
+    const b = poly[j]!;
+    if (
+      a[1] > q[1] !== b[1] > q[1] &&
+      q[0] < ((b[0] - a[0]) * (q[1] - a[1])) / (b[1] - a[1]) + a[0]
+    )
+      vnutri = !vnutri;
+  }
+  return vnutri;
+}
+
 interface ZadanieZnach {
   e: Element;
   yakor: T2;
@@ -1368,6 +1482,8 @@ interface ZadanieZnach {
   vdol: [T2, T2] | null;
   /* Подпись величины угла: вершина, внешний радиус дуги и величина на экране. */
   ugol?: { vtx: T2; r: number; th: number };
+  /* Подпись площади части: многоугольник, внутри которого она стоит. */
+  vnutri?: T2[];
 }
 function len2(v: T2): number {
   return v[0] * v[0] + v[1] * v[1];

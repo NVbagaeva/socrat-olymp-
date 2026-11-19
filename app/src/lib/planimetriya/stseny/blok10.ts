@@ -746,7 +746,9 @@ export const BLOK_X: PrototipChertezha[] = [
     },
     stsena: (p, porog) => {
       const ost = 360 - p.b - p.c;
-      const ab = Math.max(ost * 0.45, 2 * porog);
+      /* Дуга DA — остаток: не меньше половины, иначе при малом остатке
+         A и D слипаются (b = 145°, c = 154°). */
+      const ab = Math.min(Math.max(ost * 0.45, 2 * porog), ost / 2);
       const v = vpisannyyPoDugam([ab, p.b, p.c]);
       return {
         tochki: { O: O0, ...v },

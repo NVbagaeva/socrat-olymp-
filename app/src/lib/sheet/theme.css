@@ -424,6 +424,7 @@
    только дугами, равенства — засечками, данная и искомая площадь
    различаются подписью: «S = 18» и «S = ?». */
 [data-sheet-theme='print'] svg[data-engine='planimetriya'] .pl-sektor,
+[data-sheet-theme='print'] svg[data-engine='planimetriya'] .pl-zaliv,
 [data-sheet-theme='print'] svg[data-engine='planimetriya'] path[fill^='url(#plh-'],
 [data-sheet-theme='print'] svg[data-engine='chertezh3'] polygon[fill-opacity],
 [data-sheet-theme='print'] svg[data-engine='solid'] path[fill-opacity],
@@ -433,6 +434,9 @@
 [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
   svg[data-engine='planimetriya']
   .pl-sektor,
+[data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  svg[data-engine='planimetriya']
+  .pl-zaliv,
 [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
   svg[data-engine='planimetriya']
   path[fill^='url(#plh-'],

@@ -40,6 +40,13 @@ import {
   ug,
 } from '../stseny/dsl';
 import type { Element, Scena, T2 } from '../types';
+import {
+  bissektrisySmezhnyh,
+  neVyrozhdennyy,
+  smezhnyeVOtnoshenii,
+  sootvetstvennyySmezhnyy,
+  sosedniyUgolParallelogramma,
+} from './scenarii';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -431,7 +438,7 @@ function parallel(u: number, el: (m: string, n: string) => Element[]): Scena {
 
 export const BLOK_SMEZHNYE: Mikro[] = [
   mikro('P1-2-01', 'Смежный угол', '\\alpha + \\beta = 180^\\circ', (r) => {
-    const u = r.int(20, 160);
+    const u = neVyrozhdennyy(r.int, 20, 160);
     return {
       uslovie: `Один из смежных углов равен $${g(u)}$. Найдите другой угол.`,
       risunok: smezhnye(u, { zn: gr(u) }, { isk: true }),
@@ -443,7 +450,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     };
   }),
   mikro('P1-2-02', 'Разность смежных углов', '\\alpha + \\beta = 180^\\circ', (r) => {
-    const d = 2 * r.int(5, 60);
+    const d = 2 * r.int(11, 60);
     const b = (180 + d) / 2;
     return {
       uslovie: `Один из смежных углов на $${g(d)}$ больше другого. Найдите больший угол.`,
@@ -459,19 +466,12 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     const k = r.int(1, 5);
     const m = k + r.int(1, 7);
     if ((180 * k) % (k + m) !== 0) return null;
-    const mal = (180 * k) / (k + m);
-    return {
-      uslovie: `Смежные углы относятся как $${k}:${m}$. Найдите меньший угол.`,
-      risunok: smezhnye(mal, { isk: true }, {}),
-      otvet: mal,
-      razbor: [
-        `Обозначим одну часть $x$: $${k}x + ${m}x = 180^\\circ$, $x = ${g(180 / (k + m))}$.`,
-        `Меньший: $${k}\\cdot ${g(180 / (k + m))} = ${g(mal)}$.`,
-      ],
-    };
+    /* Меньший угол 80°–89° на чертеже не отличить от прямого. */
+    if ((180 * k) / (k + m) >= 80) return null;
+    return smezhnyeVOtnoshenii(k, m);
   }),
   mikro('P1-2-04', 'Вертикальные углы', '\\text{вертикальные углы равны}', (r) => {
-    const s = 2 * r.int(20, 80);
+    const s = 2 * r.int(20, 79);
     return {
       uslovie: `Сумма двух вертикальных углов равна $${g(s)}$. Найдите каждый из них.`,
       risunok: forma(s / 2, 14, 76, (h) => ({
@@ -496,7 +496,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     };
   }),
   mikro('P1-2-05', 'Угол при пересечении прямых', '\\alpha + \\beta = 180^\\circ', (r) => {
-    const u = r.int(25, 85);
+    const u = r.int(25, 79);
     return {
       uslovie: `При пересечении двух прямых один из углов равен $${g(u)}$. Найдите больший из оставшихся углов.`,
       risunok: forma(u, 28, 88, (v) => ({
@@ -524,7 +524,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     };
   }),
   mikro('P1-2-06', 'Накрест лежащие углы', '\\text{накрест лежащие углы равны}', (r) => {
-    const u = r.int(30, 150);
+    const u = neVyrozhdennyy(r.int, 30, 150);
     return {
       uslovie: `Две параллельные прямые пересечены секущей. Один из накрест лежащих углов равен $${g(u)}$. Найдите второй.`,
       risunok: parallel(u, (m, n) => [
@@ -536,7 +536,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     };
   }),
   mikro('P1-2-07', 'Односторонние углы', '\\alpha + \\beta = 180^\\circ', (r) => {
-    const u = r.int(30, 150);
+    const u = neVyrozhdennyy(r.int, 30, 150);
     return {
       uslovie: `Две параллельные прямые пересечены секущей. Один из односторонних углов равен $${g(u)}$. Найдите второй.`,
       risunok: parallel(u, (m, n) => [
@@ -552,6 +552,7 @@ export const BLOK_SMEZHNYE: Mikro[] = [
   }),
   mikro('P1-2-08', 'Половина угла', '\\text{биссектриса делит угол пополам}', (r) => {
     const u = 2 * r.int(15, 75);
+    if (u >= 80 && u <= 100) return null;
     return {
       uslovie: `Луч $OK$ — биссектриса угла $AOB$, равного $${g(u)}$. Найдите угол $AOK$.`,
       risunok: forma(u / 2, 26, 75, (h) => ({
@@ -574,51 +575,14 @@ export const BLOK_SMEZHNYE: Mikro[] = [
     'Биссектрисы смежных углов',
     '\\dfrac{\\alpha}{2} + \\dfrac{180^\\circ - \\alpha}{2} = 90^\\circ',
     (r) => {
+      /* Данный угол 80°–100° на чертеже не отличить от прямого. */
       const u = 2 * r.int(15, 75);
-      return {
-        uslovie: `Углы $AOC$ и $COB$ смежные, $\\angle COB = ${g(u)}$. Найдите угол между биссектрисами этих углов.`,
-        risunok: {
-          tochki: {
-            A: [-5, 0],
-            O: [0, 0],
-            B: [5, 0],
-            C: polar(u, 5),
-            K: polar(u / 2, 4.5),
-            L: polar(90 + u / 2, 4.5),
-          },
-          elementy: [
-            otr('A', 'B'),
-            otr('O', 'C'),
-            otr('O', 'K'),
-            otr('O', 'L'),
-            ug('C', 'O', 'B', { vydelit: 'dano', znachenie: gr(u) }),
-            ug('K', 'O', 'L', { vydelit: 'iskomoe' }),
-          ],
-          bezPodpisi: ['K', 'L'],
-        },
-        otvet: 90,
-        razbor: [
-          'Угол между биссектрисами — половина одного смежного плюс половина другого.',
-          `$\\dfrac{${g(u)}}{2} + \\dfrac{${g(180 - u)}}{2} = 90^\\circ$.`,
-        ],
-      };
+      return u >= 80 && u <= 100 ? null : bissektrisySmezhnyh(u);
     },
   ),
-  mikro('P1-2-10', 'Соответственные углы', '\\text{соответственные углы равны}', (r) => {
-    const u = r.int(30, 150);
-    return {
-      uslovie: `Две параллельные прямые пересечены секущей. Один из углов равен $${g(u)}$. Найдите угол, смежный с соответственным ему углом.`,
-      risunok: parallel(u, (m, n) => [
-        ug('B', m, n, { vydelit: 'dano', znachenie: gr(u) }),
-        ug('C', n, 'Q', { vydelit: 'iskomoe' }),
-      ]),
-      otvet: 180 - u,
-      razbor: [
-        'Соответственный угол равен данному, а смежный с ним — дополнение до $180^\\circ$.',
-        `$180^\\circ - ${g(u)} = ${g(180 - u)}$.`,
-      ],
-    };
-  }),
+  mikro('P1-2-10', 'Соответственные углы', '\\text{соответственные углы равны}', (r) =>
+    sootvetstvennyySmezhnyy(neVyrozhdennyy(r.int, 30, 150)),
+  ),
 ];
 
 /* ── 3. Прямоугольный треугольник ────────────────────────────────── */
@@ -854,26 +818,9 @@ export const BLOK_PRYAMOUGOLNYY: Mikro[] = [
 /* ── 4. Четырёхугольники ─────────────────────────────────────────── */
 
 export const BLOK_CHETYREHUGOLNIKI: Mikro[] = [
-  mikro('P1-4-01', 'Соседний угол параллелограмма', '\\angle A + \\angle B = 180^\\circ', (r) => {
-    const a = r.int(30, 85);
-    return {
-      uslovie: `В параллелограмме $ABCD$ $\\angle A = ${g(a)}$. Найдите угол $B$.`,
-      risunok: forma(a, 30, 88, (v) => ({
-        tochki: parallelogramm(v),
-        elementy: [
-          mn(['A', 'B', 'C', 'D']),
-          ug('D', 'A', 'B', { vydelit: 'dano', znachenie: gr(a) }),
-          ug('A', 'B', 'C', { vydelit: 'iskomoe' }),
-        ],
-        proverki: [ist('A', 'B', 'C', 180 - a)],
-      })),
-      otvet: 180 - a,
-      razbor: [
-        'Соседние углы параллелограмма дают $180^\\circ$.',
-        `$180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
-      ],
-    };
-  }),
+  mikro('P1-4-01', 'Соседний угол параллелограмма', '\\angle A + \\angle B = 180^\\circ', (r) =>
+    sosedniyUgolParallelogramma(r.int(30, 79)),
+  ),
   mikro('P1-4-02', 'Сумма двух углов параллелограмма', '\\angle A = \\angle C', (r) => {
     const a = r.int(30, 85);
     return {

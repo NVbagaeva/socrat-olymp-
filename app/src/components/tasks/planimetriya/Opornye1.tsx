@@ -6,6 +6,8 @@ import { OpornyeSpisokBanka, type NavykKartochki } from '../opornye/OpornyeBanka
 import { OpornayaZadacha, type OpornyyIshod } from '../opornye';
 import { Ikonka, type Shag } from '../steklo';
 import { FaktKnopka1 } from './fakt/FaktKnopka1';
+import { Scenariy1 } from './Scenariy1';
+import type { ScenariyHtml } from '@/lib/planimetriya/scenariy';
 import { OPORNYE1, TRENAZHER1 } from '@/content/planimetriya1';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
 import { mikroById } from '@/lib/planimetriya/prep/bloki';
@@ -35,6 +37,19 @@ function razborIz(z: MikroSealed): MikroRazbor | null {
     const value: unknown = JSON.parse(openText(z.razbor, z.seal));
     return typeof value === 'object' && value !== null && 'stroki' in value
       ? (value as MikroRazbor)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Подсказка-сценарий задачи: закрыта отпечатком, как разбор. */
+function scenariyIz(z: MikroSealed): ScenariyHtml | null {
+  if (z.scenariy === null) return null;
+  try {
+    const value: unknown = JSON.parse(openText(z.scenariy, z.seal));
+    return typeof value === 'object' && value !== null && 'sposoby' in value
+      ? (value as ScenariyHtml)
       : null;
   } catch {
     return null;
@@ -163,22 +178,26 @@ export function Opornye1({
         html: zadacha.formulaHtml,
         open: hintOpen,
         onOpen: () => setHintOpen(true),
-        telo: (
-          <div className="z1-op__podskazka">
-            {zadacha.risunokSvg === null ? null : (
-              <div className="trn-vopros__risunok">
-                <Chertezh svg={zadacha.risunokSvg} label={OPORNYE1.risunok} />
-              </div>
-            )}
-            <p className="z1-op__podskazka-tekst">
-              <Ikonka name="lampa" />
-              <span dangerouslySetInnerHTML={{ __html: zadacha.formulaHtml }} />
-            </p>
-            {zadacha.fakt === null ? null : (
-              <FaktKnopka1 fakt={zadacha.fakt} podsvetit={checked === 'wrong'} />
-            )}
-          </div>
-        ),
+        telo: (() => {
+          const sc = scenariyIz(zadacha);
+          if (sc !== null) return <Scenariy1 sc={sc} key={`${no}-${zadacha.seed}`} />;
+          return (
+            <div className="z1-op__podskazka">
+              {zadacha.risunokSvg === null ? null : (
+                <div className="trn-vopros__risunok">
+                  <Chertezh svg={zadacha.risunokSvg} label={OPORNYE1.risunok} />
+                </div>
+              )}
+              <p className="z1-op__podskazka-tekst">
+                <Ikonka name="lampa" />
+                <span dangerouslySetInnerHTML={{ __html: zadacha.formulaHtml }} />
+              </p>
+              {zadacha.fakt === null ? null : (
+                <FaktKnopka1 fakt={zadacha.fakt} podsvetit={checked === 'wrong'} />
+              )}
+            </div>
+          );
+        })(),
       }}
       /* Решение — после ответа; открытое до верного ответа — «с разбором». */
       reshenie={

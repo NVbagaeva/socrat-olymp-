@@ -11,6 +11,8 @@
  * на чертеже подсвечивается нужный элемент (слой подсказки сцены).
  */
 
+import type { Scenariy } from '../scenariy';
+
 export interface Sokr {
   tekst: string;
   /** Выкладка TeX без долларов (может быть пустой). */
@@ -30,6 +32,13 @@ export interface ShagResheniya {
   sloy?: number;
   /** Факты реестра (content/spravochnik1/fakty.ts): кнопки «Показать свойство» под шагом. */
   fakty?: readonly string[];
+  /**
+   * Способ решения (1, 2…): чертёж шага — построения этого способа.
+   * Первый шаг способа несёт подпись способа (sposobNazvanie).
+   */
+  sposob?: number;
+  /** Подпись этапа-способа: «Способ 1. Дополнительное построение». */
+  sposobNazvanie?: string;
 }
 
 export interface VoprosPodskazki {
@@ -39,6 +48,11 @@ export interface VoprosPodskazki {
   verno: number;
   /** Пояснение после верного ответа. */
   poyasnenie: string;
+  /**
+   * После первой ошибки: мини-объяснение без ответа, затем тот же
+   * вопрос. Нет — подсказка отправляет к факту шага.
+   */
+  utochnenie?: string;
   /** Слой чертежа, который подсвечивается на этом вопросе. */
   sloy?: number;
   /**
@@ -67,4 +81,11 @@ export interface Reshenie {
   sverka: string;
   /** Ответ числом (тот же, что otvet прототипа). */
   otvet: number;
+  /**
+   * Подсказка-сценарий (lib/planimetriya/scenariy.ts): способы, уточнения
+   * после ошибки, приём. Нет — сценарий собирается из voprosy.
+   */
+  scenariy?: Scenariy;
+  /** Плашка «Приём» для сценария из voprosy. */
+  priem?: { nazvanie: string; fakt: string };
 }

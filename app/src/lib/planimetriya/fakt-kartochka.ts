@@ -15,13 +15,15 @@ import { typeset } from '../tex';
 import { renderPlan } from './render';
 import { chertezhPrimera, chertezhTemy } from './spravochnik-chertezhi';
 import { zadachaPrimera } from './spravochnik-zadachi';
+import { vyvodHtml, type ShagVyvodaHtml } from './vyvod';
 
 /** Вид блока → класс цвета рамки (spravochnik1-web.css). */
-const KLASS: Record<VidFakta, 'def' | 'svo' | 'pri' | 'teo'> = {
+const KLASS: Record<VidFakta, 'def' | 'svo' | 'pri' | 'teo' | 'prm'> = {
   opredeleniya: 'def',
   svoystva: 'svo',
   priznaki: 'pri',
   teoremy: 'teo',
+  priemy: 'prm',
 };
 
 export interface PrimerFakta {
@@ -36,7 +38,11 @@ export interface KartochkaFakta1 {
   id: string;
   /** «Определение», «Свойство», «Признак», «Теорема» («Формула», «Таблица»). */
   vid: string;
-  klass: 'def' | 'svo' | 'pri' | 'teo';
+  klass: 'def' | 'svo' | 'pri' | 'teo' | 'prm';
+  /** Почему так: обоснование; пусто — нет. */
+  obosnovanieHtml: string;
+  /** Вывод вопросами (если у темы есть): свойство — его итог. */
+  vyvod: ShagVyvodaHtml[];
   nazvanieHtml: string;
   tekstHtml: string;
   formulaHtml: string;
@@ -91,6 +97,8 @@ export function kartochkaFakta1(id: string): KartochkaFakta1 | null {
     klass: KLASS[f.vid],
     nazvanieHtml: typeset(f.nazvanie),
     tekstHtml: typeset(f.tekst),
+    obosnovanieHtml: f.obosnovanie === undefined ? '' : typeset(f.obosnovanie),
+    vyvod: vyvodHtml(f.tema),
     formulaHtml: f.formula === undefined ? '' : display(f.formula),
     dop:
       f.dop === undefined

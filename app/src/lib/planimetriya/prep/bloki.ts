@@ -4,6 +4,7 @@
  * четырёхугольники, площади, Пифагор, тригонометрия, окружность.
  */
 
+import { PAMYATKA_SMEZHNYE } from './scenarii';
 import {
   BLOK_CHETYREHUGOLNIKI,
   BLOK_KASATELNYE,
@@ -39,10 +40,11 @@ const BLOKI_BEZ_FAKTOV: Blok[] = [
     nazvanie: 'Смежные углы и параллельные прямые',
     lead: 'Смежные, вертикальные, накрест лежащие и односторонние углы',
     formuly: [
-      '\\alpha_{\\text{смеж}} + \\beta_{\\text{смеж}} = 180^\\circ',
+      '\\angle AOC + \\angle COB = 180^\\circ',
       '\\text{вертикальные и накрест лежащие углы равны}',
-      '\\alpha_{\\text{одност}} + \\beta_{\\text{одност}} = 180^\\circ',
     ],
+    /* Словами, у каждого факта — маленький цветной чертёж. */
+    pamyatka: PAMYATKA_SMEZHNYE,
     zadachi: BLOK_SMEZHNYE,
   },
   {

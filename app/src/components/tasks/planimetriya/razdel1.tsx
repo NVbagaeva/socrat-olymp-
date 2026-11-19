@@ -14,6 +14,7 @@ import { ZAGRUZKA1 } from '@/lib/planimetriya/trening/zagruzka';
 import type { Shag } from '../steklo';
 import type { VoprosPodskazki } from '../trening/PodskazkaVoprosy';
 import { FaktKnopka1, type FaktShaga1 } from './fakt/FaktKnopka1';
+import { Scenariy1 } from './Scenariy1';
 import { Piktogramma } from '../zadanie11/Piktogrammy';
 import type { RazdelBanka, SostoyaniePod } from '../trening/bank/types';
 
@@ -181,6 +182,8 @@ export const RAZDEL1: RazdelBanka<Zadacha1T, Reshenie1T> = {
   shagi: shagiIzResheniya1,
   posle: posle1,
   voprosy: voprosy1,
+  /* Подсказка — сценарий вопросов: уточнение после ошибки, способы, приём. */
+  podskazka: (s) => <Scenariy1 sc={s.scenariy} key={s.uchitelSvg} />,
   zadachaHref: zadachaHref1,
   prezhnyayaZapis: prezhnyayaZapis1,
 };

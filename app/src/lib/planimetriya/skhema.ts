@@ -64,14 +64,20 @@ export function shtrafSceny(scena: Scena, porogi: Porogi = POROGI_SKHEMY): numbe
      недостачу поровну между углами), остальные правила — суммой. */
   let shtraf = 0;
   let ugol = 0;
-  for (const p of pravilaGeometrii(
-    scena,
-    scena.elementy,
-    (n) => tochki[n],
-    krugi,
-    porogi,
-    'luboy',
-  )) {
+  /* Способы решения рисуются по отдельности: правила — для каждого
+     способа со своими построениями. */
+  const sposoby = [...new Set(scena.elementy.map((e) => e.sposob ?? 1))];
+  const problemy = sposoby.flatMap((sp) =>
+    pravilaGeometrii(
+      scena,
+      scena.elementy.filter((e) => e.sposob === undefined || e.sposob === sp),
+      (n) => tochki[n],
+      krugi,
+      porogi,
+      'luboy',
+    ),
+  );
+  for (const p of problemy) {
     if (p.kod === 'ugol' && p.shtraf < 1e4) {
       ugol = Math.max(ugol, p.shtraf);
       shtraf += p.shtraf * 1e-3;

@@ -10,6 +10,7 @@ import { nazvanieFakta1 } from '../../../content/spravochnik1/fakty';
 import { typeset } from '../../tex';
 import { renderPlan } from '../render';
 import { sealAnswer, sealText } from '../secret';
+import { sobratScenariy } from '../scenariy';
 import { generateMikro, sOtvetom } from './generate';
 import type { Mikro } from './types';
 
@@ -25,6 +26,8 @@ export interface MikroSealed {
   fakt: { id: string; nazvanieHtml: string; vNasheyHtml: string } | null;
   /** Разбор: JSON строк HTML и рисунок учителя, закрытые отпечатком. */
   razbor: string;
+  /** Подсказка-сценарий: JSON ScenariyHtml, закрытый отпечатком; null — формула. */
+  scenariy: string | null;
 }
 
 export interface MikroRazbor {
@@ -64,5 +67,18 @@ export function sealMikro(m: Mikro, seed: string): MikroSealed {
           }
         : null,
     razbor: sealText(JSON.stringify(razbor), seal),
+    /* Сценарий доводит до ответа — закрыт, как и разбор: в HTML ответа нет. */
+    scenariy:
+      task.scenariy === undefined
+        ? null
+        : sealText(
+            JSON.stringify(
+              sobratScenariy(
+                task.scenariy,
+                task.risunok === null ? null : { scena: task.risunok, optsii: { alt: m.nazvanie } },
+              ),
+            ),
+            seal,
+          ),
   };
 }

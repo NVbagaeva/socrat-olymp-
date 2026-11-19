@@ -29,6 +29,13 @@ export const PL = {
   novoe: 'var(--chertezh-novoe, #E8730C)',
   zalivka: 'var(--chertezh-zalivka, rgba(31, 95, 208, 0.07))',
   bg: THEME.colors.bg,
+  /* Заливки частей с равной площадью (S, 2S): синий, терракота, янтарь. */
+  zaliv: [
+    'var(--chertezh-vershina, #1F5FD0)',
+    'var(--chertezh-velichina, #E07A2F)',
+    'var(--chertezh-velichina-2, #A85F06)',
+  ] as const,
+  zalivProzrachnost: 0.13,
   /* Толщины: основные линии и окружность < выделенный элемент. */
   width: {
     line: 1.75,

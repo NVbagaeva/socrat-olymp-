@@ -29,6 +29,7 @@ import { pustoyOtchet, renderPlan, shagovPodskazki } from '../render';
 import { nazvanieFakta1 } from '../../../content/spravochnik1/fakty';
 import { reshenie } from '../reshenie';
 import type { ShagResheniya, VoprosPodskazki } from '../reshenie';
+import { sobratScenariy, type ScenariyHtml, type ShagScenariyaHtml } from '../scenariy';
 import { sealAnswer, sealText } from '../secret';
 import { prototip } from '../stseny';
 import { chislo, type Params } from '../stseny/dsl';
@@ -217,6 +218,15 @@ export function bezOtvetaSrediKnopok(v: VoprosPodskazki, otvet: number): VoprosP
 
 export interface Podskazki1 {
   voprosy: VoprosHtml[];
+  /** Та же подсказка сценарием: способы, уточнение после ошибки, приём. */
+  scenariy: ScenariyHtml;
+}
+
+/** Текст уточнения по умолчанию: к факту шага, без ответа. */
+export function utochnenieKFaktu(fakt: string | null | undefined): string {
+  return typeof fakt === 'string'
+    ? `Открой «${nazvanieFakta1(fakt)}» — кнопка под вопросом — и посмотри, что оно говорит про этот случай.`
+    : 'Перечитай условие и посмотри на чертёж: что здесь дано и что нужно найти?';
 }
 
 export interface ShagHtml {
@@ -301,7 +311,11 @@ export function sostavZadachi(z: RazreshennayaZadacha) {
   const razbor: Razbor1 = {
     shagi: r.shagi.map((s) => ({
       fakty: faktyShaga(s),
-      zagolovok: typeset(ren(s.zagolovok)),
+      zagolovok:
+        (s.sposobNazvanie === undefined
+          ? ''
+          : `<span class="z1-sposob">${typeset(ren(s.sposobNazvanie))}</span> `) +
+        typeset(ren(s.zagolovok)),
       tekst: s.tekst.filter((t) => t !== '').map((t) => typeset(ren(t))),
       formuly: (s.formuly ?? []).map((f) => display(ren(f))),
       sokrashchenie: (s.sokrashchenie ?? []).map((k) => ({
@@ -313,23 +327,70 @@ export function sostavZadachi(z: RazreshennayaZadacha) {
     otvetHtml: typeset(`$${otvetTex(otvet)}$`),
     risunokSvg: risunok({ rezhim: 'uchitel' }),
   };
-  const podskazki: Podskazki1 = {
-    voprosy: voprosy.map((v, i) => ({
-      vvod: v.vvod === undefined ? '' : typeset(ren(v.vvod)),
-      vopros: typeset(ren(v.vopros)),
-      knopki: v.knopki.map((x) => typeset(ren(x))),
-      verno: v.verno,
-      poyasnenie: typeset(ren(v.poyasnenie)),
-      risunokSvg: risunok(rezhimVoprosa(voprosy, i, nShagov)),
-      fakt: typeof v.fakt === 'string' ? fakt(v.fakt, v.vNashey) : null,
-    })),
-  };
+  const voprosyHtml: VoprosHtml[] = voprosy.map((v, i) => ({
+    vvod: v.vvod === undefined ? '' : typeset(ren(v.vvod)),
+    vopros: typeset(ren(v.vopros)),
+    knopki: v.knopki.map((x) => typeset(ren(x))),
+    verno: v.verno,
+    poyasnenie: typeset(ren(v.poyasnenie)),
+    risunokSvg: risunok(rezhimVoprosa(voprosy, i, nShagov)),
+    fakt: typeof v.fakt === 'string' ? fakt(v.fakt, v.vNashey) : null,
+  }));
+  /* Сценарий: свой у прототипа — или из вопросов: тот же чертёж шага,
+     после верного ответа — с числами шага; после первой ошибки —
+     уточнение без ответа. */
+  const scenariy: ScenariyHtml =
+    r.scenariy !== undefined
+      ? sobratScenariy(r.scenariy, { scena, optsii: { variant: z.variant, alt } }, ren)
+      : {
+          vybor: null,
+          sposoby: [
+            {
+              nazvanieHtml: '',
+              knopkaHtml: '',
+              zachemHtml: '',
+              vyvodHtml: '',
+              shagi: voprosy.map((v, i): ShagScenariyaHtml => {
+                const rz = rezhimVoprosa(voprosy, i, nShagov);
+                const h = voprosyHtml[i]!;
+                return {
+                  vvodHtml: h.vvod,
+                  voprosHtml: h.vopros,
+                  knopkiHtml: h.knopki,
+                  verno: h.verno,
+                  daHtml: h.poyasnenie,
+                  formulyHtml: [],
+                  utochnenieHtml: typeset(ren(v.utochnenie ?? utochnenieKFaktu(v.fakt))),
+                  podvoprosy: [],
+                  risunokDo: h.risunokSvg,
+                  risunokPosle:
+                    rz.rezhim === 'podskazka' && rz.vopros === true
+                      ? risunok({ rezhim: 'podskazka', shag: rz.shag })
+                      : h.risunokSvg,
+                  fakt: h.fakt,
+                };
+              }),
+            },
+          ],
+          priem:
+            r.priem === undefined
+              ? null
+              : {
+                  nazvanieHtml: typeset(ren(r.priem.nazvanie)),
+                  fakt: fakt(r.priem.fakt),
+                },
+        };
+  const podskazki: Podskazki1 = { voprosy: voprosyHtml, scenariy };
   /* Решение для листа учителя: шаг — строка, выкладки в тексте. */
   const reshenieLista = `<ol class="sheet-steps z1-sheet-steps">${r.shagi
     .map((s) => {
       const tekst = s.tekst.filter((t) => t !== '').map((t) => typeset(ren(t)));
       const formuly = (s.formuly ?? []).map((f) => typeset(`$${ren(f)}$`));
-      return `<li class="sheet-step"><b>${typeset(ren(s.zagolovok))}.</b> ${[...tekst, ...formuly].join(' ')}</li>`;
+      const sposob =
+        s.sposobNazvanie === undefined
+          ? ''
+          : `<li class="sheet-step z1-sheet-sposob"><b>${typeset(ren(s.sposobNazvanie))}</b></li>`;
+      return `${sposob}<li class="sheet-step"><b>${typeset(ren(s.zagolovok))}.</b> ${[...tekst, ...formuly].join(' ')}</li>`;
     })
     .join('')}</ol>`;
   /* Ключевой шаг одной строкой — для таблицы ответов листа учителя:

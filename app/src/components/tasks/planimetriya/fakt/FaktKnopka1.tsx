@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { FAKT1 } from '@/content/fakty1';
 import type { KartochkaFakta1 } from '@/lib/planimetriya/fakt-kartochka';
+import { BLOKI_SPRAVOCHNIKA } from '@/content/spravochnik1/tipy';
 import { Ikonka } from '../../steklo';
+import { Vyvod1 } from '../spravochnik/Vyvod1';
 import './fakt1.css';
 
 /** Факт шага: что открыть и как он ложится на эту задачу. */
@@ -104,6 +106,7 @@ export function FaktKnopka1({
 function Kartochka({ k, vNasheyHtml }: { k: KartochkaFakta1; vNasheyHtml: string }) {
   return (
     <div className="fakt1">
+      <Vyvod1 shagi={k.vyvod} label={BLOKI_SPRAVOCHNIKA.vyvod} />
       <div className="fakt1__glavnoe">
         <section className={`spr1-blok spr1-blok--${k.klass} fakt1__blok`}>
           <span className="spr1-blok__label">{k.vid}</span>
@@ -113,6 +116,12 @@ function Kartochka({ k, vNasheyHtml }: { k: KartochkaFakta1; vNasheyHtml: string
               className="spr1-blok__formula rich-formula"
               dangerouslySetInnerHTML={{ __html: k.formulaHtml }}
             />
+          )}
+          {k.obosnovanieHtml === '' ? null : (
+            <span className="spr1-blok__pochemu">
+              <b>{BLOKI_SPRAVOCHNIKA.obosnovanie}.</b>{' '}
+              <span dangerouslySetInnerHTML={{ __html: k.obosnovanieHtml }} />
+            </span>
           )}
           {k.dop === null ? null : (
             <span className="spr1-blok__dop">

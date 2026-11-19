@@ -5,7 +5,26 @@
 
 import type { Params } from '../stseny/dsl';
 import { g, n, shag, sokr, sverkaDliny, sverkaUgla, vopros, variantyGradusov, f } from './obshchee';
+import { chasti15, chasti76 } from '../stseny/blok2';
+import {
+  type Chasti,
+  otvetChastey,
+  resheniyeChastey,
+  scenariyChastey,
+  sverkaChastey,
+  voprosyChastey,
+} from '../stseny/chasti';
 import type { Reshenie } from './types';
+
+function reshenieChastey(c: Chasti): Reshenie {
+  return {
+    shagi: resheniyeChastey(c),
+    voprosy: voprosyChastey(c),
+    scenariy: scenariyChastey(c),
+    sverka: sverkaChastey(c),
+    otvet: otvetChastey(c),
+  };
+}
 
 const SUMMA = 'Сумма углов треугольника';
 const SUMMA_TEKST = 'Сумма углов любого треугольника равна $180^\\circ$.';
@@ -696,47 +715,10 @@ export const RESHENIYA_1: Record<number, (p: Params) => Reshenie> = {
       otvet: s.itog,
     };
   },
-  15: (p) => {
-    const s = sokr([3, p.s], 4, 'S');
-    return {
-      shagi: [
-        shag(
-          'Отрезанный треугольник',
-          'Отрезок из вершины к середине стороны отсекает треугольник. Его высота равна высоте параллелограмма, а основание — половине стороны. Пусть сторона параллелограмма равна $a$, а высота к ней — $h$.',
-          [`S_{\\triangle} = \\dfrac12\\cdot\\dfrac{a}{2}\\cdot h = \\dfrac14\\, ah = \\dfrac14 S`],
-        ),
-        shag(
-          'Трапеция',
-          'Трапеция — это параллелограмм без треугольника.',
-          [
-            `S_{\\text{трап}} = S - \\dfrac14 S = \\dfrac34\\cdot ${n(p.s)}`,
-            `S_{\\text{трап}} = ${n(s.itog)}`,
-          ],
-          undefined,
-          s.shagi,
-        ),
-      ],
-      voprosy: [
-        f(
-          vopros(
-            'Какую часть площади параллелограмма составляет отрезанный треугольник?',
-            ['$\\frac14$', '$\\frac12$', '$\\frac13$'],
-            'Основание вдвое меньше стороны, а площадь треугольника — половина произведения основания на высоту.',
-          ),
-          'ploshchad-treugolnika',
-          'отрезанный треугольник опирается на половину стороны параллелограмма, а его высота — высота параллелограмма',
-        ),
-      ],
-      sverka: sverkaDliny(
-        'площадь трапеции',
-        s.itog,
-        'площадь параллелограмма',
-        p.s,
-        'трапеция — его часть',
-      ),
-      otvet: s.itog,
-    };
-  },
+  /* Середина стороны: общий модуль «сторона поделена на равные части»
+     (stseny/chasti.ts) — подсказка с выбором построения, два способа. */
+  15: (p) => reshenieChastey(chasti15(p)),
+  76: (p) => reshenieChastey(chasti76(p)),
   16: (p) => {
     const s = sokr([p.b, p.h], p.a, 'h');
     return {

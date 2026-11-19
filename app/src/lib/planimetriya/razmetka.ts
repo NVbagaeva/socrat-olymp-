@@ -481,7 +481,10 @@ export function pravilaGeometrii(
 /** Проверка готового рисунка по отчёту движка: экранные координаты. */
 export function proveritRazmetku(scena: Scena, optsii: Optsii, o: Otchet): ProblemaRazmetki[] {
   const rezhim: Rezhim = optsii.rezhim ?? { rezhim: 'uchenik' };
-  const vidimye = scena.elementy.filter((e) => vidim(e.sloy ?? 'uslovie', rezhim));
+  const sposob = optsii.sposob ?? 1;
+  const vidimye = scena.elementy.filter(
+    (e) => vidim(e.sloy ?? 'uslovie', rezhim) && (e.sposob === undefined || e.sposob === sposob),
+  );
   const imya = (n: string) => optsii.variant?.bukvy[n] ?? n;
   const krugi: KrugRazmetki[] = [];
   for (const p of o.prepyatstviya) if (p.tip === 'krug') krugi.push({ c: p.c, r: p.r });

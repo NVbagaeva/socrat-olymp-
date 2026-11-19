@@ -16,7 +16,7 @@
 import { RAZDELY_SPRAVOCHNIKA_1 } from './index';
 import type { Razdel1, Tema1, Teorema, Utverzhdenie } from './tipy';
 
-export type VidFakta = 'opredeleniya' | 'svoystva' | 'priznaki' | 'teoremy';
+export type VidFakta = 'opredeleniya' | 'svoystva' | 'priznaki' | 'teoremy' | 'priemy';
 
 /** Подпись вида на карточке: свойство и признак — разные вещи. */
 export const VID_FAKTA: Record<VidFakta, string> = {
@@ -24,6 +24,7 @@ export const VID_FAKTA: Record<VidFakta, string> = {
   svoystva: 'Свойство',
   priznaki: 'Признак',
   teoremy: 'Теорема',
+  priemy: 'Приём',
 };
 
 /** Запись реестра: тема, блок, номер в блоке, слова формулировки, название. */
@@ -41,6 +42,7 @@ const o = 'opredeleniya';
 const s = 'svoystva';
 const p = 'priznaki';
 const t = 'teoremy';
+const pr = 'priemy';
 
 const ZAPISI: Record<string, Zapis> = {
   /* Углы и прямые. */
@@ -60,9 +62,9 @@ const ZAPISI: Record<string, Zapis> = {
     'Определение биссектрисы угла',
   ],
   'bissektrisy-smezhnyh': [
-    'bissektrisa-ugla',
+    'bissektrisy-smezhnyh',
     s,
-    1,
+    0,
     'смежных углов перпендикулярны',
     'Свойство биссектрис смежных углов',
   ],
@@ -173,10 +175,10 @@ const ZAPISI: Record<string, Zapis> = {
   ],
   'mediany-2-1': ['mediana', s, 0, 'в отношении $2:1$', 'Свойство точки пересечения медиан'],
   'mediana-ploshchad': [
-    'mediana',
+    'mediana-ravnovelikie',
     s,
-    1,
-    'равной площади',
+    0,
+    'равновеликих',
     'Свойство медианы: два равновеликих треугольника',
   ],
   'vysota-opr': ['vysota', o, 0, 'перпендикуляр', 'Определение высоты треугольника'],
@@ -414,11 +416,46 @@ const ZAPISI: Record<string, Zapis> = {
     'Свойство противоположных сторон и углов параллелограмма',
   ],
   'parallelogramm-sosednie': [
-    'parallelogramm',
+    'ugly-parallelogramma',
     s,
-    1,
+    0,
     'прилежащих к одной стороне',
     'Свойство соседних углов параллелограмма',
+  ],
+  'diagonal-parallelogramma': [
+    'diagonal-parallelogramma',
+    s,
+    0,
+    'на два равных треугольника',
+    'Свойство диагонали параллелограмма: два равных треугольника',
+  ],
+  'obshchaya-vysota': [
+    'obshchaya-vysota',
+    s,
+    0,
+    'относятся как их основания',
+    'Свойство треугольников с общей высотой',
+  ],
+  'priem-ravnye-ugly': [
+    'priem-ravnye-ugly',
+    pr,
+    0,
+    'одной буквой',
+    'Приём: равные углы обозначаем одной буквой',
+  ],
+  'priem-ravnye-ploshchadi': [
+    'priem-ravnye-ploshchadi',
+    pr,
+    0,
+    'одной буквой',
+    'Приём: равные площади обозначаем одной буквой S',
+  ],
+  'priem-otnoshenie': [
+    'priem-otnoshenie',
+    pr,
+    0,
+    'записываем как',
+    'Приём: отношение $a : b$ — это $ax$ и $bx$',
   ],
   'parallelogramm-diagonali': [
     'parallelogramm',
@@ -715,6 +752,8 @@ export interface Fakt1 {
   formula?: string;
   /** Вторая формула теоремы с подписью. */
   dop?: { podpis: string; formula: string };
+  /** Почему так: обоснование утверждения. */
+  obosnovanie?: string;
   /** Номер разбора темы для кнопки «Пример». */
   primer: number;
   tema: Tema1;
@@ -747,6 +786,7 @@ function sobrat(): Record<string, Fakt1> {
       tekst,
       ...(u.formula === undefined ? {} : { formula: u.formula }),
       ...('slovami' in u && u.dop !== undefined ? { dop: u.dop } : {}),
+      ...(!('slovami' in u) && u.obosnovanie !== undefined ? { obosnovanie: u.obosnovanie } : {}),
       primer: primer ?? 0,
       tema: m.tema,
       razdel: m.razdel,

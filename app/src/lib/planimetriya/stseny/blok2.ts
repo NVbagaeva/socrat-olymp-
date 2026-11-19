@@ -7,7 +7,9 @@
 import { RAD, projT } from '../geom';
 import { parallelogramm, poStoronam, poUglam, ravnobedrennyy, romb, trapeciya } from '../figury';
 import { podobrat } from '../skhema';
+import { type Chasti, otvetChastey, stsenaChastey } from './chasti';
 import type { Element, T2 } from '../types';
+import type { Params } from './dsl';
 import {
   type PrototipChertezha,
   chislo,
@@ -336,28 +338,44 @@ export const BLOK_II_IV: PrototipChertezha[] = [
     otvet: (p) => (3 * p.s) / 4,
     primer: { s: 92, k: 0, u: 55 },
     sluchaynye: (r) => ({ s: r.int(4, 200), k: r.int(0, 3), u: r.int(40, 75) }),
-    stsena: (p) => {
-      const [m, , trap, konci, otrezok] = SEREDINA[p.k]!;
-      return podobrat(klyuch(15, p), { u: p.u ?? 55 }, { u: [40, 86] }, ({ u }) => ({
-        tochki: { ...parallelogramm(u, 10, 6), [m]: { seredina: konci } },
-        elementy: [
-          mn(['A', 'B', 'C', 'D']),
-          otr(otrezok[0], otrezok[1]),
-          shtrih(konci[0], m, 1),
-          shtrih(m, konci[1], 1),
-          oblast(trap.split(''), { vydelit: 'iskomoe' }),
-        ],
-        proverki: [
-          {
-            parallelny: [
-              ['A', 'B'],
-              ['D', 'C'],
-            ],
-          },
-        ],
-        otvet: chislo((3 * p.s) / 4),
-      }));
+    /* Чертёж, подсказка и решение — общий модуль «сторона поделена на
+       равные части» (chasti.ts) при n = 2: середина стороны. */
+    stsena: (p) =>
+      podobrat(klyuch(15, p), { u: p.u ?? 55 }, { u: [40, 86] }, ({ u }) => {
+        const c = chasti15(p);
+        const t = parallelogramm(u, 10, 6);
+        const [mm, , , konci] = SEREDINA[p.k]!;
+        return stsenaChastey(c, { ...t, [mm]: tochkaNa(t, konci[0], konci[1], 0.5) });
+      }),
+  },
+  {
+    id: 76,
+    blok: 'III',
+    nazvanie: 'Сторона параллелограмма поделена на равные части → площадь части',
+    fipi: [],
+    uslovie: (p) => uslovie76(p),
+    otvet: (p) => otvetChastey(chasti76(p)),
+    /* Задача из подсказок №1 (п. 9а): три равные части, трапеция, ответ 150. */
+    primer: { n: 3, m: 1, v: 0, s: 180, u: 115 },
+    sluchaynye: (r) => {
+      const n = r.int(2, 4);
+      const m = r.int(1, n - 1);
+      const v = r.int(0, 3);
+      return { n, m, v, s: sluchaynayaPloshchad76(n, m, v, r.int(2, 30)), u: r.int(100, 125) };
     },
+    stsena: (p) =>
+      /* Угол C тупой: высота из B падает на продолжение CD за точку C и
+         не слипается с точками деления. */
+      podobrat(klyuch(76, p), { u: p.u ?? 115 }, { u: [96, 135] }, ({ u }) => {
+        const c = chasti76(p);
+        const t = parallelogramm(u, 7, 10);
+        const tochki: Record<string, T2> = { ...t };
+        /* Точки деления от Q = C к R = D. */
+        c.deleniya.forEach((d, i) => {
+          tochki[d] = tochkaNa(t, 'C', 'D', (i + 1) / c.n);
+        });
+        return stsenaChastey(c, tochki);
+      }),
   },
   {
     id: 16,
@@ -609,6 +627,118 @@ const ROMB: readonly (readonly [
     ['A', 'C'],
   ],
 ];
+
+/** Точка на отрезке XY на доле t от X. */
+function tochkaNa(t: Record<string, T2>, x: string, y: string, d: number): T2 {
+  const a = t[x]!;
+  const b = t[y]!;
+  return [a[0] + (b[0] - a[0]) * d, a[1] + (b[1] - a[1]) * d];
+}
+
+/**
+ * Прототип 15 в ролях общего модуля: P — вершина отрезка, Q — соседняя
+ * с ней вершина стороны с серединой, R — другая вершина стороны, T —
+ * другая соседка P.
+ */
+const ROLI_15: readonly (readonly [string, string, string, string])[] = [
+  ['A', 'D', 'C', 'B'],
+  ['D', 'C', 'B', 'A'],
+  ['C', 'B', 'A', 'D'],
+  ['B', 'A', 'D', 'C'],
+];
+
+export function chasti15(p: Params): Chasti {
+  const [mm] = SEREDINA[p.k]!;
+  const [P, Q, R, T] = ROLI_15[p.k]!;
+  return {
+    n: 2,
+    m: 1,
+    P,
+    Q,
+    R,
+    T,
+    deleniya: [mm],
+    peresecheniya: ['K'],
+    osnovanie: 'N',
+    vid: 'trap',
+    s: p.s,
+  };
+}
+
+/* ── 76. Сторона CD поделена на n равных частей ───────────────────
+   Роли: P = B, Q = C, R = D, T = A — отрезок BE, треугольник BCE,
+   трапеция ABED. Точки деления от C: E — на m-й, остальные K, L.
+   v: 0 — найти трапецию, 1 — треугольник, 2 — дана трапеция, найти
+   параллелограмм, 3 — дан треугольник, найти параллелограмм. */
+
+const VIDY_76 = ['trap', 'treug', 'obr-trap', 'obr-treug'] as const;
+
+export function chasti76(p: Params): Chasti {
+  const n = p.n ?? 3;
+  const m = p.m ?? 1;
+  const drugie = ['K', 'L'];
+  const deleniya: string[] = [];
+  const peresecheniya: string[] = [];
+  const drugiePeres = ['G', 'H'];
+  for (let i = 1; i < n; i += 1) {
+    if (i === m) {
+      deleniya.push('E');
+      peresecheniya.push('F');
+    } else {
+      deleniya.push(drugie.shift()!);
+      peresecheniya.push(drugiePeres.shift()!);
+    }
+  }
+  return {
+    n,
+    m,
+    P: 'B',
+    Q: 'C',
+    R: 'D',
+    T: 'A',
+    deleniya,
+    peresecheniya,
+    osnovanie: 'N',
+    vid: VIDY_76[p.v ?? 0]!,
+    s: p.s,
+  };
+}
+
+const CHASTI_SLOVOM = ['', '', 'две', 'три', 'четыре'];
+
+function uslovie76(p: Params): string {
+  const c = chasti76(p);
+  /* Точки от D к C: «DK = KE = EC». */
+  const otD = ['D', ...[...c.deleniya].reverse(), 'C'];
+  const ravenstva = otD
+    .slice(0, -1)
+    .map((x, i) => `${x}${otD[i + 1]}`)
+    .join(' = ');
+  const deleniye =
+    c.n === 2
+      ? 'Точка $E$ — середина стороны $CD$.'
+      : `Сторона $CD$ разделена точками ${otD
+          .slice(1, -1)
+          .map((x) => `$${x}$`)
+          .join(c.n === 3 ? ' и ' : ', ')} на ${CHASTI_SLOVOM[c.n]} равные части ($${ravenstva}$).`;
+  const par = `Площадь параллелограмма $ABCD$ равна $${tex(c.s)}$.`;
+  switch (c.vid) {
+    case 'trap':
+      return `${par} ${deleniye} Найдите площадь трапеции $ABED$.`;
+    case 'treug':
+      return `${par} ${deleniye} Найдите площадь треугольника $BCE$.`;
+    case 'obr-trap':
+      return `$ABCD$ — параллелограмм. ${deleniye} Площадь трапеции $ABED$ равна $${tex(c.s)}$. Найдите площадь параллелограмма $ABCD$.`;
+    default:
+      return `$ABCD$ — параллелограмм. ${deleniye} Площадь треугольника $BCE$ равна $${tex(c.s)}$. Найдите площадь параллелограмма $ABCD$.`;
+  }
+}
+
+/** Площадь условия так, чтобы ответ был целым: k — сколько площадей «единицы». */
+export function sluchaynayaPloshchad76(n: number, m: number, v: number, k: number): number {
+  if (v === 0 || v === 1) return 2 * n * k;
+  return (v === 2 ? 2 * n - m : m) * k;
+}
 
 /* Середина стороны параллелограмма: [точка, сторона, трапеция, концы, отрезок-разрез]. */
 const SEREDINA: readonly (readonly [
