@@ -27,7 +27,10 @@ const poryadok = (a, b) =>
 
 const imyaFakta = (id) => {
   const f = fakt1(id);
-  return f === undefined ? `нет в реестре: ${id}` : `${VID_FAKTA[f.vid]}: ${f.nazvanie}`;
+  if (f === undefined) return `нет в реестре: ${id}`;
+  /* Название уже начинается с вида («Свойство …», «Теорема …») — не повторять. */
+  const vid = VID_FAKTA[f.vid];
+  return f.nazvanie.startsWith(vid) ? f.nazvanie : `${vid}: ${f.nazvanie}`;
 };
 
 const spisok = (...chasti) => chasti.flat().join(' ') || '—';
