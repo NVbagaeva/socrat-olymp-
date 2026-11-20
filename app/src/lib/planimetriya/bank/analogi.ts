@@ -14,10 +14,11 @@
  * Ответы аналогов по возможности различны.
  */
 
+import { sluchaynayaPloshchad76 } from '../stseny/blok2';
 import { rngOf } from '../../vychisleniya/rng';
 import type { Rng } from '../../veroyatnost/generator';
 import { POROG } from '../figury';
-import { pustoyOtchet, renderPlan, shagovPodskazki } from '../render';
+import { bezNablyudeniya, pustoyOtchet, renderPlan, shagovPodskazki } from '../render';
 import { PROTOTIPY, prototip } from '../stseny';
 import type { Nabor, Params } from '../stseny/dsl';
 import type { Rezhim } from '../types';
@@ -106,6 +107,14 @@ export const GENERATORY: Record<number, Gen> = {
     return { a, b, h: shag * r.int(1, Math.floor((b - 1) / shag)) };
   },
   15: (r) => ({ s: 4 * r.int(10, 50), k: r.int(0, 3), u: r.int(45, 70) }),
+  /* 76: 2–4 части, E ближе к C или к D, трапеция или треугольник, прямая
+     и обратная задача; площадь — так, чтобы ответ был целым. */
+  76: (r) => {
+    const n = r.int(2, 4);
+    const m = r.int(1, n - 1);
+    const v = r.int(0, 3);
+    return { n, m, v, s: sluchaynayaPloshchad76(n, m, v, r.int(3, 40)), u: r.int(100, 125) };
+  },
   16: (r) => {
     const a = r.int(6, 30);
     const b = r.int(a + 2, a + 30);
@@ -393,11 +402,13 @@ export function chertezhChist(id: number, p: Params): boolean {
     ...Array.from({ length: n }, (_, i) => ({ rezhim: 'podskazka' as const, shag: i + 1 })),
     { rezhim: 'uchitel' },
   ];
-  return rezhimy.every((rezhim) => {
-    const o = pustoyOtchet();
-    renderPlan(scena, { rezhim }, o);
-    return o.problems.length === 0;
-  });
+  return bezNablyudeniya(() =>
+    rezhimy.every((rezhim) => {
+      const o = pustoyOtchet();
+      renderPlan(scena, { rezhim }, o);
+      return o.problems.length === 0;
+    }),
+  );
 }
 
 export interface Analog {

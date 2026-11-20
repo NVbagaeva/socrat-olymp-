@@ -26,7 +26,7 @@
      4. Тренировки, «Работа над ошибками», «Похожая задача».
      5. Запись тренировки: новый формат и прежний (панель фильтров), из
         образца — та же тренировка, те же задачи.
-     6. Тексты карты: «Где теряют балл» у каждого из 75 типов.
+     6. Тексты карты: «Где теряют балл» у каждого типа.
 
    Запуск: node scripts/check-progress-1.mjs */
 
@@ -281,7 +281,7 @@ for (const [chto, raw] of [
 {
   const { analogi } = requireSrc('lib/planimetriya/bank/analogi.ts');
   const vsegoAnalogov = PROTOTIPY.reduce((n, p) => n + analogi(p.id).length, 0);
-  check(Object.keys(katalog).length === 75, `в каталоге ${Object.keys(katalog).length} типов`);
+  check(Object.keys(katalog).length === PROTOTIPY.length, `в каталоге ${Object.keys(katalog).length} типов`);
   check(
     poZadache.size === BANK_FIPI.length + vsegoAnalogov,
     `в каталоге ${poZadache.size} задач, а в банке ${BANK_FIPI.length} + ${vsegoAnalogov}`,
@@ -312,7 +312,9 @@ for (const [chto, raw] of [
     check(s.z.risunokSvg.includes('<svg'), `задача ${id}: нет чертежа условия`);
     check(s.s.shagi.length > 0 && s.s.voprosy.length > 0, `задача ${id}: нет шагов или вопросов`);
     check(
-      s.s.shagi[s.s.shagi.length - 1].risunokSvg === s.s.uchitelSvg,
+      /* Два способа: у последнего шага — построения своего способа. */
+      s.s.scenariy.sposoby.length > 1 ||
+        s.s.shagi[s.s.shagi.length - 1].risunokSvg === s.s.uchitelSvg,
       `задача ${id}: у последнего шага не чертёж всех построений`,
     );
     check(

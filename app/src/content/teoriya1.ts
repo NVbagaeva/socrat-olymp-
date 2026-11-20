@@ -526,7 +526,7 @@ const elementy: Razdel1 = {
       ],
       formula: 'S_{ACM} = S_{BCM} = \\tfrac12\\, S_{ABC}',
       risunok: 'mediana-ploshchad',
-      prototipy: [15],
+      prototipy: [15, 76],
     },
     {
       id: 'bissektrisa-delit',

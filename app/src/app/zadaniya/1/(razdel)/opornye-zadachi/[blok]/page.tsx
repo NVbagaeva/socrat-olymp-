@@ -49,11 +49,36 @@ export default async function Opornye1BlokPage({ params }: { params: Params }) {
         zapomni={
           <>
             <b>{OPORNYE1.zapomni}</b>
-            <ul className="z1-zapomni">
-              {found.formulyHtml.map((html, i) => (
-                <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
-              ))}
-            </ul>
+            {found.pamyatka.length > 0 ? (
+              /* Памятка словами: факт, мелкая формула, маленький цветной чертёж. */
+              <ul className="z1-pamyatka">
+                {found.pamyatka.map((f, i) => (
+                  <li className="z1-pamyatka__fakt" key={i}>
+                    {f.risunokSvg === null ? null : (
+                      <span
+                        className="pl-wrap z1-pamyatka__ris"
+                        dangerouslySetInnerHTML={{ __html: f.risunokSvg }}
+                      />
+                    )}
+                    <span className="z1-pamyatka__tekst">
+                      <span dangerouslySetInnerHTML={{ __html: f.tekstHtml }} />
+                      {f.formulaHtml === '' ? null : (
+                        <span
+                          className="z1-pamyatka__formula"
+                          dangerouslySetInnerHTML={{ __html: f.formulaHtml }}
+                        />
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul className="z1-zapomni">
+                {found.formulyHtml.map((html, i) => (
+                  <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
+                ))}
+              </ul>
+            )}
           </>
         }
         zadachi={found.zadachi}

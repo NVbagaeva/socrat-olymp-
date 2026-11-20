@@ -190,6 +190,38 @@
   list-style: none;
   overflow-x: auto;
 }
+/* Памятка блока словами: у каждого факта — маленький цветной чертёж,
+   формула мелко под словами; на 360 px ничего не обрезается. */
+.z1-pamyatka {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.z1-pamyatka__fakt {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+}
+.z1-pamyatka__ris {
+  display: block;
+  width: 96px;
+}
+.z1-pamyatka__tekst {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.z1-pamyatka__formula {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 .z1-op__chertezh {
   max-width: 320px;
   margin-inline: auto;

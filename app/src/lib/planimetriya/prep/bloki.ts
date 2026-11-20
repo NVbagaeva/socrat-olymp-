@@ -4,6 +4,7 @@
  * четырёхугольники, площади, Пифагор, тригонометрия, окружность.
  */
 
+import { PAMYATKA_SMEZHNYE } from './scenarii';
 import {
   BLOK_CHETYREHUGOLNIKI,
   BLOK_KASATELNYE,
@@ -15,9 +16,10 @@ import {
   BLOK_SUMMA,
   BLOK_TRIG,
 } from './mikro';
+import { FAKTY_MIKRO } from './fakty';
 import type { Blok, Mikro } from './types';
 
-export const BLOKI: Blok[] = [
+const BLOKI_BEZ_FAKTOV: Blok[] = [
   {
     id: 'P1-1',
     slug: 'summa-uglov',
@@ -38,10 +40,11 @@ export const BLOKI: Blok[] = [
     nazvanie: 'Смежные углы и параллельные прямые',
     lead: 'Смежные, вертикальные, накрест лежащие и односторонние углы',
     formuly: [
-      '\\alpha_{\\text{смеж}} + \\beta_{\\text{смеж}} = 180^\\circ',
+      '\\angle AOC + \\angle COB = 180^\\circ',
       '\\text{вертикальные и накрест лежащие углы равны}',
-      '\\alpha_{\\text{одност}} + \\beta_{\\text{одност}} = 180^\\circ',
     ],
+    /* Словами, у каждого факта — маленький цветной чертёж. */
+    pamyatka: PAMYATKA_SMEZHNYE,
     zadachi: BLOK_SMEZHNYE,
   },
   {
@@ -126,6 +129,12 @@ export const BLOKI: Blok[] = [
     zadachi: BLOK_KASATELNYE,
   },
 ];
+
+/** Блоки с фактами задач (prep/fakty.ts): подсказка словами, кнопка свойства. */
+export const BLOKI: Blok[] = BLOKI_BEZ_FAKTOV.map((b) => ({
+  ...b,
+  zadachi: b.zadachi.map((m) => ({ ...m, ...FAKTY_MIKRO[m.id] })),
+}));
 
 export function blokBySlug(slug: string): Blok | undefined {
   return BLOKI.find((b) => b.slug === slug);
