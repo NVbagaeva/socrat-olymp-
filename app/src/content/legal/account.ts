@@ -6,7 +6,7 @@
 export const registrationText = {
   title: 'Регистрация',
   role: 'Кто вы',
-  roles: { student: 'Ученик', tutor: 'Репетитор' },
+  roles: { student: 'Ученик', tutor: 'Учитель' },
   name: 'Имя',
   email: 'Почта',
   password: 'Пароль',

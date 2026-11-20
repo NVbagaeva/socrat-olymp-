@@ -118,10 +118,10 @@ try {
       JSON.parse(localStorage.getItem('budetege:onboarding:v1') ?? '{}'),
     );
     check(seen.welcomeSeen === true, '«уже видел» записан в budetege:onboarding:v1');
-    await page.getByRole('button', { name: 'Тур для репетитора' }).click();
+    await page.getByRole('button', { name: 'Тур для учителя' }).click();
     /* Обёртка тура без размера — ждём её в DOM, видна её карточка. */
     await page.waitForSelector('.tour', { state: 'attached', timeout: 15000 });
-    check(true, '«Тур для репетитора» → тур стартует');
+    check(true, '«Тур для учителя» → тур стартует');
     check((await page.locator(INTRO).count()) === 0, 'заставка закрыта после выбора');
     check(errors.length === 0, 'в консоли нет ошибок' + (errors[0] ? `: ${errors[0]}` : ''));
     await context.close();

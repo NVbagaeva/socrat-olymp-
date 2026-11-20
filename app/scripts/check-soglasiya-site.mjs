@@ -190,7 +190,7 @@ async function demoPart(browser, base) {
     const consents = page.locator('[data-testid="consents"] tbody tr');
 
     // Взрослый репетитор: без галочек кнопка неактивна.
-    await page.getByLabel('Репетитор').check();
+    await page.getByLabel('Учитель').check();
     await page.getByLabel('Имя').fill('Анна');
     await page.getByLabel('Почта', { exact: true }).fill('anna@x.ru');
     await page.getByLabel('Пароль').fill('12345678');
