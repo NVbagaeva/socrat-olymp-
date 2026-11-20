@@ -68,52 +68,55 @@ export function KartaOkoshko({
             {oblast.sostoyanie === 'skoro' ? KARTA_TEKST.skoro : KARTA_TEKST.pozzhe}
           </p>
         ) : (
-          <ol className="karta-tropinka">
-            {oblast.gruppy.map((g) => {
-              const tekushchaya = g.id === oblast.tekushchaya;
-              const href = trenazherHref(no, g.id);
-              const vid =
-                g.sostoyanie === 'osvoeno' ? 'osvoeno' : tekushchaya ? 'tekushchaya' : 'pusto';
-              const telo = (
-                <>
-                  <span className="karta-gorod__tochka" aria-hidden="true">
-                    {g.sostoyanie === 'osvoeno' ? (
-                      <svg viewBox="0 0 24 24">
-                        <path d="M6.5 12.5l3.6 3.6 7.4-8" />
-                      </svg>
-                    ) : null}
-                  </span>
-                  <span className="karta-gorod__imya">{g.nazvanie}</span>
-                  <span className="sr-only">
-                    {' — '}
-                    {tekushchaya ? KARTA_TEKST.gorod.tekushchaya : KARTA_TEKST.gorod[g.sostoyanie]}
-                    {g.povtorit ? ', стоит повторить' : ''}
-                  </span>
-                </>
-              );
-              return (
-                <li
-                  key={g.id}
-                  className={clsx(
-                    'karta-gorod',
-                    `karta-gorod--${vid}`,
-                    g.povtorit && 'is-povtorit',
-                  )}
-                >
-                  {href === null ? (
-                    <span className="karta-gorod__ssylka">{telo}</span>
-                  ) : (
-                    <Link className="karta-gorod__ssylka" href={href}>
-                      {telo}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+          <KartaTropinka oblast={oblast} />
         )}
       </div>
       <span className="karta-okoshko__hvost" aria-hidden="true" />
     </div>
+  );
+}
+
+/** «Тропинка» тем-городов раздела: тема ведёт в тренажёр сразу с ней. */
+export function KartaTropinka({ oblast }: { oblast: SostoyanieOblasti }) {
+  const { no } = oblast;
+  return (
+    <ol className="karta-tropinka">
+      {oblast.gruppy.map((g) => {
+        const tekushchaya = g.id === oblast.tekushchaya;
+        const href = trenazherHref(no, g.id);
+        const vid = g.sostoyanie === 'osvoeno' ? 'osvoeno' : tekushchaya ? 'tekushchaya' : 'pusto';
+        const telo = (
+          <>
+            <span className="karta-gorod__tochka" aria-hidden="true">
+              {g.sostoyanie === 'osvoeno' ? (
+                <svg viewBox="0 0 24 24">
+                  <path d="M6.5 12.5l3.6 3.6 7.4-8" />
+                </svg>
+              ) : null}
+            </span>
+            <span className="karta-gorod__imya">{g.nazvanie}</span>
+            <span className="sr-only">
+              {' — '}
+              {tekushchaya ? KARTA_TEKST.gorod.tekushchaya : KARTA_TEKST.gorod[g.sostoyanie]}
+              {g.povtorit ? ', стоит повторить' : ''}
+            </span>
+          </>
+        );
+        return (
+          <li
+            key={g.id}
+            className={clsx('karta-gorod', `karta-gorod--${vid}`, g.povtorit && 'is-povtorit')}
+          >
+            {href === null ? (
+              <span className="karta-gorod__ssylka">{telo}</span>
+            ) : (
+              <Link className="karta-gorod__ssylka" href={href}>
+                {telo}
+              </Link>
+            )}
+          </li>
+        );
+      })}
+    </ol>
   );
 }

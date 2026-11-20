@@ -248,6 +248,8 @@
     "test:auth": "node scripts/check-auth.mjs",
     "test:auth-disabled": "node scripts/check-auth.mjs --disabled",
     "test:auth-no-header": "node scripts/check-auth.mjs --no-header",
+    "test:karta-nazad": "node scripts/check-auth.mjs --karta-nazad",
+    "shots:karta-mobile": "node scripts/check-auth.mjs --shots-karta ../docs/screenshots/karta-mobile posle",
     "test:progress-import": "node scripts/check-progress-import.mjs",
     "test:dz-print": "node scripts/check-dz-print.mjs",
     "test:otvet": "node scripts/check-otvet.mjs",
