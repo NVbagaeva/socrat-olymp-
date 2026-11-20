@@ -334,7 +334,7 @@ const ODOBRENO = {
      «три части стороны» с аналогами, опорные P1-2-03/09/10 и P1-4-01,
      генераторы углов без 80°–100°, прототип 68 (A и D не слипаются). */
   'app/src/content/spravochnik1/fakty.ts':
-    'b9feb54143b5c7ccb56f2ca8ecdef625bbfb86ad35e6322de4a623ff0ade0adc',
+    'ec1568aae84b2e633c7dac22bf9f95f00f1e57a5b30e4c78df6fc111784343a1',
   'app/src/lib/planimetriya/bank/analogi.ts':
     '4e431aaffc657de2d6bfc04ebd0bed45f9433f072b2e4bbedcabe74fa6e45579',
   'app/src/lib/planimetriya/figury.ts':
@@ -443,7 +443,10 @@ const ODOBRENO = {
   'app/src/content/spravochnik1/index.ts':
     '4d79902c8d391d5a5dda2061773c740a9eaa080ecd34b1161d8bdd8789aef14f',
   'app/src/content/spravochnik1/novye-temy.ts':
-    'ee30827d7f4e2be4a067931a80ea65457ada23a24efb1ab99c3fac9276f61ad1',
+    '5c55d0fa69f4e2918b39eaea4271fe9d344618713369abc91f0f0e7b96c3bfff',
+  /* Число страниц пересобранного PDF справочника (новые карточки №1). */
+  'app/src/content/spravochnik1/pdf.json':
+    'c968d861ea66c4bee40351f77bc7125d4ccc11c820f11c57dc5d5b20ac332005',
   'app/src/content/spravochnik1/r01-ugly.ts':
     '165a6719391f98c884f4f5e31ea8752dc8739fe9b232fed69840284152791ca9',
   'app/src/content/spravochnik1/r06-ploshchadi.ts':

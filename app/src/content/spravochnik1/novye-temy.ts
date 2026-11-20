@@ -344,7 +344,7 @@ export const PRIEM_RAVNYE_UGLY: Tema1 = {
 
 export const PRIEM_RAVNYE_PLOSHCHADI: Tema1 = {
   id: 'priem-ravnye-ploshchadi',
-  title: 'Равные площади обозначаем одной буквой S',
+  title: 'Равные площади обозначаем одной буквой $S$',
   chertezh: {
     chto: 'Параллелограмм $ABCD$, $E$ — середина $CD$, отрезок $BE$ и прямая $EF \\parallel AD$; треугольники $BCE$ и $BFE$ — буквой $S$, параллелограмм $AFED$ — $2S$; части с равной площадью закрашены одним цветом.',
     vydelit: 'буквы $S$ внутри частей',

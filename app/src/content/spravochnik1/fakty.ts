@@ -448,7 +448,7 @@ const ZAPISI: Record<string, Zapis> = {
     pr,
     0,
     'одной буквой',
-    'Приём: равные площади обозначаем одной буквой S',
+    'Приём: равные площади обозначаем одной буквой $S$',
   ],
   'priem-otnoshenie': [
     'priem-otnoshenie',

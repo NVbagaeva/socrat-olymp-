@@ -41,6 +41,16 @@ function check(ok, what) {
   if (!ok) failures.push(what);
 }
 
+/**
+ * Пока открыта плашка cookie, кнопки «?» нет (onboarding.css): она
+ * лежала бы на «Понятно». Как и человек, сначала отвечаем на плашку.
+ */
+async function zakrytCookie(page) {
+  const cookie = page.locator('.cookie-notice .btn--primary');
+  await cookie.waitFor({ timeout: 5000 }).catch(() => {});
+  if ((await cookie.count()) > 0) await cookie.first().click();
+}
+
 const apache = await startApache(OUT, PORT);
 const A = apache.url;
 /* Apache и браузер закрываются и при упавшей проверке: иначе порт
@@ -176,6 +186,7 @@ try {
     const context = await browser.newContext(desktop);
     await welcomeSeen(context);
     const { page, errors } = await open(context, PAGE);
+    await zakrytCookie(page);
     await page.getByRole('button', { name: 'Помощь' }).click();
     await page.getByRole('menuitem', { name: 'Посмотреть приветствие' }).click();
     await page.waitForSelector(INTRO, { timeout: 10000 });
@@ -264,6 +275,7 @@ try {
       }
       return Math.round((await cdp.send('Runtime.getHeapUsage')).usedSize / 1024);
     };
+    await zakrytCookie(page);
     await page.waitForTimeout(1500);
     const before = await heap();
     /* Первый показ догружает код заставки — он остаётся; меряем второй. */
