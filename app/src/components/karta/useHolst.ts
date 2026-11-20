@@ -53,6 +53,8 @@ export interface HolstOptions {
   onTap: (clientX: number, clientY: number) => void;
   /** Вид изменился (после жеста или анимации). */
   onVid?: (vid: Vid, mir: number) => void;
+  /** false — окна нет (карта идёт списком): подключиться, когда появится. */
+  vklyuchen?: boolean;
 }
 
 /** Сколько пикселей можно сдвинуть палец, чтобы касание осталось касанием. */
@@ -175,6 +177,11 @@ export class Holst {
   /** Плавно подъехать к прямоугольнику карты. */
   pokazat(p: Pryamougolnik, polya: Polya = POLYA, maxK?: number): void {
     this.primenit(this.vidDlya(p, polya, maxK), true);
+  }
+
+  /** Поставить сохранённый вид сразу, без анимации (возврат на карту). */
+  postavit(v: Vid): void {
+    this.primenit(this.vGranicah(v));
   }
 
   vesMir(plavno = true): void {
@@ -368,11 +375,11 @@ export function useHolst(options: HolstOptions): Holst {
   useEffect(() => {
     holst.ustanovit(options);
   });
-  const { okno } = options;
+  const { okno, vklyuchen = true } = options;
   useEffect(() => {
     const el = okno.current;
-    if (el === null) return undefined;
+    if (el === null || !vklyuchen) return undefined;
     return holst.podklyuchit(el);
-  }, [holst, okno]);
+  }, [holst, okno, vklyuchen]);
   return holst;
 }

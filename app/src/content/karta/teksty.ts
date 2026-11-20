@@ -64,6 +64,19 @@ export const KARTA_TEKST = {
     tekushchaya: 'текущая тема',
   },
   novoe: (nazvanie: string) => `Освоено: ${nazvanie}`,
+  /** Карта на телефоне — список разделов сверху вниз (KartaSpisok). */
+  spisok: {
+    nazvanie: 'Карта ЕГЭ: задания по порядку',
+    vProcesse: 'В процессе',
+    povtorit: 'стоит повторить',
+    status: {
+      osvoeno: 'Освоено',
+      'v-processe': 'В процессе',
+      'ne-nachato': 'Не начато',
+      pozzhe: 'Прогресс появится позже',
+      skoro: 'Скоро',
+    },
+  },
 } as const;
 
 /** Подпись области для экранного диктора. */

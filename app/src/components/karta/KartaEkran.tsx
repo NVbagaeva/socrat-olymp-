@@ -19,7 +19,9 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
 } from 'react';
 import FON from '@/content/karta/fon.json';
 import { PROLIV_TEKST } from '@/content/karta/proliv';
@@ -44,11 +46,14 @@ import { KARTA_RAZDELY, razdelInfo } from '@/lib/karta/katalog';
 import { nomerNaOstrove, ostrovRazdela, SVOBODNYE_OSTROVA } from '@/lib/karta/mesta';
 import { postroitKartu, prolivSvodka, type Karta, type Zhurnaly } from '@/lib/karta/model';
 import { prochitatVidel, zapomnitVidel } from '@/lib/karta/zhurnaly';
+import { stranicaZadaniy, vzyatVozvrat, zapisatMetku } from '@/lib/kartaNazad';
 import { KartaOkoshko } from './KartaOkoshko';
 import { KartaOstrov, KartaSvobodnyyOstrov } from './KartaOstrov';
 import { PanelMaterika, PanelOblasti, PanelProliva, type ZakladkiKarty } from './KartaPanel';
+import { KartaSpisok } from './KartaSpisok';
 import { useHolst } from './useHolst';
 import './karta.css';
+import './karta-spisok.css';
 
 export type Vybor =
   { vid: 'oblast'; no: number } | { vid: 'proliv' } | { vid: 'chast'; chast: 1 | 2 } | null;
@@ -77,6 +82,24 @@ const PANEL_SHIRINA = 380;
 const SIZES = `(max-width: 767px) 100vw, (max-width: 1279px) 90vw, 1200px`;
 const fonUrl = (w: number) => assetUrl(`/images/karta/fon-${w}.webp`);
 const SRCSET = FON.shiriny.map((w) => `${fonUrl(w)} ${w}w`).join(', ');
+
+/**
+ * Где карта идёт списком сверху вниз (KartaSpisok), а не островами:
+ * телефон стоя (уже 768) и телефон лёжа (ниже 500 — холст в такое окно
+ * не помещается).
+ */
+const SPISOK_MQ = '(max-width: 767.98px), (max-height: 500px)';
+function podpiskaSpisok(cb: () => void) {
+  const mq = window.matchMedia(SPISOK_MQ);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+}
+const spisokSeychas = () => window.matchMedia(SPISOK_MQ).matches;
+/* На сборке страницы окна нет: острова, после гидратации — по экрану. */
+const spisokNaSborke = () => false;
+
+/** Сколько светится раздел, на который вернулись с «← К карте». */
+const PODSVETKA_MS = 1200;
 
 /** Остров области: раздел записан номером хранения, остров — местом на рисунке. */
 function ostrovOblasti(no: number) {
@@ -109,6 +132,10 @@ export function KartaEkran({
   const [podskazka, setPodskazka] = useState(false);
   const [novye, setNovye] = useState<Set<number>>(() => new Set());
   const [vid, setVid] = useState({ k: 1, mir: 1 });
+  const spisok = useSyncExternalStore(podpiskaSpisok, spisokSeychas, spisokNaSborke);
+  /* Раздел, на который вернулись с «← К карте»: светится ~1 с. */
+  const [vernulis, setVernulis] = useState<number | null>(null);
+  const kartaRef = useRef<HTMLDivElement>(null);
   const oknoRef = useRef<HTMLDivElement>(null);
   const okoshkoRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -158,6 +185,7 @@ export function KartaEkran({
 
   const holst = useHolst({
     okno: oknoRef,
+    vklyuchen: !spisok,
 
     shirina: KARTA_W,
     vysota: KARTA_H,
@@ -178,17 +206,23 @@ export function KartaEkran({
      «Весь мир», — так номера читаются, а карту можно двигать пальцем. */
   const priblizhenTelefon = useRef(false);
   useEffect(() => {
-    if (!telefon || priblizhenTelefon.current) return;
+    if (!telefon || spisok || priblizhenTelefon.current) return;
     priblizhenTelefon.current = true;
     holst.masshtab(1.35, undefined, false);
     // holst стабилен
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [telefon]);
+  }, [telefon, spisok]);
 
   /* Выбор → карта подъезжает; окошку и панели — фокус, если выбрали с клавиатуры. */
   const sKlaviatury = useRef(false);
+  /* Выбор поставлен возвратом с «← К карте»: вид уже стоит, не подъезжать. */
+  const bezPodezda = useRef(false);
   useEffect(() => {
     if (vybor === null) return;
+    if (bezPodezda.current) {
+      bezPodezda.current = false;
+      return;
+    }
     const maxK = vybor.vid === 'oblast' ? 1.1 : undefined;
     holst.pokazat(ramkaVybora(vybor), polya(true), maxK);
     if (sKlaviatury.current) {
@@ -244,6 +278,73 @@ export function KartaEkran({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [osvoennyeKlyuch]);
 
+  /* Возврат с «← К карте» (lib/kartaNazad.ts): та же прокрутка, тот же
+     вид и выбор, раздел, с которого ушли, мягко светится. Метку карта
+     забирает один раз — при первом показе. */
+  useEffect(() => {
+    const m = vzyatVozvrat(window.location.pathname);
+    if (m === null) return undefined;
+    const v = m.vybor as Vybor;
+    const ok =
+      v === null ||
+      (typeof v === 'object' &&
+        ((v.vid === 'oblast' && oblastPo(v.no) !== undefined) ||
+          v.vid === 'proliv' ||
+          (v.vid === 'chast' && (v.chast === 1 || v.chast === 2))));
+    const tamZhe = m.vid !== null && !spisokSeychas() && m.shirina === window.innerWidth;
+    /* Состояние — следующим шагом, не прямо в эффекте. */
+    const vybrat = window.setTimeout(() => {
+      if (ok && v !== null) {
+        bezPodezda.current = tamZhe;
+        setVybor(v);
+      }
+      if (m.no !== null) setVernulis(m.no);
+    }, 0);
+    if (tamZhe && m.vid !== null) {
+      priblizhenTelefon.current = true;
+      holst.postavit(m.vid);
+    }
+    const prokrutit = () => {
+      const el = kartaRef.current;
+      if (el === null) return;
+      const top = el.getBoundingClientRect().top;
+      window.scrollTo({ top: window.scrollY + top - m.verh, behavior: 'instant' });
+    };
+    const kadr = window.requestAnimationFrame(prokrutit);
+    /* Ещё раз, когда дорисуются раскрытый раздел и шрифты. */
+    const pozzhe = window.setTimeout(prokrutit, 250);
+    const gasim = window.setTimeout(() => setVernulis(null), PODSVETKA_MS);
+    return () => {
+      window.clearTimeout(vybrat);
+      window.cancelAnimationFrame(kadr);
+      window.clearTimeout(pozzhe);
+      window.clearTimeout(gasim);
+    };
+    // только при первом показе карты
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* Ушли с карты по ссылке на страницу заданий — запоминаем, откуда:
+     там будет «← К карте». Ссылка в новую вкладку (Ctrl, Cmd) — нет. */
+  const zapomnitIstochnik = (e: ReactMouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target instanceof Element ? e.target.closest('a[href]') : null;
+    if (!(a instanceof HTMLAnchorElement)) return;
+    const url = new URL(a.href, window.location.href);
+    if (url.origin !== window.location.origin || !stranicaZadaniy(url.pathname)) return;
+    const uzel = a.closest<HTMLElement>('[data-no]')?.dataset.no;
+    zapisatMetku({
+      href: window.location.pathname + window.location.search,
+      verh: kartaRef.current?.getBoundingClientRect().top ?? 0,
+      shirina: window.innerWidth,
+      vid: spisok ? null : holst.vid(),
+      vybor,
+      no: vybor?.vid === 'oblast' ? vybor.no : uzel === undefined ? null : Number(uzel),
+      zhivaya: true,
+      dlina: null,
+    });
+  };
+
   const vybrannayaOblast = vybor?.vid === 'oblast' ? oblastPo(vybor.no) : undefined;
   const vybrannyyOstrov = vybor?.vid === 'oblast' ? ostrovOblasti(vybor.no) : undefined;
 
@@ -262,7 +363,14 @@ export function KartaEkran({
 
   return (
     <div
-      className={clsx('karta', telefon && 'karta--telefon', vybor !== null && 'karta--s-vyborom')}
+      ref={kartaRef}
+      className={clsx(
+        'karta',
+        telefon && 'karta--telefon',
+        spisok && 'karta--spisok',
+        vybor !== null && 'karta--s-vyborom',
+      )}
+      onClickCapture={zapomnitIstochnik}
     >
       <header className="karta-shapka" data-karta-ne-holst="">
         <h1 className="karta-shapka__privet">
@@ -322,256 +430,276 @@ export function KartaEkran({
         ) : null}
       </header>
 
-      <div className="karta-scena">
-        <div
-          ref={oknoRef}
-          className="karta-holst"
-          data-uroven={uroven}
-          data-debug={debug ? '1' : undefined}
-          style={
-            {
-              '--pk': podpisK,
-              '--faktura': faktura,
-              '--fon-zaglushka': `url("${FON.zaglushka}")`,
-            } as CSSProperties
-          }
-        >
-          <div className="karta-sloy" style={{ width: KARTA_W, height: KARTA_H }}>
-            <img
-              className="karta-fon"
-              src={fonUrl(FON.shiriny[FON.shiriny.length - 1] ?? KARTA_W)}
-              srcSet={SRCSET}
-              sizes={SIZES}
-              width={KARTA_W}
-              height={KARTA_H}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              draggable={false}
-            />
-            <svg
-              className="karta-svg"
-              viewBox={`0 0 ${KARTA_W} ${KARTA_H}`}
-              width={KARTA_W}
-              height={KARTA_H}
-              role="group"
-              aria-label={KARTA_TEKST.karta}
-            >
-              <defs>
-                {OSTROVA.map((o) => (
-                  <clipPath key={o.no} id={`karta-kontur-${o.no}`}>
-                    <path d={o.d} />
-                  </clipPath>
-                ))}
-                <linearGradient id="karta-led" x1="0" y1="0" x2="0.3" y2="1">
-                  <stop offset="0" stopColor="#ffffff" />
-                  <stop offset="1" stopColor="#dbeafe" />
-                </linearGradient>
-                <radialGradient id="karta-svet">
-                  <stop offset="0" stopColor="#ffd9a8" stopOpacity="0.95" />
-                  <stop offset="1" stopColor="#ffb55c" stopOpacity="0" />
-                </radialGradient>
-              </defs>
-
-              {/* Фактура льда поверх фона при сильном приближении. */}
-              <g className="karta-faktura" aria-hidden="true">
-                {OSTROVA.map((o) => (
-                  <path key={o.no} d={o.d} />
-                ))}
-              </g>
-
-              {/* Полоса пролива: по ней нажимают. */}
-              <path className="karta-proliv__polosa" d={MESTA.proliv.polosa} data-cel="proliv" />
-
-              {/* Рекомендуемый путь. */}
-              {karta.put.length > 1 ? (
-                <path className="karta-put" d={putD(mestaOblastey(karta.put))} aria-hidden="true" />
-              ) : null}
-
-              {SVOBODNYE_OSTROVA.map((mesto) => {
-                const os = ostrov(mesto);
-                return os === undefined ? null : <KartaSvobodnyyOstrov key={`m${mesto}`} ostrov={os} />;
-              })}
-
-              {karta.oblasti.map((o) => {
-                const os = ostrovOblasti(o.no);
-                if (os === undefined) return null;
-                return (
-                  <KartaOstrov
-                    key={o.no}
-                    ostrov={os}
-                    razdel={o.no}
-                    nomer={nomerNaOstrove(o.no)}
-                    oblast={o}
-                    nazvanie={razdelInfo(o.no).nazvanie}
-                    vybran={vybor?.vid === 'oblast' && vybor.no === o.no}
-                    sleduyushchaya={sleduyushchaya === o.no}
-                    novaya={novye.has(o.no)}
-                    onVybor={(no, klav) => {
-                      sKlaviatury.current = klav;
-                      vybrat({ vid: 'oblast', no });
-                    }}
-                  />
-                );
-              })}
-
-              {/* Надпись в проливе. */}
-              <g className="karta-proliv" aria-hidden="true">
-                <path id="karta-proliv-liniya" d={MESTA.proliv.d} fill="none" />
-                <text className="karta-proliv__tekst">
-                  <textPath href="#karta-proliv-liniya" startOffset="50%" textAnchor="middle">
-                    {KARTA_TEKST.proliv.toUpperCase().split('').join(' ')}
-                  </textPath>
-                </text>
-              </g>
-
-              {/* Таблички частей. */}
-              {([1, 2] as const).map((chast) => {
-                const m = chast === 1 ? MESTA.chast1 : MESTA.chast2;
-                return (
-                  <g
-                    key={chast}
-                    className="karta-tablichka"
-                    transform={`translate(${m.x} ${m.y}) rotate(${m.ugol})`}
-                    data-cel={`chast:${chast}`}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`${KARTA_TEKST.chast(chast)}: ${KARTA_TEKST.materik(karta.osvoenoChast[chast], karta.vsegoChast[chast])}`}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        sKlaviatury.current = true;
-                        vybrat({ vid: 'chast', chast });
-                      }
-                    }}
-                  >
-                    <g className="karta-podpis">
-                      <rect x={-62} y={-20} width={124} height={40} rx={10} />
-                      <text y={7} textAnchor="middle">
-                        {KARTA_TEKST.chast(chast)}
-                      </text>
-                    </g>
-                  </g>
-                );
-              })}
-
-              {debug ? (
-                <g className="karta-debug" aria-hidden="true">
+      {spisok ? (
+        <KartaSpisok
+          karta={karta}
+          vybran={vybor?.vid === 'oblast' ? vybor.no : null}
+          sleduyushchaya={sleduyushchaya}
+          vernulis={vernulis}
+          zakladki={zakladki}
+          onVybor={(no) => setVybor(no === null ? null : { vid: 'oblast', no })}
+        />
+      ) : (
+        <div className="karta-scena">
+          <div
+            ref={oknoRef}
+            className="karta-holst"
+            data-uroven={uroven}
+            data-debug={debug ? '1' : undefined}
+            style={
+              {
+                '--pk': podpisK,
+                '--faktura': faktura,
+                '--fon-zaglushka': `url("${FON.zaglushka}")`,
+              } as CSSProperties
+            }
+          >
+            <div className="karta-sloy" style={{ width: KARTA_W, height: KARTA_H }}>
+              <img
+                className="karta-fon"
+                src={fonUrl(FON.shiriny[FON.shiriny.length - 1] ?? KARTA_W)}
+                srcSet={SRCSET}
+                sizes={SIZES}
+                width={KARTA_W}
+                height={KARTA_H}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+              />
+              <svg
+                className="karta-svg"
+                viewBox={`0 0 ${KARTA_W} ${KARTA_H}`}
+                width={KARTA_W}
+                height={KARTA_H}
+                role="group"
+                aria-label={KARTA_TEKST.karta}
+              >
+                <defs>
                   {OSTROVA.map((o) => (
-                    <g key={o.no}>
+                    <clipPath key={o.no} id={`karta-kontur-${o.no}`}>
                       <path d={o.d} />
-                      <circle cx={o.cx} cy={o.cy} r={3} />
-                      <circle cx={o.cx} cy={o.cy} r={o.radius} className="karta-debug__radius" />
-                      <text x={o.cx + 6} y={o.cy - 6}>
-                        {o.no}
-                      </text>
-                    </g>
+                    </clipPath>
                   ))}
-                  <path d={MESTA.proliv.polosa} className="karta-debug__proliv" />
+                  <linearGradient id="karta-led" x1="0" y1="0" x2="0.3" y2="1">
+                    <stop offset="0" stopColor="#ffffff" />
+                    <stop offset="1" stopColor="#dbeafe" />
+                  </linearGradient>
+                  <radialGradient id="karta-svet">
+                    <stop offset="0" stopColor="#ffd9a8" stopOpacity="0.95" />
+                    <stop offset="1" stopColor="#ffb55c" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+
+                {/* Фактура льда поверх фона при сильном приближении. */}
+                <g className="karta-faktura" aria-hidden="true">
+                  {OSTROVA.map((o) => (
+                    <path key={o.no} d={o.d} />
+                  ))}
                 </g>
-              ) : null}
-            </svg>
-          </div>
 
-          {vybrannayaOblast !== undefined && vybrannyyOstrov !== undefined ? (
-            <div ref={okoshkoRef} className="karta-okoshko-mesto">
-              <KartaOkoshko
-                oblast={vybrannayaOblast}
-                nazvanie={razdelInfo(vybrannayaOblast.no).nazvanie}
-                mesto={{ x: vybrannyyOstrov.cx, y: vybrannyyOstrov.ramka.y + 4 }}
-                onZakryt={zakrytVybor}
-              />
-            </div>
-          ) : null}
+                {/* Полоса пролива: по ней нажимают. */}
+                <path className="karta-proliv__polosa" d={MESTA.proliv.polosa} data-cel="proliv" />
 
-          {/* Кнопки масштаба и «Весь мир». */}
-          <div className="karta-upravlenie" data-karta-ne-holst="">
-            <div className="karta-masshtab">
-              <button
-                type="button"
-                onClick={() => holst.masshtab(1.5)}
-                aria-label={KARTA_TEKST.bolshe}
-              >
-                +
-              </button>
-              <button
-                type="button"
-                onClick={() => holst.masshtab(1 / 1.5)}
-                aria-label={KARTA_TEKST.menshe}
-              >
-                −
-              </button>
-            </div>
-            <button
-              type="button"
-              className="karta-ves-mir stk-glass"
-              onClick={() => {
-                setVybor(null);
-                holst.vesMir();
-              }}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" />
+                {/* Рекомендуемый путь. */}
+                {karta.put.length > 1 ? (
+                  <path
+                    className="karta-put"
+                    d={putD(mestaOblastey(karta.put))}
+                    aria-hidden="true"
+                  />
+                ) : null}
+
+                {SVOBODNYE_OSTROVA.map((mesto) => {
+                  const os = ostrov(mesto);
+                  return os === undefined ? null : (
+                    <KartaSvobodnyyOstrov key={`m${mesto}`} ostrov={os} />
+                  );
+                })}
+
+                {karta.oblasti.map((o) => {
+                  const os = ostrovOblasti(o.no);
+                  if (os === undefined) return null;
+                  return (
+                    <KartaOstrov
+                      key={o.no}
+                      ostrov={os}
+                      razdel={o.no}
+                      nomer={nomerNaOstrove(o.no)}
+                      oblast={o}
+                      nazvanie={razdelInfo(o.no).nazvanie}
+                      vybran={vybor?.vid === 'oblast' && vybor.no === o.no}
+                      sleduyushchaya={sleduyushchaya === o.no}
+                      novaya={novye.has(o.no)}
+                      vernulis={vernulis === o.no}
+                      onVybor={(no, klav) => {
+                        sKlaviatury.current = klav;
+                        vybrat({ vid: 'oblast', no });
+                      }}
+                    />
+                  );
+                })}
+
+                {/* Надпись в проливе. */}
+                <g className="karta-proliv" aria-hidden="true">
+                  <path id="karta-proliv-liniya" d={MESTA.proliv.d} fill="none" />
+                  <text className="karta-proliv__tekst">
+                    <textPath href="#karta-proliv-liniya" startOffset="50%" textAnchor="middle">
+                      {KARTA_TEKST.proliv.toUpperCase().split('').join(' ')}
+                    </textPath>
+                  </text>
+                </g>
+
+                {/* Таблички частей. */}
+                {([1, 2] as const).map((chast) => {
+                  const m = chast === 1 ? MESTA.chast1 : MESTA.chast2;
+                  return (
+                    <g
+                      key={chast}
+                      className="karta-tablichka"
+                      transform={`translate(${m.x} ${m.y}) rotate(${m.ugol})`}
+                      data-cel={`chast:${chast}`}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`${KARTA_TEKST.chast(chast)}: ${KARTA_TEKST.materik(karta.osvoenoChast[chast], karta.vsegoChast[chast])}`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          sKlaviatury.current = true;
+                          vybrat({ vid: 'chast', chast });
+                        }
+                      }}
+                    >
+                      <g className="karta-podpis">
+                        <rect x={-62} y={-20} width={124} height={40} rx={10} />
+                        <text y={7} textAnchor="middle">
+                          {KARTA_TEKST.chast(chast)}
+                        </text>
+                      </g>
+                    </g>
+                  );
+                })}
+
+                {debug ? (
+                  <g className="karta-debug" aria-hidden="true">
+                    {OSTROVA.map((o) => (
+                      <g key={o.no}>
+                        <path d={o.d} />
+                        <circle cx={o.cx} cy={o.cy} r={3} />
+                        <circle cx={o.cx} cy={o.cy} r={o.radius} className="karta-debug__radius" />
+                        <text x={o.cx + 6} y={o.cy - 6}>
+                          {o.no}
+                        </text>
+                      </g>
+                    ))}
+                    <path d={MESTA.proliv.polosa} className="karta-debug__proliv" />
+                  </g>
+                ) : null}
               </svg>
-              {KARTA_TEKST.vesMir}
-            </button>
-          </div>
-        </div>
+            </div>
 
-        <aside
-          ref={panelRef}
-          className={clsx('karta-panel stk-glass', vybor !== null && 'is-otkryta')}
-          aria-labelledby="karta-panel-nazvanie"
-          aria-hidden={vybor === null}
-          data-karta-ne-holst=""
-        >
-          <span className="karta-panel__ruchka" aria-hidden="true" />
-          <div className="karta-panel__telo">
-            {vybor?.vid === 'oblast' && vybrannayaOblast !== undefined ? (
-              <PanelOblasti
-                key={vybrannayaOblast.no}
-                oblast={vybrannayaOblast}
-                zakladki={zakladki}
-                onZakryt={zakrytVybor}
-              />
-            ) : vybor?.vid === 'proliv' ? (
-              <PanelProliva
-                svodka={proliv}
-                onChast2={() => setVybor({ vid: 'chast', chast: 2 })}
-                onOblast={pereytiKOblasti}
-                onZakryt={zakrytVybor}
-              />
-            ) : vybor?.vid === 'chast' ? (
-              <PanelMaterika
-                chast={vybor.chast}
-                karta={karta}
-                onOblast={pereytiKOblasti}
-                onZakryt={zakrytVybor}
-              />
+            {vybrannayaOblast !== undefined && vybrannyyOstrov !== undefined ? (
+              <div ref={okoshkoRef} className="karta-okoshko-mesto">
+                <KartaOkoshko
+                  oblast={vybrannayaOblast}
+                  nazvanie={razdelInfo(vybrannayaOblast.no).nazvanie}
+                  mesto={{ x: vybrannyyOstrov.cx, y: vybrannyyOstrov.ramka.y + 4 }}
+                  onZakryt={zakrytVybor}
+                />
+              </div>
             ) : null}
-          </div>
-        </aside>
-      </div>
 
-      <div className="karta-legenda stk-glass" aria-label={KARTA_TEKST.legenda.zagolovok}>
-        <span className="karta-legenda__p karta-legenda__p--osvoeno">
-          {KARTA_TEKST.legenda.osvoeno}
-        </span>
-        <span className="karta-legenda__p karta-legenda__p--v-processe">
-          {KARTA_TEKST.legenda.vProcesse}
-        </span>
-        <span className="karta-legenda__p karta-legenda__p--sleduyushchaya">
-          {KARTA_TEKST.legenda.sleduyushchaya}
-        </span>
-        <span className="karta-legenda__p karta-legenda__p--ne-nachato">
-          {KARTA_TEKST.legenda.neNachato}
-        </span>
-        <span className="karta-legenda__p karta-legenda__p--povtorit">
-          {KARTA_TEKST.legenda.povtorit}
-        </span>
-        <span className="karta-legenda__p karta-legenda__p--put">{KARTA_TEKST.legenda.put}</span>
-      </div>
+            {/* Кнопки масштаба и «Весь мир». */}
+            <div className="karta-upravlenie" data-karta-ne-holst="">
+              <div className="karta-masshtab">
+                <button
+                  type="button"
+                  onClick={() => holst.masshtab(1.5)}
+                  aria-label={KARTA_TEKST.bolshe}
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  onClick={() => holst.masshtab(1 / 1.5)}
+                  aria-label={KARTA_TEKST.menshe}
+                >
+                  −
+                </button>
+              </div>
+              <button
+                type="button"
+                className="karta-ves-mir stk-glass"
+                onClick={() => {
+                  setVybor(null);
+                  holst.vesMir();
+                }}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" />
+                </svg>
+                {KARTA_TEKST.vesMir}
+              </button>
+            </div>
+          </div>
+
+          <aside
+            ref={panelRef}
+            className={clsx('karta-panel stk-glass', vybor !== null && 'is-otkryta')}
+            aria-labelledby="karta-panel-nazvanie"
+            aria-hidden={vybor === null}
+            data-karta-ne-holst=""
+          >
+            <span className="karta-panel__ruchka" aria-hidden="true" />
+            <div className="karta-panel__telo">
+              {vybor?.vid === 'oblast' && vybrannayaOblast !== undefined ? (
+                <PanelOblasti
+                  key={vybrannayaOblast.no}
+                  oblast={vybrannayaOblast}
+                  zakladki={zakladki}
+                  onZakryt={zakrytVybor}
+                />
+              ) : vybor?.vid === 'proliv' ? (
+                <PanelProliva
+                  svodka={proliv}
+                  onChast2={() => setVybor({ vid: 'chast', chast: 2 })}
+                  onOblast={pereytiKOblasti}
+                  onZakryt={zakrytVybor}
+                />
+              ) : vybor?.vid === 'chast' ? (
+                <PanelMaterika
+                  chast={vybor.chast}
+                  karta={karta}
+                  onOblast={pereytiKOblasti}
+                  onZakryt={zakrytVybor}
+                />
+              ) : null}
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {spisok ? null : (
+        <div className="karta-legenda stk-glass" aria-label={KARTA_TEKST.legenda.zagolovok}>
+          <span className="karta-legenda__p karta-legenda__p--osvoeno">
+            {KARTA_TEKST.legenda.osvoeno}
+          </span>
+          <span className="karta-legenda__p karta-legenda__p--v-processe">
+            {KARTA_TEKST.legenda.vProcesse}
+          </span>
+          <span className="karta-legenda__p karta-legenda__p--sleduyushchaya">
+            {KARTA_TEKST.legenda.sleduyushchaya}
+          </span>
+          <span className="karta-legenda__p karta-legenda__p--ne-nachato">
+            {KARTA_TEKST.legenda.neNachato}
+          </span>
+          <span className="karta-legenda__p karta-legenda__p--povtorit">
+            {KARTA_TEKST.legenda.povtorit}
+          </span>
+          <span className="karta-legenda__p karta-legenda__p--put">{KARTA_TEKST.legenda.put}</span>
+        </div>
+      )}
 
       {children}
 
