@@ -49,6 +49,18 @@ import {
   sootvetstvennyySmezhnyy,
   sosedniyUgolParallelogramma,
 } from './scenarii';
+import {
+  scenariyChetvertayaStorona,
+  scenariyHordaKasatelnaya,
+  scenariyKasatelnayaSekushchaya,
+  scenariyOtrezkiKasatelnyh,
+  scenariyPerimetrOpisannogo,
+  scenariyRadiusKasatelnaya,
+  scenariySrednyayaOpisannoy,
+  scenariyUgolMezhduKasatelnymi,
+  scenariyUgolPravilnogo,
+  scenariyVpisannyyChetyrehugolnik,
+} from './scenarii-p1-9';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -1963,14 +1975,18 @@ export const BLOK_KASATELNYE: Mikro[] = [
           pryamaya('C', 'A', { zaA: 0, zaB: 0.3 }),
           ug('A', 'C', 'O', { vydelit: 'dano', znachenie: gr(u) }),
           ug('A', 'O', 'C', { vydelit: 'iskomoe' }),
+          /* Подсказка, шаг 1: радиус в точку касания — прямой угол. */
+          pryam('O', 'A', 'C', { sloy: 1 }),
         ],
         proverki: [ist('A', 'O', 'C', 90 - u)],
       })),
       otvet: 90 - u,
       razbor: [
-        'Радиус в точку касания перпендикулярен касательной: $\\angle OAC = 90^\\circ$.',
+        'Радиус в точку касания перпендикулярен касательной: $\\angle OAC = 90^\\circ$, треугольник $OAC$ прямоугольный.',
+        'Острые углы прямоугольного треугольника вместе дают $90^\\circ$: $\\angle AOC + \\angle ACO = 90^\\circ$.',
         `$\\angle AOC = 90^\\circ - ${g(u)} = ${g(90 - u)}$.`,
       ],
+      scenariy: scenariyRadiusKasatelnaya(u),
     };
   }),
   mikro('P1-9-02', 'Отрезки касательных', 'CA = CB', (r) => {
@@ -1990,10 +2006,17 @@ export const BLOK_KASATELNYE: Mikro[] = [
           otr('C', 'A', { vydelit: 'dano', znachenie: String(x) }),
           otr('C', 'B', { vydelit: 'iskomoe' }),
           tochka('O'),
+          /* Подсказка, шаг 2: отрезки касательных равны — штрихи. */
+          shtrih('C', 'A', 1, { sloy: 1 }),
+          shtrih('C', 'B', 1, { sloy: 1 }),
         ],
       },
       otvet: x,
-      razbor: ['Отрезки касательных из одной точки равны.', `$CB = ${x}$.`],
+      razbor: [
+        '$CA$ и $CB$ — отрезки касательных, проведённых из одной точки $C$; такие отрезки равны.',
+        `$CB = CA = ${x}$.`,
+      ],
+      scenariy: scenariyOtrezkiKasatelnyh(),
     };
   }),
   mikro('P1-9-03', 'Угол между касательными', '\\angle AOB = 180^\\circ - \\angle ACB', (r) => {
@@ -2016,13 +2039,18 @@ export const BLOK_KASATELNYE: Mikro[] = [
           otr('C', 'B'),
           ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(u) }),
           ug('A', 'O', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка, шаг 1: радиусы в точки касания — прямые углы. */
+          pryam('O', 'A', 'C', { sloy: 1 }),
+          pryam('O', 'B', 'C', { sloy: 1 }),
         ],
       },
       otvet: 180 - u,
       razbor: [
-        'В четырёхугольнике $OACB$ углы при $A$ и $B$ прямые.',
+        'Радиусы в точки касания перпендикулярны касательным: в четырёхугольнике $OACB$ углы при $A$ и $B$ прямые.',
+        'Сумма углов четырёхугольника $360^\\circ$, значит, $\\angle AOB + \\angle ACB = 180^\\circ$.',
         `$\\angle AOB = 180^\\circ - ${g(u)} = ${g(180 - u)}$.`,
       ],
+      scenariy: scenariyUgolMezhduKasatelnymi(u),
     };
   }),
   mikro('P1-9-04', 'Хорда и касательная', '\\arc{AB} = 2\\varphi', (r) => {
@@ -2043,9 +2071,10 @@ export const BLOK_KASATELNYE: Mikro[] = [
       })),
       otvet: 2 * f,
       razbor: [
-        'Угол между касательной и хордой равен половине дуги между ними.',
-        `$\\arc{AB} = 2\\cdot ${g(f)} = ${g(2 * f)}$.`,
+        'Угол между касательной и хордой равен половине дуги между ними, значит, дуга вдвое больше угла.',
+        `$\\arc{AB} = 2\\cdot ${g(f)} = ${g(2 * f)}$. Угол острый — дуга меньше $180^\\circ$, это меньшая дуга.`,
       ],
+      scenariy: scenariyHordaKasatelnaya(f),
     };
   }),
   mikro('P1-9-05', 'Четвёртая сторона описанного', 'AB + CD = BC + AD', (r) => {
@@ -2068,7 +2097,11 @@ export const BLOK_KASATELNYE: Mikro[] = [
         bezPodpisi: ['O'],
       },
       otvet: da,
-      razbor: ['Суммы противоположных сторон равны.', `$AD = ${ab} + ${cd} - ${bc} = ${da}$.`],
+      razbor: [
+        'Противоположные стороны: $AB$ и $CD$, $BC$ и $AD$. У описанного четырёхугольника их суммы равны: $AB + CD = BC + AD$.',
+        `$AD = AB + CD - BC = ${ab} + ${cd} - ${bc} = ${da}$.`,
+      ],
+      scenariy: scenariyChetvertayaStorona(ab, bc, cd),
     };
   }),
   mikro('P1-9-06', 'Периметр описанного четырёхугольника', 'P = 2(AB + CD)', (r) => {
@@ -2089,7 +2122,11 @@ export const BLOK_KASATELNYE: Mikro[] = [
         bezPodpisi: ['O'],
       },
       otvet: 2 * (ab + cd),
-      razbor: [`$BC + AD = AB + CD = ${ab + cd}$.`, `$P = 2\\cdot ${ab + cd} = ${2 * (ab + cd)}$.`],
+      razbor: [
+        `У описанного четырёхугольника суммы противоположных сторон равны: $BC + AD = AB + CD = ${ab + cd}$.`,
+        `Периметр — обе суммы: $P = 2\\cdot ${ab + cd} = ${2 * (ab + cd)}$.`,
+      ],
+      scenariy: scenariyPerimetrOpisannogo(ab, cd),
     };
   }),
   mikro('P1-9-07', 'Противолежащий угол вписанного', '\\angle A + \\angle C = 180^\\circ', (r) => {
@@ -2112,9 +2149,10 @@ export const BLOK_KASATELNYE: Mikro[] = [
       })(),
       otvet: 180 - a,
       razbor: [
-        'Противолежащие углы вписанного четырёхугольника дают $180^\\circ$.',
+        'Угол $C$ противолежит углу $A$; противолежащие углы вписанного четырёхугольника дают $180^\\circ$.',
         `$\\angle C = 180^\\circ - ${g(a)} = ${g(180 - a)}$.`,
       ],
+      scenariy: scenariyVpisannyyChetyrehugolnik(a),
     };
   }),
   mikro('P1-9-08', 'Средняя линия описанной трапеции', 'm = \\dfrac{c + d}{2}', (r) => {
@@ -2146,9 +2184,10 @@ export const BLOK_KASATELNYE: Mikro[] = [
       },
       otvet: (c + d) / 2,
       razbor: [
-        'Сумма оснований описанной трапеции равна сумме боковых сторон.',
-        `Средняя линия: $\\dfrac{${c} + ${d}}{2} = ${t((c + d) / 2)}$.`,
+        `Сумма оснований описанной трапеции равна сумме боковых сторон: $${c} + ${d} = ${c + d}$.`,
+        `Средняя линия — полусумма оснований: $\\dfrac{${c + d}}{2} = ${t((c + d) / 2)}$.`,
       ],
+      scenariy: scenariySrednyayaOpisannoy(c, d),
     };
   }),
   mikro(
@@ -2172,9 +2211,10 @@ export const BLOK_KASATELNYE: Mikro[] = [
         },
         otvet: 180 - 360 / n,
         razbor: [
-          `Внешний угол $360^\\circ : ${n} = ${g(360 / n)}$.`,
-          `Внутренний: $180^\\circ - ${g(360 / n)} = ${g(180 - 360 / n)}$.`,
+          `Сумма внешних углов $360^\\circ$, у правильного многоугольника они равны: внешний угол $360^\\circ : ${n} = ${g(360 / n)}$.`,
+          `Угол многоугольника и внешний угол смежные: $180^\\circ - ${g(360 / n)} = ${g(180 - 360 / n)}$.`,
         ],
+        scenariy: scenariyUgolPravilnogo(n),
       };
     },
   ),
@@ -2187,7 +2227,11 @@ export const BLOK_KASATELNYE: Mikro[] = [
       uslovie: `Из точки $A$ к окружности проведены касательная $AK$ и секущая, пересекающая окружность в точках $B$ и $C$; $AB = ${m}$, $AC = ${n}$. Найдите $AK$.`,
       risunok: null,
       otvet: k,
-      razbor: [`$AK^2 = ${m}\\cdot ${n} = ${m * n}$, $AK = ${k}$.`],
+      razbor: [
+        '$AC$ — вся секущая, $AB$ — её внешняя часть: $AK^2 = AB\\cdot AC$.',
+        `$AK^2 = ${m}\\cdot ${n} = ${m * n}$, $AK = ${k}$.`,
+      ],
+      scenariy: scenariyKasatelnayaSekushchaya(m, n),
     };
   }),
 ];
