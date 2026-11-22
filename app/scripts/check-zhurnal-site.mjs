@@ -14,7 +14,7 @@
      • ученик, тренажёр №8: неверный ответ как введён, подсказка, верный
        ответ — три события по порядку, задача закрыта, условие в снимке,
        ссылка воспроизводит задачу;
-     • «Дальше» без ответа — пропуск; «Решение» — открытое решение;
+     • ошибка и «Дальше» — «с ошибкой»; «Решение» — открытое решение;
      • активное время: пять минут без действий — в активное идёт не больше
        двух минут, общее — все пять; скрытая вкладка не считается;
      • сети нет — пачка ждёт в очереди и уходит позже, без потерь;
@@ -286,19 +286,23 @@ console.log('\nТренажёр №8, ученик:');
   }
   await shot(page, 'trenazher-8-1280');
 
-  /* «Дальше» — вторая задача; без ответа ещё раз «Дальше» — пропуск. */
+  /* Вторая задача: неверный ответ и «Дальше» — закрыта «с ошибкой».
+     (Без ответа в тренажёре дальше не уйти: пропуска здесь нет.) */
   await nextTask(page);
   await page.waitForFunction((prev) => document.querySelector('.trn-zadacha[data-task]')?.getAttribute('data-task') !== prev, id1);
   const id2 = await currentTask(page);
+  await answer(page, ru(answerOf(id2) + 1));
   await nextTask(page);
-  const run2 = await waitRun(page, mock, (r) => r.ref === id2 && r.closed_at !== null, 'пропущенная задача');
+  const run2 = await waitRun(page, mock, (r) => r.ref === id2 && r.closed_at !== null, 'задача с ошибкой');
   if (run2 !== null) {
-    check(run2.outcome === 'skipped' && run2.events.map((e) => e.type).join() === 'skip', `пропуск: ${run2.outcome}`);
+    check(run2.outcome === 'wrong' && run2.events.map((e) => e.type).join() === 'attempt', `ошибка и «Дальше»: ${run2.outcome}`);
+    check(run2.position === 2, 'номер задачи в тренировке — второй');
   }
 
-  /* Третья задача: «Решение» до ответа. */
+  /* Третья задача: неверный ответ и «Решение». */
   await page.waitForFunction((prev) => document.querySelector('.trn-zadacha[data-task]')?.getAttribute('data-task') !== prev, id2);
   const id3 = await currentTask(page);
+  await answer(page, ru(answerOf(id3) + 1));
   await page.locator('.trn-knopki button:has-text("Решение")').first().click();
   const run3 = await waitRun(page, mock, (r) => r.ref === id3 && r.closed_at !== null, 'задача с открытым решением');
   if (run3 !== null) {
