@@ -197,8 +197,8 @@ for (const size of SIZES) {
   /* Шапка: название функции под H1 видно на любой ширине, под ним —
      «График — …» (правило названий сайта). */
   const head = await page.evaluate(() => {
-    const sub = document.querySelector('.topic-head__subtitle');
-    const graph = document.querySelector('.topic-head__graph');
+    const sub = document.querySelector('.stsena__podtema');
+    const graph = document.querySelector('.stsena__grafik');
     const shown = (node) => node !== null && node.getBoundingClientRect().height > 0;
     return {
       sub: shown(sub) ? sub.textContent : null,
@@ -382,19 +382,33 @@ for (const size of SIZES) {
     );
   }
 
-  /* Кнопка «‹ Все разделы №12» над заголовком. */
+  /* Кнопка «‹ Все разделы №12» над заголовком. В шапке «Стеклянная
+     сцена» она стоит на месте крошек — только на телефоне и планшете;
+     на компьютере наверх ведут крошки, и навигацию не дублируем. */
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.locator('.razdely-vse').click();
-  await page.waitForSelector(MENU);
-  await page.waitForTimeout(400);
-  check(await menuOpen(page), where('«Все разделы №12» не открыла меню'));
-  await page.keyboard.press('Escape');
-  await waitClosed(page);
-  await page.waitForTimeout(150);
-  check(
-    (await focusClass(page)).includes('razdely-vse'),
-    where('фокус не вернулся на «Все разделы №12»'),
-  );
+  if (size.isMobile) {
+    await page.locator('.razdely-vse').click();
+    await page.waitForSelector(MENU);
+    await page.waitForTimeout(400);
+    check(await menuOpen(page), where('«Все разделы №12» не открыла меню'));
+    await page.keyboard.press('Escape');
+    await waitClosed(page);
+    await page.waitForTimeout(150);
+    check(
+      (await focusClass(page)).includes('razdely-vse'),
+      where('фокус не вернулся на «Все разделы №12»'),
+    );
+  } else {
+    const verh = await page.evaluate(() => {
+      const vidno = (sel) => {
+        const node = document.querySelector(sel);
+        return node !== null && node.getBoundingClientRect().height > 0;
+      };
+      return { knopka: vidno('.razdely-vse'), kroshki: vidno('.stsena-crumbs') };
+    });
+    check(!verh.knopka, where('на компьютере показана кнопка «Все разделы №12»'));
+    check(verh.kroshki, where('на компьютере нет крошек над шапкой'));
+  }
 
   /* С «Опорных задач» — на «Опорные задачи» другого раздела. */
   await page.goto(BASE + '/zadaniya/12/irrational/opornye-zadachi/', { waitUntil: 'networkidle' });
