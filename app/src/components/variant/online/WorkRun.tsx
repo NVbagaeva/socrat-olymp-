@@ -46,7 +46,7 @@ import type { VariantTask } from '@/lib/variant/types';
 import { WorkResult } from './WorkResult';
 import { WorkScreen } from './WorkScreen';
 import { podpis1, podpis2 } from '@/lib/variant/struktura';
-import { zapisatVariant } from '@/lib/zhurnal/variant';
+import type { ItogVarianta } from '@/lib/zhurnal/variant';
 
 export interface WorkRunProps {
   link: WorkLink;
@@ -428,13 +428,13 @@ function Finished({
         zapis.current = rec;
         /* Журнал кабинета (lib/zhurnal): работа и её задачи. «Работа над
            ошибками» — не вариант, в журнал вариантов не идёт. */
-        if (payload.oshibki === null) {
+        if (process.env.KAB2_ZHURNAL === '1' && payload.oshibki === null) {
           const ui = uiRef.current;
           const nabor = naborRazdela(link.code);
           const second = Object.fromEntries(
             Object.entries(ui.v2).map(([i, v]) => [i, v === 'right']),
           );
-          zapisatVariant({
+          const itog: ItogVarianta = {
             kind:
               payload.kabinet !== undefined
                 ? 'kabinet'
@@ -462,7 +462,9 @@ function Finished({
             secondRight: second,
             hinted: ui.hinted,
             times: ui.times,
-          });
+          };
+          /* Журнал — отдельным куском: экран варианта от него не тяжелеет. */
+          void import('@/lib/zhurnal/variant').then((m) => m.zapisatVariant(itog));
         }
         void saveWork(rec).then(() => {
           if (alive) setVolatile(archiveVolatile());
