@@ -49,6 +49,18 @@ import {
   sootvetstvennyySmezhnyy,
   sosedniyUgolParallelogramma,
 } from './scenarii';
+import {
+  scenariyDiagonalPryamougolnika,
+  scenariyGipotenuza,
+  scenariyKatet,
+  scenariyKatetRavnobedrennogo,
+  scenariyMedianaKGipotenuze,
+  scenariyStoronaKvadrata,
+  scenariyStoronaRavnostoronnego,
+  scenariyStoronaRomba,
+  scenariyVysotaKGipotenuze,
+  scenariyVysotaRavnobedrennogo,
+} from './scenarii-p1-6';
 import type { Mikro } from './types';
 
 /* ── Помощники ───────────────────────────────────────────────────── */
@@ -1326,6 +1338,13 @@ function pryamoyKatety(a: number, b: number): Scena['tochki'] {
   );
 }
 
+/*
+ * Подсказки блока — сценарии (scenarii-p1-6.ts). Чертёж условия без
+ * букв, как в ФИПИ; в подсказке вершины подписаны (podpisiPodskazki),
+ * слои — то, о чём шаг: прямой угол, гипотенуза, половины отрезков.
+ */
+const znS = (a: string, b: string, z: string, sloy: number): Element => ({ ...zn(a, b, z), sloy });
+
 export const BLOK_PIFAGOR: Mikro[] = [
   mikro('P1-6-01', 'Гипотенуза', 'c = \\sqrt{a^2 + b^2}', (r) => {
     const [a, b, c] = r.pick(TROYKI);
@@ -1339,11 +1358,20 @@ export const BLOK_PIFAGOR: Mikro[] = [
           zn('A', 'C', String(a)),
           zn('C', 'B', String(b)),
           otr('A', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка: прямой угол, затем гипотенуза напротив него. */
+          pryam('A', 'C', 'B', { sloy: 1 }),
+          otr('A', 'B', { sloy: 2 }),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C'],
       },
       otvet: c,
-      razbor: [`Гипотенуза: $\\sqrt{${a * a} + ${b * b}} = \\sqrt{${c * c}} = ${c}$.`],
+      razbor: [
+        'Напротив прямого угла $C$ лежит гипотенуза $AB$, катеты — $AC$ и $BC$.',
+        `По теореме Пифагора $AB^2 = ${a}^2 + ${b}^2 = ${a * a + b * b}$.`,
+        `$AB = \\sqrt{${c * c}} = ${c}$.`,
+      ],
+      scenariy: scenariyGipotenuza(a, b),
     };
   }),
   mikro('P1-6-02', 'Катет', 'a = \\sqrt{c^2 - b^2}', (r) => {
@@ -1358,11 +1386,20 @@ export const BLOK_PIFAGOR: Mikro[] = [
           otr('A', 'C', { vydelit: 'iskomoe' }),
           zn('C', 'B', String(b)),
           zn('A', 'B', String(c)),
+          /* Подсказка: прямой угол, затем гипотенуза напротив него. */
+          pryam('A', 'C', 'B', { sloy: 1 }),
+          otr('A', 'B', { sloy: 2 }),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C'],
       },
       otvet: a,
-      razbor: [`Катет: $\\sqrt{${c * c} - ${b * b}} = \\sqrt{${a * a}} = ${a}$.`],
+      razbor: [
+        `Напротив прямого угла $C$ лежит гипотенуза $AB = ${c}$; $BC = ${b}$ и искомая $AC$ — катеты.`,
+        `По теореме Пифагора $AC^2 = AB^2 - BC^2 = ${c * c} - ${b * b} = ${a * a}$.`,
+        `$AC = \\sqrt{${a * a}} = ${a}$.`,
+      ],
+      scenariy: scenariyKatet(a, b, c),
     };
   }),
   mikro('P1-6-03', 'Диагональ прямоугольника', 'd = \\sqrt{a^2 + b^2}', (r) => {
@@ -1376,14 +1413,22 @@ export const BLOK_PIFAGOR: Mikro[] = [
           otr('A', 'C', { vydelit: 'iskomoe' }),
           zn('A', 'B', String(a)),
           zn('A', 'D', String(b)),
+          /* Подсказка: треугольник ACD с прямым углом D, затем CD = AB. */
+          pryam('A', 'D', 'C', { sloy: 1 }),
+          otr('A', 'D', { sloy: 1 }),
+          otr('D', 'C', { sloy: 1 }),
+          znS('D', 'C', String(a), 2),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'D'],
       })),
       otvet: c,
       razbor: [
-        'Диагональ — гипотенуза прямоугольного треугольника со сторонами-катетами.',
-        `Диагональ: $\\sqrt{${a * a} + ${b * b}} = ${c}$.`,
+        'Диагональ $AC$ отрезает треугольник $ACD$ с прямым углом $D$: $AC$ — гипотенуза.',
+        `Катеты: $AD = ${b}$ и $CD = AB = ${a}$ (противоположные стороны прямоугольника равны).`,
+        `$AC^2 = ${b * b} + ${a * a} = ${c * c}$, $AC = ${c}$.`,
       ],
+      scenariy: scenariyDiagonalPryamougolnika(a, b),
     };
   }),
   mikro(
@@ -1395,19 +1440,31 @@ export const BLOK_PIFAGOR: Mikro[] = [
       return {
         uslovie: `Диагонали ромба равны $${2 * a}$ и $${2 * b}$. Найдите сторону ромба.`,
         risunok: forma(a / b, 0.45, 2.2, (k) => ({
-          tochki: { A: [-k, 0], C: [k, 0], B: [0, 1], D: [0, -1] },
+          tochki: { A: [-k, 0], C: [k, 0], B: [0, 1], D: [0, -1], O: [0, 0] },
           elementy: [
             mn(['A', 'B', 'C', 'D']),
             otr('A', 'C', { vydelit: 'dano', znachenie: String(2 * a) }),
             otr('B', 'D', { vydelit: 'dano', znachenie: String(2 * b) }),
+            /* Подсказка: диагонали перпендикулярны и делятся пополам,
+               треугольник AOB, его катеты — половины диагоналей. */
+            pryam('A', 'O', 'B', { sloy: 1 }),
+            shtrih('A', 'O', 1, { sloy: 1 }),
+            shtrih('O', 'C', 1, { sloy: 1 }),
+            shtrih('B', 'O', 2, { sloy: 1 }),
+            shtrih('O', 'D', 2, { sloy: 1 }),
+            otr('A', 'B', { sloy: 2 }),
+            znS('A', 'O', String(a), 3),
+            znS('O', 'B', String(b), 3),
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C', 'D', 'O'],
         })),
         otvet: c,
         razbor: [
-          'Диагонали ромба перпендикулярны и делятся пополам: катеты $' + a + '$ и $' + b + '$.',
-          `$\\sqrt{${a * a} + ${b * b}} = ${c}$.`,
+          `Диагонали ромба перпендикулярны и делятся точкой $O$ пополам: в треугольнике $AOB$ угол $O$ прямой, катеты $AO = ${a}$ и $BO = ${b}$.`,
+          `Сторона $AB$ — гипотенуза: $AB^2 = ${a * a} + ${b * b} = ${c * c}$, $AB = ${c}$.`,
         ],
+        scenariy: scenariyStoronaRomba(a, b),
       };
     },
   ),
@@ -1429,14 +1486,21 @@ export const BLOK_PIFAGOR: Mikro[] = [
             pryam('C', 'H', 'B'),
             zn('A', 'B', String(2 * a)),
             zn('B', 'C', String(c)),
+            /* Подсказка: AH = HB, гипотенуза BC треугольника CHB, HB. */
+            shtrih('A', 'H', 2, { sloy: 1 }),
+            shtrih('H', 'B', 2, { sloy: 1 }),
+            otr('C', 'B', { sloy: 2 }),
+            znS('H', 'B', String(a), 3),
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C', 'H'],
         },
         otvet: b,
         razbor: [
-          'Высота к основанию делит его пополам.',
-          `Высота: $\\sqrt{${c * c} - ${a * a}} = ${b}$.`,
+          `Высота к основанию — она же медиана: $HB = ${2 * a} : 2 = ${a}$.`,
+          `В прямоугольном треугольнике $CHB$ гипотенуза $BC = ${c}$: $CH^2 = ${c * c} - ${a * a} = ${b * b}$, $CH = ${b}$.`,
         ],
+        scenariy: scenariyVysotaRavnobedrennogo(a, c),
       };
     },
   ),
@@ -1453,14 +1517,21 @@ export const BLOK_PIFAGOR: Mikro[] = [
           shtrih('C', 'B', 1),
           zn('A', 'B', `${a}√2`),
           otr('C', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка: равные катеты, затем они обозначены x. */
+          shtrih('A', 'C', 1, { sloy: 1 }),
+          shtrih('C', 'B', 1, { sloy: 1 }),
+          znS('A', 'C', 'x', 2),
+          znS('C', 'B', 'x', 2),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C'],
       },
       otvet: a,
       razbor: [
-        'Гипотенуза в $\\sqrt2$ раз больше катета.',
-        `Катет: $\\dfrac{${a}\\sqrt2}{\\sqrt2} = ${a}$.`,
+        `Катеты равны: $AC = BC = x$. По теореме Пифагора $x^2 + x^2 = (${a}\\sqrt2)^2 = ${2 * a * a}$.`,
+        `$x^2 = ${a * a}$, $x = ${a}$. Короче: гипотенуза в $\\sqrt2$ раз больше катета.`,
       ],
+      scenariy: scenariyKatetRavnobedrennogo(a),
     };
   }),
   mikro('P1-6-07', 'Сторона квадрата по диагонали', 'd = a\\sqrt2', (r) => {
@@ -1473,14 +1544,22 @@ export const BLOK_PIFAGOR: Mikro[] = [
           mn(['A', 'B', 'C', 'D']),
           otr('A', 'C', { vydelit: 'dano', znachenie: `${a}√2` }),
           otr('A', 'D', { vydelit: 'iskomoe' }),
+          /* Подсказка: треугольник ACD — прямой угол D, равные катеты; x. */
+          pryam('A', 'D', 'C', { sloy: 1 }),
+          shtrih('A', 'D', 1, { sloy: 1 }),
+          shtrih('D', 'C', 1, { sloy: 1 }),
+          znS('A', 'D', 'x', 2),
+          znS('D', 'C', 'x', 2),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'D'],
       },
       otvet: a,
       razbor: [
-        'Диагональ квадрата в $\\sqrt2$ раз больше стороны.',
-        `$${a}\\sqrt2 : \\sqrt2 = ${a}$.`,
+        `Диагональ отрезает треугольник $ACD$ с прямым углом $D$ и катетами $AD = CD = x$: $x^2 + x^2 = (${a}\\sqrt2)^2 = ${2 * a * a}$.`,
+        `$x^2 = ${a * a}$, $x = ${a}$. Короче: диагональ квадрата в $\\sqrt2$ раз больше стороны.`,
       ],
+      scenariy: scenariyStoronaKvadrata(a),
     };
   }),
   mikro('P1-6-08', 'Сторона равностороннего по высоте', 'h = \\dfrac{a\\sqrt3}{2}', (r) => {
@@ -1494,13 +1573,22 @@ export const BLOK_PIFAGOR: Mikro[] = [
           otr('C', 'H', { vydelit: 'dano', znachenie: `${k}√3` }),
           pryam('C', 'H', 'B'),
           otr('A', 'B', { vydelit: 'iskomoe' }),
+          /* Подсказка: AH = HB, сторона x и HB = x/2, гипотенуза BC. */
+          shtrih('A', 'H', 2, { sloy: 1 }),
+          shtrih('H', 'B', 2, { sloy: 1 }),
+          znS('B', 'C', 'x', 2),
+          znS('H', 'B', 'x/2', 2),
+          otr('C', 'B', { sloy: 3 }),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'H'],
       },
       otvet: 2 * k,
       razbor: [
-        `Сторона — удвоенная высота, делённая на $\\sqrt3$: $\\dfrac{2\\cdot ${k}\\sqrt3}{\\sqrt3} = ${2 * k}$.`,
+        'Высота равностороннего треугольника — она же медиана: сторона $x$, $HB = \\dfrac{x}{2}$.',
+        `В треугольнике $CHB$: $x^2 = \\dfrac{x^2}{4} + (${k}\\sqrt3)^2$, $\\dfrac34 x^2 = ${3 * k * k}$, $x^2 = ${4 * k * k}$, $x = ${2 * k}$.`,
       ],
+      scenariy: scenariyStoronaRavnostoronnego(k),
     };
   }),
   mikro('P1-6-09', 'Высота к гипотенузе', 'h = \\dfrac{ab}{c}', (r) => {
@@ -1518,14 +1606,20 @@ export const BLOK_PIFAGOR: Mikro[] = [
           pryam('C', 'H', 'B'),
           zn('A', 'C', String(a)),
           zn('C', 'B', String(b)),
+          /* Подсказка: площадь треугольника, затем гипотенуза AB. */
+          { tip: 'oblast', tochki: ['A', 'B', 'C'], cvet: 1, znachenie: 'S', sloy: 1 },
+          znS('A', 'B', String(c), 2),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'H'],
       },
       otvet: h,
       razbor: [
-        `Гипотенуза: $\\sqrt{${a * a} + ${b * b}} = ${c}$.`,
-        `Высота: $\\dfrac{${a}\\cdot ${b}}{${c}} = ${t(h)}$.`,
+        `Площадь через катеты: $S = \\dfrac12 \\cdot ${a} \\cdot ${b} = ${t((a * b) / 2)}$.`,
+        `Гипотенуза: $AB = \\sqrt{${a * a} + ${b * b}} = ${c}$.`,
+        `Площадь через гипотенузу и высоту: $\\dfrac12 \\cdot ${c} \\cdot CH = ${t((a * b) / 2)}$, $CH = \\dfrac{${a * b}}{${c}} = ${t(h)}$.`,
       ],
+      scenariy: scenariyVysotaKGipotenuze(a, b, c),
     };
   }),
   mikro('P1-6-10', 'Медиана к гипотенузе по катетам', 'm = \\dfrac{c}{2}', (r) => {
@@ -1543,11 +1637,20 @@ export const BLOK_PIFAGOR: Mikro[] = [
           shtrih('M', 'B', 1),
           zn('A', 'C', String(a)),
           zn('C', 'B', String(b)),
+          /* Подсказка: гипотенуза AB, затем её длина. */
+          otr('A', 'B', { sloy: 1 }),
+          znS('A', 'B', String(c), 2),
         ],
         podpisi: false,
+        podpisiPodskazki: ['A', 'B', 'C', 'M'],
       },
       otvet: c / 2,
-      razbor: [`Гипотенуза $${c}$, медиана — её половина: $${t(c / 2)}$.`],
+      razbor: [
+        'Медиана, проведённая к гипотенузе, равна её половине: $CM = \\dfrac{AB}{2}$.',
+        `По теореме Пифагора $AB^2 = ${a * a} + ${b * b} = ${c * c}$, $AB = ${c}$.`,
+        `$CM = ${c} : 2 = ${t(c / 2)}$.`,
+      ],
+      scenariy: scenariyMedianaKGipotenuze(a, b, c),
     };
   }),
 ];
