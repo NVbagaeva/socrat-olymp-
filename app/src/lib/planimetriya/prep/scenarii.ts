@@ -181,7 +181,6 @@ export function smezhnyeVOtnoshenii(k: number, m: number): MikroGenerated {
     ],
     proverki: [ist('C', 'O', 'B', mal)],
   }));
-  const nev = [x, bol, 2 * mal].filter((y) => Math.abs(y - mal) > 1e-9);
   const sc: Scenariy = {
     sposoby: [
       {
@@ -220,22 +219,22 @@ export function smezhnyeVOtnoshenii(k: number, m: number): MikroGenerated {
           },
           {
             vopros: '$x$ — это уже ответ?',
-            knopki: [`Нет: меньший угол — это $${k}x$`, `Да, ответ $${g(x)}$`],
+            knopki: [`Нет: меньший угол — это $${k}x$`, 'Да, $x$ — это меньший угол'],
             verno: 0,
-            da: `$x$ — одна «часть», а меньший угол — $${k}$ части. Типичная ошибка — записать в ответ $${String(x).replace('.', ',')}$.`,
-            formuly: [`${k}x = ${k} \\cdot ${g(x)} = ${g(mal)}`],
+            da: `$x$ — одна «часть», а меньший угол — $${k}$ части. Типичная ошибка — записать в ответ саму «часть». Умножь $x = ${g(x)}$ на $${k}$ и посчитай сам.`,
+            formuly: [`\\text{меньший угол} = ${k}x = ${k} \\cdot ${g(x)}`],
             utochnenie: 'Что обозначает $x$ — угол или одну «часть»?',
             fakt: null,
           },
           {
-            vopros: 'Проверка: чему равен больший угол и сходится ли сумма?',
+            vopros: 'Как проверить ответ?',
             knopki: [
-              `$${m}x = ${g(bol)}$; $${g(mal)} + ${g(bol)} = 180^\\circ$`,
-              ...nev.slice(0, 1).map((y) => `$${m}x = ${g(y)}$`),
+              `Найти больший угол $${m}x$ и сложить углы — должно получиться $180^\\circ$`,
+              'Сравнить меньший угол с $x$',
             ],
             verno: 0,
-            da: `сумма $180^\\circ$, и по чертежу меньший угол острый — $${g(mal)}$ подходит.`,
-            utochnenie: `Умножь $x$ на $${m}$ и сложи углы.`,
+            da: 'смежные углы вместе дают $180^\\circ$. И по чертежу меньший угол острый.',
+            utochnenie: 'Что мы знаем про сумму смежных углов?',
             fakt: null,
           },
         ],
@@ -309,19 +308,19 @@ export function sosedniyUgolParallelogramma(a: number): MikroGenerated {
             fakt: 'parallelogramm-sosednie',
           },
           {
-            vopros: 'Чему равен угол $B$?',
-            knopki: [`$${g(b)}$`, `$${g(a)}$`, `$${g(Math.abs(90 - a))}$`],
+            vopros: 'Как найти угол $B$?',
+            knopki: ['$180^\\circ - \\angle A$', '$\\angle A$', '$90^\\circ - \\angle A$'],
             verno: 0,
-            da: 'вычитаем данный угол из $180^\\circ$.',
-            formuly: [`\\angle B = 180^\\circ - ${g(a)} = ${g(b)}`],
-            utochnenie: '$\\angle A + \\angle B = 180^\\circ$. Чему тогда равен $\\angle B$?',
+            da: 'вычитаем данный угол из $180^\\circ$. Посчитай сам.',
+            formuly: [`\\angle B = 180^\\circ - ${g(a)}`],
+            utochnenie: '$\\angle A + \\angle B = 180^\\circ$. Как тогда выразить $\\angle B$?',
             fakt: null,
           },
           {
-            vopros: 'Проверка по чертежу: каким выглядит угол $B$?',
-            knopki: [`Тупым — $${g(b)}$ подходит`, `Острым — $${g(b)}$ не подходит`],
+            vopros: 'Каким должен получиться угол $B$ — проверь по чертежу',
+            knopki: ['Тупым: больше $90^\\circ$', 'Острым: меньше $90^\\circ$'],
             verno: 0,
-            da: `угол $B$ тупой, $${g(b)} > 90^\\circ$ — сходится.`,
+            da: `угол $A$ острый, а вместе с $B$ они дают $180^\\circ$ — значит, $B$ тупой. Если получилось меньше $90^\\circ$, ищи ошибку.`,
             utochnenie: 'Сравни угол $B$ на чертеже с прямым.',
             fakt: null,
           },
@@ -414,19 +413,19 @@ export function sootvetstvennyySmezhnyy(u: number): MikroGenerated {
             knopki: ['$180^\\circ$', '$90^\\circ$', '$360^\\circ$'],
             verno: 0,
             da: 'смежные углы вместе образуют развёрнутый угол.',
-            formuly: [`? = 180^\\circ - ${g(u)} = ${g(otvet)}`],
+            formuly: [`? = 180^\\circ - ${g(u)}`],
             utochnenie:
               'Искомый угол и угол 2 вместе образуют угол между частями прямой $b$. Какой это угол?',
             fakt: 'smezhnye-ugly',
           },
           {
-            vopros: 'Проверка по чертежу: каким выглядит искомый угол?',
+            vopros: 'Каким должен получиться искомый угол — проверь по чертежу',
             knopki: [
-              `${otvet > 90 ? 'Тупым' : 'Острым'} — $${g(otvet)}$ подходит`,
-              `${otvet > 90 ? 'Острым' : 'Тупым'} — $${g(otvet)}$ не подходит`,
+              otvet > 90 ? 'Тупым: больше $90^\\circ$' : 'Острым: меньше $90^\\circ$',
+              otvet > 90 ? 'Острым: меньше $90^\\circ$' : 'Тупым: больше $90^\\circ$',
             ],
             verno: 0,
-            da: `угол ${otvet > 90 ? 'тупой' : 'острый'} — сходится.`,
+            da: `на чертеже угол ${otvet > 90 ? 'тупой' : 'острый'}. Посчитай $180^\\circ - ${g(u)}$ сам и сверь.`,
             utochnenie: 'Сравни искомый угол на чертеже с прямым.',
             fakt: null,
           },
@@ -548,7 +547,7 @@ export function scenariyNaRaznost(a: number, d: number): Scenariy {
           },
           {
             vopros: 'Чему равна сумма углов треугольника?',
-            knopki: ['$180^\\circ$', '$360^\\circ$', '$90^\\circ$'],
+            knopki: ['$180^\\circ$', '$360^\\circ$', c === 90 ? '$270^\\circ$' : '$90^\\circ$'],
             verno: 0,
             da: 'по теореме о сумме углов: три угла любого треугольника вместе дают $180^\\circ$.',
             formuly: [`x + (x + ${g(d)}) + \\angle C = 180^\\circ`],
@@ -701,7 +700,11 @@ export function scenariyUgolPriVershine(a: number): Scenariy {
           },
           {
             vopros: 'Чему равна сумма углов треугольника?',
-            knopki: ['$180^\\circ$', '$360^\\circ$', '$90^\\circ$'],
+            knopki: [
+              '$180^\\circ$',
+              '$360^\\circ$',
+              180 - 2 * a === 90 ? '$270^\\circ$' : '$90^\\circ$',
+            ],
             verno: 0,
             da: 'по теореме о сумме углов: три угла любого треугольника вместе дают $180^\\circ$.',
             formuly: ['\\angle A + \\angle B + \\angle C = 180^\\circ'],
