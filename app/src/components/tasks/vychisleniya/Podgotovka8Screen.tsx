@@ -19,6 +19,8 @@ import { HintIcon, RightIcon, WrongIcon } from '../prep/PrepIcons';
 import { AnswerInput, FormatHint } from '../otvet/AnswerInput';
 import { Razbor8 } from './Razbor8';
 import type { RazborHtml } from '@/lib/vychisleniya/razbor';
+import { idIz, otpechatokUsloviya } from '@/lib/zhurnal/model';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 
 type Attempt = 'wrong' | 'skipped';
 
@@ -89,6 +91,24 @@ export function Podgotovka8Screen({
   );
   const index = picked ?? firstOpen(status);
   const found = tasks[index];
+  const tekushchaya = found === undefined ? undefined : (fresh[found.no] ?? found);
+  /* Журнал решения задач (lib/zhurnal): задача — «микротип@seed», по ним
+     собирается та же задача. */
+  const zapis = useZapisZadachi(
+    found === undefined || tekushchaya === undefined
+      ? null
+      : {
+          id: idIz(`8|opornye|${blockId}|${found.no}|${tekushchaya.id}@${tekushchaya.seed}`),
+          task_no: 8,
+          kind: tekushchaya.id,
+          task_ref: `${tekushchaya.id}@${tekushchaya.seed}`,
+          place: 'opornye',
+          place_ref: blockId,
+          level: 1,
+          gen_hash: otpechatokUsloviya(tekushchaya.uslovieHtml),
+          ...(tekushchaya.uslovieHtml.length <= 2000 ? { uslovie_tex: tekushchaya.uslovieHtml } : {}),
+        },
+  );
   if (found === undefined) {
     return null;
   }
@@ -108,6 +128,8 @@ export function Podgotovka8Screen({
   }
 
   function open(next: number) {
+    /* Ушёл на другую задачу после ошибки — задача закрыта ошибкой. */
+    if (checked === 'wrong') zapis?.zakryt(false);
     setPicked(next);
     reset();
     scrollTabTo('.ptask__card');
@@ -124,14 +146,18 @@ export function Podgotovka8Screen({
       const reading = readSealed(value, task.seal, 'trenazher');
       if (reading.kind === 'format') {
         setHint(formatHint(reading.problem, reading.meant));
+        zapis?.popytka(value, false, 'format');
         return;
       }
       if (reading.kind === 'fractionRight') {
         setHint(fractionRightHint(reading.decimal));
+        zapis?.popytka(value, false, 'fraction');
         return;
       }
       correct = reading.right;
     }
+    zapis?.popytka(value, correct);
+    if (correct) zapis?.zakryt(true);
     setHint(null);
     setPicked(index);
     setChecked(correct ? 'right' : 'wrong');
@@ -143,6 +169,7 @@ export function Podgotovka8Screen({
   }
 
   function skip() {
+    zapis?.propustit();
     setAttempts((prev) => ({ ...prev, [base.no]: 'skipped' }));
     if (nextOpen !== null) {
       open(nextOpen);
@@ -160,6 +187,7 @@ export function Podgotovka8Screen({
   }
 
   function showSolution() {
+    zapis?.reshenie();
     try {
       setSolution(JSON.parse(openText(task.razbor, task.seal)) as RazborHtml);
     } catch {
@@ -316,7 +344,13 @@ export function Podgotovka8Screen({
               <Button onClick={check} disabled={!ready}>
                 Проверить
               </Button>
-              <Button variant="ghost" onClick={() => setMemo(!memo)}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (!memo) zapis?.shagPodskazki(1);
+                  setMemo(!memo);
+                }}
+              >
                 {memo ? 'Скрыть формулу' : 'Формула'}
               </Button>
               {checked === 'wrong' ? (

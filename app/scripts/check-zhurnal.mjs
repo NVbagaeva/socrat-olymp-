@@ -179,6 +179,35 @@ const meta = { id: M.idIz('8|trenazher|r1|0|8.A|s1|base'), task_no: 8, kind: '8.
   check(M.razmerOcheredi(M.razobratOchered({ v: 2 })) === 0, 'чужой формат — пустая очередь');
 }
 
+/* ── Вариант ────────────────────────────────────────────────────── */
+{
+  const V = requireSrc('lib/zhurnal/variant.ts');
+  const r = {
+    code: 'K7M2-1Z0GH-4F', variant: 2, mode: 'trening', title: 'Вариант 2', source: 'sobrat',
+    tasks: [
+      { taskNo: 5, taskId: '5:P01:3', prototypeId: '5:P01' },
+      { taskNo: 8, taskId: '8.H|s1|advanced', prototypeId: '8.H' },
+      { taskNo: 1, taskId: '1.A|s', prototypeId: '1.A' },
+    ],
+    answers: { 0: '0,25', 1: '3' }, second: { 1: '4' }, v1: { 0: 'right', 1: 'wrong' }, v2: { 1: 'right' },
+    hinted: [1], steps: { 1: 2 }, times: { 0: 40000, 1: 90000, 2: 5000 },
+    right: [true, false, false], key: ['0.25', '4', '7'], primary: 1, max: 3, test: 6,
+    startedAt: 1_700_000_000_000, finishedAt: 1_700_000_600_000, seconds: 500,
+  };
+  const { variant, zadachi } = V.zapisiVarianta(r);
+  check(variant.primary_score === 1 && variant.test_score === 6 && variant.active_ms === 500000,
+    'вариант: баллы и активное время');
+  check(variant.total_ms === 600000, 'вариант: общее время — от начала до конца');
+  check(zadachi.every((z) => z.place === 'variant' && z.place_ref === variant.id), 'задачи ссылаются на вариант');
+  check(zadachi[0].outcome === 'right' && zadachi[0].answer_key === '0.25' && zadachi[0].level === 2,
+    'задача №5: верно, верный ответ, повышенная сложность');
+  check(zadachi[1].outcome === 'wrong' && zadachi[1].popytki.length === 2 && zadachi[1].hint_steps === 2,
+    'тренировка: обе попытки и подсказка, в баллы — первая');
+  check(zadachi[1].level === 2, '№8 повышенного уровня — повышенная сложность');
+  check(zadachi[2].outcome === 'skipped' && zadachi[2].answer_key === '7', 'без ответа — пропущено, ключ есть');
+  check(V.zapisiVarianta(r).variant.id === variant.id, 'тот же вариант — тот же id: повтор без дубля');
+}
+
 /* ── Разделы флага ──────────────────────────────────────────────── */
 {
   check(JSON.stringify(C.razdelyIz('5,8')) === '[5,8]', 'разделы 5,8');

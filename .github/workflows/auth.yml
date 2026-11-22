@@ -80,6 +80,9 @@ jobs:
           NEXT_PUBLIC_AUTH_IN_HEADER: ${{ matrix.header }}
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
           NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key # не секрет: ключ мока
+          # Журнал решения задач (docs/kabinet-zhurnal.md): сценарий журнала
+          # в check-auth.mjs идёт на сборке с ним.
+          NEXT_PUBLIC_ZHURNAL: '1'
         run: pnpm build
 
       - name: Поставить Chromium
@@ -90,6 +93,8 @@ jobs:
 
       - name: Проверить вход, регистрацию и кабинет
         working-directory: app
+        env:
+          NEXT_PUBLIC_ZHURNAL: '1'
         run: pnpm ${{ matrix.test }} ${{ matrix.shots }}
 
       # Рейтинг устного счёта: гость, серия с буфером и очередью ответов,

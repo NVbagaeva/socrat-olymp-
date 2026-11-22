@@ -57,6 +57,7 @@ export default async function Opornye5BlokPage({ params }: { params: Params }) {
       <Opornye45Blok
         zadanie={5}
         zadachi={found.zadachi}
+        blok={found.id}
         zapomni={
           <div
             className={

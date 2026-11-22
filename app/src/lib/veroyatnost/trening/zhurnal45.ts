@@ -11,6 +11,12 @@ export interface Zadacha45Dlya {
   id: string;
   kind: string;
   uslovie: string;
+  illustration?: { path: string };
+  model?: { illustration?: { path: string } };
+}
+
+function risunokIz(z: Zadacha45Dlya): string | undefined {
+  return z.illustration?.path ?? z.model?.illustration?.path;
 }
 
 export function zhurnal45(
@@ -31,5 +37,6 @@ export function zhurnal45(
     level: zadanie === 5 ? 2 : 1,
     gen_hash: otpechatokUsloviya(z.uslovie),
     ...(z.uslovie.length <= 2000 ? { uslovie_tex: z.uslovie } : {}),
+    ...(risunokIz(z) === undefined ? {} : { risunok: risunokIz(z) }),
   };
 }

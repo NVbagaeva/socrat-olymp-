@@ -93,6 +93,8 @@ create table public.zhurnal_zadachi (
   -- Отпечаток генератора прототипа: не совпал — задача показывается по uslovie_tex.
   gen_hash text check (length(gen_hash) <= 16),
   uslovie_tex text check (length(uslovie_tex) <= 2000),
+  -- Картинка к задаче банка: путь файла сайта («/zadaniya/5/…»).
+  risunok text check (risunok ~ '^/[A-Za-z0-9_./-]{1,200}$'),
   -- Сложность: 1 — базовая, 2 — повышенная, 3 — высокая; null — неизвестно.
   level smallint check (level between 1 and 3),
   place text not null check (place in ('trenazher', 'opornye', 'kartochki', 'variant', 'povyshennye', 'dz')),
@@ -258,7 +260,7 @@ begin
 end $$;
 
 -- Пачка записей из браузера:
---   {"zadachi": [{id, task_no, kind, task_ref, gen_hash, uslovie_tex, level,
+--   {"zadachi": [{id, task_no, kind, task_ref, gen_hash, uslovie_tex, risunok, level,
 --                 place, place_ref, outcome, answer_key, attempts_n, hint_steps,
 --                 hint_wrong, shown_fact, shown_solution, skipped, active_ms,
 --                 total_ms, started_at, closed_at,
@@ -315,12 +317,12 @@ begin
       raise exception 'too_big' using errcode = 'check_violation';
     end if;
     insert into public.zhurnal_zadachi as t (
-      user_id, id, task_no, kind, task_ref, gen_hash, uslovie_tex, level, place, place_ref,
+      user_id, id, task_no, kind, task_ref, gen_hash, uslovie_tex, risunok, level, place, place_ref,
       outcome, answer_key, attempts_n, hint_steps, hint_wrong, shown_fact, shown_solution,
       skipped, active_ms, total_ms, started_at, closed_at)
     values (
       v_uid, (z ->> 'id')::uuid, v_task_no, z ->> 'kind', z ->> 'task_ref', z ->> 'gen_hash',
-      z ->> 'uslovie_tex', (z ->> 'level')::smallint, z ->> 'place', z ->> 'place_ref',
+      z ->> 'uslovie_tex', z ->> 'risunok', (z ->> 'level')::smallint, z ->> 'place', z ->> 'place_ref',
       z ->> 'outcome',
       case when z ->> 'outcome' is null then null else z ->> 'answer_key' end,
       coalesce((z ->> 'attempts_n')::smallint, 0), coalesce((z ->> 'hint_steps')::smallint, 0),
@@ -417,6 +419,7 @@ as $$
     'active_ms', z.active_ms, 'total_ms', z.total_ms, 'started_at', z.started_at,
     'closed_at', z.closed_at,
     'uslovie_tex', case when p_popytki then z.uslovie_tex end,
+    'risunok', case when p_popytki then z.risunok end,
     'last_answer', (select answer from public.zhurnal_popytki p
                      where p.user_id = z.user_id and p.zadacha_id = z.id order by n desc limit 1),
     'bystro', case when p_dlya_uchitelya and public.zhurnal_bystro(z) then true end,

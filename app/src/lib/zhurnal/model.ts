@@ -36,6 +36,7 @@ export interface ZapisZadachi {
   task_ref: string;
   gen_hash?: string;
   uslovie_tex?: string;
+  risunok?: string;
   level?: 1 | 2 | 3;
   place: Mesto;
   place_ref?: string;
@@ -88,6 +89,8 @@ export interface NovayaZadacha {
   level?: 1 | 2 | 3;
   gen_hash?: string;
   uslovie_tex?: string;
+  /** Путь картинки сайта к задаче банка. */
+  risunok?: string;
 }
 
 export function novayaZapis(z: NovayaZadacha, at: number): ZapisZadachi {
@@ -116,6 +119,7 @@ export function novayaZapis(z: NovayaZadacha, at: number): ZapisZadachi {
   if (z.uslovie_tex !== undefined && z.uslovie_tex.length <= PREDELY.uslovie) {
     out.uslovie_tex = z.uslovie_tex;
   }
+  if (z.risunok !== undefined && /^\/[A-Za-z0-9_./-]{1,200}$/.test(z.risunok)) out.risunok = z.risunok;
   return out;
 }
 
