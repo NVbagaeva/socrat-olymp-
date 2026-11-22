@@ -10,7 +10,7 @@
   "uniqueAnswers": true,
   "note": "Собственный методический материал платформы. В покрытие открытого банка ФИПИ не входит.",
   "composition": {
-    "count": 8
+    "count": 10
   },
   "tasks": [
     {
@@ -120,6 +120,36 @@
     },
     {
       "id": "P12R-11-08",
+      "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "negative",
+        "answerKind": "decimal",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-09",
+      "question": "Графики функций $f(x) = k/x$ и $g(x) = ax + b$ пересекаются в точках $A$ и $B$ (см. рисунок). Найдите ординату точки $B$.",
+      "answerRule": "cross-y",
+      "answerType": "number",
+      "hint": "Найди абсциссу $B$ (второй корень уравнения $ax^2 + bx - k = 0$), затем подставь её в $f(x) = k/x$.",
+      "form": "line",
+      "constraints": {
+        "mSign": "positive",
+        "answerKind": "integer",
+        "intersection": {
+          "axis": "y"
+        }
+      }
+    },
+    {
+      "id": "P12R-11-10",
       "question": "На рисунке изображены графики функций $f(x) = k/x$ и $g(x) = ax + b$, которые пересекаются в точках $A$ и $B$. Найдите ординату точки $B$.",
       "answerRule": "cross-y",
       "answerType": "number",
