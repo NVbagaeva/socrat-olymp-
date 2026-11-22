@@ -11,6 +11,7 @@ import { skhema18 } from '@/content/zadanie18/spisok';
 import { GRUPPY_18, type Podsvechennoe } from '@/content/zadanie18/tipy';
 import { ZADANIYA } from '@/lib/paths';
 import { trebuetsyaScenaOpornoy18 } from '@/lib/zadanie18/opornye';
+import { OtmetkaOpornoy18 } from './ProgressOpornyh18';
 import { ZhivoyChertezh18 } from './ZhivoyChertezh18';
 
 const BASE = `${ZADANIYA}/${ZADANIE18.slug}`;
@@ -185,6 +186,8 @@ export function Opornaya18Stranica({ id }: { id: string }) {
               </button>
             )}
           </section>
+
+          <OtmetkaOpornoy18 id={o.id} />
 
           {o.oshibki === undefined || o.oshibki.length === 0 ? null : (
             <section className="z18-blok" aria-labelledby="z18-op-oshibki">

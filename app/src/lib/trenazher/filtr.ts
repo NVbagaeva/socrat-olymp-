@@ -22,6 +22,7 @@ import type {
   Uroven,
   ZadachaRef,
 } from './types';
+import { estRazdel, nomerRazdela } from '@/content/struktura';
 
 export const SKOLKO: readonly Skolko[] = [5, 10, 20, 0];
 export const REZHIMY: readonly Rezhim[] = ['podskazki', 'bez', 'vremya'];
@@ -469,7 +470,10 @@ export function snyatDop(f: Filtr, id: string): Filtr {
 
 /** Строка-сводка во время тренировки: «№12 · параболы · ★★ · 10 задач». */
 export function svodka(config: TrenazherConfig, f: Filtr, n: number, slova: SlovaFiltra): string {
-  const parts = [`№${config.razdel}`, nazvanieTipov(f, config, slova)];
+  /* razdel — ключ раздела (номер хранения); на экран — номер ЕГЭ. */
+  const hranenie = Number(config.razdel);
+  const nomer = estRazdel(hranenie) ? nomerRazdela(hranenie) : config.razdel;
+  const parts = [`№${nomer}`, nazvanieTipov(f, config, slova)];
   if (f.istochnik !== 'vse') parts.push(slova.istochnik[f.istochnik]);
   if (f.urovni.length > 0) parts.push(levelsText(f.urovni));
   if (f.pravila.length > 0) parts.push(f.pravilaTitle ?? slova.pravila);

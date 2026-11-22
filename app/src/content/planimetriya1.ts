@@ -14,9 +14,10 @@
 import type { Ton } from '@/components/tasks/steklo';
 import type { Blok } from '@/lib/planimetriya/stseny/dsl';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov } from './treningBanka';
+import { nomerRazdela, slovoChasti } from './struktura';
 
 export const SHAPKA1 = {
-  nadzagolovok: 'Задание №1 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('planimetriya')} · ${slovoChasti('planimetriya')}`,
   zagolovok: 'Найти величину по готовому чертежу',
   fakty: (tipovVsego: number) => [
     { znachenie: '1', podpis: 'первичный балл' },
@@ -164,6 +165,7 @@ export const TIPY1_OPASNO: Record<string, string> = {
   p73: 'Не замечают равносторонний треугольник: $OA=OB$ и угол $60^\\circ$, поэтому радиус равен хорде.',
   p74: 'Делят $360^\\circ$ на сумму частей. Сначала $\\angle A+\\angle C=180^\\circ$, и угол $D$ дополняет до $180^\\circ$ угол $B$.',
   p75: 'Делят на части $180^\\circ$. Делить нужно внешний угол: он равен сумме двух не смежных с ним.',
+  p76: 'Треугольник при вершине — не доля параллелограмма «по числу частей»: одна часть стороны даёт треугольник $S$, а параллелограмм — по $2S$ на каждую часть стороны.',
 };
 
 export interface Formula1 {
@@ -279,7 +281,7 @@ export const FORMULY1: FormulyGruppy1[] = [
 
 export const TRENAZHER1 = (() => {
   const t = tekstyTrenazheraBanka({
-    nomer: 1,
+    nomer: nomerRazdela('planimetriya'),
     grupp: 'десяти',
     istochniki: { vse: 'Все', fipi: 'Открытый банк', new: 'Аналоги' },
   });
@@ -293,6 +295,12 @@ export const TRENAZHER1 = (() => {
       risunokShaga: 'Чертёж шага',
       bank: (n: number) => `Задача ${n} открытого банка`,
       neIzBanka: 'Не из открытого банка',
+      /* Материалы под условием — подписи прежнего тренажёра (TRENAZHER_1). */
+      materialy: 'Материалы к задаче',
+      povtoritTeoriyu: 'Повторить теорию',
+      layfhak: 'Полезный факт',
+      opornyy: 'Опорный блок',
+      razborTipa: 'Разбор типа',
       sverka: 'Сверка с рисунком',
       priznaki: 'Как сокращали: признаки делимости',
     },
@@ -347,9 +355,28 @@ export const NAVYKI1: {
 
 export const OPORNYE1 = {
   ...tekstyOpornyh(
-    'Короткие задачи на один навык: из этих навыков складывается любая задача №1. В каждом блоке десять задач, у каждой есть ещё варианты.',
+    `Короткие задачи на один навык: из этих навыков складывается любая задача №${nomerRazdela('planimetriya')}. В каждом блоке десять задач, у каждой есть ещё варианты.`,
   ),
   eshchyoVariant: 'Ещё вариант',
   risunok: 'Чертёж к задаче',
   risunokRazbora: 'Чертёж с построениями',
+};
+
+/** Подсказка-сценарий №1 (components/tasks/planimetriya/Scenariy1.tsx). */
+export const SCENARIY1 = {
+  title: 'Подсказка — вопросами',
+  vybor: 'Как будем решать? Выбери способ:',
+  sposob: (n: number) => `Способ ${n}`,
+  da: 'Да.',
+  nePotoropis: 'Не торопись.',
+  podumay: 'Подумай ещё раз и выбери снова.',
+  utochnyaem: 'Уточним:',
+  vernyomsya: 'Теперь вернёмся к вопросу.',
+  pravilno: 'Правильный ответ:',
+  dalshe: 'Дальше',
+  drugoySposob: 'Посмотреть другой способ',
+  gotovo: 'Подсказка пройдена — теперь запиши ответ.',
+  priem: 'Приём',
+  varianty: 'Варианты ответа',
+  risunok: (n: number) => `Чертёж к шагу ${n}`,
 };

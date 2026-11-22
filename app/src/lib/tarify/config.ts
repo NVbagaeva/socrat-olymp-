@@ -7,10 +7,12 @@
  * и ничего не включает сам.
  */
 
+import { nomerRazdela } from '@/content/struktura';
+
 /** Флаг оплаты: «1» — кнопки ведут на регистрацию и оплату. */
 export const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === '1';
 
-export const TARIFY_HREF = '/tarify/';
+export { TARIFY_HREF } from './href';
 
 export type Rol = 'uchenik' | 'repetitor';
 export type Srok = 'd30' | 'ege';
@@ -28,9 +30,39 @@ export const BESPLATNO = {
   trenazherVDen: 10,
   /** Вариантов онлайн всего. */
   variantovOnlayn: 1,
-  /** Вариантов генератора в день (без листа учителя). */
-  generatorVDen: 1,
+  /**
+   * Пробных генераций в каждом открытом генераторе и в «Собрать
+   * вариант» — всего, а не в день. Правило на экране генератора —
+   * lib/tarify/dostup.ts.
+   */
+  generatorProbnyh: 1,
+  /**
+   * Задания (номера сайта), чей генератор открыт без тарифа. Генераторы
+   * остальных — в пробном доступе и на платных тарифах.
+   */
+  generatorNomera: ['1', '2', '10', '11'],
+  /**
+   * Генераторы базовой математики (области «baza-N») открыты целиком:
+   * без тарифа и без счётчика пробных генераций. Решение владельца.
+   */
+  generatorBazy: true,
 } as const;
+
+/**
+ * Номер задания ЕГЭ для подписи по номеру хранения. В правиле
+ * (generatorNomera, адреса страниц) — номера хранения, а человек на
+ * странице видит номер ЕГЭ (content/struktura.js): подписи — только им.
+ */
+export function nomerDlyaPodpisi(nomerHraneniya: string): string {
+  return /^\d+$/.test(nomerHraneniya)
+    ? String(nomerRazdela(Number(nomerHraneniya)))
+    : nomerHraneniya;
+}
+
+/** «№1, 2, 9, 10» — номера ЕГЭ открытых генераторов для подписей. */
+export function nomeraGeneratorov(): string {
+  return `№${BESPLATNO.generatorNomera.map(nomerDlyaPodpisi).join(', ')}`;
+}
 
 /** Пробный доступ: полный, без карты. */
 export const PROBNYY = {
@@ -170,7 +202,7 @@ const besplatno: Plashka = {
     'Опорные задачи: первый блок каждого навыка',
     `Тренажёр: ${BESPLATNO.trenazherVDen} задач в день`,
     `${BESPLATNO.variantovOnlayn} вариант онлайн`,
-    `Генератор: ${BESPLATNO.generatorVDen} вариант в день`,
+    `Генератор: одна пробная генерация в ${nomeraGeneratorov()}`,
   ],
   net: ['Работа над ошибками, прогресс и история', 'Листы учителя с решениями'],
 };
@@ -287,9 +319,9 @@ export const SRAVNENIE: StrokaSravneniya[] = [
   },
   {
     vozmozhnost: 'Генератор и «Собрать вариант»',
-    besplatno: `${BESPLATNO.generatorVDen} вариант в день`,
+    besplatno: `одна пробная генерация: ${nomeraGeneratorov()} и «Собрать вариант»`,
     /* Платный не хуже бесплатного: у ученика тот же лимит генератора. */
-    uchenik: `${BESPLATNO.generatorVDen} вариант в день`,
+    uchenik: `одна пробная генерация: ${nomeraGeneratorov()} и «Собрать вариант»`,
     repetitor: 'без ограничений',
   },
   { vozmozhnost: 'Листы учителя с решениями', besplatno: false, uchenik: false, repetitor: true },
@@ -310,12 +342,22 @@ export const SRAVNENIE: StrokaSravneniya[] = [
 /** Общие подписи. */
 export const TARIFY_TEXT = {
   metkaGlavnoy: 'Полный доступ',
+  /** Метка платной плашки на сроке «До ЕГЭ»: рядом всегда виден якорь. */
+  metkaVygodno: 'Выгоднее всего',
+  /** Якорь под ценой «До ЕГЭ»: «помесячно вышло бы ~~3 120 ₽~~ (8 × 390 ₽)». */
+  yakor: 'помесячно вышло бы',
+  yakorRaschet: (oplat: number, tsena30: string) => `(${oplat} × ${tsena30})`,
+  vygoda: (summa: string) => `выгоднее на ${summa}`,
   bezKarty: 'без карты',
   bezAvtoprodleniya: 'Без автопродления: доступ заканчивается сам',
+  /** Подпись под «Узнать об открытии», пока оплата выключена. */
+  skoroSnoska: 'Оплата скоро откроется — сообщим в Telegram-канале. Пока занимайтесь бесплатно.',
   za30: `за ${PERIOD_DNEY} дней`,
   knopki: {
     nachat: 'Начать заниматься',
     skoro: 'Оплата скоро откроется',
+    /** Пока оплата выключена: ссылка на Telegram-канал, почту не собираем. */
+    uznat: 'Узнать об открытии',
     probnyy: 'Попробовать бесплатно',
     oplatit: 'Оформить доступ',
   },

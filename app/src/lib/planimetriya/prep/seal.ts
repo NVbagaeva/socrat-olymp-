@@ -6,9 +6,11 @@
  * он закрыт вместе с разбором.
  */
 
+import { nazvanieFakta1 } from '../../../content/spravochnik1/fakty';
 import { typeset } from '../../tex';
 import { renderPlan } from '../render';
 import { sealAnswer, sealText } from '../secret';
+import { sobratScenariy } from '../scenariy';
 import { generateMikro, sOtvetom } from './generate';
 import type { Mikro } from './types';
 
@@ -20,8 +22,12 @@ export interface MikroSealed {
   risunokSvg: string | null;
   seal: string;
   formulaHtml: string;
+  /** Факт навыка: кнопка «Показать свойство» в подсказке. */
+  fakt: { id: string; nazvanieHtml: string; vNasheyHtml: string } | null;
   /** Разбор: JSON строк HTML и рисунок учителя, закрытые отпечатком. */
   razbor: string;
+  /** Подсказка-сценарий: JSON ScenariyHtml, закрытый отпечатком; null — формула. */
+  scenariy: string | null;
 }
 
 export interface MikroRazbor {
@@ -50,7 +56,29 @@ export function sealMikro(m: Mikro, seed: string): MikroSealed {
     risunokSvg:
       task.risunok === null ? null : renderPlan(task.risunok, { chisla: true, alt: m.nazvanie }),
     seal,
-    formulaHtml: typeset(`$${m.formula}$`),
+    /* Подсказка: словами, если формула навыка записана общими буквами. */
+    formulaHtml: typeset(m.podskazka ?? `$${m.formula}$`),
+    fakt:
+      typeof m.fakt === 'string'
+        ? {
+            id: m.fakt,
+            nazvanieHtml: typeset(nazvanieFakta1(m.fakt)),
+            vNasheyHtml: m.vNashey === undefined ? '' : typeset(m.vNashey),
+          }
+        : null,
     razbor: sealText(JSON.stringify(razbor), seal),
+    /* Сценарий доводит до ответа — закрыт, как и разбор: в HTML ответа нет. */
+    scenariy:
+      task.scenariy === undefined
+        ? null
+        : sealText(
+            JSON.stringify(
+              sobratScenariy(
+                task.scenariy,
+                task.risunok === null ? null : { scena: task.risunok, optsii: { alt: m.nazvanie } },
+              ),
+            ),
+            seal,
+          ),
   };
 }

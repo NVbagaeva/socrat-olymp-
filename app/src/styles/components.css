@@ -6,6 +6,12 @@
 /* ══════════════════════════════════════════════════════════
    4. КОМПОНЕНТЫ · базовые
    ══════════════════════════════════════════════════════════ */
+/* Кнопка — одна на весь сайт (docs/design-audit.md, 1.2): главная —
+   глянцевая «таблетка», вторичная — стекло, третья — текст. Раньше
+   видов было пять: плоский прямоугольник, глянец радиусом 14, оранжевый
+   глянец, «таблетка» главной, свои у фильтров. Движение — по
+   docs/motion-system.md: наведение — светлый слой поверх (opacity),
+   нажатие — scale(0.97); фон и высота не анимируются. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -13,40 +19,61 @@
   gap: var(--space-2);
   height: var(--h-control);
   padding: 0 var(--space-5);
-  border-radius: var(--radius-md);
-  font-size: 15px;
-  font-weight: 500;
+  border-radius: var(--radius-pill);
+  font-size: 16px;
+  font-weight: 600;
   white-space: nowrap;
   /* Кнопка-ссылка не подчёркивается: либо кнопка, либо ссылка. */
   text-decoration: none;
   position: relative;
+  isolation: isolate;
   transition:
-    background var(--dur-hover) var(--ease),
-    box-shadow var(--dur-hover) var(--ease),
-    color var(--dur-hover) var(--ease);
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+/* Светлый слой наведения: проявляется opacity, а не сменой фона. */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: rgb(255 255 255 / 0.14);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .btn:hover::before {
+    opacity: 1;
+  }
+}
+.btn:active {
+  transform: scale(var(--motion-press-btn));
 }
 .btn--primary {
-  background: var(--color-primary);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
   color: var(--color-text-inverse);
 }
-.btn--primary:hover {
-  background: var(--color-primary-hover);
-}
-.btn--primary:active {
-  background: var(--color-primary-active);
+@media (hover: hover) {
+  .btn--primary:hover {
+    box-shadow: var(--gloss-shadow-soft-hover);
+  }
 }
 .btn--secondary {
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  background: var(--glass-bg-strong);
+  color: var(--color-primary);
+  box-shadow: var(--glass-ring), var(--glass-hi);
 }
-.btn--secondary:hover {
-  background: var(--color-surface-2);
+.btn--secondary::before {
+  background: var(--color-surface-soft);
 }
 .btn--ghost {
   color: var(--color-primary);
 }
-.btn--ghost:hover {
+.btn--ghost::before {
   background: var(--color-surface-soft);
 }
 .btn--danger {
@@ -62,6 +89,26 @@
   height: var(--h-control-lg);
   padding: 0 var(--space-6);
   font-size: 16px;
+}
+/* Узкий телефон: длинная подпись кнопки переносится на вторую строку,
+   а не раздвигает карточку и страницу вбок (check-mobile-overflow,
+   320 px). Однострочная кнопка остаётся прежней высоты. */
+@media (max-width: 479.98px) {
+  .btn {
+    max-width: 100%;
+    height: auto;
+    min-height: var(--h-control);
+    padding-block: var(--space-2);
+    white-space: normal;
+    text-align: center;
+  }
+  .btn--sm {
+    min-height: var(--h-control-sm);
+    padding-block: var(--space-1);
+  }
+  .btn--lg {
+    min-height: var(--h-control-lg);
+  }
 }
 .btn[disabled] {
   opacity: 0.45;
@@ -113,7 +160,7 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
-  font-size: 15px;
+  font-size: 16px;
   transition:
     border-color var(--dur-hover) var(--ease),
     box-shadow var(--dur-hover) var(--ease);
@@ -170,7 +217,7 @@ select.input {
   align-items: center;
   gap: var(--space-3);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 16px;
 }
 .check input {
   appearance: none;
@@ -242,7 +289,7 @@ select.input {
 .tabs button,
 .tabs a[role='tab'] {
   padding: 0 0 var(--space-3);
-  font-size: 15px;
+  font-size: 16px;
   color: var(--color-text-secondary);
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -343,7 +390,7 @@ select.input {
   transform: translateX(-50%);
   background: var(--color-surface-inverse);
   color: var(--color-text-inverse);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 18px;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
@@ -440,7 +487,7 @@ select.input {
   margin-top: var(--space-1);
 }
 .metric__delta {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   margin-top: var(--space-2);
   display: inline-flex;
@@ -460,18 +507,18 @@ select.input {
   padding: var(--space-5);
 }
 .metric--compact .metric__val {
-  font-size: 32px;
+  font-size: 30px;
   line-height: 40px;
 }
 .metric--tight {
   padding: 14px;
 }
 .metric--tight .metric__val {
-  font-size: 26px;
+  font-size: 24px;
   line-height: 32px;
 }
 .metric--tight .metric__lbl {
-  font-size: 11px;
+  font-size: 12px;
 }
 /* Вторая строка сетки 2×2: разделитель сверху, слева его быть не должно. */
 .metric-row--2 .metric:nth-child(3) {
@@ -539,7 +586,7 @@ a.task-card--soon:hover {
   display: grid;
   place-items: center;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 16px;
   flex: none;
 }
 .task-card__body {
@@ -615,7 +662,7 @@ a.task-card--soon:hover {
   font-weight: 500;
 }
 .rec__why {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-secondary);
   margin-top: 2px;
 }
@@ -657,7 +704,7 @@ a.task-card--soon:hover {
 }
 .topic--tight .topic__name,
 .topic--tight .topic__val {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .progress-ring {
@@ -766,7 +813,7 @@ a.task-card--soon:hover {
   background: var(--color-primary);
 }
 .bars span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-text-tertiary);
 }
 
@@ -853,7 +900,7 @@ a.task-card--soon:hover {
   stroke: none;
 }
 .chart__label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   fill: var(--color-text);
   text-anchor: middle;
@@ -911,9 +958,21 @@ a.task-card--soon:hover {
   display: none;
 }
 
-/* Правый столбец: шапка разделов и под ней содержимое. */
+/* Правый столбец: шапка разделов и под ней содержимое.
+
+   Фон — тот же, что у главной (.glavnaya, app/landing.css): синее и
+   оранжевое свечения на светлом фоне, неподвижные — без анимации.
+   Свечения заданы в пикселях от верха столбца, а не в процентах: на
+   длинной странице теории процентный градиент растянулся бы на весь
+   её рост. Это первый экран — переход «главная → банк» остаётся в
+   одном материале (docs/design-audit.md, 1.1). */
 .app-col {
   min-width: 0;
+  background:
+    radial-gradient(900px 560px at 88% 420px, rgb(31 95 208 / 0.07), transparent 70%),
+    radial-gradient(760px 520px at 6% 980px, rgb(245 160 74 / 0.08), transparent 70%),
+    var(--color-bg);
+  background-repeat: no-repeat;
 }
 .app-main {
   /* Своя система координат: декор страницы позиционируется от неё. */
@@ -928,7 +987,14 @@ a.task-card--soon:hover {
   margin-inline: auto;
 }
 .sidebar {
-  background: var(--color-surface-brand);
+  /* Сайдбар остаётся тёмно-синим (решение владельца 15.11) и связан со
+     стеклом приёмом «свет за стеклом»: лёгкий спуск --navy-800 → 900
+     и синее свечение в нижнем углу (docs/design-audit.md, 1.1). Фон не
+     прокручивается вместе со списком: свечение стоит у низа экрана. */
+  background:
+    radial-gradient(120% 40% at 0% 100%, rgb(59 130 246 / 0.12), transparent 70%),
+    linear-gradient(180deg, var(--navy-800), var(--navy-900));
+  background-color: var(--color-surface-brand);
   padding: var(--space-5) var(--space-3);
   min-height: 340px;
   display: flex;
@@ -937,17 +1003,26 @@ a.task-card--soon:hover {
 .sidebar__mark {
   color: var(--color-text-inverse);
   font-weight: 600;
-  font-size: 15px;
+  font-size: 16px;
   padding: 0 var(--space-3) var(--space-6);
   display: flex;
   gap: 10px;
   align-items: center;
 }
+.sidebar__mark {
+  text-decoration: none;
+}
+.sidebar__mark:focus-visible {
+  outline: 2px solid var(--color-text-inverse);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+/* Знак — тот же, что в шапке главной (.logo i, styles/site.css):
+   подложка и скругление внутри logo.svg. */
 .sidebar__logo {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  background: var(--color-primary);
+  width: 22px;
+  height: 22px;
+  background: url('../../public/icons/logo.svg') center / 22px 22px no-repeat;
   display: block;
   flex: none;
 }
@@ -962,7 +1037,7 @@ a.task-card--soon:hover {
   align-items: center;
   padding: 14px var(--space-3) 0;
   color: var(--color-on-brand-strong);
-  font-size: 13px;
+  font-size: 14px;
 }
 .snav {
   display: flex;
@@ -975,7 +1050,7 @@ a.task-card--soon:hover {
   gap: var(--space-3);
   height: 40px;
   padding: 0 var(--space-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   color: var(--color-on-brand);
   text-decoration: none;
   font-size: 14px;
@@ -987,8 +1062,11 @@ a.task-card--soon:hover {
   background: var(--color-on-brand-hover);
   color: var(--color-text-inverse);
 }
+/* Активный пункт — глянцевая «таблетка», как главная кнопка сайта,
+   а не плоская синяя плашка. */
 .snav a.is-active {
-  background: var(--color-primary);
+  background: var(--gloss);
+  box-shadow: var(--gloss-shadow-soft);
   color: var(--color-text-inverse);
   font-weight: 500;
 }
@@ -1025,12 +1103,12 @@ a.task-card--soon:hover {
 }
 .sidebar__caption-title {
   color: var(--color-text-inverse);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 .sidebar__caption-sub {
   color: var(--color-on-brand);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 18px;
 }
 
@@ -1040,7 +1118,7 @@ a.task-card--soon:hover {
   width: 22px;
   flex: none;
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
+  font-size: 14px;
   opacity: 0.7;
 }
 .snav a.is-active .snav__no {
@@ -1094,7 +1172,7 @@ a.task-card--soon:hover {
 }
 .snav__group-label {
   padding: 0 var(--space-3) var(--space-1);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 16px;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -1142,17 +1220,34 @@ a.task-card--soon:hover {
 .sidebar .sidebar__note {
   position: relative;
   display: block;
-  font-size: 17px;
+  font-size: 18px;
   line-height: 24px;
   color: var(--color-text-inverse);
 }
 
-/* Меню разделов в шапке. */
+/* Меню разделов в шапке. Пункты не переносятся, поэтому строка может
+   оказаться шире своего места (1024–1159 px: iPad альбомно, окно в
+   пол-экрана) — тогда она прокручивается внутри себя, а не распирает
+   страницу вбок (docs/launch-audit.md, A3). Полоса прокрутки скрыта,
+   у правого края — затухание: видно, что пункты есть дальше. Поля
+   сверху и снизу — место для кольца фокуса: overflow его не обрезает. */
 .topnav {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-block: var(--space-1);
+  /* Затухание ложится на это поле: когда пункты помещаются, гаснет
+     пустое место, а не последний пункт. */
+  padding-inline-end: 24px;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+}
+.topnav::-webkit-scrollbar {
+  display: none;
 }
 .topnav a {
   padding: var(--space-2) var(--space-3);
@@ -1174,6 +1269,80 @@ a.task-card--soon:hover {
   color: var(--color-primary);
   font-weight: 500;
 }
+/* Меню с выпадающим списком «Варианты» (Topbar, navSlot): листается
+   вбок только лента пунктов до списка, сам список и пункты после него
+   стоят вне прокрутки — иначе выпавший список обрезался бы краем
+   прокручиваемой ленты. */
+.topnav--so-spiskom {
+  overflow: visible;
+  padding-inline-end: 0;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.topnav__lenta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.topnav__lenta::-webkit-scrollbar {
+  display: none;
+}
+.topnav .nav-drop {
+  flex: none;
+}
+/* Кнопка списка — как соседние пункты меню кабинета. */
+.topnav .nav-drop__button {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition:
+    background var(--dur-hover) var(--ease),
+    color var(--dur-hover) var(--ease);
+}
+.topnav .nav-drop__button:hover,
+.topnav .nav-drop[data-open] .nav-drop__button {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.topnav .nav-drop__button.is-current {
+  background: var(--color-surface-soft);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.topnav .nav-drop__list {
+  left: 0;
+}
+/* Список без JavaScript (NavSpisok): виден, пока указатель или фокус
+   внутри группы. Скрыт прозрачностью, а не display/visibility: так
+   ссылки остаются в порядке табуляции сразу за кнопкой, и фокус,
+   войдя в них, сам держит список открытым. */
+.nav-drop--css .nav-drop__list {
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition:
+    opacity var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
+}
+.nav-drop--css:is(:hover, :focus-within) .nav-drop__list {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.nav-drop--css:is(:hover, :focus-within) .nav-drop__button svg {
+  transform: rotate(180deg);
+}
+.topnav .nav-drop--css:is(:hover, :focus-within) .nav-drop__button {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
 /* Полные названия пунктов помещаются в шапку от 1600px; уже — короткие
    (те же, что в нижней панели и на экране «Ещё»). */
 .topnav__short {
@@ -1264,6 +1433,12 @@ a.task-card--soon:hover {
   place-items: center;
   flex: none;
 }
+.bell::before {
+  /* Зона нажатия 44 px при видимых 36. */
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
 .bell--unread::after {
   content: '';
   position: absolute;
@@ -1314,8 +1489,10 @@ a.task-card--soon:hover {
   gap: 4px;
   padding: var(--space-2) 0;
   text-decoration: none;
-  color: var(--color-text-tertiary);
-  font-size: 11px;
+  /* Вторичный серый, не третичный: третичный на белом — 2,6 : 1, для
+     подписи мало (WCAG AA — 4,5 : 1). */
+  color: var(--color-text-secondary);
+  font-size: 12px;
 }
 .bnav a.is-active {
   color: var(--color-primary);
@@ -1365,7 +1542,7 @@ a.task-card--soon:hover {
        на всю панель и с запасом его перекрывает. */
     min-height: 44px;
     text-align: center;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 14px;
     /* Подписи однострочные: перенос ломает ряд, а сокращение
        многоточием — читаемость. Все пять в ячейку помещаются. */
@@ -1379,6 +1556,19 @@ a.task-card--soon:hover {
      что и сама панель. Одно значение на раскладку, без замеров. */
   body:has(.bnav--shell) {
     --fab-lift: var(--h-bnav);
+  }
+}
+
+/* Та же панель на публичных страницах (SaytPanel: тарифы, «Об авторе»,
+   правовые, вход). Столбца заданий там нет — панель во всю ширину, а
+   страница получает снизу отступ в её высоту, чтобы подвал и последние
+   строки не уходили под неё. */
+@media (max-width: 1023.98px) {
+  .bnav--sayt {
+    left: 0;
+  }
+  body:has(.bnav--sayt) {
+    padding-bottom: calc(var(--h-bnav) + env(safe-area-inset-bottom));
   }
 }
 
@@ -1408,7 +1598,7 @@ a.task-card--soon:hover {
   color: var(--color-success);
 }
 .state h4 {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   margin-bottom: var(--space-2);
 }
@@ -1605,7 +1795,7 @@ html[data-tabs-pending] .topic-panel,
 }
 .modal__d {
   color: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: 16px;
 }
 .modal__f {
   padding: var(--space-4) var(--space-6);
@@ -1778,6 +1968,33 @@ html[data-tabs-pending] .topic-panel,
   min-height: 150px;
   padding: var(--card-pad);
   overflow: hidden;
+  /* Стекло главной (docs/design-audit.md, 1.1): радиус 20, светлая
+     кромка, мягкая синяя тень. Без backdrop-filter: за карточкой —
+     гладкий фон со свечениями, размывать нечего, а два десятка
+     размытий на слабом телефоне стоили бы кадров при прокрутке. */
+  border: 1px solid var(--glass-edge);
+  border-radius: 20px;
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transition:
+    transform var(--motion-base) var(--ease-out),
+    box-shadow var(--motion-base) var(--ease-out);
+}
+/* Наведение: тень глубже; подъём — токеном, в зоне «Учёба» он 0. */
+a.task-card--bank:hover,
+a.task-card--bank:focus-visible {
+  transform: translateY(var(--motion-lift));
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+/* Неоткрытый раздел — то же стекло, приглушённое. */
+.task-card--bank.task-card--soon {
+  background: rgb(255 255 255 / 0.4);
+  box-shadow: var(--glass-ring);
+}
+.task-card--bank.task-card--soon:hover {
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-ring);
 }
 
 /* Номер крупно вместо плашки. */
@@ -1813,7 +2030,7 @@ html[data-tabs-pending] .topic-panel,
   margin-top: var(--space-2);
 }
 .task-card--bank .task-card__meta .badge {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* Миниатюра: правая колонка, две верхние строки, по центру по
@@ -1890,13 +2107,13 @@ html[data-tabs-pending] .topic-panel,
   pointer-events: none;
 }
 .ill-formula--long {
-  font-size: 11px;
+  font-size: 12px;
 }
 .ill-formula--mid {
-  font-size: 22px;
+  font-size: 24px;
 }
 .ill-formula--short {
-  font-size: 28px;
+  font-size: 30px;
 }
 .ill-line,
 .ill-accent {
@@ -1934,7 +2151,7 @@ html[data-tabs-pending] .topic-panel,
   fill: currentColor;
   opacity: 0.55;
   stroke: none;
-  font-size: 13px;
+  font-size: 14px;
   font-style: italic;
 }
 
@@ -1964,6 +2181,48 @@ html[data-tabs-pending] .topic-panel,
   transition:
     opacity var(--dur-hover) var(--ease),
     transform var(--dur-hover) var(--ease);
+}
+
+/* Прогресс ученика по разделу (docs/design-audit.md, 5.2): полоса
+   3px по нижнему краю и подпись в нижнем поле карточки. Оба слоя
+   поставлены поверх отступа абсолютно: журналы читаются в браузере
+   уже после загрузки, и карточка от их появления не меняет высоты.
+   Полоса растёт через scaleX — только transform. */
+.task-card__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  pointer-events: none;
+}
+.task-card__progress > span {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  transform-origin: left center;
+  transition: transform var(--motion-slow) var(--ease-out);
+}
+/* Нижнее поле карточки банка чуть выше обычного у всех карточек
+   сразу: подпись прогресса встаёт в него, не касаясь названия, а
+   высота карточки от появления прогресса не меняется. */
+.tasks-grid--bank .task-card--bank {
+  padding-bottom: calc(var(--card-pad) + var(--space-2));
+}
+.task-card__progress-text {
+  position: absolute;
+  left: var(--card-pad, var(--space-5));
+  bottom: 7px;
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.task-card__progress-text.is-gotovo {
+  color: var(--color-success, var(--color-primary));
 }
 
 /* Наведение и фокус с клавиатуры. Правило живёт под (hover: hover):
@@ -2002,14 +2261,14 @@ html[data-tabs-pending] .topic-panel,
   }
 }
 
-/* ── Банк заданий: раскладка Bento ─────────────────────────────
-   Карточки разного размера: размер каждой посчитан заранее
-   (lib/bento.ts) под 2, 3 и 4 колонки и лежит в data-b2/-b3/-b4,
-   поэтому ряды заполнены ровно и порядок номеров не меняется.
-   Телефон — 2 колонки, планшет и узкий компьютер — 3, широкий — 4.
-   Ряды одной высоты (grid-auto-rows от .tasks-grid): крупная
-   карточка 2×2 ровно в два ряда. */
-.tasks-grid--bento {
+/* ── Банк заданий: ровная сетка ───────────────────────────────
+   docs/design-audit.md, 5.1: раньше здесь было «бенто» — крупные
+   плитки №01 и №06 с той же иллюстрацией и тремя четвертями пустоты,
+   что выглядело как сломанная сетка. Теперь все карточки одного
+   размера: телефон — 2 колонки, планшет и узкий компьютер — 3,
+   широкий — 4. Ряды по самой высокой карточке (grid-auto-rows от
+   .tasks-grid), на телефоне — по своему содержимому. */
+.tasks-grid--bank {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   /* На телефоне ряд по своему содержимому: равные ряды по самой
      высокой карточке (13 — с двумя бейджами) оставляли в остальных
@@ -2017,64 +2276,19 @@ html[data-tabs-pending] .topic-panel,
   grid-auto-rows: auto;
   gap: var(--space-3);
 }
-.tasks-grid--bento > [data-b2='2'] {
-  grid-column: span 2;
-}
 @media (min-width: 768px) {
-  .tasks-grid--bento {
+  .tasks-grid--bank {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-rows: 1fr;
     gap: var(--space-4);
   }
-  .tasks-grid--bento > [data-b2='2'] {
-    grid-column: auto;
-  }
-  .tasks-grid--bento > [data-b3='2'] {
-    grid-column: span 2;
-  }
-  .tasks-grid--bento > [data-b3='3'] {
-    grid-column: span 3;
-  }
-  .tasks-grid--bento > [data-b3='big'] {
-    grid-column: span 2;
-    grid-row: span 2;
+  .tasks-grid--bank .task-card--bank {
+    min-height: 168px;
   }
 }
 @media (min-width: 1280px) {
-  .tasks-grid--bento {
+  .tasks-grid--bank {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .tasks-grid--bento > :is([data-b3='2'], [data-b3='3'], [data-b3='big']) {
-    grid-column: auto;
-    grid-row: auto;
-  }
-  .tasks-grid--bento > [data-b4='2'] {
-    grid-column: span 2;
-  }
-  .tasks-grid--bento > [data-b4='3'] {
-    grid-column: span 3;
-  }
-  .tasks-grid--bento > [data-b4='4'] {
-    grid-column: span 4;
-  }
-  .tasks-grid--bento > [data-b4='big'] {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-}
-/* Крупная карточка: иллюстрация растёт вместе с плиткой. */
-@media (min-width: 768px) and (max-width: 1279.98px) {
-  .tasks-grid--bento > [data-b3='big'] .task-card--bank {
-    --card-ill: clamp(96px, 34cqw, 180px);
-    --card-no: 40px;
-    --card-no-lh: 46px;
-  }
-}
-@media (min-width: 1280px) {
-  .tasks-grid--bento > [data-b4='big'] .task-card--bank {
-    --card-ill: clamp(96px, 34cqw, 200px);
-    --card-no: 44px;
-    --card-no-lh: 50px;
   }
 }
 /* Узкая плитка (половина телефона, треть планшета): иллюстрации
@@ -2082,7 +2296,7 @@ html[data-tabs-pending] .topic-panel,
    название под ними во всю ширину плитки; стрелка наведения не нужна
    — на таких экранах наведения нет. */
 @container (max-width: 239.98px) {
-  .tasks-grid--bento .task-card--bank {
+  .tasks-grid--bank .task-card--bank {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto 1fr;
     column-gap: var(--space-2);
@@ -2096,17 +2310,17 @@ html[data-tabs-pending] .topic-panel,
     --card-title-lh: 20px;
     --card-title-lines: 4;
   }
-  .tasks-grid--bento .task-card--bank .task-card__no {
+  .tasks-grid--bank .task-card--bank .task-card__no {
     grid-area: 1 / 1;
     align-self: center;
   }
-  .tasks-grid--bento .task-card--bank .task-card__ill {
+  .tasks-grid--bank .task-card--bank .task-card__ill {
     grid-area: 1 / 2;
   }
-  .tasks-grid--bento .task-card--bank .task-card__body {
+  .tasks-grid--bank .task-card--bank .task-card__body {
     grid-area: 2 / 1 / 3 / 3;
   }
-  .tasks-grid--bento .task-card--bank .task-card__go {
+  .tasks-grid--bank .task-card--bank .task-card__go {
     display: none;
   }
 }
@@ -2141,6 +2355,11 @@ html[data-tabs-pending] .topic-panel,
   color: var(--color-text-tertiary);
 }
 .crumbs a {
+  /* Зона нажатия выше строки (было 20 px): поле сверху и снизу, место
+     в раскладке не меняется. */
+  display: inline-block;
+  padding-block: 12px;
+  margin-block: -12px;
   color: var(--color-text-secondary);
   text-decoration: none;
 }
@@ -2209,8 +2428,9 @@ html[data-tabs-pending] .topic-panel,
    положение задаёт страница: сам себя компонент не позиционирует. */
 .hand-note {
   font-family: var(--font-hand);
-  color: var(--color-primary);
-  opacity: 0.8;
+  /* Без прозрачности и на тон темнее: синий с opacity 0,8 давал на
+     светлом фоне 3,9 : 1. */
+  color: var(--blue-700);
 }
 
 /* ── адаптив компонентов ── */
@@ -2306,7 +2526,7 @@ html[data-tabs-pending] .topic-panel,
     display: none;
   }
   .table {
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
@@ -2872,145 +3092,145 @@ html[data-tabs-pending] .topic-panel,
   }
 }
 
-/* ── Меню раздела плитками (Bento) ─────────────────────────────
-   Пока лента стоит на месте, вкладки раздела — плитки разного
-   размера: первая («О задании», «Подтемы») крупнее, остальные
-   делят ряды поровну, ряды заполнены без дыр (flex-wrap с ростом).
-   Телефон — по 3 в ряд, все плитки одного размера (первая во всю
-   ширину, только если иначе последняя осталась бы в ряду одна),
-   планшет — по 3, широкий экран — по 4. Ничего не прокручивается
-   вбок, подписи не обрезаются.
+/* ── Меню раздела одной строкой ─────────────────────────────────
+   Пока лента стоит на месте, вкладки раздела — одна строка стеклянных
+   плиток «значок над подписью» у всех разделов (docs/design-audit.md,
+   6.2; раньше так было только в «Стеклянной сцене», остальные стояли
+   плитками в три ряда). Компьютер и планшет — ровная сетка на всю
+   ширину; телефон — строка, которая листается пальцем, край гасится
+   градиентом (data-ten-r выше), активную вкладку в видимую часть
+   подводит TabsRow. Подписи целиком, без переносов посреди слова.
 
    Липкая панель (is-stuck, components/tasks/TabsRow.tsx) — та же
-   лента компактной строкой со своими правилами выше и ниже. Плитки
-   при этом остаются на своём месте в потоке: панель лежит поверх
-   страницы, и под плитками ничего не прыгает.
+   лента компактной строкой со своими правилами выше. Плитки при этом
+   остаются на своём месте в потоке: панель лежит поверх страницы, и
+   под плитками ничего не прыгает.
 
-   Лента с модификатором --stroka — всегда строкой, без плиток: так
-   на странице выбора типа функции №12, где под крупной картинкой
-   первая карточка подтем должна остаться на первом экране
-   (scripts/check-zadanie-hero.mjs). */
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs {
-  flex-wrap: wrap;
+   Лента с модификатором --stroka — всегда компактной строкой: так на
+   странице выбора типа функции №12, где под крупной картинкой первая
+   карточка подтем должна остаться на первом экране
+   (scripts/check-zadanie-hero.mjs). Селекторы с .app-main — чтобы
+   быть точнее правил разделов. */
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: var(--space-2);
-  padding: var(--space-2);
-  border-radius: var(--radius-xl);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   overflow: visible;
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta {
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta {
   display: contents;
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
-  flex: 1 1 calc(50% - var(--space-2));
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  :is(.tabs--lenta > a[role='tab'], .tabs--lenta > button, .topic-tabs__more) {
+  flex: none;
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
   min-width: 0;
-  min-height: 72px;
+  min-height: 76px;
   margin: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--color-border-info);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  padding: var(--space-2);
+  border: 1px solid var(--glass-edge);
+  border-radius: 18px;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  color: var(--color-text);
   font-size: var(--fs-label);
   line-height: var(--lh-label);
+  text-align: center;
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-  :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more):hover {
-  background: var(--color-surface-info);
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  :is(.tabs--lenta > a[role='tab'], .tabs--lenta > button, .topic-tabs__more)
+  .tabs__text {
+  max-width: none;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-align: center;
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  :is(.tabs--lenta > a[role='tab'], .tabs--lenta > button, .topic-tabs__more):hover {
+  background: var(--color-surface);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
+}
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
   .tabs--lenta
-  :is(button, a[role='tab'])[aria-selected='true'] {
+  > :is(a[role='tab'], button)[aria-selected='true'] {
   border-color: transparent;
   background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
+  color: var(--color-text-inverse);
+  box-shadow:
+    inset 0 1px 0 var(--color-tab-sheen),
+    var(--glow-tab);
 }
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta .tabs__text,
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more .tabs__text {
-  max-width: none;
-}
-/* Кнопка материалов — такая же плитка, черта-разделитель не нужна. */
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more::before {
+/* «Для репетиторов» — соседка вкладок по сетке, но тише: ученику она
+   не нужна. Черта-разделитель у плитки не нужна. */
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more::before {
   display: none;
 }
-/* Первая плитка крупнее: во всю ширину на телефоне, значок и подпись
-   в строку. */
-.topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-  .tabs--lenta
-  > :is(button, a[role='tab']):first-child {
-  flex-basis: 100%;
-  flex-direction: row;
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more {
+  background: var(--glass-bg);
+  box-shadow: var(--glass-ring);
+}
+.app-main
+  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+  .topic-tabs__more
+  :is(.tabs__text, .tabs__ico) {
+  color: var(--color-text-secondary);
+}
+.app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs__more-in {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  min-height: 56px;
-  font-size: var(--fs-body);
-  line-height: var(--lh-body);
+  justify-content: center;
+  gap: var(--space-1);
+  text-align: center;
 }
-/* Телефон: по 3 в ряд, значок над подписью, поля меньше. Обычные
-   шесть плиток — два ровных ряда, меню вдвое ниже. Первая плитка —
-   такая же, как остальные; во всю ширину, со значком и подписью в
-   строку, она становится, только когда иначе в последнем ряду
-   осталась бы одна плитка: 4, 7 плиток (вкладки + кнопка материалов).
-   Без :has (старые браузеры) — просто по 3 в ряд. */
+/* Телефон: одна строка, которая листается; плитки по 92 px. */
 @media (max-width: 767.98px) {
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
-    flex-basis: calc(33.333% - var(--space-2));
-    gap: var(--space-1);
-    min-height: 64px;
-    padding: var(--space-2);
+  .app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    /* Прилипание считает край с полем ленты: без этого лента стояла
+       на 4 px прокрученной, и у первой вкладки гас левый край. */
+    scroll-padding-inline: var(--space-1);
+    scrollbar-width: none;
+    /* Поле под тень плиток и под край растушёвки. */
+    padding: 2px var(--space-1) var(--space-2);
+    margin: 0 calc(var(--space-1) * -1);
   }
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child {
-    flex-basis: calc(33.333% - var(--space-2));
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: space-between;
-    min-height: 64px;
-    font-size: var(--fs-label);
-    line-height: var(--lh-label);
+  .app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .topic-tabs::-webkit-scrollbar {
+    display: none;
   }
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .topic-tabs:not(:has(.topic-tabs__more)):has(.tabs--lenta > :nth-child(3n + 1):last-child)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child,
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .topic-tabs:has(.topic-tabs__more):has(.tabs--lenta > :nth-child(3n):last-child)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child {
-    flex-basis: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 56px;
-    font-size: var(--fs-body);
-    line-height: var(--lh-body);
+  .app-main .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka) .tabs--lenta {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
   }
-}
-@media (min-width: 768px) {
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
-    flex-basis: calc(33.333% - var(--space-2));
-  }
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child {
-    flex-basis: calc(66.666% - var(--space-2));
-    min-height: 72px;
-  }
-}
-@media (min-width: 1280px) {
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    :is(.tabs--lenta button, .tabs--lenta a[role='tab'], .topic-tabs__more) {
-    flex-basis: calc(25% - var(--space-2));
-  }
-  .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
-    .tabs--lenta
-    > :is(button, a[role='tab']):first-child {
-    flex-basis: calc(50% - var(--space-2));
+  .app-main
+    .topic-tabs-row:not(.is-stuck, .topic-tabs-row--stroka)
+    :is(.tabs--lenta > a[role='tab'], .tabs--lenta > button, .topic-tabs__more) {
+    flex: 0 0 auto;
+    width: 92px;
+    min-height: 68px;
+    scroll-snap-align: start;
   }
 }
 
@@ -3482,5 +3702,51 @@ html[data-tabs-pending] .topic-panel,
   .topic-tabs-row.is-stuck .topic-tabs__more .tabs__ico svg {
     width: 16px;
     height: 16px;
+  }
+}
+
+/* ── Пункт с тёплым акцентом в меню кабинета и нижней панели ── */
+.topnav a.is-akcent {
+  background: linear-gradient(120deg, var(--color-accent-soft-surface), var(--color-surface-info));
+  box-shadow: inset 0 0 0 1px var(--color-border-accent);
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.topnav a.is-akcent:hover,
+.topnav a.is-akcent.is-active {
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent-text);
+}
+.bnav a.is-akcent {
+  color: var(--color-accent-text);
+  font-weight: 600;
+}
+.bnav a.is-akcent .nav-ico {
+  padding: 2px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 70% 25%,
+    var(--color-accent-soft-surface),
+    var(--color-surface-soft)
+  );
+  box-shadow: 0 0 0 1px var(--color-border-accent);
+}
+
+/* ── Отклик на ответ в тренажёрах ─────────────────────────────────
+   Общие ключевые кадры для плашек «Верно / Пока не так» тренажёров
+   разделов (№14, №18, №19 и фильтр-тренажёров): плашка проявляется,
+   значок в кружке «пружинит» (docs/motion-system.md, шаг 3 — тот же
+   язык, что у тренировки в trening.css). Только opacity и transform;
+   длительности — токены движения, при «Уменьшить движение» они
+   сжимаются до 1ms, а правила ниже выключают анимацию совсем. */
+@keyframes otklik-vhod {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-rise-sm, 6px));
+  }
+}
+@keyframes otklik-znachok {
+  from {
+    transform: scale(0.5);
   }
 }

@@ -6,6 +6,7 @@
  *    треугольника OCM (O — центр ABCD): d = OC·CM / OM.
  */
 
+import { vPredelah } from '@/lib/skhemy/vidimye';
 import { chertezhSvg, postroit, sVidom, vybratVid, type Scenariy } from '@/lib/chertezh3';
 import { add, div, mul, rat, ratTex, toNumber } from '@/lib/zadanie15/core/rational';
 import { sqrtRat, surdTex, surdToNumber } from '@/lib/zadanie15/core/surd';
@@ -28,7 +29,11 @@ export function chislaU15(p: PU15) {
 }
 
 function scenariy(p: PU15, punkt: 'a' | 'b'): Scenariy {
-  const t = p.m / (p.m + p.n);
+  /* Видимое положение M (lib/skhemy/vidimye.ts): при CM : MC₁ = 1 : 3
+     основание K перпендикуляра из C слипается с M. На чертеже M — не
+     ближе 0,4 ребра к концам; M между C и C₁, как в задаче. Чисел на
+     чертеже нет. */
+  const t = vPredelah(p.m / (p.m + p.n), 0.4, 0.6);
   const sc: Scenariy = {
     id: `PV-U15-${punkt}`,
     alt:

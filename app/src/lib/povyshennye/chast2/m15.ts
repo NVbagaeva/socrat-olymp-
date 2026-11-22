@@ -8,7 +8,7 @@
  * б) «ugol»: tg∠KMC = CK/CM, CM = a√3/2. «S»: S(ABK) = ½·AB·KM.
  */
 
-import { chertezhSvg, postroit, sVidom, vybratVid, type Scenariy } from '@/lib/chertezh3';
+import { chertezhSvg, postroit, sVidom, vybratObshchiyVid, type Scenariy } from '@/lib/chertezh3';
 import { add, div, mul, rat, toNumber, type Rat } from '@/lib/zadanie15/core/rational';
 import { sqrtRat, surdTex, surdToNumber } from '@/lib/zadanie15/core/surd';
 import type { Chast2Zadacha, Shablon2 } from './types';
@@ -38,7 +38,7 @@ export function chislaM15(p: PM15) {
   return { a2, t, ck2, cm2, tg2, km2, S2 };
 }
 
-function scenariy(p: PM15, punkt: 'a' | 'b'): Scenariy {
+function scenariy(p: PM15, punkt: 'a' | 'b', bezVida = false): Scenariy {
   const c = chislaM15(p);
   const sc: Scenariy = {
     id: `PV-M15-${punkt}`,
@@ -64,11 +64,13 @@ function scenariy(p: PM15, punkt: 'a' | 'b'): Scenariy {
             { id: 'km', vid: 'otrezok', tochki: ['K', 'M'] },
           ],
   };
-  if (punkt === 'b') {
-    const s = scenariy(p, 'a');
-    return { ...sc, rakurs: s.rakurs, szhatie: s.szhatie };
-  }
-  return sVidom(sc, vybratVid(postroit(sc)));
+  if (bezVida) return sc;
+  /* Этапы а) и б) — с одного ракурса, годного для обоих чертежей. */
+  const vid = vybratObshchiyVid([
+    postroit(scenariy(p, 'a', true)),
+    postroit(scenariy(p, 'b', true)),
+  ]);
+  return sVidom(sc, vid);
 }
 
 export function scenariyM15(p: PM15, punkt: 'a' | 'b'): Scenariy {

@@ -106,6 +106,8 @@ export function demoZhurnaly(uchenik: DemoUchenik): Zhurnaly {
     11: vse(11, 'rrrr', 16),
     12: vse(12, 'rrrrr', 14),
     13: vse(13, 'rrrw', 12),
+    /* Новый №12 ЕГЭ-2027: на карте он только в структуре из 19 заданий. */
+    21: vse(21, 'rrrr', 11),
     14: vse(14, 'rrr', 9),
     18: vse(18, 'rrrr', 6, tipyGruppy(18, 'ploshchadi').slice(1)),
     19: poGruppam(19, { m1: 'rrr', m2: 'rrw', m3: 'rwr', m4: 'wrrh' }, 1),

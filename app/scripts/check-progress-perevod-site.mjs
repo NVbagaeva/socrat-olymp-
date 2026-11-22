@@ -19,6 +19,7 @@ import { chromium } from 'playwright';
 import { requireSrc, APP } from './lib/load-ts.mjs';
 import { welcomeSeen } from './lib/onboarding.mjs';
 import { bezBanneraCookieVsyudu } from './lib/cookie-notice.mjs';
+import { metkaAdministratora } from './lib/metka-skrytyh.mjs';
 
 bezBanneraCookieVsyudu(chromium);
 
@@ -96,6 +97,8 @@ const executablePath = process.env.PW_CHROMIUM ?? process.env.CHROMIUM_PATH;
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 await welcomeSeen(ctx);
+/* Скрытый раздел (№6 в ЕГЭ-2027) — как у администратора. */
+await metkaAdministratora(ctx);
 /* Прежние записи — как у ученика, который решал до перевода. */
 await ctx.addInitScript(
   (fixtures) => {
@@ -139,16 +142,18 @@ for (const [url, old, logKey] of RAZDELY) {
 /* №10: прогресса раньше не было — первая попытка заводит журнал. */
 {
   errors.length = 0;
-  /* Тип задач выбран адресом — как по ссылке из «О задании». */
+  /* Тип задач выбран адресом — как по прежней ссылке из теории: общий
+     тренажёр по банку сразу начинает тренировку этого типа. Неверный
+     ответ уходит в журнал, когда ученик идёт дальше. */
   await page.goto(BASE + '/zadaniya/10/trenazher/?tipy=P22', { waitUntil: 'networkidle' });
-  await page
-    .getByRole('button', { name: /Начать/ })
-    .first()
-    .click();
-  const pole = page.locator('.z10-otvet input');
+  const pole = page.locator('.trn-otvetnaya input').first();
   await pole.waitFor({ timeout: 20000 });
   await pole.fill('123456');
   await page.getByRole('button', { name: 'Проверить' }).click();
+  await page
+    .getByRole('button', { name: /^(Дальше|К итогам)/ })
+    .first()
+    .click();
   await page.waitForFunction(() => localStorage.getItem('budetege:zadanie-10:log:v1') !== null);
   const log = L.parseLog(
     JSON.parse(await page.evaluate(() => localStorage.getItem('budetege:zadanie-10:log:v1'))),

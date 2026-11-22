@@ -133,6 +133,10 @@ export function VariantyOtveta({
                 }
               : { 'aria-pressed': vybran })}
             disabled={!dostupny(variant)}
+            /* Нарисованный вариант (vid) — формула или картинка, скрытая
+               от скринридера: кнопке нужно название текстом — само
+               значение варианта. */
+            {...(vid === undefined ? {} : { 'aria-label': variant })}
             onClick={() => onPick(variant)}
           >
             {vid === undefined ? variant : vid(variant)}

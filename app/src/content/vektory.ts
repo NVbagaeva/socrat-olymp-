@@ -13,9 +13,11 @@ import { OPORNYE } from './opornye';
 import type { TutorMaterial } from './sections';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const VEKTORY = {
-  no: '02',
+  no: nomerDvumya('vektory'),
   slug: '2',
   title: taskName('2'),
   lead: 'Три группы прототипов: длина вектора, скалярное произведение и косинус угла — по координатам и по рисунку. Числа в каждой задаче свои.',
@@ -39,7 +41,7 @@ export const VEKTORY = {
 
 /** Заголовок окна браузера: «Вкладка · Векторы — Будет на ЕГЭ». */
 export function vektoryTitle(tab: string): string {
-  return `${tab} · ${VEKTORY.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(2, VEKTORY.title, tab);
 }
 
 /* ── Вкладка «О задании» ────────────────────────────────────────── */
@@ -52,7 +54,7 @@ export interface VektoryGruppa {
 
 export const O_ZADANII = {
   title: 'О задании',
-  lead: 'Задание №2 проверяет действия с векторами на координатной плоскости: координаты по точкам и по рисунку, длину, скалярное произведение и косинус угла между векторами.',
+  lead: `Задание №${nomerRazdela('vektory')} проверяет действия с векторами на координатной плоскости: координаты по точкам и по рисунку, длину, скалярное произведение и косинус угла между векторами.`,
   format: {
     title: 'Что в ответе',
     text: 'Задание оценивается в **1 балл**. Ответ — целое число или конечная десятичная дробь: $17$, $7{,}5$, $-0{,}6$. Запятая и точка в ответе равноправны.',

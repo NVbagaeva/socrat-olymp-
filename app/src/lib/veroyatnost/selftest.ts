@@ -36,6 +36,7 @@ import { KARTINKA_NE_PO_USLOVIYU, KARTINKA_OSNOVY_PODHODIT } from './illyustrats
 import { podskazkaOpornoy } from './podgotovka5-podskazki';
 import { zapisOtveta } from './podskazka';
 import { klyuchZadachi, sealAnswer } from './secret';
+import { sDerevom } from './podgotovka5-derevya';
 import {
   ETAPY,
   konechnaya,
@@ -762,7 +763,9 @@ export function checkModel(bank: readonly Prototype[], bloki: readonly PrepBlok[
     }
   }
   for (const blok of bloki) {
-    for (const zadacha of blok.zadachi) {
+    for (const ishodnaya of blok.zadachi) {
+      /* Дерево опорной задачи — как на экране (pool.ts): сверяется с ответом. */
+      const zadacha = sDerevom(ishodnaya);
       if (zadacha.metodika === undefined) {
         bezMetodiki.push(zadacha.id);
         continue;

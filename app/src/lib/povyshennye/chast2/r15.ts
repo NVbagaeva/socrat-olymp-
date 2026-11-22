@@ -13,7 +13,7 @@
  *              d = CK·CM/KM, CK = a√3/2, CM = h/2.
  */
 
-import { chertezhSvg, postroit, sVidom, vybratVid, type Scenariy } from '@/lib/chertezh3';
+import { chertezhSvg, postroit, sVidom, vybratObshchiyVid, type Scenariy } from '@/lib/chertezh3';
 import { add, div, mul, rat, ratTex, toNumber, type Rat } from '@/lib/zadanie15/core/rational';
 import { sqrtRat, surdTex, surdToNumber } from '@/lib/zadanie15/core/surd';
 import type { Chast2Zadacha, Shablon2 } from './types';
@@ -59,9 +59,12 @@ function hTex(p: PR15): string {
   return ratTex(rat(p.hN, p.hD));
 }
 
-function scenariy(p: PR15, punkt: 'a' | 'b'): Scenariy {
+function scenariy(p: PR15, punkt: 'a' | 'b', bezVida = false): Scenariy {
   const a = 4;
-  const h = (a * p.hN) / (p.hD * p.a);
+  /* Видимая высота призмы (lib/skhemy/vidimye.ts): у низкой призмы
+     проекция H слипается с M и сторонами сечения. Не ниже 0,8 стороны
+     основания; чисел на чертеже нет. */
+  const h = Math.max((a * p.hN) / (p.hD * p.a), p.vid === 'trPrizma' ? 0.8 * a : 0);
   let sc: Scenariy;
   if (p.vid === 'kvPrizma') {
     sc = {
@@ -122,11 +125,13 @@ function scenariy(p: PR15, punkt: 'a' | 'b'): Scenariy {
       ],
     };
   }
-  if (punkt === 'b') {
-    const s = scenariy(p, 'a');
-    return { ...sc, rakurs: s.rakurs, szhatie: s.szhatie };
-  }
-  return sVidom(sc, vybratVid(postroit(sc)));
+  if (bezVida) return sc;
+  /* Этапы а) и б) — с одного ракурса, годного для обоих чертежей. */
+  const vid = vybratObshchiyVid([
+    postroit(scenariy(p, 'a', true)),
+    postroit(scenariy(p, 'b', true)),
+  ]);
+  return sVidom(sc, vid);
 }
 
 export function scenariyR15(p: PR15, punkt: 'a' | 'b'): Scenariy {

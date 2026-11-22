@@ -73,7 +73,9 @@ const { xlsx, crc32 } = requireSrc('lib/xlsx');
 
 /* ── Партия «Собрать вариант» ─────────────────────────────────────── */
 const adapters = new Map();
-for (let n = 1; n <= 13; n += 1) {
+const { EGE_NUMBERS } = requireSrc('lib/variant/types');
+const { VARIANT_NUMBERS, VARIANT_SKORO } = requireSrc('lib/variant/struktura');
+for (const n of EGE_NUMBERS) {
   const p = String(n).padStart(2, '0');
   const { section } = requireSrc(`lib/variant/adapters/z${p}/index`);
   const df = `lib/variant/data/z${p}`;
@@ -81,8 +83,10 @@ for (let n = 1; n <= 13; n += 1) {
   adapters.set(n, section.init(data == null ? null : JSON.parse(JSON.stringify(data))));
 }
 const subtypeIds = {};
-for (let n = 1; n <= 13; n += 1) subtypeIds[n] = adapters.get(n).info.subtypes.map((s) => s.id);
-const ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+for (const n of EGE_NUMBERS) subtypeIds[n] = adapters.get(n).info.subtypes.map((s) => s.id);
+/* Вариант — все задания первой части действующей структуры: в ЕГЭ-2027
+   двенадцать, последнее — «Наибольшее и наименьшее» (номер хранения 21). */
+const ALL = [...VARIANT_NUMBERS];
 const config = { tasks: ALL, subtypes: {}, source: 'mix', stars: [], count: 3, parallel: false };
 const CODE = encodeCode({ seed: 'KB2E', config, zameny: {}, version: '00' }, subtypeIds);
 const SET = buildVariantSet(
@@ -148,7 +152,8 @@ const json = JSON.stringify(view);
 ok(view.results === null, 'ученику — без итогов класса');
 ok(!/"answer"|"hints"|"key"/.test(json), 'в работе ученика нет полей ответа и подсказок');
 ok(
-  view.tasks[0].length === 13 && view.tasks[0][0].statement === SET.variants[1].tasks[0].statement,
+  view.tasks[0].length === ALL.length &&
+    view.tasks[0][0].statement === SET.variants[1].tasks[0].statement,
   'условия — те же, что у листа',
 );
 
@@ -218,7 +223,10 @@ const kr = await api.variantSubmit(
   [],
   [],
 );
-ok(kr.primary === 13 && kr.max === 13 && !kr.late, 'контрольная: все верно, в срок');
+ok(
+  kr.primary === ALL.length && kr.max === ALL.length && !kr.late,
+  'контрольная: все верно, в срок',
+);
 
 console.log('5. Репетитор: таблица класса и Excel');
 asTutor();
@@ -229,10 +237,25 @@ ok(
   table.average.every((x) => x === 1),
   'средние по номерам: 100%',
 );
-ok(
-  table.rows.find((r) => r.student.id === s2)?.test === 72,
-  'тестовый балл ученицы: 13 первичных → 72 по шкале',
-);
+{
+  /* Вариант теста — вся первая часть действующей структуры: тестовый
+     балл ставится. У каждого раздела первой части есть задачи для
+     вариантов (в ЕГЭ-2027 — и у «Наибольшего и наименьшего»). */
+  const { fullPartOne, testScore } = requireSrc('lib/variant/online/proverka');
+  ok(VARIANT_SKORO.length === 0 && fullPartOne(ALL), 'вариант покрывает всю первую часть');
+  const zhdu = testScore(ALL.length);
+  ok(
+    table.rows.find((r) => r.student.id === s2)?.test === zhdu,
+    `тестовый балл ученицы: ${ALL.length} первичных → ${zhdu}`,
+  );
+  /* Задача раздела 21 в работе класса: номер хранения в данных, номер ЕГЭ — по структуре. */
+  if (ALL.includes(21)) {
+    ok(
+      kv.tasks[0].some((t) => t.egeNo === 21),
+      'в работе класса есть задача «Наибольшего и наименьшего» (номер хранения 21)',
+    );
+  }
+}
 const tv = await api.variantWork(trening);
 const tt = classTable(tv);
 ok(

@@ -11,9 +11,10 @@
 import type { Ton } from '@/components/tasks/steklo';
 import type { GroupId } from '@/lib/zadanie7/types';
 import { tekstyOpornyh, tekstyTrenazheraBanka, tipov } from './treningBanka';
+import { nomerRazdela, slovoChasti } from './struktura';
 
 export const SHAPKA7 = {
-  nadzagolovok: 'Задание №7 · первая часть',
+  nadzagolovok: `Задание №${nomerRazdela('uravneniya')} · ${slovoChasti('uravneniya')}`,
   zagolovok: 'Решить уравнение и записать корень',
   lead: 'Одно уравнение — одно число в ответ. Если корней несколько, в условии сказано, какой записать: меньший, больший, наименьший положительный или наибольший отрицательный.',
   fakty: (tipovVsego: number) => [
@@ -261,7 +262,7 @@ export const FORMULY7: FormulyGruppy7[] = [
 
 export const TRENAZHER7 = (() => {
   const t = tekstyTrenazheraBanka({
-    nomer: 7,
+    nomer: nomerRazdela('uravneniya'),
     grupp: 'пяти',
     istochniki: { vse: 'Все', fipi: 'Из банка ФИПИ', new: 'Не из банка' },
   });
@@ -327,5 +328,5 @@ export const NAVYKI7: {
 ];
 
 export const OPORNYE7 = tekstyOpornyh(
-  'Короткие задачи на один навык: из этих навыков складывается любое уравнение №7. В каждом блоке десять задач.',
+  `Короткие задачи на один навык: из этих навыков складывается любое уравнение №${nomerRazdela('uravneniya')}. В каждом блоке десять задач.`,
 );

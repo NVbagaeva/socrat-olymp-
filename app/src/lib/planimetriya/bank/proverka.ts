@@ -709,6 +709,28 @@ export const IZMERENIYA: Record<number, Izmerenie> = {
     if (Math.abs(vneshniy - p.e) > 1e-6) return NaN;
     return Math.max(angleAt(t.C, t.A, t.B), angleAt(t.A, t.B, t.C));
   },
+  /* 76: CD поделена на n частей, E — на m-й части от C. Измеряем на
+     параллелограмме площади 1: доли трапеции ABED и треугольника BCE,
+     затем масштабируем по числу условия. */
+  76: (p) => {
+    const f = para(115, 7, 10);
+    const s1 = area(f.A, f.B, f.C, f.D);
+    const n = p.n ?? 3;
+    const m = p.m ?? 1;
+    const E: T2 = [f.C[0] + ((f.D[0] - f.C[0]) * m) / n, f.C[1] + ((f.D[1] - f.C[1]) * m) / n];
+    const dolyaTrap = area(f.A, f.B, E, f.D) / s1;
+    const dolyaTreug = area(f.B, f.C, E) / s1;
+    switch (p.v ?? 0) {
+      case 0:
+        return p.s * dolyaTrap;
+      case 1:
+        return p.s * dolyaTreug;
+      case 2:
+        return p.s / dolyaTrap;
+      default:
+        return p.s / dolyaTreug;
+    }
+  },
 };
 
 /** Ответ, измеренный на фигуре; null — для прототипа нет измерения. */

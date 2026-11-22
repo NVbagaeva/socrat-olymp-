@@ -42,7 +42,10 @@
   gap: var(--space-6);
   align-items: center;
   margin: 0 0 var(--space-4);
-  padding: var(--space-5) var(--space-7);
+  /* 28 px по бокам — как радиус. Токена --space-7 в шкале нет: с ним
+     браузер отбрасывал весь padding, и заголовок прилипал к краю
+     стекла (docs/audit-prodazhi.md, E4). */
+  padding: var(--space-5) calc(var(--space-6) + var(--space-1));
   border: 1px solid var(--glass-edge);
   border-radius: 28px;
   background: var(--glass-bg-strong);
@@ -122,9 +125,9 @@
   background: linear-gradient(180deg, var(--white), var(--blue-50));
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
   color: var(--blue-700);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 16px;
+  line-height: 19px;
   white-space: nowrap;
 }
 .stsena__tabletka--warm {
@@ -170,6 +173,42 @@
   flex: 1 1 auto;
   max-width: 320px;
   height: 8px;
+}
+
+/* Кольцо прогресса раздела (№1, №2, №11) внутри шапки: кружок слева,
+   подпись справа от него и по ширине своей колонки. Отдельным блоком
+   во всю высоту, как было в прежней шапке, оно вылезало за край
+   карточки и раздувало её. */
+.stsena__media .topic-progress,
+.stsena__actions .topic-progress {
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 100%;
+}
+.stsena__media .topic-progress__text,
+.stsena__actions .topic-progress__text {
+  max-width: 100%;
+  text-align: left;
+}
+/* Кружок рисуется с запасом в 160 px; в шапке он меньше, поэтому
+   чертёж тянется за рамкой, а не остаётся в своём размере. */
+.stsena__media .progress-ring,
+.stsena__actions .progress-ring {
+  width: 92px;
+  height: 92px;
+}
+.stsena__media .progress-ring svg,
+.stsena__actions .progress-ring svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Кнопка под прогрессом: «Продолжить подготовку» у №12. */
+.stsena__actions {
+  margin-top: var(--space-4);
 }
 
 /* ── Обложка ────────────────────────────────────────────────── */
@@ -268,8 +307,8 @@
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
   color: var(--blue-700);
   font: inherit;
-  font-size: 11px;
-  line-height: 13px;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 500;
   text-align: center;
   cursor: pointer;
@@ -315,7 +354,7 @@
   }
   .stsena__progress {
     gap: var(--space-3);
-    font-size: 13px;
+    font-size: 14px;
   }
   .stsena::before {
     right: 10%;
@@ -363,76 +402,9 @@
   }
 }
 
-/* ── Лента вкладок «Стеклянной сцены» ───────────────────────── */
-/* Плитки: одинаковые стеклянные кнопки «значок над подписью», подписи
-   целиком. На компьютере и планшете — ровная сетка на всю ширину; на
-   телефоне — строка с прокруткой пальцем, край гасится градиентом
-   (data-ten-r, components.css). Прилипшая панель — общая компактная
-   строка, как у всех разделов. Селекторы с .app-main — чтобы быть
-   точнее общих правил плиток в components.css. */
+/* Лента вкладок — общая для всех разделов: одна строка стеклянных
+   плиток (styles/components.css, «Меню раздела одной строкой»). */
 
-.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: var(--space-2);
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  overflow: visible;
-}
-.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta {
-  display: contents;
-}
-.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab'] {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  min-width: 0;
-  min-height: 76px;
-  margin: 0;
-  padding: var(--space-2) var(--space-2);
-  border: 1px solid var(--glass-edge);
-  border-radius: 18px;
-  background: var(--glass-bg-strong);
-  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
-  color: var(--color-text);
-  font-size: var(--fs-label);
-  line-height: var(--lh-label);
-  text-align: center;
-}
-.app-main
-  .topic-tabs-row--stsena:not(.is-stuck)
-  .topic-tabs
-  .tabs--lenta
-  > a[role='tab']
-  .tabs__text {
-  max-width: none;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-}
-.app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab']:hover {
-  background: var(--color-surface);
-  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover);
-}
-.app-main
-  .topic-tabs-row--stsena:not(.is-stuck)
-  .topic-tabs
-  .tabs--lenta
-  > a[role='tab'][aria-selected='true'] {
-  border-color: transparent;
-  background: linear-gradient(180deg, var(--color-tab-top), var(--color-tab-bottom));
-  color: var(--color-text-inverse);
-  box-shadow:
-    inset 0 1px 0 var(--color-tab-sheen),
-    var(--glow-tab);
-}
 @media (max-width: 767.98px) {
   /* Телефон: обложка справа от текста узкой колонкой, кнопка под ней —
      так шапка, лента и начало вкладки умещаются в экран 375×667. */
@@ -474,32 +446,5 @@
   .oblozhka__knopka svg {
     width: 18px;
     height: 18px;
-  }
-  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab'] {
-    min-height: 62px;
-  }
-  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs {
-    display: flex;
-    gap: var(--space-2);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    /* Поле под тень карточек и под край растушёвки. */
-    padding: 2px var(--space-1) var(--space-2);
-    margin: 0 calc(var(--space-1) * -1);
-  }
-  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs::-webkit-scrollbar {
-    display: none;
-  }
-  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta {
-    display: flex;
-    gap: var(--space-2);
-  }
-  .app-main .topic-tabs-row--stsena:not(.is-stuck) .topic-tabs .tabs--lenta > a[role='tab'] {
-    flex: 0 0 auto;
-    width: 92px;
-    min-height: 68px;
-    scroll-snap-align: start;
   }
 }

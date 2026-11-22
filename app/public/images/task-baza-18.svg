@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Числовая прямая: промежуток от выколотой точки до закрашенной, со штриховкой">
+  <!-- Неравенства: промежуток (a; b] на числовой прямой.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M94 150 H206 V124 H94 Z" fill="url(#b-g)" stroke="none"/>
+    <path d="M100 150 l18 -24 M113 150 l18 -24 M126 150 l18 -24 M139 150 l18 -24 M152 150 l18 -24 M165 150 l18 -24 M178 150 l18 -24 M191 150 l18 -24" stroke-width="1.5" stroke-opacity="0.75"/>
+    <path d="M64 144 V156 M236 144 V156" stroke-width="1.5"/>
+    <path d="M32 150 H268" stroke-width="2"/>
+    <path d="M259.2 154.8 L268 150 L259.2 145.2" stroke-width="2"/>
+    <path d="M150 144 V156" stroke-width="1.5"/>
+    <path d="M94 150 H206" stroke-width="4"/>
+  </g>
+  <circle cx="94" cy="150" r="8.5" fill="#fff" stroke="#0c3ebc" stroke-width="2.5"/>
+  <circle cx="206" cy="150" r="8.5" fill="#0c3ebc"/>
+</svg>

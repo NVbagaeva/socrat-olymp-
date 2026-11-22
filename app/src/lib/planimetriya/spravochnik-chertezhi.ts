@@ -119,6 +119,208 @@ const PARALLELNYE_LINII: Scena['elementy'] = [
 
 /* ── Чертежи карточек ─────────────────────────────────────────── */
 
+/* ── Чертежи карточек, которые учат рассуждать (novye-temy.ts) ───── */
+
+/** Треугольник ABC с биссектрисами AD, BE; слои — шаги вывода. */
+function bissektrisyTreugolnika(
+  ugolA: number,
+  ugolB: number,
+  o: { bukvy: boolean; c?: string },
+): Scena {
+  return {
+    tochki: {
+      ...poUglam(ugolA, ugolB),
+      D: { bissektrisa: ['A', 'B', 'C'] },
+      E: { bissektrisa: ['B', 'A', 'C'] },
+      O: {
+        peresechenie: [
+          ['A', 'D'],
+          ['B', 'E'],
+        ],
+      },
+    },
+    elementy: [
+      tri('A', 'B', 'C'),
+      otr('A', 'D'),
+      otr('B', 'E'),
+      /* Шаг 1: равные половинки — дугами своего цвета. */
+      ug('B', 'A', 'O', { cvet: 1, sloy: o.bukvy ? 'uslovie' : 1 }),
+      ug('O', 'A', 'C', { cvet: 1, sloy: o.bukvy ? 'uslovie' : 1 }),
+      ug('O', 'B', 'A', { cvet: 3, dugi: 2, sloy: o.bukvy ? 'uslovie' : 1 }),
+      ug('C', 'B', 'O', { cvet: 3, dugi: 2, sloy: o.bukvy ? 'uslovie' : 1 }),
+      /* Шаг 2: буквы α и β. */
+      ug('B', 'A', 'O', { cvet: 1, znachenie: 'α', sloy: o.bukvy ? 'uslovie' : 2 }),
+      ug('O', 'A', 'C', { cvet: 1, znachenie: 'α', sloy: o.bukvy ? 'uslovie' : 2 }),
+      ug('O', 'B', 'A', { cvet: 3, dugi: 2, znachenie: 'β', sloy: o.bukvy ? 'uslovie' : 2 }),
+      ug('C', 'B', 'O', { cvet: 3, dugi: 2, znachenie: 'β', sloy: o.bukvy ? 'uslovie' : 2 }),
+      /* Шаг 3: третий угол треугольника. */
+      ug('A', 'C', 'B', o.c === undefined ? { sloy: 3 } : { vydelit: 'dano', znachenie: o.c }),
+      /* Шаг 4: искомый угол AOB — третьим цветом. */
+      ug('A', 'O', 'B', { vydelit: 'iskomoe', cvet: 2, znachenie: '?', podsvetka: [4] }),
+    ],
+  };
+}
+
+/** Смежные углы AOC и COB с биссектрисами OK и OL. */
+function bissektrisySmezhnyhSc(u: number, chislo: boolean): Scena {
+  return {
+    tochki: {
+      A: [-5, 0],
+      O: [0, 0],
+      B: [5, 0],
+      C: polar(u, 5),
+      K: polar(90 + u / 2, 4.6),
+      L: polar(u / 2, 4.6),
+    },
+    elementy: [
+      otr('A', 'B'),
+      otr('O', 'C'),
+      otr('O', 'K'),
+      otr('O', 'L'),
+      ...(chislo ? [ug('C', 'O', 'B', { vydelit: 'dano', znachenie: `${u}°`, radiusPx: 44 })] : []),
+      ug('A', 'O', 'K', { cvet: 1, sloy: chislo ? 'uslovie' : 1 }),
+      ug('K', 'O', 'C', { cvet: 1, sloy: chislo ? 'uslovie' : 1 }),
+      ug('C', 'O', 'L', { cvet: 3, dugi: 2, sloy: chislo ? 'uslovie' : 1 }),
+      ug('L', 'O', 'B', { cvet: 3, dugi: 2, sloy: chislo ? 'uslovie' : 1 }),
+      ug('A', 'O', 'K', { cvet: 1, znachenie: 'α', sloy: chislo ? 'uslovie' : 2 }),
+      ug('K', 'O', 'C', { cvet: 1, znachenie: 'α', sloy: chislo ? 'uslovie' : 2 }),
+      ug('C', 'O', 'L', { cvet: 3, dugi: 2, znachenie: 'β', sloy: chislo ? 'uslovie' : 2 }),
+      ug('L', 'O', 'B', { cvet: 3, dugi: 2, znachenie: 'β', sloy: chislo ? 'uslovie' : 2 }),
+      ug('K', 'O', 'L', {
+        vydelit: 'iskomoe',
+        cvet: 2,
+        podsvetka: [3],
+        radiusPx: 14,
+        ...(chislo ? { znachenie: '?' } : {}),
+      }),
+    ],
+  };
+}
+
+/** Треугольник ABC (вершина A сверху, BC внизу) с медианой AM и высотой AH. */
+function medianaSc(iskomoe: boolean): Scena {
+  const t = poUglam(68, 44, 10);
+  return {
+    tochki: {
+      B: t.A,
+      C: t.B,
+      A: t.C,
+      M: { seredina: ['B', 'C'] },
+      H: { osnovanie: ['A', 'B', 'C'] },
+    },
+    elementy: [
+      ...(iskomoe
+        ? [oblast(['A', 'B', 'M'], { vydelit: 'iskomoe' as const, znachenie: '?' })]
+        : []),
+      tri('A', 'B', 'C'),
+      otr('A', 'M'),
+      shtrih('B', 'M', 1),
+      shtrih('M', 'C', 1),
+      ...(iskomoe ? [] : [otr('A', 'H', ISK), pryam('A', 'H', 'C')]),
+    ],
+  };
+}
+
+/** Треугольник BCD, E на CD (CE : CD = 1 : 3), общая высота BH. */
+function obshchayaVysotaSc(iskomoe: boolean): Scena {
+  return {
+    tochki: { C: [0, 0], D: [9, 0], B: [6.6, 5], E: [3, 0], H: { osnovanie: ['B', 'C', 'D'] } },
+    elementy: [
+      ...(iskomoe
+        ? [oblast(['B', 'C', 'E'], { vydelit: 'iskomoe' as const, znachenie: '?' })]
+        : []),
+      tri('B', 'C', 'D'),
+      otr('B', 'E'),
+      otr('B', 'H', ISK),
+      pryam('B', 'H', 'D'),
+    ],
+  };
+}
+
+const strelka = (a: string, b: string): EOtrezok => ({
+  tip: 'otrezok',
+  a,
+  b,
+  tolkoShtrihi: true,
+  strelki: 1,
+});
+
+function uglyParallelogrammaSc(chislo: boolean): Scena {
+  return {
+    tochki: parallelogramm(66, 10, 6),
+    elementy: [
+      mn(['A', 'B', 'C', 'D']),
+      strelka('B', 'C'),
+      strelka('A', 'D'),
+      otr('A', 'B', chislo ? {} : ISK),
+      ug('D', 'A', 'B', chislo ? { vydelit: 'dano', znachenie: '85°' } : { cvet: 1 }),
+      ug(
+        'A',
+        'B',
+        'C',
+        chislo ? { vydelit: 'iskomoe', cvet: 2, znachenie: '?' } : { cvet: 2, dugi: 2 },
+      ),
+    ],
+  };
+}
+
+function diagonalSc(iskomoe: boolean): Scena {
+  return {
+    tochki: parallelogramm(60, 10, 6),
+    elementy: [
+      oblast(['A', 'B', 'D'], iskomoe ? { vydelit: 'iskomoe', znachenie: '?' } : { cvet: 1 }),
+      ...(iskomoe ? [] : [oblast(['C', 'D', 'B'], { cvet: 1 })]),
+      mn(['A', 'B', 'C', 'D']),
+      otr('B', 'D', iskomoe ? {} : ISK),
+      ...(iskomoe
+        ? []
+        : [shtrih('A', 'B', 1), shtrih('C', 'D', 1), shtrih('A', 'D', 2), shtrih('B', 'C', 2)]),
+    ],
+  };
+}
+
+function ravnyePloshchadiSc(iskomoe: boolean): Scena {
+  return {
+    tochki: {
+      ...parallelogramm(62, 10, 6),
+      E: { seredina: ['C', 'D'] },
+      F: { seredina: ['A', 'B'] },
+    },
+    elementy: iskomoe
+      ? [
+          oblast(['A', 'B', 'E', 'D'], { vydelit: 'iskomoe', znachenie: '?' }),
+          mn(['A', 'B', 'C', 'D']),
+          otr('B', 'E'),
+          shtrih('C', 'E', 1),
+          shtrih('E', 'D', 1),
+        ]
+      : [
+          oblast(['B', 'C', 'E'], { cvet: 1, znachenie: 'S' }),
+          oblast(['B', 'F', 'E'], { cvet: 1, znachenie: 'S' }),
+          oblast(['A', 'F', 'E', 'D'], { cvet: 2, znachenie: '2S' }),
+          mn(['A', 'B', 'C', 'D']),
+          otr('B', 'E'),
+          otr('E', 'F', ISK),
+        ],
+  };
+}
+
+function otnoshenieSc(iskomoe: boolean): Scena {
+  return {
+    tochki: { A: [-5, 0], O: [0, 0], B: [5, 0], C: polar(40, 7.5) },
+    elementy: [
+      otr('A', 'B'),
+      otr('O', 'C'),
+      ...(iskomoe
+        ? [ug('C', 'O', 'B', { vydelit: 'iskomoe', cvet: 2, znachenie: '?', radiusPx: 46 })]
+        : []),
+      ug('C', 'O', 'B', { cvet: 2, znachenie: '2x', radiusPx: 26, ...(iskomoe ? {} : ISK) }),
+      ug('A', 'O', 'C', { cvet: 1, dugi: 2, znachenie: '7x' }),
+    ],
+    podpisi: ['A', 'O', 'B', 'C'],
+  };
+}
+
 const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
   /* 1. Углы и прямые */
   'vidy-uglov': () => {
@@ -309,7 +511,7 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
       podpisi: ['A', 'B', 'C', 'H'],
     }),
     r({
-      tochki: { A: [0, 0], C: [8, 0], B: [-3, 4.2], H: { osnovanie: ['B', 'C', 'A'] } },
+      tochki: { A: [0, 0], C: [7, 0], B: [-2.2, 5.2], H: { osnovanie: ['B', 'C', 'A'] } },
       elementy: [
         tri('A', 'B', 'C'),
         { tip: 'prodolzhenie', a: 'C', b: 'A', doTochki: 'H' },
@@ -960,7 +1162,7 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
     r({
       tochki: {
         O: [0, 0],
-        C: [9, 0],
+        C: [6.4, 0],
         A: { kasanie: { iz: 'C', okr: 'w', storona: 1 } },
         B: { kasanie: { iz: 'C', okr: 'w', storona: -1 } },
       },
@@ -1127,8 +1329,8 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
       tochki: {
         O: [0, 0],
         C: [9, 0],
-        P1: [0, 1.5],
-        P2: [0, -1.5],
+        P1: [0, 2.6],
+        P2: [0, -2.6],
         D: { pryamayaOkruzhnost: { pryamaya: ['C', 'P1'], okr: 'w', vybor: 'blizhnyaya' } },
         B: { pryamayaOkruzhnost: { pryamaya: ['C', 'P1'], okr: 'w', vybor: 'dalnyaya' } },
         E: { pryamayaOkruzhnost: { pryamaya: ['C', 'P2'], okr: 'w', vybor: 'blizhnyaya' } },
@@ -1252,7 +1454,10 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
         otr('O', 'A'),
         otr('O', 'B'),
         ug('A', 'O', 'B', ISK),
-        ug('A', 'B', 'C', { dugi: 2 }),
+        /* Двойная дуга — внутри вписанной окружности: та проходит в 0,13
+           стороны от B, и в карточке свойства (300 × 190) дуга обычного
+           радиуса её задевает. */
+        ug('A', 'B', 'C', { dugi: 2, radiusPx: 6 }),
         tochka('O'),
       ],
       podpisi: ['O', 'A', 'B', 'C'],
@@ -1260,34 +1465,13 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
   },
 
   /* 11. Полезные факты */
-  'ugol-mezhdu-bissektrisami': () =>
-    r({
-      tochki: {
-        ...poUglam(64, 52),
-        D: { bissektrisa: ['A', 'B', 'C'] },
-        E: { bissektrisa: ['B', 'A', 'C'] },
-        O: {
-          peresechenie: [
-            ['A', 'D'],
-            ['B', 'E'],
-          ],
-        },
-      },
-      elementy: [
-        tri('A', 'B', 'C'),
-        otr('A', 'D'),
-        otr('B', 'E'),
-        ug('B', 'A', 'O'),
-        ug('O', 'A', 'C'),
-        ug('O', 'B', 'A', { dugi: 2 }),
-        ug('C', 'B', 'O', { dugi: 2 }),
-        ug('A', 'O', 'B', ISK),
-      ],
-    }),
+  /* Буквы α, β, угол C и искомый угол AOB появляются по шагам вывода (слои 1–4). */
+  'ugol-mezhdu-bissektrisami': () => r(bissektrisyTreugolnika(64, 52, { bukvy: false })),
   'iz-pryamogo-ugla': () =>
     r({
       tochki: {
-        ...poUglam(34, 56),
+        /* Острый угол подобран так, чтобы основания медианы, биссектрисы и высоты не слипались. */
+        ...poUglam(27, 63),
         H: { osnovanie: ['C', 'A', 'B'] },
         D: { bissektrisa: ['C', 'A', 'B'] },
         M: { seredina: ['A', 'B'] },
@@ -1359,6 +1543,15 @@ const TEORIYA: Record<string, () => ChertezhSpravochnika> = {
       podpisi: false,
     }),
   ],
+  /* Карточки, которые учат рассуждать (novye-temy.ts). */
+  'bissektrisy-smezhnyh': () => r(bissektrisySmezhnyhSc(66, false)),
+  'mediana-ravnovelikie': () => r(medianaSc(false)),
+  'obshchaya-vysota': () => r(obshchayaVysotaSc(false)),
+  'ugly-parallelogramma': () => r(uglyParallelogrammaSc(false)),
+  'diagonal-parallelogramma': () => r(diagonalSc(false)),
+  'priem-ravnye-ugly': () => r(bissektrisyTreugolnika(64, 52, { bukvy: true })),
+  'priem-ravnye-ploshchadi': () => r(ravnyePloshchadiSc(false)),
+  'priem-otnoshenie': () => r(otnoshenieSc(false)),
 };
 
 /* ── Чертежи своих примеров (с числами) ───────────────────────── */
@@ -1375,7 +1568,8 @@ function tochkaK(A: T2, B: T2, C: T2): T2 {
 const PRIMERY: Record<string, () => RisunokSpravochnika> = {
   'vidy-uglov:0': () =>
     r({
-      tochki: { A: [-5, 0], O: [0, 0], B: [5, 0], C: polar(36, 5) },
+      /* Схема: α и 4α в масштабе (36° и 144°) дают плоский рисунок. */
+      tochki: { A: [-5, 0], O: [0, 0], B: [5, 0], C: polar(50, 5) },
       elementy: [
         otr('A', 'B'),
         otr('O', 'C'),
@@ -1386,7 +1580,9 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
     }),
   'vertikalnye:0': () =>
     r({
-      tochki: { O: [0, 0], A: polar(161, 5), B: polar(-19, 5), C: polar(19, 5), D: polar(199, 5) },
+      /* Схема: углы 38° и 142° нарисованы как 48° и 132° — рисунок не плоский. */
+      skhematichno: true,
+      tochki: { O: [0, 0], A: polar(156, 5), B: polar(-24, 5), C: polar(24, 5), D: polar(204, 5) },
       elementy: [
         otr('A', 'B'),
         otr('C', 'D'),
@@ -1421,7 +1617,8 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
     }),
   'neravenstvo:0': () =>
     r({
-      tochki: poStoronam(9, 4, 11),
+      /* Схема: стороны 9, 4 и c в масштабе дают плоский треугольник. */
+      tochki: poStoronam(8, 5.5, 10),
       elementy: [tri('A', 'B', 'C'), bk('B', 'C', '9'), bk('A', 'C', '4'), bk('A', 'B', 'c', ISK)],
       podpisi: false,
     }),
@@ -1570,7 +1767,8 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
     }),
   'teorema-kosinusov:1': () =>
     r({
-      tochki: poStoronam(7, 5, 3),
+      /* Схема: в масштабе (угол α = 120°) угол C острее 22°. */
+      tochki: poStoronam(7, 5, 4.2),
       elementy: [
         tri('A', 'B', 'C'),
         bk('A', 'B', '3'),
@@ -1691,6 +1889,16 @@ const PRIMERY: Record<string, () => RisunokSpravochnika> = {
       ],
       bezPodpisi: ['M', 'N', 'K'],
     }),
+  'bissektrisy-smezhnyh:0': () => r(bissektrisySmezhnyhSc(66, true)),
+  'mediana-ravnovelikie:0': () => r(medianaSc(true)),
+  'obshchaya-vysota:0': () => r(obshchayaVysotaSc(true)),
+  'ugly-parallelogramma:0': () => r(uglyParallelogrammaSc(true)),
+  'diagonal-parallelogramma:0': () => r(diagonalSc(true)),
+  /* ∠C = 50°: углы A и B — 64° и 66°. */
+  'ugol-mezhdu-bissektrisami:0': () => r(bissektrisyTreugolnika(64, 66, { bukvy: true, c: '50°' })),
+  'priem-ravnye-ugly:0': () => r(bissektrisyTreugolnika(64, 66, { bukvy: true, c: '50°' })),
+  'priem-ravnye-ploshchadi:0': () => r(ravnyePloshchadiSc(true)),
+  'priem-otnoshenie:0': () => r(otnoshenieSc(true)),
 };
 
 /** Чертёж карточки по якорю. */

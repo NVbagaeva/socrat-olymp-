@@ -34,44 +34,6 @@
   max-width: 72ch;
   color: var(--color-text-secondary);
 }
-.stereo-tipy__grid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-  gap: var(--space-3);
-}
-.stereo-tip {
-  display: grid;
-  gap: var(--space-2);
-  height: 100%;
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-text);
-  text-decoration: none;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-.stereo-tip:hover {
-  border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-sm);
-}
-.stereo-tip__title {
-  font-weight: 600;
-}
-.stereo-tip__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
-}
-
 /* ── Теория: план главы, пока она пишется ── */
 .stereo-plan {
   display: grid;
@@ -276,13 +238,6 @@
 }
 
 /* Карточка типа с разбором: метка «Разбор». */
-.stereo-tip__razbor {
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface-info);
-  color: var(--color-primary);
-  font-weight: 600;
-}
 
 /* ── Разбор типа (razbor/<тип>/) ──
    Оформление разборов №12 (rich-example, topic.css); здесь — живой

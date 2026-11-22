@@ -115,7 +115,8 @@ const SVOI: Record<string, () => RisunokTeorii> = {
   'tri-elementa': () =>
     sCh({
       tochki: {
-        ...poUglam(38, 70),
+        /* Углы подобраны так, чтобы основания медианы, биссектрисы и высоты не слипались. */
+        ...poUglam(32, 72),
         H: { osnovanie: ['C', 'A', 'B'] },
         L: { bissektrisa: ['C', 'A', 'B'] },
         M: { seredina: ['A', 'B'] },
@@ -489,8 +490,10 @@ const SVOI: Record<string, () => RisunokTeorii> = {
     }),
   'bissektrisy-45': () =>
     sCh({
+      /* Половины острых углов вместе дают 45°: обе не могут быть больше 22,5°. */
+      minUgol: 21,
       tochki: {
-        ...pryamougolnyy(34),
+        ...pryamougolnyy(44),
         I: { centrVpisannoy: ['A', 'B', 'C'] },
         K: { naPryamoy: ['A', 'I', 1.45] },
       },

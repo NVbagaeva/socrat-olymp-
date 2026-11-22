@@ -5,7 +5,6 @@ import { VDzKnopka } from '@/components/dz/razdel/DzVRazdele';
 import { Opornye1 } from '@/components/tasks/planimetriya/Opornye1';
 import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { OPORNYE1 } from '@/content/planimetriya1';
-import { zadanie1Title } from '@/content/zadanie1';
 import { typeset } from '@/lib/tex';
 import { BLOKI, blokBySlug } from '@/lib/planimetriya/prep/bloki';
 import { prepPool1 } from '@/lib/planimetriya/prep/pool';
@@ -13,6 +12,7 @@ import { PROTOTIPY } from '@/lib/planimetriya/stseny';
 import { OPORNYE1_HREF, tipHref1 } from '@/lib/planimetriya/trening/links';
 import { opornyyDlya } from '@/lib/planimetriya/trenazher/dannye';
 import { klyuchProto } from '@/lib/planimetriya/trenazher/sessiya';
+import { zadanie1Zagolovok } from '@/lib/seo-razdely';
 
 export function generateStaticParams() {
   return BLOKI.map((b) => ({ blok: b.slug }));
@@ -24,7 +24,7 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const found = blokBySlug(blok);
-  return { title: zadanie1Title(found === undefined ? OPORNYE1.title : found.nazvanie) };
+  return { title: zadanie1Zagolovok(found === undefined ? OPORNYE1.title : found.nazvanie) };
 }
 
 /** Блок опорных задач №1: десять задач на общем экране блока, собраны на сборке. */
@@ -55,11 +55,36 @@ export default async function Opornye1BlokPage({ params }: { params: Params }) {
         zapomni={
           <>
             <b>{OPORNYE1.zapomni}</b>
-            <ul className="z1-zapomni">
-              {found.formulyHtml.map((html, i) => (
-                <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
-              ))}
-            </ul>
+            {found.pamyatka.length > 0 ? (
+              /* Памятка словами: факт, мелкая формула, маленький цветной чертёж. */
+              <ul className="z1-pamyatka">
+                {found.pamyatka.map((f, i) => (
+                  <li className="z1-pamyatka__fakt" key={i}>
+                    {f.risunokSvg === null ? null : (
+                      <span
+                        className="pl-wrap z1-pamyatka__ris"
+                        dangerouslySetInnerHTML={{ __html: f.risunokSvg }}
+                      />
+                    )}
+                    <span className="z1-pamyatka__tekst">
+                      <span dangerouslySetInnerHTML={{ __html: f.tekstHtml }} />
+                      {f.formulaHtml === '' ? null : (
+                        <span
+                          className="z1-pamyatka__formula"
+                          dangerouslySetInnerHTML={{ __html: f.formulaHtml }}
+                        />
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul className="z1-zapomni">
+                {found.formulyHtml.map((html, i) => (
+                  <li key={i} dangerouslySetInnerHTML={{ __html: html }} />
+                ))}
+              </ul>
+            )}
           </>
         }
         zadachi={found.zadachi}

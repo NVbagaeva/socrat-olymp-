@@ -14,6 +14,9 @@
 
 import type { Blok13 } from '@/lib/zadanie13/teoriya-yakorya';
 import type { TableScheme } from '@/lib/zadanie13/types';
+import { nomerRazdela } from '@/content/struktura';
+import { EDINICY_POTERYA, MESTO13 } from '@/content/zadanie13';
+import { GLAVY_13_CHAST2 } from '@/content/teoriya13-chast2';
 
 /** Роль карточки: цвет рамки и ярлык (02-design.md, § 2.1). */
 export type Rol = 'slovami' | 'pravilo' | 'vazhno' | 'lovushka' | 'bystro' | 'priznak';
@@ -76,6 +79,11 @@ export type Blok = { yakor?: Blok13 } & (
   | { vid: 'priznaki'; title: string; stroki: { vizhu: string; tip: string; pochemu: string }[] }
   | { vid: 'opredeli'; title: string; zadachi: { text: string; tip: string; priznak: string }[] }
   | { vid: 'delimost' }
+  /* Задача прежнего №17 из варианта: условие, ответ и решение — из данных
+     вариантов (вариант k, версия v; v = null — ежемесячный вариант k). */
+  | { vid: 'varianta'; title: string; k: number; v: number | null }
+  /* Карточка со ссылками: на другие главы, вкладки и разделы. */
+  | { vid: 'ssylka'; title: string; text: string; ssylki: { label: string; href: string }[] }
 );
 
 export interface Podrazdel {
@@ -1004,7 +1012,9 @@ export const GLAVY_13: Glava[] = [
             rol: 'lovushka',
             yakor: 'lov-edinicy',
             title: 'Единицы ответа',
-            text: '«Ответ выразите в рублях» — значит, 1 200 000, а не 1200 (тысяч). Задание 13 оценивается в 1 балл, и ответ не в тех единицах — потерянный балл.',
+            text: MESTO13.vtorayaChast
+              ? `«Ответ выразите в рублях» — значит, 1 200 000, а не 1200 (тысяч). Задание ${nomerRazdela('ekonomika')} оценивается в ${MESTO13.bally}, а ответ не в тех единицах — ${EDINICY_POTERYA}.`
+              : `«Ответ выразите в рублях» — значит, 1 200 000, а не 1200 (тысяч). Задание ${nomerRazdela('ekonomika')} оценивается в ${MESTO13.bally}, и ответ не в тех единицах — потерянный балл.`,
           },
           {
             vid: 'kartochka',
@@ -1072,6 +1082,8 @@ export const GLAVY_13: Glava[] = [
       },
     ],
   },
+  /* Вторая часть экзамена: решение на 2 балла и вид «На оптимизацию». */
+  ...GLAVY_13_CHAST2,
 ];
 
 /** Признаки делимости для сворачиваемой панели. */

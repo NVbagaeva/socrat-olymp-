@@ -12,6 +12,7 @@ import {
   appNavPrimary,
   bottomNavActive,
   notificationsPage,
+  notificationsReady,
   sidebarExtras,
   topNav,
 } from '@/content/appNav';
@@ -22,6 +23,9 @@ import { AuthWidget } from '@/components/auth/AuthWidget';
 
 import { assetUrl } from '@/lib/assetUrl';
 import { SiteMenu } from './SiteMenu';
+import { levelNav, withActive } from './navUrovnya';
+import { NavSpisok } from './NavSpisok';
+import { isNavGroup, site } from '@/content/site';
 export interface AppShellProps {
   /** id раздела кабинета, который отмечается текущим в шапке. */
   active?: string;
@@ -37,10 +41,6 @@ export interface AppShellProps {
    */
   level?: Level;
   children: React.ReactNode;
-}
-
-function withActive(items: NavItem[], active: string | undefined): NavItem[] {
-  return items.map((item) => (item.id === active ? { ...item, active: true } : item));
 }
 
 /* Список заданий в сайдбаре целиком считается из конфига: номера,
@@ -63,8 +63,8 @@ function taskItem(task: ExamTask): NavItem {
   };
 }
 
-/* Список по частям экзамена: «ЧАСТЬ 1», под ней 01–13, разделитель,
-   «ЧАСТЬ 2» и 14–20. */
+/* Список по частям экзамена: «ЧАСТЬ 1» с её номерами, разделитель,
+   «ЧАСТЬ 2» (номера и части — content/struktura.js). */
 function taskGroups(level: Level): NavGroup[] {
   const tasks = tasksOf(level);
   return taskParts
@@ -76,22 +76,6 @@ function taskGroups(level: Level): NavGroup[] {
     .filter((group) => group.items.length > 0);
 }
 
-/* Меню кабинета уровня. «Задания» знают оба адреса: на странице без
-   своего уровня (статистика, настройки) пункт ведёт в банк запомненного
-   уровня. На страницах базы в банк и сборщик базы ведут и остальные
-   раскладки меню — нижняя панель берёт пункты отсюда же. */
-function levelNav(items: NavItem[], level: Level): NavItem[] {
-  const base = levelInfo('base');
-  return items.map((item) => {
-    if (item.id === 'tasks') {
-      return { ...item, href: level === 'base' ? base.bank : item.href, hrefBase: base.bank };
-    }
-    if (item.id === 'variant' && level === 'base') return { ...item, href: base.variant };
-    if (item.id === 'home' && level === 'base') return { ...item, href: base.home };
-    return item;
-  });
-}
-
 /**
  * Оболочка кабинета: слева список заданий, сверху разделы, ниже
  * содержимое страницы.
@@ -100,12 +84,24 @@ function levelNav(items: NavItem[], level: Level): NavItem[] {
  * каждой из них. Ниже 768px сайдбар прячется и его место занимает
  * нижняя панель — пункты у неё те же, что в шапке.
  */
+/* «Варианты» в шапке кабинета — тот же выпадающий список, что в шапке
+   сайта (content/site.ts): «Собрать вариант», «Повышенные» и
+   «Ежемесячные» не стоят тремя отдельными пунктами. */
+const VARIANTY = site.nav.find(isNavGroup);
+const V_SPISKE = new Set(['variant', 'povyshennye', 'ezhemesyachnye']);
+
 export function AppShell({ active, search = false, level = 'profile', children }: AppShellProps) {
   const bottomItems = withActive(
     levelNav([...appNavPrimary, appNavMorePage], level),
     bottomNavActive(active),
   );
   const tasks = tasksOf(level);
+  const vse = withActive(levelNav(topNav, level), active);
+  const verhnee =
+    VARIANTY === undefined
+      ? vse
+      : vse.filter((item) => item.id === 'variant' || !V_SPISKE.has(item.id));
+  const tekushchiy = vse.find((item) => item.active === true && V_SPISKE.has(item.id))?.href;
 
   return (
     <div className="shell shell--responsive app-shell">
@@ -119,7 +115,7 @@ export function AppShell({ active, search = false, level = 'profile', children }
         label="Задания ЕГЭ"
         items={tasks.map(taskItem)}
         groups={taskGroups(level)}
-        secondaryItems={withActive(sidebarExtras, active)}
+        secondaryItems={sidebarExtras.length > 0 ? withActive(sidebarExtras, active) : undefined}
         footer={
           /* Декор подвала: горы во всю ширину столбца, поверх них
              рукописная подпись. Картинка — фон, поэтому alt пустой.
@@ -142,10 +138,24 @@ export function AppShell({ active, search = false, level = 'profile', children }
       <div className="app-col">
         <Topbar
           lead={<LevelSwitch className="topbar__level" />}
-          nav={withActive(levelNav(topNav, level), active)}
+          nav={verhnee}
+          {...(VARIANTY === undefined
+            ? {}
+            : {
+                navSlot: {
+                  id: 'variant',
+                  node: (
+                    <NavSpisok
+                      group={VARIANTY}
+                      {...(tekushchiy === undefined ? {} : { currentHref: tekushchiy })}
+                    />
+                  ),
+                },
+              })}
           search={search}
           searchPlaceholder="Поиск по заданиям, темам, формулам…"
           notificationsHref={notificationsPage.href}
+          bell={notificationsReady}
           /* Аккаунт — настоящий: «Войти» или кружок с инициалами.
              Выдуманного пользователя в шапке больше нет. */
           userSlot={

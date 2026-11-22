@@ -12,17 +12,31 @@ import { HOWTO_HREF } from '@/content/howto';
 import { tasksPage } from '@/content/tasks';
 import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
+import { href, USTNYY } from '@/lib/paths';
 import { VARIANT_HREF } from '@/content/variant';
+import { TARIFY_HREF } from '@/lib/tarify/href';
 
 /* Разделы кабинета. Прежние пункты сайдбара разложены по ним так:
    «Прогресс» и «Статистика» → «Статистика», «Материалы» →
    «Мои материалы», «Учитель» и «Домашние работы» → «Для учителя»,
    «Уведомления» → колокольчик в шапке. */
-export const topNav: NavItem[] = [
+const vseRazdely: NavItem[] = [
   { id: 'home', label: 'Главная', href: '/', icon: 'home' },
   /* В нижней панели пункт называется полным именем страницы —
      «Банк заданий»: он ведёт на список всех заданий, а не в раздел. */
   { id: 'tasks', label: 'Задания', panel: 'Банк заданий', href: tasksPage.href, icon: 'tasks' },
+  /* Устный счёт — общий для профиля и базы (lib/paths.ts, USTNYY). В
+     нижнюю панель не входит: попадает на экран «Ещё». */
+  /* Устный счёт — общий для профиля и базы (lib/paths.ts, USTNYY).
+     Выделен тёплым акцентом и стоит в нижней панели среди главных. */
+  {
+    id: 'ustnyy',
+    label: 'Устный счёт',
+    short: 'Счёт',
+    href: href(USTNYY),
+    icon: 'schet',
+    akcent: true,
+  },
   /* Генератор варианта из всех заданий первой части (/variant/). */
   {
     id: 'variant',
@@ -72,7 +86,35 @@ export const topNav: NavItem[] = [
     href: HOWTO_HREF,
     icon: 'help',
   },
+  /* Тарифы — последними, как в шапке главной: из задания, тренажёра и
+     генератора к цене один клик (docs/audit-prodazhi.md, C1). В нижнюю
+     панель не входит — на экране «Ещё». */
+  { id: 'tarify', label: 'Тарифы', href: TARIFY_HREF, icon: 'favourites' },
 ];
+
+/**
+ * Разделы, которых ещё нет: их страницы — заглушки «Раздел в разработке»
+ * (components/layout/StubPage.tsx). В меню, нижнюю панель, экран «Ещё»,
+ * сайдбар и колокольчик они не попадают — ни одна кнопка навигации не
+ * ведёт в тупик (docs/design-audit.md, п. 13.1). Страницы по прямому
+ * адресу остаются. Раздел готов — убрать его id отсюда, и он вернётся
+ * на своё место во всех раскладках.
+ */
+const NE_GOTOVY = new Set([
+  'stats',
+  'materials',
+  'teacher',
+  'notifications',
+  'my-tasks',
+  'favourites',
+  'history',
+  'settings',
+]);
+
+const gotovye = (items: NavItem[]): NavItem[] => items.filter((item) => !NE_GOTOVY.has(item.id));
+
+/** Верхнее меню кабинета: только готовые разделы. */
+export const topNav: NavItem[] = gotovye(vseRazdely);
 
 /** Уведомления живут за колокольчиком, в списке меню их нет. */
 export const notificationsPage: NavItem = {
@@ -83,22 +125,29 @@ export const notificationsPage: NavItem = {
 };
 
 /** Личные разделы под списком заданий в сайдбаре. */
-export const sidebarExtras: NavItem[] = [
+const lichnye: NavItem[] = [
   { id: 'my-tasks', label: 'Мои задания', href: '/moi-zadaniya/', icon: 'assignments' },
   { id: 'favourites', label: 'Избранное', href: '/izbrannoe/', icon: 'favourites' },
   { id: 'history', label: 'История решений', href: '/istoriya-resheniy/', icon: 'history' },
   { id: 'settings', label: 'Настройки', href: '/nastroyki/', icon: 'settings' },
 ];
 
+/** Готовые личные разделы; пусто — блока в сайдбаре нет. */
+export const sidebarExtras: NavItem[] = gotovye(lichnye);
+
+/** Колокольчик в шапке — только когда страница уведомлений готова. */
+export const notificationsReady = !NE_GOTOVY.has(notificationsPage.id);
+
 /* «Мои конспекты» из этого списка убраны по макету. Маршрут
    /moi-konspekty остался: страница есть, ссылки в меню нет. */
 
 /* ── Мобильная панель ─────────────────────────────────────────────
-   Пунктов помещается пять: три раздела из верхнего меню и вход в
-   остальные. Здесь перечислены только идентификаторы — названия и
-   адреса те же, что наверху. */
+   Пунктов помещается пять: четыре раздела из верхнего меню и вход в
+   остальные. «Устный счёт» — среди главных и выделен акцентом; пока
+   статистики нет, четвёртая ячейка — «Вариант». Здесь перечислены
+   только идентификаторы — названия и адреса те же, что наверху. */
 
-const PRIMARY_IDS = ['home', 'tasks', 'stats'];
+const PRIMARY_IDS = ['home', 'tasks', 'ustnyy', 'variant'];
 
 /** Экран со списком разделов, не поместившихся в панель. */
 export const appNavMorePage: NavItem = {
@@ -115,10 +164,10 @@ export const appNavPrimary: NavItem[] = PRIMARY_IDS.flatMap((id) => {
 });
 
 /** Экран «Ещё»: всё, что не попало в панель. Считается, не задаётся. */
-export const appNavMore: NavItem[] = [
+export const appNavMore: NavItem[] = gotovye([
   ...topNav.filter((item) => !PRIMARY_IDS.includes(item.id)),
   notificationsPage,
-];
+]);
 
 /** id пункта панели, который подсвечивается на странице раздела active. */
 export function bottomNavActive(active: string | undefined): string | undefined {

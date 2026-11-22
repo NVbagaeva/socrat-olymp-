@@ -14,6 +14,7 @@ import '@/components/probability/probability.css';
 import '@/components/tasks/zadanie6/zadanie6.css';
 import '@/app/zadaniya/6/zadanie6.css';
 import '@/components/kartochki/kartochki.css';
+import '@/lib/planimetriya/planimetriya.css';
 import '@/components/baza/baza.css';
 
 export const generateStaticParams = bazaStaticParams;

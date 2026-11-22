@@ -5,7 +5,8 @@
  * без второго решателя: им нужен только набор.
  */
 
-import { EGE_NUMBERS, type VariantSet } from '@/lib/variant/types';
+import { sostavNabora, vChasti1 } from '@/lib/variant/struktura';
+import type { VariantSet } from '@/lib/variant/types';
 import { zagruzitVariant } from './dannye';
 import { povKod } from './kod';
 import { zadachaVersii } from './shablony';
@@ -23,12 +24,20 @@ export async function povSet(k: number): Promise<VariantSet | null> {
 /** То же без загрузки — для автотеста на Node. */
 export function povSetIz(k: number, versii: Zapis[][]): VariantSet {
   const code = povKod(k);
+  const variants = versii.map((zapisi, i) => ({
+    index: i + 1,
+    /* Задачи разделов, которых в первой части нет (в ЕГЭ-2027 — №6 и
+       экономика с кратким ответом), в вариант не идут; данные остаются. */
+    tasks: vChasti1(zapisi.map((z) => zadachaVersii(k, i + 1, z))),
+  }));
   return {
     code,
     seed: code,
     version: POV_VERSION,
     config: {
-      tasks: [...EGE_NUMBERS],
+      /* Задания первой части по действующей структуре экзамена, задачи
+         которых в наборе есть (lib/variant/struktura.ts, sostavNabora). */
+      tasks: sostavNabora(variants),
       subtypes: {},
       source: 'own',
       stars: [],
@@ -36,10 +45,7 @@ export function povSetIz(k: number, versii: Zapis[][]): VariantSet {
       parallel: true,
     },
     zameny: {},
-    variants: versii.map((zapisi, i) => ({
-      index: i + 1,
-      tasks: zapisi.map((z) => zadachaVersii(k, i + 1, z)),
-    })),
+    variants,
     createdAt: '2026-10-24T00:00:00.000Z',
   };
 }
