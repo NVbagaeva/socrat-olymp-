@@ -15,6 +15,8 @@ import type { Pool, UznayPool } from '@/lib/veroyatnost/pool';
 import { zadachaHref45, type Zadanie45 } from '@/lib/veroyatnost/trening/links';
 import { readSealed45 } from '@/lib/veroyatnost/trening/otvet45';
 import { log45 } from '@/lib/veroyatnost/trening/progress';
+import { zhurnal45 } from '@/lib/veroyatnost/trening/zhurnal45';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import { sRazborami } from '../razboryKlient';
 import { zadachaBanka, type SessiyaPayload, type SessiyaZadacha } from '../sessiyaPayload';
 import type { TekstyTrenazhera45 } from '@/content/veroyatnost45';
@@ -171,6 +173,10 @@ export function Ekran45({
 
   const task = zameny[index] ?? tasks[index];
   const gotovaya = task === undefined ? undefined : gotovye.get(task.id);
+  /* Журнал решения задач (lib/zhurnal): ученику, который вошёл, при флаге. */
+  const zapis = useZapisZadachi(
+    gotovaya === undefined ? null : zhurnal45(zadanie, gotovaya, 'trenazher', roundKey, String(index)),
+  );
 
   /* Разбор и подсказка открываются, когда нужны: до этого в памяти их нет. */
   const otvetOtkryt = checked === 'right' || solutionOpen;
@@ -211,6 +217,7 @@ export function Ekran45({
   useBeforeFinish(setBeforeFinish, () => {
     if (task !== undefined && checked === 'wrong' && marks[index] === undefined) {
       remember(task, 'wrong');
+      zapis?.zakryt(false);
     }
   });
 
@@ -246,18 +253,22 @@ export function Ekran45({
     const reading = readSealed45(value, tekushchaya.seal, tekushchaya.klyuch);
     if (reading.kind === 'format') {
       setFormat(formatHint(reading.problem, reading.meant));
+      zapis?.popytka(value, false, 'format');
       return;
     }
     if (reading.kind === 'fractionRight') {
       /* Значение верное, но дробью: не засчитано и не ошибка. */
       setFormat(fractionRightHint(reading.decimal));
+      zapis?.popytka(value, false, 'fraction');
       return;
     }
     setFormat(null);
     const right = reading.right;
     setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
+    zapis?.popytka(value, right);
     if (right) {
+      zapis?.zakryt(true);
       if (!zakryta) {
         const chisto = !failed && !hintOpen;
         setMarks({ ...marks, [index]: chisto ? 'right' : 'hinted' });
@@ -273,6 +284,7 @@ export function Ekran45({
   function reveal() {
     const wasOpen = solutionOpen;
     setSolutionOpen(!wasOpen);
+    if (!wasOpen) zapis?.reshenie();
     if (!wasOpen && checked !== 'right' && !zakryta) {
       /* Решение открыто до верного ответа: задача закрыта «с разбором». */
       setMarks({ ...marks, [index]: 'hinted' });
@@ -297,6 +309,10 @@ export function Ekran45({
     if (checked === 'wrong' && !zakryta) {
       remember(tekushchaya, 'wrong');
     }
+    /* Ушёл с задачи: была ошибка — ошибка, решение открыто — с разбором, без ответа — пропуск. */
+    if (checked === 'wrong') zapis?.zakryt(false);
+    else if (solutionOpen) zapis?.zakrytKak('revealed');
+    else if (checked === null) zapis?.propustit();
     if (last) {
       onFinish();
       return;
@@ -373,7 +389,10 @@ export function Ekran45({
           : {
               html: '',
               open: hintOpen,
-              onOpen: () => setHintOpen(true),
+              onOpen: () => {
+                setHintOpen(true);
+                zapis?.shagPodskazki(1);
+              },
               telo:
                 voprosy.length === 0 ? (
                   <p>{T.ekran.zagruzka}</p>
@@ -386,8 +405,12 @@ export function Ekran45({
                       onVerno={() => {
                         setShag(shag + 1);
                         setMimo([]);
+                        zapis?.shagPodskazki(shag + 1);
                       }}
-                      onMimo={(j) => setMimo([...mimo, j])}
+                      onMimo={(j) => {
+                        setMimo([...mimo, j]);
+                        zapis?.oshibkaPodskazki(shag);
+                      }}
                       labels={T.ekran.voprosy}
                     />
                     <DerevoPodskazki

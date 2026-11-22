@@ -13,6 +13,8 @@ import { pickRound, useRound } from '@/lib/trainerRound';
 import type { TaskMark } from '@/lib/trainerSession/types';
 import { zadachaHref } from '@/lib/vychisleniya/links';
 import { log8 } from '@/lib/vychisleniya/progress';
+import { zhurnal8 } from '@/lib/vychisleniya/zhurnal8';
+import { useZapisZadachi } from '@/lib/zhurnal/zapis';
 import type { PriznakHtml, RazborHtml, ShagHtml } from '@/lib/vychisleniya/razbor';
 import { openText, readSealed } from '@/lib/vychisleniya/secret';
 import { analogOf, parseTaskId, makeTask, type Task8 } from '@/lib/vychisleniya/session';
@@ -140,6 +142,10 @@ export function Trenazher8Screen({
   }, [payload, zameny]);
 
   const task = zameny[poolIndex] ?? pool[poolIndex];
+  /* Журнал решения задач (lib/zhurnal): ученику, который вошёл, при флаге. */
+  const zapis = useZapisZadachi(
+    task === undefined ? null : zhurnal8(task.id, task.prototype, 'trenazher', roundKey, String(index)),
+  );
 
   useSessionReport<Trenazher8Ui>(report, {
     index,
@@ -187,6 +193,7 @@ export function Trenazher8Screen({
   useBeforeFinish(setBeforeFinish, () => {
     if (task !== undefined && checked === 'wrong' && marks[index] === undefined) {
       remember(task, 'wrong');
+      zapis?.zakryt(false);
     }
   });
 
@@ -206,18 +213,22 @@ export function Trenazher8Screen({
     if (reading.kind === 'format') {
       /* Неверная запись: подсказка, попытка не тратится. */
       setFormat(formatHint(reading.problem, reading.meant));
+      zapis?.popytka(value, false, 'format');
       return;
     }
     if (reading.kind === 'fractionRight') {
       /* Значение верное, но дробью: не засчитано и не ошибка. */
       setFormat(fractionRightHint(reading.decimal));
+      zapis?.popytka(value, false, 'fraction');
       return;
     }
     setFormat(null);
     const right = reading.right;
     setViaFraction(!right && reading.viaFraction);
     setChecked(right ? 'right' : 'wrong');
+    zapis?.popytka(value, right);
     if (right) {
+      zapis?.zakryt(true);
       setMarks({ ...marks, [index]: 'right' });
       /* Верно с первой попытки, но с открытой подсказкой — «с подсказкой». */
       remember(zadacha, failed ? 'wrong' : hintOpen ? 'hinted' : 'right');
@@ -231,6 +242,7 @@ export function Trenazher8Screen({
   function reveal() {
     const wasOpen = solutionOpen;
     setSolutionOpen(!wasOpen);
+    if (!wasOpen) zapis?.reshenie();
     if (!wasOpen && checked !== 'right' && !zakryta) {
       /* Решение открыто до ответа: задача закрыта «с разбором». */
       setMarks({ ...marks, [index]: 'hinted' });
@@ -253,6 +265,10 @@ export function Trenazher8Screen({
     if (checked === 'wrong' && !zakryta) {
       remember(zadacha, 'wrong');
     }
+    /* Ушёл с задачи: была ошибка — ошибка, решение открыто — с разбором, без ответа — пропуск. */
+    if (checked === 'wrong') zapis?.zakryt(false);
+    else if (solutionOpen) zapis?.zakrytKak('revealed');
+    else if (checked === null) zapis?.propustit();
     if (last) {
       onFinish();
       return;
@@ -300,7 +316,14 @@ export function Trenazher8Screen({
       podskazka={
         control || podskazkaHtml === null
           ? null
-          : { html: podskazkaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }
+          : {
+              html: podskazkaHtml,
+              open: hintOpen,
+              onOpen: () => {
+                setHintOpen(true);
+                zapis?.shagPodskazki(1);
+              },
+            }
       }
       reshenie={
         control
