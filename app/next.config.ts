@@ -40,6 +40,14 @@ const legalReady = process.env.NEXT_PUBLIC_LEGAL_READY === '1';
 const ofertaPage =
   legalReady || process.env.NODE_ENV === 'development' || process.env.OFERTA_PREVIEW === '1';
 
+/* Экраны прогресса кабинета v2 (docs/kabinet-progress.md): страницы
+   учителя (page.uchitel.tsx) и «Моя статистика» ученика
+   (page.uchenik.tsx) есть только в сборке со своим флагом и включённым
+   входом. Без флага их адреса — 404, кода экранов в сборке нет. */
+const authOn = process.env.NEXT_PUBLIC_AUTH_ENABLED === '1';
+const progressUchitel = authOn && process.env.NEXT_PUBLIC_PROGRESS_UCHITEL === '1';
+const progressUchenik = authOn && process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1';
+
 /** Версии файлов из public/ (lib/assetUrl.ts). */
 const ASSETS = assetVersions(path.join(process.cwd(), 'public'));
 
@@ -50,6 +58,8 @@ const nextConfig: NextConfig = {
   pageExtensions: [
     ...(devPages ? ['dev.tsx'] : []),
     ...(ofertaPage ? ['oferta.tsx'] : []),
+    ...(progressUchitel ? ['uchitel.tsx'] : []),
+    ...(progressUchenik ? ['uchenik.tsx'] : []),
     'tsx',
     'ts',
     'jsx',
@@ -106,8 +116,8 @@ const nextConfig: NextConfig = {
         ? '1'
         : '0',
     ZHURNAL_RAZDELY: process.env.NEXT_PUBLIC_ZHURNAL_RAZDELY || '5,8',
-    PROGRESS_UCHITEL_ON: process.env.NEXT_PUBLIC_PROGRESS_UCHITEL === '1' ? '1' : '0',
-    PROGRESS_UCHENIK_ON: process.env.NEXT_PUBLIC_PROGRESS_UCHENIK === '1' ? '1' : '0',
+    PROGRESS_UCHITEL_ON: progressUchitel ? '1' : '0',
+    PROGRESS_UCHENIK_ON: progressUchenik ? '1' : '0',
     // Таблица версий попадает в первую загрузку каждой страницы, поэтому
     // слои заставки (public/intro/, 28 файлов) в ней не лежат: их версии —
     // в INTRO_ASSET_VERSIONS, её подставляет только код самой заставки,

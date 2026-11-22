@@ -18,6 +18,8 @@ import type { HwListItem, TutorClass } from '@/lib/dz/api';
 import { DZ_HREF, homeworkHref, issueHref, klassHref } from '@/lib/dz/links';
 import { statusOf } from '@/lib/dz/results';
 import './dz.css';
+import { PROGRESS_UCHITEL_ON } from '@/lib/zhurnal/config';
+import { klassProgressHref } from '@/lib/zhurnal/links';
 
 const api = () => import('@/lib/dz/api');
 
@@ -95,6 +97,11 @@ export function TutorClassesCard() {
                 {klass.name}
               </Link>
               <span className="dz-klassy__meta">{DZ.classes.students(klass.members.length)}</span>
+              {PROGRESS_UCHITEL_ON ? (
+                <Link className="dz-klassy__meta" href={klassProgressHref(klass.id)}>
+                  Прогресс
+                </Link>
+              ) : null}
               <span className="dz-klassy__code" aria-label={DZ.classes.code}>
                 {klass.joinCode}
               </span>

@@ -26,6 +26,8 @@ import { Confirm, NeedLogin, dzApi, errorCode, queryParam, useUser } from './com
 import { ReytingKlassa } from '@/components/ustnyySchet/ReytingKlassa';
 import { USTNYY } from '@/content/ustnyySchet';
 import './dz.css';
+import { PROGRESS_UCHITEL_ON } from '@/lib/zhurnal/config';
+import { klassProgressHref } from '@/lib/zhurnal/links';
 
 const t = DZ.klass;
 
@@ -240,6 +242,11 @@ function ClassName({
         <Button size="sm" variant="ghost" onClick={() => setEdit(true)}>
           {t.rename}
         </Button>
+        {PROGRESS_UCHITEL_ON ? (
+          <Link className="btn btn--secondary btn--sm" href={klassProgressHref(klass.id)}>
+            Прогресс класса
+          </Link>
+        ) : null}
       </header>
     );
   }

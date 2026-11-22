@@ -83,6 +83,10 @@ jobs:
           # Журнал решения задач (docs/kabinet-zhurnal.md): сценарий журнала
           # в check-auth.mjs идёт на сборке с ним.
           NEXT_PUBLIC_ZHURNAL: '1'
+          # Экраны прогресса (docs/kabinet-progress.md): класс, ученик,
+          # задача, вариант и «Моя статистика» — их сценарий ниже.
+          NEXT_PUBLIC_PROGRESS_UCHITEL: '1'
+          NEXT_PUBLIC_PROGRESS_UCHENIK: '1'
         run: pnpm build
 
       - name: Поставить Chromium
@@ -105,6 +109,23 @@ jobs:
         if: matrix.header == '1'
         working-directory: app
         run: pnpm test:karta-nazad snimki-karta-nazad
+
+      # Экраны прогресса учителя и «Моя статистика» ученика на 1280 и
+      # 375 px: тепловая карта, сводка, задача с теми же числами, вариант,
+      # Excel, лист для печати; чужой ученик — отказ. Функции базы — мок
+      # (сами права — pnpm test:soglasiya-sql, zhurnal-prava.test.sql).
+      - name: Проверить экраны прогресса
+        if: matrix.header == '1'
+        working-directory: app
+        run: pnpm test:progress-kabinet-site --shots snimki-progress
+
+      - name: Сохранить снимки экранов прогресса
+        if: always() && matrix.header == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snimki-progress
+          path: app/snimki-progress
+          if-no-files-found: ignore
 
       # Рейтинг устного счёта: гость, серия с буфером и очередью ответов,
       # срок сервера, ошибки старта, страница рейтинга и ник — на моке

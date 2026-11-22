@@ -248,6 +248,18 @@ jobs:
         working-directory: app
         run: pnpm test:progress-log
 
+      # Журнал решения задач кабинета v2 (docs/kabinet-zhurnal.md): таймер
+      # активного времени, запись задачи, очередь, вариант, разделы флага.
+      - name: Журнал решения задач — модель и таймер
+        working-directory: app
+        run: pnpm test:zhurnal
+
+      # Экраны прогресса (docs/kabinet-progress.md): период по Москве,
+      # тепловая карта, «давно не заходил», таблицы Excel, адреса экранов.
+      - name: Экраны прогресса — расчёты и адреса
+        working-directory: app
+        run: pnpm test:progress-ekrany
+
       # «Карта ЕГЭ»: состояния областей, рекомендация, прогноз, пролив и
       # каталог на трёх тестовых учениках (lib/karta).
       - name: Карта ЕГЭ — расчёт
