@@ -66,6 +66,9 @@ export function Trenazher13Tab({ base }: { base: string }) {
         {TRENAZHER13.title}
       </h2>
       <TabScrollOnMount />
+      {TRENAZHER13.podpis === null ? null : (
+        <p className="stk-lead z13-trening__podpis">{TRENAZHER13.podpis}</p>
+      )}
       <Trenazher13
         base={base}
         gruppy={gruppy13()}

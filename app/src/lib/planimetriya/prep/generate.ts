@@ -6,7 +6,7 @@
 
 import { rngOf } from '../../vychisleniya/rng';
 import { otvetEge } from '../bank/analogi';
-import { pustoyOtchet, renderPlan } from '../render';
+import { bezNablyudeniya, pustoyOtchet, renderPlan } from '../render';
 import { chislo, gr } from '../stseny/dsl';
 import type { Scena } from '../types';
 import { mikroById } from './bloki';
@@ -58,7 +58,7 @@ export function generateMikro(id: string, seed: string): MikroGenerated {
     if (draft === null || !otvetEge(draft.otvet)) continue;
     let chist = false;
     try {
-      chist = risunokChist(draft);
+      chist = bezNablyudeniya(() => risunokChist(draft));
     } catch {
       chist = false;
     }

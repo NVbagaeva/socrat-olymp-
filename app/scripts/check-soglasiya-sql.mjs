@@ -162,6 +162,27 @@ function proverkaCasesSql() {
   );
 }
 
+/* Таблица сверки рейтинговых форматов устного счёта — та же, по которой
+   проверяются генераторы сайта (check-ustnyy-schet.mjs). */
+function formatyCasesSql() {
+  const cases = JSON.parse(
+    fs.readFileSync(path.join(ROOT, 'app/src/lib/ustnyySchet/formatyCases.json'), 'utf8'),
+  );
+  const lit = (v) =>
+    v === null || v === undefined ? 'null' : `'${String(v).replace(/'/g, "''")}'`;
+  const rows = Object.entries(cases)
+    .filter(([id]) => id !== '_')
+    .map(
+      ([id, c]) =>
+        `(${lit(id)}, ${lit(c.tip)}, ${c.sek ?? 'null'}, ${c.n ?? 'null'}, ${c.min}, ${c.max}, ${c.cifrOtveta}, ` +
+        `array[${c.priyomy.map(lit).join(', ')}]::text[])`,
+    );
+  return (
+    'create temp table formaty_cases (id text, tip text, sek int, n int, mn numeric, mx numeric, cifr int, priyomy text[]);\n' +
+    `insert into formaty_cases values\n${rows.join(',\n')};\n`
+  );
+}
+
 const SUITES = [
   {
     name: 'Согласия',
@@ -279,6 +300,21 @@ const SUITES = [
       ['domeny.test.sql', path.join(SUPA, 'tests', 'domeny.test.sql')],
     ],
   },
+  {
+    /* Устный счёт: рейтинговые тренировки — аноним не пишет, чужое не
+       видно, в обход функций не записать, ответ не прочесть до ответа,
+       предел стартов, ники, рейтинг класса, генераторы форматов против
+       таблицы сверки сайта. На фоне прав своего сервера. */
+    name: 'Устный счёт',
+    db: 'ustnyy',
+    files: [
+      stub,
+      ['lite-defaults.sql', path.join(SUPA, 'tests', 'lite-defaults.sql')],
+      ...migrations.map(migration),
+      ['domeny-x-ru.sql', path.join(SUPA, 'tests', 'domeny-x-ru.sql')],
+      ['ustnyy-schet.test.sql', path.join(SUPA, 'tests', 'ustnyy-schet.test.sql'), formatyCasesSql],
+    ],
+  },
 ];
 
 let failed = false;
@@ -313,5 +349,5 @@ for (const suite of SUITES) {
 stop();
 if (failed) process.exit(1);
 console.log(
-  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, ДЗ из трёх источников, перенос ДЗ и почтовые домены в базе: все проверки прошли.',
+  '\nСогласия, кабинет, правила доступа, онлайн-вариант, ДЗ №8, ДЗ из трёх источников, перенос ДЗ, почтовые домены и устный счёт в базе: все проверки прошли.',
 );

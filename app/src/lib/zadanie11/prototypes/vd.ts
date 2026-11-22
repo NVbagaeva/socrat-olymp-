@@ -23,6 +23,7 @@ import { d, div, fq, mul, q, sub, txt, val, type Q } from '../num';
 import { chasy, sk, vremya, zaglavnaya, SLOVA } from '../sklonenie';
 import type { HintStep, Subtype } from '../types';
 import { otvet } from './common';
+import { geroyIz, glagol, poRodu } from './syuzhety';
 
 /** Время туда и обратно: S/(v + c) + S/(v − c) в TeX. */
 const tudaObratno = (S: string, v: string, c: string): string =>
@@ -281,7 +282,9 @@ const VD04: Subtype = {
     const ask = str(p, 'ask', ['c', 'v'] as const);
     /* Аналог: катер, байдарка, буксир. */
     const ktoRod = slovo(p, 'ktoRod', 'лодки');
-    const shla = slovo(p, 'shla', 'лодка шла');
+    /* «Лодка шла», «катер шёл» — глагол и род у героя. */
+    const gv = geroyIz(p, 'geroy', 'lodka');
+    const shla = `${gv.im} ${glagol(gv, 'shel')}`;
     if (ask === 'c') {
       const v = num(p, 'v');
       const sol = kvadrat(Dl, 2 * S, -Dl * v * v, 'x');
@@ -563,8 +566,10 @@ const VD06: Subtype = {
     const T = sub(raft, q(h));
     const r = sobstvennaya(S, c, T);
     /* Аналог: моторная лодка, байдарка (женский род). */
-    const kto = slovo(p, 'kto', 'яхта');
-    const ktoRod = slovo(p, 'ktoRod', 'яхты');
+    /* Аналог: катер, буксир, лодка — слова, род и глаголы у героя. */
+    const gv = geroyIz(p, 'geroy', 'yahta');
+    const kto = slovo(p, 'kto', gv.im);
+    const ktoRod = slovo(p, 'ktoRod', gv.rod);
     return {
       uslovie: `Расстояние между пристанями А и В равно ${txt(S)} км. Из А в В по течению реки отправился плот, а через ${sk(h, SLOVA.chas)} вслед за ним отправилась яхта, которая, прибыв в пункт В, тотчас повернула обратно и возвратилась в А. К этому времени плот проплыл ${txt(rr)} км. Найдите скорость яхты в неподвижной воде, если скорость течения реки равна ${txt(c)} км/ч. Ответ дайте в км/ч.`,
       answer: r.x,
@@ -574,7 +579,7 @@ const VD06: Subtype = {
           `Время ${ktoRod}`,
           [
             `Плот плывёт со скоростью течения: $${d(rr)}$ км он проплыл за $${frac2(rr, c)}=${fq(raft)}$ ч.`,
-            `${zaglavnaya(kto)} вышла на $${d(h)}$ ч позже: она в пути $${fq(raft)}-${d(h)}=${fq(T)}$ ч.`,
+            `${zaglavnaya(kto)} ${glagol(gv, 'vyshel')} на $${d(h)}$ ч позже: ${poRodu(gv, 'он', 'она')} в пути $${fq(raft)}-${d(h)}=${fq(T)}$ ч.`,
           ],
         ],
         ['Уравнение', [`$${tudaObratno(d(S), 'x', d(c))}=${fq(T)}$.`]],
@@ -598,7 +603,7 @@ const VD06: Subtype = {
           `$${fq(sub(raft, q(h)))}$`,
           `$${d(rr)}$`,
         ]),
-        vopros(`Сколько часов была в пути ${kto}?`, `$${fq(T)}$`, [
+        vopros(`Сколько часов ${poRodu(gv, 'был', 'была')} в пути ${kto}?`, `$${fq(T)}$`, [
           `$${fq(raft)}$`,
           `$${fq(mul(q(2), raft))}$`,
         ]),

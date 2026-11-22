@@ -7,11 +7,12 @@
 import { GEN_UI } from '@/content/generatorUi';
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
 import { head, foot } from './sheet12.js';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR3_TEXTS = {
-  section: '№3 · Стереометрия',
+  section: `№${nomerRazdela('stereometriya')} · Стереометрия`,
   sheet: {
-    chip: 'Задание 3',
+    chip: `Задание ${nomerRazdela('stereometriya')}`,
     title: 'Стереометрия',
     course: head.course,
     teacher: head.author,
@@ -103,8 +104,8 @@ export const GENERATOR3_PRESETS: GenPreset[] = [
 export const SHEET_GEN_3 = {
   head,
   foot,
-  title: { chip: 'Задание 3', text: 'Стереометрия' },
-  runner: 'Задание 3 · Стереометрия',
+  title: { chip: `Задание ${nomerRazdela('stereometriya')}`, text: 'Стереометрия' },
+  runner: `Задание ${nomerRazdela('stereometriya')} · Стереометрия`,
   subtitle: 'Задания для отработки',
   vidy: GEN_UI.vidyRaboty,
   otvety: 'Ответы',

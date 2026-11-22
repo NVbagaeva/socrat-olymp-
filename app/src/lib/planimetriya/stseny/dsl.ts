@@ -207,6 +207,9 @@ export function razdelit(ostatok: number, x: number, y: number, porog: number): 
   return [a, ostatok - a];
 }
 
+/** Ключ подбора формы: прототип и числа условия. */
+export const klyuch = (id: number | string, p: object): string => `${id}:${JSON.stringify(p)}`;
+
 export const clamp = (x: number, lo: number, hi: number) => Math.min(Math.max(x, lo), hi);
 
 /** Вспомогательная: сцена с проверкой «углы не меньше порога» и пометкой схематичности. */

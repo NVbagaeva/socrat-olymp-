@@ -268,6 +268,62 @@
   --spr-cvet: var(--color-spr-vaz);
   --spr-fon: var(--color-spr-vaz-soft);
 }
+.spr1-blok--prm {
+  --spr-cvet: var(--color-spr-priem);
+  --spr-fon: var(--color-spr-priem-soft);
+}
+.spr1-blok--vyvod {
+  --spr-cvet: var(--color-spr-vyvod);
+  --spr-fon: var(--color-spr-vyvod-soft);
+}
+/* «Почему так» под утверждением: обоснование словами. */
+.spr1-blok__pochemu {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--fs-small, 0.9375rem);
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+.spr1-blok__pochemu b {
+  color: var(--spr-cvet);
+}
+/* Вывод вопросами: шаг — вопрос, ответ, выкладка и чертёж шага. */
+.spr1-vyvod {
+  margin-top: var(--space-4);
+}
+.spr1-vyvod__shagi {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding-left: 1.25rem;
+}
+.spr1-vyvod__shag {
+  display: grid;
+  gap: var(--space-2);
+  align-items: start;
+}
+@media (min-width: 640px) {
+  .spr1-vyvod__shag {
+    grid-template-columns: minmax(0, 1fr) 220px;
+  }
+}
+.spr1-vyvod__tekst {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.spr1-vyvod__vopros {
+  margin: 0;
+  font-weight: 600;
+}
+.spr1-vyvod__otvet {
+  margin: 0;
+  line-height: 1.5;
+}
+.spr1-vyvod__ris {
+  display: block;
+  max-width: 260px;
+}
 .spr1-blok--pri-men {
   --spr-cvet: var(--color-spr-primenenie);
   --spr-fon: var(--color-spr-primenenie-soft);

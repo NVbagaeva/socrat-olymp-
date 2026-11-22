@@ -45,6 +45,7 @@ import {
   type Step,
   type Variant,
 } from './types';
+import { sDerevom } from './podgotovka5-derevya';
 import { nabratVykladku, typeset, typesetText } from '../tex';
 
 /**
@@ -482,7 +483,9 @@ function kartinkaOpornoy(zadacha: PrepZadacha): { path: string; alt: string } | 
   return zadacha.id in KARTINKA_OSNOVY_PODHODIT ? illyustratsiyaVarianta(kartinkaId, 1) : undefined;
 }
 
-function prepZadachaPool(zadacha: PrepZadacha): PrepPoolZadacha {
+function prepZadachaPool(ishodnaya: PrepZadacha): PrepPoolZadacha {
+  /* Задачам блока «Рисуем дерево» — рисунок дерева (podgotovka5-derevya.ts). */
+  const zadacha = sDerevom(ishodnaya);
   const otvet = prepOtvet(zadacha);
   const seal = sealAnswer(otvet, klyuchZadachi(zadacha.id));
   const model = zadacha.metodika === undefined ? null : modelPrep(zadacha);

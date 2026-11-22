@@ -62,10 +62,10 @@ export function OZadanii9() {
         opasnoTitle={SHAPKA9.opasnoTitle}
         opasno={SHAPKA9.opasno.map((line) => typeset(line))}
         oblozhka={
-          /* Обложка раздела — готовая картинка, как есть: без обрезки и
-             пережатия, прозрачный фон на стекле шапки. */
+          /* Обложка раздела — векторный чертёж (public/images/task-09.svg):
+             касательная посчитана точно, прозрачный фон на стекле шапки. */
           <img
-            src={assetUrl('/images/task-09.webp')}
+            src={assetUrl('/images/task-09.svg')}
             alt={SHAPKA9.oblozhkaAlt}
             width={512}
             height={512}

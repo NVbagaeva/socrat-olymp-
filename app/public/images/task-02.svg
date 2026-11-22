@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Два вектора и их сумма по правилу параллелограмма">
+  <!-- Векторы a = OA и b = OB, сумма — диагональ OC параллелограмма.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M58 238 L100 112 L250 74 L208 200 Z" fill="#c3dffa" fill-opacity="0.55" stroke="none"/>
+    <path d="M100 112 L250 74 M208 200 L250 74" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <path d="M58 238 L97.8 118.6" stroke-width="2.5"/>
+    <path d="M102.3 124.8 L100 112 L90.5 120.9 Z" fill="#0c3ebc" stroke-width="2.5"/>
+    <path d="M58 238 L201.2 201.7" stroke-width="2.5"/>
+    <path d="M198.5 208.8 L208 200 L195.4 196.8 Z" fill="#0c3ebc" stroke-width="2.5"/>
+    <path d="M58 238 L244.7 78.5" stroke-width="3"/>
+    <path d="M245.4 86.1 L250 74 L237.3 76.7 Z" fill="#0c3ebc" stroke-width="3"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="58" cy="238" r="6"/>
+  </g>
+</svg>

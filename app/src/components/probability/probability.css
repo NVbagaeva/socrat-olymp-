@@ -24,7 +24,7 @@
   font-family: var(--font-sans);
   /* Кегль подписей внутри рисунка задан в единицах viewBox, поэтому
      он масштабируется вместе с картинкой. */
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* Математические буквы — антиква курсивом: n, m, P, L, l.
@@ -44,7 +44,7 @@
 .pr-counts,
 .pr-total {
   fill: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* ── Плитки исходов ─────────────────────────────────────────────── */
@@ -56,7 +56,7 @@
 }
 .pr-tile text {
   fill: var(--color-text-brand);
-  font-size: 13px;
+  font-size: 14px;
 }
 .pr-tile--favorable rect {
   fill: var(--color-accent);
@@ -152,7 +152,7 @@
 }
 .pr-tick text {
   fill: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* Скоба под осью с итогом промежутка: тонкая, цвета оси, а подпись
@@ -164,7 +164,7 @@
 }
 .pr-brace text {
   fill: var(--color-text);
-  font-size: 19px;
+  font-size: 18px;
 }
 
 /* Событие-промежуток в теории: полоса цвета оси, второе событие —
@@ -255,14 +255,14 @@
 }
 .pr-mark text {
   fill: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* ── Дерево вероятностей ────────────────────────────────────────── */
 
 .pr-level {
   fill: var(--color-text-tertiary);
-  font-size: 13px;
+  font-size: 14px;
 }
 .pr-branch line {
   stroke: var(--color-border-strong);
@@ -276,7 +276,7 @@
 }
 .pr-branch-label {
   fill: var(--color-text);
-  font-size: 13px;
+  font-size: 14px;
 }
 .pr-branch-p {
   fill: var(--color-text-secondary);
@@ -300,7 +300,7 @@
 
 .pr-leaf {
   fill: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: 16px;
 }
 .pr-leaf--highlighted {
   fill: var(--color-accent);
@@ -370,7 +370,7 @@
 }
 .pr-hundred .pr-total {
   fill: var(--color-accent);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* ── Состояния всего рисунка ────────────────────────────────────── */
@@ -419,7 +419,7 @@
 }
 .pr-eiler__p {
   fill: var(--color-text-secondary);
-  font-size: 11.5px;
+  font-size: 12px;
 }
 .pr-eiler__tochka.is-vydelena circle {
   fill: var(--color-accent);

@@ -7,9 +7,11 @@ import type { ShapkaArt } from '@/components/tasks/IllyustratsiyaShapki';
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE7 = {
-  no: '07',
+  no: nomerDvumya('uravneniya'),
   slug: '7',
   title: taskName('7'),
   lead: 'Линейные, дробные, иррациональные, показательные, логарифмические и тригонометрические уравнения: найти корень, проверить ОДЗ и выбрать нужный.',
@@ -32,7 +34,7 @@ export const ZADANIE7 = {
 
 /** Заголовок окна браузера: «Вкладка · Уравнения — Будет на ЕГЭ». */
 export function zadanie7Title(tab: string): string {
-  return `${tab} · ${ZADANIE7.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(7, ZADANIE7.title, tab);
 }
 
 export const PROGRESS_7 = {
@@ -84,8 +86,8 @@ export const GENERATOR_7 = {
   primery: 'Рамки теории: разобранных примеров на тип',
   primeryBez: '0 — без теории',
   vsego: 'В варианте задач:',
-  section: '№7 · Простейшие уравнения',
-  zagolovok: 'Задание №7. Простейшие уравнения',
+  section: `№${nomerRazdela('uravneniya')} · Простейшие уравнения`,
+  zagolovok: `Задание №${nomerRazdela('uravneniya')}. Простейшие уравнения`,
   teoriya: 'Повторяем теорию',
   zadachi: 'Задачи',
   uchenik: 'лист ученика',

@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import Link from 'next/link';
+import { LinkPoNamereniyu } from './LinkPoNamereniyu';
 import { useId, useRef, useState } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
@@ -96,7 +96,10 @@ export function Tabs({
         const common = {
           role: 'tab' as const,
           id: `${autoId}-tab-${item.id}`,
-          'aria-controls': `${autoId}-panel-${item.id}`,
+          /* aria-controls нет: панели с таким id в разметке нет (у
+             вкладок-ссылок содержимое — другая страница), а ссылка на
+             несуществующий id — ошибка для скринридера (axe:
+             aria-valid-attr-value, docs/launch-audit.md, B9). */
           'aria-selected': selected,
           ...(busyId === item.id ? { 'data-busy': 'true', 'aria-busy': true } : {}),
           tabIndex: selected ? 0 : -1,
@@ -129,7 +132,7 @@ export function Tabs({
         if (item.href !== undefined && !item.disabled) {
           const href = item.href;
           return (
-            <Link
+            <LinkPoNamereniyu
               key={item.id}
               href={item.href}
               {...common}
@@ -138,7 +141,7 @@ export function Tabs({
                 : { onClick: (e: MouseEvent<HTMLAnchorElement>) => onLinkClick(e, href) })}
             >
               {inside}
-            </Link>
+            </LinkPoNamereniyu>
           );
         }
 

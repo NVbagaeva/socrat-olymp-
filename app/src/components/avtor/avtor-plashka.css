@@ -1,0 +1,97 @@
+/* Плашка автора (AvtorPlashka.tsx). Стекло — общая рецептура сайта
+   (--glass-* в styles/tokens.css), как у дверей главной. */
+
+.avtor-pl {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.avtor-pl--steklo {
+  padding: 8px 18px 8px 8px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 999px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
+  transition:
+    box-shadow 200ms var(--ease),
+    transform 200ms var(--ease);
+}
+.avtor-pl__foto {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(160deg, var(--blue-100), var(--cream-50));
+  box-shadow:
+    0 0 0 2px #fff,
+    0 4px 12px -4px rgb(31 95 208 / 0.35);
+}
+.avtor-pl__tekst {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  line-height: 1.3;
+}
+.avtor-pl__imya {
+  font-size: 15px;
+  font-weight: 620;
+}
+.avtor-pl__kto {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+.avtor-pl__strelka {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 200ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .avtor-pl--steklo:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow-hover, var(--glass-shadow));
+  }
+  .avtor-pl:hover .avtor-pl__strelka {
+    transform: translateX(3px);
+  }
+  .avtor-pl:hover .avtor-pl__imya {
+    color: var(--color-primary);
+  }
+}
+.avtor-pl:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .avtor-pl,
+  .avtor-pl__strelka {
+    transition: none;
+  }
+}
+
+/* Крупнее — отдельной полосой на главной (AvtorPolosa). */
+.avtor-pl--krupno {
+  gap: 16px;
+  padding: 10px 26px 10px 10px;
+}
+.avtor-pl--krupno .avtor-pl__foto {
+  width: 64px;
+  height: 64px;
+}
+.avtor-pl--krupno .avtor-pl__imya {
+  font-size: 18px;
+}
+.avtor-pl--krupno .avtor-pl__kto {
+  font-size: 15px;
+}

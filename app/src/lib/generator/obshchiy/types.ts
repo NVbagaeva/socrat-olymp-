@@ -132,6 +132,13 @@ export interface GenConfig {
      */
     flag?: { title: string; note: string };
     /**
+     * Ещё переключатели раздела в «Дополнительно» — когда одного flag
+     * мало (у №18 — «Цветные чертежи» во flag и «Чертёж к условию»
+     * здесь). Каждый по умолчанию выключен; включённые — в
+     * GenExtras.flagi по id. Нет поля — других переключателей нет.
+     */
+    flagi?: readonly { id: string; title: string; note: string }[];
+    /**
      * Выбор раздела в «Дополнительно» (у №13 — «Лист учителя»: только
      * ответы, краткие решения, полные). Нет поля — выбора нет.
      */
@@ -161,6 +168,11 @@ export interface GenExtras {
   urok: number;
   /** Переключатель раздела (GenConfig.extras.flag); нет — выключен. */
   flag?: boolean;
+  /**
+   * Включённые переключатели GenConfig.extras.flagi — их id; нет поля
+   * или id нет в списке — переключатель выключен.
+   */
+  flagi?: readonly string[];
   /** Выбор раздела (GenConfig.extras.vybor); нет — по умолчанию. */
   vybor?: string;
 }

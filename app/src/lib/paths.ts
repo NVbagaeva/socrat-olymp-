@@ -40,3 +40,21 @@ export function href(...parts: readonly (string | number)[]): string {
   }
   return (clean === '/' ? '/' : `${clean}/`) + rest;
 }
+
+/**
+ * Раздел «Устный счёт» — один для профиля и базы. Начало адреса без
+ * «/» на конце, ссылки собираются через href(): href(USTNYY) →
+ * /ustnyy-schet/, href(USTNYY, USTNYY_TAIL.tablica) →
+ * /ustnyy-schet/tablica-umnozheniya/, страница приёма —
+ * href(USTNYY, id приёма).
+ */
+export const USTNYY = '/ustnyy-schet';
+
+export const USTNYY_TAIL = {
+  /** Отдельный режим таблицы умножения. */
+  tablica: 'tablica-umnozheniya',
+  /** Экран тренировки (настройки в строке запроса). */
+  trenirovka: 'trenirovka',
+  /** Рейтинг — появится вместе с рейтинговыми тренировками. */
+  reyting: 'reyting',
+} as const;

@@ -8,6 +8,7 @@
 
 import { renderPlan } from '@/lib/planimetriya/render';
 import type { Element } from '@/lib/planimetriya/types';
+import { POROGI_CHERTEZHA, szhat } from '@/lib/skhemy/vidimye';
 import type { Chast2Zadacha, Shablon2 } from './types';
 
 export interface PI18 {
@@ -23,8 +24,13 @@ export function chislaI18(p: PI18) {
   return { AB, KM: AB / 2 };
 }
 
-function chertezh(p: PI18): string {
-  const ch = chislaI18(p);
+function chertezh(p0: PI18): string {
+  /* Чертёж — по видимым радиусам (lib/skhemy/vidimye.ts): радиусы 1 и 16 в
+     точной пропорции — точка у большого круга. Отношение — не больше
+     2,5 : 1, касание и «какая больше» — те же; чисел на чертеже нет. */
+  const rr = szhat({ r: p0.r, R: p0.R }, ['r', 'R'], POROGI_CHERTEZHA.otnoshenieRadiusov);
+  const p = { r: rr.r!, R: rr.R! };
+  const ch = { AB: 2 * Math.sqrt(p.r * p.R) };
   const s = 6 / (ch.AB + p.r + p.R);
   const A: [number, number] = [0, 0];
   const B: [number, number] = [ch.AB * s, 0];

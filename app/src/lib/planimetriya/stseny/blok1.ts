@@ -5,23 +5,28 @@
  */
 
 import { poUglam, ravnobedrennyy } from '../figury';
+import { podobrat } from '../skhema';
 import type { Scena } from '../types';
 import {
   type PrototipChertezha,
-  clamp,
   gr,
   grTex,
+  klyuch,
   otr,
   prod,
   pryam,
-  razdelit,
-  scena,
   shtrih,
   tri,
   ug,
 } from './dsl';
 
 const VGRADUSAH = 'Ответ дайте в градусах.';
+
+/**
+ * Наименьший угол сцен с биссектрисой прямого угла: она делит 90° на
+ * 45° и 45°, и две части одной половины не могут быть обе больше 22,5°.
+ */
+const UGOL_BISSEKTRISY = 20;
 
 /* 1–2. Равнобедренный треугольник AC = BC: угол при основании ↔ угол C. */
 type Vershina = 'A' | 'B' | 'C';
@@ -39,16 +44,18 @@ function ravnobedrennayaStsena(
   danoZn: number,
   ans: number,
 ): Scena {
-  const apexVis = clamp(apex, porog, 180 - 2 * porog);
-  const { A, B, C } = ravnobedrennyy(apexVis);
+  void porog;
   const [da, dv, db] = UGOL_PRI[dano];
   const [ia, iv, ib] = UGOL_PRI[iskomoe];
   /* Шаг 1: «углы при основании равны» — дуга на втором угле при основании. */
   const vtoroy: Vershina = dano === 'C' ? (iskomoe === 'A' ? 'B' : 'A') : dano === 'A' ? 'B' : 'A';
   const [oa, ov, ob] = UGOL_PRI[vtoroy];
-  return scena(
-    {
-      tochki: { A, B, C },
+  return podobrat(
+    klyuch('ravn', [apex, dano, iskomoe]),
+    { g: apex },
+    { g: [20, 150] },
+    ({ g }) => ({
+      tochki: ravnobedrennyy(g),
       elementy: [
         tri('A', 'B', 'C'),
         shtrih('A', 'C', 1, { podsvetka: [1] }),
@@ -73,8 +80,7 @@ function ravnobedrennayaStsena(
       ],
       otvet: gr(ans),
       shagov: 2,
-    },
-    apexVis !== apex,
+    }),
   );
 }
 
@@ -119,42 +125,37 @@ export const BLOK_I: PrototipChertezha[] = [
       const b = r.int(91, 178);
       return { b: b === 120 ? 121 : b };
     },
-    stsena: (p, porog) => {
+    stsena: (p) => {
       const apex = 2 * p.b - 180;
-      const apexVis = clamp(apex, porog, 180 - 2 * porog);
-      const { A, B, C } = ravnobedrennyy(apexVis);
-      return scena(
-        {
-          tochki: { A, B, C, D: { naPryamoy: ['A', 'B', 1.4] } },
-          elementy: [
-            tri('A', 'B', 'C'),
-            shtrih('A', 'C', 1),
-            shtrih('B', 'C', 1),
-            prod('A', 'B', { doTochki: 'D', sploshnoe: true }),
-            ug('C', 'B', 'D', { vydelit: 'dano', znachenie: gr(p.b) }),
-            ug('A', 'B', 'C', { sloy: 1, znachenie: gr(180 - p.b) }),
-            ug('C', 'A', 'B', { sloy: 2, znachenie: gr(180 - p.b) }),
-            ug('A', 'C', 'B', {
-              vydelit: 'iskomoe',
-              znachenie: gr(apex),
-              otvet: true,
-              podsvetka: [3],
-            }),
-          ],
-          proverki: [
-            {
-              ravny: [
-                ['A', 'C'],
-                ['B', 'C'],
-              ],
-            },
-            { ugol: ['C', 'B', 'D'], gradusy: p.b },
-          ],
-          otvet: gr(apex),
-          shagov: 3,
-        },
-        apexVis !== apex,
-      );
+      return podobrat(klyuch(3, p), { g: apex }, { g: [20, 150] }, ({ g }) => ({
+        tochki: { ...ravnobedrennyy(g), D: { naPryamoy: ['A', 'B', 1.2] } },
+        elementy: [
+          tri('A', 'B', 'C'),
+          shtrih('A', 'C', 1),
+          shtrih('B', 'C', 1),
+          prod('A', 'B', { doTochki: 'D', sploshnoe: true }),
+          ug('C', 'B', 'D', { vydelit: 'dano', znachenie: gr(p.b) }),
+          ug('A', 'B', 'C', { sloy: 1, znachenie: gr(180 - p.b) }),
+          ug('C', 'A', 'B', { sloy: 2, znachenie: gr(180 - p.b) }),
+          ug('A', 'C', 'B', {
+            vydelit: 'iskomoe',
+            znachenie: gr(apex),
+            otvet: true,
+            podsvetka: [3],
+          }),
+        ],
+        proverki: [
+          {
+            ravny: [
+              ['A', 'C'],
+              ['B', 'C'],
+            ],
+          },
+          { ugol: ['C', 'B', 'D'], gradusy: p.b },
+        ],
+        otvet: gr(apex),
+        shagov: 3,
+      }));
     },
   },
   {
@@ -167,43 +168,37 @@ export const BLOK_I: PrototipChertezha[] = [
     otvet: (p) => 90 - p.b,
     primer: { b: 35 },
     sluchaynye: (r) => ({ b: r.int(3, 87) }),
-    stsena: (p, porog) => {
-      const bVis = clamp(p.b, porog, 90 - porog);
-      const { A, B, C } = poUglam(90 - bVis, bVis);
-      return scena(
-        {
-          tochki: { A, B, C, D: { seredina: ['A', 'B'] } },
-          elementy: [
-            tri('A', 'B', 'C'),
-            otr('C', 'D'),
-            pryam('A', 'C', 'B'),
-            ug('A', 'B', 'C', { vydelit: 'dano', znachenie: gr(p.b) }),
-            ug('A', 'C', 'D', {
-              vydelit: 'iskomoe',
-              znachenie: gr(90 - p.b),
-              otvet: true,
-              podsvetka: [2],
-            }),
-            shtrih('A', 'D', 1, { sloy: 1 }),
-            shtrih('D', 'B', 1, { sloy: 1 }),
-            shtrih('C', 'D', 1, { sloy: 1 }),
-            ug('B', 'A', 'C', { sloy: 2, dugi: 2, znachenie: gr(90 - p.b), otvet: true }),
-          ],
-          proverki: [
-            { ugol: ['A', 'C', 'B'], vid: 'pryamoy' },
-            {
-              ravny: [
-                ['A', 'D'],
-                ['B', 'D'],
-                ['C', 'D'],
-              ],
-            },
-          ],
-          otvet: gr(90 - p.b),
-        },
-        bVis !== p.b,
-      );
-    },
+    stsena: (p) =>
+      podobrat(klyuch(4, p), { b: p.b }, { b: [15, 75] }, ({ b }) => ({
+        tochki: { ...poUglam(90 - b, b), D: { seredina: ['A', 'B'] } },
+        elementy: [
+          tri('A', 'B', 'C'),
+          otr('C', 'D'),
+          pryam('A', 'C', 'B'),
+          ug('A', 'B', 'C', { vydelit: 'dano', znachenie: gr(p.b) }),
+          ug('A', 'C', 'D', {
+            vydelit: 'iskomoe',
+            znachenie: gr(90 - p.b),
+            otvet: true,
+            podsvetka: [2],
+          }),
+          shtrih('A', 'D', 1, { sloy: 1 }),
+          shtrih('D', 'B', 1, { sloy: 1 }),
+          shtrih('C', 'D', 1, { sloy: 1 }),
+          ug('B', 'A', 'C', { sloy: 2, dugi: 2, znachenie: gr(90 - p.b), otvet: true }),
+        ],
+        proverki: [
+          { ugol: ['A', 'C', 'B'], vid: 'pryamoy' },
+          {
+            ravny: [
+              ['A', 'D'],
+              ['B', 'D'],
+              ['C', 'D'],
+            ],
+          },
+        ],
+        otvet: gr(90 - p.b),
+      })),
   },
   {
     id: 5,
@@ -215,16 +210,22 @@ export const BLOK_I: PrototipChertezha[] = [
     otvet: (p) => Math.abs(45 - p.b),
     primer: { b: 21 },
     sluchaynye: (r) => ({ b: r.int(3, 87) }),
-    stsena: (p, porog) => {
-      /* |45 − B| не меньше порога, сторона от 45° сохраняется. */
-      const znak = p.b <= 45 ? -1 : 1;
-      let bVis = clamp(p.b, porog, 90 - porog);
-      if (Math.abs(45 - bVis) < porog) bVis = 45 + znak * porog;
-      const { A, B, C } = poUglam(90 - bVis, bVis);
+    stsena: (p) => {
       const ans = Math.abs(45 - p.b);
-      return scena(
-        {
-          tochki: { A, B, C, D: { bissektrisa: ['C', 'A', 'B'] }, M: { seredina: ['A', 'B'] } },
+      /* Жёсткая конфигурация: биссектриса делит прямой угол на 45° и
+         45°, медиана отсекает от одной половины угол, равный острому
+         углу треугольника. Оба — искомый и меньший острый — не могут
+         быть больше 22,5°: рисуются наибольшими возможными. */
+      return podobrat(
+        klyuch(5, p),
+        { b: p.b },
+        { b: p.b <= 45 ? [10, 44] : [46, 80] },
+        ({ b }) => ({
+          tochki: {
+            ...poUglam(90 - b, b),
+            D: { bissektrisa: ['C', 'A', 'B'] },
+            M: { seredina: ['A', 'B'] },
+          },
           elementy: [
             tri('A', 'B', 'C'),
             otr('C', 'D'),
@@ -248,8 +249,8 @@ export const BLOK_I: PrototipChertezha[] = [
             { ugol: ['A', 'B', 'C'], gradusy: p.b },
           ],
           otvet: gr(ans),
-        },
-        bVis !== p.b,
+        }),
+        { minUgol: UGOL_BISSEKTRISY },
       );
     },
   },
@@ -263,16 +264,14 @@ export const BLOK_I: PrototipChertezha[] = [
     otvet: (p) => 45 - p.f,
     primer: { f: 14 },
     sluchaynye: (r) => ({ f: r.int(1, 44) }),
-    stsena: (p, porog) => {
-      const fVis = clamp(p.f, porog, 45 - porog);
-      const a = 45 - fVis;
-      const { A, B, C } = poUglam(a, 90 - a);
-      return scena(
-        {
+    stsena: (p) =>
+      podobrat(
+        klyuch(6, p),
+        { f: p.f },
+        { f: [8, 37] },
+        ({ f }) => ({
           tochki: {
-            A,
-            B,
-            C,
+            ...poUglam(45 - f, 45 + f),
             H: { osnovanie: ['C', 'A', 'B'] },
             L: { bissektrisa: ['C', 'A', 'B'] },
           },
@@ -294,15 +293,15 @@ export const BLOK_I: PrototipChertezha[] = [
             ug('C', 'A', 'H', { sloy: 2, dugi: 2 }),
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C', 'H', 'L'],
           proverki: [
             { ugol: ['A', 'C', 'B'], vid: 'pryamoy' },
             { ugol: ['L', 'C', 'H'], gradusy: p.f },
           ],
           otvet: gr(45 - p.f),
-        },
-        fVis !== p.f,
-      );
-    },
+        }),
+        { minUgol: UGOL_BISSEKTRISY },
+      ),
   },
   {
     id: 7,
@@ -314,13 +313,17 @@ export const BLOK_I: PrototipChertezha[] = [
     otvet: (p) => 45 - p.f,
     primer: { f: 12 },
     sluchaynye: (r) => ({ f: r.int(1, 44) }),
-    stsena: (p, porog) => {
-      const fVis = clamp(p.f, porog, 45 - porog);
-      const a = 45 - fVis;
-      const { A, B, C } = poUglam(a, 90 - a);
-      return scena(
-        {
-          tochki: { A, B, C, M: { seredina: ['A', 'B'] }, L: { bissektrisa: ['C', 'A', 'B'] } },
+    stsena: (p) =>
+      podobrat(
+        klyuch(7, p),
+        { f: p.f },
+        { f: [8, 37] },
+        ({ f }) => ({
+          tochki: {
+            ...poUglam(45 - f, 45 + f),
+            M: { seredina: ['A', 'B'] },
+            L: { bissektrisa: ['C', 'A', 'B'] },
+          },
           elementy: [
             tri('A', 'B', 'C'),
             otr('C', 'M'),
@@ -340,15 +343,15 @@ export const BLOK_I: PrototipChertezha[] = [
             ug('A', 'C', 'L', { sloy: 3, znachenie: '45°' }),
           ],
           podpisi: false,
+          podpisiPodskazki: ['A', 'B', 'C', 'M', 'L'],
           proverki: [
             { ugol: ['A', 'C', 'B'], vid: 'pryamoy' },
             { ugol: ['M', 'C', 'L'], gradusy: p.f },
           ],
           otvet: gr(45 - p.f),
-        },
-        fVis !== p.f,
-      );
-    },
+        }),
+        { minUgol: UGOL_BISSEKTRISY },
+      ),
   },
   {
     id: 8,
@@ -364,15 +367,22 @@ export const BLOK_I: PrototipChertezha[] = [
       const a = r.int(46, 89);
       return { a: a === 60 ? 61 : a };
     },
-    stsena: (p, porog) => {
+    stsena: (p) => {
       const bolshiy = Math.max(p.a, 90 - p.a);
       const menshiy = 90 - bolshiy;
-      const mVis = clamp(menshiy, porog, (90 - porog) / 2);
-      const { A, B, C } = poUglam(mVis, 90 - mVis);
       const ans = bolshiy - menshiy;
-      return scena(
-        {
-          tochki: { A, B, C, H: { osnovanie: ['C', 'A', 'B'] }, M: { seredina: ['A', 'B'] } },
+      /* Меньший угол m и угол между высотой и медианой 90° − 2m оба
+         видны только при m около 28°–31°: форма почти одна и та же. */
+      return podobrat(
+        klyuch(8, p),
+        { m: menshiy },
+        { m: [15, 44] },
+        ({ m }) => ({
+          tochki: {
+            ...poUglam(m, 90 - m),
+            H: { osnovanie: ['C', 'A', 'B'] },
+            M: { seredina: ['A', 'B'] },
+          },
           elementy: [
             tri('A', 'B', 'C'),
             otr('C', 'H'),
@@ -394,10 +404,11 @@ export const BLOK_I: PrototipChertezha[] = [
             ug('H', 'C', 'B', { sloy: 2, dugi: 2, znachenie: gr(menshiy) }),
           ],
           podpisi: ['A', 'B', 'C'],
+          podpisiPodskazki: ['H', 'M'],
           proverki: [{ ugol: ['A', 'C', 'B'], vid: 'pryamoy' }],
           otvet: gr(ans),
-        },
-        mVis !== menshiy,
+        }),
+        { minUgol: UGOL_BISSEKTRISY },
       );
     },
   },
@@ -417,33 +428,38 @@ export const BLOK_I: PrototipChertezha[] = [
       if (180 - c - 2 * d === 2 * d) d -= 1;
       return { c, d };
     },
-    stsena: (p, porog) => {
+    stsena: (p) => {
       const b = 180 - p.c - 2 * p.d;
-      const dVis = Math.max(p.d, porog / 1);
-      const [cVis] = razdelit(180 - 2 * dVis, p.c, b, porog);
-      /* Основание AC горизонтально, B сверху: как на рисунках ФИПИ. */
-      const t = poUglam(2 * dVis, cVis);
-      return scena(
-        {
-          tochki: { A: t.A, C: t.B, B: t.C, D: { bissektrisa: ['A', 'B', 'C'] } },
-          elementy: [
-            tri('A', 'C', 'B'),
-            otr('A', 'D'),
-            ug('C', 'A', 'D', { vydelit: 'dano', znachenie: gr(p.d) }),
-            ug('D', 'A', 'B'),
-            ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(p.c) }),
-            ug('A', 'B', 'C', {
-              vydelit: 'iskomoe',
-              znachenie: gr(b),
-              otvet: true,
-              podsvetka: [2],
-            }),
-            ug('C', 'A', 'B', { sloy: 1, dugi: 2, znachenie: gr(2 * p.d) }),
-          ],
-          proverki: [{ naPryamoy: ['B', 'D', 'C'] }],
-          otvet: gr(b),
+      /* Половина угла A меньше всех углов рисунка: при тупом угле C
+         она не может быть больше 22°. */
+      return podobrat(
+        klyuch(9, p),
+        { d: p.d, c: p.c },
+        { d: [12, 60], c: [25, 140] },
+        ({ d, c }) => {
+          /* Основание AC горизонтально, B сверху: как на рисунках ФИПИ. */
+          const t = poUglam(2 * d, c);
+          return {
+            tochki: { A: t.A, C: t.B, B: t.C, D: { bissektrisa: ['A', 'B', 'C'] } },
+            elementy: [
+              tri('A', 'C', 'B'),
+              otr('A', 'D'),
+              ug('C', 'A', 'D', { vydelit: 'dano', znachenie: gr(p.d) }),
+              ug('D', 'A', 'B'),
+              ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(p.c) }),
+              ug('A', 'B', 'C', {
+                vydelit: 'iskomoe',
+                znachenie: gr(b),
+                otvet: true,
+                podsvetka: [2],
+              }),
+              ug('C', 'A', 'B', { sloy: 1, dugi: 2, znachenie: gr(2 * p.d) }),
+            ],
+            proverki: [{ naPryamoy: ['B', 'D', 'C'] }],
+            otvet: gr(b),
+          };
         },
-        dVis !== p.d || Math.abs(cVis - p.c) > 1e-9,
+        { minUgol: 18 },
       );
     },
   },

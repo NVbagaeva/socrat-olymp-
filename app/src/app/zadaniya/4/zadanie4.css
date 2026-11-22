@@ -645,7 +645,8 @@
 }
 .vvid--accent .vvid__opredelenie {
   background: var(--color-accent-soft-surface);
-  color: var(--color-accent);
+  /* Акцент «для текста»: сам акцент на своей заливке — 2,7 : 1. */
+  color: var(--color-accent-text);
 }
 .vvid--info .vvid__opredelenie {
   background: var(--color-surface-soft);
@@ -689,7 +690,7 @@
   background: var(--color-surface-soft);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
+  color: var(--color-text-lead);
 }
 .vvid__galka {
   display: grid;
@@ -796,7 +797,8 @@
 }
 .vzveno--accent {
   background: var(--color-accent-soft-surface);
-  color: var(--color-accent);
+  /* Акцент «для текста»: сам акцент на своей заливке — 2,7 : 1. */
+  color: var(--color-accent-text);
 }
 .vzveno--info {
   background: var(--color-surface-soft);
@@ -1017,7 +1019,7 @@
   background: var(--color-accent-soft-surface);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 /* Сноска карточки — прижата к низу, чтобы ряд читался ровно. */
 .vklass__snoska {
@@ -1028,7 +1030,7 @@
   background: var(--color-surface-soft);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
+  color: var(--color-text-lead);
 }
 .vklass__snoska-label {
   display: block;
@@ -1084,6 +1086,11 @@
   border-radius: var(--radius-md);
   background: var(--color-accent-soft-surface);
 }
+/* Текст на кремовой плашке — тон темнее: secondary на ней не
+   добирает 4.5:1 (WCAG AA). */
+.vklass-nelzya .vklass__text {
+  color: var(--color-text-lead);
+}
 .vklass-nelzya__title {
   display: flex;
   align-items: center;
@@ -1092,7 +1099,7 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 /* Формула, под ней бейдж «Нельзя!» — отдельной строкой на всех
    ширинах. Сбоку он помещается только в узкой карточке телефона, а
@@ -1120,7 +1127,7 @@
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
   font-weight: 700;
-  color: var(--color-error);
+  color: var(--red-700);
 }
 
 /* Кубики с подписью под ними. */
@@ -1164,7 +1171,7 @@
   background: var(--color-surface-soft);
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
-  color: var(--color-text-secondary);
+  color: var(--color-text-lead);
 }
 .vklass-shag__no {
   display: grid;
@@ -1232,7 +1239,7 @@
   white-space: nowrap;
   font-size: var(--fs-caption);
   line-height: var(--lh-caption);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 .vpon__strelka {
   display: grid;
@@ -1421,7 +1428,8 @@
 }
 .vsvyaz__plashka--info {
   background: var(--color-surface-soft);
-  color: var(--color-text-secondary);
+  /* Вторичный серый на голубой заливке — 4,17 : 1; «лид» — 8 : 1. */
+  color: var(--color-text-lead);
 }
 .vsvyaz__plashka--info b {
   color: var(--color-primary);
@@ -1429,12 +1437,12 @@
 .vsvyaz__plashka--accent {
   border: 1px solid var(--color-border-accent);
   background: var(--color-accent-soft-surface);
-  color: var(--color-text-secondary);
+  color: var(--color-text-lead);
 }
 .vsvyaz__plashka--accent b {
   display: block;
   margin-bottom: var(--space-1);
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 
 /* ── Теория: планшет и телефон ──────────────────────────────────── */

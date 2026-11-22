@@ -16,6 +16,15 @@ export function n(x: number): string {
 /** Градусы в TeX. */
 export const g = (x: number) => `${n(x)}^\\circ`;
 
+/**
+ * Доля угла total : k в TeX. Делится нацело или до тысячных — числом,
+ * иначе дробью: «7,333333°» в выкладке школьнику не прочитать.
+ */
+export function gDolya(total: number, k: number): string {
+  const x = total / k;
+  return Math.abs(x * 1000 - Math.round(x * 1000)) < 1e-9 ? g(x) : `\\dfrac{${g(total)}}{${k}}`;
+}
+
 export function shag(
   zagolovok: string,
   tekst: string | string[],
@@ -52,6 +61,31 @@ export function vopros(
     poyasnenie,
     ...(sloy === undefined ? {} : { sloy }),
   };
+}
+
+/**
+ * Факт шага: кнопка «Показать свойство» под вопросом. id — из реестра
+ * фактов справочника, null — шаг без факта. vNashey — тот же факт на
+ * буквах этой задачи (без ответа шага), vvod — фраза перед вопросом,
+ * которой вводится новая точка.
+ */
+export function f(
+  v: VoprosPodskazki,
+  fakt: string | null,
+  vNashey?: string,
+  vvod?: string,
+): VoprosPodskazki {
+  return {
+    ...v,
+    fakt,
+    ...(vNashey === undefined ? {} : { vNashey }),
+    ...(vvod === undefined ? {} : { vvod }),
+  };
+}
+
+/** Факты шага решения: кнопки «Показать свойство» под шагом. */
+export function sf(s: ShagResheniya, fakty: readonly string[]): ShagResheniya {
+  return { ...s, fakty };
 }
 
 /** Коэффициент при x: единицу не пишут — «x», «3x». */

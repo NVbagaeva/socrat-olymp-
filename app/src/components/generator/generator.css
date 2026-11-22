@@ -138,8 +138,8 @@
   padding: 4px 8px;
   border-radius: var(--radius-pill);
   background: var(--color-warning-soft);
-  color: var(--color-warning);
-  font-size: 11px;
+  color: var(--amber-700);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -159,6 +159,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   background: var(--color-bg-translucent);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow-sm);
 }
@@ -276,7 +277,8 @@
 }
 .gen-preset span {
   font-size: var(--fs-label);
-  color: var(--color-text-secondary);
+  /* На голубой заливке выбранного пресета вторичный серый — 4,45 : 1. */
+  color: var(--color-text-lead);
 }
 .gen-preset[aria-pressed='true'] {
   border-color: var(--color-primary);
@@ -407,7 +409,7 @@
   margin-top: 2px;
   font-size: var(--fs-label);
   line-height: var(--lh-label);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 .gen-trow__metatext {
   white-space: nowrap;
@@ -432,7 +434,7 @@
   border-radius: var(--radius-pill);
   background: var(--color-surface-2);
   color: var(--color-text-secondary);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 16px;
   white-space: nowrap;
   overflow: hidden;
@@ -513,7 +515,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 16px;
 }
 /* Номер прототипа — маленький бейдж «№49», не цифра, слитая с текстом. */
@@ -632,7 +634,7 @@
   border-radius: 4px;
   background: var(--color-surface);
   box-shadow: var(--shadow-md);
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--color-text);
 }
@@ -655,7 +657,7 @@
 }
 .gen-paper__brand {
   font-weight: 800;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.1;
 }
 .gen-paper__div {
@@ -694,13 +696,13 @@
 }
 .gen-paper__title h3 {
   margin: 0;
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
 .gen-paper__sub {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-secondary);
 }
 .gen-paper__fields {
@@ -708,7 +710,7 @@
   align-items: flex-end;
   gap: var(--space-2);
   margin: var(--space-3) 0 var(--space-1);
-  font-size: 13px;
+  font-size: 14px;
 }
 .gen-paper__fields span {
   flex: 1;
@@ -741,7 +743,7 @@
   background: var(--color-primary);
   color: var(--color-text-inverse);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
 }
 .gen-task__body {
   min-width: 0;
@@ -779,7 +781,7 @@
   border-left: 3px solid var(--color-success);
   border-radius: 0 6px 6px 0;
   background: var(--color-success-soft);
-  font-size: 12.5px;
+  font-size: 12px;
 }
 .gen-task__sol .sheet-steps {
   margin: var(--space-1) 0 0;
@@ -1121,7 +1123,7 @@
 }
 .gen-example__label {
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1132,7 +1134,7 @@
 }
 .gen-example__sol {
   margin-top: var(--space-2);
-  font-size: 12.5px;
+  font-size: 12px;
 }
 .gen-example__sol .sheet-steps {
   margin: var(--space-1) 0 0;
@@ -1349,6 +1351,7 @@
     border-width: 1px 0;
     border-radius: 0;
     background: var(--color-bg);
+    -webkit-backdrop-filter: none;
     backdrop-filter: none;
     box-shadow: 0 6px 12px -10px rgb(16 23 40 / 0.25);
   }
@@ -1429,13 +1432,13 @@
     padding: var(--space-4) var(--space-3) var(--space-5);
     border-radius: 0;
     box-shadow: none;
-    font-size: 15px;
+    font-size: 16px;
   }
   .gen-paper__motto {
     display: none;
   }
   .gen-paper__title h3 {
-    font-size: 19px;
+    font-size: 18px;
   }
   .gen-paper__fields {
     display: grid;
@@ -1483,7 +1486,7 @@
      двух слов («Вписанная окружность») вставали в строку. */
   @media (max-width: 389.98px) {
     .gen-trow__name b {
-      font-size: 13px;
+      font-size: 14px;
     }
   }
   /* Подтипы: неглубокая вложенность — отступ 12 px и тонкая линия. */
@@ -1532,11 +1535,11 @@
     text-overflow: ellipsis;
   }
   .gen-actbar__sum b {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 18px;
   }
   .gen-actbar__sum small {
-    font-size: 11px;
+    font-size: 12px;
   }
   .gen-actbar .gen-go {
     flex: 0 0 auto;
@@ -1556,11 +1559,11 @@
       padding-right: calc(var(--space-4) + 40px + var(--space-2));
     }
     .gen-actbar__sum b {
-      font-size: 12.5px;
+      font-size: 12px;
     }
     .gen-actbar .gen-go {
       padding: 0 var(--space-3);
-      font-size: 13px;
+      font-size: 14px;
     }
   }
   .gen-toast {

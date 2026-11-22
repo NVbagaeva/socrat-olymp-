@@ -4,16 +4,22 @@
  * scripts/verify_schemes/trenazherDop/okruzhnost.mjs.
  */
 
-import type { ZadachaDop18 } from './tipy';
+import { ch, drob, type ZadachaDop18 } from './tipy';
 
 export const OK18_ORTOCENTR: ZadachaDop18 = {
   id: 'ok-ortocentr',
   uroven: 2,
   nazvanie: 'Высота и радиус описанной окружности',
+  /* k = √(4R² − BC²) — целое: cos A = k / 2R. */
+  varianty: [
+    { BC: 8, R: 5, k: 6 },
+    { BC: 24, R: 13, k: 10 },
+    { BC: 16, R: 10, k: 12 },
+  ],
   uslovie:
     'Точка $O$ — центр окружности, описанной около остроугольного треугольника $ABC$, точка $H$ — точка пересечения его высот.',
   a: 'Докажите, что $\\angle BAH = \\angle OAC$.',
-  b: 'Найдите $AH$, если $BC = 8$, а радиус описанной окружности равен $5$.',
+  b: (p) => `Найдите $AH$, если $BC = ${p.BC}$, а радиус описанной окружности равен $${p.R}$.`,
   skhemy: [
     {
       id: 'ugly-i-dugi',
@@ -39,10 +45,9 @@ export const OK18_ORTOCENTR: ZadachaDop18 = {
       gruppy: ['itog'],
     },
   ],
-  reshenieB: [
+  reshenieB: (p) => [
     {
-      tekst:
-        'По теореме синусов $\\sin A = \\dfrac{BC}{2R} = \\dfrac{8}{10} = \\dfrac45$; угол $A$ острый, поэтому $\\cos A = \\dfrac35$.',
+      tekst: `По теореме синусов $\\sin A = \\dfrac{BC}{2R} = \\dfrac{${p.BC}}{${2 * p.R!}} = ${drob(p.BC!, 2 * p.R!)}$; угол $A$ острый, поэтому $\\cos A = \\sqrt{1 - \\sin^2 A} = ${drob(p.k!, 2 * p.R!)}$.`,
       gruppy: ['om'],
     },
     {
@@ -51,22 +56,27 @@ export const OK18_ORTOCENTR: ZadachaDop18 = {
       gruppy: ['ah'],
     },
     {
-      tekst:
-        'По теореме синусов $AB = 2R\\sin C$, значит, $AH = 2R\\cos A = 10\\cdot\\dfrac35 = 6$.',
+      tekst: `По теореме синусов $AB = 2R\\sin C$, значит, $AH = 2R\\cos A = ${2 * p.R!}\\cdot${drob(p.k!, 2 * p.R!)} = ${ch(p.k!)}$.`,
       gruppy: ['ah'],
     },
   ],
-  otvet: 6,
+  otvet: (p) => p.k!,
 };
 
 export const OK18_SEKUSHCHIE: ZadachaDop18 = {
   id: 'ok-sekushchie',
   uroven: 2,
   nazvanie: 'Две секущие и хорды между ними',
+  /* PD = PA·PB / PC; C между P и D: PC < PD. */
+  varianty: [
+    { PA: 4, PB: 9, PC: 3, BD: 12 },
+    { PA: 3, PB: 8, PC: 4, BD: 10 },
+    { PA: 6, PB: 10, PC: 5, BD: 9 },
+  ],
   uslovie:
     'Через точку $P$, лежащую вне окружности, проведены две секущие. Первая пересекает окружность в точках $A$ и $B$, вторая — в точках $C$ и $D$, причём $A$ лежит между $P$ и $B$, а $C$ — между $P$ и $D$.',
   a: 'Докажите, что треугольники $PAC$ и $PDB$ подобны.',
-  b: 'Найдите $AC$, если $PA = 4$, $PB = 9$, $PC = 3$ и $BD = 12$.',
+  b: (p) => `Найдите $AC$, если $PA = ${p.PA}$, $PB = ${p.PB}$, $PC = ${p.PC}$ и $BD = ${p.BD}$.`,
   skhemy: [
     {
       id: 'dve-sekushchie',
@@ -91,29 +101,35 @@ export const OK18_SEKUSHCHIE: ZadachaDop18 = {
       gruppy: ['pod'],
     },
   ],
-  reshenieB: [
-    {
-      tekst:
-        'Из подобия $\\dfrac{PA}{PD} = \\dfrac{PC}{PB}$, то есть $PA\\cdot PB = PC\\cdot PD$: $4\\cdot 9 = 3\\cdot PD$ и $PD = 12$.',
-      gruppy: ['stepen'],
-    },
-    {
-      tekst:
-        'Коэффициент подобия $k = \\dfrac{PA}{PD} = \\dfrac{4}{12} = \\dfrac13$, поэтому $AC = k\\cdot DB = \\dfrac13\\cdot 12 = 4$.',
-      gruppy: ['otv'],
-    },
-  ],
-  otvet: 4,
+  reshenieB: (p) => {
+    const PD = (p.PA! * p.PB!) / p.PC!;
+    return [
+      {
+        tekst: `Из подобия $\\dfrac{PA}{PD} = \\dfrac{PC}{PB}$, то есть $PA\\cdot PB = PC\\cdot PD$: $${p.PA}\\cdot ${p.PB} = ${p.PC}\\cdot PD$ и $PD = ${ch(PD)}$.`,
+        gruppy: ['stepen'],
+      },
+      {
+        tekst: `Коэффициент подобия $k = \\dfrac{PA}{PD} = \\dfrac{${p.PA}}{${ch(PD)}} = ${drob(p.PA! * p.PC!, p.PA! * p.PB!)}$, поэтому $AC = k\\cdot DB = ${drob(p.PC!, p.PB!)}\\cdot ${p.BD} = ${ch((p.BD! * p.PC!) / p.PB!)}$.`,
+        gruppy: ['otv'],
+      },
+    ];
+  },
+  otvet: (p) => (p.BD! * p.PC!) / p.PB!,
 };
 
 export const OK18_BRAHMAGUPTA: ZadachaDop18 = {
   id: 'ok-brahmagupta',
   uroven: 3,
   nazvanie: 'Перпендикулярные диагонали вписанного четырёхугольника',
+  varianty: [
+    { BC: 6, AD: 8 },
+    { BC: 10, AD: 24 },
+    { BC: 12, AD: 16 },
+  ],
   uslovie:
     'Диагонали четырёхугольника $ABCD$, вписанного в окружность, перпендикулярны и пересекаются в точке $P$. Точка $M$ — середина стороны $BC$, прямая $MP$ пересекает сторону $AD$ в точке $K$.',
   a: 'Докажите, что $MK \\perp AD$.',
-  b: 'Найдите радиус окружности, если $BC = 6$ и $AD = 8$.',
+  b: (p) => `Найдите радиус окружности, если $BC = ${p.BC}$ и $AD = ${p.AD}$.`,
   skhemy: [
     {
       id: 'pryamye-ugly',
@@ -143,7 +159,7 @@ export const OK18_BRAHMAGUPTA: ZadachaDop18 = {
       gruppy: ['perp'],
     },
   ],
-  reshenieB: [
+  reshenieB: (p) => [
     {
       tekst: 'В прямоугольном треугольнике $APB$: $\\angle BAC + \\angle ABD = 90^\\circ$.',
       gruppy: ['R'],
@@ -154,9 +170,9 @@ export const OK18_BRAHMAGUPTA: ZadachaDop18 = {
       gruppy: ['R'],
     },
     {
-      tekst: 'Значит, $BC^2 + AD^2 = 4R^2$: $36 + 64 = 4R^2$, $R = 5$.',
+      tekst: `Значит, $BC^2 + AD^2 = 4R^2$: $${p.BC! ** 2} + ${p.AD! ** 2} = 4R^2$, $R = ${ch(Math.sqrt(p.BC! ** 2 + p.AD! ** 2) / 2)}$.`,
       gruppy: ['R'],
     },
   ],
-  otvet: 5,
+  otvet: (p) => Math.sqrt(p.BC! ** 2 + p.AD! ** 2) / 2,
 };

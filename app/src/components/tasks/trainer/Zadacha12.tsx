@@ -19,7 +19,7 @@ import { TrainerReview } from './TrainerReview';
  */
 
 /** Состояние подсказки: шаг, поля, отметка шага, вопросы и части. */
-interface Hint {
+export interface Hint {
   step: number;
   fields: Record<string, string>;
   mark: 'right' | 'wrong' | null;
@@ -28,7 +28,7 @@ interface Hint {
   note: string | null;
 }
 
-function hintOf(shagi: Shagi | null): Hint {
+export function hintOf(shagi: Shagi | null): Hint {
   const raw = shagi ?? {};
   const num = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) && v >= 0 ? v : 0);
   const fields: Record<string, string> = {};
@@ -132,7 +132,7 @@ function Otvet12({
   );
 }
 
-function Podskazka12({
+export function Podskazka12({
   task,
   shagi,
   setShagi,

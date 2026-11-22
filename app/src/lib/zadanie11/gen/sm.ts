@@ -1,6 +1,10 @@
 /** Генераторы раздела СМ — смеси и сплавы. */
 
+import { VESHCHESTVA } from '../prototypes/syuzhety';
 import { cel, shag, type Gen, type Zagotovka } from './types';
+
+/** СМ-09: на такие разности концентраций делить удобно. */
+const UDOBNO = new Set([2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50]);
 
 export const GEN_SM: Record<string, Gen> = {
   'SM-01': (r): Zagotovka | null => {
@@ -114,5 +118,70 @@ export const GEN_SM: Record<string, Gen> = {
       return null;
     }
     return { params: { a, b, c: Math.round(c), d: Math.round(d) }, answer: x };
+  },
+
+  /*
+   * СМ-09, свой подтип: воды w кг, раствора m кг, m ≠ w. От ответа:
+   * c и d = c + k, массы добавок; разность уравнений
+   * k·S = m(p₃ − d) + c·w, S = x + y. Берём j = p₃ − d так, чтобы k
+   * делило m или j и c или w: в решении каждое слагаемое сокращается в
+   * один шаг, а не перемножается. Затем p₁, p₂ по разные стороны от
+   * средней концентрации смеси I + II — из всех пар, где x целое.
+   */
+  'SM-09': (r): Zagotovka | null => {
+    const vv = r.pick(['kislota', 'sol', 'sahar', 'spirt', 'glicerin'] as const);
+    const hi = Math.min(80, VESHCHESTVA[vv]?.p[1] ?? 80);
+    const k = r.pick([2, 3, 4, 5, 6, 8, 10]);
+    const w = r.int(3, 25);
+    const m = r.int(3, 25);
+    const c = r.int(3, hi - 2 * k);
+    const dd = c + k;
+    const j = r.int(1, hi - dd);
+    const p3 = dd + j;
+    const delit = (a: number, b: number) => a % k === 0 || b % k === 0;
+    if (Math.abs(m - w) < 3 || !delit(m, j) || !delit(c, w)) {
+      return null;
+    }
+    const S = (m * j + c * w) / k;
+    if (!cel(S) || S < 10 || S > 100) {
+      return null;
+    }
+    /* Средняя концентрация смеси I + II: A/S, A = c(S + w). */
+    const A = c * (S + w);
+    const pary: Array<[number, number, number]> = [];
+    for (let lo = 2; lo < A / S; lo += 1) {
+      for (let top = Math.ceil(A / S); top <= hi; top += 1) {
+        const xTop = (A - lo * S) / (top - lo);
+        /* Делить на p₁ − p₂ удобно: 2…10, 12, 15, 20, 25, 30, 40, 50. */
+        if (
+          top > lo &&
+          UDOBNO.has(top - lo) &&
+          cel(xTop) &&
+          xTop >= 3 &&
+          S - xTop >= 3 &&
+          2 * xTop !== S
+        ) {
+          pary.push([lo, top, xTop]);
+        }
+      }
+    }
+    if (pary.length === 0) {
+      return null;
+    }
+    const [lo, top, xTop] = r.pick(pary);
+    const silnyyPervyy = r.next() < 0.5;
+    const [p1, p2] = silnyyPervyy ? [top, lo] : [lo, top];
+    const x = silnyyPervyy ? xTop : S - xTop;
+    const y = S - x;
+    /* Совпадений нет: концентрации и массы все разные. */
+    if (new Set([p1, p2, p3, c, dd, w, m]).size < 7 || new Set([x, y, w, m]).size < 4) {
+      return null;
+    }
+    const ask = r.pick(['I', 'II', 'vse'] as const);
+    const por = r.pick(['vr', 'rv'] as const);
+    return {
+      params: { p1, p2, p3, c, d: dd, w, m, por, ask, vv },
+      answer: ask === 'I' ? x : ask === 'II' ? y : S,
+    };
   },
 };

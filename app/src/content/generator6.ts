@@ -5,11 +5,12 @@
  */
 
 import type { GenPreset } from '@/lib/generator/obshchiy/types';
+import { nomerRazdela } from './struktura';
 
 export const GENERATOR6_TEXTS = {
-  section: '№6 · Случайные величины',
+  section: `№${nomerRazdela('sluchainye-velichiny')} · Случайные величины`,
   sheet: {
-    chip: 'Задание 6',
+    chip: `Задание ${nomerRazdela('sluchainye-velichiny')}`,
     title: 'Случайные величины и распределения',
     course: 'Профильная математика',
     teacher: 'Багаева Н.В.',
@@ -59,7 +60,7 @@ const VSE = { I: 2, II: 1, III: 6, IV: 2, V: 4 };
 export const GENERATOR6_PRESETS: GenPreset[] = [
   {
     id: 'ves',
-    title: 'Весь №6',
+    title: `Весь №${nomerRazdela('sluchainye-velichiny')}`,
     sub: '15 задач · по прототипу',
     variants: 1,
     levels: [],

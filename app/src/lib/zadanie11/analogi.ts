@@ -30,6 +30,7 @@ import sm05 from '../../data/zadanie11/analogs/SM-05.json';
 import sm06 from '../../data/zadanie11/analogs/SM-06.json';
 import sm08 from '../../data/zadanie11/analogs/SM-08.json';
 import sm07 from '../../data/zadanie11/analogs/SM-07.json';
+import sm09 from '../../data/zadanie11/analogs/SM-09.json';
 import ok01 from '../../data/zadanie11/analogs/OK-01.json';
 import ok02 from '../../data/zadanie11/analogs/OK-02.json';
 import ok03 from '../../data/zadanie11/analogs/OK-03.json';
@@ -165,6 +166,8 @@ export const POOL_ANALOGOV: Record<string, Analog[]> = {
   'SM-06': sm06 as unknown as Analog[],
   'SM-08': sm08 as unknown as Analog[],
   'SM-07': sm07 as unknown as Analog[],
+  /* Свой подтип, не из открытого банка: у него только аналоги и генератор. */
+  'SM-09': sm09 as unknown as Analog[],
 };
 
 export const ANALOGI: Analog[] = Object.values(POOL_ANALOGOV).flat();

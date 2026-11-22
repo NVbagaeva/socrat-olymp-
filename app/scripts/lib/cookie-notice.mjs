@@ -9,10 +9,16 @@
    Так же — с окном «Впервые здесь?» (components/onboarding): при первом
    визите оно закрывает страницу целиком, поэтому браузер проверки —
    посетитель, который это окно уже видел (как lib/onboarding.mjs).
-   Само окно и тур проверяют сценарии онбординга. */
+   Само окно и тур проверяют сценарии онбординга.
+
+   И с ключом проверок генераторов (lib/tarify/dostup.ts): без тарифа
+   закрыты генераторы большинства заданий и есть одна пробная
+   генерация, а проверки гоняют все генераторы сколько нужно. Ключ
+   действует только на 127.0.0.1 и localhost. */
 
 export const COOKIE_NOTICE_KEY = 'budetege:cookie-notice:v1';
 export const ONBOARDING_KEY = 'budetege:onboarding:v1';
+export const DOSTUP_PROVERKA_KEY = 'budetege:dostup:proverka';
 
 /** Каждая новая вкладка браузера — с прочитанным баннером. Возвращает тот же браузер. */
 export function bezBanneraCookie(browser) {
@@ -20,17 +26,18 @@ export function bezBanneraCookie(browser) {
   browser.newContext = async (options) => {
     const context = await newContext(options);
     await context.addInitScript(
-      ([cookieKey, onboardingKey]) => {
+      ([cookieKey, onboardingKey, dostupKey]) => {
         try {
           window.localStorage.setItem(cookieKey, JSON.stringify({ seen: true }));
           if (window.localStorage.getItem(onboardingKey) === null) {
             window.localStorage.setItem(onboardingKey, JSON.stringify({ welcomeSeen: true }));
           }
+          window.localStorage.setItem(dostupKey, 'true');
         } catch {
           /* about:blank и страницы без хранилища — баннера там нет. */
         }
       },
-      [COOKIE_NOTICE_KEY, ONBOARDING_KEY],
+      [COOKIE_NOTICE_KEY, ONBOARDING_KEY, DOSTUP_PROVERKA_KEY],
     );
     return context;
   };

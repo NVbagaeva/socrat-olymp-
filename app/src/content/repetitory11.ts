@@ -9,6 +9,7 @@
 import { GEN_UI } from '@/content/generatorUi';
 import { plural } from '@/lib/plural';
 import type { SectionId } from '@/lib/zadanie11/types';
+import { nomerRazdela } from '@/content/struktura';
 
 /* ── Печатный лист ──────────────────────────────────────────────── */
 
@@ -19,10 +20,10 @@ export const SHEET_11 = {
     motto: 'Больше, чем подготовка',
   },
   title: {
-    chip: 'Задание 11',
+    chip: `Задание ${nomerRazdela('tekstovye-zadachi')}`,
     text: 'Текстовые задачи',
   },
-  runner: 'Задание 11 · Текстовые задачи',
+  runner: `Задание ${nomerRazdela('tekstovye-zadachi')} · Текстовые задачи`,
   podpis: 'Учитель: Багаева Н.В.',
   subtitle: {
     otrabotka: 'Задания для отработки',
@@ -101,7 +102,7 @@ export const MARSHRUTY_11: Marshrut11[] = [
     razdely: ['SM'],
     opornye: ['P11-08', 'P11-08', 'P11-08', 'P11-01'],
     bank: ['SM-01', 'SM-02', 'SM-03', 'SM-06', 'SM-04', 'SM-05', 'SM-07', 'SM-08'],
-    novye: ['SM-01', 'SM-06', 'SM-04', 'SM-05', 'SM-07', 'SM-08'],
+    novye: ['SM-01', 'SM-06', 'SM-04', 'SM-05', 'SM-07', 'SM-08', 'SM-09'],
   },
   {
     no: 3,

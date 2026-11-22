@@ -26,7 +26,7 @@
      4. Тренировки, «Работа над ошибками», «Похожая задача».
      5. Запись тренировки: новый формат и прежний (панель фильтров), из
         образца — та же тренировка, те же задачи.
-     6. Тексты карты: «Где теряют балл» у каждого из 75 типов.
+     6. Тексты карты: «Где теряют балл» у каждого типа.
 
    Запуск: node scripts/check-progress-1.mjs */
 
@@ -281,7 +281,7 @@ for (const [chto, raw] of [
 {
   const { analogi } = requireSrc('lib/planimetriya/bank/analogi.ts');
   const vsegoAnalogov = PROTOTIPY.reduce((n, p) => n + analogi(p.id).length, 0);
-  check(Object.keys(katalog).length === 75, `в каталоге ${Object.keys(katalog).length} типов`);
+  check(Object.keys(katalog).length === PROTOTIPY.length, `в каталоге ${Object.keys(katalog).length} типов`);
   check(
     poZadache.size === BANK_FIPI.length + vsegoAnalogov,
     `в каталоге ${poZadache.size} задач, а в банке ${BANK_FIPI.length} + ${vsegoAnalogov}`,
@@ -312,7 +312,9 @@ for (const [chto, raw] of [
     check(s.z.risunokSvg.includes('<svg'), `задача ${id}: нет чертежа условия`);
     check(s.s.shagi.length > 0 && s.s.voprosy.length > 0, `задача ${id}: нет шагов или вопросов`);
     check(
-      s.s.shagi[s.s.shagi.length - 1].risunokSvg === s.s.uchitelSvg,
+      /* Два способа: у последнего шага — построения своего способа. */
+      s.s.scenariy.sposoby.length > 1 ||
+        s.s.shagi[s.s.shagi.length - 1].risunokSvg === s.s.uchitelSvg,
       `задача ${id}: у последнего шага не чертёж всех построений`,
     );
     check(
@@ -456,6 +458,27 @@ const vse = Object.keys(katalog);
     'текст «Где теряют балл» у несуществующего типа',
   );
   check(FORMULY1.length > 0, 'нет блока «Что нужно знать»');
+  /* Ссылки под условием: у каждого типа — теория, опорный блок и разбор;
+     якорь теории — карточка справочника, которая есть на странице. */
+  const { ssylki1 } = requireSrc('lib/planimetriya/trening/ssylki.ts');
+  const { RAZDELY_SPRAVOCHNIKA_1 } = requireSrc('content/spravochnik1/index.ts');
+  const yakorya = new Set(RAZDELY_SPRAVOCHNIKA_1.flatMap((r) => r.temy.map((t) => `k-${t.id}`)));
+  const ss = ssylki1();
+  for (const p of PROTOTIPY) {
+    const s1 = ss[kp(p.id)];
+    check(s1?.teoriya !== undefined, `у типа ${kp(p.id)} нет ссылки «Повторить теорию»`);
+    for (const href of [s1?.teoriya, s1?.fakt].filter(Boolean)) {
+      check(yakorya.has(href.split('#')[1]), `тип ${kp(p.id)}: якоря ${href} нет в справочнике`);
+    }
+    check(
+      /opornye-zadachi\/[a-z-]+\/$/.test(s1?.opornye ?? ''),
+      `тип ${kp(p.id)}: нет опорного блока`,
+    );
+    check(
+      s1?.razbor === `/zadaniya/1/#tip-${kp(p.id)}`,
+      `тип ${kp(p.id)}: разбор не на карточку типа`,
+    );
+  }
   const { primer1 } = requireSrc('lib/planimetriya/trening/primer.ts');
   for (const p of PROTOTIPY) {
     const ex = primer1(kp(p.id));

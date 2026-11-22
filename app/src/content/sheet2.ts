@@ -7,6 +7,8 @@
  * подвал — те же, что у сборников №4, №8 и №12.
  */
 
+import { nomerRazdela } from './struktura';
+
 export const SHEET_2 = {
   head: {
     course: 'Профильная математика',
@@ -14,11 +16,11 @@ export const SHEET_2 = {
     motto: 'Больше, чем подготовка',
   },
   title: {
-    chip: 'Задание 2',
+    chip: `Задание ${nomerRazdela('vektory')}`,
     text: 'Векторы',
     subtitle: 'Задания для отработки',
   },
-  runner: 'Задание 2 · Векторы',
+  runner: `Задание ${nomerRazdela('vektory')} · Векторы`,
   /* Лист учителя в «Всё одним файлом» генератора: к подзаголовку. */
   resheniya: 'Решения',
   vse: 'Листы ученика и учителя',

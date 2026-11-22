@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Весы в равновесии: на чашах равные грузы">
+  <!-- Уравнение — весы в равновесии: слева x и гиря, справа гири.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 64 V236 M110 240 H190" stroke-width="2.5"/>
+    <path d="M58 84 H242" stroke-width="2.5"/>
+    <path d="M58 84 L34 150 M58 84 L82 150 M242 84 L218 150 M242 84 L266 150" stroke-width="1.5"/>
+    <path d="M28 150 H88 A30 14 0 0 1 28 150 Z M212 150 H272 A30 14 0 0 1 212 150 Z" fill="url(#b-g)" stroke-width="2"/>
+    <rect x="36" y="118" width="26" height="32" rx="5" fill="#7FAEEA" fill-opacity="0.6" stroke-width="1.8"/>
+    <path d="M66 150 L72 128 H80 L86 150 Z" fill="#c3dffa" stroke-width="1.8"/>
+    <path d="M216 150 L222 128 H230 L236 150 Z M240 150 L246 128 H254 L260 150 Z" fill="#c3dffa" stroke-width="1.8"/>
+    <path d="M240 128 L250 118 L250 128" stroke="none"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="150" cy="60" r="7"/>
+  </g>
+</svg>

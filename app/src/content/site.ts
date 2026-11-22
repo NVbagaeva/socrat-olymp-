@@ -11,9 +11,12 @@ import { EZH_HREF } from '@/content/ezhemesyachnye';
 import { POV_HREF } from '@/content/povyshennye';
 import { VARIANT_HREF, VARIANT_ONLAYN_HREF } from '@/content/variant';
 import { ONLINE_TEXT } from '@/content/variantOnline/text';
-import { levelInfo } from '@/lib/level';
-import { TARIFY_HREF } from '@/lib/tarify/config';
+import { levelInfo, type Level } from '@/lib/level';
+import { AUTH_HREF, AUTH_IN_HEADER, REGISTRATION_OPEN } from '@/lib/auth/config';
+import { TARIFY_HREF } from '@/lib/tarify/href';
 import type { NavIconName } from '@/components/ui/NavIcons';
+import { nomeraChasti } from '@/content/struktura';
+import { href, USTNYY } from '@/lib/paths';
 
 export interface SiteLink {
   label: string;
@@ -23,6 +26,8 @@ export interface SiteLink {
    * /baza/zadaniya/. Не задан — адрес от уровня не зависит.
    */
   hrefBase?: string;
+  /** Пункт выделен тёплым акцентом (новый раздел, на который зовём). */
+  akcent?: boolean;
 }
 
 /**
@@ -70,6 +75,14 @@ const LINKS = {
     hrefBase: levelInfo('base').bank,
     icon: 'tasks',
   },
+  /* Раздел общий для профиля и базы — адрес от уровня не зависит. */
+  ustnyy: {
+    label: 'Устный счёт',
+    hint: 'Приёмы, таймер и рейтинг',
+    href: href(USTNYY),
+    icon: 'schet',
+    akcent: true,
+  },
   sobrat: {
     label: 'Собрать вариант',
     hint: 'Для домашней и контрольной',
@@ -78,7 +91,7 @@ const LINKS = {
   },
   onlayn: {
     label: ONLINE_TEXT.nachalo.menu,
-    hint: 'Задания 1–13 с автопроверкой',
+    hint: `Задания ${nomeraChasti(1)} с автопроверкой`,
     href: VARIANT_ONLAYN_HREF,
     icon: 'target',
   },
@@ -121,16 +134,34 @@ const LINKS = {
   tarify: { label: 'Тарифы', hint: 'Что входит в доступ', href: TARIFY_HREF, icon: 'favourites' },
 } satisfies Record<string, MenuLink>;
 
+/**
+ * Куда ведёт «Начать бесплатно». Регистрация открыта (REGISTRATION_OPEN
+ * в lib/auth/config.ts) и вход показан всем — кнопка «Войти» в шапке
+ * (AUTH_IN_HEADER, он же включает и сам вход) — на регистрацию. Иначе —
+ * в банк заданий уровня: там занимаются бесплатно и без аккаунта, а
+ * страница входа без кнопки в шапке остаётся только по прямой ссылке.
+ */
+export function startHref(level: Level = 'profile'): string {
+  if (AUTH_IN_HEADER && REGISTRATION_OPEN) return AUTH_HREF.registraciya;
+  return level === 'base' ? levelInfo('base').bank : tasksPage.href;
+}
+
+/** Telegram-канал платформы: подвал и разметка для поисковиков (lib/jsonLd.ts). */
+export const TELEGRAM_HREF = 'https://t.me/budet_na_ege_math';
+
 export const site = {
   brand: 'Будет на ЕГЭ',
 
   /**
    * Пункты широкой шапки. Каждый ведёт на работающую страницу или блок.
-   * Порядок — от дела к справке: сначала задания и варианты, потом
-   * разделы о проекте, «Тарифы» последними.
+   * Порядок — от дела к справке: сначала задания, устный счёт и
+   * варианты, потом разделы о проекте, «Тарифы» последними. «Об авторе»
+   * живёт в подвале и в бургере: с «Устным счётом» шапка в одну строку
+   * на 1024 px иначе не помещалась.
    */
   nav: [
     LINKS.bank,
+    LINKS.ustnyy,
     /* Всё про варианты — одной группой: семь пунктов в одну строку не
        помещались даже на 1440 px, и шапка переносилась в две строки.
        Первым — главное действие, оно в списке выделено. */
@@ -140,7 +171,6 @@ export const site = {
     },
     LINKS.uchitelyam,
     LINKS.howto,
-    LINKS.avtor,
     LINKS.tarify,
   ] as NavItem[],
 
@@ -151,7 +181,7 @@ export const site = {
   menu: {
     glavnoe: LINKS.onlayn as MenuLink,
     groups: [
-      { label: 'Практика', items: [LINKS.bank, LINKS.sobrat, LINKS.baza] },
+      { label: 'Практика', items: [LINKS.bank, LINKS.ustnyy, LINKS.sobrat, LINKS.baza] },
       { label: 'Готовые варианты', items: [LINKS.mesyaca, LINKS.slozhnye] },
       { label: 'О проекте', items: [LINKS.howto, LINKS.uchitelyam, LINKS.avtor] },
     ] as MenuGroup[],
@@ -164,7 +194,7 @@ export const site = {
      «Начать бесплатно» без входа ведёт в банк заданий — платного ничего
      нет; со входом — на регистрацию. */
   headerActions: {
-    signup: { label: 'Начать бесплатно', href: tasksPage.href } satisfies SiteLink,
+    signup: { label: 'Начать бесплатно', href: startHref('profile') } satisfies SiteLink,
   },
 
   footer: {
@@ -176,8 +206,9 @@ export const site = {
       { label: legalDocs.politika.linkLabel, href: legalDocs.politika.href },
       { label: legalDocs.soglashenie.linkLabel, href: legalDocs.soglashenie.href },
       { label: 'Тарифы', href: TARIFY_HREF },
-      { label: 'Контакты', href: '#' },
-      { label: 'Telegram', href: 'https://t.me/budet_na_ege_math', external: true },
+      { label: LINKS.avtor.label, href: LINKS.avtor.href },
+      { label: 'Контакты', href: `${LINKS.avtor.href}#oa-svyaz` },
+      { label: 'Telegram', href: TELEGRAM_HREF, external: true },
     ] satisfies (SiteLink | ExternalLink)[],
     /**
      * С флагом NEXT_PUBLIC_LEGAL_READY (lib/legal/prodavets.ts) подвал

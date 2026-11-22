@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Куб с невидимыми рёбрами пунктиром">
+  <!-- Куб в косоугольной проекции: ребро 128, сдвиг задней грани (70, -56).
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M52 122 L122 66 L250 66 L180 122 Z" fill="#c3dffa" fill-opacity="0.55" stroke="none"/>
+    <path d="M180 122 L250 66 L250 194 L180 250 Z" fill="#7FAEEA" fill-opacity="0.3" stroke="none"/>
+    <rect x="52" y="122" width="128" height="128" fill="#c3dffa" fill-opacity="0.75" stroke="none"/>
+    <path d="M122 194 L52 250 M122 194 L250 194 M122 194 L122 66" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <path d="M52 250 L180 250 L180 122 L52 122 Z M52 122 L122 66 L250 66 L180 122 M250 66 L250 194 L180 250" stroke-width="2"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="52" cy="250" r="5.5"/>
+    <circle cx="180" cy="250" r="5.5"/>
+    <circle cx="52" cy="122" r="5.5"/>
+    <circle cx="180" cy="122" r="5.5"/>
+    <circle cx="122" cy="66" r="5.5"/>
+    <circle cx="250" cy="66" r="5.5"/>
+    <circle cx="250" cy="194" r="5.5"/>
+    <circle cx="122" cy="194" r="4.5"/>
+  </g>
+</svg>

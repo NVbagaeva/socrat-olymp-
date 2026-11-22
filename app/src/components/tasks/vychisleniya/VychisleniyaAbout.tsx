@@ -1,4 +1,5 @@
 import { OPORNYE } from '@/content/opornye';
+import { Razminka } from '@/components/ustnyySchet/Razminka';
 import { VYCHISLENIYA } from '@/content/vychisleniya';
 import {
   DELIMOST8,
@@ -164,6 +165,8 @@ export function VychisleniyaAbout() {
           ))}
         </div>
       </section>
+
+      <Razminka id="profil-8" />
 
       <section className="kz-razdel kz-znat" aria-labelledby="z8-znat-title">
         <div className="kz-razdel__head">

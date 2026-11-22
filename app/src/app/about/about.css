@@ -72,8 +72,8 @@
 /* ── Типографика: одна шкала на страницу ─────────────────────── */
 
 .oa-kicker {
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 19px;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -264,7 +264,7 @@
 .oa-geo-bukva {
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 22px;
+  font-size: 24px;
   fill: var(--navy-700);
 }
 .oa-sm__krug {
@@ -386,7 +386,7 @@
   box-shadow: var(--glass-ring), var(--glass-hi), var(--glass-shadow);
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 19px;
+  font-size: 18px;
   line-height: 24px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -398,6 +398,12 @@
 
 .oa-sec {
   padding-top: var(--oa-sec);
+}
+/* «Контакты» в подвале ведут на #oa-svyaz (заголовок раздела): якорь
+   открывается с меткой над ним и не под липкой шапкой (96 px — как
+   у #bank на главной, landing.css). */
+.oa-h2 {
+  scroll-margin-top: calc(96px + var(--space-6));
 }
 .oa-sec:last-of-type {
   padding-bottom: var(--oa-sec);
@@ -469,8 +475,8 @@
 .oa-printsipy__num {
   display: block;
   margin-bottom: var(--space-3);
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 19px;
   font-weight: 600;
   letter-spacing: 0.1em;
   font-variant-numeric: tabular-nums;
@@ -493,7 +499,7 @@
   gap: var(--space-2) var(--space-6);
   border-top: 1px solid var(--oa-line);
   border-bottom: 1px solid var(--oa-line);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 24px;
   font-weight: 500;
   color: var(--oa-ink);
@@ -597,8 +603,8 @@
   content: counter(shag) ' →';
   display: block;
   margin-bottom: var(--space-2);
-  font-size: 13px;
-  line-height: 16px;
+  font-size: 14px;
+  line-height: 19px;
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--color-accent-text);
@@ -616,7 +622,7 @@
 .oa-tsep span {
   display: block;
   margin-top: var(--space-1);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 22px;
 }
 

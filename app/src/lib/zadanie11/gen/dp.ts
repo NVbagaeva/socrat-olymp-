@@ -108,7 +108,9 @@ export const GEN_DP: Record<string, Gen> = {
     const d = r.int(2, 10);
     const S = x * (x + d);
     const ask = r.pick(['first', 'second'] as const);
-    return S <= 400 ? { params: { S, d, ask }, answer: ask === 'first' ? x + d : x } : null;
+    /* Герой — в параметрах: глагол берётся у него («приехавшего к финишу»). */
+    const geroy = r.pick(['velo', 'velosipedistka'] as const);
+    return S <= 400 ? { params: { S, d, ask, geroy }, answer: ask === 'first' ? x + d : x } : null;
   },
 
   /* S/x − S/(x + dv) = Δt ⇒ S = Δt·x(x + dv)/dv. */

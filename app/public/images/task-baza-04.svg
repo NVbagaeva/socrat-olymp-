@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Карточка формулы: в клетки-буквы подставляют числа">
+  <!-- Вычисление по формуле: клетки — буквы формулы (вид y = a · b), в одну подставляют число.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <g transform="translate(14 0)">
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="34" y="96" width="202" height="108" rx="18" fill="url(#b-g)" stroke-width="2"/>
+    <rect x="46" y="130" width="36" height="40" rx="7" fill="#7FAEEA" fill-opacity="0.55" stroke-width="2"/>
+    <path d="M92 143 H112 M92 157 H112" stroke-width="2.5"/>
+    <rect x="122" y="130" width="36" height="40" rx="7" fill="#fff" stroke-width="2"/>
+    <circle cx="168" cy="150" r="2.5" fill="#0c3ebc" stroke="none"/>
+    <rect x="178" y="130" width="36" height="40" rx="7" fill="#c3dffa" stroke-width="2"/>
+    <path d="M196 78 V118" stroke-width="2"/>
+    <path d="M191.7 114.1 L196 122 L200.3 114.1" stroke-width="2"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="196" cy="70" r="7"/>
+  </g>
+  </g>
+</svg>
