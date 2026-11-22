@@ -514,6 +514,26 @@
   height: 200px;
   translate: calc(-1 * var(--space-3)) calc(-1 * var(--space-3));
 }
+/* На узкой карточке (телефон) картинка с подложкой занимала почти
+   весь экран, и до условия приходилось долго листать. Здесь она —
+   около 58 % ширины шапки и не выше 200px, по центру; пропорции
+   подложки и картинки те же, что на широкой: картинка — 200/224
+   высоты круга и так же сдвинута к левому верхнему краю. Сама
+   картинка не обрезается: ширина идёт за высотой. На широкой
+   карточке (ниже, vteor-razdel ≥ 560px) — прежний размер. */
+@container vteor-razdel (max-width: 559.98px) {
+  .vteor-sluchay__figura {
+    /* Поперечник круга: доля ширины раздела (контейнер vteor-razdel). */
+    --d: 180px;
+    --d: min(56cqw, 200px);
+    width: var(--d);
+    height: var(--d);
+  }
+  .vteor-sluchay__kartinka {
+    height: calc(var(--d) * 200 / 224);
+    translate: calc(var(--d) * -12 / 224) calc(var(--d) * -12 / 224);
+  }
+}
 .vteor-sluchay__text {
   display: grid;
   gap: var(--space-3);
@@ -522,17 +542,18 @@
      на всю ширину карточки она не растягивается. */
   max-width: 70ch;
 }
-/* Заголовок случая — уровень H3 по макету, с синей точкой перед
-   ним. Тег остаётся h4: заголовок раздела — h3 (vteor-razdel__title),
-   и случай стоит под ним. */
+/* Заголовок случая — h4 с синей точкой перед ним, кеглем остальных
+   заголовков карточек теории (vizo-primer__title, vizo-eylerblok__title):
+   --fs-h4. Кегль H3 из макета на телефоне выходил крупнее заголовка
+   самого раздела (vteor-razdel__title). */
 .vteor-sluchay__title {
   display: flex;
   align-items: start;
   gap: var(--space-3);
   margin: 0;
   color: var(--color-primary);
-  font-size: var(--fs-h3);
-  line-height: var(--lh-h3);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-h4);
   font-weight: 700;
 }
 /* Метка случая: кружок без цифры. Цифру в кружке на вкладке носит
@@ -541,9 +562,9 @@
    строки: на телефоне заголовок в две-три строки. */
 .vteor-sluchay__metka {
   flex: none;
-  width: var(--space-5);
-  height: var(--space-5);
-  margin-top: calc((var(--lh-h3) - var(--space-5)) / 2);
+  width: var(--space-3);
+  height: var(--space-3);
+  margin-top: calc((var(--lh-h4) - var(--space-3)) / 2);
   border-radius: var(--radius-pill);
   background: var(--color-primary);
 }
@@ -617,6 +638,29 @@
 .vteor-vazhno__text {
   padding-left: var(--space-4);
   border-left: 1px solid var(--color-border);
+}
+/* На узкой карточке плашка компактнее: знак меньше, отступы и черта
+   ближе, текст на ступень мельче основного (--fs-caption) — так на
+   телефоне ему остаётся вся ширина и он укладывается в 2–3 строки,
+   а не в четыре-пять. Формулы внутри (.katex) идут от того же кегля. */
+@container vteor-razdel (max-width: 559.98px) {
+  .vteor-vazhno {
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--fs-caption);
+    line-height: var(--lh-caption);
+  }
+  .vteor-vazhno__znak {
+    width: var(--space-6);
+    height: var(--space-6);
+    font-size: var(--fs-caption);
+  }
+  .vteor-vazhno__text {
+    padding-left: var(--space-3);
+  }
+  .vteor-sluchay__shema > .vteor-vazhno {
+    margin-inline: var(--space-3);
+  }
 }
 
 /* ── Решение ───────────────────────────────────────────────────── */
@@ -820,6 +864,26 @@
   }
 }
 
+/* Узкая карточка (телефон): поля карточки случая, решения и шагов
+   разбора на ступень уже — на 320–390px колонке выкладки иначе не
+   хватало ширины даже на одно обозначение «P(1 < X < 2)», и формула
+   выступала за край плашки. */
+@container vteor-razdel (max-width: 559.98px) {
+  .vteor-sluchay {
+    padding: var(--space-4);
+  }
+  .vteor-reshenie {
+    padding: var(--space-5) var(--space-4);
+  }
+  .vteor-protivopolozhnoe {
+    padding: var(--space-4) var(--space-3);
+  }
+  .vteor-shag {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+}
+
 /* Раскладка раздела считается от ширины самого раздела, а не окна:
    рядом стоит колонка содержания, и при одной и той же ширине окна
    место под текст разное. По ширине окна колонки получались по
@@ -950,6 +1014,52 @@
   r: 10;
 }
 
+/* Компактный рисунок случая (CoordinateLine kompaktnyy, поле 360).
+
+   Подписи здесь — обычный SVG-текст в единицах рисунка, без
+   подгонки кегля через tan(atan2(…cqw)) и без сдвигов translate:
+   эта подгонка в Safari на iPhone не срабатывала, и подписи
+   пропадали с чертежа. Рисунок узкий, на телефоне он идёт почти
+   один к одному, а кегль меняется ступенями по ширине самого
+   рисунка (контейнер vteor-shema) так, чтобы на экране подпись была
+   14–17px. Геометрия рисунка рассчитана под самый крупный кегль
+   (22), поэтому ни на одной ступени подписи не налегают друг на
+   друга, на лучи и на точки. */
+.vteor-shema .pr-line--kompakt {
+  --pr-kegl: 14px;
+}
+@container vteor-shema (max-width: 419.98px) {
+  .vteor-shema .pr-line--kompakt {
+    --pr-kegl: 16px;
+  }
+}
+@container vteor-shema (max-width: 329.98px) {
+  .vteor-shema .pr-line--kompakt {
+    --pr-kegl: 18px;
+  }
+}
+@container vteor-shema (max-width: 259.98px) {
+  .vteor-shema .pr-line--kompakt {
+    --pr-kegl: 22px;
+  }
+}
+.vteor-shema .pr-line--kompakt :is(.pr-band-label, .pr-axis-name, .pr-tick text, .pr-brace text) {
+  font-size: var(--pr-kegl);
+  translate: none;
+}
+.vteor-shema .pr-line--kompakt .pr-brace {
+  translate: none;
+}
+/* Подписи лучей — цветом лучей (акцент), скоба и её подписи — цветом
+   скобы (синий). Итог под скобой — жирный, как и промежуток. */
+.vteor-shema .pr-line--kompakt .pr-brace text {
+  fill: var(--color-primary);
+  font-weight: 700;
+}
+.vteor-shema .pr-line--kompakt .pr-tick text {
+  fill: var(--color-text);
+}
+
 /* Карточке хватает ширины — шапка в две колонки: картинка слева,
    заголовок и условие справа; чертёж компактный, по центру плашки —
    около половины её ширины, но не уже, чем нужно подписям. */
@@ -972,6 +1082,12 @@
   .vteor-sluchay__risunok {
     width: max(50%, 480px);
     max-width: 100%;
+  }
+  /* Компактный рисунок (поле 360) на широкой карточке — не шире
+     440px: иначе он вырастает больше чем в 1,2 раза, а с ним и
+     подписи. */
+  .vteor-sluchay__risunok:has(.pr-line--kompakt) {
+    width: min(100%, 440px);
   }
   .vteor-vykladka {
     font-size: var(--fs-h4);

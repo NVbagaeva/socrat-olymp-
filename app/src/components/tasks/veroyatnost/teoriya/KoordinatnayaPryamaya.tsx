@@ -148,8 +148,10 @@ export function KoordinatnayaPryamaya() {
         <div className="vteor-sluchay__shema">
           {/* Оба условия со знаком «больше»: области смотрят вправо,
               и одна целиком лежит в другой — это и видно на рисунке.
-              Рисунок компактный, по центру плашки; подписи считаются
-              от его ширины (контейнер vteor-shema).
+              Рисунок компактный (kompaktnyy): на телефоне он идёт
+              почти один к одному, и кегль подписей ступенями берётся
+              от его ширины (контейнер vteor-shema). У лучей — их
+              вероятности, под скобой — промежуток и итог вычитания.
 
               Искомый промежуток — то, что осталось от «X > 1» после
               вычитания «X > 2»: точка 2 в него входит, точка 1 нет.
@@ -163,11 +165,17 @@ export function KoordinatnayaPryamaya() {
               d={2}
               leftBoundary="strict"
               rightBoundary="inclusive"
-              upper={{ value: 1, side: 'right', note: '0,96', boundary: 'strict' }}
-              lower={{ value: 2, side: 'right', note: '0,85', boundary: 'strict' }}
+              upper={{ value: 1, side: 'right', podpis: 'P = 0,96', boundary: 'strict' }}
+              lower={{ value: 2, side: 'right', podpis: 'P = 0,85', boundary: 'strict' }}
               axisLabel={OS}
               ticks={[0, 1, 2]}
-              brace={{ from: 1, to: 2, label: `1 < ${OS} ≤ 2` }}
+              brace={{
+                from: 1,
+                to: 2,
+                label: `1 < ${OS} ≤ 2`,
+                itog: 'P = 0,96 − 0,85 = 0,11',
+              }}
+              kompaktnyy
               alt="Координатная прямая: область X больше единицы целиком содержит область X больше двух"
             />
           </div>
@@ -207,11 +215,20 @@ export function KoordinatnayaPryamaya() {
               d={2}
               leftBoundary="strict"
               rightBoundary="strict"
-              upper={{ value: 2, side: 'left', note: '0,85', boundary: 'strict' }}
-              lower={{ value: 1, side: 'right', note: '0,95', boundary: 'strict' }}
+              upper={{ value: 2, side: 'left', podpis: 'P = 0,85', boundary: 'strict' }}
+              lower={{
+                value: 1,
+                side: 'right',
+                podpis: 'P = 0,95',
+                /* От двойки, а не от единицы: иначе подпись упирается
+                   в пунктир верхнего луча над точкой 2. */
+                podpisOt: 2,
+                boundary: 'strict',
+              }}
               axisLabel={OS}
               ticks={[0, 1, 2]}
               brace={{ from: 1, to: 2, label: `1 < ${OS} < 2` }}
+              kompaktnyy
               alt="Координатная прямая: области X меньше двух и X больше единицы пересекаются"
             />
           </div>
