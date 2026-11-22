@@ -1,0 +1,274 @@
+/* «Карта ЕГЭ» на телефоне — список сверху вниз (KartaSpisok.tsx) и
+   подсветка раздела при возврате с «← К карте». Префикс karta-ps-.
+
+   Широкая схема островов в узкое или низкое окно не помещается:
+   подписи мельчают и налезают друг на друга. Здесь та же карта — путь
+   по заданиям сверху вниз. Подписи не мельче 14 px, строка раздела не
+   ниже 56 px, у состояния есть значок и слово. Без размытия и теней на
+   узлах: список листается плавно и на слабом телефоне. */
+
+/* ── Возврат: раздел, с которого ушли, светится ~1 с ─────────── */
+
+.karta-ostrov.is-vernulis .karta-ostrov__kontur {
+  stroke: var(--blue-500);
+  stroke-width: 6;
+  animation: karta-vernulis 1.2s var(--ease) both;
+}
+@keyframes karta-vernulis {
+  0% {
+    stroke-opacity: 0;
+  }
+  25% {
+    stroke-opacity: 1;
+  }
+  100% {
+    stroke-opacity: 0;
+  }
+}
+
+/* ── Список ───────────────────────────────────────────────────── */
+
+.karta-ps {
+  display: grid;
+  gap: var(--space-5);
+}
+.karta-ps__zagolovok {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-2);
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 800;
+  color: var(--karta-navy);
+}
+.karta-ps__itog {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.karta-ps__put {
+  --ps-metka: 32px;
+  --ps-pole: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  position: relative;
+}
+/* Линия пути: от первого значка к последнему, за значками. */
+.karta-ps__put::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--ps-pole) + var(--ps-metka) / 2 - 1px);
+  top: 28px;
+  bottom: 28px;
+  border-left: 2px dashed var(--blue-300);
+  pointer-events: none;
+}
+.karta-ps__uzel {
+  position: relative;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.86);
+  border: 1px solid var(--blue-100);
+}
+.karta-ps__uzel.is-sleduyushchaya {
+  border-color: var(--karta-teplo);
+}
+.karta-ps__uzel.is-otkryt {
+  border-color: var(--blue-300);
+  background: #fff;
+}
+.karta-ps__knopka {
+  display: grid;
+  grid-template-columns: var(--ps-metka) minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 56px;
+  padding: 10px var(--ps-pole);
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.karta-ps__knopka:focus-visible {
+  outline: 2px solid var(--blue-600);
+  outline-offset: 2px;
+}
+.karta-ps__metka {
+  position: relative;
+  z-index: 1;
+  width: var(--ps-metka);
+  height: var(--ps-metka);
+  border-radius: 50%;
+  background: #fff;
+}
+.karta-ps__metka svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.karta-ps__krug {
+  stroke: var(--blue-200);
+  stroke-width: 2;
+  fill: #fff;
+}
+.karta-ps__znak {
+  stroke-width: 2.6;
+}
+.karta-ps__dolya {
+  stroke: var(--karta-sinij);
+  stroke-width: 5;
+}
+.karta-ps__uzel--osvoeno .karta-ps__krug {
+  fill: var(--karta-teplo-2);
+  stroke: var(--karta-teplo-2);
+}
+.karta-ps__uzel--osvoeno .karta-ps__znak {
+  stroke: #fff;
+}
+.karta-ps__uzel--v-processe .karta-ps__krug {
+  stroke: var(--blue-300);
+}
+.karta-ps__uzel--skoro .karta-ps__krug,
+.karta-ps__uzel--pozzhe .karta-ps__krug {
+  stroke-dasharray: 4 4;
+}
+.karta-ps__uzel--skoro .karta-ps__znak,
+.karta-ps__uzel--pozzhe .karta-ps__znak {
+  stroke: var(--color-text-tertiary);
+  stroke-width: 2;
+}
+.karta-ps__tekst {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.karta-ps__imya {
+  font-size: 1rem;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--karta-navy);
+  overflow-wrap: anywhere;
+}
+.karta-ps__imya b {
+  font-weight: 800;
+  margin-right: 2px;
+}
+.karta-ps__status {
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+}
+.karta-ps__uzel--osvoeno .karta-ps__status {
+  color: var(--terracotta-700);
+  font-weight: 600;
+}
+.karta-ps__uzel--v-processe .karta-ps__status {
+  color: var(--blue-700);
+  font-weight: 600;
+}
+.karta-ps__povtorit {
+  color: var(--karta-terra);
+}
+.karta-ps__dalee {
+  justify-self: start;
+  margin-top: 2px;
+  padding: 1px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--terracotta-50);
+  color: var(--terracotta-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.karta-ps__strelka {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--blue-600);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.karta-ps__uzel.is-otkryt .karta-ps__strelka {
+  transform: rotate(180deg);
+}
+.karta-ps__detali {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0 var(--ps-pole) var(--space-3) calc(var(--ps-pole) + var(--ps-metka) + var(--space-3));
+}
+.karta-ps__zametka {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+.karta-ps__knopki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.karta-ps__knopki .karta-knopka {
+  min-height: 44px;
+  font-size: 0.875rem;
+  box-shadow: none;
+}
+.karta-ps__zakladka {
+  width: 44px;
+  height: 44px;
+}
+/* Темы раздела — столбиком, каждая строка — под палец. */
+.karta-ps .karta-tropinka {
+  flex-direction: column;
+  gap: 2px;
+}
+.karta-ps .karta-gorod + .karta-gorod::before {
+  content: none;
+}
+.karta-ps .karta-gorod__ssylka {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  font-size: 0.875rem;
+  text-align: left;
+}
+.karta-ps .karta-gorod__imya {
+  max-width: none;
+}
+.karta-ps__uzel.is-vernulis {
+  animation: karta-ps-vernulis 1.2s var(--ease) both;
+}
+@keyframes karta-ps-vernulis {
+  0%,
+  30% {
+    background: var(--blue-100);
+    border-color: var(--blue-400);
+  }
+  100% {
+    background: rgb(255 255 255 / 0.86);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .karta-ostrov.is-vernulis .karta-ostrov__kontur {
+    animation: none;
+  }
+  .karta-ps__uzel.is-vernulis {
+    animation: none;
+    background: var(--blue-100);
+    border-color: var(--blue-400);
+  }
+}

@@ -342,7 +342,7 @@ export const ONLINE_TEXT = {
     worksTitle: 'Варианты',
     noWorks: 'Вариантов пока не выдавали.',
     finished: (d: number, t: number) => `сдали ${d} из ${t}`,
-    studentWorks: 'Варианты от репетитора',
+    studentWorks: 'Варианты от учителя',
     noStudentWorks: 'Вариантов пока нет.',
     stats: 'Статистика по вариантам',
     // страница работы
