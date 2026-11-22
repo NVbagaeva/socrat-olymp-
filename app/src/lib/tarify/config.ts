@@ -71,7 +71,7 @@ export const PROBNYY = {
   raz: 1,
 } as const;
 
-/** Учеников в одном классе репетитора. */
+/** Учеников в одном классе учителя. */
 export const KLASS_MAKS = 30;
 
 /**
@@ -108,7 +108,7 @@ export const PLATNYE: Record<Rol, PlatnyyTarif> = {
     ],
   },
   repetitor: {
-    nazvanie: 'Репетитор',
+    nazvanie: 'Учитель',
     tsena30: 890,
     doEge: [
       { s: '2026-01-01', tsena: 4990 },
@@ -227,7 +227,7 @@ const probnyy: Record<Rol, Plashka> = {
     nazvanie: `Пробный ${PROBNYY.dney} дней`,
     dlyaKogo: 'Чтобы посмотреть всё, прежде чем платить',
     vhodit: [
-      `Всё из тарифа «Репетитор» на ${PROBNYY.dney} дней`,
+      `Всё из тарифа «Учитель» на ${PROBNYY.dney} дней`,
       PODSKAZKI.punkt,
       'Генератор и «Собрать вариант» без ограничений',
       'Листы учителя с решениями',
@@ -252,7 +252,7 @@ const platnye: Record<Rol, Plashka> = {
       'Все варианты онлайн с баллами',
       'Варианты повышенной сложности',
     ],
-    net: ['Классы и домашние задания — в тарифе «Репетитор»'],
+    net: ['Классы и домашние задания — в тарифе «Учитель»'],
   },
   repetitor: {
     id: 'repetitor',
