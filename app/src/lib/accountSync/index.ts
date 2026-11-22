@@ -266,6 +266,12 @@ let stopCurrent: (() => void) | null = null;
  */
 export function startAccountSync(): () => void {
   stopCurrent?.();
+  /* Остаток журнала решения с прошлого визита уходит на сервер
+     (lib/zhurnal). Отсюда, а не из шапки: этот кусок и так грузится
+     только вошедшему, и первая загрузка страниц не тяжелеет. */
+  if (process.env.KAB2_ZHURNAL === '1') {
+    void import('../zhurnal').then(({ dootpravit }) => dootpravit());
+  }
   let timer: ReturnType<typeof setTimeout> | null = null;
   const schedule = () => {
     if (timer !== null) clearTimeout(timer);
