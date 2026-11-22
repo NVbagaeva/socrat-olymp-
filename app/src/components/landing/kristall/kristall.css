@@ -88,3 +88,9 @@
 .kristall__hint.is-skryt {
   opacity: 0;
 }
+
+/* Тёмная сцена главной (temnyyFon): у живой модели отсвет на полу
+   светлее, как вшитый в рендер. */
+.kristall--temnyy .kristall__kholst::before {
+  background: radial-gradient(closest-side, rgb(200 222 255 / 0.5), rgb(200 222 255 / 0));
+}

@@ -1,0 +1,59 @@
+/* Обзор чертежей №18 «до и после» (/styleguide/chertezhi-18). */
+.sg18__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 16px 0 8px;
+  font-size: var(--fs-small, 14px);
+}
+.sg18__tip {
+  margin-top: 32px;
+}
+.sg18__tip h2 code {
+  font-size: 0.8em;
+  color: var(--color-text-secondary);
+}
+.sg18__ryad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.sg18__ryad--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.sg18__chisla {
+  grid-column: 1 / -1;
+  margin: 8px 0 0;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+.sg18__ris {
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--color-border, #e3e8f0);
+  border-radius: 8px;
+  background: var(--color-surface, #fff);
+  min-width: 0;
+}
+.sg18__ris figcaption {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+.sg18__ris svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.sg18__net {
+  color: var(--color-text-secondary);
+}
+@media (max-width: 720px) {
+  .sg18__ryad,
+  .sg18__ryad--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -39,6 +39,19 @@ export interface KristallProps {
   sizes?: string;
   /** Подсказка под фигурой. По умолчанию — на «вы», как на главной. */
   hint?: string;
+  /**
+   * Кристалл стоит на тёмной сцене главной: живая модель светится ярче
+   * (рендер в покое — тот же, что на светлой главной).
+   */
+  temnyyFon?: boolean;
+  /**
+   * Отпустили — через паузу фигура сама плавно возвращается в исходный
+   * ракурс, и на место встаёт рендер. Нужно сцене, где на кристалле
+   * сидит попугай: он возвращается вместе с фигурой.
+   */
+  vozvrat?: boolean;
+  /** true — фигуру начали крутить; false — она вернулась на место. */
+  onKrutyat?: (krutyat: boolean) => void;
 }
 
 /* Ракурс модели, совпадающий с рендером. */
@@ -58,6 +71,11 @@ const NA_RENDERE: Record<TochkaId, { x: number; y: number }> = {
   ugol: { x: 0.5, y: 0.6 },
 };
 
+/** Пауза после того, как фигуру отпустили и она остановилась, мс. */
+const VOZVRAT_PAUZA = 1400;
+/** Сколько длится возврат в исходный ракурс, мс. */
+const VOZVRAT_MS = 900;
+
 const FORMATY = [
   { ext: 'avif', type: 'image/avif' },
   { ext: 'webp', type: 'image/webp' },
@@ -68,7 +86,17 @@ export function Kristall({
   podpisi = [],
   sizes = '(max-width: 767.98px) 285px, (max-width: 1023.98px) 420px, 560px',
   hint = 'Покрутите фигуру',
+  temnyyFon = false,
+  vozvrat = false,
+  onKrutyat,
 }: KristallProps) {
+  const onKrutyatRef = useRef(onKrutyat);
+  useEffect(() => {
+    onKrutyatRef.current = onKrutyat;
+  }, [onKrutyat]);
+  const krutyat = useRef(false);
+  const vozvratT = useRef(0);
+  const vozvratRaf = useRef(0);
   const oblast = useRef<HTMLDivElement>(null);
   const kholst = useRef<HTMLDivElement>(null);
   const model = useRef<Kristall3d | null>(null);
@@ -91,7 +119,9 @@ export function Kristall({
         .then(({ sozdatKristall }) => {
           const host = kholst.current;
           if (host === null) return null;
-          const m = sozdatKristall(host, vid.current.az, vid.current.el);
+          const m = sozdatKristall(host, vid.current.az, vid.current.el, {
+            sumerki: temnyyFon,
+          });
           model.current = m;
           setTochki(m.tochki());
           setZhivoy(true);
@@ -100,7 +130,51 @@ export function Kristall({
         .catch(() => null);
     }
     return zagruzka.current;
+  }, [temnyyFon]);
+
+  /* Начали крутить: отменить возврат, показать живую модель, сообщить. */
+  const nachali = useCallback(() => {
+    window.clearTimeout(vozvratT.current);
+    cancelAnimationFrame(vozvratRaf.current);
+    if (model.current !== null) setZhivoy(true);
+    if (!krutyat.current) {
+      krutyat.current = true;
+      onKrutyatRef.current?.(true);
+    }
   }, []);
+
+  /* Остановились: через паузу — плавно домой, потом снова рендер. */
+  const planVozvrat = useCallback(() => {
+    if (!vozvrat) return;
+    window.clearTimeout(vozvratT.current);
+    vozvratT.current = window.setTimeout(() => {
+      const v = vid.current;
+      const ot = { az: v.az, el: v.el };
+      const doma = () => {
+        v.az = AZ;
+        v.el = EL;
+        narisovat();
+        setZhivoy(false);
+        krutyat.current = false;
+        onKrutyatRef.current?.(false);
+      };
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        doma();
+        return;
+      }
+      const t0 = performance.now();
+      const shag = (now: number) => {
+        const t = Math.min(1, (now - t0) / VOZVRAT_MS);
+        const k = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        v.az = ot.az + (AZ - ot.az) * k;
+        v.el = ot.el + (EL - ot.el) * k;
+        narisovat();
+        if (t < 1) vozvratRaf.current = requestAnimationFrame(shag);
+        else doma();
+      };
+      vozvratRaf.current = requestAnimationFrame(shag);
+    }, VOZVRAT_PAUZA);
+  }, [vozvrat, narisovat]);
 
   const povernut = useCallback(
     (dAz: number, dEl: number) => {
@@ -123,6 +197,7 @@ export function Kristall({
     const down = (e: PointerEvent) => {
       if (e.button !== 0) return;
       void podgruzit();
+      nachali();
       cancelAnimationFrame(raf);
       tyanu = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
       skorost = 0;
@@ -141,13 +216,19 @@ export function Kristall({
     const up = (e: PointerEvent) => {
       if (tyanu === null || e.pointerId !== tyanu.id) return;
       tyanu = null;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        planVozvrat();
+        return;
+      }
       let last = performance.now();
       const tik = (now: number) => {
         const dt = now - last;
         last = now;
         skorost *= Math.pow(0.9, dt / 16);
-        if (Math.abs(skorost) < 0.004) return;
+        if (Math.abs(skorost) < 0.004) {
+          planVozvrat();
+          return;
+        }
         povernut(skorost * dt, 0);
         raf = requestAnimationFrame(tik);
       };
@@ -164,7 +245,7 @@ export function Kristall({
       el.removeEventListener('pointerup', up);
       el.removeEventListener('pointercancel', up);
     };
-  }, [podgruzit, povernut]);
+  }, [podgruzit, povernut, nachali, planVozvrat]);
 
   /* Размер холста — за размером области. */
   useEffect(() => {
@@ -180,6 +261,8 @@ export function Kristall({
 
   useEffect(
     () => () => {
+      window.clearTimeout(vozvratT.current);
+      cancelAnimationFrame(vozvratRaf.current);
       model.current?.ubrat();
       model.current = null;
     },
@@ -196,11 +279,23 @@ export function Kristall({
     const d = shag[e.key];
     if (d === undefined) return;
     e.preventDefault();
-    void podgruzit().then(() => povernut(d[0], d[1]));
+    nachali();
+    void podgruzit().then(() => {
+      setZhivoy(true);
+      povernut(d[0], d[1]);
+      planVozvrat();
+    });
   };
 
   return (
-    <div className={clsx('kristall', zhivoy && 'is-zhivoy', className)}>
+    <div
+      className={clsx(
+        'kristall',
+        temnyyFon && 'kristall--temnyy',
+        zhivoy && 'is-zhivoy',
+        className,
+      )}
+    >
       <div
         ref={oblast}
         className="kristall__oblast"

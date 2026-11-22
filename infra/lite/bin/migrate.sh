@@ -13,6 +13,7 @@
 # Со стандартного ввода приходят строки KEY=value (из GitHub Secrets,
 # не печатаются):
 #   ALLOWED_EMAILS     — адреса через запятую, кому открыта регистрация;
+#                        «*» — регистрация открыта для всех;
 #   DOCUMENTS_VERSION  — дата редакции правовых документов, ГГГГ-ММ-ДД
 #                        (из app/src/content/legal/operator.json): без
 #                        неё регистрация закрыта, с новой датой люди
@@ -97,8 +98,12 @@ psql_db -v emails="$ALLOWED_EMAILS" <<'SQL'
 insert into vault.secrets (name, secret) values ('allowed_emails', :'emails')
 on conflict (name) do update set secret = excluded.secret, updated_at = now();
 SQL
-count=$(printf '%s' "$ALLOWED_EMAILS" | tr ',' '\n' | grep -c '@' || true)
-log "Список приглашённых обновлён: адресов $count"
+if [ "$ALLOWED_EMAILS" = '*' ]; then
+  log "Регистрация открыта для всех (ALLOWED_EMAILS = *)"
+else
+  count=$(printf '%s' "$ALLOWED_EMAILS" | tr ',' '\n' | grep -c '@' || true)
+  log "Список приглашённых обновлён: адресов $count"
+fi
 
 # Почта, добавленная вручную (миграция 20261113120000_pochtovye_domeny.sql):
 # таблица переписывается целиком, одной транзакцией. Значение с ошибкой —

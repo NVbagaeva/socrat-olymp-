@@ -20,10 +20,17 @@
      NEXT_PUBLIC_SUPABASE_ANON_KEY=mock-anon-key
 
    Сценарии (сборка со входом и кнопкой в шапке, NEXT_PUBLIC_AUTH_IN_HEADER=1):
-     • шапка на 1440: «Войти» таблеткой со словом, «Начать бесплатно»
-       ведёт в банк заданий (регистрация пока по приглашению); на 390,
-       375 и 320 «Войти» — кружок в шапке не меньше 40 px,
-       горизонтальной прокрутки нет, в меню телефона тоже «Войти»;
+     • шапка на 1440: «Войти» — вторичная таблетка со словом, без
+       значка, «Начать бесплатно» — основная и ведёт на регистрацию
+       (регистрация открыта, REGISTRATION_OPEN); на 320,
+       375, 390 и 430 в шапке знак с названием, «Войти» словом и
+       бургер (оба не меньше 44×44, ничего не налезает), «Начать
+       бесплатно» нет в шапке и есть на первом экране под лидом;
+       горизонтальной прокрутки нет; на прокрутке шапка ниже, а
+       содержимое под ней не сдвигается; в меню телефона тоже «Войти»;
+     • после входа на 320 и 375: кружок с инициалами 44×44 вместо
+       «Войти»; меню аккаунта с клавиатуры (фокус, стрелки, Esc
+       возвращает фокус) и закрывается нажатием вне меню;
      • регистрация без галочек согласий → просьба отметить, запрос не уходит;
        ученику — год рождения, младше 18 — почта родителя;
      • регистрация чужой почтой → «Регистрация пока по приглашению»,
@@ -83,6 +90,8 @@ const { generate } = requireSrc('lib/vychisleniya/generate.ts');
 const { emailDomainAllowed } = requireSrc('lib/auth/allowed-domains.ts');
 const { parseTaskId } = requireSrc('lib/vychisleniya/ids.ts');
 const { ru } = requireSrc('lib/vychisleniya/numbers.ts');
+/* Областей на «Карте ЕГЭ» — по действующей структуре экзамена. */
+const KARTA_OBLASTEY = requireSrc('lib/karta/katalog.ts').KARTA_RAZDELY.length;
 
 const OUT = path.join(APP, 'out');
 const PORT = 4181;
@@ -709,6 +718,46 @@ async function noHorizontalScroll(page) {
   return page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
 }
 
+/** Шапка и первый экран главной на телефоне: что видно и где стоит. */
+async function phoneHead(page) {
+  return page.evaluate(() => {
+    const box = (el) => {
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || getComputedStyle(el).visibility === 'hidden') return null;
+      return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom };
+    };
+    const q = (sel) => document.querySelector(sel);
+    const login = q('.site-head a.auth-widget__login');
+    const logo = q('.site-head .logo');
+    /* Прежний первый экран (HeroSection, база) и синяя сцена (SumerkiHero). */
+    const hero = q('.hero__start, .sm-start');
+    const lead = q('.hero__lead, .sm__lid');
+    const door = q('.hero__doors, .sm-dver');
+    const heroBox = box(hero);
+    return {
+      login: box(login),
+      loginText: login?.innerText.trim() ?? null,
+      loginIcon: login?.querySelector('svg, .auth-login__ico') !== null && login !== null,
+      burger: box(q('.site-head .burger')),
+      startVisible: box(q('.site-head .site-head__start')) !== null,
+      logo: box(logo),
+      nameVisible: logo !== null && parseFloat(getComputedStyle(logo).fontSize) >= 14,
+      heroStart: heroBox,
+      /* Ширина содержимого первого экрана — по дверям (у прежнего
+         первого экрана это ряд дверей, у синей сцены — сама дверь). */
+      doorW: door?.getBoundingClientRect().width ?? null,
+      heroStartHref: hero?.getAttribute('href') ?? null,
+      heroOrder:
+        heroBox !== null &&
+        lead !== null &&
+        door !== null &&
+        heroBox.y >= lead.getBoundingClientRect().bottom &&
+        heroBox.bottom <= door.getBoundingClientRect().top,
+    };
+  });
+}
+
 async function newPage(mock, width, errors) {
   const context = await browser.newContext({
     viewport: { width, height: width < 500 ? 844 : 900 },
@@ -835,49 +884,105 @@ async function runEnabled() {
       (await page.locator(LOGIN).innerText()).trim() === 'Войти',
       'главная 1440: на кнопке видно слово «Войти»',
     );
-    /* Регистрация пока по приглашению: «Начать бесплатно» ведёт туда
-       же, куда без входа, — в банк заданий, а не в закрытую форму. */
+    /* Регистрация открыта (REGISTRATION_OPEN): «Начать бесплатно»
+       ведёт на вкладку «Регистрация» страницы входа. */
     check(
-      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) === '/zadaniya/',
-      'главная: «Начать бесплатно» ведёт в банк заданий',
+      (await page.locator('.site-head__cta .btn--primary').getAttribute('href')) ===
+        '/voyti/?vkladka=registraciya',
+      'главная: «Начать бесплатно» ведёт на регистрацию',
+    );
+    check(
+      (await page.locator('.site-head .auth-login__ico').count()) === 0,
+      'главная 1440: у «Войти» нет значка-дубля',
+    );
+    check(
+      await page.locator('.site-head__cta .btn--primary').isVisible(),
+      'главная 1440: «Начать бесплатно» — основная кнопка в шапке',
+    );
+    check(
+      !(await page.locator('.hero__start, .sm-start').isVisible()),
+      'главная 1440: на первом экране «Начать бесплатно» не повторяется',
     );
     await shot(page, 'shapka-do-vhoda-1440');
     await context.close();
   }
-  /* Телефон: «Войти» — кружок со значком прямо в шапке, имя ссылки
-     «Войти» для скринридера; прокрутки вбок нет и на 320. */
-  for (const width of [320, 375]) {
+  /* Телефон: в шапке знак с названием, «Войти» словом (вторичная
+     таблетка, без значка) и бургер; «Начать бесплатно» в шапке нет —
+     она на первом экране главной, под лидом, над дверями. Тап-зоны не
+     меньше 44×44, ничего не налезает, прокрутки вбок нет и на 320. */
+  for (const width of [320, 375, 390, 430]) {
     const { context, page } = await newPage(mock, width, errors);
     await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
     check(await noHorizontalScroll(page), `главная ${width}: горизонтальной прокрутки нет`);
+    const head = await phoneHead(page);
+    check(head.login !== null, `главная ${width}: «Войти» видна в шапке`);
+    check(head.loginText === 'Войти', `главная ${width}: на кнопке слово «Войти»`);
+    check(!head.loginIcon, `главная ${width}: значка-человечка у «Войти» нет`);
     check(
-      await page.getByRole('link', { name: 'Войти', exact: true }).first().isVisible(),
-      `главная ${width}: кружок «Войти» виден в шапке`,
-    );
-    await context.close();
-  }
-  {
-    const { context, page } = await newPage(mock, 390, errors);
-    await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
-    check(await noHorizontalScroll(page), 'главная 390: горизонтальной прокрутки нет');
-    const login = page.locator(LOGIN);
-    const box = await login.boundingBox();
-    check(
-      box !== null && box.width >= 40 && box.height >= 40,
-      'главная 390: кружок «Войти» не меньше 40 px',
+      head.login !== null && head.login.w >= 44 && head.login.h >= 44,
+      `главная ${width}: «Войти» не меньше 44×44`,
     );
     check(
-      (await login.getAttribute('href')) === '/voyti/',
-      'главная 390: кружок «Войти» ведёт на /voyti/',
+      head.burger !== null && head.burger.w >= 44 && head.burger.h >= 44,
+      `главная ${width}: бургер не меньше 44×44`,
     );
-    await shot(page, 'shapka-do-vhoda-390');
-    await page.click('.burger');
-    await page.waitForSelector('#site-menu');
+    check(!head.startVisible, `главная ${width}: «Начать бесплатно» в шапке нет`);
+    check(head.nameVisible, `главная ${width}: название сайта видно рядом со знаком`);
     check(
-      (await page.locator('#site-menu a[href="/voyti/"]').count()) === 1,
-      'меню телефона: пункт «Войти» есть',
+      head.login !== null && head.logo.right <= head.login.x - 4,
+      `главная ${width}: логотип не налезает на «Войти»`,
     );
-    await shot(page, 'menyu-390');
+    check(
+      head.login !== null && head.burger !== null && head.login.right <= head.burger.x,
+      `главная ${width}: «Войти» не налезает на бургер`,
+    );
+    check(head.burger !== null && head.burger.right <= width, `главная ${width}: бургер в экране`);
+    check(
+      head.heroStart !== null &&
+        head.doorW !== null &&
+        head.heroStart.w >= head.doorW - 1 &&
+        head.heroStart.w >= width - 64 &&
+        head.heroStart.h >= 44,
+      `главная ${width}: «Начать бесплатно» на первом экране во всю ширину содержимого`,
+    );
+    check(
+      head.heroStartHref === '/voyti/?vkladka=registraciya',
+      `главная ${width}: «Начать бесплатно» ведёт на регистрацию (регистрация открыта)`,
+    );
+    check(head.heroOrder, `главная ${width}: «Начать бесплатно» под лидом и над дверями`);
+    if (width === 390) {
+      check(
+        (await page.locator(LOGIN).getAttribute('href')) === '/voyti/',
+        'главная 390: «Войти» ведёт на /voyti/',
+      );
+      await shot(page, 'shapka-do-vhoda-390');
+      /* На прокрутке шапка ниже, а содержимое под ней не сдвигается. */
+      const before = await page.evaluate(
+        () => document.querySelector('main').getBoundingClientRect().top + window.scrollY,
+      );
+      await page.evaluate(() => window.scrollTo(0, 300));
+      await page.waitForFunction(() =>
+        document.querySelector('.site-head').hasAttribute('data-compact'),
+      );
+      await page.waitForTimeout(400);
+      const after = await page.evaluate(() => ({
+        main: document.querySelector('main').getBoundingClientRect().top + window.scrollY,
+        head: document.querySelector('.site-head').getBoundingClientRect(),
+      }));
+      check(after.head.height < 72 && after.head.top === 0, 'прокрутка: шапка ниже и у верха');
+      check(Math.abs(after.main - before) < 0.5, 'прокрутка: содержимое под шапкой не сдвинулось');
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForFunction(
+        () => !document.querySelector('.site-head').hasAttribute('data-compact'),
+      );
+      await page.click('.burger');
+      await page.waitForSelector('#site-menu');
+      check(
+        (await page.locator('#site-menu a[href="/voyti/"]').count()) === 1,
+        'меню телефона: пункт «Войти» есть',
+      );
+      await shot(page, 'menyu-390');
+    }
     await context.close();
   }
 
@@ -1297,6 +1402,65 @@ async function runEnabled() {
     );
     await shot(page, 'shapka-posle-vhoda-1440');
 
+    /* Телефон после входа: вместо «Войти» — кружок с инициалами 44×44,
+       по нажатию меню «Мой кабинет» / «Выйти»; меню с клавиатуры: фокус
+       на первом пункте, стрелки, Esc закрывает и возвращает фокус на
+       кружок; касание вне меню закрывает. */
+    for (const width of [320, 375]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
+      await page.waitForSelector(AVATAR);
+      check(await noHorizontalScroll(page), `после входа ${width}: прокрутки вбок нет`);
+      const head = await phoneHead(page);
+      const avatar = await page.locator(AVATAR).boundingBox();
+      check(head.login === null, `после входа ${width}: «Войти» в шапке нет`);
+      check(
+        avatar !== null && avatar.width >= 44 && avatar.height >= 44,
+        `после входа ${width}: кружок аккаунта не меньше 44×44`,
+      );
+      check(
+        avatar !== null && head.burger !== null && avatar.x + avatar.width <= head.burger.x,
+        `после входа ${width}: кружок не налезает на бургер`,
+      );
+      check(!head.startVisible, `после входа ${width}: «Начать бесплатно» в шапке нет`);
+      check(head.nameVisible, `после входа ${width}: название сайта видно`);
+    }
+    await page.focus(AVATAR);
+    await page.keyboard.press('Enter');
+    await page.waitForSelector('.auth-widget__menu');
+    check(
+      await page.evaluate(
+        () =>
+          document.activeElement?.getAttribute('role') === 'menuitem' &&
+          document.activeElement.textContent?.includes('Мой кабинет'),
+      ),
+      'меню аккаунта с клавиатуры: фокус на «Мой кабинет»',
+    );
+    await page.keyboard.press('ArrowDown');
+    check(
+      await page.evaluate(() => document.activeElement?.textContent?.includes('Выйти') === true),
+      'меню аккаунта: стрелка вниз — «Выйти»',
+    );
+    check(
+      (await page.locator(AVATAR).getAttribute('aria-expanded')) === 'true',
+      'меню аккаунта: aria-expanded="true"',
+    );
+    await shot(page, 'menyu-akkaunta-375');
+    await page.keyboard.press('Escape');
+    await page.waitForSelector('.auth-widget__menu', { state: 'detached' });
+    check(
+      await page.evaluate(() => document.activeElement?.classList.contains('auth-widget__button')),
+      'меню аккаунта: Esc закрывает и возвращает фокус на кружок',
+    );
+    await page.click(AVATAR);
+    await page.waitForSelector('.auth-widget__menu');
+    await page.mouse.click(20, 400);
+    await page.waitForSelector('.auth-widget__menu', { state: 'detached' });
+    check(true, 'меню аккаунта: касание вне меню закрывает');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${SITE}/kabinet/`, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.kabinet');
+
     /* Выход из меню шапки. */
     await page.click(AVATAR);
     await page.waitForSelector('.auth-widget__menu');
@@ -1505,18 +1669,19 @@ async function runEnabled() {
       (await page.locator('.kabinet__role').innerText()) === 'Кабинет ученика',
       'кабинет: «Кабинет ученика»',
     );
-    /* Главная ученика — «Карта ЕГЭ»: без прогресса — 0 из 20 и без прогноза;
+    /* Главная ученика — «Карта ЕГЭ»: без прогресса — 0 из всех областей и без прогноза;
        карточки ДЗ нет, пока ДЗ не выдано; плашки «Войдите…» у вошедшего нет. */
     await page.waitForSelector('[data-section="karta"] .karta-holst[data-gotov]');
     const kartaItog = (await page.locator('.karta-shapka__itog').innerText()).replace(/\s+/g, ' ');
     check(
-      kartaItog.includes('Освоено 0 из 20') && kartaItog.includes('Решите ещё немного'),
-      `ученик: карта — «Освоено 0 из 20», прогноза нет (${kartaItog})`,
+      kartaItog.includes(`Освоено 0 из ${KARTA_OBLASTEY}`) &&
+        kartaItog.includes('Решите ещё немного'),
+      `ученик: карта — «Освоено 0 из ${KARTA_OBLASTEY}», прогноза нет (${kartaItog})`,
     );
     check((await page.locator('.karta-gost').count()) === 0, 'ученик: плашки «Войдите…» нет');
     check(
-      (await page.locator('[data-section="karta"] .karta-ostrov').count()) === 20,
-      'ученик: на карте 20 областей',
+      (await page.locator('[data-section="karta"] .karta-ostrov').count()) === KARTA_OBLASTEY,
+      `ученик: на карте ${KARTA_OBLASTEY} областей`,
     );
     await page.waitForFunction(() => document.querySelector('.karta-dz') === null, null, {
       timeout: 10000,

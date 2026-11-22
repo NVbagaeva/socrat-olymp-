@@ -5,6 +5,7 @@ import { ONLINE_TEXT as T } from '@/content/variantOnline/text';
 import type { ArchivedWork } from '@/lib/variant/online/archive';
 import { computeStats, heatLevel, type TrendPoint } from '@/lib/variant/online/stats';
 import { secondsText } from './format';
+import { podpis1 } from '@/lib/variant/struktura';
 
 const W = 620;
 const H = 220;
@@ -95,7 +96,7 @@ export function StatsView({
               data-empty={n.rate === null ? '' : undefined}
               title={n.rate === null ? '—' : `${n.right} из ${n.total}`}
             >
-              <span className="vo-heat__no">№{n.egeNumber}</span>
+              <span className="vo-heat__no">№{podpis1(n.egeNumber)}</span>
               <b>{n.rate === null ? '—' : `${Math.round(n.rate * 100)}%`}</b>
             </li>
           ))}
@@ -108,11 +109,12 @@ export function StatsView({
           className="vo-bars"
           caption={s.numbers
             .map(
-              (n) => `№${n.egeNumber}: ${n.avgSeconds === null ? '—' : secondsText(n.avgSeconds)}`,
+              (n) =>
+                `№${podpis1(n.egeNumber)}: ${n.avgSeconds === null ? '—' : secondsText(n.avgSeconds)}`,
             )
             .join(', ')}
           bars={s.numbers.map((n) => ({
-            label: String(n.egeNumber),
+            label: podpis1(n.egeNumber),
             value: n.avgSeconds === null ? 0 : Math.round((n.avgSeconds / maxAvg) * 100),
           }))}
         />
@@ -121,7 +123,7 @@ export function StatsView({
             .filter((n) => n.avgSeconds !== null)
             .map((n) => (
               <li key={n.egeNumber}>
-                №{n.egeNumber} — {secondsText(n.avgSeconds ?? 0)}
+                №{podpis1(n.egeNumber)} — {secondsText(n.avgSeconds ?? 0)}
               </li>
             ))}
         </ul>
@@ -135,7 +137,7 @@ export function StatsView({
           <ul className="vo-weak">
             {s.weak.map((n) => (
               <li key={n.egeNumber}>
-                {T.stats.weakRow(n.egeNumber, Math.round((n.rate ?? 0) * 100))}
+                {T.stats.weakRow(podpis1(n.egeNumber), Math.round((n.rate ?? 0) * 100))}
               </li>
             ))}
           </ul>

@@ -138,7 +138,8 @@ function blokov(t: Tema1): number {
     (t.opredeleniya?.length ?? 0) +
     (t.svoystva?.length ?? 0) +
     (t.priznaki?.length ?? 0) +
-    (t.teoremy?.length ?? 0)
+    (t.teoremy?.length ?? 0) +
+    (t.priemy?.length ?? 0)
   );
 }
 
@@ -266,7 +267,8 @@ export function checkChertezhi(): { risunkov: number; problems: string[] } {
         if (e.vydelit === 'iskomoe') klyuch = true;
         const z = e.znachenie;
         if (z === undefined || GRADUSY_V_FORMULIROVKE.has(t.id)) continue;
-        if (/\d/.test(z) && !/^[1-8]$/.test(z))
+        /* «2S», «2x» — обозначения с буквой (приёмы), не числа. */
+        if (/\d/.test(z) && !/^[1-8]$/.test(z) && !/[a-zA-Zα-ω]/.test(z))
           problems.push(`чертёж «${t.id}»: число «${z}» на чертеже теории`);
       }
     }

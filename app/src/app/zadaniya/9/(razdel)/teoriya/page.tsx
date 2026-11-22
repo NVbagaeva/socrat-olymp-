@@ -2,14 +2,15 @@ import type { Metadata } from 'next';
 import { ProverkaTeorii } from '@/components/kartochki/ProverkaTeorii';
 import { Teoriya9 } from '@/components/tasks/proizvodnaya/Teoriya9';
 import { kolodaNomera } from '@/content/kartochki';
-import { PROIZVODNAYA, proizvodnayaTitle } from '@/content/proizvodnaya';
+import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { ZADANIYA } from '@/lib/paths';
 import '@/components/tasks/teoriya/teoriya-steklo.css';
+import { proizvodnayaZagolovok } from '@/lib/seo-razdely';
 
 const VKLADKA = PROIZVODNAYA.tabs.find((tab) => tab.id === 'teoriya')?.label ?? 'Теория';
 
 export const metadata: Metadata = {
-  title: proizvodnayaTitle(VKLADKA),
+  title: proizvodnayaZagolovok(VKLADKA),
 };
 
 /**

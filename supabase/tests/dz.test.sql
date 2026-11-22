@@ -280,7 +280,7 @@ select pg_temp.fails($q$select public.issue_homework_tasks(pg_temp.dz_a('{"solut
 select pg_temp.fails($q$select public.issue_homework_tasks(pg_temp.dz_a('{"attempts_limit":3}'))$q$, 'bad_settings');
 select pg_temp.fails($q$select public.issue_homework_tasks(pg_temp.dz_a('{"solutions_when":"never"}'))$q$, 'bad_settings');
 select pg_temp.fails($q$select public.issue_homework_tasks(pg_temp.dz_a('{"origin":"chat"}'))$q$, 'bad_settings');
-select pg_temp.fails($q$select public.issue_homework_tasks(pg_temp.dz_a('{"task_no":21}'))$q$, 'bad_task_no');
+select pg_temp.fails($q$select public.issue_homework_tasks(pg_temp.dz_a('{"task_no":99}'))$q$, 'bad_task_no');
 select pg_temp.fails($q$select public.issue_homework_tasks(pg_temp.dz_a('{"tasks":[]}'))$q$, 'no_tasks');
 select pg_temp.fails(format($q$select public.issue_homework_tasks(pg_temp.dz_a('{"parent_id":%s}'))$q$,
   to_json(:'hw_t2'::text)), 'bad_parent');

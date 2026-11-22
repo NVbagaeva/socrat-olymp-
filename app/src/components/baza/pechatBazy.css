@@ -1,0 +1,11 @@
+/* Печатные листы генератора базы на общем шаблоне lib/sheet
+   (lib/baza/sheetBazy.ts): вёрстку страницы, карточек, ключа и разбора
+   задаёт sheet.css, здесь — только своё: разбор. */
+
+.baza-sheet-razbor .baza-razbor__etap {
+  margin: 0;
+}
+
+.baza-sheet-razbor .baza-razbor__title {
+  font-size: var(--sheet-fs-small);
+}

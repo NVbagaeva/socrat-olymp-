@@ -1,3 +1,4 @@
+import { ogStranicy } from '@/lib/og';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
@@ -32,8 +33,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
      (data/functionTypes.ts), одни и те же в заголовке, описании и
      карточке при отправке ссылки. */
   const title = `${subtopic.title} — Будет на ЕГЭ`;
-  const description = `Задание №${task}. ${subtopic.title}. ${subtopic.graphName}.`;
-  return { title, description, openGraph: { title, description } };
+  /* task — часть адреса; номер задания ЕГЭ — у раздела. */
+  const description = `Задание №${findSection(task)?.no ?? task}. ${subtopic.title}. ${subtopic.graphName}.`;
+  return { title, description, openGraph: ogStranicy(title, description) };
 }
 
 export default async function SubtopicPage({ params }: { params: Params }) {

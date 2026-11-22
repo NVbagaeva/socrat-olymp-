@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Три утверждения: два отмечены галочкой, одно зачёркнуто">
+  <!-- Анализ утверждений: верные отмечены, неверное — крестик.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="38" y="68" width="40" height="40" rx="9" fill="#c3dffa" stroke-width="2"/>
+    <path d="M48 88 L56 97 L71 79" stroke-width="3"/>
+    <rect x="92" y="72" width="172" height="32" rx="10" fill="url(#b-g)" stroke-width="1.6"/>
+    <path d="M108 88 H220" stroke-width="2.2" />
+    <rect x="38" y="130" width="40" height="40" rx="9" fill="#fff" stroke-width="2"/>
+    <path d="M50 140 L69 160 M69 140 L50 160" stroke-width="2.5" stroke-opacity="0.6"/>
+    <rect x="92" y="134" width="172" height="32" rx="10" fill="url(#b-g)" stroke-width="1.6"/>
+    <path d="M108 150 H198" stroke-width="2.2" stroke-opacity="0.45"/>
+    <rect x="38" y="192" width="40" height="40" rx="9" fill="#c3dffa" stroke-width="2"/>
+    <path d="M48 212 L56 221 L71 203" stroke-width="3"/>
+    <rect x="92" y="196" width="172" height="32" rx="10" fill="url(#b-g)" stroke-width="1.6"/>
+    <path d="M108 212 H176" stroke-width="2.2" />
+  </g>
+</svg>

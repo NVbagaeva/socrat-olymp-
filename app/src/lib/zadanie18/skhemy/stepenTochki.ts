@@ -111,7 +111,9 @@ function sluchaynaya(rnd: () => number): Tochki {
   return NACHALO;
 }
 
-const NACHALO: Tochki = { M: [-6.8, 1.6], P: polar(-60, R) };
+/* Секущая — по другую сторону от прямой MO, чем касательная MT: между
+   ними она сливалась бы с одной из них (весь угол — 25°). */
+const NACHALO: Tochki = { M: [-6.8, 1.6], P: polar(-10, R) };
 
 export const STEPEN_TOCHKI: ZhivayaSkhema = {
   id: 'stepen-tochki',

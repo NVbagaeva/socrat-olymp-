@@ -1,20 +1,22 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
+import { StsenaShapka, tabletkiRazdela } from '@/components/tasks/stsena';
 import { Chart } from '@/components/graph/Chart';
-import { HandNote } from '@/components/ui';
 import { findSection } from '@/content/sections';
 import { tasksPage } from '@/content/tasks';
 import { VKLADKI_12 } from '@/content/vkladki';
 import { lineScene } from '@/lib/scenes';
 import { href, ZADANIYA } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
-import { ShapkaRazdela } from '../ShapkaRazdela';
 import { ZadanieHero } from '../ZadanieHero';
 
 /**
- * Оболочка задания №12: крошки, заголовок с иллюстрацией и лента
- * вкладок — устройство то же, что у №9–11. Вызывается из layout
+ * Оболочка задания №12: шапка «Стеклянная сцена» с иллюстрацией и
+ * лента вкладок — устройство то же, что у №9–11. Вызывается из layout
  * маршрута: при переходе между вкладками остаётся на месте.
+ *
+ * Рукописной подписи под иллюстрацией больше нет: в новой шапке её не
+ * держит ни один раздел.
  */
 export function Shell12({ children }: { children: React.ReactNode }) {
   const section = findSection('12');
@@ -31,16 +33,17 @@ export function Shell12({ children }: { children: React.ReactNode }) {
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <ShapkaRazdela
+        <StsenaShapka
           crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
             { label: `№${section.no}` },
           ]}
           title={section.title}
-          {...(section.hero === undefined ? {} : { className: 'section-head--hero' })}
-          {...(section.badge === undefined ? {} : { badge: section.badge })}
           lead={section.description}
+          tabletki={tabletkiRazdela({
+            ...(section.badge === undefined ? {} : { chast: section.badge }),
+          })}
           actions={
             entry === undefined ? null : (
               <Link
@@ -55,20 +58,17 @@ export function Shell12({ children }: { children: React.ReactNode }) {
             )
           }
           media={
-            <>
-              {section.hero === undefined ? (
-                <Chart
-                  className="section-head__chart"
-                  scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
-                />
-              ) : (
-                <ZadanieHero task={section.hero} />
-              )}
-              <HandNote className="section-head__note">Функции описывают мир вокруг нас</HandNote>
-            </>
+            section.hero === undefined ? (
+              <Chart
+                className="section-head__chart"
+                scene={lineScene({ k: 0.5, b: 1, half: 6, label: 'y = f(x)' })}
+              />
+            ) : (
+              <ZadanieHero task={section.hero} />
+            )
           }
         />
-        <RazdelTabs base={base} tabs={VKLADKI_12} />
+        <RazdelTabs base={base} tabs={VKLADKI_12} className="topic-tabs-row--stsena" />
         <div className="section-panel">{children}</div>
       </main>
     </AppShell>

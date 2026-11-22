@@ -10,7 +10,8 @@
  * проверки на Node. Запоминание выбранного уровня — lib/levelStore.ts.
  */
 
-import { href, ZADANIYA } from './paths';
+import { nomeraChasti, zadaniyaEge } from '@/content/struktura';
+import { href, USTNYY, ZADANIYA } from './paths';
 
 export type Level = 'profile' | 'base';
 
@@ -46,8 +47,10 @@ const INFO: Readonly<Record<Level, LevelInfo>> = {
     id: 'profile',
     label: 'Профиль',
     name: 'Профильная математика',
-    range: '1–13',
-    count: 13,
+    /* Сколько заданий с кратким ответом у профиля и какие у них номера —
+       по структуре экзамена (content/struktura.js), а не числом здесь. */
+    range: nomeraChasti(1),
+    count: zadaniyaEge().filter((zadanie) => zadanie.chast === 1).length,
     home: '/',
     bankBase: ZADANIYA,
     bank: href(ZADANIYA),
@@ -104,6 +107,8 @@ export function levelOfPath(pathname: string): Level | null {
  */
 export function levelTwin(pathname: string, to: Level): string {
   const path = pathname.split(/[?#]/)[0] ?? '';
+  /* Общий для обоих уровней раздел: переключатель оставляет на месте. */
+  if (under(path, USTNYY)) return path;
   const from = levelOfPath(path);
   const rest = from === 'base' ? path.slice(BAZA.length) || '/' : path;
   if (under(rest, ZADANIYA)) return INFO[to].bank;

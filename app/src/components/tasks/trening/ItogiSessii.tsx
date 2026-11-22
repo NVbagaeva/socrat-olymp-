@@ -107,10 +107,15 @@ export function ItogiSessii({
         <div className="trn-itogi__tipy">
           <p className="stk-podpis">{labels.poTipam}</p>
           <ul className="trn-razbivka">
-            {stroki.map((s) => {
+            {stroki.map((s, i) => {
               const d = s.vsego === 0 ? 0 : s.verno / s.vsego;
               return (
-                <li key={s.id} className={clsx(s.metka !== undefined && 'is-slabo')}>
+                <li
+                  key={s.id}
+                  className={clsx(s.metka !== undefined && 'is-slabo')}
+                  /* Шаг каскада: не больше пяти, остальные — вместе с пятым. */
+                  style={{ ['--i' as string]: Math.min(i, 4) }}
+                >
                   <Znak html={s.znakHtml} figura={s.znak} ton={s.ton} size="sm" />
                   <span className="trn-razbivka__nazvanie">{s.nazvanie}</span>
                   <Polosa dolya={d} ton={s.metka !== undefined ? 'terra' : 'green'} />

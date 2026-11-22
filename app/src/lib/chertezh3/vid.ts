@@ -204,6 +204,37 @@ export function vybratVid(scena: Scena3): VybranVid {
   return luchshiy as VybranVid;
 }
 
+/**
+ * Общий вид для нескольких чертежей одного тела (этапы решения а) и б)
+ * рисуются с одного ракурса): первый ракурс набора, при котором годны
+ * все чертежи; нет такого — с наименьшим числом нарушений на всех.
+ * Сжатие — то, при котором пропорции годны у всех (подбор — по первому,
+ * проверка — по каждому).
+ */
+export function vybratObshchiyVid(sceny: readonly Scena3[]): VybranVid {
+  const pervaya = sceny[0];
+  if (pervaya === undefined) throw new Error('vybratObshchiyVid: нет чертежей');
+  if (sceny.length === 1) return vybratVid(pervaya);
+  const svoy = pervaya.sc.rakurs;
+  const kamery = svoy ? [svoy, ...KAMERY] : KAMERY;
+  let luchshiy: { kand: VybranVid; vsego: number } | null = null;
+  let i = 0;
+  for (const rakurs of kamery) {
+    i += 1;
+    const szhatie = podobratSzhatie(
+      (sz) => metrikiVida(pervaya, rakurs, sz).proporciya,
+      PRAVILA.szhatieMin,
+      PRAVILA.szhatieMax,
+    );
+    const vse = sceny.map((sc) => metrikiVida(sc, rakurs, szhatie));
+    const vsego = vse.reduce((n, m) => n + m.narusheniya.length, 0);
+    const kand = { rakurs, szhatie, metriki: vse[vse.length - 1] as Metriki, popytok: i };
+    if (vsego === 0) return kand;
+    if (luchshiy === null || vsego < luchshiy.vsego) luchshiy = { kand, vsego };
+  }
+  return (luchshiy as { kand: VybranVid }).kand;
+}
+
 /** Сценарий с выбранным видом. */
 export function sVidom(sc: Scenariy, vid: Pick<VybranVid, 'rakurs' | 'szhatie'>): Scenariy {
   return {

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Двенадцать точек, сложенных прямоугольником три на четыре">
+  <!-- Числа и делимость: 12 = 3 · 4 — точки складываются в прямоугольник.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="54" y="68" width="192" height="140" rx="18" fill="url(#b-g)" stroke-width="2"/>
+    <path d="M150 68 V208" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <path d="M54 230 V240 H246 V230" stroke-width="1.8"/>
+    <path d="M30 68 H22 V208 H30" stroke-width="1.8"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="78" cy="92" r="9"/>
+    <circle cx="126" cy="92" r="9"/>
+    <circle cx="174" cy="92" r="9"/>
+    <circle cx="222" cy="92" r="9"/>
+    <circle cx="78" cy="138" r="9"/>
+    <circle cx="126" cy="138" r="9"/>
+    <circle cx="174" cy="138" r="9"/>
+    <circle cx="222" cy="138" r="9"/>
+    <circle cx="78" cy="184" r="9"/>
+    <circle cx="126" cy="184" r="9"/>
+    <circle cx="174" cy="184" r="9"/>
+    <circle cx="222" cy="184" r="9"/>
+  </g>
+</svg>

@@ -11,9 +11,11 @@
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE14 = {
-  no: '14',
+  no: nomerDvumya('uravnenie-s-otborom'),
   slug: '14',
   title: taskName('14'),
   lead: 'Уравнение с развёрнутым решением: в пункте а решить, в пункте б отобрать корни на промежутке.',
@@ -30,7 +32,7 @@ export const ZADANIE14 = {
 
 /** Заголовок окна: «Вкладка · Уравнение — Будет на ЕГЭ». */
 export function zadanie14Title(tab: string): string {
-  return `${tab} · ${ZADANIE14.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(14, ZADANIE14.title, tab);
 }
 
 export const PROGRESS_14 = {
@@ -40,7 +42,7 @@ export const PROGRESS_14 = {
 /* ── «О задании» ────────────────────────────────────────────────── */
 
 export const O_ZADANII_14 = {
-  title: 'Задание 14. Уравнение',
+  title: `Задание ${nomerRazdela('uravnenie-s-otborom')}. Уравнение`,
   lead: 'Первое задание второй части: решение записывается полностью, а не только ответ.',
   format: [
     '**Пункт а** — решить уравнение: найти все корни и записать их сериями, например $x=\\dfrac{\\pi}{6}+2\\pi k,\\ k\\in\\mathbb{Z}$.',
@@ -58,9 +60,9 @@ export const O_ZADANII_14 = {
   kriteriiNote:
     'Критерии — по проекту демонстрационного варианта ЕГЭ‑2027 (ФИПИ). Максимум — 2 балла. Правильный ответ без решения оценивается в 0 баллов.',
   tipyTitle: 'Типы уравнений',
-  tipyLead:
-    'Уравнение №14 бывает разных типов. Начни с тригонометрии — она встречается чаще всего.',
+  tipyLead: `Уравнение №${nomerRazdela('uravnenie-s-otborom')} бывает разных типов. Начни с тригонометрии — она встречается чаще всего.`,
   kTeorii: 'Открыть теорию',
+  kGlave: 'Глава в теории',
 } as const;
 
 export type TipId14 = 'trig' | 'pokaz' | 'log' | 'irr' | 'komb';

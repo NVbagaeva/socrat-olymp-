@@ -4,7 +4,10 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { FigureZoom } from '@/components/ui';
 import { OpornyeSpisokBanka, type NavykKartochki } from '../opornye/OpornyeBanka';
 import { OpornayaZadacha, type OpornyyIshod } from '../opornye';
-import type { Shag } from '../steklo';
+import { Ikonka, type Shag } from '../steklo';
+import { FaktKnopka1 } from './fakt/FaktKnopka1';
+import { Scenariy1 } from './Scenariy1';
+import type { ScenariyHtml } from '@/lib/planimetriya/scenariy';
 import { OPORNYE1, TRENAZHER1 } from '@/content/planimetriya1';
 import { formatHint, fractionRightHint } from '@/lib/otvet';
 import { mikroById } from '@/lib/planimetriya/prep/bloki';
@@ -40,6 +43,19 @@ function razborIz(z: MikroSealed): MikroRazbor | null {
   }
 }
 
+/** Подсказка-сценарий задачи: закрыта отпечатком, как разбор. */
+function scenariyIz(z: MikroSealed): ScenariyHtml | null {
+  if (z.scenariy === null) return null;
+  try {
+    const value: unknown = JSON.parse(openText(z.scenariy, z.seal));
+    return typeof value === 'object' && value !== null && 'sposoby' in value
+      ? (value as ScenariyHtml)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Разбор задачи → шаги сцены; чертёж с построениями — у последнего шага. */
 function shagiRazbora(z: MikroSealed): Shag[] {
   const r = razborIz(z);
@@ -50,6 +66,8 @@ function shagiRazbora(z: MikroSealed): Shag[] {
     ...(i === r.stroki.length - 1 && r.risunokSvg !== null
       ? { risunok: <Chertezh svg={r.risunokSvg} label={OPORNYE1.risunokRazbora} /> }
       : {}),
+    /* Факт навыка — под первой строкой разбора: там он и назван. */
+    ...(i === 0 && z.fakt !== null ? { posle: <FaktKnopka1 fakt={z.fakt} /> } : {}),
   }));
 }
 
@@ -154,8 +172,33 @@ export function Opornye1({
       checked={checked}
       onCheck={check}
       formatHint={format}
-      /* Подсказка — формула навыка: ответа в ней нет. */
-      podskazka={{ html: zadacha.formulaHtml, open: hintOpen, onOpen: () => setHintOpen(true) }}
+      /* Подсказка — формула навыка (ответа в ней нет) рядом с чертежом
+         задачи и кнопка «Показать свойство» с фактом навыка. */
+      podskazka={{
+        html: zadacha.formulaHtml,
+        open: hintOpen,
+        onOpen: () => setHintOpen(true),
+        telo: (() => {
+          const sc = scenariyIz(zadacha);
+          if (sc !== null) return <Scenariy1 sc={sc} key={`${no}-${zadacha.seed}`} />;
+          return (
+            <div className="z1-op__podskazka">
+              {zadacha.risunokSvg === null ? null : (
+                <div className="trn-vopros__risunok">
+                  <Chertezh svg={zadacha.risunokSvg} label={OPORNYE1.risunok} />
+                </div>
+              )}
+              <p className="z1-op__podskazka-tekst">
+                <Ikonka name="lampa" />
+                <span dangerouslySetInnerHTML={{ __html: zadacha.formulaHtml }} />
+              </p>
+              {zadacha.fakt === null ? null : (
+                <FaktKnopka1 fakt={zadacha.fakt} podsvetit={checked === 'wrong'} />
+              )}
+            </div>
+          );
+        })(),
+      }}
       /* Решение — после ответа; открытое до верного ответа — «с разбором». */
       reshenie={
         checked === null

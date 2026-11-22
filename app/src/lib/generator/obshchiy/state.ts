@@ -441,15 +441,25 @@ export function defaultState(config: GenConfig): GenState {
   return stateFromPreset(config, preset, source);
 }
 
+/** Включён ли переключатель раздела id (GenConfig.extras.flagi). */
+export function flagVklyuchen(extras: Pick<GenExtras, 'flagi'>, id: string): boolean {
+  return extras.flagi?.includes(id) === true;
+}
+
+/** Переключить флаг id: включённые — по порядку, без повторов; пусто — поля нет. */
+export function sFlagom(extras: GenExtras, id: string, on: boolean): GenExtras {
+  const { flagi: prezhnie, ...rest } = extras;
+  const flagi = [...(prezhnie ?? []).filter((f) => f !== id), ...(on ? [id] : [])].sort();
+  return flagi.length === 0 ? rest : { ...rest, flagi };
+}
+
 /** Сколько пунктов «Дополнительно» включено: для подписи кнопки. */
 export function extrasOn(extras: GenExtras): number {
-  return [
-    extras.theory,
-    extras.examples > 0,
-    extras.qr,
-    extras.urok > 0,
-    extras.flag === true,
-  ].filter(Boolean).length;
+  return (
+    [extras.theory, extras.examples > 0, extras.qr, extras.urok > 0, extras.flag === true].filter(
+      Boolean,
+    ).length + (extras.flagi?.length ?? 0)
+  );
 }
 
 /** Какой пресет совпадает с экраном: число вариантов, уровни и темы. */

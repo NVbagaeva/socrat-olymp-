@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { SpravochnikPdf1 } from '@/components/tasks/planimetriya/spravochnik/SpravochnikPdf1';
 import { PDF_SPRAVOCHNIKA_1 } from '@/content/spravochnik1/pdf';
 import { SPRAVOCHNIK_1 } from '@/content/spravochnik1/tipy';
-import { ZADANIE1, zadanie1Title } from '@/content/zadanie1';
+import { ZADANIE1 } from '@/content/zadanie1';
 import { ZADANIYA } from '@/lib/paths';
 import { specSpravochnika1 } from '@/lib/planimetriya/spravochnik-pdf';
 import 'katex/dist/katex.min.css';
@@ -12,11 +12,12 @@ import '@/lib/sheet/sheet.css';
 import '@/lib/planimetriya/planimetriya.css';
 import '../pechat1.css';
 import './spravochnik1-pdf.css';
+import { zadanie1Zagolovok } from '@/lib/seo-razdely';
 
 const BASE = `${ZADANIYA}/${ZADANIE1.slug}`;
 
 export const metadata: Metadata = {
-  title: zadanie1Title(SPRAVOCHNIK_1.title),
+  title: zadanie1Zagolovok(SPRAVOCHNIK_1.title),
   robots: { index: false },
 };
 

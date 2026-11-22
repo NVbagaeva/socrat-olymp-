@@ -6,6 +6,8 @@
 
 import fs from 'node:fs';
 import { typeset } from '../../tex';
+import { katex } from '../../graph/katex';
+import { renderPlan } from '../render';
 import { BLOKI } from './bloki';
 import { fixedSeed } from './generate';
 import { sealMikro, type MikroSealed } from './seal';
@@ -17,6 +19,8 @@ export interface PoolBlok {
   nazvanie: string;
   lead: string;
   formulyHtml: string[];
+  /** Памятка словами с чертежами; пусто — формулы. */
+  pamyatka: { tekstHtml: string; formulaHtml: string; risunokSvg: string | null }[];
   zadachi: (MikroSealed & { no: number })[];
 }
 
@@ -34,6 +38,15 @@ export function prepPool1(): PoolBlok[] {
     nazvanie: b.nazvanie,
     lead: b.lead,
     formulyHtml: b.formuly.map((f) => typeset(`$${f}$`)),
+    pamyatka: (b.pamyatka ?? []).map((f) => ({
+      tekstHtml: typeset(f.tekst),
+      formulaHtml:
+        f.formula === undefined ? '' : katex.renderToString(f.formula, { throwOnError: false }),
+      risunokSvg:
+        f.risunok === undefined
+          ? null
+          : renderPlan(f.risunok, { shirina: 110, vysota: 70, chisla: true }),
+    })),
     zadachi: b.zadachi.map((m, i) => ({ ...sealMikro(m, fixedSeed(m.id)), no: i + 1 })),
   }));
   return kesh;

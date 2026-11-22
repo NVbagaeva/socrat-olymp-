@@ -26,7 +26,8 @@ export const GEN_OK: Record<string, Gen> = {
     if (!cel(k) || !cel(dt) || dt < 2 || dt > 120) {
       return null;
     }
-    return { params: { N, L, dt: Math.round(dt), t1 }, answer: x };
+    /* Герой — в параметрах: гонщик «приехал» на финиш, а не «пришёл». */
+    return { params: { N, L, dt: Math.round(dt), t1, geroy: 'gonshchik' }, answer: x };
   },
 
   /* x·t₁ = y(t₀ + t₁) и (x − y)·t₂ = 60L. */

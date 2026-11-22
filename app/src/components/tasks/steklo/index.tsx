@@ -106,6 +106,8 @@ export interface Shag {
   ton?: 'odz' | 'otbor' | 'vnimanie';
   /** Таблица или рисунок шага (№6: таблица решения, дерево с выделением). */
   risunok?: ReactNode;
+  /** Под шагом: кнопки раздела (№1: «Показать свойство» — факты шага). */
+  posle?: ReactNode;
 }
 
 /** Признак делимости под решением: «На 4» и правило с примером (HTML). */
@@ -157,6 +159,7 @@ export function ShagiResheniya({
             {shag.risunok === undefined ? null : (
               <div className="stk-shag__risunok">{shag.risunok}</div>
             )}
+            {shag.posle === undefined ? null : shag.posle}
           </li>
         ))}
       </ol>

@@ -8,7 +8,7 @@
  *    (K — середина AD): cos∠SAD = AK/SA = a/(2b).
  */
 
-import { chertezhSvg, postroit, sVidom, vybratVid, type Scenariy } from '@/lib/chertezh3';
+import { chertezhSvg, postroit, sVidom, vybratObshchiyVid, type Scenariy } from '@/lib/chertezh3';
 import { rat, ratTex } from '@/lib/zadanie15/core/rational';
 import type { Chast2Zadacha, Shablon2 } from './types';
 
@@ -23,8 +23,11 @@ export function chislaA15(p: PA15) {
   return { cos, ugol: Math.acos(p.a / (2 * p.b)) };
 }
 
-function scenariy(p: PA15, punkt: 'a' | 'b'): Scenariy {
-  const h = Math.sqrt(p.b * p.b - (p.a * p.a) / 2);
+function scenariy(p: PA15, punkt: 'a' | 'b', bezVida = false): Scenariy {
+  /* Видимая высота (lib/skhemy/vidimye.ts): при AB = 11, SA = 8 пирамида
+     почти плоская (высота 1,9 при стороне 11). На чертеже — не ниже
+     0,45 стороны основания; чисел на чертеже нет. */
+  const h = Math.max(Math.sqrt(p.b * p.b - (p.a * p.a) / 2), 0.45 * p.a);
   const sc: Scenariy = {
     id: `PV-A15-${punkt}`,
     alt:
@@ -45,11 +48,13 @@ function scenariy(p: PA15, punkt: 'a' | 'b'): Scenariy {
             { id: 'sk', vid: 'otrezok', tochki: ['S', 'K'] },
           ],
   };
-  if (punkt === 'b') {
-    const s = scenariy(p, 'a');
-    return { ...sc, rakurs: s.rakurs, szhatie: s.szhatie };
-  }
-  return sVidom(sc, vybratVid(postroit(sc)));
+  if (bezVida) return sc;
+  /* Этапы а) и б) — с одного ракурса, годного для обоих чертежей. */
+  const vid = vybratObshchiyVid([
+    postroit(scenariy(p, 'a', true)),
+    postroit(scenariy(p, 'b', true)),
+  ]);
+  return sVidom(sc, vid);
 }
 
 export function scenariyA15(p: PA15, punkt: 'a' | 'b'): Scenariy {

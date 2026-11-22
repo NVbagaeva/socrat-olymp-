@@ -14,6 +14,7 @@ import { R08_CHETYREHUGOLNIKI } from './r08-chetyrehugolniki';
 import { R09_OKRUZHNOST } from './r09-okruzhnost';
 import { R10_VPISANNYE } from './r10-vpisannye';
 import { R11_FAKTY } from './r11-fakty';
+import { R12_PRIEMY } from './r12-priemy';
 import type { Razdel1, Tema1 } from './tipy';
 
 export * from './tipy';
@@ -30,6 +31,7 @@ export const RAZDELY_SPRAVOCHNIKA_1: readonly Razdel1[] = [
   R09_OKRUZHNOST,
   R10_VPISANNYE,
   R11_FAKTY,
+  R12_PRIEMY,
 ];
 
 /** Все карточки по порядку справочника. */

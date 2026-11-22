@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HELP, HOWTO_HREF } from '@/content/onboarding';
 import { useDismiss } from '@/lib/dismiss';
@@ -19,6 +19,47 @@ import { TourButtons } from './TourButtons';
  * предка с transform, filter или backdrop-filter fixed прилипает
  * к нему, а не к экрану, и кнопка ездит вместе с ним.
  */
+/**
+ * Телефон: пока человек листает вниз и читает, кнопка уходит — иначе
+ * она лежит поверх карточек (docs/audit-prodazhi.md, E6). Стоит
+ * прокрутить вверх или дойти до самого верха — кнопка снова на месте.
+ * Скрытие — атрибутом data-skryta, сама прозрачность — в onboarding.css.
+ */
+function useSkrytPriProkrutke(
+  root: React.RefObject<HTMLDivElement | null>,
+  open: boolean,
+  /** Меняется, когда кнопка появляется после тура: узел новый. */
+  tur: unknown,
+) {
+  useEffect(() => {
+    const uzel = root.current;
+    const telefon = window.matchMedia('(max-width: 767.98px)');
+    let proshlyy = window.scrollY;
+    let kadr = 0;
+    const obnovit = () => {
+      kadr = 0;
+      const node = uzel;
+      if (!node) return;
+      const y = window.scrollY;
+      const vniz = y - proshlyy;
+      if (Math.abs(vniz) < 8) return;
+      const skryt = telefon.matches && !open && vniz > 0 && y > 120;
+      node.toggleAttribute('data-skryta', skryt);
+      proshlyy = y;
+    };
+    const onScroll = () => {
+      if (kadr === 0) kadr = window.requestAnimationFrame(obnovit);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (kadr !== 0) window.cancelAnimationFrame(kadr);
+      uzel?.removeAttribute('data-skryta');
+    };
+    /* tur — только чтобы взять новый узел после тура. */
+  }, [root, open, tur]);
+}
+
 export function HelpFab() {
   const state = useOnboarding();
   const [open, setOpen] = useState(false);
@@ -27,6 +68,7 @@ export function HelpFab() {
   const menuId = useId();
   const close = useCallback(() => setOpen(false), []);
   useDismiss({ open, onClose: close, menu: root, trigger: button });
+  useSkrytPriProkrutke(root, open, state.active);
 
   if (state.active !== null) return null;
 

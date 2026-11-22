@@ -1,10 +1,11 @@
 import { AppShell } from '@/components/layout/AppShell';
 import { DzVRazdele } from '@/components/dz/razdel/DzVRazdele';
+import { RisunokRazdela, StsenaShapka, tabletkiRazdela } from '@/components/tasks/stsena';
+import { STSENA } from '@/content/stsena';
 import { tasksPage } from '@/content/tasks';
 import { PROIZVODNAYA } from '@/content/proizvodnaya';
 import { ZADANIYA } from '@/lib/paths';
 import { RazdelTabs } from '../RazdelTabs';
-import { ShapkaRazdela } from '../ShapkaRazdela';
 
 /**
  * Оболочка задания №9: крошки, заголовок и лента вкладок. Вызывается
@@ -14,25 +15,32 @@ import { ShapkaRazdela } from '../ShapkaRazdela';
  */
 export function ProizvodnayaShell({ children }: { children: React.ReactNode }) {
   const base = `${ZADANIYA}/${PROIZVODNAYA.slug}`;
+  const no = String(Number(PROIZVODNAYA.no));
 
   return (
     <AppShell active="tasks">
       <main className="app-main">
-        <ShapkaRazdela
-          className="z9-head"
+        <StsenaShapka
           crumbs={[
             { label: 'Главная', href: '/' },
             { label: 'Банк заданий', href: tasksPage.href },
-            { label: `№${Number(PROIZVODNAYA.no)}` },
+            { label: `№${no}` },
           ]}
           title={PROIZVODNAYA.title}
-          badge={PROIZVODNAYA.badge}
           lead={PROIZVODNAYA.lead}
+          tabletki={tabletkiRazdela({ chast: PROIZVODNAYA.badge })}
+          media={
+            <RisunokRazdela
+              no={PROIZVODNAYA.slug}
+              label={`${STSENA.oblozhka}: ${PROIZVODNAYA.title}`}
+            />
+          }
         />
 
         <RazdelTabs
           base={base}
           tabs={PROIZVODNAYA.tabs}
+          className="topic-tabs-row--stsena"
           {...(PROIZVODNAYA.tutors.items.length === 0 ? {} : { tutors: PROIZVODNAYA.tutors })}
         />
 

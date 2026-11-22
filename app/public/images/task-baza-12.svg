@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Прямоугольный треугольник с высотой к гипотенузе и описанной полуокружностью">
+  <!-- Планиметрия: прямой угол опирается на диаметр, высота — пунктиром.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 228 A102 102 0 0 1 252 228" stroke-width="1.5" stroke-dasharray="6 5" stroke-opacity="0.7"/>
+    <path d="M48 228 L252 228 L102.1 137.9 Z" fill="url(#b-g)" stroke-width="2.5"/>
+    <path d="M102.1 137.9 L102.1 228" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <path d="M94.9 149.9 L106.9 157.2 L114.1 145.1" stroke-width="1.5"/>
+    <path d="M91.1 228 V217 H102.1" stroke-width="1.3"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="48" cy="228" r="5.5"/>
+    <circle cx="252" cy="228" r="5.5"/>
+    <circle cx="102.1" cy="137.9" r="5.5"/>
+    <circle cx="102.1" cy="228" r="4"/>
+    <circle cx="150" cy="228" r="4"/>
+  </g>
+</svg>

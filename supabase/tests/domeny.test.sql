@@ -146,4 +146,19 @@ select pg_temp.fails($q$insert into auth_hooks.signup_extra (value, kind) values
   'permission denied');
 reset role;
 
+/* ── 7. Открытая регистрация: «*» в списке приглашённых ─────────── */
+
+update vault.secrets set secret = ' * ' where name = 'allowed_emails';
+select pg_temp.ok(pg_temp.hook('neznakomets@mail.ru') = 'ok',
+  'со «*» в списке российский адрес без приглашения должен проходить');
+select pg_temp.ok(pg_temp.hook('neznakomets@gmail.com') = 'domain_not_allowed',
+  'со «*» отбор по домену должен остаться');
+select pg_temp.ok(public.email_allowed('kto-ugodno@yandex.ru'),
+  'email_allowed со «*» должен пропускать любой адрес');
+select pg_temp.ok(not public.email_allowed(''),
+  'email_allowed со «*» не пропускает пустой адрес');
+update vault.secrets set secret = 'anna@mail.ru' where name = 'allowed_emails';
+select pg_temp.ok(pg_temp.hook('neznakomets@mail.ru') = 'invite_only',
+  'список вернули — регистрация снова по приглашению');
+
 do $$ begin raise notice 'Почтовые домены: всё сходится'; end $$;

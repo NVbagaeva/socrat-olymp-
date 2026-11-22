@@ -124,6 +124,7 @@
   --graph-accent: #e07a2f;
   --chertezh-vershina: #1f5fd0;
   --chertezh-velichina: #e07a2f;
+  --chertezh-velichina-tekst: #a8500f;
   --chertezh-velichina-2: #a85f06;
   --graph-aux-axis: #e07a2f;
   --graph-asymptote: #8a8f9c;
@@ -222,6 +223,7 @@
   /* Тема чертежей в ч/б: вершины — чёрный полужирный, величины — чёрный. */
   --chertezh-vershina: #000000;
   --chertezh-velichina: #000000;
+  --chertezh-velichina-tekst: #000000;
   --chertezh-velichina-2: #000000;
   /* Вспомогательные оси разбора — серым пунктиром: чёрные слились бы
      с основными осями. */
@@ -324,6 +326,7 @@
   /* Тема чертежей в ч/б: вершины — чёрный полужирный, величины — чёрный. */
   --chertezh-vershina: #000000;
   --chertezh-velichina: #000000;
+  --chertezh-velichina-tekst: #000000;
   --chertezh-velichina-2: #000000;
   --graph-aux-axis: #8a8a8a;
   --graph-asymptote: #6b6b6b;
@@ -371,6 +374,7 @@
   --graph-accent: #e07a2f;
   --chertezh-vershina: #1f5fd0;
   --chertezh-velichina: #e07a2f;
+  --chertezh-velichina-tekst: #a8500f;
   --chertezh-velichina-2: #a85f06;
   --graph-aux-axis: #e07a2f;
   --graph-asymptote: #8a8f9c;
@@ -420,6 +424,7 @@
    только дугами, равенства — засечками, данная и искомая площадь
    различаются подписью: «S = 18» и «S = ?». */
 [data-sheet-theme='print'] svg[data-engine='planimetriya'] .pl-sektor,
+[data-sheet-theme='print'] svg[data-engine='planimetriya'] .pl-zaliv,
 [data-sheet-theme='print'] svg[data-engine='planimetriya'] path[fill^='url(#plh-'],
 [data-sheet-theme='print'] svg[data-engine='chertezh3'] polygon[fill-opacity],
 [data-sheet-theme='print'] svg[data-engine='solid'] path[fill-opacity],
@@ -429,6 +434,9 @@
 [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
   svg[data-engine='planimetriya']
   .pl-sektor,
+[data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
+  svg[data-engine='planimetriya']
+  .pl-zaliv,
 [data-sheet-theme='strict']:not([data-sheet-chertezhi='color'])
   svg[data-engine='planimetriya']
   path[fill^='url(#plh-'],
