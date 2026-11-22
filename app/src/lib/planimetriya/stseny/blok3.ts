@@ -13,6 +13,7 @@ import {
   ravnobedrennyy,
   vpisannyyPoDugam,
 } from '../figury';
+import { podobrat } from '../skhema';
 import type { Element, Scena } from '../types';
 import {
   type Nabor,
@@ -24,6 +25,7 @@ import {
   duga,
   gr,
   grTex,
+  klyuch,
   koren,
   korenTex,
   mn,
@@ -79,6 +81,19 @@ function vpisannyyChetyrehugolnik(
   );
 }
 
+/**
+ * Дуги AB, BC, CD вписанного четырёхугольника по углам ABD и CAD
+ * рисунка: дуга AD = 2·∠ABD, дуга CD = 2·∠CAD, остаток делится между
+ * AB и BC. Дуга между соседними вершинами не меньше 40° — вершины не
+ * слипаются.
+ */
+function dugiRisunka(abd: number, cad: number, dolyaAB: number): [number, number, number] {
+  const ostatok = 360 - 2 * abd - 2 * cad;
+  const d: [number, number, number] = [ostatok * dolyaAB, ostatok * (1 - dolyaAB), 2 * cad];
+  if ([...d, 2 * abd].some((x) => x < 40)) throw new Error('вершины слипаются');
+  return d;
+}
+
 /** Дуги вписанного четырёхугольника не меньше 2·порога (углы на них не меньше порога). */
 function dugiVidimye(
   d: [number, number, number],
@@ -111,12 +126,13 @@ export const BLOK_V_IX: PrototipChertezha[] = [
       const l = r.int(3, 40);
       return { l, c: r.int(1, 2 * l - 1) };
     },
-    stsena: (p, porog) => {
-      const A0 = Math.acos(p.c / (2 * p.l)) / RAD;
-      const aV = clamp(A0, porog, 78);
-      return scena(
-        {
-          tochki: { ...ravnobedrennyy(180 - 2 * aV), H: { seredina: ['A', 'B'] } },
+    stsena: (p) =>
+      podobrat(
+        klyuch(23, p),
+        { a: Math.acos(p.c / (2 * p.l)) / RAD },
+        { a: [28, 76] },
+        ({ a }) => ({
+          tochki: { ...ravnobedrennyy(180 - 2 * a), H: { seredina: ['A', 'B'] } },
           elementy: [
             tri('A', 'B', 'C'),
             shtrih('A', 'C', 1, { znachenie: chislo(p.l), vydelit: 'dano' }),
@@ -125,6 +141,9 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             ug('C', 'A', 'B', { vydelit: 'iskomoe' }),
             ...vysota('C', 'A', 'B', 'H', null, { sloy: 1 }),
             storona('A', 'H', chislo(p.c / 2), { sloy: 2, vydelit: undefined }),
+            /* Высота к основанию — медиана: половины основания равны. */
+            shtrih('A', 'H', 2, { sloy: 2 }),
+            shtrih('H', 'B', 2, { sloy: 2 }),
           ],
           proverki: [
             {
@@ -135,10 +154,8 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             },
           ],
           otvet: chislo(p.c / (2 * p.l)),
-        },
-        Math.abs(aV - A0) > 1e-9,
-      );
-    },
+        }),
+      ),
   },
   {
     id: 24,
@@ -351,12 +368,13 @@ export const BLOK_V_IX: PrototipChertezha[] = [
       const d = r.int(2, 25);
       return { hk: r.int(1, 30), hm: 1, n: r.int(1, d - 1), d, m: 1, dec: 0 };
     },
-    stsena: (p, porog) => {
-      const A0 = Math.acos((p.n * Math.sqrt(p.m)) / p.d) / RAD;
-      const aV = clamp(A0, porog, 90 - porog / 2);
-      return scena(
-        {
-          tochki: { ...ravnobedrennyy(180 - 2 * aV), H: { seredina: ['A', 'B'] } },
+    stsena: (p) =>
+      podobrat(
+        klyuch(30, p),
+        { a: Math.acos((p.n * Math.sqrt(p.m)) / p.d) / RAD },
+        { a: [28, 76] },
+        ({ a }) => ({
+          tochki: { ...ravnobedrennyy(180 - 2 * a), H: { seredina: ['A', 'B'] } },
           elementy: [
             tri('A', 'B', 'C'),
             shtrih('A', 'C', 1),
@@ -373,10 +391,8 @@ export const BLOK_V_IX: PrototipChertezha[] = [
               ],
             },
           ],
-        },
-        Math.abs(aV - A0) > 1e-9,
-      );
-    },
+        }),
+      ),
   },
   {
     id: 31,
@@ -393,49 +409,51 @@ export const BLOK_V_IX: PrototipChertezha[] = [
       const a = r.int(4, 40);
       return { a, h: r.int(1, a - 1), k: r.int(0, 1) };
     },
-    stsena: (p, porog) => {
-      const b0 = Math.asin(p.h / p.a) / RAD;
-      let bV = clamp(b0, porog, 78);
-      /* Угол при вершине около 90°: основание высоты сливается с вершиной. */
-      if (Math.abs(bV - 45) < 7) bV = bV < 45 ? 38 : 52;
-      const t = ravnobedrennyy(180 - 2 * bV);
-      /* k = 0: вершина C, высота AH на BC; k = 1: вершина B, высота CH на AB. */
-      const tochki = p.k ? { A: t.A, C: t.B, B: t.C } : t;
-      const [ot, s1, s2] = p.k ? (['C', 'B', 'A'] as const) : (['A', 'B', 'C'] as const);
-      const vne = 180 - 2 * bV > 90 ? 'b' : null;
+    stsena: (p) => {
       const isk = p.k
         ? ug('A', 'C', 'B', { vydelit: 'iskomoe' })
         : ug('C', 'A', 'B', { vydelit: 'iskomoe' });
-      return scena(
-        {
-          tochki: { ...tochki, H: { osnovanie: [ot, s1, s2] } },
-          elementy: [
-            p.k ? tri('A', 'B', 'C') : tri('A', 'B', 'C'),
-            ...(p.k
-              ? [shtrih('A', 'B', 1), shtrih('B', 'C', 1)]
-              : [shtrih('A', 'C', 1), shtrih('B', 'C', 1)]),
-            ...vysota(ot, s1, s2, 'H', vne, { vydelit: 'dano', znachenie: chislo(p.h) }),
-            storona(p.k ? 'A' : 'A', p.k ? 'C' : 'B', chislo(p.a)),
-            isk,
-            p.k ? ug('C', 'A', 'B', { sloy: 1, dugi: 1 }) : ug('A', 'B', 'C', { sloy: 1 }),
-          ],
-          proverki: [
-            p.k
-              ? {
-                  ravny: [
-                    ['A', 'B'],
-                    ['B', 'C'],
-                  ],
-                }
-              : {
-                  ravny: [
-                    ['A', 'C'],
-                    ['B', 'C'],
-                  ],
-                },
-          ],
+      /* Угол при основании рисунка подбирается: основание высоты не
+         сливается с вершиной (угол при вершине не около 90°). */
+      return podobrat(
+        klyuch(31, p),
+        { b: Math.asin(p.h / p.a) / RAD },
+        { b: [30, 76] },
+        ({ b: bV }) => {
+          const t = ravnobedrennyy(180 - 2 * bV);
+          /* k = 0: вершина C, высота AH на BC; k = 1: вершина B, высота CH на AB. */
+          const tochki = p.k ? { A: t.A, C: t.B, B: t.C } : t;
+          const [ot, s1, s2] = p.k ? (['C', 'B', 'A'] as const) : (['A', 'B', 'C'] as const);
+          const vne = 180 - 2 * bV > 90 ? 'b' : null;
+          return {
+            tochki: { ...tochki, H: { osnovanie: [ot, s1, s2] } },
+            elementy: [
+              p.k ? tri('A', 'B', 'C') : tri('A', 'B', 'C'),
+              ...(p.k
+                ? [shtrih('A', 'B', 1), shtrih('B', 'C', 1)]
+                : [shtrih('A', 'C', 1), shtrih('B', 'C', 1)]),
+              ...vysota(ot, s1, s2, 'H', vne, { vydelit: 'dano', znachenie: chislo(p.h) }),
+              storona(p.k ? 'A' : 'A', p.k ? 'C' : 'B', chislo(p.a)),
+              isk,
+              p.k ? ug('C', 'A', 'B', { sloy: 1, dugi: 1 }) : ug('A', 'B', 'C', { sloy: 1 }),
+            ],
+            proverki: [
+              p.k
+                ? {
+                    ravny: [
+                      ['A', 'B'],
+                      ['B', 'C'],
+                    ],
+                  }
+                : {
+                    ravny: [
+                      ['A', 'C'],
+                      ['B', 'C'],
+                    ],
+                  },
+            ],
+          };
         },
-        Math.abs(bV - b0) > 1e-9,
       );
     },
   },
@@ -496,33 +514,28 @@ export const BLOK_V_IX: PrototipChertezha[] = [
     otvet: (p) => (p.k ? p.d : 2 * p.d),
     primer: { d: 28, k: 0 },
     sluchaynye: (r) => ({ d: r.int(2, 89), k: r.int(0, 1) }),
-    stsena: (p, porog) => {
-      const dV = clamp(p.d, porog, 80);
-      return scena(
-        {
-          tochki: {
-            O: O0,
-            A: { naDuge: { okr: 'w', gradus: 270 - dV } },
-            B: { naDuge: { okr: 'w', gradus: 270 + dV } },
-            C: { naDuge: { okr: 'w', gradus: 125 } },
-          },
-          okruzhnosti: OKR,
-          elementy: [
-            okr('w'),
-            otr('O', 'A'),
-            otr('O', 'B'),
-            otr('C', 'A'),
-            otr('C', 'B'),
-            ug('A', 'O', 'B', p.k ? { dugi: 2 } : { vydelit: 'iskomoe', dugi: 2 }),
-            ug('A', 'C', 'B', p.k ? { vydelit: 'iskomoe' } : {}),
-            duga('w', 'A', 'B', { sloy: 1 }),
-          ],
-          podpisi: false,
-          otvet: gr(p.k ? p.d : 2 * p.d),
+    stsena: (p) =>
+      podobrat(klyuch(33, p), { d: p.d }, { d: [28, 75] }, ({ d: dV }) => ({
+        tochki: {
+          O: O0,
+          A: { naDuge: { okr: 'w', gradus: 270 - dV } },
+          B: { naDuge: { okr: 'w', gradus: 270 + dV } },
+          C: { naDuge: { okr: 'w', gradus: 125 } },
         },
-        dV !== p.d,
-      );
-    },
+        okruzhnosti: OKR,
+        elementy: [
+          okr('w'),
+          otr('O', 'A'),
+          otr('O', 'B'),
+          otr('C', 'A'),
+          otr('C', 'B'),
+          ug('A', 'O', 'B', p.k ? { dugi: 2 } : { vydelit: 'iskomoe', dugi: 2 }),
+          ug('A', 'C', 'B', p.k ? { vydelit: 'iskomoe' } : {}),
+          duga('w', 'A', 'B', { sloy: 1 }),
+        ],
+        podpisi: false,
+        otvet: gr(p.k ? p.d : 2 * p.d),
+      })),
   },
   {
     id: 34,
@@ -539,48 +552,44 @@ export const BLOK_V_IX: PrototipChertezha[] = [
       const k = r.int(0, 1);
       return { u: k ? r.int(2, 88) : r.int(2, 178), k };
     },
-    stsena: (p, porog) => {
+    stsena: (p) => {
       const aod = p.k ? 180 - 2 * p.u : p.u;
-      const aodV = clamp(aod, 2 * porog + 10, 180 - 2 * porog);
       const ans = p.k ? 180 - 2 * p.u : (180 - p.u) / 2;
-      return scena(
-        {
-          tochki: {
-            O: O0,
-            D: { naDuge: { okr: 'w', gradus: 180 } },
-            B: { naDuge: { okr: 'w', gradus: 0 } },
-            A: { naDuge: { okr: 'w', gradus: 180 + aodV } },
-            C: { naDuge: { okr: 'w', gradus: aodV } },
-          },
-          okruzhnosti: OKR,
-          elementy: [
-            okr('w'),
-            otr('D', 'B'),
-            otr('A', 'C'),
-            otr('C', 'B'),
-            tochka('O'),
-            ug(
-              'A',
-              'O',
-              'D',
-              p.k
-                ? { vydelit: 'iskomoe', znachenie: gr(ans), otvet: true }
-                : { vydelit: 'dano', znachenie: gr(p.u) },
-            ),
-            ug(
-              'A',
-              'C',
-              'B',
-              p.k
-                ? { vydelit: 'dano', znachenie: gr(p.u) }
-                : { vydelit: 'iskomoe', znachenie: gr(ans), otvet: true },
-            ),
-            ug('A', 'O', 'B', { sloy: 1, dugi: 2 }),
-          ],
-          otvet: gr(ans),
+      return podobrat(klyuch(34, p), { x: aod }, { x: [28, 124] }, ({ x: aodV }) => ({
+        tochki: {
+          O: O0,
+          D: { naDuge: { okr: 'w', gradus: 180 } },
+          B: { naDuge: { okr: 'w', gradus: 0 } },
+          A: { naDuge: { okr: 'w', gradus: 180 + aodV } },
+          C: { naDuge: { okr: 'w', gradus: aodV } },
         },
-        aodV !== aod,
-      );
+        okruzhnosti: OKR,
+        elementy: [
+          okr('w'),
+          otr('D', 'B'),
+          otr('A', 'C'),
+          otr('C', 'B'),
+          tochka('O'),
+          ug(
+            'A',
+            'O',
+            'D',
+            p.k
+              ? { vydelit: 'iskomoe', znachenie: gr(ans), otvet: true }
+              : { vydelit: 'dano', znachenie: gr(p.u) },
+          ),
+          ug(
+            'A',
+            'C',
+            'B',
+            p.k
+              ? { vydelit: 'dano', znachenie: gr(p.u) }
+              : { vydelit: 'iskomoe', znachenie: gr(ans), otvet: true },
+          ),
+          ug('A', 'O', 'B', { sloy: 1, dugi: 2 }),
+        ],
+        otvet: gr(ans),
+      }));
     },
   },
   {
@@ -640,33 +649,39 @@ export const BLOK_V_IX: PrototipChertezha[] = [
       const ac = r.int(20, 250);
       return { ac, bc: r.int(20, 340 - ac) };
     },
-    stsena: (p, porog) => {
+    stsena: (p) => {
       const ab = 360 - p.ac - p.bc;
-      const { d, sk } = dugiVidimye([p.ac, ab, p.bc], porog);
       const c0 = 70;
-      return scena(
-        {
-          tochki: {
-            O: O0,
-            C: { naDuge: { okr: 'w', gradus: c0 } },
-            A: { naDuge: { okr: 'w', gradus: c0 + d[0] } },
-            B: { naDuge: { okr: 'w', gradus: c0 - d[2] } },
-          },
-          okruzhnosti: OKR,
-          elementy: [
-            okr('w'),
-            tochka('O'),
-            otr('C', 'A'),
-            otr('C', 'B'),
-            ug('A', 'C', 'B', { vydelit: 'iskomoe', znachenie: gr(ab / 2), otvet: true }),
-            duga('w', 'C', 'A', { sloy: 1, vydelit: 'dano', znachenie: gr(p.ac) }),
-            duga('w', 'B', 'C', { sloy: 1, vydelit: 'dano', znachenie: gr(p.bc) }),
-            duga('w', 'A', 'B', { sloy: 2, znachenie: gr(ab), otvet: true }),
-          ],
-          bezPodpisi: ['O'],
-          otvet: gr(ab / 2),
+      /* Дуги рисунка подбираются: точки не слипаются (дуга между
+         соседними не меньше 50°), вписанный угол остаётся острым или тупым. */
+      return podobrat(
+        klyuch(36, p),
+        { ac: p.ac, bc: p.bc },
+        { ac: [50, 250], bc: [50, 250] },
+        ({ ac, bc }) => {
+          if (360 - ac - bc < 50) throw new Error('дуга AB мала');
+          return {
+            tochki: {
+              O: O0,
+              C: { naDuge: { okr: 'w', gradus: c0 } },
+              A: { naDuge: { okr: 'w', gradus: c0 + ac } },
+              B: { naDuge: { okr: 'w', gradus: c0 - bc } },
+            },
+            okruzhnosti: OKR,
+            elementy: [
+              okr('w'),
+              tochka('O'),
+              otr('C', 'A'),
+              otr('C', 'B'),
+              ug('A', 'C', 'B', { vydelit: 'iskomoe', znachenie: gr(ab / 2), otvet: true }),
+              duga('w', 'C', 'A', { sloy: 1, vydelit: 'dano', znachenie: gr(p.ac) }),
+              duga('w', 'B', 'C', { sloy: 1, vydelit: 'dano', znachenie: gr(p.bc) }),
+              duga('w', 'A', 'B', { sloy: 2, znachenie: gr(ab), otvet: true }),
+            ],
+            bezPodpisi: ['O'],
+            otvet: gr(ab / 2),
+          };
         },
-        sk,
       );
     },
   },
@@ -758,22 +773,14 @@ export const BLOK_V_IX: PrototipChertezha[] = [
       /* Секущие пересекаются вне окружности: f > t − 180. */
       return { f: r.int(Math.max(2, t - 175), Math.floor(t / 2) - 2), t };
     },
-    stsena: (p, porog) => {
-      let delta = p.t - 2 * p.f;
-      let t = p.t;
-      const sk0 = delta < 2 * porog;
-      delta = Math.max(delta, 2 * porog);
-      t = Math.min(Math.max(t, delta + 2 * porog + 20), 300);
-      if (t + delta > 310) {
-        const k = 310 / (t + delta);
-        t *= k;
-        delta = Math.max(delta * k, 2 * porog);
-      }
-      const x = (360 - t - delta) / 2;
-      const sk = sk0 || t !== p.t || x < 25;
-      const xV = Math.max(x, 25);
-      return scena(
-        {
+    stsena: (p) =>
+      /* Дуги рисунка подбираются: углы ACB и DAE не острее порога, порядок
+         углов по величине прежний, точки на секущих не слипаются. */
+      podobrat(klyuch(40, p), { f: p.f, t: p.t }, { f: [28, 130], t: [100, 290] }, ({ f, t }) => {
+        const delta = t - 2 * f;
+        const xV = 180 - t + f;
+        if (delta < 40 || xV < 25) throw new Error('точки слипаются');
+        return {
           tochki: {
             O: O0,
             D: { naDuge: { okr: 'w', gradus: delta / 2 } },
@@ -800,10 +807,8 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             ug('A', 'D', 'B', { sloy: 1, znachenie: gr(p.t / 2) }),
           ],
           otvet: gr(p.t / 2 - p.f),
-        },
-        sk,
-      );
-    },
+        };
+      }),
     diapazon: { povorot: 180 },
   },
 
@@ -893,6 +898,7 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             pryam('A', 'B', 'C'),
             storona('C', 'D', chislo(p.c)),
             otr('O', 'T', { sloy: 1, vydelit: 'iskomoe', znachenie: 'r' }),
+            pryam('O', 'T', 'A', { sloy: 1 }),
             storona('A', 'B', '2r', { sloy: 1, vydelit: undefined }),
           ],
           podpisi: false,
@@ -942,6 +948,11 @@ export const BLOK_V_IX: PrototipChertezha[] = [
             storona('A', 'B', chislo(p.c)),
             storona('D', 'C', chislo(p.d)),
             otr('M', 'N', { vydelit: 'iskomoe', znachenie: chislo((p.c + p.d) / 2), otvet: true }),
+            /* Средняя линия соединяет середины боковых сторон. */
+            shtrih('A', 'M', 1),
+            shtrih('M', 'B', 1),
+            shtrih('D', 'N', 2),
+            shtrih('N', 'C', 2),
           ],
           podpisi: false,
           otvet: chislo((p.c + p.d) / 2),
@@ -968,36 +979,42 @@ export const BLOK_V_IX: PrototipChertezha[] = [
       return { abd, cad: r.int(5, Math.min(160 - abd, 80)), k: r.int(0, 1) };
     },
     stsena: (p, porog) => {
-      const ostatok = 360 - 2 * p.abd - 2 * p.cad;
-      const { d, sk } = dugiVidimye([ostatok * 0.62, ostatok * 0.38, 2 * p.cad], porog);
       const abc = p.abd + p.cad;
-      return vpisannyyChetyrehugolnik(
-        d,
-        porog,
-        [
-          otr('A', 'C'),
-          otr('B', 'D'),
-          ug(
-            'A',
-            'B',
-            'D',
-            p.k
-              ? { vydelit: 'iskomoe', znachenie: gr(p.abd), otvet: true }
-              : { vydelit: 'dano', znachenie: gr(p.abd) },
+      /* Дуги рисунка подбираются: вершины не слипаются, углы остаются
+         острыми или тупыми — как по числам. */
+      return podobrat(
+        klyuch(45, p),
+        { abd: p.abd, cad: p.cad },
+        { abd: [28, 125], cad: [28, 90] },
+        ({ abd, cad }) =>
+          vpisannyyChetyrehugolnik(
+            dugiRisunka(abd, cad, 0.62),
+            porog,
+            [
+              otr('A', 'C'),
+              otr('B', 'D'),
+              ug(
+                'A',
+                'B',
+                'D',
+                p.k
+                  ? { vydelit: 'iskomoe', znachenie: gr(p.abd), otvet: true }
+                  : { vydelit: 'dano', znachenie: gr(p.abd) },
+              ),
+              ug('C', 'A', 'D', { vydelit: 'dano', dugi: 2, znachenie: gr(p.cad) }),
+              ug(
+                'A',
+                'B',
+                'C',
+                p.k
+                  ? { vydelit: 'dano', znachenie: gr(abc) }
+                  : { vydelit: 'iskomoe', znachenie: gr(abc), otvet: true },
+              ),
+              ug('D', 'B', 'C', { sloy: 1, dugi: 2, znachenie: gr(p.cad) }),
+            ],
+            true,
           ),
-          ug('C', 'A', 'D', { vydelit: 'dano', dugi: 2, znachenie: gr(p.cad) }),
-          ug(
-            'A',
-            'B',
-            'C',
-            p.k
-              ? { vydelit: 'dano', znachenie: gr(abc) }
-              : { vydelit: 'iskomoe', znachenie: gr(abc), otvet: true },
-          ),
-          ug('D', 'B', 'C', { sloy: 1, dugi: 2, znachenie: gr(p.cad) }),
-        ],
-        true,
-        sk,
+        { minUgol: 20 },
       );
     },
     diapazon: { povorot: 180 },
@@ -1017,26 +1034,29 @@ export const BLOK_V_IX: PrototipChertezha[] = [
     },
     stsena: (p, porog) => {
       const cad = p.abc - p.abd;
-      const ostatok = 360 - 2 * p.abd - 2 * cad;
-      const { d, sk } = dugiVidimye([ostatok * 0.6, ostatok * 0.4, 2 * cad], porog);
-      return {
-        ...vpisannyyChetyrehugolnik(
-          d,
-          porog,
-          [
-            otr('A', 'C'),
-            otr('B', 'D'),
-            tochka('O'),
-            ug('A', 'B', 'C', { vydelit: 'dano', znachenie: gr(p.abc) }),
-            ug('A', 'B', 'D', { vydelit: 'dano', dugi: 2, znachenie: gr(p.abd) }),
-            ug('C', 'A', 'D', { vydelit: 'iskomoe', znachenie: gr(cad), otvet: true }),
-            ug('D', 'B', 'C', { sloy: 1, znachenie: gr(cad), otvet: true }),
-          ],
-          true,
-          sk,
-        ),
-        bezPodpisi: [],
-      };
+      return podobrat(
+        klyuch(46, p),
+        { abd: p.abd, cad },
+        { abd: [28, 125], cad: [28, 90] },
+        ({ abd: abdV, cad: cadV }) => ({
+          ...vpisannyyChetyrehugolnik(
+            dugiRisunka(abdV, cadV, 0.6),
+            porog,
+            [
+              otr('A', 'C'),
+              otr('B', 'D'),
+              tochka('O'),
+              ug('A', 'B', 'C', { vydelit: 'dano', znachenie: gr(p.abc) }),
+              ug('A', 'B', 'D', { vydelit: 'dano', dugi: 2, znachenie: gr(p.abd) }),
+              ug('C', 'A', 'D', { vydelit: 'iskomoe', znachenie: gr(cad), otvet: true }),
+              ug('D', 'B', 'C', { sloy: 1, znachenie: gr(cad), otvet: true }),
+            ],
+            true,
+          ),
+          bezPodpisi: [],
+        }),
+        { minUgol: 20 },
+      );
     },
     diapazon: { povorot: 180 },
   },
@@ -1134,44 +1154,48 @@ export const BLOK_V_IX: PrototipChertezha[] = [
     otvet: (p) => Math.round(((p.k * Math.sqrt(p.m)) / (2 * Math.sin(p.g * RAD))) * 1e6) / 1e6,
     primer: { k: 3, m: 2, g: 135 },
     sluchaynye: (r) => ({ k: r.int(1, 20), m: r.pick([1, 2, 3]), g: r.int(95, 170) }),
-    stsena: (p, porog) => {
-      /* Тупой угол на рисунке — не больше 125°: хорда AB ближе к центру,
-         треугольник крупный. Угол из условия тупее — рисунок схематичный. */
-      const gV = clamp(p.g, 91, Math.min(125, 180 - 2 * porog));
-      const s = 360 - 2 * gV; // дуга AB, содержащая C
-      return scena(
-        {
-          tochki: {
-            O: O0,
-            A: { naDuge: { okr: 'w', gradus: 90 + s / 2 } },
-            B: { naDuge: { okr: 'w', gradus: 90 - s / 2 } },
-            /* C — посередине меньшей дуги, сверху. */
-            C: { naDuge: { okr: 'w', gradus: 90 } },
-          },
-          okruzhnosti: OKR,
-          elementy: [
-            okr('w'),
-            tri('A', 'B', 'C'),
-            ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(p.g), dolyaRadiusa: 0.22 }),
-            storona('A', 'B', koren(p.k, p.m)),
-            tochka('O', { sloy: 1 }),
-            otr('O', 'A', { sloy: 1, vydelit: 'iskomoe', znachenie: 'R' }),
-            otr('O', 'B', { sloy: 1 }),
-            ug('A', 'O', 'B', { sloy: 2, znachenie: gr(360 - 2 * p.g) }),
-          ],
-          proverki: [{ ugol: ['A', 'C', 'B'], vid: 'tupoy' }],
+    stsena: (p) =>
+      /* Тупой угол рисунка подбирается: углы при A и B не острее порога,
+         центральный угол AOB (подсказка) остаётся острым, прямым или
+         тупым — как по числам. При C больше 135° углы A и B не могут быть
+         больше 22°: рисуются наибольшими возможными. */
+      podobrat(
+        klyuch(49, p),
+        { g: p.g },
+        { g: [96, 150] },
+        ({ g: gV }) => {
+          const s = 360 - 2 * gV; // дуга AB, содержащая C
+          return {
+            tochki: {
+              O: O0,
+              A: { naDuge: { okr: 'w', gradus: 90 + s / 2 } },
+              B: { naDuge: { okr: 'w', gradus: 90 - s / 2 } },
+              /* C — посередине меньшей дуги, сверху. */
+              C: { naDuge: { okr: 'w', gradus: 90 } },
+            },
+            okruzhnosti: OKR,
+            elementy: [
+              okr('w'),
+              tri('A', 'B', 'C'),
+              ug('A', 'C', 'B', { vydelit: 'dano', znachenie: gr(p.g), dolyaRadiusa: 0.22 }),
+              storona('A', 'B', koren(p.k, p.m)),
+              tochka('O', { sloy: 1 }),
+              otr('O', 'A', { sloy: 1, vydelit: 'iskomoe', znachenie: 'R' }),
+              otr('O', 'B', { sloy: 1 }),
+              ug('A', 'O', 'B', { sloy: 2, znachenie: gr(360 - 2 * p.g) }),
+            ],
+            proverki: [{ ugol: ['A', 'C', 'B'], vid: 'tupoy' }],
+          };
         },
-        gV !== p.g,
-      );
-    },
+        { minUgol: 18 },
+      ),
   },
 ];
 
 /* 37–38. Касательная CA и секущая CO. */
 function kasatelnaya(p: Params, porog: number, sDiametrom: boolean): Scena {
   const u0 = p.k ? 90 - p.u : p.u;
-  /* C не ближе к окружности, чем на 0,15 радиуса: иначе C и B сливаются. */
-  const uV = clamp(u0, Math.max(porog, 15), 58);
+  void porog;
   const r0 = 5;
   const ans = sDiametrom ? 90 + p.u : 90 - p.u;
   const elementy: Element[] = [
@@ -1190,34 +1214,38 @@ function kasatelnaya(p: Params, porog: number, sDiametrom: boolean): Scena {
     pryam('O', 'A', 'C', { sloy: 1 }),
     ug('B', 'O', 'A', { sloy: 2, znachenie: gr(90 - u0), otvet: !sDiametrom && p.k === 0 }),
   ];
-  return scena(
-    {
-      tochki: {
-        O: O0,
-        C: [r0 / Math.sin(uV * RAD), 0],
-        A: { kasanie: { iz: 'C', okr: 'w', storona: 1 } },
-        B: { naDuge: { okr: 'w', gradus: 0 } },
-        ...(sDiametrom ? { D: { naDuge: { okr: 'w', gradus: 180 } } } : {}),
-      },
-      okruzhnosti: OKR,
-      /* B и D названы в условии: B — точка на секущей, её подписываем сразу. */
-      elementy: sDiametrom ? [...elementy, tochka('O'), tochka('B')] : elementy,
-      proverki: [{ naOkruzhnosti: 'w', tochki: ['A', 'B'] }],
-      otvet: gr(sDiametrom ? ans : p.k ? 90 - p.u : ans),
+  /* Угол рисунка подбирается: C не сливается с B, угол AOB виден. */
+  return podobrat(klyuch(sDiametrom ? 38 : 37, p), { u: u0 }, { u: [20, 62] }, ({ u: uV }) => ({
+    tochki: {
+      O: O0,
+      C: [r0 / Math.sin(uV * RAD), 0],
+      A: { kasanie: { iz: 'C', okr: 'w', storona: 1 } },
+      B: { naDuge: { okr: 'w', gradus: 0 } },
+      ...(sDiametrom ? { D: { naDuge: { okr: 'w', gradus: 180 } } } : {}),
     },
-    uV !== u0,
-  );
+    okruzhnosti: OKR,
+    /* B и D названы в условии: B — точка на секущей, её подписываем сразу. */
+    elementy: sDiametrom ? [...elementy, tochka('O'), tochka('B')] : elementy,
+    proverki: [{ naOkruzhnosti: 'w', tochki: ['A', 'B'] }],
+    otvet: gr(sDiametrom ? ans : p.k ? 90 - p.u : ans),
+  }));
 }
 
 /* 41–42. Описанный четырёхугольник по четырём сторонам. */
 function opisannyyStsena(p: Params, extra: Element[]): Scena {
-  const f = opisannyyPoStoronam(p.ab, p.bc, p.cd, p.da);
-  return {
-    tochki: { O: O0, A: f.A, B: f.B, C: f.C, D: f.D },
-    okruzhnosti: { w: { centr: 'O', radius: f.r } },
-    elementy: [mn(['A', 'B', 'C', 'D']), okr('w'), ...extra],
-    proverki: [],
-  };
+  /* Стороны рисунка сближаются к равным (суммы противоположных сторон
+     остаются равными), пока углы четырёхугольника не станут читаемыми. */
+  const sr = (p.ab + p.bc + p.cd + p.da) / 4;
+  return podobrat(klyuch('opis', [p, extra]), { l: 0 }, { l: [0, 0.92] }, ({ l }) => {
+    const k = (x: number) => x * (1 - l) + sr * l;
+    const f = opisannyyPoStoronam(k(p.ab), k(p.bc), k(p.cd), k(p.da));
+    return {
+      tochki: { O: O0, A: f.A, B: f.B, C: f.C, D: f.D },
+      okruzhnosti: { w: { centr: 'O', radius: f.r } },
+      elementy: [mn(['A', 'B', 'C', 'D']), okr('w'), ...extra],
+      proverki: [],
+    };
+  });
 }
 
 function sluchaynyyOpisannyy(r: { int(a: number, b: number): number }): Nabor {

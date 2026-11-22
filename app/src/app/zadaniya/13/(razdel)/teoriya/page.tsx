@@ -2,13 +2,14 @@ import type { Metadata } from 'next';
 import { ProverkaTeorii } from '@/components/kartochki/ProverkaTeorii';
 import { Teoriya13 } from '@/components/tasks/zadanie13/Teoriya13';
 import { kolodaNomera } from '@/content/kartochki';
-import { ZADANIE13, zadanie13Title } from '@/content/zadanie13';
+import { ZADANIE13 } from '@/content/zadanie13';
 import { ZADANIYA } from '@/lib/paths';
+import { zadanie13Zagolovok } from '@/lib/seo-razdely';
 
 const VKLADKA = ZADANIE13.tabs.find((tab) => tab.id === 'teoriya')?.label ?? 'Теория';
 
 export const metadata: Metadata = {
-  title: zadanie13Title(VKLADKA),
+  title: zadanie13Zagolovok(VKLADKA),
 };
 
 /**

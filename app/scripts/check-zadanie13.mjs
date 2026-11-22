@@ -1544,6 +1544,40 @@ const bezZapolni = (json) =>
   console.log('сгенерировано по типам:', JSON.stringify(counts));
 }
 
+/* ── Задачи прежнего №17 из вариантов: у каждой свой сюжет и вид ──
+   В ЕГЭ-2027 они идут внутри задания: экономические — примерами на
+   «О задании», на оптимизацию — вкладкой «На оптимизацию». Сюжет того же
+   вида, что задача (vidZadachi17); «Другие задачи» — значит, шаблону не
+   назначен сюжет или у него сменился вид. Название карточки — начало
+   условия без разорванной формулы; задача собирается загрузчиком карточки. */
+{
+  const { katalogVariantov17 } = requireSrc('lib/zadanie13/varianty17');
+  const { zadachaVarianta17 } = requireSrc('lib/zadanie13/zadachaVarianta');
+  const { SYUZHETY13 } = requireSrc('content/ekonomicheskie13');
+  const katalog = await katalogVariantov17();
+  checks += 1;
+  if (katalog.length !== 36 * 6 + 4)
+    problems.push(`задачи из вариантов: ${katalog.length} вместо ${36 * 6 + 4}`);
+  const ids = new Set();
+  for (const z of katalog) {
+    checks += 1;
+    if (ids.has(z.id)) problems.push(`задачи из вариантов: повтор ключа ${z.id}`);
+    ids.add(z.id);
+    const s = SYUZHETY13.find((x) => x.id === z.syuzhet);
+    if (s === undefined || s.vid !== z.vid || z.syuzhet.startsWith('drugie'))
+      problems.push(`задача ${z.id} (${z.shablon}): нет сюжета своего вида`);
+    if ((z.nachalo.match(/\$/g) ?? []).length % 2 !== 0)
+      problems.push(`задача ${z.id}: в названии разорвана формула`);
+    const zz = await zadachaVarianta17(z);
+    if (zz.shablon !== z.shablon || zz.reshenie.length === 0)
+      problems.push(`задача ${z.id}: загрузчик собрал не ту задачу или без решения`);
+  }
+  const po = (vid) => katalog.filter((z) => z.vid === vid).length;
+  console.log(
+    `задачи из вариантов: экономических ${po('ekonomika')}, на оптимизацию ${po('optimizaciya')}`,
+  );
+}
+
 if (problems.length) {
   console.error(`check-zadanie13: проблем ${problems.length} из ${checks} проверок`);
   for (const p of problems) console.error('  — ' + p);

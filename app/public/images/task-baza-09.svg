@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Трапеция на клетчатой бумаге, высота пунктиром">
+  <!-- Клетчатая бумага: вершины трапеции в узлах сетки, высота — по линиям клеток.
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <linearGradient id="b-g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7FAEEA" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#7FAEEA" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M42 42 V258 M66 42 V258 M90 42 V258 M114 42 V258 M138 42 V258 M162 42 V258 M186 42 V258 M210 42 V258 M234 42 V258 M258 42 V258 M42 42 H258 M42 66 H258 M42 90 H258 M42 114 H258 M42 138 H258 M42 162 H258 M42 186 H258 M42 210 H258 M42 234 H258 M42 258 H258" stroke="#7FAEEA" stroke-opacity="0.5" stroke-width="1"/>
+    <path d="M66 210 L234 210 L186 90 L114 90 Z" fill="url(#b-g)" stroke-width="2.5"/>
+    <path d="M114 90 V210" stroke-width="1.5" stroke-dasharray="6 5"/>
+    <path d="M114 198 h12 v12" stroke-width="1.5"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="66" cy="210" r="5.5"/>
+    <circle cx="234" cy="210" r="5.5"/>
+    <circle cx="186" cy="90" r="5.5"/>
+    <circle cx="114" cy="90" r="5.5"/>
+  </g>
+</svg>

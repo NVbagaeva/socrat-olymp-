@@ -1,6 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
+import type { ReactNode } from 'react';
 import { Ikonka } from '../steklo';
 
 /** Шаг подсказки: вопрос и кнопки-ответы, одна верная. Всё — готовый HTML. */
@@ -15,6 +16,21 @@ export interface VoprosPodskazki {
    * общее «Подумай ещё».
    */
   pochemuHtml?: string[];
+  /**
+   * Перед вопросом: новая точка вводится словами — «Обозначим основание
+   * высоты буквой H» (№1). В этом же шаге она есть на чертеже.
+   */
+  vvodHtml?: string;
+  /**
+   * Чертёж шага (№1): все буквы, которые называет шаг, подписаны на
+   * нём. На телефоне стоит над текстом шага.
+   */
+  risunok?: ReactNode;
+  /**
+   * Под шагом: кнопка «Показать свойство» (№1). oshibka — на этом
+   * вопросе уже была неверная кнопка: кнопка факта подсвечивается.
+   */
+  posle?: (oshibka: boolean) => ReactNode;
 }
 
 export interface PodskazkaVoprosyLabels {
@@ -68,7 +84,16 @@ export function PodskazkaVoprosy({
           /* Текущий вопрос — последний открытый; когда пройдены все, текущего нет. */
           const tekushchiy = i === otkryto - 1 && !vsePoydeno;
           return (
-            <li className="trn-vopros" key={i}>
+            <li
+              className={clsx('trn-vopros', v.risunok !== undefined && 'trn-vopros--s-risunkom')}
+              key={i}
+            >
+              {v.risunok === undefined ? null : (
+                <div className="trn-vopros__risunok">{v.risunok}</div>
+              )}
+              {v.vvodHtml === undefined || v.vvodHtml === '' ? null : (
+                <p className="trn-vopros__vvod" dangerouslySetInnerHTML={{ __html: v.vvodHtml }} />
+              )}
               <p className="trn-vopros__tekst" dangerouslySetInnerHTML={{ __html: v.voprosHtml }} />
               <div className="trn-vopros__knopki" role="group" aria-label={labels.varianty}>
                 {v.variantyHtml.map((html, j) => {
@@ -101,6 +126,7 @@ export function PodskazkaVoprosy({
               ) : mimo.length > 0 ? (
                 <Pochemu html={v.pochemuHtml?.[mimo[mimo.length - 1] ?? -1]} labels={labels} />
               ) : null}
+              {v.posle === undefined ? null : v.posle(tekushchiy && mimo.length > 0)}
             </li>
           );
         })}

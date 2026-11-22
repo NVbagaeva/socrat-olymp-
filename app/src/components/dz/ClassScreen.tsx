@@ -23,6 +23,8 @@ import type { ClassMember, TutorClass } from '@/lib/dz/api';
 import { memberNameOf } from '@/lib/dz/names';
 import { DZ_HREF, inviteUrl } from '@/lib/dz/links';
 import { Confirm, NeedLogin, dzApi, errorCode, queryParam, useUser } from './common';
+import { ReytingKlassa } from '@/components/ustnyySchet/ReytingKlassa';
+import { USTNYY } from '@/content/ustnyySchet';
 import './dz.css';
 
 const t = DZ.klass;
@@ -154,6 +156,10 @@ export function ClassScreen() {
             ))}
           </ul>
         )}
+      </Card>
+
+      <Card className="kabinet__card" title={USTNYY.klass.zag} data-section="ustnyy-schet">
+        <ReytingKlassa klassId={klass.id} />
       </Card>
 
       {note === null ? null : (

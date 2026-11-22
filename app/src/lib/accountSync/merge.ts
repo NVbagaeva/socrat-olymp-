@@ -10,7 +10,9 @@
  *   закладки          — по каждой закладке побеждает более поздняя запись;
  *   история           — объединение тренировок по идентификатору;
  *   тренировка        — побеждает более свежая (updatedAt); завершённая на
- *                       любом устройстве (есть в истории) не воскресает.
+ *                       любом устройстве (есть в истории) не воскресает;
+ *   устный счёт       — объединение тренировок, лучший рекорд, более
+ *                       поздняя запись клетки таблицы (lib/ustnyySchet).
  *
  * Что синхронизируется — список ключей lib/progressImport/registry.ts.
  */
@@ -19,6 +21,7 @@ import { IMPORT_GROUPS } from '../progressImport/registry';
 import { mergeLogs, parseLog } from '../progressLog/model';
 import { mergeBookmarks, parseBookmarks } from '../zakladki/model';
 import { mergeHistory, parseHistory } from '../istoriya/model';
+import { mergeStat, parseStat, USTNYY_KEY } from '../ustnyySchet/statistika/model';
 
 /** Ключи, которые живут в аккаунте. */
 export const SYNCED_KEYS: readonly string[] = IMPORT_GROUPS.flatMap((group) => group.keys);
@@ -131,6 +134,7 @@ export function mergeValue(
     return mergeBookmarks(parseBookmarks(local), parseBookmarks(server));
   if (key === 'budetege:istoriya:v1')
     return mergeHistory(parseHistory(local), parseHistory(server));
+  if (key === USTNYY_KEY) return mergeStat(parseStat(local), parseStat(server));
   /* Неизвестный вид данных: аккаунт главнее. */
   return server;
 }

@@ -93,15 +93,19 @@
 }
 
 /* ── Заливки и секторы ── */
+/* Непрозрачные: тон смешан с белым заранее — две заливки не накладываются. */
 .skh-mnog {
-  fill: var(--skh-cvet);
-  fill-opacity: 0.14;
+  fill: color-mix(in srgb, var(--skh-cvet) 14%, #fff);
   stroke: none;
   animation: skh-poyavlenie var(--dur-reveal) var(--ease);
 }
+/* Заливка круга: на чертеже нет многоугольника — основная фигура круг. */
+.skh-zalivka-okr {
+  fill: color-mix(in srgb, var(--skh-a) 10%, #fff);
+  stroke: none;
+}
 .skh-sektor {
-  fill: var(--skh-cvet);
-  fill-opacity: 0.18;
+  fill: color-mix(in srgb, var(--skh-cvet) 18%, #fff);
   stroke: none;
 }
 
@@ -163,10 +167,10 @@
 }
 
 /* Величины — данные условия на чертеже (длины, углы, площади):
-   мельче букв, цифры прямым шрифтом, латинские буквы курсивом. */
+   кегль букв вершин, цифры прямым шрифтом, латинские буквы курсивом. */
 .skh-velichina {
   fill: var(--skh-ink);
-  font-size: 15px;
+  font-size: 19px;
   paint-order: stroke;
   stroke: var(--skh-bg);
   stroke-width: 3;

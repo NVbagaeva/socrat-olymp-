@@ -10,9 +10,11 @@
 import { OPORNYE } from './opornye';
 import { taskName } from './tasks';
 import type { RazdelTab } from './vkladki';
+import { nomerDvumya, nomerRazdela } from './struktura';
+import { zagolovokRazdela } from '@/lib/seo';
 
 export const ZADANIE16 = {
-  no: '16',
+  no: nomerDvumya('neravenstvo'),
   slug: '16',
   title: taskName('16'),
   lead: 'Решение различных видов неравенств и их систем. Использование метода интервалов.',
@@ -28,7 +30,7 @@ export const ZADANIE16 = {
 
 /** Заголовок окна браузера: «Вкладка · Неравенство — Будет на ЕГЭ». */
 export function zadanie16Title(tab: string): string {
-  return `${tab} · ${ZADANIE16.title} — Будет на ЕГЭ`;
+  return zagolovokRazdela(16, ZADANIE16.title, tab);
 }
 
 export const PROGRESS_16 = {
@@ -39,7 +41,7 @@ export const PROGRESS_16 = {
 /* ── Вкладка «О задании» ────────────────────────────────────────── */
 
 export const O_ZADANII_16 = {
-  title: 'Задание 16. Неравенства',
+  title: `Задание ${nomerRazdela('neravenstvo')}. Неравенства`,
   lead: 'Развёрнутый ответ: решение записывается полностью, ответ — промежутками.',
   about:
     'В задании нужно решить неравенство и записать ответ множеством на числовой прямой. Главные инструменты — равносильные переходы и метод интервалов: им посвящены первые главы теории. Каждая глава устроена одинаково — теория, разбор опорных задач и тренировочная работа из десяти заданий с проверкой ответа.',

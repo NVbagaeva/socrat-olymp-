@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 270 270" width="270" height="270" role="img" aria-label="Два пересекающихся круга событий с точками-исходами">
+  <!-- Круги событий A и B, R = 82; пересечение — «A и B».
+       Стиль — как у task-01.svg: линии #0c3ebc, заливка #c3dffa, лёгкая заливка
+       #7FAEEA. Фона нет — его даёт плашка или шапка раздела. -->
+  <defs>
+    <clipPath id="t04-a"><circle cx="112" cy="150" r="82"/></clipPath>
+  </defs>
+  <g fill="none" stroke="#0c3ebc" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="112" cy="150" r="82" fill="#c3dffa" fill-opacity="0.55" stroke-width="2"/>
+    <circle cx="188" cy="150" r="82" fill="#c3dffa" fill-opacity="0.55" stroke-width="2"/>
+    <circle cx="188" cy="150" r="82" fill="#7FAEEA" fill-opacity="0.55" stroke="none" clip-path="url(#t04-a)"/>
+  </g>
+  <g fill="#0c3ebc">
+    <circle cx="150" cy="150" r="5"/>
+    <circle cx="150" cy="108" r="5"/>
+    <circle cx="150" cy="192" r="5"/>
+    <circle cx="78" cy="112" r="5"/>
+    <circle cx="70" cy="166" r="5"/>
+    <circle cx="98" cy="200" r="5"/>
+    <circle cx="222" cy="112" r="5"/>
+    <circle cx="230" cy="166" r="5"/>
+    <circle cx="202" cy="200" r="5"/>
+  </g>
+</svg>

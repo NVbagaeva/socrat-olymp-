@@ -12,6 +12,7 @@
  */
 
 import { plural } from '../../lib/plural';
+import { nomerRazdela } from '@/content/struktura';
 
 /** Одно утверждение блока: словами и, если есть, формулой. */
 export interface Utverzhdenie {
@@ -25,6 +26,25 @@ export interface Utverzhdenie {
    * их совпадения отдельным списком и не считает ошибкой.
    */
   shkolnaya?: true;
+  /**
+   * Почему так: короткое обоснование словами. Правило справочника — ни
+   * одно свойство и ни один вывод не стоят без обоснования.
+   */
+  obosnovanie?: string;
+}
+
+/**
+ * Шаг вывода «вопросами»: вопрос, который ученик задаёт себе сам,
+ * ответ словами, выкладка и чертёж — слой sloy чертежа карточки, на
+ * котором появляется то, о чём шаг.
+ */
+export interface ShagVyvoda {
+  vopros: string;
+  otvet: string;
+  /** Строки выкладки (TeX без $). */
+  tex?: string[];
+  /** Слой чертежа карточки (сцена — chertezhTemy): что появилось на этом шаге. */
+  sloy?: number;
 }
 
 /** Теорема или формула: название, формулировка словами, формула. */
@@ -103,6 +123,13 @@ export interface Tema1 {
   svoystva?: Utverzhdenie[];
   priznaki?: Utverzhdenie[];
   teoremy?: Teorema[];
+  /** Приём решения: «равные углы обозначаем одной буквой». */
+  priemy?: Utverzhdenie[];
+  /**
+   * Вывод вопросами: рассуждение, которое приводит к свойству. Свойство
+   * карточки стоит после него — как итог, а не готовая формула.
+   */
+  vyvod?: ShagVyvoda[];
   /** Таблица под блоками: заголовки столбцов и строки (тексты с $…$). */
   tablica?: { head: string[]; rows: string[][] };
   /** «Как применять»: 2–4 типичных хода в задании №1. */
@@ -141,6 +168,9 @@ export const BLOKI_SPRAVOCHNIKA = {
   svoystva: 'Свойство',
   priznaki: 'Признак',
   teoremy: 'Теорема / формула',
+  priemy: 'Приём',
+  vyvod: 'Вывод — вопросами',
+  obosnovanie: 'Почему так',
   primenenie: 'Как применять',
   vazhno: 'Важно',
   primery: 'Пример',
@@ -149,7 +179,7 @@ export const BLOKI_SPRAVOCHNIKA = {
 
 export const SPRAVOCHNIK_1 = {
   title: 'Справочник по планиметрии',
-  lead: 'Всё для задания №1 первой части ЕГЭ профильного уровня',
+  lead: `Всё для задания №${nomerRazdela('planimetriya')} первой части ЕГЭ профильного уровня`,
   /** Поиск по темам. */
   poisk: 'Найти тему…',
   poiskLabel: 'Поиск по темам справочника',
@@ -193,13 +223,13 @@ export const SPRAVOCHNIK_1 = {
     nazad: 'Назад',
     kroshki: {
       aria: 'Вы здесь',
-      zadanie: 'Задание №1',
+      zadanie: `Задание №${nomerRazdela('planimetriya')}`,
       teoriya: 'Теория',
       spravochnik: 'Справочник',
     },
     gotovim: 'Раскладываем страницы…',
-    shapka: 'Справочник по планиметрии · Задание №1 ЕГЭ',
-    zadanie: 'Задание №1 ЕГЭ',
+    shapka: `Справочник по планиметрии · Задание №${nomerRazdela('planimetriya')} ЕГЭ`,
+    zadanie: `Задание №${nomerRazdela('planimetriya')} ЕГЭ`,
     soderzhanie: 'Содержание',
     /** Разбор ушёл в следующую колонку: к какой теме он. */
     kTeme: 'К теме:',

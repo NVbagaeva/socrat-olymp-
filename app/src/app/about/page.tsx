@@ -1,5 +1,6 @@
 import { clsx } from 'clsx';
 import type { Metadata } from 'next';
+import { ogStranicy } from '@/lib/og';
 import { SiteFooter, SiteHeader } from '@/components/layout';
 import { about, type Illyustraciya, type Nadpis } from '@/content/about';
 import { Dvizhenie } from './Dvizhenie';
@@ -9,6 +10,7 @@ import './about.css';
 export const metadata: Metadata = {
   title: about.meta.title,
   description: about.meta.description,
+  openGraph: ogStranicy(about.meta.title, about.meta.description),
 };
 
 const { hero, imya, podhod, put, sajt, polza, svyaz, fonFigury } = about;

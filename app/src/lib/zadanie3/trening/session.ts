@@ -93,9 +93,14 @@ export function buildByTipy(
   for (let i = 0; out.length < count && pusto < ocheredi.length; i += 1) {
     const ochered = ocheredi[i % ocheredi.length] as string[];
     const proshlyy = out.at(-1);
-    const at = ochered.findIndex(
-      (id) => proshlyy === undefined || prototipZadachi(id) !== prototipZadachi(proshlyy.id),
-    );
+    const drugoy = (id: string) =>
+      proshlyy === undefined || prototipZadachi(id) !== prototipZadachi(proshlyy.id);
+    /* Нерешённые важнее, чем «не подряд из одного прототипа»: сначала
+       нерешённая другого прототипа, потом любая нерешённая, и только
+       потом решённая. */
+    let at = ochered.findIndex((id) => !closed.has(id) && drugoy(id));
+    if (at === -1) at = ochered.findIndex((id) => !closed.has(id));
+    if (at === -1) at = ochered.findIndex(drugoy);
     const id = ochered.splice(at === -1 ? 0 : at, 1)[0];
     if (id === undefined) {
       pusto += 1;

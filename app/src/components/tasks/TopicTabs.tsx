@@ -31,6 +31,7 @@ import { TAB_TAP_SCRIPT, takePendingTabTap } from '@/lib/tabTap';
 import { hasActiveScope, scopeOfPath } from '@/lib/trainerSession/scope';
 import { useActiveTrainerScopes } from '@/lib/trainerSession/store';
 import { sessionText } from './session/text';
+import { nomerRazdela } from '@/content/struktura';
 
 export interface TopicTabsProps {
   /** Вкладка «О задании» целиком: собрана на сервере. */
@@ -427,11 +428,11 @@ export function TopicTabs({
             <RazdelyNav
               {...razdely}
               vkladka={tab}
-              /* Первый пункт меню №12 — весь раздел: зачётная работа и
+              /* Первый пункт меню графиков функций — весь раздел: зачётная работа и
                  генератор по всем типам. В прокрутке вместе со списком:
                  на телефоне панель невысокая. */
               dop={
-                String(razdely.no) === '12' ? (
+                String(razdely.no) === String(nomerRazdela('grafiki-funkciy')) ? (
                   <>
                     <VesRazdelCards place="menu" />
                     <h3 className="razdely-menu__sub">{vesRazdel.orType}</h3>

@@ -6,11 +6,11 @@ import { TabScrollOnMount } from '@/components/tasks/TabScroll';
 import { Opornye13Screen } from '@/components/tasks/zadanie13/Opornye13Screen';
 import { Tex } from '@/components/ui/Tex';
 import { OPORNYE13 } from '@/content/ekonomicheskie13';
-import { zadanie13Title } from '@/content/zadanie13';
 import { OPORNYE13_HREF, RAZDEL13 } from '@/lib/zadanie13/links';
 import { BLOKI_13, blokBySlug13 } from '@/lib/zadanie13/opornye/bloki';
 import { prepPool13 } from '@/lib/zadanie13/opornye/pool';
 import { PROTOTYPE_BY_ID } from '@/lib/zadanie13/proto';
+import { zadanie13Zagolovok } from '@/lib/seo-razdely';
 
 /* Статический экспорт: адреса блоков известны до сборки. */
 export function generateStaticParams() {
@@ -23,7 +23,7 @@ type Params = Promise<{ blok: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { blok } = await params;
   const found = blokBySlug13(blok);
-  return { title: zadanie13Title(found === undefined ? OPORNYE13.title : found.nazvanie) };
+  return { title: zadanie13Zagolovok(found === undefined ? OPORNYE13.title : found.nazvanie) };
 }
 
 /**

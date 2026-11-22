@@ -468,8 +468,9 @@ export const OP_DVE_OKR = scena({
       ug('uO2', A, O2, O1, { skrytyy: true, gruppy: ['ugolD', 'pod'], cvet: 'c', dugi: 2 }),
       ug('pB', A, B, C, { pryamoy: true, skrytyy: true, gruppy: ['diam', 'b'], cvet: 'a' }),
       ug('pD', A, D, E, { pryamoy: true, skrytyy: true, gruppy: ['b'], cvet: 'a' }),
-      /* Общая хорда короткая и зажата дугами — запись «AB = 2» рядом с ней. */
-      vel('d-AB', `AB = ${ch(dist(A, B))}`, { vnutri: mid(mid(A, B), O1) }),
+      /* Общая хорда короткая и зажата дугами: у неё места под запись нет,
+         а поодаль «AB = 2» читается как подпись другого — строкой под чертежом. */
+      vel('d-AB', `AB = ${ch(dist(A, B))}`, { podChertezhom: true }),
       tch('O_1', O1),
       tch('O_2', O2),
       tch('A', A),
@@ -553,10 +554,9 @@ export const OP_CHEREZ_CENTR = scena({
       ug('pM', A, M, O, { pryamoy: true, skrytyy: true, gruppy: ['pryamye', 'par'], cvet: 'a' }),
       ug('pQ', A, Q, P, { pryamoy: true, skrytyy: true, gruppy: ['pryamye', 'par'], cvet: 'a' }),
       ug('uAOC', A, O, C, { rol: 'angle', gruppy: ['dugi'], cvet: 'c' }),
-      /* Синус — записью снаружи окружности против угла AOC: внутри тесно от хорд. */
-      vel('d-AOC', `sin ∠AOC = ${zapisSinusa(Math.abs(fi))}`, {
-        vnutri: rotate(mul(A, 1.22), O, -fi / 2),
-      }),
+      /* Синус: у дуги угла AOC тесно от хорд, а поодаль запись не «его» —
+         строкой под чертежом (дуга угла остаётся). */
+      vel('d-AOC', `sin ∠AOC = ${zapisSinusa(Math.abs(fi))}`, { podChertezhom: true }),
       tch('O', O),
       tch('A', A),
       tch('B', B),

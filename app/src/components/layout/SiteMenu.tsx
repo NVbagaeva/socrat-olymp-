@@ -45,7 +45,11 @@ function Row({ link, onClick }: { link: MenuLink; onClick: () => void }) {
   const level = useLevel();
   const to = level === 'base' && link.hrefBase !== undefined ? link.hrefBase : link.href;
   return (
-    <a href={to} className="site-menu__row" onClick={onClick}>
+    <a
+      href={to}
+      className={link.akcent === true ? 'site-menu__row site-menu__row--akcent' : 'site-menu__row'}
+      onClick={onClick}
+    >
       <span className="site-menu__ico">
         <NavIcon name={link.icon} />
       </span>
@@ -59,9 +63,10 @@ function Row({ link, onClick }: { link: MenuLink; onClick: () => void }) {
 }
 
 /**
- * Бургер-меню узкой шапки: пункты навигации и «Войти» уезжают сюда,
- * логотип и кнопка «Начать бесплатно» остаются в шапке. После входа
- * вместо «Войти» — «Мой кабинет» и «Выйти».
+ * Бургер-меню узкой шапки: пункты навигации уезжают сюда, логотип и
+ * «Войти» (или кружок аккаунта) остаются в шапке; «Войти» есть и здесь,
+ * в разделе «Аккаунт». После входа вместо «Войти» — «Мой кабинет» и
+ * «Выйти».
  */
 export function SiteMenu() {
   const [state, setState] = useState<MenuState | null>(null);
@@ -196,11 +201,21 @@ export function SiteMenu() {
                     <Chevron />
                   </a>
 
+                  {/* «Тарифы» — сразу под главной карточкой, в первом экране
+                     меню: раньше до них нужно было листать мимо всех групп
+                     (docs/audit-prodazhi.md, C1). */}
+                  <div
+                    className="site-menu__group site-menu__list site-menu__list--accent"
+                    style={{ '--i': 1 } as CSSProperties}
+                  >
+                    <Row link={tarify} onClick={close} />
+                  </div>
+
                   {groups.map((group, index) => (
                     <section
                       key={group.label}
                       className="site-menu__group"
-                      style={{ '--i': index + 1 } as CSSProperties}
+                      style={{ '--i': index + 2 } as CSSProperties}
                     >
                       <h2 className="site-menu__title">{group.label}</h2>
                       <div className="site-menu__list">
@@ -210,13 +225,6 @@ export function SiteMenu() {
                       </div>
                     </section>
                   ))}
-
-                  <div
-                    className="site-menu__group site-menu__list site-menu__list--accent"
-                    style={{ '--i': groups.length + 1 } as CSSProperties}
-                  >
-                    <Row link={tarify} onClick={close} />
-                  </div>
 
                   {account || withLogout ? (
                     <section

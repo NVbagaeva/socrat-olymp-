@@ -21,18 +21,30 @@ export const PL = {
      чернеют. */
   vershina: 'var(--chertezh-vershina, #1F5FD0)',
   velichina: 'var(--chertezh-velichina, #E07A2F)',
+  /* Числа и буквы величин — темнее дуг: мелкий текст читается на телефоне. */
+  velichinaTekst: 'var(--chertezh-velichina-tekst, #A8500F)',
   iskomoe: 'var(--chertezh-velichina, #E07A2F)',
   podskazka: 'var(--chertezh-velichina-2, #A85F06)',
+  /* Новый элемент шага подсказки — оранжевый; заливка фигуры в подсказке. */
+  novoe: 'var(--chertezh-novoe, #E8730C)',
+  zalivka: 'var(--chertezh-zalivka, rgba(31, 95, 208, 0.07))',
   bg: THEME.colors.bg,
+  /* Заливки частей с равной площадью (S, 2S): синий, терракота, янтарь. */
+  zaliv: [
+    'var(--chertezh-vershina, #1F5FD0)',
+    'var(--chertezh-velichina, #E07A2F)',
+    'var(--chertezh-velichina-2, #A85F06)',
+  ] as const,
+  zalivProzrachnost: 0.13,
   /* Толщины: основные линии и окружность < выделенный элемент. */
   width: {
     line: 1.75,
     iskomoe: 2.25,
-    novoe: 2.25,
+    novoe: 2.75,
     /* Дуга угла и значок прямого угла; искомого угла — markIskomoe. */
     mark: 1.25,
     markIskomoe: 1.75,
-    tick: 1.4,
+    tick: 1.7,
     /* Выделенная дуга окружности (дуга AB условия). */
     duga: 3,
     vynoska: 0.8,
@@ -47,7 +59,8 @@ export const PL = {
     slovo: THEME.font.family,
     /* Подписи вершин — полужирный курсив, на 12 % крупнее прежних 16. */
     razmer: 18,
-    razmerZnach: 13.5,
+    /* Подписи величин: на 11 % крупнее прежних 13,5. */
+    razmerZnach: 15,
   },
   /* Зазор подписи до линий и других подписей, px. */
   gap: 2.5,
@@ -61,9 +74,32 @@ export const PL = {
    * с вершиной — до minKrayniy. rPryamoy — сторона квадратика прямого
    * угла, sektor — прозрачность заливки искомого угла.
    */
-  ugol: { r: 13, shag: 4, min: 9, minKrayniy: 7, korotkaya: 0.35, rPryamoy: 9, sektor: 0.14 },
+  ugol: {
+    r: 14,
+    shag: 4,
+    min: 9,
+    minKrayniy: 7,
+    korotkaya: 0.35,
+    rPryamoy: 9,
+    sektor: 0.14,
+    /* Узкий угол с подписью: дуга растёт, чтобы число встало внутри угла
+       сразу за ней, — но не больше rMax и доли korotkayaMax короткой стороны. */
+    rMax: 34,
+    korotkayaMax: 0.45,
+    /* Дуги разных углов при одной вершине: радиусы отличаются не меньше чем на столько. */
+    mezhduDugami: 5.5,
+    /* Значок прямого угла соразмерен фигуре: доля короткой стороны угла, в пределах. */
+    pryamoyDolya: 0.13,
+    pryamoyMin: 7,
+    pryamoyMax: 11,
+    /* Подпись величины без выноски — не дальше от своей дуги, px. */
+    podpisOtDugi: 14,
+  },
+  /* Знак градуса — кольцо вектором (в долях кегля): одинаков в любом
+     шрифте, не превращается в кавычку под белой обводкой. */
+  gradus: { r: 0.115, tolshchina: 0.075, vysota: 0.5, shirina: 0.4 },
   /* Засечки равных отрезков: длина 2·half, шаг между засечками. */
-  tick: { half: 3.5, shag: 3 },
+  tick: { half: 4.5, shag: 3.5 },
   tochkaR: 2.5,
   /* Наименьшие размеры на экране: короче — фигура вырождена. */
   minOtrezok: 12,

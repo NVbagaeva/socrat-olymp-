@@ -18,6 +18,7 @@ import {
   type BlokTeorii10,
   type RazdelTeorii10,
 } from '@/content/teoriya10';
+import { GDE_NA_EGE10 } from '@/content/prikladnye10';
 import { PROGRESS_10 } from '@/content/zadanie10';
 import { BANK } from '@/lib/zadanie10/bank/index';
 import {
@@ -28,10 +29,11 @@ import {
 } from '@/lib/zadanie10/teoriya-kondensator';
 import { primerStefana } from '@/lib/zadanie10/teoriya-stepeni';
 import { YAKOR_10 } from '@/lib/zadanie10/teoriya-yakorya';
-import { GROUPS, kodNaSayte, PROTOTYPES, prototype } from '@/lib/zadanie10/prototypes';
+import { GROUPS, PROTOTYPES, prototype } from '@/lib/zadanie10/prototypes';
 import { Illyustraciya10 } from './Illyustraciya10';
 import { Most10 } from './Most10';
 import { ZhivoyMyach, ZhivoyRaspad } from './Zhivye10';
+import '../teoriya/teoriya-steklo.css';
 
 /** Задача банка по id (F001, P11-a02). */
 function zadachaBanka(id: string) {
@@ -190,9 +192,7 @@ function FizikaKarty() {
               return (
                 <article className="z10-fizika__karta" key={p.id} id={`fizika-${p.id}`}>
                   <Illyustraciya10 id={p.id} className="z10-fizika__ill" />
-                  <h5>
-                    {kodNaSayte(p.id)}. {p.title}
-                  </h5>
+                  <h5>{p.title}</h5>
                   <p className="z10-fizika__formula">
                     <Tex text={`$${p.formula}$`} />
                   </p>
@@ -340,13 +340,13 @@ export function GdeNaEge({ prototipy, trenazher }: { prototipy: string[]; trenaz
   }
   return (
     <section className="z10-gde">
-      <h4 className="z10-gde__title">Где на ЕГЭ</h4>
-      <p className="z10-gde__lead">Задание №10, прототипы — нажмите, чтобы потренироваться:</p>
+      <h4 className="z10-gde__title">{GDE_NA_EGE10.title}</h4>
+      <p className="z10-gde__lead">{GDE_NA_EGE10.lead}</p>
       <ul className="z10-gde__spisok">
         {prototipy.map((id) => (
           <li key={id}>
             <Link className="z10-gde__chip" href={`${trenazher}?tipy=${id}`}>
-              {kodNaSayte(id)} {prototype(id).title}
+              {prototype(id).title}
             </Link>
           </li>
         ))}
@@ -357,7 +357,7 @@ export function GdeNaEge({ prototipy, trenazher }: { prototipy: string[]; trenaz
 
 function Telo({ r, trenazher }: { r: RazdelTeorii10; trenazher: string }) {
   return (
-    <div className="z10-teoriya">
+    <div className="z10-teoriya teor-steklo">
       <p className="z10-teoriya__lead">
         <Tex text={r.lead} />
       </p>

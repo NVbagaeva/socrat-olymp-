@@ -24,6 +24,12 @@ export interface Dop18 {
   uchitel: string;
   /** «Цветные чертежи»: на листе и в PDF — фирменные цвета; нет — монохромные. */
   cvetnye?: boolean;
+  /**
+   * «Чертёж к условию»: под условием на листе ученика — чертёж с данными
+   * задачи. Нет — лист ученика только текстом (чертёж ученик делает
+   * сам). У учителя чертёж в решении — всегда. Задачи от флага не зависят.
+   */
+  chertezh?: boolean;
 }
 
 export const DOP_18: Dop18 = {
@@ -64,6 +70,7 @@ export function sheetQuery18(p: SheetParams18): string {
   if (d.data !== '') q.set('d', d.data);
   if (d.uchitel !== DOP_18.uchitel) q.set('uch', d.uchitel);
   if (d.cvetnye === true) q.set('cv', '1');
+  if (d.chertezh === true) q.set('ch', '1');
   return q.toString();
 }
 
@@ -99,6 +106,7 @@ export function parseSheetQuery18(
       data: /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : '',
       uchitel: chistyy(q.get('uch') ?? '', 60) || DOP_18.uchitel,
       ...(q.get('cv') === '1' ? { cvetnye: true } : {}),
+      ...(q.get('ch') === '1' ? { chertezh: true } : {}),
     },
   };
 }

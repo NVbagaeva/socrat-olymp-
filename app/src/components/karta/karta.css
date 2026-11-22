@@ -190,7 +190,8 @@
 .karta-ostrov--skoro .karta-ostrov__zalivka {
   fill: var(--karta-tuman);
 }
-.karta-ostrov--skoro .karta-ostrov__zalivka {
+.karta-ostrov--skoro .karta-ostrov__zalivka,
+.karta-svobodnyy .karta-ostrov__zalivka {
   fill: rgb(214 230 248 / 0.78);
 }
 .karta-ostrov--v-processe .karta-ostrov__zalivka {
@@ -263,13 +264,13 @@
   font-family: var(--font-sans);
 }
 .karta-podpis__nomer {
-  font-size: 23px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.02em;
   fill: currentColor;
 }
 .karta-podpis__nazvanie {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   fill: currentColor;
 }
@@ -277,11 +278,13 @@
   color: var(--navy-700);
 }
 .karta-ostrov--skoro .karta-ostrov__podpis,
-.karta-ostrov--pozzhe .karta-ostrov__podpis {
+.karta-ostrov--pozzhe .karta-ostrov__podpis,
+.karta-svobodnyy .karta-ostrov__podpis {
   color: var(--navy-600);
   opacity: 0.7;
 }
-.karta-ostrov--skoro .karta-podpis__nazvanie {
+.karta-ostrov--skoro .karta-podpis__nazvanie,
+.karta-svobodnyy .karta-podpis__nazvanie {
   font-style: italic;
   font-weight: 500;
 }
@@ -394,7 +397,7 @@
 }
 .karta-proliv__tekst {
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.35em;
   fill: rgb(17 60 140 / 0.62);
@@ -422,7 +425,7 @@
 }
 .karta-tablichka text {
   font-family: var(--font-sans);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   font-style: italic;
   letter-spacing: -0.01em;
@@ -1312,4 +1315,9 @@ body:has(.karta-panel.is-otkryta) {
     opacity: 0.5;
     transform: scale(1.4);
   }
+}
+
+/* Свободный остров «Будет на ЕГЭ»: не нажимается. */
+.karta-svobodnyy {
+  pointer-events: none;
 }

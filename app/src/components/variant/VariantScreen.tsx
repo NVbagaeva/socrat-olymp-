@@ -1,10 +1,18 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Select } from '@/components/ui';
 import { VARIANT_SCREEN as T, WORK_KINDS, standardInstruction } from '@/content/variant';
 import { useSessionUser } from '@/lib/auth/session';
+import {
+  potratitProbnuyu,
+  SOBRAT_VARIANT,
+  usePolnyyDostup,
+  useProbnyhOstalos,
+} from '@/lib/tarify/dostup';
+import { ProbnayaPotrachena } from '@/components/generator/GenZamok';
+import { GEN_UI } from '@/content/generatorUi';
 import { newSeed } from '@/lib/variant/code';
 import { SpaceOption } from '@/components/tasks/space/SpaceOption';
 import {
@@ -24,6 +32,9 @@ import {
   saveSpace,
 } from '@/lib/variant/handoff';
 import { SECTIONS, sectionInfo } from '@/lib/variant/sections';
+import { VARIANT_NUMBERS, VARIANT_SKORO, podpis1 } from '@/lib/variant/struktura';
+import { nomerEge } from '@/content/struktura';
+import { vseRazdely } from '@/content/tasks';
 import {
   buildSet,
   currentVersion,
@@ -89,6 +100,15 @@ function Segment<I extends string>({
   );
 }
 
+/** Плитки заданий: первая часть экзамена по действующей структуре. */
+const PLITKI = SECTIONS.filter((s) => VARIANT_NUMBERS.includes(s.egeNumber));
+
+/** Название раздела, для которого задач варианта ещё нет. */
+function nazvanieRazdela(hranenie: number): string {
+  const task = vseRazdely.find((t) => t.hranenie === hranenie);
+  return task?.shortTitle ?? task?.name ?? '';
+}
+
 function sameConfig(a: VariantConfig, b: VariantConfig): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -114,6 +134,18 @@ export function VariantScreen() {
   const [dev, setDev] = useState(false);
   const restored = useRef(false);
   const user = useSessionUser();
+  /* Без тарифа — одна пробная генерация (lib/tarify/dostup.ts). */
+  const polnyy = usePolnyyDostup();
+  const ostalos = useProbnyhOstalos(SOBRAT_VARIANT);
+  const probnayaPotrachena = !polnyy && ostalos !== null && ostalos <= 0;
+  const [tarif, setTarif] = useState(false);
+  const zakrytTarif = useCallback(() => setTarif(false), []);
+  /** Новые задачи без тарифа: пробная генерация потрачена — окно тарифов. */
+  function nuzhenTarif(): boolean {
+    if (!probnayaPotrachena) return false;
+    setTarif(true);
+    return true;
+  }
 
   /* Настройки и шапка — из прошлого раза; режим разработчика — ?dev=1.
      Читаются после гидратации (разметка сборки — с настройками по
@@ -157,21 +189,24 @@ export function VariantScreen() {
     try {
       const built = await buildSet(next, seed, zameny);
       setSet(built.set);
-      if (built.failed.length > 0) setError(T.failed(built.failed.map((n) => `№${n}`).join(', ')));
+      if (built.failed.length > 0)
+        setError(T.failed(built.failed.map((n) => `№${podpis1(n)}`).join(', ')));
     } catch {
-      setError(T.failed(next.tasks.map((n) => `№${n}`).join(', ')));
+      setError(T.failed(next.tasks.map((n) => `№${podpis1(n)}`).join(', ')));
     } finally {
       setBusy(false);
     }
   }
 
   function sformirovat() {
+    if (nuzhenTarif()) return;
+    if (!polnyy) potratitProbnuyu(SOBRAT_VARIANT);
     setNotice(null);
     void run(config, newSeed(), {});
   }
 
   function zamenit(variant: number, ege: EgeNo) {
-    if (set === null) return;
+    if (set === null || nuzhenTarif()) return;
     const key = zamenaKey(variant, ege);
     const zameny = { ...set.zameny, [key]: (set.zameny[key] ?? 0) + 1 };
     void run(set.config, set.seed, zameny);
@@ -199,6 +234,8 @@ export function VariantScreen() {
 
   /* Серия: N разных вариантов без повторов задач, фильтры — те же. */
   function seriya(n: number) {
+    if (nuzhenTarif()) return;
+    if (!polnyy) potratitProbnuyu(SOBRAT_VARIANT);
     setNotice(null);
     const next = { ...config, count: Math.min(MAX_VARIANTS, Math.max(2, n)), parallel: false };
     setConfig(next);
@@ -234,6 +271,7 @@ export function VariantScreen() {
       const tasks = on
         ? c.tasks.filter((x) => x !== n)
         : EGE_NUMBERS.filter((x) => x === n || c.tasks.includes(x));
+      /* Порядок — по номерам хранения: он же порядок номеров ЕГЭ. */
       return { ...c, tasks };
     });
   }
@@ -264,7 +302,7 @@ export function VariantScreen() {
   const openInfo = open === null ? null : sectionInfo(open);
   const summary = T.summaryNbsp(config.tasks.length, config.count);
   const sectionsNoLevel = useMemo(
-    () => SECTIONS.filter((s) => !s.capabilities.difficulty).map((s) => s.egeNumber),
+    () => PLITKI.filter((s) => !s.capabilities.difficulty).map((s) => s.egeNumber),
     [],
   );
 
@@ -330,7 +368,7 @@ export function VariantScreen() {
               type="button"
               className="var-link"
               aria-label="Выбрать все задания"
-              onClick={() => setConfig((c) => ({ ...c, tasks: [...EGE_NUMBERS] }))}
+              onClick={() => setConfig((c) => ({ ...c, tasks: [...VARIANT_NUMBERS] }))}
             >
               {T.all}
             </button>
@@ -345,7 +383,7 @@ export function VariantScreen() {
         </div>
         <p className="var-sostav__note">{T.sostavNote}</p>
         <ul className="var-plitki">
-          {SECTIONS.map((s) => {
+          {PLITKI.map((s) => {
             const n = s.egeNumber;
             const on = config.tasks.includes(n);
             const chosen = config.subtypes[n];
@@ -373,7 +411,7 @@ export function VariantScreen() {
                     toggleTask(n);
                   }}
                 >
-                  <span className="var-plitka__no">{n}</span>
+                  <span className="var-plitka__no">{podpis1(n)}</span>
                   <span className="var-plitka__name">{name}</span>
                   {chosen === undefined ? null : (
                     <span className="var-plitka__metka">{T.podtipovMetka(chosen.length)}</span>
@@ -383,7 +421,7 @@ export function VariantScreen() {
                   <button
                     type="button"
                     className="var-plitka__more"
-                    aria-label={T.podtipyKnopka(n, s.title)}
+                    aria-label={T.podtipyKnopka(podpis1(n), s.title)}
                     aria-haspopup="dialog"
                     onClick={() => setOpen(n)}
                   >
@@ -397,6 +435,16 @@ export function VariantScreen() {
               </li>
             );
           })}
+          {/* Раздел первой части, для которого задач ещё нет: плитка без нажатия. */}
+          {VARIANT_SKORO.map((hranenie) => (
+            <li key={`skoro-${hranenie}`} className="var-plitka is-skoro">
+              <span className="var-plitka__main" aria-disabled="true">
+                <span className="var-plitka__no">{nomerEge(hranenie)}</span>
+                <span className="var-plitka__name">{nazvanieRazdela(hranenie)}</span>
+                <span className="var-plitka__metka">{T.skoro}</span>
+              </span>
+            </li>
+          ))}
         </ul>
       </section>
 
@@ -616,7 +664,7 @@ export function VariantScreen() {
               ))}
             </div>
             <p className="var-field__note">
-              {T.levelNote} ({sectionsNoLevel.map((n) => `№${n}`).join(', ')}).
+              {T.levelNote} ({sectionsNoLevel.map((n) => `№${podpis1(n)}`).join(', ')}).
             </p>
           </div>
           <div id="var-g-count" className="var-field">
@@ -811,7 +859,10 @@ export function VariantScreen() {
         title={
           openInfo === null
             ? ''
-            : T.podtipy.title(openInfo.egeNumber, T.short[openInfo.egeNumber] ?? openInfo.title)
+            : T.podtipy.title(
+                podpis1(openInfo.egeNumber),
+                T.short[openInfo.egeNumber] ?? openInfo.title,
+              )
         }
         subtitle={
           openInfo === null
@@ -950,6 +1001,9 @@ export function VariantScreen() {
           </button>
         </form>
       </Okno>
+      {tarif ? (
+        <ProbnayaPotrachena tekst={GEN_UI.dostup.potrachena.variant} onClose={zakrytTarif} />
+      ) : null}
     </div>
   );
 }

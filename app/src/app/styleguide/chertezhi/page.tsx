@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { TIPY_18 } from '@/content/zadanie18/trenazher';
 import { mnog, nepodvizhnaya, otr, tch, ug, vel, velOtr } from '@/lib/skhemy/dsl';
 import { svgSkhemy } from '@/lib/skhemy/svg';
-import { TEMA_CVET, TEMA_TOLSHCHINY, type VersiyaTemy } from '@/lib/skhemy/tema';
+import { TEMA_CVET, TEMA_TOLSHCHINY, TEMA_ZALIVKI, type VersiyaTemy } from '@/lib/skhemy/tema';
 import { VID_ISHODNYY, type Element, type T2 } from '@/lib/skhemy/tipy';
 import { scena18 } from '@/lib/zadanie18/trenazher/sceny';
 import { chertezhSvg } from '@/lib/chertezh3';
@@ -61,7 +61,7 @@ const tochki = (t: Record<string, T2>, imena: string[]) => imena.map((i) => tch(
 const ROLI: { rol: string; opisanie: string; elementy: (t: Record<string, T2>) => Element[] }[] = [
   {
     rol: 'figure',
-    opisanie: `Основная фигура: контур navy ${TEMA_CVET.navy}, ${TEMA_TOLSHCHINY.ekran.kontur} px, без заливки (голубая заливка — только у искомой площади). Отрезок с конкретным числом (AB = 15, хорда) — тоже navy: цветная только подпись.`,
+    opisanie: `Основная фигура: контур navy ${TEMA_CVET.navy}, ${TEMA_TOLSHCHINY.ekran.kontur} px, заливка — светлый голубой тон ${TEMA_ZALIVKI.figura} (непрозрачный); нет многоугольника — заливается круг. Отрезок с конкретным числом (AB = 15, хорда) — тоже navy: цветная только подпись.`,
     elementy: (t) => [
       mnog('f', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'figure' }),
       ...kontur(t),
@@ -72,8 +72,7 @@ const ROLI: { rol: string; opisanie: string; elementy: (t: Record<string, T2>) =
   },
   {
     rol: 'region',
-    opisanie:
-      'Данная площадь: заливка терракотой ~18 %, подпись с числом — терракотой внутри фигуры.',
+    opisanie: `Данная площадь: светлый тёплый тон ${TEMA_ZALIVKI.dano}, подпись с числом — под чертежом.`,
     elementy: (t) => [
       mnog('r', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'region' }),
       ...kontur(t),
@@ -83,8 +82,7 @@ const ROLI: { rol: string; opisanie: string; elementy: (t: Record<string, T2>) =
   },
   {
     rol: 'region-sought',
-    opisanie:
-      'Искомая площадь: лёгкая голубая заливка ~8 %, пунктирный контур внутри фигуры, подпись «S = ?» синим.',
+    opisanie: `Искомая площадь: оранжевый тон ${TEMA_ZALIVKI.iskomaya}, толстый сплошной контур терракотой поверх сторон, подпись «S = ?» под чертежом.`,
     elementy: (t) => [
       mnog('r', [t.A!, t.B!, t.C!], { skrytyy: false, rol: 'region-sought' }),
       ...kontur(t),
@@ -154,8 +152,11 @@ const PRAVILA: string[] = [
   'Отрезок с конкретным числом (AB = 15, хорда) — линия navy, цветная только подпись (терракота).',
   'Цвет линии — только у смысловых связей: части через x и y (семьи переменных) и равные отрезки.',
   'Равные отрезки — всегда одного цвета и с одинаковыми засечками. Равный отрезок на стороне — сторона разбивается в точке.',
-  'Данная площадь — терракотовая заливка ~18 % и подпись с числом; искомая — голубая заливка ~8 %, пунктирный контур и «S = ?».',
-  'Чёрно-белые чертежи (печать, PDF листов по умолчанию) — без заливок вообще: углы только дугами, равенства — засечками, данная и искомая площадь различаются только подписью: «S = 18» и «S = ?».',
+  'Заливки непрозрачные: одна область — одна заливка, без наложения полупрозрачных слоёв; большая ниже, меньшая поверх. Пунктир — только у вспомогательных построений.',
+  'Основная фигура — светлый голубой тон; данная площадь — светлый тёплый; искомая — оранжевый тон и толстый сплошной контур.',
+  'Подписи площадей («S = 24», «S = ?») — строками под чертежом, никогда внутри фигуры или на сторонах. Подпись угла — у дуги своего угла; если там нет места — строкой под чертежом: «∠BAC = 120°».',
+  'Числа и подписи S — тем же кеглем, что буквы вершин (19 px).',
+  'Чёрно-белые чертежи (печать, PDF листов по умолчанию) — без заливок: углы только дугами, равенства — засечками; искомая площадь — штриховка 45° и толстый контур, данная часть внутри неё не штрихуется.',
 ];
 
 /** Контраст с белым по WCAG. */
@@ -171,12 +172,12 @@ const CVETA: { imya: string; hex: string; gde: string }[] = [
   {
     imya: 'синий',
     hex: TEMA_CVET.vershina,
-    gde: 'вершины и точки; искомая площадь (заливка ~8 %, пунктир, «S = ?»)',
+    gde: 'вершины и точки',
   },
   {
     imya: 'терракота',
     hex: TEMA_CVET.velichina,
-    gde: 'величины, первая переменная (x, a), угол, данная площадь',
+    gde: 'величины, первая переменная (x, a), угол, контур искомой площади',
   },
   { imya: 'янтарь', hex: TEMA_CVET.velichina2, gde: 'вторая переменная (y, b)' },
   { imya: 'серо-синий', hex: TEMA_CVET.postroenie, gde: 'построения (пунктир)' },

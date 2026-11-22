@@ -1,3 +1,4 @@
+import { BISSEKTRISY_SMEZHNYH } from './novye-temy';
 import type { Razdel1 } from './tipy';
 
 /* ── 1. Углы и прямые ─────────────────────────────────────────── */
@@ -252,6 +253,7 @@ export const R01_UGLY: Razdel1 = {
       prototipy: [5, 6, 7, 9, 11, 53],
       zamenyaet: ['bissektrisa-ugla', 'bissektrisa-delit'],
     },
+    BISSEKTRISY_SMEZHNYH,
     {
       id: 'parallelnye',
       title: 'Параллельные прямые и секущая',

@@ -18,6 +18,8 @@
  * подключён только журнал.
  */
 
+import { nomerRazdela } from '@/content/struktura';
+
 export interface ImportGroup {
   /** Короткое имя для данных и проверок. */
   id: string;
@@ -80,18 +82,22 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z4',
     title: '№4 «Вероятность: простая»',
     keys: [
-      /* Журнал попыток тренажёра (components/tasks/veroyatnost/Trenazher.tsx). Прежний ключ
+      /* Журнал попыток тренажёра (lib/veroyatnost/trening/progress.ts). Прежний ключ
          budetege:veroyatnost-4:v2 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:veroyatnost-4:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «4»). */
+      'budetege:trainer:4:session',
     ],
   },
   {
     id: 'z5',
     title: '№5 «Вероятность: сложная»',
     keys: [
-      /* Журнал попыток тренажёра (components/tasks/veroyatnost/Trenazher.tsx). Прежний ключ
+      /* Журнал попыток тренажёра (lib/veroyatnost/trening/progress.ts). Прежний ключ
          budetege:veroyatnost-5:v2 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:veroyatnost-5:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «5»). */
+      'budetege:trainer:5:session',
     ],
   },
   {
@@ -133,8 +139,11 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     id: 'z10',
     title: '№10 «Физический смысл»',
     keys: [
-      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts). */
+      /* Журнал попыток тренажёра (lib/zadanie10/progress.ts): тот же ключ
+         и в тренажёре «Стеклянной сцены» (lib/zadanie10/trening/progress.ts). */
       'budetege:zadanie-10:log:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «10»). */
+      'budetege:trainer:10:session',
     ],
   },
   {
@@ -155,6 +164,8 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
       /* Журнал попыток тренажёра (lib/trainerProgress.ts). Прежний ключ
          budetege:trainer:v1 сворачивается в него на месте (LEGACY_LOGS). */
       'budetege:zadanie-12:log:v1',
+      /* Незаконченная тренировка узла (lib/trainerSession/store.ts, раздел «12»). */
+      'budetege:trainer:12:session',
     ],
   },
   {
@@ -187,11 +198,34 @@ export const IMPORT_GROUPS: readonly ImportGroup[] = [
     ],
   },
   {
+    id: 'z21',
+    /* Номер задания — из структуры экзамена: в ЕГЭ-2027 это задание 12. */
+    title: `№${nomerRazdela('naibolshee-naimenshee')} «Наибольшее и наименьшее»`,
+    keys: [
+      /* Журнал попыток тренажёра (lib/zadanie21/trening/progress.ts). */
+      'budetege:zadanie-21:log:v1',
+      /* Решённые опорные задачи (lib/zadanie21/progress.ts). */
+      'budetege:zadanie-21:opornye:v1',
+      /* Незаконченная тренировка (lib/trainerSession/store.ts, раздел «21»). */
+      'budetege:trainer:21:session',
+    ],
+  },
+  {
     id: 'z19',
     title: '№19 «Параметр»',
     keys: [
       /* Журнал попыток тренажёра (lib/zadanie19/progress.ts). */
       'budetege:zadanie-19:log:v1',
+    ],
+  },
+  {
+    id: 'ustnyy',
+    title: '«Устный счёт»',
+    keys: [
+      /* Тренировки, рекорды и клетки таблицы умножения
+         (lib/ustnyySchet/statistika/model.ts, USTNYY_KEY). Сливается своим
+         правилом (lib/accountSync/merge.ts). */
+      'budetege:ustnyy-schet:v1',
     ],
   },
   {

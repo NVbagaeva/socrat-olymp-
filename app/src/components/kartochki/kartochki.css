@@ -454,7 +454,7 @@
 .kart-luch__podpis,
 .kart-luch__chislo {
   fill: var(--color-text);
-  font-size: 15px;
+  font-size: 16px;
 }
 .kart-luch__chislo {
   font-family: var(--font-sans);
@@ -500,7 +500,7 @@
   color: var(--color-text);
 }
 .kart-card__otvet {
-  font-size: 19px;
+  font-size: 18px;
   line-height: 1.55;
   overflow-wrap: anywhere;
   /* Формула шире карточки прокручивается внутри себя, страница — нет. */
@@ -662,7 +662,7 @@
     font-size: 18px;
   }
   .kart-card__otvet {
-    font-size: 17px;
+    font-size: 18px;
   }
   .kart-start__main > .btn--lg {
     justify-self: stretch;

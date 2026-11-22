@@ -63,17 +63,17 @@ export const RAZDELY = {
   lid: 'Тринадцать заданий первой части. Здесь — четыре из них.',
   kartochki: [
     { no: '01', nazvanie: 'Планиметрия', format: 'svg', sostav: 'Теория · Опорные · Тренажёр' },
-    { no: '03', nazvanie: 'Стереометрия', format: 'webp', sostav: 'Теория · Опорные · Тренажёр' },
+    { no: '03', nazvanie: 'Стереометрия', format: 'svg', sostav: 'Теория · Опорные · Тренажёр' },
     {
       no: '04',
       nazvanie: 'Вероятность: простая',
-      format: 'webp',
+      format: 'svg',
       sostav: 'Теория · Опорные · Тренажёр',
     },
     {
       no: '12',
       nazvanie: 'Графики функций',
-      format: 'webp',
+      format: 'svg',
       sostav: 'Теория · Опорные · Тренажёр',
     },
   ],

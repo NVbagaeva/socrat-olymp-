@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { Razminka } from '@/components/ustnyySchet/Razminka';
+import { razminkaBazy } from '@/lib/ustnyySchet/razminka';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Kartochki } from '@/components/kartochki/Kartochki';
@@ -9,12 +11,14 @@ import { Tex } from '@/components/ui/Tex';
 import { vkladkaBazy } from '@/content/baza/razdely';
 import { taskBase, tasksOf, type ExamTask } from '@/content/tasks';
 import { bankRazdela } from '@/lib/baza/bank';
+import { configBazy } from '@/lib/baza/generatorBazy';
 import { razdelBazy } from '@/lib/baza/razdely';
 import { sealText, zapechatat } from '@/lib/baza/secret';
 import type { BlokOpornyh, RazdelBazy, VkladkaBazy } from '@/lib/baza/types';
 import { podgotovit } from '@/lib/kartochki/podgotovka';
 import { texPlain, typeset } from '@/lib/tex';
 import type { KatalogBanka } from '@/lib/trening/bank';
+import { GeneratorBazy } from './GeneratorBazy';
 import { FormatZadaniya, OZadaniiBaza } from './OZadaniiBaza';
 import { OPORNYE_BAZY, OpornyeBazyBlok, OpornyeBazySpisok } from './OpornyeBazy';
 import { Pusto } from './Pusto';
@@ -179,6 +183,22 @@ function Trenazher({ task, razdel }: { task: ExamTask; razdel: RazdelBazy }) {
   );
 }
 
+/** Генератор листов: темы — группы раздела, подтипы — прототипы, задачи — банк. */
+function GeneratorRazdela({ task, razdel }: { task: ExamTask; razdel: RazdelBazy }) {
+  const base = taskBase(task);
+  const ekran = `${base}/${vkladkaBazy('generator').tail}`;
+  return (
+    <GeneratorBazy
+      config={configBazy(task, razdel, ekran)}
+      base={base}
+      ekran={ekran}
+      znaki={Object.fromEntries(
+        (razdel.gruppy ?? []).map((g) => [g.id, { html: typeset(`$${g.znak}$`), ton: g.ton }]),
+      )}
+    />
+  );
+}
+
 /** Содержимое вкладки: наполнение раздела или «Материал готовится». */
 export async function VkladkaBazyPage({ params, tab }: { params: BazaParams; tab: VkladkaBazy }) {
   const task = bazaTask((await params).task);
@@ -193,6 +213,9 @@ export async function VkladkaBazyPage({ params, tab }: { params: BazaParams; tab
             <OZadaniiBaza task={task} oZadanii={razdel.oZadanii} />
           )}
           <FormatZadaniya task={task} />
+          {razminkaBazy(task.slug) === null ? null : (
+            <Razminka id={razminkaBazy(task.slug) ?? 'baza-4'} />
+          )}
           {razdel?.oZadanii === undefined ? pusto : null}
         </>
       );
@@ -226,6 +249,10 @@ export async function VkladkaBazyPage({ params, tab }: { params: BazaParams; tab
     case 'trenazher':
       return razdel?.prototipy === undefined ? pusto : <Trenazher task={task} razdel={razdel} />;
     case 'generator':
-      return pusto;
+      return razdel?.prototipy === undefined ? (
+        pusto
+      ) : (
+        <GeneratorRazdela task={task} razdel={razdel} />
+      );
   }
 }

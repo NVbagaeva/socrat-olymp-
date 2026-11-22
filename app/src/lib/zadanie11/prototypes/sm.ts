@@ -1,5 +1,6 @@
 /**
- * Раздел СМ — растворы, смеси, сплавы (СМ-01 … СМ-08).
+ * Раздел СМ — растворы, смеси, сплавы (СМ-01 … СМ-09; СМ-09 — свой
+ * подтип, не из открытого банка).
  *
  * Уравнение всегда по массе чистого вещества: «сколько было —
  * столько стало». Таблица: масса смеси | % | масса вещества.
@@ -9,6 +10,7 @@ import { chtoSprashivayut, etapy, koncentraciya, num, slovo, str, vopros } from 
 import { d, frac, round9, txt } from '../num';
 import type { Params, Subtype } from '../types';
 import { klyuch, TARY, VESHCHESTVA } from './syuzhety';
+import { priznak, sokratit } from '../proporciya/sokrashchenie';
 import { otvet, pct } from './common';
 
 /** Масса вещества: m·p/100 в TeX. */
@@ -764,4 +766,244 @@ const SM08: Subtype = {
   },
 };
 
-export const SM: Subtype[] = [SM01, SM02, SM03, SM04, SM05, SM06, SM07, SM08];
+/**
+ * Сокращение (ch[0]·ch[1]…)/zn для разбора: если один множитель
+ * делится на знаменатель — одно сокращение, делимость объяснена
+ * признаком; иначе — пошагово по простым множителям (sokratit).
+ */
+function sokratitKratko(ch: number[], zn: number, x: string): { lines: string[]; itog: number } {
+  const itog = ch.reduce((a, b) => a * b, 1) / zn;
+  const i = ch.findIndex((n) => n % zn === 0);
+  if (zn > 1 && i >= 0) {
+    const n = ch[i] as number;
+    const q = n / zn;
+    const pr = priznak(n, zn);
+    const top = ch
+      .map((v, j) => (j === i ? `\\cancel{${d(v)}}^{\\,${d(q)}}` : d(v)))
+      .join('\\cdot');
+    const ostalos = ch.map((v, j) => (j === i ? q : v)).filter((v) => v !== 1);
+    const proizv = ostalos.length > 1 ? `=${ostalos.map(d).join('\\cdot')}` : '';
+    return {
+      lines: [
+        pr
+          ? `Проверяем: ${pr}. Сокращаем на $${d(zn)}$: $${d(n)}:${d(zn)}=${d(q)}$.`
+          : `$${d(n)}$ делится на $${d(zn)}$: $${d(n)}:${d(zn)}=${d(q)}$ (проверка: $${d(zn)}\\cdot${d(q)}=${d(n)}$).`,
+        `$${x}=\\dfrac{${top}}{\\cancel{${d(zn)}}_{\\,1}}${proizv}=${d(itog)}$.`,
+      ],
+      itog,
+    };
+  }
+  const s = sokratit(ch, zn, x);
+  return {
+    lines: s.shagi.flatMap((sh) => [
+      sh.tekst,
+      ...(sh.tex ? [`$${sh.tex.replace(/=([\d{},]+)=\1$/, '=$1')}$`] : []),
+    ]),
+    itog: s.itog,
+  };
+}
+
+/* ── СМ-09 Воды и раствора добавили разное количество ───────── */
+
+/**
+ * Своя задача (не из открытого банка): как СМ-08, но воды добавили
+ * w кг, а раствора — m кг, m ≠ w, и раствор не обязательно 50 %.
+ * Смешали x кг p₁%-го и y кг p₂%-го; с водой — c %, с m кг p₃%-го —
+ * d %. Порядок опытов в условии разный (por): сначала вода (vr) или
+ * сначала раствор (rv). Спрашивают x, y или x + y (ask).
+ *
+ * Главный ход: вещества из I и II в обоих опытах одинаково, разность
+ * уравнений даёт p₃·m = d(S + m) − c(S + w), S = x + y. Массы смесей
+ * разные: x + y + w и x + y + m.
+ */
+const SM09: Subtype = {
+  id: 'SM-09',
+  section: 'SM',
+  title: 'Воды и раствора добавили разное количество',
+  level: 3,
+  svoy: true,
+  keywords: ['чистой воды', 'вместо воды', 'разное количество', 'добавили раствор', 'система'],
+  solve(p) {
+    const p1 = num(p, 'p1');
+    const p2 = num(p, 'p2');
+    const p3 = num(p, 'p3');
+    const c = num(p, 'c');
+    const dd = num(p, 'd');
+    const w = num(p, 'w');
+    const m = num(p, 'm');
+    const por = str(p, 'por', ['vr', 'rv'] as const);
+    const ask = str(p, 'ask', ['I', 'II', 'vse'] as const);
+    const vv = veshchestvo(p, 'кислоты');
+    const k = dd - c;
+    if (!(k > 0) || p3 <= dd || p1 === p2 || m === w) {
+      throw new Error('СМ-09: нужно d > c, p₃ > d, p₁ ≠ p₂, m ≠ w');
+    }
+    /* k·S = m(p₃ − d) + c·w */
+    const t1 = m * (p3 - dd);
+    const t2 = c * w;
+    const S = round9((t1 + t2) / k);
+    const A = c * (S + w); // p₁x + p₂y, в «процентах·кг»
+    const x = round9((A - p2 * S) / (p1 - p2));
+    const y = round9(S - x);
+    if (!(x > 0 && y > 0)) {
+      throw new Error('СМ-09: массы растворов должны быть положительны');
+    }
+    const ans = ask === 'I' ? x : ask === 'II' ? y : S;
+    const q3 = round9((p3 * m) / 100); // вещества в добавленном растворе, кг
+
+    /* Условие: опыт, который описан первым, и «если бы вместо…». */
+    const sVodoy = `${txt(w)} кг чистой воды`;
+    const sRastvorom = `${txt(m)} кг ${txt(p3)}-процентного раствора ${vv}`;
+    const vopr =
+      ask === 'vse'
+        ? `Сколько всего килограммов ${txt(p1)}-процентного и ${txt(p2)}-процентного растворов смешали?`
+        : `Сколько килограммов ${txt(ask === 'I' ? p1 : p2)}-процентного раствора использовали для получения смеси?`;
+    const uslovie =
+      por === 'vr'
+        ? `Смешав ${txt(p1)}-процентный и ${txt(p2)}-процентный растворы ${vv} и добавив ${sVodoy}, получили ${txt(c)}-процентный раствор ${vv}. Если бы вместо воды добавили ${sRastvorom}, то получили бы ${txt(dd)}-процентный раствор ${vv}. ${vopr}`
+        : `Смешав ${txt(p1)}-процентный и ${txt(p2)}-процентный растворы ${vv} и добавив ${sRastvorom}, получили ${txt(dd)}-процентный раствор ${vv}. Если бы вместо этого раствора добавили ${sVodoy}, то получили бы ${txt(c)}-процентный раствор ${vv}. ${vopr}`;
+
+    /* Уравнения по строке массы вещества, умноженные на 100. */
+    const urVoda = `${d(p1)}x+${d(p2)}y=${d(c)}(x+y+${d(w)})`;
+    const urRastvor = `${d(p1)}x+${d(p2)}y+${d(p3)}\\cdot${d(m)}=${d(dd)}(x+y+${d(m)})`;
+    const sistema =
+      por === 'vr'
+        ? `$\\begin{cases}${urVoda},\\\\ ${urRastvor}.\\end{cases}$`
+        : `$\\begin{cases}${urRastvor},\\\\ ${urVoda}.\\end{cases}$`;
+
+    /* Делим k·S = m(p₃ − d) + c·w на k: каждое слагаемое сокращаем отдельно. */
+    const sokr1 = sokratitKratko([m, p3 - dd], k, 'a');
+    const sokr2 = sokratitKratko([c, w], k, 'b');
+
+    /* x из уравнения с водой: (p₁ − p₂)x = c(S + w) − p₂S. */
+    const bolshe = p1 > p2;
+    const raz = Math.abs(p1 - p2);
+    const N = Math.abs(A - p2 * S);
+    const sokrX = sokratitKratko([N], raz, 'x');
+    const lineX = bolshe
+      ? `$${d(raz)}x=${d(c)}\\cdot${d(S + w)}-${d(p2)}\\cdot${d(S)}=${d(A)}-${d(p2 * S)}=${d(N)}$.`
+      : `Переносим: $${d(raz)}x=${d(p2)}\\cdot${d(S)}-${d(c)}\\cdot${d(S + w)}=${d(p2 * S)}-${d(A)}=${d(N)}$.`;
+
+    const kto = (a: 'I' | 'II' | 'vse'): string =>
+      a === 'vse'
+        ? 'массу всей смеси I + II, то есть $x+y$'
+        : `массу $${pct(a === 'I' ? p1 : p2)}$-го раствора — ${a === 'I' ? '$x$' : '$y$'}`;
+
+    const tVoda = koncentraciya(
+      [
+        { label: 'I', mvv: `${d(p1 / 100)}x`, mr: 'x', p: d(p1) },
+        { label: 'II', mvv: `${d(p2 / 100)}y`, mr: 'y', p: d(p2) },
+        { label: 'вода', mvv: '0', mr: d(w), p: '0' },
+        {
+          label: 'I + II + вода',
+          mvv: `${d(c / 100)}(x+y+${d(w)})`,
+          mr: `x+y+${d(w)}`,
+          p: d(c),
+        },
+      ],
+      por === 'vr' ? `Добавили $${d(w)}$ кг воды` : `Вместо раствора — $${d(w)}$ кг воды`,
+    );
+    const tRastvor = koncentraciya(
+      [
+        { label: 'I', mvv: `${d(p1 / 100)}x`, mr: 'x', p: d(p1) },
+        { label: 'II', mvv: `${d(p2 / 100)}y`, mr: 'y', p: d(p2) },
+        { label: 'III', mvv: `${d(p3 / 100)}\\cdot${d(m)}=${d(q3)}`, mr: d(m), p: d(p3) },
+        {
+          label: 'I + II + III',
+          mvv: `${d(dd / 100)}(x+y+${d(m)})`,
+          mr: `x+y+${d(m)}`,
+          p: d(dd),
+        },
+      ],
+      por === 'vr'
+        ? `Вместо воды — $${d(m)}$ кг $${pct(p3)}$-го раствора (столбец III)`
+        : `Добавили $${d(m)}$ кг $${pct(p3)}$-го раствора (столбец III)`,
+    );
+
+    return {
+      uslovie,
+      answer: ans,
+      etapy: etapy(
+        [
+          'Обозначаем',
+          [
+            `Масса $${pct(p1)}$-го раствора (столбец I) — $x$ кг, $${pct(p2)}$-го (столбец II) — $y$ кг. Добавленный $${pct(p3)}$-й раствор — столбец III, у воды концентрация $0\\%$.`,
+          ],
+        ],
+        [
+          'Таблица',
+          [
+            `С водой: вода вещества не добавляет, масса смеси $x+y+${d(w)}$, ${vv} в ней $${d(c / 100)}(x+y+${d(w)})$.`,
+            `С раствором: в $${d(m)}$ кг $${pct(p3)}$-го раствора ${vv} $${d(p3 / 100)}\\cdot${d(m)}=${d(q3)}$ кг, масса смеси $x+y+${d(m)}$.`,
+            `**Массы двух смесей разные:** $x+y+${d(w)}$ и $x+y+${d(m)}$ — воды и раствора добавили не поровну. Когда добавляют поровну, массы смесей совпадают; здесь в каждой смеси своя масса.`,
+          ],
+        ],
+        [
+          'Система',
+          [
+            `Уравнения — по строке $m_{\\text{в-ва}}$: вещества в столбцах слева столько же, сколько в итоговом. Умножаем обе части на $100$:`,
+            sistema,
+          ],
+        ],
+        [
+          'Решение',
+          [
+            `**Главный ход.** Вещества из растворов I и II в обоих опытах одинаково — $${d(p1)}x+${d(p2)}y$: меняется только добавка. Вычтем из уравнения с раствором уравнение с водой — $${d(p1)}x+${d(p2)}y$ уйдёт:`,
+            `$${d(p3)}\\cdot${d(m)}=${d(dd)}(x+y+${d(m)})-${d(c)}(x+y+${d(w)})$.`,
+            `Это работает и при разных массах добавок: вычитаем левые части и правые части, одинаковое слагаемое $${d(p1)}x+${d(p2)}y$ исчезает. Разные массы $${d(m)}$ и $${d(w)}$ дают только разные числа в скобках.`,
+            `Обозначим $S=x+y$ и раскроем скобки: $${d(p3 * m)}=${d(dd)}S+${d(dd * m)}-${d(c)}S-${d(c * w)}$, то есть $${d(k)}S=${d(m)}\\cdot${d(p3 - dd)}+${d(c)}\\cdot${d(w)}$.`,
+            `Делим на $${d(k)}$ — каждое слагаемое отдельно: $S=a+b$, где $a=\\dfrac{${d(m)}\\cdot${d(p3 - dd)}}{${d(k)}}$, $b=\\dfrac{${d(c)}\\cdot${d(w)}}{${d(k)}}$.`,
+            ...sokr1.lines,
+            ...sokr2.lines,
+            `$S=x+y=${d(sokr1.itog)}+${d(sokr2.itog)}=${d(S)}$ кг.`,
+            `Теперь $x$ из уравнения с водой, $y=${d(S)}-x$: $${d(p1)}x+${d(p2)}(${d(S)}-x)=${d(c)}\\cdot${d(S + w)}$.`,
+            lineX,
+            ...sokrX.lines,
+            `$y=${d(S)}-${d(x)}=${d(y)}$.`,
+          ],
+        ],
+        [
+          'Ответ на вопрос задачи',
+          [
+            `Проверка. С водой: $${d(p1)}\\cdot${d(x)}+${d(p2)}\\cdot${d(y)}=${d(A)}$ и $${d(c)}\\cdot${d(S + w)}=${d(A)}$. С раствором: $${d(A)}+${d(p3 * m)}=${d(A + p3 * m)}$ и $${d(dd)}\\cdot${d(S + m)}=${d(dd * (S + m))}$.`,
+            `Спрашивают ${kto(ask)}.`,
+            otvet(ans),
+          ],
+        ],
+      ),
+      tables: por === 'vr' ? [tVoda, tRastvor] : [tRastvor, tVoda],
+      hints: [
+        HINT_STROKA,
+        vopros(
+          `Сколько ${vv} в $${d(m)}$ кг $${pct(p3)}$-го раствора?`,
+          `$${d(q3)}$ кг`,
+          [`$${d(round9((p3 * m) / 10))}$ кг`, `$${d(p3 + m)}$ кг`],
+          `$${d(p3 / 100)}\\cdot${d(m)}=${d(q3)}$.`,
+        ),
+        vopros(
+          'Одинаковы ли массы двух смесей?',
+          `нет: $x+y+${d(w)}$ и $x+y+${d(m)}$`,
+          [`да: обе $x+y+${d(w)}$`, 'да: обе $x+y$'],
+          'Воды и раствора добавили по-разному — и массы смесей разные.',
+        ),
+        vopros(
+          'Что даёт разность уравнений?',
+          `$x+y=${d(S)}$`,
+          [`$x=${d(S)}$`, `$x+y+${d(w)}=${d(S)}$`],
+          `Слагаемое $${d(p1)}x+${d(p2)}y$ уходит: $${d(k)}(x+y)=${d(t1 + t2)}$.`,
+        ),
+        chtoSprashivayut(
+          ask === 'vse'
+            ? 'массу всей смеси I + II'
+            : `массу $${pct(ask === 'I' ? p1 : p2)}$-го раствора`,
+          ask === 'vse'
+            ? [`массу $${pct(p1)}$-го раствора`, `массу смеси с водой`]
+            : [`массу $${pct(ask === 'I' ? p2 : p1)}$-го раствора`, 'массу всей смеси I + II'],
+        ),
+      ],
+      lifehacks: ['substitution'],
+    };
+  },
+};
+
+export const SM: Subtype[] = [SM01, SM02, SM03, SM04, SM05, SM06, SM07, SM08, SM09];

@@ -21,7 +21,7 @@ import {
 } from '@/lib/zadanie10/sborka';
 import { sheetSpec10, type Vid10 } from '@/lib/zadanie10/sheet10';
 import type { Prototype } from '@/lib/zadanie10/types';
-import type { IllInfo } from './Zadacha10';
+import type { IllInfo } from './Kartinka10';
 
 interface Gotovo {
   model: ModelLista;

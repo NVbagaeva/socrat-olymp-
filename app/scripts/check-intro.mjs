@@ -3,7 +3,7 @@
 
    Запуск: pnpm build && pnpm test:intro   (Chromium; Apache — как на хостинге)
 
-   Сценарии (страница задания №12, ширина компьютера, если не сказано иначе):
+   Сценарии (главная, ширина компьютера, если не сказано иначе):
      1. первый визит → заставка → «Пропустить» → окно → «Тур для
         репетитора» → тур стартует; контент страницы под заставкой в DOM;
         «уже видел» записан тем же ключом, что и раньше;
@@ -13,7 +13,9 @@
         не использует, проверяется reduced-motion и слабое устройство
         (deviceMemory < 4);
      4. «Посмотреть приветствие» из меню «?» показывает заставку снова;
-     5. ссылка с кодом комплекта (?kit=) и ссылка на тренажёр — заставки нет;
+     5. заставка — только на главных (/ и /baza/): на странице раздела,
+        тарифах, тренажёре и по ссылке с кодом комплекта (?kit=) её нет и
+        «уже видел» не записан; после этого на главной — заставка есть;
      6. в консоли нет ошибок;
      7. на 390 px нет горизонтальной прокрутки; нижний лист во всю ширину;
      8. CLS за время заставки = 0;
@@ -29,7 +31,7 @@ import { welcomeSeen } from './lib/onboarding.mjs';
 const app = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(app, 'out');
 const PORT = 4187;
-const PAGE = '/zadaniya/12/';
+const PAGE = '/';
 
 const failures = [];
 let checks = 0;
@@ -37,6 +39,16 @@ function check(ok, what) {
   checks += 1;
   console.log(`${ok ? '  ok ' : '  НЕТ'} ${what}`);
   if (!ok) failures.push(what);
+}
+
+/**
+ * Пока открыта плашка cookie, кнопки «?» нет (onboarding.css): она
+ * лежала бы на «Понятно». Как и человек, сначала отвечаем на плашку.
+ */
+async function zakrytCookie(page) {
+  const cookie = page.locator('.cookie-notice .btn--primary');
+  await cookie.waitFor({ timeout: 5000 }).catch(() => {});
+  if ((await cookie.count()) > 0) await cookie.first().click();
 }
 
 const apache = await startApache(OUT, PORT);
@@ -174,6 +186,7 @@ try {
     const context = await browser.newContext(desktop);
     await welcomeSeen(context);
     const { page, errors } = await open(context, PAGE);
+    await zakrytCookie(page);
     await page.getByRole('button', { name: 'Помощь' }).click();
     await page.getByRole('menuitem', { name: 'Посмотреть приветствие' }).click();
     await page.waitForSelector(INTRO, { timeout: 10000 });
@@ -187,13 +200,34 @@ try {
     await context.close();
   }
 
-  /* ── 5. Ссылки, где заставка лишняя ────────────────────────────── */
-  console.log('5. Ссылка с кодом комплекта и на тренажёр');
-  for (const url of ['/zadaniya/11/generator/?kit=ABCD-EFGH', '/zadaniya/4/trenazher/']) {
+  /* ── 5. Где заставки нет ───────────────────────────────────────── */
+  console.log('5. Заставка только на главных: / и /baza/');
+  for (const url of [
+    '/zadaniya/12/',
+    '/zadaniya/4/teoriya/',
+    '/tarify/',
+    '/zadaniya/4/trenazher/',
+    '/?kit=ABCD-EFGH',
+  ]) {
     const context = await browser.newContext(desktop);
     const { page } = await open(context, url);
     await page.waitForTimeout(3500);
     check((await page.locator(INTRO).count()) === 0, `${url}: заставки нет`);
+    const seen = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('budetege:onboarding:v1') ?? '{}'),
+    );
+    check(seen.welcomeSeen !== true, `${url}: «уже видел» не записан`);
+    await context.close();
+  }
+  {
+    /* Пришёл по ссылке в раздел, потом открыл главную базы — заставка там. */
+    const context = await browser.newContext(desktop);
+    const first = await open(context, '/zadaniya/12/');
+    await first.page.waitForTimeout(3500);
+    await first.page.close();
+    const { page } = await open(context, '/baza/');
+    await page.waitForSelector(INTRO, { timeout: 15000 });
+    check(true, 'раздел → /baza/: заставка на главной базы');
     await context.close();
   }
 
@@ -241,6 +275,7 @@ try {
       }
       return Math.round((await cdp.send('Runtime.getHeapUsage')).usedSize / 1024);
     };
+    await zakrytCookie(page);
     await page.waitForTimeout(1500);
     const before = await heap();
     /* Первый показ догружает код заставки — он остаётся; меряем второй. */

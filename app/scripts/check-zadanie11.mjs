@@ -66,8 +66,25 @@ for (const { where, s } of [...bank.solved, ...razminka.solved, ...gen.solved]) 
 const inBank = new Set(
   [...bank.solved, ...razminka.solved].map(({ where }) => where.split(' ')[2]),
 );
+/* Свои подтипы (svoy, СМ-09) — не из открытого банка: задач банка у них
+   нет и быть не должно, задачи — аналоги и генератор. */
+const { SVOI_PODTIPY_11 } = requireSrc('lib/zadanie11/svoi');
+const { POOL_ANALOGOV } = requireSrc('lib/zadanie11/analogi');
 for (const st of SUBTYPES) {
-  if (!inBank.has(st.id)) {
+  if (Boolean(st.svoy) !== SVOI_PODTIPY_11.has(st.id)) {
+    problems.push({
+      where: st.id,
+      what: 'поле svoy не совпадает со списком lib/zadanie11/svoi.ts',
+    });
+  }
+  if (st.svoy) {
+    if (inBank.has(st.id)) {
+      problems.push({ where: st.id, what: 'у своего подтипа есть задача банка' });
+    }
+    if ((POOL_ANALOGOV[st.id] ?? []).length < 10) {
+      problems.push({ where: st.id, what: 'у своего подтипа нет 10 аналогов' });
+    }
+  } else if (!inBank.has(st.id)) {
     problems.push({ where: st.id, what: 'у подтипа нет ни одной задачи в банке или разминке' });
   }
 }

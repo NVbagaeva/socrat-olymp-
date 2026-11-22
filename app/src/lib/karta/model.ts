@@ -20,8 +20,8 @@
  *                       переведённая в тестовые баллы по шкале сайта.
  */
 
-import { MAX_BALL, type EgeNo20 } from '@/content/variantOnline/bally';
-import { TESTOVYJ_33 } from '@/content/variantOnline/shkala';
+import { estRazdel, maxBall } from '@/content/struktura';
+import { TESTOVYJ_RABOTY } from '@/content/variantOnline/shkala';
 import { PROLIV_POROG, PROLIV_SVYAZKI } from '@/content/karta/proliv';
 import { isMistake, kindStats, type LogOutcome, type ProgressLog } from '@/lib/progressLog/model';
 
@@ -57,6 +57,8 @@ export type StatusRazdela = 'gotov' | 'pozzhe' | 'skoro';
 export interface KartaRazdel {
   no: number;
   chast: 1 | 2;
+  /** Место области по порядку карты (остров); нет — по номеру. */
+  poryadok?: number;
   status: StatusRazdela;
   gruppy: readonly KartaGruppa[];
 }
@@ -259,14 +261,14 @@ function sleduyushchaya(oblasti: readonly SostoyanieOblasti[]): number | null {
   return null;
 }
 
-/** Первичный балл → тестовый по шкале сайта (33 первичных). */
+/** Первичный балл → тестовый по шкале сайта (первичных — по структуре экзамена). */
 export function testovyyBall(pervichnyy: number): number {
-  const k = Math.max(0, Math.min(TESTOVYJ_33.length - 1, Math.round(pervichnyy)));
-  return TESTOVYJ_33[k] ?? 0;
+  const k = Math.max(0, Math.min(TESTOVYJ_RABOTY.length - 1, Math.round(pervichnyy)));
+  return TESTOVYJ_RABOTY[k] ?? 0;
 }
 
 function prognoz(oblasti: readonly SostoyanieOblasti[]): Prognoz {
-  const pervichnyy = oblasti.reduce((sum, o) => sum + (MAX_BALL[o.no as EgeNo20] ?? 0) * o.p, 0);
+  const pervichnyy = oblasti.reduce((sum, o) => sum + (estRazdel(o.no) ? (maxBall(o.no) ?? 0) : 0) * o.p, 0);
   const popytok = oblasti.reduce((n, o) => n + o.popytok, 0);
   const oblastey = oblasti.filter((o) => o.popytok > 0).length;
   return {
@@ -285,7 +287,7 @@ export function postroitKartu(
   now: number,
 ): Karta {
   const oblasti = [...razdely]
-    .sort((a, b) => a.no - b.no)
+    .sort((a, b) => (a.poryadok ?? a.no) - (b.poryadok ?? b.no))
     .map((r) => sostoyanieOblasti(r, zhurnaly[r.no], now));
   const osvoennye = oblasti.filter((o) => o.sostoyanie === 'osvoeno');
   const sled = sleduyushchaya(oblasti);

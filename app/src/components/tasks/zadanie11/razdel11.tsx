@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import Link from 'next/link';
 import { TRENAZHER11 } from '@/content/tekstovye11';
 import { teoriyaHref11, zadachaHref11 } from '@/lib/zadanie11/links';
+import { SVOI_PODTIPY_11 } from '@/lib/zadanie11/svoi';
 import { YAKOR_11 } from '@/lib/zadanie11/teoriya-yakorya';
 import type { ZadachaLite11 } from '@/lib/zadanie11/trening/dannye';
 import { readChoice11, readSealed11 } from '@/lib/zadanie11/trening/otvet11';
@@ -34,7 +35,13 @@ function Pod11({ z, ssylki }: { z: ZadachaLite11; ssylki: SsylkiTipa11 | undefin
   return (
     <>
       <p className="trn-istochnik">
-        {z.source === 'fipi' ? T.fipi : z.source === 'razminka' ? T.razminka : T.analog}
+        {z.source === 'fipi'
+          ? T.fipi
+          : z.source === 'razminka'
+            ? T.razminka
+            : SVOI_PODTIPY_11.has(z.prototypeId)
+              ? T.svoya
+              : T.analog}
       </p>
       <nav className="z11-materialy" aria-label={T.materialy}>
         {layfhak === undefined ? null : (
