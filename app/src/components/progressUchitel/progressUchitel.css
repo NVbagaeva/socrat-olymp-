@@ -405,3 +405,18 @@ i.pu-cell {
     font-size: 10pt;
   }
 }
+
+/* Подсказка с общим временем: длинный текст. Общий тултип не переносит
+   строки и лежит в разметке и скрытым — на 375 он раздвигал страницу.
+   Здесь он есть, только пока открыт, и переносится. */
+.pu .tip__bubble {
+  display: none;
+  white-space: normal;
+  width: max-content;
+  max-width: min(260px, 70vw);
+}
+.pu .tip:hover .tip__bubble,
+.pu .tip:focus-visible .tip__bubble,
+.pu .tip:focus-within .tip__bubble {
+  display: block;
+}

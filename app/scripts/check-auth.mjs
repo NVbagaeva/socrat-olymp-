@@ -80,6 +80,8 @@
    что вход не включён; адреса сервиса в сборке нет. */
 
 import fs from 'node:fs';
+import os from 'node:os';
+import { spawnSync } from 'node:child_process';
 import http from 'node:http';
 import path from 'node:path';
 import { chromium } from 'playwright';
@@ -649,6 +651,8 @@ function makeMock() {
   const dz = createDzMock({ profiles, classes, members });
 
   /* ── Чтение журнала для экранов прогресса ── */
+  /* Ошибка функции базы — в формате PostgREST: код в начале message. */
+  const perr = (status, code, message) => ({ status, body: { code, message, details: null, hint: null } });
   const SOLVED = ['right', 'hinted', 'wrong', 'revealed'];
   const moyStudent = (tutorId, studentId) =>
     classes.some(
@@ -721,7 +725,7 @@ function makeMock() {
   }
   function variant(uid, id, uchitel) {
     const v = zhurnalVarianty.find((x) => x.user_id === uid && x.id === id);
-    if (v === undefined) return err(400, 'P0002', 'not_found');
+    if (v === undefined) return perr(400, 'P0002', 'not_found');
     const out = { ...v, zadachi: zhurnal.filter((z) => z.user_id === uid && z.place_ref === id).map((z) => vid(z, uchitel, true)) };
     delete out.user_id;
     return { status: 200, body: out };
@@ -729,10 +733,10 @@ function makeMock() {
   function zhurnalRead(name, b, me) {
     const role = profiles.get(me.id)?.role;
     if (name.startsWith('uchitel_')) {
-      if (role !== 'tutor') return err(403, '42501', name === 'uchitel_klass' ? 'forbidden' : 'not_your_student');
+      if (role !== 'tutor') return perr(403, '42501', name === 'uchitel_klass' ? 'forbidden' : 'not_your_student');
       if (name === 'uchitel_klass') {
         const c = classes.find((x) => x.id === b.p_class && x.tutor_id === me.id);
-        if (c === undefined) return err(403, '42501', 'forbidden');
+        if (c === undefined) return perr(403, '42501', 'forbidden');
         const ids = members.filter((m) => m.class_id === c.id).map((m) => m.user_id);
         const karta = [];
         for (const uid of ids) {
@@ -759,7 +763,7 @@ function makeMock() {
           },
         };
       }
-      if (!moyStudent(me.id, b.p_student)) return err(403, '42501', 'not_your_student');
+      if (!moyStudent(me.id, b.p_student)) return perr(403, '42501', 'not_your_student');
       const uid = b.p_student;
       if (name === 'uchitel_uchenik') {
         return {
@@ -771,11 +775,11 @@ function makeMock() {
       if (name === 'uchitel_lenta') return { status: 200, body: lenta(uid, b, true) };
       if (name === 'uchitel_zadacha') {
         const z = zhurnal.find((x) => x.user_id === uid && x.id === b.p_id);
-        return z === undefined ? err(400, 'P0002', 'not_found') : { status: 200, body: vid(z, true, true) };
+        return z === undefined ? perr(400, 'P0002', 'not_found') : { status: 200, body: vid(z, true, true) };
       }
       return variant(uid, b.p_id, true);
     }
-    if (role !== 'student') return err(403, '42501', 'forbidden');
+    if (role !== 'student') return perr(403, '42501', 'forbidden');
     if (name === 'moya_statistika') return { status: 200, body: svodka(me.id, b) };
     if (name === 'moya_lenta') return { status: 200, body: lenta(me.id, b, false) };
     return variant(me.id, b.p_id, false);
@@ -2695,7 +2699,14 @@ async function runProgress() {
     await welcomeSeen(context);
     await login(page, 'zhurnal-uchitel@yandex.ru', 'zhurnal-parol-2');
     const snap = async (name) => {
-      check(await noHorizontalScroll(page), `прогресс ${width} ${name}: без горизонтальной прокрутки страницы`);
+      const shire = await page.evaluate(() =>
+        [...document.querySelectorAll('main *')]
+          .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1)
+          .slice(0, 4)
+          .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).split(' ')[0]}:${Math.round(e.getBoundingClientRect().right)}`)
+          .join(', '),
+      );
+      check(await noHorizontalScroll(page), `прогресс ${width} ${name}: без горизонтальной прокрутки страницы ${shire}`);
       if (SHOTS === null) return;
       await page.evaluate(() => document.fonts.ready);
       await page.screenshot({
@@ -2720,8 +2731,16 @@ async function runProgress() {
     check((await page.locator('.pu-dinamika').count()) === 1, `ученик ${width}: динамика тестового балла`);
     if (width === 1280) {
       const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('button:has-text("Excel")').click()]);
-      check(/\.xlsx$/.test(dl.suggestedFilename()) && dl.suggestedFilename().includes('Аня'),
-        `Excel ученика: ${dl.suggestedFilename()}`);
+      /* Имя файла (по-русски) проверяет test:zhurnal: headless-Chromium
+         отдаёт для не-ASCII имени «download». Здесь — сам файл. */
+      const file = path.join(os.tmpdir(), `progress-${Date.now()}.xlsx`);
+      await dl.saveAs(file);
+      const py = spawnSync('python3', ['-c',
+        'import sys,openpyxl;ws=openpyxl.load_workbook(sys.argv[1]).active;print(ws.max_row, ws["F2"].value)', file],
+        { encoding: 'utf8' });
+      if (py.status === 0) check(/^14 /.test(py.stdout.trim()), `Excel ученика: строки на месте (${py.stdout.trim()})`);
+      else check(spawnSync('unzip', ['-t', file]).status === 0, 'Excel ученика: архив .xlsx цел');
+      fs.rmSync(file, { force: true });
     }
     await snap('uchenik');
 

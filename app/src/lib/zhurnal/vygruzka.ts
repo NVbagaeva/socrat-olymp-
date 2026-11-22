@@ -50,5 +50,5 @@ export function strokiKlassa(k: KlassView): Cell[][] {
 /** Имя файла без знаков, которые не любят файловые системы. */
 export function imyaFayla(chto: string, from: string, to: string): string {
   const chisto = chto.replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
-  return `${chisto} ${from}—${to}.xlsx`;
+  return `${chisto} ${from}_${to}.xlsx`;
 }
